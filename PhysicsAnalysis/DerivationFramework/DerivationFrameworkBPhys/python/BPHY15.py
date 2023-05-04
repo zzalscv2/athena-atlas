@@ -6,6 +6,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 
 
 BPHYDerivationName = "BPHY15"
@@ -495,10 +496,10 @@ def BPHY15Cfg(ConfigFlags):
                                                     #Only skim if not MC
                                                     SkimmingTools     = [BPHY15SkimmingOR] if not isSimulation else [],
                                                     ThinningTools     = []))
-   
+
    from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-   from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+   from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
    BPHY15SlimmingHelper = SlimmingHelper("BPHY15SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
    AllVariables  = getDefaultAllVariables()
@@ -507,55 +508,55 @@ def BPHY15Cfg(ConfigFlags):
    # Needed for trigger objects
    BPHY15SlimmingHelper.IncludeMuonTriggerContent  = True
    BPHY15SlimmingHelper.IncludeBPhysTriggerContent = True
-   
+
    ## primary vertices
    AllVariables  += ["PrimaryVertices"]
    for x in range(1,6):
       StaticContent += ["xAOD::VertexContainer#BPHY15RefittedPrimaryVertices%s"   %     str(x)]
       StaticContent += ["xAOD::VertexAuxContainer#BPHY15RefittedPrimaryVertices%sAux." % str(x)]
-   
+
    ## ID track particles
    AllVariables += ["InDetTrackParticles"]
-   
-   ## combined / extrapolated muon track particles 
+
+   ## combined / extrapolated muon track particles
    ## (note: for tagged muons there is no extra TrackParticle collection since the ID tracks
    ##        are store in InDetTrackParticles collection)
    AllVariables += ["CombinedMuonTrackParticles"]
    AllVariables += ["ExtrapolatedMuonTrackParticles"]
-   
+
    ## muon container
-   AllVariables += ["Muons"] 
-   
-   
-   ## Jpsi candidates 
+   AllVariables += ["Muons"]
+
+
+   ## Jpsi candidates
    StaticContent += ["xAOD::VertexContainer#%s"        %                 BPHY15JpsiSelectAndWrite.OutputVtxContainerName]
    ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
    StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY15JpsiSelectAndWrite.OutputVtxContainerName]
-   
+
    ## Bc+>J/psi pi+ candidates
    StaticContent += ["xAOD::VertexContainer#%s"        %                 BPHY15BcJpsipiSelectAndWrite.OutputVtxContainerName]
    StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY15BcJpsipiSelectAndWrite.OutputVtxContainerName]
-   
-   
+
+
    ## Bc+>J/psi D_(s)+/-, J/psi D*+/- and J/psi D_s1+/- candidates
    for cascades in CascadeCollections:
       StaticContent += ["xAOD::VertexContainer#%s"   %     cascades]
       StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % cascades]
-   
+
    # Tagging information (in addition to that already requested by usual algorithms)
-   AllVariables += ["GSFTrackParticles", "MuonSpectrometerTrackParticles" ] 
-   
+   AllVariables += ["GSFTrackParticles", "MuonSpectrometerTrackParticles" ]
+
    # Truth information for MC only
    if isSimulation:
        AllVariables += ["TruthEvents","TruthParticles","TruthVertices","MuonTruthParticles"]
-   
+
    AllVariables = list(set(AllVariables)) # remove duplicates
-   
+
    BPHY15SlimmingHelper.AllVariables = AllVariables
    BPHY15SlimmingHelper.StaticContent = StaticContent
 
    BPHY15ItemList = BPHY15SlimmingHelper.GetItemList()
    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY15", ItemList=BPHY15ItemList, AcceptAlgs=["BPHY15Kernel"]))
-   acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_BPHY15", AcceptAlgs=["BPHY15Kernel"]))
+   acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_BPHY15", AcceptAlgs=["BPHY15Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
    return acc

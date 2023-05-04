@@ -10,6 +10,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 
 from DerivationFrameworkEGamma.PhotonsCPDetailedContent import (
     PhotonsCPDetailedContent )
@@ -278,7 +279,7 @@ def EGAM9Cfg(ConfigFlags):
 
     # configure slimming
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     EGAM9SlimmingHelper = SlimmingHelper(
         'EGAM9SlimmingHelper',
@@ -436,8 +437,9 @@ def EGAM9Cfg(ConfigFlags):
                               'DAOD_EGAM9',
                               ItemList = EGAM9ItemList,
                               AcceptAlgs = ['EGAM9Kernel']))
-    acc.merge(InfileMetaDataCfg(ConfigFlags, 'DAOD_EGAM9',
-                                AcceptAlgs=['EGAM9Kernel']))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, 'DAOD_EGAM9',
+                                AcceptAlgs=['EGAM9Kernel'],
+                                createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
     

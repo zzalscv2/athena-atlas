@@ -10,6 +10,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 
 # Main algorithm config
 def HIGG1D1KernelCfg(flags, name='HIGG1D1Kernel', **kwargs):
@@ -203,7 +204,7 @@ def HIGG1D1Cfg(flags):
     # Define contents of the format
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
     HIGG1D1SlimmingHelper = SlimmingHelper("HIGG1D1SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, ConfigFlags = flags)
@@ -425,8 +426,7 @@ def HIGG1D1Cfg(flags):
     
     # Output stream    
     HIGG1D1ItemList = HIGG1D1SlimmingHelper.GetItemList()
-
-    acc.merge(OutputStreamCfg(flags, "DAOD_HIGG1D1", ItemList=HIGG1D1ItemList, AcceptAlgs=["HIGG1D1Kernel"]))
-    acc.merge(InfileMetaDataCfg(flags, "DAOD_HIGG1D1", AcceptAlgs=["HIGG1D1Kernel"]))
+    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_HIGG1D1", ItemList=HIGG1D1ItemList, AcceptAlgs=["HIGG1D1Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_HIGG1D1", AcceptAlgs=["HIGG1D1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc

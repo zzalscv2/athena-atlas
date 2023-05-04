@@ -77,6 +77,7 @@ namespace LVL1::jFEXBits {
 /************     jFEX to ROD Trailer     ************/
 
     ///Masking words
+    static constexpr uint32_t ROD_TRAILER_1b  = 0x1;
     static constexpr uint32_t ROD_TRAILER_2b  = 0x3;
     static constexpr uint32_t ROD_TRAILER_4b  = 0xf;
     static constexpr uint32_t ROD_TRAILER_6b  = 0x3f;
@@ -92,6 +93,13 @@ namespace LVL1::jFEXBits {
     
     static constexpr uint32_t ERROR_ROD_TRAILER   = 0;
     static constexpr uint32_t CRC_ROD_TRAILER     = 12;
+    
+    static constexpr uint32_t ERROR_CORR_TRAILER    = 5; // For corrective trailer bit in the jFEX to ROD Error bits
+    static constexpr uint32_t ERROR_SAFE_MODE       = 4; // For safe mode in the jFEX to ROD Error bits
+    static constexpr uint32_t ERROR_PROTOCOL_ERROR  = 3; // For protocol error in the jFEX to ROD Error bits
+    static constexpr uint32_t ERROR_LENGTH_MISMATCH = 2; // For length mismatch in the jFEX to ROD Error bits
+    static constexpr uint32_t ERROR_HEADER_MISMATCH = 1; // For header mismatch in the jFEX to ROD Error bits
+    static constexpr uint32_t ERROR_PROC_TIMEOUT    = 0; // For processor timeout in the jFEX to ROD Error bits
     
     
 /************     Input Bulk Stream data     ************/  

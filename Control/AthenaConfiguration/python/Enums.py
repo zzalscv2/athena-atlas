@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-from enum import Enum
+from enum import Enum, auto
 
 
 class FlagEnum(Enum):
@@ -92,3 +92,12 @@ class BunchStructureSource(FlagEnum):
     MC = 1
     TrigConf = 2
     Lumi = 3
+
+
+class MetadataCategory(FlagEnum):
+    FileMetaData = auto()
+    CutFlowMetaData = auto()
+    ByteStreamMetaData = auto()
+    LumiBlockMetaData = auto()
+    TriggerMenuMetaData = auto()
+    TruthMetaData = auto()

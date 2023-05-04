@@ -142,7 +142,7 @@ def CommonSimulationCfg(flags, log):
         cfg.merge(PerfMonMTSvcCfg(flags))
 
     # Add in-file MetaData
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
-    cfg.merge(InfileMetaDataCfg(flags, "HITS", AcceptAlgs=AcceptAlgNames))
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+    cfg.merge(SetupMetaDataForStreamCfg(flags, "HITS", AcceptAlgs=AcceptAlgNames))
 
     return cfg

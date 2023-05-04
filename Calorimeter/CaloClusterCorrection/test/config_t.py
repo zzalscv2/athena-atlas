@@ -160,7 +160,7 @@ def test1 (flags_in):
 
 
     checkTools \
-      (ca._conditionsAlgs,
+      (ca.getCondAlgos(),
        [ToolConstantsCondAlg ('ToolConstantsCondAlg_CaloSwClusterCorrections_rfac-v5',
                               DetStoreKey='CaloSwClusterCorrections.rfac-v5',
                               ToolConstantsKey='CaloSwClusterCorrections.rfac-v5'),
@@ -288,7 +288,7 @@ def test2 (flags_in):
         ])
 
     checkTools \
-      (ca._conditionsAlgs,
+      (ca.getCondAlgos(),
        [CondInputLoader ('CondInputLoader',
                          Load=[['CaloRec::ToolConstants',
                                 '/CALO/Ofl/CaloSwClusterCorrections/rfac'],

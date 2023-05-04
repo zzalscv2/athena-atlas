@@ -925,8 +925,13 @@ void CondContMixedBase::list (std::ostream& ost) const
            {
              const CondContSet* tsmap =
                reinterpret_cast<const CondContSet*> (ent.second);
-             for (const CondContSet::value_type& ent2 : tsmap->range()) {
-               ost << ent2.first.m_range << " " << ent2.second << std::endl;
+             if (tsmap->empty()) {
+               ost << ent.first.m_range << " (empty tsmap)" << std::endl;
+             }
+             else {
+               for (const CondContSet::value_type& ent2 : tsmap->range()) {
+                 ost << ent2.first.m_range << " " << ent2.second << std::endl;
+               }
              }
            });
 }

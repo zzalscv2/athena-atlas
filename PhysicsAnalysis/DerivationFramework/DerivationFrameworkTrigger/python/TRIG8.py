@@ -11,6 +11,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 
 TRIG8MergedElectronContainer = "StdWithLRTElectrons"
 TRIG8MergedMuonContainer = "StdWithLRTMuons"
@@ -171,7 +172,7 @@ def TRIG8Cfg(ConfigFlags):
     # Define contents of the format
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 
     TRIG8SlimmingHelper = SlimmingHelper("TRIG8SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
@@ -333,7 +334,7 @@ def TRIG8Cfg(ConfigFlags):
     # Output stream
     TRIG8ItemList = TRIG8SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TRIG8", ItemList=TRIG8ItemList, AcceptAlgs=["TRIG8Kernel"]))
-    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_TRIG8", AcceptAlgs=["TRIG8Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_TRIG8", AcceptAlgs=["TRIG8Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
 

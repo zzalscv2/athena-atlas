@@ -117,7 +117,51 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                 READ_WORDS = false;
                 continue;
             }
-            const auto [payload, jfex, fpga]                      = jFEXtoRODTrailer  ( vec_words.at(trailers_pos-2), vec_words.at(trailers_pos-1) );
+            
+            const auto [payload, jfex, fpga, error] = jFEXtoRODTrailer  ( vec_words.at(trailers_pos-2), vec_words.at(trailers_pos-1) );
+            
+            if(error != 0 ){
+                
+                std::stringstream sdetail;
+                sdetail  << "Error bit set in the jFEX to ROD trailer - 0x"<< std::hex <<error << std::dec <<" in FPGA: "<< fpga << " and jFEX: "<< jfex;
+                std::stringstream slocation;
+                slocation  << "Error bit set";
+ 
+                if( ((error >> jBits::ERROR_CORR_TRAILER  ) & jBits::ROD_TRAILER_1b) ){
+                    std::stringstream stitle;
+                    stitle  << "Corrective Trailer" ;
+                    printError(slocation.str(),stitle.str(),MSG::ERROR,sdetail.str());
+                    
+                    //Returning Status code failure here because the contents are unreliable and should not be decoded
+                    return StatusCode::FAILURE;           
+                }   
+                if( ((error >> jBits::ERROR_SAFE_MODE  ) & jBits::ROD_TRAILER_1b) ){
+                    std::stringstream stitle;
+                    stitle  << "Safe Mode" ;
+                    printError(slocation.str(),stitle.str(),MSG::WARNING,sdetail.str());                    
+                }   
+                if( ((error >> jBits::ERROR_PROTOCOL_ERROR  ) & jBits::ROD_TRAILER_1b) ){
+                    std::stringstream stitle;
+                    stitle  << "Protocol error" ;
+                    printError(slocation.str(),stitle.str(),MSG::WARNING,sdetail.str());                    
+                }   
+                if( ((error >> jBits::ERROR_LENGTH_MISMATCH  ) & jBits::ROD_TRAILER_1b) ){
+                    std::stringstream stitle;
+                    stitle  << "Length mismatch" ;
+                    printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                    
+                }   
+                if( ((error >> jBits::ERROR_HEADER_MISMATCH  ) & jBits::ROD_TRAILER_1b) ){
+                    std::stringstream stitle;
+                    stitle  << "Header mismatch" ;
+                    printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                    
+                }   
+                if( ((error >> jBits::ERROR_PROC_TIMEOUT  ) & jBits::ROD_TRAILER_1b) ){
+                    std::stringstream stitle;
+                    stitle  << "Processor Timeout" ;
+                    printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                    
+                }   
+
+            }            
             
             if(payload % jBits::DATA_BLOCKS != 0){
                 ATH_MSG_DEBUG("  Not full readout activated (" << payload << "). Data blocks/channels expected (" << jBits::DATA_BLOCKS <<")"<<C.END);
@@ -246,13 +290,15 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
 
 
 // Unpack jFEX to ROD Trailer
-std::array<uint32_t,3> jFexInputByteStreamTool::jFEXtoRODTrailer (uint32_t word0, uint32_t /*word1*/) const {
+std::array<uint32_t,4> jFexInputByteStreamTool::jFEXtoRODTrailer (uint32_t word0, uint32_t word1) const {
     
     uint32_t payload    = ((word0 >> jBits::PAYLOAD_ROD_TRAILER ) & jBits::ROD_TRAILER_16b);
     uint32_t jfex       = ((word0 >> jBits::jFEX_ROD_TRAILER    ) & jBits::ROD_TRAILER_4b );
     uint32_t fpga       = ((word0 >> jBits::FPGA_ROD_TRAILER    ) & jBits::ROD_TRAILER_2b );
     
-    return {payload,jfex,fpga};
+    uint32_t error      = ((word1 >> jBits::ERROR_ROD_TRAILER   ) & jBits::ROD_TRAILER_6b );
+    
+    return {payload,jfex,fpga,error};
    
 }
 

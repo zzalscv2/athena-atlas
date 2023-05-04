@@ -449,12 +449,12 @@ class AthConfigFlags(object):
         """
         import argparse
         parser= argparse.ArgumentParser(formatter_class = argparse.ArgumentDefaultsHelpFormatter, **kwargs )
-        parser.add_argument("-d","--debug", default=None, help="attach debugger (gdb) before run, <stage>: init, exec, fini")
-        parser.add_argument("-i","--interactive", default=None, help="Drop into interactive mode before <stage>: init or run")
+        parser.add_argument("-d","--debug", default=None, choices=["init", "exec", "fini"], help="attach debugger (gdb) before run, <stage>")
+        parser.add_argument("-i","--interactive", default=None, choices=["init","run"], help="Drop into interactive mode at <stage>")
         parser.add_argument("--evtMax", type=int, default=None, help="Max number of events to process")
         parser.add_argument("--skipEvents", type=int, default=None, help="Number of events to skip")
         parser.add_argument("--filesInput", default=None,nargs='+', help="Input file(s), supports * wildcard")
-        parser.add_argument("-l", "--loglevel", default=None, help="logging level (ALL, VERBOSE, DEBUG,INFO, WARNING, ERROR, or FATAL")
+        parser.add_argument("-l", "--loglevel", default=None, choices=["ALL","VERBOSE","DEBUG","INFO","WARNING","ERROR","FATAL"], help="logging level")
         parser.add_argument("--config-only", type=str, default=None, help="Stop after configuration phase (may not be respected by all diver scripts)")
         parser.add_argument("--threads", type=int, default=None, help="Run with given number of threads (use 0 for serial execution)")
         parser.add_argument("--nprocs", type=int, default=None, help="Run AthenaMP with given number of worker processes")

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 // Author: Vadim Kostyukhin (vadim.kostyukhin@cern.ch)
 
@@ -53,18 +53,11 @@ InDetVKalVxInJetTool::InDetVKalVxInJetTool(const std::string& type,
     m_fillHist(false),
     m_existIBL(true),
     m_RobustFit(1),
-    m_beampipeX (0.),
-    m_beampipeY (0.),
-    m_xLayerB (0.),
-    m_yLayerB (0.),
-    m_xLayer1 (0.),
-    m_yLayer1 (0.),
-    m_xLayer2 (0.),
-    m_yLayer2 (0.),
     m_beampipeR (0.),  //Correct values are filled     
-    m_rLayerB   (0.),  // in jobO or initialize()
+    m_rLayerB   (0.),  // in initialize()
     m_rLayer1   (0.),
     m_rLayer2   (0.),
+    m_rLayer3   (0.),
     m_useVertexCleaningPix(false),
     m_useVertexCleaningFMP(false),
     m_rejectBadVertices(false),
@@ -116,19 +109,6 @@ InDetVKalVxInJetTool::InDetVKalVxInJetTool(const std::string& type,
 
     declareProperty("RobustFit",  m_RobustFit, "Use vertex fit with RobustFit functional(VKalVrt) for common secondary vertex fit" );
 
-    declareProperty("Xbeampipe", m_beampipeX);
-    declareProperty("Ybeampipe", m_beampipeY);
-    declareProperty("XlayerB",   m_xLayerB  );
-    declareProperty("YlayerB",   m_yLayerB  );
-    declareProperty("Xlayer1",   m_xLayer1  );
-    declareProperty("Ylayer1",   m_yLayer1  );
-    declareProperty("Xlayer2",   m_xLayer2  );
-    declareProperty("Ylayer2",   m_yLayer2  );
-    declareProperty("Rbeampipe", m_beampipeR);
-    declareProperty("RlayerB",   m_rLayerB  );
-    declareProperty("Rlayer1",   m_rLayer1  );
-    declareProperty("Rlayer2",   m_rLayer2  );
-
     declareProperty("useVertexCleaningPix", m_useVertexCleaningPix, "Clean vertices requiring track pixel hit patterns according to vertex position" );
     declareProperty("useVertexCleaningFMP", m_useVertexCleaningFMP, "Clean vertices requiring track F(irst) M(easured) P(oints) matching to vertex position" );
     declareProperty("rejectBadVertices", m_rejectBadVertices, "Reject V0s after checking 3D PV impact" );
@@ -148,13 +128,6 @@ InDetVKalVxInJetTool::InDetVKalVxInJetTool(const std::string& type,
 
     declareProperty("useITkMaterialRejection", m_useITkMaterialRejection, "Reject vertices from hadronic interactions in detector material using ITk layout");
 
-    m_iflag=0;
-    m_massPi  = 139.5702 ;
-    m_massP   = 938.272  ;
-    m_massE   =   0.511  ;
-    m_massK0  = 497.648  ;
-    m_massLam =1115.683  ;
-    m_massB   =5279.400  ;
     m_instanceName=name;
 
    }

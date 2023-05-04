@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.Enums import Format
+from AthenaConfiguration.Enums import Format, MetadataCategory
 
 
 def RecoSteering(flags):
@@ -226,14 +226,25 @@ def RecoSteering(flags):
 
     # setup output
     acc.flagPerfmonDomain('IO')
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+
     if flags.Output.doWriteESD:
         # Needed for Trk::Tracks TPCnv
         from TrkEventCnvTools.TrkEventCnvToolsConfigCA import (
             TrkEventCnvSuperToolCfg)
         acc.merge(TrkEventCnvSuperToolCfg(flags))
         # Needed for MetaData
-        acc.merge(InfileMetaDataCfg(flags, "ESD"))
+        acc.merge(
+            SetupMetaDataForStreamCfg(
+                flags,
+                "ESD",
+                createMetadata=[
+                    MetadataCategory.ByteStreamMetaData,
+                    MetadataCategory.LumiBlockMetaData,
+                    MetadataCategory.TruthMetaData,
+                ],
+            )
+        )
         log.info("ESD ItemList: %s", acc.getEventAlgo(
             "OutputStreamESD").ItemList)
         log.info("ESD MetadataItemList: %s", acc.getEventAlgo(
@@ -242,7 +253,17 @@ def RecoSteering(flags):
 
     if flags.Output.doWriteAOD:
         # Needed for MetaData
-        acc.merge(InfileMetaDataCfg(flags, "AOD"))
+        acc.merge(
+            SetupMetaDataForStreamCfg(
+                flags,
+                "AOD",
+                createMetadata=[
+                    MetadataCategory.ByteStreamMetaData,
+                    MetadataCategory.LumiBlockMetaData,
+                    MetadataCategory.TruthMetaData,
+                ],
+            )
+        )
         log.info("AOD ItemList: %s", acc.getEventAlgo(
             "OutputStreamAOD").ItemList)
         log.info("AOD MetadataItemList: %s", acc.getEventAlgo(

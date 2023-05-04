@@ -83,7 +83,7 @@ MUCTPISLAnyHit::execute( const std::string& name, const TObject& object, const d
   result->status_ = dqm_core::Result::Green;
   uint howmanybad=0;
 
-  for(int iBin=0;iBin<projection->GetNbinsX();iBin++)//foreach bin of the projection
+  for(int iBin=1;iBin<=projection->GetNbinsX();iBin++)//foreach bin of the projection (0=underflow)
   {
       if( projection->GetBinContent(iBin) < thresh  ) //if bin content less than algorithm threshold => bad
       {

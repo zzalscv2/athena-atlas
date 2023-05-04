@@ -3,6 +3,7 @@
 # TRUTH3.py - format containing standard common ATLAS truth record
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.Enums import MetadataCategory
 
 def TRUTH3Cfg(ConfigFlags):
     """Main config for TRUTH3"""
@@ -53,9 +54,9 @@ def TRUTH3Cfg(ConfigFlags):
         
     # Generate item list and create stream 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     TRUTH3ItemList = TRUTH3SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TRUTH3", ItemList=TRUTH3ItemList))
-    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_TRUTH3"))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_TRUTH3", createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc

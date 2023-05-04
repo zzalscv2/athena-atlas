@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 // Author: Vadim Kostyukhin (vadim.kostyukhin@cern.ch)
 
@@ -107,23 +107,19 @@ namespace InDet{
 
   bool InDetVKalVxInJetTool::insideMatLayer(float xvt,float yvt) const
   {
-        float Dist2DBP=std::sqrt( (xvt-m_beampipeX)*(xvt-m_beampipeX) + (yvt-m_beampipeY)*(yvt-m_beampipeY) ); 
-        float Dist2DBL=std::sqrt( (xvt-m_xLayerB)*(xvt-m_xLayerB) + (yvt-m_yLayerB)*(yvt-m_yLayerB) ); 
-        float Dist2DL1=std::sqrt( (xvt-m_xLayer1)*(xvt-m_xLayer1) + (yvt-m_yLayer1)*(yvt-m_yLayer1) );
-        float Dist2DL2=std::sqrt( (xvt-m_xLayer2)*(xvt-m_xLayer2) + (yvt-m_yLayer2)*(yvt-m_yLayer2) );
-        if(m_existIBL){              // 4-layer pixel detector
-               if( std::abs(Dist2DBP-m_beampipeR)< 1.0)  return true;           // Beam Pipe removal  
-               if( std::abs(Dist2DBL-m_rLayerB)  < 2.5)     return true;
-               if( std::abs(Dist2DL1-m_rLayer1)  < 3.0)      return true;
-               if( std::abs(Dist2DL2-m_rLayer2)  < 3.0)      return true;
-               //if( std::abs(Dist2DL2-m_rLayer3)  < 4.0)      return true;
-        }else{                       // 3-layer pixel detector
-               if( std::abs(Dist2DBP-m_beampipeR)< 1.5)  return true;           // Beam Pipe removal  
-               if( std::abs(Dist2DBL-m_rLayerB)  < 3.5)     return true;
-               if( std::abs(Dist2DL1-m_rLayer1)  < 4.0)      return true;
-               if( std::abs(Dist2DL2-m_rLayer2)  < 5.0)      return true;
-        }
-        return false; 
+     float R = std::hypot(xvt, yvt);
+     if(m_existIBL){              // 4-layer pixel detector
+       if( std::abs(R-m_beampipeR)< 1.0) return true; // Beam Pipe removal
+       if( std::abs(R-m_rLayerB)  < 2.5) return true;
+       if( std::abs(R-m_rLayer1)  < 3.0) return true;
+       if( std::abs(R-m_rLayer2)  < 3.0) return true;
+     }else{                       // 3-layer pixel detector
+       if( std::abs(R-m_beampipeR)< 1.5) return true; // Beam Pipe removal
+       if( std::abs(R-m_rLayerB)  < 3.5) return true;
+       if( std::abs(R-m_rLayer1)  < 4.0) return true;
+       if( std::abs(R-m_rLayer2)  < 5.0) return true;
+     }
+     return false;
   }
   
   double InDetVKalVxInJetTool::vrtVrtDist(const xAOD::Vertex & PrimVrt, const Amg::Vector3D & SecVrt, 

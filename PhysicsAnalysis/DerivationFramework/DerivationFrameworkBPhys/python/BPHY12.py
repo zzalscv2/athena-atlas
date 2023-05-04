@@ -7,6 +7,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 
 
 BPHYDerivationName = "BPHY12"
@@ -185,7 +186,7 @@ def BPHY12Cfg(ConfigFlags):
     for t in  augTools + skimTools + BPHY12ThinningTools : acc.addPublicTool(t)
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     BPHY12SlimmingHelper = SlimmingHelper("BPHY12SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
     AllVariables  = getDefaultAllVariables()
@@ -194,47 +195,47 @@ def BPHY12Cfg(ConfigFlags):
     # Needed for trigger objects
     BPHY12SlimmingHelper.IncludeMuonTriggerContent = True
     BPHY12SlimmingHelper.IncludeBPhysTriggerContent = True
-    
+
     ## primary vertices
     AllVariables += ["PrimaryVertices"]
     StaticContent += ["xAOD::VertexContainer#BPHY12RefittedPrimaryVertices"]
     StaticContent += ["xAOD::VertexAuxContainer#BPHY12RefittedPrimaryVerticesAux."]
     StaticContent += ["xAOD::VertexContainer#BPHY12RefittedPrimaryVertices2"]
     StaticContent += ["xAOD::VertexAuxContainer#BPHY12RefittedPrimaryVertices2Aux."]
-    
+
     ## ID track particles
     AllVariables += ["InDetTrackParticles"]
-    
-    ## combined / extrapolated muon track particles 
+
+    ## combined / extrapolated muon track particles
     ## (note: for tagged muons there is no extra TrackParticle collection since the ID tracks
     ##        are store in InDetTrackParticles collection)
     AllVariables += ["CombinedMuonTrackParticles"]
     AllVariables += ["ExtrapolatedMuonTrackParticles"]
-    
+
     ## muon container
     AllVariables += ["Muons"]
-    
-    ## Jpsi candidates 
+
+    ## Jpsi candidates
     StaticContent += ["xAOD::VertexContainer#%s"        % BPHY12_Reco_DiMuon.OutputVtxContainerName]
     StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY12_Reco_DiMuon.OutputVtxContainerName]
     ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
     StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY12_Reco_DiMuon.OutputVtxContainerName]
-    
+
     StaticContent += ["xAOD::VertexContainer#%s"        % BPHY12_Reco_BmumuKst.OutputVtxContainerName]
     StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY12_Reco_BmumuKst.OutputVtxContainerName]
     ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
     StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY12_Reco_BmumuKst.OutputVtxContainerName]
-    
+
     # Added by ASC
     # Truth information for MC only
     if isSimulation:
         AllVariables += ["TruthEvents","TruthParticles","TruthVertices","MuonTruthParticles"]
-    
+
     BPHY12SlimmingHelper.AllVariables = AllVariables
     BPHY12SlimmingHelper.StaticContent = StaticContent
 
     BPHY12ItemList = BPHY12SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY12", ItemList=BPHY12ItemList, AcceptAlgs=["BPHY12Kernel"]))
-    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_BPHY12", AcceptAlgs=["BPHY12Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_BPHY12", AcceptAlgs=["BPHY12Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
     acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
     return acc

@@ -10,6 +10,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 
 # Main algorithm config
 def PHYSKernelCfg(ConfigFlags, name='PHYSKernel', **kwargs):
@@ -67,7 +68,7 @@ def PHYSCfg(ConfigFlags):
     # Define contents of the format
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
     PHYSSlimmingHelper = SlimmingHelper("PHYSSlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
@@ -178,7 +179,7 @@ def PHYSCfg(ConfigFlags):
     # Output stream    
     PHYSItemList = PHYSSlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_PHYS", ItemList=PHYSItemList, AcceptAlgs=["PHYSKernel"]))
-    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_PHYS", AcceptAlgs=["PHYSKernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_PHYS", AcceptAlgs=["PHYSKernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
 
