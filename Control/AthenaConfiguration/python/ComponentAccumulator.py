@@ -779,9 +779,7 @@ class ComponentAccumulator:
 
         if not other._isMergable:
             raiseWithCurrentContext(ConfigurationError(
-                "Attempted to merge the ComponentAccumulator that was unsafely manipulated "
-                "(likely with foreach_component, ...) or is a top level ComponentAccumulator, "
-                "in such case revert the order\n"))
+                "Attempted to merge a top level ComponentAccumulator. Revert the order of merging\n"))
 
         def mergeSequences( dest, src ):
             if dest.name == src.name:
@@ -1182,7 +1180,6 @@ class ComponentAccumulator:
         Services - located under SvcMgr/ and type/instance_name is used
         """
         from AthenaConfiguration.PropSetterProxy import PropSetterProxy
-        self._isMergable=False
         return PropSetterProxy(self, path)
 
 
