@@ -56,5 +56,4 @@ if __name__ == '__main__':
   with open("test.pkl", "wb") as f:
     cfg.store(f)
 
-  print (cfg._publicTools)
   print ("-----------------finished----------------------")
