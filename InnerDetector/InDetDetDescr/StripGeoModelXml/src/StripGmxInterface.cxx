@@ -629,10 +629,10 @@ void StripGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
 
     IRDBRecordset_ptr stereoAnnulus = rdbAccessSvc->getRecordsetPtr("StereoAnnulus","");
     std::vector<std::string> stereoAnnulusParamNames({"thickness","carrierType","readoutSide","fieldDirection","stripDirection","stereoAngle","centreR","nRows","splitLevel","nStrips","phiPitch","startR","endR"});
-    std::map<std::string,std::string> stereoAnnulusMap;
 
     if(stereoAnnulus->size() !=0){
        for (unsigned int iR =0;iR<stereoAnnulus->size();iR++){
+            std::map<std::string,std::string> stereoAnnulusMap;
             for(std::string paramName:stereoAnnulusParamNames){
             std::string paramValue = (*stereoAnnulus)[iR]->getString(paramName);
             stereoAnnulusMap.insert({paramName,paramValue});
@@ -645,10 +645,10 @@ void StripGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
     
     IRDBRecordset_ptr stripBox = rdbAccessSvc->getRecordsetPtr("SiStripBox","");
     std::vector<std::string> stripBoxParamNames({"thickness","carrierType","readoutSide","fieldDirection","stripDirection","nRows","stripLength","splitLevel","nStrips","pitch"});
-    std::map<std::string,std::string> stripBoxMap;
 
     if(stripBox->size() !=0){
        for (unsigned int iR =0;iR<stripBox->size();iR++){
+            std::map<std::string,std::string> stripBoxMap;
             for(std::string paramName:stripBoxParamNames){
             std::string paramValue = (*stripBox)[iR]->getString(paramName);
             stripBoxMap.insert({paramName,paramValue});
