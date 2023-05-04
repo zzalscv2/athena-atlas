@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Run unit tests on RandomServices.py
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaCommon.Logging import log
 from AthenaCommon.Constants import DEBUG
@@ -27,5 +27,4 @@ t1.merge(t5)
 t1.merge(t6)
 t1.merge(t7)
 # Flag as merged to prevent error on destruction
-t1._wasMerged = True
-
+t1.wasMerged()

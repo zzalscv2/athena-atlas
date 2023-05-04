@@ -231,7 +231,7 @@ with ConfigurableCABehavior(): # need to temporarily activate run3 behaviour to 
 if ConfigFlags.Exec.MaxEvents==0: acc.printConfig()
 print("Configured Services:",*[svc.name for svc in acc.getServices()])
 print("Configured EventAlgos:",*[alg.name for alg in acc.getEventAlgos()])
-print("Configured CondAlgos:",*[alg.name for alg in acc._conditionsAlgs])
+print("Configured CondAlgos:",*[alg.name for alg in acc.getCondAlgos()])
 
 
 if not isComponentAccumulatorCfg():
