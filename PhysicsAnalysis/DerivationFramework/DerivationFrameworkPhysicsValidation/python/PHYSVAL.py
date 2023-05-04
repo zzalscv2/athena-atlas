@@ -71,7 +71,7 @@ def PHYSVALCfg(ConfigFlags):
     # Define contents of the format
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 
     PHYSVALSlimmingHelper = SlimmingHelper("PHYSVALSlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
@@ -294,7 +294,7 @@ def PHYSVALCfg(ConfigFlags):
     # Output stream
     PHYSVALItemList = PHYSVALSlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_PHYSVAL", ItemList=PHYSVALItemList, AcceptAlgs=["PHYSVALKernel"]))
-    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_PHYSVAL", AcceptAlgs=["PHYSVALKernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_PHYSVAL", AcceptAlgs=["PHYSVALKernel"]))
 
     return acc
 

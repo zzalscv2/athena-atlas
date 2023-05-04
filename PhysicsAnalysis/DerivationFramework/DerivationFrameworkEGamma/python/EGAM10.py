@@ -10,6 +10,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 
 from DerivationFrameworkEGamma.PhotonsCPDetailedContent import (
     PhotonsCPDetailedContent )
@@ -253,7 +254,7 @@ def EGAM10Cfg(ConfigFlags):
 
     # configure slimming
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     EGAM10SlimmingHelper = SlimmingHelper(
         'EGAM10SlimmingHelper',
@@ -428,8 +429,9 @@ def EGAM10Cfg(ConfigFlags):
                               'DAOD_EGAM10',
                               ItemList = EGAM10ItemList,
                               AcceptAlgs = ['EGAM10Kernel']))
-    acc.merge(InfileMetaDataCfg(ConfigFlags, 'DAOD_EGAM10',
-                                AcceptAlgs=['EGAM10Kernel']))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, 'DAOD_EGAM10',
+                                AcceptAlgs=['EGAM10Kernel'],
+                                createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
     

@@ -9,6 +9,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 
 from AthenaCommon.SystemOfUnits import MeV, GeV
 
@@ -331,7 +332,7 @@ def EGAM5Cfg(ConfigFlags):
 
     # configure slimming
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     EGAM5SlimmingHelper = SlimmingHelper(
         'EGAM5SlimmingHelper',
@@ -471,8 +472,9 @@ def EGAM5Cfg(ConfigFlags):
                               'DAOD_EGAM5',
                               ItemList = EGAM5ItemList,
                               AcceptAlgs = ['EGAM5Kernel']))
-    acc.merge(InfileMetaDataCfg(ConfigFlags, 'DAOD_EGAM5',
-                                AcceptAlgs=['EGAM5Kernel']))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, 'DAOD_EGAM5',
+                                AcceptAlgs=['EGAM5Kernel'],
+                                createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
     

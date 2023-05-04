@@ -5,6 +5,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 
 BPHYDerivationName = "BPHY6"
 streamName = "StreamDAOD_BPHY6"
@@ -162,7 +163,7 @@ def BPHY6Cfg(ConfigFlags):
 
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     BPHY6SlimmingHelper = SlimmingHelper("BPHY6SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     
     # Needed for trigger objects
@@ -223,6 +224,6 @@ def BPHY6Cfg(ConfigFlags):
     BPHY6SlimmingHelper.StaticContent = StaticContent
     BPHY6ItemList = BPHY6SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY6", ItemList=BPHY6ItemList, AcceptAlgs=["BPHY6Kernel"]))
-    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_BPHY6", AcceptAlgs=["BPHY6Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_BPHY6", AcceptAlgs=["BPHY6Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
     acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
     return acc

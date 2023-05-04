@@ -4,6 +4,7 @@
 # No additional information is added
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.Enums import MetadataCategory
 
 def TRUTH0Cfg(ConfigFlags):
     """Main config for TRUTH0"""
@@ -39,9 +40,9 @@ def TRUTH0Cfg(ConfigFlags):
 
     # Create output stream 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     TRUTH0ItemList = TRUTH0SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TRUTH0", ItemList=TRUTH0ItemList))
-    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_TRUTH0"))
- 
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_TRUTH0", createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
+
     return acc
