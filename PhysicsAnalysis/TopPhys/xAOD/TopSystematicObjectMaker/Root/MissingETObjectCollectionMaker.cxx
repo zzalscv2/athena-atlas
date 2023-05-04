@@ -284,13 +284,13 @@ namespace top {
         // https://svnweb.cern.ch/trac/atlasoff/browser/Reconstruction/MET/METUtilities/tags/METUtilities-00-01-43/util/example_METMaker_METSystematicsTool.cxx
 
         //get the soft cluster term, and applyCorrection
-        xAOD::MissingET* softClusMet = (*new_met_container)["SoftClusCore"];
+        xAOD::MissingET* softClusMet = (*new_met_container)["SoftClus"];
         if (softClusMet != nullptr) { //check we retrieved the clust term
           m_met_systematics->setRandomSeed(static_cast<int>(1e6*softClusMet->phi()));
           top::check(m_met_systematics->applyCorrection(*softClusMet, metHelper), "Failed to applyCorrection");
         }
 
-        xAOD::MissingET* softTrkMet = (*new_met_container)["PVSoftTrkCore"];
+        xAOD::MissingET* softTrkMet = (*new_met_container)["PVSoftTrk"];
         if (softTrkMet != nullptr) { //check we retrieved the soft trk
           m_met_systematics->setRandomSeed(static_cast<int>(1e6*softTrkMet->phi()));
           top::check(m_met_systematics->applyCorrection(*softTrkMet, metHelper), "Failed to applyCorrection");
