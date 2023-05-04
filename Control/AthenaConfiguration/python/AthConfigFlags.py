@@ -455,7 +455,7 @@ class AthConfigFlags(object):
         parser.add_argument('--concurrent-events', type=int, default=None, help='number of concurrent events for AthenaMT')
         parser.add_argument("--nprocs", type=int, default=None, help="Run AthenaMP with given number of worker processes")
         parser.add_argument("---",dest="terminator",action='store_true', help=argparse.SUPPRESS) # special hidden option required to convert option terminator -- for --help calls
-        parser.add_argument("--pmon", type=str, default=None, choices=['FastMonMT','FullMonMT','sdmonfp'], help="Perfomance monitoring. Legacy parameter 'sdmonf' identical to 'FullMonMT'")
+        parser.add_argument("--pmon", type=str, default=None, choices=['FastMonMT','FullMonMT'], help="Perfomance monitoring")
 
         return parser
 
@@ -591,9 +591,6 @@ class AthConfigFlags(object):
             self.Concurrency.NumProcs = args.nprocs
 
         if args.pmon is not None:
-            if args.pmon=="sdmonfp": #Translate legacy argument 
-                args.pmon="FullMonMT"
-
             self._loadDynaFlags("PerfMon")
             self._set("PerfMon.do"+args.pmon,True)
 
