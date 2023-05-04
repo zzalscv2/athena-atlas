@@ -229,11 +229,11 @@ def BasicPixelDigitizationTool(name="PixelDigitizationTool", **kwargs):
             from PixelConditionsAlgorithms.PixelConditionsAlgorithmsConf import PixelChargeLUTCalibCondAlg
             condSeq += PixelChargeLUTCalibCondAlg(name="PixelChargeLUTCalibCondAlg", ReadKey="/PIXEL/ChargeCalibration")
     else:
-        if not conddb.folderRequested("/PIXEL/PixCalib"):
-            conddb.addFolderSplitOnline("PIXEL", "/PIXEL/Onl/PixCalib", "/PIXEL/PixCalib", className="CondAttrListCollection")
+        if not conddb.folderRequested("/PIXEL/ChargeCalibration"):
+            conddb.addFolder("PIXEL_OFL", "/PIXEL/ChargeCalibration", className="CondAttrListCollection")
         if not hasattr(condSeq, 'PixelChargeCalibCondAlg'):
             from PixelConditionsAlgorithms.PixelConditionsAlgorithmsConf import PixelChargeCalibCondAlg
-            condSeq += PixelChargeCalibCondAlg(name="PixelChargeCalibCondAlg", ReadKey="/PIXEL/PixCalib" if commonGeoFlags.Run() == "RUN2" else "")
+            condSeq += PixelChargeCalibCondAlg(name="PixelChargeCalibCondAlg", ReadKey="/PIXEL/ChargeCalibration" if commonGeoFlags.Run() == "RUN2" else "")
 
     #####################
     # Cabling map Setup #

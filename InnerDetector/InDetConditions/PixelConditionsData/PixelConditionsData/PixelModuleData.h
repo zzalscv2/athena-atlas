@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file PixelConditionsData/PixelModuleData.h
@@ -124,8 +124,8 @@ class PixelModuleData
     float getDefaultQ2TotE() const;
     float getDefaultQ2TotC() const;
 
-    void setRUN3PIXLinearExtrapolation(bool doLinearExtrapolation);
-    bool getRUN3PIXLinearExtrapolation() const;
+    void setPIXLinearExtrapolation(bool doLinearExtrapolation);
+    bool getPIXLinearExtrapolation() const;
 
     // Lorentz angle correction
     void setBarrelLorentzAngleCorr(const std::vector<double> &barrelLorentzAngleCorr);

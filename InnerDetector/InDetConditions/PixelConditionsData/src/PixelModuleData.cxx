@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <sstream>
@@ -427,8 +427,8 @@ float PixelModuleData::getDefaultQ2TotA() const { return m_paramA; }
 float PixelModuleData::getDefaultQ2TotE() const { return m_paramE; }
 float PixelModuleData::getDefaultQ2TotC() const { return m_paramC; }
 
-void PixelModuleData::setRUN3PIXLinearExtrapolation(bool doLinearExtrapolation) { m_doLinearExtrapolation = doLinearExtrapolation; }
-bool PixelModuleData::getRUN3PIXLinearExtrapolation() const { return m_doLinearExtrapolation; }
+void PixelModuleData::setPIXLinearExtrapolation(bool doLinearExtrapolation) { m_doLinearExtrapolation = doLinearExtrapolation; }
+bool PixelModuleData::getPIXLinearExtrapolation() const { return m_doLinearExtrapolation; }
 
 // Lorentz angle correction
 void PixelModuleData::setBarrelLorentzAngleCorr(const std::vector<double> &barrelLorentzAngleCorr) { m_barrelLorentzAngleCorr = barrelLorentzAngleCorr; }

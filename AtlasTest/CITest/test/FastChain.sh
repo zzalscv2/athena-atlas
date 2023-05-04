@@ -14,6 +14,6 @@ FastChain_tf.py \
     --conditionsTag default:OFLCOND-MC16-SDR-16 \
     --preSimExec 'from TrkDetDescrSvc.TrkDetDescrJobProperties import TrkDetFlags;TrkDetFlags.TRT_BuildStrawLayers=True;from Digitization.DigitizationFlags import digitizationFlags;digitizationFlags.experimentalDigi=["NewMerge"]' \
     --postInclude='PyJobTransforms/UseFrontier.py' \
-    --postExec 'from IOVDbSvc.CondDB import conddb;conddb.addOverride("/TILE/OFL02/CALIB/SFR","TileOfl02CalibSfr-SIM-05")' \
+    --postExec 'from IOVDbSvc.CondDB import conddb;conddb.addOverride("/TILE/OFL02/CALIB/SFR","TileOfl02CalibSfr-SIM-05");conddb.addOverride("/PIXEL/ChargeCalibration","PixelChargeCalibration-SIM-MC16-000-18");' \
     --DataRunNumber '284500' \
     --imf False

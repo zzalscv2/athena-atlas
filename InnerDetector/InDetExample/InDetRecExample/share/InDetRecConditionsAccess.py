@@ -114,11 +114,12 @@ if DetFlags.pixel_on():
             from PixelConditionsAlgorithms.PixelConditionsAlgorithmsConf import PixelChargeLUTCalibCondAlg
             condSeq += PixelChargeLUTCalibCondAlg(name="PixelChargeLUTCalibCondAlg", ReadKey="/PIXEL/ChargeCalibration")
     else:
-        if not conddb.folderRequested("/PIXEL/PixCalib"):
-            conddb.addFolderSplitOnline("PIXEL", "/PIXEL/Onl/PixCalib", "/PIXEL/PixCalib", className="CondAttrListCollection")
+        PixCalibFolder = 'ChargeCalibration'
+        if not conddb.folderRequested("/PIXEL/"+PixCalibFolder):
+            conddb.addFolderSplitOnline("PIXEL", "/PIXEL/Onl/"+PixCalibFolder, "/PIXEL/"+PixCalibFolder, className="CondAttrListCollection")
         if not hasattr(condSeq, 'PixelChargeCalibCondAlg'):
             from PixelConditionsAlgorithms.PixelConditionsAlgorithmsConf import PixelChargeCalibCondAlg
-            condSeq += PixelChargeCalibCondAlg(name="PixelChargeCalibCondAlg", ReadKey="/PIXEL/PixCalib" if commonGeoFlags.Run() == "RUN2" else "")
+            condSeq += PixelChargeCalibCondAlg(name="PixelChargeCalibCondAlg", ReadKey="/PIXEL/"+PixCalibFolder if commonGeoFlags.Run() == "RUN2" else "")
 
     if not athenaCommonFlags.isOnline():
         if not conddb.folderRequested('/PIXEL/PixdEdx'):
