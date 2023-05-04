@@ -157,7 +157,7 @@ namespace JetTagDQA {
       if(dsid == 410000 || dsid == 601229){
         m_jetPtCut = m_jetPtCutTtbar;
       }
-      else if(dsid == 427080 || dsid == 427081 ||dsid == 801271) {
+      else if(dsid == 427080 || dsid == 427081 ||dsid == 801271 || dsid == 800030) {
         m_jetPtCut = m_jetPtCutZprime;
         m_onZprime = true;
       }
