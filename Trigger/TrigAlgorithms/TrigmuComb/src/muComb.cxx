@@ -220,35 +220,21 @@ int muComb::g4Match(const xAOD::L2StandAloneMuon* feature,
    //Protection against failing extrapolation
    double extr_eta;
    double extr_phi;
-   double extr_pt;
    if (!muonPerigee) { //G4 probably failed, getting LUT extrapolated values
       extr_eta    = feature->eta();
       extr_phi    = feature->phi();
-      extr_pt = pt;
    } else {
       double extr_theta    = muonPerigee -> parameters()[Trk::theta];
       extr_phi      = muonPerigee -> parameters()[Trk::phi0];
-      double extr_q_over_p = muonPerigee -> parameters()[Trk::qOverP];
       extr_eta      = -log(tan(extr_theta / 2.));
       if (doFix) extr_eta = -log(tan(theta / 2.));
-      int    extr_q        = (extr_q_over_p > 0 ? 1 : -1);
-      extr_pt       = extr_q * 1.0e33;
-      if (extr_q_over_p != 0.) {
-         extr_pt = (1. / extr_q_over_p) * sin(extr_theta);
-         if (doFix) extr_pt = (1. / extr_q_over_p) * sin(theta);
-      }
    }
 
    double extr_eeta = muCombUtil::getG4ExtEtaRes(feature->pt(), feature->etaMS());
    double extr_ephi = muCombUtil::getG4ExtPhiRes(feature->pt(), feature->etaMS());
    double extr_ptinv  = 1.0e33;
-   if (extr_pt != 0) extr_ptinv = 1. / extr_pt;
+   if (pt != 0) extr_ptinv = 1. / pt;
    double extr_eptinv = eptinv;
-
-   if (isBarrel) {//retuned ptinv resolution (only for barrel)
-      extr_eptinv *= m_Chi2Weight_g4;
-      id_eptinv   *= m_Chi2Weight_g4;
-   }
 
    //Combined muon parameters
    combPtInv = muCombUtil::getCombinedAverage(extr_ptinv, extr_eptinv, id_ptinv, id_eptinv);
