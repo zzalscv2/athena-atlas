@@ -326,6 +326,10 @@ def ITkTrackRecoOutputCfg(flags):
 
     if flags.Tracking.doStoreSiSPSeededTracks:
         toAOD += [
+            "xAOD::TrackStateValidationContainer#SiSP_ITkPixel_MSOSs",
+            "xAOD::TrackStateValidationAuxContainer#SiSP_ITkPixel_MSOSsAux.",
+            "xAOD::TrackStateValidationContainer#SiSP_ITkStrip_MSOSs",
+            "xAOD::TrackStateValidationAuxContainer#SiSP_ITkStrip_MSOSsAux.",
             "xAOD::TrackParticleContainer#SiSPSeededTracksTrackParticles",
             f"xAOD::TrackParticleAuxContainer#SiSPSeededTracksTrackParticlesAux.{excludedAuxData}"
         ]
