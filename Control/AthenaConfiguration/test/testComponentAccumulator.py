@@ -159,7 +159,16 @@ class TestComponentAccumulator( unittest.TestCase ):
         self.assertEqual( algo3.OutputLevel, DEBUG, "wrong OutputLevel value for Algo3")
         self.acc.foreach_component("*sub2*/*").OutputLevel = INFO
         self.assertEqual(self.acc.getEventAlgo("NestedAlgo1").OutputLevel, INFO, "wrong OutputLevel value for NestedAlgo1")
-        self.assertEqual(self.acc.getEventAlgo("NestedAlgo2").OutputLevel, INFO, "wrong OutputLevel value for NestedAlgo1")
+        self.assertEqual(self.acc.getEventAlgo("NestedAlgo2").OutputLevel, INFO, "wrong OutputLevel value for NestedAlgo2")
+        # test other properties
+        self.acc.foreach_component("*sub2*/*").MyInt = 333
+        self.acc.foreach_component("*/Algo3").MyInt =  222
+        self.acc.foreach_component("*sub2*/*").MyIn = 444 # try setting property that does not exist
+        self.assertEqual(self.acc.getEventAlgo("NestedAlgo2").MyInt, 333, "wrong MyInt in NestedAlgo2 set via foreach_component")
+        self.assertEqual(self.acc.getEventAlgo("Algo3").MyInt, 222, "wrong MyInt value for Algo3 set via foreach_component")
+
+
+
 
 def test_gatherProps(self):
     self.acc.addEventAlgo(TestAlgo("GPTest", MyInt=123, MyBool=True))
