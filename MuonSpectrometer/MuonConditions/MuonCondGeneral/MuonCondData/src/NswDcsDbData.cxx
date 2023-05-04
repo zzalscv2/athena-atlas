@@ -7,11 +7,15 @@
 #include "MuonIdHelpers/sTgcIdHelper.h"
 #include "Identifier/Identifier.h"
 
+#include "MuonReadoutGeometry/MuonChannelDesign.h"
+#include "MuonReadoutGeometry/MMReadoutElement.h"
+
 
 // general functions ---------------------------------
-NswDcsDbData::NswDcsDbData(const MmIdHelper& mmIdHelper, const sTgcIdHelper& stgcIdHelper):
+NswDcsDbData::NswDcsDbData(const MmIdHelper& mmIdHelper, const sTgcIdHelper& stgcIdHelper, const MuonGM::MuonDetectorManager* muonGeoMgr):
     m_mmIdHelper(mmIdHelper),
-    m_stgcIdHelper(stgcIdHelper)
+    m_stgcIdHelper(stgcIdHelper),
+    m_muonGeoMgr(muonGeoMgr)
 {
 }
 
@@ -167,7 +171,9 @@ NswDcsDbData::getDataForChannel(const DcsTechType tech, const Identifier& channe
 bool NswDcsDbData::isGood(const Identifier& channelId, bool issTgcQ1OuterHv) const {
     // here we will check the different DCS components that need to be good to declare a detector region as good
     // for now we only we only have the HV data
-    return isGoodHv(channelId, issTgcQ1OuterHv); 
+    if(!isGoodHv(channelId, issTgcQ1OuterHv)) return false;
+    if(!isConnectedChannel(channelId))  return false;
+    return true;
 
 }
 
@@ -196,3 +202,33 @@ bool NswDcsDbData::isGoodHv(const Identifier& channelId, bool issTgcQ1OuterHv) c
 }
 
 
+bool NswDcsDbData::isConnectedChannel(const Identifier& channelId) const {
+    // for stgc we do not have unconnected channels
+    if(m_stgcIdHelper.is_stgc(channelId)) return true;
+
+    if(!m_mmIdHelper.is_mm(channelId)) throw std::runtime_error("the check for unconnected channels was called with an identifier that is in MM and not sTGC");
+
+    const MuonGM::MMReadoutElement* detectorReadoutElement = m_muonGeoMgr->getMMReadoutElement(channelId);
+    if(!detectorReadoutElement) {
+       throw std::runtime_error("failed to retrieve MMReadoutElement");
+    }
+    const MuonGM::MuonChannelDesign* channelDesign = detectorReadoutElement->getDesign(channelId);
+    if(!channelDesign) {
+      throw std::runtime_error("failed to retrieve MuonChannelDesign");
+    }
+
+    int channel_number = m_mmIdHelper.channel(channelId);
+    if(m_mmIdHelper.isStereo(channelId)){
+      if(channel_number <= channelDesign->nMissedBottomStereo  || channel_number >= channelDesign->totalStrips - channelDesign->nMissedTopStereo) {
+         return false;
+       } 
+    } else {
+      if(channel_number <= channelDesign->nMissedBottomEta  || channel_number >= channelDesign->totalStrips - channelDesign->nMissedTopEta) {
+        return false;
+      } 
+    }
+    return true; 
+
+
+
+}

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file PixelConditionsAlgorithms/PixelConfigCondAlg.h
@@ -854,8 +854,8 @@ class PixelConfigCondAlg : public AthReentrantAlgorithm {
     Gaudi::Property<float> m_CalibrationParameterC
     {this, "DefaultCalibrationParameterC", 26000.0, "Default charge calibration parameter C"};
 
-    Gaudi::Property<bool> m_doRUN3PIXLinearExtrapolation
-    {this, "doRUN3PIXLinearExtrapolation", true, "Activation for linear extrapolation for PIXEL"};
+    Gaudi::Property<bool> m_doPIXLinearExtrapolation
+    {this, "doPIXLinearExtrapolation", true, "Activation for linear extrapolation for PIXEL"};
 
     // DCS parameters
     Gaudi::Property<float> m_biasVoltage

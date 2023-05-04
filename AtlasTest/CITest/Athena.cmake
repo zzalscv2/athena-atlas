@@ -26,7 +26,7 @@ atlas_add_citest( SimulationRun4FullSim
    LOG_IGNORE_PATTERN "WARNING FPE INVALID" )  # ignore FPEs from Geant4
 
 atlas_add_citest( PileUpPresamplingRun2
-   SCRIPT RunWorkflowTests_Run2.py --CI -p -w PileUpPresampling -e '--maxEvents 5' --no-output-checks )
+   SCRIPT RunWorkflowTests_Run2.py --CI -p -w PileUpPresampling -e '--maxEvents 5 --conditionsTag OFLCOND-MC16-SDR-RUN2-11' --no-output-checks )
 
 atlas_add_citest( PileUpPresamplingRun3
    SCRIPT RunWorkflowTests_Run3.py --CI -p -w PileUpPresampling -e '--maxEvents 5' --no-output-checks )

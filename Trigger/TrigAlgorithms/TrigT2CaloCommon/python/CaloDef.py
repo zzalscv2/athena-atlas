@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from AthenaCommon.CFElements import seqAND, parOR
+from AthenaCommon.CFElements import parOR
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
 from TriggerMenuMT.HLT.CommonSequences.FullScanDefs import caloFSRoI
@@ -106,71 +106,6 @@ def fastCaloVDVCfg(name="fastCaloVDV",InViewRoIs="EMCaloRoIs") :
 ####################################
 ##### SEQUENCES
 ####################################
-
-
-def fastCaloRecoFWDSequence(flags, InViewRoIs, ClustersName="HLT_FastCaloEMClusters_FWD", RingerKey="HLT_FastCaloRinger_FWD"):
-    # create alg
-    fastCaloAlg = algorithmCAToGlobalWrapper(fastCaloRecoSequenceCfg, flags, inputEDM=InViewRoIs, ClustersName=ClustersName, RingerKey=RingerKey,
-                                doForward=True)
-    import AthenaCommon.CfgMgr as CfgMgr
-    fastCaloVDV = CfgMgr.AthViews__ViewDataVerifier("fastCaloVDV_FWD")
-    fastCaloVDV.DataObjects = [( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' ),
-                               ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+FSJETMETCaloRoI' )]
-    fastCaloInViewSequence = seqAND('fastCaloInViewSequence_FWD' , [fastCaloVDV, fastCaloAlg] )
-    sequenceOut = "HLT_FastCaloEMClusters_FWD"
-    return (fastCaloInViewSequence, sequenceOut)
-
-
-
-def fastCaloEVCreator():
-    InViewRoIs="EMCaloRoIs"
-    fastCaloViewsMaker = CompFactory.EventViewCreatorAlgorithm( "IMfastCalo" )
-    fastCaloViewsMaker.ViewFallThrough = True
-    fastCaloViewsMaker.RoIsLink = "initialRoI"
-    fastCaloViewsMaker.RoITool = CompFactory.ViewCreatorInitialROITool()
-    fastCaloViewsMaker.InViewRoIs = InViewRoIs
-    fastCaloViewsMaker.Views = "EMCaloViews"
-    fastCaloViewsMaker.ViewNodeName = "fastCaloInViewSequence"
-    return (fastCaloViewsMaker, InViewRoIs)
-
-
-
-def fastCaloEVFWDCreator():
-    #InViewRoIs="EMCaloRoIs"
-    InViewRoIs = "FSJETMETCaloRoI"
-    fastCaloViewsMaker = CompFactory.EventViewCreatorAlgorithm( "IMfastCalo_FWD" )
-    fastCaloViewsMaker.ViewFallThrough = True
-    fastCaloViewsMaker.RoIsLink = "initialRoI"
-    fastCaloViewsMaker.RoITool = CompFactory.ViewCreatorInitialROITool()
-    fastCaloViewsMaker.InViewRoIs = InViewRoIs
-    fastCaloViewsMaker.Views = "EMCaloViews_FWD"
-    fastCaloViewsMaker.ViewNodeName = "fastCaloInViewSequence_FWD"
-
-    return (fastCaloViewsMaker, InViewRoIs)
-
-
-def fastCalo_All_EVCreator():
-    InViewRoIs = "EMCaloRoIs"
-    fastCaloViewsMaker = CompFactory.EventViewCreatorAlgorithm( "IM_LArPS_All" )
-    fastCaloViewsMaker.ViewFallThrough = True
-    fastCaloViewsMaker.RoIsLink = "initialRoI"
-    fastCaloViewsMaker.RoITool = CompFactory.ViewCreatorInitialROITool()
-    fastCaloViewsMaker.InViewRoIs = InViewRoIs
-    fastCaloViewsMaker.Views = "LArPS_All_Views"
-
-    return (fastCaloViewsMaker, InViewRoIs)
-
-def fastCalo_AllEM_EVCreator():
-    InViewRoIs = "EMCaloRoIs"
-    fastCaloViewsMaker = CompFactory.EventViewCreatorAlgorithm( "IM_LArPS_AllEM" )
-    fastCaloViewsMaker.ViewFallThrough = True
-    fastCaloViewsMaker.RoIsLink = "initialRoI"
-    fastCaloViewsMaker.RoITool = CompFactory.ViewCreatorInitialROITool()
-    fastCaloViewsMaker.InViewRoIs = InViewRoIs
-    fastCaloViewsMaker.Views = "LArPS_AllEM_Views"
-
-    return (fastCaloViewsMaker, InViewRoIs)
-
 
 ##################################
 # cluster maker functions

@@ -928,6 +928,7 @@ private:
 
   bool m_DumpStore; ///<  property Dump: triggers dump() at EndEvent
   bool m_ActivateHistory; ///< property: activate the history service
+  bool m_DumpArena; ///< DumpArena Property flag : trigger m_arena->report() at clearStore
 
   /// Cache store type in the facade class.
   StoreID::type m_storeID;

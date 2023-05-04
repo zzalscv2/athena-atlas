@@ -24,6 +24,8 @@ NswDcsDbAlg::initialize(){
 	
 	// write key for time/charge data
 	ATH_CHECK(m_writeKey.initialize());
+
+	ATH_CHECK(detStore()->retrieve(m_muDetMgrFromDetStore));
 	
 	return StatusCode::SUCCESS;
 }
@@ -43,7 +45,7 @@ NswDcsDbAlg::execute(const EventContext& ctx) const {
 		return StatusCode::SUCCESS;
 	}
 	ATH_MSG_DEBUG("Range of time/charge output is " << wrHdl.getRange());
-	std::unique_ptr<NswDcsDbData> wrCdo{std::make_unique<NswDcsDbData>(m_idHelperSvc->mmIdHelper(), m_idHelperSvc->stgcIdHelper())};
+	std::unique_ptr<NswDcsDbData> wrCdo{std::make_unique<NswDcsDbData>(m_idHelperSvc->mmIdHelper(), m_idHelperSvc->stgcIdHelper(), m_muDetMgrFromDetStore)};
 
 	// load data
 	ATH_CHECK(loadHvData(ctx, m_readKey_mmg_hv, DcsTechType::MMG, wrHdl, wrCdo.get()));

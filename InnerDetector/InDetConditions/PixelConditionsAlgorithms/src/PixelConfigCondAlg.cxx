@@ -78,7 +78,7 @@ StatusCode PixelConfigCondAlg::execute(const EventContext& ctx) const {
   writeCdo -> setDefaultQ2TotA(m_CalibrationParameterA);
   writeCdo -> setDefaultQ2TotE(m_CalibrationParameterE);
   writeCdo -> setDefaultQ2TotC(m_CalibrationParameterC);
-  writeCdo -> setRUN3PIXLinearExtrapolation(m_doRUN3PIXLinearExtrapolation);
+  writeCdo -> setPIXLinearExtrapolation(m_doPIXLinearExtrapolation);
 
   // DCS parameters
   writeCdo -> setDefaultBiasVoltage(m_biasVoltage);

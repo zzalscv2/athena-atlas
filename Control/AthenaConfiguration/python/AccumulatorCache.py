@@ -111,6 +111,10 @@ class AccumulatorDecorator:
             return hash(x)
         return None
 
+    def __get__(self, obj, objtype):
+        """Support instance methods."""
+        return functools.partial(self.__call__, obj)
+
     def __call__(self , *args , **kwargs):
         cacheHit = None
         try:
@@ -186,7 +190,10 @@ class AccumulatorDecorator:
                 else:
                     _msg.debug('Hash not found in AccumulatorCache for function %s' , self._func)
                     if(len(self._cache) >= self._maxSize):
-                        del self._cache[next(iter(self._cache))]
+                        _msg.debug("Cache limit (%d) reached for %s.%s", self._maxSize, self._func.__module__, self._func.__name__)
+                        oldest = self._cache.pop(next(iter(self._cache)))
+                        if isinstance(oldest, ComponentAccumulator):
+                            oldest.wasMerged()
 
                     res = self._func(*args , **kwargs)
 

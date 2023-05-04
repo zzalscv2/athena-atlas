@@ -500,9 +500,7 @@ public:
    *
    * Returns the number of objects that were removed.
    */
-  size_t trim (const std::vector<key_query_type>& keys, bool trimall);
-  // temporary --- remove this
-  size_t trim (const std::vector<key_query_type>& keys);
+  size_t trim (const std::vector<key_query_type>& keys, bool trimall = false);
 
 
   /**

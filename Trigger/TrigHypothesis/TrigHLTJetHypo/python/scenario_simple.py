@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TrigHLTJetHypo.RepeatedConditionParams import RepeatedConditionParams
 from TrigHLTJetHypo.FilterParams import FilterParams
@@ -6,16 +6,8 @@ from TrigHLTJetHypo.HelperConfigToolParams import HelperConfigToolParams
 from TrigHLTJetHypo.ConditionDefaults import defaults
 from TrigHLTJetHypo.make_treevec import make_treevec
 
-from AthenaCommon.Logging import logging
-from AthenaCommon.Constants import DEBUG
-
-logger = logging.getLogger( __name__)
-logger.setLevel(DEBUG)
-
-from copy import deepcopy
 
 # make a list of all possible cut items for the simple scenario
-
 all_elemental_keys = ('etaRange', 'jvt', 'smc',
                       'threshold', 'momCuts', 'bsel', 'timing')
 
@@ -49,19 +41,19 @@ def get_condition_args_from_chainpart(cp):
         if k == 'threshold':
             key = 'pt'
             vals = defaults(key, lo=v)
-            condargs.append((key, deepcopy(vals)))
+            condargs.append((key, vals))
                 
         if k == 'etaRange':
             key='eta'
             lo, hi = v.split(key)
             vals = defaults(key, lo=lo, hi=hi)
-            condargs.append((key, deepcopy(vals)))
+            condargs.append((key, vals))
 
         if k == 'smc':
             key = 'smc'
             lo, hi = v.split(key)
             vals = defaults(key, lo=lo, hi=hi)
-            condargs.append((key, deepcopy(vals)))
+            condargs.append((key, vals))
                 
         if k == 'jvt':
             key    = 'jvt'
@@ -69,14 +61,14 @@ def get_condition_args_from_chainpart(cp):
             assert values[1] == '','jvt condition takes only one argument, two were given' # protection when an upper (not supported) cut is requested
             lo   = values[0]
             vals = defaults(key, lo=lo)
-            condargs.append((key, deepcopy(vals)))
+            condargs.append((key, vals))
 
         if k == 'timing':
             key    = 'timing'
             values = v.split(key)
             lo   = values[0]
             vals = defaults(key, lo=lo)
-            condargs.append((key, deepcopy(vals)))
+            condargs.append((key, vals))
 
         if k == 'bsel':
             if 'bgnone' in v:
@@ -107,7 +99,7 @@ def get_condition_args_from_chainpart(cp):
                     'namePu': 'fastGN120230327_pu',
                     'nameValid': 'TracksForMinimalJetTag_isValid'
                 }
-                condargs.append((k, deepcopy(vals)))
+                condargs.append((k, vals))
             elif 'bdips' in v:
                 key = 'bdips'
                 values = v.split(key)
@@ -138,7 +130,7 @@ def get_condition_args_from_chainpart(cp):
                     'namePu': 'fastDips_pu',
                     'nameValid': 'TracksForMinimalJetTag_isValid'
                 }
-                condargs.append((k, deepcopy(vals)))
+                condargs.append((k, vals))
             else:
                 raise ValueError(f'btagger {v.split("b")[1]} not supportted')
 
@@ -201,8 +193,6 @@ def scenario_simple(chain_parts):
         # make an empty filter condition for the FR condition
         filterparams.append(FilterParams(typename='PassThroughFilter'))
 
-        args = deepcopy(condargs)
-        args.append(filterparams)
         clique = None
         try:
             clique = clique_list.index(condargs)

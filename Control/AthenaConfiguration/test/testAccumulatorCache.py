@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 import unittest
@@ -51,6 +51,15 @@ class TestCache(unittest.TestCase):
         y = fac(hashwrapper(11))
         info = fac.getInfo()
         self.assertEqual(info["hits"] , 1)
+
+    def test_instance_method(self):
+        class Foo:
+            @AccumulatorCache
+            def bar(self):
+                return 42
+
+        f = Foo()
+        self.assertEqual(f.bar(), 42)
 
     def test_exception(self):
         """Test cache when function throws exception."""

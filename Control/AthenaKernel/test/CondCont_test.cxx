@@ -798,7 +798,33 @@ void test5 (TestRCUSvc& rcusvc)
     std::abort();
   }
 
-  assert (cc.entries() == 8);
+  std::vector<CondCont<B>::key_type> keys1 =
+    { CondContBase::keyFromRunLBN (runlbn (1, 10)),
+      CondContBase::keyFromRunLBN (runlbn (1, 30)),
+      CondContBase::keyFromRunLBN (runlbn (2, 10)),
+      CondContBase::keyFromRunLBN (runlbn (20, 10)) };
+  std::vector<CondCont<B>::key_type> keys2 =
+    { CondContBase::keyFromTimestamp (timestamp (1)),
+      CondContBase::keyFromTimestamp (timestamp (2)),
+      CondContBase::keyFromTimestamp (timestamp (25)) };
+  
+  assert (cc.trim (keys1, keys2) == 5);
+  std::ostringstream ss3;
+  cc.list (ss3);
+  std::ostringstream exp3;
+  exp3 << "id:  ( 'UNKNOWN_CLASS:cls' , 'key' )   proxy: 0 [4] run+lbn entries\n";
+  exp3 << "{[1,t:1,l:10] - [1,t:2,l:20]} " << bptrs[0] << "\n";
+  exp3 << "{[1,t:2,l:10] - [1,t:4.500000000,l:20]} " << bptrs[1] << "\n";
+  exp3 << "{[1,t:25,l:30] - [1,t:30,l:40]} " << bptrs[2] << "\n";
+  exp3 << "{[2,t:100,l:10] - [2,t:103.500000000,l:20]} (empty tsmap)\n";
+  exp3 << "{[20,t:120,l:10] - [20,t:130,l:40]} (empty tsmap)\n";
+  if (ss3.str() != exp3.str()) {
+    std::cout << "ss3: " << ss3.str() << "\nexp3: " << exp3.str() << "\n";
+    std::cout.flush();
+    std::abort();
+  }
+
+  assert (cc.entries() == 3);
   cc.clear();
   assert (cc.entries() == 0);
 }
