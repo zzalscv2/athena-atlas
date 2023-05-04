@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuFastTrackExtrapolator.h"
@@ -16,13 +16,6 @@ TrigL2MuonSA::MuFastTrackExtrapolator::MuFastTrackExtrapolator(const std::string
                                                                const IInterface*  parent): 
   AthAlgTool(type,name,parent)
 {
-
-  setMuFastRes(m_muFastRes_barrel,  0.042, -0.00046, 3.5, -1.8, 0.35, -0.017);
-  setMuFastRes(m_muFastRes_endcap1, 0.098, -0.000097, 77.0, -47.0, 9.8, -0.67);
-  setMuFastRes(m_muFastRes_endcap2, 0.19, -0.00043, 10.4, -5.21, 1.14, -0.056);
-  setMuFastRes(m_muFastRes_endcap3, 0.087, -0.0013, 98.0, -60.0, 12.0, -0.80);
-  setMuFastRes(m_muFastRes_endcap4, 0.060, -0.0014, 101.0, -61.0, 12.0, -0.80);
-  
 }
 
 // --------------------------------------------------------------------------------
@@ -54,7 +47,7 @@ StatusCode TrigL2MuonSA::MuFastTrackExtrapolator::extrapolateTrack(std::vector<T
     double sigEta = 0.;
     double sigPhi = 0.;
 
-    const double eptinv = getMuFastRes(m_muFastRes_barrel, track.pt*track.charge, track.s_address, track.etaMap, track.phiMS);
+    const double eptinv = getMuFastRes(track.pt*track.charge, track.s_address, track.etaMap, track.phiMS);
 
     if (m_backExtrapolatorTool) {
 
@@ -90,19 +83,10 @@ StatusCode TrigL2MuonSA::MuFastTrackExtrapolator::extrapolateTrack(std::vector<T
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-void TrigL2MuonSA::MuFastTrackExtrapolator::setMuFastRes(std::vector<double>& vec, double p1,double p2,
-                                                         double p3,double p4,double p5,double p6) {
-  vec = {p1, p2, p3, p4, p5, p6};
-}
-
-// --------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------
-
 // Calculation of error on pT from L2 Muon SA
 // Original author: Stefano Giagu
 // Copied from TrigmuComb/muCombUtil.cxx
-double TrigL2MuonSA::MuFastTrackExtrapolator::getMuFastRes(std::vector<double> vec,
-                                                           const double pt, const int add,
+double TrigL2MuonSA::MuFastTrackExtrapolator::getMuFastRes(const double pt, const int add,
                                                            const double eta, const double phi) const
 {
   
@@ -111,15 +95,20 @@ double TrigL2MuonSA::MuFastTrackExtrapolator::getMuFastRes(std::vector<double> v
   double AbsPtInv = std::abs(1./pt);
   double AbsEta   = std::abs(eta);
   
-  if ( add != -1) {
-    if (AbsPtInv < 0.186) {
-      return vec[0]*AbsPtInv + vec[1];
-    }
-    else {
-      double AbsPtInv3 = AbsPtInv*AbsPtInv*AbsPtInv;
-      double AbsPtInv2 = AbsPtInv*AbsPtInv;
-      return vec[2]*AbsPtInv3 + vec[3]*AbsPtInv2 + vec[4]*AbsPtInv +vec[5];
-    }
+  if ( add != -1) { // Barrel
+    const int N_PARAMS = 3;
+    // relative resolution terms; vparBR[0]=constant, vparBR[1]=proportional to AbsPt, vparBR[2]=proportional to AbsPtInv
+    const double vparBR1[N_PARAMS] = {0.0495619, 0.00180415, 0.307058}; // for AbsEta < 0.534
+    const double vparBR2[N_PARAMS] = {1., 0., 0.}; // for 0.534 < AbsEta < 0.687
+    const double vparBR3[N_PARAMS] = {0.0370408, 0.00142206, -0.492544}; // for 0.687 < AbsEta < 1.05
+    const double* vpar;
+
+    if     ( AbsEta < 0.534) { vpar = vparBR1; }
+    else if( AbsEta < 0.687) { vpar = vparBR2; }
+    else                     { vpar = vparBR3; }
+
+    double fracRes = sqrt(pow(vpar[0],2) + pow(vpar[1]/AbsPtInv,2) + pow(vpar[2]*AbsPtInv,2));
+    return std::abs(fracRes * AbsPtInv);
   }
   else {//Takuya/Kunihiro updated numbers 
     
