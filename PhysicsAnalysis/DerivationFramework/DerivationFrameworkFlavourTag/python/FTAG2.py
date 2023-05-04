@@ -10,6 +10,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 
 # Main algorithm config
 def FTAG2KernelCfg(ConfigFlags, name='FTAG2Kernel', **kwargs):
@@ -92,7 +93,7 @@ def FTAG2Cfg(ConfigFlags):
     # Define contents of the format
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
     FTAG2SlimmingHelper = SlimmingHelper("FTAG2SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
@@ -140,7 +141,7 @@ def FTAG2Cfg(ConfigFlags):
     # Output stream    
     FTAG2ItemList = FTAG2SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_FTAG2", ItemList=FTAG2ItemList, AcceptAlgs=["FTAG2Kernel"]))
-    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_FTAG2", AcceptAlgs=["FTAG2Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_FTAG2", AcceptAlgs=["FTAG2Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
 

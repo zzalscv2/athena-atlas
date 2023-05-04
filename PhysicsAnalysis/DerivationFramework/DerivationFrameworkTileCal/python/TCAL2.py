@@ -3,7 +3,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import LHCPeriod
+from AthenaConfiguration.Enums import LHCPeriod, MetadataCategory
 
 def TCAL2MbtsToVectorsToolCfg(flags, **kwargs):
     """ Configure the MbtsToVectorsTool augmentation tool """
@@ -76,7 +76,7 @@ def TCAL2Cfg(ConfigFlags):
     acc.merge(TCAL2KernelCfg(ConfigFlags, name="TCAL2Kernel", StreamName = "OutputStreamDAOD_TCAL2", Prefix=TCAL2Prefix))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     TCAL2SlimmingHelper = SlimmingHelper("TCAL2SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     TCAL2SlimmingHelper.SmartCollections = ["EventInfo"]
@@ -92,6 +92,6 @@ def TCAL2Cfg(ConfigFlags):
     TCAL2ItemList = TCAL2SlimmingHelper.GetItemList()
 
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TCAL2", ItemList=TCAL2ItemList, AcceptAlgs=["TCAL2Kernel"]))
-    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_TCAL2", AcceptAlgs=["TCAL2Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_TCAL2", AcceptAlgs=["TCAL2Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc

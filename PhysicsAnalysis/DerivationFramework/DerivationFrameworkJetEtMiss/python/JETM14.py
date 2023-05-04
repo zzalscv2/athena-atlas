@@ -6,6 +6,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 
 # Main algorithm config
 def JETM14TriggerSkimmingToolCfg(ConfigFlags):
@@ -76,7 +77,7 @@ def JETM14Cfg(ConfigFlags):
     # Define contents of the format
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
     JETM14SlimmingHelper = SlimmingHelper("JETM14SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
@@ -99,7 +100,7 @@ def JETM14Cfg(ConfigFlags):
     # Output stream    
     JETM14ItemList = JETM14SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_JETM14", ItemList=JETM14ItemList, AcceptAlgs=["JETM14Kernel"]))
-    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_JETM14", AcceptAlgs=["JETM14Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_JETM14", AcceptAlgs=["JETM14Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
 

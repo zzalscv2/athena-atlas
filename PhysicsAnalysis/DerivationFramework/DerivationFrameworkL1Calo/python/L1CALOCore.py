@@ -7,10 +7,10 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
 from AthenaCommon.Constants import INFO
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import Format
+from AthenaConfiguration.Enums import Format, MetadataCategory
 
 # 
 def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
@@ -404,7 +404,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     # Output stream    
     L1CaloItemList = L1CaloSlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, streamNameStem, ItemList=L1CaloItemList, AcceptAlgs=["DFL1CALO_KERN"]))
-    acc.merge(InfileMetaDataCfg(flags, streamNameStem, AcceptAlgs=["DFL1CALO_KERN"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, streamNameStem, AcceptAlgs=["DFL1CALO_KERN"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
 

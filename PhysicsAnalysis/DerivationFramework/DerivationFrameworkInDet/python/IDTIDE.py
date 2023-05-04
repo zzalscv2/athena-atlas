@@ -11,6 +11,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 from AthenaCommon.CFElements import seqAND
 from AthenaCommon.Constants import INFO
 
@@ -21,10 +22,6 @@ def IDTIDEKernelCfg(flags, name='IDTIDEKernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for IDTIDE"""
     acc = ComponentAccumulator()
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
-
-    # Cut flow service
-    from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
-    acc.merge(CutFlowSvcCfg(flags))
 
     # Sequence for skimming kernel (if running on data) -> PrepDataToxAOD -> IDTIDE kernel
     # sequence to be used for algorithm which should run before the IDTIDEPresel
@@ -381,7 +378,7 @@ def IDTIDECfg(flags):
     # Define contents of the format
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     IDTIDESlimmingHelper = SlimmingHelper(
         "IDTIDESlimmingHelper",
@@ -545,7 +542,8 @@ def IDTIDECfg(flags):
     IDTIDEItemList = IDTIDESlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_IDTIDE",
               ItemList=IDTIDEItemList, AcceptAlgs=["IDTIDEKernel"]))
-    acc.merge(InfileMetaDataCfg(
-        flags, "DAOD_IDTIDE", AcceptAlgs=["IDTIDEKernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(
+        flags, "DAOD_IDTIDE", AcceptAlgs=["IDTIDEKernel"],
+        createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc

@@ -147,7 +147,10 @@ def OverlayMainContentCfg(configFlags):
         acc.merge(CopyTRT_DriftCircleContainerCfg(configFlags))
 
     # Add in-file MetaData
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
-    acc.merge(InfileMetaDataCfg(configFlags, "RDO"))
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+    if configFlags.Output.doWriteRDO:
+        acc.merge(SetupMetaDataForStreamCfg(configFlags, "RDO"))
+    if configFlags.Output.doWriteRDO_SGNL:
+        acc.merge(SetupMetaDataForStreamCfg(configFlags, "RDO_SGNL"))
 
     return acc

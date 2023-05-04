@@ -5,6 +5,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 
 def TEST4KernelCfg(flags, name='TEST4Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel)"""
@@ -20,7 +21,7 @@ def TEST4Cfg(ConfigFlags):
     acc.merge(TEST4KernelCfg(ConfigFlags, name="TEST4Kernel"))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     TEST4SlimmingHelper = SlimmingHelper("TEST4SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     TEST4SlimmingHelper.SmartCollections = ["EventInfo",
@@ -43,6 +44,6 @@ def TEST4Cfg(ConfigFlags):
     TEST4ItemList = TEST4SlimmingHelper.GetItemList()
 
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TEST4", ItemList=TEST4ItemList, AcceptAlgs=["TEST4Kernel"]))
-    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_TEST4", AcceptAlgs=["TEST4Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_TEST4", AcceptAlgs=["TEST4Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
