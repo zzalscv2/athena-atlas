@@ -118,8 +118,10 @@ namespace ST {
     // Note that for PHYSLITE jets we don't need the nominal calibration
     if (jetkey!="AnalysisJets") {
       ATH_CHECK(m_jetCalibTool->applyCalibration(*copy));
-      ATH_CHECK(m_jetJvtEfficiencyTool->recalculateScores(*copy));
-    } 
+    }
+    
+    // Re-calculate NNJvt scores
+    if (m_applyJVTCut) ATH_CHECK(m_jetJvtEfficiencyTool->recalculateScores(*copy));
 
     // Update the jets
     for (const auto& jet : *copy) {
