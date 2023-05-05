@@ -402,16 +402,7 @@ DataHeader_p6* DataHeaderCnv::createPersistent(DataHeader* transObj, DataHeaderF
 //______________________________________________________________________________
 void DataHeaderCnv::removeBadElements(DataHeader* dh)
 {
-   auto iter = dh->m_dataHeader.begin();
-   while( iter != dh->m_dataHeader.end() ) {
-      if( iter->getToken()->dbID() == Guid::null() ) {
-         ATH_MSG_WARNING("Removed incomplete DataObject Element");
-         iter = dh->m_dataHeader.erase(iter);
-      } else {
-         ++iter;
-      }
-   }
-   iter = dh->m_inputDataHeader.begin();
+   auto iter = dh->m_inputDataHeader.begin();
    while( iter != dh->m_inputDataHeader.end() ) {
       if( iter->getToken()->dbID() == Guid::null() ) {
          ATH_MSG_WARNING("Removed incomplete Input Element");
