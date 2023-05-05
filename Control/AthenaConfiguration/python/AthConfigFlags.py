@@ -117,7 +117,7 @@ class FlagAddress(object):
             return object.__setattr__(self, name, value)
         merged = self._name + "." + name
 
-        if not self._flags.hasFlag( merged ): # flag ismisisng, try loading dynamic ones
+        if not self._flags.hasFlag( merged ): # flag is misisng, try loading dynamic ones
             self._flags._loadDynaFlags( merged )
 
         if not self._flags.hasFlag( merged ):
@@ -457,8 +457,10 @@ class AthConfigFlags(object):
         parser.add_argument("-l", "--loglevel", default=None, choices=["ALL","VERBOSE","DEBUG","INFO","WARNING","ERROR","FATAL"], help="logging level")
         parser.add_argument("--config-only", type=str, default=None, help="Stop after configuration phase (may not be respected by all diver scripts)")
         parser.add_argument("--threads", type=int, default=None, help="Run with given number of threads (use 0 for serial execution)")
+        parser.add_argument('--concurrent-events', type=int, default=None, help='number of concurrent events for AthenaMT')
         parser.add_argument("--nprocs", type=int, default=None, help="Run AthenaMP with given number of worker processes")
         parser.add_argument("---",dest="terminator",action='store_true', help=argparse.SUPPRESS) # special hidden option required to convert option terminator -- for --help calls
+        parser.add_argument("--pmon", type=str, default=None, choices=['FastMonMT','FullMonMT'], help="Perfomance monitoring")
 
         return parser
 
@@ -587,8 +589,15 @@ class AthConfigFlags(object):
         if args.threads is not None:
             self.Concurrency.NumThreads = args.threads
 
+        if args.concurrent_events is not None:
+            self.Concurrency.NumConcurrentEvents = args.concurrent_events
+
         if args.nprocs is not None:
             self.Concurrency.NumProcs = args.nprocs
+
+        if args.pmon is not None:
+            self._loadDynaFlags("PerfMon")
+            self._set("PerfMon.do"+args.pmon,True)
 
         #All remaining arguments are assumed to be key=value pairs to set arbitrary flags:
         for arg in leftover:

@@ -135,6 +135,9 @@ def fromRunArgs(runArgs):
     from SimulationConfig.SimConfigFlags import simulationRunArgsToFlags
     simulationRunArgsToFlags(runArgs, flags)
 
+    # To respect --athenaopts 
+    flags.fillFromArgs()
+
     # Lock flags
     flags.lock()
 

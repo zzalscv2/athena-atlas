@@ -87,6 +87,9 @@ def fromRunArgs(runArgs):
     # TODO not parsed yet:
     # '--outputRDO_FILTFile'
 
+    # To respect --athenaopts 
+    flags.fillFromArgs()
+
     # Lock flags
     flags.lock()
 
