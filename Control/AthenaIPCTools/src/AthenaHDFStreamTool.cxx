@@ -114,7 +114,7 @@ StatusCode AthenaHDFStreamTool::getLockedEvent(void** target, unsigned int&/* st
       FileIncident endFileIncident(name(), "EndInputFile", "HDF:test.h5"); //FIXME, hardcoded filename
       m_incidentSvc->fireIncident(endFileIncident);
       ATH_MSG_INFO("AthenaHDFStreamTool::getLockedEvent: no more events = " << m_event_iter);
-      return(StatusCode::FAILURE);
+      return(StatusCode::RECOVERABLE);
    }
 
    const hsize_t offset[1] = {m_event_iter};

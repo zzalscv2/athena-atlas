@@ -502,9 +502,17 @@ StatusCode EventSelectorAthenaPool::next(IEvtSelector::Context& ctxt) const {
       ++m_evtCount;
       void* tokenStr = nullptr;
       unsigned int status = 0;
-      if (!m_eventStreamingTool->getLockedEvent(&tokenStr, status).isSuccess()) {
+      StatusCode sc = m_eventStreamingTool->getLockedEvent(&tokenStr, status);
+      if (sc.isRecoverable()) {
+         delete [] (char*)tokenStr; tokenStr = nullptr;
+         // Return end iterator
+         ctxt = *m_endIter;
+         // This is not a real failure but a Gaudi way of handling "end of job"
+         return(StatusCode::FAILURE);
+      }
+      if (sc.isFailure()) {
          ATH_MSG_FATAL("Cannot get NextEvent from AthenaSharedMemoryTool");
-         delete (char*)tokenStr; tokenStr = nullptr;
+         delete [] (char*)tokenStr; tokenStr = nullptr;
          return(StatusCode::FAILURE);
       }
       if (!eventStore()->clearStore().isSuccess()) {
@@ -515,13 +523,13 @@ StatusCode EventSelectorAthenaPool::next(IEvtSelector::Context& ctxt) const {
       (*athAttrList)["eventRef"].data<std::string>() = std::string((char*)tokenStr);
       SG::WriteHandle<AthenaAttributeList> wh(m_attrListKey.value(), eventStore()->name());
       if (!wh.record(std::move(athAttrList)).isSuccess()) {
-         delete (char*)tokenStr; tokenStr = nullptr;
+         delete [] (char*)tokenStr; tokenStr = nullptr;
          ATH_MSG_ERROR("Cannot record AttributeList to StoreGate " << StoreID::storeName(eventStore()->storeID()));
          return(StatusCode::FAILURE);
       }
       Token token;
       token.fromString(std::string((char*)tokenStr));
-      delete (char*)tokenStr; tokenStr = nullptr;
+      delete [] (char*)tokenStr; tokenStr = nullptr;
       Guid guid = token.dbID();
       if (guid != m_guid && m_processMetadata.value()) {
          if (m_evtCount >= 0 && m_guid != Guid::null()) {
