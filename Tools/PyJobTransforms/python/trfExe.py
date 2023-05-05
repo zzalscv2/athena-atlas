@@ -1568,7 +1568,8 @@ class athenaExecutor(scriptExecutor):
                         defaultOptions = defaultOptions,
                         extraOptionsList = extraOptionsList,
                         AthenaSerialisedConfigurationFile = \
-                            AthenaSerialisedConfigurationFile
+                            AthenaSerialisedConfigurationFile,
+                        isCAEnabled = self._isCAEnabled()
                     )
                     msg.debug("Valgrind command: {command}".format(command = command))
                     print(command, file=wrapper)
