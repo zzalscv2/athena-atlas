@@ -42,6 +42,8 @@ class TrigMuonEfficiencyMon : public TrigMuonMonitorAlgorithm{
   Gaudi::Property<bool> m_doEFSA {this, "doEFSA", true, "Flag to analyze EFSA"};
   Gaudi::Property<bool> m_doEFCB {this, "doEFCB", true, "Flag to analyze EFCB"};
   Gaudi::Property<bool> m_doEFIso {this, "doEFIso", true, "Flag to analyze EFIso"};
+  Gaudi::Property<bool> m_doEFSAFS {this, "doEFSAFS", true, "Flag to analyze EFSAFS"};
+  Gaudi::Property<bool> m_doEFCBFS {this, "doEFCBFS", true, "Flag to analyze EFCBFS"};
   Gaudi::Property<bool> m_BarrelOnly {this, "BarrelOnly", false, "Flag to BarrelOnly"};
   Gaudi::Property<bool> m_use_extrapolator {this, "UseExtrapolator", false, "Flag to activate the track extrapolator"};
   Gaudi::Property<double> m_mass_lowlim {this, "MassLowLim", 81., "Lower mass limit for the tag and probe method"};
