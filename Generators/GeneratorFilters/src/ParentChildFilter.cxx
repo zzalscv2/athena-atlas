@@ -59,7 +59,7 @@ StatusCode ParentChildFilter::filterEvent() {
 	   && (std::abs(pitr->momentum().rap()) > m_RapidityMinParent)
 	   && (std::abs(pitr->momentum().rap()) < m_RapidityRangeParent))) {
 #else
-     && (std::abs(getRapidity(pitr)) > m_RapidityMinParent)
+       && (std::abs(getRapidity(pitr)) > m_RapidityMinParent)
 	   && (std::abs(getRapidity(pitr)) < m_RapidityRangeParent))) {
 #endif
         // Check if has end_vertex (skips initial protons)
