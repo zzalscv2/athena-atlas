@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -154,8 +154,9 @@ template<> inline double eflowCellIntegrand<lookupExp>::evaluate(double phi) { r
 template <int expType> class eflowCellIntegrator {
 public:
   eflowCellIntegrator(double stdDev, double error) : m_integrand2D(std::make_unique<eflowCellIntegrand<(Exp_t)expType> >(stdDev)), m_outerIntegrator(this, error), m_innerIntegrator(m_integrand2D.get(), error) { }
-  eflowCellIntegrator(const eflowCellIntegrator& original) : m_integrand2D(std::make_unique<eflowCellIntegrand<(Exp_t)expType> >(*(original.m_integrand2D.get()))), m_outerIntegrator(this, original.m_outerIntegrator.getError()), m_innerIntegrator( m_integrand2D.get(), original.m_innerIntegrator.getError()) {
-    m_rangePhi = original.m_rangePhi;
+  eflowCellIntegrator(const eflowCellIntegrator& original) : m_integrand2D(std::make_unique<eflowCellIntegrand<(Exp_t)expType> >(*(original.m_integrand2D.get()))), m_outerIntegrator(this, original.m_outerIntegrator.getError()), m_innerIntegrator( m_integrand2D.get(), original.m_innerIntegrator.getError()),
+    m_rangePhi (original.m_rangePhi)
+  {
   }
   eflowCellIntegrator&  operator=(const eflowCellIntegrator& original){
     m_integrand2D(std::make_unique<eflowCellIntegrand<(Exp_t)expType> >(*(original.m_integrand2D.get())));

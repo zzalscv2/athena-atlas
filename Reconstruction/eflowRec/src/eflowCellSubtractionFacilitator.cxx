@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Athena Headers
@@ -301,7 +301,7 @@ eflowCellSubtractionFacilitator::subtractReorderedCells(
     }
     /* Erase the CellPosition from the cell list */
     CellIt tmp = itCellPosition;
-    itCellPosition++;
+    ++itCellPosition;
     reorderedCells.deleteFromList(tmp);
   }
   return false;

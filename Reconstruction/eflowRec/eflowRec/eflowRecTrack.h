@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -101,13 +101,13 @@ public:
   void setLayerHED(int layerHED) { m_layerHED = layerHED; }
   
   std::vector<int> getLayerCellOrderVector() const { return m_layerCellOrderVector; }
-  void setLayerCellOrderVector(std::vector<int> layerToStoreVector) { m_layerCellOrderVector = layerToStoreVector; }
+  void setLayerCellOrderVector(const std::vector<int>& layerToStoreVector) { m_layerCellOrderVector = layerToStoreVector; }
   
   std::vector<float> getRadiusCellOrderVector() const { return m_radiusCellOrderVector; }
-  void setRadiusCellOrderVector(std::vector<float> radiusToStoreVector) { m_radiusCellOrderVector = radiusToStoreVector; }
+  void setRadiusCellOrderVector(const std::vector<float>& radiusToStoreVector) { m_radiusCellOrderVector = radiusToStoreVector; }
   
   std::vector<float> getAvgEDensityCellOrderVector() const { return m_avgEdensityCellOrderVector; }
-  void setAvgEDensityCellOrderVector(std::vector<float> avgEdensityToStoreVector) { m_avgEdensityCellOrderVector = avgEdensityToStoreVector; }
+  void setAvgEDensityCellOrderVector(const std::vector<float>& avgEdensityToStoreVector) { m_avgEdensityCellOrderVector = avgEdensityToStoreVector; }
   
   
   bool isInDenseEnvironment() const { return m_isInDenseEnvironment;}
@@ -143,7 +143,6 @@ private:
   std::vector<eflowTrackClusterLink*> m_clusterMatches;
   std::map<std::string,std::vector<eflowTrackClusterLink*> > m_alternativeClusterMatches;
 
-  ISvcLocator* m_svcLoc;
   IMessageSvc* m_msgSvc{};
   std::unique_ptr<MsgStream> m_mlog;
 
