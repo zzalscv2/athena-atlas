@@ -13,7 +13,7 @@ export TRF_ECHO=True; Reco_tf.py \
 --outputESDFile=ESD.pool.root \
 --outputAODFile=AOD.pool.root \
 --maxEvents=20 \
---conditionsTag 'default:CONDBR2-BLKPA-RUN2-06' \
+--conditionsTag 'default:CONDBR2-BLKPA-RUN2-11' \
 --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
 --autoConfiguration 'everything' \
 --steering='doRAWtoALL' \
