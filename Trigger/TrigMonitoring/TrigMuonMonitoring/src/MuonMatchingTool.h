@@ -190,6 +190,77 @@ class MuonMatchingTool : public AthAlgTool {
   const xAOD::Muon* matchEFCBReadHandle(const EventContext& ctx, const xAOD::Muon *mu) const;
 
   /**
+   * @brief Function that searches for an EF FS standalone muon (EFSAFS) candidate and judges if it is matched to a given offline muon.
+   * @param mu Offline muon around which EFSAFS candidates are searched.
+   * @param trigger Considered chain name, e.g. HLT_mu26_ivarmedium_L1MU20, etc.
+   * @param pass True if the matched candidate passed the hypothesis step.
+   * @return Pointer to the matched candidate. This is @c nullptr when there is no candidate found.
+   * Important: a valid pointer doesn't mean that it passed the hypothesis, users should check @c pass for the decision.
+   */
+  const xAOD::Muon* matchEFSAFS(const xAOD::Muon *mu, std::string trigger, bool &pass) const;
+  /**
+   * @brief Function that searches for an EF standalone muon (EFSAFS) candidate and judges if it is matched to a given truth muon.
+   * @param mu Truth muon around which EFSAFS candidates are searched.
+   * @param trigger Considered chain name, e.g. HLT_mu26_ivarmedium_L1MU20, etc.
+   * @param pass True if the matched candidate passed the hypothesis step.
+   * @return Pointer to the matched candidate. This is @c nullptr when there is no candidate found.
+   * Important: a valid pointer doesn't mean that it passed the hypothesis, users should check @c pass for the decision.
+   */
+  const xAOD::Muon* matchEFSAFS(const xAOD::TruthParticle *mu, std::string trigger, bool &pass) const;
+
+  /**
+   * @brief Function that searches for an EF standalone muon (EFSAFS) candidate and judges if it is matched to a given track particle.
+   * @param mu Offline muon around which EFSAFS candidates are searched.
+   * @param trigger Considered chain name, e.g. HLT_mu26_ivarmedium_L1MU20, etc.
+   * @return Pointer to the matched candidate. This is inValid link when there is no candidate found.
+   * Important: a valid pointer doesn't mean that it passed the hypothesis, users should check @c pass for the decision.
+   */
+  const TrigCompositeUtils::LinkInfo<xAOD::MuonContainer> matchEFSAFSLinkInfo( const xAOD::Muon *mu, std::string trig) const;
+
+  /**
+   * @brief Function that searches for an EF standalone muon (EFSAFS) candidate by ReadHandle and judges if it is matched to a given offlineSAFS muon.
+   * @param mu Offline muon around which EFSAFS candidates are searched.
+   * @return Pointer to the matched candidate. This is @c nullptr when there is no candidate found.
+   */
+  const xAOD::Muon* matchEFSAFSReadHandle(const EventContext& ctx, const xAOD::Muon *mu) const;
+
+  /**
+   * @brief Function that searches for an EF combined muon (EFCBFS) candidate and judges if it is matched to a given offline muon.
+   * @param mu Offline muon around which EFCBFS candidates are searched.
+   * @param trigger Considered chain name, e.g. HLT_mu26_ivarmedium_L1MU20, etc.
+   * @param pass True if the matched candidate passed the hypothesis step.
+   * @return Pointer to the matched candidate. This is @c nullptr when there is no candidate found.
+   * Important: a valid pointer doesn't mean that it passed the hypothesis, users should check @c pass for the decision.
+   */
+  const xAOD::Muon* matchEFCBFS(const xAOD::Muon *mu, std::string trigger, bool &pass) const;
+
+  /**
+   * @brief Function that searches for an EF combined muon (EFCBFS) candidate and judges if it is matched to a given truth muon.
+   * @param mu Truth muon around which EFCBFS candidates are searched.
+   * @param trigger Considered chain name, e.g. HLT_mu26_ivarmedium_L1MU20, etc.
+   * @param pass True if the matched candidate passed the hypothesis step.
+   * @return Pointer to the matched candidate. This is @c nullptr when there is no candidate found.
+   * Important: a valid pointer doesn't mean that it passed the hypothesis, users should check @c pass for the decision.
+   */
+  const xAOD::Muon* matchEFCBFS(const xAOD::TruthParticle *mu, std::string trig, bool &pass) const;
+
+  /**
+   * @brief Function that searches for an EF combined muon (EFCBFS) candidate and judges if it is matched to a given track particle.
+   * @param mu Offline muon around which EFCBFS candidates are searched.
+   * @param trigger Considered chain name, e.g. HLT_mu26_ivarmedium_L1MU20, etc.
+   * @return Pointer to the matched candidate. This is inValid link when there is no candidate found.
+   * Important: a valid pointer doesn't mean that it passed the hypothesis, users should check @c pass for the decision.
+   */
+  const TrigCompositeUtils::LinkInfo<xAOD::MuonContainer> matchEFCBFSLinkInfo( const xAOD::Muon *mu, std::string trig) const;
+
+  /**
+   * @brief Function that searches for an EF combined muon (EFCBFS) candidate by ReadHandle and judges if it is matched to a given offlineCB muon.
+   * @param mu Offline muon around which EFCBFS candidates are searched.
+   * @return Pointer to the matched candidate. This is @c nullptr when there is no candidate found.
+   */
+  const xAOD::Muon* matchEFCBFSReadHandle(const EventContext& ctx, const xAOD::Muon *mu) const;
+
+  /**
    * @brief Function that searches for an EF isolation muon (EFIso) candidate and judges if it is matched to a given offline muon.
    * @param mu Offline muon around which EFIso candidates are searched.
    * @param trigger Considered chain name, e.g. HLT_mu26_ivarmedium_L1MU20, etc.
@@ -371,6 +442,8 @@ class MuonMatchingTool : public AthAlgTool {
   SG::ReadHandleKey<xAOD::L2CombinedMuonContainer> m_L2muCombContainerKey {this, "L2CombinedMuonContainerName", "HLT_MuonL2CBInfo", "L2muComb container"};
   SG::ReadHandleKey<xAOD::MuonContainer> m_EFSAMuonContainerKey {this, "EFSAMuonContainerName", "HLT_Muons_RoI", "EFSAMuon container"};
   SG::ReadHandleKey<xAOD::MuonContainer> m_EFCBMuonContainerKey {this, "EFCBMuonContainerName", "HLT_MuonsCB_RoI", "EFCBMuon container"};
+  SG::ReadHandleKey<xAOD::MuonContainer> m_EFSAFSMuonContainerKey {this, "EFSAFSMuonContainerName", "HLT_Muons_FS", "EFSAFSMuon container"};
+  SG::ReadHandleKey<xAOD::MuonContainer> m_EFCBFSMuonContainerKey {this, "EFCBFSMuonContainerName", "HLT_MuonsCB_FS", "EFCBFSMuon container"};
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_MStrackContainerKey {this, "ExtrapolatedMStrackConntainner", "HLT_MSExtrapolatedMuons_RoITrackParticles", "ExtrapolatedMuons track container"};
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_CBtrackContainerKey {this, "CBtrackContainerName", "HLT_CBCombinedMuon_RoITrackParticles", "CombinedMuon track container"};
 

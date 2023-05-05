@@ -71,6 +71,8 @@ StatusCode TrigMuonEfficiencyMon :: fillVariablesPerOfflineMuonPerChain(const Ev
   auto EFSApass = Monitored::Scalar<bool>(m_group+"_EFSApass",false);
   auto EFCBpass = Monitored::Scalar<bool>(m_group+"_EFCBpass",false);
   auto EFIsopass = Monitored::Scalar<bool>(m_group+"_EFIsopass",false);
+  auto EFSAFSpass = Monitored::Scalar<bool>(m_group+"_EFSAFSpass",false);
+  auto EFCBFSpass = Monitored::Scalar<bool>(m_group+"_EFCBFSpass",false);
 
 
   if(m_doL1){
@@ -137,16 +139,37 @@ StatusCode TrigMuonEfficiencyMon :: fillVariablesPerOfflineMuonPerChain(const Ev
   }
 
 
+  if(m_doEFSAFS){
+    bool activestate = false;
+    m_matchTool->matchEFSAFS(mu, chain, activestate);
+    EFSAFSpass = activestate;
+  } else {
+    EFSAFSpass = true;
+  }
+
+
+  if(EFSAFSpass){
+    if(m_doEFCBFS){
+      bool activestate = false;
+      m_matchTool->matchEFCBFS(mu, chain, activestate);
+      EFCBFSpass = activestate;
+    } else {
+      EFCBFSpass = true;
+    }
+  }
+
+
   ATH_MSG_DEBUG("doL1:" << m_doL1 << " L1pass:" << L1pass << " doL2SA:" << m_doL2SA << " L2SAPass:" << L2SApass << " doL2CB:" << m_doL2CB << " L2CBpass:" << L2CBpass <<
-                " doEFSA:" << m_doEFSA << " EFSApass:" << EFSApass << " doEFCB:" << m_doEFCB <<  " EFCBpass:" << EFCBpass << " doEFIso:" << m_doEFIso << " EFIsopass:" << EFIsopass);
+                " doEFSA:" << m_doEFSA << " EFSApass:" << EFSApass << " doEFCB:" << m_doEFCB <<  " EFCBpass:" << EFCBpass << " doEFIso:" << m_doEFIso << " EFIsopass:" << EFIsopass <<
+                " doEFSAFS:" << m_doEFSAFS << " EFSAFSpass:" << EFSAFSpass << " doEFCBFS:" << m_doEFCBFS <<  " EFCBFSpass:" << EFCBFSpass);
 
   //// Cuts based on the offline muon's features ////
   // Inclusive
-  fill(m_group, muPt, L1pass, L2SApass, L2CBpass, EFSApass, EFCBpass, EFIsopass);
+  fill(m_group, muPt, L1pass, L2SApass, L2CBpass, EFSApass, EFCBpass, EFIsopass, EFSAFSpass, EFCBFSpass);
 
   // Plateau
   if(muPt>m_thresholds.at(chain)){
-    fill(m_group, muEta, muPhi, averageMu, L1pass, L2SApass, L2CBpass, EFSApass, EFCBpass, EFIsopass);
+    fill(m_group, muEta, muPhi, averageMu, L1pass, L2SApass, L2CBpass, EFSApass, EFCBpass, EFIsopass, EFSAFSpass, EFCBFSpass);
   }
 
   return StatusCode::SUCCESS;

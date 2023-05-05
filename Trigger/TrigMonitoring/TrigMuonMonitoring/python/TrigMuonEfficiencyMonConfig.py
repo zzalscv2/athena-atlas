@@ -30,7 +30,7 @@ def TrigMuonEfficiencyMonTTbarConfig(helper):
     # if mon groups not found fall back to hard-coded trigger monitoring list
     if len(MonitoredChains) == 0:
         # HLT_mu6_L1MU6 is test chain for small statistics, so it will be removed.
-        MonitoredChains = ['HLT_mu6_L1MU5VF', 'HLT_mu24_ivarmedium_L1MU14FCH', 'HLT_mu50_L1MU14FCH', 'HLT_mu60_0eta105_msonly_L1MU14FCH', 'HLT_mu14_L1MU8F', 'HLT_mu22_mu8noL1_L1MU14FCH']
+        MonitoredChains = ['HLT_mu6_L1MU5VF', 'HLT_mu24_ivarmedium_L1MU14FCH', 'HLT_mu50_L1MU14FCH', 'HLT_mu60_0eta105_msonly_L1MU14FCH', 'HLT_mu14_L1MU8F', 'HLT_mu22_mu8noL1_L1MU14FCH', 'HLT_mu6_mu6noL1_L1MU5VF']
 
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
     for chain in MonitoredChains:
@@ -64,11 +64,11 @@ def TrigMuonEfficiencyMonZTPConfig(helper):
     moniAccess = getHLTMonitoringAccess(helper.flags)
     Chains = moniAccess.monitoredChains(signatures="muonMon",monLevels=["shifter","t0","val"])
     MonitoredChains = [c for c in Chains if '2mu14' not in c]
-  
+          
     # if mon groups not found fall back to hard-coded trigger monitoring list
     if len(MonitoredChains) == 0:
         # HLT_mu6_L1MU6 is test chain for small statistics, so it will be removed.
-        MonitoredChains = ['HLT_mu6_L1MU5VF', 'HLT_mu24_ivarmedium_L1MU14FCH', 'HLT_mu50_L1MU14FCH', 'HLT_mu60_0eta105_msonly_L1MU14FCH', 'HLT_mu14_L1MU8F', 'HLT_mu22_mu8noL1_L1MU14FCH']
+        MonitoredChains = ['HLT_mu6_L1MU5VF', 'HLT_mu24_ivarmedium_L1MU14FCH', 'HLT_mu50_L1MU14FCH', 'HLT_mu60_0eta105_msonly_L1MU14FCH', 'HLT_mu14_L1MU8F', 'HLT_mu22_mu8noL1_L1MU14FCH', 'HLT_mu6_mu6noL1_L1MU5VF']
 
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
     for chain in MonitoredChains:
@@ -109,6 +109,13 @@ def PlotConfig(monAlg, chain):
 
      if "0eta105" in chain:
          monAlg.BarrelOnly = True
+         
+     if "noL1" in chain:
+         monAlg.doEFSAFS = True
+         monAlg.doEFCBFS = True
+     else:
+         monAlg.doEFSAFS = False
+         monAlg.doEFCBFS = False
 
 
 def defineEfficiencyHistograms(monAlg, histGroup, GroupName, chain):
@@ -169,6 +176,36 @@ def defineEfficiencyHistograms(monAlg, histGroup, GroupName, chain):
     
             histGroup.defineHistogram(GroupName+'_EFCBpass,'+GroupName+'_'+xvariable+';EffEFCB_'+xvariable+'_wrt_offlineCB_passedL2CB',
                                       title='EFCB Muon Efficiency passed L2CB '+chain+' wrt offlineCB;'+xlabel+';Efficiency',
+                                      cutmask=GroupName+'_L2CBpass',
+                                      type='TEfficiency', path='',xbins=xbins,xmin=xmin,xmax=xmax)
+
+        if monAlg.doEFSAFS:
+            histGroup.defineHistogram(GroupName+'_EFSAFSpass,'+GroupName+'_'+xvariable+';EffEFSAFS_'+xvariable+'_wrt_Upstream',
+                                      title='EFSAFS Muon Efficiency '+chain+' wrt Upstream;'+xlabel+';Efficiency',
+                                      cutmask=GroupName+'_EFCBpass',
+                                      type='TEfficiency', path='',xbins=xbins,xmin=xmin,xmax=xmax)
+    
+            histGroup.defineHistogram(GroupName+'_EFSAFSpass,'+GroupName+'_'+xvariable+';EffEFSAFS_'+xvariable+'_wrt_offlineCB',
+                                      title='EFSAFS Muon Efficiency '+chain+' wrt offlineCB;'+xlabel+';Efficiency',
+                                      type='TEfficiency', path='',xbins=xbins,xmin=xmin,xmax=xmax)
+    
+            histGroup.defineHistogram(GroupName+'_EFSAFSpass,'+GroupName+'_'+xvariable+';EffEFSAFS_'+xvariable+'_wrt_offlineCB_passedL2SA',
+                                      title='EFSAFS Muon Efficiency passed L2SA '+chain+' wrt offlineCB;'+xlabel+';Efficiency',
+                                      cutmask=GroupName+'_L2SApass',
+                                      type='TEfficiency', path='',xbins=xbins,xmin=xmin,xmax=xmax)
+    
+        if monAlg.doEFCBFS:
+            histGroup.defineHistogram(GroupName+'_EFCBFSpass,'+GroupName+'_'+xvariable+';EffEFCBFS_'+xvariable+'_wrt_Upstream',
+                                      title='EFCBFS Muon Efficiency '+chain+' wrt Upstream;'+xlabel+';Efficiency',
+                                      cutmask=GroupName+'_EFSAFSpass',
+                                      type='TEfficiency', path='',xbins=xbins,xmin=xmin,xmax=xmax)
+    
+            histGroup.defineHistogram(GroupName+'_EFCBFSpass,'+GroupName+'_'+xvariable+';EffEFCBFS_'+xvariable+'_wrt_offlineCB',
+                                      title='EFCBFS Muon Efficiency '+chain+' wrt offlineCB;'+xlabel+';Efficiency',
+                                      type='TEfficiency', path='',xbins=xbins,xmin=xmin,xmax=xmax)
+    
+            histGroup.defineHistogram(GroupName+'_EFCBFSpass,'+GroupName+'_'+xvariable+';EffEFCBFS_'+xvariable+'_wrt_offlineCB_passedL2CB',
+                                      title='EFCBFS Muon Efficiency passed L2CB '+chain+' wrt offlineCB;'+xlabel+';Efficiency',
                                       cutmask=GroupName+'_L2CBpass',
                                       type='TEfficiency', path='',xbins=xbins,xmin=xmin,xmax=xmax)
     
