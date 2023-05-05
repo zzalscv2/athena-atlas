@@ -299,6 +299,12 @@ def getDevHISignatures():
         ChainProp(name='HLT_mb_excl_1trk4_pt1_hi_FgapAC3_L12TAU1_VTE200', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+PrimaryLegGroup),
         ChainProp(name='HLT_mb_sptrk_hi_FgapAC3_L12TAU1_VTE200', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportLegGroup),
 
+        #----------- temporarily added to test the HLT despite TE simulation issue ATR-26798
+        ChainProp(name='HLT_mb_sp_vpix15_hi_FgapAC3_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_mb_sp_vpix30_hi_FgapAC3_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_mb_excl_1trk4_pt1_hi_FgapAC3_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_mb_sptrk_hi_FgapAC3_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportLegGroup),
+
         #----------- UPC diphotons/dielectrons - phase-1
         ChainProp(name='HLT_mb_excl_1trk4_pt1_hi_FgapAC5_L12eEM1_VjTE200', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+PrimaryPhIGroup),
         
@@ -347,6 +353,9 @@ def getDevHISignatures():
         ChainProp(name='HLT_mb_excl_1trk5_pt2_L1TAU1_VTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_mb_excl_1trk5_pt1_L1TRT_VTE50', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
         
+        #----------- temporarily added to test the HLT despite TE simulation issue ATR-26798
+        ChainProp(name='HLT_mb_excl_1trk4_pt1_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'],stream=[UPCStream],groups=MinBiasGroup+SupportLegGroup),
+
         #----------- UPC exclusive dileptons - phase-1
         ChainProp(name='HLT_mb_sp_vpix15_L12eEM1_VjTE200_GAP_AANDC', l1SeedThresholds=['FSNOSEED'],stream=[UPCStream],groups=MinBiasGroup+PrimaryPhIGroup),
         ChainProp(name='HLT_mb_sp_vpix30_L12eEM1_VjTE200_GAP_AANDC', l1SeedThresholds=['FSNOSEED'],stream=[UPCStream],groups=MinBiasGroup+PrimaryPhIGroup),
