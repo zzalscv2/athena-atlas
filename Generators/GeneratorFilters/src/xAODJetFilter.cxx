@@ -18,8 +18,7 @@ xAODJetFilter::xAODJetFilter(const std::string& name, ISvcLocator* pSvcLocator)
 
 StatusCode xAODJetFilter::filterInitialize() {
   m_emaxeta = 6.0;
-  m_twopi = 2 * M_PI;
-  m_edphi = m_twopi / m_grphi;         // cell size
+  m_edphi = 2 * M_PI / m_grphi;         // cell size
   m_edeta = 2. * m_emaxeta / m_greta;  // cell size
   // How many cells in the jet cluster
   if (!m_type) {  // it's the rectangular grid
@@ -83,7 +82,7 @@ StatusCode xAODJetFilter::filterEvent() {
              m_emaxeta)) {  // no neutrinos or muons and particles must be in
                             // active range
           int ip, ie;
-          ip = static_cast<int>((m_twopi / 2. + part->phi()) /
+          ip = static_cast<int>((M_PI + part->phi()) /
                      m_edphi);  // phi is in range -CLHEP::pi to CLHEP::pi
           ie = static_cast<int>((part->eta() + m_emaxeta) / m_edeta);
           if (ie < 0 ||
@@ -212,9 +211,9 @@ StatusCode xAODJetFilter::filterEvent() {
             if (!etgridused[ip1][ie1]) {
               etgridused[ip1][ie1] = true;
               jetpx = jetpx + etgrid[ip1][ie1] *
-                                  std::cos(-m_twopi / 2. + (ip1 + 0.5) * m_edphi);
+                                  std::cos(-M_PI + (ip1 + 0.5) * m_edphi);
               jetpy = jetpy + etgrid[ip1][ie1] *
-                                  std::sin(-m_twopi / 2. + (ip1 + 0.5) * m_edphi);
+                                  std::sin(-M_PI + (ip1 + 0.5) * m_edphi);
               jetpz = jetpz + etgrid[ip1][ie1] *
                                   std::sinh((ie1 + 0.5) * m_edeta - m_emaxeta);
               jete = jete +

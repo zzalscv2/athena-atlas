@@ -25,7 +25,6 @@ JetFilter::JetFilter(const std::string& name, ISvcLocator* pSvcLocator)
    m_emaxeta = 0.;
    m_edeta = 0.;
    m_edphi = 0.;
-   m_twopi = 0.;
    m_nphicell = 0;
    m_netacell = 0;
    m_nphicell2 = 0;
@@ -35,8 +34,7 @@ JetFilter::JetFilter(const std::string& name, ISvcLocator* pSvcLocator)
 
 StatusCode JetFilter::filterInitialize() {
   m_emaxeta = 6.0;
-  m_twopi = 4*asin(1.);
-  m_edphi = m_twopi/m_grphi; // cell size
+  m_edphi = 2.*M_PI/m_grphi; // cell size
   m_edeta = 2.*m_emaxeta/m_greta; // cell size
   // How many cells in the jet cluster
   if (!m_Type) { // it's the rectangular grid
@@ -88,7 +86,7 @@ StatusCode JetFilter::filterEvent() {
            (part->pdg_id() != 16 ) && (part->pdg_id() != -16 ) &&
            (std::abs(part->momentum().pseudoRapidity()) <= m_emaxeta) ) { // no neutrinos or muons and particles must be in active range
         int ip, ie;
-        ip = (int) ((m_twopi/2.+ part->momentum().phi())/m_edphi); //phi is in range -CLHEP::pi to CLHEP::pi
+        ip = (int) ((M_PI+ part->momentum().phi())/m_edphi); //phi is in range -CLHEP::pi to CLHEP::pi
         ie = (int) ((part->momentum().pseudoRapidity()+m_emaxeta)/m_edeta);
         if (ie < 0 || (ie >= m_greta)) { // its outside the ends so we should not be here
           ATH_MSG_FATAL("Jet too close to end");
@@ -189,8 +187,8 @@ StatusCode JetFilter::filterEvent() {
             //check that the cell can be used and add energy to jet and mark the cell as used
             if (!etgridused[ip1][ie1]) {
               etgridused[ip1][ie1] = true;
-              jetpx = jetpx+etgrid[ip1][ie1]*cos(-m_twopi/2.+(ip1+0.5)*m_edphi);
-              jetpy = jetpy+etgrid[ip1][ie1]*sin(-m_twopi/2.+(ip1+0.5)*m_edphi);
+              jetpx = jetpx+etgrid[ip1][ie1]*cos(-M_PI+(ip1+0.5)*m_edphi);
+              jetpy = jetpy+etgrid[ip1][ie1]*sin(-M_PI+(ip1+0.5)*m_edphi);
               jetpz = jetpz+etgrid[ip1][ie1]*sinh((ie1+0.5)*m_edeta-m_emaxeta);
               jete = jete+etgrid[ip1][ie1]*cosh((ie1+0.5)*m_edeta-m_emaxeta);
             }

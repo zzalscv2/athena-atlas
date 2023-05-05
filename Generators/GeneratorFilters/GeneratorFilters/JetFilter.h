@@ -69,7 +69,6 @@ private:
   double m_emaxeta; // largest eta of bins
   double m_edeta; // size of eta bins
   double m_edphi; //size of phi bins
-  double m_twopi; //twopi
   int m_nphicell; // number of phi cells inside half cone
   int m_netacell; // number of eta cells inside half cone
   int m_nphicell2; // number of phi cells inside full cone
