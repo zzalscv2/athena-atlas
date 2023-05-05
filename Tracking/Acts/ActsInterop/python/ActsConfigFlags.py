@@ -19,7 +19,9 @@ class TrackFitterType(FlagEnum):
 def createActsConfigFlags():
     actscf = AthConfigFlags()
 
-    # General Flags - TO BE ADDED
+    # General Flags
+    actscf.addFlag('Acts.EDM.PersistifyClusters', False)
+    actscf.addFlag('Acts.EDM.PersistifySpacePoints', False)
     
     # Geometry Flags
 

@@ -43,6 +43,7 @@ run "Reconstruction" \
     --steering doRAWtoALL \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsInterop.ActsCIFlags.actsArtFlags" \
     --postInclude "ActsInterop.ActsPostIncludes.PersistifyActsEDMCfg" \
+    --preExec "flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;" \
     --maxEvents 20
 
 reco_rc=$?

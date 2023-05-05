@@ -120,7 +120,13 @@ class TrackingComponentConfigurer:
     @property
     def doActsToAthenaSeed(self) -> bool:
         return self.ActsToAthenaSeedConverter
+
+    def producesActsClusters(self) -> bool:
+        return self.ActsCluster or self.AthenaToActsClusterConverter
     
+    def producesActsSpacePoints(self) -> bool:
+        return self.ActsSpacePoint or self.AthenaToActsSpacePointConverter
+
     def AthenaChain(self):
         self.AthenaCluster = True
         self.AthenaSpacePoint = True
