@@ -63,7 +63,7 @@ namespace SG {
 class AuxTypeRegistry
 {
 public:
-  /// Additional flags to quality an auxiliary variable.
+  /// Additional flags to qualify an auxiliary variable.
   enum Flags {
     /// No special flags set.
     None   = 0x00,
@@ -78,8 +78,12 @@ public:
     /// Contact core software before using this for new code.
     Atomic = 0x01,
 
+    // These flags control the behavior of findAuxID() but are not
+    // stored with the variable.
+    SkipNameCheck = 0x80,
+
     /// Enable bitwise functions on this enum; see bitmask.h.
-    IS_ATH_BITMASK
+    ATH_BITMASK
   };
 
   /**
