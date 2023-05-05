@@ -53,7 +53,7 @@ namespace MuonCombined {
     }
 
     void MuonInsideOutRecoTool::handleCandidate(const InDetCandidate& indetCandidate, InDetCandidateToTagMap* tagMap,
-                                                IMuonCombinedInDetExtensionTool::MuonPrdData prdData, TrackCollection* combTracks,
+                                                const IMuonCombinedInDetExtensionTool::MuonPrdData& prdData, TrackCollection* combTracks,
                                                 TrackCollection* meTracks, Trk::SegmentCollection* segColl, const EventContext& ctx) const {
         if (m_ignoreSiAssocated && indetCandidate.isSiliconAssociated()) {
             ATH_MSG_DEBUG(" skip silicon associated track for extension ");

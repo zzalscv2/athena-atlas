@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONINSIDEOUTRECOTOOL_H
@@ -69,7 +69,7 @@ namespace MuonCombined {
     private:
         /** handle a single candidate */
         void handleCandidate(const InDetCandidate& inDetCandidate, InDetCandidateToTagMap* tagMap,
-                             IMuonCombinedInDetExtensionTool::MuonPrdData prdData, TrackCollection* combTracks, TrackCollection* meTracks,
+                             const IMuonCombinedInDetExtensionTool::MuonPrdData& prdData, TrackCollection* combTracks, TrackCollection* meTracks,
                              Trk::SegmentCollection* segments, const EventContext& ctx) const;
 
         /** add muon candidate to indet candidate */
