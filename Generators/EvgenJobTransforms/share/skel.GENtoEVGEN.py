@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 """Functionality core of the Gen_tf transform"""
 
@@ -142,6 +142,10 @@ svcMgr.THistSvc.Output = ["TestHepMCname DATAFILE='TestHepMC.root' OPT='RECREATE
 from EvgenProdTools.EvgenProdToolsConf import CopyEventWeight
 if not hasattr(postSeq, "CopyEventWeight"):
     postSeq += CopyEventWeight(mcEventWeightsKey="TMPEvtInfo.mcEventWeights")
+
+from EvgenProdTools.EvgenProdToolsConf import FillFilterValues
+if not hasattr(postSeq, "FillFilterValues"):
+    postSeq += FillFilterValues(mcFilterHTKey="TMPEvtInfo.mcFilterHT")
 
 ## Configure the event counting (AFTER all filters)
 # TODO: Rewrite in Python?

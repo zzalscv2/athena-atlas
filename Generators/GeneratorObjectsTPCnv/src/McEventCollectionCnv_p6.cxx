@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // McEventCollectionCnv_p6.cxx
@@ -104,6 +104,8 @@ void McEventCollectionCnv_p6::persToTrans( const McEventCollection_p6* persObj,
       if (persEvt.m_e_attribute_name[i] == "signal_process_id") continue;
       if (persEvt.m_e_attribute_name[i] == "signal_vertex_id") continue;
       if (persEvt.m_e_attribute_name[i] == "filterWeight") continue;
+      if (persEvt.m_e_attribute_name[i] == "filterHT") continue;
+      if (persEvt.m_e_attribute_name[i] == "filterMET") continue;
       if (persEvt.m_e_attribute_name[i] == "event_scale") continue;
       if (persEvt.m_e_attribute_name[i] == "alphaQCD") continue;
       if (persEvt.m_e_attribute_name[i] == "alphaQED") continue;
@@ -123,6 +125,8 @@ void McEventCollectionCnv_p6::persToTrans( const McEventCollection_p6* persObj,
     genEvt->add_attribute("alphaQCD", std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_alphaQCD));
     genEvt->add_attribute("alphaQED", std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_alphaQED));
     genEvt->add_attribute("filterWeight", std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_filterWeight));
+    genEvt->add_attribute("filterHT", std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_filterHT));
+    genEvt->add_attribute("filterMET", std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_filterMET));
     genEvt->weights()= persEvt.m_weights;
     genEvt->add_attribute("random_states", std::make_shared<HepMC3::VectorLongIntAttribute>(persEvt.m_randomStates));
 
@@ -400,6 +404,8 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
       auto A_alphaQCD=genEvt->attribute<HepMC3::DoubleAttribute>("alphaQCD");
       auto A_alphaQED=genEvt->attribute<HepMC3::DoubleAttribute>("alphaQED");
       auto A_filterWeight=genEvt->attribute<HepMC3::DoubleAttribute>("filterWeight");
+      auto A_filterHT=genEvt->attribute<HepMC3::DoubleAttribute>("filterHT");
+      auto A_filterMET=genEvt->attribute<HepMC3::DoubleAttribute>("filterMET");
       auto signal_process_vertex = HepMC::signal_process_vertex(genEvt);
       auto A_random_states=genEvt->attribute<HepMC3::VectorLongIntAttribute>("random_states");
       auto beams=genEvt->beams();
@@ -411,6 +417,8 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
                               A_alphaQCD?(A_alphaQCD->value()):0.0,
                               A_alphaQED?(A_alphaQED->value()):0.0,
                               A_filterWeight?(A_filterWeight->value()):1.0,
+                              A_filterHT?(A_filterHT->value()):-13.,
+                              A_filterMET?(A_filterMET->value()):-13.0,
                               signal_process_vertex?HepMC::barcode(signal_process_vertex):0,
                               !beams.empty()?HepMC::barcode(beams[0]):0,
                               beams.size()>1?HepMC::barcode(beams[1]):0,
@@ -444,6 +452,8 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
        if (attmap.first == "signal_process_id") continue;
        if (attmap.first == "signal_vertex_id") continue;
        if (attmap.first == "filterWeight") continue;
+       if (attmap.first == "filterHT") continue;
+       if (attmap.first == "filterMET") continue;
        if (attmap.first == "event_scale") continue;
        if (attmap.first == "alphaQCD") continue;
        if (attmap.first == "alphaQED") continue;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header for this module
@@ -74,6 +74,14 @@ StatusCode HTFilter::filterFinalize() {
 
 StatusCode HTFilter::filterEvent() {
   m_total++; // Book keeping
+
+#ifdef HEPMC3
+    
+
+ATH_MSG_ERROR(" For HEPMC3 releases xAOD filters should be used. Exiting with ERROR. ");
+return StatusCode::FAILURE;
+
+#endif
 
   // Get jet container out
   const xAOD::JetContainer* truthjetTES = 0;

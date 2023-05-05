@@ -19,6 +19,14 @@ MissingEtFilter::MissingEtFilter(const std::string& name, ISvcLocator* pSvcLocat
 
 StatusCode MissingEtFilter::filterEvent() {
   double sumx(0), sumy(0);
+
+#ifdef HEPMC3
+  
+ATH_MSG_ERROR(" For HEPMC3 releases xAOD filters should be used. Exiting with ERROR. ");
+return StatusCode::FAILURE;
+  
+#endif
+
   McEventCollection::const_iterator itr;
   for (itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);

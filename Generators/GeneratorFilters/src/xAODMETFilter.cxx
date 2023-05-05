@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODMETFilter.h"
@@ -29,13 +29,34 @@ StatusCode xAODMETFilter::filterEvent() {
   for (unsigned int iPart=0; iPart<nParticles; ++iPart) {
     const xAOD::TruthParticle* missingETparticle = (*xTruthParticleContainer)[iPart];
     if (!m_useHadronicNu && MC::PID::isNeutrino(missingETparticle->pdgId()) &&
-    !(missingETparticle->auxdata<bool>("isFromWZ") || missingETparticle->auxdata<bool>("isFromTau")) ) continue;
-    sumx += missingETparticle->px();
-    sumy += missingETparticle->py();
+      !(missingETparticle->auxdata<bool>("isPrompt"))) continue; // ignore neutrinos from hadron decays
+      
+      sumx += missingETparticle->px();
+      sumy += missingETparticle->py();
+       
   }
 
   double met = std::sqrt(sumx*sumx + sumy*sumy);
+#ifdef HEPMC3
+  const McEventCollection* mecc = 0;
+    if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){
+      setFilterPassed(false);
+      ATH_MSG_ERROR("Could not retrieve MC Event Collection - might not work");
+      return StatusCode::SUCCESS;
+    }
+
+  McEventCollection* mec = const_cast<McEventCollection*> (&(*mecc));
+  for (unsigned int i = 0; i < mec->size(); ++i) {
+      if (!(*mec)[i]) continue;
+    
+      //for test filterHT->filterWeight
+      (*mec)[i]->add_attribute("filterMET", std::make_shared<HepMC3::DoubleAttribute>(met/1000.));
+  }
+#endif
+ 
   setFilterPassed(met >= m_METmin);
   return StatusCode::SUCCESS;
 }
+
+ 
 
