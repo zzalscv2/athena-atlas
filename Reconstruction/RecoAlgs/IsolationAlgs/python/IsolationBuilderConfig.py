@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """
           Instantiate the electron or photon isolation
@@ -31,10 +31,14 @@ def egIsolationCfg(flags, name='egIsolation', **kwargs):
         TrackIsolationToolCfg, ElectronTrackIsolationToolCfg,
         EGammaCaloIsolationToolCfg)
 
+    isoType  = []
+    isoCor   = []
+    isoExCor = []
+
     if flags.Detector.EnableID or flags.Detector.EnableITk:
-        isoType  = [ [ isoPar.ptcone30, isoPar.ptcone20 ] ]
-        isoCor   = [ [ isoPar.coreTrackPtr ] ]
-        isoExCor = [ [] ]
+        isoType.append([ isoPar.ptcone30, isoPar.ptcone20 ])
+        isoCor.append([ isoPar.coreTrackPtr ])
+        isoExCor.append([])
         if 'TrackIsolationTool' not in kwargs:
             if pref == 'Ph':
                 kwargs['TrackIsolationTool'] = acc.popToolsAndMerge(
@@ -76,10 +80,14 @@ def muIsolationCfg(flags, name='muIsolation', **kwargs):
     from IsolationAlgs.IsoToolsConfig import (
         TrackIsolationToolCfg, MuonCaloIsolationToolCfg)
 
+    isoType  = []
+    isoCor   = []
+    isoExCor = []
+
     if flags.Detector.EnableID or flags.Detector.EnableITk:
-        isoType  = [ [ isoPar.ptcone40, isoPar.ptcone30, isoPar.ptcone20 ] ]
-        isoCor   = [ [ isoPar.coreTrackPtr ] ]
-        isoExCor = [ [] ]
+        isoType.append([ isoPar.ptcone40, isoPar.ptcone30, isoPar.ptcone20 ])
+        isoCor.append([ isoPar.coreTrackPtr ])
+        isoExCor.append([])
         if 'TrackIsolationTool' not in kwargs:
             kwargs['TrackIsolationTool'] = acc.popToolsAndMerge(
                 TrackIsolationToolCfg(flags))
