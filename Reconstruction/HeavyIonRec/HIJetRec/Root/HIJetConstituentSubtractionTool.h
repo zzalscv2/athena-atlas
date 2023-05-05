@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // HIJetConstituentSubtractionTool.h
@@ -93,7 +93,7 @@ protected:
   inline std::string momentName() const { return m_momentName; };
   inline bool momentOnly() const { return m_momentOnly; };
 
-  inline void setEventShapeKey( SG::ReadHandleKey< xAOD::HIEventShapeContainer > key ) { m_eventShapeKey=key; };
+  inline void setEventShapeKey( const SG::ReadHandleKey< xAOD::HIEventShapeContainer >& key ) { m_eventShapeKey=key; };
   inline void setMomentName(const std::string& key) { m_momentName=key; };
   inline void setMomentOnly(bool x) { m_momentOnly=x; };
 

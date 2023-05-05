@@ -1577,6 +1577,7 @@ def ValgrindCommand(
     defaultOptions                    = True,
     extraOptionsList                  = None,
     AthenaSerialisedConfigurationFile = "athenaConf.pkl",
+    isCAEnabled                       = False,
     returnFormat                      = "string"
     ):
 
@@ -1611,7 +1612,10 @@ def ValgrindCommand(
                 sfile = suppressionFile, path = pathEnvironmentVariable)
             )
     optionsList.append("$(which python)")
-    optionsList.append("$(which athena.py)")
+    if not isCAEnabled:
+        optionsList.append("$(which athena.py)")
+    else:
+        optionsList.append("$(which CARunner.py)")
     optionsList.append(AthenaSerialisedConfigurationFile)
     # Return the command in the requested format, string (by default) or list.
     if returnFormat is None or returnFormat == "string":

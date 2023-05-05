@@ -35,7 +35,7 @@ public:
   virtual StatusCode fillCollectionFromCells(std::unique_ptr<xAOD::HIEventShapeContainer>& evtShape, const SG::ReadHandleKey<CaloCellContainer>& m_cell_container_key, const EventContext& ctx) const = 0;
 
   inline std::string getContainerName() const { return m_outputContainerName; };
-  inline void setContainerName(std::string cname) { m_outputContainerName = cname; };
+  inline void setContainerName(const std::string& cname) { m_outputContainerName = cname; };
 
 private:
 

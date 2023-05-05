@@ -124,7 +124,6 @@ StatusCode TrigCaloClusterMaker::execute(const EventContext& ctx) const
 
 
   // monitored variables 
-  auto mon_container_size = Monitored::Scalar("container_size", 0.);
   auto mon_clusEt = Monitored::Collection("Et",   *pCaloClusterContainer, &xAOD::CaloCluster::et );
   auto mon_clusSignalState = Monitored::Collection("signalState",   *pCaloClusterContainer, &xAOD::CaloCluster::signalState );
   auto mon_clusSize = Monitored::Collection("clusterSize",   *pCaloClusterContainer, &xAOD::CaloCluster::clusterSize );
@@ -139,11 +138,15 @@ StatusCode TrigCaloClusterMaker::execute(const EventContext& ctx) const
   auto mon_engFrac = Monitored::Collection("ENG_FRAC_MAX",N_BAD_CELLS );
   auto mon_size = Monitored::Collection("size",sizeVec );
   auto monmu = Monitored::Scalar("mu",-999.0);
+  auto mon_container_size = Monitored::Scalar("container_size", 0.);
   auto moncount_1thrsigma = Monitored::Scalar("count_1thrsigma",-999.0);
   auto moncount_2thrsigma = Monitored::Scalar("count_2thrsigma",-999.0);
+  auto mon_container_size_by_mu  = Monitored::Scalar("container_size_by_mu", 0.);
+  auto moncount_1thrsigma_by_mu2 = Monitored::Scalar("count_1thrsigma_by_mu2",-999.0);
+  auto moncount_2thrsigma_by_mu2 = Monitored::Scalar("count_2thrsigma_by_mu2",-999.0);
   auto monitorIt = Monitored::Group( m_monTool, time_tot, time_clusMaker,  time_clusCorr, mon_container_size, mon_clusEt,
 					    mon_clusPhi, mon_clusEta, mon_clusSignalState, mon_clusSize, 
-					    mon_badCells, mon_engFrac, mon_size, monmu, moncount_1thrsigma, moncount_2thrsigma);
+					    mon_badCells, mon_engFrac, mon_size, monmu, moncount_1thrsigma, moncount_2thrsigma, mon_container_size_by_mu, moncount_1thrsigma_by_mu2, moncount_2thrsigma_by_mu2);
 
 
   // Looping over cluster maker tools...
@@ -256,6 +259,12 @@ StatusCode TrigCaloClusterMaker::execute(const EventContext& ctx) const
   monmu=mu;
   moncount_1thrsigma = count_1thrsigma;
   moncount_2thrsigma = count_2thrsigma;
+  if ( mu > 5 ){
+    mon_container_size_by_mu  = pCaloClusterContainer->size()/mu; // fill monitored variable
+    float onemu2 = 1.0/(mu*mu);
+    moncount_1thrsigma_by_mu2 = count_1thrsigma*onemu2;
+    moncount_2thrsigma_by_mu2 = count_2thrsigma*onemu2;
+  }
 
   // Stop timer
   time_tot.stop();

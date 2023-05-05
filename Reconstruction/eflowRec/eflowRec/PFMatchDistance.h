@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -51,7 +51,7 @@ Factory to create IDistanceProvider of the type requested.
 */
 class DistanceFactory {
 public:
-  static std::unique_ptr<IDistanceProvider> Get(std::string distanceType, std::unique_ptr<IPositionProvider> trackPosition,
+  static std::unique_ptr<IDistanceProvider> Get(const std::string& distanceType, std::unique_ptr<IPositionProvider> trackPosition,
 						std::unique_ptr<IPositionProvider> clusterPosition) {
     if (distanceType == "EtaPhiSquareDistance") {
       return std::make_unique<DistanceProvider<EtaPhi, EtaPhi> >(std::move(trackPosition), std::move(clusterPosition), std::make_unique<EtaPhiSqDistanceCalculator>());

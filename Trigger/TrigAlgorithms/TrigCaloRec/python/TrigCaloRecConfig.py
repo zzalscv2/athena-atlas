@@ -20,6 +20,7 @@ def trigCaloClusterMakerMonTool(flags, doMonCells = False):
     maxProcTime = 150000 if doMonCells else 4500
 
     monTool.defineHistogram('container_size', path='EXPERT', type='TH1F',  title="Container Size; Number of Clusters; Number of Events", xbins=50, xmin=0.0, xmax=maxNumberOfClusters)
+    monTool.defineHistogram('container_size_by_mu', path='EXPERT', type='TH1F',  title="Container Size; Number of Clusters; Number of Events", xbins=50, xmin=0.0, xmax=maxNumberOfClusters/60)
     monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title="Total Execution Time; Execution time [ us ] ; Number of runs", xbins=100, xmin=0.0, xmax=maxProcTime)
     monTool.defineHistogram('TIME_ClustMaker', path='EXPERT', type='TH1F', title="Cluster Maker Time; Execution time [ us ] ; Number of runs", xbins=100, xmin=0.0, xmax=maxProcTime)
     monTool.defineHistogram('TIME_ClustCorr', path='EXPERT', type='TH1F', title="Cluster Correction Time; Execution time [ us ] ; Number of runs", xbins=100, xmin=0.0, xmax=100)
@@ -36,10 +37,12 @@ def trigCaloClusterMakerMonTool(flags, doMonCells = False):
     monTool.defineHistogram('mu,container_size', path='EXPERT', type='TH2F',  title="Container Size versus #mu; #mu; cluster container size", xbins=50, xmin=20.0, xmax=70, ybins=50, ymin=0.0, ymax=maxNumberOfClusters)
 
     if doMonCells:
-        monTool.defineHistogram('count_1thrsigma', path='EXPERT', type='TH1F',  title="count_1thrsigma; count_1thresigma; Number of Events", xbins=50, xmin=0.0, xmax=10e3)
-        monTool.defineHistogram('count_2thrsigma', path='EXPERT', type='TH1F',  title="count_2thrsigma; count_2thresigma; Number of Events", xbins=50, xmin=0.0, xmax=5e3)
-        monTool.defineHistogram('mu,count_1thrsigma', path='EXPERT', type='TH2F',  title="nCells above 1st thr versus #mu; #mu; nCells", xbins=50, xmin=20.0, xmax=70, ybins=50, ymin=0.0, ymax=10e3)
-        monTool.defineHistogram('mu,count_2thrsigma', path='EXPERT', type='TH2F',  title="nCells above 2nd thr versus #mu; #mu; nCells", xbins=50, xmin=20.0, xmax=70, ybins=50, ymin=0.0, ymax=5e3)
+        monTool.defineHistogram('count_1thrsigma', path='EXPERT', type='TH1F',  title="count_1thrsigma; count_1thresigma; Number of Events", xbins=60, xmin=0.0, xmax=12e3)
+        monTool.defineHistogram('count_2thrsigma', path='EXPERT', type='TH1F',  title="count_2thrsigma; count_2thresigma; Number of Events", xbins=60, xmin=0.0, xmax=6e3)
+        monTool.defineHistogram('count_1thrsigma_by_mu2', path='EXPERT', type='TH1F',  title="count_1thrsigma_by_mu2; count_1thresigma_by_mu2; Number of Events", xbins=50, xmin=0.0, xmax=10)
+        monTool.defineHistogram('count_2thrsigma_by_mu2', path='EXPERT', type='TH1F',  title="count_2thrsigma_by_mu2; count_2thresigma_by_mu2; Number of Events", xbins=50, xmin=0.0, xmax=5)
+        monTool.defineHistogram('mu,count_1thrsigma', path='EXPERT', type='TH2F',  title="nCells above 1st thr versus #mu; #mu; nCells", xbins=50, xmin=20.0, xmax=70, ybins=60, ymin=0.0, ymax=12e3)
+        monTool.defineHistogram('mu,count_2thrsigma', path='EXPERT', type='TH2F',  title="nCells above 2nd thr versus #mu; #mu; nCells", xbins=50, xmin=20.0, xmax=70, ybins=60, ymin=0.0, ymax=6e3)
 
     return monTool
 

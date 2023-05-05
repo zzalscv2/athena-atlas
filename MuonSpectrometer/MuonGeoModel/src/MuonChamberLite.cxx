@@ -758,7 +758,6 @@ namespace MuonGM {
                 int stationEta = zi;
                 int stationPhi = fi + 1;
                 int doubletR = 1;
-                int nfields = 6;
                 int doubletZ = 1;
 
                 if (nRpc > 1 && nDoubletR == 2 && ypos > 0.)
@@ -799,7 +798,6 @@ namespace MuonGM {
                 if (std::abs(xpos) > 100. * Gaudi::Units::mm) {
                     if (ndbz[doubletR - 1] > 2) {
                         doubletZ = 3;
-                        nfields++;
                     }
                     ndbz[doubletR - 1]--;
                 }

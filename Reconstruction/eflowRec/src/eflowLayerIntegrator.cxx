@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -61,14 +61,14 @@ eflowLayerIntegrator::eflowLayerIntegrator(double stdDev, double error, double r
   }
 }
 
-eflowLayerIntegrator::eflowLayerIntegrator(const eflowLayerIntegrator& originalEflowLayerIntegrator){
-  m_rMax = originalEflowLayerIntegrator.m_rMax;
-  m_isHLLHC = originalEflowLayerIntegrator.m_isHLLHC;
-  m_allClustersIntegral =  originalEflowLayerIntegrator.m_allClustersIntegral;
-  m_nUnitCellPerWindowOverCellEtaPhiArea = originalEflowLayerIntegrator.m_nUnitCellPerWindowOverCellEtaPhiArea;
-  m_integrator = std::make_unique<eflowCellIntegrator<0> >(*originalEflowLayerIntegrator.m_integrator);
-  m_integratorLookup = std::make_unique<eflowCellIntegrator<1> >(*originalEflowLayerIntegrator.m_integratorLookup);
-
+eflowLayerIntegrator::eflowLayerIntegrator(const eflowLayerIntegrator& originalEflowLayerIntegrator)
+  : m_rMax (originalEflowLayerIntegrator.m_rMax),
+    m_isHLLHC (originalEflowLayerIntegrator.m_isHLLHC),
+    m_allClustersIntegral (originalEflowLayerIntegrator.m_allClustersIntegral),
+    m_nUnitCellPerWindowOverCellEtaPhiArea (originalEflowLayerIntegrator.m_nUnitCellPerWindowOverCellEtaPhiArea),
+    m_integrator (std::make_unique<eflowCellIntegrator<0> >(*originalEflowLayerIntegrator.m_integrator)),
+    m_integratorLookup (std::make_unique<eflowCellIntegrator<1> >(*originalEflowLayerIntegrator.m_integratorLookup))
+{
   for (int i = 0; i < eflowCalo::nRegions; i++){
     m_densityConversion[i] = originalEflowLayerIntegrator.m_densityConversion[i];
     m_nUnitCellPerWindowOverCellEtaPhiArea[i] = originalEflowLayerIntegrator.m_nUnitCellPerWindowOverCellEtaPhiArea[i];
