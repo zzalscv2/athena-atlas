@@ -525,7 +525,9 @@ AuxTypeRegistry::findAuxID (const std::string& name,
   }
 
   // Verify now that the variable names are ok.
-  if (!checkName (name) || (!clsname.empty() && !checkName (clsname)))
+  if (!(flags & Flags::SkipNameCheck) &&
+      (!checkName (name) ||
+       (!clsname.empty() && !checkName (clsname))))
   {
     throw ExcBadVarName (key);
   }
@@ -546,7 +548,7 @@ AuxTypeRegistry::findAuxID (const std::string& name,
   t.m_clsname = clsname;
   t.m_ti = &ti;
   t.m_factory = fac;
-  t.m_flags = flags;
+  t.m_flags = (flags & ~Flags::SkipNameCheck);
   AthContainers_detail::fence_seq_cst();
   m_auxids.insert_or_assign (key, auxid);
 

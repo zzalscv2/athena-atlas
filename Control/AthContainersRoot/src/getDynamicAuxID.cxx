@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersRoot/src/getDynamicAuxID.h
@@ -70,7 +70,7 @@ SG::auxid_t getDynamicAuxID (const std::type_info& ti,
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t auxid = SG::null_auxid;
 
-  auxid = r.getAuxID (ti, name);
+  auxid = r.getAuxID (ti, name, "", SG::AuxTypeRegistry::Flags::SkipNameCheck);
   if (auxid != SG::null_auxid) return auxid;
 
   // Be careful --- if we don't exactly match the name
