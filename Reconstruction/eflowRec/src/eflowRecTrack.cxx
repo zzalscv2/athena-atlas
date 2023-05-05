@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -28,27 +28,30 @@ eflowRecTrack::eflowRecTrack(
     m_isInDenseEnvironment(false),
     m_isSubtracted(false),
     m_hasBin(true),
-    m_trackCaloPoints(theTrackExtrapolatorTool->execute(m_track)) {
-  m_svcLoc = Gaudi::svcLocator();
-  StatusCode status = m_svcLoc->service( "MessageSvc", m_msgSvc );  
+    m_trackCaloPoints(theTrackExtrapolatorTool->execute(m_track))
+{
+  ISvcLocator* svcLoc = Gaudi::svcLocator();
+  StatusCode status = svcLoc->service( "MessageSvc", m_msgSvc );  
   if ( status.isSuccess( ) ) m_mlog = std::make_unique<MsgStream>(m_msgSvc,"eflowRecTrack");
   else m_mlog = nullptr;
 }
 
-eflowRecTrack::eflowRecTrack(const eflowRecTrack& eflowRecTrack){
-  m_trackId = eflowRecTrack.m_trackId;
-  m_trackElemLink = eflowRecTrack.m_trackElemLink;
-  m_track = *m_trackElemLink;
-  m_type = eflowRecTrack.m_type;
-  m_pull15 = eflowRecTrack.m_pull15;
-  m_eExpect = eflowRecTrack.m_eExpect;
-  m_varEExpect = eflowRecTrack.m_varEExpect;
-  m_isInDenseEnvironment = eflowRecTrack.m_isInDenseEnvironment;
-  m_isSubtracted = eflowRecTrack.m_isSubtracted;
-  m_hasBin = eflowRecTrack.m_hasBin;
-  m_trackCaloPoints = std::make_unique<eflowTrackCaloPoints>(*eflowRecTrack.m_trackCaloPoints);
-  m_svcLoc = Gaudi::svcLocator();
-  StatusCode status = m_svcLoc->service( "MessageSvc", m_msgSvc );  
+eflowRecTrack::eflowRecTrack(const eflowRecTrack& eflowRecTrack)
+  : m_trackId (eflowRecTrack.m_trackId),
+    m_trackElemLink (eflowRecTrack.m_trackElemLink),
+    m_track (*m_trackElemLink),
+    m_type (eflowRecTrack.m_type),
+    m_pull15 (eflowRecTrack.m_pull15),
+    m_layerHED (eflowRecTrack.m_layerHED),
+    m_eExpect (eflowRecTrack.m_eExpect),
+    m_varEExpect (eflowRecTrack.m_varEExpect),
+    m_isInDenseEnvironment (eflowRecTrack.m_isInDenseEnvironment),
+    m_isSubtracted (eflowRecTrack.m_isSubtracted),
+    m_hasBin (eflowRecTrack.m_hasBin),
+    m_trackCaloPoints (std::make_unique<eflowTrackCaloPoints>(*eflowRecTrack.m_trackCaloPoints))
+{
+  ISvcLocator* svcLoc = Gaudi::svcLocator();
+  StatusCode status = svcLoc->service( "MessageSvc", m_msgSvc );  
   if ( status.isSuccess( ) ) m_mlog = std::make_unique<MsgStream>(m_msgSvc,"eflowRecTrack");
   else m_mlog = nullptr;
 }
@@ -68,10 +71,11 @@ eflowRecTrack& eflowRecTrack::operator = (const eflowRecTrack& originalEflowRecT
     m_isSubtracted = originalEflowRecTrack.m_isSubtracted;
     m_hasBin = originalEflowRecTrack.m_hasBin;
     m_trackCaloPoints = std::make_unique<eflowTrackCaloPoints>(*originalEflowRecTrack.m_trackCaloPoints);
-    m_svcLoc = Gaudi::svcLocator();
-    StatusCode status = m_svcLoc->service( "MessageSvc", m_msgSvc );  
+    ISvcLocator* svcLoc = Gaudi::svcLocator();
+    StatusCode status = svcLoc->service( "MessageSvc", m_msgSvc );  
     if ( status.isSuccess( ) ) m_mlog = std::make_unique<MsgStream>(m_msgSvc,"eflowRecTrack");
     else m_mlog = nullptr;
+    m_layerHED = originalEflowRecTrack.m_layerHED;
     return *this;
   }//if not assigning to self, then we have copied the data to the new object
 }

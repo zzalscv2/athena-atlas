@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -92,7 +92,7 @@ private:
 
 class TrackPositionFactory {
 public:
-  static std::unique_ptr<IPositionProvider> Get(std::string positionType) {
+  static std::unique_ptr<IPositionProvider> Get(const std::string& positionType) {
     if (positionType == "EM1EtaPhi") {
       return std::make_unique<TrackEtaPhiInFixedLayersProvider>(TrackLayer::EMB1, TrackLayer::EME1, TrackLayer::FCAL0);
     } else if (positionType == "EM2EtaPhi") {
@@ -107,7 +107,7 @@ public:
 
 class ClusterPositionFactory {
 public:
-  static std::unique_ptr<IPositionProvider> Get(std::string positionType) {
+  static std::unique_ptr<IPositionProvider> Get(const std::string& positionType) {
     if (positionType == "PlainEtaPhi") {
       return std::make_unique<ClusterPlainEtaPhiProvider>();
     } else if (positionType == "GeomCenterEtaPhi") {
