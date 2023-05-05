@@ -6,6 +6,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 
 streamName = "StreamDAOD_IDTR2"
 
@@ -136,7 +137,7 @@ def IDTR2Cfg(flags):
     # Define contents of the format
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 
     IDTR2SlimmingHelper = SlimmingHelper(
@@ -177,7 +178,8 @@ def IDTR2Cfg(flags):
     acc.merge(OutputStreamCfg(flags, "DAOD_IDTR2",
                               ItemList=IDTR2ItemList,
                               AcceptAlgs=["IDTR2Kernel"]))
-    acc.merge(InfileMetaDataCfg(flags, "DAOD_IDTR2",
-                                AcceptAlgs=["IDTR2Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_IDTR2",
+                                AcceptAlgs=["IDTR2Kernel"],
+                                createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc

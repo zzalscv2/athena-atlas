@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TrigHLTJetHypo.RepeatedConditionParams import RepeatedConditionParams
 from TrigHLTJetHypo.FilterParams import FilterParams
@@ -6,14 +6,7 @@ from TrigHLTJetHypo.HelperConfigToolParams import HelperConfigToolParams
 from TrigHLTJetHypo.ConditionDefaults import defaults
 from TrigHLTJetHypo.make_treevec import make_treevec
 
-from AthenaCommon.Logging import logging
-from AthenaCommon.Constants import DEBUG
-
 import re
-from copy import deepcopy
-
-logger = logging.getLogger( __name__)
-logger.setLevel(DEBUG)
 
 
 pattern = r'^FBDJNOSHARED'\
@@ -30,14 +23,14 @@ def get_fb_jet_args(groupdict, back):
 
     condargs = []
     vals = defaults('et', lo=groupdict['fbetlo'], hi=groupdict['fbethi'])
-    condargs.append(('et', deepcopy(vals)))
+    condargs.append(('et', vals))
 
     if back:
         vals = defaults('neta')
-        condargs.append(('neta', deepcopy(vals)))
+        condargs.append(('neta', vals))
     else:
         vals = defaults('peta')
-        condargs.append(('peta', deepcopy(vals)))
+        condargs.append(('peta', vals))
 
     return condargs
 
@@ -51,10 +44,10 @@ def get_dijet_args(groupdict):
                     lo=groupdict['masslo'],
                     hi=groupdict['masshi'])
     
-    condargs.append(('djmass', deepcopy(vals)))
+    condargs.append(('djmass', vals))
     
     vals = defaults('djdphi', lo='260')
-    condargs.append(('djdphi', deepcopy(vals)))
+    condargs.append(('djdphi', vals))
 
     return condargs
     
@@ -67,10 +60,10 @@ def get_dijet_jet_args(groupdict, jstr):
     
     condargs = []
     vals = defaults('et', lo=groupdict[jstr+'etlo'], hi=groupdict[jstr+'ethi'])
-    condargs.append(('et', deepcopy(vals)))
+    condargs.append(('et', vals))
 
     vals = defaults('eta', lo='0', hi='490')
-    condargs.append(('eta', deepcopy(vals)))
+    condargs.append(('eta', vals))
 
     return condargs
 

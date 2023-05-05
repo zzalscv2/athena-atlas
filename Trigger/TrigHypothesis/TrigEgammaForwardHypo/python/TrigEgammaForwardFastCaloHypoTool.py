@@ -8,8 +8,8 @@ from AthenaCommon.SystemOfUnits import GeV
 def createTrigEgammaForwardFastCaloHypoAlg(name, sequenceOut):
   
   # make the Hypo alg
-  from TrigEgammaForwardHypo.TrigEgammaForwardHypoConf import TrigEgammaForwardFastCaloHypoAlg
-  theFastCaloHypo = TrigEgammaForwardFastCaloHypoAlg(name)
+  from AthenaConfiguration.ComponentFactory import CompFactory
+  theFastCaloHypo = CompFactory.TrigEgammaForwardFastCaloHypoAlg(name)
   theFastCaloHypo.CaloClusters = sequenceOut
   return theFastCaloHypo
 

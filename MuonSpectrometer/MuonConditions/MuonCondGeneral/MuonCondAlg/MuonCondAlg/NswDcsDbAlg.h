@@ -61,6 +61,8 @@ private:
 	
 	readKey_t m_readKey_mmg_hv {this, "ReadKey_MMG_HV", "/MMG/DCS/TSTHV", "Key of input MMG condition data for HV"};
 	readKey_t m_readKey_stg_hv {this, "ReadKey_STG_HV", "/STG/DCS/TSTHV", "Key of input STG condition data for HV"};
+
+	const MuonGM::MuonDetectorManager *m_muDetMgrFromDetStore; 
  
 };
 

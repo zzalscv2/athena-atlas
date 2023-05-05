@@ -59,7 +59,7 @@ namespace MuonGM {
         sTGCDetectorHelper sTGC_helper;
 
 #ifndef NDEBUG
-        std::string sTGCname = std::string("sTG1-") + sName;
+        std::string sTGCname = std::string("sTG1-") + stName;
         MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
         if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "sTGCname: " << sTGCname << endmsg;
         sTGCDetectorDescription* sTGC = sTGC_helper.Get_sTGCDetectorType(sTGCname);

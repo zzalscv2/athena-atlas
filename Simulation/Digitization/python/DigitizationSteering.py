@@ -190,8 +190,8 @@ def DigitizationMainContentCfg(flags):
         acc.merge(PerfMonMTSvcCfg(flags))
 
     # Add in-file MetaData
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
-    acc.merge(InfileMetaDataCfg(flags, "RDO"))
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+    acc.merge(SetupMetaDataForStreamCfg(flags, "RDO"))
 
     return acc
 

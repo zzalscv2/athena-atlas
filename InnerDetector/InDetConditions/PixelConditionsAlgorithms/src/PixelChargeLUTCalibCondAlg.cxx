@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/EventIDRange.h"
@@ -243,7 +243,7 @@ StatusCode PixelChargeLUTCalibCondAlg::execute(const EventContext& ctx) const {
                 totRes2.push_back(calibArray[19].get<float>());
 
                 // Linear extrapolation above large charge
-                if (configData->getRUN3PIXLinearExtrapolation()) {
+                if (configData->getPIXLinearExtrapolation()) {
                   writeCdo -> setCalibrationStrategy(moduleHash, PixelChargeCalibCondData::CalibrationStrategy::RUN3PIX);
 
                   Identifier wafer_id = m_pixelID->wafer_id(IdentifierHash(moduleHash));

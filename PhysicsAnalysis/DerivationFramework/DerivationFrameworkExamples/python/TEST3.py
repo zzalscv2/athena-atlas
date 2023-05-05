@@ -4,6 +4,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 
 def TEST3ThinningToolCfg(flags,streamName):
     """Configure the example thinning tool"""
@@ -30,11 +31,11 @@ def TEST3Cfg(ConfigFlags):
     acc.merge(TEST3KernelCfg(ConfigFlags, name="TEST3Kernel",StreamName = "StreamDAOD_TEST3"))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     TEST3SlimmingHelper = SlimmingHelper("TEST3SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     TEST3SlimmingHelper.SmartCollections = ["EventInfo","InDetTrackParticles"]
     TEST3ItemList = TEST3SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TEST3", ItemList=TEST3ItemList, AcceptAlgs=["TEST3Kernel"]))
-    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_TEST3", AcceptAlgs=["TEST3Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_TEST3", AcceptAlgs=["TEST3Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
     return acc

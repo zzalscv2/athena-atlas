@@ -6,6 +6,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 
 BPHYDerivationName = "BPHY10"
 streamName = "StreamDAOD_BPHY10"
@@ -33,14 +34,14 @@ def BPHY10Cfg(flags):
                               muAndMu                     = True,
                               muAndTrack                  = False,
                               TrackAndTrack               = False,
-                              assumeDiMuons               = True, 
+                              assumeDiMuons               = True,
                               invMassUpper                = 4000.0,
                               invMassLower                = 2600.0,
                               Chi2Cut                     = 200.,
                               oppChargesOnly              = True,
                               combOnly                    = True,
                               atLeastOneComb              = False,
-                              useCombinedMeasurement      = False, # Only takes effect if combOnly=True   
+                              useCombinedMeasurement      = False, # Only takes effect if combOnly=True
                               muonCollectionKey           = "Muons",
                               TrackParticleCollection     = "InDetTrackParticles",
                               V0VertexFitterTool          = None,             # V0 vertex fitter
@@ -49,7 +50,7 @@ def BPHY10Cfg(flags):
                               TrackSelectorTool           = trackselect,
                               VertexPointEstimator        = vpest,
                               useMCPCuts                  = False)
- 
+
     BPHY10JpsiSelectAndWrite   = CompFactory.DerivationFramework.Reco_Vertex(
                               name                   = "BPHY10JpsiSelectAndWrite",
                               VertexSearchTool       = BPHY10JpsiFinder,
@@ -69,7 +70,7 @@ def BPHY10Cfg(flags):
                               MassMax               = 4000.0,
                               Chi2Max               = 200,
                               DoVertexType =1)
- 
+
     BPHY10BdJpsiKst = CompFactory.Analysis.JpsiPlus2Tracks(
                              name                    = "BPHY10BdJpsiKst",
                              kaonkaonHypothesis      = False,
@@ -254,12 +255,12 @@ def BPHY10Cfg(flags):
                                                      ThinningTools     = []))
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     BPHY10SlimmingHelper = SlimmingHelper("BPHY10SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, ConfigFlags = flags)
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
     AllVariables  = getDefaultAllVariables()
     StaticContent = []
-    
+
     # Needed for trigger objects
     BPHY10SlimmingHelper.IncludeMuonTriggerContent  = True
     BPHY10SlimmingHelper.IncludeBPhysTriggerContent = True
@@ -270,28 +271,28 @@ def BPHY10Cfg(flags):
     for x in range(1,5):
        StaticContent += ["xAOD::VertexContainer#BPHY10RefittedPrimaryVertices%s"   %     str(x)]
        StaticContent += ["xAOD::VertexAuxContainer#BPHY10RefittedPrimaryVertices%sAux." % str(x)]
-    
+
     ## ID track particles
     AllVariables += ["InDetTrackParticles"]
-    
-    ## combined / extrapolated muon track particles 
+
+    ## combined / extrapolated muon track particles
     ## (note: for tagged muons there is no extra TrackParticle collection since the ID tracks
     ##        are store in InDetTrackParticles collection)
     AllVariables += ["CombinedMuonTrackParticles"]
     AllVariables += ["ExtrapolatedMuonTrackParticles"]
-    
+
     ## muon container
     AllVariables += ["Muons", "MuonsLRT"]
-    
-    
-    ## Jpsi candidates 
+
+
+    ## Jpsi candidates
     StaticContent += ["xAOD::VertexContainer#%s"        %                 BPHY10JpsiSelectAndWrite.OutputVtxContainerName]
     ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
     StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY10JpsiSelectAndWrite.OutputVtxContainerName]
-    
+
     StaticContent += ["xAOD::VertexContainer#%s"        %                 BPHY10BdKstSelectAndWrite.OutputVtxContainerName]
     StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY10BdKstSelectAndWrite.OutputVtxContainerName]
-    
+
     StaticContent += ["xAOD::VertexContainer#%s"        %                 BPHY10V0ContainerName]
     StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY10V0ContainerName]
     StaticContent += ["xAOD::VertexContainer#%s"        %                 BPHY10KshortContainerName]
@@ -300,25 +301,25 @@ def BPHY10Cfg(flags):
     StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY10LambdaContainerName]
     StaticContent += ["xAOD::VertexContainer#%s"        %                 BPHY10LambdabarContainerName]
     StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY10LambdabarContainerName]
-    
+
     for cascades in CascadeCollections:
        StaticContent += ["xAOD::VertexContainer#%s"   %     cascades]
        StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % cascades]
-    
+
     # Tagging information (in addition to that already requested by usual algorithms)
-    AllVariables += ["GSFTrackParticles", "MuonSpectrometerTrackParticles" ] 
-    
+    AllVariables += ["GSFTrackParticles", "MuonSpectrometerTrackParticles" ]
+
     # Truth information for MC only
     if isSimulation:
         AllVariables += ["TruthEvents","TruthParticles","TruthVertices","MuonTruthParticles"]
-    
+
     AllVariables = list(set(AllVariables)) # remove duplicates
-    
+
     BPHY10SlimmingHelper.AllVariables = AllVariables
     BPHY10SlimmingHelper.StaticContent = StaticContent
     BPHY10SlimmingHelper.SmartCollections = []
     BPHY10ItemList = BPHY10SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_BPHY10", ItemList=BPHY10ItemList, AcceptAlgs=["BPHY10Kernel"]))
-    acc.merge(InfileMetaDataCfg(flags, "DAOD_BPHY10", AcceptAlgs=["BPHY10Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY10", AcceptAlgs=["BPHY10Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
     acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
     return acc

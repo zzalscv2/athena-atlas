@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ## @file   PscConfig.py
 ## @brief  Python flags that are used to configure C++ Psc
@@ -24,3 +24,6 @@ forcePSK = False
 
 ## string:string map equivalent to TrigPsc/Config.h (filled in TrigPsc.cxx)
 optmap = {}
+
+## Unparsed command line arguments that should be suppressed in reload_from_json
+unparsedArguments = []

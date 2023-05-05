@@ -98,6 +98,7 @@ def defineMenu():
         'L1_gTE200',
         'L1_jTE200',
         # additional jTE items for 2023 heavy ion runs
+        'L1_jTE20','L1_jTE50',
         'L1_jTE600',
         'L1_jTE1500',
         'L1_jTE3000',
@@ -110,6 +111,9 @@ def defineMenu():
         #UPC - MU
         'L1_MU3V_VTE50', 'L1_MU5VF_VTE50', 'L1_2MU3V_VTE50',
         
+        #UPC - MU, phase-1 calo
+        'L1_MU3V_VjTE50', 'L1_MU5VF_VjTE50', 'L1_2MU3V_VjTE50', 'L1_MU3V_VjTE50_GAP_AANDC',
+        
         #UPC - EM
         'L1_TAU1_TE3_VTE200', 'L1_TAU1_TE5_VTE200',
         'L1_TAU1_VTE200', 'L1_TAU1_VTE200_EMPTY',
@@ -117,7 +121,7 @@ def defineMenu():
         'L1_EM7_VTE200',
         
         #UPC - new EM
-        #'L1_eEM1_TE3_VgTE200', 'L1_2eEM1_VgTE50'
+        'L1_eEM1_VjTE200', 'L1_2eEM1_VjTE200', 'L1_2eEM2_VjTE200', 'L1_2eEM1_VjTE200_GAP_AANDC',
         
         #UPC - calo, MBTS, calo  
         'L1_ZDC_XOR_VTE200', 'L1_VZDC_A_VZDC_C_TE5_VTE200',
@@ -128,17 +132,25 @@ def defineMenu():
         'L1_MBTS_1_VTE50',
         'L1_MBTS_1_1_VTE50',
         'L1_MBTS_1_VTE200',
+        #UPC MBTS, phase-1 calo
+        'L1_MBTS_1_VjTE200_GAP_A', 'L1_MBTS_1_VjTE200_GAP_C',
         #UPC - calo, TRT - legacy
         'L1_TRT_VTE50',
         'L1_TRT_VTE200',
         'L1_TRT_VTE20',
+        #UPC - TRT,  phase-1 calo
+        'L1_TRT_VjTE50', 'L1_TRT_VjTE50_GAP_AANDC',
         #UPC - calo only - legacy
         'L1_VTE20',
         'L1_VTE50', 'L1_TE3_VTE50', 'L1_TE5_VTE50',
         'L1_TE5_VTE20',
         'L1_VTE200', 'L1_TE3_VTE200', 'L1_TE5_VTE200', 'L1_TE20_VTE200', 'L1_TE50_VTE200',
         'L1_J12_VTE200',
-        
+         #UPC, calo only, phase-1
+         'L1_jTE5_VjTE200',  'L1_jTE5_VjTE200_GAP_A', 'L1_jTE5_VjTE200_GAP_C',
+         'L1_VjTE200_GAP_A', 'L1_VjTE200_GAP_C',
+         'L1_jTE3_VjTE200_GAP_A', 'L1_jTE3_VjTE200_GAP_C',       
+
         
         #LUCID
         'L1_LUCID_A', 'L1_LUCID_C',

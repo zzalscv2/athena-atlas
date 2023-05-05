@@ -295,16 +295,14 @@ namespace InDet{
 
     double xvt = fitVertex.x();
     double yvt = fitVertex.y();
-    double Dist2DBP = std::hypot( xvt-m_beampipeX, yvt-m_beampipeY);
-    double Dist2DBL = std::hypot( xvt-m_xLayerB, yvt-m_yLayerB);
-    double Dist2DL1 = std::hypot( xvt-m_xLayer1, yvt-m_yLayer1);
-    double Dist2DL2 = std::hypot( xvt-m_xLayer2, yvt-m_yLayer2);
-    double minDstMat = 39.9;
-    minDstMat = TMath::Min(minDstMat,std::abs(Dist2DBP-m_beampipeR));
-    minDstMat = TMath::Min(minDstMat,std::abs(Dist2DBL-m_rLayerB));
-    minDstMat = TMath::Min(minDstMat,std::abs(Dist2DL1-m_rLayer1));
-    minDstMat = TMath::Min(minDstMat,std::abs(Dist2DL2-m_rLayer2));
-    if(m_existIBL) minDstMat = std::min(minDstMat,std::abs(Dist2DL2-m_rLayer3));  // 4-layer pixel detector
+    double R = std::hypot(xvt, yvt);
+    std::vector<double> distMat = {39.9, // Maximum distance
+				   std::abs(R-m_beampipeR),
+				   std::abs(R-m_rLayerB),
+				   std::abs(R-m_rLayer1),
+				   std::abs(R-m_rLayer2)};
+    if(m_existIBL) distMat.push_back(std::abs(R-m_rLayer3)); // 4-layer pixel detector
+    double minDstMat = *(std::min_element(distMat.begin(), distMat.end()));
 
     vrtVrtDist(primVrt, fitVertex, errorMatrix, Signif3D);
     if(jetVrtDir < 0) Signif3D = -Signif3D;
@@ -626,7 +624,7 @@ namespace InDet{
 	  h.m_curTup->pTvsJet[i] = TLV.Perp(jetDir.Vect());
 	  TLorentzVector normJ;
 	  normJ.SetPtEtaPhiM(1.,jetDir.Eta(),jetDir.Phi(),0.);
-	  h.m_curTup->prodTJ[i] = std::sqrt(TMath::Abs(TLV.Dot(normJ)));
+	  h.m_curTup->prodTJ[i] = std::sqrt(std::abs(TLV.Dot(normJ)));
 	  h.m_curTup->nVrtT[i] = 0;
 	}
       }
@@ -939,9 +937,9 @@ namespace InDet{
     double xvt = fitVertex.x();
     double yvt = fitVertex.y();
     double radiusError = vrtRadiusError(fitVertex, vrtErr);
-    double Dist2DBL = std::hypot(xvt-m_xLayerB, yvt-m_yLayerB);
+    double R = std::hypot(xvt, yvt);
 
-    if(Dist2DBL < m_rLayerB-radiusError) {
+    if(R < m_rLayerB-radiusError) {
       //----------------------------------------- Inside B-layer
       if(blTrk[0]==0 && blTrk[1]==0) return false;  // No b-layer hits at all, but all expected
       if(blTrk[0]<1  && l1Trk[0]<1 ) return false;
@@ -949,7 +947,7 @@ namespace InDet{
       if(nLays[0]<2)                 return false;  // Less than 2 layers on track 0
       if(nLays[1]<2)                 return false;  // Less than 2 layers on track 1
       return true;
-    } else if(Dist2DBL > m_rLayerB+radiusError){
+    } else if(R > m_rLayerB+radiusError){
       //----------------------------------------- Outside b-layer
       if(blTrk[0]>0 && blP[0]==0 && blTrk[1]>0 && blP[1]==0) return false;  // Good hit in b-layer is present
     }
@@ -958,21 +956,19 @@ namespace InDet{
     // L1 and L2 are considered only if vertex is in acceptance
     //
     if(std::abs(fitVertex.z())<400.){
-      double Dist2DL1 = std::hypot(xvt-m_xLayer1, yvt-m_yLayer1);
-      double Dist2DL2 = std::hypot(xvt-m_xLayer2, yvt-m_yLayer2);
 
-      if(Dist2DL1 < m_rLayer1-radiusError) {
+      if(R < m_rLayer1-radiusError) {
 	//------------------------------------------ Inside 1st-layer
 	if( l1Trk[0]==0 && l1Trk[1]==0 )     return false;  // No L1 hits at all
 	if( l1Trk[0]<1  && l2Trk[0]<1  )     return false;  // Less than 1 hits on track 0
 	if( l1Trk[1]<1  && l2Trk[1]<1  )     return false;  // Less than 1 hits on track 1
 	return true;
-      } else if(Dist2DL1 > m_rLayer1+radiusError) {
+      } else if(R > m_rLayer1+radiusError) {
 	//------------------------------------------- Outside 1st-layer
 	if( l1Trk[0]>0 && l1P[0]==0 && l1Trk[1]>0 && l1P[1]==0 )       return false;  //  Good L1 hit is present
       }
     
-      if(Dist2DL2 < m_rLayer2-radiusError) { 
+      if(R < m_rLayer2-radiusError) {
 	//------------------------------------------- Inside 2nd-layer
 	if( (l2Trk[0]+l2Trk[1])==0 ) return false;           // At least one L2 hit must be present
       }

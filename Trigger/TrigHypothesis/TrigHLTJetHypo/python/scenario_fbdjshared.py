@@ -1,18 +1,10 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TrigHLTJetHypo.RepeatedConditionParams import RepeatedConditionParams
 from TrigHLTJetHypo.FilterParams import FilterParams
 from TrigHLTJetHypo.HelperConfigToolParams import HelperConfigToolParams
 from TrigHLTJetHypo.ConditionDefaults import defaults
 from TrigHLTJetHypo.make_treevec import make_treevec
-
-from copy import deepcopy
-
-from AthenaCommon.Logging import logging
-from AthenaCommon.Constants import DEBUG
-
-logger = logging.getLogger( __name__)
-logger.setLevel(DEBUG)
 
 
 def scenario_fbdjshared(scenario, chainPartInd):
@@ -43,10 +35,10 @@ def scenario_fbdjshared(scenario, chainPartInd):
     
     # backward jet
     vals = defaults('et', lo='50')
-    condargs.append(('et', deepcopy(vals)))
+    condargs.append(('et', vals))
     
     vals = defaults('neta', lo='-500')
-    condargs.append(('neta', deepcopy(vals)))
+    condargs.append(('neta', vals))
 
     repcondargs.append(RepeatedConditionParams(tree_id = 1,
                                                tree_pid=0,
@@ -57,10 +49,10 @@ def scenario_fbdjshared(scenario, chainPartInd):
     condargs = []
 
     vals = defaults('et', lo='50')
-    condargs.append(('et', deepcopy(vals)))
+    condargs.append(('et', vals))
 
     vals = defaults('peta', hi='500')
-    condargs.append(('peta', deepcopy(vals)))
+    condargs.append(('peta', vals))
 
     repcondargs.append(RepeatedConditionParams(tree_id = 2,
                                                tree_pid=0,
@@ -90,10 +82,10 @@ def scenario_fbdjshared(scenario, chainPartInd):
     repcondargs = []
     condargs = []
     vals = defaults('djmass', lo='34')
-    condargs.append(('djmass', deepcopy(vals)))
+    condargs.append(('djmass', vals))
 
     vals = defaults('djdphi', lo='260')
-    condargs.append(('djdphi', deepcopy(vals)))
+    condargs.append(('djdphi', vals))
     
 
     repcondargs.append(RepeatedConditionParams(tree_id = 1,
@@ -106,10 +98,10 @@ def scenario_fbdjshared(scenario, chainPartInd):
     # Conditions for the dijet j1
     condargs = []
     vals = defaults('et', lo='10')
-    condargs.append(('et', deepcopy(vals)))
+    condargs.append(('et', vals))
 
     vals = defaults('eta', lo='0', hi='490')
-    condargs.append(('eta', deepcopy(vals)))
+    condargs.append(('eta', vals))
 
     repcondargs.append(RepeatedConditionParams(tree_id = 2,
                                                tree_pid=1,
@@ -120,10 +112,10 @@ def scenario_fbdjshared(scenario, chainPartInd):
     # Conditions for the dijet j2
     condargs = []
     vals = defaults('et', lo='20')
-    condargs.append(('et', deepcopy(vals)))
+    condargs.append(('et', vals))
 
     vals = defaults('eta', lo='0', hi='490')
-    condargs.append(('eta', deepcopy(vals)))
+    condargs.append(('eta', vals))
 
     repcondargs.append(RepeatedConditionParams(tree_id = 3,
                                                tree_pid=1,

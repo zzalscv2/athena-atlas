@@ -3,7 +3,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import BeamType
+from AthenaConfiguration.Enums import BeamType, MetadataCategory
 from AthenaCommon.SystemOfUnits import GeV
 
 
@@ -126,12 +126,12 @@ def TCAL1Cfg(ConfigFlags):
     TCAL1Prefix = 'TCAL1_'
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
     TCAL1TriggerListsHelper = TriggerListsHelper(ConfigFlags)
-    
+
     acc = ComponentAccumulator()
     acc.merge(TCAL1KernelCfg(ConfigFlags, name="TCAL1Kernel", StreamName="StreamDAOD_TCAL1", Prefix=TCAL1Prefix,  TriggerListsHelper=TCAL1TriggerListsHelper))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     TCAL1SlimmingHelper = SlimmingHelper("TCAL1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     TCAL1SlimmingHelper.SmartCollections = ['EventInfo', 'Muons', 'AntiKt4EMTopoJets', 'AntiKt4EMPFlowJets', 'MET_Baseline_AntiKt4EMTopo', 'MET_Baseline_AntiKt4EMPFlow', 'PrimaryVertices']
@@ -170,6 +170,6 @@ def TCAL1Cfg(ConfigFlags):
 
     TCAL1ItemList = TCAL1SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TCAL1", ItemList=TCAL1ItemList, AcceptAlgs=["TCAL1Kernel"]))
-    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_TCAL1", AcceptAlgs=["TCAL1Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_TCAL1", AcceptAlgs=["TCAL1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc

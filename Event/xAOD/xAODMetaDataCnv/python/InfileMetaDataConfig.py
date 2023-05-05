@@ -1,114 +1,228 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
+from dataclasses import dataclass, field
+
+from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import Format
+from AthenaConfiguration.Enums import Format, MetadataCategory
 from OutputStreamAthenaPool.OutputStreamConfig import addToMetaData
 
-def InfileMetaDataCfg(flags, streamName="", AcceptAlgs=[]):
-    """
-    The main configuration for setting up Metadata for the stream named streamName
 
-    Currently this is a single method that is used in all workflows
-    However, it would be more maintainable/preferable to split it into custom ones
-    For example, one for simulation/digitization/overlay, another for reco etc.
-    The additional argument, AcceptAlgs, is needed for workflows with custom kernels
+@dataclass
+class MetaDataHelperLists:
+    """
+    Helper class aggregating lists needed to setup metadata
+    for the output stream configuration and metadata service.
+    """
+
+    helperTools: list = field(default_factory=list)
+    mdTools: list = field(default_factory=list)
+    mdToolNames: list = field(default_factory=list)
+    mdItems: list = field(default_factory=list)
+
+    def __iadd__(self, helperLists):
+        self.helperTools += helperLists.helperTools
+        self.mdTools += helperLists.mdTools
+        self.mdToolNames += helperLists.mdToolNames
+        self.mdItems += helperLists.mdItems
+        return self
+
+
+def createCutFlowMetaData(flags):
+    tools = MetaDataHelperLists()
+    result = ComponentAccumulator()
+    from EventBookkeeperTools.EventBookkeeperToolsConfig import (
+        CutFlowOutputList,
+        CutFlowSvcCfg,
+    )
+
+    result.merge(CutFlowSvcCfg(flags))
+    tools.mdItems += CutFlowOutputList(flags)
+    return tools, result
+
+
+def createByteStreamMetaData(flags):
+    tools = MetaDataHelperLists()
+    result = ComponentAccumulator()
+    tools.mdItems += ["ByteStreamMetadataContainer#*"]
+    if flags.Input.Format == Format.BS and not flags.Common.isOnline:
+        from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+
+        result.merge(ByteStreamReadCfg(flags))
+    return tools, result
+
+
+def createLumiBlockMetaData(flags):
+    tools = MetaDataHelperLists()
+    result = ComponentAccumulator()
+    if flags.Input.Format == Format.BS and not flags.Common.isOnline:
+        from LumiBlockComps.CreateLumiBlockCollectionFromFileConfig import (
+            CreateLumiBlockCollectionFromFileCfg,
+        )
+
+        result.merge(CreateLumiBlockCollectionFromFileCfg(flags))
+        tools.mdItems += [
+            "xAOD::LumiBlockRangeContainer#*",
+            "xAOD::LumiBlockRangeAuxContainer#*",
+        ]
+    return tools, result
+
+
+def createTruthMetaData(flags):
+    tools = MetaDataHelperLists()
+    result = ComponentAccumulator()
+    tools.mdItems += [
+        "xAOD::TruthMetaDataContainer#TruthMetaData",
+        "xAOD::TruthMetaDataAuxContainer#TruthMetaDataAux.",
+    ]
+    tools.mdTools.append(CompFactory.xAODMaker.TruthMetaDataTool("TruthMetaDataTool"))
+    return tools, result
+
+
+def propagateMetaData(flags, streamName="", category=None, *args, **kwargs):
+    """
+    Returns the tuple of MetaDataHelperLists and ComponentAccumulator.
+    The former combines the lists needed to setup given metadata category
+    for the output stream configuration and metadata service.
+    The latter contains the CA needed for a given metadata category.
+    """
+    tools = MetaDataHelperLists()
+    result = ComponentAccumulator()
+    log = logging.getLogger("SetupMetaDataForStreamCfg")
+
+    if category == MetadataCategory.FileMetaData:
+        tools.mdToolNames.append("xAODMaker::FileMetaDataTool")
+        tools.mdItems += [
+            "xAOD::FileMetaData#FileMetaData",
+            "xAOD::FileMetaDataAuxInfo#FileMetaDataAux.",
+        ]
+        tools.helperTools.append(
+            CompFactory.xAODMaker.FileMetaDataCreatorTool(
+                f"Stream{streamName}_FileMetaDataCreatorTool",
+                OutputKey="FileMetaData",
+                StreamName=f"Stream{streamName}",
+            )
+        )
+    elif category == MetadataCategory.CutFlowMetaData:
+        if "CutBookkeepers" in flags.Input.MetadataItems:
+            from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowOutputList
+
+            tools.mdToolNames.append("BookkeeperTool")
+            tools.mdItems += CutFlowOutputList(flags)
+
+    elif category == MetadataCategory.TriggerMenuMetaData:
+        if any("TriggerMenu" in item for item in flags.Input.MetadataItems):
+            tools.mdTools.append(
+                CompFactory.xAODMaker.TriggerMenuMetaDataTool("TriggerMenuMetaDataTool")
+            )
+            tools.mdItems += [
+                "xAOD::TriggerMenuContainer#*",
+                "xAOD::TriggerMenuAuxContainer#*",
+                "xAOD::TriggerMenuJsonContainer#*",
+                "xAOD::TriggerMenuJsonAuxContainer#*",
+            ]
+
+    elif category == MetadataCategory.TruthMetaData:
+        if "TruthMetaData" in flags.Input.MetadataItems:
+            tools.mdItems += [
+                "xAOD::TruthMetaDataContainer#TruthMetaData",
+                "xAOD::TruthMetaDataAuxContainer#TruthMetaDataAux.",
+            ]
+            tools.mdTools.append(
+                CompFactory.xAODMaker.TruthMetaDataTool("TruthMetaDataTool")
+            )
+    elif category == MetadataCategory.ByteStreamMetaData:
+        if "ByteStreamMetadata" in flags.Input.MetadataItems:
+            tools.mdItems += ["ByteStreamMetadataContainer#*"]
+    elif category == MetadataCategory.LumiBlockMetaData:
+        if any(
+            lb in flags.Input.MetadataItems
+            for lb in ["SuspectLumiBlocks", "IncompleteLumiBlocks", "LumiBlocks"]
+        ):
+            tools.mdToolNames.append("LumiBlockMetaDataTool")
+            tools.mdItems += [
+                "xAOD::LumiBlockRangeContainer#*",
+                "xAOD::LumiBlockRangeAuxContainer#*",
+            ]
+
+    else:
+        log.warning(f"Requested metadata category: {category} could not be configured")
+    return tools, result
+
+
+def SetupMetaDataForStreamCfg(
+    flags,
+    streamName="",
+    AcceptAlgs=None,
+    createMetadata=None,
+    propagateMetadataFromInput=True,
+    *args,
+    **kwargs,
+):
+    """
+    Set up metadata for the stream named streamName
+
+    It takes optional arguments: createMetadata to specify a list of metadata
+    categories to create (empty by default) and propagateMetadataFromInput (bool)
+    to propagate metadata existing in the input (True by default).
+
+    The additional argument, AcceptAlgs, is needed for workflows with custom kernels.
 
     Returns CA to be merged
     """
-
-    # Bare CA
+    log = logging.getLogger("SetupMetaDataForStreamCfg")
     result = ComponentAccumulator()
     if not isinstance(streamName, str) or not streamName:
         return result
+    if not AcceptAlgs:
+        AcceptAlgs = []
+    if not createMetadata:
+        createMetadata = []
 
-    # Internal caches of tools
-    helperTools = []
-    mdTools = []
-    mdToolNames = []
+    helperLists = MetaDataHelperLists()
 
-    # FileMetaData items
-    MetadataItemList = ["xAOD::FileMetaData#FileMetaData"
-                       ,"xAOD::FileMetaDataAuxInfo#FileMetaDataAux."]
+    if propagateMetadataFromInput:
+        for mdCategory in MetadataCategory:
+            lists, caConfig = propagateMetaData(
+                flags,
+                streamName,
+                mdCategory,
+                *args,
+                **kwargs,
+            )
+            helperLists += lists
+            result.merge(caConfig)
 
-    # FileMetaDataCreatorTool and FileMetaDataTool work together
-    # Therefore, we want both of them configured
-    helperTools.append(
-        CompFactory.xAODMaker.FileMetaDataCreatorTool(
-            f"Stream{streamName}_FileMetaDataCreatorTool",
-            OutputKey="FileMetaData",
-            StreamName=f"Stream{streamName}",
-        )
-    )
-
-    if "FileMetaData" in flags.Input.MetadataItems:
-        mdToolNames.append("xAODMaker::FileMetaDataTool")
-
-    # Add MetaData that are relevant to downstream formats: ESD, AOD, and DAOD
-    if not flags.Output.doWriteHITS and not flags.Output.doWriteRDO:
-
-        # Trigger MetaData items
-        mdTools.append(CompFactory.xAODMaker.TriggerMenuMetaDataTool("TriggerMenuMetaDataTool"))
-        MetadataItemList += ["xAOD::TriggerMenuContainer#*"
-                            ,"xAOD::TriggerMenuAuxContainer#*"
-                            ,"xAOD::TriggerMenuJsonContainer#*"
-                            ,"xAOD::TriggerMenuJsonAuxContainer#*"]
-
-        # Collision data specific MetaData items
-        if not flags.Input.isMC:
-            MetadataItemList += ["ByteStreamMetadataContainer#*"
-                                ,"xAOD::LumiBlockRangeContainer#*"
-                                ,"xAOD::LumiBlockRangeAuxContainer#*"]
-        # MC specific MetaData items
-        else:
-            MetadataItemList += ["xAOD::TruthMetaDataContainer#TruthMetaData"
-                                ,"xAOD::TruthMetaDataAuxContainer#TruthMetaDataAux."]
-
-        # CutFlow related MetaData items
-        # Now, I think this needs the CutFlowSvc to be set up
-        # For the time being this is done in the relevant skeleton, e.g. Derivations
-        # These should be reconciled, i.e. move that here and configure via flags
-        if "CutBookkeepers" in flags.Input.MetadataItems or streamName not in ["ESD", "AOD"]:
-            from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowOutputList
-            MetadataItemList += CutFlowOutputList(flags)
-
-        # Data specific MetaData components
-        if not flags.Input.isMC:
-            # Here we're running RAWtoALL so we're in creation mode
-            if flags.Input.Format == Format.BS and not flags.Common.isOnline:
-                # Configure ByteStream related components
-                from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-                result.merge(ByteStreamReadCfg(flags))
-                # Configure LumiBlock Creation Algorithm
-                from LumiBlockComps.CreateLumiBlockCollectionFromFileConfig import CreateLumiBlockCollectionFromFileCfg
-                result.merge(CreateLumiBlockCollectionFromFileCfg(flags))
-            elif "LumiBlock" in flags.Input.MetadataItems:
-                # Propagate LumiBlock data if it exists in the input
-                # Do we always want this tool instead?
-                mdToolNames.append("LumiBlockMetaDataTool")
-        # MC specific MetaData components
-        else:
-            # Configure TruthMetaDataTool
-            mdTools.append(CompFactory.xAODMaker.TruthMetaDataTool("TruthMetaDataTool"))
-
-        # Propagate CutBookkeepers if it exists in the input
-        if "CutBookkeepers" in flags.Input.MetadataItems:
-           mdToolNames.append("BookkeeperTool")
+    for md in createMetadata:
+        try:
+            lists, caConfig = globals()[f"create{md.name}"](
+                flags,
+                *args,
+                **kwargs,
+            )
+        except KeyError:
+            log.warning(f"Requested metadata category: {md.name} could not be configured")
+            continue
+        helperLists += lists
+        result.merge(caConfig)
 
     # Configure the relevant output stream
     result.merge(
         addToMetaData(
-                      flags,
-                      streamName=streamName,
-                      itemOrList=MetadataItemList,
-                      AcceptAlgs=AcceptAlgs,
-                      HelperTools=helperTools,
-                     )
+            flags,
+            streamName=streamName,
+            itemOrList=helperLists.mdItems,
+            AcceptAlgs=AcceptAlgs,
+            HelperTools=helperLists.helperTools,
+        )
     )
-
     # Configure the MetaDataSvc and pass the relevant tools
     from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
-    result.merge(MetaDataSvcCfg(flags, tools = mdTools, toolNames = mdToolNames))
 
-    # Finally return the CA
+    result.merge(
+        MetaDataSvcCfg(
+            flags, tools=helperLists.mdTools, toolNames=helperLists.mdToolNames
+        )
+    )
     return result

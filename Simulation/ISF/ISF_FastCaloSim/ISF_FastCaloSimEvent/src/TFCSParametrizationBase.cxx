@@ -17,8 +17,6 @@
 //======= TFCSParametrizationBase =========
 //=============================================
 
-std::vector<TFCSParametrizationBase *> TFCSParametrizationBase::s_cleanup_list;
-
 TFCSParametrizationBase::TFCSParametrizationBase(const char *name,
                                                  const char *title)
     : TNamed(name, title) {}
@@ -88,22 +86,6 @@ void TFCSParametrizationBase::Print(Option_t *option) const {
   } else {
     ATH_MSG_INFO(optprint << GetTitle());
   }
-}
-
-void TFCSParametrizationBase::DoCleanup() {
-  std::scoped_lock lock(s_cleanup_mutex);
-  // Do cleanup only at the end of read/write operations
-  for (auto *ptr : s_cleanup_list)
-    if (ptr) {
-      delete ptr;
-    }
-  s_cleanup_list.resize(0);
-}
-
-void TFCSParametrizationBase::AddToCleanup(
-    const std::vector<TFCSParametrizationBase *> &garbage) {
-  std::scoped_lock lock(s_cleanup_mutex);
-  s_cleanup_list.insert(s_cleanup_list.end(), garbage.begin(), garbage.end());
 }
 
 void TFCSParametrizationBase::FindDuplicates(

@@ -14,6 +14,8 @@
 #include "AthenaKernel/BaseInfo.h" 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
+#include "MuonReadoutGeometry/MuonDetectorManager.h"
+
 
 class NswDcsDbData {  
 
@@ -49,7 +51,7 @@ public:
        DcsFsmState fsmState{DcsFsmState::NONE};
     };
     
-    NswDcsDbData(const MmIdHelper& mmHelper, const sTgcIdHelper& stgcHelper);
+    NswDcsDbData(const MmIdHelper& mmHelper, const sTgcIdHelper& stgcHelper, const MuonGM::MuonDetectorManager* muonGeoMgr);
     virtual ~NswDcsDbData() = default;
 
     // setting functions
@@ -65,6 +67,7 @@ public:
     /// Returns whether the channel is alive, i.e. DCS state on, etc...
     bool isGood(const Identifier& channelId, bool issTgcQ1OuterHv = false) const;
     bool isGoodHv(const Identifier& channelId, bool issTgcQ1OuterHv = false) const;
+    bool isConnectedChannel(const Identifier& channelId) const;
 
     
     // helper functions
@@ -88,6 +91,8 @@ private:
     // ID helpers
     const MmIdHelper&   m_mmIdHelper;
     const sTgcIdHelper& m_stgcIdHelper;
+
+    const MuonGM::MuonDetectorManager* m_muonGeoMgr{nullptr}; 
 
 };
 

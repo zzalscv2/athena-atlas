@@ -300,4 +300,4 @@ if __name__=="__main__":
     except ModuleNotFoundError:
         #  The McEventSelector package required by MainEvgenServicesCfg is not part of the AthAnalysis project
         cfg = MainServicesCfg(flags)
-    cfg._wasMerged = True   # to avoid errror that CA was not merged
+    cfg.wasMerged()   # to avoid errror that CA was not merged

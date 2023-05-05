@@ -535,15 +535,13 @@ class ComponentAccumulator:
 
         return algo
 
+    def getCondAlgos(self):
+        """Get all conditions algorithms"""
+        return self._conditionsAlgs
 
     def getCondAlgo(self, name):
-        """Get Conditions algorithm"""
-        hits = [a for a in self._conditionsAlgs if a.name==name]
-        if len(hits)!=1:
-            raise ConfigurationError(f"{len(hits)} conditions algorithms with name {name} found")
-
-        return hits[0]
-
+        """Get conditions algorithm by name"""
+        return self.__getOne( self._conditionsAlgs, name, "conditions algorithms")
 
     def addService(self, newSvc, primary=False, create=False):
         """Add service"""

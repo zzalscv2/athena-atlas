@@ -69,7 +69,7 @@ class jFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
         // Read handle keys for the L1Calo EDMs for xAOD->BS mode of operation
         SG::ReadHandleKey < xAOD::jFexTowerContainer> m_jTowersReadKey    {this,"jTowersReadKey"   ,"L1_jFexDataTowers","Read jFexEDM Trigger Tower container"};
 
-        std::array<uint32_t,3> jFEXtoRODTrailer  (uint32_t, uint32_t) const;
+        std::array<uint32_t,4> jFEXtoRODTrailer  (uint32_t, uint32_t) const;
         std::array<uint16_t,2> BulkStreamTrailer (uint32_t, uint32_t) const;
         std::array<uint16_t,3> Dataformat1 (uint32_t ) const;
         std::array<uint16_t,4> Dataformat2 (uint32_t ) const;

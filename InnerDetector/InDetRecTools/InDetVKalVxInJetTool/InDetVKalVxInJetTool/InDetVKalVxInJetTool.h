@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///
@@ -172,14 +172,6 @@ namespace InDet {
         TProfile * m_pr_effVrtEta{};
       };
       std::unique_ptr<Hists> m_h;
-      
-      long int m_iflag{};
-
-      SimpleProperty<int>    m_Robustness;
-      SimpleProperty<double> m_MassForConstraint;
-      std::vector<double>    m_MassInputParticles;
-
-
 
       long int m_cutSctHits{};
       long int m_cutPixelHits{};
@@ -207,14 +199,6 @@ namespace InDet {
 
       long int m_RobustFit{};
 
-      double m_beampipeX{};
-      double m_beampipeY{};
-      double m_xLayerB{};
-      double m_yLayerB{};
-      double m_xLayer1{};
-      double m_yLayer1{};
-      double m_xLayer2{};
-      double m_yLayer2{};
       double m_beampipeR{};
       double m_rLayerB{};
       double m_rLayer1{};
@@ -251,12 +235,13 @@ namespace InDet {
       const InDetDD::PixelDetectorManager* m_pixelManager;
       std::unique_ptr<TH2D> m_ITkPixMaterialMap;
 
-      double m_massPi {};
-      double m_massP {};
-      double m_massE{};
-      double m_massK0{};
-      double m_massLam{};
-      double m_massB{};
+      const double m_massPi  = 139.5702 ;
+      const double m_massP   = 938.272  ;
+      const double m_massE   =   0.511  ;
+      const double m_massK0  = 497.648  ;
+      const double m_massLam =1115.683  ;
+      const double m_massB   =5279.400  ;
+
       std::string m_instanceName;
 
 //-------------------------------------------
@@ -596,32 +581,28 @@ namespace InDet {
         double radiusError=vrtRadiusError(FitVertex, VrtCov);
         double xvt=FitVertex.x();
         double yvt=FitVertex.y();
-        double Dist2DBL=std::hypot( xvt-m_xLayerB, yvt-m_yLayerB);
-        if      (Dist2DBL < m_rLayerB-radiusError){       //----------------------------------------- Inside B-layer
-          if( blTrk<1  && l1Trk<1  )  return false;
+        double R=std::hypot(xvt, yvt);
+        if(R < m_rLayerB-radiusError){           // Inside B-layer
+          if( blTrk<1  && l1Trk<1 )  return false;
           if(  nLays           <2 )   return false;  // Less than 2 layers on track 0
           return true;
-        }else if(Dist2DBL > m_rLayerB+radiusError){      //----------------------------------------- Outside b-layer
+        }else if(R > m_rLayerB+radiusError){     // Outside b-layer
           if( blTrk>0 && blP==0 ) return false;  // Good hit in b-layer is present
        }
 // 
 // L1 and L2 are considered only if vertex is in acceptance
 //
-        if(fabs(FitVertex.z())<400.){
-          double Dist2DL1=std::hypot( xvt-m_xLayer1, yvt-m_yLayer1);
-          double Dist2DL2=std::hypot( xvt-m_xLayer2, yvt-m_yLayer2);
-          if      (Dist2DL1 < m_rLayer1-radiusError) {   //------------------------------------------ Inside 1st-layer
-             if( l1Trk<1  && l2Trk<1  )     return false;  // Less than 1 hits on track 0
+        if(std::abs(FitVertex.z())<400.){
+          if(R < m_rLayer1-radiusError) {        // Inside 1st-layer
+             if( l1Trk<1  && l2Trk<1 )     return false;  // Less than 1 hits on track 0
              return true;
-          }else if(Dist2DL1 > m_rLayer1+radiusError) {  //------------------------------------------- Outside 1st-layer
+          }else if(R > m_rLayer1+radiusError) {  // Outside 1st-layer
              if( l1Trk>0 && l1P==0 )       return false;  //  Good L1 hit is present
           }
           
-          if      (Dist2DL2 < m_rLayer2-radiusError) {  //------------------------------------------- Inside 2nd-layer
+          if(R < m_rLayer2-radiusError) {        // Inside 2nd-layer
              if( l2Trk==0 )  return false;           // At least one L2 hit must be present
-          }else if(Dist2DL2 > m_rLayer2+radiusError) {  
-          //   if( l2Trk>0  )  return false;           // L2 hits are present
-          }           
+          }
         } else {
           int d0Trk=0, d1Trk=0, d2Trk=0; 
           getPixelDiscs( p1, d0Trk , d1Trk, d2Trk );

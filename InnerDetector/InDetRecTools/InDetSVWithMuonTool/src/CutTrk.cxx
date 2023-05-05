@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -11,16 +11,16 @@
 namespace InDet{
 
   StatusCode InDetSVWithMuonTool::CutTrk(double PInvVert,double ThetaVert, 
-         double A0Vert, double ZVert, double Chi2, 
-         long int PixelHits,long int SctHits,long int SharedHits, long int BLayHits)
+					 double A0Vert, double ZVert, double Chi2,
+					 long int PixelHits,long int SctHits,long int SharedHits, long int BLayHits)
   const
   {
-     double Pt = sin(ThetaVert)/fabs(PInvVert);
+     double Pt = sin(ThetaVert)/std::abs(PInvVert);
 //- Track quality
-     if(Pt               < m_CutPt) 			return StatusCode::FAILURE;
-     if(fabs(ZVert)      > m_CutZVrt/sin(ThetaVert))	return StatusCode::FAILURE;
-     if(Chi2 	         > m_CutChi2) 			return StatusCode::FAILURE;
-     if(fabs(A0Vert)     > m_CutA0) 			return StatusCode::FAILURE;
+     if(Pt                  < m_CutPt) 			return StatusCode::FAILURE;
+     if(std::abs(ZVert)*sin(ThetaVert) > m_CutZVrt)	return StatusCode::FAILURE;
+     if(Chi2 	            > m_CutChi2) 		return StatusCode::FAILURE;
+     if(std::abs(A0Vert)    > m_CutA0) 			return StatusCode::FAILURE;
 
 
      if(PixelHits	    < m_CutPixelHits) 		return StatusCode::FAILURE;
@@ -70,9 +70,11 @@ namespace InDet{
 	  if( ConeDist(VectPerig,Muon->p4()) > m_ConeForTag )   continue;
 	  if( ConeDist(VectPerig,Muon->p4()) < 0.005 )          continue;  //muon itself. To protect code.
 
-          double trkP=1./fabs(VectPerig[4]);         
-          if(trkP>10000.){  double trkPErr=sqrt(CovTrkMtx55)*trkP;
-                            if(trkPErr>0.5) continue;   }
+          double trkP=1./std::abs(VectPerig[4]);
+          if(trkP>10000.){
+            double trkPErr=std::sqrt(CovTrkMtx55)*trkP;
+            if(trkPErr>0.5) continue;
+          }
 
           uint8_t PixelHits,SctHits,BLayHits;
           if( !((*i_ntrk)->summaryValue(PixelHits,xAOD::numberOfPixelHits)) )   continue; // Track is 
@@ -93,12 +95,13 @@ namespace InDet{
           double ImpactZ=VectPerig[1]-PrimVrt.position().z();   // Temporary
 	  ImpactA0=Impact[0];  
 	  ImpactZ=Impact[1];   
-          if(fabs((*i_ntrk)->eta())>2.  ) {
-            if( PixelHits<=3 && ( splSCTHits || outSCTHits || outPixHits || splPixHits ))continue;
+          if(std::abs((*i_ntrk)->eta())>2.) {
+            if(PixelHits<=3 &&
+	       (splSCTHits || outSCTHits || outPixHits || splPixHits)) continue;
             if(m_existIBL){PixelHits -=1; SctHits   -=1;}             // 4-layer pixel detector
             else          {PixelHits -=1;}                            // 3-layer pixel detector
           }
-          if(fabs((*i_ntrk)->eta())>1.65)  SctHits   -=1;
+          if(std::abs((*i_ntrk)->eta())>1.65)  SctHits   -=1;
 //----
           StatusCode sc = CutTrk( VectPerig[4] , VectPerig[3],
                           ImpactA0 , ImpactZ, trkChi2,

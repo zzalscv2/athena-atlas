@@ -6,6 +6,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 
 BPHYDerivationName = "BPHY2"
 streamName = "StreamDAOD_BPHY2"
@@ -173,7 +174,7 @@ def BPHY2Cfg(ConfigFlags):
     for t in  augCollection + thiningCollection : acc.addPublicTool(t)
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     BPHY2SlimmingHelper = SlimmingHelper("BPHY2SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
     AllVariables  = getDefaultAllVariables()
@@ -219,7 +220,7 @@ def BPHY2Cfg(ConfigFlags):
     BPHY2SlimmingHelper.SmartCollections = SmartVar
     BPHY2ItemList = BPHY2SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY2", ItemList=BPHY2ItemList, AcceptAlgs=["BPHY2Kernel"]))
-    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_BPHY2", AcceptAlgs=["BPHY2Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_BPHY2", AcceptAlgs=["BPHY2Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
     acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
     return acc
 

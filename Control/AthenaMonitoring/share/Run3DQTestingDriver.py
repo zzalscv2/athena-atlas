@@ -120,13 +120,17 @@ if __name__=='__main__':
 
     # Force loading of conditions in MT mode
     if flags.Concurrency.NumThreads > 0:
-        if len([_ for _ in cfg._conditionsAlgs if _.name=="PixelDetectorElementCondAlg"]) > 0:
-            beginseq = cfg.getSequence("AthBeginSeq")
-            beginseq.Members.append(CompFactory.ForceIDConditionsAlg("ForceIDConditionsAlg"))
-        if len([_ for _ in cfg._conditionsAlgs if _.name=="MuonAlignmentCondAlg"]) > 0:
-            beginseq = cfg.getSequence("AthBeginSeq")
-            beginseq.Members.append(CompFactory.ForceMSConditionsAlg("ForceMSConditionsAlg"))
-    
+        from AthenaConfiguration.ComponentAccumulator import ConfigurationError
+        for condalg, alg in (("PixelDetectorElementCondAlg", "ForceIDConditionsAlg"),
+                             ("MuonAlignmentCondAlg", "ForceMSConditionsAlg")):
+            try:
+                cfg.getCondAlgo(condalg)
+            except ConfigurationError:
+                pass  # do nothing if the CondAlg is not present
+            else:
+                beginseq = cfg.getSequence("AthBeginSeq")
+                beginseq.Members.append(CompFactory.getComp(alg)())
+
     # any last things to do?
     if args.postExec:
         log.info('Executing postExec: %s', args.postExec)
