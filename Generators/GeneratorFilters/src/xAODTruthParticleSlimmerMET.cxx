@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/errorcheck.h"
@@ -20,9 +20,11 @@
 
 #include "GeneratorFilters/xAODTruthParticleSlimmerMET.h"
 
+#include "MCTruthClassifier/IMCTruthClassifier.h"
 
 xAODTruthParticleSlimmerMET::xAODTruthParticleSlimmerMET(const std::string &name, ISvcLocator *svcLoc)
     : AthAlgorithm(name, svcLoc)
+    , m_classif("MCTruthClassifier/DFCommonTruthClassifier")
 {
     declareProperty("xAODTruthParticleContainerName", m_xaodTruthParticleContainerName = "TruthParticles");
     declareProperty("xAODTruthParticleContainerNameMET", m_xaodTruthParticleContainerNameMET = "TruthMET");
@@ -33,6 +35,9 @@ StatusCode xAODTruthParticleSlimmerMET::initialize()
 {
     ATH_MSG_INFO("xAOD input TruthParticleContainer name = " << m_xaodTruthParticleContainerName);
     ATH_MSG_INFO("xAOD output TruthParticleContainerMET name = " << m_xaodTruthParticleContainerNameMET);
+
+    ATH_CHECK(m_classif.retrieve());
+
     return StatusCode::SUCCESS;
 }
 
@@ -69,8 +74,7 @@ StatusCode xAODTruthParticleSlimmerMET::execute()
     }
 
     // Set up decorators if needed
-    const static SG::AuxElement::Decorator<bool> isFromWZDecorator("isFromWZ");
-    const static SG::AuxElement::Decorator<bool> isFromTauDecorator("isFromTau");
+    const static SG::AuxElement::Decorator<bool> isPrompt("isPrompt");
 
     // Loop over full TruthParticle container
     xAOD::TruthEventContainer::const_iterator itr;
@@ -102,64 +106,43 @@ StatusCode xAODTruthParticleSlimmerMET::execute()
           xTruthParticle->setE(theParticle->e());
 
           //Decorate
-          isFromWZDecorator(*xTruthParticle) = fromWZ(theParticle);
-          isFromTauDecorator(*xTruthParticle) = fromTau(theParticle);
-        
+          isPrompt(*xTruthParticle) = prompt(theParticle);
         }
     }
 
     return StatusCode::SUCCESS;
 }
 
-bool xAODTruthParticleSlimmerMET::fromWZ( const xAOD::TruthParticle* part ) const
+bool xAODTruthParticleSlimmerMET::prompt( const xAOD::TruthParticle* part ) const
 {
-  // !!! IMPORTANT !!! This is a TEMPORARY function
-  //  it's used in place of code in MCTruthClassifier as long as this package is not dual-use
-  //  when MCTruthClassifier is made dual-use, this function should be discarded.
-  // see ATLJETMET-26
-  //
-  // Loop through parents
-  // Hit a hadron -> return false
-  // Hit a parton -> return true
-  //   This catch is important - we *cannot* look explicitly for the W or Z, because some
-  //    generators do not include the W or Z in the truth record (like Sherpa)
-  //   This code, like the code before it, really assumes one incoming particle per vertex...
-  if (!part->hasProdVtx()) return false;
 
-  unsigned int nIncomingParticles = part->prodVtx()->nIncomingParticles();
-  for (unsigned int iPart = 0; iPart<nIncomingParticles; iPart++)
-  {
-    const xAOD::TruthParticle* incoming_particle = part->prodVtx()->incomingParticle(iPart); 
-    int parent_pdgid = incoming_particle->pdgId();
-    if (MC::PID::isW(parent_pdgid) || MC::PID::isZ(parent_pdgid)) return true;
-    if (MC::PID::isHadron( parent_pdgid ) ) return false;
-    if ( std::abs( parent_pdgid ) < 9 ) return true;
-    if ( parent_pdgid == part->pdgId() ) return fromWZ( incoming_particle );
+    MCTruthPartClassifier::ParticleOrigin orig = m_classif->particleTruthClassifier( part ).second;
+    ATH_MSG_DEBUG("Particle has origin " << orig);
+      
+    switch(orig) {
+    case MCTruthPartClassifier::NonDefined:
+    case MCTruthPartClassifier::PhotonConv:
+    case MCTruthPartClassifier::DalitzDec:
+    case MCTruthPartClassifier::ElMagProc:
+    case MCTruthPartClassifier::Mu:
+    case MCTruthPartClassifier::LightMeson:
+    case MCTruthPartClassifier::StrangeMeson:
+    case MCTruthPartClassifier::CharmedMeson:
+    case MCTruthPartClassifier::BottomMeson:
+    case MCTruthPartClassifier::CCbarMeson:
+    case MCTruthPartClassifier::JPsi:
+    case MCTruthPartClassifier::BBbarMeson:
+    case MCTruthPartClassifier::LightBaryon:
+    case MCTruthPartClassifier::StrangeBaryon:
+    case MCTruthPartClassifier::CharmedBaryon:
+    case MCTruthPartClassifier::BottomBaryon:
+    case MCTruthPartClassifier::PionDecay:
+    case MCTruthPartClassifier::KaonDecay: 
+      return false;
+    default:
+      break;
+    }
+    
+    return true;
   }
-  return false;
-}
 
-bool xAODTruthParticleSlimmerMET::fromTau( const xAOD::TruthParticle* part ) const
-{
-  // !!! IMPORTANT !!! This is a TEMPORARY function
-  //  it's used in place of code in MCTruthClassifier as long as this package is not dual-use
-  //  when MCTruthClassifier is made dual-use, this function should be discarded.
-  // see ATLJETMET-26
-  //
-  // Loop through parents
-  // Find a tau -> return true
-  // Find a hadron or parton -> return false
-  //   This code, like the code before it, really assumes one incoming particle per vertex...
-  if (!part->hasProdVtx()) return false;
-
-  unsigned int nIncomingParticles = part->prodVtx()->nIncomingParticles();
-  for (unsigned int iPart = 0; iPart<nIncomingParticles; iPart++)
-  {
-    const xAOD::TruthParticle* incoming_particle = part->prodVtx()->incomingParticle(iPart); 
-    int parent_pdgid = incoming_particle->pdgId();
-    if ( std::abs( parent_pdgid ) == 15  && fromWZ(incoming_particle)) return true;
-    if (MC::PID::isHadron( parent_pdgid ) || std::abs( parent_pdgid ) < 9 ) return false;
-    if ( parent_pdgid == incoming_particle->pdgId() ) return fromTau( incoming_particle );
-  }
-  return false;
-}

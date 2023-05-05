@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORFILTERS_XAODTRUTHPARTICLESLIMMERPHOMET_H
@@ -10,6 +10,7 @@
 #include "xAODTruth/TruthEvent.h"
 #include "xAODTruth/TruthEventContainer.h"
 #include "xAODTruth/TruthMetaDataContainer.h"
+#include "MCTruthClassifier/IMCTruthClassifier.h"
 
 /// @brief Algorithm to skim the xAOD truth particle container for xAOD MET filter
 ///
@@ -37,9 +38,9 @@ private:
     /// Selection values for keeping METs
     //double m_MET_pt_selection; //in GeV
 
-    bool fromTau( const xAOD::TruthParticle* tp ) const;
-    bool fromWZ( const xAOD::TruthParticle* tp ) const;
+    bool prompt( const xAOD::TruthParticle* tp ) const;
 
+    ToolHandle<IMCTruthClassifier> m_classif;
 }; // class xAODTruthParticleSlimmerMET
 
 #endif //GENERATORFILTERS_XAODTRUTHPARTICLESLIMMERPHOMET_H

@@ -1,5 +1,6 @@
 #include "EvgenProdTools/CopyEventWeight.h"
 #include "EvgenProdTools/CountHepMC.h"
+#include "EvgenProdTools/FillFilterValues.h" 
 #include "EvgenProdTools/FixHepMC.h"
 #include "EvgenProdTools/TestHepMC.h"
 #include "EvgenProdTools/EvgenOTFTopUpSvc.h"
@@ -7,6 +8,7 @@
 
 DECLARE_COMPONENT( CopyEventWeight )
 DECLARE_COMPONENT( CountHepMC )
+DECLARE_COMPONENT( FillFilterValues )
 DECLARE_COMPONENT( FixHepMC )
 DECLARE_COMPONENT( TestHepMC )
 DECLARE_COMPONENT( EvgenOTFTopUpSvc )
