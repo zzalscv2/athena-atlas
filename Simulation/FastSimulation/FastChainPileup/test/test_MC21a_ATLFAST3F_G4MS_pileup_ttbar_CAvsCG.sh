@@ -157,13 +157,17 @@ ntup=-9999
 if [ ${cg} -eq 0 ]
 then
     # Reconstruction
-    Reco_tf.py --inputRDOFile run_cg/${RDO_File} \
+    Reco_tf.py \
+               --CA "all:True" "RDOtoRDOTrigger:False" \
+               --inputRDOFile run_cg/${RDO_File} \
                --outputAODFile ${AOD_File} \
                --steering 'doRDO_TRIG' 'doTRIGtoALL' \
                --maxEvents '-1' \
                --autoConfiguration=everything \
+               --geometryVersion default:ATLAS-R3S-2021-03-00-00 \
+               --conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
                --athenaopts "all:--threads=1" \
-               --postExec 'RDOtoRDOTrigger:from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("RDOtoRDOTrigger_config.txt")' 'RAWtoALL:from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("RAWtoALL_config.txt")' \
+               --postExec 'RAWtoALL:from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("RAWtoALL_config.txt")' \
                --imf False
 
      rec=$?
@@ -173,6 +177,8 @@ then
          Reco_tf.py --inputAODFile ${AOD_File} \
                     --outputNTUP_PHYSVALFile ${NTUP_File} \
                     --maxEvents '-1' \
+                    --geometryVersion default:ATLAS-R3S-2021-03-00-00 \
+                    --conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
                     --ignoreErrors True \
                     --validationFlags 'doInDet' \
                     --valid 'True'

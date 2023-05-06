@@ -119,7 +119,7 @@ class OverlayTest(WorkflowTest):
         self.command = \
             (f"Overlay_tf.py --AMIConfig {ID}"
              f" --inputHITSFile {input_HITS_MC_overlay[run]} --inputRDO_BKGFile {input_RDO_BKG[run]} --outputRDOFile myRDO.pool.root"
-             f" --imf False --athenaopts=\"--pmon=sdmonfp\" {extra_args}")
+             f" --imf False {extra_args}")
 
         # skip performance checks for now due to CA
         self.skip_performance_checks = True
@@ -144,7 +144,7 @@ class DataOverlayTest(WorkflowTest):
             (f"Overlay_tf.py --AMIConfig {ID}"
              f" --inputHITSFile {input_HITS_data_overlay[run]} --inputBS_SKIMFile {input_BS_SKIM[run]} --outputRDOFile myRDO.pool.root"
              " --triggerConfig 'Overlay=NONE'"  # disable trigger for now
-             f" --imf False --athenaopts=\"--pmon=sdmonfp\" {extra_args}")
+             f" --imf False {extra_args}")
 
         self.output_checks = [
             FrozenTier0PolicyCheck(setup, "RDO", 10)
@@ -166,7 +166,7 @@ class PileUpTest(WorkflowTest):
             (f"Digi_tf.py --AMIConfig {ID} --jobNumber 1 --digiSeedOffset1 1 --digiSeedOffset2 1"
              f" --inputHITSFile {input_HITS_neutrino[run]} --inputHighPtMinbiasHitsFile {input_HITS_minbias_high[run]} --inputLowPtMinbiasHitsFile {input_HITS_minbias_low[run]} --outputRDOFile myRDO.pool.root"
              " --postExec 'FPEAuditor.NStacktracesOnFPE=500'"
-             f" --imf False --athenaopts=\"--pmon=sdmonfp\" {extra_args}")
+             f" --imf False {extra_args}")
 
         self.output_checks = [
             FrozenTier0PolicyCheck(setup, "RDO", 5)

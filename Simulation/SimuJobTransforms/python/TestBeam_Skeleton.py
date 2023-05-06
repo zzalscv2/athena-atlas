@@ -96,6 +96,9 @@ def fromRunArgs(runArgs):
     # Common simulation runtime arguments
     from SimulationConfig.TestBeamConfigFlags import testBeamRunArgsToFlags
     testBeamRunArgsToFlags(runArgs, flags)
+    
+    # To respect --athenaopts 
+    flags.fillFromArgs()
 
     # Lock flags
     flags.lock()
