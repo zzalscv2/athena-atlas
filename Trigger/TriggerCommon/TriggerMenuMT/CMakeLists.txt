@@ -19,14 +19,16 @@ atlas_install_scripts( scripts/generateL1MenuRun3.py
                        scripts/runTriggerAPIExample.py
                        scripts/generateUnprescaledLists.py
                        scripts/test_menu_dump.py
-		       scripts/test_menu_CA.py
+		                 scripts/test_menu_CA.py
+                       python/HLT/Config/Utility/DictFromChainName.py
                        POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Shell scripts without flake8 checking:
 atlas_install_scripts( scripts/test_HLTmenu.sh
                        scripts/test_manual_menu_cf.sh
                        scripts/test_emu_step_menu_processing_cf.sh
-                       scripts/test_emu_step_processing_cf.sh )
+                       scripts/test_emu_step_processing_cf.sh
+                     )
 
 atlas_install_joboptions( share/*.py
                           POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-ignore=F821 )
