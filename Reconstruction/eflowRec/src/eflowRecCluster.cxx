@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -37,28 +37,15 @@ eflowRecCluster::eflowRecCluster(const ElementLink<xAOD::CaloClusterContainer>& 
   setClusterType();
 }
 
-eflowRecCluster::eflowRecCluster(const eflowRecCluster& originalEflowRecCluster) {
-  m_clusterId = originalEflowRecCluster.m_clusterId;
-  m_cluster = originalEflowRecCluster.m_cluster;
-  m_clusElementLink = originalEflowRecCluster.m_clusElementLink;
-  m_originalClusElementLink = originalEflowRecCluster.m_originalClusElementLink;
-  m_isTouchable = originalEflowRecCluster.m_isTouchable;
-  m_matchCluster = std::make_unique<eflowMatchCluster>(this);
-  m_calorimeterType = originalEflowRecCluster.m_calorimeterType;
-}
-
-eflowRecCluster& eflowRecCluster::operator=(const eflowRecCluster& originalEflowRecCluster) {
-  if (this == &originalEflowRecCluster) return *this;
-  //if not assigning to self, then we copy the data to the new object
-  else{
-    m_cluster = originalEflowRecCluster.m_cluster;
-    m_clusElementLink = originalEflowRecCluster.m_clusElementLink;
-    m_originalClusElementLink = originalEflowRecCluster.m_originalClusElementLink;
-    m_isTouchable = originalEflowRecCluster.m_isTouchable;
-    m_matchCluster = std::make_unique<eflowMatchCluster>(this);
-    m_calorimeterType = originalEflowRecCluster.m_calorimeterType;
-    return *this;
-  }//if not assigning to self, then we have copied the data to the new object
+eflowRecCluster::eflowRecCluster(const eflowRecCluster& originalEflowRecCluster)
+  : m_clusterId (originalEflowRecCluster.m_clusterId),
+    m_calorimeterType (originalEflowRecCluster.m_calorimeterType),
+    m_cluster (originalEflowRecCluster.m_cluster),
+    m_originalClusElementLink (originalEflowRecCluster.m_originalClusElementLink),
+    m_clusElementLink (originalEflowRecCluster.m_clusElementLink),
+    m_isTouchable (originalEflowRecCluster.m_isTouchable),
+    m_matchCluster (std::make_unique<eflowMatchCluster>(this))
+{
 }
 
 eflowRecCluster::~eflowRecCluster() = default;

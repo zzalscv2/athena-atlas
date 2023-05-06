@@ -80,12 +80,11 @@ const TrigCompositeUtils::LinkInfo<DataVector<T> > MuonMatchingTool :: matchLink
   double offlEta = offl->eta();
   double offlPhi = offl->phi();
 
-  std::vector< TrigCompositeUtils::LinkInfo<CONTAINER> > featureCont = m_trigDec->features<CONTAINER>( trig, TrigDefs::includeFailedDecisions, containerSGKey );
+  std::vector< TrigCompositeUtils::LinkInfo<CONTAINER> > featureCont = m_trigDec->features<CONTAINER>( trig, TrigDefs::Physics, containerSGKey );
   TrigCompositeUtils::LinkInfo<CONTAINER> muonLinkInfo;
   for(const TrigCompositeUtils::LinkInfo<CONTAINER>& featureLinkInfo : featureCont){
     if ( !featureLinkInfo.isValid() ) continue;
     const ElementLink<CONTAINER> link = featureLinkInfo.link;
-
     const auto [status, trigEta, trigPhi] = trigPosForMatchFunc(*link);
     if(!status) continue;
     double deta = offlEta - trigEta;
