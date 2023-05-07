@@ -10,6 +10,7 @@
 
 Reco_tf.py \
 --AMI=q444 \
+--conditionsTag 'all:OFLCOND-MC16-SDR-RUN2-11' \
 --multithreaded \
 --steering doOverlay doRDO_TRIG \
 --maxEvents=500 \
