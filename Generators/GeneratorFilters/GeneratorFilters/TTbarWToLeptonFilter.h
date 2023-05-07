@@ -9,7 +9,7 @@
 
 /// Require the event to contain at least one charged lepton (from W decay, which should come from top) with pt at or above Ptcut.
 ///
-/// Events that do not contain t AND t CLHEP::bar quarks are rejected.
+/// Events that do not contain t AND t bar quarks are rejected.
 /// Only tops decaying to W X are analyzed and counted in this algorithm.
 /// @author Gia Khoriauli, June 2008
 /// @author Andy Buckley, extension to specific lepton multiplicities, April 2012

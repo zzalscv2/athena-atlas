@@ -1,3 +1,4 @@
+#! /bin/env python
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """
@@ -14,6 +15,7 @@ from TriggerMenuMT.HLT.Menu.EventBuildingInfo import isRoIBasedPEB
 from TrigConfHLTUtils.HLTUtils import string2hash
 from AthenaCommon.Logging import logging
 import re
+from copy import deepcopy
 
 import collections.abc
 
@@ -161,11 +163,9 @@ def verifyExplicitL1Thresholds(chainname,chainparts,L1thresholds):
             counter += 1
     assert counter>0, f"Did not find explicit L1 seeds in chain parts for {chainname}!"
 
-from ...Menu.SignatureDicts import getSignatureInformation, JetRecoKeys
-from ...Jet.JetRecoCommon import etaRangeAbbrev
-from copy import deepcopy
-
 def unifyJetRecoParts(chainParts):
+    from TriggerMenuMT.HLT.Menu.SignatureDicts import getSignatureInformation, JetRecoKeys
+
     """
     Postprocess the jet chainParts to set all the reco config consistently
     For formatting reasons, we extract these from the last jet chainPart
@@ -210,6 +210,8 @@ def analyseChainName(chainName, L1thresholds, L1item):
 
     # ---- dictionary with all chain properties ----
     from TriggerMenuMT.HLT.Menu.SignatureDicts import ChainDictTemplate
+    from TriggerMenuMT.HLT.Menu.SignatureDicts import getSignatureInformation
+    from TriggerMenuMT.HLT.Jet.JetRecoCommon import etaRangeAbbrev
     genchainDict = deepcopy(ChainDictTemplate)
     genchainDict['chainName'] = chainName
 
@@ -748,5 +750,36 @@ def dictFromChainName(flags, chainInfo):
 
     return chainDict
 
+def main():
 
+    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    parser = ConfigFlags.getArgumentParser()
+    parser.add_argument(
+        'chain',
+        type=str,
+        help='Chain name to be parsed into chain dictionary')
+    parser.add_argument(
+        '-t', '--thresholds',
+        nargs='+',
+        help='L1 thresholds, needed for multileg or fullscan chains')
+    args = ConfigFlags.fillFromArgs(parser=parser)
+    ConfigFlags.lock()
+
+    if args.thresholds:
+        from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
+        cd = dictFromChainName(ConfigFlags, ChainProp(args.chain,l1SeedThresholds=args.thresholds,groups=[]))
+    else:
+        cd = dictFromChainName(ConfigFlags, args.chain)
+    
+    from pprint import pprint
+    pprint(cd)
+
+    import json
+    with open(f'{args.chain}.dict.json','w') as f:
+        json.dump(cd, f, indent=2)
+
+    return 0
+
+if __name__=='__main__':
+    main()
 

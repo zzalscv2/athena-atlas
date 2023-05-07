@@ -17,40 +17,45 @@ def fromRunArgs(runArgs):
 
 
     # some basic settings here...
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
 
     # Input
     if hasattr(runArgs, 'inputBSFile'):
         log.warning("Enters the inputBSFile if")
-        ConfigFlags.Input.Files = runArgs.inputBSFile
+        flags.Input.Files = runArgs.inputBSFile
 
     # Output 
     if hasattr(runArgs, 'outputDAOD_TLAFile'):
-        ConfigFlags.Output.AODFileName = runArgs.outputDAOD_TLAFile
+        flags.Output.AODFileName = runArgs.outputDAOD_TLAFile
         log.info("---------- Configured DAOD_TLA output")
 
 
     # Set non-default flags 
-    ConfigFlags.Trigger.DecodeHLT = False
-    ConfigFlags.Trigger.L1.doCTP = False
-    ConfigFlags.Trigger.DecisionMakerValidation.Execute = False
+    flags.Trigger.DecodeHLT = False
+    flags.Trigger.L1.doCTP = False
+    flags.Trigger.DecisionMakerValidation.Execute = False
 
     # process pre-include/exec
-    processPreInclude(runArgs, ConfigFlags)
-    processPreExec(runArgs, ConfigFlags)
+    processPreInclude(runArgs, flags)
+    processPreExec(runArgs, flags)
+
+    # To respect --athenaopts 
+    flags.fillFromArgs()
+
     # Lock flags
-    ConfigFlags.lock()
+    flags.lock()
 
     log.info("Configuring according to flag values listed below")
-    ConfigFlags.dump()
+    flags.dump()
     
     # import the main config
     from TrigTLAMonitoring.decodeBS_TLA_AOD import setupDecodeCfgCA as TLADecodeConfig
-    cfg = TLADecodeConfig(ConfigFlags)
+    cfg = TLADecodeConfig(flags)
 
     # process post-include/exec
-    processPostInclude(runArgs, ConfigFlags, cfg)
-    processPostExec(runArgs, ConfigFlags, cfg)
+    processPostInclude(runArgs, flags, cfg)
+    processPostExec(runArgs, flags, cfg)
 
     # run the job
     import sys

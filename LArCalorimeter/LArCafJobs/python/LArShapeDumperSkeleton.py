@@ -33,6 +33,9 @@ def fromRunArgs(runArgs):
     if hasattr(runArgs,"outputNTUP_HECNOISEFile"):
         flags.LArShapeDump.HECNoiseNtup=runArgs.outputNTUP_HECNOISEFile
         
+    # To respect --athenaopts 
+    flags.fillFromArgs()
+
     flags.lock()
     
     cfg=MainServicesCfg(flags)

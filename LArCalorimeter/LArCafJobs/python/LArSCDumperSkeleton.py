@@ -102,6 +102,9 @@ def fromRunArgs(runArgs):
     flags.Trigger.enableL1CaloLegacy = True
     flags.Trigger.enableL1CaloPhase1 = True
 
+    # To respect --athenaopts 
+    flags.fillFromArgs()
+
     flags.lock()
     
     cfg=MainServicesCfg(flags)
