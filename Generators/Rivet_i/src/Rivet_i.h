@@ -8,6 +8,8 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "CxxUtils/checker_macros.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "GaudiKernel/ToolHandle.h"
+#include "GenInterfaces/IxAODtoHepMCTool.h"
 
 #include "Rivet/AnalysisHandler.hh"
 
@@ -17,6 +19,7 @@
 #include <string>
 
 class ISvcLocator;
+class IxAODtoHepMCTool;
 //class ITHistSvc;
 
 
@@ -53,7 +56,7 @@ private:
 //  StatusCode regGraph(const AIDA::IDataPointSet& dps, const std::string& path);
 
   // Check and potentially modify events for correct units, beam particles, ...
-  const HepMC::GenEvent* checkEvent(const HepMC::GenEvent* event, const EventContext& ctx);
+  const HepMC::GenEvent* checkEvent(const HepMC::GenEvent& event, const EventContext& ctx);
 
   /// A pointer to the THistSvc
   //ServiceHandle<ITHistSvc> m_histSvc;
@@ -77,6 +80,17 @@ private:
   /// Default is false: checks will be made to ensure that the supplied
   /// events have beams of the sort that the analysis was written to expect.
   bool m_ignorebeams;
+
+  /// @brief Do we need to convert xAOD::Truth back to HepMC::GenEvemt?
+  ///
+  /// Default is false: assume user runs on EVNT files
+  bool m_needsConversion;
+
+  /// Flag to insert beam protons when they are unavailable in the event
+  bool m_patchBeams;
+
+  /// A tool to convert xAOD::Truth to HepMC::GenEvent
+  ToolHandle<IxAODtoHepMCTool> m_xAODtoHepMCTool{this, "HepMCTool", "xAODtoHepMCTool"};
 
   /// @brief Will we convert Rivet's internal histo format into a ROOT histo for streaming with THistSvc?
   ///
@@ -102,7 +116,7 @@ private:
 
   /// The uncertainity of the cross section for this run of events, set from the job properties.
   double m_crossSection_uncert;
-  
+
   /// Flag to determine whether Rivet init has already happened (in execute())
   bool m_init;
 
@@ -118,7 +132,7 @@ private:
   /// String to specify non-standard nominal weight
   std::string m_nominalWeightName;
 
-  ///Weight cap to set allowed maximum for weights 
+  ///Weight cap to set allowed maximum for weights
   double m_weightcap;
 
   SG::ReadHandleKey<xAOD::EventInfo> m_evtInfoKey{this

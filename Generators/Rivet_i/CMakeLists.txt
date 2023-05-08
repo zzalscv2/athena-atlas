@@ -19,7 +19,7 @@ atlas_add_component( Rivet_i
    INCLUDE_DIRS ${FASTJET_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
     ${RIVET_INCLUDE_DIRS} ${YODA_INCLUDE_DIRS}
    LINK_LIBRARIES ${FASTJET_LIBRARIES} ${ROOT_LIBRARIES} AtlasHepMCLib
-   ${RIVET_LIBRARIES} ${YODA_LIBRARIES} AthenaBaseComps CxxUtils GaudiKernel
+   ${RIVET_LIBRARIES} ${YODA_LIBRARIES} AthenaBaseComps CxxUtils GaudiKernel GenInterfacesLib
    AthenaKernel GeneratorObjects PathResolver xAODEventInfo )
 
 # Install file(s) from the package.

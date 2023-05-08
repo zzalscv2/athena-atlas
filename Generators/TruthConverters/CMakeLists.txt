@@ -3,16 +3,20 @@
 # Package: TruthConverters
 ################################################################################
 
+set( extra_libs )
+if( NOT XAOD_STANDALONE )
+   set( extra_libs AthAnalysisBaseCompsLib )
+endif()
+
 # Set the name of the package:
 atlas_subdir( TruthConverters )
-
 
 # Component(s) in the package:
 atlas_add_library( TruthConvertersLib
    TruthConverters/*.h Root/*.cxx
    SHARED
    PUBLIC_HEADERS TruthConverters
-   LINK_LIBRARIES AsgTools  xAODEventInfo xAODTruth GenInterfacesLib )
+   LINK_LIBRARIES AsgTools xAODEventInfo xAODTruth GenInterfacesLib ${extra_libs} )
 
 atlas_add_component( TruthConverters
    src/components/*.cxx
