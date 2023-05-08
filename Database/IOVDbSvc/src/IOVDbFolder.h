@@ -28,6 +28,8 @@
 #include "FolderTypes.h"
 #include "IovStore.h"
 
+#include <map> 
+
 class MsgStream;
 class IOVDbConn;
 class IOpaqueAddress;
@@ -286,6 +288,8 @@ private:
   const bool m_outputToFile{false};
   const bool m_crestToFile{false};
   const std::string m_source;
+  std::string m_globaltag = "";
+  std::map<std::string, std::string> m_cresttagmap; // pairs: COOL folder - CREST tag name
 };
 
 inline const std::string& IOVDbFolder::folderName() const {return m_foldername;}
