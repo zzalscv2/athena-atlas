@@ -16,9 +16,12 @@ namespace Trig {
     {
         if (!m_defaultTool.empty())
             ATH_CHECK(m_defaultTool.retrieve());
+        else
+            ATH_MSG_WARNING("No default scoring tool given, may result in crash if type isn't covered.");
+ 
         if (m_typedTools.size() != m_toolTypes.size())
         {
-            ATH_MSG_ERROR("Number of tools does match the number types!");
+            ATH_MSG_ERROR("Number of tools " << m_typedTools.size() << " doesn't match the number types" << m_toolTypes.size() << "!");
             return StatusCode::FAILURE;
         }
         ATH_CHECK(m_typedTools.retrieve());
