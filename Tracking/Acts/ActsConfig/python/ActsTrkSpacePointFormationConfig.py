@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from ActsInterop.ActsConfigFlags import SpacePointStrategy
+from ActsConfig.ActsConfigFlags import SpacePointStrategy
 
 def ActsTrkPixelSpacePointToolCfg(flags, name = "ActsTrkPixelSpacePointTool", **kwargs):
     acc = ComponentAccumulator()
@@ -24,7 +24,7 @@ def ActsCoreStripSpacePointToolCfg(flags, name = "ActsCoreStripSpacePointTool", 
     from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
     kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)) )
     kwargs.setdefault("AllClusters", False)
-    from ActsTrkEventCnv.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
+    from ActsConfig.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
     kwargs.setdefault("ConverterTool", acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
 
     acc.setPrivateTools(CompFactory.ActsTrk.ActsCoreStripSpacePointFormationTool(name, **kwargs))
@@ -46,7 +46,7 @@ def ActsTrkPixelSpacePointFormationCfg(flags,
     kwargs.setdefault("PixelSpacePoints", "ITkPixelSpacePoints")
 
     if flags.Acts.doMonitoring:
-        from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkPixelSpacePointFormationMonitoringToolCfg
+        from ActsConfig.ActsTrkMonitoringConfig import ActsTrkPixelSpacePointFormationMonitoringToolCfg
         kwargs.setdefault("MonTool", acc.popToolsAndMerge(ActsTrkPixelSpacePointFormationMonitoringToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.PixelSpacePointFormationAlg(name, **kwargs))
@@ -75,7 +75,7 @@ def ActsTrkStripSpacePointFormationCfg(flags,
     kwargs.setdefault("ProcessOverlapForStrip", True)
 
     if flags.Acts.doMonitoring:
-        from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkStripSpacePointFormationMonitoringToolCfg
+        from ActsConfig.ActsTrkMonitoringConfig import ActsTrkStripSpacePointFormationMonitoringToolCfg
         kwargs.setdefault("MonTool", acc.popToolsAndMerge(ActsTrkStripSpacePointFormationMonitoringToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.StripSpacePointFormationAlg(name, **kwargs))
@@ -102,7 +102,7 @@ def ActsTrkSpacePointFormationCfg(flags):
         acc.merge(ActsTrkStripSpacePointFormationCfg(flags))
 
     if flags.Acts.doAnalysis:
-        from ActsTrkAnalysis.ActsTrkAnalysisConfig import ActsTrkSpacePointAnalysisCfg
+        from ActsConfig.ActsTrkAnalysisConfig import ActsTrkSpacePointAnalysisCfg
         acc.merge(ActsTrkSpacePointAnalysisCfg(flags))
         
     return acc

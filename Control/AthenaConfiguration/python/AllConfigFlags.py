@@ -366,9 +366,9 @@ def initConfigFlags():
     _addFlagsCategory(acf, "Tracking", __tracking, 'TrkConfig')
 
     def __acts():
-        from ActsInterop.ActsConfigFlags import createActsConfigFlags
+        from ActsConfig.ActsConfigFlags import createActsConfigFlags
         return createActsConfigFlags()
-    _addFlagsCategory(acf, "Acts", __acts, 'ActsInterop')
+    _addFlagsCategory(acf, "Acts", __acts, 'ActsConfig')
 
     def __hgtd():
         from HGTD_Config.HGTD_ConfigFlags import createHGTD_ConfigFlags

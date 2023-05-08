@@ -6,8 +6,8 @@ n_events=2
 
 # Run reconstruction and produce AOD with persistified Acts EDM
 Reco_tf.py --CA \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsInterop.ActsCIFlags.actsWorkflowFlags" \
-  --postInclude "ActsInterop.ActsPostIncludes.PersistifyActsEDMCfg" \
+  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+  --postInclude "ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
   --preExec "flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;" \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.pool.root \

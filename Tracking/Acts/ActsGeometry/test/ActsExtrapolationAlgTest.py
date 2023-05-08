@@ -1,15 +1,10 @@
 #!/usr/bin/env python
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration 
+
 """
 This job options file will run an example extrapolation using the
 Acts tracking geometry and the Acts extrapolation toolchain.
-
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
-
-# start from scratch with component accumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
-
-from ActsGeometry.ActsGeometryConfig import ActsExtrapolationAlgCfg
 
 if "__main__" == __name__:
   from AthenaCommon.Logging import log
@@ -45,7 +40,7 @@ if "__main__" == __name__:
   from BeamPipeGeoModel.BeamPipeGMConfig import BeamPipeGeometryCfg
   cfg.merge(BeamPipeGeometryCfg(flags))
 
-
+  from ActsConfig.ActsGeometryConfig import ActsExtrapolationAlgCfg
   alg = ActsExtrapolationAlgCfg(flags,
                                 OutputLevel=INFO,
                                 NParticlesPerEvent = int(100),
@@ -63,9 +58,10 @@ if "__main__" == __name__:
     "TRT",
     "Calo"
   ]
-  # needed to construct the calo geometry in ACTS
-  tgSvc.CaloVolumeBuilder = CompFactory.ActsCaloTrackingVolumeBuilder()
 
+  # needed to construct the calo geometry in ACTS
+  from AthenaConfiguration.ComponentFactory import CompFactory
+  tgSvc.CaloVolumeBuilder = CompFactory.ActsCaloTrackingVolumeBuilder()
 
   cfg.printConfig()
 

@@ -45,7 +45,7 @@ ToolSvc += actsReFittingTrackingGeometry
 
 actsExtrapolationTool = CfgMgr.ActsExtrapolationTool("ActsExtrapolationTool", TrackingGeometryTool = actsReFittingTrackingGeometry, MaxSteps = 10000)
 
-from ActsTrkEventCnv.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
+from ActsConfig.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
 actsAtlasConverter = ActsToTrkConverterToolCfg( TrackingGeometryTool = actsReFittingTrackingGeometry)
 ToolSvc+=actsAtlasConverter
 

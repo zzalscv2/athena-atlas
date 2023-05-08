@@ -41,8 +41,8 @@ run "Reconstruction" \
     --inputRDOFile ${rdo_23p0} \
     --outputAODFile AOD.root \
     --steering doRAWtoALL \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsInterop.ActsCIFlags.actsArtFlags" \
-    --postInclude "ActsInterop.ActsPostIncludes.PersistifyActsEDMCfg" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsArtFlags" \
+    --postInclude "ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
     --preExec "flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;" \
     --maxEvents 20
 

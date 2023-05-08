@@ -16,7 +16,7 @@ def ExtrapolatorComparisonTestCfg(flags, name = "ExtrapolatorComparisonTest", **
       AtlasExtrapolatorCfg(flags)))
   
   if "ExtrapolationTool" not in kwargs:
-    from ActsGeometry.ActsGeometryConfig import ActsExtrapolationToolCfg
+    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
     kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(
       ActsExtrapolationToolCfg(flags))) # PrivateToolHandle
   

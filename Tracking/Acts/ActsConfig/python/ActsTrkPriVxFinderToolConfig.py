@@ -1,0 +1,95 @@
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Configuration of InDetPriVxFinderTool package
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+def ActsGaussAdaptiveMultiFindingCfg(flags,
+                                     name="ActsAdaptiveMultiPriVtxFinderTool",
+                                     **kwargs):
+    acc = ComponentAccumulator()
+
+    if "TrackSelector" not in kwargs:
+        from InDetConfig.InDetTrackSelectionToolConfig import (
+            VtxInDetTrackSelectionCfg)
+        kwargs.setdefault("TrackSelector", acc.popToolsAndMerge(
+            VtxInDetTrackSelectionCfg(flags)))
+
+    if "TrackingGeometryTool" not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(
+            ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
+
+    if "ExtrapolationTool" not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+        kwargs.setdefault("ExtrapolationTool", acc.popToolsAndMerge(
+            ActsExtrapolationToolCfg(flags))) # PrivateToolHandle
+
+    kwargs.setdefault("useBeamConstraint",
+                      flags.Tracking.PriVertex.useBeamConstraint)
+    kwargs.setdefault("tracksMaxZinterval",
+                      flags.Tracking.PriVertex.maxZinterval)
+    kwargs.setdefault("do3dSplitting",
+                      not flags.Tracking.PriVertex.useBeamConstraint)
+
+    acc.setPrivateTools(
+        CompFactory.ActsTrk.AdaptiveMultiPriVtxFinderTool(name, **kwargs))
+    return acc
+
+def TrigActsGaussAdaptiveMultiFindingCfg(
+        flags,
+        name="ActsAdaptiveMultiPriVtxFinderTool",
+        signature="",
+        **kwargs):
+    acc = ComponentAccumulator()
+
+    if "TrackSelector" not in kwargs:
+        from InDetConfig.InDetTrackSelectionToolConfig import (
+            TrigVtxInDetTrackSelectionCfg)
+        kwargs.setdefault("TrackSelector", acc.popToolsAndMerge(
+            TrigVtxInDetTrackSelectionCfg(flags, signature=signature)))
+
+    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
+    config = getInDetTrigConfig(signature)
+
+    kwargs.setdefault("useBeamConstraint", True)
+    kwargs.setdefault("useSeedConstraint", False)
+    kwargs.setdefault("tracksMaxZinterval", config.TracksMaxZinterval)
+    kwargs.setdefault("do3dSplitting", False)
+    kwargs.setdefault("addSingleTrackVertices", config.addSingleTrackVertices)
+
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        ActsGaussAdaptiveMultiFindingCfg(flags, name+signature, **kwargs)))
+    return acc
+
+def ActsIterativeFindingCfg(flags,
+                            name="ActsIterativePriVtxFinderTool",
+                            **kwargs):
+    acc = ComponentAccumulator()
+
+    if "TrackSelector" not in kwargs:
+        from InDetConfig.InDetTrackSelectionToolConfig import (
+            VtxInDetTrackSelectionCfg)
+        kwargs.setdefault("TrackSelector", acc.popToolsAndMerge(
+            VtxInDetTrackSelectionCfg(flags)))
+
+    if "TrackingGeometryTool" not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(
+            ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
+
+    if "ExtrapolationTool" not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+        kwargs.setdefault("ExtrapolationTool", acc.popToolsAndMerge(
+            ActsExtrapolationToolCfg(flags))) # PrivateToolHandle
+
+    kwargs.setdefault("useBeamConstraint",
+                      flags.Tracking.PriVertex.useBeamConstraint)
+    kwargs.setdefault("significanceCutSeeding", 12)
+    kwargs.setdefault("maximumChi2cutForSeeding", 49)
+    kwargs.setdefault("maxVertices", flags.Tracking.PriVertex.maxVertices)
+    kwargs.setdefault("doMaxTracksCut", flags.Tracking.PriVertex.doMaxTracksCut)
+    kwargs.setdefault("maxTracks", flags.Tracking.PriVertex.maxTracks)
+
+    acc.setPrivateTools(
+        CompFactory.ActsTrk.IterativePriVtxFinderTool(name, **kwargs))
+    return acc

@@ -109,7 +109,7 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
     #
     # --- Deducing configuration from the flags
     #
-    from ActsInterop.TrackingComponentConfigurer import (
+    from ActsConfig.TrackingComponentConfigurer import (
         TrackingComponentConfigurer)
     configuration_settings = TrackingComponentConfigurer(flags)
 
@@ -122,7 +122,7 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
         acc.merge(AthenaTrkClusterizationCfg(flags))
 
     if configuration_settings.doActsCluster:
-        from ActsTrkClusterization.ActsTrkClusterizationConfig import (
+        from ActsConfig.ActsTrkClusterizationConfig import (
             ActsTrkClusterizationCfg)
         acc.merge(ActsTrkClusterizationCfg(flags))
 
@@ -162,7 +162,7 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
         acc.merge(ITkSiTrackerSpacePointFinderCfg(flags))
 
     if configuration_settings.doActsSpacePoint:
-        from TrkConfig.ActsTrkSpacePointFormationConfig import (
+        from ActsConfig.ActsTrkSpacePointFormationConfig import (
             ActsTrkSpacePointFormationCfg)
         acc.merge(ActsTrkSpacePointFormationCfg(flags))
 

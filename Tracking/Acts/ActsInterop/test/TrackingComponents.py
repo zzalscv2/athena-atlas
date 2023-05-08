@@ -3,7 +3,7 @@
 
 if __name__ == "__main__":
     from TrkConfig.TrkConfigFlags import TrackingComponent
-    from ActsInterop.TrackingComponentConfigurer import TrackingComponentConfigurer
+    from ActsConfig.TrackingComponentConfigurer import TrackingComponentConfigurer
 
     request_collection = {
         "Production Mode" : [TrackingComponent.AthenaChain, TrackingComponent.ActsChain],

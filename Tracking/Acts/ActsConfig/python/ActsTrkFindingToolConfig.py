@@ -2,12 +2,12 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from ActsGeometry.ActsGeometryConfig import (
+from ActsConfig.ActsGeometryConfig import (
     ActsExtrapolationToolCfg,
     ActsTrackingGeometryToolCfg,
 )
 from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
-from ActsTrkEventCnv.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
+from ActsConfig.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
 
 
 def ActsTrkFindingToolCfg(

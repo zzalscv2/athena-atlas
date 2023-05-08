@@ -8,7 +8,7 @@ Reco_tf.py --CA \
    --detectors Bpipe ITkPixel ITkStrip \
    --preExec "flags.Reco.EnableHGTDExtension=False;" \
    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
-   --postInclude "ActsTrkFittingAlgs.ActsTrkFittingAlgsConfig.ActsReFitterAlgCfg" \
+   --postInclude "ActsConfig.ActsTrkFittingAlgsConfig.ActsReFitterAlgCfg" \
    --inputRDOFile ${input_rdo} \
    --outputESDFile ESD.pool.root \
    --outputAODFile AOD.pool.root \

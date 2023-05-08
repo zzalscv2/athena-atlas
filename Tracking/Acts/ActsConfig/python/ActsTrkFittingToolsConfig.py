@@ -5,14 +5,14 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 from ActsInterop import UnitConstants
 
-from ActsGeometry.ActsGeometryConfig import (
+from ActsConfig.ActsGeometryConfig import (
     ActsExtrapolationToolCfg,
     ActsTrackingGeometryToolCfg,
 )
 from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
-from ActsTrkEventCnv.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
+from ActsConfig.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
 
-from ActsInterop.ActsConfigFlags import TrackFitterType
+from ActsConfig.ActsConfigFlags import TrackFitterType
 
 
 def ActsFitterCfg(flags, name: str = "ActsKalmanFitter", **kwargs):

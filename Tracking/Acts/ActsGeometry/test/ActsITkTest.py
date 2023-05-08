@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-"""Run ACTS geometry construction for ITk
-
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+"""
+  Run ACTS geometry construction for ITk
 """
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 flags = initConfigFlags()
@@ -29,7 +29,7 @@ flags.dump()
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 acc = MainServicesCfg( flags )
 
-from ActsGeometry.ActsGeometryConfig import ActsExtrapolationAlgCfg, ActsTrackingGeometrySvcCfg
+from ActsConfig.ActsGeometryConfig import ActsExtrapolationAlgCfg, ActsTrackingGeometrySvcCfg
 
 from AthenaCommon.Constants import INFO
 tgSvc = ActsTrackingGeometrySvcCfg(flags,
