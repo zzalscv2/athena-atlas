@@ -251,30 +251,29 @@ def RpcMonitoringConfig(inputFlags):
     ######################################################################################################
     ## Rpc lv1 trigger
     ######################################################################################################
-    myGroup_lv1Trigger = helper.addGroup(rpcTrackAnaAlg, 'RpcTrackAnaAlg', 'Muon/MuonRawDataMonitoring/RPC/')
-    myGroup_lv1Trigger.defineHistogram('nMu;NMuon',
+    myGroup_track.defineHistogram('nMu;NMuon',
                             title='Number of Muons;nMuons;Events',
                             type='TH1I',
                             path='PlotCand',
                             xbins=10,xmin=-0.5,xmax=9.5)
-    myGroup_lv1Trigger.defineHistogram('nMuBarrel;NMuonBarrel',
+    myGroup_track.defineHistogram('nMuBarrel;NMuonBarrel',
                             title='Number of Barrel Muons;nMuons;Events',
                             type='TH1I',
                             path='PlotCand',
                             xbins=5,xmin=-0.5,xmax=4.5)
-    myGroup_lv1Trigger.defineHistogram('roiEta;roiEta',
+    myGroup_track.defineHistogram('roiEta;roiEta',
                             title='roi eta;roi #eta;rois',
                             type='TH1D',
                             path='PlotCand',
                             xbins=50,xmin=-2.5,xmax=2.5)
 
-    myGroup_lv1Trigger.defineHistogram('roiBarrelEta;roiBarrelEta',
+    myGroup_track.defineHistogram('roiBarrelEta;roiBarrelEta',
                             title='Barrel roi eta;roi #eta;rois',
                             type='TH1D',
                             path='PlotCand',
                             xbins=50,xmin=-2.5,xmax=2.5)
 
-    myGroup_lv1Trigger.defineHistogram('roiBarrelThr;roiBarrelThrs',
+    myGroup_track.defineHistogram('roiBarrelThr;roiBarrelThrs',
                             title='Barrel roi threshold;roi threshold;rois',
                             type='TH1I',
                             path='PlotCand',
