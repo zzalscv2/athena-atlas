@@ -493,7 +493,7 @@ namespace Rec {
 
             if (msgLevel(MSG::DEBUG)) { countAEOTs(*fittedTrack, " cb before clean Track "); }
             std::unique_ptr<Trk::Track> cleanTrack = m_cleaner->clean(*fittedTrack, ctx);
-            if (msgLevel(MSG::DEBUG)) { countAEOTs(*cleanTrack, " cb after clean Track "); }
+	    if (cleanTrack && msgLevel(MSG::DEBUG)) { countAEOTs(*cleanTrack, " cb after clean Track "); }
 
             if (!cleanTrack) {
                 if (m_allowCleanerVeto && chi2Before > m_badFitChi2) {
@@ -650,8 +650,13 @@ namespace Rec {
         const Trk::TrackStates* trackTSOS = track.trackStateOnSurfaces();
         unsigned int naeots = 0;
 
+	if (!trackTSOS){
+	  ATH_MSG_ERROR("No trackStateOnSurfaces");
+	  return naeots;
+	}
+	
         for (const auto* m : *trackTSOS) {
-            if (m->alignmentEffectsOnTrack()) naeots++;
+	  if (m && m->alignmentEffectsOnTrack()) naeots++;
         }
 
         ATH_MSG_DEBUG(" count AEOTs " << txt << " " << naeots);
