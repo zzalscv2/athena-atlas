@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # All derivation framework formats must be listed here
 
 # Example formats
@@ -76,6 +76,8 @@ from DerivationFrameworkEGamma.EGAM7 import EGAM7Cfg
 from DerivationFrameworkEGamma.EGAM8 import EGAM8Cfg
 from DerivationFrameworkEGamma.EGAM9 import EGAM9Cfg
 from DerivationFrameworkEGamma.EGAM10 import EGAM10Cfg
+from DerivationFrameworkEGamma.EGAM11 import EGAM11Cfg
+from DerivationFrameworkEGamma.EGAM12 import EGAM12Cfg
 
 # FTAG derivations
 from DerivationFrameworkFlavourTag.FTAG1 import FTAG1Cfg
@@ -128,7 +130,7 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'STDM7Cfg',
            'TCAL1Cfg', 'TCAL2Cfg',
            'EGAM1Cfg', 'EGAM2Cfg', 'EGAM3Cfg', 'EGAM4Cfg', 'EGAM5Cfg',
-           'EGAM7Cfg', 'EGAM8Cfg', 'EGAM9Cfg', 'EGAM10Cfg',
+           'EGAM7Cfg', 'EGAM8Cfg', 'EGAM9Cfg', 'EGAM10Cfg', 'EGAM11Cfg', 'EGAM12Cfg',
            'JETM1Cfg','JETM2Cfg','JETM3Cfg','JETM4Cfg','JETM5Cfg','JETM6Cfg',
            'JETM10Cfg','JETM11Cfg','JETM12Cfg','JETM14Cfg',
            'TRIG8Cfg','L1CALO1Cfg'

@@ -132,13 +132,14 @@ def EGAM7KernelCfg(ConfigFlags, name='EGAM7Kernel', **kwargs):
     #EGAM7ThinningHelper.TriggerChains = '(^(?!.*_[0-9]*(mu|j|xe|tau|ht|xs|te))(?!HLT_[eg].*_[0-9]*[eg][0-9].*)(?!HLT_eb.*)(?!.*larpeb.*)(?!HLT_.*_AFP_.*)(HLT_[eg].*))|HLT_e.*_Jpsiee.*'
     #EGAM7ThinningHelper.AppendToStream( EGAM7Stream, ExtraContainersTrigger )
 
+    streamName = kwargs['StreamName']
+
     # Track thinning
     if ConfigFlags.Derivation.Egamma.doTrackThinning:
 
         from DerivationFrameworkInDet.InDetToolsConfig import (
             TrackParticleThinningCfg, MuonTrackParticleThinningCfg, 
             TauTrackParticleThinningCfg )
-        streamName = kwargs['StreamName']
 
         TrackThinningKeepElectronTracks = True
         TrackThinningKeepPhotonTracks = True
