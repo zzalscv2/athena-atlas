@@ -74,7 +74,7 @@ namespace FlavorTagDiscriminants {
       if (!truth_link || !truth_link.isValid()) {
         // if the truth link is broken, assume PU
         dec_origin_label(*electron) = InDet::ExclusiveOrigin::Pileup;
-        dec_type_label(*electron) = TruthDecoratorHelpers::get_truth_type(nullptr);
+        dec_type_label(*electron) = TruthDecoratorHelpers::ExclusiveType::NoTruth;
         dec_vertex_index(*electron) = -2;
         dec_barcode(*electron) = -2;
         dec_parent_barcode(*electron) = -2;
