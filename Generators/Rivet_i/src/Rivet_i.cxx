@@ -298,13 +298,8 @@ const HepMC::GenEvent* Rivet_i::checkEvent(const HepMC::GenEvent& event, const E
   std::shared_ptr<HepMC3::GenRunInfo> modRunInfo;
   if (event.run_info()) {
     modRunInfo = std::make_shared<HepMC3::GenRunInfo>(*(event.run_info().get()));
-    try {
-      event.weight_names();
-    }
-    catch (std::runtime_error &e) {
-      // most likely a HepMC2-style GenEvent
-      if (event.weights().size() != 1)  throw e;
-      modRunInfo->set_weight_names({"Default"});
+    if (event.run_info()->weight_names().empty() && event.weights().size() == 1) {
+       modRunInfo->set_weight_names({"Default"});
     }
   }
   else {
@@ -405,7 +400,8 @@ const HepMC::GenEvent* Rivet_i::checkEvent(const HepMC::GenEvent& event, const E
     for (const HepMC::GenParticlePtr& p : modEvent->beams()) {
       if (p->status() != 4)  notBeams.push_back(p);
     }
-    for (auto bp : notBeams)  bp->production_vertex()->remove_particle_out(bp);
+    //AV: the loop is over shared pointers! Should be const auto&
+    for (const auto& bp : notBeams)  bp->production_vertex()->remove_particle_out(bp);
     // add dummy beam particles
     modEvent->set_beam_particles(b1, b2);
   }
