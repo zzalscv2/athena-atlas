@@ -10,6 +10,7 @@
 
 Reco_tf.py \
 --AMI=q443 \
+--conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-11' 'RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02' \
 --multithreaded \
 --maxEvents=500 \
 --outputRDOFile=myRDO.pool.root --outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root --outputHISTFile=myHIST.root \

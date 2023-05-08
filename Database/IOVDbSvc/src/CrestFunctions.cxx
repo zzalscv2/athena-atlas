@@ -259,4 +259,24 @@ namespace IOVDbNamespace{
     return resolveCrestTag(globalTag,folderName);
   }
   
+  std::map<std::string, std::string>
+  getGlobalTagMap(const std::string globaltag){
+    std::map<std::string, std::string> tagmap;
+    try{
+      auto crestClient = Crest::CrestClient(urlBase());
+      nlohmann::json j = crestClient.findGlobalTagMap(globaltag);
+      int n = j.size();
+      for (int i = 0; i < n; i++ ){
+	nlohmann::json j_item = j[i];
+        if (j_item.contains("label") && j_item.contains("tagName") ){
+          tagmap[j_item["label"]] = j_item["tagName"];
+        }
+      }
+    } catch (std::exception & e){
+      std::cout<<__FILE__<<":"<<__LINE__<< ": " << e.what() << " Cannot get a global tag map for " << globaltag << std::endl;
+    }
+
+    return tagmap;
+  }
+
 }

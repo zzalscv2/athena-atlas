@@ -52,10 +52,12 @@ EGCrackVetoCleaningTool::addBranches() const
     bool maybeBug = clu->hasSampling(CaloSampling::EMB2) &&
                     clu->hasSampling(CaloSampling::EME2);
     const std::vector<const xAOD::CaloCluster*> assocC =
-      xAOD::EgammaHelpers::getAssociatedTopoClusters(clu);
+      xAOD::EgammaHelpers::getAssociatedTopoClusters(clu);    
     double dRsatMax = -1.;
     if (assocC.size() > 1) {
       for (const xAOD::CaloCluster* sclu : assocC) {
+        // sometimes sclu can be 0 if the topocluster has been thinned away
+	if (not sclu) continue;
         double dR = clu->p4().DeltaR(sclu->p4());
         if (dR > dRsatMax)
           dRsatMax = dR;

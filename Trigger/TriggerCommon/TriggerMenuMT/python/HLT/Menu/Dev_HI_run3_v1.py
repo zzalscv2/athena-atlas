@@ -338,8 +338,6 @@ def getDevHISignatures():
         ChainProp(name='HLT_mb_sp15_trk15_hmt_L1MBTS_1_VTE50', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
         ChainProp(name='HLT_mb_sp300_trk20_hmt_L1TE3_VTE50',   l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
 
-        ChainProp(name='HLT_mb_sptrk_L1VjTE200_GAP_A', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
-        ChainProp(name='HLT_mb_sptrk_L1VjTE200_GAP_C', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_mb_sp50_trk15_hmt_L1MBTS_1_VjTE200_GAP_A', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_mb_sp50_trk15_hmt_L1MBTS_1_VjTE200_GAP_C', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_mb_sp400_trk25_hmt_L1jTE3_VjTE200_GAP_A', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
@@ -353,9 +351,6 @@ def getDevHISignatures():
         ChainProp(name='HLT_mb_excl_1trk5_pt2_L1TAU1_VTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_mb_excl_1trk5_pt1_L1TRT_VTE50', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
         
-        #----------- temporarily added to test the HLT despite TE simulation issue ATR-26798
-        ChainProp(name='HLT_mb_excl_1trk4_pt1_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'],stream=[UPCStream],groups=MinBiasGroup+SupportLegGroup),
-
         #----------- UPC exclusive dileptons - phase-1
         ChainProp(name='HLT_mb_sp_vpix15_L12eEM1_VjTE200_GAP_AANDC', l1SeedThresholds=['FSNOSEED'],stream=[UPCStream],groups=MinBiasGroup+PrimaryPhIGroup),
         ChainProp(name='HLT_mb_sp_vpix30_L12eEM1_VjTE200_GAP_AANDC', l1SeedThresholds=['FSNOSEED'],stream=[UPCStream],groups=MinBiasGroup+PrimaryPhIGroup),

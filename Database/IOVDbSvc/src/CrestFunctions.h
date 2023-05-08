@@ -67,5 +67,8 @@ namespace IOVDbNamespace{
   
   std::string
   jsonTagName(const std::string &globalTag, const std::string & folderName);
+
+  std::map<std::string, std::string>
+    getGlobalTagMap(const std::string globaltag);
 }
 #endif
