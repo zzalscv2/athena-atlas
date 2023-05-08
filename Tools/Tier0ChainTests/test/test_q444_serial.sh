@@ -9,6 +9,7 @@
 
 Reco_tf.py \
 --AMI=q444 \
+--conditionsTag 'all:OFLCOND-MC16-SDR-RUN2-11' \
 --maxEvents=100 \
 --steering doOverlay doRDO_TRIG \
 --outputRDOFile=myRDO.pool.root --outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root \

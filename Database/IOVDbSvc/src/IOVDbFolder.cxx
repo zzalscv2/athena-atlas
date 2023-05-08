@@ -148,6 +148,9 @@ IOVDbFolder::IOVDbFolder(IOVDbConn* conn,
   if (m_extensible) {
     ATH_MSG_INFO( "Extensible folder " << m_foldername );
   }
+
+
+  
 }
 
 IOVDbFolder::~IOVDbFolder() {
@@ -229,7 +232,13 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
   BasicFolder basicFolder;
   if (m_source == "CREST"){
     //const std::string  jsonFolderName=sanitiseCrestTag(m_foldername);
-    const std::string  completeTag=jsonTagName(globalTag, m_foldername);
+
+    if (m_globaltag != globalTag){
+      m_globaltag = globalTag;
+      m_cresttagmap.clear();
+      m_cresttagmap = getGlobalTagMap(globalTag);
+    }
+    const std::string completeTag = m_cresttagmap[m_foldername];
     ATH_MSG_INFO("Download tag would be: "<<completeTag);
 
     // *** *** *** *** *** ***
@@ -1006,7 +1015,12 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
   p_tagInfoMgr = tagInfoMgr;
   if( not m_useFileMetaData ) {
     if(m_source=="CREST"){
-      const std::string  & tagName=resolveCrestTag(globalTag,m_foldername );
+      if (m_globaltag != globalTag){
+        m_globaltag = globalTag;
+        m_cresttagmap.clear();
+        m_cresttagmap = getGlobalTagMap(globalTag);
+      }
+      const std::string  & tagName=m_cresttagmap[m_foldername];
       m_folderDescription = folderDescriptionForTag(tagName);
     } else {
       //folder desc from db
@@ -1030,9 +1044,16 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
   // setup channel list and folder type
   if( not m_useFileMetaData ) {
     if(m_source=="CREST"){
-        const std::string  & crestTag=resolveCrestTag(globalTag,m_foldername );
+        if (m_globaltag != globalTag){
+          m_globaltag = globalTag;
+          m_cresttagmap.clear();
+          m_cresttagmap = getGlobalTagMap(globalTag); // test
+        }       
+        const std::string  & crestTag=m_cresttagmap[m_foldername];
+
         std::tie(m_channums, m_channames) =channelListForTag(crestTag);
         const std::string & payloadSpec = payloadSpecificationForTag(crestTag);
+
         //determine foldertype from the description, the spec and the number of channels
         m_foldertype = IOVDbNamespace::determineFolderType(m_folderDescription, payloadSpec, m_channums);
  
@@ -1157,7 +1178,12 @@ IOVDbFolder::resolveTag(cool::IFolderPtr fptr,const std::string& globalTag) {
     return false;
   }
   if(m_source=="CREST"){
-    m_tag=IOVDbNamespace::resolveCrestTag(globalTag,m_foldername);
+    if (m_globaltag != globalTag){
+      m_globaltag = globalTag;
+      m_cresttagmap.clear();
+      m_cresttagmap = getGlobalTagMap(globalTag); // test
+    }
+    m_tag = m_cresttagmap[m_foldername];
     ATH_MSG_DEBUG( "resolveTag returns " << m_tag );
     return true;
   }

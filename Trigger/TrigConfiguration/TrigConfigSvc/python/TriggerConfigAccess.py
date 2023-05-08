@@ -1,6 +1,9 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
+from AthenaCommon.Logging import logging
+log = logging.getLogger( "TriggerConfigAccess.py" )
+
 from .TrigConfigSvcCfg import getTrigConfigFromFlag, getL1MenuFileName, getHLTMenuFileName, getL1PrescalesSetFileName, getHLTPrescalesSetFileName, getBunchGroupSetFileName, getHLTJobOptionsFileName, getHLTMonitoringFileName
 
 from TrigConfIO.L1TriggerConfigAccess import L1MenuAccess, L1PrescalesSetAccess, BunchGroupSetAccess
@@ -71,6 +74,27 @@ def getKeysFromCool(runNr, lbNr = 0):
 
     return d
 
+def getDBKeysFromMetadata(flags):
+    """Provides access to the database keys from the in-file metadata
+
+    Gets the database keys from the in-file metadata which are stored together with the json representation
+    If the keys are in the file, then usually SMK, L1PSK and HLTPSK are present.
+    The bunchgroupset is not stored in the metadata, so 0 is returned for the BGS key for completeness.
+
+    @returns: dictionary with the DB keys. Returns 'None' if information is not present.
+    """
+    from AthenaConfiguration.AutoConfigFlags import GetFileMD
+    metadata = GetFileMD(flags.Input.Files)
+    keys = metadata.get("TriggerConfigInfo", None)
+    if keys is None:
+        return None
+    return {
+        'SMK': keys['HLT']['key'] if 'HLT' in keys else 0,
+        'L1PSK': keys['L1PS']['key'] if 'L1PS' in keys else 0,
+        'HLTPSK': keys['HLTPS']['key'] if 'HLTPSK' in keys else 0,
+        'BGSK': 0
+    }
+
 """
 Returns a string-serialised JSON object from the metadata store.
 Checks AOD syntax first, then fully-qualified ESD syntax
@@ -85,7 +109,12 @@ def _getJSONFromMetadata(flags, key):
     if menu_json is None:
         menu_json = metadata.get('DataVector<xAOD::TriggerMenuJson_v1>_%s' % key, None)
     if menu_json is None:
-        raise RuntimeError("Cannot read trigger configuration (%s) from input file metadata" % key)
+        if key == 'TriggerMenuJson_HLTMonitoring':
+            # currently the HLT Monitoring information is missing from many pool files' metadata
+            log.info("Trigger metadata with key 'TriggerMenuJson_HLTMonitoring' is not available in this file. This feature is currently being introduced.")
+            return None
+        else:
+            raise RuntimeError("Cannot read trigger configuration (%s) from input file metadata" % key)
     return menu_json
 
 
@@ -152,7 +181,6 @@ def getBunchGroupSetAccess( flags = None ):
     else:
         raise RuntimeError("Unknown source of trigger configuration: %s" % tc["SOURCE"])
     return cfg
-
 
 
 """
@@ -230,7 +258,28 @@ def getHLTMonitoringAccess( flags = None ):
     elif tc["SOURCE"] == "DB":
         cfg = HLTMonitoringAccess( dbalias = tc["DBCONN"], smkey = tc["SMK"] )
     elif tc["SOURCE"] == "INFILE":
-        cfg = HLTMonitoringAccess(jsonString=_getJSONFromMetadata(flags, key='TriggerMenuJson_HLTMonitoring'))
+        jsonHLTMon = _getJSONFromMetadata(flags, key='TriggerMenuJson_HLTMonitoring')
+        if jsonHLTMon is not None:
+            cfg = HLTMonitoringAccess(jsonString=jsonHLTMon)
+        else:
+            keysFromInfileMD = getDBKeysFromMetadata(flags)
+            smkey = keysFromInfileMD['SMK'] if keysFromInfileMD is not None else 0
+            if smkey < 3000 and not flags.Input.isMC:
+                # Run 1/2 data or keys missing in metadata 
+                log.info("Trigger metadata with key 'TriggerMenuJson_HLTMonitoring' is not available for Run 2 data. Returning empty dummy.")
+                jsonHLTMon = '{"filetype": "hltmonitoringsummary","name": "EmptyDefault", "signatures": {}}'
+                cfg = HLTMonitoringAccess(jsonString=jsonHLTMon)
+            else:
+                # Run 3 data or MC
+                try:
+                    log.info("Falling back on reading the HLTMonitoring from the TRIGGERDB_RUN3 for SMK %i.", smkey)
+                    cfg = HLTMonitoringAccess( dbalias = "TRIGGERDB_RUN3", smkey = smkey )
+                except KeyError:
+                    # SMK for this run has no HLT monitoring (earlier 2022 data) => providing dummy configuration
+                    log.info("Trigger HLTMonitoring is not available for SMK %i. Returning empty dummy.", smkey)
+                    jsonHLTMon = '{"filetype": "hltmonitoringsummary","name": "EmptyDefault", "signatures": {}}'
+                    cfg = HLTMonitoringAccess(jsonString=jsonHLTMon)
+
     else:
         raise RuntimeError("Unknown source of trigger configuration: %s" % tc["SOURCE"])
     return cfg
