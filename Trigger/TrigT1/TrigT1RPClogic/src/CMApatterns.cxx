@@ -772,6 +772,9 @@ CMApatterns::create_hardware(TrigType type)
       
       CMAword ovl1 = 0x0;
       CMAword ovl2 = 0x0;
+      CMAword maj_th0 = 0x2;
+      CMAword maj_th1 = 0x2;
+      CMAword maj_th2 = 0x2;
 
 
       if(program)
@@ -809,6 +812,10 @@ CMApatterns::create_hardware(TrigType type)
 	  
 	  ovl1 = program->overlap1();
 	  ovl2 = program->overlap2();
+          maj_th0 = program->trig_thr0_maj_reg();
+          maj_th1 = program->trig_thr1_maj_reg();
+          maj_th2 = program->trig_thr2_maj_reg();	
+
 	  
         }
       else if (!program && cma_parameters().id().type() == Phi)
@@ -824,9 +831,9 @@ CMApatterns::create_hardware(TrigType type)
 	}
       
       // Load the Majority logic setup
-      matrix->setMajority(0,2);
-      matrix->setMajority(1,2);
-      matrix->setMajority(2,2);
+      matrix->setMajority(0,maj_th0);
+      matrix->setMajority(1,maj_th1);
+      matrix->setMajority(2,maj_th2);
       
       //matrix->setMask1(0,1);
       
@@ -850,8 +857,10 @@ CMApatterns::create_hardware(TrigType type)
 	
         CMAword ovl1 = 0x0;
 	CMAword ovl2 = 0x0;
+        CMAword maj_th0 = 0x1;
+        CMAword maj_th1 = 0x1;
+        CMAword maj_th2 = 0x1;
 
-	
         if(program)
 	  {
 
@@ -886,6 +895,9 @@ CMApatterns::create_hardware(TrigType type)
 	    
             ovl1 = program->overlap1();
 	    ovl2 = program->overlap2();
+            maj_th0 = program->trig_thr0_maj_reg();
+            maj_th1 = program->trig_thr1_maj_reg();
+            maj_th2 = program->trig_thr2_maj_reg();
 
 	  }
         else if (!program && cma_parameters().id().type() == Phi)
@@ -901,9 +913,9 @@ CMApatterns::create_hardware(TrigType type)
 		  }
 	  }
         // Load the Majority logic setup
-        matrix->setMajority(0,1);
-        matrix->setMajority(1,1);
-        matrix->setMajority(2,1);
+        matrix->setMajority(0,maj_th0);
+        matrix->setMajority(1,maj_th1);
+        matrix->setMajority(2,maj_th2);
 	
 	// Load the Overlap flag
 	matrix->setMatOverlap(0, ovl1);
