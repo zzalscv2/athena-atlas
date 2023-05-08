@@ -56,6 +56,10 @@ public:
    //@}
 
 private:
+  StatusCode convertPixelClusters(const EventContext& ctx) const;
+  StatusCode convertStripClusters(const EventContext& ctx) const;
+  
+private:
   const PixelID* m_pixelID {};
   const SCT_ID* m_stripID {};
 
