@@ -3,6 +3,9 @@
 */
 
 #include "TruthConverters/xAODtoHepMCTool.h"
+#ifndef XAOD_STANDALONE
+#include "AthAnalysisBaseComps/AthAnalysisHelper.h"
+#endif
 
 xAODtoHepMCTool::xAODtoHepMCTool(const std::string &name)
     : asg::AsgTool(name),
@@ -79,9 +82,15 @@ std::vector<HepMC::GenEvent> xAODtoHepMCTool ::getHepMCEvents(const xAOD::TruthE
       printxAODEvent(xAODEvent, eventInfo);
     // Create GenEvent for each xAOD truth event
     ATH_MSG_DEBUG("Create new GenEvent");
-    HepMC::GenEvent hepmcEvent = createHepMCEvent(xAODEvent, eventInfo);
+    HepMC::GenEvent&& hepmcEvent = createHepMCEvent(xAODEvent, eventInfo);
+    #ifdef HEPMC3
+    std::shared_ptr<HepMC3::GenRunInfo> runinfo = std::make_shared<HepMC3::GenRunInfo>(*(hepmcEvent.run_info().get()));
+    #endif
     // Insert into McEventCollection
     mcEventCollection.push_back(std::move(hepmcEvent));
+    #ifdef HEPMC3
+    mcEventCollection[mcEventCollection.size()-1].set_run_info(runinfo);
+    #endif
     if (doPrint)
       ATH_MSG_DEBUG("XXX Printing HepMC Event");
     if (doPrint)
@@ -98,10 +107,58 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
 
   /// EVENT LEVEL
   HepMC::GenEvent genEvt;
+  #ifdef HEPMC3
+  genEvt.set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
+  #endif
 
   long long int evtNum = eventInfo->eventNumber();
   genEvt.set_event_number(evtNum);
   ATH_MSG_DEBUG("Start createHepMCEvent for event " << evtNum);
+
+  //Weights
+  #ifndef XAOD_STANDALONE
+  const std::vector<float> weights = xEvt->weights();
+  std::map<std::string, int> weightNameMap;
+  if (AthAnalysisHelper::retrieveMetadata("/Generation/Parameters","HepMCWeightNames", weightNameMap).isFailure()) {
+    ATH_MSG_DEBUG("Couldn't find meta-data for weight names.");
+  }
+  #ifdef HEPMC3
+  std::shared_ptr<HepMC3::GenRunInfo> runinfo = std::make_shared<HepMC3::GenRunInfo>();
+  genEvt.set_run_info(runinfo);
+  std::vector<std::string> wnames;
+  wnames.reserve(weights.size());
+  for (int idx = 0; idx < int(weights.size()); ++idx) {
+    for (const auto& it : weightNameMap) {
+      if (it.second == idx) {
+        wnames.push_back(it.first);
+        break;
+      }
+    }
+  }
+  genEvt.run_info()->set_weight_names(wnames);
+  for ( std::vector<float>::const_iterator wgt = weights.begin(); wgt != weights.end(); ++wgt ) {
+    genEvt.weights().push_back(*wgt);
+  }
+  #else
+  if (weightNameMap.size()) {
+    HepMC::WeightContainer& wc = genEvt.weights();
+    wc.clear();
+    for (int idx = 0; idx < int(weights.size()); ++idx) {
+      for (const auto& it : weightNameMap) {
+        if (it.second == idx) {
+          wc[ it.first ] = weights[idx];
+          break;
+        }
+      }
+    }
+  }
+  else {
+    for ( std::vector<float>::const_iterator wgt = weights.begin(); wgt != weights.end(); ++wgt ) {
+      genEvt.weights().push_back(*wgt);
+    }
+  }
+  #endif
+  #endif
 
   // PARTICLES AND VERTICES
   // Map of existing vertices - needed for the tree linking
