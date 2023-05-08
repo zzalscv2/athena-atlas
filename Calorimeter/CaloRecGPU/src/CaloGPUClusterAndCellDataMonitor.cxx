@@ -142,6 +142,11 @@ StatusCode CaloGPUClusterAndCellDataMonitor::update_plots_end(const EventContext
 
   for (const auto & combination : m_toolCombinations)
     {
+      if (combination.index_ref < 0 || combination.index_test < 0)
+        {
+          ATH_MSG_WARNING("Invalid tool combination, please check your configuration! " << combination.prefix);
+          continue;
+        }
       ATH_CHECK( add_combination(ctx, constant_data, combination.index_ref, combination.index_test, combination.prefix, combination.match_in_energy) );
     }
 
@@ -413,7 +418,6 @@ StatusCode CaloGPUClusterAndCellDataMonitor::convert_to_GPU_data_structures(cons
           ret_moments->engCalibFracRest[cluster_number] = cluster->getMomentValue(xAOD::CaloCluster::ENG_CALIB_FRAC_REST);
           for (auto it = cell_links->begin(); it != cell_links->end(); ++it)
             {
-
               const int cell_ID = m_calo_id->calo_cell_hash(it->ID());
               const float weight = it.weight();
 
@@ -655,6 +659,61 @@ StatusCode CaloGPUClusterAndCellDataMonitor::compactify_clusters(const EventCont
   return StatusCode::SUCCESS;
 }
 
+namespace
+{
+  template <class ... Args>
+  struct multi_class_holder
+  {
+    static constexpr size_t size()
+    {
+      return sizeof...(Args);
+    }
+  };
+
+  //To deal with potential lack of maybe_unused in pack expansions.
+  template <class Arg>
+  static constexpr decltype(auto) suppress_warning(Arg && a)
+  {
+    return std::forward<Arg>(a);
+  }
+
+  static constexpr void suppress_warning()
+  {
+    return;
+  }
+
+  template <class F, class ... Types, class ... Args>
+  void apply_to_multi_class(F && f, const multi_class_holder<Types...> &, Args && ... args)
+  {
+    size_t i = 0;
+    if constexpr (std::is_same_v < decltype(f((Types{}, ...), i, std::forward<Args>(args)...)), void > )
+      {
+        (f(Types{}, i++, std::forward<Args>(args)...), ...);
+      }
+    else
+      {
+        (suppress_warning(f(Types{}, i++, std::forward<Args>(args)...)), ...);
+      }
+  }
+
+  static float float_unhack(const unsigned int bits)
+  {
+    float res;
+    std::memcpy(&res, &bits, sizeof(float));
+    //In C++20, we should bit-cast. For now, for our platform, works.
+    return res;
+  }
+
+  static double protect_from_zero(const double x)
+  {
+    return x == 0 ? 1e-15 : x;
+  }
+
+  static float protect_from_zero(const float x)
+  {
+    return x == 0 ? 1e-7 : x;
+  }
+}
 
 StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters(sample_comparisons_holder & sch,
                                                             const CaloRecGPU::ConstantDataHolder & constant_data,
@@ -673,7 +732,7 @@ StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters(sample_comparisons_h
   sch.t2r_table.clear();
   sch.t2r_table.resize(cluster_info_2.number, -1);
 
-  std::vector<int> similarity_map(cluster_info_1.number * cluster_info_2.number, 0.);
+  std::vector<double> similarity_map(cluster_info_1.number * cluster_info_2.number, 0.);
 
   std::vector<double> ref_normalization(cluster_info_1.number, 0.);
   std::vector<double> test_normalization(cluster_info_2.number, 0.);
@@ -703,11 +762,11 @@ StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters(sample_comparisons_h
 
       const double quantity = ( match_in_energy ? std::abs(cell_info.energy[i]) : SNR );
       const double weight = (quantity + 1e-8) *
-                            ( quantity > m_seedThreshold ? (match_in_energy ? 1000 : m_seed_weight) :
+                            ( SNR > m_seedThreshold ? (match_in_energy ? 1000 : m_seed_weight) :
                               (
-                                      quantity > m_growThreshold ? (match_in_energy ? 750 : m_grow_weight) :
+                                      SNR > m_growThreshold ? (match_in_energy ? 950 : m_grow_weight) :
                                       (
-                                              quantity > m_termThreshold ? (match_in_energy ? 500 : m_terminal_weight) : 0
+                                              SNR > m_termThreshold ? (match_in_energy ? 900 : m_terminal_weight) : (match_in_energy ? 100 : 0)
                                       )
                               )
                             );
@@ -725,10 +784,8 @@ StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters(sample_comparisons_h
           test_c2 = test_tag.is_shared_between_clusters() ? test_tag.secondary_cluster_index() : test_c1;
         }
 
-      float ref_rev_cw = ref_tag.is_shared_between_clusters() ? 0.5f : 1.0f;
-      //float_unhack(ref_tag.secondary_cluster_weight());
-      float test_rev_cw = test_tag.is_shared_between_clusters() ? 0.5f : 1.0f;
-      //float_unhack(test_tag.secondary_cluster_weight());
+      float ref_rev_cw = float_unhack(ref_tag.secondary_cluster_weight());
+      float test_rev_cw = float_unhack(test_tag.secondary_cluster_weight());
 
       float ref_cw = 1.0f - ref_rev_cw;
       float test_cw = 1.0f - test_rev_cw;
@@ -751,13 +808,23 @@ StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters(sample_comparisons_h
         }
       if (ref_c1 >= 0)
         {
-          ref_normalization[ref_c1] += weight * ref_cw;
-          ref_normalization[ref_c2] += weight * ref_rev_cw;
+          ref_normalization[ref_c1] += weight * ref_cw * ref_cw;
+          ref_normalization[ref_c2] += weight * ref_rev_cw * ref_rev_cw;
         }
       if (test_c1 >= 0)
         {
-          test_normalization[test_c1] += weight * test_cw;
-          test_normalization[test_c2] += weight * test_rev_cw;
+          test_normalization[test_c1] += weight * test_cw * test_cw;
+          test_normalization[test_c2] += weight * test_rev_cw * test_rev_cw;
+        }
+    }
+
+  for (int testc = 0; testc < cluster_info_2.number; ++testc)
+    {
+      const double test_norm = test_normalization[testc] + double(test_normalization[testc] == 0.);
+      for (int refc = 0; refc < cluster_info_1.number; ++refc)
+        {
+          const double ref_norm = ref_normalization[refc] + double(ref_normalization[refc] == 0.);
+          similarity_map[testc * cluster_info_1.number + refc] /= std::sqrt(ref_norm * test_norm);
         }
     }
 
@@ -785,7 +852,7 @@ StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters(sample_comparisons_h
 
       for (; wanted_size < sorter.size(); ++wanted_size)
         {
-          const double match_weight = similarity_map[testc * cluster_info_1.number + sorter[wanted_size]] / test_normalization [testc];
+          const double match_weight = similarity_map[testc * cluster_info_1.number + sorter[wanted_size]];
           if (match_weight < m_min_similarity)
             {
               break;
@@ -819,7 +886,7 @@ StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters(sample_comparisons_h
           if (skipped_matching[testc] < sorted_GPU_matches[testc].size())
             {
               const int match_c = sorted_GPU_matches[testc][skipped_matching[testc]];
-              const double match_weight = similarity_map[testc * cluster_info_1.number + match_c] / ref_normalization[match_c];
+              const double match_weight = similarity_map[testc * cluster_info_1.number + match_c];
               if (match_weight >= m_min_similarity && match_weight > matched_weights[match_c])
                 {
                   const int prev_match = sch.r2t_table[match_c];
@@ -895,67 +962,6 @@ CaloGPUClusterAndCellDataMonitor::~CaloGPUClusterAndCellDataMonitor()
 namespace
 {
 
-  template <class ... Args>
-  struct multi_class_holder
-  {
-    static constexpr size_t size()
-    {
-      return sizeof...(Args);
-    }
-  };
-
-  //To deal with potential lack of maybe_unused in pack expansions.
-  template <class Arg>
-  static constexpr decltype(auto) suppress_warning(Arg && a)
-  {
-    return std::forward<Arg>(a);
-  }
-
-  static constexpr void suppress_warning()
-  {
-    return;
-  }
-
-  template <class F, class ... Types, class ... Args>
-  void apply_to_multi_class(F && f, const multi_class_holder<Types...> &, Args && ... args)
-  {
-    size_t i = 0;
-    if constexpr (std::is_same_v < decltype(f((Types{}, ...), i, std::forward<Args>(args)...)), void > )
-      {
-        (f(Types{}, i++, std::forward<Args>(args)...), ...);
-      }
-    else
-      {
-        (suppress_warning(f(Types{}, i++, std::forward<Args>(args)...)), ...);
-      }
-  }
-
-  static double regularize_angle (const double b, const double a = 0.)
-  //a. k. a. proxim in Athena code.
-  {
-    const float diff = b - a;
-    const float divi = (fabs(diff) - Helpers::Constants::pi<double>) / (2 * Helpers::Constants::pi<float>);
-    return b - ceilf(divi) * ((b > a + Helpers::Constants::pi<double>) - (b < a - Helpers::Constants::pi<float>)) * 2 * Helpers::Constants::pi<float>;
-  }
-
-  static float float_unhack(const unsigned int bits)
-  {
-    float res;
-    std::memcpy(&res, &bits, sizeof(float));
-    //In C++20, we should bit-cast. For now, for our platform, works.
-    return res;
-  }
-
-  static double protect_from_zero(const double x)
-  {
-    return x == 0 ? 1e-15 : x;
-  }
-
-  static float protect_from_zero(const float x)
-  {
-    return x == 0 ? 1e-7 : x;
-  }
-
   namespace ClusterProperties
   {
 #define CALORECGPU_BASIC_CLUSTER_PROPERTY(NAME, ...)                                                                              \
@@ -990,6 +996,7 @@ namespace
 
 #define CALORECGPU_CLUSTER_MOMENT(NAME, PROPERTY) CALORECGPU_BASIC_CLUSTER_PROPERTY(moments_ ## NAME, return cluster_moments . PROPERTY [cluster_index];)
 
+    CALORECGPU_CLUSTER_MOMENT(time, time)
     CALORECGPU_CLUSTER_MOMENT(FIRST_PHI, firstPhi)
     CALORECGPU_CLUSTER_MOMENT(FIRST_ETA, firstEta)
     CALORECGPU_CLUSTER_MOMENT(SECOND_R, secondR)
@@ -1176,14 +1183,14 @@ namespace
   };
 
     CALORECGPU_COMPARED_CLUSTER_PROPERTY(delta_phi_in_range,
-                                         return regularize_angle( regularize_angle(cluster_info_2.clusterPhi[cluster_index_2]) -
-                                                                  regularize_angle(cluster_info_1.clusterPhi[cluster_index_1])    );
+                                         return Helpers::regularize_angle( Helpers::regularize_angle(cluster_info_2.clusterPhi[cluster_index_2]) -
+                                                                           Helpers::regularize_angle(cluster_info_1.clusterPhi[cluster_index_1])    );
                                         )
 
     CALORECGPU_COMPARED_CLUSTER_PROPERTY(delta_R,
                                          const double delta_eta = cluster_info_2.clusterEta[cluster_index_2] - cluster_info_1.clusterEta[cluster_index_1];
-                                         const double delta_phi = regularize_angle( regularize_angle(cluster_info_2.clusterPhi[cluster_index_2]) -
-                                                                                    regularize_angle(cluster_info_1.clusterPhi[cluster_index_1])    );
+                                         const double delta_phi = Helpers::regularize_angle( Helpers::regularize_angle(cluster_info_2.clusterPhi[cluster_index_2]) -
+                                                                                             Helpers::regularize_angle(cluster_info_1.clusterPhi[cluster_index_1])    );
                                          return std::sqrt(delta_eta * delta_eta + delta_phi * delta_phi);
 
                                         )
@@ -1370,14 +1377,7 @@ StatusCode CaloGPUClusterAndCellDataMonitor::initialize_plotted_variables()
   const std::vector<std::string> histo_strings = m_moniTool->histogramService()->getHists();
   //Small problem: other histograms with matching names.
   //Mitigated by the fact that we use cell_<property> and cluster_<property>...
-  
-  std::cout << "------------------------------------------------------------------------------------------\n";
-  for (const auto & str: histo_strings)
-  {
-    std::cout << str << "\n";
-  }
-  std::cout << "------------------------------------------------------------------------------------------" << std::endl;
-  
+
   m_clusterPropertiesToDo.resize(BasicClusterProperties::size(), false);
   m_comparedClusterPropertiesToDo.resize(BasicClusterProperties::size(), false);
   m_extraComparedClusterPropertiesToDo.resize(ComparedClusterProperties::size(), false);

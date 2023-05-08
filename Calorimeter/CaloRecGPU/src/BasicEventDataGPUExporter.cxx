@@ -59,21 +59,15 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
     }
 
 
-
   if (cell_collection->isOrderedAndComplete())
     //Fast path: cell indices within the collection and identifierHashes match!
     {
+      ATH_MSG_DEBUG("Taking quick path on event " << ctx.evt());
       int cell_index = 0;
       for (CaloCellContainer::const_iterator iCells = cell_collection->begin(); iCells != cell_collection->end(); ++iCells, ++cell_index)
         {
           const CaloCell * cell = (*iCells);
-        
-          const int alt_index = cell->caloDDE()->calo_hash();
-          if (alt_index != cell_index)
-          {
-            std::cout << alt_index << " " << cell_index << std::endl;
-          }
-        
+
           const float energy = cell->energy();
           const unsigned int gain = GainConversion::from_standard_gain(cell->gain());
           ed.m_cell_info->energy[cell_index] = energy;
@@ -94,12 +88,54 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
             }
         }
     }
+  else if (m_missingCellsToFill.size() > 0)
+    //Remediated: we know the missing cells, force them to be invalid.
+    //(Tests so far, on samples both oldish and newish, had 186986 and 187352 missing...)
+    {
+      ATH_MSG_DEBUG("Taking remediated fast path on event " << ctx.evt());
+      int cell_index = 0;
+      size_t missing_cell_count = 0;
+      for (CaloCellContainer::const_iterator iCells = cell_collection->begin(); iCells != cell_collection->end(); ++iCells, ++cell_index)
+        {
+          const CaloCell * cell = (*iCells);
+
+          if (missing_cell_count < m_missingCellsToFill.size() && cell_index == m_missingCellsToFill[missing_cell_count])
+            {
+              --iCells;
+              ed.m_cell_info->gain[cell_index] = GainConversion::invalid_gain();
+              ++missing_cell_count;
+              continue;
+            }
+          else
+            {
+              const float energy = cell->energy();
+              const unsigned int gain = GainConversion::from_standard_gain(cell->gain());
+              ed.m_cell_info->energy[cell_index] = energy;
+              ed.m_cell_info->gain[cell_index] = gain;
+              ed.m_cell_info->time[cell_index] = cell->time();
+              if (CaloRecGPU::GeometryArr::is_tile(cell_index))
+                {
+                  const TileCell * tile_cell = (TileCell *) cell;
+
+                  ed.m_cell_info->qualityProvenance[cell_index] = QualityProvenance{tile_cell->qual1(),
+                                                                                    tile_cell->qual2(),
+                                                                                    tile_cell->qbit1(),
+                                                                                    tile_cell->qbit2()};
+                }
+              else
+                {
+                  ed.m_cell_info->qualityProvenance[cell_index] = QualityProvenance{cell->quality(), cell->provenance()};
+                }
+            }
+        }
+    }
   else
     //Slow path: be careful.
     {
       /*
       std::vector<bool> has_cell(NCaloCells, false);
       // */
+      ATH_MSG_DEBUG("Taking slow path on event " << ctx.evt());
       for (int cell_index = 0; cell_index < NCaloCells; ++cell_index)
         {
           //ed.m_cell_info->energy[cell_index] = 0;
@@ -115,11 +151,11 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
           //const int cell_index = m_calo_id->calo_cell_hash(cell->ID());
           const int cell_index = cell->caloDDE()->calo_hash();
           //See calodde
-          
+
           /*
           has_cell[cell_index] = true;
           // */
-        
+
           const float energy = cell->energy();
 
           const unsigned int gain = GainConversion::from_standard_gain(cell->gain());
@@ -186,7 +222,7 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
 
           for (auto it = cell_links->begin(); it != cell_links->end(); ++it)
             {
-              if (m_considerSharedcells)
+              if (m_considerSharedCells)
                 {
                   const int cell_ID = m_calo_id->calo_cell_hash(it->ID());
                   const float weight = it.weight();

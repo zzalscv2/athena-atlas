@@ -9,7 +9,7 @@ import CaloRecGPUTesting
 def Configure(Configurator, clustersname = None):
         from AthenaConfiguration.ComponentFactory import CompFactory
         
-        result = Configurator.StandardConfigurationPreClusterAlgorithmsConf(clustersname)
+        result = CaloRecGPUTesting.PrevAlgorithmsConfiguration(Configurator, clustersname)
         
         HybridClusterProcessor = CompFactory.CaloGPUHybridClusterProcessor("HybridClusterProcessor")
         HybridClusterProcessor.ClustersOutputName = Configurator.ClustersOutputName

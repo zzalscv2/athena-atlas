@@ -1,4 +1,5 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#import CaloRecGPU.CaloRecGPUConfigurator
 
 from CaloRecGPU.CaloRecGPUConfigurator import SingleToolToPlot, ComparedToolsToPlot
 
@@ -90,6 +91,8 @@ def FullTestConfiguration(Configurator, TestGrow=False, TestSplit=False, TestMom
     
     Configurator.ClustersOutputName = clustersname
     
+    if not (TestGrow and TestSplit):
+        DoCrossTests = False
     
     result= PrevAlgorithmsConfiguration(Configurator, clustersname)
         
@@ -112,11 +115,11 @@ def FullTestConfiguration(Configurator, TestGrow=False, TestSplit=False, TestMom
         if TestSplit and not DoCrossTests:
             Plotter.ToolsToPlot += [ SingleToolToPlot("DefaultSplitting", "CPU_splitting") ]
             Plotter.ToolsToPlot += [ SingleToolToPlot("PropCalcPostSplitting", "GPU_splitting") ]
-            Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultSplitting", "PropCalcPostSplitting", "splitting") ]
+            Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultSplitting", "PropCalcPostSplitting", "splitting", True) ]
         if TestMoments:
             Plotter.ToolsToPlot += [ SingleToolToPlot("CPUMoments", "CPU_moments") ]
             Plotter.ToolsToPlot += [ SingleToolToPlot("AthenaClusterImporter", "GPU_moments") ]
-            Plotter.PairsToPlot += [ ComparedToolsToPlot("CPUMoments", "AthenaClusterImporter", "moments") ]
+            Plotter.PairsToPlot += [ ComparedToolsToPlot("CPUMoments", "AthenaClusterImporter", "moments", True) ]
         if DoCrossTests:
             Plotter.ToolsToPlot += [ SingleToolToPlot("DefaultGrowing", "CPU_growing") ]
             Plotter.ToolsToPlot += [ SingleToolToPlot("PropCalcPostGrowing", "GPU_growing") ]
@@ -124,12 +127,12 @@ def FullTestConfiguration(Configurator, TestGrow=False, TestSplit=False, TestMom
             
             Plotter.ToolsToPlot += [ SingleToolToPlot("DefaultSplitting", "CPUCPU_splitting") ]
             Plotter.ToolsToPlot += [ SingleToolToPlot("PropCalcPostSplitting", "GPUGPU_splitting") ]
-            Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultSplitting", "PropCalcPostSplitting", "CPU_to_GPUGPU_splitting") ]
+            Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultSplitting", "PropCalcPostSplitting", "CPU_to_GPUGPU_splitting", True) ]
             
             Plotter.ToolsToPlot += [ SingleToolToPlot("PropCalcDefaultGrowGPUSplit", "CPUGPU_splitting") ]
             Plotter.ToolsToPlot += [ SingleToolToPlot("DefaultPostGPUSplitting", "GPUCPU_splitting") ]
-            Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultSplitting", "PropCalcDefaultGrowGPUSplit", "CPU_to_CPUGPU_splitting") ]
-            Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultSplitting", "DefaultPostGPUSplitting", "CPU_to_GPUCPU_splitting") ]
+            Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultSplitting", "PropCalcDefaultGrowGPUSplit", "CPU_to_CPUGPU_splitting", True) ]
+            Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultSplitting", "DefaultPostGPUSplitting", "CPU_to_GPUCPU_splitting", True) ]
             
         
     HybridClusterProcessor.DoMonitoring = Configurator.DoMonitoring
@@ -151,15 +154,14 @@ def FullTestConfiguration(Configurator, TestGrow=False, TestSplit=False, TestMom
     
     ConstantDataExporter = result.popToolsAndMerge( Configurator.BasicConstantDataExporterToolConf() )
     EventDataExporter = result.popToolsAndMerge( Configurator.BasicEventDataExporterToolConf() )
-    
+        
     AthenaClusterImporter = None
     
     if TestMoments:
          AthenaClusterImporter = result.popToolsAndMerge( Configurator.AthenaClusterAndMomentsImporterToolConf("AthenaClusterImporter") )
     else:
          AthenaClusterImporter = result.popToolsAndMerge( Configurator.BasicAthenaClusterImporterToolConf("AthenaClusterImporter") )
-        
-    
+            
     HybridClusterProcessor.ConstantDataToGPUTool = ConstantDataExporter
     HybridClusterProcessor.EventDataToGPUTool = EventDataExporter
     HybridClusterProcessor.GPUToEventDataTool = AthenaClusterImporter
@@ -340,13 +342,6 @@ def FullTestConfiguration(Configurator, TestGrow=False, TestSplit=False, TestMom
                 CPUOut3 = result.popToolsAndMerge( Configurator.CPUOutputToolConf("./out_modified_grow_default_split", "ModifiedGrowDefaultSplitOutput") )
                 HybridClusterProcessor.AfterGPUTools += [CPUOut3]
             
-    
-    from CaloBadChannelTool.CaloBadChanToolConfig import CaloBadChanToolCfg
-    caloBadChanTool = result.popToolsAndMerge( CaloBadChanToolCfg(Configurator.ConfigFlags) )
-    CaloClusterBadChannelList=CompFactory.CaloClusterBadChannelList
-    BadChannelListCorr = CaloClusterBadChannelList(badChannelTool = caloBadChanTool)
-    HybridClusterProcessor.AfterGPUTools += [BadChannelListCorr]
-
     result.addEventAlgo(HybridClusterProcessor,primary=True)
 
     return result
@@ -457,6 +452,8 @@ def PrepareTest(Configurator,
     if 'StreamRDO' in Configurator.ConfigFlags.Input.ProcessingTags:
         cfg.addEventAlgo(CompFactory.xAODMaker.EventInfoCnvAlg(),sequenceName="AthAlgSeq")
     
+    Configurator.MissingCellsToFill = [186986, 187352]
+    
     if parse_command_arguments:
         return (cfg, int(args.numevents))
     else:
@@ -465,7 +462,7 @@ def PrepareTest(Configurator,
 #For pretty printing things in axes when it comes to moments:
 #<MOMENT_NAME>: <PLOT TITLE> <AXIS TITLE> <UNITS>
 name_to_moment_map =  {
-    "time"                        :  ("time",                "time",                ""),
+    "time"                        :  ("time",                "time",                "[#mu s]"),
     "FIRST_PHI"                   :  ("firstPhi",            "firstPhi",            ""),
     "FIRST_ETA"                   :  ("firstEta",            "firstEta",            ""),
     "SECOND_R"                    :  ("secondR",             "secondR",             ""),
@@ -715,51 +712,51 @@ class PlotterConfigurator:
                                   ]
         if DoMoments:
             for pair in PairsToPlot:
-                for mom, prettynames in name_to_moment_map:
+                for mom, prettynames in name_to_moment_map.items():
                     self.PlotsToDo += [
-                                        ( (pair + "_cluster_moments_delta_" + mom + "_rel_ref;" + pair + "_cluster_moments_delta_" + mom + "_rel_ref_zoom_0",),
+                                        ( (pair + "_cluster_delta_moments_" + mom + "_rel_ref;" + pair + "_cluster_delta_moments_" + mom + "_rel_ref_zoom_0",),
                                           {'type': 'TH1F', 
-                                           'title': prettynames[0] + ";" + prettynames[1] + prettynames[2] + "; #Delta " + prettynames[1],
+                                           'title': prettynames[0] + "; #Delta " + prettynames[1] + "; Number of Clusters",
                                            'xbins': 51,
                                            'xmin':  -1,
                                            'xmax':  1,
                                            'path': "EXPERT"}
                                         ),
-                                        ( (pair + "_cluster_moments_delta_" + mom + "_rel_ref;" + pair + "_cluster_moments_delta_" + mom + "_rel_ref_zoom_1",),
+                                        ( (pair + "_cluster_delta_moments_" + mom + "_rel_ref;" + pair + "_cluster_delta_moments_" + mom + "_rel_ref_zoom_1",),
                                           {'type': 'TH1F', 
-                                           'title': prettynames[0] + ";" + prettynames[1] + prettynames[2] + "; #Delta " + prettynames[1],
+                                           'title': prettynames[0] + "; #Delta " + prettynames[1] + "; Number of Clusters",
                                            'xbins': 51,
                                            'xmin':  -0.5,
                                            'xmax':  0.5,
                                            'path': "EXPERT"}
                                         ),
-                                        ( (pair + "_cluster_moments_delta_" + mom + "_rel_ref;" + pair + "_cluster_moments_delta_" + mom + "_rel_ref_zoom_2",),
+                                        ( (pair + "_cluster_delta_moments_" + mom + "_rel_ref;" + pair + "_cluster_delta_moments_" + mom + "_rel_ref_zoom_2",),
                                           {'type': 'TH1F', 
-                                           'title': prettynames[0] + ";" + prettynames[1] + prettynames[2] + "; #Delta " + prettynames[1],
+                                           'title': prettynames[0] + "; #Delta " + prettynames[1] + "; Number of Clusters",
                                            'xbins': 51,
                                            'xmin':  -0.1,
                                            'xmax':  0.1,
                                            'path': "EXPERT"}
                                         ),
-                                        ( (pair + "_cluster_moments_delta_" + mom + "_rel_ref;" + pair + "_cluster_moments_delta_" + mom + "_rel_ref_zoom_3",),
+                                        ( (pair + "_cluster_delta_moments_" + mom + "_rel_ref;" + pair + "_cluster_delta_moments_" + mom + "_rel_ref_zoom_3",),
                                           {'type': 'TH1F', 
-                                           'title': prettynames[0] + ";" + prettynames[1] + prettynames[2] + "; #Delta " + prettynames[1],
+                                           'title': prettynames[0] + "; #Delta " + prettynames[1] + "; Number of Clusters",
                                            'xbins': 51,
                                            'xmin':  -0.01,
                                            'xmax':  0.01,
                                            'path': "EXPERT"}
                                         ),
-                                        ( (pair + "_cluster_moments_delta_" + mom + "_rel_ref;" + pair + "_cluster_moments_delta_" + mom + "_rel_ref_zoom_4",),
+                                        ( (pair + "_cluster_delta_moments_" + mom + "_rel_ref;" + pair + "_cluster_delta_moments_" + mom + "_rel_ref_zoom_4",),
                                           {'type': 'TH1F', 
-                                           'title': prettynames[0] + ";" + prettynames[1] + prettynames[2] + "; #Delta " + prettynames[1],
+                                           'title': prettynames[0] + "; #Delta " + prettynames[1] + "; Number of Clusters",
                                            'xbins': 51,
                                            'xmin':  -0.001,
                                            'xmax':  0.001,
                                            'path': "EXPERT"}
                                         ),
-                                        ( (pair + "_cluster_moments_delta_" + mom + "_rel_ref;" + pair + "_cluster_moments_delta_" + mom + "_rel_ref_zoom_5",),
+                                        ( (pair + "_cluster_delta_moments_" + mom + "_rel_ref;" + pair + "_cluster_delta_moments_" + mom + "_rel_ref_zoom_5",),
                                           {'type': 'TH1F', 
-                                           'title': prettynames[0] + ";" + prettynames[1] + prettynames[2] + "; #Delta " + prettynames[1],
+                                           'title': prettynames[0] + "; #Delta " + prettynames[1] + "; Number of Clusters",
                                            'xbins': 51,
                                            'xmin':  -0.0001,
                                            'xmax':  0.0001,

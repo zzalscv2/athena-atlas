@@ -49,7 +49,7 @@ class BasicConstantGPUDataExporter :
    *
    */
 
-  Gaudi::Property<bool> m_keepCPUData {this, "KeepCPUData", false, "Keep CPU version of GPU data format"};
+  Gaudi::Property<bool> m_keepCPUData {this, "KeepCPUData", true, "Keep CPU version of GPU data format"};
 
   /** @brief Key of the CaloNoise Conditions data object. Typical values
       are '"electronicNoise', 'pileupNoise', or '"totalNoise' (default) */

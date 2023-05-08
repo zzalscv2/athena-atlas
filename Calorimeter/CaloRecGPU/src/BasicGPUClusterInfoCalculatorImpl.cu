@@ -101,15 +101,6 @@ void updateSeedCellProperties(CaloRecGPU::EventDataHolder & holder,
 
 /**********************************************************************************/
 
-__device__  static inline
-float regularize_angle(const float b, const float a)
-//a. k. a. proxim in Athena code.
-{
-  const float diff = b - a;
-  const float divi = (fabsf(diff) - Helpers::Constants::pi<float>) / (2 * Helpers::Constants::pi<float>);
-  return b - ceilf(divi) * ((b > a + Helpers::Constants::pi<float>) - (b < a - Helpers::Constants::pi<float>)) * 2 * Helpers::Constants::pi<float>;
-}
-
 __global__ static
 void calculateClusterInfoKernel( Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
                                  const Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
@@ -141,7 +132,7 @@ void calculateClusterInfoKernel( Helpers::CUDA_kernel_object<ClusterInfoArr> clu
               atomicAdd(&(clusters_arr->clusterEta[primary_cluster]), abs_energy * geometry->eta[index] * weight);
 
               const float primary_phi_0 = temporaries->seedCellPhi[primary_cluster];
-              const float primary_phi_real = regularize_angle(phi_raw, primary_phi_0);
+              const float primary_phi_real = Helpers::regularize_angle(phi_raw, primary_phi_0);
               atomicAdd(&(clusters_arr->clusterPhi[primary_cluster]), primary_phi_real * abs_energy * weight);
 
               atomicAdd(&(clusters_arr->clusterEnergy[secondary_cluster]), energy * secondary_weight);
@@ -149,7 +140,7 @@ void calculateClusterInfoKernel( Helpers::CUDA_kernel_object<ClusterInfoArr> clu
               atomicAdd(&(clusters_arr->clusterEta[secondary_cluster]), abs_energy * geometry->eta[index] * secondary_weight);
 
               const float secondary_phi_0 = temporaries->seedCellPhi[secondary_cluster];
-              const float secondary_phi_real = regularize_angle(phi_raw, secondary_phi_0);
+              const float secondary_phi_real = Helpers::regularize_angle(phi_raw, secondary_phi_0);
               atomicAdd(&(clusters_arr->clusterPhi[secondary_cluster]), secondary_phi_real * abs_energy * secondary_weight);
             }
           else
@@ -164,7 +155,7 @@ void calculateClusterInfoKernel( Helpers::CUDA_kernel_object<ClusterInfoArr> clu
               atomicAdd(&(clusters_arr->clusterEta[cluster_index]), abs_energy * geometry->eta[index]);
 
               const float phi_0 = temporaries->seedCellPhi[cluster_index];
-              const float phi_real = regularize_angle(phi_raw, phi_0);
+              const float phi_real = Helpers::regularize_angle(phi_raw, phi_0);
               atomicAdd(&(clusters_arr->clusterPhi[cluster_index]), phi_real * abs_energy);
             }
         }
@@ -192,7 +183,7 @@ void finalizeClusterInfoKernel( Helpers::CUDA_kernel_object<ClusterInfoArr> clus
 
           clusters_arr->clusterEt[i] = temp_ET;
 
-          clusters_arr->clusterPhi[i] = regularize_angle(clusters_arr->clusterPhi[i] / abs_energy, 0.f);
+          clusters_arr->clusterPhi[i] = Helpers::regularize_angle(clusters_arr->clusterPhi[i] / abs_energy, 0.f);
 
           if ( !(temp_ET > ET_threshold || (cut_in_absolute_ET && fabsf(temp_ET) > ET_threshold) ) )
             {

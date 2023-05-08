@@ -30,8 +30,6 @@ BasicConstantGPUDataExporter::BasicConstantGPUDataExporter(const std::string & t
   declareInterface<ICaloClusterGPUConstantTransformer> (this);
 }
 
-#include "MacroHelpers.h"
-
 StatusCode BasicConstantGPUDataExporter::initialize()
 {
   if (m_hasBeenInitialized)
@@ -97,20 +95,79 @@ StatusCode BasicConstantGPUDataExporter::convert(const EventContext & ctx, Const
     return false;
   };
 
+  float min_eta_pos[NumSamplings], max_eta_pos[NumSamplings],
+        min_eta_neg[NumSamplings], max_eta_neg[NumSamplings],
+        min_phi_pos[NumSamplings], max_phi_pos[NumSamplings],
+        min_phi_neg[NumSamplings], max_phi_neg[NumSamplings],
+        min_deta   [NumSamplings], min_dphi   [NumSamplings];
+
+  for (int i = 0; i < NumSamplings; ++i)
+    {
+      min_eta_pos[i] = std::numeric_limits<float>::max();
+      max_eta_pos[i] = std::numeric_limits<float>::lowest();
+      min_eta_neg[i] = std::numeric_limits<float>::max();
+      max_eta_neg[i] = std::numeric_limits<float>::lowest();
+      min_phi_pos[i] = std::numeric_limits<float>::max();
+      max_phi_pos[i] = std::numeric_limits<float>::lowest();
+      min_phi_neg[i] = std::numeric_limits<float>::max();
+      max_phi_neg[i] = std::numeric_limits<float>::lowest();
+      min_deta   [i] = std::numeric_limits<float>::max();
+      min_dphi   [i] = std::numeric_limits<float>::max();
+    }
+
   for (int cell = 0; cell < NCaloCells; ++cell)
     {
       const CaloDetDescrElement * caloElement = calo_dd_man->get_element((IdentifierHash) cell);
 
-      cd.m_geometry->caloSample[cell] = calo_id->calo_sample(calo_id->cell_id((IdentifierHash) cell));
+      const int sampling = calo_id->calo_sample(calo_id->cell_id((IdentifierHash) cell));
+
+      cd.m_geometry->caloSample[cell] = sampling;
       cd.m_geometry->x[cell] = caloElement->x();
       cd.m_geometry->y[cell] = caloElement->y();
       cd.m_geometry->z[cell] = caloElement->z();
+      cd.m_geometry->r[cell] = caloElement->r();
       cd.m_geometry->eta[cell] = caloElement->eta();
       cd.m_geometry->phi[cell] = caloElement->phi();
+
+      cd.m_geometry->dx[cell] = caloElement->dx();
+      cd.m_geometry->dy[cell] = caloElement->dy();
+      cd.m_geometry->dz[cell] = caloElement->dz();
+      cd.m_geometry->dr[cell] = caloElement->dr();
+      cd.m_geometry->deta[cell] = caloElement->deta();
+      cd.m_geometry->dphi[cell] = caloElement->dphi();
+
       cd.m_geometry->volume[cell] = caloElement->volume();
       cd.m_geometry->neighbours.total_number[cell] = 0;
       cd.m_geometry->neighbours.offsets[cell] = 0;
+
+      if (caloElement->eta() >= 0)
+        {
+          min_eta_pos[sampling] = std::min(min_eta_pos[sampling], caloElement->eta() - caloElement->deta() / 2);
+          min_phi_pos[sampling] = std::min(min_phi_pos[sampling], caloElement->phi() - caloElement->dphi() / 2);
+          max_eta_pos[sampling] = std::max(max_eta_pos[sampling], caloElement->eta() + caloElement->deta() / 2);
+          max_phi_pos[sampling] = std::max(max_phi_pos[sampling], caloElement->phi() + caloElement->dphi() / 2);
+        }
+      else
+        {
+          min_eta_neg[sampling] = std::min(min_eta_neg[sampling], caloElement->eta() - caloElement->deta() / 2);
+          min_phi_neg[sampling] = std::min(min_phi_neg[sampling], caloElement->phi() - caloElement->dphi() / 2);
+          max_eta_neg[sampling] = std::max(max_eta_neg[sampling], caloElement->eta() + caloElement->deta() / 2);
+          max_phi_neg[sampling] = std::max(max_phi_neg[sampling], caloElement->phi() + caloElement->dphi() / 2);
+        }
+          min_deta[sampling] = std::min(min_deta[sampling], caloElement->deta());
+          min_dphi[sampling] = std::min(min_dphi[sampling], caloElement->dphi());
+
     }
+
+  for (int i = 0; i < NumSamplings; ++i)
+    {
+      constexpr float corrective_factor = 0.99f;
+      cd.m_geometry->etaPhiToCell.initialize(i, min_eta_neg[i], min_phi_neg[i], max_eta_neg[i], max_phi_neg[i],
+                                             min_eta_pos[i], min_phi_pos[i], max_eta_pos[i], max_phi_pos[i],
+                                             min_deta[i]*corrective_factor, min_dphi[i]*corrective_factor);
+    }
+
+  cd.m_geometry->fill_eta_phi_map();
 
   std::vector<IdentifierHash> neighbour_vector, full_neighs, prev_neighs;
 
@@ -221,6 +278,15 @@ StatusCode BasicConstantGPUDataExporter::convert(const EventContext & ctx, Const
 
   IdentifierHash t_start, t_end;
   calo_id->calo_cell_hash_range(CaloCell_ID::TILE, t_start, t_end);
+
+  if (t_start != cd.m_geometry->s_tileStart)
+    {
+      ATH_MSG_WARNING("Tile start (" << t_start << ") differs from assumed constant value (" << cd.m_geometry->s_tileStart << ")!");
+    }
+  if (t_end != cd.m_geometry->s_tileEnd)
+    {
+      ATH_MSG_WARNING("Tile end (" << t_end << ") differs from assumed constant value (" << cd.m_geometry->s_tileEnd << ")!");
+    }
 
   cd.m_cell_noise.allocate();
 

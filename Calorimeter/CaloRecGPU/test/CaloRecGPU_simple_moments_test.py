@@ -11,7 +11,7 @@ if __name__=="__main__":
 
     Configurator = CaloRecGPUConfigurator()
         
-    PlotterConfig = CaloRecGPUTesting.PlotterConfigurator(["CPU_growing", "GPU_growing", "CPU_splitting", "GPU_splitting", "CPU_moments", "GPU_moments"], ["growing", "splitting", "moments"])
+    PlotterConfig = CaloRecGPUTesting.PlotterConfigurator(["CPU_moments", "GPU_moments"], ["moments"], DoMoments = True)
     
     Configurator.DoMonitoring = True
     

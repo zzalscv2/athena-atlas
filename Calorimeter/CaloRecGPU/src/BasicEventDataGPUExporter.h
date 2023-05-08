@@ -62,8 +62,11 @@ class BasicEventDataGPUExporter :
    *  Defaults to @p false.
    *
    */
-  Gaudi::Property<bool> m_considerSharedcells {this, "ConsiderSharedCells", false, "Take into account the possibility of a cell being shared between clusters."};
+  Gaudi::Property<bool> m_considerSharedCells {this, "ConsiderSharedCells", false, "Take into account the possibility of a cell being shared between clusters."};
 
+  /** @brief Cell indices to fill as disabled cells (useful if the cell vector is always missing the same cells).
+   */
+  Gaudi::Property<std::vector<int>> m_missingCellsToFill {this, "MissingCellsToFill", {}, "Force fill these cells as disabled on empty containers."};
 
   /**
   * @brief Pointer to Calo ID Helper
