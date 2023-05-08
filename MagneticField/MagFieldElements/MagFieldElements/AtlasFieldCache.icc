@@ -37,22 +37,7 @@ MagField::AtlasFieldCache::fillFieldCache(double z, double r, double phi)
     return false;
   }
 
-  // We have a map with both on
-  if (solenoidOn() && toroidOn()) {
-    m_scaleToUse = (m_zone3d->id() == m_solZoneId) ? m_solScale : m_torScale;
-  }
-  // We have a solenoid only map
-  else if (solenoidOn()) {
-    m_scaleToUse = m_solScale;
-  }
-  // We have a toroid only map
-  else if (toroidOn()) {
-    m_scaleToUse = m_torScale;
-  }
-  // Both off
-  else {
-    m_scaleToUse = 0;
-  }
+  m_scaleToUse = (m_zone3d->id() == m_solZoneId) ? m_solScale : m_torScale;
   // fill the cache, pass in current scale factor
   m_zone3d->getCache(z, r, phi, m_cache3d, m_scaleToUse);
   // save pointer to the conductors in the zone
