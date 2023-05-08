@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -6,8 +6,9 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.SystemOfUnits import GeV
 def TrigHTTSGInputCfg(flags):
     """
-    Configure HTT wrapers generation, outFile will be taken from flags in the future
+    Configure HTT wrappers generation, outFile will be taken from flags in the future
     """
+
     acc = ComponentAccumulator()
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     acc.merge(ITkPixelReadoutGeometryCfg(flags))

@@ -4,6 +4,7 @@ def createHTTConfigFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
     cf = AthConfigFlags()
     cf.addFlag('algoTag', '')
+    cf.addFlag('wrapperFileName', 'HTTWrapper.root')
 
     def __httHough1DFlags():
         """Additional function delays import"""
@@ -32,7 +33,6 @@ def createBasicHTTConfigFlags():
 
     # common
     cf.addFlag('name', '')
-    cf.addFlag('wrapperFileName', 'HTTWrapper.root')
 
     # input
     cf.addFlag('firstInputToolN', 1)
