@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from ActsInterop import UnitConstants
-from ActsInterop.ActsConfigFlags import SeedingStrategy 
+from ActsConfig.ActsConfigFlags import SeedingStrategy 
 
 def ActsTrkITkPixelSeedingToolCfg(flags,
                                   **kwargs) -> ComponentAccumulator:
@@ -97,7 +97,7 @@ def  ActsTrkSiSpacePointsSeedMakerCfg(flags,
     kwargs['name'] = name
 
     # Main properties
-    from ActsInterop.TrackingComponentConfigurer import TrackingComponentConfigurer
+    from ActsConfig.TrackingComponentConfigurer import TrackingComponentConfigurer
     configuration_settings = TrackingComponentConfigurer(flags) 
 
     kwargs.setdefault('SpacePointsPixelName', 'ITkPixelSpacePoints')

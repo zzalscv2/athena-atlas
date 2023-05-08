@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     print(flags_set[0].dump())
 
-    from ActsTrkAnalysis.ActsTrkAnalysisConfig import ActsTrkSeedingAlgorithmAnalysisAlgCfg
+    from ActsConfig.ActsTrkAnalysisConfig import ActsTrkSeedingAlgorithmAnalysisAlgCfg
     acc.merge(ActsTrkSeedingAlgorithmAnalysisAlgCfg(flags_set[0]))
 
     mlog = logging.getLogger("SeedingAlgorithmAnalysis")

@@ -86,14 +86,14 @@ if args.verboseStoreGate:
 log.debug('Dumping of ConfigFlags now.')
 flags.dump()
 
-from ActsGeometry.ActsGeometryConfig import ActsExtrapolationToolCfg
+from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
 extrapol = cfg.popToolsAndMerge(ActsExtrapolationToolCfg(flags,
                                                          "ActsExtrapolationTool",
                                                          InteractionMultiScatering = True,
                                                          InteractionEloss = True,
                                                          InteractionRecord = True))
 
-from ActsGeometry.ActsGeometryConfig import ActsExtrapolationAlgCfg
+from ActsConfig.ActsGeometryConfig import ActsExtrapolationAlgCfg
 cfg.merge(ActsExtrapolationAlgCfg(flags,
                                   "ActsExtrapolationAlg",
                                   NParticlesPerEvent=int(1e4),

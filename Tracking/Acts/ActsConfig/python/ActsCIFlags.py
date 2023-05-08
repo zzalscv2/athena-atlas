@@ -25,7 +25,7 @@ def actsTrkValidateSpacePointsFlags(flags):
 
 def actsCoreValidateSpacePointsFlags(flags):
     """flags for Reco_tf with CA used in CI tests: use for validating ACTS-based space point formation"""
-    from ActsInterop.ActsConfigFlags import SpacePointStrategy
+    from ActsConfig.ActsConfigFlags import SpacePointStrategy
     flags.Acts.SpacePointStrategy = SpacePointStrategy.ActsCore
     actsTrkValidateSpacePointsFlags(flags)
     
@@ -37,7 +37,7 @@ def actsValidateSeedsFlags(flags):
 
 def actsValidateOrthogonalSeedsFlags(flags):
     """flags for Reco_tf with CA used in CI tests: use SiSpacePointSeedMaker tool during reconstruction (orthogonal seeding)"""
-    from ActsInterop.ActsConfigFlags import SeedingStrategy
+    from ActsConfig.ActsConfigFlags import SeedingStrategy
     flags.Acts.SeedingStrategy = SeedingStrategy.Orthogonal
     actsValidateSeedsFlags(flags)
 

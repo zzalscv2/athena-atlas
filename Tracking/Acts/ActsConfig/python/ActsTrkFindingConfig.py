@@ -2,7 +2,6 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from ActsTrkFindingTool.ActsTrkFindingToolConfig import ActsTrkFindingToolCfg
 
 # ACTS only algorithm
 def ActsTrkFindingCfg(flags, name: str = "ActsTrkFindingAlg", **kwargs):
@@ -10,6 +9,7 @@ def ActsTrkFindingCfg(flags, name: str = "ActsTrkFindingAlg", **kwargs):
 
     # tools
     if "TrackFindingTool" not in kwargs:
+        from ActsConfig.ActsTrkFindingToolConfig import ActsTrkFindingToolCfg
         kwargs["TrackFindingTool"] = acc.popToolsAndMerge(ActsTrkFindingToolCfg(flags))
 
     kwargs.setdefault("PixelClusterContainerKey", "ITkPixelClusters")
@@ -20,7 +20,7 @@ def ActsTrkFindingCfg(flags, name: str = "ActsTrkFindingAlg", **kwargs):
     kwargs.setdefault("TracksLocation", "SiSPSeededActsTracks")
 
     if flags.Acts.doMonitoring:
-        from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkFindingMonitoringCfg
+        from ActsConfig.ActsTrkMonitoringConfig import ActsTrkFindingMonitoringCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkFindingMonitoringCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.TrackFindingAlg(name, **kwargs))

@@ -2,12 +2,12 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from ActsTrkSeedingTool.ActsTrkSeedingToolConfig import ActsTrkITkPixelSeedingToolCfg, ActsTrkITkStripSeedingToolCfg
-from ActsTrkSeedingTool.ActsTrkSeedingToolConfig import ActsTrkITkPixelOrthogonalSeedingToolCfg, ActsTrkITkStripOrthogonalSeedingToolCfg
-from ActsTrkTrackParamsEstimationTool.ActsTrkTrackParamsEstimationToolConfig import TrackParamsEstimationToolCfg
-from ActsGeometry.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-from ActsInterop.ActsConfigFlags import SeedingStrategy
-from ActsTrkEventCnv.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
+from ActsConfig.ActsTrkSeedingToolConfig import ActsTrkITkPixelSeedingToolCfg, ActsTrkITkStripSeedingToolCfg
+from ActsConfig.ActsTrkSeedingToolConfig import ActsTrkITkPixelOrthogonalSeedingToolCfg, ActsTrkITkStripOrthogonalSeedingToolCfg
+from ActsConfig.ActsTrkTrackParamsEstimationToolConfig import TrackParamsEstimationToolCfg
+from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+from ActsConfig.ActsConfigFlags import SeedingStrategy
+from ActsConfig.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
 
 # ACTS algorithm using Athena objects upstream
 def ActsTrkITkPixelSeedingCfg(flags,
@@ -44,7 +44,7 @@ def ActsTrkITkPixelSeedingCfg(flags,
     kwargs.setdefault('DetectorElements', 'ITkPixelDetectorElementCollection')
 
     if flags.Acts.doMonitoring:
-        from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkITkPixelSeedingMonitoringCfg
+        from ActsConfig.ActsTrkMonitoringConfig import ActsTrkITkPixelSeedingMonitoringCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkPixelSeedingMonitoringCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
@@ -85,7 +85,7 @@ def ActsTrkITkStripSeedingCfg(flags,
     kwargs.setdefault('DetectorElements', 'ITkStripDetectorElementCollection')
 
     if flags.Acts.doMonitoring:
-        from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkITkStripSeedingMonitoringCfg
+        from ActsConfig.ActsTrkMonitoringConfig import ActsTrkITkStripSeedingMonitoringCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkStripSeedingMonitoringCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
@@ -100,7 +100,7 @@ def ActsTrkSeedingCfg(flags):
         acc.merge(ActsTrkITkStripSeedingCfg(flags))
 
     if flags.Acts.doAnalysis:
-        from ActsTrkAnalysis.ActsTrkAnalysisConfig import ActsTrkSeedAnalysisCfg, ActsTrkEstimatedTrackParamsAnalysisCfg
+        from ActsConfig.ActsTrkAnalysisConfig import ActsTrkSeedAnalysisCfg, ActsTrkEstimatedTrackParamsAnalysisCfg
         acc.merge(ActsTrkSeedAnalysisCfg(flags))
         acc.merge(ActsTrkEstimatedTrackParamsAnalysisCfg(flags))
 

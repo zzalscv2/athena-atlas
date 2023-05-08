@@ -7,34 +7,34 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
 
     toAOD = []
 
-    pixel_cluster_shortlist = ['-pixelClusterLink']
-    strip_cluster_shortlist = ['-sctClusterLink']
-
-    pixel_cluster_variables = '.'.join(pixel_cluster_shortlist)
-    strip_cluster_variables = '.'.join(strip_cluster_shortlist)
-
-    from ActsInterop.TrackingComponentConfigurer import (
+    from ActsConfig.TrackingComponentConfigurer import (
         TrackingComponentConfigurer)
     configuration_settings = TrackingComponentConfigurer(flags)
 
     if flags.Acts.EDM.PersistifyClusters and configuration_settings.producesActsClusters():
+        pixel_cluster_shortlist = ['-pixelClusterLink']
+        strip_cluster_shortlist = ['-sctClusterLink']
+        
+        pixel_cluster_variables = '.'.join(pixel_cluster_shortlist)
+        strip_cluster_variables = '.'.join(strip_cluster_shortlist)
+
         toAOD += ['xAOD::PixelClusterContainer#ITkPixelClusters',
                   'xAOD::PixelClusterAuxContainer#ITkPixelClustersAux.' + pixel_cluster_variables,
                   'xAOD::StripClusterContainer#ITkStripClusters',
                   'xAOD::StripClusterAuxContainer#ITkStripClustersAux.' + strip_cluster_variables]
+
+    if flags.Acts.EDM.PersistifySpacePoints and configuration_settings.producesActsSpacePoints():        
+        pixel_spacepoint_shortlist = []
+        strip_spacepoint_shortlist = ['topHalfStripLength', 
+                                      'bottomHalfStripLength', 
+                                      'topStripDirection',
+                                      'bottomStripDirection',
+                                      'stripCenterDistance',
+                                      'topStripCenter']
+
+        pixel_spacepoint_variables = '.'.join(pixel_spacepoint_shortlist)
+        strip_spacepoint_variables = '.'.join(strip_spacepoint_shortlist)
         
-    pixel_spacepoint_shortlist = []
-    strip_spacepoint_shortlist = ['topHalfStripLength', 
-                                  'bottomHalfStripLength', 
-                                  'topStripDirection',
-                                  'bottomStripDirection',
-                                  'stripCenterDistance',
-                                  'topStripCenter']
-
-    pixel_spacepoint_variables = '.'.join(pixel_spacepoint_shortlist)
-    strip_spacepoint_variables = '.'.join(strip_spacepoint_shortlist)
-
-    if flags.Acts.EDM.PersistifySpacePoints and configuration_settings.producesActsSpacePoints():
         toAOD += ['xAOD::SpacePointContainer#ITkPixelSpacePoints',
                   'xAOD::SpacePointAuxContainer#ITkPixelSpacePointsAux.' + pixel_spacepoint_variables,
                   'xAOD::SpacePointContainer#ITkStripSpacePoints',

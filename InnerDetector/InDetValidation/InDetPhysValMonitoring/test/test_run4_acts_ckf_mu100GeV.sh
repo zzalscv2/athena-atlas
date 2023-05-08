@@ -33,7 +33,7 @@ run () {
 run "Reconstruction" \
     Reco_tf.py --CA \
     --steering doRAWtoALL \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsInterop.ActsCIFlags.actsValidateTracksFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
     --inputRDOFile ${rdo_23p0} \
     --outputAODFile AOD.root \
     --maxEvents 1000

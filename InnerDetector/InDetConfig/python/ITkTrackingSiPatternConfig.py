@@ -51,7 +51,7 @@ def ITkTrackingSiPatternCfg(flags,
         #
         # --- Deducing configuration from the flags
         #
-        from ActsInterop.TrackingComponentConfigurer import (
+        from ActsConfig.TrackingComponentConfigurer import (
             TrackingComponentConfigurer)
         configuration_settings = TrackingComponentConfigurer(flags)
 
@@ -73,7 +73,7 @@ def ITkTrackingSiPatternCfg(flags,
         # ACTS seed
         if configuration_settings.doActsSeed:
 
-            from ActsTrkSeeding.ActsTrkSeedingConfig import (
+            from ActsConfig.ActsTrkSeedingConfig import (
                 ActsTrkSeedingCfg)
             acc.merge(ActsTrkSeedingCfg(flags))
 
@@ -86,7 +86,7 @@ def ITkTrackingSiPatternCfg(flags,
         # ACTS track
         if configuration_settings.doActsTrack:
 
-            from ActsTrkFinding.ActsTrkFindingConfig import ActsTrkFindingCfg
+            from ActsConfig.ActsTrkFindingConfig import ActsTrkFindingCfg
             if configuration_settings.doAthenaTrack:
                 acc.merge(ActsTrkFindingCfg(flags))
             else:  # send output TrackCollection to Athena ambiguity scorer etc

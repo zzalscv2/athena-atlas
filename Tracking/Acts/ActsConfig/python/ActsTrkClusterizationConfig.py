@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from ActsTrkClusterizationTools.ActsTrkClusterizationToolsConfig import ActsTrkITkPixelClusteringToolCfg, ActsTrkITkStripClusteringToolCfg
+from ActsConfig.ActsTrkClusterizationToolsConfig import ActsTrkITkPixelClusteringToolCfg, ActsTrkITkStripClusteringToolCfg
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from SCT_ConditionsTools.ITkStripConditionsToolsConfig import ITkStripConditionsSummaryToolCfg
@@ -12,7 +12,7 @@ def ActsTrkITkPixelClusterizationAlgCfg(flags, name='ActsTrkITkPixelClusterizati
     kwargs.setdefault("PixelClusteringTool", acc.popToolsAndMerge(ActsTrkITkPixelClusteringToolCfg(flags)))
 
     if flags.Acts.doMonitoring:
-        from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkITkPixelClusterizationMonitoringToolCfg
+        from ActsConfig.ActsTrkMonitoringConfig import ActsTrkITkPixelClusterizationMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkPixelClusterizationMonitoringToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterizationAlg(name, **kwargs))
@@ -29,7 +29,7 @@ def ActsTrkITkStripClusterizationAlgCfg(flags, name='ActsTrkITkStripClusterizati
     kwargs.setdefault("checkBadModules", True)
 
     if flags.Acts.doMonitoring:
-        from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkITkStripClusterizationMonitoringToolCfg
+        from ActsConfig.ActsTrkMonitoringConfig import ActsTrkITkStripClusterizationMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkStripClusterizationMonitoringToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.StripClusterizationAlg(name, **kwargs))
@@ -43,7 +43,7 @@ def ActsTrkClusterizationCfg(flags):
         acc.merge(ActsTrkITkStripClusterizationAlgCfg(flags))
 
     if flags.Acts.doAnalysis:
-        from ActsTrkAnalysis.ActsTrkAnalysisConfig import ActsTrkClusterAnalysisCfg
+        from ActsConfig.ActsTrkAnalysisConfig import ActsTrkClusterAnalysisCfg
         acc.merge(ActsTrkClusterAnalysisCfg(flags))
 
     return acc

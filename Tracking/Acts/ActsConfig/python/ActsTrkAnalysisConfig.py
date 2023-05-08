@@ -153,16 +153,16 @@ def ActsTrkBaseSeedAnalysisAlgCfg(flags,
 
     kwargs.setdefault('InputSeedCollection', 'ITkPixelSeeds')
 
-    from ActsGeometry.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
     geoTool = acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
     acc.addPublicTool(geoTool)
     
     # ATLAS Converter Tool
-    from ActsTrkEventCnv.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
+    from ActsConfig.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
     converterTool = acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags))
     
     # Track Param Estimation Tool
-    from ActsTrkTrackParamsEstimationTool.ActsTrkTrackParamsEstimationToolConfig import TrackParamsEstimationToolCfg
+    from ActsConfig.ActsTrkTrackParamsEstimationToolConfig import TrackParamsEstimationToolCfg
     trackEstimationTool = acc.popToolsAndMerge(TrackParamsEstimationToolCfg(flags))
     
     kwargs.setdefault('TrackingGeometryTool', acc.getPublicTool(geoTool.name)) # PublicToolHandle
@@ -318,13 +318,13 @@ def ActsTrkSeedingAlgorithmAnalysisAlgCfg(flags, name="ActsTrkSeedingAlgorithmAn
         ITkSiSpacePointsSeedMaker.maxSize = 1e8
         MonitoringGroupNames.append("ITkSiSpacePointSeedMaker")
 
-        from ActsTrkSeedingTool.ActsTrkSeedingToolConfig import ActsTrkSiSpacePointsSeedMakerCfg
+        from ActsConfig.ActsTrkSeedingToolConfig import ActsTrkSiSpacePointsSeedMakerCfg
         ActsITkSiSpacePointsSeedMaker = result.popToolsAndMerge(ActsTrkSiSpacePointsSeedMakerCfg(flags))
         ActsITkSiSpacePointsSeedMaker.doSpacePointConversion = False
         ActsITkSiSpacePointsSeedMaker.doSeedConversion = False
         MonitoringGroupNames.append("ActsITkSiSpacePointSeedMaker")
 
-        from ActsTrkSeedingTool.ActsTrkSeedingToolConfig import ActsTrkITkPixelOrthogonalSeedingToolCfg
+        from ActsConfig.ActsTrkSeedingToolConfig import ActsTrkITkPixelOrthogonalSeedingToolCfg
         orthogonal_seeding_tool = result.popToolsAndMerge(ActsTrkITkPixelOrthogonalSeedingToolCfg(flags))
         ActsITkSiSpacePointsSeedMakerOrthogonal = \
           result.popToolsAndMerge(ActsTrkSiSpacePointsSeedMakerCfg(flags,

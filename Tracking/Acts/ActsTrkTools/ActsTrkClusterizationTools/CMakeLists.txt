@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 atlas_subdir(ActsTrkClusterizationTools)
 
@@ -18,5 +18,3 @@ atlas_add_component(ActsTrkClusterizationTools
 		    InDetReadoutGeometry
 		    SiClusterizationToolLib
 		    xAODInDetMeasurement)
-
-atlas_install_python_modules(python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8})
