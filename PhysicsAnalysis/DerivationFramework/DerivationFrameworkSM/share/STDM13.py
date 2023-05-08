@@ -67,6 +67,18 @@ print STDM13TriggerSkimmingTool
 STDM13Seq += CfgMgr.DerivationFramework__DerivationKernel("STDM13SkimKernel",
                                                          SkimmingTools = [STDM13StringSkimmingTool,STDM13TriggerSkimmingTool])
 
+#====================================================================
+# PromptLeptonVeto
+#====================================================================
+import LeptonTaggers.LeptonTaggersConfig as PLVConfig
+
+# simple call to replaceAODReducedJets(["AntiKt4PV0TrackJets"], SeqPHYS, "PHYS")
+PLVConfig.ConfigureAntiKt4PV0TrackJets(STDM13Seq, "STDM13")
+# add decoration
+STDM13Seq += PLVConfig.GetDecoratePromptLeptonAlgs(addSpectators=False)
+
+STDM13Seq += PLVConfig.GetDecorateImprovedPromptLeptonAlgs()
+
 
 #====================================================================
 # TRUTH SETUP
@@ -182,6 +194,8 @@ STDM13SlimmingHelper.ExtraVariables += ["BTagging_AntiKt4EMTopo_201810SecVtx.-vx
                                        "AntiKt4EMPFlowJets_BTagging201903.EMFrac.HECFrac.LArQuality.HECQuality.FracSamplingMax.NegativeE.AverageLArQF.FracSamplingMaxIndex.HadronConeExclTruthLabelID.GhostTrack",
                                        "AntiKt4EMPFlowJets_BTagging201903.Jvt.JvtRpt.JvtJvfcorr",
                                        "AntiKt4EMPFlowJets_BTagging201903.NumTrkPt1000.NumTrkPt500.SumPtTrkPt500.SumPtTrkPt1000"]
+
+STDM13SlimmingHelper.ExtraVariables += PLVConfig.GetExtraImprovedPromptVariablesForDxAOD(onlyBDT=True)
 
 #----------------------------------------------------------------------
 # Add needed dictionary stuff
