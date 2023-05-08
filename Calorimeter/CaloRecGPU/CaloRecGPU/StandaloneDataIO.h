@@ -223,8 +223,15 @@ struct StandaloneDataIO
               geo->z[i] = temp->z[i];
               geo->eta[i] = temp->eta[i];
               geo->phi[i] = temp->phi[i];
+              geo->r[i] = std::sqrt(temp->x[i] * temp->x[i] + temp->y[i] * temp->y[i] + temp->z[i] * temp->z[i]);
+              geo->dx[i] = 0;
+              geo->dy[i] = 0;
+              geo->dz[i] = 0;
+              geo->dr[i] = 0;
+              geo->deta[i] = 0;
+              geo->dphi[i] = 0;
               geo->volume[i] = 0;
-              //We weren't caring about volume then.
+              //We weren't caring about these then.
               geo->neighbours.total_number[i] = temp->nNeighbours[i];
               geo->neighbours.offsets[i] = 0;
               for (int j = 0; j < NMaxNeighboursOld; ++j)
@@ -233,6 +240,7 @@ struct StandaloneDataIO
                   //We switched the order!
                 }
             }
+          std::memset(&(geo->etaPhiToCell), 0, sizeof(CaloRecGPU::EtaPhiToCellMap));
         }
       else if (version == 3)
         {
@@ -251,8 +259,15 @@ struct StandaloneDataIO
               geo->z[i] = temp->z[i];
               geo->eta[i] = temp->eta[i];
               geo->phi[i] = temp->phi[i];
+              geo->r[i] = std::sqrt(temp->x[i] * temp->x[i] + temp->y[i] * temp->y[i] + temp->z[i] * temp->z[i]);
+              geo->dx[i] = 0;
+              geo->dy[i] = 0;
+              geo->dz[i] = 0;
+              geo->dr[i] = 0;
+              geo->deta[i] = 0;
+              geo->dphi[i] = 0;
               geo->volume[i] = 0;
-              //We weren't caring about volume then.
+              //We weren't caring about these then.
               geo->neighbours.total_number[i] = temp->nReverseNeighbours[i];
               geo->neighbours.offsets[i] = 0;
               for (int j = 0; j < NMaxNeighboursOld; ++j)
@@ -261,6 +276,7 @@ struct StandaloneDataIO
                   //We switched the order!
                 }
             }
+          std::memset(&(geo->etaPhiToCell), 0, sizeof(CaloRecGPU::EtaPhiToCellMap));
         }
       else if (version == 4 || version == 5)
         {
@@ -279,6 +295,15 @@ struct StandaloneDataIO
               geo->z[i] = temp->z[i];
               geo->eta[i] = temp->eta[i];
               geo->phi[i] = temp->phi[i];
+              geo->r[i] = std::sqrt(temp->x[i] * temp->x[i] + temp->y[i] * temp->y[i] + temp->z[i] * temp->z[i]);
+              geo->dx[i] = 0;
+              geo->dy[i] = 0;
+              geo->dz[i] = 0;
+              geo->dr[i] = 0;
+              geo->deta[i] = 0;
+              geo->dphi[i] = 0;
+              //We weren't caring about these then.
+              
               geo->volume[i] = temp->volume[i];
               geo->neighbours.total_number[i] = temp->neighbours.total_number[i];
               for (int j = 0; j < NMaxNeighboursOld; ++j)
@@ -287,6 +312,7 @@ struct StandaloneDataIO
                 }
               geo->neighbours.offsets[i] = old_to_new_offset(temp->neighbours.offsets[i]);
             }
+          std::memset(&(geo->etaPhiToCell), 0, sizeof(CaloRecGPU::EtaPhiToCellMap));
         }
       else if (version == 6)
         {

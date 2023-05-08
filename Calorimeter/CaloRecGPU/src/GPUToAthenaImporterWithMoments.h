@@ -14,10 +14,11 @@
 #include "CaloRecGPU/CaloClusterGPUTransformers.h"
 #include "CaloRecGPU/CaloGPUTimed.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadCondHandleKey.h"
 
-#include "CaloDetDescr/CaloDepthTool.h"
-#include "CaloInterface/ILArHVFraction.h"
-#include <stdexcept>
+#include "CaloDetDescr/CaloDetDescrManager.h"
+#include "LArCabling/LArOnOffIdMapping.h"
+#include "LArElecCalib/ILArHVScaleCorr.h"
 
 class CaloCell_ID;
 
@@ -62,40 +63,53 @@ class GPUToAthenaImporterWithMoments :
   Gaudi::Property<std::string> m_clusterSizeString {this, "ClusterSize", "Topo_420", "The size/type of the clusters"};
 
   xAOD::CaloCluster::ClusterSize m_clusterSize;
-  
+
   /**
    * @brief Pointer to Calo ID Helper
    */
-  const CaloCell_ID* m_calo_id {nullptr};
+  const CaloCell_ID * m_calo_id {nullptr};
 
   /**
    * @brief Key for the CaloDetDescrManager in the Condition Store
    */
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this, "CaloDetDescrManager", "CaloDetDescrManager",
-                                                          "SG Key for CaloDetDescrManager in the Condition Store"};
-  
-  //Tool handles for things we can't (yet) do on the GPU.
-  
-  ToolHandle<CaloDepthTool> m_caloDepthTool{"CaloDepthTool", this};
-  ToolHandle<ILArHVFraction> m_larHVFraction{this, "LArHVFraction", {}, "Tool Handle for LArHVFraction"};
+    "SG Key for CaloDetDescrManager in the Condition Store"};
 
-  
-  
-  /** 
+  //Handles for things we can't (yet) do on the GPU.
+
+  ///@brief Cabling for the CPU-based HV moments calculation.
+   SG::ReadCondHandleKey<LArOnOffIdMapping> m_HVCablingKey{this, "LArCablingKey","LArOnOffIdMap","SG Key of LAr Cabling object"};
+ 
+ ///@brief HV corrections for the CPU-based HV moments.
+   SG::ReadCondHandleKey<ILArHVScaleCorr> m_HVScaleKey{this,"HVScaleCorrKey","LArHVScaleCorr","SG key of HVScaleCorr conditions object"};
+ 
+  ///@brief Threshold above which a cell contributes to the HV moments.
+   Gaudi::Property<float> m_HVthreshold{this,"HVThreshold",0.2,"Threshold to consider a cell 'affected' by HV issues"};
+
+  /** @brief Cell indices to fill as disabled cells (useful if the cell vector is always missing the same cells).
+   */
+  Gaudi::Property<std::vector<int>> m_missingCellsToFill {this, "MissingCellsToFill", {}, "Force fill these cells as disabled on empty containers."};
+
+
+  /**
    * @brief vector holding the input list of names of moments to
    * calculate.
    *
    * This is the list of desired names of moments given in the
    * jobOptions.*/
-  Gaudi::Property<std::vector<std::string>>  m_momentsNames{this, "MomentsNames", {}, "List of names of moments to calculate"}; 
-  
-    
+  Gaudi::Property<std::vector<std::string>> m_momentsNames{this, "MomentsNames", {}, "List of names of moments to calculate"};
+
+
   struct MomentsOptionsArray
   {
     static constexpr int num_moments = 72;
     bool array[num_moments]{};
     //Initialize to false.
-    
+    //(We could consider using
+    //some form of bitset here,
+    //but I'm not sure there would be
+    //a significant performance difference...)
+
     static constexpr int moment_to_linear(const xAOD::CaloCluster::MomentType moment)
     {
       switch (moment)
@@ -248,7 +262,7 @@ class GPUToAthenaImporterWithMoments :
             return 71;
         }
     }
-    
+
     bool & operator[] (const xAOD::CaloCluster::MomentType moment)
     {
       const int idx=moment_to_linear(moment); //this can return 72
@@ -257,7 +271,7 @@ class GPUToAthenaImporterWithMoments :
       }
       return array[moment_to_linear(moment)];
     }
-    
+
     bool operator[] (const xAOD::CaloCluster::MomentType moment) const
     { 
       const int idx=moment_to_linear(moment); //this can return 72
@@ -267,12 +281,15 @@ class GPUToAthenaImporterWithMoments :
       return array[moment_to_linear(moment)];
     }
   };
-  
+
   /** @brief Holds (in a linearized way) the moments and whether to add them to the clusters.
              (on the GPU side, they are unconditionally calculated).
   */
   MomentsOptionsArray m_momentsToDo;
-  
+
+
+  ///@brief To abbreviate checks of @p m_momentsToDo...
+  bool m_doHVMoments;
 
 };
 

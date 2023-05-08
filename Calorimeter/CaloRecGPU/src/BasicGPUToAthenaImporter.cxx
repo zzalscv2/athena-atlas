@@ -180,16 +180,75 @@ StatusCode BasicGPUToAthenaImporter::convert (const EventContext & ctx,
 
                   back_it.reindex(first_idx);
                   back_it.reweight(first_wgt);
-                  
+
                   //Of course, this is to ensure the first cell is the seed cell,
                   //in accordance to the way some cluster properties
                   //(mostly phi-related) are calculated.
                 }
-                
+
               if (this_tag.is_shared_between_clusters())
                 {
                   const int other_index = this_tag.secondary_cluster_index();
                   cell_links[other_index]->addCell(cell_index, reverse_weight);
+                }
+            }
+        }
+    }
+  else if (m_missingCellsToFill.size() > 0)
+    {
+      size_t missing_cell_count = 0;
+      for (int cell_index = 0; cell_index < NCaloCells; ++cell_index)
+        {
+          if (missing_cell_count < m_missingCellsToFill.size() && cell_index == m_missingCellsToFill[missing_cell_count])
+            {
+              ++missing_cell_count;
+              continue;
+            }
+          const ClusterTag this_tag = ed.m_cell_state->clusterTag[cell_index];
+
+          if (this_tag.is_part_of_cluster())
+            {
+              const int this_index = this_tag.cluster_index();
+              const int32_t weight_pattern = this_tag.secondary_cluster_weight();
+
+              float tempf = 1.0f;
+
+              std::memcpy(&tempf, &weight_pattern, sizeof(float));
+              //C++20 would give us bit cast to do this more properly.
+              //Still, given how the bit pattern is created,
+              //it should be safe.
+
+              const float reverse_weight = tempf;
+
+              const float this_weight = 1.0f - reverse_weight;
+
+              cell_links[this_index]->addCell(cell_index - missing_cell_count, this_weight);
+
+              if (cell_index == ed.m_clusters->seedCellID[this_index] && cell_links[this_index]->size() > 1)
+                //Seed cells aren't shared,
+                //so no need to check this on the other case.
+                {
+                  CaloClusterCellLink::iterator begin_it = cell_links[this_index]->begin();
+                  CaloClusterCellLink::iterator back_it  = (--cell_links[this_index]->end());
+
+                  const unsigned int first_idx = begin_it.index();
+                  const double first_wgt = begin_it.weight();
+
+                  begin_it.reindex(back_it.index());
+                  begin_it.reweight(back_it.weight());
+
+                  back_it.reindex(first_idx);
+                  back_it.reweight(first_wgt);
+
+                  //Of course, this is to ensure the first cell is the seed cell,
+                  //in accordance to the way some cluster properties
+                  //(mostly phi-related) are calculated.
+                }
+
+              if (this_tag.is_shared_between_clusters())
+                {
+                  const int other_index = this_tag.secondary_cluster_index();
+                  cell_links[other_index]->addCell(cell_index - missing_cell_count, reverse_weight);
                 }
             }
         }
@@ -205,7 +264,7 @@ StatusCode BasicGPUToAthenaImporter::convert (const EventContext & ctx,
 
           //const int cell_index = m_calo_id->calo_cell_hash(cell->ID());
           const int cell_index = cell->caloDDE()->calo_hash();
-          
+
           const ClusterTag this_tag = ed.m_cell_state->clusterTag[cell_index];
 
           if (this_tag.is_part_of_cluster())
@@ -242,12 +301,12 @@ StatusCode BasicGPUToAthenaImporter::convert (const EventContext & ctx,
 
                   back_it.reindex(first_idx);
                   back_it.reweight(first_wgt);
-                  
+
                   //Of course, this is to ensure the first cell is the seed cell,
                   //in accordance to the way some cluster properties
                   //(mostly phi-related) are calculated.
                 }
-                
+
               if (this_tag.is_shared_between_clusters())
                 {
                   const int other_index = this_tag.secondary_cluster_index();
@@ -262,9 +321,27 @@ StatusCode BasicGPUToAthenaImporter::convert (const EventContext & ctx,
 
   std::iota(cluster_order.begin(), cluster_order.end(), 0);
 
-  std::sort(cluster_order.begin(), cluster_order.end(), [&](const int a, const int b)
+  std::sort(cluster_order.begin(), cluster_order.end(), [&](const int a, const int b) -> bool
   {
-    return ed.m_clusters->clusterEt[a] > ed.m_clusters->clusterEt[b];
+    const bool a_valid = ed.m_clusters->seedCellID[a] >= 0;
+    const bool b_valid = ed.m_clusters->seedCellID[b] >= 0;
+    if (a_valid && b_valid)
+      {
+        return ed.m_clusters->clusterEt[a]
+        > ed.m_clusters->clusterEt[b];
+      }
+    else if (a_valid)
+      {
+        return true;
+      }
+    else if (b_valid)
+      {
+        return false;
+      }
+    else
+      {
+        return b > a;
+      }
   } );
 
   //Ordered by Et as in the default algorithm...

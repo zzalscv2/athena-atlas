@@ -1,10 +1,9 @@
-#!/bin/python
+#!/usr/bin/env python
 # art-description: GPU Topological (Topo-Automaton) Clustering test: 4 2 0 thresholds.
 # art-type: local
 # art-include: master/Athena
 # art-architecture: '#&nvidia'
-# art-output: plots_ttbar/*.png
-# art-output: plots_jets/*.png
+# art-output: expert-monitoring.root
 
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 

@@ -22,7 +22,7 @@ struct TASTag : public CaloRecGPU::Tag_1_1_12_32_18
  protected:
 
   static constexpr uint32_t s_start_counter = 0xFFFU;
-  //7 bits.
+  //12 bits.
 
   static constexpr carrier s_tag_propagation_delta = carrier(1) << s_12_bit_offset;
 

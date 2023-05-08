@@ -364,7 +364,7 @@ std::ostream & operator<<(std::ostream & s, const T & t )
 struct MatchingOptions:
   impl::simple_tuple_conversion<MatchingOptions, double, double, double, double>
 {
-  double min_similarity = 0.5, term_w = 1., grow_w = 250., seed_w = 5000.;
+  double min_similarity = 0.50, term_w = 250., grow_w = 500., seed_w = 1000.;
 
   CALORECGPU_OPTIONCLASS_CONSTRUCTORS(MatchingOptions)
 };
@@ -381,7 +381,7 @@ struct SimpleToolPair:
   impl::simple_tuple_conversion<SimpleToolPair, std::string, std::string, std::string, bool>
 {
   std::string tool_ref, tool_test, plot_id;
-  bool match_in_energy=false;
+  bool match_in_energy = false;
   
   CALORECGPU_OPTIONCLASS_CONSTRUCTORS(SimpleToolPair)
 };

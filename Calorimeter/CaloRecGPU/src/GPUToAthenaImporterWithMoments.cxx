@@ -24,7 +24,8 @@ using namespace CaloRecGPU;
 
 GPUToAthenaImporterWithMoments::GPUToAthenaImporterWithMoments(const std::string & type, const std::string & name, const IInterface * parent):
   AthAlgTool(type, name, parent),
-  CaloGPUTimed(this)
+  CaloGPUTimed(this),
+  m_doHVMoments(false)
 {
   declareInterface<ICaloClusterGPUOutputTransformer> (this);
 
@@ -39,6 +40,9 @@ StatusCode GPUToAthenaImporterWithMoments::initialize()
   ATH_CHECK( detStore()->retrieve(m_calo_id, "CaloCell_ID") );
 
   ATH_CHECK(m_caloMgrKey.initialize());
+
+  ATH_CHECK(m_HVCablingKey.initialize());
+  ATH_CHECK(m_HVScaleKey.initialize());
 
   auto get_cluster_size_from_string = [](const std::string & str, bool & failed)
   {
@@ -210,22 +214,13 @@ StatusCode GPUToAthenaImporterWithMoments::initialize()
                      << " are not valid moments and will be ignored!" );
     }
 
-  if (m_momentsToDo[xAOD::CaloCluster::CENTER_LAMBDA])
-    {
-      CHECK(m_caloDepthTool.retrieve());
-    }
-
-  if (m_momentsToDo[xAOD::CaloCluster::ENG_BAD_HV_CELLS] || m_momentsToDo[xAOD::CaloCluster::N_BAD_HV_CELLS])
-    {
-      ATH_CHECK(m_larHVFraction.retrieve());
-    }
-
+  m_doHVMoments =  m_momentsToDo[xAOD::CaloCluster::ENG_BAD_HV_CELLS] || m_momentsToDo[xAOD::CaloCluster::N_BAD_HV_CELLS];
   return StatusCode::SUCCESS;
 }
 
 
 StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
-                                                    const ConstantDataHolder &,
+                                                    const ConstantDataHolder & cdh,
                                                     EventDataHolder & ed,
                                                     xAOD::CaloClusterContainer * cluster_container) const
 {
@@ -234,10 +229,10 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
   {
     return boost::chrono::duration_cast<boost::chrono::microseconds>(after - before).count();
   };
-  
-  
+
+
   const auto start = clock_type::now();
-  
+
   SG::ReadHandle<CaloCellContainer> cell_collection(m_cellsKey, ctx);
   if ( !cell_collection.isValid() )
     {
@@ -249,13 +244,13 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
   //ed.returnToCPU(!m_keepGPUData, true, true, true);
 
   const auto pre_processing = clock_type::now();
-  
+
   ed.returnClusterNumberToCPU();
   CaloRecGPU::CUDA_Helpers::GPU_synchronize();
-  
-  
+
+
   const auto cluster_number = clock_type::now();
-  
+
   ed.returnSomeClustersToCPU(ed.m_clusters->number);
 
   std::vector<std::unique_ptr<CaloClusterCellLink>> cell_links;
@@ -267,7 +262,7 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
   CaloRecGPU::CUDA_Helpers::GPU_synchronize();
 
   const auto clusters = clock_type::now();
-  
+
   ed.returnCellsToCPU();
 
   for (int i = 0; i < ed.m_clusters->number; ++i)
@@ -285,10 +280,19 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
           //The excluded clusters don't have any cells.
         }
     }
+
+  std::vector<float> HV_energy(ed.m_clusters->number * m_doHVMoments, 0.f);
+  std::vector<int>   HV_number(ed.m_clusters->number * m_doHVMoments, 0  );
+
+  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl(m_HVCablingKey, ctx);
+  const LArOnOffIdMapping * cabling = *cablingHdl;
+  SG::ReadCondHandle<ILArHVScaleCorr> hvScaleHdl(m_HVScaleKey, ctx);
+  const ILArHVScaleCorr * hvcorr = *hvScaleHdl;
+
   CaloRecGPU::CUDA_Helpers::GPU_synchronize();
 
   const auto cells = clock_type::now();
-  
+
   ed.returnSomeMomentsToCPU(ed.m_clusters->number);
 
   if (cell_collection->isOrderedAndComplete())
@@ -341,6 +345,101 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
                 {
                   const int other_index = this_tag.secondary_cluster_index();
                   cell_links[other_index]->addCell(cell_index, reverse_weight);
+                }
+
+              if (m_doHVMoments && !cdh.m_geometry->is_tile(cell_index))
+                {
+                  HWIdentifier hwid = cabling->createSignalChannelIDFromHash((IdentifierHash) cell_index);
+                  const float corr = hvcorr->HVScaleCorr(hwid);
+                  if (corr > 0.f && corr < 100.f && fabsf(corr - 1.f) > m_HVthreshold)
+                    {
+                      const float abs_energy = fabsf(ed.m_cell_info->energy[cell_index]);
+                      HV_energy[this_index] += abs_energy;
+                      ++HV_number[this_index];
+                      if (this_tag.is_shared_between_clusters())
+                        {
+                          const int other_index = this_tag.secondary_cluster_index();
+                          HV_energy[other_index] += abs_energy;
+                          ++HV_number[other_index];
+                        }
+                    }
+                }
+            }
+        }
+    }
+  else if (m_missingCellsToFill.size() > 0)
+    {
+      size_t missing_cell_count = 0;
+      for (int cell_index = 0; cell_index < NCaloCells; ++cell_index)
+        {
+          if (missing_cell_count < m_missingCellsToFill.size() && cell_index == m_missingCellsToFill[missing_cell_count])
+            {
+              ++missing_cell_count;
+              continue;
+            }
+          const ClusterTag this_tag = ed.m_cell_state->clusterTag[cell_index];
+
+          if (this_tag.is_part_of_cluster())
+            {
+              const int this_index = this_tag.cluster_index();
+              const int32_t weight_pattern = this_tag.secondary_cluster_weight();
+
+              float tempf = 1.0f;
+
+              std::memcpy(&tempf, &weight_pattern, sizeof(float));
+              //C++20 would give us bit cast to do this more properly.
+              //Still, given how the bit pattern is created,
+              //it should be safe.
+
+              const float reverse_weight = tempf;
+
+              const float this_weight = 1.0f - reverse_weight;
+
+              cell_links[this_index]->addCell(cell_index - missing_cell_count, this_weight);
+
+              if (cell_index == ed.m_clusters->seedCellID[this_index] && cell_links[this_index]->size() > 1)
+                //Seed cells aren't shared,
+                //so no need to check this on the other case.
+                {
+                  CaloClusterCellLink::iterator begin_it = cell_links[this_index]->begin();
+                  CaloClusterCellLink::iterator back_it  = (--cell_links[this_index]->end());
+
+                  const unsigned int first_idx = begin_it.index();
+                  const double first_wgt = begin_it.weight();
+
+                  begin_it.reindex(back_it.index());
+                  begin_it.reweight(back_it.weight());
+
+                  back_it.reindex(first_idx);
+                  back_it.reweight(first_wgt);
+
+                  //Of course, this is to ensure the first cell is the seed cell,
+                  //in accordance to the way some cluster properties
+                  //(mostly phi-related) are calculated.
+                }
+
+              if (this_tag.is_shared_between_clusters())
+                {
+                  const int other_index = this_tag.secondary_cluster_index();
+                  cell_links[other_index]->addCell(cell_index - missing_cell_count, reverse_weight);
+                }
+                
+              if (m_doHVMoments && !cdh.m_geometry->is_tile(cell_index))
+                {
+                  HWIdentifier hwid = cabling->createSignalChannelIDFromHash((IdentifierHash) cell_index);
+                  const float corr = hvcorr->HVScaleCorr(hwid);
+                  if (corr > 0.f && corr < 100.f && fabsf(corr - 1.f) > m_HVthreshold)
+                    {
+                      const float abs_energy = fabsf(ed.m_cell_info->energy[cell_index]);
+                      HV_energy[this_index] += abs_energy;
+                      ++HV_number[this_index];
+                      if (this_tag.is_shared_between_clusters())
+                        {
+                          const int other_index = this_tag.secondary_cluster_index();
+                          HV_energy[other_index] += abs_energy;
+                          ++HV_number[other_index];
+                        }
+                    }
                 }
             }
         }
@@ -404,19 +503,55 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
                   const int other_index = this_tag.secondary_cluster_index();
                   cell_links[other_index]->addCell(cell_count, reverse_weight);
                 }
+                
+              if (m_doHVMoments && !cdh.m_geometry->is_tile(cell_index))
+                {
+                  HWIdentifier hwid = cabling->createSignalChannelIDFromHash((IdentifierHash) cell_index);
+                  const float corr = hvcorr->HVScaleCorr(hwid);
+                  if (corr > 0.f && corr < 100.f && fabsf(corr - 1.f) > m_HVthreshold)
+                    {
+                      const float abs_energy = fabsf(ed.m_cell_info->energy[cell_index]);
+                      HV_energy[this_index] += abs_energy;
+                      ++HV_number[this_index];
+                      if (this_tag.is_shared_between_clusters())
+                        {
+                          const int other_index = this_tag.secondary_cluster_index();
+                          HV_energy[other_index] += abs_energy;
+                          ++HV_number[other_index];
+                        }
+                    }
+                }
             }
         }
     }
 
   const auto end_cell_cycle = clock_type::now();
-  
+
   std::vector<int> cluster_order(ed.m_clusters->number);
 
   std::iota(cluster_order.begin(), cluster_order.end(), 0);
 
-  std::sort(cluster_order.begin(), cluster_order.end(), [&](const int a, const int b)
+  std::sort(cluster_order.begin(), cluster_order.end(), [&](const int a, const int b) -> bool
   {
-    return ed.m_clusters->clusterEt[a] > ed.m_clusters->clusterEt[b];
+    const bool a_valid = ed.m_clusters->seedCellID[a] >= 0;
+    const bool b_valid = ed.m_clusters->seedCellID[b] >= 0;
+    if (a_valid && b_valid)
+      {
+        return ed.m_clusters->clusterEt[a]
+        > ed.m_clusters->clusterEt[b];
+      }
+    else if (a_valid)
+      {
+        return true;
+      }
+    else if (b_valid)
+      {
+        return false;
+      }
+    else
+      {
+        return b > a;
+      }
   } );
 
   //Ordered by Et as in the default algorithm...
@@ -427,7 +562,7 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
   //the rest is still ordered like we want it to be.
 
   const auto ordered = clock_type::now();
-  
+
   cluster_container->clear();
   cluster_container->reserve(cell_links.size());
 
@@ -448,7 +583,7 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
 
           cluster->setEta(ed.m_clusters->clusterEta[cluster_index]);
           cluster->setPhi(ed.m_clusters->clusterPhi[cluster_index]);
-          
+
           cluster->setE(ed.m_clusters->clusterEnergy[cluster_index]);
           cluster->setM(0.0);
 
@@ -458,12 +593,12 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
     }
 
   const auto pre_moments = clock_type::now();
-  
+
   CaloRecGPU::CUDA_Helpers::GPU_synchronize();
 
-  
+
   const auto post_moments = clock_type::now();
-  
+
   for (size_t i = 0; i < cluster_container->size(); ++i)
     {
       xAOD::CaloCluster * cluster = (*cluster_container)[i];
@@ -484,7 +619,7 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
             }
         }
       cluster->setSamplingPattern(sampling_pattern);
-      
+
       for (int i = 0; i < NumSamplings; ++i)
         {
           const int cells_per_sampling = ed.m_moments->nCellSampling[i][cluster_index];
@@ -504,7 +639,7 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
               cluster->setNumberCellsInSampling((CaloSampling::CaloSample) i, cells_per_sampling, false);
             }
         }
-      
+
 #define CALORECGPU_MOMENTS_CONVERSION_HELPER(MOMENT_ENUM, MOMENT_ARRAY)                                     \
   if (m_momentsToDo[xAOD::CaloCluster:: MOMENT_ENUM ] )                                                     \
     {                                                                                                       \
@@ -530,9 +665,7 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
       CALORECGPU_MOMENTS_CONVERSION_HELPER(CENTER_Y,          centerY           );
       CALORECGPU_MOMENTS_CONVERSION_HELPER(CENTER_Z,          centerZ           );
       CALORECGPU_MOMENTS_CONVERSION_HELPER(CENTER_MAG,        centerMag         );
-
-      //Center lambda ---> is *the* special case.
-
+      CALORECGPU_MOMENTS_CONVERSION_HELPER(CENTER_LAMBDA,     centerLambda      );
       CALORECGPU_MOMENTS_CONVERSION_HELPER(LATERAL,           lateral           );
       CALORECGPU_MOMENTS_CONVERSION_HELPER(LONGITUDINAL,      longitudinal      );
       CALORECGPU_MOMENTS_CONVERSION_HELPER(ENG_FRAC_EM,       engFracEM         );
@@ -553,8 +686,14 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
       CALORECGPU_MOMENTS_CONVERSION_HELPER(AVG_LAR_Q,         avgLArQ           );
       CALORECGPU_MOMENTS_CONVERSION_HELPER(AVG_TILE_Q,        avgTileQ          );
 
-      //ENG_BAD_HV_CELLS ---\ These ones are also
-      //N_BAD_HV_CELLS   ---/ (less) special cases.
+      if (m_momentsToDo[xAOD::CaloCluster::ENG_BAD_HV_CELLS])
+        {
+          cluster->insertMoment(xAOD::CaloCluster::ENG_BAD_HV_CELLS, HV_energy[cluster_index]);
+        }
+      if (m_momentsToDo[xAOD::CaloCluster::N_BAD_HV_CELLS])
+        {
+          cluster->insertMoment(xAOD::CaloCluster::N_BAD_HV_CELLS, HV_number[cluster_index]);
+        }
 
       CALORECGPU_MOMENTS_CONVERSION_HELPER(PTD,               PTD               );
       CALORECGPU_MOMENTS_CONVERSION_HELPER(MASS,              mass              );
@@ -609,121 +748,16 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
       CALORECGPU_MOMENTS_CONVERSION_INVALID(ENG_CALIB_FRAC_REST                 );
 
       //Maybe things to do with DigiHSTruth, if needed?
-
-      //Now the special cases.
-      //Hopefully, we might find a solution
-      //for those in the not-too-distant future.
-
-      if (m_momentsToDo[xAOD::CaloCluster::ENG_BAD_HV_CELLS] || m_momentsToDo[xAOD::CaloCluster::N_BAD_HV_CELLS])
-        {
-          const auto hvFrac = m_larHVFraction->getLArHVFrac(cluster->getCellLinks(), ctx);
-          const double eBadLArHV = hvFrac.first;
-          const double nBadLArHV = hvFrac.second;
-          if (m_momentsToDo[xAOD::CaloCluster::ENG_BAD_HV_CELLS])
-            {
-              cluster->insertMoment(xAOD::CaloCluster::ENG_BAD_HV_CELLS, eBadLArHV);
-            }
-          if (m_momentsToDo[xAOD::CaloCluster::N_BAD_HV_CELLS])
-            {
-              cluster->insertMoment(xAOD::CaloCluster::N_BAD_HV_CELLS, nBadLArHV);
-            }
-        }
-
-      if (m_momentsToDo[xAOD::CaloCluster::CENTER_LAMBDA])
-        //Ooof.
-        {
-          //Copied/adapted from the CPU version.
-          //Not the most optimized thing in the world,
-          //especially since the get_* functions are expensive...
-
-          SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
-          const CaloDetDescrManager * caloDDMgr = *caloMgrHandle;
-
-          Amg::Vector3D showerCenter(ed.m_moments->centerX[cluster_index], ed.m_moments->centerY[cluster_index], ed.m_moments->centerZ[cluster_index]);
-          Amg::Vector3D showerAxis(ed.m_moments->EMProbability[cluster_index], ed.m_moments->hadWeight[cluster_index], ed.m_moments->OOCweight[cluster_index]);
-
-          //These are the non-overwritten temporaries from the GPU code.
-          //Dirty, I know.
-          //But we plan on having this on the GPU side instead, right?
-
-          double r_calo(0), z_calo(0), lambda_c(0);
-          r_calo = m_caloDepthTool->get_entrance_radius(CaloCell_ID::EMB1,
-                                                        showerCenter.eta(),
-                                                        showerCenter.phi(),
-                                                        caloDDMgr);
-          if ( r_calo == 0 )
-            {
-              z_calo = m_caloDepthTool->get_entrance_z(CaloCell_ID::EME1,
-                                                       showerCenter.eta(),
-                                                       showerCenter.phi(),
-                                                       caloDDMgr);
-              if ( z_calo == 0 )
-                {
-                  z_calo = m_caloDepthTool->get_entrance_z(CaloCell_ID::EME2,
-                                                           showerCenter.eta(),
-                                                           showerCenter.phi(),
-                                                           caloDDMgr);
-                }
-              if ( z_calo == 0 )
-                {
-                  z_calo = m_caloDepthTool->get_entrance_z(CaloCell_ID::FCAL0,
-                                                           showerCenter.eta(),
-                                                           showerCenter.phi(),
-                                                           caloDDMgr);
-                }
-              if ( z_calo == 0 )  // for H6 TB without EMEC outer wheel
-                {
-                  z_calo = m_caloDepthTool->get_entrance_z(CaloCell_ID::HEC0,
-                                                           showerCenter.eta(),
-                                                           showerCenter.phi(),
-                                                           caloDDMgr);
-                }
-              if ( z_calo != 0 && showerAxis.z() != 0 )
-                {
-                  lambda_c = fabs((z_calo - showerCenter.z()) / showerAxis.z());
-                }
-            }
-          else
-            {
-              double r_s2 = showerAxis.x() * showerAxis.x()
-                            + showerAxis.y() * showerAxis.y();
-              double r_cs = showerAxis.x() * showerCenter.x()
-                            + showerAxis.y() * showerCenter.y();
-              double r_cr = showerCenter.x() * showerCenter.x()
-                            + showerCenter.y() * showerCenter.y() - r_calo * r_calo;
-              if ( r_s2 > 0 )
-                {
-                  double det = r_cs * r_cs / (r_s2 * r_s2) - r_cr / r_s2;
-                  if ( det > 0 )
-                    {
-                      det = sqrt(det);
-                      double l1(-r_cs / r_s2);
-                      double l2(l1);
-                      l1 += det;
-                      l2 -= det;
-                      if ( fabs(l1) < fabs(l2) )
-                        {
-                          lambda_c = fabs(l1);
-                        }
-                      else
-                        {
-                          lambda_c = fabs(l2);
-                        }
-                    }
-                }
-            }
-          cluster->insertMoment(xAOD::CaloCluster::CENTER_LAMBDA, lambda_c);
-        }
     }
-  
+
   const auto end = clock_type::now();
-  
+
   if (!m_keepGPUData)
     {
       ed.clear_GPU();
     }
 
-  
+
   if (m_measureTimes)
     {
       record_times(ctx.evt(),
@@ -739,7 +773,7 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
                   );
     }
 
-  
+
   return StatusCode::SUCCESS;
 
 }
@@ -749,7 +783,7 @@ StatusCode GPUToAthenaImporterWithMoments::finalize()
 {
   if (m_measureTimes)
     {
-      print_times("Preprocessing Cluster_Number Clusters Cells Cell_Cycle Ordering Cluster_Creation Moments_Transfer Moments_Fill",9);
+      print_times("Preprocessing Cluster_Number Clusters Cells Cell_Cycle Ordering Cluster_Creation Moments_Transfer Moments_Fill", 9);
     }
   return StatusCode::SUCCESS;
 }

@@ -413,29 +413,6 @@ namespace
 //However, it'd be less clean when it came
 //to the temporary array thing...
 
-
-__device__  static inline
-float regularize_angle(const float b, const float a = 0.f)
-//a. k. a. proxim in Athena code.
-{
-  const float diff = b - a;
-  const float divi = (fabsf(diff) - Helpers::Constants::pi<float>) / (2 * Helpers::Constants::pi<float>);
-  return b - ceilf(divi) * ((b > a + Helpers::Constants::pi<float>) - (b < a - Helpers::Constants::pi<float>)) * 2 * Helpers::Constants::pi<float>;
-}
-
-__device__ static inline
-float angular_difference(const float x, const float y)
-{
-  return regularize_angle(x - y, 0.f);
-  //Might be problematic if x and y have a significant difference
-  //in terms of factors of pi, in which case one should add
-  //a regularize_angle(x) and regularize_angle(y) in there.
-  //For our use case, I think this will be fine.
-  //(The Athena ones are even worse,
-  // being a branchy thing that only
-  // takes care of one factor of 2 pi...)
-}
-
 constexpr int WarpSize = 32;
 //Let's do this per warp...
 //In sufficiently new hardware,
@@ -695,7 +672,7 @@ void firstCellPassKernel( Helpers::CUDA_kernel_object<ClusterMomentsArr> moments
                 case 15:
                   {
                     const float phi_0 = CMCHack::get_temporary_array<SeedCellPhi>(moments_arr)[cluster];
-                    const float phi_real = regularize_angle(phi, phi_0);
+                    const float phi_real = Helpers::regularize_angle(phi, phi_0);
                     atomicAdd(&(clusters_arr->clusterPhi[cluster]), phi_real * abs_energy * weight);
                   }
                   break;
@@ -912,7 +889,7 @@ void firstClusterPassKernel( Helpers::CUDA_kernel_object<ClusterMomentsArr> mome
                       const float temp_ET = clusters_arr->clusterEnergy[cluster] / coshf(abs(tempeta));
 
                       clusters_arr->clusterEt[cluster] = temp_ET;
-                      clusters_arr->clusterPhi[cluster] = regularize_angle(clusters_arr->clusterPhi[cluster] / abs_energy, 0.f);
+                      clusters_arr->clusterPhi[cluster] = Helpers::regularize_angle(clusters_arr->clusterPhi[cluster] / abs_energy, 0.f);
                     }
                   else
                     {
@@ -1218,9 +1195,9 @@ void secondClusterPassKernel( Helpers::CUDA_kernel_object<ClusterMomentsArr> mom
                   //but give results larger than that here,
                   //which leads to differences in delta_phi,
                   //delta_theta and delta_alpha.
-                  
+
                   float lambda = 0, vec[3];
-                  
+
                   switch (moment)
                     {
                       case WarpSize - 1:
@@ -1304,7 +1281,7 @@ void secondClusterPassKernel( Helpers::CUDA_kernel_object<ClusterMomentsArr> mom
                       switch (moment)
                         {
                           case WarpSize - 3:
-                            delta_phi = angular_difference(calc_phi(axis_x, axis_y, axis_z), calc_phi(chosen_vec[0], chosen_vec[1], chosen_vec[2]));
+                            delta_phi = Helpers::angular_difference(calc_phi(axis_x, axis_y, axis_z), calc_phi(chosen_vec[0], chosen_vec[1], chosen_vec[2]));
                             if (chosen_angle < max_axis_angle)
                               {
                                 axis_x = chosen_vec[0];
@@ -1529,7 +1506,7 @@ void thirdCellPassKernel( Helpers::CUDA_kernel_object<ClusterMomentsArr> moments
                 case 0:
                   {
                     const float phi_0 = CMCHack::get_temporary_array<SeedCellPhi>(moments_arr)[cluster];
-                    const float phi_real = regularize_angle(phi, phi_0);
+                    const float phi_real = Helpers::regularize_angle(phi, phi_0);
                     atomicAdd(&(moments_arr->firstPhi[cluster]), weighted_energy * phi_real);
                   }
                   break;
@@ -1548,7 +1525,7 @@ void thirdCellPassKernel( Helpers::CUDA_kernel_object<ClusterMomentsArr> moments
                 case 5:
                   {
                     const float phi_0 = CMCHack::get_temporary_array<SeedCellPhi>(moments_arr)[cluster];
-                    const float phi_real = regularize_angle(phi, phi_0);
+                    const float phi_real = Helpers::regularize_angle(phi, phi_0);
                     atomicAdd(&(moments_arr->phiPerSample[sampling][cluster]), abs_energy * weight * phi_real);
                   }
                   break;
@@ -1628,9 +1605,9 @@ void thirdCellPassKernel( Helpers::CUDA_kernel_object<ClusterMomentsArr> moments
     }
 }
 
-
 __global__ static
 void thirdClusterPassKernel( Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr,
+                             const Helpers::CUDA_kernel_object<GeometryArr> geometry,
                              const int cluster_number)
 {
 
@@ -1655,32 +1632,141 @@ void thirdClusterPassKernel( Helpers::CUDA_kernel_object<ClusterMomentsArr> mome
 
           const float old_phi = moments_arr->phiPerSample[sampling][cluster];
 
-          moments_arr->phiPerSample[sampling][cluster] = regularize_angle(old_phi / sampling_normalization, 0.f);
+          moments_arr->phiPerSample[sampling][cluster] = Helpers::regularize_angle(old_phi / sampling_normalization, 0.f);
         }
       else
         {
-          switch (moment - NumSamplings)
+          const int thread_id = moment - NumSamplings;
+
+          const float center_x        = moments_arr->centerX[cluster];
+          const float center_y        = moments_arr->centerY[cluster];
+          const float center_z        = moments_arr->centerZ[cluster];
+          const float axis_x          = CMCHack::get_temporary_array<ShowerAxisX>(moments_arr)[cluster];
+          const float axis_y          = CMCHack::get_temporary_array<ShowerAxisY>(moments_arr)[cluster];
+          const float axis_z          = CMCHack::get_temporary_array<ShowerAxisZ>(moments_arr)[cluster];
+
+          const float center_phi = Helpers::regularize_angle(atan2f(center_y, center_x));
+
+          const float center_eta = Helpers::eta_from_coordinates(center_x, center_y, center_z);
+
+          const int first_attempt_cell = geometry->get_closest_cell(CaloSampling::EMB1, center_eta, center_phi);
+
+          float lambda_c = 0.f;
+          
+          if (first_attempt_cell >= 0)
+            //Condition on CPU is r_calo == 0,
+            //but, by definition, I'd expect no cell
+            //to potentially overlap with the center
+            //of the detector, right?!
+            {
+              if (thread_id == 0)
+                {
+                  const float r_calo = geometry->r[first_attempt_cell] - geometry->dr[first_attempt_cell] /
+                                       (geometry->is_tile(first_attempt_cell) ? 2.f : 1.f);
+
+                  const float axis_r = axis_x * axis_x + axis_y * axis_y;
+
+                  if (axis_r > 0)
+                    {
+                      const float axis_and_center_r = axis_x * center_x + axis_y * center_y;
+                      const float center_r = center_x * center_x + center_y * center_y - r_calo * r_calo;
+                      const float det = axis_and_center_r * axis_and_center_r / (axis_r * axis_r) - center_r / axis_r;
+                      if (det > 0)
+                        {
+                          const float quot = -axis_and_center_r / axis_r;
+                          const float rootdet = sqrtf(det);
+                          const float branch_1 = quot + rootdet;
+                          const float branch_2 = quot - rootdet;
+                          lambda_c = min(fabsf(branch_1), fabsf(branch_2));
+                        }
+                    }
+
+                }
+            }
+          else
+            {
+              int this_sampling = 0;
+              switch (thread_id)
+                {
+                  case 0:
+                    this_sampling = CaloSampling::EME1;
+                    break;
+                  case 1:
+                    this_sampling = CaloSampling::EME2;
+                    break;
+                  case 2:
+                    this_sampling = CaloSampling::FCAL0;
+                    break;
+                  case 3:
+                    this_sampling = CaloSampling::HEC0;
+                    break;
+                  default:
+                    break;
+                }
+              const int this_cell = geometry->get_closest_cell(this_sampling, center_eta, center_phi);
+              float this_calc = 0.f;
+
+              if (this_cell >= 0)
+                {
+                  const float this_z = geometry->z[this_cell];
+                  this_calc = this_z + (this_z > 0 ? -geometry->dz[this_cell] : geometry->dz[this_cell]) /
+                              (geometry->is_tile(this_cell) ? 2.f : 1.f);
+                }
+
+              const unsigned int mask = 0xF0000000U;
+              //The last 4 threads.
+
+              const float new_one = __shfl_down_sync(mask, this_calc, 1);
+              if (this_calc == 0.f)
+                {
+                  this_calc = new_one;
+                }
+              //(0, 1) and (2, 3) get the wanted between the both of them.
+              const float new_two = __shfl_down_sync(mask, this_calc, 2);
+              if (this_calc == 0.f)
+                {
+                  this_calc = new_two;
+                }
+              //0 got the correct one.
+
+              if (this_calc != 0.f && axis_z != 0.f)
+                {
+                  lambda_c = fabsf( (this_calc - center_z) / axis_z );
+                }
+
+            }
+            
+          switch (thread_id)
             {
               case 0:
-                {
-                  const float old_first_phi = moments_arr->firstPhi[cluster];
-                  moments_arr->firstPhi[cluster] = regularize_angle(old_first_phi / (sum_energies > 0.f ? sum_energies : 1.f));
-                  moments_arr->firstEta[cluster] /= (sum_energies > 0.f ? sum_energies : 1.f);
-                }
+                if (first_attempt_cell < 0)
+                  {
+                    moments_arr->lateral[cluster] /= CMCHack::get_temporary_array<LateralNormalization>(moments_arr)[cluster];
+                  }
+                moments_arr->centerLambda[cluster] = lambda_c;
                 break;
               case 1:
+                if (first_attempt_cell >= 0)
+                  {
+                    moments_arr->lateral[cluster] /= CMCHack::get_temporary_array<LateralNormalization>(moments_arr)[cluster];
+                  }
+                moments_arr->longitudinal[cluster] /= CMCHack::get_temporary_array<LongitudinalNormalization>(moments_arr)[cluster];
+                break;
+              case 2:
                 moments_arr->secondR[cluster] /= (sum_energies > 0.f ? sum_energies : 1.f);
                 moments_arr->secondLambda[cluster] /= (sum_energies > 0.f ? sum_energies : 1.f);
                 break;
-              case 2:
-                moments_arr->lateral[cluster] /= CMCHack::get_temporary_array<LateralNormalization>(moments_arr)[cluster];
-                break;
               case 3:
-                moments_arr->longitudinal[cluster] /= CMCHack::get_temporary_array<LongitudinalNormalization>(moments_arr)[cluster];
+                {
+                  const float old_first_phi = moments_arr->firstPhi[cluster];
+                  moments_arr->firstPhi[cluster] = Helpers::regularize_angle(old_first_phi / (sum_energies > 0.f ? sum_energies : 1.f));
+                  moments_arr->firstEta[cluster] /= (sum_energies > 0.f ? sum_energies : 1.f);
+                }
                 break;
               default:
                 break;
             }
+
         }
     }
 }
@@ -1759,7 +1845,7 @@ void calculateClusterPropertiesAndMomentsDeferKernel( Helpers::CUDA_kernel_objec
 
       thirdCellPassKernel <<< dimGridCells, dimBlockCells>>>(moments_arr, cell_state_arr, cell_info_arr, geometry, opts->use_abs_energy,
                                                              opts->eta_inner_wheel, opts->min_l_longitudinal, opts->min_r_lateral);
-      thirdClusterPassKernel <<< dimGridClusters, dimBlockClusters>>>(moments_arr, cluster_number);
+      thirdClusterPassKernel <<< dimGridClusters, dimBlockClusters>>>(moments_arr, geometry, cluster_number);
 
       finalClusterPassKernel <<< dimGridFinal, dimBlockFinal>>>(moments_arr, cell_state_arr, cell_info_arr, geometry, cluster_number);
 

@@ -65,11 +65,15 @@ class BasicGPUToAthenaImporter :
   Gaudi::Property<std::string> m_clusterSizeString {this, "ClusterSize", "Topo_420", "The size/type of the clusters"};
 
   xAOD::CaloCluster::ClusterSize m_clusterSize;
-  
+
+  /** @brief Cell indices to fill as disabled cells (useful if the cell vector is always missing the same cells).
+   */
+  Gaudi::Property<std::vector<int>> m_missingCellsToFill {this, "MissingCellsToFill", {}, "Force fill these cells as disabled on empty containers."};
+
   /**
    * @brief Pointer to Calo ID Helper
    */
-  const CaloCell_ID* m_calo_id {nullptr};
+  const CaloCell_ID * m_calo_id {nullptr};
 
 
 };

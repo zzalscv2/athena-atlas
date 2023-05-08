@@ -10,7 +10,7 @@ def SingleToolToPlot(tool_name, prefix):
 def ComparedToolsToPlot(tool_ref, tool_test, prefix, match_in_energy = False):
     return (tool_ref, tool_test, prefix, match_in_energy)
 
-def MatchingOptions(min_similarity = 0.25, terminal_weight = 10., grow_weight = 250., seed_weight = 5000.):
+def MatchingOptions(min_similarity = 0.50, terminal_weight = 250., grow_weight = 500., seed_weight = 1000.):
     return (min_similarity, terminal_weight, grow_weight, seed_weight)
 
 class CaloRecGPUConfigurator:
@@ -61,7 +61,14 @@ class CaloRecGPUConfigurator:
         self.SeedThresholdOnTAbs = 12.5 * ns
         
         self.CutClustersInAbsEt = None
-        self.ClusterEtorAbsEtCut = 0.0*MeV
+        self.ClusterEtorAbsEtCut = -1e-16*MeV
+        
+        #Since we (by default) use absolute values,
+        #a cut off of 0 MeV could mean some clusters
+        #where the cells have just the right combination
+        #of energies could sum down to 0 on one side (CPU/GPU)
+        #and not on the other. This is actually valid
+        #for any threshold, but this way we accept all clusters...
         
         if configFlags is not None:
             self.TwoGaussianNoise = configFlags.Calo.TopoCluster.doTwoGaussianNoise
@@ -154,6 +161,8 @@ class CaloRecGPUConfigurator:
         self.FillMissingCells = True
         #We want a full (and ordered) cell container
         #to get to the fast path.
+        
+        self.MissingCellsToFill = []
                     
     def BasicConstantDataExporterToolConf(self, name = "ConstantDataExporter"):
         result=ComponentAccumulator()
@@ -169,6 +178,8 @@ class CaloRecGPUConfigurator:
         EventDataExporter.MeasureTimes = self.MeasureTimes
         EventDataExporter.TimeFileOutput = "EventDataExporterTimes.txt"
         EventDataExporter.CellsName = self.CellsName
+        if self.FillMissingCells:
+            EventDataExporter.MissingCellsToFill = self.MissingCellsToFill
         result.setPrivateTools(EventDataExporter)
         return result
 
@@ -179,6 +190,8 @@ class CaloRecGPUConfigurator:
         AthenaClusterImporter.TimeFileOutput = "ClusterImporterTimes.txt"
         AthenaClusterImporter.CellsName = self.CellsName
         AthenaClusterImporter.ClusterSize = self.ClusterSize
+        if self.FillMissingCells:
+            AthenaClusterImporter.MissingCellsToFill = self.MissingCellsToFill
         result.setPrivateTools(AthenaClusterImporter)
         return result
 
@@ -432,15 +445,20 @@ class CaloRecGPUConfigurator:
         
         AthenaClusterImporter.MeasureTimes = self.MeasureTimes
         AthenaClusterImporter.TimeFileOutput = "ClusterAndMomentsImporterTimes.txt"
+        
+        
                 
         if not self.ConfigFlags.Common.isOnline:
             if self.ConfigFlags.Input.isMC:
-                AthenaClusterImporter.LArHVFraction=CompFactory.LArHVFraction(HVScaleCorrKey="LArHVScaleCorr")
+                AthenaClusterImporter.HVScaleCorrKey = "LArHVScaleCorr"
             else:
-                AthenaClusterImporter.LArHVFraction=CompFactory.LArHVFraction(HVScaleCorrKey="LArHVScaleCorrRecomputed")
+                AthenaClusterImporter.HVScaleCorrKey = "LArHVScaleCorrRecomputed"
         
         AthenaClusterImporter.MomentsNames = self.MomentsToCalculate
         
+        if self.FillMissingCells:
+            AthenaClusterImporter.MissingCellsToFill = self.MissingCellsToFill
+            
         result.setPrivateTools(AthenaClusterImporter)
         return result
         

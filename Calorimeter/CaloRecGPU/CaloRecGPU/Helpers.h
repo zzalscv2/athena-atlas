@@ -284,7 +284,75 @@ namespace CaloRecGPU
   inline constexpr T pi = T(3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819644288109756659334461284756482337867831652712019091456485669234603486104543266482133936072602491412737245870066063155881748815209209628292540917153643678925903600113305305488204665213841469519415116094330572703657595919530921861173819326117931051185480744623799627495673518857527248912279381830119491298336733624L);
 #endif
     }
+    
+    CUDA_HOS_DEV static inline
+    float regularize_angle(const float b, const float a = 0.f)
+    //a. k. a. proxim in Athena code.
+    {
+      using namespace std;
+      const float diff = b - a;
+      const float divi = (fabsf(diff) - Helpers::Constants::pi<float>) / (2 * Helpers::Constants::pi<float>);
+      return b - ceilf(divi) * ((b > a + Helpers::Constants::pi<float>) - (b < a - Helpers::Constants::pi<float>)) * 2 * Helpers::Constants::pi<float>;
+    }
+    
+    CUDA_HOS_DEV static inline
+    double regularize_angle(const double b, const double a = 0.)
+    //a. k. a. proxim in Athena code.
+    {
+      using namespace std;
+      const float diff = b - a;
+      const float divi = (fabs(diff) - Helpers::Constants::pi<double>) / (2 * Helpers::Constants::pi<double>);
+      return b - ceil(divi) * ((b > a + Helpers::Constants::pi<double>) - (b < a - Helpers::Constants::pi<double>)) * 2 * Helpers::Constants::pi<double>;
+    }
+    
+    template <class T>
+    CUDA_HOS_DEV static inline
+    T angular_difference(const T x, const T y)
+    {
+      return regularize_angle(x - y, T(0));
+      //Might be problematic if x and y have a significant difference
+      //in terms of factors of pi, in which case one should add
+      //a regularize_angle(x) and regularize_angle(y) in there.
+      //For our use case, I think this will be fine.
+      //(The Athena ones are even worse,
+      // being a branchy thing that only
+      // takes care of one factor of 2 pi...)
+    }
+    
+    CUDA_HOS_DEV static inline
+    float eta_from_coordinates(const float x, const float y, const float z)
+    {
+      using namespace std;
+      const float rho2 = x * x + y * y;
+      if (rho2 > 0.)
+        {
+          const float m = sqrtf(rho2 + z * z);
+          return 0.5 * logf((m + z) / (m - z));
+        }
+      else
+        {
+          constexpr float s_etaMax = 22756.0; 
+          return z + ((z > 0) - (z < 0)) * s_etaMax;
+        }
+    }
 
+    CUDA_HOS_DEV static inline
+    double eta_from_coordinates(const double x, const double y, const double z)
+    {
+      using namespace std;
+      const double rho2 = x * x + y * y;
+      if (rho2 > 0.)
+        {
+          const double m = sqrt(rho2 + z * z);
+          return 0.5 * log((m + z) / (m - z));
+        }
+      else
+        {
+          constexpr double s_etaMax = 22756.0; 
+          return z + ((z > 0) - (z < 0)) * s_etaMax;
+        }
+    }
+    
     ///! Holds dummy classes just to identify the place in which memory lives.
     namespace MemoryContext
     {

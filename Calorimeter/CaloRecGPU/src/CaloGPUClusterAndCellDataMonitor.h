@@ -248,9 +248,9 @@ class CaloGPUClusterAndCellDataMonitor :
 
   struct pair_to_plot
   {
-    int index_ref{}, index_test{};
+    int index_ref = -1, index_test = -1;
     std::string prefix;
-    bool match_in_energy{false};
+    bool match_in_energy = false;
   };
 
   std::vector<pair_to_plot> m_toolCombinations;
