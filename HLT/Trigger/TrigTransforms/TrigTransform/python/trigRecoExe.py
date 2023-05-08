@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # @brief: Trigger executor to call base transforms
 # @details: Based on athenaExecutor with some modifications
@@ -192,6 +192,42 @@ class trigRecoExecutor(athenaExecutor):
                     matchedOutputFileNames.append(file)
         return matchedOutputFileNames
 
+    # merge multiple BS files into a single BS file
+    def _mergeBSfiles(self, inputFiles, outputFile):
+        msg.info(f'Merging multiple BS files ({inputFiles}) into {outputFile}')
+        # Write the list of input files to a text file, to use it as a input for file_merging
+        mergeBSFileList = 'RAWFileMerge.list'
+        try:
+            with open(mergeBSFileList, 'w') as BSFileList:
+                for fname in inputFiles:
+                    BSFileList.write(f'{fname}\n')
+        except (IOError, OSError) as e:
+            raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'), 
+                f'Got an error when writing list of BS files to {mergeBSFileList}: {e}')
+        
+        # The user should never need to use this directly, but check it just in case...
+        if not outputFile.endswith('._0001.data'):
+            raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'), 
+                'Output merged BS filename must end in "._0001.data"')
+        else:
+            # We need to remove the suffix to pass the output as an argument to file_merging
+            outputFile = outputFile.split('._0001.data')[0]
+        
+        mergeBSFailure = 0
+        try:
+            cmd = f'file_merging {mergeBSFileList} 0 {outputFile}'
+            msg.info('running command for merging (in original asetup env): %s', cmd)
+            mergeBSFailure = subprocess.call(cmd, shell=True)
+            msg.debug('file_merging return code %s', mergeBSFailure)
+        except OSError as e:
+            raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'),
+                f'Exception raised when merging BS files using file_merging: {e}')
+        if mergeBSFailure != 0:
+            msg.error('file_merging returned error (%s) no merged BS file created', mergeBSFailure)
+            return 1
+        return 0
+
+
     # run trigbs_extractStream.py to split a stream out of the BS file
     # renames the split file afterwards
     def _splitBSfile(self, outputStream, allStreamsFileName, splitFileName):
@@ -329,46 +365,56 @@ class trigRecoExecutor(athenaExecutor):
             expectedOutputFileName = '*_HLTMPPy_*.data'
             # list of filenames of files matching expectedOutputFileName
             matchedOutputFileNames = self._findOutputFiles(expectedOutputFileName)
+
+
             # check there are file matches and rename appropriately
-            if(len(matchedOutputFileNames) > 1):
-                msg.warning('Multiple BS files found: will only rename internal arg')
-                if 'BS' in self.conf.dataDictionary:
-                    argInDict = self.conf.dataDictionary['BS']
-                    dataset_argInDict = argInDict._dataset
-                    msg.info('Renaming internal BS arg from %s to %s', argInDict.value[0], matchedOutputFileNames)
-                    argInDict.multipleOK = True
-                    argInDict.value = matchedOutputFileNames
-                    argInDict._dataset = dataset_argInDict
-            elif(len(matchedOutputFileNames)):
-                msg.info('Single BS file found: will split (if requested) and rename file')
+            if len(matchedOutputFileNames) == 0:
+                msg.error('no BS files created with expected name: %s', expectedOutputFileName)
+            else:
+                # if only one BS file was created
+                if len(matchedOutputFileNames) == 1:
+                    msg.info('Single BS file found: will split (if requested) and rename the file')
+                    BSFile = matchedOutputFileNames[0]
+
+                # if more than one file BS was created, then merge them
+                else:
+                    msg.info('Multiple BS files found. A single BS file is required by the next transform steps, so they will be merged. Will split the merged file (if requested) and rename the file')
+                    mergedBSFile = matchedOutputFileNames[0].split('._0001.data')[0] + '.mrg._0001.data' # a specific format is required to run file_merging
+
+                    mergeFailed = self._mergeBSfiles(matchedOutputFileNames, mergedBSFile)
+                    if(mergeFailed):
+                        raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'),
+                            'Did not produce a merged BS file with file_merging')
+                    
+                    BSFile = 'tmp.BS.mrg'
+                    msg.info(f'Renaming temporary merged BS file to {BSFile}')
+                    self._renamefile(mergedBSFile, BSFile)
 
                 # First check if we want to produce the COST DRAW output
                 if 'DRAW_TRIGCOST' in self.conf.dataDictionary:
-                    splitFailed = self._splitBSfile('CostMonitoring', matchedOutputFileNames[0], self.conf.dataDictionary['DRAW_TRIGCOST'].value[0])
+                    splitFailed = self._splitBSfile('CostMonitoring', BSFile, self.conf.dataDictionary['DRAW_TRIGCOST'].value[0])
                     if(splitFailed):
                         raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'),
                             'Did not produce any BS file when selecting CostMonitoring stream with trigbs_extractStream.py in file')
 
                 # Run debug step for all streams
                 if "HIST_DEBUGSTREAMMON" in self.conf.dataDictionary:
-                    self._postExecuteDebug(matchedOutputFileNames[0])
+                    self._postExecuteDebug(BSFile)
 
                 # Rename BS file if requested
                 if 'BS' in self.conf.dataDictionary:
                     argInDict = self.conf.dataDictionary['BS']
                     # If a stream (not All) is selected, then slim the orignal (many stream) BS output to the particular stream
                     if 'streamSelection' in self.conf.argdict and self.conf.argdict['streamSelection'].value != "All":
-                        splitFailed = self._splitBSfile(self.conf.argdict['streamSelection'].value, matchedOutputFileNames[0], argInDict.value[0])
+                        splitFailed = self._splitBSfile(self.conf.argdict['streamSelection'].value, BSFile, argInDict.value[0])
                         if(splitFailed):
                             raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'),
                                 'Did not produce any BS file when selecting stream with trigbs_extractStream.py in file')
                     else:
                         msg.info('Stream "All" requested, so not splitting BS file')
-                        self._renamefile(matchedOutputFileNames[0], argInDict.value[0])
+                        self._renamefile(BSFile, argInDict.value[0])
                 else:
                     msg.info('BS output filetype not defined so skip renaming BS')
-            else:
-                msg.error('no BS files created with expected name: %s', expectedOutputFileName)
         else:
             msg.info('BS, DRAW_TRIGCOST or HIST_DEBUGSTREAMMON output filetypes not defined so skip BS post processing')
 
