@@ -374,6 +374,15 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                         if 'RAWTriggerMenuJson' in return_obj:
                             meta_dict[filename][key] = return_obj['RAWTriggerMenuJson']
                             del return_obj['RAWTriggerMenuJson']
+                        if 'TriggerConfigInfo' not in meta_dict[filename]:
+                            meta_dict[filename]['TriggerConfigInfo'] = {}
+                        if 'dbkey' in return_obj:
+                            meta_dict[filename]['TriggerConfigInfo'][key.split('_')[-1]] = {
+                                'key' : return_obj['dbkey'],
+                                'name': return_obj['name']
+                                }
+                            del return_obj['dbkey']
+                            del return_obj['name']
                         if 'TriggerMenu' not in meta_dict[filename]:
                             meta_dict[filename]['TriggerMenu'] = {}
                         meta_dict[filename]['TriggerMenu'].update(return_obj)
@@ -952,6 +961,8 @@ def _extract_fields_triggermenujson(interface, aux):
             import json
             decoded = json.loads(firstMenu.payload())
             result['RAWTriggerMenuJson'] = firstMenu.payload()
+            result['name'] = firstMenu.name()
+            result['dbkey'] = firstMenu.key()
             if decoded['filetype'] == 'hltmenu':
                 result['HLTChains'] = [ _convert_value(chain) for chain in decoded['chains'] ] 
             elif decoded['filetype'] == 'l1menu':
