@@ -16,7 +16,7 @@ Reco_tf.py \
 --AMI=q220 \
 --athenaopts='--nprocs=2' \
 --maxEvents=500 \
---conditionsTag 'all:CONDBR2-BLKPA-RUN2-09' \
+--conditionsTag 'all:CONDBR2-BLKPA-RUN2-11' \
 --outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root --imf False
 
 

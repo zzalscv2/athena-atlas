@@ -1443,7 +1443,7 @@ class athenaExecutor(scriptExecutor):
         ## Add --drop-and-reload if possible (and allowed!)
         if self._tryDropAndReload:
             if self._isCAEnabled():
-                msg.info('ComponentAccumulator-based transforms do not support "--drop-and-reload" yet')
+                msg.info('ignoring "--drop-and-reload" for CA-based transforms, config cleaned up anyway')
             elif 'valgrind' in self.conf._argdict and self.conf._argdict['valgrind'].value is True:
                 msg.info('Disabling "--drop-and-reload" because the job is configured to use Valgrind')
             elif 'athenaopts' in self.conf.argdict:
@@ -1466,17 +1466,18 @@ class athenaExecutor(scriptExecutor):
         else:
             msg.info('Skipping test for "--drop-and-reload" in this executor')
             
-        # For AthenaMT apply --threads=N if threads have been configured via ATHENA_CORE_NUMBER + multithreaded
-        if self._athenaMT > 0 and not self._disableMT:
-            if not ('athenaopts' in self.conf.argdict and
-                any('--threads' in opt for opt in self.conf.argdict['athenaopts'].value[currentSubstep])):
-                self._cmd.append('--threads=%s' % str(self._athenaMT))
+        if not self._isCAEnabled():  #For CA-jobs, threads and nproc set in runargs file
+            # For AthenaMT apply --threads=N if threads have been configured via ATHENA_CORE_NUMBER + multithreaded
+            if self._athenaMT > 0 and not self._disableMT:
+                if not ('athenaopts' in self.conf.argdict and
+                        any('--threads' in opt for opt in self.conf.argdict['athenaopts'].value[currentSubstep])):
+                        self._cmd.append('--threads=%s' % str(self._athenaMT))
 
-        # For AthenaMP apply --nprocs=N if threads have been configured via ATHENA_CORE_NUMBER + multiprocess
-        if self._athenaMP > 0 and not self._disableMP:
-            if not ('athenaopts' in self.conf.argdict and
-                any('--nprocs' in opt for opt in self.conf.argdict['athenaopts'].value[currentSubstep])):
-                self._cmd.append('--nprocs=%s' % str(self._athenaMP))
+            # For AthenaMP apply --nprocs=N if threads have been configured via ATHENA_CORE_NUMBER + multiprocess
+            if self._athenaMP > 0 and not self._disableMP:
+                if not ('athenaopts' in self.conf.argdict and
+                        any('--nprocs' in opt for opt in self.conf.argdict['athenaopts'].value[currentSubstep])):
+                        self._cmd.append('--nprocs=%s' % str(self._athenaMP))
 
         #Switch to ComponentAccumulator based config if requested
         if self._isCAEnabled():
@@ -1568,7 +1569,8 @@ class athenaExecutor(scriptExecutor):
                         defaultOptions = defaultOptions,
                         extraOptionsList = extraOptionsList,
                         AthenaSerialisedConfigurationFile = \
-                            AthenaSerialisedConfigurationFile
+                            AthenaSerialisedConfigurationFile,
+                        isCAEnabled = self._isCAEnabled()
                     )
                     msg.debug("Valgrind command: {command}".format(command = command))
                     print(command, file=wrapper)

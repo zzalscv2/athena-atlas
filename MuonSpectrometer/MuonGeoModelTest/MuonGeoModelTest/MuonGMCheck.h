@@ -63,7 +63,7 @@ class MuonGMCheck : public AthAlgorithm {
         this, "testTgcDetectorElementHash", false};
     Gaudi::Property<bool> m_testCscDetectorElementHash{
         this, "testCscDetectorElementHash", false};
-    Gaudi::Property<bool> m_check_first_last{this, "check_first_last", true};
+    Gaudi::Property<int> m_check_first_last{this, "check_first_last", 1};
     Gaudi::Property<bool> m_check_parent{this, "check_ParentStation", false};
     Gaudi::Property<bool> m_check_blines{this, "check_Blines", false};
     Gaudi::Property<bool> m_check_surfaces{this, "check_surfaces", false};

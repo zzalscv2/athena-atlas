@@ -133,6 +133,9 @@ def fromRunArgs(runArgs):
     # Pre-exec
     processPreExec(runArgs, flags)
 
+    # To respect --athenaopts 
+    flags.fillFromArgs()
+
     # Lock flags
     flags.lock()
 
@@ -225,8 +228,8 @@ def fromRunArgs(runArgs):
     cfg.merge( OutputStreamCfg(flags, "HITS", ItemList=getStreamHITS_ItemList(flags), disableEventTag="xAOD::EventInfo#EventInfo" not in flags.Input.TypedCollections) )
 
     # Add in-file MetaData
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
-    cfg.merge(InfileMetaDataCfg(flags, "HITS"))
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+    cfg.merge(SetupMetaDataForStreamCfg(flags, "HITS"))
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)

@@ -9,6 +9,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 
 from AthenaCommon.SystemOfUnits import MeV
 
@@ -269,14 +270,14 @@ def EGAM1KernelCfg(ConfigFlags, name='EGAM1Kernel', **kwargs):
 
     # thinning tools
     thinningTools = []
-    
+    streamName = kwargs['StreamName']    
+
     # Track thinning
     if ConfigFlags.Derivation.Egamma.doTrackThinning:
 
         from DerivationFrameworkInDet.InDetToolsConfig import (
             TrackParticleThinningCfg, MuonTrackParticleThinningCfg, 
             TauTrackParticleThinningCfg )
-        streamName = kwargs['StreamName']
 
         TrackThinningKeepElectronTracks = True
         TrackThinningKeepPhotonTracks = True
@@ -471,7 +472,7 @@ def EGAM1Cfg(ConfigFlags):
 
     # configure slimming
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     EGAM1SlimmingHelper = SlimmingHelper(
         'EGAM1SlimmingHelper',
@@ -628,7 +629,8 @@ def EGAM1Cfg(ConfigFlags):
                               'DAOD_EGAM1',
                               ItemList = EGAM1ItemList,
                               AcceptAlgs = ['EGAM1Kernel']))
-    acc.merge(InfileMetaDataCfg(ConfigFlags, 'DAOD_EGAM1',
-                                AcceptAlgs=['EGAM1Kernel']))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, 'DAOD_EGAM1',
+                                AcceptAlgs=['EGAM1Kernel'],
+                                createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc

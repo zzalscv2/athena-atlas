@@ -384,13 +384,15 @@ namespace Rec {
             // Don't run the outliers anymore at this stage
             dumpCaloEloss(newTrack.get(), "CB input TSOS after refine IDMS ");
             std::unique_ptr<Trk::Track> refittedTrack{fit(ctx, *newTrack, false, Trk::muon)};
-            if (msgLevel(MSG::DEBUG)) countAEOTs(*refittedTrack, " CB fit after refit ");
-            if (refittedTrack) dumpCaloEloss(refittedTrack.get(), "CB refit after refine IDMS ");
-            /// This should only happen if adding the ID/MS errors fails or the property is disabled
-            if (checkTrack("combinedFit", refittedTrack.get())) {
+	    if (refittedTrack){
+	      if (msgLevel(MSG::DEBUG)) countAEOTs(*refittedTrack, " CB fit after refit ");
+	      dumpCaloEloss(refittedTrack.get(), "CB refit after refine IDMS ");
+	      /// This should only happen if adding the ID/MS errors fails or the property is disabled
+	      if (checkTrack("combinedFit", refittedTrack.get())) {
                 // Make the combined point to the refitted
                 combinedTrack.swap(refittedTrack);
-            }
+	      }
+	    }
         }
 
         /// Final check to avoid FPEs later on

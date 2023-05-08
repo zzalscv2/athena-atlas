@@ -10,6 +10,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 
 # Main algorithm config
 def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
@@ -177,7 +178,7 @@ def PHYSLITECfg(ConfigFlags):
     # Define contents of the format
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
     PHYSLITESlimmingHelper = SlimmingHelper("PHYSLITESlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
@@ -301,7 +302,7 @@ def PHYSLITECfg(ConfigFlags):
     PHYSLITEItemList = PHYSLITESlimmingHelper.GetItemList()
     formatString = 'D2AOD_PHYSLITE' if 'StreamDAOD_PHYS' in ConfigFlags.Input.ProcessingTags else 'DAOD_PHYSLITE'
     acc.merge(OutputStreamCfg(ConfigFlags, formatString, ItemList=PHYSLITEItemList, AcceptAlgs=["PHYSLITEKernel"]))
-    acc.merge(InfileMetaDataCfg(ConfigFlags, formatString, AcceptAlgs=["PHYSLITEKernel"]))
-    
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, formatString, AcceptAlgs=["PHYSLITEKernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+
     return acc
 

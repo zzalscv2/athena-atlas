@@ -5,6 +5,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 
 def STDM7SkimmingToolCfg(flags):
     '''Configure the STDM7 skimming tool'''
@@ -116,7 +117,7 @@ def STDM7Cfg(flags):
     # Define contents of the format
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
     STDM7SlimmingHelper = SlimmingHelper("STDM7SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, ConfigFlags = flags)
@@ -218,6 +219,6 @@ def STDM7Cfg(flags):
     # Output stream    
     STDM7ItemList = STDM7SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_STDM7", ItemList=STDM7ItemList, AcceptAlgs=["STDM7Kernel"]))
-    acc.merge(InfileMetaDataCfg(flags, "DAOD_STDM7", AcceptAlgs=["STDM7Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_STDM7", AcceptAlgs=["STDM7Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc

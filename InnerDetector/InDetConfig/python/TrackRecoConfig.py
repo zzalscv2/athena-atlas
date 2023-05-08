@@ -984,6 +984,15 @@ def InDetTrackRecoOutputCfg(flags):
                 "xAOD::TrackStateValidationContainer#Pseudo_TRT_MSOSs",
                 "xAOD::TrackStateValidationAuxContainer#Pseudo_TRT_MSOSsAux."
             ]
+        if flags.InDet.Tracking.doStoreSiSPSeededTracks:
+            toAOD += [
+                "xAOD::TrackStateValidationContainer#SiSP_Pixel_MSOSs",
+                "xAOD::TrackStateValidationAuxContainer#SiSP_Pixel_MSOSsAux.",
+                "xAOD::TrackStateValidationContainer#SiSP_SCT_MSOSs",
+                "xAOD::TrackStateValidationAuxContainer#SiSP_SCT_MSOSsAux.",
+                "xAOD::TrackStateValidationContainer#SiSP_TRT_MSOSs",
+                "xAOD::TrackStateValidationAuxContainer#SiSP_TRT_MSOSsAux."
+            ]
 
     result = ComponentAccumulator()
     result.merge(addToESD(flags, toESD + toAOD))

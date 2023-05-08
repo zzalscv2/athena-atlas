@@ -20,10 +20,8 @@ class PropSetterProxy(object):
          return super(PropSetterProxy, self).__setattr__(name, value)
 
       if name != "OutputLevel":
-         msg.warning( "Only OutputLevel is allowed to be changed with the foreach_component at the moment"  )
-         return
-
-       
+         msg.error("The foreach_component is a debugging feature and should not be used in production jobs, remove it before committing to the repository, proceeding to set the properties now" )
+    
       import fnmatch
       for component_path, component in PropSetterProxy.__compPaths.items():
          if fnmatch.fnmatch( component_path, self.__path ):
@@ -55,7 +53,12 @@ class PropSetterProxy(object):
                PropSetterProxy.__compPaths['SvcMgr/'+svc.getFullJobOptName()] = svc
            for t in ca._publicTools:
                PropSetterProxy.__compPaths['ToolSvc/'+t.getFullJobOptName()] = t
-           
+           for t in ca._conditionsAlgs:
+               PropSetterProxy.__compPaths[t.getFullJobOptName()] = t
+           if ca._privateTools:
+               for t in ca._privateTools:
+                   PropSetterProxy.__compPaths[t.getFullJobOptName()] = t
+
            def __nestAlg(startpath, comp): # it actually dives inside the algorithms and (sub) tools               
                if comp.getName() == "":
                    return

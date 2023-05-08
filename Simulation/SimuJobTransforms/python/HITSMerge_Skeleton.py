@@ -49,6 +49,9 @@ def fromRunArgs(runArgs):
     # Pre-exec
     processPreExec(runArgs, flags)
 
+    # To respect --athenaopts 
+    flags.fillFromArgs()
+
     # Lock flags
     flags.lock()
 
@@ -71,8 +74,8 @@ def fromRunArgs(runArgs):
     cfg.getEventAlgo('OutputStreamHITS').TakeItemsFromInput = True
 
     # Add in-file MetaData
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
-    cfg.merge(InfileMetaDataCfg(flags, "HITS"))
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+    cfg.merge(SetupMetaDataForStreamCfg(flags, "HITS"))
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)

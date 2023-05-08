@@ -82,6 +82,9 @@ def fromRunArgs(runArgs):
     # Pre-exec
     processPreExec(runArgs, flags)
 
+    # To respect --athenaopts 
+    flags.fillFromArgs()
+
     # Lock flags
     flags.lock()
 
@@ -97,10 +100,6 @@ def fromRunArgs(runArgs):
     if (allowedInputTypes[idx]=='EVNT'):
        from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
        cfg.merge(MetaDataSvcCfg(flags, ['IOVDbMetaDataTool']))
-
-    # Cut flow service
-    from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
-    cfg.merge(CutFlowSvcCfg(flags))
 
     for formatName in formats:
         derivationConfig = getattr(DerivationConfigList, f'{formatName}Cfg')

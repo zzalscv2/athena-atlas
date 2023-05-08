@@ -12,6 +12,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 
 from DerivationFrameworkEGamma.PhotonsCPDetailedContent import (
     PhotonsCPDetailedContent )
@@ -131,13 +132,14 @@ def EGAM7KernelCfg(ConfigFlags, name='EGAM7Kernel', **kwargs):
     #EGAM7ThinningHelper.TriggerChains = '(^(?!.*_[0-9]*(mu|j|xe|tau|ht|xs|te))(?!HLT_[eg].*_[0-9]*[eg][0-9].*)(?!HLT_eb.*)(?!.*larpeb.*)(?!HLT_.*_AFP_.*)(HLT_[eg].*))|HLT_e.*_Jpsiee.*'
     #EGAM7ThinningHelper.AppendToStream( EGAM7Stream, ExtraContainersTrigger )
 
+    streamName = kwargs['StreamName']
+
     # Track thinning
     if ConfigFlags.Derivation.Egamma.doTrackThinning:
 
         from DerivationFrameworkInDet.InDetToolsConfig import (
             TrackParticleThinningCfg, MuonTrackParticleThinningCfg, 
             TauTrackParticleThinningCfg )
-        streamName = kwargs['StreamName']
 
         TrackThinningKeepElectronTracks = True
         TrackThinningKeepPhotonTracks = True
@@ -326,7 +328,7 @@ def EGAM7Cfg(ConfigFlags):
 
     # configure slimming
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     EGAM7SlimmingHelper = SlimmingHelper(
         'EGAM7SlimmingHelper',
@@ -479,7 +481,8 @@ def EGAM7Cfg(ConfigFlags):
                               'DAOD_EGAM7',
                               ItemList = EGAM7ItemList,
                               AcceptAlgs = ['EGAM7Kernel']))
-    acc.merge(InfileMetaDataCfg(ConfigFlags, 'DAOD_EGAM7',
-                                AcceptAlgs=['EGAM7Kernel']))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, 'DAOD_EGAM7',
+                                AcceptAlgs=['EGAM7Kernel'],
+                                createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc

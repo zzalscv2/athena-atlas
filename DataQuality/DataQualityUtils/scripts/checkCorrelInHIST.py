@@ -130,18 +130,19 @@ def hType(hist, verbose=False):
     return None
 
 
-def checkCorrel(histos, listLB):
+def checkCorrel(histos, listLB, checkList):
   # Dump the correlations in histograms to be displayed
   cRatio = {}
   paveCorrel = {}
 
   correls = {}
   
+  fractionNonZero = 0
   for iPath in histos.keys():
     for iPath2 in histos.keys():
       corr = "%s_%s"%(iPath,iPath2)
       corr2 = "%s_%s"%(iPath2,iPath)
-      if "CaloTopoClusters" not in iPath and "CaloTopoClusters" not in iPath2:
+      if not any([ cl in iPath for cl in checkList]) and not any([cl in iPath2 for cl in checkList]):
         print("Skipping comparison of",iPath,"vs",iPath2)
         if corr in correls.keys(): del correls[corr]
         if corr2 in correls.keys(): del correls[corr2]
@@ -256,7 +257,10 @@ def getSummary(histos, correls, fractionNonZero):
           meanNonZero = 0.
         print("When there is at least one entry in %s (%d LBs), there are %.1f %% of events with an entry in %s - Mean ratio: %.2f"%(iPath2.split("/")[-1],correls[corr]["hRatio"].Integral(1,100),fractionNonZero*100.,iPath.split("/")[-1],meanNonZero))
 
-        fractionNonZero = correls[corr2]["hRatio"].Integral(2,100)/correls[corr2]["hRatio"].Integral(1,100)
+        try:
+          fractionNonZero = correls[corr2]["hRatio"].Integral(2,100)/correls[corr2]["hRatio"].Integral(1,100)
+        except ZeroDivisionError:
+          fractionNonZero = 0
         if fractionNonZero != 0.:
           meanNonZero = correls[corr2]["hRatio"].GetMean()/fractionNonZero
         else:
@@ -330,6 +334,7 @@ if __name__ == "__main__":
   parser.add_argument('--onlyBoxes', dest='onlyBoxes', default=False, action='store_true', help="Only show the histograms with the box around the target area - don't do the correlation analysis")
   parser.add_argument('--draw1D', dest='draw1D', default=False, action='store_true', help="Also draw the 1D correlation plots")
   parser.add_argument('-n','--topN', dest='topN', type=int, default=4, help="Report the N bins with the highest content")
+  parser.add_argument('--checkCorr', dest='checkCorr', nargs='*', default = [ 'CaloTopoClusters' ], help="Only check the full per-LB correlation for combinations of plots where one of the plots contains this substring. As many as you want")
   args = parser.parse_args()
   
   # Info for the DQM APIs... if we are using them
@@ -337,7 +342,7 @@ if __name__ == "__main__":
 
   dqmAPI = None
 
-  
+  grouped = {}
 
   if args.tag == "": # Try to retrieve the data project tag via atlasdqm
     dqmAPI = setupDqmAPI()
@@ -389,6 +394,11 @@ if __name__ == "__main__":
     # LIDProposal(h, args.globalX, args.globalY, args.globalDelta)
     histos[h] = {}
     canvs[h] = {}
+
+  for hist in histos.keys():
+    histos[hist]["nbHitInHot"] = [0.] * nLB
+    histos[hist]["regionBins"] = []
+
   print("Finding the path to the merged hist file")
   mergedFilePath = pathExtract.returnEosHistPath( args.runNumber,
                                                   args.stream, args.amiTag, 
@@ -397,108 +407,107 @@ if __name__ == "__main__":
   if ("FILE NOT FOUND" in runFilePath):
     print("No merged file found for this run")
     print("HINT: check if there is a folder like","/eos/atlas/atlastier0/rucio/"+args.tag+"/physics_CosmicCalo/00"+str(args.runNumber)+"/"+args.tag+".00"+str(args.runNumber)+".physics_CosmicCalo.*."+args.amiTag)
-    sys.exit()
-  print("I have found the merged HIST file %s"%(runFilePath))
+  else:
+      print("I have found the merged HIST file %s"%(runFilePath))
+      drawngroup = {}
+      print("Opening the merged hist file and getting some information")
+      f = R.TFile.Open(runFilePath)
+      print("File is",runFilePath)
+      for hist in histos.keys():
+        hpath = "run_%d/%s"%(args.runNumber,hist)
+        print("Reading histogram",hpath)
+        histos[hist]["merged"] = f.Get(hpath)
+        if not isinstance(histos[hist]["merged"], R.TH1) and not isinstance(histos[hist]["merged"], R.TH2): 
+          print("WARNING: path",hpath,"was not found in merged file")
+          continue
+        histos[hist]["type"] = hType(histos[hist]["merged"])
+        histos[hist]["min"] = histos[hist]["merged"].GetMinimum()*0.8
+        histos[hist]["max"] = histos[hist]["merged"].GetMaximum()*1.2    
+        histos[hist]["merged"].SetMinimum(histos[hist]["min"])
+        histos[hist]["merged"].SetMaximum(histos[hist]["max"])
 
 
-  drawngroup = {}
-  print("Opening the merged hist file and getting some information")
-  f = R.TFile.Open(runFilePath)
-  print("File is",runFilePath)
-  for hist in histos.keys():
-    hpath = "run_%d/%s"%(args.runNumber,hist)
-    print("Reading histogram",hpath)
-    histos[hist]["merged"] = f.Get(hpath)
-    histos[hist]["type"] = hType(histos[hist]["merged"])
-    histos[hist]["min"] = histos[hist]["merged"].GetMinimum()*0.8
-    histos[hist]["max"] = histos[hist]["merged"].GetMaximum()*1.2    
-    histos[hist]["merged"].SetMinimum(histos[hist]["min"])
-    histos[hist]["merged"].SetMaximum(histos[hist]["max"])
-    
-    histos[hist]["nbHitInHot"] = [0.] * nLB
-    histos[hist]["regionBins"] = []
+        # here, find another way to define x y delta?
+        tmp_x = args.globalX
+        tmp_delta = args.globalDelta
+        # steps for iterating over bins in the scan
+        nSteps = 1000
+        subStep = 2*tmp_delta/nSteps
 
-    # here, find another way to define x y delta?
-    tmp_x = args.globalX
-    tmp_delta = args.globalDelta
-    # steps for iterating over bins in the scan
-    nSteps = 1000
-    subStep = 2*tmp_delta/nSteps
+        groupname = None
+        if hist in [ val for k,v in grouped.items() for val in v ]:
+          groupname = [ k for k,b in grouped.items() if hist in grouped[k] ][0]
+          if groupname not in canvs.keys():
+            canvs[groupname] = R.TCanvas(groupname.replace("*","x"), groupname.replace("*","x"), 400*len(grouped[groupname]), 400)
+            drawngroup[groupname] = 1
+            if len(grouped[groupname]) <6:
+              canvs[groupname].Divide(len(grouped[groupname]),1)
+              print("dividing canvas", len(grouped[groupname]))
+            else:
+              print("Too many plots in the wildcard", groupname, len(grouped[groupname]))
+              groupname = None
 
-    groupname = None
-    if hist in [ val for k,v in grouped.items() for val in v ]:
-      groupname = [ k for k,b in grouped.items() if hist in grouped[k] ][0]
-      if groupname not in canvs.keys():
-        canvs[groupname] = R.TCanvas(groupname.replace("*","x"), groupname.replace("*","x"), 400*len(grouped[groupname]), 400)
-        drawngroup[groupname] = 1
-        if len(grouped[groupname]) <6:
-          canvs[groupname].Divide(len(grouped[groupname]),1)
-          print("dividing canvas", len(grouped[groupname]))
+        if groupname is None:
+          canvs[hist]["canv"] = R.TCanvas(hist, hist)
+          thiscanv = canvs[hist]["canv"]
         else:
-          print("Too many plots in the wildcard", groupname, len(grouped[groupname]))
-          groupname = None
+          thiscanv = canvs[groupname]        
+          thiscanv.cd(drawngroup[groupname])
 
-    if groupname is None:
-      canvs[hist]["canv"] = R.TCanvas(hist, hist)
-      thiscanv = canvs[hist]["canv"]
-    else:
-      thiscanv = canvs[groupname]        
-      thiscanv.cd(drawngroup[groupname])
+        if histos[hist]["type"] == "1d":
+          histos[hist]["merged"].Draw()
+          histos[hist]["box"] = R.TBox( tmp_x-tmp_delta,
+                                     histos[hist]["min"],
+                                     tmp_x+tmp_delta,
+                                     histos[hist]["max"] )
+          # Extract the list of bins where to count.
+          # Scans the window to find all bins that fall in the window
+          # The regionBins is defined for each histogram allowing different binning
+          for ix in range(nSteps):
+            iX = tmp_x - tmp_delta + ix * subStep 
+            tmp_bin = histos[hist]["merged"].FindBin(iX)
+            if (tmp_bin not in histos[hist]["regionBins"]):
+              histos[hist]["regionBins"].append(tmp_bin)
+        else: # 2D hist
+          tmp_y = args.globalY
+          R.gPad.SetLogz(1)
+          R.gStyle.SetPalette(1)
+          R.gStyle.SetOptStat("")
+          print("Draw",hist)
+          histos[hist]["merged"].Draw("COLZ")
+          histos[hist]["box"] = R.TBox( tmp_x-tmp_delta,
+                                     tmp_y-tmp_delta,
+                                     tmp_x+tmp_delta,
+                                     tmp_y+tmp_delta )
+          # find the >Qth plot equivalent if this is the occupancy vs eta phi plot
+          QthHist = None
+          if "CellOccupancyVsEtaPhi" in hist:
+            QthHistPath= hist.replace("2d_Occupancy/CellOccupancyVsEtaPhi", "2d_PoorQualityFraction/fractionOverQthVsEtaPhi").replace("_5Sigma_CSCveto", "_hiEth_noVeto").replace("_hiEth_CSCveto", "_hiEth_noVeto")
+            QthHist = f.Get("run_%d/%s"%(args.runNumber,QthHistPath))
 
-    if histos[hist]["type"] == "1d":
-      histos[hist]["merged"].Draw()
-      histos[hist]["box"] = R.TBox( tmp_x-tmp_delta,
-                                 histos[hist]["min"],
-                                 tmp_x+tmp_delta,
-                                 histos[hist]["max"] )
-      # Extract the list of bins where to count.
-      # Scans the window to find all bins that fall in the window
-      # The regionBins is defined for each histogram allowing different binning
-      for ix in range(nSteps):
-        iX = tmp_x - tmp_delta + ix * subStep 
-        tmp_bin = histos[hist]["merged"].FindBin(iX)
-        if (tmp_bin not in histos[hist]["regionBins"]):
-          histos[hist]["regionBins"].append(tmp_bin)
-    else: # 2D hist
-      tmp_y = args.globalY
-      R.gPad.SetLogz(1)
-      R.gStyle.SetPalette(1)
-      R.gStyle.SetOptStat("")
-      print("Draw",hist)
-      histos[hist]["merged"].Draw("COLZ")
-      histos[hist]["box"] = R.TBox( tmp_x-tmp_delta,
-                                 tmp_y-tmp_delta,
-                                 tmp_x+tmp_delta,
-                                 tmp_y+tmp_delta )
-      # find the >Qth plot equivalent if this is the occupancy vs eta phi plot
-      QthHist = None
-      if "CellOccupancyVsEtaPhi" in hist:
-        QthHistPath= hist.replace("2d_Occupancy/CellOccupancyVsEtaPhi", "2d_PoorQualityFraction/fractionOverQthVsEtaPhi").replace("_5Sigma_CSCveto", "_hiEth_noVeto").replace("_hiEth_CSCveto", "_hiEth_noVeto")
-        QthHist = f.Get("run_%d/%s"%(args.runNumber,QthHistPath))
+          # Extract the list of bins where to count.
+          # Scans the window to find all bins that fall in the window
+          # The regionBins is defined for each histogram allowing different binning
+          for ix in range(nSteps):
+            iX = tmp_x - tmp_delta + ix * subStep 
+            for iy in range (nSteps):
+              iY = tmp_y - tmp_delta + iy * subStep
+              tmp_bin = histos[hist]["merged"].FindBin(iX,iY)
+              if (tmp_bin not in histos[hist]["regionBins"]):
+                histos[hist]["regionBins"].append(tmp_bin)
+          topNBins(histos[hist]["merged"],args.topN,histos[hist]["regionBins"], QthHist)
+        # Draw a box on each of the plots, highlighting the region that we will compare
+        histos[hist]["box"].SetLineColor(R.kRed+1)
+        histos[hist]["box"].SetLineWidth(3)
+        histos[hist]["box"].SetFillStyle(0)    
+        histos[hist]["box"].Draw()
 
-      # Extract the list of bins where to count.
-      # Scans the window to find all bins that fall in the window
-      # The regionBins is defined for each histogram allowing different binning
-      for ix in range(nSteps):
-        iX = tmp_x - tmp_delta + ix * subStep 
-        for iy in range (nSteps):
-          iY = tmp_y - tmp_delta + iy * subStep
-          tmp_bin = histos[hist]["merged"].FindBin(iX,iY)
-          if (tmp_bin not in histos[hist]["regionBins"]):
-            histos[hist]["regionBins"].append(tmp_bin)
-      topNBins(histos[hist]["merged"],args.topN,histos[hist]["regionBins"], QthHist)
-    # Draw a box on each of the plots, highlighting the region that we will compare
-    histos[hist]["box"].SetLineColor(R.kRed+1)
-    histos[hist]["box"].SetLineWidth(3)
-    histos[hist]["box"].SetFillStyle(0)    
-    histos[hist]["box"].Draw()
-    
-    thiscanv.objs = []
-    thiscanv.objs.append(histos[hist]["box"])
-    thiscanv.Update()
-    if groupname is not None:
-      drawngroup[groupname] += 1
-      thiscanv.cd()
+        thiscanv.objs = []
+        thiscanv.objs.append(histos[hist]["box"])
+        thiscanv.Update()
+        if groupname is not None:
+          drawngroup[groupname] += 1
+          thiscanv.cd()
 
   if args.onlyBoxes is True:
     input("I am done...")
@@ -539,13 +548,14 @@ if __name__ == "__main__":
       histos[iPath][ilb] = fLB.Get("run_%d/%s"%(args.runNumber,iPath))
       if not isinstance(histos[iPath][ilb], R.TH1) and not isinstance(histos[iPath][ilb], R.TH2):
         continue
+
       for iBin in histos[iPath]['regionBins']:
         histos[iPath]["nbHitInHot"][ilb] = histos[iPath]["nbHitInHot"][ilb] + histos[iPath][ilb].GetBinContent(iBin)
 
     fLB.Close()
 
   print("Time to check for correlations")
-  correls, fractionNonZero = checkCorrel(histos, listLB)
+  correls, fractionNonZero = checkCorrel(histos, listLB, args.checkCorr)
   
   getSummary(histos, correls, fractionNonZero)
 

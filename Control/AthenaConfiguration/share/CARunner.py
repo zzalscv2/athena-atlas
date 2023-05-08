@@ -7,10 +7,13 @@ import pickle
 if __name__=="__main__":
     import argparse
     parser= argparse.ArgumentParser(prog="CARunner.py",description="Executes a pickled ComponentAccumulator",
-                                    usage="CARunner.py [-h] [-d DEBUG] [--evtMax EVTMAX] [-l LOGLEVEL] <picklefile>")
-    parser.add_argument("-d","--debug", default=None, help="attach debugger (gdb) before run, <stage>: init, exec, fini")
+                                    usage="CARunner.py [options]  <picklefile>")
+    parser.add_argument("-d","--debug", default=None, choices=["init", "exec", "fini"], help="attach debugger (gdb) before run, <stage>")
+    parser.add_argument("-i","--interactive", action='store_true', help="Drop into interactive mode")
     parser.add_argument("--evtMax", type=int, default=None, help="Max number of events to process")
-    parser.add_argument("-l", "--loglevel", default=None, help="logging level (ALL, VERBOSE, DEBUG,INFO, WARNING, ERROR, or FATAL")
+    parser.add_argument("--skipEvents", type=int, default=None, help="Number of events to skip")
+    parser.add_argument("-l", "--loglevel", default=None, choices=["ALL","VERBOSE","DEBUG","INFO","WARNING","ERROR","FATAL"], help="logging level")
+    
 
     (args,leftover)=parser.parse_known_args(sys.argv[1:])
 
@@ -59,5 +62,11 @@ if __name__=="__main__":
         else:
             print ("ERROR: Unknown log-level, allowed values are ALL, VERBOSE, DEBUG,INFO, WARNING, ERROR, FATAL")
             sys.exit(-1)
+
+    if args.interactive:
+        acc1.interactive="init"
+
+    if args.skipEvents:
+        acc1.getService("EventSelector").SkipEvents=int(args.skipEvents)
 
     acc1.run(nEvt)

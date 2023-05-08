@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TopConfiguration/JsonUtils.h"
@@ -16,7 +16,7 @@ namespace top {
     out.push_back('"');
     for (auto it = value.cbegin(); it != value.cend(); it++) {
       char c = *it;
-      if (0x00 <= c && c < 0x20) {
+      if (0x00 <= static_cast<signed char>(c) && c < 0x20) {
         out.push_back('\\');
         switch (c) {
         case '\b': out.push_back('b');

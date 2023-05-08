@@ -23,6 +23,10 @@ def fromRunArgs(runArgs):
 
     if '_ATHENA_GENERIC_INPUTFILE_NAME_' in flags.Input.Files:
         flags.Input.Files = []
+
+    # To respect --athenaopts 
+    flags.fillFromArgs()
+
     flags.lock()
 
     cfg=MainServicesCfg(flags)

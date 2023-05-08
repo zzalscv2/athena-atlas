@@ -5,6 +5,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 
 
 BPHYDerivationName = "BPHY16"
@@ -145,7 +146,7 @@ def BPHY16Cfg(ConfigFlags):
     
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     BPHY16SlimmingHelper = SlimmingHelper("BPHY16SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
     AllVariables  = getDefaultAllVariables()
@@ -198,6 +199,6 @@ def BPHY16Cfg(ConfigFlags):
     BPHY16SlimmingHelper.StaticContent = StaticContent
     BPHY16ItemList = BPHY16SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY16", ItemList=BPHY16ItemList, AcceptAlgs=["BPHY16Kernel"]))
-    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_BPHY16", AcceptAlgs=["BPHY16Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_BPHY16", AcceptAlgs=["BPHY16Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
     acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
     return acc

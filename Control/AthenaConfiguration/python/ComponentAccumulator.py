@@ -535,15 +535,13 @@ class ComponentAccumulator:
 
         return algo
 
+    def getCondAlgos(self):
+        """Get all conditions algorithms"""
+        return self._conditionsAlgs
 
     def getCondAlgo(self, name):
-        """Get Conditions algorithm"""
-        hits = [a for a in self._conditionsAlgs if a.name==name]
-        if len(hits)!=1:
-            raise ConfigurationError(f"{len(hits)} conditions algorithms with name {name} found")
-
-        return hits[0]
-
+        """Get conditions algorithm by name"""
+        return self.__getOne( self._conditionsAlgs, name, "conditions algorithms")
 
     def addService(self, newSvc, primary=False, create=False):
         """Add service"""
@@ -779,9 +777,7 @@ class ComponentAccumulator:
 
         if not other._isMergable:
             raiseWithCurrentContext(ConfigurationError(
-                "Attempted to merge the ComponentAccumulator that was unsafely manipulated "
-                "(likely with foreach_component, ...) or is a top level ComponentAccumulator, "
-                "in such case revert the order\n"))
+                "Attempted to merge a top level ComponentAccumulator. Revert the order of merging\n"))
 
         def mergeSequences( dest, src ):
             if dest.name == src.name:
@@ -1182,7 +1178,6 @@ class ComponentAccumulator:
         Services - located under SvcMgr/ and type/instance_name is used
         """
         from AthenaConfiguration.PropSetterProxy import PropSetterProxy
-        self._isMergable=False
         return PropSetterProxy(self, path)
 
 

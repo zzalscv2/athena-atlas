@@ -21,6 +21,7 @@
 
 #include <typeinfo>
 #include <utility>
+#include <cmath>
 
 
 namespace{
@@ -130,7 +131,7 @@ namespace CP {
     if(part_type == IsolationCorrection::ELECTRON && fabs(etaS2) > 2.47) return 0.;
     
     if(fabs(etaS1) > 2.5) return 0.;
-    if(fabs(phiCluster) > 3.2) return 0.;
+    if(fabs(phiCluster) > float(M_PI)) return 0.;
 
     if (part_type == IsolationCorrection::ELECTRON && energy > 15e3)
       ATH_MSG_VERBOSE("Electron ? " << (part_type == IsolationCorrection::ELECTRON) << " Input E = " << input.caloCluster()->e() << " E used " << energy << " author = " << input.author() << " pT = " << input.pt() << " phi = " << input.phi());

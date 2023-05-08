@@ -95,6 +95,10 @@ def fromRunArgs(runArgs):
     log.info('**** Processing preExec')
     processPreExec(runArgs, flags)
 
+    # To respect --athenaopts 
+    log.info('**** Processing athenaopts')
+    flags.fillFromArgs()
+
     # Lock configuration flags
     log.info('**** Locking configuration flags')
     flags.lock()
@@ -119,8 +123,14 @@ def fromRunArgs(runArgs):
     Stream.ForceRead = True
     Stream.TakeItemsFromInput = True
     # Add in-file MetaData
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
-    cfg.merge(InfileMetaDataCfg(flags, streamToMerge))
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+    cfg.merge(
+        SetupMetaDataForStreamCfg(
+            flags,
+            streamToMerge,
+        )
+    )
+
     log.info(f'**** Configured {streamToMerge} writing')
 
     # Configure extra bits that are needed for TP conversion
