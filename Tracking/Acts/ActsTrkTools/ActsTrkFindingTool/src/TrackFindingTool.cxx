@@ -579,14 +579,18 @@ namespace ActsTrk
                                     const Trk::TrackParameters *parm) const
   {
     const Trk::PrepRawData *rio = nullptr;
-    if (auto pixcl = dynamic_cast<const xAOD::PixelCluster *>(&uncalibMeas))
+    const xAOD::UncalibMeasType measurementType = uncalibMeas.type();
+
+    if (measurementType == xAOD::UncalibMeasType::PixelClusterType)
     {
       static const SG::AuxElement::ConstAccessor<ElementLink<InDet::PixelClusterCollection>> pixelLinkAcc("pixelClusterLink");
-      if (!pixelLinkAcc.isAvailable(*pixcl))
+      auto pixcl = dynamic_cast<const xAOD::PixelCluster *>(&uncalibMeas);
+      if (not pixcl or not pixelLinkAcc.isAvailable(*pixcl))
       {
         ATH_MSG_WARNING("no pixelClusterLink for cluster associated to measurement");
         return nullptr;
       }
+
       auto pix = *pixelLinkAcc(*pixcl);
       if (m_RotCreatorTool.empty())
       {
@@ -607,14 +611,16 @@ namespace ActsTrk
       }
       rio = pix;
     }
-    else if (auto stripcl = dynamic_cast<const xAOD::StripCluster *>(&uncalibMeas))
+    else if (measurementType == xAOD::UncalibMeasType::StripClusterType)
     {
       static const SG::AuxElement::ConstAccessor<ElementLink<InDet::SCT_ClusterCollection>> stripLinkAcc("sctClusterLink");
-      if (!stripLinkAcc.isAvailable(*stripcl))
+      auto stripcl = dynamic_cast<const xAOD::StripCluster *>(&uncalibMeas);
+      if (not stripcl or not stripLinkAcc.isAvailable(*stripcl))
       {
         ATH_MSG_WARNING("no sctClusterLink for clusters associated to measurement");
         return nullptr;
       }
+
       auto sct = *stripLinkAcc(*stripcl);
       if (m_RotCreatorTool.empty())
       {
