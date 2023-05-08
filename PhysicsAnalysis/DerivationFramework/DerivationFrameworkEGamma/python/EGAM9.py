@@ -139,11 +139,10 @@ def EGAM9KernelCfg(ConfigFlags, name='EGAM9Kernel', **kwargs):
 
     # thinning tools
     thinningTools = []
+    streamName = kwargs['StreamName']
 
     # Track thinning
     if ConfigFlags.Derivation.Egamma.doTrackThinning:
-
-        streamName = kwargs['StreamName']
 
         TrackThinningKeepElectronTracks = False
         TrackThinningKeepPhotonTracks = True

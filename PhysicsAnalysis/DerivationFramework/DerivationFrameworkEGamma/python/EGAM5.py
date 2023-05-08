@@ -175,6 +175,7 @@ def EGAM5KernelCfg(ConfigFlags, name='EGAM5Kernel', **kwargs):
 
     # thinning tools
     thinningTools = []
+    streamName = kwargs['StreamName']
 
     # Track thinning
     if ConfigFlags.Derivation.Egamma.doTrackThinning:
@@ -182,7 +183,6 @@ def EGAM5KernelCfg(ConfigFlags, name='EGAM5Kernel', **kwargs):
         from DerivationFrameworkInDet.InDetToolsConfig import (
             TrackParticleThinningCfg, MuonTrackParticleThinningCfg,
             TauTrackParticleThinningCfg )
-        streamName = kwargs['StreamName']
 
         TrackThinningKeepElectronTracks = True
         TrackThinningKeepPhotonTracks = True
