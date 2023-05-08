@@ -29,7 +29,7 @@ namespace xAOD {
         /// @{
 
         /// Returns the type of the pixel cluster as a simple enumeration
-        xAOD::UncalibMeasType type() const final {
+        xAOD::UncalibMeasType type() const override final {
             return xAOD::UncalibMeasType::PixelClusterType;
         }
 
