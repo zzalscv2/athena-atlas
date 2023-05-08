@@ -2,6 +2,7 @@
 
 import os
 import json
+import re
 import six
 import xml.etree.ElementTree as ET
 from collections import OrderedDict as odict
@@ -38,7 +39,7 @@ class ConfigType(Enum):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-class ConfigLoader(object):
+class ConfigLoader:
     """ 
     ConfigLoader derived classes hold the information of the configuration source
     and define the method to load the configuration
@@ -51,7 +52,6 @@ class ConfigLoader(object):
         """
         if config['filetype'] != self.configType:
             raise RuntimeError("Can not load file with filetype '%s' when expecting '%s'" % (config['filetype'], self.configType.filetype))
-        
 
 class ConfigFileLoader(ConfigLoader):
     def __init__(self, configType, filename ):
@@ -197,12 +197,25 @@ class ConfigDBLoader(ConfigLoader):
             log.warning("Failed to read schema version: %r", e)
 
     @staticmethod
-    def getCoralQuery(session, queryStr):
+    def getCoralQuery(session, queryStr, qdict = None):
         ''' Parse output, tables and contidion from the query string into coral query object'''
         query = session.nominalSchema().newQuery()
 
+        if qdict is not None:
+            queryStr = queryStr.format(**qdict)
+
+        # bind vars
+        bindVars = coral.AttributeList()
+        bindVarsInQuery = re.findall(r":(\w*)", queryStr)
+        if len(bindVarsInQuery) > 0 and qdict is None:
+            log.error("Query has bound-variable syntax but no value dictionary is provided. Query: %s", queryStr)
+        for k in bindVarsInQuery:
+            bindVars.extend(k, "int")
+            bindVars[k].setData(qdict[k])
+
         output = queryStr.split("SELECT")[1].split("FROM")[0]
-        query.addToOutputList(output)
+        for field in output.split(','):
+            query.addToOutputList(field)
 
         log.debug("Conversion for Coral of query: %s", queryStr)
 
@@ -212,7 +225,14 @@ class ConfigDBLoader(ConfigLoader):
             query.addToTableList(tableSplit[0].split(".")[1], tableSplit[1])
 
         if "WHERE" in queryStr:
-            query.setCondition(queryStr.split("WHERE")[1], coral.AttributeList())
+            cond = queryStr.split("WHERE")[1]
+            m = re.match("(.*)(?i: ORDER *BY )(.*)", cond) # check for "order by" clause
+            if m:
+                where, order = m.groups()
+                query.setCondition(where, bindVars)
+                query.addToOrderList(order)
+            else:
+                query.setCondition(cond, bindVars)
 
         return query
 
@@ -236,6 +256,7 @@ class ConfigDBLoader(ConfigLoader):
         svcconfig.disablePoolAutomaticCleanUp()
         svcconfig.setConnectionTimeOut(0)
 
+        failureMode = 0
         for credential in credentials:
             log.debug("Trying credentials %s",credential)
 
@@ -243,53 +264,70 @@ class ConfigDBLoader(ConfigLoader):
                 session = svc.connect(credential, coral.access_ReadOnly)
             except Exception as e:
                 log.warning("Failed to establish connection: %s",e)
+                failureMode = max(1, failureMode)
                 continue
 
-            try:
-                # Check that the FRONTIER_SERVER is set properly, if not reduce the retrial period and time out values
-                if not ('FRONTIER_SERVER' in os.environ and os.environ['FRONTIER_SERVER']):
-                    svcconfig.setConnectionRetrialPeriod(1)
-                    svcconfig.setConnectionRetrialTimeOut(1)
-                else:
-                    svcconfig.setConnectionRetrialPeriod(300)
-                    svcconfig.setConnectionRetrialTimeOut(3600)
+            # Check that the FRONTIER_SERVER is set properly, if not reduce the retrial period and time out values
+            if 'FRONTIER_SERVER' in os.environ and os.environ['FRONTIER_SERVER']:
+                svcconfig.setConnectionRetrialPeriod(300)
+                svcconfig.setConnectionRetrialTimeOut(3600)
+            else:
+                svcconfig.setConnectionRetrialPeriod(1)
+                svcconfig.setConnectionRetrialTimeOut(1)
 
+            try:
                 session.transaction().start(True) # readOnly
                 self.schema = ConfigDBLoader.getSchema(credential)
                 qdict = { "schema" : self.schema, "dbkey" : self.dbkey }
                 
-                # Choose query basen on schema
+                # Choose query based on schema
                 schemaVersion = ConfigDBLoader.readSchemaVersion(qdict, session)
                 qstr = self.getQueryDefinition(schemaVersion)
-
-                query = ConfigDBLoader.getCoralQuery(session, qstr.format(**qdict))
-
+                # execute coral query
+                query = ConfigDBLoader.getCoralQuery(session, qstr, qdict)
                 cursor = query.execute()
 
-                # Read query result
-                cursor.next()
-                configblob = cursor.currentRow()[0].data()
-                if type(configblob) != str:
-                    configblob = configblob.readline()
-                config = json.loads(configblob, object_pairs_hook = odict)
-                session.transaction().commit()
-                
-                self.confirmConfigType(config)
-                return config       
             except Exception as e:
-                log.warning("Failed to execute query: %s", qstr.format(**qdict))
+                log.warning(f"DB query on {credential} failed to execute.")
                 log.warning("Exception message: %r", e)
+                failureMode = max(2, failureMode)
+                continue # to next source
 
-        log.error("Query failed on all sources")
-        raise RuntimeError("Query failed")
+            # Read query result
+            if not cursor.next():
+                # empty result
+                log.warning(f"DB query on {credential} returned empty result, likely due to non-existing key {self.dbkey}")
+                failureMode = 3
+                continue # to next source
+
+            configblob = cursor.currentRow()[0].data()
+            if type(configblob) != str:
+                configblob = configblob.readline()
+            config = json.loads(configblob, object_pairs_hook = odict)
+            session.transaction().commit()
+            
+            self.confirmConfigType(config)
+            return config
+
+        log.error("Unsuccessful DB query: %s", qstr.format(**qdict))
+        log.error("Considered sources: %s", ", ".join(credentials))
+        if failureMode == 1:
+            log.error("TriggerDB query: could not connect to any source for %s", self.configType.basename)
+            raise RuntimeError("TriggerDB query: could not connect to any source", self.configType.basename)
+        if failureMode == 2:
+            log.error("Query failed due to wrong definition for %s", self.configType.basename)
+            raise RuntimeError("Query failed due to wrong definition", self.configType.basename)
+        elif failureMode == 3:
+            log.error("DB key %s does not exist for %s", self.dbkey, self.configType.basename)
+            raise KeyError("DB key does not exist", self.dbkey, self.configType.basename)
+        else:
+            raise RuntimeError("Query failed for unknown reason")
 
     # proposed filename when writing config to file
     def getWriteFilename(self):
         return "{basename}_{schema}_{dbkey}.json".format(basename = self.configType.basename, schema = self.schema, dbkey = self.dbkey)
 
-
-
-class TriggerConfigAccess(object):
+class TriggerConfigAccess:
     """ 
     base class to hold the configuration (OrderedDict) 
     and provides basic functions to access and print
