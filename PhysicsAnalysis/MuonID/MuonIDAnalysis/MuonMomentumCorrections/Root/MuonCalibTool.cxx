@@ -234,12 +234,17 @@ namespace CP
 
     CorrectionCode MuonCalibTool::applyCorrectionTrkOnly(xAOD::TrackParticle &inTrk, const int DetType) const
     {
-                // Convert to the internal object
+        // Convert to the internal object
         MCP::MuonObj muonObj = convertToMuonObj(inTrk, DetType);
 
         // Do Scale and Smearing corrections
         CorrectionCode sgCode = m_MuonIntScaleSmearTool->applyCorrection(muonObj);
         if (sgCode != CorrectionCode::Ok) return sgCode;
+
+	//re-converting the pT to MeV
+	muonObj.ID.calib_pt = muonObj.ID.calib_pt * GeVtoMeV;
+	muonObj.ME.calib_pt = muonObj.ME.calib_pt * GeVtoMeV;
+	muonObj.CB.calib_pt = muonObj.CB.calib_pt * GeVtoMeV;
 
         double res_pt = muonObj.ID.calib_pt;
         if(DetType == MCP::DetectorType::MS) res_pt = muonObj.ME.calib_pt;
@@ -500,6 +505,12 @@ namespace CP
         auto ME = MCP::TrackCalibObj(&inTrk,   MCP::TrackType::ME, charge, year, isData);
 
         MCP::MuonObj muonObj{CB,ID,ME};
+
+	//converting pT into GeV
+	muonObj.ID.calib_pt = muonObj.ID.calib_pt * MeVtoGeV;
+	muonObj.ME.calib_pt = muonObj.ME.calib_pt * MeVtoGeV;
+	muonObj.CB.calib_pt = muonObj.CB.calib_pt * MeVtoGeV;
+
         return muonObj;
     }
 
