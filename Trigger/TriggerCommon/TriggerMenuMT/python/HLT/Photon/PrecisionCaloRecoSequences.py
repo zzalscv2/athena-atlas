@@ -20,19 +20,14 @@ def precisionCaloRecoSequence(flags, RoIs, name = None, ion=False):
     log.debug('flags = %s',flags)
     log.debug('RoIs = %s',RoIs)
 
-    from TrigCaloRec.TrigCaloRecConfig import hltCaloTopoClusteringCfg, hltCaloTopoClusteringHICfg
+    from TrigCaloRec.TrigCaloRecConfig import egammaTopoClusteringCfg, hltCaloTopoClusteringHICfg
     
     if ion:
         topoCluster = hltCaloTopoClusteringHICfg(flags,
-                                                 namePrefix='',
                                                  CellsName = "CaloCells",
                                                  roisKey=RoIs)
     else:
-        topoCluster = hltCaloTopoClusteringCfg(flags,
-                                               namePrefix='',
-                                               nameSuffix='RoI',
-                                               CellsName = "CaloCells",
-                                               roisKey=RoIs) 
+        topoCluster = egammaTopoClusteringCfg(flags, RoIs) 
     acc.merge(topoCluster)
     tag = 'HI' if ion is True else '' 
     

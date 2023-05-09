@@ -16,13 +16,9 @@ def _caloSeq(flags):
                                                                                ('CaloBCIDAverage', 'StoreGateSvc+CaloBCIDAverage'),
                                                                                ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing'),
                                                                                ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.actualInteractionsPerCrossing') ]))
-    from TrigCaloRec.TrigCaloRecConfig import hltCaloTopoClusteringCfg
-    recoAcc.mergeReco(hltCaloTopoClusteringCfg(flags,
-                                                    namePrefix="Tau",
-                                                    nameSuffix="",
-                                                    roisKey=recoAcc.inputMaker().InViewRoIs,
-                                                    clustersKey='HLT_TopoCaloClustersLC',
-                                                    doLC = True))
+    from TrigCaloRec.TrigCaloRecConfig import tauTopoClusteringCfg
+    recoAcc.mergeReco(tauTopoClusteringCfg(flags,
+                                           RoIs = recoAcc.inputMaker().InViewRoIs))
 
     from TrigTauRec.TrigTauRecConfig import trigTauRecMergedCaloOnlyMVACfg
     recoAcc.addRecoAlgo(CompFactory.TrigTauCaloRoiUpdater("TauCaloRoiUpdater",
