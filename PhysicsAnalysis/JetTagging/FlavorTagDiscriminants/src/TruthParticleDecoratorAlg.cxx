@@ -81,6 +81,15 @@ namespace FlavorTagDiscriminants {
     // first loop - decorate origin label, just store truth vertex for now
     auto tp_truth_vertices = std::vector<const xAOD::TruthVertex*>();
     for ( const auto& truth_particle : sorted_truth_particles ) {
+      
+      // for efficiency, skip unstable and low pt particles (< 500 MeV)
+      if ( truth_particle->status() != 1 or truth_particle->pt() < 500) {
+        dec_origin_label(*truth_particle) = InDet::ExclusiveOrigin::Pileup;
+        dec_type_label(*truth_particle) = TruthDecoratorHelpers::ExclusiveType::NoTruth;
+        dec_vertex_index(*truth_particle) = -1;
+        dec_parent_barcode(*truth_particle) = -1;
+        continue;
+      }
 
       // get parent hadron and decorate barcode 
       auto truth_parent = TruthDecoratorHelpers::get_parent_hadron(truth_particle);

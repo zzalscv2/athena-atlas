@@ -7,12 +7,15 @@ from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
+from TrigCaloRec.TrigCaloRecConfig import jetmetTopoClusteringCfg
+from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
 
 def UTTJetRecoSequence(flags):
 
-        from TriggerMenuMT.HLT.CommonSequences.CaloSequences import caloClusterRecoSequence
-        topoClusterSequence, clustersKey = RecoFragmentsPool.retrieve(
-                caloClusterRecoSequence, flags, RoIs='')
+        topoClusterSequence = algorithmCAToGlobalWrapper(jetmetTopoClusteringCfg,
+                                                 flags = flags,
+                                                 RoIs = '')
+        clustersKey = "HLT_TopoCaloClustersFS"
  
         from TrigStreamerHypo.TrigStreamerHypoConf   import TrigStreamerHypoAlg
         from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator

@@ -26,7 +26,8 @@ TruthTestTool::TruthTestTool(const std::string& type, const std::string& name, c
     m_meanx_vert(0), m_meany_vert(0), m_meanz_vert(0),
     m_px_truth(0), m_py_truth(0), m_pz_truth(0), m_pt_truth(0), m_log_pt_truth(0),
     m_theta_truth(0), m_eta_truth(0), m_phi_truth(0),
-    m_barcode_small(0),m_barcode_large(0), m_log_barcode_large(0), m_particle_status(0),m_particle_type(0),
+    m_origin(0),
+     m_particle_status(0),m_particle_type(0),
     m_p_gen(0), m_log_p_gen(0), m_eta_gen(0), m_phi_gen(0),m_pion_mass(0)
 {
   declareProperty("DumpMcEvent", m_mcEventDump=10);
@@ -114,12 +115,7 @@ StatusCode TruthTestTool::initialize()
   _SET_TITLE(m_eta_truth,"eta distribution of MC truth","eta","dN/deta");
   _TH1D(m_phi_truth,"phi_truth",25,-M_PI,M_PI);
   _SET_TITLE(m_phi_truth,"phi distribution of MC truth","phi","dN/dphi");
-
-  _TH1D(m_barcode_large,(histdirname+"_barcode1").c_str(),100,0.,1500000.);
-  m_barcode_large -> StatOverflows();
-  _TH1D(m_log_barcode_large,(histdirname+"_log_barcode1").c_str(),50,0.,16.);
-  _TH1D(m_barcode_small,(histdirname+"_barcode2").c_str(),100,10000.,10100.);
-
+  _TH1D(m_origin,(histdirname+"_origin").c_str(),2,0.,1.);
   _TH1D(m_particle_status,"particle_status",5,-0.5,4.5);
   _SET_TITLE(m_particle_status,"Particle Status (1==undecayed, 2==decayed, 4==beam particle)","GenParticle Status","N GenParticles");
   _TH1D(m_particle_type,"particle_type",15,-7.5,7.5);
@@ -224,7 +220,7 @@ StatusCode TruthTestTool::processEvent()
 
       int npart_prim=0, npart_sec=0;
       for (const auto& currentGenParticle: *(*currentGenEventIter)) {
-        int barcode = HepMC::barcode(currentGenParticle);
+        bool is_simulation = HepMC::is_simulation_particle(currentGenParticle);
         const HepMC::FourVector mom = currentGenParticle->momentum();
         m_px_truth->Fill( mom.x() );
         m_py_truth->Fill( mom.y() );
@@ -239,9 +235,8 @@ StatusCode TruthTestTool::processEvent()
         if(std::abs(currentGenParticle->pdg_id())==211) {
           m_pion_mass->Fill(mom.m());
         }
-        m_barcode_small->Fill(barcode);
-        m_barcode_large->Fill(barcode);
-        m_log_barcode_large->Fill( barcode > 0 ? log(barcode) : -1);
+        m_origin->Fill(is_simulation?1:0);
+             
         m_particle_status->Fill(currentGenParticle->status());
 
         int pdg = currentGenParticle->pdg_id();
@@ -280,25 +275,18 @@ StatusCode TruthTestTool::processEvent()
         particleType = (pdg<0) ? -particleType : particleType;
         m_particle_type->Fill( particleType );
 
-        if ( !HepMC::is_simulation_particle(barcode) ) {
+        if ( !is_simulation ) {
           double momentum=std::sqrt(mom.x()*mom.x()+mom.y()*mom.y()+mom.z()*mom.z());
           m_p_gen->Fill( momentum );
           m_log_p_gen->Fill( std::log(momentum) );
           m_eta_gen->Fill( mom.eta() );
           m_phi_gen->Fill( mom.phi() );
           ++npart_prim;
-          if ( barcode<10000 ) {
-            m_n_generations ->Fill(0);
-          }
-          else {
-            m_n_generations ->Fill(1);
-          }
         }
         else {
           ++npart_sec;
-          const int gen = barcode/ HepMC::SIM_REGENERATION_INCREMENT +2;
-          m_n_generations ->Fill(gen);
         }
+        m_n_generations ->Fill(HepMC::generations(currentGenParticle));
       }
       m_n_part_prim->Fill(npart_prim);
       m_n_part_sec->Fill(npart_sec);

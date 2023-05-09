@@ -48,33 +48,27 @@ def fastCaloMenuSequenceCfg(flags, name, doRinger=True, is_probe_leg=False):
     from TrigEgammaHypo.TrigEgammaFastCaloHypoTool import TrigEgammaFastCaloHypoToolFromDict
     return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaFastCaloHypoToolFromDict,isProbe=is_probe_leg)
     
-###
 def fastCaloMenuSequence(flags, name, doRinger=True, is_probe_leg=False):
      if isComponentAccumulatorCfg():
         return fastCaloMenuSequenceCfg(flags,name=name,doRinger=doRinger,is_probe_leg=is_probe_leg)
      else: 
         return menuSequenceCAToGlobalWrapper(fastCaloMenuSequenceCfg,flags,name=name,doRinger=doRinger,is_probe_leg=is_probe_leg)
 
-def cellRecoSequence(flags, name="HLTCaloCellMakerFS", RoIs=caloFSRoI, outputName="CaloCellsFS"):
-    """ Produce the full scan cell collection """
-    if not RoIs:
-        from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
-        RoIs = mapThresholdToL1RoICollection("FSNOSEED")
-    from TrigCaloRec.TrigCaloRecConfig import HLTCaloCellMaker
-    alg = HLTCaloCellMaker(flags, name, roisKey = RoIs, CellsName=outputName, monitorCells=False)
-    return parOR(name+"RecoSequence", [alg]), str(alg.CellsName)
+def cellRecoSequence(flags, name="HLTCaloCellMakerFS", RoIs=caloFSRoI, outputName="CaloCellsFS", monitorCells = False):
+    from TrigCaloRec.TrigCaloRecConfig import hltCaloCellMakerCfg
+    alg = algorithmCAToGlobalWrapper(hltCaloCellMakerCfg, flags=flags, name=name, roisKey=RoIs, CellsName=outputName, monitorCells=monitorCells)
+    return alg,outputName
 
 def caloClusterRecoSequence(
         flags, name="HLTCaloClusterMakerFS", RoIs=caloFSRoI,
         outputName="HLT_TopoCaloClustersFS"):
-    """ Create the EM-level fullscan clusters """
-    cell_sequence, cells_name = RecoFragmentsPool.retrieve(cellRecoSequence, flags=flags, RoIs=RoIs)
-    from TrigCaloRec.TrigCaloRecConfig import hltTopoClusterMakerCfg
-    alg = algorithmCAToGlobalWrapper(hltTopoClusterMakerCfg, flags, name,
-                                     doLC=False,
-                                     clustersKey=outputName,
-                                     cellsKey=cells_name)[0]
-    return parOR(name+"RecoSequence", [cell_sequence, alg]), str(alg.CaloClusters)
+        from TrigCaloRec.TrigCaloRecConfig import jetmetTopoClusteringCfg
+    
+        alg=algorithmCAToGlobalWrapper(jetmetTopoClusteringCfg,
+                                       flags	   =flags,
+                                       RoIs        =RoIs
+                                       )        
+        return alg, outputName
 
 def LCCaloClusterRecoSequence(
         flags, name="HLTCaloClusterCalibratorLCFS", RoIs=caloFSRoI,

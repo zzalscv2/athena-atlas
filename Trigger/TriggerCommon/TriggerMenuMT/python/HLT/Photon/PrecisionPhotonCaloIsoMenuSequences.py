@@ -2,9 +2,12 @@
 
 # menu components   
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
-from AthenaCommon.CFElements import seqAND
+from AthenaCommon.CFElements import seqAND, parOR
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorPreviousROITool
+from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
+from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
+import AthenaCommon.CfgMgr as CfgMgr
 
 # logger
 from AthenaCommon.Logging import logging
@@ -17,6 +20,8 @@ def precisionPhotonCaloIsoSequence(flags, ion=False):
     """ This function creates the PrecisionPhotonCaloIso sequence"""
     # Prepare first the EventView
     InViewRoIs="PrecisionPhotonCaloIsoRoIs"                                          
+    TrigEgammaKeys = getTrigEgammaKeys(ion=ion)
+    caloClusters = TrigEgammaKeys.precisionPhotonCaloClusterContainer    
     precisionPhotonCaloIsoViewsMaker = EventViewCreatorAlgorithm( "IM" + tag(ion))
     precisionPhotonCaloIsoViewsMaker.ViewFallThrough = True                          
     precisionPhotonCaloIsoViewsMaker.RequireParentView = True
@@ -26,15 +31,34 @@ def precisionPhotonCaloIsoSequence(flags, ion=False):
     precisionPhotonCaloIsoViewsMaker.Views = tag(ion) + "Views"     # Output container which has the view objects
 
     # Configure the reconstruction algorithm sequence
+    hiInfo = 'HI' if ion is True else ''
     from TriggerMenuMT.HLT.Photon.PrecisionPhotonCaloIsoRecoSequences import precisionPhotonCaloIsoRecoSequence
-    (precisionPhotonCaloIsoInViewSequence, sequenceOut) = precisionPhotonCaloIsoRecoSequence(flags, RoIs=InViewRoIs, ion=ion)
+    precisionCaloIsoSequence = algorithmCAToGlobalWrapper(precisionPhotonCaloIsoRecoSequence, flags, InViewRoIs, ion)
+    sequenceOut = TrigEgammaKeys.precisionPhotonIsoContainer
 
+    ViewVerify = CfgMgr.AthViews__ViewDataVerifier("PrecisionPhotonCaloIsoPhotonViewDataVerifier" + hiInfo)
+    ViewVerify.DataObjects = [( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % caloClusters ),
+                              ( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % TrigEgammaKeys.precisionTopoClusterContainer), # this is for the calo isolation tool 
+                              ( 'xAOD::PhotonContainer' , 'StoreGateSvc+%s' % TrigEgammaKeys.precisionPhotonContainer), # This is the Photon input container with non-isolated photons
+                              ( 'CaloCellContainer' , 'StoreGateSvc+CaloCells' ),
+                              ( 'CaloCellContainer' , 'StoreGateSvc+CaloCellsFS' ),
+                              ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
+                              ( 'xAOD::EventShape' , 'StoreGateSvc+TrigIsoEventShape' ),
+                              ( 'xAOD::IParticleContainer' , 'StoreGateSvc+HLT_TopoCaloClustersFS'),
+                              ( 'PseudoJetContainer' , 'StoreGateSvc+PseudoJetTrigEMTopo' )]
+                              
+    if ion is True: ViewVerify.DataObjects.append(( 'CaloCellContainer' , 'StoreGateSvc+CorrectedRoICaloCells' ))
+    
+    precisionPhotonCaloIsoInViewSequence = parOR("precisionPhotonCaloIsoAlgs" + hiInfo, [ViewVerify, precisionCaloIsoSequence])
+
+    
     precisionPhotonCaloIsoViewsMaker.ViewNodeName = precisionPhotonCaloIsoInViewSequence.name()
 
     theSequence = seqAND(tag(ion)+"Sequence", [])
     # Add first the sequence part that is FS, so to run outside the view
-    from TriggerMenuMT.HLT.Egamma.TrigEgammaFactories import egammaFSEventDensitySequence
-    theSequence += egammaFSEventDensitySequence(flags)
+    from TriggerMenuMT.HLT.Egamma.TrigEgammaFactoriesCfg import TrigEgammaFSEventDensitySequenceCfg
+    TrigEgammaFSEventDensity = algorithmCAToGlobalWrapper(TrigEgammaFSEventDensitySequenceCfg, flags)
+    theSequence += TrigEgammaFSEventDensity
 
     # And now add the the rest which is run isnide the EventView:
     theSequence += [precisionPhotonCaloIsoViewsMaker,precisionPhotonCaloIsoInViewSequence]

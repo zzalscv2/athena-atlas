@@ -3,6 +3,7 @@
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, ChainStep, Chain, InEventRecoCA, SelectionCA
 from AthenaConfiguration.ComponentFactory import CompFactory
 import pprint
+from TrigCaloRec.TrigCaloRecConfig import jetmetTopoClusteringCfg, HICaloTowerCfg
 from AthenaCommon.Logging import logging
 from ..CommonSequences.FullScanDefs import trkFSRoI, em_clusters, caloFSRoI
 from .JetRecoCommon import jetRecoDictToString
@@ -26,9 +27,8 @@ def generateChains( flags, chainDict ):
     if jetRecoDict["ionopt"] == "noion":
         clustersname = em_clusters
 
-        from ..CommonSequences.CaloConfig import CaloClusterCfg
-        InEventReco.mergeReco(CaloClusterCfg(flags, doLCCalib=False))
-
+        InEventReco.mergeReco(jetmetTopoClusteringCfg(flags,RoIs ='')) 
+                                                       
         if jetRecoDict["trkopt"] != "notrk":
             from .JetTrackingConfig import JetFSTrackingCfg
             trk_acc, trkcolls = JetFSTrackingCfg(flags, jetRecoDict["trkopt"], trkFSRoI)
@@ -41,8 +41,6 @@ def generateChains( flags, chainDict ):
         InEventReco.mergeReco(jet_acc)
     else:
         clustersname = caloFSRoI 
-
-        from ..CommonSequences.CaloConfig import HICaloTowerCfg
         InEventReco.mergeReco(HICaloTowerCfg(flags))
 
         from .JetHIConfig import JetHICfg
