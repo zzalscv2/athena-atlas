@@ -70,15 +70,15 @@ StatusCode ActsReFitterAlg::execute(const EventContext &ctx) const {
       }
       new_tracks.push_back(std::move(newtrack));
     }
-    else if (msgLvl(MSG::WARNING)) {  // newtrack might be equal to a nullptr
-      ATH_MSG_WARNING("The Acts Refitting (KF or GSF) has returned a nullptr. Below is information on the offending track."); // TODO: solve the cases where we return a nullptr
-      msg(MSG::WARNING) << "ATLAS param : " << endmsg;
-      msg(MSG::WARNING) << *((**track).perigeeParameters()) << endmsg;
-      msg(MSG::WARNING) << *((**track).perigeeParameters()->covariance()) << endmsg;
+    else if (msgLvl(MSG::DEBUG)) {  // newtrack might be equal to a nullptr
+      msg(MSG::DEBUG) << "The Acts Refitting (KF or GSF) has returned a nullptr. Below is information on the offending track." << endmsg; // TODO: solve the cases where we return a nullptr
+      msg(MSG::DEBUG) << "ATLAS param : " << endmsg;
+      msg(MSG::DEBUG) << *((**track).perigeeParameters()) << endmsg;
+      msg(MSG::DEBUG) << *((**track).perigeeParameters()->covariance()) << endmsg;
 
-      msg(MSG::WARNING) << "ATLAS INFO : " << endmsg;
-      msg(MSG::WARNING) << *((**track).trackSummary()) << endmsg;
-      msg(MSG::WARNING) << "==========================" << endmsg;
+      msg(MSG::DEBUG) << "ATLAS INFO : " << endmsg;
+      msg(MSG::DEBUG) << *((**track).trackSummary()) << endmsg;
+      msg(MSG::DEBUG) << "==========================" << endmsg;
     }
   }
   
@@ -90,7 +90,7 @@ StatusCode ActsReFitterAlg::execute(const EventContext &ctx) const {
     new_track_collection->push_back(std::move(new_track));
   }
   
-  ATH_MSG_VERBOSE ("Saving tracks");
+  ATH_MSG_DEBUG ("Saving tracks");
   ATH_CHECK(SG::WriteHandle<TrackCollection>(m_newTrackName, ctx).record(std::move(new_track_collection)));
   return StatusCode::SUCCESS;
 }
