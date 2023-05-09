@@ -47,6 +47,12 @@ def actsValidateTracksFlags(flags):
     flags.Tracking.ITkMainPass.doAmbiguityProcessorTrackFit = False
     flags.Tracking.recoChain = [TrackingComponent.ValidateActsTracks]
 
+def actsValidateGSFFlags(flags):
+    """flags for Reco_tf with CA used in CI tests: use GaussianSumFitter"""
+    flags.Reco.EnableHGTDExtension = False
+    from ActsConfig.ActsConfigFlags import TrackFitterType
+    flags.Acts.trackFitterType = TrackFitterType.GaussianSumFitter
+
 def actsArtFlags(flags):
     """flags for Reco_tf with CA used in ART test: add Acts workflow to reco sequence"""
     flags.Reco.EnableHGTDExtension = False
