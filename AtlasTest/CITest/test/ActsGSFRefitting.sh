@@ -5,8 +5,7 @@ input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitori
 n_events=5
 
 Reco_tf.py --CA \
-   --preExec "flags.Reco.EnableHGTDExtension=False;" \
-   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
+   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateGSFFlags" \
    --postInclude "ActsConfig.ActsTrkFittingAlgsConfig.ActsReFitterAlgCfg" \
    --inputRDOFile ${input_rdo} \
    --outputESDFile ESD.pool.root \
