@@ -11,7 +11,7 @@ from JetRecConfig.DependencyHelper import solveDependencies, solveGroomingDepend
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 
 from . import JetRecoCommon
-from ..CommonSequences.CaloSequences import caloClusterRecoSequence, LCCaloClusterRecoSequence
+from TrigCaloRec.TrigCaloRecConfig import jetmetTopoClusteringCfg, jetmetTopoClusteringCfg_LC
 from eflowRec.PFHLTSequence import PFHLTSequence
 from eflowRec.PFHLTSequence import trackvtxcontainers
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
@@ -258,11 +258,16 @@ def jetClusterSequence(configFlags, RoIs, clusterCalib):
 
     # Start by adding the topocluster reco sequence
     if clusterCalib == "em":
-        topoClusterSequence, clustersKey = RecoFragmentsPool.retrieve(
-                caloClusterRecoSequence, flags=configFlags, RoIs=RoIs)
+        topoClusterSequence = algorithmCAToGlobalWrapper(jetmetTopoClusteringCfg,
+                                                  flags = configFlags,
+                                                  RoIs = RoIs)
+        clustersKey = "HLT_TopoCaloClustersFS"
+
     elif clusterCalib == "lcw":
-        topoClusterSequence, clustersKey = RecoFragmentsPool.retrieve(
-                LCCaloClusterRecoSequence, flags=configFlags, RoIs=RoIs)
+        topoClusterSequence = algorithmCAToGlobalWrapper(jetmetTopoClusteringCfg_LC,
+                                                  flags = configFlags,
+                                                  RoIs = RoIs)
+        clustersKey = "HLT_TopoCaloClustersLCFS"
     else:
         raise ValueError("Invalid value for calib: '{}'".format(clusterCalib))
 
