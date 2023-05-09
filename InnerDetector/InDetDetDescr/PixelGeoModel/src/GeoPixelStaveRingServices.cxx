@@ -204,7 +204,7 @@ GeoVPhysVol* GeoPixelStaveRingServices::Build()
 //	GeoTrf::Vector3D p=ladderTransform*ladderLocalTrf*(serviceCoolPipeTrfA->getTransform())*GeoTrf::Vector3D(0.,0.,0.);
 	//       std::cout<<"Cooling pipe srv : "<<p.x()<<" "<<p.y()<<" "<<p.z();
 	//       std::cout<<"   r : "<<sqrt(p.x()*p.x()+p.y()*p.y())<<" ";
-	//       std::cout<<"  ang : "<<acos(p.x()/sqrt(p.x()*p.x()+p.y()*p.y()))*180./3.1415<<" "; 
+	//       std::cout<<"  ang : "<<acos(p.x()/sqrt(p.x()*p.x()+p.y()*p.y()))*180./M_PI<<" "; 
 	//       std::cout<<std::endl;
 	
 	

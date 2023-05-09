@@ -292,7 +292,7 @@ void ModuleAlignDraw(char nname[80]=NULL,Int_t DetType= 1, Int_t Layer= 0, float
   std::vector<float> ringID, ringEta;
   for (int ring = -10; ring <=9; ring++) {
     float thisZ =  ComputeTz(PIX, 0, (double) ring);
-    float thistheta = atan(33.45/thisZ); if (thistheta <0) thistheta += 3.14159265;
+    float thistheta = atan(33.45/thisZ); if (thistheta <0) thistheta += M_PI;
     float thiseta = -log(tan(thistheta/2));
     std::cout << " ring :" << ring << "  thisZ = " << thisZ << "  theta " << thistheta << "  eta " << thiseta << std::endl;
     ringID.push_back((float)ring);
