@@ -66,11 +66,11 @@ JetGhostTrackDecoName None # can be e.g. GhostTrack
 ### Electron configuration
 ElectronPt 25000
 ElectronID TightLH
-ElectronIDLoose LooseAndBLayerLH
+ElectronIDLoose TightLH
 ElectronIsolationWPs HighPtCaloOnly TightTrackOnly_VarRad TightTrackOnly_FixedRad Tight_VarRad Loose_VarRad
 ElectronIsolation Tight_VarRad
-ElectronIsolationLoose None
-ElectronTriggerEfficiencyConfig SINGLE_E_2015_e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose_2016_2018_e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0 # NOTE: the value for this option is for Run2 environment and needs to be set to a different value for Run3 
+ElectronIsolationLoose Tight_VarRad
+ElectronTriggerEfficiencyConfig 2022_e26_lhtight_ivarloose_L1EM22VHI_OR_e60_lhmedium_L1EM22VHI_OR_e140_lhloose_L1EM22VHI 
 
 ### Muon configuration
 MuonPt 25000
