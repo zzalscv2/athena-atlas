@@ -12,6 +12,7 @@ __author__ = "Sebastien Binet"
 ### imports -------------------------------------------------------------------
 import PyUtils.acmdlib as acmdlib
 import PyUtils.RootUtils as ru
+from math import isnan
 ROOT = ru.import_root()
 
 ### globals -------------------------------------------------------------------
@@ -78,6 +79,11 @@ Enable a particular error mode.
 default='%(default)s'.
 allowed: %(choices)s
 """
+                  )
+@acmdlib.argument('--nan-equal',
+                  action='store_true',
+                  default=False,
+                  help="""Compare nan as equal to nan"""
                   )
 def main(args):
     """check that 2 ROOT files have same content (containers and sizes)
@@ -214,7 +220,12 @@ def main(args):
             if d_old == d_new:
                 n_good += 1
                 continue
-            
+
+            # for regression testing we should have NAN == NAN
+            if isnan(iold) and isnan(inew) and args.nan_equal:
+                n_good += 1
+                continue
+
             if d_old:    
                 tree_name, ientry, name, iold = d_old
             if d_new:
