@@ -13,13 +13,16 @@
 #ifndef INDETSIMDATA_INDETSIMDATACOLLECTION_H
 #define INDETSIMDATA_INDETSIMDATACOLLECTION_H
 
+#include "AthAllocators/ArenaPoolSTLAllocator.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "Identifier/Identifier.h"
 #include "InDetSimData/InDetSimData.h"
 // std includes
 #include <map>
 class InDetSimDataCollection
-    : public std::map<Identifier, InDetSimData>{
+    : public std::map<Identifier, InDetSimData, std::less<Identifier>,
+                      SG::ArenaPoolSTLAllocator<
+                          std::pair<const Identifier, InDetSimData>>> {
   // empty
 };
 CLASS_DEF(InDetSimDataCollection, 2543, 1)
