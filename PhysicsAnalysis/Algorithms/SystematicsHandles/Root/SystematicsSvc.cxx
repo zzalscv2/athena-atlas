@@ -17,6 +17,7 @@
 #include <cassert>
 #include <cmath>
 #include <regex>
+#include <functional>
 
 //
 // method implementations
@@ -265,6 +266,13 @@ namespace CP
         ANA_MSG_INFO ("found systematic: (" << mysys << ")");
       else
         ANA_MSG_INFO ("found systematic: " << mysys);
+    }
+
+    if(m_systematicsRegex!=".*") {
+      ANA_MSG_INFO("Systematics regex '" << m_systematicsRegex << "' matched:");
+      for(const CP::SystematicSet& mysys : makeSystematicsVector()) {
+          ANA_MSG_INFO ("  '" << mysys.name() << "'");
+      }
     }
     return StatusCode::SUCCESS;
   }
