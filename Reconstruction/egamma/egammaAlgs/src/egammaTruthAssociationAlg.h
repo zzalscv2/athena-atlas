@@ -263,12 +263,6 @@ private:
     "Minimum Pt for FSR to enter egamma truth particle container"
   };
 
-  /** Barcode offset for G4 particles **/
-  Gaudi::Property<int> m_barcodeOffset{ this,
-                                        "SimBarcodeOffset",
-                                        200e3,
-                                        "Barcode offset for G4 particles" };
-
   /** @brief MCTruthClassifier **/
   ToolHandle<IMCTruthClassifier> m_mcTruthClassifier{
     this,
