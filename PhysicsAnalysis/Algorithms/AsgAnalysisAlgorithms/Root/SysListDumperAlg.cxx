@@ -98,4 +98,14 @@ namespace CP
     return systematicsVector;
   }
 
+
+  StatusCode SysListDumperAlg ::
+  finalize ()
+  {
+    ANA_MSG_INFO("Systematics regex '" << m_regex << "' matched:");
+    for(const CP::SystematicSet& mysys : makeSystematicsVector(m_regex)) {
+      ANA_MSG_INFO ("  '" << mysys.name() << "'");
+    }
+    return StatusCode::SUCCESS;
+  }
 }

@@ -33,6 +33,9 @@ namespace CP
   public:
     virtual ::StatusCode execute () override;
 
+  public:
+    virtual ::StatusCode finalize () override;
+
     /// \brief make the systematics vector using a regex
   private:
     std::vector<CP::SystematicSet> makeSystematicsVector (const std::string &regex) const;
