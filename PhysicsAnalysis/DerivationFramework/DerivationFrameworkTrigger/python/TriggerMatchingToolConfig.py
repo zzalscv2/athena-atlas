@@ -16,9 +16,23 @@ def IParticleRetrievalToolCfg(ConfigFlags):
                       primary = True)
     return(acc)
 
-def TriggerMatchingToolCfg(ConfigFlags, name, **kwargs):
+def TriggerMatchingToolCfg(ConfigFlags, name, UseTypedScoringTool=False, **kwargs):
     """Config fragment for the trigger matching tool used in DAOD production"""
     acc = ComponentAccumulator()
+
+    # Option to use typed scoring tool
+    if UseTypedScoringTool:
+        from xAODBase.xAODType import xAODType
+        drST = CompFactory.Trig.DRScoringTool("DRScoringTool")
+        emST = CompFactory.Trig.EgammaDRScoringTool("EgammaDRScoringTool",
+                                                    UseClusterDecorator = False)
+
+        tst = CompFactory.Trig.TypedScoringTool("TypedScoringTool",
+                              DefaultScoringTool = drST,
+                              TypedScoringTools = [emST],
+                              ToolTypes = [xAODType.Electron])
+        kwargs["ScoringTool"] = tst
+
     OnlineParticleTool = acc.getPrimaryAndMerge(IParticleRetrievalToolCfg(ConfigFlags))
     kwargs['OnlineParticleTool'] = OnlineParticleTool
     TriggerMatchingTool = CompFactory.DerivationFramework.TriggerMatchingTool

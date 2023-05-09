@@ -287,16 +287,24 @@ MagField::AtlasFieldCacheCondAlg::scaleField(
   Cache& cache,
   const MagField::AtlasFieldMap* fieldMap) const
 {
-  // Calculate the scale factor for solenoid and toroid
-  // For each current, if it is 0, either from conditions or jobOpt, set the
-  // corresponding SF to 0
+  // Calculate the scale factor for solenoid and toroid.
 
+  // We have one piece of information coming from the map.
+  // Do  we have a map including both Toroid/Solenoid or only one.
+  // The values are typically the nominal value for the map
+  // or 0.
+  bool mapHasToroid = fieldMap && (fieldMap->toroidCurrent()>0);
+  bool mapHasSolenoid = fieldMap && (fieldMap->solenoidCurrent()>0);
+
+  // Then we have the info we get on the actual current we have
+  // So we might need to scale the map with it.
+  // Set the SF for the solenoid
   if (cache.m_solenoidCurrent > 0.0) {
-    if (fieldMap && fieldMap->solenoidCurrent() > 0.0 &&
+    if (mapHasSolenoid &&
         std::abs(cache.m_solenoidCurrent / fieldMap->solenoidCurrent() - 1.0) >
-          0.001) {
+            0.001) {
       cache.m_solScaleFactor =
-        cache.m_solenoidCurrent / fieldMap->solenoidCurrent();
+          cache.m_solenoidCurrent / fieldMap->solenoidCurrent();
     }
     ATH_MSG_INFO("scaleField: Solenoid field scale factor "
                  << cache.m_solScaleFactor
@@ -314,9 +322,10 @@ MagField::AtlasFieldCacheCondAlg::scaleField(
                  << ((fieldMap) ? fieldMap->solenoidCurrent() : 0));
   }
 
-  //
+
+  // Set the SF for the toroid
   if (cache.m_toroidCurrent > 0.0) {
-    if (fieldMap && fieldMap->toroidCurrent() > 0.0 &&
+    if (mapHasToroid &&
         std::abs(cache.m_toroidCurrent / fieldMap->toroidCurrent() - 1.0) >
           0.001) {
       // scale the field in all zones except for the solenoid zone
@@ -335,5 +344,15 @@ MagField::AtlasFieldCacheCondAlg::scaleField(
                  << ". Desired current and map current: "
                  << cache.m_toroidCurrent << ","
                  << ((fieldMap) ? fieldMap->toroidCurrent() : 0));
+  }
+  // If the map was toroid only set both to the toroid
+  // the 0s in the  solenoid should be covered by the map
+  if (mapHasToroid && !mapHasSolenoid) {
+    cache.m_solScaleFactor = cache.m_torScaleFactor;
+  }
+  // if the map is solenoid only set both to the solenoid
+  // the 0s in the  toroid should be covered by the map
+  if (!mapHasToroid && mapHasSolenoid) {
+    cache.m_torScaleFactor = cache.m_solScaleFactor;
   }
 }

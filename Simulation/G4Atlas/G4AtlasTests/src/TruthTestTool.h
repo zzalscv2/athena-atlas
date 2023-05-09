@@ -35,7 +35,7 @@ private:
   TH1 *m_meanx_vert, *m_meany_vert, *m_meanz_vert;
   TH1 *m_px_truth, *m_py_truth, *m_pz_truth, *m_pt_truth, *m_log_pt_truth;
   TH1 *m_theta_truth, *m_eta_truth, *m_phi_truth;
-  TH1 *m_barcode_small, *m_barcode_large, *m_log_barcode_large;
+  TH1 *m_origin;
   TH1 *m_particle_status, *m_particle_type;
   TH1 *m_p_gen,*m_log_p_gen, *m_eta_gen,*m_phi_gen,*m_pion_mass;
 
