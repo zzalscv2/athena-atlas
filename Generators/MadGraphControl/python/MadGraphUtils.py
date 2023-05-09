@@ -100,7 +100,7 @@ def generate_prep(process_dir):
             mglog.warning('Way too many Cards_bkup* directories found. Giving up -- standalone script may not work.')
 
 
-def error_check(errors_a):
+def error_check(errors_a, return_code):
     global MADGRAPH_CATCH_ERRORS
     if not MADGRAPH_CATCH_ERRORS:
         return
@@ -177,6 +177,11 @@ def error_check(errors_a):
     if bad_variables:
         mglog.warning('Appeared to detect variables in your run card that MadGraph did not understand:')
         mglog.warning('  Check your run card / JO settings for %s',bad_variables)
+
+    # Check the return code
+    if return_code!=0:
+        mglog.error(f'Detected a bad return code: {return_code}')
+        unmasked_error = True
 
     # Now raise an error if we were in either of the error states
     if unmasked_error or my_debug_file is not None:
@@ -270,7 +275,7 @@ def new_process(process='generate p p > t t~\noutput -f', plugin=None, keepJpegs
     global MADGRAPH_CATCH_ERRORS
     generate = subprocess.Popen([python,madpath+'/bin/mg5_aMC',plugin_cmd,card_loc],stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
     (out,err) = generate.communicate()
-    error_check(err)
+    error_check(err,generate.returncode)
 
     mglog.info('Finished process generation at '+str(time.asctime()))
 
@@ -513,7 +518,7 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
     global MADGRAPH_CATCH_ERRORS
     generate = stack_subprocess(command,stdin=subprocess.PIPE, stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
     (out,err) = generate.communicate()
-    error_check(err)
+    error_check(err,generate.returncode)
 
     # Get back to where we came from
     os.chdir(currdir)
@@ -541,10 +546,10 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
                 os.chdir('madevent/')
                 compilep = stack_subprocess(['./bin/compile'],stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
                 (out,err) = compilep.communicate()
-                error_check(err)
+                error_check(err,compilep.returncode)
                 clean = stack_subprocess(['./bin/clean4grid'],stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
                 (out,err) = clean.communicate()
-                error_check(err)
+                error_check(err,clean.returncode)
                 clean.wait()
                 MADGRAPH_COMMAND_STACK += ['cd ..','rm ../'+gridpack_name]
                 os.chdir('../')
@@ -680,7 +685,7 @@ def generate_from_gridpack(runArgs=None, extlhapath=None, gridpack_compile=None,
         MADGRAPH_COMMAND_STACK+=["export LD_LIBRARY_PATH="+":".join(['${LD_LIBRARY_PATH}',new_ld_path])]
         generate = stack_subprocess([python,MADGRAPH_GRIDPACK_LOCATION+'/bin/gridrun',str(int(nevents)),str(int(random_seed)),str(granularity)],stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)        
         (out,err) = generate.communicate()
-        error_check(err)
+        error_check(err,generate.returncode)
         gp_events=MADGRAPH_GRIDPACK_LOCATION+"/Events/GridRun_{}/unweighted_events.lhe.gz".format(int(random_seed))
         if not os.path.exists(gp_events):
             mglog.error('Error in gp generation, did not find events at '+gp_events)
@@ -724,7 +729,7 @@ def generate_from_gridpack(runArgs=None, extlhapath=None, gridpack_compile=None,
             generate_prep(MADGRAPH_GRIDPACK_LOCATION)
             generate = stack_subprocess([python,MADGRAPH_GRIDPACK_LOCATION+'/bin/generate_events','--parton','--nocompile','--only_generation','-f','--name='+gridpack_run_name],stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
             (out,err) = generate.communicate()
-            error_check(err)
+            error_check(err,generate.returncode)
         else:
             mglog.info('Allowing recompilation of gridpack')
             if os.path.islink(MADGRAPH_GRIDPACK_LOCATION+'/lib/libLHAPDF.a'):
@@ -734,7 +739,7 @@ def generate_from_gridpack(runArgs=None, extlhapath=None, gridpack_compile=None,
             generate_prep(MADGRAPH_GRIDPACK_LOCATION)
             generate = stack_subprocess([python,MADGRAPH_GRIDPACK_LOCATION+'/bin/generate_events','--parton','--only_generation','-f','--name='+gridpack_run_name],stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
             (out,err) = generate.communicate()
-            error_check(err)
+            error_check(err,generate.returncode)
     if isNLO and systematics_settings is not None:
         # run systematics
         mglog.info('Running systematics standalone')
@@ -1069,7 +1074,7 @@ add_time_of_flight '''+run+((' --threshold='+str(threshold)) if threshold is not
     global MADGRAPH_CATCH_ERRORS
     generate = stack_subprocess([python,me_exec,'time_of_flight_exec_card'],stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
     (out,err) = generate.communicate()
-    error_check(err)
+    error_check(err,generate.returncode)
 
     mglog.info('Finished adding time of flight information at '+str(time.asctime()))
 
@@ -1125,7 +1130,7 @@ decay_events '''+run)
     global MADGRAPH_CATCH_ERRORS
     generate = stack_subprocess([python,me_exec,'madspin_exec_card'],stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
     (out,err) = generate.communicate()
-    error_check(err)
+    error_check(err,generate.returncode)
     if len(glob.glob(process_dir+'/Events/'+run+'_decayed_*/')) == 0:
         mglog.error('No '+process_dir+'/Events/'+run+'_decayed_*/ can be found')
         raise RuntimeError('Problem while running MadSpin')
@@ -1183,7 +1188,7 @@ def madspin_on_lhe(input_LHE,madspin_card,runArgs=None,keep_original=False):
     global MADGRAPH_CATCH_ERRORS
     generate = stack_subprocess([python,madpath+'/MadSpin/madspin','madspin_exec_card'],stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
     (out,err) = generate.communicate()
-    error_check(err)
+    error_check(err,generate.returncode)
     mglog.info('Done with madspin at '+str(time.asctime()))
     # Should now have a re-zipped LHE file
     # We now have to do a shortened version of arrange_output below
@@ -2486,7 +2491,7 @@ def add_reweighting(run_name,reweight_card=None,process_dir=MADGRAPH_GRIDPACK_LO
     global MADGRAPH_CATCH_ERRORS
     reweight = stack_subprocess([python]+reweight_cmd.split(),stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
     (out,err) = reweight.communicate()
-    error_check(err)
+    error_check(err,reweight.returncode)
     mglog.info('Finished reweighting')
 
 def check_reset_proc_number(opts):
