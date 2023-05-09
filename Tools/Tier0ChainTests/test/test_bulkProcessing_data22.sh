@@ -17,8 +17,9 @@ Reco_tf.py --CA \
 --outputDRAW_ZMUMUFile="myDRAW_ZMUMU.data" \
 --outputDESDM_MCPFile="myDESDM_MCP.pool.root" \
 --outputDRAW_EGZFile="myDRAW_EGZ.data" \
+--outputDESDM_ALLCELLSFile="myDESDM_ALLCELLS.pool.root" \
 --outputDAOD_L1CALO1File="myDAOD_L1CALO1.pool.root" \
---outputDESDM_PHOJETFile="myDAOD_PHOJET.pool.root" \
+--outputDESDM_PHOJETFile="myDESDM_PHOJET.pool.root" \
 --imf False
 
 rc1=$?
