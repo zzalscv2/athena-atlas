@@ -8,7 +8,13 @@ monitoring_photon = [
     'HLT_g50_loose_L1EM20VH',
     'HLT_g25_medium_L1EM20VH',
     'HLT_g140_loose_L1EM22VHI',
-    'HLT_g300_etcut_L1EM22VHI'
+    'HLT_g300_etcut_L1EM22VHI',
+    'HLT_g22_tight_L1eEM18M',
+    'HLT_g25_medium_L1eEM24L',
+    'HLT_g35_medium_L1eEM24L',
+    'HLT_g50_loose_L1eEM24L',
+    'HLT_g140_loose_L1eEM26M',
+    'HLT_g300_etcut_L1eEM26M'
         ]
 
 monitoring_bootstrap = {
@@ -16,12 +22,19 @@ monitoring_bootstrap = {
         'HLT_g35_medium_L1EM20VH' : 'HLT_g25_loose_L1EM20VH',
         'HLT_g22_tight_L1EM15VHI' : 'HLT_g20_tight_L1EM15VHI',
         'HLT_g50_loose_L1EM20VH'  : 'HLT_g25_loose_L1EM20VH',
+        'HLT_g22_tight_L1eEM18M'  : 'HLT_g20_tight_L1eEM18M',
+        'HLT_g25_medium_L1eEM24L' : 'HLT_g25_loose_L1eEM24L',
+        'HLT_g35_medium_L1eEM24L' : 'HLT_g25_loose_L1eEM24L',
+        'HLT_g50_loose_L1eEM24L'  : 'HLT_g25_loose_L1eEM24L'
         }
 
 
 
 monitoring_electron = [
     'HLT_e300_etcut_L1EM22VHI',
+    'HLT_e300_etcut_L1eEM26M',
+    'HLT_e80_etcut_L1EM22VHI',
+    'HLT_e80_etcut_L1eEM26M'
             ]
 
 monitoringTP_electron = [
@@ -74,11 +87,9 @@ validation_electron = [
         ]
 
 validationTP_electron = [
-        'HLT_e26_lhtight_L1EM22VHI',
-        'HLT_e26_lhtight_ivarloose_L1EM22VH',
-        'HLT_e26_lhtight_ivarloose_L1EM15VH',
+        'HLT_e10_lhvloose_L1EM7',
+        'HLT_e14_lhvloose_L1EM10VH',
         'HLT_e26_lhtight_ivarloose_L1EM22VHI',
-        'HLT_e26_lhtight_ivarmedium_L1EM22VHI',
         'HLT_e28_lhtight_ivarloose_L1EM22VHI',
         'HLT_e140_lhloose_L1EM22VHI',
         'HLT_e140_lhloose_noringer_L1EM22VHI',
@@ -88,16 +99,19 @@ validationTP_electron = [
 
 
 validationTP_electron_DNN = [ # will be added when new DNN is ready 
-        'HLT_e26_dnntight_ivarloose_L1EM22VHI'
+        'HLT_e26_dnntight_ivarloose_L1eEM26M'
         ]
 
 validationTP_electron_eEM = [
-        'HLT_e26_lhtight_L1eEM26',
-        'HLT_e26_lhtight_L1eEM26L',
+        'HLT_e10_lhvloose_L1eEM9',
+        'HLT_e14_lhvloose_L1eEM12L',
         'HLT_e26_lhtight_ivarloose_L1eEM26',
         'HLT_e26_lhtight_ivarloose_L1eEM26M',
         'HLT_e26_lhtight_ivarloose_L1eEM26T',
         'HLT_e60_lhmedium_L1eEM26M',
+        'HLT_e140_lhloose_L1eEM26M',
+        'HLT_e140_lhloose_noringer_L1eEM26M',
+        'HLT_e300_etcut_L1eEM26M',
         ]
 
 
