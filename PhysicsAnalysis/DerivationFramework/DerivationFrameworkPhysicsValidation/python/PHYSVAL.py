@@ -11,7 +11,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from DerivationFrameworkEGamma.ElectronsCPDetailedContent import GSFTracksCPDetailedContent
-from AthenaConfiguration.Enums import LHCPeriod
+from AthenaConfiguration.Enums import LHCPeriod, MetadataCategory
 
 # Main algorithm config
 def PHYSVALKernelCfg(ConfigFlags, name='PHYSVALKernel', **kwargs):
@@ -294,7 +294,7 @@ def PHYSVALCfg(ConfigFlags):
     # Output stream
     PHYSVALItemList = PHYSVALSlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_PHYSVAL", ItemList=PHYSVALItemList, AcceptAlgs=["PHYSVALKernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_PHYSVAL", AcceptAlgs=["PHYSVALKernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_PHYSVAL", AcceptAlgs=["PHYSVALKernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
 
