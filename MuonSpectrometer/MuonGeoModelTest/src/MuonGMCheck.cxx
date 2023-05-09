@@ -1110,7 +1110,7 @@ void MuonGMCheck::checkreadoutmdtgeo() {
                 // check B-lines
                 if (m_check_blines) {
                     double zRO = mdt->signedRODistanceFromTubeCentre(chid);
-                    double halfTubeL = mdt->getTubeLength(tl, tube) / 2.;
+                    double halfTubeL = mdt->getWireLength(tl, tube) / 2.;
 
                     double z1000RO = 1000.;
                     if (zRO < 0) z1000RO = -1000.;
@@ -1240,7 +1240,7 @@ void MuonGMCheck::checkreadoutmdtgeo() {
             if (!m_minimal_checks) {
                 // temporary
                 Amg::Vector3D myPloc = Amg::Vector3D(0., 0., 10.);  //
-                Amg::Vector3D myP = mdt->localToGlobalCoords(myPloc, chid);
+                Amg::Vector3D myP = mdt->localToGlobalTransf(chid)*myPloc;
                 double distRO = mdt->tubeFrame_localROPos(chid).z();
                 double distToRO = mdt->distanceFromRO(myP, chid);
                 double propagationDistance = distToRO - mdt->RODistanceFromTubeCentre(chid);
