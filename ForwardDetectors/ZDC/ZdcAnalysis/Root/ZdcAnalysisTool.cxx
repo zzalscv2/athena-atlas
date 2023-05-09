@@ -1086,7 +1086,7 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
     m_zdcDataAnalyzer->FinishEvent();
     
     ATH_MSG_DEBUG("Adding variables with suffix=" + m_auxSuffix);
-    
+
     for (const auto zdcModule : moduleContainer)
     {
 
@@ -1131,28 +1131,30 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
     // In Run 3 - we have to assume the container already exists (since it is needed to store the per-side trigger info)
     // reprocessing will add new variables with the suffix
 
-    for (const auto zdc_sum: moduleSumContainer)
-      {
+    //if (moduleContainer.size()>0)
+    //  {
+	for (const auto zdc_sum: moduleSumContainer)
+	  {
 	    int iside = (zdc_sum->zdcSide()==-1) ? 0 : 1;
-
-        float calibEnergy = getCalibModuleSum(iside);
-        zdc_sum->auxdecor<float>("CalibEnergy"+m_auxSuffix) = calibEnergy;
-        float calibEnergyErr = getCalibModuleSumErr(iside);
-        zdc_sum->auxdecor<float>("CalibEnergyErr"+m_auxSuffix) = calibEnergyErr;
-
-        float uncalibSum = getUncalibModuleSum(iside);
-        zdc_sum->auxdecor<float>("UncalibSum"+m_auxSuffix) = uncalibSum;
-        float uncalibSumErr = getUncalibModuleSumErr(iside);
-        zdc_sum->auxdecor<float>("UncalibSumErr"+m_auxSuffix) = uncalibSumErr;
-
-        float finalEnergy = calibEnergy;
-
-        zdc_sum->auxdecor<float>("FinalEnergy"+m_auxSuffix) = finalEnergy;
-        zdc_sum->auxdecor<float>("AverageTime"+m_auxSuffix) = getAverageTime(iside);
-        zdc_sum->auxdecor<unsigned int>("Status"+m_auxSuffix) = !sideFailed(iside);
-        zdc_sum->auxdecor<unsigned int>("ModuleMask"+m_auxSuffix) = (getModuleMask() >> (4 * iside)) & 0xF;
-    }
-
+	    
+	    float calibEnergy = getCalibModuleSum(iside);
+	    zdc_sum->auxdecor<float>("CalibEnergy"+m_auxSuffix) = calibEnergy;
+	    float calibEnergyErr = getCalibModuleSumErr(iside);
+	    zdc_sum->auxdecor<float>("CalibEnergyErr"+m_auxSuffix) = calibEnergyErr;
+	    
+	    float uncalibSum = getUncalibModuleSum(iside);
+	    zdc_sum->auxdecor<float>("UncalibSum"+m_auxSuffix) = uncalibSum;
+	    float uncalibSumErr = getUncalibModuleSumErr(iside);
+	    zdc_sum->auxdecor<float>("UncalibSumErr"+m_auxSuffix) = uncalibSumErr;
+	    
+	    float finalEnergy = calibEnergy;
+	    
+	    zdc_sum->auxdecor<float>("FinalEnergy"+m_auxSuffix) = finalEnergy;
+	    zdc_sum->auxdecor<float>("AverageTime"+m_auxSuffix) = getAverageTime(iside);
+	    zdc_sum->auxdecor<unsigned int>("Status"+m_auxSuffix) = !sideFailed(iside);
+	    zdc_sum->auxdecor<unsigned int>("ModuleMask"+m_auxSuffix) = (getModuleMask() >> (4 * iside)) & 0xF;
+	  }
+	//  }
     return StatusCode::SUCCESS;
 }
 
