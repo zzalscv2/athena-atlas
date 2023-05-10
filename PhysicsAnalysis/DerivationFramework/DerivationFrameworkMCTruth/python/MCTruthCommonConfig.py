@@ -119,9 +119,9 @@ def PreJetMCTruthAugmentationsCfg(flags, **kwargs):
         augmentationToolsList.append(acc.getPrimaryAndMerge(DFCommonTruthElectronDressingToolCfg(flags, decorationName = kwargs['decorationDressing'])))
         augmentationToolsList.append(acc.getPrimaryAndMerge(DFCommonTruthMuonDressingToolCfg(flags, decorationName = kwargs['decorationDressing'])))
 
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    acc.addEventAlgo(CommonAugmentation(name = "MCTruthCommonPreJetKernel", AugmentationTools = augmentationToolsList))
-
+    for tool in augmentationToolsList:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name ="MCTruthCommonPreJetKernel"+tool.name, AugmentationTools = [tool]))
+    
     return(acc)
 
 
