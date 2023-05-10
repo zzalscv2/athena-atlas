@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MVATRACKVERTEXASSOCIATIONTOOL_H
@@ -11,6 +11,7 @@
 
 // FrameWork includes
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "AthLinks/ElementLink.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/ReadDecorHandleKey.h"
@@ -29,8 +30,6 @@
 // STL includes
 #include <map>
 #include <memory>
-#include <string>
-#include <vector>
 
 namespace CP {
 
@@ -83,36 +82,42 @@ private:
   // Private data:
   ///////////////////////////////////////////////////////////////////
 private:
-
   /// @name The properties that can be defined via the python job options
   /// @{
 
   /// Input lwtnn network file
-  std::string m_fileName = "";
+  Gaudi::Property<std::string> m_fileName{this, "NetworkFileName", "" };
 
   /// Vector of input variable names
-  std::vector<std::string> m_inputNames = {};
+  Gaudi::Property<std::vector<std::string>> m_inputNames{this, "InputNames", {},
+                  "Vector of the network's input variable names (std::vector<std::string>)." };
 
   /// Vector of input variable types
-  std::vector<int> m_inputTypes = {};
+  Gaudi::Property<std::vector<int>> m_inputTypes{this,"InputTypes", {},
+                  "Vector of the network's input variable evaluator types (std::vector<CP::MVAEvaluatorInput::Input>)."};
 
   /// Name of the output node to cut on
-  std::string m_outputName = "";
+  Gaudi::Property<std::string> m_outputName{this, "OutputNodeName", "", 
+                               "Name of the output node to cut on for TVA."} ;
 
   /// Is the network sequential or functional
-  bool m_isSequential = true;
+  Gaudi::Property<bool> m_isSequential{this, "IsSequential", true,
+                "Is the network sequential (true) or functional (false)."};
 
   /// TVA working point
-  std::string m_wp = "Tight";
+  Gaudi::Property<std::string> m_wp{this, "WorkingPoint", "Tight", "TVA working point to apply."};
 
   /// TVA cut value on the output discriminant
-  float m_cut = -1.0;
+  Gaudi::Property<float> m_cut{this, "OutputCut" , -1.0, 
+                        "TVA cut value on the output value (set manually with \"Custom\" WP)."};
 
   /// Use the PathResolver to find our input file
-  bool m_usePathResolver = true;
+  Gaudi::Property<bool> m_usePathResolver{this, "UsePathResolver", true, 
+                        "Use the PathResolver for finding the input lwtnn network file."};
 
   /// The decoration name of the ElementLink to the hardscatter vertex (found on xAOD::EventInfo)
-  std::string m_hardScatterDeco;
+  Gaudi::Property<std::string> m_hardScatterDeco{this, "HardScatterLinkDeco",  "hardScatterVertexLink",
+                              "The decoration name of the ElementLink to the hardscatter vertex (found on xAOD::EventInfo)"};
 
   /// @}
 
@@ -131,7 +136,8 @@ private:
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo {this, "EventInfo", "EventInfo", "EventInfo key"};
 
   /// Hardscatter vertex link key
-  SG::ReadDecorHandleKey<xAOD::EventInfo> m_hardScatterDecoKey;
+  SG::ReadDecorHandleKey<xAOD::EventInfo> m_hardScatterDecoKey{this, "VertexScatterKey", "" , 
+                              "Overwrriten in the configuration step by the <HardScatterLinkDeco> property"};
 
   /// Name of the input node (for functional modes)
   std::string m_inputNodeName = ""; //!

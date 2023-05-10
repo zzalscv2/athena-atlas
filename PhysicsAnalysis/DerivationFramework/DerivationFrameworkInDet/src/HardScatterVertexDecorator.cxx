@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -23,15 +23,7 @@
 namespace DerivationFramework {
 
   HardScatterVertexDecorator::HardScatterVertexDecorator(const std::string& type, const std::string& name, const IInterface* parent) : 
-    AthAlgTool(type, name, parent),
-    m_vtxContKey("PrimaryVertices"),
-    m_evtDecoName("hardScatterVertexLink"),
-    m_vtxSelectTool("InDet::InDetHardScatterSelectionTool/" + name + "_IDHSSelectionTool", this)
-  {
-    // Property declarations
-    declareProperty("VertexContainerName",      m_vtxContKey,    "Name of the input vertex container");
-    declareProperty("HardScatterDecoName",      m_evtDecoName,   "Name of the hardscatter vertex decoration (applied to xAOD::EventInfo)");
-    declareProperty("HardScatterSelectionTool", m_vtxSelectTool, "IInDetHardScatterSelectionTool for selecting the hardscatter vertex");
+    AthAlgTool(type, name, parent) {
     declareInterface<DerivationFramework::IAugmentationTool>(this);
   }
 
@@ -63,24 +55,10 @@ namespace DerivationFramework {
     ATH_CHECK(m_evtInfoKey.initialize());
 
     // Instantiate and initialize our event info decorator write
-    m_evtDecoKey = SG::WriteDecorHandleKey<xAOD::EventInfo>(m_evtInfoKey.key() + "." + m_evtDecoName);
-    this->declare(m_evtDecoKey);
-    m_evtDecoKey.setOwner(&(*this));
-    ATH_CHECK(m_evtDecoKey.initialize());
-
+    m_evtDecoKey = m_evtInfoKey.key() + "." + m_evtDecoName;
+    ATH_CHECK(m_evtDecoKey.initialize());    
     // Fetch our InDet::IInDetHardScatterSelectionTool
     ATH_CHECK(m_vtxSelectTool.retrieve());
-
-    return StatusCode::SUCCESS;
-  }
-
-  StatusCode HardScatterVertexDecorator::finalize()
-  {
-    ATH_MSG_DEBUG("Finalizing " << name() << "...");
-
-    // Release our tool
-    ATH_CHECK(m_vtxSelectTool.release());
-
     return StatusCode::SUCCESS;
   }
 

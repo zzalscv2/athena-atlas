@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,6 +10,7 @@
 #define DERIVATIONFRAMEWORK_HARDSCATTERVERTEXDECORATOR_H
 
 // Framework include(s):
+#include "AsgTools/PropertyWrapper.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/WriteDecorHandleKey.h"
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -47,9 +48,6 @@ namespace DerivationFramework {
     /// Function initialising the tool
     StatusCode initialize();
 
-    /// Function finalizing the tool
-    StatusCode finalize();
-
     /// Function decorating the inputs
     virtual StatusCode addBranches() const;
 
@@ -64,16 +62,18 @@ namespace DerivationFramework {
     /// @{
 
     /// ReadHandleKey for the input vertices
-    SG::ReadHandleKey<xAOD::VertexContainer> m_vtxContKey;
+    SG::ReadHandleKey<xAOD::VertexContainer> m_vtxContKey{this, "VertexContainerName", "PrimaryVertices", 
+                                                          "Name of the input vertex container"};
 
     /// Name of the output hardscatter decoration (applied to xAOD::EventInfo)
-    std::string m_evtDecoName;
+    Gaudi::Property<std::string> m_evtDecoName{this, "HardScatterDecoName", "hardScatterVertexLink", 
+                                              "Name of the hardscatter vertex decoration (applied to xAOD::EventInfo)"};
 
     /// ToolHandle for the IInDetHardScatterSelectionTool
-    ToolHandle<InDet::IInDetHardScatterSelectionTool> m_vtxSelectTool;
+    ToolHandle<InDet::IInDetHardScatterSelectionTool> m_vtxSelectTool{this, "HardScatterSelectionTool", "",
+                                                                      "IInDetHardScatterSelectionTool for selecting the hardscatter vertex" };
 
     /// @}
-
   private:
 
     /// @name Truly private internal data members
@@ -83,7 +83,8 @@ namespace DerivationFramework {
     SG::ReadHandleKey<xAOD::EventInfo> m_evtInfoKey {this, "EventInfo", "EventInfo", "EventInfo key"};
 
     /// WriteDecorHandleKey for the output hardscatter decoration (applied to xAOD::EventInfo)
-    SG::WriteDecorHandleKey<xAOD::EventInfo> m_evtDecoKey;
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_evtDecoKey{this, "VertexDecorationKey", "", 
+                                            "Declaration of the HardScatterVertexLink key. Will be overwrriten during initialize"};
 
     /// @}
 
