@@ -29,6 +29,7 @@
 #include "IovStore.h"
 
 #include <map> 
+#include "nlohmann/json.hpp"
 
 class MsgStream;
 class IOVDbConn;
@@ -290,6 +291,8 @@ private:
   const std::string m_source;
   std::string m_globaltag = "";
   std::map<std::string, std::string> m_cresttagmap; // pairs: COOL folder - CREST tag name
+  std::string m_crest_tag = "";
+  nlohmann::json m_tag_info = nullptr;
 };
 
 inline const std::string& IOVDbFolder::folderName() const {return m_foldername;}
