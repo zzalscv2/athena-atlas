@@ -12,6 +12,7 @@
 #include "TrkTrack/TrackStateOnSurface.h"
 #include "MuonCombinedEvent/TagBase.h"
 #include "FourMomUtils/xAODP4Helpers.h"
+#include "AtlasHepMC/MagicNumbers.h"
 using namespace xAOD::P4Helpers;
 namespace {
     constexpr unsigned int dummy_unsigned = 999;
@@ -131,9 +132,9 @@ StatusCode MuonTruthAssociationAlg::execute(const EventContext& ctx) const {
                 for (const xAOD::TruthParticle* truthParticle : *muonTruthContainer) {
                     if (truthParticle->status() != 1) continue;
                     ATH_MSG_DEBUG("Got truth muon with barcode " << truthParticle->barcode() << " pt " << truthParticle->pt());
-                    if (((*truthLink)->barcode() % m_barcodeOffset) != truthParticle->barcode()) {
-                        ATH_MSG_VERBOSE("Barcode truth link: " << (*truthLink)->barcode() << " offset:  " << m_barcodeOffset << " --> "
-                                                               << ((*truthLink)->barcode() % m_barcodeOffset)
+                    if (((*truthLink)->barcode() % HepMC::SIM_REGENERATION_INCREMENT) != truthParticle->barcode()) {
+                        ATH_MSG_VERBOSE("Barcode truth link: " << (*truthLink)->barcode() << " HepMC::SIM_REGENERATION_INCREMENT:  " << HepMC::SIM_REGENERATION_INCREMENT << " --> "
+                                                               << ((*truthLink)->barcode() % HepMC::SIM_REGENERATION_INCREMENT)
                                                                << " != " << truthParticle->barcode());
                         continue;
                     }

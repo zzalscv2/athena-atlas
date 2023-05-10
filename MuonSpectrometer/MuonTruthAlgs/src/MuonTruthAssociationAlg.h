@@ -62,7 +62,6 @@ private:
                         "Collection of track containers to be decorated before this alg can be scheduled. truthLink decoration exploited "};
     Gaudi::Property<std::string> m_recoLink{this, "RecoLinkName", "recoMuonLink" , "Decoration to the truth particle pointing to the muon"};
     Gaudi::Property<bool> m_associateWithInDetTP{this, "AssociateWithInDetTP", false, "force use of ID track particles for association"};
-    Gaudi::Property<int> m_barcodeOffset{this, "BarcodeOffset", 1000000, "barcode offset for truth particles"};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
