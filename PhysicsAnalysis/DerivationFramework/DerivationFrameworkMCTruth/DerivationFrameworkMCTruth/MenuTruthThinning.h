@@ -140,10 +140,7 @@ namespace DerivationFramework {
         mutable std::atomic<unsigned int> m_totpart;
         mutable std::atomic<unsigned int> m_removedpart;
         mutable std::atomic<int> m_eventCount{};
-        
 
-        /// Parameter: simulation barcode offset
-        int m_geantOffset;
     }; 
 }
 

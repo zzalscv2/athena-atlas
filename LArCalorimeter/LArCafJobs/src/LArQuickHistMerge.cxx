@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -209,13 +209,13 @@ void identical(TObject* a, const TObject* b) {
    const TH1* b1=dynamic_cast<const TH1*>(b);
    TH2* c1=(dynamic_cast<TH2*>(a));
    const TH2* d1=dynamic_cast<const TH2*>(b);
-   if ((!b1 || !a1) && (!c1 || !d1) ){
+   if (a1 and b1){
+     dqutils::MonitoringFile::merge_identical(*a1,*b1);
+   } else if (c1 and d1){
+     dqutils::MonitoringFile::merge_identical(*c1,*d1);
+   } else {
      std::cout << "ERROR in identical: Object not of type THist" << std::endl;
      std::cout << a1 << " " << b1 << " " << c1 << " " <<d1 <<std::endl;
-   }else if (a1){
-     dqutils::MonitoringFile::merge_identical(*a1,*b1);
-   }else {
-     dqutils::MonitoringFile::merge_identical(*c1,*d1);
    }
    return;
 }
@@ -233,8 +233,8 @@ histCollection::histPerDir_t::histPerDir_t(const std::string& nameIn, TObject* o
     return;
   }
 
-  char howToMerge[256];
-  char mdName[256];
+  char howToMerge[256]={};
+  char mdName[256]={};
   strcpy(howToMerge,"<default>");
   if (!md) {
     std::cout << "ERROR while adding " << nameIn << ": No metadata tree. Use default merging method" << std::endl;

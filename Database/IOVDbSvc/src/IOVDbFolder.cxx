@@ -347,7 +347,13 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     }
     //
     std::istringstream ss(reply);
-    const auto & specString =  payloadSpecificationForTag(completeTag);
+ 
+    if (m_crest_tag != completeTag){
+      m_crest_tag = completeTag;
+      m_tag_info = getTagInfo(completeTag);
+    }
+    const auto & specString =  getTagInfoElement(m_tag_info,"payload_spec");
+
     if (specString.empty()){
       ATH_MSG_FATAL("Reading payload spec from "<<m_foldername<<" failed.");
       return false;
@@ -1021,7 +1027,12 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
         m_cresttagmap = getGlobalTagMap(globalTag);
       }
       const std::string  & tagName=m_cresttagmap[m_foldername];
-      m_folderDescription = folderDescriptionForTag(tagName);
+
+      if (m_crest_tag != tagName){
+        m_crest_tag = tagName;
+        m_tag_info = getTagInfo(tagName);
+      }
+      m_folderDescription = getTagInfoElement(m_tag_info,"node_description");
     } else {
       //folder desc from db
       std::tie(m_multiversion, m_folderDescription) = IOVDbNamespace::folderMetadata(m_conn, m_foldername);
@@ -1051,8 +1062,14 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
         }       
         const std::string  & crestTag=m_cresttagmap[m_foldername];
 
-        std::tie(m_channums, m_channames) =channelListForTag(crestTag);
-        const std::string & payloadSpec = payloadSpecificationForTag(crestTag);
+        if (m_crest_tag != crestTag){
+          m_crest_tag = crestTag;
+          m_tag_info = getTagInfo(crestTag);
+        }
+ 
+        const std::string & payloadSpec = getTagInfoElement(m_tag_info,"payload_spec");  
+        std::string chanList = getTagInfoElement(m_tag_info,"channel_list");
+        std::tie(m_channums, m_channames) = extractChannelListFromString(chanList);
 
         //determine foldertype from the description, the spec and the number of channels
         m_foldertype = IOVDbNamespace::determineFolderType(m_folderDescription, payloadSpec, m_channums);

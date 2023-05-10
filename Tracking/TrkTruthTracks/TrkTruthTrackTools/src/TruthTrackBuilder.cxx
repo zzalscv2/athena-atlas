@@ -20,6 +20,7 @@
 // HepMC
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
+#include "AtlasHepMC/MagicNumbers.h"
 #include "HepPDT/ParticleDataTable.hh"
 
 #include "AtlasDetDescr/AtlasDetectorID.h"
@@ -198,7 +199,7 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
                      std::abs(genPart->momentum().eta()) <= m_forwardBoundary) ||
        (track.measurementsOnTrack()->size() < m_minSiHitsForward &&
         std::abs(genPart->momentum().eta()) > m_forwardBoundary) ||
-       (m_onlyPrimaries && HepMC::barcode(genPart) >= m_primaryBarcodeCutOff)) {
+       (m_onlyPrimaries && HepMC::is_simulation_particle(genPart))) {
      ATH_MSG_VERBOSE(
        "Track does not fulfill requirements for refitting. Skipping it.");
      return nullptr;
