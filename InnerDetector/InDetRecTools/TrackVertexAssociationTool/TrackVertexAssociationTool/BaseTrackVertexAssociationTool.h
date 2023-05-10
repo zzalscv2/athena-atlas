@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BASETRACKVERTEXASSOCIATIONTOOL_H
@@ -11,6 +11,7 @@
 
 // FrameWork includes
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "AthLinks/ElementLink.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/ReadDecorHandleKey.h"
@@ -92,8 +93,9 @@ public:
 
 private:
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo { this, "EventInfo", "EventInfo", "EventInfo key" };
-  SG::ReadDecorHandleKey<xAOD::EventInfo> m_hardScatterDecoKey;
-
+  
+  SG::ReadDecorHandleKey<xAOD::EventInfo> m_hardScatterDecoKey{this, "VertexScatterKey", "" , 
+                              "Overwrriten in the configuration step by the <HardScatterLinkDeco> property"};
   /// Checks if a track-vertex pair passes the cuts.  Returns
   /// Δz * sin θ of the pair in `dzSinTheta` if successful.
   bool isMatch(const xAOD::TrackParticle &trk, const xAOD::Vertex &vx,
@@ -111,12 +113,14 @@ private:
   const xAOD::Vertex *getUniqueMatchVertexImpl(const xAOD::TrackParticle &trk,
                                                T &vx_list) const;
 
+  
   /// Cut on d0 significance
-  float m_d0sig_cut;
+  Gaudi::Property<float> m_d0sig_cut{this, "d0sig_cut", -1.};
   /// Cut on dz*sin theta
-  float m_dzSinTheta_cut;
+  Gaudi::Property<float> m_dzSinTheta_cut{this, "dzSinTheta_cut", 1.};
   /// The decoration name of the ElementLink to the hardscatter vertex (applied to xAOD::EventInfo)
-  std::string m_hardScatterDeco;
+  Gaudi::Property<std::string> m_hardScatterDeco{this, "HardScatterLinkDeco", "hardScatterVertexLink",
+                              "The decoration name of the ElementLink to the hardscatter vertex (found on xAOD::EventInfo)"};
 
 };
 
