@@ -5,6 +5,12 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
 
+def InDetToXAODSpacePointConversionCfg(flags,
+                                       name: str = "InDetToXAODSpacePointConversion",
+                                       **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    acc.addEventAlgo( CompFactory.InDet.InDetToXAODSpacePointConversion(name, **kwargs) )
+    return acc
 
 def InDetSiElementPropertiesTableCondAlgCfg(
         flags, name="InDetSiElementPropertiesTableCondAlg", **kwargs):
