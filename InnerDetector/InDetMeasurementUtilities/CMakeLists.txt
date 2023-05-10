@@ -5,6 +5,7 @@ atlas_subdir( InDetMeasurementUtilities )
 
 atlas_add_library( InDetMeasurementUtilitiesLib
 		   src/ClusterConversionUtilities.cxx
+		   src/SpacePointConversionUtilities.cxx
 		   PUBLIC_HEADERS 
 		      InDetMeasurementUtilities
    		   LINK_LIBRARIES 

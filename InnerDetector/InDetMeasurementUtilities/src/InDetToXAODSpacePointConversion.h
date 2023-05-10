@@ -2,8 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRKTOXAOD_SPACEPOINT_CONVERSION_H
-#define TRKTOXAOD_SPACEPOINT_CONVERSION_H
+#ifndef INDETTOXAOD_SPACEPOINT_CONVERSION_H
+#define INDETTOXAOD_SPACEPOINT_CONVERSION_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
@@ -17,22 +17,17 @@
 
 namespace InDet {
 
-  class TrkToXAODSpacePointConversion :
+  class InDetToXAODSpacePointConversion :
     public AthReentrantAlgorithm {
   public:
     /// Constructor with parameters:
-    TrkToXAODSpacePointConversion(const std::string &name, ISvcLocator *pSvcLocator);
-
+    InDetToXAODSpacePointConversion(const std::string &name, ISvcLocator *pSvcLocator);
+    
     //@name Usual algorithm methods
     //@{
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
     //@{
-    //@}
-    TrkToXAODSpacePointConversion() = delete;
-    TrkToXAODSpacePointConversion(const TrkToXAODSpacePointConversion&) = delete;
-    TrkToXAODSpacePointConversion &operator=(const TrkToXAODSpacePointConversion&) = delete;
-    //@}
 
   private:
     StatusCode convertPixel(const EventContext& ctx) const;
