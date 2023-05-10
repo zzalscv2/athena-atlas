@@ -28,15 +28,6 @@
 
 using Gaudi::Units::GeV;
 
-namespace {
-    
-    const int PARTONPDGMAX = 43;
-    const int NPPDGMIN = 1000000;
-    const int NPPDGMAX = 8999999;
-    const int PHOTOSMIN = 10000;
-    
-} // anonymous namespace
-
 // Constructor
 DerivationFramework::MenuTruthThinning::MenuTruthThinning(const std::string& t,
                                                           const std::string& n,
@@ -45,8 +36,7 @@ base_class(t,n,p),
 m_eventsKey("TruthEvents"),
 m_writeFirstN(-1),
 m_totpart(0),
-m_removedpart(0),
-m_geantOffset(200000)
+m_removedpart(0)
 {
     declareProperty ("EventsKey",
                      m_eventsKey = "TruthEvents",
@@ -152,10 +142,6 @@ m_geantOffset(200000)
     declareProperty ("PreserveHadronizationVertices",
                      m_preserveHadVtx = false,
                      "Preserve hadronization vertices with parents/children.");
-    
-    declareProperty("SimBarcodeOffset",
-                    m_geantOffset = 200000,
-                    "Barcode offset for simulation particles");
     
     declareProperty ("WritettHFHadrons",
                      m_writettHFHadrons = false,
@@ -264,7 +250,7 @@ StatusCode DerivationFramework::MenuTruthThinning::doThinning() const
     // - update the masks including the descendants/ancestors
     // To ensure graph completeness, this  over-rides anything set by the special treatment
     // of taus in the section above
-    DerivationFramework::DecayGraphHelper decayHelper(m_geantOffset);
+    DerivationFramework::DecayGraphHelper decayHelper;
     std::unordered_set<int> encounteredBarcodes; // For loop handling
     if (m_preserveDescendants || m_preserveGeneratorDescendants || m_preserveAncestors) {
         for (int i=0; i<nTruthParticles; ++i) {
@@ -318,7 +304,7 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
     }
 
 
-    if (barcode > m_geantOffset && !m_writeGeant && !m_writeEverything && !ok) {
+    if (HepMC::is_simulation_particle(barcode) && !m_writeGeant && !m_writeEverything && !ok) {
         if (! (pdg_id == 22/*PDG::gamma*/ &&
                m_geantPhotonPtThresh >= 0 &&
                p->pt() > m_geantPhotonPtThresh) )
@@ -335,29 +321,29 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
     
     // OK if we select partons and are at beginning of event record
     if( m_writePartons &&
-       (pdg_id <= PARTONPDGMAX || (pdg_id >= NPPDGMIN && pdg_id <= NPPDGMAX) ) &&
+       (pdg_id <= HepMC::PARTONPDGMAX || (pdg_id >= HepMC::NPPDGMIN && pdg_id <= HepMC::NPPDGMAX) ) &&
        (m_partonPtThresh<0 || p->pt()>m_partonPtThresh) )
         ok = true;
     
     //  OK if we should select hadrons and are in hadron range
     // JRC: cut changed from PHOTOSMIN to m_geantOffset
-    if( m_writeHadrons && HepPID::isHadron (pdg_id) && barcode < m_geantOffset )
+    if( m_writeHadrons && HepPID::isHadron (pdg_id) && !HepMC::is_simulation_particle(barcode) )
         ok = true;
     
     // OK if we should select b hadrons and are in hadron range
     // JRC: cut changed from PHOTOSMIN to m_geantOffset
-    if( m_writeBHadrons &&  barcode < m_geantOffset && HepPID::isHadron (pdg_id) && HepPID::hasBottom (pdg_id) )
+    if( m_writeBHadrons &&  !HepMC::is_simulation_particle(barcode) && HepPID::isHadron (pdg_id) && HepPID::hasBottom (pdg_id) )
         ok= true;
 
     // OK if we should select c hadrons and are in hadron range
     // JRC: cut changed from PHOTOSMIN to m_geantOffset
-    if( m_writeCHadrons &&  barcode < m_geantOffset && HepPID::isHadron (pdg_id) && HepPID::hasCharm (pdg_id) )
+    if( m_writeCHadrons &&  !HepMC::is_simulation_particle(barcode) && HepPID::isHadron (pdg_id) && HepPID::hasCharm (pdg_id) )
         ok= true;
 
     // PHOTOS range: check whether photons come from parton range or
     // hadron range
     int motherPDGID = 999999999;
-    if( barcode > PHOTOSMIN && barcode < m_geantOffset &&
+    if( barcode > HepMC::PHOTOSMIN && !HepMC::is_simulation_particle(barcode) &&
        p->hasProdVtx() )
     {
         const xAOD::TruthVertex* vprod = p->prodVtx();
@@ -372,7 +358,7 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
     }
     
     // OK if we should select G4 particles and are in G4 range
-    if( m_writeGeant && barcode > m_geantOffset )
+    if( m_writeGeant && HepMC::is_simulation_particle(barcode) )
         ok = true;
     
     if(isLeptonFromTau(p))
@@ -409,7 +395,7 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
         ok = true;
     
     // All stable
-    if (m_writeAllStable && p->status()==1 && barcode<m_geantOffset)
+    if (m_writeAllStable && p->status()==1 && !HepMC::is_simulation_particle(barcode))
         ok = true;
     
     // All leptons not from hadron decays
@@ -720,7 +706,7 @@ bool DerivationFramework::MenuTruthThinning::isBoson(const xAOD::TruthParticle* 
 bool DerivationFramework::MenuTruthThinning::isFsrFromLepton(const xAOD::TruthParticle* part) const {
     int pdg = part->pdgId();
     if(abs(pdg) != 22) return false; // photon
-    if(part->barcode() >= m_geantOffset) return false; // Geant photon
+    if(HepMC::is_simulation_particle(part->barcode()) ) return false; // Geant photon
     const xAOD::TruthVertex* prod = part->prodVtx();
     if(!prod) return false; // no parent.
     // Simple loop check
