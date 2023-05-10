@@ -24,7 +24,7 @@ void AFPFastReco::recoClusters()
     constexpr float dx   = 0.25;  // [mm]
     constexpr float dy   = 0.05;  // [mm]
     constexpr float dz   = 9.00;  // [mm]
-    constexpr float tilt = 14. / 180. * 3.14159;
+    constexpr float tilt = 14. / 180. * M_PI;
 
     std::list toCluster(m_hitContainer->begin(), m_hitContainer->end());
 

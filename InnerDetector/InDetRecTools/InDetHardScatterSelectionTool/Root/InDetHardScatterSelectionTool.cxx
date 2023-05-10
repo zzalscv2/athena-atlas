@@ -110,7 +110,7 @@ StatusCode InDet::InDetHardScatterSelectionTool::initialize()
 
   // Initialize our EventInfo container and decoration reads
   ATH_CHECK(m_evtInfoKey.initialize());
-  m_hardScatterDecoKey = SG::ReadDecorHandleKey<xAOD::EventInfo>(m_hardScatterDeco.toString());
+  m_hardScatterDecoKey = m_evtInfoKey.key() + "." + m_hardScatterDeco;
   ATH_CHECK(m_hardScatterDecoKey.initialize());
 
   // Initialize our vertex container read

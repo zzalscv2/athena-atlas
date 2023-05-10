@@ -1139,8 +1139,6 @@ void getHistograms(bool histsDone) {
             name << "_dY_MDT";
             if (!histsDone) {
                 phiSecHistsMDT[iecAC][iphi] = new TH1F(name.str().c_str(), name.str().c_str(), NVALBINS, valmin, valmax);
-                double min = std::tan(-2.5 * 3.14159 / 180.);
-                double max = std::tan(3.5 * 3.14159 / 180.);
 
             } else {
                 phiSecHistsMDT[iecAC][iphi] = (TH1F*)inputHistsFile->Get(name.str().c_str());

@@ -20,17 +20,11 @@
 #include "MCTruthClassifier/MCTruthClassifier.h"
 #include "HepPID/ParticleIDMethods.hh"
 #include "AtlasHepMC/MagicNumbers.h"
-#include<unordered_set>
+#include <unordered_set>
 
 namespace DerivationFramework {
     struct DecayGraphHelper {
-        // Geant4 barcode offset
-        int g4BarcodeOffset;
-        DecayGraphHelper(int init_g4BarcodeOffset) {
-            g4BarcodeOffset = init_g4BarcodeOffset;
-        }
-        DecayGraphHelper(void) {
-            g4BarcodeOffset = HepMC::SIM_BARCODE_THRESHOLD;
+        DecayGraphHelper() {
         }
         
         // Immediate relatives (parents, siblings, children)
@@ -164,7 +158,7 @@ namespace DerivationFramework {
             
             // Save the particle position in the mask
             // If user doesn't want Geant, check and reject Geant particles
-            if (!includeGeant && pHead->barcode()>g4BarcodeOffset) return;
+            if (!includeGeant && HepMC::is_simulation_particle(pHead->barcode()) ) return;
             int headIndex = pHead->index();
             particleMask[headIndex] = true;
             
@@ -179,7 +173,7 @@ namespace DerivationFramework {
             for (int i=0; i<nChildren; ++i) {
               if (decayVtx->outgoingParticle(i)==nullptr) continue;
               descendants(decayVtx->outgoingParticle(i),particleMask,vertexMask,encounteredBarcodes,includeGeant);
-              saveVertex = saveVertex || includeGeant || !(decayVtx->outgoingParticle(i)->barcode()>g4BarcodeOffset);
+              saveVertex = saveVertex || includeGeant || !(HepMC::is_simulation_particle(decayVtx->outgoingParticle(i)->barcode()));
             }
 
             // Save the decay vertex
@@ -246,7 +240,7 @@ namespace DerivationFramework {
                 if (!skipPdgCheck && find(pdgId.begin(), pdgId.end(), abs(particle->pdgId())) == pdgId.end()) continue;
                 
                 //ensure particles are not from GEANT
-                if (particle->barcode() >= g4BarcodeOffset) continue;
+                if ( HepMC::is_simulation_particle(particle->barcode())) continue;
                 
                 //check if we have a neutral particle (threeCharge returns int)
                 if (chargedOnly && HepPID::threeCharge(particle->pdgId()) == 0) continue;

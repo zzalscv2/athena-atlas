@@ -10,6 +10,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import MetadataCategory
 
 # Main algorithm config
 def DESDM_ALLCELLSKernelCfg(configFlags, name='DESDM_ALLCELLSKernel', **kwargs):
@@ -60,7 +61,18 @@ def DESDM_ALLCELLSCfg(configFlags):
     acc.merge( OutputStreamCfg( configFlags, 'DESDM_ALLCELLS', ItemList=items, AcceptAlgs=["DESDM_ALLCELLSKernel"]) )
 
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    acc.merge(SetupMetaDataForStreamCfg(configFlags, 'DESDM_ALLCELLS', AcceptAlgs=["DESDM_ALLCELLSKernel"]))
+    acc.merge(
+        SetupMetaDataForStreamCfg(
+            configFlags,
+            "DESDM_ALLCELLS",
+            AcceptAlgs=["DESDM_ALLCELLSKernel"],
+            createMetadata=[
+                    MetadataCategory.ByteStreamMetaData,
+                    MetadataCategory.LumiBlockMetaData,
+                    MetadataCategory.TriggerMenuMetaData,
+            ],
+        )
+    )
 
     return acc
 

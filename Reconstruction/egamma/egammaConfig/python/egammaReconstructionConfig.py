@@ -31,6 +31,10 @@ def egammaReconstructionCfg(flags, name="egammaReconstruction"):
             EMVertexBuilderCfg)
         acc.merge(EMVertexBuilderCfg(flags))
 
+    from egammaAlgs.egammaTopoClusterCopierConfig import (
+        egammaTopoClusterCopierCfg)
+    acc.merge(egammaTopoClusterCopierCfg(flags))
+
     # Add algorithms to produce
     # xAOD Electrons and Photons
     if flags.Egamma.doCentral:
