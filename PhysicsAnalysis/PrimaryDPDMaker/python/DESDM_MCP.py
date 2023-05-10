@@ -220,7 +220,7 @@ def setupDESDMCPSkimmingAlgCfg(flags, name= "DESDMCPEventKernel", **kwargs):
 
 def DESDMCPOutputCfg(flags, **kwargs):
     result = ComponentAccumulator()
-    from AthenaConfiguration.Enums import LHCPeriod
+    from AthenaConfiguration.Enums import LHCPeriod, MetadataCategory
     isRun3 = flags.GeoModel.Run == LHCPeriod.Run3
 
     container_items = ["xAOD::EventInfo#*", "xAOD::EventAuxInfo#*",
@@ -328,7 +328,19 @@ def DESDMCPOutputCfg(flags, **kwargs):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     kwargs.setdefault("ItemList", container_items)
     result.merge(OutputStreamCfg(flags, **kwargs))
-    result.merge(SetupMetaDataForStreamCfg(flags, kwargs.get("streamName"), kwargs.get("AcceptAlgs")))
+    result.merge(
+        SetupMetaDataForStreamCfg(
+            flags,
+            kwargs.get("streamName"),
+            kwargs.get("AcceptAlgs"),
+            createMetadata=[
+                    MetadataCategory.ByteStreamMetaData,
+                    MetadataCategory.CutFlowMetaData,
+                    MetadataCategory.LumiBlockMetaData,
+                    MetadataCategory.TriggerMenuMetaData,
+            ],
+        )
+    )
     return result
 
 
