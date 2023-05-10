@@ -6,8 +6,6 @@
 #include "GenFilterTool.h"
 
 // EDM includes
-#include "xAODEventInfo/EventInfo.h"
-#include "xAODJet/JetContainer.h"
 #include "TruthUtils/MagicNumbers.h"
 
 // Tool handle interface
@@ -47,24 +45,14 @@ namespace DerivationFramework {
   static const SG::AuxElement::Decorator<float> dec_genFiltFatJ("GenFiltFatJ");
 
   GenFilterTool::GenFilterTool(const std::string& t, const std::string& n, const IInterface* p)
-    : AthAlgTool(t,n,p)
-    , m_classif("MCTruthClassifier/DFCommonTruthClassifier")
-  {
+    : AthAlgTool(t,n,p) {
 
     declareInterface<DerivationFramework::IAugmentationTool>(this);
 
-    declareProperty("EventInfoName",m_eventInfoName="EventInfo");
-    declareProperty("MCCollectionName",m_mcName="TruthParticles");
-    declareProperty("TruthJetCollectionName",m_truthJetsName="AntiKt4TruthWZJets");
-    declareProperty("MinJetPt",m_MinJetPt = 35e3);
-    declareProperty("MaxJetEta",m_MaxJetEta = 2.5);
-    declareProperty("MinLeptonPt",m_MinLepPt = 25e3);
-    declareProperty("MaxLeptonEta",m_MaxLepEta = 2.5);
   }
 
 
-  GenFilterTool::~GenFilterTool(){}
-
+  GenFilterTool::~GenFilterTool() = default;
 
   bool GenFilterTool::isPrompt( const xAOD::TruthParticle* tp ) const
   {
@@ -96,24 +84,31 @@ namespace DerivationFramework {
     }
     return true;
   }
-
+  StatusCode GenFilterTool::initialize() {
+    ATH_CHECK(m_eventInfoKey.initialize());
+    ATH_CHECK(m_mcKey.initialize());
+    ATH_CHECK(m_truthJetsKey.initialize());
+    ATH_CHECK(m_truthFatJetsKey.initialize());
+    for (const SG::AuxElement::Decorator<float>& dec : {
+        dec_genFiltHT, dec_genFiltHTinclNu, dec_genFiltMET, dec_genFiltPTZ, dec_genFiltFatJ
+    }) {
+      m_decorKeys.emplace_back(m_eventInfoKey.key() + "." + SG::AuxTypeRegistry::instance().getName(dec.auxid()));
+    }
+    ATH_CHECK(m_decorKeys.initialize());
+    return StatusCode::SUCCESS;
+  }
   StatusCode GenFilterTool::addBranches() const{
     ATH_MSG_VERBOSE("GenFilterTool::addBranches()");
-
-    const xAOD::EventInfo* eventInfo;
-    if (evtStore()->retrieve(eventInfo,m_eventInfoName).isFailure()) {
-      ATH_MSG_ERROR("could not retrieve event info " <<m_eventInfoName);
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    SG::ReadHandle<xAOD::EventInfo> eventInfo{m_eventInfoKey, ctx};
+    if (!eventInfo.isValid()) {
+      ATH_MSG_ERROR("could not retrieve event info " <<m_eventInfoKey.fullKey());
       return StatusCode::FAILURE;
     }
 
-    const xAOD::TruthParticleContainer* truthPC = nullptr;
-    if (evtStore()->retrieve(truthPC,m_mcName).isFailure()) {
-      ATH_MSG_ERROR("WARNING could not retrieve TruthParticleContainer " <<m_mcName);
-      return StatusCode::FAILURE;
-    }
-
-    float genFiltHT(0.), genFiltHTinclNu(0.), genFiltMET(0.), genFiltPTZ(0.), genFiltFatJ(0.);
-    ATH_CHECK( getGenFiltVars(truthPC, genFiltHT, genFiltHTinclNu, genFiltMET, genFiltPTZ, genFiltFatJ) );
+   
+    float genFiltHT{0.f}, genFiltHTinclNu{0.f}, genFiltMET{0.f}, genFiltPTZ{0.f}, genFiltFatJ{0.f};
+    ATH_CHECK( getGenFiltVars(ctx, genFiltHT, genFiltHTinclNu, genFiltMET, genFiltPTZ, genFiltFatJ) );
 
     ATH_MSG_DEBUG("Computed generator filter quantities: HT " << genFiltHT/1e3 << ", HTinclNu " << genFiltHTinclNu/1e3 << ", MET " << genFiltMET/1e3 << ", PTZ " << genFiltPTZ/1e3 << ", FatJ " << genFiltFatJ/1e3 );
 
@@ -126,11 +121,18 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode GenFilterTool::getGenFiltVars(const xAOD::TruthParticleContainer* tpc, float& genFiltHT, float& genFiltHTinclNu, float& genFiltMET, float& genFiltPTZ, float& genFiltFatJ) const {
+  StatusCode GenFilterTool::getGenFiltVars(const EventContext& ctx, float& genFiltHT, float& genFiltHTinclNu, float& genFiltMET, float& genFiltPTZ, float& genFiltFatJ) const {
     // Get jet container out
-    const xAOD::JetContainer* truthjets = nullptr;
-    if ( evtStore()->retrieve( truthjets, m_truthJetsName).isFailure() || !truthjets ){
-      ATH_MSG_ERROR( "No xAOD::JetContainer found in StoreGate with key " << m_truthJetsName );
+    
+    SG::ReadHandle<xAOD::TruthParticleContainer> tpc{m_mcKey, ctx} ;
+    if (!tpc.isValid()) {
+      ATH_MSG_ERROR("WARNING could not retrieve TruthParticleContainer " <<m_mcKey.fullKey());
+      return StatusCode::FAILURE;
+    }
+
+    SG::ReadHandle<xAOD::JetContainer> truthjets{m_truthJetsKey, ctx};
+    if (!truthjets.isValid()){
+      ATH_MSG_ERROR( "No xAOD::JetContainer found in StoreGate with key " << m_truthJetsKey );
       return StatusCode::FAILURE;
     }
 
@@ -231,9 +233,9 @@ namespace DerivationFramework {
 
    //Get FatJ
    // Get correct jet container
-   const xAOD::JetContainer* truthjets10 = nullptr;
-   if ( evtStore()->retrieve( truthjets10, "AntiKt10TruthJets").isFailure() || !truthjets10 ){
-     ATH_MSG_ERROR( "No xAOD::JetContainer found in StoreGate with key AntiKt10TruthJets" );
+   SG::ReadHandle<xAOD::JetContainer> truthjets10{m_truthFatJetsKey, ctx} ;
+   if ( !truthjets10.isValid()){
+     ATH_MSG_ERROR( "No xAOD::JetContainer found in StoreGate with key "<<m_truthFatJetsKey.fullKey() );
      return StatusCode::FAILURE;
    }
    genFiltFatJ=0.;
