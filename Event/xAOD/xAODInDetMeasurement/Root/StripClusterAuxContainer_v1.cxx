@@ -13,6 +13,5 @@ namespace xAOD {
         AUX_VARIABLE(globalPosition);
         AUX_VARIABLE(rdoList);
         AUX_VARIABLE(channelsInPhi);
-        AUX_VARIABLE(hitsInThirdTimeBin);
     }
 }

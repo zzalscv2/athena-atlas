@@ -64,9 +64,6 @@ namespace ActsTrk {
     TH1* m_sizeX_barrel {};
     TH1* m_sizeX_endcap {};
 
-    TH1* m_hitsInThirdTimeBin_barrel {};
-    TH1* m_hitsInThirdTimeBin_endcap {};
-
     TH2* m_global_xy_barrel {};
     TH2* m_global_xy_endcap {};
 

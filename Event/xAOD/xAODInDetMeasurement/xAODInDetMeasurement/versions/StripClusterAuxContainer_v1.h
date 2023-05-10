@@ -32,7 +32,6 @@ namespace xAOD {
         std::vector < std::array < float, 3 > > globalPosition;
         std::vector < std::vector < Identifier::value_type > > rdoList;
         std::vector < int > channelsInPhi;
-        std::vector < uint16_t > hitsInThirdTimeBin;
         /// @}
     };
 }

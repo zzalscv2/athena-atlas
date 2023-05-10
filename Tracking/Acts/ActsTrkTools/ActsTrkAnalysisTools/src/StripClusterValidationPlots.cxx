@@ -48,9 +48,6 @@ namespace ActsTrk {
     m_sizeX_barrel = Book1D("sizeX_barrel", "StripCluster_sizeX_barrel;Size X;Entries;", 100, 0, 400, false);
     m_sizeX_endcap = Book1D("sizeX_endcap", "StripCluster_sizeX_endcap;Size X;Entries;", 100, 0, 400, false);
 
-    m_hitsInThirdTimeBin_barrel = Book1D("hitsInThirdTimeBin_barrel", "StripCluster_hitsInThirdTimeBin_barrel;Hits In Third Time Bin;Entries", 100, 0, 70000, false);
-    m_hitsInThirdTimeBin_endcap = Book1D("hitsInThirdTimeBin_endcap", "StripCluster_hitsInThirdTimeBin_endcap;Hits In Third Time Bin;Entries", 100, 0, 70000, false);
-
     m_global_xy_barrel = Book2D("global_xy_barrel", "StripCluster_global_xy_barrel;x [mm];y [mm];", 100, -1100, 1100, 100, -1100, 1100, false);
     m_global_xy_endcap = Book2D("global_xy_endcap", "StripCluster_global_xy_endcap;x [mm];y [mm];", 100, -1100, 1100, 100, -1100, 1100, false);
 
@@ -92,7 +89,6 @@ namespace ActsTrk {
       m_localCovXX_barrel->Fill(local_covariance(0, 0), beamSpotWeight);
 
       m_sizeX_barrel->Fill(cluster->channelsInPhi(), beamSpotWeight);
-      m_hitsInThirdTimeBin_barrel->Fill(cluster->hitsInThirdTimeBin(), beamSpotWeight);
 
       m_global_xy_barrel->Fill(globalPos(0, 0), globalPos(1, 0), beamSpotWeight);
       m_global_zr_barrel->Fill(globalPos(2, 0), globalPosition.perp(), beamSpotWeight);
@@ -114,7 +110,6 @@ namespace ActsTrk {
       m_localCovXX_endcap->Fill(local_covariance(0, 0), beamSpotWeight);
 
       m_sizeX_endcap->Fill(cluster->channelsInPhi(), beamSpotWeight);
-      m_hitsInThirdTimeBin_endcap->Fill(cluster->hitsInThirdTimeBin(), beamSpotWeight);
 
       m_global_xy_endcap->Fill(globalPos(0, 0), globalPos(1, 0), beamSpotWeight);
       m_global_zr_endcap->Fill(globalPos(2, 0), globalPosition.perp(), beamSpotWeight);

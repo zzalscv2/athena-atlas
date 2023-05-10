@@ -43,9 +43,6 @@ namespace xAOD {
         /// Returns the dimensions of the cluster in numbers of channels in phi (x), respectively
         int channelsInPhi() const;
 
-        /// Returns the third time bin, referring to which strips had 010 and which 011 for first 16 strips in a cluster. Gets up to 16 strips.
-        uint16_t hitsInThirdTimeBin() const;
-
         /// @}
 
         /// @name Functions to set pixel cluster properties
@@ -56,9 +53,6 @@ namespace xAOD {
 
         /// Sets the dimensions of the cluster in numbers of channels in phi (x)
         void setChannelsInPhi(int channelsInPhi);
-
-        /// Sets the third time bin, referring to which strips had 010 and which 011 for first 16 strips in a cluster. Sets up to 16 strips.
-        void setHitsInThirdTimeBin(uint16_t hitsInThirdTimeBin);
 
         /// @}
 

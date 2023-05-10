@@ -182,7 +182,6 @@ StripClusteringTool::makeCluster(const Cluster &cluster,
     cl.globalPosition() = globalPos;
     cl.setRDOlist(cluster.ids);
     cl.setChannelsInPhi(cluster.ids.size());
-    cl.setHitsInThirdTimeBin(cluster.hitsInThirdTimeBin);
 
     return StatusCode::SUCCESS;
 }
