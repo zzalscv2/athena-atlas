@@ -35,6 +35,21 @@
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 
+class ExtrapolationResult {
+public:
+  double ptinv;
+  double eta;
+  double phi;
+  double eptinv;
+  double eeta;
+  double ephi;
+  double charge;
+  bool isBarrel;
+  int isRpcFailure;
+  int isTgcFailure;
+  int status;
+};
+
 /** Main LVL2 Algorithm. Sided by a xAOD::L2StandaloneMuon, match the muon spectrometer track with an ID track, and produces a xAOD::L2CombinedMuon. */
 class muComb : public AthReentrantAlgorithm
 {
@@ -90,9 +105,11 @@ class muComb : public AthReentrantAlgorithm
                  double, double, double, double,
 		 double&, double&, double&, double&, double&, int&) const;
 
-  int    g4Match(const xAOD::L2StandAloneMuon* feature,
+  int    g4Match(const ExtrapolationResult &extr,
                  double, double, double, double, double, double, double,
 		 double&, double&, double&, double&, double&, int&) const;
+
+  ExtrapolationResult getExtrapolatedMuon(const xAOD::L2StandAloneMuon* feature) const;
 
  private:
 
