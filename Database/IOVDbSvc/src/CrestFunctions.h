@@ -19,6 +19,9 @@
 
 #include "CoolKernel/ChannelId.h"
 
+#include "nlohmann/json.hpp"
+
+
 namespace IOVDbNamespace{
   typedef std::pair<std::string,std::string> IovHashPair; // <IOV,Hash> pairs extracted from Json
 
@@ -70,5 +73,16 @@ namespace IOVDbNamespace{
 
   std::map<std::string, std::string>
     getGlobalTagMap(const std::string globaltag);
+
+  nlohmann::json getTagInfo(const std::string & tag);
+
+  std::string 
+    extractPayloadSpecification(const std::string & tag, nlohmann::json tagMeta);
+
+  std::string
+    getTagInfoElement(nlohmann::json tag_info, const std::string & key);
+
+  std::pair<std::vector<cool::ChannelId> , std::vector<std::string>>
+    extractChannelListFromString(const std::string & chanString);
 }
 #endif

@@ -279,4 +279,54 @@ namespace IOVDbNamespace{
     return tagmap;
   }
 
+
+  nlohmann::json getTagInfo(const std::string & tag){
+    try{
+      auto crestClient = Crest::CrestClient(urlBase());
+      nlohmann::json meta_info = crestClient.getTagMetaInfo(tag)[0];
+
+      if (meta_info.contains("tagInfo")){
+	return crestClient.getJson(meta_info["tagInfo"]);
+      }
+
+    } catch (std::exception & e){
+      std::cout<<__FILE__<<":"<<__LINE__<< ": " << e.what() << " Cannot get a tag meta info " << tag << std::endl;
+    }
+    return nullptr;
+  }
+
+
+  std::string getTagInfoElement(nlohmann::json tag_info, const std::string & key){
+    if (tag_info.contains(key)){
+      if (key == "channel_list"){ 
+        return  tag_info[key].dump();
+      }
+      else{
+        return tag_info[key];
+      }
+    }
+    return "";
+  }
+
+  std::pair<std::vector<cool::ChannelId> , std::vector<std::string>>
+  extractChannelListFromString(const std::string & chanString){
+    std::vector<cool::ChannelId> list;
+    std::vector<std::string> names;
+    nlohmann::json js = nlohmann::json::parse(chanString);
+    int n = js.size();
+
+    for (int i = 0; i <= n; i++) {
+      nlohmann::json j_object = js[i];
+      for (auto& [key, val] : j_object.items()){
+        list.push_back(std::stoll(key));
+        names.push_back(val);
+      }
+    }
+
+    // if all the names are empty, these are unnamed channels, and can just return an empty vector for the names
+    auto isEmpty=[](const std::string & s){return s.empty();};
+    if ( std::all_of(names.begin(), names.end(), isEmpty)) names.clear();
+    return std::make_pair(std::move(list), std::move(names));
+  }
+
 }
