@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelGeoModelXml/PixelGmxInterface.h"
@@ -12,6 +12,11 @@
 #include <ReadoutGeometryBase/PixelDiodeMatrix.h>
 #include <ReadoutGeometryBase/SiCommonItems.h>
 
+#include <RDBAccessSvc/IRDBAccessSvc.h>
+#include <RDBAccessSvc/IRDBRecord.h>
+#include <RDBAccessSvc/IRDBRecordset.h>
+#include <GeoModelRead/ReadGeoModel.h>
+#include <GeoModelKernel/GeoFullPhysVol.h>
 
 namespace
 {
@@ -420,6 +425,57 @@ std::shared_ptr<const PixelDiodeMatrix> PixelGmxInterface::buildMatrix(double ph
   }
 
   return fullMatrix;
+}
+
+void PixelGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccessSvc,GeoModelIO::ReadGeoModel* sqlreader){
+
+    const std::array<std::string,2> sensorTypes({"QuadChip_RD53","SingleChip_RD53"});
+    const std::array<std::string,17> rd53_ParamNames({"circuitsPerEta","circuitsPerPhi","columns","detectorType","is3D","nEtaEndPerSide","nEtaLongPerSide","nPhiEndPerSide","nPhiLongPerSide","pitchEta","pitchEtaEnd","pitchEtaLong","pitchPhi","pitchPhiEnd","pitchPhiLong","rows","thickness"});
+    
+    for(const std::string & sType:sensorTypes){
+       IRDBRecordset_ptr rd53 = rdbAccessSvc->getRecordsetPtr(sType,"");
+       if(rd53->size() !=0){
+          for (unsigned int iR =0;iR<rd53->size();iR++){
+            std::map<std::string,std::string> rd53_Map;
+            for(const std::string & paramName:rd53_ParamNames){
+            std::string paramValue = (*rd53)[iR]->getString(paramName);
+            rd53_Map[paramName] = paramValue;
+        }
+           std::string rd35_Name = (*rd53)[iR]->getString("SensorType");
+           makePixelModule(rd35_Name,rd53_Map);
+          } 
+       }
+    else ATH_MSG_WARNING("Could not retrieve "<<sType<<" table");
+    }
+
+     //Now, loop over the FullPhysVols and create the SiDetectorElements
+    //lots of string parsing...
+    const std::array<std::string,5> fields({"barrel_endcap","layer_wheel","phi_module","eta_module","side"}); 
+    //The below is a map of string keys which contain all the Identifier/DetElement relevant info, and the associated FullPhysVol
+    std::map<std::string, GeoFullPhysVol*> mapFPV = sqlreader->getPublishedNodes<std::string, GeoFullPhysVol*>("GeoModelXML");
+    for (const auto&[fullPhysVolInfoString, fullPhysVolPointer] : mapFPV){
+        //find the name of the corresponding detector design type
+        size_t startRG = fullPhysVolInfoString.find("RD53_");
+        if(startRG==std::string::npos){
+            ATH_MSG_DEBUG("GeoFullPhysVol "<<fullPhysVolInfoString<<" does not have the expected format. Skipping");
+            continue;
+            } 
+        std::string typeName = fullPhysVolInfoString.substr(startRG);
+        std::map<std::string, int> index;
+        for (const std::string & field:fields){
+        size_t first = fullPhysVolInfoString.find(field+"_");
+        size_t last = fullPhysVolInfoString.find("_",first+field.size()+1);//start looking only after end of first delimiter (plus 1 for the "_" appended) ends
+        if(first==std::string::npos || last==std::string::npos){
+            ATH_MSG_DEBUG("Could not extract "<<field<<" from "<<fullPhysVolInfoString<<". Skipping");
+            continue;
+            } 
+        std::string strNew = fullPhysVolInfoString.substr(first+field.size()+1,last-(first+field.size()+1));
+        index[field] = std::stoi(strNew);
+        }
+
+        addSensor(typeName,index,0,fullPhysVolPointer);
+    }
+
 }
 
 } // namespace ITk

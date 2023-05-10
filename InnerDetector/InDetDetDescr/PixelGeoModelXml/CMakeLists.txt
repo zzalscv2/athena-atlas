@@ -12,7 +12,7 @@ atlas_add_library( PixelGeoModelXmlLib
                    src/*.cxx
                    PUBLIC_HEADERS PixelGeoModelXml
                    PRIVATE_INCLUDE_DIRS ${XERCESC_INCLUDE_DIRS} ${GEOMODEL_INCLUDE_DIRS}
-                   LINK_LIBRARIES InDetGeoModelUtils PixelReadoutGeometryLib
+                   LINK_LIBRARIES InDetGeoModelUtils PixelReadoutGeometryLib GeometryDBSvcLib
                    PRIVATE_LINK_LIBRARIES ${XERCESC_LIBRARIES} ${GEOMODEL_LIBRARIES}
                    GaudiKernel DetDescrConditions InDetSimEvent )
 

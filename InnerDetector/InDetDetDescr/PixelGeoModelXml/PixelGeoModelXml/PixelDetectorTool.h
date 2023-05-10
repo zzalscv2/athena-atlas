@@ -13,6 +13,7 @@
 #include <InDetGeoModelUtils/GeoModelXmlTool.h>
 #include <InDetGeoModelUtils/WaferTree.h>
 #include <ReadoutGeometryBase/SiCommonItems.h>
+#include "GeometryDBSvc/IGeometryDBSvc.h"
 
 #include <memory>
 
@@ -46,6 +47,8 @@ private:
   Gaudi::Property<std::string> m_alignmentFolderName{this, "AlignmentFolderName", "/Indet/Align", ""};
   // Print out how many of each layer/eta/phi etc. have been set up.
   void doNumerology(InDetDD::PixelDetectorManager *manager);
+  ServiceHandle< IGeometryDBSvc > m_geometryDBSvc{this,"GeometryDBSvc","InDetGeometryDBSvc",""};
+
 };
 
 } // namespace ITk
