@@ -3,6 +3,7 @@
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
 
 def _setupCondDB(flags, CoolDataBaseFolder, quiet=True):
 
@@ -23,7 +24,7 @@ def _setupCondDB(flags, CoolDataBaseFolder, quiet=True):
     cfolder = CoolDataBaseFolder + '<tag>TagInfoMajor/' + \
         atlasMaterialTag + '_/GeoAtlas</tag>'
 
-    if not flags.Detector.GeometryITk:
+    if flags.GeoModel.Run < LHCPeriod.Run4:
         # load the right folders
         from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
         result.merge(addFoldersSplitOnline(
@@ -139,8 +140,9 @@ def TrackingGeometryCondAlgCfg(flags, name='AtlasTrackingGeometryCondAlg',
     atlas_geometry_processors = []
 
     if flags.TrackingGeometry.MaterialSource == 'COOL':
-        CoolDataBaseFolder = '/GLOBAL/TrackingGeo/LayerMaterialV2'
-        if flags.Detector.GeometryITk:
+        if flags.GeoModel.Run < LHCPeriod.Run4:
+            CoolDataBaseFolder = '/GLOBAL/TrackingGeo/LayerMaterialV2'
+        else:
             CoolDataBaseFolder = '/GLOBAL/TrackingGeo/LayerMaterialITK'
 
         from TrackingGeometryCondAlg.TrkDetDescrToolsConfig import (

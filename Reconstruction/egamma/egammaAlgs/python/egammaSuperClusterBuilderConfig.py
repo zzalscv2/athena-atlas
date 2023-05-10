@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """Instantiate the two supercluster
 builders with default configuration"""
@@ -37,6 +37,7 @@ def electronSuperClusterBuilderCfg(flags,
         mvacal = egammaMVASvcCfg(flags)
         kwargs["MVACalibSvc"] = acc.getPrimaryAndMerge(mvacal)
 
+    kwargs.setdefault("doTrackMatching", flags.Egamma.doTracking)
     kwargs.setdefault(
         "InputEgammaRecContainerName",
         flags.Egamma.Keys.Internal.EgammaRecs)
@@ -79,6 +80,7 @@ def photonSuperClusterBuilderCfg(
         mvacal = egammaMVASvcCfg(flags)
         kwargs["MVACalibSvc"] = acc.getPrimaryAndMerge(mvacal)
 
+    kwargs.setdefault("doConversions", flags.Egamma.doConversionBuilding)
     kwargs.setdefault(
         "InputEgammaRecContainerName",
         flags.Egamma.Keys.Internal.EgammaRecs)
