@@ -56,7 +56,6 @@ def RpcBytestreamDecodeCfg(flags, name="RpcRawDataProvider"):
         MuonRpcRawDataProviderTool.RpcContainerCacheKey   = MuonCacheNames.RpcCache
         MuonRpcRawDataProviderTool.WriteOutRpcSectorLogic = False
 
-    acc.addPublicTool( MuonRpcRawDataProviderTool ) # This should be removed, but now defined as PublicTool at MuFastSteering 
     
     # Setup the RAW data provider algorithm
     Muon__RpcRawDataProvider=CompFactory.Muon.RpcRawDataProvider
@@ -102,7 +101,6 @@ def TgcBytestreamDecodeCfg(flags, name="TgcRawDataProvider"):
     if flags.Muon.MuonTrigger:
         MuonTgcRawDataProviderTool.TgcContainerCacheKey   = MuonCacheNames.TgcCache
 
-    acc.addPublicTool( MuonTgcRawDataProviderTool ) # This should be removed, but now defined as PublicTool at MuFastSteering 
     
     # Setup the RAW data provider algorithm
     Muon__TgcRawDataProvider=CompFactory.Muon.TgcRawDataProvider
@@ -149,8 +147,6 @@ def MdtBytestreamDecodeCfg(flags, name="MdtRawDataProvider"):
     if flags.Muon.MuonTrigger:
         MuonMdtRawDataProviderTool.CsmContainerCacheKey = MuonCacheNames.MdtCsmCache
 
-    acc.addPublicTool( MuonMdtRawDataProviderTool ) # This should be removed, but now defined as PublicTool at MuFastSteering 
-
     # Setup the RAW data provider algorithm
     Muon__MdtRawDataProvider=CompFactory.Muon.MdtRawDataProvider
     MdtRawDataProvider = Muon__MdtRawDataProvider(name         = name,
@@ -190,8 +186,6 @@ def CscBytestreamDecodeCfg(flags, name="CscRawDataProvider"):
                                                                  RdoLocation = keyName)
     if flags.Muon.MuonTrigger:
         MuonCscRawDataProviderTool.CscContainerCacheKey = MuonCacheNames.CscCache
-
-    acc.addPublicTool( MuonCscRawDataProviderTool ) # This should be removed, but now defined as PublicTool at MuFastSteering 
     
     # Setup the RAW data provider algorithm
     Muon__CscRawDataProvider=CompFactory.Muon.CscRawDataProvider
@@ -246,8 +240,6 @@ def sTgcBytestreamDecodeCfg(flags, name="MuonsTgcRawDataProvider"):
 
     #if flags.Muon.MuonTrigger:
     #    MuonsTgcRawDataProviderTool.sTgcContainerCacheKey = MuonCacheNames.sTgcCache
-
-    acc.addPublicTool( MuonsTgcRawDataProviderTool ) # This should be removed, but now defined as PublicTool at MuFastSteering 
     
     # Setup the RAW data provider algorithm
     Muon__sTgcRawDataProvider=CompFactory.Muon.sTgcRawDataProvider
@@ -284,7 +276,6 @@ def sTgcPadTriggerBytestreamDecodeCfg(flags, name="MuonsTgcPadTriggerRawDataProv
                                                                                 Decoder = STGCPadTriggerRodDecoder,
                                                                                 RdoLocation = keyName)
 
-    acc.addPublicTool( MuonsTgcPadTriggerRawDataProviderTool ) # This should be removed, but now defined as PublicTool at MuFastSteering
 
     # Setup the RAW data provider algorithm
     Muon__sTgcPadTriggerRawDataProvider = CompFactory.Muon.sTgcPadTriggerRawDataProvider
@@ -331,8 +322,6 @@ def MmBytestreamDecodeCfg(flags, name="MmRawDataProvider"):
 
     #if flags.Muon.MuonTrigger:
     #    MuonMmRawDataProviderTool.RawDataContainerCacheKey = MuonCacheNames.MicromegasCache
-
-    acc.addPublicTool( MuonMmRawDataProviderTool ) # This should be removed, but now defined as PublicTool at MuFastSteering 
 
     # Setup the RAW data provider algorithm
     Muon__MmRawDataProvider = CompFactory.Muon.MM_RawDataProvider
