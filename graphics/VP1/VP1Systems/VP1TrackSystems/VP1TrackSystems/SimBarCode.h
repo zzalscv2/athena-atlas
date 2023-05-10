@@ -41,9 +41,7 @@ public:
 
   typedef std::pair<int,HepMcParticleLink::index_type> ExtBarCode;
   ExtBarCode extBarCode() const { return ExtBarCode(barCode(),evtIndex()); }
-//   //Comparison operators do not consider pdgCodes if one of them is unknown!
-//   inline bool operator==(const SimBarCode&) const;
-//   inline bool operator!=(const SimBarCode&) const;
+
 
 private:
   int m_barCode;
