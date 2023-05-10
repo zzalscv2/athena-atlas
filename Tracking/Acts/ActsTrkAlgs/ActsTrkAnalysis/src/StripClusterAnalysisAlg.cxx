@@ -100,10 +100,6 @@ namespace ActsTrk {
     auto monitor_sizeX = Monitored::Collection("sizeX", *inputStripClusterContainer,
 					       [] (const auto* cluster) -> int
 					       { return cluster->channelsInPhi(); });
-
-    auto monitor_hitsInThirdTimeBin = Monitored::Collection("hitsInThirdTimeBin", *inputStripClusterContainer,
-							    [] (const auto* cluster) -> int 
-							    { return static_cast<int>(cluster->hitsInThirdTimeBin()); });
     
     fill("ActsTrkClusterAnalysisAlg",
 	 monitor_barrelEndcap, monitor_layerDisk,
@@ -111,7 +107,7 @@ namespace ActsTrk {
 	 monitor_eta, monitor_perp,
 	 monitor_globalX, monitor_globalY, monitor_globalZ,
 	 monitor_localX, monitor_localCovXX,
-	 monitor_sizeX, monitor_hitsInThirdTimeBin);
+	 monitor_sizeX);
     
     return StatusCode::SUCCESS;
   }

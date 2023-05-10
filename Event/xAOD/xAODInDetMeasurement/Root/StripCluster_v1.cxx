@@ -39,6 +39,3 @@ const std::vector< Identifier > xAOD::StripCluster_v1::rdoList() const {
 
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( xAOD::StripCluster_v1, int,
                                       channelsInPhi, setChannelsInPhi)
-
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( xAOD::StripCluster_v1, uint16_t,
-                                      hitsInThirdTimeBin, setHitsInThirdTimeBin)

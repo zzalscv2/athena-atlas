@@ -52,17 +52,6 @@ void fill( xAOD::StripCluster& stripCluster) {
 
     stripCluster.globalPosition() = globalPosition;
     stripCluster.setChannelsInPhi(3);
-
-    uint16_t hitsInThirdTimeBin = 0;
-    std::vector < std::bitset<3> > timePatterns = { std::bitset<3>("010"),
-                                                    std::bitset<3>("011"),
-                                                    std::bitset<3>("010") };
-    for (unsigned int iStrip=0; iStrip<timePatterns.size(); iStrip++) {
-        if (iStrip < 16) hitsInThirdTimeBin |= (timePatterns.at(iStrip).test(0) << iStrip);
-    }
-    stripCluster.setHitsInThirdTimeBin(hitsInThirdTimeBin);
-
-    return;
 }
 
 void print ( const xAOD::StripCluster& stripCluster) {
@@ -74,9 +63,6 @@ void print ( const xAOD::StripCluster& stripCluster) {
     std::cout << "Global Position = " << stripCluster.globalPosition() << std::endl;
     std::cout << "RDOs = " << stripCluster.rdoList() << std::endl;
     std::cout << "Number of strips = " << stripCluster.channelsInPhi() << std::endl;
-    std::cout << "hits In Third Time Bin = " << stripCluster.hitsInThirdTimeBin() << std::endl;
-
-    return;
 }
 
 int main() {

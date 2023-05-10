@@ -92,7 +92,6 @@ namespace TrackingUtilities {
     xaodCluster.setRDOlist(RDOs);
     xaodCluster.globalPosition() = globalPosition;
     xaodCluster.setChannelsInPhi(width.colRow()[0]);
-    xaodCluster.setHitsInThirdTimeBin(indetCluster.hitsInThirdTimeBin());
     
     return StatusCode::SUCCESS;
   }
@@ -267,7 +266,6 @@ namespace TrackingUtilities {
 					  width,
 					  &element,
 					  errorMatrix);
-    indetCluster->setHitsInThirdTimeBin( xaodCluster.hitsInThirdTimeBin() );
 
     return StatusCode::SUCCESS;    
   }
