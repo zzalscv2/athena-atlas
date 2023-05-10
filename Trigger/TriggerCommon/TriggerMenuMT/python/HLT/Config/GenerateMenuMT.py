@@ -430,6 +430,8 @@ class GenerateMenuMT(object, metaclass=Singleton):
                 if len(listOfChainConfigs)>1:
                     log.debug("Merging strategy from dictionary: %s", mainChainDict["mergingStrategy"])
                     theChainConfig, perSig_lengthOfChainConfigs = mergeChainDefs(listOfChainConfigs, mainChainDict, perSig_lengthOfChainConfigs)
+                    if isCAMenu() and perSig_lengthOfChainConfigs is None:
+                       raise NoCAmigration("[__generateChainConfigs] chain {0} generation missed configuration during merging".format(mainChainDict['chainName']))
                     lengthOfChainConfigs = [] 
                     for nSteps, aGrps in perSig_lengthOfChainConfigs:
                         if len(nSteps) != len(aGrps):
