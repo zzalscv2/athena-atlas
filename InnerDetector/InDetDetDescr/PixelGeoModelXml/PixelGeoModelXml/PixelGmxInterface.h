@@ -13,6 +13,12 @@
 #include <sstream>
 #include <string>
 
+class IRDBAccessSvc;
+
+namespace GeoModelIO{
+  class ReadGeoModel;
+}
+
 namespace InDetDD {
 
 class PixelDetectorManager;
@@ -49,6 +55,8 @@ public:
 						      int nEtaLong, int nEtaEnd,
 						      int circuitsPhi, int circuitsEta,
 						      int diodeColPerCirc, int diodeRowPerCirc) const;
+
+   void buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccessSvc, GeoModelIO::ReadGeoModel* sqlreader);
 
 protected:
   std::map<std::string, int> m_geometryMap;

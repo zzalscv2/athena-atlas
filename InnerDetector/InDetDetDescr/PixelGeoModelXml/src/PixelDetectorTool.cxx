@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelGeoModelXml/PixelDetectorTool.h"
@@ -39,7 +39,7 @@ StatusCode PixelDetectorTool::create()
 
   m_commonItems = std::make_unique<InDetDD::SiCommonItems>(idHelper);
    
-  const GeoModelIO::ReadGeoModel* sqlreader = getSqliteReader();
+  GeoModelIO::ReadGeoModel* sqlreader = getSqliteReader();
   
   // If we are not taking the geo from sqlite, check the availability of tables 
   // (or that we have a local geometry)
@@ -89,6 +89,10 @@ StatusCode PixelDetectorTool::create()
   // empty strings are the (optional) containing detector and envelope names
   // allowed to pass a null sqlreader ptr - it will be used to steer the source of the geometry
   const GeoVPhysVol* topVolume = createTopVolume(world, gmxInterface, node, table,"","",sqlreader);
+  if(sqlreader){
+        ATH_MSG_INFO("Building Pixel Readout Geometry from SQLite using "<<m_geoDbTagSvc->getParamSvcName());
+        gmxInterface.buildReadoutGeometryFromSqlite(m_sqliteReadSvc.operator->(),sqlreader);
+  }
   if (topVolume) { //see that a valid pointer is returned
     manager->addTreeTop(topVolume);
     doNumerology(manager);
