@@ -15,7 +15,6 @@
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include <algorithm>
 #include "xAODTracking/VertexContainer.h"
-#include "DerivationFrameworkBPhys/LocalVector.h"
 #include "HepPDT/ParticleDataTable.hh"
 
 #include "TrkVKalVrtFitter/VxCascadeInfo.h"

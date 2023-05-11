@@ -7,7 +7,6 @@
 #include "DerivationFrameworkBPhys/MuPlusDsCascade.h"
 #include "DerivationFrameworkBPhys/CascadeTools.h"
 #include "DerivationFrameworkBPhys/BPhysPVCascadeTools.h"
-#include "DerivationFrameworkBPhys/LocalVector.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
