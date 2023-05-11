@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -12,13 +12,13 @@
 // Base classes
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
-// For handles
-#include "GaudiKernel/ServiceHandle.h"
-// Standard library includes
-#include <string>
 
-// Forward declaration
-class StoreGateSvc;
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteHandleKey.h"
+#include "xAODTruth/TruthEventContainer.h"
+#include "xAODTruth/TruthVertexContainer.h"
+#include "xAODTruth/TruthParticleContainer.h"
+
 
 namespace DerivationFramework {
 
@@ -30,10 +30,15 @@ namespace DerivationFramework {
       virtual StatusCode addBranches() const;
 
     private:
-      std::string m_eventsKey; //!< Input particle collection (navigates to the vertices)
-      std::string m_collectionName; //!< Output collection name stem
-      int m_generations; //!< Number of generations after the particle in question to keep
-      ServiceHandle<StoreGateSvc> m_metaStore; //!< Handle on the metadata store for init
+      Gaudi::Property<std::string> m_collectionName{this, "NewCollectionName", "" }; //!< Output collection name stem
+      Gaudi::Property<int> m_generations{this, "Generations", 1,
+      "Number of generations after the particle in question to keep (-1 for all)"};
+      ServiceHandle<StoreGateSvc> m_metaStore{this, "MetaDataStore", "MetaDataStore"}; //!< Handle on the metadata store for init
+
+      SG::ReadHandleKey<xAOD::TruthEventContainer> m_eventsKey{this, "TruthEventKey", "TruthEvents",
+                                                      "Input particle collection (navigates to the vertices)"};
+      SG::WriteHandleKey<xAOD::TruthVertexContainer> m_outVtxKey{this, "OutVtxContainer", "" };
+      SG::WriteHandleKey<xAOD::TruthParticleContainer> m_outPartKey{this, "OutPartContainer", "" };
   }; 
 }
 
