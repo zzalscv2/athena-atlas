@@ -5,12 +5,10 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.SystemOfUnits import MeV
-from BarcodeServices.BarcodeServicesConfig import BarcodeSvcCfg
 
 
 def ParticleHelperCfg(flags, name="ISF_ParticleHelper", **kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("BarcodeSvc", acc.getPrimaryAndMerge(BarcodeSvcCfg(flags)).name)
     acc.setPrivateTools(CompFactory.ISF.ParticleHelper(name, **kwargs))
     return acc
 

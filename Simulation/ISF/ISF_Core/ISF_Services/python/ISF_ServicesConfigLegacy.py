@@ -19,8 +19,6 @@ def getParticleBrokerSvcNoOrdering(name="ISF_ParticleBrokerSvcNoOrdering", **kwa
     kwargs.setdefault('ValidateGeoIDs', ISF_Flags.ValidationMode())
     kwargs.setdefault('ValidationOutput', ISF_Flags.ValidationMode())
     kwargs.setdefault('ValidationStreamName', "ParticleBroker")
-    from G4AtlasApps.SimFlags import simFlags
-    kwargs.setdefault('BarcodeService', simFlags.TruthStrategy.BarcodeServiceName())
     return CfgMgr.ISF__ParticleBrokerDynamicOnReadIn(name, **kwargs)
 
 
@@ -83,8 +81,6 @@ def getGenParticleFilters():
 
 
 def getInputConverter(name="ISF_InputConverter", **kwargs):
-    from G4AtlasApps.SimFlags import simFlags
-    kwargs.setdefault('BarcodeSvc', simFlags.TruthStrategy.BarcodeServiceName())
     kwargs.setdefault("UseGeneratedParticleMass", False)
     kwargs.setdefault("GenParticleFilters", getGenParticleFilters())
     return CfgMgr.ISF__InputConverter(name, **kwargs)
