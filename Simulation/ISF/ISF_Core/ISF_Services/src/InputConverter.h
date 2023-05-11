@@ -16,15 +16,12 @@
 
 #include "BarcodeEvent/Barcode.h"
 
-// forward declarations
-namespace Barcode {
-  class IBarcodeSvc;
-}
 namespace HepPDT {
   class ParticleDataTable;
 }
 #include "AtlasHepMC/GenEvent_fwd.h"
 #include "AtlasHepMC/GenParticle_fwd.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 class IPartPropSvc;
 class McEventCollection;
@@ -122,8 +119,7 @@ namespace ISF {
 
     bool                                  m_quasiStableParticlesIncluded; //<! will quasi-stable particles be included in the simulation
 
-    ServiceHandle<Barcode::IBarcodeSvc>   m_barcodeSvc;                 //!< The ISF Barcode service
-    Barcode::ParticleBarcode              m_barcodeGenerationIncrement; //!< to be retrieved from ISF Barcode service
+    const Barcode::ParticleBarcode              m_barcodeGenerationIncrement = HepMC::SIM_REGENERATION_INCREMENT; //!< to be retrieved from ISF Barcode service
 
   };
 

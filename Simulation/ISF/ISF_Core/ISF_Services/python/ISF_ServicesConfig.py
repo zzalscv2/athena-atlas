@@ -55,7 +55,6 @@ def GenParticleFiltersToolCfg(flags):
 
 def InputConverterCfg(flags, name="ISF_InputConverter", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("BarcodeSvc", result.getPrimaryAndMerge(BarcodeSvcCfg(flags)).name)
     kwargs.setdefault("UseGeneratedParticleMass", False)
     if "GenParticleFilters" not in kwargs:
         acc_GenParticleFiltersList = GenParticleFiltersToolCfg(flags)
@@ -91,8 +90,6 @@ def ParticleBrokerSvcNoOrderingCfg(flags, name="ISF_ParticleBrokerSvcNoOrdering"
     kwargs.setdefault("ValidateGeoIDs", flags.Sim.ISF.ValidationMode)
     kwargs.setdefault("ValidationOutput", flags.Sim.ISF.ValidationMode)
     kwargs.setdefault("ValidationStreamName", "ParticleBroker")
-
-    kwargs.setdefault("BarcodeService", result.getPrimaryAndMerge(BarcodeSvcCfg(flags)).name)
 
     result.addService(CompFactory.ISF.ParticleBrokerDynamicOnReadIn(name, **kwargs), primary = True)
     return result
