@@ -69,14 +69,14 @@ if __name__ == "__main__":
     #cfg.merge(setupEgammaCalibProviderCfg(flags, "PhotonProvider", Input="Photons", Output="CalibPhotons"))
     iso_tool = cfg.popToolsAndMerge(IsolationSelectionToolCfg(flags, 
                                                               ElectronWP="PflowTight_FixedRad",
-                                                              MuonWP="PflowTight_FixedRad"))
+                                                              MuonWP="PflowTight_FixedRad",
+                                                              InMuonContainer = "Muons",
+                                                              InElecContainer = "Electrons"))
     iso_corr_tool = cfg.popToolsAndMerge(IsoCloseByCorrectionToolCfg(flags,
                                                                      BackupPrefix="vanilla",                                        
                                                                      IsolationSelectionTool = iso_tool,
                                                                      SelectionDecorator = "considerInCorrection",
-                                                                     IsolationSelectionDecorator =  "correctedIsol",
-                                                                     EleContainers = ["Electrons"],
-                                                                     MuoContainers = ["Muons"] ))
+                                                                     IsolationSelectionDecorator =  "correctedIsol"))
     ### Associate the close-by pflow objects and the calorimeter clusters
     cfg.merge(IsoCloseByCaloDecorCfg(flags,
                                      containers = ["Electrons", "Muons", "Photons"] ))

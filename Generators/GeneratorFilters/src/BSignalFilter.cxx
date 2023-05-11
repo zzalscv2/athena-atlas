@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // -----------------------------------------------------------------------------------------------
@@ -480,7 +480,7 @@ void BSignalFilter::FindAllChildren(const HepMC::ConstGenParticlePtr& mother,std
   if( (!fromFinalB) && (MC::PID::isBottomMeson(pID) || MC::PID::isBottomBaryon(pID)) )
     {
       fromFinalB = true;
-      int pID;
+      int pID{};
       for (auto thisChild = firstChild; thisChild != lastChild; ++thisChild)
 	{
 	  pID = (*thisChild)->pdg_id();
@@ -489,7 +489,10 @@ void BSignalFilter::FindAllChildren(const HepMC::ConstGenParticlePtr& mother,std
     }
 
   // ** Main loop: iterate over all children, call method recursively.
-  for (auto thisChild = firstChild; thisChild != lastChild++; ++thisChild)
+  //Note: Iterators changed between HEPMC2 and HEPMC3; the previous version
+  //was a custom iterator which could be incremented indefinitely, always returning
+  //'end' when necessary. In HEPMC3, these are standard library iterators
+  for (auto thisChild = firstChild; thisChild != lastChild; ++thisChild)
     {
       childCnt++;
       std::stringstream childCntSS; childCntSS << childCnt;
