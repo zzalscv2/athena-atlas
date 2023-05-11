@@ -65,16 +65,10 @@ def getCopyTruthLabelParticles(truthtype):
 def getCopyTruthJetParticles(modspec, cflags):
     truthclassif = getMCTruthClassifier()
 
-    barCodeFromMetadata=2
-    # Input file is EVNT
-    if "McEventCollection#GEN_EVENT" in cflags.Input.TypedCollections:
-        barCodeFromMetadata=0
-
     truthpartcopy = CompFactory.CopyTruthJetParticles(
         "truthpartcopy"+modspec,
         OutputName="JetInputTruthParticles"+modspec,
-        MCTruthClassifier=truthclassif,
-        BarCodeFromMetadata=barCodeFromMetadata)
+        MCTruthClassifier=truthclassif)
     if modspec=="NoWZ":
         truthpartcopy.IncludePromptLeptons=False
         truthpartcopy.IncludePromptPhotons=False
