@@ -19,9 +19,6 @@ BkgElectronClassification::BkgElectronClassification(const std::string& t,
 {
 
   declareInterface<DerivationFramework::IAugmentationTool>(this);
-  declareProperty("barcodeCut",
-                  m_barcodecut = HepMC::SIM_BARCODE_THRESHOLD,
-                  "Cut on the barcode for the xAODEgammaTruthHelpers");
 }
 
 StatusCode
@@ -122,7 +119,7 @@ BkgElectronClassification::addBranches() const
     firstEgMotherTPL(*el) = ElementLink<xAOD::TruthParticleContainer>();
     firstEgMotherPdgID(*el) = 0;
     const xAOD::TruthParticle* firstElTruth =
-      xAOD::EgammaHelpers::getBkgElectronMother(el, m_barcodecut);
+      xAOD::EgammaHelpers::getBkgElectronMother(el, false);
 
     IMCTruthClassifier::Info mcinfo(ctx);
     if (firstElTruth) {

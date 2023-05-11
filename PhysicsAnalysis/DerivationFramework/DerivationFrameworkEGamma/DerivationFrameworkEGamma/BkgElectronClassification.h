@@ -40,8 +40,6 @@ private:
     "",
     "Handle to the MCTruthClassifier"
   };
-  /** @brief barcode cut for egamma helpers **/
-  int m_barcodecut;
 
   /** @brief input electron container **/
   SG::ReadHandleKey<xAOD::ElectronContainer> m_electronContainer{

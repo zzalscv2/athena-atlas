@@ -102,7 +102,6 @@ def EGammaLRTCfg(ConfigFlags):
             ConfigFlags,
             name="BkgLRTElectronClassificationTool",
             MCTruthClassifierTool=BkgElectronMCTruthClassifier,
-            barcodeCut=simBarcodeOffset,
             ElectronContainerName="LRTElectrons"))
         LRTEGAugmentationTools.append(BkgLRTElectronClassificationTool)
 
