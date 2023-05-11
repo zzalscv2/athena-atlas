@@ -2,6 +2,8 @@ import subprocess, os, shlex, re
 
 from AthenaCommon import Logging
 
+from DatRepository import writeDatRepository
+
 ## Get handle to Athena logging
 logger = Logging.logging.getLogger("Superchic_i")
 
@@ -371,6 +373,7 @@ def SuperChicRun(Init, genSeq):
     genSeq.SuperChicConfig = Init
     
     writeInputDAT(Init)
+    writeDatRepository('Cards')
     SuperChicInitialize(Init)
     SuperChicExecute(Init)
     
