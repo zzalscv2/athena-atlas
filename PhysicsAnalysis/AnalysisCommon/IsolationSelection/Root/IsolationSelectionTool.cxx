@@ -18,27 +18,11 @@
 
 namespace CP {
     IsolationSelectionTool::IsolationSelectionTool(const std::string& name) : asg::AsgTool(name) {}
-    void IsolationSelectionTool::clearWPs(std::vector<IsolationWP*>& WP) {
-        for (auto& c : WP) {
-            if (c) delete c;
-        }
-        WP.clear();
-    }
-
-    void IsolationSelectionTool::clearPhotonWPs() { clearWPs(m_phWPs); }
-    void IsolationSelectionTool::clearElectronWPs() { clearWPs(m_elWPs); }
-    void IsolationSelectionTool::clearMuonWPs() { clearWPs(m_muWPs); }
-    void IsolationSelectionTool::clearObjWPs() { clearWPs(m_objWPs); }
-    const std::vector<IsolationWP*>& IsolationSelectionTool::getMuonWPs() const { return m_muWPs; }
-    const std::vector<IsolationWP*>& IsolationSelectionTool::getElectronWPs() const { return m_elWPs; }
-    const std::vector<IsolationWP*>& IsolationSelectionTool::getPhotonWPs() const { return m_phWPs; }
-    const std::vector<IsolationWP*>& IsolationSelectionTool::getObjWPs() const { return m_objWPs; }
-    IsolationSelectionTool::~IsolationSelectionTool() {
-        clearMuonWPs();
-        clearPhotonWPs();
-        clearElectronWPs();
-        clearObjWPs();
-    }
+    const std::vector<std::unique_ptr<IsolationWP>>& IsolationSelectionTool::getMuonWPs() const { return m_muWPs; }
+    const std::vector<std::unique_ptr<IsolationWP>>& IsolationSelectionTool::getElectronWPs() const { return m_elWPs; }
+    const std::vector<std::unique_ptr<IsolationWP>>& IsolationSelectionTool::getPhotonWPs() const { return m_phWPs; }
+    const std::vector<std::unique_ptr<IsolationWP>>& IsolationSelectionTool::getObjWPs() const { return m_objWPs; }
+    IsolationSelectionTool::~IsolationSelectionTool() = default;
 
     StatusCode IsolationSelectionTool::initialize() {
         /// Greet the user:
@@ -89,9 +73,17 @@ namespace CP {
         for (const std::string& c : m_phWPvec) ATH_CHECK(addPhotonWP(c));
 
         m_calibFile.reset();
-
+        ATH_CHECK(m_isoDecors.initialize());
         /// Return gracefully:
         return StatusCode::SUCCESS;
+    }
+    void IsolationSelectionTool::addDependencies(const std::string& container, const IsolationWP& wp) {
+        if (container.empty()) return;
+        for (const std::unique_ptr<IsolationCondition>& cond : wp.conditions()) {
+            for (unsigned int acc = 0; acc < cond->num_types(); ++acc) {
+                m_isoDecors.emplace_back(container + "." + SG::AuxTypeRegistry::instance().getName(cond->accessor(acc).auxid()));
+            }
+        }
     }
 
     StatusCode IsolationSelectionTool::setIParticleCutsFrom(xAOD::Type::ObjectType ObjType) {
@@ -144,7 +136,7 @@ namespace CP {
     }
 
     StatusCode IsolationSelectionTool::addMuonWP(std::string muWPname) {
-        IsolationWP* wp = new IsolationWP(muWPname);
+        std::unique_ptr<IsolationWP> wp = std::make_unique<IsolationWP>(muWPname);
         if (muWPname == "HighPtTrackOnly") {
             wp->addCut(std::make_unique<IsolationConditionFormula>(
                 "ptcone20_Tight_1p25", xAOD::Iso::ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000, "1.25E03"));  // units are MeV!
@@ -210,16 +202,16 @@ namespace CP {
                 "MuonPFlowLoose", isoTypes, std::make_unique<TF2>("pflowTFunction", "fabs(x)+0.4*(y>0?y:0)"), "0.16*x"));
         } else {
             ATH_MSG_ERROR("Unknown muon isolation WP: " << muWPname);
-            delete wp;
             return StatusCode::FAILURE;
         }
-        m_muWPs.push_back(wp);
         m_muonAccept.addCut(wp->name(), wp->name());
+        addDependencies(m_inMuonContainer, *wp);
+        m_muWPs.push_back(std::move(wp));        
         return StatusCode::SUCCESS;
     }
 
     StatusCode IsolationSelectionTool::addPhotonWP(std::string phWPname) {
-        auto wp = new IsolationWP(phWPname);
+        std::unique_ptr<IsolationWP> wp = std::make_unique<IsolationWP>(phWPname);
         if (phWPname == "TightCaloOnly") {
             wp->addCut(std::make_unique<IsolationConditionFormula>("PhFixedCut_calo40", xAOD::Iso::topoetcone40, "0.022*x+2450"));
         } else if (phWPname == "FixedCutTight") {
@@ -238,19 +230,19 @@ namespace CP {
                                                                    xAOD::Iso::ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000, "0.05*x"));
         } else {
             ATH_MSG_ERROR("Unknown photon isolation WP: " << phWPname);
-            delete wp;
             return StatusCode::FAILURE;
         }
 
-        m_phWPs.push_back(wp);
         m_photonAccept.addCut(wp->name(), wp->name());
-
+        addDependencies(m_inPhotContainer, *wp);
+        m_phWPs.push_back(std::move(wp));
+       
         // Return gracefully:
         return StatusCode::SUCCESS;
     }
 
     StatusCode IsolationSelectionTool::addElectronWP(std::string elWPname) {
-        auto wp = new IsolationWP(elWPname);
+        std::unique_ptr<IsolationWP> wp = std::make_unique<IsolationWP>(elWPname);
 
         if (elWPname == "HighPtCaloOnly") {
             wp->addCut(std::make_unique<IsolationConditionFormula>("FCHighPtCaloOnly_calo", xAOD::Iso::topoetcone20,
@@ -305,13 +297,13 @@ namespace CP {
                 "ElecPFlowLoose", isoTypes, std::make_unique<TF2>("pflowLFunction", "fabs(x)+0.4*(y>0?y:0)"), "0.16*x"));
         } else {
             ATH_MSG_ERROR("Unknown electron isolation WP: " << elWPname);
-            delete wp;
             return StatusCode::FAILURE;
         }
 
-        m_elWPs.push_back(wp);
         m_electronAccept.addCut(wp->name(), wp->name());
-
+        addDependencies(m_inElecContainer, *wp);
+        m_elWPs.push_back(std::move(wp));
+        
         // Return gracefully:
         return StatusCode::SUCCESS;
     }
@@ -319,7 +311,7 @@ namespace CP {
     StatusCode IsolationSelectionTool::addUserDefinedWP(std::string WPname, xAOD::Type::ObjectType ObjType,
                                                         std::vector<std::pair<xAOD::Iso::IsolationType, std::string>>& cuts,
                                                         std::string key, IsoWPType type) {
-        std::vector<IsolationWP*>* wps(nullptr);
+        std::vector<std::unique_ptr<IsolationWP>>* wps(nullptr);
         asg::AcceptInfo* ac = nullptr;
         if (ObjType == xAOD::Type::Electron) {
             if (key == "") key = m_elWPKey;
@@ -341,20 +333,18 @@ namespace CP {
             return StatusCode::FAILURE;
         }
 
-        auto wp = new IsolationWP(WPname);
+        std::unique_ptr<IsolationWP> wp = std::make_unique<IsolationWP>(WPname);
         if (type == Efficiency) {
-            for (auto& c : cuts) ATH_CHECK(addCutToWP(wp, key, c.first, c.second));
+            for (auto& c : cuts) ATH_CHECK(addCutToWP(wp.get(), key, c.first, c.second));
         } else if (type == Cut) {
             for (auto& c : cuts) wp->addCut(std::make_unique<IsolationConditionFormula>(xAOD::Iso::toCString(c.first), c.first, c.second));
         } else {
             ATH_MSG_ERROR("Unknown isolation WP type -- should not happen.");
-            delete wp;
             return StatusCode::FAILURE;
         }
 
-        wps->push_back(wp);
         ac->addCut(wp->name(), wp->name());
-
+        wps->push_back(std::move(wp));
         return StatusCode::SUCCESS;
     }
 
@@ -369,19 +359,21 @@ namespace CP {
 
         return StatusCode::FAILURE;
     }
-    StatusCode IsolationSelectionTool::addWP(IsolationWP* wp, xAOD::Type::ObjectType ObjType) {
+    StatusCode IsolationSelectionTool::addWP(std::unique_ptr<IsolationWP> wp, xAOD::Type::ObjectType ObjType) {
         if (ObjType == xAOD::Type::Electron) {
-            m_elWPs.push_back(wp);
             m_electronAccept.addCut(wp->name(), wp->name());
+            m_elWPs.push_back(std::move(wp));
         } else if (ObjType == xAOD::Type::Muon) {
-            m_muWPs.push_back(wp);
             m_muonAccept.addCut(wp->name(), wp->name());
+            m_muWPs.push_back(std::move(wp));
+    
         } else if (ObjType == xAOD::Type::Photon) {
-            m_phWPs.push_back(wp);
             m_photonAccept.addCut(wp->name(), wp->name());
+            m_phWPs.push_back(std::move(wp));
+    
         } else if (ObjType == xAOD::Type::Other) {
-            m_objWPs.push_back(wp);
             m_objAccept.addCut(wp->name(), wp->name());
+            m_objWPs.push_back(std::move(wp));    
         } else {
             return StatusCode::FAILURE;
         }
@@ -389,9 +381,9 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
     template <typename T>
-    void IsolationSelectionTool::evaluateWP(const T& x, const std::vector<IsolationWP*>& WP, asg::AcceptData& accept) const {
+    void IsolationSelectionTool::evaluateWP(const T& x, const std::vector<std::unique_ptr<IsolationWP>>& WP, asg::AcceptData& accept) const {
         accept.clear();
-        for (IsolationWP* i : WP) {
+        for (const std::unique_ptr<IsolationWP>& i : WP) {
             if (i->accept(x)) accept.setCutResult(i->name(), true);
         }
     }

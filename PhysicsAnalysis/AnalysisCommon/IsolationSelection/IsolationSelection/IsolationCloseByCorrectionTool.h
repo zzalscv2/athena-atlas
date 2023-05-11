@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef IsolationSelection_IsolationCloseByCorrectionTool_H
@@ -11,9 +11,6 @@
 #include <AsgTools/PropertyWrapper.h>
 #include <AsgTools/ToolHandle.h>
 #include <CxxUtils/checker_macros.h>
-#ifndef XAOD_STANDALONE
-#include <StoreGate/ReadDecorHandleKeyArray.h>
-#endif
 
 #include <InDetTrackSelectionTool/IInDetTrackSelectionTool.h>
 #include <IsolationSelection/Defs.h>
@@ -89,7 +86,7 @@ namespace CP {
 
     private:
         /// Helper function to load all Isolation types from the iso working points
-        void isoTypesFromWP(const std::vector<IsolationWP*>& WP, IsoVector& types);
+        void isoTypesFromWP(const std::vector<std::unique_ptr<IsolationWP>>& WP, IsoVector& types);
         /// Retrieve all Inner detector tracks associated with the primary particle
         TrackSet getAssociatedTracks(const xAOD::IParticle* P) const;
         /// Retrieve the subset of tracks passing the isolation selection
@@ -231,21 +228,7 @@ namespace CP {
             "order to account for extrapolation effects"};  // Extend - shrink the cone size to account for extrapolation effects
 
         Gaudi::Property<bool> m_declareCaloDecors{this, "declareCaloDecors", false, "If set to true, the data dependency on the calo/pflow decors will be declared"};
-        /// Declare the data dependencies of the Input containers. The isolation variables used in the working point calculation are
-        /// are declared to the avalanche scheduler. Is not needed for the AnalysisBase releases
-#ifndef XAOD_STANDALONE
-        Gaudi::Property<std::vector<std::string>> m_elecKeys{
-            this, "EleContainers", {}, "Pipe the list of electron containers given later to the tool"};
-        Gaudi::Property<std::vector<std::string>> m_muonKeys{
-            this, "MuoContainers", {}, "Pipe the list of muon containers given later to the tool"};
-        Gaudi::Property<std::vector<std::string>> m_photKeys{
-            this, "PhoContainers", {}, "Pipe the list of photon containers given later to the tool"};
-        SG::ReadDecorHandleKeyArray<xAOD::IParticleContainer> m_isoVarKeys{
-            this, "IsoVarKeys", {}, "The list is filled during the initialization"};
-        /// Helper function to declare the data dependencies
-        void declareDependency(const std::vector<std::string>& containers, const IsoVector& types);
-#endif
-
+        
         SG::ReadHandleKey<xAOD::VertexContainer> m_VtxKey{this, "VertexContainer", "PrimaryVertices",
                                                           "Name of the primary vertex container"};
         SG::ReadHandleKey<xAOD::CaloClusterContainer> m_CaloClusterKey{this, "CaloClusterContainer", "CaloCalTopoClusters",

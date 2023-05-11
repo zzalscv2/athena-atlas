@@ -18,7 +18,7 @@ namespace CP {
 
     class IsoCorrectionTestHelper : public IMuonTesterBranch {
     public:
-        IsoCorrectionTestHelper(MuonTesterTree& outTree, const std::string& ContainerName, const std::vector<IsolationWP*>& WP);
+        IsoCorrectionTestHelper(MuonTesterTree& outTree, const std::string& ContainerName, const std::vector<std::unique_ptr<IsolationWP>>& WP);
         StatusCode Fill(const xAOD::IParticleContainer* Particles);
 
         /// Pipe the name of the decorator selecting the objects dumped to the TTree
