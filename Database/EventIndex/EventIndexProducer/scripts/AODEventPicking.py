@@ -105,7 +105,7 @@ if '__main__' in __name__:
 
     # Configure metadata
     log.info('== Configuring metadata for the output stream')
-    from OutputStreamAthenaPool.OutputStreamConfig import SetupMetaDataForStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     cfg.merge(SetupMetaDataForStreamCfg(flags, 'AOD'))
 
     # Setup the output stream algorithm
