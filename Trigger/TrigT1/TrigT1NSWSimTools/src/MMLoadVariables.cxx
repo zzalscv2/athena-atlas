@@ -45,7 +45,7 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
 #endif
           const HepMC::FourVector momentum = particle->momentum();
           int barcodeparticle = HepMC::barcode(particle);
-          if( barcodeparticle < HepMC::SIM_REGENERATION_INCREMENT && std::abs(particle->pdg_id())==13){
+          if( HepMC::generations(barcodeparticle) < 1 && std::abs(particle->pdg_id())==13){
             thePart.SetCoordinates(momentum.perp(),momentum.eta(),momentum.phi(),momentum.e());
             if(trackRecordCollection!=nullptr){
             for(const auto & mit : *trackRecordCollection ) {
@@ -76,7 +76,7 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
           }
           j++;
 
-            if(thePart.Pt() > 0. && barcodeparticle < HepMC::SIM_REGENERATION_INCREMENT){
+            if(thePart.Pt() > 0. && HepMC::generations(barcodeparticle) < 1){
               bool addIt = true;
               for(unsigned int ipart=0; ipart < truthParticles.size(); ipart++){
                 if( std::abs(thePart.Pt()-truthParticles[ipart].Pt()) < 0.001 ||

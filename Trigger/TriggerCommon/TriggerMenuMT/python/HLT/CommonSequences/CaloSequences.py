@@ -28,7 +28,7 @@ def fastCaloMenuSequenceCfg(flags, name, doRinger=True, is_probe_leg=False):
     from TrigT2CaloCommon.CaloDef import fastCaloVDVCfg
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Calo
     from TrigT2CaloCommon.CaloDef import fastCaloRecoSequenceCfg
-    nameselAcc = "fastCaloSequence"
+    nameselAcc = "fastCaloSequence"+name
     output = "HLT_FastCaloEMClusters"
     selAcc = SelectionCA(nameselAcc,isProbe=is_probe_leg)
     InViewRoIs="EMCaloRoIs"

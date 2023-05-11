@@ -282,7 +282,9 @@ def PHYSLITECfg(ConfigFlags):
         'MuonSpectrometerTrackParticles.phi.d0.z0.vz.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.vertexLink.theta.qOverP.truthParticleLink',
         'AnalysisTauJets.pt.eta.phi.m.ptFinalCalib.etaFinalCalib.ptTauEnergyScale.etaTauEnergyScale.charge.isTauFlags.PanTau_DecayMode.NNDecayMode.RNNJetScore.RNNJetScoreSigTrans.JetDeepSetScore.JetDeepSetScoreTrans.JetDeepSetVeryLoose.JetDeepSetLoose.JetDeepSetMedium.JetDeepSetTight.RNNEleScore.RNNEleScoreSigTrans.RNNEleScoreSigTrans_v1.EleRNNLoose_v1.EleRNNMedium_v1.EleRNNTight_v1.tauTrackLinks.vertexLink.truthParticleLink.truthJetLink.IsTruthMatched.truthOrigin.truthType',
         'AnalysisJets.pt.eta.phi.m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.NumTrkPt500.SumPtTrkPt500.DetectorEta.JVFCorr.NNJvtPass.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.PartonTruthLabelID.ConeTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID.TrueFlavor.DFCommonJets_jetClean_LooseBad.DFCommonJets_jetClean_TightBad.Timing.btagging.btaggingLink.GhostTrack.DFCommonJets_fJvt.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PSFrac.JetAccessorMap.EMFrac.Width.ActiveArea4vec_pt.ActiveArea4vec_eta.ActiveArea4vec_m.ActiveArea4vec_phi.EnergyPerSampling.SumPtChargedPFOPt500',
-        'BTagging_AntiKt4EMPFlow.DL1dv00_pu.DL1dv00_pc.DL1dv00_pb.DL1dv01_pu.DL1dv01_pc.DL1dv01_pb',
+        'BTagging_AntiKt4EMPFlow.DL1dv01_pu.DL1dv01_pc.DL1dv01_pb.GN120220509_pu.GN120220509_pc.GN120220509_pb.GN2v00_pu.GN2v00_pc.GN2v00_pb',
+        'AntiKt10UFOCSSKJets.GhostAntiKtVR30Rmax4Rmin02PV0TrackJets',
+        'BTagging_AntiKtVR30Rmax4Rmin02Track.DL1dv01_pu.DL1dv01_pc.DL1dv01_pb.GN2v00_pu.GN2v00_pc.GN2v00_pb',
         'TruthPrimaryVertices.t.x.y.z',
         'MET_Core_AnalysisMET.name.mpx.mpy.sumet.source',
         'METAssoc_AnalysisMET.',
@@ -290,7 +292,7 @@ def PHYSLITECfg(ConfigFlags):
         'EventInfo.RandomRunNumber.PileupWeight_NOSYS.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ',
         'Kt4EMPFlowEventShape.Density',
         'TauTracks.pt.eta.phi.flagSet.trackLinks',
-        'AnalysisLargeRJets.pt.eta.phi.m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.DetectorEta.TrackSumMass.TrackSumPt.constituentLinks.ECF1.ECF2.ECF3.Tau1_wta.Tau2_wta.Tau3_wta.Split12.Split23.Qw.D2.C2',
+        'AnalysisLargeRJets.pt.eta.phi.m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.DetectorEta.TrackSumMass.TrackSumPt.constituentLinks.ECF1.ECF2.ECF3.Tau1_wta.Tau2_wta.Tau3_wta.Split12.Split23.Qw.D2.C2.R10TruthLabel_R22v1.R10TruthLabel_R21Precision_2022v1.R10TruthLabel_R21Precision.GhostBHadronsFinalCount.GhostCHadronsFinalCount.Parent.GN2Xv00_phbb.GN2Xv00_phcc.GN2Xv00_ptop.GN2Xv00_pqcd.GN2XWithMassv00_phbb.GN2XWithMassv00_phcc.GN2XWithMassv00_ptop.GN2XWithMassv00_pqcd',
         'EventInfo.RandomRunNumber.PileupWeight_NOSYS.GenFiltHT.GenFiltMET'
     ]
 

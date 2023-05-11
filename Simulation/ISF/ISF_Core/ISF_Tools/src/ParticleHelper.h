@@ -20,12 +20,6 @@
 #include "ISF_Interfaces/IParticleHelper.h"
 // Barcode includes
 #include "BarcodeEvent/Barcode.h"
-#include "BarcodeInterfaces/IBarcodeSvc.h"
-
-// // forward declarations
-// namespace Barcode {
-//   class IBarcodeSvc;
-// }
 
 namespace ISF {
 
@@ -96,9 +90,6 @@ namespace ISF {
                                     const HepGeom::Vector3D<double>& updatedMom,
                                     double deltaTime = 0.) const override final;
 
-	private:
-	    
-      ServiceHandle<Barcode::IBarcodeSvc>  m_barcodeSvc;             //!< The Barcode service
       
   }; 
   

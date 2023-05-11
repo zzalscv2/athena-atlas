@@ -43,13 +43,6 @@ namespace CP {
         printIsolationCones(m_electron_isoTypes, xAOD::Type::ObjectType::Electron);
         printIsolationCones(m_muon_isoTypes, xAOD::Type::ObjectType::Muon);
         printIsolationCones(m_photon_isoTypes, xAOD::Type::ObjectType::Photon);
-         /// Setup the data dependency
-#ifndef XAOD_STANDALONE
-        declareDependency(m_elecKeys.value(), m_electron_isoTypes);
-        declareDependency(m_muonKeys.value(), m_muon_isoTypes);
-        declareDependency(m_photKeys.value(), m_photon_isoTypes);
-        ATH_CHECK(m_isoVarKeys.initialize());
-#endif
        
         ATH_CHECK(m_VtxKey.initialize());
         ATH_CHECK(m_CaloClusterKey.initialize(m_caloModel == TopoConeCorrectionModel::SubtractObjectsDirectly));
@@ -84,9 +77,9 @@ namespace CP {
         m_isInitialised = true;
         return StatusCode::SUCCESS;
     }
-    void IsolationCloseByCorrectionTool::isoTypesFromWP(const std::vector<IsolationWP*>& WPs, IsoVector& types) {
+    void IsolationCloseByCorrectionTool::isoTypesFromWP(const std::vector<std::unique_ptr<IsolationWP>>& WPs, IsoVector& types) {
         types.clear();
-        for (const IsolationWP* W : WPs) {
+        for (const std::unique_ptr<IsolationWP>& W : WPs) {
             for (const std::unique_ptr<IsolationCondition>& C : W->conditions()) {
                 for (unsigned int t = 0; t < C->num_types(); ++t) {
                     const IsoType iso_type = C->type(t);
@@ -104,21 +97,7 @@ namespace CP {
         m_hasEtConeIso |= std::find_if(types.begin(), types.end(),
                                       [](const IsolationType& t) { return isTopoEtIso(t); }) != types.end();
     }
-#ifndef XAOD_STANDALONE
-    void IsolationCloseByCorrectionTool::declareDependency(const std::vector<std::string>& containers, const IsoVector& types) {
-        for (const std::string& cont : containers) {
-            for (const IsoType iso : types) { m_isoVarKeys.emplace_back(cont + "." + std::string(toString(iso))); }
-            if (!m_declareCaloDecors && m_caloModel == TopoConeCorrectionModel::SubtractObjectsDirectly) continue;
-            if (m_declareCaloDecors || m_hasPflowIso) {
-                for (const std::string& decor : pflowDecors()) m_isoVarKeys.emplace_back(cont + "." + decor);
-            }
-            if (m_declareCaloDecors || m_hasEtConeIso) {
-                for (const std::string& decor : caloDecors()) m_isoVarKeys.emplace_back(cont + "." + decor);
-            }   
-        }
-    }
-#endif
-    void IsolationCloseByCorrectionTool::loadPrimaryParticles(const xAOD::IParticleContainer* container, ObjectCache& cache) const {
+   void IsolationCloseByCorrectionTool::loadPrimaryParticles(const xAOD::IParticleContainer* container, ObjectCache& cache) const {
         if (!container) return;
         for (const xAOD::IParticle* particle : *container) {
             if (m_dec_isoselection) (*m_dec_isoselection)(*particle) = true && m_selectorTool->accept(*particle);

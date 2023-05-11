@@ -58,7 +58,7 @@ flags.addFlag("Trigger.disabledSignatures",[])
 flags.addFlag("Trigger.selectChains",[])       
 flags.addFlag("Trigger.disableChains",[]) 
 
-flags.Trigger.enabledSignatures = ['Muon', 'Tau','MinBias','Bphysics','Egamma', 'Electron', 'Photon', 'MET', 'Jet','Bjet']
+flags.Trigger.enabledSignatures = ['Muon', 'Tau','MinBias','Bphysics','Egamma', 'Electron', 'Photon', 'MET', 'Jet','Bjet','Calib']
 #--------------#
 #Leave commented lines for tests, since this is under development
 #flags.Trigger.triggerMenuModifier=[ 'emptyMenu','HLT_mu8_L1MU5VF']

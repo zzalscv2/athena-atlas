@@ -12,19 +12,13 @@
 // ISF includes
 #include "ISF_Event/ISFParticle.h"
 
-// Barcode
-#include "BarcodeInterfaces/IBarcodeSvc.h"
-
 // HMPL
 #include "GeneratorObjects/HepMcParticleLink.h"
 
 /** Constructor **/
 ISF::ParticleHelper::ParticleHelper(const std::string& t, const std::string& n, const IInterface* p) :
-  base_class(t,n,p),
-  m_barcodeSvc("BarcodeSvc",n)
+  base_class(t,n,p)
 {
-  // different options
-  declareProperty("BarcodeSvc",               m_barcodeSvc);
 
 }
 

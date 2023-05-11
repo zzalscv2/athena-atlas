@@ -36,10 +36,10 @@ namespace CP {
     void IsoCorrectionTestHelper::SetFlowElements(const PflowSet& flows) {m_flows = flows;}
 
     IsoCorrectionTestHelper::IsoCorrectionTestHelper(MuonTesterTree& outTree, const std::string& ContainerName,
-                                                     const std::vector<IsolationWP*>& WPs) :
+                                                     const std::vector<std::unique_ptr<IsolationWP>>& WPs) :
         m_tree(outTree), m_cont_name{ContainerName} {
         // Retrieve the isolaiton accessors directly from the WP
-        for (const IsolationWP* W : WPs) {
+        for (const std::unique_ptr<IsolationWP>& W : WPs) {
             for (const auto& C : W->conditions()) {
                 for (unsigned int t = 0; t < C->num_types(); ++t) {
                     const IsoType iso_type = C->type(t);

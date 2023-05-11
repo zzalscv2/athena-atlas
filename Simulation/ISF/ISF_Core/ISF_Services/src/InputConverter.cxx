@@ -14,9 +14,6 @@
 // ISF_HepMC include
 #include "ISF_Event/TruthBinding.h"
 #include "ISF_HepMC_Interfaces/IGenParticleFilter.h"
-// barcode event and interfaces for bc creation
-#include "BarcodeEvent/Barcode.h"
-#include "BarcodeInterfaces/IBarcodeSvc.h"
 // ISF_Event include
 #include "ISF_Event/ISFParticle.h"
 #include "ISF_Event/ISFParticleContainer.h"
@@ -57,8 +54,6 @@ ISF::InputConverter::InputConverter(const std::string& name, ISvcLocator* svc)
     , m_useGeneratedParticleMass(false)
     , m_genParticleFilters(this)
     , m_quasiStableParticlesIncluded(false)
-    , m_barcodeSvc("", name)
-    , m_barcodeGenerationIncrement(Barcode::fUndefinedBarcode)
 {
   // particle mass from particle data table?
   declareProperty("UseGeneratedParticleMass",
@@ -72,8 +67,6 @@ ISF::InputConverter::InputConverter(const std::string& name, ISvcLocator* svc)
   declareProperty("ParticlePropertyService",
                   m_particlePropSvc,
                   "ParticlePropertyService to retrieve the PDT.");
-  // the barcode service (used to compute Vertex Barcodes)
-  declareProperty("BarcodeSvc",                 m_barcodeSvc           );
   declareProperty("QuasiStableParticlesIncluded", m_quasiStableParticlesIncluded);
 }
 
@@ -89,14 +82,6 @@ StatusCode
 ISF::InputConverter::initialize()
 {
   ATH_MSG_VERBOSE("initialize() begin");
-
-  // retrieve BarcodeSvc
-  ATH_CHECK(m_barcodeSvc.retrieve());
-  m_barcodeGenerationIncrement = m_barcodeSvc->particleGenerationIncrement();
-  if (m_barcodeGenerationIncrement == Barcode::fUndefinedBarcode) {
-    ATH_MSG_FATAL( "'Barcode::fUndefinedBarcode' returned as 'BarcodeGenerationIncrement' by BarcodeService. Abort." );
-    return StatusCode::FAILURE;
-  }
 
   // setup PDT if requested (to get particle masses later on)
   if (!m_useGeneratedParticleMass) {

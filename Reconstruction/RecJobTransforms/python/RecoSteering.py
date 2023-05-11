@@ -201,12 +201,12 @@ def RecoSteering(flags):
         acc.merge(LucidRecCfg(flags))
         log.info("---------- Configured Lucid reconstruction")
 
-    # ZDC 
-    acc.flagPerfmonDomain('ZDC')
-    if flags.Detector.EnableZDC:
-        from ZdcRec.ZdcRecConfig import ZdcRecCfg
-        acc.merge(ZdcRecCfg(flags))
-        log.info("---------- Configured ZDC reconstruction")
+    # ZDC under construction but disabled as per APR-90
+    #acc.flagPerfmonDomain('ZDC')
+    #if flags.Reco.EnableZDC:
+    #    from ForwardRec.ZDCRecConfig import ZDCRecCfg
+    #    acc.merge(ZDCRecCfg(flags))
+    #    log.info("---------- Configured ZDC reconstruction")
 
     # Monitoring
     acc.flagPerfmonDomain('DQM')

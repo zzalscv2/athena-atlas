@@ -47,7 +47,7 @@ namespace yampl {
   class ISocket;
 }
 
-class AthenaMtesEventLoopMgr 
+class ATLAS_NOT_THREAD_SAFE AthenaMtesEventLoopMgr
   : virtual public IEventSeek,
     virtual public ICollectionSize,
     virtual public IIncidentListener,
@@ -285,8 +285,6 @@ private:
       , "EventService_EventRanges"
       , "The name of the Yampl channel between AthenaMT and the Pilot"
       };
-
-  Gaudi::Property<std::string> m_socketName{this, "SocketName", {}, "YAMPL socket name"};
 
   // Hopefully a temporary measurement. For the time being we cannot
   // support event ranges from different input files.
