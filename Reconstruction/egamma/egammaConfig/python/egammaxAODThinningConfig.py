@@ -35,6 +35,9 @@ def egammaxAODThinningCfg(flags, name="EGammaxAODThinning"):
         if flags.Tracking.doLargeD0:
             allClusters.append(f"LRT{outFlags.CaloClusters}")
 
+        if flags.HeavyIon.Egamma.doSubtractedClusters:
+            allClusters.append(flags.HeavyIon.Egamma.CaloTopoCluster)
+
         samplings = [
             "TileGap1",
             "TileGap2",
@@ -47,11 +50,18 @@ def egammaxAODThinningCfg(flags, name="EGammaxAODThinning"):
             CaloThinCellsByClusterAlgCfg)
 
         for clus in allClusters:
+            if flags.HeavyIon.Egamma.doSubtractedClusters and (
+                    clus == outFlags.CaloClusters or clus == flags.HeavyIon.Egamma.CaloTopoCluster):
+                cellsName = flags.HeavyIon.Egamma.SubtractedCells
+            else:
+                cellsName = flags.Egamma.Keys.Input.CaloCells
+
             acc.merge(CaloThinCellsByClusterAlgCfg(
                 flags,
                 streamName="StreamAOD",
                 clusters=clus,
                 samplings=samplings,
+                cells=cellsName
             ))
 
     mlog.info("EGamma xAOD Thinning configured")
