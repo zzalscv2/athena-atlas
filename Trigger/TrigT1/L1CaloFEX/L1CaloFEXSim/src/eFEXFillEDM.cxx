@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***********************************************************************
@@ -95,7 +95,8 @@ namespace LVL1 {
     myTauEDM->setRCoreDenominator(tobObject->getRcoreEnv());
     myTauEDM->setRHadNumerator(tobObject->getRhadCore());
     myTauEDM->setRHadDenominator(tobObject->getRhadEnv());
-    ATH_MSG_DEBUG(" setting tau eFEX Number: " << +myTauEDM->eFexNumber() << " shelf: " << +myTauEDM->shelfNumber() << " et: " << myTauEDM->et() << " eta: " << myTauEDM->eta() << " phi: " << myTauEDM->phi() << " input eFexNum: " << +eFexNum << " TOB word: " << tobObject->getTobword() << MSG::dec);
+    
+    ATH_MSG_DEBUG("setting tau version " << myTauEDM->tobVersion() << " eFEX Number: " << +myTauEDM->eFexNumber() << " shelf: " << +myTauEDM->shelfNumber() << " et: " << myTauEDM->et() << " eta: " << myTauEDM->eta() << " phi: " << myTauEDM->phi() << " input eFexNum: " << +eFexNum << " TOB word: " << tobObject->getTobword() <<" xTOB word 1: "<< tobObject->getxTobword0() << " xTOB word 2: " << tobObject->getxTobword1() << " BDT score: " << tobObject->getBDTScore() << " BDT score from EDM " << myTauEDM->bdtScore() << MSG::dec);
 
   }
 

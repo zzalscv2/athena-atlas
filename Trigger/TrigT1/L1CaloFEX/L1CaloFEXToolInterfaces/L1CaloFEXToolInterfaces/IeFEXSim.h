@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -42,7 +42,8 @@ Interface definition for eFEXSim
 
     virtual StatusCode NewExecute(int tmp[10][18], eFEXOutputCollection* inputOutputCollection) = 0;
     virtual std::vector<std::unique_ptr<eFEXegTOB>> getEmTOBs() = 0;
-    virtual std::vector<std::unique_ptr<eFEXtauTOB>> getTauTOBs() = 0;
+    virtual std::vector<std::unique_ptr<eFEXtauTOB>> getTauHeuristicTOBs() = 0;
+    virtual std::vector<std::unique_ptr<eFEXtauTOB>> getTauBDTTOBs() = 0;
 
   private:
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -31,7 +31,7 @@ StatusCode eFEXFormTOBs::initialize()
   return StatusCode::SUCCESS;
 }
 
-uint32_t eFEXFormTOBs::formTauTOBWord(int & fpga, int & eta, int & phi, unsigned int & et, unsigned int & rhad, unsigned int & rcore, unsigned int & seed, unsigned int & und, unsigned int & ptMinTopo)
+uint32_t eFEXFormTOBs::doFormTauTOBWord(int fpga, int eta, int phi, unsigned int et, unsigned int rhad, unsigned int rcore, unsigned int seed, unsigned int und, unsigned int ptMinTopo, unsigned int algoVersion)
 {
 
   uint32_t tobWord = 0;
@@ -47,15 +47,26 @@ uint32_t eFEXFormTOBs::formTauTOBWord(int & fpga, int & eta, int & phi, unsigned
   if (etTob > 0xfff) etTob = 0xfff;
 
   // Create tob word with et, eta, phi, and fpga index, bitshifted to the appropriate locations
-  tobWord = (fpga << m_fpgaShift) + (eta << m_etaShift) + (phi << m_phiShift) + (rhad << m_taurhadShift) + (rcore << m_taurcoreShift) + (seed << m_seedShift) + (und << m_undShift) + (0x1 << m_seedMaxShift) + etTob;
-
-  ATH_MSG_DEBUG("Tau tobword: " << std::bitset<32>(tobWord) );
+  tobWord = (fpga << m_fpgaShift) + (eta << m_etaShift) + (phi << m_phiShift) + (rhad << m_taurhadShift) + (rcore << m_taurcoreShift) + (seed << m_seedShift) + (und << m_undShift) + (0x1 << m_seedMaxShift) + etTob + (algoVersion << m_tauAlgoVersionShift);
 
   return tobWord;
 }
 
+uint32_t eFEXFormTOBs::formTauTOBWord(int & fpga, int & eta, int & phi, unsigned int & et, unsigned int & rhad, unsigned int & rcore, unsigned int & seed, unsigned int & und, unsigned int & ptMinTopo)
+{
+  uint32_t tobWord = doFormTauTOBWord(fpga, eta, phi, et, rhad, rcore, seed, und, ptMinTopo, 0);
+  ATH_MSG_DEBUG("Tau tobword: " << std::bitset<32>(tobWord) );
+  return tobWord;
+}
 
-std::vector<uint32_t>  eFEXFormTOBs::formTauxTOBWords(int & efexid, int & fpga, int & eta, int & phi, unsigned int & et, unsigned int & rhad, unsigned int & rcore, unsigned int & seed, unsigned int & und, unsigned int & ptMinTopo)
+uint32_t eFEXFormTOBs::formTauBDTTOBWord(int & fpga, int & eta, int & phi, unsigned int & et, unsigned int & rhad, unsigned int & bdtCondition, unsigned int & ptMinTopo)
+{
+  uint32_t tobWord = doFormTauTOBWord(fpga, eta, phi, et, rhad, bdtCondition, 0, 0, ptMinTopo, 1);
+  ATH_MSG_DEBUG("Tau BDT tobword: " << std::bitset<32>(tobWord) );
+  return tobWord;
+}
+
+std::vector<uint32_t>  eFEXFormTOBs::doFormTauxTOBWords(int efexid, int fpga, int eta, int phi, unsigned int et, unsigned int rhad, unsigned int rcore, unsigned int seed, unsigned int und, unsigned int ptMinTopo, unsigned int algoVersion)
 {
 
   std::vector<uint32_t> tobWords = {0, 0};
@@ -71,12 +82,31 @@ std::vector<uint32_t>  eFEXFormTOBs::formTauxTOBWords(int & efexid, int & fpga, 
   uint8_t efex  = efexid%12;
 
   // Create tob word 0 with eta, phi, and fpga index, bitshifted to the appropriate locations
-  tobWords[0] = (fpga << m_fpgaShift) + (eta << m_etaShift) + (phi << m_phiShift) + (rhad << m_taurhadShift) + (rcore << m_taurcoreShift) + (seed << m_seedShift) + (und << m_undShift) + (0x1 << m_seedMaxShift);
+  tobWords[0] = (fpga << m_fpgaShift) + (eta << m_etaShift) + (phi << m_phiShift) + (rhad << m_taurhadShift) + (rcore << m_taurcoreShift) + (seed << m_seedShift) + (und << m_undShift) + (0x1 << m_seedMaxShift) + (algoVersion << m_tauAlgoVersionShift);
 
   // Create tob word 1 with et, efex and shelf indices, bitshifted to the appropriate locations
   tobWords[1] = (shelf << m_shelfShift) + (efex << m_efexShift) + etTob;
 
+  return tobWords;
+}
+
+std::vector<uint32_t>  eFEXFormTOBs::formTauxTOBWords(int & efexid, int & fpga, int & eta, int & phi, unsigned int & et, unsigned int & rhad, unsigned int & rcore, unsigned int & seed, unsigned int & und, unsigned int & ptMinTopo)
+{
+  std::vector<uint32_t> tobWords = doFormTauxTOBWords(efexid, fpga, eta, phi, et, rhad, rcore, seed, und, ptMinTopo, 0);
+
   ATH_MSG_DEBUG("Tau xtobwords: " << std::bitset<32>(tobWords[0]) << ", " << std::bitset<32>(tobWords[1]));
+
+  return tobWords;
+}
+
+std::vector<uint32_t>  eFEXFormTOBs::formTauBDTxTOBWords(int & efexid, int & fpga, int & eta, int & phi, unsigned int & et, unsigned int & rhad, unsigned int & bdtCondition, unsigned int & ptMinTopo, unsigned int & bdtScore)
+{
+  std::vector<uint32_t> tobWords = doFormTauxTOBWords(efexid, fpga, eta, phi, et, rhad, bdtCondition, 0, 0, ptMinTopo, 1);
+  if ( (tobWords[0] > 0) or (tobWords[1] > 0) ) {
+    tobWords[0] += bdtScore;
+  }
+
+  ATH_MSG_DEBUG("Tau BDT xtobwords: " << std::bitset<32>(tobWords[0]) << ", " << std::bitset<32>(tobWords[1]));
 
   return tobWords;
 }

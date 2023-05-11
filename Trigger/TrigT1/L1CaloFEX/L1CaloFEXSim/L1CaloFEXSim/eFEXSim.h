@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -60,8 +60,12 @@ namespace LVL1 {
     virtual StatusCode NewExecute(int tmp[10][18], eFEXOutputCollection* inputOutputCollection) override;
 
     virtual std::vector<std::unique_ptr<eFEXegTOB>> getEmTOBs() override;
-    virtual std::vector<std::unique_ptr<eFEXtauTOB>> getTauTOBs() override;
+    virtual std::vector<std::unique_ptr<eFEXtauTOB>> getTauHeuristicTOBs() override;
+    virtual std::vector<std::unique_ptr<eFEXtauTOB>> getTauBDTTOBs() override;
 
+  private:
+
+    std::vector<std::unique_ptr<eFEXtauTOB>> getTauTOBs(std::vector<std::vector<std::unique_ptr<eFEXtauTOB>> >& tauTobObjects);
     /** Internal data */
   private:
     int m_id;
@@ -71,7 +75,8 @@ namespace LVL1 {
     std::vector<eFEXFPGA*> m_eFEXFPGACollection;
 
     std::vector<std::vector<std::unique_ptr<eFEXegTOB>> > m_emTobObjects;
-    std::vector<std::vector<std::unique_ptr<eFEXtauTOB>> > m_tauTobObjects;
+    std::vector<std::vector<std::unique_ptr<eFEXtauTOB>> > m_tauHeuristicTobObjects;
+    std::vector<std::vector<std::unique_ptr<eFEXtauTOB>> > m_tauBDTTobObjects;
 
     ToolHandle<IeFEXFPGA> m_eFEXFPGATool {this, "eFEXFPGATool", "LVL1::eFEXFPGA", "Tool that simulates the FPGA hardware"};
 
