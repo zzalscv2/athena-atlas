@@ -715,8 +715,7 @@ StatusCode AthenaMtesEventLoopMgr::nextEvent(int maxevt)
   yampl::ISocketFactory* socketFactory = new yampl::SocketFactory();
   // Create a socket to communicate with the Pilot
   m_socket = socketFactory->createClientSocket(yampl::Channel(m_eventRangeChannel.value(),yampl::LOCAL),
-                                               yampl::MOVE_DATA, yampl::defaultDeallocator,
-                                               m_socketName.value());
+                                               yampl::MOVE_DATA);
 
   // Reset the application return code.
   resetAppReturnCode();
@@ -1381,7 +1380,7 @@ std::unique_ptr<AthenaMtesEventLoopMgr::RangeStruct> AthenaMtesEventLoopMgr::get
      memcpy(ready_message,strReady.data(),strReady.size());
      socket->send(ready_message,strReady.size());
      void* eventRangeMessage;
-     ssize_t eventRangeSize = socket->recv(eventRangeMessage, m_socketName.value());
+     ssize_t eventRangeSize = socket->recv(eventRangeMessage);
      range = std::string((const char*)eventRangeMessage,eventRangeSize);
      leftString(range, '\n');
   }

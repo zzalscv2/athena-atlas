@@ -37,6 +37,10 @@ def initConfigFlags():
     acf.addFlag('Exec.WarningMessageComponents',[])
     acf.addFlag('Exec.ErrorMessageComponents',[])
 
+    #Multi-threaded event service mode
+    acf.addFlag('Exec.MTEventService',False)
+    acf.addFlag('Exec.MTEventServiceChannel','EventService_EventRanges') # The name of YAMPL communication channel between AthenaMT and Pilot
+
     #Activate per-event log-output of StoreGate content
     acf.addFlag('Debug.DumpEvtStore',False)
     acf.addFlag('Debug.DumpDetStore',False)

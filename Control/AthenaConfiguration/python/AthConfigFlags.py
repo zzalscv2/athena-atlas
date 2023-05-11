@@ -459,6 +459,8 @@ class AthConfigFlags(object):
         parser.add_argument("--threads", type=int, default=None, help="Run with given number of threads (use 0 for serial execution)")
         parser.add_argument('--concurrent-events', type=int, default=None, help='number of concurrent events for AthenaMT')
         parser.add_argument("--nprocs", type=int, default=None, help="Run AthenaMP with given number of worker processes")
+        parser.add_argument("--mtes", type=bool, default=None, help="Run multi-threaded event service")
+        parser.add_argument("--mtes-channel", type=str, default=None, help="For multi-threaded event service: the name of communication channel between athena and pilot")
         parser.add_argument("---",dest="terminator",action='store_true', help=argparse.SUPPRESS) # special hidden option required to convert option terminator -- for --help calls
         parser.add_argument("--pmon", type=str, default=None, choices=['FastMonMT','FullMonMT'], help="Perfomance monitoring")
 
@@ -598,6 +600,12 @@ class AthConfigFlags(object):
         if args.pmon is not None:
             self._loadDynaFlags("PerfMon")
             self._set("PerfMon.do"+args.pmon,True)
+
+        if args.mtes is not None:
+            self.Exec.MTEventService = args.mtes
+
+        if args.mtes_channel is not None:
+            self.Exec.MTEventServiceChannel = args.mtes_channel
 
         #All remaining arguments are assumed to be key=value pairs to set arbitrary flags:
         for arg in leftover:
