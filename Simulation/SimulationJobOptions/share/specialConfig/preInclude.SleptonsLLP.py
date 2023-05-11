@@ -6,15 +6,13 @@ def get_and_fix_PDGTABLE(replace):
     import os, shutil, re, sys
 
     # Download generic PDGTABLE (do not overwrite existing one if it exists, use existing one instead) 
-    from G4AtlasApps.SimFlags import simFlags
-    from ExtraParticles.PDGHelpers import getLocalPDGTableName
-    tableName = getLocalPDGTableName(simFlags.ExtraParticlesPDGTABLE.get_Value())
-    shutil.move( tableName,  tableName+'.backup')
+    os.system('get_files -remove -data PDGTABLE.MeV')
+    shutil.move('PDGTABLE.MeV', 'PDGTABLE.MeV.org')
 
     # an example line to illustrate the fixed format, see PDGTABLE.MeV for more details
     # M 1000022                          0.E+00         +0.0E+00 -0.0E+00 ~chi(0,1)     0
 
-    lines = open( tableName+'.backup','r').readlines()
+    lines = open('PDGTABLE.MeV.org').readlines()
     for pdgid,mass,name,charge in replace:
         if not re.search(r'[MW]\s+'+str(pdgid)+'\s+\S+', ''.join(lines)):
             lines.append('M' + str(pdgid).rjust(8) +''.ljust(26) +
@@ -79,8 +77,6 @@ def load_files_for_sleptonLLP_scenario(simdict):
                 ])
         pdgcodes += [1000022]
 
-    from ExtraParticles.PDGHelpers import updateExtraParticleWhiteList
-    updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', pdgcodes)
 
 doG4SimConfig = True
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
