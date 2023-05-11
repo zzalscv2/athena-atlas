@@ -52,9 +52,11 @@ StatusCode xAODMETFilter::filterEvent() {
       //for test filterHT->filterWeight
       (*mec)[i]->add_attribute("filterMET", std::make_shared<HepMC3::DoubleAttribute>(met/1000.));
   }
-#endif
  
+  setFilterPassed(met >= m_METmin || keepAll());
+#else
   setFilterPassed(met >= m_METmin);
+#endif
   return StatusCode::SUCCESS;
 }
 

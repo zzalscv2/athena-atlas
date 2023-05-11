@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorModules/GenFilter.h"
@@ -9,6 +9,9 @@ GenFilter::GenFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenBase(name, pSvcLocator)
 {
   declareProperty("TotalPassed", m_nNeeded=-1);
+#ifdef HEPMC3
+  declareProperty("KeepAllEvents", m_keepAll=false);
+#endif
   m_nPass = 0;
   m_nFail = 0;
 }
@@ -32,7 +35,11 @@ StatusCode GenFilter::execute() {
     ATH_MSG_WARNING("More than one event in current McEventCollection -- which is valid?");
   }
   StatusCode sc = filterEvent();
-  if (filterPassed()) {
+#ifdef HEPMC3
+  if (filterPassed() || m_keepAll ) {
+#else
+  if (filterPassed() ) {
+#endif
     ATH_MSG_DEBUG("Event passed filter");
     m_nPass += 1;
   } else {
