@@ -83,10 +83,10 @@ def LArNoiseCorrelationMonConfigCore(helper, algoinstance,inputFlags):
         larNoiseCorrelMonAlg.FEBlist=febsToMonitorBarrelA+febsToMonitorBarrelC+febsToMonitorEndcapA+febsToMonitorEndcapC
     else:
         setCustomFEBS=set(customFEBStoMonitor)
-        febsToMonitorBarrelA=list(setCustomFEBS.intersection(lArDQGlobals.febsBarrelA))
-        febsToMonitorEndcapA=list(setCustomFEBS.intersection(lArDQGlobals.febsEndcapA))
-        febsToMonitorBarrelC=list(setCustomFEBS.intersection(lArDQGlobals.febsBarrelC))
-        febsToMonitorEndcapC=list(setCustomFEBS.intersection(lArDQGlobals.febsEndcapC))
+        febsToMonitorBarrelA=sorted(setCustomFEBS.intersection(lArDQGlobals.febsBarrelA))
+        febsToMonitorEndcapA=sorted(setCustomFEBS.intersection(lArDQGlobals.febsEndcapA))
+        febsToMonitorBarrelC=sorted(setCustomFEBS.intersection(lArDQGlobals.febsBarrelC))
+        febsToMonitorEndcapC=sorted(setCustomFEBS.intersection(lArDQGlobals.febsEndcapC))
 
         if len(febsToMonitorBarrelA)==0 and len(febsToMonitorEndcapA)==0 and len(febsToMonitorBarrelC)==0 and len(febsToMonitorEndcapC)==0:
             print("LArNoiseCorrelationMonAlg:WARNING. None of the following FEBs were recognised, no plot will be produced")
