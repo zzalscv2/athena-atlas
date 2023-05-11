@@ -9,14 +9,13 @@
 
 #include "HardScatterCollectionMaker.h"
 #include "CollectionMakerHelpers.h"
-#include "xAODTruth/TruthEventContainer.h"
-#include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthParticleAuxContainer.h"
-#include "xAODTruth/TruthVertexContainer.h"
 #include "xAODTruth/TruthVertexAuxContainer.h"
 
 // To look up which generator is being used
-#include "StoreGate/StoreGateSvc.h"
+#include "StoreGate/ReadHandle.h"
+#include "StoreGate/WriteHandle.h"
+
 #include "xAODTruth/TruthMetaDataContainer.h"
 
 // STL includes
@@ -32,43 +31,35 @@ DerivationFramework::HardScatterCollectionMaker::HardScatterCollectionMaker(cons
                                                                           const std::string& n,
                                                                           const IInterface* p)
   : AthAlgTool(t,n,p)
-  , m_eventsKey("TruthEvents")
-  , m_collectionName("")
-  , m_metaStore( "MetaDataStore", n )
 {
     declareInterface<DerivationFramework::IAugmentationTool>(this);
-    declareProperty("TruthEventKey", m_eventsKey);
-    declareProperty("NewCollectionName", m_collectionName);
-    declareProperty("Generations", m_generations=1, "Number of generations after the particle in question to keep (-1 for all)");
-    declareProperty("MetaDataStore", m_metaStore );
 }
 
 // Destructor
-DerivationFramework::HardScatterCollectionMaker::~HardScatterCollectionMaker() {
-}
-
+DerivationFramework::HardScatterCollectionMaker::~HardScatterCollectionMaker()  = default;
 // Athena initialize
 StatusCode DerivationFramework::HardScatterCollectionMaker::initialize()
 {
     ATH_MSG_VERBOSE("initialize() ...");
+    ATH_CHECK(m_eventsKey.initialize());
+    ATH_MSG_INFO("Using " << m_eventsKey << " as the source collections for new truth collections");
 
-    if (m_eventsKey.empty()) {
-        ATH_MSG_FATAL("No truth event collection provided to use as a basis for new collections");
-        return StatusCode::FAILURE;
-    } else {ATH_MSG_INFO("Using " << m_eventsKey << " as the source collections for new truth collections");}
-
-    if (m_collectionName.empty()) {
+    if (m_collectionName.value().empty()) {
         ATH_MSG_FATAL("No key provided for the new truth particle collections");
         return StatusCode::FAILURE;
-    } else {ATH_MSG_INFO("New truth particle collection key: " << m_collectionName );}
-
+    } 
+    ATH_MSG_INFO("New truth particle collection key: " << m_collectionName );
+    m_outPartKey = m_collectionName.value() + "Particles";
+    m_outVtxKey = m_collectionName.value() + "Vertices";
+    ATH_CHECK(m_outVtxKey.initialize());
+    ATH_CHECK(m_outPartKey.initialize());
     return StatusCode::SUCCESS;
 }
 
 
 // Selection and collection creation
-StatusCode DerivationFramework::HardScatterCollectionMaker::addBranches() const
-{
+StatusCode DerivationFramework::HardScatterCollectionMaker::addBranches() const {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
     // Set up for some metadata handling
     static const bool is_pure_pythia8 = [this]() {
         bool is_pure_pythia8 = false;
@@ -105,21 +96,21 @@ StatusCode DerivationFramework::HardScatterCollectionMaker::addBranches() const
     }();
 
     // Retrieve truth collections
-    const xAOD::TruthEventContainer* importedTruthEvents(nullptr);
-    if (evtStore()->retrieve(importedTruthEvents,m_eventsKey).isFailure()) {
-        ATH_MSG_ERROR("No TruthEvent collection with name " << m_eventsKey << " found in StoreGate!");
+    SG::ReadHandle<xAOD::TruthEventContainer> importedTruthEvents{m_eventsKey, ctx};
+    if (!importedTruthEvents.isValid()) {
+        ATH_MSG_ERROR("No TruthEvent collection with name " << m_eventsKey.fullKey() << " found in StoreGate!");
         return StatusCode::FAILURE;
     }
     // We only care about the first event
     if (importedTruthEvents->empty()){
-        ATH_MSG_ERROR("TruthEvent collection with name " << m_eventsKey << " is empty!");
+        ATH_MSG_ERROR("TruthEvent collection with name " << m_eventsKey.fullKey() << " is empty!");
         return StatusCode::FAILURE;
     }
     // Check that it has a hard scatter process defined
     const xAOD::TruthVertex* my_tv = importedTruthEvents->at(0)->signalProcessVertex();
     if (my_tv==nullptr){
         [[maybe_unused]] static const bool warn_once = [this]() {
-            ATH_MSG_WARNING("TruthEvent collection with name " << m_eventsKey << " has a null signal process vertex!");
+            ATH_MSG_WARNING("TruthEvent collection with name " << m_eventsKey.fullKey() << " has a null signal process vertex!");
             return true;
         }();
         size_t i_vtx=0;
@@ -135,19 +126,17 @@ StatusCode DerivationFramework::HardScatterCollectionMaker::addBranches() const
     }
 
     // Create the new particle containers
-    xAOD::TruthParticleContainer* newParticleCollection = new xAOD::TruthParticleContainer();
-    CHECK( evtStore()->record( newParticleCollection, m_collectionName + "Particles" ) );
-    xAOD::TruthParticleAuxContainer* newParticleAuxCollection = new xAOD::TruthParticleAuxContainer();
-    CHECK( evtStore()->record( newParticleAuxCollection, m_collectionName + "ParticlesAux." ) );
-    newParticleCollection->setStore( newParticleAuxCollection );
-    ATH_MSG_DEBUG( "Recorded new TruthParticleContainer with key: " << (m_collectionName+"Particles"));
+    SG::WriteHandle<xAOD::TruthParticleContainer> writeHandlePart{m_outPartKey, ctx};
+    ATH_CHECK(writeHandlePart.record(std::make_unique<xAOD::TruthParticleContainer>(),
+                                           std::make_unique<xAOD::TruthParticleAuxContainer>()));
+    xAOD::TruthParticleContainer* newParticleCollection = writeHandlePart.ptr();
+    ATH_MSG_DEBUG( "Recorded new TruthParticleContainer with key: " << m_outPartKey.fullKey());
     // Create the new vertex containers
-    xAOD::TruthVertexContainer* newVertexCollection = new xAOD::TruthVertexContainer();
-    CHECK( evtStore()->record( newVertexCollection, m_collectionName + "Vertices" ) );
-    xAOD::TruthVertexAuxContainer* newVertexAuxCollection = new xAOD::TruthVertexAuxContainer();
-    CHECK( evtStore()->record( newVertexAuxCollection, m_collectionName + "VerticesAux." ) );
-    newVertexCollection->setStore( newVertexAuxCollection );
-    ATH_MSG_DEBUG( "Recorded new TruthVertexContainer with key: " << (m_collectionName+"Vertices"));
+    SG::WriteHandle<xAOD::TruthVertexContainer> writeHandleVtx{m_outVtxKey, ctx};
+    ATH_CHECK(writeHandleVtx.record(std::make_unique<xAOD::TruthVertexContainer>(),
+                                         std::make_unique<xAOD::TruthVertexAuxContainer>()));
+    xAOD::TruthVertexContainer* newVertexCollection = writeHandleVtx.ptr();
+    ATH_MSG_DEBUG( "Recorded new TruthVertexContainer with key: " << m_outVtxKey.fullKey());
 
     std::vector<int> seen_particles; // Loop protection
 
