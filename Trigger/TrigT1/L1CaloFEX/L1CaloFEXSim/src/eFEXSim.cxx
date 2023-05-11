@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -77,7 +77,8 @@ namespace LVL1 {
 
 StatusCode eFEXSim::NewExecute(int tmp_eTowersIDs_subset[10][18], eFEXOutputCollection* inputOutputCollection){
   m_emTobObjects.clear();
-  m_tauTobObjects.clear();
+  m_tauHeuristicTobObjects.clear();
+  m_tauBDTTobObjects.clear();
 
   std::copy(&tmp_eTowersIDs_subset[0][0], &tmp_eTowersIDs_subset[0][0]+(10*18),&m_eTowersIDs[0][0]);
 
@@ -95,7 +96,8 @@ StatusCode eFEXSim::NewExecute(int tmp_eTowersIDs_subset[10][18], eFEXOutputColl
   m_eFEXFPGATool->SetTowersAndCells_SG(tmp_eTowersIDs_subset_FPGA);
   ATH_CHECK(m_eFEXFPGATool->execute(inputOutputCollection));
   m_emTobObjects.push_back(m_eFEXFPGATool->getEmTOBs());
-  m_tauTobObjects.push_back(m_eFEXFPGATool->getTauTOBs());
+  m_tauHeuristicTobObjects.push_back(m_eFEXFPGATool->getTauHeuristicTOBs());
+  m_tauBDTTobObjects.push_back(m_eFEXFPGATool->getTauBDTTOBs());
   m_eFEXFPGATool->reset();
   //FPGA 0----------------------------------------------------------------------------------------------------------------------------------------------
   
@@ -110,7 +112,8 @@ StatusCode eFEXSim::NewExecute(int tmp_eTowersIDs_subset[10][18], eFEXOutputColl
   m_eFEXFPGATool->SetTowersAndCells_SG(tmp_eTowersIDs_subset_FPGA);
   ATH_CHECK(m_eFEXFPGATool->execute(inputOutputCollection));
   m_emTobObjects.push_back(m_eFEXFPGATool->getEmTOBs());
-  m_tauTobObjects.push_back(m_eFEXFPGATool->getTauTOBs());
+  m_tauHeuristicTobObjects.push_back(m_eFEXFPGATool->getTauHeuristicTOBs());
+  m_tauBDTTobObjects.push_back(m_eFEXFPGATool->getTauBDTTOBs());
   m_eFEXFPGATool->reset();
   //FPGA 1----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -126,7 +129,8 @@ StatusCode eFEXSim::NewExecute(int tmp_eTowersIDs_subset[10][18], eFEXOutputColl
   m_eFEXFPGATool->SetTowersAndCells_SG(tmp_eTowersIDs_subset_FPGA);
   ATH_CHECK(m_eFEXFPGATool->execute(inputOutputCollection));
   m_emTobObjects.push_back(m_eFEXFPGATool->getEmTOBs());
-  m_tauTobObjects.push_back(m_eFEXFPGATool->getTauTOBs());
+  m_tauHeuristicTobObjects.push_back(m_eFEXFPGATool->getTauHeuristicTOBs());
+  m_tauBDTTobObjects.push_back(m_eFEXFPGATool->getTauBDTTOBs());
   m_eFEXFPGATool->reset();
   //FPGA 2----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -141,7 +145,8 @@ StatusCode eFEXSim::NewExecute(int tmp_eTowersIDs_subset[10][18], eFEXOutputColl
   m_eFEXFPGATool->SetTowersAndCells_SG(tmp_eTowersIDs_subset_FPGA);
   ATH_CHECK(m_eFEXFPGATool->execute(inputOutputCollection));
   m_emTobObjects.push_back(m_eFEXFPGATool->getEmTOBs());
-  m_tauTobObjects.push_back(m_eFEXFPGATool->getTauTOBs());
+  m_tauHeuristicTobObjects.push_back(m_eFEXFPGATool->getTauHeuristicTOBs());
+  m_tauBDTTobObjects.push_back(m_eFEXFPGATool->getTauBDTTOBs());
   m_eFEXFPGATool->reset();
   //FPGA 3----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -180,7 +185,7 @@ std::vector<std::unique_ptr<eFEXegTOB>> eFEXSim::getEmTOBs()
 }
 
 
-std::vector<std::unique_ptr<eFEXtauTOB>> eFEXSim::getTauTOBs()
+std::vector<std::unique_ptr<eFEXtauTOB>> eFEXSim::getTauTOBs(std::vector<std::vector<std::unique_ptr<eFEXtauTOB>> >& tauTobObjects)
 {
 
   std::vector<std::unique_ptr<eFEXtauTOB>> tobsSort;
@@ -188,7 +193,7 @@ std::vector<std::unique_ptr<eFEXtauTOB>> eFEXSim::getTauTOBs()
 
   // concatenate tobs from the fpgas
   // As we're using unique_ptrs here we have to move rather than copy
-  for( auto &j : m_tauTobObjects ){
+  for( auto &j : tauTobObjects ){
     for (auto &k : j) {
        tobsSort.push_back(std::move(k));
     }
@@ -206,6 +211,16 @@ std::vector<std::unique_ptr<eFEXtauTOB>> eFEXSim::getTauTOBs()
   if (tobsSort.size() > 6) tobsSort.resize(6);
   */
   return tobsSort;
+}
+
+std::vector<std::unique_ptr<eFEXtauTOB>> eFEXSim::getTauHeuristicTOBs()
+{
+  return getTauTOBs(m_tauHeuristicTobObjects);
+}
+
+std::vector<std::unique_ptr<eFEXtauTOB>> eFEXSim::getTauBDTTOBs()
+{
+  return getTauTOBs(m_tauBDTTobObjects);
 }
 
 void eFEXSim::SetTowersAndCells_SG(int tmp_eTowersIDs_subset[10][18]){ // METHOD USING ONLY IDS

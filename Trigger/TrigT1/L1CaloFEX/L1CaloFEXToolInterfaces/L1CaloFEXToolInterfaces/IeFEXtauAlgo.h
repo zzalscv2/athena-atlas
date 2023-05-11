@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -30,6 +30,7 @@ Interface definition for eFEXtauAlgo
 
     virtual StatusCode safetyTest() = 0;
     virtual void setup(int inputTable[3][3], int efex_id, int fpga_id, int central_eta) = 0;
+    virtual void compute() = 0;
     
     virtual bool isCentralTowerSeed() = 0;
     virtual std::unique_ptr<eFEXtauTOB> getTauTOB() = 0;
@@ -47,6 +48,10 @@ Interface definition for eFEXtauAlgo
     virtual unsigned int getSeed() = 0;
     virtual void getSums(unsigned int seed, bool UnD, std::vector<unsigned int> & RcoreSums, 
                          std::vector<unsigned int> & RemSums) = 0;
+    virtual unsigned int getBDTScore() = 0;
+    virtual unsigned int getBDTCondition() = 0;
+    virtual bool isBDT() = 0;
+    virtual void setThresholds(std::vector<unsigned int> rHadThreshold, std::vector<unsigned int> bdtThreshold, unsigned int etThreshold, unsigned int etThresholdForRHad) = 0;
 
   private:
 

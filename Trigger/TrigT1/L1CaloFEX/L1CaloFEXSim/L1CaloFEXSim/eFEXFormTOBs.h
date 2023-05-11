@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***********************************************************************
@@ -32,8 +32,15 @@ namespace LVL1 {
     /** Destructor */
     virtual ~eFEXFormTOBs();
 
+    
+    uint32_t doFormTauTOBWord(int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
     virtual uint32_t formTauTOBWord(int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) override;
     virtual std::vector<uint32_t> formTauxTOBWords(int &, int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) override;
+
+
+    std::vector<uint32_t>  doFormTauxTOBWords(int, int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
+    virtual uint32_t formTauBDTTOBWord(int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) override;
+    virtual std::vector<uint32_t> formTauBDTxTOBWords(int &, int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) override;
 
     virtual uint32_t formEmTOBWord(int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) override;
     virtual std::vector<uint32_t> formEmxTOBWords(int &, int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) override;
@@ -54,6 +61,7 @@ namespace LVL1 {
     const unsigned int m_efexShift = 20;
     const unsigned int m_taurhadShift = 20;
     const unsigned int m_taurcoreShift = 18;
+    const unsigned int m_tauAlgoVersionShift= 12;
 
   };
 
