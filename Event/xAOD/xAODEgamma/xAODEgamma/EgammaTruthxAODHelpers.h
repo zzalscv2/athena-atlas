@@ -52,7 +52,7 @@ namespace xAOD {
 
     ///@brief Helper wrapper function for calling the function below that accepts truth input.
     /// It extract the  truth from the  reco electron and uses the function below 
-    const xAOD::TruthParticle* getBkgElectronMother(const xAOD::Electron* el,const  int barcodecut=0);
+    const xAOD::TruthParticle* getBkgElectronMother(const xAOD::Electron* el,const bool hard = true);
 
     ///@brief Helper function for getting the True "Mother" electron for an existing electron.
     /// There are cases when an electron has  a  photon (or electron) mother, that in turn comes
@@ -65,11 +65,11 @@ namespace xAOD {
     /// The user can apply also a barcode cut. This is handy in cases when we want to find
     /// the first non geant particle occuring when going back the lineage.
     /// The method will stop after the 1st particle failing this cut 
-    const xAOD::TruthParticle* getBkgElectronMother(const xAOD::TruthParticle* truthel, const int barcodecut=0);
+    const xAOD::TruthParticle* getBkgElectronMother(const xAOD::TruthParticle* truthel,const bool hard = true);
 
     ///@brief Helper wrapper function for calling the function below that accepts truth input.
     std::vector<const xAOD::TruthParticle*> 
-    getBkgElectronLineage(const xAOD::Electron* el,const int barcodecut=0);
+    getBkgElectronLineage(const xAOD::Electron* el,const bool hard = true);
     
     ///@brief Helper function for getting the True Lineage of an electron for an existing electron.
     /// There are cases when an electron has  a  photon (or electron) mother, that in turn comes
@@ -81,7 +81,7 @@ namespace xAOD {
     /// the first non geant particle occuring when going back the lineage.
     /// The method will stop after the 1st particle failing this cut 
     std::vector<const xAOD::TruthParticle*> 
-    getBkgElectronLineage(const xAOD::TruthParticle* truthel,const  int barcodecut=0);
+    getBkgElectronLineage(const xAOD::TruthParticle* truthel,const bool hard = true);
 
         
   }// EgammaHelpers

@@ -13,6 +13,8 @@
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODEgamma/PhotonContainer.h"
 
+#include "TruthUtils/MagicNumbers.h"
+
 // ==================================================================
 
 /// Accessor for the "recoElectronLink" dynamic variable
@@ -84,14 +86,14 @@ bool xAOD::EgammaHelpers::isTrueConvertedPhoton(const xAOD::TruthParticle* truth
 
 // ==================================================================
 
-const xAOD::TruthParticle* xAOD::EgammaHelpers::getBkgElectronMother(const xAOD::Electron* el,  const int barcodecut/*=0*/){ 
+const xAOD::TruthParticle* xAOD::EgammaHelpers::getBkgElectronMother(const xAOD::Electron* el,  const bool hard/*=true*/){ 
   const xAOD::TruthParticle *truthel = xAOD::TruthHelpers::getTruthParticle(*el);
-  return getBkgElectronMother(truthel,barcodecut);
+  return getBkgElectronMother(truthel,hard);
 }
 
-const xAOD::TruthParticle* xAOD::EgammaHelpers::getBkgElectronMother(const xAOD::TruthParticle* truthel, const  int barcodecut/*=0*/){
+const xAOD::TruthParticle* xAOD::EgammaHelpers::getBkgElectronMother(const xAOD::TruthParticle* truthel, const bool hard/*=true*/){
 
-  std::vector<const xAOD::TruthParticle*>  vec = xAOD::EgammaHelpers::getBkgElectronLineage(truthel,barcodecut);
+  std::vector<const xAOD::TruthParticle*>  vec = xAOD::EgammaHelpers::getBkgElectronLineage(truthel,hard);
   if(!vec.empty()){ 
     return vec.back();
   }
@@ -99,14 +101,14 @@ const xAOD::TruthParticle* xAOD::EgammaHelpers::getBkgElectronMother(const xAOD:
 }
 
 std::vector<const xAOD::TruthParticle*> 
-xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::Electron* el,const int barcodecut/*=0*/){
+xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::Electron* el,const bool hard/*=true*/){
   const xAOD::TruthParticle *truthel = xAOD::TruthHelpers::getTruthParticle(*el);
-  return getBkgElectronLineage(truthel,barcodecut);
+  return getBkgElectronLineage(truthel,hard);
 }
 
 //The actual implementation code 
 std::vector<const xAOD::TruthParticle*> 
-xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::TruthParticle* truthel,const int barcodecut/*=0*/){
+xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::TruthParticle* truthel,const bool hard/*=true*/){
   std::vector<const xAOD::TruthParticle*> vec;
   //Truth must exist and be an electron
   if (!truthel || truthel->absPdgId()!=11){ 
@@ -115,7 +117,7 @@ xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::TruthParticle* truthel,co
   vec.push_back(truthel); //push its self back as first entry
 
   // The first parent has to exist
-  if ( !truthel->nParents() || abs(truthel->barcode())<barcodecut ){
+  if ( !truthel->nParents() || ( (!HepMC::is_simulation_particle(abs(truthel->barcode()))) && hard)   ){
     return vec;
   }
   //And has to be a photon or electron
@@ -127,7 +129,7 @@ xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::TruthParticle* truthel,co
   vec.push_back(parent); //push in the parent as the second entry
 
   //Loop over the generations
-  while (parent->nParents() && abs(parent->barcode())>=barcodecut){ 
+  while (parent->nParents() && ( HepMC::is_simulation_particle(abs(parent->barcode())) || hard ) ){ 
     //Find the next parent
     const xAOD::TruthParticle* tmp = parent->parent();
     //You want to see an electron or a photon 
