@@ -75,14 +75,13 @@ def setupTrackCaloAssoc(flags, caloClusterName="CaloCalTopoClusters",detectorEta
     
 
 def runTCCReconstruction(flags, caloClusterName="CaloCalTopoClusters", detectorEtaName = "default", trackParticleName="InDetTrackParticles",
-                         assocPostfix="TCC", doCombined=False, doNeutral=True, doCharged=False, outputTCCName="TrackCaloClusters"):
-
-    """Create a TrackCaloCluster collection from clusters and tracks (caloClusterName and trackParticleName). 
+                         assocPostfix="TCC", doCombined=False, doCharged=False, doNeutral=True, outputTCCName="TrackCaloClusters"):
+    """
+    Create a TrackCaloCluster collection from clusters and tracks (caloClusterName and trackParticleName).
     Depending on options, the collection contains combined, neutral and/or charged TCC.
-    This functions schedules 2 TCC spécific algs : 
+    This functions schedules 2 TCC specific algs :
        * a TrackCaloClusterInfoAlg to build the TrackCaloClusterInfo object
        * a TrackCaloClusterAlg to build the TCC
-    
     """
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -95,14 +94,6 @@ def runTCCReconstruction(flags, caloClusterName="CaloCalTopoClusters", detectorE
         setupTrackCaloAssoc(flags, caloClusterName, detectorEtaName, trackParticleName, assocPostfix, onlyPV0Tracks=False)
     )
 
-    from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg
-    commonArgs=dict(
-        TrackVertexAssoTool = components.popToolsAndMerge(TTVAToolCfg(flags,"tvaTool",WorkingPoint="Nonprompt_All_MaxWeight")),
-        AssoClustersDecor=decorKey("AssoClusters"),            
-    )    
-
-
-        
     ###################################
     # Schedule the TrackCaloClusterInfoAlg to create the weights for clusters/tracks and store them in a TrackCaloClusterInfo object.
     tccInfoAlg = CompFactory.TrackCaloClusterInfoAlg(
@@ -121,7 +112,6 @@ def runTCCReconstruction(flags, caloClusterName="CaloCalTopoClusters", detectorE
     # and a list of tools to build the various TCC types.
     tccTools = []
 
-
     from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg
     commonArgs=dict(
         TrackVertexAssoTool = components.popToolsAndMerge(TTVAToolCfg(flags,"tvaTool",WorkingPoint="Nonprompt_All_MaxWeight")),
@@ -134,49 +124,17 @@ def runTCCReconstruction(flags, caloClusterName="CaloCalTopoClusters", detectorE
     if doCharged:
         tccCharged = CompFactory.TCCChargedTool("TCCCharged", **commonArgs )
         tccTools.append(tccCharged)
-
-
     if doNeutral:
         tccNeutral = CompFactory.TCCNeutralTool("TCCNeutral", **commonArgs )        
         tccTools.append(tccNeutral)
 
-    FEContainerName=""
-    if(doNeutral):
-        FEContainerName="JetETMissNeutralParticleFlowObjects"
-        neutraloutputTCCName=outputTCCName+"Neutral"
-        neutraltccAlg = CompFactory.TrackCaloClusterAlg(name = "TrackCaloClusterAlg_neutral",
-                                                        OutputTCCName = neutraloutputTCCName,
-                                                        TCCInfo = "TCCInfo",
-                                                        TCCTools = tccTools,
-                                                        #OutputLevel
-                                                        AppendToTCCName = FEContainerName
-                                                        
-                                                    )
-        components.addEventAlgo(neutraltccAlg)
+    tccAlg = CompFactory.TrackCaloClusterAlg(name = "TrackCaloClusterAlg",
+            OutputTCCName = outputTCCName,
+            TCCInfo       = "TCCInfo",
+            TCCTools      = tccTools,
+    )
 
-    if(doCharged):
-        FEContainerName="JetETMissChargedParticleFlowObjects"
-        chargedoutputTCCName=outputTCCName+"Charged"
-        chargedtccAlg = CompFactory.TrackCaloClusterAlg(name = "TrackCaloClusterAlg_charged",
-                                                        OutputTCCName = chargedoutputTCCName,
-                                                        TCCInfo = "TCCInfo",
-                                                        TCCTools = tccTools,
-                                                        #OutputLevel = 2,
-                                                        AppendToTCCName = FEContainerName,
-                                                        
-                                                    )
-        components.addEventAlgo(chargedtccAlg)
-
-        #exit(0)
-    if(doCombined or (doCharged and doNeutral)):
-        ufolog.error("TCC: Combined mode not setup - exiting gracefully")
-        exit(0)
-    if((not doCombined) and (not doCharged) and (not doNeutral)):
-        ufolog.error("runTCCReco: no mode set for input, this is an unexpected state")
-        exit(0)
-    
-        
-
+    components.addEventAlgo(tccAlg)
 
     return components
 
