@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/TTbarMassFilter.h"
@@ -70,7 +70,7 @@ StatusCode TTbarMassFilter::filterEvent() {
           if (!prodVtx) {
             ATH_MSG_WARNING("Top particle with a status " << mcpart->status() << " has no valid production vertex");
             //save null pointer for consistency
-            top_vtxs.push_back(nullptr);
+            top_vtxs.emplace_back(nullptr);
           } else {
             // Loop until the 'first' top particle  production vertex is not reached
             while (!isFirstTop && prodVtx) {
@@ -82,7 +82,7 @@ StatusCode TTbarMassFilter::filterEvent() {
                   prodVtx = mother_mcpart->production_vertex();
                   if (!prodVtx) {
                     ATH_MSG_WARNING("mother particle is still a top with a status " << mcpart->status() << ", but has no valid production vertex");
-                    top_vtxs.push_back(nullptr);
+                    top_vtxs.emplace_back(nullptr);
                   }
                   break;
                 } else {
@@ -280,8 +280,13 @@ StatusCode TTbarMassFilter::filterEvent() {
       setFilterPassed(false);
       return StatusCode::SUCCESS;
     }
+    if ((top_21 < 0) or (top_22 < 0)) {
+      ATH_MSG_ERROR("Indexing error. Event failed the filter");
+      setFilterPassed(false);
+      return StatusCode::SUCCESS;
+    }
 
-    // Check that the second top-pair relly has the same production vertex
+    // Check that the second top-pair really has the same production vertex
     if (top_vtxs[top_21] != top_vtxs[top_22]) {
       ATH_MSG_ERROR("Production vertex for the second top-pair particles is not the same. Event failed the filter");
       setFilterPassed(false);
