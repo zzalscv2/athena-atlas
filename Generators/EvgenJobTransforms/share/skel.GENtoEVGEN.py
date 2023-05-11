@@ -192,6 +192,13 @@ if hasattr(runArgs, "rivetAnas"):
     if hasattr(runArgs, "outputYODAFile"):
       anaSeq.Rivet_i.HistoFile = runArgs.outputYODAFile
 
+# in case of mc23 protect against changing run number in McEventSelector 
+rel = os.popen("echo $AtlasVersion").read()
+rel = rel.strip()
+if (int(rel[:2]) > 22 ): 
+  from AthenaCommon.AppMgr import ServiceMgr
+  ServiceMgr.EventSelector.EventsPerRun = int(2**63 - 1) #sys.maxint on a 64-bit machine
+
 ##==============================================================
 ## Pre- and main config parsing
 ##==============================================================
@@ -585,8 +592,6 @@ def checkPurpleList(relFlavour,cache,generatorName) :
 
 ## Announce start of JO checkingrelease number checking
 evgenLog.debug("****************** CHECKING RELEASE IS NOT BLACKLISTED *****************")
-rel = os.popen("echo $AtlasVersion").read()
-rel = rel.strip()
 errorBL = checkBlackList("AthGeneration",rel,gennames)
 if (errorBL):
   if (hasattr( runArgs, "ignoreBlackList") and runArgs.ignoreBlackList): 

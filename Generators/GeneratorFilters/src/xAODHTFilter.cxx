@@ -47,7 +47,6 @@ xAODHTFilter::xAODHTFilter(const std::string &name, ISvcLocator *pSvcLocator)
   declareProperty("MinLeptonPt", m_MinLepPt = 0 * Gaudi::Units::GeV);
   declareProperty("MaxLeptonEta", m_MaxLepEta = 10.0);
   declareProperty("EventInfoName",m_eventInfoName="EventInfo");   
-
 }
 
 //--------------------------------------------------------------------------
@@ -101,7 +100,11 @@ StatusCode xAODHTFilter::filterEvent()
       evtStore()->retrieve(truthjetTES, m_TruthJetContainerName).isFailure() || !truthjetTES)
   {
     ATH_MSG_INFO("No xAOD::JetContainer found in StoreGate with key " << m_TruthJetContainerName);
+#ifdef HEPMC3
+    setFilterPassed(m_MinHT < 1. || keepAll());
+#else
     setFilterPassed(m_MinHT < 1.);
+#endif
     return StatusCode::SUCCESS;
   }
 
@@ -173,13 +176,6 @@ StatusCode xAODHTFilter::filterEvent()
   HT /= Gaudi::Units::GeV; // Make sure we're in GeV
   ATH_MSG_DEBUG("HT: " << HT);
 
-  if (HT < m_MinHT || HT >= m_MaxHT)
-  {
-    ATH_MSG_DEBUG("Failed filter on HT: " << HT << " is not between " << m_MinHT << " and " << m_MaxHT);
-    setFilterPassed(false);
-  }
-  else
-  {
 #ifdef HEPMC3
     // fill the HT value
     // Event passed.  Will add HT to xAOD::EventInfo
@@ -189,15 +185,25 @@ StatusCode xAODHTFilter::filterEvent()
       setFilterPassed(false);
       ATH_MSG_ERROR("Could not retrieve MC Event Collection - might not work");
       return StatusCode::SUCCESS;
-    }
- 
+    } 
+  
     McEventCollection* mec = const_cast<McEventCollection*> (&(*mecc));
     for (unsigned int i = 0; i < mec->size(); ++i) {
       if (!(*mec)[i]) continue;
-
+   
       (*mec)[i]->add_attribute("filterHT", std::make_shared<HepMC3::DoubleAttribute>(HT));
     }
+
+  if ((HT < m_MinHT || HT >= m_MaxHT) && (!keepAll()))
+#else
+  if ((HT < m_MinHT || HT >= m_MaxHT) )
 #endif
+  {
+    ATH_MSG_DEBUG("Failed filter on HT: " << HT << " is not between " << m_MinHT << " and " << m_MaxHT);
+    setFilterPassed(false);
+  }
+  else
+  {
    // Made it to the end - success! 
     m_passed++;
     setFilterPassed(true);

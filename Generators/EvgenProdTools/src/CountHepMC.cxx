@@ -65,6 +65,15 @@ StatusCode CountHepMC::execute() {
     return StatusCode::FAILURE;
   }
 
+#ifndef HEPMC3
+   /// crash the run if event number gets above 32bit int.
+   constexpr long long int max32 = std::pow(2, 31) - 1;
+   if (newnum >= max32) {
+      ATH_MSG_ERROR("Event number " << newnum << " exceeds 32bit limit. In HepMC2 it is not allowed.");
+      return StatusCode::FAILURE;
+  }
+#endif
+
   if (m_corHepMC) {
     std::string   key = m_inputKeyName;
     // retrieve event from Transient Store (Storegate)

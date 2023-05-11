@@ -52,6 +52,9 @@ public:
   int nPassed() const { return m_nPass; }
   int nFailed() const { return m_nFail; }
   int nNeeded() const { return m_nNeeded; }
+#ifdef HEPMC3
+  bool keepAll() const {return m_keepAll; }
+#endif
   //@}
 
 
@@ -62,6 +65,9 @@ protected:
   int m_nPass;
   int m_nFail;
   int m_nNeeded;
+#ifdef HEPMC3
+  bool m_keepAll;
+#endif
   //@}
 
 };
