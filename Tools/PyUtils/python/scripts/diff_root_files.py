@@ -13,6 +13,7 @@ __author__ = "Sebastien Binet"
 import PyUtils.acmdlib as acmdlib
 import PyUtils.RootUtils as ru
 from math import isnan
+from numbers import Real
 ROOT = ru.import_root()
 
 ### globals -------------------------------------------------------------------
@@ -222,9 +223,10 @@ def main(args):
                 continue
 
             # for regression testing we should have NAN == NAN
-            if isnan(iold) and isnan(inew) and args.nan_equal:
-                n_good += 1
-                continue
+            if args.nan_equal:
+                if all([isinstance(x,Real) and isnan(x) for x in [iold,inew]]):
+                    n_good += 1
+                    continue
 
             if d_old:    
                 tree_name, ientry, name, iold = d_old
