@@ -1,11 +1,11 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from OutputStreamAthenaPool.OutputStreamConfig import addToAOD, addToESD
 
 def HIGlobalRecCfg(flags):
-    """Configures Heavy IOn Global quantities """
+    """Configures Heavy Ion Global quantities """
     acc = ComponentAccumulator()
 
     # load dependencies

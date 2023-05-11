@@ -126,7 +126,8 @@ unsigned int HIEventShapeIndex::getIndex_Internal(float eta, int layer, bool eta
 		float abs_eta=std::abs(eta);
 		float rmin=HICaloRange::getRange().getRangeMin(layer);
 		float rmax=HICaloRange::getRange().getRangeMax(layer);
-		if(abs_eta < rmin) eta_c=rmin-std::copysign(1e-2,eta);
+
+		if(abs_eta < rmin) eta_c=rmin+std::copysign(1e-2,eta);
 		else if(abs_eta > rmax) eta_c=rmax-std::copysign(1e-2,eta);
 	}
 
@@ -136,8 +137,8 @@ unsigned int HIEventShapeIndex::getIndex_Internal(float eta, int layer, bool eta
 		const range_index_t& p=vec.at(pIndex);
 		if(p(eta_c)) break;
 	}
-	return (etaIndex) ? pIndex : vec.at(pIndex).index;
 
+	return (etaIndex) ? pIndex : vec.at(pIndex).index;
 }
 
 

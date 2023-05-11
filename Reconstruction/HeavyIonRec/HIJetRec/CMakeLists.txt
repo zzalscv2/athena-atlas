@@ -22,7 +22,12 @@ atlas_add_component( HIJetRec
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/*.py )
 
-atlas_add_test( ConfigTest
-             SCRIPT  python -m  HIJetRec.HIJetRecConfigCA 
+atlas_add_test( HIRec_HIJet_test
+             SCRIPT  python -m HIJetRec.HIJetRecConfigCA 
+             PROPERTIES TIMEOUT 900
+             POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( HIRec_HIegamma_test
+             SCRIPT  python -m egammaConfig.egammaReconstructionConfig Reco.EnableHI=True
              POST_EXEC_SCRIPT nopost.sh)
 
