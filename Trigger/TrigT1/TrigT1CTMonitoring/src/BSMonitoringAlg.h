@@ -97,7 +97,7 @@ namespace TrigT1CTMonitoring {
 
     StatusCode compareRerun(const CTP_BC &bunchCrossing,
 							const EventContext& ctx ) const;
-	
+
     SG::ReadCondHandleKey<TrigConf::L1BunchGroupSet> m_bgKey{this, "L1BunchGroup", "L1BunchGroup", "L1BunchGroupSet key name"};
 
     SG::ReadCondHandleKey<AthenaAttributeList> m_LBLBFolderInputKey{ this, "LBLBFolderInputKey", "/TRIGGER/LUMI/LBLB" };
