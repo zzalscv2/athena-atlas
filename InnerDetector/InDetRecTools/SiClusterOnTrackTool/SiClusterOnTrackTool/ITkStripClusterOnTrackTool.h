@@ -17,15 +17,13 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 
-#include "InDetCondTools/ISiLorentzAngleTool.h"
 #include "InDetRIO_OnTrack/SCT_ClusterOnTrack.h"
 #include "InDetRIO_OnTrack/SCTRIO_OnTrackErrorScaling.h"
-#include "SCT_ModuleDistortions/ISCT_ModuleDistortionsTool.h"
 #include "TrkParameters/TrackParameters.h"
 
 namespace ITk {
 
-/** @brief creates StripClusterOnTrack objects allowing to
+/** @brief creates SCT_ClusterOnTrack objects allowing to
      calibrate cluster position and error using a given track hypothesis. 
 
     See doxygen of Trk::RIO_OnTrackCreator for details.
@@ -49,69 +47,25 @@ public:
   virtual StatusCode initialize() override;
 
   
-  /** @brief produces an StripClusterOnTrack using the measured
-      SCT_Cluster and the track prediction. 
-
-      This method is a factory, so the client has to take care
-      of management/deletion of the  StripClusterOnTrack.
+  /** @brief produces an SCT_ClusterOnTrack for ITk strip clusters
+   * using the measured SCT_Cluster and the track prediction.
+   * This method is a factory, so the client has to take care
+   * of management/deletion of the SCT_ClusterOnTrack.
   */
   virtual const InDet::SCT_ClusterOnTrack* correct
     (const Trk::PrepRawData&, const Trk::TrackParameters&) const override; 
 
-  
-  /** @brief Returns a correction to be applied to the Strip cluster local x position
-      in simulated events to remove a position bias introduced by the Strip digitisation.
-
-      @param [in] phi     angle of track relative to Lorentz drift direction, in transverse plane
-      @param [in] nstrip  Strip cluster size (number of strips)
-  */
-  static double getCorrection(double phi, int nstrip) ;
-  
-
-  /** @brief Returns the resolution on the reconstructed position (local x) of Strip clusters
-      in simulated events.
-
-      @param [in] phi     angle of track relative to Lorentz drift direction, in transverse plane
-      @param [in] nstrip  Strip cluster size (number of strips)
-
-    The parameterisation of the resolution contained in getError() was derived from SCT
-    barrel clusters (80 micron pitch).  It can be applied also to endcap clusters, after
-    rescaling to the appropriate pitch.
-  */
-  static double getError(double phi, int nstrip) ;
-
- private:
+private:
 
   ///////////////////////////////////////////////////////////////////
   // Private data:
   ///////////////////////////////////////////////////////////////////
 
-   //! toolhandle for central error scaling
-   SG::ReadCondHandleKey<RIO_OnTrackErrorScaling> m_stripErrorScalingKey
-     {this,"ErrorScalingKey", "/Indet/TrkErrorScalingITkStrip", "Key for ITkStrip error scaling conditions data."};
-
-   ToolHandle<ISCT_ModuleDistortionsTool> m_distortionsTool{this, "DistortionsTool", "StripDistortionsTool", "Tool to retrieve ITkStrip distortions"};
-   ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool{this, "LorentzAngleTool", "SiLorentzAngleTool", "Tool to retreive Lorentz angle"};
-   //! flag storing if errors need scaling or should be kept nominal
-
-   //! job options
-   bool                               m_option_make2dimBarrelClusters;
-   bool                               m_doDistortions ;//!< Flag to set Distortions
-   int                                m_option_errorStrategy;
-   int                                m_option_correctionStrategy;
-
-   // Correction for AnnulusBounds 
-   std::unique_ptr<const InDet::SCT_ClusterOnTrack> correctAnnulus(const InDet::SCT_Cluster*, const Trk::TrackParameters&) const;
- 
-   /// @brief Correction method for polar annulus bounds. 
-   /// Produces local polar coordinates from the cartesian measurement @c SC,
-   /// but links back to the original cluster. Expects that @c trackPar
-   /// links to a @c DiscSurface with @c AnnulusBoundsPC bounds on it.
-   /// Also assumes @c SC links to an instance @c StripStereoAnnulusBounds
-   /// @param SC The cartesian cluster to correct
-   /// @param trackPar Track parameters
-   std::unique_ptr<const InDet::SCT_ClusterOnTrack> correctAnnulusPC
-     (const InDet::SCT_Cluster* SC, const Trk::TrackParameters& trackPar) const; 
+  //! toolhandle for central error scaling
+  SG::ReadCondHandleKey<RIO_OnTrackErrorScaling> m_stripErrorScalingKey
+    {this,"ErrorScalingKey", "/Indet/TrkErrorScalingITkStrip", "Key for ITkStrip error scaling conditions data."};
+  IntegerProperty m_option_errorStrategy{this, "ErrorStrategy", -1, "if ErrorStrategy < 0, keep previous errors else recompute"};
+  IntegerProperty m_option_correctionStrategy{this, "CorrectionStrategy", -1, "if CorrectionStrategy >= 0, apply correction to position"};
 
 };
 
