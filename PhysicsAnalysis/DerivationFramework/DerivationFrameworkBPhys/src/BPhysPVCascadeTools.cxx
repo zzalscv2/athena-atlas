@@ -8,7 +8,7 @@
 #include "TVector3.h"
 #include "DerivationFrameworkBPhys/BPhysPVTools.h"
 #include "TrkVKalVrtFitter/VxCascadeInfo.h"
-#include "DerivationFrameworkBPhys/LocalVector.h"
+#include <boost/container/static_vector.hpp>
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include "HepPDT/ParticleDataTable.hh"
 #include <limits>
@@ -281,8 +281,8 @@ StatusCode DerivationFramework::BPhysPVCascadeTools::FillCandwithRefittedVertice
               refPVvertexes_toDelete.push_back(refPV);
            }
         }
-         LocalVector<size_t, 4> indexesUsed;
-         LocalVector<std::pair<size_t, xAOD::BPhysHelper::pv_type>, 4> indexestoProcess;
+         boost::container::static_vector<size_t, 4> indexesUsed;
+         boost::container::static_vector<std::pair<size_t, xAOD::BPhysHelper::pv_type>, 4> indexestoProcess;
 
          if(doPt){
             indexestoProcess.push_back(std::make_pair
@@ -310,7 +310,8 @@ StatusCode DerivationFramework::BPhysPVCascadeTools::FillCandwithRefittedVertice
              auto pvtype = indexestoProcess[i].second;
              const xAOD::VertexContainer* ParentContainer =
                  (refPVvertexes_toDelete.at(index)) ? refPvContainer : pvContainer;
-             if(ParentContainer == refPvContainer && !indexesUsed.contains(index)) {
+             if(ParentContainer == refPvContainer && std::find(indexesUsed.begin(),
+                                      indexesUsed.end(), index) == indexesUsed.end()) {
                  // store the new vertex
                  refPvContainer->push_back(refPVvertexes_toDelete.at(index));
                  indexesUsed.push_back(index);

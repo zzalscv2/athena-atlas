@@ -16,7 +16,6 @@
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include <algorithm>
 #include "xAODTracking/VertexContainer.h"
-#include "DerivationFrameworkBPhys/LocalVector.h"
 
 #include "TrkVKalVrtFitter/VxCascadeInfo.h"
 
