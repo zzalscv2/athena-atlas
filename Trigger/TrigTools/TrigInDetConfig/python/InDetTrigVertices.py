@@ -370,7 +370,7 @@ def adaptiveMultiVertexFinderTool_builder( signature, config ) :
         # be called by any tool that actually needed it to be configured, then we would avoid this python error 
         # without unecessary python code 
 
-        from ActsConfig.ActsTrackingGeometryTool import ConfiguredActsTrackingGeometry
+        from ActsGeometry.ActsTrackingGeometryTool import ConfiguredActsTrackingGeometry
         
         if not hasattr(ToolSvc, "ActsTrackingGeometryTool"):
             log.info( "ID Trigger: creating new acts geometry" )

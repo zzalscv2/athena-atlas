@@ -2,4 +2,4 @@
 
 from AthenaCommon.CfgGetter import addTool
 
-addTool("ActsConfig.ISF_ActsToolsConfigLegacy.getActsFatrasSimTool",  "ISF_ActsFatrasSimTool")
+addTool("ISF_ActsTools.ISF_ActsToolsConfigLegacy.getActsFatrasSimTool",  "ISF_ActsFatrasSimTool")
