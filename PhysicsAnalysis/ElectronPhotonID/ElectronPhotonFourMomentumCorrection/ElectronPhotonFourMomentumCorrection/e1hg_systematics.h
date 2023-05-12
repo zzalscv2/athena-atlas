@@ -18,7 +18,7 @@ class e1hg_systematics {
 
  public:
   /** @brief constructor (initialization done there reading root files) */
-  e1hg_systematics();
+  e1hg_systematics(const std::string& filename);
   ~e1hg_systematics();
 
   /** 
