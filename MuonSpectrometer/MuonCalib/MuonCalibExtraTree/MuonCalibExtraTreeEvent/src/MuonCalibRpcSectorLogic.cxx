@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCalibExtraTreeEvent/MuonCalibRpcSectorLogic.h"
@@ -28,6 +28,6 @@ namespace MuonCalib {
     int MuonCalibRpcSectorLogic::triggerBcid() const { return m_params.triggerBcid; }
     int MuonCalibRpcSectorLogic::isInput() const { return m_params.isInput; }
 
-    MuonCalibRpcSectorLogic::MuonCalibRpcSectorLogic(MuonCalibRpcSectorLogic::defineParams pars) : m_params{pars} {}
+    MuonCalibRpcSectorLogic::MuonCalibRpcSectorLogic(const MuonCalibRpcSectorLogic::defineParams& pars) : m_params{pars} {}
 
 }  // namespace MuonCalib
