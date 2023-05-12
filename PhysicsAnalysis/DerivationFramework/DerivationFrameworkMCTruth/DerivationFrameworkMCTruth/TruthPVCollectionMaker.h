@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_TRUTHPVCOLLECTIONMAKER_H
@@ -8,8 +8,10 @@
 // Base classes
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
-// Standard library includes
-#include <string>
+#include "xAODTruth/TruthEventContainer.h"
+#include "xAODTruth/TruthVertexContainer.h"
+#include "StoreGate/WriteHandleKey.h"
+#include "StoreGate/ReadHandleKey.h"
 
 namespace DerivationFramework {
 
@@ -21,8 +23,8 @@ namespace DerivationFramework {
       virtual StatusCode addBranches() const;
 
     private:
-      std::string m_eventsKey; //!< Input event collection (navigates to the vertices)
-      std::string m_collectionName; //!< Output collection name
+      SG::ReadHandleKey<xAOD::TruthEventContainer> m_eventsKey{this, "EventsKey", "TruthEvents"}; //!< Input event collection (navigates to the vertices)
+      SG::WriteHandleKey<xAOD::TruthVertexContainer> m_outVtxKey{this, "NewCollectionName", ""}; //!< Output collection name
   }; 
 }
 
