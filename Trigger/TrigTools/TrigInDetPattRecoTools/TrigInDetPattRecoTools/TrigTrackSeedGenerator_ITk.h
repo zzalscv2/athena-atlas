@@ -15,7 +15,14 @@ class TrigInDetTriplet;
 class TrigFTF_GNN_DataStorage;
 class IRoiDescriptor;
 
-typedef std::vector<std::pair<float, TrigInDetTriplet*> > INTERNAL_TRIPLET_BUFFER;
+struct GNN_TrigTracklet {
+public:
+GNN_TrigTracklet(std::vector<const TrigSiSpacePointBase*>& vSP, std::vector<TrigInDetTriplet>& tbuf) : m_track(vSP), m_seeds(tbuf) {};
+  ~GNN_TrigTracklet() {};
+  
+  std::vector<const TrigSiSpacePointBase*> m_track;
+  std::vector<TrigInDetTriplet> m_seeds;
+};
 
 typedef class TrigTrackSeedGeneratorITk {
 
@@ -28,11 +35,12 @@ typedef class TrigTrackSeedGeneratorITk {
   void createSeeds(const IRoiDescriptor*);
   void createSeedsZv();
   void getSeeds(std::vector<TrigInDetTriplet>&);
+  void getTracklets(const IRoiDescriptor*, std::vector<GNN_TrigTracklet>&);
 
 private:
 
-  void storeTriplets(INTERNAL_TRIPLET_BUFFER&);
-
+  void runGNN_TrackFinder(const IRoiDescriptor*, std::vector<GNN_TrigTracklet>&);
+  
   TrigFTF_GNN_DataStorage* m_storage;
 
   const TrigCombinatorialSettings& m_settings;
@@ -41,7 +49,7 @@ private:
 
   float m_minR_squ, m_maxCurv;
 
-  INTERNAL_TRIPLET_BUFFER m_triplets;
+  std::vector<TrigInDetTriplet> m_triplets;
 
 } TRIG_TRACK_SEED_GENERATOR_ITK;
 

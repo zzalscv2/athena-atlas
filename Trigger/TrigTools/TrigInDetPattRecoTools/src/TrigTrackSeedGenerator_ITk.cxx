@@ -57,7 +57,7 @@ void TrigTrackSeedGeneratorITk::loadSpacePoints(const std::vector<TrigSiSpacePoi
 
 }
 
-void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor) {
+void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDescriptor, std::vector<GNN_TrigTracklet>& vTracks) {
 
   const int MaxEdges = 2000000;
 
@@ -441,12 +441,9 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
   if(vSeeds.empty()) return;
 
-
   //backtracking
 
   TrigFTF_GNN_TRACKING_FILTER tFilter(m_settings.m_layerGeometry, edgeStorage);
-
-  INTERNAL_TRIPLET_BUFFER output;
 
   for(auto pS : vSeeds) {
 
@@ -479,6 +476,8 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
     //making triplets
 
     unsigned int nTriplets = 0;
+
+    std::vector<TrigInDetTriplet> output;
 
     for(unsigned int idx_m = 1;idx_m < vSP.size()-1;idx_m++) {
 
@@ -550,62 +549,77 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
 	  const double Q = fabs_d0*fabs_d0;
 
-	  TrigInDetTriplet* t = new TrigInDetTriplet(spI, spM, spO, Q);
-
-	  output.push_back(std::pair<double, TrigInDetTriplet*>(Q,t));
+	  output.emplace_back(spI, spM, spO, Q);
 
 	  nTriplets++;
+
 	  if(nTriplets >= m_settings.m_maxTripletBufferLength) break;
 	}
 	if(nTriplets >= m_settings.m_maxTripletBufferLength) break;
       }
       if(nTriplets >= m_settings.m_maxTripletBufferLength) break;
     }
+    
+    if(output.empty()) continue;
+
+    vTracks.emplace_back(vSP, output);
   }
 
-  if(!output.empty()) storeTriplets(output);
-
-  
 }
 
+void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor) {
+
+  std::vector<GNN_TrigTracklet> vTracks;
+
+  vTracks.reserve(5000);
+
+  runGNN_TrackFinder(roiDescriptor, vTracks);
+
+  if(vTracks.empty()) return;
+
+  m_triplets.clear();
+
+  for(auto& track : vTracks) {
+    for(auto& seed : track.m_seeds) {
+
+      float newQ = seed.Q();
+
+      if (m_settings.m_LRTmode) {
+	// In LRT mode penalize pixels in Triplets
+	if(seed.s1().isPixel()) newQ+=1000;
+	if(seed.s2().isPixel()) newQ+=1000;
+	if(seed.s3().isPixel()) newQ+=1000;
+      } else {
+	// In normal (non LRT) mode penalise SSS by 1000, PSS (if enabled) and PPS by 10000
+	if(seed.s3().isSCT()) {
+	  newQ += seed.s1().isSCT() ? 1000.0 : 10000.0;
+	} 
+      }
+      seed.Q(newQ);
+      m_triplets.emplace_back(seed);
+    }
+  }
+  vTracks.clear();
+
+}
+
+void TrigTrackSeedGeneratorITk::getTracklets(const IRoiDescriptor* roiDescriptor, std::vector<GNN_TrigTracklet>& vTracks) {
+  runGNN_TrackFinder(roiDescriptor, vTracks);
+}
 
 void TrigTrackSeedGeneratorITk::createSeedsZv() {
 
 
 }
 
-void TrigTrackSeedGeneratorITk::storeTriplets(INTERNAL_TRIPLET_BUFFER& tripletVec) {
-  for(INTERNAL_TRIPLET_BUFFER::iterator it=tripletVec.begin();it!=tripletVec.end();++it) {
-    double Q = (*it).first;
-    if (m_settings.m_LRTmode) {
-      // In LRT mode penalize pixels in Triplets
-      if((*it).second->s1().isPixel()) Q+=1000;
-      if((*it).second->s2().isPixel()) Q+=1000;
-      if((*it).second->s3().isPixel()) Q+=1000;
-    } else {
-      // In normal (non LRT) mode penalise SSS by 1000, PSS (if enabled) and PPS by 10000
-      if((*it).second->s3().isSCT()) {
-	Q += (*it).second->s1().isSCT() ? 1000.0 : 10000.0;
-      } 
-    }
-    m_triplets.push_back(std::pair<double, TrigInDetTriplet*>(Q, (*it).second));
-  }
-}
-
 void TrigTrackSeedGeneratorITk::getSeeds(std::vector<TrigInDetTriplet>& vs) {
-
-
   vs.clear();
-  vs.reserve(m_triplets.size());
   std::sort(m_triplets.begin(), m_triplets.end(), 
-    [](const std::pair<float, TrigInDetTriplet>& A, const std::pair<float, TrigInDetTriplet>& B) {
-      return A.first > B.first;
+    [](const TrigInDetTriplet& A, const TrigInDetTriplet& B) {
+      return A.Q() < B.Q();
     }
   );
-  for(INTERNAL_TRIPLET_BUFFER::reverse_iterator it=m_triplets.rbegin();it!=m_triplets.rend();++it) {
-    vs.push_back((*it).second);
-  }
-  m_triplets.clear();
-
-
+  vs = std::move(m_triplets);
 }
+
+

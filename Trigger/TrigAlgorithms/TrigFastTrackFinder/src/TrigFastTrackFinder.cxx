@@ -593,10 +593,20 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
       seedGen.loadSpacePoints(convertedSpacePoints);
 
       if (m_doZFinder && m_doFastZVseeding) seedGen.createSeedsZv();
-      else seedGen.createSeeds(tmpRoi.get());
-    
-      seedGen.getSeeds(triplets);
- 
+      else {
+
+	std::vector<GNN_TrigTracklet> vGNN_Tracks;
+
+	seedGen.getTracklets(tmpRoi.get(), vGNN_Tracks);
+	
+	for(auto& track : vGNN_Tracks) {
+	  for(auto& seed : track.m_seeds) {
+	    triplets.emplace_back(seed);
+	  }
+	  ATH_MSG_DEBUG("GNN tracklet has " << track.m_track.size()<<" spacepoints");
+	}
+	vGNN_Tracks.clear();
+      }
     } else {
       TRIG_TRACK_SEED_GENERATOR seedGen(m_tcs);
       
