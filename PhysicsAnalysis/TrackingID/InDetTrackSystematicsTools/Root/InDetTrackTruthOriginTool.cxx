@@ -21,7 +21,6 @@ namespace InDet {
     declareInterface<IInDetTrackTruthOriginTool>(this);
 #endif
 
-    declareProperty("barcodeG4", m_barcodeG4 = HepMC::SIM_BARCODE_THRESHOLD);
     declareProperty("matchingProbabilityCut", m_matchingProbabilityCut = 0.5);
 
     declareProperty("truthParticleLinkName", m_truthParticleLinkName = "truthParticleLink");
@@ -86,10 +85,9 @@ namespace InDet {
       isFragmentation = false;
     }
 
-    // Secondary? check based on barcode: secondaries are produced by G4,
-    // and have barcodes > 2e5.
+    // Secondary? 
     int truthBarcode = truth->barcode();
-    if (truthBarcode > m_barcodeG4) {
+    if (HepMC::is_simulation_particle(truthBarcode)) {
       // sub-categorize secondaries...
       int parentID = getParentID(truth);
 
@@ -104,12 +102,12 @@ namespace InDet {
       }
 
       // Lambda
-      else if(abs(parentID) == 3122){
+      else if(std::abs(parentID) == 3122){
         origin = origin | (0x1 << InDet::TrkOrigin::LambdaDecay);
       }
 
       // other long living particle decays
-      else if(abs(parentID) > 3) {
+      else if(std::abs(parentID) > 3) {
         origin = origin | (0x1 << InDet::TrkOrigin::OtherDecay);
       }
 
