@@ -48,6 +48,7 @@ namespace G4UA
 
       StatusCode getSecondaryActions( std::vector< G4UserSteppingAction* >& actions ) override final;
 
+      StatusCode addActionTool(const ToolHandle<IUserActionTool>& service_tool) override final;
     private:
 
       /// @name Handles to ATLAS action tools

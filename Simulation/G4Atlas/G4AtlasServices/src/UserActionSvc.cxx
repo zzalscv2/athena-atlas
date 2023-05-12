@@ -43,6 +43,20 @@ namespace G4UA
 
     return StatusCode::SUCCESS;
   }
+  StatusCode UserActionSvc::addActionTool(const ToolHandle<IUserActionTool>& service_tool){
+    
+    if (!service_tool.isPublic()){
+        ATH_MSG_FATAL("Only public tools are allowed");
+        return StatusCode::FAILURE;
+    }
+    if (service_tool.empty()) {
+      ATH_MSG_FATAL("NO point in adding empty tool handles here.");
+      return StatusCode::FAILURE;
+    }
+    ATH_MSG_INFO(" Add new tool "<<service_tool.name());
+    m_userActionTools.push_back(service_tool);
+    return StatusCode::SUCCESS;
+  }
 
   //---------------------------------------------------------------------------
   // Initialize the user actions for the current thread.
