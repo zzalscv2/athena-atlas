@@ -69,7 +69,14 @@ def RecoSteering(flags):
         from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
         acc.merge(InDetTrackRecoCfg(flags))
         log.info("---------- Configured tracking")
-
+    
+    # HI
+    acc.flagPerfmonDomain('HI')
+    if flags.Reco.EnableHI:
+        from HIRecConfig.HIRecConfig import HIRecCfg
+        acc.merge(HIRecCfg(flags))
+        log.info("---------- Configured Heavy Ion reconstruction")
+    
     # HGTD
     acc.flagPerfmonDomain('HGTD')
     if flags.Reco.EnableHGTDExtension:
@@ -179,13 +186,6 @@ def RecoSteering(flags):
         from CaloRingerAlgs.CaloRingerAlgsConfig import CaloRingerSteeringCfg
         acc.merge(CaloRingerSteeringCfg(flags))
         log.info("---------- Configured Calo Rings")
-
-    # HI
-    acc.flagPerfmonDomain('HI')
-    if flags.Reco.EnableHI:
-        from HIRecConfig.HIRecConfig import HIRecCfg
-        acc.merge(HIRecCfg(flags))
-        log.info("---------- Configured Heavy Ion reconstruction")
 
     # AFP
     acc.flagPerfmonDomain('AFP')
