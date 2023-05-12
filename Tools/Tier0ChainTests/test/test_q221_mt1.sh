@@ -4,6 +4,7 @@
 # art-type: grid
 # art-include: master/Athena
 # art-include: 22.0-mc20/Athena
+# art-output: log.*
 
 Reco_tf.py \
 --AMI=q221 \
@@ -16,15 +17,10 @@ Reco_tf.py \
 rc1=$?
 echo "art-result: $rc1 Reco"
 
-
 rc2=-9999
 if [ ${rc1} -eq 0 ]
-then
-  ArtPackage=$1
-  ArtJobName=$2
-  art.py compare grid --entries 20 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --ignore-exit-code diff-pool --ignore-leave 'Token' --ignore-leave 'index_ref' --ignore-leave '(.*)_timings\.(.*)' --ignore-leave '(.*)_mems\.(.*)' --ignore-leave '(.*)TrigCostContainer(.*)' --ignore-leave '(.*)HLTNav_Summary_OnlineSlimmed(.*)'
-  rc2=$?
+    ArtRef=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/$1/TCT_22.0-mc20_references/$2
+    art.py compare ref . $ArtRef --entries 20 --mode=semi-detailed --order-trees --ignore-exit-code diff-pool --ignore-leave 'Token' --ignore-leave 'index_ref' --ignore-leave '(.*)_timings\.(.*)' --ignore-leave '(.*)_mems\.(.*)' --ignore-leave '(.*)TrigCostContainer(.*)' --ignore-leave '(.*)HLTNav_Summary_OnlineSlimmed(.*)'
+    rc2=$?
 fi
 echo  "art-result: ${rc2} Diff"
-
-

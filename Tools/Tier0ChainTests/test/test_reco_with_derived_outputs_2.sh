@@ -8,6 +8,7 @@
 # art-include: 22.0-mc20/Athena
 # art-include: 21.3/Athena
 # art-include: 21.9/Athena
+# art-output: log.*
 
 # disabled HLTMon in preExec as recommended in https://its.cern.ch/jira/browse/ATR-22947                                    
 
@@ -28,11 +29,8 @@ echo "art-result: $rc1 Reco"
 
 rc2=-9999
 if [ ${rc1} -eq 0 ]
-then
-  ArtPackage=$1
-  ArtJobName=$2
-  art.py compare grid --entries 20 ${ArtPackage} ${ArtJobName} --mode=semi-detailed
-  rc2=$?
+    ArtRef=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/$1/TCT_22.0-mc20_references/$2
+    art.py compare ref . $ArtRef --entries 20 --mode=semi-detailed
+    rc2=$?
 fi
 echo  "art-result: ${rc2} Diff"
-
