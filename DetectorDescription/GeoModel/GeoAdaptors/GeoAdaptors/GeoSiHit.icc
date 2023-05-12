@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
@@ -53,12 +53,28 @@ inline HepGeom::Point3D<double> GeoSiHit::getGlobalPosition() const {
   }
 
   if (geoelement) {
+    if(m_hit->isHGTD()){
+      // This special treatment is necessary because the localStartPosition and localEndPosition 
+      // of the SiHit in the HGTD SD class https://gitlab.cern.ch/atlas/athena/-/blob/master/HighGranularityTimingDetector/HGTD_G4/HGTD_G4_SD/src/HGTDSensorGmxSD.cxx#L83-L89
+      // are set with coordinates in the (y, z, x) order.
+      const HepGeom::Point3D<double> localHit = m_hit->localStartPosition(); 
+      HepGeom::Point3D<double> flippedHit;
+      flippedHit[0]=localHit.y();
+      flippedHit[1]=localHit.z();
+      flippedHit[2]=localHit.x();
+      const HepGeom::Point3D<double> globalStartPos = Amg::EigenTransformToCLHEP(geoelement->transformHit()) * (flippedHit);
+      double x=globalStartPos.x();
+      double y=globalStartPos.y();
+      double z=globalStartPos.z();
+      return HepGeom::Point3D<double>(x,y,z);
+    }else{
     const HepGeom::Point3D<double> globalStartPos = Amg::EigenTransformToCLHEP(geoelement->transformHit()) * HepGeom::Point3D<double>(m_hit->localStartPosition());
 
     double x=globalStartPos.x();
     double y=globalStartPos.y();
     double z=globalStartPos.z();
     return HepGeom::Point3D<double>(x,y,z);
+    }
   }
 
   return HepGeom::Point3D<double>(0.0,0.0,0.0);
