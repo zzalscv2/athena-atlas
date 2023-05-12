@@ -1,11 +1,15 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
 // TruthBornLeptonCollectionMaker.cxx
 // Makes a special collection of Born leptons
 
+// R/W/D handles
+#include "StoreGate/ReadHandle.h"
+#include "StoreGate/WriteHandle.h"
+#include "StoreGate/WriteDecorHandle.h"
 // My own header file
 #include "TruthBornLeptonCollectionMaker.h"
 // EDM includes for the particles we need
@@ -25,8 +29,6 @@ DerivationFramework::TruthBornLeptonCollectionMaker::TruthBornLeptonCollectionMa
   , m_metaStore( "MetaDataStore", n )
 {
   declareInterface<DerivationFramework::IAugmentationTool>(this);
-  declareProperty("ParticlesKey", m_particlesKey="TruthParticles");
-  declareProperty("NewCollectionName", m_collectionName="");
   declareProperty( "MetaDataStore", m_metaStore );
 }
 
@@ -39,16 +41,28 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::initialize()
 {
   ATH_MSG_VERBOSE("initialize() ...");
 
-  if (m_particlesKey.empty() /*|| m_verticesKey==""*/) {
-    ATH_MSG_FATAL("No truth particle collection provided to use as a basis for new collections");
-    return StatusCode::FAILURE;
-  } else {ATH_MSG_INFO("Using " << m_particlesKey << " as the source collections for new truth collections");}
-  
+   // Input truth particles
+   ATH_CHECK( m_particlesKey.initialize() );
+   ATH_MSG_INFO("Using " << m_particlesKey.key() << " as the input truth container key");
+
+  // Output truth particles
   if (m_collectionName.empty()) {
     ATH_MSG_FATAL("No key provided for the new truth particle collection");
     return StatusCode::FAILURE;
-  } else {ATH_MSG_INFO("New truth particle collection key: " << m_collectionName );}
+  } else {ATH_MSG_INFO("New truth particle collection key: " << m_collectionName.key() );}
+  ATH_CHECK( m_collectionName.initialize());
 
+  // Decoration keys
+  m_originDecoratorKey = m_collectionName.key() + ".classifierParticleOrigin";
+  ATH_CHECK(m_originDecoratorKey.initialize());
+  m_typeDecoratorKey = m_collectionName.key() + ".classifierParticleType";
+  ATH_CHECK(m_typeDecoratorKey.initialize());
+  m_outcomeDecoratorKey = m_collectionName.key() + ".classifierParticleOutCome";
+  ATH_CHECK(m_outcomeDecoratorKey.initialize());
+  m_classificationDecoratorKey = m_collectionName.key() + ".Classification";
+  ATH_CHECK(m_classificationDecoratorKey.initialize());
+  
+  // TODO: needs to be made MT-friendly
   ATH_CHECK( m_metaStore.retrieve() );
 
   return StatusCode::SUCCESS;
@@ -57,9 +71,13 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::initialize()
 // Selection and collection creation
 StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() const
 {
+  // Event context
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  
   // Set up for some metadata handling
   static const bool is_sherpa = [this]() {
     bool is_sherpa = false;
+    // TODO: needs to be made MT-friendly
     if (m_metaStore->contains<xAOD::TruthMetaDataContainer>("TruthMetaData")){
       // Note that I'd like to get this out of metadata in general, but it seems that the
       // metadata isn't fully available in initialize, and since this is a const function
@@ -86,30 +104,28 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() co
   }();
 
   // Retrieve truth collections
-  const xAOD::TruthParticleContainer* importedTruthParticles(nullptr);
-  if (evtStore()->retrieve(importedTruthParticles,m_particlesKey).isFailure()) {
-    ATH_MSG_ERROR("No TruthParticle collection with name " << m_particlesKey << " found in StoreGate!");
-    return StatusCode::FAILURE;
+  SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_particlesKey,ctx);    
+  if (!truthParticles.isValid()) {        
+    ATH_MSG_ERROR("Couldn't retrieve TruthParticle collection with name " << m_particlesKey);        
+    return StatusCode::FAILURE;    
   }
 
-  // Create the new containers
-  xAOD::TruthParticleContainer* newParticleCollection = new xAOD::TruthParticleContainer();
-  CHECK( evtStore()->record( newParticleCollection, m_collectionName ) );
-  xAOD::TruthParticleAuxContainer* newParticleAuxCollection = new xAOD::TruthParticleAuxContainer();
-  CHECK( evtStore()->record( newParticleAuxCollection, m_collectionName + "Aux." ) );
-  newParticleCollection->setStore( newParticleAuxCollection );
-  ATH_MSG_DEBUG( "Recorded new TruthParticleContainer with key: " <<  m_collectionName);
+  // Create the new particle containers and WriteHandles
+  SG::WriteHandle<xAOD::TruthParticleContainer> newParticlesWriteHandle(m_collectionName, ctx);
+  ATH_CHECK(newParticlesWriteHandle.record(std::make_unique<xAOD::TruthParticleContainer>(),
+                                           std::make_unique<xAOD::TruthParticleAuxContainer>()));
+  ATH_MSG_DEBUG( "Recorded new TruthParticleContainer with key: " << (m_collectionName.key()));
 
   // Set up decorators
-  const static SG::AuxElement::Decorator< unsigned int > originDecorator("classifierParticleOrigin");
-  const static SG::AuxElement::Decorator< unsigned int > typeDecorator("classifierParticleType");
-  const static SG::AuxElement::Decorator< unsigned int > outcomeDecorator("classifierParticleOutCome");
-  const static SG::AuxElement::Decorator< unsigned int > classificationDecorator("Classification");
+  SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > originDecorator(m_originDecoratorKey, ctx);
+  SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > typeDecorator(m_typeDecoratorKey, ctx);
+  SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > outcomeDecorator(m_outcomeDecoratorKey, ctx);
+  SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > classificationDecorator(m_classificationDecoratorKey, ctx);
 
   // add relevant particles to new collection
-  for (unsigned int i=0; i<importedTruthParticles->size(); ++i) {
+  for (unsigned int i=0; i<truthParticles->size(); ++i) {
     // Grab the particle
-    const xAOD::TruthParticle* theParticle = (*importedTruthParticles)[i];
+    const xAOD::TruthParticle* theParticle = (*truthParticles)[i];
     if (!theParticle) continue; // Protection against null pointers
     if (!theParticle->isLepton()) continue; // Only include leptons!
 
@@ -153,7 +169,7 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() co
 
     // Add this particle to the new collection
     xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
-    newParticleCollection->push_back( xTruthParticle );
+    newParticlesWriteHandle->push_back( xTruthParticle );
     // Fill with numerical content
     xTruthParticle->setPdgId(theParticle->pdgId());
     xTruthParticle->setBarcode(theParticle->barcode());
