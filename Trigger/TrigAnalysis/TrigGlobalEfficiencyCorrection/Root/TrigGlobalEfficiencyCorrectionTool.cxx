@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -742,11 +742,6 @@ CP::CorrectionCode TrigGlobalEfficiencyCorrectionTool::getEfficiency(unsigned ru
 	efficiencyMc = 0.;
 	
 	ATH_MSG_DEBUG("Computing global trigger efficiency for this event with  " << particles.size() << " lepton(s) as input; run number = " << runNumber);
-	
-	if(runNumber<266904 || runNumber>364292)
-	{
-		ATH_MSG_WARNING("Suspicious run number provided " << runNumber << ", continuing anyway");
-	}
 	
 	#ifdef XAOD_STANDALONE
 	if(!m_initialized)
