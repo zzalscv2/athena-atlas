@@ -173,7 +173,7 @@ StatusCode TrigMuonEFIdtpInvMassHypoTool::doTPIdperf(const xAOD::TrackParticle* 
    auto mon_FTF_qovp  = Monitored::Collection("FTF_qovp", mnt_FTF_qovp);
    auto mon_phi_effi  = Monitored::Scalar<float>("probePhiEfficiency", -999.0);
    auto mon_eta_effi  = Monitored::Scalar<float>("probeEtaEfficiency", -999.0);
-   auto mon_pt_found  = Monitored::Scalar<float>("PTfoundCombined",  -1);
+   auto mon_pt_found  = Monitored::Scalar<float>("PTfound",  -1);
    auto mon_ftf_found = Monitored::Scalar<float>("FTFfound", -1);
    auto mon_pt_phi    = Monitored::Scalar<float>("PTphi", -999.0);
    auto mon_pt_pix    = Monitored::Scalar<float>("PTpixelFound", -1);
