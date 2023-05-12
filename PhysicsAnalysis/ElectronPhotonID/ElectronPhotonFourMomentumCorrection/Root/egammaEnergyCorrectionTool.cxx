@@ -263,7 +263,7 @@ namespace AtlasRoot {
       const std::string gain_filename2 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
       m_gain_tool.reset(new egGain::GainTool(gain_filename1, gain_filename2));
 
-      m_e1hg_tool.reset(new e1hg_systematics());
+      m_e1hg_tool.reset(new e1hg_systematics(PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/e1hg_systematics_histos.root")));
 
       // mc12a : crude MSc fix in G4; old geometry
       // All systematics as in 2010.
@@ -334,7 +334,7 @@ namespace AtlasRoot {
       const std::string gain_filename2 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
       m_gain_tool.reset(new egGain::GainTool(gain_filename1, gain_filename2));
 
-      m_e1hg_tool.reset(new e1hg_systematics());
+      m_e1hg_tool.reset(new e1hg_systematics(PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/e1hg_systematics_histos.root")));
     }
     else if (m_esmodel == egEnergyCorr::es2012XX) {
       m_use_etaCalo_scales = true;
@@ -384,7 +384,7 @@ namespace AtlasRoot {
       const std::string gain_filename2 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
       m_gain_tool.reset(new egGain::GainTool(gain_filename1, gain_filename2));
 
-      m_e1hg_tool.reset(new e1hg_systematics());
+      m_e1hg_tool.reset(new e1hg_systematics(PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/e1hg_systematics_histos.root")));
     }
     else if (m_esmodel == egEnergyCorr::es2015PRE ||
 	     m_esmodel == egEnergyCorr::es2015cPRE) {
@@ -448,7 +448,7 @@ namespace AtlasRoot {
       const std::string gain_filename2 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
       m_gain_tool.reset(new egGain::GainTool(gain_filename1, gain_filename2));
 
-      m_e1hg_tool.reset(new e1hg_systematics());
+      m_e1hg_tool.reset(new e1hg_systematics(PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/e1hg_systematics_histos.root")));
     }
 
     else if (m_esmodel == egEnergyCorr::es2015PRE_res_improved ||
@@ -513,7 +513,7 @@ namespace AtlasRoot {
       const std::string gain_filename2 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
       m_gain_tool.reset(new egGain::GainTool(gain_filename1, gain_filename2));
 
-      m_e1hg_tool.reset(new e1hg_systematics());
+      m_e1hg_tool.reset(new e1hg_systematics(PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/e1hg_systematics_histos.root")));
     }
 
     else if (m_esmodel == egEnergyCorr::es2015c_summer) {
@@ -577,7 +577,7 @@ namespace AtlasRoot {
       const std::string gain_filename2 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
       m_gain_tool.reset(new egGain::GainTool(gain_filename1, gain_filename2));
 
-      m_e1hg_tool.reset( new e1hg_systematics());
+      m_e1hg_tool.reset( new e1hg_systematics(PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/e1hg_systematics_histos.root")));
       m_use_temp_correction201215 = true;  // for eta > 2.5
       m_use_temp_correction201516 = false;
     }
@@ -642,7 +642,7 @@ namespace AtlasRoot {
       const std::string gain_filename2 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
       m_gain_tool.reset(new egGain::GainTool(gain_filename1, gain_filename2));
 
-      m_e1hg_tool.reset( new e1hg_systematics());
+      m_e1hg_tool.reset( new e1hg_systematics(PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/e1hg_systematics_histos.root")));
       m_use_temp_correction201215 = true;  // for eta > 2.5
       m_use_temp_correction201516 = true;
     }
@@ -985,8 +985,14 @@ namespace AtlasRoot {
       }
 
       m_gain_tool_run2->msg().setLevel(this->msg().level());
+
+      if(m_esmodel == egEnergyCorr::es2022_R21_Precision) {
+        m_e1hg_tool.reset(new e1hg_systematics(PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v29/e1hg_systematics_histos.root")));
+      }
+      else {
+        m_e1hg_tool.reset(new e1hg_systematics(PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/e1hg_systematics_histos.root")));
+      }
       
-      m_e1hg_tool.reset( new e1hg_systematics());
       m_use_temp_correction201215 = false;
       m_use_temp_correction201516 = false;
 
@@ -1038,7 +1044,7 @@ namespace AtlasRoot {
       const std::string gain_filename2 = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/FunctionsG_all.root");
       m_gain_tool.reset( new egGain::GainTool(gain_filename1, gain_filename2));
 
-      m_e1hg_tool.reset( new e1hg_systematics());
+      m_e1hg_tool.reset( new e1hg_systematics(PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/e1hg_systematics_histos.root")));
 
       // If we are here, fail      :
 

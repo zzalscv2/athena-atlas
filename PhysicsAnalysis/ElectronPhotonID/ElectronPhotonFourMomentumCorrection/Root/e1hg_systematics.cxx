@@ -14,10 +14,10 @@
 #include "PathResolver/PathResolver.h"
 #endif
 
-e1hg_systematics::e1hg_systematics()
+e1hg_systematics::e1hg_systematics(const std::string& filename)
 {
 
-  m_file0 = TFile::Open( PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v8/e1hg_systematics_histos.root").c_str() );
+  m_file0 = TFile::Open( filename.c_str() );
 
 
   for (Int_t ieta=0;ieta<8;ieta++) {
