@@ -34,7 +34,7 @@ private:
 
 #else
   /** calculate the rapidity of a particle */
-  inline double getRapidity(const HepMC::GenParticle*& p) const {
+  inline double getRapidity(const HepMC::GenParticle* p) const {
     double e = (p)->momentum().e();
     double pz = (p)->momentum().pz();
     if (e == pz) return 9999.;
