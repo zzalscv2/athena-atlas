@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrkConfig )
@@ -7,6 +7,10 @@ atlas_subdir( TrkConfig )
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_data( share/*.ref )
 
+
+atlas_add_test( TrackingPassFlags_test
+		SCRIPT python -m TrkConfig.TrackingPassFlags
+		POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( TrackCollectionReadConfig_test
                 SCRIPT python -m TrkConfig.TrackCollectionReadConfig
