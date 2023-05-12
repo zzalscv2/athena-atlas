@@ -279,7 +279,7 @@ def createTrackingConfigFlags():
 
     # InDet
 
-    from InDetConfig.TrackingPassFlags import (
+    from TrkConfig.TrackingPassFlags import (
         createTrackingPassFlags, createHighPileupTrackingPassFlags,
         createMinBiasTrackingPassFlags, createLargeD0TrackingPassFlags,
         createR3LargeD0TrackingPassFlags, createLowPtLargeD0TrackingPassFlags,
@@ -334,7 +334,7 @@ def createTrackingConfigFlags():
 
     # ITk
 
-    from InDetConfig.TrackingPassFlags import (
+    from TrkConfig.TrackingPassFlags import (
         createITkTrackingPassFlags, createITkLargeD0TrackingPassFlags,
         createITkConversionFindingTrackingPassFlags,
         createITkFastTrackingPassFlags, createITkLargeD0FastTrackingPassFlags,
