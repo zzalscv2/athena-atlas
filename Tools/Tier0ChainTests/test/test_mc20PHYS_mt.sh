@@ -2,7 +2,6 @@
 
 # art-description: DAOD building PHYS mc20 MT
 # art-type: grid
-# art-output: *.pool.root
 # art-output: checkFile.txt
 # art-output: checkxAOD.txt
 # art-output: checkIndexRefs*.txt

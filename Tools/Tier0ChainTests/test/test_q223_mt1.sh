@@ -2,6 +2,7 @@
 #
 # art-description: RecoTrf
 # art-type: grid
+# art-output: log.*
 
 # Added "preExec" here, because it was needed to disable dynamic alignment wrt q223 as discussed in ATLASRECTS-5783 (changed InDetGeometryFlags.useDynamicAlignFolders to false wrt q223).                                                      
 # Updated to data18 input file (q223 uses data15 input file)                               
@@ -19,7 +20,10 @@ Reco_tf.py \
 
 echo "art-result: $? Reco"
 
-ArtPackage=$1
-ArtJobName=$2
-art.py compare grid --entries 20 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --ignore-exit-code diff-pool
-echo "art-result: $? Diff"
+rc2=-9999
+if [ ${rc1} -eq 0 ]
+    ArtRef=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/$1/TCT_22.0-mc20_references/$2
+    art.py compare ref . $ArtRef --entries 20 --mode=semi-detailed --order-trees --ignore-exit-code diff-pool
+    rc2=$?
+fi
+echo  "art-result: ${rc2} Diff"

@@ -5,6 +5,7 @@
 # art-include: master/Athena
 # art-include: 22.0-mc20/Athena
 # art-athena-mt: 8
+# art-output: log.*
 
 Reco_tf.py \
 --AMI=q441 \

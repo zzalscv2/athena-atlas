@@ -3,7 +3,6 @@
 # art-include: 21.2/AthDerivation
 # art-description: DAOD building PHYSVAL data18 MT (DISABLED)
 # art-type: grid
-# art-output: *.pool.root
 # art-output: checkFile.txt
 # art-output: checkxAOD.txt
 # art-output: checkIndexRefs*.txt
