@@ -351,7 +351,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
                     configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_TA_12Oct2018.config"
 
         if self.jetInput == "UFO":
-            configFile = "JES_MC16recommendation_R10_UFO_CSSK_SoftDrop_JMS_01April2020.config"
+            configFile = "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_10Mar2023.config"
 
         # Prepare the jet calibration algorithm
         alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+postfix )
