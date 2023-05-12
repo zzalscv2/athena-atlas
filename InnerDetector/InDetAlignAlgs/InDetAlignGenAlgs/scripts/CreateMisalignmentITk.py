@@ -75,9 +75,9 @@ def CreateMis(flags,name="CreateITkMisalignAlg",**kwargs):
     ####################################################################################################################
 
     acc=MainServicesCfg(flags)
-    print ("\n CreateMisalignAlg: Creation of misalignment mode %s: %s \n" % (MisalignMode,misalignModeMap.get(MisalignMode,'unknown')))
+    print ("\n CreateMisalignAlg: Creation of misalignment mode %s: %s \n" % (int(MisalignMode),misalignModeMap.get(int(MisalignMode),'unknown')))
     kwargs.setdefault("ASCIIFilenameBase",outFiles)
-    kwargs.setdefault("SQLiteTag",'MisalignMode_'+str(misalignModeMap.get(MisalignMode,'unknown')))
+    kwargs.setdefault("SQLiteTag",'MisalignMode_'+str(misalignModeMap.get(int(MisalignMode),'unknown')))
     kwargs.setdefault("MisalignMode",int(MisalignMode))
     kwargs.setdefault("MaxShift",shiftInMicrons)
     kwargs.setdefault("CreateFreshDB",createFreshDB)
@@ -123,6 +123,6 @@ if __name__ == "__main__":
     acc.printConfig()
     #run
     sc=acc.run(10)
-    if sc.isFailure:
+    if sc.isFailure():
         print("Failed to run the Misalignment Algorithm")
         sys.exit(-1)
