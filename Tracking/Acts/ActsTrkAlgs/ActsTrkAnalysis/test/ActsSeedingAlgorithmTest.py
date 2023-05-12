@@ -36,8 +36,8 @@ if __name__ == "__main__":
     from InDetConfig.InDetPrepRawDataFormationConfig import ITkInDetToXAODClusterConversionCfg
     acc.merge(ITkInDetToXAODClusterConversionCfg(flags))
 
-    from SiSpacePointFormation.SiSpacePointFormationConfig import TrkToXAODSpacePointConversionCfg
-    acc.merge(TrkToXAODSpacePointConversionCfg(flags))
+    from InDetConfig.SiSpacePointFormationConfig import InDetToXAODSpacePointConversionCfg
+    acc.merge(InDetToXAODSpacePointConversionCfg(flags))
 
     from InDetConfig.ITkTrackRecoConfig import CombinedTrackingPassFlagSets
     flags_set = CombinedTrackingPassFlagSets(flags)
