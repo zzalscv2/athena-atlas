@@ -14,11 +14,11 @@ from JetRecConfig import JetRecConfig
 from JetRecConfig.DependencyHelper import solveDependencies
 
 def HIJetRecCfg(flags):
-    """Configures Heavy IOn Jet reconstruction """
+    """Configures Heavy Ion Jet reconstruction """
     acc = ComponentAccumulator()
 
     clustersKey = "HICluster"
-    eventshapeKey_egamma = "HIEventShape"
+    eventshapeKey_egamma = flags.HeavyIon.Egamma.EventShape
     #get HIClusters
     acc.merge(HIClusterMakerCfg(flags,cluster_key=clustersKey))
     #set eventshape map
@@ -268,7 +268,7 @@ def HIJetRecCfg(flags):
     return acc
 
 
-def HIClusterMakerCfg(flags, cell_key="AllCalo", cluster_key="", save = True) :
+def HIClusterMakerCfg(flags, cell_key="AllCalo", cluster_key="HICluster", save = True) :
     """Function to equip HI cluster builder from towers and cells, adds to output AOD stream"""
 
     acc = ComponentAccumulator()
@@ -279,9 +279,6 @@ def HIClusterMakerCfg(flags, cell_key="AllCalo", cluster_key="", save = True) :
     from CaloRec.CaloTowerMakerConfig import CaloTowerMakerCfg
     towerMaker = acc.getPrimaryAndMerge(CaloTowerMakerCfg(flags))
     tower_key = towerMaker.TowerContainerName
-
-    if cluster_key == "" :
-        cluster_key = "HICluster"
 
     HIClusterMaker = CompFactory.HIClusterMaker("HIClusterMaker",
                                 InputTowerKey = tower_key,
@@ -683,6 +680,12 @@ if __name__ == "__main__":
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     acc = MainServicesCfg(flags)
+    from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
+    acc.merge(InDetTrackRecoCfg(flags))
+    from HIGlobal.HIGlobalConfig import HIGlobalRecCfg
+    acc.merge(HIGlobalRecCfg(flags))
 
     acc.merge(HIJetRecCfg(flags))
-
+    
+    import sys
+    sys.exit(acc.run().isFailure())

@@ -88,20 +88,16 @@ StatusCode DQBadLBFilterAlg::execute() {
   }    
 
   // Define validity of the output cond object and record it
-  EventIDRange rangeW;
-  if(!readHandle.range(rangeW)) {
-    ATH_MSG_ERROR("Failed to retrieve validity range for " << readHandle.key());
-    return StatusCode::FAILURE;
-  }
- 
-  if(writeHandle.record(rangeW,attribListW.release()).isFailure()) {
+  writeHandle.addDependency(readHandle);
+
+  if(writeHandle.record(attribListW.release()).isFailure()) {
     ATH_MSG_ERROR("Could not record DQ AthenaAttributeList object with " 
 		  << writeHandle.key() 
-		  << " with EventRange " << rangeW
+		  << " with EventRange " << writeHandle.getRange()
 		  << " into Conditions Store");
     return StatusCode::FAILURE;
   }
-  ATH_MSG_INFO("recorded new " << writeHandle.key() << " with range " << rangeW << " into Conditions Store");
+  ATH_MSG_INFO("recorded new " << writeHandle.key() << " with range " << writeHandle.getRange() << " into Conditions Store");
 
   return StatusCode::SUCCESS;
 }

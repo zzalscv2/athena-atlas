@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -45,7 +45,9 @@ Interface definition for eFEXFPGA
 
     virtual std::vector<std::unique_ptr<eFEXegTOB>> getEmTOBs() = 0; 
 
-    virtual std::vector<std::unique_ptr<eFEXtauTOB>> getTauTOBs() = 0; 
+    virtual std::vector<std::unique_ptr<eFEXtauTOB>> getTauHeuristicTOBs() = 0; 
+    
+    virtual std::vector<std::unique_ptr<eFEXtauTOB>> getTauBDTTOBs() = 0; 
 
     // static virtual bool etSort(uint32_t &, uint32_t &) = 0;
 

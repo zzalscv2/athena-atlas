@@ -12,7 +12,7 @@ atlas_add_library( xAODEgamma
    xAODEgamma/*.h xAODEgamma/versions/*.h Root/*.cxx
    PUBLIC_HEADERS xAODEgamma
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthLinks GeoPrimitives
+   LINK_LIBRARIES ${ROOT_LIBRARIES} TruthUtils AthContainers AthLinks GeoPrimitives
    EventPrimitives xAODBase xAODCaloEvent xAODCore xAODPrimitives xAODTracking xAODPFlow
    xAODTruth )
 

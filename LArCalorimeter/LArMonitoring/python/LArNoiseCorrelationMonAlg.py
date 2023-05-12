@@ -83,14 +83,16 @@ def LArNoiseCorrelationMonConfigCore(helper, algoinstance,inputFlags):
         larNoiseCorrelMonAlg.FEBlist=febsToMonitorBarrelA+febsToMonitorBarrelC+febsToMonitorEndcapA+febsToMonitorEndcapC
     else:
         setCustomFEBS=set(customFEBStoMonitor)
-        febsToMonitorBarrelA=list(setCustomFEBS.intersection(lArDQGlobals.febsBarrelA))
-        febsToMonitorEndcapA=list(setCustomFEBS.intersection(lArDQGlobals.febsEndcapA))
-        febsToMonitorBarrelC=list(setCustomFEBS.intersection(lArDQGlobals.febsBarrelC))
-        febsToMonitorEndcapC=list(setCustomFEBS.intersection(lArDQGlobals.febsEndcapC))
+        febsToMonitorBarrelA=sorted(setCustomFEBS.intersection(lArDQGlobals.febsBarrelA))
+        febsToMonitorEndcapA=sorted(setCustomFEBS.intersection(lArDQGlobals.febsEndcapA))
+        febsToMonitorBarrelC=sorted(setCustomFEBS.intersection(lArDQGlobals.febsBarrelC))
+        febsToMonitorEndcapC=sorted(setCustomFEBS.intersection(lArDQGlobals.febsEndcapC))
 
         if len(febsToMonitorBarrelA)==0 and len(febsToMonitorEndcapA)==0 and len(febsToMonitorBarrelC)==0 and len(febsToMonitorEndcapC)==0:
-            print("LArNoiseCorrelationMonAlg:WARNING. None of the following FEBs were recognised, no plot will be produced")
-            print(customFEBStoMonitor)
+            from AthenaCommon.Logging import logging
+            msg=logging.getLogger("LArNoiseCorrelationMonAlg")
+            msg.warning("None of the following FEBs were recognised, no plot will be produced")
+            msg.warning(customFEBStoMonitor)
             larNoiseCorrelMonAlg.PlotsOFF=True #lets protect ourselves against poor writing
             larNoiseCorrelMonAlg.PlotCustomFEBSset=False
             larNoiseCorrelMonAlg.FEBlist=lArDQGlobals.febsBarrelA+lArDQGlobals.febsEndcapA+lArDQGlobals.febsBarrelC+lArDQGlobals.febsEndcapC #to avoid having it empty, would it crash otherwise?
@@ -183,9 +185,7 @@ def LArNoiseCorrelationMonConfigCore(helper, algoinstance,inputFlags):
                                 ybins=lArDQGlobals.FEB_N_channels,ymin=lArDQGlobals.FEB_channels_Min,ymax=lArDQGlobals.FEB_channels_Max,
                                 pattern=febsToMonitorEndcapC)
 
-    print(correlArray)
-
-
+   
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     if isComponentAccumulatorCfg():
         cfg=ComponentAccumulator()

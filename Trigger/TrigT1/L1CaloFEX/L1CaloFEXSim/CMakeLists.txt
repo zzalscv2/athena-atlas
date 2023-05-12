@@ -26,6 +26,7 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/*.py )
 atlas_install_runtime( share/*.csv )
 atlas_install_data( share/*.ref )
+atlas_install_data( data/bdt_config.json )
 
 atlas_add_test( L1CaloFEXSimCfg_MC
                 SCRIPT python -m L1CaloFEXSim.L1CaloFEXSimCfg -i ttbar -e -n 5
@@ -44,3 +45,9 @@ atlas_add_test( L1CaloFEXSimCfg_R3data
                 LOG_SELECT_PATTERN "^ApplicationMgr"
                 PROPERTIES TIMEOUT 300
                 PRIVATE_WORKING_DIRECTORY )
+
+atlas_add_test( L1CaloFEXSimCfgBDTTau_R3data
+                SCRIPT python -m L1CaloFEXSim.L1CaloFEXSimCfg -i data -e -d -n 5
+                PRIVATE_WORKING_DIRECTORY 
+		ENVIRONMENT "TAU_EFEX_BDT_CONFIG_PATH=${CMAKE_CURRENT_SOURCE_DIR}/data/bdt_config.json"
+		POST_EXEC_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/validateBDTTau.py )

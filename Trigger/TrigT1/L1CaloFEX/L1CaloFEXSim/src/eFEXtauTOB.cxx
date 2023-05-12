@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -25,6 +25,7 @@ LVL1::eFEXtauTOB::eFEXtauTOB():
 	m_efex_id{99999},
 	m_seed_und{true},
 	m_seed{99999},
+	m_bdt_score{99999},
 	m_tobword{0},
 	m_xtobword0{0},
 	m_xtobword1{0}
@@ -93,6 +94,16 @@ void LVL1::eFEXtauTOB::setRhadCore(unsigned int rhadcore)
 void LVL1::eFEXtauTOB::setRhadEnv(unsigned int rhadenv)
 {
 	m_rhad_env = rhadenv;
+}
+
+void LVL1::eFEXtauTOB::setBDTScore(unsigned int bdtscore)
+{
+	m_bdt_score = bdtscore;
+}
+
+void LVL1::eFEXtauTOB::setIsBDTAlgo(unsigned int is_bdt_algo)
+{
+	m_is_bdt_algo = is_bdt_algo;
 }
 
 void LVL1::eFEXtauTOB::setTobword(uint32_t tobword) {

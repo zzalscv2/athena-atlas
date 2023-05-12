@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1CaloFEXSim/eFEXDriver.h"
@@ -9,6 +9,7 @@
 #include "L1CaloFEXSim/eFEXSim.h"
 #include "L1CaloFEXSim/eFEXFPGA.h"
 #include "L1CaloFEXSim/eFEXtauAlgo.h"
+#include "L1CaloFEXSim/eFEXtauBDTAlgo.h"
 #include "L1CaloFEXSim/eFEXegAlgo.h"
 #include "L1CaloFEXSim/eFEXTOBEtTool.h"
 #include "L1CaloFEXSim/eFEXNtupleWriter.h"
@@ -57,6 +58,7 @@ DECLARE_COMPONENT(eTowerBuilder)
 DECLARE_COMPONENT(eSuperCellTowerMapper)
 DECLARE_COMPONENT(eFEXFPGA)
 DECLARE_COMPONENT(eFEXtauAlgo)
+DECLARE_COMPONENT(eFEXtauBDTAlgo)
 DECLARE_COMPONENT(eFEXegAlgo)
 DECLARE_COMPONENT(eFEXTOBEtTool)
 DECLARE_COMPONENT(eFEXNtupleWriter)
