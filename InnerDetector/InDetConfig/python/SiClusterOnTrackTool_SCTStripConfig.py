@@ -25,14 +25,7 @@ def InDetBroadSCT_ClusterOnTrackToolCfg(flags, name='InDetBroadSCT_ClusterOnTrac
 def ITkStripClusterOnTrackToolCfg(flags, name='ITkStrip_ClusterOnTrackTool', **kwargs):
     acc = ComponentAccumulator()
 
-    if 'LorentzAngleTool' not in kwargs:
-        from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
-        kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(
-            ITkStripLorentzAngleToolCfg(flags)))
-
-    kwargs.setdefault("CorrectionStrategy", 0 ) # do correct position bias
     kwargs.setdefault("ErrorStrategy", 0 ) # use width / sqrt(12)
-
     kwargs.setdefault("ErrorScalingKey", "")
 
     acc.setPrivateTools(CompFactory.ITk.StripClusterOnTrackTool(name, **kwargs))
