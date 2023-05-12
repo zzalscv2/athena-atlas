@@ -68,8 +68,7 @@ if DetFlags.haveRIO.Calo_on() :
     from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
     from egammaAlgs.egammaTopoClusterCopierConfig import egammaTopoClusterCopierCfg
-    CAtoGlobalWrapper(egammaTopoClusterCopierCfg,ConfigFlags,
-                          name='SubtractedEgammaTopoClusterCopier')
+    CAtoGlobalWrapper(egammaTopoClusterCopierCfg,ConfigFlags)
 
     #Run CaloExtension
     if (rec.doESD()) and (rec.doEgamma()) :
