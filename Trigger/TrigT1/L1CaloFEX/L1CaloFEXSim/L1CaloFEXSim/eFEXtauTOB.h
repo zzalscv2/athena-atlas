@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -33,6 +33,8 @@ namespace LVL1 {
     unsigned int m_efex_id;
     bool m_seed_und;
     unsigned int m_seed;
+    unsigned int m_bdt_score;
+    unsigned int m_is_bdt_algo;
     uint32_t m_tobword;
     uint32_t m_xtobword0;
     uint32_t m_xtobword1;
@@ -56,6 +58,8 @@ namespace LVL1 {
     inline unsigned int getRcoreEnv() const {return m_rcore_env;}
     inline unsigned int getRhadCore() const {return m_rhad_core;}
     inline unsigned int getRhadEnv() const {return m_rhad_env;}
+    inline unsigned int getBDTScore() const {return m_bdt_score;}
+    inline unsigned int getIsBDTAlgo() const {return m_is_bdt_algo;}
     inline uint32_t getTobword() const {return m_tobword;}
     inline uint32_t getxTobword0() const {return m_xtobword0;}
     inline uint32_t getxTobword1() const {return m_xtobword1;}
@@ -73,6 +77,8 @@ namespace LVL1 {
     void setRcoreEnv(unsigned int);
     void setRhadCore(unsigned int);
     void setRhadEnv(unsigned int);
+    void setBDTScore(unsigned int);
+    void setIsBDTAlgo(unsigned int);
     void setTobword(uint32_t);
     void setxTobword0(uint32_t);
     void setxTobword1(uint32_t);

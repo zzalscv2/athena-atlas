@@ -187,8 +187,8 @@ namespace LVL1::MuCTPIBits {
   static constexpr uint32_t RUN3_CAND_WORD_SECTORERRORFLAG_MASK = 0x1;
   static constexpr uint32_t RUN3_CAND_WORD_SLID_SHIFT = 21;
   static constexpr uint32_t RUN3_CAND_WORD_SLID_MASK = 0xff;
-  static constexpr uint32_t RUN3_CAND_WORD_SECTORFLAGS_SHIFT = 17;
-  static constexpr uint32_t RUN3_CAND_WORD_SECTORFLAGS_MASK = 0xf;
+  static constexpr uint32_t RUN3_CAND_WORD_SECTORFLAGS_GTN_SHIFT = 17;
+  static constexpr uint32_t RUN3_CAND_WORD_SECTORFLAGS_GTN_MASK = 0x1;
   static constexpr uint32_t RUN3_CAND_WORD_VETO_SHIFT = 16;
   static constexpr uint32_t RUN3_CAND_WORD_VETO_MASK = 0x1;
   static constexpr uint32_t RUN3_CAND_WORD_CANDFLAGS_SHIFT = 12;

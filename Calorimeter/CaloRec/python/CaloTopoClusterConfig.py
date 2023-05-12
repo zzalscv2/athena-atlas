@@ -298,7 +298,7 @@ def CaloTopoClusterSplitterToolCfg(flags):
     result.setPrivateTools(TopoSplitter)
     return result
 
-def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None):
+def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersnapname="CaloTopoClusters"):
     """
     Configures topo clustering
 
@@ -356,7 +356,7 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None):
     CaloTopoCluster.ClustersOutputName=clustersname
     
     if doLCCalib:
-        theCaloClusterSnapshot=CaloClusterSnapshot(OutputName="CaloTopoClusters",SetCrossLinks=True)        
+        theCaloClusterSnapshot=CaloClusterSnapshot(OutputName=clustersnapname,SetCrossLinks=True)        
         CaloTopoCluster.ClusterCorrectionTools += [theCaloClusterSnapshot]
         #if not clustersname:
         CaloTopoCluster.ClusterCorrectionTools += getTopoClusterLocalCalibTools(flags)

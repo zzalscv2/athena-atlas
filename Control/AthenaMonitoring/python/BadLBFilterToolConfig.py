@@ -30,7 +30,7 @@ def BadLBFilterAlgCfg(inputFlags,name, defects, writekey, ignoreRecoverable=Fals
     primary_defect_ids = [ddb.defect_id_map[id] for id in primary_defects]
 
     monFilterAlg =CompFactory.DQBadLBFilterAlg(name)
-    monFilterAlg.defectList = primary_defect_ids
+    monFilterAlg.defectList = sorted(primary_defect_ids)
     monFilterAlg.ignoreRecoverable = ignoreRecoverable
     monFilterAlg.WriteKey = writekey
 
@@ -66,7 +66,7 @@ def BadLBFilterToolCfg(inputFlags,name, defects, alwaysReturnTrue=False, ignoreR
 
     sgkey = 'DQBadLBFilterAlgResult_%s' % name
     #Schedule required cond-algo
-    result.merge(BadLBFilterAlgCfg(inputFlags,name+'_Alg',defects,sgkey,ignoreRecoverable, origDbTag))
+    result.merge(BadLBFilterAlgCfg(inputFlags,name+'_Alg',sorted(defects),sgkey,ignoreRecoverable, origDbTag))
 
     monFilterTool=CompFactory.DQBadLBFilterTool(name,alwaysReturnTrue=alwaysReturnTrue,
                                                 ReadKey= sgkey)
