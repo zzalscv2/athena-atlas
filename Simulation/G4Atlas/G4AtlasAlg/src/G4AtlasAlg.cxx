@@ -79,6 +79,7 @@ StatusCode G4AtlasAlg::initialize ATLAS_NOT_THREAD_SAFE ()
 
   ATH_CHECK( m_rndmGenSvc.retrieve() );
   ATH_CHECK( m_userActionSvc.retrieve() );
+  ATH_CHECK(m_actionTools.retrieve());
 
   ATH_CHECK(m_senDetTool.retrieve());
   ATH_CHECK(m_fastSimTool.retrieve());
@@ -111,6 +112,11 @@ void G4AtlasAlg::initializeOnce()
   if(m_physListSvc.retrieve().isFailure()) {
     throw std::runtime_error("Could not initialize ATLAS PhysicsListSvc!");
   }
+  for (const auto& action_tool : m_actionTools) {
+    if (m_userActionSvc->addActionTool(action_tool).isFailure()) {
+      throw std::runtime_error("Failed to add action tool "+action_tool.name());
+    }
+  }
 
   // Create the (master) run manager
   if(m_useMT) {
@@ -128,7 +134,7 @@ void G4AtlasAlg::initializeOnce()
     workerInit->SetFastSimMasterTool( m_fastSimTool.typeAndName() );
     runMgr->SetUserInitialization( workerInit.release() );
     std::unique_ptr<G4AtlasActionInitialization> actionInitialization =
-      std::make_unique<G4AtlasActionInitialization>(&*m_userActionSvc);
+      std::make_unique<G4AtlasActionInitialization>(m_userActionSvc.get());
     runMgr->SetUserInitialization(actionInitialization.release());
 #else
     throw std::runtime_error("Trying to use multi-threading in non-MT build!");
@@ -145,7 +151,7 @@ void G4AtlasAlg::initializeOnce()
     runMgr->SetFastSimMasterTool(m_fastSimTool.typeAndName() );
     runMgr->SetPhysListSvc(m_physListSvc.typeAndName() );
     std::unique_ptr<G4AtlasActionInitialization> actionInitialization =
-      std::make_unique<G4AtlasActionInitialization>(&*m_userActionSvc);
+      std::make_unique<G4AtlasActionInitialization>(m_userActionSvc.get());
     runMgr->SetUserInitialization(actionInitialization.release());
   }
 

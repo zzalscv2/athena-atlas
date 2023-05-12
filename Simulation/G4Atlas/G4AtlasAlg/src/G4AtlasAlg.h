@@ -22,6 +22,7 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "G4AtlasInterfaces/IUserActionSvc.h"
+#include "G4AtlasInterfaces/IUserActionTool.h"
 #include "G4AtlasInterfaces/IDetectorGeometrySvc.h"
 #include "G4AtlasInterfaces/ISensitiveDetectorMasterTool.h"
 #include "G4AtlasInterfaces/IFastSimulationMasterTool.h"
@@ -143,6 +144,7 @@ private:
   /// Fast Simulation Master Tool
   PublicToolHandle<IFastSimulationMasterTool> m_fastSimTool{this, "FastSimMasterTool", "FastSimulationMasterTool", ""};
   /// @}
+  PublicToolHandleArray<G4UA::IUserActionTool> m_actionTools{this, "UserActionTools", {}, "User action tools to be added to the G4 Action service."};
 
 };
 

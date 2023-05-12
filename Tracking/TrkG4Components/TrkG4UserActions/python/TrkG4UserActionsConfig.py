@@ -82,3 +82,16 @@ def MaterialStepRecorder(configFlags, name="G4UA::ISFFullUserActionSvc", **kwarg
   result.addEventAlgo(outputStream)
   
   return result
+
+def GeantFollowerMSToolCfg(configFlags, name="G4UA::GeantFollowerMSTool", **kwargs):
+  from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+  from AthenaConfiguration.ComponentFactory import CompFactory
+  
+  THistSvc= CompFactory.THistSvc
+  result = ComponentAccumulator()
+  histsvc = THistSvc(name="THistSvc")
+  histsvc.Output = ["val DATAFILE='GeantFollowing.root' OPT='RECREATE'"]
+  result.addService(histsvc)
+  result.setPrivateTools(CompFactory.G4UA.GeantFollowerMSTool(name, **kwargs))
+  
+  return result
