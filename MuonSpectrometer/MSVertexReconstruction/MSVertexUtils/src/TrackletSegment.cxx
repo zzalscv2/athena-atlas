@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MSVertexUtils/TrackletSegment.h"
@@ -21,19 +21,20 @@ TrackletSegment::TrackletSegment() {
 }
 
 TrackletSegment::TrackletSegment(int ch, int cheta, int chphi, float chmid, float alpha, float dalpha, const Amg::Vector3D& gpos,
-                                 float rErr, float zErr, const std::vector<const Muon::MdtPrepData*>& mdts, int pattern) {
-    m_chamber = ch;
-    m_cham_eta = cheta;
-    m_cham_phi = chphi;
-    m_chmid = chmid;
-    m_alpha = alpha;
-    m_dalpha = dalpha;
-    m_globalPosition = gpos;
-    m_rErr = rErr;
-    m_zErr = zErr;
-    m_mdts = mdts;
-    m_pattern = pattern;
-    m_isCombined = false;
+                                 float rErr, float zErr, const std::vector<const Muon::MdtPrepData*>& mdts, int pattern)
+  : m_chamber (ch),
+    m_cham_eta (cheta),
+    m_cham_phi (chphi),
+    m_alpha (alpha),
+    m_dalpha (dalpha),
+    m_rErr (rErr),
+    m_zErr (zErr),
+    m_globalPosition (gpos),
+    m_chmid (chmid),
+    m_mdts (mdts),
+    m_pattern (pattern),
+    m_isCombined (false)
+{
 }
 
 TrackletSegment::~TrackletSegment() {}
