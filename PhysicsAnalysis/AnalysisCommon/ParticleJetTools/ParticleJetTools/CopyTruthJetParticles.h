@@ -1,7 +1,5 @@
-// this file is -*- C++ -*-
-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COPYTRUTHJETPARTICLES_H
@@ -9,6 +7,7 @@
 
 #include "ParticleJetTools/CopyTruthParticles.h"
 #include "AsgTools/ToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "xAODTruth/TruthParticle.h"
 #include "MCTruthClassifier/IMCTruthClassifier.h"
 #include <vector>
@@ -40,34 +39,42 @@ public:
   bool classify(const xAOD::TruthParticle* ) const {return false;}
   
 private:
+ 
   // Options for storate
-  bool m_includeBSMNonInt; //!< Include non-interacting BSM particles in particles
-  bool m_includeNu; //!< Include neutrinos in particles
-  bool m_includeMu; //!< Include muons in particles
-  bool m_includePromptLeptons; //!< Include particles from prompt decays, i.e. not from hadrons
-  bool m_includePromptPhotons; //!< Include photons from prompt decays, e.g. Higgs decays
-  bool m_chargedOnly; //!< Include only charged particles
+  Gaudi::Property<bool> m_includeBSMNonInt{this, "IncludeBSMNonInteracting", false,
+            "Include noninteracting BSM particles (excluding neutrinos) in the output collection"};
+  Gaudi::Property<bool> m_includeNu{this,"IncludeNeutrinos", false,
+                                    "Include neutrinos in the output collection"}; 
+  Gaudi::Property<bool> m_includeMu{this, "IncludeMuons", false,
+                                  "Include muons in the output collection"}; 
+  Gaudi::Property<bool> m_includePromptLeptons{this, "IncludePromptLeptons", true,
+            "Include leptons from prompt decays (i.e. not from hadron decays) in the output collection"}; 
+  Gaudi::Property<bool> m_includePromptPhotons{this, "IncludePromptPhotons", true,
+            "Include photons from Higgs and other decays that produce isolated photons"};
+  Gaudi::Property<bool> m_chargedOnly{this, "ChargedParticlesOnly", false,
+                            "Include only charged particles in the output collection" };
   // -- added for dark jet clustering -- //
-  bool m_includeSM; //!< Include SM particles
-  bool m_includeDark; //!< Include dark hadrons
+  Gaudi::Property<bool> m_includeSM{this, "IncludeSMParts", true, 
+                            "Include SM particles in the output collection"};
+  Gaudi::Property<bool> m_includeDark{this, "IncludeDarkHads", false,
+                            "Include dark hadrons in the output collection"}; 
 
   unsigned int getTCresult(const xAOD::TruthParticle* tp,
                            std::map<const xAOD::TruthParticle*,unsigned int>& tc_results) const;
-
+ 
   /// Maximum allowed eta for particles in jets
-  float m_maxAbsEta;
+  Gaudi::Property<float> m_maxAbsEta{this, "MaxAbsEta" , 5.};
 
-  /// Cone to be used for removing FSR photons from around prompt leptons
-  float m_photonCone;
-
-  std::vector<int> m_vetoPDG_IDs; //! List of PDG IDs that should be ignored (and whose children should be ignored)
+  Gaudi::Property<std::vector<int>> m_vetoPDG_IDs{this, "VetoPDG_IDs", {},
+              "List of PDG IDs (python list) to veto.  Will ignore these and all children of these."};
   bool comesFrom( const xAOD::TruthParticle* tp, const int pdgID, std::vector<int>& used_vertices ) const;
 
   /// Name of the decoration to be used for identifying FSR (dressing) photons
-  std::string m_dressingName;
+  Gaudi::Property<std::string> m_dressingName{this, "DressingDecorationName", "",
+              "Name of the dressed photon decoration (if one should be used)"};
 
   /// Handle on MCTruthClassifier for finding prompt leptons
-  ToolHandle<IMCTruthClassifier> m_classif;
+  ToolHandle<IMCTruthClassifier> m_classif{this, "MCTruthClassifier", ""};
 };
 
 

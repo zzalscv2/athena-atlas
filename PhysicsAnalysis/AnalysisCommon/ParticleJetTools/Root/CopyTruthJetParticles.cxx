@@ -32,46 +32,13 @@ using namespace std;
 using namespace MCTruthPartClassifier;
 
 CopyTruthJetParticles::CopyTruthJetParticles(const std::string& name)
-  : CopyTruthParticles(name) ,
-    m_maxAbsEta(5)
-  , m_photonCone(0.1)
-  , m_classif("",this)
-{
-  declareProperty("IncludeBSMNonInteracting",  m_includeBSMNonInt=false, "Include noninteracting BSM particles (excluding neutrinos) in the output collection");
-  declareProperty("IncludeNeutrinos",  m_includeNu=false, "Include neutrinos in the output collection");
-  declareProperty("IncludeMuons",      m_includeMu=false, "Include muons in the output collection");
-  declareProperty("IncludePromptLeptons",  m_includePromptLeptons=true,  "Include leptons from prompt decays (i.e. not from hadron decays) in the output collection");
-  declareProperty("IncludePromptPhotons",  m_includePromptPhotons=true,  "Include photons from Higgs and other decays that produce isolated photons");
-  declareProperty("ChargedParticlesOnly", m_chargedOnly=false, "Include only charged particles in the output collection");
-
-  // -- added for dark jet clustering -- //
-  declareProperty("IncludeSMParts", m_includeSM=true, "Include SM particles in the output collection");
-  declareProperty("IncludeDarkHads", m_includeDark=false, "Include dark hadrons in the output collection");
-  // ----------------------------------- //
-  
-  declareProperty("MaxAbsEta", m_maxAbsEta);
-
-  declareProperty("MCTruthClassifier", m_classif);
-
-  declareProperty("FSRPhotonCone", m_photonCone = -1.0);
-
-  declareProperty("VetoPDG_IDs", m_vetoPDG_IDs, "List of PDG IDs (python list) to veto.  Will ignore these and all children of these.");
-
-  declareProperty("DressingDecorationName", m_dressingName="", "Name of the dressed photon decoration (if one should be used)");
-}
-
+  : CopyTruthParticles(name) {}
 StatusCode CopyTruthJetParticles::initialize() {
   ATH_CHECK(m_classif.retrieve());
 
   ATH_CHECK(m_truthEventKey.initialize());
   ATH_CHECK(m_outTruthPartKey.initialize());
 
-  // Ensure consistency in the photon dressing treatment
-  if (m_photonCone>0) {
-    ATH_MSG_ERROR("The FSRPhotonCone option is not supported anymore. Please use the TruthDressingTool"); 
-    return StatusCode::FAILURE;
-  }
-  
   return StatusCode::SUCCESS;
 }
 
@@ -121,7 +88,7 @@ bool CopyTruthJetParticles::classifyJetInput(const xAOD::TruthParticle* tp,
     if (tp->hasDecayVtx() && (abs(tp->child()->pdgId()) >= 4.9e6)) return false; // ignore "non-stable" dark hadrons (decaying to dark sector) -- "stable" if decaying to SM
   }
   // for SM jets: ignore dark particles - probably unnecessary bc of status requirement above
-  if (!m_includeDark && (abs(tp->pdgId()) >= 4.9e6) && (abs(tp->pdgId()) < 5e6)) return false;
+  if (!m_includeDark && (std::abs(tp->pdgId()) >= 4.9e6) && (std::abs(tp->pdgId()) < 5e6)) return false;
   // ----------------------------------- //
 
   if (!m_includePromptPhotons && MC::PID::isPhoton(pdgid) && tp->hasProdVtx()){
@@ -134,11 +101,11 @@ bool CopyTruthJetParticles::classifyJetInput(const xAOD::TruthParticle* tp,
   if (!m_dressingName.empty()){
     // Accessor for the dressing decoration above
     const static SG::AuxElement::Accessor<char> dressAcc(m_dressingName);
-    if (pdgid==22 && dressAcc(*tp)) return false;
+    if (MC::PID::isPhoton(pdgid) && dressAcc(*tp)) return false;
   } // End of removal via dressing decoration
 
   // Pseudo-rapidity cut
-  if(fabs(tp->eta())>m_maxAbsEta) return false;
+  if(std::abs(tp->eta())>m_maxAbsEta) return false;
 
   // Vetoes of specific origins.  Not fast, but if no particles are specified should not execute
   if (m_vetoPDG_IDs.size()>0){
@@ -235,7 +202,7 @@ int CopyTruthJetParticles::execute() const {
 
   for (unsigned int ip = 0; ip < hsevt->nTruthParticles(); ++ip) {
     const xAOD::TruthParticle* tp = hsevt->truthParticle(ip);
-    if(tp == NULL) continue;
+    if(!tp) continue;
     if (tp->pt() < m_ptmin)
         continue;
     // Cannot use the truth helper functions; they're written for HepMC
@@ -251,7 +218,7 @@ int CopyTruthJetParticles::execute() const {
 
   for (size_t itp(0); itp<hsevt->nTruthParticles(); ++itp) {
     const xAOD::TruthParticle* tp = hsevt->truthParticle(itp);
-    if(tp == NULL) continue;
+    if(!tp) continue;
     if (tp->pt() < m_ptmin)
         continue;
 
@@ -261,7 +228,7 @@ int CopyTruthJetParticles::execute() const {
     }
   }
 
-  ATH_MSG_DEBUG("Copied " << numCopied << " truth particles into " << m_outputname << " TruthParticle container");
+  ATH_MSG_DEBUG("Copied " << numCopied << " truth particles into " << m_outTruthPartKey.key() << " TruthParticle container");
 
   // record
   auto truthParticles_out = SG::makeHandle(m_outTruthPartKey);
