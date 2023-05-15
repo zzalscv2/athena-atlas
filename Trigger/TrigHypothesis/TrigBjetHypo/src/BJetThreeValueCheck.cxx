@@ -2,7 +2,7 @@
    Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #include "BJetThreeValueCheck.h"
-#include "safeLogRatio.h"
+#include "TrigBjetHypo/safeLogRatio.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 
 BJetThreeValueCheck::BJetThreeValueCheck(
