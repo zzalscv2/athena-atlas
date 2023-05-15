@@ -206,9 +206,7 @@ jtm += PV0TrackSelectionAlg(
 #--------------------------------------------------------------
 
 if jetFlags.useTruth:
-  from MCTruthClassifier.MCTruthClassifierConfig import firstSimCreatedBarcode
   truthClassifier = MCTruthClassifier(name = "JetMCTruthClassifier",
-                                      barcodeG4Shift= firstSimCreatedBarcode(),
                                       ParticleCaloExtensionTool="")
   jtm += truthClassifier
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -9,43 +9,31 @@
 // Future option: try to add b-decay vertices, or LLP vertices?
 
 #include "DerivationFrameworkMCTruth/TruthPVCollectionMaker.h"
-#include "xAODTruth/TruthEventContainer.h"
-#include "xAODTruth/TruthVertexContainer.h"
 #include "xAODTruth/TruthVertexAuxContainer.h"
-// STL includes
-#include <string>
+#include "StoreGate/ReadHandle.h"
+#include "StoreGate/WriteHandle.h"
 
 // Constructor
 DerivationFramework::TruthPVCollectionMaker::TruthPVCollectionMaker(const std::string& t,
                                                                     const std::string& n,
                                                                     const IInterface* p)
   : AthAlgTool(t,n,p)
-  , m_eventsKey("TruthEvents")
-  , m_collectionName("")
-{
+ {
     declareInterface<DerivationFramework::IAugmentationTool>(this);
-    declareProperty("EventsKey", m_eventsKey);
-    declareProperty("NewCollectionName", m_collectionName);
 }
 
 // Destructor
-DerivationFramework::TruthPVCollectionMaker::~TruthPVCollectionMaker() {
-}
-
+DerivationFramework::TruthPVCollectionMaker::~TruthPVCollectionMaker() = default;
 // Athena initialize
 StatusCode DerivationFramework::TruthPVCollectionMaker::initialize()
 {
     ATH_MSG_VERBOSE("initialize() ...");
 
     // Check configuration, print errors, warning, and information for the user
-    if (m_eventsKey.empty()) {
-        ATH_MSG_FATAL("No truth event collection provided to use as a basis for new collections");
-        return StatusCode::FAILURE;
-    } else {ATH_MSG_INFO("Using " << m_eventsKey << " as the source collections for new truth collections");}
-    if (m_collectionName.empty()) {
-        ATH_MSG_FATAL("No key provided for the new truth vertex collections");
-        return StatusCode::FAILURE;
-    } else {ATH_MSG_INFO("New truth vertex collection key: " << m_collectionName );}
+    ATH_CHECK(m_eventsKey.initialize());
+    ATH_MSG_INFO("Using " << m_eventsKey.fullKey() << " as the source collections for new truth collections");
+    ATH_CHECK(m_outVtxKey.initialize());
+    ATH_MSG_INFO("New truth vertex collection key: " << m_outVtxKey.fullKey() );
 
     return StatusCode::SUCCESS;
 }
@@ -54,20 +42,20 @@ StatusCode DerivationFramework::TruthPVCollectionMaker::initialize()
 // Selection and collection creation
 StatusCode DerivationFramework::TruthPVCollectionMaker::addBranches() const
 {
+    const EventContext& ctx{Gaudi::Hive::currentContext()};
     // Retrieve truth collections
-    const xAOD::TruthEventContainer* importedTruthEvents(nullptr);
-    if (evtStore()->retrieve(importedTruthEvents,m_eventsKey).isFailure()) {
-        ATH_MSG_ERROR("No TruthEvent collection with name " << m_eventsKey << " found in StoreGate!");
+    SG::ReadHandle<xAOD::TruthEventContainer> importedTruthEvents{m_eventsKey, ctx};
+    if (!importedTruthEvents.isValid()) {
+        ATH_MSG_ERROR("No TruthEvent collection with name " << m_eventsKey.fullKey() << " found in StoreGate!");
         return StatusCode::FAILURE;
     }
 
     // Create the new vertex containers
-    xAOD::TruthVertexContainer* newVertexCollection = new xAOD::TruthVertexContainer();
-    CHECK( evtStore()->record( newVertexCollection, m_collectionName ) );
-    xAOD::TruthVertexAuxContainer* newVertexAuxCollection = new xAOD::TruthVertexAuxContainer();
-    CHECK( evtStore()->record( newVertexAuxCollection, m_collectionName + "Aux." ) );
-    newVertexCollection->setStore( newVertexAuxCollection );
-    ATH_MSG_DEBUG( "Recorded new TruthVertexContainer with key: " << m_collectionName);
+    SG::WriteHandle<xAOD::TruthVertexContainer> writeHandleVtx{m_outVtxKey, ctx};
+    ATH_CHECK(writeHandleVtx.record(std::make_unique<xAOD::TruthVertexContainer>(), 
+                                    std::make_unique<xAOD::TruthVertexAuxContainer>()));
+    xAOD::TruthVertexContainer* newVertexCollection = writeHandleVtx.ptr();
+    ATH_MSG_DEBUG( "Recorded new TruthVertexContainer with key: " << m_outVtxKey.fullKey());
 
     // Go through the events, add one vertex for each event
     for (const auto * event : *importedTruthEvents){

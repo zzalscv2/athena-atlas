@@ -16,6 +16,7 @@ parser.add_argument('--infile', type=str, help='input file')
 parser.add_argument('--outdir', type=str, help='output directory')
 parser.add_argument('--usemu', action='store_true', help='Plot vs. mu. Default == LB')
 parser.add_argument('--absolute', action='store_true', help='Use for official lumi absolute comparison')
+parser.add_argument('--t0', action='store_true', help='Modifications for t0 operation')
 
 args = parser.parse_args()
 infilename = args.infile
@@ -28,23 +29,41 @@ if match:
     year = match.group(1)
 else:
     print("Year not found")
+    year = 'XX'
 
 def main():
     dfz = pd.read_csv(infilename, delimiter=',')
+    if dfz.empty:
+        print('No data available. Exiting')
+        return
+
     run_number = str(int(dfz.RunNum[0]))
     lhc_fill   = str(int(dfz.FillNum[0]))
 
+    if not args.t0:
+        outdirstr = outdir + run_number
+        filepfx = f'data{year}_{run_number}_'
+    else:
+        outdirstr = outdir
+        filepfx = ''
+
+    if args.t0:
+        rfo = R.TFile.Open(os.path.join(outdirstr, 'zlumi.root'), 'RECREATE')
+
     # Drop LBs with no Z-counting information
+    dfz0 = dfz.copy()
     dfz = dfz.drop(dfz[(dfz.ZeeLumi == 0) | (dfz.ZmumuLumi == 0)].index)
 
     # Calculate mean per LB against ATLAS
     for channel in ['Zee', 'Zmumu']:
-        dfz = dfz.drop(dfz[(dfz['LBLive']<10) | (dfz['PassGRL']==0)].index)
+        dfz = dfz.drop(dfz[(dfz['LBLive']<9) | (dfz['PassGRL']==0)].index)
         ratio = array('d', dfz[channel+'Lumi']/dfz['OffLumi'])
         print("mean for "+channel+": ", np.mean(ratio))
 
+    dfz['OffDelLumi'] = dfz['OffLumi']*dfz['LBFull']
+
     # Scale by livetime
-    for entry in ['ZeeLumi','ZmumuLumi','ZeeLumiErr','ZmumuLumiErr','OffLumi']:  
+    for entry in ['ZeeLumi','ZmumuLumi','ZeeLumiErr','ZmumuLumiErr','ZmumuRate','OffLumi']:  
         dfz[entry] *= dfz['LBLive']
 
     # Square uncertainties
@@ -55,12 +74,33 @@ def main():
     if args.usemu:
         dfz['OffMu'] = dfz['OffMu'].astype(int)
         dfz = dfz.groupby(['OffMu']).sum()
-    else: 
+    else:
         dfz['LBNum'] = (dfz['LBNum']//20)*20
         dfz = dfz.groupby(['LBNum']).sum()
     
     dfz['ZeeLumiErr']   = np.sqrt(dfz['ZeeLumiErr'])
     dfz['ZmumuLumiErr'] = np.sqrt(dfz['ZmumuLumiErr'])
+
+    if args.t0:
+        translist = []
+        timeformat = '%y/%m/%d %H:%M:%S'
+        import time
+        for k in range(len(dfz)):
+            thisrow = dfz.iloc[k]
+            lb = thisrow.name
+            lbselector = (lb <= dfz0['LBNum']) & (dfz0['LBNum'] < lb+20)
+            translist.append({'FillNum' : dfz0[lbselector]['FillNum'].iloc[0],
+                              'beginTime' : time.strftime(timeformat,
+                                                        time.gmtime(dfz0[lbselector]['LBStart'].iloc[0])),
+                              'endTime': time.strftime(timeformat,
+                                                     time.gmtime(dfz0[(dfz0['LBNum']//20)*20 == lb]['LBEnd'].iloc[-1])),
+                              'ZmumuRate': thisrow['ZmumuRate']/thisrow['LBLive'],
+                              'instDelLumi': thisrow['OffDelLumi']/thisrow['LBFull']/1e3,  # time-averaged instantaneous delivered lumi
+                              'delLumi': thisrow['OffLumi']/1e3,  # livetime * instantaneous delivered lumi
+                              'ZDel': thisrow['ZmumuRate']  # after above, this variable is yield not rate
+                              })
+        pdn = pd.DataFrame.from_records(translist)
+        pdn.to_csv(os.path.join(args.outdir, 'zrate.csv'), header=False, index=False)
 
     print("Making Z-counting vs. ATLAS plots!")
     for channel in ['Zee', 'Zmumu']: 
@@ -76,16 +116,16 @@ def main():
             leg = R.TLegend(0.6, 0.28, 0.75, 0.50)
             xtitle = "<#mu>"
             if args.absolute:
-                outfile = outdir + run_number + "/" + "data"+year+"_"+run_number+"_"+channel+"_vs_atlas_mu_abs"
+                outfile = filepfx+channel+"_vs_atlas_mu_abs"
             else:
-                outfile = outdir + run_number + "/" + "data"+year+"_"+run_number+"_"+channel+"_vs_atlas_mu"
+                outfile = filepfx+channel+"_vs_atlas_mu"
         else: 
             leg = R.TLegend(0.6, 0.65, 0.75, 0.87)
             xtitle = "Luminosity Block Number"
             if args.absolute:
-                outfile = outdir + run_number + "/" + "data"+year+"_"+run_number+"_"+channel+"_vs_atlas_abs"
+                outfile = filepfx+channel+"_vs_atlas_abs"
             else:
-                outfile = outdir + run_number + "/" + "data"+year+"_"+run_number+"_"+channel+"_vs_atlas"
+                outfile = filepfx+channel+"_vs_atlas"
 	
         normalisation = dfz[channel+'Lumi'].sum() / dfz['OffLumi'].sum()
         if args.absolute:
@@ -120,6 +160,7 @@ def main():
 
         hz.SetMarkerStyle(4)
         hz.Draw('ap')
+        hr.SetTitle()  # Get rid of unnecessary "Graph" text 
         ho.Draw("same L")
         hz.Draw('same p')
         hz.GetYaxis().SetTitle("Luminosity [10^{33} cm^{-2}s^{-1}]")
@@ -128,7 +169,7 @@ def main():
         ymax = hz.GetHistogram().GetMaximum()
         ymin = hz.GetHistogram().GetMinimum()
         if not args.usemu:
-            if args.absolute:
+            if args.absolute and not args.t0:
                 hz.GetYaxis().SetRangeUser(0, 33)
             else: 
                 hz.GetYaxis().SetRangeUser(ymin-2, ymax*1.6)
@@ -163,7 +204,10 @@ def main():
         hr.GetXaxis().SetTitle(xtitle)
 
         hr.GetYaxis().SetTitleSize(0.05)
-        hr.GetYaxis().SetRangeUser(0.95, 1.05)
+        if args.absolute and args.t0:
+            hr.GetYaxis().SetRangeUser(0.9, 1.1)
+        else:
+            hr.GetYaxis().SetRangeUser(0.95, 1.05)
     
         line0 = R.TLine(xmin, 1.0, xmax, 1.0)
         line0.SetLineStyle(2)
@@ -182,10 +226,11 @@ def main():
         hr.GetYaxis().SetNdivisions(3)
 
         pt.drawAtlasLabel(0.2, 0.86, "Internal")
-        if year in ['15', '16', '17', '18']:
-            pt.drawText(0.2, 0.80, "Data 20" + year + ", #sqrt{s} = 13 TeV")
-        else:
-            pt.drawText(0.2, 0.80, "Data 20" + year + ", #sqrt{s} = 13.6 TeV")
+        if not args.t0:
+            if year in ['15', '16', '17', '18']:
+                pt.drawText(0.2, 0.80, "Data 20" + year + ", #sqrt{s} = 13 TeV")
+            else:
+                pt.drawText(0.2, 0.80, "Data 20" + year + ", #sqrt{s} = 13.6 TeV")
         pt.drawText(0.2, 0.74, "LHC Fill " + lhc_fill)
         pt.drawText(0.2, 0.68,  channel_string)
        
@@ -199,8 +244,15 @@ def main():
         line4.Draw("same 3")
         hr.Draw("same ep0")
 
-        c1.SaveAs(outfile + ".eps")
-        c1.SaveAs(outfile + ".pdf")
+        if not args.t0:
+            c1.SaveAs(os.path.join(outdirstr, outfile + ".eps"))
+            c1.SaveAs(os.path.join(outdirstr, outfile + ".pdf"))
+        else:
+            rfo.WriteTObject(c1, outfile)
+            if channel == 'Zmumu':
+                rfo.WriteTObject(hz, 'z_lumi')
+                rfo.WriteTObject(hr, 'z_lumi_ratio')
+        c1.Clear()
 
         # Plot ratio with fit
         c2 = R.TCanvas()
@@ -219,15 +271,19 @@ def main():
         hr.GetFunction('pol1').Draw('same l')
 
         pt.drawAtlasLabel(0.2, 0.86, "Internal")
-        if year == "22":
-            pt.drawText(0.2, 0.80, "Data 20" + year + ", #sqrt{s} = 13.6 TeV")
-        else:
-            pt.drawText(0.2, 0.80, "Data 20" + year + ", #sqrt{s} = 13 TeV")
+        if not args.t0:
+            if year == "22":
+                pt.drawText(0.2, 0.80, "Data 20" + year + ", #sqrt{s} = 13.6 TeV")
+            else:
+                pt.drawText(0.2, 0.80, "Data 20" + year + ", #sqrt{s} = 13 TeV")
         pt.drawText(0.2, 0.74, "LHC Fill " + lhc_fill)
         pt.drawText(0.2, 0.68,  channel_string)
 
-        c2.SaveAs(outfile+"_ratio.eps")
-        c2.SaveAs(outfile+"_ratio.pdf")
+        if not args.t0:
+            c2.SaveAs(os.path.join(outdirstr, outfile+"_ratio.eps"))
+            c2.SaveAs(os.path.join(outdirstr, outfile+"_ratio.pdf"))
+        else:
+            rfo.WriteTObject(c2, f'{outfile}_ratio')
         
 
     if args.usemu:
@@ -263,10 +319,11 @@ def main():
 
     latex = R.TLatex()
     R.ATLASLabel(0.2, 0.86, "Internal")
-    if year in ['15', '16', '17', '18']:
-        latex.DrawLatexNDC(0.2, 0.80, "Data 20" +year+ ", #sqrt{s} = 13 TeV")
-    else:
-        latex.DrawLatexNDC(0.2, 0.80, "Data 20" +year+ ", #sqrt{s} = 13.6 TeV")
+    if not args.t0:
+        if year in ['15', '16', '17', '18']:
+            latex.DrawLatexNDC(0.2, 0.80, "Data 20" +year+ ", #sqrt{s} = 13 TeV")
+        else:
+            latex.DrawLatexNDC(0.2, 0.80, "Data 20" +year+ ", #sqrt{s} = 13.6 TeV")
     latex.DrawLatexNDC(0.2, 0.74, "LHC Fill " + lhc_fill)
 
     chi2 = gr.GetFunction('pol0').GetChisquare()
@@ -287,8 +344,11 @@ def main():
     leg.AddEntry(line1, "68% band", "f")
     leg.Draw()
 
-    c1.SaveAs(outdir + run_number + "/" + "data"+year+"_"+run_number+"_zeezmmratio.eps")
-    c1.SaveAs(outdir + run_number + "/" + "data"+year+"_"+run_number+"_zeezmmratio.pdf")
+    if not args.t0:
+        c1.SaveAs(os.path.join(outdirstr, filepfx+run_number+"_zeezmmratio.eps"))
+        c1.SaveAs(os.path.join(outdirstr, filepfx+run_number+"_zeezmmratio.pdf"))
+    else:
+        rfo.WriteTObject(c1, 'zeezmmratio')
      
 
 if __name__ == "__main__":

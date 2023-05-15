@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCALIBRPCSECTORLOGIC_H
@@ -38,7 +38,7 @@ namespace MuonCalib {
         };
         MuonCalibRpcSectorLogic() = default;
 
-        MuonCalibRpcSectorLogic(defineParams pars);  //!< constructor setting all members
+        MuonCalibRpcSectorLogic(const defineParams& pars);  //!< constructor setting all members
         ~MuonCalibRpcSectorLogic() = default;        //!< destructor
 
         int sectorId() const;

@@ -731,7 +731,8 @@ def efmuisoRecoSequence( flags, RoIs, Muons, doMSiso=False ):
   from TrigMuonEF.TrigMuonEFConfig import TrigMuonEFTrackIsolationAlgCfg
   trigEFmuIso = algorithmCAToGlobalWrapper(TrigMuonEFTrackIsolationAlgCfg,flags,name="TrigEFMuIso"+name, requireCombinedMuon = not doMSiso, 
                                            MuonEFContainer = Muons,IdTrackParticles = PTTrackParticles[-1], MuonContName = muNames.EFIsoMuonName+name,
-                                           ptcone02Name = "%s.ptcone02" % Muons, ptcone03Name = "%s.ptcone03" % Muons)
+                                           ptcone02Name = muNames.EFIsoMuonName+name + ".ptcone02",
+                                           ptcone03Name = muNames.EFIsoMuonName+name + ".ptcone03")
 
   efmuisoRecoSequence += trigEFmuIso
 

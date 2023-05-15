@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = "Instantiate egammaTopoClusterCopier with default configuration"
 
@@ -7,11 +7,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 
-def egammaTopoClusterCopierCfg(
-        flags,
-        name='egammaTopoClusterCopier',
-        **kwargs):
-
+def egammaTopoClusterCopierCfg(flags, name='', **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault(
         "InputTopoCollection",
@@ -28,6 +24,9 @@ def egammaTopoClusterCopierCfg(
     kwargs.setdefault(
         "ECut",
         700 if not flags.Egamma.doLowMu else 300)
+
+    if name=='':
+        name = kwargs["OutputTopoCollection"]+'Copier'
 
     egcopierAlg = CompFactory.egammaTopoClusterCopier(name, **kwargs)
 
@@ -48,7 +47,7 @@ if __name__ == "__main__":
     mlog.info("Configuring  egammaTopoClusterCopier: ")
     acc.merge(egammaTopoClusterCopierCfg(flags))
     printProperties(mlog,
-                    acc.getEventAlgo("egammaTopoClusterCopier"),
+                    acc.getEventAlgo("egammaTopoClustersCopier"),
                     nestLevel=1,
                     printDefaults=True)
     with open("egammatopoclustercopier.pkl", "wb") as f:

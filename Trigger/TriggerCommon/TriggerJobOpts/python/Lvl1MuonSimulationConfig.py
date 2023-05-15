@@ -206,6 +206,8 @@ def MuonRdoToMuonDigitToolCfg(flags, name="MuonRdoToMuonDigitTool", **kwargs ):
 def MuonRdo2DigitConfig(flags):
     acc = ComponentAccumulator()
 
+    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+    acc.merge( AtlasFieldCacheCondAlgCfg(flags) )
     # Read RPCPAD and TGCRDO from the input POOL file (for BS it comes from [Rpc|Tgc]RawDataProvider)
     suffix = "" if flags.Input.Format is Format.POOL else "_L1"
     RPCRdoName = "RPCPAD"+suffix

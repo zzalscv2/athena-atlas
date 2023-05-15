@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM includes
 
 // Local includes
 #include "EventCleaningTestAlg.h"
+#include "StoreGate/WriteDecorHandle.h"
 
 
 //-----------------------------------------------------------------------------
@@ -13,19 +14,7 @@
 //-----------------------------------------------------------------------------
 EventCleaningTestAlg::EventCleaningTestAlg(const std::string& name,
                                              ISvcLocator* svcLoc)
-    : AthAlgorithm(name, svcLoc),
-      m_ecTool("ECUtils::EventCleaningTool/EventCleaningTool", this)
-{
-  m_ecTool.declarePropertyFor( this, "EventCleaningTool" );
-  declareProperty("EventCleanPrefix", m_prefix = "",
-                  "Input name of event cleaning decorator prefix");
-  declareProperty("CleaningLevel", m_cleaningLevel = "LooseBad",
-                  "Input cleaning level");
-  declareProperty("JetCollectionName", m_collection = "AntiKt4EMTopoJets",
-                  "Jet collection name");
-  declareProperty("doEvent",m_doEvent = true,
-                  "Decorate the EventInfo");
-}
+    : AthAlgorithm(name, svcLoc) {}
 
 //-----------------------------------------------------------------------------
 // Initialize
@@ -36,10 +25,11 @@ StatusCode EventCleaningTestAlg::initialize()
 
   // Try to retrieve the tool
   ATH_CHECK( m_ecTool.retrieve() );
-
-  // Create the decorator
-  if(m_doEvent) m_dec_eventClean = std::make_unique<SG::AuxElement::Decorator<char>>(m_prefix + "eventClean_" + m_cleaningLevel);
-
+  ATH_CHECK( m_jetKey.initialize());
+  ATH_CHECK(m_evtKey.initialize());
+ // Create the decorator
+  m_evtInfoDecor = m_evtKey.key() + "." + m_prefix + "eventClean_"+m_cleaningLevel;
+  ATH_CHECK(m_evtInfoDecor.initialize(m_doEvent));
   return StatusCode::SUCCESS;
 }
 
@@ -48,30 +38,25 @@ StatusCode EventCleaningTestAlg::initialize()
 //-----------------------------------------------------------------------------
 StatusCode EventCleaningTestAlg::execute()
 {
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   // Jets
-  const xAOD::JetContainer* jets = nullptr;
-  ATH_CHECK( evtStore()->retrieve(jets, m_collection) );
-
+  SG::ReadHandle<xAOD::JetContainer> jets{m_jetKey, ctx};
+  if (!jets.isValid()) {
+    ATH_MSG_FATAL("Failed to retrieve jet collection "<<m_jetKey.fullKey());
+    return StatusCode::FAILURE;
+  }
   // Apply the event cleaning
-  bool result = 0;
-  result = m_ecTool->acceptEvent(jets) ;
+  bool result = m_ecTool->acceptEvent(jets.cptr());
 
   //Decorate event
   if(m_doEvent){
-    const xAOD::EventInfo* eventInfo = nullptr;
-    ATH_CHECK( evtStore()->retrieve(eventInfo, "EventInfo") );
-    (*m_dec_eventClean)(*eventInfo) = result;
+    SG::WriteDecorHandle<xAOD::EventInfo, char> eventInfo{m_evtInfoDecor, ctx};
+    if (!eventInfo.isValid()){
+       ATH_MSG_FATAL("Failed to retrieve the event info "<<m_evtKey.fullKey());
+       return StatusCode::FAILURE;
+    }
+    eventInfo(*eventInfo) = result;
   }
-
-  return StatusCode::SUCCESS;
-}
-
-//-----------------------------------------------------------------------------
-// Finalize
-//-----------------------------------------------------------------------------
-StatusCode EventCleaningTestAlg::finalize()
-{
-  ATH_MSG_INFO("Finalize");
 
   return StatusCode::SUCCESS;
 }
