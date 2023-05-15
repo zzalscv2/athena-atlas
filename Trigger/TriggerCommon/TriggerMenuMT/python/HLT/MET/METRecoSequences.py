@@ -422,7 +422,8 @@ class CVFClusterInputConfig(AlgInputConfig):
                 dzSinTheta_cut=2.0,
                 addDecoAlg=False,
                 TrackContName=inputTracks,
-                VertexContName=inputVertices,
+                VertexContName=inputVertices, 
+                HardScatterLinkDeco = ""
             ),
             ExtensionTool=ApproximateTrackToLayerTool(),
         )
@@ -493,6 +494,7 @@ class CVFClusterInputConfig(AlgInputConfig):
                         dzSinTheta_cut=2.0,
                         TrackContName=inputs["Tracks"],
                         VertexContName=inputs["Vertices"],
+                        HardScatterLinkDeco = ""
                     )
                 ),
                 ExtensionTool=CompFactory.ApproximateTrackToLayerTool(),
