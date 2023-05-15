@@ -153,7 +153,7 @@ def ActsTrkBaseSeedAnalysisAlgCfg(flags,
 
     kwargs.setdefault('InputSeedCollection', 'ITkPixelSeeds')
 
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+    from ActsConfig.ActsTrkGeometryConfig import ActsTrackingGeometryToolCfg
     geoTool = acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
     acc.addPublicTool(geoTool)
     
@@ -162,7 +162,7 @@ def ActsTrkBaseSeedAnalysisAlgCfg(flags,
     converterTool = acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags))
     
     # Track Param Estimation Tool
-    from ActsConfig.ActsTrkTrackParamsEstimationToolConfig import TrackParamsEstimationToolCfg
+    from ActsConfig.ActsTrkTrackParamsEstimationConfig import TrackParamsEstimationToolCfg
     trackEstimationTool = acc.popToolsAndMerge(TrackParamsEstimationToolCfg(flags))
     
     kwargs.setdefault('TrackingGeometryTool', acc.getPublicTool(geoTool.name)) # PublicToolHandle
@@ -318,13 +318,13 @@ def ActsTrkSeedingAlgorithmAnalysisAlgCfg(flags, name="ActsTrkSeedingAlgorithmAn
         ITkSiSpacePointsSeedMaker.maxSize = 1e8
         MonitoringGroupNames.append("ITkSiSpacePointSeedMaker")
 
-        from ActsConfig.ActsTrkSeedingToolConfig import ActsTrkSiSpacePointsSeedMakerCfg
+        from ActsConfig.ActsTrkSeedingConfig import ActsTrkSiSpacePointsSeedMakerCfg
         ActsITkSiSpacePointsSeedMaker = result.popToolsAndMerge(ActsTrkSiSpacePointsSeedMakerCfg(flags))
         ActsITkSiSpacePointsSeedMaker.doSpacePointConversion = False
         ActsITkSiSpacePointsSeedMaker.doSeedConversion = False
         MonitoringGroupNames.append("ActsITkSiSpacePointSeedMaker")
 
-        from ActsConfig.ActsTrkSeedingToolConfig import ActsTrkITkPixelOrthogonalSeedingToolCfg
+        from ActsConfig.ActsTrkSeedingConfig import ActsTrkITkPixelOrthogonalSeedingToolCfg
         orthogonal_seeding_tool = result.popToolsAndMerge(ActsTrkITkPixelOrthogonalSeedingToolCfg(flags))
         ActsITkSiSpacePointsSeedMakerOrthogonal = \
           result.popToolsAndMerge(ActsTrkSiSpacePointsSeedMakerCfg(flags,
@@ -365,7 +365,12 @@ def ActsTrkStripEstimatedTrackParamsAnalysisAlgCfg(flags, name = 'ActsTrkStripEs
     kwargs.setdefault('InputTrackParamsCollection', 'ITkStripEstimatedTrackParams')
     return ActsTrkBaseEstimatedTrackParamsAnalysisAlgCfg(flags, name, histoPath = 'StripEstimatedTrackParams', ntupleName = 'StripEstimatedTrackParams', **kwargs)
 
-
+def PhysValActsCfg(flags,
+                   name: str = 'PhysValActs') -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(CompFactory.ActsTrk.PhysValTool(name=name))
+    return acc
+    
 def ActsTrkClusterAnalysisCfg(flags):
     acc = ComponentAccumulator()
     if flags.Detector.EnableITkPixel:
