@@ -115,12 +115,12 @@ def TIDAMonitoring( flags=None, name=None, monlevel=None, mcTruth=False ) :
         tidamuon.AnalysisConfig = "Tier0"
 
         chains = getchains( flags, 
-                            [ "HLT_mu(?!.*LRT.*)(?!.*tau.*).*idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon",
-                              "HLT_mu(?!.*LRT.*)(?!.*tau.*).*idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon",
+                            [ "HLT_mu(?!.*LRT.*)(?!.*tau.*).*_idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon",
+                              "HLT_mu(?!.*LRT.*)(?!.*tau.*).*_idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon",
                               "HLT_mu.*ivarperf.*:key=HLT_IDTrack_MuonIso_FTF:roi=HLT_Roi_MuonIso",
                               "HLT_mu.*ivarperf.*:key=HLT_IDTrack_MuonIso_IDTrig:roi=HLT_Roi_MuonIso",
-                              "HLT_mu.*_mu.*idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon",
-                              "HLT_mu.*_mu.*idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon",
+                              "HLT_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon",
+                              "HLT_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon",
                               "HLT_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon",
                               "HLT_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon",
                               "HLT_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:te=1",
@@ -129,12 +129,12 @@ def TIDAMonitoring( flags=None, name=None, monlevel=None, mcTruth=False ) :
                               "HLT_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=mu_probe:te=1",
                               "HLT_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=mu_tag:te=0",
                               "HLT_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=mu_probe:te=1",
-                              "HLT_mu.*_mu.*idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:te=1",
-                              "HLT_mu.*_mu.*idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:te=1",
-                              "HLT_mu.*_mu.*idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=mu_tag:te=0",
-                              "HLT_mu.*_mu.*idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=mu_probe:te=1",
-                              "HLT_mu.*_mu.*idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=mu_tag:te=0",
-                              "HLT_mu.*_mu.*idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=mu_probe:te=1" ], monlevel )
+                              "HLT_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:te=1",
+                              "HLT_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:te=1",
+                              "HLT_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=mu_tag:te=0",
+                              "HLT_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=mu_probe:te=1",
+                              "HLT_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=mu_tag:te=0",
+                              "HLT_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=mu_probe:te=1" ], monlevel )
                               
 
         if len(chains)>0 : 
@@ -249,7 +249,7 @@ def TIDAMonitoring( flags=None, name=None, monlevel=None, mcTruth=False ) :
                             [ "HLT_j45_pf_ftf_preselj20_L1J15:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
                               "HLT_j.*_ftf.*boffperf.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
                               "HLT_j.*boffperf.*_ftf.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
-                              "HLT_j.*boffperf.*:key=HLT_IDTrack_JetSuper_FTF:HLT_Roi_JetSuper",
+                              "HLT_j.*boffperf.*:key=HLT_IDTrack_JetSuper_FTF:roi=HLT_Roi_JetSuper",
                               "HLT_j.*boffperf.*:key=HLT_IDTrack_Bjet_FTF",
                               "HLT_j.*boffperf.*:key=HLT_IDTrack_Bjet_IDTrig" ], monlevel )
 
