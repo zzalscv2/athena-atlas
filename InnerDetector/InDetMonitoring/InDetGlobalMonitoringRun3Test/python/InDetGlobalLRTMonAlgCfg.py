@@ -16,7 +16,7 @@ def InDetGlobalLRTMonAlgCfg(helper, alg, **kwargs):
     # values
     m_nBinsEta = 50
     m_nBinsPhi = 50
-    m_trackBin = 75
+    m_trackBin = 200
     m_c_etaRange = 3
     m_c_etaRangeTRT = 2.0
     m_c_range_LB = 3000
@@ -29,8 +29,7 @@ def InDetGlobalLRTMonAlgCfg(helper, alg, **kwargs):
 
     varName = 'm_nBase;nCOMBtrks'
     title = 'Track multiplicity (baseline tracks);Track multiplicity;Events'
-    lrtGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_trackBin, xmin=0, xmax=40)
-
+    lrtGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_trackBin, xmin=0, xmax=200)
 
     varName = 'm_d0_perigee;trkD' 
     title = 'd_{0} ;d_{0} (mm)'
