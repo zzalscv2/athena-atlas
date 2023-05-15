@@ -88,10 +88,10 @@ def main():
         for k in range(len(dfz)):
             thisrow = dfz.iloc[k]
             lb = thisrow.name
-            # print('lb', lb, type(lb))
-            translist.append({'FillNum' : dfz0[dfz0['LBNum']==lb]['FillNum'].iloc[0],
+            lbselector = (lb <= dfz0['LBNum']) & (dfz0['LBNum'] < lb+20)
+            translist.append({'FillNum' : dfz0[lbselector]['FillNum'].iloc[0],
                               'beginTime' : time.strftime(timeformat,
-                                                        time.gmtime(dfz0[dfz0['LBNum']==lb]['LBStart'].iloc[0])),
+                                                        time.gmtime(dfz0[lbselector]['LBStart'].iloc[0])),
                               'endTime': time.strftime(timeformat,
                                                      time.gmtime(dfz0[(dfz0['LBNum']//20)*20 == lb]['LBEnd'].iloc[-1])),
                               'ZmumuRate': thisrow['ZmumuRate']/thisrow['LBLive'],
