@@ -7,7 +7,7 @@ n_events=5
 Reco_tf.py --CA \
    --preExec "flags.Reco.EnableHGTDExtension=False;" \
    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
-   --postInclude "ActsConfig.ActsTrkFittingAlgsConfig.ActsReFitterAlgCfg" \
+   --postInclude "ActsConfig.ActsTrkFittingConfig.ActsReFitterAlgCfg" \
    --inputRDOFile ${input_rdo} \
    --outputESDFile ESD.pool.root \
    --outputAODFile AOD.pool.root \

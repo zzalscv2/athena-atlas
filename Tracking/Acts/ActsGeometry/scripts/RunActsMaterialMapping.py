@@ -93,7 +93,7 @@ if args.verboseStoreGate:
 log.debug('Dumping of ConfigFlags now.')
 flags.dump()
 
-from ActsConfig.ActsGeometryConfig import ActsMaterialTrackWriterSvcCfg
+from ActsConfig.ActsTrkGeometryConfig import ActsMaterialTrackWriterSvcCfg
 cfg.merge(ActsMaterialTrackWriterSvcCfg(flags,
                                         "ActsMaterialTrackWriterSvc",
                                         FilePath="MaterialTracks_mapping.root",
@@ -102,7 +102,7 @@ cfg.merge(ActsMaterialTrackWriterSvcCfg(flags,
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 cfg.merge(PoolReadCfg(flags))
 
-from ActsConfig.ActsGeometryConfig import ActsMaterialMappingCfg
+from ActsConfig.ActsTrkGeometryConfig import ActsMaterialMappingCfg
 cfg.merge(ActsMaterialMappingCfg(flags, "ActsMaterialMappingCfg",
                                  mapSurfaces = True,
                                  mapVolumes = True))

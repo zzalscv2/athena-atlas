@@ -29,7 +29,7 @@ flags.dump()
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 acc = MainServicesCfg( flags )
 
-from ActsConfig.ActsGeometryConfig import ActsExtrapolationAlgCfg, ActsTrackingGeometrySvcCfg
+from ActsConfig.ActsTrkGeometryConfig import ActsExtrapolationAlgCfg, ActsTrackingGeometrySvcCfg
 
 from AthenaCommon.Constants import INFO
 tgSvc = ActsTrackingGeometrySvcCfg(flags,

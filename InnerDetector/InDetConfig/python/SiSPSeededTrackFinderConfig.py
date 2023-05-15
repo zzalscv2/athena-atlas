@@ -92,7 +92,7 @@ def ITkSiSPSeededTrackFinderCfg(flags, name="ITkSiSpTrackFinder", **kwargs):
 
         if (flags.Tracking.ActiveConfig.extension != "ConversionFinding" and
             configuration_settings.ActsToAthenaSeedConverter):
-            from ActsConfig.ActsTrkSeedingToolConfig import (
+            from ActsConfig.ActsTrkSeedingConfig import (
                 ActsTrkSiSpacePointsSeedMakerCfg)
             ITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(
                 ActsTrkSiSpacePointsSeedMakerCfg(flags))

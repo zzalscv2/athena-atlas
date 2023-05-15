@@ -79,7 +79,7 @@ def PhysValMonitoringCfg(flags, name="PhysValMonManager", tools=[], **kwargs):
         from MuonPhysValMonitoring.MuonPhysValConfig import PhysValMuonCfg
         tools.append(acc.popToolsAndMerge(PhysValMuonCfg(flags)))
     if flags.PhysVal.doActs:
-        from ActsConfig.ActsTrkAnalysisToolsConfig import PhysValActsCfg
+        from ActsConfig.ActsTrkAnalysisConfig import PhysValActsCfg
         tools.append(acc.popToolsAndMerge(PhysValActsCfg(flags)))
     if flags.PhysVal.doLLPSecVtx:
         from InDetSecVertexValidation.InDetSecVertexValidationConfig import PhysValSecVtxCfg

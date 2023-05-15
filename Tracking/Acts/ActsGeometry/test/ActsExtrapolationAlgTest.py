@@ -40,7 +40,7 @@ if "__main__" == __name__:
   from BeamPipeGeoModel.BeamPipeGMConfig import BeamPipeGeometryCfg
   cfg.merge(BeamPipeGeometryCfg(flags))
 
-  from ActsConfig.ActsGeometryConfig import ActsExtrapolationAlgCfg
+  from ActsConfig.ActsTrkGeometryConfig import ActsExtrapolationAlgCfg
   alg = ActsExtrapolationAlgCfg(flags,
                                 OutputLevel=INFO,
                                 NParticlesPerEvent = int(100),

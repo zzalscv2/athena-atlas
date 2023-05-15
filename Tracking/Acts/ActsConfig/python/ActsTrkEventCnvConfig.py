@@ -4,7 +4,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 
 def ActsToTrkConverterToolCfg(flags, name="ActsToTrkConverterTool", **kwargs):
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+    from ActsConfig.ActsTrkGeometryConfig import ActsTrackingGeometryToolCfg
     result = ComponentAccumulator()
     kwargs.setdefault("TrackingGeometryTool", result.popToolsAndMerge(
         ActsTrackingGeometryToolCfg(flags)))  # PrivateToolHandle

@@ -6,7 +6,7 @@ n_events=5
 
 Reco_tf.py --CA \
    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateGSFFlags" \
-   --postInclude "ActsConfig.ActsTrkFittingAlgsConfig.ActsReFitterAlgCfg" \
+   --postInclude "ActsConfig.ActsTrkFittingConfig.ActsReFitterAlgCfg" \
    --inputRDOFile ${input_rdo} \
    --outputESDFile ESD.pool.root \
    --outputAODFile AOD.pool.root \

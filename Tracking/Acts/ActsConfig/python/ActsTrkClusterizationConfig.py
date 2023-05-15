@@ -1,9 +1,33 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from ActsConfig.ActsTrkClusterizationToolsConfig import ActsTrkITkPixelClusteringToolCfg, ActsTrkITkStripClusteringToolCfg
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from SCT_ConditionsTools.ITkStripConditionsToolsConfig import ITkStripConditionsSummaryToolCfg
+from InDetConfig.SiClusterizationToolConfig import ITkClusterMakerToolCfg, ITkPixelRDOToolCfg
+from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
+
+def ActsTrkITkPixelClusteringToolCfg(flags, name="ActsITkPixelClusteringTool", **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault("PixelRDOTool", acc.popToolsAndMerge(ITkPixelRDOToolCfg(flags)))
+    kwargs.setdefault("ClusterMakerTool", acc.popToolsAndMerge(ITkClusterMakerToolCfg(flags)))
+    kwargs.setdefault("AddCorners", True)
+    kwargs.setdefault("ErrorStrategy", 1)
+    acc.setPrivateTools(CompFactory.ActsTrk.PixelClusteringTool(name, **kwargs))
+    return acc
+
+
+def ActsTrkITkStripClusteringToolCfg(flags, name="ActsITkStripClusteringTool", **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault("StripConditionsTool", acc.popToolsAndMerge(ITkStripConditionsSummaryToolCfg(flags)))
+    kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)))
+
+    if flags.ITk.selectStripIntimeHits:
+        from AthenaConfiguration.Enums import BeamType
+        coll_25ns = flags.Beam.BunchSpacing<=25 and flags.Beam.Type is BeamType.Collisions
+        kwargs.setdefault("timeBins", "01X" if coll_25ns else "X1X")
+
+    acc.setPrivateTools(CompFactory.ActsTrk.StripClusteringTool(name, **kwargs))
+    return acc
 
 def ActsTrkITkPixelClusterizationAlgCfg(flags, name='ActsTrkITkPixelClusterizationAlg', **kwargs):
     acc = ComponentAccumulator()
@@ -17,7 +41,6 @@ def ActsTrkITkPixelClusterizationAlgCfg(flags, name='ActsTrkITkPixelClusterizati
 
     acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterizationAlg(name, **kwargs))
     return acc
-
 
 def ActsTrkITkStripClusterizationAlgCfg(flags, name='ActsTrkITkStripClusterizationAlg', **kwargs):
     acc = ComponentAccumulator()
