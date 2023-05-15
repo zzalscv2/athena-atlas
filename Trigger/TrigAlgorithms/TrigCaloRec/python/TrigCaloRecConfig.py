@@ -55,7 +55,7 @@ def HLTCaloCellMaker(flags, name, roisKey='UNSPECIFIED', CellsName=None, monitor
     return cellmaker
 
 
-def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None, monitorCells=False):
+def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None, monitorCells=False, doTau=False):
     acc = ComponentAccumulator()
     from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg, CaloDataAccessSvcDependencies
     acc.merge(trigCaloDataAccessSvcCfg(flags))
@@ -87,7 +87,8 @@ def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None,
                                              ExtraInputs = CaloDataAccessSvcDependencies,
                                              RoIs=roisKey,
                                              monitorCells = monitorCells,
-                                             MonTool = monTool)
+                                             MonTool = monTool,
+                                             TileCellsInROI = False if not doTau else True)
     acc.addEventAlgo(cellMaker, primary=True)
     return acc
 
@@ -306,7 +307,7 @@ def hltCaloTopoClusteringCfg(
     clusters = clustersKeyFromName if clustersKey is None else clustersKey
     acc = ComponentAccumulator()
     acc.merge(
-        hltCaloCellMakerCfg(flags, namePrefix + "HLTCaloCellMaker"+nameSuffix, roisKey=roisKey, CellsName=CellsName, monitorCells=monitorCells)
+        hltCaloCellMakerCfg(flags, namePrefix + "HLTCaloCellMaker"+nameSuffix, roisKey=roisKey, CellsName=CellsName, monitorCells=monitorCells, doTau = doTau)
     )
     acc.merge(
         hltTopoClusterMakerCfg(
