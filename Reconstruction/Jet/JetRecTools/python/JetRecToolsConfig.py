@@ -66,6 +66,7 @@ def getJetTrackVtxAlg( trkOpt, algname="jetTVA", **ttva_overide):
         addDecoAlg = False, # We add it ourselves for sequence management
         TrackContName = trkProperties["Tracks"],
         VertexContName = trkProperties["Vertices"],
+        HardScatterLinkDeco = ""
     )
     # allow client to overide options : 
     ttva_options.update(**ttva_overide)
