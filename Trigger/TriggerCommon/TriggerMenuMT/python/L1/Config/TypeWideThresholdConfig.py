@@ -401,9 +401,9 @@ def getConfig_gLJ():
     confObj = odict()
     confObj["ptMinToTopo1"] = 6 
     confObj["ptMinToTopo2"] = 6 
-    confObj["seedThrA"] = 3 
-    confObj["seedThrB"] = 3 
-    confObj["seedThrC"] = 3 
+    confObj["seedThrA"] = 20
+    confObj["seedThrB"] = 20
+    confObj["seedThrC"] = 20 
     confObj["rhoTowerMinA"] = -9.6 
     confObj["rhoTowerMinB"] = -9.6 
     confObj["rhoTowerMinC"] = -9.6 
@@ -454,9 +454,9 @@ def getConfig_jTE():
 
 def getConfig_gXE():
     confObj = odict()
-    confObj["seedThrA"] = 25 
-    confObj["seedThrB"] = 25 
-    confObj["seedThrC"] = 25 
+    confObj["seedThrA"] = 24 
+    confObj["seedThrB"] = 24 
+    confObj["seedThrC"] = 24 
     confObj["XERHO_sigmaPosA"] = 3 
     confObj["XERHO_sigmaPosB"] = 3 
     confObj["XERHO_sigmaPosC"] = 3 

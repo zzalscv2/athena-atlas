@@ -16423,13 +16423,13 @@ HLT_j110_a10sd_cssk_pf_jes_ftf_preselj80_L1J30:
     0: 15
     1: 17
 HLT_j110_a10sd_cssk_pf_jes_ftf_preselj80_L1gLJ80:
-  eventCount: 12
+  eventCount: 11
   stepCounts:
-    0: 14
-    1: 12
+    0: 12
+    1: 11
   stepFeatures:
-    0: 14
-    1: 17
+    0: 12
+    1: 16
 HLT_j110_a10sd_cssk_pf_jes_ftf_preselj80_L1jJ60:
   eventCount: 12
   stepCounts:
@@ -16453,11 +16453,11 @@ HLT_j110_a10t_lcw_jes_L1J30:
   stepFeatures:
     0: 33
 HLT_j110_a10t_lcw_jes_L1gLJ80:
-  eventCount: 14
+  eventCount: 12
   stepCounts:
-    0: 14
+    0: 12
   stepFeatures:
-    0: 30
+    0: 28
 HLT_j110_a10t_lcw_jes_L1jJ60:
   eventCount: 15
   stepCounts:
@@ -27729,7 +27729,7 @@ HLT_noalg_L1gJ160:
 HLT_noalg_L1gLJ160:
   eventCount: 3
 HLT_noalg_L1gXEJWOJ100:
-  eventCount: 12
+  eventCount: 11
 HLT_noalg_L1gXENC100:
   eventCount: 13
 HLT_noalg_L1gXERHO100:
@@ -32418,7 +32418,7 @@ HLT_xe55_cell_xe105_nn_L1gXEJWOJ100:
     0: 5
     1: 3
   stepFeatures:
-    0: 17
+    0: 16
     1: 3
 HLT_xe55_cell_xe105_nn_L1jXE100:
   eventCount: 4
@@ -32494,7 +32494,7 @@ HLT_xe55_cell_xe90_nn_L1gXEJWOJ100:
     0: 5
     1: 3
   stepFeatures:
-    0: 17
+    0: 16
     1: 3
 HLT_xe55_cell_xe90_nn_L1jXE100:
   eventCount: 4
@@ -32556,7 +32556,7 @@ HLT_xe65_cell_xe100_mhtpufit_pf_L1gXEJWOJ100:
     0: 4
     1: 3
   stepFeatures:
-    0: 16
+    0: 15
     1: 3
 HLT_xe65_cell_xe100_mhtpufit_pf_L1gXENC100:
   eventCount: 4
@@ -32652,7 +32652,7 @@ HLT_xe65_cell_xe105_nn_L1gXEJWOJ100:
     0: 4
     1: 3
   stepFeatures:
-    0: 16
+    0: 15
     1: 3
 HLT_xe65_cell_xe105_nn_L1jXE100:
   eventCount: 4
@@ -32708,7 +32708,7 @@ HLT_xe65_cell_xe90_nn_L1gXEJWOJ100:
     0: 4
     1: 3
   stepFeatures:
-    0: 16
+    0: 15
     1: 3
 HLT_xe65_cell_xe90_nn_L1jXE100:
   eventCount: 4
@@ -32740,7 +32740,7 @@ HLT_xe65_cell_xe90_pfopufit_L1gXEJWOJ100:
     0: 4
     1: 3
   stepFeatures:
-    0: 16
+    0: 15
     1: 3
 HLT_xe65_cell_xe90_pfopufit_L1gXENC100:
   eventCount: 4
