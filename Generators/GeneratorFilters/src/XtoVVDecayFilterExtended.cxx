@@ -126,7 +126,7 @@ bool XtoVVDecayFilterExtended::RunHistory(const HepMC::ConstGenParticlePtr& inpu
   if(std::abs(pitr->pdg_id()) != m_PDGGrandParent && std::abs(pitr->pdg_id()) != m_PDGParent) return false;
   if (result == m_PDGGrandParent) return true;
 
-  HepMC::ConstGenParticlePtr& pitr_current = (*firstMother);
+  auto pitr_current = (*firstMother);
   while ( result >= 0 ) {
     pitr_current = CheckGrandparent(pitr_current, result);
     ATH_MSG_DEBUG("Pointer PDG ID: " << pitr->pdg_id());
@@ -194,7 +194,6 @@ HepMC::ConstGenParticlePtr   XtoVVDecayFilterExtended::CheckGrandparent(const He
     n_mothers++;
 
   }
-
   if (isGrandParentOK) {
      result = m_PDGGrandParent;
   }
