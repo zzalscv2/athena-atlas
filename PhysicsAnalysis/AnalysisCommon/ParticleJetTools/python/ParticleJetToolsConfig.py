@@ -22,10 +22,8 @@ except ModuleNotFoundError:
 # Putting MCTruthClassifier here as we needn't stick jet configs in really foreign packages
 def getMCTruthClassifier():
     # Assume mc15 value
-    firstSimCreatedBarcode = 200000
     truthclassif = CompFactory.MCTruthClassifier(
-        "JetMCTruthClassifier",
-        barcodeG4Shift=firstSimCreatedBarcode,
+        "JetMCTruthClassifier"
         )
     if not isAnalysisRelease() :
         truthclassif.xAODTruthLinkVector= ""

@@ -63,8 +63,6 @@ def addTruthJetsIfNotExising(truth_jets_name):
             dir(jtm)
             create_truth_jet_input = None
             if not hasattr(jtm, truth_part_copy_name):
-
-                from MCTruthClassifier.MCTruthClassifierConfig import firstSimCreatedBarcode
                 from MCTruthClassifier.MCTruthClassifierConf import MCTruthClassifier
                 truth_classifier_name = 'JetMCTruthClassifier'
                 if not hasattr(jtm, truth_classifier_name):
@@ -72,16 +70,13 @@ def addTruthJetsIfNotExising(truth_jets_name):
                     if not hasattr(ToolSvc, truth_classifier_name):
                         truthClassifier = MCTruthClassifier(
                             name=truth_classifier_name,
-                            barcodeG4Shift=firstSimCreatedBarcode(),
                             ParticleCaloExtensionTool="")
                     else:
                         truthClassifier = getattr(
                             ToolSvc, truth_classifier_name)
-                        truthClassifier.barcodeG4Shift = firstSimCreatedBarcode()
                     jtm += truthClassifier
                 else:
                     truthClassifier = getattr(jtm, truth_classifier_name)
-                    truthClassifier.barcodeG4Shift = firstSimCreatedBarcode()
 
                 from ParticleJetTools.ParticleJetToolsConf import CopyTruthJetParticles
                 create_truth_jet_input = CopyTruthJetParticles(truth_part_copy_name, OutputName="JetInputTruthParticles",

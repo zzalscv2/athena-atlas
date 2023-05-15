@@ -40,7 +40,6 @@ def MCTruthClassifierCaloTruthMatchCfg(flags, **kwargs):
         kwargs["ParticleCaloExtensionTool"] = acc.popToolsAndMerge(extension)
 
     kwargs.setdefault("CaloDetDescrManager", "CaloDetDescrManager")
-    kwargs.setdefault("barcodeG4Shift", flags.Sim.SimBarcodeOffset + 1)
 
     if flags.GeoModel.Run >= LHCPeriod.Run4:
         kwargs.setdefault("FwdElectronUseG4Sel", False)
