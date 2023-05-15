@@ -86,14 +86,12 @@ def EGammaLRTCfg(ConfigFlags):
     # ==================================================
     # Truth Related tools
     if ConfigFlags.Input.isMC:
-        simBarcodeOffset = ConfigFlags.Sim.SimBarcodeOffset
 
         # Decorate Electron with bkg electron type/origin
         from MCTruthClassifier.MCTruthClassifierConfig import MCTruthClassifierCfg
         BkgElectronMCTruthClassifier = acc.popToolsAndMerge(MCTruthClassifierCfg(
             ConfigFlags,
             name="BkgElectronMCTruthClassifier",
-            barcodeG4Shift = simBarcodeOffset+1,
             ParticleCaloExtensionTool = ""))
         acc.addPublicTool(BkgElectronMCTruthClassifier)
 

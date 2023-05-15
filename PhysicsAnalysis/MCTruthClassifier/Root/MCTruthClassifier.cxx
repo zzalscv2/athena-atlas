@@ -21,7 +21,6 @@ Updated:
 
 //
 #include "MCTruthClassifier/MCTruthClassifier.h"
-#include "TruthUtils/MagicNumbers.h"
 using namespace MCTruthPartClassifier;
 using std::abs;
 
@@ -65,10 +64,7 @@ MCTruthClassifier::MCTruthClassifier(const std::string& type)
   declareProperty("pTNeutralPartCut", m_pTNeutralPartCut = 0.);
   declareProperty("inclG4part", m_inclG4part = false);
   declareProperty("LQpatch", m_LQpatch = false);
-  declareProperty("barcodeG4Shift", m_barcodeG4Shift = 200001);
 
-  // Other non-static variables init
-  m_barcodeShift = 1000000;
 }
 
 // DESTRUCTOR:
@@ -80,11 +76,6 @@ MCTruthClassifier::initialize()
 {
 
   ATH_MSG_INFO(" Initializing MCTruthClassifier");
-  // define barcode scheme
-  m_barcodeShift = HepMC::SIM_REGENERATION_INCREMENT;
-  if (m_barcodeG4Shift == HepMC::SIM_REGENERATION_INCREMENT+1) {
-    m_barcodeShift = 10000000;
-  }
 
 #ifndef XAOD_ANALYSIS
   // Only needed for GenParticle interface
