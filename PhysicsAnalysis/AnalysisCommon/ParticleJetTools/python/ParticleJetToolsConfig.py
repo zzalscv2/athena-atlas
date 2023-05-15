@@ -77,8 +77,9 @@ def getCopyTruthJetParticles(modspec, cflags):
         truthpartcopy.IncludePromptPhotons=True
         truthpartcopy.IncludeMuons=True
         truthpartcopy.IncludeNeutrinos=True
-        truthpartcopy.FSRPhotonCone=-1.
         truthpartcopy.DressingDecorationName='dressedPhoton'
+        ### Declare the dependency on the photon dressing. Needed to run the tool with avalanche scheduler
+        truthpartcopy.ExtraInputs = [( 'xAOD::TruthParticleContainer' , 'StoreGateSvc+TruthParticles.dressedPhoton' )]
     if modspec=="Charged":
         truthpartcopy.ChargedParticlesOnly=True
     return truthpartcopy
