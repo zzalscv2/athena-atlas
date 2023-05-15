@@ -41,8 +41,7 @@ def buildJetInputTruthGEN(parentjetdef, truthmod):
     truthmod = truthmod or ""
 
     # recopy config from GeneratorFilters/share/common/GenerateTruthJets.py
-    truthClassifier = CompFactory.MCTruthClassifier("JetMCTruthClassifier",
-                                                                   barcodeG4Shift=1000000) # or 200k? Doesn't matter anyway?
+    truthClassifier = CompFactory.MCTruthClassifier("JetMCTruthClassifier") 
 
     if truthmod == "":
         truthpartcopy = CompFactory.CopyTruthJetParticles("truthpartcopy",

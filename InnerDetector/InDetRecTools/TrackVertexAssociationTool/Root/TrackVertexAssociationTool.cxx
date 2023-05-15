@@ -22,6 +22,7 @@
 // STL includes
 #include <cmath>
 #include <map>
+#include <set>
 #include <stdexcept>
 #include <utility>
 
@@ -237,31 +238,8 @@ namespace {
 namespace CP {
 
 TrackVertexAssociationTool::TrackVertexAssociationTool(const std::string& name) :
-  AsgTool(name),
-  m_wp("Old_Nominal"),
-  m_d0_cut(-1),
-  m_use_d0sig(false),
-  m_d0sig_cut(-1),
-  m_dzSinTheta_cut(-1),
-  m_doUsedInFit(false),
-  m_doPVPriority(false),
-  m_requirePriVtx(false),
-  m_hardScatterDeco("hardScatterVertexLink"),
-  m_trkContName("InDetTrackParticles")
-{
-  declareProperty("WorkingPoint",        m_wp,              "Working point to operate on.");
-  declareProperty("d0_cut",              m_d0_cut,          "Cut on d0. Not applied if set to -1.");
-  declareProperty("use_d0sig",           m_use_d0sig,       "Flag to cut on d0sig instead of d0.");
-  declareProperty("d0sig_cut",           m_d0sig_cut,       "Cut on d0Sig. Not applied if set to -1.");
-  declareProperty("dzSinTheta_cut",      m_dzSinTheta_cut,  "Cut on |dz*sinTheta| (in mm). Not applied if set to -1.");
-  declareProperty("doUsedInFit",         m_doUsedInFit,     "Control whether to allow for a MatchStatus of UsedInFit.");
-  declareProperty("doPVPriority",        m_doPVPriority,    "Control whether to give priority to matching to PV instead of closest vertex.");
-  declareProperty("requirePriVtx",       m_requirePriVtx,   "Control whether a vertex must be VxType::PriVtx in order for a track (not UsedInFit) to be uniquely matched to it.");
-  declareProperty("HardScatterLinkDeco", m_hardScatterDeco, "The decoration name of the ElementLink to the hardscatter vertex (found on xAOD::EventInfo)");
-  declareProperty("TrackContName",       m_trkContName,     "The name of the xAOD::TrackParticleContainer to access the AMVF vertices+weights for (not actually read).");
-  declareProperty("AMVFVerticesDeco",    m_vtxDecoKey = "TTVA_AMVFVertices",     "The per-track decoration name of the vector of AMVF used-in-fit vertex ElementLinks.");
-  declareProperty("AMVFWeightsDeco",     m_wgtDecoKey = "TTVA_AMVFWeights",     "The per-track decoration name of the vector of AMVF used-in-fit annealing weights.");
-}
+  AsgTool(name) {} 
+ 
 
 #define IF_WORKING_POINT(WORKING_POINT, DO_USED_IN_FIT, REQUIRE_PRI_VTX)                               \
 if (m_wp == #WORKING_POINT) {                                                                          \
@@ -274,16 +252,18 @@ StatusCode TrackVertexAssociationTool::initialize()
 {
   ATH_MSG_INFO("Initializing TrackVertexAssociationTool.");
 
-  std::vector<std::string> run_2_wps = {"Loose", "Nominal", "Tight", "Electron", "Muon", "Old_Loose", "Old_Nominal", "Old_Tight", "Old_Electron", "Old_Muon"};
-  if (std::find(run_2_wps.begin(), run_2_wps.end(), m_wp) != run_2_wps.end()) {
+  static const std::set<std::string> run_2_wps = {"Loose", "Nominal", "Tight", "Electron", "Muon", "Old_Loose", "Old_Nominal", "Old_Tight", "Old_Electron", "Old_Muon"};
+  std::string wp{m_wp};  
+  if (run_2_wps.count(wp)) {
     std::string prefix = "Old_";
-    if (m_wp.compare(0, prefix.size(), prefix) == 0) {
+    if (wp.compare(0, prefix.size(), prefix) == 0) {
       ATH_MSG_WARNING("WorkingPoint '" << m_wp << "' corresponds to a Run 2 working point and is not recommended.");
     }
     else {
       ATH_MSG_WARNING("WorkingPoint '" << m_wp << "' corresponds to a Run 2 working point and is not recommended - remapping to 'Old_" << m_wp << "' (same definition, however).");
-      m_wp.insert(0, "Old_");
+      wp.insert(0, "Old_");
     }
+    m_wp = wp;
   }
 
   IF_WORKING_POINT(Old_Loose, true, true)
@@ -328,13 +308,17 @@ StatusCode TrackVertexAssociationTool::initialize()
 
   // Initialize our EventInfo container and decoration reads
   ATH_CHECK(m_eventInfo.initialize());
-  m_hardScatterDecoKey = SG::ReadDecorHandleKey<xAOD::EventInfo>(m_eventInfo.key() + "." + m_hardScatterDeco);
-  ATH_CHECK(m_hardScatterDecoKey.initialize());
-  m_vtxDecoAcc = std::make_unique<AMVFVerticesAcc>(m_vtxDecoKey.key());
-  m_vtxDecoKey = SG::ReadDecorHandleKey<xAOD::TrackParticleContainer>(m_trkContName + "." + m_vtxDecoKey.key());
+  ATH_CHECK(m_trkKey.initialize());
+  {
+    const std::string decorName = m_hardScatterDeco;
+    m_hardScatterDecoKey = m_eventInfo.key() + "." + decorName;
+    ATH_CHECK(m_hardScatterDecoKey.initialize(!decorName.empty()));
+  }
+  m_vtxDecoAcc = std::make_unique<AMVFVerticesAcc>(m_vtxDecoName);
+  m_vtxDecoKey = m_trkKey.key() + "." + m_vtxDecoName;
   ATH_CHECK(m_vtxDecoKey.initialize());
-  m_wgtDecoAcc = std::make_unique<AMVFWeightsAcc>(m_wgtDecoKey.key());
-  m_wgtDecoKey = SG::ReadDecorHandleKey<xAOD::TrackParticleContainer>(m_trkContName + "." + m_wgtDecoKey.key());
+  m_wgtDecoAcc = std::make_unique<AMVFWeightsAcc>(m_wgtDecoName);
+  m_wgtDecoKey = m_trkKey.key() + "." + m_wgtDecoName;
   ATH_CHECK(m_wgtDecoKey.initialize());
 
   return StatusCode::SUCCESS;
@@ -450,8 +434,8 @@ template <typename T>
 const xAOD::Vertex* TrackVertexAssociationTool::getUniqueMatchVertexInternal(const xAOD::TrackParticle& trk, T& vx_list) const
 {
   FitWeight weight;
-  float dzSinTheta;
-  float min_dz = ((m_dzSinTheta_cut >= 0) ? m_dzSinTheta_cut : +999.0);
+  float dzSinTheta{0.};
+  float min_dz = ((m_dzSinTheta_cut >= 0) ? m_dzSinTheta_cut.value() : +999.0);
   const xAOD::Vertex* bestMatchVertex = nullptr;
 
   for (const auto& vertex : vx_list) {

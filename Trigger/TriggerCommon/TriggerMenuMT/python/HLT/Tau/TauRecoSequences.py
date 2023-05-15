@@ -9,9 +9,8 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorInitialROITool, ViewCreatorFetchFromViewROITool, ViewCreatorPreviousROITool
-from TrigT2CaloCommon.CaloDef import HLTLCTopoRecoSequence
 from TrigEDMConfig.TriggerEDMRun3 import recordable
-from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool, algorithmCAToGlobalWrapper
+from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
 from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si, ROBPrefetchingAlgCfg_Calo
 from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
 import AthenaCommon.CfgMgr as CfgMgr
@@ -108,11 +107,11 @@ def tauLRTRoiUpdaterCfg(inflags, inputRoIs, tracks):
 def tauCaloMVARecoSequence(flags, InViewRoIs, SeqName):
     global TauCaloJetContainer
     from TrigTauRec.TrigTauRecConfig import trigTauRecMergedCaloOnlyMVACfg
-    # lc sequence
-    (lcTopoInViewSequence, lcCaloSequenceOut) = RecoFragmentsPool.retrieve(HLTLCTopoRecoSequence, flags, RoIs=InViewRoIs)
-    tauCaloRoiUpdaterAlg                      = algorithmCAToGlobalWrapper(tauCaloRoiUpdaterCfg,flags, inputRoIs=InViewRoIs,clusters = lcCaloSequenceOut)[0]
+    from TrigCaloRec.TrigCaloRecConfig import tauTopoClusteringCfg
+    tauTopoClusAlg                            = algorithmCAToGlobalWrapper(tauTopoClusteringCfg, flags, RoIs=InViewRoIs)
+    tauCaloRoiUpdaterAlg                      = algorithmCAToGlobalWrapper(tauCaloRoiUpdaterCfg,flags, inputRoIs=InViewRoIs,clusters = 'HLT_TopoCaloClustersLC')[0]
     tauCaloOnlyMVAAlg                         = algorithmCAToGlobalWrapper(trigTauRecMergedCaloOnlyMVACfg,flags)[0]
-    RecoSequence                              = parOR( SeqName, [lcTopoInViewSequence,tauCaloRoiUpdaterAlg,tauCaloOnlyMVAAlg] )
+    RecoSequence                              = parOR( SeqName, [tauTopoClusAlg,tauCaloRoiUpdaterAlg,tauCaloOnlyMVAAlg] )
     return (RecoSequence, tauCaloOnlyMVAAlg.Key_trigTauJetOutputContainer)
 
 def tauCaloMVASequence(flags):

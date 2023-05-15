@@ -52,7 +52,7 @@ fatjetcontexts = {
     "CombinedMass":  ("JES_MC16recommendation_FatJet_Trimmed_JMS_comb_17Oct2018.config","00-04-82","EtaJES_JMS"),
     "CaloMass":      ("JES_MC16recommendation_FatJet_Trimmed_JMS_calo_12Oct2018.config","00-04-82","EtaJES_JMS"),
     "TAMass":        ("JES_MC16recommendation_FatJet_Trimmed_JMS_TA_12Oct2018.config","00-04-82","EtaJES_JMS"),
-    "SoftDrop":      ("JES_MC16recommendation_R10_UFO_CSSK_SoftDrop_JMS_01April2020.config","00-04-82","EtaJES_JMS"),
+    "SoftDrop":      ("JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_10Mar2023.config","00-04-82","EtaJES_JMS"),
     "TrigUngroomed": ("JES_Full2012dataset_Rscan_June2014.config","00-04-77","JetArea_EtaJES"),
     "TrigTrimmed":   ("JES_MC15recommendation_FatJet_June2015_PtFrac4.config","00-04-82","EtaJES_JMS"),
     "TrigSoftDrop":  ("JES_MC16recommendation_R10_UFO_CSSK_SoftDrop_JMS_01April2020.config","00-04-82","EtaJES_JMS"),

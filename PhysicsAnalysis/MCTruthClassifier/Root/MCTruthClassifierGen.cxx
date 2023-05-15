@@ -196,7 +196,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
     }
   }
 
-  if (partOriVert == nullptr && thePart->barcode() > m_barcodeShift) {
+  if (partOriVert == nullptr && HepMC::is_simulation_particle(thePart->barcode())) {
     return std::make_pair(NonPrimary, partOrig);
   }
   if (partOriVert == nullptr && MC::PID::isElectron(iParticlePDG)) {
@@ -393,7 +393,7 @@ std::tuple<unsigned int, const xAOD::TruthParticle*> MCTruthClassifier::defOrigO
 
   bool uncat = 0, fromHad = 0, fromTau = 0;
   bool isPhysical = (status == 1 || status == 2);
-  bool isGeant = std::abs(thePart->barcode()) >= m_barcodeG4Shift;
+  bool isGeant = HepMC::is_simulation_particle(thePart->barcode());
   bool isBSM = MC::PID::isBSM(thePart->pdgId());
   bool fromBSM = isBSM; // just to initialise
 
@@ -1914,8 +1914,6 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
   //-- dijets and min bias
   if (numOfParents == 1 && motherStatus == 3) {
 
-    //  const xAOD::TruthParticle* thePhotMoth = (*mcEventItr)->barcode_to_particle(motherBarcode);
-    //  const xAOD::TruthVertex*   MothOriVert = thePhotMoth->prodVtx();
     if (mothOriVert != nullptr && abs(mothOriVert->barcode()) == 5)
       return FSRPhot;
 
@@ -2747,7 +2745,7 @@ MCTruthClassifier::getMother(const xAOD::TruthParticle* thePart) const
       ATH_MSG_WARNING("getMother:: infinite while");
       break;
     }
-  } while (MothOriVert != nullptr && MotherPDG == partPDG && partBarcode < m_barcodeG4Shift &&
+  } while (MothOriVert != nullptr && MotherPDG == partPDG && !HepMC::is_simulation_particle(partBarcode) &&
            MothOriVert != partOriVert);
 
   ATH_MSG_DEBUG("succeded getMother");
@@ -2772,7 +2770,7 @@ MCTruthClassifier::findEndVert(const xAOD::TruthParticle* thePart) const
         if (((itrDaug->barcode() % m_barcodeShift == thePart->barcode() % m_barcodeShift) ||
              // brem on generator level for tau
              (EndVert->nOutgoingParticles() == 1 && EndVert->nIncomingParticles() == 1 &&
-              itrDaug->barcode() < m_barcodeG4Shift && thePart->barcode() < m_barcodeG4Shift)) &&
+              !HepMC::is_simulation_particle(itrDaug->barcode()) && !HepMC::is_simulation_particle(thePart->barcode()))) &&
             itrDaug->pdgId() == thePart->pdgId()) {
           samePart = true;
           pVert = itrDaug->decayVtx();
@@ -3177,7 +3175,7 @@ MCTruthClassifier::findParticleDaughters(const xAOD::TruthParticle* thePart,
       const xAOD::TruthParticle* theDaughter = endVtx->outgoingParticle(i);
       if (theDaughter == nullptr)
         continue;
-      if (theDaughter->status() == 1 && !HepMC::is_simulation_particle(theDaughter)) {
+      if (theDaughter->status() == 1 && !HepMC::is_simulation_particle(theDaughter->barcode())) {
         // Add descendants with status code 1
         daughters.insert(theDaughter);
       }

@@ -409,7 +409,9 @@ def makeLargeRJetAnalysisSequence( seq, dataType, jetCollection,
                 configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_TA_12Oct2018.config"
 
     if jetInput == "UFO":
-        configFile = "JES_MC16recommendation_R10_UFO_CSSK_SoftDrop_JMS_01April2020.config"
+        # R22 pre-recs
+        # More info: https://twiki.cern.ch/twiki/bin/view/AtlasProtected/ApplyJetCalibrationR22#R_1_0_unified_flow_object_UFO_je
+        configFile = "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_10Mar2023.config"
 
     # Prepare the jet calibration algorithm
     alg = createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+postfix )

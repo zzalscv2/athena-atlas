@@ -32,12 +32,12 @@ def copyPlot(infname, outfname):
     if not fin: return
     fout = ROOT.TFile.Open(outfname, 'UPDATE')
     if not fout: return
-    for objname in ['z_lumi']:
+    for objname in ['z_lumi', 'z_lumi_ratio']:
         obj = fin.Get(objname)
         if obj:
             d = fout.Get('run_%d/GLOBAL/DQTGlobalWZFinder' % run)
             if d:
-                d.WriteTObject(obj)
+                d.WriteTObject(obj, objname)
     fin.Close(); fout.Close()
             
 def makeGRL(run, defect, fname):
@@ -95,10 +95,9 @@ def go(fname):
         print('Run number', runno, 'not 2017 data')
 
     # Temporarily comment. Run 3 version of this code will be inserted soon
-    # subprocess.check_call(['dqt_zlumi_compute_lumi.py', fname, '--out', 'zlumiraw.root', '--dblivetime', '--plotdir', ''] + grlcmd)
-    # subprocess.check_call(['dqt_zlumi_alleff_HIST.py', fname, '--out', 'zlumieff.root', '--plotdir', ''])
-    # subprocess.check_call(['dqt_zlumi_combine_lumi.py', 'zlumiraw.root', 'zlumieff.root', 'zlumi.root'])
-    # subprocess.check_call(['dqt_zlumi_display_z_rate.py', 'zlumi.root', '--plotdir', ''])
-    # copyPlot('zlumi.root', fname)
-    # if os.path.isfile('zlumi.root_zrate.csv'):
-    #     shutil.move('zlumi.root_zrate.csv', 'zrate.csv')
+    subprocess.check_call(['dqt_zlumi_pandas.py', '--infile', fname, '--dblivetime', '--outdir', '', '--campaign', 'mc21'] + grlcmd)
+    subprocess.check_call(['dqt_csv_luminosity.py', '--infile', f'run_{runno}.csv', '--outdir', '', '--absolute', '--t0'])
+    if os.path.isfile(f'run_{runno}.csv'):
+        shutil.move(f'run_{runno}.csv', 'zlumi.csv')
+    if os.path.isfile('zlumi.root'):
+        copyPlot('zlumi.root', fname)

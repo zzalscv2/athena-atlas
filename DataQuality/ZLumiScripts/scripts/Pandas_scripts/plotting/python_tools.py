@@ -5,10 +5,16 @@ import re
 import ROOT as R
 from subprocess import Popen, PIPE
 from array import array
-    
-R.gROOT.LoadMacro(os.getcwd() + "/plotting/AtlasStyle/AtlasStyle.C")
-R.gROOT.LoadMacro(os.getcwd() + "/plotting/AtlasStyle/AtlasLabels.C")
-R.gROOT.LoadMacro(os.getcwd() + "/plotting/AtlasStyle/AtlasUtils.C")
+
+try:
+    from AthenaCommon.Utils import unixtools
+    R.gROOT.LoadMacro(unixtools.find_datafile('ZLumiScripts/AtlasStyle/AtlasStyle.C'))
+    R.gROOT.LoadMacro(unixtools.find_datafile('ZLumiScripts/AtlasStyle/AtlasLabels.C'))
+    R.gROOT.LoadMacro(unixtools.find_datafile('ZLumiScripts/AtlasStyle/AtlasUtils.C'))
+except Exception:
+    R.gROOT.LoadMacro(os.getcwd() + "/plotting/AtlasStyle/AtlasStyle.C")
+    R.gROOT.LoadMacro(os.getcwd() + "/plotting/AtlasStyle/AtlasLabels.C")
+    R.gROOT.LoadMacro(os.getcwd() + "/plotting/AtlasStyle/AtlasUtils.C")
 
 def get_grl(year):
     CVMFS = "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists"

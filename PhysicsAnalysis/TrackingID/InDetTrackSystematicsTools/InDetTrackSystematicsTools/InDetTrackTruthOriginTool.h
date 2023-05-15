@@ -51,7 +51,6 @@ namespace InDet {
     int getParentID(const xAOD::TruthParticle* part) const;
 
     float m_matchingProbabilityCut;
-    float m_barcodeG4;
 
     std::string m_truthParticleLinkName;
     std::string m_truthMatchProbabilityAuxName;

@@ -3,7 +3,6 @@
 from TrackToCalo.TrackToCaloConf import Trk__ParticleCaloExtensionTool
 from MCTruthClassifier.MCTruthClassifierConf import (
     MCTruthClassifier as classifierTool)
-from MCTruthClassifier.MCTruthClassifierConfig import firstSimCreatedBarcode
 from AthenaCommon.AppMgr import ToolSvc
 from AthenaCommon.Logging import logging
 import AthenaCommon.CfgMgr as CfgMgr
@@ -14,7 +13,6 @@ mlog = logging.getLogger('MCTruthClassifierBase.py::configure:')
 
 MCTruthClassifier = classifierTool(
     name='MCTruthClassifier',
-    barcodeG4Shift=firstSimCreatedBarcode(),
     ParticleCaloExtensionTool='')
 
 ToolSvc += MCTruthClassifier
@@ -69,6 +67,5 @@ def getMCTruthClassifierCaloExtensionTool():
 
 MCTruthClassifierCalo = classifierTool(
     name='MCTruthClassifierCalo',
-    barcodeG4Shift=firstSimCreatedBarcode(),
     ParticleCaloExtensionTool=getMCTruthClassifierCaloExtensionTool(),
     CaloDetDescrManager="CaloDetDescrManager")

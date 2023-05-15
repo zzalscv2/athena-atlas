@@ -89,15 +89,8 @@ def InDetCommonCfg(flags, **kwargs):
                                              name="DFCommonHSSelectionTool"))
         acc.addPublicTool(DFCommonHSSelectionTool)
 
-        from DerivationFrameworkInDet.InDetToolsConfig import (
-            HardScatterVertexDecoratorCfg)
-        DFCommonHSDecorator = acc.getPrimaryAndMerge(
-            HardScatterVertexDecoratorCfg(
-                flags,
-                name                     = "DFCommonHSDecorator",
-                VertexContainerName      = "PrimaryVertices",
-                HardScatterDecoName      = "hardScatterVertexLink",
-                HardScatterSelectionTool = DFCommonHSSelectionTool))
+        from DerivationFrameworkInDet.InDetToolsConfig import HardScatterVertexDecoratorCfg
+        acc.merge(HardScatterVertexDecoratorCfg(flags))
 
         # ====================================================================
         # DECORATE THE TRACKS WITH USED-IN-FIT TTVA VARIABLES
@@ -180,23 +173,21 @@ def InDetCommonCfg(flags, **kwargs):
             # =======================================
             # CREATE THE DERIVATION KERNEL ALGORITHM
             # =======================================
-
-            acc.addEventAlgo(CommonAugmentation(
-                "InDetCommonKernel",
-                AugmentationTools=[DFCommonTrackSelection,
+            for tool in [DFCommonTrackSelection,
                                    DFCommonZ0AtPV,
-                                   DFCommonHSDecorator,
                                    DFCommonUsedInFitDecorator,
-                                   DFCommonUsedInFitDecoratorLRT]))
+                                   DFCommonUsedInFitDecoratorLRT]:
+                acc.addEventAlgo(CommonAugmentation("InDetCommonKernel"+tool.name,
+                                 AugmentationTools=[tool]))
         else:
             AugTools = [DFCommonTrackSelection,
                         DFCommonZ0AtPV,
-                        DFCommonHSDecorator,
                         DFCommonUsedInFitDecorator]
             if kwargs['AddPseudoTracks']:
                 AugTools += PseudoTrackDecorators
-            acc.addEventAlgo(CommonAugmentation("InDetCommonKernel",
-                                                AugmentationTools=AugTools))
+            for tool in AugTools:
+                acc.addEventAlgo(CommonAugmentation("InDetCommonKernel"+tool.name,
+                                                AugmentationTools=[tool]))
 
     # Add LRT merger job to the sequence when the LRT track particle is supposed to be made already
     if (kwargs['MergeLRT'] and kwargs['DoR3LargeD0'] and

@@ -10,6 +10,7 @@
  **/
 
 #include "AthTruthSelectionTool.h"
+#include "AtlasHepMC/MagicNumbers.h"
 #include "xAODTruth/TruthVertex.h"
 
 #include <vector>
@@ -50,7 +51,7 @@ AthTruthSelectionTool::AthTruthSelectionTool(const std::string& type, const std:
   declareProperty("maxEta", m_maxEta = 2.5);
   declareProperty("minPt", m_minPt = 400);
   declareProperty("maxPt", m_maxPt = -1);
-  declareProperty("maxBarcode", m_maxBarcode = 200e3);
+  declareProperty("maxBarcode", m_maxBarcode = HepMC::SIM_BARCODE_THRESHOLD);
   declareProperty("requireCharged", m_requireCharged = true);
   declareProperty("selectedCharge", m_selectedCharge = 0);
   declareProperty("requireStatus1", m_requireStatus1 = true);

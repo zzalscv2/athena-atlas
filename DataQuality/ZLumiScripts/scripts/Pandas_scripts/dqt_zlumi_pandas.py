@@ -31,7 +31,6 @@ parser.add_argument('--tag', type=str, help='Lumi tag', default='OflLumiAcct-Run
 parser.add_argument('--useofficial', action='store_true', help='Use official lumi folder (otherwise, use OflLumiAcct')
 parser.add_argument('--lumifolder', type=str, help='Lumi folder', default='/TRIGGER/OFLLUMI/OflPrefLumi')
 parser.add_argument('--lumitag', type=str, help='Lumi tag', default='OflLumi-Run3-003')
-parser.add_argument('--plotdir', type=str, help='Directory to dump plots', default='plots')
 parser.add_argument('--outdir', type=str, help='Directory to dump plots', default='plots')
 parser.add_argument('--dblivetime', action='store_true', help='Look up livetime from DB')
 parser.add_argument('--campaign', type=str, help='mc16a/d/e')
@@ -195,31 +194,32 @@ for pileup in o_recoeff_fit:
     arr_rec_eff.append(o_recoeff_fit[pileup]/o_recoerr_fit[pileup])
     arr_rec_err.append(1/pow(o_recoerr_fit[pileup], 0.5))
 
-tg_fit = ROOT.TGraphErrors(len(arr_mu), arr_mu, arr_rec_eff, ROOT.nullptr, arr_rec_err)
-if len(o_recoeff_fit) == 1:
-    fit_type = "pol0"
-elif len(o_recoeff_fit) == 2:
-    fit_type = "pol1"
-elif len(o_recoeff_fit) > 2:
-    fit_type = "pol2"
+if arr_mu:  # skip if no data
+    tg_fit = ROOT.TGraphErrors(len(arr_mu), arr_mu, arr_rec_eff, ROOT.nullptr, arr_rec_err)
+    if len(o_recoeff_fit) == 1:
+        fit_type = "pol0"
+    elif len(o_recoeff_fit) == 2:
+        fit_type = "pol1"
+    elif len(o_recoeff_fit) > 2:
+        fit_type = "pol2"
 
-print("Fit type", fit_type, "pileup bins", len(o_recoeff_fit))
-tg_fit.Fit(fit_type, "q")
+    print("Fit type", fit_type, "pileup bins", len(o_recoeff_fit))
+    tg_fit.Fit(fit_type, "q")
 
 
 if args.outdir: 
     out_dir = args.outdir
     os.system("mkdir -p " + out_dir)
-    out_dir += "/" + runname + ".csv"
+    out_dir = os.path.join(out_dir, runname + ".csv")
 else: 
     out_dir = runname + ".csv"
 
 csvfile = open(out_dir, 'w')
 csvwriter = csv.writer(csvfile, delimiter=',')
 csvwriter.writerow(['FillNum','RunNum','LBNum','LBStart','LBEnd','LBLive','LBFull','OffLumi','OffMu', 'PassGRL', 
-                    'ZeeRaw','ZeeRawErr','ZeeN1','ZeeN2','ZeeEffTrig','ZeeErrTrig','ZeeEffReco','ZeeErrReco','ZeeEffComb','ZeeErrComb','ZeeEffAComb','ZeeErrAComb','ZeeDefTrig','ZeeDefReco','ZeeLumi','ZeeLumiErr',
+                    'ZeeRaw','ZeeRawErr','ZeeN1','ZeeN2','ZeeEffTrig','ZeeErrTrig','ZeeEffReco','ZeeErrReco','ZeeEffComb','ZeeErrComb','ZeeEffAComb','ZeeErrAComb','ZeeDefTrig','ZeeDefReco','ZeeLumi','ZeeLumiErr','ZeeRate',
                     'ZmumuRaw','ZmumuRawErr','ZmumuN1','ZmumuN2','ZmumuEffTrig','ZmumuErrTrig','ZmumuEffReco','ZmumuErrReco','ZmumuEffComb','ZmumuErrComb','ZmumuEffAComb','ZmumuErrAComb',
-                    'ZmumuDefTrig','ZmumuDefReco','ZmumuLumi','ZmumuLumiErr', 
+                    'ZmumuDefTrig','ZmumuDefReco','ZmumuLumi','ZmumuLumiErr','ZmumuRate',
                     'ZllLumi', 'ZllLumiErr'])
 
 lb_minus_one_reco_eff = {}
@@ -394,18 +394,21 @@ for ibin in range(1, int(lbmax-lbmin)+1):
         else:
             loclivetime = lblive 
 
-        zlumi = zlumistat = 0.0
+        zlumi = zlumistat = zrate = 0.0
+        CORRECTIONS = ZPURITYFACTOR/ACCEPTANCE/ZXSEC
         if do_toys and loclivetime != 0.0:
-                arr_zlumi = np.divide(arr_NZ, effcy) * (ZPURITYFACTOR/ACCEPTANCE/ZXSEC)/loclivetime
+                arr_zlumi = np.divide(arr_NZ, effcy) * CORRECTIONS/loclivetime
                 arr_zlumi = arr_zlumi[~np.isnan(arr_zlumi)]
                 zlumi     = np.median(arr_zlumi)
                 zlumistat = arr_zlumi.std()
+                zrate     = zlumi / CORRECTIONS
         elif (loclivetime != 0.0 and effcy != 0.0):
-                zlumi     = (z_m/effcy)*(ZPURITYFACTOR/ACCEPTANCE/ZXSEC)/loclivetime
-                zlumistat = math.sqrt(pow(z_merr/effcy, 2) + pow(z_m/effcy**2*effcyerr, 2))*ZPURITYFACTOR/ACCEPTANCE/ZXSEC/loclivetime
+                zlumi     = (z_m/effcy)*CORRECTIONS/loclivetime
+                zlumistat = math.sqrt(pow(z_merr/effcy, 2) + pow(z_m/effcy**2*effcyerr, 2))*CORRECTIONS/loclivetime
+                zrate     = zlumi / CORRECTIONS
 
 
-        out_dict[channel] = [z_m, z_merr, N1, N2, eff_trig, err_trig, eff_reco, err_reco, eff_comb, err_comb, eff_Acomb, err_Acomb, defaulted_trig_eff, defaulted_reco_eff, zlumi, zlumistat]    
+        out_dict[channel] = [z_m, z_merr, N1, N2, eff_trig, err_trig, eff_reco, err_reco, eff_comb, err_comb, eff_Acomb, err_Acomb, defaulted_trig_eff, defaulted_reco_eff, zlumi, zlumistat, zrate]    
 
     run = int(runname.replace("run_", ""))
        

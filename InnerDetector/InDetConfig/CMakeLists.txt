@@ -11,10 +11,6 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 #atlas_install_joboptions( share/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 if (NOT SIMULATIONBASE)
-    atlas_add_test( TrackingPassFlags_test
-        SCRIPT python -m InDetConfig.TrackingPassFlags
-        POST_EXEC_SCRIPT nopost.sh)
-    
     atlas_add_test( BackTrackingConfig_test
         SCRIPT python -m InDetConfig.BackTrackingConfig --norun
         POST_EXEC_SCRIPT nopost.sh)

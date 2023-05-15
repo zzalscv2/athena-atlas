@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCalibExtraTreeEvent/MuonCalibMUCTPI.h"
@@ -23,6 +23,6 @@ namespace MuonCalib {
     float MuonCalibMUCTPI::phi() const { return m_params.phi; }
     float MuonCalibMUCTPI::eta() const { return m_params.eta; }
 
-    MuonCalibMUCTPI::MuonCalibMUCTPI(MuonCalibMUCTPI::defineParams pars) : m_params{pars} {}
+    MuonCalibMUCTPI::MuonCalibMUCTPI(const MuonCalibMUCTPI::defineParams& pars) : m_params{pars} {}
 
 }  // namespace MuonCalib

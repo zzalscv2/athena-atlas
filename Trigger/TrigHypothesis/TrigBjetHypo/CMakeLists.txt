@@ -4,10 +4,14 @@
 atlas_subdir( TrigBjetHypo )
 
 # Component(s) in the package:
+atlas_add_library( TrigBjetHypoLib
+                   src/*.cxx
+                   PUBLIC_HEADERS TrigBjetHypo
+                   LINK_LIBRARIES AthLinks AthViews AthenaBaseComps AthenaMonitoringKernelLib DecisionHandlingLib EventPrimitives TrigCompositeUtilsLib TrigSteeringEvent xAODBTagging xAODJet xAODTracking BeamSpotConditionsData )
+
 atlas_add_component( TrigBjetHypo
-                     src/*.cxx safeLogRatio.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthLinks AthViews AthenaBaseComps AthenaMonitoringKernelLib DecisionHandlingLib EventPrimitives TrigCompositeUtilsLib TrigSteeringEvent xAODBTagging xAODJet xAODTracking BeamSpotConditionsData )
+                     LINK_LIBRARIES TrigBjetHypoLib )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-select=ATL900,ATL901 )

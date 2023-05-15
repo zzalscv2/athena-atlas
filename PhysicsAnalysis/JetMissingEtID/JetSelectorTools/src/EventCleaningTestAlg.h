@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASSOCIATIONUTILS_OVERLAPREMOVALTESTALG_H
@@ -7,12 +7,13 @@
 
 // Framework includes
 #include "GaudiKernel/ToolHandle.h"
-#include "AsgTools/AnaToolHandle.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteDecorHandleKey.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
 
 // EDM includes
-#include "xAODBase/IParticleContainer.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "xAODJet/JetContainer.h"
 
 // Local includes
 #include "JetSelectorTools/IEventCleaningTool.h"
@@ -32,23 +33,25 @@ class EventCleaningTestAlg : public AthAlgorithm
     /// Initialize the algorithm
     virtual StatusCode initialize() override;
 
-    /// Finalize the algorithm
-    virtual StatusCode finalize() override;
-
     /// Execute the algorithm
     virtual StatusCode execute() override;
 
   private:
 
-    /// Handle to the tool
-    asg::AnaToolHandle<ECUtils::IEventCleaningTool> m_ecTool;
+    ToolHandle<ECUtils::IEventCleaningTool> m_ecTool{this, "EventCleaningTool","ECUtils::EventCleaningTool/EventCleaningTool" };
 
+    SG::ReadHandleKey<xAOD::JetContainer> m_jetKey{this, "JetCollectionName", "AntiKt4EMTopoJets",
+                                                   "Jet collection name"};
+    SG::ReadHandleKey<xAOD::EventInfo> m_evtKey{this, "EventInfoKey",
+                                                "EventInfo"};
     /// Configuration
-    std::string m_prefix;
-    std::string m_cleaningLevel;
-    std::string m_collection;
-    bool m_doEvent; //boolean to save event-level decoration
-    std::unique_ptr<SG::AuxElement::Decorator<char>> m_dec_eventClean;
+    Gaudi::Property<std::string> m_prefix{this, "EventCleanPrefix" , "",
+                                  "Input name of event cleaning decorator prefix" };
+    Gaudi::Property<std::string> m_cleaningLevel{this, "CleaningLevel" , "LooseBad",
+                                                "Input cleaning level"};
+    Gaudi::Property<bool> m_doEvent{this, "doEvent" , true, "Decorate the EventInfo"};
+
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_evtInfoDecor{this, "EvtDecorKey", "" , "Will be overwritten in initialze"};    
 };
 
 #endif
