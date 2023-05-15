@@ -1695,21 +1695,22 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeInner(State& state,
       isInner = true; isStrip = false;
       inner = rd.nsweta()           // 8 bit
         + (rd.nswphi() << 8)        // 6 bit
-        + (rd.nswsl() << 14)        // 3 bit
-        + (rd.nswcand() << 17)      // 2 bit
+        + (((rd.nswcand()>>2)&0x7) << 14) //  nsw input 3 bit
+        + ((rd.nswcand()&0x3) << 17)      // nsw cand 2 bit
         + (rd.nswdtheta() << 19)    // 5 bit
         + (rd.nswphires() << 24)    // 1 bit
         + (rd.nswlowres() << 25)    // 1 bit
         + (rd.nswid() << 26)        // 4 bit
-        + (rd.bcId() << 30)     ;  // 4 bit
+        + (((rd.nswcand()>>5)&0xf) << 30);  // nsw bcid 4 bit
     }else if(rd.type()==TgcRawData::TYPE_INNER_BIS){
       isInner = true; isStrip = true;
       inner = rd.rpceta()           // 6 bit
         + (rd.rpcphi() << 6)        // 6 bit
         + (rd.rpcdeta() << 12)      // 3 bit
         + (rd.rpcdphi() << 15)      // 3 bit
-        + (rd.rpcflag() << 18)      // 2 bit
-        + (rd.bcId()    << 20)   ;  // 2 bit
+        + ((rd.rpcflag()&0x3) << 18)      // rpc flag 2 bit
+        + (((rd.rpcflag()>>4)&0xf) << 20)  // rpc bcid 4 bit
+	+ (((rd.rpcflag()>>2)&0x3) << 24);      // rpc cand 2 bit
     }else if(rd.type()==TgcRawData::TYPE_INNER_EIFI){
       isInner = false; isStrip = false;
       inner = rd.ei()               // 8 bit
@@ -1721,7 +1722,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeInner(State& state,
         + (rd.tmdbbcid() << 12) ;   //  4 bit
     }
   }
-  
+
   int locId = (rd.bcTag()==TgcDigit::BC_CURRENT || rd.bcTag()==TgcDigit::BC_UNDEFINED)
     ? 1 : rd.bcTag()-1;
   
