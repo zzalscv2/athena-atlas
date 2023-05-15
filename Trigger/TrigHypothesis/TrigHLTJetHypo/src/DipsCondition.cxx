@@ -6,6 +6,7 @@
 #include "./ITrigJetHypoInfoCollector.h"
 #include "TrigHLTJetHypo/TrigHLTJetHypoUtils/IJet.h"
 #include "TrigHLTJetHypo/TrigHLTJetHypoUtils/xAODJetAsIJet.h"
+#include "TrigBjetHypo/safeLogRatio.h"
 
 #include <sstream>
 #include <cmath>
@@ -56,7 +57,7 @@ float DipsCondition::getDipsDecValue(const pHypoJet &ip,
 float DipsCondition::evaluateDips(const float &dips_pb,
                                   const float &dips_pc,
                                   const float &dips_pu) const {
-  return log(dips_pb / (m_cfrac * dips_pc + (1 - m_cfrac) * dips_pu));
+  return safeLogRatio(dips_pb, (m_cfrac * dips_pc + (1 - m_cfrac) * dips_pu));
 }
 
 bool DipsCondition::isSatisfied(const pHypoJet &ip,
