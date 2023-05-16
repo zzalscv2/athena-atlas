@@ -340,13 +340,6 @@ namespace ActsTrk
                  clusterContainerVar);
     }
 
-    std::vector<Acts::BoundTrackParameters> initialParameters;
-    initialParameters.reserve(estimatedTrackParameters.size());
-    for (auto *trkParms : estimatedTrackParameters)
-    {
-      initialParameters.push_back(*trkParms);
-    }
-
     // Construct a perigee surface as the target surface
     auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
 
@@ -371,20 +364,20 @@ namespace ActsTrk
                                &(*pSurface));
 
     // Perform the track finding for all initial parameters
-    ATH_MSG_DEBUG("Invoke track finding with " << initialParameters.size() << " seeds.");
+    ATH_MSG_DEBUG("Invoke track finding with " << estimatedTrackParameters.size() << " seeds.");
 
     Acts::TrackContainer tc{Acts::VectorTrackContainer{},
                             Acts::VectorMultiTrajectory{}};
 
-    m_nTotalSeeds += initialParameters.size();
+    m_nTotalSeeds += estimatedTrackParameters.size();
 
     // Loop over the track finding results for all initial parameters
-    for (std::size_t iseed = 0; iseed < initialParameters.size(); ++iseed)
+    for (std::size_t iseed = 0; iseed < estimatedTrackParameters.size(); ++iseed)
     {
       // Get the Acts tracks, given this seed
       // Result here contains a vector of TrackProxy objects
 
-      auto result = m_trackFinder->findTracks(initialParameters[iseed], options, tc);
+      auto result = m_trackFinder->findTracks(*estimatedTrackParameters[iseed], options, tc);
 
       // The result for this seed
       if (not result.ok())
@@ -402,9 +395,9 @@ namespace ActsTrk
         {
           ATH_MSG_INFO("CKF input measurements:");
           m_trackStatePrinter->printSourceLinks(ctx, tgContext, sourceLinksVec, ncoll);
-          ATH_MSG_INFO("CKF results for " << initialParameters.size() << " seeds:");
+          ATH_MSG_INFO("CKF results for " << estimatedTrackParameters.size() << " seeds:");
         }
-        m_trackStatePrinter->printTracks(tgContext, tc, result.value(), initialParameters[iseed], iseed, ntracks);
+        m_trackStatePrinter->printTracks(tgContext, tc, result.value(), *estimatedTrackParameters[iseed], iseed, ntracks);
         std::cout << std::flush;
       }
 
