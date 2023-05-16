@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPTRACKER_DATADUMPERHELPERS_H
@@ -11,21 +11,21 @@
 namespace FPTracker{
   class LineFormater{
   public:
-    LineFormater(int numPerLine): m_numPerLine(0), m_maxPerLine(numPerLine), m_ost(new std::ostringstream()){}
+    LineFormater(int numPerLine): m_numPerLine(0), m_maxPerLine(numPerLine) {}
     template<class T>
     void operator()(T t){
       if (m_numPerLine == m_maxPerLine){
 	m_numPerLine = 0;
-	(*m_ost)<<'\n';
+	m_ost<<'\n';
       }
-      (*m_ost)<<t<<" ";
+      m_ost<<t<<" ";
       ++m_numPerLine;
     }
-    std::string toString() const {return m_ost->str();}
+    std::string toString() const {return m_ost.str();}
   private:
     int m_numPerLine;
     int m_maxPerLine;
-    std::ostringstream* m_ost;
+    std::ostringstream m_ost;
   };
   
   template<class Array1D>

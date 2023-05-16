@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPTracker/DipoleBender.h"
@@ -40,7 +40,7 @@ namespace FPTracker{
     // position[i] =  New displ. = old + effect of gradient + effect of bend.
     // position[i-1] = old displacement + effect of gradient in non-bending plane.
 
-    // calcualtes new x, y coordinates and direction after deflection
+    // calculates new x, y coordinates and direction after deflection
 
     Point& position  = particle.position();
     Point& direction = particle.direction();
