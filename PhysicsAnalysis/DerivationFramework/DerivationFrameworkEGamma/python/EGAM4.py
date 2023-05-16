@@ -469,7 +469,10 @@ def EGAM4Cfg(ConfigFlags):
                               ItemList = EGAM4ItemList,
                               AcceptAlgs = ['EGAM4Kernel']))
     acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, 'DAOD_EGAM4',
-                                AcceptAlgs=['EGAM4Kernel'],
-                                createMetadata=[MetadataCategory.CutFlowMetaData]))
+                                        AcceptAlgs=['EGAM4Kernel'],
+                                        createMetadata=[
+                                            MetadataCategory.CutFlowMetaData,
+                                            MetadataCategory.TruthMetaData,
+                                        ]))
 
     return acc
