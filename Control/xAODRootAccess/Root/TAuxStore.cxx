@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 // System include(s):
 #include <cassert>
@@ -1565,7 +1565,8 @@ namespace xAOD {
       }
 
       // Check for an auxiliary ID for this branch:
-      auxid_t auxid = registry.getAuxID( *ti, auxName );
+      auxid_t auxid = registry.getAuxID( *ti, auxName, "",
+                                         SG::AuxTypeRegistry::SkipNameCheck );
 
       // First try to find a compiled factory for the vector type:
       if( auxid == SG::null_auxid ) {
@@ -1600,7 +1601,8 @@ namespace xAOD {
                      SG::IAuxTypeVectorFactory* fac =
                         reinterpret_cast< SG::IAuxTypeVectorFactory* >( tmp );
                      registry.addFactory( *ti, fac );
-                     auxid = registry.getAuxID( *ti, auxName );
+                     auxid = registry.getAuxID( *ti, auxName, "",
+                                                SG::AuxTypeRegistry::SkipNameCheck );
                   }
                }
             }
@@ -1623,7 +1625,8 @@ namespace xAOD {
          if( vec_class && vec_class->IsLoaded() ) {
             SG::IAuxTypeVectorFactory* fac = new TAuxVectorFactory( vec_class );
             registry.addFactory( *ti, fac );
-            auxid = registry.getAuxID( *ti, auxName );
+            auxid = registry.getAuxID( *ti, auxName, "",
+                                       SG::AuxTypeRegistry::SkipNameCheck );
          } else {
             ::Warning( "xAOD::TAuxStore::setupAuxBranch",
                        "Couldn't find dictionary for type: %s",
