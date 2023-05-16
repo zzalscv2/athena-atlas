@@ -28,19 +28,11 @@ void clusterAddCell(PixelClusteringTool::Cluster& cl, const PixelClusteringTool:
 
 StatusCode PixelClusteringTool::initialize()
 {
-    if (m_pixelRDOTool.retrieve().isFailure()) {
-	ATH_MSG_FATAL(m_pixelRDOTool.propertyName() <<
-		      ": Failed to retrieve tool " <<
-		      m_pixelRDOTool.type());
-	return StatusCode::FAILURE;
-    }
+    ATH_CHECK(m_pixelRDOTool.retrieve());
 
-    if (m_clusterMakerTool.retrieve().isFailure()) {
-	ATH_MSG_FATAL(m_clusterMakerTool.propertyName() <<
-		      ": Failed to retrieve tool " <<
-		      m_clusterMakerTool.type());
-	return StatusCode::FAILURE;
-    }
+    ATH_CHECK(m_clusterMakerTool.retrieve());
+    ATH_CHECK(m_chargeDataKey.initialize(SG::AllowEmpty));
+    ATH_CHECK(m_offlineCalibDataKey.initialize(SG::AllowEmpty));
 
     ATH_MSG_DEBUG("Acts::PixelClusteringTool successfully initialized");
     return StatusCode::SUCCESS;
@@ -104,6 +96,21 @@ PixelClusteringTool::makeCluster(const PixelClusteringTool::Cluster &cluster,
     double phiWidth = design.widthFromRowRange(rowmin, rowmax);
     InDet::SiWidth siWidth(Amg::Vector2D(rowWidth,colWidth), Amg::Vector2D(phiWidth,etaWidth));
 
+
+    const PixelChargeCalibCondData *calibData = nullptr;
+    if (!m_chargeDataKey.empty()) {
+      SG::ReadCondHandle<PixelChargeCalibCondData> calibDataHandle(m_chargeDataKey);
+      calibData = *calibDataHandle;
+    }
+
+    const PixelCalib::PixelOfflineCalibData *offlineCalibData = nullptr;
+    if (!m_offlineCalibDataKey.empty()) {
+      SG::ReadCondHandle<PixelCalib::PixelOfflineCalibData> offlineCalibDataHandle(m_offlineCalibDataKey);
+      offlineCalibData = *offlineCalibDataHandle;
+    }
+
+
+
     // N.B. the cluster is automatically added to the container
     xAOD::PixelCluster *cl =
 	m_clusterMakerTool->xAODpixelCluster(
@@ -116,7 +123,12 @@ PixelClusteringTool::makeCluster(const PixelClusteringTool::Cluster &cluster,
 	    element,
 	    hasGanged,
 	    m_errorStrategy,
-	    pixelID
+	    pixelID,
+      false,
+      0.0,
+      0.0,
+      calibData,
+      offlineCalibData
 	    );
 
     return (cl != nullptr) ? StatusCode::SUCCESS : StatusCode::FAILURE;
