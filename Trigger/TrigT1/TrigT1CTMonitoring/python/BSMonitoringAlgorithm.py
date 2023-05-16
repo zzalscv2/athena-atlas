@@ -560,11 +560,10 @@ def BSMonitoringConfig(inputFlags):
         from TrigT1CTMonitoring.BSMonDefinitions import endcapPhiLowBinEdges
         from TrigT1CTMonitoring.BSMonDefinitions import forwardEtaLowBinEdges
         from TrigT1CTMonitoring.BSMonDefinitions import forwardPhiLowBinEdges
-        #from TrigT1CTMonitoring.BSMonDefinitions import barrelPtThresholds
-        from TrigT1CTMonitoring.BSMonDefinitions import endcapForwardPtThresholds
         from TrigT1CTMonitoring.BSMonDefinitions import candidateWordsPerTimeslice
         from TrigT1CTMonitoring.BSMonDefinitions import tobWordsPerTimeslice        
         #from TrigT1CTMonitoring.BSMonDefinitions import muctpiErrorBins
+        # TODO: import a vector for the 15 pt indexes
 
         #general errors, defined in this code
         myGroup.defineHistogram('errorSummaryMUCTPI',title='MUCTPI errors;', type='TH1I', path=monPath, xbins=len(errorSummaryMUCTPIBinLabels), xmin=0.5, xmax=0.5+len(errorSummaryMUCTPIBinLabels), xlabels=errorSummaryMUCTPIBinLabels, opt='kAlwaysCreate')
@@ -679,13 +678,13 @@ def BSMonitoringConfig(inputFlags):
         myGroup.defineHistogram('tobEtaPhi_ChargeXdecoded_FW,tobEtaPhi_ChargeYdecoded_FW;tobEtaPhi_Charge_FW',title='TOB Charge flag hitmap FW (eta,phi);Eta;Phi', type='TH2F', path=monPath, xbins=forwardEtaLowBinEdges, ybins=forwardPhiLowBinEdges, opt='kAlwaysCreate')
 
         #pt vs eta/phi
-        myGroup.defineHistogram('tobPtVsEtaXdecoded_BA,tobPtVsEtaYdecoded_BA;tobPtVsEta_BA',title='TOB pT VS eta BA;Eta;pT index', type='TH2F', path=monPath, xbins=barrelEtaLowBinEdges, ybins=endcapForwardPtThresholds, opt='kAlwaysCreate')
-        myGroup.defineHistogram('tobPtVsEtaXdecoded_EC,tobPtVsEtaYdecoded_EC;tobPtVsEta_EC',title='TOB pT VS eta EC;Eta;pT index', type='TH2F', path=monPath, xbins=endcapEtaLowBinEdges, ybins=endcapForwardPtThresholds, opt='kAlwaysCreate')
-        myGroup.defineHistogram('tobPtVsEtaXdecoded_FW,tobPtVsEtaYdecoded_FW;tobPtVsEta_FW',title='TOB pT VS eta FW;Eta;pT index', type='TH2F', path=monPath, xbins=forwardEtaLowBinEdges, ybins=endcapForwardPtThresholds, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobPtVsEtaXdecoded_BA,tobPtVsEtaYdecoded_BA;tobPtVsEta_BA',title='TOB pT VS eta BA;Eta;pT index', type='TH2F', path=monPath, xbins=barrelEtaLowBinEdges, ybins=15, ymin=0.5, ymax=15.5, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobPtVsEtaXdecoded_EC,tobPtVsEtaYdecoded_EC;tobPtVsEta_EC',title='TOB pT VS eta EC;Eta;pT index', type='TH2F', path=monPath, xbins=endcapEtaLowBinEdges, ybins=15, ymin=0.5, ymax=15.5, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobPtVsEtaXdecoded_FW,tobPtVsEtaYdecoded_FW;tobPtVsEta_FW',title='TOB pT VS eta FW;Eta;pT index', type='TH2F', path=monPath, xbins=forwardEtaLowBinEdges, ybins=15, ymin=0.5, ymax=15.5, opt='kAlwaysCreate')
 
-        myGroup.defineHistogram('tobPtVsPhiXdecoded_BA,tobPtVsPhiYdecoded_BA;tobPtVsPhi_BA',title='TOB pT VS phi BA;Phi;pT index', type='TH2F', path=monPath, xbins=barrelPhiLowBinEdges, ybins=endcapForwardPtThresholds, opt='kAlwaysCreate')
-        myGroup.defineHistogram('tobPtVsPhiXdecoded_EC,tobPtVsPhiYdecoded_EC;tobPtVsPhi_EC',title='TOB pT VS phi EC;Phi;pT index', type='TH2F', path=monPath, xbins=endcapPhiLowBinEdges, ybins=endcapForwardPtThresholds, opt='kAlwaysCreate')
-        myGroup.defineHistogram('tobPtVsPhiXdecoded_FW,tobPtVsPhiYdecoded_FW;tobPtVsPhi_FW',title='TOB pT VS phi FW;Phi;pT index', type='TH2F', path=monPath, xbins=forwardPhiLowBinEdges, ybins=endcapForwardPtThresholds, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobPtVsPhiXdecoded_BA,tobPtVsPhiYdecoded_BA;tobPtVsPhi_BA',title='TOB pT VS phi BA;Phi;pT index', type='TH2F', path=monPath, xbins=barrelPhiLowBinEdges, ybins=15, ymin=0.5, ymax=15.5, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobPtVsPhiXdecoded_EC,tobPtVsPhiYdecoded_EC;tobPtVsPhi_EC',title='TOB pT VS phi EC;Phi;pT index', type='TH2F', path=monPath, xbins=endcapPhiLowBinEdges, ybins=15, ymin=0.5, ymax=15.5, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobPtVsPhiXdecoded_FW,tobPtVsPhiYdecoded_FW;tobPtVsPhi_FW',title='TOB pT VS phi FW;Phi;pT index', type='TH2F', path=monPath, xbins=forwardPhiLowBinEdges, ybins=15, ymin=0.5, ymax=15.5, opt='kAlwaysCreate')
         # tob count
         myGroup.defineHistogram('tobCount',title='TOBs distrib. per event (central slice);TOBs',type='TH1I',xbins=tobWordsPerTimeslice,path=monPath,opt='kAlwaysCreate')
         # difference between number of candidates and tobs
