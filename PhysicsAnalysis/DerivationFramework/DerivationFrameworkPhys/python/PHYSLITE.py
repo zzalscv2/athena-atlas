@@ -304,7 +304,7 @@ def PHYSLITECfg(ConfigFlags):
     PHYSLITEItemList = PHYSLITESlimmingHelper.GetItemList()
     formatString = 'D2AOD_PHYSLITE' if 'StreamDAOD_PHYS' in ConfigFlags.Input.ProcessingTags else 'DAOD_PHYSLITE'
     acc.merge(OutputStreamCfg(ConfigFlags, formatString, ItemList=PHYSLITEItemList, AcceptAlgs=["PHYSLITEKernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, formatString, AcceptAlgs=["PHYSLITEKernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, formatString, AcceptAlgs=["PHYSLITEKernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc
 
