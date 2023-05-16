@@ -72,7 +72,7 @@ private:
      float m_maxEta;
      float m_maxPt;
      float m_minPt;
-     float m_maxBarcode;
+     bool m_requirePrimaryOnly;
      bool m_requireCharged;
      bool m_requireDecayBeforePixel;
      bool m_requireStatus1;

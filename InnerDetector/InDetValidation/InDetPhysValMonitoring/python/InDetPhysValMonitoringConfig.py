@@ -39,9 +39,9 @@ def InDetRttTruthSelectionToolCfg(
     kwargs.setdefault("requireStatus1", True)
     kwargs.setdefault("requireCharged", True)
     kwargs.setdefault("selectedCharge", flags.PhysVal.IDPVM.selectedCharge)
-    kwargs.setdefault("maxBarcode",
-                      200*1000 if kwargs.pop("OnlyDressPrimaryTracks", True)
-                      else 2**31-1)
+    kwargs.setdefault("requireOnlyPrimary",
+                      True if kwargs.pop("OnlyDressPrimaryTracks", True)
+                      else False)
     kwargs.setdefault("maxProdVertRadius",
                       flags.PhysVal.IDPVM.maxProdVertRadius)
     kwargs.setdefault("maxEta", 4. if flags.Detector.GeometryITk else 2.5)
