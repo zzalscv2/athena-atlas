@@ -199,6 +199,9 @@ def createTriggerFlags(doTriggerRecoFlags):
     # enable CTP ByteStream conversion / simulation
     flags.addFlag('Trigger.L1.doCTP', True)
 
+    # replace Topo3 with ALFA in CTP inputs
+    flags.addFlag('Trigger.L1.doAlfaCtpin', False)
+
     # partition name used to determine online vs offline BS result writing
     flags.addFlag('Trigger.Online.partitionName', os.getenv('TDAQ_PARTITION') or '')
 

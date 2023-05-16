@@ -4,21 +4,19 @@
 import sys
 
 def main():
-    import argparse
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
 
-    parser = argparse.ArgumentParser()
+    parser = flags.getArgumentParser()
     parser.add_argument("menu", nargs="?", default='PhysicsP1_pp_run3_v1',
                         help="the menu to generate [%(default)s]")
     parser.add_argument("--bgrp", action="store_true",
                         help="generate default MC bunchgroup")
     parser.add_argument("-v", "--verbose", action="store_true",
                         help="increase output verbosity")
-
-    args = parser.parse_args()
+    args = flags.fillFromArgs(parser=parser)
 
     # set menu
-    flags = initConfigFlags()
     flags.Input.Files = []
     flags.Trigger.triggerMenuSetup = args.menu
     flags.lock()

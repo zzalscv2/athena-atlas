@@ -37,7 +37,7 @@ log = logging.getLogger(__name__)
 
 class L1MenuConfig(object):
 
-    def __init__(self, menuName, inputFile = None ):
+    def __init__(self, menuName, inputFile = None, do_alfa = False ):
 
         L1MenuFlags.MenuSetup = menuName
 
@@ -63,7 +63,7 @@ class L1MenuConfig(object):
 
         # menu
         L1MenuFlags.CTPVersion = 4 # this needs to be done here already, since L1Menu depends on it during init
-        self.l1menu = L1Menu(self.menuName)
+        self.l1menu = L1Menu(self.menuName, do_alfa)
         self.l1menu.setBunchGroupSplitting() # store bunchgroups separate from other item inputs
 
         if not self._checkMenuExistence():
@@ -736,6 +736,9 @@ class L1MenuConfig(object):
 
         # check that the ordering of the L1Topo parameters matches those expected in the L1Topo firmware
         self.l1menu.checkL1TopoParams()
+
+        # check that every item in the menu is on a board connected to CTP
+        self.l1menu.checkItemsHaveInputs()
 
     def mapThresholds(self):
         """
