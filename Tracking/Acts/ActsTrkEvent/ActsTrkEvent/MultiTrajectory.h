@@ -314,20 +314,25 @@ class MultiTrajectory final
   }
 
   /**
-   * Implementation of calibrated link insertion
-   */ 
-  ATH_MEMBER_REQUIRES(RWState == IsReadWrite, void)
-  setUncalibratedSourceLink_impl(const Acts::SourceLink& sourceLink,
-                                 IndexType istate);
-
+   * Implementation of uncalibrated link insertion
+   */  
+  ATH_MEMBER_REQUIRES(RWState == IsReadWrite,
+                      void)
+  setUncalibratedSourceLink_impl(IndexType istate, const Acts::SourceLink& sourceLink) {
+  auto el =
+      sourceLink.get<ElementLink<xAOD::UncalibratedMeasurementContainer>>();
+  trackStates()[istate]->setUncalibratedMeasurementLink(el);
+  trackStates()[istate]->setGeometryId(sourceLink.geometryId().value());
+  }
   /**
-   * Implementation of calibrated link fetch
+   * Implementation of uncalibrated link fetch
    */ 
-  ATH_MEMBER_REQUIRES(RWState == IsReadWrite, Acts::SourceLink)
-  getUncalibratedSourceLink_impl(IndexType istate);
+  typename Acts::SourceLink getUncalibratedSourceLink_impl(ActsTrk::MultiTrajectory<RWState>::IndexType istate) const;
 
-  ATH_MEMBER_REQUIRES(RWState == IsReadOnly, Acts::SourceLink)
-  getUncalibratedSourceLink_impl(IndexType istate) const;
+  ATH_MEMBER_REQUIRES(RWState == IsReadWrite,
+                      Acts::SourceLink)
+  getUncalibratedSourceLink_impl(ActsTrk::MultiTrajectory<RWState>::IndexType istate);
+
 
  private:
   // bare pointers to the backend (need to be fast and we do not claim ownership
@@ -396,7 +401,6 @@ struct Decoration {
   GetterType getter;
 };
 }  // namespace detail
-
 }  // namespace ActsTrk
 
 #include "MultiTrajectory.icc"

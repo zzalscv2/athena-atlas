@@ -265,35 +265,23 @@ std::any ActsTrk::MultiTrajectory<RWState>::component_impl(
   }
 }
 
+/**
+   * Implementation of uncalibrated link fetch
+*/ 
 template <bool RWState>
-ATH_MEMBER_REQUIRES_DEF(RWState == ActsTrk::IsReadWrite, void)
-ActsTrk::MultiTrajectory<RWState>::setUncalibratedSourceLink_impl(
-    const Acts::SourceLink& sourceLink,
-    ActsTrk::MultiTrajectory<RWState>::IndexType istate) {
-  auto el =
-      sourceLink.get<ElementLink<xAOD::UncalibratedMeasurementContainer>>();
-  (*m_trackStates)[istate]->setUncalibratedMeasurementLink(el);
-  (*m_trackStates)[istate]->setGeometryId(sourceLink.geometryId().value());
-}
-
-template <bool RWState>
-ATH_MEMBER_REQUIRES_DEF(RWState == ActsTrk::IsReadOnly, Acts::SourceLink)
-ActsTrk::MultiTrajectory<RWState>::getUncalibratedSourceLink_impl(
-    ActsTrk::MultiTrajectory<RWState>::IndexType istate) const {
-  auto el = (*m_trackStates)[istate]->uncalibratedMeasurementLink();
-  auto geoID = (*m_trackStates)[istate]->geometryId();
+typename Acts::SourceLink ActsTrk::MultiTrajectory<RWState>::getUncalibratedSourceLink_impl(ActsTrk::MultiTrajectory<RWState>::IndexType istate) const{
+  auto el = trackStates()[istate]->uncalibratedMeasurementLink();
+  auto geoID = trackStates()[istate]->geometryId();
   return Acts::SourceLink(geoID, el);
 }
-
 template <bool RWState>
-ATH_MEMBER_REQUIRES_DEF(RWState == ActsTrk::IsReadWrite, Acts::SourceLink)
-ActsTrk::MultiTrajectory<RWState>::getUncalibratedSourceLink_impl(
-    ActsTrk::MultiTrajectory<RWState>::IndexType istate) {
-  auto el = (*m_trackStates)[istate]->uncalibratedMeasurementLink();
-  auto geoID = (*m_trackStates)[istate]->geometryId();
+ATH_MEMBER_REQUIRES_DEF(RWState == ActsTrk::IsReadWrite,
+                      Acts::SourceLink)
+ActsTrk::MultiTrajectory<RWState>::getUncalibratedSourceLink_impl(ActsTrk::MultiTrajectory<RWState>::IndexType istate) {
+  auto el = trackStates()[istate]->uncalibratedMeasurementLink();
+  auto geoID = trackStates()[istate]->geometryId();
   return Acts::SourceLink(geoID, el);
 }
-
 
 // Implementation of unset
 template <bool RWState>
