@@ -211,6 +211,20 @@ public:
                uint16_t sector,
                uint16_t mod,
                uint16_t bcid);
+
+    static constexpr uint32_t NSW_CAND_BITSHIFT = 0;
+    static constexpr uint32_t NSW_CAND_BIT = 0x3;
+    static constexpr uint32_t NSW_INPUT_BITSHIFT = 2;
+    static constexpr uint32_t NSW_INPUT_BIT = 0x7;
+    static constexpr uint32_t NSW_BCID_BITSHIFT = 5;
+    static constexpr uint32_t NSW_BCID_BIT = 0xF;
+
+    static constexpr uint32_t RPC_FLAG_BITSHIFT = 0;
+    static constexpr uint32_t RPC_FLAG_BIT = 0x3;
+    static constexpr uint32_t RPC_CAND_BITSHIFT = 2;
+    static constexpr uint32_t RPC_CAND_BIT = 0x3;
+    static constexpr uint32_t RPC_BCID_BITSHIFT = 4;
+    static constexpr uint32_t RPC_BCID_BIT = 0xF;
     
     // Destructor
     virtual ~TgcRawData()

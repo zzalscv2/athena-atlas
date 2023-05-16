@@ -224,6 +224,56 @@ namespace Muon
       /** return global position of track on TGC3 */
       const Amg::Vector3D& globalposOut() const;
 
+      /** Bit info in int inner for the NSW inner-coincidence */
+      static constexpr uint32_t INNER_NSW_R_BITSHIFT = 0;
+      static constexpr uint32_t INNER_NSW_R_BIT = 0xFF;
+      static constexpr uint32_t INNER_NSW_PHI_BITSHIFT = 8;
+      static constexpr uint32_t INNER_NSW_PHI_BIT = 0x3F;
+      static constexpr uint32_t INNER_NSW_INPUT_BITSHIFT = 14;
+      static constexpr uint32_t INNER_NSW_INPUT_BIT = 0x7;
+      static constexpr uint32_t INNER_NSW_CAND_BITSHIFT = 17;
+      static constexpr uint32_t INNER_NSW_CAND_BIT = 0x3;
+      static constexpr uint32_t INNER_NSW_DTHETA_BITSHIFT = 19;
+      static constexpr uint32_t INNER_NSW_DTHETA_BIT = 0x1F;
+      static constexpr uint32_t INNER_NSW_PHIRES_BITSHIFT = 24;
+      static constexpr uint32_t INNER_NSW_PHIRES_BIT = 0x1;
+      static constexpr uint32_t INNER_NSW_LOWRES_BITSHIFT = 25;
+      static constexpr uint32_t INNER_NSW_LOWRES_BIT = 0x1;
+      static constexpr uint32_t INNER_NSW_ID_BITSHIFT = 26;
+      static constexpr uint32_t INNER_NSW_ID_BIT = 0xF;
+      static constexpr uint32_t INNER_NSW_BCID_BITSHIFT = 30;
+      static constexpr uint32_t INNER_NSW_BCID_BIT = 0xF;
+
+      /** Bit info in int inner for the RPC inner-coincidence */
+      static constexpr uint32_t INNER_RPC_ETA_BITSHIFT = 0;
+      static constexpr uint32_t INNER_RPC_ETA_BIT = 0x3F;
+      static constexpr uint32_t INNER_RPC_PHI_BITSHIFT = 6;
+      static constexpr uint32_t INNER_RPC_PHI_BIT = 0x3F;
+      static constexpr uint32_t INNER_RPC_DETA_BITSHIFT = 12;
+      static constexpr uint32_t INNER_RPC_DETA_BIT = 0x7;
+      static constexpr uint32_t INNER_RPC_DPHI_BITSHIFT = 15;
+      static constexpr uint32_t INNER_RPC_DPHI_BIT = 0x7;
+      static constexpr uint32_t INNER_RPC_FLAG_BITSHIFT = 18;
+      static constexpr uint32_t INNER_RPC_FLAG_BIT = 0x3;
+      static constexpr uint32_t INNER_RPC_BCID_BITSHIFT = 20;
+      static constexpr uint32_t INNER_RPC_BCID_BIT = 0xF;
+      static constexpr uint32_t INNER_RPC_CAND_BITSHIFT = 24;
+      static constexpr uint32_t INNER_RPC_CAND_BIT = 0x3;
+
+      /** Bit info in int inner for the EI/FI inner-coincidence */
+      static constexpr uint32_t INNER_EIFI_EI_BITSHIFT = 0;
+      static constexpr uint32_t INNER_EIFI_EI_BIT = 0xFF;
+      static constexpr uint32_t INNER_EIFI_FI_BITSHIFT = 8;
+      static constexpr uint32_t INNER_EIFI_FI_BIT = 0xFF;
+      static constexpr uint32_t INNER_EIFI_CID_BITSHIFT = 16;
+      static constexpr uint32_t INNER_EIFI_CID_BIT = 0x7;
+
+      /** Bit info in int inner for the Tile inner-coincidence */
+      static constexpr uint32_t INNER_TILE_MODULE_BITSHIFT = 0;
+      static constexpr uint32_t INNER_TILE_MODULE_BIT = 0xFFF;
+      static constexpr uint32_t INNER_TILE_BCID_BITSHIFT = 12;
+      static constexpr uint32_t INNER_TILE_BCID_BIT = 0xF;
+
   private:
 
       Identifier m_channelIdIn;
