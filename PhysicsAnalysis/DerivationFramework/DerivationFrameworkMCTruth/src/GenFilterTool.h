@@ -22,6 +22,7 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODJet/JetContainer.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadDecorHandleKey.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
 // Defs for the particle origin
 #include "MCTruthClassifier/MCTruthClassifierDefs.h"
@@ -49,6 +50,7 @@ namespace DerivationFramework {
     SG::ReadHandleKey<xAOD::JetContainer>m_truthJetsKey{this, "TruthJetCollectionName", "AntiKt4TruthWZJets"};
     SG::ReadHandleKey<xAOD::JetContainer>m_truthFatJetsKey{this, "TruthFatJetCollectionName", "AntiKt10TruthJets"};
 
+    SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_mcReadDecor{this, "TruthClassKey",""};
     
 
     SG::WriteDecorHandleKeyArray<xAOD::EventInfo> m_decorKeys{this, "DecorationKeys", {} , "Decorations added to the eventinfo"};
