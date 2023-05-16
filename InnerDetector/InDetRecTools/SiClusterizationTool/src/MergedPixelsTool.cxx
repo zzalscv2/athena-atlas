@@ -41,6 +41,9 @@ namespace InDet {
   {
     ATH_CHECK(m_clusterMaker.retrieve());
     ATH_CHECK(m_pixelRDOTool.retrieve());
+    ATH_CHECK(m_chargeDataKey.initialize(SG::AllowEmpty));
+    ATH_CHECK(m_clusterErrorKey.initialize(SG::AllowEmpty));
+
     return StatusCode::SUCCESS;
   }
 
@@ -75,7 +78,9 @@ namespace InDet {
                                                int& clusterNumber,
                                                bool split,
                                                double splitProb1,
-                                               double splitProb2) const 
+                                               double splitProb2,
+                                               const PixelChargeCalibCondData* calibData,
+                                               const PixelOfflineCalibData* offlineCalibData) const
   {
       ATH_MSG_VERBOSE("makeCluster called, number " << clusterNumber);
   
@@ -262,7 +267,9 @@ namespace InDet {
                                                              pixelID,
                                                              split,
                                                              splitProb1,
-                                                             splitProb2);
+                                                             splitProb2,
+                                                             calibData,
+                                                             offlineCalibData);
           return cluster;
       }
   }
@@ -398,6 +405,20 @@ namespace InDet {
     Lvl1.reserve(collectionID.back().NCL);
 
     ++collectionSize;    
+
+    //retrieve conddata
+    const PixelChargeCalibCondData *calibData = nullptr;
+    if (!m_chargeDataKey.empty()) {
+      SG::ReadCondHandle<PixelChargeCalibCondData> calibDataHandle(m_chargeDataKey, ctx);
+      calibData = *calibDataHandle;
+    }
+
+    const PixelCalib::PixelOfflineCalibData *offlineCalibData = nullptr;
+    if (!m_clusterErrorKey.empty()) {
+      SG::ReadCondHandle<PixelCalib::PixelOfflineCalibData> offlineCalibDataHandle(m_clusterErrorKey, ctx);
+      offlineCalibData = *offlineCalibDataHandle;
+    }
+
     for(int i=1; i<=collectionSize; ++i) {
 
       if(i!=collectionSize and collectionID.at(i).NCL==NCL0) {
@@ -413,8 +434,13 @@ namespace InDet {
                                             Totg,
                                             Lvl1,
                                             element,
-                                            pixelID, 
-                                            ++clusterNumber);
+                                            pixelID,
+                                            ++clusterNumber,
+                                            false,
+                                            0.0,
+                                            0.0,
+                                            calibData,
+                                            offlineCalibData);
         
         // no merging has been done;
         if (cluster) { 
