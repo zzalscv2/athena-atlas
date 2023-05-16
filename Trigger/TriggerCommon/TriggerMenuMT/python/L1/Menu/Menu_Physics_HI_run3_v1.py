@@ -269,8 +269,8 @@ def defineMenu():
         'L1_LAR-ZEE', 'L1_LAR-ZEE-eEM',
 
         #ATR-17320
-        'L1_CEP-CjJ100',
-        'L1_CEP-CjJ90' ,
+        # 'L1_CEP-CjJ100',
+        # 'L1_CEP-CjJ90' ,
 
         #ATR-21371
         'L1_ALFA_ANY',

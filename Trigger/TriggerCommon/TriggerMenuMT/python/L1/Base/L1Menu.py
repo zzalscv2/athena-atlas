@@ -21,7 +21,7 @@ class L1Menu(object):
     This class holds everything that is needed to define the menu
     """
 
-    def __init__(self, menuName):
+    def __init__(self, menuName, do_alfa=False):
         self.menuName = menuName
 
         # items in menu
@@ -40,7 +40,7 @@ class L1Menu(object):
         self.boards = MenuBoardsCollection()
 
         # CTP Info in the menu
-        self.ctp = CTP()
+        self.ctp = CTP(do_alfa)
         
         if self.menuName:
             smk_psk_Name = get_smk_psk_Name(self.menuName)
@@ -488,4 +488,39 @@ class L1Menu(object):
             for algo in algo_param_mismatch:
                 log.error(f'    {algo.name} ({algo.classtype})')
             raise RuntimeError('checkL1TopoParams: L1Topo algorithm parameters do not match specification')
-                
+
+    def checkItemsHaveInputs(self):
+        all_ctpin = []
+        connected_boards = []
+        for layout,connectors in self.ctp.inputConnectors.items():
+            for connector, contents in connectors.items():
+                if layout=='ctpin':
+                    # Ignore empty
+                    connected_boards += [board for board in contents.values() if board]
+                else:
+                    connected_boards.append(contents)
+
+        for conn_name in connected_boards:
+            conn = self.connectors[conn_name]
+            if conn.ctype != CType.ELEC:
+                for tl in conn.triggerLines:
+                    thrName = tl.name
+                    if thrName[:3]=='ZB_':
+                        thrName = thrName[3:]
+                    all_ctpin.append(thrName)
+            else:
+                for fpga in conn.triggerLines:
+                    for clock in conn.triggerLines[fpga]:
+                        for tl in conn.triggerLines[fpga][clock]:
+                            thrName = tl.name
+                            if thrName[:3]=='ZB_':
+                                thrName = thrName[3:]
+                            all_ctpin.append(thrName)
+
+        for item in self.items:
+            for thrName in item.thresholdNames():
+                if thrName[:3]=='ZB_':
+                    thrName = thrName[3:]
+                if thrName not in all_ctpin:
+                    raise RuntimeError(
+                        f'checkItemsHaveInputs: Threshold {thrName} used by {item.name} is not on a board connected to CTP')
