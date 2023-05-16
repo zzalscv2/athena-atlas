@@ -24,6 +24,7 @@ precommand = ''.join([
   'doRuntimeNaviVal=True', # Perform runtime graph vaidation in this test
 ])
 ex.args = '-c "{:s}"'.format(precommand)
+ex.max_events = 15 # nominal is 20, reduce to avoid occasional timeout
 
 test = Test.Test()
 test.art_type = 'build'
