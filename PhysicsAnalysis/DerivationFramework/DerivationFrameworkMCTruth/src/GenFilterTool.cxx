@@ -24,8 +24,15 @@ namespace DerivationFramework {
     return false;
   }
 
+  static const SG::AuxElement::Decorator<float> dec_genFiltHT("GenFiltHT");
+  static const SG::AuxElement::Decorator<float> dec_genFiltHTinclNu("GenFiltHTinclNu");
+  static const SG::AuxElement::Decorator<float> dec_genFiltMET("GenFiltMET");
+  static const SG::AuxElement::Decorator<float> dec_genFiltPTZ("GenFiltPTZ");
+  static const SG::AuxElement::Decorator<float> dec_genFiltFatJ("GenFiltFatJ");
+  static const SG::AuxElement::ConstAccessor<unsigned int> acc_PartOrigin("classifierParticleOrigin");
+
   static bool isFromWZTau(const xAOD::TruthParticle* tp) {
-    ParticleOrigin orig = static_cast<ParticleOrigin>(tp->auxdata<unsigned int>("classifierParticleOrigin"));
+    ParticleOrigin orig = static_cast<ParticleOrigin>(acc_PartOrigin(*tp));
 
     switch(orig) {
     case ParticleOrigin::WBoson:
@@ -38,11 +45,6 @@ namespace DerivationFramework {
     return false;
   }
 
-  static const SG::AuxElement::Decorator<float> dec_genFiltHT("GenFiltHT");
-  static const SG::AuxElement::Decorator<float> dec_genFiltHTinclNu("GenFiltHTinclNu");
-  static const SG::AuxElement::Decorator<float> dec_genFiltMET("GenFiltMET");
-  static const SG::AuxElement::Decorator<float> dec_genFiltPTZ("GenFiltPTZ");
-  static const SG::AuxElement::Decorator<float> dec_genFiltFatJ("GenFiltFatJ");
 
   GenFilterTool::GenFilterTool(const std::string& t, const std::string& n, const IInterface* p)
     : AthAlgTool(t,n,p) {
@@ -95,6 +97,8 @@ namespace DerivationFramework {
       m_decorKeys.emplace_back(m_eventInfoKey.key() + "." + SG::AuxTypeRegistry::instance().getName(dec.auxid()));
     }
     ATH_CHECK(m_decorKeys.initialize());
+    m_mcReadDecor = m_mcKey.key() + "." + SG::AuxTypeRegistry::instance().getName(acc_PartOrigin.auxid());
+    ATH_CHECK(m_mcReadDecor.initialize());
     return StatusCode::SUCCESS;
   }
   StatusCode GenFilterTool::addBranches() const{

@@ -83,6 +83,8 @@ def TauTruthToolsCfg(ConfigFlags):
         DFCommonTauTruthWrapperTools.append(acc.getPublicTool("DFCommonTauTruthCollectionMaker"))
 
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation    
-    acc.addEventAlgo(CommonAugmentation( "TauTruthCommonKernel", AugmentationTools = DFCommonTauTruthWrapperTools ))    
+    acc.addEventAlgo(CommonAugmentation( "TauTruthCommonKernel", AugmentationTools = DFCommonTauTruthWrapperTools,
+                                        ExtraOutputs = [( 'xAOD::TruthParticleContainer' , 'StoreGateSvc+TruthTaus' ),
+                                                        ( 'xAOD::IParticleContainer' , 'StoreGateSvc+TruthTaus' )] ))    
     
     return acc    
