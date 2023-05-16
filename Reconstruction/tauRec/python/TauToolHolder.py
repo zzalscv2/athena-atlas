@@ -36,6 +36,7 @@ def TVAToolCfg(flags):
     # returns a component accumulator instance, also sets UsedInFitDecorator
     TVAToolCA = _TTVAToolCfg(flags, _name,
                            WorkingPoint = "Nonprompt_Hard_MaxWeight",
+                           HardScatterLinkDeco="",
                            TrackContName = flags.Tau.ActiveConfig.TrackCollection,
                            VertexContName = flags.Tau.ActiveConfig.VertexCollection)
     return TVAToolCA
