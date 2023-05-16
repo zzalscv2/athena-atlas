@@ -42,6 +42,7 @@ StatusCode TgcRawDataMonitorAlgorithm::initialize() {
   ATH_CHECK(m_TgcPrepDataContainerKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_TgcCoinDataContainerCurrBCKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_TgcCoinDataContainerNextBCKey.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_TgcCoinDataContainerNextNextBCKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_TgcCoinDataContainerPrevBCKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_PrimaryVertexContainerKey.initialize(SG::AllowEmpty));
 
@@ -1896,17 +1897,21 @@ return (m.muon->charge()>0);
 
   ///////////////// Filling TGC CoinData histograms /////////////////
   if(m_anaTgcCoin){
+    SG::ReadHandle < Muon::TgcCoinDataContainer > tgcCoinPrev(m_TgcCoinDataContainerPrevBCKey, ctx);
     SG::ReadHandle < Muon::TgcCoinDataContainer > tgcCoinCurr(m_TgcCoinDataContainerCurrBCKey, ctx);
     SG::ReadHandle < Muon::TgcCoinDataContainer > tgcCoinNext(m_TgcCoinDataContainerNextBCKey, ctx);
-    SG::ReadHandle < Muon::TgcCoinDataContainer > tgcCoinPrev(m_TgcCoinDataContainerPrevBCKey, ctx);
     if (!tgcCoinCurr.isValid() || !tgcCoinNext.isValid() || !tgcCoinPrev.isValid()) {
       ATH_MSG_WARNING("Couldn't get TGC Coin Data");
     }else{
       ATH_MSG_DEBUG("Filling TGC CoinData histograms");
       std::map<int, SG::ReadHandle<Muon::TgcCoinDataContainer> > tgcCoin;
-      tgcCoin[0] = tgcCoinCurr;
-      tgcCoin[+1] = tgcCoinNext;
       tgcCoin[-1] = tgcCoinPrev;
+      tgcCoin[0]  = tgcCoinCurr;
+      tgcCoin[+1] = tgcCoinNext;
+      if(!m_TgcCoinDataContainerNextNextBCKey.empty()){
+	SG::ReadHandle < Muon::TgcCoinDataContainer > tgcCoinNextNext(m_TgcCoinDataContainerNextNextBCKey, ctx);
+	if(tgcCoinNextNext.isValid())tgcCoin[+2] = tgcCoinNextNext;
+      }
       std::vector< TgcTrig > tgcTrigMap_SL;
       std::vector< TgcTrig > tgcTrigMap_SL_Endcap;
       std::vector< TgcTrig > tgcTrigMap_SL_Forward;
@@ -1928,6 +1933,9 @@ return (m.muon->charge()>0);
       std::vector< TgcTrig > tgcTrigMap_EIFI_Strip;
       std::vector< TgcTrig > tgcTrigMap_EIFI_Endcap_Strip;
       std::vector< TgcTrig > tgcTrigMap_EIFI_Forward_Strip;
+      std::vector< TgcTrigTile > tgcTrigTileMap;
+      std::vector< TgcTrigNsw > tgcTrigNswMap;
+      std::vector< TgcTrigRpc > tgcTrigRpcMap;
       int n_TgcCoin_detElementIsNull = 0;
       int n_TgcCoin_postOutPtrIsNull = 0;
       for (auto thisCoin : tgcCoin) {
@@ -1936,6 +1944,53 @@ return (m.muon->charge()>0);
 	  for (const auto data : *tgccnt) {
 	    if ( data->detectorElementOut() == nullptr ) n_TgcCoin_detElementIsNull++;
 	    if ( data->posOutPtr() == nullptr ) n_TgcCoin_postOutPtrIsNull++;
+
+	    if(data->type() == Muon::TgcCoinData::TYPE_UNKNOWN){ // inner muon detectors (EI/FI/Tile/NSW/RPCBIS78)
+	      int slsector = (data->isAside())?(data->phi()):(-data->phi());
+	      if (data->isInner() && data->isStrip()) {  // RPC-BIS78
+		TgcTrigRpc rpcCoin;
+		rpcCoin.slSector = slsector;
+		rpcCoin.roiEta = -999;
+		rpcCoin.roiPhi = -999;
+		rpcCoin.roiNum = -999;
+		rpcCoin.deltaBcid = (data->inner() >> Muon::TgcCoinData::INNER_RPC_BCID_BITSHIFT) & Muon::TgcCoinData::INNER_RPC_BCID_BIT;
+		rpcCoin.deltaTiming = bunch;
+		rpcCoin.rpcEta = (data->inner() >> Muon::TgcCoinData::INNER_RPC_ETA_BITSHIFT) & Muon::TgcCoinData::INNER_RPC_ETA_BIT;
+		rpcCoin.rpcPhi = (data->inner() >> Muon::TgcCoinData::INNER_RPC_PHI_BITSHIFT) & Muon::TgcCoinData::INNER_RPC_PHI_BIT;
+		rpcCoin.rpcDEta = (data->inner() >> Muon::TgcCoinData::INNER_RPC_DETA_BITSHIFT) & Muon::TgcCoinData::INNER_RPC_DETA_BIT;
+		rpcCoin.rpcDPhi = (data->inner() >> Muon::TgcCoinData::INNER_RPC_DPHI_BITSHIFT) & Muon::TgcCoinData::INNER_RPC_DPHI_BIT;
+		tgcTrigRpcMap.push_back(rpcCoin);
+	      } else if (data->isInner() && !data->isStrip()) {  // NSW
+		TgcTrigNsw nswCoin;
+		nswCoin.slSector = slsector;
+		nswCoin.roiEta = -999;
+		nswCoin.roiPhi = -999;
+		nswCoin.roiNum = -999;
+		nswCoin.isForward = data->isForward();
+		nswCoin.isEndcap = !data->isForward();
+		nswCoin.deltaBcid = (data->inner() >> Muon::TgcCoinData::INNER_NSW_BCID_BITSHIFT) & Muon::TgcCoinData::INNER_NSW_BCID_BIT;
+		nswCoin.deltaTiming = bunch;
+		nswCoin.R = (data->inner() >> Muon::TgcCoinData::INNER_NSW_R_BITSHIFT) & Muon::TgcCoinData::INNER_NSW_R_BIT;
+		nswCoin.Phi = (data->inner() >> Muon::TgcCoinData::INNER_NSW_PHI_BITSHIFT) & Muon::TgcCoinData::INNER_NSW_PHI_BIT;
+		nswCoin.deltaTheta = (data->inner() >> Muon::TgcCoinData::INNER_NSW_DTHETA_BITSHIFT) & Muon::TgcCoinData::INNER_NSW_DTHETA_BIT;
+		if(nswCoin.R!=0 && nswCoin.Phi!=0)
+		  tgcTrigNswMap.push_back(nswCoin);
+	      } else if (!data->isInner() && data->isStrip()) {  // TMDB
+		TgcTrigTile tileCoin;
+		tileCoin.slSector = slsector;
+		tileCoin.roiEta = -999;
+		tileCoin.roiPhi = -999;
+		tileCoin.roiNum = -999;
+		tileCoin.deltaBcid = (data->inner() >> Muon::TgcCoinData::INNER_TILE_BCID_BITSHIFT) & Muon::TgcCoinData::INNER_TILE_BCID_BIT;
+		tileCoin.deltaTiming = bunch;
+		tileCoin.tmdbDecisions = (data->inner() >> Muon::TgcCoinData::INNER_TILE_MODULE_BITSHIFT) & Muon::TgcCoinData::INNER_TILE_MODULE_BIT;
+		if(tileCoin.tmdbDecisions!=0)
+		  tgcTrigTileMap.push_back(tileCoin);
+	      } else  if (!data->isInner() && !data->isStrip()) {  // EI
+		// nothing to be implemented at this moment
+	      }
+	    }
+
 	    if ( data->detectorElementOut() == nullptr ||
 		 data->posOutPtr() == nullptr )continue; // to avoid FPE
 	    TgcTrig tgcTrig;
@@ -1956,6 +2011,17 @@ return (m.muon->charge()>0);
 	      const Amg::MatrixX &matrix = data->errMat();
 	      tgcTrig.width_R = matrix(0, 0);
 	      tgcTrig.width_Phi = matrix(1, 1);
+
+	      tgcTrig.muonMatched = 0;
+	      for(const auto& ext : extpositions_pivot){
+		if(ext.muon->pt() < pt_15_cut )continue;
+		if(data->isAside() && ext.extPos.z()<0)continue;
+		if(!data->isAside()&& ext.extPos.z()>0)continue;
+		if( Amg::deltaR(posOut,ext.extPos) > m_l1trigMatchWindow1.value() )continue;
+		tgcTrig.muonMatched = 1;
+		break;
+	      }
+
 	    } else {
 	      tgcTrig.width_R = 0.;
 	      tgcTrig.width_Phi = 0.;
@@ -2051,6 +2117,68 @@ return (m.muon->charge()>0);
 	}
       }
       
+
+      std::vector< TgcTrigRpc > tgcTrigRpcMap_matched;
+      for(auto& inner : tgcTrigRpcMap){
+	for(const auto& sl : tgcTrigMap_SL_Endcap){
+	  if(sl.bunch != 0)continue;
+	  if(sl.muonMatched == 0)continue;
+	  if(sl.isForward)continue;
+	  if(sl.sector != inner.slSector)continue;
+	  inner.roiEta = sl.eta;
+	  inner.roiPhi = sl.phi;
+	  inner.roiNum = sl.roi;
+	  inner.deltaBcid -= (GetEventInfo(ctx)->bcid() & 0xF);
+	  inner.deltaTiming -= sl.bunch;
+	  break;
+	}
+	if(inner.roiNum >= 0) tgcTrigRpcMap_matched.push_back(inner);
+      }
+      std::vector< TgcTrigNsw > tgcTrigNswMap_matched;
+      for(auto& inner : tgcTrigNswMap){
+	for(const auto& sl : tgcTrigMap_SL){
+	  if(sl.bunch != 0)continue;
+	  if(sl.muonMatched == 0)continue;
+	  if(sl.isForward != inner.isForward)continue;
+	  if(sl.sector != inner.slSector)continue;
+	  inner.roiEta = sl.eta;
+	  inner.roiPhi = sl.phi;
+	  inner.roiNum = sl.roi;
+	  inner.deltaBcid -= (GetEventInfo(ctx)->bcid() & 0xF);
+	  inner.deltaTiming -= sl.bunch;
+	  break;
+	}
+	if(inner.roiNum >= 0) tgcTrigNswMap_matched.push_back(inner);
+      }
+      std::vector< TgcTrigTile > tgcTrigTileMap_matched;
+      std::vector< TgcTrigTile > tgcTrigTileMap_matched_allmods;
+      for(auto& inner : tgcTrigTileMap){
+	for(const auto& sl : tgcTrigMap_SL_Endcap){
+	  if(sl.bunch != 0)continue;
+	  if(sl.muonMatched == 0)continue;
+	  if(sl.isForward)continue;
+	  if(sl.sector != inner.slSector)continue;
+	  inner.roiEta = sl.eta;
+	  inner.roiPhi = sl.phi;
+	  inner.roiNum = sl.roi;
+	  inner.deltaBcid -= (GetEventInfo(ctx)->bcid() & 0xF);
+	  inner.deltaTiming -= sl.bunch;
+	  break;
+	}
+	if(inner.roiNum >= 0){
+	  tgcTrigTileMap_matched.push_back(inner);
+	  for(int i = 0 ; i < 12 ; i++){
+	    TgcTrigTile inner2 = inner;
+	    if((inner.tmdbDecisions>>i) & 0x1){
+	      inner2.tmdbDecisions = (i+3)%3 + 1;
+	      tgcTrigTileMap_matched_allmods.push_back(inner2);
+	    }
+	  }
+	}
+      }
+
+
+
       MonVariables  tgcCoin_variables;
       tgcCoin_variables.push_back(mon_bcid);
       tgcCoin_variables.push_back(mon_pileup);
@@ -2098,6 +2226,134 @@ return (m.muon->charge()>0);
       fillTgcCoinEff("HPT_Strip",tgcTrigMap_HPT_Strip,extpositions_pivot,extTrigInfo_HPT_Strip,vo_exttriginfo,tgcCoin_variables);
       fillTgcCoinEff("LPT_Wire",tgcTrigMap_LPT_Wire,extpositions_pivot,extTrigInfo_LPT_Wire,vo_exttriginfo,tgcCoin_variables);
       fillTgcCoinEff("LPT_Strip",tgcTrigMap_LPT_Strip,extpositions_pivot,extTrigInfo_LPT_Strip,vo_exttriginfo,tgcCoin_variables);
+
+      // RPC BIS78 inner coincidence
+      auto coin_inner_rpc_slSector=Monitored::Collection("coin_inner_rpc_slSector",tgcTrigRpcMap_matched,[](const TgcTrigRpc&m){
+	  return m.slSector;
+	});
+      tgcCoin_variables.push_back(coin_inner_rpc_slSector);
+      auto coin_inner_rpc_roiEta=Monitored::Collection("coin_inner_rpc_roiEta",tgcTrigRpcMap_matched,[](const TgcTrigRpc&m){
+	  return m.roiEta;
+	});
+      tgcCoin_variables.push_back(coin_inner_rpc_roiEta);
+      auto coin_inner_rpc_roiPhi=Monitored::Collection("coin_inner_rpc_roiPhi",tgcTrigRpcMap_matched,[](const TgcTrigRpc&m){
+	  return m.roiPhi;
+	});
+      tgcCoin_variables.push_back(coin_inner_rpc_roiPhi);
+      auto coin_inner_rpc_roiNum=Monitored::Collection("coin_inner_rpc_roiNum",tgcTrigRpcMap_matched,[](const TgcTrigRpc&m){
+	  return m.roiNum;
+	});
+      tgcCoin_variables.push_back(coin_inner_rpc_roiNum);
+      auto coin_inner_rpc_deltaBcid=Monitored::Collection("coin_inner_rpc_deltaBcid",tgcTrigRpcMap_matched,[](const TgcTrigRpc&m){
+	  return m.deltaBcid;
+	});
+      tgcCoin_variables.push_back(coin_inner_rpc_deltaBcid);
+      auto coin_inner_rpc_deltaTiming=Monitored::Collection("coin_inner_rpc_deltaTiming",tgcTrigRpcMap_matched,[](const TgcTrigRpc&m){
+	  return m.deltaTiming;
+	});
+      tgcCoin_variables.push_back(coin_inner_rpc_deltaTiming);
+      auto coin_inner_rpc_rpcEta=Monitored::Collection("coin_inner_rpc_rpcEta",tgcTrigRpcMap_matched,[](const TgcTrigRpc&m){
+	  return m.rpcEta;
+	});
+      tgcCoin_variables.push_back(coin_inner_rpc_rpcEta);
+      auto coin_inner_rpc_rpcPhi=Monitored::Collection("coin_inner_rpc_rpcPhi",tgcTrigRpcMap_matched,[](const TgcTrigRpc&m){
+	  return m.rpcPhi;
+	});
+      tgcCoin_variables.push_back(coin_inner_rpc_rpcPhi);
+      auto coin_inner_rpc_rpcDEta=Monitored::Collection("coin_inner_rpc_rpcDEta",tgcTrigRpcMap_matched,[](const TgcTrigRpc&m){
+	  return m.rpcDEta;
+	});
+      tgcCoin_variables.push_back(coin_inner_rpc_rpcDEta);
+      auto coin_inner_rpc_rpcDPhi=Monitored::Collection("coin_inner_rpc_rpcDPhi",tgcTrigRpcMap_matched,[](const TgcTrigRpc&m){
+	  return m.rpcDPhi;
+	});
+      tgcCoin_variables.push_back(coin_inner_rpc_rpcDPhi);
+
+      // NSW inner coincidence
+      auto coin_inner_nsw_slSector=Monitored::Collection("coin_inner_nsw_slSector",tgcTrigNswMap_matched,[](const TgcTrigNsw&m){
+	  return m.slSector;
+	});
+      tgcCoin_variables.push_back(coin_inner_nsw_slSector);
+      auto coin_inner_nsw_roiEta=Monitored::Collection("coin_inner_nsw_roiEta",tgcTrigNswMap_matched,[](const TgcTrigNsw&m){
+	  return m.roiEta;
+	});
+      tgcCoin_variables.push_back(coin_inner_nsw_roiEta);
+      auto coin_inner_nsw_roiPhi=Monitored::Collection("coin_inner_nsw_roiPhi",tgcTrigNswMap_matched,[](const TgcTrigNsw&m){
+	  return m.roiPhi;
+	});
+      tgcCoin_variables.push_back(coin_inner_nsw_roiPhi);
+      auto coin_inner_nsw_roiNum=Monitored::Collection("coin_inner_nsw_roiNum",tgcTrigNswMap_matched,[](const TgcTrigNsw&m){
+	  return m.roiNum;
+	});
+      tgcCoin_variables.push_back(coin_inner_nsw_roiNum);
+      auto coin_inner_nsw_deltaBcid=Monitored::Collection("coin_inner_nsw_deltaBcid",tgcTrigNswMap_matched,[](const TgcTrigNsw&m){
+	  return m.deltaBcid;
+	});
+      tgcCoin_variables.push_back(coin_inner_nsw_deltaBcid);
+      auto coin_inner_nsw_deltaTiming=Monitored::Collection("coin_inner_nsw_deltaTiming",tgcTrigNswMap_matched,[](const TgcTrigNsw&m){
+	  return m.deltaTiming;
+	});
+      tgcCoin_variables.push_back(coin_inner_nsw_deltaTiming);
+      auto coin_inner_nsw_R=Monitored::Collection("coin_inner_nsw_R",tgcTrigNswMap_matched,[](const TgcTrigNsw&m){
+	  return m.R;
+	});
+      tgcCoin_variables.push_back(coin_inner_nsw_R);
+      auto coin_inner_nsw_Phi=Monitored::Collection("coin_inner_nsw_Phi",tgcTrigNswMap_matched,[](const TgcTrigNsw&m){
+	  return m.Phi;
+	});
+      tgcCoin_variables.push_back(coin_inner_nsw_Phi);
+      auto coin_inner_nsw_deltaTheta=Monitored::Collection("coin_inner_nsw_deltaTheta",tgcTrigNswMap_matched,[](const TgcTrigNsw&m){
+	  return m.deltaTheta;
+	});
+      tgcCoin_variables.push_back(coin_inner_nsw_deltaTheta);
+      auto coin_inner_nsw_isForward=Monitored::Collection("coin_inner_nsw_isForward",tgcTrigNswMap_matched,[](const TgcTrigNsw&m){
+	  return m.isForward;
+	});
+      tgcCoin_variables.push_back(coin_inner_nsw_isForward);
+      auto coin_inner_nsw_isEndcap=Monitored::Collection("coin_inner_nsw_isEndcap",tgcTrigNswMap_matched,[](const TgcTrigNsw&m){
+	  return m.isEndcap;
+	});
+      tgcCoin_variables.push_back(coin_inner_nsw_isEndcap);
+
+      // Tile inner coincidence
+      auto coin_inner_tile_slSector=Monitored::Collection("coin_inner_tile_slSector",tgcTrigTileMap_matched,[](const TgcTrigTile&m){
+	  return m.slSector;
+	});
+      tgcCoin_variables.push_back(coin_inner_tile_slSector);
+      auto coin_inner_tile_roiEta=Monitored::Collection("coin_inner_tile_roiEta",tgcTrigTileMap_matched,[](const TgcTrigTile&m){
+	  return m.roiEta;
+	});
+      tgcCoin_variables.push_back(coin_inner_tile_roiEta);
+      auto coin_inner_tile_roiPhi=Monitored::Collection("coin_inner_tile_roiPhi",tgcTrigTileMap_matched,[](const TgcTrigTile&m){
+	  return m.roiPhi;
+	});
+      tgcCoin_variables.push_back(coin_inner_tile_roiPhi);
+      auto coin_inner_tile_roiNum=Monitored::Collection("coin_inner_tile_roiNum",tgcTrigTileMap_matched,[](const TgcTrigTile&m){
+	  return m.roiNum;
+	});
+      tgcCoin_variables.push_back(coin_inner_tile_roiNum);
+      auto coin_inner_tile_deltaBcid=Monitored::Collection("coin_inner_tile_deltaBcid",tgcTrigTileMap_matched,[](const TgcTrigTile&m){
+	  return m.deltaBcid;
+	});
+      tgcCoin_variables.push_back(coin_inner_tile_deltaBcid);
+      auto coin_inner_tile_deltaTiming=Monitored::Collection("coin_inner_tile_deltaTiming",tgcTrigTileMap_matched,[](const TgcTrigTile&m){
+	  return m.deltaTiming;
+	});
+      tgcCoin_variables.push_back(coin_inner_tile_deltaTiming);
+      auto coin_inner_tile_tmdbDecisions=Monitored::Collection("coin_inner_tile_tmdbDecisions",tgcTrigTileMap_matched,[](const TgcTrigTile&m){
+	  return m.tmdbDecisions;
+	});
+      tgcCoin_variables.push_back(coin_inner_tile_tmdbDecisions);
+      // Tile inner coincidence (modified decisions)
+      auto coin_inner_tile2_slSector=Monitored::Collection("coin_inner_tile2_slSector",tgcTrigTileMap_matched_allmods,[](const TgcTrigTile&m){
+	  return m.slSector;
+	});
+      tgcCoin_variables.push_back(coin_inner_tile2_slSector);
+      auto coin_inner_tile2_tmdbDecisions=Monitored::Collection("coin_inner_tile2_tmdbDecisions",tgcTrigTileMap_matched_allmods,[](const TgcTrigTile&m){
+	  return m.tmdbDecisions;
+	});
+      tgcCoin_variables.push_back(coin_inner_tile2_tmdbDecisions);
+
       
       fill(m_packageName+"_TgcCoin", tgcCoin_variables);
 
@@ -2198,7 +2454,7 @@ void TgcRawDataMonitorAlgorithm::fillTgcCoinEff(const std::string & type,
 						std::vector<Monitored::ObjectsCollection<std::vector<ExtTrigInfo>, double>>& varowner,
 						MonVariables& variables) const {
   for(const auto& ext : extpositions_pivot){
-    if(ext.muon->pt() < pt_10_cut )continue;
+    if(ext.muon->pt() < pt_15_cut )continue;
     bool matched = false;
     bool matchedQ = false;
     bool matchedF = false;
@@ -2212,10 +2468,15 @@ void TgcRawDataMonitorAlgorithm::fillTgcCoinEff(const std::string & type,
       if(tgcTrig.bunch!=0)continue; // only the current bunch
       if(tgcTrig.isAside==1 && ext.extPos.z()<0)continue;
       if(tgcTrig.isAside==0 && ext.extPos.z()>0)continue;
-      TVector2 vec(tgcTrig.x_Out,tgcTrig.y_Out);
-      double deltaPhi = vec.DeltaPhi( TVector2(ext.extPos.x(), ext.extPos.y()) );
-      double deltaR = vec.Mod() - TVector2(ext.extPos.x(), ext.extPos.y()).Mod();
-      if( std::abs(deltaPhi) > m_dPhiCutOnM3 || std::abs(deltaR) > m_dRCutOnM3 )continue;
+      if(tgcTrig.type == Muon::TgcCoinData::TYPE_SL){
+	const Amg::Vector3D posOut(tgcTrig.x_Out,tgcTrig.y_Out,tgcTrig.z_Out);
+	if( Amg::deltaR(posOut,ext.extPos) > m_l1trigMatchWindow1.value() )continue;
+      }else{
+	TVector2 vec(tgcTrig.x_Out,tgcTrig.y_Out);
+	double deltaPhi = vec.DeltaPhi( TVector2(ext.extPos.x(), ext.extPos.y()) );
+	double deltaR = vec.Mod() - TVector2(ext.extPos.x(), ext.extPos.y()).Mod();
+	if( std::abs(deltaPhi) > m_dPhiCutOnM3 || std::abs(deltaR) > m_dRCutOnM3 )continue;
+      }
       matched |= 1;
       int charge = (tgcTrig.isPositiveDeltaR==0) ? (-1) : (+1);
       matchedQ |= (ext.muon->charge()*charge>0);

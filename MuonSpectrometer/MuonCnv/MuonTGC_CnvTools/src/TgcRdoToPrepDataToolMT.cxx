@@ -1693,33 +1693,37 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeInner(State& state,
     isEndcap = !rd.isForward();
     if(rd.type()==TgcRawData::TYPE_INNER_NSW){
       isInner = true; isStrip = false;
-      inner = rd.nsweta()           // 8 bit
-        + (rd.nswphi() << 8)        // 6 bit
-        + (((rd.nswcand()>>2)&0x7) << 14) //  nsw input 3 bit
-        + ((rd.nswcand()&0x3) << 17)      // nsw cand 2 bit
-        + (rd.nswdtheta() << 19)    // 5 bit
-        + (rd.nswphires() << 24)    // 1 bit
-        + (rd.nswlowres() << 25)    // 1 bit
-        + (rd.nswid() << 26)        // 4 bit
-        + (((rd.nswcand()>>5)&0xf) << 30);  // nsw bcid 4 bit
+      inner
+	= (rd.nsweta()    << Muon::TgcCoinData::INNER_NSW_R_BITSHIFT)
+        + (rd.nswphi()    << Muon::TgcCoinData::INNER_NSW_PHI_BITSHIFT)
+        + (((rd.nswcand()>>TgcRawData::NSW_INPUT_BITSHIFT)&TgcRawData::NSW_INPUT_BIT) << Muon::TgcCoinData::INNER_NSW_INPUT_BITSHIFT)
+        + (((rd.nswcand()>>TgcRawData::NSW_CAND_BITSHIFT)&TgcRawData::NSW_CAND_BIT)   << Muon::TgcCoinData::INNER_NSW_CAND_BITSHIFT)
+        + (rd.nswdtheta() << Muon::TgcCoinData::INNER_NSW_DTHETA_BITSHIFT)
+        + (rd.nswphires() << Muon::TgcCoinData::INNER_NSW_PHIRES_BITSHIFT)
+        + (rd.nswlowres() << Muon::TgcCoinData::INNER_NSW_LOWRES_BITSHIFT)
+        + (rd.nswid()     << Muon::TgcCoinData::INNER_NSW_ID_BITSHIFT)
+        + (((rd.nswcand()>>TgcRawData::NSW_BCID_BITSHIFT)&TgcRawData::NSW_BCID_BIT)   << Muon::TgcCoinData::INNER_NSW_BCID_BITSHIFT);
     }else if(rd.type()==TgcRawData::TYPE_INNER_BIS){
       isInner = true; isStrip = true;
-      inner = rd.rpceta()           // 6 bit
-        + (rd.rpcphi() << 6)        // 6 bit
-        + (rd.rpcdeta() << 12)      // 3 bit
-        + (rd.rpcdphi() << 15)      // 3 bit
-        + ((rd.rpcflag()&0x3) << 18)      // rpc flag 2 bit
-        + (((rd.rpcflag()>>4)&0xf) << 20)  // rpc bcid 4 bit
-	+ (((rd.rpcflag()>>2)&0x3) << 24);      // rpc cand 2 bit
+      inner
+	= (rd.rpceta()  << Muon::TgcCoinData::INNER_RPC_ETA_BITSHIFT)
+        + (rd.rpcphi()  << Muon::TgcCoinData::INNER_RPC_PHI_BITSHIFT)
+        + (rd.rpcdeta() << Muon::TgcCoinData::INNER_RPC_DETA_BITSHIFT)
+        + (rd.rpcdphi() << Muon::TgcCoinData::INNER_RPC_DPHI_BITSHIFT)
+        + (((rd.rpcflag()>>TgcRawData::RPC_FLAG_BITSHIFT)&TgcRawData::RPC_FLAG_BIT) << Muon::TgcCoinData::INNER_RPC_FLAG_BITSHIFT)
+        + (((rd.rpcflag()>>TgcRawData::RPC_BCID_BITSHIFT)&TgcRawData::RPC_BCID_BIT) << Muon::TgcCoinData::INNER_RPC_BCID_BITSHIFT)
+        + (((rd.rpcflag()>>TgcRawData::RPC_CAND_BITSHIFT)&TgcRawData::RPC_CAND_BIT) << Muon::TgcCoinData::INNER_RPC_CAND_BITSHIFT);
     }else if(rd.type()==TgcRawData::TYPE_INNER_EIFI){
       isInner = false; isStrip = false;
-      inner = rd.ei()               // 8 bit
-        + (rd.fi() << 8)            // 8 bit
-        + (rd.cid() << 16)  ;       // 3 bit
+      inner
+	= (rd.ei()  << Muon::TgcCoinData::INNER_EIFI_EI_BITSHIFT)
+        + (rd.fi()  << Muon::TgcCoinData::INNER_EIFI_FI_BITSHIFT)
+        + (rd.cid() << Muon::TgcCoinData::INNER_EIFI_CID_BITSHIFT);
     }else if(rd.type()==TgcRawData::TYPE_INNER_TMDB){
       isInner = false; isStrip = true;
-      inner = rd.tmdbmod()          // 12 bit
-        + (rd.tmdbbcid() << 12) ;   //  4 bit
+      inner
+	= (rd.tmdbmod()  << Muon::TgcCoinData::INNER_TILE_MODULE_BITSHIFT)
+        + (rd.tmdbbcid() << Muon::TgcCoinData::INNER_TILE_BCID_BITSHIFT);
     }
   }
 

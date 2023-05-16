@@ -580,9 +580,9 @@ void Muon::TGC_RodDecoderReadout::byteStreamSrod2Rdo(OFFLINE_FRAGMENTS_NAMESPACE
           }
 
 	  uint16_t cand_input_bcid
-	    = nswpos.cand // 2 bits
-	    + (nswang.input<<2) // 3 bits
-	    + (nswang.bcid<<5); // 4 bits
+	    = (nswpos.cand  << TgcRawData::NSW_CAND_BITSHIFT)
+	    + (nswang.input << TgcRawData::NSW_INPUT_BITSHIFT)
+	    + (nswang.bcid  << TgcRawData::NSW_BCID_BITSHIFT);
 
           for ( int isector = 0; isector < 2; isector++ ){// duplicate for the neighboring trigger sector
 	    TgcRawData* raw = new TgcRawData(nswpos.bcBitmap+1,
@@ -623,9 +623,9 @@ void Muon::TGC_RodDecoderReadout::byteStreamSrod2Rdo(OFFLINE_FRAGMENTS_NAMESPACE
           }
 
 	  uint16_t flag_cand_bcid
-	    = rpccoin.flag // 2 bits
-	    + (rpccoin.cand<<2) // 2 bits
-	    + (rpccoin.bcid<<4); // 4 bits
+	    = (rpccoin.flag << TgcRawData::RPC_FLAG_BITSHIFT)
+	    + (rpccoin.cand << TgcRawData::RPC_CAND_BITSHIFT)
+	    + (rpccoin.bcid << TgcRawData::RPC_BCID_BITSHIFT);
 
           for ( int isector = 0; isector < 2; isector++ ){// duplicate for the neighboring trigger sector
             TgcRawData* raw = new TgcRawData(rpcpos.bcBitmap+1,
