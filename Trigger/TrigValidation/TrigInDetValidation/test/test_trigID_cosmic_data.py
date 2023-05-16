@@ -5,8 +5,6 @@
 # art-type: grid
 # art-include: master/Athena
 # art-include: 23.0/Athena
-# art-input: group.trig-hlt.data22_cos.00433897.express_express.merge.RAW
-# art-input-nfiles: 9
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt
@@ -43,7 +41,9 @@ preexec_reco = [
   "InDetFlags.doForwardTracks.set_Value_and_Lock(False)",
 ]
 Input   = 'data_cos'    # defined in TrigValTools/share/TrigValInputs.json
-GridFiles = True
+# don't use grid files, as ART submission doesn't allow multiple LBs to be processed in 1 job (ATR-26472)
+# once this is fixed, we can use the 3 files from group.trig-hlt.data23_cos.00448208.physics_CosmicMuons.merge.RAW
+GridFiles = False
 
 Jobs = [ ( "Offline",     " TIDAdata-run3-offline-cosmic.dat      -r Offline -o data-hists-offline.root" ) ]
 
