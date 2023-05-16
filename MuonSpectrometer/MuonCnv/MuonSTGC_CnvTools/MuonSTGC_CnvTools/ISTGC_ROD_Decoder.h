@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -25,6 +25,8 @@ namespace Muon
   class ISTGC_ROD_Decoder : virtual public IAlgTool
   {
     public:
+      virtual ~ISTGC_ROD_Decoder() = default;
+
       DeclareInterfaceID(Muon::ISTGC_ROD_Decoder, 1, 0);
 
       /** Convert ROBFragments to RDOs */

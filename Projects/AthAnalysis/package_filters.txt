@@ -29,6 +29,8 @@
 + Event/xAOD/xAODTruthCnv
 + Event/xAOD/xAODEventInfoCnv
 - Event/xAOD/.*Cnv
+- Event/xAOD/xAODMuonRDO
+- Event/xAOD/xAODMuonRDOAthenaPool
 + Event/xAOD/.*
 
 # Others:
