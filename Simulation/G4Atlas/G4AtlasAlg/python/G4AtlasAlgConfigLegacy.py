@@ -40,6 +40,8 @@ def getG4AtlasAlg(name='G4AtlasAlg', **kwargs):
 
     kwargs.setdefault('TruthRecordService', simFlags.TruthStrategy.TruthServiceName())
     kwargs.setdefault('GeoIDSvc', 'ISF_GeoIDSvc')
+    from AthenaCommon.CfgGetter import getService
+    kwargs.setdefault("UserActionSvc", getService("G4UA::UserActionSvc"))
 
     ## G4AtlasAlg verbosities (available domains = Navigator, Propagator, Tracking, Stepping, Stacking, Event)
     ## Set stepper verbose = 1 if the Athena logging level is <= DEBUG
@@ -57,3 +59,4 @@ def getG4AtlasAlg(name='G4AtlasAlg', **kwargs):
         # Needed to ensure that DeadMaterialCalibrationHitsMerger is scheduled correctly.
         kwargs.setdefault("ExtraOutputs", [( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitActive_DEAD' ), ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitDeadMaterial_DEAD' ), ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitInactive_DEAD' )])
     return CfgMgr.G4AtlasAlg(name, **kwargs)
+

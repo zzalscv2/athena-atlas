@@ -68,6 +68,8 @@ StatusCode G4AtlasAlg::initialize ATLAS_NOT_THREAD_SAFE ()
   // Create the scoring manager if requested
   if (m_recordFlux) G4ScoringManager::GetScoringManager();
 
+  ATH_CHECK( m_userActionSvc.retrieve() );
+  
   // One-time initialization
   try {
     std::call_once(initializeOnceFlag, &G4AtlasAlg::initializeOnce, this);
@@ -78,7 +80,6 @@ StatusCode G4AtlasAlg::initialize ATLAS_NOT_THREAD_SAFE ()
   }
 
   ATH_CHECK( m_rndmGenSvc.retrieve() );
-  ATH_CHECK( m_userActionSvc.retrieve() );
   ATH_CHECK(m_actionTools.retrieve());
 
   ATH_CHECK(m_senDetTool.retrieve());
