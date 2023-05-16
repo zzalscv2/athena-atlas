@@ -2,12 +2,23 @@
 <lcgdict>
 
     <class name="xAOD::NRPCRDO_v1" />
+    <class name="xAOD::NSWTPRDO_v1" />
+    
     <class name="xAOD::NRPCRDOContainer_v1"
            id="E43FA4A0-9C96-45D9-824A-F692EC062F31" />
+    <class name="xAOD::NSWTPRDOContainer_v1"
+           id="D5B8D004-7E09-4BB6-83DA-BE7788448F5" />
     <typedef name="xAOD::NRPCRDO" />
+    <typedef name = "xAOD::NSWTPRDO" />
     <typedef name="xAOD::NRPCRDOContainer" />
+    <typedef name="xAOD::NSWTPRDOContainer" />
+    
     
     <class name="xAOD::NRPCRDOAuxContainer_v1"
            id="DFA7070F-7132-4988-93E1-4C3D23E4E2FF" />
+     <class name="xAOD::NSWTPRDOAuxContainer_v1"
+           id="C52ED077-C36D-4CE1-B0D6-7C954FC19B0B" />
     <typedef name = "xAOD::NRPCRDOAuxContainer" />
+    <typedef name = "xAOD::NSWTPRDOAuxContainer" />
+
 </lcgdict>

@@ -21,18 +21,25 @@
 #include "MuonNSWCommonDecode/NSWMMTPDecodeBitmaps.h"
 #include <cstdint>
 
-namespace utf = boost::unit_test;
-
 
 BOOST_AUTO_TEST_SUITE(NSWMMTPDecodeBitmaps)
-  BOOST_AUTO_TEST_CASE(NSWMMTPDecodeBitmaps_Functionality, * utf::expected_failures(1)){
+  BOOST_AUTO_TEST_CASE(NSWMMTPDecodeBitmaps_Functionality){
     //no need to template this
-    constexpr auto bitSlice=bit_slice<uint64_t,uint32_t>;
+    constexpr auto bitSlice=Muon::bit_slice<uint64_t,uint32_t>;
     //fill a posiible bytestream fragment with all 1's
-    uint32_t bytestream[3]={0xFFFFUL, 0xFFFFUL, 0xFFFFUL};
+    uint32_t bytestream[3]={0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU};
     int start=0;
     int end=2; //inclusive interval, so three bits
     BOOST_TEST(bitSlice(bytestream, start, end) == 0b111ULL);
+  }
+
+  BOOST_AUTO_TEST_CASE(NSWMMTPDecodeBitmaps_Functionality_Long){
+    //no need to template this
+    constexpr auto bitSlice=Muon::bit_slice<uint64_t,uint32_t>;
+    uint32_t bytestream[10]={0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFU, 0x0U, 0x0U, 0x0U, 0x0U};
+    int start=159;
+    int end=161; //inclusive interval, so three bits
+    BOOST_TEST(bitSlice(bytestream, start, end) == 0b100ULL);
   }
 
 BOOST_AUTO_TEST_SUITE_END()

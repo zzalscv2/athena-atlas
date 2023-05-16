@@ -25,6 +25,7 @@ namespace Muon
   class IMM_ROD_Decoder : virtual public IAlgTool
   {
     public:
+      virtual ~IMM_ROD_Decoder() = default;
       DeclareInterfaceID(Muon::IMM_ROD_Decoder, 1, 0);
 
       /** Convert ROBFragments to RDOs */

@@ -220,70 +220,13 @@ struct outBranches
   std::vector<std::vector<uint32_t>> b_STGL1A_merge_nsw_segmentSelector = {};
   std::vector<std::vector<uint32_t>> b_STGL1A_merge_valid_segmentSelector = {};
 
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_monitor_segment7 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_spare_segment7 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_lowRes_segment7 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_phiRes_segment7 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_dTheta_segment7 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_phiID_segment7 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_RIndex_segment7 = {};
-  
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_monitor_segment6 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_spare_segment6 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_lowRes_segment6 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_phiRes_segment6 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_dTheta_segment6 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_phiID_segment6 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_RIndex_segment6 = {};
-
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_monitor_segment5 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_spare_segment5 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_lowRes_segment5 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_phiRes_segment5 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_dTheta_segment5 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_phiID_segment5 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_RIndex_segment5 = {};
-
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_monitor_segment4 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_spare_segment4 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_lowRes_segment4 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_phiRes_segment4 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_dTheta_segment4 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_phiID_segment4 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_RIndex_segment4 = {};
-
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_monitor_segment3 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_spare_segment3 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_lowRes_segment3 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_phiRes_segment3 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_dTheta_segment3 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_phiID_segment3 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_RIndex_segment3 = {};
-
-
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_monitor_segment2 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_spare_segment2 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_lowRes_segment2 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_phiRes_segment2 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_dTheta_segment2 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_phiID_segment2 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_RIndex_segment2 = {};
-
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_monitor_segment1 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_spare_segment1 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_lowRes_segment1 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_phiRes_segment1 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_dTheta_segment1 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_phiID_segment1 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_RIndex_segment1 = {};
-
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_monitor_segment0 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_spare_segment0 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_lowRes_segment0 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_phiRes_segment0 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_dTheta_segment0 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_phiID_segment0 = {};
-  std::vector<std::vector<uint32_t>> b_STGL1A_merge_RIndex_segment0 = {};
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPSegments::num_segments> b_STGL1A_merge_monitor_segments{};
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPSegments::num_segments> b_STGL1A_merge_spare_segments{};
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPSegments::num_segments> b_STGL1A_merge_lowRes_segments{};
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPSegments::num_segments> b_STGL1A_merge_phiRes_segments{};
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPSegments::num_segments> b_STGL1A_merge_dTheta_segments{};
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPSegments::num_segments> b_STGL1A_merge_phiID_segments{};
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPSegments::num_segments> b_STGL1A_merge_RIndex_segments{};
 
   std::vector<std::vector<uint32_t>> b_STGL1A_merge_BCID = {};
   std::vector<std::vector<uint32_t>> b_STGL1A_merge_sectorID = {};
@@ -525,69 +468,15 @@ int test_nsw_trigger_common_decoder_init_tree (TTree &outtree, outBranches &data
    outtree.Branch( "STGL1A_merge_nsw_segmentSelector", &data.b_STGL1A_merge_nsw_segmentSelector);
    outtree.Branch( "STGL1A_merge_valid_segmentSelector", &data.b_STGL1A_merge_valid_segmentSelector);
 
-   outtree.Branch( "STGL1A_merge_monitor_segment7", &data.b_STGL1A_merge_monitor_segment7);
-   outtree.Branch( "STGL1A_merge_spare_segment7", &data.b_STGL1A_merge_spare_segment7);
-   outtree.Branch( "STGL1A_merge_lowRes_segment7", &data.b_STGL1A_merge_lowRes_segment7);
-   outtree.Branch( "STGL1A_merge_phiRes_segment7", &data.b_STGL1A_merge_phiRes_segment7);
-   outtree.Branch( "STGL1A_merge_dTheta_segment7", &data.b_STGL1A_merge_dTheta_segment7);
-   outtree.Branch( "STGL1A_merge_phiID_segment7", &data.b_STGL1A_merge_phiID_segment7);
-   outtree.Branch( "STGL1A_merge_RIndex_segment7", &data.b_STGL1A_merge_RIndex_segment7);
-
-   outtree.Branch( "STGL1A_merge_monitor_segment6", &data.b_STGL1A_merge_monitor_segment6);
-   outtree.Branch( "STGL1A_merge_spare_segment6", &data.b_STGL1A_merge_spare_segment6);
-   outtree.Branch( "STGL1A_merge_lowRes_segment6", &data.b_STGL1A_merge_lowRes_segment6);
-   outtree.Branch( "STGL1A_merge_phiRes_segment6", &data.b_STGL1A_merge_phiRes_segment6);
-   outtree.Branch( "STGL1A_merge_dTheta_segment6", &data.b_STGL1A_merge_dTheta_segment6);
-   outtree.Branch( "STGL1A_merge_phiID_segment6", &data.b_STGL1A_merge_phiID_segment6);
-   outtree.Branch( "STGL1A_merge_RIndex_segment6", &data.b_STGL1A_merge_RIndex_segment6);
-
-   outtree.Branch( "STGL1A_merge_monitor_segment5", &data.b_STGL1A_merge_monitor_segment5);
-   outtree.Branch( "STGL1A_merge_spare_segment5", &data.b_STGL1A_merge_spare_segment5);
-   outtree.Branch( "STGL1A_merge_lowRes_segment5", &data.b_STGL1A_merge_lowRes_segment5);
-   outtree.Branch( "STGL1A_merge_phiRes_segment5", &data.b_STGL1A_merge_phiRes_segment5);
-   outtree.Branch( "STGL1A_merge_dTheta_segment5", &data.b_STGL1A_merge_dTheta_segment5);
-   outtree.Branch( "STGL1A_merge_phiID_segment5", &data.b_STGL1A_merge_phiID_segment5);
-   outtree.Branch( "STGL1A_merge_RIndex_segment5", &data.b_STGL1A_merge_RIndex_segment5);
-
-   outtree.Branch( "STGL1A_merge_monitor_segment4", &data.b_STGL1A_merge_monitor_segment4);
-   outtree.Branch( "STGL1A_merge_spare_segment4", &data.b_STGL1A_merge_spare_segment4);
-   outtree.Branch( "STGL1A_merge_lowRes_segment4", &data.b_STGL1A_merge_lowRes_segment4);
-   outtree.Branch( "STGL1A_merge_phiRes_segment4", &data.b_STGL1A_merge_phiRes_segment4);
-   outtree.Branch( "STGL1A_merge_dTheta_segment4", &data.b_STGL1A_merge_dTheta_segment4);
-   outtree.Branch( "STGL1A_merge_phiID_segment4", &data.b_STGL1A_merge_phiID_segment4);
-   outtree.Branch( "STGL1A_merge_RIndex_segment4", &data.b_STGL1A_merge_RIndex_segment4);
-
-   outtree.Branch( "STGL1A_merge_monitor_segment3", &data.b_STGL1A_merge_monitor_segment3);
-   outtree.Branch( "STGL1A_merge_spare_segment3", &data.b_STGL1A_merge_spare_segment3);
-   outtree.Branch( "STGL1A_merge_lowRes_segment3", &data.b_STGL1A_merge_lowRes_segment3);
-   outtree.Branch( "STGL1A_merge_phiRes_segment3", &data.b_STGL1A_merge_phiRes_segment3);
-   outtree.Branch( "STGL1A_merge_dTheta_segment3", &data.b_STGL1A_merge_dTheta_segment3);
-   outtree.Branch( "STGL1A_merge_phiID_segment3", &data.b_STGL1A_merge_phiID_segment3);
-   outtree.Branch( "STGL1A_merge_RIndex_segment3", &data.b_STGL1A_merge_RIndex_segment3);
-
-   outtree.Branch( "STGL1A_merge_monitor_segment2", &data.b_STGL1A_merge_monitor_segment2);
-   outtree.Branch( "STGL1A_merge_spare_segment2", &data.b_STGL1A_merge_spare_segment2);
-   outtree.Branch( "STGL1A_merge_lowRes_segment2", &data.b_STGL1A_merge_lowRes_segment2);
-   outtree.Branch( "STGL1A_merge_phiRes_segment2", &data.b_STGL1A_merge_phiRes_segment2);
-   outtree.Branch( "STGL1A_merge_dTheta_segment2", &data.b_STGL1A_merge_dTheta_segment2);
-   outtree.Branch( "STGL1A_merge_phiID_segment2", &data.b_STGL1A_merge_phiID_segment2);
-   outtree.Branch( "STGL1A_merge_RIndex_segment2", &data.b_STGL1A_merge_RIndex_segment2);
-
-   outtree.Branch( "STGL1A_merge_monitor_segment1", &data.b_STGL1A_merge_monitor_segment1);
-   outtree.Branch( "STGL1A_merge_spare_segment1", &data.b_STGL1A_merge_spare_segment1);
-   outtree.Branch( "STGL1A_merge_lowRes_segment1", &data.b_STGL1A_merge_lowRes_segment1);
-   outtree.Branch( "STGL1A_merge_phiRes_segment1", &data.b_STGL1A_merge_phiRes_segment1);
-   outtree.Branch( "STGL1A_merge_dTheta_segment1", &data.b_STGL1A_merge_dTheta_segment1);
-   outtree.Branch( "STGL1A_merge_phiID_segment1", &data.b_STGL1A_merge_phiID_segment1);
-   outtree.Branch( "STGL1A_merge_RIndex_segment1", &data.b_STGL1A_merge_RIndex_segment1);
-
-   outtree.Branch( "STGL1A_merge_monitor_segment0", &data.b_STGL1A_merge_monitor_segment0);
-   outtree.Branch( "STGL1A_merge_spare_segment0", &data.b_STGL1A_merge_spare_segment0);
-   outtree.Branch( "STGL1A_merge_lowRes_segment0", &data.b_STGL1A_merge_lowRes_segment0);
-   outtree.Branch( "STGL1A_merge_phiRes_segment0", &data.b_STGL1A_merge_phiRes_segment0);
-   outtree.Branch( "STGL1A_merge_dTheta_segment0", &data.b_STGL1A_merge_dTheta_segment0);
-   outtree.Branch( "STGL1A_merge_phiID_segment0", &data.b_STGL1A_merge_phiID_segment0);
-   outtree.Branch( "STGL1A_merge_RIndex_segment0", &data.b_STGL1A_merge_RIndex_segment0);
+   for (std::size_t i=0; i < Muon::nsw::STGTPSegments::num_segments; ++i) {
+     outtree.Branch( Muon::format("STGL1A_merge_monitor_segment{}", i).c_str(), &data.b_STGL1A_merge_monitor_segments.at(i));
+     outtree.Branch( Muon::format("STGL1A_merge_spare_segment{}", i).c_str(), &data.b_STGL1A_merge_spare_segments.at(i));
+     outtree.Branch( Muon::format("STGL1A_merge_lowRes_segment{}", i).c_str(), &data.b_STGL1A_merge_lowRes_segments.at(i));
+     outtree.Branch( Muon::format("STGL1A_merge_phiRes_segment{}", i).c_str(), &data.b_STGL1A_merge_phiRes_segments.at(i));
+     outtree.Branch( Muon::format("STGL1A_merge_dTheta_segment{}", i).c_str(), &data.b_STGL1A_merge_dTheta_segments.at(i));
+     outtree.Branch( Muon::format("STGL1A_merge_phiID_segment{}", i).c_str(), &data.b_STGL1A_merge_phiID_segments.at(i));
+     outtree.Branch( Muon::format("STGL1A_merge_RIndex_segment{}", i).c_str(), &data.b_STGL1A_merge_RIndex_segments.at(i));
+   }
 
    outtree.Branch( "STGL1A_merge_BCID", &data.b_STGL1A_merge_BCID);
    outtree.Branch( "STGL1A_merge_sectorID", &data.b_STGL1A_merge_sectorID);
@@ -883,23 +772,25 @@ int test_nsw_trigger_common_decoder_event (std::string &line, outBranches &data,
      data.b_STGL1A_pad_phiID_2.push_back(dummy);
      data.b_STGL1A_pad_phiID_3.push_back(dummy);
 
+     data.b_STGL1A_pad_coincidence_wedge.push_back(dummy);
      data.b_STGL1A_pad_idleFlag.push_back(dummy);
 
      for (unsigned int i_pad = 0; i_pad < pad_packets.size(); i_pad++)
      {
        auto packet = pad_packets.at(i_pad);
-       data.b_STGL1A_pad_BCID.back().push_back(packet->BCID());
-       data.b_STGL1A_pad_bandID_0.back().push_back(packet->BandID(0));
-       data.b_STGL1A_pad_bandID_1.back().push_back(packet->BandID(1));
-       data.b_STGL1A_pad_bandID_2.back().push_back(packet->BandID(2));
-       data.b_STGL1A_pad_bandID_3.back().push_back(packet->BandID(3));
+       data.b_STGL1A_pad_BCID.back().push_back(packet.BCID());
+       data.b_STGL1A_pad_bandID_0.back().push_back(packet.BandID(0));
+       data.b_STGL1A_pad_bandID_1.back().push_back(packet.BandID(1));
+       data.b_STGL1A_pad_bandID_2.back().push_back(packet.BandID(2));
+       data.b_STGL1A_pad_bandID_3.back().push_back(packet.BandID(3));
 
-       data.b_STGL1A_pad_phiID_0.back().push_back(packet->PhiID(0));
-       data.b_STGL1A_pad_phiID_1.back().push_back(packet->PhiID(1));
-       data.b_STGL1A_pad_phiID_2.back().push_back(packet->PhiID(2));
-       data.b_STGL1A_pad_phiID_3.back().push_back(packet->PhiID(3));
+       data.b_STGL1A_pad_phiID_0.back().push_back(packet.PhiID(0));
+       data.b_STGL1A_pad_phiID_1.back().push_back(packet.PhiID(1));
+       data.b_STGL1A_pad_phiID_2.back().push_back(packet.PhiID(2));
+       data.b_STGL1A_pad_phiID_3.back().push_back(packet.PhiID(3));
        
-       data.b_STGL1A_pad_idleFlag.back().push_back(packet->PadIdleFlag());
+       data.b_STGL1A_pad_coincidence_wedge.back().push_back(packet.CoincidenceWedge());
+       data.b_STGL1A_pad_idleFlag.back().push_back(packet.PadIdleFlag());
 
      }
 
@@ -909,149 +800,43 @@ int test_nsw_trigger_common_decoder_event (std::string &line, outBranches &data,
     data.b_STGL1A_merge_LUT_choiceSelection.push_back(dummy);
     data.b_STGL1A_merge_nsw_segmentSelector.push_back(dummy);
     data.b_STGL1A_merge_valid_segmentSelector.push_back(dummy);
+
+    const auto push_segment_dummy = [&dummy] (auto& segments) {
+      for (auto& segment : segments) {
+        segment.push_back(dummy);
+      }
+    };
   
-    data.b_STGL1A_merge_monitor_segment7.push_back(dummy);
-    data.b_STGL1A_merge_spare_segment7.push_back(dummy);
-    data.b_STGL1A_merge_lowRes_segment7.push_back(dummy);
-    data.b_STGL1A_merge_phiRes_segment7.push_back(dummy);
-    data.b_STGL1A_merge_dTheta_segment7.push_back(dummy);
-    data.b_STGL1A_merge_phiID_segment7.push_back(dummy);
-    data.b_STGL1A_merge_RIndex_segment7.push_back(dummy);
-  
-    data.b_STGL1A_merge_monitor_segment6.push_back(dummy);
-    data.b_STGL1A_merge_spare_segment6.push_back(dummy);
-    data.b_STGL1A_merge_lowRes_segment6.push_back(dummy);
-    data.b_STGL1A_merge_phiRes_segment6.push_back(dummy);
-    data.b_STGL1A_merge_dTheta_segment6.push_back(dummy);
-    data.b_STGL1A_merge_phiID_segment6.push_back(dummy);
-    data.b_STGL1A_merge_RIndex_segment6.push_back(dummy);
+    push_segment_dummy(data.b_STGL1A_merge_monitor_segments);
+    push_segment_dummy(data.b_STGL1A_merge_spare_segments);
+    push_segment_dummy(data.b_STGL1A_merge_lowRes_segments);
+    push_segment_dummy(data.b_STGL1A_merge_phiRes_segments);
+    push_segment_dummy(data.b_STGL1A_merge_dTheta_segments);
+    push_segment_dummy(data.b_STGL1A_merge_phiID_segments);
+    push_segment_dummy(data.b_STGL1A_merge_RIndex_segments);
 
-    data.b_STGL1A_merge_monitor_segment5.push_back(dummy);
-    data.b_STGL1A_merge_spare_segment5.push_back(dummy);
-    data.b_STGL1A_merge_lowRes_segment5.push_back(dummy);
-    data.b_STGL1A_merge_phiRes_segment5.push_back(dummy);
-    data.b_STGL1A_merge_dTheta_segment5.push_back(dummy);
-    data.b_STGL1A_merge_phiID_segment5.push_back(dummy);
-    data.b_STGL1A_merge_RIndex_segment5.push_back(dummy);
-
-    data.b_STGL1A_merge_monitor_segment4.push_back(dummy);
-    data.b_STGL1A_merge_spare_segment4.push_back(dummy);
-    data.b_STGL1A_merge_lowRes_segment4.push_back(dummy);
-    data.b_STGL1A_merge_phiRes_segment4.push_back(dummy);
-    data.b_STGL1A_merge_dTheta_segment4.push_back(dummy);
-    data.b_STGL1A_merge_phiID_segment4.push_back(dummy);
-    data.b_STGL1A_merge_RIndex_segment4.push_back(dummy);
-
-
-    data.b_STGL1A_merge_monitor_segment3.push_back(dummy);
-    data.b_STGL1A_merge_spare_segment3.push_back(dummy);
-    data.b_STGL1A_merge_lowRes_segment3.push_back(dummy);
-    data.b_STGL1A_merge_phiRes_segment3.push_back(dummy);
-    data.b_STGL1A_merge_dTheta_segment3.push_back(dummy);
-    data.b_STGL1A_merge_phiID_segment3.push_back(dummy);
-    data.b_STGL1A_merge_RIndex_segment3.push_back(dummy);
-
-    data.b_STGL1A_merge_monitor_segment2.push_back(dummy);
-    data.b_STGL1A_merge_spare_segment2.push_back(dummy);
-    data.b_STGL1A_merge_lowRes_segment2.push_back(dummy);
-    data.b_STGL1A_merge_phiRes_segment2.push_back(dummy);
-    data.b_STGL1A_merge_dTheta_segment2.push_back(dummy);
-    data.b_STGL1A_merge_phiID_segment2.push_back(dummy);
-    data.b_STGL1A_merge_RIndex_segment2.push_back(dummy);
-
-    data.b_STGL1A_merge_monitor_segment1.push_back(dummy);
-    data.b_STGL1A_merge_spare_segment1.push_back(dummy);
-    data.b_STGL1A_merge_lowRes_segment1.push_back(dummy);
-    data.b_STGL1A_merge_phiRes_segment1.push_back(dummy);
-    data.b_STGL1A_merge_dTheta_segment1.push_back(dummy);
-    data.b_STGL1A_merge_phiID_segment1.push_back(dummy);
-    data.b_STGL1A_merge_RIndex_segment1.push_back(dummy);
-
-    data.b_STGL1A_merge_monitor_segment0.push_back(dummy);
-    data.b_STGL1A_merge_spare_segment0.push_back(dummy);
-    data.b_STGL1A_merge_lowRes_segment0.push_back(dummy);
-    data.b_STGL1A_merge_phiRes_segment0.push_back(dummy);
-    data.b_STGL1A_merge_dTheta_segment0.push_back(dummy);
-    data.b_STGL1A_merge_phiID_segment0.push_back(dummy);
-    data.b_STGL1A_merge_RIndex_segment0.push_back(dummy);
-  
     data.b_STGL1A_merge_BCID.push_back(dummy);
     data.b_STGL1A_merge_sectorID.push_back(dummy);
    
      for (unsigned int i_merge = 0; i_merge < segment_packets.size(); i_merge++)
      {
        auto packet = segment_packets.at(i_merge);
-       data.b_STGL1A_merge_LUT_choiceSelection.back().push_back(packet->LUT_ChoiceSelection());
-       data.b_STGL1A_merge_nsw_segmentSelector.back().push_back(packet->NSW_SegmentSelector());
-       data.b_STGL1A_merge_valid_segmentSelector.back().push_back(packet->ValidSegmentSelector()); 
-       data.b_STGL1A_merge_monitor_segment7.back().push_back(packet->Monitor_Segment7());
+       data.b_STGL1A_merge_LUT_choiceSelection.back().push_back(packet.LUT_ChoiceSelection());
+       data.b_STGL1A_merge_nsw_segmentSelector.back().push_back(packet.NSW_SegmentSelector());
+       data.b_STGL1A_merge_valid_segmentSelector.back().push_back(packet.ValidSegmentSelector());
 
-       data.b_STGL1A_merge_spare_segment7.back().push_back(packet->Spare_Segment7());
-       data.b_STGL1A_merge_lowRes_segment7.back().push_back(packet->LowRes_Segment7());
-       data.b_STGL1A_merge_phiRes_segment7.back().push_back(packet->PhiRes_Segment7());
-       data.b_STGL1A_merge_dTheta_segment7.back().push_back(packet->DTheta_Segment7());
-       data.b_STGL1A_merge_phiID_segment7.back().push_back(packet->DTheta_Segment7());
-       data.b_STGL1A_merge_phiID_segment7.back().push_back(packet->PhiID_Segment7());
-       data.b_STGL1A_merge_RIndex_segment7.back().push_back(packet->RIndex_Segment7());
+       for (std::size_t i_seg=0; i_seg < Muon::nsw::STGTPSegments::num_segments; ++i_seg) {
+         data.b_STGL1A_merge_monitor_segments.at(i_seg).back().push_back(packet.Segment(i_seg).monitor);
+         data.b_STGL1A_merge_spare_segments.at(i_seg).back().push_back(packet.Segment(i_seg).spare);
+         data.b_STGL1A_merge_lowRes_segments.at(i_seg).back().push_back(packet.Segment(i_seg).lowRes);
+         data.b_STGL1A_merge_phiRes_segments.at(i_seg).back().push_back(packet.Segment(i_seg).phiRes);
+         data.b_STGL1A_merge_dTheta_segments.at(i_seg).back().push_back(packet.Segment(i_seg).dTheta);
+         data.b_STGL1A_merge_phiID_segments.at(i_seg).back().push_back(packet.Segment(i_seg).phiID);
+         data.b_STGL1A_merge_RIndex_segments.at(i_seg).back().push_back(packet.Segment(i_seg).rIndex);
+       }
 
-       data.b_STGL1A_merge_spare_segment6.back().push_back(packet->Spare_Segment6());
-       data.b_STGL1A_merge_lowRes_segment6.back().push_back(packet->LowRes_Segment6());
-       data.b_STGL1A_merge_phiRes_segment6.back().push_back(packet->PhiRes_Segment6());
-       data.b_STGL1A_merge_dTheta_segment6.back().push_back(packet->DTheta_Segment6());
-       data.b_STGL1A_merge_phiID_segment6.back().push_back(packet->DTheta_Segment6());
-       data.b_STGL1A_merge_phiID_segment6.back().push_back(packet->PhiID_Segment6());
-       data.b_STGL1A_merge_RIndex_segment6.back().push_back(packet->RIndex_Segment6());
-
-       data.b_STGL1A_merge_spare_segment5.back().push_back(packet->Spare_Segment5());
-       data.b_STGL1A_merge_lowRes_segment5.back().push_back(packet->LowRes_Segment5());
-       data.b_STGL1A_merge_phiRes_segment5.back().push_back(packet->PhiRes_Segment5());
-       data.b_STGL1A_merge_dTheta_segment5.back().push_back(packet->DTheta_Segment5());
-       data.b_STGL1A_merge_phiID_segment5.back().push_back(packet->DTheta_Segment5());
-       data.b_STGL1A_merge_phiID_segment5.back().push_back(packet->PhiID_Segment5());
-       data.b_STGL1A_merge_RIndex_segment5.back().push_back(packet->RIndex_Segment5());
-
-       data.b_STGL1A_merge_spare_segment4.back().push_back(packet->Spare_Segment4());
-       data.b_STGL1A_merge_lowRes_segment4.back().push_back(packet->LowRes_Segment4());
-       data.b_STGL1A_merge_phiRes_segment4.back().push_back(packet->PhiRes_Segment4());
-       data.b_STGL1A_merge_dTheta_segment4.back().push_back(packet->DTheta_Segment4());
-       data.b_STGL1A_merge_phiID_segment4.back().push_back(packet->DTheta_Segment4());
-       data.b_STGL1A_merge_phiID_segment4.back().push_back(packet->PhiID_Segment4());
-       data.b_STGL1A_merge_RIndex_segment4.back().push_back(packet->RIndex_Segment4());
-
-       data.b_STGL1A_merge_spare_segment3.back().push_back(packet->Spare_Segment3());
-       data.b_STGL1A_merge_lowRes_segment3.back().push_back(packet->LowRes_Segment3());
-       data.b_STGL1A_merge_phiRes_segment3.back().push_back(packet->PhiRes_Segment3());
-       data.b_STGL1A_merge_dTheta_segment3.back().push_back(packet->DTheta_Segment3());
-       data.b_STGL1A_merge_phiID_segment3.back().push_back(packet->DTheta_Segment3());
-       data.b_STGL1A_merge_phiID_segment3.back().push_back(packet->PhiID_Segment3());
-       data.b_STGL1A_merge_RIndex_segment3.back().push_back(packet->RIndex_Segment3());
-
-       data.b_STGL1A_merge_spare_segment2.back().push_back(packet->Spare_Segment2());
-       data.b_STGL1A_merge_lowRes_segment2.back().push_back(packet->LowRes_Segment2());
-       data.b_STGL1A_merge_phiRes_segment2.back().push_back(packet->PhiRes_Segment2());
-       data.b_STGL1A_merge_dTheta_segment2.back().push_back(packet->DTheta_Segment2());
-       data.b_STGL1A_merge_phiID_segment2.back().push_back(packet->DTheta_Segment2());
-       data.b_STGL1A_merge_phiID_segment2.back().push_back(packet->PhiID_Segment2());
-       data.b_STGL1A_merge_RIndex_segment2.back().push_back(packet->RIndex_Segment2());
-
-       data.b_STGL1A_merge_spare_segment1.back().push_back(packet->Spare_Segment1());
-       data.b_STGL1A_merge_lowRes_segment1.back().push_back(packet->LowRes_Segment1());
-       data.b_STGL1A_merge_phiRes_segment1.back().push_back(packet->PhiRes_Segment1());
-       data.b_STGL1A_merge_dTheta_segment1.back().push_back(packet->DTheta_Segment1());
-       data.b_STGL1A_merge_phiID_segment1.back().push_back(packet->DTheta_Segment1());
-       data.b_STGL1A_merge_phiID_segment1.back().push_back(packet->PhiID_Segment1());
-       data.b_STGL1A_merge_RIndex_segment1.back().push_back(packet->RIndex_Segment1());
-
-       data.b_STGL1A_merge_spare_segment0.back().push_back(packet->Spare_Segment0());
-       data.b_STGL1A_merge_lowRes_segment0.back().push_back(packet->LowRes_Segment0());
-       data.b_STGL1A_merge_phiRes_segment0.back().push_back(packet->PhiRes_Segment0());
-       data.b_STGL1A_merge_dTheta_segment0.back().push_back(packet->DTheta_Segment0());
-       data.b_STGL1A_merge_phiID_segment0.back().push_back(packet->DTheta_Segment0());
-       data.b_STGL1A_merge_phiID_segment0.back().push_back(packet->PhiID_Segment0());
-       data.b_STGL1A_merge_RIndex_segment0.back().push_back(packet->RIndex_Segment0());
-
-       data.b_STGL1A_merge_BCID.back().push_back(packet->BCID());
-       data.b_STGL1A_merge_sectorID.back().push_back(packet->SectorID());
+       data.b_STGL1A_merge_BCID.back().push_back(packet.BCID());
+       data.b_STGL1A_merge_sectorID.back().push_back(packet.SectorID());
 
   
    }

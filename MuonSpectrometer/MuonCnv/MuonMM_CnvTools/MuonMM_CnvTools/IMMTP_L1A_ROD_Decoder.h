@@ -12,13 +12,13 @@
 
 namespace Muon {
 
-  static const InterfaceID IID_IMMTP_L1A_ROD_Decoder("Muon::IMMTP_L1A_ROD_Decoder", 1, 0);
-
   // IAlgTool which facilitates conversion from MM Trigger Processor L1A ROBFragments to RDO
   class IMMTP_L1A_ROD_Decoder : virtual public IAlgTool {
   public:
-    static const InterfaceID& interfaceID() { return IID_IMMTP_L1A_ROD_Decoder; }
-
+    virtual ~IMMTP_L1A_ROD_Decoder() = default;
+    
+    DeclareInterfaceID(Muon::IMMTP_L1A_ROD_Decoder, 1, 0);
+    
     // Fill the given MMTP L1A RDO container with data from the MMTP ROB
     // MMTP ROB has 3 L1A elinks (containing hits and segments in a given time window)
     // the 3 elinks are flattened in the collection
