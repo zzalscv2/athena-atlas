@@ -146,8 +146,8 @@ def getInDetRttTruthSelectionTool(**kwargs):
         requireStatus1=True,
         requireCharged=True,
         requireSiHit=0,
-        maxBarcode=(
-            200*1000 if kwargs.pop("OnlyDressPrimaryTracks", True) else 2**31-1),
+        requireOnlyPrimary=(
+            True if kwargs.pop("OnlyDressPrimaryTracks", True) else False),
         maxProdVertRadius=300.,
         maxEta=2.5,
         minPt=500.)
