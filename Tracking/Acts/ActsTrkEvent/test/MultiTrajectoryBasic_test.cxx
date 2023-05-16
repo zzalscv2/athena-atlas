@@ -238,12 +238,12 @@ BOOST_FIXTURE_TEST_CASE(Fill, EmptyMTJ) {
 BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
   using namespace Acts::HashedStringLiteral;
   BOOST_CHECK(mtj->has_backends());
-  BOOST_CHECK_EQUAL(mtj->hasColumn_impl("jacobian"_hash),
+  BOOST_CHECK_EQUAL(mtj->hasColumn("jacobian"_hash),
                     true);  // not dynamic column
-  BOOST_CHECK_EQUAL(mtj->hasColumn_impl("author"_hash),
+  BOOST_CHECK_EQUAL(mtj->hasColumn("author"_hash),
                     false);              // dynamic column absent initially
-  mtj->addColumn_impl<short>("author");  // add dynamic column
-  BOOST_CHECK_EQUAL(mtj->hasColumn_impl("author"_hash),
+  mtj->addColumn<short>("author");  // add dynamic column
+  BOOST_CHECK_EQUAL(mtj->hasColumn("author"_hash),
                     true);  // dynamic column present now
 
   constexpr auto kMask = Acts::TrackStatePropMask::Predicted;
@@ -251,7 +251,7 @@ BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
   auto i1 = mtj->addTrackState(kMask, i0);
   auto i2 = mtj->addTrackState(kMask, i1);
   // dynamic column enabled late
-  mtj->addColumn_impl<float>("mcprob");
+  mtj->addColumn<float>("mcprob");
   auto ts0 = mtj->getTrackState(i0);
   auto ts1 = mtj->getTrackState(i1);
   auto ts2 = mtj->getTrackState(i2);
@@ -280,7 +280,7 @@ BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
 
 // FIXME - test below should use ACTS::MTJ api once available in needed shape
 BOOST_FIXTURE_TEST_CASE(UncalibratedSourceLink, EmptyMTJ) {
-  mtj->addTrackState();
+  auto index = mtj->addTrackState();
   using namespace Acts::HashedStringLiteral;
 
   // BOOST_CHECK_EQUAL((ts0.component<Acts::SourceLink *, "uncalibratedSourceLink"_hash>()),
@@ -288,15 +288,15 @@ BOOST_FIXTURE_TEST_CASE(UncalibratedSourceLink, EmptyMTJ) {
   auto el1 = ElementLink<xAOD::UncalibratedMeasurementContainer>("hello", 7); // EL to a fictional container & a fictional index
 
   auto link1 = Acts::SourceLink(99, el1); // a fictional geometry ID
-  mtj->setUncalibratedSourceLink_impl(link1, 0); // set link at position 0
-
+  auto ts = mtj->getTrackState(index);
+  ts.setUncalibratedSourceLink(link1); // set link at position 0
   // get it back
-  auto link1Back = mtj->getUncalibratedSourceLink_impl(0);
+  auto link1Back = ts.getUncalibratedSourceLink();
   BOOST_CHECK_EQUAL( link1.geometryId(), link1Back.geometryId());
   auto el1Back = link1Back.get<ElementLink<xAOD::UncalibratedMeasurementContainer>>();
   // compare them by key & index because equality, requires proper has key generation and is bound to SG
   BOOST_CHECK_EQUAL( el1.key(), el1Back.key());
-  BOOST_CHECK_EQUAL( el1.index(), el1Back.index());
+  BOOST_CHECK_EQUAL( el1.index(), el1Back.index()); 
 }
 
 
@@ -783,6 +783,49 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProjector, EmptyMTJ) {
   ts.setProjector(proj);
 
   BOOST_CHECK_EQUAL(ts.effectiveProjector(), proj);
+}
+
+
+BOOST_FIXTURE_TEST_CASE(TrackStateProxyStorage, EmptyMTJ) {
+
+  std::default_random_engine rng(12345);
+  TestTrackState pc(rng, 2u);
+
+  size_t ia = mtj->addTrackState(TrackStatePropMask::All);
+  auto ts = mtj->getTrackState(ia);
+  fillTrackState(pc, TrackStatePropMask::All, ts);
+
+  // check that the track parameters are set
+  BOOST_CHECK(ts.hasPredicted());
+  BOOST_CHECK_EQUAL(ts.predicted(), pc.predicted.parameters());
+  BOOST_CHECK(pc.predicted.covariance().has_value());
+  BOOST_CHECK_EQUAL(ts.predictedCovariance(), *pc.predicted.covariance());
+  BOOST_CHECK(ts.hasFiltered());
+  BOOST_CHECK_EQUAL(ts.filtered(), pc.filtered.parameters());
+  BOOST_CHECK(pc.filtered.covariance().has_value());
+  BOOST_CHECK_EQUAL(ts.filteredCovariance(), *pc.filtered.covariance());
+  BOOST_CHECK(ts.hasSmoothed());
+  BOOST_CHECK_EQUAL(ts.smoothed(), pc.smoothed.parameters());
+  BOOST_CHECK(pc.smoothed.covariance().has_value());
+  BOOST_CHECK_EQUAL(ts.smoothedCovariance(), *pc.smoothed.covariance());
+
+  // check that the jacobian is set
+  BOOST_CHECK(ts.hasJacobian());
+  BOOST_CHECK_EQUAL(ts.jacobian(), pc.jacobian);
+  BOOST_CHECK_EQUAL(ts.pathLength(), pc.pathLength);
+  // check that chi2 is set
+  BOOST_CHECK_EQUAL(ts.chi2(), pc.chi2);
+  
+  // set SourceLink and get it back
+  auto el = ElementLink<xAOD::UncalibratedMeasurementContainer>("hello", 7); // EL to a fictional container & a fictional index
+  auto link = Acts::SourceLink(99, el); // a fictional geometry ID
+  ts.setUncalibratedSourceLink(link);
+  // check that the uncalibratedSourceLink source link is set
+  BOOST_CHECK_EQUAL(ts.getUncalibratedSourceLink().geometryId(), link.geometryId());
+  BOOST_CHECK_EQUAL(ts.getUncalibratedSourceLink().get<ElementLink<xAOD::UncalibratedMeasurementContainer>>().index(), 
+      link.get<ElementLink<xAOD::UncalibratedMeasurementContainer>>().index());
+  BOOST_CHECK_EQUAL(ts.getUncalibratedSourceLink().get<ElementLink<xAOD::UncalibratedMeasurementContainer>>().key(), 
+      link.get<ElementLink<xAOD::UncalibratedMeasurementContainer>>().key());    
 }
 
 // TODO remaining tests
