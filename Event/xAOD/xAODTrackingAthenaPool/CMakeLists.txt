@@ -19,6 +19,14 @@ atlas_add_poolcnv_library( xAODTrackingAthenaPoolPoolCnv
    xAODTracking/TrackMeasurementValidationAuxContainer.h
    xAODTracking/TrackStateValidationContainer.h
    xAODTracking/TrackStateValidationAuxContainer.h
+   xAODTracking/TrackStateContainer.h
+   xAODTracking/TrackStateAuxContainer.h
+   xAODTracking/TrackJacobianContainer.h
+   xAODTracking/TrackJacobianAuxContainer.h
+   xAODTracking/TrackMeasurementContainer.h
+   xAODTracking/TrackMeasurementAuxContainer.h
+   xAODTracking/TrackParametersContainer.h
+   xAODTracking/TrackParametersAuxContainer.h
    TYPES_WITH_NAMESPACE xAOD::TrackParticleContainer
    xAOD::TrackParticleAuxContainer xAOD::NeutralParticleContainer
    xAOD::NeutralParticleAuxContainer xAOD::VertexContainer
@@ -27,6 +35,10 @@ atlas_add_poolcnv_library( xAODTrackingAthenaPoolPoolCnv
    xAOD::TrackMeasurementValidationContainer
    xAOD::TrackMeasurementValidationAuxContainer
    xAOD::TrackStateValidationContainer xAOD::TrackStateValidationAuxContainer
+   xAOD::TrackStateContainer xAOD::TrackStateAuxContainer
+   xAOD::TrackJacobianContainer xAOD::TrackJacobianAuxContainer
+   xAOD::TrackMeasurementContainer xAOD::TrackMeasurementAuxContainer
+   xAOD::TrackParametersContainer xAOD::TrackParametersAuxContainer
    CNV_PFX xAOD
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthenaKernel
