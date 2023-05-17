@@ -40,7 +40,7 @@ private:
   float m_maxEta;
   float m_maxPt;
   float m_minPt;
-  float m_maxBarcode;
+  bool m_requireOnlyPrimary;
   bool m_requireCharged;
   bool m_requireStatus1;
   // max decay radius for secondaries [mm];

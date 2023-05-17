@@ -49,11 +49,6 @@ private:
                                "",
                                "Stream for which thinning is to be done." };
 
-  Gaudi::Property<int> m_geantOffset{ this,
-                                      "GeantBarcodeOffset",
-                                      200000,
-                                      "Barcode offset for Geant particles" };
-
   Gaudi::Property<float> m_etaMaxEgTruth{ this,
                                           "EtaMaxEGammaTruth",
                                           2.525,

@@ -34,6 +34,8 @@
 // Standard includes
 #include <cstdlib>
 
+#include "AtlasHepMC/MagicNumbers.h"
+
 StatusCode
 ThinGeantTruthAlg::initialize()
 {
@@ -237,8 +239,7 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
     if (std::find(recoParticleTruthIndices.begin(),
                   recoParticleTruthIndices.end(),
                   i) != recoParticleTruthIndices.end()) {
-      if (abs(particle->barcode()) >
-          m_geantOffset) { // only need to do this for Geant particles since
+      if (HepMC::is_simulation_particle(abs(particle->barcode()))) { // only need to do this for Geant particles since
                            // non-Geant are kept anyway
         ancestors(particle, particleMask, encounteredBarcodes);
         encounteredBarcodes.clear();
@@ -255,7 +256,7 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
       encounteredBarcodes.clear();
     }
 
-    if (abs(particle->barcode()) < m_geantOffset) {
+    if (!HepMC::is_simulation_particle(abs(particle->barcode()))) {
       particleMask[i] = true;
     }
   }
