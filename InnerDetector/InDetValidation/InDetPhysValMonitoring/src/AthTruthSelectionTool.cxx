@@ -17,6 +17,7 @@
 #include <cmath>
 
 #include "TrkParameters/TrackParameters.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 namespace {
   constexpr int electronId(11);
@@ -51,7 +52,7 @@ AthTruthSelectionTool::AthTruthSelectionTool(const std::string& type, const std:
   declareProperty("maxEta", m_maxEta = 2.5);
   declareProperty("minPt", m_minPt = 400);
   declareProperty("maxPt", m_maxPt = -1);
-  declareProperty("maxBarcode", m_maxBarcode = HepMC::SIM_BARCODE_THRESHOLD);
+  declareProperty("requireOnlyPrimary", m_requireOnlyPrimary = true);
   declareProperty("requireCharged", m_requireCharged = true);
   declareProperty("selectedCharge", m_selectedCharge = 0);
   declareProperty("requireStatus1", m_requireStatus1 = true);
@@ -106,10 +107,10 @@ AthTruthSelectionTool::initialize() {
       else return false;
     }, "siHit"));
   }
-  if (m_maxBarcode > -1) {
-    m_cutList.add(Accept_t([&m_maxBarcode = std::as_const(m_maxBarcode)](const P_t& p) {
-      return(p.barcode() < m_maxBarcode);
-    }, "barcode < " + std::to_string(m_maxBarcode)));
+  if (m_requireOnlyPrimary) {
+    m_cutList.add(Accept_t([](const P_t& p) {
+      return(!HepMC::is_simulation_particle(p.barcode()));
+    }, "OnlyPrimary"));
   }
   if (m_requireCharged) {
     m_cutList.add(Accept_t([&m_selectedCharge = std::as_const(m_selectedCharge)](const P_t& p) {

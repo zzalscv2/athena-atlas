@@ -6,6 +6,7 @@
 #include "TrackTruthSelectionTool.h"
 #include "AtlasHepMC/MagicNumbers.h"
 #include "xAODTruth/TruthVertex.h"
+#include "AtlasHepMC/MagicNumbers.h"
 #include <cmath> // std::fabs
 
 
@@ -20,7 +21,7 @@ TrackTruthSelectionTool::TrackTruthSelectionTool(const std::string& name) :
   declareProperty("maxEta", m_maxEta = 2.5);
   declareProperty("minPt", m_minPt = 400);
   declareProperty("maxPt", m_maxPt = -1);
-  declareProperty("maxBarcode", m_maxBarcode = HepMC::SIM_BARCODE_THRESHOLD);
+  declareProperty("requireOnlyPrimary", m_requireCharged = true);
   declareProperty("requireCharged", m_requireCharged = true);
   declareProperty("requireStatus1", m_requireStatus1 = true);
   declareProperty("maxProdVertRadius", m_maxProdVertRadius = 110.);
@@ -48,8 +49,8 @@ TrackTruthSelectionTool::initialize() {
     m_cuts.emplace_back("max_pt", "Cut on maximum particle pT");
   }
 
-  if (m_maxBarcode > -1) {
-    m_cuts.emplace_back("barcode", "Cut on maximum particle barcode");
+  if (m_requireOnlyPrimary) {
+    m_cuts.emplace_back("OnlyPrimary", "Cut on origin");
   }
 
   if (m_requireCharged) {
@@ -119,8 +120,8 @@ TrackTruthSelectionTool::accept(const xAOD::TruthParticle* p) const {
   if (m_maxPt > -1) {
     acceptData.setCutResult("max_pt", (p->pt() < m_maxPt));
   }
-  if ((m_maxBarcode > -1)) {
-    acceptData.setCutResult("barcode", (p->barcode() < m_maxBarcode));
+  if (m_requireOnlyPrimary) {
+    acceptData.setCutResult("OnlyPrimary", (!HepMC::is_simulation_particle(p->barcode())));
   }
 
   if (m_requireCharged) {

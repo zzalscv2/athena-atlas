@@ -68,9 +68,6 @@ def ITkClusterMakerToolCfg(flags, name="ITkClusterMakerTool", **kwargs):
         kwargs.setdefault("SCTLorentzAngleTool", acc.popToolsAndMerge(
             ITkStripLorentzAngleToolCfg(flags)))
 
-    kwargs.setdefault("PixelChargeCalibCondData", "ITkPixelChargeCalibCondData")
-    kwargs.setdefault("PixelOfflineCalibData", "")
-
     acc.setPrivateTools(CompFactory.InDet.ClusterMakerTool(name, **kwargs))
     return acc
 
@@ -156,6 +153,9 @@ def ITkMergedPixelsToolCfg(flags, name="ITkMergedPixelsTool", **kwargs):
         ITkClusterMakerToolCfg(flags)))
     kwargs.setdefault("PixelRDOTool", acc.popToolsAndMerge(
         ITkPixelRDOToolCfg(flags)))
+
+    kwargs.setdefault("PixelChargeCalibCondData", "ITkPixelChargeCalibCondData")
+    kwargs.setdefault("PixelOfflineCalibData", "")
 
     acc.setPrivateTools(CompFactory.InDet.MergedPixelsTool(name, **kwargs))
     return acc

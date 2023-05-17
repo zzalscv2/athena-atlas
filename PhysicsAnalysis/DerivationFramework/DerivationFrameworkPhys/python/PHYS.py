@@ -179,7 +179,7 @@ def PHYSCfg(ConfigFlags):
     # Output stream    
     PHYSItemList = PHYSSlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_PHYS", ItemList=PHYSItemList, AcceptAlgs=["PHYSKernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_PHYS", AcceptAlgs=["PHYSKernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_PHYS", AcceptAlgs=["PHYSKernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc
 

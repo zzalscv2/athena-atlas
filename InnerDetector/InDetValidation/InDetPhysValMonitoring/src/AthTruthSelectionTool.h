@@ -52,7 +52,7 @@ private:
   float m_maxEta;
   float m_maxPt;
   float m_minPt;
-  int m_maxBarcode;
+  bool m_requireOnlyPrimary;
   bool m_requireCharged;
   int m_selectedCharge;
   bool m_requireStatus1;

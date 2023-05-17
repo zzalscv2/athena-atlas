@@ -9,11 +9,12 @@
 //    email                 : nicholas.andrew.luongo@cern.ch
 //*************************************************************************
 
-#include <iostream>
 
 #include "L1CaloFEXSim/eFEXtauAlgo.h"
 #include "L1CaloFEXSim/eFEXtauTOB.h"
 #include "L1CaloFEXSim/eTower.h"
+#include <vector>
+#include <algorithm>  //for std::copy
 
   // default constructor for persistency
 LVL1::eFEXtauAlgo::eFEXtauAlgo(const std::string& type, const std::string& name, const IInterface* parent):

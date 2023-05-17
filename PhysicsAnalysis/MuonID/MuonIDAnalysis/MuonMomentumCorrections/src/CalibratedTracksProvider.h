@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef CALIBRATEDTRACKSPROVIDER
-#define CALIBRATEDTRACKSPROVIDER
+#ifndef CALIBRATEDTRACKSPROVIDER_H
+#define CALIBRATEDTRACKSPROVIDER_H
 
 // Gaudi/Athena include(s):
-#include <AsgAnalysisInterfaces/IPileupReweightingTool.h>
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -43,12 +42,13 @@ namespace CP {
         /// Calibration tool handle
         ToolHandle<IMuonCalibrationAndSmearingTool> m_tool{this, "Tool", "",
                                                            "Configured instance of the MuonMomentum and calibration tool"};
-        ToolHandle<IPileupReweightingTool> m_prwTool{this, "prwTool", "", "Configured instance of the prwReweightingTool, if needed "};
-
         /// detector type of track (MS or ID)
         Gaudi::Property<int> m_detType{this, "DetType", 1,
                                        "Which kind of track particle container is parsed. Either the Id tracks (2) or the MS tracks(1)"};
-        Gaudi::Property<bool> m_useRndNumber{this, "useRndRunNumber"};
+        
+        Gaudi::Property<bool> m_useRndNumber{this, "useRndRunNumber", false};
+        SG::ReadDecorHandleKey<xAOD::EventInfo> m_rndNumKey{this, "RandomNumberDecor", "EventInfo.RandomRunNumber",
+                                                            "Dependency on the random run number"};
 
     };  // class
 

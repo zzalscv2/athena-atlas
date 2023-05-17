@@ -127,6 +127,41 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
     int veto{};
     int bunch{};
     int inner{};
+    int muonMatched{};
+  };
+  struct TgcTrigTile{
+    int slSector{}; // SL sector ID
+    double roiEta{};
+    double roiPhi{};
+    int roiNum{};
+    int deltaBcid{}; // BCID difference between SL and TMDB
+    int deltaTiming{}; // Signal timing difference between SL and TMDB
+    int tmdbDecisions{}; // TMDB signal decisions for modules 0..3 (D5 only, D6 only, D5+D6)
+  };
+  struct TgcTrigNsw{
+    int slSector{};
+    double roiEta{};
+    double roiPhi{};
+    int roiNum{};
+    int isForward{};
+    int isEndcap{};
+    int deltaBcid{}; // BCID difference between SL and NSW
+    int deltaTiming{}; // Signal timing difference between SL and NSW
+    int R{};
+    int Phi{};
+    int deltaTheta{};
+  };
+  struct TgcTrigRpc{
+    int slSector{};
+    double roiEta{};
+    double roiPhi{};
+    int roiNum{};
+    int deltaBcid{}; // BCID difference between SL and NSW
+    int deltaTiming{}; // Signal timing difference between SL and NSW
+    int rpcEta{};
+    int rpcPhi{};
+    int rpcDEta{};
+    int rpcDPhi{};
   };
   struct CtpDecMonObj{
     std::string trigItem;
@@ -163,9 +198,10 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
   SG::ReadHandleKey<xAOD::MuonRoIContainer> m_MuonRoIContainerBCp2Key{this,"MuonRoIContainerBCp2Name","LVL1MuonRoIsBCp2","L1 muon RoI container at +2BC"};
   
   SG::ReadHandleKey<Muon::TgcPrepDataContainer> m_TgcPrepDataContainerKey{this,"TgcPrepDataContainerName","TGC_MeasurementsAllBCs","current BC TGC PRD"};
+  SG::ReadHandleKey<Muon::TgcCoinDataContainer> m_TgcCoinDataContainerPrevBCKey{this,"TgcCoinDataContainerPrevBCName","TrigT1CoinDataCollectionPriorBC","TGC Coin Data Container PrevBC"};
   SG::ReadHandleKey<Muon::TgcCoinDataContainer> m_TgcCoinDataContainerCurrBCKey{this,"TgcCoinDataContainerCurrBCName","TrigT1CoinDataCollection","TGC Coin Data Container CurrBC"};
   SG::ReadHandleKey<Muon::TgcCoinDataContainer> m_TgcCoinDataContainerNextBCKey{this,"TgcCoinDataContainerNextBCName","TrigT1CoinDataCollectionNextBC","TGC Coin Data Container NextBC"};
-  SG::ReadHandleKey<Muon::TgcCoinDataContainer> m_TgcCoinDataContainerPrevBCKey{this,"TgcCoinDataContainerPrevBCName","TrigT1CoinDataCollectionPriorBC","TGC Coin Data Container PrevBC"};
+  SG::ReadHandleKey<Muon::TgcCoinDataContainer> m_TgcCoinDataContainerNextNextBCKey{this,"TgcCoinDataContainerNextNextBCName","TrigT1CoinDataCollectionNextNextBC","TGC Coin Data Container NextNextBC"};
   SG::ReadHandleKey<xAOD::VertexContainer> m_PrimaryVertexContainerKey{this,"PrimaryVertexContainerName","PrimaryVertices","Primary Vertex Container"};
   
   DoubleProperty m_muonToPVdz{this,"MuonToPVdz",50.,"Window size in deltaZ between muon track and primary vertex"};

@@ -462,6 +462,7 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
        if (attmap.first == "GenCrossSection") continue;
        if (attmap.first == "GenPdfInfo") continue;
        if (attmap.first == "GenHeavyIon") continue;
+       if (attmap.first == "ShadowParticle") continue;
        for (auto& att: attmap.second) {
          persEvt.m_e_attribute_name.push_back(attmap.first);
          persEvt.m_e_attribute_id.push_back(att.first);

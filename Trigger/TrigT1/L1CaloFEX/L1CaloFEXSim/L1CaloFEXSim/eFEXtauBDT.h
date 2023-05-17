@@ -12,8 +12,11 @@
 #ifndef eFEXtauBDT_H
 #define eFEXtauBDT_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
+//#include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXSim/eFEXBDT.h"
+#include <vector>
+
+class AthAlgTool;
 
 namespace LVL1 {
 // Doxygen class description below:
@@ -86,7 +89,7 @@ public:
   inline unsigned int BitLeftShift(unsigned int number, int by, int totalNBits);
   inline int flatTowerIndex(int eta, int phi);
 
-protected:
+
 private:
   void initPointers(const std::vector<std::vector<int>> &scells,
                     std::vector<unsigned int *> &ptr_list);
@@ -95,27 +98,27 @@ private:
 
   unsigned int *superCellToPtr(int eta, int phi, int layer);
 
-  unsigned int *m_em0cells[3][3];
-  unsigned int *m_em1cells[12][3];
-  unsigned int *m_em2cells[12][3];
-  unsigned int *m_em3cells[3][3];
-  unsigned int *m_hadcells[3][3];
-  unsigned int *m_fracMultipliers[3];
-  unsigned int *m_bdtThresholds[3];
-  unsigned int *m_etThreshold;
-  unsigned int *m_etThresholdForFrac;
-  unsigned int m_bdtScore;
-  unsigned int m_bdtScoreShifted;
-  unsigned int m_eTEstimate;
-  bool m_eTEstimateOverflow;
-  unsigned int m_EM_eTEstimate;
-  bool m_EM_eTEstimateOverflow;
-  unsigned int m_HAD_eTEstimate;
-  bool m_HAD_eTEstimateOverflow;
-  unsigned int m_fracCondition;
-  unsigned int m_bdtCondition;
-  bool m_isSeeded;
-  unsigned int m_hadEstimateShifted;
+  unsigned int *m_em0cells[3][3]{};
+  unsigned int *m_em1cells[12][3]{};
+  unsigned int *m_em2cells[12][3]{};
+  unsigned int *m_em3cells[3][3]{};
+  unsigned int *m_hadcells[3][3]{};
+  unsigned int *m_fracMultipliers[3]{};
+  unsigned int *m_bdtThresholds[3]{};
+  unsigned int *m_etThreshold{};
+  unsigned int *m_etThresholdForFrac{};
+  unsigned int m_bdtScore = 0;
+  unsigned int m_bdtScoreShifted = 0;
+  unsigned int m_eTEstimate = 0;
+  bool m_eTEstimateOverflow = false;
+  unsigned int m_EM_eTEstimate = 0;
+  bool m_EM_eTEstimateOverflow = 0;
+  unsigned int m_HAD_eTEstimate = 0;
+  bool m_HAD_eTEstimateOverflow = false;
+  unsigned int m_fracCondition = 0;
+  unsigned int m_bdtCondition = 0;
+  bool m_isSeeded = false;
+  unsigned int m_hadEstimateShifted = 0;
   std::vector<unsigned int> m_emEtXMultiplier;
   std::vector<unsigned int> m_emEtXMultiplierOverflow;
   std::vector<unsigned int> m_towers;

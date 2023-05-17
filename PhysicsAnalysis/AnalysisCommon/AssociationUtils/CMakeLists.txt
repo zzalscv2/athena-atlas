@@ -13,7 +13,7 @@ atlas_add_library( AssociationUtilsLib
    AssociationUtils/*.h Root/*.cxx
    PUBLIC_HEADERS AssociationUtils
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES AnaAlgorithmLib AsgMessagingLib AsgTools AthContainers AthLinks
+   LINK_LIBRARIES AnaAlgorithmLib AsgMessagingLib AsgTools AthContainers AthLinks AsgDataHandlesLib
    xAODBase xAODEgamma xAODJet xAODMuon xAODTau xAODTracking
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} FourMomUtils )
 

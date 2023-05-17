@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -28,16 +28,9 @@ Interface definition for jTowerBuilder
   class IjTowerBuilder : virtual public IAlgTool {
   public:
     static const InterfaceID& interfaceID( ) ;
-
-    virtual void BuildEMBjTowers(std::unique_ptr<jTowerContainer> & jTowerContainer) const = 0;
-    virtual void BuildTRANSjTowers(std::unique_ptr<jTowerContainer> & jTowerContainer) const = 0;
-    virtual void BuildEMEjTowers(std::unique_ptr<jTowerContainer> & jTowerContainer) const = 0 ;
-    virtual void BuildEMIEjTowers(std::unique_ptr<jTowerContainer> & jTowerContainer) const = 0 ;
-    virtual void BuildFCALjTowers(std::unique_ptr<jTowerContainer> & jTowerContainer) const = 0 ;
-    virtual void BuildHECjTowers(std::unique_ptr<jTowerContainer> & jTowerContainer) const = 0;
-    virtual void BuildAllTowers(std::unique_ptr<jTowerContainer> & jTowerContainer) const = 0;
-    virtual void BuildSingleTower(std::unique_ptr<jTowerContainer> & jTowerContainer,float eta, float phi, int key_eta, float keybase, int posneg, float centre_eta, float centre_phi, int fcal_layer) const = 0;
     
+    virtual StatusCode initialize() = 0;
+
     virtual void init(std::unique_ptr<jTowerContainer> & jTowerContainer) = 0;
     virtual void execute(std::unique_ptr<jTowerContainer> & jTowerContainer) = 0;
     virtual void reset() = 0;

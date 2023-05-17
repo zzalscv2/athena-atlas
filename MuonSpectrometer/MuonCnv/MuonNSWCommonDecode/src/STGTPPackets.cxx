@@ -1,126 +1,86 @@
 /*
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-#include <vector>
+#include "MuonNSWCommonDecode/STGTPPackets.h"
+
+#include <algorithm>
 #include <exception>
 #include <sstream>
+#include <stdexcept>
 #include <string>
-#include <algorithm>
 #include <tuple>
+#include <vector>
 
-#include "MuonNSWCommonDecode/STGTPPackets.h"
-#include "MuonNSWCommonDecode/NSWSTGTPDecodeBitmaps.h"
+#include "MuonNSWCommonDecode/NSWDecodeHelper.h"
 #include "MuonNSWCommonDecode/NSWMMTPDecodeBitmaps.h"
-#define PARSE_VAR(var,st,pp,siz) {\
-var =  bit_slice<uint64_t,uint32_t>(st,pp,pp+siz-1);\
-pp += siz;\
+#include "MuonNSWCommonDecode/NSWSTGTPDecodeBitmaps.h"
+
+Muon::nsw::STGTPPadPacket::STGTPPadPacket(const std::vector<uint32_t>& payload) {
+  static constexpr auto PACKETS_SIZE = std::size_t{3};
+  if (std::size(payload) != PACKETS_SIZE) {
+    throw std::runtime_error(
+        Muon::format("Packet vector has size {} instead of expected size {}", std::size(payload), PACKETS_SIZE));
+  }
+
+  const auto packets = CxxUtils::span{payload.data(), std::size(payload)};
+  auto readPointer = std::size_t{0};
+  auto decode = [&packets](std::size_t& readPointer, const std::size_t size) {
+    return decode_and_advance<std::uint64_t, std::uint32_t>(packets, readPointer, size);
+  };
+
+  m_coincWedge = decode(readPointer, Muon::nsw::STGTPPad::size_coincidence_wedge);
+  for (std::size_t i = Muon::nsw::STGTPPad::num_pads; i > 0; --i) {
+    const auto index = i - 1;
+    m_phiIDs.at(index) = decode(readPointer, Muon::nsw::STGTPPad::size_phiID);
+  }
+
+  for (std::size_t i = Muon::nsw::STGTPPad::num_pads; i > 0; --i) {
+    const auto index = i - 1;
+    m_bandIDs.at(index) = decode(readPointer, Muon::nsw::STGTPPad::size_bandID);
+  }
+
+  m_BCID = decode(readPointer, Muon::nsw::STGTPPad::size_BCID);
+
+  readPointer += Muon::nsw::STGTPPad::size_spare;
+  m_idleFlag = decode(readPointer, Muon::nsw::STGTPPad::size_idleFlag);
 }
 
-Muon::nsw::STGTPPadPacket::STGTPPadPacket (const std::vector<uint32_t>& packet){
-  uint pp = 0;
+Muon::nsw::STGTPSegmentPacket::STGTPSegmentPacket(const std::vector<uint32_t>& payload) {
+  static constexpr auto PACKETS_SIZE = std::size_t{8};
+  if (std::size(payload) != PACKETS_SIZE) {
+    throw std::runtime_error(
+        Muon::format("Packet vector has size {} instead of expected size {}", std::size(payload), PACKETS_SIZE));
+  }
+  auto readPointer = std::size_t{0};
+  const auto packets = CxxUtils::span{payload.data(), std::size(payload)};
+  auto decode = [&packets](std::size_t& readPointer, const std::size_t size) {
+    return decode_and_advance<std::uint64_t, std::uint32_t>(packets, readPointer, size);
+  };
 
-  uint32_t bs[3]={packet[0],packet[1],packet[2]};
-  m_coincWege =    bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::STGTPPad::size_coincidence_wedge-1);     pp+= Muon::nsw::STGTPPad::size_coincidence_wedge;
-  uint32_t phi_3 = bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::STGTPPad::size_phiID_3-1);     pp+= Muon::nsw::STGTPPad::size_phiID_3;
-  uint32_t phi_2 = bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::STGTPPad::size_phiID_2-1);     pp+= Muon::nsw::STGTPPad::size_phiID_2;
-  uint32_t phi_1 = bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::STGTPPad::size_phiID_1-1);     pp+= Muon::nsw::STGTPPad::size_phiID_1;
-  uint32_t phi_0 = bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::STGTPPad::size_phiID_0-1);     pp+= Muon::nsw::STGTPPad::size_phiID_0;
-  m_phiIDs[0]=phi_0;
-  m_phiIDs[1]=phi_1;
-  m_phiIDs[2]=phi_2;
-  m_phiIDs[3]=phi_3;
-  
-  uint32_t band_3 = bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::STGTPPad::size_bandID_3-1);     pp+= Muon::nsw::STGTPPad::size_bandID_3;
-  uint32_t band_2 = bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::STGTPPad::size_bandID_2-1);     pp+= Muon::nsw::STGTPPad::size_bandID_2;
-  uint32_t band_1 = bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::STGTPPad::size_bandID_1-1);     pp+= Muon::nsw::STGTPPad::size_bandID_1;
-  uint32_t band_0 = bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::STGTPPad::size_bandID_0-1);     pp+= Muon::nsw::STGTPPad::size_bandID_0;
-  m_bandIDs[0]=band_0;
-  m_bandIDs[1]=band_1;
-  m_bandIDs[2]=band_2;
-  m_bandIDs[3]=band_3;
+  m_lut_choice = decode(readPointer, Muon::nsw::STGTPSegments::size_lut_choice_selection);
+  m_nsw_segment_selector = decode(readPointer, Muon::nsw::STGTPSegments::size_nsw_segment_selector);
+  m_valid_segment_selector = decode(readPointer, Muon::nsw::STGTPSegments::size_valid_segment_selector);
 
-  m_BCID = bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::STGTPPad::size_BCID-1);     pp+= Muon::nsw::STGTPPad::size_BCID;
+  for (std::size_t i = Muon::nsw::STGTPSegments::num_segments; i > 0; --i) {
+    const auto index = i - 1;
+    m_segmentData.at(index).monitor = decode(readPointer, Muon::nsw::STGTPSegments::size_output_segment_monitor);
+    m_segmentData.at(index).spare = decode(readPointer, Muon::nsw::STGTPSegments::size_output_segment_spare);
+    m_segmentData.at(index).lowRes = decode(readPointer, Muon::nsw::STGTPSegments::size_output_segment_lowRes);
+    m_segmentData.at(index).phiRes = decode(readPointer, Muon::nsw::STGTPSegments::size_output_segment_phiRes);
+    m_segmentData.at(index).dTheta = decode(readPointer, Muon::nsw::STGTPSegments::size_output_segment_dTheta);
+    m_segmentData.at(index).phiID = decode(readPointer, Muon::nsw::STGTPSegments::size_output_segment_phiID);
+    m_segmentData.at(index).rIndex = decode(readPointer, Muon::nsw::STGTPSegments::size_output_segment_rIndex);
+  }
 
-  pp+=Muon::nsw::STGTPPad::size_spare;
-  m_idleFlag = bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::STGTPPad::size_idleFlag-1);     pp+= Muon::nsw::STGTPPad::size_idleFlag; 
-
+  m_BCID = decode(readPointer, Muon::nsw::STGTPSegments::size_bcid);
+  m_sectorID = decode(readPointer, Muon::nsw::STGTPSegments::size_sectorID);
 }
 
-Muon::nsw::STGTPSegmentPacket::STGTPSegmentPacket(const std::vector<uint32_t>& packet)
-{
-  uint pp = 0;
-  uint32_t bs[8]={packet[0],packet[1],packet[2],packet[3],packet[4],packet[5],packet[6],packet[7]};
-  PARSE_VAR(m_lut_choice,bs,pp,Muon::nsw::STGTPSegments::size_lut_choice_selection);
-  PARSE_VAR(m_nsw_segment_selector,bs,pp,Muon::nsw::STGTPSegments::size_nsw_segment_selector);
-  PARSE_VAR(m_valid_segment_selector,bs,pp,Muon::nsw::STGTPSegments::size_valid_segment_selector);
-
-  PARSE_VAR(m_monitor_segment_7,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_7_monitor);
-  PARSE_VAR(m_spare_segment_7,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_7_spare);
-  PARSE_VAR(m_lowRes_segment_7,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_7_lowRes);
-  PARSE_VAR(m_phiRes_segment_7,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_7_phiRes);
-  PARSE_VAR(m_dTheta_segment_7,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_7_dTheta);
-  PARSE_VAR(m_phiID_segment_7,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_7_phiID);
-  PARSE_VAR(m_RIndex_segment_7,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_7_rIndex);
-
-  PARSE_VAR(m_monitor_segment_6,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_6_monitor);
-  PARSE_VAR(m_spare_segment_6,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_6_spare);
-  PARSE_VAR(m_lowRes_segment_6,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_6_lowRes);
-  PARSE_VAR(m_phiRes_segment_6,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_6_phiRes);
-  PARSE_VAR(m_dTheta_segment_6,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_6_dTheta);
-  PARSE_VAR(m_phiID_segment_6,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_6_phiID);
-  PARSE_VAR(m_RIndex_segment_6,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_6_rIndex);
-
-  PARSE_VAR(m_monitor_segment_5,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_5_monitor);
-  PARSE_VAR(m_spare_segment_5,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_5_spare);
-  PARSE_VAR(m_lowRes_segment_5,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_5_lowRes);
-  PARSE_VAR(m_phiRes_segment_5,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_5_phiRes);
-  PARSE_VAR(m_dTheta_segment_5,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_5_dTheta);
-  PARSE_VAR(m_phiID_segment_5,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_5_phiID);
-  PARSE_VAR(m_RIndex_segment_5,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_5_rIndex);
-
-  PARSE_VAR(m_monitor_segment_4,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_4_monitor);
-  PARSE_VAR(m_spare_segment_4,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_4_spare);
-  PARSE_VAR(m_lowRes_segment_4,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_4_lowRes);
-  PARSE_VAR(m_phiRes_segment_4,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_4_phiRes);
-  PARSE_VAR(m_dTheta_segment_4,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_4_dTheta);
-  PARSE_VAR(m_phiID_segment_4,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_4_phiID);
-  PARSE_VAR(m_RIndex_segment_4,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_4_rIndex);
-
-  PARSE_VAR(m_monitor_segment_3,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_3_monitor);
-  PARSE_VAR(m_spare_segment_3,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_3_spare);
-  PARSE_VAR(m_lowRes_segment_3,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_3_lowRes);
-  PARSE_VAR(m_phiRes_segment_3,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_3_phiRes);
-  PARSE_VAR(m_dTheta_segment_3,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_3_dTheta);
-  PARSE_VAR(m_phiID_segment_3,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_3_phiID);
-  PARSE_VAR(m_RIndex_segment_3,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_3_rIndex);
-
-  PARSE_VAR(m_monitor_segment_2,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_2_monitor);
-  PARSE_VAR(m_spare_segment_2,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_2_spare);
-  PARSE_VAR(m_lowRes_segment_2,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_2_lowRes);
-  PARSE_VAR(m_phiRes_segment_2,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_2_phiRes);
-  PARSE_VAR(m_dTheta_segment_2,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_2_dTheta);
-  PARSE_VAR(m_phiID_segment_2,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_2_phiID);
-  PARSE_VAR(m_RIndex_segment_2,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_2_rIndex);
-
-  PARSE_VAR(m_monitor_segment_1,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_1_monitor);
-  PARSE_VAR(m_spare_segment_1,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_1_spare);
-  PARSE_VAR(m_lowRes_segment_1,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_1_lowRes);
-  PARSE_VAR(m_phiRes_segment_1,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_1_phiRes);
-  PARSE_VAR(m_dTheta_segment_1,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_1_dTheta);
-  PARSE_VAR(m_phiID_segment_1,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_1_phiID);
-  PARSE_VAR(m_RIndex_segment_1,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_1_rIndex); 
- 
-  PARSE_VAR(m_monitor_segment_0,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_0_monitor);
-  PARSE_VAR(m_spare_segment_0,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_0_spare);
-  PARSE_VAR(m_lowRes_segment_0,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_0_lowRes);
-  PARSE_VAR(m_phiRes_segment_0,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_0_phiRes); 
-  PARSE_VAR(m_dTheta_segment_0,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_0_dTheta); 
-  PARSE_VAR(m_phiID_segment_0,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_0_phiID);
-  PARSE_VAR(m_RIndex_segment_0,bs,pp,Muon::nsw::STGTPSegments::size_output_segment_0_rIndex);
-
-  PARSE_VAR(m_BCID,bs,pp,Muon::nsw::STGTPSegments::size_bcid);
-  PARSE_VAR(m_sectorID,bs,pp,Muon::nsw::STGTPSegments::size_sectorID);
-
-
+const Muon::nsw::STGTPSegmentPacket::SegmentData& Muon::nsw::STGTPSegmentPacket::Segment(
+    const std::size_t segment) const {
+  if (segment >= STGTPSegments::num_segments) {
+    throw std::out_of_range(
+        Muon::format("Requested segment {} which does not exist (max {})", segment, STGTPSegments::num_segments - 1));
+  }
+  return m_segmentData.at(segment);
 }
-

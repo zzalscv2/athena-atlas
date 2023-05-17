@@ -50,13 +50,11 @@ namespace {
     int mom_pdg_id = pdg_id;
     const xAOD::TruthVertex* vprod = p->prodVtx();
     const xAOD::TruthVertex*oldVprod = vprod;
-    //int mom_barcode = barcode;
     // Ascend decay chain looking for when actual decay occurs (not jsut evolution of particle)
     while (pdg_id == mom_pdg_id) {
       const xAOD::TruthParticle* mother = vprod->incomingParticle(0) ;
       if (mother) {
 	mom_pdg_id = abs(mother->pdgId());
-	//mom_barcode = mother->barcode();
       } else break;
       if (pdg_id != mom_pdg_id) break;
         

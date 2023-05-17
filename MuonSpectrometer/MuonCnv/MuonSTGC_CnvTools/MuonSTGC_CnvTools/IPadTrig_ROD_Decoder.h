@@ -6,15 +6,13 @@
 #include "MuonRDO/NSW_PadTriggerDataContainer.h"
 
 namespace Muon {
-static const InterfaceID IID_IPadTrig_ROD_Decoder("Muon::IPadTrig_ROD_Decoder",
-                                                  1, 0);
 
 // IAlgTool which facilitates conversion from Pad Trigger ROBFragments to RDO.
 class IPadTrig_ROD_Decoder : virtual public IAlgTool {
  public:
+  virtual ~IPadTrig_ROD_Decoder() = default;
   // InterfaceID for this AlgTool
-  static const InterfaceID& interfaceID() { return IID_IPadTrig_ROD_Decoder; }
-
+  DeclareInterfaceID(Muon::IPadTrig_ROD_Decoder, 1, 0);
   // Fill the given Pad Trigger RDO container with data from the given
   // ROBFragments.
   virtual StatusCode fillCollection(

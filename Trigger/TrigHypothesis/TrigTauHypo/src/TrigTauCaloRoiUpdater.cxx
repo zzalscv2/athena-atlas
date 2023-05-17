@@ -18,10 +18,14 @@ TrigTauCaloRoiUpdater::TrigTauCaloRoiUpdater(const std::string & name, ISvcLocat
 
 StatusCode TrigTauCaloRoiUpdater::initialize() {
 
-  ATH_MSG_DEBUG( "declareProperty review:"   );
-  ATH_MSG_DEBUG( "    " << m_dRForCenter     );
-  ATH_MSG_DEBUG( "    " << m_etaHalfWidth    );
-  ATH_MSG_DEBUG( "    " << m_phiHalfWidth    );
+  ATH_MSG_INFO( "Initializing " << name() );
+  ATH_MSG_INFO( "z0HalfWidth  " << m_z0HalfWidth );
+  if(m_z0HalfWidth <= 0.) {
+    ATH_MSG_INFO( "z0HalfWidth <= 0:  will use the original RoIInput z0HalfWidth" );
+  }
+  ATH_MSG_INFO( "etaHalfWidth " << m_etaHalfWidth );
+  ATH_MSG_INFO( "phiHalfWidth " << m_phiHalfWidth );
+  ATH_MSG_INFO( "dRForCenter  " << m_dRForCenter );
 
   ATH_MSG_DEBUG( "Initialising HandleKeys" );
   CHECK( m_roIInputKey.initialize()        );
@@ -66,6 +70,14 @@ StatusCode TrigTauCaloRoiUpdater::execute(const EventContext& ctx) const {
   float dEta = m_etaHalfWidth; 
   float dPhi = m_phiHalfWidth;
 
+  float zed  = roiDescriptor->zed();
+  float zedPlus = roiDescriptor->zedPlus();
+  float zedMinus = roiDescriptor->zedMinus();
+  if(m_z0HalfWidth > 0.) {
+    zedPlus = zed + m_z0HalfWidth;
+    zedMinus = zed - m_z0HalfWidth;
+  }
+
   ATH_MSG_DEBUG( "; RoI ID = " << roiDescriptor->roiId()
                  << ": Eta = " << eta
                  << ", Phi = " << phi );
@@ -105,7 +117,7 @@ StatusCode TrigTauCaloRoiUpdater::execute(const EventContext& ctx) const {
   TrigRoiDescriptor *outRoi = new TrigRoiDescriptor(roiDescriptor->roiWord(), roiDescriptor->l1Id(), roiDescriptor->roiId(),
                                                     eta, eta-dEta, eta+dEta,
                                                     phi, CxxUtils::wrapToPi(phi-dPhi), CxxUtils::wrapToPi(phi+dPhi),
-                                                    roiDescriptor->zed() ,roiDescriptor->zedMinus(), roiDescriptor->zedPlus());
+                                                    zed, zedMinus, zedPlus);
 
   ATH_MSG_DEBUG("Input RoI " << *roiDescriptor);
   ATH_MSG_DEBUG("Output RoI " << *outRoi);

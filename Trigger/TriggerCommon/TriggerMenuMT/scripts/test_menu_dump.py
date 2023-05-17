@@ -13,7 +13,6 @@ _h_l1check = "do check of L1 items vs L1 menu"
 _h_stream = "filter by stream"
 _h_dump_dicts = "dump dicts to json"
 
-from argparse import ArgumentParser, RawDescriptionHelpFormatter
 import sys
 from AthenaCommon.Logging import logging
 
@@ -30,11 +29,12 @@ MENU_ALIASES = {
     'mc': 'MC_pp_run3_v1'
 }
 
-def get_args():
+def get_parser(flags):
     aliases = '\n'.join(f'{a} -> {f}' for a, f in MENU_ALIASES.items())
     epi='menu aliases:\n' + aliases
-    parser = ArgumentParser(description=__doc__, epilog=epi,
-                            formatter_class=RawDescriptionHelpFormatter)
+    parser = flags.getArgumentParser(
+        description=__doc__, epilog=epi,
+    )
     parser.add_argument('-m', '--menu',
                         default='Physics_pp_run3_v1',
                         help=_h_menu)
@@ -43,11 +43,11 @@ def get_args():
                         help=_h_names)
     output.add_argument('-p', '--parse-names', action='store_true',
                         help=_h_parse)
-    parser.add_argument('-l', '--check-l1', action='store_true',
+    parser.add_argument('-L', '--check-l1', action='store_true',
                         help=_h_l1check)
     parser.add_argument('-s', '--stream', const='Main', nargs='?',
                         help=_h_stream)
-    parser.add_argument('-d', '--dump-dicts', action='store_true',
+    parser.add_argument('-D', '--dump-dicts', action='store_true',
                         help=_h_dump_dicts)
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
@@ -62,21 +62,23 @@ def get_args():
         action='store_const',
         const='Support:',
     )
-    return parser.parse_args()
+    return parser
 
 def run():
-    args = get_args()
+    # The Physics menu (at least) depends on a check of the menu name
+    # in order to decide if PS:Online chains should be retained.
+    # Should do this in a more explicit way
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    parser = get_parser(flags)
+
+    args = flags.fillFromArgs(parser=parser)
     menu_name = MENU_ALIASES.get(args.menu, args.menu)
 
     # Can't do these without parsing
     if args.check_l1 or args.dump_dicts:
         args.parse_names = True
 
-    # The Physics menu (at least) depends on a check of the menu name
-    # in order to decide if PS:Online chains should be retained.
-    # Should do this in a more explicit way
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    flags = initConfigFlags()
     flags.Input.Files=[]
     flags.Trigger.triggerMenuSetup=menu_name
     flags.lock()

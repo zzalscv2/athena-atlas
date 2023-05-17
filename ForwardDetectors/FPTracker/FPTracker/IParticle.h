@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPTRACKER_IPARTICLE_H
@@ -17,11 +17,11 @@ namespace FPTracker
   {
   public:
     virtual ~IParticle();
-    virtual Point   position()        const = 0;
-    virtual Point&  position()              = 0;
-    virtual Point   positionRelBeam() const = 0;
-    virtual Point   direction()       const = 0;
-    virtual Point&  direction()             = 0;
+    virtual const Point&  position()        const = 0;
+    virtual       Point&  position()              = 0;
+    virtual       Point   positionRelBeam() const = 0;
+    virtual const Point&  direction()       const = 0;
+    virtual       Point&  direction()             = 0;
     
     virtual TransversePoint 
       displacement()                  const = 0;

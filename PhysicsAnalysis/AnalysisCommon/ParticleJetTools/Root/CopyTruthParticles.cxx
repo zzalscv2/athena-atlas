@@ -13,10 +13,7 @@ using namespace std;
 
 
 CopyTruthParticles::CopyTruthParticles(const std::string& name)
-  : AsgTool(name)
-{
-  declareProperty("PtMin", m_ptmin=0, "Minimum pT of particles to be accepted for tagging (in MeV)");
-}
+  : AsgTool(name) {}
 
 StatusCode CopyTruthParticles::initialize() {
 
@@ -59,7 +56,7 @@ int CopyTruthParticles::execute() const {
     }
   }
 
-  ATH_MSG_DEBUG("Copied " << numCopied << " truth particles into " << m_outputname << " TruthParticle container");
+  ATH_MSG_DEBUG("Copied " << numCopied << " truth particles into " << m_outTruthPartKey.key() << " TruthParticle container");
 
   // record
   auto truthParticles_out = SG::makeHandle(m_outTruthPartKey);

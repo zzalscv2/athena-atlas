@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaRootComps )
@@ -91,6 +91,7 @@ atlas_add_test( test_athena_variable_shape_merged
                 SCRIPT test_athena_variable_shape_merged.sh ${CMAKE_CURRENT_SOURCE_DIR}/test/ref.data.merged.ascii
                 ENVIRONMENT ATLAS_REFERENCE_TAG=${_reftag}
                 POST_EXEC_SCRIPT nopost.sh
+                PROPERTIES TIMEOUT 300
                 DEPENDS test_athena_variable_shape1 test_athena_variable_shape2 test_athena_variable_shape3 )
 
 atlas_add_test( test_athena_multtuple
@@ -103,5 +104,6 @@ atlas_add_test( test_athena_multtuple
 atlas_add_test( test_athena_multtuple_seek
                 SCRIPT test/test_athena_multtuple_seek.sh
                 ENVIRONMENT ATLAS_REFERENCE_TAG=${_reftag}
+                PROPERTIES TIMEOUT 300
                 POST_EXEC_SCRIPT "arc_refcomp.sh ref.d3pd_seek.ascii"
                 PRIVATE_WORKING_DIRECTORY )

@@ -43,12 +43,12 @@ class HotCell : public asg::AsgMessaging
         bool jetAffectedByHotCell(const xAOD::Jet& jet) const;
     private:
         HotCell();
-        const int m_layer;
-        const float m_etaMin;
-        const float m_etaMax;
-        const float m_phiMin;
-        const float m_phiMax;
-        SG::AuxElement::ConstAccessor< std::vector<float> > m_ePerSamp;
+        const int m_layer{-1};
+        const float m_etaMin{10};
+        const float m_etaMax{10};
+        const float m_phiMin{10};
+        const float m_phiMax{10};
+        SG::AuxElement::ConstAccessor< std::vector<float> > m_ePerSamp{"EnergyPerSampling"};
 };
 
 HotCell::HotCell(const int layer, const float etaMin, const float etaMax, const float phiMin, const float phiMax)
@@ -57,19 +57,10 @@ HotCell::HotCell(const int layer, const float etaMin, const float etaMax, const 
     , m_etaMin(etaMin)
     , m_etaMax(etaMax)
     , m_phiMin(phiMin)
-    , m_phiMax(phiMax)
-    , m_ePerSamp("EnergyPerSampling")
-{ }
+    , m_phiMax(phiMax) { }
 
 HotCell::HotCell()
-    : asg::AsgMessaging("HotCell")
-    , m_layer( -1 )
-    , m_etaMin(-10)
-    , m_etaMax( 10)
-    , m_phiMin(-10)
-    , m_phiMax( 10)
-    , m_ePerSamp("EnergyPerSampling")
-{ }
+    : asg::AsgMessaging("HotCell"){}
 
 bool HotCell::jetAffectedByHotCell(const xAOD::Jet& jet) const
 {
@@ -100,23 +91,7 @@ bool HotCell::jetAffectedByHotCell(const xAOD::Jet& jet) const
 // Constructors
 //=============================================================================
 JetCleaningTool::JetCleaningTool(const std::string& name)
-  : asg::AsgTool(name)
-  , m_cutName("")
-  , m_cutLevel(LooseBad)
-  , m_doUgly(false)
-  , m_useDecorations(true)
-  , m_jetCleanDFName("")
-  , m_acc_jetClean("DFCommonJets_jetClean_LooseBad")
-  , m_acc_looseClean("DFCommonJets_jetClean_LooseBad")
-  , m_hotCellsFile("")
-  , m_hotCellsMap(nullptr)
-{
-  declareProperty( "CutLevel" , m_cutName = "" );
-  declareProperty( "DoUgly"   , m_doUgly = false);
-  declareProperty( "UseDecorations"   , m_useDecorations = true);
-  declareProperty( "HotCellsFile" , m_hotCellsFile = "");
-}
-
+  : asg::AsgTool(name) {}
 /** Cut-based constructor */
 JetCleaningTool::JetCleaningTool(const CleaningLevel alevel, const bool doUgly)
   : JetCleaningTool( "JetCleaningTool_"+getCutName(alevel) )
@@ -137,28 +112,7 @@ JetCleaningTool::JetCleaningTool(const std::string& name , const CleaningLevel a
 //=============================================================================
 // Destructor  
 //=============================================================================
-JetCleaningTool::~JetCleaningTool()
-{
-    if (m_hotCellsMap)
-    {
-        std::unordered_map<unsigned int, std::vector<JCT::HotCell*>*>::iterator iter;
-        for (iter = m_hotCellsMap->begin(); iter != m_hotCellsMap->end(); ++iter)
-        {
-            std::vector<JCT::HotCell*>* cellVec = iter->second;
-            if (cellVec)
-            {
-                for (size_t index = 0; index < cellVec->size(); ++index)
-                    if (cellVec->at(index))
-                    {
-                        delete cellVec->at(index);
-                        cellVec->at(index) = nullptr;
-                    }
-                delete cellVec;
-            }
-        }
-        delete m_hotCellsMap;
-    }
-}
+JetCleaningTool::~JetCleaningTool() = default;
 
 //=============================================================================
 // Initialize
@@ -172,23 +126,17 @@ StatusCode JetCleaningTool::initialize()
 
   if (m_cutName!="") m_cutLevel = getCutLevel( m_cutName );
   ATH_MSG_INFO( "Configured with cut level " << getCutName( m_cutLevel ) );
-  m_jetCleanDFName = "DFCommonJets_jetClean_"+getCutName(m_cutLevel);
-  m_acc_jetClean = m_jetCleanDFName;
+  std::string jetCleanDFName = "DFCommonJets_jetClean_"+getCutName(m_cutLevel);
+  m_acc_jetClean = jetCleanDFName;
   m_jetCleanKey = m_jetContainerName + "." + getCutName(m_cutLevel);
-  m_acc_looseClean = "DFCommonJets_jetClean_"+getCutName(LooseBad);
 
-  ATH_MSG_DEBUG( "Initialized decorator name: " << m_jetCleanDFName );
+  ATH_MSG_DEBUG( "Initialized decorator name: " << jetCleanDFName );
 
   m_accept.addCut( "Cleaning", "Cleaning of the jet" );
     
-    // Read in the map of runNumbers to bad cells
-    if (!m_hotCellsMap && m_hotCellsFile != "")
-    {
-        m_hotCellsMap = new std::unordered_map<unsigned int, std::vector<JCT::HotCell*>*>();
-        if(readHotCells().isFailure())
-            return StatusCode::FAILURE;
-    }
-
+  // Read in the map of runNumbers to bad cells
+  ATH_CHECK(readHotCells());
+   
   ATH_CHECK(m_jetCleanKey.initialize(!m_jetContainerName.empty()));
 
   return StatusCode::SUCCESS;
@@ -433,13 +381,13 @@ StatusCode JetCleaningTool::decorate(const xAOD::JetContainer &jets) const
 bool JetCleaningTool::containsHotCells( const xAOD::Jet& jet, const unsigned int runNumber) const
 {
     // Check if the runNumber contains bad cells
-    std::unordered_map<unsigned int, std::vector<JCT::HotCell*>*>::const_iterator hotCells = std::as_const(m_hotCellsMap)->find(runNumber);
-    if (hotCells != std::as_const(m_hotCellsMap)->end())
+    std::unordered_map<unsigned int, std::vector<std::unique_ptr<JCT::HotCell>>>::const_iterator hotCells = m_hotCellsMap.find(runNumber);
+    if (hotCells != m_hotCellsMap.end())
     {
         // The run contains hot cells
         // Check if the jet is affected by one of the hot cells
-        for (size_t index = 0; index < hotCells->second->size(); ++index)
-            if (hotCells->second->at(index)->jetAffectedByHotCell(jet))
+        for (const std::unique_ptr<JCT::HotCell>& cell : hotCells->second)
+            if (cell->jetAffectedByHotCell(jet))
                 return true;
     }
     return false;
@@ -471,8 +419,11 @@ std::string JetCleaningTool::getCutName( const CleaningLevel c) const
 /** Hot cells reading helper */
 StatusCode JetCleaningTool::readHotCells()
 {
+    const std::string& file_path{m_hotCellsFile};
+    if (file_path.empty()) return StatusCode::SUCCESS;
+    
     // Ensure that the file exists
-    if ( !JCT::utils::fileExists(m_hotCellsFile) )
+    if ( !JCT::utils::fileExists(file_path) )
     {
         ATH_MSG_ERROR("Failed to find hot cells file: " << m_hotCellsFile);
         return StatusCode::FAILURE;
@@ -480,7 +431,7 @@ StatusCode JetCleaningTool::readHotCells()
 
     // Now parse the file
     TEnv readCells;
-    if (readCells.ReadFile(m_hotCellsFile.c_str(),kEnvGlobal))
+    if (readCells.ReadFile(file_path.c_str(),kEnvGlobal))
     {
         ATH_MSG_ERROR("Cannot read hot cells file: " << m_hotCellsFile);
         return StatusCode::FAILURE;
@@ -503,15 +454,13 @@ StatusCode JetCleaningTool::readHotCells()
     }
 
     // Loop over the run numbers
-    for (size_t iRun = 0; iRun < runNumbers.size(); ++iRun)
-    {
-        std::vector<JCT::HotCell*>* cellVec = new std::vector<JCT::HotCell*>();
-        m_hotCellsMap->insert(std::make_pair(runNumbers.at(iRun),cellVec));
+    for (unsigned int run : runNumbers){
+        std::vector<std::unique_ptr<JCT::HotCell>>& cellVec = m_hotCellsMap[run];
 
         // The number of hot cells should be below 100 for a given run...
         for (size_t iCell = 0; iCell < 100; ++iCell)
         {
-            const TString baseName = Form("Run%u.Cell%zu.",runNumbers.at(iRun),iCell);
+            const TString baseName = Form("Run%u.Cell%zu.",run,iCell);
 
             // Read the cell info
             const int   layer  = readCells.GetValue(baseName+"Layer", -1  );
@@ -529,13 +478,13 @@ StatusCode JetCleaningTool::readHotCells()
                 ATH_MSG_ERROR(Form("Got Layer=%d, EtaMin=%f, EtaMax=%f, PhiMin=%f, PhiMax=%f",layer,minEta,maxEta,minPhi,maxPhi));
                 return StatusCode::FAILURE;
             }
-            cellVec->push_back(new JCT::HotCell(layer,minEta,maxEta,minPhi,maxPhi));
+            cellVec.emplace_back(std::make_unique<JCT::HotCell>(layer,minEta,maxEta,minPhi,maxPhi));
         }
         
         // Ensure we found the expected run
-        if (!cellVec->size())
+        if (cellVec.empty())
         {
-            ATH_MSG_ERROR("Specified that Run# " << runNumbers.at(iRun) << " contains hot cells, but did not find any corresponding cells in the file: " << m_hotCellsFile);
+            ATH_MSG_ERROR("Specified that Run# " << run << " contains hot cells, but did not find any corresponding cells in the file: " << m_hotCellsFile);
             return StatusCode::FAILURE;
         }
     }

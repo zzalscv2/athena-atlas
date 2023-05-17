@@ -231,7 +231,7 @@ namespace DerivationFramework {
             
             bool skipPdgCheck = (pdgId.size()==0);
             //bypass the hadron veto?
-            
+            static const SG::AuxElement::ConstAccessor<unsigned int> acc_class{"Classification"};
             for (xAOD::TruthParticleContainer::const_iterator pItr=allParticles->begin(); pItr!=allParticles->end(); ++pItr) {
                 const xAOD::TruthParticle *particle = *pItr;
                 
@@ -247,8 +247,8 @@ namespace DerivationFramework {
                 
                 //if we have a particle from hadron decay, and allowFromHadron=false, skip this particle
                 if (!allowFromHadron) {
-                  if (!particle->isAvailable<unsigned int>("Classification"))  return false;
-                  unsigned int result = particle->auxdata<unsigned int>("Classification");
+                  if (!acc_class.isAvailable(*particle))  return false;
+                  unsigned int result = acc_class(*particle);
                   const bool isPrompt = MCTruthClassifier::isPrompt(result, true);
                   if (!isPrompt)  continue;
                 }

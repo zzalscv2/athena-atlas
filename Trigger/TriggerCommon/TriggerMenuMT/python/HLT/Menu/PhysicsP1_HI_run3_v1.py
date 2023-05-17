@@ -54,7 +54,7 @@ def getPhysicsHISignatures():
     chains['Jet'] = [
 
         # ALFA + jet triggers
-        ChainProp(name='HLT_j15_L1ALFA_Jet_Phys', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=['PS:Online','PS:NoHLTReprocessing']+SingleJetGroup),
+        ChainProp(name='HLT_j15_L1ALFA_Jet_Phys', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=['PS:Online','PS:NoHLTReprocessing']+SingleJetGroup+SupportLegGroup),
         ChainProp(name='HLT_2j10_L1ALFA_ELAS', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=['PS:Online','PS:NoHLTReprocessing']+SingleJetGroup),
         ChainProp(name='HLT_2j10_L1ALFA_SYS', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=['PS:Online','PS:NoHLTReprocessing']+SingleJetGroup),
     ]

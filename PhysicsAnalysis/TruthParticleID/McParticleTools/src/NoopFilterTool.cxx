@@ -14,9 +14,6 @@
 // FrameWork includes
 #include "Gaudi/Property.h"
 
-#include "TruthHelper/IsGenStable.h"
-#include "TruthHelper/IsGenInteracting.h"
-
 // McParticleKernel includes
 #include "McParticleKernel/IMcVtxFilterTool.h"
 
@@ -27,7 +24,6 @@
 /// Public methods: 
 /////////////////////////////////////////////////////////////////// 
 
-using namespace TruthHelper;
 
 /// Constructors
 ////////////////

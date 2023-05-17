@@ -12,6 +12,7 @@ def isoTTVAToolCfg(flags,**kwargs):
     from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg
     kwargs.setdefault('name', 'ttvaToolForIso')
     kwargs.setdefault('WorkingPoint','Nonprompt_All_MaxWeight')
+    kwargs.setdefault("HardScatterLinkDeco", "")
     return TTVAToolCfg(flags,**kwargs)
 
 def TrackIsolationToolCfg(flags, **kwargs):

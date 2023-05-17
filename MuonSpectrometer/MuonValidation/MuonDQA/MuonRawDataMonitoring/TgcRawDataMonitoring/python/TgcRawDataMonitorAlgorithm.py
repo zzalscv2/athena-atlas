@@ -76,6 +76,7 @@ def TgcRawDataMonitoringConfig(inputFlags):
         tgcRawDataMonAlg.MuonRoIContainerBCp1Name = ''
         tgcRawDataMonAlg.MuonRoIContainerBCp2Name = ''
         tgcRawDataMonAlg.MuRoIThresholdPatternsKey = ''
+        tgcRawDataMonAlg.TgcCoinDataContainerNextNextBCName = ''
         tgcRawDataMonAlg.MonitorThresholdPatterns = False
 
     if inputFlags.Input.Format is Format.BS or 'TGC_MeasurementsAllBCs' in inputFlags.Input.Collections:
@@ -1082,6 +1083,37 @@ def TgcRawDataMonitoringConfig(inputFlags):
                             path=coinPath,xbins=101,xmin=-0.5,xmax=100.5)
     myGroupCoin.defineHistogram('nTgcCoinPostOutPtrIsNull;h_nTgcCoinPostOutPtrIsNull',title='nTgcCoinPostOutPtrIsNull',
                             path=coinPath,xbins=101,xmin=-0.5,xmax=100.5)
+
+    #Rpc inner coincidence
+    myGroupCoin.defineHistogram('coin_inner_rpc_slSector,coin_inner_rpc_deltaBcid;InnerCoin_Rpc_DeltaBcid',title='InnerCoin_Rpc_DeltaBcid;SL Trigger Sector (>0 for A, <0 for C);Delta Bcid',
+                                path=coinPath,type='TH2F',xbins=97,xmin=-48.5,xmax=48.5,ybins=41,ymin=-20.5,ymax=20.5)
+    myGroupCoin.defineHistogram('coin_inner_rpc_slSector,coin_inner_rpc_deltaTiming;InnerCoin_Rpc_DeltaTiming',title='InnerCoin_Rpc_DeltaTiming;SL Trigger Sector (>0 for A, <0 for C);Delta Signal Timing',
+                                path=coinPath,type='TH2F',xbins=97,xmin=-48.5,xmax=48.5,ybins=11,ymin=-5.5,ymax=5.5)
+
+    #Tile inner coincidence
+    myGroupCoin.defineHistogram('coin_inner_tile_slSector,coin_inner_tile_deltaBcid;InnerCoin_Tile_DeltaBcid',title='InnerCoin_Tile_DeltaBcid;SL Trigger Sector (>0 for A, <0 for C);Delta Bcid',
+                                path=coinPath,type='TH2F',xbins=97,xmin=-48.5,xmax=48.5,ybins=41,ymin=-20.5,ymax=20.5)
+    myGroupCoin.defineHistogram('coin_inner_tile_slSector,coin_inner_tile_deltaTiming;InnerCoin_Tile_DeltaTiming',title='InnerCoin_Tile_DeltaTiming;SL Trigger Sector (>0 for A, <0 for C);Delta Signal Timing',
+                                path=coinPath,type='TH2F',xbins=97,xmin=-48.5,xmax=48.5,ybins=11,ymin=-5.5,ymax=5.5)
+    myGroupCoin.defineHistogram('coin_inner_tile2_slSector,coin_inner_tile2_tmdbDecisions;InnerCoin_Tile_tmdbDecisions',title='InnerCoin_Tile_tmdbDecisions;SL Trigger Sector (>0 for A, <0 for C);TMDB Module Decisions',
+                                path=coinPath,type='TH2F',xbins=97,xmin=-48.5,xmax=48.5,ybins=3,ymin=0.5,ymax=3.5,ylabels=['D5 only','D6 only','D5+D6'])
+
+    #Nsw inner coincidence
+    myGroupCoin.defineHistogram('coin_inner_nsw_slSector,coin_inner_nsw_deltaBcid;InnerCoin_Nsw_DeltaBcid_Endcap',title='InnerCoin_Nsw_DeltaBcid_Endcap;SL Trigger Sector (>0 for A, <0 for C);Delta Bcid',
+                                path=coinPath,type='TH2F',cutmask='coin_inner_nsw_isEndcap',xbins=97,xmin=-48.5,xmax=48.5,ybins=41,ymin=-20.5,ymax=20.5)
+    myGroupCoin.defineHistogram('coin_inner_nsw_slSector,coin_inner_nsw_deltaTiming;InnerCoin_Nsw_DeltaTiming_Endcap',title='InnerCoin_Nsw_DeltaTiming_Endcap;SL Trigger Sector (>0 for A, <0 for C);Delta Signal Timing',
+                                path=coinPath,type='TH2F',cutmask='coin_inner_nsw_isEndcap',xbins=97,xmin=-48.5,xmax=48.5,ybins=11,ymin=-5.5,ymax=5.5)
+
+    myGroupCoin.defineHistogram('coin_inner_nsw_slSector,coin_inner_nsw_deltaBcid;InnerCoin_Nsw_DeltaBcid_Forward',title='InnerCoin_Nsw_DeltaBcid_Forward;SL Trigger Sector (>0 for A, <0 for C);Delta Bcid',
+                                path=coinPath,type='TH2F',cutmask='coin_inner_nsw_isForward',xbins=49,xmin=-24.5,xmax=24.5,ybins=41,ymin=-20.5,ymax=20.5)
+    myGroupCoin.defineHistogram('coin_inner_nsw_slSector,coin_inner_nsw_deltaTiming;InnerCoin_Nsw_DeltaTiming_Forward',title='InnerCoin_Nsw_DeltaTiming_Forward;SL Trigger Sector (>0 for A, <0 for C);Delta Signal Timing',
+                                path=coinPath,type='TH2F',cutmask='coin_inner_nsw_isForward',xbins=49,xmin=-24.5,xmax=24.5,ybins=11,ymin=-5.5,ymax=5.5)
+
+    myGroupCoin.defineHistogram('coin_inner_nsw_roiEta,coin_inner_nsw_R;InnerCoin_Nsw_R',title='InnerCoin_Nsw_R;SL RoI Eta;NSW R',
+                                path=coinPath,type='TH2F',xbins=100,xmin=-2.5,xmax=2.5,ybins=251,ymin=-0.5,ymax=250.5)
+    myGroupCoin.defineHistogram('coin_inner_nsw_roiPhi,coin_inner_nsw_Phi;InnerCoin_Nsw_Phi',title='InnerCoin_Nsw_Phi;SL RoI Phi;NSW Phi',
+                                path=coinPath,type='TH2F',xbins=48*10,xmin=-math.pi,xmax=math.pi,ybins=61,ymin=-0.5,ymax=60.5)
+
     for coinType in ['SL','HPT','LPT','EIFI']:
         for region in ['','Endcap','Forward']:
             suffix0 = coinType if region == '' else coinType+'_'+region
@@ -1210,7 +1242,7 @@ if __name__=='__main__':
         flags.Output.HISTFileName = 'ExampleMonitorOutput.root'
 
     if not flags.Input.isMC:
-        flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2022-10"
+        flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2023-01"
 
     flags.lock()
     flags.dump()

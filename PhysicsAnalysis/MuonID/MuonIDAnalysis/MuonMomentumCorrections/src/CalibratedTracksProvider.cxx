@@ -10,31 +10,25 @@
 
 namespace CP {
 
-    static const SG::AuxElement::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");
     CalibratedTracksProvider::CalibratedTracksProvider(const std::string& name, ISvcLocator* svcLoc) : AthAlgorithm(name, svcLoc) {}
 
     StatusCode CalibratedTracksProvider::initialize() {
         ATH_CHECK(m_eventInfo.initialize());
         ATH_CHECK(m_inputKey.initialize());
         ATH_CHECK(m_outputKey.initialize());
+        ATH_CHECK(m_rndNumKey.initialize(m_useRndNumber));
         ATH_CHECK(m_tool.retrieve());
-        if (!m_prwTool.empty()) {
-            m_useRndNumber = true;
-            ATH_MSG_DEBUG("prwTool is given assume that the selection of the periods is based on the random run number");
-            ATH_CHECK(m_prwTool.retrieve());
-        }
         return StatusCode::SUCCESS;
     }
 
     StatusCode CalibratedTracksProvider::execute() {
         const EventContext& ctx = Gaudi::Hive::currentContext();
-        SG::ReadHandle<xAOD::TrackParticleContainer> readHandle{m_inputKey, ctx};
-        if (!readHandle.isValid()) {
+        SG::ReadHandle<xAOD::TrackParticleContainer> tracks{m_inputKey, ctx};
+        if (!tracks.isValid()) {
             ATH_MSG_FATAL("No muon container found");
             return StatusCode::FAILURE;
         }
-        const xAOD::TrackParticleContainer* tracks{readHandle.cptr()};
-
+      
         std::pair<std::unique_ptr<xAOD::TrackParticleContainer>, std::unique_ptr<xAOD::ShallowAuxContainer>> output =
             xAOD::shallowCopyContainer(*tracks, ctx);
 
@@ -48,16 +42,6 @@ namespace CP {
             return StatusCode::FAILURE;
         }
 
-        if (m_useRndNumber) {
-            SG::ReadHandle<xAOD::EventInfo> evInfo{m_eventInfo, ctx};
-            if (!evInfo->eventType(xAOD::EventInfo::IS_SIMULATION)) {
-                m_useRndNumber = false;
-                ATH_MSG_DEBUG("On data no random run number is needed.");
-            } else if (!acc_rnd.isAvailable(*evInfo)) {
-                ATH_MSG_DEBUG("Apply the prw tool");
-                ATH_CHECK(m_prwTool->apply(*evInfo));
-            }
-        }
         for (xAOD::TrackParticle* iParticle : *(output.first)) {
             ATH_MSG_VERBOSE("Old pt=" << iParticle->pt());
             if (m_tool->applyCorrectionTrkOnly(*iParticle, m_detType).code() == CorrectionCode::Error) return StatusCode::FAILURE;
