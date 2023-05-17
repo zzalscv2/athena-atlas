@@ -3546,5 +3546,8 @@ namespace xAOD {
       return getOutputObject( key, ti, metadata );
    }
 
+   void TEvent::setPrintEventProxyWarnings(bool print) {
+      m_printEventProxyWarnings = print;
+   }
 
 } // namespace xAOD
