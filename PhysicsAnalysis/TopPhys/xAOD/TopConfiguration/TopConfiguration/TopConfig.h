@@ -2893,7 +2893,7 @@ namespace top {
 
     // EGamma calibration to be used
     bool m_egamma_calibmodel_warning = false;
-    std::string m_egamma_calibration_model = "es2018_R21_v0";
+    std::string m_egamma_calibration_model = "es2022_R21_Precision";
 
     // b-tag SF helpers - one of each per WP
     // will be set in the BTagScaleFactorCalculator
