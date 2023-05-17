@@ -27,7 +27,7 @@
 namespace top {
   EgammaCPTools::EgammaCPTools(const std::string& name) :
     asg::AsgTool(name),
-    m_egammaCalibrationModel("es2018_R21_v0"),
+    m_egammaCalibrationModel("es2022_R21_Precision"),
     m_electronEffTriggerFile("SetMe"),
     m_electronEffTriggerLooseFile("SetMe"),
     m_electronEffSFTriggerFile("SetMe"),
