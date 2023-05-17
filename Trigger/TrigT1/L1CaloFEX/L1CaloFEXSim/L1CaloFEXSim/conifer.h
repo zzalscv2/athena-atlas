@@ -121,7 +121,7 @@ public:
   std::vector<U> decision_function(std::vector<T> x) const {
     /* Do the prediction */
     assert("Size of feature vector mismatches expected m_n_features" &&
-           x.size() == m_n_features);
+           x.size() == static_cast<size_t>(m_n_features));
     std::vector<U> values;
     std::vector<std::vector<U>> values_trees;
     values_trees.resize(m_n_classes);
