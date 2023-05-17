@@ -17,12 +17,12 @@ atlas_add_library( AnalysisUtilsLib
                    PUBLIC_HEADERS AnalysisUtils
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${HEPPDT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} ${HEPPDT_LIBRARIES} ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CxxUtils AthContainers EventKernel NavFourMom GaudiKernel ParticleEvent AraTool McParticleEvent
+                   LINK_LIBRARIES ${Boost_LIBRARIES} ${HEPPDT_LIBRARIES} ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CxxUtils AthContainers EventKernel NavFourMom GaudiKernel ParticleEvent AraTool McParticleEvent TruthUtils
                    PRIVATE_LINK_LIBRARIES Particle egammaEvent )
 
 atlas_add_component( AnalysisUtils
                      src/components/*.cxx
-                     LINK_LIBRARIES AnalysisUtilsLib )
+                     LINK_LIBRARIES AnalysisUtilsLib)
 
 atlas_add_dictionary( AnalysisUtilsDict
                       AnalysisUtils/AnalysisUtilsDict.h
