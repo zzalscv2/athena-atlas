@@ -29,7 +29,6 @@
 // McParticleTools includes
 #include "TruthIsolationTool.h"
 
-using namespace TruthHelper;
 using CLHEP::GeV;
 
 using CLHEP::HepLorentzVector;
@@ -193,8 +192,8 @@ TruthIsolationTool::buildEtIsolations( const std::string& mcEvtName,
     return StatusCode::RECOVERABLE;
   }
 
-  static const IsGenStable isStable;
-  static const IsGenInteracting isInteracting;
+  static const TruthHelper::IsGenStable isStable;
+  static const TruthHelper::IsGenInteracting isInteracting;
 
   // create a reduced list of particles
   GenParticles_t particles;
@@ -229,7 +228,7 @@ TruthIsolationTool::computeIso( const GenParticles_t& particles,
 				TruthEtIsolations& etIsolations, 
 				ITruthIsolationTool::ParticleSelect partSel  )
 {
-  static const IsGenInteracting isInteracting;
+  static const TruthHelper::IsGenInteracting isInteracting;
   const HepLorentzVector hlv = ::svToLv(part->momentum());
   const int ida = std::abs(part->pdg_id());
 

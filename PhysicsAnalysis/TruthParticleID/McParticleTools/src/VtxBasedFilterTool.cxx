@@ -15,8 +15,6 @@
 // FrameWork includes
 
 // CLHEP/HepMC includes
-#include "TruthHelper/IsGenerator.h"
-#include "TruthHelper/IsGenStable.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 
 // McParticleKernel includes
@@ -26,7 +24,6 @@
 #include "VtxBasedFilterTool.h"
 #include "copyBeamParticles.h"
 #include "AtlasHepMC/Flow.h"
-using namespace TruthHelper;
 
 /// Constructors
 ////////////////
