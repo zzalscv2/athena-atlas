@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header include
@@ -48,12 +48,12 @@
 
 /** Constructor **/
 ISF::InputConverter::InputConverter(const std::string& name, ISvcLocator* svc)
-    : base_class(name, svc)
-    , m_particlePropSvc("PartPropSvc",name)
-    , m_particleDataTable(nullptr)
-    , m_useGeneratedParticleMass(false)
-    , m_genParticleFilters(this)
-    , m_quasiStableParticlesIncluded(false)
+  : base_class(name, svc)
+  , m_particlePropSvc("PartPropSvc",name)
+  , m_particleDataTable(nullptr)
+  , m_useGeneratedParticleMass(false)
+  , m_genParticleFilters(this)
+  , m_quasiStableParticlesIncluded(false)
 {
   // particle mass from particle data table?
   declareProperty("UseGeneratedParticleMass",
@@ -162,8 +162,8 @@ StatusCode ISF::InputConverter::convertHepMCToG4Event(McEventCollection& inputGe
   //Convert from ISFParticleContainer to ConstISFParticleVector
   ISF::ISFParticleVector simParticleVector{
     std::make_move_iterator(std::begin(simParticleList)),
-    std::make_move_iterator(std::end(simParticleList))
-  };
+      std::make_move_iterator(std::end(simParticleList))
+      };
   outputG4Event = this->ISF_to_G4Event(simParticleVector, inputGenEvents.back());
   return StatusCode::SUCCESS;
 }
@@ -185,17 +185,17 @@ ISF::InputConverter::getSelectedParticles(HepMC::GenEvent& evnt, bool legacyOrde
     // FIXME: remove this block and the 'legacyOrdering' flag
     //        once we don't need the legacy order any longer
     for (auto vtx: evnt.vertices() ) {
-      std::copy_if(vtx->particles_out().begin(),
-                   vtx->particles_out().end(),
-                   std::back_inserter(passedGenParticles),
-                   [this](HepMC::GenParticlePtr p){return this->passesFilters(std::const_pointer_cast<const HepMC3::GenParticle>(p));});
+      std::copy_if (vtx->particles_out().begin(),
+                    vtx->particles_out().end(),
+                    std::back_inserter(passedGenParticles),
+                    [this](HepMC::GenParticlePtr p){return this->passesFilters(std::const_pointer_cast<const HepMC3::GenParticle>(p));});
     }
   }
   else {
-    std::copy_if(allGenPartBegin,
-                 allGenPartEnd,
-                 std::back_inserter(passedGenParticles),
-                 [this](HepMC::GenParticlePtr p){return this->passesFilters(std::const_pointer_cast<const HepMC3::GenParticle>(p));});
+    std::copy_if (allGenPartBegin,
+                  allGenPartEnd,
+                  std::back_inserter(passedGenParticles),
+                  [this](HepMC::GenParticlePtr p){return this->passesFilters(std::const_pointer_cast<const HepMC3::GenParticle>(p));});
   }
 
   passedGenParticles.shrink_to_fit();
@@ -220,17 +220,17 @@ ISF::InputConverter::getSelectedParticles(HepMC::GenEvent& evnt, bool legacyOrde
     auto vtxItEnd = evnt.vertices_end();
     for ( ; vtxIt != vtxItEnd; ++vtxIt ) {
       const auto vtxPtr = *vtxIt;
-      std::copy_if(vtxPtr->particles_begin(HepMC::children),
-                   vtxPtr->particles_end(HepMC::children),
-                   std::back_inserter(passedGenParticles),
-                   [this](HepMC::GenParticlePtr p){return this->passesFilters(*p);});
+      std::copy_if (vtxPtr->particles_begin(HepMC::children),
+                    vtxPtr->particles_end(HepMC::children),
+                    std::back_inserter(passedGenParticles),
+                    [this](HepMC::GenParticlePtr p){return this->passesFilters(*p);});
     }
   }
   else {
-    std::copy_if(allGenPartBegin,
-                 allGenPartEnd,
-                 std::back_inserter(passedGenParticles),
-                 [this](HepMC::GenParticlePtr p){return this->passesFilters(*p);});
+    std::copy_if (allGenPartBegin,
+                  allGenPartEnd,
+                  std::back_inserter(passedGenParticles),
+                  [this](HepMC::GenParticlePtr p){return this->passesFilters(*p);});
   }
 
   passedGenParticles.shrink_to_fit();
@@ -251,7 +251,7 @@ ISF::InputConverter::convertParticle(const HepMC::GenParticlePtr& genPartPtr, EB
     return nullptr;
   }
   auto parentEvent = genPartPtr->parent_event();
-  if(!parentEvent) {
+  if (!parentEvent) {
     ATH_MSG_ERROR("Cannot convert a GenParticle without a parent GenEvent into an ISFParticle!!!");
     return nullptr;
   }
@@ -263,37 +263,37 @@ ISF::InputConverter::convertParticle(const HepMC::GenParticlePtr& genPartPtr, EB
   const double pMass = this->getParticleMass(genPartPtr);
 #else
   const double pMass = this->getParticleMass(*genPartPtr);
-#endif  
+#endif
   double e=pMomentum.e();
-  if(e>1) { //only test for >1 MeV in momentum
+  if (e>1) { //only test for >1 MeV in momentum
     double px=pMomentum.px();
     double py=pMomentum.py();
     double pz=pMomentum.pz();
     double teste=std::sqrt(px*px + py*py + pz*pz + pMass*pMass);
-    if(std::abs(e-teste)>0.01*e) {
+    if (std::abs(e-teste)>0.01*e) {
       ATH_MSG_WARNING("Difference in energy for: " << genPartPtr<<" Morg="<<pMomentum.m()<<" Mmod="<<pMass<<" Eorg="<<e<<" Emod="<<teste);
     }
-    if(genPartPtr->status()==2 && pVertex && genPartPtr->end_vertex()) { //check for possible changes of gamma for quasi stable particles
+    if (genPartPtr->status()==2 && pVertex && genPartPtr->end_vertex()) { //check for possible changes of gamma for quasi stable particles
       const auto& prodVtx = genPartPtr->production_vertex()->position();
       const auto& endVtx = genPartPtr->end_vertex()->position();
       CLHEP::Hep3Vector dist3D(endVtx.x()-prodVtx.x(), endVtx.y()-prodVtx.y(), endVtx.z()-prodVtx.z());
 
-      if(dist3D.mag()>1*Gaudi::Units::mm) { 
+      if (dist3D.mag()>1*Gaudi::Units::mm) {
         CLHEP::HepLorentzVector mom( pMomentum.x(), pMomentum.y(), pMomentum.z(), pMomentum.t() );
         double gamma_org=mom.gamma();
         mom.setE(teste);
         double gamma_new=mom.gamma();
-        
-        if(std::abs(gamma_new-gamma_org)/(gamma_new+gamma_org)>0.001) {
+
+        if (std::abs(gamma_new-gamma_org)/(gamma_new+gamma_org)>0.001) {
           ATH_MSG_WARNING("Difference in boost gamma for Quasi stable particle "<<genPartPtr);
           ATH_MSG_WARNING("  gamma(m="<<mom.m()<<")="<<gamma_org<<" gamma(m="<<pMass<<")="<<gamma_new);
         } else {
           ATH_MSG_VERBOSE("Quasi stable particle "<<genPartPtr);
           ATH_MSG_VERBOSE("  gamma(m="<<mom.m()<<")="<<gamma_org<<" gamma(m="<<pMass<<")="<<gamma_new);
-        }  
-      }  
+        }
+      }
     }
-  }  
+  }
 
   const int pPdgId = genPartPtr->pdg_id();
   const double charge = HepPDT::ParticleID(pPdgId).charge();
@@ -307,7 +307,7 @@ ISF::InputConverter::convertParticle(const HepMC::GenParticlePtr& genPartPtr, EB
   const int bcid = (kindOfCollection==EBC_MAINEVCOLL) ? 0 : 1;
 
   auto hmpl = std::make_unique<HepMcParticleLink>(pBarcode, parentEvent->event_number(), kindOfCollection);
-  
+
   auto sParticle = std::make_unique<ISF::ISFParticle>( std::move(pos),
                                                        std::move(mom),
                                                        pMass,
@@ -398,8 +398,8 @@ ISF::InputConverter::passesFilters(const HepMC::ConstGenParticlePtr& part) const
     }
   }
 
-  return true;	
-}	
+  return true;
+}
 #else
 bool
 ISF::InputConverter::passesFilters(const HepMC::GenParticle& part) const
@@ -441,17 +441,17 @@ G4Event* ISF::InputConverter::ISF_to_G4Event(const ISF::ISFParticleVector& ispVe
   for ( ISF::ISFParticle *ispPtr: ispVector ) {
     ISF::ISFParticle &isp = *ispPtr;
     if ( !isInsideG4WorldVolume(isp, worldSolid) ) {
-        ATH_MSG_WARNING("Unable to convert ISFParticle to G4PrimaryParticle!");
-        ATH_MSG_WARNING(" ISFParticle: " << isp );
-        if(worldSolid) {
-          ATH_MSG_WARNING(" is outside Geant4 world volume: ");
-          worldSolid->DumpInfo();
-          G4cout << std::flush;
-        }
-        else {
-          ATH_MSG_WARNING(" is outside Geant4 world volume.");
-	}
-        continue;
+      ATH_MSG_WARNING("Unable to convert ISFParticle to G4PrimaryParticle!");
+      ATH_MSG_WARNING(" ISFParticle: " << isp );
+      if (worldSolid) {
+        ATH_MSG_WARNING(" is outside Geant4 world volume: ");
+        worldSolid->DumpInfo();
+        G4cout << std::flush;
+      }
+      else {
+        ATH_MSG_WARNING(" is outside Geant4 world volume.");
+      }
+      continue;
     }
     this->addG4PrimaryVertex(g4evt,isp,useHepMC);
     n_pp++;
@@ -478,14 +478,14 @@ const G4ParticleDefinition* ISF::InputConverter::getG4ParticleDefinition(int pdg
   }
   /// Standard particles
   G4ParticleTable *ptable = G4ParticleTable::GetParticleTable();
-  if(ptable) {
+  if (ptable) {
     return ptable->FindParticle(pdgcode);
   }
   ATH_MSG_ERROR("getG4ParticleDefinition - Failed to retrieve G4ParticleTable!");
   return nullptr;
 }
 
-double SetProperTimeFromDetectorFrameDecayLength(G4PrimaryParticle& g4particle,const double GeneratorDecayLength) 
+double SetProperTimeFromDetectorFrameDecayLength(G4PrimaryParticle& g4particle,const double GeneratorDecayLength)
 {
   //particle with velocity v travels distance l in time t=l/v
   //proper time: c^2 tau^2 = c^2 t^2 - l^2 = l^2/c^2 * (1/beta^2 -1)
@@ -503,11 +503,11 @@ double SetProperTimeFromDetectorFrameDecayLength(G4PrimaryParticle& g4particle,c
 //________________________________________________________________________
 #ifdef HEPMC3
 G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(const HepMC::GenParticlePtr& genpart) const{
- ATH_MSG_VERBOSE("Creating G4PrimaryParticle from GenParticle.");
+  ATH_MSG_VERBOSE("Creating G4PrimaryParticle from GenParticle.");
 
   const G4ParticleDefinition *particleDefinition = this->getG4ParticleDefinition(genpart->pdg_id());
 
-  if(particleDefinition==nullptr) {
+  if (particleDefinition==nullptr) {
     ATH_MSG_ERROR("ISF_to_G4Event particle conversion failed. ISF_Particle PDG code = " << genpart->pdg_id() <<
                   "\n This usually indicates a problem with the evgen step.\n" <<
                   "Please report this to the Generators group, mentioning the release and generator used for evgen and the PDG code above." );
@@ -537,7 +537,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(const HepMC::GenPar
     CLHEP::Hep3Vector dist3D(endVtx.x()-prodVtx.x(), endVtx.y()-prodVtx.y(), endVtx.z()-prodVtx.z());
     double tau=SetProperTimeFromDetectorFrameDecayLength(*g4particle,dist3D.mag());
 
-    if(msgLvl(MSG::VERBOSE)) {
+    if (msgLvl(MSG::VERBOSE)) {
       double pmag2=g4particle->GetTotalMomentum(); //magnitude of particle momentum
       pmag2*=pmag2;                                //magnitude of particle momentum squared
       double e2=g4particle->GetTotalEnergy();      //energy of particle
@@ -545,9 +545,9 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(const HepMC::GenPar
       double beta2=pmag2/e2;                       //beta^2=v^2/c^2 for particle
       double tau2=dist3D.mag2()*(1/beta2-1)/Gaudi::Units::c_light/Gaudi::Units::c_light;
       ATH_MSG_VERBOSE("lifetime tau(beta)="<<std::sqrt(tau2)<<" tau="<<tau);
-    }  
+    }
     const int bcgenpart = HepMC::barcode(genpart);
-    if(m_quasiStableParticlesIncluded) {
+    if (m_quasiStableParticlesIncluded) {
       ATH_MSG_VERBOSE( "Detected primary particle with end vertex." );
       ATH_MSG_VERBOSE( "Will add the primary particle set on." );
       ATH_MSG_VERBOSE( "Primary Particle: " << genpart );
@@ -561,14 +561,14 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(const HepMC::GenPar
     }
     // Add all necessary daughter particles
     for ( auto daughter: genpart->end_vertex()->particles_out() ) {
-      if(m_quasiStableParticlesIncluded) {
+      if (m_quasiStableParticlesIncluded) {
         ATH_MSG_VERBOSE ( "Attempting to add daughter particle of "<<bcgenpart<<": " << daughter );
       }
       else {
         ATH_MSG_WARNING ( "Attempting to add daughter particle of "<<bcgenpart<<": " << daughter );
       }
       G4PrimaryParticle *daughterG4Particle = this->getG4PrimaryParticle( daughter );
-      if(!daughterG4Particle) {
+      if (!daughterG4Particle) {
         ATH_MSG_ERROR("Bailing out of loop over daughters of particle with barcode: "<<bcgenpart <<
                       " due to errors - will not return G4Particle.");
         return nullptr;
@@ -593,7 +593,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(HepMC::GenParticle&
 
   const G4ParticleDefinition *particleDefinition = this->getG4ParticleDefinition(genpart.pdg_id());
 
-  if(particleDefinition==nullptr) {
+  if (particleDefinition==nullptr) {
     ATH_MSG_ERROR("ISF_to_G4Event particle conversion failed. ISF_Particle PDG code = " << genpart.pdg_id() <<
                   "\n This usually indicates a problem with the evgen step.\n" <<
                   "Please report this to the Generators group, mentioning the release and generator used for evgen and the PDG code above." );
@@ -623,7 +623,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(HepMC::GenParticle&
     CLHEP::Hep3Vector dist3D(endVtx.x()-prodVtx.x(), endVtx.y()-prodVtx.y(), endVtx.z()-prodVtx.z());
     double tau=SetProperTimeFromDetectorFrameDecayLength(*g4particle,dist3D.mag());
 
-    if(msgLvl(MSG::VERBOSE)) {
+    if (msgLvl(MSG::VERBOSE)) {
       double pmag2=g4particle->GetTotalMomentum(); //magnitude of particle momentum
       pmag2*=pmag2;                                //magnitude of particle momentum squared
       double e2=g4particle->GetTotalEnergy();      //energy of particle
@@ -631,9 +631,9 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(HepMC::GenParticle&
       double beta2=pmag2/e2;                       //beta^2=v^2/c^2 for particle
       double tau2=dist3D.mag2()*(1/beta2-1)/Gaudi::Units::c_light/Gaudi::Units::c_light;
       ATH_MSG_VERBOSE("lifetime tau(beta)="<<std::sqrt(tau2)<<" tau="<<tau);
-    }  
+    }
     const int bcgenpart = genpart.barcode();
-    if(m_quasiStableParticlesIncluded) {
+    if (m_quasiStableParticlesIncluded) {
       ATH_MSG_VERBOSE( "Detected primary particle with end vertex." );
       ATH_MSG_VERBOSE( "Will add the primary particle set on." );
       ATH_MSG_VERBOSE( "Primary Particle: " << genpart );
@@ -648,14 +648,14 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(HepMC::GenParticle&
     // Add all necessary daughter particles
     for ( auto daughterIter=genpart.end_vertex()->particles_out_const_begin();
           daughterIter!=genpart.end_vertex()->particles_out_const_end(); ++daughterIter ) {
-      if(m_quasiStableParticlesIncluded) {
+      if (m_quasiStableParticlesIncluded) {
         ATH_MSG_VERBOSE ( "Attempting to add daughter particle of "<<bcgenpart<<": " << **daughterIter );
       }
       else {
         ATH_MSG_WARNING ( "Attempting to add daughter particle of "<<bcgenpart<<": " << **daughterIter );
       }
       G4PrimaryParticle *daughterG4Particle = this->getG4PrimaryParticle( **daughterIter );
-      if(!daughterG4Particle) {
+      if (!daughterG4Particle) {
         ATH_MSG_ERROR("Bailing out of loop over daughters of particle with barcode: "<<bcgenpart <<
                       " due to errors - will not return G4Particle.");
         return nullptr;
@@ -683,17 +683,17 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
 
   auto* truthBinding = isp.getTruthBinding();
   if (!truthBinding) {
-      G4ExceptionDescription description;
-      description << G4String("getG4PrimaryParticle: ") + "No ISF::TruthBinding associated with ISParticle (" << isp <<")";
-      G4Exception("iGeant4::TransportTool", "NoISFTruthBinding", FatalException, description);
-      return nullptr; //The G4Exception call above should abort the job, but Coverity does not seem to pick this up.
+    G4ExceptionDescription description;
+    description << G4String("getG4PrimaryParticle: ") + "No ISF::TruthBinding associated with ISParticle (" << isp <<")";
+    G4Exception("iGeant4::TransportTool", "NoISFTruthBinding", FatalException, description);
+    return nullptr; //The G4Exception call above should abort the job, but Coverity does not seem to pick this up.
   }
   HepMC::GenParticlePtr        genpart = truthBinding->getTruthParticle();
   HepMC::GenParticlePtr primaryGenpart = truthBinding->getPrimaryTruthParticle();
 
   const G4ParticleDefinition *particleDefinition = this->getG4ParticleDefinition(isp.pdgCode());
 
-  if(particleDefinition==nullptr) {
+  if (particleDefinition==nullptr) {
     ATH_MSG_ERROR("ISF_to_G4Event particle conversion failed. ISF_Particle PDG code = " << isp.pdgCode() <<
                   "\n This usually indicates a problem with the evgen step.\n" <<
                   "Please report this to the Generators group, mentioning the release and generator used for evgen and the PDG code above." );
@@ -705,7 +705,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
   G4double px(0.0);
   G4double py(0.0);
   G4double pz(0.0);
-  if(useHepMC && genpart) {
+  if (useHepMC && genpart) {
     auto &genpartMomentum = genpart->momentum();
     px = genpartMomentum.x();
     py = genpartMomentum.y();
@@ -736,11 +736,11 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
       /// that we have to validate for every generator on earth...
       const auto& prodVtx = genpart->production_vertex()->position();
       const auto& endVtx = genpart->end_vertex()->position();
-      
+
       CLHEP::Hep3Vector dist3D(endVtx.x()-prodVtx.x(), endVtx.y()-prodVtx.y(), endVtx.z()-prodVtx.z());
       double tau=SetProperTimeFromDetectorFrameDecayLength(*g4particle,dist3D.mag());
-      
-      if(msgLvl(MSG::VERBOSE)) {
+
+      if (msgLvl(MSG::VERBOSE)) {
         double pmag2=g4particle->GetTotalMomentum(); //magnitude of particle momentum
         pmag2*=pmag2;                                //magnitude of particle momentum squared
         double e2=g4particle->GetTotalEnergy();      //energy of particle
@@ -748,7 +748,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
         double beta2=pmag2/e2;                       //beta^2=v^2/c^2 for particle
         double mass2=g4particle->GetMass();          //mass of particle
         mass2*=mass2;                                //mass^2 of particle
-        
+
         double tau2=dist3D.mag2()*(1/beta2-1)/Gaudi::Units::c_squared;
 
         const G4LorentzVector lv0( prodVtx.x(), prodVtx.y(), prodVtx.z(), prodVtx.t() );
@@ -757,26 +757,26 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
         //g4particle->SetProperTime( (lv1-lv0).mag()/Gaudi::Units::c_light );
         G4LorentzVector dist4D(lv1);
         dist4D-=lv0;
-        
+
         double dist4Dgamma=std::numeric_limits<double>::infinity();
-        if(dist4D.t()>0 && dist4D.mag2()>0) {
+        if (dist4D.t()>0 && dist4D.mag2()>0) {
           dist4Dgamma=dist4D.gamma();
         } else {
           ATH_MSG_VERBOSE( "dist4D t="<<dist4D.t()<<" mag2="<<dist4D.mag2());
-        }  
-        
+        }
+
         G4LorentzVector fourmom(g4particle->GetMomentum(),g4particle->GetTotalEnergy());
         double fourmomgamma=std::numeric_limits<double>::infinity();
-        if(fourmom.t()>0 && fourmom.mag2()>0) {
+        if (fourmom.t()>0 && fourmom.mag2()>0) {
           fourmomgamma=fourmom.gamma();
         } else {
           ATH_MSG_VERBOSE( "fourmom t="<<fourmom.t()<<" mag2="<<fourmom.mag2());
-        }  
+        }
 
         ATH_MSG_VERBOSE( "gammaVertex="<<dist4Dgamma<<" gammamom="<<fourmomgamma<<" gamma(beta)="<<1/std::sqrt(1-beta2)<<" lifetime tau(beta)="<<std::sqrt(tau2)<<" lifetime tau="<<tau);
       }
       const int bcgenpart = HepMC::barcode(genpart);
-      if(m_quasiStableParticlesIncluded) {
+      if (m_quasiStableParticlesIncluded) {
         ATH_MSG_VERBOSE( "Detected primary particle with end vertex." );
         ATH_MSG_VERBOSE( "Will add the primary particle set on." );
         ATH_MSG_VERBOSE( "ISF Particle: " << isp );
@@ -802,7 +802,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
       }
       // Add all necessary daughter particles
       for ( auto daughter: *(genpart->end_vertex())) {
-        if(m_quasiStableParticlesIncluded) {
+        if (m_quasiStableParticlesIncluded) {
           ATH_MSG_VERBOSE ( "Attempting to add daughter particle of "<<bcgenpart<<": " << daughter );
         }
         else {
@@ -813,7 +813,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
 #else
         G4PrimaryParticle *daughterG4Particle = this->getG4PrimaryParticle( *daughter );
 #endif
-        if(!daughterG4Particle) {
+        if (!daughterG4Particle) {
           ATH_MSG_ERROR("Bailing out of loop over daughters of particle with barcode: "<<bcgenpart <<
                         " due to errors - will not return G4Particle.");
           return nullptr;
@@ -821,14 +821,14 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
         g4particle->SetDaughter( daughterG4Particle );
       }
     } // particle had an end vertex
-    
+
     double px,py,pz;
     const double pmass = g4particle->GetMass();
     CLHEP::Hep3Vector gpv = g4particle->GetMomentum();
     double g4px=g4particle->GetMomentum().x();
     double g4py=g4particle->GetMomentum().y();
     double g4pz=g4particle->GetMomentum().z();
-    if(useHepMC) {
+    if (useHepMC) {
       //Code adapted from TruthHepMCEventConverter::TransformHepMCParticle
       px=g4px;
       py=g4py;
@@ -839,7 +839,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
       py=genpart->momentum().py();
       pz=genpart->momentum().pz();
       //Now a dirty hack to keep backward compatibility in the truth:
-      //When running AtlasG4 or FullG4 between 21.0.41 and 21.0.111, the genpart 3-momentum and mass was reset to the values from the g4particle 
+      //When running AtlasG4 or FullG4 between 21.0.41 and 21.0.111, the genpart 3-momentum and mass was reset to the values from the g4particle
       //together with the mass of the g4particle after the 1st initialization of the g4particle from the genevent. This is done for a consistent mass
       //value in the truth record compared to the used g4 mass. Since g4particles don't store the 3-momentum directly, but rather a
       //unit direction vector, the mass and the kinetic energy, this reduces the numeric accuracy.
@@ -847,7 +847,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
       //this old method. This comparison is needed, since in ISF this code could be rerun after the ID or CALO simulation, where
       //real energy was lost in previous detectors and hence genpart should NOT be changed to some g4particle values!
       //TODO: find a way to implement this in a backward compatible way in ISF::InputConverter::convertParticle(HepMC::GenParticlePtr genPartPtr, int bcid)
-      if(std::abs(px-g4px)<CLHEP::keV && std::abs(py-g4py)<CLHEP::keV && std::abs(pz-g4pz)<CLHEP::keV) {
+      if (std::abs(px-g4px)<CLHEP::keV && std::abs(py-g4py)<CLHEP::keV && std::abs(pz-g4pz)<CLHEP::keV) {
         px=g4px;
         py=g4py;
         pz=g4pz;
@@ -855,17 +855,17 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
     }
     const double mag2=px*px + py*py + pz*pz;
     const double pe = std::sqrt(mag2 + pmass*pmass);  // this does only change for boosts, etc.
-    
+
     double originalEnergy=genpart->momentum().e();
-    if(originalEnergy>0.01) { //only test for >1 MeV in momentum
-      if((originalEnergy-pe)/originalEnergy>0.01) {
+    if (originalEnergy>0.01) { //only test for >1 MeV in momentum
+      if ((originalEnergy-pe)/originalEnergy>0.01) {
         double genpx=genpart->momentum().px();
         double genpy=genpart->momentum().py();
         double genpz=genpart->momentum().pz();
         double genp=sqrt(genpx*genpx + genpy*genpy + genpz*genpz);
         ATH_MSG_WARNING("Truth change in energy for: " << genpart<<" Morg="<<genpart->momentum().m()<<" Mmod="<<pmass<<" Eorg="<<originalEnergy<<" Emod="<<pe<<" porg="<<genp<<" pmod="<<gpv.mag());
       }
-    }  
+    }
 
 #ifdef HEPMC3
     auto& genpart_nc = genpart;
