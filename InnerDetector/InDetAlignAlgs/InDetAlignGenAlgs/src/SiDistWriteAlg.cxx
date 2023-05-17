@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // SiDistWriteAlg.cxx
@@ -37,26 +37,18 @@ SiDistWriteAlg::~SiDistWriteAlg()
 
 StatusCode SiDistWriteAlg::initialize()
 {
-  msg (MSG::DEBUG) << "SiDistWriteAlg::initialize()" << endmsg;
+  ATH_MSG_DEBUG( "SiDistWriteAlg::initialize()" );
   // check StoreGate service available
-  if (evtStore().retrieve().isFailure())
-    {
-      ATH_MSG_VERBOSE("StoreGate service not found");
-      return StatusCode::FAILURE;
-    }
-  
+  ATH_CHECK(evtStore().retrieve());
+   
   // get detector store
-  if (detStore().retrieve().isFailure())
-    {
-      msg( MSG::FATAL) << "Detector store not found" << endmsg; 
-    }
+  ATH_CHECK(detStore().retrieve());
   
   
   // get identifier helpers
   if ((StatusCode::SUCCESS!=detStore()->retrieve(m_pixid)) ||
       (StatusCode::SUCCESS!=detStore()->retrieve(m_sctid))) {
-    msg (MSG::ERROR) << "Could not get helpers from detector store" 
-    << endmsg;
+    ATH_MSG_ERROR( "Could not get helpers from detector store");
   }
    ATH_MSG_DEBUG( "Distortion information in TDS at key " <<
     m_par_distkey );
@@ -92,7 +84,7 @@ bool SiDistWriteAlg::readFile() {
   std::ifstream infile;
   infile.open(m_par_readfile.c_str());
   if (!infile) {
-    msg (MSG::ERROR) << "Problem opening input file" << endmsg;
+    ATH_MSG_ERROR( "Problem opening input file" );
     return false;
   }
   // loop over lines in file
@@ -119,8 +111,7 @@ bool SiDistWriteAlg::readFile() {
       pdist->add(identifier,fbuf);
       ++nadd;
     } else {
-      msg (MSG::ERROR) << "Problem constructing identifier " << ident << 
-  " / " << identhash << endmsg;
+     ATH_MSG_ERROR( "Problem constructing identifier " << ident << " / " << identhash);
     }
     ++nline;
   }
@@ -128,12 +119,10 @@ bool SiDistWriteAlg::readFile() {
   ATH_MSG_DEBUG ( "Read distortions for " << nline << " modules" << 
       " of which " << nadd << " successfully added" );
   // record in StoreGate
-  if (StatusCode::SUCCESS==detStore()->record(pdist.get(),m_par_distkey)) {
-    pdist.release();
+  if (StatusCode::SUCCESS==detStore()->record(std::move(pdist),m_par_distkey)) {
     ATH_MSG_DEBUG ( "Recorded DetCondCFloat " << m_par_distkey << " in TDS" );
   } else {
-    msg(MSG::ERROR) << "Failed to record DetCondCFloat " << m_par_distkey << " in TDS"
-    << endmsg;
+    ATH_MSG_ERROR("Failed to record DetCondCFloat " << m_par_distkey << " in TDS");
     return false;
   }
   return true;
@@ -149,14 +138,17 @@ bool SiDistWriteAlg::makeIdent(const std::string& ident,
     if (lident[i]==']' || lident[i]=='.') lident[i]=' ';
   }
   std::istringstream instring(lident);
-  int atlas,det,bec,layer,phi,eta,side;
+  int atlas{},det{},bec{},layer{},phi{},eta,side{};
   instring >> atlas >> det >> bec >> layer >> phi >> eta >> side;
+   if ((bec<-2) or (bec>2)){
+    ATH_MSG_ERROR("bec value is "<<bec);
+  }
   if (det==1) {
     identifier=m_pixid->wafer_id(bec,layer,phi,eta);
   } else if (det==2) {
     identifier=m_sctid->wafer_id(bec,layer,phi,eta,side);
   } else {
-    msg(MSG::ERROR) << "Unknown detector type " << det << endmsg;
+    ATH_MSG_ERROR( "Unknown detector type " << det);
     return false;
   }
   // cross check with the supplied identifier compact value
@@ -171,7 +163,6 @@ void SiDistWriteAlg::print() {
   if (StatusCode::SUCCESS==detStore()->retrieve(pdist,m_par_distkey)) {
     pdist->print2();
   } else {
-    msg (MSG::ERROR) << "Unable to retrieve distortion parameters " <<
-      endmsg;
+    ATH_MSG_ERROR( "Unable to retrieve distortion parameters " );
   }
 }
