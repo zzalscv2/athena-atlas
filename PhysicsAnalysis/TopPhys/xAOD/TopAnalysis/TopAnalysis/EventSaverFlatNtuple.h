@@ -324,6 +324,8 @@ namespace top {
     float m_weight_leptonSF_MU_SF_ID_TAGPT_DOWN;
     float m_weight_leptonSF_MU_SF_ID_EXTRAPOLATION_UP;
     float m_weight_leptonSF_MU_SF_ID_EXTRAPOLATION_DOWN;
+    float m_weight_leptonSF_MU_SF_ID_EXTRAPOLATION_LOWPT_UP;
+    float m_weight_leptonSF_MU_SF_ID_EXTRAPOLATION_LOWPT_DOWN;
     // Muon isolation SF systematics
     float m_weight_leptonSF_MU_SF_Isol_STAT_UP;
     float m_weight_leptonSF_MU_SF_Isol_STAT_DOWN;

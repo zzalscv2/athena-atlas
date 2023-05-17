@@ -102,6 +102,9 @@ namespace top {
     m_weight_leptonSF_MU_SF_ID_TAGPT_DOWN(0.),
     m_weight_leptonSF_MU_SF_ID_EXTRAPOLATION_UP(0.),
     m_weight_leptonSF_MU_SF_ID_EXTRAPOLATION_DOWN(0.),
+    m_weight_leptonSF_MU_SF_ID_EXTRAPOLATION_LOWPT_UP(0.),
+    m_weight_leptonSF_MU_SF_ID_EXTRAPOLATION_LOWPT_DOWN(0.),
+
     // Muon isolation SF systematics
     m_weight_leptonSF_MU_SF_Isol_STAT_UP(0.),
     m_weight_leptonSF_MU_SF_Isol_STAT_DOWN(0.),
@@ -661,6 +664,10 @@ namespace top {
                                                 "weight_leptonSF_MU_SF_ID_EXTRAPOLATION_UP");
             systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_EXTRAPOLATION_DOWN,
                                                 "weight_leptonSF_MU_SF_ID_EXTRAPOLATION_DOWN");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_EXTRAPOLATION_LOWPT_UP,
+                                                "weight_leptonSF_MU_SF_ID_EXTRAPOLATION_LOWPT_UP");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_EXTRAPOLATION_LOWPT_DOWN,
+                                                "weight_leptonSF_MU_SF_ID_EXTRAPOLATION_LOWPT_DOWN");
           } else {
             systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_SYST_LOWPT_UP,
                                                "weight_leptonSF_MU_SF_ID_SYST_LOWPT_UP");
