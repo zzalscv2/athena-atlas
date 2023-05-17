@@ -46,12 +46,17 @@ def _getTauSignatureShort( name ):
     return signature, signatureID
 
 @AccumulatorCache
-def tauCaloRoiUpdaterCfg(flags, inputRoIs, clusters):
+def tauCaloRoiUpdaterCfg(inflags, inputRoIs, clusters):
+    flags = inflags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.tauCore")
     acc = ComponentAccumulator()
-    alg                               = CompFactory.TrigTauCaloRoiUpdater("TauCaloRoiUpdater",
-                                        RoIInputKey     = inputRoIs,
-                                        RoIOutputKey    = 'UpdatedCaloRoI',
-                                        CaloClustersKey = clusters)
+    alg                               = CompFactory.TrigTauCaloRoiUpdater(
+        "TauCaloRoiUpdater",
+        etaHalfWidth                  = flags.Tracking.ActiveConfig.etaHalfWidth,
+        phiHalfWidth                  = flags.Tracking.ActiveConfig.phiHalfWidth,
+        z0HalfWidth                   = flags.Tracking.ActiveConfig.zedHalfWidth,
+        RoIInputKey                   = inputRoIs,
+        RoIOutputKey                  = 'UpdatedCaloRoI',
+        CaloClustersKey               = clusters)
     acc.addEventAlgo(alg)
     return acc
 
