@@ -1696,13 +1696,12 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeInner(State& state,
       inner
 	= (rd.nsweta()    << Muon::TgcCoinData::INNER_NSW_R_BITSHIFT)
         + (rd.nswphi()    << Muon::TgcCoinData::INNER_NSW_PHI_BITSHIFT)
-        + (((rd.nswcand()>>TgcRawData::NSW_INPUT_BITSHIFT)&TgcRawData::NSW_INPUT_BIT) << Muon::TgcCoinData::INNER_NSW_INPUT_BITSHIFT)
-        + (((rd.nswcand()>>TgcRawData::NSW_CAND_BITSHIFT)&TgcRawData::NSW_CAND_BIT)   << Muon::TgcCoinData::INNER_NSW_CAND_BITSHIFT)
         + (rd.nswdtheta() << Muon::TgcCoinData::INNER_NSW_DTHETA_BITSHIFT)
         + (rd.nswphires() << Muon::TgcCoinData::INNER_NSW_PHIRES_BITSHIFT)
         + (rd.nswlowres() << Muon::TgcCoinData::INNER_NSW_LOWRES_BITSHIFT)
         + (rd.nswid()     << Muon::TgcCoinData::INNER_NSW_ID_BITSHIFT)
-        + (((rd.nswcand()>>TgcRawData::NSW_BCID_BITSHIFT)&TgcRawData::NSW_BCID_BIT)   << Muon::TgcCoinData::INNER_NSW_BCID_BITSHIFT);
+        + (((rd.nswcand()>>TgcRawData::NSW_BCID_BITSHIFT)&TgcRawData::NSW_BCID_BIT)   << Muon::TgcCoinData::INNER_NSW_BCID_BITSHIFT)
+        + (((rd.nswcand()>>TgcRawData::NSW_INPUT_BITSHIFT)&TgcRawData::NSW_INPUT_BIT) << Muon::TgcCoinData::INNER_NSW_INPUT_BITSHIFT);
     }else if(rd.type()==TgcRawData::TYPE_INNER_BIS){
       isInner = true; isStrip = true;
       inner
@@ -1711,8 +1710,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeInner(State& state,
         + (rd.rpcdeta() << Muon::TgcCoinData::INNER_RPC_DETA_BITSHIFT)
         + (rd.rpcdphi() << Muon::TgcCoinData::INNER_RPC_DPHI_BITSHIFT)
         + (((rd.rpcflag()>>TgcRawData::RPC_FLAG_BITSHIFT)&TgcRawData::RPC_FLAG_BIT) << Muon::TgcCoinData::INNER_RPC_FLAG_BITSHIFT)
-        + (((rd.rpcflag()>>TgcRawData::RPC_BCID_BITSHIFT)&TgcRawData::RPC_BCID_BIT) << Muon::TgcCoinData::INNER_RPC_BCID_BITSHIFT)
-        + (((rd.rpcflag()>>TgcRawData::RPC_CAND_BITSHIFT)&TgcRawData::RPC_CAND_BIT) << Muon::TgcCoinData::INNER_RPC_CAND_BITSHIFT);
+        + (((rd.rpcflag()>>TgcRawData::RPC_BCID_BITSHIFT)&TgcRawData::RPC_BCID_BIT) << Muon::TgcCoinData::INNER_RPC_BCID_BITSHIFT);
     }else if(rd.type()==TgcRawData::TYPE_INNER_EIFI){
       isInner = false; isStrip = false;
       inner
