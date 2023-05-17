@@ -6,7 +6,7 @@ atlas_subdir( StgcRawDataMonitoring )
 # Component(s) in the package:
 atlas_add_component( StgcRawDataMonitoring
    StgcRawDataMonitoring/*.h src/*.cxx src/components/*.cxx
-   LINK_LIBRARIES AthenaMonitoringLib MuonIdHelpersLib MuonPrepRawData StoreGateLib MuonRIO_OnTrack TrkToolInterfaces TrkParameters) 
+   LINK_LIBRARIES AthenaMonitoringLib MuonIdHelpersLib MuonPrepRawData StoreGateLib MuonRIO_OnTrack TrkToolInterfaces TrkParameters MuonRDO) 
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )
