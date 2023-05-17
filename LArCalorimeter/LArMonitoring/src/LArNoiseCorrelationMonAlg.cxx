@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /*
 */
@@ -30,27 +30,11 @@
 //
 // ********************************************************************
 
-
-//STL:
-#include <sstream>
-#include <iomanip>
-#include <cmath>
-#include <vector>
-#include <algorithm>
-
-//ROOT
-#include "TPRegexp.h"
-
-
 //LAr infos:
 #include "Identifier/HWIdentifier.h"
 #include "LArIdentifier/LArOnlineID.h"
 #include "LArRawEvent/LArDigit.h"
 #include "LArRawEvent/LArDigitContainer.h"
-#include "LArRecEvent/LArNoisyROSummary.h"
-
-//for looping on FEBs
-#include "LArRawEvent/LArFebHeaderContainer.h"
 
 //Helper:
 #include "LArMonitoring/LArStrHelper.h"
@@ -58,16 +42,6 @@
 //Header:
 #include "LArNoiseCorrelationMonAlg.h"
 
-
-
-
-
-
-/*---------------------------------------------------------*/
-LArNoiseCorrelationMonAlg::LArNoiseCorrelationMonAlg( const std::string& name, ISvcLocator* pSvcLocator) 
-  : AthMonitorAlgorithm(name, pSvcLocator),
-    m_LArOnlineIDHelper(nullptr)
-{ }
 
 /*---------------------------------------------------------*/
 LArNoiseCorrelationMonAlg::~LArNoiseCorrelationMonAlg()
@@ -92,10 +66,28 @@ LArNoiseCorrelationMonAlg::initialize()
   ATH_CHECK(m_bcMask.buildBitMask(m_problemsToMask,msg()));
 
   // initialize superclass
-  ATH_CHECK( AthMonitorAlgorithm::initialize() );
+  ATH_CHECK( AthMonitorAlgorithm::initialize() ); 
 
   /*now the group*/
   m_noiseCorrGroups=Monitored::buildToolMap<int>(m_tools,m_noiseCorrGroupName,m_FEBlist);
+  
+  
+  const std::set<std::string> febSet(m_FEBlist.begin(),m_FEBlist.end());
+
+  //Check for abort-gap if the trigger m_abortGapTrig is in the list of triggers
+  m_checkAbortGap=std::find(m_vTrigChainNames.begin(),m_vTrigChainNames.end(),m_abortGapTrig)!=m_vTrigChainNames.end();
+
+
+  /** helper for feb names*/
+  LArStrHelper larStrHelp;
+
+  //Pre-fill the 'model' of the internal structure (to be copied for each event) 
+  for (HWIdentifier fid : m_LArOnlineIDHelper->feb_range()) {
+      const std::string fName=larStrHelp.febNameString(m_LArOnlineIDHelper->isEMBchannel(fid),m_LArOnlineIDHelper->pos_neg(fid),m_LArOnlineIDHelper->feedthrough(fid),m_LArOnlineIDHelper->slot(fid));
+      if (febSet.find(fName)!=febSet.end()) {
+        m_febMapModel.emplace(std::make_pair(fid,perFeb_t(fName)));
+      }
+  }
 
   return StatusCode::SUCCESS;
 }
@@ -111,36 +103,20 @@ LArNoiseCorrelationMonAlg::fillHistograms(const EventContext& ctx) const
   }
 
   ATH_MSG_DEBUG("in fillHists()" ); 
-    
 
-  /** check trigger */
-  bool passTrig = m_isCalibrationRun;
-  if(!m_isCalibrationRun) { 
-    const ToolHandle<Trig::TrigDecisionTool> trigTool=getTrigDecisionTool();
 
-     bool passBCID;
-     if(!trigTool.empty()) {
-       // BCIDs of the abort gap
-       const int ABORT_GAP_START = 3446;
-       const int ABORT_GAP_END   = 3563;
-       for(auto trig_chain : m_vTrigChainNames) {
-	passBCID = ((trig_chain == "HLT_noalg_cosmiccalo_L1RD1_EMPTY")?(ctx.eventID().bunch_crossing_id() >= ABORT_GAP_START && ctx.eventID().bunch_crossing_id() <= ABORT_GAP_END):true);
-	passTrig=(passTrig || (passBCID && trigTool->isPassed(trig_chain)));
-       }
-     }
+  /** check for abort gap*/
+  if (m_checkAbortGap && !m_trigDecTool.empty()) {
+    // BCIDs of the abort gap
+    constexpr unsigned int ABORT_GAP_START = 3446;
+    constexpr unsigned int ABORT_GAP_END   = 3563;
+    const unsigned int bcid=ctx.eventID().bunch_crossing_id();
+    if (m_trigDecTool->isPassed(m_abortGapTrig) && bcid<ABORT_GAP_START && bcid>ABORT_GAP_END) {
+      ATH_MSG_DEBUG("Passed trigger ["<<m_abortGapTrig <<"] and bcid "<< bcid <<" falls outside the abort gap. Ignoring this event");
+      return StatusCode::SUCCESS;  
+    }
   }
-
-  if (!passTrig) { 
-      ATH_MSG_DEBUG ( " Failed trigger selection " );
-      return StatusCode::SUCCESS;
-  } else {
-    ATH_MSG_DEBUG ( " Pass trigger selection " );
-  }
-
-  /*setup vectors for filling: want to use collactions and array or I'll call fill() tousands of times */
-  std::map<std::string,std::vector<std::pair<int,double> > > meanMap;
-  std::map<std::string,std::vector<std::pair<std::pair<int,int>,double> > > partSumMap;
-
+  
   /*retrieve cabling*/
   SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey,ctx};
   const LArOnOffIdMapping* cabling=*cablingHdl;
@@ -164,102 +140,35 @@ LArNoiseCorrelationMonAlg::fillHistograms(const EventContext& ctx) const
   SG::ReadHandle<LArDigitContainer> pLArDigitContainer{m_LArDigitContainerKey,ctx};
   
   ATH_MSG_DEBUG ( " LArDigitContainer size "<<pLArDigitContainer->size()<<" for key "<<m_LArDigitContainerKey); 
-  /** Define iterators to loop over Digits containers*/
-  LArDigitContainer::const_iterator itDig = pLArDigitContainer->begin(); 
-  LArDigitContainer::const_iterator itDig_2;
-  LArDigitContainer::const_iterator itDig_e= pLArDigitContainer->end(); 
 
-  /** helper for feb names*/
-  LArStrHelper larStrHelp;
-
-  /** Loop over digits*/
-  for ( ; itDig!=itDig_e;++itDig) {
-    const LArDigit* pLArDigit = *itDig;
-    
-    /** Retrieve pedestals */
-    HWIdentifier id = pLArDigit->hardwareID();
-    CaloGain::CaloGain gain = pLArDigit->gain();
-    float pedestal = pedestals->pedestal(id,gain);    
-
-    if(!isGoodChannel(id,pedestal,cabling,bcCont))
-      continue;
-    
-    /** Retrieve samples*/
-    const std::vector<short>* digito = &pLArDigit->samples();
-    
-    /** Retrieve once, all the cell info:*/
-    HWIdentifier febID = m_LArOnlineIDHelper->feb_Id(id);
-    int ch1 = m_LArOnlineIDHelper->channel(id);
-
-    std::string febSTR = larStrHelp.febNameString(m_LArOnlineIDHelper->isEMBchannel(id),m_LArOnlineIDHelper->pos_neg(id),m_LArOnlineIDHelper->feedthrough(id),m_LArOnlineIDHelper->slot(id));
-      //febString(febID); 
-    /** If we are only plotting a sub-set of FEBs, check if it belongs to that set */
-    if(m_plotCustomFEBSset) {
-      bool plotThisFEB=false;
-      for(uint ifm=0;ifm<m_FEBlist.size();ifm++) {
-	if(febSTR==m_FEBlist[ifm]) {
-	  plotThisFEB=true;
-	  break;
-	}
-      }
-      if(!plotThisFEB) continue;
+  //copy model-map ...
+  std::map<HWIdentifier,perFeb_t> febMap{m_febMapModel};
+  //... and pre-fill with pointers to digits and pedestals
+  for (const LArDigit* pDig : *pLArDigitContainer) {
+    const HWIdentifier chid=pDig->channelID();
+    const HWIdentifier fid=m_LArOnlineIDHelper->feb_Id(chid);
+    auto febDat=febMap.find(fid);
+    if (febDat!=febMap.end()) {
+      CaloGain::CaloGain gain = pDig->gain();
+	    double ped = pedestals->pedestal(chid,gain);
+       if(isGoodChannel(chid,ped,cabling,bcCont)) {
+        febDat->second.m_digitsAndPed.emplace_back(std::make_pair(pDig,ped));
+       }
     }
 
-    /** Second loop over digit */
-    bool av_set=false;
-    for(itDig_2 = itDig; itDig_2!=itDig_e;++itDig_2)
-      {
-	const LArDigit* pLArDigit2 = *itDig_2;
-	HWIdentifier id2 = pLArDigit2->hardwareID();
-	if(m_LArOnlineIDHelper->feb_Id(id2)!=febID) continue;
+  }
 
-	/** get the pedestal */
-	CaloGain::CaloGain gain2 = pLArDigit2->gain();
-	float pedestal2 = pedestals->pedestal(id2,gain2);
-
-	if(!isGoodChannel(id2,pedestal2,cabling,bcCont))  continue;
-
-	/** get the channel number */
-	int ch2 = m_LArOnlineIDHelper->channel(id2);
-
-	/** get the samples */
-	const std::vector<short>* digito2 = &pLArDigit2->samples();
-	std::vector<short>::const_iterator iterSam2= digito2->begin();
-	std::vector<short>::const_iterator iterSam= digito->begin();
-
-	double part_sum=0;
-	int Nsam=pLArDigit->nsamples();
-	if(pLArDigit2->nsamples()!=Nsam)
-	  {
-	    ATH_MSG_WARNING( Form("Different number of samples between channels %d vs %d: skipping these two",Nsam,pLArDigit2->nsamples()) );
-	    continue;
-	  }
-
-	/** Loop over the samples and compute average and sum of squares*/
-	for(int i=0;i<Nsam;++i,++iterSam,++iterSam2)
-	  {
-	    if(!av_set) { /** fill the mean only once per ch1. This code is here to avoid one additional loop over samples before the second loop. */
-	      meanMap[febSTR].push_back(std::make_pair(ch1,(*iterSam-pedestal)));
-	    }
-	    /** now compute sum of squares */
-	    part_sum+=((*iterSam-pedestal)*(*iterSam2-pedestal2));
-	  }
-	av_set=true; /** now the average is set and I won't do this again in next ch2 loop*/
-	partSumMap[febSTR].push_back(std::make_pair(std::make_pair(ch1,ch2),part_sum));
-      }/** End of second loop on LArDigit*/    
-  }/** End of loop on LArDigit*/
- 
   //now fill the plots
-  for(std::map<std::string,std::vector<std::pair<int,double> > >::iterator feb_iter = meanMap.begin(); feb_iter != meanMap.end(); ++feb_iter) {
-    std::string febid = feb_iter->first;
-    auto chanMean = Monitored::Collection("chanMean",feb_iter->second,[](const std::pair<int,double> ch){return ch.second;});
-    auto chanMeanX = Monitored::Collection("chanMeanX",feb_iter->second,[](const std::pair<int,double> ch){return ch.first;});
-    auto chanPartSum = Monitored::Collection("chanPartSum",partSumMap[febid],[](const std::pair<std::pair<int,int>,double> ch){return ch.second;});
-    auto chanPartSumX = Monitored::Collection("chanPartSumX",partSumMap[febid],[](const std::pair<std::pair<int,int>,double> ch){return std::min(ch.first.first,ch.first.second);});
-    auto chanPartSumY = Monitored::Collection("chanPartSumY",partSumMap[febid],[](const std::pair<std::pair<int,int>,double> ch){return std::max(ch.first.first,ch.first.second);}); //needs max and min to fill the correlation plot always on the same side of the diagonal, otherwise it would be mixed up
+  for (auto& [febid,febdat] : febMap) {
+    febdat.sumSamples(m_LArOnlineIDHelper);
+    auto chanMean = Monitored::Collection("chanMean",febdat.m_meanSum,[](const std::pair<int,double> ch){return ch.second;});
+    auto chanMeanX = Monitored::Collection("chanMeanX",febdat.m_meanSum,[](const std::pair<int,double> ch){return ch.first;});
+    auto chanPartSum = Monitored::Collection("chanPartSum",febdat.m_partSum,[](const std::pair<std::pair<int,int>,double> ch){return ch.second;});
+    auto chanPartSumX = Monitored::Collection("chanPartSumX",febdat.m_partSum,[](const std::pair<std::pair<int,int>,double> ch){return std::min(ch.first.first,ch.first.second);});
+    auto chanPartSumY = Monitored::Collection("chanPartSumY",febdat.m_partSum,[](const std::pair<std::pair<int,int>,double> ch){return std::max(ch.first.first,ch.first.second);}); //needs max and min to fill the correlation plot always on the same side of the diagonal, otherwise it would be mixed up
   
     //fill the correct FEB
-    fill(m_tools[m_noiseCorrGroups.at(febid)],chanMean,chanMeanX,chanPartSum,chanPartSumX,chanPartSumY);
+    fill(m_tools[m_noiseCorrGroups.at(febdat.m_febName)],chanMean,chanMeanX,chanPartSum,chanPartSumX,chanPartSumY);
 
     /* actual correlations will be computed at post-processing stage */
 
@@ -290,15 +199,27 @@ bool LArNoiseCorrelationMonAlg::isGoodChannel(const HWIdentifier ID,const float 
 
 
 /*---------------------------------------------------------*/
-/** build the FEB string, following instructions from python config */
-std::string LArNoiseCorrelationMonAlg::febString(const HWIdentifier afeb) const {
-  std::string eb=m_LArOnlineIDHelper->isEMBchannel(afeb) ? "Barrel" : "Endcap";
-  std::string ac=(m_LArOnlineIDHelper->pos_neg(afeb)==1) ? "A" : "C";
-  int FT = m_LArOnlineIDHelper->feedthrough(afeb);
-  int SL = m_LArOnlineIDHelper->slot(afeb);
-  return eb+ac+Form("ft%02d",FT)+Form("slot%02d",SL);
+
+
+void LArNoiseCorrelationMonAlg::perFeb_t::sumSamples(const LArOnlineID* lArOnlineIDHelper) {
+  const size_t S=m_digitsAndPed.size();
+  for (size_t i1=0;i1<S;++i1) {
+    const auto& [pDig1,pedestal1]=m_digitsAndPed[i1];
+    const int ch1 = lArOnlineIDHelper->channel(pDig1->channelID());
+    //Sum mean:
+    for (const short adc : pDig1->samples()) {
+      m_meanSum.emplace_back(ch1,adc-pedestal1);
+    }  
+    //sum of squares
+    for (size_t i2=i1;i2<S;++i2) {
+      const auto& [pDig2,pedestal2]=m_digitsAndPed[i2];
+      const int ch2 = lArOnlineIDHelper->channel(pDig2->channelID());
+      double sumSquare=0;
+      const unsigned nADC=std::min(pDig1->nsamples(),pDig2->nsamples());    
+      for (unsigned i=0;i<nADC;++i) {
+        sumSquare+=((pDig1->samples().at(i)-pedestal1)*(pDig2->samples().at(i)-pedestal2));
+      }//end loop over samples   
+     m_partSum.emplace_back(std::make_pair(std::make_pair(ch1,ch2),sumSquare));
+    }//end loop pDig2
+  }//end loop pDig1 
 }
-
-
-
-
