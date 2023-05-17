@@ -249,7 +249,8 @@ namespace xAOD {
          static SG::SGKeySet missingSGKeys ATLAS_THREAD_SAFE;
          static mutex_t mutex;
          guard_t lock(mutex);
-         if( missingSGKeys.emplace( sgkey ).second ) {
+         if( missingSGKeys.emplace( sgkey ).second &&
+             m_printEventProxyWarnings) {
             ::Warning( "xAOD::TEvent::proxy_exact",
                        "Can't find BranchInfo for %d.",
                        sgkey );
@@ -362,9 +363,11 @@ namespace xAOD {
          static mutex_t mutex;
          guard_t lock(mutex);
          if( missingSGKeys.emplace( sgkey ).second ) {
-            ::Warning( "xAOD::TEvent::getEventFormatElement",
-                       "Can't find EventFormatElement for hashed "
-                       "SG key %d", sgkey );
+            if (m_printEventProxyWarnings) {
+               ::Warning( "xAOD::TEvent::getEventFormatElement",
+                          "Can't find EventFormatElement for hashed "
+                          "SG key %d", sgkey );
+            }
             return 0;
          }
       }
@@ -385,7 +388,7 @@ namespace xAOD {
 
       // Warn the user that the function got called:
       static std::atomic_flag warningPrinted ATLAS_THREAD_SAFE = ATOMIC_FLAG_INIT;
-      if ( ! warningPrinted.test_and_set() ) {
+      if ( ! warningPrinted.test_and_set() && m_printEventProxyWarnings) {
           ::Warning( "xAOD::TEvent::addToStore",
                     "Function should only be called through an invalid "
                     "ElementLink" );
