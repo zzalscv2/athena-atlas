@@ -39,12 +39,30 @@ def sTgcMonitoringConfig(inputFlags):
     #Expert
     sTgcOccupancyGroup = helper.addGroup(sTgcMonAlg, 'sTgcOccupancy', globalPath + 'Expert/Occupancy')
 
+    #Pad trigger
+    sTgcPadTriggerShifterGroup = helper.addGroup(sTgcMonAlg, 'padTriggerShifter', globalPath + 'Shifter/')
+    sTgcPadTriggerExpertGroup = helper.addGroup(sTgcMonAlg, 'padTriggerExpert', globalPath + 'Expert/')
+    
     # Layered and occupancy histograms
     side          = ['A', 'C']
+    size          = ['L', 'S']
     stationEtaMax = 3
     sectorMax     = 16
     layerMax      = 8
     
+    titleRelBCIDvsLB = '; LB; relBCID'
+    varRelBCIDvsLB   = 'lb,relBCID;RelBCID_vs_LB'
+    sTgcPadTriggerShifterGroup.defineHistogram(varRelBCIDvsLB, type = 'TH2F', title = titleRelBCIDvsLB, path = 'PadTrigger/Triggers', xbins = 3000, xmin = 0, xmax = 3000, ybins = 5, ymin = 0, ymax = 5, opt = 'kAlwaysCreate')
+
+    titleSectorVsLB  = '; LB; sector; number of triggers; number of triggers'
+    varSectorVsLB    = 'lb,sector;OccupancySector_vs_LB'
+    weightSectorVsLB = 'numberOfTriggers'
+    sTgcPadTriggerShifterGroup.defineHistogram(varSectorVsLB, type = 'TH2F', title = titleSectorVsLB, path = 'PadTrigger/Triggers', xbins = 3000, xmin = 0, xmax = 3000, ybins = 2*sectorMax + 2, ymin = -float(sectorMax + 1), ymax = float(sectorMax + 1), opt = 'kAlwaysCreate', weight = weightSectorVsLB)
+
+    titlehitpfebperSector = '; hit_pfeb; sector; hit_pfeb per sector'
+    varhitpfebperSector = 'sector,hitpfeb'
+    sTgcPadTriggerShifterGroup.defineHistogram(varhitpfebperSector, type = 'TH2F', title = titlehitpfebperSector, path = 'PadTrigger/Triggers', xbins = 33, xmin = -16, xmax = 16, ybins = 24, ymin = 0, ymax = 24, opt = 'kAlwaysCreate')
+
     for stationEtaIndex in range(1, stationEtaMax + 1):
         sTgcPadTimingExpertGroup = helper.addGroup(sTgcMonAlg, f'padTiming_quad_{stationEtaIndex}', globalPath + 'Expert/Timing/Pad')
         sTgcStripTimingExpertGroup = helper.addGroup(sTgcMonAlg, f'stripTiming_quad_{stationEtaIndex}', globalPath + 'Expert/Timing/Strip')
@@ -80,8 +98,21 @@ def sTgcMonitoringConfig(inputFlags):
             sTgcLBwireShifterGroup.defineHistogram(varSectorsVersusLumiblockWire, type = 'TH2F', title = titleSectorsVersusLumiblockWire, path = f'Q{stationEtaIndex}', xbins = 3000, xmin = 0., xmax = 3000., ybins = 2*sectorMax + 2, ymin = -float(sectorMax + 1), ymax = float(sectorMax + 1), opt = 'kAlwaysCreate')
 
     for sideIndex in side:
-        for stationEtaIndex in range(1, stationEtaMax + 1):
-            for sectorIndex in range(1, sectorMax + 1):            
+        for sizeIndex in size:
+            titlePhiVsIds = f'{sideIndex}{sizeIndex}; phiId; bandId'
+            varPhiVsIds   = f'phiIds_{sideIndex}_{sizeIndex},bandIds_{sideIndex}_{sizeIndex};bandIdsVSphiIds_{sideIndex}_{sizeIndex}'
+            sTgcPadTriggerShifterGroup.defineHistogram(varPhiVsIds, type = 'TH2F', title = titlePhiVsIds, path = 'PadTrigger/Triggers', xbins = 65, xmin = 0, xmax = 64, ybins = 100, ymin = 0, ymax = 100, opt = 'kAlwaysCreate')
+        for sectorIndex in range(1, sectorMax + 1):
+            titleBandIdVersusLBperSector = f'{sideIndex}' + f'{sectorIndex}'.zfill(2) + '; lb; bandId; number of triggers'
+            varBandIdVersusLBperSector = f'lb_{sideIndex}_sector_{sectorIndex},bandIds_{sideIndex}_sector_{sectorIndex};OccupancyBandId_vs_LB_{sideIndex}{sectorIndex}'
+            weightBandIdVersusLBperSector = f'numberOfTriggers_{sideIndex}_sector_{sectorIndex}'
+            sTgcPadTriggerExpertGroup.defineHistogram(varBandIdVersusLBperSector, type = 'TH2F', title = titleBandIdVersusLBperSector, path = 'PadTrigger/Triggers/OccupancyBandId_vs_LB', xbins = 3000, xmin = 0, xmax = 3000, ybins = 100, ymin = 0, ymax = 100, opt = 'kAlwaysCreate', weight = weightBandIdVersusLBperSector)
+            
+            titlePhiVsIds = f'{sideIndex}' + f'{sectorIndex}'.zfill(2) + '; phiId; bandId'
+            varPhiVsIds   = f'phiIds_{sideIndex}_sector_{sectorIndex},bandIds_{sideIndex}_sector_{sectorIndex};bandIdsVSphiIds_{sideIndex}{sectorIndex}'
+            sTgcPadTriggerExpertGroup.defineHistogram(varPhiVsIds, type = 'TH2F', title = titlePhiVsIds, path = 'PadTrigger/Triggers/OccupancyBandId_vs_PhiId', xbins = 65, xmin = 0, xmax = 64, ybins = 100, ymin = 0, ymax = 100, opt = 'kAlwaysCreate')
+
+            for stationEtaIndex in range(1, stationEtaMax + 1):
                 padChargeGroup = helper.addGroup(sTgcMonAlg, f'padCharge_{sideIndex}{sectorIndex}_quad_{stationEtaIndex}', globalPath + f'Expert/Charge/{sideIndex}' + f'{sectorIndex}'.zfill(2) + '/Pad')
                 stripChargeGroup = helper.addGroup(sTgcMonAlg, f'stripCharge_{sideIndex}{sectorIndex}_quad_{stationEtaIndex}', globalPath + f'Expert/Charge/{sideIndex}' + f'{sectorIndex}'.zfill(2) + '/Strip')
                 wireGroupChargeGroup = helper.addGroup(sTgcMonAlg, f'wireGroupCharge_{sideIndex}{sectorIndex}_quad_{stationEtaIndex}', globalPath + f'Expert/Charge/{sideIndex}' + f'{sectorIndex}'.zfill(2) + '/Wire')

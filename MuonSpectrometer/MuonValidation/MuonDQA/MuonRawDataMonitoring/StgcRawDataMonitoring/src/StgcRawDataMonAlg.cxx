@@ -19,6 +19,8 @@
 // Public Methods
 // ********************************************************************* 
 /////////////////////////////////////////////////////////////////////////////
+ 
+// Pad Trigger Branch -> Testing 
 
 sTgcRawDataMonAlg::sTgcRawDataMonAlg(const std::string& name, ISvcLocator* pSvcLocator) : AthMonitorAlgorithm(name, pSvcLocator) {
   //Declare the property 
@@ -31,23 +33,33 @@ StatusCode sTgcRawDataMonAlg::initialize() {
   ATH_CHECK(m_detectorManagerKey.initialize());
   ATH_CHECK(m_meTrkKey.initialize());
   ATH_CHECK(m_residualPullCalculator.retrieve());
+  
+  ATH_CHECK(m_rdoKey.initialize()); 
+  
   return StatusCode::SUCCESS;
 } 
 
 StatusCode sTgcRawDataMonAlg::fillHistograms(const EventContext& ctx) const {  
+  const int lumiblock = GetEventInfo(ctx) -> lumiBlock();
+
   SG::ReadHandle<Muon::sTgcPrepDataContainer> sTgcContainer(m_sTgcContainerKey, ctx);
   SG::ReadCondHandle<MuonGM::MuonDetectorManager> detectorManagerKey(m_detectorManagerKey, ctx); 
   SG::ReadHandle<xAOD::TrackParticleContainer> meTPContainer(m_meTrkKey, ctx);
+  SG::ReadHandle<Muon::NSW_PadTriggerDataContainer> NSWpadTriggerContainer(m_rdoKey, ctx);
 
   if (!meTPContainer.isValid()) {
     ATH_MSG_FATAL("Could not get track particle container: " << m_meTrkKey.fullKey());
     return StatusCode::FAILURE;
   }
  
+  if (!NSWpadTriggerContainer.isValid()) {
+    ATH_MSG_FATAL("Could not get pad trigger data container: " << m_rdoKey.fullKey());
+    return StatusCode::FAILURE;
+  }
+
   fillsTgcClusterFromTrackHistograms(meTPContainer.cptr());
- 
-  const int lumiblock = GetEventInfo(ctx) -> lumiBlock();
-  
+  fillsTgcPadTriggerDataHistograms(NSWpadTriggerContainer.cptr(), lumiblock);
+   
   for(const Muon::sTgcPrepDataCollection* coll : *sTgcContainer) {
     for (const Muon::sTgcPrepData* prd : *coll) {
       fillsTgcOccupancyHistograms(prd, detectorManagerKey.cptr());
@@ -307,5 +319,44 @@ void sTgcRawDataMonAlg::fillsTgcClusterFromTrackHistograms(const xAOD::TrackPart
   }
 }
 
+void sTgcRawDataMonAlg::fillsTgcPadTriggerDataHistograms(const Muon::NSW_PadTriggerDataContainer* NSWpadTriggerObject, int lb) const {
+  for (const Muon::NSW_PadTriggerData* rdo : *NSWpadTriggerObject ) {
+    for (size_t it = 0; it < rdo -> getNumberOfTriggers(); ++it) {
+      std::vector<unsigned int> phiIds  = rdo -> getTriggerPhiIds();
+      std::vector<unsigned int> bandIds = rdo -> getTriggerBandIds();
+      std::vector<unsigned int> relBCID = rdo -> getTriggerRelBcids();
+      std::vector<unsigned int> hitpfeb = rdo -> getHitPfebs();
 
+      bool sideA = rdo -> sideA();
+      bool largeSector = rdo -> largeSector();
+      
+      int iside = (sideA) ? 1 : 0;
+      int isize = (largeSector) ? 1 : 0; 
+      
+      std::string side = GeometricSectors::sTgcSide[iside];
+      std::string size = GeometricSectors::sTgcSize[isize];
 
+      unsigned int sourceId = rdo -> getSourceid();
+      int sectorNumber = sourceidToSector(sourceId, sideA);
+      unsigned int numberOfTriggers = rdo -> getNumberOfTriggers();
+
+      auto phiIdsSidedSizedMon  = Monitored::Collection("phiIds_"  + side + "_" + size, phiIds);
+      auto bandIdsSidedSizedMon = Monitored::Collection("bandIds_" + side + "_" + size, bandIds);
+      fill("padTriggerShifter", phiIdsSidedSizedMon, bandIdsSidedSizedMon);
+
+      auto relBCIDMon = Monitored::Collection("relBCID", relBCID);
+      auto hitpfebMon = Monitored::Collection("hitpfeb", hitpfeb);
+      auto lbMon = Monitored::Scalar<int>("lb", lb);
+      auto sectorMon = Monitored::Scalar<int>("sector", sectorNumber);
+      auto numberOfTriggersMon = Monitored::Scalar<int>("numberOfTriggers", numberOfTriggers);
+      fill("padTriggerShifter", relBCIDMon, lbMon, sectorMon, numberOfTriggersMon, hitpfebMon);
+
+      auto lbPerSectorMon = Monitored::Scalar<int>("lb_" + side + "_sector_" + std::to_string(std::abs(sectorNumber)), lb);
+      auto bandIDperSectorMon = Monitored::Collection("bandIds_" + side + "_sector_" + std::to_string(std::abs(sectorNumber)), bandIds);
+      auto numberOfTriggersPerSectorMon = Monitored::Scalar<int>("numberOfTriggers_" + side + "_sector_" + std::to_string(std::abs(sectorNumber)), numberOfTriggers);
+      auto phiIdsSidedSizedPerSectorMon  = Monitored::Collection("phiIds_"  + side + "_sector_" + std::to_string(std::abs(sectorNumber)), phiIds);
+      auto bandIdsSidedSizedPerSectorMon = Monitored::Collection("bandIds_" + side + "_sector_" + std::to_string(std::abs(sectorNumber)), bandIds);
+      fill("padTriggerExpert", lbPerSectorMon, bandIDperSectorMon, numberOfTriggersPerSectorMon, phiIdsSidedSizedPerSectorMon, bandIdsSidedSizedPerSectorMon);
+    }
+  }
+}

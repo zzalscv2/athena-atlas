@@ -18,3 +18,7 @@ int sTgcRawDataMonAlg::getLayer(int multiplet, int gasGap) const {
   return 4*(multiplet -1 ) + gasGap;
 }
 
+int32_t sTgcRawDataMonAlg::sourceidToSector(uint32_t sourceid, bool isSideA) const {
+  uint32_t sectorNumber = sourceid & 0xf;
+  return (isSideA) ? sectorNumber + 1: -sectorNumber - 1;
+}
