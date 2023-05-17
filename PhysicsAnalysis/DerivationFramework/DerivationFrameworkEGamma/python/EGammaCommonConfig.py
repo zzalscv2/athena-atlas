@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # ********************************************************************
 # EGammaCommonConfig.py
@@ -157,13 +157,14 @@ def EGammaCommonCfg(ConfigFlags):
     # ====================================================================
     # ELECTRON CHARGE SELECTION
     # ====================================================================
-    from ElectronPhotonSelectorTools.AsgElectronChargeIDSelectorToolConfig import AsgElectronChargeIDSelectorToolCfg
-    ElectronChargeIDSelector = acc.popToolsAndMerge(AsgElectronChargeIDSelectorToolCfg(
-        ConfigFlags,
-        name="ElectronChargeIDSelectorLoose"))
-    ElectronChargeIDSelector.primaryVertexContainer = "PrimaryVertices"
-    ElectronChargeIDSelector.TrainingFile = "ElectronPhotonSelectorTools/ChargeID/ECIDS_20180731rel21Summer2018.root"
-    acc.addPublicTool(ElectronChargeIDSelector)
+    if ConfigFlags.Derivation.Egamma.addECIDS:
+        from ElectronPhotonSelectorTools.AsgElectronChargeIDSelectorToolConfig import AsgElectronChargeIDSelectorToolCfg
+        ElectronChargeIDSelector = acc.popToolsAndMerge(AsgElectronChargeIDSelectorToolCfg(
+            ConfigFlags,
+            name="ElectronChargeIDSelectorLoose"))
+        ElectronChargeIDSelector.primaryVertexContainer = "PrimaryVertices"
+        ElectronChargeIDSelector.TrainingFile = "ElectronPhotonSelectorTools/ChargeID/ECIDS_20180731rel21Summer2018.root"
+        acc.addPublicTool(ElectronChargeIDSelector)
 
     # ====================================================================
     # FWD ELECTRON LH SELECTORS
@@ -365,15 +366,16 @@ def EGammaCommonCfg(ConfigFlags):
         StoreTResult = False))
 
     # decorate electrons with the output of ECIDS
-    ElectronPassECIDS = acc.getPrimaryAndMerge(EGElectronLikelihoodToolWrapperCfg(
-        ConfigFlags,
-        name="ElectronPassECIDS",
-        EGammaElectronLikelihoodTool=ElectronChargeIDSelector,
-        EGammaFudgeMCTool="",
-        CutType="",
-        StoreGateEntryName="DFCommonElectronsECIDS",
-        ContainerName="Electrons",
-        StoreTResult=True))
+    if ConfigFlags.Derivation.Egamma.addECIDS:
+        ElectronPassECIDS = acc.getPrimaryAndMerge(EGElectronLikelihoodToolWrapperCfg(
+            ConfigFlags,
+            name="ElectronPassECIDS",
+            EGammaElectronLikelihoodTool=ElectronChargeIDSelector,
+            EGammaFudgeMCTool="",
+            CutType="",
+            StoreGateEntryName="DFCommonElectronsECIDS",
+            ContainerName="Electrons",
+            StoreTResult=True))
 
     if includeFwdElectrons:
         # decorate forward electrons with the output of LH loose
@@ -517,7 +519,6 @@ def EGammaCommonCfg(ConfigFlags):
                            ElectronPassDNNLoose,
                            ElectronPassDNNMedium,
                            ElectronPassDNNTight,
-                           ElectronPassECIDS,
                            PhotonPassIsEMLoose,
                            PhotonPassIsEMTight,
                            PhotonPassIsEMTightPtIncl,
@@ -525,11 +526,16 @@ def EGammaCommonCfg(ConfigFlags):
                            PhotonPassCrackVeto,
                            ElectronPassCrackVeto,
                            ElectronAmbiguity]
+
+    if ConfigFlags.Derivation.Egamma.addECIDS:
+        EGAugmentationTools.extend([ElectronPassECIDS])
+
     if includeFwdElectrons:
         EGAugmentationTools.extend([
-                           ForwardElectronPassLHLoose,
-                           ForwardElectronPassLHMedium,
-                           ForwardElectronPassLHTight])
+            ForwardElectronPassLHLoose,
+            ForwardElectronPassLHMedium,
+            ForwardElectronPassLHTight,
+        ])
 
 
     # ==================================================
