@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETSELECTORTOOLS_JETCLEANINGTOOL_H
@@ -113,24 +113,23 @@ public:
     std::string   getCutName( const CleaningLevel ) const;
 
   private:
-    /** Name of the cut */    
-    std::string m_cutName; 
-    CleaningLevel m_cutLevel;
-    bool m_doUgly;
-    bool m_useDecorations;
-    std::string m_jetCleanDFName; //new implementation with derivation level event cleaning decision
-    SG::AuxElement::ConstAccessor<char> m_acc_jetClean;
-    SG::AuxElement::ConstAccessor<char> m_acc_looseClean;
 
+    /** Name of the cut */    
+    Gaudi::Property<std::string> m_cutName{this, "CutLevel", "" }; 
+    CleaningLevel m_cutLevel{LooseBad};
+    Gaudi::Property<bool> m_doUgly{this, "DoUgly", false};
+    Gaudi::Property<bool> m_useDecorations{this, "UseDecorations", true};
+    
+    SG::AuxElement::ConstAccessor<char> m_acc_jetClean{"DFCommonJets_jetClean_LooseBad"};
+  
     //
     Gaudi::Property<std::string> m_jetContainerName{this, "JetContainer", "", "SG key for input jet container"};
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_jetCleanKey{this, "JetCleaningName", "isClean", "SG key for output jet cleaning decoration"};
-
     asg::AcceptInfo m_accept;
 
     /** Hot cells caching */
-    std::string m_hotCellsFile;
-    std::unordered_map<unsigned int, std::vector<JCT::HotCell*>*>* m_hotCellsMap;
+    Gaudi::Property<std::string> m_hotCellsFile{this, "HotCellsFile", ""};
+    std::unordered_map<unsigned int, std::vector<std::unique_ptr<JCT::HotCell>>> m_hotCellsMap;
     StatusCode readHotCells();
     
     void missingVariable(const std::string& varName) const;
