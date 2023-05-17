@@ -25,7 +25,7 @@ Digi_tf.py \
 --postExec 'all:CfgMgr.MessageSvc().setError+=["HepMcParticleLink"]' 'HITtoRDO:from AthenaCommon import CfgGetter;mergeMcEventCollTool=CfgGetter.getPublicTool("MergeMcEventCollTool").DoSlimming=False' 'HITtoRDO:condSeq.TileSamplingFractionCondAlg.G4Version = -1;' \
 --postInclude 'all:PyJobTransforms/UseFrontier.py,SimulationJobOptions/postInclude.HijingPars.py,PixelConditionsAlgorithms/postInclude.UsePixelModuleLevelMask.py' \
 --geometryVersion ATLAS-R2-2015-03-01-00 \
---conditionsTag all:OFLCOND-MC15c-SDR-15 \
+--conditionsTag all:OFLCOND-RUN12-SDR-31-01 \
 --DataRunNumber 295000 \
 --pileupInitialBunch 0 \
 --pileupFinalBunch 0 \
