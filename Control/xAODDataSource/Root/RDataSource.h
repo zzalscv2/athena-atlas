@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODDATASOURCE_RDATASOURCE_H
 #define XAODDATASOURCE_RDATASOURCE_H
@@ -52,16 +52,27 @@ namespace xAOD {
 
       /// Set the number of threads/slots that the data source should use
       virtual void SetNSlots( unsigned int slots ) override final;
-      /// Initialise the data source, before the start of the event loop
+      /// Initialize the data source, before the start of the event loop
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,28,0)
       virtual void Initialise() override final;
-      /// Initialise one of the slots/threads
+#else
+      virtual void Initialize() override final;
+#endif
+      /// Initialize one of the slots/threads
       virtual void
       InitSlot( unsigned int slot, ULong64_t firstEntry ) override final;
 
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,28,0)
       /// Close the input file reading in one of the slots/threads
       virtual void FinaliseSlot( unsigned int slot ) override final;
       /// Finalise the data source, after the event loop
       virtual void Finalise() override final;
+#else
+      /// Close the input file reading in one of the slots/threads
+      virtual void FinalizeSlot( unsigned int slot ) override final;
+      /// Finalize the data source, after the event loop
+      virtual void Finalize() override final;
+#endif
 
       /// Get the column/object names for the input file(s)
       virtual const std::vector< std::string >&
@@ -115,7 +126,7 @@ namespace xAOD {
 
       /// @}
 
-      /// @name Variables that become valid after calling @c Initialise()
+      /// @name Variables that become valid after calling @c Initialize()
       /// @{
 
       /// Optimal entry ranges to split the processing into

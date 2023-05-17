@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s).
@@ -28,7 +28,11 @@ int main() {
 
    // Set up the data source.
    xAOD::RDataSource ds( "${ASG_TEST_FILE_DATA}" );
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,28,00)
    ds.Initialise();
+#else
+   ds.Initialize();
+#endif
 
    // Print the ideal entry ranges to process.
    std::cout << ds.GetEntryRanges() << std::endl;
