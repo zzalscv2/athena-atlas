@@ -316,23 +316,152 @@ StatusCode   LumiBlockMetaDataTool::finishUp() {
 
   // Store the LumiBlockRangeContainer in the metadata store
   // =======================================================
-  if(!piovComplete->empty()) {
-    ATH_MSG_INFO(  "Write Complete LumiBlocks with size  " <<  piovComplete->size());
-    ATH_CHECK( m_pMetaDataStore->record( std::move(piovComplete), m_LBColl_name ) );
-    ATH_CHECK( m_pMetaDataStore->record( std::move(piovCompleteAux), m_LBColl_name + "Aux." ) );
-  }
-  
-  if(!piovUnfinished->empty()) {
-    ATH_MSG_INFO(  "Write Unfinished LumiBlocks with size  " <<  piovUnfinished->size());
-    ATH_CHECK( m_pMetaDataStore->record( std::move(piovUnfinished), m_unfinishedLBColl_name ) );
-    ATH_CHECK( m_pMetaDataStore->record( std::move(piovUnfinishedAux), m_unfinishedLBColl_name + "Aux." ) );
+  if (!piovComplete->empty()) {
+    ATH_MSG_INFO("Write Complete LumiBlocks with size  " << piovComplete->size());
+    // Check if we have already written them out
+    if (m_pMetaDataStore->contains<xAOD::LumiBlockRangeContainer>(m_LBColl_name)) {
+      ATH_MSG_WARNING(
+          "Complete LumiBlocks container with key "
+          << m_LBColl_name
+          << " already exists. Updating if there are missing LumiBlocks.");
+      xAOD::LumiBlockRangeContainer* complete = nullptr;
+      ATH_CHECK(m_pMetaDataStore->retrieve(complete, m_LBColl_name));
+
+      for (const auto range : *piovComplete) {
+        // Check if this configuration is already in the existing container:
+        bool exists = false;
+        for (const auto existing : *complete) {
+          if ((existing->startRunNumber() == range->startRunNumber()) &&
+              (existing->stopRunNumber() == range->stopRunNumber()) &&
+              (existing->startLumiBlockNumber() == range->startLumiBlockNumber()) &&
+              (existing->stopLumiBlockNumber() == range->stopLumiBlockNumber()) &&
+              (existing->eventsSeen() == range->eventsSeen()) &&
+              (existing->eventsExpected() == range->eventsExpected())) {
+            exists = true;
+            break;
+          }
+        }
+        if (exists) {
+          continue;
+        }
+        // New LumiBlock, put it into the output container
+        ATH_MSG_INFO(
+            "Copying LumiBlock: [ ("
+            << range->startRunNumber() << "," << range->stopLumiBlockNumber()
+            << "):(" << range->startRunNumber() << ","
+            << range->stopLumiBlockNumber()
+            << ") eventsSeen = " << range->eventsSeen()
+            << ", eventsExpected = " << range->eventsExpected() << " ]");
+        xAOD::LumiBlockRange* out = new xAOD::LumiBlockRange();
+        complete->push_back(out);
+        *out = *range;
+      }
+    } else {
+      ATH_MSG_INFO("Recording "
+                   << m_LBColl_name
+                   << " LumiBlockRangeContainer in output MetaDataStore");
+      ATH_CHECK(m_pMetaDataStore->record(std::move(piovComplete), m_LBColl_name));
+      ATH_CHECK(m_pMetaDataStore->record(std::move(piovCompleteAux), m_LBColl_name + "Aux."));
+    }
   }
 
-  if(!piovSuspect->empty()) {
-    ATH_MSG_INFO(  "Write Suspect LumiBlocks with size  " <<  piovSuspect->size());
-    ATH_CHECK( m_pMetaDataStore->record( std::move(piovSuspect), m_suspectLBColl_name ) );
-    ATH_CHECK( m_pMetaDataStore->record( std::move(piovSuspectAux), m_suspectLBColl_name + "Aux." ) );
+  if (!piovUnfinished->empty()) {
+    ATH_MSG_INFO("Write Unfinished LumiBlocks with size  " << piovUnfinished->size());
+    // Check if we have already written them out
+    if (m_pMetaDataStore->contains<xAOD::LumiBlockRangeContainer>(m_unfinishedLBColl_name)) {
+      ATH_MSG_WARNING(
+          "Unfinished LumiBlocks container with key "
+          << m_unfinishedLBColl_name
+          << " already exists. Updating if there are missing LumiBlocks.");
+      xAOD::LumiBlockRangeContainer* unfinished = nullptr;
+      ATH_CHECK(m_pMetaDataStore->retrieve(unfinished, m_unfinishedLBColl_name));
+
+      for (const auto range : *piovUnfinished) {
+        // Check if this configuration is already in the existing container:
+        bool exists = false;
+        for (const auto existing : *unfinished) {
+          if ((existing->startRunNumber() == range->startRunNumber()) &&
+              (existing->stopRunNumber() == range->stopRunNumber()) &&
+              (existing->startLumiBlockNumber() == range->startLumiBlockNumber()) &&
+              (existing->stopLumiBlockNumber() == range->stopLumiBlockNumber()) &&
+              (existing->eventsSeen() == range->eventsSeen()) &&
+              (existing->eventsExpected() == range->eventsExpected())) {
+            exists = true;
+            break;
+          }
+        }
+        if (exists) {
+          continue;
+        }
+        // New LumiBlock, put it into the output container
+        ATH_MSG_INFO(
+            "Copying LumiBlock: [ ("
+            << range->startRunNumber() << "," << range->stopLumiBlockNumber()
+            << "):(" << range->startRunNumber() << ","
+            << range->stopLumiBlockNumber()
+            << ") eventsSeen = " << range->eventsSeen()
+            << ", eventsExpected = " << range->eventsExpected() << " ]");
+        xAOD::LumiBlockRange* out = new xAOD::LumiBlockRange();
+        unfinished->push_back(out);
+        *out = *range;
+      }
+    } else {
+      ATH_MSG_INFO("Recording "
+                   << m_unfinishedLBColl_name
+                   << " LumiBlockRangeContainer in output MetaDataStore");
+      ATH_CHECK(m_pMetaDataStore->record(std::move(piovUnfinished), m_unfinishedLBColl_name));
+      ATH_CHECK(m_pMetaDataStore->record(std::move(piovUnfinishedAux), m_unfinishedLBColl_name + "Aux."));
+    }
   }
-  
+
+  if (!piovSuspect->empty()) {
+    ATH_MSG_INFO("Write Suspect LumiBlocks with size  " << piovSuspect->size());
+    // Check if we have already written them out
+    if (m_pMetaDataStore->contains<xAOD::LumiBlockRangeContainer>(m_suspectLBColl_name)) {
+      ATH_MSG_WARNING(
+          "Suspect LumiBlocks container with key "
+          << m_suspectLBColl_name
+          << " already exists. Updating if there are missing LumiBlocks.");
+      xAOD::LumiBlockRangeContainer* suspect = nullptr;
+      ATH_CHECK(m_pMetaDataStore->retrieve(suspect, m_suspectLBColl_name));
+
+      for (const auto range : *piovSuspect) {
+        // Check if this configuration is already in the existing container:
+        bool exists = false;
+        for (const auto existing : *suspect) {
+          if ((existing->startRunNumber() == range->startRunNumber()) &&
+              (existing->stopRunNumber() == range->stopRunNumber()) &&
+              (existing->startLumiBlockNumber() == range->startLumiBlockNumber()) &&
+              (existing->stopLumiBlockNumber() == range->stopLumiBlockNumber()) &&
+              (existing->eventsSeen() == range->eventsSeen()) &&
+              (existing->eventsExpected() == range->eventsExpected())) {
+            exists = true;
+            break;
+          }
+        }
+        if (exists) {
+          continue;
+        }
+        // New LumiBlock, put it into the output container
+        ATH_MSG_INFO(
+            "Copying LumiBlock: [ ("
+            << range->startRunNumber() << "," << range->stopLumiBlockNumber()
+            << "):(" << range->startRunNumber() << ","
+            << range->stopLumiBlockNumber()
+            << ") eventsSeen = " << range->eventsSeen()
+            << ", eventsExpected = " << range->eventsExpected() << " ]");
+        xAOD::LumiBlockRange* out = new xAOD::LumiBlockRange();
+        suspect->push_back(out);
+        *out = *range;
+      }
+    } else {
+      ATH_MSG_INFO("Recording "
+                   << m_suspectLBColl_name
+                   << " LumiBlockRangeContainer in output MetaDataStore");
+      ATH_CHECK(m_pMetaDataStore->record(std::move(piovSuspect), m_suspectLBColl_name));
+      ATH_CHECK(m_pMetaDataStore->record(std::move(piovSuspectAux), m_suspectLBColl_name + "Aux."));
+    }
+  }
+
   return(StatusCode::SUCCESS);
 }
