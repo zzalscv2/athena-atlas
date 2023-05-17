@@ -16,14 +16,11 @@ PURPOSE:
 #include "MissingETEvent/MissingEtTruth.h"
 #include "MissingETEvent/MissingEtRegions.h"
 
-#include "TruthHelper/IsGenStable.h"
 #include "TruthHelper/IsGenNonInteracting.h"
-#include "TruthHelper/GenAccessIO.h"
 
 #include "CLHEP/Vector/LorentzVector.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 
-using namespace TruthHelper; 
 
 MissingEtTruth::MissingEtTruth() : MissingET(MissingET::Truth)
 {
@@ -59,7 +56,7 @@ void MissingEtTruth::addPart(HepMC::ConstGenParticlePtr Part, double etaFull)
   int idp    = (Part)->pdg_id();
  
   TruthIndex thePart = NotValid;
-  IsGenNonInteracting nonint;
+  TruthHelper::IsGenNonInteracting nonint;
  
   if ( nonint.operator()(Part) )  // if IsGenNonInteracting returns true
   {  

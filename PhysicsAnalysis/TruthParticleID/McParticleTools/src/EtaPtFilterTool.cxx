@@ -29,7 +29,6 @@
 /// Public methods: 
 /////////////////////////////////////////////////////////////////// 
 
-using namespace TruthHelper;
 using CLHEP::GeV;
 
 /// Constructors
@@ -198,7 +197,7 @@ bool EtaPtFilterTool::isAccepted( const HepMC::ConstGenParticlePtr& mc ) const
   }
   
   if ( m_butKeepAllGeneratorStable.value() ) {
-    static const IsGenStable isStable;
+    static const TruthHelper::IsGenStable isStable;
     if ( isStable(mc) ) 
       return true;
   }
@@ -206,7 +205,7 @@ bool EtaPtFilterTool::isAccepted( const HepMC::ConstGenParticlePtr& mc ) const
   if ( m_onlyGenerator.value() ) {
     // helper class to know if a GenParticle has been produced at Generator 
     // level. ie: not at simulation level (Geant4)
-    static const IsGenerator ifs;
+    static const TruthHelper::IsGenerator ifs;
     if ( !ifs(mc) ) {
       return false;
     }
