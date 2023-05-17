@@ -49,15 +49,11 @@ def HISubtractedCellMakerToolCfg(flags, name="HISubtractedCellMakerTool", **kwar
     if "EventShapeKey" not in kwargs:
         kwargs.setdefault("EventShapeKey", flags.HeavyIon.Egamma.EventShape)
     if "EventShapeMapTool" not in kwargs:
+        from HIGlobal.HIGlobalConfig import HIEventShapeMapToolCfg
         eventShapeMapTool = acc.popToolsAndMerge(HIEventShapeMapToolCfg(flags, name="HIEventShapeMapTool"))
         kwargs.setdefault("EventShapeMapTool",eventShapeMapTool)
 
     acc.setPrivateTools(CompFactory.HISubtractedCellMakerTool(name, **kwargs))
-    return acc
-
-def HIEventShapeMapToolCfg(flags, name="HIEventShapeMapTool", **kwargs):
-    acc = ComponentAccumulator()
-    acc.setPrivateTools(CompFactory.HIEventShapeMapTool(name, **kwargs))
     return acc
 
 def CaloCellContainerFinalizerToolCfg(flags, name="HICaloCellFinalizerTool", **kwargs):

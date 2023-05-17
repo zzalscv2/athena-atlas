@@ -2,52 +2,102 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
 from OutputStreamAthenaPool.OutputStreamConfig import addToAOD, addToESD
+
+def HITowerWeightToolCfg(flags, name="WeightTool", **kwargs):
+    """Configures HITowerWeightTool"""
+    acc = ComponentAccumulator()
+
+    if "InputFile" not in kwargs:
+        if flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2]:
+            kwargs.setdefault("InputFile", 'cluster.geo.DATA_PbPb_2018v2.root')
+        else:
+            kwargs.setdefault("InputFile", 'cluster.geo.DATA_PbPb_2022.root')
+    kwargs.setdefault("ApplyCorrection", flags.HeavyIon.Jet.ApplyTowerEtaPhiCorrection)
+    kwargs.setdefault("ConfigDir", 'HIJetCorrection/')
+
+    acc.setPrivateTools(CompFactory.HITowerWeightTool(name, **kwargs))
+    return acc
+
+def HIEventShapeMapToolCfg(flags, name="HIEventShapeMapTool", **kwargs):
+    """Configures HIEventShapeMapTool"""
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(CompFactory.HIEventShapeMapTool(name, **kwargs))
+    return acc
+
+def HIEventShapeFillerToolCfg(flags, name="HIEventShapeFillerTool", **kwargs):
+    """Configures HIEventShapeFillerTool"""
+    acc = ComponentAccumulator()
+    if "EventShapeMapTool" not in kwargs:
+        eventShapeMapTool = acc.popToolsAndMerge(HIEventShapeMapToolCfg(flags, name="HIEventShapeMapTool"))
+        kwargs.setdefault("EventShapeMapTool", eventShapeMapTool)
+    kwargs.setdefault("UseClusters", False)
+    if kwargs["UseClusters"]:
+        #Add weight tool to filler tool
+        TWTool=acc.popToolsAndMerge(HITowerWeightToolCfg(flags, name="WeightTool"))
+        kwargs.setdefault("TowerWeightTool", TWTool)
+
+    acc.setPrivateTools(CompFactory.HIEventShapeFillerTool(name, **kwargs))
+    return acc
+
+def HIEventShapeMakerCfg(flags, name="HIEventShapeMaker", doWeighted=False, **kwargs):
+    """Configures HIEventShapeMaker, either with weights (for HIJets) or without weight (for HIGlobal)"""
+    acc = ComponentAccumulator()
+    
+    # merge dependencies
+    from CaloRec.CaloRecoConfig import CaloRecoCfg  
+    acc.merge(CaloRecoCfg(flags))
+    from CaloRec.CaloTowerMakerConfig import CaloTowerMakerCfg
+    towerMaker = acc.getPrimaryAndMerge(CaloTowerMakerCfg(flags))
+
+    kwargs.setdefault("NaviTowerKey", towerMaker.TowerContainerName)
+    kwargs.setdefault("InputTowerKey", towerMaker.TowerContainerName)
+    kwargs.setdefault("OutputContainerKey", "HIEventShape")
+    if "HIEventShapeFillerTool" not in kwargs:
+        name_esft="HIEventShapeFillerTool_Weighted" if doWeighted else "HIEventShapeFillerTool"
+        eventShapeTool = acc.popToolsAndMerge(HIEventShapeFillerToolCfg(flags, 
+                                                                        name=name_esft,
+                                                                        UseClusters=doWeighted))
+        kwargs.setdefault("HIEventShapeFillerTool",eventShapeTool)
+
+    acc.addEventAlgo(CompFactory.HIEventShapeMaker(name, **kwargs))
+    return acc
+
+def HIEventShapeSummaryToolCfg(flags, name="HIEventShapeSummaryTool", **kwargs):
+    """Configures HIEventShapeSummaryTool"""
+    acc = ComponentAccumulator()
+
+    # TODO configure MBTS &FWD conversion once available
+    kwargs.setdefault("SubCalos", ['FCal','EMCal','HCal','ALL'])
+    kwargs.setdefault("Samplings", ['FCAL0','FCAL1','FCAL2'])
+    kwargs.setdefault("DoPositiveNegativeSides", False)
+
+    acc.setPrivateTools(CompFactory.HIEventShapeSummaryTool(name, **kwargs))
+    return acc
 
 def HIGlobalRecCfg(flags):
     """Configures Heavy Ion Global quantities """
     acc = ComponentAccumulator()
 
-    # load dependencies
-    from CaloRec.CaloRecoConfig import CaloRecoCfg  
-    acc.merge(CaloRecoCfg(flags))
-    from CaloRec.CaloTowerMakerConfig import CaloTowerMakerCfg
-    towerMaker = acc.getPrimaryAndMerge(CaloTowerMakerCfg(flags))
-    input = towerMaker.TowerContainerName
-
-
-    eventShapeTool = CompFactory.HIEventShapeFillerTool( 
-            EventShapeMapTool = CompFactory.HIEventShapeMapTool()
-    )
-    shapeKey = "HIEventShape"
-    eventShapeMakerAlg = CompFactory.HIEventShapeMaker(
-                    InputTowerKey = input,
-                    NaviTowerKey = input,
-                    OutputContainerKey = shapeKey,
-                    HIEventShapeFillerTool = eventShapeTool)
+    shapeKey="HIEventShape"
     output = [ f"xAOD::HIEventShapeContainer#{shapeKey}", f"xAOD::HIEventShapeAuxContainer#{shapeKey}Aux."]
 
-    # TODO configure MBTS &FWD conversion once available
-
-
+    kwargs_hies=dict()
     if flags.HeavyIon.Global.doEventShapeSummary:
         summaryKey = "CaloSums"
-        summaryTool = CompFactory.HIEventShapeSummaryTool(  SubCalos =  ['FCal','EMCal','HCal','ALL'],
-                                                            Samplings = ['FCAL0','FCAL1','FCAL2'],
-                                                            DoPositiveNegativeSides= False )
-
-        eventShapeMakerAlg.SummaryTool = summaryTool
-        eventShapeMakerAlg.SummaryContainerKey = summaryKey
-
+        summaryTool = acc.popToolsAndMerge(HIEventShapeSummaryToolCfg(flags))
+        kwargs_hies["SummaryTool"] = summaryTool
+        kwargs_hies["SummaryContainerKey"] = summaryKey
         output.extend([ f"xAOD::HIEventShapeContainer#{summaryKey}", f"xAOD::HIEventShapeAuxContainer#{summaryKey}Aux."])
+
+    acc.merge(HIEventShapeMakerCfg(flags, **kwargs_hies))  
 
     acc.merge(addToESD(flags, output))
     acc.merge(addToAOD(flags, output))
-                    
-    acc.addEventAlgo( eventShapeMakerAlg )
-
 
     return acc
+
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
@@ -63,10 +113,14 @@ if __name__ == "__main__":
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     acc = MainServicesCfg(flags)
     from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
-    readBSAcc = ByteStreamReadCfg(flags)
+    acc.merge(ByteStreamReadCfg(flags))
+
     acc.merge(HIGlobalRecCfg(flags))
     from AthenaCommon.Constants import DEBUG
     acc.getEventAlgo("HIEventShapeMaker").OutputLevel=DEBUG
+    
+    acc.printConfig(withDetails=True, summariseProps=True)
+    flags.dump()
 
     import sys
     sys.exit(acc.run().isFailure())
