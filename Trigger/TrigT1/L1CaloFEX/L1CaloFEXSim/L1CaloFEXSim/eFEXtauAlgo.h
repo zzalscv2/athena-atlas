@@ -13,11 +13,10 @@
 #ifndef eFEXtauAlgo_H
 #define eFEXtauAlgo_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/eFEXtauAlgoBase.h"
 #include "L1CaloFEXSim/eFEXtauTOB.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
+#include <memory> //for unique_ptr
 
 namespace LVL1 {
   
@@ -58,9 +57,9 @@ namespace LVL1 {
     virtual bool getUnD() override;
     virtual unsigned int getSeed() override;
 	
-    unsigned int m_seed;
-    bool m_und;
-    unsigned int m_offPhi;
+    unsigned int m_seed = 0;
+    bool m_und = false;
+    unsigned int m_offPhi = 0;
 
   };
   
