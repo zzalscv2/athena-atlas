@@ -649,7 +649,7 @@ void TileInfoDump::printBadCells() {
   int ncells = m_tileID->cell_hash_max();
 
   const TileCablingService* cabling = TileCablingService::getInstance();
-  bool run2 = cabling->isRun2Cabling();
+  bool run2 = cabling->isRun2PlusCabling();
 
   std::ostringstream sSum;
   std::ostringstream sDet;
