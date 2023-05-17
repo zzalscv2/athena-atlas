@@ -19,7 +19,7 @@ Digi_tf.py \
 --digiSeedOffset1 11 \
 --digiSeedOffset2 22  \
 --geometryVersion ATLAS-R2-2015-03-01-00_VALIDATION  \
---conditionsTag default:OFLCOND-RUN12-SDR-25  \
+--conditionsTag default:OFLCOND-RUN12-SDR-31-01  \
 --DataRunNumber 222500  \
 --preExec 'HITtoRDO:from Digitization.DigitizationFlags import digitizationFlags;digitizationFlags.TRTRangeCut.set_Value_and_Lock(0.05);' \
 --preInclude default:LArConfiguration/LArConfigRun2Old_NoPileup.py \

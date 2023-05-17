@@ -17,7 +17,7 @@ LowPtMinbiasHitsFiles="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Digitiz
 
 Digi_tf.py \
 --inputHITSFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/HITS.04919495._001041.pool.root.1 \
---conditionsTag default:OFLCOND-RUN12-SDR-25 \
+--conditionsTag default:OFLCOND-RUN12-SDR-31-01 \
 --digiSeedOffset1 170 \
 --digiSeedOffset2 170 \
 --doAllNoise False \
