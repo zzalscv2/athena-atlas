@@ -62,7 +62,7 @@ namespace xAOD {
     /// Then the user just needs to check this electron/photon.
     /// If it fails returns null pointer.
     ///
-    /// The user can apply also a barcode cut. This is handy in cases when we want to find
+    /// The user can also get the first Geant4 particle cut. This is handy in cases when we want to find
     /// the first non geant particle occuring when going back the lineage.
     /// The method will stop after the 1st particle failing this cut 
     const xAOD::TruthParticle* getBkgElectronMother(const xAOD::TruthParticle* truthel,const bool hard = true);

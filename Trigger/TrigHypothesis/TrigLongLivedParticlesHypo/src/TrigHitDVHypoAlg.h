@@ -64,7 +64,7 @@ private:
    StatusCode doMonitor(const xAOD::TrigCompositeContainer*) const;
 
    //
-   float      deltaR(float, float, float, float) const;
+   float      deltaR2(float, float, float, float) const;
    int        getSPLayer(int, float) const;
    StatusCode findSPSeeds(const EventContext&, const xAOD::TrigCompositeContainer*, std::vector<float>&, std::vector<float>&) const;
    StatusCode findJetSeeds(const xAOD::JetContainer*, const float, const float, std::vector<float>&, std::vector<float>&, std::vector<float>&) const;
@@ -90,6 +90,9 @@ private:
    };
    mutable SG::SlotSpecificObj<TMVAReader> m_tmva_reader ATLAS_THREAD_SAFE;
 
+   // parameters
+   int m_tools_lowest_jetEt;
+   int m_tools_loosest_wp;
 };
 
 #endif //> !TRIGLONGLIVEDPARTICLESHYPO_TRIGHITDVHYPOALG_H

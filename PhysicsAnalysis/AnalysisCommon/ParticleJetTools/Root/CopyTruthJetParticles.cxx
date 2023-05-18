@@ -50,7 +50,7 @@ bool CopyTruthJetParticles::classifyJetInput(const xAOD::TruthParticle* tp,
 
   // Check if this thing is a candidate to be in a truth jet
   //  First block is largely copied from isGenStable, which works on HepMC only
-  if (HepMC::is_simulation_particle(tp->barcode())) return false; // Particle is from G4
+  if (HepMC::is_simulation_particle(tp)) return false; // Particle is from G4
   int pdgid = tp->pdgId();
   if (pdgid==21 && tp->e()==0) return false; // Work around for an old generator bug
 
@@ -210,7 +210,7 @@ int CopyTruthJetParticles::execute() const {
     int pdgid = tp->pdgId();
     if ((std::abs(pdgid)==11 || std::abs(pdgid)==13) && tp->hasProdVtx()){
       // If this is a prompt, generator stable lepton, then we can use it
-      if(tp->status()==1 && !HepMC::is_simulation_particle(tp->barcode()) && MCTruthClassifier::isPrompt(getTCresult(tp, tc_results))) {
+      if(tp->status()==1 && !HepMC::is_simulation_particle(tp) && MCTruthClassifier::isPrompt(getTCresult(tp, tc_results))) {
         promptLeptons.push_back(tp);
       }
     }
