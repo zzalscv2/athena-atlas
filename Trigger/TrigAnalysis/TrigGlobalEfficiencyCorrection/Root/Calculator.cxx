@@ -1023,6 +1023,29 @@ auto Calculator::globalEfficiency(const LeptonList& leptons, unsigned runNumber,
 	return success;
 }
 
+///
+/// One symmetric tetralepton trigger
+///
+template<typename Trig4Lsym>
+auto Calculator::globalEfficiency(const LeptonList& leptons, unsigned runNumber, const Trig4Lsym trig, Efficiencies& globalEfficiencies)
+	-> std::enable_if_t<Trig4Lsym::is4Lsym(), bool>
+{
+	ATH_MSG_DEBUG("Entered Calculator::globalEfficiency_One4L() at line " << __LINE__);
+	globalEfficiencies = {0.};
+	Efficiencies singleInefficiencies{1.}, efficiencies2L{0.},  efficiencies3L{0.};
+	bool success = true;
+	for(auto& lepton : leptons)
+	{
+		if(trig.irrelevantFor(lepton) || !aboveThreshold(lepton, trig())) continue;
+		auto efficiencies = getCachedTriggerLegEfficiencies(lepton, runNumber, trig(), success);
+		globalEfficiencies = ~efficiencies*globalEfficiencies + efficiencies*efficiencies3L;
+		efficiencies3L = ~efficiencies*efficiencies3L + efficiencies*efficiencies2L;
+		efficiencies2L = ~efficiencies*efficiencies2L + efficiencies*~singleInefficiencies;
+		singleInefficiencies *= ~efficiencies;
+	}
+	return success;
+}
+
 bool Calculator::globalEfficiency_Factorized2(const LeptonList& leptons, unsigned runNumber, GlobEffFunc func1, GlobEffFunc func2, Efficiencies& globalEfficiencies)
 {
 	Efficiencies efficiencies[2];
@@ -1061,28 +1084,33 @@ bool Calculator::fillListOfLegsFor(const Lepton& lepton, const std::vector<TrigD
 
 bool Calculator::canTriggerBeFired(const TrigDef& trig, const std::vector<flat_set<std::size_t> >& firedLegs) const
 {
-	static_assert(std::tuple_size<decltype(trig.leg)>::value == 3, "extend Calculator::canTriggerBeFired() implementation to support triggers with >= 4 legs");
-	int n0=0, n1=0, n0min = 1 + (trig.leg[1]!=0)*(trig.leg[0]!=trig.leg[1]?-5:1) + (trig.leg[2]!=0)*(trig.leg[0]!=trig.leg[2]?-9:1);
-	if(n0min>0 || !trig.leg[2])
+	const int nLegs = static_cast<int>(std::count_if(
+		trig.leg.begin(), trig.leg.end(), [](auto x){ return x != 0ul; }));
+	const int sameLegs = static_cast<int>(std::count(
+		trig.leg.begin(), trig.leg.end(), trig.leg[0]));
+	if(sameLegs == nLegs)
 	{
+		// single-lepton and symmetric multilepton triggers
+		return std::count_if(
+			firedLegs.cbegin(),
+			firedLegs.cend(),
+			[&](auto& legs) { return legs.count(trig.leg[0]); }) >= nLegs;
+	}
+	else if(nLegs == 2)
+	{
+		// asymmetric or mixed-flavour dilepton triggers
+		bool n0 = false, n1 = false;
 		for(auto& legs : firedLegs)
 		{
-			bool fire0 = legs.count(trig.leg[0]);
-			if(n0min <= 0) /// Asymmetric dilepton triggers
-			{
-				if(n1 && fire0) return true;
-				if(legs.count(trig.leg[1]))
-				{
-					if(n0) return true;
-					++n1;
-				}
-				if(fire0) ++n0;
-			}
-			else if(fire0 && ++n0>=n0min) return true; /// Single-lepton and symmetric di/trilepton triggers 
+			if(n0 && legs.count(trig.leg[1])) return true;
+			if(n1 && legs.count(trig.leg[0])) return true;
+			n0 = n0 || legs.count(trig.leg[0]);
+			n1 = n1 || legs.count(trig.leg[1]);
 		}
 	}
-	else /// Trilepton triggers (except fully-symmetric ones that are addressed above)
+	else if(nLegs == 3)
 	{
+		// other trilepton triggers
 		auto end = firedLegs.end();
 		for(auto legs0=firedLegs.begin();legs0!=end;++legs0)
 		{
@@ -1102,6 +1130,10 @@ bool Calculator::canTriggerBeFired(const TrigDef& trig, const std::vector<flat_s
 				}
 			}
 		}
+	}
+	else
+	{
+		ATH_MSG_ERROR("incomplete support of 4-lepton triggers.");
 	}
 	return false;
 }
@@ -1261,22 +1293,26 @@ bool Calculator::Helper::findAndBindFunction() /// for combinations with a singl
 	using A1L = flat_set<typename A::T_1>;
 	using A_2sym = typename A::T_2sym;
 	using A_2asym = typename A::T_2asym;
-	if(!m_n2L && !m_n3L)
+	if(m_n2L + m_n3L + m_n4L == 0)
 	{
 		return bindFunction<typename A::T_1>() || bindFunction<A1L>();
 	}
-	else if(m_n2L==1 && !m_n3L)
+	else if(m_n2L==1 && m_n3L + m_n4L == 0)
 	{
 		return bindFunction<A_2sym>() || bindFunction<A_2asym>()
 			|| bindFunction<A_2sym, A1L>() || bindFunction<A_2asym, A1L>();
 	}
-	else if(m_n2L==2 && !m_n3L)
+	else if(m_n2L==2 && m_n3L + m_n4L == 0)
 	{
 		return bindFunction<A_2sym, A_2sym, Optional<A1L>>() || bindFunction<A_2asym, A_2sym, Optional<A1L>>();
 	}
-	else if(m_n3L==1 && !m_n1L && !m_n2L)
+	else if(m_n3L==1 && m_n1L + m_n2L + m_n4L == 0)
 	{
 		return bindFunction<typename A::T_3sym>() || bindFunction<typename A::T_3halfsym>();
+	}
+	else if(m_n4L==1 && m_n1L + m_n2L + m_n3L == 0)
+	{
+		return bindFunction<typename A::T_4sym>();
 	}
 	return false;
 }
@@ -1299,16 +1335,16 @@ bool Calculator::Helper::findAndBindFunction() /// for combinations with two fla
 	using AB_1_1 = typename AB::T_1_1;
 	
 	/// checked if triggers can be factorized = no mixed trigger in the combination.
-	if(m_n1L>0 && !m_n2L && !m_n3L)
+	if(m_n1L>0 && m_n2L + m_n3L + m_n4L == 0)
 	{
 		return bindFunction<A_1, B_1>() || bindFunction<flat_set<A_1>, flat_set<B_1>>();
 	}
-	else if(m_n2L==1 && !m_n3L) /// one dilepton trigger (+ single-lepton triggers)
-	{
+	else if(m_n2L==1 && m_n3L + m_n4L == 0)
+	{   // one dilepton trigger (+ single-lepton triggers)
 		return bindFunction<AB_1_1>() || bindFunction<AB_1_1, flat_set<A_1>, flat_set<B_1>>();
 	}
-	else if(m_n2L>=2 && m_n2L<=6 && !m_n3L) /// several dilepton triggers (+ single-lepton triggers)
-	{
+	else if(m_n2L>=2 && m_n2L<=6 && m_n3L + m_n4L == 0)
+	{   // several dilepton triggers (+ single-lepton triggers)
 		return 
 			/// 2 dilepton triggers
 			   bindFunction<A_2sym, AB_1_1>() || bindFunction<A_2asym, AB_1_1>()
@@ -1324,13 +1360,13 @@ bool Calculator::Helper::findAndBindFunction() /// for combinations with two fla
 			|| bindFunction<Optional<A_2sym>, Optional<A_2sym>, Optional<B_2asym>, Optional<B_2sym>, Optional<AB_1_1>, Optional<AB_1_1>, OA1L, OB1L>()
 			|| bindFunction<Optional<A_2asym>, Optional<A_2sym>, Optional<B_2asym>, Optional<B_2sym>, Optional<AB_1_1>, Optional<AB_1_1>, OA1L, OB1L>();
 	}
-	else if(m_n3L==1 && !m_n2L && !m_n1L) /// one mixed trilepton trigger
-	{
+	else if(m_n3L==1 && m_n1L + m_n2L + m_n4L == 0)
+	{   // one mixed trilepton trigger
 		return bindFunction<typename AB::T_2sym_1>() || bindFunction<typename AB::T_1_2sym>()
 			||  bindFunction<typename AB::T_2asym_1>() || bindFunction<typename AB::T_1_2asym>();
 	}
-	else if(m_n3L==2 && !m_n2L && !m_n1L) /// two mixed trilepton triggers
-	{
+	else if(m_n3L==2 && m_n1L + m_n2L + m_n4L == 0)
+	{   // two mixed trilepton triggers
 		return bindFunction<typename AB::T_2sym_1, typename AB::T_1_2sym>() 
 			|| bindFunction<typename AB::T_2asym_1, typename AB::T_1_2sym>()
 			|| bindFunction<typename AB::T_2sym_1, typename AB::T_1_2asym>() 
@@ -1345,6 +1381,7 @@ bool Calculator::Helper::findAndBindFunction() /// top-level function
 	m_n1L = countTriggers(TT_SINGLELEPTON_FLAG);
 	m_n2L = countTriggers(TT_DILEPTON_FLAG);
 	m_n3L = countTriggers(TT_TRILEPTON_FLAG);
+	m_n4L = countTriggers(TT_TETRALEPTON_FLAG);
 	auto exclusively = [&](auto obj_flags) { return std::none_of(m_defs.cbegin(), m_defs.cend(), [=](auto& def){return def.type&TT_MASK_FLAVOUR&~obj_flags;}); };
 
 	/// First check if the trigger combination refers to a single object type

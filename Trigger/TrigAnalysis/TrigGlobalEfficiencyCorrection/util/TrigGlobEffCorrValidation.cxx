@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -471,9 +471,14 @@ int main(int argc, char* argv[])
 		.setEfficiency("g22_tight_L1EM15VHI", 0.35)
 		.setEfficiency("g120_loose", 0.56)
 		.setEventSelection([](VE ve, VM vm, VP vp) { return (count(ve,13e3f)>1  && count(vm,11e3f)>0) || count(vp,21e3f)>0; })
-	));	
-	
-	//Info(MSGSOURCE, "Boost version: %i", BOOST_VERSION);
+	));
+
+	ANA_CHECK(run_test(Config("4mu")
+		.setTriggers("4mu4_L14MU3V")
+		.setLeptonPDF(4, 6, {20e3f})
+		.setEfficiency("mu4_L1MU3V", 0.72)
+		.setEventSelection([](VE, VM vm, VP) { return count(vm,5e3f)>=4; })
+	));
 	return 0;
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -76,6 +76,12 @@ enum TriggerType
 	TT_MU_2G_SYM = TT_2MU_G_SYM | TT_X2Y_FLAG,
 	TT_2MU_G_ASYM = TT_TRILEPTON_ASYM | TT_MUON_FLAG | TT_PHOTON_FLAG,
 	TT_MU_2G_ASYM = TT_2MU_G_ASYM | TT_X2Y_FLAG,
+	// tetralepton triggers
+	TT_TETRALEPTON_FLAG = 0x8000,
+	TT_TETRALEPTON_SYM = TT_TETRALEPTON_FLAG | TT_SYM,
+	TT_4E_SYM = TT_TETRALEPTON_SYM | TT_ELECTRON_FLAG,
+	TT_4MU_SYM = TT_TETRALEPTON_SYM | TT_MUON_FLAG,
+	TT_4G_SYM = TT_TETRALEPTON_SYM | TT_PHOTON_FLAG
 };
 
 class ImportData : public asg::AsgMessaging
@@ -87,9 +93,16 @@ public:
 	{ 
 		TriggerType type;
 		std::size_t name;
-		std::array<std::size_t,3> leg;
-		bool used = false; /// auxiliary variable used by Calculator::Helper::extra() and bindFunction()
-		TrigDef(TriggerType type=TT_UNKNOWN, std::size_t name=0, std::size_t leg0=0, std::size_t leg1=0, std::size_t leg2=0) : type(type), name(name), leg{leg0,leg1,leg2} {}
+		std::array<std::size_t, 4> leg;
+		bool used = false; // auxiliary variable used by 
+						   // Calculator::Helper::extra() and bindFunction()
+		TrigDef(TriggerType type = TT_UNKNOWN,
+				std::size_t name = 0,
+				std::size_t leg0 = 0,
+				std::size_t leg1 = 0,
+				std::size_t leg2 = 0,
+				std::size_t leg3 = 0) : 
+			type(type), name(name), leg{leg0, leg1, leg2, leg3} {}
 	};	
 
 	ImportData();
