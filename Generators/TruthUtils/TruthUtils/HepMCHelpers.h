@@ -40,8 +40,8 @@ inline bool isDisconnected(HepMC::ConstGenVertexPtr v) {return (v->particles_in_
     HepMC::GenVertex* vend = gp->end_vertex();
 
     // Disconnect the unwanted particle from its vertices and delete it
-    if (vstart != NULL) vstart->remove_particle(gp);
-    if (vend != NULL) vend->remove_particle(gp);
+    if (vstart != nullptr) vstart->remove_particle(gp);
+    if (vend != nullptr) vend->remove_particle(gp);
     delete gp;
 
     // If start/end vertices are valid and distinct, and this was the only particle that
@@ -49,7 +49,7 @@ inline bool isDisconnected(HepMC::ConstGenVertexPtr v) {return (v->particles_in_
     // and rewrite the vertex position as most appropriate.
     /// @note The disconnected end vertex will be picked up by the final "sweeper" loop if necessary.
     /// @note We do the reassigning this way since GV::add_particle_*() modifies the end vertex
-    if (vstart != NULL && vend != NULL && vend != vstart) {
+    if (vstart != nullptr && vend != nullptr && vend != vstart) {
       bool is_only_link = true;
       for (auto pchild=vstart->particles_out_const_begin();pchild!=vstart->particles_out_const_end();++pchild) {
         if ((*pchild)->end_vertex() == vend) is_only_link = false;
@@ -152,15 +152,8 @@ namespace MC {
   /// @brief Identify if the particle is considered stable at the post-detector-sim stage
   inline bool isSimStable(const HepMC::ConstGenParticlePtr& p) {
     if (p->status() != 1) return false;
-    if (isGenStable(p)) return p->end_vertex() == NULL;
+    if (isGenStable(p)) return p->end_vertex() == nullptr;
     return true;
-  }
-
-  /// @brief Identify if the particle is considered stable at the post-detector-sim stage
-  /// @todo I'm sure this shouldn't be exactly the same as isGenStable, but it is...
-  /// @deprecated Use isSimulStable: this function _will_ be removed!
-  inline bool isGenSimulStable(const HepMC::ConstGenParticlePtr& p) {
-    return isSimStable(p);
   }
 
   /// @brief Identify if the particle would not interact with the detector, i.e. not a neutrino or WIMP
@@ -174,11 +167,6 @@ namespace MC {
     return !MC::isNonInteracting(p);
   }
 
-  /// @brief Oddly-named alias for isSimInteracting
-  /// @deprecated Use isSimInteracting: this function _will_ be removed!
-  inline bool isGenInteracting(const HepMC::ConstGenParticlePtr& p) {
-    return isSimInteracting(p);
-  }
 
   //@}
 
