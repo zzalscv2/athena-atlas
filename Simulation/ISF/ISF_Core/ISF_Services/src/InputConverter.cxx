@@ -502,7 +502,7 @@ double SetProperTimeFromDetectorFrameDecayLength(G4PrimaryParticle& g4particle,c
 
 //________________________________________________________________________
 #ifdef HEPMC3
-G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(const HepMC::GenParticlePtr& genpart) const{
+G4PrimaryParticle* ISF::InputConverter::getDaughterG4PrimaryParticle(const HepMC::GenParticlePtr& genpart, bool makeLinkToTruth) const{
   ATH_MSG_VERBOSE("Creating G4PrimaryParticle from GenParticle.");
 
   const G4ParticleDefinition *particleDefinition = this->getG4ParticleDefinition(genpart->pdg_id());
@@ -567,7 +567,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(const HepMC::GenPar
       else {
         ATH_MSG_WARNING ( "Attempting to add daughter particle of "<<bcgenpart<<": " << daughter );
       }
-      G4PrimaryParticle *daughterG4Particle = this->getG4PrimaryParticle( daughter );
+      G4PrimaryParticle *daughterG4Particle = this->getDaughterG4PrimaryParticle( daughter, makeLinkToTruth );
       if (!daughterG4Particle) {
         ATH_MSG_ERROR("Bailing out of loop over daughters of particle with barcode: "<<bcgenpart <<
                       " due to errors - will not return G4Particle.");
@@ -577,17 +577,19 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(const HepMC::GenPar
     }
   }
 
-  // Set the user information for this primary to point to the HepMcParticleLink...
-  PrimaryParticleInformation* ppi = new PrimaryParticleInformation(genpart);
-  ppi->SetParticle(genpart);
-  ppi->SetRegenerationNr(0);
-  g4particle->SetUserInformation(ppi);
-  ATH_MSG_VERBOSE("Making primary down the line with barcode " << ppi->GetParticleBarcode());
+  if (makeLinkToTruth) {
+    // Set the user information for this primary to point to the HepMcParticleLink...
+    PrimaryParticleInformation* ppi = new PrimaryParticleInformation(genpart);
+    ppi->SetParticle(genpart);
+    ppi->SetRegenerationNr(0);
+    g4particle->SetUserInformation(ppi);
+    ATH_MSG_VERBOSE("Making primary down the line with barcode " << ppi->GetParticleBarcode());
+  }
 
   return g4particle.release();
 }
 #else
-G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(HepMC::GenParticle& genpart) const
+G4PrimaryParticle* ISF::InputConverter::getDaughterG4PrimaryParticle(HepMC::GenParticle& genpart, bool makeLinkToTruth) const
 {
   ATH_MSG_VERBOSE("Creating G4PrimaryParticle from GenParticle.");
 
@@ -654,7 +656,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(HepMC::GenParticle&
       else {
         ATH_MSG_WARNING ( "Attempting to add daughter particle of "<<bcgenpart<<": " << **daughterIter );
       }
-      G4PrimaryParticle *daughterG4Particle = this->getG4PrimaryParticle( **daughterIter );
+      G4PrimaryParticle *daughterG4Particle = this->getDaughterG4PrimaryParticle( **daughterIter, makeLinkToTruth );
       if (!daughterG4Particle) {
         ATH_MSG_ERROR("Bailing out of loop over daughters of particle with barcode: "<<bcgenpart <<
                       " due to errors - will not return G4Particle.");
@@ -664,17 +666,112 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(HepMC::GenParticle&
     }
   }
 
-  // Set the user information for this primary to point to the HepMcParticleLink...
-  PrimaryParticleInformation* ppi = new PrimaryParticleInformation(&genpart);
-  ppi->SetParticle(&genpart);
-  ppi->SetRegenerationNr(0);
-  g4particle->SetUserInformation(ppi);
-  ATH_MSG_VERBOSE("Making primary down the line with barcode " << ppi->GetParticleBarcode());
+  if (makeLinkToTruth) {
+    // Set the user information for this primary to point to the HepMcParticleLink...
+    PrimaryParticleInformation* ppi = new PrimaryParticleInformation(&genpart);
+    ppi->SetParticle(&genpart);
+    ppi->SetRegenerationNr(0);
+    g4particle->SetUserInformation(ppi);
+    ATH_MSG_VERBOSE("Making primary down the line with barcode " << ppi->GetParticleBarcode());
+  }
 
   return g4particle.release();
 }
 #endif
 
+
+//________________________________________________________________________
+void ISF::InputConverter::processPredefinedDecays(const HepMC::GenParticlePtr& genpart, ISF::ISFParticle& isp, G4PrimaryParticle* g4particle, bool makeLinkToTruth) const
+{
+  /// Set the lifetime appropriately - this is slow but rigorous,
+  /// and we don't want to end up with something like vertex time
+  /// that we have to validate for every generator on earth...
+  const auto& prodVtx = genpart->production_vertex()->position();
+  const auto& endVtx = genpart->end_vertex()->position();
+
+  CLHEP::Hep3Vector dist3D(endVtx.x()-prodVtx.x(), endVtx.y()-prodVtx.y(), endVtx.z()-prodVtx.z());
+  double tau=SetProperTimeFromDetectorFrameDecayLength(*g4particle,dist3D.mag());
+
+  if (msgLvl(MSG::VERBOSE)) {
+    double pmag2=g4particle->GetTotalMomentum(); //magnitude of particle momentum
+    pmag2*=pmag2;                                //magnitude of particle momentum squared
+    double e2=g4particle->GetTotalEnergy();      //energy of particle
+    e2*=e2;                                      //energy^2 of particle
+    double beta2=pmag2/e2;                       //beta^2=v^2/c^2 for particle
+    double mass2=g4particle->GetMass();          //mass of particle
+    mass2*=mass2;                                //mass^2 of particle
+
+    double tau2=dist3D.mag2()*(1/beta2-1)/Gaudi::Units::c_squared;
+
+    const G4LorentzVector lv0( prodVtx.x(), prodVtx.y(), prodVtx.z(), prodVtx.t() );
+    const G4LorentzVector lv1( endVtx.x(), endVtx.y(), endVtx.z(), endVtx.t() );
+    //Old calculation, not taken because vertex information is not sufficiently precise
+    //g4particle->SetProperTime( (lv1-lv0).mag()/Gaudi::Units::c_light );
+    G4LorentzVector dist4D(lv1);
+    dist4D-=lv0;
+
+    double dist4Dgamma=std::numeric_limits<double>::infinity();
+    if (dist4D.t()>0 && dist4D.mag2()>0) {
+      dist4Dgamma=dist4D.gamma();
+    } else {
+      ATH_MSG_VERBOSE( "dist4D t="<<dist4D.t()<<" mag2="<<dist4D.mag2());
+    }
+
+    G4LorentzVector fourmom(g4particle->GetMomentum(),g4particle->GetTotalEnergy());
+    double fourmomgamma=std::numeric_limits<double>::infinity();
+    if (fourmom.t()>0 && fourmom.mag2()>0) {
+      fourmomgamma=fourmom.gamma();
+    } else {
+      ATH_MSG_VERBOSE( "fourmom t="<<fourmom.t()<<" mag2="<<fourmom.mag2());
+    }
+
+    ATH_MSG_VERBOSE( "gammaVertex="<<dist4Dgamma<<" gammamom="<<fourmomgamma<<" gamma(beta)="<<1/std::sqrt(1-beta2)<<" lifetime tau(beta)="<<std::sqrt(tau2)<<" lifetime tau="<<tau);
+  }
+  const int bcgenpart = HepMC::barcode(genpart);
+  if (m_quasiStableParticlesIncluded) {
+    ATH_MSG_VERBOSE( "Detected primary particle with end vertex." );
+    ATH_MSG_VERBOSE( "Will add the primary particle set on." );
+    ATH_MSG_VERBOSE( "ISF Particle: " << isp );
+    ATH_MSG_VERBOSE( "Primary Particle: " << genpart );
+#ifdef HEPMC3
+    ATH_MSG_VERBOSE( "Number of daughters of "<<bcgenpart<<": " << genpart->end_vertex()->particles_out().size() << " at position "<< genpart->end_vertex() );
+#else
+    ATH_MSG_VERBOSE( "Number of daughters of "<<bcgenpart<<": " << genpart->end_vertex()->particles_out_size() << " at position "<< genpart->end_vertex() );
+#endif
+  }
+  else {
+    ATH_MSG_WARNING( "Detected primary particle with end vertex. This should only be the case if" );
+    ATH_MSG_WARNING( "you are running with quasi-stable particle simulation enabled.  This is not" );
+    ATH_MSG_WARNING( "yet validated - you'd better know what you're doing.  Will add the primary" );
+    ATH_MSG_WARNING( "particle set on." );
+    ATH_MSG_WARNING( "ISF Particle: " << isp );
+    ATH_MSG_WARNING( "Primary Particle: " << genpart );
+#ifdef HEPMC3
+    ATH_MSG_VERBOSE( "Number of daughters of "<<bcgenpart<<": " << genpart->end_vertex()->particles_out().size() );
+#else
+    ATH_MSG_WARNING( "Number of daughters of "<<bcgenpart<<": " << genpart->end_vertex()->particles_out_size() );
+#endif
+  }
+  // Add all necessary daughter particles
+  for ( auto daughter: *(genpart->end_vertex())) {
+    if (m_quasiStableParticlesIncluded) {
+      ATH_MSG_VERBOSE ( "Attempting to add daughter particle of "<<bcgenpart<<": " << daughter );
+    }
+    else {
+      ATH_MSG_WARNING ( "Attempting to add daughter particle of "<<bcgenpart<<": " << daughter );
+    }
+#ifdef HEPMC3
+    G4PrimaryParticle *daughterG4Particle = this->getDaughterG4PrimaryParticle( daughter, makeLinkToTruth );
+#else
+    G4PrimaryParticle *daughterG4Particle = this->getDaughterG4PrimaryParticle( *daughter, makeLinkToTruth );
+#endif
+    if (!daughterG4Particle) {
+      ATH_MSG_FATAL("Bailing out of loop over daughters of particle with barcode: "<<bcgenpart <<
+                    " due to errors.");
+    }
+    g4particle->SetDaughter( daughterG4Particle );
+  }
+}
 
 //________________________________________________________________________
 G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& isp, bool useHepMC) const
@@ -731,95 +828,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
 
   if ( genpart ) {
     if (genpart->end_vertex()) {
-      /// Set the lifetime appropriately - this is slow but rigorous,
-      /// and we don't want to end up with something like vertex time
-      /// that we have to validate for every generator on earth...
-      const auto& prodVtx = genpart->production_vertex()->position();
-      const auto& endVtx = genpart->end_vertex()->position();
-
-      CLHEP::Hep3Vector dist3D(endVtx.x()-prodVtx.x(), endVtx.y()-prodVtx.y(), endVtx.z()-prodVtx.z());
-      double tau=SetProperTimeFromDetectorFrameDecayLength(*g4particle,dist3D.mag());
-
-      if (msgLvl(MSG::VERBOSE)) {
-        double pmag2=g4particle->GetTotalMomentum(); //magnitude of particle momentum
-        pmag2*=pmag2;                                //magnitude of particle momentum squared
-        double e2=g4particle->GetTotalEnergy();      //energy of particle
-        e2*=e2;                                      //energy^2 of particle
-        double beta2=pmag2/e2;                       //beta^2=v^2/c^2 for particle
-        double mass2=g4particle->GetMass();          //mass of particle
-        mass2*=mass2;                                //mass^2 of particle
-
-        double tau2=dist3D.mag2()*(1/beta2-1)/Gaudi::Units::c_squared;
-
-        const G4LorentzVector lv0( prodVtx.x(), prodVtx.y(), prodVtx.z(), prodVtx.t() );
-        const G4LorentzVector lv1( endVtx.x(), endVtx.y(), endVtx.z(), endVtx.t() );
-        //Old calculation, not taken because vertex information is not sufficiently precise
-        //g4particle->SetProperTime( (lv1-lv0).mag()/Gaudi::Units::c_light );
-        G4LorentzVector dist4D(lv1);
-        dist4D-=lv0;
-
-        double dist4Dgamma=std::numeric_limits<double>::infinity();
-        if (dist4D.t()>0 && dist4D.mag2()>0) {
-          dist4Dgamma=dist4D.gamma();
-        } else {
-          ATH_MSG_VERBOSE( "dist4D t="<<dist4D.t()<<" mag2="<<dist4D.mag2());
-        }
-
-        G4LorentzVector fourmom(g4particle->GetMomentum(),g4particle->GetTotalEnergy());
-        double fourmomgamma=std::numeric_limits<double>::infinity();
-        if (fourmom.t()>0 && fourmom.mag2()>0) {
-          fourmomgamma=fourmom.gamma();
-        } else {
-          ATH_MSG_VERBOSE( "fourmom t="<<fourmom.t()<<" mag2="<<fourmom.mag2());
-        }
-
-        ATH_MSG_VERBOSE( "gammaVertex="<<dist4Dgamma<<" gammamom="<<fourmomgamma<<" gamma(beta)="<<1/std::sqrt(1-beta2)<<" lifetime tau(beta)="<<std::sqrt(tau2)<<" lifetime tau="<<tau);
-      }
-      const int bcgenpart = HepMC::barcode(genpart);
-      if (m_quasiStableParticlesIncluded) {
-        ATH_MSG_VERBOSE( "Detected primary particle with end vertex." );
-        ATH_MSG_VERBOSE( "Will add the primary particle set on." );
-        ATH_MSG_VERBOSE( "ISF Particle: " << isp );
-        ATH_MSG_VERBOSE( "Primary Particle: " << genpart );
-#ifdef HEPMC3
-        ATH_MSG_VERBOSE( "Number of daughters of "<<bcgenpart<<": " << genpart->end_vertex()->particles_out().size() << " at position "<< genpart->end_vertex() );
-#else
-        ATH_MSG_VERBOSE( "Number of daughters of "<<bcgenpart<<": " << genpart->end_vertex()->particles_out_size() << " at position "<< genpart->end_vertex() );
-#endif
-      }
-      else {
-        ATH_MSG_WARNING( "Detected primary particle with end vertex. This should only be the case if" );
-        ATH_MSG_WARNING( "you are running with quasi-stable particle simulation enabled.  This is not" );
-        ATH_MSG_WARNING( "yet validated - you'd better know what you're doing.  Will add the primary" );
-        ATH_MSG_WARNING( "particle set on." );
-        ATH_MSG_WARNING( "ISF Particle: " << isp );
-        ATH_MSG_WARNING( "Primary Particle: " << genpart );
-#ifdef HEPMC3
-        ATH_MSG_VERBOSE( "Number of daughters of "<<bcgenpart<<": " << genpart->end_vertex()->particles_out().size() );
-#else
-        ATH_MSG_WARNING( "Number of daughters of "<<bcgenpart<<": " << genpart->end_vertex()->particles_out_size() );
-#endif
-      }
-      // Add all necessary daughter particles
-      for ( auto daughter: *(genpart->end_vertex())) {
-        if (m_quasiStableParticlesIncluded) {
-          ATH_MSG_VERBOSE ( "Attempting to add daughter particle of "<<bcgenpart<<": " << daughter );
-        }
-        else {
-          ATH_MSG_WARNING ( "Attempting to add daughter particle of "<<bcgenpart<<": " << daughter );
-        }
-#ifdef HEPMC3
-        G4PrimaryParticle *daughterG4Particle = this->getG4PrimaryParticle( daughter );
-#else
-        G4PrimaryParticle *daughterG4Particle = this->getG4PrimaryParticle( *daughter );
-#endif
-        if (!daughterG4Particle) {
-          ATH_MSG_ERROR("Bailing out of loop over daughters of particle with barcode: "<<bcgenpart <<
-                        " due to errors - will not return G4Particle.");
-          return nullptr;
-        }
-        g4particle->SetDaughter( daughterG4Particle );
-      }
+      processPredefinedDecays(genpart, isp, g4particle.get());
     } // particle had an end vertex
 
     double px,py,pz;
