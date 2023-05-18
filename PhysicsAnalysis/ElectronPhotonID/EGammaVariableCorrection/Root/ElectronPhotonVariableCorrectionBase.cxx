@@ -265,7 +265,7 @@ const CP::CorrectionCode ElectronPhotonVariableCorrectionBase::applyCorrection(x
     // if variable not found, fail
     float original_variable = 0.;
 
-    if (m_correctionVariable == "transformed_e_probability_ht" and !m_variableToCorrect->isAvailable(electron)) {
+    if (m_correctionVariable == "transformed_e_probability_ht") {
         // this is a special case, since what we want to fudge is not the variable
         // usually stoared in (D)xAOD, but a transformed version
         // here we compute the transormed version
