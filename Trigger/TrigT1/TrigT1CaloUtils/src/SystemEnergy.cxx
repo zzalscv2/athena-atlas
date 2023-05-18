@@ -320,7 +320,7 @@ void SystemEnergy::etSumTrigger()
   // get Threshold values and test
   // Since eta-dependent values are being used to disable TE in regions, must find lowest value for each threshold
   for ( const auto& thresh : allThresholds ) {
-    if ( thresh->type() == L1DataDef::xeType()) {
+    if ( thresh->type() == L1DataDef::teType()) {
       int threshNumber = thresh->mapping();
       int thresholdValue = m_maxEtSumThr;
       std::shared_ptr<TrigConf::L1Threshold_Calo> thresh_Calo = std::static_pointer_cast<TrigConf::L1Threshold_Calo>(thresh);
