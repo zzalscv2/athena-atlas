@@ -158,7 +158,7 @@ namespace DerivationFramework {
             
             // Save the particle position in the mask
             // If user doesn't want Geant, check and reject Geant particles
-            if (!includeGeant && HepMC::is_simulation_particle(pHead->barcode()) ) return;
+            if (!includeGeant && HepMC::is_simulation_particle(pHead) ) return;
             int headIndex = pHead->index();
             particleMask[headIndex] = true;
             
@@ -173,7 +173,7 @@ namespace DerivationFramework {
             for (int i=0; i<nChildren; ++i) {
               if (decayVtx->outgoingParticle(i)==nullptr) continue;
               descendants(decayVtx->outgoingParticle(i),particleMask,vertexMask,encounteredBarcodes,includeGeant);
-              saveVertex = saveVertex || includeGeant || !(HepMC::is_simulation_particle(decayVtx->outgoingParticle(i)->barcode()));
+              saveVertex = saveVertex || includeGeant || !(HepMC::is_simulation_particle(decayVtx->outgoingParticle(i)));
             }
 
             // Save the decay vertex
@@ -240,7 +240,7 @@ namespace DerivationFramework {
                 if (!skipPdgCheck && find(pdgId.begin(), pdgId.end(), abs(particle->pdgId())) == pdgId.end()) continue;
                 
                 //ensure particles are not from GEANT
-                if ( HepMC::is_simulation_particle(particle->barcode())) continue;
+                if ( HepMC::is_simulation_particle(particle)) continue;
                 
                 //check if we have a neutral particle (threeCharge returns int)
                 if (chargedOnly && HepPID::threeCharge(particle->pdgId()) == 0) continue;

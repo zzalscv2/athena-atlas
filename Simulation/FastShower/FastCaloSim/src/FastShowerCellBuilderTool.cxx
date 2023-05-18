@@ -83,7 +83,7 @@ using MCparticleCollection = std::vector<HepMC::ConstGenParticlePtr> ;
 //This is a copy of the previous isGenSimulStable which depended on TruthHelper
 bool FastCaloSimIsGenSimulStable(const HepMC::ConstGenParticlePtr&  p) {
   int status=p->status();
-  auto vertex = p->end_vertex();
+  const auto& vertex = p->end_vertex();
   return (status%1000 == 1) ||
           (status%1000 == 2 && status > 1000) ||
           (status==2 && !vertex) ||

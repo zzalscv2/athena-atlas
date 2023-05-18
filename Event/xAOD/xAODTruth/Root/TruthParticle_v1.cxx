@@ -309,7 +309,7 @@ namespace xAOD {
 #undef MC_PID_HELPER
    bool TruthParticle_v1::isGenStable() const {
     if (status() != 1) return false;
-    return !HepMC::is_simulation_particle(barcode());   
+    return !HepMC::is_simulation_particle(this);   
    };
 
    //

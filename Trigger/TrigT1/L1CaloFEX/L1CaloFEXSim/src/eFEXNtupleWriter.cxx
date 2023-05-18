@@ -270,7 +270,7 @@ StatusCode LVL1::eFEXNtupleWriter::loadTruthElectron() {
       const xAOD::TruthParticle* each_particle = ite->truthParticle(i);
 
       // ignore geant4
-      if(HepMC::is_simulation_particle(each_particle->barcode())) continue;
+      if(HepMC::is_simulation_particle(each_particle)) continue;
       // select particles that is not decayed further by the generator
       if(each_particle->status() != 1) continue;
       // select electrons
@@ -322,7 +322,7 @@ StatusCode LVL1::eFEXNtupleWriter::loadTruthTau() {
     for(int i = 0; i < nParticle; i++) {
       const xAOD::TruthParticle* each_particle = ite->truthParticle(i);
       // ignore geant4
-      if(HepMC::is_simulation_particle(each_particle->barcode())) continue;
+      if(HepMC::is_simulation_particle(each_particle)) continue;
       // select final state particles and decaying hadrons, muons or taus
       if (each_particle->status() != 1 && each_particle->status() != 2) continue;
       // select tau

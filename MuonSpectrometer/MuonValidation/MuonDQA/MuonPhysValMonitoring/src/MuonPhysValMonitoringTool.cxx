@@ -1087,7 +1087,7 @@ namespace MuonPhysValMonitoring {
             if (type ==
                 xAOD::Muon::InnerDetectorTrackParticle) {  // don't fill histograms for any ID track, only for muons; buys a lot of time
                 if ((*truthLink)->absPdgId() != 13 || (*truthLink)->status() != 1) return;     // not a muon
-                if ((*truthLink)->barcode() == 0 || HepMC::is_simulation_particle((*truthLink)->barcode())) return;  // must have valid barcode
+                if ((*truthLink)->barcode() == 0 || HepMC::is_simulation_particle((*truthLink))) return;  // must have valid barcode
             }
 
             if (!passesAcceptanceCuts(*truthLink)) return;

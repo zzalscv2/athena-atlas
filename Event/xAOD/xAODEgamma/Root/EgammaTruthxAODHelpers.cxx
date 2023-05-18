@@ -117,7 +117,7 @@ xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::TruthParticle* truthel,co
   vec.push_back(truthel); //push its self back as first entry
 
   // The first parent has to exist
-  if ( !truthel->nParents() || ( (!HepMC::is_simulation_particle(abs(truthel->barcode()))) && hard)   ){
+  if ( !truthel->nParents() || ( (!HepMC::is_simulation_particle(truthel)) && hard)   ){
     return vec;
   }
   //And has to be a photon or electron
@@ -129,7 +129,7 @@ xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::TruthParticle* truthel,co
   vec.push_back(parent); //push in the parent as the second entry
 
   //Loop over the generations
-  while (parent->nParents() && ( HepMC::is_simulation_particle(abs(parent->barcode())) || hard ) ){ 
+  while (parent->nParents() && ( HepMC::is_simulation_particle(parent) || hard ) ){ 
     //Find the next parent
     const xAOD::TruthParticle* tmp = parent->parent();
     //You want to see an electron or a photon 
