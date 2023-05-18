@@ -77,14 +77,16 @@ namespace ISF {
     const G4ParticleDefinition* getG4ParticleDefinition(int pdgcode) const;
 
 #ifdef HEPMC3
-    G4PrimaryParticle* getG4PrimaryParticle(const HepMC::GenParticlePtr& gp) const;
+    G4PrimaryParticle* getDaughterG4PrimaryParticle(const HepMC::GenParticlePtr& gp, bool makeLinkToTruth=true) const;
 #else
-    G4PrimaryParticle* getG4PrimaryParticle(HepMC::GenParticle& gp) const;
+    G4PrimaryParticle* getDaughterG4PrimaryParticle(HepMC::GenParticle& gp, bool makeLinkToTruth=true) const;
 #endif
 
     G4PrimaryParticle* getG4PrimaryParticle(ISF::ISFParticle& isp, bool useHepMC) const;
 
     void addG4PrimaryVertex(G4Event* g4evt, ISF::ISFParticle& isp, bool useHepMC) const;
+
+    void processPredefinedDecays(const HepMC::GenParticlePtr& genpart, ISF::ISFParticle& isp, G4PrimaryParticle* g4particle, bool makeLinkToTruth=true) const;
 
     /** Tests whether the given ISFParticle is within the Geant4 world volume */
     bool isInsideG4WorldVolume(const ISF::ISFParticle& isp, const G4VSolid* worldSolid) const;
