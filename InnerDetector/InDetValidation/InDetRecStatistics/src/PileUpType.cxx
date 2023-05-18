@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TruthHelper/PileUpType.h"
+#include "InDetRecStatistics/PileUpType.h"
 
 
 PileUpType::PileUpType(const McEventCollection * collection) {
