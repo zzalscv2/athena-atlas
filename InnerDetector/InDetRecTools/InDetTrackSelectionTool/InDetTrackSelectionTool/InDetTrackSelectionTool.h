@@ -168,6 +168,23 @@ namespace InDet {
 
     std::vector< Double_t > m_vecPtCutoffsForSctHitsCut; //!< Above each of these pT levels a new SCT hits + dead sensors will be applied
     std::vector< Int_t > m_vecMinNSctHitsAbovePt; //!< the minimum SCT hits above each pt level
+
+    std::vector< Double_t > m_vecEtaCutoffsForZ0SinThetaCut;
+    std::vector< Double_t > m_vecPtCutoffsForZ0SinThetaCut;
+    std::vector< std::vector< Double_t >> m_vecvecMaxZ0SinThetaAboveEtaPt;
+
+    std::vector< Double_t > m_vecEtaCutoffsForD0Cut;
+    std::vector< Double_t > m_vecPtCutoffsForD0Cut;
+    std::vector< std::vector< Double_t >> m_vecvecMaxD0AboveEtaPt;
+
+    std::vector< Double_t > m_vecEtaCutoffsForSctHolesCut;
+    std::vector< Double_t > m_vecPtCutoffsForSctHolesCut;
+    std::vector< std::vector< Double_t >> m_vecvecMaxSctHolesAboveEtaPt;
+
+    std::vector< Double_t > m_vecEtaCutoffsForSctHitsPlusDeadCut;
+    std::vector< Double_t > m_vecPtCutoffsForSctHitsPlusDeadCut;
+    std::vector< std::vector< Double_t >> m_vecvecMinSctHitsPlusDeadAboveEtaPt;
+    
     std::vector< Int_t > m_allowedTrackPattern; //!< if set, lists all allowed TrackPatternRecoInfo
     /// Object used to store the last decision
     mutable Root::TAccept m_accept; //!< Object that stores detailed selection information

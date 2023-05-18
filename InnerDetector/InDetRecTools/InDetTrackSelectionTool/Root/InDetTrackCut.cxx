@@ -713,7 +713,6 @@ bool InDet::MinNSiHitsAboveEta::result() const
     ATH_MSG_WARNING( "Eta accessor not valid." );
     return false;
   }
-  //  ATH_MSG_INFO(" in MinNSiHitsAboveEta" );
   return std::fabs(m_etaAccessor->getValue()) <= m_etaCutoff
     || (m_pixAccessor->getValue() + m_pixDeadAccessor->getValue()
 	+ m_sctAccessor->getValue() + m_sctDeadAccessor->getValue() >= m_minSiHits);
@@ -880,21 +879,14 @@ bool InDet::EtaDependentSiliconHitsCut::result() const
     ATH_MSG_WARNING( "eta accessor not valid. Track will not pass." );
     return false;
   }
-  //  ATH_MSG_INFO("in eta dependent hit cut");
   static int cutVecSize = m_etaCutoffs.size();
-  //  ATH_MSG_INFO("cut vec size "<<cutVecSize);
 
   float trketa = std::fabs(m_etaAccessor->getValue());
   int trknHits =   m_sctAccessor->getValue() + m_pixAccessor->getValue() + m_sctDeadAccessor->getValue() + m_pixDeadAccessor->getValue();
-  //  ATH_MSG_INFO("eta of track "<<trketa<<" Si hits on track "<<trknHits);
-  //  ATH_MSG_INFO(" ");
 
   // loop over eta cutoff vector
-
   for (int i_etabin = cutVecSize-1; i_etabin >= 0; --i_etabin) {
 
-    //    ATH_MSG_INFO("etabin "<<i_etabin<<" eta cutoff "<<std::fabs(m_etaCutoffs.at(i_etabin))<<" Hit cut value "<<m_siHitCuts.at(i_etabin) );
-    //
     float etaMax =5.0;
     if(i_etabin<cutVecSize-1) etaMax = std::fabs(m_etaCutoffs.at(i_etabin+1));
     //
@@ -902,17 +894,14 @@ bool InDet::EtaDependentSiliconHitsCut::result() const
     if (  (trketa >= std::fabs(m_etaCutoffs.at(i_etabin)) && trketa < etaMax )) {
 
       if ( trknHits < m_siHitCuts.at(i_etabin)) {  
-	//     ATH_MSG_INFO("returning false");
            return false;
       }
       else {
-	//      ATH_MSG_INFO("returning true");
 	   return true;
       }
     }   
   }
 
-  //  ATH_MSG_INFO("returning true");
   return true;
 }
 
@@ -967,19 +956,16 @@ bool InDet::EtaDependentPtCut::result() const
     if(i_etabin<cutVecSize-1) etaMax = std::fabs(m_etaCutoffs.at(i_etabin+1));
 
     if (  (trketa >= std::fabs(m_etaCutoffs.at(i_etabin)) && trketa < etaMax )) {
-
+      
       if ( trkpt < m_ptCuts.at(i_etabin)) {
-        //     ATH_MSG_INFO("returning false");                                                                                                                                                                  
 	return false;
       }
       else {
-        //      ATH_MSG_INFO("returning true");                                                                                                                                                                  
 	return true;
       }
     }
   }
 
-  //  ATH_MSG_INFO("returning true");                                                                                                                                                                            
   return true;
 }
 
@@ -1045,6 +1031,312 @@ bool InDet::PtDependentSctHitsCut::result() const
     }
   }  
   return true;
+}
+
+// ---------------- EtaPtDependentZ0SinThetaCut ----------------
+InDet::EtaPtDependentZ0SinThetaCut::EtaPtDependentZ0SinThetaCut(InDet::InDetTrackSelectionTool* tool,
+	  std::vector<Double_t> eta, std::vector<Double_t> pt, std::vector<std::vector<Double_t>> z0)
+  : InDet::TrackCut(tool)
+  , m_etaCutoffs(eta)
+  , m_ptCutoffs(pt)
+  , m_Z0SinThetaCuts(z0)
+  , m_etaAccessor(nullptr)
+  , m_ptAccessor(nullptr)
+  , m_Z0Accessor(nullptr)
+  , m_ThetaAccessor(nullptr)
+{
+}
+
+StatusCode InDet::EtaPtDependentZ0SinThetaCut::initialize()
+{
+  ATH_CHECK( TrackCut::initialize() );
+
+  if (m_etaCutoffs.size()-1!= m_Z0SinThetaCuts.size()) {
+    ATH_MSG_ERROR( "Eta cutoffs and Z0SinTheta cuts must be vectors of the same length." );
+    return StatusCode::FAILURE;
+  }
+  for (size_t i_size=0; i_size< m_Z0SinThetaCuts.size(); ++i_size) {
+    if ((m_ptCutoffs.size()-1) != m_Z0SinThetaCuts.at(i_size).size()) {
+      ATH_MSG_ERROR( "Pt cutoffs and Z0SinTheta cuts must be vectors of the same length." );
+      return StatusCode::FAILURE;
+    }
+  }
+
+  ATH_CHECK( getAccessor("eta", m_etaAccessor) );
+  ATH_CHECK( getAccessor("pt", m_ptAccessor) );
+  ATH_CHECK( getAccessor("z0", m_Z0Accessor) );
+  ATH_CHECK( getAccessor("theta",  m_ThetaAccessor) );
+  return StatusCode::SUCCESS;
+}
+
+bool InDet::EtaPtDependentZ0SinThetaCut::result() const
+{
+  if (!m_etaAccessor) {
+    ATH_MSG_WARNING( "eta accessor not valid. Track will not pass." );
+    return false;
+  }
+  if (!m_ptAccessor) {
+    ATH_MSG_WARNING( "pt accessor not valid. Track will not pass." );
+    return false;
+  }
+  if (!m_Z0Accessor) {
+    ATH_MSG_WARNING( "Z0 accessor not valid. Track will not pass this cut." );
+    return false;
+  }
+  if (!m_ThetaAccessor) {
+    ATH_MSG_WARNING( "Theta accessor not valid. Track will not pass this cut." );
+    return false;
+  }
+
+  static int etaSize = m_etaCutoffs.size();
+  static int ptSize  = m_ptCutoffs.size();
+
+  double eta = std::fabs(m_etaAccessor->getValue());
+  double pt  = m_ptAccessor->getValue();
+  if (eta > m_etaCutoffs.back()) return false;
+  if (pt  < m_ptCutoffs.at(0)) return false; // Cuts are not optimized in pT < 500 MeV and should not be used here
+  
+  for (int i_etabin = 0; i_etabin <= etaSize-2; i_etabin++) {
+    for (int i_ptbin = 0; i_ptbin <= ptSize-2; i_ptbin++) {
+      if (((m_etaCutoffs.at(i_etabin)<=eta)&&(eta<m_etaCutoffs.at(i_etabin+1)))&&
+	  ((m_ptCutoffs.at(i_ptbin)<=pt)&&(pt<m_ptCutoffs.at(i_ptbin+1)))){
+	if (std::fabs(m_Z0Accessor->getValue() * std::sin(m_ThetaAccessor->getValue())) <= m_Z0SinThetaCuts.at(i_etabin).at(i_ptbin)) {
+	  return true;
+	}
+	else return false;
+      }
+    }
+  }
+  return false;
+}
+
+// ---------------- EtaPtDependentD0Cut ----------------
+InDet::EtaPtDependentD0Cut::EtaPtDependentD0Cut(InDet::InDetTrackSelectionTool* tool,
+          std::vector<Double_t> eta, std::vector<Double_t> pt, std::vector<std::vector<Double_t>> d0)
+  : InDet::TrackCut(tool)
+  , m_etaCutoffs(eta)
+  , m_ptCutoffs(pt)
+  , m_D0Cuts(d0)
+  , m_etaAccessor(nullptr)
+  , m_ptAccessor(nullptr)
+  , m_D0Accessor(nullptr)
+{
+}
+
+StatusCode InDet::EtaPtDependentD0Cut::initialize()
+{
+  ATH_CHECK( TrackCut::initialize() );
+
+  if ((m_etaCutoffs.size()-1) != m_D0Cuts.size()) {
+    ATH_MSG_ERROR( "Eta cutoffs and D0 cuts must be vectors of the same length." );
+    return StatusCode::FAILURE;
+  }
+  for (size_t i_size=0; i_size< m_D0Cuts.size(); ++i_size) {
+    if ((m_ptCutoffs.size()-1) != m_D0Cuts.at(i_size).size()) {
+      ATH_MSG_ERROR( "Pt cutoffs and D0 cuts must be vectors of the same length." );
+      return StatusCode::FAILURE;
+    }
+  }
+
+  ATH_CHECK( getAccessor("eta", m_etaAccessor) );
+  ATH_CHECK( getAccessor("pt", m_ptAccessor) );
+  ATH_CHECK( getAccessor("d0", m_D0Accessor) );
+  return StatusCode::SUCCESS;
+}
+
+bool InDet::EtaPtDependentD0Cut::result() const
+{
+  if (!m_etaAccessor) {
+    ATH_MSG_WARNING( "eta accessor not valid. Track will not pass." );
+    return false;
+  }
+  if (!m_ptAccessor) {
+    ATH_MSG_WARNING( "pt accessor not valid. Track will not pass." );
+    return false;
+  }
+  if (!m_D0Accessor) {
+    ATH_MSG_WARNING( "D0 accessor not valid. Track will not pass this cut." );
+    return false;
+  }
+
+  static int etaSize = m_etaCutoffs.size();
+  static int ptSize  = m_ptCutoffs.size();
+
+  double eta = std::fabs(m_etaAccessor->getValue());
+  double pt  = m_ptAccessor->getValue();
+  if (eta > m_etaCutoffs.back()) return false;
+  if (pt  < m_ptCutoffs.at(0)) return false; // Cuts are not optimized in pT < 500 MeV and should not be used here
+  
+  for (int i_etabin = 0; i_etabin <= etaSize-2; i_etabin++) {
+    for (int i_ptbin = 0; i_ptbin <= ptSize-2; i_ptbin++) {
+      if (((m_etaCutoffs.at(i_etabin)<=eta)&&(eta<m_etaCutoffs.at(i_etabin+1)))&&
+          ((m_ptCutoffs.at(i_ptbin)<=pt)&&(pt<m_ptCutoffs.at(i_ptbin+1)))){
+        if (std::fabs(m_D0Accessor->getValue()) <= m_D0Cuts.at(i_etabin).at(i_ptbin)) {
+          return true;
+	}
+        else return false;
+      }
+    }
+  }
+  return false;
+}
+
+// ---------------- EtaPtDependentSctHolesCut ----------------
+InDet::EtaPtDependentSctHolesCut::EtaPtDependentSctHolesCut(InDet::InDetTrackSelectionTool* tool,
+    std::vector<Double_t> eta, std::vector<Double_t> pt, std::vector<std::vector<Double_t>> sctholes)
+
+  : InDet::TrackCut(tool)
+  , m_etaCutoffs(eta)
+  , m_ptCutoffs(pt)
+  , m_SctHolesCuts(sctholes)
+  , m_etaAccessor(nullptr)
+  , m_ptAccessor(nullptr)
+  , m_sctholesAccessor(nullptr)
+{
+}
+
+StatusCode InDet::EtaPtDependentSctHolesCut::initialize()
+{
+  ATH_CHECK( TrackCut::initialize() );
+
+  if ((m_etaCutoffs.size()-1) != m_SctHolesCuts.size()) {
+    ATH_MSG_ERROR( "Eta cutoffs and SctHoles cuts must be vectors of the same length." );
+    return StatusCode::FAILURE;
+  }
+  for (size_t i_size=0; i_size< m_SctHolesCuts.size(); ++i_size) {
+    if ((m_ptCutoffs.size()-1) != m_SctHolesCuts.at(i_size).size()) {
+      ATH_MSG_ERROR( "Pt cutoffs and SctHoles cuts must be vectors of the same length." );
+      return StatusCode::FAILURE;
+    }
+  }
+
+  ATH_CHECK( getAccessor("eta", m_etaAccessor) );
+  ATH_CHECK( getAccessor("pt", m_ptAccessor) );
+  std::string sctHoles = "summaryType";
+  sctHoles += std::to_string(xAOD::numberOfSCTHoles);
+  ATH_CHECK( getAccessor(sctHoles, m_sctholesAccessor) );
+  m_sctholesAccessor->setSummaryType( xAOD::numberOfSCTHoles );
+  return StatusCode::SUCCESS;
+}
+
+bool InDet::EtaPtDependentSctHolesCut::result() const
+{
+  if (!m_etaAccessor) {
+    ATH_MSG_WARNING( "eta accessor not valid. Track will not pass." );
+    return false;
+  }
+  if (!m_ptAccessor) {
+    ATH_MSG_WARNING( "pt accessor not valid. Track will not pass." );
+    return false;
+  }
+  if (!m_sctholesAccessor) {
+    ATH_MSG_WARNING( "SctHoles accessor not valid. Track will not pass." );
+    return false;
+  }
+
+  static int etaSize = m_etaCutoffs.size();
+  static int ptSize  = m_ptCutoffs.size();
+
+  double eta = std::fabs(m_etaAccessor->getValue());
+  double pt  = m_ptAccessor->getValue();
+  if (eta > m_etaCutoffs.back()) return false;
+  if (pt  < m_ptCutoffs.at(0)) return false; // Cuts are not optimized in pT < 500 MeV and should not be used here
+  
+  for (int i_etabin = 0; i_etabin <= etaSize-2; i_etabin++) {
+    for (int i_ptbin = 0; i_ptbin <= ptSize-2; i_ptbin++) {
+      if (((m_etaCutoffs.at(i_etabin)<=eta)&&(eta<m_etaCutoffs.at(i_etabin+1)))&&
+          ((m_ptCutoffs.at(i_ptbin)<=pt)&&(pt<m_ptCutoffs.at(i_ptbin+1)))){
+        if (m_sctholesAccessor->getValue() <= m_SctHolesCuts.at(i_etabin).at(i_ptbin)) {
+          return true;
+        }
+        else return false;
+      }
+    }
+  }
+  return false;
+}
+
+// ---------------- EtaPtDependentSctHitsPlusDeadCut ----------------
+InDet::EtaPtDependentSctHitsPlusDeadCut::EtaPtDependentSctHitsPlusDeadCut(InDet::InDetTrackSelectionTool* tool,
+          std::vector<Double_t> eta, std::vector<Double_t> pt, std::vector<std::vector<Double_t>> shpd)
+  : InDet::TrackCut(tool)
+  , m_etaCutoffs(eta)
+  , m_ptCutoffs(pt)
+  , m_SctHitsPlusDeadCuts(shpd)
+  , m_etaAccessor(nullptr)
+  , m_ptAccessor(nullptr)
+  , m_sctAccessor(nullptr)
+  , m_sctDeadAccessor(nullptr)
+{
+}
+
+StatusCode InDet::EtaPtDependentSctHitsPlusDeadCut::initialize()
+{
+  ATH_CHECK( TrackCut::initialize() );
+
+  if ((m_etaCutoffs.size()-1) != m_SctHitsPlusDeadCuts.size()) {
+    ATH_MSG_ERROR( "Eta cutoffs and SctHitsPlusDead cuts must be vectors of the same length." );
+    return StatusCode::FAILURE;
+  }
+  for (size_t i_size=0; i_size< m_SctHitsPlusDeadCuts.size(); ++i_size) {
+    if ((m_ptCutoffs.size()-1) != m_SctHitsPlusDeadCuts.at(i_size).size()) {
+      ATH_MSG_ERROR( "Pt cutoffs and SctHitsPlusDead cuts must be vectors of the same length." );
+      return StatusCode::FAILURE;
+    }
+  }
+
+  ATH_CHECK( getAccessor("eta", m_etaAccessor) );
+  ATH_CHECK( getAccessor("pt", m_ptAccessor) );
+  std::string sctHits = "summaryType";
+  sctHits += std::to_string(xAOD::numberOfSCTHits);
+  std::string sctDead = "summaryType";
+  sctDead += std::to_string(xAOD::numberOfSCTDeadSensors);
+  ATH_CHECK( getAccessor(sctHits, m_sctAccessor) );
+  ATH_CHECK( getAccessor(sctDead, m_sctDeadAccessor) );
+  m_sctAccessor->setSummaryType( xAOD::numberOfSCTHits );
+  m_sctDeadAccessor->setSummaryType( xAOD::numberOfSCTDeadSensors );
+  return StatusCode::SUCCESS;
+}
+
+bool InDet::EtaPtDependentSctHitsPlusDeadCut::result() const
+{
+  if (!m_etaAccessor) {
+    ATH_MSG_WARNING( "eta accessor not valid. Track will not pass." );
+    return false;
+  }
+  if (!m_ptAccessor) {
+    ATH_MSG_WARNING( "pt accessor not valid. Track will not pass." );
+    return false;
+  }
+  if (!m_sctAccessor) {
+    ATH_MSG_WARNING( "SCT hits accessor not valid." );
+    return false;
+  }
+  if (!m_sctDeadAccessor) {
+    ATH_MSG_WARNING( "SCT dead sensor accessor not valid." );
+    return false;
+  }
+
+  static int etaSize = m_etaCutoffs.size();
+  static int ptSize  = m_ptCutoffs.size();
+
+  double eta = std::fabs(m_etaAccessor->getValue());
+  double pt  = m_ptAccessor->getValue();
+  if (eta > m_etaCutoffs.back()) return false;
+  if (pt  < m_ptCutoffs.at(0)) return false; // Cuts are not optimized in pT < 500 MeV and should not be used here
+  
+  for (int i_etabin = 0; i_etabin <= etaSize-2; i_etabin++) {
+    for (int i_ptbin = 0; i_ptbin <= ptSize-2; i_ptbin++) {
+      if (((m_etaCutoffs.at(i_etabin)<=eta)&&(eta<m_etaCutoffs.at(i_etabin+1)))&&
+          ((m_ptCutoffs.at(i_ptbin)<=pt)&&(pt<m_ptCutoffs.at(i_ptbin+1)))){
+        if ((m_sctAccessor->getValue() + m_sctDeadAccessor->getValue()) >= m_SctHitsPlusDeadCuts.at(i_etabin).at(i_ptbin)) {
+          return true;
+        }
+        else return false;
+      }
+    }
+  }
+  return false;
 }
 
 // ---------------- TrackPatternRecoInfoCut ----------------
