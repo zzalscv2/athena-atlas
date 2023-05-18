@@ -23,10 +23,10 @@ namespace {
   // We'll have to use this package when they work properly with xAOD.
 
   inline bool isStable(const xAOD::TruthParticle* p) {
-    if (HepMC::is_simulation_particle(p->barcode())) return false; // This particle is from G4
+    if (HepMC::is_simulation_particle(p)) return false; // This particle is from G4
     if (p->pdgId() == 21 && p->p4().E() == 0) return false; //< Workaround for a gen bug?
     return ((p->status() % 1000 == 1) || //< Fully stable, even if marked that way by G4
-            (p->status() % 1000 == 2 && p->hasDecayVtx() && p->decayVtx() != NULL && HepMC::is_simulation_vertex(p->decayVtx()->barcode()))); //< Gen-stable with G4 decay
+            (p->status() % 1000 == 2 && p->hasDecayVtx() && p->decayVtx() != nullptr && HepMC::is_simulation_vertex(p->decayVtx()))); //< Gen-stable with G4 decay
     /// @todo Add a no-descendants-from-G4 check?
   }
   

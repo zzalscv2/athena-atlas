@@ -396,7 +396,7 @@ int DerivationFramework::HardTruthThinning::getDescendants(
   const xAOD::TruthVertex* dvtx = p->decayVtx();
   if( !dvtx ) return 0;
   if( dvtx->nOutgoingParticles() == 0 ) return 0;
-  if(HepMC::is_simulation_vertex(dvtx->barcode())) return 0;
+  if(HepMC::is_simulation_vertex(dvtx)) return 0;
   const std::vector< ElementLink< xAOD::TruthParticleContainer > >& outPart =
   dvtx->outgoingParticleLinks();
   for(unsigned int k=0; k<outPart.size(); ++k){
@@ -415,13 +415,13 @@ int DerivationFramework::HardTruthThinning::getDescendants(
       const xAOD::TruthVertex* vpp = pp->decayVtx();
       if( !vpp ) continue;
       if( vpp->nOutgoingParticles() == 0 ) continue;
-      if( HepMC::is_simulation_vertex(vpp->barcode())) continue;
+      if( HepMC::is_simulation_vertex(vpp)) continue;
       const std::vector< ElementLink< xAOD::TruthParticleContainer > >&
       outPart2 = vpp->outgoingParticleLinks();
       for(unsigned int k=0; k<outPart2.size(); ++k){
         if( ! (outPart2[k]).isValid() ) continue;
         const xAOD::TruthParticle* kpp = *(outPart2[k]);
-        if( HepMC::is_simulation_particle(kpp->barcode())) continue;
+        if( HepMC::is_simulation_particle(kpp)) continue;
         bool isIn = false;
         for(unsigned int kk=0; kk<descendants.size(); ++kk){
           if(kpp==descendants[kk]) isIn = true;

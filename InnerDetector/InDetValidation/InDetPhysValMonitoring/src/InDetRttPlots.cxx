@@ -101,7 +101,7 @@ InDetRttPlots::fill(const xAOD::TrackParticle& particle, const xAOD::TruthPartic
   if (particle.isAvailable<float>(m_trackParticleTruthProbKey)) {
     const float prob = particle.auxdata<float>(m_trackParticleTruthProbKey);
     int barcode = truthParticle.barcode();
-    if (!HepMC::is_simulation_particle(barcode) && barcode != 0 && prob > 0.5) {
+    if (!HepMC::is_simulation_particle(&truthParticle) && barcode != 0 && prob > 0.5) {
         if (m_resolutionPlotPrim) m_resolutionPlotPrim->fill(particle, truthParticle, weight);
     } else if (HepMC::is_simulation_particle(barcode) && prob > 0.7 && m_iDetailLevel >= 200) {
         if (m_resolutionPlotSecd) m_resolutionPlotSecd->fill(particle, truthParticle, weight);
@@ -110,7 +110,7 @@ InDetRttPlots::fill(const xAOD::TrackParticle& particle, const xAOD::TruthPartic
       if (m_resolutionPlotPrim_truthFromB) m_resolutionPlotPrim_truthFromB->fill(particle, truthParticle, weight);
     }
 
-    if(m_config.doResolutionsPerAuthor &&  m_iDetailLevel >= 200 and ( !HepMC::is_simulation_particle(barcode) and barcode != 0 and prob > 0.5)){
+    if(m_config.doResolutionsPerAuthor &&  m_iDetailLevel >= 200 and ( !HepMC::is_simulation_particle(&truthParticle) and barcode != 0 and prob > 0.5)){
       std::bitset<xAOD::TrackPatternRecoInfo::NumberOfTrackRecoInfo>  patternInfo = particle.patternRecoInfo();
       
       bool isSiSpSeededFinder = patternInfo.test(xAOD::TrackPatternRecoInfo::SiSPSeededFinder);

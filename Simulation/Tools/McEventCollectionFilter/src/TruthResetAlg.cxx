@@ -82,14 +82,13 @@ StatusCode TruthResetAlg::execute() {
      std::vector<HepMC::GenParticlePtr> p_to_remove;
      std::vector<HepMC::GenVertexPtr> v_to_remove;
      for (auto& particle: outputEvent->particles()) {
-       if (HepMC::is_simulation_particle(particle)) { // TODO Consider making the threshold for this check configurable.
+       if (HepMC::is_simulation_particle(particle)) {
          p_to_remove.push_back(particle);
        }
      }
      for (auto& particle: p_to_remove) outputEvent->remove_particle(particle);
      for (auto& vertex: outputEvent->vertices()) {
-       if (HepMC::is_simulation_vertex(vertex) || vertex->particles_out().empty() ) {  // TODO Consider making the threshold for this check configurable.
-         v_to_remove.push_back(vertex);
+       if (HepMC::is_simulation_vertex(vertex) || vertex->particles_out().empty() ) {
        }
      }
      for (auto& vertex: v_to_remove) outputEvent->remove_vertex(vertex);
@@ -126,7 +125,7 @@ StatusCode TruthResetAlg::execute() {
   ATH_MSG_VERBOSE( "Starting a vertex loop ... " );
   for (; currentVertexIter != endOfCurrentListOfVertices; ++currentVertexIter) {
     const HepMC::GenVertex *pCurrentVertex(*currentVertexIter);
-    if (HepMC::is_simulation_vertex(pCurrentVertex)) { // TODO Consider making the threshold for this check configurable.
+    if (HepMC::is_simulation_vertex(pCurrentVertex)) {
       continue; // skip vertices created by the simulation
     }
     std::unique_ptr<HepMC::GenVertex> copyOfGenVertex =std::make_unique<HepMC::GenVertex>(pCurrentVertex->position(), pCurrentVertex->id(), pCurrentVertex->weights() );
@@ -150,8 +149,7 @@ StatusCode TruthResetAlg::execute() {
   for ( HepMC::GenEvent::particle_const_iterator particleIter = inputEvent.particles_begin();
         particleIter != inputEvent.particles_end(); ++particleIter ) {
     const HepMC::GenParticle* currentParticle = *particleIter;
-    if (HepMC::is_simulation_particle(currentParticle)) { // TODO Consider making the threshold for this check configurable.
-      continue; // skip particles created by the simulation
+    if (HepMC::is_simulation_particle(currentParticle)) {
     }
     std::unique_ptr<HepMC::GenParticle> copyOfGenParticle = std::make_unique<HepMC::GenParticle>(*currentParticle);
     const bool isBeamParticle1(currentParticle == inputEvent.beam_particles().first);

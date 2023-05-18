@@ -27,16 +27,27 @@ constexpr int crazyParticleBarcode(std::numeric_limits<int32_t>::max());
 
 constexpr int INVALID_PARTICLE_BARCODE = -1;
 
-template <class T>  inline bool is_simulation_particle(const T& p){ return (barcode(p)>SIM_BARCODE_THRESHOLD);}
+template <class T>  inline bool is_simulation_particle(const T& p){ return (p->barcode()>SIM_BARCODE_THRESHOLD);}
 template <>  inline bool is_simulation_particle(const int& b){ return (b>SIM_BARCODE_THRESHOLD);}
+#ifdef HEPMC3
+template <>  inline bool is_simulation_particle(const ConstGenParticlePtr& p){ return (barcode(p)>SIM_BARCODE_THRESHOLD);}
+template <>  inline bool is_simulation_particle(const GenParticlePtr& p){ return (barcode(p)>SIM_BARCODE_THRESHOLD);}
+#endif
 
-template <class T>  inline int generations(const T& p){ return (barcode(p)/SIM_REGENERATION_INCREMENT);}
+
+template <class T>  inline int generations(const T& p){ return (p->barcode()/SIM_REGENERATION_INCREMENT);}
 template <>  inline int generations(const int& b){ return (b/SIM_REGENERATION_INCREMENT);}
+#ifdef HEPMC3
+template <>  inline int generations(const ConstGenParticlePtr& p){ return (barcode(p)/SIM_REGENERATION_INCREMENT);}
+template <>  inline int generations(const GenParticlePtr& p){ return (barcode(p)/SIM_REGENERATION_INCREMENT);}
+#endif
 
 
-
-template <class T>  inline bool is_simulation_vertex(const T& p){ return (barcode(p)<-SIM_BARCODE_THRESHOLD);}
-template <>  inline bool is_simulation_vertex(const int& b){ return (b<-SIM_BARCODE_THRESHOLD);}
+template <class T>  inline bool is_simulation_vertex(const T& p){ return (p->barcode()<-SIM_BARCODE_THRESHOLD);}
+#ifdef HEPMC3
+template <>  inline bool is_simulation_vertex(const ConstGenVertexPtr& p){ return (barcode(p)<-SIM_BARCODE_THRESHOLD);}
+template <>  inline bool is_simulation_vertex(const GenVertexPtr& p){ return (barcode(p)<-SIM_BARCODE_THRESHOLD);}
+#endif
 
 }
 #endif
