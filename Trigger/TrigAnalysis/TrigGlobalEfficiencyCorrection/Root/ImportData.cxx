@@ -114,7 +114,7 @@ bool ImportData::importTriggers()
 	bool success = true;
 	for(auto& line : config)
 	{
-                ATH_MSG_DEBUG(line);
+		ATH_MSG_DEBUG(line);
 		ss.clear();
 		ss.str(line);
 		ss >> triggerName;
@@ -181,7 +181,18 @@ bool ImportData::importTriggers()
 					++nm;
 				}
 				else if(flavour2 != xAOD::Type::Photon) success = false;
-				if(ne+nm==0 || ne==3 || nm==3) /// single-flavour trilepton triggers
+				if(def.leg[3])
+				{
+					/// symmetric tetralepton triggers
+					if(std::count(def.leg.cbegin(),
+								  def.leg.cend(),
+								  def.leg[0]) == 4)
+					{
+						def.type = nm? TT_4MU_SYM : TT_4E_SYM;
+					}
+					else success = false;
+				}
+				else if(ne+nm==0 || ne==3 || nm==3) /// single-flavour trilepton triggers
 				{
 					setNonMixed3LType(def, (ne? TT_ELECTRON_FLAG : nm? TT_MUON_FLAG : TT_PHOTON_FLAG));
 				}

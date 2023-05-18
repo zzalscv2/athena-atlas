@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -196,7 +196,11 @@ private:
 						&& Trig3Lmix1::object1() == Trig3Lmix2::object2()
 						&& Trig3Lmix1::object2() == Trig3Lmix2::object1(), 
 			bool>;
-	
+	/// One symmetric tetralepton trigger
+	template<typename Trig4Lsym>
+	auto globalEfficiency(const LeptonList&, unsigned, const Trig4Lsym, Efficiencies&)
+		-> std::enable_if_t<Trig4Lsym::is4Lsym(), bool>;
+
 	bool globalEfficiency_Factorized2(const LeptonList& leptons, unsigned runNumber, GlobEffFunc func1, GlobEffFunc func2, Efficiencies& globalEfficiencies);
 	bool globalEfficiency_Factorized3(const LeptonList& leptons, unsigned runNumber, GlobEffFunc func1, GlobEffFunc func2, GlobEffFunc func3, Efficiencies& globalEfficiencies);
 
@@ -216,7 +220,7 @@ private:
 
 	protected:
 		std::vector<TrigDef> m_defs;
-		unsigned m_n1L = 0, m_n2L = 0, m_n3L = 0;
+		unsigned m_n1L = 0, m_n2L = 0, m_n3L = 0, m_n4L = 0;
 	
 		template<TriggerType object_flag> bool findAndBindFunction();
 		template<TriggerType object1_flag, TriggerType object2_flag> bool findAndBindFunction();

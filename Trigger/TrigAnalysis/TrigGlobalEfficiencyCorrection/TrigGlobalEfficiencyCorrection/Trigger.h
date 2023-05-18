@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -42,6 +42,7 @@ public:
 		if(m_type&TT_SINGLELEPTON_FLAG) return 1;
 		else if(m_type&TT_DILEPTON_FLAG) return 2 - 1*(x==TT_SYM);
 		else if(m_type&TT_TRILEPTON_FLAG) return (x==TT_ASYM)? 3 : 1 + 1*(mixed()||(x!=TT_SYM));
+		else if((m_type&TT_TETRALEPTON_FLAG) && x==TT_SYM) return 1;
 		return 0;
 	}
 	constexpr unsigned nDistinctLegs(xAOD::Type::ObjectType obj) const
@@ -105,7 +106,7 @@ public:
 	
 protected:
 	TriggerType m_type;
-	std::array<std::size_t, 3> m_legs;
+	std::array<std::size_t, 4> m_legs;
 };
 
 template<TriggerType tt, typename CastType1 = UnusedArg, typename CastType2 = UnusedArg>
@@ -173,6 +174,7 @@ public:
 	static constexpr bool is3Lhalfsym() { return ((tt&TT_MASK_TYPE)==TT_TRILEPTON_HALFSYM) && !mixed(); }
 	static constexpr bool is2Lmix() { return (tt&TT_DILEPTON_FLAG) && mixed(); }
 	static constexpr bool is3Lmix() { return (tt&TT_TRILEPTON_FLAG) && mixed(); }
+	static constexpr bool is4Lsym() { return ((tt&TT_MASK_TYPE) == TT_TETRALEPTON_SYM); }
 
 	
 	std::array<std::size_t, nDistinctLegs()> legs;
@@ -319,6 +321,8 @@ struct TriggerClass<object_flag, TT_UNKNOWN>
 	struct T_3sym : public Trigger<addObjFlag(TT_TRILEPTON_SYM)> {};
 	/// half-symmetric trilepton trigger (e17_lhloose_2e9_lhloose, mu6_2mu4, ...):
 	struct T_3halfsym : public Trigger<addObjFlag(TT_TRILEPTON_HALFSYM), T_3sym> {};
+	/// symmetric tetralepton trigger (4mu4, ...):
+	struct T_4sym : public Trigger<addObjFlag(TT_TETRALEPTON_SYM)> {};
 };
 
 template<TriggerType object1_flag, TriggerType object2_flag>
