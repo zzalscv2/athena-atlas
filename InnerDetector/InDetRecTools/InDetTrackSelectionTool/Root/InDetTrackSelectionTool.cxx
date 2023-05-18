@@ -148,6 +148,32 @@ InDet::InDetTrackSelectionTool::InDetTrackSelectionTool(const std::string& name,
   declareProperty("vecPtCutoffsForSctHitsCut", m_vecPtCutoffsForSctHitsCut,
 		  "Minimum pt cutoffs for each SCT hits");
   declareProperty("vecMinNSctHitsAbovePt", m_vecMinNSctHitsAbovePt, "Minimum SCT hits above each pt cutoff");
+
+  declareProperty("vecEtaCutoffsForZ0SinThetaCut", m_vecEtaCutoffsForZ0SinThetaCut,
+                  "Minimum eta cutoffs for each Z0SinTheta value");
+  
+  declareProperty("vecPtCutoffsForZ0SinThetaCut", m_vecPtCutoffsForZ0SinThetaCut,
+                  "Minimum pt cutoffs for each Z0SinTheta value");
+  declareProperty("vecvecMaxZ0SinThetaAboveEtaPt", m_vecvecMaxZ0SinThetaAboveEtaPt, "Maximum Z0SinTheta value above each eta and pt cutoff");
+
+  declareProperty("vecEtaCutoffsForD0Cut", m_vecEtaCutoffsForD0Cut,
+                  "Minimum eta cutoffs for each D0 value");
+  declareProperty("vecPtCutoffsForD0Cut", m_vecPtCutoffsForD0Cut,
+                  "Minimum pt cutoffs for each D0 value");
+  declareProperty("vecvecMaxD0AboveEtaPt", m_vecvecMaxD0AboveEtaPt, "Maximum D0 value above each eta and pt cutoff");
+
+  declareProperty("vecEtaCutoffsForSctHolesCut", m_vecEtaCutoffsForSctHolesCut,
+                  "Minimum eta cutoffs for each SctHoles value");
+  declareProperty("vecPtCutoffsForSctHolesCut", m_vecPtCutoffsForSctHolesCut,
+                  "Minimum pt cutoffs for each SctHoles value");
+  declareProperty("vecvecMaxSctHolesAboveEtaPt", m_vecvecMaxSctHolesAboveEtaPt, "Maximum SctHoles value above each eta and pt cutoff");
+
+  declareProperty("vecEtaCutoffsForSctHitsPlusDeadCut", m_vecEtaCutoffsForSctHitsPlusDeadCut,
+                  "Minimum eta cutoffs for each SctHitsPlusDead value");
+  declareProperty("vecPtCutoffsForSctHitsPlusDeadCut", m_vecPtCutoffsForSctHitsPlusDeadCut,
+                  "Minimum pt cutoffs for each SctHitsPlusDead value");
+  declareProperty("vecvecMinSctHitsPlusDeadAboveEtaPt", m_vecvecMinSctHitsPlusDeadAboveEtaPt, "Minimum SctHitsPlusDead value above each eta and pt cutoff");
+  
   declareProperty("useExperimentalInnermostLayersCut", m_useExperimentalInnermostLayersCut, "Use the experimental cut on pixel holes");
   declareProperty("allowedTrackPatterns", m_allowedTrackPattern, "At least one of these TrackPatternRecoInfo bits is required");
 #ifndef XAOD_ANALYSIS
@@ -654,6 +680,192 @@ StatusCode InDet::InDetTrackSelectionTool::initialize() {
   }
 
 
+  if (!m_vecPtCutoffsForZ0SinThetaCut.empty()  ||
+      !m_vecEtaCutoffsForZ0SinThetaCut.empty() ||
+      !m_vecvecMaxZ0SinThetaAboveEtaPt.empty()) {
+    auto etaSize = m_vecEtaCutoffsForZ0SinThetaCut.size();
+    auto ptSize  = m_vecPtCutoffsForZ0SinThetaCut.size();
+    if (etaSize-1 != m_vecvecMaxZ0SinThetaAboveEtaPt.size()) {
+      ATH_MSG_ERROR( "Eta cutoffs and Z0SinTheta cuts must be vectors of the same length." );
+      return StatusCode::FAILURE;
+    }
+    for (size_t i_size=0; i_size<etaSize-1; ++i_size) {
+      if (ptSize-1 != m_vecvecMaxZ0SinThetaAboveEtaPt.at(i_size).size()) {
+        ATH_MSG_ERROR( "Pt cutoffs and Z0SinTheta cuts must be vectors of the same length." );
+        return StatusCode::FAILURE;
+      }
+    }
+    for (size_t i_cut_eta=0; i_cut_eta<etaSize-2; ++i_cut_eta) {
+      for (size_t i_cut_pt=0; i_cut_pt<ptSize-2; ++i_cut_pt) {
+        ATH_MSG_INFO( "  for " << m_vecEtaCutoffsForZ0SinThetaCut.at(i_cut_eta)
+                      << " < |#eta| < " << m_vecEtaCutoffsForZ0SinThetaCut.at(i_cut_eta+1)
+                      << " and " << m_vecPtCutoffsForZ0SinThetaCut.at(i_cut_pt)
+                      << " < pt < " << m_vecPtCutoffsForZ0SinThetaCut.at(i_cut_pt+1)
+                      << " MeV,\tZ0SinTheta <= " << m_vecvecMaxZ0SinThetaAboveEtaPt.at(i_cut_eta).at(i_cut_pt) );
+      }
+      ATH_MSG_INFO( "  for " << m_vecEtaCutoffsForZ0SinThetaCut.at(i_cut_eta)
+                    << " < |#eta| < " << m_vecEtaCutoffsForZ0SinThetaCut.at(i_cut_eta+1)
+                    << " and pt > " << m_vecPtCutoffsForZ0SinThetaCut.at(ptSize-2)
+                    << " MeV,\tZ0SinTheta <= " << m_vecvecMaxZ0SinThetaAboveEtaPt.at(i_cut_eta).at(ptSize-2) );
+    }
+    for (size_t i_cut_pt=0; i_cut_pt<ptSize-2; ++i_cut_pt) {
+      ATH_MSG_INFO( "  for " << m_vecEtaCutoffsForZ0SinThetaCut.at(etaSize-2)
+                    << " < |#eta| < " << m_maxAbsEta
+                    << " and " << m_vecPtCutoffsForZ0SinThetaCut.at(i_cut_pt)
+                    << " < pt < " << m_vecPtCutoffsForZ0SinThetaCut.at(i_cut_pt+1)
+                    << " MeV,\tZ0SinTheta <= " << m_vecvecMaxZ0SinThetaAboveEtaPt.at(etaSize-2).at(i_cut_pt) );
+    }
+    
+    ATH_MSG_INFO( "  for " << m_vecEtaCutoffsForZ0SinThetaCut.at(etaSize-2)
+		  << " < |#eta| < " << m_maxAbsEta
+                  << " and pt > " << m_vecPtCutoffsForZ0SinThetaCut.at(ptSize-2)
+		  << " MeV,\tZ0SinTheta <= " << m_vecvecMaxZ0SinThetaAboveEtaPt.at(etaSize-2).at(ptSize-2) );
+
+    auto Z0SinThetaCut = std::make_unique<EtaPtDependentZ0SinThetaCut>
+      (this, m_vecEtaCutoffsForZ0SinThetaCut, m_vecPtCutoffsForZ0SinThetaCut, m_vecvecMaxZ0SinThetaAboveEtaPt);
+    m_trackCuts["Z0SinTheta"].push_back(std::move(Z0SinThetaCut));
+
+  }
+
+  if (!m_vecPtCutoffsForD0Cut.empty()  ||
+      !m_vecEtaCutoffsForD0Cut.empty() ||
+      !m_vecvecMaxD0AboveEtaPt.empty()) {
+    auto etaSize = m_vecEtaCutoffsForD0Cut.size();
+    auto ptSize  = m_vecPtCutoffsForD0Cut.size();
+    if (etaSize-1 != m_vecvecMaxD0AboveEtaPt.size()) {
+      ATH_MSG_ERROR( "Eta cutoffs and D0 cuts must be vectors of the same length." );
+      return StatusCode::FAILURE;
+    }
+    for (size_t i_size=0; i_size<etaSize-1; ++i_size) {
+      if (ptSize-1 != m_vecvecMaxD0AboveEtaPt.at(i_size).size()) {
+        ATH_MSG_ERROR( "Pt cutoffs and D0 cuts must be vectors of the same length." );
+        return StatusCode::FAILURE;
+      }
+    }
+    for (size_t i_cut_eta=0; i_cut_eta<etaSize-2; ++i_cut_eta) {
+      for (size_t i_cut_pt=0; i_cut_pt<ptSize-2; ++i_cut_pt) {
+        ATH_MSG_INFO( "  for " << m_vecEtaCutoffsForD0Cut.at(i_cut_eta)
+                      << " < |#eta| < " << m_vecEtaCutoffsForD0Cut.at(i_cut_eta+1)
+                      << " and " << m_vecPtCutoffsForD0Cut.at(i_cut_pt)
+                      << " < pt < " << m_vecPtCutoffsForD0Cut.at(i_cut_pt+1)
+                      << " MeV,\tD0 <= " << m_vecvecMaxD0AboveEtaPt.at(i_cut_eta).at(i_cut_pt) );
+      }
+      ATH_MSG_INFO( "  for " << m_vecEtaCutoffsForD0Cut.at(i_cut_eta)
+                    << " < |#eta| < " << m_vecEtaCutoffsForD0Cut.at(i_cut_eta+1)
+                    << " and pt > " << m_vecPtCutoffsForD0Cut.at(ptSize-2)
+                    << " MeV,\tD0 <= " << m_vecvecMaxD0AboveEtaPt.at(i_cut_eta).at(ptSize-2) );
+    }
+    for (size_t i_cut_pt=0; i_cut_pt<ptSize-2; ++i_cut_pt) {
+      ATH_MSG_INFO( "  for " << m_vecEtaCutoffsForD0Cut.at(etaSize-2)
+                    << " < |#eta| < " << m_maxAbsEta
+                    << " and " << m_vecPtCutoffsForD0Cut.at(i_cut_pt)
+                    << " < pt < " << m_vecPtCutoffsForD0Cut.at(i_cut_pt+1)
+                    << " MeV,\tD0 <= " << m_vecvecMaxD0AboveEtaPt.at(etaSize-2).at(i_cut_pt) );
+    }
+    ATH_MSG_INFO( "  for " << m_vecEtaCutoffsForD0Cut.at(etaSize-2)
+                  << " < |#eta| < " << m_maxAbsEta
+                  << " and pt > " << m_vecPtCutoffsForD0Cut.at(ptSize-2)
+                  << " MeV,\tD0 <= " << m_vecvecMaxD0AboveEtaPt.at(etaSize-2).at(ptSize-2) );
+
+    auto D0Cut = std::make_unique<EtaPtDependentD0Cut>
+      (this, m_vecEtaCutoffsForD0Cut, m_vecPtCutoffsForD0Cut, m_vecvecMaxD0AboveEtaPt);
+    m_trackCuts["D0"].push_back(std::move(D0Cut));
+
+  }
+
+  if (!m_vecPtCutoffsForSctHolesCut.empty()  ||
+      !m_vecEtaCutoffsForSctHolesCut.empty() ||
+      !m_vecvecMaxSctHolesAboveEtaPt.empty()) {
+    auto etaSize = m_vecEtaCutoffsForSctHolesCut.size();
+    auto ptSize  = m_vecPtCutoffsForSctHolesCut.size();
+    if (etaSize-1 != m_vecvecMaxSctHolesAboveEtaPt.size()) {
+      ATH_MSG_ERROR( "Eta cutoffs and SctHoles cuts must be vectors of the same length." );
+      return StatusCode::FAILURE;
+    }
+    for (size_t i_size=0; i_size<etaSize-1; ++i_size) {
+      if (ptSize-1 != m_vecvecMaxSctHolesAboveEtaPt.at(i_size).size()) {
+        ATH_MSG_ERROR( "Pt cutoffs and SctHoles cuts must be vectors of the same length." );
+        return StatusCode::FAILURE;
+      }
+    }
+    for (size_t i_cut_eta=0; i_cut_eta<etaSize-2; ++i_cut_eta) {
+      for (size_t i_cut_pt=0; i_cut_pt<ptSize-2; ++i_cut_pt) {
+        ATH_MSG_INFO( "  for " << m_vecEtaCutoffsForSctHolesCut.at(i_cut_eta)
+                      << " < |#eta| < " << m_vecEtaCutoffsForSctHolesCut.at(i_cut_eta+1)
+                      << " and " << m_vecPtCutoffsForSctHolesCut.at(i_cut_pt)
+                      << " < pt < " << m_vecPtCutoffsForSctHolesCut.at(i_cut_pt+1)
+                      << " MeV,\tSctHoles <= " << m_vecvecMaxSctHolesAboveEtaPt.at(i_cut_eta).at(i_cut_pt) );
+      }
+      ATH_MSG_INFO( "  for " << m_vecEtaCutoffsForSctHolesCut.at(i_cut_eta)
+                    << " < |#eta| < " << m_vecEtaCutoffsForSctHolesCut.at(i_cut_eta+1)
+                    << " and pt > " << m_vecPtCutoffsForSctHolesCut.at(ptSize-2)
+                    << " MeV,\tSctHoles <= " << m_vecvecMaxSctHolesAboveEtaPt.at(i_cut_eta).at(ptSize-2) );
+    }
+    for (size_t i_cut_pt=0; i_cut_pt<ptSize-2; ++i_cut_pt) {
+      ATH_MSG_INFO( "  for " << m_vecEtaCutoffsForSctHolesCut.at(etaSize-2)
+                    << " < |#eta| < " << m_maxAbsEta
+                    << " and " << m_vecPtCutoffsForSctHolesCut.at(i_cut_pt)
+                    << " < pt < " << m_vecPtCutoffsForSctHolesCut.at(i_cut_pt+1)
+                    << " MeV,\tSctHoles <= " << m_vecvecMaxSctHolesAboveEtaPt.at(etaSize-2).at(i_cut_pt) );
+    }
+    ATH_MSG_INFO( "  for " << m_vecEtaCutoffsForSctHolesCut.at(etaSize-2)
+                  << " < |#eta| < " << m_maxAbsEta
+                  << " and pt > " << m_vecPtCutoffsForSctHolesCut.at(ptSize-2)
+                  << " MeV,\tSctHoles <= " << m_vecvecMaxSctHolesAboveEtaPt.at(etaSize-2).at(ptSize-2) );
+
+    
+    auto SctHolesCut = std::make_unique<EtaPtDependentSctHolesCut>
+      (this, m_vecEtaCutoffsForSctHolesCut, m_vecPtCutoffsForSctHolesCut, m_vecvecMaxSctHolesAboveEtaPt);
+    m_trackCuts["SctHoles"].push_back(std::move(SctHolesCut));
+
+  }
+  
+  if (!m_vecPtCutoffsForSctHitsPlusDeadCut.empty()  ||
+      !m_vecEtaCutoffsForSctHitsPlusDeadCut.empty() ||
+      !m_vecvecMinSctHitsPlusDeadAboveEtaPt.empty()) {
+    auto etaSize = m_vecEtaCutoffsForSctHitsPlusDeadCut.size();
+    auto ptSize  = m_vecPtCutoffsForSctHitsPlusDeadCut.size();
+    if (etaSize-1 != m_vecvecMinSctHitsPlusDeadAboveEtaPt.size()) {
+      ATH_MSG_ERROR( "Eta cutoffs and SctHitsPlusDead cuts must be vectors of the same length." );
+      return StatusCode::FAILURE;
+    }
+    for (size_t i_size=0; i_size<etaSize-1; ++i_size) {
+      if (ptSize-1 != m_vecvecMinSctHitsPlusDeadAboveEtaPt.at(i_size).size()) {
+        ATH_MSG_ERROR( "Pt cutoffs and SctHitsPlusDead cuts must be vectors of the same length." );
+        return StatusCode::FAILURE;
+      }
+    }
+    for (size_t i_cut_eta=0; i_cut_eta<etaSize-2; ++i_cut_eta) {
+      for (size_t i_cut_pt=0; i_cut_pt<ptSize-2; ++i_cut_pt) {
+        ATH_MSG_INFO( "  for " << m_vecEtaCutoffsForSctHitsPlusDeadCut.at(i_cut_eta)
+                      << " < |#eta| < " << m_vecEtaCutoffsForSctHitsPlusDeadCut.at(i_cut_eta+1)
+                      << " and " << m_vecPtCutoffsForSctHitsPlusDeadCut.at(i_cut_pt)
+                      << " < pt < " << m_vecPtCutoffsForSctHitsPlusDeadCut.at(i_cut_pt+1)
+                      << " MeV,\tSctHitsPlusDead >= " << m_vecvecMinSctHitsPlusDeadAboveEtaPt.at(i_cut_eta).at(i_cut_pt) );
+      }
+      ATH_MSG_INFO( "  for " << m_vecEtaCutoffsForSctHitsPlusDeadCut.at(i_cut_eta)
+                    << " < |#eta| < " << m_vecEtaCutoffsForSctHitsPlusDeadCut.at(i_cut_eta+1)
+                    << " and pt > " << m_vecPtCutoffsForSctHitsPlusDeadCut.at(ptSize-2)
+                    << " MeV,\tSctHitsPlusDead >= " << m_vecvecMinSctHitsPlusDeadAboveEtaPt.at(i_cut_eta).at(ptSize-2) );
+    }
+    for (size_t i_cut_pt=0; i_cut_pt<ptSize-2; ++i_cut_pt) {
+      ATH_MSG_INFO( "  for " << m_vecEtaCutoffsForSctHitsPlusDeadCut.at(etaSize-2)
+                    << " < |#eta| < " << m_maxAbsEta
+                    << " and " << m_vecPtCutoffsForSctHitsPlusDeadCut.at(i_cut_pt)
+                    << " < pt < " << m_vecPtCutoffsForSctHitsPlusDeadCut.at(i_cut_pt+1)
+                    << " MeV,\tSctHitsPlusDead >= " << m_vecvecMinSctHitsPlusDeadAboveEtaPt.at(etaSize-2).at(i_cut_pt) );
+    }
+    ATH_MSG_INFO( "  for " << m_vecEtaCutoffsForSctHitsPlusDeadCut.at(etaSize-2)
+                  << " < |#eta| < " << m_maxAbsEta
+                  << " and pt > " << m_vecPtCutoffsForSctHitsPlusDeadCut.at(ptSize-2)
+                  << " MeV,\tSctHitsPlusDead >= " << m_vecvecMinSctHitsPlusDeadAboveEtaPt.at(etaSize-2).at(ptSize-2) );
+
+    auto SctHitsPlusDeadCut = std::make_unique<EtaPtDependentSctHitsPlusDeadCut>
+      (this, m_vecEtaCutoffsForSctHitsPlusDeadCut, m_vecPtCutoffsForSctHitsPlusDeadCut, m_vecvecMinSctHitsPlusDeadAboveEtaPt);
+    m_trackCuts["SctHitsPlusDead"].push_back(std::move(SctHitsPlusDeadCut));
+
+  }
+  
   // initialize the cuts and set up the TAccept object
   for (const auto& cutFamily : m_trackCuts) {
     for (const auto& cut : cutFamily.second) {
@@ -971,6 +1183,18 @@ void InDet::InDetTrackSelectionTool::setCutLevel(InDet::CutLevel level, Bool_t o
       m_vecMinPtAboveEta.clear();
       m_vecPtCutoffsForSctHitsCut.clear();
       m_vecMinNSctHitsAbovePt.clear();
+      m_vecEtaCutoffsForZ0SinThetaCut.clear();
+      m_vecPtCutoffsForZ0SinThetaCut.clear();
+      m_vecvecMaxZ0SinThetaAboveEtaPt.clear();
+      m_vecEtaCutoffsForD0Cut.clear();
+      m_vecPtCutoffsForD0Cut.clear();
+      m_vecvecMaxD0AboveEtaPt.clear();
+      m_vecEtaCutoffsForSctHolesCut.clear();
+      m_vecPtCutoffsForSctHolesCut.clear();
+      m_vecvecMaxSctHolesAboveEtaPt.clear();
+      m_vecEtaCutoffsForSctHitsPlusDeadCut.clear();
+      m_vecPtCutoffsForSctHitsPlusDeadCut.clear();
+      m_vecvecMinSctHitsPlusDeadAboveEtaPt.clear();
     }
     break;
   case CutLevel::Loose :
@@ -1069,6 +1293,90 @@ void InDet::InDetTrackSelectionTool::setCutLevel(InDet::CutLevel level, Bool_t o
     if (overwrite || m_maxZ0SinTheta >= LOCAL_MAX_DOUBLE) m_maxZ0SinTheta = 1.0;
     if (overwrite || m_maxChiSqperNdf >= LOCAL_MAX_DOUBLE) m_maxChiSqperNdf = 6.0;
     break;
+  case CutLevel::HILooseOptimized:
+    setCutLevel(CutLevel::NoCut, overwrite);
+    if (overwrite || m_maxAbsEta >= LOCAL_MAX_DOUBLE) m_maxAbsEta = 2.5;
+    if (overwrite || m_maxNPixelHoles >= LOCAL_MAX_INT) m_maxNPixelHoles = 0;
+    if (overwrite || m_useMinBiasInnermostLayersCut >= 0) m_useMinBiasInnermostLayersCut = 1;
+    if (overwrite || (m_vecEtaCutoffsForZ0SinThetaCut.empty() &&
+                      m_vecPtCutoffsForZ0SinThetaCut.empty()  &&
+                      m_vecvecMaxZ0SinThetaAboveEtaPt.empty())){
+      m_vecEtaCutoffsForZ0SinThetaCut = {0.0, 1.1, 1.6, 2.0, 2.5};
+
+      m_vecPtCutoffsForZ0SinThetaCut  = { 500,  600,  700,  800,  900,  1000,  1500,
+                                          2000, 2500, 3000, 5000, 8000, 12000, 10000000};
+      m_vecvecMaxZ0SinThetaAboveEtaPt    = {{2.10, 2.15, 6.00, 5.00, 3.10, 2.00, 1.75, 1.60, 1.43, 1.40, 1.05, 0.65, 0.60},
+					    {1.44, 1.47, 1.50, 1.55, 1.62, 1.45, 1.45, 1.78, 1.73, 1.50, 1.20, 0.97, 0.53},
+					    {1.40, 1.45, 1.50, 1.46, 1.41, 1.37, 1.25, 1.50, 1.50, 1.36, 1.10, 0.85, 0.52},
+					    {1.51, 1.70, 1.70, 1.71, 1.71, 1.53, 1.54, 1.49, 1.36, 1.20, 0.95, 0.60, 0.55}};
+    }
+    if (overwrite || (m_vecEtaCutoffsForD0Cut.empty() &&
+                      m_vecPtCutoffsForD0Cut.empty()  &&
+                      m_vecvecMaxD0AboveEtaPt.empty())){
+      m_vecEtaCutoffsForD0Cut = {0.0, 1.1, 1.6, 2.0, 2.5};
+      
+      m_vecPtCutoffsForD0Cut  = { 500,  600,  700,  800,  900,  1000,  1500,
+				  2000, 2500, 3000, 5000, 8000, 12000, 10000000};
+      m_vecvecMaxD0AboveEtaPt    = {{0.81, 0.90, 0.94, 0.92, 0.90, 0.75, 0.65, 0.63, 0.62, 0.60, 0.63, 0.50, 0.55},
+				    {1.00, 0.98, 0.98, 0.92, 0.90, 0.69, 0.67, 0.86, 0.88, 0.88, 0.88, 0.87, 1.06},
+				    {1.19, 1.15, 1.10, 1.08, 1.03, 0.94, 0.85, 0.97, 0.97, 0.96, 0.95, 0.92, 1.04},
+				    {1.33, 1.23, 1.21, 1.15, 1.15, 1.07, 0.94, 0.97, 0.97, 0.97, 0.98, 1.10, 1.10}};
+    }
+    break;
+  case CutLevel::HITightOptimized:
+    setCutLevel(CutLevel::NoCut, overwrite);
+    if (overwrite || m_maxAbsEta >= LOCAL_MAX_DOUBLE) m_maxAbsEta = 2.5;
+    if (overwrite || m_maxNPixelHoles >= LOCAL_MAX_INT) m_maxNPixelHoles = 0;
+    if (overwrite || m_useMinBiasInnermostLayersCut >= 0) m_useMinBiasInnermostLayersCut = 1;
+    if (overwrite || (m_vecEtaCutoffsForZ0SinThetaCut.empty() &&
+                      m_vecPtCutoffsForZ0SinThetaCut.empty()  &&
+                      m_vecvecMaxZ0SinThetaAboveEtaPt.empty())){
+      m_vecEtaCutoffsForZ0SinThetaCut = {0.0, 1.1, 1.6, 2.0, 2.5};
+
+      m_vecPtCutoffsForZ0SinThetaCut  = { 500,  600,  700,  800,  900,  1000,  1500,
+                                          2000, 2500, 3000, 5000, 8000, 12000, 10000000};
+      m_vecvecMaxZ0SinThetaAboveEtaPt    = {{0.62, 0.70, 0.82, 0.87, 0.74, 0.61, 0.50, 0.48, 0.46, 0.45, 0.30, 0.24, 0.23},
+					    {0.51, 0.53, 0.53, 0.53, 0.52, 0.43, 0.28, 0.27, 0.28, 0.30, 0.24, 0.22, 0.13},
+					    {0.91, 0.89, 0.87, 0.55, 0.59, 0.37, 0.39, 0.31, 0.34, 0.35, 0.30, 0.30, 0.20},
+					    {0.76, 0.71, 0.69, 0.48, 0.48, 0.47, 0.46, 0.42, 0.38, 0.32, 0.28, 0.20, 0.15}};
+    }
+    if (overwrite || (m_vecEtaCutoffsForD0Cut.empty() &&
+                      m_vecPtCutoffsForD0Cut.empty()  &&
+                      m_vecvecMaxD0AboveEtaPt.empty())){
+      m_vecEtaCutoffsForD0Cut = {0.0, 1.1, 1.6, 2.0, 2.5};
+
+      m_vecPtCutoffsForD0Cut  = { 500,  600,  700,  800,  900,  1000,  1500,
+				  2000, 2500, 3000, 5000, 8000, 12000, 10000000};
+      m_vecvecMaxD0AboveEtaPt    = {{0.34, 0.39, 0.47, 0.49, 0.55, 0.47, 0.44, 0.21, 0.19, 0.17, 0.12, 0.14, 0.15},
+				    {0.32, 0.32, 0.33, 0.33, 0.33, 0.27, 0.16, 0.15, 0.13, 0.15, 0.13, 0.16, 0.20},
+				    {0.95, 0.91, 0.88, 0.35, 0.37, 0.24, 0.26, 0.22, 0.23, 0.24, 0.19, 0.19, 0.23},
+				    {0.68, 0.67, 0.65, 0.42, 0.42, 0.36, 0.35, 0.31, 0.27, 0.26, 0.27, 0.28, 0.30}};
+    }
+    if (overwrite || (m_vecEtaCutoffsForSctHolesCut.empty() &&
+                      m_vecPtCutoffsForSctHolesCut.empty()  &&
+                      m_vecvecMaxSctHolesAboveEtaPt.empty())){
+      m_vecEtaCutoffsForSctHolesCut = {0.0, 1.1, 1.6, 2.0, 2.5};
+      
+      m_vecPtCutoffsForSctHolesCut  = { 500,  600,  700,  800,  900,  1000,  1500,
+					2000, 2500, 3000, 5000, 8000, 12000, 10000000};
+      m_vecvecMaxSctHolesAboveEtaPt    = {{0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1},
+					 {0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1},
+					 {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+					 {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
+    }
+    if (overwrite || (m_vecEtaCutoffsForSctHitsPlusDeadCut.empty() &&
+                      m_vecPtCutoffsForSctHitsPlusDeadCut.empty()  &&
+                      m_vecvecMinSctHitsPlusDeadAboveEtaPt.empty())){
+      m_vecEtaCutoffsForSctHitsPlusDeadCut = {0.0, 1.1, 1.6, 2.0, 2.5};
+      
+      m_vecPtCutoffsForSctHitsPlusDeadCut  = { 500,  600,  700,  800,  900,  1000,  1500,
+					       2000, 2500, 3000, 5000, 8000, 12000, 10000000};
+      m_vecvecMinSctHitsPlusDeadAboveEtaPt    = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+						 {0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0},
+						 {8, 8, 8, 7, 7, 6, 6, 6, 6, 6, 0, 0, 0},
+						 {7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
+    }
+    break;
   default:
     ATH_MSG_ERROR("CutLevel not recognized. Cut selection will remain unchanged.");
     break;
@@ -1088,5 +1396,7 @@ InDet::InDetTrackSelectionTool::s_mapCutLevel =
     {"LooseTau", InDet::CutLevel::LooseTau},
     {"MinBias", InDet::CutLevel::MinBias},
     {"HILoose", InDet::CutLevel::HILoose},
-    {"HITight", InDet::CutLevel::HITight}
+    {"HITight", InDet::CutLevel::HITight},
+    {"HILooseOptimized", InDet::CutLevel::HILooseOptimized},
+    {"HITightOptimized", InDet::CutLevel::HITightOptimized}
   };

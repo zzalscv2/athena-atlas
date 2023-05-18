@@ -460,6 +460,78 @@ namespace InDet {
     std::shared_ptr<SummaryAccessor> m_sctDeadAccessor;
   };
 
+  // ---------------- EtaPtDependentZ0SinThetaCut ----------------
+  class EtaPtDependentZ0SinThetaCut : public virtual TrackCut {
+  public:
+    EtaPtDependentZ0SinThetaCut(InDetTrackSelectionTool*, std::vector<Double_t> eta, std::vector<Double_t> pt, std::vector<std::vector<Double_t>> z0);
+    void setEta(std::vector<Double_t> eta) {m_etaCutoffs = eta;}
+    void setPt(std::vector<Double_t> pt) {m_ptCutoffs = pt;}
+    void setZ0(std::vector<std::vector<Double_t>> z0) {m_Z0SinThetaCuts = z0;}
+    virtual StatusCode initialize();
+    virtual bool result() const;
+  private:
+    std::vector<Double_t> m_etaCutoffs;
+    std::vector<Double_t> m_ptCutoffs;
+    std::vector<std::vector<Double_t>> m_Z0SinThetaCuts;
+    std::shared_ptr< FuncAccessor< double, &xAOD::TrackParticle::eta> > m_etaAccessor;
+    std::shared_ptr< FuncAccessor< double, &xAOD::TrackParticle::pt> > m_ptAccessor;
+    std::shared_ptr< ParamAccessor<1> > m_Z0Accessor;
+    std::shared_ptr< ParamAccessor<3> > m_ThetaAccessor;
+  };
+  // ---------------- EtaPtDependentD0Cut ----------------
+  class EtaPtDependentD0Cut : public virtual TrackCut {
+  public:
+    EtaPtDependentD0Cut(InDetTrackSelectionTool*, std::vector<Double_t> eta, std::vector<Double_t> pt, std::vector<std::vector<Double_t>> d0);
+    void setEta(std::vector<Double_t> eta) {m_etaCutoffs = eta;}
+    void setPt(std::vector<Double_t> pt) {m_ptCutoffs = pt;}
+    void setD0(std::vector<std::vector<Double_t>> d0) {m_D0Cuts = d0;}
+    virtual StatusCode initialize();
+    virtual bool result() const;
+  private:
+    std::vector<Double_t> m_etaCutoffs;
+    std::vector<Double_t> m_ptCutoffs;
+    std::vector<std::vector<Double_t>> m_D0Cuts;
+    std::shared_ptr< FuncAccessor< double, &xAOD::TrackParticle::eta> > m_etaAccessor;
+    std::shared_ptr< FuncAccessor< double, &xAOD::TrackParticle::pt> > m_ptAccessor;
+    std::shared_ptr< ParamAccessor<0> > m_D0Accessor;
+  };
+  // ---------------- EtaPtDependentSctHolesCut ----------------
+  class EtaPtDependentSctHolesCut : public virtual TrackCut {
+  public:
+    EtaPtDependentSctHolesCut(InDetTrackSelectionTool*, std::vector<Double_t> eta, std::vector<Double_t> pt, std::vector<std::vector<Double_t>> sctholes);
+    void setEta(std::vector<Double_t> eta) {m_etaCutoffs = eta;}
+    void setPt(std::vector<Double_t> pt) {m_ptCutoffs = pt;}
+    void setSctHoles(std::vector<std::vector<Double_t>> sctholes) {m_SctHolesCuts = sctholes;}
+    virtual StatusCode initialize();
+    virtual bool result() const;
+  private:
+    std::vector<Double_t> m_etaCutoffs;
+    std::vector<Double_t> m_ptCutoffs;
+    std::vector<std::vector<Double_t>> m_SctHolesCuts;
+    std::shared_ptr< FuncAccessor< double, &xAOD::TrackParticle::eta> > m_etaAccessor;
+    std::shared_ptr< FuncAccessor< double, &xAOD::TrackParticle::pt> > m_ptAccessor;
+    std::shared_ptr<SummaryAccessor> m_sctholesAccessor;
+  };
+
+  // ---------------- EtaPtDependentSctHitsPlusDeadCut ----------------
+  class EtaPtDependentSctHitsPlusDeadCut : public virtual TrackCut {
+  public:
+    EtaPtDependentSctHitsPlusDeadCut(InDetTrackSelectionTool*, std::vector<Double_t> eta, std::vector<Double_t> pt, std::vector<std::vector<Double_t>> shpd);
+    void setEta(std::vector<Double_t> eta) {m_etaCutoffs = eta;}
+    void setPt(std::vector<Double_t> pt) {m_ptCutoffs = pt;}
+    void setSHPD(std::vector<std::vector<Double_t>> shpd) {m_SctHitsPlusDeadCuts = shpd;}
+    virtual StatusCode initialize();
+    virtual bool result() const;
+  private:
+    std::vector<Double_t> m_etaCutoffs;
+    std::vector<Double_t> m_ptCutoffs;
+    std::vector<std::vector<Double_t>> m_SctHitsPlusDeadCuts;
+    std::shared_ptr< FuncAccessor< double, &xAOD::TrackParticle::eta> > m_etaAccessor;
+    std::shared_ptr< FuncAccessor< double, &xAOD::TrackParticle::pt> > m_ptAccessor;
+    std::shared_ptr<SummaryAccessor> m_sctAccessor;
+    std::shared_ptr<SummaryAccessor> m_sctDeadAccessor;
+  };
+
   class TrackPatternRecoInfoCut : public virtual TrackCut {
   public:
     TrackPatternRecoInfoCut(InDetTrackSelectionTool*, const std::vector<Int_t>& allowedTrackPatterns);

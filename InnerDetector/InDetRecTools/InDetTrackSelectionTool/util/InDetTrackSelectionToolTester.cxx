@@ -110,7 +110,7 @@ int main( int argc, char* argv[] ) {
    unique_ptr< TFile > outFile(new TFile("IDTrackSelectionToolTestOut.root", "RECREATE"));
    Info( APP_NAME, "Creating output file %s", outFile->GetName() );
 
-   const vector<string> cutNames = {"NoCut", "Loose", "LoosePrimary", "TightPrimary", "LooseMuon", "LooseElectron", "MinBias", "HILoose", "HITight"}; // these are names of pre-defined selections
+   const vector<string> cutNames = {"NoCut", "Loose", "LoosePrimary", "TightPrimary", "LooseMuon", "LooseElectron", "MinBias", "HILoose", "HITight", "HITightOptimized", "HILooseOptimized"}; // these are names of pre-defined selections
    const vector<string> otherCutNames = {"IP", "IPSigma", "IPSignificance", "Author"}; // other configurations we will define manually
    std::map<string, unique_ptr<TrkSelTool> > selToolMap;
    std::map<string, unique_ptr<HistFamily> > histFamilyMap;
