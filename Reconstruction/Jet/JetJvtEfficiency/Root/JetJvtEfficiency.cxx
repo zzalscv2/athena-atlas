@@ -37,6 +37,7 @@ JetJvtEfficiency::JetJvtEfficiency( const std::string& name): asg::AsgTool( name
   m_isHSAcc(nullptr)
   {
     declareProperty( "TaggingAlg",                m_tagger = CP::JvtTagger::NNJvt                                 );
+    declareProperty( "NNJvtTool",                 m_NNJvtTool_handle,                "NN Jvt tool"                );
     declareProperty( "WorkingPoint",              m_wp = "Default"                                                );
     declareProperty( "SFFile",                    m_file = ""                                                     );
     declareProperty( "JetContainerName",          m_jetContainerName = "AntiKt4EMPFlowJets"                       );
@@ -114,6 +115,7 @@ StatusCode JetJvtEfficiency::initialize(){
 
     // setup the NNJvt tool for recalculating NNJvt scores
     if (m_NNJvtTool_handle.empty()) {
+      ATH_MSG_INFO( "NNJvtTool is empty! Initializing default tool ");
       asg::AsgToolConfig config_NNjvt ("JetPileupTag::JetVertexNNTagger/NNJvt");
       ATH_CHECK(config_NNjvt.setProperty("JetContainer", m_jetContainerName+"_NNJvtCopy"));
       ATH_CHECK(config_NNjvt.setProperty("NNParamFile", m_NNJvtParamFile));
@@ -121,6 +123,7 @@ StatusCode JetJvtEfficiency::initialize(){
       ATH_CHECK(config_NNjvt.setProperty("SuppressInputDependence", true)); // otherwise decorations can't be accessed properly
       ATH_CHECK(config_NNjvt.makePrivateTool(m_NNJvtTool_handle));
     }
+
     ATH_CHECK(m_NNJvtTool_handle.retrieve());
 
     // NNJvt tool will decorate decision on jets that we can retrieve
