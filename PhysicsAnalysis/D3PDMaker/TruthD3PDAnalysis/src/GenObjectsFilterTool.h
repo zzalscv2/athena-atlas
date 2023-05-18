@@ -89,7 +89,6 @@ private:
   bool m_keepbcHadrons; //// keep b/c hadrons
   bool m_keepbcHadronDecayChain; //// all particles from b/c hadrons including G4
   double m_bcHadronsDescendantsPtCut;
-  int m_bcHadronsDescendantsBarcodeCut;
   double m_bcHadronsDescendantsEtaCut;
   std::vector<int> m_keepParticleWithPdgId;
   bool m_keepLeptonicWZBosons; /// W/Z bosons decaying leptonically

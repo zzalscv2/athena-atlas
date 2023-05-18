@@ -245,7 +245,7 @@ namespace Rec{
                                TP->auxdata< ElementLink< xAOD::TruthParticleContainer > >("truthParticleLink");
         if( !tplink.isValid() ) return 0;
         if( TP->auxdata< float >( "truthMatchProbability" ) < 0.75 ) return 0;
-        if( HepMC::is_simulation_particle((*tplink)->barcode())) return 0;
+        if( HepMC::is_simulation_particle((*tplink))) return 0;
         if( (*tplink)->hasProdVtx()){
           if( (*tplink)->prodVtx()->nIncomingParticles()==1){
              int PDGID1=0, PDGID2=0, PDGID3=0;
@@ -290,7 +290,7 @@ namespace Rec{
       if( TP->isAvailable< ElementLink< xAOD::TruthParticleContainer> >( "truthParticleLink") ) {
         const ElementLink<xAOD::TruthParticleContainer>& tplink = 
                                TP->auxdata< ElementLink< xAOD::TruthParticleContainer > >("truthParticleLink");
-        if( tplink.isValid() && HepMC::is_simulation_particle((*tplink)->barcode())) return 1;
+        if( tplink.isValid() && HepMC::is_simulation_particle((*tplink))) return 1;
       }
       return 0;
   }

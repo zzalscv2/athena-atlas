@@ -706,7 +706,7 @@ bool DerivationFramework::MenuTruthThinning::isBoson(const xAOD::TruthParticle* 
 bool DerivationFramework::MenuTruthThinning::isFsrFromLepton(const xAOD::TruthParticle* part) const {
     int pdg = part->pdgId();
     if(abs(pdg) != 22) return false; // photon
-    if(HepMC::is_simulation_particle(part->barcode()) ) return false; // Geant photon
+    if(HepMC::is_simulation_particle(part) ) return false; // Geant photon
     const xAOD::TruthVertex* prod = part->prodVtx();
     if(!prod) return false; // no parent.
     // Simple loop check

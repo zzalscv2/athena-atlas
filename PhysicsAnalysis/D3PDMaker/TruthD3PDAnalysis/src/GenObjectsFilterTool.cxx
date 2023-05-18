@@ -65,7 +65,6 @@ GenObjectsFilterTool::GenObjectsFilterTool( const std::string& type,
    declareProperty( "KeepBCHadrons",m_keepbcHadrons=false);
    declareProperty( "KeepBCHadronDecayChain",m_keepbcHadronDecayChain=false);
    declareProperty( "BCHadronsDescendantsPtCut",m_bcHadronsDescendantsPtCut=-1);
-   declareProperty( "BCHadronsDescendantsBarcodeCut",m_bcHadronsDescendantsBarcodeCut=-1); /// -1 for no cut
    declareProperty( "BCHadronsDescendantsEtaCut",m_bcHadronsDescendantsEtaCut=-1);/// -1 for no cut
    declareProperty( "KeepParticleWithPdgId",m_keepParticleWithPdgId);
 
@@ -268,7 +267,6 @@ bool GenObjectsFilterTool::isRequested(const HepMC::ConstGenParticlePtr& part) c
 
      if(pt>m_bcHadronsDescendantsPtCut){
        if(m_bcHadronsDescendantsEtaCut<0 || std::abs(eta)<m_bcHadronsDescendantsEtaCut){
-	 if(barcode < m_bcHadronsDescendantsBarcodeCut || m_bcHadronsDescendantsBarcodeCut<0){
 
 	   bool isfromhadron=false;
 #ifdef HEPMC3
@@ -289,7 +287,6 @@ bool GenObjectsFilterTool::isRequested(const HepMC::ConstGenParticlePtr& part) c
 	   }
 #endif
 	   if(isfromhadron) return true;
-	 }
        }
      }
    }

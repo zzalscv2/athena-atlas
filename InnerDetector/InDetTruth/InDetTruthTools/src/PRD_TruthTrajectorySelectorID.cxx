@@ -166,7 +166,7 @@ bool InDet::PRD_TruthTrajectorySelectorID::pass( const Trk::PRD_TruthTrajectory 
   
   ThreePointCircle circle(pos);
   // trajectory only selected when within cuts
-  if( ( std::abs(circle.d0()) <= 15 && !HepMC::is_simulation_particle(*prdvec.genParticle)  ))  return true;
+  if( ( std::abs(circle.d0()) <= 15 && !HepMC::is_simulation_particle(prdvec.genParticle)  ))  return true;
   
   return false;
 }

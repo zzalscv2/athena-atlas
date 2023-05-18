@@ -145,6 +145,7 @@ xAODEventSelector::xAODEventSelector( const std::string& name,
   declareProperty( "MetaDataTreeName", m_metadataName = "MetaData","Name of the TTree to load/read metadata from input file(s)" );
 
   declareProperty( "ReadMetaDataWithPool", m_readMetadataWithPool=false, "If true, using POOL to read metadata, will ensure input file is registered with catalog");
+  declareProperty( "printEventProxyWarnings", m_printEventProxyWarnings);
 
 #ifndef XAOD_ANALYSIS
   declareProperty( "CollectionType", m_collectionType="", "Compability flag for RecExCommon");
@@ -198,6 +199,7 @@ StatusCode xAODEventSelector::initialize()
   } else {
    m_tevent = new xAOD::xAODTEvent(); //our special class inheriting from xAOD::TEvent
   }
+  m_tevent->setPrintEventProxyWarnings(m_printEventProxyWarnings);
 
   //use the first file to decide if reading metadata with POOL is ok
   if(m_readMetadataWithPool) {
