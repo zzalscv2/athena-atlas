@@ -12,6 +12,8 @@ def ActsTrkITkPixelClusteringToolCfg(flags, name="ActsITkPixelClusteringTool", *
     kwargs.setdefault("ClusterMakerTool", acc.popToolsAndMerge(ITkClusterMakerToolCfg(flags)))
     kwargs.setdefault("AddCorners", True)
     kwargs.setdefault("ErrorStrategy", 1)
+    kwargs.setdefault("PixelChargeCalibCondData", "ITkPixelChargeCalibCondData")
+    kwargs.setdefault("PixelOfflineCalibData", "")
     acc.setPrivateTools(CompFactory.ActsTrk.PixelClusteringTool(name, **kwargs))
     return acc
 

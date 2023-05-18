@@ -227,7 +227,8 @@ class METConfig:
                                                                   minPt=500)
             #
             from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg
-            self.trkvxtool=self.accumulator.popToolsAndMerge(TTVAToolCfg(inputFlags, "TrackVertexAssociationTool_MET",addDecoAlg=True, WorkingPoint="Nonprompt_All_MaxWeight"))
+            self.trkvxtool=self.accumulator.popToolsAndMerge(TTVAToolCfg(inputFlags, "TrackVertexAssociationTool_MET",addDecoAlg=True, 
+                                                                         WorkingPoint="Nonprompt_All_MaxWeight", HardScatterLinkDeco=""))
             #
             self.trkisotool = CompFactory.getComp("xAOD::TrackIsolationTool")("TrackIsolationTool_MET")
             self.trkisotool.TrackSelectionTool = self.trkseltool # As configured above

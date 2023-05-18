@@ -149,7 +149,6 @@ StatusCode  ClusterMakerTool::initialize(){
    if (not m_pixelReadout.empty()) {
      ATH_CHECK(m_pixelReadout.retrieve());
    }
-   ATH_CHECK(m_chargeDataKey.initialize(SG::AllowEmpty));
 
    if (not m_pixelLorentzAngleTool.empty()) {
      ATH_CHECK(m_pixelLorentzAngleTool.retrieve());
@@ -162,7 +161,6 @@ StatusCode  ClusterMakerTool::initialize(){
      m_sctLorentzAngleTool.disable();
    }
 
-   ATH_CHECK(m_clusterErrorKey.initialize(SG::AllowEmpty));
 
    return StatusCode::SUCCESS;
 }
@@ -194,8 +192,7 @@ StatusCode  ClusterMakerTool::initialize(){
 // OBSOLETE, kept just for backward compatibility
 
 
-PixelCluster* ClusterMakerTool::pixelCluster(
-                         const Identifier& clusterID,
+PixelCluster* ClusterMakerTool::pixelCluster(const Identifier& clusterID,
                          const Amg::Vector2D& localPos,
                          const std::vector<Identifier>& rdoList,
                          const int lvl1a,
@@ -208,7 +205,9 @@ PixelCluster* ClusterMakerTool::pixelCluster(
                          const float omegay,
          			           bool split,
                          double splitProb1,
-                         double splitProb2) const{
+                         double splitProb2,
+                         const PixelChargeCalibCondData *calibData,
+                         const PixelOfflineCalibData *offlineCalibData) const{
   if ( errorStrategy==2 && m_issueErrorA ) {
     m_issueErrorA=false;
   }
@@ -222,9 +221,7 @@ PixelCluster* ClusterMakerTool::pixelCluster(
   if ( errorStrategy==2 && m_forceErrorStrategy1A ) errorStrategy=1;
   // Fill vector of charges
   std::vector<float> chargeList;
-  if (!m_chargeDataKey.empty()) {
-    SG::ReadCondHandle<PixelChargeCalibCondData> calibDataHandle(m_chargeDataKey);
-    const PixelChargeCalibCondData *calibData = *calibDataHandle;
+  if (calibData) {
     int nRDO=rdoList.size();
     chargeList.reserve(nRDO);
     for (int i=0; i<nRDO; i++) {
@@ -285,21 +282,22 @@ PixelCluster* ClusterMakerTool::pixelCluster(
     // contain long pixels or ganged pixels
     // Also require calibration service is available....
     if (!ganged && zPitch>399*micrometer && zPitch<401*micrometer) {
-      SG::ReadCondHandle<PixelCalib::PixelOfflineCalibData> offlineCalibData(m_clusterErrorKey);
-      if(element->isBarrel()){
-        int ibin = offlineCalibData->getPixelClusterErrorData()->getBarrelBin(eta,int(colRow.y()),int(colRow.x()));
-        double phiError = offlineCalibData->getPixelClusterErrorData()->getPixelBarrelPhiError(ibin);
-        double etaError = offlineCalibData->getPixelClusterErrorData()->getPixelBarrelEtaError(ibin);
-	      errorMatrix.fillSymmetric(0,0,square(phiError));
-	      errorMatrix.fillSymmetric(1,1,square(etaError));
+      if (offlineCalibData) {
+        if(element->isBarrel()){
+          int ibin = offlineCalibData->getPixelClusterErrorData()->getBarrelBin(eta,int(colRow.y()),int(colRow.x()));
+          double phiError = offlineCalibData->getPixelClusterErrorData()->getPixelBarrelPhiError(ibin);
+          double etaError = offlineCalibData->getPixelClusterErrorData()->getPixelBarrelEtaError(ibin);
+          errorMatrix.fillSymmetric(0,0,square(phiError));
+          errorMatrix.fillSymmetric(1,1,square(etaError));
+        }
+        else {
+          int ibin = offlineCalibData->getPixelClusterErrorData()->getEndcapBin(int(colRow.y()),int(colRow.x()));
+          double phiError = offlineCalibData->getPixelClusterErrorData()->getPixelEndcapPhiError(ibin);
+          double etaError = offlineCalibData->getPixelClusterErrorData()->getPixelEndcapRError(ibin);
+          errorMatrix.fillSymmetric(0,0,square(phiError));
+          errorMatrix.fillSymmetric(1,1,square(etaError));
+        }
       }
-      else {
-        int ibin = offlineCalibData->getPixelClusterErrorData()->getEndcapBin(int(colRow.y()),int(colRow.x()));
-        double phiError = offlineCalibData->getPixelClusterErrorData()->getPixelEndcapPhiError(ibin);
-        double etaError = offlineCalibData->getPixelClusterErrorData()->getPixelEndcapRError(ibin);
-	      errorMatrix.fillSymmetric(0,0,square(phiError));
-	      errorMatrix.fillSymmetric(1,1,square(etaError));
-			}
     }else{// cluster with ganged and/or long pixels
       errorMatrix.fillSymmetric(0,0,square(width.phiR()/colRow.x())*ONE_TWELFTH);
       errorMatrix.fillSymmetric(1,1,square(zPitch)*ONE_TWELFTH);
@@ -359,10 +357,12 @@ ClusterType ClusterMakerTool::makePixelCluster(
                          bool  ganged,
                          int errorStrategy,
                          const PixelID& pixelID,
-			 bool split,
+                         bool split,
                          double splitProb1,
                          double splitProb2,
-			 CreatorType clusterCreator) const{
+                         CreatorType clusterCreator,
+                         const PixelChargeCalibCondData *calibData,
+                         const PixelOfflineCalibData *offlineCalibData) const{
 	
  
   ATH_MSG_VERBOSE("ClusterMakerTool called, number ");
@@ -385,10 +385,8 @@ ClusterType ClusterMakerTool::makePixelCluster(
   float qColMin = 0;  float qColMax = 0;
   std::vector<float> chargeList;
   int nRDO=rdoList.size();
-  if (!m_chargeDataKey.empty()) { 
+  if (calibData) {
     chargeList.reserve(nRDO); 
-    SG::ReadCondHandle<PixelChargeCalibCondData> calibDataHandle(m_chargeDataKey);
-    const PixelChargeCalibCondData *calibData = *calibDataHandle;
     for (int i=0; i<nRDO; i++) {
       Identifier pixid=rdoList[i];
       int ToT=totList[i];
@@ -411,7 +409,7 @@ ClusterType ClusterMakerTool::makePixelCluster(
     int ToT=totList[i];
 
     float charge = ToT;
-    if (!m_chargeDataKey.empty()) { charge=chargeList[i]; }
+    if (calibData) { charge=chargeList[i]; }
 
     //     std::cout << "tot, charge =  " << ToT << " " << charge << std::endl;
     int row = pixelID.phi_index(pixid);
@@ -497,22 +495,22 @@ ClusterType ClusterMakerTool::makePixelCluster(
     // contain long pixels or ganged pixels
     // Also require calibration service is available....
     if (!ganged && zPitch>399*micrometer && zPitch<401*micrometer) {
-	    
-      SG::ReadCondHandle<PixelCalib::PixelOfflineCalibData> offlineCalibData(m_clusterErrorKey);
-      if (element->isBarrel()) {
-        int ibin = offlineCalibData->getPixelClusterErrorData()->getBarrelBin(eta,int(colRow.y()),int(colRow.x()));
-        double phiError = offlineCalibData->getPixelClusterErrorData()->getPixelBarrelPhiError(ibin);
-        double etaError = offlineCalibData->getPixelClusterErrorData()->getPixelBarrelEtaError(ibin);
-				errorMatrix.fillSymmetric(0,0,pow(phiError,2));  
-				errorMatrix.fillSymmetric(1,1,pow(etaError,2)); 
+	    if (offlineCalibData) {
+        if (element->isBarrel()) {
+          int ibin = offlineCalibData->getPixelClusterErrorData()->getBarrelBin(eta,int(colRow.y()),int(colRow.x()));
+          double phiError = offlineCalibData->getPixelClusterErrorData()->getPixelBarrelPhiError(ibin);
+          double etaError = offlineCalibData->getPixelClusterErrorData()->getPixelBarrelEtaError(ibin);
+          errorMatrix.fillSymmetric(0,0,pow(phiError,2));
+          errorMatrix.fillSymmetric(1,1,pow(etaError,2));
+        }
+        else {
+          int ibin = offlineCalibData->getPixelClusterErrorData()->getEndcapBin(int(colRow.y()),int(colRow.x()));
+          double phiError = offlineCalibData->getPixelClusterErrorData()->getPixelEndcapPhiError(ibin);
+          double etaError = offlineCalibData->getPixelClusterErrorData()->getPixelEndcapRError(ibin);
+          errorMatrix.fillSymmetric(0,0,square(phiError));
+          errorMatrix.fillSymmetric(1,1,square(etaError));
+        }
       }
-      else {
-        int ibin = offlineCalibData->getPixelClusterErrorData()->getEndcapBin(int(colRow.y()),int(colRow.x()));
-        double phiError = offlineCalibData->getPixelClusterErrorData()->getPixelEndcapPhiError(ibin);
-        double etaError = offlineCalibData->getPixelClusterErrorData()->getPixelEndcapRError(ibin);
-				errorMatrix.fillSymmetric(0,0,square(phiError)); 
-				errorMatrix.fillSymmetric(1,1,square(etaError)); 
-			}
     }else{// cluster with ganged and/or long pixels
       errorMatrix.fillSymmetric(0,0,square(width.phiR()/colRow.x())*ONE_TWELFTH);
       errorMatrix.fillSymmetric(1,1,square(zPitch)*ONE_TWELFTH);
@@ -560,7 +558,9 @@ PixelCluster* ClusterMakerTool::pixelCluster(
     const PixelID& pixelID,
     bool split,
     double splitProb1,
-    double splitProb2) const
+    double splitProb2,
+    const PixelChargeCalibCondData *calibData,
+    const PixelOfflineCalibData *offlineCalibData) const
 {
     return makePixelCluster<PixelCluster*>(
 	clusterID,
@@ -576,7 +576,9 @@ PixelCluster* ClusterMakerTool::pixelCluster(
 	split,
 	splitProb1,
 	splitProb2,
-	newInDetpixelCluster);
+	newInDetpixelCluster,
+  calibData,
+  offlineCalibData);
 }
 
 
@@ -593,7 +595,9 @@ xAOD::PixelCluster* ClusterMakerTool::xAODpixelCluster(
     const PixelID& pixelID,
     bool split,
     double splitProb1,
-    double splitProb2) const
+    double splitProb2,
+    const PixelChargeCalibCondData *calibData,
+    const PixelOfflineCalibData *offlineCalibData) const
 {
     return makePixelCluster<xAOD::PixelCluster*>(
 	Identifier(),
@@ -609,7 +613,9 @@ xAOD::PixelCluster* ClusterMakerTool::xAODpixelCluster(
 	split,
 	splitProb1,
 	splitProb2,
-	AddNewxAODpixelCluster(cluster));
+	AddNewxAODpixelCluster(cluster),
+	calibData,
+	offlineCalibData);
 }
 
 

@@ -15,10 +15,9 @@ forwardPhiLowBinEdges = [-3.14159 ,-3.07614 ,-3.01069 ,-2.94524 ,-2.87979 ,-2.81
 
 forwardEtaLowBinEdges = [-2.5, -2.475, -2.45, -2.425, -2.4 ,-2.375 ,-2.35 ,-2.325 ,-2.3 ,-2.275 ,-2.25 ,-2.225 ,-2.2 ,-2.175 ,-2.15 ,-2.125 ,-2.1 ,-2.075 ,-2.05 ,-2.025 ,-2, -1.975, -1.95, 1.95, 1.975 ,2 ,2.025 ,2.05 ,2.075 ,2.1 ,2.125 ,2.15 ,2.175 ,2.2 ,2.225 ,2.25 ,2.275 ,2.3 ,2.325 ,2.35 ,2.375, 2.4, 2.425, 2.45, 2.475, 2.5]
 
-barrelPtThresholds = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5] # 6 thresholds
-
-endcapForwardPtThresholds = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5, 13.5, 14.5, 15.5] # 15 thresholds
-
 candidateWordsPerTimeslice = [*range(0,33,1)]
 
 tobWordsPerTimeslice = [*range(0,33,1)]
+
+# TODO
+# define a vector for the 15 indexes of pt to be used in the histograms 

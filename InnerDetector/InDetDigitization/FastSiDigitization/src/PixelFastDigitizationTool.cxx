@@ -86,6 +86,7 @@ StatusCode PixelFastDigitizationTool::initialize()
 
   ATH_CHECK(m_pixelReadout.retrieve());
   ATH_CHECK(m_chargeDataKey.initialize());
+  ATH_CHECK(m_offlineCalibDataKey.initialize());
   ATH_CHECK(m_pixelDetEleCollKey.initialize());
 
   //locate the AtRndmGenSvc and initialize our local ptr
@@ -421,6 +422,7 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx,
 
   SG::ReadCondHandle<PixelChargeCalibCondData> calibDataHandle(m_chargeDataKey, ctx);
   const PixelChargeCalibCondData *calibData = *calibDataHandle;
+  SG::ReadCondHandle<PixelCalib::PixelOfflineCalibData> offlineCalibData(m_offlineCalibDataKey, ctx);
   std::vector<int> trkNo;
   std::vector<Identifier> detEl;
 
@@ -758,7 +760,12 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx,
                                                     hitSiDetElement,
                                                     isGanged,
                                                     m_pixErrorStrategy,
-                                                    *m_pixel_ID);
+                                                    *m_pixel_ID,
+                                                    false,
+                                                    0.0,
+                                                    0.0,
+                                                    calibData,
+                                                    *offlineCalibData);
         if (isGanged)  pixelCluster->setGangedPixel(isGanged);
       } else {
         ATH_MSG_WARNING("[ cluster - pix ] No pixels errors provided, but configured to use them.");

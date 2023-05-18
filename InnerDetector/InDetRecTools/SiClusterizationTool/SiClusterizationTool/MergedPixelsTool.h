@@ -23,6 +23,8 @@
 #include "InDetRawData/InDetRawDataCollection.h"
 #include "InDetRawData/PixelRDORawData.h"
 #include "StoreGate/ReadCondHandleKey.h"
+#include "PixelConditionsData/PixelChargeCalibCondData.h"
+#include "PixelConditionsData/PixelOfflineCalibData.h"
 
 #include "GaudiKernel/ServiceHandle.h"
 
@@ -35,6 +37,8 @@ class PixelID;
 namespace InDetDD {
   class SiDetectorElement;
 }
+
+using PixelCalib::PixelOfflineCalibData;
 
 namespace InDet {
   
@@ -85,9 +89,11 @@ namespace InDet {
                               const InDetDD::SiDetectorElement* element,
                               const PixelID& pixelID,
                               int& clusterNumber,
-                              bool split=false,
-                              double splitProb1=0.,
-                              double splitProb2=0.) const;
+                              bool split,
+                              double splitProb1,
+                              double splitProb2,
+                              const PixelChargeCalibCondData* calibData,
+                              const PixelOfflineCalibData* offlineCalibData) const;
 
     ///Retrieve the necessary services in initialize                
     virtual StatusCode initialize() override;
@@ -110,7 +116,10 @@ namespace InDet {
 
     ToolHandle<ClusterMakerTool> m_clusterMaker {this, "globalPosAlg", "InDet::ClusterMakerTool"};
     ToolHandle<PixelRDOTool> m_pixelRDOTool {this, "PixelRDOTool", "InDet::PixelRDOTool"};
-    
+
+    SG::ReadCondHandleKey<PixelChargeCalibCondData> m_chargeDataKey {this, "PixelChargeCalibCondData", "PixelChargeCalibCondData", "Pixel charge calibration data"};
+    SG::ReadCondHandleKey<PixelCalib::PixelOfflineCalibData> m_clusterErrorKey{this, "PixelOfflineCalibData", "PixelOfflineCalibData", "Output key of pixel cluster"};
+
 
     IntegerProperty m_posStrategy{this, "posStrategy", 0};
     IntegerProperty m_errorStrategy{this, "errorStrategy", 1};

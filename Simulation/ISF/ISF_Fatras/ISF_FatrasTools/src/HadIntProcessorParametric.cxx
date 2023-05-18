@@ -20,7 +20,8 @@
 #include "ISF_Event/ParticleClipboard.h"
 // Fatras
 #include "ISF_FatrasInterfaces/IPhysicsValidationTool.h"
-
+// AtlasHepMC
+#include "AtlasHepMC/MagicNumbers.h"
 // CLHEP
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "CLHEP/Matrix/Vector.h"
@@ -340,7 +341,7 @@ ISF::ISFParticleVector iFatras::HadIntProcessorParametric::getHadState(const ISF
 		   << E << " | " << m << " | " << p << " | " );
 
   /* TODO: this will not work with the new barcode style */
-  if (m_cutChain && ( parent->barcode()>100000 || parent->barcode()==0 ) ) {
+  if (m_cutChain && ( parent->barcode()>HepMC::SIM_REGENERATION_INCREMENT || parent->barcode()==0 ) ) {
     if (m_hadIntValidationTree) m_hadIntValidationTree->Fill();
     ATH_MSG_VERBOSE( "[ had ] interaction initiated by a secondary particle, no children saved " );
     return chDef;

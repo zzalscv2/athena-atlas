@@ -9,7 +9,7 @@ find_package( xAODUtilities )
 atlas_add_library( xAODMuonRDO
     xAODMuonRDO/*.h xAODMuonRDO/versions/*.h Root/*.cxx
     PUBLIC_HEADERS xAODMuonRDO
-    LINK_LIBRARIES xAODCore GeoPrimitives xAODMeasurementBase Identifier)
+    LINK_LIBRARIES xAODCore GeoPrimitives xAODMeasurementBase Identifier MuonNSWCommonDecode)
 
   
 atlas_add_xaod_smart_pointer_dicts(

@@ -256,6 +256,28 @@ def sTgcBytestreamDecodeCfg(flags, name="MuonsTgcRawDataProvider"):
 
     return acc
 
+def NswTrigProcessorRodDecoderCfg(flags, name ="NswTrigProcessorDecoder", **kwargs):
+    result = ComponentAccumulator()
+    the_tool = CompFactory.Muon.NSWTP_ROD_Decoder(name = name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
+def NswTrigProccesorRawDataProviderToolCfg(flags, name = "NswTrigProcessorRawDataTool", **kwargs ):
+    result = ComponentAccumulator()
+    kwargs.setdefault("Decoder", result.popToolsAndMerge(NswTrigProcessorRodDecoderCfg(flags)))
+    kwargs.setdefault( "RdoLocation", ( flags.Overlay.BkgPrefix  if flags.Common.isOverlay else "") + "NSW_TrigProcessor_RDO" )
+    the_tool = CompFactory.Muon.NSWTP_RawDataProviderToolMT(name = name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
+def NswTrigProcByteStreamDecodeCfg(flags, name = "NswProcByteStream"):
+    result = ComponentAccumulator()
+    # Make sure muon geometry is configured
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+    result.merge(MuonGeoModelCfg(flags))
+    the_alg = CompFactory.Muon.sTgcPadTriggerRawDataProvider(name = name,
+                                                             ProviderTool = result.popToolsAndMerge(NswTrigProccesorRawDataProviderToolCfg(flags)) )
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
 def sTgcPadTriggerBytestreamDecodeCfg(flags, name="MuonsTgcPadTriggerRawDataProvider"):
 
     acc = ComponentAccumulator()
@@ -278,11 +300,10 @@ def sTgcPadTriggerBytestreamDecodeCfg(flags, name="MuonsTgcPadTriggerRawDataProv
 
 
     # Setup the RAW data provider algorithm
-    Muon__sTgcPadTriggerRawDataProvider = CompFactory.Muon.sTgcPadTriggerRawDataProvider
-    sTgcPadTriggerRawDataProvider = Muon__sTgcPadTriggerRawDataProvider(name = name,
-                                                                        ProviderTool = MuonsTgcPadTriggerRawDataProviderTool )
+    the_alg = CompFactory.Muon.sTgcPadTriggerRawDataProvider(name = name,
+                                                             ProviderTool = MuonsTgcPadTriggerRawDataProviderTool )
 
-    acc.addEventAlgo(sTgcPadTriggerRawDataProvider, primary = True)
+    acc.addEventAlgo(the_alg, primary = True)
 
     return acc
 
@@ -363,16 +384,14 @@ def MuonByteStreamDecodersCfg(flags):
 
     if (flags.Detector.GeometrysTGC and flags.Detector.GeometryMM):
         # Schedule MM data decoding
-        mmdecodingAcc  = MmBytestreamDecodeCfg( flags )
-        cfg.merge( mmdecodingAcc )
+        cfg.merge( MmBytestreamDecodeCfg( flags ) )
 
         # Schedule sTGC data decoding
-        stgcdecodingAcc = sTgcBytestreamDecodeCfg( flags ) 
-        cfg.merge( stgcdecodingAcc )
+        cfg.merge( sTgcBytestreamDecodeCfg( flags )  )
 
         # Schedule sTGC Pad Trigger data decoding
-        stgcpadtriggerdecodingAcc = sTgcPadTriggerBytestreamDecodeCfg( flags )
-        cfg.merge( stgcpadtriggerdecodingAcc )
+        cfg.merge( sTgcPadTriggerBytestreamDecodeCfg( flags ) )
+        cfg.merge(NswTrigProcByteStreamDecodeCfg(flags))
 
     return cfg
 

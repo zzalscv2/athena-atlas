@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DataQualityUtils )
@@ -119,5 +119,6 @@ atlas_add_test( physval_make_web_display_test2
 atlas_add_test( han_results_print_test
     SCRIPT test/test_han_results_print.sh ${CMAKE_CURRENT_SOURCE_DIR}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/unitTestRun_han_results_print_test
+    LOG_IGNORE_PATTERN "RooFit v|Copyright|All rights|^$"
     PROPERTIES TIMEOUT 300
 )

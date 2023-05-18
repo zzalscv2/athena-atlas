@@ -35,7 +35,6 @@
 // Public methods: 
 /////////////////////////////////////////////////////////////////// 
 
-using namespace TruthHelper;
 using CLHEP::GeV;
 
 // Constructors
@@ -147,9 +146,9 @@ StatusCode PileupFilterTool::selectSpclMcBarcodes()
 
   // Initialize helper classes to test event and final particles
 
-  static const IsGenStable      isStable;
-  static const IsGenSimulStable isGSStable;
-  static const IsGenerator      isGenerator;
+  static const TruthHelper::IsGenStable      isStable;
+  static const TruthHelper::IsGenSimulStable isGSStable;
+  static const TruthHelper::IsGenerator      isGenerator;
 
   // Get all of the generated particles (does not have Geant secondaries)
 
@@ -157,7 +156,7 @@ StatusCode PileupFilterTool::selectSpclMcBarcodes()
   if ( m_includeSimul ) {
     sc = m_tesIO->getMC(particles,  m_mcEventsReadHandleKey.key());
   } else {
-    static const IsGenerator ifs;
+    static const TruthHelper::IsGenerator ifs;
     sc = m_tesIO->getMC(particles, &ifs, m_mcEventsReadHandleKey.key());
   }
   if ( sc.isFailure() ) {
@@ -627,7 +626,7 @@ StatusCode PileupFilterTool::initializeTool()
   ATH_MSG_DEBUG("Calling initializeTool");
   // accessor for particles
   delete m_tesIO;
-  m_tesIO = new GenAccessIO();
+  m_tesIO = new TruthHelper::GenAccessIO();
   if( nullptr == m_tesIO ) {
     ATH_MSG_ERROR("Unable to retrieve GenAccessIO pointer");
     return StatusCode::FAILURE;

@@ -540,7 +540,7 @@ namespace CP
 
     MCP::DataYear MuonCalibTool::getPeriod(bool isData) const 
     {
-        static const SG::AuxElement::Accessor<unsigned int> acc_rnd("RandomRunNumber");
+        static const SG::AuxElement::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");
         // I've copied the run number ranges from SUSYTools
         // https://gitlab.cern.ch/atlas/athena/blob/21.2/PhysicsAnalysis/SUSYPhys/SUSYTools/Root/SUSYObjDef_xAOD.cxx#L2438
         constexpr unsigned int last_run_16 = 320000;

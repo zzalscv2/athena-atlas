@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s).
@@ -155,7 +155,7 @@ namespace xAOD {
          TChain* chain = m_chains.back().get();
          RDataSourceEvent* event = m_events.back().get();
 
-         // Initialise the event object.
+         // Initialize the event object.
          if( ! event->readFrom( chain ).isSuccess() ) {
             ::Error( "xAOD::RDataSource::SetNSlots",
                      XAOD_MESSAGE( "Failed to set up xAOD::RDataSourceEvent "
@@ -165,7 +165,7 @@ namespace xAOD {
          }
 
          // Load entry 0 for it. Notice that this is a waste of CPU and I/O
-         // on the surface. But it's not... This triggers the initialisation of
+         // on the surface. But it's not... This triggers the initialization of
          // the files/trees used by these chains. Which happens much more
          // quickly in a serial way in a single thread than in multiple threads
          // at the same time. To be followed up with the ROOT developers...
@@ -174,21 +174,25 @@ namespace xAOD {
                      XAOD_MESSAGE( "Failed to load entry 0 for slot %u" ), i );
             throw std::runtime_error( "Failed to load entry for slot" );
          }
-         PRINT_VERBOSE( "SetNSlots: Initialised objects for slot " << i );
+         PRINT_VERBOSE( "SetNSlots: Initialized objects for slot " << i );
       }
 
       // Return gracefully.
       return;
    }
 
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,28,00)
    void RDataSource::Initialise() {
+#else
+   void RDataSource::Initialize() {
+#endif
 
       // A sanity check.
       if( m_entryRanges.size() != 0 ) {
-         ::Fatal( "xAOD::RDataSource::Initialise",
-                  XAOD_MESSAGE( "Function called on an initialised object" ) );
+         ::Fatal( "xAOD::RDataSource::Initialize",
+                  XAOD_MESSAGE( "Function called on an initialized object" ) );
       }
-      PRINT_VERBOSE( "Initialise: Initialising the data source" );
+      PRINT_VERBOSE( "Initialize: Initializing the data source" );
 
       // Create a chain that will help determine the optimal entry ranges
       // to process.
@@ -204,7 +208,7 @@ namespace xAOD {
          auto file = std::unique_ptr< TFile >( TFile::Open( fileName,
                                                             "READ" ) );
          if( ( ! file ) || file->IsZombie() ) {
-            ::Error( "xAOD::RDataSource::Initialise",
+            ::Error( "xAOD::RDataSource::Initialize",
                      XAOD_MESSAGE( "Failed to open file: %s" ), fileName );
             throw std::runtime_error( "Failed to open file: " +
                                       std::string( fileName ) );
@@ -233,7 +237,7 @@ namespace xAOD {
          // Increment the file offset value.
          fileOffset += entries;
       }
-      PRINT_VERBOSE( "Initialise: Created entry ranges: " << m_entryRanges );
+      PRINT_VERBOSE( "Initialize: Created entry ranges: " << m_entryRanges );
 
       // Return gracefully.
       return;
@@ -268,6 +272,7 @@ namespace xAOD {
       return;
    }
 
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,28,00)
    void RDataSource::FinaliseSlot( unsigned int slot ) {
 
       // Simply print what's happening.
@@ -285,6 +290,25 @@ namespace xAOD {
       // Return gracefully.
       return;
    }
+#else
+   void RDataSource::FinalizeSlot( unsigned int slot ) {
+
+      // Simply print what's happening.
+      PRINT_VERBOSE( "FinalizeSlot: Called for slot " << slot );
+
+      // Return gracefully.
+      return;
+   }
+
+   void RDataSource::Finalize() {
+
+      // Simply print what's happening.
+      PRINT_VERBOSE( "Finalize: Function called" );
+
+      // Return gracefully.
+      return;
+   }
+#endif
 
    const std::vector< std::string >& RDataSource::GetColumnNames() const {
 

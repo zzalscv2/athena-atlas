@@ -14,11 +14,7 @@
 
 #include "L1CaloFEXSim/jTowerContainer.h"
 
-#include "TROOT.h"
-#include "TH1.h"
-#include "TH1F.h"
-#include "TPad.h"
-#include "TCanvas.h"
+#include "PathResolver/PathResolver.h"
 
 // TOWER IS A COLLECTION OF SUPER CELLS
 // IT SHOULD HAVE A UNIQUE ID
@@ -32,10 +28,49 @@ jTowerBuilder::jTowerBuilder(const std::string& type,const std::string& name,con
     declareInterface<IjTowerBuilder>(this);
 }
 
+StatusCode jTowerBuilder::initialize()
+{
+    std::unique_ptr<TFile> jTowerFile(TFile::Open(PathResolver::find_calib_file(m_PileupWeigthFile).c_str()));
+    std::unique_ptr<TFile> jTowerMapFile(TFile::Open(PathResolver::find_calib_file(m_PileupHelperFile).c_str()));
+    if (!jTowerFile || jTowerFile->IsZombie()) {
+        ATH_MSG_ERROR("Failed to open cell timing file " << m_PileupWeigthFile);
+        return StatusCode::FAILURE;
+    }
+    if (!jTowerMapFile || jTowerMapFile->IsZombie()) {
+        ATH_MSG_ERROR("Failed to open cell timing file " << m_PileupHelperFile);
+        return StatusCode::FAILURE;
+    }
+
+    m_jTowerArea_hist    = (TH1F*) jTowerFile->Get("jTowerArea_final_hist");
+    m_Firmware2BitwiseID = (TH1I*) jTowerMapFile->Get("Firmware2BitwiseID");
+    m_BinLayer           = (TH1I*) jTowerMapFile->Get("BinLayer");
+    m_EtaCoords          = (TH1F*) jTowerMapFile->Get("EtaCoords");
+    m_PhiCoords          = (TH1F*) jTowerMapFile->Get("PhiCoords");
+
+    //detach the Histograms from the TFiles
+    m_jTowerArea_hist->SetDirectory(0);
+    m_Firmware2BitwiseID->SetDirectory(0);
+    m_BinLayer->SetDirectory(0);
+    m_EtaCoords->SetDirectory(0);
+    m_PhiCoords->SetDirectory(0);
+
+    jTowerFile->Close();
+    jTowerMapFile->Close();
+
+    return StatusCode::SUCCESS;
+
+}
+
+
 
 void jTowerBuilder::init(std::unique_ptr<jTowerContainer> & jTowerContainerRaw) {
 
     execute(jTowerContainerRaw);
+    
+    jTowerContainerRaw->clearContainerMap();
+    jTowerContainerRaw->fillContainerMap();
+    
+    AssignPileupAndNoiseValues(jTowerContainerRaw);
 }
 
 
@@ -255,8 +290,7 @@ void jTowerBuilder::BuildFCALjTowers(std::unique_ptr<jTowerContainer> & jTowerCo
 
 
 
-  void jTowerBuilder::BuildHECjTowers(std::unique_ptr<jTowerContainer> & jTowerContainerRaw) const
-{
+  void jTowerBuilder::BuildHECjTowers(std::unique_ptr<jTowerContainer> & jTowerContainerRaw) const {
   // Region 0
   int HEC_MODIFIER = 29;
   int tmpVal = HEC_MODIFIER;
@@ -288,6 +322,63 @@ void jTowerBuilder::BuildSingleTower(std::unique_ptr<jTowerContainer> & jTowerCo
     jTowerContainerRaw->push_back(eta, phi, key_eta, keybase, posneg, centre_eta, centre_phi, fcal_layer);
 
 }
+
+
+
+void jTowerBuilder::AssignPileupAndNoiseValues(std::unique_ptr<jTowerContainer> & jTowerContainerRaw) const {
+    
+    // Including the jTowerArea for Pileup subtraction
+
+    for(int i=1; i<m_jTowerArea_hist->GetNbinsX()+1; i++) {
+        float TTowerArea = m_jTowerArea_hist->GetBinContent(i);
+        int TTid = m_Firmware2BitwiseID->GetBinContent(i);
+        
+        // layer has values of (EM:0 HAD():1 FCAL0:2 FCAL1:3 FCAL2:4)
+        int layer = m_BinLayer->GetBinContent(i);
+        float eta = m_EtaCoords->GetBinContent(i);
+        float phi = m_PhiCoords->GetBinContent(i);
+
+  
+        if(TTid == 0) continue; //avoid repeated TTID in jTowerArea_hist, which are set to 0 in Firmware2BitwiseID
+        
+        
+        //Expected noise cut from the performance group
+        int noise = 0;  
+        
+        // Currently applied in the firmware at P1  
+        // setting noise for EMB, EMEC and HEC (all LAr)   
+        // the noise cut depends on different regions for LAr and Tile
+        if(layer == 0 or (layer == 1 and TTid > 500000) ){
+            noise = 40*25;
+        }
+        else if(layer == 1 ){ // 500 MEV cut for Tile
+            noise = 1*500;
+        }
+        else{
+            noise = 0;
+        }      
+
+        LVL1::jTower * targetTower = jTowerContainerRaw->findTower(TTid);
+    
+        int CalorimeterLayer = 1; // it is = 1 for Hadronic calorimeters Tile=1, FCAL1=3 and FCAL2=4
+        if(layer == 0 || layer==2){
+            CalorimeterLayer = 0;  // it is = 0 for EM calorimeters LAr=0 and FCAL0=2
+        }
+        
+        targetTower->setTTowerArea(TTowerArea,CalorimeterLayer);
+
+        targetTower->setNoiseForMet(noise,CalorimeterLayer);
+        targetTower->setNoiseForJet(noise,CalorimeterLayer);
+        
+        
+        //This step is to correct the FCAL coordinates since there is non-homogeneous granularity
+        if(layer>1){
+            targetTower->setCentreEta(eta);
+            targetTower->setCentrePhi(phi);
+        }
+    }
+}
+
 
 void jTowerBuilder::BuildAllTowers(std::unique_ptr<jTowerContainer> & jTowerContainerRaw) const {
     BuildEMBjTowers(jTowerContainerRaw);

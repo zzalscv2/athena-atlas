@@ -37,7 +37,7 @@ namespace DerivationFramework {
       /// Parameter: target collection
       SG::ReadHandleKeyArray<xAOD::TruthParticleContainer> m_targetKeys{this, "TargetCollections", {"TruthMuons","TruthPhotons","TruthElectrons"}, "Name of target truth collections"};
       
-      SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_decorKey{this, "TargetDecorKeys", "", "Will be overwritten during initialize"};
+      SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_decorKey{this, "TargetDecorKeys", "", "Will be overwritten during initialize"};
       // Helper function for finding matching truth particle and warning consistently
       static int find_match(const xAOD::TruthParticle* p, const xAOD::TruthParticleContainer* c) ;
   }; 

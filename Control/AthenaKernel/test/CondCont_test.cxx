@@ -736,14 +736,16 @@ void test5 (TestRCUSvc& rcusvc)
 
 
   // Insert w/overlap
-  bptrs.push_back (new BM (11));
+  bptrs.push_back (new BM (11)); // [6]
   sc = cc.insert (EventIDRange (mixed (2, 10, 125),
                                 mixed (2, 20, 127)),
                   std::unique_ptr<BM> (bptrs.back()));
   assert (CondContBase::Category::isDuplicate (sc));
 
 
-  bptrs.push_back (new BM (11));
+  // Make sure bptrs[7] != bptrs[6].
+  auto xx = std::make_unique<BM>(11);
+  bptrs.push_back (new BM (11)); // [7]
   sc = cc.insert (EventIDRange (mixed (2, 10, 125),
                                 mixed (2, 20, 135)),
                   std::unique_ptr<BM> (bptrs.back()));
@@ -761,7 +763,7 @@ void test5 (TestRCUSvc& rcusvc)
                                     mixed (2, 30, 130)),
                       std::make_unique<BM> (12)).isFailure() );
   // Insert new last RL range with one TS range.
-  bptrs.push_back (new BM(13));
+  bptrs.push_back (new BM(13)); // [8]
   assert ( cc.insert (EventIDRange (mixed (20, 10, 120),
                                     mixed (20, 30, 130)),
                       std::unique_ptr<BM> (bptrs.back())).isSuccess() );
@@ -790,7 +792,7 @@ void test5 (TestRCUSvc& rcusvc)
   exp2 << "{[2,t:100,l:10] - [2,t:103.500000000,l:20]} " << bptrs[3] << "\n";
   exp2 << "{[2,t:103.500000000,l:10] - [2,t:110,l:20]} " << bptrs[4] << "\n";
   exp2 << "{[2,t:120,l:10] - [2,t:130,l:20]} " << bptrs[5] << "\n";
-  exp2 << "{[2,t:130,l:10] - [2,t:135,l:20]} " << bptrs[6] << "\n";
+  exp2 << "{[2,t:130,l:10] - [2,t:135,l:20]} " << bptrs[7] << "\n";
   exp2 << "{[20,t:120,l:10] - [20,t:130,l:40]} " << bptrs[8] << "\n";
   if (ss2.str() != exp2.str()) {
     std::cout << "ss2: " << ss2.str() << "\nexp2: " << exp2.str() << "\n";

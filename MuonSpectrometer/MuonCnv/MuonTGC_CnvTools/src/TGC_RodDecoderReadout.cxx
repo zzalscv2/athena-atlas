@@ -579,21 +579,28 @@ void Muon::TGC_RodDecoderReadout::byteStreamSrod2Rdo(OFFLINE_FRAGMENTS_NAMESPACE
             continue;
           }
 
-          TgcRawData* raw = new TgcRawData(nswpos.bcBitmap+1,
-                                           rdo->subDetectorId(),
-                                           rdo->rodId(),
-                                           rdo->l1Id(),
-                                           static_cast<uint16_t>(rdo->bcId()),
-                                           static_cast<bool>(nswpos.fwd),
-                                           static_cast<uint16_t>(nswpos.sector),
-                                           nswpos.eta,
-                                           nswpos.phi,
-                                           nswpos.cand,
-                                           nswang.angle,
-                                           nswang.phires,
-                                           nswang.lowres,
-                                           nswang.nswid);
-          rdo->push_back(raw);
+	  uint16_t cand_input_bcid
+	    = (nswpos.cand  << TgcRawData::NSW_CAND_BITSHIFT)
+	    + (nswang.input << TgcRawData::NSW_INPUT_BITSHIFT)
+	    + (nswang.bcid  << TgcRawData::NSW_BCID_BITSHIFT);
+
+          for ( int isector = 0; isector < 2; isector++ ){// duplicate for the neighboring trigger sector
+	    TgcRawData* raw = new TgcRawData(nswpos.bcBitmap+1,
+					     rdo->subDetectorId(),
+					     rdo->rodId(),
+					     rdo->l1Id(),
+					     static_cast<uint16_t>(rdo->bcId()),
+					     static_cast<bool>(nswpos.fwd),
+					     static_cast<uint16_t>(nswpos.sector) + isector,
+					     nswpos.eta,
+					     nswpos.phi,
+					     cand_input_bcid, // was nswpos.cand,
+					     nswang.angle,
+					     nswang.phires,
+					     nswang.lowres,
+					     nswang.nswid);
+	    rdo->push_back(raw);
+	  }
           break;
         }
       case 6 : // RPC BIS78 6-7
@@ -615,6 +622,11 @@ void Muon::TGC_RodDecoderReadout::byteStreamSrod2Rdo(OFFLINE_FRAGMENTS_NAMESPACE
             continue;
           }
 
+	  uint16_t flag_cand_bcid
+	    = (rpccoin.flag << TgcRawData::RPC_FLAG_BITSHIFT)
+	    + (rpccoin.cand << TgcRawData::RPC_CAND_BITSHIFT)
+	    + (rpccoin.bcid << TgcRawData::RPC_BCID_BITSHIFT);
+
           for ( int isector = 0; isector < 2; isector++ ){// duplicate for the neighboring trigger sector
             TgcRawData* raw = new TgcRawData(rpcpos.bcBitmap+1,
                                              rdo->subDetectorId(),
@@ -625,7 +637,7 @@ void Muon::TGC_RodDecoderReadout::byteStreamSrod2Rdo(OFFLINE_FRAGMENTS_NAMESPACE
                                              static_cast<uint16_t>(rpcpos.sector) + isector,
                                              rpcpos.eta,
                                              rpcpos.phi,
-                                             static_cast<uint16_t>(rpccoin.flag),
+                                             flag_cand_bcid, // was static_cast<uint16_t>(rpccoin.flag),
                                              rpccoin.deta,
                                              rpccoin.dphi);
             rdo->push_back(raw);

@@ -18,6 +18,7 @@ namespace Muon {
   class ISTGC_RDO_Decoder : virtual public IAlgTool {
     
   public:
+    virtual ~ISTGC_RDO_Decoder() = default;
     
     /** AlgTool InterfaceID
      */

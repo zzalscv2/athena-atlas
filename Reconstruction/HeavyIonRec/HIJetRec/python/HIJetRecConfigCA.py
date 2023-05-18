@@ -12,6 +12,7 @@ from JetRecConfig.JetDefinition import JetModifier, JetInputExternal
 from JetRecConfig.StandardJetMods import stdJetModifiers
 from JetRecConfig import JetRecConfig
 from JetRecConfig.DependencyHelper import solveDependencies
+from HIGlobal.HIGlobalConfig import HIEventShapeMakerCfg, HIEventShapeMapToolCfg
 
 def HIJetRecCfg(flags):
     """Configures Heavy Ion Jet reconstruction """
@@ -21,11 +22,13 @@ def HIJetRecCfg(flags):
     eventshapeKey_egamma = flags.HeavyIon.Egamma.EventShape
     #get HIClusters
     acc.merge(HIClusterMakerCfg(flags,cluster_key=clustersKey))
-    #set eventshape map
-    theMapTool = CompFactory.HIEventShapeMapTool()
     #get weighted event shape
-    HIEventShapeAlg = acc.getPrimaryAndMerge(HIEventShapeCfg(flags, map_tool=theMapTool)) 
-    eventshapeKey = str(HIEventShapeAlg.OutputContainerKey)
+    eventshapeKey="HIEventShape_Weighted"
+    acc.merge(HIEventShapeMakerCfg(flags,
+                                   name="HIEventShapeMaker_Weighted",
+                                   doWeighted=True,
+                                   InputTowerKey=clustersKey,
+                                   OutputContainerKey=eventshapeKey))
    
     #jet definition
     #R=0.2 calojets are use as seeds for UE subtraction
@@ -70,6 +73,7 @@ def HIJetRecCfg(flags):
     #adding seed0 to CA
     acc.merge(JetCopyAlgCfg(flags,jetname2, jetDef_seed0)) 
  
+    theMapTool=acc.popToolsAndMerge(HIEventShapeMapToolCfg(flags))
     iter0 = acc.popToolsAndMerge(AddIterationCfg(flags,jetname_seed0, eventshapeKey, clustersKey, map_tool=theMapTool, assoc_name=associationName, suffix="iter0"))
     acc.merge(RunToolsCfg(flags,[iter0], "jetalgHI_iter0")) #this run iter0 and produce the new shape
 
@@ -295,50 +299,6 @@ def HIClusterMakerCfg(flags, cell_key="AllCalo", cluster_key="HICluster", save =
 
     return acc
 
-def HIEventShapeCfg(flags, clustersKey= "HICluster", suffix="_Weighted", **kwargs) :
-
-    acc = ComponentAccumulator()
-
-    #get towers
-    from CaloRec.CaloRecoConfig import CaloRecoCfg
-    acc.merge(CaloRecoCfg(flags))
-    from CaloRec.CaloTowerMakerConfig import CaloTowerMakerCfg
-    towerMaker = acc.getPrimaryAndMerge(CaloTowerMakerCfg(flags))
-    input_tower = towerMaker.TowerContainerName
-   
-    #map tool
-    if 'map_tool' in kwargs.keys() : map_tool=kwargs['map_tool']
-    else : map_tool = CompFactory.HIEventShapeMapTool()
-
-    #Add weight tool to filler tool
-    if flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2]:
-        HITowerWeightTool_inputFile='cluster.geo.DATA_PbPb_2018v2.root'
-    else:
-        HITowerWeightTool_inputFile='cluster.geo.DATA_PbPb_2022.root'
-
-    TWTool = CompFactory.HITowerWeightTool("WeightTool",
-        ApplyCorrection=flags.HeavyIon.Jet.ApplyTowerEtaPhiCorrection,
-        ConfigDir='HIJetCorrection/',
-        InputFile=HITowerWeightTool_inputFile)
-
-    #Event Shape filler
-    eventShapeTool = CompFactory.HIEventShapeFillerTool( 
-            EventShapeMapTool = map_tool,
-            TowerWeightTool = TWTool,
-            UseClusters=True
-    )
-    
-    #event shape maker
-    shapeKey = "HIEventShape"+suffix
-    eventShapeMakerAlg = CompFactory.HIEventShapeMaker("HIEventShapeMaker"+suffix,
-                    InputTowerKey = clustersKey,
-                    NaviTowerKey = input_tower,
-                    OutputContainerKey = shapeKey,
-                    HIEventShapeFillerTool = eventShapeTool)
-
-    acc.addEventAlgo( eventShapeMakerAlg, primary=True )
-
-    return acc
 
 def defineHICaloJets(clustersKey=None,prefix='',suffix='',**kwargs):
     minpt = {

@@ -79,7 +79,6 @@ def LArNoiseCorrelationMonConfigCore(helper, algoinstance,inputFlags):
         febsToMonitorEndcapA=lArDQGlobals.febsEndcapA
         febsToMonitorBarrelC=lArDQGlobals.febsBarrelC
         febsToMonitorEndcapC=lArDQGlobals.febsEndcapC
-        larNoiseCorrelMonAlg.PlotCustomFEBSset=False
         larNoiseCorrelMonAlg.FEBlist=febsToMonitorBarrelA+febsToMonitorBarrelC+febsToMonitorEndcapA+febsToMonitorEndcapC
     else:
         setCustomFEBS=set(customFEBStoMonitor)
@@ -94,13 +93,11 @@ def LArNoiseCorrelationMonConfigCore(helper, algoinstance,inputFlags):
             msg.warning("None of the following FEBs were recognised, no plot will be produced")
             msg.warning(customFEBStoMonitor)
             larNoiseCorrelMonAlg.PlotsOFF=True #lets protect ourselves against poor writing
-            larNoiseCorrelMonAlg.PlotCustomFEBSset=False
             larNoiseCorrelMonAlg.FEBlist=lArDQGlobals.febsBarrelA+lArDQGlobals.febsEndcapA+lArDQGlobals.febsBarrelC+lArDQGlobals.febsEndcapC #to avoid having it empty, would it crash otherwise?
         else:
             #pass to algorithm
 #            customFEBStoMonitor_forAlgo=[[lArDQGlobals.dictBarrelEndcap[i[0]],lArDQGlobals.dictSides[i[1]],int(i[2]),int(i[3])] for i in customFEBStoMonitor]
  #           larNoiseCorrelMonAlg.FEBsToMonitor=customFEBStoMonitor_forAlgo
-            larNoiseCorrelMonAlg.PlotCustomFEBSset=True
             larNoiseCorrelMonAlg.FEBlist=febsToMonitorBarrelA+febsToMonitorBarrelC+febsToMonitorEndcapA+febsToMonitorEndcapC
             pass
         pass

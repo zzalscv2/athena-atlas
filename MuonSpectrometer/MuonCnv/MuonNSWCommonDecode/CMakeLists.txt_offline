@@ -7,13 +7,14 @@ atlas_subdir( MuonNSWCommonDecode )
 find_package( tdaq-common COMPONENTS DataReader EventStorage eformat eformat_write ers)
 find_package( Boost COMPONENTS unit_test_framework)
 find_package( ROOT REQUIRED COMPONENTS Core Hist Tree RIO Gpad Graf )
+find_package( GTest )
 
 # Component(s) in the package:
 atlas_add_library (MuonNSWCommonDecode
 		   src/*.cxx src/*.cpp
                    PUBLIC_HEADERS MuonNSWCommonDecode
-                   INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES})
+                   INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${FMT_INCLUDE_DIRS}
+                   LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES} CxxUtils)
                    
                    
 atlas_add_test(NSWMMTPDecodeBitmaps_test
@@ -22,6 +23,15 @@ atlas_add_test(NSWMMTPDecodeBitmaps_test
   LINK_LIBRARIES ${Boost_LIBRARIES} MuonNSWCommonDecode
   POST_EXEC_SCRIPT nopost.sh
 )
+
+atlas_add_test(STGCTPSegmentDecoderTest_test
+  SOURCES src/test/test_tp_segment_decoder.cxx
+  INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}  MuonNSWCommonDecode
+  LINK_LIBRARIES ${Boost_LIBRARIES} MuonNSWCommonDecode
+  POST_EXEC_SCRIPT nopost.sh
+)
+
+
 
 atlas_add_executable (test_stgc_cabling
 		      src/test/test_stgc_cabling.cxx
@@ -48,4 +58,31 @@ atlas_add_executable (test_nsw_online2offline
           INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
 		      LINK_LIBRARIES MuonNSWCommonDecode ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES})
 
+if ( ${ATLAS_BASE_PROJECT_NAMES} MATCHES "^Athena" )
 
+atlas_add_test(gt_STGTPPadPackets
+          SOURCES test/gt_STGTPPadPackets.cxx
+          INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+          LINK_LIBRARIES AsgTestingLib MuonNSWCommonDecode TestTools ${GTEST_LIBRARIES}
+          POST_EXEC_SCRIPT noerror.sh)
+    
+atlas_add_test(gt_STGTPSegmentPackets
+          SOURCES test/gt_STGTPSegmentPackets.cxx
+          INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+          LINK_LIBRARIES AsgTestingLib MuonNSWCommonDecode TestTools ${GTEST_LIBRARIES}
+          POST_EXEC_SCRIPT noerror.sh)
+
+atlas_add_test(gt_DecodeHelper
+          SOURCES test/gt_DecodeHelper.cxx
+          INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+          LINK_LIBRARIES AsgTestingLib MuonNSWCommonDecode TestTools ${GTEST_LIBRARIES}
+          POST_EXEC_SCRIPT noerror.sh)
+
+
+atlas_add_test(gt_NSWTriggerSTGL1AElink
+          SOURCES test/gt_NSWTriggerSTGL1AElink.cxx
+          INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+          LINK_LIBRARIES AsgTestingLib MuonNSWCommonDecode TestTools ${GTEST_LIBRARIES}
+          POST_EXEC_SCRIPT noerror.sh)
+
+endif()

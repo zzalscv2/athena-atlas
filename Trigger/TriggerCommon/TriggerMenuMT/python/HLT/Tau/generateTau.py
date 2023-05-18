@@ -7,39 +7,49 @@ from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 
 @AccumulatorCache
-def _caloSeq(flags):
-    recoAcc = InViewRecoCA('CaloTauReco')
+def _caloSeq(flags, is_probe_leg=False):
+    selAcc = SelectionCA('CaloTau', isProbe=is_probe_leg)
 
-    recoAcc.addRecoAlgo(CompFactory.AthViews.ViewDataVerifier(name='VDV'+recoAcc.name,
-                                                                  DataObjects=[('TrigRoiDescriptorCollection', recoAcc.inputMaker().InViewRoIs.Path),
-                                                                               ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+HLT_TAURoI'),
+    recoAcc = InViewRecoCA(name       = 'tauCaloMVA', 
+                           InViewRoIs = 'CaloMVA_RoIs',
+                           isProbe    = is_probe_leg)
+
+    recoAcc.addRecoAlgo(CompFactory.AthViews.ViewDataVerifier(name=recoAcc.name+'RecoVDV',
+                                                                  DataObjects=[('TrigRoiDescriptorCollection', 'StoreGateSvc+'+recoAcc.inputMaker().InViewRoIs.Path),
+                                                                               #( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+HLT_TAURoI'),
                                                                                ('CaloBCIDAverage', 'StoreGateSvc+CaloBCIDAverage'),
-                                                                               ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing'),
-                                                                               ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.actualInteractionsPerCrossing') ]))
+                                                                               ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
+                                                                               ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.actualInteractionsPerCrossing'), 
+                                                                               ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing')]))
+
     from TrigCaloRec.TrigCaloRecConfig import tauTopoClusteringCfg
     recoAcc.mergeReco(tauTopoClusteringCfg(flags,
                                            RoIs = recoAcc.inputMaker().InViewRoIs))
 
-    from TrigTauRec.TrigTauRecConfig import trigTauRecMergedCaloOnlyMVACfg
     recoAcc.addRecoAlgo(CompFactory.TrigTauCaloRoiUpdater("TauCaloRoiUpdater",
                                                                 CaloClustersKey = 'HLT_TopoCaloClustersLC',
                                                                 RoIInputKey = recoAcc.inputMaker().InViewRoIs,
                                                                 RoIOutputKey = 'UpdatedCaloRoI'))
+
+    from TrigTauRec.TrigTauRecConfig import trigTauRecMergedCaloOnlyMVACfg
     recoAcc.mergeReco(trigTauRecMergedCaloOnlyMVACfg(flags))
-
-    selAcc = SelectionCA("CaloTau")
     selAcc.mergeReco(recoAcc)
-    hypoAlg = CompFactory.TrigTauCaloHypoAlg("HL2CaloTauHypo",
-                                                    taujets = "HLT_TrigTauRecMerged_CaloMVAOnly" )
 
+    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Calo
+    robPrefetchAlg = ROBPrefetchingAlgCfg_Calo( flags, nameSuffix='IM_'+recoAcc.name+'_probe' if is_probe_leg else 'IM_'+recoAcc.name)    
+    selAcc.mergeReco(recoAcc, robPrefetchCA=robPrefetchAlg)
+
+    hypoAlg = CompFactory.TrigTauCaloHypoAlg("TauL2CaloMVAHypo",
+                                                    taujets = "HLT_TrigTauRecMerged_CaloMVAOnly" )
     selAcc.addHypoAlgo(hypoAlg)
+
     from TrigTauHypo.TrigTauHypoTool import TrigL2TauHypoToolFromDict
-    menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigL2TauHypoToolFromDict)   
+    menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigL2TauHypoToolFromDict,isProbe=is_probe_leg)   
     return (selAcc , menuCA)
 
 
 def tauCaloMVAMenuSeq(flags, name, is_probe_leg=False):
-    (selAcc , menuCA) = _caloSeq(flags)
+    (selAcc , menuCA) = _caloSeq(flags, is_probe_leg)
     return menuCA 
 
 

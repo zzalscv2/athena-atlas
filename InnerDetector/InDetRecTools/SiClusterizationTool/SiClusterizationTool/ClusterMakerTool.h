@@ -42,6 +42,8 @@ namespace InDetDD {
   class SiDetectorElement;
 }
 
+using PixelCalib::PixelOfflineCalibData;
+
 class PixelID;
 
 namespace InDet {
@@ -97,28 +99,32 @@ public:
                              const int lvl1a,
                              const std::vector<int>& totList,
                              const SiWidth& width,
-                             const InDetDD::SiDetectorElement* element, 
+                             const InDetDD::SiDetectorElement* element,
                              bool ganged,
                              int errorStrategy,
                              const float omegax,
                              const float omegay,
-                             bool split = false,
-                             double splitProb1 = 0.,
-                             double splitProb2 = 0.) const;
+                             bool split,
+                             double splitProb1,
+                             double splitProb2,
+                             const PixelChargeCalibCondData *calibData,
+                             const PixelOfflineCalibData *offlineCalibData) const;
 
   PixelCluster* pixelCluster(const Identifier& clusterID,
-			     const Amg::Vector2D& localPos,
-			     const std::vector<Identifier>& rdoList,
-			     const int lvl1a,
-			     const std::vector<int>& totList,
-			     const SiWidth& width,
-			     const InDetDD::SiDetectorElement* element, 
-			     bool ganged,
-			     int errorStrategy,
-			     const PixelID& pixelID,
-			     bool split = false,
-			     double splitProb1 = 0.,
-			     double splitProb2 = 0.) const;
+                             const Amg::Vector2D& localPos,
+                             const std::vector<Identifier>& rdoList,
+                             const int lvl1a,
+                             const std::vector<int>& totList,
+                             const SiWidth& width,
+                             const InDetDD::SiDetectorElement* element,
+                             bool ganged,
+                             int errorStrategy,
+                             const PixelID& pixelID,
+                             bool split,
+                             double splitProb1,
+                             double splitProb2,
+                             const PixelChargeCalibCondData *calibData,
+                             const PixelOfflineCalibData *offlineCalibData) const;
 
   xAOD::PixelCluster* xAODpixelCluster(xAOD::PixelCluster& cluster,
 				       const Amg::Vector2D& localPos,
@@ -130,11 +136,11 @@ public:
 				       bool ganged,
 				       int errorStrategy,
 				       const PixelID& pixelID,
-				       bool split = false,
-				       double splitProb1 = 0.,
-				       double splitProb2 = 0.) const;
-
- 
+                                       bool split,
+                                       double splitProb1,
+                                       double splitProb2,
+                                       const PixelChargeCalibCondData *calibData,
+                                       const PixelOfflineCalibData *offlineCalibData) const;
 
   // Computes global position and errors for SCT cluster.
   // Called by SCT Clustering tools
@@ -155,30 +161,29 @@ public:
                          const SiWidth& width,
                          const InDetDD::SiDetectorElement* element,
                          int errorStrategy) const;
- 
+
 private:
 
   template <typename ClusterType, typename CreatorType>
   ClusterType makePixelCluster(const Identifier& clusterID,
-			       const Amg::Vector2D& localPos,
-			       const std::vector<Identifier>& rdoList,
-			       const int lvl1a,
-			       const std::vector<int>& totList,
-			       const SiWidth& width,
-			       const InDetDD::SiDetectorElement* element, 
-			       bool ganged,
-			       int errorStrategy,
-			       const PixelID& pixelID,
-			       bool split,
-			       double splitProb1,
-			       double splitProb2,
-			       CreatorType clusterCreator) const;
+             const Amg::Vector2D& localPos,
+             const std::vector<Identifier>& rdoList,
+             const int lvl1a,
+             const std::vector<int>& totList,
+             const SiWidth& width,
+             const InDetDD::SiDetectorElement* element,
+             bool ganged,
+             int errorStrategy,
+             const PixelID& pixelID,
+             bool split,
+             double splitProb1,
+             double splitProb2,
+             CreatorType clusterCreator,
+             const PixelChargeCalibCondData *calibData,
+             const PixelOfflineCalibData *offlineCalibData) const;
 
   ServiceHandle<InDetDD::IPixelReadoutManager> m_pixelReadout
   {this, "PixelReadoutManager", "PixelReadoutManager", "Pixel readout manager" };
-
-  SG::ReadCondHandleKey<PixelChargeCalibCondData> m_chargeDataKey
-  {this, "PixelChargeCalibCondData", "PixelChargeCalibCondData", "Pixel charge calibration data"};
 
   ToolHandle<ISiLorentzAngleTool> m_pixelLorentzAngleTool
   {this, "PixelLorentzAngleTool", "SiLorentzAngleTool/PixelLorentzAngleTool", "Tool to retreive Lorentz angle of Pixel"};
@@ -197,10 +202,8 @@ private:
 
   // Parametrization of the Pixel errors
   // now moved in PixelConditionsData, except for CTB parametrization
-  
+
   double getPixelCTBPhiError(int layer, int phi, int PhiClusterSize) const;
- 
-  SG::ReadCondHandleKey<PixelCalib::PixelOfflineCalibData> m_clusterErrorKey{this, "PixelOfflineCalibData", "PixelOfflineCalibData", "Output key of pixel cluster"};
 
 };
 
