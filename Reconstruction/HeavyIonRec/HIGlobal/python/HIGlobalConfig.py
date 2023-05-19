@@ -2,7 +2,6 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import LHCPeriod
 from OutputStreamAthenaPool.OutputStreamConfig import addToAOD, addToESD
 
 def HITowerWeightToolCfg(flags, name="WeightTool", **kwargs):
@@ -10,10 +9,8 @@ def HITowerWeightToolCfg(flags, name="WeightTool", **kwargs):
     acc = ComponentAccumulator()
 
     if "InputFile" not in kwargs:
-        if flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2]:
-            kwargs.setdefault("InputFile", 'cluster.geo.DATA_PbPb_2018v2.root')
-        else:
-            kwargs.setdefault("InputFile", 'cluster.geo.DATA_PbPb_2022.root')
+        from HIJetRec.HIJetRecUtilsCA import getHIClusterGeoWeightFile
+        kwargs.setdefault("InputFile", getHIClusterGeoWeightFile(flags))
     kwargs.setdefault("ApplyCorrection", flags.HeavyIon.Jet.ApplyTowerEtaPhiCorrection)
     kwargs.setdefault("ConfigDir", 'HIJetCorrection/')
 
