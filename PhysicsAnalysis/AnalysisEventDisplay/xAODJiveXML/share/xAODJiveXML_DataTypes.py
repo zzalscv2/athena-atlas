@@ -67,7 +67,7 @@ from xAODJiveXML.xAODJiveXMLConf import JiveXML__xAODTrackParticleRetriever
 thexAODTrackParticleRetriever = JiveXML__xAODTrackParticleRetriever (name = "xAODTrackParticleRetriever")
 thexAODTrackParticleRetriever.StoreGateKey = "InDetTrackParticles"
 ## If this list is not set, all other collections will be retrieved
-thexAODTrackParticleRetriever.OtherTrackCollections = ["CombinedMuonTrackParticles","GSFTrackParticles"]
+thexAODTrackParticleRetriever.OtherTrackCollections = ["InDetLargeD0TrackParticles","CombinedMuonTrackParticles","GSFTrackParticles"]
 ##thexAODTrackParticleRetriever.OutputLevel = DEBUG
 ToolSvc += thexAODTrackParticleRetriever
 
