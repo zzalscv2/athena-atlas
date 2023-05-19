@@ -13,6 +13,7 @@ formatList = ["PHYSVAL","PHYS","PHYSLITE",
               "EGAM1","EGAM2","EGAM3","EGAM4","EGAM5","EGAM7","EGAM8","EGAM9","EGAM10",
               "FTAG1","FTAG2",
               "BPHY1","BPHY2","BPHY3","BPHY4","BPHY5","BPHY6","BPHY10","BPHY15","BPHY16","BPHY18","BPHY21","BPHY22",
+              "BPHY23","BPHY24",
               "STDM7"
 ]
 
