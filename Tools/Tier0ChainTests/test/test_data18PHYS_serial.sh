@@ -3,7 +3,6 @@
 # art-include: master/Athena
 # art-description: DAOD building PHYS data18
 # art-type: grid
-# art-output: *.pool.root
 # art-output: checkFile.txt
 # art-output: checkxAOD.txt
 # art-output: checkIndexRefs*.txt

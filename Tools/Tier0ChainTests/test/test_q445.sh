@@ -6,6 +6,7 @@
 # art-include: 22.0/Athena
 # art-include: 22.0-mc20/Athena
 # art-athena-mt: 8
+# art-output: log.*
 
 Reco_tf.py \
 --AMI=q445 \
@@ -18,19 +19,12 @@ rc1=$?
 echo "art-result: $rc1 Reco"
 
 rc2=-9999
-if [ $rc1 -eq 0 ]
+if [ ${rc1} -eq 0 ]
 then
-  art.py compare grid --entries 50 "$1" "$2" --mode=semi-detailed --order-trees --ignore-exit-code diff-pool
+  ArtRef=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/$1/TCT_22.0_references/$2
+  art.py compare ref . $ArtRef --entries 50 --mode=semi-detailed --order-trees --ignore-exit-code diff-pool \
+  --ignore-leave 'Token' --ignore-leave 'index_ref' --ignore-leave '(.*)_timings\.(.*)' --ignore-leave '(.*)_mems\.(.*)' \
+  --ignore-leave '(.*)TrigCostContainer(.*)' --ignore-leave '(.*)HLTNav_Summary_OnlineSlimmed(.*)'
   rc2=$?
 fi
-echo "art-result: $rc2 Diff"
-
-rc3=-9999
-if [ $rc1 -eq 0 ]
-then
-  ArtRef=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3-22.0_references_for_comparison/test_q445
-  cat $ArtRef/version.txt
-  art.py compare ref --entries 50 . $ArtRef --mode=semi-detailed --order-trees --ignore-exit-code diff-pool
-  rc3=$?
-fi
-echo "art-result: $rc3 Diff (fixed reference)"
+echo  "art-result: ${rc2} Comparison with the latest result"
