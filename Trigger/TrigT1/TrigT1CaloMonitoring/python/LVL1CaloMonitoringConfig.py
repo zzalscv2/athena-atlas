@@ -45,13 +45,11 @@ def LVL1CaloMonitoringConfig(flags):
             from TrigT1CaloMonitoring.JepCmxMonitorAlgorithm import JepCmxMonitoringConfig
             from TrigT1CaloMonitoring.OverviewMonitorAlgorithm import OverviewMonitoringConfig
             from TrigT1CaloMonitoring.PPMSimBSMonitorAlgorithm import PPMSimBSMonitoringConfig
-            from TrigT1CaloMonitoring.JetEfficiencyMonitorAlgorithm import JetEfficiencyMonitoringConfig
             
             result.merge(CpmMonitoringConfig(flags))
             result.merge(CpmSimMonitoringConfig(flags))
             result.merge(JepCmxMonitoringConfig(flags))
             result.merge(PPMSimBSMonitoringConfig(flags))
-            result.merge(JetEfficiencyMonitoringConfig(flags))
             result.merge(OverviewMonitoringConfig(flags))
 
             if  flags.Input.TriggerStream == "physics_Mistimed":
@@ -64,7 +62,7 @@ def LVL1CaloMonitoringConfig(flags):
             result.merge(LVL1CaloRun2ReadBSCfg(flags))
 
         # Phase 1 monitoring
-        if flags.Trigger.enableL1CaloPhase1:
+        if flags.Trigger.enableL1CaloPhase1 and flags.Input.Format is not Format.POOL:
             #efex monitoring
             from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringConfig
             EfexMonitorCfg = EfexMonitoringConfig(flags)
@@ -80,7 +78,13 @@ def LVL1CaloMonitoringConfig(flags):
             from TrigT1CaloMonitoring.GfexMonitorAlgorithm import GfexMonitoringConfig
             result.merge(GfexMonitoringConfig(flags))
 
-            #efex input monitoring 
+            # efex input monitoring (requires SCell and Emulated towers)
+            from L1CaloFEXSim.L1CaloFEXSimCfg import ReadSCellFromByteStreamCfg
+            result.merge(ReadSCellFromByteStreamCfg(flags))
+
+            from L1CaloFEXAlgos.FexEmulatedTowersConfig import eFexEmulatedTowersCfg
+            result.merge(eFexEmulatedTowersCfg(flags,'L1_eFexEmulatedTowers'))
+
             from TrigT1CaloMonitoring.EfexInputMonitorAlgorithm import EfexInputMonitoringConfig
             result.merge(EfexInputMonitoringConfig(flags))
 
@@ -92,7 +96,9 @@ def LVL1CaloMonitoringConfig(flags):
             from TrigT1CaloMonitoring.JfexInputMonitorAlgorithm import JfexInputMonitoringConfig
             result.merge(JfexInputMonitoringConfig(flags))
 
-
+            # jet monitoring
+            from TrigT1CaloMonitoring.JetEfficiencyMonitorAlgorithm import JetEfficiencyMonitoringConfig
+            result.merge(JetEfficiencyMonitoringConfig(flags))
 
 
     # algorithms for validation checks

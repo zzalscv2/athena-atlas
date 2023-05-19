@@ -57,25 +57,26 @@ def EfexInputMonitoringConfig(inputFlags):
 
     refCompareFracGroup = helper.addGroup(EfexInputMonAlg,groupName+"_RefCompareFrac", mainDir)
     refCompareTreeGroup = helper.addGroup(EfexInputMonAlg,groupName+"_RefCompareTree", mainDir)
+    refCompareTreeHistGroup = helper.addGroup(EfexInputMonAlg,groupName+"_RefCompareTreeHist", mainDir)
 
-    refCompareTreeGroup.defineHistogram('TowerEta,TowerPhi;phi_vs_eta',title="location of mismatches;#eta;#phi;mismatches",type='TH2I',
+    refCompareTreeHistGroup.defineHistogram('TowerEta,TowerPhi;phi_vs_eta',title="location of mismatches;#eta;#phi;mismatches",type='TH2I',
                              path=trigPath+"mismatches/",xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
     refCompareFracGroup.defineHistogram('TowerEta,TowerPhi,Weight;phi_vs_eta',title="fraction of matches;#eta;#phi;Fraction of matches",type='TProfile2D',
                                     path=trigPath+"fexTowers_matchedFrac/",xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
     refCompareTreeGroup.defineTree('EventNumber,TowerId,TowerEta,TowerPhi,TowerEmstatus,TowerHadstatus,TowerSlot,TowerCount,RefTowerCount,SlotSCID;mismatched',
                                    "eventNumber/l:id/I:eta/F:phi/F:em_status/i:had_status/i:slot/I:count/I:ref_count/I:scid/string",
                                    title="mismatched",path=trigPath+"mismatches/")
-    refCompareTreeGroup.defineHistogram('LBNString,TowerSlotSplitHad;slot_vs_lbn', path=trigPath+"mismatches/", type='TH2I',
+    refCompareTreeHistGroup.defineHistogram('LBNString,TowerSlotSplitHad;slot_vs_lbn', path=trigPath+"mismatches/", type='TH2I',
                             title='Mismatched counts;LB;Slot;Number of mismatches',
                             xbins=1, xmin=0, xmax=1, xlabels=[""],
                             ybins=12, ymin=-0.5, ymax=11.5, ylabels=slotLabels,
                             opt=['kCanRebin'])
-    refCompareTreeGroup.defineHistogram('LBNString,SlotSCID;scid_vs_lbn', path=trigPath+"mismatches/", type='TH2I',
+    refCompareTreeHistGroup.defineHistogram('LBNString,SlotSCID;scid_vs_lbn', path=trigPath+"mismatches/", type='TH2I',
                                         title='Mismatched counts;LB;SCID;mismatches',
                                         xbins=1, xmin=0, xmax=1, xlabels=[""],
                                         ybins=1, ymin=0, ymax=1, ylabels=[""],
                                         opt=['kCanRebin'])
-    refCompareTreeGroup.defineHistogram('TowerCount,RefTowerCount;caloCount_vs_fexCount', path=trigPath+"mismatches/", type='TH2I',
+    refCompareTreeHistGroup.defineHistogram('TowerCount,RefTowerCount;caloCount_vs_fexCount', path=trigPath+"mismatches/", type='TH2I',
                                         title='Mismatched counts;Fex Readout;Calo Readout;mismatches',
                                         xbins=60, xmin=-0.5, xmax=59.5,
                                         ybins=60, ymin=-0.5, ymax=59.5)

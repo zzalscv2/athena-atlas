@@ -28,5 +28,7 @@ private:
 
   std::map<std::pair<std::pair<int,int>,int>,std::pair<std::set<unsigned long long>,std::string>> m_scMap;
 
+  Gaudi::Property<bool> m_fillTree{this,"fillTree",false,"fill and write the debug tree"};
+
 };
 #endif
