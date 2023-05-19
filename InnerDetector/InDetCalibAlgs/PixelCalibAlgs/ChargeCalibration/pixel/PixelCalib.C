@@ -20,7 +20,28 @@
 //======================================================================
 
 #include "../common/PixelMapping.h"
-#include  <filesystem>
+#include "TROOT.h"
+#include "TKey.h"
+#include "TString.h"
+#include "TFile.h"
+#include "TH1F.h"
+#include "TF1.h"
+#include "TH2F.h"
+#include "TDirectoryFile.h"
+#include "TGraphErrors.h"
+
+
+
+#include <array>
+#include <iostream>
+#include <string>
+#include <map>
+#include <filesystem>
+
+#ifdef ATLAS_GCC_CHECKERS
+  #include "CxxUtils/checker_macros.h"
+  ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
+#endif
 
 namespace fs = std::filesystem;
 using pix::PixelMapping; 
@@ -48,8 +69,8 @@ std::string getDatetodayStr() {
   const tm* localTime = localtime(&t);
   std::stringstream s;
   s << "20" << localTime->tm_year - 100;
-  s << setw(2) << setfill('0') << localTime->tm_mon + 1;
-  s << setw(2) << setfill('0') << localTime->tm_mday;
+  s << std::setw(2) << std::setfill('0') << localTime->tm_mon + 1;
+  s << std::setw(2) << std::setfill('0') << localTime->tm_mday;
   return s.str();
 }
 
@@ -853,7 +874,7 @@ void PixelCalib(bool test=false) {
                 find_max[i]=(std::abs(1 - ((parAI[idx] * parEI[idx] - parCI[idx] * totArrI_re[idx][i]) / (totArrI_re[idx][i] - parAI[idx])) / chargeArrI_re[idx][i]));
               }
               std::vector<Double_t>::iterator iter = std::max_element(find_max.begin(), find_max.end());
-              size_t n_max = std::distance(find_max.begin(), iter);
+              int n_max = static_cast<int>(std::distance(find_max.begin(), iter));
             
               ncharge_re = ncharge_re - 1;
               if ( n_max == ncharge_re - 1 || n_max == ncharge_re - 2 ){
@@ -903,7 +924,7 @@ void PixelCalib(bool test=false) {
               for(int i = qthresh; i < ncharge_re; i++){
                 badcalI[idx][i] = std::abs( 1 - ( (parAI[idx] * parEI[idx] - parCI[idx] * totArrI_re[idx][i]) / (totArrI_re[idx][i] - parAI[idx]) ) / chargeArrI_re[idx][i] );
               }
-              badcalI_max[idx] = *max_element(badcalI[idx].begin(), badcalI[idx].begin() + 10);
+              badcalI_max[idx] = *std::max_element(badcalI[idx].begin(), badcalI[idx].begin() + 10);
             }
           }
           fprintf(outputfile, "]");
@@ -1000,4 +1021,9 @@ void getFEID(int iphi, int ieta, int phi_module, int *circ, int *pixtype) {
   else {
     *pixtype = 0; // treat it as normal
   }
+}
+
+int main(){
+  PixelCalib(false);
+  return 0;
 }
