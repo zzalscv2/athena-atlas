@@ -1,6 +1,7 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
+#undef NDEBUG
 #define BOOST_TEST_MODULE MultiTrajectoryBasic_test
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/included/unit_test.hpp>
@@ -776,7 +777,7 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProjector, EmptyMTJ) {
   BOOST_CHECK_EQUAL(ts.effectiveCalibratedCovariance(), measCov);
 
   // Set and test projector
-  Acts::ActsMatrix<eBoundSize, 2> proj;
+  Acts::ActsMatrix<eBoundSize, eBoundSize> proj;
   proj.setZero();
   proj(Acts::eBoundLoc0, Acts::eBoundLoc0) = 1;
   proj(Acts::eBoundLoc1, Acts::eBoundLoc1) = 1;
