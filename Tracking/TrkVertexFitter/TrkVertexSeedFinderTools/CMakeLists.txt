@@ -10,7 +10,7 @@ atlas_add_library( TrkVertexSeedFinderToolsLib
                    TrkVertexSeedFinderTools/*.h
                    INTERFACE
                    PUBLIC_HEADERS TrkVertexSeedFinderTools
-                   LINK_LIBRARIES AthenaKernel GaudiKernel AthenaBaseComps TrkVertexFitterInterfaces
+                   LINK_LIBRARIES TruthUtils AthenaKernel GaudiKernel AthenaBaseComps TrkVertexFitterInterfaces
                    TrkVertexSeedFinderUtilsLib xAODEventInfo GeneratorObjects AtlasHepMCLib CxxUtils )
 
 # Component(s) in the package:

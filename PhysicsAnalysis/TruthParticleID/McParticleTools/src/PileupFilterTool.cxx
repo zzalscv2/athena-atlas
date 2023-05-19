@@ -15,14 +15,13 @@
 // FrameWork includes
 
 // HepMC includes
+#include "TruthUtils/MagicNumbers.h"
 #include "TruthHelper/GenAccessIO.h"
-#include "TruthHelper/IsGenStable.h"
-#include "TruthHelper/IsGenSimulStable.h"
-#include "TruthHelper/IsGenerator.h"
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/Relatives.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 
 // McParticleKernel includes
@@ -144,20 +143,13 @@ StatusCode PileupFilterTool::selectSpclMcBarcodes()
 {
   StatusCode sc = StatusCode::SUCCESS;
 
-  // Initialize helper classes to test event and final particles
-
-  static const TruthHelper::IsGenStable      isStable;
-  static const TruthHelper::IsGenSimulStable isGSStable;
-  static const TruthHelper::IsGenerator      isGenerator;
-
   // Get all of the generated particles (does not have Geant secondaries)
 
   std::vector<HepMC::ConstGenParticlePtr> particles;
   if ( m_includeSimul ) {
-    sc = m_tesIO->getMC(particles,  m_mcEventsReadHandleKey.key());
+    sc = m_tesIO->getMC(particles, false, m_mcEventsReadHandleKey.key());
   } else {
-    static const TruthHelper::IsGenerator ifs;
-    sc = m_tesIO->getMC(particles, &ifs, m_mcEventsReadHandleKey.key());
+    sc = m_tesIO->getMC(particles, true, m_mcEventsReadHandleKey.key());
   }
   if ( sc.isFailure() ) {
     ATH_MSG_ERROR("Could not get Monte Carlo particles from TDS at : "<< m_mcEventsReadHandleKey.key());
@@ -217,9 +209,9 @@ StatusCode PileupFilterTool::selectSpclMcBarcodes()
         ///////////////////////////
         /// stable particles
         if (m_includeSimul ) {
-           if ( isGSStable(part) && accept ) isSpcl = true;
+           if ( MC::isSimStable(part) && accept ) isSpcl = true;
         } else {
-           if ( isStable(part) && accept ) isSpcl = true;
+           if ( MC::isGenStable(part) && accept ) isSpcl = true;
         }
 
         //////////////////////////////////////
@@ -231,7 +223,7 @@ StatusCode PileupFilterTool::selectSpclMcBarcodes()
         // Children
         if( isSpcl && decayVtx ) {
           for(const auto& child: *(part->end_vertex())) {
-             if( isGenerator(child) && !m_removeDecayToSelf) { 
+             if( HepMC::is_truthhelper_generator_particle(child) && !m_removeDecayToSelf) { 
 	       m_particles.insert(child);// its not there already
              }
           }

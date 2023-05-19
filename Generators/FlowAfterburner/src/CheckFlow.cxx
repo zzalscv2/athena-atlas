@@ -17,16 +17,12 @@
 #include <TH2F.h>
 #include <TH3F.h>
 
-#include "TruthHelper/IsGenStable.h"
-#include "TruthHelper/GenAll.h"
-
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 
 #include "GeneratorObjects/HijingEventParams.h"
 
-using namespace TruthHelper;
 
 typedef std::vector<HepMC::ConstGenParticlePtr>  MCparticleCollection ;
 
@@ -154,7 +150,7 @@ StatusCode CheckFlow::initialize(){
 
   msg(MSG::DEBUG) << "Histograms have been booked " << endmsg;
 
-  m_tesIO = new GenAccessIO();
+  m_tesIO = new TruthHelper::GenAccessIO();
 
   return result;
 }
@@ -200,11 +196,9 @@ StatusCode CheckFlow::execute() {
   double phi_reco_sin1phip = 0, phi_reco_cos1phip = 0;
   double phi_reco_sin1phin = 0, phi_reco_cos1phin = 0;
   double phi_reco_sin2phi = 0, phi_reco_cos2phi = 0;
-  // Iterate over MC particles  We are using the IsGenStable predicate from
-  // IsGenStable ifs;
-  GenAll ifs;
+
   std::vector<HepMC::ConstGenParticlePtr> particles;
-  StatusCode stat = m_tesIO->getMC(particles, &ifs, m_key);
+  StatusCode stat = m_tesIO->getMC(particles, false, m_key);
   if (stat.isFailure()) {
     msg(MSG::ERROR) << "Could not find " << m_key << endmsg;
     return stat;
