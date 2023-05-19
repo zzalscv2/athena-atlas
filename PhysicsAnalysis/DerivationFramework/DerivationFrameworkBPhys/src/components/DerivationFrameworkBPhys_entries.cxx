@@ -35,6 +35,8 @@
 #include "DerivationFrameworkBPhys/JpsiPlusDsCascade.h"
 #include "DerivationFrameworkBPhys/JpsiPlusDpstCascade.h"
 #include "DerivationFrameworkBPhys/JpsiPlusDs1Cascade.h"
+#include "DerivationFrameworkBPhys/JpsiPlusPsiCascade.h"
+#include "DerivationFrameworkBPhys/PsiPlusPsiCascade.h"
 #include "DerivationFrameworkBPhys/ReVertex.h"
 #include "DerivationFrameworkBPhys/BPhysConversionFinder.h"
 #include "DerivationFrameworkBPhys/Cascade3Plus1.h"
@@ -69,7 +71,7 @@ DECLARE_COMPONENT( FourMuonTool )
 DECLARE_COMPONENT( BTrackVertexMapLogger )
 //DECLARE_COMPONENT( Select_Bmumu )
 //DECLARE_COMPONENT( BPhysVarBlinder )
-//DECLARE_COMPONENT( BmumuThinningTool )
+DECLARE_COMPONENT( PsiPlusPsiCascade )
 DECLARE_COMPONENT( VertexPlus1TrackCascade )
 DECLARE_COMPONENT( TriggerCountToMetadata )
 DECLARE_COMPONENT( MuonExtrapolationTool )
@@ -79,6 +81,7 @@ DECLARE_COMPONENT( JpsiPlusV0Cascade )
 DECLARE_COMPONENT( JpsiPlusDsCascade )
 DECLARE_COMPONENT( JpsiPlusDpstCascade )
 DECLARE_COMPONENT( JpsiPlusDs1Cascade )
+DECLARE_COMPONENT( JpsiPlusPsiCascade )
 DECLARE_COMPONENT( ReVertex )
 DECLARE_COMPONENT( BPhysConversionFinder )
 DECLARE_COMPONENT( Cascade3Plus1 )

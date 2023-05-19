@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef JPSIPLUSV0CASCADE_H
 #define JPSIPLUSV0CASCADE_H
@@ -52,6 +52,7 @@ namespace DerivationFramework {
         double m_MassLower;
         double m_MassUpper;
 
+        double m_mass_electron;
         double m_mass_muon;
         double m_mass_pion;
         double m_mass_proton;
@@ -70,8 +71,11 @@ namespace DerivationFramework {
         ToolHandle < Trk::V0Tools > m_V0Tools;
         ToolHandle < DerivationFramework::CascadeTools > m_CascadeTools;
 
+        int         m_jpsi_trk_pdg; // PDG ID for J/psi tracks, can be either 11 or 13
         bool        m_refitPV;
         Gaudi::Property<std::string>  m_refPVContainerName;
+        Gaudi::Property<std::string> m_jpsiTrackContainerName;
+        Gaudi::Property<std::string> m_v0TrackContainerName;
         std::string m_hypoName;               //!< name of the mass hypothesis. E.g. Jpis, Upsi, etc. Will be used as a prefix for decorations
         //This parameter will allow us to optimize the number of PVs under consideration as the probability
         //of a useful primary vertex drops significantly the higher you go
