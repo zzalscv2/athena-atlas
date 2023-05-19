@@ -65,15 +65,12 @@ def jetHIEventShapeSequence(configFlags, clustersKey, towerKey):
     ESFiller.UseClusters=True
     
     #Add weight tool to filler tool
-    from AthenaConfiguration.Enums import LHCPeriod
     from HIEventUtils.HIEventUtilsConf import HITowerWeightTool
     TWTool=HITowerWeightTool()
     TWTool.ApplyCorrection=True
     TWTool.ConfigDir='HIJetCorrection/'
-    if configFlags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2]:
-        TWTool.InputFile='cluster.geo.HIJING_2018.root'
-    else:
-        TWTool.InputFile='cluster.geo.DATA_PbPb_2022.root'
+    from HIJetRec.HIJetRecUtilsCA import getHIClusterGeoWeightFile
+    TWTool.InputFile=getHIClusterGeoWeightFile(configFlags)
 
     from AthenaCommon.AppMgr import ToolSvc
     ToolSvc += HITowerWeightTool()
@@ -304,11 +301,8 @@ def HLTAddIteration(configFlags, seed_container,shape_name,clustersKey, **kwargs
 
     if 'sub_tool' in kwargs.keys() : sub_tool=kwargs['sub_tool']
     else :
-        from AthenaConfiguration.Enums import LHCPeriod
-        if configFlags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2]:
-            weightInputFile='cluster.geo.HIJING_2018.root'
-        else:
-            weightInputFile='cluster.geo.DATA_PbPb_2022.root'
+        from HIJetRec.HIJetRecUtilsCA import getHIClusterGeoWeightFile
+        weightInputFile=getHIClusterGeoWeightFile(configFlags)
 
         HIJetClusterSubtractorTool=CompFactory.HIJetClusterSubtractorTool
         sub_tool=HIJetClusterSubtractorTool("HLTHIJetClusterSubtractor", ConfigDir='HIJetCorrection/', InputFile=weightInputFile)
@@ -388,11 +382,8 @@ def HLTMakeModulatorTool(mod_key, **kwargs):
     return mod
 
 def HLTHIJetClusterSubtractorGetter(configFlags):
-    from AthenaConfiguration.Enums import LHCPeriod
-    if configFlags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2]:
-        weightInputFile='cluster.geo.HIJING_2018.root'
-    else:
-        weightInputFile='cluster.geo.DATA_PbPb_2022.root'
+    from HIJetRec.HIJetRecUtilsCA import getHIClusterGeoWeightFile
+    weightInputFile=getHIClusterGeoWeightFile(configFlags)
 
     HIJetClusterSubtractorTool = CompFactory.HIJetClusterSubtractorTool
     sub_tool = HIJetClusterSubtractorTool("HLTHIJetClusterSubtractor", ConfigDir='HIJetCorrection/', InputFile=weightInputFile)
