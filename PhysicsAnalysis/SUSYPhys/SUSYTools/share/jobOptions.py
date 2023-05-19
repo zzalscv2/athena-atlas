@@ -1,3 +1,7 @@
+""" 
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+""" 
+
 # Author: Will Buttinger
 
 # run this with:
@@ -21,13 +25,13 @@ susyArgsParser.add_argument("--fileOutput",default=None,help="Name of output fil
 susyArgs = susyArgsParser.parse_args()
 
 if susyArgs.testCampaign:
-    pTag = 'p5511' if susyArgs.testCampaign!='data22' else 'p5514'
-    inputDir = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/'
+    pTag = 'p5631' if susyArgs.testCampaign!='data22' else 'p5632'
+    inputDir = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools'
     inputFiles = {}
-    inputFiles['data18'] = f'DAOD_{susyArgs.testFormat}.data18_13TeV.00356250_{pTag}.pool.root'
-    inputFiles['data22'] = f'DAOD_{susyArgs.testFormat}.data22_13p6TeV.00440543_{pTag}.pool.root'
-    inputFiles['mc20e']  = f'DAOD_{susyArgs.testFormat}.mc20_13TeV.410470.FS_mc20e_{pTag}.{susyArgs.testFormat}.pool.root'
-    inputFiles['mc21a']  = f'DAOD_{susyArgs.testFormat}.mc21_13p6TeV.601229.FS_mc21a_{pTag}.{susyArgs.testFormat}.pool.root'
+    inputFiles['data18'] = f'data18_13TeV.00356250_{pTag}.{susyArgs.testFormat}.pool.root'
+    inputFiles['data22'] = f'data22_13p6TeV.00440543_{pTag}.{susyArgs.testFormat}.pool.root'
+    inputFiles['mc20e']  = f'mc20_13TeV.410470.FS_mc20e_{pTag}.{susyArgs.testFormat}.pool.root'
+    inputFiles['mc21a']  = f'mc21_13p6TeV.601229.FS_mc21a_{pTag}.{susyArgs.testFormat}.pool.root'
     jps.AthenaCommonFlags.FilesInput = [f'{inputDir}/{inputFiles[susyArgs.testCampaign]}']
     if susyArgs.fileOutput is None: 
         susyArgs.fileOutput = f"hist-Ath_{susyArgs.testCampaign}_DAOD_{susyArgs.testFormat}.root"

@@ -103,24 +103,24 @@ set (extra_patterns "  (Entire loop|Excluding first event|First event).*ms|cvmfs
 # Test(s) in the package:
 if( XAOD_STANDALONE )
    atlas_add_test( ut_SUSYToolsTester_data
-      SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.data18_13TeV.00356250_p5511.pool.root
+      SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/data18_13TeV.00356250_p5631.PHYS.pool.root
              maxEvents=500 isData=1 isAtlfast=0 Debug=0
       LOG_IGNORE_PATTERN ${extra_patterns}
    )
    atlas_add_test( ut_SUSYToolsTester_data_Run3
-      SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.data22_13p6TeV.00440543_p5514.pool.root
+      SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/data22_13p6TeV.00440543_p5632.PHYS.pool.root
             maxEvents=1000 isData=1 isAtlfast=0 Debug=0
       LOG_IGNORE_PATTERN ${extra_patterns}
    )
    atlas_add_test( ut_SUSYToolsTester_mc
-      SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.mc20_13TeV.410470.FS_mc20e_p5511.PHYS.pool.root
+      SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/mc20_13TeV.410470.FS_mc20e_p5631.PHYS.pool.root
              maxEvents=100 isData=0 isAtlfast=0 Debug=0 NoSyst=0
              PRWFile=dev/PileupReweighting/mc16_13TeV/pileup_mc16e_dsid410470_FS.root
              ilumicalcFile=GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root
       LOG_IGNORE_PATTERN ${extra_patterns}
    )
    atlas_add_test( ut_SUSYToolsTester_mc_Run3
-      SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.mc21_13p6TeV.601229.FS_mc21a_p5511.PHYS.pool.root
+      SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/mc21_13p6TeV.601229.FS_mc21a_p5631.PHYS.pool.root
              maxEvents=100 isData=0 isAtlfast=0 Debug=0 NoSyst=0
              PRWFile=dev/PileupReweighting/mc16_13TeV/pileup_mc21a_dsid601229_FS.root
              ilumicalcFile=GoodRunsLists/data22_13p6TeV/20230116/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-002.root 

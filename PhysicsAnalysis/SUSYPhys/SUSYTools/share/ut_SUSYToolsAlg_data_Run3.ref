@@ -113,6 +113,8 @@ VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (
 VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key AntiKt4EMPFlowJets_NNJvtCopy
 VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key AntiKt4EMPFlowJets_NNJvtCopy
 VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key AntiKt4EMPFlowJets_NNJvtCopy
+SUSYToolsAlg                                      WARNING No PV found for this event! Skipping...
+SUSYToolsAlg                                      WARNING No PV found for this event! Skipping...
 VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key AntiKt4EMPFlowJets_NNJvtCopy
 VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key AntiKt4EMPFlowJets_NNJvtCopy
 VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key AntiKt4EMPFlowJets_NNJvtCopy
@@ -464,6 +466,7 @@ VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (
 VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key AntiKt4EMPFlowJets_NNJvtCopy
 VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key AntiKt4EMPFlowJets_NNJvtCopy
 VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key AntiKt4EMPFlowJets_NNJvtCopy
+SUSYToolsAlg                                      WARNING No PV found for this event! Skipping...
 VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key AntiKt4EMPFlowJets_NNJvtCopy
 VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key AntiKt4EMPFlowJets_NNJvtCopy
 VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key AntiKt4EMPFlowJets_NNJvtCopy
@@ -586,20 +589,18 @@ VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (
 VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key AntiKt4EMPFlowJets_NNJvtCopy
 VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key AntiKt4EMPFlowJets_NNJvtCopy
 VarHandle(Store...WARNING WARNING message limit (500) reached for VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvtCopy[1244316195]). Suppressing further output.
-ToolSvc.TopTagger                                 WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger                                 WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger                                 WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger                                 WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger                                 WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger                                 WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger                                 WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
+SUSYToolsAlg                                      WARNING No PV found for this event! Skipping...
+SUSYToolsAlg                                      WARNING No PV found for this event! Skipping...
 ToolSvc.TopTagger                                 WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
 ToolSvc.TopTagger                                 WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
 ToolSvc.TopTagger                                 WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
 SUSYToolsAlg                                      WARNING No PV found for this event! Skipping...
+ToolSvc.TopTagger                                 WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
+ToolSvc.TopTagger                                 WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
+ToolSvc.TopTagger                                 WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
 		CalibrationDataInterfaceROOT object out-of-bounds summary:
 			No issues found
 Listing sources of suppressed message: 
  Message Source              |   Level |    Count
 -----------------------------+---------+-------------
- VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvtCopy[1244316195])| WARNING |    14151
+ VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvtCopy[1244316195])| WARNING |    14385

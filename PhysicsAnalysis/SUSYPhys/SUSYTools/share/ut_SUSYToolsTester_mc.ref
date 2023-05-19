@@ -96,27 +96,9 @@ ToolSvc.TauTrigEffTool...WARNING TauEfficiency callibrations from 2022-prerec ar
 SUSYObjDef_xAOD          WARNING TruthBSM is empty. Skipping FindSusyHP.
 SUSYObjDef_xAOD          WARNING TruthBSM is empty. Skipping FindSusyHP.
 SUSYObjDef_xAOD          WARNING TruthBSM is empty. Skipping FindSusyHP.
-ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
 SUSYObjDef_xAOD          WARNING TruthBSM is empty. Skipping FindSusyHP.
 SUSYObjDef_xAOD          WARNING TruthBSM is empty. Skipping FindSusyHP.
 ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-Info in <EfficiencyScaleFactor>: No TTVA sf/efficiency provided for standalone muons with 2.5<|eta|<2.7 for variation  and muon with pt=53121.6172, eta=2.59 and phi=-2.93, returning 1.0
-Info in <EfficiencyScaleFactor>: No TTVA sf/efficiency provided for standalone muons with 2.5<|eta|<2.7 for variation  and muon with pt=53121.6172, eta=2.59 and phi=-2.93, returning 1.0
-Info in <EfficiencyScaleFactor>: No TTVA sf/efficiency provided for standalone muons with 2.5<|eta|<2.7 for variation  and muon with pt=53121.6172, eta=2.59 and phi=-2.93, returning 1.0
-Info in <EfficiencyScaleFactor>: No TTVA sf/efficiency provided for standalone muons with 2.5<|eta|<2.7 for variation  and muon with pt=53121.6172, eta=2.59 and phi=-2.93, returning 1.0
-Info in <EfficiencyScaleFactor>: No TTVA sf/efficiency provided for standalone muons with 2.5<|eta|<2.7 for variation  and muon with pt=53121.6172, eta=2.59 and phi=-2.93, returning 1.0
-Info in <EfficiencyScaleFactor>: No TTVA sf/efficiency provided for standalone muons with 2.5<|eta|<2.7 for variation  and muon with pt=53121.6172, eta=2.59 and phi=-2.93, returning 1.0
-Info in <EfficiencyScaleFactor>: No TTVA sf/efficiency provided for standalone muons with 2.5<|eta|<2.7 for variation  and muon with pt=53121.6172, eta=2.59 and phi=-2.93, returning 1.0
-Info in <EfficiencyScaleFactor>: No TTVA sf/efficiency provided for standalone muons with 2.5<|eta|<2.7 for variation  and muon with pt=53121.6172, eta=2.59 and phi=-2.93, returning 1.0
-Info in <EfficiencyScaleFactor>: No TTVA sf/efficiency provided for standalone muons with 2.5<|eta|<2.7 for variation  and muon with pt=53121.6172, eta=2.59 and phi=-2.93, returning 1.0
-Info in <EfficiencyScaleFactor>: No TTVA sf/efficiency provided for standalone muons with 2.5<|eta|<2.7 for variation  and muon with pt=53121.6172, eta=2.59 and phi=-2.93, returning 1.0
-Info in <EfficiencyScaleFactor>: No TTVA sf/efficiency provided for standalone muons with 2.5<|eta|<2.7 for variation TTVA_STAT__1DN and muon with pt=53121.6172, eta=2.59 and phi=-2.93, returning 1.0
-Info in <EfficiencyScaleFactor>: No TTVA sf/efficiency provided for standalone muons with 2.5<|eta|<2.7 for variation TTVA_STAT__1UP and muon with pt=53121.6172, eta=2.59 and phi=-2.93, returning 1.0
-Info in <EfficiencyScaleFactor>: No TTVA sf/efficiency provided for standalone muons with 2.5<|eta|<2.7 for variation TTVA_SYS__1DN and muon with pt=53121.6172, eta=2.59 and phi=-2.93, returning 1.0
-Info in <EfficiencyScaleFactor>: No TTVA sf/efficiency provided for standalone muons with 2.5<|eta|<2.7 for variation TTVA_SYS__1UP and muon with pt=53121.6172, eta=2.59 and phi=-2.93, returning 1.0
 Info in <SUSYToolsTester>: Time per event:          (CPU / WALL)
 		CalibrationDataInterfaceROOT object out-of-bounds summary:
 			No issues found

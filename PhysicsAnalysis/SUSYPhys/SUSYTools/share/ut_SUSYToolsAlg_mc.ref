@@ -490,7 +490,6 @@ VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (
 VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key AntiKt4EMPFlowJets_NNJvtCopy
 VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key AntiKt4EMPFlowJets_NNJvtCopy
 VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key AntiKt4EMPFlowJets_NNJvtCopy
-ToolSvc.TopTagger                                 WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
 VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key AntiKt4EMPFlowJets_NNJvtCopy
 VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key AntiKt4EMPFlowJets_NNJvtCopy
 VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key AntiKt4EMPFlowJets_NNJvtCopy
@@ -629,12 +628,9 @@ VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (
 VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvt...WARNING ../VarHandleBase.cxx (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key AntiKt4EMPFlowJets_NNJvtCopy
 VarHandle(Store...WARNING WARNING message limit (500) reached for VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvtCopy[1244316195]). Suppressing further output.
 ToolSvc.TopTagger                                 WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger                                 WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger                                 WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger                                 WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
 		CalibrationDataInterfaceROOT object out-of-bounds summary:
-			DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/Light/default_SF general: 0, extrapolated: 9
+			DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/Light/default_SF general: 0, extrapolated: 18
 Listing sources of suppressed message: 
  Message Source              |   Level |    Count
 -----------------------------+---------+-------------
- VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvtCopy[1244316195])| WARNING |    15894
+ VarHandle(StoreGateSvc+AntiKt4EMPFlowJets_NNJvtCopy[1244316195])| WARNING |    17712
