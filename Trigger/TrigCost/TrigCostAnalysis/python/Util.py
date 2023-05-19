@@ -15,7 +15,7 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger('CostAnalysisPostProcessing')
 
 
-def exploreTree(inputFile, dumpSummary=False, underflowThreshold=0.1, overflowThreshold=0.1, maxRanges=5):
+def exploreTree(inputFile, dumpSummary=False, underflowThreshold=0.1, overflowThreshold=0.1, maxRanges=5, skipRanges=-1):
     ''' @brief Explore ROOT Tree to find tables with histograms to be saved in csv
 
     Per each found directory TableConstructor object is created.
@@ -38,7 +38,13 @@ def exploreTree(inputFile, dumpSummary=False, underflowThreshold=0.1, overflowTh
 
     processingWarnings = []
     rangeCounter = 0
+    rangesToSkip = skipRanges
     for timeRange in inputFile.GetListOfKeys():
+        if timeRange.GetName() != "metadata" and rangesToSkip > 0:
+            rangesToSkip-=1
+            log.debug("Skipping range {0}".format(timeRange.GetName()))
+            continue
+
         if maxRanges > 0 and rangeCounter >= maxRanges:
             log.info("{0} ranges were processed - exiting the postprocessing".format(rangeCounter))
             break

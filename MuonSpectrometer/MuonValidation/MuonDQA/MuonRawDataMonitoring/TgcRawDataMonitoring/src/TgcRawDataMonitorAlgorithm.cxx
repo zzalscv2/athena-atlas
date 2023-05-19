@@ -1945,16 +1945,21 @@ return (m.muon->charge()>0);
 	    if ( data->detectorElementOut() == nullptr ) n_TgcCoin_detElementIsNull++;
 	    if ( data->posOutPtr() == nullptr ) n_TgcCoin_postOutPtrIsNull++;
 
+	    int slsector = (data->isForward()) ? ( (data->phi() + 1) % 24 + 1) : ( (data->phi() + 1) % 48 + 1); // translation from the phi index to trigger sector
+	    if(!data->isAside()) slsector *= -1;
+
 	    if(data->type() == Muon::TgcCoinData::TYPE_UNKNOWN){ // inner muon detectors (EI/FI/Tile/NSW/RPCBIS78)
-	      int slsector = (data->isAside())?(data->phi()):(-data->phi());
 	      if (data->isInner() && data->isStrip()) {  // RPC-BIS78
 		TgcTrigRpc rpcCoin;
 		rpcCoin.slSector = slsector;
 		rpcCoin.roiEta = -999;
 		rpcCoin.roiPhi = -999;
 		rpcCoin.roiNum = -999;
-		rpcCoin.deltaBcid = (data->inner() >> Muon::TgcCoinData::INNER_RPC_BCID_BITSHIFT) & Muon::TgcCoinData::INNER_RPC_BCID_BIT;
-		rpcCoin.deltaTiming = bunch;
+		rpcCoin.deltaBcid = -999;
+		rpcCoin.deltaTiming = -999;
+		rpcCoin.bcid = (data->inner() >> Muon::TgcCoinData::INNER_RPC_BCID_BITSHIFT) & Muon::TgcCoinData::INNER_RPC_BCID_BIT;
+		rpcCoin.bunch = bunch;
+		rpcCoin.currBc = (bunch==0);
 		rpcCoin.rpcEta = (data->inner() >> Muon::TgcCoinData::INNER_RPC_ETA_BITSHIFT) & Muon::TgcCoinData::INNER_RPC_ETA_BIT;
 		rpcCoin.rpcPhi = (data->inner() >> Muon::TgcCoinData::INNER_RPC_PHI_BITSHIFT) & Muon::TgcCoinData::INNER_RPC_PHI_BIT;
 		rpcCoin.rpcDEta = (data->inner() >> Muon::TgcCoinData::INNER_RPC_DETA_BITSHIFT) & Muon::TgcCoinData::INNER_RPC_DETA_BIT;
@@ -1966,10 +1971,12 @@ return (m.muon->charge()>0);
 		nswCoin.roiEta = -999;
 		nswCoin.roiPhi = -999;
 		nswCoin.roiNum = -999;
+		nswCoin.deltaBcid = -999;
+		nswCoin.deltaTiming = -999;
 		nswCoin.isForward = data->isForward();
-		nswCoin.isEndcap = !data->isForward();
-		nswCoin.deltaBcid = (data->inner() >> Muon::TgcCoinData::INNER_NSW_BCID_BITSHIFT) & Muon::TgcCoinData::INNER_NSW_BCID_BIT;
-		nswCoin.deltaTiming = bunch;
+		nswCoin.bcid = (data->inner() >> Muon::TgcCoinData::INNER_NSW_BCID_BITSHIFT) & Muon::TgcCoinData::INNER_NSW_BCID_BIT;
+		nswCoin.bunch = bunch;
+		nswCoin.currBc = (bunch==0);
 		nswCoin.R = (data->inner() >> Muon::TgcCoinData::INNER_NSW_R_BITSHIFT) & Muon::TgcCoinData::INNER_NSW_R_BIT;
 		nswCoin.Phi = (data->inner() >> Muon::TgcCoinData::INNER_NSW_PHI_BITSHIFT) & Muon::TgcCoinData::INNER_NSW_PHI_BIT;
 		nswCoin.deltaTheta = (data->inner() >> Muon::TgcCoinData::INNER_NSW_DTHETA_BITSHIFT) & Muon::TgcCoinData::INNER_NSW_DTHETA_BIT;
@@ -1981,8 +1988,11 @@ return (m.muon->charge()>0);
 		tileCoin.roiEta = -999;
 		tileCoin.roiPhi = -999;
 		tileCoin.roiNum = -999;
-		tileCoin.deltaBcid = (data->inner() >> Muon::TgcCoinData::INNER_TILE_BCID_BITSHIFT) & Muon::TgcCoinData::INNER_TILE_BCID_BIT;
-		tileCoin.deltaTiming = bunch;
+		tileCoin.deltaBcid = -999;
+		tileCoin.deltaTiming = -999;
+		tileCoin.bcid = (data->inner() >> Muon::TgcCoinData::INNER_TILE_BCID_BITSHIFT) & Muon::TgcCoinData::INNER_TILE_BCID_BIT;
+		tileCoin.bunch = bunch;
+		tileCoin.currBc = (bunch==0);
 		tileCoin.tmdbDecisions = (data->inner() >> Muon::TgcCoinData::INNER_TILE_MODULE_BITSHIFT) & Muon::TgcCoinData::INNER_TILE_MODULE_BIT;
 		if(tileCoin.tmdbDecisions!=0)
 		  tgcTrigTileMap.push_back(tileCoin);
@@ -2046,13 +2056,14 @@ return (m.muon->charge()>0);
 	    tgcTrig.type = data->type();
 	    tgcTrig.trackletId = data->trackletId();
 	    tgcTrig.trackletIdStrip = data->trackletIdStrip();
-	    tgcTrig.sector = (data->isAside())?(data->phi()):(-data->phi());
+	    tgcTrig.sector = slsector;
 	    tgcTrig.roi = data->roi();
 	    tgcTrig.pt = data->pt();
 	    tgcTrig.delta = data->delta();
 	    tgcTrig.sub = data->sub();
 	    tgcTrig.veto = data->veto();
 	    tgcTrig.bunch = bunch;
+	    tgcTrig.bcid = (GetEventInfo(ctx)->bcid() & 0xF);
 	    tgcTrig.inner = data->inner();
 	    if( !data->isInner() ){
 	      if (data->type() == Muon::TgcCoinData::TYPE_SL && !data->isForward()) {
@@ -2118,61 +2129,53 @@ return (m.muon->charge()>0);
       }
       
 
-      std::vector< TgcTrigRpc > tgcTrigRpcMap_matched;
-      for(auto& inner : tgcTrigRpcMap){
-	for(const auto& sl : tgcTrigMap_SL_Endcap){
-	  if(sl.bunch != 0)continue;
-	  if(sl.muonMatched == 0)continue;
-	  if(sl.isForward)continue;
-	  if(sl.sector != inner.slSector)continue;
+      for(auto& sl : tgcTrigMap_SL){
+	if( sl.muonMatched == 0 )continue;
+	if( sl.bunch != 0 )continue;
+	for(auto& inner : tgcTrigRpcMap){
+	  if( sl.sector != inner.slSector )continue;
 	  inner.roiEta = sl.eta;
 	  inner.roiPhi = sl.phi;
 	  inner.roiNum = sl.roi;
-	  inner.deltaBcid -= (GetEventInfo(ctx)->bcid() & 0xF);
-	  inner.deltaTiming -= sl.bunch;
-	  break;
+	  inner.deltaBcid = (sl.bunch==0 && sl.muonMatched==1) ? (inner.bcid - sl.bcid) : -999;
+	  inner.deltaTiming = (sl.bunch==0 && sl.muonMatched==1) ? (inner.bunch - sl.bunch) : -999;
+	  inner.goodBcid = (inner.bcid == sl.bcid);
+	  inner.goodTiming = (inner.bunch == sl.bunch);
+	  sl.rpc.push_back(&inner);
 	}
-	if(inner.roiNum >= 0) tgcTrigRpcMap_matched.push_back(inner);
-      }
-      std::vector< TgcTrigNsw > tgcTrigNswMap_matched;
-      for(auto& inner : tgcTrigNswMap){
-	for(const auto& sl : tgcTrigMap_SL){
-	  if(sl.bunch != 0)continue;
-	  if(sl.muonMatched == 0)continue;
-	  if(sl.isForward != inner.isForward)continue;
-	  if(sl.sector != inner.slSector)continue;
+	for(auto& inner : tgcTrigNswMap){
+	  if( sl.sector != inner.slSector )continue;
+	  if( sl.isForward != inner.isForward )continue;
 	  inner.roiEta = sl.eta;
 	  inner.roiPhi = sl.phi;
 	  inner.roiNum = sl.roi;
-	  inner.deltaBcid -= (GetEventInfo(ctx)->bcid() & 0xF);
-	  inner.deltaTiming -= sl.bunch;
-	  break;
+	  inner.deltaBcid = (sl.bunch==0 && sl.muonMatched==1) ? (inner.bcid - sl.bcid) : -999;
+	  inner.deltaTiming = (sl.bunch==0 && sl.muonMatched==1) ? (inner.bunch - sl.bunch) : -999;
+	  inner.goodBcid = (inner.bcid == sl.bcid);
+	  inner.goodTiming = (inner.bunch == sl.bunch);
+	  sl.nsw.push_back(&inner);
 	}
-	if(inner.roiNum >= 0) tgcTrigNswMap_matched.push_back(inner);
+	for(auto& inner : tgcTrigTileMap){
+	  if( sl.sector != inner.slSector )continue;
+	  inner.roiEta = sl.eta;
+	  inner.roiPhi = sl.phi;
+	  inner.roiNum = sl.roi;
+	  inner.deltaBcid = (sl.bunch==0 && sl.muonMatched==1) ? (inner.bcid - sl.bcid) : -999;
+	  inner.deltaTiming = (sl.bunch==0 && sl.muonMatched==1) ? (inner.bunch - sl.bunch) : -999;
+	  inner.goodBcid = (inner.bcid == sl.bcid);
+	  inner.goodTiming = (inner.bunch == sl.bunch);
+	  sl.tile.push_back(&inner);
+	}
       }
-      std::vector< TgcTrigTile > tgcTrigTileMap_matched;
-      std::vector< TgcTrigTile > tgcTrigTileMap_matched_allmods;
+
+      std::vector< TgcTrigTile > tgcTrigTileMap_allmods;
       for(auto& inner : tgcTrigTileMap){
-	for(const auto& sl : tgcTrigMap_SL_Endcap){
-	  if(sl.bunch != 0)continue;
-	  if(sl.muonMatched == 0)continue;
-	  if(sl.isForward)continue;
-	  if(sl.sector != inner.slSector)continue;
-	  inner.roiEta = sl.eta;
-	  inner.roiPhi = sl.phi;
-	  inner.roiNum = sl.roi;
-	  inner.deltaBcid -= (GetEventInfo(ctx)->bcid() & 0xF);
-	  inner.deltaTiming -= sl.bunch;
-	  break;
-	}
-	if(inner.roiNum >= 0){
-	  tgcTrigTileMap_matched.push_back(inner);
-	  for(int i = 0 ; i < 12 ; i++){
-	    TgcTrigTile inner2 = inner;
-	    if((inner.tmdbDecisions>>i) & 0x1){
-	      inner2.tmdbDecisions = (i+3)%3 + 1;
-	      tgcTrigTileMap_matched_allmods.push_back(inner2);
-	    }
+	if(inner.roiNum<0)continue;
+	for(int i = 0 ; i < 12 ; i++){
+	  TgcTrigTile inner2 = inner;
+	  if((inner.tmdbDecisions>>i) & 0x1){
+	    inner2.tmdbDecisions = (i+3)%3 + 1;
+	    tgcTrigTileMap_allmods.push_back(inner2);
 	  }
 	}
       }
@@ -2227,129 +2230,370 @@ return (m.muon->charge()>0);
       fillTgcCoinEff("LPT_Wire",tgcTrigMap_LPT_Wire,extpositions_pivot,extTrigInfo_LPT_Wire,vo_exttriginfo,tgcCoin_variables);
       fillTgcCoinEff("LPT_Strip",tgcTrigMap_LPT_Strip,extpositions_pivot,extTrigInfo_LPT_Strip,vo_exttriginfo,tgcCoin_variables);
 
+      // TGC
+      auto coin_inner_tgc_sector=Monitored::Collection("coin_inner_tgc_sector",tgcTrigMap_SL,[](const TgcTrig&m){
+	  return (m.bunch==0 && m.muonMatched==1) ? (m.sector) : -999;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_sector);
+      auto coin_inner_tgc_forward=Monitored::Collection("coin_inner_tgc_forward",tgcTrigMap_SL,[](const TgcTrig&m){
+	  return m.isForward==1;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_forward);
+      auto coin_inner_tgc_etaupto1p3=Monitored::Collection("coin_inner_tgc_etaupto1p3",tgcTrigMap_SL,[](const TgcTrig&m){
+	  return std::abs(m.eta) < 1.3;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_etaupto1p3);
+      auto coin_inner_tgc_etafrom1p3_endcap=Monitored::Collection("coin_inner_tgc_etafrom1p3_endcap",tgcTrigMap_SL,[](const TgcTrig&m){
+	  return std::abs(m.eta) > 1.3 && m.isForward==0;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_etafrom1p3_endcap);
+
+      auto coin_inner_tgc_prevBcRpc=Monitored::Collection("coin_inner_tgc_prevBcRpc",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.rpc){
+	    if(inner->bunch == -1) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_prevBcRpc);
+      auto coin_inner_tgc_currBcRpc=Monitored::Collection("coin_inner_tgc_currBcRpc",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.rpc){
+	    if(inner->bunch == 0) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_currBcRpc);
+      auto coin_inner_tgc_nextBcRpc=Monitored::Collection("coin_inner_tgc_nextBcRpc",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.rpc){
+	    if(inner->bunch == 1) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_nextBcRpc);
+      auto coin_inner_tgc_nextnextBcRpc=Monitored::Collection("coin_inner_tgc_nextnextBcRpc",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.rpc){
+	    if(inner->bunch == 2) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_nextnextBcRpc);
+
+      auto coin_inner_tgc_prevBcRpc_goodBcid=Monitored::Collection("coin_inner_tgc_prevBcRpc_goodBcid",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.rpc){
+	    if(inner->bunch == -1 && inner->goodBcid == 1) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_prevBcRpc_goodBcid);
+      auto coin_inner_tgc_currBcRpc_goodBcid=Monitored::Collection("coin_inner_tgc_currBcRpc_goodBcid",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.rpc){
+	    if(inner->bunch == 0 && inner->goodBcid == 1) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_currBcRpc_goodBcid);
+      auto coin_inner_tgc_nextBcRpc_goodBcid=Monitored::Collection("coin_inner_tgc_nextBcRpc_goodBcid",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.rpc){
+	    if(inner->bunch == 1 && inner->goodBcid == 1) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_nextBcRpc_goodBcid);
+      auto coin_inner_tgc_nextnextBcRpc_goodBcid=Monitored::Collection("coin_inner_tgc_nextnextBcRpc_goodBcid",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.rpc){
+	    if(inner->bunch == 2 && inner->goodBcid == 1) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_nextnextBcRpc_goodBcid);
+
+      auto coin_inner_tgc_prevBcNsw=Monitored::Collection("coin_inner_tgc_prevBcNsw",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.nsw){
+	    if(inner->bunch == -1) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_prevBcNsw);
+      auto coin_inner_tgc_currBcNsw=Monitored::Collection("coin_inner_tgc_currBcNsw",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.nsw){
+	    if(inner->bunch == 0) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_currBcNsw);
+      auto coin_inner_tgc_nextBcNsw=Monitored::Collection("coin_inner_tgc_nextBcNsw",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.nsw){
+	    if(inner->bunch == 1) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_nextBcNsw);
+      auto coin_inner_tgc_nextnextBcNsw=Monitored::Collection("coin_inner_tgc_nextnextBcNsw",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.nsw){
+	    if(inner->bunch == 2) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_nextnextBcNsw);
+
+      auto coin_inner_tgc_prevBcNsw_goodBcid=Monitored::Collection("coin_inner_tgc_prevBcNsw_goodBcid",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.nsw){
+	    if(inner->bunch == -1 && inner->goodBcid == 1) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_prevBcNsw_goodBcid);
+      auto coin_inner_tgc_currBcNsw_goodBcid=Monitored::Collection("coin_inner_tgc_currBcNsw_goodBcid",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.nsw){
+	    if(inner->bunch == 0 && inner->goodBcid == 1) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_currBcNsw_goodBcid);
+      auto coin_inner_tgc_nextBcNsw_goodBcid=Monitored::Collection("coin_inner_tgc_nextBcNsw_goodBcid",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.nsw){
+	    if(inner->bunch == 1 && inner->goodBcid == 1) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_nextBcNsw_goodBcid);
+      auto coin_inner_tgc_nextnextBcNsw_goodBcid=Monitored::Collection("coin_inner_tgc_nextnextBcNsw_goodBcid",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.nsw){
+	    if(inner->bunch == 2 && inner->goodBcid == 1) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_nextnextBcNsw_goodBcid);
+
+      auto coin_inner_tgc_prevBcTile=Monitored::Collection("coin_inner_tgc_prevBcTile",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.tile){
+	    if(inner->bunch == -1) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_prevBcTile);
+      auto coin_inner_tgc_currBcTile=Monitored::Collection("coin_inner_tgc_currBcTile",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.tile){
+	    if(inner->bunch == 0) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_currBcTile);
+      auto coin_inner_tgc_nextBcTile=Monitored::Collection("coin_inner_tgc_nextBcTile",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.tile){
+	    if(inner->bunch == 1) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_nextBcTile);
+      auto coin_inner_tgc_nextnextBcTile=Monitored::Collection("coin_inner_tgc_nextnextBcTile",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto inner : m.tile){
+	    if(inner->bunch == 2) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_nextnextBcTile);
+
+      auto coin_inner_tgc_prevBcTile_goodBcid=Monitored::Collection("coin_inner_tgc_prevBcTile_goodBcid",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.tile){
+	    if(inner->bunch == -1 && inner->goodBcid == 1) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_prevBcTile_goodBcid);
+      auto coin_inner_tgc_currBcTile_goodBcid=Monitored::Collection("coin_inner_tgc_currBcTile_goodBcid",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.tile){
+	    if(inner->bunch == 0 && inner->goodBcid == 1) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_currBcTile_goodBcid);
+      auto coin_inner_tgc_nextBcTile_goodBcid=Monitored::Collection("coin_inner_tgc_nextBcTile_goodBcid",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.tile){
+	    if(inner->bunch == 1 && inner->goodBcid == 1) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_nextBcTile_goodBcid);
+      auto coin_inner_tgc_nextnextBcTile_goodBcid=Monitored::Collection("coin_inner_tgc_nextnextBcTile_goodBcid",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto inner : m.tile){
+	    if(inner->bunch == 2 && inner->goodBcid == 1) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_nextnextBcTile_goodBcid);
+
+
       // RPC BIS78 inner coincidence
-      auto coin_inner_rpc_slSector=Monitored::Collection("coin_inner_rpc_slSector",tgcTrigRpcMap_matched,[](const TgcTrigRpc&m){
+      auto coin_inner_rpc_slSector=Monitored::Collection("coin_inner_rpc_slSector",tgcTrigRpcMap,[](const TgcTrigRpc&m){
 	  return m.slSector;
 	});
       tgcCoin_variables.push_back(coin_inner_rpc_slSector);
-      auto coin_inner_rpc_roiEta=Monitored::Collection("coin_inner_rpc_roiEta",tgcTrigRpcMap_matched,[](const TgcTrigRpc&m){
+      auto coin_inner_rpc_roiEta=Monitored::Collection("coin_inner_rpc_roiEta",tgcTrigRpcMap,[](const TgcTrigRpc&m){
 	  return m.roiEta;
 	});
       tgcCoin_variables.push_back(coin_inner_rpc_roiEta);
-      auto coin_inner_rpc_roiPhi=Monitored::Collection("coin_inner_rpc_roiPhi",tgcTrigRpcMap_matched,[](const TgcTrigRpc&m){
+      auto coin_inner_rpc_roiPhi=Monitored::Collection("coin_inner_rpc_roiPhi",tgcTrigRpcMap,[](const TgcTrigRpc&m){
 	  return m.roiPhi;
 	});
       tgcCoin_variables.push_back(coin_inner_rpc_roiPhi);
-      auto coin_inner_rpc_roiNum=Monitored::Collection("coin_inner_rpc_roiNum",tgcTrigRpcMap_matched,[](const TgcTrigRpc&m){
+      auto coin_inner_rpc_roiNum=Monitored::Collection("coin_inner_rpc_roiNum",tgcTrigRpcMap,[](const TgcTrigRpc&m){
 	  return m.roiNum;
 	});
       tgcCoin_variables.push_back(coin_inner_rpc_roiNum);
-      auto coin_inner_rpc_deltaBcid=Monitored::Collection("coin_inner_rpc_deltaBcid",tgcTrigRpcMap_matched,[](const TgcTrigRpc&m){
+      auto coin_inner_rpc_deltaBcid=Monitored::Collection("coin_inner_rpc_deltaBcid",tgcTrigRpcMap,[](const TgcTrigRpc&m){
 	  return m.deltaBcid;
 	});
       tgcCoin_variables.push_back(coin_inner_rpc_deltaBcid);
-      auto coin_inner_rpc_deltaTiming=Monitored::Collection("coin_inner_rpc_deltaTiming",tgcTrigRpcMap_matched,[](const TgcTrigRpc&m){
+      auto coin_inner_rpc_deltaTiming=Monitored::Collection("coin_inner_rpc_deltaTiming",tgcTrigRpcMap,[](const TgcTrigRpc&m){
 	  return m.deltaTiming;
 	});
       tgcCoin_variables.push_back(coin_inner_rpc_deltaTiming);
-      auto coin_inner_rpc_rpcEta=Monitored::Collection("coin_inner_rpc_rpcEta",tgcTrigRpcMap_matched,[](const TgcTrigRpc&m){
+      auto coin_inner_rpc_rpcEta=Monitored::Collection("coin_inner_rpc_rpcEta",tgcTrigRpcMap,[](const TgcTrigRpc&m){
 	  return m.rpcEta;
 	});
       tgcCoin_variables.push_back(coin_inner_rpc_rpcEta);
-      auto coin_inner_rpc_rpcPhi=Monitored::Collection("coin_inner_rpc_rpcPhi",tgcTrigRpcMap_matched,[](const TgcTrigRpc&m){
+      auto coin_inner_rpc_rpcPhi=Monitored::Collection("coin_inner_rpc_rpcPhi",tgcTrigRpcMap,[](const TgcTrigRpc&m){
 	  return m.rpcPhi;
 	});
       tgcCoin_variables.push_back(coin_inner_rpc_rpcPhi);
-      auto coin_inner_rpc_rpcDEta=Monitored::Collection("coin_inner_rpc_rpcDEta",tgcTrigRpcMap_matched,[](const TgcTrigRpc&m){
+      auto coin_inner_rpc_rpcDEta=Monitored::Collection("coin_inner_rpc_rpcDEta",tgcTrigRpcMap,[](const TgcTrigRpc&m){
 	  return m.rpcDEta;
 	});
       tgcCoin_variables.push_back(coin_inner_rpc_rpcDEta);
-      auto coin_inner_rpc_rpcDPhi=Monitored::Collection("coin_inner_rpc_rpcDPhi",tgcTrigRpcMap_matched,[](const TgcTrigRpc&m){
+      auto coin_inner_rpc_rpcDPhi=Monitored::Collection("coin_inner_rpc_rpcDPhi",tgcTrigRpcMap,[](const TgcTrigRpc&m){
 	  return m.rpcDPhi;
 	});
       tgcCoin_variables.push_back(coin_inner_rpc_rpcDPhi);
+      auto coin_inner_rpc_currBc=Monitored::Collection("coin_inner_rpc_currBc",tgcTrigRpcMap,[](const TgcTrigRpc&m){
+	  return m.currBc;
+	});
+      tgcCoin_variables.push_back(coin_inner_rpc_currBc);
+      auto coin_inner_rpc_goodBcid=Monitored::Collection("coin_inner_rpc_goodBcid",tgcTrigRpcMap,[](const TgcTrigRpc&m){
+	  return m.goodBcid;
+	});
+      tgcCoin_variables.push_back(coin_inner_rpc_goodBcid);
+      auto coin_inner_rpc_goodTiming=Monitored::Collection("coin_inner_rpc_goodTiming",tgcTrigRpcMap,[](const TgcTrigRpc&m){
+	  return m.goodTiming;
+	});
+      tgcCoin_variables.push_back(coin_inner_rpc_goodTiming);
 
       // NSW inner coincidence
-      auto coin_inner_nsw_slSector=Monitored::Collection("coin_inner_nsw_slSector",tgcTrigNswMap_matched,[](const TgcTrigNsw&m){
+      auto coin_inner_nsw_slSector=Monitored::Collection("coin_inner_nsw_slSector",tgcTrigNswMap,[](const TgcTrigNsw&m){
 	  return m.slSector;
 	});
       tgcCoin_variables.push_back(coin_inner_nsw_slSector);
-      auto coin_inner_nsw_roiEta=Monitored::Collection("coin_inner_nsw_roiEta",tgcTrigNswMap_matched,[](const TgcTrigNsw&m){
+      auto coin_inner_nsw_slSector_endcap=Monitored::Collection("coin_inner_nsw_slSector_endcap",tgcTrigNswMap,[](const TgcTrigNsw&m){
+	  return (std::abs(m.roiEta)>1.3 && m.isForward==0) ? m.slSector : -999;
+	});
+      tgcCoin_variables.push_back(coin_inner_nsw_slSector_endcap);
+      auto coin_inner_nsw_slSector_forward=Monitored::Collection("coin_inner_nsw_slSector_forward",tgcTrigNswMap,[](const TgcTrigNsw&m){
+	  return (m.isForward==1) ? m.slSector : -999;
+	});
+      tgcCoin_variables.push_back(coin_inner_nsw_slSector_forward);
+      auto coin_inner_nsw_roiEta=Monitored::Collection("coin_inner_nsw_roiEta",tgcTrigNswMap,[](const TgcTrigNsw&m){
 	  return m.roiEta;
 	});
       tgcCoin_variables.push_back(coin_inner_nsw_roiEta);
-      auto coin_inner_nsw_roiPhi=Monitored::Collection("coin_inner_nsw_roiPhi",tgcTrigNswMap_matched,[](const TgcTrigNsw&m){
+      auto coin_inner_nsw_roiPhi=Monitored::Collection("coin_inner_nsw_roiPhi",tgcTrigNswMap,[](const TgcTrigNsw&m){
 	  return m.roiPhi;
 	});
       tgcCoin_variables.push_back(coin_inner_nsw_roiPhi);
-      auto coin_inner_nsw_roiNum=Monitored::Collection("coin_inner_nsw_roiNum",tgcTrigNswMap_matched,[](const TgcTrigNsw&m){
+      auto coin_inner_nsw_roiNum=Monitored::Collection("coin_inner_nsw_roiNum",tgcTrigNswMap,[](const TgcTrigNsw&m){
 	  return m.roiNum;
 	});
       tgcCoin_variables.push_back(coin_inner_nsw_roiNum);
-      auto coin_inner_nsw_deltaBcid=Monitored::Collection("coin_inner_nsw_deltaBcid",tgcTrigNswMap_matched,[](const TgcTrigNsw&m){
+      auto coin_inner_nsw_deltaBcid=Monitored::Collection("coin_inner_nsw_deltaBcid",tgcTrigNswMap,[](const TgcTrigNsw&m){
 	  return m.deltaBcid;
 	});
       tgcCoin_variables.push_back(coin_inner_nsw_deltaBcid);
-      auto coin_inner_nsw_deltaTiming=Monitored::Collection("coin_inner_nsw_deltaTiming",tgcTrigNswMap_matched,[](const TgcTrigNsw&m){
+      auto coin_inner_nsw_deltaTiming=Monitored::Collection("coin_inner_nsw_deltaTiming",tgcTrigNswMap,[](const TgcTrigNsw&m){
 	  return m.deltaTiming;
 	});
       tgcCoin_variables.push_back(coin_inner_nsw_deltaTiming);
-      auto coin_inner_nsw_R=Monitored::Collection("coin_inner_nsw_R",tgcTrigNswMap_matched,[](const TgcTrigNsw&m){
+      auto coin_inner_nsw_R=Monitored::Collection("coin_inner_nsw_R",tgcTrigNswMap,[](const TgcTrigNsw&m){
 	  return m.R;
 	});
       tgcCoin_variables.push_back(coin_inner_nsw_R);
-      auto coin_inner_nsw_Phi=Monitored::Collection("coin_inner_nsw_Phi",tgcTrigNswMap_matched,[](const TgcTrigNsw&m){
+      auto coin_inner_nsw_Phi=Monitored::Collection("coin_inner_nsw_Phi",tgcTrigNswMap,[](const TgcTrigNsw&m){
 	  return m.Phi;
 	});
       tgcCoin_variables.push_back(coin_inner_nsw_Phi);
-      auto coin_inner_nsw_deltaTheta=Monitored::Collection("coin_inner_nsw_deltaTheta",tgcTrigNswMap_matched,[](const TgcTrigNsw&m){
+      auto coin_inner_nsw_deltaTheta=Monitored::Collection("coin_inner_nsw_deltaTheta",tgcTrigNswMap,[](const TgcTrigNsw&m){
 	  return m.deltaTheta;
 	});
       tgcCoin_variables.push_back(coin_inner_nsw_deltaTheta);
-      auto coin_inner_nsw_isForward=Monitored::Collection("coin_inner_nsw_isForward",tgcTrigNswMap_matched,[](const TgcTrigNsw&m){
-	  return m.isForward;
+      auto coin_inner_nsw_isForward=Monitored::Collection("coin_inner_nsw_isForward",tgcTrigNswMap,[](const TgcTrigNsw&m){
+	  return m.isForward==1;
 	});
       tgcCoin_variables.push_back(coin_inner_nsw_isForward);
-      auto coin_inner_nsw_isEndcap=Monitored::Collection("coin_inner_nsw_isEndcap",tgcTrigNswMap_matched,[](const TgcTrigNsw&m){
-	  return m.isEndcap;
+      auto coin_inner_nsw_isEndcap=Monitored::Collection("coin_inner_nsw_isEndcap",tgcTrigNswMap,[](const TgcTrigNsw&m){
+	  return m.isForward==0;
 	});
       tgcCoin_variables.push_back(coin_inner_nsw_isEndcap);
+      auto coin_inner_nsw_currBc=Monitored::Collection("coin_inner_nsw_currBc",tgcTrigNswMap,[](const TgcTrigNsw&m){
+	  return m.currBc;
+	});
+      tgcCoin_variables.push_back(coin_inner_nsw_currBc);
+      auto coin_inner_nsw_goodBcid=Monitored::Collection("coin_inner_nsw_goodBcid",tgcTrigNswMap,[](const TgcTrigNsw&m){
+	  return m.goodBcid;
+	});
+      tgcCoin_variables.push_back(coin_inner_nsw_goodBcid);
+      auto coin_inner_nsw_goodTiming=Monitored::Collection("coin_inner_nsw_goodTiming",tgcTrigNswMap,[](const TgcTrigNsw&m){
+	  return m.goodTiming;
+	});
+      tgcCoin_variables.push_back(coin_inner_nsw_goodTiming);
 
       // Tile inner coincidence
-      auto coin_inner_tile_slSector=Monitored::Collection("coin_inner_tile_slSector",tgcTrigTileMap_matched,[](const TgcTrigTile&m){
+      auto coin_inner_tile_slSector=Monitored::Collection("coin_inner_tile_slSector",tgcTrigTileMap,[](const TgcTrigTile&m){
 	  return m.slSector;
 	});
       tgcCoin_variables.push_back(coin_inner_tile_slSector);
-      auto coin_inner_tile_roiEta=Monitored::Collection("coin_inner_tile_roiEta",tgcTrigTileMap_matched,[](const TgcTrigTile&m){
+      auto coin_inner_tile_roiEta=Monitored::Collection("coin_inner_tile_roiEta",tgcTrigTileMap,[](const TgcTrigTile&m){
 	  return m.roiEta;
 	});
       tgcCoin_variables.push_back(coin_inner_tile_roiEta);
-      auto coin_inner_tile_roiPhi=Monitored::Collection("coin_inner_tile_roiPhi",tgcTrigTileMap_matched,[](const TgcTrigTile&m){
+      auto coin_inner_tile_roiPhi=Monitored::Collection("coin_inner_tile_roiPhi",tgcTrigTileMap,[](const TgcTrigTile&m){
 	  return m.roiPhi;
 	});
       tgcCoin_variables.push_back(coin_inner_tile_roiPhi);
-      auto coin_inner_tile_roiNum=Monitored::Collection("coin_inner_tile_roiNum",tgcTrigTileMap_matched,[](const TgcTrigTile&m){
+      auto coin_inner_tile_roiNum=Monitored::Collection("coin_inner_tile_roiNum",tgcTrigTileMap,[](const TgcTrigTile&m){
 	  return m.roiNum;
 	});
       tgcCoin_variables.push_back(coin_inner_tile_roiNum);
-      auto coin_inner_tile_deltaBcid=Monitored::Collection("coin_inner_tile_deltaBcid",tgcTrigTileMap_matched,[](const TgcTrigTile&m){
+      auto coin_inner_tile_deltaBcid=Monitored::Collection("coin_inner_tile_deltaBcid",tgcTrigTileMap,[](const TgcTrigTile&m){
 	  return m.deltaBcid;
 	});
       tgcCoin_variables.push_back(coin_inner_tile_deltaBcid);
-      auto coin_inner_tile_deltaTiming=Monitored::Collection("coin_inner_tile_deltaTiming",tgcTrigTileMap_matched,[](const TgcTrigTile&m){
+      auto coin_inner_tile_deltaTiming=Monitored::Collection("coin_inner_tile_deltaTiming",tgcTrigTileMap,[](const TgcTrigTile&m){
 	  return m.deltaTiming;
 	});
       tgcCoin_variables.push_back(coin_inner_tile_deltaTiming);
-      auto coin_inner_tile_tmdbDecisions=Monitored::Collection("coin_inner_tile_tmdbDecisions",tgcTrigTileMap_matched,[](const TgcTrigTile&m){
+      auto coin_inner_tile_tmdbDecisions=Monitored::Collection("coin_inner_tile_tmdbDecisions",tgcTrigTileMap,[](const TgcTrigTile&m){
 	  return m.tmdbDecisions;
 	});
       tgcCoin_variables.push_back(coin_inner_tile_tmdbDecisions);
+      auto coin_inner_tile_currBc=Monitored::Collection("coin_inner_tile_currBc",tgcTrigTileMap,[](const TgcTrigTile&m){
+	  return m.currBc;
+	});
+      tgcCoin_variables.push_back(coin_inner_tile_currBc);
+      auto coin_inner_tile_goodBcid=Monitored::Collection("coin_inner_tile_goodBcid",tgcTrigTileMap,[](const TgcTrigTile&m){
+	  return m.goodBcid;
+	});
+      tgcCoin_variables.push_back(coin_inner_tile_goodBcid);
+      auto coin_inner_tile_goodTiming=Monitored::Collection("coin_inner_tile_goodTiming",tgcTrigTileMap,[](const TgcTrigTile&m){
+	  return m.goodTiming;
+	});
+      tgcCoin_variables.push_back(coin_inner_tile_goodTiming);
       // Tile inner coincidence (modified decisions)
-      auto coin_inner_tile2_slSector=Monitored::Collection("coin_inner_tile2_slSector",tgcTrigTileMap_matched_allmods,[](const TgcTrigTile&m){
+      auto coin_inner_tile2_slSector=Monitored::Collection("coin_inner_tile2_slSector",tgcTrigTileMap_allmods,[](const TgcTrigTile&m){
 	  return m.slSector;
 	});
       tgcCoin_variables.push_back(coin_inner_tile2_slSector);
-      auto coin_inner_tile2_tmdbDecisions=Monitored::Collection("coin_inner_tile2_tmdbDecisions",tgcTrigTileMap_matched_allmods,[](const TgcTrigTile&m){
+      auto coin_inner_tile2_currBc=Monitored::Collection("coin_inner_tile2_currBc",tgcTrigTileMap_allmods,[](const TgcTrigTile&m){
+	  return m.currBc;
+	});
+      tgcCoin_variables.push_back(coin_inner_tile2_currBc);
+      auto coin_inner_tile2_tmdbDecisions=Monitored::Collection("coin_inner_tile2_tmdbDecisions",tgcTrigTileMap_allmods,[](const TgcTrigTile&m){
 	  return m.tmdbDecisions;
 	});
       tgcCoin_variables.push_back(coin_inner_tile2_tmdbDecisions);

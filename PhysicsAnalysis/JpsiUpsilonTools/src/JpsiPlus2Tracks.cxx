@@ -246,7 +246,6 @@ namespace Analysis {
             
             if (m_jpsiMassUpper>0.0 || m_jpsiMassLower > 0.0) {
                 xAOD::BPhysHelper jpsiCandidate(*vxcItr);
-                jpsiCandidate.setRefTrks();
                 double jpsiMass = jpsiCandidate.totalP(m_altMassMuonTracks).M();
                 bool pass = JpsiUpsilonCommon::cutRange(jpsiMass, m_jpsiMassLower, m_jpsiMassUpper);
                 if (!pass) continue;

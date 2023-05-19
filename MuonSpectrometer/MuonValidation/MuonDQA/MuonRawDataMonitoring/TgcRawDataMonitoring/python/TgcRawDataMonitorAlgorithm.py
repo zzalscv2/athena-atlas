@@ -173,11 +173,11 @@ def TgcRawDataMonitoringConfig(inputFlags):
         monTrigGroup.defineHistogram('l1item_roi_eta_'+monTrig+',l1item_roi_goodmf_'+monTrig+';L1Item_MuonRoI_Evt_EtaVsGoodMF_'+monTrig,title='L1Item_MuonRoI_Evt_EtaVsGoodMF_'+monTrig+';MuonRoI Eta;MuonRoI GoodMF Flag',
                                      path=trigThrPatternsPath,type='TH2F',xbins=100,xmin=-2.5,xmax=2.5,ybins=3,ymin=-1.5,ymax=1.5)
 
-        monTrigGroup.defineHistogram('l1item_roi_roiNumber_'+monTrig+',l1item_roi_sector_'+monTrig+';L1Item_MuonRoI_Evt_SectorVsRoINumber_Barrel_'+monTrig,title='L1Item_MuonRoI SectorVsRoINumber Barrel '+monTrig+';RoI Number;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+        monTrigGroup.defineHistogram('l1item_roi_roiNumber_'+monTrig+',l1item_roi_sector_'+monTrig+';L1Item_MuonRoI_Evt_SectorVsRoINumber_Barrel_'+monTrig,title='L1Item_MuonRoI SectorVsRoINumber Barrel '+monTrig+';RoI Number;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                                      type='TH2F',cutmask='l1item_roi_barrel_'+monTrig,path=trigThrPatternsPath,xbins=29,xmin=-0.5,xmax=28.5,ybins=65,ymin=-32.5,ymax=32.5)
-        monTrigGroup.defineHistogram('l1item_roi_roiNumber_'+monTrig+',l1item_roi_sector_'+monTrig+';L1Item_MuonRoI_Evt_SectorVsRoINumber_Endcap_'+monTrig,title='L1Item_MuonRoI SectorVsRoINumber Endcap '+monTrig+';RoI Number;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+        monTrigGroup.defineHistogram('l1item_roi_roiNumber_'+monTrig+',l1item_roi_sector_'+monTrig+';L1Item_MuonRoI_Evt_SectorVsRoINumber_Endcap_'+monTrig,title='L1Item_MuonRoI SectorVsRoINumber Endcap '+monTrig+';RoI Number;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                                      type='TH2F',cutmask='l1item_roi_endcap_'+monTrig,path=trigThrPatternsPath,xbins=149,xmin=-0.5,xmax=148.5,ybins=97,ymin=-48.5,ymax=48.5)
-        monTrigGroup.defineHistogram('l1item_roi_roiNumber_'+monTrig+',l1item_roi_sector_'+monTrig+';L1Item_MuonRoI_Evt_SectorVsRoINumber_Forward_'+monTrig,title='L1Item_MuonRoI SectorVsRoINumber Forward '+monTrig+';RoI Number;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+        monTrigGroup.defineHistogram('l1item_roi_roiNumber_'+monTrig+',l1item_roi_sector_'+monTrig+';L1Item_MuonRoI_Evt_SectorVsRoINumber_Forward_'+monTrig,title='L1Item_MuonRoI SectorVsRoINumber Forward '+monTrig+';RoI Number;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                                      type='TH2F',cutmask='l1item_roi_forward_'+monTrig,path=trigThrPatternsPath,xbins=65,xmin=-0.5,xmax=64.5,ybins=49,ymin=-24.5,ymax=24.5)
 
         monTrigGroup.defineHistogram('lumiBlock_l1item_'+monTrig+',l1item_roi_phi_barrel_'+monTrig+';L1Item_MuonRoI_Evt_PhiVsLB_Barrel_sideA_'+monTrig,title='L1Item_MuonRoI PhiVsLB Barrel sideA '+monTrig+';Luminosity block;MuonRoI Phi',type='TH2F',
@@ -349,37 +349,37 @@ def TgcRawDataMonitoringConfig(inputFlags):
     trigPath = 'Trig/'
 
     myGroup.defineHistogram('roi_sector,roi_timing;MuonRoI_Evt_SectorVsTiming_Barrel',type='TH2F',
-                            title='MuonRoI Sector vs Timing Barrel;MuonRoI Trigger Sector (>0 for A, <0 for C);Timing',cutmask='roi_barrel',path=trigPath,
+                            title='MuonRoI Sector vs Timing Barrel;MuonRoI Trigger Sector +1  (>0 for A, <0 for C);Timing',cutmask='roi_barrel',path=trigPath,
                             xbins=65,xmin=-32.5,xmax=32.5,ybins=5,ymin=-2.5,ymax=2.5,ylabels=['-2BC','-1BC','CurrBC','+1BC','+2BC'])
     myGroup.defineHistogram('roi_sector,roi_timing;MuonRoI_Evt_SectorVsTiming_Endcap',type='TH2F',
-                            title='MuonRoI Sector vs Timing Endcap;MuonRoI Trigger Sector (>0 for A, <0 for C);Timing',cutmask='roi_endcap',path=trigPath,
+                            title='MuonRoI Sector vs Timing Endcap;MuonRoI Trigger Sector +1  (>0 for A, <0 for C);Timing',cutmask='roi_endcap',path=trigPath,
                             xbins=97,xmin=-48.5,xmax=48.5,ybins=5,ymin=-2.5,ymax=2.5,ylabels=['-2BC','-1BC','CurrBC','+1BC','+2BC'])
     myGroup.defineHistogram('roi_sector,roi_timing;MuonRoI_Evt_SectorVsTiming_Forward',type='TH2F',
-                            title='MuonRoI Sector vs Timing Forward;MuonRoI Trigger Sector (>0 for A, <0 for C);Timing',cutmask='roi_forward',path=trigPath,
+                            title='MuonRoI Sector vs Timing Forward;MuonRoI Trigger Sector +1  (>0 for A, <0 for C);Timing',cutmask='roi_forward',path=trigPath,
                             xbins=49,xmin=-24.5,xmax=24.5,ybins=5,ymin=-2.5,ymax=2.5,ylabels=['-2BC','-1BC','CurrBC','+1BC','+2BC'])
 
-    myGroup.defineHistogram('roi_thr,roi_sector;MuonRoI_Evt_SectorVsThreshold_Barrel',title='MuonRoI SectorVsThreshold Barrel;Threshold;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+    myGroup.defineHistogram('roi_thr,roi_sector;MuonRoI_Evt_SectorVsThreshold_Barrel',title='MuonRoI SectorVsThreshold Barrel;Threshold;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                             type='TH2F',cutmask='roi_barrel',path=trigPath,xbins=7,xmin=-0.5,xmax=6.5,ybins=65,ymin=-32.5,ymax=32.5)
-    myGroup.defineHistogram('roi_thr,roi_sector;MuonRoI_Evt_SectorVsThreshold_Endcap',title='MuonRoI SectorVsThreshold Endcap;Threshold;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+    myGroup.defineHistogram('roi_thr,roi_sector;MuonRoI_Evt_SectorVsThreshold_Endcap',title='MuonRoI SectorVsThreshold Endcap;Threshold;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                             type='TH2F',cutmask='roi_endcap',path=trigPath,xbins=16,xmin=-0.5,xmax=15.5,ybins=97,ymin=-48.5,ymax=48.5)
-    myGroup.defineHistogram('roi_thr,roi_sector;MuonRoI_Evt_SectorVsThreshold_Forward',title='MuonRoI SectorVsThreshold Forward;Threshold;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+    myGroup.defineHistogram('roi_thr,roi_sector;MuonRoI_Evt_SectorVsThreshold_Forward',title='MuonRoI SectorVsThreshold Forward;Threshold;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                             type='TH2F',cutmask='roi_forward',path=trigPath,xbins=16,xmin=-0.5,xmax=15.5,ybins=49,ymin=-24.5,ymax=24.5)
 
-    myGroup.defineHistogram('roi_roiNumber,roi_sector;MuonRoI_Evt_SectorVsRoINumber_Barrel',title='MuonRoI SectorVsRoINumber Barrel;RoI Number;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+    myGroup.defineHistogram('roi_roiNumber,roi_sector;MuonRoI_Evt_SectorVsRoINumber_Barrel',title='MuonRoI SectorVsRoINumber Barrel;RoI Number;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                             type='TH2F',cutmask='roi_barrel',path=trigPath,xbins=29,xmin=-0.5,xmax=28.5,ybins=65,ymin=-32.5,ymax=32.5)
-    myGroup.defineHistogram('roi_roiNumber,roi_sector;MuonRoI_Evt_SectorVsRoINumber_Endcap',title='MuonRoI SectorVsRoINumber Endcap;RoI Number;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+    myGroup.defineHistogram('roi_roiNumber,roi_sector;MuonRoI_Evt_SectorVsRoINumber_Endcap',title='MuonRoI SectorVsRoINumber Endcap;RoI Number;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                             type='TH2F',cutmask='roi_endcap',path=trigPath,xbins=149,xmin=-0.5,xmax=148.5,ybins=97,ymin=-48.5,ymax=48.5)
-    myGroup.defineHistogram('roi_roiNumber,roi_sector;MuonRoI_Evt_SectorVsRoINumber_Forward',title='MuonRoI SectorVsRoINumber Forward;RoI Number;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+    myGroup.defineHistogram('roi_roiNumber,roi_sector;MuonRoI_Evt_SectorVsRoINumber_Forward',title='MuonRoI SectorVsRoINumber Forward;RoI Number;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                             type='TH2F',cutmask='roi_forward',path=trigPath,xbins=65,xmin=-0.5,xmax=64.5,ybins=49,ymin=-24.5,ymax=24.5)
 
-    myGroup.defineHistogram('roi_roiNumber,roi_sector_wBW3Coin;MuonRoI_Evt_SectorVsRoINumber_wBW3Coin_Endcap',title='MuonRoI SectorVsRoINumber wBW3Coin Endcap;RoI Number;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+    myGroup.defineHistogram('roi_roiNumber,roi_sector_wBW3Coin;MuonRoI_Evt_SectorVsRoINumber_wBW3Coin_Endcap',title='MuonRoI SectorVsRoINumber wBW3Coin Endcap;RoI Number;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                             type='TH2F',cutmask='roi_endcap',path=trigPath,xbins=149,xmin=-0.5,xmax=148.5,ybins=97,ymin=-48.5,ymax=48.5)
-    myGroup.defineHistogram('roi_roiNumber,roi_sector_wBW3Coin;MuonRoI_Evt_SectorVsRoINumber_wBW3Coin_Forward',title='MuonRoI SectorVsRoINumber wBW3Coin Forward;RoI Number;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+    myGroup.defineHistogram('roi_roiNumber,roi_sector_wBW3Coin;MuonRoI_Evt_SectorVsRoINumber_wBW3Coin_Forward',title='MuonRoI SectorVsRoINumber wBW3Coin Forward;RoI Number;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                             type='TH2F',cutmask='roi_forward',path=trigPath,xbins=65,xmin=-0.5,xmax=64.5,ybins=49,ymin=-24.5,ymax=24.5)
 
-    myGroup.defineHistogram('roi_roiNumber,roi_sector_wInnerCoin;MuonRoI_Evt_SectorVsRoINumber_wInnerCoin_Endcap',title='MuonRoI SectorVsRoINumber wInnerCoin Endcap;RoI Number;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+    myGroup.defineHistogram('roi_roiNumber,roi_sector_wInnerCoin;MuonRoI_Evt_SectorVsRoINumber_wInnerCoin_Endcap',title='MuonRoI SectorVsRoINumber wInnerCoin Endcap;RoI Number;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                             type='TH2F',cutmask='roi_endcap',path=trigPath,xbins=149,xmin=-0.5,xmax=148.5,ybins=97,ymin=-48.5,ymax=48.5)
-    myGroup.defineHistogram('roi_roiNumber,roi_sector_wInnerCoin;MuonRoI_Evt_SectorVsRoINumber_wInnerCoin_Forward',title='MuonRoI SectorVsRoINumber wInnerCoin Forward;RoI Number;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+    myGroup.defineHistogram('roi_roiNumber,roi_sector_wInnerCoin;MuonRoI_Evt_SectorVsRoINumber_wInnerCoin_Forward',title='MuonRoI SectorVsRoINumber wInnerCoin Forward;RoI Number;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                             type='TH2F',cutmask='roi_forward',path=trigPath,xbins=65,xmin=-0.5,xmax=64.5,ybins=49,ymin=-24.5,ymax=24.5)
 
     myGroup.defineHistogram('roi_charge;MuonRoI_Evt_Charge',title='MuonRoI Charge;Charge;Number of events',
@@ -409,9 +409,9 @@ def TgcRawDataMonitoringConfig(inputFlags):
                             type='TEfficiency',path=trigPath,xbins=48,xmin=-math.pi,xmax=math.pi)
     myGroup.defineHistogram('roi_innercoin,roi_eta_tgc,roi_phi_tgc;MuonRoI_Eff_EtaVsPhi_wInnerCoin_ThrAll',title='MuonRoI Eff Eta vs Phi wInnerCoin ThrAll;MuonRoI Eta;Efficiency',
                             type='TEfficiency',path=trigPath,xbins=100,xmin=-2.5,xmax=2.5,ybins=48,ymin=-math.pi,ymax=math.pi)
-    myGroup.defineHistogram('roi_innercoin,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wInnerCoin_Endcap_ThrAll',title='MuonRoI Eff SectorVsRoINumber wInnerCoin Endcap ThrAll;RoI Number;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+    myGroup.defineHistogram('roi_innercoin,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wInnerCoin_Endcap_ThrAll',title='MuonRoI Eff SectorVsRoINumber wInnerCoin Endcap ThrAll;RoI Number;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                             type='TEfficiency',cutmask='roi_endcap',path=trigPath,xbins=149,xmin=-0.5,xmax=148.5,ybins=97,ymin=-48.5,ymax=48.5)
-    myGroup.defineHistogram('roi_innercoin,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wInnerCoin_Forward_ThrAll',title='MuonRoI Eff SectorVsRoINumber wInnerCoin Forward ThrAll;RoI Number;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+    myGroup.defineHistogram('roi_innercoin,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wInnerCoin_Forward_ThrAll',title='MuonRoI Eff SectorVsRoINumber wInnerCoin Forward ThrAll;RoI Number;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                             type='TEfficiency',cutmask='roi_forward',path=trigPath,xbins=65,xmin=-0.5,xmax=64.5,ybins=49,ymin=-24.5,ymax=24.5)
 
     myGroup.defineHistogram('roi_innveto,roi_eta_tgc;MuonRoI_Eff_Eta_wInnerCoinVeto_ThrAll',title='MuonRoI Eff Eta wInnerCoinVeto ThrAll;MuonRoI Eta;Efficiency',
@@ -420,9 +420,9 @@ def TgcRawDataMonitoringConfig(inputFlags):
                             type='TEfficiency',path=trigPath,xbins=48,xmin=-math.pi,xmax=math.pi)
     myGroup.defineHistogram('roi_innveto,roi_eta_tgc,roi_phi_tgc;MuonRoI_Eff_EtaVsPhi_wInnerCoinVeto_ThrAll',title='MuonRoI Eff Eta vs Phi wInnerCoinVeto ThrAll;MuonRoI Eta;Efficiency',
                             type='TEfficiency',path=trigPath,xbins=100,xmin=-2.5,xmax=2.5,ybins=48,ymin=-math.pi,ymax=math.pi)
-    myGroup.defineHistogram('roi_innveto,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wInnerCoinVeto_Endcap_ThrAll',title='MuonRoI Eff SectorVsRoINumber wInnerCoinVeto Endcap ThrAll;RoI Number;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+    myGroup.defineHistogram('roi_innveto,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wInnerCoinVeto_Endcap_ThrAll',title='MuonRoI Eff SectorVsRoINumber wInnerCoinVeto Endcap ThrAll;RoI Number;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                             type='TEfficiency',cutmask='roi_endcap',path=trigPath,xbins=149,xmin=-0.5,xmax=148.5,ybins=97,ymin=-48.5,ymax=48.5)
-    myGroup.defineHistogram('roi_innveto,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wInnerCoinVeto_Forward_ThrAll',title='MuonRoI Eff SectorVsRoINumber wInnerCoinVeto Forward ThrAll;RoI Number;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+    myGroup.defineHistogram('roi_innveto,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wInnerCoinVeto_Forward_ThrAll',title='MuonRoI Eff SectorVsRoINumber wInnerCoinVeto Forward ThrAll;RoI Number;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                             type='TEfficiency',cutmask='roi_forward',path=trigPath,xbins=65,xmin=-0.5,xmax=64.5,ybins=49,ymin=-24.5,ymax=24.5)
 
     myGroup.defineHistogram('roi_bw3coin,roi_eta_tgc;MuonRoI_Eff_Eta_wBW3Coin_ThrAll',title='MuonRoI Eff Eta wBW3Coin ThrAll;MuonRoI Eta;Efficiency',
@@ -431,9 +431,9 @@ def TgcRawDataMonitoringConfig(inputFlags):
                             type='TEfficiency',path=trigPath,xbins=48,xmin=-math.pi,xmax=math.pi)
     myGroup.defineHistogram('roi_bw3coin,roi_eta_tgc,roi_phi_tgc;MuonRoI_Eff_EtaVsPhi_wBW3Coin_ThrAll',title='MuonRoI Eff Eta vs Phi wBW3Coin ThrAll;MuonRoI Eta;Efficiency',
                             type='TEfficiency',path=trigPath,xbins=100,xmin=-2.5,xmax=2.5,ybins=48,ymin=-math.pi,ymax=math.pi)
-    myGroup.defineHistogram('roi_bw3coin,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wBW3Coin_Endcap_ThrAll',title='MuonRoI Eff SectorVsRoINumber wBW3Coin Endcap ThrAll;RoI Number;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+    myGroup.defineHistogram('roi_bw3coin,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wBW3Coin_Endcap_ThrAll',title='MuonRoI Eff SectorVsRoINumber wBW3Coin Endcap ThrAll;RoI Number;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                             type='TEfficiency',cutmask='roi_endcap',path=trigPath,xbins=149,xmin=-0.5,xmax=148.5,ybins=97,ymin=-48.5,ymax=48.5)
-    myGroup.defineHistogram('roi_bw3coin,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wBW3Coin_Forward_ThrAll',title='MuonRoI Eff SectorVsRoINumber wBW3Coin Forward ThrAll;RoI Number;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+    myGroup.defineHistogram('roi_bw3coin,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wBW3Coin_Forward_ThrAll',title='MuonRoI Eff SectorVsRoINumber wBW3Coin Forward ThrAll;RoI Number;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                             type='TEfficiency',cutmask='roi_forward',path=trigPath,xbins=65,xmin=-0.5,xmax=64.5,ybins=49,ymin=-24.5,ymax=24.5)
 
     myGroup.defineHistogram('roi_bw3coinveto,roi_eta_tgc;MuonRoI_Eff_Eta_wBW3CoinVeto_ThrAll',title='MuonRoI Eff Eta wBW3CoinVeto ThrAll;MuonRoI Eta;Efficiency',
@@ -442,9 +442,9 @@ def TgcRawDataMonitoringConfig(inputFlags):
                             type='TEfficiency',path=trigPath,xbins=48,xmin=-math.pi,xmax=math.pi)
     myGroup.defineHistogram('roi_bw3coinveto,roi_eta_tgc,roi_phi_tgc;MuonRoI_Eff_EtaVsPhi_wBW3CoinVeto_ThrAll',title='MuonRoI Eff Eta vs Phi wBW3CoinVeto ThrAll;MuonRoI Eta;Efficiency',
                             type='TEfficiency',path=trigPath,xbins=100,xmin=-2.5,xmax=2.5,ybins=48,ymin=-math.pi,ymax=math.pi)
-    myGroup.defineHistogram('roi_bw3coinveto,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wBW3CoinVeto_Endcap_ThrAll',title='MuonRoI Eff SectorVsRoINumber wBW3CoinVeto Endcap ThrAll;RoI Number;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+    myGroup.defineHistogram('roi_bw3coinveto,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wBW3CoinVeto_Endcap_ThrAll',title='MuonRoI Eff SectorVsRoINumber wBW3CoinVeto Endcap ThrAll;RoI Number;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                             type='TEfficiency',cutmask='roi_endcap',path=trigPath,xbins=149,xmin=-0.5,xmax=148.5,ybins=97,ymin=-48.5,ymax=48.5)
-    myGroup.defineHistogram('roi_bw3coinveto,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wBW3CoinVeto_Forward_ThrAll',title='MuonRoI Eff SectorVsRoINumber wBW3CoinVeto Forward ThrAll;RoI Number;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+    myGroup.defineHistogram('roi_bw3coinveto,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wBW3CoinVeto_Forward_ThrAll',title='MuonRoI Eff SectorVsRoINumber wBW3CoinVeto Forward ThrAll;RoI Number;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                             type='TEfficiency',cutmask='roi_forward',path=trigPath,xbins=65,xmin=-0.5,xmax=64.5,ybins=49,ymin=-24.5,ymax=24.5)
 
     myGroup.defineHistogram('roi_goodmf,roi_eta_tgc;MuonRoI_Eff_Eta_wGoodMF_ThrAll',title='MuonRoI Eff Eta wGoodMF ThrAll;MuonRoI Eta;Efficiency',
@@ -453,9 +453,9 @@ def TgcRawDataMonitoringConfig(inputFlags):
                             type='TEfficiency',path=trigPath,xbins=48,xmin=-math.pi,xmax=math.pi)
     myGroup.defineHistogram('roi_goodmf,roi_eta_tgc,roi_phi_tgc;MuonRoI_Eff_EtaVsPhi_wGoodMF_ThrAll',title='MuonRoI Eff Eta vs Phi wGoodMF ThrAll;MuonRoI Eta;Efficiency',
                             type='TEfficiency',path=trigPath,xbins=100,xmin=-2.5,xmax=2.5,ybins=48,ymin=-math.pi,ymax=math.pi)
-    myGroup.defineHistogram('roi_goodmf,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wGoodMF_Endcap_ThrAll',title='MuonRoI Eff SectorVsRoINumber wGoodMF Endcap ThrAll;RoI Number;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+    myGroup.defineHistogram('roi_goodmf,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wGoodMF_Endcap_ThrAll',title='MuonRoI Eff SectorVsRoINumber wGoodMF Endcap ThrAll;RoI Number;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                             type='TEfficiency',cutmask='roi_endcap',path=trigPath,xbins=149,xmin=-0.5,xmax=148.5,ybins=97,ymin=-48.5,ymax=48.5)
-    myGroup.defineHistogram('roi_goodmf,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wGoodMF_Forward_ThrAll',title='MuonRoI Eff SectorVsRoINumber wGoodMF Forward ThrAll;RoI Number;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+    myGroup.defineHistogram('roi_goodmf,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wGoodMF_Forward_ThrAll',title='MuonRoI Eff SectorVsRoINumber wGoodMF Forward ThrAll;RoI Number;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                             type='TEfficiency',cutmask='roi_forward',path=trigPath,xbins=65,xmin=-0.5,xmax=64.5,ybins=49,ymin=-24.5,ymax=24.5)
 
     myGroup.defineHistogram('roi_badmf,roi_eta_tgc;MuonRoI_Eff_Eta_wBadMF_ThrAll',title='MuonRoI Eff Eta wBadMF ThrAll;MuonRoI Eta;Efficiency',
@@ -464,9 +464,9 @@ def TgcRawDataMonitoringConfig(inputFlags):
                             type='TEfficiency',path=trigPath,xbins=48,xmin=-math.pi,xmax=math.pi)
     myGroup.defineHistogram('roi_badmf,roi_eta_tgc,roi_phi_tgc;MuonRoI_Eff_EtaVsPhi_wBadMF_ThrAll',title='MuonRoI Eff Eta vs Phi wBadMF ThrAll;MuonRoI Eta;Efficiency',
                             type='TEfficiency',path=trigPath,xbins=100,xmin=-2.5,xmax=2.5,ybins=48,ymin=-math.pi,ymax=math.pi)
-    myGroup.defineHistogram('roi_badmf,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wBadMF_Endcap_ThrAll',title='MuonRoI Eff SectorVsRoINumber wBadMF Endcap ThrAll;RoI Number;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+    myGroup.defineHistogram('roi_badmf,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wBadMF_Endcap_ThrAll',title='MuonRoI Eff SectorVsRoINumber wBadMF Endcap ThrAll;RoI Number;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                             type='TEfficiency',cutmask='roi_endcap',path=trigPath,xbins=149,xmin=-0.5,xmax=148.5,ybins=97,ymin=-48.5,ymax=48.5)
-    myGroup.defineHistogram('roi_badmf,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wBadMF_Forward_ThrAll',title='MuonRoI Eff SectorVsRoINumber wBadMF Forward ThrAll;RoI Number;MuonRoI Trigger Sector (>0 for A, <0 for C)',
+    myGroup.defineHistogram('roi_badmf,roi_roiNumber,roi_sector;MuonRoI_Eff_SectorVsRoINumber_wBadMF_Forward_ThrAll',title='MuonRoI Eff SectorVsRoINumber wBadMF Forward ThrAll;RoI Number;MuonRoI Trigger Sector +1  (>0 for A, <0 for C)',
                             type='TEfficiency',cutmask='roi_forward',path=trigPath,xbins=65,xmin=-0.5,xmax=64.5,ybins=49,ymin=-24.5,ymax=24.5)
 
     #########################
@@ -1085,34 +1085,130 @@ def TgcRawDataMonitoringConfig(inputFlags):
                             path=coinPath,xbins=101,xmin=-0.5,xmax=100.5)
 
     #Rpc inner coincidence
-    myGroupCoin.defineHistogram('coin_inner_rpc_slSector,coin_inner_rpc_deltaBcid;InnerCoin_Rpc_DeltaBcid',title='InnerCoin_Rpc_DeltaBcid;SL Trigger Sector (>0 for A, <0 for C);Delta Bcid',
-                                path=coinPath,type='TH2F',xbins=97,xmin=-48.5,xmax=48.5,ybins=41,ymin=-20.5,ymax=20.5)
-    myGroupCoin.defineHistogram('coin_inner_rpc_slSector,coin_inner_rpc_deltaTiming;InnerCoin_Rpc_DeltaTiming',title='InnerCoin_Rpc_DeltaTiming;SL Trigger Sector (>0 for A, <0 for C);Delta Signal Timing',
+    myGroupCoin.defineHistogram('coin_inner_rpc_slSector,coin_inner_rpc_deltaBcid;InnerCoin_Evt_Rpc_SectorVsDeltaBcid',title='InnerCoin_Evt_Rpc_SectorVsDeltaBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Delta Bcid (RPC - ATLAS)',
                                 path=coinPath,type='TH2F',xbins=97,xmin=-48.5,xmax=48.5,ybins=11,ymin=-5.5,ymax=5.5)
+    myGroupCoin.defineHistogram('coin_inner_rpc_slSector,coin_inner_rpc_deltaTiming;InnerCoin_Evt_Rpc_SectorVsDeltaTiming',title='InnerCoin_Evt_Rpc_SectorVsDeltaTiming;SL Trigger Sector +1  (>0 for A, <0 for C);Delta Signal Timing',
+                                path=coinPath,type='TH2F',xbins=97,xmin=-48.5,xmax=48.5,ybins=11,ymin=-5.5,ymax=5.5)
+
+    myGroupCoin.defineHistogram('coin_inner_rpc_slSector,coin_inner_rpc_deltaBcid;InnerCoin_Evt_Rpc_SectorVsDeltaBcid_BcCurr',title='InnerCoin_Evt_Rpc_SectorVsDeltaBcid_BcCurr;SL Trigger Sector +1  (>0 for A, <0 for C);Delta Bcid (RPC - ATLAS)',
+                                path=coinPath,type='TH2F',cutmask='coin_inner_rpc_currBc',xbins=97,xmin=-48.5,xmax=48.5,ybins=11,ymin=-5.5,ymax=5.5)
+    myGroupCoin.defineHistogram('coin_inner_rpc_slSector,coin_inner_rpc_deltaTiming;InnerCoin_Evt_Rpc_SectorVsDeltaTiming_goodBcid',title='InnerCoin_Evt_Rpc_SectorVsDeltaTiming_goodBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Delta Signal Timing',
+                                path=coinPath,type='TH2F',cutmask='coin_inner_rpc_goodBcid',xbins=97,xmin=-48.5,xmax=48.5,ybins=11,ymin=-5.5,ymax=5.5)
+
+    myGroupCoin.defineHistogram('coin_inner_tgc_prevBcRpc,coin_inner_tgc_sector;InnerCoin_Eff_Rpc_Eff_BcPrev',title='InnerCoin_Eff_Rpc_Eff_BcPrev;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etaupto1p3',xbins=97,xmin=-48.5,xmax=48.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_currBcRpc,coin_inner_tgc_sector;InnerCoin_Eff_Rpc_BcCurr',title='InnerCoin_Eff_Rpc_BcCurr;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etaupto1p3',xbins=97,xmin=-48.5,xmax=48.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_nextBcRpc,coin_inner_tgc_sector;InnerCoin_Eff_Rpc_BcNext',title='InnerCoin_Eff_Rpc_BcNext;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etaupto1p3',xbins=97,xmin=-48.5,xmax=48.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_nextnextBcRpc,coin_inner_tgc_sector;InnerCoin_Eff_Rpc_BcNextNext',title='InnerCoin_Eff_Rpc_BcNextNext;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etaupto1p3',xbins=97,xmin=-48.5,xmax=48.5)
+
+    myGroupCoin.defineHistogram('coin_inner_tgc_prevBcRpc_goodBcid,coin_inner_tgc_sector;InnerCoin_Eff_Rpc_BcPrev_goodBcid',title='InnerCoin_Eff_Rpc_BcPrev_goodBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etaupto1p3',xbins=97,xmin=-48.5,xmax=48.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_currBcRpc_goodBcid,coin_inner_tgc_sector;InnerCoin_Eff_Rpc_BcCurr_goodBcid',title='InnerCoin_Eff_Rpc_BcCurr_goodBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etaupto1p3',xbins=97,xmin=-48.5,xmax=48.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_nextBcRpc_goodBcid,coin_inner_tgc_sector;InnerCoin_Eff_Rpc_BcNext_goodBcid',title='InnerCoin_Eff_Rpc_BcNext_goodBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etaupto1p3',xbins=97,xmin=-48.5,xmax=48.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_nextnextBcRpc_goodBcid,coin_inner_tgc_sector;InnerCoin_Eff_Rpc_BcNextNext_goodBcid',title='InnerCoin_Eff_Rpc_BcNextNext_goodBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etaupto1p3',xbins=97,xmin=-48.5,xmax=48.5)
 
     #Tile inner coincidence
-    myGroupCoin.defineHistogram('coin_inner_tile_slSector,coin_inner_tile_deltaBcid;InnerCoin_Tile_DeltaBcid',title='InnerCoin_Tile_DeltaBcid;SL Trigger Sector (>0 for A, <0 for C);Delta Bcid',
-                                path=coinPath,type='TH2F',xbins=97,xmin=-48.5,xmax=48.5,ybins=41,ymin=-20.5,ymax=20.5)
-    myGroupCoin.defineHistogram('coin_inner_tile_slSector,coin_inner_tile_deltaTiming;InnerCoin_Tile_DeltaTiming',title='InnerCoin_Tile_DeltaTiming;SL Trigger Sector (>0 for A, <0 for C);Delta Signal Timing',
+    myGroupCoin.defineHistogram('coin_inner_tile_slSector,coin_inner_tile_deltaBcid;InnerCoin_Evt_Tile_SectorVsDeltaBcid',title='InnerCoin_Evt_Tile_SectorVsDeltaBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Delta Bcid (Tile - ATLAS)',
                                 path=coinPath,type='TH2F',xbins=97,xmin=-48.5,xmax=48.5,ybins=11,ymin=-5.5,ymax=5.5)
-    myGroupCoin.defineHistogram('coin_inner_tile2_slSector,coin_inner_tile2_tmdbDecisions;InnerCoin_Tile_tmdbDecisions',title='InnerCoin_Tile_tmdbDecisions;SL Trigger Sector (>0 for A, <0 for C);TMDB Module Decisions',
+    myGroupCoin.defineHistogram('coin_inner_tile_slSector,coin_inner_tile_deltaTiming;InnerCoin_Evt_Tile_SectorVsDeltaTiming',title='InnerCoin_Evt_Tile_SectorVsDeltaTiming;SL Trigger Sector +1  (>0 for A, <0 for C);Delta Signal Timing',
+                                path=coinPath,type='TH2F',xbins=97,xmin=-48.5,xmax=48.5,ybins=11,ymin=-5.5,ymax=5.5)
+    myGroupCoin.defineHistogram('coin_inner_tile2_slSector,coin_inner_tile2_tmdbDecisions;InnerCoin_Evt_Tile_SectorVsTmdbDecisions',title='InnerCoin_Evt_Tile_SectorVsTmdbDecisions;SL Trigger Sector +1  (>0 for A, <0 for C);TMDB Module Decisions',
                                 path=coinPath,type='TH2F',xbins=97,xmin=-48.5,xmax=48.5,ybins=3,ymin=0.5,ymax=3.5,ylabels=['D5 only','D6 only','D5+D6'])
 
+    myGroupCoin.defineHistogram('coin_inner_tile_slSector,coin_inner_tile_deltaBcid;InnerCoin_Evt_Tile_SectorVsDeltaBcid_BcCurr',title='InnerCoin_Evt_Tile_SectorVsDeltaBcid_BcCurr;SL Trigger Sector +1  (>0 for A, <0 for C);Delta Bcid (Tile - ATLAS)',
+                                path=coinPath,type='TH2F',cutmask='coin_inner_tile_currBc',xbins=97,xmin=-48.5,xmax=48.5,ybins=11,ymin=-5.5,ymax=5.5)
+    myGroupCoin.defineHistogram('coin_inner_tile_slSector,coin_inner_tile_deltaTiming;InnerCoin_Evt_Tile_SectorVsDeltaTiming_goodBcid',title='InnerCoin_Evt_Tile_SectorVsDeltaTiming_goodBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Delta Signal Timing',
+                                path=coinPath,type='TH2F',cutmask='coin_inner_tile_goodBcid',xbins=97,xmin=-48.5,xmax=48.5,ybins=11,ymin=-5.5,ymax=5.5)
+    myGroupCoin.defineHistogram('coin_inner_tile2_slSector,coin_inner_tile2_tmdbDecisions;InnerCoin_Evt_Tile_SectorVsTmdbDecisions_BcCurr',title='InnerCoin_Evt_Tile_SectorVsTmdbDecisions_BcCurr;SL Trigger Sector +1  (>0 for A, <0 for C);TMDB Module Decisions',
+                                path=coinPath,type='TH2F',cutmask='coin_inner_tile2_currBc',xbins=97,xmin=-48.5,xmax=48.5,ybins=3,ymin=0.5,ymax=3.5,ylabels=['D5 only','D6 only','D5+D6'])
+
+
+    myGroupCoin.defineHistogram('coin_inner_tgc_prevBcTile,coin_inner_tgc_sector;InnerCoin_Eff_Tile_BcPrev',title='InnerCoin_Eff_Tile_BcPrev;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etaupto1p3',xbins=97,xmin=-48.5,xmax=48.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_currBcTile,coin_inner_tgc_sector;InnerCoin_Eff_Tile_BcCurr',title='InnerCoin_Eff_Tile_BcCurr;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etaupto1p3',xbins=97,xmin=-48.5,xmax=48.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_nextBcTile,coin_inner_tgc_sector;InnerCoin_Eff_Tile_BcNext',title='InnerCoin_Eff_Tile_BcNext;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etaupto1p3',xbins=97,xmin=-48.5,xmax=48.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_nextnextBcTile,coin_inner_tgc_sector;InnerCoin_Eff_Tile_BcNextNext',title='InnerCoin_Eff_Tile_BcNextNext;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etaupto1p3',xbins=97,xmin=-48.5,xmax=48.5)
+
+    myGroupCoin.defineHistogram('coin_inner_tgc_prevBcTile_goodBcid,coin_inner_tgc_sector;InnerCoin_Eff_Tile_BcPrev_goodBcid',title='InnerCoin_Eff_Tile_BcPrev_goodBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etaupto1p3',xbins=97,xmin=-48.5,xmax=48.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_currBcTile_goodBcid,coin_inner_tgc_sector;InnerCoin_Eff_Tile_BcCurr_goodBcid',title='InnerCoin_Eff_Tile_BcCurr_goodBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etaupto1p3',xbins=97,xmin=-48.5,xmax=48.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_nextBcTile_goodBcid,coin_inner_tgc_sector;InnerCoin_Eff_Tile_BcNext_goodBcid',title='InnerCoin_Eff_Tile_BcNext_goodBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etaupto1p3',xbins=97,xmin=-48.5,xmax=48.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_nextnextBcTile_goodBcid,coin_inner_tgc_sector;InnerCoin_Eff_Tile_BcNextNext_goodBcid',title='InnerCoin_Eff_Tile_BcNextNext_goodBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etaupto1p3',xbins=97,xmin=-48.5,xmax=48.5)
+
+
     #Nsw inner coincidence
-    myGroupCoin.defineHistogram('coin_inner_nsw_slSector,coin_inner_nsw_deltaBcid;InnerCoin_Nsw_DeltaBcid_Endcap',title='InnerCoin_Nsw_DeltaBcid_Endcap;SL Trigger Sector (>0 for A, <0 for C);Delta Bcid',
-                                path=coinPath,type='TH2F',cutmask='coin_inner_nsw_isEndcap',xbins=97,xmin=-48.5,xmax=48.5,ybins=41,ymin=-20.5,ymax=20.5)
-    myGroupCoin.defineHistogram('coin_inner_nsw_slSector,coin_inner_nsw_deltaTiming;InnerCoin_Nsw_DeltaTiming_Endcap',title='InnerCoin_Nsw_DeltaTiming_Endcap;SL Trigger Sector (>0 for A, <0 for C);Delta Signal Timing',
-                                path=coinPath,type='TH2F',cutmask='coin_inner_nsw_isEndcap',xbins=97,xmin=-48.5,xmax=48.5,ybins=11,ymin=-5.5,ymax=5.5)
-
-    myGroupCoin.defineHistogram('coin_inner_nsw_slSector,coin_inner_nsw_deltaBcid;InnerCoin_Nsw_DeltaBcid_Forward',title='InnerCoin_Nsw_DeltaBcid_Forward;SL Trigger Sector (>0 for A, <0 for C);Delta Bcid',
-                                path=coinPath,type='TH2F',cutmask='coin_inner_nsw_isForward',xbins=49,xmin=-24.5,xmax=24.5,ybins=41,ymin=-20.5,ymax=20.5)
-    myGroupCoin.defineHistogram('coin_inner_nsw_slSector,coin_inner_nsw_deltaTiming;InnerCoin_Nsw_DeltaTiming_Forward',title='InnerCoin_Nsw_DeltaTiming_Forward;SL Trigger Sector (>0 for A, <0 for C);Delta Signal Timing',
-                                path=coinPath,type='TH2F',cutmask='coin_inner_nsw_isForward',xbins=49,xmin=-24.5,xmax=24.5,ybins=11,ymin=-5.5,ymax=5.5)
-
-    myGroupCoin.defineHistogram('coin_inner_nsw_roiEta,coin_inner_nsw_R;InnerCoin_Nsw_R',title='InnerCoin_Nsw_R;SL RoI Eta;NSW R',
+    myGroupCoin.defineHistogram('coin_inner_nsw_roiEta,coin_inner_nsw_R;InnerCoin_Evt_Nsw_RoiEtaVsR',title='InnerCoin_Evt_Nsw_RoiEtaVsR;SL RoI Eta;NSW R',
                                 path=coinPath,type='TH2F',xbins=100,xmin=-2.5,xmax=2.5,ybins=251,ymin=-0.5,ymax=250.5)
-    myGroupCoin.defineHistogram('coin_inner_nsw_roiPhi,coin_inner_nsw_Phi;InnerCoin_Nsw_Phi',title='InnerCoin_Nsw_Phi;SL RoI Phi;NSW Phi',
+    myGroupCoin.defineHistogram('coin_inner_nsw_roiPhi,coin_inner_nsw_Phi;InnerCoin_Evt_Nsw_RoiPhiVsPhi',title='InnerCoin_Evt_Nsw_RoiPhiVsPhi;SL RoI Phi;NSW Phi',
                                 path=coinPath,type='TH2F',xbins=48*10,xmin=-math.pi,xmax=math.pi,ybins=61,ymin=-0.5,ymax=60.5)
+
+    myGroupCoin.defineHistogram('coin_inner_nsw_slSector_endcap,coin_inner_nsw_deltaBcid;InnerCoin_Evt_Nsw_Endcap_SectorVsDeltaBcid',title='InnerCoin_Evt_Nsw_Endcap_SectorVsDeltaBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Delta Bcid (NSW - ATLAS)',
+                                path=coinPath,type='TH2F',xbins=97,xmin=-48.5,xmax=48.5,ybins=11,ymin=-5.5,ymax=5.5)
+    myGroupCoin.defineHistogram('coin_inner_nsw_slSector_endcap,coin_inner_nsw_deltaTiming;InnerCoin_Evt_Nsw_Endcap_SectorVsDeltaTiming',title='InnerCoin_Evt_Nsw_Endcap_SectorVsDeltaTiming;SL Trigger Sector +1  (>0 for A, <0 for C);Delta Signal Timing',
+                                path=coinPath,type='TH2F',xbins=97,xmin=-48.5,xmax=48.5,ybins=11,ymin=-5.5,ymax=5.5)
+
+    myGroupCoin.defineHistogram('coin_inner_nsw_slSector_endcap,coin_inner_nsw_deltaBcid;InnerCoin_Evt_Nsw_Endcap_SectorVsDeltaBcid_BcCurr',title='InnerCoin_Evt_Nsw_Endcap_SectorVsDeltaBcid_BcCurr;SL Trigger Sector +1  (>0 for A, <0 for C);Delta Bcid (NSW - ATLAS)',
+                                path=coinPath,type='TH2F',cutmask='coin_inner_nsw_currBc',xbins=97,xmin=-48.5,xmax=48.5,ybins=11,ymin=-5.5,ymax=5.5)
+    myGroupCoin.defineHistogram('coin_inner_nsw_slSector_endcap,coin_inner_nsw_deltaTiming;InnerCoin_Evt_Nsw_Endcap_SectorVsDeltaTiming_goodBcid',title='InnerCoin_Evt_Nsw_Endcap_SectorVsDeltaTiming_goodBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Delta Signal Timing',
+                                path=coinPath,type='TH2F',cutmask='coin_inner_nsw_goodBcid',xbins=97,xmin=-48.5,xmax=48.5,ybins=11,ymin=-5.5,ymax=5.5)
+
+    myGroupCoin.defineHistogram('coin_inner_nsw_slSector_forward,coin_inner_nsw_deltaBcid;InnerCoin_Evt_Nsw_Forward_SectorVsDeltaBcid',title='InnerCoin_Evt_Nsw_Forward_SectorVsDeltaBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Delta Bcid (NSW - ATLAS)',
+                                path=coinPath,type='TH2F',xbins=49,xmin=-24.5,xmax=24.5,ybins=11,ymin=-5.5,ymax=5.5)
+    myGroupCoin.defineHistogram('coin_inner_nsw_slSector_forward,coin_inner_nsw_deltaTiming;InnerCoin_Evt_Nsw_Forward_SectorVsDeltaTiming',title='InnerCoin_Evt_Nsw_Forward_SectorVsDeltaTiming;SL Trigger Sector +1  (>0 for A, <0 for C);Delta Signal Timing',
+                                path=coinPath,type='TH2F',xbins=49,xmin=-24.5,xmax=24.5,ybins=11,ymin=-5.5,ymax=5.5)
+
+    myGroupCoin.defineHistogram('coin_inner_nsw_slSector_forward,coin_inner_nsw_deltaBcid;InnerCoin_Evt_Nsw_Forward_SectorVsDeltaBcid_BcCurr',title='InnerCoin_Evt_Nsw_Forward_SectorVsDeltaBcid_BcCurr;SL Trigger Sector +1  (>0 for A, <0 for C);Delta Bcid (NSW - ATLAS)',
+                                path=coinPath,type='TH2F',cutmask='coin_inner_nsw_currBc',xbins=49,xmin=-24.5,xmax=24.5,ybins=11,ymin=-5.5,ymax=5.5)
+    myGroupCoin.defineHistogram('coin_inner_nsw_slSector_forward,coin_inner_nsw_deltaTiming;InnerCoin_Evt_Nsw_Forward_SectorVsDeltaTiming_goodBcid',title='InnerCoin_Evt_Nsw_Forward_SectorVsDeltaTiming_goodBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Delta Signal Timing',
+                                path=coinPath,type='TH2F',cutmask='coin_inner_nsw_goodBcid',xbins=49,xmin=-24.5,xmax=24.5,ybins=11,ymin=-5.5,ymax=5.5)
+
+    myGroupCoin.defineHistogram('coin_inner_tgc_prevBcNsw,coin_inner_tgc_sector;InnerCoin_Eff_Nsw_Endcap_BcPrev',title='InnerCoin_Eff_Nsw_Endcap_BcPrev;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etafrom1p3_endcap',xbins=97,xmin=-48.5,xmax=48.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_currBcNsw,coin_inner_tgc_sector;InnerCoin_Eff_Nsw_Endcap_BcCurr',title='InnerCoin_Eff_Nsw_Endcap_BcCurr;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etafrom1p3_endcap',xbins=97,xmin=-48.5,xmax=48.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_nextBcNsw,coin_inner_tgc_sector;InnerCoin_Eff_Nsw_Endcap_BcNext',title='InnerCoin_Eff_Nsw_Endcap_BcNext;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etafrom1p3_endcap',xbins=97,xmin=-48.5,xmax=48.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_nextnextBcNsw,coin_inner_tgc_sector;InnerCoin_Eff_Nsw_Endcap_BcNextNext',title='InnerCoin_Eff_Nsw_Endcap_BcNextNext;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etafrom1p3_endcap',xbins=97,xmin=-48.5,xmax=48.5)
+
+    myGroupCoin.defineHistogram('coin_inner_tgc_prevBcNsw_goodBcid,coin_inner_tgc_sector;InnerCoin_Eff_Nsw_Endcap_BcPrev_goodBcid',title='InnerCoin_Eff_Nsw_Endcap_BcPrev_goodBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etafrom1p3_endcap',xbins=97,xmin=-48.5,xmax=48.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_currBcNsw_goodBcid,coin_inner_tgc_sector;InnerCoin_Eff_Nsw_Endcap_BcCurr_goodBcid',title='InnerCoin_Eff_Nsw_Endcap_BcCurr_goodBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etafrom1p3_endcap',xbins=97,xmin=-48.5,xmax=48.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_nextBcNsw_goodBcid,coin_inner_tgc_sector;InnerCoin_Eff_Nsw_Endcap_BcNext_goodBcid',title='InnerCoin_Eff_Nsw_Endcap_BcNext_goodBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etafrom1p3_endcap',xbins=97,xmin=-48.5,xmax=48.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_nextnextBcNsw_goodBcid,coin_inner_tgc_sector;InnerCoin_Eff_Nsw_Endcap_BcNextNext_goodBcid',title='InnerCoin_Eff_Nsw_Endcap_BcNextNext_goodBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_etafrom1p3_endcap',xbins=97,xmin=-48.5,xmax=48.5)
+
+    myGroupCoin.defineHistogram('coin_inner_tgc_prevBcNsw,coin_inner_tgc_sector;InnerCoin_Eff_Nsw_Forward_BcPrev',title='InnerCoin_Eff_Nsw_Forward_BcPrev;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_forward',xbins=49,xmin=-24.5,xmax=24.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_currBcNsw,coin_inner_tgc_sector;InnerCoin_Eff_Nsw_Forward_BcCurr',title='InnerCoin_Eff_Nsw_Forward_BcCurr;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_forward',xbins=49,xmin=-24.5,xmax=24.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_nextBcNsw,coin_inner_tgc_sector;InnerCoin_Eff_Nsw_Forward_BcNext',title='InnerCoin_Eff_Nsw_Forward_BcNext;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_forward',xbins=49,xmin=-24.5,xmax=24.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_nextnextBcNsw,coin_inner_tgc_sector;InnerCoin_Eff_Nsw_Forward_BcNextNext',title='InnerCoin_Eff_Nsw_Forward_BcNextNext;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_forward',xbins=49,xmin=-24.5,xmax=24.5)
+
+    myGroupCoin.defineHistogram('coin_inner_tgc_prevBcNsw_goodBcid,coin_inner_tgc_sector;InnerCoin_Eff_Nsw_Forward_BcPrev_goodBcid',title='InnerCoin_Eff_Nsw_Forward_BcPrev_goodBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_forward',xbins=49,xmin=-24.5,xmax=24.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_currBcNsw_goodBcid,coin_inner_tgc_sector;InnerCoin_Eff_Nsw_Forward_BcCurr_goodBcid',title='InnerCoin_Eff_Nsw_Forward_BcCurr_goodBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_forward',xbins=49,xmin=-24.5,xmax=24.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_nextBcNsw_goodBcid,coin_inner_tgc_sector;InnerCoin_Eff_Nsw_Forward_BcNext_goodBcid',title='InnerCoin_Eff_Nsw_Forward_BcNext_goodBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_forward',xbins=49,xmin=-24.5,xmax=24.5)
+    myGroupCoin.defineHistogram('coin_inner_tgc_nextnextBcNsw_goodBcid,coin_inner_tgc_sector;InnerCoin_Eff_Nsw_Forward_BcNextNext_goodBcid',title='InnerCoin_Eff_Nsw_Forward_BcNextNext_goodBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                path=coinPath,type='TEfficiency',cutmask='coin_inner_tgc_forward',xbins=49,xmin=-24.5,xmax=24.5)
 
     for coinType in ['SL','HPT','LPT','EIFI']:
         for region in ['','Endcap','Forward']:
@@ -1137,7 +1233,7 @@ def TgcRawDataMonitoringConfig(inputFlags):
                                                     xbins=100,xmin=-2.5,xmax=2.5,ybins=48,ymin=-math.pi,ymax=math.pi)
                         else:
                             myGroupCoin.defineHistogram(suffix+'coin_roi,'+suffix+'coin_sector;'+suffix+'TgcCoin_Evt_SectorVsRoI'+PT,
-                                                    title=suffix+'TgcCoin_Evt_SectorVsRoI'+PT+';RoI;Trigger Sector (>0 for A, <0 for C)',
+                                                    title=suffix+'TgcCoin_Evt_SectorVsRoI'+PT+';RoI;Trigger Sector +1  (>0 for A, <0 for C)',
                                                     type='TH2F',path=coinPath,cutmask=cut,
                                                     xbins=nrois+1,xmin=-0.5,xmax=nrois+0.5,
                                                     ybins=nsectors*2+1,ymin=-nsectors-0.5,ymax=nsectors+0.5)
@@ -1165,12 +1261,12 @@ def TgcRawDataMonitoringConfig(inputFlags):
 
                 else:
                     myGroupCoin.defineHistogram(suffix+'coin_sector,'+suffix+'coin_bunch;'+suffix+'TgcCoin_Evt_SectorVsTiming',
-                                            title=suffix+'TgcCoin_Evt_SectorVsTiming;Trigger Sector (>0 for A, <0 for C);Timing',
+                                            title=suffix+'TgcCoin_Evt_SectorVsTiming;Trigger Sector +1  (>0 for A, <0 for C);Timing',
                                             type='TH2F',path=coinPath,
                                             xbins=nsectors*2+1,xmin=-nsectors-0.5,xmax=nsectors+0.5,
                                             ybins=3,ymin=-1.5,ymax=1.5,ylabels=['Previous','Current','Next'])
                     myGroupCoin.defineHistogram(suffix+'coin_lb,'+suffix+'coin_sector;'+suffix+'TgcCoin_Evt_SectorVsLB',
-                                            title=suffix+'TgcCoin_Evt_SectorVsLB;LumiBlock;Trigger Sector (>0 for A, <0 for C)',
+                                            title=suffix+'TgcCoin_Evt_SectorVsLB;LumiBlock;Trigger Sector +1  (>0 for A, <0 for C)',
                                             type='TH2F',path=coinPath,
                                             xbins=100,xmin=0.5,xmax=100.5,opt='kAddBinsDynamically', merge='merge',
                                             ybins=nsectors*2+1,ymin=-nsectors-0.5,ymax=nsectors+0.5)
@@ -1182,34 +1278,34 @@ def TgcRawDataMonitoringConfig(inputFlags):
                                 if coinflag == 'Tile' :continue
                                 if coinflag == 'RPC' :continue
                             myGroupCoin.defineHistogram(suffix+'coin_roi,'+suffix+'coin_sector;'+suffix+'TgcCoin_Evt_SectorVsRoI_CoinFlag'+coinflag,
-                                                        title=suffix+'TgcCoin_Evt_SectorVsRoI_CoinFlag'+coinflag+';RoI;Trigger Sector (>0 for A, <0 for C)',
+                                                        title=suffix+'TgcCoin_Evt_SectorVsRoI_CoinFlag'+coinflag+';RoI;Trigger Sector +1  (>0 for A, <0 for C)',
                                                         type='TH2F',path=coinPath,cutmask=suffix+'coin_CoinFlag'+coinflag,
                                                         xbins=nrois+1,xmin=-0.5,xmax=nrois+0.5,
                                                         ybins=nsectors*2+1,ymin=-nsectors-0.5,ymax=nsectors+0.5)
                             if coinflag != 'H' :
                                 myGroupCoin.defineHistogram(suffix+'coin_lb,'+suffix+'coin_sector;'+suffix+'TgcCoin_Evt_SectorVsLB_CoinFlag'+coinflag,
-                                                            title=suffix+'TgcCoin_Evt_SectorVsLB_CoinFlag'+coinflag+';LumiBlock;Trigger Sector (>0 for A, <0 for C)',
+                                                            title=suffix+'TgcCoin_Evt_SectorVsLB_CoinFlag'+coinflag+';LumiBlock;Trigger Sector +1  (>0 for A, <0 for C)',
                                                             type='TH2F',path=coinPath,cutmask=suffix+'coin_CoinFlag'+coinflag,
                                                             xbins=100,xmin=0.5,xmax=100.5,opt='kAddBinsDynamically', merge='merge',
                                                             ybins=nsectors*2+1,ymin=-nsectors-0.5,ymax=nsectors+0.5)
 
                         myGroupCoin.defineHistogram(suffix+'coin_roi,'+suffix+'coin_sector;'+suffix+'TgcCoin_Evt_SectorVsRoI',
-                                                title=suffix+'TgcCoin_Evt_SectorVsRoI;RoI;Trigger Sector (>0 for A, <0 for C)',
+                                                title=suffix+'TgcCoin_Evt_SectorVsRoI;RoI;Trigger Sector +1  (>0 for A, <0 for C)',
                                                 type='TH2F',path=coinPath,
                                                 xbins=nrois+1,xmin=-0.5,xmax=nrois+0.5,
                                                 ybins=nsectors*2+1,ymin=-nsectors-0.5,ymax=nsectors+0.5)
                         myGroupCoin.defineHistogram(suffix+'coin_veto_roi,'+suffix+'coin_veto_sector;'+suffix+'TgcCoin_Evt_SectorVsRoI_wVeto',
-                                                title=suffix+'TgcCoin_Evt_SectorVsRoI_wVeto;RoI;Trigger Sector (>0 for A, <0 for C)',
+                                                title=suffix+'TgcCoin_Evt_SectorVsRoI_wVeto;RoI;Trigger Sector +1  (>0 for A, <0 for C)',
                                                 type='TH2F',path=coinPath,
                                                 xbins=nrois+1,xmin=-0.5,xmax=nrois+0.5,
                                                 ybins=nsectors*2+1,ymin=-nsectors-0.5,ymax=nsectors+0.5)
                         myGroupCoin.defineHistogram(suffix+'coin_sector,'+suffix+'coin_pt;'+suffix+'TgcCoin_Evt_SectorVsThr',
-                                                title=suffix+'TgcCoin_Evt_SectorVsThr;Trigger Sector (>0 for A, <0 for C);Threshold',
+                                                title=suffix+'TgcCoin_Evt_SectorVsThr;Trigger Sector +1  (>0 for A, <0 for C);Threshold',
                                                 type='TH2F',path=coinPath,
                                                 xbins=nsectors*2+1,xmin=-nsectors-0.5,xmax=nsectors+0.5,
                                                 ybins=15,ymin=0.5,ymax=15.5)
                         myGroupCoin.defineHistogram(suffix+'coin_sector,'+suffix+'coin_isPositiveDeltaR;'+suffix+'TgcCoin_Evt_SectorVsisPositiveDeltaR',
-                                                title=suffix+'TgcCoin_Evt_SectorVsisPositiveDeltaR;Trigger Sector (>0 for A, <0 for C);isPositiveDeltaR',
+                                                title=suffix+'TgcCoin_Evt_SectorVsisPositiveDeltaR;Trigger Sector +1  (>0 for A, <0 for C);isPositiveDeltaR',
                                                 type='TH2F',path=coinPath,
                                                 xbins=nsectors*2+1,xmin=-nsectors-0.5,xmax=nsectors+0.5,
                                                 ybins=2,ymin=-0.5,ymax=1.5)

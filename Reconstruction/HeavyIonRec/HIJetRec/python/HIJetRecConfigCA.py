@@ -4,7 +4,6 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import LHCPeriod
 from OutputStreamAthenaPool.OutputStreamConfig import addToAOD, addToESD
 from JetRecConfig.JetDefinition import JetInputConstitSeq,JetInputConstit, xAODType, JetDefinition
 from JetRecConfig.JetDefinition import JetModifier, JetInputExternal
@@ -418,10 +417,8 @@ def AddIterationCfg(flags,seed_container,shape_name,clustersKey, **kwargs) :
             mod_tool=MakeModulatorTool(mod_shape_key,harmonics=harmicsforSub,**kwargs)
 
     if useClusters :
-        if flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2]:
-            HIJetClusterSubtractorTool_inputFile='cluster.geo.DATA_PbPb_2018v2.root'
-        else:
-            HIJetClusterSubtractorTool_inputFile='cluster.geo.DATA_PbPb_2022.root'
+        from HIJetRec.HIJetRecUtilsCA import getHIClusterGeoWeightFile
+        HIJetClusterSubtractorTool_inputFile=getHIClusterGeoWeightFile(flags)
         
         HIJetClusterSubtractorTool = CompFactory.HIJetClusterSubtractorTool
         sub_tool = HIJetClusterSubtractorTool("HIJetClusterSubtractor", 
@@ -546,10 +543,8 @@ def ApplySubtractionToClustersCfg(flags, **kwargs) :
         map_tool=HIEventShapeMapTool()
 
     if useClusters :
-        if flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2]:
-            HIJetClusterSubtractorTool_inputFile='cluster.geo.DATA_PbPb_2018v2.root'
-        else:
-            HIJetClusterSubtractorTool_inputFile='cluster.geo.DATA_PbPb_2022.root'
+        from HIJetRec.HIJetRecUtilsCA import getHIClusterGeoWeightFile
+        HIJetClusterSubtractorTool_inputFile=getHIClusterGeoWeightFile(flags)
 
         HIJetClusterSubtractorTool = CompFactory.HIJetClusterSubtractorTool
         sub_tool = HIJetClusterSubtractorTool("HIJetClusterSubtractor",

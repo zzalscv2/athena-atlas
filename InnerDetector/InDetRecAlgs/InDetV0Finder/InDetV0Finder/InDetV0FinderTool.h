@@ -219,6 +219,9 @@ namespace InDet
     Gaudi::Property<std::string>       m_lbKey { this, "LambdabarContainerName", "LambdabarCandidates", 
                                                               "Lambdabar container name (same calling alg)" };
     Gaudi::Property<int>       m_maxPV { this, "MaxPV", 999999 };
+    SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_RelinkContainers{this, "RelinkTracks", {}, "Track Containers if they need to be relinked through indirect use" };
+    ElementLink<xAOD::TrackParticleContainer> makeLink(const xAOD::TrackParticle*, const std::vector<const xAOD::TrackParticleContainer*>&) const;
+
   };
 
 }//end of namespace InDet

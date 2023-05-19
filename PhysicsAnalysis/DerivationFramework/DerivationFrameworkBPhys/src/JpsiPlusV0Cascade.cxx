@@ -61,6 +61,7 @@ namespace DerivationFramework {
         const HepPDT::ParticleDataTable* pdt = partPropSvc->PDT();
 
         // retrieve particle masses
+        m_mass_electron = BPhysPVCascadeTools::getParticleMass(pdt, PDG::e_minus);
         m_mass_muon     = BPhysPVCascadeTools::getParticleMass(pdt, PDG::mu_minus);
         m_mass_pion     = BPhysPVCascadeTools::getParticleMass(pdt, PDG::pi_plus);
         m_mass_proton   = BPhysPVCascadeTools::getParticleMass(pdt, PDG::p_plus);
@@ -220,9 +221,10 @@ namespace DerivationFramework {
 
         double mass_v0 = m_mass_ks; 
         double mass_b = m_mass_b0;
-        std::vector<double> massesJpsi(2, m_mass_muon);
+        double mass_track = m_jpsi_trk_pdg == 11 ? m_mass_electron : m_mass_muon;
+        std::vector<double> massesJpsi(2, mass_track);
         std::vector<double> massesV0;
-        std::vector<double> Masses(2, m_mass_muon);
+        std::vector<double> Masses(2, mass_track);
         if (m_v0_pid == 310) {
            massesV0.push_back(m_mass_pion);
            massesV0.push_back(m_mass_pion);
@@ -378,6 +380,7 @@ namespace DerivationFramework {
     m_V0MassUpper(10000.0),
     m_MassLower(0.0),
     m_MassUpper(20000.0),
+    m_mass_electron( 0 ),
     m_mass_muon   ( 0 ),
     m_mass_pion   ( 0 ),
     m_mass_proton ( 0 ),
@@ -398,6 +401,8 @@ namespace DerivationFramework {
        declareProperty("V0Vertices", m_vertexV0ContainerKey);
        declareProperty("VxPrimaryCandidateName", m_VxPrimaryCandidateName);
        declareProperty("RefPVContainerName", m_refPVContainerName  = "RefittedPrimaryVertices");
+       declareProperty("JpsiTrackContainerName", m_jpsiTrackContainerName = "InDetTrackParticles");
+       declareProperty("V0TrackContainerName", m_v0TrackContainerName = "InDetTrackParticles");
        declareProperty("JpsiMassLowerCut", m_jpsiMassLower);
        declareProperty("JpsiMassUpperCut", m_jpsiMassUpper);
        declareProperty("V0MassLowerCut", m_V0MassLower);
@@ -408,6 +413,7 @@ namespace DerivationFramework {
        declareProperty("V0Hypothesis",              m_v0_pid);
        declareProperty("ApplyV0MassConstraint",     m_constrV0);
        declareProperty("ApplyJpsiMassConstraint",   m_constrJpsi);
+       declareProperty("JpsiTrackPDGID",            m_jpsi_trk_pdg           = 13);
        declareProperty("RefitPV",                   m_refitPV                = true);
        declareProperty("MaxnPV",                    m_PV_max                 = 999);
        declareProperty("MinNTracksInPV",            m_PV_minNTracks          = 0);
@@ -426,9 +432,11 @@ namespace DerivationFramework {
         ATH_MSG_DEBUG( "JpsiPlusV0Cascade::performSearch" );
         assert(cascadeinfoContainer!=nullptr);
 
-        // Get TrackParticle container (for setting links to the original tracks)
-        const xAOD::TrackParticleContainer  *trackContainer(nullptr);
-        CHECK(evtStore()->retrieve(trackContainer   , "InDetTrackParticles"      ));
+        // Get TrackParticle containers (for setting links to the original tracks)
+        const xAOD::TrackParticleContainer  *jpsiTrackContainer(nullptr);
+        CHECK(evtStore()->retrieve(jpsiTrackContainer   , m_jpsiTrackContainerName      ));
+        const xAOD::TrackParticleContainer  *v0TrackContainer(nullptr);
+        CHECK(evtStore()->retrieve(v0TrackContainer   , m_v0TrackContainerName      ));
 
         // Get Jpsi container
         const xAOD::VertexContainer  *jpsiContainer(nullptr);
@@ -439,11 +447,12 @@ namespace DerivationFramework {
         CHECK(evtStore()->retrieve(v0Container   , m_vertexV0ContainerKey       ));
 
         double mass_v0 = m_mass_ks; 
+        double mass_tracks = m_jpsi_trk_pdg == 11 ? m_mass_electron : m_mass_muon;
         std::vector<const xAOD::TrackParticle*> tracksJpsi;
         std::vector<const xAOD::TrackParticle*> tracksV0;
-        std::vector<double> massesJpsi(2, m_mass_muon);
+        std::vector<double> massesJpsi(2, mass_tracks);
         std::vector<double> massesV0;
-        std::vector<double> Masses(2, m_mass_muon);
+        std::vector<double> Masses(2, mass_tracks);
         if (m_v0_pid == 310) {
            massesV0.push_back(m_mass_pion);
            massesV0.push_back(m_mass_pion);
@@ -535,7 +544,19 @@ namespace DerivationFramework {
 
               if (result != NULL) {
                 // reset links to original tracks
-                BPhysPVCascadeTools::PrepareVertexLinks(result.get(), trackContainer);
+                auto &collection = result->vertices();
+                std::vector<std::pair<xAOD::Vertex*, const xAOD::TrackParticleContainer*>> zip = {{collection[0], v0TrackContainer},{collection[1], jpsiTrackContainer}};
+                for(auto & pair : zip) {
+                  auto& v = pair.first; auto& c = pair.second;
+                  std::vector<ElementLink<DataVector<xAOD::TrackParticle> > > newLinkVector;
+                  for(unsigned int i=0; i< v->trackParticleLinks().size(); i++) {
+                    ElementLink<DataVector<xAOD::TrackParticle> > mylink=v->trackParticleLinks()[i]; // makes a copy (non-const) 
+                    mylink.setStorableObject(*c, true);
+                    newLinkVector.push_back( mylink ); 
+                  }
+                  v->clearTracks();
+                  v->setTrackParticleLinks( newLinkVector );
+                }
 
                 ATH_MSG_DEBUG("storing tracks " << ((result->vertices())[0])->trackParticle(0) << ", "
                                                 << ((result->vertices())[0])->trackParticle(1) << ", "
