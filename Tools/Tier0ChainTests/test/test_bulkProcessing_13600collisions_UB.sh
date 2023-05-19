@@ -5,6 +5,7 @@
 # art-include: master/Athena
 # art-include: 22.0/Athena
 # art-athena-mt: 8
+# art-output: log.*
 
 # Not doing diff-root comparison for DAOD_IDTIDE at the moment (because 0 events are selected). To enable comparison for DAOD_IDTIDE, rename the output to DAOD_IDTIDE.pool.root
 
@@ -25,20 +26,8 @@ echo "art-result: $rc1 Reco"
 rc2=-9999
 if [ ${rc1} -eq 0 ]
 then
-  ArtPackage=$1
-  ArtJobName=$2
-  art.py compare grid --entries 30 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --ignore-exit-code diff-pool
+  ArtRef=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/$1/TCT_22.0_references/$2
+  art.py compare ref . $ArtRef --entries 30 --mode=semi-detailed --order-trees --ignore-exit-code diff-pool
   rc2=$?
 fi
-echo  "art-result: ${rc2} (against previous nightly)"
-
-rc3=-9999
-if [ ${rc1} -eq 0 ]
-then
-  ArtRef=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3-22.0_references_for_comparison/test_bulkProcessing_13600collisions_UB
-  cat $ArtRef/version.txt
-  art.py compare ref . $ArtRef \
-  --entries 100 --mode=semi-detailed --order-trees --ignore-exit-code diff-pool
-  rc3=$?
-fi
-echo  "art-result: ${rc3} (against reference)"
+echo  "art-result: ${rc2} Comparison with the latest result"

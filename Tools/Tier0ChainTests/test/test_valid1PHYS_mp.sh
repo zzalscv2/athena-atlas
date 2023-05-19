@@ -5,7 +5,6 @@
 # art-include: 22.0-mc20/Athena
 # art-description: DAOD building PHYS valid1 MP
 # art-type: grid
-# art-output: *.pool.root
 # art-output: checkFile.txt
 # art-output: checkxAOD.txt
 # art-output: checkIndexRefs*.txt
