@@ -21,6 +21,9 @@ CaloCellsCounterGPU::CaloCellsCounterGPU(const std::string & type, const std::st
 }
 
 
+namespace {
+
+
 struct size_struct
 {
   unsigned int total = 0, seed = 0, grow = 0, term = 0, invalid = 0, shared = 0;
@@ -44,6 +47,8 @@ struct cluster_info_struct
     return s;
   }
 };
+
+} // anonymous namespace
 
 StatusCode CaloCellsCounterGPU::execute(const EventContext & ctx, const ConstantDataHolder & constant_data, EventDataHolder & event_data, void * /*temporary_buffer*/) const
 {

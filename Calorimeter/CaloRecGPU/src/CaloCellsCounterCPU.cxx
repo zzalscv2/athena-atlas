@@ -29,6 +29,8 @@ StatusCode CaloCellsCounterCPU::initialize()
   return StatusCode::SUCCESS;
 }
 
+namespace {
+
 struct size_struct
 {
   unsigned int total = 0, seed = 0, grow = 0, term = 0, invalid = 0, shared = 0;
@@ -53,6 +55,8 @@ struct cluster_info_struct
     return s;
   }
 };
+
+} // anonymous namespace
 
 StatusCode CaloCellsCounterCPU::execute (const EventContext & ctx, xAOD::CaloClusterContainer * cluster_collection) const
 {
