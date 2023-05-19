@@ -89,7 +89,7 @@ private:
 };
 
 
-#include "TruthHelper/PileUpType.icc"
+#include "InDetRecStatistics/PileUpType.icc"
 
 
 #endif

@@ -138,7 +138,7 @@ StatusCode NswCondTestAlg::retrieveTdoPdo(const EventContext& ctx, TimeChargeTyp
         ATH_MSG_INFO("Checking channel 0 (Id = " << channel.get_compact() << ") "<<calib_data);
         if (!m_logName.empty()){
             for (const Identifier& chan_id : channelIds) {
-                const NswCalibDbTimeChargeData::CalibConstants& calib_data = *readCdo->getCalibForChannel(data, channel);
+                const NswCalibDbTimeChargeData::CalibConstants& calib_data = *readCdo->getCalibForChannel(data, chan_id);
                 sstr<<m_idHelperSvc->toString(chan_id)<<" "<<calib_data<<std::endl;
             }                   
         }

@@ -62,7 +62,7 @@
 #include "InDetRecStatistics/InDetRecStatisticsAlg.h"
 #include "InDetRecStatistics/TrackStatHelper.h"
 #include "AtlasHepMC/GenParticle.h"
-#include "TruthHelper/PileUpType.h"
+#include "InDetRecStatistics//PileUpType.h"
 
 
 

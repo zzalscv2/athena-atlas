@@ -145,17 +145,17 @@ namespace DerivationFramework {
     //----------------------------------------------------
     // save in the StoreGate
     //----------------------------------------------------
-    SG::WriteHandle<xAOD::VertexContainer> handle(m_outputVtxContainerName);
+    SG::WriteHandle<xAOD::VertexContainer> handle(m_outputVtxContainerName, ctx);
     ATH_CHECK(handle.record(std::move(vtxContainer), std::move(vtxAuxContainer)));
     
     if(m_refitPV) {
-       SG::WriteHandle<xAOD::VertexContainer> handle(m_refPVContainerName);
+       SG::WriteHandle<xAOD::VertexContainer> handle(m_refPVContainerName, ctx);
        ATH_CHECK(handle.record(std::move(refPvContainer), std::move(refPvAuxContainer)));
     }
     }
 
     if (!callTool) { //Fill with empty containers
-      SG::WriteHandle<xAOD::VertexContainer> handle(m_outputVtxContainerName);
+      SG::WriteHandle<xAOD::VertexContainer> handle(m_outputVtxContainerName, ctx);
       ATH_CHECK(handle.record(std::unique_ptr<xAOD::VertexContainer>(new xAOD::VertexContainer ),
           std::unique_ptr<xAOD::VertexAuxContainer>(new xAOD::VertexAuxContainer )));
     }

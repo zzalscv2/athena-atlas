@@ -95,6 +95,54 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
     double matchedRPC{};
     double matchedNSW{};
   };
+  struct TgcTrigTile{
+    int slSector{}; // SL sector ID
+    double roiEta{}; // SL RoI at the current BC and with matched offline muon
+    double roiPhi{};
+    int roiNum{};
+    int deltaBcid{}; // BCID difference between SL and TMDB
+    int deltaTiming{}; // Signal timing difference between SL and TMDB
+    int tmdbDecisions{}; // TMDB signal decisions for modules 0..3 (D5 only, D6 only, D5+D6)
+    int bcid{};
+    int bunch{};
+    int currBc{};
+    int goodBcid{};
+    int goodTiming{};
+  };
+  struct TgcTrigNsw{
+    int slSector{};
+    double roiEta{};
+    double roiPhi{};
+    int roiNum{};
+    int isForward{};
+    int deltaBcid{}; // BCID difference between SL and NSW
+    int deltaTiming{}; // Signal timing difference between SL and NSW
+    int R{};
+    int Phi{};
+    int deltaTheta{};
+    int bcid{};
+    int bunch{};
+    int currBc{};
+    int goodBcid{};
+    int goodTiming{};
+  };
+  struct TgcTrigRpc{
+    int slSector{};
+    double roiEta{};
+    double roiPhi{};
+    int roiNum{};
+    int deltaBcid{}; // BCID difference between SL and NSW
+    int deltaTiming{}; // Signal timing difference between SL and NSW
+    int rpcEta{};
+    int rpcPhi{};
+    int rpcDEta{};
+    int rpcDPhi{};
+    int bcid{};
+    int bunch{};
+    int currBc{};
+    int goodBcid{};
+    int goodTiming{};
+  };
   struct TgcTrig{
     int lb{};
     double x_In{};
@@ -128,40 +176,10 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
     int bunch{};
     int inner{};
     int muonMatched{};
-  };
-  struct TgcTrigTile{
-    int slSector{}; // SL sector ID
-    double roiEta{};
-    double roiPhi{};
-    int roiNum{};
-    int deltaBcid{}; // BCID difference between SL and TMDB
-    int deltaTiming{}; // Signal timing difference between SL and TMDB
-    int tmdbDecisions{}; // TMDB signal decisions for modules 0..3 (D5 only, D6 only, D5+D6)
-  };
-  struct TgcTrigNsw{
-    int slSector{};
-    double roiEta{};
-    double roiPhi{};
-    int roiNum{};
-    int isForward{};
-    int isEndcap{};
-    int deltaBcid{}; // BCID difference between SL and NSW
-    int deltaTiming{}; // Signal timing difference between SL and NSW
-    int R{};
-    int Phi{};
-    int deltaTheta{};
-  };
-  struct TgcTrigRpc{
-    int slSector{};
-    double roiEta{};
-    double roiPhi{};
-    int roiNum{};
-    int deltaBcid{}; // BCID difference between SL and NSW
-    int deltaTiming{}; // Signal timing difference between SL and NSW
-    int rpcEta{};
-    int rpcPhi{};
-    int rpcDEta{};
-    int rpcDPhi{};
+    int bcid{};
+    std::vector<TgcTrigTile*> tile;
+    std::vector<TgcTrigNsw*> nsw;
+    std::vector<TgcTrigRpc*> rpc;
   };
   struct CtpDecMonObj{
     std::string trigItem;

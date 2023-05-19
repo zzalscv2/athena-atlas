@@ -342,10 +342,6 @@ StatusCode IdDictDetDescrCnv::getFileNamesFromTags() {
     ATH_CHECK(service(geoDbTagSvc->getParamSvcName(), rdbAccessSvc));
     ATH_MSG_DEBUG("Accessed " << geoDbTagSvc->getParamSvcName());
 
-    if (geoDbTagSvc->getSqliteReader()) {
-        return StatusCode::SUCCESS;
-    }
-
     auto assignTagAndName = [this](const IRDBRecordset_ptr &idDictSet,
                                    std::string &fileName,
                                    std::string &dictTag) {
