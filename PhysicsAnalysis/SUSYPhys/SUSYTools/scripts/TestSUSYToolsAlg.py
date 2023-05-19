@@ -23,7 +23,7 @@ parser.add_option( '-s', '--submission-dir', dest = 'submission_dir', default = 
 parser.add_option('-t', '--type', dest = 'type', default = 'mc20e', help = 'Job type. (mc20a, mc20d, mc20e, mc21a, data18, data22)', choices = ['mc20a', 'mc20d', 'mc20e', 'mc21a', 'data18', 'data22'])
 parser.add_option('--AF', dest = 'AF', default = False, action = 'store_true' )
 parser.add_option('-d', '--daod', dest = 'daod', type = 'int', default = 0, help = 'input DAOD type. Do not specify for xAOD input' )
-parser.add_option('-f', '--flav', dest = 'flav', default = 'PHYSVAL', help = 'input DAOD flavour' )
+parser.add_option('-f', '--flav', dest = 'flav', default = 'PHYS', help = 'input DAOD flavour' )
 parser.add_option('-m', '--maxEvts', dest = 'maxEvts', type = 'int', default = 500, help = 'Max events (-1 is all)' )
 parser.add_option('-M', '--maxEvtsManual', dest = 'maxEvtsManual', type = 'int')
 parser.add_option('-p', '--ptag', dest = 'ptag', default = 'p5226', help = 'ptag' )
@@ -35,8 +35,8 @@ parser.add_option('--inputXRD', dest = 'inputXRD')
 parser.add_option('--overwrite', dest = 'overwrite', default = False, action = 'store_true' )
 ( options, args ) = parser.parse_args()
 print("Configured input data ptag: %s"%(options.ptag))
-ptageqdata = {'p5226':'p5226','p5278':'p5267'}
-if 'data' in options.type and options.ptag in ptageqdata: 
+ptageqdata = {'p5511':'p5514','p5631':'p5632'}
+if 'data22' in options.type and options.ptag in ptageqdata: 
    options.ptag = ptageqdata[options.ptag]
    print("Overriding ptag to equivalent data ptag: -> %s"%(options.ptag))
 print("Configured input data type: %s"%(options.type))
@@ -65,12 +65,10 @@ cvmfsInputArea = [
 '/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/SUSYTools/ART/ARTInput/',
 ]
 inputFiles = {}
-inputFiles['mc20a']      = 'DAOD_mc20aPHYS.%s.art.merge.root'%(options.ptag)
-inputFiles['mc20d']      = 'DAOD_mc20dPHYS.%s.art.merge.root'%(options.ptag)
-inputFiles['mc20e']      = 'DAOD_PHYS.mc20_13TeV.410470.FS_mc20e_%s.PHYS.pool.root'%(options.ptag)
-inputFiles['mc21a']      = 'DAOD_PHYS.mc21_13p6TeV.601229.FS_mc21a_%s.PHYS.pool.root'%(options.ptag)
-inputFiles['data18']     = 'DAOD_PHYS.data18_13TeV.358031.data18_%s.PHYS.pool.root'%(options.ptag)
-inputFiles['data22']     = 'DAOD_PHYS.data22_13p6TeV.430542.data22_%s.PHYS.pool.root'%(options.ptag)
+inputFiles['mc20e']      = 'mc20_13TeV.410470.FS_mc20e_%s.%s.pool.root'%(options.ptag,options.flav)
+inputFiles['mc21a']      = 'mc21_13p6TeV.601229.FS_mc21a_%s.%s.pool.root'%(options.ptag,options.flav)
+inputFiles['data18']     = 'data18_13TeV.358031.data18_%s.%s.pool.root'%(options.ptag,options.flav)
+inputFiles['data22']     = 'data22_13p6TeV.430542.data22_%s.%s.pool.root'%(options.ptag,options.flav)
 if options.daod == 0 and not '%s%s'%(options.type,'_AF' if options.AF else '') in inputFiles: sys.exit('No input file configured for type %s%s. Exiting.'%(options.type,'_AF' if options.AF else ''))
 
 inputDir = ''

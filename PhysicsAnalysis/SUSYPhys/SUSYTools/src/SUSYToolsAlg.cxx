@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // SUSYToolsAlg.cxx
@@ -42,8 +42,8 @@
 #endif
 
 // For output of histograms
-#include "TH1F.h"
-#include "TH2F.h"
+#include "TH1.h"
+#include "TH2.h"
 #include "TFile.h"
 #include "TEfficiency.h"
 //#include <AnaAlgorithm/IHistogramWorker.h>
@@ -74,9 +74,9 @@ SUSYToolsAlg::SUSYToolsAlg(const std::string& name,
                            ISvcLocator* pSvcLocator )
   : EL::AnaAlgorithm (name, pSvcLocator)
   , m_SUSYTools("ST::SUSYObjDef_xAOD/SUSYTools",this)
-  , m_tauTruthMatchingTool("")
+  , m_tauTruthMatchingTool("TauAnalysisTools::TauTruthMatchingTool/TauTruthMatchingTool")
   , m_Nevts(0)
-  , m_kernel("")
+  , m_kernel("StreamDAOD")
   , m_configFile("SUSYTools/SUSYTools_Default.conf")
 {
 
@@ -189,7 +189,7 @@ StatusCode SUSYToolsAlg::initialize() {
 
     m_triggers["ph"] = {};
     m_triggers["ph"].push_back("HLT_g140_loose_L1EM22VHI");
-    m_triggers["ph"].push_back("HLT_g300_etcut_L1EM22VHI");
+    m_triggers["ph"].push_back("HLT_g300_L1EM22VHI"); // HLT_g300_etcut_L1EM22VHI not working in mc21
 
     m_triggers["mu"] = {};
     m_triggers["mu"].push_back("HLT_mu24_ivarmedium_L1MU14FCH");
@@ -567,9 +567,11 @@ StatusCode SUSYToolsAlg::execute() {
               bool passit = ((isRun3Trig||t.find("_L1")==std::string::npos) ? m_SUSYTools->IsTrigMatched(el, t) : false);
               passTM |= passit;
               if(passit) el_trigmatch_eff_nominal->SetBinContent(idx, el_trigmatch_eff_nominal->GetBinContent(idx)+1);
-              //m_heffs["Trigger/el_pt_"+t]->Fill(passit,el->pt()/1000.);
-              //m_heffs["Trigger/el_eta_"+t]->Fill(passit,el->eta());
-              //m_heffs["Trigger/el_phi_"+t]->Fill(passit,el->phi());
+              #ifdef XAOD_STANDALONE
+              m_heffs["Trigger/el_pt_"+t]->Fill(passit,el->pt()/1000.);
+              m_heffs["Trigger/el_eta_"+t]->Fill(passit,el->eta());
+              m_heffs["Trigger/el_phi_"+t]->Fill(passit,el->phi());
+              #endif
               idx++;
             }
             if(passTM) el_n_flow_nominal->Fill(Cut::trigmatch);
@@ -610,9 +612,11 @@ StatusCode SUSYToolsAlg::execute() {
               bool passit = ((isRun3Trig||t.find("_L1")==std::string::npos) ? m_SUSYTools->IsTrigMatched(ph, t) : false);
               passTM |= passit;
               if(passit) ph_trigmatch_eff_nominal->SetBinContent(idx, ph_trigmatch_eff_nominal->GetBinContent(idx)+1);
-              //m_heffs["Trigger/ph_pt_"+t]->Fill(passit,ph->pt()/1000.);
-              //m_heffs["Trigger/ph_eta_"+t]->Fill(passit,ph->eta());
-              //m_heffs["Trigger/ph_phi_"+t]->Fill(passit,ph->phi());
+              #ifdef XAOD_STANDALONE
+              m_heffs["Trigger/ph_pt_"+t]->Fill(passit,ph->pt()/1000.);
+              m_heffs["Trigger/ph_eta_"+t]->Fill(passit,ph->eta());
+              m_heffs["Trigger/ph_phi_"+t]->Fill(passit,ph->phi());
+              #endif
               idx++;
             }
             if (passTM) ph_n_flow_nominal->Fill(Cut::trigmatch);
@@ -653,9 +657,11 @@ StatusCode SUSYToolsAlg::execute() {
               bool passit = ((isRun3Trig||t.find("_L1")==std::string::npos) ? m_SUSYTools->IsTrigMatched(mu, t) : false);
               passTM |= passit;
               if(passit) mu_trigmatch_eff_nominal->SetBinContent(idx, mu_trigmatch_eff_nominal->GetBinContent(idx)+1);
-              //m_heffs["Trigger/mu_pt_"+t]->Fill(passit,mu->pt()/1000.);
-              //m_heffs["Trigger/mu_eta_"+t]->Fill(passit,mu->eta());
-              //m_heffs["Trigger/mu_phi_"+t]->Fill(passit,mu->phi());
+              #ifdef XAOD_STANDALONE
+              m_heffs["Trigger/mu_pt_"+t]->Fill(passit,mu->pt()/1000.);
+              m_heffs["Trigger/mu_eta_"+t]->Fill(passit,mu->eta());
+              m_heffs["Trigger/mu_phi_"+t]->Fill(passit,mu->phi());
+              #endif
               idx++;
             }
             if(passTM) mu_n_flow_nominal->Fill(Cut::trigmatch);
@@ -1349,21 +1355,21 @@ StatusCode SUSYToolsAlg::bookHistograms(void) {
      }
   }
 
+  #ifdef XAOD_STANDALONE  
   //// Trigger histograms
-  //for (std::string obj : {"el","mu","ph"}) {
-  //   for (auto trg : m_triggers[obj]) {
-  //      for (std::string var : {"pt","eta","phi"} ) {
-  //         std::string key = "Trigger/"+obj+"_"+var+"_"+trg;
-  //         std::string labels = ";"+labels_objects[obj]+" "+cfg_hist_labels[var][0]+";Efficiency "+trg;
-  //         m_heffs[key] = new TEfficiency(key.c_str(), labels.c_str(), cfg_hist_nbins[var], cfg_hist_minmax[var][0], cfg_hist_minmax[var][1]);
-  //         //histogramWorker()->addOutput(m_heffs[key]);
-  //         //ATH_CHECK( book(TEfficiency(key.c_str(), labels.c_str(), cfg_hist_nbins[var], cfg_hist_minmax[var][0], cfg_hist_minmax[var][1])) );
-  //         //m_heffs[key] = hist(key);
-  //         ATH_CHECK( book(reinterpret_cast<TH1&>(m_heffs[key])) );
-  //         ATH_MSG_INFO("Defined histogram: " << key.c_str() << ", " << m_heffs[key]);
-  //      }
-  //   }
-  //}
+  for (std::string obj : {"el","mu","ph"}) {
+    for (auto trg : m_triggers[obj]) {
+       for (std::string var : {"pt","eta","phi"} ) {
+          std::string key = "Trigger/"+obj+"_"+var+"_"+trg;
+          std::string labels = ";"+labels_objects[obj]+" "+cfg_hist_labels[var][0]+";Efficiency "+trg;
+          ATH_CHECK(book(TEfficiency(key.c_str(), labels.c_str(), cfg_hist_nbins[var], cfg_hist_minmax[var][0], cfg_hist_minmax[var][1])));
+          m_heffs[key] = histeff(key);
+          ATH_MSG_INFO("Defined histogram: " << key.c_str() << ", " << m_heffs[key]);
+       }
+    }
+  }
+  #endif
+  
   ATH_CHECK( book(TH1D("Trigger/el_trigmatch_eff_nominal", "Electron Trigger Matching Efficiency (Nominal);Electron Trigger Matching Efficiency (Nominal);N", getSize(m_triggers,"el"), 0, getSize(m_triggers,"el")) ) );
   ATH_CHECK( book(TH1D("Trigger/ph_trigmatch_eff_nominal", "Photon Trigger Matching Efficiency (Nominal);Photon Trigger Matching Efficiency (Nominal);N", getSize(m_triggers,"ph"), 0, getSize(m_triggers,"ph")) ) );
   ATH_CHECK( book(TH1D("Trigger/mu_trigmatch_eff_nominal", "Muon Trigger Matching Efficiency (Nominal);Muon Trigger Matching Efficiency (Nominal);N", getSize(m_triggers,"mu"), 0, getSize(m_triggers,"mu")) ) );
