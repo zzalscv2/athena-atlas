@@ -26,6 +26,11 @@ atlas_add_executable( makeInactiveModuleList
    Application/makeInactiveModuleList.C
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils PixelConditionsData PixelCalibAlgsLib )
+   
+atlas_add_executable( PixelCalib
+   ChargeCalibration/pixel/PixelCalib.C
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils PixelCalibAlgsLib )
 
 
    
