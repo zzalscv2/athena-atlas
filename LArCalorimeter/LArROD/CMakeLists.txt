@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArROD )
@@ -29,4 +29,4 @@ atlas_install_joboptions( share/*.py )
 
 atlas_add_test( LArRawChannelBuilderAlg 
 		SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/python/LArRawChannelBuilderAlgConfig.py
-		POST_EXEC_SCRIPT " /usr/bin/diff LArRawChannels.txt ${CMAKE_CURRENT_SOURCE_DIR}/share/LArRawChannels.txt.ref > diff.log " )
+		POST_EXEC_SCRIPT "/usr/bin/diff -u0 LArRawChannels.txt ${CMAKE_CURRENT_SOURCE_DIR}/share/LArRawChannels.txt.ref" )
