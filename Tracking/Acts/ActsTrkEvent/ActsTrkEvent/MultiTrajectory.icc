@@ -141,6 +141,8 @@ constexpr bool ActsTrk::MultiTrajectory<RWState>::has_impl(
       return trackStates[istate]->calibrated() < kInvalid;
     case "measdim"_hash:
       return trackStates[istate]->measDim() < kInvalid;
+    case "uncalibratedSourceLink"_hash:
+      return !trackStates[istate]->uncalibratedMeasurementLink().isDefault();
     default:
       for (auto& d : m_decorations) {
         if (d.hash == key) {
