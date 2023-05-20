@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -160,7 +160,7 @@ IdDictCnvTest::initialize()
      
 
     ATH_MSG_DEBUG ( " Get AtlasDetectorID. " );
-    const AtlasDetectorID* atlasID;
+    const AtlasDetectorID* atlasID = nullptr;
     // Access AtlasID from detector store
     ATH_CHECK(  detStore()->retrieve(atlasID, "AtlasID") );
     ATH_MSG_DEBUG ( " Found the AtlasDetectorID. " );
