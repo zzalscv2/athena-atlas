@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #define AlfaLocalHits_cxx
@@ -22,14 +22,15 @@ using std::endl;
 //  which stores information about one hit
 //
 ////////////////////////////////////////////
-AlfaLocalHit::AlfaLocalHit(){
-	m_pot        = 0;
-	m_potname    = "";
-	m_ishit      = 0;
-	m_x          = 0.0;
-	m_y          = 0.0;
-	m_z          = 0.0;
-	m_LocRecCorr = nullptr;
+AlfaLocalHit::AlfaLocalHit() :
+  m_pot (0),
+  m_potname (""),
+  m_ishit (0),
+  m_x (0.0),
+  m_y (0.0),
+  m_z (0.0),
+  m_LocRecCorr (nullptr)
+{
 }
 
 

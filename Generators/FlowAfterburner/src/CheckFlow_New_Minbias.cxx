@@ -25,8 +25,6 @@
 #include <TH1D.h>
 #include <TProfile.h>
 
-#include "TruthHelper/IsGenStable.h"
-#include "TruthHelper/GenAll.h"
 
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
@@ -34,10 +32,6 @@
 
 #include "GeneratorObjects/HijingEventParams.h"
 
-
-
-
-using namespace TruthHelper;
 
 //typedef std::vector<HepMC::ConstGenParticlePtr>  MCParticleCollection ;
 
@@ -200,7 +194,7 @@ StatusCode CheckFlow_New_Minbias::initialize(){
 
 
   ATH_MSG_DEBUG("Histograms have been booked ");
-  m_tesIO = new GenAccessIO();
+  m_tesIO = new TruthHelper::GenAccessIO();
   return result;
 }
 
@@ -257,10 +251,9 @@ StatusCode CheckFlow_New_Minbias::execute() {
   }
 
 
-  // Iterate over MC particles  We are using the IsGenStable predicate from IsGenStable ifs;
-  GenAll ifs;
+  // Iterate over MC particles 
   std::vector<HepMC::ConstGenParticlePtr> particles;
-  CHECK(m_tesIO->getMC(particles, &ifs, m_key));
+  CHECK(m_tesIO->getMC(particles, false, m_key));
 
   for (auto pitr: particles) {
     int    pid    = pitr->pdg_id();

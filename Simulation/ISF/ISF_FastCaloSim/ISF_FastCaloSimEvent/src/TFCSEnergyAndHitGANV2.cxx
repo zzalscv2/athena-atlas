@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCSEnergyAndHitGANV2.h"
@@ -639,9 +639,7 @@ void TFCSEnergyAndHitGANV2::unit_test(TFCSSimulationState *simulstate,
   ATH_MSG_NOCLASS(logger, "Open FCSGANtest.root");
   fGAN = TFile::Open("FCSGANtest.root");
   TFCSEnergyAndHitGANV2 *GAN2 = (TFCSEnergyAndHitGANV2 *)(fGAN->Get("GAN"));
-  if (GAN2) {
-    GAN2->Print();
-  }
+  GAN2->Print();
 
   GAN2->setLevel(MSG::DEBUG);
   ATH_MSG_NOCLASS(logger, "Before running GAN2->simulate()");

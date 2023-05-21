@@ -231,7 +231,6 @@ void GeoModelMdtTest::dumpToFile(const EventContext& ctx, const MdtReadoutElemen
                                 LocTubePos{reElement->localTubePos(tube_id)};
                 
             const Amg::Vector3D globalDir {(tubePos - roPos).unit()};
-            const Amg::Vector3D localDir {(LocTubePos - LocRoPos).unit()};
             sstr << " *** (" << std::setfill('0') << std::setw(2) << lay
                  << ", " << std::setfill('0') << std::setw(3) << tube << ")    "; 
             sstr << Amg::toString(roPos,3)<<" / "

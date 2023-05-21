@@ -38,6 +38,8 @@ public:
     StatusCode getMC(MCParticleCollection& mc, const std::string& key="GEN_EVENT") const;
     StatusCode getMC(MCParticleCollection& mc,
                      const GenIMCselector* selector, const std::string& key="GEN_EVENT") const;
+    StatusCode getMC(MCParticleCollection& mc,
+                     const bool ifgen=false, const std::string& key="GEN_EVENT") const;
 
     StatusCode getDH(const McEventCollection*& dh) const {
         return m_sgSvc->retrieve(dh);

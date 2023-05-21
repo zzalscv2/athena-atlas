@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LumiBlockComps )
@@ -79,5 +79,5 @@ if( NOT XAOD_ANALYSIS )
 
    atlas_add_test( BunchCrossingCondAlg
                    SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/python/BunchCrossingCondAlgTest.py
-                   POST_EXEC_SCRIPT " /usr/bin/diff BCData.txt ${CMAKE_CURRENT_SOURCE_DIR}/share/BCData.txt.ref > BC_diff.log " )
+                   POST_EXEC_SCRIPT "/usr/bin/diff -u0 BCData.txt ${CMAKE_CURRENT_SOURCE_DIR}/share/BCData.txt.ref" )
 endif()

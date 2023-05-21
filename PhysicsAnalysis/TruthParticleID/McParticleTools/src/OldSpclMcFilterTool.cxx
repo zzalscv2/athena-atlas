@@ -13,15 +13,15 @@
 #include <cmath>
 
 // CLHEP/HepMC includes
+#include "TruthUtils/MagicNumbers.h"
 #include "TruthHelper/GenAccessIO.h"
-#include "TruthHelper/IsGenStable.h"
-#include "TruthHelper/IsGenSimulStable.h"
-#include "TruthHelper/IsGenerator.h"
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/Relatives.h"
 #include "CLHEP/Units/SystemOfUnits.h"
+#include "TruthUtils/HepMCHelpers.h"
+
 
 // McParticleKernel includes
 #include "McParticleKernel/IMcVtxFilterTool.h"
@@ -141,20 +141,13 @@ StatusCode OldSpclMcFilterTool::selectSpclMcBarcodes()
 {
   StatusCode sc = StatusCode::SUCCESS;
 
-  // Initialize helper classes to test event and final particles
-
-  static const IsGenStable      isStable;
-  static const IsGenSimulStable isGSStable;
-  static const IsGenerator      isGenerator;
-
   // Get all of the generated particles (does not have Geant secondaries)
 
   std::vector<HepMC::ConstGenParticlePtr> particles;
   if ( m_includeSimul ) {
-    sc = m_tesIO->getMC(particles,  m_mcEventsReadHandleKey.key());
+    sc = m_tesIO->getMC(particles, false,  m_mcEventsReadHandleKey.key());
   } else {
-    static const IsGenerator ifs;
-    sc = m_tesIO->getMC(particles, &ifs, m_mcEventsReadHandleKey.key());
+    sc = m_tesIO->getMC(particles, true, m_mcEventsReadHandleKey.key());
   }
   if ( sc.isFailure() ) {
     ATH_MSG_ERROR("Could not get Monte Carlo particles from TDS at : "
@@ -193,9 +186,9 @@ StatusCode OldSpclMcFilterTool::selectSpclMcBarcodes()
 
     /// stable particles
     if (m_includeSimul ) {
-        if ( isGSStable(part) && accept && std::abs(eta) < m_etaRange ) isSpcl = true;
+        if ( MC::isSimStable(part) && accept && std::abs(eta) < m_etaRange ) isSpcl = true;
     } else {
-        if ( isStable(part) && accept && std::abs(eta) < m_etaRange ) isSpcl = true;
+        if ( MC::isGenStable(part) && accept && std::abs(eta) < m_etaRange ) isSpcl = true;
     }
     // e, mu, tau, neutrino 
     // Hard coded cut pt>2GeV to remove beam-jet Dalitz decays, etc.
@@ -251,7 +244,7 @@ StatusCode OldSpclMcFilterTool::selectSpclMcBarcodes()
         for(const auto& child: *dcyVtx) {
 	if( child->pdg_id()==id && //> looking for parton showers or documentaries
 	    HepMC::barcode(child) !=barcode  && //> just to be sure that merging GEN_EVENT/G4Truth is OK
-	    isGenerator(child)  //> child is not from GEANT
+	    HepMC::is_truthhelper_generator_particle(child)  //> child is not from GEANT
 	    ) {
 	  if ( m_includePartonShowers ) {
 	    // we keep the parent particle
@@ -285,7 +278,7 @@ StatusCode OldSpclMcFilterTool::selectSpclMcBarcodes()
     // Children
     if( isSpcl && decayVtx ) {
       for(const auto& child: *(part->end_vertex())) {
-        if( isGenerator(child) && !m_removeDecayToSelf) { 
+        if( HepMC::is_truthhelper_generator_particle(child) && !m_removeDecayToSelf) { 
 	  m_barcodes.insert(HepMC::barcode(child));// its not there already
         }
       }

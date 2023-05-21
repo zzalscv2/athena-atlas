@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArCompleteToFlat.h"
@@ -680,7 +680,7 @@ StatusCode LArCompleteToFlat::stop() {
     
 
   if (m_DAC2uAInput.size()) {
-    const ILArDAC2uA* DAC2uAComplete;
+    const ILArDAC2uA* DAC2uAComplete = nullptr;
     sc=detStore()->retrieve(DAC2uAComplete,m_DAC2uAInput);
     if (sc.isFailure()) {
       if(m_forceStop) { 
@@ -789,7 +789,7 @@ StatusCode LArCompleteToFlat::stop() {
   }//end have m_OFCInput
   //Shape:
   if (m_ShapeInput.size()) {
-    const LArShapeComplete* shapeComplete;
+    const LArShapeComplete* shapeComplete = nullptr;
     sc=detStore()->retrieve(shapeComplete,m_ShapeInput);
     if (sc.isFailure()) {
       if(m_forceStop) { 

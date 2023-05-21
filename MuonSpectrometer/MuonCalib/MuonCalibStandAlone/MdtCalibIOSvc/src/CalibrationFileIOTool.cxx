@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // this
@@ -7,6 +7,7 @@
 
 // Framework
 #include "CxxUtils/checker_macros.h"
+#include "CxxUtils/starts_with.h"
 
 // MdtCalibUtils
 #include "MdtCalibUtils/RtDataFromFile.h"
@@ -213,9 +214,9 @@ namespace MuonCalib {
                                                               int &phi, int &ml) {
         // check if name begins with the prefix
         std::string prefix_st(prefix);
-        if (nm.find(prefix_st) != 0) return false;
+        if (!CxxUtils::starts_with (nm, prefix_st)) return false;
         // check if filename ends in .dat
-        if (static_cast<int>(nm.find(".dat")) < 0 || nm.find(".dat") != nm.size() - 4) return false;
+        if (!CxxUtils::ends_with (nm, ".dat")) return false;
         // cut prefix and suffix from filename
         std::string cutout(nm, prefix_st.size(), nm.size() - 4 - prefix_st.size());
         // extract station name

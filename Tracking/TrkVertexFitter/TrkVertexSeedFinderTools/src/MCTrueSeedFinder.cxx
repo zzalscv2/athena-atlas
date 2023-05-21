@@ -20,12 +20,11 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "GaudiKernel/IPartPropSvc.h"
 
 // Helper functors:
-#include "TruthHelper/IsGenStable.h"
-#include "TruthHelper/IsGenInteracting.h"
 #include "HepPDT/ParticleDataTable.hh"
 
 namespace {
@@ -231,8 +230,8 @@ namespace Trk
 
     // Now check for stable particles
     if (!HepMC::is_simulation_particle(part)) {
-      if( ! TruthHelper::IsGenStable()( part ) ) return false;
-      if( ! TruthHelper::IsGenInteracting()( part ) ) return false;
+      if( ! MC::isGenStable( part ) ) return false;
+      if( ! MC::isSimInteracting( part ) ) return false;
     }
 
     // finally require it to be charged

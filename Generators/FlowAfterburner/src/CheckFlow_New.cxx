@@ -26,8 +26,6 @@
 #include "TProfile.h"
 
 #include "TruthHelper/GenAccessIO.h"
-#include "TruthHelper/IsGenStable.h"
-#include "TruthHelper/GenAll.h"
 
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
@@ -238,7 +236,7 @@ StatusCode CheckFlow_New::initialize(){
   }
 
   msg(MSG::DEBUG) << "Histograms have been booked " << endmsg;
-  m_tesIO = new GenAccessIO();
+  m_tesIO = new TruthHelper::GenAccessIO();
   return result;
 }
 
@@ -278,9 +276,8 @@ StatusCode CheckFlow_New::execute() {
                                 cos_n_neg[ihar]=0;sin_n_neg[ihar]=0;   cos_n_pt_neg[ihar]=0;sin_n_pt_neg[ihar]=0;}
 
   // Iterate over all MC particles
-  GenAll ifs;
   std::vector<HepMC::ConstGenParticlePtr> particles;
-  StatusCode stat = m_tesIO->getMC(particles, &ifs, m_key);
+  StatusCode stat = m_tesIO->getMC(particles, false, m_key);
   if (stat.isFailure()) {
     msg(MSG::ERROR) << "Could not find " << m_key << endmsg;
     return stat;

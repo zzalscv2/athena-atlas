@@ -294,7 +294,7 @@ const MuonGM::MuonDetectorManager& make_dd ATLAS_NOT_THREAD_SAFE ()
   AGDDVolumeStore& vs = c->GetVolumeStore();
   AGDDPositionerStore& ps = c->GetPositionerStore();
 
-  sTGCDetectorDescription ddsdet ("sTG1-dummy", ds);
+  sTGCDetectorDescription ddsdet ("sTG1-STS", ds);
   ddsdet.Register();
   ddsdet.roParameters.nWires.push_back(0);
   ddsdet.roParameters.nPadPhi.push_back(0);
@@ -400,7 +400,7 @@ const MuonGM::MuonDetectorManager& make_dd ATLAS_NOT_THREAD_SAFE ()
   mdt_id->initialize_from_dictionary (idd);
   assert ( sg->record (std::move (mdt_id), "MdtIdHelper") );
 
-  new MuonGM::sTGC_Technology ("sTG1-dummy", ds);
+  new MuonGM::sTGC_Technology ("sTG1-STS", ds);
   new MuonGM::sTGC_Technology ("sTGC_1", ds);
   auto stgc_id = std::make_unique<sTgcIdHelper>();
   stgc_id->initialize_from_dictionary (idd);
