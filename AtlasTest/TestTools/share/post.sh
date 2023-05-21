@@ -144,7 +144,7 @@ PP="$PP"'|^AtRndmGenSvc         INFO Initializing AtRndmGenSvc'
 PP="$PP"'|^AtRanluxGenSvc2      INFO Initializing AtRanluxGenSvc2'
 PP="$PP"'|^AtRanluxGenSvc       INFO Initializing AtRanluxGenSvc'
 #ignore personal .athenarc files
-PP="$PP"'|including file \"\$HOME/.athenarc'
+PP="$PP"'|including file "\$HOME/.athenarc'
 #ignore known gaudi python warning
 PP="$PP"'|Bindings.py:660: DeprecationWarning'
 #ignore the ignored
@@ -315,8 +315,8 @@ else
            # Process/filter log and reference file
            process() {
                sed -r "$II" $1 |
-                   ( [[ "$selectpatterns" ]] && egrep -a "$selectpatterns" || tee ) |
-                   ( [[ "$ignorepatterns" ]] && egrep -av "$ignorepatterns" || tee ) > $2
+                   ( [[ "$selectpatterns" ]] && grep -Ea "$selectpatterns" || tee ) |
+                   ( [[ "$ignorepatterns" ]] && grep -Eav "$ignorepatterns" || tee ) > $2
            }
            process $joblog $jobdiff
            process $reflog $refdiff

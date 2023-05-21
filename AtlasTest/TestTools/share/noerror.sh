@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 #
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # Post-processing script to be used with atlas_add_test to
 # check for common error patterns in the log file.
@@ -54,9 +54,9 @@ fi
 
 # check log file:
 if [ -n "${ATLAS_CTEST_LOG_IGNORE_PATTERN}" ]; then
-    matches=`egrep -a "${errors}" ${joblog} | egrep -av "${ATLAS_CTEST_LOG_IGNORE_PATTERN}"`
+    matches=`grep -Ea "${errors}" ${joblog} | grep -Eav "${ATLAS_CTEST_LOG_IGNORE_PATTERN}"`
 else
-    matches=`egrep -a "${errors}" ${joblog}`
+    matches=`grep -Ea "${errors}" ${joblog}`
 fi
 
 if [ -n "${matches}" ]; then
