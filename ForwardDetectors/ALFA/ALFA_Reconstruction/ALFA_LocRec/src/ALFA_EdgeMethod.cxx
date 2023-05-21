@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_LocRec/ALFA_EdgeMethod.h"
@@ -13,10 +13,10 @@ ALFA_EdgeMethod::ALFA_EdgeMethod() :
 }
 
 ALFA_EdgeMethod::ALFA_EdgeMethod(Bool_t bOpt_Sisters, Bool_t bOpt_UseGaps) :
-    AthMessaging("ALFA_EdgeMethod")
+  AthMessaging("ALFA_EdgeMethod"),
+  m_bOpt_Sisters (bOpt_Sisters),
+  m_bOpt_UseGaps (bOpt_UseGaps)
 {
-	m_bOpt_Sisters = bOpt_Sisters;
-	m_bOpt_UseGaps = bOpt_UseGaps;
 }
 
 ALFA_EdgeMethod::~ALFA_EdgeMethod()

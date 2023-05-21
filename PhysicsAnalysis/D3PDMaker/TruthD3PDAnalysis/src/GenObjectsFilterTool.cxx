@@ -10,16 +10,13 @@
 #include "AthenaKernel/errorcheck.h"
 #include "HepPDT/ParticleDataTable.hh"
 
-// Helper functors:
-#include "TruthHelper/IsGenStable.h"
-#include "TruthHelper/IsGenInteracting.h"
-
 // EDM include(s):
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/Relatives.h"
 #include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "GeneratorObjects/McEventCollection.h"
 
 // Local include(s):
@@ -416,11 +413,10 @@ bool GenObjectsFilterTool::pass( const HepMC::ConstGenParticlePtr& part,
    // If we don't want to specifically select charged truth tracks, then this
    // is already good enough:
    if( ! m_selectTruthTracks ) return true;
-   if (!HepMC::is_simulation_particle(part)) {
-     if( ! TruthHelper::IsGenStable()( part ) ) return false;
-     if( ! TruthHelper::IsGenInteracting()( part ) ) return false;
-   }
-
+    if (!HepMC::is_simulation_particle(part)) {
+      if( ! MC::isGenStable( part ) ) return false;
+      if( ! MC::isSimInteracting( part ) ) return false;
+    }
    int pdg = part->pdg_id();
    /// remove gluons and quarks of status 2 that pass IsGenStable!!!
    if( std::abs(pdg) < 7 || std::abs(pdg) == 21 ) return false;

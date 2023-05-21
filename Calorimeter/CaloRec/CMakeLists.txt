@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloRec )
@@ -114,7 +114,7 @@ atlas_add_test( ToolConstantsCondAlgConfig_test
 
 atlas_add_test( CaloCellMakerTest
                 SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/python/CaloCellMakerConfig.py
-                POST_EXEC_SCRIPT " /usr/bin/diff CaloCells.txt ${CMAKE_CURRENT_SOURCE_DIR}/share/CaloCells.txt.ref > diff.log " )
+                POST_EXEC_SCRIPT "/usr/bin/diff -u0 CaloCells.txt ${CMAKE_CURRENT_SOURCE_DIR}/share/CaloCells.txt.ref" )
 
 atlas_add_test( CaloTowerStore_test
    SCRIPT athena.py CaloRec/CaloTowerStore_test.py

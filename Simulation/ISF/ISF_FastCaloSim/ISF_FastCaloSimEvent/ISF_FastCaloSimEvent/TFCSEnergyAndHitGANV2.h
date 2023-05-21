@@ -63,7 +63,7 @@ public:
   unsigned int get_nr_of_init(unsigned int bin) const;
   void set_nr_of_init(unsigned int bin, unsigned int ninit);
 
-  const TFCSGANXMLParameters::Binning get_Binning() const {
+  const TFCSGANXMLParameters::Binning& get_Binning() const {
     return m_param.GetBinning();
   };
   const TFCSGANEtaSlice::ExtrapolatorWeights get_ExtrapolationWeights() const {

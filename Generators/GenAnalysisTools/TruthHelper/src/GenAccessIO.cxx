@@ -3,7 +3,9 @@
 */
 
 #include "TruthHelper/GenAccessIO.h"
+#include "TruthHelper/GenIMCselector.h"
 #include "TruthHelper/GenAll.h"
+#include "TruthHelper/IsGenerator.h"
 #include "GaudiKernel/MsgStream.h"
 #include "AthenaKernel/getMessageSvc.h"
 
@@ -21,6 +23,13 @@ StatusCode GenAccessIO::getMC(MCParticleCollection& mcParticles, const std::stri
     const GenIMCselector* selector = new GenAll();
     return this->getMC(mcParticles, selector, key);
     /// @todo Memory leak on the undeleted GenAll?
+}
+
+StatusCode GenAccessIO::getMC(MCParticleCollection& mcParticles, const bool ifgen,  const std::string& key) const {
+    std::shared_ptr<GenIMCselector> selector = nullptr;
+    if (ifgen) selector = std::make_shared<IsGenerator>(); else selector = std::make_shared<GenAll>();
+
+    return getMC(mcParticles,selector.get(),key);
 }
 
 
