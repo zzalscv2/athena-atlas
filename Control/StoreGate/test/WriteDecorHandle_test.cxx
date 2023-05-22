@@ -241,6 +241,15 @@ void test3()
   assert (h2.auxid() == r.getAuxID<int> ("bbb"));
   assert (h2.isAvailable());
   assert (h2.isPresent());
+
+  SG::AuxStoreInternal auxstore2;
+  auto cont2 = std::make_unique<MyObjCont>();
+  cont2->setStore (&auxstore2);
+  cont2->push_back (new MyObj(1));
+  cont2->push_back (new MyObj(2));
+  cont2->push_back (new MyObj(3));
+  const MyObjCont* pcont2 = cont2.get();
+  EXPECT_EXCEPTION( SG::ExcBadDecorElement, h1 (*(*pcont2)[1]) = 11 );
 }
 
 
@@ -357,6 +366,7 @@ void test6()
   assert (foo1_proxy->refCount() == 1);
   h1 (*(*pcont1)[0]) = 11;
   assert (foo1_proxy->refCount() == 2);
+  EXPECT_EXCEPTION( SG::ExcBadDecorElement, h1 (*(*pcont2)[0]) = 12 );
 
   SG::WriteDecorHandleKey<MyObjCont> k2 ("foo2.aaa");
   assert (k2.initialize().isSuccess());
@@ -365,8 +375,9 @@ void test6()
   assert (h2.setProxyDict (&testStore).isSuccess());
 
   assert (foo2_proxy->refCount() == 1);
-  h2 (*(*pcont2)[0]) = 11;
+  h2 (*(*pcont2)[0]) = 13;
   assert (foo2_proxy->refCount() == 1);
+  h2 (*(*pcont1)[0]) = 14; // ok, h2 has been renounced.
 }
 
 

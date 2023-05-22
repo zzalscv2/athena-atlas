@@ -10,6 +10,7 @@
 
 
 #include "CxxUtils/checker_macros.h"
+#include "StoreGate/exceptions.h"
 
 
 namespace SG {
@@ -173,8 +174,15 @@ template <class T, class D>
 typename WriteDecorHandle<T, D>::reference_type
 WriteDecorHandle<T, D>::operator() (const AuxElement& e)
 {
-  if (m_state != RENOUNCED) {
-    this->cptr();
+  // Ensure that the element we're given is actually an element
+  // of the container we're writing.
+  // (Note that we need to look up the container in the store independently
+  // of this check.  We previously called cptr() here, but that's
+  // redundant with vectorData().
+  if (m_state != RENOUNCED && e.container() != this->vectorData()) {
+    throwExcBadDecorElement (Gaudi::DataHandle::Writer,
+                             this->clid(),
+                             this->m_decorKey);
   }
   return m_acc (e);
 }
