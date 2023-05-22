@@ -25,16 +25,11 @@
 #include "TH1D.h"
 #include "TProfile.h"
 
-#include "TruthHelper/GenAccessIO.h"
-
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 
 #include "GeneratorObjects/HijingEventParams.h"
-
-using namespace TruthHelper;
-
 
 /// @todo Migrate to a GenBase class or at least AthAlgorithm
 CheckFlow_New::CheckFlow_New(const std::string& name, ISvcLocator* pSvcLocator) :
