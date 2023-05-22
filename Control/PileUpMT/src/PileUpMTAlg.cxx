@@ -482,7 +482,17 @@ StatusCode PileUpMTAlg::execute() {
             }
             catch (const std::exception& e) {
                 ATH_MSG_ERROR("Caught exception processing subevent: " << e.what() << ", TOOL: "
-                                                                       << tool.name());
+                                                                       << tool.name() << ", BC: " << start_evt->time());
+                const auto evt_ids =
+                    ranges::make_subrange(start_evt, end_evt) |
+                    rv::transform([](const SubEvent& sev) {
+                      return fmt::format("({}, {})", sev.ptr()->runNumber(),
+                                         sev.ptr()->eventNumber());
+                    }) |
+                    ranges::to<std::vector>;
+                const std::string evts = fmt::format("[{}]", fmt::join(evt_ids, ", "));
+                ATH_MSG_ERROR(
+                    "Exception occured in one of these events: " << evts);
                 return StatusCode::FAILURE;
             }
         }
