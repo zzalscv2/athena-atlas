@@ -101,16 +101,22 @@ namespace xAOD {
 
     /// Methods that require combining results or applying scales
 
-    /// Ex in 1 MeV scale
+    /// Met Ex in 1 MeV scale (all signs considered)
     int jFexMETRoI_v1::Ex() const {
+        //Since the firmware uses phi values of one hemisphere we need to apply a minus to the other hemisphere
         int hemisphere = fpgaNumber() == 0 ? 1 : -1;
-        return hemisphere*tobEx()*tobEtScale();
+        
+        //We need to apply a global minus to return the "missing" vectorial Et instead of the "visible" vectorial Et
+        return -1*hemisphere*tobEx()*tobEtScale();
     }
 
-    /// Ey in 1 MeV scale
+    /// Met Ey in 1 MeV scale (all signs considered)
     int jFexMETRoI_v1::Ey() const {
+        //Since the firmware uses phi values of one hemisphere we need to apply a minus to the other hemisphere
         int hemisphere = fpgaNumber() == 0 ? 1 : -1;
-        return hemisphere*tobEy()*tobEtScale();
+        
+        //We need to apply a global minus to return the "missing" vectorial Et instead of the "visible" vectorial Et
+        return -1*hemisphere*tobEy()*tobEtScale();
     }
 
 

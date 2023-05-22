@@ -361,7 +361,7 @@ void xAODtoHepMCTool::printxAODEvent(const xAOD::TruthEvent *event, const xAOD::
     if (part == nullptr)
       continue;
     int bc = part->barcode();
-    if (bc > HepMC::SIM_REGENERATION_INCREMENT)
+    if (HepMC::generations(bc) > 0)
       continue;
     int id = part->pdgId();
     if (id != 25)

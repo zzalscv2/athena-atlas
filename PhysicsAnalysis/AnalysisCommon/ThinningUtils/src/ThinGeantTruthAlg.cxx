@@ -239,7 +239,7 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
     if (std::find(recoParticleTruthIndices.begin(),
                   recoParticleTruthIndices.end(),
                   i) != recoParticleTruthIndices.end()) {
-      if (HepMC::is_simulation_particle(abs(particle->barcode()))) { // only need to do this for Geant particles since
+      if (HepMC::is_simulation_particle(particle)) { // only need to do this for Geant particles since
                            // non-Geant are kept anyway
         ancestors(particle, particleMask, encounteredBarcodes);
         encounteredBarcodes.clear();
@@ -256,7 +256,7 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
       encounteredBarcodes.clear();
     }
 
-    if (!HepMC::is_simulation_particle(abs(particle->barcode()))) {
+    if (!HepMC::is_simulation_particle(particle)) {
       particleMask[i] = true;
     }
   }
