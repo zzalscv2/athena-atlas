@@ -252,18 +252,24 @@ TBranchAuxDynReader::getBranchInfo(const SG::auxid_t& auxid, const SG::AuxStoreI
       const std::type_info* ti = getAuxElementType( brInfo.tclass, typ, store.standalone(),
                                                     elem_tname, branch_tname );
       const std::type_info* reg_ti = r.getType(auxid);
-      if( ti && ti != reg_ti && strcmp(ti->name(), reg_ti->name()) != 0 )
+      const std::type_info *tinf =  store.getIOType(auxid);
+      bool different_elt_type = ti && ti != reg_ti && strcmp(ti->name(), reg_ti->name()) != 0;
+      bool different_vec_type = tinf && brInfo.tclass &&
+        (!brInfo.tclass->GetTypeInfo() || 
+         (tinf != brInfo.tclass->GetTypeInfo() && strcmp (tinf->name(), brInfo.tclass->GetTypeInfo()->name()) != 0));
+      if( different_elt_type || different_vec_type )
       {
          // type in registry is different than type in the file.
          // will need to use ROOT auto schema evolution
          brInfo.needsSE = true;
-         errorcheck::ReportMessage msg (MSG::INFO, ERRORCHECK_ARGS, "TBranchAuxDynReader");
-         msg << "attribute " << brInfo.attribName << " (id=" << auxid <<
-            " typename=" << SG::AuxTypeRegistry::instance().getType(auxid)->name()
-             << ") has different type than the branch " << branch_tname;
-         msg << "  Attempting schema evolution.";
+         if (different_elt_type) {
+           errorcheck::ReportMessage msg (MSG::INFO, ERRORCHECK_ARGS, "TBranchAuxDynReader");
+           msg << "attribute " << brInfo.attribName << " (id=" << auxid <<
+             " typename=" << SG::AuxTypeRegistry::instance().getType(auxid)->name()
+               << ") has different type than the branch " << branch_tname;
+           msg << "  Attempting schema evolution.";
+         }
 
-         const std::type_info *tinf =  store.getIOType(auxid);
          brInfo.SE_tclass  = TClass::GetClass(*tinf);
          brInfo.SE_edt = kOther_t;
          if( !brInfo.SE_tclass  ) {
