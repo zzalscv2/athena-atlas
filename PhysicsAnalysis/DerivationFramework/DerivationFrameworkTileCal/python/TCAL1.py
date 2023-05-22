@@ -61,7 +61,12 @@ def TCAL1StringSkimmingToolCfg(flags, **kwargs):
     acc = ComponentAccumulator()
     tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
 
-    selectionExpression = f'Muons.{prefix}SelectedMuon' if flags.Beam.Type is BeamType.Collisions else 'abs(Muons.eta) < 1.7'
+    selectionExpression = ""
+    if flags.Beam.Type is BeamType.Collisions:
+        selectionExpression = f'(Muons.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500 + 0.4 * Muons.neflowisol20) / Muons.pt < 0.18 && Muons.{prefix}SelectedMuon'
+    else:
+        selectionExpression = 'abs(Muons.eta) < 1.7'
+
     skimmingExpression = f'count({selectionExpression}) > 0'
 
     kwargs.setdefault('name', 'TCAL1StringSkimmingTool')
