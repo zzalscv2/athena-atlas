@@ -289,10 +289,10 @@ bool TFCSEnergyAndHitGAN::fillEnergy(TFCSSimulationState &simulstate,
   simulstate.set_E(0);
 
   int vox = 0;
-  for (auto element : binsInLayers) {
+  for (const auto& element : binsInLayers) {
     int layer = element.first;
 
-    TH2D *h = &element.second;
+    const TH2D *h = &element.second;
     int xBinNum = h->GetNbinsX();
     // If only one bin in r means layer is empty, no value should be added
     if (xBinNum == 1) {
@@ -336,12 +336,12 @@ bool TFCSEnergyAndHitGAN::fillEnergy(TFCSSimulationState &simulstate,
   }
 
   vox = 0;
-  for (auto element : binsInLayers) {
+  for (const auto& element : binsInLayers) {
     int layer = element.first;
     simulstate.setAuxInfo<int>("GANlayer"_FCShash, layer);
     TFCSLateralShapeParametrizationHitBase::Hit hit;
 
-    TH2D *h = &element.second;
+    const TH2D *h = &element.second;
     int xBinNum = h->GetNbinsX();
     // If only one bin in r means layer is empty, no value should be added
     if (xBinNum == 1) {
@@ -429,7 +429,7 @@ bool TFCSEnergyAndHitGAN::fillEnergy(TFCSSimulationState &simulstate,
           continue;
         }
 
-        TAxis *x = (TAxis *)h->GetXaxis();
+        const TAxis *x = h->GetXaxis();
         nHitsR = x->GetBinUpEdge(ix) - x->GetBinLowEdge(ix);
         if (yBinNum == 1) {
           // nbins in alpha depend on circumference lenght
@@ -438,7 +438,7 @@ bool TFCSEnergyAndHitGAN::fillEnergy(TFCSSimulationState &simulstate,
         } else {
           // d = 2*r*sin (a/2r) this distance at the upper r must be 1mm for
           // layer 1 or 5, 5mm otherwise.
-          TAxis *y = (TAxis *)h->GetYaxis();
+          const TAxis *y = h->GetYaxis();
           double angle = y->GetBinUpEdge(iy) - y->GetBinLowEdge(iy);
           double r = x->GetBinUpEdge(ix);
           double d = 2 * r * sin(angle / 2 * r);
@@ -449,7 +449,7 @@ bool TFCSEnergyAndHitGAN::fillEnergy(TFCSSimulationState &simulstate,
         nHitsR = std::min(10, std::max(1, nHitsR));
 
         for (int ir = 0; ir < nHitsR; ++ir) {
-          TAxis *x = (TAxis *)h->GetXaxis();
+          const TAxis *x = h->GetXaxis();
           double r =
               x->GetBinLowEdge(ix) + x->GetBinWidth(ix) / (nHitsR + 1) * ir;
 
@@ -459,7 +459,7 @@ bool TFCSEnergyAndHitGAN::fillEnergy(TFCSSimulationState &simulstate,
               alpha = CLHEP::RandFlat::shoot(simulstate.randomEngine(), -M_PI,
                                              M_PI);
             } else {
-              TAxis *y = (TAxis *)h->GetYaxis();
+              const TAxis *y = h->GetYaxis();
               alpha = y->GetBinLowEdge(iy) +
                       y->GetBinWidth(iy) / (nHitsAlpha + 1) * ialpha;
             }
