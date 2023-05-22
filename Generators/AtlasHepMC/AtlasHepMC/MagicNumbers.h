@@ -49,5 +49,15 @@ template <>  inline bool is_simulation_vertex(const ConstGenVertexPtr& p){ retur
 template <>  inline bool is_simulation_vertex(const GenVertexPtr& p){ return (barcode(p)<-SIM_BARCODE_THRESHOLD);}
 #endif
 
+
+template <class T>  inline bool is_truthhelper_generator_particle(const T& p) {
+    return (!is_simulation_particle(p)) &&
+           (p->status() < 200 ||
+            p->status() % 1000 == 1 || p->status() % 1000 == 2 ||
+            p->status() == 10902);
+}
+
+
+
 }
 #endif
