@@ -16,7 +16,7 @@ namespace top {
     int b = mc.barcode();
 
     // secondary particles  
-    if (b > HepMC::SIM_REGENERATION_INCREMENT) return false;
+    if (HepMC::generations(b) > 0) return false;
 
     if (p == 11 || p == 13) {
       if (s != 1) // only final electrons and muons for e-in-jet and isolation performance eval.

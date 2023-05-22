@@ -125,7 +125,7 @@ MCTruthClassifier::egammaClusMatch(const xAOD::CaloCluster* clus,
     }
     // excluding G4 particle
     if(!isFwrdEle || (isFwrdEle && m_FwdElectronUseG4Sel)){
-      if (HepMC::is_simulation_particle(thePart->barcode())) {
+      if (HepMC::is_simulation_particle(thePart)) {
 	continue;
       }
     }
@@ -257,7 +257,7 @@ MCTruthClassifier::egammaClusMatch(const xAOD::CaloCluster* clus,
       continue;
     }
     // only G4 particle
-    if (!HepMC::is_simulation_particle(thePart->barcode())) {
+    if (!HepMC::is_simulation_particle(thePart)) {
       continue;
     }
     long iParticlePDG = thePart->pdgId();

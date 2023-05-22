@@ -22,7 +22,7 @@ if __name__ == '__main__':
     parser.add_argument('--filesInput',nargs='+',help="input files",required=True)
     parser.add_argument('--skipEvents',type=int,default=0,help="number of events to skip")
     parser.add_argument('--outputLevel',default="WARNING",choices={ 'INFO','WARNING','DEBUG','VERBOSE'})
-    parser.add_argument('--outputs',nargs='+',choices={"jFex","eFex","gFex"},required=True, help="What data to decode and output.")
+    parser.add_argument('--outputs',nargs='+',choices={"jFex","eFex","gFex","legacy"},required=True, help="What data to decode and output.")
     args = parser.parse_args()
 
 
@@ -313,10 +313,43 @@ if __name__ == '__main__':
         decoderTools += [gFexInputTool]
         outputEDM += addEDM('xAOD::gFexTowerContainer'    , 'L1_gFexDataTowers'        )                
 
-    
+    if "legacy" in args.outputs:
+        
+        from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import RoIBResultByteStreamToolCfg
+        roibResultTool = acc.popToolsAndMerge(RoIBResultByteStreamToolCfg(flags, name="RoIBResultBSDecoderTool", writeBS=False))
+        decoderTools += [roibResultTool]
+
+        from libpyeformat_helper import SourceIdentifier, SubDetector
+        
+        for module_id in roibResultTool.L1TopoModuleIds:
+          maybeMissingRobs.append(int(SourceIdentifier(SubDetector.TDAQ_CALO_TOPO_PROC, module_id)))
+
+        for module_id in roibResultTool.JetModuleIds:
+          maybeMissingRobs.append(int(SourceIdentifier(SubDetector.TDAQ_CALO_JET_PROC_ROI, module_id)))
+
+        for module_id in roibResultTool.EMModuleIds:
+          maybeMissingRobs.append(int(SourceIdentifier(SubDetector.TDAQ_CALO_CLUSTER_PROC_ROI, module_id)))
+          
+        # Converts RoIBResult to xAOD objects
+        from AnalysisTriggerAlgs.AnalysisTriggerAlgsCAConfig import RoIBResultToxAODCfg
+        xRoIBResultAcc, xRoIBResultOutputs = RoIBResultToxAODCfg(flags)
+        acc.merge(xRoIBResultAcc)          
+
+
+        # outputEDM += ['CTP_RDO#*']
+        outputEDM += ['ROIB::RoIBResult#*']
+
+        outputEDM += addEDM('xAOD::JetEtRoI'         , 'LVL1JetEtRoI')
+        outputEDM += addEDM('xAOD::JetRoIContainer'  , 'LVL1JetRoIs')
+        outputEDM += addEDM('xAOD::EmTauRoIContainer', 'LVL1EmTauRoIs')
+        #different naming scheme of Aux branches and types for legacy EnergySumRoI (MET,sumET)
+        outputEDM += ["xAOD::EnergySumRoI#LVL1EnergySumRoI", "xAOD::EnergySumRoIAuxInfo#LVL1EnergySumRoIAux."] 
+        
+           
     decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder", DecoderTools=decoderTools, MaybeMissingROBs=maybeMissingRobs)
     acc.addEventAlgo(decoderAlg, sequenceName='AthAlgSeq')
     
+
 
    
     
