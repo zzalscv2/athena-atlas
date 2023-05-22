@@ -62,7 +62,7 @@ StatusCode xAODTTbarWithJpsimumuFilter::filterEvent()
         {
             const xAOD::TruthParticle *pitr = (*itr)->truthParticle(iPart);
             if (std::abs(pitr->pdgId())!=443) continue;
-            if (HepMC::is_simulation_particle(pitr->barcode())) continue;
+            if (HepMC::is_simulation_particle(pitr)) continue;
             if(!isLeptonDecay(pitr, 13)) continue;
             if (!passJpsiSelection(pitr)) continue;
             isjpsi = true;

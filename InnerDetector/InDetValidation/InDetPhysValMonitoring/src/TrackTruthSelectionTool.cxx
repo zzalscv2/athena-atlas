@@ -121,7 +121,7 @@ TrackTruthSelectionTool::accept(const xAOD::TruthParticle* p) const {
     acceptData.setCutResult("max_pt", (p->pt() < m_maxPt));
   }
   if (m_requireOnlyPrimary) {
-    acceptData.setCutResult("OnlyPrimary", (!HepMC::is_simulation_particle(p->barcode())));
+    acceptData.setCutResult("OnlyPrimary", (!HepMC::is_simulation_particle(p)));
   }
 
   if (m_requireCharged) {
