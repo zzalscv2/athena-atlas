@@ -16,3 +16,4 @@ SG::ExcBadContext: Bad EventContext extension while building ReadCondHandle. The
 SG::ExcNoCondCont: Can't retrieve CondCont from ReadCondHandle for key foo. because
 SG::ExcBadReadCondHandleInit: ReadCondHandle didn't initialize in getRange().
 SG::ExcBadReadCondHandleInit: Range not set in ReadCondHandle::getRange().
+SG::ExcBadDecorElement: WriteDecorHandle foo.bar[1234] given an element not in the requested container.
