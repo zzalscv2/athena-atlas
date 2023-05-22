@@ -544,6 +544,6 @@ def IDTIDECfg(flags):
               ItemList=IDTIDEItemList, AcceptAlgs=["IDTIDEKernel"]))
     acc.merge(SetupMetaDataForStreamCfg(
         flags, "DAOD_IDTIDE", AcceptAlgs=["IDTIDEKernel"],
-        createMetadata=[MetadataCategory.CutFlowMetaData]))
+        createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TriggerMenuMetaData]))
 
     return acc
