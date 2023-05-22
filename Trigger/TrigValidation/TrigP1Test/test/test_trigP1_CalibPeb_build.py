@@ -12,7 +12,7 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
-ex.job_options = 'TrigExamples/MTCalibPeb.py'
+ex.job_options = 'TrigExamples.MTCalibPeb.calibPebCfg'
 ex.input = 'data'
 
 test = Test.Test()

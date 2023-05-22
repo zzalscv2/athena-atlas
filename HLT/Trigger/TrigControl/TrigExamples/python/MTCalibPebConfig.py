@@ -136,7 +136,8 @@ def set_flags(flags, options=default_options):
 
 def l1_seq_cfg(flags, options=default_options):
     from HLTSeeding.HLTSeedingConfig import HLTSeedingCfg
-    acc = HLTSeedingCfg(flags, seqName='l1Seq')
+    acc = HLTSeedingCfg(flags)
+
     l1_decoder_alg = acc.getEventAlgo('HLTSeeding')
     l1_decoder_alg.prescaler = CompFactory.PrescalingEmulationTool()
 
