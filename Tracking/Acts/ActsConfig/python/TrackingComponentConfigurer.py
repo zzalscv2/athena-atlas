@@ -136,7 +136,7 @@ class TrackingComponentConfigurer:
     def ActsChain(self):
         self.ActsCluster = True
         self.ActsSpacePoint = True
-        self.ActsSeed = True
+        self.ActsSeed = False
         # Track finding is not yet in its final form
         # thus, it is not enabled yet
 
