@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/exceptions_test.cxx
@@ -38,6 +38,8 @@ void test1()
   std::cout << SG::ExcNoCondCont("foo", "because").what() << "\n";
   std::cout << SG::ExcBadReadCondHandleInit().what() << "\n";
   std::cout << SG::ExcNoRange().what() << "\n";
+  std::cout << SG::ExcBadDecorElement(Gaudi::DataHandle::Writer,
+                                      1234, "foo.bar").what() << "\n";
 }
 
 

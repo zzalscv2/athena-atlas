@@ -21,6 +21,7 @@ def MuonDQAMonitoringConfig(flags):
                 result.merge(CscMonitoringESD_AlgConfig(flags))
             if flags.Detector.GeometrysTGC:
                 from StgcRawDataMonitoring.StgcMonitorAlgorithm import sTgcMonitoringConfig
+                sTgcMonitoringConfig.NSW_PadTriggerDataKey = 'NSW_PadTrigger_RDO'
                 result.merge(sTgcMonitoringConfig(flags))
         if flags.DQ.Environment in ('online', 'tier0','tier0Raw'):
             if flags.Detector.GeometryCSC:

@@ -34,7 +34,7 @@ StatusCode sTgcRawDataMonAlg::initialize() {
   ATH_CHECK(m_meTrkKey.initialize());
   ATH_CHECK(m_residualPullCalculator.retrieve());
   
-  ATH_CHECK(m_rdoKey.initialize()); 
+  ATH_CHECK(m_rdoKey.initialize(SG::AllowEmpty)); 
   
   return StatusCode::SUCCESS;
 } 
@@ -45,20 +45,22 @@ StatusCode sTgcRawDataMonAlg::fillHistograms(const EventContext& ctx) const {
   SG::ReadHandle<Muon::sTgcPrepDataContainer> sTgcContainer(m_sTgcContainerKey, ctx);
   SG::ReadCondHandle<MuonGM::MuonDetectorManager> detectorManagerKey(m_detectorManagerKey, ctx); 
   SG::ReadHandle<xAOD::TrackParticleContainer> meTPContainer(m_meTrkKey, ctx);
-  SG::ReadHandle<Muon::NSW_PadTriggerDataContainer> NSWpadTriggerContainer(m_rdoKey, ctx);
 
   if (!meTPContainer.isValid()) {
     ATH_MSG_FATAL("Could not get track particle container: " << m_meTrkKey.fullKey());
     return StatusCode::FAILURE;
   }
  
-  if (!NSWpadTriggerContainer.isValid()) {
-    ATH_MSG_FATAL("Could not get pad trigger data container: " << m_rdoKey.fullKey());
-    return StatusCode::FAILURE;
-  }
+  if(!m_rdoKey.key().empty()){
+    SG::ReadHandle<Muon::NSW_PadTriggerDataContainer> NSWpadTriggerContainer(m_rdoKey, ctx);
+    if (!NSWpadTriggerContainer.isValid()) {
+      ATH_MSG_FATAL("Could not get pad trigger data container: " << m_rdoKey.fullKey());
+      return StatusCode::FAILURE;
+    }
+    fillsTgcPadTriggerDataHistograms(NSWpadTriggerContainer.cptr(), lumiblock);
+  } 
 
   fillsTgcClusterFromTrackHistograms(meTPContainer.cptr());
-  fillsTgcPadTriggerDataHistograms(NSWpadTriggerContainer.cptr(), lumiblock);
    
   for(const Muon::sTgcPrepDataCollection* coll : *sTgcContainer) {
     for (const Muon::sTgcPrepData* prd : *coll) {

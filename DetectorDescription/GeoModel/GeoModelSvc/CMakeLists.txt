@@ -15,5 +15,3 @@ atlas_add_component( GeoModelSvc
                   StoreGateLib GeoModelInterfaces GeoModelUtilities GaudiKernel
                   RDBAccessSvcLib EventInfoMgtLib )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
