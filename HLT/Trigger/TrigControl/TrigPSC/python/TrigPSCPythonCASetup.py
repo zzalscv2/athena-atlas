@@ -41,12 +41,12 @@ if __name__ == "__main__":
                        "POSTCOMMAND"       : ""}
 
 
-def execCommands(cmds):
+def execCommands(cmds, stage):
    """Helper to execute a command string"""
    if cmds:
       log.info("-"*80)
-      log.info("Executing pre-command: %s", cmds)
-      exec(cmds)
+      log.info("Executing %scommand: %s", stage, cmds)
+      exec(cmds, globals())
       log.info("-"*80)
 
 
@@ -54,7 +54,7 @@ from TrigPSC.PscDefaultFlags import defaultOnlineFlags
 flags = defaultOnlineFlags()
 
 # Run pre-command before user CA:
-execCommands(PscConfig.optmap["PRECOMMAND"])
+execCommands(PscConfig.optmap["PRECOMMAND"], "pre-")
 
 # Now clone and use locked flags for services configuration:
 locked_flags = flags.clone()
@@ -73,7 +73,7 @@ cfg.merge( commonServicesCfg(locked_flags) )
 cfg.merge( AthHLT.getCACfg(PscConfig.optmap["JOBOPTIONSPATH"])(flags) )
 
 # Run post-command after user CA:
-execCommands(PscConfig.optmap["POSTCOMMAND"])
+execCommands(PscConfig.optmap["POSTCOMMAND"], "post-")
 
 # Dump and convert job configuration:
 fname = "HLTJobOptions"
