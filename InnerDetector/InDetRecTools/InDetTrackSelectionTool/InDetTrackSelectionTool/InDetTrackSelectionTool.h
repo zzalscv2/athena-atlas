@@ -24,6 +24,10 @@
 #include <map>
 #include <mutex>
 #include <unordered_map>
+#include <string>
+#include <sstream>
+#include <algorithm>
+#include <iterator>
 
 namespace InDetAccessor {
 
@@ -200,6 +204,22 @@ namespace InDet {
     std::vector< Double_t > m_vecPtCutoffsForSctHitsCut; //!< Above each of these pT levels a new SCT hits + dead sensors will be applied
     std::vector< Int_t > m_vecMinNSctHitsAbovePt; //!< the minimum SCT hits above each pt level
 
+    std::vector< Double_t > m_vecEtaCutoffsForZ0SinThetaCut; //!< Above each of these eta levels a new z0*sin(theta) cut will be applied
+    std::vector< Double_t > m_vecPtCutoffsForZ0SinThetaCut; //!< Above each of these pT levels a new z0*sin(theta) cut will be applied
+    std::vector< std::vector< Double_t >> m_vecvecMaxZ0SinThetaAboveEtaPt; //!< Maximum values of z0*sin(theta) above each eta-pT level
+
+    std::vector< Double_t > m_vecEtaCutoffsForD0Cut;//!< Above each of these eta levels a new d0 cut will be applied
+    std::vector< Double_t > m_vecPtCutoffsForD0Cut; //!< Above each of these pT levels a new d0 cut will be applied
+    std::vector< std::vector< Double_t >> m_vecvecMaxD0AboveEtaPt; //!< Maximum values of d0 above each eta-pT level
+
+    std::vector< Double_t > m_vecEtaCutoffsForSctHolesCut;//!< Above each of these eta levels a new SCT holes cut will be applied
+    std::vector< Double_t > m_vecPtCutoffsForSctHolesCut; //!< Above each of these pT levels a new SCT holes cut will be applied
+    std::vector< std::vector< Double_t >> m_vecvecMaxSctHolesAboveEtaPt; //!< Maximum numbers of SCT holes above each eta-pT level
+
+    std::vector< Double_t > m_vecEtaCutoffsForSctHitsPlusDeadCut;//!< Above each of these eta levels a new SCT hits cut will be applied
+    std::vector< Double_t > m_vecPtCutoffsForSctHitsPlusDeadCut; //!< Above each of these pT levels a new SCT hits cut will be applied
+    std::vector< std::vector< Double_t >> m_vecvecMinSctHitsPlusDeadAboveEtaPt; //!< Minimum numbers of SCT hits plus dead sensors above each eta-pT level
+    
     /// Object used to store the last decision
     asg::AcceptInfo m_acceptInfo; //!< Object that stores detailed selection information
 

@@ -40,7 +40,8 @@ namespace InDet {
   CutLevel {
     NoCut, Loose, LoosePrimary, TightPrimary,
       LooseMuon, LooseElectron, LooseTau,
-      MinBias, HILoose, HITight
+      MinBias, HILoose, HITight,
+      HITightOptimized, HILooseOptimized
       };
   
   /// Interface for track selection tool

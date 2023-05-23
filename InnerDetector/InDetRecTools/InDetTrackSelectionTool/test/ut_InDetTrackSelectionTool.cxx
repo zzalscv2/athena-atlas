@@ -41,6 +41,8 @@ bool passLooseTau( const TrackParticle& trk, const xAOD::Vertex* vtx = nullptr )
 bool passMinBias( const TrackParticle& trk, const xAOD::Vertex* vtx = nullptr );
 bool passHILoose( const TrackParticle& trk, const xAOD::Vertex* vtx = nullptr );
 bool passHITight( const TrackParticle& trk, const xAOD::Vertex* vtx = nullptr );
+bool passHILooseOptimized( const TrackParticle& trk, const xAOD::Vertex* vtx = nullptr );
+bool passHITightOptimized( const TrackParticle& trk, const xAOD::Vertex* vtx = nullptr );
 bool passExpPix( const TrackParticle& trk, const xAOD::Vertex* vtx = nullptr );
 uint8_t getSum(const TrackParticle&, xAOD::SummaryType);
 void dumpTrack( const TrackParticle& );
@@ -79,6 +81,8 @@ int main( int argc, char* argv[] ) {
    FUNC_HELP( MinBias );
    FUNC_HELP( HILoose );
    FUNC_HELP( HITight );
+   FUNC_HELP( HILooseOptimized );
+   FUNC_HELP( HITightOptimized );
 #undef FUNC_HELP
 
    for (const auto& cutLevelPair : cutFuncs) {
@@ -369,6 +373,134 @@ bool passHITight( const TrackParticle& trk, const xAOD::Vertex* vtx )
   }
 
   if (trk.chiSquared() / trk.numberDoF() > 6.0) return false;
+
+  return true;
+}
+
+bool passHILooseOptimized( const TrackParticle& trk, const xAOD::Vertex* vtx )
+{
+  auto eta=std::fabs(trk.eta());
+  if (eta > 2.5) return false;
+
+  uint8_t nPixHoles = getSum(trk, xAOD::numberOfPixelHoles);
+  if (nPixHoles > 0) return false;
+
+  bool expectIBL = getSum(trk, xAOD::expectInnermostPixelLayerHit);
+  bool expectBL = getSum(trk, xAOD::expectNextToInnermostPixelLayerHit);
+  uint8_t nIBL = getSum(trk, xAOD::numberOfInnermostPixelLayerHits);
+  uint8_t nBL = getSum(trk, xAOD::numberOfNextToInnermostPixelLayerHits);
+  if (expectIBL) {
+    if (nIBL < 1) return false;
+  } else {
+    if (expectBL && nBL < 1) return false;
+  }
+
+  std::vector<double> vEta = {0.0, 1.1,1.6,2.0};
+  std::vector<double> vPt  = {500, 600, 700, 800, 900, 1000, 1500,
+                              2000,2500,3000,5000,8000,12000};
+  std::vector<std::vector<double>> vvMaxZ0sT = {{2.10,2.15,6.00,5.00,3.10,2.00,1.75,1.60,1.43,1.40,1.05,0.65,0.60},
+                                                {1.44,1.47,1.50,1.55,1.62,1.45,1.45,1.78,1.73,1.50,1.20,0.97,0.53},
+                                                {1.40,1.45,1.50,1.46,1.41,1.37,1.25,1.50,1.50,1.36,1.10,0.85,0.52},
+                                                {1.51,1.70,1.70,1.71,1.71,1.53,1.54,1.49,1.36,1.20,0.95,0.60,0.55}};
+  std::vector<std::vector<double>> vvMaxD0 = {{0.81,0.90,0.94,0.92,0.90,0.75,0.65,0.63,0.62,0.60,0.63,0.50,0.55},
+                                              {1.00,0.98,0.98,0.92,0.90,0.69,0.67,0.86,0.88,0.88,0.88,0.87,1.06},
+                                              {1.19,1.15,1.10,1.08,1.03,0.94,0.85,0.97,0.97,0.96,0.95,0.92,1.04},
+                                              {1.33,1.23,1.21,1.15,1.15,1.07,0.94,0.97,0.97,0.97,0.98,1.10,1.10}};
+  auto pt=std::fabs(trk.pt());
+  if(eta>vEta.at(0) && pt>vPt.at(0))
+  {
+    uint8_t eta_bin=0;
+    for(;eta_bin<vEta.size()-1;++eta_bin)
+    {
+      if(vEta.at(eta_bin)<=eta && eta<vEta.at(eta_bin+1))
+      {
+        break;
+      }
+    }
+    uint8_t pt_bin=0;
+    for(;pt_bin<vPt.size()-1;++pt_bin)
+    {
+      if(vPt.at(pt_bin)<=pt && pt<vPt.at(pt_bin+1))
+      {
+        break;
+      }
+    }
+
+    if (vtx != nullptr) {
+      if (std::fabs(trk.z0()+trk.vz()-vtx->z())*std::sin(trk.theta()) > vvMaxZ0sT.at(eta_bin).at(pt_bin)) return false;
+    }
+    if(std::abs(trk.d0())>vvMaxD0.at(eta_bin).at(pt_bin)) return false;
+  }
+
+  return true;
+}
+
+bool passHITightOptimized( const TrackParticle& trk, const xAOD::Vertex* vtx )
+{
+  auto eta=std::fabs(trk.eta());
+  if (eta > 2.5) return false;
+
+  uint8_t nPixHoles = getSum(trk, xAOD::numberOfPixelHoles);
+  if (nPixHoles > 0) return false;
+
+  bool expectIBL = getSum(trk, xAOD::expectInnermostPixelLayerHit);
+  bool expectBL = getSum(trk, xAOD::expectNextToInnermostPixelLayerHit);
+  uint8_t nIBL = getSum(trk, xAOD::numberOfInnermostPixelLayerHits);
+  uint8_t nBL = getSum(trk, xAOD::numberOfNextToInnermostPixelLayerHits);
+  if (expectIBL) {
+    if (nIBL < 1) return false;
+  } else {
+    if (expectBL && nBL < 1) return false;
+  }
+
+  std::vector<double> vEta = {0.0,1.1,1.6,2.0};
+  std::vector<double> vPt  = {500, 600, 700, 800, 900, 1000, 1500,
+                              2000,2500,3000,5000,8000,12000};
+  std::vector<std::vector<double>> vvMaxZ0sT = {{0.62,0.70,0.82,0.87,0.74,0.61,0.50,0.48,0.46,0.45,0.30,0.24,0.23},
+                                                {0.51,0.53,0.53,0.53,0.52,0.43,0.28,0.27,0.28,0.30,0.24,0.22,0.13},
+                                                {0.91,0.89,0.87,0.55,0.59,0.37,0.39,0.31,0.34,0.35,0.30,0.30,0.20},
+                                                {0.76,0.71,0.69,0.48,0.48,0.47,0.46,0.42,0.38,0.32,0.28,0.20,0.15}};
+  std::vector<std::vector<double>> vvMaxD0 = {{0.34,0.39,0.47,0.49,0.55,0.47,0.44,0.21,0.19,0.17,0.12,0.14,0.15},
+                                              {0.32,0.32,0.33,0.33,0.33,0.27,0.16,0.15,0.13,0.15,0.13,0.16,0.20},
+                                              {0.95,0.91,0.88,0.35,0.37,0.24,0.26,0.22,0.23,0.24,0.19,0.19,0.23},
+                                              {0.68,0.67,0.65,0.42,0.42,0.36,0.35,0.31,0.27,0.26,0.27,0.28,0.30}};
+  std::vector<std::vector<double>> vvMaxSctHoles = {{0,0,0,0,0,0,0,1,1,1,1,1,1},
+                                                    {0,0,0,0,0,0,1,1,1,1,1,1,1},
+                                                    {1,1,1,1,1,1,1,1,1,1,1,1,1},
+                                                    {1,1,1,1,1,1,1,1,1,1,1,1,1}};                           
+  std::vector<std::vector<double>> vvMinSctHits = {{0,0,0,0,0,0,0,0,0,0,0,0,0},
+                                                   {0,0,0,0,0,0,6,6,6,6,0,0,0},
+                                                   {8,8,8,7,7,6,6,6,6,6,0,0,0},
+                                                   {7,7,7,0,0,0,0,0,0,0,0,0,0}};
+  auto pt=std::fabs(trk.pt());
+  if(eta>vEta.at(0) && pt>vPt.at(0))
+  {
+    uint8_t eta_bin=0;
+    for(;eta_bin<vEta.size()-1;++eta_bin)
+    {
+      if(vEta.at(eta_bin)<=eta && eta<vEta.at(eta_bin+1))
+      {
+        break;
+      }
+    }
+    uint8_t pt_bin=0;
+    for(;pt_bin<vPt.size()-1;++pt_bin)
+    {
+      if(vPt.at(pt_bin)<=pt && pt<vPt.at(pt_bin+1))
+      {
+        break;
+      }
+    }
+
+    if (vtx != nullptr) {
+      if (std::fabs(trk.z0()+trk.vz()-vtx->z())*std::sin(trk.theta()) > vvMaxZ0sT.at(eta_bin).at(pt_bin)) return false;
+    }
+    if(std::abs(trk.d0())>vvMaxD0.at(eta_bin).at(pt_bin)) return false;
+    uint8_t nSctHoles = getSum(trk, xAOD::numberOfSCTHoles);
+    if (nSctHoles > vvMaxSctHoles.at(eta_bin).at(pt_bin)) return false;
+    uint8_t nSctHits = getSum(trk, xAOD::numberOfSCTHits) + getSum(trk, xAOD::numberOfSCTDeadSensors);
+    if (nSctHits < vvMinSctHits.at(eta_bin).at(pt_bin)) return false;
+  }
 
   return true;
 }
