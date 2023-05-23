@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
- Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
  */
 #ifndef ATHLINKS_ELEMENTLINK_H
 #define ATHLINKS_ELEMENTLINK_H
