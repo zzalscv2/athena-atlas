@@ -15,7 +15,7 @@ atlas_add_library( MissingETEvent
                    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES ${Boost_LIBRARIES} AthenaKernel AtlasHepMCLib CaloEvent CaloGeoHelpers AthContainers Navigation NavFourMom
-                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} CxxUtils TruthHelper TruthUtils )
+                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} CxxUtils TruthUtils )
 
 atlas_add_dictionary( MissingETEventDict
                       MissingETEvent/MissingETEventDict.h
