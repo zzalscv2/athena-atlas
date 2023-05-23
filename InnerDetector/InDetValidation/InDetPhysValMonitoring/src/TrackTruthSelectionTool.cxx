@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // InDetPhysValMonitoring includes
@@ -21,7 +21,7 @@ TrackTruthSelectionTool::TrackTruthSelectionTool(const std::string& name) :
   declareProperty("maxEta", m_maxEta = 2.5);
   declareProperty("minPt", m_minPt = 400);
   declareProperty("maxPt", m_maxPt = -1);
-  declareProperty("requireOnlyPrimary", m_requireCharged = true);
+  declareProperty("requireOnlyPrimary", m_requireOnlyPrimary = true);
   declareProperty("requireCharged", m_requireCharged = true);
   declareProperty("requireStatus1", m_requireStatus1 = true);
   declareProperty("maxProdVertRadius", m_maxProdVertRadius = 110.);
