@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARMONITORING_LArRODMONALG_H
@@ -42,7 +42,9 @@ class LArDigit;
 class LArRODMonAlg: public AthMonitorAlgorithm
 {
  public:
-  LArRODMonAlg(const std::string& name, ISvcLocator* pSvcLocator);
+
+  using AthMonitorAlgorithm::AthMonitorAlgorithm;
+  //LArRODMonAlg(const std::string& name, ISvcLocator* pSvcLocator);
 
   /** @brief Default destructor */
   virtual ~LArRODMonAlg();
@@ -55,7 +57,7 @@ class LArRODMonAlg: public AthMonitorAlgorithm
 
 
 private:
-  const LArOnlineID* m_LArOnlineIDHelper;
+  const LArOnlineID* m_LArOnlineIDHelper=nullptr;
 
   enum PARTITION {EMBC=0,EMBA,EMECC,EMECA,HECC,HECA,FCALC,FCALA,N_PARTITIONS};
   const std::vector<std::string> m_PARTNAMES{"EMBC","EMBA","EMECC","EMECA","HECC","HECA","FCalC","FCalA","UNKNOWN"};
@@ -86,14 +88,11 @@ private:
                              std::vector<unsigned> &errsPerFEB,
                              std::vector<ERRCOUNTER> &errcounters,
                              const LArRawChannel& rcDig, const LArRawChannel& rcBS, 
-                             bool doDspTestDump, bool doCellsDump, 
 		             std::ofstream &ofcfile,               
 		             std::ofstream &digitsfile,            
 	         	     std::ofstream &energyfile,
                              std::ofstream &dumpfile,              
-                             const LArDigit* dig=nullptr) const;
-
-  void closeDumpfiles();
+                             const LArDigit* dig) const;
 
   bool FebStatus_Check();
 
@@ -226,7 +225,7 @@ private:
   Gaudi::Property<float> m_peakTime_cut{this, "peakTimeCut", 5., "Cut on abs(peak time) to compare online/offline (all quantities)"};
   /*float m_nb_lb;*/
 
-  const float m_BC; // value of 1 bunch-crossing = 25ns
+  const float m_BC=25000; // value of 1 bunch-crossing = 25ns
 
   /* Histogram grouping (part) */
   std::map<std::string,int> m_histoGroups;
@@ -234,10 +233,10 @@ private:
   Gaudi::Property<std::vector<std::string> > m_streams{this, "Streams", {} };
 
   Gaudi::Property<unsigned> m_max_dump{this, "MaxEvDump", 100, "max number of events to dump"};
-  mutable std::atomic<unsigned> m_ndump;
+  mutable std::atomic<unsigned> m_ndump{0};
 
-  mutable std::atomic<unsigned>  m_counter;
-  mutable std::atomic<unsigned> m_eventsCounter;
+  mutable std::atomic<unsigned>  m_counter{0};
+  mutable std::atomic<unsigned> m_eventsCounter{0};
 };
 
 

@@ -28,35 +28,9 @@
 #include "CaloDetDescr/CaloDetDescrElement.h"
 
 #include "AthenaKernel/errorcheck.h"
+#include "GaudiKernel/ConcurrencyFlags.h"
 #include <cmath>
-#include <sys/stat.h>
 
-
-LArRODMonAlg::LArRODMonAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthMonitorAlgorithm(name, pSvcLocator),
-    m_LArOnlineIDHelper(nullptr),
-    m_BC(25000.), // picoseconds time unit
-    m_ndump(0),
-    m_counter(0),
-    m_eventsCounter(0)
-
-{
-  /*
-  declareProperty("OnlineHistorySize",m_history_size = 20);
-  declareProperty("OnlineHistoryGranularity",m_history_granularity = 5);
-  */
-
-  /*declareProperty("numberOfLB",m_nb_lb = 2000.);*/
-
-  //declareProperty("IsOnline",m_IsOnline = false);  // exists in the base class
-
-
-  /*
-  m_last_lb = -1;
-  m_curr_lb = -1;
-  */
-
-}
 
 /*---------------------------------------------------------*/
 LArRODMonAlg::~LArRODMonAlg()
@@ -89,6 +63,20 @@ LArRODMonAlg::initialize() {
   ATH_CHECK(m_bcMask.buildBitMask(m_problemsToMask,msg()));
 
   ATH_CHECK( m_eventInfoKey.initialize() );
+
+
+  //Check properties ... 
+  if (Gaudi::Concurrency::ConcurrencyFlags::numThreads() > 1) { //MT  environment
+    if (m_doDspTestDump) {
+      ATH_MSG_ERROR("Property 'DoDspTestDump' must not be true if nThreads>1");
+      return StatusCode::FAILURE;
+    }
+    if (m_doCellsDump) {
+      ATH_MSG_ERROR("Property 'DoCellsDump' must not be true if nThreads>1");
+      return StatusCode::FAILURE;
+    }
+  }
+
 
   // Open output files for DspTest
   std::ofstream fai;
@@ -270,11 +258,12 @@ StatusCode LArRODMonAlg::fillHistograms(const EventContext& ctx) const {
   LArRawChannelContainer::const_iterator rcBSIt=rawColl_fromBytestream->begin();
   LArRawChannelContainer::const_iterator rcBSIt_e=rawColl_fromBytestream->end();
 
+  LArDigitContainer::const_iterator digIt=pLArDigitContainer->begin();
+  LArDigitContainer::const_iterator digIt_e=pLArDigitContainer->end();
+
+
   //Loop over indices in LArRawChannelContainer built offline (the small one)
   ATH_MSG_DEBUG( "Entering the LArRawChannel loop." );
-
-  short minSamples;
-  short maxSamples;
 
   for (;rcDigIt!=rcDigIt_e;++rcDigIt) {
     const HWIdentifier idDig=rcDigIt->hardwareID();
@@ -297,7 +286,7 @@ StatusCode LArRODMonAlg::fillHistograms(const EventContext& ctx) const {
     LArRawChannelContainer::const_iterator currIt=rcBSIt; //Remember current position in container
     for (;rcBSIt!=rcBSIt_e && rcBSIt->hardwareID() != idDig; ++rcBSIt);
     if (rcBSIt==rcBSIt_e) {
-      ATH_MSG_WARNING( "LArRawChannelContainer not in the expected order. Change of LArByteStream format?" );
+      ATH_MSG_WARNING( "LArDigitContainer not in the expected order. Change of LArByteStream format?" );
       //Wrap-around
       for (rcBSIt=rawColl_fromBytestream->begin();rcBSIt!=currIt && rcBSIt->hardwareID() != idDig; ++rcBSIt);
       if (rcBSIt==currIt) {
@@ -306,44 +295,35 @@ StatusCode LArRODMonAlg::fillHistograms(const EventContext& ctx) const {
       }
     }
 
-    bool doDspTestDump =  m_doDspTestDump;
-    bool doCellsDump =  m_doCellsDump;
-
-    const LArDigit* dig=NULL;
-    unsigned index=rcDigIt-rawColl_fromDigits->begin();
-    const unsigned digContSize=pLArDigitContainer->size();
-    for(;index<digContSize && pLArDigitContainer->at(index)->hardwareID()!=idDig;++index);
-    if (index==digContSize) {
-      ATH_MSG_ERROR( "Can't find LArDigit corresponding to channel " << m_LArOnlineIDHelper->channel_name(idDig) << ". Turn off digit dump" );
-      doDspTestDump=false;
-      doCellsDump=false;
-    }
-    else{
-      dig=pLArDigitContainer->at(index);
-    }
-    minSamples = 4095;
-    maxSamples = 0;
-    if (dig){
-      const std::vector<short>& samples=dig->samples();
-      for (unsigned int k = 0; k<samples.size(); k++) {
-	if (samples.at(k) > maxSamples) maxSamples = samples.at(k);
-	if (samples.at(k) < minSamples) minSamples = samples.at(k);
+    //Now look for corresponding channel in the LArDigitContainer read from Bytestream
+    //Should be in almost in sync with the RawChannelContainer we are iterating over, 
+    //but contains disconnected channels that are not part of the LArRawChannelContainer
+    LArDigitContainer::const_iterator currDigIt=digIt; //Remember current position in digit-container
+    for (;digIt!=digIt_e && (*digIt)->hardwareID() != idDig; ++digIt);
+    if (digIt==digIt_e) {
+        ATH_MSG_WARNING( "LArRawChannelContainer not in the expected order. Change of LArRawChannelBuilder behavior?" );
+      //Wrap-around
+      for (digIt=pLArDigitContainer->begin();digIt!=currDigIt && (*digIt)->hardwareID() != idDig; ++digIt);
+      if (digIt==currDigIt) {
+	      ATH_MSG_ERROR( "Channel " << m_LArOnlineIDHelper->channel_name(idDig) << " not found in LArDigitContainer." );
+	      return StatusCode::FAILURE;
       }
     }
-
-    if ((maxSamples-minSamples) > m_adc_th || m_adc_th <= 0) {
+    const LArDigit* dig=*digIt;
+    const std::vector<short>& samples=dig->samples();
+    const auto [minSamplesIt, maxSamplesIt] = std::minmax_element(samples.begin(),samples.end());
+    if (m_adc_th<=0 || (*maxSamplesIt-*minSamplesIt)>m_adc_th) {
       compareChannels(cabling, ofcs, shapes,
                       hvScaleCorrs, pedestals, adc2mev,
                       idDig,
                       errsPerFEB, errcounters,
                       (*rcDigIt),(*rcBSIt),
-                      doDspTestDump, doCellsDump, 
                       fai, fdig, fen, fdump,
                       dig).ignore();
       ++count_gain[gain];
     }
     else {
-      if (dig) ATH_MSG_DEBUG( "Samples : "<< maxSamples << " " << minSamples );
+      ATH_MSG_DEBUG( "Samples : "<< *maxSamplesIt << " " << *minSamplesIt );
     }      
 
   }//end loop over rawColl_fromDigits
@@ -358,37 +338,33 @@ StatusCode LArRODMonAlg::fillHistograms(const EventContext& ctx) const {
     fill(m_tools[m_histoGroups.at(pn)],sweetc);
   }
 
-  ERRCOUNTER allEC;  
-  //unsigned allErr_E=0;
-  //unsigned allErr_T=0;
-  //unsigned allErr_Q=0;
 
-  for (unsigned g=0;g<3;++g) {
-    for (unsigned p=0;p<N_PARTITIONS;++p) {
-      allEC.errors_E[g]+=errcounters[p].errors_E[g];
-      allEC.errors_T[g]+=errcounters[p].errors_T[g];
-      allEC.errors_Q[g]+=errcounters[p].errors_Q[g];
-    }
-    //allErr_E+=allEC.errors_E[g];
-    //allErr_T+=allEC.errors_T[g];
-    //allErr_Q+=allEC.errors_Q[g];
-  }
-
-
-
-  ATH_MSG_VERBOSE( "*Number of errors in Energy Computation : " );
-  ATH_MSG_VERBOSE( "*     Low Gain : " << allEC.errors_E[2] << " / " << count_gain[CaloGain::LARLOWGAIN] );
-  ATH_MSG_VERBOSE( "*     Medium Gain : " << allEC.errors_E[1] << " / " << count_gain[CaloGain::LARMEDIUMGAIN] );
-  ATH_MSG_VERBOSE( "*     High Gain : " <<  allEC.errors_E[0] << " / " << count_gain[CaloGain::LARHIGHGAIN] );
-  ATH_MSG_VERBOSE( "*Number of errors in Time Computation : " );
-  ATH_MSG_VERBOSE( "*     Low Gain : " <<  allEC.errors_T[2] << " / " << count_gain[CaloGain::LARLOWGAIN] );
-  ATH_MSG_VERBOSE( "*     Medium Gain : " <<  allEC.errors_T[1] <<  " / " << count_gain[CaloGain::LARMEDIUMGAIN] );
-  ATH_MSG_VERBOSE( "*     High Gain : " <<  allEC.errors_T[0] << " / " << count_gain[CaloGain::LARHIGHGAIN] );
-  ATH_MSG_VERBOSE( "*Number of errors in Quality Computation : " );
-  ATH_MSG_VERBOSE( "*     Low Gain : " <<  allEC.errors_Q[2] << " / " << count_gain[CaloGain::LARLOWGAIN] );
-  ATH_MSG_VERBOSE( "*     Medium Gain : " <<  allEC.errors_Q[1] << " / " << count_gain[CaloGain::LARMEDIUMGAIN] );
-  ATH_MSG_VERBOSE( "*     High Gain : " <<  allEC.errors_Q[0] << " / " << count_gain[CaloGain::LARHIGHGAIN] );
+  if (msgLvl(MSG::VERBOSE)) {
+    ERRCOUNTER allEC;  
   
+    for (unsigned g=0;g<3;++g) {
+      for (unsigned p=0;p<N_PARTITIONS;++p) {
+        allEC.errors_E[g]+=errcounters[p].errors_E[g];
+        allEC.errors_T[g]+=errcounters[p].errors_T[g];
+        allEC.errors_Q[g]+=errcounters[p].errors_Q[g];
+      }
+    }
+
+
+
+    ATH_MSG_VERBOSE( "*Number of errors in Energy Computation : " );
+    ATH_MSG_VERBOSE( "*     Low Gain : " << allEC.errors_E[2] << " / " << count_gain[CaloGain::LARLOWGAIN] );
+    ATH_MSG_VERBOSE( "*     Medium Gain : " << allEC.errors_E[1] << " / " << count_gain[CaloGain::LARMEDIUMGAIN] );
+    ATH_MSG_VERBOSE( "*     High Gain : " <<  allEC.errors_E[0] << " / " << count_gain[CaloGain::LARHIGHGAIN] );
+    ATH_MSG_VERBOSE( "*Number of errors in Time Computation : " );
+    ATH_MSG_VERBOSE( "*     Low Gain : " <<  allEC.errors_T[2] << " / " << count_gain[CaloGain::LARLOWGAIN] );
+    ATH_MSG_VERBOSE( "*     Medium Gain : " <<  allEC.errors_T[1] <<  " / " << count_gain[CaloGain::LARMEDIUMGAIN] );
+    ATH_MSG_VERBOSE( "*     High Gain : " <<  allEC.errors_T[0] << " / " << count_gain[CaloGain::LARHIGHGAIN] );
+    ATH_MSG_VERBOSE( "*Number of errors in Quality Computation : " );
+    ATH_MSG_VERBOSE( "*     Low Gain : " <<  allEC.errors_Q[2] << " / " << count_gain[CaloGain::LARLOWGAIN] );
+    ATH_MSG_VERBOSE( "*     Medium Gain : " <<  allEC.errors_Q[1] << " / " << count_gain[CaloGain::LARMEDIUMGAIN] );
+    ATH_MSG_VERBOSE( "*     High Gain : " <<  allEC.errors_Q[0] << " / " << count_gain[CaloGain::LARHIGHGAIN] );
+  }
 
   for (unsigned p=0;p<N_PARTITIONS;++p) {
     unsigned allErrsPartE=0;
@@ -415,15 +391,17 @@ StatusCode LArRODMonAlg::fillHistograms(const EventContext& ctx) const {
     fill(m_MonGroupName, lb, partitionI, numE, numT, numQ); 
   }
 
+  /*
   for(int str = 0; str < nStreams + 1; str++) {
     if (hasStream[str] == 1) {
-       /*
+      
       m_hEErrors_LB_stream->Fill((float)m_curr_lb,(float)str,(float)allErr_E);
       m_hTErrors_LB_stream->Fill((float)m_curr_lb,(float)str,(float)allErr_T);
       m_hQErrors_LB_stream->Fill((float)m_curr_lb,(float)str,(float)allErr_Q);
-      FIXME */
+      FIXME 
     }
   }
+  */
 
   if (m_doDspTestDump) {
     fai.close();
@@ -516,14 +494,9 @@ void LArRODMonAlg::DumpCellInfo(HWIdentifier chid,                    // FEB HW 
 
 StatusCode LArRODMonAlg::finalize() {
   ATH_MSG_VERBOSE("Finalize LArRODMonAlg");
-  closeDumpfiles();
   return StatusCode::SUCCESS;
 } 
  
-void LArRODMonAlg::closeDumpfiles() {
-  // Close output files
-}
-
 StatusCode LArRODMonAlg::compareChannels( const LArOnOffIdMapping* cabling,
                                           const ILArOFC* ofcs,
                                           const ILArShape* shapes,
@@ -534,7 +507,6 @@ StatusCode LArRODMonAlg::compareChannels( const LArOnOffIdMapping* cabling,
                                           std::vector<unsigned> &errsPerFEB,
                                           std::vector<ERRCOUNTER> &errcounters,
                                           const LArRawChannel& rcDig, const LArRawChannel& rcBS, 
-                                          bool doDspTestDump, bool doCellsDump,
                                           std::ofstream &ofcfile,               
 		                          std::ofstream &digitsfile,            
 	         	                  std::ofstream &energyfile,
@@ -544,7 +516,7 @@ StatusCode LArRODMonAlg::compareChannels( const LArOnOffIdMapping* cabling,
   ATH_MSG_DEBUG( " I am entering compareChannels method" );
 
   const int slot_fD = m_LArOnlineIDHelper->slot(chid);
-  const  int feedthrough_fD = m_LArOnlineIDHelper->feedthrough(chid);
+  const int feedthrough_fD = m_LArOnlineIDHelper->feedthrough(chid);
   const float timeOffline = rcDig.time()/m_unit_offline - m_timeOffset*m_BC;
 
   const unsigned q_gain = (int)rcDig.gain();
@@ -774,31 +746,30 @@ StatusCode LArRODMonAlg::compareChannels( const LArOnOffIdMapping* cabling,
  
 
   //Detailed text dump if requested:
-  if (dig) {
-    if ((keepE && fabs(DiffE)>DECut) || (keepT && fabs(DiffT)>DTCut) || (keepQ && DiffQ > DQCut)) {
-      if (doDspTestDump) {
-	int Ind = 0;
-	const float timeBinWidth_test=ofcs->timeBinWidth(chid,q_gain);
-	unsigned delayIdx_test=(unsigned)floor(0.5+Ind/timeBinWidth_test);
-	ILArOFC::OFCRef_t this_OFC_a_test = ofcs->OFC_a(chid,q_gain,delayIdx_test);
-	ILArOFC::OFCRef_t this_OFC_b_test = ofcs->OFC_b(chid,q_gain,delayIdx_test);
-	ILArShape::ShapeRef_t this_OFC_h_test = shapes->Shape(chid,q_gain,delayIdx_test);
-	ILArShape::ShapeRef_t this_OFC_d_test = shapes->ShapeDer(chid,q_gain,delayIdx_test);	
-	const std::vector<short>& samples=dig->samples();
-	const auto polynom_adc2mev=adc2mev->ADC2MEV(chid,q_gain);
-	const float escale = (polynom_adc2mev)[1];
-	float ramp0 = (polynom_adc2mev)[0];
-	if (q_gain == 0) ramp0 = 0.; // no ramp intercepts in HG
-	const float ped = pedestals->pedestal(chid,q_gain);
-	this->DumpCellEvent((int)m_counter,this_OFC_a_test,this_OFC_b_test,this_OFC_h_test,this_OFC_d_test,escale,ramp0,ped,&samples,(int)(rcDig.energy()),(int)(en_fB),ofcfile,digitsfile,energyfile, chid, (int)m_eventsCounter);
-      }
-      if (doCellsDump) {
-	this->DumpCellInfo(chid,hg,(int)q_gain,(int)m_eventsCounter,(int)rcDig.energy(),(int)(en_fB),rcDig.time(),t_fB,q_fD,q_fB,dumpfile);
-      }
-      //++m_counter;
+  if (m_doDspTestDump &&
+      ((keepE && fabs(DiffE)>DECut) || (keepT && fabs(DiffT)>DTCut) || (keepQ && DiffQ > DQCut))) {
+    int Ind = 0;
+    const float timeBinWidth_test=ofcs->timeBinWidth(chid,q_gain);
+    unsigned delayIdx_test=(unsigned)floor(0.5+Ind/timeBinWidth_test);
+    ILArOFC::OFCRef_t this_OFC_a_test = ofcs->OFC_a(chid,q_gain,delayIdx_test);
+    ILArOFC::OFCRef_t this_OFC_b_test = ofcs->OFC_b(chid,q_gain,delayIdx_test);
+    ILArShape::ShapeRef_t this_OFC_h_test = shapes->Shape(chid,q_gain,delayIdx_test);
+    ILArShape::ShapeRef_t this_OFC_d_test = shapes->ShapeDer(chid,q_gain,delayIdx_test);	
+    const std::vector<short>& samples=dig->samples();
+    const auto polynom_adc2mev=adc2mev->ADC2MEV(chid,q_gain);
+    const float escale = (polynom_adc2mev)[1];
+    float ramp0 = (polynom_adc2mev)[0];
+    if (q_gain == 0) ramp0 = 0.; // no ramp intercepts in HG
+    const float ped = pedestals->pedestal(chid,q_gain);
+    this->DumpCellEvent((int)m_counter,this_OFC_a_test,this_OFC_b_test,this_OFC_h_test,this_OFC_d_test,escale,ramp0,ped,&samples,(int)(rcDig.energy()),(int)(en_fB),ofcfile,digitsfile,energyfile, chid, (int)m_eventsCounter);
+    ++m_counter;
+  }
 
-    }//end if E,t or Q cut passed
-  }//end if dig
+  if (m_doCellsDump &&
+      ((keepE && fabs(DiffE)>DECut) || (keepT && fabs(DiffT)>DTCut) || (keepQ && DiffQ > DQCut))) {
+
+    this->DumpCellInfo(chid,hg,(int)q_gain,(int)m_eventsCounter,(int)rcDig.energy(),(int)(en_fB),rcDig.time(),t_fB,q_fD,q_fB,dumpfile);
+  }
   ATH_MSG_DEBUG( " I am leaving compareChannels method" );
   return StatusCode::SUCCESS;
 }
