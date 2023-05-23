@@ -1955,7 +1955,11 @@ def setupMenu(menu_name):
         # ATR-22230
         ChainProp(name='HLT_tau30_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB30_L1DR-TAU20ITAU12I-J25', l1SeedThresholds=['TAU20IM','TAU12IM'], stream=['VBFDelayed'], groups=PrimaryLegGroup+MultiTauGroup+LegacyTopoGroup),
         ChainProp(name='HLT_tau30_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB_L1TAU20IM_2TAU12IM_4J12p0ETA25', l1SeedThresholds=['TAU20IM','TAU12IM'], stream=['VBFDelayed'], groups=PrimaryLegGroup+MultiTauGroup),
-        
+        #ATR-27546
+        ChainProp(name='HLT_tau30_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB30_L1DR-TAU20ITAU12I', l1SeedThresholds=['TAU20IM','TAU12IM'], stream=['VBFDelayed'], groups=SupportLegGroup+MultiTauGroup+LegacyTopoGroup),
+        ChainProp(name='HLT_tau30_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB_L1TAU20IM_2TAU12IM', l1SeedThresholds=['TAU20IM','TAU12IM'], stream=['VBFDelayed'], groups=SupportLegGroup+MultiTauGroup),
+
+
         # ATR-27252
         ChainProp(name='HLT_tau30_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB_L1cTAU30M_2cTAU20M_4jJ30p0ETA25', l1SeedThresholds=['cTAU30M','cTAU20M'], stream=['VBFDelayed'], groups=PrimaryPhIGroup+MultiTauGroup),
 
