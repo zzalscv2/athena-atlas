@@ -209,41 +209,8 @@ StatusCode TrigMuonEFHypoTool::inclusiveSelection(std::vector<MuonEFInfo>& toolI
       if(overlap) continue;
 
       if(decideOnSingleObject(tool, 0)==true){
-        if(m_nscan){
-        ATH_MSG_DEBUG("Applying narrow-scan selection");
-        float deta,dphi=10;
-        unsigned int nInCone=0;
-    	float muonR = sqrt( pow(tool.muon->eta(),2) +pow(tool.muon->phi(),2));
-    	float coneCheck=m_conesize*muonR;
-          for (auto& tooltmp : toolInput){
-            ATH_MSG_DEBUG(">>Testing Muon with pt: "<<tooltmp.muon->pt()/Gaudi::Units::GeV << "GeV, eta: "
-                       << tooltmp.muon->eta() << ", phi: " << tooltmp.muon->phi());
-            if (tooltmp.muon->p4() == tool.muon->p4()) {
-            ATH_MSG_DEBUG("<< same muon, skipping...");
-            }else {
-
-      	  deta = fabs(tooltmp.muon->eta()-tool.muon->eta());
-    	  dphi = getdphi(tooltmp.muon->phi(),tool.muon->phi());
-      	  if(deta<coneCheck && dphi<m_conesize){
-      	    nInCone++;
-      	  }
-
-              ATH_MSG_DEBUG(">> dPhi is: " << dphi);
-              ATH_MSG_DEBUG(">> dEta is: " << deta);
-              ATH_MSG_DEBUG(">> dR is: " <<sqrt( pow( deta, 2) + pow( dphi, 2) ));
-
-            }  
-          } 
-          //end test nscan
-
-          if (nInCone > 0) {
-	    ATH_MSG_DEBUG("Passes narrow-scan  selection");
-	    TrigCompositeUtils::addDecisionID(m_decisionId, tool.decision);
-          }else ATH_MSG_DEBUG("Does not pass narrow-scan selection");
-        }else{
-	  ATH_MSG_DEBUG("Passes selection");
-	  TrigCompositeUtils::addDecisionID(m_decisionId, tool.decision);
-        }
+        ATH_MSG_DEBUG("Passes selection");
+        TrigCompositeUtils::addDecisionID(m_decisionId, tool.decision);
       }
       else ATH_MSG_DEBUG("Does not pass selection");
     }
@@ -252,13 +219,45 @@ StatusCode TrigMuonEFHypoTool::inclusiveSelection(std::vector<MuonEFInfo>& toolI
 }
 StatusCode TrigMuonEFHypoTool::multiplicitySelection(std::vector<MuonEFInfo>& toolInput) const{
   HLT::Index2DVec passingSelection(m_ptBins.size());
+  bool passingNscan=false;
   for(size_t cutIndex=0; cutIndex < m_ptBins.size(); ++cutIndex) {
     size_t elementIndex{0};
-    for(auto& i : toolInput){
-      if(TrigCompositeUtils::passed(m_decisionId.numeric(), i.previousDecisionIDs)){
-	if(decideOnSingleObject(i, cutIndex)==true){
-	  ATH_MSG_DEBUG("Passing selection "<<m_decisionId << " , Index["<<elementIndex<<"]");
-	  passingSelection[cutIndex].push_back(elementIndex);
+    for(auto& tool : toolInput){
+      if(TrigCompositeUtils::passed(m_decisionId.numeric(), tool.previousDecisionIDs)){
+	if(decideOnSingleObject(tool, cutIndex)==true){
+          if(m_nscan && cutIndex==0 && (!passingNscan)){
+            ATH_MSG_DEBUG("Applying narrow-scan selection");
+            float deta,dphi=10;
+            unsigned int nInCone=0;
+            float muonR = sqrt( pow(tool.muon->eta(),2) +pow(tool.muon->phi(),2));
+      	    float coneCheck=m_conesize*muonR;
+            for (auto& tooltmp : toolInput){
+              ATH_MSG_DEBUG(">>Testing Muon with pt: "<<tooltmp.muon->pt()/Gaudi::Units::GeV << "GeV, eta: "
+                         << tooltmp.muon->eta() << ", phi: " << tooltmp.muon->phi());
+              if (tooltmp.muon->p4() == tool.muon->p4()) {
+                ATH_MSG_DEBUG("<< same muon, skipping...");
+              }else {
+        	deta = std::abs(tooltmp.muon->eta()-tool.muon->eta());
+                dphi = getdphi(tooltmp.muon->phi(),tool.muon->phi());
+                if(deta<coneCheck && dphi<coneCheck){
+                  nInCone++;
+                }
+
+                ATH_MSG_DEBUG(">> dPhi is: " << dphi);
+                ATH_MSG_DEBUG(">> dEta is: " << deta);
+                ATH_MSG_DEBUG(">> dR is: " <<sqrt( pow( deta, 2) + pow( dphi, 2) ));
+
+              }  
+            } 
+            //end test nscan
+
+            if (nInCone > 0) {
+              ATH_MSG_DEBUG("Passes narrow-scan selection Index["<<elementIndex<<"]");
+              passingNscan=true;
+            }else ATH_MSG_DEBUG("Does not pass narrow-scan selection Index["<<elementIndex<<"]");
+          }
+          ATH_MSG_DEBUG("Passing selection "<<m_decisionId << " , Index["<<elementIndex<<"]");
+          passingSelection[cutIndex].push_back(elementIndex); 
 	}
 	else ATH_MSG_DEBUG("Not passing selection "<<m_decisionId << " , Index["<<elementIndex<<"]");
       }
@@ -266,6 +265,10 @@ StatusCode TrigMuonEFHypoTool::multiplicitySelection(std::vector<MuonEFInfo>& to
 	ATH_MSG_DEBUG("No match for decisionId "<<m_decisionId);
       }
       elementIndex++;
+    }
+    if (m_nscan &&(!passingNscan)){
+      ATH_MSG_DEBUG("Narrow-scan is required and no muons passed, all muons will be rejected ");
+      return StatusCode::SUCCESS;
     }
     //If nothing passes, then we should stop
     if(passingSelection[cutIndex].empty()){
