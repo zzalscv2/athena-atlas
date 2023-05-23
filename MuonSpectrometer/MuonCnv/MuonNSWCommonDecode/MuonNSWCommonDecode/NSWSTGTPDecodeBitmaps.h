@@ -6,6 +6,7 @@
 #define _MUON_NSW_STGTP_DECODE_BITMAPS_H_
 
 #include "MuonNSWCommonDecode/NSWDecodeHelper.h"
+#include <stdexcept>
 #include <cstddef>
 
 namespace Muon
@@ -82,11 +83,21 @@ namespace Muon
           phiID = fill_bitmask<uint32_t>(max_bit(dTheta)+1 , size_output_segment_phiID),
           rIndex = fill_bitmask<uint32_t>(max_bit(phiID)+1, size_output_segment_rIndex)
       };
+      
       constexpr uint32_t getSegmentProperty(const uint32_t mask, const MergedSegmentProperty prop) {
-          return (mask & static_cast<uint32_t>(prop) ) >> min_bit(static_cast<uint32_t>(prop));
+          const auto shift = min_bit(static_cast<uint32_t>(prop));
+          if (shift < 0) {
+            throw std::runtime_error("bitshift is negative in NSWSTGTPDecodeBitmaps getSegmentProperty");
+          }
+          return (mask & static_cast<uint32_t>(prop) ) >> shift;
       }
+      
       constexpr void encodeSegmentProperty(const MergedSegmentProperty prop, const uint32_t word, uint32_t& buffer) {
-          uint32_t shifted_word = (word << min_bit(static_cast<uint32_t>(prop)));
+          const auto shift = min_bit(static_cast<uint32_t>(prop));
+          if (shift < 0) {
+            throw std::runtime_error("bitshift is negative in NSWSTGTPDecodeBitmaps encodeSegmentProperty");
+          }
+          uint32_t shifted_word = (word << shift);
           buffer = (buffer) | (shifted_word & static_cast<uint32_t>(prop));
       }
       
@@ -107,10 +118,19 @@ namespace Muon
           stationPhi = fill_bitmask<uint32_t>(max_bit(stationEta) + 1, moduleIDBits::stationPhi),
       };
       constexpr uint32_t getIdentifierProperty(const uint32_t mask, const ModuleIDProperty prop) {
-        return (mask &  static_cast<uint32_t>(prop)) >> min_bit(static_cast<uint32_t>(prop));
+        const auto shift = min_bit(static_cast<uint32_t>(prop));
+        if (shift < 0) {
+          throw std::runtime_error("bitshift is negative in NSWSTGTPDecodeBitmaps getIdentifierProperty");
+        }
+        return (mask &  static_cast<uint32_t>(prop)) >> shift;
+        
       }
       constexpr void encodeIdentifierProperty(const ModuleIDProperty prop, const uint32_t word, uint32_t& buffer) {
-          uint32_t shifted_word = (word << min_bit(static_cast<uint32_t>(prop)));
+          const auto shift = min_bit(static_cast<uint32_t>(prop));
+          if (shift < 0) {
+            throw std::runtime_error("bitshift is negative in NSWSTGTPDecodeBitmaps encodeIdentifierProperty");
+          }
+          uint32_t shifted_word = (word << shift);
           buffer = (buffer) | (shifted_word & static_cast<uint32_t>(prop));
       }
     }
