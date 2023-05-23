@@ -122,6 +122,7 @@ StatusCode TrkVKalVrtFitter::VKalVrtFit(const std::vector<const xAOD::TrackParti
     if(!InpTrkN.empty()){sc=CvtNeutralParticle(InpTrkN,ntrk,state); if(sc.isFailure())return StatusCode::FAILURE;}
 //--
     int ierr = VKalVrtFit3( ntrk, Vertex, Momentum, Charge, ErrorMatrix, Chi2PerTrk, TrkAtVrt, Chi2, state, ifCovV0 ) ;
+    if (ierr) return StatusCode::FAILURE;
 //
 //-- Check vertex position with respect to first measured hit and refit with plane constraint if needed
     state.m_planeCnstNDOF = 0;
@@ -294,6 +295,7 @@ int TrkVKalVrtFitter::VKalVrtFit3( int ntrk,
     if(ierr){
       return ierr;
     }
+    if(ptot[0]*ptot[0]+ptot[1]*ptot[1] == 0.) return -5; // Bad (divergent) fit
 //  
 //  Postfit operation. Creation of array for different error calculations and full error matrix copy
 //
@@ -314,6 +316,8 @@ int TrkVKalVrtFitter::VKalVrtFit3( int ntrk,
     Vertex[0]= xyzfit[0] + state.m_refFrameX;
     Vertex[1]= xyzfit[1] + state.m_refFrameY;
     Vertex[2]= xyzfit[2] + state.m_refFrameZ;
+
+    if(Vertex.perp()>m_IDsizeR || std::abs(Vertex.z())>m_IDsizeZ)return -5; // Solution outside acceptable volume due to divergence
 
     state.m_save_xyzfit[0]=xyzfit[0];    // saving of vertex position 
     state.m_save_xyzfit[1]=xyzfit[1];    // for full error matrix
