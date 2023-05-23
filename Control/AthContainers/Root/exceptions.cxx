@@ -543,7 +543,9 @@ std::string excBadVarName_format (const std::string& name)
   std::ostringstream os;
   os << "SG::ExcBadVarName: "
      << "Bad name for auxiliary variable `" << name << "'. "
-     << "Variable and class name must be identifiers, and variable name must not be empty.";
+     << "Variable and class names must consist of only digits, letters, "
+     << "and underscores, and cannot start with a digit.  "
+     << "Variable names may not be empty, but class names may be.";
   return os.str();
 }
 
