@@ -142,8 +142,8 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
 #endif
     int bcpart = xPart->barcode();
 
-    // status 10902 should be treated just as status 2
-    if (hepmcParticle->status() == 10902)
+    // status HepMC::SPECIALSTATUS should be treated just as status 2
+    if (hepmcParticle->status() == HepMC::SPECIALSTATUS)
       hepmcParticle->set_status(2);
 
     // Get the production and decay vertices

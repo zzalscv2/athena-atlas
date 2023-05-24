@@ -133,7 +133,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
 
   int iParticlePDG = thePart->pdgId();
   // status=10902 in Pythia?
-  if (thePart->status() != 1 && thePart->status() != 2 && thePart->status() != 10902) {
+  if (thePart->status() != 1 && thePart->status() != 2 && thePart->status() != HepMC::SPECIALSTATUS) {
     return std::make_pair(GenParticle, partOrig);
   }
   bool isPartHadr = isHadron(thePart);
@@ -160,7 +160,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
     return std::make_pair(OtherBSMParticle, partOrig);
   }
 
-  if (thePart->status() == 10902 &&
+  if (thePart->status() == HepMC::SPECIALSTATUS &&
       (abs(iParticlePDG) != 11 && abs(iParticlePDG) != 13 && abs(iParticlePDG) != 15 && abs(iParticlePDG) != 22) &&
       !isPartHadr) {
     return std::make_pair(GenParticle, partOrig);
@@ -435,7 +435,7 @@ bool MCTruthClassifier::fromHadron(const xAOD::TruthParticle* p,
     // PhysicsAnalysis/TruthParticleID/McParticleTools/src/EtaPtFilterTool.cxx#L374
     // not at all clear why and unfortunately there's no documentation in the code
     const int st = parent->status();
-    if (st > 2 && st != 10902)  return false;
+    if (st > 2 && st != HepMC::SPECIALSTATUS)  return false;
     fromTau |= abs(parent->pdgId()) == 15;
     if (isHadron(parent)) {
       if (!hadptr)  hadptr = parent; // assumes linear hadron parentage

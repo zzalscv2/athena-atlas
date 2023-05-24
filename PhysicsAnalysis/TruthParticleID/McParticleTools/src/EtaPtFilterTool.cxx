@@ -350,7 +350,7 @@ StatusCode EtaPtFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx, H
       p->set_generated_mass( child->generated_mass() );
       p->set_pdg_id( child->pdg_id() );
       if ( m_butKeepAllGeneratorStable && !isAccepted(child) && child->status() == 2 ) 
-        p->set_status( 10902 ) ;
+        p->set_status( HepMC::SPECIALSTATUS ) ;
       else
         p->set_status( child->status() );
       HepMC::set_flow(p, HepMC::flow(child) );
@@ -410,7 +410,7 @@ StatusCode EtaPtFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx, H
       p->set_generated_mass( (*child)->generated_mass() );
       p->set_pdg_id( (*child)->pdg_id() );
       if ( m_butKeepAllGeneratorStable && !isAccepted(*child) && (*child)->status() == 2 ) 
-	p->set_status( 10902 ) ;
+	p->set_status( HepMC::SPECIALSTATUS );
       else
 	p->set_status( (*child)->status() );
       p->set_flow( (*child)->flow() );

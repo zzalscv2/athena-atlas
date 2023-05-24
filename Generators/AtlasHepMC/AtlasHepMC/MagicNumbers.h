@@ -20,6 +20,7 @@ constexpr int PARTONPDGMAX = 43;
 constexpr int NPPDGMIN = 1000000;
 constexpr int NPPDGMAX = 8999999;
 constexpr int PHOTOSMIN = 10000;
+constexpr int SPECIALSTATUS = 10902;
 
 /// @brief This barcode is used by objects matched to particles from pile-up
 /// interactions in standard MC Production

@@ -376,7 +376,7 @@ StatusCode BuildTruthTaus::examineTruthTauDecay (const xAOD::TruthParticle& xTru
     int iPdgId = xTruthDaughter->pdgId();
 
     // look at decay of unstable particles
-    if (xTruthDaughter->status() == 2 or xTruthDaughter->status() == 11 or xTruthDaughter->status() == 10902) // 11 for HERWIG++
+    if (xTruthDaughter->status() == 2 or xTruthDaughter->status() == 11 or xTruthDaughter->status() == HepMC::SPECIALSTATUS) // 11 for HERWIG++
     {
       if ( iAbsPdgId != 111 and iAbsPdgId != 311 and iAbsPdgId != 310 and iAbsPdgId != 130 )
       {
