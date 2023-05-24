@@ -6,8 +6,9 @@
 
 
 #include <unordered_map>
-
-#include "CxxUtils/StringUtils.h"
+#include <algorithm>
+#include <string>
+#include <vector>
 #include "TruthUtils/WeightHelpers.h"
 
 
@@ -23,7 +24,9 @@ std::string weightNameCleanup(const std::string &name)
   }
 
   // Trim trailing whitespace
-  std::string out = CxxUtils::StringUtils::trim (name);
+  size_t start = name.find_first_not_of(" \t\n\r");
+  size_t end = name.find_last_not_of(" \t\n\r");
+  std::string out = name.substr(start,end-start+1);  
   std::string outLowercase = out;
   std::transform(outLowercase.begin(), outLowercase.end(), outLowercase.begin(),
     [](unsigned char c){ return std::tolower(c); });
