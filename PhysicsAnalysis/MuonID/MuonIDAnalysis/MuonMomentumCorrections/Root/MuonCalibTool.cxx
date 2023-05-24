@@ -241,13 +241,7 @@ namespace CP
         CorrectionCode sgCode = m_MuonIntScaleSmearTool->applyCorrection(muonObj);
         if (sgCode != CorrectionCode::Ok) return sgCode;
 
-	//re-converting the pT to MeV
-	muonObj.ID.calib_pt = muonObj.ID.calib_pt * GeVtoMeV;
-	muonObj.ME.calib_pt = muonObj.ME.calib_pt * GeVtoMeV;
-	muonObj.CB.calib_pt = muonObj.CB.calib_pt * GeVtoMeV;
-
-        double res_pt = muonObj.ID.calib_pt;
-        if(DetType == MCP::DetectorType::MS) res_pt = muonObj.ME.calib_pt;
+        double res_pt = (DetType == MCP::DetectorType::MS) ? muonObj.ME.calib_pt*GeVtoMeV : muonObj.ID.calib_pt*GeVtoMeV;
 
         inTrk.setDefiningParameters(inTrk.d0(), inTrk.z0(), inTrk.phi0(), inTrk.theta(),
                             inTrk.charge() / (res_pt * std::cosh(inTrk.eta())));
@@ -505,11 +499,6 @@ namespace CP
         auto ME = MCP::TrackCalibObj(&inTrk,   MCP::TrackType::ME, charge, year, isData);
 
         MCP::MuonObj muonObj{CB,ID,ME};
-
-	//converting pT into GeV
-	muonObj.ID.calib_pt = muonObj.ID.calib_pt * MeVtoGeV;
-	muonObj.ME.calib_pt = muonObj.ME.calib_pt * MeVtoGeV;
-	muonObj.CB.calib_pt = muonObj.CB.calib_pt * MeVtoGeV;
 
         return muonObj;
     }
