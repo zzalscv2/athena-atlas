@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// GenParticleSimWhiteList.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header include
 #include "GenParticleSimWhiteList.h"
@@ -20,8 +16,6 @@
 #include "PathResolver/PathResolver.h"
 
 // Units
-#include "GaudiKernel/SystemOfUnits.h"
-
 #include <fstream>
 #include <cstdlib>
 
@@ -31,10 +25,6 @@ ISF::GenParticleSimWhiteList::GenParticleSimWhiteList( const std::string& t,
                                                        const IInterface* p )
   : base_class(t,n,p)
 {
-    // different options
-    declareProperty("WhiteLists", m_whiteLists={"G4particle_whitelist.txt"});
-    declareProperty("QuasiStableSim", m_qs=true);
-    declareProperty("MinimumDecayRadiusQS", m_minDecayRadiusQS=30.19*Gaudi::Units::mm);
 }
 
 // Athena algtool's Hooks
@@ -224,4 +214,3 @@ StatusCode  ISF::GenParticleSimWhiteList::finalize()
     ATH_MSG_VERBOSE("Finalizing ...");
     return StatusCode::SUCCESS;
 }
-

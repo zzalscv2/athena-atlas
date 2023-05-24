@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/src/exceptions.cxx
@@ -441,6 +441,55 @@ ExcBadReadCondHandleInit::ExcBadReadCondHandleInit()
 ExcNoRange::ExcNoRange()
   : std::runtime_error ("SG::ExcBadReadCondHandleInit: Range not set in ReadCondHandle::getRange().")
 {
+}
+
+
+//****************************************************************************
+
+
+/// Helper: format exception error string.
+std::string excBadDecorElement_format (Gaudi::DataHandle::Mode mode,
+                                       CLID clid,
+                                       const std::string& decorKey)
+{
+  std::ostringstream os;
+  os << "SG::ExcBadDecorElement: ";
+  if (mode == Gaudi::DataHandle::Writer)
+    os << "Write";
+  else if (mode == Gaudi::DataHandle::Reader)
+    os << "Read";
+  else
+    os << "???";
+  os << "DecorHandle " << decorKey
+     << "[" << clid << "]"
+     << " given an element not in the requested container.";
+  return os.str();
+}
+
+
+/**
+ * @brief Constructor.
+ * @param mode Reader or Writer, depending on the handle type.
+ * @param clid CLID from the handle.
+ * @param decorKey Decoration key in CONTAINER.DECOR format.
+ */
+ExcBadDecorElement::ExcBadDecorElement (Gaudi::DataHandle::Mode mode,
+                                        CLID clid,
+                                        const std::string& decorKey)
+  : std::runtime_error (excBadDecorElement_format (mode, clid, decorKey))
+{
+}
+
+
+/**
+ * @brief Throw a SG::ExcBadDecorElement exception.
+ */
+[[noreturn]]
+void throwExcBadDecorElement (Gaudi::DataHandle::Mode mode,
+                              CLID clid,
+                              const std::string& decorKey)
+{
+  throw SG::ExcBadDecorElement (mode, clid, decorKey);
 }
 
 

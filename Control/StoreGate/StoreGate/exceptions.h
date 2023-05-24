@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/exceptions.h
@@ -15,8 +15,11 @@
 #define STOREGATE_EXCEPTIONS_H
 
 
+#include "AthContainersInterfaces/AuxTypes.h"
+#include "CxxUtils/sgkey_t.h"
 #include "GaudiKernel/ClassID.h"
 #include "GaudiKernel/EventContext.h"
+#include "GaudiKernel/DataHandle.h"
 #include <stdexcept>
 #include <typeinfo>
 #include <string>
@@ -361,6 +364,36 @@ public:
    */
   ExcNoRange();
 };
+
+
+
+
+/**
+ * @brief Exception --- DecorHandle given an element not in the requested container.
+ */
+class ExcBadDecorElement
+  : public std::runtime_error
+{
+public:
+  /**
+   * @brief Constructor.
+   * @param mode Reader or Writer, depending on the handle type.
+   * @param clid CLID from the handle.
+   * @param decorKey Decoration key in CONTAINER.DECOR format.
+   */
+  ExcBadDecorElement (Gaudi::DataHandle::Mode mode,
+                      CLID clid,
+                      const std::string& decorKey);
+};
+
+
+/**
+ * @brief Throw a SG::ExcBadDecorElement exception.
+ */
+[[noreturn]]
+void throwExcBadDecorElement (Gaudi::DataHandle::Mode mode,
+                              CLID clid,
+                              const std::string& decorKey);
 
 
 } // namespace SG

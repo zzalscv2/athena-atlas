@@ -13,4 +13,5 @@ atlas_add_component( McParticleTools
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${HEPPDT_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} 
-                     LINK_LIBRARIES ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} TruthUtils AtlasHepMCLib AtlasHepMCsearchLib AthenaBaseComps AthContainers StoreGateLib EventKernel GaudiKernel TruthHelper GeneratorObjects McParticleEvent McParticleKernel McParticleUtils SGTools )
+
+                     LINK_LIBRARIES ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} TruthUtils AtlasHepMCLib AtlasHepMCsearchLib AthenaBaseComps AthContainers StoreGateLib EventKernel GaudiKernel GeneratorObjects McParticleEvent McParticleKernel McParticleUtils SGTools )

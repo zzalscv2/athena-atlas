@@ -15,6 +15,7 @@
 #include <memory>
 #include <stdexcept>
 #include <type_traits>
+#include <array>
 
 #include "MuonNSWCommonDecode/NSWDecodeHelper.h"
 
@@ -75,5 +76,24 @@ TEST(DecodeHelper, decodeAndAdvanceWorks) {
   EXPECT_EQ(res, 0b11111);
   EXPECT_EQ(start, START + size);
 }
+
+TEST(DecodeHelper, min_bitWorks){
+  const uint32_t sampleInt{0b01100000};
+  constexpr auto cnt = Muon::min_bit<uint32_t>(sampleInt);
+  EXPECT_EQ(cnt, 5);
+  const uint32_t zero{0b00000000};
+  constexpr auto zcnt = Muon::min_bit<uint32_t>(zero);
+  EXPECT_EQ(zcnt, -1);
+}
+
+TEST(DecodeHelper, max_bitWorks){
+  const uint32_t sampleInt{0b01100000};
+  constexpr auto cnt = Muon::max_bit<uint32_t>(sampleInt);
+  EXPECT_EQ(cnt, 6);
+  const uint32_t zero{0b00000000};
+  constexpr auto zcnt = Muon::max_bit<uint32_t>(zero);
+  EXPECT_EQ(zcnt, -1);
+}
+
 
 ATLAS_GOOGLE_TEST_MAIN

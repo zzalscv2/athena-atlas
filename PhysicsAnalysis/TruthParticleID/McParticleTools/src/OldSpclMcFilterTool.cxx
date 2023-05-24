@@ -14,7 +14,7 @@
 
 // CLHEP/HepMC includes
 #include "TruthUtils/MagicNumbers.h"
-#include "TruthHelper/GenAccessIO.h"
+#include "GenAccessIO.h"
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
