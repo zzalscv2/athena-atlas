@@ -26,6 +26,7 @@ constexpr int PARTONPDGMAX = 43;
 constexpr int NPPDGMIN = 1000000;
 constexpr int NPPDGMAX = 8999999;
 constexpr int PHOTOSMIN = 10000;
+constexpr int SPECIALSTATUS = 10902;
 
 /// @brief This barcode is used by objects matched to particles from pile-up
 /// interactions in standard MC Production
@@ -59,7 +60,7 @@ template <class T>  inline bool is_truthhelper_generator_particle(const T& p) {
     return (!is_simulation_particle(p)) &&
            (p->status() < 200 ||
             p->status() % 1000 == 1 || p->status() % 1000 == 2 ||
-            p->status() == 10902);
+            p->status() == SPECIALSTATUS);
 }
 }
 #endif
