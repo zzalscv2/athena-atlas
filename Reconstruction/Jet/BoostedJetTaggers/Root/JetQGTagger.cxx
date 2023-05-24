@@ -13,6 +13,7 @@
 #include "InDetTrackSystematicsTools/JetTrackFilterTool.h"
 
 #include "xAODTracking/VertexContainer.h"
+#include "TruthUtils/MagicNumbers.h"
 
 namespace CP {
 
@@ -588,7 +589,7 @@ namespace CP {
       // require the particle in the final state
       if( ! (part->status() == 1) ) continue;
       // require that the particle type (e.g. production type) be valid (e.g. not primaries)
-      if ((part->barcode())>2e5) continue;
+      if (HepMC::is_simulation_particle(part)) continue;
       // pt>500 MeV
       if( ! (part->pt()>500.) )  continue;
       // charged
