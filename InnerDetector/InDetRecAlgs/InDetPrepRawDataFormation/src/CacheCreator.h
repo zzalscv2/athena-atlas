@@ -19,6 +19,7 @@ Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 #include "InDetRawData/SCT_RDO_Container.h"
 #include "InDetRawData/PixelRDO_Container.h"
 #include "InDetByteStreamErrors/IDCInDetBSErrContainer.h"
+#include "InDetRawData/TRT_RDO_Container.h"
 
 class TRT_ID;
 class PixelID;
@@ -59,6 +60,9 @@ namespace InDet{
           {this, "PixRDOCacheKey", ""};
 	SG::WriteHandleKey<IDCInDetBSErrContainer_Cache>  m_PixBSErrCacheKey
 	  {this, "PixBSErrCacheKey", ""};
+
+	SG::WriteHandleKey<TRT_RDO_Cache>  m_TRTRDOCacheKey
+	  {this, "TRTRDOCacheKey", ""};
 
         BooleanProperty m_disableTRT{this, "disableTRT", false};
         BooleanProperty m_disableWarning{this, "DisableViewWarning", false};

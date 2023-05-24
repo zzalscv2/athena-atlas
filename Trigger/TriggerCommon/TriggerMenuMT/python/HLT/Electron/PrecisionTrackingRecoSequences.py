@@ -3,7 +3,6 @@
 #
 
 from AthenaCommon.CFElements import parOR
-from AthenaCommon.GlobalFlags import globalflags
 import AthenaCommon.CfgMgr as CfgMgr
 
 #logging
@@ -30,12 +29,13 @@ def precisionTracking(flags, RoIs, ion=False, variant=''):
                                  ]
 
     # These objects must be loaded from SGIL if not from CondInputLoader
-    from AthenaCommon.AlgSequence import AlgSequence
-    topSequence = AlgSequence()
-    if globalflags.InputFormat.is_bytestream():
+    if not flags.Input.isMC:
       ViewVerifyTrk.DataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
-                                    ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' )]
+                                    ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' ),
+                                    ( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
     else:
+      from AthenaCommon.AlgSequence import AlgSequence
+      topSequence = AlgSequence()
       topSequence.SGInputLoader.Load += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
       ViewVerifyTrk.DataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
 

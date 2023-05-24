@@ -17,6 +17,7 @@ class InDetCacheNames(object):
   SCTRDOCacheKey     = "SctRDOCache"
   PixRDOCacheKey     = "PixRDOCache"
   PixBSErrCacheKey   = "PixBSErrCache"
+  TRTRDOCacheKey     = "TrtRDOCache"
 
 def InDetIDCCacheCreatorCfg(flags):
   #Create IdentifiableCaches
@@ -31,7 +32,8 @@ def InDetIDCCacheCreatorCfg(flags):
                                               SCTBSErrCacheKey   = InDetCacheNames.SCTBSErrCacheKey,
                                               SCTFlaggedCondCacheKey = InDetCacheNames.SCTFlaggedCondCacheKey,
                                               PixRDOCacheKey     = InDetCacheNames.PixRDOCacheKey,
-                                              PixBSErrCacheKey   = InDetCacheNames.PixBSErrCacheKey)
+                                              PixBSErrCacheKey   = InDetCacheNames.PixBSErrCacheKey,
+                                              TRTRDOCacheKey     = InDetCacheNames.TRTRDOCacheKey)
   if not flags.Detector.GeometryTRT:
     InDetCacheCreatorTrig.disableTRT = True
 
@@ -118,6 +120,7 @@ def TRTDataProviderCfg(flags : AthConfigFlags, rois : str, signatureName : str =
   from RegionSelector.RegSelToolConfig import regSelTool_TRT_Cfg
   dataProviderAlg = CompFactory.TRTRawDataProvider(name = providerName,
                                                    RDOKey       = TrigTRTKeys.RDOs,
+                                                   RDOCacheKey       = InDetCacheNames.TRTRDOCacheKey,
                                                    ProviderTool = dataProviderTool,
                                                    RegSelTool   = acc.popToolsAndMerge( regSelTool_TRT_Cfg(flags)),
                                                    isRoI_Seeded = True,
@@ -172,20 +175,17 @@ def trigInDetPrecisionTrackingCfg( inflags, rois, signatureName, in_view=True ):
   acc = ComponentAccumulator()
   flags = inflags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking."+signatureName)
 
-  from .InDetTrigCollectionKeys import TrigPixelKeys,TrigTRTKeys
+  from .InDetTrigCollectionKeys import TrigPixelKeys
   if in_view:
     #TODO share setup with FTF
-    TRT_RDO_Key = "TRT_RDOs"
-    if flags.Input.Format is Format.BS:
-          TRT_RDO_Key = TrigTRTKeys.RDOs
     verifier = CompFactory.AthViews.ViewDataVerifier( name = 'VDVInDetPrecision'+flags.Tracking.ActiveConfig.suffix,
                                                       DataObjects= [('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
-                                                                    ('InDet::PixelClusterContainerCache', 'PixelTrigClustersCache'),
-                                                                    ('PixelRDO_Cache', 'PixRDOCache'),
-                                                                    ('SCT_RDO_Cache', 'SctRDOCache'),
-                                                                    ( 'TRT_RDO_Container' , TRT_RDO_Key),
-                                                                    ('SpacePointCache', 'PixelSpacePointCache'),
-                                                                    ('SpacePointCache', 'SctSpacePointCache'),
+                                                                    ('InDet::PixelClusterContainerCache', InDetCacheNames.Pixel_ClusterKey),
+                                                                    ('PixelRDO_Cache', InDetCacheNames.PixRDOCacheKey),
+                                                                    ('SCT_RDO_Cache', InDetCacheNames.SCTRDOCacheKey),
+                                                                    ('TRT_RDO_Cache', InDetCacheNames.TRTRDOCacheKey),
+                                                                    ('SpacePointCache', InDetCacheNames.SpacePointCachePix),
+                                                                    ('SpacePointCache', InDetCacheNames.SpacePointCacheSCT),
                                                                     ('TrigRoiDescriptorCollection', flags.Tracking.ActiveConfig.roi),
                                                                     ( 'TagInfo', 'DetectorStore+ProcessingTags' ), 
                                                                     ( 'InDet::PixelGangedClusterAmbiguities' , TrigPixelKeys.PixelClusterAmbiguitiesMap),

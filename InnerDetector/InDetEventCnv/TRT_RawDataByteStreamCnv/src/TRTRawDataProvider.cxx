@@ -24,6 +24,7 @@ TRTRawDataProvider::TRTRawDataProvider(const std::string& name,
   declareProperty("isRoI_Seeded", m_roiSeeded = false, "Use RoI");
   declareProperty("RDOKey", m_rdoContainerKey = std::string("TRT_RDOs"));
   declareProperty("BSErrkey",m_bsErrContKey = "TRT_ByteStreamErrs");
+  declareProperty("RDOCacheKey", m_rdoCacheKey);
   declareProperty ("ProviderTool", m_rawDataTool );
 }
 
@@ -32,45 +33,12 @@ TRTRawDataProvider::TRTRawDataProvider(const std::string& name,
 
 StatusCode TRTRawDataProvider::initialize() {
 
-  ATH_MSG_INFO( "TRTRawDataProvider::initialize" );
+  ATH_CHECK(m_robDataProvider.retrieve());
 
-  // Get ROBDataProviderSvc
-  if (m_robDataProvider.retrieve().isFailure()) 
-  {
-    ATH_MSG_FATAL( "Failed to retrieve serive " << m_robDataProvider );
-    return StatusCode::FAILURE;
-  } else
-    ATH_MSG_INFO( "Retrieved service " << m_robDataProvider );
- 
-
-  /*
-   * Get TRTRawDataProviderTool
-   */
-  if ( m_rawDataTool.retrieve().isFailure() )
-  {
-    ATH_MSG_FATAL( "Failed to retrieve serive " << m_rawDataTool );
-    return StatusCode::FAILURE;
-  } else
-    ATH_MSG_INFO( "Retrieved service " << m_rawDataTool );
-
-
-  // Get TRT Detector Manager 
-  const InDetDD::TRT_DetectorManager* indet_mgr;
-  StatusCode sc = detStore()->retrieve(indet_mgr,"TRT"); 
-  if (sc.isFailure()) 
-  {
-    ATH_MSG_FATAL( "Cannot retrieve TRT_DetectorManager!" );
-    return StatusCode::FAILURE;
-  } 
+  ATH_CHECK(m_rawDataTool.retrieve());
 
   // Get the TRT Helper
-  if (detStore()->retrieve(m_trt_id, "TRT_ID").isFailure()) 
-  {
-    ATH_MSG_FATAL( "Could not get TRT ID helper" );
-    return StatusCode::FAILURE;
-  }
-
-
+  ATH_CHECK(detStore()->retrieve(m_trt_id, "TRT_ID"));
 
   
   if (m_roiSeeded) {
@@ -87,6 +55,7 @@ StatusCode TRTRawDataProvider::initialize() {
   ATH_CHECK( m_rdoContainerKey.initialize() );
 
   ATH_CHECK( m_bsErrContKey.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_rdoCacheKey.initialize(SG::AllowEmpty) );
 
   return StatusCode::SUCCESS;
 }
@@ -97,7 +66,14 @@ StatusCode TRTRawDataProvider::initialize() {
 StatusCode TRTRawDataProvider::execute(const EventContext& ctx) const
 {
   SG::WriteHandle<TRT_RDO_Container> rdoContainer(m_rdoContainerKey, ctx);
-  rdoContainer = std::make_unique<TRT_RDO_Container>(m_trt_id->straw_hash_max(), EventContainers::Mode::OfflineFast); 
+  if( m_rdoCacheKey.empty() ) {
+    rdoContainer = std::make_unique<TRT_RDO_Container>(m_trt_id->straw_hash_max(), EventContainers::Mode::OfflineFast); 
+  }
+  else{
+    SG::UpdateHandle<TRT_RDO_Cache> updateh(m_rdoCacheKey, ctx);
+    rdoContainer = std::make_unique<TRT_RDO_Container>(updateh.ptr());
+    ATH_MSG_DEBUG("Created container " << m_rdoContainerKey.key() << " using external cache " << m_rdoCacheKey.key());
+  }
   ATH_CHECK(rdoContainer.isValid());
 
   std::unique_ptr<TRT_BSErrContainer> bsErrCont=std::make_unique<TRT_BSErrContainer>();
