@@ -3,7 +3,7 @@
 */
 
 #include "GeneratorFilters/xAODParentTwoChildrenFilter.h"
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "CxxUtils/BasicTypes.h"
 #include "xAODTruth/TruthVertexContainer.h"
 

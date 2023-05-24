@@ -8,7 +8,7 @@
 #include <cmath>       /* remainder and M_PI */
 
 // Event Kernel include
-#include "TruthUtils/PIDHelpers.h" // for MC::PID::isElectron(...) and others
+#include "TruthUtils/HepMCHelpers.h" // for MC::PID::isElectron(...) and others
 
 // EDM include(s):
 #include "xAODCore/AuxStoreAccessorMacros.h"

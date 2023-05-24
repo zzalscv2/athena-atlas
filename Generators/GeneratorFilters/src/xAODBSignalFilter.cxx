@@ -23,7 +23,7 @@
 // -----------------------------------------------------------------------------------------------
 
 #include "GeneratorFilters/xAODBSignalFilter.h"
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Vector/LorentzVector.h"
 
 #include <sstream>
