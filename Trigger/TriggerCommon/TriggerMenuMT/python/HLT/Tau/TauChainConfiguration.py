@@ -13,12 +13,12 @@ from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBa
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
 
-from .generateTau import tauCaloMVAMenuSeq
+from .generateTau import tauCaloMVAMenuSeq, tauFTFTauCoreSeq
 
 if isComponentAccumulatorCfg():
-    from .generateTau import tauFTFTauCoreSeq, tauFTFTauIsoSeq, tauFTFTauIsoBDTSeq
+    from .generateTau import tauFTFTauIsoSeq, tauFTFTauIsoBDTSeq
 else:
-    from .TauMenuSequences import tauFTFTauCoreSeq, tauFTFTauLRTSeq, tauFTFTauIsoSeq, tauFTFTauIsoBDTSeq, tauTrackTwoMVASeq, tauTrackTwoLLPSeq, tauTrackLRTSeq, tauPrecTrackIsoSeq, tauPrecTrackLRTSeq
+    from .TauMenuSequences import tauFTFTauLRTSeq, tauFTFTauIsoSeq, tauFTFTauIsoBDTSeq, tauTrackTwoMVASeq, tauTrackTwoLLPSeq, tauTrackLRTSeq, tauPrecTrackIsoSeq, tauPrecTrackLRTSeq
 
 #--------------------------------------------------------
 # fragments generating config will be functions in new JO
@@ -30,7 +30,10 @@ def getTauCaloMVACfg(flags, is_probe_leg=False):
        return menuSequenceCAToGlobalWrapper(tauCaloMVAMenuSeq,flags, "Tau", is_probe_leg=is_probe_leg)
 
 def getFTFCoreCfg(flags, is_probe_leg=False):
-    return tauFTFTauCoreSeq(flags, is_probe_leg=is_probe_leg)
+    if isComponentAccumulatorCfg():
+       return tauFTFTauCoreSeq(flags, is_probe_leg=is_probe_leg)
+    else:
+       return menuSequenceCAToGlobalWrapper(tauFTFTauCoreSeq,flags, is_probe_leg=is_probe_leg)
 
 def getFTFLRTCfg(flags, is_probe_leg=False):
     return tauFTFTauLRTSeq(flags, is_probe_leg=is_probe_leg)

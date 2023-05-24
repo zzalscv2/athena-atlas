@@ -5,8 +5,6 @@
 from AthenaCommon.CFElements import parOR, seqAND
 from AthenaCommon.GlobalFlags import globalflags
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorInitialROITool, ViewCreatorFetchFromViewROITool, ViewCreatorPreviousROITool
 from TrigEDMConfig.TriggerEDMRun3 import recordable
@@ -45,74 +43,11 @@ def _getTauSignatureShort( name ):
 
     return signature, signatureID
 
-@AccumulatorCache
-def tauCaloRoiUpdaterCfg(inflags, inputRoIs, clusters):
-    flags = inflags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.tauCore")
-    acc = ComponentAccumulator()
-    alg                               = CompFactory.TrigTauCaloRoiUpdater(
-        "TauCaloRoiUpdater",
-        etaHalfWidth                  = flags.Tracking.ActiveConfig.etaHalfWidth,
-        phiHalfWidth                  = flags.Tracking.ActiveConfig.phiHalfWidth,
-        z0HalfWidth                   = flags.Tracking.ActiveConfig.zedHalfWidth,
-        RoIInputKey                   = inputRoIs,
-        RoIOutputKey                  = 'UpdatedCaloRoI',
-        CaloClustersKey               = clusters)
-    acc.addEventAlgo(alg)
-    return acc
-
-@AccumulatorCache
-def tauTrackRoiUpdaterCfg(inflags, inputRoIs, tracks):
-    acc = ComponentAccumulator()
-    flags = inflags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.tauIso")
-    alg                               = CompFactory.TrigTauTrackRoiUpdater(
-        "TrackRoiUpdater",
-        etaHalfWidth                  = flags.Tracking.ActiveConfig.etaHalfWidth,
-        phiHalfWidth                  = flags.Tracking.ActiveConfig.phiHalfWidth,
-        z0HalfWidth                   = flags.Tracking.ActiveConfig.zedHalfWidth,
-        RoIInputKey                   = inputRoIs,
-        RoIOutputKey                  = "UpdatedTrackRoI",
-        fastTracksKey                 = tracks,
-        Key_trigTauJetInputContainer  = "" )
-    acc.addEventAlgo(alg)
-    return acc
-
-@AccumulatorCache
-def tauTrackBDTRoiUpdaterCfg(inflags, inputRoIs, tracks):
-    acc                               = ComponentAccumulator()
-    flags = inflags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.tauIso")
-    alg                               = CompFactory.TrigTauTrackRoiUpdater(
-        "TrackRoiUpdaterBDT",
-        etaHalfWidth                  = flags.Tracking.ActiveConfig.etaHalfWidth,
-        phiHalfWidth                  = flags.Tracking.ActiveConfig.phiHalfWidth,
-        z0HalfWidth                   = flags.Tracking.ActiveConfig.zedHalfWidth,
-        RoIInputKey                   = inputRoIs,
-        RoIOutputKey                  = "UpdatedTrackBDTRoI",
-        fastTracksKey                 = tracks,
-        BDTweights                    = f"{flags.Trigger.Offline.Tau.tauRecToolsCVMFSPath}/{flags.Trigger.Offline.Tau.FTFTauCoreBDTConfig}",
-        Key_trigTauJetInputContainer  = "HLT_TrigTauRecMerged_CaloMVAOnly" )
-    acc.addEventAlgo(alg)
-    return acc
-
-@AccumulatorCache
-def tauLRTRoiUpdaterCfg(inflags, inputRoIs, tracks):
-    acc                               = ComponentAccumulator()
-    flags = inflags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.tauLRT")
-    alg                               = CompFactory.TrigTauTrackRoiUpdater(
-        "TrackRoiUpdaterLRT",
-        etaHalfWidth                  = flags.Tracking.ActiveConfig.etaHalfWidth,
-        phiHalfWidth                  = flags.Tracking.ActiveConfig.phiHalfWidth,
-        z0HalfWidth                   = flags.Tracking.ActiveConfig.zedHalfWidth,
-        RoIInputKey                   = inputRoIs,
-        RoIOutputKey                  = "UpdatedTrackLRTRoI",
-        fastTracksKey                 = tracks,
-        Key_trigTauJetInputContainer  = "" )
-    acc.addEventAlgo(alg)
-    return acc
-
 def tauCaloMVARecoSequence(flags, InViewRoIs, SeqName):
     global TauCaloJetContainer
     from TrigTauRec.TrigTauRecConfig import trigTauRecMergedCaloOnlyMVACfg
     from TrigCaloRec.TrigCaloRecConfig import tauTopoClusteringCfg
+    from TrigTauHypo.TrigTauHypoConfig import tauCaloRoiUpdaterCfg
     tauTopoClusAlg                            = algorithmCAToGlobalWrapper(tauTopoClusteringCfg, flags, RoIs=InViewRoIs)
     tauCaloRoiUpdaterAlg                      = algorithmCAToGlobalWrapper(tauCaloRoiUpdaterCfg,flags, inputRoIs=InViewRoIs,clusters = 'HLT_TopoCaloClustersLC')[0]
     tauCaloOnlyMVAAlg                         = algorithmCAToGlobalWrapper(trigTauRecMergedCaloOnlyMVACfg,flags)[0]
@@ -242,6 +177,8 @@ def tauFTFSequence( flags, RoIs, name ):
 
     viewVerify.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs ),
                                ( 'xAOD::TauJetContainer' , 'StoreGateSvc+HLT_TrigTauRecMerged_CaloMVAOnly')] 
+
+    from TrigTauHypo.TrigTauHypoConfig import tauTrackRoiUpdaterCfg,tauTrackBDTRoiUpdaterCfg,tauLRTRoiUpdaterCfg
 
     if 'LRT' in signatureName:
       tauLRTRoiUpdaterAlg = algorithmCAToGlobalWrapper(tauLRTRoiUpdaterCfg,flags,inputRoIs = RoIs,tracks = TrackCollection)[0]
