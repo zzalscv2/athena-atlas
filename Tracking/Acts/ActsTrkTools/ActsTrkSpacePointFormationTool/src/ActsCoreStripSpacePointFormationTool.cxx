@@ -634,7 +634,7 @@ double ActsCoreStripSpacePointFormationTool::computeOffset(const InDetDD::SiDete
                                                  size_t &stripIndex) const
   {
     const auto &localPos = sourceLink.values();
-    InDetDD::SiLocalPosition localPosition(0., localPos(0, 0), 0.);
+
     auto cluster = dynamic_cast<const xAOD::StripCluster *>(&sourceLink.atlasHit());
     if(!cluster){
       ATH_MSG_FATAL("Could not cast UncalibratedMeasurement as StripCluster");
@@ -648,21 +648,18 @@ double ActsCoreStripSpacePointFormationTool::computeOffset(const InDetDD::SiDete
         return {};
       }
 
-      const auto &rdoList = cluster->rdoList();
-      const Identifier &firstStripId = rdoList.front();
-      const int firstStrip = m_stripId->strip(firstStripId);
-      const int stripRow = m_stripId->row(firstStripId);
-      const int clusterSizeInStrips = cluster->channelsInPhi();
+      // calculate phi pitch for evaluating the strip index
+      double phiPitchPhi = design->phiWidth()/design->diodesInRow(0);
+      stripIndex = -std::floor(localPos(0, 0) / phiPitchPhi) + design->diodesInRow(0) *0.5 - 0.5;
 
-      // Evaluate position on the readout from first strip and cluster width
-      const auto clusterPosition = design->localPositionOfCluster(design->strip1Dim(firstStrip, stripRow), clusterSizeInStrips);
-      const double shift = m_lorentzAngleTool->getLorentzShift(element->identifyHash());
-      localPosition = InDetDD::SiLocalPosition(clusterPosition.xEta(), clusterPosition.xPhi() + shift, 0.);
-
-      const auto cellid = design->cellIdOfPosition(localPosition);
-      stripIndex = cellid.strip();
+      std::pair<Amg::Vector3D, Amg::Vector3D > ends = {
+        element->globalPosition(design->stripPosAtR(stripIndex, 0, design->minR())),
+        element->globalPosition(design->stripPosAtR(stripIndex, 0, design->maxR()))
+      };
+      return ends;
     }
 
+    InDetDD::SiLocalPosition localPosition(0., localPos(0, 0), 0.);
     std::pair<Amg::Vector3D, Amg::Vector3D> ends(element->endsOfStrip(localPosition));
     return ends;
   }
