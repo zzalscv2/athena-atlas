@@ -40,9 +40,9 @@ def precisionTracks_GSFRefitted(RoIs, ion=False, variant=''):
     from AthenaCommon.GlobalFlags import globalflags
     if (globalflags.InputFormat.is_bytestream()):
       ViewVerifyPrecisionTrk.DataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' )]
-      ViewVerifyPrecisionTrk.DataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+%s' % TrigTRTKeys.RDOs )]
+      ViewVerifyPrecisionTrk.DataObjects += [( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
     else:
-      ViewVerifyPrecisionTrk.DataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+%s' % "TRT_RDOs" )]
+      ViewVerifyPrecisionTrk.DataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
 
 
     from TriggerMenuMT.HLT.Electron.TrigEMBremCollectionBuilder import TrigEMBremCollectionBuilderCfg

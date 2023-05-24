@@ -6,7 +6,6 @@
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
 from AthenaCommon.CFElements import parOR, seqAND
 import AthenaCommon.CfgMgr as CfgMgr
-from AthenaCommon.GlobalFlags import globalflags
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorCentredOnClusterROITool
 from TrigTRTHighTHitCounter.TrigTRTHTHCounterConfig import TrigTRTHTHCounterFex
@@ -39,8 +38,10 @@ def TRTHitGeneratorSequence(flags):
     ViewVerify = CfgMgr.AthViews__ViewDataVerifier("TRTHitGeneratorViewDataVerifier")
     ViewVerify.DataObjects = [('TrigRoiDescriptorCollection' , 'StoreGateSvc+TRTHitGenerator'),
                              ]
-    if not globalflags.InputFormat.is_bytestream():
+    if flags.Input.isMC:
         ViewVerify.DataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
+    else:
+        ViewVerify.DataObjects += [( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
 
     # calling trtRIOMaker
     from TrigInDetConfig.InDetTrigPrecisionTracking import trtRIOMaker_builder

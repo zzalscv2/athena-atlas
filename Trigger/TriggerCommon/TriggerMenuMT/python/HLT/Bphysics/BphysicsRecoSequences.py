@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from AthenaCommon.GlobalFlags import globalflags
 from AthenaCommon.CFElements import seqAND, parOR
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -21,11 +20,14 @@ def bmumuxRecoSequence(flags, rois, muons):
                                      ('xAOD::MuonContainer', 'StoreGateSvc+%s' % muons)]
 
     # Make sure required objects are still available at whole-event level
-    if not globalflags.InputFormat.is_bytestream():
+    if flags.Input.isMC:
         from AthenaCommon.AlgSequence import AlgSequence
         topSequence = AlgSequence()
         viewDataVerifier.DataObjects += [('TRT_RDO_Container', 'StoreGateSvc+TRT_RDOs')]
         topSequence.SGInputLoader.Load += [('TRT_RDO_Container', 'StoreGateSvc+TRT_RDOs')]
+    else:
+        viewDataVerifier.DataObjects += [( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
+
 
     for viewAlg in viewAlgs:
         recoSequence += viewAlg
