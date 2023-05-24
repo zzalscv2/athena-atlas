@@ -47,6 +47,7 @@ namespace LVL1 {
     /** Tool to calculate eEM discriminant sums */
     virtual
     StatusCode getegSums(float etaTOB, float phiTOB, int seed, int UnD, 
+                                  std::vector<unsigned int> &ClusterCellETs,
                                   std::vector<unsigned int> &RetaSums,
                                   std::vector<unsigned int> &RhadSums, 
                                   std::vector<unsigned int> &WstotSums) override;

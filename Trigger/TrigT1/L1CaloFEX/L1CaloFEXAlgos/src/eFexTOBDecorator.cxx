@@ -76,11 +76,12 @@ namespace LVL1 {
       float phi = emRoI->phi();
       int seed = emRoI->seed();
       int UnD = emRoI->UpNotDown();
+      std::vector<unsigned int> ClusterCellETs;
       std::vector<unsigned int> RetaSums;
       std::vector<unsigned int> RhadSums;
       std::vector<unsigned int> WstotSums;
 
-      ATH_CHECK( m_eFEXTOBEtTool->getegSums(eta, phi, seed, UnD, RetaSums, RhadSums, WstotSums) );
+      ATH_CHECK( m_eFEXTOBEtTool->getegSums(eta, phi, seed, UnD, ClusterCellETs, RetaSums, RhadSums, WstotSums) );
 
       RetaCoreDec (*emRoI) = RetaSums[0];
       RetaEnvDec  (*emRoI) = RetaSums[1];

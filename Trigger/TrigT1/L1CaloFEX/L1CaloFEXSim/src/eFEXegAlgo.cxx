@@ -240,47 +240,65 @@ void LVL1::eFEXegAlgo::getWstot(std::vector<unsigned int> & output){
 
 }
 
-unsigned int LVL1::eFEXegAlgo::getET() {
-  int phiUpDownID = -1;
-  if (m_seed_UnD) {
-    phiUpDownID = 2;
-  } else {
-    phiUpDownID = 0;
-  }
-  
-  unsigned int PS_ET_1, PS_ET_2;
-  getWindowET(0, 1, 0, PS_ET_1);
-  getWindowET(0, phiUpDownID, 0, PS_ET_2);
-  unsigned int L1_ET_1, L1_ET_2, L1_ET_3, L1_ET_4, L1_ET_5, L1_ET_6;
-  // central phi and eta tower
-  getWindowET(1, 1, m_seedID, L1_ET_1); 
-  getWindowET(1, 1, m_seedID - 1, L1_ET_2); 
-  getWindowET(1, 1, m_seedID + 1, L1_ET_3);
-  // top/bottom phi and central eta tower
-  getWindowET(1, phiUpDownID, m_seedID, L1_ET_4); 
-  getWindowET(1, phiUpDownID, m_seedID - 1, L1_ET_5); 
-  getWindowET(1, phiUpDownID, m_seedID + 1, L1_ET_6);
-  unsigned int L2_ET_1, L2_ET_2, L2_ET_3, L2_ET_4, L2_ET_5, L2_ET_6;
-  // central phi and eta tower
-  getWindowET(2, 1, m_seedID, L2_ET_1); 
-  getWindowET(2, 1, m_seedID - 1, L2_ET_2); 
-  getWindowET(2, 1, m_seedID + 1, L2_ET_3);
-  // top/bottom phi and central eta tower
-  getWindowET(2, phiUpDownID, m_seedID, L2_ET_4); 
-  getWindowET(2, phiUpDownID, m_seedID - 1, L2_ET_5); 
-  getWindowET(2, phiUpDownID, m_seedID + 1, L2_ET_6);
-  unsigned int L3_ET_1, L3_ET_2;
-  getWindowET(3, 1, 0, L3_ET_1); getWindowET(3, phiUpDownID, 0, L3_ET_2);
+/// Return cell ET values used in cluster.
+/// Placed in its own function to allow other classes to access these
+void LVL1::eFEXegAlgo::getClusterCells(std::vector<unsigned int> &cellETs) {
 
-  /// Layer sums (including dead material corrections if requested)
-  unsigned int PS_ET = dmCorrection(PS_ET_1, 0) + dmCorrection(PS_ET_2, 0);
-  unsigned int L1_ET = dmCorrection(L1_ET_1, 1) + dmCorrection(L1_ET_2, 1)
-                         + dmCorrection(L1_ET_3, 1) + dmCorrection(L1_ET_4, 1)
-                         + dmCorrection(L1_ET_5, 1) + dmCorrection(L1_ET_6, 1);
-  unsigned int L2_ET = dmCorrection(L2_ET_1, 2) + dmCorrection(L2_ET_2, 2)
-                         + dmCorrection(L2_ET_3, 2) + dmCorrection(L2_ET_4, 2)
-                         + dmCorrection(L2_ET_5, 2) + dmCorrection(L2_ET_6, 2);
-  unsigned int L3_ET = L3_ET_1 + L3_ET_2;
+  int phiUpDownID = 0;
+  if (m_seed_UnD) phiUpDownID = 2;
+
+  // Initialise results vector
+  cellETs.resize(16,0);
+  // Fill vector with 2 PS cells, 6 L1, 6 L2, 2 L3
+  // Presampler
+  getWindowET(0, 1, 0, cellETs[0]);
+  getWindowET(0, phiUpDownID, 0, cellETs[1]);
+  // central phi Layer 1
+  getWindowET(1, 1, m_seedID,     cellETs[2]);
+  getWindowET(1, 1, m_seedID - 1, cellETs[3]);
+  getWindowET(1, 1, m_seedID + 1, cellETs[4]);
+  // top/bottom phi Layer 1
+  getWindowET(1, phiUpDownID, m_seedID,     cellETs[5]);
+  getWindowET(1, phiUpDownID, m_seedID - 1, cellETs[6]);
+  getWindowET(1, phiUpDownID, m_seedID + 1, cellETs[7]);
+  // central phi Layer 2
+  getWindowET(2, 1, m_seedID,     cellETs[8]);
+  getWindowET(2, 1, m_seedID - 1, cellETs[9]);
+  getWindowET(2, 1, m_seedID + 1, cellETs[10]);
+  // top/bottom phi Layer 2
+  getWindowET(2, phiUpDownID, m_seedID,     cellETs[11]);
+  getWindowET(2, phiUpDownID, m_seedID - 1, cellETs[12]);
+  getWindowET(2, phiUpDownID, m_seedID + 1, cellETs[13]);
+  // Layer 3
+  getWindowET(3, 1, 0,           cellETs[14]);
+  getWindowET(3, phiUpDownID, 0, cellETs[15]);
+
+  return;
+
+}
+
+unsigned int LVL1::eFEXegAlgo::getET() {
+
+  /// Get cells used in cluster
+  std::vector<unsigned int> clusterCells;
+  getClusterCells(clusterCells);
+
+  /// Layer sums including dead material corrections
+  unsigned int PS_ET = dmCorrection(clusterCells[0], 0)
+                     + dmCorrection(clusterCells[1], 0);
+  unsigned int L1_ET = dmCorrection(clusterCells[2], 1)
+                     + dmCorrection(clusterCells[3], 1)
+                     + dmCorrection(clusterCells[4], 1)
+                     + dmCorrection(clusterCells[5], 1)
+                     + dmCorrection(clusterCells[6], 1)
+                     + dmCorrection(clusterCells[7], 1);
+  unsigned int L2_ET = dmCorrection(clusterCells[8], 2)
+                     + dmCorrection(clusterCells[9], 2)
+                     + dmCorrection(clusterCells[10], 2)
+                     + dmCorrection(clusterCells[11], 2)
+                     + dmCorrection(clusterCells[12], 2)
+                     + dmCorrection(clusterCells[13], 2);
+  unsigned int L3_ET = clusterCells[14] + clusterCells[15];
 
   /// Final ET sum
   unsigned int totET = PS_ET + L1_ET + L2_ET + L3_ET;
@@ -293,7 +311,7 @@ unsigned int LVL1::eFEXegAlgo::getET() {
 }
 
 unsigned int LVL1::eFEXegAlgo::dmCorrection (unsigned int ET, unsigned int layer) {
-  /// Check layer is valid, otherwise do nothing
+  /// Check corrections are required and layer is valid, otherwise do nothing
   if ( !m_dmCorr || layer > 2 ) return ET;
 
   /// Get correction factor
