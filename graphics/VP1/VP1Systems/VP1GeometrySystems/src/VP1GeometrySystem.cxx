@@ -364,7 +364,7 @@ void VP1GeometrySystem::Imp::addSubSystem(const VP1GeoFlags::SubSystemFlag& f,
 					  const QString& grandchildrenregexp, bool negategrandchildrenregexp)
 {
   theclass->message("VP1GeometrySystem::Imp::addSubSystem - flag: '" + QString(f) + "' - matName: '" + str(matname.c_str()) + "'." );
-  
+
   QCheckBox * cb = controller->subSystemCheckBox(f);
   if (!cb) {
     theclass->message("Error: Problems retrieving checkbox for subsystem "+str(f));
@@ -424,8 +424,13 @@ QWidget * VP1GeometrySystem::buildController()
                           bool negategrandchildrenregexp = false // wheter we want to negate teh granchildren regex
    */
 
-  m_d->addSubSystem( VP1GeoFlags::Pixel,"Pixel");
-  m_d->addSubSystem( VP1GeoFlags::SCT,"SCT");
+  if (VP1JobConfigInfo::hasITkGeometry()) {
+    m_d->addSubSystem( VP1GeoFlags::Pixel,"ITkPixel", "", "ITkPixel");
+    m_d->addSubSystem( VP1GeoFlags::SCT,"ITkStrip", "", "ITkStrip");
+  } else {
+    m_d->addSubSystem( VP1GeoFlags::Pixel,"Pixel");
+    m_d->addSubSystem( VP1GeoFlags::SCT,"SCT");
+  }
   m_d->addSubSystem( VP1GeoFlags::TRT,"TRT");
   m_d->addSubSystem( VP1GeoFlags::InDetServMat,"InDetServMat");
   m_d->addSubSystem( VP1GeoFlags::LAr, ".*LAr.*");
@@ -775,6 +780,7 @@ void VP1GeometrySystem::checkboxChanged()
     message("ERROR: Unknown checkbox");
     return;
   }
+
   SoSwitch * sw = subsys->soswitch;
   assert(sw);
   if (cb->isChecked()) {
@@ -1400,13 +1406,19 @@ void VP1GeometrySystem::Imp::createPathExtras(const VolumeHandle* volhandle, QSt
   case VP1GeoFlags::Pixel: {
     prefix = QString("Pixel::");
     entries.push("IDET::IDET");
-    entries.push("Pixel::Pixel");
+    if (VP1JobConfigInfo::hasITkGeometry())
+      entries.push("ITkPixel::ITkPixel");
+    else
+      entries.push("Pixel::Pixel");
     return;
   }
   case VP1GeoFlags::SCT:{
     prefix = QString("SCT::");
     entries.push("IDET::IDET");
-    entries.push("SCT::SCT");
+    if (VP1JobConfigInfo::hasITkGeometry())
+      entries.push("ITkStrip::ITkStrip");
+    else
+      entries.push("SCT::SCT");
     return;
   }
   case VP1GeoFlags::TRT:{

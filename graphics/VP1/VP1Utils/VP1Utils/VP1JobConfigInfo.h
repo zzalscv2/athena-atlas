@@ -32,6 +32,8 @@ public:
   //These next methods tells us what geomodel parts are initialised:
   static bool hasGeoModelExperiment();//If GeoModelExperiment/"ATLAS" can be retrieved
 
+  static bool hasITkGeometry();
+
   static bool hasPixelGeometry();
   static bool hasSCTGeometry();
   static bool hasTRTGeometry();

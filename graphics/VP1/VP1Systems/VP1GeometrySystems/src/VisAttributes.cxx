@@ -154,6 +154,15 @@ DetVisAttributes::DetVisAttributes() {
   {
     SoMaterial *material = new SoMaterial;
     material->ambientColor.setValue(0, .157811, .187004);
+    material->diffuseColor.setValue(0, .631244, .748016);
+    material->specularColor.setValue(.915152, .915152, .915152);
+    material->shininess.setValue(0.642424);
+    add("ITkPixel",material);
+  }
+
+  {
+    SoMaterial *material = new SoMaterial;
+    material->ambientColor.setValue(0, .157811, .187004);
     material->diffuseColor.setValue(.40, .631244, .748016);
     material->specularColor.setValue(.915152, .915152, .915152);
     material->shininess.setValue(0.642424);
@@ -262,6 +271,15 @@ DetVisAttributes::DetVisAttributes() {
     material->specularColor.setValue(1, 1, 1);
     material->shininess.setValue(1.0);
     add("SCT",material);
+  }
+
+  {
+    SoMaterial *material = new SoMaterial;
+    material->ambientColor.setValue(.37, .69, 1.00);
+    material->diffuseColor.setValue(.21, .64, 1.00);
+    material->specularColor.setValue(1, 1, 1);
+    material->shininess.setValue(1.0);
+    add("ITkStrip",material);
   }
 
   {
