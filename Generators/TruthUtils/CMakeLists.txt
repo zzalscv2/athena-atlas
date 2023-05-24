@@ -20,7 +20,7 @@ atlas_add_library( TruthUtils
    PUBLIC_HEADERS TruthUtils
    INCLUDE_DIRS ${HEPUTILS_INCLUDE_DIRS} ${MCUTILS_INCLUDE_DIRS}
    LINK_LIBRARIES ${HEPUTILS_LIBRARIES} ${MCUTILS_LIBRARIES} ${extra_libs}
-   PRIVATE_LINK_LIBRARIES CxxUtils )
+   )
 
 # Dictionary
 atlas_add_dictionary( TruthUtilsDict
