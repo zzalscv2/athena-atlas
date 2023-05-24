@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -61,6 +61,13 @@ StatusCode CountHepMC::execute() {
   ATH_MSG_INFO("Options for HepMC event number, EvtID event number, EvtID run number = " << m_corHepMC << m_corEvtID << m_corRunNumber );
   // Fix the event number
   int newnum = m_nPass + m_firstEv - 1;
+
+/// crash the run if event number gets above 32bit int.
+   constexpr long long int max32 = std::pow(2, 31) - 1;
+   if (newnum >= max32) {
+      ATH_MSG_ERROR("Event number " << newnum << " exceeds 32bit limit. In HepMC2 it is not allowed.");
+      return StatusCode::FAILURE;
+  }
 
   if (m_corHepMC) {
     std::string key = m_inputKeyName;
