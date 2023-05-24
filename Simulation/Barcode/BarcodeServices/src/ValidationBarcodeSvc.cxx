@@ -1,15 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// ValidationBarcodeSvc.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #include "BarcodeServices/ValidationBarcodeSvc.h"
 // framework include
 #include "GaudiKernel/IIncidentSvc.h"
 #include "TruthUtils/MagicNumbers.h"
+
 
 /** Constructor **/
 Barcode::ValidationBarcodeSvc::ValidationBarcodeSvc(const std::string& name,ISvcLocator* svc) :
@@ -26,13 +23,10 @@ Barcode::ValidationBarcodeSvc::ValidationBarcodeSvc(const std::string& name,ISvc
   m_doUnderOverflowChecks(true)
 {
   // python properties
-  declareProperty("FirstSecondaryVertexBarcode",  m_firstVertex=HepMC::SIM_BARCODE_THRESHOLD-1                );
-  declareProperty("VertexIncrement"            ,  m_vertexIncrement=-1                 );
-  declareProperty("FirstSecondaryBarcode"      ,  m_firstSecondary=HepMC::SIM_BARCODE_THRESHOLD+1              );
-  declareProperty("SecondaryIncrement"         ,  m_secondaryIncrement=1               );
-  declareProperty("ParticleGenerationIncrement",  m_particleGenerationIncrement=HepMC::SIM_REGENERATION_INCREMENT);
-  declareProperty("BarcodeGenerationOffset"    ,  m_barcodeGenerationOffset=1e8        );
-  declareProperty("DoUnderAndOverflowChecks"   ,  m_doUnderOverflowChecks=true         );
+  declareProperty("VertexIncrement"            ,  m_vertexIncrement);
+  declareProperty("SecondaryIncrement"         ,  m_secondaryIncrement);
+  declareProperty("BarcodeGenerationOffset"    ,  m_barcodeGenerationOffset);
+  declareProperty("DoUnderAndOverflowChecks"   ,  m_doUnderOverflowChecks);
 }
 
 
