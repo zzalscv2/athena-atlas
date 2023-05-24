@@ -1,38 +1,32 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// GenericBarcodeSvc.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #include "BarcodeServices/GenericBarcodeSvc.h"
 // framework include
 #include "GaudiKernel/IIncidentSvc.h"
+#include "TruthUtils/MagicNumbers.h"
 
 
 /** Constructor **/
 Barcode::GenericBarcodeSvc::GenericBarcodeSvc(const std::string& name,ISvcLocator* svc) :
   base_class(name,svc),
   m_incidentSvc("IncidentSvc", name),
-  m_firstVertex(-1000001),
+  m_firstVertex(-HepMC::SIM_BARCODE_THRESHOLD-1),
   m_vertexIncrement(-1),
   m_currentVertex(-1),
-  m_firstSecondary(1000001),
+  m_firstSecondary(HepMC::SIM_BARCODE_THRESHOLD+1),
   m_secondaryIncrement(1),
   m_currentSecondary(1),
-  m_particleRegenerationIncrement(10000000),
+  m_particleRegenerationIncrement(HepMC::SIM_REGENERATION_INCREMENT),
   m_doUnderOverflowChecks(true),
   m_encodePhysicsProcess(false)
 {
   // python properties
-  declareProperty("FirstSecondaryVertexBarcode"   ,  m_firstVertex=-1000001                  );
-  declareProperty("VertexIncrement"               ,  m_vertexIncrement=-1                    );
-  declareProperty("FirstSecondaryBarcode"         ,  m_firstSecondary=1000001                );
-  declareProperty("SecondaryIncrement"            ,  m_secondaryIncrement=1                  );
-  declareProperty("ParticleRegenerationIncrement" ,  m_particleRegenerationIncrement=10000000);
-  declareProperty("DoUnderAndOverflowChecks"      ,  m_doUnderOverflowChecks=true            );
-  declareProperty("EncodePhysicsProcessInVertexBC",  m_encodePhysicsProcess=false            );
+  declareProperty("VertexIncrement"               ,  m_vertexIncrement);
+  declareProperty("SecondaryIncrement"            ,  m_secondaryIncrement);
+  declareProperty("DoUnderAndOverflowChecks"      ,  m_doUnderOverflowChecks);
+  declareProperty("EncodePhysicsProcessInVertexBC",  m_encodePhysicsProcess);
 }
 
 

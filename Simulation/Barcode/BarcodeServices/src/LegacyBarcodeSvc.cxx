@@ -1,35 +1,29 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// LegacyBarcodeSvc.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #include "BarcodeServices/LegacyBarcodeSvc.h"
 // framework include
+#include "TruthUtils/MagicNumbers.h"
 
 
 /** Constructor **/
 Barcode::LegacyBarcodeSvc::LegacyBarcodeSvc(const std::string& name,ISvcLocator* svc) :
   base_class(name,svc),
   m_bitcalculator(new Barcode::BitCalculator()),
-  m_firstVertex(-200001),
+  m_firstVertex(-HepMC::SIM_BARCODE_THRESHOLD-1),
   m_vertexIncrement(-1),
   m_currentVertex(-1),
-  m_firstSecondary(200001),
+  m_firstSecondary(HepMC::SIM_BARCODE_THRESHOLD+1),
   m_secondaryIncrement(1),
   m_currentSecondary(1),
-  m_particleGenerationIncrement(1000000),
+  m_particleGenerationIncrement(HepMC::SIM_REGENERATION_INCREMENT),
   m_doUnderOverflowChecks(true)
 {
   // python properties
-  declareProperty("FirstSecondaryVertexBarcode",  m_firstVertex=-200001                );
-  declareProperty("VertexIncrement"            ,  m_vertexIncrement=-1                 );
-  declareProperty("FirstSecondaryBarcode"      ,  m_firstSecondary=200001              );
-  declareProperty("SecondaryIncrement"         ,  m_secondaryIncrement=1               );
-  declareProperty("ParticleGenerationIncrement",  m_particleGenerationIncrement=1000000);
-  declareProperty("DoUnderAndOverflowChecks"   ,  m_doUnderOverflowChecks=true         );
+  declareProperty("VertexIncrement"            ,  m_vertexIncrement);
+  declareProperty("SecondaryIncrement"         ,  m_secondaryIncrement);
+  declareProperty("DoUnderAndOverflowChecks"   ,  m_doUnderOverflowChecks);
 }
 
 
