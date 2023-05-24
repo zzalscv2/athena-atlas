@@ -13,6 +13,7 @@
 #include "SiClusterizationTool/TruthPixelClusterSplitProbTool.h"
 #include "../LWTNNCondAlg.h"
 #include "../TTrainedNetworkCondAlg.h"
+#include "../HitsToxAODCopier.h"
 
 DECLARE_COMPONENT( InDet::PixelRDOTool )
 DECLARE_COMPONENT( InDet::MergedPixelsTool )
@@ -28,6 +29,7 @@ DECLARE_COMPONENT( InDet::NnPixelClusterSplitProbTool )
 DECLARE_COMPONENT( InDet::TruthPixelClusterSplitter )
 DECLARE_COMPONENT( InDet::TruthClusterizationFactory )
 DECLARE_COMPONENT( InDet::TruthPixelClusterSplitProbTool )
+DECLARE_COMPONENT( InDet::HitsToxAODCopier )
 
 
   
