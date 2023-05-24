@@ -540,7 +540,6 @@ namespace dqutils
   {
     dqi::DisableMustClean disabled;
     std::string value("");
-
     if (file_version == 1)
     {
       gROOT->cd(location.c_str());
@@ -614,13 +613,13 @@ namespace dqutils
       std::string TDir_path("");    // Path befor Results
       std::string path_inJSON("");  // Path after Results
       std::size_t split_point = 0;
-      if ((split_point = location.find("/Results")) != std::string::npos)
+      if ((split_point = location.rfind("/Results")) != std::string::npos)
       {
         JSON_name = "Results";
         TDir_path = location.substr(0, split_point);
         path_inJSON = location.substr(split_point + 8);  // 8 - is the length of "/Results"
       }
-      else if ((split_point = location.find("/Config")) != std::string::npos)
+      else if ((split_point = location.rfind("/Config")) != std::string::npos)
       {
         JSON_name = "Config";
         TDir_path = location.substr(0, split_point);
