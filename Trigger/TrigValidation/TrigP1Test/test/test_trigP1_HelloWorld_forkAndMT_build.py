@@ -12,7 +12,7 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
-ex.job_options = 'AthExHelloWorld/HelloWorldOptions.py'
+ex.job_options = 'AthExHelloWorld.HelloWorldConfig.HelloWorldCfg'
 ex.input = 'data'
 ex.forks = 2
 ex.threads = 2
