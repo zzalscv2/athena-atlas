@@ -445,6 +445,10 @@ def main():
    if args.loop_files and args.number_of_events<0:
       log.warning("Looping over files without specifying number of events will run forever!")
 
+   # the '-i' command line option only becomes active after the reload:
+   if args.dump_config_reload:
+      args.interactive = False
+
    # Update args and set athena flags
    from TrigPSC import PscConfig
 
