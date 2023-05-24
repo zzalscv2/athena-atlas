@@ -250,15 +250,7 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
     newPrimBC = this->maxGeneratedParticleBarcode(ti.parentParticle()->parent_event())+1;
   }
   else {
-    newPrimBC = m_barcodeSvc->incrementBarcode( parentBC, processCode);
-  }
-  if ( newPrimBC == Barcode::fUndefinedBarcode) {
-    if (m_ignoreUndefinedBarcodes) {
-      ATH_MSG_WARNING("Unable to generate new Particle Barcode. Continuing due to 'IgnoreUndefinedBarcodes'==True");
-    } else {
-      ATH_MSG_FATAL("Unable to generate new Particle Barcode. Aborting");
-      abort();
-    }
+    newPrimBC = parentBC + HepMC::SIM_REGENERATION_INCREMENT;
   }
 
   HepMC::GenParticlePtr  parentBeforeIncident = ti.parentParticle();
@@ -418,7 +410,7 @@ HepMC::GenVertexPtr  ISF::TruthSvc::createGenVertexFromTruthIncident( ISF::ITrut
   Barcode::ParticleBarcode       parentBC = ti.parentBarcode();
 
   std::vector<double> weights(1);
-  Barcode::ParticleBarcode primaryBC = parentBC % m_barcodeSvc->particleGenerationIncrement();
+  Barcode::ParticleBarcode primaryBC = parentBC % HepMC::SIM_REGENERATION_INCREMENT;
   weights[0] = static_cast<double>( primaryBC );
 
   // Check for a previous end vertex on this particle.  If one existed, then we should put down next to this
