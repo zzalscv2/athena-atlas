@@ -24,6 +24,10 @@ StatusCode EfexMonitorAlgorithm::initialize() {
   ATH_CHECK( m_eFexEMTobKeyList.initialize() );
   ATH_CHECK( m_eFexTauTobKeyList.initialize() );
 
+  // TOBs may come from trigger bytestream - renounce from scheduler
+  renounceArray(m_eFexEMTobKeyList);
+  renounceArray(m_eFexTauTobKeyList);
+
   ATH_CHECK( AthMonitorAlgorithm::initialize() );
 
   return StatusCode::SUCCESS;
