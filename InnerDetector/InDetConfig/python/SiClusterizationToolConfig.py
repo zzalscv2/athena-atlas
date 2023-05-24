@@ -434,3 +434,19 @@ def ITkTruthPixelClusterSplitProbToolCfg(
     acc.setPrivateTools(
         CompFactory.InDet.TruthPixelClusterSplitProbTool(name, **kwargs))
     return acc
+
+
+def HitsToxAODCopierCfg(flags):
+    ca = ComponentAccumulator()
+    from InDetConfig.SiClusterizationToolConfig import ITkPixelRDOToolCfg
+    tool = ca.popToolsAndMerge(ITkPixelRDOToolCfg(flags))
+    alg = CompFactory.InDet.HitsToxAODCopier(PixelRDOTool=tool, PixelRDOContainerKey="ITkPixelRDOs")
+    ca.addEventAlgo(alg)
+
+    from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
+    # for the available content of this collection, consult the HitsToxAODCopier.cxx
+    toRecod = [ "xAOD::BaseContainer#PixelHits", "xAOD::AuxContainerBase#PixelHitsAux.col.row.tot.eta_module.phi_module.layer_disk.barrel_ec.detid" ]
+    ca.merge(addToAOD(flags, toRecod))
+    ca.merge(addToESD(flags, toRecod))
+
+    return ca    
