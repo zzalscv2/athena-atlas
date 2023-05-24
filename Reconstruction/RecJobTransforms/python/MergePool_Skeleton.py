@@ -128,6 +128,7 @@ def fromRunArgs(runArgs):
         SetupMetaDataForStreamCfg(
             flags,
             streamToMerge,
+            mergeJob=True,
         )
     )
 
