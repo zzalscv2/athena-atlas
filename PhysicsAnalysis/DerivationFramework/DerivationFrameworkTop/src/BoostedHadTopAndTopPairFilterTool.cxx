@@ -154,7 +154,6 @@ const xAOD::TruthParticle*  BoostedHadTopAndTopPairFilterTool::findInitial(const
 
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
-    if( part->barcode() < parent->barcode()) continue; /// protection for sherpa
     if( part->pdgId() == parent->pdgId() ) return findInitial(parent);
   }
 
@@ -168,7 +167,6 @@ bool BoostedHadTopAndTopPairFilterTool::isFromTop(const xAOD::TruthParticle* par
 
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
-    if( part->barcode() < parent->barcode() ) continue; /// protection for sherpa
     if( abs( parent->pdgId() ) == 6 ) return true;
   }
 
@@ -180,7 +178,6 @@ bool BoostedHadTopAndTopPairFilterTool::isHadronic(const xAOD::TruthParticle* pa
 
   for(unsigned j = 0; j < part->nChildren(); j++){
     const xAOD::TruthParticle* child = part->child(j);
-    if( part->barcode() > child->barcode() ) continue; /// protection for sherpa
     if( abs(child->pdgId()) <= 5 ) return true;
   }
   return false;
@@ -191,7 +188,6 @@ bool BoostedHadTopAndTopPairFilterTool::isFinalParticle(const xAOD::TruthParticl
   int type = part->pdgId();
   for(unsigned j = 0; j < part->nChildren(); j++){
     const xAOD::TruthParticle* child = part->child(j);
-    if( part->barcode() > child->barcode() ) continue; /// protection for sherpa
     int childtype = child->pdgId();
     if( childtype == type ) return false;
   }
@@ -210,7 +206,6 @@ double BoostedHadTopAndTopPairFilterTool::PxBofW(const xAOD::TruthParticle* part
 
   for(unsigned j = 0; j < initpart->nChildren(); j++){
     const xAOD::TruthParticle* child = initpart->child(j);
-    if( part->barcode() > child->barcode() ) continue; /// protection for sherpa
     if( abs( child->pdgId() ) == 5 ){
       px = child->px();
      }
@@ -227,7 +222,6 @@ double BoostedHadTopAndTopPairFilterTool::PyBofW(const xAOD::TruthParticle* part
 
   for(unsigned j = 0; j < initpart->nChildren(); j++){
     const xAOD::TruthParticle* child = initpart->child(j);
-    if( part->barcode() > child->barcode() ) continue; /// protection for sherpa
     if( abs( child->pdgId() ) == 5 ){
       py = child->py();
      }
