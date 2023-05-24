@@ -3,7 +3,7 @@
 */
 
 #include "GeneratorFilters/xAODMETFilter.h"
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 
 xAODMETFilter::xAODMETFilter(const std::string& name, ISvcLocator* pSvcLocator)

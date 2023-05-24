@@ -10,7 +10,7 @@
 #include "AtlasHepMC/GenVertex.h"
 
 // Helper function
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 // For finding that file
 #include "PathResolver/PathResolver.h"

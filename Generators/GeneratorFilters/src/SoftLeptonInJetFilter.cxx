@@ -3,7 +3,7 @@
 */
 
 #include "GeneratorFilters/SoftLeptonInJetFilter.h"
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 SoftLeptonInJetFilter::SoftLeptonInJetFilter(const std::string& name, ISvcLocator* pSvcLocator)
 : GenFilter(name,pSvcLocator)

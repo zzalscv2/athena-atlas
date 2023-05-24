@@ -15,7 +15,7 @@
 #include "xAODTruth/xAODTruthHelpers.h"
 #include "xAODTruth/TruthParticleContainer.h"
 
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include <list>
 #include <string>

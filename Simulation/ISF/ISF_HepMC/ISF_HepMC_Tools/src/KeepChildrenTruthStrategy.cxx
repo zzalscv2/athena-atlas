@@ -14,7 +14,7 @@
 #include "ISF_Event/ISFParticle.h"
 
 // For BSM helper
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 
 /** Constructor **/

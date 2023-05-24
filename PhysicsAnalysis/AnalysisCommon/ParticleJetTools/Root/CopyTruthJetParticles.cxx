@@ -5,7 +5,7 @@
 #include "ParticleJetTools/CopyTruthJetParticles.h"
 #include "MCTruthClassifier/MCTruthClassifier.h"
 #include "xAODTruth/TruthVertex.h"
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "TruthUtils/MagicNumbers.h"
 
 #include "xAODTruth/TruthParticleContainer.h"
