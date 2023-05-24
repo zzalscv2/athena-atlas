@@ -606,7 +606,6 @@ namespace ActsTrk {
                                                    size_t& stripIndex) const
     {
         const Eigen::Matrix<float,1,1>& localPos = cluster->localPosition<1>();
-        InDetDD::SiLocalPosition localPosition(0., localPos(0, 0), 0.);
 
         if (element->isEndcap()) {
             // design for endcap modules
@@ -617,22 +616,21 @@ namespace ActsTrk {
                 return std::pair<Amg::Vector3D, Amg::Vector3D >();
             }
 
-            auto& rdoList = cluster->rdoList();
-            // obtain cluster information to evaluate position on the readout
-            const Identifier& firstStripId = rdoList.front();
-            int firstStrip = m_stripId->strip(firstStripId);
-            int stripRow = m_stripId->row(firstStripId);
-            int clusterSizeInStrips = cluster->channelsInPhi();
-            // Evaluate position on the readout from first strip and cluster width
-            auto clusterPosition = design->localPositionOfCluster(design->strip1Dim(firstStrip, stripRow), clusterSizeInStrips);
-            double shift = m_lorentzAngleTool->getLorentzShift(element->identifyHash());
-            localPosition = InDetDD::SiLocalPosition(clusterPosition.xEta(), clusterPosition.xPhi()+shift, 0.);
+            // calculate phi pitch for evaluating the strip index
+            double phiPitchPhi = design->phiWidth()/design->diodesInRow(0);
+            stripIndex = -std::floor(localPos(0, 0) / phiPitchPhi) + design->diodesInRow(0) *0.5 - 0.5;
 
-            auto cellid = design->cellIdOfPosition(localPosition);
-            stripIndex = cellid.strip();
+            std::pair<Amg::Vector3D, Amg::Vector3D > ends = {
+                element->globalPosition(design->stripPosAtR(stripIndex, 0, design->minR())),
+                element->globalPosition(design->stripPosAtR(stripIndex, 0, design->maxR()))
+            };
+            return ends;
+
         }
 
+        InDetDD::SiLocalPosition localPosition(0., localPos(0, 0), 0.);
         std::pair<Amg::Vector3D, Amg::Vector3D > ends(element->endsOfStrip(localPosition));
+
         return ends;
     }
 }
