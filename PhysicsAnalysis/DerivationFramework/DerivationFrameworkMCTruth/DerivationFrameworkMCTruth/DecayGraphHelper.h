@@ -118,7 +118,6 @@ namespace DerivationFramework {
                          std::unordered_set<int> &encounteredBarcodes) {
             
             // Check that this barcode hasn't been seen before (e.g. we are in a loop)
-            //if ( find(encounteredBarcodes.begin(),encounteredBarcodes.end(),pHead->barcode()) != encounteredBarcodes.end()) return;
             std::unordered_set<int>::const_iterator found = encounteredBarcodes.find(pHead->barcode());
             if (found!=encounteredBarcodes.end()) return;
             encounteredBarcodes.insert(pHead->barcode());
@@ -151,7 +150,6 @@ namespace DerivationFramework {
             if (pHead==nullptr) return;           
  
             // Check that this barcode hasn't been seen before (e.g. we are in a loop)
-            //if ( find(encounteredBarcodes.begin(),encounteredBarcodes.end(),pHead->barcode()) != encounteredBarcodes.end()) return;
             std::unordered_set<int>::const_iterator found = encounteredBarcodes.find(pHead->barcode());
             if (found!=encounteredBarcodes.end()) return;
             encounteredBarcodes.insert(pHead->barcode());
@@ -194,7 +192,6 @@ namespace DerivationFramework {
             if (pHead==nullptr) return;
 
             // Check that this barcode hasn't been seen before (e.g. we are in a loop)
-            //if ( find(encounteredBarcodes.begin(),encounteredBarcodes.end(),pHead->barcode()) != encounteredBarcodes.end()) return;
             std::unordered_set<int>::const_iterator found = encounteredBarcodes.find(pHead->barcode());
             if (found!=encounteredBarcodes.end()) return;
             encounteredBarcodes.insert(pHead->barcode());

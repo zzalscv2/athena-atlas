@@ -298,7 +298,7 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
     int barcode = p->barcode();
 
     // All explicitly requested PDG IDs of long lived particles, this is needed
-    // because their childrens barcodes can be above the cut off m_geantOffset = 200000
+    // because their childrens barcodes can be above the cut off m_geantOffset
     if(!m_longLivedPdgIds.empty() && parentIsLongLived(p)){
       ok=true;
     }

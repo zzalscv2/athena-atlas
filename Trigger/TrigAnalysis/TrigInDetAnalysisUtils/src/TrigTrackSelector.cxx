@@ -779,24 +779,6 @@ TIDA::Track* TrigTrackSelector::makeTrack( const TruthParticle* track, unsigned 
     
     double pT  = q*track->pt();
 
-    //// BP this is slightly confusing, since d0 =? a0?,
-    //// ToolHandle<Trk::ITruthToTrack> truthToTrack;
-    //// const HepMC::GenParticle* particle = track->genParticle();
-    //// const HepMC::GenParticle* gp = track->genParticle();
-    //// boost::scoped_ptr<const Trk::TrackParameters> generatedTrackPerigee( truthToTrack->makePerigeeParameters(particle) );
-    //// const Trk::TrackParameters* generatedTrackPerigee(0);
-    //// cout<<"BP BP here "<<endl;
-    //// if ( gp->production_vertex() ){
-    ////   cout<<"BP BP gp->production_vertex() "<<endl;
-    ////   generatedTrackPerigee = truthToTrack->makePerigeeParameters( gp );
-    ////   if (generatedTrackPerigee == NULL && gp->barcode() > HepMC::SIM_REGENERATION_INCREMENT ) {
-    ////      std::cout<<"BP No perigee available for interacting truth particle."<<std::endl;
-    ////   }
-    //// }
-
-    //// generatedTrackPerigee = truthToTrack->makePerigeeParameters( gp );
-    //// cout<<"BP BP "<<generatedTrackPerigee->parameters()[Trk::d0]<<endl;
-    //// double d0 = generatedTrackPerigee ? generatedTrackPerigee->parameters()[Trk::d0] : 999.;
 
     double d0  = 0;
 
