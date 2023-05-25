@@ -36,29 +36,21 @@ int GetBuffer( PyObject* pyobject, char tc, int size, void*& buf, Bool_t check )
 
    PySequenceMethods* seqmeths = Py_TYPE(pyobject)->tp_as_sequence;
    if ( seqmeths != 0 && bufprocs != 0
-#if  PY_VERSION_HEX < 0x03000000
-        && bufprocs->bf_getwritebuffer != 0
-        && (*(bufprocs->bf_getsegcount))( pyobject, 0 ) == 1
-#else
         && bufprocs->bf_getbuffer != 0
-#endif
       ) {
 
    // get the buffer
-#if PY_VERSION_HEX < 0x03000000
-      Py_ssize_t buflen = (*(bufprocs->bf_getwritebuffer))( pyobject, 0, &buf );
-#else
       Py_buffer bufinfo;
       (*(bufprocs->bf_getbuffer))( pyobject, &bufinfo, PyBUF_WRITABLE );
       buf = (char*)bufinfo.buf;
       Py_ssize_t buflen = bufinfo.len;
-#endif
 
       if ( buf && check == kTRUE ) {
       // determine buffer compatibility (use "buf" as a status flag)
          PyObject* pytc = PyObject_GetAttrString( pyobject, "typecode");
          if ( pytc != 0 ) {     // for array objects
-            if ( PyROOT_PyUnicode_AsString( pytc )[0] != tc )
+            const char* s = PyUnicode_AsUTF8AndSize( pytc, nullptr );
+            if ( s && s[0] != tc )
                buf = 0;         // no match
             Py_DECREF( pytc );
          } else if ( seqmeths->sq_length &&
@@ -74,9 +66,11 @@ int GetBuffer( PyObject* pyobject, char tc, int size, void*& buf, Bool_t check )
          // clarify error message
             PyObject* pytype = 0, *pyvalue = 0, *pytrace = 0;
             PyErr_Fetch( &pytype, &pyvalue, &pytrace );
-            PyObject* pyvalue2 = PyROOT_PyUnicode_FromFormat(
+            const char* s = PyUnicode_AsUTF8AndSize( pyvalue, nullptr );
+            if (!s) s = "(null)";
+            PyObject* pyvalue2 = PyUnicode_FromFormat(
                (char*)"%s and given element size (%ld) do not match needed (%d)",
-               PyROOT_PyUnicode_AsString( pyvalue ),
+               s,
                seqmeths->sq_length ? (Long_t)(buflen / (*(seqmeths->sq_length))( pyobject )) : (Long_t)buflen,
                size );
             Py_DECREF( pyvalue );
