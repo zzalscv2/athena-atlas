@@ -10,6 +10,7 @@
 // Top includes
 #include "TopConfiguration/TopConfig.h"
 #include "TopEvent/EventTools.h"
+#include "TopConfiguration/Tokenize.h"
 
 // PathResolver include(s):
 #include "PathResolver/PathResolver.h"
@@ -376,6 +377,7 @@ namespace top {
     // Summer2022 - JES precision flavour unc. update
 
     std::string conference = "Summer2019";
+    std::string qgFracFile = m_config->jetUncertainties_QGFracFile();  // Need to process this later on for HI-setups
 
     std::string JMSOption = m_config->jetJMSOption();
     if (JMSOption != "None") {
@@ -451,6 +453,37 @@ namespace top {
 
         // hardcode the path as only one is supported
         calibrationPathJESJER = "HIJetUncertainties/Winter2021/HIR4_GlobalReduction_SimpleJER.config";
+
+        // Check if we need different QG-fraction setups for pPb and Pbp (separated in the config by comma)
+        auto qgFracFiles = std::vector<std::string>();
+        tokenize(qgFracFile, qgFracFiles, ",", true);
+
+        if (qgFracFiles.size() == 1 and qgFracFile != "None") {  // Just for info purposes
+          if (m_config->isHI_pPb()) {
+            ATH_MSG_INFO("Using single custom QGFracFile '" + qgFracFile + "' for p + Pb collision setup.");
+          } else if (m_config->isHI_Pbp()) {
+            ATH_MSG_INFO("Using single custom QGFracFile '" + qgFracFile + "' for Pb + p collision setup.");
+          }  // Don't need the third possibility for PbPb, since only one file is expected there anyway...
+        } else if (qgFracFiles.size() == 2) {  // We now need to select into pPb (first item) and Pbp (second item)
+          if (m_config->isHI_pPb()) {
+            qgFracFile = qgFracFiles.at(0);
+            ATH_MSG_INFO("Using custom QGFracFile '" + qgFracFile + "' for p + Pb collision setup.");
+          } else if (m_config->isHI_Pbp()) {
+            qgFracFile = qgFracFiles.at(1);
+            ATH_MSG_INFO("Using custom QGFracFile '" + qgFracFile + "' for Pb + p collision setup.");
+          } else {
+            ATH_MSG_ERROR(
+                    "Two QGFracFiles for HI-collision setup supplied as '" + qgFracFile
+                    + ", but input seems to be neither p + Pb nor Pb + p!");
+            return StatusCode::FAILURE;
+          }
+        } else if (qgFracFiles.size() != 1 && qgFracFile != "") {  // We either expect one item, two items, or empty
+                                                                   // everything else is not good
+            ATH_MSG_ERROR(
+                    "HI-collision setup requires either one QGFracFile, or two individual ones for p + Pb and Pb + p,"
+                    " but " + std::to_string(qgFracFiles.size()) + " were supplied as '" + qgFracFile + "'!");
+            return StatusCode::FAILURE;
+        }
       }
 
       m_jetUncertaintiesTool = setupJetUncertaintiesTool("JetUncertaintiesTool",
@@ -459,7 +492,7 @@ namespace top {
                                                          m_config->isMC(),
                                                          calibrationPathJESJER,
                                                          nullptr,
-                                                         m_config->jetUncertainties_QGFracFile(),
+                                                         qgFracFile,
                                                          calib_area
                                                          );
       // setup the pseudodata tool when required
@@ -470,7 +503,7 @@ namespace top {
                                                                      false, // treat MC as data
                                                                      calibrationPathJESJER,
                                                                      nullptr,
-                                                                     m_config->jetUncertainties_QGFracFile(),
+                                                                     qgFracFile,
                                                                      calib_area
                                                                      );
 
@@ -490,7 +523,7 @@ namespace top {
                                     + JMSOption
                                     + ".config",
                                     nullptr,
-                                    m_config->jetUncertainties_QGFracFile(),
+                                    qgFracFile,
                                     calib_area);
       m_jetUncertaintiesToolReducedNPScenario2
         = setupJetUncertaintiesTool("JetUncertaintiesToolReducedNPScenario2",
@@ -503,7 +536,7 @@ namespace top {
                                     + JMSOption
                                     + ".config",
                                     nullptr,
-                                    m_config->jetUncertainties_QGFracFile(),
+                                    qgFracFile,
                                     calib_area);
       m_jetUncertaintiesToolReducedNPScenario3
         = setupJetUncertaintiesTool("JetUncertaintiesToolReducedNPScenario3",
@@ -516,7 +549,7 @@ namespace top {
                                     + JMSOption
                                     + ".config",
                                     nullptr,
-                                    m_config->jetUncertainties_QGFracFile(),
+                                    qgFracFile,
                                     calib_area);
       m_jetUncertaintiesToolReducedNPScenario4
         = setupJetUncertaintiesTool("JetUncertaintiesToolReducedNPScenario4",
@@ -529,7 +562,7 @@ namespace top {
                                     + JMSOption
                                     + ".config",
                                     nullptr,
-                                    m_config->jetUncertainties_QGFracFile(),
+                                    qgFracFile,
                                     calib_area);
     }
 

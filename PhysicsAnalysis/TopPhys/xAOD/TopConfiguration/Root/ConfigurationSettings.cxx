@@ -263,9 +263,11 @@ namespace top {
     registerParameter("JetUncertainties_NPModel",
                       "AllNuisanceParameters, CategoryReduction (default), GlobalReduction, StrongReduction - for JetUncertainties",
                       "CategoryReduction");
-    registerParameter("JetUncertainties_QGFracFile", "To specify a root file with quark/gluon fractions,"
-                                                     " in order to reduce FlavourComposition and response uncertainties."
-                                                     " Default: None (i.e. no file is used and default flat 50+/-50% fraction is used).",
+    registerParameter("JetUncertainties_QGFracFile",
+                      "To specify a root file with quark/gluon fractions, in order to reduce FlavourComposition and"
+                      " response uncertainties. In case of p + Pb and Pb + p collisions, two comma-separated files can"
+                      " instead be supplied as follows: \"<pPb_QGFracFile>,<Pbp_QGFracFile>\"."
+                      " Default: None (i.e. no file is used and default flat 50+/-50% fraction is used).",
                       "None");
     registerParameter("JetUncertainties_QGHistPatterns", "To specify a pattern for the name of the quark/gluon fractions histograms, or a list of DSIDs which will have their specific histogram."
                                                          " Two syntaxes are possible, either a single string or a list of DSIDs separated by commas:"
