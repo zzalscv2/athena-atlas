@@ -296,7 +296,7 @@ flags and positional arguments:
   CatA.Flag1  : This is Flag1 (default: '')
 """)
 
-    def test_catHelp(self):
+    def test_catHelpSub(self):
         # tests getting help for a subcategory of flags (tests navigation down through categories)
         self.do_test(args="--help CatA.SubCatA",expected="""flags:
   CatA.SubCatA.Flag2  : This is Flag2 (default: '')
