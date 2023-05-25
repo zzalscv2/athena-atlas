@@ -655,7 +655,6 @@ def setAdditionalParticleParametrizationFileNames( FastShowerCellBuilderTool ):
     FastShowerCellBuilderTool.AdditionalParticleParametrizationFileNames = getAdditionalParticleParametrizationFileNames()
 
 def getPunchThroughTool(name="ISF_PunchThroughTool", **kwargs):
-    from G4AtlasApps.SimFlags import simFlags
     kwargs.setdefault("FilenameLookupTable"     , ISF_FastCaloSimFlags.PunchThroughParamsInputFilename())
     kwargs.setdefault("FilenameInverseCdf"      , ISF_FastCaloSimFlags.PunchThroughParamsInverseCdfFilename())
     kwargs.setdefault("FilenameInversePca"      , ISF_FastCaloSimFlags.PunchThroughParamsInversePcaFilename())
@@ -670,7 +669,6 @@ def getPunchThroughTool(name="ISF_PunchThroughTool", **kwargs):
     kwargs.setdefault("FullCorrelationEnergy"   , [ 100000., 100000., 100000., 100000.,      0., 100000., 100000., 100000., 100000.]    )
     kwargs.setdefault("MinEnergy"               , [   938.3,   135.6,     50.,     50.,   105.7,   939.6, 493.7,   497.6,   497.6 ]    )
     kwargs.setdefault("MaxNumParticles"         , [      -1,      -1,      -1,      -1,      -1,    -1,     -1,     -1,     -1 ]    )
-    kwargs.setdefault("BarcodeSvc"              , simFlags.TruthStrategy.BarcodeServiceName()        )
     kwargs.setdefault("EnvelopeDefSvc"          , getService('AtlasGeometry_EnvelopeDefSvc')         )
     kwargs.setdefault("BeamPipeRadius"          , 500.                                               )
 

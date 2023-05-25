@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// ValidationBarcodeSvc.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef BARCODESERVICES_VALIDATIONBARCODESVC_H
 #define BARCODESERVICES_VALIDATIONBARCODESVC_H 1
@@ -67,16 +63,9 @@ namespace Barcode {
     virtual ParticleBarcode sharedChildBarcode( ParticleBarcode parentBC,
                                                 PhysicsProcessCode process=Barcode::fUndefinedProcessCode );
 
-    /** Update the given barcode (e.g. after an interaction) */
-    virtual ParticleBarcode incrementBarcode( ParticleBarcode oldBC,
-                                              PhysicsProcessCode process=Barcode::fUndefinedProcessCode );
-
     /** Return the secondary particle and vertex offsets */
     virtual Barcode::ParticleBarcode secondaryParticleBcOffset() const;
     virtual Barcode::VertexBarcode   secondaryVertexBcOffset()  const;
-
-    /** Return the barcode increment for each generation of updated particles */
-    virtual Barcode::ParticleBarcode particleGenerationIncrement() const;
 
     /** Inform the BarcodeSvc about the largest particle and vertex Barcodes
         in the event input */
