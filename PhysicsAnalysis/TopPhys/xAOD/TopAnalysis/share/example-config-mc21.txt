@@ -57,7 +57,7 @@ GlobalTriggersLoose 2022@e26_lhtight_ivarloose_L1EM22VHI_OR_e60_lhmedium_L1EM22V
 ElectronCollectionName Electrons
 MuonCollectionName Muons
 JetCollectionName AntiKt4EMPFlowJets
-LargeJetCollectionName None # can be e.g. AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets 
+LargeJetCollectionName None # can be e.g. AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets
 TauCollectionName None #can be e.g. TauJets
 PhotonCollectionName None #can be e.g. Photons
 TrackJetCollectionName None #can be e.g. AntiKtVR30Rmax4Rmin02TrackJets_BTagging201903

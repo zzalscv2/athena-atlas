@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef CONFIGURATIONSETTINGS_H_
@@ -86,7 +86,9 @@ namespace top {
      * @brief Add a variable to the configuration settings.
      *
      * @param name The key used to refer to this variable.
-     * @param message A human readable explanation
+     * @param message A human readable explanation.
+     * @param default_val Default value used for this setting.
+     * @param allowed_values Possible choices for this setting (optional, by default all values are allowed).
      */
     void registerParameter(const std::string& name, const std::string& message,
         const std::string& default_val = "", const std::vector<std::string> allowed_values = {});

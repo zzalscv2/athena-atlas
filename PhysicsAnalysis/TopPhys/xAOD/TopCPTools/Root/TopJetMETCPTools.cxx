@@ -437,56 +437,42 @@ namespace top {
 
   StatusCode JetMETCPTools::setupLargeRJetsCalibration() {
     std::string jetCalibrationNameLargeR = m_config->sgKeyLargeRJets();
-    // erase "Jets" from the end
-    jetCalibrationNameLargeR.erase(jetCalibrationNameLargeR.length() - 4);
+    jetCalibrationNameLargeR.erase(jetCalibrationNameLargeR.length() - 4);  // erase "Jets" from the end
 
     // Only a single calib config/sequence for MC and data
     // so just put it here for now.
     std::string calibConfigLargeR = "";
+    std::string calibSequenceLargeR = "EtaJES_JMS";  // CalibSequence for MC (changed below for data)
+    const std::string calibAreaLargeR = "00-04-82";
     const std::string calibChoice = m_config->largeRJESJMSConfig();
+
     if (asg::ToolStore::contains<IJetCalibrationTool>("JetCalibrationToolLargeR")) {
       m_jetCalibrationToolLargeR = asg::ToolStore::get<IJetCalibrationTool>("JetCalibrationToolLargeR");
     } else {
-      if (m_config->isMC()) {
-        if (calibChoice == "CombMass") {
-          calibConfigLargeR = "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_17Oct2018.config";
-        } else if (calibChoice == "TAMass") {
-          calibConfigLargeR = "JES_MC16recommendation_FatJet_Trimmed_JMS_TA_12Oct2018.config";
-        } else if (calibChoice == "CaloMass") {
-          calibConfigLargeR = "JES_MC16recommendation_FatJet_Trimmed_JMS_calo_12Oct2018.config";
-        } else if (calibChoice == "TCCMass") {
-          calibConfigLargeR = "JES_MC16recommendation_FatJet_TCC_JMS_calo_30Oct2018.config";
-	} else if (calibChoice == "UFOSDMass") {
-	  calibConfigLargeR = "JES_MC16recommendation_R10_UFO_CSSK_SoftDrop_JMS_01April2020.config";
-        } else {
-          ATH_MSG_ERROR(
-            "Unknown largeRJESJMSConfig (Available options: TAMass, CaloMass, CombMass, TCCMass and UFOSDMass)) : " + calibChoice);
-          return StatusCode::FAILURE;
+      // First check that we have a valid calibChoice
+      // !!! Please also update the options in ConfigurationSettings.cxx 'LargeJetJESJMSConfig' if more are added !!!
+      if (calibChoice != "UFOSDMass") {
+        ATH_MSG_ERROR(
+                "Unknown largeRJESJMSConfig (Available options: UFOSDMass)) : " + calibChoice);
+        return StatusCode::FAILURE;
+      }
+
+      if (m_config->isMC()) {  // Currently the same for both data and MC (but not always from R21 experience...)
+        if (calibChoice == "UFOSDMass") {
+          calibConfigLargeR = "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_10Mar2023.config";
         }
-      } else { //Insitu calibration for Data
-        if ((calibChoice == "CombMass") || (calibChoice == "TAMass") || (calibChoice == "CaloMass")) {
-          calibConfigLargeR = "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_March2021.config"; //Data has only one
-                                                                                                  // config file
-        } else if (calibChoice == "TCCMass") {
-          calibConfigLargeR = "JES_MC16recommendation_FatJet_TCC_JMS_calo_30Oct2018.config"; //There's no insitu
-                                                                                             // calibration yet
-        } else if (calibChoice == "UFOSDMass") {
-	  calibConfigLargeR = "JES_MC16recommendation_R10_UFO_CSSK_SoftDrop_JMS_01April2020.config"; //There's no insitu
-	                                                                                     // calibration yet
-	} else {
-          ATH_MSG_ERROR(
-            "Unknown largeRJESJMSConfig (Available options: TAMass, CaloMass, CombMass, TCCMass and UFOSDMass) : " + calibChoice);
-          return StatusCode::FAILURE;
+      } else {  // In-situ calibration for Data
+        if (calibChoice == "UFOSDMass") {
+          calibConfigLargeR = "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_10Mar2023.config";
         }
       }
-      std::string calibSequenceLargeR = "EtaJES_JMS";
-      if ((!m_config->isMC()) &&
-          (calibChoice != "TCCMass") &&
-	  (calibChoice != "UFOSDMass")) calibSequenceLargeR = "EtaJES_JMS_Insitu_InsituCombinedMass"; //For data, there's
-                                                                                                    // is insitu
-                                                                                                    // calibration for
-                                                                                                    // lc-topo jets
-      const std::string calibAreaLargeR = "00-04-82";
+
+      if (!m_config->isMC()) {
+        if (calibChoice == "UFOSDMass") {
+          calibSequenceLargeR = "EtaJES_JMS_Insitu";
+        }
+      }
+
       JetCalibrationTool* jetCalibrationToolLargeR
         = new JetCalibrationTool("JetCalibrationToolLargeR");
       top::check(asg::setProperty(jetCalibrationToolLargeR, "JetCollection", jetCalibrationNameLargeR),
@@ -504,47 +490,45 @@ namespace top {
       m_jetCalibrationToolLargeR = jetCalibrationToolLargeR;
     }
 
-    // Moriond2017 uncertainty recommendations:
-    // names = "UJ_2016/Moriond2017/UJ2016_CaloMass_strong.config"     // strong,medium,weak
-    // names = "UJ_2016/Moriond2017/UJ2016_CombinedMass_strong.config" // strong,medium,weak
-
     std::string configDir("");
     std::string largeRJESJERJMS_unc_config = m_config->largeRJetUncertainties_NPModel();
     std::string largeRJMR_unc_config = m_config->largeRJetUncertainties_JMR_NPModel();
-    std::string calibArea = "None"; // Take the default JetUncertainties CalibArea tag
-    std::string MC_type = "MC16";
+    std::string calibArea = "None";  // Take the default JetUncertainties CalibArea tag
+    std::string MC_type = "MC20";
 
-    configDir = m_config->largeRJetUncertaintiesConfigDir(); 
-   
-    if(m_config->largeRJESJMSConfig() != "UFOSDMass"){
+    // If we are in Run 3, we should use MC21 instead...
+    if (m_config->isRun3()) MC_type = "MC21";
 
-      m_jetUncertaintiesToolLargeR
-        = setupJetUncertaintiesTool("JetUncertaintiesToolLargeR",
-				    jetCalibrationNameLargeR, 
-                                    MC_type, 
-                                    m_config->isMC(),
-                                    configDir + "/R10_" + largeRJESJERJMS_unc_config + ".config",
-                                    nullptr,
-                                    "",
-                                    calibArea);
-      
-      // setup the large-R pseudodata tool when required
-      if (m_config->isMC() && m_config->doLargeRPseudodataJER()) {
-        m_jetUncertaintiesToolLargeRPseudoData
-          = setupJetUncertaintiesTool("JetUncertaintiesToolLargeRPseudoData",
-                                      jetCalibrationNameLargeR,
-                                      MC_type,
-                                      false, // treat MC as data
-                                      configDir + "/R10_" + largeRJESJERJMS_unc_config + ".config",
-                                      nullptr,
-                                      "",
-                                      calibArea);      
-      } 
+    configDir = m_config->largeRJetUncertaintiesConfigDir();
 
-      if (!m_config->isSystNominal(m_config->systematics()))
-        m_FFJetSmearingTool = setupFFJetSmearingTool(calibChoice,configDir + "/R10_" + largeRJMR_unc_config + ".config");
+    // Comment out uncertainties tool setup until we have large-R uncertainty prescriptions
+    ATH_MSG_WARNING("No large-R jet uncertainty prescriptions are available yet!");
 
-    }
+    // m_jetUncertaintiesToolLargeR
+    //   = setupJetUncertaintiesTool("JetUncertaintiesToolLargeR",
+    //                               jetCalibrationNameLargeR,
+    //                               MC_type,
+    //                               m_config->isMC(),
+    //                               configDir + "/R10_" + largeRJESJERJMS_unc_config + ".config",
+    //                               nullptr,
+    //                               "",
+    //                               calibArea);
+    //
+    // // setup the large-R pseudodata tool when required
+    // if (m_config->isMC() && m_config->doLargeRPseudodataJER()) {
+    //   m_jetUncertaintiesToolLargeRPseudoData
+    //     = setupJetUncertaintiesTool("JetUncertaintiesToolLargeRPseudoData",
+    //                                 jetCalibrationNameLargeR,
+    //                                 MC_type,
+    //                                 false,  // treat MC as data
+    //                                 configDir + "/R10_" + largeRJESJERJMS_unc_config + ".config",
+    //                                 nullptr,
+    //                                 "",
+    //                                 calibArea);
+    // }
+    //
+    // if (!m_config->isSystNominal(m_config->systematics()))
+    //   m_FFJetSmearingTool = setupFFJetSmearingTool(calibChoice,configDir + "/R10_" + largeRJMR_unc_config + ".config");
 
     return StatusCode::SUCCESS;
   }
