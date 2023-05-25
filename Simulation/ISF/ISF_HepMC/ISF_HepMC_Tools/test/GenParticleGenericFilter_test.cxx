@@ -104,7 +104,7 @@ protected:
   }
 
   // the tested AthAlgTool
-  ISF::GenParticleGenericFilter* m_filterTool;
+  ISF::GenParticleGenericFilter* m_filterTool = nullptr;
 
 };  // GenParticleGenericFilter_test fixture
 
