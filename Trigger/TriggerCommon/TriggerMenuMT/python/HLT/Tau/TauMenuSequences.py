@@ -29,14 +29,14 @@ def tauCaloMVAMenuSeq(flags, name, is_probe_leg=False):
                           IsProbe     = is_probe_leg )
 
 # ===============================================================================================                                
-#    Fast track finder (core) + TrackRoI Updater + RejectEmpty Hypo step (tracktwoMVA)                                             
+#    Fast track finder (core) + TrackRoI Updater + PassBy Hypo step (tracktwoMVA)                                             
 # ===============================================================================================                                                   
 
 def tauFTFTauCoreSeq(flags, is_probe_leg=False):
     (sequence, ftfCoreViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauFTFCoreSequence,flags)
 
     from TrigTauHypo.TrigTauHypoConf import  TrigTrackPreSelHypoAlg
-    fastTrkHypo                 = TrigTrackPreSelHypoAlg("TrackPreSelHypoAlg_RejectEmpty")
+    fastTrkHypo                 = TrigTrackPreSelHypoAlg("TrackPreSelHypoAlg_PassByCore")
     fastTrkHypo.trackcollection = sequenceOut
 
     from TrigTauHypo.TrigTauHypoTool import TrigTauTrackHypoToolFromDict
@@ -49,14 +49,14 @@ def tauFTFTauCoreSeq(flags, is_probe_leg=False):
                           IsProbe     = is_probe_leg )
 
 # ===============================================================================================
-#    Fast track finder (LRT) + TrackRoI Updater + RejectEmpty Hypo step
+#    Fast track finder (LRT) + TrackRoI Updater + PassBy Hypo step
 # ===============================================================================================
 
 def tauFTFTauLRTSeq(flags, is_probe_leg=False):
     (sequence, ftfLRTViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauFTFLRTSequence,flags)
 
     from TrigTauHypo.TrigTauHypoConf import  TrigTrackPreSelHypoAlg
-    fastTrkHypo                 = TrigTrackPreSelHypoAlg("TrackPreSelLRTHypoAlg_RejectEmpty")
+    fastTrkHypo                 = TrigTrackPreSelHypoAlg("TrackPreSelHypoAlg_PassByLRT")
     fastTrkHypo.trackcollection = sequenceOut
     fastTrkHypo.RoIForIDReadHandleKey = "UpdatedTrackLRTRoI"
 

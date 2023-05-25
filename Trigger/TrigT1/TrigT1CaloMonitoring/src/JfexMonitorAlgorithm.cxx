@@ -29,6 +29,14 @@ StatusCode JfexMonitorAlgorithm::initialize() {
   ATH_CHECK( m_jFexMETContainerKey.initialize()   );  
   ATH_CHECK( m_jFexSumEtContainerKey.initialize()   );  
 
+  // TOBs may come from trigger bytestream - renounce from scheduler
+  renounce(m_jFexLRJetContainerKey);
+  renounce(m_jFexSRJetContainerKey);
+  renounce(m_jFexTauContainerKey);
+  renounce(m_jFexFwdElContainerKey);
+  renounce(m_jFexMETContainerKey);
+  renounce(m_jFexSumEtContainerKey);
+
   return AthMonitorAlgorithm::initialize();
 }
 
@@ -203,5 +211,3 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
     
   return StatusCode::SUCCESS;
 }
-
-

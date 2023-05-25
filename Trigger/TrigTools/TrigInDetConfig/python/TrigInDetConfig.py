@@ -6,6 +6,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import Format
+from AthenaCommon.Logging import logging
 
 class InDetCacheNames(object):
   Pixel_ClusterKey   = "PixelTrigClustersCache"
@@ -77,10 +78,11 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
     return  ITktrigInDetFastTrackingCfg( inflags, roisKey, signatureName, in_view )
  
   """ Generates precision fast tracking config, it is a primary config function """
+  log = logging.getLogger("trigInDetFastTrackingCfg")
 
-  # redirect Tracking.ActiveConfig flags to point to a specific trigger setting
+  from TrigInDetConfig.utils import getFlagsForActiveConfig
+  flags = getFlagsForActiveConfig(inflags, signatureName, log)
 
-  flags = inflags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking."+signatureName)
   from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
   seq = InDetTrigSequence(flags, 
                           flags.Tracking.ActiveConfig.input_name, 

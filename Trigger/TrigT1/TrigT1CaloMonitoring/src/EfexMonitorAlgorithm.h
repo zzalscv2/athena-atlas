@@ -25,8 +25,8 @@ private:
   Gaudi::Property<float> m_lowPtCut{this,"LowPtCut",0.0,"The Et value for the low Pt cut (probably 0)"};
   Gaudi::Property<float> m_hiPtCut{this,"HiPtCut",15.0,"The Et value for the high Pt cut"};
   
-  Gaudi::Property<SG::ReadHandleKeyArray<xAOD::eFexEMRoIContainer>> m_eFexEMTobKeyList{this,"eFexEMTobKeyList",{"L1_eEMRoI"},"Array of eFEX EM ReadHandleKeys to fill histograms for"};
-  Gaudi::Property<SG::ReadHandleKeyArray<xAOD::eFexTauRoIContainer>> m_eFexTauTobKeyList{this,"eFexTauTobKeyList",{"L1_eTauRoI"},"Array of eFEX Tau ReadHandleKeys to fill histograms for"};
+  SG::ReadHandleKeyArray<xAOD::eFexEMRoIContainer> m_eFexEMTobKeyList{this,"eFexEMTobKeyList",{},"Array of eFEX EM ReadHandleKeys to fill histograms for"};
+  SG::ReadHandleKeyArray<xAOD::eFexTauRoIContainer> m_eFexTauTobKeyList{this,"eFexTauTobKeyList",{},"Array of eFEX Tau ReadHandleKeys to fill histograms for"};
 
   StatusCode fillEMHistograms(const std::string& groupName, const xAOD::eFexEMRoIContainer *emcont, const float &cut_et) const;
   StatusCode fillTauHistograms(const std::string& groupName, const xAOD::eFexTauRoIContainer *taucont, const float &cut_et) const;
