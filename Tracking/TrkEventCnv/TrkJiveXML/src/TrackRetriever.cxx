@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkJiveXML/TrackRetriever.h"
@@ -339,10 +339,11 @@ namespace JiveXML {
 		  AthAlgTool(type,name,parent),
 		  m_typeName("Track"),
 		  m_residualPullCalculator("Trk::ResidualPullCalculator/ResidualPullCalculator"),
-		  m_idHelper(nullptr) {
+		  m_idHelper(nullptr),
+                  m_trackSumTool ("Trk::TrackSummaryTool/InDetTrackSummaryTool")
+                {
 				//Declare the interface
 				declareInterface<IDataRetriever>(this);
-				m_trackSumTool = ToolHandle<Trk::ITrackSummaryTool>("Trk::TrackSummaryTool/InDetTrackSummaryTool");
 				//Properties
 				declareProperty("ResidualPullCalculator" , m_residualPullCalculator, "ToolHandle to ResidualPullCaclulator" );
 				declareProperty("PriorityTrackCollection", m_PriorityTrackCollection = "CombinedInDetTracks", "Track collections to retrieve first, shown as default in Atlantis");
@@ -434,7 +435,7 @@ namespace JiveXML {
 				}
 
 			//Next loop over all collections
-			for (; trackCollIter!=trackCollEnd; trackCollIter++) {
+			for (; trackCollIter!=trackCollEnd; ++trackCollIter) {
 				//Check if this is an HLT-AutoKey collection
 				if ((trackCollIter.key().find("HLT",0) != std::string::npos) && (!m_doWriteHLT)){
 				 ATH_MSG_DEBUG( "Ignoring HLT-AutoKey collection " << trackCollIter.key());
