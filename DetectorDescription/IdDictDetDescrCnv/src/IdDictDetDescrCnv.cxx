@@ -632,6 +632,7 @@ StatusCode IdDictDetDescrCnv::loadProperty(const std::string &propertyName,
                                            dType &pipeTo) {
     if (!m_detDescrProxy)
         ATH_CHECK(serviceLocator()->service("DetDescrCnvSvc", m_detDescrProxy));
+    // cppcheck-suppress nullPointerRedundantCheck; false positive
     if (!m_detDescrProxy->hasProperty(propertyName)) {
         ATH_MSG_FATAL("DetDescrSvc does not have the property "
                       << propertyName);
