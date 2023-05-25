@@ -6,33 +6,14 @@
 #include "GeneratorObjects/McEventCollection.h"
 #include "McParticleEvent/TruthParticle.h"
 #include "McParticleEvent/TruthParticleContainer.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include <array>
 #include "TError.h"
-#include "TDatabasePDG.h"
-#include "TParticlePDG.h"
+
 
 
 // GeneratorObjects includes
 #include "GeneratorObjects/HepMcParticleLink.h"
-
-namespace {
-
-/** 3*charge for basic pdgId codes -- used to parse unknown id's
-    Fix from Frank for the charge of the MC Truth Particle */
-static const std::array<int, 100> qcharge = {
-  {+0, -1, +2, -1, +2, -1, +2, -1, +2, +0,  // 0-9
-   +0, -3, +0, -3, +0, -3, +0, -3, +0, +0,  // 10-19
-   +0, +0, +0, +3, +0, +0, +0, +0, +0, +0,  // 20-29
-   +0, +0, +0, +3, +0, +0, +0, +3, +0, +0,  // 30-39
-   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0}
-};
-
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -80,7 +61,7 @@ RootTruthParticleCnvTool::convert(const McEventCollection *mcCollection,
   /// Create a map to enhance access between GenParticles and TruthParticles
   TruthParticleContainer::Map_t bcToMcPart;
 
-  for ( auto hepMcPart:  *evt) {
+  for ( const auto& hepMcPart:  *evt) {
 
     TruthParticle * mcPart = new TruthParticle( hepMcPart, container );
     container->push_back( mcPart );
@@ -142,44 +123,7 @@ RootTruthParticleCnvTool::convert(const McEventCollection *mcCollection,
 
 double RootTruthParticleCnvTool::chargeFromPdgId (int pdgId) const
 {
-  const double third = 1./3;
-  if (0 == pdgId)
-    return -999;
-  TParticlePDG* ap = TDatabasePDG::Instance()->GetParticle (pdgId);
-  if ( ap ) {
-    return ap->Charge()*third;
-  } else {
-    /** Set charge using PDG convention:
-	id = nnnnijkl
-	i == 0, j == 0:   see qcharge[100]
-	i == 0:           meson, j kbar quarks    l = 2*spin+1
-	i != 0:           baryon, i j k quarks    l = 2*spin+1
-	Default is 0; */
-    const int idmod = std::abs(pdgId) % 10000;
-    const int q1 = (idmod/10) % 10;
-    const int q2 = (idmod/100) % 10;
-    const int q3 = (idmod/1000) % 10;
-    double q = 0;
-
-    if (abs(pdgId) >= 1000000000) {
-      // Seems to be a nucleus: 100pppnnn0
-      q = (abs(pdgId) / 10000) % 1000;
-    }
-    else if( idmod < 100 ) {
-      q = qcharge[idmod]*third;
-    }
-    else if ( idmod < 1000 ) {
-      q = (qcharge[q1]-qcharge[q2])*third;
-      if ( qcharge[q2] == 2 ) {
-	q *= -1.;
-      }
-    }
-    else if( idmod < 10000 ) {
-      q = (qcharge[q3]+qcharge[q2]+qcharge[q1])*third;
-    }
-    if (q == 0) q = 0; // Change -0 to 0.
-    return (pdgId < 0) ? -q : q;
-  }
+  return MC::charge(pdgId);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
