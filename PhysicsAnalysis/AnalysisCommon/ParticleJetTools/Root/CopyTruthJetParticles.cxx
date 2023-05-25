@@ -60,7 +60,7 @@ bool CopyTruthJetParticles::classifyJetInput(const xAOD::TruthParticle* tp,
   // ----------------------------------- //
   
   // Easy classifiers by PDG ID
-  if(MCUtils::PID::isNeutrino(pdgid)) {
+  if(MC::PID::isNeutrino(pdgid)) {
     if (!m_includeNu) return false;
   } else {
     if (!m_includeBSMNonInt && MC::isNonInteracting(pdgid)) return false;
@@ -75,7 +75,7 @@ bool CopyTruthJetParticles::classifyJetInput(const xAOD::TruthParticle* tp,
 
   // Extra catch.  If we aren't supposed to include prompt leptons, we aren't supposed to include prompt neutrinos
   unsigned int tc_res = getTCresult(tp, tc_results);
-  if (!m_includePromptLeptons && MCUtils::PID::isNeutrino(pdgid) && MCTruthClassifier::isPrompt(tc_res)) {
+  if (!m_includePromptLeptons && MC::PID::isNeutrino(pdgid) && MCTruthClassifier::isPrompt(tc_res)) {
     return false;
   }
 
