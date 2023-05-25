@@ -63,6 +63,7 @@ namespace ISFTesting {
     virtual ~MockInputConverter() { };
 
     MOCK_METHOD0(finalize, StatusCode());
+    // cppcheck-suppress unknownMacro
     MOCK_CONST_METHOD3(convert, StatusCode(McEventCollection&,
                                            ISF::ISFParticleContainer&,
                                            EBC_EVCOLL kindOfCollection));
