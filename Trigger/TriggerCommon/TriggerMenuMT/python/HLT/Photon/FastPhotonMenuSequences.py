@@ -1,43 +1,23 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 
-
 # menu components   
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
-from AthenaCommon.CFElements import parOR, seqAND
-from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
-from DecisionHandling.DecisionHandlingConf import ViewCreatorCentredOnClusterROITool
-import AthenaCommon.CfgMgr as CfgMgr
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
-# logger
-from AthenaCommon.Logging import logging
-log = logging.getLogger(__name__)
-
-
-def fastPhotonSequence(flags):
+    
+@AccumulatorCache
+def fastPhotonMenuSequenceCfg(flags,is_probe_leg=False):
     """Creates secpond step photon sequence"""
     
     TrigEgammaKeys = getTrigEgammaKeys()
 
-    from TriggerMenuMT.HLT.CommonSequences.CaloSequences import CaloMenuDefs
-
-    ViewVerify = CfgMgr.AthViews__ViewDataVerifier("FastPhotonViewDataVerifier")
-    ViewVerify.DataObjects = [( 'xAOD::TrigEMClusterContainer' , 'StoreGateSvc+%s' % CaloMenuDefs.L2CaloClusters ),
-                              ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+EMIDRoIs' )]
-
-
-    from TrigEgammaRec.TrigEgammaFastPhotonConfig import TrigEgammaFastPhoton_ReFastAlgo 
-    thePhotonFex = TrigEgammaFastPhoton_ReFastAlgo ()
-    thePhotonFex.TrigEMClusterName = CaloMenuDefs.L2CaloClusters # From commom staff
-    thePhotonFex.PhotonsName= TrigEgammaKeys.fastPhotonContainer
-    #thePhotonFex.RoIs="EMIDRoIs"
-
-
-    l2PhotonViewsMaker = EventViewCreatorAlgorithm("IMl2Photon")
-    l2PhotonViewsMaker.RoIsLink = "initialRoI" # Merge inputs based on their initial L1 ROI
+    InViewRoIs = "EMIDRoIs"
     # Spawn View on SuperRoI encompassing all clusters found within the L1 RoI
-    roiTool = ViewCreatorCentredOnClusterROITool()
+    roiTool = CompFactory.ViewCreatorCentredOnClusterROITool()
     roiTool.AllowMultipleClusters = False # If True: SuperROI mode. If False: highest eT cluster in the L1 ROI
     roiTool.RoisWriteHandleKey = TrigEgammaKeys.fastPhotonRoIContainer
     # not running the tracking here, so do not need to set this size 
@@ -46,51 +26,34 @@ def fastPhotonSequence(flags):
     # for consistency
     roiTool.RoIEtaWidth = 0.05
     roiTool.RoIPhiWidth = 0.10
-    l2PhotonViewsMaker.RoITool = roiTool
-    l2PhotonViewsMaker.InViewRoIs = "EMIDRoIs"
-    #l2PhotonViewsMaker.InViewRoIs = "EMCaloRoIs"
-    l2PhotonViewsMaker.Views = "EMPhotonViews"
-    l2PhotonViewsMaker.ViewFallThrough = True
-    l2PhotonViewsMaker.RequireParentView = True
-
-    thePhotonFex.RoIs = l2PhotonViewsMaker.InViewRoIs
-
-    photonInViewAlgs = parOR("photonInViewAlgs", [ViewVerify, thePhotonFex ])
-
-    l2PhotonViewsMaker.ViewNodeName = "photonInViewAlgs"
+    reco = InViewRecoCA("EMPhoton",InViewRoIs=InViewRoIs, RoITool = roiTool, RequireParentView = True, isProbe=is_probe_leg)
 
 
-    
-    # this needs to be added:
-    #electronDecisionsDumper = DumpDecisions("electronDecisionsDumper", Decisions = [theElectronHypo.Output] )
-
-    photonAthSequence = seqAND("photonAthSequence",  [l2PhotonViewsMaker, photonInViewAlgs] )
-    
-    return (photonAthSequence, l2PhotonViewsMaker)
-    
-
-
-def fastPhotonMenuSequence(flags, is_probe_leg=False):
-    """Creates secpond step photon sequence"""
-    
-    TrigEgammaKeys = getTrigEgammaKeys()
-
-    # retrieve the reco sequence+IM
-    (photonAthSequence, l2PhotonViewsMaker) = RecoFragmentsPool.retrieve(fastPhotonSequence, flags)
-
-    # make the hypo
-    from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaFastPhotonHypoAlg
-    thePhotonHypo = TrigEgammaFastPhotonHypoAlg()
+    from TriggerMenuMT.HLT.Photon.FastPhotonRecoSequences import fastPhotonRecoSequence
+    reco.mergeReco(fastPhotonRecoSequence(flags, InViewRoIs, "FastPhotonRecoSequence"))
+ 
+    thePhotonHypo = CompFactory.TrigEgammaFastPhotonHypoAlg()    
     thePhotonHypo.Photons = TrigEgammaKeys.fastPhotonContainer
     thePhotonHypo.RunInView=True
 
     from TrigEgammaHypo.TrigEgammaFastPhotonHypoTool import TrigEgammaFastPhotonHypoToolFromDict
 
-    return MenuSequence( flags,
-                         Maker=l2PhotonViewsMaker,
-                         Sequence=photonAthSequence,
-                         Hypo=thePhotonHypo,
-                         HypoToolGen=TrigEgammaFastPhotonHypoToolFromDict,
-                         IsProbe=is_probe_leg)
+    selAcc = SelectionCA('FastPhotonMenuSequence',isProbe=is_probe_leg)
+    selAcc.mergeReco(reco)
+    selAcc.addHypoAlgo(thePhotonHypo)
+
+    return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaFastPhotonHypoToolFromDict,isProbe=is_probe_leg)
+
+
+
+def fastPhotonMenuSequence(flags, is_probe_leg=False):
+    """Creates secpond step photon sequence"""
+
+    if isComponentAccumulatorCfg():
+        return fastPhotonMenuSequenceCfg(flags,is_probe_leg=is_probe_leg)
+    else: 
+        return menuSequenceCAToGlobalWrapper(fastPhotonMenuSequenceCfg,flags, is_probe_leg=is_probe_leg)
+
                          
+
 
