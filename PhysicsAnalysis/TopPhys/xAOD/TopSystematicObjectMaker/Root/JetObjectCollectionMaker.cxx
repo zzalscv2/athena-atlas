@@ -100,16 +100,17 @@ namespace top {
     if (m_config->useLargeRJets()) {
       top::check(m_jetCalibrationToolLargeR.retrieve(),
                  "Failed to retrieve JetCalibrationToolLargeR");
-      if(m_config->largeRJESJMSConfig() != "UFOSDMass"){
-	top::check(m_jetUncertaintiesToolLargeR.retrieve(),
-		   "Failed to retrieve JetUncertaintiesToolLargeR");
-        if (m_config->isMC() && m_config->doLargeRPseudodataJER())
-          top::check(m_jetUncertaintiesToolLargeRPseudoData.retrieve(),
-                     "Failed to retrieve JetUncertaintiesToolLargeRPseudoData");
-        if (!m_config->isSystNominal(m_config->systematics()))
-          top::check(m_FFJetSmearingTool.retrieve(),
-                     "Failed to retrieve FFJetSmearingTool");
-      }
+
+      // Retrieve large-R jet uncertainties tools
+      // (Commented out until large-R jet uncertainty prescriptions become available)
+      // top::check(m_jetUncertaintiesToolLargeR.retrieve(),
+      //            "Failed to retrieve JetUncertaintiesToolLargeR");
+      // if (m_config->isMC() && m_config->doLargeRPseudodataJER())
+      //   top::check(m_jetUncertaintiesToolLargeRPseudoData.retrieve(),
+      //              "Failed to retrieve JetUncertaintiesToolLargeRPseudoData");
+      // if (!m_config->isSystNominal(m_config->systematics()))
+      //   top::check(m_FFJetSmearingTool.retrieve(),
+      //              "Failed to retrieve FFJetSmearingTool");
     }
 
     ///-- Small-R JER (Pseudo-)Data Smearing Config --///
@@ -226,14 +227,10 @@ namespace top {
     ///-- Large-R JES/JER/JMS/JMR systematics --///
     CP::SystematicSet largeRsysts;
     if ((m_isMC || m_doFull_JER_largeR) && m_config->useLargeRJets()) {
-      if (m_config->largeRJESJMSConfig() == "CombMass") { // Only CombMass is supported for large-R JES/JER/JMS/JMR systematics at the moment
-        largeRsysts.insert(m_jetUncertaintiesToolLargeR->recommendedSystematics());
-        if (!m_config->isSystNominal(m_config->systematics()))
-          largeRsysts.insert(m_FFJetSmearingTool->recommendedSystematics());
-      } else {
-        ATH_MSG_WARNING(
-          "TA Mass & Calo Mass & TCCMass & UFO SD Mass are not supported for large-R jet uncertainties at the moment. Large-R jet systemtatics skipped!");
-      }
+      ATH_MSG_WARNING("No Large-R jet systematic recommendations are available yet! Large-R jet systematics skipped!");
+      // largeRsysts.insert(m_jetUncertaintiesToolLargeR->recommendedSystematics());
+      // if (!m_config->isSystNominal(m_config->systematics()))
+      //   largeRsysts.insert(m_FFJetSmearingTool->recommendedSystematics());
     }
 
 
@@ -244,7 +241,7 @@ namespace top {
         if (tmp_SF_uncert_tool.retrieve()) {
 	  
 	  m_tagSFUncorrelatedSystematics[name.first].clear();
-	  CP::SystematicSet correlatedSys,uncorrelatedSys;
+	  CP::SystematicSet correlatedSys, uncorrelatedSys;
 	  const CP::SystematicSet& recommendedSys = tmp_SF_uncert_tool->recommendedSystematics();
 	  
 	  for (const CP::SystematicVariation& sys : recommendedSys) {

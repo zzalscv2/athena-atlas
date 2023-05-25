@@ -20,7 +20,7 @@ TDPPath dev/AnalysisTop/TopDataPreparation/XSection-MC21-13p6TeV.data
 ElectronCollectionName Electrons
 MuonCollectionName Muons
 JetCollectionName AntiKt4EMPFlowJets
-LargeJetCollectionName AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets 
+LargeJetCollectionName AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets
 TauCollectionName TauJets
 PhotonCollectionName Photons
 TrackJetCollectionName AntiKtVR30Rmax4Rmin02PV0TrackJets
@@ -28,7 +28,7 @@ TrackJetCollectionName AntiKtVR30Rmax4Rmin02PV0TrackJets
 UseEgammaLeakageCorrection False
 
 ### Large-R configuration
-LargeRJESJMSConfig CombMass
+LargeRJESJMSConfig UFOSDMass
 LargeRJetPt 200000
 LargeRJetEta 2
 LargeJetSubstructure None

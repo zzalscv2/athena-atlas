@@ -54,7 +54,7 @@ GlobalTriggersLoose 2015@e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose,m
 ElectronCollectionName Electrons
 MuonCollectionName Muons
 JetCollectionName AntiKt4EMPFlowJets
-LargeJetCollectionName None # can be e.g. AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets 
+LargeJetCollectionName None # can be e.g. AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets
 TauCollectionName None #can be e.g. TauJets
 PhotonCollectionName None #can be e.g. Photons
 TrackJetCollectionName None #can be e.g. AntiKtVR30Rmax4Rmin02TrackJets_BTagging201903

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TopCPTools/TopBoostedTaggingCPTools.h"
@@ -87,13 +87,18 @@ namespace top {
         std::string jet_def = m_config->sgKeyLargeRJets();
         jet_def.erase(jet_def.length() - 4); // jet collection name sans 'Jets' suffix
 
+        std::string mc_type = "MC20";
+
+        // If we are in Run 3, we should use MC21 instead...
+        if (m_config->isRun3()) mc_type = "MC21";
+
         const std::string name = "JetSFuncert_" + taggerName;
         try {
           const std::string& cfg = m_taggerSFsConfigs.at(taggerName);
           JetUncertaintiesTool* jet_SF_tmp = new JetUncertaintiesTool(name);
 
           top::check(jet_SF_tmp->setProperty("JetDefinition", jet_def), "Failed to set JetDefinition for " + name);
-          top::check(jet_SF_tmp->setProperty("MCType", "MC16"), "Failed to set MCType for " + name);
+          top::check(jet_SF_tmp->setProperty("MCType", mc_type), "Failed to set MCType for " + name);
           top::check(jet_SF_tmp->setProperty("ConfigFile", cfg), "Failed to set ConfigFile for " + name);
           top::check(jet_SF_tmp->setProperty("IsData", false), "Failed to set IsData for " + name);
           top::check(jet_SF_tmp->initialize(), "Failed to initialize " + name);
@@ -110,84 +115,82 @@ namespace top {
   }
   
   void BoostedTaggingCPTools::initTaggersMaps() {
-    
+
     // Calib areas
-    m_taggersCalibAreas["JSSWTopTaggerDNN"] = "JSSWTopTaggerDNN/Rel21/";
-    m_taggersCalibAreas["SmoothedWZTagger"] = "SmoothedWZTaggers/Rel21/";
-    
+    m_taggersCalibAreas["JSSWTopTaggerANN"] = "JSSWTopTaggerANN/Rel21/March2023/";
+    m_taggersCalibAreas["JSSWTopTaggerDNN"] = "JSSWTopTaggerDNN/Rel21/February2022/";
+    m_taggersCalibAreas["SmoothedWZTagger"] = "SmoothedWZTaggers/Rel21/February2022/";
+
     // Supported tagger types
+    // (ANN tagger is not yet ported to R22)
     m_taggersTypes = {
-      "JSSWTopTaggerDNN", "SmoothedWZTagger"
+      // "JSSWTopTaggerANN",
+      "JSSWTopTaggerDNN",
+      "SmoothedWZTagger",
     };
-    
+
     // Supported jet collections
     m_jetCollections = {
-      "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
-      "AntiKt10TrackCaloClusterTrimmedPtFrac5SmallR20Jets"
+      "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
     };
-    
-    
+
+
     auto setConfig = [this](const std::string& tagger, const std::string& configName) {
       m_taggersConfigs[tagger] = configName;
     };
-    
-    if (m_config->sgKeyLargeRJets() == "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets") {
-      
+
+    if (m_config->sgKeyLargeRJets() == "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets") {
+      // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BoostedJetTaggingRecommendationFullRun2#UFO_jets
+
       // Top taggers
-      setConfig("DNNTaggerTopQuarkContained50","JSSDNNTagger_AntiKt10LCTopoTrimmed_TopQuarkContained_MC16_20201216_50Eff.dat");
-      setConfig("DNNTaggerTopQuarkContained80","JSSDNNTagger_AntiKt10LCTopoTrimmed_TopQuarkContained_MC16_20201216_80Eff.dat");
-      setConfig("DNNTaggerTopQuarkInclusive50","JSSDNNTagger_AntiKt10LCTopoTrimmed_TopQuarkInclusive_MC16_20201216_50Eff.dat");
-      setConfig("DNNTaggerTopQuarkInclusive80","JSSDNNTagger_AntiKt10LCTopoTrimmed_TopQuarkInclusive_MC16_20201216_80Eff.dat");
-      
-      // WZ taggers
-      setConfig("SmoothWContained50","SmoothedContainedWTagger_AntiKt10LCTopoTrimmed_FixedSignalEfficiency50_MC16_20201216.dat");
-      setConfig("SmoothWContained80","SmoothedContainedWTagger_AntiKt10LCTopoTrimmed_FixedSignalEfficiency80_MC16_20201216.dat");
-      setConfig("SmoothZContained50","SmoothedContainedZTagger_AntiKt10LCTopoTrimmed_FixedSignalEfficiency50_MC16_20201216.dat");
-      setConfig("SmoothZContained80","SmoothedContainedZTagger_AntiKt10LCTopoTrimmed_FixedSignalEfficiency80_MC16_20201216.dat");
+      setConfig("DNNTaggerTopQuarkContained50", "DNNTagger_AntiKt10UFOSD_TopContained50_Oct30.dat");
+      setConfig("DNNTaggerTopQuarkContained80", "DNNTagger_AntiKt10UFOSD_TopContained80_Oct30.dat");
+      setConfig("DNNTaggerTopQuarkInclusive50", "DNNTagger_AntiKt10UFOSD_TopInclusive50_Oct30.dat");
+      setConfig("DNNTaggerTopQuarkInclusive80", "DNNTagger_AntiKt10UFOSD_TopInclusive80_Oct30.dat");
 
-    } else if (m_config->sgKeyLargeRJets() == "AntiKt10TrackCaloClusterTrimmedPtFrac5SmallR20Jets") {
       // WZ taggers
-      setConfig("SmoothWContained2VarMaxSig","SmoothedWTagger_AntiKt10TrackCaloClusterTrimmed_MaxSignificance_2Var_MC16d_20190809.dat");
-      setConfig("SmoothZContained2VarMaxSig","SmoothedZTagger_AntiKt10TrackCaloClusterTrimmed_MaxSignificance_2Var_MC16d_20190809.dat");
-      setConfig("SmoothW3VarMaxSig","SmoothedContainedWTagger_AntiKt10TrackCaloClusterTrimmed_MaxSignificance_3Var_MC16d_20190410.dat");
-      setConfig("SmoothZ3VarMaxSig","SmoothedContainedZTagger_AntiKt10TrackCaloClusterTrimmed_MaxSignificance_3Var_MC16d_20190410.dat");
+      // (ANN tagger is not yet ported to R22)
+      // setConfig("ANNTaggerWZContained50", "JSSANN50Tagger_AntiKt10UFOCSSKSoftDrop_Mar23pol3.dat");
+      // setConfig("ANNTaggerWZContained60", "JSSANN60Tagger_AntiKt10UFOCSSKSoftDrop_Mar23pol3.dat");
+      // setConfig("ANNTaggerWZContained70", "JSSANN70Tagger_AntiKt10UFOCSSKSoftDrop_Mar23pol3.dat");
+      // setConfig("ANNTaggerWZContained80", "JSSANN80Tagger_AntiKt10UFOCSSKSoftDrop_Mar23pol3.dat");
+      // setConfig("ANNTaggerWZContained90", "JSSANN90Tagger_AntiKt10UFOCSSKSoftDrop_Mar23pol3.dat");
+
+      setConfig("SmoothWContained50", "SmoothedContainedWTagger_AntiKt10UFOCSSKSoftDrop_FixedSignalEfficiency50_20220221.dat");
+      setConfig("SmoothWContained80", "SmoothedContainedWTagger_AntiKt10UFOCSSKSoftDrop_FixedSignalEfficiency80_20220221.dat");
+      setConfig("SmoothZContained50", "SmoothedContainedZTagger_AntiKt10UFOCSSKSoftDrop_FixedSignalEfficiency50_20220221.dat");
+      setConfig("SmoothZContained80", "SmoothedContainedZTagger_AntiKt10UFOCSSKSoftDrop_FixedSignalEfficiency80_20220221.dat");
+
+      // (DNN tagger is not yet ported to R22)
+      // setConfig("DNNTaggerWContained50", "JSSDNN50Tagger_AntiKt10UFOCSSKSoftDrop_Jan22.dat");
+      // setConfig("DNNTaggerWContained80", "JSSDNN80Tagger_AntiKt10UFOCSSKSoftDrop_Jan22.dat");
     }
-
   }
-  
-  
-  
+
   void BoostedTaggingCPTools::initSFsMaps() {
     // Here we initialize SFs maps
-    
+
     // This lambda function is universal for all taggers
-    auto setMaps = [this](const std::string& configPath, const std::string& tagger, const std::string& configName) {
-      m_taggerSFsConfigs[tagger] = configPath + "/" + configName;
-      m_taggerSFsNames[tagger] = tagger+"_SF";
-    };
-    
-    if (m_config->sgKeyLargeRJets() == "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets") {
-      // Tagging scale factors availabel for AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets
-      
-      const std::string configPath="rel21/Fall2020";
-      //Top taggers
-      setMaps(configPath,"DNNTaggerTopQuarkContained50","R10_SF_LCTopo_TopTagContained_SigEff50.config");
-      setMaps(configPath,"DNNTaggerTopQuarkContained80","R10_SF_LCTopo_TopTagContained_SigEff80.config");
-      setMaps(configPath,"DNNTaggerTopQuarkInclusive50","R10_SF_LCTopo_TopTagInclusive_SigEff50.config");
-      setMaps(configPath,"DNNTaggerTopQuarkInclusive80","R10_SF_LCTopo_TopTagInclusive_SigEff80.config");
-      //WZ taggers
-      setMaps(configPath,"SmoothWContained50","R10_SF_LCTopo_WTag_SigEff50.config");
-      setMaps(configPath,"SmoothWContained80","R10_SF_LCTopo_WTag_SigEff80.config");
-      
-    } else if (m_config->sgKeyLargeRJets() == "AntiKt10TrackCaloClusterTrimmedPtFrac5SmallR20Jets") {
-      // Tagging scale factors available for some of the taggers for TCC jets
-      
-      const std::string configPath="rel21/Summer2019/";
-      //WZ taggers
-      setMaps(configPath,"SmoothWContained2VarMaxSig","R10_SF_TCC_2VarSmooth_WTag.config");
-      setMaps(configPath,"SmoothZContained2VarMaxSig","R10_SF_TCC_2VarSmooth_ZTag.config");
+    // (Commented out until SFs are available to suppress compilation warning)
+    // auto setMaps = [this](const std::string& configPath, const std::string& tagger, const std::string& configName) {
+    //   m_taggerSFsConfigs[tagger] = configPath + "/" + configName;
+    //   m_taggerSFsNames[tagger] = tagger + "_SF";
+    // };
+
+    if (m_config->sgKeyLargeRJets() == "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets") {
+      ATH_MSG_WARNING("No Large-R jet tagging scale factors available yet!");
+
+      // Leaving old R21 LCTopo-configs here for now to have some idea on how to apply the settings later on
+      // const std::string configPath="rel21/Fall2020";
+      // //Top taggers
+      // setMaps(configPath,"DNNTaggerTopQuarkContained50","R10_SF_LCTopo_TopTagContained_SigEff50.config");
+      // setMaps(configPath,"DNNTaggerTopQuarkContained80","R10_SF_LCTopo_TopTagContained_SigEff80.config");
+      // setMaps(configPath,"DNNTaggerTopQuarkInclusive50","R10_SF_LCTopo_TopTagInclusive_SigEff50.config");
+      // setMaps(configPath,"DNNTaggerTopQuarkInclusive80","R10_SF_LCTopo_TopTagInclusive_SigEff80.config");
+      // //WZ taggers
+      // setMaps(configPath,"SmoothWContained50","R10_SF_LCTopo_WTag_SigEff50.config");
+      // setMaps(configPath,"SmoothWContained80","R10_SF_LCTopo_WTag_SigEff80.config");
     }
   }
-  
-  
+
 }  // namespace top
