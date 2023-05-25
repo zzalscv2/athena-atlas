@@ -69,6 +69,7 @@ class MockFilterTool : public AthAlgTool,
 #ifdef HEPMC3
   MOCK_CONST_METHOD1(pass, bool(const HepMC::ConstGenParticlePtr&));
 #else
+  // cppcheck-suppress unknownMacro
   MOCK_CONST_METHOD1(pass, bool(const HepMC::GenParticle&));
 #endif
 };
