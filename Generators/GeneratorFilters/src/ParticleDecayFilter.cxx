@@ -60,7 +60,7 @@ StatusCode ParticleDecayFilter::filterEvent(){
             }
                         
             // check if the parent particle id is found
-            if (std::abs(particle->pdg_id()) == m_pdgIdParent){
+            if (std::abs(particle->pdg_id()) == static_cast<int>(m_pdgIdParent)){
                 const HepMC::ConstGenVertexPtr& decayVtx = particle->end_vertex();
                 ATH_MSG_DEBUG("Number of children is " << decayVtx->particles_out_size());
                 //loop over children and count number of particles with each pdgId
