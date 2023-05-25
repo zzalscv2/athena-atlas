@@ -13,7 +13,7 @@ from TrigP1Test import TrigP1TestSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
-ex.job_options = 'AthExHelloWorld/HelloWorldOptions.py'
+ex.job_options = 'AthExHelloWorld.HelloWorldConfig.HelloWorldCfg'
 ex.input = 'data'
 ex.args = '-M'
 ex.perfmon = False # perfmon currently not fully supported with athenaHLT -M
