@@ -119,6 +119,9 @@ ITk::StripClusterOnTrackTool::correct
   ATH_MSG_VERBOSE("TRACK PAR LOCAL POS = " << loct[0] << ", " << loct[1]);
   ATH_MSG_VERBOSE("TRACK PAR GLOBAL POSITION = " << trackPar.position().x() << ", " << trackPar.position().y() << ", " << trackPar.position().z());
 
+  // phi pitch in radians, for endcap modules
+  double phiPitchInRad = 0.;
+
   // barrel or endcap treatment
   if (detectorElement->isBarrel()) {
     // barrel treatment:
@@ -145,6 +148,8 @@ ITk::StripClusterOnTrackTool::correct
     const InDetDD::SiCellId & siCellId = detectorElement->cellIdOfPosition(cluster->localPosition());
     double striphalflength = design->stripLength(siCellId) / 2.0;
     ATH_MSG_VERBOSE("ENDCAP ====>>>> DISTANCE / STRIP HALF LENGTH --> " << distance << " / " << striphalflength);
+    // caching phi pitch in radians
+    phiPitchInRad = design->phiWidth()/design->diodesInRow(0);
     // Check if distance between track parameter local position
     // and cluster position is larger than strip length.
     // If so, set distance to maximum (- tolerance)
@@ -255,7 +260,9 @@ ITk::StripClusterOnTrackTool::correct
     double sinAlphaCosAlpha = sinAlpha * std::sqrt(cosAlpha2);
     // Weight factor to express the strip pitch (in mm) from the module center to the
     // estimated track parameter position.
-    double weight = detectorElement->phiPitch(loct) / detectorElement->phiPitch();
+    double radiusAtLocPos = std::hypot(loct.x(), loct.y());
+    double phiPitchAtLocPos = phiPitchInRad*radiusAtLocPos;
+    double weight = phiPitchAtLocPos / detectorElement->phiPitch();
     // Error matrix scaling term, this is expressend in the module frame.
     // It is evaluated using the same jacobian used above.
     double dV0 = (cosAlpha2 * covariance(0, 0) + sinAlpha2 * covariance(1, 1) +
