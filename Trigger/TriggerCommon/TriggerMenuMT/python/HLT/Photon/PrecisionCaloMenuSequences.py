@@ -10,6 +10,7 @@ from DecisionHandling.DecisionHandlingConf import ViewCreatorPreviousROITool
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys	  import getTrigEgammaKeys
 from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
 from AthenaCommon.CFElements import parOR
+from AthenaConfiguration.ComponentFactory import CompFactory
 
 def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'CaloPhoton'
@@ -38,19 +39,7 @@ def precisionCaloSequence(flags, ion=False):
     from TriggerMenuMT.HLT.Photon.PrecisionCaloRecoSequences import precisionCaloRecoSequence
     precisionCaloSequence = algorithmCAToGlobalWrapper(precisionCaloRecoSequence,flags, InViewRoIs,'gPrecisionCaloRecoSequence'+hiInfo, ion)
    
-    import AthenaCommon.CfgMgr as CfgMgr
-    HLTRoITopoRecoSequenceVDV = CfgMgr.AthViews__ViewDataVerifier(tag(ion)+'VDV')
-    dataObjects= [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+PrecisionCaloRoIs' ),
-                  ( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' ),
-                  ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' )]
-    if ion:
-        dataObjects += [( 'xAOD::HIEventShapeContainer' , 'StoreGateSvc+' + TrigEgammaKeys.egEventShape ),
-                        ( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' ),
-                        ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' )]
-
-
-    HLTRoITopoRecoSequenceVDV.DataObjects = dataObjects
-    precisionCaloInViewSequence = parOR("photonRoITopoRecoSequence"+hiInfo, [HLTRoITopoRecoSequenceVDV, precisionCaloSequence])
+    precisionCaloInViewSequence = parOR("photonRoITopoRecoSequence"+hiInfo, [precisionCaloSequence])
 
     precisionCaloViewsMaker.ViewNodeName = precisionCaloInViewSequence.name()
 
@@ -79,10 +68,9 @@ def precisionCaloMenuSequence(flags, name, is_probe_leg=False, ion=False):
     (sequence, precisionCaloViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(precisionCaloSequence, flags, ion=ion)
 
     #Hypo
-    from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaPrecisionCaloHypoAlg
     from TrigEgammaHypo.TrigEgammaPrecisionCaloHypoTool import TrigEgammaPrecisionCaloHypoToolFromDict
 
-    thePrecisionCaloHypo = TrigEgammaPrecisionCaloHypoAlg(name + tag(ion) + 'Hypo')
+    thePrecisionCaloHypo = CompFactory.TrigEgammaPrecisionCaloHypoAlg(name+tag(ion) + 'Hypo')
     thePrecisionCaloHypo.CaloClusters = sequenceOut
 
     return MenuSequence( flags,
