@@ -99,7 +99,7 @@ TrigJetEJsHypoTool::decide( std::vector<JetInfo>& input ) const {
 	promptTrackFrac = 0.0;
 	for (auto trackIter = i.AllTracks->begin(); trackIter != i.AllTracks->end(); ++trackIter){
 	  float trackPt = (*trackIter)->pt();
-	  if (std::abs((*trackIter)->z0() - i.PV->z()) > m_PV_z        || trackPt < m_trackPtCut_Exotics || \
+	  if (std::abs((*trackIter)->z0() + (*trackIter)->vz() - i.PV->z()) > m_PV_z        || trackPt < m_trackPtCut_Exotics || \
 	      std::abs((*trackIter)->eta()) > m_trackEtaCut_Exotics    || (i.jet)->p4().DeltaR((*trackIter)->p4()) > m_dr)  
 	    continue;
 
