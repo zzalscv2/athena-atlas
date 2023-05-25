@@ -25,6 +25,7 @@
 #include "GeneratorFilters/xAODBSignalFilter.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Vector/LorentzVector.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 #include <sstream>
 
@@ -210,7 +211,7 @@ StatusCode xAODBSignalFilter::filterEvent()
                                                                                                                         // including immediate decays of resonances.
                 {
                     // ** Reject whole event if any of B-hadrons in the event is not decayed **
-                    if (part->status() == 1 || part->status() == 899)
+                    if (part->status() == 1 || part->status() == HepMC::EVTGENUNDECAYEDSTATUS)
                     {
                         acceptEvent = false;
                     }
