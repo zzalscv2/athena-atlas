@@ -137,24 +137,6 @@ Barcode::ParticleBarcode Barcode::LegacyBarcodeSvc::sharedChildBarcode( Barcode:
 }
 
 
-/** Update the given barcode (e.g. after an interaction) */
-Barcode::ParticleBarcode Barcode::LegacyBarcodeSvc::incrementBarcode( Barcode::ParticleBarcode old,
-                                                                      Barcode::PhysicsProcessCode /* process */)
-{
-  Barcode::ParticleBarcode newBC = old + m_particleGenerationIncrement;
-  // a naive overflow checking based on the fact that particle
-  // barcodes should never be negative
-  if ( m_doUnderOverflowChecks && (newBC < 0))
-    {
-      ATH_MSG_DEBUG("LegacyBarcodeSvc::incrementBarcode('" << old << "')"
-                    << " will return a particle barcode of less than 0: "
-                    << newBC << ". Reset to zero.");
-      newBC = Barcode::fUndefinedBarcode;
-    }
-  return newBC;
-}
-
-
 void Barcode::LegacyBarcodeSvc::registerLargestGenEvtParticleBC( Barcode::ParticleBarcode /* bc */) {
 }
 
@@ -174,12 +156,6 @@ Barcode::VertexBarcode Barcode::LegacyBarcodeSvc::secondaryVertexBcOffset() cons
   return m_firstVertex;
 }
 
-
-/** Return the barcode increment for each generation of updated particles */
-Barcode::ParticleBarcode Barcode::LegacyBarcodeSvc::particleGenerationIncrement() const
-{
-  return m_particleGenerationIncrement;
-}
 
 StatusCode Barcode::LegacyBarcodeSvc::resetBarcodes()
 {
