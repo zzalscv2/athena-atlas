@@ -208,7 +208,9 @@ PP="$PP"'|INFO Found MetaDataTools'
 
 PP="$PP"'|INFO TopAlg list empty.'
 
+PP="$PP"'|\*+Chrono\*+ +INFO +(\*+|The Final CPU consumption)'
 PP="$PP"'|^ChronoStatSvc +INFO +Number of skipped events for MemStat'
+PP="$PP"'|^ChronoStatSvc.*INFO +Service finalized successfully'
 PP="$PP"'|^Py:Athena +INFO +including file'
 PP="$PP"'|^Athena +INFO +including file'
 PP="$PP"'|statistics are unreliable'
@@ -257,6 +259,9 @@ PP="$PP"'|Py:PropertyProxy.*WARNING'
 
 # APR version numbers are not important
 PP="$PP"'|Reading Param:POOL_VSN=|Reading Param:FORMAT_VSN='
+
+# Ignore AthenaPoolCnvSvc performance measurements
+PP="$PP"'|^AthenaPoolCnvSvc.*PerfStats'
 
 ########################################### END #####################################################
 

@@ -20,7 +20,7 @@
 #include "StoreGate/WriteDecorHandle.h"
 
 // Other classes used by this class
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "AtlasHepMC/GenEvent.h"
 // #include "GeneratorObjects/McEventCollection.h"
 #include "TruthUtils/HepMCHelpers.h"

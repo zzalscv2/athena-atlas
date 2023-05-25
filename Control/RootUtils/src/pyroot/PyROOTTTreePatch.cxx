@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file RootUtils/src/pyroot/PyROOTTTreePatch.cxx
@@ -32,11 +32,7 @@ namespace PyROOT {
 
 class CPPInstance {
 public:
-#if ROOT_VERSION_CODE < ROOT_VERSION(6,22,0)
-  enum EFlags { kIsReference = 0x0002 };
-#else
   enum EFlags { kIsReference = 0x0008 };
-#endif
 
   PyObject_HEAD
   void*     fObject;
@@ -144,7 +140,7 @@ Bool_t TreeNotifier::Notify()
 
   // Intern __pynotify__ if needed.
   if (pynotify_str == 0)
-    pynotify_str = PyROOT_PyUnicode_InternFromString("__pynotify__");
+    pynotify_str = PyUnicode_InternFromString("__pynotify__");
 
   // Look for a notification object.
   PyObject* treeobj = PyWeakref_GetObject (m_treeobj_ref);
@@ -191,10 +187,10 @@ PyObject* treeSetNotify (PyObject*, PyObject* args)
 
   // Intern strings if needed.
   if (pynotify_str == 0) {
-    pynotify_str = PyROOT_PyUnicode_InternFromString("__pynotify__");
+    pynotify_str = PyUnicode_InternFromString("__pynotify__");
   }
   if (notifier_str == 0) {
-    notifier_str = PyROOT_PyUnicode_InternFromString("__notifier__");
+    notifier_str = PyUnicode_InternFromString("__notifier__");
   }
 
   // Set up notifier.
@@ -241,7 +237,7 @@ PyObject* treeGetNotify (PyObject*, PyObject* args)
 
   // Intern string if needed.
   if (pynotify_str == 0)
-    pynotify_str = PyROOT_PyUnicode_InternFromString("__pynotify__");
+    pynotify_str = PyUnicode_InternFromString("__pynotify__");
 
   // Retrieve the notifier.
   PyObject* ret = PyObject_GetAttr (self, pynotify_str);
@@ -319,11 +315,7 @@ void installMethod (PyObject* pyclass,
   pdef.ml_doc = 0;
 
   PyObject* func = PyCFunction_New (&pdef, 0);
-#if PY_VERSION_HEX >= 0x03000000
   PyObject* method = PyInstanceMethod_New (func);
-#else
-  PyObject* method = PyMethod_New (func, 0, pyclass);
-#endif
   Bool_t isOK = PyObject_SetAttrString (pyclass, pdef.ml_name, method) == 0;
 
   if (PyErr_Occurred())

@@ -34,7 +34,7 @@ bool SPCountHypoTool::applyInverseCut(const Gaudi::Property<int> &threshold, con
 		return m_logicAnd; //If the logic is And, it should return true and otherwise it should return false.
 	const std::string detailName =  (name != "" ? std::string(name) : threshold.name() );
 
-	ATH_MSG_DEBUG("count for = " << threshold.name() << "=" << (composit->getDetail<int>(detailName) > threshold));
+	ATH_MSG_DEBUG("count for = " << threshold.name() << "=" << (composit->getDetail<int>(detailName) < threshold));
 	return (composit->getDetail<int>(detailName) < threshold); // here is the difference
 }
 
@@ -62,16 +62,18 @@ StatusCode SPCountHypoTool::decide(SPCountsInfo &spinfo) const
 
 	if (m_logicAnd && !std::all_of(decisionCuts.begin(), decisionCuts.end(), [](bool k) { return k; }))
 	{
+		ATH_MSG_DEBUG("REGTEST " << name() << " rejected");
 		return StatusCode::SUCCESS;
 	}
 	else if (m_logicAnd == false && !std::any_of(decisionCuts.begin(), decisionCuts.end(), [](bool k) { return k; }))
 	{
+		ATH_MSG_DEBUG("REGTEST " << name() << " rejected");
 		return StatusCode::SUCCESS;
 	}
 	else
 	{
 		addDecisionID(m_decisionId.numeric(), spinfo.decision);
-		ATH_MSG_DEBUG("REGTEST event accepted");
+		ATH_MSG_DEBUG("REGTEST " << name() << " accepted");
 	}
 	return StatusCode::SUCCESS;
 }

@@ -508,7 +508,7 @@ TRT_RodDecoder::fillCollection ( const ROBFragment* robFrag,
  * on the version of the software/hardware generating the BS.
  *
  * If we fail to add a collection to the IDC, we print an ERROR and
- * return the StatusCode from IDC::addCollection()
+ * return the StatusCode from IDC::addOrDelete()
  *
  * If we have been set up in an inconsistant state, wrt type of RDO to
  * create, we have a *serious* problem.  We print a FATAL and return
@@ -674,7 +674,7 @@ TRT_RodDecoder::int_fillExpanded( const ROBFragment* robFrag,
 
   // add collections into IDC
   for (auto& p : colls) {
-    ATH_CHECK( rdoIdc->addCollection (p.second.release(), p.first) );
+    ATH_CHECK( rdoIdc->addOrDelete (std::move(p.second), p.first) );
   }
   
   return StatusCode::SUCCESS;
@@ -697,7 +697,7 @@ TRT_RodDecoder::int_fillExpanded( const ROBFragment* robFrag,
  * by 4 more 0s, we print an ERROR and return FAILURE.
  *
  * If we fail to add a collection to the IDC, we print an ERROR and
- * return the StatusCode from IDC::addCollection()
+ * return the StatusCode from IDC::addOrDelete()
  *
  * If we have been set up in an inconsistant state, wrt type of RDO to
  * create, we have a *serious* problem.  We print a FATAL and return
@@ -910,7 +910,7 @@ TRT_RodDecoder::int_fillMinimalCompress( const ROBFragment *robFrag,
   
   // add collections into IDC
   for (auto& p : colls) {
-    ATH_CHECK( rdoIdc->addCollection (p.second.release(), p.first) );
+    ATH_CHECK( rdoIdc->addOrDelete (std::move(p.second), p.first) );
   }
   
   return StatusCode::SUCCESS;
@@ -929,7 +929,7 @@ TRT_RodDecoder::int_fillMinimalCompress( const ROBFragment *robFrag,
  * by 4 more 0s, we print an ERROR and return FAILURE.
  *
  * If we fail to add a collection to the IDC, we print an ERROR and
- * return the StatusCode from IDC::addCollection()
+ * return the StatusCode from IDC::addOrDelete()
  *
  * If we have been set up in an inconsistant state, wrt type of RDO to
  * create, we have a *serious* problem.  We print a FATAL and return
@@ -1202,7 +1202,7 @@ TRT_RodDecoder::int_fillFullCompress( const ROBFragment *robFrag,
 
   // add collections into IDC
   for (auto& p : colls) {
-    ATH_CHECK( rdoIdc->addCollection (p.second.release(), p.first) );
+    ATH_CHECK( rdoIdc->addOrDelete (std::move(p.second), p.first) );
   }
 
   //  ATH_MSG_INFO( "Input: " << in_ptr << " / " << v_size << "   Output: " << out_ptr << " / 1920" );

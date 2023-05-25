@@ -12,7 +12,7 @@
 #include <stdexcept>
 
 // Utility include(s):
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "TruthUtils/MagicNumbers.h"
 
 // xAOD include(s):

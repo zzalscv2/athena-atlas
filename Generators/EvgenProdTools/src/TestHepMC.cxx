@@ -5,7 +5,7 @@
 
 #include "EvgenProdTools/TestHepMC.h"
 #include "GaudiKernel/DataSvc.h"
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "PathResolver/PathResolver.h"
 

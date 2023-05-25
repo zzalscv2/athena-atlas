@@ -21,6 +21,7 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/Polarization.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "HepPDT/ParticleData.hh"
 
 // McParticleKernel includes
@@ -28,9 +29,6 @@
 
 // McParticleEvent includes
 #include "McParticleEvent/TruthParticle.h"
-
-// McParticleUtils includes
-#include "McParticleUtils/McUtils.h" // for chargeFromPdgId
 
 // McParticleTools includes
 #include "TruthParticleCnvTool.h"
@@ -285,7 +283,7 @@ TruthParticleCnvTool::convert( const McEventCollection * mcCollection,
       visitor->visit( mcPart );
     }
 
-    mcPart->setCharge( McUtils::chargeFromPdgId( mcPart->pdgId(), m_pdt ) );
+    mcPart->setCharge( MC::charge( mcPart->pdgId()) );
     mcPart->setGenEventIndex( genEventIndex);
 
     if ( hepMcPart != mcPart->genParticle() ) {

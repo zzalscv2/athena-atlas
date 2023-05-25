@@ -2150,6 +2150,10 @@ UnAssocMuonSegmentsAuxDyn.clusterTime
 UnAssocMuonSegmentsAuxDyn.clusterTimeError
 UnAssocMuonSegmentsAuxDyn.clusterTimeValid
 UnAssocMuonSegmentsAuxDyn.muonSegment
+ZdcModules
+ZdcModulesAux.
+ZdcSums
+ZdcSumsAux.
 _TagInfo
 egammaClusters
 egammaClustersAux.

@@ -23,7 +23,6 @@
 
 // McParticle includes
 #include "McParticleEvent/TruthEtIsolationsContainer.h"
-#include "McParticleUtils/McUtils.h"
 
 // McParticleTools includes
 #include "TruthIsolationTool.h"
@@ -238,8 +237,7 @@ TruthIsolationTool::computeIso( const GenParticles_t& particles,
       continue;
     }
     if( partSel == ITruthIsolationTool::UseChargedOnly ) {
-      double particleCharge = McUtils::chargeFromPdgId(particle->pdg_id(),
-						       m_pdt);
+      double particleCharge = MC::charge(particle->pdg_id());
       if( std::abs(particleCharge)<1.e-2 )
 	continue;
     }
@@ -264,7 +262,7 @@ TruthIsolationTool::computeIso( const GenParticles_t& particles,
     for (const auto& child:  *decVtx) {
       if ( MC::isSimInteracting(child) ) {
 	if( partSel == ITruthIsolationTool::UseChargedOnly ) {
-	  double particleCharge = McUtils::chargeFromPdgId(child->pdg_id(),m_pdt);
+	  double particleCharge = MC::charge(child->pdg_id());
 	  if( std::abs(particleCharge)<1.e-2 )
 	    continue;
 	}

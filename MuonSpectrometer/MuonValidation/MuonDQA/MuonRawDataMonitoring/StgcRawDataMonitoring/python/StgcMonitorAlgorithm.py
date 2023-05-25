@@ -27,7 +27,7 @@ def sTgcMonitoringConfig(inputFlags):
 
     # Adding an algorithm to the helper.
     sTgcMonAlg = helper.addAlgorithm(CompFactory.sTgcRawDataMonAlg,'sTgcMonAlg')
-    sTgcMonAlg.clusterSizeCut = 3
+    sTgcMonAlg.cutPt = 15000.
 
     globalPath = 'Muon/MuonRawDataMonitoring/STG/'
 
@@ -38,6 +38,7 @@ def sTgcMonitoringConfig(inputFlags):
     
     #Expert
     sTgcOccupancyGroup = helper.addGroup(sTgcMonAlg, 'sTgcOccupancy', globalPath + 'Expert/Occupancy')
+    efficiencyGroup = helper.addGroup(sTgcMonAlg, 'efficiencyOverview', globalPath + 'Expert/Efficiency/')
 
     #Pad trigger
     sTgcPadTriggerShifterGroup = helper.addGroup(sTgcMonAlg, 'padTriggerShifter', globalPath + 'Shifter/')
@@ -62,6 +63,20 @@ def sTgcMonitoringConfig(inputFlags):
     titlehitpfebperSector = '; hit_pfeb; sector; hit_pfeb per sector'
     varhitpfebperSector = 'sector,hitpfeb'
     sTgcPadTriggerShifterGroup.defineHistogram(varhitpfebperSector, type = 'TH2F', title = titlehitpfebperSector, path = 'PadTrigger/Triggers', xbins = 33, xmin = -16, xmax = 16, ybins = 24, ymin = 0, ymax = 24, opt = 'kAlwaysCreate')
+
+    for sideIndex in side:
+        for sectorIndex in range(1, sectorMax + 1):
+            efficiencyRcoordGroup = helper.addGroup(sTgcMonAlg, f'rPosStrip_{sideIndex}{sectorIndex}', globalPath + 'Expert/Efficiency/')
+            for layerIndex in range(1, layerMax + 1):
+                titleEffCoordR = f'{sideIndex}' + f'{sectorIndex}'.zfill(2) + f'L{layerIndex}; sTgc-GlobalR-Strip (on track) [mm]; Efficiency'
+                varEffCoordR = f'hitLayer,rPosStrip_{sideIndex}_sector_{sectorIndex}_layer_{layerIndex};Efficiency_per_Radius_Layer{layerIndex}'
+                efficiencyRcoordGroup.defineHistogram(varEffCoordR, type = 'TEfficiency', title = titleEffCoordR, path = f'{sideIndex}' + f'{sectorIndex}'.zfill(2), xbins = 500, xmin = 0., xmax = 5000., opt = 'kAlwaysCreate')
+                
+        for layerIndex in range(1, layerMax + 1):
+            titleEffYvsXstrip = f'{sideIndex}L{layerIndex}; sTgc-GlobalX-Strip (on track) [mm]; sTgc-GlobalY-Strip (on track) [mm]; Efficiency'
+            varEffYvsXstrip = f'hitLayer,xPosStrip_{sideIndex}_layer_{layerIndex},yPosStrip_{sideIndex}_layer_{layerIndex};strip_efficiency_per_mm_squared_Wheel{sideIndex}_layer{layerIndex}'
+            efficiencyGroup.defineHistogram(varEffYvsXstrip, type = 'TEfficiency', title = titleEffYvsXstrip, path = 'Overview', xbins = 500, xmin = -5000., xmax = 5000., ybins = 500, ymin = -5000., ymax = 5000., opt = 'kAlwaysCreate')
+            sTgcOverviewGroup.defineHistogram(varEffYvsXstrip, type = 'TEfficiency', title = titleEffYvsXstrip, path = 'Overview', xbins = 500, xmin = -5000., xmax = 5000., ybins = 500, ymin = -5000., ymax = 5000., opt = 'kAlwaysCreate')
 
     for stationEtaIndex in range(1, stationEtaMax + 1):
         sTgcPadTimingExpertGroup = helper.addGroup(sTgcMonAlg, f'padTiming_quad_{stationEtaIndex}', globalPath + 'Expert/Timing/Pad')
@@ -180,7 +195,6 @@ def sTgcMonitoringConfig(inputFlags):
         titleWireGroupOccupancyPerQuad  = f'L{layerIndex}; Wire Group Number; Quad; Hits'
         varWireGroupOccupancyPerQuad    = f'wireGroupNumber_layer_{layerIndex},stationEta_layer_{layerIndex};Wire_ch_occupancy_per_sector_Layer{layerIndex}'
         sTgcOccupancyGroup.defineHistogram(varWireGroupOccupancyPerQuad, type = 'TH2F', title = titleWireGroupOccupancyPerQuad, path = 'Wire', xbins = 58*sectorMax, xmin = 0., xmax = float(58*sectorMax), ybins = 2*stationEtaMax + 2, ymin = -float(stationEtaMax + 1), ymax = float(stationEtaMax + 1), opt = 'kAlwaysCreate')
-    
 
     acc = helper.result()
     result.merge(acc)

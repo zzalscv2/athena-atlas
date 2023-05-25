@@ -33,6 +33,8 @@ def SPCountHypoToolGen(chainDict):
     if "sp_pix" in chainDict["chainName"]:
         hypo.pixCL = int(chainDict["chainParts"][0]["hypoSPInfo"].strip("pix"))
     if "sp_vpix" in chainDict["chainName"]:
+        hypo.pixCL = -1  # Remove any cut on mininum number of Pixel and SCT SpacePoints
+        hypo.sctSP = -1
         hypo.pixCLMax = int(chainDict["chainParts"][0]["hypoSPInfo"].strip("vpix"))
     return hypo
 

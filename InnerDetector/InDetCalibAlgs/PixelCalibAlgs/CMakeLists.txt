@@ -8,6 +8,9 @@ find_package( ROOT COMPONENTS Graf Core Tree MathCore Hist RIO MathMore Physics
    Matrix Gpad )
    
 find_package( Boost COMPONENTS unit_test_framework)
+find_package( COOL COMPONENTS CoolKernel CoolApplication )
+find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
+
 
 # Libraries in the package:
 atlas_add_library( PixelCalibAlgsLib
@@ -31,6 +34,11 @@ atlas_add_executable( PixelCalib
    ChargeCalibration/pixel/PixelCalib.C
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils PixelCalibAlgsLib )
+   
+atlas_add_executable( MakeReferenceFile
+   ChargeCalibration/pixel/MakeReferenceFile.cxx
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils ${COOL_LIBRARIES} ${CORAL_LIBRARIES} )
 
 
    

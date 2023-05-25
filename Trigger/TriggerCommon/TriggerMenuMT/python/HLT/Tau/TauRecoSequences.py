@@ -3,7 +3,6 @@
 #
 
 from AthenaCommon.CFElements import parOR, seqAND
-from AthenaCommon.GlobalFlags import globalflags
 from AthenaConfiguration.ComponentFactory import CompFactory
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorInitialROITool, ViewCreatorFetchFromViewROITool, ViewCreatorPreviousROITool
@@ -130,9 +129,10 @@ def precTrackSequence( flags, RoIs , name):
     from AthenaCommon.AlgSequence import AlgSequence
     topSequence = AlgSequence()
 
-    if globalflags.InputFormat.is_bytestream():
+    if not flags.Input.isMC:
       ViewVerifyTrk.DataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
-                                 ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' ) ]
+                                 ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' ) ,
+                                 ( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
     else:
       topSequence.SGInputLoader.Load += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
       ViewVerifyTrk.DataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]

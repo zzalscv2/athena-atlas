@@ -593,7 +593,6 @@ public:
 							  -1.81e+04,
 							  +2.15e+04 ),
 						   -14, 1 ) );
-    //const int bcWlnu = vtx->barcode();
 
     McVtxFilter filter;
     filter.setDecayPattern( "24 -> -13 + -14" );

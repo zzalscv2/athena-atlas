@@ -3,13 +3,19 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-
+from AthenaCommon.Logging import logging
+import os
 
 def DRAWCommonByteStreamCfg(flags,
                             formatName,
                             filename):
     '''Common config fragment for setting up 
        ByteStream for DRAW formats'''
+    if os.access(filename,os.F_OK):
+        msg=logging.getLogger('DRAWByteStreamCfg')
+        msg.warning(f"Deleting pre-existing DRAW file {filename}")
+        os.remove(filename)
+
 
     # Output configuration
     outCA = ComponentAccumulator(

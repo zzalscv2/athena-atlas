@@ -97,7 +97,7 @@ namespace ISF {
     /** Helper function to classify existing GenVertex objects */
     ISF::InteractionClass_t interactionClassification(HepMC::GenVertexPtr& vtx) const;
 
-    ServiceHandle<Barcode::IBarcodeSvc> m_barcodeSvc{this, "BarcodeSvc", "", ""};           //!< The Barcode service
+    ServiceHandle<Barcode::IBarcodeSvc> m_barcodeSvc{this, "BarcodeSvc", "BarcodeSvc", ""};           //!< The Barcode service
 
     /** the truth strategies applied (as AthenaToolHandle Array) */
     ToolHandleArray<ITruthStrategy> m_truthStrategies{this, "TruthStrategies", {}, ""};

@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// LegacyBarcodeSvc.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef BARCODESERVICES_LEGACYBARCODESVC_H
 #define BARCODESERVICES_LEGACYBARCODESVC_H 1
@@ -72,10 +68,6 @@ namespace Barcode {
     virtual ParticleBarcode sharedChildBarcode( ParticleBarcode parentBC,
                                                 PhysicsProcessCode process=Barcode::fUndefinedProcessCode ) override;
 
-    /** Update the given barcode (e.g. after an interaction) */
-    virtual ParticleBarcode incrementBarcode( ParticleBarcode oldBC,
-                                              PhysicsProcessCode process=Barcode::fUndefinedProcessCode ) override;
-
     /** Inform the BarcodeSvc about the largest particle and vertex Barcodes
         in the event input */
     virtual void registerLargestGenEvtParticleBC( ParticleBarcode bc) override;
@@ -84,9 +76,6 @@ namespace Barcode {
     /** Return the secondary particle and vertex offsets */
     virtual Barcode::ParticleBarcode secondaryParticleBcOffset() const override;
     virtual Barcode::VertexBarcode   secondaryVertexBcOffset()  const override;
-
-    /** Return the barcode increment for each generation of updated particles */
-    virtual Barcode::ParticleBarcode particleGenerationIncrement() const override;
 
     /** handles to get barcode bitcalculator */
     virtual inline const Barcode::BitCalculator* getBitCalculator() const override { return m_bitcalculator; }

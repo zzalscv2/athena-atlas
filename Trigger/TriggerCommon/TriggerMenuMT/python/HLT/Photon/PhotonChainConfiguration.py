@@ -9,17 +9,16 @@ log = logging.getLogger(__name__)
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from ..CommonSequences.CaloSequences import fastCaloMenuSequence
+from ..Photon.FastPhotonMenuSequences import fastPhotonMenuSequence
 
 if isComponentAccumulatorCfg():
     pass
 else:
-    from ..Photon.FastPhotonMenuSequences import fastPhotonMenuSequence
     from ..Photon.PrecisionPhotonMenuSequences import precisionPhotonMenuSequence
     from ..Photon.PrecisionPhotonCaloIsoMenuSequences import precisionPhotonCaloIsoMenuSequence
-    from ..Photon.PrecisionCaloMenuSequences import precisionCaloMenuSequence
     from ..Photon.HipTRTMenuSequences import hipTRTMenuSequence
     from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaTopoHypoTool
-
+    from ..Photon.PrecisionCaloMenuSequences import precisionCaloMenuSequence
 
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool

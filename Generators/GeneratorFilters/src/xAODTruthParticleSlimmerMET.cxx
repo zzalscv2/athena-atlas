@@ -16,7 +16,7 @@
 #include "xAODTruth/TruthParticleAuxContainer.h"
 
 #include "TruthUtils/HepMCHelpers.h"
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "GeneratorFilters/xAODTruthParticleSlimmerMET.h"
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_ARRAYBRANCH_H
 #define MUONTESTER_ARRAYBRANCH_H
@@ -55,7 +55,7 @@ public:
     /// default value in cases the branch is not updated
     const T& getDefault() const;
 
-    virtual void setDefault(const T& val);
+    void setDefault(const T& val);
 
 private:
     /// Data type of the branch in the tree

@@ -33,6 +33,7 @@ namespace InDet{
         ATH_CHECK( m_SCTFlaggedCondCacheKey.initialize(SG::AllowEmpty) );
         ATH_CHECK( m_PixRDOCacheKey.initialize(SG::AllowEmpty) );
         ATH_CHECK( m_PixBSErrCacheKey.initialize(SG::AllowEmpty) );
+        ATH_CHECK( m_TRTRDOCacheKey.initialize(SG::AllowEmpty) );
         if (!m_disableTRT.value()) ATH_CHECK(detStore()->retrieve(m_pTRTHelper  , "TRT_ID"));
         ATH_CHECK(detStore()->retrieve(m_sct_idHelper, "SCT_ID"));
         ATH_CHECK(detStore()->retrieve(m_pix_idHelper, "PixelID"));
@@ -49,7 +50,10 @@ namespace InDet{
 
         ATH_CHECK(checkInsideViewOnce(ctx));
 
-        if (!m_disableTRT.value()) ATH_CHECK(createContainer(m_rioContainerCacheKey, m_pTRTHelper->straw_layer_hash_max(), ctx));
+        if (!m_disableTRT.value()) { 
+          ATH_CHECK(createContainer(m_rioContainerCacheKey, m_pTRTHelper->straw_layer_hash_max(), ctx));
+          ATH_CHECK(createContainer(m_TRTRDOCacheKey, m_pTRTHelper->straw_layer_hash_max(), ctx));
+        }
         
         ATH_CHECK(createContainer(m_SCTclusterContainerCacheKey, m_sct_idHelper->wafer_hash_max(), ctx));
         

@@ -101,8 +101,6 @@ def getLongLivedInputConverter(name="ISF_LongLivedInputConverter", **kwargs):
 #
 
 def getGenericTruthService(name="ISF_TruthService", **kwargs):
-    from G4AtlasApps.SimFlags import simFlags
-    kwargs.setdefault('BarcodeSvc', simFlags.TruthStrategy.BarcodeServiceName())
     kwargs.setdefault('SkipIfNoChildren', True)
     kwargs.setdefault('SkipIfNoParentBarcode', True)
     kwargs.setdefault('ForceEndVtxInRegions', [])

@@ -9,7 +9,7 @@
 
 #include "DerivationFrameworkMCTruth/TruthIsolationTool.h"
 #include "HepPID/ParticleIDMethods.hh"
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include <vector>
 #include <string>
 #include <algorithm>

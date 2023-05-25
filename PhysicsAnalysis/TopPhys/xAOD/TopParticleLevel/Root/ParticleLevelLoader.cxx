@@ -28,6 +28,7 @@
 #include "FourMomUtils/xAODP4Helpers.h"
 
 #include <boost/algorithm/string.hpp>
+#include "TruthUtils/MagicNumbers.h"
 
 // #define TOP_PARTICLE_LEVEL_DEBUG_OVERLAP_REMOVAL 1
 
@@ -340,7 +341,7 @@ namespace top {
         }
 
         // FIXME: Is this still needed?
-        if (electron->barcode() >= 2e5) {
+        if (HepMC::is_simulation_particle(electron)) {
           continue;
         }
 
@@ -361,7 +362,7 @@ namespace top {
         }
 
         // FIXME: Is this still needed?
-        if (muon->barcode() >= 2e5) {
+        if (HepMC::is_simulation_particle(muon)) {
           continue;
         }
 
@@ -382,7 +383,7 @@ namespace top {
         }
 
         // FIXME: Is this still needed?
-        if (photon->barcode() >= 2e5) {
+        if (HepMC::is_simulation_particle(photon)) {
           continue;
         }
 

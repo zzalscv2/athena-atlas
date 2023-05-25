@@ -1,6 +1,6 @@
 """Main ISF tools configuration with ComponentAccumulator
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -90,6 +90,9 @@ def Kernel_GenericSimulatorMTCfg(flags, name="ISF_Kernel_GenericSimulatorMT", **
         # Needed to ensure that DeadMaterialCalibrationHitsMerger is scheduled correctly.
         kwargs.setdefault("ExtraOutputs", [( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitActive_DEAD' ), ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitDeadMaterial_DEAD' ), ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitInactive_DEAD' )])
 
+    if "QuasiStablePatcher" not in kwargs and flags.Sim.ISF.Simulator.isQuasiStable():
+        from BeamEffects.BeamEffectsAlgConfig import ZeroLifetimePositionerCfg
+        kwargs.setdefault("QuasiStablePatcher", acc.getPrimaryAndMerge(ZeroLifetimePositionerCfg(flags)) )
     if flags.Sim.ISF.ReSimulation:
         acc.addSequence(AthSequencer('SimSequence'), parentName='AthAlgSeq') # TODO make the name configurable?
         acc.addEventAlgo(CompFactory.ISF.SimKernelMT(name, **kwargs), 'SimSequence') # TODO make the name configurable?

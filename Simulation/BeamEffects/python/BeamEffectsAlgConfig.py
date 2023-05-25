@@ -153,6 +153,14 @@ def BeamSpotFixerAlgCfg(flags, name="BeamSpotFixerAlg", **kwargs):
     return acc
 
 
+def ZeroLifetimePositionerCfg(flags, name="ZeroLifetimePositioner", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault('ApplyPatch', True)
+    kwargs.setdefault('RemovePatch', True)
+    result.addService(CompFactory.Simulation.ZeroLifetimePositioner(name, **kwargs), primary = True)
+    return result
+
+
 def BeamSpotReweightingAlgCfg(flags, name="BeamSpotReweightingAlg", **kwargs):
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
     acc = BeamSpotCondAlgCfg(flags)

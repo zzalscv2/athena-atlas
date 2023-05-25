@@ -3,7 +3,7 @@
 */
 
 #include "GeneratorFilters/ParentTwoChildrenFilter.h"
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 ParentTwoChildrenFilter::ParentTwoChildrenFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter(name,pSvcLocator)

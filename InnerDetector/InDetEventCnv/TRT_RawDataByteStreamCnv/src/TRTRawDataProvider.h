@@ -65,6 +65,7 @@ private:
   SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey;
   SG::WriteHandleKey<TRT_RDO_Container> m_rdoContainerKey;
   SG::WriteHandleKey<TRT_BSErrContainer> m_bsErrContKey;
+  SG::UpdateHandleKey<TRT_RDO_Cache> m_rdoCacheKey;
 
 };
 

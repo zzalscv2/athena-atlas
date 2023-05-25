@@ -772,7 +772,7 @@ void TrigTrackSeedGenerator::createTriplets(const TrigSiSpacePointBase* pS, int 
 	} else { // choose smallest d0
 
 	  std::sort(output.begin(), output.end(), 
-		    [](TrigInDetTriplet A, const TrigInDetTriplet B) {
+		    [](const TrigInDetTriplet& A, const TrigInDetTriplet& B) {
 		      return A.Q() > B.Q();
 		    }
 		    );
@@ -1224,7 +1224,7 @@ void TrigTrackSeedGenerator::createConfirmedTriplets(const TrigSiSpacePointBase*
 
     }//loop over outer spacepoints
     
-    for(auto ps : vPro) {
+    for(const auto& ps : vPro) {
       if(!ps.m_confirmed) continue;
       if(output.size()>=m_settings.m_maxTripletBufferLength) {
 	if (m_settings.m_LRTmode) { // take the first m_maxTripletBufferLength triplets

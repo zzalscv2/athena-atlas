@@ -45,7 +45,8 @@ def makeInDetTrigPrecisionTracking( inflags, config=None, verifier=False, rois='
     if verifier:
         from .InDetTrigCollectionKeys import TrigPixelKeys
         verifier.DataObjects += [( 'InDet::PixelGangedClusterAmbiguities' , 'StoreGateSvc+' + TrigPixelKeys.PixelClusterAmbiguitiesMap ),
-                                 ( 'TrackCollection' , 'StoreGateSvc+' +inputTracks )]
+                                 ( 'TrackCollection' , 'StoreGateSvc+' +inputTracks ),
+                                 ( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
 
     
     ambiSolvingAlgs = ambiguitySolver_builder(flags, signature, config, summaryTool, inputTracks, outputTrackName=ambiTrackCollection, prefix=prefix+"Trk" )

@@ -139,7 +139,7 @@ def addSimulationArguments(parser):
 
 def addAtlasG4Arguments(parser):
     addCommonSimDigArguments(parser)
-    addCommonSimulationArguments(parser)
+    addPureSimulationArguments(parser)
 
 def addHITSMergeArguments(parser):
     from SimuJobTransforms.simTrfArgs import addHITSMergeArgs
