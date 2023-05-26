@@ -100,6 +100,9 @@ namespace top {
     ToolHandle<IElectronPhotonShowerShapeFudgeTool> m_photonFudgeTool;
 
     ///-- Isolation --///
+    ToolHandle<CP::IIsolationSelectionTool> m_isolationTool_Tight_VarRad;
+    ToolHandle<CP::IIsolationSelectionTool> m_isolationTool_Loose_VarRad;
+    ToolHandle<CP::IIsolationSelectionTool> m_isolationTool_TightTrackOnly_VarRad;
     ToolHandle<CP::IIsolationSelectionTool> m_isolationTool_LooseTrackOnly;
     ToolHandle<CP::IIsolationSelectionTool> m_isolationTool_Loose;
     ToolHandle<CP::IIsolationSelectionTool> m_isolationTool_PflowLoose;

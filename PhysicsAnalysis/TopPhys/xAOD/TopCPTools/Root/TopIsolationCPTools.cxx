@@ -101,6 +101,9 @@ namespace top {
 
     // Electron Isolation WPs
     std::set<std::string> electron_isolations {{
+                                                 "Tight_VarRad",
+                                                 "Loose_VarRad",
+                                                 "TightTrackOnly_VarRad",
                                                  "Gradient",
                                                  "FCHighPtCaloOnly",
                                                  "FCTight",

@@ -922,7 +922,7 @@ IAsgElectronEfficiencyCorrectionTool*
     if (type == "Tight") working_point = "FCTight";
     if (type == "Loose") working_point = "FCLoose";
     if (type == "HighPtCaloOnly") working_point = "FCHighPtCaloOnly";
-    if (type == "FCTight" || type == "FCLoose" || type == "FCHighPtCaloOnly" || type == "Gradient" || type == "PLVTight" || type == "PLVLoose" || type == "PLImprovedTight" || type == "PLImprovedVeryTight" || type == "TightTrackOnly_FixedRad") working_point = type;
+    if (type == "Tight_VarRad" || type == "Loose_VarRad" || type == "TightTrackOnly_VarRad" || type == "FCTight" || type == "FCLoose" || type == "FCHighPtCaloOnly" || type == "Gradient" || type == "PLVTight" || type == "PLVLoose" || type == "PLImprovedTight" || type == "PLImprovedVeryTight" || type == "TightTrackOnly_FixedRad") working_point = type;
 
     return working_point;
   }
