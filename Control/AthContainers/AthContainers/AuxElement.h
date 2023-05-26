@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/AuxElement.h
@@ -23,6 +23,7 @@
 #include "AthContainers/tools/AuxDataTraits.h"
 #include "AthContainers/exceptions.h"
 #include "AthContainers/tools/likely.h"
+#include "CxxUtils/span.h"
 #include <cstddef>
 
 
@@ -242,16 +243,19 @@ public:
   {
   public:
     /// Type the user sees.
-    typedef typename AuxDataTraits<T>::element_type
-     element_type;
+    using element_type = typename AuxDataTraits<T>::element_type;
 
     /// Type referencing an item.
-    typedef typename AuxDataTraits<T>::const_reference_type
-      const_reference_type;
+    using const_reference_type =
+      typename AuxDataTraits<T>::const_reference_type;
 
     /// Pointer into the container holding this item.
-    typedef typename AuxDataTraits<T>::const_container_pointer_type
-      const_container_pointer_type;
+    using const_container_pointer_type =
+      typename AuxDataTraits<T>::const_container_pointer_type;
+
+    /// A span over elements in the container.
+    using const_span = typename AuxDataTraits<T>::const_span;
+
 
     /**
      * @brief Constructor.
@@ -302,6 +306,14 @@ public:
      */
     const_container_pointer_type
     getDataArray (const AuxVectorData& container) const;
+
+
+    /**
+     * @brief Get a span over the auxilary data array.
+     * @param container The container from which to fetch the variable.
+     */
+    const_span
+    getDataSpan (const AuxVectorData& container) const;
     
 
     /**
@@ -368,18 +380,20 @@ public:
   {
   public:
     /// Type referencing an item.
-    typedef typename AuxDataTraits<T>::reference_type
-     reference_type;
+    using reference_type = typename AuxDataTraits<T>::reference_type;
 
     /// Type the user sees.
-    typedef typename AuxDataTraits<T>::element_type
-     element_type;
+    using element_type = typename AuxDataTraits<T>::element_type;
 
     /// Pointer into the container holding this item.
-    typedef typename AuxDataTraits<T>::container_pointer_type
-      container_pointer_type;
-    typedef typename AuxDataTraits<T>::const_container_pointer_type
-      const_container_pointer_type;
+    using container_pointer_type =
+      typename AuxDataTraits<T>::container_pointer_type;
+    using const_container_pointer_type =
+      typename AuxDataTraits<T>::const_container_pointer_type;
+
+    /// A span over elements in the container.
+    using span = typename AuxDataTraits<T>::span;
+    using const_span = typename AuxDataTraits<T>::const_span;
 
 
     /**
@@ -462,6 +476,26 @@ public:
      */
     container_pointer_type getDecorationArray (const AuxVectorData& container) const;
     
+
+    /**
+     * @brief Get a span over the auxilary data array.
+     * @param container The container from which to fetch the variable.
+     */
+    const_span
+    getDataSpan (const AuxVectorData& container) const;
+
+
+    /**
+     * @brief Get a span over the auxilary data array.
+     * @param container The container from which to fetch the variable.
+     *
+     * If the container is locked, this will allow fetching only variables
+     * that do not yet exist (in which case they will be marked as decorations)
+     * or variables already marked as decorations.
+     */
+    span
+    getDecorationSpan (const AuxVectorData& container) const;
+
 
     /**
      * @brief Test to see if this variable exists in the store.
@@ -997,19 +1031,21 @@ public:
   {
   public:
     /// Type referencing an item.
-    typedef typename AuxDataTraits<T>::reference_type
-     reference_type;
+    using reference_type = typename AuxDataTraits<T>::reference_type;
 
     /// Type the user sees.
-    typedef typename AuxDataTraits<T>::element_type
-     element_type;
+    using element_type = typename AuxDataTraits<T>::element_type;
 
     /// Pointer into the container holding this item.
-    typedef typename AuxDataTraits<T>::container_pointer_type
-      container_pointer_type;
+    using container_pointer_type =
+      typename AuxDataTraits<T>::container_pointer_type;
+
+    /// A span over elements in the container.
+    using span = typename AuxDataTraits<T>::span;
 
     using ConstAccessor<T>::operator();
     using ConstAccessor<T>::getDataArray;
+    using ConstAccessor<T>::getDataSpan;
 
 
     /**
@@ -1064,6 +1100,14 @@ public:
      */
     container_pointer_type getDataArray (AuxVectorData& container) const;
 
+
+    /**
+     * @brief Get a span over the auxilary data array.
+     * @param container The container from which to fetch the variable.
+     */
+    span
+    getDataSpan (AuxVectorData& container) const;
+    
 
     /**
      * @brief Test to see if this variable exists in the store and is writable.

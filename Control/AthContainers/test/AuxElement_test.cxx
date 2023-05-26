@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxElement_test.cxx
@@ -165,6 +165,9 @@ void test1()
   ityp1(v, 5) = 2;
   assert (ityp1(v, 5) == 2);
   assert (ityp1.getDataArray(v)[5] == 2);
+  ityp1.getDataSpan(v)[5] = 42;
+  assert (ityp1.getDataSpan(v)[5] == 42);
+  assert (ityp1.getDataSpan(v).size() == 10);
   ityp1.getDataArray(v)[5] = 1;
   assert (ityp1.getDataArray(v)[5] == 1);
 
@@ -582,6 +585,8 @@ void test_decoration()
   SG::AuxElement::Decorator<int> ityp3 ("anInt3");
   ityp3(cb) = 12;
   assert (ityp3.getDecorationArray (v)+5 == &ityp3(cb));
+  assert (ityp3.getDecorationSpan(v)[5] == 12);
+  assert (ityp3.getDataSpan(v)[5] == 12);
 
   assert (10 == ityp1(cb));
   assert (12 == ityp3(cb));
@@ -697,6 +702,12 @@ void test_const1()
 
   assert (ityp1_c(v, 5) == 123);
   assert (ityp1_c.getDataArray(v)[5] == 123);
+  {
+    std::vector<int> vec (ityp1_c.getDataSpan(v).begin(),
+                          ityp1_c.getDataSpan(v).end());
+    std::vector<int> vexp {0, 0, 0, 0, 0, 123, 0, 0, 0, 0};
+    assert (vec == vexp);
+  }
 
   SG::ConstAuxElement b3 = b2;
   assert (b3.index() == 0);
@@ -740,6 +751,8 @@ void test_const_decoration()
   SG::ConstAuxElement::Decorator<int> ityp3 ("anInt3");
   ityp3(cb) = 12;
   assert (ityp3.getDecorationArray (v)+5 == &ityp3(cb));
+  assert (ityp3.getDecorationSpan(v)[5] == 12);
+  assert (ityp3.getDataSpan(v)[5] == 12);
 
   assert (12 == ityp3(cb));
 
