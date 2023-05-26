@@ -1,0 +1,14 @@
+EFTrackingEmulation
+
+This package contains tools to emulate EFTracking performance
+
+FakeTrackSmearer:
+   - class to smear track parameters and eventually add fake tracks
+
+
+EFTrackingSmearingAlg:
+   - Athena algorithm to retreive input TrackParticleContainer and produce a smeared TrackParticleContainer 
+
+
+EFTrackingSmearingConfig:
+  - contains the configuraiton of EFTrackingSmearingAlg and an example of how to implement in a job (as unit test)
