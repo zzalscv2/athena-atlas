@@ -13,8 +13,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 // ISF includes
 #include "ISF_Interfaces/IParticleFilter.h"
-// Barcode Includes
-#include "BarcodeEvent/Barcode.h"
 
 namespace ISF {
 
@@ -52,9 +50,6 @@ namespace ISF {
 
       /** filter primary particles according to the barcode offsets/increments as used by MC12 */
       bool                          m_onlyLegacyPrimaries;           //!< turn legacy primary filter on/off
-      Barcode::ParticleBarcode      m_legacyPartGenerationIncrement; //!< increment for updated particles
-      Barcode::ParticleBarcode      m_legacyFirstSecondary;          //!< first secondary barcode produced by simulation
-
   }; 
   
 }

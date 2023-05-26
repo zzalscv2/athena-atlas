@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/tools/AuxDataTraits.h
@@ -15,6 +15,7 @@
 #define ATHCONTAINERS_AUXDATATRAITS_H
 
 
+#include "CxxUtils/span.h"
 #include <vector>
 #include <cstdlib>
 
@@ -44,6 +45,7 @@ public:
 
   /// Container type used to store this variable.
   using vector_type = std::vector<T, allocator_type>;
+  using container_value_type = typename vector_type::value_type;
 
   /// Pointers to the data within the container.
   using container_pointer_type = typename vector_type::pointer;
@@ -62,7 +64,9 @@ public:
   {
     return reinterpret_cast<const_container_pointer_type>(ptr)[ndx];
   }
-    
+
+  using span = CxxUtils::span<container_value_type>;
+  using const_span = CxxUtils::span<const container_value_type>;
 };
 
 
@@ -90,6 +94,7 @@ public:
 
   /// Container type used to store this variable.
   using vector_type = std::vector<char, allocator_type>;
+  using container_value_type = typename vector_type::value_type;
 
   /// Pointers to the data within the container.
   using container_pointer_type = typename vector_type::pointer;
@@ -108,6 +113,9 @@ public:
   {
     return reinterpret_cast<const bool*>(ptr)[ndx];
   }
+
+  using span = CxxUtils::span<container_value_type>;
+  using const_span = CxxUtils::span<const container_value_type>;
 };
 
 

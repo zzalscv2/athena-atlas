@@ -4,6 +4,7 @@
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
 from AthenaConfiguration.Enums import Format
 
+import copy
 import unittest
 
 class FlagsSetup(unittest.TestCase):
@@ -129,6 +130,11 @@ class BasicTests(FlagsSetup):
         self.flags.addFlag("FormatWrong", lambda flags : "ABC", enum=Format)
         with self.assertRaises(RuntimeError) as _:
             x = self.flags.FormatWrong  # noqa: F841
+
+    def test_copy(self):
+        """Test that flags can be copied"""
+        copy.copy(self.flags)
+        copy.deepcopy(self.flags)
 
 
 class TestFlagsSetupDynamic(FlagsSetup):
@@ -296,7 +302,7 @@ flags and positional arguments:
   CatA.Flag1  : This is Flag1 (default: '')
 """)
 
-    def test_catHelp(self):
+    def test_catHelpSub(self):
         # tests getting help for a subcategory of flags (tests navigation down through categories)
         self.do_test(args="--help CatA.SubCatA",expected="""flags:
   CatA.SubCatA.Flag2  : This is Flag2 (default: '')
