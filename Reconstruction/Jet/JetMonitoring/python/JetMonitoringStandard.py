@@ -55,22 +55,22 @@ commonHistoSpecs = [
 
 
     # 2D histos, by concatenating 1D histo specifications :
-    "pt;m",
-    "pt;eta",
-    "phi;eta",
+    "m;pt",
+    "eta;pt",
+    "eta;phi",
 
 
     # TProfile2D : just use 3 variables. For now the sytem will automatically
     #  interpret it as a TProfile2D (the 3rd variable being profiled)
-    "phi;eta;e",  # --> Average Energy vs pt and eta
-    "phi;eta;pt", # --> Average pt vs phi and eta
+    "eta;phi;e",  # --> Average Energy vs pt and eta
+    "eta;phi;pt", # --> Average pt vs phi and eta
 
     # Histograms build from a selection of filtered jets.
     #  Use a SelectSpec dictionary to define the selection, and the histo to be drawn from it.
     SelectSpec( 'central',   # the name of the selection
                 '|eta|<0.5', # selection expression. The form 'min<var<max' is automatically interpreted.
                 path='CentralJets', # force the path where the histos are saved in the final ROOT file
-                FillerTools = ["pt","m","eta","phi","EMFrac","Tile0Frac","LArQuality","nconstit","N90Constituents",
+                FillerTools = ["pt","m","eta","phi","EMFrac","Tile0Frac","LArQuality","nconstit","N90Constituents", "eta;phi",
                 "JetConstitScaleMomentum_pt","JetEMScaleMomentum_pt","JetPileupScaleMomentum_pt","JetEtaJESScaleMomentum_pt",
                 "JetConstitScaleMomentum_eta","JetEMScaleMomentum_eta","JetPileupScaleMomentum_eta","JetEtaJESScaleMomentum_eta",
                 "JetConstitScaleMomentum_phi","JetEMScaleMomentum_phi","JetPileupScaleMomentum_phi","JetEtaJESScaleMomentum_phi",
@@ -79,7 +79,7 @@ commonHistoSpecs = [
      SelectSpec( 'tilegap3',   # the name of the selection
                 '1.0<|eta|<1.4', # selection expression. The form 'min<var<max' is automatically interpreted.
                 path='TileGap3', # force the path where the histos are saved in the final ROOT file
-                FillerTools = ["pt","m","eta","phi","EMFrac","Tile0Frac","HECFrac","LArQuality","nconstit","N90Constituents",
+                FillerTools = ["pt","m","eta","phi","EMFrac","Tile0Frac","HECFrac","LArQuality","nconstit","N90Constituents", "eta;phi",
                 ] ),
 
     # another selection : only leading jets
@@ -105,22 +105,22 @@ commonHistoSpecs = [
                 ] ),
 
     # another selection : only very high pT jets
-    SelectSpec( 'highptrange2TeVto8TeV','2000<pt:GeV<8000',path='highptrange2TeVto8TeV',FillerTools = ["highpt","m","eta","phi","eta;phi",] ),
-    SelectSpec( 'highptrange1TeVto2TeV','1000<pt:GeV<2000',path='highptrange1TeVto2TeV',FillerTools = ["highpt","m","eta","phi","eta;phi",] ),
-    SelectSpec( 'highptrange500GeVto1TeV','500<pt:GeV<1000',path='highptrange500GeVto1TeV',FillerTools = ["highpt","m","eta","phi","eta;phi",] ),
-    SelectSpec( 'highptrange200GeVto500GeV','200<pt:GeV<500',path='highptrange200GeVto500GeV',FillerTools = ["highpt","m","eta","phi","eta;phi",] ),
+    SelectSpec( 'highptrange2TeVto8TeV','2000<pt:GeV<8000',path='highptrange2TeVto8TeV',FillerTools = ["pt","highpt","m","eta","phi","eta;phi","eta;phi;e","eta;phi;pt"] ),
+    SelectSpec( 'highptrange1TeVto2TeV','1000<pt:GeV<2000',path='highptrange1TeVto2TeV',FillerTools = ["pt","highpt","m","eta","phi","eta;phi","eta;phi;e","eta;phi;pt"] ),
+    SelectSpec( 'highptrange500GeVto1TeV','500<pt:GeV<1000',path='highptrange500GeVto1TeV',FillerTools = ["pt","highpt","m","eta","phi","eta;phi","eta;phi;e","eta;phi;pt"] ),
+    SelectSpec( 'highptrange200GeVto500GeV','200<pt:GeV<500',path='highptrange200GeVto500GeV',FillerTools = ["pt","highpt","m","eta","phi","eta;phi","eta;phi;e","eta;phi;pt"] ),
 
     # Selecting jets failing the LooseBad selection from the JetCleaningTool.
     SelectSpec( 'LooseBadFailedJets', 'LooseBad', InverseJetSel=True, 
                 FillerTools = ["pt","phi","eta","m","EMFrac","LArQuality","Tile0Frac","HECFrac","nconstit","N90Constituents",
-                "phi;eta","phi;eta;e","phi;eta;pt",
+                               "eta;phi","eta;phi;e","eta;phi;pt",
                 ]),   
 
     # Selecting jets passing the LooseBad selection from the JetCleaningTool.
     SelectSpec( 'LooseBadJets',
                 'LooseBad', # this is not in the form 'min<x<max', so it will be assumed 'LooseBad' is an entry existing in JetStandardHistoSpecs.knownSelector
                 FillerTools = [ "pt","eta","phi","m","EMFrac","LArQuality","Tile0Frac","HECFrac","nconstit","N90Constituents",
-                "phi;eta","phi;eta;e","phi;eta;pt",
+                                "eta;phi","eta;phi;e","eta;phi;pt",
                 ] ),
     ] # end commonHistoSpecs
 
@@ -128,7 +128,8 @@ commonHistoSpecs = [
 jvfHistosSpec = [
     SelectSpec( 'highJVF',
                 '0.3<JVF[0]', # JVF is a vector<float> for each jets. Here we cut on the 0th entry of this vector
-                FillerTools = ["pt","m","eta","phi",
+                FillerTools = ["pt","m","eta","phi","nconstit","N90Constituents",
+                               "eta;phi","eta;phi;e","eta;phi;pt",
                 ] ),
 ]
 
@@ -234,8 +235,8 @@ def standardJetMonitoring(inputFlags):
     jetAlgConfs = [
         # use the helper function defined above :
         #jetMonAlgConfig( "AntiKt4LCTopoJets", truthJetName="AntiKt4TruthJets"),     #How can we make sure truth jets are available ??
-        jetMonAlgConfig( "AntiKt4LCTopoJets", inputFlags),
         jetMonAlgConfig( "AntiKt4EMTopoJets", inputFlags),
+        jetMonAlgConfig( "AntiKt4LCTopoJets", inputFlags),
         jetMonAlgConfig( "AntiKt4EMPFlowJets", inputFlags),
         ]
     
