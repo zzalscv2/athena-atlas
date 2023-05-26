@@ -372,6 +372,7 @@ fillTimingCalibration(ValueMap_t & timMap, const std::string & inTimFile, const 
     while ((modKey=(TKey*)modItr())) {
       TString modName(modKey->GetName());
       std::string modStr(modKey->GetName());
+      if (moduleNotInPart(WhichPart, modStr)) continue;
       if (modName=="DSP_ERRORS") { continue; }
 
       // get module map
@@ -628,6 +629,7 @@ void PixelCalib(bool test=false) {
       while ((modKey=(TKey*)modItr())) {
         TString modName(modKey->GetName());
         std::string modStr(modKey->GetName());
+        if (moduleNotInPart(WhichPart, modStr)) continue;
         TString st(modName(3,3));
         // get module map
 
