@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/test/AuxVectorData_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -50,6 +48,13 @@ public:
 
 using SG::AuxVectorData;
 using SG::AuxVectorData_test;
+
+
+template <class T>
+std::vector<typename T::value_type> make_vector (const T& c)
+{
+  return std::vector<typename T::value_type> (c.begin(), c.end());
+}
 
 
 void test_get_data()
@@ -111,6 +116,9 @@ void test_get_data()
   assert (reinterpret_cast<const int*>(cb1.getDataArray (ityp))[1] == 2);
   assert (reinterpret_cast<const int*>(cb1.getDataArrayAllowMissing (ityp))[1] == 2);
 
+  std::vector<int> vexp {1, 2, 0, 0, 0, 0, 0, 0, 0, 0};
+  assert (make_vector (b1.getDataSpan<int> ("anInt")) == vexp);
+
   b1.setStore (cstore);
   assert (!b1.hasNonConstStore());
   assert (cb1.getData<int> (ityp, 0) == 1);
@@ -128,6 +136,11 @@ void test_get_data()
   ff[1] = 2.5;
   assert (cb1.getData<float> (ftyp, 0) == 1.5);
   assert (cb1.getData<float> (ftyp, 1) == 2.5);
+
+  assert (b1.getConstDataSpan<int> ("anInt")[0] == 1);
+  assert (make_vector (b1.getConstDataSpan<int> ("anInt")) == vexp);
+  assert (make_vector (cb1.getDataSpan<int> ("anInt")) == vexp);
+  assert (make_vector (cb1.getDecorationSpan<int> ("anInt")) == vexp);
 }
 
 
