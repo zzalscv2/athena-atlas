@@ -48,6 +48,8 @@ class PixelChargeLUTCalibCondAlg : public AthReentrantAlgorithm {
 
     SG::WriteCondHandleKey<PixelChargeCalibCondData> m_writeKey
     {this, "WriteKey", "PixelChargeCalibCondData", "Output charge caliblation data"};
+
+    Gaudi::Property<bool> m_useLUTRD53 {this, "useLUTRD53",false,"use LUT for RD53 charge calibration"};
 };
 
 #endif
