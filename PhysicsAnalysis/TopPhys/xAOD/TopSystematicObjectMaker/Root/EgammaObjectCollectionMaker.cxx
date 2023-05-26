@@ -36,6 +36,9 @@ namespace top {
     m_calibrationTool("CP::EgammaCalibrationAndSmearingTool"),
     m_photonFudgeTool("PhotonFudgeTool"),
 
+    m_isolationTool_Tight_VarRad("CP::IsolationTool_Tight_VarRad"),
+    m_isolationTool_Loose_VarRad("CP::IsolationTool_Loose_VarRad"),
+    m_isolationTool_TightTrackOnly_VarRad("CP::IsolationTool_TightTrackOnly_VarRad"),
     m_isolationTool_LooseTrackOnly("CP::IsolationTool_LooseTrackOnly"),
     m_isolationTool_Loose("CP::IsolationTool_Loose"),
     m_isolationTool_PflowLoose("CP::IsolationTool_PflowLoose"),
@@ -66,6 +69,9 @@ namespace top {
 
     declareProperty("EgammaCalibrationAndSmearingTool", m_calibrationTool);
 
+    declareProperty("IsolationTool_Tight_VarRad", m_isolationTool_Tight_VarRad);
+    declareProperty("IsolationTool_Loose_VarRad", m_isolationTool_Loose_VarRad);
+    declareProperty("IsolationTool_TightTrackOnly_VarRad", m_isolationTool_TightTrackOnly_VarRad);
     declareProperty("IsolationTool_LooseTrackOnly", m_isolationTool_LooseTrackOnly);
     declareProperty("IsolationTool_Loose", m_isolationTool_Loose);
     declareProperty("IsolationTool_PflowLoose", m_isolationTool_PflowLoose);
@@ -122,6 +128,9 @@ namespace top {
     }
 
     if (m_config->useElectrons()) {
+      top::check(m_isolationTool_Tight_VarRad.retrieve(), "Failed to retrieve Isolation Tool");
+      top::check(m_isolationTool_Loose_VarRad.retrieve(), "Failed to retrieve Isolation Tool");
+      top::check(m_isolationTool_TightTrackOnly_VarRad.retrieve(), "Failed to retrieve Isolation Tool");
       top::check(m_isolationTool_Gradient.retrieve(), "Failed to retrieve Isolation Tool");
       top::check(m_isolationTool_FCTight.retrieve(), "Failed to retrieve Isolation Tool");
       top::check(m_isolationTool_FCLoose.retrieve(), "Failed to retrieve Isolation Tool");
@@ -301,6 +310,7 @@ namespace top {
     static const SG::AuxElement::ConstAccessor<float> ptvarcone30_TightTTVALooseCone_pt1000("ptvarcone30_TightTTVALooseCone_pt1000");
     static const SG::AuxElement::ConstAccessor<float> ptvarcone30_TightTTVALooseCone_pt500("ptvarcone30_TightTTVALooseCone_pt500");
     static const SG::AuxElement::ConstAccessor<float> neflowisol20("neflowisol20");
+    static const SG::AuxElement::ConstAccessor<float> topoetcone20("topoetcone20");
     static const SG::AuxElement::ConstAccessor<short> PLV_TrackJetNTrack("PromptLeptonInput_TrackJetNTrack");
     static const SG::AuxElement::ConstAccessor<float> PLV_DRlj("PromptLeptonInput_DRlj");
     static const SG::AuxElement::ConstAccessor<float> PLV_PtRel("PromptLeptonInput_PtRel");
@@ -310,6 +320,9 @@ namespace top {
     static const SG::AuxElement::ConstAccessor<float> PromptLeptonImprovedVetoECAP("PromptLeptonImprovedVetoECAP");
     static const SG::AuxElement::ConstAccessor<float> PromptLeptonImprovedVetoBARR("PromptLeptonImprovedVetoBARR");
     static const SG::AuxElement::ConstAccessor<float> ptvarcone30_TightTTVA_pt500("ptvarcone30_TightTTVA_pt500");
+    static SG::AuxElement::Accessor<char> AnalysisTop_Isol_Tight_VarRad("AnalysisTop_Isol_Tight_VarRad");
+    static SG::AuxElement::Accessor<char> AnalysisTop_Isol_Loose_VarRad("AnalysisTop_Isol_Loose_VarRad");
+    static SG::AuxElement::Accessor<char> AnalysisTop_Isol_TightTrackOnly_VarRad("AnalysisTop_Isol_TightTrackOnly_VarRad");
     static SG::AuxElement::Accessor<char> AnalysisTop_Isol_FCTight("AnalysisTop_Isol_FCTight");
     static SG::AuxElement::Accessor<char> AnalysisTop_Isol_FCLoose("AnalysisTop_Isol_FCLoose");
     static SG::AuxElement::Accessor<char> AnalysisTop_Isol_Tight("AnalysisTop_Isol_Tight");
@@ -399,11 +412,17 @@ namespace top {
         electron->auxdecor<char>("AnalysisTop_Isol_Gradient") = passIsol_Gradient;
         electron->auxdecor<char>("AnalysisTop_Isol_FCHighPtCaloOnly") = passIsol_FCHighPtCaloOnly;
         electron->auxdecor<char>("AnalysisTop_Isol_HighPtCaloOnly") = passIsol_HighPtCaloOnly;
+
+        if (ptvarcone30_TightTTVALooseCone_pt1000.isAvailable(*electron) && topoetcone20.isAvailable(*electron)) {
+          AnalysisTop_Isol_Tight_VarRad(*electron) = (m_isolationTool_Tight_VarRad->accept(*electron) ? 1 : 0);
+          AnalysisTop_Isol_Loose_VarRad(*electron) = (m_isolationTool_Loose_VarRad->accept(*electron) ? 1 : 0);
+        }
         if (ptvarcone20_TightTTVA_pt1000.isAvailable(*electron)) {
           AnalysisTop_Isol_FCTight(*electron) = (m_isolationTool_FCTight->accept(*electron) ? 1 : 0);
           AnalysisTop_Isol_FCLoose(*electron) = (m_isolationTool_FCLoose->accept(*electron) ? 1 : 0);
         }
         if (ptvarcone30_TightTTVALooseCone_pt1000.isAvailable(*electron)) {
+          AnalysisTop_Isol_TightTrackOnly_VarRad(*electron) = (m_isolationTool_TightTrackOnly_VarRad->accept(*electron) ? 1 : 0);
           AnalysisTop_Isol_Tight(*electron) = (m_isolationTool_Tight->accept(*electron) ? 1 : 0);
           AnalysisTop_Isol_Loose(*electron) = (m_isolationTool_Loose->accept(*electron) ? 1 : 0);
           AnalysisTop_Isol_TightTrackOnly(*electron) = (m_isolationTool_TightTrackOnly->accept(*electron) ? 1 : 0);
