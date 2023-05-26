@@ -183,7 +183,7 @@ if hasattr(runArgs, "rivetAnas"):
         anaSeq.Rivet_i.HistoFile = runArgs.outputYODAFile
 
 from AthenaCommon.AppMgr import ServiceMgr
-  ServiceMgr.EventSelector.EventsPerRun = int(2**31 - 1) #sys.maxint on a 32-bit machine
+ServiceMgr.EventSelector.EventsPerRun = int(2**31 - 1) #sys.maxint on a 32-bit machine
 
 ##==============================================================
 ## Pre- and main config parsing
