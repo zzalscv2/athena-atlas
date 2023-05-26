@@ -628,34 +628,34 @@ void StripGmxInterface::addAlignable(int level,
 void StripGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccessSvc,GeoModelIO::ReadGeoModel* sqlreader){
 
     IRDBRecordset_ptr stereoAnnulus = rdbAccessSvc->getRecordsetPtr("StereoAnnulus","");
-    std::vector<std::string> stereoAnnulusParamNames({"thickness","carrierType","readoutSide","fieldDirection","stripDirection","stereoAngle","centreR","nRows","splitLevel","nStrips","phiPitch","startR","endR"});
+    const std::array<std::string,13> stereoAnnulusParamNames({"thickness","carrierType","readoutSide","fieldDirection","stripDirection","stereoAngle","centreR","nRows","splitLevel","nStrips","phiPitch","startR","endR"});
 
     if(stereoAnnulus->size() !=0){
        for (unsigned int iR =0;iR<stereoAnnulus->size();iR++){
             std::map<std::string,std::string> stereoAnnulusMap;
             for(std::string paramName:stereoAnnulusParamNames){
-            std::string paramValue = (*stereoAnnulus)[iR]->getString(paramName);
-            stereoAnnulusMap.insert({paramName,paramValue});
-        }
+                std::string paramValue = (*stereoAnnulus)[iR]->getString(paramName);
+                stereoAnnulusMap[paramName] = paramValue;
+            }
         std::string stereoAnnulusName = (*stereoAnnulus)[iR]->getString("SensorType");
         makeStereoAnnulus(stereoAnnulusName,stereoAnnulusMap);
-       } 
+        } 
     }
     else ATH_MSG_WARNING("Could not retrieve StereoAnnulus table");
     
     IRDBRecordset_ptr stripBox = rdbAccessSvc->getRecordsetPtr("SiStripBox","");
-    std::vector<std::string> stripBoxParamNames({"thickness","carrierType","readoutSide","fieldDirection","stripDirection","nRows","stripLength","splitLevel","nStrips","pitch"});
+    const std::array<std::string,10> stripBoxParamNames({"thickness","carrierType","readoutSide","fieldDirection","stripDirection","nRows","stripLength","splitLevel","nStrips","pitch"});
 
     if(stripBox->size() !=0){
        for (unsigned int iR =0;iR<stripBox->size();iR++){
             std::map<std::string,std::string> stripBoxMap;
             for(std::string paramName:stripBoxParamNames){
-            std::string paramValue = (*stripBox)[iR]->getString(paramName);
-            stripBoxMap.insert({paramName,paramValue});
-        } 
+                std::string paramValue = (*stripBox)[iR]->getString(paramName);
+                stripBoxMap[paramName] = paramValue;
+            }
         std::string stripBoxName = (*stripBox)[iR]->getString("SensorType");
         makeSiStripBox(stripBoxName,stripBoxMap);
-       } 
+        } 
     }
     else ATH_MSG_WARNING("Could not retrieve SiStripBox table");
 
@@ -664,32 +664,38 @@ void StripGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
     std::vector<std::string> fields({"barrel_endcap","layer_wheel","phi_module","eta_module","side"}); 
     //The below is a map of string keys which contain all the Identifier/DetElement relevant info, and the associated FullPhysVol
     std::map<std::string, GeoFullPhysVol*> mapFPV = sqlreader->getPublishedNodes<std::string, GeoFullPhysVol*>("GeoModelXML");
-    for (std::pair<std::string,GeoFullPhysVol*> publishedPhysVol : mapFPV){
+    for (const auto&[fullPhysVolInfoString, fullPhysVolPointer] : mapFPV){
         //find the name of the corresponding detector design type
-        size_t startRG = (publishedPhysVol.first).find("RG_");
-        if(startRG==std::string::npos){ATH_MSG_DEBUG("GeoFullPhysVol "<<publishedPhysVol.first<<" does not have the expected format. Skipping");continue;} 
-        std::string typeName = (publishedPhysVol.first).substr(startRG);
+        size_t startRG = fullPhysVolInfoString.find("RG_");
+        if(startRG==std::string::npos){
+            ATH_MSG_DEBUG("GeoFullPhysVol "<<fullPhysVolInfoString<<" does not have the expected format. Skipping");
+            continue;
+        } 
+        std::string typeName = fullPhysVolInfoString.substr(startRG);
         std::map<std::string, int> index;
         for (std::string field:fields){
-        size_t first = (publishedPhysVol.first).find(field+"_");
-        size_t last = (publishedPhysVol.first).find("_",first+field.size()+1);//start looking only after end of first delimiter (plus 1 for the "_" appended) ends
-        if(first==std::string::npos || last==std::string::npos){ATH_MSG_DEBUG("Could not extract "<<field<<" from "<<publishedPhysVol.first<<". Skipping");continue;} 
-        std::string strNew = (publishedPhysVol.first).substr(first+field.size()+1,last-(first+field.size()+1));
+        size_t first = fullPhysVolInfoString.find(field+"_");
+        size_t last = fullPhysVolInfoString.find("_",first+field.size()+1);//start looking only after end of first delimiter (plus 1 for the "_" appended) ends
+        if(first==std::string::npos || last==std::string::npos){
+            ATH_MSG_DEBUG("Could not extract "<<field<<" from "<<fullPhysVolInfoString<<". Skipping");
+            continue;
+        } 
+        std::string strNew = fullPhysVolInfoString.substr(first+field.size()+1,last-(first+field.size()+1));
         index[field] = std::stoi(strNew);
         }
         //now check if we need to split
-        size_t splitPos = (publishedPhysVol.first).find("split_");
+        size_t splitPos = fullPhysVolInfoString.find("split_");
         if(splitPos!=std::string::npos){
-        size_t last = (publishedPhysVol.first).find("_",splitPos+6);//"split_" is 6 characters
-        std::string strNew = (publishedPhysVol.first).substr(splitPos+6,last-(splitPos+6));
-        int splitLevel = std::stoi(strNew);
-        for(int i=0;i<splitLevel;i++){
-          std::string field = "eta_module";//eventually specify in Xml the field to split in?
-          std::pair<std::string,int> extraIndex(field,i);
-          addSplitSensor(typeName,index,extraIndex,0,publishedPhysVol.second);
+            size_t last = fullPhysVolInfoString.find("_",splitPos+6);//"split_" is 6 characters
+            std::string strNew = fullPhysVolInfoString.substr(splitPos+6,last-(splitPos+6));
+            int splitLevel = std::stoi(strNew);
+            for(int i=0;i<splitLevel;i++){
+              std::string field = "eta_module";//eventually specify in Xml the field to split in?
+              std::pair<std::string,int> extraIndex(field,i);
+              addSplitSensor(typeName,index,extraIndex,0,fullPhysVolPointer);
+            }
         }
-        }
-        else addSensor(typeName,index,0,publishedPhysVol.second);
+        else addSensor(typeName,index,0,fullPhysVolPointer);
     }
 }
 
