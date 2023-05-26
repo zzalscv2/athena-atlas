@@ -31,3 +31,5 @@ atlas_add_component( InDetMeasurementUtilities
 			BeamSpotConditionsData
 		     )
 
+atlas_install_scripts( share/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+
