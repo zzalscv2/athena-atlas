@@ -38,7 +38,7 @@ atlas_add_library( BoostedJetTaggersLib
    xAODBase xAODJet xAODTruth xAODTracking JetInterface JetRecLib JetEDM JetSelectorToolsLib JetCalibToolsLib  JetUncertaintiesLib ParticleJetToolsLib PathResolver
    MuonSelectorToolsLib MuonMomentumCorrectionsLib PATCoreLib PATInterfaces FlavorTagDiscriminants
    JetAnalysisInterfacesLib InDetTrackSelectionToolLib InDetTrackSystematicsToolsLib 
-   MuonAnalysisInterfacesLib ${extra_libs} 
+   MuonAnalysisInterfacesLib  TruthUtils ${extra_libs} 
    PRIVATE_LINK_LIBRARIES JetEDM )
 
 if( NOT XAOD_STANDALONE )

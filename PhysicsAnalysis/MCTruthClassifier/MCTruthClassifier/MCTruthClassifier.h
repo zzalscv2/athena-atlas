@@ -20,7 +20,7 @@ CREATED:  Sep 2007
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthVertex.h"
 // For making PID selections easier
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "TruthUtils/MagicNumbers.h"
 
 #ifndef XAOD_ANALYSIS

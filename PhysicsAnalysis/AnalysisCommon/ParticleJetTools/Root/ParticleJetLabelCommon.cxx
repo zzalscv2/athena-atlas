@@ -4,7 +4,7 @@
 
 #include "ParticleJetTools/ParticleJetLabelCommon.h"
 
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 // private internal functions
 namespace {

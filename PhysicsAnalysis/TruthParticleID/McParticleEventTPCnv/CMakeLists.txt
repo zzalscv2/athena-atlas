@@ -11,7 +11,7 @@ atlas_add_tpcnv_library( McParticleEventTPCnv
                          src/*.cxx
                          PUBLIC_HEADERS McParticleEventTPCnv
                          PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                         LINK_LIBRARIES LINK_LIBRARIES  AthenaPoolCnvSvcLib DataModelAthenaPoolLib GeneratorObjects McParticleEvent McParticleKernel
+                         LINK_LIBRARIES LINK_LIBRARIES  TruthUtils AthenaPoolCnvSvcLib DataModelAthenaPoolLib GeneratorObjects McParticleEvent McParticleKernel
                          PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaKernel AtlasHepMCLib GaudiKernel )
 
 atlas_add_dictionary( McParticleEventTPCnvDict

@@ -32,6 +32,9 @@ def fromRunArgs(runArgs):
     # Set the simulator
     if hasattr(runArgs, 'simulator'):
         flags.Sim.ISF.Simulator = SimulationFlavour(runArgs.simulator)
+        allowedSimulators = [SimulationFlavour.AtlasG4, SimulationFlavour.AtlasG4_QS]
+        if flags.Sim.ISF.Simulator not in allowedSimulators:
+            raise RuntimeError("simulator argument not in allowed list of simulators")
     else:
         flags.Sim.ISF.Simulator = SimulationFlavour.AtlasG4
 

@@ -43,6 +43,11 @@ def getG4AtlasAlg(name='G4AtlasAlg', **kwargs):
     from AthenaCommon.CfgGetter import getService
     kwargs.setdefault("UserActionSvc", getService("G4UA::UserActionSvc"))
 
+    from ISF_Config.ISF_jobProperties import ISF_Flags
+    if ISF_Flags.Simulator.isQuasiStable():
+        kwargs.setdefault('InputConverter', 'ISF_LongLivedInputConverter')
+        kwargs.setdefault('QuasiStablePatcher', 'ZeroLifetimePositioner')
+
     ## G4AtlasAlg verbosities (available domains = Navigator, Propagator, Tracking, Stepping, Stacking, Event)
     ## Set stepper verbose = 1 if the Athena logging level is <= DEBUG
     # TODO: Why does it complain that G4AtlasAlgConf.G4AtlasAlg has no "Verbosities" object? Fix.

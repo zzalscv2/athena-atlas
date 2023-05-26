@@ -22,7 +22,8 @@
 #include "G4ParticleTable.hh"
 #include "G4ThreeVector.hh"
 #include "TLorentzVector.h"
-#include "MCUtils/PIDUtils.h"
+
+static inline unsigned short int nth_digit(const int& val,const unsigned short& n) { return (std::abs(val)/(int(std::pow(10,n-1))))%10;} 
 
 // STL includes
 #include <cstdlib>
@@ -164,8 +165,8 @@ void Pythia8ForDecays::fillParticle(const G4Track& aTrack, Pythia8::Event& event
 
 bool Pythia8ForDecays::isGluinoRHadron(int pdgId) const{
   // Checking what kind of RHadron this is based on the digits in its PDGID
-  const unsigned short digitValue_q1 = MCUtils::PID::_digit(MCUtils::PID::Location::nq1,pdgId);
-  const unsigned short digitValue_l = MCUtils::PID::_digit(MCUtils::PID::Location::nl,pdgId);
+  const unsigned short digitValue_q1 = nth_digit(pdgId,4);
+  const unsigned short digitValue_l = nth_digit(pdgId,5);
 
   // Gluino R-Hadrons have the form 109xxxx or 1009xxx
   if (digitValue_l == 9 || (digitValue_l==0 && digitValue_q1 == 9) ){

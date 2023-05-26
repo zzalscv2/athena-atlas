@@ -11,7 +11,13 @@ if hasattr(runArgs, 'useISF') and runArgs.useISF:
     raise RuntimeError("Unsupported configuration! If you want to run with useISF=True, please use Sim_tf.py!")
 
 from ISF_Config.ISF_jobProperties import ISF_Flags
-ISF_Flags.Simulator = 'AtlasG4'
+if hasattr(runArgs, 'simulator'):
+    allowedSimulators = ['AtlasG4', 'AtlasG4_QS']
+    if runArgs.simulator not in allowedSimulators:
+        raise RuntimeError("simulator argument not in allowed list of simulators")
+    ISF_Flags.Simulator.set_Value_and_Lock(runArgs.simulator)
+else:
+    ISF_Flags.Simulator = 'AtlasG4'
 
 ## Simulation flags need to be imported first
 from G4AtlasApps.SimFlags import simFlags

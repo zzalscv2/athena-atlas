@@ -19,11 +19,19 @@
 #include "InDetRawData/InDetRawDataCollection.h"
 #include "InDetRawData/TRT_RDORawData.h"
 #include "InDetRawData/TRT_RDO_Collection.h"
+#include "AthLinks/DeclareIndexingPolicy.h"
+#include "EventContainers/IIdentifiableCont.h"
 
 typedef InDetRawDataContainer<InDetRawDataCollection<TRT_RDORawData> >
         TRT_RDO_Container;
 
+
+typedef EventContainers::IdentifiableCache< InDetRawDataCollection<TRT_RDORawData> > TRT_RDO_Cache;
+
 CLASS_DEF(TRT_RDO_Container,2542,1)
+CONTAINER_IS_IDENTCONT(TRT_RDO_Container)
+
+CLASS_DEF( TRT_RDO_Cache , 183588116, 1 )
 
 // new persistent class
 typedef  ConstDataVector<DataVector<InDetRawDataCollection<TRT_RDORawData> > > TRT_RDO_colvector;

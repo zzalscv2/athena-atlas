@@ -1,15 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// ValidationBarcodeSvc.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #include "BarcodeServices/ValidationBarcodeSvc.h"
 // framework include
 #include "GaudiKernel/IIncidentSvc.h"
 #include "TruthUtils/MagicNumbers.h"
+
 
 /** Constructor **/
 Barcode::ValidationBarcodeSvc::ValidationBarcodeSvc(const std::string& name,ISvcLocator* svc) :
@@ -26,13 +23,10 @@ Barcode::ValidationBarcodeSvc::ValidationBarcodeSvc(const std::string& name,ISvc
   m_doUnderOverflowChecks(true)
 {
   // python properties
-  declareProperty("FirstSecondaryVertexBarcode",  m_firstVertex=HepMC::SIM_BARCODE_THRESHOLD-1                );
-  declareProperty("VertexIncrement"            ,  m_vertexIncrement=-1                 );
-  declareProperty("FirstSecondaryBarcode"      ,  m_firstSecondary=HepMC::SIM_BARCODE_THRESHOLD+1              );
-  declareProperty("SecondaryIncrement"         ,  m_secondaryIncrement=1               );
-  declareProperty("ParticleGenerationIncrement",  m_particleGenerationIncrement=HepMC::SIM_REGENERATION_INCREMENT);
-  declareProperty("BarcodeGenerationOffset"    ,  m_barcodeGenerationOffset=1e8        );
-  declareProperty("DoUnderAndOverflowChecks"   ,  m_doUnderOverflowChecks=true         );
+  declareProperty("VertexIncrement"            ,  m_vertexIncrement);
+  declareProperty("SecondaryIncrement"         ,  m_secondaryIncrement);
+  declareProperty("BarcodeGenerationOffset"    ,  m_barcodeGenerationOffset);
+  declareProperty("DoUnderAndOverflowChecks"   ,  m_doUnderOverflowChecks);
 }
 
 
@@ -105,23 +99,6 @@ Barcode::ParticleBarcode Barcode::ValidationBarcodeSvc::sharedChildBarcode( Barc
 }
 
 
-/** Update the given barcode (e.g. after an interaction) */
-Barcode::ParticleBarcode Barcode::ValidationBarcodeSvc::incrementBarcode( Barcode::ParticleBarcode old,
-                                                                          Barcode::PhysicsProcessCode /* process */)
-{
-  Barcode::ParticleBarcode newBC = old + m_particleGenerationIncrement;
-  // a naive overflow checking based on the fact that particle
-  // barcodes should never be negative
-  if ( m_doUnderOverflowChecks && (newBC < 0))
-    {
-      ATH_MSG_ERROR("ValidationBarcodeSvc::incrementBarcode('" << old << "')"
-                    << " will return a particle barcode of less than 0: "
-                    << newBC << ". Possibly Integer Overflow?");
-    }
-  return (newBC);
-}
-
-
 void Barcode::ValidationBarcodeSvc::registerLargestGenEvtParticleBC( Barcode::ParticleBarcode /* bc */)
 {
 }
@@ -143,13 +120,6 @@ Barcode::ParticleBarcode Barcode::ValidationBarcodeSvc::secondaryParticleBcOffse
 Barcode::VertexBarcode Barcode::ValidationBarcodeSvc::secondaryVertexBcOffset() const
 {
   return m_firstVertex;
-}
-
-
-/** Return the barcode increment for each generation of updated particles */
-Barcode::ParticleBarcode Barcode::ValidationBarcodeSvc::particleGenerationIncrement() const
-{
-  return m_particleGenerationIncrement;
 }
 
 

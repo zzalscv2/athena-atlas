@@ -44,6 +44,16 @@ namespace GeometricSectors {
   static const std::array<std::string, 2> sTgcSize = {"S", "L"};
 }
 
+namespace {
+  struct sTGCeff {
+    std::vector<int>   layerMultiplet;
+    std::vector<float> xPosMultiplet;
+    std::vector<float> yPosMultiplet;
+    std::vector<float> zPosMultiplet;
+    std::vector<float> rPosMultiplet;
+  };
+}
+
 class sTgcRawDataMonAlg: public AthMonitorAlgorithm {
  public:
   sTgcRawDataMonAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -59,6 +69,7 @@ class sTgcRawDataMonAlg: public AthMonitorAlgorithm {
   void fillsTgcLumiblockHistograms(const Muon::sTgcPrepData*, const int lb) const;
   void fillsTgcClusterFromTrackHistograms(const xAOD::TrackParticleContainer*) const;  
   void fillsTgcPadTriggerDataHistograms(const Muon::NSW_PadTriggerDataContainer*, const int lb) const;
+  void fillsTgcEfficiencyHistograms(const xAOD::MuonContainer*, const MuonGM::MuonDetectorManager*) const;
 
   int getSectors(const Identifier& id) const;
   int getLayer(const int multiplet, const int gasGap) const;
@@ -67,9 +78,9 @@ class sTgcRawDataMonAlg: public AthMonitorAlgorithm {
   SG::ReadHandleKey<Muon::sTgcPrepDataContainer> m_sTgcContainerKey{this,"sTgcPrepDataContainerName", "STGC_Measurements"};
   SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detectorManagerKey{this, "DetectorManagerKey", "MuonDetectorManager","Key of input MuonDetectorManager condition data"}; 
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_meTrkKey{this, "METrkContainer", "ExtrapolatedMuonTrackParticles"};
-  SG::ReadHandleKey<Muon::NSW_PadTriggerDataContainer> m_rdoKey{this, "NSW_PadTriggerDataKey", ""};
+  SG::ReadHandleKey<Muon::NSW_PadTriggerDataContainer> m_rdoKey{this, "NSW_PadTriggerDataKey", ""};  
+  SG::ReadHandleKey<xAOD::MuonContainer> m_muonKey{this, "MuonsKey", "Muons"};
 
-
-  Gaudi::Property<unsigned int> m_clusterSizeCut{this, "clusterSizeCut", 3};
+  Gaudi::Property<float> m_cutPt{this, "cutPt", 15000.};
 };    
 #endif

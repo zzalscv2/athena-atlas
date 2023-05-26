@@ -1,35 +1,29 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// LegacyBarcodeSvc.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #include "BarcodeServices/LegacyBarcodeSvc.h"
 // framework include
+#include "TruthUtils/MagicNumbers.h"
 
 
 /** Constructor **/
 Barcode::LegacyBarcodeSvc::LegacyBarcodeSvc(const std::string& name,ISvcLocator* svc) :
   base_class(name,svc),
   m_bitcalculator(new Barcode::BitCalculator()),
-  m_firstVertex(-200001),
+  m_firstVertex(-HepMC::SIM_BARCODE_THRESHOLD-1),
   m_vertexIncrement(-1),
   m_currentVertex(-1),
-  m_firstSecondary(200001),
+  m_firstSecondary(HepMC::SIM_BARCODE_THRESHOLD+1),
   m_secondaryIncrement(1),
   m_currentSecondary(1),
-  m_particleGenerationIncrement(1000000),
+  m_particleGenerationIncrement(HepMC::SIM_REGENERATION_INCREMENT),
   m_doUnderOverflowChecks(true)
 {
   // python properties
-  declareProperty("FirstSecondaryVertexBarcode",  m_firstVertex=-200001                );
-  declareProperty("VertexIncrement"            ,  m_vertexIncrement=-1                 );
-  declareProperty("FirstSecondaryBarcode"      ,  m_firstSecondary=200001              );
-  declareProperty("SecondaryIncrement"         ,  m_secondaryIncrement=1               );
-  declareProperty("ParticleGenerationIncrement",  m_particleGenerationIncrement=1000000);
-  declareProperty("DoUnderAndOverflowChecks"   ,  m_doUnderOverflowChecks=true         );
+  declareProperty("VertexIncrement"            ,  m_vertexIncrement);
+  declareProperty("SecondaryIncrement"         ,  m_secondaryIncrement);
+  declareProperty("DoUnderAndOverflowChecks"   ,  m_doUnderOverflowChecks);
 }
 
 
@@ -143,24 +137,6 @@ Barcode::ParticleBarcode Barcode::LegacyBarcodeSvc::sharedChildBarcode( Barcode:
 }
 
 
-/** Update the given barcode (e.g. after an interaction) */
-Barcode::ParticleBarcode Barcode::LegacyBarcodeSvc::incrementBarcode( Barcode::ParticleBarcode old,
-                                                                      Barcode::PhysicsProcessCode /* process */)
-{
-  Barcode::ParticleBarcode newBC = old + m_particleGenerationIncrement;
-  // a naive overflow checking based on the fact that particle
-  // barcodes should never be negative
-  if ( m_doUnderOverflowChecks && (newBC < 0))
-    {
-      ATH_MSG_DEBUG("LegacyBarcodeSvc::incrementBarcode('" << old << "')"
-                    << " will return a particle barcode of less than 0: "
-                    << newBC << ". Reset to zero.");
-      newBC = Barcode::fUndefinedBarcode;
-    }
-  return newBC;
-}
-
-
 void Barcode::LegacyBarcodeSvc::registerLargestGenEvtParticleBC( Barcode::ParticleBarcode /* bc */) {
 }
 
@@ -180,12 +156,6 @@ Barcode::VertexBarcode Barcode::LegacyBarcodeSvc::secondaryVertexBcOffset() cons
   return m_firstVertex;
 }
 
-
-/** Return the barcode increment for each generation of updated particles */
-Barcode::ParticleBarcode Barcode::LegacyBarcodeSvc::particleGenerationIncrement() const
-{
-  return m_particleGenerationIncrement;
-}
 
 StatusCode Barcode::LegacyBarcodeSvc::resetBarcodes()
 {

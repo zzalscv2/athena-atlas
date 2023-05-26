@@ -29,9 +29,6 @@ def PoolSvcCfg(flags, withCatalogs=False, **kwargs):
 def AthenaPoolCnvSvcCfg(flags, **kwargs):
     acc = PoolSvcCfg(flags)
 
-    # ChronoStatSvc is not reliable in MT jobs
-    kwargs.setdefault('EnableChronoStat', not flags.Trigger.doHLT and flags.Concurrency.NumThreads == 0)
-
     service = CompFactory.AthenaPoolCnvSvc(**kwargs)
     acc.addService(service)
     acc.addService(CompFactory.EvtPersistencySvc("EventPersistencySvc",

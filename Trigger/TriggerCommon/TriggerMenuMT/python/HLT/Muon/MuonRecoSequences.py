@@ -3,7 +3,6 @@
 #
 
 from AthenaCommon.Logging import logging
-from AthenaCommon.GlobalFlags import globalflags
 log = logging.getLogger(__name__)
 
 ### Output data name ###
@@ -445,6 +444,8 @@ def VDVEFMuCBCfg(flags, RoIs, name):
                     ( 'Muon::sTgcPrepDataContainer' , 'StoreGateSvc+STGC_Measurements') ]
   if flags.Input.isMC:
     dataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
+  else:
+    dataObjects += [( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
 
   alg = CompFactory.AthViews.ViewDataVerifier( name = "VDVMuEFCB_"+name,
                                                DataObjects = dataObjects)
@@ -462,7 +463,8 @@ def VDVPrecMuTrkCfg(flags, name):
 
   if not flags.Input.isMC:
     dataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
-                    ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' )]
+                    ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' ),
+                    ( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
 
   alg = CompFactory.AthViews.ViewDataVerifier( name = vdvName,
                                                DataObjects = dataObjects)
@@ -707,11 +709,13 @@ def efmuisoRecoSequence( flags, RoIs, Muons, doMSiso=False ):
                              ( 'xAOD::MuonContainer' , 'StoreGateSvc+IsoViewMuons'+name )]
 
   # Make sure required objects are still available at whole-event level
-  if not globalflags.InputFormat.is_bytestream():
+  if flags.Input.isMC:
     from AthenaCommon.AlgSequence import AlgSequence
     topSequence = AlgSequence()
     viewVerify.DataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
     topSequence.SGInputLoader.Load += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
+  else:
+    viewVerify.DataObjects += [( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
 
   for viewAlg in viewAlgs:
     efmuisoRecoSequence += viewAlg

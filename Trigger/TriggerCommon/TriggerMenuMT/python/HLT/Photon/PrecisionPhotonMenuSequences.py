@@ -2,9 +2,11 @@
 
 # menu components   
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
-from AthenaCommon.CFElements import seqAND
+from AthenaCommon.CFElements import seqAND, parOR
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorPreviousROITool
+from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
+from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
 
 # logger
 from AthenaCommon.Logging import logging
@@ -26,15 +28,30 @@ def precisionPhotonSequence(flags, ion=False):
     precisionPhotonViewsMaker.Views = tag(ion) + "Views"     # Output container which has the view objects
 
     # Configure the reconstruction algorithm sequence
-    from TriggerMenuMT.HLT.Photon.PrecisionPhotonRecoSequences import precisionPhotonRecoSequence
-    (precisionPhotonInViewSequence, sequenceOut) = precisionPhotonRecoSequence(flags, InViewRoIs, ion)
+    import AthenaCommon.CfgMgr as CfgMgr
+    TrigEgammaKeys = getTrigEgammaKeys(ion = ion)    
+    caloClusters = TrigEgammaKeys.precisionPhotonCaloClusterContainer
 
+    ViewVerify = CfgMgr.AthViews__ViewDataVerifier("PrecisionPhotonViewDataVerifier" + tag(ion))
+    ViewVerify.DataObjects = [( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % caloClusters ),
+                              ( 'EgammaRecContainer', 'StoreGateSvc+%s' % TrigEgammaKeys.precisionPhotonSuperClusterCollection),
+                              ( 'CaloCellContainer' , 'StoreGateSvc+CaloCells' ),
+                              ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
+                              ]
+
+    hiInfo = 'HI' if ion is True else ''
+    from TriggerMenuMT.HLT.Photon.PrecisionPhotonRecoSequences import precisionPhotonRecoSequence
+    precisionPhotonSequence = algorithmCAToGlobalWrapper(precisionPhotonRecoSequence,flags, InViewRoIs,'PrecisionPhotonRecoSequence'+hiInfo, ion)
+
+    precisionPhotonInViewSequence = parOR("precisionPhotonInViewSequence"+hiInfo, [ViewVerify, precisionPhotonSequence])
     precisionPhotonViewsMaker.ViewNodeName = precisionPhotonInViewSequence.name()
 
     theSequence = seqAND(tag(ion)+"Sequence", [])
 
     # And now add the the rest which is run isnide the EventView:
     theSequence += [precisionPhotonViewsMaker,precisionPhotonInViewSequence]
+
+    sequenceOut = TrigEgammaKeys.precisionPhotonContainer
 
     return (theSequence, precisionPhotonViewsMaker, sequenceOut)
 
@@ -59,4 +76,5 @@ def precisionPhotonMenuSequence(flags, name,ion=False, is_probe_leg=False):
                          Hypo        = thePrecisionPhotonHypo,
                          HypoToolGen = TrigEgammaPrecisionPhotonHypoToolFromDict,
                          IsProbe     = is_probe_leg)
+
 

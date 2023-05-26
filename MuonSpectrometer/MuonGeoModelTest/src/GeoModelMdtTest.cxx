@@ -125,10 +125,10 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadout
     m_tubePitch = readoutEle->tubePitch();
 
     const Amg::Transform3D& trans{readoutEle->transform()};
-    m_readoutTransform.push_back(trans.translation());
-    m_readoutTransform.push_back(trans.linear()*Amg::Vector3D::UnitX());
-    m_readoutTransform.push_back(trans.linear()*Amg::Vector3D::UnitY());
-    m_readoutTransform.push_back(trans.linear()*Amg::Vector3D::UnitX());
+    m_readoutTransform.push_back(Amg::Vector3D(trans.translation()));
+    m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitX()));
+    m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitY()));
+    m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitX()));
     
     const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
 
@@ -149,10 +149,10 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadout
             if (tube == 1) {
                 const Amg::Transform3D layTransf{readoutEle->transform(tube_id)};
                 m_layTransNumber.push_back(lay);
-                m_layCenter.push_back(layTransf.translation());
-                m_layTransColX.push_back(layTransf.linear()* Amg::Vector3D::UnitX());
-                m_layTransColY.push_back(layTransf.linear()* Amg::Vector3D::UnitY());
-                m_layTransColZ.push_back(layTransf.linear()* Amg::Vector3D::UnitZ());
+                m_layCenter.push_back(Amg::Vector3D(layTransf.translation()));
+                m_layTransColX.push_back(Amg::Vector3D(layTransf.linear()* Amg::Vector3D::UnitX()));
+                m_layTransColY.push_back(Amg::Vector3D(layTransf.linear()* Amg::Vector3D::UnitY()));
+                m_layTransColZ.push_back(Amg::Vector3D(layTransf.linear()* Amg::Vector3D::UnitZ()));
             }
             const Amg::Vector3D roPos = readoutEle->ROPos(tube_id);
             const Amg::Vector3D tubePos = readoutEle->tubePos(tube_id);
@@ -176,10 +176,10 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadout
                 m_layDistTubeNum.push_back(tube);
                 m_layDistPosAlongWire.push_back(l);
                 const Amg::Transform3D layTransf{sagged->transform()};
-                m_layDistCenter.push_back(layTransf.translation());
-                m_layDistColX.push_back(layTransf.linear()* Amg::Vector3D::UnitX());
-                m_layDistColY.push_back(layTransf.linear()* Amg::Vector3D::UnitY());
-                m_layDistColZ.push_back(layTransf.linear()* Amg::Vector3D::UnitZ());               
+                m_layDistCenter.push_back(Amg::Vector3D(layTransf.translation()));
+                m_layDistColX.push_back(Amg::Vector3D(layTransf.linear()* Amg::Vector3D::UnitX()));
+                m_layDistColY.push_back(Amg::Vector3D(layTransf.linear()* Amg::Vector3D::UnitY()));
+                m_layDistColZ.push_back(Amg::Vector3D(layTransf.linear()* Amg::Vector3D::UnitZ()));
             }
         }
     }

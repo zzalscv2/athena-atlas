@@ -47,7 +47,8 @@ StatusCode eFEXTOBEtTool::initialize()
 }
   
 // The main user calls
-StatusCode eFEXTOBEtTool::getegSums(float etaTOB, float phiTOB, int seed, int UnD, 
+StatusCode eFEXTOBEtTool::getegSums(float etaTOB, float phiTOB, int seed, int UnD,
+                              std::vector<unsigned int> &ClusterCellETs, 
                               std::vector<unsigned int> &RetaSums,
                               std::vector<unsigned int> &RhadSums, 
                               std::vector<unsigned int> &WstotSums)
@@ -79,6 +80,9 @@ StatusCode eFEXTOBEtTool::getegSums(float etaTOB, float phiTOB, int seed, int Un
   ATH_CHECK( m_eFEXegAlgoTool->safetyTest() );
   m_eFEXegAlgoTool->setup(tobtable, eFEX, FPGA, fpgaEta);
 
+  // Get ETs of cells making up the ET clusters
+  m_eFEXegAlgoTool->getClusterCells(ClusterCellETs);
+  
   // Get sums from algorithm
   // This will override the seed calculated by the algorithm with the one supplied here
   m_eFEXegAlgoTool->getSums(seed, UnD, RetaSums, RhadSums, WstotSums);

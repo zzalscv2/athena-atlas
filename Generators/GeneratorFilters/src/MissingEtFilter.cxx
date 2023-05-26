@@ -4,7 +4,7 @@
 
 #include "GeneratorFilters/MissingEtFilter.h"
 #include "TruthUtils/HepMCHelpers.h"
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 
 MissingEtFilter::MissingEtFilter(const std::string& name, ISvcLocator* pSvcLocator)

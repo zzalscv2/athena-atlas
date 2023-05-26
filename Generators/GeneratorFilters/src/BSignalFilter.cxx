@@ -23,8 +23,9 @@
 // -----------------------------------------------------------------------------------------------
 
 #include "GeneratorFilters/BSignalFilter.h"
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Vector/LorentzVector.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 #include <sstream>
 
@@ -204,7 +205,7 @@ StatusCode BSignalFilter::filterEvent()
 		                            // including immediate decays of resonances.
                 {
 		  // ** Reject whole event if any of B-hadrons in the event is not decayed **
-		  if( part->status() == 1 || part->status() == 899 ) { acceptEvent = false; }
+		  if( part->status() == 1 || part->status() == HepMC::EVTGENUNDECAYEDSTATUS ) { acceptEvent = false; }
 
 #ifdef HEPMC3
 		  auto  firstParent = part->production_vertex()->particles_in().begin();

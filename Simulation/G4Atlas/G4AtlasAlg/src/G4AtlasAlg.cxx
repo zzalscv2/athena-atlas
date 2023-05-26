@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -101,6 +101,10 @@ StatusCode G4AtlasAlg::initialize ATLAS_NOT_THREAD_SAFE ()
   ATH_CHECK( m_eventInfoKey.initialize() );
 
   ATH_CHECK(m_inputConverter.retrieve());
+
+  if ( not m_qspatcher.empty() ) {
+    ATH_CHECK( m_qspatcher.retrieve() );
+  }
 
   ATH_MSG_DEBUG("End of initialize()");
   return StatusCode::SUCCESS;
@@ -340,14 +344,21 @@ StatusCode G4AtlasAlg::execute()
     return StatusCode::FAILURE;
   }
   ATH_MSG_DEBUG("Found input GenEvent collection " << inputTruthCollection.name() << " in store " << inputTruthCollection.store());
-  // create copy
+  // create the output Truth collection
   SG::WriteHandle<McEventCollection> outputTruthCollection(m_outputTruthCollectionKey);
   ATH_CHECK(outputTruthCollection.record(std::make_unique<McEventCollection>(*inputTruthCollection)));
   if (!outputTruthCollection.isValid()) {
     ATH_MSG_FATAL("Unable to record output GenEvent collection " << outputTruthCollection.name() << " in store " << outputTruthCollection.store());
     return StatusCode::FAILURE;
-
   }
+  // Apply QS patch if required
+  if ( not m_qspatcher.empty() ) {
+    for (HepMC::GenEvent* currentGenEvent : *outputTruthCollection ) {
+      ATH_CHECK(m_qspatcher->applyWorkaround(*currentGenEvent));
+    }
+  }
+
+
   ATH_MSG_DEBUG("Recorded output GenEvent collection " << outputTruthCollection.name() << " in store " << outputTruthCollection.store());
   G4Event *inputEvent{};
   ATH_CHECK( m_inputConverter->convertHepMCToG4Event(*outputTruthCollection, inputEvent, HepMcParticleLink::find_enumFromKey(outputTruthCollection.name())) );
@@ -396,6 +407,13 @@ StatusCode G4AtlasAlg::execute()
   ATH_CHECK(m_fastSimTool->EndOfAthenaEvent());
 
   ATH_CHECK( m_truthRecordSvc->releaseEvent() );
+
+  // Remove QS patch if required
+  if(!m_qspatcher.empty()) {
+    for (HepMC::GenEvent* currentGenEvent : *outputTruthCollection ) {
+      ATH_CHECK(m_qspatcher->removeWorkaround(*currentGenEvent));
+    }
+  }
 
   return StatusCode::SUCCESS;
 }

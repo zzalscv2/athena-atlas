@@ -464,12 +464,6 @@ public:
     ///   }
     /// }    
 
-    /// this abomination didn't work
-    ///  if ( m_pdt ) { 
-    ///      q = McUtils::chargeFromPdgId( track->pdgId(), m_pdt );
-    ///      double q   = track->charge();
-    ///  }
-
     /// how about storing barcode/status/pidg info?
     int author  = track->pdgId();   /// this isn't good!! but it will do for testing 
     int barcode = track->barcode(); /// probably won't work either

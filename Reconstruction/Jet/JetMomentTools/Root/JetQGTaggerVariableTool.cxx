@@ -10,6 +10,7 @@
 #include "PathResolver/PathResolver.h"
 #include "AsgDataHandles/ReadDecorHandle.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
+#include "TruthUtils/MagicNumbers.h"
 
 
 using std::string;
@@ -224,7 +225,7 @@ StatusCode JetQGTaggerVariableTool::decorate(const xAOD::JetContainer& jetCont) 
 	  if( ! (part->status() == 1) ) continue;
 	  // require that the particle type (e.g. production type) be valid (e.g. not primaries)                                                                                                        
 	  ATH_MSG_DEBUG("barcode: " << (part->barcode()) );
-	  if ((part->barcode())>2e5) continue;
+	  if (HepMC::is_simulation_particle(part)) continue;
 	  // pt>500 MeV
 	  ATH_MSG_DEBUG("pt: " << (part->pt()) );
 	  if( ! (part->pt()>500.) )  continue;

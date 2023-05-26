@@ -14,6 +14,7 @@
  */
 #include "ParticleJetTools/JetQuarkLabel.h"
 #include "ParticleJetTools/HadronUtils.h"
+#include "TruthUtils/MagicNumbers.h"
 
 #include "AsgDataHandles/ReadHandle.h"
 #include <algorithm>
@@ -131,7 +132,7 @@ bool JetQuarkLabel::matchJet(const xAOD::Jet& myJet,
 	      }
 	      if ((**thisChild)->pdgId() == pdg) afterFSR = false;
 	    }
-	  } else if ( ((*pitr)->status() == 3 && m_noDoc) || ((*pitr)->status() == 10902) ) {
+	  } else if ( ((*pitr)->status() == 3 && m_noDoc) || ((*pitr)->status() == HepMC::SPECIALSTATUS) ) {
 	    // do not label by documentary quark 
 	    // (New 27/06/2006, for PYTHIA, with new Shower and maybe dependant on MSTP(128). What a mess !)
 	    afterFSR = false;

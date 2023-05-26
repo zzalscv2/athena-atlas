@@ -187,6 +187,15 @@ def update_nested_dict(d, u):
          d[k] = v
    return d
 
+def get_run_mode(jobOptions):
+   """Deduce the running mode: (legacy) 'JO', 'CA' or 'JSON'"""
+   if jobOptions.endswith('.json'):  # json file
+      return 'JSON'
+   elif jobOptions.endswith('.py'):  # regular job options
+      return 'JO'
+   else:                             # ComponentAccumulator
+      return 'CA'
+
 def HLTMPPy_cfgdict(args):
    """Create the configuration dictionary as expected by HLTMPPy as defined in
    https://gitlab.cern.ch/atlas-tdaq-software/HLTMPPU/blob/master/python/HLTMPPy/runner.py"""
@@ -284,13 +293,10 @@ def HLTMPPy_cfgdict(args):
          'logLevels' : args.log_level
       })
       # Python bootstrap depending on file type
-      if args.jobOptions.endswith('.json'):  # json file
-         cdict['trigger']['pythonSetupFile'] = 'TrigPSC.TrigPSCPythonDbSetup'
-      elif args.jobOptions.endswith('.py'):  # regular job options
-         cdict['trigger']['pythonSetupFile'] = 'TrigPSC/TrigPSCPythonSetup.py'
-      else:                                  # ComponentAccumulator
-         cdict['trigger']['pythonSetupFile'] = 'TrigPSC.TrigPSCPythonCASetup'
-
+      bootstrap = {'JSON' : 'TrigPSC.TrigPSCPythonDbSetup',
+                   'JO'   : 'TrigPSC/TrigPSCPythonSetup.py',
+                   'CA'   : 'TrigPSC.TrigPSCPythonCASetup'}
+      cdict['trigger']['pythonSetupFile'] = bootstrap[get_run_mode(args.jobOptions)]
 
    else:
       cdict['trigger'].update({
@@ -444,6 +450,14 @@ def main():
 
    if args.loop_files and args.number_of_events<0:
       log.warning("Looping over files without specifying number of events will run forever!")
+
+   # In CA-mode we always dump and reload:
+   if args.jobOptions and get_run_mode(args.jobOptions)=='CA':
+      args.dump_config_reload = True
+
+   # the '-i' command line option only becomes active after the reload:
+   if args.dump_config_reload:
+      args.interactive = False
 
    # Update args and set athena flags
    from TrigPSC import PscConfig
