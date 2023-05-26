@@ -9,7 +9,7 @@ atlas_subdir( ISF_Tools )
 atlas_add_component( ISF_Tools
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES GaudiKernel AthenaBaseComps AtlasDetDescr BarcodeInterfacesLib GeneratorObjects ISF_Event ISF_InterfacesLib TrackRecordLib )
+                     LINK_LIBRARIES GaudiKernel AthenaBaseComps AtlasDetDescr BarcodeInterfacesLib GeneratorObjects ISF_Event ISF_InterfacesLib TrackRecordLib  TruthUtils)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
