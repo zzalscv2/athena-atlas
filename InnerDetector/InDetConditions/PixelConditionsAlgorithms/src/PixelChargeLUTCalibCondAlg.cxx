@@ -170,7 +170,7 @@ StatusCode PixelChargeLUTCalibCondAlg::execute(const EventContext& ctx) const {
             const auto &calibArray = data.at(j);
             if (!calibArray.empty()) {
               // new charge calibration for RUN-3
-              if (p_design->getReadoutTechnology() == InDetDD::PixelReadoutTechnology::FEI4 && !(element->isDBM())) {
+              if ((p_design->getReadoutTechnology() == InDetDD::PixelReadoutTechnology::FEI4 && !(element->isDBM())) || (m_useLUTRD53 && p_design->getReadoutTechnology() == InDetDD::PixelReadoutTechnology::RD53)) {
                 if (calibArray.size() != FEStringSize) {
                   ATH_MSG_FATAL("Parameter size is not consistent(" << FEStringSize << ") " << calibArray.size() << " at (i,j)=(" <<  moduleHash << "," << j << ")");
                   return StatusCode::FAILURE;
