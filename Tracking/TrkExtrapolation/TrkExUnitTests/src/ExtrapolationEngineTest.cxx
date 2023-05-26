@@ -66,6 +66,7 @@ Trk::ExtrapolationEngineTest::ExtrapolationEngineTest(const std::string& name, I
   m_sensitiveCenterPosY(nullptr),
   m_sensitiveCenterPosZ(nullptr),
   m_sensitiveCenterPosR(nullptr),
+  m_sensitiveCenterPosPhi(nullptr),
   m_materialThicknessInX0(0.),
   m_materialThicknessInL0(0.),
   m_materialThicknessZARho(0.),
@@ -173,6 +174,7 @@ StatusCode Trk::ExtrapolationEngineTest::finalize() {
   delete m_sensitiveCenterPosY;
   delete m_sensitiveCenterPosZ;
   delete m_sensitiveCenterPosR;
+  delete m_sensitiveCenterPosPhi;
   delete m_sensitiveLocalPosX;
   delete m_sensitiveLocalPosY;
   delete m_sensitiveLocalPosR;
@@ -323,6 +325,7 @@ StatusCode Trk::ExtrapolationEngineTest::bookTree() {
     m_sensitiveCenterPosY      = new std::vector< float >;
     m_sensitiveCenterPosZ      = new std::vector< float >;
     m_sensitiveCenterPosR      = new std::vector< float >;
+    m_sensitiveCenterPosPhi    = new std::vector< float >;
     m_sensitiveLocalPosX       = new std::vector< float >;
     m_sensitiveLocalPosY       = new std::vector< float >;
     m_sensitiveLocalPosR       = new std::vector< float >;
@@ -346,6 +349,7 @@ StatusCode Trk::ExtrapolationEngineTest::bookTree() {
     m_tree->Branch("SensitiveCenterPosY"  ,  m_sensitiveCenterPosY);
     m_tree->Branch("SensitiveCenterPosZ"  ,  m_sensitiveCenterPosZ);
     m_tree->Branch("SensitiveCenterPosR"  ,  m_sensitiveCenterPosR);
+    m_tree->Branch("SensitiveCenterPosPhi", m_sensitiveCenterPosPhi);
     m_tree->Branch("SensitiveLocalPosX"   ,  m_sensitiveLocalPosX);
     m_tree->Branch("SensitiveLocalPosY"   ,  m_sensitiveLocalPosY);
     m_tree->Branch("SensitiveLocalPosR"   ,  m_sensitiveLocalPosR);

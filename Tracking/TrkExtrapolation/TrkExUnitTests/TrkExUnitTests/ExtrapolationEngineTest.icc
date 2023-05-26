@@ -90,6 +90,7 @@ template < class T, class P > StatusCode Trk::ExtrapolationEngineTest::runTestT(
       m_sensitiveCenterPosY->clear();
       m_sensitiveCenterPosZ->clear();
       m_sensitiveCenterPosR->clear();
+      m_sensitiveCenterPosPhi->clear();
       m_sensitiveLocalPosX->clear();
       m_sensitiveLocalPosY->clear();
       m_sensitiveLocalPosR->clear();
@@ -376,6 +377,7 @@ template < class T, class P > StatusCode Trk::ExtrapolationEngineTest::fillStepI
           m_sensitiveCenterPosY->push_back(parameters->associatedSurface().associatedDetectorElement()->center().y());
           m_sensitiveCenterPosZ->push_back(parameters->associatedSurface().associatedDetectorElement()->center().z());
           m_sensitiveCenterPosR->push_back(parameters->associatedSurface().associatedDetectorElement()->center().perp());
+          m_sensitiveCenterPosPhi->push_back(parameters->associatedSurface().associatedDetectorElement()->center().phi());
           
           bool isHGTD = false;
           if (m_idHelper->is_pixel(id)) {

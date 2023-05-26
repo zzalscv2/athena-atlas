@@ -178,6 +178,7 @@ namespace Trk {
        std::vector< float >*                        m_sensitiveCenterPosY;
        std::vector< float >*                        m_sensitiveCenterPosZ;
        std::vector< float >*                        m_sensitiveCenterPosR;
+       std::vector< float >*                        m_sensitiveCenterPosPhi;
        std::vector< float >*                        m_sensitiveLocalPosR = nullptr;
        std::vector< float >*                        m_sensitiveLocalPosPhi = nullptr;
        std::vector< int >*                          m_sensitiveDetector = nullptr;
