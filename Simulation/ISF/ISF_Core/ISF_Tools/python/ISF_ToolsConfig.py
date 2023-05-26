@@ -47,8 +47,6 @@ def MC12EntryLayerFilterCfg(flags, name="ISF_MC12EntryLayerFilter", **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("AllowOnlyDefinedBarcodes", True)
     kwargs.setdefault("AllowOnlyLegacyPrimaries", False)
-    kwargs.setdefault("LegacyParticleGenerationIncrement", 1000000)
-    kwargs.setdefault("LegacyFirstSecondaryBarcode", 200001)
     acc.setPrivateTools(CompFactory.ISF.GenericBarcodeFilter(name, **kwargs))
     return acc
 
