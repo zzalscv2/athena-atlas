@@ -118,8 +118,8 @@ _knownHistos = [
     HistoSpec('Jvt', (70, -0.2, 1.2), title='Jet JVT;JVT;Entries',  ),
     HistoSpec('JVFCorr', (120, -1.2, 1.2), title='Jet JVT; JVFCorr;Entries', ),
     HistoSpec('JvtRpt', (75, 0, 1.5), title='Jet JVT Rpt; JVTRpt;Entries', ),
-    HistoSpec('EM3Frac', (50,-0.1,1.0), title="EM3 fraction;EM3 fraction;Entries"),
-    HistoSpec('Tile0Frac', (50,-0.1,1.0), title="Tile0 fraction;Tile0 fraction;Entries"),
+    HistoSpec('EM3Frac', (50,-0.1,1.0), title='EM3 fraction;EM3 fraction;Entries'),
+    HistoSpec('Tile0Frac', (50,-0.1,1.0), title='Tile0 fraction;Tile0 fraction;Entries'),
 
 
     HistoSpec('GhostMuonSegmentCount', (60, 0, 60), title='Number of associated muon segments;Number;', xvar=VarSpec('GhostMuonSegmentCount','int')),
@@ -209,8 +209,8 @@ _knownHistos = [
 
     HistoSpec('Charge', (100, -2, 2), title='Charge;Charge;', ),
 
-    HistoSpec('DetectorEta', (100,-5,5), title="DetectorEta;Detector #eta;Entries" ), 
-    HistoSpec('ActiveArea', (80,0,0.8), title="ActiveArea;Active Area;Entries" ), 
+    HistoSpec('DetectorEta', (100,-5,5), title='DetectorEta;Detector #eta;Entries' ),
+    HistoSpec('ActiveArea', (80,0,0.8), title='ActiveArea;Active Area;Entries' ),
     HistoSpec('ActiveArea15', (80, 0, 1.5), title='Active Area;Active Area;Entries', xvar='ActiveArea'),
 
     HistoSpec('PullPhi', (100, -6.3, 6.3), title='PullPhi;PullPhi;', ),
