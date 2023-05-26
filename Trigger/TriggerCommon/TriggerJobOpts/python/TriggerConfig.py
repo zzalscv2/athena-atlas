@@ -684,23 +684,27 @@ def triggerRunCfg( flags, menu=None ):
 
 def triggerIDCCacheCreatorsCfg(flags, seqName = None):
     """
-    Configures IDC cache loading, for now unconditionally, may make it menu dependent in future
+    Configures IDC cache loading
+    Returns: CA
     """
     acc = ComponentAccumulator(seqName)
-    from MuonConfig.MuonBytestreamDecodeConfig import MuonCacheCfg
-    acc.merge( MuonCacheCfg(flags), sequenceName = seqName )
 
-    from MuonConfig.MuonRdoDecodeConfig import MuonPrdCacheCfg
-    acc.merge( MuonPrdCacheCfg(flags), sequenceName = seqName )
+    if flags.Trigger.doMuon:
+        from MuonConfig.MuonBytestreamDecodeConfig import MuonCacheCfg
+        acc.merge( MuonCacheCfg(flags), sequenceName = seqName )
 
-    from TrigInDetConfig.TrigInDetConfig import InDetIDCCacheCreatorCfg
-    acc.merge( InDetIDCCacheCreatorCfg(flags), sequenceName = seqName )
+        from MuonConfig.MuonRdoDecodeConfig import MuonPrdCacheCfg
+        acc.merge( MuonPrdCacheCfg(flags), sequenceName = seqName )
+
+    if flags.Trigger.doID:
+        from TrigInDetConfig.TrigInDetConfig import InDetIDCCacheCreatorCfg
+        acc.merge( InDetIDCCacheCreatorCfg(flags), sequenceName = seqName )
 
     return acc
 
 def triggerPostRunCfg(flags):
     """
-    Configures components needed for processing trigger informatin in Raw/ESD step
+    Configures components needed for processing trigger information in RAW/ESD step
     Returns: ca only
     """
     acc = ComponentAccumulator()
