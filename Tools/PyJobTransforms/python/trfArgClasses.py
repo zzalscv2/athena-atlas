@@ -1224,14 +1224,26 @@ class argFile(argList):
             # Need to ensure that "nprocs" is not passed to merger
             # and prevent multiple '--threads' options when there are multiple sub-steps in 'athenopts'
             for subStep in myargdict['athenaopts'].value:
+                hasNprocs = False
+                hasNthreads = False
                 for opt in myargdict['athenaopts'].value[subStep]:
                     if opt.startswith('--nprocs'):
+                        hasNprocs = True
                         continue
                     # Keep at least one '--threads'
                     elif opt.startswith('--threads'):
+                        hasNthreads = True
                         if opt in newopts:
                             continue
                     newopts.append(opt)
+                # If we have hybrid MP+MT job make sure --threads is not passed to merger
+                if hasNprocs and hasNthreads:
+                    tmpopts = []
+                    for opt in newopts:
+                        if opt.startswith('--threads'):
+                            continue
+                        tmpopts.append(opt)
+                    newopts = tmpopts
             myargdict['athenaopts'] = argSubstepList(newopts, runarg=False)
         return myargdict
 
