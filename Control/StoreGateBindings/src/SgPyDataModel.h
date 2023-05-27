@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATEBINDINGS_SGPYDATAMODEL_H
@@ -248,11 +248,7 @@ namespace SG {
         if ( alias ) {
           tp = alias;
         } else {
-#if PY_VERSION_HEX < 0x03000000
-          tp = PyString_FromString(cpp_tp.c_str());
-#else
           tp = PyUnicode_FromString(cpp_tp.c_str());
-#endif
         }
         PyDict_SetItem(m_clids, clid, tp);
         // reverse look-up
