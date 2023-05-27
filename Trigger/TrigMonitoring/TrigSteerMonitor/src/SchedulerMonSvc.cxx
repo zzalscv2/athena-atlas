@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SchedulerMonSvc.h"
@@ -61,8 +61,8 @@ StatusCode SchedulerMonSvc::startMonitoring() {
   }
 
   // Get the number of threads and slots
-  int numThreads = std::stoi( SmartIF<IProperty>(m_scheduler)->getProperty("ThreadPoolSize").toString() );
-  int numSlots = std::stoi( serviceLocator()->service("EventDataSvc").as<IProperty>()->getProperty("NSlots").toString() );
+  const int numThreads = std::stoi( SmartIF<IProperty>(m_scheduler)->getProperty("ThreadPoolSize").toString() );
+  const int numSlots = std::stoi( serviceLocator()->service("EventDataSvc").as<IProperty>()->getProperty("NSlots").toString() );
 
   // Flag the monitoring as running (prevents going past this point twice)
   if (bool expected = false; not m_running.compare_exchange_strong(expected, true)) {
@@ -71,7 +71,8 @@ StatusCode SchedulerMonSvc::startMonitoring() {
   }
 
   // Construct the callback and pass it to the scheduler monitoring API
-  auto monCallback = [this, &numThreads, &numSlots](IScheduler::OccupancySnapshot snap) -> void {
+  // Note: capture by value as this lambda is called from outside the scope of this method
+  auto monCallback = [this, numThreads, numSlots](IScheduler::OccupancySnapshot snap) -> void {
     auto monTime = Monitored::Timer("TIME_monCallback");
     // Calculate and update snap counters
     const ClockType::duration wallTime = snap.time - m_startTime;
