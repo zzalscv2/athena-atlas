@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATEBINDINGS_ATHENAPYROOT_H
@@ -15,18 +15,6 @@
 #include "CPyCppyy/PyException.h"
 #ifndef ROOT_TPyException
 # define ROOT_TPyException 1 /* there was a typo in TPyException-v20882 */
-#endif
-
-// fixes 'dereferencing type-punned pointer will break strict-aliasing rules'
-#if PY_VERSION_HEX < 0x03000000
-#ifdef Py_True
-#undef Py_True
-#define Py_True ( (PyObject*)(void*)&_Py_TrueStruct )
-#endif
-#ifdef Py_False
-#undef Py_False
-#define Py_False ( (PyObject*)(void*)&_Py_ZeroStruct )
-#endif
 #endif
 
 #define CPPInstance_ASVOIDPTR(o) (TPython::CPPInstance_AsVoidPtr(o))
