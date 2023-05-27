@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_IMUONTESTERBRANCH_H
 #define MUONTESTER_IMUONTESTERBRANCH_H
@@ -12,10 +12,10 @@
 #include <memory>
 #include <string>
 #include <vector>
-class MuonTesterTree;
 
-// Interface classes
+class TTree;
 
+namespace MuonVal {
 /// Most basic interface class used by the MuonTester tree
 class IMuonTesterBranch {
 public:
@@ -32,7 +32,6 @@ public:
     ///     --> return false  if the branch has already been defined or
     ///         the inclusion of the branch to the tree failed
     ///         or the name of the branch is empty
-
     virtual bool init() = 0;
     ///     Returns the name of the branch
     virtual std::string name() const = 0;
@@ -40,6 +39,10 @@ public:
     using DataDependency = SG::VarHandleKey*;
     /// Returns a vector of all Event data dependencies needed by the Branch to work
     virtual std::vector<DataDependency> data_dependencies() = 0;
+
+    /// Returns the pointer to the underlying TTree object
+    virtual TTree* tree() = 0;
+    virtual const TTree* tree() const = 0;
 
 };
 
@@ -69,4 +72,5 @@ public:
     virtual void operator+=(const xAOD::IParticle& p) = 0;
     virtual ~IParticleDecorationBranch() = default;
 };
+}
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONSCALARBRANCH_H
 #define MUONTESTER_MUONSCALARBRANCH_H
@@ -7,6 +7,7 @@
 #include <MuonTesterTree/MuonTesterBranch.h>
 /// Implementation to save simple Scalar variables to the Tree. Satisfies all properties of the
 /// common interface and inherits from the MuonTesterBranch class to make use of the addToTree method
+namespace MuonVal {
 class MuonTesterTree;
 template <class T> class ScalarBranch : public MuonTesterBranch, virtual public IMuonTesterBranch {
 public:
@@ -48,6 +49,6 @@ private:
 };
 
 template <typename T> std::ostream& operator<<(std::ostream& out, const ScalarBranch<T>& B);
-
+}
 #include <MuonTesterTree/ScalarBranch.icc>
 #endif

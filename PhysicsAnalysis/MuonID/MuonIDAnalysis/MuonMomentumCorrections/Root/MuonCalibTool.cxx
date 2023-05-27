@@ -499,7 +499,6 @@ namespace CP
         auto ME = MCP::TrackCalibObj(&inTrk,   MCP::TrackType::ME, charge, year, isData);
 
         MCP::MuonObj muonObj{CB,ID,ME};
-
         return muonObj;
     }
 

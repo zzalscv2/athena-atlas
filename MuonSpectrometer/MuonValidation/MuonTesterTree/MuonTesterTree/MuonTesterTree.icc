@@ -1,39 +1,74 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONTESTERTREE_IXX
 #define MUONTESTER_MUONTESTERTREE_IXX
 #include <MuonTesterTree/MuonTesterTree.h>
+namespace MuonVal {
 template <typename T> VectorBranch<T>& MuonTesterTree::newVector(const std::string& b_name) {
     if (!addBranch(std::make_shared<VectorBranch<T>>(*this, b_name))) {
         throw std::runtime_error("Failed to create vector branch " + b_name);
     }
-    std::shared_ptr<VectorBranch<T>> b = get_branch<VectorBranch<T>>(b_name);
+    std::shared_ptr<VectorBranch<T>> b = getBranch<VectorBranch<T>>(b_name);
     return *b;
 }
 template <typename T> ScalarBranch<T>& MuonTesterTree::newScalar(const std::string& b_name) {
     if (!addBranch(std::make_shared<ScalarBranch<T>>(*this, b_name))) {
         throw std::runtime_error("Failed to create scalar branch " + b_name);
     }
-    std::shared_ptr<ScalarBranch<T>> b = get_branch<ScalarBranch<T>>(b_name);
+    std::shared_ptr<ScalarBranch<T>> b = getBranch<ScalarBranch<T>>(b_name);
     return *b;
 }
 template <typename T> MatrixBranch<T>& MuonTesterTree::newMatrix(const std::string& b_name) {
     if (!addBranch(std::make_shared<MatrixBranch<T>>(*this, b_name))) {
         throw std::runtime_error("Failed to create matrix branch " + b_name);
     }
-    std::shared_ptr<MatrixBranch<T>> b = get_branch<MatrixBranch<T>>(b_name);
+    std::shared_ptr<MatrixBranch<T>> b = getBranch<MatrixBranch<T>>(b_name);
     return *b;
 }
+
+template <typename T> VectorBranch<T>& MuonTesterTree::newVector(const std::string& b_name, const T def_val) {
+    if (!addBranch(std::make_shared<VectorBranch<T>>(*this, b_name, def_val))) {
+        throw std::runtime_error("Failed to create vector branch " + b_name);
+    }
+    std::shared_ptr<VectorBranch<T>> b = getBranch<VectorBranch<T>>(b_name);
+    return *b;
+}
+template <typename T> ScalarBranch<T>& MuonTesterTree::newScalar(const std::string& b_name, const T def_val) {
+    if (!addBranch(std::make_shared<ScalarBranch<T>>(*this, b_name, def_val))) {
+        throw std::runtime_error("Failed to create scalar branch " + b_name);
+    }
+    std::shared_ptr<ScalarBranch<T>> b = getBranch<ScalarBranch<T>>(b_name);
+    return *b;
+}
+template <typename T> MatrixBranch<T>& MuonTesterTree::newMatrix(const std::string& b_name, const T def_val) {
+    if (!addBranch(std::make_shared<MatrixBranch<T>>(*this, b_name, def_val))) {
+        throw std::runtime_error("Failed to create matrix branch " + b_name);
+    }
+    std::shared_ptr<MatrixBranch<T>> b = getBranch<MatrixBranch<T>>(b_name);
+    return *b;
+}
+template <typename T> SetBranch<T>& MuonTesterTree::newSet(const std::string& b_name) {
+    if (!addBranch(std::make_shared<SetBranch<T>>(*this, b_name))) {
+        throw std::runtime_error("Failed to create matrix branch " + b_name);
+    }
+    std::shared_ptr<SetBranch<T>> b = getBranch<SetBranch<T>>(b_name);
+    return *b;
+}
+
 template <typename T> T& MuonTesterTree::newBranch(std::shared_ptr<T> br) {
     if (!addBranch(br)) { throw std::runtime_error("Failed to create generic branch " + br->name()); }
-    br = get_branch<T>(br->name());
+    br = getBranch<T>(br->name());
     return *br;
 }
-template <class T> std::shared_ptr<T> MuonTesterTree::get_branch(const std::string& br_name) const {
+template <class T> std::shared_ptr<T> MuonTesterTree::getBranch(const std::string& br_name) const {
     for (const auto& br : m_branches) {
         if (br->name() == br_name) return std::dynamic_pointer_cast<T>(br);
     }
+    for (const FriendTreePtr& friend_tree : getFriends()) {
+        std::shared_ptr<T> br = friend_tree->getBranch<T>(br_name);
+        if (br) return br;
+     }
     return nullptr;
 }
 
@@ -41,13 +76,15 @@ template <class OWNER,
           typename >
 StatusCode MuonTesterTree::init(OWNER* instance) {
     ATH_CHECK(init(instance->histSvc()));
-    unsigned int counter{0};
-    for (auto& ev : m_dependencies) {    
-        auto p = instance->declareProperty( "DataDep_"+name()+"nmuber_"+ std::to_string(counter), *ev);
-        p->template setOwnerType<OWNER>();   
-        ++counter;        
+    for ( ; m_depCounter < m_dependencies.size(); ++m_depCounter ){
+        auto p = instance->declareProperty( "DataDep_"+name()+"No"+ std::to_string(m_depCounter), 
+                                            *m_dependencies[m_depCounter]);
+        p->template setOwnerType<OWNER>(); 
     }
-    m_dependencies.clear();
+    for (const FriendTreePtr& friend_tree : getFriends()) {
+        ATH_CHECK(friend_tree->init(instance));
+    }   
     return StatusCode::SUCCESS;
+}
 }
 #endif

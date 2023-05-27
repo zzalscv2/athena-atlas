@@ -104,13 +104,6 @@ if "useHfor" not in dir() or useHfor:
         from TruthD3PDMaker.HforD3PDObject import HforD3PDObject
         alg += HforD3PDObject(0,'HforInfo')
 
-        # Configure the Hfor tool
-        from AthenaCommon.AppMgr import ToolSvc
-        from HforTool.HforToolConf import HforTool
-        ToolSvc += HforTool("HforTool")
-        ToolSvc.HforTool.RemovalSchema = "jetbased"
-        ToolSvc.HforTool.SampleType = hforSampleType
-
 
 #--------------------------------------------------------------------------
 # Copy EventInfo into D3PD

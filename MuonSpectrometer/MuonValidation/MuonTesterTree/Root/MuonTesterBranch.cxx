@@ -13,6 +13,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 #define SET_BRANCHSTRING(theType, thestring) \
     template <> std::string ArrayBranch<theType>::tree_data_type() const { return thestring; }
+namespace MuonVal {
 SET_BRANCHSTRING(Char_t, "/B")
 SET_BRANCHSTRING(std::string, "/C")
 SET_BRANCHSTRING(UChar_t, "/b")
@@ -27,7 +28,6 @@ SET_BRANCHSTRING(ULong64_t, "/l")
 SET_BRANCHSTRING(Float_t, "/F")
 SET_BRANCHSTRING(Double_t, "/D")
 SET_BRANCHSTRING(Bool_t, "/o")
-#undef SET_BRANCHSTRING
 
 MuonTesterBranch::MuonTesterBranch(MuonTesterTree& tree, const std::string& br_name) : MuonTesterBranch(tree.tree(), br_name) {
     m_parent = &tree;
@@ -54,10 +54,11 @@ std::string MuonTesterBranch::eraseWhiteSpaces(const std::string& In) {
     out.erase(std::remove_if(out.begin(), out.end(), isspace), out.end());
     return out;
 }
- std::vector<MuonTesterBranch::DataDependency> MuonTesterBranch::data_dependencies() { return m_dependencies;}
+std::vector<MuonTesterBranch::DataDependency> MuonTesterBranch::data_dependencies() { return m_dependencies;}
 
 template <> bool& VectorBranch<bool>::get(size_t) {
     throw std::runtime_error("For boolean branches the get() operator is cumbersome");
     return m_default;
 }
-
+}
+#undef SET_BRANCHSTRING
