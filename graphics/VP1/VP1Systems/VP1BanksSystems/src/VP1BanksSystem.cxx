@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1BanksSystems/VP1BanksSystem.h"
@@ -124,12 +124,12 @@ void VP1BanksSystem::refreshList()
   VP1SGContentsHelper sgcont(this,m_d->useDetStore());
 
   int i(0);
-  foreach (CLID id, sgcont.getPossibleCLIDs()) {
+  for (CLID id : sgcont.getPossibleCLIDs()) {
     QStringList keys = sgcont.getKeys(id);
     if (!keys.isEmpty()) {
       QString typeName = m_d->idToName(id);
       QString idstr = QString::number(id);
-      foreach (QString key,keys) {
+      for (QString key : keys) {
 	entry_key << key;
 	entry_type << typeName;
 	entry_id << idstr;
