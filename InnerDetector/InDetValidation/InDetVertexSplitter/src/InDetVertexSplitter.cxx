@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -181,7 +181,7 @@ StatusCode InDet::InDetVertexSplitter::split_vertices() {
 
   if (m_savetpb and tpbTES){
     //we loop over that list
-    for (const auto & tpb: *tpbTES){
+    for (const Rec::TrackParticle* tpb: *tpbTES){
       const Trk::TrackParameters* trkPerigee = &(tpb->definingParameters());
       bool trackmatched = false;
       //we compare it to the tracks already associated with vertices
@@ -195,7 +195,7 @@ StatusCode InDet::InDetVertexSplitter::split_vertices() {
       std::stringstream sss;
       std::string oeNameString;
       oeNameString.reserve(20);
-      for (const auto & vtx : *vtxTES){
+      for (const Trk::VxCandidate* vtx : *vtxTES){
         if ( (!m_priOnly || vtx->vertexType() == 1) && (i_vtx < m_maxVtx) ){
           i_vtx++;
           const std::vector<Trk::VxTrackAtVertex*> & vertexTracks = *vtx->vxTrackAtVertex();
