@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1TrkAuxAlgs/VP1TrkInitializer.h"
@@ -84,9 +84,9 @@ void VP1TrkInitializer::initTools(QStringList& toolTypes, QString env)
   QStringList existingTools = availTools.availableTools();
 
 #if QTCORE_VERSION >= 0x050E00
-  foreach (QString key,VP1QtUtils::environmentVariableValue(env).split(';',Qt::SkipEmptyParts))
+  for (QString key : VP1QtUtils::environmentVariableValue(env).split(';',Qt::SkipEmptyParts))
 #else
-  foreach (QString key,VP1QtUtils::environmentVariableValue(env).split(';',QString::SkipEmptyParts))
+  for (QString key : VP1QtUtils::environmentVariableValue(env).split(';',QString::SkipEmptyParts))
 #endif
   {
     if (existingTools.contains(key))
