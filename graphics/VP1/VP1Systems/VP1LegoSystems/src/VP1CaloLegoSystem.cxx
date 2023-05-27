@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1LegoSystems/VP1CaloLegoSystem.h"
@@ -105,7 +105,7 @@ QWidget* VP1CaloLegoSystem::buildController()
   m_clockwork->checkBoxNamesMap.insert(ui.chbxHEC3, "HEC3");
 
   // Populate Check Box Map and connect slots
-  foreach(QCheckBox* cb,m_clockwork->checkBoxNamesMap.keys())
+  for(QCheckBox* cb : m_clockwork->checkBoxNamesMap.keys())
   {
     connect(cb,SIGNAL(toggled(bool)),this,SLOT(checkboxChanged()));
     m_clockwork->checkBoxMap.insert(m_clockwork->checkBoxNamesMap[cb],cb);
