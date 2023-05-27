@@ -40,15 +40,21 @@ namespace CP
 
         } else if (m_calibMode == MuonCalibTool::correctData_IDMS) {
             ATH_MSG_INFO("Data will be corrected for sagitta bias with ID+MS calibration");
+	    if (m_isRun3.value()) ATH_MSG_INFO("Please make sure you are using the correct muon calibration. Please refer to the twiki MCPAnalysisGuidelinesR22");
             m_doDirectCBCalib = false;
             m_applyCorrectionOnData = true;
 
         } else if (m_calibMode == MuonCalibTool::notCorrectData_IDMS) {
             ATH_MSG_INFO("Data will be untouched. Instead an additional systematic will be added with ID+MS calibration");
+	    if (m_isRun3.value()) ATH_MSG_INFO("Please make sure you are using the correct muon calibration. Please refer to the twiki MCPAnalysisGuidelinesR22");
             m_doDirectCBCalib = false;
             m_applyCorrectionOnData = false;
-
         } 
+	else if (m_calibMode == MuonCalibTool::notCorrectData_CB) {
+            ATH_MSG_INFO("Data will be untouched. Instead an additional systematic will be added with CB calibration");
+            m_doDirectCBCalib = true;
+            m_applyCorrectionOnData = false;
+	}
         else if (m_calibMode == MuonCalibTool::userDefined) {
             ATH_MSG_INFO("Using options as provided by the user");
         } 
@@ -56,7 +62,8 @@ namespace CP
             ATH_MSG_FATAL("Invalid  calibration mode: " << m_calibMode << " Allowed modes are correctData_CB("
                                                         << MuonCalibTool::correctData_CB << ") correctData_IDMS ("
                                                         << MuonCalibTool::correctData_IDMS << ") or notCorrectData_IDMS ("
-                                                        << MuonCalibTool::notCorrectData_IDMS << ")");
+                                                        << MuonCalibTool::notCorrectData_IDMS << ") or notCorrectData_CB ("
+                                                        << MuonCalibTool::notCorrectData_CB << ")");
             return StatusCode::FAILURE;
         }
 
@@ -227,12 +234,17 @@ namespace CP
 
     CorrectionCode MuonCalibTool::applyCorrectionTrkOnly(xAOD::TrackParticle &inTrk, const int DetType) const
     {
-                // Convert to the internal object
+        // Convert to the internal object
         MCP::MuonObj muonObj = convertToMuonObj(inTrk, DetType);
 
         // Do Scale and Smearing corrections
         CorrectionCode sgCode = m_MuonIntScaleSmearTool->applyCorrection(muonObj);
         if (sgCode != CorrectionCode::Ok) return sgCode;
+
+        //re-converting the pT to MeV
+        muonObj.ID.calib_pt = muonObj.ID.calib_pt * GeVtoMeV;
+        muonObj.ME.calib_pt = muonObj.ME.calib_pt * GeVtoMeV;
+        muonObj.CB.calib_pt = muonObj.CB.calib_pt * GeVtoMeV;
 
         double res_pt = muonObj.ID.calib_pt;
         if(DetType == MCP::DetectorType::MS) res_pt = muonObj.ME.calib_pt;
@@ -493,6 +505,12 @@ namespace CP
         auto ME = MCP::TrackCalibObj(&inTrk,   MCP::TrackType::ME, charge, year, isData);
 
         MCP::MuonObj muonObj{CB,ID,ME};
+
+        //converting pT into GeV
+        muonObj.ID.calib_pt = muonObj.ID.calib_pt * MeVtoGeV;
+        muonObj.ME.calib_pt = muonObj.ME.calib_pt * MeVtoGeV;
+        muonObj.CB.calib_pt = muonObj.CB.calib_pt * MeVtoGeV;
+
         return muonObj;
     }
 

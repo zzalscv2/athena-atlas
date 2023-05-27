@@ -28,16 +28,13 @@ namespace CP {
     //############################################################################
     //                      IsoCorrectionTestHelper
     //############################################################################
-    MuonTesterTree& IsoCorrectionTestHelper::tree() { return m_tree; }
-    std::string IsoCorrectionTestHelper::name() const { return m_cont_name; }
     bool IsoCorrectionTestHelper::init() { return true; }
     bool IsoCorrectionTestHelper::fill(const EventContext&) { return true; }
-    std::vector<IsoCorrectionTestHelper::DataDependency> IsoCorrectionTestHelper::data_dependencies() {return {}; }
     void IsoCorrectionTestHelper::SetFlowElements(const PflowSet& flows) {m_flows = flows;}
-
-    IsoCorrectionTestHelper::IsoCorrectionTestHelper(MuonTesterTree& outTree, const std::string& ContainerName,
+    IsoCorrectionTestHelper::IsoCorrectionTestHelper(MuonVal::MuonTesterTree& outTree, const std::string& ContainerName,
                                                      const std::vector<std::unique_ptr<IsolationWP>>& WPs) :
-        m_tree(outTree), m_cont_name{ContainerName} {
+        MuonTesterBranch(outTree, ContainerName),
+        m_cont_name{ContainerName} {
         // Retrieve the isolaiton accessors directly from the WP
         for (const std::unique_ptr<IsolationWP>& W : WPs) {
             for (const auto& C : W->conditions()) {
@@ -168,7 +165,7 @@ namespace CP {
     }
 
     StatusCode IsoCorrectionTestHelper::FillIsolationBranches(const xAOD::IParticle* P, const IsoHelperPtr& Acc,
-                                                              VectorBranch<float>& Original, VectorBranch<float>& Corrected) {
+                                                              MuonVal::VectorBranch<float>& Original, MuonVal::VectorBranch<float>& Corrected) {
         if (!Acc) return StatusCode::SUCCESS;
         float IsoValue{-1.};
         if (Acc->getOrignalIsolation(P, IsoValue).code() != CorrectionCode::Ok) return StatusCode::FAILURE;

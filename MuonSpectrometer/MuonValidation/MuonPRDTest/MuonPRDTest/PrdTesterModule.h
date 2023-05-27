@@ -11,6 +11,8 @@
 #include "MuonTesterTree/MuonTesterTreeDict.h"
 #include "StoreGate/ReadCondHandleKey.h"
 namespace MuonPRDTest {
+    using namespace MuonVal;
+    
     class PrdTesterModule : public MuonTesterBranch, public AthMessaging {
     public:
         PrdTesterModule(MuonTesterTree& tree, const std::string& grp_name, bool useCondGeo, MSG::Level msglvl);

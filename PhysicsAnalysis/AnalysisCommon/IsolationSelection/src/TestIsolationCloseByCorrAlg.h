@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef ISOLATIONSELECTION_TESTISOLATIONCLOSEBYCORRATHENAALG_H
@@ -85,7 +85,7 @@ namespace CP {
         ToolHandle<CP::IIsolationCloseByCorrectionTool> m_isoCloseByCorrTool{this, "IsoCloseByCorrTool", ""};
         ToolHandle<CP::IIsolationSelectionTool> m_isoSelectorTool{this, "IsolationSelectionTool", ""};
 
-        MuonTesterTree m_tree{"IsoCorrTest", "/ISOCORRECTION"};
+        MuonVal::MuonTesterTree m_tree{"IsoCorrTest", "/ISOCORRECTION"};
         std::shared_ptr<IsoCorrectionTestHelper> m_ele_helper{nullptr};
         std::shared_ptr<IsoCorrectionTestHelper> m_muo_helper{nullptr};
         std::shared_ptr<IsoCorrectionTestHelper> m_pho_helper{nullptr};

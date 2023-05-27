@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONTESTERBRANCH_H
 #define MUONTESTER_MUONTESTERBRANCH_H
@@ -11,7 +11,7 @@
 ///  --> saves the name of the MuonTree as member and
 ///      provides a generic method to add the data variable
 ///      to the TTree in the initialization stage
-
+namespace MuonVal {
 class MuonTesterTree;
 class MuonTesterBranch : virtual public IMuonTesterBranch {
 public:
@@ -29,8 +29,8 @@ public:
     /// of the addToTree method
     bool initialized() const;
     /// Returns the underlying TTree object
-    TTree* tree();
-    const TTree* tree() const;
+    TTree* tree() override final;
+    const TTree* tree() const override final;
     /// Returns the data dependencies needed by the MuonTesterBranch
     std::vector<DataDependency> data_dependencies() override final;
 
@@ -56,5 +56,6 @@ private:
     bool m_init{false};
     std::vector<DataDependency> m_dependencies{};
 };
+}
 #include <MuonTesterTree/MuonTesterBranch.icc>
 #endif
