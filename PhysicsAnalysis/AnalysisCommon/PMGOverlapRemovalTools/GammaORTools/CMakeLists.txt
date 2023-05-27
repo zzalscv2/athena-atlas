@@ -3,15 +3,11 @@
 # Declare the package name:
 atlas_subdir( GammaORTools )
 
-# External dependencies:
-find_package( Boost )
-
 # Libraries in the package:
 atlas_add_library( GammaORToolsLib
    GammaORTools/*.h Root/*.cxx
    PUBLIC_HEADERS GammaORTools
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} AsgTools xAODTruth MCTruthClassifierLib )
+   LINK_LIBRARIES AsgTools xAODTruth MCTruthClassifierLib TruthUtils)
 
 if( NOT XAOD_STANDALONE )
   atlas_add_component( GammaORTools

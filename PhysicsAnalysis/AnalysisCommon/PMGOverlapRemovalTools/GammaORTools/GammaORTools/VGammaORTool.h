@@ -151,9 +151,6 @@ private:
 
   // CONFIGURATION =================================================
 
-  // Maximum barcode considered for final state particles (exclude particles from Geant)
-  int m_max_barcode;
-
   // Number of leptons expected in process (e.g. 2 for Z+gamma, 1 for W+gamma, 4 for ZZ+gamma)
   // If this is set to a negative number, all possible leptons are considered
   // Per default this includes leptons from unkown origins, so it is more robuts to set a positive value
