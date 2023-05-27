@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_AUXELEMENTBRANCH_H
 #define MUONTESTER_AUXELEMENTBRANCH_H
 
 #include <MuonTesterTree/VectorBranch.h>
-
+namespace MuonVal {
 template <class T> class AuxElementBranch : public VectorBranch<T>, virtual public IAuxElementDecorationBranch {
 public:
     void setAccessor(const std::string& name);
@@ -54,6 +54,6 @@ public:
     void push_back(const xAOD::IParticle* p) override;
     void push_back(const xAOD::IParticle& p) override;
 };
-
+}
 #include <MuonTesterTree/AuxElementBranch.icc>
 #endif

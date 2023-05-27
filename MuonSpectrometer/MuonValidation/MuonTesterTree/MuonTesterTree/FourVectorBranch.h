@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONFOURVECTORBRANCH_H
 #define MUONTESTER_MUONFOURVECTORBRANCH_H
@@ -9,6 +9,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #include <MuonTesterTree/ThreeVectorBranch.h>
 #include <TLorentzVector.h>
 
+namespace MuonVal {
 /// Helper class to store the four-momentum in a TTree using
 /// the Pt, Eta, Phi, E representation
 class PtEtaPhiEBranch : public MuonTesterBranch {
@@ -69,4 +70,5 @@ private:
     VectorBranch<float>& m_z{parent().newVector<float>(name() + (m_mom ? "Pz" : "Z"))};
     VectorBranch<float>& m_t{parent().newVector<float>(name() + (m_mom ? "E" : "T"))};
 };
+}
 #endif

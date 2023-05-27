@@ -23,20 +23,16 @@ NSWPRDValAlg::NSWPRDValAlg(const std::string& name, ISvcLocator* pSvcLocator) : 
 
 StatusCode NSWPRDValAlg::initialize() {
     ATH_MSG_DEBUG("initialize()");
-    // MuonDetectorManager from the conditions store
-    ATH_CHECK(m_DetectorManagerKey.initialize(m_isData));
-    m_tree.addBranch(std::make_unique<EventInfoBranch>(m_tree, !m_isData));
-
-    // MuonDetectorManager from the Detector Store (to be used only at initialize)
-    ATH_CHECK(detStore()->retrieve(m_muonDetMgrDS));
+    unsigned int ev_infomask{EventInfoBranch::writePileUp};
+    if (!m_isData) ev_infomask |= EventInfoBranch::isMC | EventInfoBranch::writeBeamSpot;    
+    m_tree.addBranch(std::make_unique<EventInfoBranch>(m_tree,ev_infomask));
 
     ATH_CHECK(m_idHelperSvc.retrieve());
-    ATH_CHECK(evtStore().retrieve());
+  
     if (m_doTruth) { m_tree.addBranch(std::make_unique<TruthVariables>(m_tree, m_Truth_ContainerName, msgLevel())); }
 
     if (m_doMuEntry) {
-        m_testers.emplace_back(
-            std::make_unique<MuEntryVariables>(evtStore().get(), m_muonDetMgrDS, m_tree.tree(), m_MuEntry_ContainerName, msgLevel()));
+        m_tree.addBranch(std::make_unique<MuEntryVariables>(m_tree, m_MuEntry_ContainerName, msgLevel()));
     }
 
     if (m_doSTGCHit) { m_tree.addBranch(std::make_unique<sTGCSimHitVariables>(m_tree, m_NSWsTGC_ContainerName.value(), msgLevel())); }
@@ -89,8 +85,6 @@ StatusCode NSWPRDValAlg::initialize() {
     }
     if (m_doTGCPRD) { m_tree.addBranch(std::make_unique<TGCPRDVariables>(m_tree, m_TGC_PRDContainerName.value(), msgLevel())); }
 
-    for (std::unique_ptr<ValAlgVariables>& tester : m_testers) { ATH_CHECK(tester->initializeVariables()); }
-
     ATH_MSG_DEBUG("Init TTree");
     ATH_CHECK(m_tree.init(this));
 
@@ -108,23 +102,6 @@ StatusCode NSWPRDValAlg::finalize() {
 StatusCode NSWPRDValAlg::execute() {
     ATH_MSG_DEBUG("execute()");
     const EventContext& ctx = Gaudi::Hive::currentContext();
-
-    // MuonDetectorManager from the detector store for MC
-    const MuonGM::MuonDetectorManager* muonDetMgr = m_muonDetMgrDS;
-    // MuonDetectorManager from the conditions store for data
-    if (m_isData) {
-        SG::ReadCondHandle<MuonGM::MuonDetectorManager> DetectorManagerHandle{m_DetectorManagerKey};
-        muonDetMgr = DetectorManagerHandle.cptr();
-        if (!muonDetMgr) {
-            ATH_MSG_ERROR("Null pointer to the read MuonDetectorManager conditions object");
-            return StatusCode::FAILURE;
-        }
-    }
-
-    for (std::unique_ptr<ValAlgVariables>& tester : m_testers) {
-        ATH_CHECK(tester->fillVariables(muonDetMgr));
-    }
-
     ATH_MSG_DEBUG("Fill TTree");
     if (!m_tree.fill(ctx)) return StatusCode::FAILURE;
 

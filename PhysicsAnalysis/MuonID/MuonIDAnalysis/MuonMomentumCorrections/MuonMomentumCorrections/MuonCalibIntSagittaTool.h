@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCAST_MUONCALIBINTSAGITTATOOL_H
@@ -77,6 +77,8 @@ namespace CP {
         struct ParameterSetSagitta {
             double SagittaRho{0.};
             double SagittaBias{0.};
+            double SagittaGlobal{0.};
+            double SagittaPtExtra{0.};
             double SagittaDataStat{0.};
             double SagittaEtaSlice{0.};
         };

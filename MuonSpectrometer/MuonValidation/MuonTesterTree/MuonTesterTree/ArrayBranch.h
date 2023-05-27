@@ -7,6 +7,8 @@
 #include <MuonTesterTree/IMuonTesterBranch.h>
 #include <TTree.h>
 /// Class to store array like branches into the n-tuples
+
+namespace MuonVal {
 class MuonTesterTree;
 template <class T> class ArrayBranch : public IMuonTesterBranch {
 public:
@@ -32,8 +34,8 @@ public:
     std::vector<DataDependency> data_dependencies() override final;
 
     /// Underlying tree object
-    const TTree* tree() const;
-    TTree* tree();
+    const TTree* tree() const override final;
+    TTree* tree() override final;
     
 
     /// Is the branch initialized
@@ -92,6 +94,6 @@ template <> std::string ArrayBranch<ULong64_t>::tree_data_type() const;
 template <> std::string ArrayBranch<Float_t>::tree_data_type() const;
 template <> std::string ArrayBranch<Double_t>::tree_data_type() const;
 template <> std::string ArrayBranch<Bool_t>::tree_data_type() const;
-
+}
 #include <MuonTesterTree/ArrayBranch.icc>
 #endif

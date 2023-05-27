@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONTHREEVECTORBRANCH_H
 #define MUONTESTER_MUONTHREEVECTORBRANCH_H
@@ -15,6 +15,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 /// Helper class to dump spatial vectors in their x,y,z representation
 /// to the n-tuple
+namespace MuonVal {
 class ThreeVectorBranch : public MuonTesterBranch {
 public:
     ThreeVectorBranch(MuonTesterTree& tree, const std::string& vec_name);
@@ -47,4 +48,5 @@ private:
     VectorBranch<float>& m_y{parent().newVector<float>(name() + "Y")};
     VectorBranch<float>& m_z{parent().newVector<float>(name() + "Z")};
 };
+}
 #endif
