@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////
@@ -150,7 +150,7 @@ void TrackingSurfacesSystem::userPickedNode(SoNode* pickedNode, SoPath * /*picke
 //_____________________________________________________________________________________
 void TrackingSurfacesSystem::userChangedSelection(SoCooperativeSelection*, QSet<SoNode*> nodes, QSet<SoPath*>)
 {
-  foreach (SoNode * node, nodes) {
+  for (SoNode * node : nodes) {
     //Surface pointer:
     if (m_nodeToSurface.find(node)==m_nodeToSurface.end()) {
       message("Error: Does not have surface information for all nodes");
