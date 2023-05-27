@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -112,7 +112,7 @@ void VP1AvailableToolsHelper::addMonitoredType(const QString& mt, const QStringL
 void VP1AvailableToolsHelper::addMonitoredTypes(const QStringList& mts, const QStringList& ignoreList)
 {
   bool added(false);
-  foreach (QString mt, mts) {
+  for (QString mt : mts) {
     m_d->monitoredTypeToIgnoreList[mt] = ignoreList;
     if (!m_d->monitoredTypes.contains(mt)) {
       m_d->monitoredTypes << mt;
@@ -137,7 +137,7 @@ void VP1AvailableToolsHelper::removeMonitoredType(const QString& mt)
 void VP1AvailableToolsHelper::removeMonitoredTypes(const QStringList& mts)
 {
   bool removed(false);
-  foreach (QString mt, mts) {
+  for (QString mt : mts) {
     if (m_d->monitoredTypes.contains(mt)) {
       m_d->monitoredTypes.removeAll(mt);
       m_d->removeIgnoreList(mt);
@@ -169,7 +169,7 @@ QStringList VP1AvailableToolsHelper::Imp::actualCurrentlyAvailableTools()
 {
   QStringList l;
   if (toolsvc) {
-    foreach ( QString tooltype, monitoredTypes ) {
+    for ( QString tooltype : monitoredTypes ) {
       std::vector<std::string> instances;
       instances = toolsvc->getInstances( tooltype.toStdString() );
       if (!silent&&VP1Msg::verbose())
@@ -182,7 +182,7 @@ QStringList VP1AvailableToolsHelper::Imp::actualCurrentlyAvailableTools()
 	QStringList ignorelist = ignoreList(tooltype);
 	if (!ignorelist.isEmpty()) {
 	  bool ignore(false);
-	  foreach (QString ignorepattern, ignorelist) {
+	  for (QString ignorepattern : ignorelist) {
 	    if (QRegExp(ignorepattern,Qt::CaseSensitive,QRegExp::Wildcard).exactMatch(instance)) {
 	      ignore = true;
 	      break;
@@ -219,12 +219,12 @@ void VP1AvailableToolsHelper::update() const
   bool notempty = ! m_d->availableTools.empty();
 
   if (notempty) {
-    foreach (QComboBox* cb, m_d->handledComboBoxes) {
+    for (QComboBox* cb : m_d->handledComboBoxes) {
       cb->clear();
       cb->addItems(m_d->availableTools);
     }
   }
-  foreach (QWidget* w, m_d->handledWidgets) {
+  for (QWidget* w : m_d->handledWidgets) {
     if (w->isEnabled() != notempty)
       w->setEnabled(notempty);
   }
