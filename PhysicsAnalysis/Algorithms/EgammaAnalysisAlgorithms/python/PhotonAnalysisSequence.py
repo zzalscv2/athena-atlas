@@ -142,10 +142,9 @@ def makePhotonCalibrationSequence( seq, dataType,
         alg = createAlgorithm( 'CP::PhotonShowerShapeFudgeAlg',
                                'PhotonShowerShapeFudgeAlg' + postfix )
         addPrivateTool( alg, 'showerShapeFudgeTool',
-                        'ElectronPhotonShowerShapeFudgeTool' )
-        alg.showerShapeFudgeTool.Preselection = 22 # Rel 21
-        alg.showerShapeFudgeTool.FFCalibFile = \
-            'ElectronPhotonShowerShapeFudgeTool/v2/PhotonFudgeFactors.root' # only for rel21
+                            'ElectronPhotonVariableCorrectionTool' )
+        alg.showerShapeFudgeTool.ConfigFile = \
+          'EGammaVariableCorrection/TUNE23/ElPhVariableNominalCorrection.conf'
         seq.append( alg, inputPropName = 'photons', outputPropName = 'photonsOut',
                     stageName = 'calibration',
                     dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNamesOutput"])} )

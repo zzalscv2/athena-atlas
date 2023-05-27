@@ -9,7 +9,6 @@ from xAODEgamma.xAODEgammaParameters import xAOD
 
 import PATCore.ParticleDataType
 
-
 class PhotonCalibrationConfig (ConfigBlock) :
     """the ConfigBlock for the photon four-momentum correction"""
 
@@ -62,10 +61,9 @@ class PhotonCalibrationConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::PhotonShowerShapeFudgeAlg',
                                           'PhotonShowerShapeFudgeAlg' + postfix )
             config.addPrivateTool( 'showerShapeFudgeTool',
-                                   'ElectronPhotonShowerShapeFudgeTool' )
-            alg.showerShapeFudgeTool.Preselection = 22 # Rel 21
-            alg.showerShapeFudgeTool.FFCalibFile = \
-                'ElectronPhotonShowerShapeFudgeTool/v2/PhotonFudgeFactors.root' # only for rel21
+                                    'ElectronPhotonVariableCorrectionTool' )
+            alg.showerShapeFudgeTool.ConfigFile = \
+              'EGammaVariableCorrection/TUNE23/ElPhVariableNominalCorrection.conf'
             alg.photons = config.readName (self.containerName)
             alg.photonsOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')

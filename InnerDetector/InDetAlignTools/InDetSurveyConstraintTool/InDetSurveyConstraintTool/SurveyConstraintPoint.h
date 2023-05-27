@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //--------------------------------------------------------------------------
@@ -21,8 +21,6 @@
 #include "EventPrimitives/EventPrimitives.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include <iostream>
-using std::cout;
-using std::endl;
 
 class SurveyConstraintPoint {
 
