@@ -116,6 +116,7 @@ TClass* objectIsA (PyObject* obj)
       cls = TClass::GetClass (s);
       Py_DECREF(buf);
     }
+    Py_DECREF(attr);
   }
   PyErr_Clear();
   return cls;
