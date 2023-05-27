@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -25,7 +25,7 @@
 QList<VP1StdCollection*> VP1MissingEtTruthHandle::createCollections(IVP1System*sys)
 {
   QList<VP1StdCollection*> l;
-  foreach (QString key, VP1SGContentsHelper(sys).getKeys<MissingEtTruth>()) {
+  for (QString key : VP1SGContentsHelper(sys).getKeys<MissingEtTruth>()) {
     VP1MissingEtTruthHandle * col = new VP1MissingEtTruthHandle(sys,key);
     col->init();
     l << col;

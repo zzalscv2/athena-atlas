@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -104,7 +104,7 @@ VP1CollectionWidget* missingEtController::collWidget() const
 }
 
 void missingEtController::refreshPivots(){
- foreach (VP1MissingEtHandle* handle,m_d->collWidget->collections<VP1MissingEtHandle>()){
+ for (VP1MissingEtHandle* handle : m_d->collWidget->collections<VP1MissingEtHandle>()){
   if(handle)
    handle->refresh();
  }
