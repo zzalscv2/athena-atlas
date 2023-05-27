@@ -43,9 +43,9 @@ namespace ISF {
 
     /** passes through to the private version */
 #ifdef HEPMC3
-    bool pass(const HepMC::ConstGenParticlePtr& particle ) const;
+    virtual bool pass(const HepMC::ConstGenParticlePtr& particle ) const override;
 #else
-    bool pass(const HepMC::GenParticle& particle ) const;
+    virtual bool pass(const HepMC::GenParticle& particle ) const override;
 #endif
 
   private:
