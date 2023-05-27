@@ -163,8 +163,11 @@ class AthConfigFlags(object):
         return hash(str(self._flagdict.items()))
 
     def __getattr__(self, name):
+        # Avoid infinite recursion looking up our own attributes
+        _flagdict = object.__getattribute__(self, "_flagdict")
+
         # First try to get an already loaded flag or category
-        if self.hasFlag(name):
+        if name in _flagdict:
             return self._get(name)
 
         if self.hasCategory(name):
@@ -174,7 +177,7 @@ class AthConfigFlags(object):
         self._loadDynaFlags(name)
 
         # Try again
-        if self.hasFlag(name):
+        if name in _flagdict:
             return self._get(name)
 
         if self.hasCategory(name):

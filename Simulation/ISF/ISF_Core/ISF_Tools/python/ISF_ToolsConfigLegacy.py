@@ -19,8 +19,6 @@ def getMemoryMonitor(name="ISF_MemoryMonitor", **kwargs):
 def getMC12EntryLayerFilter(name="ISF_MC12EntryLayerFilter", **kwargs):
     kwargs.setdefault('AllowOnlyDefinedBarcodes'          , True    )
     kwargs.setdefault('AllowOnlyLegacyPrimaries'          , False   )
-    kwargs.setdefault('LegacyParticleGenerationIncrement' , 1000000 )
-    kwargs.setdefault('LegacyFirstSecondaryBarcode'       , 200001  )
     return CfgMgr.ISF__GenericBarcodeFilter(name, **kwargs)
 
 def getMC12LLPEntryLayerFilter(name="ISF_MC12LLPEntryLayerFilter", **kwargs):
