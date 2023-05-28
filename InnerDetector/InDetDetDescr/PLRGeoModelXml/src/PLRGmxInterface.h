@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PLRGEOMODELXML_PLRGMXINTERFACE_H
@@ -40,10 +40,6 @@ public:
 private:
   void makePLRModule(const std::string& typeName,
                      const std::map<std::string, std::string> &parameters);
-
-  PixelDetectorManager *m_detectorManager{};
-  SiCommonItems *m_commonItems{};
-  WaferTree *m_moduleTree{};
 };
 
 } // namespace InDetDD
