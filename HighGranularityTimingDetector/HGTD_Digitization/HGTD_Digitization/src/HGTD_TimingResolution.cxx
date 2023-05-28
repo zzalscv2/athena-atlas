@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_Digitization/src/HGTD_TimingResolution.cxx
  *
@@ -34,36 +34,37 @@ inline float exp16(float x) {
 HGTD_TimingResolution::HGTD_TimingResolution(const std::string& type,
                                              const std::string& name,
                                              const IInterface* parent)
-        : AthAlgTool(type, name, parent) {
+  : AthAlgTool(type, name, parent),
+    m_version ("HGTD Timing three-ring layout"),
 
-  m_version = "HGTD Timing three-ring layout";
+    // resolution in ns
+    m_sensorResolution (std::sqrt((0.025 * 0.025) - (0.010 * 0.010))),
 
-  // Contain also the peripheral electronics region, i.e. (R>640 mm)
-  m_radii = {120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230,
+    // Contain also the peripheral electronics region, i.e. (R>640 mm)
+    m_radii {120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230,
              240, 250, 260, 270, 280, 290, 300, 310, 320, 330, 340, 350,
              360, 370, 380, 390, 400, 410, 420, 430, 440, 450, 460, 470,
              480, 490, 500, 510, 520, 530, 540, 550, 560, 570, 580, 590,
-             600, 610, 620, 630, 640, 650, 660, 670, 680, 690};
+             600, 610, 620, 630, 640, 650, 660, 670, 680, 690},
 
-  m_doseInner1000 = {1.995, 1.953, 1.787, 1.687, 1.608, 1.518,
-                     1.448, 1.425, 1.354, 1.328, 1.275};
+    m_doseInner1000 {1.995, 1.953, 1.787, 1.687, 1.608, 1.518,
+                     1.448, 1.425, 1.354, 1.328, 1.275},
 
-  m_doseMiddle2000 = {2.44,  2.355, 2.26,  2.204, 2.137, 2.081, 2.015, 1.96,
+    m_doseMiddle2000 {2.44,  2.355, 2.26,  2.204, 2.137, 2.081, 2.015, 1.96,
                       1.878, 1.87,  1.809, 1.732, 1.722, 1.63,  1.588, 1.57,
-                      1.509, 1.464, 1.44,  1.38,  1.333, 1.321, 1.284, 1.271};
+                      1.509, 1.464, 1.44,  1.38,  1.333, 1.321, 1.284, 1.271},
 
-  m_doseOuter4000 = {2.458, 2.4,   2.382, 2.362, 2.266, 2.207, 2.122, 2.067,
+    m_doseOuter4000 {2.458, 2.4,   2.382, 2.362, 2.266, 2.207, 2.122, 2.067,
                      2.046, 1.973, 1.94,  1.9,   1.869, 1.83,  1.711, 1.701,
-                     1.685, 1.615, 1.626, 1.565, 1.53,  1.499, 1.429};
+                     1.685, 1.615, 1.626, 1.565, 1.53,  1.499, 1.429},
 
-  m_doseResolution = {{0.01, 0.025}, {0.1, 0.031}, {0.3, 0.035}, {0.6, 0.040},
-                      {1.0, 0.046},  {3.0, 0.065}, {6.0, 0.065}};
+    m_doseResolution {{0.01, 0.025}, {0.1, 0.031}, {0.3, 0.035}, {0.6, 0.040},
+                      {1.0, 0.046},  {3.0, 0.065}, {6.0, 0.065}},
 
-  m_doseGain = {{0.01, 39}, {0.1, 23}, {0.3, 21}, {0.6, 19},
-                {1.0, 10},  {3.0, 5},  {6.0, 4}};
+    m_doseGain {{0.01, 39}, {0.1, 23}, {0.3, 21}, {0.6, 19},
+                {1.0, 10},  {3.0, 5},  {6.0, 4}}
+{
 
-  // resolution in ns
-  m_sensorResolution = std::sqrt((0.025 * 0.025) - (0.010 * 0.010));
 
 }
 
