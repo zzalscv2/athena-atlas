@@ -28,11 +28,6 @@ include("TopInputsD3PD.py")
 #from TruthD3PDMaker.topInputsD3PD import topInputsD3PD
 #alg = topInputsD3PD(tupleFileOutput)
 
-#from HforTool.HforToolConf import HforTool
-#ToolSvc += HforTool("HforTool");
-#ToolSvc.HforTool.RemovalSchema = "angularbased" #"jetbased", "angularbased","mc08"
-#ToolSvc.HforTool.SampleType = "isC"  #isBB isCC isC isLightFlavor
-
 from RecExConfig.RecFlags import rec
 rec.doHist = False
 rec.doMonitoring = False

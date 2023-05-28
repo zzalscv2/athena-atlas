@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MATRIXBRANCH_H
 #define MUONTESTER_MATRIXBRANCH_H
 #include <MuonTesterTree/VectorBranch.h>
 /// Helper class to store branches of type std::vector<std::vector<T>>
+namespace MuonVal {
 class MuonTesterTree;
 template <class T> class MatrixBranch : public IMuonTesterBranch {
 public:
@@ -26,8 +27,8 @@ public:
 
     std::vector<DataDependency> data_dependencies() override final;
 
-    const TTree* tree() const;
-    TTree* tree();
+    const TTree* tree() const override final;
+    TTree* tree() override final;
 
     bool initialized() const;
 
@@ -54,5 +55,6 @@ private:
     VectorBranch<std::vector<T>> m_Vec;
     T m_default;
 };
+}
 #include <MuonTesterTree/MatrixBranch.icc>
 #endif

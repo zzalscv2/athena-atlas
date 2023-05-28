@@ -8,6 +8,7 @@
 #include <MuonTesterTree/MuonTesterTree.h>
 #include <MuonTesterTree/VectorBranch.h>
 
+namespace MuonVal {
 template <class T> VectorBranch<T>::VectorBranch(TTree* tree, const std::string& name) : MuonTesterBranch(tree, name) {}
 
 template <class T> VectorBranch<T>::VectorBranch(MuonTesterTree& tree, const std::string& name) : MuonTesterBranch(tree, name) {}
@@ -56,4 +57,5 @@ template <class T> void VectorBranch<T>::operator+=(const T& value) { push_back(
 template <class T> bool VectorBranch<T>::isUpdated() const { return m_updated; }
 template <class T> const T& VectorBranch<T>::getDefault() const { return m_default; }
 template <class T> void VectorBranch<T>::setDefault(const T& def) { m_default = def; }
+}
 #endif

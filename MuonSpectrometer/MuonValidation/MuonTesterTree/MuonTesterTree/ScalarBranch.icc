@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONSCALARBRANCH_IXX
 #define MUONTESTER_MUONSCALARBRANCH_IXX
@@ -7,7 +7,7 @@
 #include <GaudiKernel/MsgStream.h>
 #include <MuonTesterTree/MuonTesterTree.h>
 #include <MuonTesterTree/ScalarBranch.h>
-
+namespace MuonVal {
 template <class T> ScalarBranch<T>::ScalarBranch(TTree* tree, const std::string& name) : MuonTesterBranch(tree, name) {}
 template <class T> ScalarBranch<T>::ScalarBranch(MuonTesterTree& tree, const std::string& name) : MuonTesterBranch(tree, name) {}
 template <class T> ScalarBranch<T>::ScalarBranch(TTree* tree, const std::string& name, const T& default_value) : ScalarBranch(tree, name) {
@@ -58,5 +58,6 @@ template <class T> bool ScalarBranch<T>::isUpdated() const { return m_updated; }
 template <typename T> std::ostream& operator<<(std::ostream& out, const ScalarBranch<T>& B) {
     out << B.getVariable();
     return out;
+}
 }
 #endif

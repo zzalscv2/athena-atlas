@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONSMATRIXBRANCH_IXX
 #define MUONTESTER_MUONSMATRIXBRANCH_IXX
 #include <MuonTesterTree/MuonTesterTree.h>
+namespace MuonVal {
 template <class T> MatrixBranch<T>::MatrixBranch(TTree* tree, const std::string& name) : m_Vec(tree, name) {}
 template <class T> MatrixBranch<T>::MatrixBranch(TTree* tree, const std::string& b_name, const T& def) : MatrixBranch<T>(tree, b_name) {
     setDefault(def);
@@ -35,6 +36,6 @@ template <class T> void MatrixBranch<T>::setDefault(const T& def) { m_default = 
 template <class T> const TTree* MatrixBranch<T>::tree() const { return m_Vec.tree(); }
 template <class T> TTree* MatrixBranch<T>::tree() { return m_Vec.tree(); }
 template <class T> bool MatrixBranch<T>::initialized() const { return m_Vec.initialized(); }
-
 template <class T> std::vector<IMuonTesterBranch::DataDependency> MatrixBranch<T>::data_dependencies() { return {};}
+}
 #endif

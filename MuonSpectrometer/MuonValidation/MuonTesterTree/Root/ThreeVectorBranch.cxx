@@ -1,7 +1,8 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonTesterTree/ThreeVectorBranch.h>
+namespace MuonVal {
 
 bool ThreeVectorBranch::fill(const EventContext&) { return true; }
 bool ThreeVectorBranch::init() { return true; }
@@ -32,3 +33,4 @@ void ThreeVectorBranch::operator+=(const HepMC::ThreeVector& vec) { push_back(ve
 void ThreeVectorBranch::push_back(const TVector3& vec) { push_back(vec.X(), vec.Y(), vec.Z()); }
 void ThreeVectorBranch::operator+=(const TVector3& vec) { push_back(vec); }
 void ThreeVectorBranch::set(const TVector3& vec, size_t pos) { set(vec.X(), vec.Y(), vec.Z(), pos); }
+}

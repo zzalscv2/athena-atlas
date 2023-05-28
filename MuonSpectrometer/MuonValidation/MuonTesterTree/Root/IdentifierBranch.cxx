@@ -1,8 +1,10 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonTesterTree/IdentifierBranch.h>
 #ifndef XAOD_ANALYSIS
+namespace MuonVal {
+
 MuonIdentifierBranch::MuonIdentifierBranch(MuonTesterTree& tree, const std::string& grp_name) : MuonTesterBranch(tree, grp_name) {}
 
 bool MuonIdentifierBranch::fill(const EventContext&) { return true; }
@@ -104,5 +106,6 @@ void MmIdentifierBranch::push_back(const Identifier& id) {
     m_gas_gap.push_back(idHelperSvc()->mmIdHelper().gasGap(id));
     m_multiplet.push_back(idHelperSvc()->mmIdHelper().multilayer(id));
     m_channel.push_back(idHelperSvc()->mmIdHelper().channel(id));
+}
 }
 #endif

@@ -7,7 +7,7 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #include <MuonTesterTree/MuonTesterBranch.h>
 
 // Implementation to store vector like variables
-
+namespace MuonVal {
 class MuonTesterTree;
 template <class T> class VectorBranch : public MuonTesterBranch, virtual public IMuonTesterBranch {
 public:
@@ -52,5 +52,6 @@ private:
 };
 
 template <> bool& VectorBranch<bool>::get(size_t idx);
+}
 #include <MuonTesterTree/VectorBranch.icc>
 #endif

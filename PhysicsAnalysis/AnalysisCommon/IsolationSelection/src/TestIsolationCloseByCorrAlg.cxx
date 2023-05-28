@@ -23,8 +23,10 @@ namespace CP {
         ATH_CHECK(m_elecKey.initialize(!m_elecKey.empty()));
         ATH_CHECK(m_photKey.initialize(!m_photKey.empty()));
         ATH_CHECK(m_polTrkKey.initialize(!m_polTrkKey.empty()));
-
-        m_tree.addBranch(std::make_shared<EventInfoBranch>(m_tree, m_isMC));
+        using wOpts = MuonVal::EventInfoBranch::WriteOpts;
+        unsigned int writeOpts = wOpts::writePileUp | wOpts::writeBeamSpot;
+        if (m_isMC) writeOpts |= wOpts::isMC;
+        m_tree.addBranch(std::make_shared<MuonVal::EventInfoBranch>(m_tree, writeOpts));
 
         auto add_correctionHelper = [this](std::shared_ptr<IsoCorrectionTestHelper> helper) {
             if (!m_selDecoration.empty()) helper->SetSelectionDecorator(m_selDecoration.value());

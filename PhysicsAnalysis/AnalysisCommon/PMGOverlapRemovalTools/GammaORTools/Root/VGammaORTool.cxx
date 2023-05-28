@@ -3,12 +3,11 @@
 */
 
 #include "GammaORTools/VGammaORTool.h"
+#include "TruthUtils/MagicNumbers.h"
 
 VGammaORTool::VGammaORTool(const std::string& name)
   : asg::AsgTool(name),
     m_truthClassifier("MCTruthClassifier",this) {
-
-  declareProperty("max_barcode", m_max_barcode = 1e5);
 
   declareProperty("n_leptons", m_n_leptons = -2);
   declareProperty("lepton_pdgIds", m_lepton_pdgIds = {11, -11, 13, -13, 15, -15});
@@ -166,12 +165,12 @@ StatusCode VGammaORTool::setInput(std::vector<TLorentzVector>& leptons_out,
     }
   }
 
-  ATH_MSG_DEBUG(BOOST_CURRENT_FUNCTION << ": Found " << photons_out.size() << " photons.");
-  ATH_MSG_DEBUG(BOOST_CURRENT_FUNCTION << ": Found " << leptons_out.size() << " leptons.");
+  ATH_MSG_DEBUG("VGammaORTool::setInput" << ": Found " << photons_out.size() << " photons.");
+  ATH_MSG_DEBUG("VGammaORTool::setInput" << ": Found " << leptons_out.size() << " leptons.");
 
   if (m_n_leptons >=0 && int(leptons_out.size()) < m_n_leptons) {
     ATH_MSG_WARNING(
-      BOOST_CURRENT_FUNCTION << ": Found " << leptons_out.size() << " leptons but expected " << m_n_leptons << ".");
+      "VGammaORTool::setInput" << ": Found " << leptons_out.size() << " leptons but expected " << m_n_leptons << ".");
   }
 
   return StatusCode::SUCCESS;
@@ -184,7 +183,7 @@ std::vector<TLorentzVector> VGammaORTool::filterPhotonOrigins(const std::vector<
   // this should only happen if the user gives the wrong input
   if (photon_candidates.size() != photon_origins.size()) {
     ATH_MSG_ERROR(
-      BOOST_CURRENT_FUNCTION << ": size of photon candidates (" << photon_candidates.size() << ") different from number of photon origins (" << photon_origins.size() <<
+      "VGammaORTool::filterPhotonOrigins" << ": size of photon candidates (" << photon_candidates.size() << ") different from number of photon origins (" << photon_origins.size() <<
         ").");
   }
   // filter out vetoed photons
@@ -207,7 +206,7 @@ std::vector<TLorentzVector> VGammaORTool::filterLeptonOrigins(const std::vector<
   // this should only happen if the user gives the wrong input
   if (lepton_candidates.size() != lepton_origins.size()) {
     ATH_MSG_ERROR(
-      BOOST_CURRENT_FUNCTION << ": size of lepton candidates (" << lepton_candidates.size() << ") different from number of lepton origins (" << lepton_origins.size() <<
+      "VGammaORTool::filterLeptonOrigins" << ": size of lepton candidates (" << lepton_candidates.size() << ") different from number of lepton origins (" << lepton_origins.size() <<
         ").");
   }
   std::vector<TLorentzVector> lepton_p4s;
@@ -252,7 +251,7 @@ std::vector<TLorentzVector> VGammaORTool::getLeptonP4s(const xAOD::TruthParticle
   std::vector<const xAOD::TruthParticle*> elmu_candidates;
   for (const auto *p : truthParticles) {
     // ignore all particles with geant barcodes
-    if (p->barcode() > m_max_barcode) {
+    if (HepMC::is_simulation_particle(p)) {
       continue;
     }
     // ignore all particles with the wrong pdgid
@@ -311,7 +310,7 @@ std::vector<TLorentzVector> VGammaORTool::getPhotonP4s(const xAOD::TruthParticle
   std::vector<int> photon_origins;
   for (const auto *p : truthParticles) {
     // consider only final state photons, not from geant, above a lower pt cut
-    if (p->status() != 1 || p->barcode() > m_max_barcode || p->pdgId() != 22 || p->pt() < m_min_considered_photon_pT) {
+    if (p->status() != 1 || HepMC::is_simulation_particle(p) || p->pdgId() != 22 || p->pt() < m_min_considered_photon_pT) {
       continue;
     }
     // require photons to be isolated if use_gamma_iso is true
@@ -374,7 +373,7 @@ bool VGammaORTool::frixioneIsolated(const xAOD::TruthParticle& photon,
   std::map<float, float> dr_to_pt;
   for (const auto *p : truthParticles) {
     // consider status 1  not from geant
-    if (p->status() != 1 || p->barcode() > m_max_barcode) {
+    if (p->status() != 1 || HepMC::is_simulation_particle(p)) {
       continue;
     }
     // ignore what typically is leptons and photons
