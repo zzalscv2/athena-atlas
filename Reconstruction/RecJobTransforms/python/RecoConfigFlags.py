@@ -113,6 +113,10 @@ def createRecoConfigFlags():
     flags.addFlag("Reco.EnableBeamSpotDecoration",
                   lambda prevFlags: not prevFlags.Common.isOnline)
 
+    # Enable ZDC reconstruction if ZDC data is in Bytestream or simulated
+    flags.addFlag("Reco.EnableZDC",_recoZDC)
+                  
+
     # Enable common thinning and other post-processing
     flags.addFlag("Reco.EnablePostProcessing", True)
     flags.addFlag("Reco.PostProcessing.ThinNegativeClusters",
@@ -197,3 +201,15 @@ def recoRunArgsToFlags(runArgs, flags):
     # --userExec
     # --triggerConfig
     # --trigFilterList
+
+
+def _recoZDC(prevFlags):
+    if prevFlags.Input.isMC: 
+        return prevFlags.Detector.EnableZDC
+    else:
+        from AthenaConfiguration.AutoConfigFlags import GetFileMD
+        from libpyeformat_helper import SubDetector, DetectorMask
+        maskbits=GetFileMD(prevFlags.Input.Files).get("detectorMask",[0x0])
+        maskbits=maskbits[0] #Check the first input file
+        detMask=DetectorMask(maskbits & 0xFFFFFFFF, maskbits >> 64) #DetectorMask constructor swallows two 64bit ints
+        return detMask.is_set(SubDetector.FORWARD_ZDC)

@@ -203,7 +203,7 @@ def RecoSteering(flags):
 
     # ZDC 
     acc.flagPerfmonDomain('ZDC')
-    if flags.Detector.EnableZDC:
+    if flags.Reco.EnableZDC:
         from ZdcRec.ZdcRecConfig import ZdcRecCfg
         acc.merge(ZdcRecCfg(flags))
         log.info("---------- Configured ZDC reconstruction")
