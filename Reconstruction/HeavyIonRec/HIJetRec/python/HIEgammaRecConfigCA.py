@@ -13,7 +13,7 @@ def HIEgammaRecCfg(flags):
     acc_hijets=HIJetRecCfg(flags)
 
     # get modulator from HI jets
-    jahi_stct = acc_hijets.getEventAlgo("jetalgHI_subtoclustertool")
+    jahi_stct = acc_hijets.getEventAlgo("jetalgHI_subtrToClusterTool")
     modulator=jahi_stct.Tools[0].Modulator
 
     # merge HI jets CA to ensure their reconstruction
