@@ -82,7 +82,7 @@ def ZdcRecRun2Cfg(flags):
 def ZdcRecRun3Cfg(flags):
 
     acc = ComponentAccumulator()
-    config = "default"
+    config = "LHCf2022"
     doCalib = False
     doTimeCalib = False
     doTrigEff = False
