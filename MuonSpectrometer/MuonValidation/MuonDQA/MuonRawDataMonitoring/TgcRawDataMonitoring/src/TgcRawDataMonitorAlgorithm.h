@@ -38,6 +38,11 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
     CoinFlagF=4,CoinFlagC,CoinFlagH,CoinFlagEI,CoinFlagTile,CoinFlagRPC,CoinFlagNSW,
     CoinFlags = CoinFlagF, InnerCoinFlags = CoinFlagEI
   };
+  struct EtaPhi{
+    double eta{};
+    double phi{};
+    EtaPhi(double _eta, double _phi){eta=_eta;phi=_phi;}
+  };
   struct MyMuonRoI{
     int timing{}; // -2,-1,0(current BC),+1,+2
     const xAOD::MuonRoI* muonRoI{};
@@ -96,52 +101,71 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
     double matchedNSW{};
   };
   struct TgcTrigTile{
-    int slSector{}; // SL sector ID
-    double roiEta{}; // SL RoI at the current BC and with matched offline muon
-    double roiPhi{};
-    int roiNum{};
-    int deltaBcid{}; // BCID difference between SL and TMDB
-    int deltaTiming{}; // Signal timing difference between SL and TMDB
-    int tmdbDecisions{}; // TMDB signal decisions for modules 0..3 (D5 only, D6 only, D5+D6)
-    int bcid{};
-    int bunch{};
-    int currBc{};
-    int goodBcid{};
-    int goodTiming{};
+    int slSector{-999}; // SL sector ID
+    double roiEta{-999}; // SL RoI at the current BC and with matched offline muon
+    double roiPhi{-999};
+    int roiNum{-999};
+    int deltaBcid{-999}; // BCID difference between SL and TMDB
+    int deltaTiming{-999}; // Signal timing difference between SL and TMDB
+    int tmdbDecisions{-999}; // TMDB signal decisions for modules 0..3 (D5 only, D6 only, D5+D6)
+    int bcid{-999};
+    int bunch{-999};
+    int currBc{0};
+    int goodBcid{0};
+    int goodBcid1{0};
+    int goodBcid2{0};
+    int goodTiming{0};
   };
   struct TgcTrigNsw{
-    int slSector{};
-    double roiEta{};
-    double roiPhi{};
-    int roiNum{};
-    int isForward{};
-    int deltaBcid{}; // BCID difference between SL and NSW
-    int deltaTiming{}; // Signal timing difference between SL and NSW
-    int R{};
-    int Phi{};
-    int deltaTheta{};
-    int bcid{};
-    int bunch{};
-    int currBc{};
-    int goodBcid{};
-    int goodTiming{};
+    int slSector{-999};
+    int slInput{-999};
+    int slInputIndex{-999};
+    double roiEta{-999};
+    double roiPhi{-999};
+    int roiNum{-999};
+    int isForward{-999};
+    int isAside{-999};
+    int deltaBcid{-999}; // BCID difference between SL and NSW
+    int deltaTiming{-999}; // Signal timing difference between SL and NSW
+    int R{-999};
+    int Phi{-999};
+    int deltaTheta{-999};
+    int bcid{-999};
+    int bunch{-999};
+    int currBc{0};
+    int goodBcid{0};
+    int goodBcid1{0};
+    int goodBcid2{0};
+    int goodTiming{0};
   };
   struct TgcTrigRpc{
-    int slSector{};
-    double roiEta{};
-    double roiPhi{};
-    int roiNum{};
-    int deltaBcid{}; // BCID difference between SL and NSW
-    int deltaTiming{}; // Signal timing difference between SL and NSW
-    int rpcEta{};
-    int rpcPhi{};
-    int rpcDEta{};
-    int rpcDPhi{};
-    int bcid{};
-    int bunch{};
-    int currBc{};
-    int goodBcid{};
-    int goodTiming{};
+    int slSector{-999};
+    double roiEta{-999};
+    double roiPhi{-999};
+    int roiNum{-999};
+    int deltaBcid{-999};
+    int deltaTiming{-999};
+    int rpcEta{-999};
+    int rpcPhi{-999};
+    int rpcDEta{-999};
+    int rpcDPhi{-999};
+    int bcid{-999};
+    int bunch{-999};
+    int currBc{0};
+    int goodBcid{0};
+    int goodBcid1{0};
+    int goodBcid2{0};
+    int goodTiming{0};
+  };
+  struct TgcTrigEifi{
+    int slSector{-999};
+    double roiEta{-999};
+    double roiPhi{-999};
+    int roiNum{-999};
+    int deltaTiming{-999};
+    int bunch{-999};
+    int currBc{0};
+    int goodTiming{0};
   };
   struct TgcTrig{
     int lb{};
@@ -176,10 +200,13 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
     int bunch{};
     int inner{};
     int muonMatched{};
+    int loosemuonMatched{};
+    int isBiased{};
     int bcid{};
     std::vector<TgcTrigTile*> tile;
     std::vector<TgcTrigNsw*> nsw;
     std::vector<TgcTrigRpc*> rpc;
+    std::vector<TgcTrigEifi*> eifi;
   };
   struct CtpDecMonObj{
     std::string trigItem;
@@ -242,11 +269,11 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
   BooleanProperty m_offlMuonCutOnQuality{this,"OfflMuonCutOnQuality",true,"applying cut on offline muon quality"};
   BooleanProperty m_anaMuonRoI{this,"AnaMuonRoI",true,"switch to perform analysis on xAOD::LVL1MuonRoI"};
   DoubleProperty m_trigMatchWindow{this,"TrigMatchingWindow",0.2,"Window size in R for trigger matching"};
-  DoubleProperty m_l1trigMatchWindow1{this,"L1TrigMatchingWindow1",0.15,"Window size in R for L1 trigger matching: param 1"};
-  DoubleProperty m_l1trigMatchWindow2{this,"L1TrigMatchingWindow2",0.3,"Window size in R for L1 trigger matching: param 2"};
-  DoubleProperty m_l1trigMatchWindow3{this,"L1TrigMatchingWindow3",-0.01,"Window size in R for L1 trigger matching: param 3"};
-  DoubleProperty m_l1trigMatchWindow4{this,"L1TrigMatchingWindow4",0.36,"Window size in R for L1 trigger matching: param 4"};
-  DoubleProperty m_l1trigMatchWindow5{this,"L1TrigMatchingWindow5",-0.0016,"Window size in R for L1 trigger matching: param 5"};
+  DoubleProperty m_l1trigMatchWindowPt15{this,"L1TrigMatchingWindowPt15",0.15,"Window size in R for L1 trigger matching for 15GeV muons"};
+  DoubleProperty m_l1trigMatchWindowPt10a{this,"L1TrigMatchingWindowPt10a",0.3,"Window size in R for L1 trigger matching for 10GeV(a) muons"};
+  DoubleProperty m_l1trigMatchWindowPt10b{this,"L1TrigMatchingWindowPt10b",-0.01,"Window size in R for L1 trigger matching for 10GeV(b) muons"};
+  DoubleProperty m_l1trigMatchWindowPt0a{this,"L1TrigMatchingWindowPt0a",0.36,"Window size in R for L1 trigger matching for 0GeV(a) muons"};
+  DoubleProperty m_l1trigMatchWindowPt0b{this,"L1TrigMatchingWindowPt0b",-0.0016,"Window size in R for L1 trigger matching for 0GeV(b) muons"};
   DoubleProperty m_isolationWindow{this,"IsolationWindow",1.0,"Window size in R for isolation with other muons"};
   BooleanProperty m_requireIsolated{this,"RequireIsolated",true,"Probe muon should be isolated from other muons"};
   BooleanProperty m_useIDTrackForExtrapolation{this,"UseIDTrackForExtrapolation",false,"Use InnerDetectorTrackParticle for extrapolation"};
