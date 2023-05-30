@@ -44,7 +44,7 @@ namespace {
 
     std::string to_string(const Amg::Vector3D& v) {
         std::stringstream sstr{};
-        sstr<<"[x,y,z]=("<<Amg::toString(v)<<") [theta/eta/phi]=("<<(v.theta() / Gaudi::Units::degree)<<","<<v.eta()<<","<<(v.phi()/ Gaudi::Units::degree)<<")";
+        sstr<<"[x,y,z]="<<Amg::toString(v, 2)<<" [theta/eta/phi]=("<<(v.theta() / Gaudi::Units::degree)<<","<<v.eta()<<","<<(v.phi()/ Gaudi::Units::degree)<<")";
         return sstr.str();
     }
     /// Coarse eta cut on the segment direction if the beam spot constraint is activated
@@ -277,7 +277,7 @@ namespace Muon {
     const IMuonIdHelperSvc* MuonNSWSegmentFinderTool::idHelper() const { return m_idHelperSvc.get(); }
     //============================================================================
     void MuonNSWSegmentFinderTool::find(const EventContext& ctx, SegmentMakingCache& cache) const {
-        
+       
         std::vector<const Muon::MuonClusterOnTrack*> muonClusters{};
         muonClusters.reserve(cache.inputClust.size());
         std::transform(cache.inputClust.begin(), cache.inputClust.end(), std::back_inserter(muonClusters), 
@@ -372,35 +372,12 @@ namespace Muon {
         LayerMeasVec orderedClust =
             classifyByLayer(cleanClusters(allClusts, HitType::Eta | HitType::Phi, singleWedge), HitType::Wire | HitType::Pad);
         
-        if (orderedClust.empty()) return {};
-      
-        // The following lines protect the NSW segment seeding from events with an extremly high occupancy in the MM detectors which lead to very long processing times.
-        // For now the NSW segment building is canceled if the MMs have more than 75 hits per layer in average.
-        // This kill switch is meant as last safety net while the upstream part of the code will be improved to catch such high occupancy events earlier in the reco chain
-        // pscholer 04/2023
-  
-
-        ATH_MSG_DEBUG("in findStereSegments checking occupancy. Found n layers with hits: " << orderedClust.size());
-        std::vector<uint> MMHitMap(8); // hit map for the 8 MM layers of a sector
-        for(uint i_meas=0; i_meas<orderedClust.size(); i_meas++){
-          Identifier id = orderedClust.at(i_meas).front()->identify();
-          ATH_MSG_DEBUG("layer "<< i_meas << " has number of clusters: " << orderedClust.at(i_meas).size() << " " << m_idHelperSvc->toString(id));
-          if(!m_idHelperSvc->isMM(id)) continue;
-          uint layer = 4*(m_idHelperSvc->mmIdHelper().multilayer(id)-1) + m_idHelperSvc->mmIdHelper().gasGap(id) - 1;
-          MMHitMap.at(layer) += orderedClust.at(i_meas).size();
-        }
-        uint nMMLayers{0}, nMMHits{0};
-        for(uint val:MMHitMap){
-          if(val==0) continue;
-          nMMLayers+=1;
-          nMMHits += val;
-        }
-        float meanNumberOfMMHitsPerLayer = 1.f * nMMHits / std::max(nMMLayers,1u);
-        ATH_MSG_DEBUG("Found "<< nMMHits  << " hits on " << nMMLayers << " MM layers. This is an average of " << meanNumberOfMMHitsPerLayer << "hits per MM layer");
-        if(meanNumberOfMMHitsPerLayer > m_maxNumberOfMMHitsPerLayer){
-                ATH_MSG_DEBUG("A mean number of "<< meanNumberOfMMHitsPerLayer<< " mm hits per MM layer is too much. MM segment reconstruction will be suspended for this pattern.");
-                return{};
-        }
+        for (MeasVec& hitsInLayer : orderedClust) hitsInLayer = vetoBursts(std::move(hitsInLayer));
+        orderedClust.erase(std::remove_if(orderedClust.begin(), orderedClust.end(),
+                                             [](const MeasVec& vec) { return vec.empty(); }),
+                              orderedClust.end());
+        if (orderedClust.empty()) return {};      
+        
 
         std::vector<NSWSeed> seeds = segmentSeedFromMM(orderedClust);
         if (seeds.empty()) return {};
@@ -782,11 +759,16 @@ namespace Muon {
                                              [](const MeasVec& vec) { return vec.empty(); }),
                               orderedClusters.end());
        
+           
         for( MeasVec& lays: orderedClusters){
             std::sort(lays.begin(),lays.end(), [this](const SeedMeasurement& a, const SeedMeasurement& b){
                 return channel(a) < channel(b);
             });
+            
+       
         }
+        ATH_MSG_VERBOSE("Collected clusters "<<print(orderedClusters));
+        
         return orderedClusters;
     }
 
@@ -1241,9 +1223,9 @@ namespace Muon {
                             }
                             if (seed.dir().block<2,1>(0,0).dot(seed.pos().block<2,1>(0,0)) < 0.) continue;
                             /// We will revise this requirement in the near future. Keep the block for the moment
-                            ///   static const Muon::MuonSectorMapping  sector_mapping{};
-                            ///   const double deltaPhi = std::abs(seed.dir().deltaPhi(seed.pos()));
-                            /// if (deltaPhi > sector_mapping.sectorWidth(m_idHelperSvc->sector(base_seed[0]->identify()))) continue;
+                            static const Muon::MuonSectorMapping  sector_mapping{};
+                            const double deltaPhi = std::abs(seed.dir().deltaPhi(seed.pos()));
+                            if (deltaPhi > sector_mapping.sectorWidth(m_idHelperSvc->sector(base_seed[0]->identify()))) continue;
                         }                   
                         getClustersOnSegment(orderedClusters, seed, {selLayers[0], selLayers[1],selLayers[2], selLayers[3]});
                         seeds.emplace_back(std::move(seed));
@@ -1452,5 +1434,79 @@ namespace Muon {
             <<" pointing to (" <<to_string(cl.dir())<<" cluster size: "<<clusterSize(cl);
         
         return sstr.str();
+    }
+    std::string MuonNSWSegmentFinderTool::print(const MeasVec& measurements) const {
+        std::stringstream sstr{};
+        for (const SeedMeasurement& cl : measurements){
+            sstr<<" *** "<<print(cl)<<std::endl;
+        }
+        return sstr.str();
+    }
+    std::string MuonNSWSegmentFinderTool::print(const LayerMeasVec& sortedVec) const {
+        std::stringstream sstr{};
+        unsigned int lay{0};
+        for (const MeasVec& clusts: sortedVec){
+            sstr<<"Clusters in Layer: "<<(lay+1)<<std::endl;
+            sstr<<"#################################################"<<std::endl;
+            sstr<<print(clusts);
+            ++lay;
+        }
+        return sstr.str();
+    }
+     
+    MeasVec MuonNSWSegmentFinderTool::vetoBursts( MeasVec && clustInLay ) const {
+        if (clustInLay.size() < m_ocupMmNumPerBin || m_idHelperSvc->issTgc(clustInLay[0]->identify())) return clustInLay;
+        /// The micromegas are slobbering quite a lot in the 2023 data taking leading to uncopable comptuing times.
+        /// The burst vetoing aims to mitigate this situation. A histogram with a bin width of m_ocupMmBinWidth is defined
+        /// Hits are filled into the accoring bin using their channel number
+        /// Bins with large activity are then cleared. In the second step, pairs of bins where their sum is too exhaustive
+        /// are removed.
+        MeasVec prunedMeas{};
+        prunedMeas.reserve(clustInLay.size());       
+        const unsigned int firstCh = channel(clustInLay[0]);
+        const unsigned int lastCh = channel(clustInLay[clustInLay.size() -1]);
+        /// Define the number of bins
+        const unsigned int deltaCh = lastCh - firstCh;
+        const unsigned int nBins = deltaCh / m_ocupMmBinWidth + (deltaCh % m_ocupMmBinWidth > 0);
+        ATH_MSG_VERBOSE("Clusters in layer "<<print(clustInLay)<<" lowest channel: "<<
+                        firstCh<<", highest channel: "<<lastCh<<" bin width: "<<m_ocupMmBinWidth<<" number of bins"<<nBins);
+        
+        LayerMeasVec occupancyHisto{};
+        occupancyHisto.resize(nBins);
+        for (MeasVec& bin : occupancyHisto) {
+            bin.reserve(clustInLay.size());
+        }
+        ATH_MSG_VERBOSE("Clusters sorted into bins "<<print(occupancyHisto));
+        /// Fill the measurements into the histograms
+        for (SeedMeasurement& meas : clustInLay){
+            unsigned int bin = (channel(meas) - firstCh) % nBins;
+            occupancyHisto[bin].push_back(std::move(meas));
+        }
+        /// Apply the single bin cleaning
+        for (MeasVec& bin : occupancyHisto) {
+            if(bin.size() >= m_ocupMmNumPerBin){
+                ATH_MSG_VERBOSE("The micromegas are slobbering. Detected too many clusters "<<bin.size()<<std::endl<<print(bin));
+                bin.clear();
+            }
+        }
+        /// Apply the pair wise bin cleaning
+        for (unsigned int i = 0; i < occupancyHisto.size() -1; ++i) {
+            if (occupancyHisto[i].size() + occupancyHisto[i+1].size() >= m_ocupMmNumPerPair){
+                ATH_MSG_VERBOSE("The two neighbouring bins "<<i<<"&"<<(i+1)<<" have too many clusters "<<std::endl<<
+                print(occupancyHisto[i])<<std::endl<<print(occupancyHisto[i+1]));
+                occupancyHisto[i].clear();
+                occupancyHisto[i+1].clear();
+            }
+        }
+        /// Copy the rest over
+        for (MeasVec& bin : occupancyHisto){
+            std::copy(std::make_move_iterator(bin.begin()),
+                      std::make_move_iterator(bin.end()),
+                      std::back_inserter(prunedMeas));
+        }
+
+        ATH_MSG_VERBOSE("Number of measurements before pruning "<<clustInLay.size()<<" number of measurments survived the pruning "<<prunedMeas.size());
+        return prunedMeas;
+
     }
 }  // namespace Muon
