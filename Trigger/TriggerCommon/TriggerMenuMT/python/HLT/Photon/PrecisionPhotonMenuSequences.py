@@ -33,11 +33,15 @@ def precisionPhotonSequence(flags, ion=False):
     caloClusters = TrigEgammaKeys.precisionPhotonCaloClusterContainer
 
     ViewVerify = CfgMgr.AthViews__ViewDataVerifier("PrecisionPhotonViewDataVerifier" + tag(ion))
-    ViewVerify.DataObjects = [( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % caloClusters ),
+    dataObjects = [( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % caloClusters ),
                               ( 'EgammaRecContainer', 'StoreGateSvc+%s' % TrigEgammaKeys.precisionPhotonSuperClusterCollection),
                               ( 'CaloCellContainer' , 'StoreGateSvc+CaloCells' ),
                               ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
                               ]
+    if ion:
+        dataObjects += [( 'CaloCellContainer' , 'StoreGateSvc+CorrectedRoICaloCells' )]
+ 
+    ViewVerify.DataObjects = dataObjects
 
     hiInfo = 'HI' if ion is True else ''
     from TriggerMenuMT.HLT.Photon.PrecisionPhotonRecoSequences import precisionPhotonRecoSequence
