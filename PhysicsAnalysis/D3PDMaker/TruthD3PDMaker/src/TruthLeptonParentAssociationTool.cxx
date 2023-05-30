@@ -16,7 +16,7 @@
 #include "McParticleEvent/TruthParticle.h"
 #include "McParticleEvent/TruthParticleContainer.h"
 #include "GeneratorObjects/McEventCollection.h"
-#include "HepPID/ParticleIDMethods.hh"
+#include "TruthUtils/HepMCHelpers.h"
 #include <algorithm>
 
 namespace D3PD {
@@ -122,7 +122,7 @@ void TruthLeptonParentAssociationTool::addLeptonParent(HepMC::ConstGenParticlePt
          pdg == 24 || // W
          pdg == 25 || // Higgs
          (pdg == 15 && !m_primary_is_tau) || // Tau
-         HepPID::isHadron (pdg) // from a hadron!
+         MC::isHadron (pdg) // from a hadron!
         ){
       m_parent_barcodes.push_back( HepMC::barcode(*itrPar) ); 
     } else { // Will get to here if we are coming from the same lepton again
