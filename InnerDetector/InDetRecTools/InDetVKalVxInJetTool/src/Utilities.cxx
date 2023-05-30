@@ -10,6 +10,7 @@
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "CxxUtils/sincos.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
+#include "AtlasHepMC/MagicNumbers.h"
 //-------------------------------------------------
 // Other stuff
 #include <cmath>
@@ -580,7 +581,7 @@ namespace InDet{
                                TP->auxdata< ElementLink< xAOD::TruthParticleContainer > >("truthParticleLink");
         if( !tplink.isValid() ) return 0;
         if( TP->auxdata< float >( "truthMatchProbability" ) < 0.5 ) return 0;
-        if( (*tplink)->barcode() > 200000) return 0;
+        if (HepMC::is_simulation_particle(*tplink)) return 0;
         if( (*tplink)->hasProdVtx()){
           if( (*tplink)->prodVtx()->nIncomingParticles()==1){
              int PDGID1=0, PDGID2=0, PDGID3=0, PDGID4=0;
@@ -627,7 +628,7 @@ namespace InDet{
       if( TP->isAvailable< ElementLink< xAOD::TruthParticleContainer> >( "truthParticleLink") ) {
         const ElementLink<xAOD::TruthParticleContainer>& tplink = 
                                TP->auxdata< ElementLink< xAOD::TruthParticleContainer > >("truthParticleLink");
-        if( tplink.isValid() && (*tplink)->barcode()>200000) return 1;
+        if( tplink.isValid() && HepMC::is_simulation_particle(*tplink)) return 1;
       }
       return 0;
   }
