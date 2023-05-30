@@ -12,7 +12,7 @@ atlas_add_library( TruthD3PDAnalysisLib
                    PUBLIC_HEADERS TruthD3PDAnalysis
                    PRIVATE_INCLUDE_DIRS  ${HEPPDT_INCLUDE_DIRS}
                    LINK_LIBRARIES AthenaBaseComps AtlasHepMCLib AtlasHepMCsearchLib D3PDMakerUtils GaudiKernel McParticleKernel MCTruthClassifierLib
-                   PRIVATE_LINK_LIBRARIES  ${HEPPDT_LIBRARIES} AthenaKernel EventKernel xAODEgamma xAODJet xAODMuon GeneratorObjects McParticleEvent Particle ParticleJetToolsLib ParticleTruth StoreGateLib TrkParticleBase VxVertex )
+                   PRIVATE_LINK_LIBRARIES TruthUtils ${HEPPDT_LIBRARIES} AthenaKernel EventKernel xAODEgamma xAODJet xAODMuon GeneratorObjects McParticleEvent Particle ParticleJetToolsLib ParticleTruth StoreGateLib TrkParticleBase VxVertex )
 
 atlas_add_component( TruthD3PDAnalysis
                      src/components/*.cxx

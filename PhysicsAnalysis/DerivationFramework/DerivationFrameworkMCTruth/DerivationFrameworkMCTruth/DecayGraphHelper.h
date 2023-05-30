@@ -18,7 +18,7 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthVertexContainer.h"
 #include "MCTruthClassifier/MCTruthClassifier.h"
-#include "HepPID/ParticleIDMethods.hh"
+#include "TruthUtils/HepMCHelpers.h"
 #include "AtlasHepMC/MagicNumbers.h"
 #include <unordered_set>
 
@@ -240,7 +240,7 @@ namespace DerivationFramework {
                 if ( HepMC::is_simulation_particle(particle)) continue;
                 
                 //check if we have a neutral particle (threeCharge returns int)
-                if (chargedOnly && HepPID::threeCharge(particle->pdgId()) == 0) continue;
+                if (chargedOnly && MC::threeCharge(particle->pdgId()) == 0) continue;
                 
                 //if we have a particle from hadron decay, and allowFromHadron=false, skip this particle
                 if (!allowFromHadron) {

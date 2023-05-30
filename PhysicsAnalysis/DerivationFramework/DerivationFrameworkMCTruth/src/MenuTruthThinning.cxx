@@ -19,7 +19,7 @@
 #include "xAODTruth/TruthVertexContainer.h"
 //#include "EventKernel/PdtPdg.h"
 #include "AthenaKernel/errorcheck.h"
-#include "HepPID/ParticleIDMethods.hh"
+#include "TruthUtils/HepMCHelpers.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "StoreGate/ThinningHandle.h"
 #include "GaudiKernel/ThreadLocalContext.h"
@@ -327,17 +327,17 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
     
     //  OK if we should select hadrons and are in hadron range
     // JRC: cut changed from PHOTOSMIN to m_geantOffset
-    if( m_writeHadrons && HepPID::isHadron (pdg_id) && !HepMC::is_simulation_particle(barcode) )
+    if( m_writeHadrons && MC::isHadron (pdg_id) && !HepMC::is_simulation_particle(barcode) )
         ok = true;
     
     // OK if we should select b hadrons and are in hadron range
     // JRC: cut changed from PHOTOSMIN to m_geantOffset
-    if( m_writeBHadrons &&  !HepMC::is_simulation_particle(barcode) && HepPID::isHadron (pdg_id) && HepPID::hasBottom (pdg_id) )
+    if( m_writeBHadrons &&  !HepMC::is_simulation_particle(barcode) && MC::isBottomHadron (pdg_id))
         ok= true;
 
     // OK if we should select c hadrons and are in hadron range
     // JRC: cut changed from PHOTOSMIN to m_geantOffset
-    if( m_writeCHadrons &&  !HepMC::is_simulation_particle(barcode) && HepPID::isHadron (pdg_id) && HepPID::hasCharm (pdg_id) )
+    if( m_writeCHadrons &&  !HepMC::is_simulation_particle(barcode) && MC::isCharmHadron (pdg_id))
         ok= true;
 
     // PHOTOS range: check whether photons come from parton range or
@@ -351,9 +351,9 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
             const xAOD::TruthParticle* mother = vprod->incomingParticle(0);
             if (mother) motherPDGID = mother->pdgId();
         }
-        if( m_writePartons && !HepPID::isHadron( motherPDGID ) )
+        if( m_writePartons && !MC::isHadron( motherPDGID ) )
             ok = true;
-        if( m_writeHadrons && HepPID::isHadron( motherPDGID ) )
+        if( m_writeHadrons && MC::isHadron( motherPDGID ) )
             ok = true;
     }
     
