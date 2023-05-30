@@ -435,8 +435,7 @@ def MuonNSWSegmentFinderToolCfg(flags, name='MuonNSWSegmentFinderTool', **kwargs
     from MuonConfig.MuonRecToolsConfig import MuonTrackToSegmentToolCfg
     from TrkConfig.TrkTrackSummaryToolConfig import MuonCombinedTrackSummaryToolCfg, MuonTrackSummaryToolCfg
     result=ComponentAccumulator()
-    # Won't explicitly configure MuonIdHelperSvc
-    # Won't explicitly configure MuonEDMHelperSvc
+    
     kwargs.setdefault('SegmentAmbiguityTool', result.popToolsAndMerge( MuonAmbiProcessorCfg(flags) ) ) 
     kwargs.setdefault('SLFitter', result.popToolsAndMerge( MCTBSLFitterMaterialFromTrackCfg(flags) ) ) 
     kwargs.setdefault("TrackToSegmentTool", result.popToolsAndMerge( MuonTrackToSegmentToolCfg(flags) ) )
