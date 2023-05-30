@@ -71,6 +71,7 @@ opt_obsolete = ['setDetDescr',
                 'doID',
                 'doCalo',
                 'doMuon',
+                'BFieldAutoConfig',
 ]
 
 ################################################################################
@@ -236,13 +237,9 @@ if opt.doWriteBS:
 # Modifiers
 #-------------------------------------------------------------
 # Setup list of modifiers
-# Common modifiers for MC and data
 setModifiers = []
-
-if not flags.Input.isMC:  # data modifiers
-    setModifiers += ['BFieldAutoConfig']
-
 modifierList=[]
+
 from TrigConfigSvc.TrigConfMetaData import TrigConfMetaData
 meta = TrigConfMetaData()
 

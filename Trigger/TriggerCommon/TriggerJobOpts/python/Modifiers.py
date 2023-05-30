@@ -59,16 +59,6 @@ class ToroidsOff(_modifier):
         condSeq = AthSequencer("AthCondSeq")
         condSeq.AtlasFieldMapCondAlg.MapToroCurrent = 0
 
-
-class BFieldAutoConfig(_modifier):
-    """
-    Read field currents from configuration ptree (athenaHLT)
-    """
-    def postSetup(self, flags):
-        if hasattr(svcMgr,'HltEventLoopMgr'):
-            svcMgr.HltEventLoopMgr.setMagFieldFromPtree = True
-
-
 class forceConditions(_modifier):
     """
     Force all conditions (except prescales) to match run from input file
