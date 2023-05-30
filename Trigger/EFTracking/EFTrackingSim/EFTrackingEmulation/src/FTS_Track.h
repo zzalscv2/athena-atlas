@@ -2,7 +2,7 @@
 #ifndef EFTRACKINGEMULATION_FTSTRACK_H
 #define EFTRACKINGEMULATION_FTSTRACK_H
 
-// Easy represetnation of a smeared track, allows fast manipulation
+// Easy representation of a smeared track, allows fast manipulation
 
 #include <iostream>
 #include "TMath.h"
@@ -11,8 +11,7 @@ namespace EFTrackingSmearing{
 class FTS_Track {
 
  public:
- FTS_Track():  m_pt(0), m_eta(0), m_phi(0), m_d0(0), m_z0(0),
-    m_sigma_pt(0), m_sigma_eta(0), m_sigma_phi(0), m_sigma_d0(0), m_sigma_z0(0) {};
+ 
 
  FTS_Track(double pt, double eta, double phi, double d0, double z0):
   m_pt(pt), m_eta(eta), m_phi(phi), m_d0(d0), m_z0(z0) {};
@@ -39,18 +38,18 @@ class FTS_Track {
   int FakeFlags() const {return m_FakeFlags;};
 
  protected:
-  double m_pt;
-  double m_eta;
-  double m_phi;
-  double m_d0;
-  double m_z0;
+  double m_pt = 0.;
+  double m_eta = 0.;
+  double m_phi= 0.;
+  double m_d0 = 0.;
+  double m_z0 = 0.;
 
-  double m_sigma_pt;
-  double m_sigma_eta;
-  double m_sigma_phi;
-  double m_sigma_d0;
-  double m_sigma_z0;
-  int m_FakeFlags;
+  double m_sigma_pt = 0. ;
+  double m_sigma_eta = 0.;
+  double m_sigma_phi = 0.;
+  double m_sigma_d0 = 0. ;
+  double m_sigma_z0 = 0. ;
+  int m_FakeFlags = 0;
 };
 }
 

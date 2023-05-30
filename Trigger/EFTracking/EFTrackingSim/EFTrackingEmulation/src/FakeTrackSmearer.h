@@ -13,7 +13,9 @@
 #include "TH1F.h"
 #include "TROOT.h"
 
+
 #include "FTS_Track.h"
+#include <cmath>
 namespace FitFunctions {
   #include "FitFunctions/L1TT/d0Fitparam_N.C"
   #include "FitFunctions/L1TT/z0Fitparam_N.C"
@@ -24,20 +26,12 @@ namespace FitFunctions {
 class FakeTrackSmearer
 {
  public:
-  FakeTrackSmearer(std::string InstanceName, long long randomseed=0, bool verbose=false)
-    {
-      m_useCoinToss=false;
-      m_includeFakesInResolutionCalculation=false;
-      m_fakeKillerEnable=false;
-      m_produceFakes=true;
-      m_nominalEfficiency=0.95;
-      m_outPtCut=2.0;
-      m_inPtCut=1.0; 
-      m_useTrackingTruth=true;      
+  FakeTrackSmearer(const std::string & InstanceName, long long randomseed=0, bool verbose=false)
+    {    
       m_baseName=InstanceName;
       Prepare();
       m_myRandom=new TRandom3(randomseed);
-      m_ntracks=0; m_nfakes=0; Tracks.clear(); 
+      Tracks.clear(); 
       m_verbose=verbose;   
       
       // Set these in order to define the scenario:
@@ -46,6 +40,9 @@ class FakeTrackSmearer
       //UseResolutionPtCutOff(true);  
       
     }
+    //
+  FakeTrackSmearer(const FakeTrackSmearer & other) = delete;
+  FakeTrackSmearer & operator=(const FakeTrackSmearer & other) = delete;
 
 // prepare the functions to use
   void Prepare()
@@ -167,9 +164,9 @@ double curvRefFunc(double eta __attribute__((unused)),double pt __attribute__((u
     // input curv is in GeV    
     bool verbose=m_verbose;
       
-    double abseta=TMath::Abs(eta);
-    double abspt=TMath::Abs(1.0/curv); //GeV
-    if (verbose) printf("Smearer::AddTrack : d0=%f, z0=%f, qOverPt=%f, eta=%f, phi=%f pt=%f\n", d0, z0, curv, eta,phi, TMath::Abs(1.0/curv));
+    double abseta=std::abs(eta);
+    double abspt=std::abs(1.0/curv); //GeV
+    if (verbose) printf("Smearer::AddTrack : d0=%f, z0=%f, qOverPt=%f, eta=%f, phi=%f pt=%f\n", d0, z0, curv, eta,phi, abspt);
  
     bool condition = (abspt>m_inPtCut) &&
       (d0RefFunc(abseta,abspt,verbose)>0.0) &&
@@ -242,7 +239,7 @@ double curvRefFunc(double eta __attribute__((unused)),double pt __attribute__((u
               false
         );
         if (verbose) printf("Producing this track: curv = %f, phi=%f, eta=%f, d0=%f, z0=%f pt=%f\n",gencurv, genphi, geneta, gend0, genz0, Track.pt()/1000.0);
-        if (TMath::Abs(Track.pt())>=m_outPtCut)
+        if (std::abs(Track.pt())>=m_outPtCut)
           {
             Tracks.push_back(Track);
             m_ntracks++;
@@ -270,28 +267,28 @@ double curvRefFunc(double eta __attribute__((unused)),double pt __attribute__((u
   void EnableFakes(bool enable=true)
   {
     m_produceFakes=enable;
-    if (Tracks.size()!=0)
+    if (not Tracks.empty())
       printf("Warning: you are reconfiguring fakes production but it seems you have already processed events with this instance of FakeTracksSmearer\n");
   }
 
   void FakeKillerEnable(bool enable=true)
   {
     m_fakeKillerEnable=enable;
-    if (Tracks.size()!=0)
+    if (not Tracks.empty())
       printf("Warning: you are reconfiguring fakes production but it seems you have already processed events with this instance of FakeTracksSmearer (FakeKillerEnable)\n");
   }
 
   void IncludeFakesInResolutionCalculation(bool enable=true)
   {
     m_includeFakesInResolutionCalculation=enable;
-    if (Tracks.size()!=0)
+    if (not Tracks.empty())
       printf("Warning: you are reconfiguring fakes production but it seems you have already processed events with this instance of FakeTracksSmearer (IncluldeFakesInResolutionCalculation)\n");
   }
 
   void UseCoinToss(bool enable=true)
   {
     m_useCoinToss=enable;
-    if (Tracks.size()!=0)
+    if (not Tracks.empty())
       printf("Warning: you are reconfiguring fakes production but it seems you have already processed events with this instance of FakeTracksSmearer (UseCoinToss)\n");
   }
 
@@ -309,36 +306,43 @@ double curvRefFunc(double eta __attribute__((unused)),double pt __attribute__((u
   double eta(int idx) {return Tracks[idx].eta();};
 
   
-  TH1F *d0Narrow,*z0Narrow;
-  TH1F *d0Sim,*z0Sim;
+  TH1F *d0Narrow = nullptr;
+  TH1F *z0Narrow = nullptr;
+  TH1F *d0Sim = nullptr;
+  TH1F *z0Sim = nullptr;
 
-  TF1 *d0res_eta,*d0ref_eta;
-  TF1 *z0res_eta,*z0ref_eta;
-  TF1 *d0res_pt,*d0ref_pt;
-  TF1 *z0res_pt,*z0ref_pt;
+  TF1 *d0res_eta = nullptr;
+  TF1 *d0ref_eta = nullptr;
+  TF1 *z0res_eta = nullptr;
+  TF1 *z0ref_eta = nullptr;
+  TF1 *d0res_pt = nullptr;
+  TF1 *d0ref_pt = nullptr;
+  TF1 *z0res_pt = nullptr;
+  TF1 *z0ref_pt = nullptr;
 
 
  private:
   std::string m_baseName;
-  int m_ntracks;
-  int m_nfakes;
-  bool m_verbose;
-  TRandom3 *m_myRandom;
+  int m_ntracks = 0;
+  int m_nfakes = 0;
+  bool m_verbose = false;
+  TRandom3 *m_myRandom = nullptr;
 
-  double m_FMatches;
-  double m_FakeFraction;
-  double m_SigmaScaleFactor;
-  double m_nominalEfficiency;
+  double m_FMatches = 1.; // NMatch/NOffline  i.e. k
+  double m_FakeFraction = 0.;
+  double m_SigmaScaleFactor = 1.0;//Note: This is an *integer property* in EFTrackingSmearingAlg.h
+  double m_nominalEfficiency = 0.95;
 
-  bool m_includeFakesInResolutionCalculation;
-  bool m_fakeKillerEnable;
-  bool m_useCoinToss;
-  bool m_useInputSigmas;
-  bool m_produceFakes;
-  bool m_useResolutionPtCutOff;
-  bool m_useTrackingTruth;
+  bool m_includeFakesInResolutionCalculation =  false;
+  bool m_fakeKillerEnable = false;
+  bool m_useCoinToss = false;
+  bool m_useInputSigmas = false;
+  bool m_produceFakes = true;
+  bool m_useResolutionPtCutOff = false;
+  bool m_useTrackingTruth = true;
   double m_resolutionPtCutOff=0.0;
-  double m_inPtCut,m_outPtCut;
+  double m_inPtCut = 1.0;
+  double m_outPtCut = 2.0;
 
 };
 
