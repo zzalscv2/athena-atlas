@@ -89,7 +89,7 @@ namespace ActsTrk
     // CKF configuration
     Acts::PropagatorPlainOptions m_pOptions;
     std::unique_ptr<Acts::MeasurementSelector> m_measurementSelector;
-    Acts::CombinatorialKalmanFilterExtensions<Acts::VectorMultiTrajectory> m_ckfExtensions;
+    Acts::CombinatorialKalmanFilterExtensions<ActsTrk::TrackStateBackend> m_ckfExtensions;
 
     // statistics
     mutable std::atomic<size_t> m_nTotalSeeds{0};

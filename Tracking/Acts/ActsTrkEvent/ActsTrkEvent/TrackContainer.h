@@ -10,8 +10,10 @@
 
 namespace ActsTrk
 {
-  using TrackContainer = Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>;
-  using ConstTrackContainer = Acts::TrackContainer<Acts::ConstVectorTrackContainer, Acts::ConstVectorMultiTrajectory, Acts::detail::ValueHolder>;
+  using TrackStateBackend =  Acts::VectorMultiTrajectory;
+  using ConstTrackStateBackend =  Acts::ConstVectorMultiTrajectory;
+  using TrackContainer = Acts::TrackContainer<Acts::VectorTrackContainer, TrackStateBackend, Acts::detail::ValueHolder>;
+  using ConstTrackContainer = Acts::TrackContainer<Acts::ConstVectorTrackContainer, ConstTrackStateBackend, Acts::detail::ValueHolder>;
 }
 
 #endif

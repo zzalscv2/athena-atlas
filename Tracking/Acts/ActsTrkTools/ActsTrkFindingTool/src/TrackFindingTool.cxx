@@ -29,9 +29,8 @@
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/TrackFitting/GainMatrixSmoother.hpp"
 #include "Acts/TrackFitting/GainMatrixUpdater.hpp"
-#include "Acts/EventData/MultiTrajectory.hpp"
-#include "Acts/EventData/VectorMultiTrajectory.hpp"
-#include "Acts/EventData/VectorTrackContainer.hpp"
+// ACTS glue
+#include "ActsTrkEvent/TrackContainer.h"
 
 // PACKAGE
 #include "ActsGeometry/ATLASSourceLink.h"
@@ -61,22 +60,22 @@ namespace
 
   static Acts::Result<void>
   gainMatrixUpdate(const Acts::GeometryContext &gctx,
-                   typename Acts::MultiTrajectory<Acts::VectorMultiTrajectory>::TrackStateProxy trackState,
+                   typename Acts::MultiTrajectory<ActsTrk::TrackStateBackend>::TrackStateProxy trackState,
                    Acts::NavigationDirection direction,
                    const Acts::Logger &logger)
   {
     Acts::GainMatrixUpdater updater;
-    return updater.template operator()<Acts::VectorMultiTrajectory>(gctx, trackState, direction, logger);
+    return updater.template operator()<ActsTrk::TrackStateBackend>(gctx, trackState, direction, logger);
   }
 
   static Acts::Result<void>
   gainMatrixSmoother(const Acts::GeometryContext &gctx,
-                     Acts::MultiTrajectory<Acts::VectorMultiTrajectory> &trajectory,
+                     Acts::MultiTrajectory<ActsTrk::TrackStateBackend> &trajectory,
                      size_t entryIndex,
                      const Acts::Logger &logger)
   {
     Acts::GainMatrixSmoother smoother;
-    return smoother.template operator()<Acts::VectorMultiTrajectory>(gctx, trajectory, entryIndex, logger);
+    return smoother.template operator()<ActsTrk::TrackStateBackend>(gctx, trajectory, entryIndex, logger);
   }
 
   /// Borrowed from Acts Examples/Framework/include/ActsExamples/EventData/GeometryContainers.hpp
@@ -201,7 +200,7 @@ namespace
   using Stepper = Acts::EigenStepper<>;
   using Navigator = Acts::Navigator;
   using Propagator = Acts::Propagator<Stepper, Navigator>;
-  using CKF = Acts::CombinatorialKalmanFilter<Propagator, Acts::VectorMultiTrajectory>;
+  using CKF = Acts::CombinatorialKalmanFilter<Propagator, ActsTrk::TrackStateBackend>;
 
   // get Athena SiDetectorElement from Acts surface
   static const InDetDD::SiDetectorElement *actsToDetElem(const Acts::Surface &surface)
@@ -279,8 +278,8 @@ namespace ActsTrk
 
     m_ckfExtensions.updater.connect<&gainMatrixUpdate>();
     m_ckfExtensions.smoother.connect<&gainMatrixSmoother>();
-    m_ckfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<Acts::VectorMultiTrajectory, ATLASUncalibSourceLink>>();
-    m_ckfExtensions.measurementSelector.connect<&Acts::MeasurementSelector::select<Acts::VectorMultiTrajectory>>(m_measurementSelector.get());
+    m_ckfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<ActsTrk::TrackStateBackend, ATLASUncalibSourceLink>>();
+    m_ckfExtensions.measurementSelector.connect<&Acts::MeasurementSelector::select<ActsTrk::TrackStateBackend>>(m_measurementSelector.get());
 
     return StatusCode::SUCCESS;
   }
@@ -354,7 +353,7 @@ namespace ActsTrk
     slAccessorDelegate.connect<&UncalibSourceLinkAccessor::range>(&slAccessor);
 
     // Set the CombinatorialKalmanFilter options
-    using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<UncalibSourceLinkAccessor::Iterator, Acts::VectorMultiTrajectory>;
+    using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<UncalibSourceLinkAccessor::Iterator, ActsTrk::TrackStateBackend>;
     TrackFinderOptions options(tgContext,
                                mfContext,
                                calContext,
@@ -367,7 +366,7 @@ namespace ActsTrk
     ATH_MSG_DEBUG("Invoke track finding with " << estimatedTrackParameters.size() << " seeds.");
 
     Acts::TrackContainer tc{Acts::VectorTrackContainer{},
-                            Acts::VectorMultiTrajectory{}};
+                            ActsTrk::TrackStateBackend{}};
 
     m_nTotalSeeds += estimatedTrackParameters.size();
 
@@ -435,7 +434,7 @@ namespace ActsTrk
       // Loop over all the output state to create track state
       tracks.trackStateContainer().visitBackwards(
           lastMeasurementIndex,
-          [&](const Acts::VectorMultiTrajectory::ConstTrackStateProxy &state) -> void
+          [&](const ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
           {
             // First only consider states with an associated detector element
             if (!state.referenceSurface().associatedDetectorElement())
