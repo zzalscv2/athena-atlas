@@ -97,7 +97,8 @@ for option in defaultOptions:
 
 for option in opt_obsolete:
     if option in globals():
-        log.error("%s is not supported anymore. Set the relevant flag instead.", option)
+        log.error("%s is not supported anymore. Set the relevant ConfigFlag instead.", option)
+        theApp.exit(1)
 
 import re
 
