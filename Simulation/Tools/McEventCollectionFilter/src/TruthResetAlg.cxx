@@ -89,6 +89,7 @@ StatusCode TruthResetAlg::execute() {
      for (auto& particle: p_to_remove) outputEvent->remove_particle(particle);
      for (auto& vertex: outputEvent->vertices()) {
        if (HepMC::is_simulation_vertex(vertex) || vertex->particles_out().empty() ) {
+         v_to_remove.push_back(vertex);
        }
      }
      for (auto& vertex: v_to_remove) outputEvent->remove_vertex(vertex);
@@ -150,6 +151,7 @@ StatusCode TruthResetAlg::execute() {
         particleIter != inputEvent.particles_end(); ++particleIter ) {
     const HepMC::GenParticle* currentParticle = *particleIter;
     if (HepMC::is_simulation_particle(currentParticle)) {
+      continue; // skip particles created by simulation
     }
     std::unique_ptr<HepMC::GenParticle> copyOfGenParticle = std::make_unique<HepMC::GenParticle>(*currentParticle);
     const bool isBeamParticle1(currentParticle == inputEvent.beam_particles().first);
