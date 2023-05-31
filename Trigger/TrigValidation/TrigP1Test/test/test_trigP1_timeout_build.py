@@ -15,7 +15,7 @@ output_name_base = 'output.test_trigP1_timeout'
 
 ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
-ex.job_options = 'TrigP1Test/testHLT_timeout.py'
+ex.job_options = 'TrigP1Test.Timeout.run'
 ex.input = 'data'
 ex.max_events = 20
 ex.args = '--timeout 2000'
