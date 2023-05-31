@@ -22,7 +22,8 @@ flags.addFlag("Trigger.enabledSignatures",[])
 flags.addFlag("Trigger.disabledSignatures",[])
 flags.addFlag("Trigger.selectChains",[])
 flags.addFlag("Trigger.disableChains",[])
-flags.Trigger.enabledSignatures = ['Muon', 'Photon','Electron', 'MinBias', 'HeavyIon', 'Jet']
+flags.Trigger.enabledSignatures = ['Muon', 'Photon','Electron', 'MinBias', 'HeavyIon', 'Jet', 'Tau', 'Bphysics', 'Egamma', 'MET', 'Bjet']
+# to be added after ATR-27632 fix: 'Calib']
 
 flags.Trigger.generateMenuDiagnostics = True
 
