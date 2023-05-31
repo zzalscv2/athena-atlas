@@ -2574,7 +2574,7 @@ MCTruthClassifier::convHadronTypeToOrig(ParticleType pType, int motherPDG)
 }
 //---------------------------------------------------------------------------------
 ParticleOrigin
-MCTruthClassifier::defHadronType(long pdg)
+MCTruthClassifier::defHadronType(int pdg)
 {
   //---------------------------------------------------------------------------------
   // Special case
@@ -2615,7 +2615,7 @@ MCTruthClassifier::defHadronType(long pdg)
 
 //---------------------------------------------------------------------------------
 ParticleType
-MCTruthClassifier::defTypeOfHadron(long pdg)
+MCTruthClassifier::defTypeOfHadron(int pdg)
 {
   //---------------------------------------------------------------------------------
   // Note that this differs from the above by return type -- should we be more clear?
@@ -2699,7 +2699,7 @@ MCTruthClassifier::isHadron(const xAOD::TruthParticle* thePart)
 
   bool isPartHadron = false;
   if (thePart != nullptr) {
-    long pdg = thePart->pdgId();
+    int pdg = thePart->pdgId();
     isPartHadron = MC::PID::isHadron(pdg);
     //--exclude protons from beam
     if (pdg == 2212 && thePart->status() == 3)
@@ -2847,7 +2847,7 @@ MCTruthClassifier::defOutComeOfMuon(const xAOD::TruthParticle* thePart) const
   int NumOfMuonNeutr(0);
 
   int NumOfElec(0);
-  long EndDaugType(0);
+  int EndDaugType(0);
 
   NumOfMuDaug = EndVert->nOutgoingParticles();
   for (unsigned int ipOut = 0; ipOut < EndVert->nOutgoingParticles(); ipOut++) {
@@ -2908,7 +2908,7 @@ MCTruthClassifier::defOutComeOfTau(const xAOD::TruthParticle* thePart, Info* inf
   std::vector<const xAOD::TruthParticle*> tauFinalStatePart = findFinalStatePart(EndVert);
 
   for (auto& i : tauFinalStatePart) {
-    long pdg = i->pdgId();
+    int pdg = i->pdgId();
     if (MC::PID::isElectron(pdg))
       NumOfElec++;
     else if (MC::PID::isMuon(pdg))

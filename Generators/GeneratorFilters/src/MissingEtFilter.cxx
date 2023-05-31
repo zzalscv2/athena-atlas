@@ -28,7 +28,7 @@ StatusCode MissingEtFilter::filterEvent() {
       // We want Missing Transverse Momentum, not "Missing Transverse Energy"
       if (MC::isNonInteracting(pitr) || (m_useChargedNonShowering && MC::isChargedNonShowering(pitr->pdg_id()))) {
         bool addpart = true;
-        if(!m_useHadronicNu && MC::isNeutrino(pitr->pdg_id()) && !(fromWZ(pitr) || fromTau(pitr)) ) {
+        if(!m_useHadronicNu && MC::PID::isNeutrino(pitr->pdg_id()) && !(fromWZ(pitr) || fromTau(pitr)) ) {
           addpart = false; // ignore neutrinos from hadron decays
         }
         if(addpart) {
