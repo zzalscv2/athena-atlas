@@ -8,6 +8,7 @@ def createHIRecConfigFlags():
   
   flags.addFlag("HeavyIon.doGlobal", True)
   flags.addFlag("HeavyIon.Global.doEventShapeSummary", True)
+  flags.addFlag("HeavyIon.Global.EventShape", "HIEventShape")
 
   flags.addFlag("HeavyIon.doJet", True)
   flags.addFlag("HeavyIon.Jet.doTrackJetSeed", True)
@@ -17,10 +18,10 @@ def createHIRecConfigFlags():
   flags.addFlag("HeavyIon.Jet.RecoOutputPtMin", 25000)
   flags.addFlag("HeavyIon.Jet.TrackJetPtMin", 7000)
   flags.addFlag("HeavyIon.Jet.HIClusterGeoWeightFile", "auto")
-  flags.addFlag("HeavyIon.Jet.ClusterKey", "HICluster")
+  flags.addFlag("HeavyIon.Jet.ClusterKey", "HIClusters")
 
   flags.addFlag("HeavyIon.Egamma.doSubtractedClusters", lambda prevFlags: prevFlags.Reco.EnableHI)
-  flags.addFlag("HeavyIon.Egamma.EventShape", "HIEventShape")
+  flags.addFlag("HeavyIon.Egamma.EventShape", "HIEventShape_iter_egamma")
   flags.addFlag("HeavyIon.Egamma.SubtractedCells", "SubtractedCells")
   flags.addFlag("HeavyIon.Egamma.CaloTopoCluster", lambda prevFlags: "SubtractedCaloCalTopoClusters" if prevFlags.Calo.TopoCluster.doTopoClusterLocalCalib else "SubtractedCaloTopoClusters")
 
