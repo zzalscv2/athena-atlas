@@ -21,7 +21,6 @@
 #include "xAODBase/IParticle.h"
 #include "xAODBase/IParticleContainer.h"
 #include "AthenaKernel/errorcheck.h"
-#include "HepPID/ParticleIDMethods.hh"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "StoreGate/ThinningHandle.h"
 #include "GaudiKernel/ThreadLocalContext.h"

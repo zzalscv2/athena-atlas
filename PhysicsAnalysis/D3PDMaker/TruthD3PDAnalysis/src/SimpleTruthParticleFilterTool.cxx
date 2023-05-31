@@ -8,7 +8,7 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/MagicNumbers.h"
-#include "HepPID/ParticleIDMethods.hh"
+#include "TruthUtils/HepMCHelpers.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
 namespace D3PD {
@@ -72,8 +72,8 @@ SimpleTruthParticleFilterTool::isAccepted (const HepMC::ConstGenParticlePtr& p)
   }
 
   // Cheating.  If we ask for 94 or 95, use those for heavy flavor hadrons
-  if (m_filterID==94 && HepPID::hasCharm  (p->pdg_id()) && p->momentum().perp()>m_minPt) ok=true;
-  if (m_filterID==95 && HepPID::hasBottom (p->pdg_id()) && p->momentum().perp()>m_minPt) ok=true;
+  if (m_filterID==94 && MC::hasCharm  (p->pdg_id()) && p->momentum().perp()>m_minPt) ok=true;
+  if (m_filterID==95 && MC::hasBottom (p->pdg_id()) && p->momentum().perp()>m_minPt) ok=true;
 
   return ok;
 }

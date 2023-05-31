@@ -132,7 +132,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
                 << " has valid ReadHandle ");
 
   int iParticlePDG = thePart->pdgId();
-  // status=10902 in Pythia?
+  // status=HepMC::SPECIALSTATUS in Pythia?
   if (thePart->status() != 1 && thePart->status() != 2 && thePart->status() != HepMC::SPECIALSTATUS) {
     return std::make_pair(GenParticle, partOrig);
   }
@@ -255,7 +255,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
     }
   }
 
-  if (motherPDG == iParticlePDG && motherStatus == 3 && thePart->status() == 10902)
+  if (motherPDG == iParticlePDG && motherStatus == 3 && thePart->status() == HepMC::SPECIALSTATUS)
     return std::make_pair(GenParticle, partOrig);
 
   if (MC::PID::isElectron(iParticlePDG)) {
@@ -431,7 +431,7 @@ bool MCTruthClassifier::fromHadron(const xAOD::TruthParticle* p,
     // should this really go into parton-level territory?
     // probably depends where BSM particles are being decayed
     fromBSM |= MC::PID::isBSM(parent->pdgId());
-    // sometimes Athena replaces status 2 with 10902, see e.g.
+    // sometimes Athena replaces status 2 with HepMC::SPECIALSTATUS, see e.g.
     // PhysicsAnalysis/TruthParticleID/McParticleTools/src/EtaPtFilterTool.cxx#L374
     // not at all clear why and unfortunately there's no documentation in the code
     const int st = parent->status();

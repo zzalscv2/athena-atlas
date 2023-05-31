@@ -13,7 +13,6 @@
 
 #include "TruthParticleChildAssociationTool.h"
 #include "xAODTruth/TruthVertex.h"
-#include "barcodeOrder.h"
 #include "AthenaKernel/errorcheck.h"
 
 
@@ -66,7 +65,7 @@ TruthParticleChildAssociationTool::reset (const xAOD::TruthParticle& p)
     if (p2)
       m_xaod_children[i] =  p2;
   }
-  std::sort (m_xaod_children.begin(), m_xaod_children.end(), barcodeOrder());
+  std::sort (m_xaod_children.begin(), m_xaod_children.end(), [](const auto & a, const auto & b) -> bool{ return a->barcode()< b->barcode(); });
   return StatusCode::SUCCESS;
 }
 

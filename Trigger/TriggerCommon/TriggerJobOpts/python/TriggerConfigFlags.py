@@ -208,8 +208,11 @@ def createTriggerFlags(doTriggerRecoFlags):
     # shortcut to check if job is running in a partition (i.e. partition name is not empty)
     flags.addFlag('Trigger.Online.isPartition', lambda prevFlags: len(prevFlags.Trigger.Online.partitionName)>0)
 
-    # use TrigMonTHistSvc
-    flags.addFlag('Trigger.Online.useOnlineTHistSvc', False)
+    flags.addFlag('Trigger.Online.useOnlineTHistSvc', False,
+                  help='Use online THistSvc')
+
+    flags.addFlag('Trigger.Online.BFieldAutoConfig', True,
+                  help='Auto-configure magnetic field from currents in IS')
 
     # write BS output file
     flags.addFlag('Trigger.writeBS', False)

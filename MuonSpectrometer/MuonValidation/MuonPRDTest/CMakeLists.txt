@@ -21,7 +21,7 @@ atlas_add_component( MuonPRDTest
                      INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel GaudiKernel MuonAGDDDescription MuonCSC_CnvToolsLib 
                                     MuonDigitContainer MuonPRDTestLib MuonPrepRawData MuonRDO MuonReadoutGeometry MuonSimData MuonSimEvent TGCcablingInterfaceLib 
-                                    AthAnalysisBaseCompsLib xAODCutFlow PileupReweightingLib EventBookkeeperMetaData xAODMetaData)
+                                    AthAnalysisBaseCompsLib xAODCutFlow PileupReweightingLib EventBookkeeperMetaData xAODMetaData MuonPattern)
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )

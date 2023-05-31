@@ -735,7 +735,7 @@ TriggerHLTListRun3 = [
     ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT',        'BS ESD AODFULL',  'Tau'),
     ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT_probe',  'BS ESD AODFULL',  'Tau'),
 
-    ('xAOD::JetContainer#HLT_jet_seed',                         'BS ESD AODCOMM', 'Tau', 'inViews:TAUCaloMVAViews'),
+    ('xAOD::JetContainer#HLT_jet_seed',                         'BS ESD AODCOMM', 'Tau', 'inViews:tauCaloMVAViews'),
     ('xAOD::JetAuxContainer#HLT_jet_seedAux.',                  'BS ESD AODCOMM', 'Tau'),
 
     # Jet
@@ -1007,7 +1007,7 @@ TriggerHLTListRun3 = [
 
     # tau
     # will enable when needed
-    ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_CaloMVAOnly',                         'BS ESD AODFULL', 'Tau', 'inViews:TAUCaloMVAViews'),
+    ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_CaloMVAOnly',                         'BS ESD AODFULL', 'Tau', 'inViews:tauCaloMVAViews'),
     ('xAOD::TauJetAuxContainer#HLT_TrigTauRecMerged_CaloMVAOnlyAux.',                  'BS ESD AODFULL', 'Tau'),
 
     ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_MVA',                     'BS ESD AODFULL AODSLIM', 'Tau', 'inViews:TAUMVAViews'),
@@ -1020,7 +1020,7 @@ TriggerHLTListRun3 = [
     ('xAOD::TauJetAuxContainer#HLT_TrigTauRecMerged_LRTAux.',              'BS ESD AODFULL AODSLIM', 'Tau'),
 
     # tau calo clusters
-    ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersLC',                             'BS ESD AODFULL', 'Tau', 'inViews:TAUCaloMVAViews'),
+    ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersLC',                             'BS ESD AODFULL', 'Tau', 'inViews:tauCaloMVAViews'),
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersLCAux.nCells.CENTER_MAG', 'BS ESD AODFULL', 'Tau'),
 
     # tau tracks

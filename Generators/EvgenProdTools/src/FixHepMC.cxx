@@ -20,7 +20,69 @@ FixHepMC::FixHepMC(const std::string& name, ISvcLocator* pSvcLocator)
   declareProperty("CleanDecays", m_cleanDecays = true, "Clean decay chains from non-propagating particles?");
   declareProperty("LoopsByBarcode", m_loopByBC = false, "Detect loops based on barcodes as well as vertices?");
 }
+#ifndef HEPMC3
+//---->//This is copied from MCUtils
+  /// @name Event reduction functions
+  //@{
 
+  /// Remove an unwanted particle from the event, collapsing the graph structure consistently
+static  inline void reduce(HepMC::GenEvent* ge, HepMC::GenParticle* gp) {
+    // Do nothing if for some reason this particle is not actually in this event
+    if (gp->parent_event() != ge) return;
+
+    // Get start and end vertices
+    HepMC::GenVertex* vstart = gp->production_vertex();
+    HepMC::GenVertex* vend = gp->end_vertex();
+
+    // Disconnect the unwanted particle from its vertices and delete it
+    if (vstart != nullptr) vstart->remove_particle(gp);
+    if (vend != nullptr) vend->remove_particle(gp);
+    delete gp;
+
+    // If start/end vertices are valid and distinct, and this was the only particle that
+    // connected them, then reassign the end vertex decay products to the start vertex
+    // and rewrite the vertex position as most appropriate.
+    /// @note The disconnected end vertex will be picked up by the final "sweeper" loop if necessary.
+    /// @note We do the reassigning this way since GV::add_particle_*() modifies the end vertex
+    if (vstart != nullptr && vend != nullptr && vend != vstart) {
+      bool is_only_link = true;
+      for (auto pchild=vstart->particles_out_const_begin();pchild!=vstart->particles_out_const_end();++pchild) {
+        if ((*pchild)->end_vertex() == vend) is_only_link = false;
+      }
+      if (is_only_link) {
+        if (vend->position() != HepMC::FourVector())
+          vstart->set_position(vend->position()); //< @todo Always use end position if defined... ok?
+        while (vend->particles_out_size() > 0) {
+          vstart->add_particle_out(*vend->particles_out_const_begin());
+        }
+        while (vend->particles_in_size() > 0) {
+          vstart->add_particle_in(*vend->particles_in_const_begin());
+        }
+      }
+    }
+
+    // Sweep up any vertices orphaned by the particle removal
+    /// @todo Can we be a bit more efficient rather than having to run over all vertices every time?
+    ///       Or allow disabling of this clean-up, with a single clean being run at the end of filtering.
+    /// @todo Use neater looping via vertices_match (or iterated vertex_match)
+    /// @todo Also look for and report changes in number of no-parent and no-child vertices
+    std::vector<HepMC::GenVertex*> orphaned_vtxs;
+    for (HepMC::GenEvent::vertex_const_iterator vi = ge->vertices_begin(); vi != ge->vertices_end(); ++vi) {
+      if ((*vi)->particles_in_size() == 0 && (*vi)->particles_out_size() == 0) orphaned_vtxs.push_back(*vi);
+    }
+    for (HepMC::GenVertex* gv : orphaned_vtxs) delete gv;
+  }
+
+  /// Remove unwanted particles from the event, collapsing the graph structure consistently
+  inline void reduce(HepMC::GenEvent* ge, std::vector<HepMC::GenParticlePtr> toremove) {
+    while (toremove.size()) {
+      auto gp = toremove.back();
+      toremove.pop_back();
+      reduce(ge, gp);
+    }
+  }
+//<----//This is copied from MCUtils
+#endif
 
 StatusCode FixHepMC::execute() {
   for (McEventCollection::const_iterator ievt = events()->begin(); ievt != events()->end(); ++ievt) {
@@ -357,14 +419,14 @@ StatusCode FixHepMC::execute() {
     int num_noparent_vtxs_orig = 0;
     int num_nochild_vtxs_orig = 0;
     for (auto v = evt->vertices_begin(); v != evt->vertices_end(); ++v) {
-      if (MC::isDisconnected(*v)) num_orphan_vtxs_orig++;
-      if (MC::hasNoParents(*v)) num_noparent_vtxs_orig++;
-      if (MC::hasNoChildren(*v)) num_nochild_vtxs_orig++;
+      if (v->particles_in_size()==0&&v->particles_out_size()==0) num_orphan_vtxs_orig++;
+      if (v->particles_in_size()==0) num_noparent_vtxs_orig++;
+      if (v->particles_out_size()==0) num_nochild_vtxs_orig++;
     }
     // Clean!
     int signal_vertex_bc = evt->signal_process_vertex() ? evt->signal_process_vertex()->barcode() : 0;
     //This is the only place where reduce is used.
-    MC::reduce(evt , toremove);
+    reduce(evt , toremove);
     if (evt->barcode_to_vertex (signal_vertex_bc) == nullptr) {
       evt->set_signal_process_vertex (nullptr);
     }
@@ -375,9 +437,9 @@ StatusCode FixHepMC::execute() {
     int num_noparent_vtxs_filt = 0;
     int num_nochild_vtxs_filt = 0;
     for (auto v = evt->vertices_begin(); v != evt->vertices_end(); ++v) {
-      if (MC::isDisconnected(*v)) num_orphan_vtxs_filt++;
-      if (MC::hasNoParents(*v)) num_noparent_vtxs_filt++;
-      if (MC::hasNoChildren(*v)) num_nochild_vtxs_filt++;
+      if (v->particles_in_size()==0&&v->particles_out_size()==0) num_orphan_vtxs_filt++;
+      if (v->particles_in_size()==0) num_noparent_vtxs_filt++;
+      if (v->particles_out_size()==0) num_nochild_vtxs_filt++;
     }
 
     // Write out the change in the number of particles

@@ -17,6 +17,7 @@ def createHIRecConfigFlags():
   flags.addFlag("HeavyIon.Jet.RecoOutputPtMin", 25000)
   flags.addFlag("HeavyIon.Jet.TrackJetPtMin", 7000)
   flags.addFlag("HeavyIon.Jet.HIClusterGeoWeightFile", "auto")
+  flags.addFlag("HeavyIon.Jet.ClusterKey", "HICluster")
 
   flags.addFlag("HeavyIon.Egamma.doSubtractedClusters", lambda prevFlags: prevFlags.Reco.EnableHI)
   flags.addFlag("HeavyIon.Egamma.EventShape", "HIEventShape")

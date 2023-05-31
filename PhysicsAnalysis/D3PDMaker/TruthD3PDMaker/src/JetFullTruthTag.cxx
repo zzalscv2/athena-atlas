@@ -14,7 +14,7 @@
 #include "JetEvent/Jet.h"
 #include "GeneratorObjects/McEventCollection.h"
 #include "AtlasHepMC/GenParticle.h"
-#include "HepPID/ParticleIDMethods.hh"
+#include "TruthUtils/HepMCHelpers.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
 #include <iostream>
@@ -87,7 +87,7 @@ StatusCode JetFullTruthTag::fill (const Jet& p)
         } // Low energy
 
         // Hadron labeling section
-        if ((HepPID::isHadron (pdgid) || std::abs(pdgid)==15) && (currentGenParticle->momentum().perp()>m_min_hadron_pt)){
+        if ((MC::isHadron (pdgid) || std::abs(pdgid)==15) && (currentGenParticle->momentum().perp()>m_min_hadron_pt)){
 
           // Check on DR match
           dR2 = std::pow( std::acos( std::cos( p.phi() - currentGenParticle->momentum().phi() ) ) , 2 );
@@ -99,11 +99,11 @@ StatusCode JetFullTruthTag::fill (const Jet& p)
               *m_hadronPDGID = 15;
               *m_hadronFlavor = 15;
             }
-            if ( HepPID::hasCharm (pdgid) && ((*m_hadronPDGID)==0 || (*m_hadronPDGID)==15)){
+            if ( MC::hasCharm (pdgid) && ((*m_hadronPDGID)==0 || (*m_hadronPDGID)==15)){
               *m_hadronPDGID = 4;
               *m_hadronFlavor = pdgid;
             }
-            if ( HepPID::hasBottom (pdgid) ){
+            if ( MC::hasBottom (pdgid) ){
               *m_hadronPDGID = 5;
               *m_hadronFlavor = pdgid;
             }

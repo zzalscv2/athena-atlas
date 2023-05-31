@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TROOT.h"
@@ -46,7 +46,7 @@ ValidationStep*  get_validation_histo(const char* name, TFile* result) {
 }
 */
 
-void NSWGeomAnalysis (std::string filename) {
+void NSWGeomAnalysis (const std::string& filename) {
 
     setup();
 

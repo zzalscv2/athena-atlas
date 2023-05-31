@@ -104,7 +104,11 @@ def getHltROBDataProviderSvc(flags, name='ROBDataProviderSvc'):
 
 def getHltEventLoopMgr(flags, name='HltEventLoopMgr'):
    '''online event loop manager'''
-   svc = CompFactory.HltEventLoopMgr(name)
+   svc = CompFactory.HltEventLoopMgr(
+      name,
+      setMagFieldFromPtree = flags.Trigger.Online.BFieldAutoConfig
+   )
+
    svc.MonTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
 
    svc.MonTool.defineHistogram('TotalTime', path='EXPERT', type='TH1F',
