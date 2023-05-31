@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGSERVICES_HLTEVENTLOOPMGR_H
@@ -282,7 +282,7 @@ private:
     this, "execAtStart", {}, "List of algorithms/sequences to execute during prepareForRun"};
 
   Gaudi::Property<bool> m_setMagFieldFromPtree{
-    this, "setMagFieldFromPtree", false, "Read magnet currents from ptree"};
+    this, "setMagFieldFromPtree", true, "Read magnet currents from ptree"};
 
   Gaudi::Property<unsigned int> m_forceRunNumber{
     this, "forceRunNumber", 0, "Override run number"};

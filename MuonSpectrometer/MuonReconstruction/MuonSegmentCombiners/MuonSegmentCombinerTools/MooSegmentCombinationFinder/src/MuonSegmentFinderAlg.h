@@ -183,6 +183,9 @@ private:
     /// Run the NSW segment maker
     Gaudi::Property<bool> m_doSTgcSegments{this, "doStgcSegments", true};
     Gaudi::Property<bool> m_doMMSegments{this, "doMMSegments", true};
+    /// If switched to true, hits that have been already successfully combined to a segment are removed from 
+    /// future searches
+    Gaudi::Property<bool> m_removeUsedNswHits{this, "removeUsedNSW", true};
     /// Apply a preselection on the segments
     Gaudi::Property<int> m_segQuality{this, "SegmentQuality", -1};
     

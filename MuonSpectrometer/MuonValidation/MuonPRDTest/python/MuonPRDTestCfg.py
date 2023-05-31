@@ -1,8 +1,16 @@
-
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+def NswOccupancyAlgCfg(flags, binWidth = 100):
+    result = ComponentAccumulator()
+
+    histSvc = CompFactory.THistSvc(Output=["NSWSTORIES DATAFILE='NswFairyTales.root' OPT='RECREATE'"])
+    result.addService(histSvc) 
+    the_alg = CompFactory.NswOccupancyAlg("NswOccupancyAlgBin{width}".format(width = binWidth), BinWidth = binWidth)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
 
 def AddMetaAlgCfg(flags, alg_name="MuonTPMetaAlg", OutStream="NSWPRDValAlg", **kwargs):
     result = ComponentAccumulator()

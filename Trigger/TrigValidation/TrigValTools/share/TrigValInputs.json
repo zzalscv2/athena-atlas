@@ -213,8 +213,8 @@
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.801272.P8B_A14_CTEQ6L1_Jpsie3e3.recon.RDO.e8453_e8455_s3873_s3874_r13929_tid30652147_00/RDO.30652147._000003.pool.root.1",
-	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.801272.P8B_A14_CTEQ6L1_Jpsie3e3.recon.RDO.e8453_e8455_s3873_s3874_r13929_tid30652147_00/RDO.30652147._000018.pool.root.1"
+            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.801272.P8B_A14_CTEQ6L1_Jpsie3e3.recon.RDO.e8514_e8528_s4111_s4114_r14622_tid33575013_00/RDO.33575013._000001.pool.root.1",
+	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/valid1.801272.P8B_A14_CTEQ6L1_Jpsie3e3.recon.RDO.e8514_e8528_s4111_s4114_r14622_tid33575013_00/RDO.33575013._000010.pool.root.1"
         ]
     },
     "Single_el": {

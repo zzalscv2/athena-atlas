@@ -17,7 +17,7 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/MagicNumbers.h"
-#include "HepPID/ParticleIDMethods.hh"
+#include "TruthUtils/HepMCHelpers.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include <algorithm>
 
@@ -163,11 +163,11 @@ TruthParticleFilterTool::isAccepted (const HepMC::ConstGenParticlePtr& p)
     ok = true;
 
   //  OK if we should select hadrons and are in hadron range 
-  if( m_writeHadrons && HepPID::isHadron (pdg_id) && barcode < HepMC::PHOTOSMIN )
+  if( m_writeHadrons && MC::isHadron (pdg_id) && barcode < HepMC::PHOTOSMIN )
     ok = true;
 
   // OK if we should select b hadrons and are in hadron range 
-  if( m_writeBHadrons && barcode < HepMC::PHOTOSMIN && HepPID::isHadron (pdg_id) && HepPID::hasBottom (pdg_id) )
+  if( m_writeBHadrons && barcode < HepMC::PHOTOSMIN && MC::isBottomHadron (pdg_id) )
     ok= true;
 
   // PHOTOS range: check whether photons come from parton range or 
@@ -187,9 +187,9 @@ TruthParticleFilterTool::isAccepted (const HepMC::ConstGenParticlePtr& p)
       if (mother) motherPDGID = mother->pdg_id();
     }
 #endif
-    if( m_writePartons && !HepPID::isHadron( motherPDGID ) )
+    if( m_writePartons && !MC::isHadron( motherPDGID ) )
       ok = true;
-    if( m_writeHadrons && HepPID::isHadron( motherPDGID ) )
+    if( m_writeHadrons && MC::isHadron( motherPDGID ) )
       ok = true;
   }
 

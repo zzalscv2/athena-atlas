@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #define NSWstudies_cxx
@@ -211,7 +211,7 @@ void NSWstudies::match_Hits_Digits (Flocalize_collection& Hits, Flocalize_collec
 	static bool done_once = 0;
 	if (!done_once) { printf("Converting %s to %s\n", Hits.name.data(), Digits.name.data()); done_once = 1; } 
    //first level check: sizes
-   if (!quiet) printf("About to match, size of Hits: %lu, size of Digits:%lu \n", Hits.size(), Digits.size());
+   if (!quiet) printf("About to match, size of Hits: %zu, size of Digits:%zu \n", Hits.size(), Digits.size());
 
    for (unsigned int i = 0; i < Hits.size(); ++i)
    {

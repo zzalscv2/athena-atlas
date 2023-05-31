@@ -6,7 +6,6 @@
 #define MUONTESTER_MUONTESTERBRANCH_IXX
 #include <AthenaKernel/getMessageSvc.h>
 #include <GaudiKernel/MsgStream.h>
-#include <MuonTesterTree/MuonTesterBranch.h>
 namespace MuonVal {
 template <class T> bool MuonTesterBranch::addToTree(T& variable) {
     if (initialized()) {
