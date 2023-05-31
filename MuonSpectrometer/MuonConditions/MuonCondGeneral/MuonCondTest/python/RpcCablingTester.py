@@ -19,6 +19,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     flags = initConfigFlags()
+    flags.Muon.enableNRPC = True
     flags.Concurrency.NumThreads = args.threads
     flags.Concurrency.NumConcurrentEvents = args.threads  # Might change this later, but good enough for the moment.
     flags.Output.ESDFileName = args.output

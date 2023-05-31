@@ -2,15 +2,18 @@
 
 from AthenaCommon.CfgGetter import addAlgorithm, addTool
 
-
 addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getMdtRdoToMdtDigitAlg", "MdtRdoToMdtDigitAlg")
 addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getRpcRdoToRpcDigitAlg", "RpcRdoToRpcDigitAlg")
+addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getNrpcDigitToNrpcRDO", "NrpcRdoToNrpcDigitAlg")
+
 addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getTgcRdoToTgcDigitAlg", "TgcRdoToTgcDigitAlg")
 addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getSTGC_RdoToDigitAlg", "STGC_RdoToDigitAlg")
 addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getMM_RdoToDigitAlg", "MM_RdoToDigitAlg")
 
 addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getMdtDigitToMdtRDO" , "MdtDigitToMdtRDO")
 addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getRpcDigitToRpcRDO" , "RpcDigitToRpcRDO")
+addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getNrpcDigitToNrpcRDO" , "NrpcDigitToNrpcRDO")
+
 addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getTgcDigitToTgcRDO" , "TgcDigitToTgcRDO")
 addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getSTGC_DigitToRDO" , "STGC_DigitToRDO")
 addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getMM_DigitToRDO" , "MM_DigitToRDO")

@@ -164,6 +164,10 @@ flags.Detector.GeometryALFA = False
 flags.Detector.GeometryFwdRegion = False
 flags.Detector.GeometryLucid = False
 
+from MuonRecExample.MuonRecFlags import muonRecFlags
+flags.Muon.enableNRPC = muonRecFlags.doNRPCs()
+    
+
 # Increase scheduler checks and verbosity
 flags.Scheduler.CheckDependencies = True
 flags.Scheduler.ShowControlFlow = True

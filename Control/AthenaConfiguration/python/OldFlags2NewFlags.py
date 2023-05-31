@@ -6,7 +6,6 @@ def getNewConfigFlags():
     from AthenaConfiguration.OldFlags2NewFlags import getNewConfigFlags
     ConfigFlags = getNewConfigFlags()
     """
-
     # Set up a logger object.
     from AthenaCommon.Logging import logging
     log = logging.getLogger('getNewConfigFlags')
@@ -142,6 +141,7 @@ def getNewConfigFlags():
     try:
         from MuonRecExample.MuonRecFlags import muonRecFlags
         ConfigFlags.Muon.doMSVertex = muonRecFlags.doMSVertex()
+        ConfigFlags.Muon.enableNRPC = muonRecFlags.doNRPCs()
     except ImportError:
         log.info('MuonRecExample not available, "ConfigFlags.Muon.doMSVertex" not set')
         pass
