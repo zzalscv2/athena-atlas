@@ -66,30 +66,26 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
   bool use_emulated_gfex_trig =  m_emulated;
   bool use_passed_before_prescale =  m_passedb4Prescale;
   std::string  bootstrap_trigger = m_bootstrap_reference_trigger;
-  std::string random_reference_trigger = m_random_reference_trigger; 
-  std::vector<std::string> muon_triggers = {"L1_MU14FCH", "L1_MU18VFCH",
-    "L1_MU8F_TAU20IM", "L1_2MU8F", "L1_MU8VF_2MU5VF", "L1_3MU3VF",
-    "L1_MU5VF_3MU3VF", "L1_4MU3V", "L1_2MU5VF_3MU3V",
-    "L1_RD0_FILLED"};
+  std::string  HLTbootstrap_trigger = m_HLTbootstrap_reference_trigger;
+  std::vector<std::string> muon_triggers = m_muon_reference_triggers;
+  std::vector<std::string> HLTrandom_triggers = m_HLTrandom_reference_triggers;
   std::vector<std::string> gFex_types {"leadingGfex_SmallRadiusTOB", "leadingGfex_LargeRadiusTOB"};
   
   
   //Define the various reference vector things!
-  std::vector<std::string> reference_trigger_options {"Bootstrap", "Random", "No", "Muon"};
+  std::vector<std::string> reference_trigger_options {"Bootstrap", "BootstrapHLT", "RandomHLT", "No", "Muon"};
   
-  bool bootstrap_ref_decision = false; //bootstrap trigger decision (L1_J15 -- defined in py file)
-  bool random_ref_decision = false; //random reference trigger decision, (L1_RD0_FILLED -- defined in py file)
-  bool muon_ref_decision = false; //muon trigger decision, a combinaton of if any of the muon triggers in line 70 - 73 passed 
+  bool bootstrap_ref_decision = false; //bootstrap trigger decision 
+  bool bootstrapHLT_ref_decision = false; //HLT bootstrap trigger chain decision 
+  bool random_ref_decision = false; //random reference triggers decision
+  bool muon_ref_decision = false; //muon reference triggers decision
   
-  // if use pass before prescale, then we have to use this more complicated format
-  // is passed bits, l1 passed before prescale feature for extracting if the trigger passed
+
+
+  //if using pass before prescale to increase statstics, we determine reference trigger decision differently
   if (use_passed_before_prescale) {
     const unsigned int bs_bits = AthMonitorAlgorithm::getTrigDecisionTool()->isPassedBits(bootstrap_trigger);
     bootstrap_ref_decision = bs_bits & TrigDefs::L1_isPassedBeforePrescale;
-    
-    const unsigned int random_trigger_bits = AthMonitorAlgorithm::getTrigDecisionTool()->isPassedBits(random_reference_trigger);
-    random_ref_decision = random_trigger_bits & TrigDefs::L1_isPassedBeforePrescale;
-    
     for (auto & u : muon_triggers) {
       const unsigned int bits = AthMonitorAlgorithm::getTrigDecisionTool()->isPassedBits(u);
       bool pass = bits & TrigDefs::L1_isPassedBeforePrescale;
@@ -99,15 +95,22 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
   // if not using pass before prescale, then is a more direct process to see if trigger passed
   else {
     bootstrap_ref_decision = AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(bootstrap_trigger);
-    random_ref_decision = AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(random_reference_trigger);
     for (auto & u : muon_triggers) {
       if (AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(u)) {muon_ref_decision = true;}
     } //close iterating through the muon triggers
   } //close else
+
+  //then for the HLT decision chains, we always want to use the traditional way of getting our trigger deicsion
+  bootstrapHLT_ref_decision = AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(HLTbootstrap_trigger);
+  for (auto & u : HLTrandom_triggers) {
+    if (AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(u)) {random_ref_decision = true;}
+  } //close iterating through the HLT random chains
+
   
   std::map<std::string, bool> reference_trigger_decision {
     {"Bootstrap", bootstrap_ref_decision },
-    {"Random", random_ref_decision},
+    {"BootstrapHLT", bootstrapHLT_ref_decision },
+    {"RandomHLT", random_ref_decision},
     {"No", true},
     {"Muon", muon_ref_decision}
   };
@@ -256,10 +259,9 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
   std::string emulatedString = " ";
   if (use_emulated_gfex_trig) {emulatedString = " Emulated Decision "; }
   
-  
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Fill some useful sample histograms
+  // Fill sample histograms of the pt of leading jet
   auto raw_pt  = Monitored::Scalar<float>("raw_pt", 0.);
   raw_pt = jet_pt["leadingOffline_SmallRadiusJet"];
   fill(m_packageName, raw_pt);
