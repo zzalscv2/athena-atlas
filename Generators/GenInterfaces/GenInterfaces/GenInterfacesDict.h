@@ -12,9 +12,6 @@
 // Includes for the dictionary generation:
 #include "GenInterfaces/IEvgenOTFTopUpSvc.h"
 #include "GenInterfaces/IHepMCWeightSvc.h"
-#include "GenInterfaces/IHforTool.h"
-#include "GenInterfaces/IPDFReweightTool.h"
-
 #include "AtlasHepMC/SimpleVector.h"
 #include <vector>
 
