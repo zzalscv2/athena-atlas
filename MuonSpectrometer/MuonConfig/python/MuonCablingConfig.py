@@ -5,18 +5,19 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def NRPCCablingConfigCfg(flags, name = "MuonNRPC_CablingAlg", **kwargs):
     result = ComponentAccumulator()
-    from AthenaConfiguration.Enums  import LHCPeriod
-    if  flags.GeoModel.Run < LHCPeriod.Run3:
+    if not flags.Muon.enableNRPC:
         return result
     ### Add the database configuration here
     NRPCCablingAlg = CompFactory.MuonNRPC_CablingAlg(name, **kwargs)
     result.addCondAlgo( NRPCCablingAlg, primary= True)
     return result
 
+
 def RPCCablingConfigCfg(flags):
     acc = ComponentAccumulator()
     if not flags.Detector.GeometryRPC: return acc
-   
+    acc.merge(NRPCCablingConfigCfg(flags))
+
     dbName = 'RPC_OFL' if flags.Input.isMC else 'RPC'
     dbRepo="MuonRPC_Cabling/ATLAS.data"
     rpcCabMap="/RPC/CABLING/MAP_SCHEMA"

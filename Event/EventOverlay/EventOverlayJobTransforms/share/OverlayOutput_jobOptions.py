@@ -123,6 +123,9 @@ if DetFlags.overlay.MDT_on():
 
 if DetFlags.overlay.RPC_on():
     outStream.ItemList += [ 'RpcPadContainer#RPCPAD' ]
+    from MuonRecExample.MuonRecFlags import muonRecFlags
+    if muonRecFlags.doNRPCs():
+        outStream.ItemList += [ 'xAOD::NRPCRDOContainer#NRPCRDO' , 'xAOD::NRPCRDOAuxContainer#NRPCRDOAux.' ]
 
 if DetFlags.overlay.TGC_on():
     outStream.ItemList += [ 'TgcRdoContainer#TGCRDO' ]
