@@ -58,7 +58,7 @@ ex.type = 'athenaHLT'
 ex.job_options = 'TrigP1Test/testHLT_magField.py'
 ex.input = ''
 ex.max_events = 20
-ex.args = '-f raw.data -i -M -ul'
+ex.args = '-f raw.data -i -M -ul -c "flags.Trigger.Online.BFieldAutoConfig=False"'
 ex.perfmon = False # perfmon currently not fully supported with athenaHLT -M
 
 # Pass the transitions file into athenaHLT -i
