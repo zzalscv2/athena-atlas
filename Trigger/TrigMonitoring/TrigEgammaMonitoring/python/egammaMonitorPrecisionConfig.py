@@ -44,9 +44,6 @@ def egammaMonitorPrecisionCfg(flags, name):
 
         #Isolation variables monitoring
         monTool.defineHistogram('ptcone20',    type='TH1F', path='EXPERT',title="count;ptcone20",xbins=50, xmin=0, xmax=5 )
-        monTool.defineHistogram('ptcone30',    type='TH1F', path='EXPERT',title="count;ptcone30",xbins=50, xmin=0, xmax=5 )
-        monTool.defineHistogram('ptcone40',   type='TH1F', path='EXPERT', title="count;ptcone40",xbins=50, xmin=0, xmax=5 )
-        monTool.defineHistogram('ptvarcone20',    type='TH1F', path='EXPERT',title="count;ptvarcone20",xbins=50, xmin=0, xmax=5 )
         monTool.defineHistogram('ptvarcone30',    type='TH1F', path='EXPERT',title="count;ptvarcone30",xbins=50, xmin=0, xmax=5 )
         monTool.defineHistogram('ptvarcone40',   type='TH1F', path='EXPERT', title="count;ptvarcone40",xbins=50, xmin=0, xmax=5 )
         monTool.defineHistogram('topoetcone20',    type='TH1F', path='EXPERT',title="count;topoetcone20[GeV]",xbins=100, xmin=-10, xmax=50 )
@@ -73,11 +70,8 @@ def egammaMonitorPrecisionCfg(flags, name):
 
         #Isolation variables monitoring
         monTool.defineHistogram('ptcone20',    type='TH1F', path='EXPERT',title="count;ptcone20",xbins=50, xmin=0, xmax=5 )
-        monTool.defineHistogram('ptcone30',    type='TH1F', path='EXPERT',title="count;ptcone30",xbins=50, xmin=0, xmax=5 )
-        monTool.defineHistogram('ptcone40',   type='TH1F', path='EXPERT', title="count;ptcone40",xbins=50, xmin=0, xmax=5 )
         monTool.defineHistogram('ptvarcone20',    type='TH1F', path='EXPERT',title="count;ptvarcone20",xbins=50, xmin=0, xmax=5 )
         monTool.defineHistogram('ptvarcone30',    type='TH1F', path='EXPERT',title="count;ptvarcone30",xbins=50, xmin=0, xmax=5 )
-        monTool.defineHistogram('ptvarcone40',   type='TH1F', path='EXPERT', title="count;ptvarcone40",xbins=50, xmin=0, xmax=5 )
         monTool.defineHistogram('topoetcone20',    type='TH1F', path='EXPERT',title="count;topoetcone20[GeV]",xbins=100, xmin=-10, xmax=50 )
         monTool.defineHistogram('topoetcone40_shift',    type='TH1F', path='EXPERT',title="count;topoetcone40[GeV]",xbins=100, xmin=-10, xmax=50 )
     
@@ -93,10 +87,8 @@ def egammaMonitorSuperClusterCfg(flags, name):
 
      #calo cluster variables monitoring
      monTool.defineHistogram('et',             type='TH1D', path='EXPERT', title="E_{T};              E_{T} [GeV];        Entries", xbins= 150, xmin= 0.0, xmax= 200.0)
-     monTool.defineHistogram('eta',            type='TH1D', path='EXPERT', title="#eta;               #eta;               Entries", xbins=  50, xmin=-3.0, xmax=   3.0) ,
+     monTool.defineHistogram('eta',            type='TH1D', path='EXPERT', title="#eta;               #eta;               Entries", xbins=  50, xmin=-3.0, xmax=   3.0) 
      monTool.defineHistogram('phi',            type='TH1D', path='EXPERT', title="#phi;               #phi;               Entries", xbins=  64, xmin= -pi, xmax=    pi)
-     monTool.defineHistogram('container_size', type='TH1D', path='EXPERT', title="Container Size;     Number of Clusters; Entries", xbins=2001, xmin=-0.5, xmax=2000.5)
-     monTool.defineHistogram('clusterSize',    type='TH1D', path='EXPERT', title="Cluster Size;       Type;               Entries", xbins=  13, xmin= 0.5, xmax=  13.5)
      monTool.defineHistogram('signalState',    type='TH1D', path='EXPERT', title="Signal State;       Signal State;       Entries", xbins=   4, xmin=-1.5, xmax=   2.5)
      
      return monTool
