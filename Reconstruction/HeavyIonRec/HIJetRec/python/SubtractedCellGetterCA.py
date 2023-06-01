@@ -44,8 +44,9 @@ def HISubtractedCellMakerToolCfg(flags, name="HISubtractedCellMakerTool", **kwar
 
     if "Modulator" not in kwargs:
         __log.warning("Modulator is None, will set it to NULL")
-        from HIJetRec.HIJetRecConfigCA import GetNullModulator
-        kwargs.setdefault("Modulator",GetNullModulator())
+        from HIJetRec.HIJetRecConfigCA import NullModulatorCfg
+        modulator = acc.popToolsAndMerge(NullModulatorCfg())
+        kwargs.setdefault("Modulator", modulator)
     if "EventShapeKey" not in kwargs:
         kwargs.setdefault("EventShapeKey", flags.HeavyIon.Egamma.EventShape)
     if "EventShapeMapTool" not in kwargs:
