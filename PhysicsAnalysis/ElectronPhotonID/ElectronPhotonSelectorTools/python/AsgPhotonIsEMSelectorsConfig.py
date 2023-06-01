@@ -1,10 +1,12 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """Configure the AsgPhotonIsEMSelector with the quality cuts
               and allow for (re-)setting of all provided cuts."""
 
 from ElectronPhotonSelectorTools.PhotonIsEMSelectorMapping import (
     PhotonIsEMMap, photonPIDmenu)
+from TriggerMenuMT.HLT.Photon.TriggerPhotonIsEMSelectorMapping import (
+    TriggerPhotonIsEMMap, triggerPhotonPIDmenu)
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -13,7 +15,8 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 def AsgPhotonIsEMSelectorCfg(flags,
                              name,
                              quality,
-                             menu=photonPIDmenu.menuCurrentCuts):
+                             menu=photonPIDmenu.menuCurrentCuts,
+                             trigger = False):
 
     mlog = logging.getLogger('AsgPhotonIsEMSelector')
     mlog.debug('Start configuration')
@@ -21,7 +24,11 @@ def AsgPhotonIsEMSelectorCfg(flags,
     AsgPhotonIsEMSelector = CompFactory.AsgPhotonIsEMSelector
 
     try:
-        ntuple = PhotonIsEMMap(quality, menu)
+        if trigger:
+            menu = triggerPhotonPIDmenu.menuCurrentCuts
+            ntuple = TriggerPhotonIsEMMap(quality, menu)
+        else:
+            ntuple = PhotonIsEMMap(quality, menu)
         mlog.debug('ntuple: %s', ntuple)
     except KeyError:
         mlog.error("Photon quality not found."
@@ -42,3 +49,4 @@ def AsgPhotonIsEMSelectorCfg(flags,
 
     acc.setPrivateTools(tool)
     return acc
+
