@@ -573,12 +573,16 @@ class AthConfigFlags(object):
         if args.filesInput is not None:
             self.Input.Files = [] # remove generic
             for f in args.filesInput:
-                for ffile in f.split(","):
-                    if '*' in ffile: # handle wildcard
-                        import glob
-                        self.Input.Files += glob.glob(ffile)
-                    else:
-                        self.Input.Files += [ffile]
+                #because of argparse used with nargs+, fileInput will also swallow arguments meant to be flags
+                if "=" in f:
+                    leftover.append(f)
+                else:
+                    for ffile in f.split(","):
+                        if '*' in ffile: # handle wildcard
+                            import glob
+                            self.Input.Files += glob.glob(ffile)
+                        else:
+                            self.Input.Files += [ffile]
 
         if args.loglevel is not None:
             from AthenaCommon import Constants
