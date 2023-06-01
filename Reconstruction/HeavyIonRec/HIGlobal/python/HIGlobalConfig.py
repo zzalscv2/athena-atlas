@@ -77,7 +77,7 @@ def HIGlobalRecCfg(flags):
     """Configures Heavy Ion Global quantities """
     acc = ComponentAccumulator()
 
-    shapeKey="HIEventShape"
+    shapeKey=flags.HeavyIon.Global.EventShape
     output = [ f"xAOD::HIEventShapeContainer#{shapeKey}", f"xAOD::HIEventShapeAuxContainer#{shapeKey}Aux."]
 
     kwargs_hies=dict()

@@ -207,7 +207,7 @@ bool HTFilter::fromTau(const HepMC::ConstGenParticlePtr& part ) const
   for (const auto& iter: part->production_vertex()->particles_in()){
     int parent_pdgid = iter->pdg_id();
     if ( std::abs( parent_pdgid ) == 15 ) return true;
-    if (MC::PID::isHadron( parent_pdgid ) || std::abs( parent_pdgid ) < 9 ) return false;
+    if (MC::PID::isHadron( parent_pdgid ) || MC::PID::isQuark( parent_pdgid ) ) return false;
     if ( parent_pdgid == part->pdg_id() ) return fromTau( iter );
   }
 #else
@@ -215,7 +215,7 @@ bool HTFilter::fromTau(const HepMC::ConstGenParticlePtr& part ) const
        iter!=part->production_vertex()->particles_in_const_end();++iter){
     int parent_pdgid = (*iter)->pdg_id();
     if ( std::abs( parent_pdgid ) == 15 ) return true;
-    if (MC::PID::isHadron( parent_pdgid ) || abs( parent_pdgid ) < 9 ) return false;
+    if (MC::PID::isHadron( parent_pdgid ) || MC::PID::isQuark( parent_pdgid ) ) return false;
     if ( parent_pdgid == part->pdg_id() ) return fromTau( *iter );
   }
 #endif

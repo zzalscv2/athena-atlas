@@ -283,7 +283,7 @@ TruthParticleCnvTool::convert( const McEventCollection * mcCollection,
       visitor->visit( mcPart );
     }
 
-    mcPart->setCharge( MC::charge( mcPart->pdgId()) );
+    mcPart->setCharge( MC::charge( int(mcPart->pdgId())) );
     mcPart->setGenEventIndex( genEventIndex);
 
     if ( hepMcPart != mcPart->genParticle() ) {

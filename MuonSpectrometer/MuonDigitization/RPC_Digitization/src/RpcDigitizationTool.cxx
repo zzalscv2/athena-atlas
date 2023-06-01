@@ -842,6 +842,9 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
                 // Calculate propagation time for a hit at the center of the strip, to be subtructed as well as the nominal TOF
                 double propTimeFromStripCenter = PropagationTimeNew(theId, posi);
                 double newDigit_time = currTime + uncorrjitter + m_rpc_time_shift - tp - propTimeFromStripCenter;
+		
+		double digi_ToT = -1.;  // Time over threshold, for Narrow-gap RPCs only
+		if (m_idHelper->stationName(theId) < 2) digi_ToT=extract_time_over_threshold_value(rndmEngine);  //mn 
 
                 ATH_MSG_VERBOSE("last_time=currTime " << last_time << " jitter " << uncorrjitter << " TOFcorrection " << tp << " shift "
                                                       << m_rpc_time_shift << "  newDigit_time " << newDigit_time);
@@ -860,7 +863,8 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
                 // this is an accepted hit to become digit
                 last_time = (*map_dep_iter).first;
 
-                auto newDigit = std::make_unique<RpcDigit>(theId, newDigit_time);  // RpcDigit::time MUST be a double, or we will lose the precision we need
+                std::unique_ptr<RpcDigit> newDigit = std::make_unique<RpcDigit>(theId, newDigit_time, digi_ToT);  
+                
                 Identifier elemId = m_idHelper->elementID(theId);
                 RpcDigitCollection* digitCollection = nullptr;
 
@@ -919,6 +923,7 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
 //--------------------------------------------
 std::vector<int> RpcDigitizationTool::PhysicalClusterSize(const EventContext& ctx, const Identifier& id, const RPCSimHit* theHit,
                                                           CLHEP::HepRandomEngine* rndmEngine) {
+    int stationName = m_idHelper->stationName(id);
     int stationEta = m_idHelper->stationEta(id);
     float pitch;
     int measuresPhi = m_idHelper->measuresPhi(id);
@@ -970,7 +975,7 @@ std::vector<int> RpcDigitizationTool::PhysicalClusterSize(const EventContext& ct
     result[2] = nstrip;
 
     // testbeam algorithm
-    if (m_testbeam_clustersize) {
+    if (m_testbeam_clustersize && stationName != 1) {  // do not apply for BIS
         // code to decide if the physical cluster size is 1 or 2;
         // this is based on a distribution shown in the muon TDR, representing the
         // fraction cs1/cs2 as a function of the impact point.
@@ -1051,7 +1056,7 @@ std::vector<int> RpcDigitizationTool::PhysicalClusterSize(const EventContext& ct
                 result[0] = 4;
         }
     }  // testbeam algorithm
-    else {
+    else { 
         float xstripnorm = xstrip / 30.;
         result[0] = ClusterSizeEvaluation(ctx, id, xstripnorm, rndmEngine);
 
@@ -1072,13 +1077,14 @@ std::vector<int> RpcDigitizationTool::PhysicalClusterSize(const EventContext& ct
 std::vector<int> RpcDigitizationTool::TurnOnStrips(std::vector<int> pcs, const Identifier& id, CLHEP::HepRandomEngine* rndmEngine) {
     int nstrips{0};
     int measuresPhi = m_idHelper->measuresPhi(id);
+    int stationName = m_idHelper->stationName(id);
 
     const RpcReadoutElement* ele = m_GMmgr->getRpcReadoutElement(id);
 
     nstrips = ele->Nstrips(measuresPhi);
 
     // testbeam algorithm
-    if (m_testbeam_clustersize) {
+    if (m_testbeam_clustersize && stationName != 1) {  // do not apply for BIS
         int stripsAlreadyTurnedOn = 1 - pcs[1] + pcs[2];
 
         // turn on strips according to spread distribution obtained from data
@@ -1446,6 +1452,7 @@ StatusCode RpcDigitizationTool::fillTagInfo() {
 
 //--------------------------------------------
 StatusCode RpcDigitizationTool::readParameters() {
+    // Digitization parameters for RPC
     std::string fileName = m_paraFile.value().c_str();
     std::string file = PathResolver::find_file(fileName, "DATAPATH");
     std::ifstream filein(file.c_str(), std::ios::in);
@@ -2021,29 +2028,45 @@ int RpcDigitizationTool::ClusterSizeEvaluation(const EventContext& ctx, const Id
 
     float rndmCS = CLHEP::RandFlat::shoot(rndmEngine, ITot);
 
-    // Expanded CS2 of 1.3 to match average CS1 and CS2 (to be investigate)
-    if (rndmCS < FracClusterSize1plus2) {
-        // deterministic assignment of CS 1 or 2
-        if (xstripnorm <= FracClusterSize2norm / 2. * 1.3) {
-            ClusterSize = -2;
-        } else if ((1.0 - FracClusterSize2norm / 2. * 1.3) <= xstripnorm) {
-            ClusterSize = 2;
+    if (stationName >= 2) {  // Legacy RPCs
+        // Expanded CS2 of 1.3 to match average CS1 and CS2 (to be investigate)
+        if (rndmCS < FracClusterSize1plus2) {
+            // deterministic assignment of CS 1 or 2
+            if (xstripnorm <= FracClusterSize2norm / 2. * 1.3) {
+                ClusterSize = -2;
+            } else if ((1.0 - FracClusterSize2norm / 2. * 1.3) <= xstripnorm) {
+                ClusterSize = 2;
+            } else {
+                ClusterSize = 1;
+            }
+            if (m_ClusterSize1_2uncorr) {
+                float rndmCS1_2 = CLHEP::RandFlat::shoot(rndmEngine, 1);
+                ClusterSize = 1;
+                if (rndmCS1_2 < FracClusterSize2norm) ClusterSize = 2;
+            }
+
+        } else if ((FracClusterSize1plus2 <= rndmCS) && (rndmCS <= ITot)) {
+            ClusterSize = m_FirstClusterSizeInTail;
+            ClusterSize += int(CLHEP::RandExponential::shoot(rndmEngine, MeanClusterSizeTail));
+            float rndmLR = CLHEP::RandFlat::shoot(rndmEngine, 1.0);
+            if (rndmLR > 0.5) ClusterSize = -ClusterSize;
         } else {
             ClusterSize = 1;
         }
-        if (m_ClusterSize1_2uncorr) {
-            float rndmCS1_2 = CLHEP::RandFlat::shoot(rndmEngine, 1);
-            ClusterSize = 1;
-            if (rndmCS1_2 < FracClusterSize2norm) ClusterSize = 2;
-        }
 
-    } else if ((FracClusterSize1plus2 <= rndmCS) && (rndmCS <= ITot)) {
-        ClusterSize = m_FirstClusterSizeInTail;
-        ClusterSize += int(CLHEP::RandExponential::shoot(rndmEngine, MeanClusterSizeTail));
-        float rndmLR = CLHEP::RandFlat::shoot(rndmEngine, 1.0);
-        if (rndmLR > 0.5) ClusterSize = -ClusterSize;
-    } else {
-        ClusterSize = 1;
+    } else {  // NRPCs
+        if (rndmCS < FracClusterSize1) {
+            ClusterSize = 1;
+        } else if (rndmCS < FracClusterSize1 + FracClusterSize2) {
+            ClusterSize = 2;
+        } else {
+            ClusterSize = int(CLHEP::RandExponential::shoot(rndmEngine, MeanClusterSizeTail));
+        }
+        if (ClusterSize < 1) ClusterSize = 1;
+        if (ClusterSize > 1) {
+            float rndmLR = CLHEP::RandFlat::shoot(rndmEngine, 1.0);
+            if (rndmLR > 0.5) ClusterSize = -ClusterSize;
+        }
     }
 
     // negative CS correspond to left asymmetric cluster with respect to nstrip
@@ -2924,4 +2947,23 @@ double RpcDigitizationTool::FCPEfficiency(HepMC::ConstGenParticlePtr genParticle
     // A scale factor is calculated by efficiency of fcp / efficiency of muon(charge==1.0
     const double eff_SF = eff_fcp / eff_muon;
     return eff_SF;
+}
+
+double RpcDigitizationTool::extract_time_over_threshold_value(CLHEP::HepRandomEngine* rndmEngine) const {
+    //mn Time-over-threshold modeled as a narrow and a wide gaussian
+    //mn for the moment based on slide 10 in https://indico.cern.ch/event/1123140/contributions/4994338/attachments/2519481/4340749/Aielli_RPC2022.pdf
+    constexpr double tot_mean_narrow = 15.;
+    constexpr double tot_sigma_narrow = 2.;
+    constexpr double tot_mean_wide = 13.;
+    constexpr double tot_sigma_wide = 6.;
+
+    double thetot = 0.;
+    
+    if (CLHEP::RandFlat::shoot(rndmEngine)<0.5) {
+      thetot = CLHEP::RandGaussZiggurat::shoot(rndmEngine, tot_mean_narrow, tot_sigma_narrow);
+    } else {
+      thetot = CLHEP::RandGaussZiggurat::shoot(rndmEngine, tot_mean_wide, tot_sigma_wide);
+    }
+
+    return (thetot > 0.) ? thetot : 0.;
 }

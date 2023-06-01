@@ -185,10 +185,10 @@ def JfexMonitoringConfig(inputFlags):
     myGroup.defineHistogram('jEM_GlobalEta,jEM_GlobalPhi;h_jEM_GlobalEtaPhiMap', title="jFex EM Global #eta vs #phi;(int) #eta; (int) #phi",
                             type='TH2F',path=trigPath+'jEM/', xbins=100,xmin=-50,xmax=50,ybins=67,ymin=-1,ymax=65)                                
     ######  jXE  ######                          
-    myGroup.defineHistogram('jXE_X;h_jXE_X', title='jFex MET X component;tobEx [200 MeV Scale];Counts',
+    myGroup.defineHistogram('jXE_X;h_jXE_X', title='jFex MET X component (tobEx);tobEx [200 MeV Scale];Counts',
                             type='TH1I', path=trigPath+'jXE/',xbins=1000,xmin=-500,xmax=500)
     
-    myGroup.defineHistogram('jXE_Y;h_jXE_Y', title='jFex MET Y component;tobEy [200 MeV Scale];Counts',
+    myGroup.defineHistogram('jXE_Y;h_jXE_Y', title='jFex MET Y component (tobEy);tobEy [200 MeV Scale];Counts',
                             type='TH1I', path=trigPath+'jXE/',xbins=1000,xmin=-500,xmax=500)
 
     myGroup.defineHistogram('jXE_MET;h_jXE_MET', title='jFex MET ;Total jXE [200 MeV Scale];Counts',
@@ -218,13 +218,23 @@ if __name__=='__main__':
     # set input file and config options
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     import glob
-    inputs = glob.glob('../../Monitoring/run/valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8453_e8455_s3873_s3874_r14022/*.root*')
+    
+    import argparse
+    parser = argparse.ArgumentParser(prog='python -m TrigT1CaloMonitoring.JfexMonitorAlgorithm',
+                                   description="""Used to run jFEX Monitoring\n\n
+                                   Example: python -m TrigT1CaloMonitoring.JfexMonitorAlgorithm --filesInput file.root --skipEvents 0 --evtMax 100""")
+    parser.add_argument('--evtMax',type=int,default=-1,help="number of events")
+    parser.add_argument('--filesInput',nargs='+',help="input files",required=True)
+    parser.add_argument('--skipEvents',type=int,default=0,help="number of events to skip")
+    args = parser.parse_args()
+
 
     flags = initConfigFlags()
-    flags.Input.Files = inputs
-    flags.Output.HISTFileName = 'ExampleMonitorOutput_LVL1.root'
-
-    flags.Exec.MaxEvents=10
+    flags.Input.Files = [file for x in args.filesInput for file in glob.glob(x)]
+    flags.Output.HISTFileName = 'jFEX_MonitorOutput_L1Calo.root'
+    
+    flags.Exec.MaxEvents = args.evtMax
+    flags.Exec.SkipEvents = args.skipEvents    
 
     flags.lock()
     flags.dump() # print all the configs

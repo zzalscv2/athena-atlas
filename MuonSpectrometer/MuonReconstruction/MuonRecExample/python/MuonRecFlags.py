@@ -230,6 +230,19 @@ class doRPCs(JobProperty):
     def _undo_action(self):
         muonRecFlags.sync_DetFlags("RPC")
 
+## Use NRPCs in reconstruction
+class doNRPCs(JobProperty):
+    statusOn=True
+    allowedTypes=['bool']
+    StoredValue=False
+
+    def _do_action(self):
+        muonRecFlags.sync_DetFlags("NRPC")
+
+    def _undo_action(self):
+        muonRecFlags.sync_DetFlags("NRPC")
+
+
 ## Use TGCs in reconstruction
 class doTGCs(JobProperty):
     statusOn=True
@@ -407,6 +420,7 @@ class MuonRec(JobPropertyContainer):
         setDefault(self.doSegmentsOnly,False)
         setDefault(self.doMDTs,True)
         setDefault(self.doRPCs,True)
+        setDefault(self.doNRPCs,False)
         setDefault(self.doTGCs,True)
         setDefault(self.doCSCs, True)
         setDefault(self.dosTGCs, True)
@@ -557,6 +571,7 @@ class MuonRec(JobPropertyContainer):
         # do sync per technology for selected flags
         MDT_on = self.doMDTs()                # noqa: F841
         RPC_on = self.doRPCs()                # noqa: F841
+        NRPC_on = self.doNRPCs()              # noqa: F841
         CSC_on = self.doCSCs()                # noqa: F841
         TGC_on = self.doTGCs()                # noqa: F841
         sTGC_on = self.dosTGCs()              # noqa: F841

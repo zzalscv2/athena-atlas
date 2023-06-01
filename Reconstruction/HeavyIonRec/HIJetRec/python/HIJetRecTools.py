@@ -159,7 +159,7 @@ jtm.add(HIJetCellSubtractorTool("HIJetCellSubtractor"))
 
 from HIJetRec.HIJetRecConf import HIJetClusterSubtractorTool
 cl_subtr_tool=HIJetClusterSubtractorTool("HIJetClusterSubtractor")
-cl_subtr_tool.ConfigDir='HIEventUtils/'
+cl_subtr_tool.ConfigDir='HIJetCorrection/'
 jtm.add(cl_subtr_tool)
 
 hi_calib_map={}

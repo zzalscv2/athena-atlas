@@ -31,7 +31,6 @@
 #include "../TruthParticleBarcodesFillerTool.h"
 #include "../PileUpInfoFillerTool.h"
 #include "../TruthParticleFakerTool.h"
-#include "../HforFillerTool.h"
 #include "../JetFullTruthTag.h"
 #include "../TruthParticleClassificationFillerTool.h"
 // Filter tool(s):
@@ -72,7 +71,6 @@ DECLARE_COMPONENT( D3PD::TruthParticleBarcodesFillerTool )
 DECLARE_COMPONENT( D3PD::PileUpInfoFillerTool )
 DECLARE_COMPONENT( D3PD::TruthParticleFakerTool )
 DECLARE_COMPONENT( D3PD::JetFullTruthTag )
-DECLARE_COMPONENT( D3PD::HforFillerTool )
 DECLARE_COMPONENT( D3PD::TruthParticleClassificationFillerTool )
 // Filter tool(s):
 DECLARE_COMPONENT( D3PD::GenEventGetterFilterTool )

@@ -85,6 +85,15 @@ def getRpcDigitToRpcRDO(name="RpcDigitToRpcRDO", **kwargs):
         kwargs.setdefault("OutputObjectName", "RPCPAD")
     return CfgMgr.RpcDigitToRpcRDO(name, **kwargs)
 
+def getNrpcDigitToNrpcRDO(name="NrpcDigitToNrpcRDO", **kwargs):
+    from Digitization.DigitizationFlags import digitizationFlags
+    if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
+        from OverlayCommonAlgs.OverlayFlags import overlayFlags
+        kwargs.setdefault("NrpcRdoKey", overlayFlags.bkgPrefix() + "NRPCRDO")
+    else:
+        kwargs.setdefault("NrpcRdoKey", "NRPCRDO")
+    return CfgMgr.NrpcDigitToNrpcRDO(name, **kwargs)
+
 def getTgcDigitToTgcRDO(name="TgcDigitToTgcRDO", **kwargs):
     from Digitization.DigitizationFlags import digitizationFlags
     if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
