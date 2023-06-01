@@ -92,10 +92,10 @@ def L1TopoSimulationCfg(flags, doMonitoring=True):
         emtauProvider.eFexTauRoIKey = ""
         jetProvider.jFexSRJetRoIKey = ""
         jetProvider.jFexLRJetRoIKey = ""
-        jetProvider.jFexEMRoIKey = ""
+        jetProvider.jFexFwdElRoIKey = ""
         jetProvider.jFexTauRoIKey = ""
-        jetProvider.jFexXERoIKey = ""
-        jetProvider.jFexTERoIKey = ""
+        jetProvider.jFexMETRoIKey = ""
+        jetProvider.jFexSumETRoIKey = ""
         energyProvider.gFexSRJetRoIKey = ""
         energyProvider.gFexLRJetRoIKey = ""
         energyProvider.gFexXEJWOJRoIKey = ""
@@ -162,7 +162,7 @@ def L1TopoSimulationStandaloneCfg(flags, outputEDM=[], doMuons = False):
     acc = ComponentAccumulator()
 
     efex_provider_attr = ['eFexEMRoI','eFexTauRoI']
-    jfex_provider_attr = ['jFexSRJetRoI','jFexLRJetRoI','jFexEMRoI','jFexTauRoI','jFexXERoI','jFexTERoI']
+    jfex_provider_attr = ['jFexSRJetRoI','jFexLRJetRoI','jFexFwdElRoI','jFexTauRoI','jFexMETRoI','jFexSumETRoI']
     gfex_provider_attr = ['gFexSRJetRoI','gFexLRJetRoI','gFexXEJWOJRoI','gFexXENCRoI','gFexXERHORoI','gFexMHTRoI','gFexTERoI']
 
     from L1TopoSimulation.L1TopoInputHistograms import configureMuonInputProviderHistograms, configureeFexInputProviderHistograms, configurejFexInputProviderHistograms, configuregFexInputProviderHistograms
@@ -233,7 +233,7 @@ def L1TopoSimulationStandaloneCfg(flags, outputEDM=[], doMuons = False):
                                                     JetInputProvider = jfexProvider,
                                                     EnergyInputProvider = gfexProvider,
                                                     IsLegacyTopo = False,
-                                                    EnableInputDump = True,
+                                                    EnableInputDump = flags.Trigger.enableL1TopoDump,
                                                     UseBitwise = flags.Trigger.enableL1TopoBWSimulation
                                                     )
 
@@ -257,7 +257,7 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser("Running L1TopoSimulation standalone for the BS input", formatter_class=RawTextHelpFormatter)
   parser.add_argument("-i","--inputs",nargs='*',action="store", dest="inputs", help="Inputs will be used in commands", required=True)
   parser.add_argument("-m","--module",action="store", dest="module", help="Input modules wants to be simulated.",default="", required=False)
-  parser.add_argument("-bw","--useBitWise",action="store_true", dest="useBW", help="Run with L1Topo Bitwise simulation?",default=False, required=False)
+  parser.add_argument("-bw","--useBitWise",action="store_true", dest="useBW", help="Run with L1Topo Bitwise simulation?",default=True, required=False)
   parser.add_argument("-ifex","--doCaloInput",action="store_true", dest="doCaloInput", help="Decoding L1Calo inputs",default=False, required=False)
   parser.add_argument("-fCtp","--forceCtp",action="store_true", dest="forceCtp", help="Force to CTP monitoring as primary in Sim/Hdw comparison.",default=False, required=False)
   parser.add_argument("-hdwMon","--algoHdwMon",action="store_true", dest="algoHdwMon", help="Fill algorithm histograms based on hardware decision.",default=False, required=False)
@@ -265,7 +265,7 @@ if __name__ == '__main__':
   parser.add_argument("-l","--logLevel",action="store", dest="log", help="Log level.",default="warning", required=False)
   parser.add_argument("-n","--nevent", type=int, action="store", dest="nevent", help="Maximum number of events will be executed.",default=0, required=False)
   parser.add_argument("-s","--skipEvents", type=int, action="store", dest="skipEvents", help="How many events will be skipped.",default=0, required=False)
-  
+  parser.add_argument("-d","--enableL1TopoDump", type=bool, action="store", dest="enableL1TopoDump", help="Whether to output events into inputdump.txt",default=False, required=False) 
   args = parser.parse_args()
 
   supportedSubsystems = ['Muons','jFex','eFex','gFex','Topo']
@@ -282,8 +282,6 @@ if __name__ == '__main__':
 
   flags = initConfigFlags()
 
-  if "data22" in filename:
-    flags.Trigger.triggerConfig='DB'
   flags.Exec.OutputLevel = WARNING
   if(args.nevent > 0):
     flags.Exec.MaxEvents = args.nevent
@@ -299,7 +297,7 @@ if __name__ == '__main__':
   flags.Trigger.enableL1TopoBWSimulation = args.useBW
   flags.PerfMon.doFullMonMT = args.perfmon
   flags.PerfMon.OutputJSON = 'perfmonmt_test.json'
-  
+  flags.Trigger.enableL1TopoDump = args.enableL1TopoDump 
   flags.lock()
 
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg
