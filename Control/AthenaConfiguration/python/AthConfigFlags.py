@@ -593,6 +593,12 @@ class AthConfigFlags(object):
 
         if args.threads is not None:
             self.Concurrency.NumThreads = args.threads
+            #Work-around a possible inconsistency of NumThreads and NumConcurrentEvents that may
+            #occur when these values are set by the transforms and overwritten by --athenaopts .. 
+            #See also ATEAM-907
+            if args.concurrent_events is None and self.Concurrency.NumConcurrentEvents==0:
+                self.Concurrency.NumConcurrentEvents = args.threads
+
 
         if args.concurrent_events is not None:
             self.Concurrency.NumConcurrentEvents = args.concurrent_events
