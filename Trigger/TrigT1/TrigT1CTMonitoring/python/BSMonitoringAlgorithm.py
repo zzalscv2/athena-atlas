@@ -687,8 +687,6 @@ def BSMonitoringConfig(inputFlags):
         myGroup.defineHistogram('tobPtVsPhiXdecoded_FW,tobPtVsPhiYdecoded_FW;tobPtVsPhi_FW',title='TOB pT VS phi FW;Phi;pT index', type='TH2F', path=monPath, xbins=forwardPhiLowBinEdges, ybins=15, ymin=0.5, ymax=15.5, opt='kAlwaysCreate')
         # tob count
         myGroup.defineHistogram('tobCount',title='TOBs distrib. per event (central slice);TOBs',type='TH1I',xbins=tobWordsPerTimeslice,path=monPath,opt='kAlwaysCreate')
-        # difference between number of candidates and tobs
-        myGroup.defineHistogram('tobCandDifferenceX,tobCandDifferenceY;tobCandDifference',title='Discrepancy distrib. of Cand-TOBs per LumiBlock;LB;discrepancy',type='TH2F',path=monPath,xbins=2000, xmin=0.5, xmax=2000.5, ybins=tobWordsPerTimeslice, opt='kAlwaysCreate')
 
         monPath="/MUCTPI/Timing"
         candSliceVsSLMUCTPIBinLabels = [ #cxx indices
