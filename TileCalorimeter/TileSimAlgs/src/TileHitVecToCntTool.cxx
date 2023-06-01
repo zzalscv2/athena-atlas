@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -1137,11 +1137,12 @@ void TileHitVecToCntTool::findAndMergeE1(TileHitCollection* coll, int frag_id, T
   if (fromHitIt != coll->end()) {
     ATH_MSG_VERBOSE("Found TileHit (E1 cell) for merging [" << m_tileID->to_string((*fromHitIt)->pmt_ID(), -1) 
 		    << "] in module: " << module);
+    bool isToHitNew = false;
     if (toHit == 0) {
       int side = m_tileID->side((*fromHitIt)->pmt_ID());
       Identifier to_pmt_id = m_tileID->pmt_id(TileID::GAPDET, side, module, E1_TOWER, TileID::SAMP_E, 0);
       toHit = new TileHit(to_pmt_id);
-      hitCont->push_back(toHit);
+      isToHitNew = true;
       ATH_MSG_VERBOSE("New TileHit (E1 cell) for merging added Id: " << m_tileID->to_string(toHit->pmt_ID(), -1) );
     } else {
       ATH_MSG_VERBOSE("Found TileHit (E1 cell) for merging Id: " << m_tileID->to_string(toHit->pmt_ID(), -1) );
@@ -1163,6 +1164,10 @@ void TileHitVecToCntTool::findAndMergeE1(TileHitCollection* coll, int frag_id, T
     }
     
     coll->erase(fromHitIt);
+
+    if (isToHitNew) {
+      hitCont->push_back(toHit);
+    }
   }
 }
 
@@ -1190,12 +1195,13 @@ void TileHitVecToCntTool::findAndMergeMBTS(TileHitCollection* coll, int frag_id,
   if (fromHitIt != coll->end()) {
     ATH_MSG_VERBOSE("Found TileHit (MBTS) for merging [" << m_tileTBID->to_string((*fromHitIt)->pmt_ID(), 0) 
 		    << "] in module: " << module);
+    bool isToHitNew = false;
     if (toHit == 0) {
       int side = m_tileTBID->side((*fromHitIt)->pmt_ID());
       int phi = m_tileTBID->phi((*fromHitIt)->pmt_ID()) - 1;
       Identifier to_pmt_id = m_tileTBID->channel_id(side, phi, 1);
       toHit = new TileHit(to_pmt_id);
-      hitCont->push_back(toHit);
+      isToHitNew = true;
       ATH_MSG_VERBOSE("New TileHit (MBTS) for merging added Id: " << m_tileTBID->to_string(toHit->pmt_ID(), 0) );
     } else {
       ATH_MSG_VERBOSE("Found TileHit (MBTS) for merging Id: " << m_tileTBID->to_string(toHit->pmt_ID(), 0) );
@@ -1218,6 +1224,9 @@ void TileHitVecToCntTool::findAndMergeMBTS(TileHitCollection* coll, int frag_id,
     }
     
     coll->erase(fromHitIt);
-  }
 
+    if (isToHitNew) {
+      hitCont->push_back(toHit);
+    }
+  }
 }
