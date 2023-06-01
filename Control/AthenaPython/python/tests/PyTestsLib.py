@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # @file: AthenaPython/python/tests/PyTestsLib.py
 # @purpose: a set of py-components to test various aspects of PyAthena
@@ -27,17 +27,17 @@ class MyAlg( PyAthena.Alg ):
         self.px           = kw.get('px',  10.*Units.GeV)
         self.eta          = kw.get('eta', 2.5)
         self.pt           = kw.get('pt',  40.*Units.GeV)
-        self.mytool       = kw.get('mytool', MyTool("%s_mytool"%self.name()))
+        self.mytool       = kw.get('mytool', MyTool("%s_mytool"%self.name))
         self.filterPassed = kw.get('filterPassed', True)
         
     def initialize(self):
         self.sg = PyAthena.py_svc("StoreGateSvc")
-        self.msg.info( "==> initializing [%s]...", self.name() )
+        self.msg.info( "==> initializing [%s]...", self.name )
         self.msg.info( "eta: %r",self.eta )
         self.msg.info( "pt:  %r",self.pt  )
         self.msg.info( "px:  %r",self.px  )
         self.mytool.counter += 1
-        self.msg.info( "tool:%r %r",self.mytool.counter, self.mytool.name() )
+        self.msg.info( "tool:%r %r",self.mytool.counter, self.mytool.name )
         return StatusCode.Success
 
     def execute(self):
@@ -66,7 +66,7 @@ class MySvc( PyAthena.Svc ):
         
     def initialize(self):
         self.sg = PyAthena.py_svc("StoreGateSvc")
-        self.msg.info( "==> initializing [%s]...", self.name() )
+        self.msg.info( "==> initializing [%s]...", self.name )
         self.msg.info( "cnt: %r",self.counter )
         return StatusCode.Success
 
@@ -87,7 +87,7 @@ class MyTool( PyAthena.AlgTool ):
         
     def initialize(self):
         self.sg = PyAthena.py_svc("StoreGateSvc")
-        self.msg.info( "==> initializing [%s]...", self.name() )
+        self.msg.info( "==> initializing [%s]...", self.name )
         self.msg.info( "cnt: %r",self.counter )
         return StatusCode.Success
 
@@ -105,11 +105,11 @@ class MyNameAud( PyAthena.Aud ):
         super(MyNameAud,self).__init__(**kw)
 
     def initialize(self):
-        self.msg.info("==> initializing [%s]...", self.name())
+        self.msg.info("==> initializing [%s]...", self.name)
         return StatusCode.Success
 
     def finalize(self):
-        self.msg.info("==> finalizing [%s]...", self.name())
+        self.msg.info("==> finalizing [%s]...", self.name)
         return StatusCode.Success
 
     def before(self, evt_name, comp_name):
