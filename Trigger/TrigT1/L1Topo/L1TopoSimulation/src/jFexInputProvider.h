@@ -47,10 +47,10 @@ namespace LVL1 {
 
       SG::ReadHandleKey<xAOD::jFexSRJetRoIContainer> m_jJet_EDMKey {this, "jFexSRJetRoIKey", "L1_jFexSRJetRoI", "jFEX Jet EDM"};
       SG::ReadHandleKey<xAOD::jFexLRJetRoIContainer> m_jLJet_EDMKey {this, "jFexLRJetRoIKey", "L1_jFexLRJetRoI", "jFEX LJet EDM"};
-      SG::ReadHandleKey<xAOD::jFexFwdElRoIContainer> m_jEM_EDMKey {this, "jFexEMRoIKey", "L1_jFexFwdElRoI", "jFEX EM EDM"};     
+      SG::ReadHandleKey<xAOD::jFexFwdElRoIContainer> m_jEM_EDMKey {this, "jFexFwdElRoIKey", "L1_jFexFwdElRoI", "jFEX EM EDM"};     
       SG::ReadHandleKey<xAOD::jFexTauRoIContainer> m_jTau_EDMKey {this, "jFexTauRoIKey", "L1_jFexTauRoI", "jFEX Tau EDM"};
-      SG::ReadHandleKey<xAOD::jFexMETRoIContainer> m_jXE_EDMKey {this, "jFexXERoIKey", "L1_jFexMETRoI", "jFEX XE EDM"};
-      SG::ReadHandleKey<xAOD::jFexSumETRoIContainer> m_jTE_EDMKey {this, "jFexTERoIKey", "L1_jFexSumETRoI", "jFEX TE EDM"};
+      SG::ReadHandleKey<xAOD::jFexMETRoIContainer> m_jXE_EDMKey {this, "jFexMETRoIKey", "L1_jFexMETRoI", "jFEX XE EDM"};
+      SG::ReadHandleKey<xAOD::jFexSumETRoIContainer> m_jTE_EDMKey {this, "jFexSumETRoIKey", "L1_jFexSumETRoI", "jFEX TE EDM"};
      
       // jFex to L1Topo conversion factors
       static const int m_Et_conversion;
