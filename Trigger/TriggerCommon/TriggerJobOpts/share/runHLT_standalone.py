@@ -1,4 +1,3 @@
-
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 ################################################################################
 # TriggerJobOpts/runHLT_standalone.py
@@ -63,6 +62,7 @@ opt_obsolete = ['setDetDescr',
                 'setGlobalTag',
                 'doL1Unpacking',
                 'enableL1MuonPhase1',
+                'enableL1CaloPhase1',
                 'enableL1CaloLegacy',
                 'enableL1TopoDump',
                 'enableL1TopoBWSimulation',
