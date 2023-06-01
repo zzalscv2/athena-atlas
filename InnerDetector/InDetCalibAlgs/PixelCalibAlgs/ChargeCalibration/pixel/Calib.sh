@@ -25,13 +25,7 @@ echo ""
 echo ""
 echo "${ITSNAME} Create reference file from DB"
 START=$SECONDS
-AtlCoolConsole.py COOLOFL_PIXEL/CONDBR2 > PixCalib-DATA-RUN2-UPD4-21.log << EOF
-usetag PixCalib-DATA-RUN2-UPD4-21
-more /PIXEL/PixCalib
-exit
-EOF
-#Following line to be activated after testing:
-#MakeReferenceFile PixCalib-DATA-RUN2-UPD4-21
+MakeReferenceFile PixCalib-DATA-RUN2-UPD4-21
 DURATION=$((SECONDS-START))
 echo "Preparing DB reference took ${DURATION} seconds"
 echo 
@@ -40,7 +34,7 @@ echo ""
 
 echo "${ITSNAME} Start calibration"
 START=$SECONDS
-root -b -q PixelCalib.C > output.dat
+PixelCalib > output.dat
 DURATION=$((SECONDS-START))
 echo ""
 echo ""

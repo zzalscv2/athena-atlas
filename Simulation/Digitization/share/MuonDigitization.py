@@ -1,4 +1,5 @@
 from AthenaCommon.DetFlags import DetFlags
+from MuonRecExample.MuonRecFlags import muonRecFlags
 
 from AthenaCommon.AlgSequence import AlgSequence
 job = AlgSequence()
@@ -19,6 +20,8 @@ if DetFlags.digitize.Muon_on():
     #----------------
     if DetFlags.digitize.RPC_on():
         job += CfgGetter.getAlgorithm("RpcDigitToRpcRDO/RpcDigitToRpcRDO", tryDefaultConfigurable=True)
+        if muonRecFlags.doNRPCs():
+            job += CfgGetter.getAlgorithm("NrpcDigitToNrpcRDO/NrpcDigitToNrpcRDO", tryDefaultConfigurable=True)
     #----------------
     if DetFlags.digitize.TGC_on():
         job += CfgGetter.getAlgorithm("TgcDigitToTgcRDO/TgcDigitToTgcRDO", tryDefaultConfigurable=True)

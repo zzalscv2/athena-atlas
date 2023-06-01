@@ -7,19 +7,13 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 def HIEgammaRecCfg(flags):
     acc=ComponentAccumulator()
+
+    from HIJetRec.HIJetRecConfigCA import HIModulatorCfg
+    modulator=acc.popToolsAndMerge(HIModulatorCfg(flags,
+                                                  # caveat: mod_key has to be the same as in HIJetRecConfigCA
+                                                  mod_key="HIEventShapeWeighted_iter1_Modulate", 
+                                                  suffix="iter1"))
     
-    # get HI jets setup
-    from HIJetRec.HIJetRecConfigCA import HIJetRecCfg
-    acc_hijets=HIJetRecCfg(flags)
-
-    # get modulator from HI jets
-    jahi_stct = acc_hijets.getEventAlgo("jetalgHI_subtrToClusterTool")
-    modulator=jahi_stct.Tools[0].Modulator
-
-    # merge HI jets CA to ensure their reconstruction
-    acc.merge(acc_hijets)
-
-
     # get subtracted cells 
     from HIJetRec.SubtractedCellGetterCA import SubtractedCellGetterCfgCA
     acc.merge(SubtractedCellGetterCfgCA(flags, modulator))

@@ -76,7 +76,7 @@ def HICaloJetDef(flags, jetradius, **kwargs):
     return solveDependencies(JetDefinition(**kwargs))
 
 
-def HITrackJetInputConstit(flags, name="Track", **kwargs):
+def HITrackJetInputConstit(flags, name="HITrack", **kwargs):
     kwargs.setdefault("objtype", xAODType.TrackParticle)
     kwargs.setdefault("containername", "JetSelectedTracks")
 
@@ -392,7 +392,7 @@ def HIEventShapeJetIterationCfg(flags, suffix=None, useClusters=True, **kwargs):
 
     out_shape_name = kwargs["InputEventShapeKey"]
     if suffix is not None:
-        out_shape_name = '_'+suffix
+        out_shape_name += '_'+suffix
     mod_shape_key = out_shape_name+'_Modulate'
 
     if 'Modulator' not in kwargs:
@@ -514,7 +514,7 @@ def HIJetRecCfg(flags):
     acc.merge(HIClusterMakerCfg(flags))
 
     # get weighted event shape
-    eventshapeKey = "HIEventShape_Weighted"
+    eventshapeKey = "HIEventShapeWeighted"
     acc.merge(HIEventShapeMakerCfg(flags,
                                    name="HIEventShapeMaker_Weighted",
                                    doWeighted=True,
@@ -602,7 +602,8 @@ def HIJetRecCfg(flags):
     jm_dict1_eg, acc_iter1_eg = HIEventShapeJetIterationCfg(flags,
                                                             suffix="iter_egamma",
                                                             useClusters=False,
-                                                            InputEventShapeKey=flags.HeavyIon.Egamma.EventShape,
+                                                            InputEventShapeKey=flags.HeavyIon.Global.EventShape,
+                                                            OutputEventShapeKey=flags.HeavyIon.Egamma.EventShape,
                                                             CaloJetSeedContainerKey=jetDef_seed1.fullname())
     iter1_eg = acc.popToolsAndMerge(acc_iter1_eg)
     acc.addEventAlgo(CompFactory.JetAlgorithm("jetalgHI_iter1_egamma", Tools=[iter1_eg]))

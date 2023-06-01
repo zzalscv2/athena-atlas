@@ -41,13 +41,15 @@ def RpcRdoToRpcDigitCfg(flags, name="RpcRdoToRpcDigitAlg", **kwargs):
     acc = ComponentAccumulator()
     from MuonConfig.MuonCablingConfig import RPCCablingConfigCfg
     acc.merge(RPCCablingConfigCfg(flags))
-
+    kwargs.setdefault("DecodeNrpcRDO", flags.Muon.enableNRPC)
     if flags.Common.isOverlay:
         kwargs.setdefault("RpcRdoContainer", f"{flags.Overlay.BkgPrefix}RPCPAD")
         kwargs.setdefault("RpcDigitContainer", f"{flags.Overlay.BkgPrefix}RPC_DIGITS")
+        kwargs.setdefault("NRpcRdoContainer", f"{flags.Overlay.BkgPrefix}NRPCRDO")
     else:
         kwargs.setdefault("RpcRdoContainer", "RPCPAD")
         kwargs.setdefault("RpcDigitContainer", "RPC_DIGITS")
+        kwargs.setdefault("NRpcRdoContainer", "NRPCRDO")
 
     if flags.Common.isOverlay and not flags.Overlay.DataOverlay:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
@@ -145,6 +147,20 @@ def RpcDigitToRpcRDOCfg(flags, name="RpcDigitToRpcRDO", **kwargs):
         kwargs.setdefault("OutputObjectName", "RPCPAD")
 
     acc.addEventAlgo(CompFactory.RpcDigitToRpcRDO(name, **kwargs))
+    return acc
+
+
+def NrpcDigitToNrpcRDOCfg(flags, name="NrpcDigitToNrpcRDO", **kwargs):
+    """Return ComponentAccumulator with configured NrpcDigitToNrpcRDO algorithm"""
+    acc = ComponentAccumulator()
+    kwargs.setdefault("MuonIdHelperSvc", acc.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags)).name)
+
+    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+        kwargs.setdefault("NrpcRdoKey", flags.Overlay.BkgPrefix + "NRPCRDO")
+    else:
+        kwargs.setdefault("NrpcRdoKey", "NRPCRDO")
+
+    acc.addEventAlgo(CompFactory.NrpcDigitToNrpcRDO(name, **kwargs))
     return acc
 
 

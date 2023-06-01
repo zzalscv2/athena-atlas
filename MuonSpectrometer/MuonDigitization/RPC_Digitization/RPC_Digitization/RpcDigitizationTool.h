@@ -218,6 +218,8 @@ private:
     bool m_SetEtaOn{false};
     Gaudi::Property<bool> m_muonOnlySDOs{this, "MuonOnlySDOs", true, ""};
 
+    double extract_time_over_threshold_value(CLHEP::HepRandomEngine* rndmEngine) const;
+    
 protected:
     ServiceHandle<PileUpMergeSvc> m_mergeSvc{this, "PileUpMergeSvc", "PileUpMergeSvc", "Pile up service"};
     Gaudi::Property<bool> m_onlyUseContainerName{this, "OnlyUseContainerName", true,

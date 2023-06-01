@@ -36,12 +36,20 @@ def RPC_OverlayAlgCfg(flags, name="RpcOverlay", **kwargs):
         acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
             "RpcPadContainer#RPCPAD"
         ]))
+        if flags.Muon.enableNRPC:
+            acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
+                "xAOD::NRPCRDOContainer#NRPCRDO", "xAOD::NRPCRDOAuxContainer#NRPCRDOAux."
+            ]))
 
     if flags.Output.doWriteRDO_SGNL:
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
         acc.merge(OutputStreamCfg(flags, "RDO_SGNL", ItemList=[
             f"RpcPadContainer#{flags.Overlay.SigPrefix}RPCPAD"
         ]))
+        if flags.Muon.enableNRPC:
+            acc.merge(OutputStreamCfg(flags, "RDO_SGNL", ItemList=[
+                f"xAOD::NRPCRDOContainer#{flags.Overlay.SigPrefix}NRPCRDO", f"xAOD::NRPCRDOAuxContainer#{flags.Overlay.SigPrefix}NRPCRDOAux."
+            ]))
 
     return acc
 
@@ -104,5 +112,8 @@ def RPC_OverlayCfg(flags):
     # Add RPC digit to RDO config
     from MuonConfig.MuonByteStreamCnvTestConfig import RpcDigitToRpcRDOCfg
     acc.merge(RpcDigitToRpcRDOCfg(flags))
+    if flags.Muon.enableNRPC:
+        from MuonConfig.MuonByteStreamCnvTestConfig import NrpcDigitToNrpcRDOCfg
+        acc.merge(NrpcDigitToNrpcRDOCfg(flags))
 
     return acc
