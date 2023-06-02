@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "TrigCaloDataAccessSvc.h"
@@ -11,8 +11,10 @@
 #include <type_traits>
 
 TrigCaloDataAccessSvc::TrigCaloDataAccessSvc( const std::string& name, ISvcLocator* pSvcLocator )
-  : base_class( name, pSvcLocator ), m_lateInitDone(false), m_nSlots(0) {
-  m_bcidAvgKey="CaloBCIDAverage";
+  : base_class( name, pSvcLocator ),
+    m_bcidAvgKey("CaloBCIDAverage"),
+    m_lateInitDone(false), m_nSlots(0)
+{
 }
 
 StatusCode TrigCaloDataAccessSvc::initialize() {
