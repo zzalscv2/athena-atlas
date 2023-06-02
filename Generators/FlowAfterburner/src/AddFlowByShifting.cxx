@@ -22,8 +22,6 @@
 #include "CLHEP/Random/RandGaussQ.h"
 #include "CLHEP/Vector/LorentzVector.h"
 
-#include "TruthUtils/GeneratorName.h"
-
 #include "GaudiKernel/PhysicalConstants.h"
 
 #include "CxxUtils/checker_macros.h"

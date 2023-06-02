@@ -7,7 +7,6 @@
 
 #include "GaudiKernel/Algorithm.h"
 #include "GeneratorModules/GenModule.h"
-#include "TruthUtils/GeneratorName.h"
 
 #include "AtlasHepMC/GenEvent.h"
 

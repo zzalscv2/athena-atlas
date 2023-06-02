@@ -20,7 +20,6 @@
 
 #include "Hijing_i/Hijing.h"
 #include "Hijing_i/VertexShift.h"
-#include "TruthUtils/GeneratorName.h"
 
 #include "GaudiKernel/MsgStream.h"
 
@@ -221,7 +220,7 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
     HepMC::set_random_states(evt,m_seeds);
 
     // Set the generator id
-    HepMC::set_signal_process_id(evt,HIJING + m_iap);
+    HepMC::set_signal_process_id(evt,50000000 + m_iap);
 
     // Store collision parameters
     int np = m_himain1.np();
