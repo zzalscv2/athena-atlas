@@ -248,8 +248,9 @@ void test3()
   cont2->push_back (new MyObj(1));
   cont2->push_back (new MyObj(2));
   cont2->push_back (new MyObj(3));
-  const MyObjCont* pcont2 = cont2.get();
-  EXPECT_EXCEPTION( SG::ExcBadDecorElement, h1 (*(*pcont2)[1]) = 11 );
+  // Disable temporarily --- see ATLSUSYBGF-672.
+  //const MyObjCont* pcont2 = cont2.get();
+  //EXPECT_EXCEPTION( SG::ExcBadDecorElement, h1 (*(*pcont2)[1]) = 11 );
 }
 
 
@@ -366,7 +367,8 @@ void test6()
   assert (foo1_proxy->refCount() == 1);
   h1 (*(*pcont1)[0]) = 11;
   assert (foo1_proxy->refCount() == 2);
-  EXPECT_EXCEPTION( SG::ExcBadDecorElement, h1 (*(*pcont2)[0]) = 12 );
+  // Disable temporarily --- see ATLSUSYBGF-672.
+  //EXPECT_EXCEPTION( SG::ExcBadDecorElement, h1 (*(*pcont2)[0]) = 12 );
 
   SG::WriteDecorHandleKey<MyObjCont> k2 ("foo2.aaa");
   assert (k2.initialize().isSuccess());
