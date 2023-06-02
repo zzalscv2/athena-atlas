@@ -23,6 +23,6 @@ def HIEgammaRecCfg(flags):
     acc.merge(CaloTopoClusterCfg(flags,
                                  cellsname=flags.HeavyIon.Egamma.SubtractedCells,
                                  clustersname=flags.HeavyIon.Egamma.CaloTopoCluster,
-                                 clustersnapname="SubtractedCaloTopoClusters"))
+                                 clustersnapname=flags.HeavyIon.Egamma.UncalibCaloTopoCluster))
 
     return acc
