@@ -75,7 +75,7 @@ def get_trigconf_keys(run_number, lb_number):
 
 def getCACfg(jopath):
    """Return the CA Cfg function based on joboptions path.
-   The format is MODULE[.FNC]."""
+   The format is MODULE[.FNC]. If no FNC is given, 'main' will be tried."""
 
    import importlib
 
@@ -83,7 +83,6 @@ def getCACfg(jopath):
 
    # try to import module as given:
    try:
-      fnc_name = None
       module = importlib.import_module(jopath)
    except ModuleNotFoundError:
       if '.' not in jopath:
@@ -91,6 +90,9 @@ def getCACfg(jopath):
       # or interpret as module.fnc:
       mod_name, fnc_name = jopath.rsplit('.', maxsplit=1)
       module = importlib.import_module(mod_name)
+   else:
+      # if the first import worked we are using the 'main(flags)' function:
+      fnc_name = 'main'
 
    sys.path.pop()
 
