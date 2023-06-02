@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODEgamma/EgammaxAODHelpers.h"
@@ -11,7 +11,7 @@
 
 
 bool xAOD::EgammaHelpers::isElectron(const xAOD::Egamma *eg){
-  return ( (eg->type()==xAOD::Type::Electron) && 
+  return ( (eg->type()==xAOD::Type::Electron) &&
 	   (!eg->author(xAOD::EgammaParameters::AuthorFwdElectron)));
 }
 // ==================================================================
@@ -36,23 +36,34 @@ bool xAOD::EgammaHelpers::isBarrel(const xAOD::Egamma *eg){
 }
 // ==================================================================
 bool xAOD::EgammaHelpers::isBarrel(const xAOD::CaloCluster *cluster){
-  if (cluster->inBarrel() &&  cluster->inEndcap()){
+  const bool isBarrel = cluster->inBarrel();
+  const bool isEndcap = cluster->inEndcap();
+  if (isBarrel && isEndcap){
     return  cluster->eSample(CaloSampling::EMB2) >= cluster->eSample(CaloSampling::EME2);
   }
-  return cluster->inBarrel();
+  return isBarrel;
+}
+// ==================================================================
+bool xAOD::EgammaHelpers::isFCAL(const xAOD::CaloCluster *cluster){
+  const bool hasEME2 = cluster->hasSampling(CaloSampling::EME2);
+  const bool hasFCAL0 = cluster->hasSampling(CaloSampling::FCAL0);
+  if (hasEME2 && hasFCAL0){
+    return  cluster->eSample(CaloSampling::FCAL0) >= cluster->eSample(CaloSampling::EME2);
+  }
+  return hasFCAL0;
 }
 // ==================================================================
 std::vector< ElementLink< xAOD::CaloClusterContainer > > xAOD::EgammaHelpers::getAssociatedTopoClustersLinks(const xAOD::CaloCluster *cluster){
 
   static const SG::AuxElement::Accessor < std::vector< ElementLink< xAOD::CaloClusterContainer > > > caloClusterLinks("constituentClusterLinks");
-  std::vector< ElementLink< xAOD::CaloClusterContainer > > veclinks; 
-  if(caloClusterLinks.isAvailable(*cluster)){ 
+  std::vector< ElementLink< xAOD::CaloClusterContainer > > veclinks;
+  if(caloClusterLinks.isAvailable(*cluster)){
     veclinks=caloClusterLinks(*cluster);
   }
   return veclinks;
 }
 // ==================================================================
-std::vector<const xAOD::CaloCluster*> xAOD::EgammaHelpers::getAssociatedTopoClusters(const xAOD::CaloCluster *cluster){ 
+std::vector<const xAOD::CaloCluster*> xAOD::EgammaHelpers::getAssociatedTopoClusters(const xAOD::CaloCluster *cluster){
   std::vector< const xAOD::CaloCluster* > topoclusters;
   std::vector< ElementLink< xAOD::CaloClusterContainer > > veclinks = xAOD::EgammaHelpers::getAssociatedTopoClustersLinks(cluster);
   for (const auto& i : veclinks){
@@ -62,7 +73,7 @@ std::vector<const xAOD::CaloCluster*> xAOD::EgammaHelpers::getAssociatedTopoClus
     else{
       topoclusters.push_back(nullptr);
     }
-  }  
+  }
   return topoclusters;
 }
 // ==================================================================
@@ -107,9 +118,9 @@ std::vector<const xAOD::FlowElement*> xAOD::EgammaHelpers::getAssociatedFlowElem
   return flowelements;
 }
 // ==================================================================
-std::set<const xAOD::TrackParticle*> xAOD::EgammaHelpers::getTrackParticles(const xAOD::Egamma *eg, 
-										  bool useBremAssoc /* = true */, 
-										  bool allParticles /* = true */){  
+std::set<const xAOD::TrackParticle*> xAOD::EgammaHelpers::getTrackParticles(const xAOD::Egamma *eg,
+										  bool useBremAssoc /* = true */,
+										  bool allParticles /* = true */){
 
   if (eg) {
     if (eg->type()==xAOD::Type::Electron) {
@@ -119,7 +130,7 @@ std::set<const xAOD::TrackParticle*> xAOD::EgammaHelpers::getTrackParticles(cons
       }
     }
     else if (eg->type()==xAOD::Type::Photon) {
-      const xAOD::Photon* ph = static_cast<const xAOD::Photon*> (eg);  
+      const xAOD::Photon* ph = static_cast<const xAOD::Photon*> (eg);
       if (ph) {
         return getTrackParticles(ph, useBremAssoc);
       }
@@ -128,9 +139,9 @@ std::set<const xAOD::TrackParticle*> xAOD::EgammaHelpers::getTrackParticles(cons
   return std::set<const xAOD::TrackParticle*>{};
 }
 // ==================================================================
-std::vector<const xAOD::TrackParticle*> xAOD::EgammaHelpers::getTrackParticlesVec(const xAOD::Egamma *eg, 
-											bool useBremAssoc /* = true */, 
-											bool allParticles /* = true */){  
+std::vector<const xAOD::TrackParticle*> xAOD::EgammaHelpers::getTrackParticlesVec(const xAOD::Egamma *eg,
+											bool useBremAssoc /* = true */,
+											bool allParticles /* = true */){
   if (eg) {
     if (eg->type()==xAOD::Type::Electron) {
       const xAOD::Electron* el = static_cast<const xAOD::Electron*> (eg);
@@ -139,7 +150,7 @@ std::vector<const xAOD::TrackParticle*> xAOD::EgammaHelpers::getTrackParticlesVe
       }
     }
     else if (eg->type()==xAOD::Type::Photon) {
-      const xAOD::Photon* ph = static_cast<const xAOD::Photon*> (eg);  
+      const xAOD::Photon* ph = static_cast<const xAOD::Photon*> (eg);
       if (ph) {
         return getTrackParticlesVec(ph, useBremAssoc);
       }
@@ -148,16 +159,16 @@ std::vector<const xAOD::TrackParticle*> xAOD::EgammaHelpers::getTrackParticlesVe
   return std::vector<const xAOD::TrackParticle*>{};
 }
 // ==================================================================
-int xAOD::EgammaHelpers::summaryValueInt(const xAOD::TrackParticle& tp, 
-					 const xAOD::SummaryType& info, 
+int xAOD::EgammaHelpers::summaryValueInt(const xAOD::TrackParticle& tp,
+					 const xAOD::SummaryType& info,
 					 int deflt /* = -999 */){
   uint8_t dummy(0);
   return (tp.summaryValue(dummy, info) ? dummy : deflt);
 }
 // ==================================================================
-float xAOD::EgammaHelpers::summaryValueFloat(const xAOD::TrackParticle& tp, 
-					     const xAOD::SummaryType& info, 
-					     int deflt /* = -999. */){
+float xAOD::EgammaHelpers::summaryValueFloat(const xAOD::TrackParticle& tp,
+					     const xAOD::SummaryType& info,
+					     float deflt /* = -999. */){
   float dummy(0);
   return (tp.summaryValue(dummy, info) ? dummy : deflt);
 }

@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from ElectronPhotonSelectorTools.EgammaPIDdefs import egammaPID
+from egammaTools.EMTrackMatchBuilderConfig import EMTrackMatchBuilderCfg
 from ElectronPhotonSelectorTools.AsgForwardElectronIsEMSelectorsConfig import (
     AsgForwardElectronIsEMSelectorCfg)
 from AthenaCommon.Logging import logging
@@ -15,6 +16,11 @@ def egammaForwardBuilderCfg(flags, name='egammaForwardElectron', **kwargs):
     mlog.info('Starting configuration')
 
     acc = ComponentAccumulator()
+    if "TrackMatchBuilderTool" not in kwargs:
+        emtrkmatch = EMTrackMatchBuilderCfg(flags)
+        kwargs["TrackMatchBuilderTool"] = acc.popToolsAndMerge(emtrkmatch)
+    if flags.Detector.GeometryITk:
+        kwargs["doTrackMatching"] = True
     if "forwardelectronIsEMselectors" not in kwargs:
         LooseFwdElectronSelector = AsgForwardElectronIsEMSelectorCfg(
             flags,

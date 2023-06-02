@@ -8,6 +8,7 @@
 #include "xAODCore/ShallowCopy.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
+#include "xAODEgamma/EgammaxAODHelpers.h"
 
 #include <cmath>
 
@@ -122,7 +123,7 @@ StatusCode egammaTopoClusterCopier::execute(const EventContext& ctx) const {
                     clus->energyBE(2) + clus->energyBE(3) + eg_tilegap) / clusterE;
 
     acc_emfraction(*clus) = emfrac;
-    if (emfrac > m_EMFracCut && (clusterE * emfrac) > m_ECut) {
+    if ((emfrac > m_EMFracCut && (clusterE * emfrac) > m_ECut) || xAOD::EgammaHelpers::isFCAL(clus)) {
       ++buff_PassSelection;
       ATH_MSG_DEBUG("-->Selected Cluster at eta,phi,et,EMFraction " << clus->eta()
                     << " , "<< clus->phi() << " , " << clus->et()<<" , "<< emfrac);

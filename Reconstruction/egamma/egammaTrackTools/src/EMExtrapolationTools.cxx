@@ -115,6 +115,10 @@ EMExtrapolationTools::getClusterLayerSurfaces(
     CaloSampling::EME2,
     CaloSampling::EME3
   };
+  constexpr std::array<CaloSampling::CaloSample, 4> endcapLayersAboveEta2p5 = {
+    CaloSampling::EME2,
+    CaloSampling::EME3
+  };
   constexpr std::array<CaloSampling::CaloSample, 1> forwardLayers = {
     CaloSampling::FCAL0,
   };
@@ -143,11 +147,20 @@ EMExtrapolationTools::getClusterLayerSurfaces(
       }
     }
   } else if (isEMEC) {
-    for (const CaloSampling::CaloSample lay : endcapLayers) {
-      if (cluster.hasSampling(lay)) {
-        clusterLayers.emplace_back(lay);
+      if(std::abs(cluster.eta()) < 2.5){
+        for (const CaloSampling::CaloSample lay : endcapLayers) {
+          if (cluster.hasSampling(lay)) {
+            clusterLayers.emplace_back(lay);
+          }
+        }
       }
-    }
+      else {
+        for (const CaloSampling::CaloSample lay : endcapLayersAboveEta2p5) {
+          if (cluster.hasSampling(lay)) {
+            clusterLayers.emplace_back(lay);
+          }
+        }
+      }
   } else {
     for (const CaloSampling::CaloSample lay : forwardLayers) {
       if (cluster.hasSampling(lay)) {
@@ -272,7 +285,7 @@ EMExtrapolationTools::getMatchAtCalo(
       i = 0;
     } else if (sample == CaloSampling::EME1 || sample == CaloSampling::EMB1) {
       i = 1;
-    } else if (sample == CaloSampling::EME2 || sample == CaloSampling::EMB2) {
+    } else if (sample == CaloSampling::EME2 || sample == CaloSampling::EMB2 || sample == CaloSampling::FCAL0) {
       i = 2;
     } else if (sample == CaloSampling::EME3 || sample == CaloSampling::EMB3) {
       i = 3;
