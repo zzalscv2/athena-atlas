@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaOutputStream.h"
@@ -682,7 +682,7 @@ StatusCode AthenaOutputStream::collectAllObjects() {
    // Collect all objects that need to be persistified:
    //FIXME refactor: move this in folder. Treat as composite
    for (SG::IFolder::const_iterator i = m_p2BWritten->begin(), iEnd = m_p2BWritten->end(); i != iEnd; ++i) {
-     addItemObjects(*i, *vetoes, *compInfo);
+      ATH_CHECK( addItemObjects(*i, *vetoes, *compInfo) );
       folderclids.push_back(i->id());
    }
 
@@ -729,9 +729,9 @@ StatusCode AthenaOutputStream::collectAllObjects() {
 }
 
 //FIXME refactor: move this in folder. Treat as composite
-void AthenaOutputStream::addItemObjects(const SG::FolderItem& item,
-                                        SG::SelectionVetoes& vetoes,
-                                        SG::CompressionInfo& compInfo)
+StatusCode AthenaOutputStream::addItemObjects(const SG::FolderItem& item,
+                                              SG::SelectionVetoes& vetoes,
+                                              SG::CompressionInfo& compInfo)
 {
    // anything after a dot is a list of dynamic Aux attrubutes, separated by dots
    size_t dotpos = item.key().find('.');
@@ -863,16 +863,16 @@ void AthenaOutputStream::addItemObjects(const SG::FolderItem& item,
                      // create a temporary DataObject for an entry in the  container to pass to CnvSvc
                      DataBucketBase* dbb = static_cast<DataBucketBase*>( itemProxy->object() );
                      const MetaContBase* metaCont = static_cast<MetaContBase*>( dbb->cast( ClassID_traits<MetaContBase>::ID() ) );
-                     if( metaCont ) {
-                        void* obj = metaCont->getAsVoid( m_outSeqSvc->currentRangeID() );
+                     void* obj = metaCont? metaCont->getAsVoid( m_outSeqSvc->currentRangeID() ) : nullptr;
+                     if( obj ) {
                         auto altbucket = std::make_unique<AltDataBucket>(
                            obj, item_id, *CLIDRegistry::CLIDToTypeinfo(item_id), proxyName );
                         m_objects.push_back( altbucket.get() );
                         m_ownedObjects.push_back( std::move(altbucket) );
                         m_altObjects.push_back( itemProxy->object() ); // only for duplicate prevention
                      } else {
-                        ATH_MSG_ERROR("Failed to retrieve object from MetaCont with key=" << item_key << " for EventRangeID=" << m_outSeqSvc->currentRangeID() );
-                        return;
+                        ATH_MSG_ERROR("Failed to retrieve object from MetaCont with key=" << item_key << ", for EventRangeID=" << m_outSeqSvc->currentRangeID() );
+                        return StatusCode::FAILURE;
                      }
                   } else if (item.exact()) {
                    // If the exact flag is set, make a new DataObject
@@ -985,6 +985,7 @@ void AthenaOutputStream::addItemObjects(const SG::FolderItem& item,
       ATH_MSG_DEBUG(" Failed to receive proxy iterators from StoreGate for "
               << item_id << ",\"" << item_key  << "\". Skipping");
    }
+   return StatusCode::SUCCESS;
 }
 
 /// Here we build the list of attributes for the float compression
