@@ -27,7 +27,7 @@ class dbgEventInfo:
         self.HLT_Result                            = 'None'
         self.SuperMasterKey                        = 0
         self.HLTPrescaleKey                        = 0
-        self.HLT_Decision                          = False
+        self.HLT_Decision                          = 0
         self.L1_Chain_Names                        = []
         self.HLT_Chain_Names                       = []
         self.EventStatusNames                      = 'None'
@@ -372,7 +372,7 @@ class dbgEventInfo:
             Int_t   Node_ID;\
             ULong_t   SuperMasterKey;\
             ULong_t   HLTPrescaleKey;\
-            Bool_t  HLT_Decision;\
+            Int_t  HLT_Decision;\
             Char_t  EventStatusNames[STRINGLENGTH];\
             };" )
   
@@ -390,7 +390,7 @@ class dbgEventInfo:
         self.event_info_tree.Branch('Node_ID',          addressof(self.Event_Info, 'Node_ID'),          'node_ID/I')
         self.event_info_tree.Branch('SuperMasterKey',   addressof(self.Event_Info, 'SuperMasterKey'),   'superMasterKey/I')
         self.event_info_tree.Branch('HLTPrescaleKey',   addressof(self.Event_Info, 'HLTPrescaleKey'),   'hltPrescaleKey/I')
-        self.event_info_tree.Branch('HLT_Decision',     addressof(self.Event_Info, 'HLT_Decision'),     'hLT_Decision/B')
+        self.event_info_tree.Branch('HLT_Decision',     addressof(self.Event_Info, 'HLT_Decision'),     'hLT_Decision/I')
         self.event_info_tree.Branch('EventStatusNames', addressof(self.Event_Info, 'EventStatusNames'), 'eventStatusNames/C')
 
         # Setup vector data
