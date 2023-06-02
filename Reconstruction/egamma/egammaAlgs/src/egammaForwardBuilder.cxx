@@ -57,6 +57,9 @@ StatusCode egammaForwardBuilder::initialize()
                   "fwd-electron selector names");
     return StatusCode::FAILURE;
   }
+  
+  // retrieve track match builder
+  ATH_CHECK(RetrieveEMTrackMatchBuilder());
 
   ATH_MSG_DEBUG("Initialization completed successfully");
 
@@ -97,6 +100,8 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
     return StatusCode::FAILURE;
   }
 
+  EgammaRecContainer egammaRecsFwd;
+
   // loop over input cluster container and create fwd electrons
   xAOD::CaloClusterContainer::const_iterator clus_begin =
     inputClusters->begin();
@@ -108,40 +113,54 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
   size_t origClusterIndex = 0;
   for (; clus_begin!=clus_end; ++clus_begin,++origClusterIndex) {
  
-    //Preselectcion cuts
+    //Preselection cuts
     if((*clus_begin)->et() < m_ETcut||
        std::abs((*clus_begin)->eta())<m_etacut){
       continue;
     }
 
-    //Create a new electron
-    xAOD::Electron* el = new xAOD::Electron();
-    xaodFrwd->push_back(el);
-    el->setAuthor( xAOD::EgammaParameters::AuthorFwdElectron );
-
-    //Deep copy of topo cluster as might want to own modify it 
-    xAOD::CaloCluster *newCluster = new xAOD::CaloCluster(**clus_begin);
+    auto newCluster = new xAOD::CaloCluster(**clus_begin);
     outClusterContainer->push_back(newCluster);  
 
-    //set links back to the original caloCalTopoCluster we copied from
+    // Create links back to the original clusters
     std::vector<ElementLink<xAOD::CaloClusterContainer>> constituentLinks;
     constituentLinks.emplace_back(*inputClusters, origClusterIndex, ctx);
     caloClusterLinks(*newCluster) = constituentLinks;
-
-    //Now attach the copied cluster to the electron
-    int index = outClusterContainer->size() - 1;
-    ElementLink<xAOD::CaloClusterContainer> newclusterElementLink(
+   
+    int index = outClusterContainer->size() - 1;    
+    const ElementLink<xAOD::CaloClusterContainer> clusterLink(
       *outClusterContainer, index, ctx);
-    std::vector< ElementLink< xAOD::CaloClusterContainer > > linksToClusters;
-    linksToClusters.push_back(newclusterElementLink);
-    el->setCaloClusterLinks(linksToClusters);
+    const std::vector<ElementLink<xAOD::CaloClusterContainer>>
+      clusterLinkVector{ clusterLink };
 
-    // do  Four Momentum
+    auto egRec = std::make_unique<egammaRec>();
+    egRec->setCaloClusters(clusterLinkVector);
+    egammaRecsFwd.push_back(std::move(egRec));
+  }
+  
+  // Add track-cluster matching information if requested
+  if (m_doTrackMatching) {
+    ATH_CHECK(m_trackMatchBuilder->executeRec(ctx, &egammaRecsFwd));
+  }
+
+  for (const egammaRec* egRec : egammaRecsFwd) {
+
+    if (!egRec) {
+      return StatusCode::FAILURE;
+    }
+
+    xAOD::Electron* el = new xAOD::Electron();
+    xaodFrwd->push_back(el);
+    el->setAuthor(xAOD::EgammaParameters::AuthorFwdElectron);
+
+    std::vector<ElementLink<xAOD::CaloClusterContainer>> clusterLinks;
+    for (size_t i = 0; i < egRec->getNumberOfClusters(); ++i) {
+      clusterLinks.push_back(egRec->caloClusterElementLink(i));
+    }
+    el->setCaloClusterLinks(clusterLinks);
+
     ATH_CHECK(m_fourMomBuilder->execute(ctx, el));
-
-    // do object quality
     ATH_CHECK(ExecObjectQualityTool(ctx, el));
-
     // Apply the Forward Electron selectors
     size_t size = m_forwardElectronIsEMSelectors.size();
 
@@ -156,6 +175,59 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
                            "isEM" +
                              m_forwardElectronIsEMSelectorResultNames[i]);
     }
+    if (egRec->getNumberOfTrackParticles() == 0 and m_doTrackMatching) {
+      continue;
+    }
+    std::vector<ElementLink<xAOD::TrackParticleContainer>> trackLinks;
+    for (size_t i = 0; i < egRec->getNumberOfTrackParticles(); ++i) {
+      trackLinks.push_back(egRec->trackParticleElementLink(i));
+    }
+    el->setTrackParticleLinks(trackLinks);
+
+    const xAOD::TrackParticle* trackParticle = el->trackParticle();
+    if (trackParticle) {
+      el->setCharge(trackParticle->charge());
+    }
+    if (m_doTrackMatching) {
+      // Set DeltaEta, DeltaPhi , DeltaPhiRescaled
+      std::array<double, 4> deltaEta = egRec->deltaEta();
+      std::array<double, 4> deltaPhi = egRec->deltaPhi();
+      std::array<double, 4> deltaPhiRescaled = egRec->deltaPhiRescaled();
+
+      el->setTrackCaloMatchValue(static_cast<float>(deltaEta[0]),
+                                      xAOD::EgammaParameters::deltaEta0);
+      el->setTrackCaloMatchValue(static_cast<float>(deltaPhi[0]),
+                                      xAOD::EgammaParameters::deltaPhi0);
+      el->setTrackCaloMatchValue(static_cast<float>(deltaPhiRescaled[0]),
+                                      xAOD::EgammaParameters::deltaPhiRescaled0);
+
+      el->setTrackCaloMatchValue(static_cast<float>(deltaEta[1]),
+                                      xAOD::EgammaParameters::deltaEta1);
+      el->setTrackCaloMatchValue(static_cast<float>(deltaPhi[1]),
+                                      xAOD::EgammaParameters::deltaPhi1);
+      el->setTrackCaloMatchValue(static_cast<float>(deltaPhiRescaled[1]),
+                                      xAOD::EgammaParameters::deltaPhiRescaled1);
+
+      static const SG::AuxElement::Accessor<float> pear("deltaEta1PearDistortion");
+
+      el->setTrackCaloMatchValue(static_cast<float>(deltaEta[2]),
+                                      xAOD::EgammaParameters::deltaEta2);
+      el->setTrackCaloMatchValue(static_cast<float>(deltaPhi[2]),
+                                      xAOD::EgammaParameters::deltaPhi2);
+      el->setTrackCaloMatchValue(static_cast<float>(deltaPhiRescaled[2]),
+                                      xAOD::EgammaParameters::deltaPhiRescaled2);
+
+      el->setTrackCaloMatchValue(static_cast<float>(deltaEta[3]),
+                                      xAOD::EgammaParameters::deltaEta3);
+      el->setTrackCaloMatchValue(static_cast<float>(deltaPhi[3]),
+                                      xAOD::EgammaParameters::deltaPhi3);
+      el->setTrackCaloMatchValue(static_cast<float>(deltaPhiRescaled[3]),
+                                      xAOD::EgammaParameters::deltaPhiRescaled3);
+
+      float deltaPhiLast = static_cast<float>(egRec->deltaPhiLast());
+      el->setTrackCaloMatchValue(
+        deltaPhiLast, xAOD::EgammaParameters::deltaPhiFromLastMeasurement);
+      }
   }
 
   // Now finalize the cluster: based on code in CaloClusterStoreHelper::finalizeClusters
@@ -179,4 +251,26 @@ egammaForwardBuilder::ExecObjectQualityTool(
   if (!m_objectQualityTool.isEnabled()) return StatusCode::SUCCESS;
   // execute the tool
   return m_objectQualityTool->execute(ctx,*eg);
+}
+
+StatusCode
+egammaForwardBuilder::RetrieveEMTrackMatchBuilder()
+{
+  if (!m_doTrackMatching) {
+    m_trackMatchBuilder.disable();
+    return StatusCode::SUCCESS;
+  }
+
+  if (m_trackMatchBuilder.empty()) {
+    ATH_MSG_ERROR(
+      "EMTrackMatchBuilder is empty, but track matching is enabled");
+    return StatusCode::FAILURE;
+  }
+
+  if (m_trackMatchBuilder.retrieve().isFailure()) {
+    ATH_MSG_ERROR("Unable to retrieve " << m_trackMatchBuilder);
+    return StatusCode::FAILURE;
+  }
+
+  return StatusCode::SUCCESS;
 }

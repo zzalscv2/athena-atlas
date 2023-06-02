@@ -24,6 +24,10 @@ def egammaTopoClusterCopierCfg(flags, name='', **kwargs):
     kwargs.setdefault(
         "ECut",
         700 if not flags.Egamma.doLowMu else 300)
+    if flags.Detector.GeometryITk: 
+        kwargs.setdefault(
+            "EtaCut",
+            4.0)
 
     if name=='':
         name = kwargs["OutputTopoCollection"]+'Copier'

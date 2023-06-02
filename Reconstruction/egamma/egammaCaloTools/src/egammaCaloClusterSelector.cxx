@@ -3,6 +3,7 @@
 */
 #include "egammaCaloClusterSelector.h"
 #include "xAODCaloEvent/CaloCluster.h"
+#include "xAODEgamma/EgammaxAODHelpers.h"
 #include "CaloUtils/CaloCellList.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include <CLHEP/Units/SystemOfUnits.h>
@@ -55,6 +56,17 @@ bool egammaCaloClusterSelector::passSelection(
     return false;
   }
 
+  // Accept all clusters in the FCAL
+  if (xAOD::EgammaHelpers::isFCAL(cluster)){
+    return true;
+  }
+  
+  // Sanity check to catch extreme eta values
+  const double eta2 = std::abs(cluster->etaBE(2));
+  if (eta2 > 10) {
+    return false;
+  }
+
   // Check energy deposit if requested
   if (!m_egammaCheckEnergyDepositTool.empty() &&
       !m_egammaCheckEnergyDepositTool->checkFractioninSamplingCluster(cluster)) {
@@ -65,11 +77,6 @@ bool egammaCaloClusterSelector::passSelection(
   // Check second sampling is present
   if (!cluster->hasSampling(CaloSampling::EMB2) && !cluster->hasSampling(CaloSampling::EME2)){
       return false;
-  }
-  const double eta2 = std::abs(cluster->etaBE(2));
-  constexpr double ETA2_CUT = 10;
-  if (eta2 > ETA2_CUT) {
-    return false;
   }
   // minimum energy reconstructed in 2nd sampling
   constexpr double EM2ENERGY_CUT = 50 * MeV;

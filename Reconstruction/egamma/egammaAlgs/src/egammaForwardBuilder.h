@@ -45,6 +45,7 @@
 #include "egammaInterfaces/IegammaBaseTool.h"
 #include "egammaInterfaces/IEMFourMomBuilder.h"
 #include "EgammaAnalysisInterfaces/IAsgForwardElectronIsEMSelector.h"
+#include "egammaInterfaces/IEMTrackMatchBuilder.h"
 
 #include "GaudiKernel/SystemOfUnits.h"
 
@@ -68,6 +69,7 @@ class egammaForwardBuilder : public AthReentrantAlgorithm
   virtual StatusCode execute(const EventContext& ctx) const override final;
 
  private:
+   StatusCode RetrieveEMTrackMatchBuilder();
    StatusCode ExecObjectQualityTool(const EventContext& ctx,
                                     xAOD::Egamma* eg) const;
 
@@ -84,6 +86,14 @@ class egammaForwardBuilder : public AthReentrantAlgorithm
                                                    "FourMomBuilderTool",
                                                    "EMFourMomBuilder",
                                                    "Handle of 4-mom Builder" };
+
+   /** @brief Tool to perform track-cluster matching*/
+   ToolHandle<IEMTrackMatchBuilder> m_trackMatchBuilder{
+     this,
+     "TrackMatchBuilderTool",
+     "EMTrackMatchBuilder",
+     "Tool that matches tracks to egammaRecs (Fwd)"
+   };
 
    /** @brief input topo cluster type */
    SG::ReadHandleKey<xAOD::CaloClusterContainer> m_topoClusterKey{
@@ -122,6 +132,12 @@ class egammaForwardBuilder : public AthReentrantAlgorithm
 
    /** @brief eta cut */
    Gaudi::Property<double> m_etacut{ this, "EtaCut", 2.5, "eta cut" };
+
+   /** @brief private member flag to do the track matching */
+   Gaudi::Property<bool> m_doTrackMatching{ this,
+                                            "doTrackMatching",
+                                            false,
+                                            "Boolean to do track matching" };
 
  protected:
   /** Handle to the selectors */

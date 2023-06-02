@@ -211,7 +211,7 @@ egammaSelectedTrackCopy::selectTrack(const EventContext& ctx,
                                          z_perigee);
 
   // Get Cluster parameters
-  const double clusterEta = cluster->etaBE(2);
+  const double clusterEta = xAOD::EgammaHelpers::isFCAL(cluster) ? cluster->eta() : cluster->etaBE(2);
   const bool isEndCap = !xAOD::EgammaHelpers::isBarrel(cluster);
   // use trkEta only if sufficient hits in the Si
   const double Et = trkTRT ? cluster->et() : cluster->e() / cosh(trkEta);
