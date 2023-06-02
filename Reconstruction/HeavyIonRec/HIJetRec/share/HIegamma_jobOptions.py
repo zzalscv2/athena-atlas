@@ -48,14 +48,8 @@ if DetFlags.haveRIO.Calo_on() :
                 treatException("Problem with LArDigitsFromEMClust. Switched off.")
                 jobproperties.CaloRecFlags.doEMDigits=False
 
-    #Topoclusters
-    if jobproperties.CaloRecFlags.doCaloTopoCluster() :
-        try: 
-            from HIJetRec.SubtractedCaloClusterTopoGetter import SubtractedCaloClusterTopoGetter
-            SubtractedCaloClusterTopoGetter()
-        except Exception:
-            treatException("Problem with CaloTopoCluster. Switched off.")
-            jobproperties.CaloRecFlags.doCaloTopoCluster=False
+    #Topoclusters are produced in HIEgammaRecCfg which is included in egammaReconstructionCfg
+
 
     #EM Topoclusters
     if jobproperties.CaloRecFlags.doCaloEMTopoCluster() :
@@ -64,11 +58,8 @@ if DetFlags.haveRIO.Calo_on() :
             treatException("Problem with EMTopoCluster. Switched off")
             jobproperties.CaloRecFlags.doCaloEMTopoCluster=False
 
-    #EgammaTopoCluster
-    from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    from egammaAlgs.egammaTopoClusterCopierConfig import egammaTopoClusterCopierCfg
-    CAtoGlobalWrapper(egammaTopoClusterCopierCfg,ConfigFlags)
+    #EgammaTopoClusters are produced in egammaReconstructionCfg
+
 
     #Run CaloExtension
     if (rec.doESD()) and (rec.doEgamma()) :
