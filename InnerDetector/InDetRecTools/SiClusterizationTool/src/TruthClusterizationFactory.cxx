@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -62,7 +62,6 @@ namespace InDet {
  
     ATH_CHECK( m_simDataCollectionName.initialize() );
 
-
     return StatusCode::SUCCESS;
   }
   
@@ -93,9 +92,9 @@ namespace InDet {
           for( const auto& deposit : simData.getdeposits() ){
             //If deposit exists
             if (!deposit.first){ATH_MSG_WARNING("No deposits found"); continue;}
-             if(!m_usePUHits && deposit.first.eventIndex()!=0) continue;
-              int bc = deposit.first.barcode();
-              barcodes.insert(bc);
+            if(!m_usePUHits && deposit.first.eventIndex()!=ctx.eventID().event_number()) continue;
+            int bc = deposit.first.barcode();
+            barcodes.insert(bc);
           }
         }
       }
