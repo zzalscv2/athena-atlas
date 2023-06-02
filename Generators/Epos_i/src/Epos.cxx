@@ -14,8 +14,6 @@
 //   Andrii Verbytskyi: 2.0.1+
 // ----------------------------------------------------------------------
 
-#include "TruthUtils/GeneratorName.h"
-
 #include "GaudiKernel/MsgStream.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "AthenaKernel/RNGWrapper.h"
@@ -28,6 +26,7 @@
 #include "CRMChepevt.h"
 #define CRMC_STATIC
 #include "CRMCinterface.h"
+
 
 namespace {
 static std::string epos_rndm_stream = "EPOS_INIT";

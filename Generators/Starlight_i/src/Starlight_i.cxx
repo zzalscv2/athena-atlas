@@ -16,8 +16,6 @@
 
 #include "Starlight_i/Starlight_i.h"
 
-#include "TruthUtils/GeneratorName.h"
-
 #include "GeneratorUtils/StringParse.h"
 
 #include "AtlasHepMC/GenEvent.h"
