@@ -169,11 +169,10 @@ protected:  // data members
   
 template<class SpacePoint> 
 IDScanZFinderInternal<SpacePoint>::IDScanZFinderInternal( const std::string& type, 
-  							  const std::string& name)  
+  							  const std::string& name)
+  : m_Type (type),
+    m_Name (name)
 {
-  m_Type = type;
-  m_Name = name;
-  
   m_phiBinSize       = 0.2   ;
   m_forcePhiBinSize  = false ;
   m_usedphiBinSize   = m_phiBinSize   ;
