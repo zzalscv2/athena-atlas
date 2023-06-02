@@ -16,7 +16,8 @@
 
 EgammaMonitoring::EgammaMonitoring(const std::string &name, ISvcLocator *pSvcLocator) :
   AthAlgorithm(name, pSvcLocator){
-    declareProperty("sampleType", m_sampleType = "Unknown", "Descriptive name for the processed type of particle");
+    declareProperty("sampleType", m_sampleType = "Unknown",
+		    "Descriptive name for the processed type of particle");
 }
 
 // ******
@@ -279,7 +280,6 @@ StatusCode EgammaMonitoring::initialize() {
     InDetTracksTRTNotMatchedhighpT = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TrackHistograms(
     "InDetTracksTRTNotMatchedhighpT","InDet Tracks TRTSA not matched pT > 3 GeV", "/MONITORING/InDetTracksTRTNotMatchedhighpT/", rootHistSvc));
 
-
     ATH_CHECK(recoPhotonAll->initializePlots());
     ATH_CHECK(truthPhotonAll->initializePlots());
     ATH_CHECK(truthPhotonAllUnconv->initializePlots());
@@ -344,32 +344,39 @@ StatusCode EgammaMonitoring::initialize() {
 
   } // gamma Hists
 
-  //*****************LLH Requirement********************
-  ATH_CHECK(m_LooseLH.retrieve());
-  //*****************MLH Requirement********************
-  ATH_CHECK(m_MediumLH.retrieve());
-  //*****************TLH Requirement********************
-  ATH_CHECK(m_TightLH.retrieve());
-  //*****************LLH Requirement********************
-  ATH_CHECK(m_LooseLH_Photon.retrieve());
-  //*****************TLH Requirement********************
-  ATH_CHECK(m_TightLH_Photon.retrieve());
+  if ("electron" == m_sampleType) {
+    //*****************ID selectors (3 levels)********************
+    ATH_CHECK(m_LooseLH.retrieve());
+    ATH_CHECK(m_MediumLH.retrieve());
+    ATH_CHECK(m_TightLH.retrieve());
 
-  //*****************Iso Requirements********************
-  ATH_CHECK(m_IsoFixedCutTight.retrieve());
-  ATH_CHECK(m_IsoFixedCutTightCaloOnly.retrieve());
-  ATH_CHECK(m_IsoFixedCutLoose.retrieve());
+    ATH_CHECK(m_ElectronsKey.initialize());
+    ATH_CHECK(m_FwdElectronsKey.initialize(!m_FwdElectronsKey.empty()));
+    ATH_CHECK(m_GSFTrackParticlesKey.initialize());
+  }
+
+  if ("gamma" == m_sampleType) {
+    //*****************ID selectors (2 levels)********************
+    ATH_CHECK(m_Loose_Photon.retrieve());
+    ATH_CHECK(m_Tight_Photon.retrieve());
+
+    //*****************Iso Requirements********************
+    ATH_CHECK(m_IsoFixedCutTight.retrieve());
+    ATH_CHECK(m_IsoFixedCutTightCaloOnly.retrieve());
+    ATH_CHECK(m_IsoFixedCutLoose.retrieve());
+
+    ATH_CHECK(m_PhotonsKey.initialize());
+  }
+
   //*****************MC Truth Classifier Requirement********************
   ATH_CHECK(m_mcTruthClassifier.retrieve());
 
-  //***************** The handles ********************
+  //***************** The handles used whatever the sample********************
   ATH_CHECK(m_eventInfoKey.initialize());
   ATH_CHECK(m_egTruthParticlesKey.initialize());
   ATH_CHECK(m_truthParticlesKey.initialize());
-  ATH_CHECK(m_ElectronsKey.initialize());
-  ATH_CHECK(m_PhotonsKey.initialize());
   ATH_CHECK(m_InDetTrackParticlesKey.initialize());
-  ATH_CHECK(m_GSFTrackParticlesKey.initialize());
+
   return StatusCode::SUCCESS;
 }
 
@@ -387,10 +394,12 @@ StatusCode EgammaMonitoring::execute() {
   // Retrieve truth particles
   SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_truthParticlesKey, ctx);
 
+  // Retrieve indet track particles
+  SG::ReadHandle<xAOD::TrackParticleContainer > InDetTPs(m_InDetTrackParticlesKey, ctx);
+
   if ("electron" == m_sampleType) {
 
     SG::ReadHandle<xAOD::ElectronContainer > RecoEl(m_ElectronsKey, ctx);
-    SG::ReadHandle<xAOD::TrackParticleContainer > InDetTracks(m_InDetTrackParticlesKey, ctx);
     SG::ReadHandle<xAOD::TrackParticleContainer > GSFTracks(m_GSFTrackParticlesKey, ctx);
 
     ATH_MSG_DEBUG( "------------ Truth Egamma Container ---------------" );
@@ -409,11 +418,11 @@ StatusCode EgammaMonitoring::execute() {
     }
 
     ATH_MSG_DEBUG( "------------ Truth Particles Container ---------------" );
-    unsigned int promtpElectronTruthIndex = - 9;
+    unsigned int promptElectronTruthIndex = - 9;
     for (const auto *truth : *truthParticles) {
 
       if (!truth) continue;
-      if (fabs(truth->pdgId()) != 11) continue;
+      if (std::abs(truth->pdgId()) != 11) continue;
 
       auto res = m_mcTruthClassifier->particleTruthClassifier(truth);
       MCTruthPartClassifier::ParticleOrigin TO = res.second;
@@ -433,51 +442,44 @@ StatusCode EgammaMonitoring::execute() {
       if (TO == MCTruthPartClassifier::SingleElec &&
           TT == MCTruthPartClassifier::IsoElectron && truth->barcode() == 10001) {
         truthPromptElectronAll->fill(truth);
-        promtpElectronTruthIndex = truth->index();
+        promptElectronTruthIndex = truth->index();
 
       }
 
-
       // Check that it is not from geant4
-      if ( TT != MCTruthPartClassifier::NonPrimary) truthElectronAll->fill(truth);
+      if (TT != MCTruthPartClassifier::NonPrimary) truthElectronAll->fill(truth);
 
     }
 
     ATH_MSG_DEBUG( "------------ InDetTracks ---------------" );
 
-    bool foundPromptElectron = false;
-
-    for (const auto *tp : *InDetTracks) {
+    for (const auto *tp : *InDetTPs) {
 
       if (!tp) continue;
 
       uint8_t nPi = 0;
-
       uint8_t nSCT = 0;
 
       tp->summaryValue(nPi, xAOD::numberOfPixelHits);
-
       tp->summaryValue(nSCT, xAOD::numberOfSCTHits);
 
       if ((nPi + nSCT) < 7) continue;
 
       const xAOD::TruthParticle *truth = xAOD::TruthHelpers::getTruthParticle(*tp);
 
-      if (!truth || fabs(truth->pdgId()) != 11) continue;
+      if (!truth || std::abs(truth->pdgId()) != 11) continue;
 
-
-      auto res2 = m_mcTruthClassifier->particleTruthClassifier(truth);
-      MCTruthPartClassifier::ParticleOrigin TO = res2.second;
-      MCTruthPartClassifier::ParticleType TT = res2.first;
+      auto res = m_mcTruthClassifier->particleTruthClassifier(truth);
+      MCTruthPartClassifier::ParticleOrigin TO = res.second;
+      MCTruthPartClassifier::ParticleType TT = res.first;
       if (TO == MCTruthPartClassifier::SingleElec &&
           TT == MCTruthPartClassifier::IsoElectron &&
-          truth->index() == promtpElectronTruthIndex && !foundPromptElectron ) {
+          truth->index() == promptElectronTruthIndex) {
 
         // we found the track from the prompt electron
         // let's count it
         truthPromptElectronWithTrack->fill(truth);
-        foundPromptElectron = true;
-
+        break;
 
       } else {
         const xAOD::TruthParticle *firstElTruth = xAOD::EgammaHelpers::getBkgElectronMother(truth);
@@ -486,10 +488,9 @@ StatusCode EgammaMonitoring::execute() {
         // but we need to make sure that we double count if already found the track
         // foundPromptElectron will check that
 
-        if ((firstElTruth->index() == promtpElectronTruthIndex) &&
-            (!foundPromptElectron)) {
-          truthPromptElectronWithTrack->fill(firstElTruth);
-          foundPromptElectron = true;
+        if (firstElTruth->index() == promptElectronTruthIndex) {
+	  truthPromptElectronWithTrack->fill(firstElTruth);
+	  break;
         }
 
       }
@@ -497,9 +498,6 @@ StatusCode EgammaMonitoring::execute() {
     }
 
     ATH_MSG_DEBUG( "------------ GSFTracks ---------------" );
-
-    foundPromptElectron = false;
-
     for (const auto *gsf : *GSFTracks) {
 
       if (!gsf) continue;
@@ -509,42 +507,40 @@ StatusCode EgammaMonitoring::execute() {
       if (!truth) continue;
 
       uint8_t nPi = 0;
-
       uint8_t nSCT = 0;
 
       gsf->summaryValue(nPi, xAOD::numberOfPixelHits);
-
       gsf->summaryValue(nSCT, xAOD::numberOfSCTHits);
 
       if ((nPi + nSCT) < 7) continue;
 
-      auto res2 = m_mcTruthClassifier->particleTruthClassifier(truth);
-      MCTruthPartClassifier::ParticleOrigin TO = res2.second;
-      MCTruthPartClassifier::ParticleType TT = res2.first;
-      auto res = m_mcTruthClassifier->checkOrigOfBkgElec(truth);
-      MCTruthPartClassifier::ParticleOrigin bkgTO = res.second;
-      MCTruthPartClassifier::ParticleType bkgTT = res.first;
-      ATH_MSG_DEBUG(" ** Truth particle associated to track Found: "
-                << " STATUS  " << truth->status()
-                << " type  " << truth->type()
-                << " barcode  " << truth->barcode()
-                << " PDG id   " << truth->pdgId()
-                << " index    " << truth->index()
-                << " bkg T0  " << bkgTO
-                << " bkg TT   " << bkgTT
-                << " T0  " << TO
-                << " TT   " << TT
-                << " eventNumber  " << eventInfo->eventNumber() );
-
+      auto res = m_mcTruthClassifier->particleTruthClassifier(truth);
+      MCTruthPartClassifier::ParticleOrigin TO = res.second;
+      MCTruthPartClassifier::ParticleType TT = res.first;
+      if (msgLvl(MSG::DEBUG)) {
+	auto res2 = m_mcTruthClassifier->checkOrigOfBkgElec(truth);
+	MCTruthPartClassifier::ParticleOrigin bkgTO = res2.second;
+	MCTruthPartClassifier::ParticleType bkgTT = res2.first;
+	ATH_MSG_DEBUG(" ** Truth particle associated to track Found: "
+		      << " STATUS  " << truth->status()
+		      << " type  " << truth->type()
+		      << " barcode  " << truth->barcode()
+		      << " PDG id   " << truth->pdgId()
+		      << " index    " << truth->index()
+		      << " bkg T0  " << bkgTO
+		      << " bkg TT   " << bkgTT
+		      << " T0  " << TO
+		      << " TT   " << TT
+		      << " eventNumber  " << eventInfo->eventNumber() );
+      }
       if (TO == MCTruthPartClassifier::SingleElec &&
           TT == MCTruthPartClassifier::IsoElectron &&
-          truth->index() == promtpElectronTruthIndex && !foundPromptElectron ) {
+          truth->index() == promptElectronTruthIndex) {
 
         // we found the track from the prompt electron
         // let's count it
         truthPromptElectronWithGSFTrack->fill(truth);
-        foundPromptElectron = true;
-
+        break;
 
       } else {
         const xAOD::TruthParticle *firstElTruth = xAOD::EgammaHelpers::getBkgElectronMother(truth);
@@ -558,80 +554,120 @@ StatusCode EgammaMonitoring::execute() {
         // this is not a prompt electron, we need to check the parents
         // but we need to make sure that we double count if already found the track
         // foundPromptElectron will check that
-        if ((firstElTruth->index() == promtpElectronTruthIndex) &&
-            (!foundPromptElectron)) {
-          truthPromptElectronWithGSFTrack->fill(firstElTruth);
-          foundPromptElectron = true;
+        if (firstElTruth->index() == promptElectronTruthIndex) {
+	  truthPromptElectronWithGSFTrack->fill(firstElTruth);
+	  break;
         }
 
       }
 
-
     }
 
-
-    foundPromptElectron = false;
+    ATH_MSG_DEBUG( "------------ Reco central electrons ---------------" );
+    bool foundPromptElectron = false;
 
     for (const auto *elrec : *RecoEl) {
 
       if (!elrec) continue;
+
+      bool toFill = false;
+
       clusterAll->fill(*elrec,mu);
-      if (elrec->pt() > 10*Gaudi::Units::GeV) {
-        cluster10GeV->fill(*elrec,mu);
-      }
       recoElectronAll->fill(*elrec);
       showerShapesAll->fill(*elrec);
       isolationAll->fill(*elrec);
       if (elrec->pt() > 10*Gaudi::Units::GeV) {
+	cluster10GeV->fill(*elrec,mu);
         showerShapes10GeV->fill(*elrec);
       }
 
       const xAOD::TruthParticle *truth = xAOD::TruthHelpers::getTruthParticle(*elrec);
       if (!truth ) continue;
       truthElectronRecoElectronAll->fill(truth, elrec);
-      if (fabs(truth->pdgId()) != 11) continue;
-      auto res2 = m_mcTruthClassifier->particleTruthClassifier(truth);
-      MCTruthPartClassifier::ParticleOrigin TO = res2.second;
-      MCTruthPartClassifier::ParticleType TT = res2.first;
-
+      if (std::abs(truth->pdgId()) != 11 || foundPromptElectron)
+	continue;
+      const xAOD::TruthParticle *elTruth(nullptr);
+      auto res = m_mcTruthClassifier->particleTruthClassifier(truth);
+      MCTruthPartClassifier::ParticleOrigin TO = res.second;
+      MCTruthPartClassifier::ParticleType TT = res.first;
       if (TO == MCTruthPartClassifier::SingleElec &&
           TT == MCTruthPartClassifier::IsoElectron &&
-          truth->index() == promtpElectronTruthIndex && !foundPromptElectron ) {
-
-        // we found the track from the prompt electron
-        // let's count it
-        truthPromptElectronWithReco->fill(truth, elrec);
-        foundPromptElectron = true;
-        if (m_LooseLH->accept(elrec)) truthRecoElectronLooseLH->fill(truth,elrec);
-        if (m_MediumLH->accept(elrec)) truthRecoElectronMediumLH->fill(truth,elrec);
-        if (m_TightLH->accept(elrec)) truthRecoElectronTightLH->fill(truth,elrec);
+          truth->index() == promptElectronTruthIndex) {
+	toFill = true;
+	elTruth = truth;
       } else {
-        const xAOD::TruthParticle *firstElTruth = xAOD::EgammaHelpers::getBkgElectronMother(truth);
+        const xAOD::TruthParticle *firstElTruth =
+	  xAOD::EgammaHelpers::getBkgElectronMother(truth);
         if (!firstElTruth) continue;
         // this is not a prompt electron, we need to check the parents
         // but we need to make sure that we double count if already found the track
         // foundPromptElectron will check that
-        if ((firstElTruth->index() == promtpElectronTruthIndex)) {
-          if  (!foundPromptElectron) {
-            foundPromptElectron = true;
-            truthPromptElectronWithReco->fill(firstElTruth,elrec);
-            if (m_LooseLH->accept(elrec)) truthRecoElectronLooseLH->fill(firstElTruth,elrec);
-            if (m_MediumLH->accept(elrec)) truthRecoElectronMediumLH->fill(firstElTruth,elrec);
-            if (m_TightLH->accept(elrec)) truthRecoElectronTightLH->fill(firstElTruth,elrec);
-          }
-
-        }
-
+        if (firstElTruth->index() == promptElectronTruthIndex) {
+	  toFill = true;
+	  elTruth = firstElTruth;
+	}
+      }
+      if (toFill) {
+	foundPromptElectron = true;
+	truthPromptElectronWithReco->fill(elTruth,elrec);
+	if (m_LooseLH->accept(elrec))
+	  truthRecoElectronLooseLH->fill(elTruth,elrec);
+	if (m_MediumLH->accept(elrec))
+	  truthRecoElectronMediumLH->fill(elTruth,elrec);
+	if (m_TightLH->accept(elrec))
+	  truthRecoElectronTightLH->fill(elTruth,elrec);
       }
 
     } // RecoEl Loop
 
+    if (!m_FwdElectronsKey.empty()) {
+      SG::ReadHandle<xAOD::ElectronContainer > RecoFwdEl(m_FwdElectronsKey, ctx);
+      for (const auto *el : *RecoFwdEl) {
+	// This would be very weird ??
+	if (!el)
+	  continue;
+
+	bool toFill = false;
+
+	const xAOD::TruthParticle *truth = xAOD::TruthHelpers::getTruthParticle(*el);
+	if (!truth ) continue;
+	//truthElectronRecoFwdElectronAll->fill(truth, elrec); // to be done
+	if (std::abs(truth->pdgId()) != 11)
+	  continue;
+	const xAOD::TruthParticle *elTruth(nullptr);
+	auto res = m_mcTruthClassifier->particleTruthClassifier(truth);
+	if (res.second == MCTruthPartClassifier::SingleElec &&
+	    res.first == MCTruthPartClassifier::IsoElectron &&
+	    truth->index() == promptElectronTruthIndex) {
+	  toFill = true;
+	  elTruth = truth;
+	} else {
+	  const xAOD::TruthParticle *firstElTruth =
+	    xAOD::EgammaHelpers::getBkgElectronMother(truth);
+	  if (!firstElTruth) continue;
+	  if (firstElTruth->index() == promptElectronTruthIndex) {
+	    toFill = true;
+	    elTruth = firstElTruth;
+	  }
+	}
+	if (toFill) {
+	  if (foundPromptElectron) {
+	    ATH_MSG_WARNING("A fwd electron also reconstructed as central "
+			    "true eta = " << elTruth->eta() << " event = "
+			    << eventInfo->eventNumber());
+	  } else {
+	    foundPromptElectron = true;
+	    truthPromptElectronWithReco->fill(elTruth,el);
+	  }
+	}
+      } // loop on fwdEl
+    }
 
   } // if electron
 
-
   if ("gamma" == m_sampleType) {
 
+    ATH_MSG_DEBUG( "------------ Photons ---------------" );
     SG::ReadHandle<xAOD::PhotonContainer > RecoPh(m_PhotonsKey, ctx);
 
     for (const auto *phrec : *RecoPh) {
@@ -709,8 +745,8 @@ StatusCode EgammaMonitoring::execute() {
           if (m_IsoFixedCutTight->accept(*photon)) recoPhotonConvIsoFixedCutTight->fill(*egtruth, mu);
           if (m_IsoFixedCutTightCaloOnly->accept(*photon)) recoPhotonConvIsoFixedCutTightCaloOnly->fill(*egtruth, mu);
           if (m_IsoFixedCutLoose->accept(*photon)) recoPhotonConvIsoFixedCutLoose->fill(*egtruth, mu);
-          if (m_LooseLH_Photon->accept(photon)) recoPhotonConvLooseLH->fill(*egtruth, mu);
-          if (m_TightLH_Photon->accept(photon)) recoPhotonConvTightLH->fill(*egtruth, mu);
+          if (m_Loose_Photon->accept(photon)) recoPhotonConvLooseLH->fill(*egtruth, mu);
+          if (m_Tight_Photon->accept(photon)) recoPhotonConvTightLH->fill(*egtruth, mu);
         } // isRecoConv
         else {
           truthPhotonConvRecoUnconv->fill(*egtruth, mu);
@@ -747,19 +783,12 @@ StatusCode EgammaMonitoring::execute() {
         if (m_IsoFixedCutTight->accept(*photon)) recoPhotonUnconvIsoFixedCutTight->fill(*egtruth, mu);
         if (m_IsoFixedCutTightCaloOnly->accept(*photon)) recoPhotonUnconvIsoFixedCutTightCaloOnly->fill(*egtruth, mu);
         if (m_IsoFixedCutLoose->accept(*photon)) recoPhotonUnconvIsoFixedCutLoose->fill(*egtruth, mu);
-        if (m_LooseLH_Photon->accept(photon)) recoPhotonUnconvLooseLH->fill(*egtruth, mu);
-        if (m_TightLH_Photon->accept(photon)) recoPhotonUnconvTightLH->fill(*egtruth, mu);
+        if (m_Loose_Photon->accept(photon)) recoPhotonUnconvLooseLH->fill(*egtruth, mu);
+        if (m_Tight_Photon->accept(photon)) recoPhotonUnconvTightLH->fill(*egtruth, mu);
       } // !isTrueLateConv
     } //egtruth Loop
 
     //loop over InDetTrackParticles
-
-    const xAOD::TrackParticleContainer* InDetTPs = nullptr;
-    if(!evtStore()->retrieve(InDetTPs, "InDetTrackParticles").isSuccess()) {
-      Error("execute()", "Failed to retrieve InDetTrackParticles. Exiting.");
-      return StatusCode::FAILURE;
-    }
-
     for (const auto *tp : *InDetTPs) {
 
       InDetTracks->fill(*tp, mu);
@@ -896,7 +925,6 @@ StatusCode EgammaMonitoring::finalize() {
     ATH_CHECK(recoPhotonUnconvLooseLHEfficiency.divide( recoPhotonUnconvLooseLH.get(), truthPhotonUnconvRecoUnconv.get()));
     egammaMonitoring::EfficiencyPlot recoPhotonUnconvTightLHEfficiency("recoPhotonUnconvTightLHEfficiency", "/MONITORING/recoPhotonUnconvTightLHEfficiency/", rootHistSvc );
     ATH_CHECK(recoPhotonUnconvTightLHEfficiency.divide( recoPhotonUnconvTightLH.get(), truthPhotonUnconvRecoUnconv.get()));
-
 
     egammaMonitoring::WidthPlot truthPhotonRecoPhotonWidth("truthPhotonRecoPhotonWidth", "/MONITORING/truthPhotonRecoPhotonWidth/", rootHistSvc);
     ATH_CHECK(truthPhotonRecoPhotonWidth.fill(truthPhotonRecoPhoton.get()));
