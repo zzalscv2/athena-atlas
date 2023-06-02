@@ -151,7 +151,7 @@ StatusCode TileCellMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
   }
 
   // Weights for E-cells, only towers 10..15
-  static const float energyWeight[6] = {1./3., 1./6., 1./11., 1./11., 1./28., 1./28.};
+  static const float energyWeight[6] = {1.f/3.f, 1.f/6.f, 1.f/11.f, 1.f/11.f, 1.f/28.f, 1.f/28.f};
   static const int gapScintIndex[6] = {0, 1, 2, 2, 3, 3};
 
   std::vector<const CaloCell*> muonCells;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONITORING_TILEMBTSMONITORALGORITHM_H
@@ -59,13 +59,13 @@ class TileMBTSMonitorAlgorithm : public AthMonitorAlgorithm {
     Gaudi::Property<std::vector<float>> m_energyCut{this,
         "EnergyCuts",
          {//MBTSA00   MBTSA01   MBTSA02   MBTSA03   MBTSA04   MBTSA05   MBTSA06   MBTSA07
-           60. /222, 60. /222, 60. /222, 60. /222, 60. /222, 60. /222, 60. /222, 60. /222,
+           60.f/222, 60.f/222, 60.f/222, 60.f/222, 60.f/222, 60.f/222, 60.f/222, 60.f/222,
           //MBTSA08   MBTSA09   MBTSA10   MBTSA11   MBTSA12   MBTSA13   MBTSA14   MBTSA15
-           60. /222, 60. /222, 60. /222, 60. /222, 60. /222, 60. /222, 60. /222, 60. /222,
+           60.f/222, 60.f/222, 60.f/222, 60.f/222, 60.f/222, 60.f/222, 60.f/222, 60.f/222,
           //MBTSC00   MBTSC01   MBTSC02   MBTSC03   MBTSC04   MBTSC05   MBTSC06   MBTSC07
-           60. /222, 60. /222, 60. /222, 60. /222, 60. /222, 60. /222, 60. /222, 60. /222,
+           60.f/222, 60.f/222, 60.f/222, 60.f/222, 60.f/222, 60.f/222, 60.f/222, 60.f/222,
           //MBTSC08   MBTSC09   MBTSC10   MBTSC11   MBTSC12   MBTSC13   MBTSC14   MBTSC15
-           60. /222, 60. /222, 60. /222, 60. /222, 60. /222, 60. /222, 60. /222, 60. /222},
+           60.f/222, 60.f/222, 60.f/222, 60.f/222, 60.f/222, 60.f/222, 60.f/222, 60.f/222},
         "Energy cuts for 32 MBTS counters (MBTSA00, .., MBTSC15)"};
 
     SG::ReadHandleKey<TileDQstatus> m_DQstatusKey{this,
