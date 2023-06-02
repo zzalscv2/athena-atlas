@@ -16,7 +16,6 @@
 
 //HepMC includes
 #include "GeneratorObjects/McEventCollection.h"
-#include "HepPDT/ParticleDataTable.hh"
 #include "AtlasHepMC/IO_GenEvent.h"
 
 // McParticleTools includes

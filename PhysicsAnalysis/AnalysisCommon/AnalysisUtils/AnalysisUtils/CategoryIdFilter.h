@@ -239,8 +239,6 @@ bool CategoryIdFilter<T>::isAccepted( const T * p ) const
     return true;
   }
 
-  //const HepPDT::ParticleData * partData = 0;
-  //partData = m_ppSvc->PDT()->particle(HepPDT::ParticleID(std::abs(p->pdgId())));
   for ( std::vector<PDGCat::category>::const_iterator itr = m_categories.begin();
 	itr != m_categories.end();
 	++itr ) {
@@ -261,8 +259,6 @@ template<typename T>
 bool CategoryIdFilter<T>::belongsTo( const T * t, 
 				     const PDGCat::category& cat ) const
 {
-  //const HepPDT::ParticleData * partData = 0;
-  //partData = m_ppSvc->PDT()->particle(HepPDT::ParticleID(std::abs(t->pdgId())));
   return isInCategory( t, cat );
 }
 
