@@ -11,7 +11,7 @@ find_package( ROOT COMPONENTS Core MathCore )
 atlas_add_component( CaloTools
    CaloTools/*.h CaloTools/*.icc src/*.cxx src/components/*.cxx
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} 
-   LINK_LIBRARIES  ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel AthenaPoolUtilities AtlasDetDescr CaloCondBlobObjs CaloConditions CaloDetDescrLib CaloEvent CaloGeoHelpers CaloIdentifier CaloInterfaceLib GaudiKernel Identifier LArCablingLib LArElecCalib LArRawConditions LArRecEvent StoreGateLib TileConditionsLib TileEvent TileIdentifier xAODBase )
+   LINK_LIBRARIES  ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel AthenaPoolUtilities AtlasDetDescr CaloCondBlobObjs CaloConditions CaloDetDescrLib CaloEvent CaloGeoHelpers CaloIdentifier CaloInterfaceLib GaudiKernel Identifier LArCablingLib LArElecCalib LArRawConditions LArRecConditions LArRecEvent StoreGateLib TileConditionsLib TileEvent TileIdentifier xAODBase )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
