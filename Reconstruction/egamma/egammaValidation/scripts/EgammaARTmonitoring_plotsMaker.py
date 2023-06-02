@@ -310,6 +310,9 @@ def make_comparison_plots(type, f_base, f_nightly, result_file):
         for histo in get_key_names(f_nightly, folder['name']):
             h_base = f_base.Get(folder['name'] + '/' + histo)
             h_nightly = f_nightly.Get(folder['name'] + '/' + histo)
+            if not h_base or not h_nightly:
+                print(histo,' is missing in one of the files ',h_base,h_nightly)
+                continue
             if h_base.GetEntries() == 0 or h_nightly.GetEntries() == 0:
                 continue
             make_ratio_plot(h_base, h_nightly, folder['title'], result_file)
@@ -337,27 +340,24 @@ def make_profile_plots(f_base, f_nightly, result_file, particle_type):
         for histo in get_key_names(f_nightly, folder['name']):
             if '2D' not in histo and not 'profile' in histo:
                 continue
+            h_base = f_base.Get(folder['name'] + '/' + histo)
+            h_nightly = f_nightly.Get(folder['name'] + '/' + histo)
+            if not h_base or not h_nightly:
+                print(histo,' is missing in one of the files ',h_base,h_nightly)
+                continue
+            if h_base.GetEntries() == 0 or h_nightly.GetEntries() == 0:
+                continue
             if 'mu' in histo:
-                h_base = f_base.Get(folder['name'] + '/' + histo)
-                h_nightly = f_nightly.Get(folder['name'] + '/' + histo)
-                if h_base.GetEntries() == 0 or h_nightly.GetEntries() == 0:
-                    continue
                 h_base = makeIQEPlots(h_base, 'IQE')
                 h_nightly = makeIQEPlots(h_nightly, 'IQE')
-                make_ratio_plot(h_base, h_nightly,
-                                folder['title'], result_file, 'IQE')
-
+                y_axis_label = 'IQE'
             else:
-                h_base = f_base.Get(folder['name'] + '/' + histo)
-                h_nightly = f_nightly.Get(folder['name'] + '/' + histo)
                 h_base.SetDirectory(0)
                 h_nightly.SetDirectory(0)
-                if h_base.GetEntries() == 0 or h_nightly.GetEntries() == 0:
-                    continue
                 y_axis_label = "Mean %s" % (h_base.GetTitle())
                 h_base.SetTitle("")
-                make_ratio_plot(h_base, h_nightly,
-                                folder['title'], result_file, y_axis_label)
+            make_ratio_plot(h_base, h_nightly,
+                            folder['title'], result_file, y_axis_label)
 
 
 def make_conversion_plot(f_base, f_nightly, result_file):
