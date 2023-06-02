@@ -180,9 +180,12 @@ WriteDecorHandle<T, D>::operator() (const AuxElement& e)
   // of this check.  We previously called cptr() here, but that's
   // redundant with vectorData().
   if (m_state != RENOUNCED && e.container() != this->vectorData()) {
+#if 0
+    // Disable temporarily --- see ATLSUSYBGF-672.
     throwExcBadDecorElement (Gaudi::DataHandle::Writer,
                              this->clid(),
                              this->m_decorKey);
+#endif
   }
   return m_acc (e);
 }
