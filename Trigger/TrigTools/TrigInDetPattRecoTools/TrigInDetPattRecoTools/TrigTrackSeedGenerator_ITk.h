@@ -31,6 +31,9 @@ typedef class TrigTrackSeedGeneratorITk {
   TrigTrackSeedGeneratorITk(const TrigCombinatorialSettings&);
   ~TrigTrackSeedGeneratorITk(); 
 
+  TrigTrackSeedGeneratorITk(const TrigTrackSeedGeneratorITk&) = delete;
+  TrigTrackSeedGeneratorITk& operator=(const TrigTrackSeedGeneratorITk&) = delete;
+
   void loadSpacePoints(const std::vector<TrigSiSpacePointBase>&);
   void createSeeds(const IRoiDescriptor*);
   void createSeedsZv();

@@ -1068,13 +1068,20 @@ class SelectionCA(ComponentAccumulator):
         super( SelectionCA, self ).__init__()   
 
         self.stepViewSequence = seqAND(self.name)
-        self.addSequence(self.stepViewSequence)
+        
 
-    def mergeReco(self, recoCA, robPrefetchCA=None):
-        self.addEventAlgo(recoCA.inputMaker(), sequenceName=self.stepViewSequence.name)
+    def mergeReco(self, recoCA, robPrefetchCA=None, upSequenceCA=None):        
+        ''' upSequenceCA is the user CA to run before the recoCA'''
+        ca=ComponentAccumulator()
+        ca.addSequence(self.stepViewSequence)
+        ca.addEventAlgo(recoCA.inputMaker(), sequenceName=self.stepViewSequence.name)
         if robPrefetchCA:
-             self.merge(robPrefetchCA, self.stepViewSequence.name)
-        self.merge(recoCA, sequenceName=self.stepViewSequence.name)
+            ca.merge(robPrefetchCA, self.stepViewSequence.name)
+        ca.merge(recoCA, sequenceName=self.stepViewSequence.name)
+        if upSequenceCA:
+            self.merge(upSequenceCA)
+        self.merge(ca)        
+        
 
     def mergeHypo(self, other):
         """To be used when the hypo alg configuration comes with auxiliary tools/services"""

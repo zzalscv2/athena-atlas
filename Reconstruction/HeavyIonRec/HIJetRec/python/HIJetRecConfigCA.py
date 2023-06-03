@@ -322,12 +322,11 @@ def NullModulatorCfg():
 
 def HIModulatorCfg(flags, mod_key, suffix=None, **kwargs):
     """Provides modulator tool."""
-    acc = ComponentAccumulator()
 
     kwargs.setdefault("harmonics", flags.HeavyIon.Jet.HarmonicsForSubtraction)
     if len(kwargs["harmonics"]) == 0:
-        acc.merge(NullModulatorCfg())
-        return acc
+        return NullModulatorCfg()
+    acc = ComponentAccumulator()
     kwargs.setdefault("name", "Modulator_"+mod_key+
                       "".join(["_V"+str(h) for h in kwargs["harmonics"]]))
     if suffix is not None:

@@ -31,6 +31,7 @@ def IOVDbSvcCfg(flags, **kwargs):
     # m_h_metaDataTool("IOVDbMetaDataTool"),
     # m_h_tagInfoMgr("TagInfoMgr", name),
 
+    kwargs.setdefault('OnlineMode', flags.Common.isOnline)
     kwargs.setdefault('dbConnection', flags.IOVDb.DBConnection)
     # setup knowledge of dbinstance in IOVDbSvc, for global tag x-check
     kwargs.setdefault('DBInstance', flags.IOVDb.DatabaseInstance)

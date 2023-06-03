@@ -31,8 +31,7 @@ def _caloSeq(flags, is_probe_leg=False):
 
     recoAcc.mergeReco(tauCaloRoiUpdaterCfg(flags,inputRoIs=recoAcc.inputMaker().InViewRoIs,clusters = 'HLT_TopoCaloClustersLC'))
 
-    recoAcc.mergeReco(trigTauRecMergedCaloOnlyMVACfg(flags))
-    selAcc.mergeReco(recoAcc)
+    recoAcc.mergeReco(trigTauRecMergedCaloOnlyMVACfg(flags))    
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Calo
     robPrefetchAlg = ROBPrefetchingAlgCfg_Calo( flags, nameSuffix='IM_'+recoAcc.name+'_probe' if is_probe_leg else 'IM_'+recoAcc.name)    
@@ -106,8 +105,7 @@ def _ftfCoreSeq(flags,name,is_probe_leg=False):
     else:
        fastInDetReco.mergeReco(tauTrackRoiUpdaterCfg(flags,inputRoIs = RoIs,tracks = TrackCollection))
        fastInDetReco.mergeReco(tauTrackBDTRoiUpdaterCfg(flags,inputRoIs = RoIs,tracks = TrackCollection))
-
-    selAcc.mergeReco(fastInDetReco)
+    
     selAcc.mergeReco(fastInDetReco, robPrefetchCA=robPrefetchAlg)
     hypoAlg = CompFactory.TrigTrackPreSelHypoAlg('TrackPreSelHypoAlg_PassBy'+name,
                                                  RoIForIDReadHandleKey = 'UpdatedTrackLRTRoI' if 'LRT' in name else '',

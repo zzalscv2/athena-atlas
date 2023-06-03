@@ -149,7 +149,7 @@ private:
 //	double m_phi;
 //	double m_eta;
   /**set to true to turn debugging info on*/
-  bool m_debug;
+  bool m_debugKeyBase;
   /**holds central coords of JEs in regions:
   Region 	Eta
   0   	<2.2

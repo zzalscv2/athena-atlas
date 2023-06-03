@@ -2,19 +2,32 @@
 
 from AthenaCommon.SystemOfUnits import GeV
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-from ROOT import egammaPID
-
+from ElectronPhotonSelectorTools.EgammaPIDdefs import egammaPID
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
 #
 # photon hypo alg
 #
-def createTrigEgammaPrecisionPhotonHypoAlg(flags, name, sequenceOut):
 
-  from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaPrecisionPhotonHypoAlg
-  thePrecisionPhotonHypo = TrigEgammaPrecisionPhotonHypoAlg(name)
-  thePrecisionPhotonHypo.IsEMNames = ['tight','medium','loose']
-  thePrecisionPhotonHypo.PhotonIsEMSelectorTools = createTrigEgammaPrecisionPhotonSelectors(flags)
-  thePrecisionPhotonHypo.Photons = sequenceOut
-  return thePrecisionPhotonHypo
+def TrigEgammaPrecisionPhotonHypoAlgCfg(flags, name, sequenceOut,**kwargs ):
+    acc = ComponentAccumulator()
+    from ElectronPhotonSelectorTools.AsgPhotonIsEMSelectorsConfig import (AsgPhotonIsEMSelectorCfg)
+    from TriggerMenuMT.HLT.Photon.TriggerPhotonIsEMSelectorMapping import (triggerPhotonPIDmenu)
+
+    if "PhotonIsEMSelectorTools" not in kwargs:
+        LoosePhotonSelector = acc.popToolsAndMerge(AsgPhotonIsEMSelectorCfg(flags, "LoosePhotonSelector", egammaPID.PhotonIDLoose, triggerPhotonPIDmenu.menuCurrentCuts, trigger = True))
+        MediumPhotonSelector = acc.popToolsAndMerge(AsgPhotonIsEMSelectorCfg(flags, "MediumPhotonSelector", egammaPID.PhotonIDMedium, triggerPhotonPIDmenu.menuCurrentCuts, trigger = True))
+        TightPhotonSelector = acc.popToolsAndMerge(AsgPhotonIsEMSelectorCfg(flags, "TightPhotonSelector", egammaPID.PhotonIDTight, triggerPhotonPIDmenu.menuCurrentCuts, trigger = True))
+        kwargs["PhotonIsEMSelectorTools"] = [TightPhotonSelector, MediumPhotonSelector, LoosePhotonSelector]
+    if "IsEMNames" not in kwargs:
+        kwargs["IsEMNames"]=['tight','medium','loose']
+   
+    if "Photons" not in kwargs:
+        kwargs["Photons"] = sequenceOut
+  
+    hypoAlg = CompFactory.TrigEgammaPrecisionPhotonHypoAlg(name, **kwargs)
+    acc.addEventAlgo( hypoAlg )
+    return acc
 
 
 def same( val , tool):
@@ -41,8 +54,7 @@ class TrigEgammaPrecisionPhotonHypoToolConfig:
     self.__monGroups = monGroups
     
     if not tool:
-      from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaPrecisionPhotonHypoTool    
-      tool = TrigEgammaPrecisionPhotonHypoTool( name )
+      tool = CompFactory.TrigEgammaPrecisionPhotonHypoTool( name )
      
     tool.EtaBins        = [0.0, 0.6, 0.8, 1.15, 1.37, 1.52, 1.81, 2.01, 2.37, 2.47]
     tool.ETthr          = same( self.__threshold*GeV , tool)
@@ -144,48 +156,5 @@ def TrigEgammaPrecisionPhotonHypoToolFromDict(flags, d , tool=None):
     cparts = [i for i in d['chainParts'] if ((i['signature']=='Electron') or (i['signature']=='Photon'))] 
     return _IncTool( flags, d['chainName'], d['monGroups'], cparts[0], tool=tool )
                    
-    
 
 
-#
-# Photon IsEM selectors
-#
-def createTrigEgammaPrecisionPhotonSelectors(flags, ConfigFilePath=None):
-
-    from ElectronPhotonSelectorTools.ConfiguredAsgPhotonIsEMSelectors import ConfiguredAsgPhotonIsEMSelector
-
-    if not ConfigFilePath:
-      ConfigFilePath = flags.Trigger.egamma.photonPidVersion
-
-    import collections.abc
-    # Configure the IsEM selectors
-    SelectorNames = collections.OrderedDict( {
-            'tight'  : 'TightPhotonSelector',
-            'medium' : 'MediumPhotonSelector',
-            'loose'  : 'LoosePhotonSelector',
-            } )
-    SelectorPID = {
-            'loose'  : egammaPID.PhotonIDLoose,
-            'medium' : egammaPID.PhotonIDMedium,
-            'tight'  : egammaPID.PhotonIDTight,
-            }
-    PhotonToolConfigFile = {
-            'loose'  : 'PhotonIsEMLooseSelectorCutDefs.conf', 
-            'medium' : 'PhotonIsEMMediumSelectorCutDefs.conf', 
-            'tight'  : 'PhotonIsEMTightSelectorCutDefs.conf',
-            } 
-    PhotonIsEMBits = {
-            'loose'  : egammaPID.PhotonLoose,
-            'medium' : egammaPID.PhotonMedium,
-            'tight'  : egammaPID.PhotonTight,
-            }
-    selectors = []
-    for sel, name in SelectorNames.items():
-        SelectorTool = ConfiguredAsgPhotonIsEMSelector(name, SelectorPID[sel])
-        ConfigFile = ConfigFilePath + '/' + PhotonToolConfigFile[sel] 
-        SelectorTool.ConfigFile = ConfigFile
-        SelectorTool.ForceConvertedPhotonPID = True
-        SelectorTool.isEMMask = PhotonIsEMBits[sel] 
-        selectors.append(SelectorTool)
-
-    return selectors

@@ -1,4 +1,3 @@
-
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 ################################################################################
 # TriggerJobOpts/runHLT_standalone.py
@@ -63,6 +62,7 @@ opt_obsolete = ['setDetDescr',
                 'setGlobalTag',
                 'doL1Unpacking',
                 'enableL1MuonPhase1',
+                'enableL1CaloPhase1',
                 'enableL1CaloLegacy',
                 'enableL1TopoDump',
                 'enableL1TopoBWSimulation',
@@ -97,7 +97,8 @@ for option in defaultOptions:
 
 for option in opt_obsolete:
     if option in globals():
-        log.error("%s is not supported anymore. Set the relevant flag instead.", option)
+        log.error("%s is not supported anymore. Set the relevant ConfigFlag instead.", option)
+        theApp.exit(1)
 
 import re
 

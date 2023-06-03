@@ -66,6 +66,7 @@ namespace MuonHough {
 
         /// copy constructor
         Hit(const Hit& h_);
+        Hit(Hit&& h_) noexcept = default;
 
         /// =operator
         Hit& operator=(const Hit& h_);
@@ -102,6 +103,7 @@ namespace MuonHough {
 
         /// copy constructor
         PhiHit(const PhiHit& h_);
+        PhiHit(PhiHit&& h_) noexcept = default;
 
         /// =operator
         PhiHit& operator=(const PhiHit& h_);

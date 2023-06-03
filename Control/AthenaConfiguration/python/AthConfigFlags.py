@@ -573,12 +573,16 @@ class AthConfigFlags(object):
         if args.filesInput is not None:
             self.Input.Files = [] # remove generic
             for f in args.filesInput:
-                for ffile in f.split(","):
-                    if '*' in ffile: # handle wildcard
-                        import glob
-                        self.Input.Files += glob.glob(ffile)
-                    else:
-                        self.Input.Files += [ffile]
+                #because of argparse used with nargs+, fileInput will also swallow arguments meant to be flags
+                if "=" in f:
+                    leftover.append(f)
+                else:
+                    for ffile in f.split(","):
+                        if '*' in ffile: # handle wildcard
+                            import glob
+                            self.Input.Files += glob.glob(ffile)
+                        else:
+                            self.Input.Files += [ffile]
 
         if args.loglevel is not None:
             from AthenaCommon import Constants
@@ -593,6 +597,12 @@ class AthConfigFlags(object):
 
         if args.threads is not None:
             self.Concurrency.NumThreads = args.threads
+            #Work-around a possible inconsistency of NumThreads and NumConcurrentEvents that may
+            #occur when these values are set by the transforms and overwritten by --athenaopts .. 
+            #See also ATEAM-907
+            if args.concurrent_events is None and self.Concurrency.NumConcurrentEvents==0:
+                self.Concurrency.NumConcurrentEvents = args.threads
+
 
         if args.concurrent_events is not None:
             self.Concurrency.NumConcurrentEvents = args.concurrent_events

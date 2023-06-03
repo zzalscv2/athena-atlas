@@ -43,7 +43,6 @@
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/DataHandle.h"
 #include "GeneratorObjects/McEventCollection.h"
-#include "HepPDT/ParticleData.hh"
 #include "HepPID/ParticleName.hh"
 
 #include "AthenaKernel/RNGWrapper.h"

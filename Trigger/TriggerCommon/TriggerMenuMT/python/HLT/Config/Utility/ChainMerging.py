@@ -28,7 +28,7 @@ def mergeChainDefs(listOfChainDefs, chainDict, perSig_lengthOfChainConfigs = Non
                     [seq.ca.wasMerged() for chainPartConfig in listOfChainDefs for step in chainPartConfig.steps for seq in step.sequences  ]                                     
                     raise NoCAmigration (f'[mergeChainDefs] not possible for chain {chainDict["chainName"]} due to missing configurations')
         except NoCAmigration as e:
-            log.warning(str(e))
+            log.debug(str(e))
             if perSig_lengthOfChainConfigs is None:
                 return None
             else:

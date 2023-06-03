@@ -2804,7 +2804,7 @@ MCTruthClassifier::defOutComeOfElectron(const xAOD::TruthParticle* thePart) cons
   int ElecOutNumOfElec(0);
 
   int NumOfHadr(0);
-  long EndDaugType(0);
+  int EndDaugType(0);
   NumOfElecDaug = EndVert->nOutgoingParticles();
   for (unsigned int ipOut = 0; ipOut < EndVert->nOutgoingParticles(); ipOut++) {
     if (!EndVert->outgoingParticle(ipOut))

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           JetEnergyModuleKey.cpp  -  description
@@ -33,8 +33,8 @@
 namespace LVL1 {
 
 /** constructs a JetEnergyModuleKey object*/
-JetEnergyModuleKey::JetEnergyModuleKey() : KeyUtilities(), m_debug(false){
-	if (m_debug) std::cout << "JetEnergyModuleKey: m_debug output turned on...."<<std::endl;
+JetEnergyModuleKey::JetEnergyModuleKey() : KeyUtilities(), m_debugModuleKey(false){
+	if (m_debugModuleKey) std::cout << "JetEnergyModuleKey: m_debugModuleKey output turned on...."<<std::endl;
 }
 
 JetEnergyModuleKey::~JetEnergyModuleKey(){
@@ -157,7 +157,7 @@ double LVL1::JetEnergyModuleKey::rowPhiCoord(unsigned int rowNum, const Coordina
   double phi =( (static_cast<double>(phiBin))*TrigT1CaloDefs::jemPhiSize ); //bot of JEM
   phi+= static_cast<double>( rowNum )*0.2+0.1; //mid of row
   delete iCoord;
-  if (m_debug){
+  if (m_debugModuleKey){
     if ( (phi<(jemCoord.phi()-0.8))||(phi>(jemCoord.phi()+0.8) ) ){
     std::cerr << "ERROR!!! JetEnergyModuleKey::rowPhiCoord phi of row is "<<phi
          <<" in a JEM at ("<<jemCoord.phi()<<", "<<jemCoord.eta()<<")"<<std::endl;
@@ -260,7 +260,7 @@ LVL1::BinAndCoord* LVL1::JetEnergyModuleKey::calculateTriggerBin(ICoordinate* iC
   }else{
      centralEta=3.65*sign;//centre of end JEMs
   }
-  if (m_debug){
+  if (m_debugModuleKey){
     std::cout << "JetEnergyModuleKey: start calcTrigBin"<<std::endl;
     std::cout << "phi, eta   : ("<<m_phi<<", "<<m_eta<<")"<<std::endl;
     std::cout << "iphi, ieta : ("<<( iCoord->phi() )<<", "<<( iCoord->eta() )<<")"<<std::endl;
@@ -270,7 +270,7 @@ LVL1::BinAndCoord* LVL1::JetEnergyModuleKey::calculateTriggerBin(ICoordinate* iC
   }
 
   Coordinate* centralCoords = new Coordinate(centralPhi, centralEta);
-  if (m_debug) std::cout <<" JetEnergyModuleKey : created coord "<<(*centralCoords)<<std::endl;
+  if (m_debugModuleKey) std::cout <<" JetEnergyModuleKey : created coord "<<(*centralCoords)<<std::endl;
 	return new BinAndCoord(phiBin,etaBin,centralCoords);
 }
 

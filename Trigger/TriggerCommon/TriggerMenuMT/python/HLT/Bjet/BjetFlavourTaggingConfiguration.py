@@ -145,6 +145,13 @@ def getFastFlavourTagging( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                     **{f'GN120230327_p{x}': f'fastGN120230327_p{x}' for x in 'cub'},
                     'btagIp_': trackIpPrefix,
                 }
+            ],
+            [
+                'BTagging/20230223trig/dipz/antikt4emtopo/network.json',
+                {
+                    'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
+                    'btagIp_': trackIpPrefix,
+                }
             ]
         ]
 

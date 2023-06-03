@@ -61,7 +61,7 @@ def GetBadLBFilterAlg(name, defects, writekey, ignoreRecoverable=False, origDbTa
         else:
             raise ValueError('%s is not a known defect' % defect)
         
-    log.info ("Algorithm name %s to be configured with intolerable defects %s" % (name, list(primary_defects)))
+    log.debug ("Algorithm name %s to be configured with intolerable defects %s" % (name, list(primary_defects)))
 
     primary_defect_ids = [ddb.defect_id_map[id] for id in primary_defects]
 

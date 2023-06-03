@@ -22,7 +22,6 @@
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "CLHEP/Vector/ThreeVector.h"
 #include "CLHEP/Vector/LorentzVector.h"
-#include "HepPDT/ParticleData.hh"
 
 
 std::istream& operator >> ( std::istream& is, MuonBackgroundEventParser& evt ) 

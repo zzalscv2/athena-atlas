@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOTOOLS_CALRNOISECONDALG_H
@@ -11,7 +11,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
-#include "LArElecCalib/ILArHVScaleCorr.h"
+#include "LArRecConditions/LArHVCorr.h"
 #include "CaloConditions/CaloNoise.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "CaloIdentifier/CaloNoiseHashRanges.h"
@@ -38,12 +38,10 @@ class CaloNoiseCondAlg: public AthReentrantAlgorithm {
   //Legacy folder, still needed?
   SG::ReadCondHandleKey<CondAttrListCollection> m_caloNoiseKey{this, "CaloNoiseFolder","/CALO/Ofl/Noise/CellNoise",
       "SG key of CondAttrListCollection holding both LAr and Tile noise (legacy)"};  
-  SG::ReadCondHandleKey<ILArHVScaleCorr> m_hvCorrKey{this, "LArHVCorrKey","LArHVScaleCorrRecomputed",
+  SG::ReadCondHandleKey<LArHVCorr> m_hvCorrKey{this, "LArHVCorrKey","LArHVScaleCorrRecomputed",
       "SG Key of HV Scale correction CDO"};
   SG::ReadCondHandleKey<CondAttrListCollection> m_lumiFolderKey{this, "LumiFolder","/TRIGGER/LUMI/LBLESTONL", 
       "SG Key of  CondAttrListCollection holding Luminosity information" };
-
-  SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
 
   SG::WriteCondHandleKey<CaloNoise> m_outputKey{this, "OutputKey", "TotalNoise", "SG Key of resulting noise CDO"};
 

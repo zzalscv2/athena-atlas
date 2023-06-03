@@ -10,11 +10,11 @@ from ..Config.ChainConfigurationBase import ChainConfigurationBase
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from ..CommonSequences.CaloSequences import fastCaloMenuSequence
 from ..Photon.FastPhotonMenuSequences import fastPhotonMenuSequence
+from ..Photon.PrecisionPhotonMenuSequences import precisionPhotonMenuSequence
 
 if isComponentAccumulatorCfg():
     pass
 else:
-    from ..Photon.PrecisionPhotonMenuSequences import precisionPhotonMenuSequence
     from ..Photon.PrecisionPhotonCaloIsoMenuSequences import precisionPhotonCaloIsoMenuSequence
     from ..Photon.HipTRTMenuSequences import hipTRTMenuSequence
     from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaTopoHypoTool
@@ -205,3 +205,4 @@ class PhotonChainConfiguration(ChainConfigurationBase):
 
         return self.getStep(flags,5,stepName,sequenceCfgArray=[precisionPhotonCaloIsoMenuSequenceCfg], name = 'Photon', comboTools=comboTools, ion=do_ion, is_probe_leg=is_probe_leg)
     
+

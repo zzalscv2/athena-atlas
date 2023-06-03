@@ -204,8 +204,8 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
             }
             
             for (unsigned int iblock = 0; iblock < Max_iter; iblock++){
-                const auto [channel, saturation] = BulkStreamTrailer(vec_words.at(wordIndex-1),vec_words.at(wordIndex-2));
-                
+                const auto [channel, saturation] = BulkStreamTrailer(vec_words.at(wordIndex-1),vec_words.at(wordIndex-2), jfex);
+                                
                 const auto [DATA13_low          , DATA15, DATA14] = Dataformat1(vec_words.at(wordIndex-3));
                 const auto [DATA13_up,DATA10_up , DATA12, DATA11] = Dataformat2(vec_words.at(wordIndex-4));
                 const auto [DATA10_low          , DATA9 , DATA8 ] = Dataformat1(vec_words.at(wordIndex-5));
@@ -225,6 +225,7 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                 for(uint idata = 0; idata < allDATA.size(); idata++){
                     
                     char et_saturation = ((saturation >> idata) & jBits::BS_TRAILER_1b);
+                    
                     //allsat[idata] = et_saturation;
                     
                     // read ID, eta and phi from map
@@ -240,7 +241,6 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                     }
 
                     const auto [IDsim, eta, phi, source, iEta, iPhi] = it_Firm2Tower_map->second;
-
                     
                     std::vector<uint16_t> vtower_ET;
                     vtower_ET.clear();
@@ -303,18 +303,27 @@ std::array<uint32_t,4> jFexInputByteStreamTool::jFEXtoRODTrailer (uint32_t word0
 }
 
 // Unpack Bulk stream trailer
-std::array<uint16_t,2> jFexInputByteStreamTool::BulkStreamTrailer (uint32_t word0, uint32_t word1) const {
+std::array<uint16_t,2> jFexInputByteStreamTool::BulkStreamTrailer (uint32_t word0, uint32_t word1, uint32_t jfex) const {
     
     uint16_t Satur_down = ((word1 >> jBits::BS_SATUR_1_TRAILER ) & jBits::BS_TRAILER_8b );
     uint16_t Satur_high = ((word1 >> jBits::BS_SATUR_0_TRAILER ) & jBits::BS_TRAILER_8b );
     uint16_t Channel    = ((word0 >> jBits::BS_CHANNEL_TRAILER ) & jBits::BS_TRAILER_8b );
     
-    uint16_t Satur = ( Satur_high << jBits::BS_SATUR_1_TRAILER ) + Satur_down;
-    
-    // Checking if K28.5 is there, if so then any jTower is saturated
-    if(Satur_high == 0xbc and Satur_down == 0x0){
-        Satur = 0;
+    //Tile fibre are decoded differently, no saturation bits are set for tile  
+    bool isTileFibre = false;
+    for(unsigned int i=0; i< jBits::tile_channels.at(jfex).size(); i++){
+        if(jBits::tile_channels.at(jfex).at(i) == Channel){
+            isTileFibre=true;
+            break;
+        }
     }
+    
+    if(isTileFibre){
+        //If it is tile then return just the channel number and sat = 0
+        return {Channel, 0};
+    }
+    
+    uint16_t Satur = ( Satur_high << jBits::BS_SATUR_1_TRAILER ) + Satur_down;
     
     return {Channel, Satur};
    

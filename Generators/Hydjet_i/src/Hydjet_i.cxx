@@ -13,7 +13,6 @@
 // m_hyipar used only for stoing precalculated AW nad RA
 
 #include "Hydjet_i/Hydjet_i.h"
-#include "TruthUtils/GeneratorName.h"
 
 #include "GaudiKernel/MsgStream.h"
 
@@ -213,7 +212,7 @@ Hydjet::fillEvt(HepMC::GenEvent* evt)
   // evt->set_random_states(m_seeds);
 
   // Set the generator id
-  HepMC::set_signal_process_id(evt,HYDJET + int(m_a));
+  HepMC::set_signal_process_id(evt,100000000 + int(m_a));
 
   // Create the event vertex
   HepMC::GenVertexPtr v1 = HepMC::newGenVertexPtr();
@@ -237,7 +236,7 @@ Hydjet::fillEvt(HepMC::GenEvent* evt)
     }
 
   // Set the generator id
-  HepMC::set_signal_process_id(evt,HYDJET + int(m_a));
+  HepMC::set_signal_process_id(evt,100000000 + int(m_a));
 
   // Convert cm->mm and GeV->MeV
   //

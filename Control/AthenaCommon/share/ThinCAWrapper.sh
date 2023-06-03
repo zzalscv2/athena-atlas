@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # Thin wrapper to execute configurations with the CA. 
 # Might be called from athena.py
@@ -28,62 +28,36 @@ do
     esac
 done
 
-#Check if we got a pickle-file 
-if [ -z "${picklefile+x}" ]
-    then
-    #Check if we got a top-level script 
-    #Improve: Check if there is exactly one!
-    if [ -z "$topscriptfile" ]
-        then
-	echo "ERROR: No top-level python script given"
+#Check if we got a pickle-file or top-level script
+if [ -z "${picklefile}" ] && [ -z "${topscriptfile}" ] ;then
+	echo "ERROR: No top-level python script or pickle file given"
 	exit 1
-    fi
-else 
-    echo "Starting from pickle file $picklefile"
-    topscriptfile="AthenaConfiguration/CARunner.py"
-    scriptargs="$picklefile $scriptargs"
-fi 
-
-
-#Assemble the search path for top-level jobOption files.
-#Search the local directoy, a possible WorkDir and the installed Athena
-#Note: We could also search $PYTHONPATH but that's a much longer list
-topScriptSearchPath="."
-
-if [ ! -z "${WorkDir_DIR}" ]
- then
-    topScriptSearchPath="$topScriptSearchPath $WorkDir_DIR/python" 
 fi
 
-if [ ! -z "${Athena_DIR}" ]
- then
-    topScriptSearchPath="$topScriptSearchPath $Athena_DIR/python" 
-fi
-
-if [ -f $topscriptfile ]
- then #Script found, local or absolute path
-    topscript="$topscriptfile"
-else
-    #Now search for the top-level script:
-    for pp in $topScriptSearchPath
-    do
-	if [ -f "$pp/$topscriptfile" ]
-	 then
-	    topscript="$pp/$topscriptfile"
-	    break
-	fi
+#If script, try to find it locally or in PYTHONPATH
+if [ -n "${topscriptfile}" ]; then
+    for pp in . ${PYTHONPATH//:/ }; do
+	    if [ -f "${pp}/${topscriptfile}" ]; then
+	        topscript="${pp}/${topscriptfile}"
+	        break
+	    fi
     done
+    if [ -z "$topscript" ]; then
+        echo "Could not find python script $topscriptfile"
+        exit 1
+    fi
 fi
 
-if [ -z "$topscript" ];
-    then
-    echo "Could not find python script $topscriptfile"
-    exit 1
+#Finally: Execute it!
+if [ -z "${picklefile}" ]; then
+    python $topscript $scriptargs
+else
+    echo "Starting from pickle file $picklefile"
+    CARunner.py $picklefile $scriptargs
 fi
-
-#Finally: Execute it! 
-python $topscript $scriptargs
 status=$?
+
+#Handle exit code
 if [ ! $status -eq 0 ]; then
     echo "leaving with code $status: \"failure\""
     exit $status
