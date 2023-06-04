@@ -54,7 +54,7 @@ StatusCode TgcDigitCrosstalkCondAlg::execute(const EventContext& ctx) const {
   for (const auto &[channel, attribute] : *readHandle_XTalk.cptr()) {
     const coral::Blob& blob_strip = attribute["bXTalk_strip"].data<coral::Blob>();
     const char* charstrip = reinterpret_cast<const char*>(blob_strip.startingAddress());
-    std::string_view strstrip(charstrip);
+    std::string_view strstrip(charstrip, blob_strip.size());
 
     std::vector<std::string_view> tokens = MdtStringUtils::tokenize(strstrip, delimiter);
     auto it = std::begin(tokens);
@@ -78,7 +78,7 @@ StatusCode TgcDigitCrosstalkCondAlg::execute(const EventContext& ctx) const {
 
     const coral::Blob& blob_wire = attribute["bXTalk_wire"].data<coral::Blob>();
     const char* charwire = reinterpret_cast<const char*>(blob_wire.startingAddress());
-    std::string_view strwire(charwire);
+    std::string_view strwire(charwire, blob_wire.size());
 
     tokens.clear();
     tokens = MuonCalib::MdtStringUtils::tokenize(strwire, delimiter);

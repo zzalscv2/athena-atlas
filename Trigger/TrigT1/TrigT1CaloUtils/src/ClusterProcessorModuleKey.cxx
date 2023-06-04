@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           ClusterProcessorModuleKey.cpp  -  description
@@ -31,8 +31,8 @@
 namespace LVL1 {
 
 /** constructs a ClusterProcessorModuleKey object*/
-ClusterProcessorModuleKey::ClusterProcessorModuleKey() : KeyUtilities(), m_debug(false){
-  if (m_debug) std::cout << "ClusterProcessorModuleKey: m_debug output turned on...."<<std::endl;
+ClusterProcessorModuleKey::ClusterProcessorModuleKey() : KeyUtilities(), m_debugModuleKey(false){
+  if (m_debugModuleKey) std::cout << "ClusterProcessorModuleKey: m_debugModuleKey output turned on...."<<std::endl;
 }
 
 ClusterProcessorModuleKey::~ClusterProcessorModuleKey(){
@@ -95,7 +95,7 @@ LVL1::BinAndCoord* LVL1::ClusterProcessorModuleKey::calculateTriggerBin(ICoordin
     + TrigT1CaloDefs::cpmPhiSize*0.5;
   double centralEta=( static_cast<double>(etaBin)*TrigT1CaloDefs::cpmEtaSize )
      - (TrigT1CaloDefs::cpmEtaSize)*sign*0.5;
-  if (m_debug){
+  if (m_debugModuleKey){
     std::cout << "ClusterProcessorModuleKey: start calcTrigBin"<<std::endl;
     std::cout << "phi, eta   : ("<<m_phi<<", "<<m_eta<<")"<<std::endl;
     std::cout << "iphi, ieta : ("<<( iCoord->phi() )<<", "<<( iCoord->eta() )<<")"<<std::endl;
@@ -105,7 +105,7 @@ LVL1::BinAndCoord* LVL1::ClusterProcessorModuleKey::calculateTriggerBin(ICoordin
   }
 
   Coordinate* centralCoords = new Coordinate(centralPhi, centralEta);
-  if (m_debug) std::cout <<" ClusterProcessorModuleKey : created coord "<<(*centralCoords)<<std::endl;
+  if (m_debugModuleKey) std::cout <<" ClusterProcessorModuleKey : created coord "<<(*centralCoords)<<std::endl;
 	return new BinAndCoord(phiBin,etaBin,centralCoords);
 }
 

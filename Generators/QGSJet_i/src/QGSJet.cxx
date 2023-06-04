@@ -13,8 +13,6 @@
 //   Sebastian Piec:  Adaptation for Epos 1.99.crmc.r2790.
 // ----------------------------------------------------------------------
 
-#include "TruthUtils/GeneratorName.h"
-
 #include "GaudiKernel/MsgStream.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "AthenaKernel/RNGWrapper.h"

@@ -90,7 +90,7 @@ namespace LVL1 {
 
       Gaudi::Property<bool> m_isLegacyTopo { this, "IsLegacyTopo", false, "Simulation of Legacy L1Topo boards" };
       Gaudi::Property<bool> m_enableInputDump { this, "EnableInputDump", false, "Enable writing of input data for standalone running" };
-      Gaudi::Property<bool> m_enableBitwise { this, "UseBitwise", false, "Boolean to enable the bitwise version of software algorithms"}; 
+      Gaudi::Property<bool> m_enableBitwise { this, "UseBitwise", true, "Boolean to enable the bitwise version of software algorithms"}; 
       Gaudi::Property<std::string> m_inputDumpFile { this, "InputDumpFile", "inputdump.txt", "File name for dumping input data" };
       Gaudi::Property<int> m_topoOutputLevel { this, "TopoOutputLevel", TrigConf::MSGTC::WARNING, "OutputLevel for L1Topo algorithms"};
       Gaudi::Property<int> m_topoSteeringOutputLevel { this, "TopoSteeringOutputLevel", TrigConf::MSGTC::WARNING, "OutputLevel for L1Topo steering"};

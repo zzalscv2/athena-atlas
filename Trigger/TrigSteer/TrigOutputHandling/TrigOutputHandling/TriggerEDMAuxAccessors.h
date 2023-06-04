@@ -117,6 +117,8 @@ auto floatAccessors = initAccessors<float>(
   "GN120220813_pb",
   "GN120220813_pc",
   "GN120220813_pu",
+  "dipz20230223_z",
+  "dipz20230223_negLogSigma2",  
   "fastGN120230327_pb",
   "fastGN120230327_pc",
   "fastGN120230327_pu",

@@ -199,7 +199,7 @@ class CFSequenceCA(CFSequence):
             self.ca.addEventAlgo(filterAlg.Alg, sequenceName=seqAndWithFilter.getName())
             self.stepReco = parOR(chainStep.name + CFNaming.RECO_POSTFIX)  # all reco algorithms from all the sequences in a parallel sequence                            
             self.ca.addSequence(self.stepReco, parentName=seqAndWithFilter.getName())
-            log.info("created parOR %s inside seqAND %s  ", self.stepReco.getName(), seqAndWithFilter.getName())
+            log.debug("created parOR %s inside seqAND %s  ", self.stepReco.getName(), seqAndWithFilter.getName())
             self.mergeStepSequences(chainStep)
             
         CFSequence.__init__(self, chainStep, filterAlg)

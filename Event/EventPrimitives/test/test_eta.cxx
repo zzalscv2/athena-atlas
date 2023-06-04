@@ -25,6 +25,9 @@ int main() {
   vec << 1, 1, 1;
   std::cout << vec.eta() << '\n';
 
+  vec << 1.02848e-05, -2.52655e-05, -7122.83;
+  std::cout << vec.eta() << '\n';
+
   std::cout << "-----" << '\n';
   Eigen::Matrix<double, 3, 1> vec1;
   vec1 << 0, 0, 0;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           ClusterProcessorModuleKey.h  -  description
@@ -71,7 +71,7 @@ private: // Private methods
   unsigned int phiQuadrant(const double phi) const ;
 private:
   /**set to true to turn debugging info on*/
-  bool m_debug;
+  bool m_debugModuleKey;
 };
 }
 

@@ -20,19 +20,19 @@ using namespace egammaMonitoring;
 StatusCode ClusterHistograms::initializePlots() {
   
   profileMap["Eraw_Etruth_vs_Etruth_profile"] = new TProfile(Form("%s_%s",m_name.c_str(),"Eraw_Etruth_vs_Etruth_profile"), ";E^{truth};E^{raw}/E^{truth}", 100,0.,200., 0.5,1.5);
-  profileMap["Eraw_Etruth_vs_eta_profile"] = new TProfile(Form("%s_%s",m_name.c_str(),"Eraw_Etruth_vs_eta_profile"), ";truth #eta;E^{raw}/E^{truth}", 40,-3,3, 0.5,1.5);
+  profileMap["Eraw_Etruth_vs_eta_profile"] = new TProfile(Form("%s_%s",m_name.c_str(),"Eraw_Etruth_vs_eta_profile"), ";truth #eta;E^{raw}/E^{truth}", 60,-4.5,4.5, 0.5,1.5);
   profileMap["number_cells_vs_et_in_layer_0_profile"] = new TProfile(Form("%s_%s",m_name.c_str(),"number_cells_vs_et_in_layer_0_profile"), "Number of cells;E_{T}", 60,0,300, 0,100.);
   profileMap["number_cells_vs_et_in_layer_1_profile"] = new TProfile(Form("%s_%s",m_name.c_str(),"number_cells_vs_et_in_layer_1_profile"), "Number of cells;E_{T}", 60,0,300, 0,100.);
   profileMap["number_cells_vs_et_in_layer_2_profile"] = new TProfile(Form("%s_%s",m_name.c_str(),"number_cells_vs_et_in_layer_2_profile"), "Number of cells;E_{T}", 60,0,300, 0,100.);
   profileMap["number_cells_vs_et_in_layer_3_profile"] = new TProfile(Form("%s_%s",m_name.c_str(),"number_cells_vs_et_in_layer_3_profile"), "Number of cells;E_{T}", 60,0,300, 0,100.);
 
-  profileMap["number_cells_vs_eta_in_layer_0_profile"] = new TProfile(Form("%s_%s",m_name.c_str(),"number_cells_vs_eta_in_layer_0_profile"), "Number of cells;truth #eta", 40,-3,3, 0,100);
-  profileMap["number_cells_vs_eta_in_layer_1_profile"] = new TProfile(Form("%s_%s",m_name.c_str(),"number_cells_vs_eta_in_layer_1_profile"), "Number of cells;truth #eta", 40,-3,3, 0,100);
-  profileMap["number_cells_vs_eta_in_layer_2_profile"] = new TProfile(Form("%s_%s",m_name.c_str(),"number_cells_vs_eta_in_layer_2_profile"), "Number of cells;truth #eta", 40,-3,3, 0,100);
-  profileMap["number_cells_vs_eta_in_layer_3_profile"] = new TProfile(Form("%s_%s",m_name.c_str(),"number_cells_vs_eta_in_layer_3_profile"), "Number of cells;truth #eta", 40,-3,3, 0,100);
+  profileMap["number_cells_vs_eta_in_layer_0_profile"] = new TProfile(Form("%s_%s",m_name.c_str(),"number_cells_vs_eta_in_layer_0_profile"), "Number of cells;truth #eta", 60,-4.5,4.5, 0,100);
+  profileMap["number_cells_vs_eta_in_layer_1_profile"] = new TProfile(Form("%s_%s",m_name.c_str(),"number_cells_vs_eta_in_layer_1_profile"), "Number of cells;truth #eta", 60,-4.5,4.5, 0,100);
+  profileMap["number_cells_vs_eta_in_layer_2_profile"] = new TProfile(Form("%s_%s",m_name.c_str(),"number_cells_vs_eta_in_layer_2_profile"), "Number of cells;truth #eta", 60,-4.5,4.5, 0,100);
+  profileMap["number_cells_vs_eta_in_layer_3_profile"] = new TProfile(Form("%s_%s",m_name.c_str(),"number_cells_vs_eta_in_layer_3_profile"), "Number of cells;truth #eta", 60,-4.5,4.5, 0,100);
 
   profileMap["number_topocluster_vs_et_profile"] = new TProfile(Form("%s_%s",m_name.c_str(),"number_topocluster_vs_et_profile"), "Number of topocluster;E_{T}", 60,0,300, -0.5,14.5);
-  profileMap["number_topocluster_vs_eta_profile"] = new TProfile(Form("%s_%s",m_name.c_str(),"number_topocluster_vs_eta_profile"), "Number of topocluster;truth #eta", 40,-3,3, -0.5,14.5);
+  profileMap["number_topocluster_vs_eta_profile"] = new TProfile(Form("%s_%s",m_name.c_str(),"number_topocluster_vs_eta_profile"), "Number of topocluster;truth #eta", 60,-4.5,4.5, -0.5,14.5);
 
   profileMap["number_cell_in_layer"]    = new TProfile(Form("%s_%s",m_name.c_str(),"number_cell_in_layer"), ";Number of cells;Layer",100,0,200, 0,4);
   histo2DMap["mu_energy_resolution_2D"] = new TH2D(Form("%s_%s",m_name.c_str(),"mu_energy_resolution_2D"), ";<#mu>; Energy Resolution", 5,0,80, 20,-1,1);

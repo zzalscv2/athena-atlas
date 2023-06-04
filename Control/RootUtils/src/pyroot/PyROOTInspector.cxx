@@ -271,6 +271,7 @@ recurse_pyinspect(PyObject *pyobj,
           Py_XDECREF(pyidx);
           Py_DECREF(item);
         }
+        Py_DECREF(iter);
       }
     }
 

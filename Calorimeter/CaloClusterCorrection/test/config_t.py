@@ -6,9 +6,6 @@
 # Purpose: Regression tests CaloCluterCorrection configuration
 #
 
-from __future__ import print_function
-
-
 from PyUtils import coverage
 c = coverage.Coverage ('CaloClusterCorrection.common')
 
@@ -44,6 +41,13 @@ class TestTool:
                     print ('match fail: ', self.__class__.__name__, self.name, k, p, v)
                 assert p == v
             del props[k]
+
+        # Ignore properties that are set to their default values
+        defaults = config.getDefaultProperties().items()
+        for k in list(props):
+            if (k, props[k]) in defaults:
+                del props[k]
+
         assert not props
         return
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cmath>
@@ -1279,8 +1279,8 @@ TH2F_LW* TrigT1CaloLWHistogramToolV1::bookJEMSubStatusVsCrate(
 
 // Book PPM Em eta
 
-TH1F_LW* TrigT1CaloLWHistogramToolV1::bookPPMEmEta(const std::string name,
-                                                 const std::string title)
+TH1F_LW* TrigT1CaloLWHistogramToolV1::bookPPMEmEta(const std::string& name,
+                                                 const std::string& title)
 {
   const int nxbins = 66;
   const double xbins[nxbins+1] = {-4.9,-4.475,-4.050,-3.625,-3.2,-3.1,-2.9,
@@ -1298,8 +1298,8 @@ TH1F_LW* TrigT1CaloLWHistogramToolV1::bookPPMEmEta(const std::string name,
 
 // Book PPM Had eta
 
-TH1F_LW* TrigT1CaloLWHistogramToolV1::bookPPMHadEta(const std::string name,
-                                                  const std::string title)
+TH1F_LW* TrigT1CaloLWHistogramToolV1::bookPPMHadEta(const std::string& name,
+                                                  const std::string& title)
 {
   const int nxbins = 62;
   const double xbins[nxbins+1] = {-4.9,-4.050,-3.2,-3.1,-2.9,
@@ -1317,8 +1317,8 @@ TH1F_LW* TrigT1CaloLWHistogramToolV1::bookPPMHadEta(const std::string name,
  
 // Book PPM Em eta vs phi
 
-TH2F_LW* TrigT1CaloLWHistogramToolV1::bookPPMEmEtaVsPhi(const std::string name,
-                                                      const std::string title)
+TH2F_LW* TrigT1CaloLWHistogramToolV1::bookPPMEmEtaVsPhi(const std::string& name,
+                                                      const std::string& title)
 {
   TH2F_LW* hist = 0;
   LWHist::LWHistAxis* axis = 0;
@@ -1364,8 +1364,8 @@ TH2F_LW* TrigT1CaloLWHistogramToolV1::bookPPMEmEtaVsPhi(const std::string name,
 
 // Book PPM Had eta vs phi
 
-TH2F_LW* TrigT1CaloLWHistogramToolV1::bookPPMHadEtaVsPhi(const std::string name,
-                                                       const std::string title)
+TH2F_LW* TrigT1CaloLWHistogramToolV1::bookPPMHadEtaVsPhi(const std::string& name,
+                                                       const std::string& title)
 {
   TH2F_LW* hist = bookPPMEmEtaVsPhi(name, title);
   if (m_shrinkEtaBins) {
@@ -1380,7 +1380,7 @@ TH2F_LW* TrigT1CaloLWHistogramToolV1::bookPPMHadEtaVsPhi(const std::string name,
 // Book PPM Em eta vs phi profile
 
 TProfile2D_LW* TrigT1CaloLWHistogramToolV1::bookProfilePPMEmEtaVsPhi(
-                              const std::string name, const std::string title)
+                              const std::string& name, const std::string& title)
 {
   // todo - remove duplication with above
   TProfile2D_LW* hist = 0;
@@ -1428,7 +1428,7 @@ TProfile2D_LW* TrigT1CaloLWHistogramToolV1::bookProfilePPMEmEtaVsPhi(
 // Book PPM Had eta vs phi profile
 
 TProfile2D_LW* TrigT1CaloLWHistogramToolV1::bookProfilePPMHadEtaVsPhi(
-                              const std::string name, const std::string title)
+                              const std::string& name, const std::string& title)
 {
   TProfile2D_LW* hist = bookProfilePPMEmEtaVsPhi(name, title);
   if (m_shrinkEtaBins) {

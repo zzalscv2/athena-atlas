@@ -120,9 +120,6 @@ private:
 
   McEventCollection* m_mcEvtColl{};
 
-  // Particle properties service
-  //const HepPDT::ParticleDataTable* m_pdt;
-
   // EvtGen interface
   EvtInclusiveAtRndmGen*  m_evtAtRndmGen{};
   EvtGen*                 m_myEvtGen{};

@@ -80,8 +80,11 @@ inline Scalar eta() const {
   EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(MatrixBase, 3)
   const Scalar rho2 = (*this).x() * (*this).x() + (*this).y() * (*this).y();
   const Scalar z = (*this).z();
-  if (rho2 > 0.) {  // rho^2 >0.
-    const double m = std::sqrt(rho2 + z * z);
+  const Scalar z2 = z * z;
+  constexpr Scalar epsilon = 2. * std::numeric_limits<Scalar>::epsilon();
+  // avoid magnitude being parallel to z
+  if (rho2 >  z2 * epsilon) {
+    const double m = std::sqrt(rho2 + z2);
     return 0.5 * std::log((m + z) / (m - z));
   }
   if (z == 0) {

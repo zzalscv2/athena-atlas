@@ -536,8 +536,6 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
   auto tobPtVsPhiYdecoded_EC = Monitored::Scalar<float>("tobPtVsPhiYdecoded_EC",0);
   auto tobPtVsPhiYdecoded_FW = Monitored::Scalar<float>("tobPtVsPhiYdecoded_FW",0);
   auto tobCount = Monitored::Scalar<int>("tobCount");
-  auto tobCandDifferenceX = Monitored::Scalar<int>("tobCandDifferenceX",0);
-  auto tobCandDifferenceY = Monitored::Scalar<int>("tobCandDifferenceY",0);
 
   //mlt
   auto multThrX      = Monitored::Scalar<int>("multThrX",0);
@@ -973,11 +971,6 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 	  {
 		  tobCount  = slices[iSlice].tob.size();
 		  fill(m_packageName,tobCount);
-
-		  //Histogramming the difference between candidates and TOBs for each side per lumiblock
-		  tobCandDifferenceX = currentLumiBlock;
-		  tobCandDifferenceY = slices[iSlice].cand.size() - slices[iSlice].tob.size();
-		  fill(m_packageName, tobCandDifferenceX, tobCandDifferenceY);
 
 		  if(slices[iSlice].bcid != currentBCID)
 		  {

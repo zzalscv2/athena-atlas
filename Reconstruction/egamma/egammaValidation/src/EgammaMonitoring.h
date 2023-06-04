@@ -46,24 +46,18 @@ public:
   /// Tools and services ///
   ITHistSvc* rootHistSvc = nullptr;
 
+  // Whatever samples
   std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterAll;
   std::unique_ptr<egammaMonitoring::ClusterHistograms> cluster10GeV;
 
   std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterPromptAll;
   std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterPrompt10GeV;
 
-  std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterConvPhoton;
-  std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterConvPhotonSi;
-  std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterConvPhotonSiSi;
-  std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterConvPhotonTRT;
-  std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterConvPhotonTRTTRT;
-  std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterConvPhotonSiTRT;
-  std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterUnconvPhoton;
-
   std::unique_ptr<egammaMonitoring::ShowerShapesHistograms> showerShapesAll;
   std::unique_ptr<egammaMonitoring::ShowerShapesHistograms> showerShapes10GeV;
   std::unique_ptr<egammaMonitoring::IsolationHistograms> isolationAll;
 
+  // electrons
   std::unique_ptr<egammaMonitoring::TruthElectronHistograms> truthElectronAll;
   std::unique_ptr<egammaMonitoring::TruthElectronHistograms>
     truthPromptElectronAll;
@@ -82,10 +76,15 @@ public:
     truthRecoElectronMediumLH;
   std::unique_ptr<egammaMonitoring::TruthElectronHistograms>
     truthRecoElectronTightLH;
-  std::unique_ptr<egammaMonitoring::TruthElectronHistograms>
-    recoElectronIsoFixedCutTight;
-  std::unique_ptr<egammaMonitoring::TruthElectronHistograms>
-    recoElectronIsoFixedCutLoose;
+
+  // photons
+  std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterConvPhoton;
+  std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterConvPhotonSi;
+  std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterConvPhotonSiSi;
+  std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterConvPhotonTRT;
+  std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterConvPhotonTRTTRT;
+  std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterConvPhotonSiTRT;
+  std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterUnconvPhoton;
 
   std::unique_ptr<egammaMonitoring::IHistograms> recoPhotonAll;
   std::unique_ptr<egammaMonitoring::IHistograms> truthPhotonAll;
@@ -166,79 +165,55 @@ private:
 
   /// Selector tools
   // electron ID
-  ToolHandle<IAsgElectronLikelihoodTool>
-    m_LooseLH{ this, "LooseLH", "AsgElectronLikelihoodTool/LooseLH", "" };
-  ToolHandle<IAsgElectronLikelihoodTool>
-    m_MediumLH{ this, "MediumLH", "AsgElectronLikelihoodTool/MediumLH", "" };
-  ToolHandle<IAsgElectronLikelihoodTool>
-    m_TightLH{ this, "TightLH", "AsgElectronLikelihoodTool/TightLH", "" };
+  ToolHandle<IAsgElectronLikelihoodTool> m_LooseLH
+    { this, "LooseLH", "", "" };
+  ToolHandle<IAsgElectronLikelihoodTool> m_MediumLH
+    { this, "MediumLH", "", "" };
+  ToolHandle<IAsgElectronLikelihoodTool> m_TightLH
+    { this, "TightLH", "", "" };
 
   // photon ID
-  ToolHandle<IAsgPhotonIsEMSelector> m_LooseLH_Photon{
-    this,
-    "Loose_Photon",
-    "AsgPhotonIsEMSelector/photonLooseIsEMSelector",
-    ""
-  };
-  ToolHandle<IAsgPhotonIsEMSelector> m_TightLH_Photon{
-    this,
-    "Tight_Photon",
-    "AsgPhotonIsEMSelector/photonTightIsEMSelector",
-    ""
-  };
+  ToolHandle<IAsgPhotonIsEMSelector> m_Loose_Photon
+    { this, "Loose_Photon", "", "" };
+  ToolHandle<IAsgPhotonIsEMSelector> m_Tight_Photon
+    { this, "Tight_Photon", "", "" };
 
   // photon isolation
-  ToolHandle<CP::IIsolationSelectionTool> m_IsoFixedCutTight{
-    this,
-    "IsoFixedCutTight",
-    "CP::IsolationSelectionTool/IsoFixedCutTight",
-    ""
-  };
-  ToolHandle<CP::IIsolationSelectionTool> m_IsoFixedCutTightCaloOnly{
-    this,
-    "IsoTightCaloOnly",
-    "CP::IsolationSelectionTool/IsoTightCaloOnly",
-    ""
-  };
-  ToolHandle<CP::IIsolationSelectionTool> m_IsoFixedCutLoose{
-    this,
-    "IsoFixedCutLoose",
-    "CP::IsolationSelectionTool/IsoFixedCutLoose",
-    ""
-  };
+  ToolHandle<CP::IIsolationSelectionTool> m_IsoFixedCutTight
+    { this, "IsoFixedCutTight", "", "" };
+  ToolHandle<CP::IIsolationSelectionTool> m_IsoFixedCutTightCaloOnly
+    { this, "IsoTightCaloOnly", "", "" };
+  ToolHandle<CP::IIsolationSelectionTool> m_IsoFixedCutLoose
+    { this, "IsoFixedCutLoose", "", "" };
 
   // Truth classifier
-  ToolHandle<IMCTruthClassifier> m_mcTruthClassifier{
-    this,
-    "MCTruthClassifier",
-    "MCTruthClassifier/MCTruthClassifier",
-    ""
-  };
+  ToolHandle<IMCTruthClassifier> m_mcTruthClassifier
+    { this, "MCTruthClassifier", "MCTruthClassifier/MCTruthClassifier", "" };
 
   // Collections to read
-  SG::ReadHandleKey<xAOD::EventInfo>
-    m_eventInfoKey{ this, "EventInfoKey", "EventInfo", "" };
+  SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey
+    { this, "EventInfoKey", "EventInfo", "" };
 
-  SG::ReadHandleKey<xAOD::TruthParticleContainer>
-    m_egTruthParticlesKey{
-    this, "egammaTruthParticlesKey", "egammaTruthParticles", "" };
+  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_egTruthParticlesKey
+    { this, "egammaTruthParticlesKey", "egammaTruthParticles", "" };
 
-  SG::ReadHandleKey<xAOD::TruthParticleContainer>
-    m_truthParticlesKey{ this, "truthParticlesKey", "TruthParticles", "" };
+  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticlesKey
+    { this, "truthParticlesKey", "TruthParticles", "" };
 
-  SG::ReadHandleKey<xAOD::ElectronContainer>
-    m_ElectronsKey{ this, "ElectronsKey", "Electrons", "" };
+  SG::ReadHandleKey<xAOD::ElectronContainer> m_ElectronsKey
+    { this, "ElectronsKey", "", "" };
 
-  SG::ReadHandleKey<xAOD::PhotonContainer>
-    m_PhotonsKey{ this, "PhotonsKey", "Photons", "" };
+  SG::ReadHandleKey<xAOD::ElectronContainer> m_FwdElectronsKey
+    { this, "FwdElectronsKey", "", "" };
 
-  SG::ReadHandleKey<xAOD::TrackParticleContainer>
-    m_InDetTrackParticlesKey{
-    this, "InDetTrackParticlesKey", "InDetTrackParticles", "" };
+  SG::ReadHandleKey<xAOD::PhotonContainer> m_PhotonsKey
+    { this, "PhotonsKey", "", "" };
 
-  SG::ReadHandleKey<xAOD::TrackParticleContainer>
-    m_GSFTrackParticlesKey{
-    this, "GSFTrackParticlesKey", "GSFTrackParticles", "" };
+  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_InDetTrackParticlesKey
+    { this, "InDetTrackParticlesKey", "InDetTrackParticles", "" };
+
+  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_GSFTrackParticlesKey
+    { this, "GSFTrackParticlesKey", "", "" };
 
   static bool matchedToElectron(const xAOD::TrackParticle& tp);
   static bool matchedToPion(const xAOD::TrackParticle& tp);

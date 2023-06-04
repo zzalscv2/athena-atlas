@@ -108,6 +108,7 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
         
         
         uint16_t Total_Et_encoded = 0;
+        char jTower_sat = 0;
         
         if( source != 1 ){
             
@@ -146,6 +147,10 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
                     et = 0.0;
                 }
                 
+                if(myCell->quality() == 1){
+                    jTower_sat = 1;
+                }
+                
                 Total_Et += et;
                 
             }      
@@ -173,9 +178,6 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
             else{
                 Total_Et_encoded = (it_TileID2ptr->second)->cpET();
             }           
-            
-            
-
         }
         
         std::vector<uint16_t> vtower_ET;
@@ -186,7 +188,7 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
         vtower_SAT.clear();
         
         //Needs to be updated with Saturation flag from LAr CaloCell container, not ready yet!
-        vtower_SAT.push_back(0);     
+        vtower_SAT.push_back(jTower_sat);     
         
         jTowersContainer->push_back( std::make_unique<xAOD::jFexTower>() );
         jTowersContainer->back()->initialize(eta, phi, iEta, iPhi, IDSimulation, source, vtower_ET, jfex, fpga, channel, tower, vtower_SAT );                

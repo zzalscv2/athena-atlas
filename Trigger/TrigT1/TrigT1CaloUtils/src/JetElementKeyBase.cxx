@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                            JetElementKeyBase.cpp  -  description
@@ -33,9 +33,9 @@ which can return the key for this coord
 */
 JetElementKeyBase::JetElementKeyBase(double phi, double eta) :
 	KeyUtilities(phi,eta),
-	m_debug(false)
+	m_debugKeyBase(false)
 	{
-	if (m_debug) { std::cout << "JetElementKeyBase: m_debug output turned on...."<<std::endl; }
+	if (m_debugKeyBase) { std::cout << "JetElementKeyBase: m_debugKeyBase output turned on...."<<std::endl; }
 	//setupRegionData();
 	//setupThisKeyValues();
 }
@@ -43,9 +43,9 @@ JetElementKeyBase::JetElementKeyBase(double phi, double eta) :
 /** constructs a JetElementKeyBase object*/
 JetElementKeyBase::JetElementKeyBase() :
 	KeyUtilities(),
-	m_debug(false)
+	m_debugKeyBase(false)
 	{
-	if (m_debug) { std::cout << "JetElementKeyBase: m_debug output turned on...."<<std::endl; }
+	if (m_debugKeyBase) { std::cout << "JetElementKeyBase: m_debugKeyBase output turned on...."<<std::endl; }
 	//setupRegionData();
 	//setupThisKeyValues();
 }
@@ -53,9 +53,9 @@ JetElementKeyBase::JetElementKeyBase() :
 /** constructs a JetElementKeyBase object*/
 JetElementKeyBase::JetElementKeyBase(const Coordinate coord) :
 	KeyUtilities(coord.phi(),coord.eta()),
-	m_debug(false)
+	m_debugKeyBase(false)
 	{
-	if (m_debug) { std::cout << "JetElementKeyBase: m_debug output turned on...."<<std::endl; }
+	if (m_debugKeyBase) { std::cout << "JetElementKeyBase: m_debugKeyBase output turned on...."<<std::endl; }
 	//setupRegionData();
 	//setupThisKeyValues();
 }
@@ -77,7 +77,7 @@ BinAndCoord* JetElementKeyBase::calculateTriggerBin(ICoordinate* iCoord){
   int abs_ieta=abs(ieta);
   int sign=ieta/abs_ieta;
 
-  if (m_debug){
+  if (m_debugKeyBase){
     std::cout << "JetElementKeyBase: start calculateTriggerBin"<<std::endl;
     //std::cout << "phi, eta   : ("<<m_phi<<", "<<m_eta<<")"<<std::endl;
     std::cout << "iphi, ieta : ("<<iphi<<", "<<ieta<<")"<<std::endl;
@@ -136,7 +136,7 @@ BinAndCoord* JetElementKeyBase::calculateTriggerBin(ICoordinate* iCoord){
     
   }
   
-  if (m_debug) std::cout << "central : ("<<centralPhi<<", "<<centralEta<<")"
+  if (m_debugKeyBase) std::cout << "central : ("<<centralPhi<<", "<<centralEta<<")"
                       << " bin : ("<<phiBin<<","<<etaBin<<")"<<std::endl;
   Coordinate* centralCoords = new Coordinate(centralPhi, centralEta);
   BinAndCoord* bandc = new BinAndCoord(phiBin,etaBin,centralCoords);
@@ -148,13 +148,13 @@ BinAndCoord* JetElementKeyBase::calculateTriggerBin(ICoordinate* iCoord){
 
 /** returns key of passed tower */
 unsigned int JetElementKeyBase::jeKey( const xAOD::TriggerTower& tower) {
-  if (m_debug) std::cout << "JetElementKeyBase: returning key for coords ("<<tower.phi()<<","<<tower.eta()<<")"<<std::endl;
+  if (m_debugKeyBase) std::cout << "JetElementKeyBase: returning key for coords ("<<tower.phi()<<","<<tower.eta()<<")"<<std::endl;
   return key(tower.phi(), tower.eta());
 }
 
 /** returns the key of the passed tower */
 unsigned int JetElementKeyBase::jeKey( const xAOD::JetElement& jetElement){
-  if (m_debug) std::cout << "JetElementKeyBase: returning key for coords ("<<jetElement.phi()<<","<<jetElement.eta()<<")"<<std::endl;
+  if (m_debugKeyBase) std::cout << "JetElementKeyBase: returning key for coords ("<<jetElement.phi()<<","<<jetElement.eta()<<")"<<std::endl;
   return key(jetElement.phi(), jetElement.eta());
 }
 
@@ -163,13 +163,13 @@ unsigned int JetElementKeyBase::jeKey( const xAOD::JetElement& jetElement){
 
 /** returns trigger tower key of passed coords */
 unsigned int JetElementKeyBase::jeKey(const double phi, const double eta){
-  if (m_debug) std::cout << "JetElementKeyBase: returning key for coords ("<<phi<<","<<eta<<")"<<std::endl;
+  if (m_debugKeyBase) std::cout << "JetElementKeyBase: returning key for coords ("<<phi<<","<<eta<<")"<<std::endl;
   return key(phi, eta);
 }
 
 /** returns trigger tower key of passed Coordinate */
 unsigned int JetElementKeyBase::jeKey(const Coordinate coord){
-  if (m_debug) std::cout << "JetElementKeyBase: returning key for Coord: ("<<coord.phi()<<","<<coord.eta()<<")"<<std::endl;
+  if (m_debugKeyBase) std::cout << "JetElementKeyBase: returning key for Coord: ("<<coord.phi()<<","<<coord.eta()<<")"<<std::endl;
   return key(coord.phi(), coord.eta());
 }
 

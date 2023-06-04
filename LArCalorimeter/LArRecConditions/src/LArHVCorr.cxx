@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRecConditions/LArHVCorr.h"
@@ -13,10 +13,7 @@ LArHVCorr::LArHVCorr(std::vector<float>&& vVec, const LArOnOffIdMapping* cabling
 // retrieving HVScaleCorr using offline ID  
 const float& LArHVCorr::HVScaleCorr(const Identifier& id) const  {
   const IdentifierHash h=m_calo_id->calo_cell_hash(id);
-  if (h<m_hvCorr.size()) //Catches also Tile Ids 
-    return m_hvCorr[m_calo_id->calo_cell_hash(id)]; 
-  else 
-    return m_noCorr;
+  return HVScaleCorr_oflHash(h);
 }
 
 const float& LArHVCorr::HVScaleCorr(const HWIdentifier& id) const  {

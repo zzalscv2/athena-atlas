@@ -1,10 +1,28 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
 #logging
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
+def precisionPhotonVDVCfg(name, InViewRoIs, ion=False):
+    acc = ComponentAccumulator()
+    TrigEgammaKeys = getTrigEgammaKeys(ion=ion)
+    caloClusters = TrigEgammaKeys.precisionPhotonCaloClusterContainer
+    dataObjects = [( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % caloClusters ),
+                              ( 'EgammaRecContainer', 'StoreGateSvc+%s' % TrigEgammaKeys.precisionPhotonSuperClusterCollection),
+                              ( 'CaloCellContainer' , 'StoreGateSvc+CaloCells' ),
+                              ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
+                              ]
+    if ion:
+        dataObjects += [( 'CaloCellContainer' , 'StoreGateSvc+CorrectedRoICaloCells' )]
+
+    precisionPhotonVDV = CompFactory.AthViews.ViewDataVerifier(name)
+    precisionPhotonVDV.DataObjects = dataObjects
+    acc.addEventAlgo(precisionPhotonVDV)
+    return acc
 
 
 def precisionPhotonRecoSequence(flags, RoIs, name = None, ion=False):
@@ -27,6 +45,8 @@ def precisionPhotonRecoSequence(flags, RoIs, name = None, ion=False):
 
     log.debug('retrieve(precisionPhotonRecoSequence,None,RoIs = %s)',RoIs)
     
+    acc.merge(precisionPhotonVDVCfg(name+'VDV',RoIs,ion))
+
     if ion:
         TrigTopoEgammaPhoton = TrigTopoEgammaPhotonCfg_HI(flags)
     else:
@@ -45,4 +65,5 @@ def precisionPhotonRecoSequence(flags, RoIs, name = None, ion=False):
     acc.merge(PrecisionPhotonSuperClusterMonAlgo)
 
     return acc
+
 

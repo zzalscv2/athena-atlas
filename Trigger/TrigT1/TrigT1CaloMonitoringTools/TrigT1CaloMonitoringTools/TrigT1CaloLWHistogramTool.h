@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOMONITORINGTOOLS_TRIGT1CALOLWHISTOGRAMTOOL_H
@@ -356,19 +356,19 @@ class TrigT1CaloLWHistogramTool : public asg::AsgTool {
    ////////////////////////////////
 
    /// Book PPM Em eta
-   TH1F_LW* bookPPMEmEta(const std::string name,const std::string title);
+   TH1F_LW* bookPPMEmEta(const std::string& name,const std::string& title);
    /// Book PPM Had eta
-   TH1F_LW* bookPPMHadEta(const std::string name,const std::string title);
+   TH1F_LW* bookPPMHadEta(const std::string& name,const std::string& title);
    /// Book PPM Em eta vs phi
-   TH2F_LW* bookPPMEmEtaVsPhi(const std::string name, const std::string title);
+   TH2F_LW* bookPPMEmEtaVsPhi(const std::string& name, const std::string& title);
    /// Book PPM Had eta vs phi
-   TH2F_LW* bookPPMHadEtaVsPhi(const std::string name, const std::string title);
+   TH2F_LW* bookPPMHadEtaVsPhi(const std::string& name, const std::string& title);
    /// Book PPM Em eta vs phi profile
-   TProfile2D_LW* bookProfilePPMEmEtaVsPhi(const std::string name,
-                                           const std::string title);
+   TProfile2D_LW* bookProfilePPMEmEtaVsPhi(const std::string& name,
+                                           const std::string& title);
    /// Book PPM Had eta vs phi profile
-   TProfile2D_LW* bookProfilePPMHadEtaVsPhi(const std::string name,
-                                            const std::string title);
+   TProfile2D_LW* bookProfilePPMHadEtaVsPhi(const std::string& name,
+                                            const std::string& title);
    /// Book PPM events with error/mismatch vs crate/module
    TH2I_LW* bookPPMEventVsCrateModule(const std::string& name,
                                       const std::string& title,
