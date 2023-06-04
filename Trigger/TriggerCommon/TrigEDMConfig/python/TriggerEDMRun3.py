@@ -1102,7 +1102,7 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigT2MbtsBitsContainer#HLT_MbtsBitsContainer',                     'BS ESD AODFULL', 'MinBias'),
     ('xAOD::TrigT2MbtsBitsAuxContainer#HLT_MbtsBitsContainerAux.',              'BS ESD AODFULL', 'MinBias'),
 
-    ('xAOD::TrigCompositeContainer#HLT_SpacePointCounts',            'BS ESD AODFULL AODSLIM', 'MinBias', 'inViews:SPView'),
+    ('xAOD::TrigCompositeContainer#HLT_SpacePointCounts',            'BS ESD AODFULL AODSLIM', 'MinBias', 'inViews:SPCountingRecoViews'),
     ('xAOD::TrigCompositeAuxContainer#HLT_SpacePointCountsAux.pixCL.pixCL_1.pixCL_2.pixCLmin3.pixCLBarrel.pixCLEndcapA.pixCLEndcapC.sctSP.sctSPBarrel.sctSPEndcapA.sctSPEndcapC',     'BS ESD AODFULL AODSLIM', 'MinBias'),
 
     ('xAOD::TrigCompositeContainer#HLT_TrackCount',                                                'BS ESD AODFULL AODSLIM', 'MinBias'),
