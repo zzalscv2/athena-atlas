@@ -178,13 +178,26 @@ class HypoAlgNode(AlgNode):
         from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu 
         log.debug("Adding HypoTool %s for chain %s to %s", hypoToolConf.name, hypoToolConf.chainDict['chainName'], self.Alg.getName())        
         try:
-            self.Alg.HypoTools = self.Alg.HypoTools + [hypoToolConf.create(flags)]  # see ATEAM-773
+            result = hypoToolConf.create(flags)
+            if isinstance(result, ComponentAccumulator):
+                tool = result.popPrivateTools()
+                assert not isinstance(tool, list), "Can not handle list of tools"
+                if not isCAMenu():
+                    # do not do this in CA, use unconverted tool
+                    tool = conf2toConfigurable(tool)
+                    self.Alg.HypoTools = self.Alg.HypoTools + [tool]  # see ATEAM-773
+                else:
+                    self.Alg.HypoTools.append(tool)
+                return result
+            else:
+                self.Alg.HypoTools = self.Alg.HypoTools + [result]  # see ATEAM-773
             if isCAMenu():
                 assert isinstance(self.Alg.HypoTools[-1], GaudiConfig2._configurables.Configurable), "The Hypo Tool for {} is not Configurable2".format(hypoToolConf.chainDict['chainName'])
 
         except NoHypoToolCreated as e:
             log.debug("%s returned empty tool: %s", hypoToolConf.name, e)
-
+        return None
+    
     def setPreviousDecision(self,prev):
         self.previous.append(prev)
         return self.addInput(prev)

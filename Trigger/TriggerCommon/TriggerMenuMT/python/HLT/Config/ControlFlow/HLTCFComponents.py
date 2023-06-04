@@ -7,6 +7,7 @@ from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import isComboHypoAlg
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.CFElements import compName, findAlgorithmByPredicate, parOR, seqAND
+from AthenaCommon.Configurable import ConfigurableCABehavior
 from functools import lru_cache
 
 from AthenaCommon.Logging import logging
@@ -158,6 +159,8 @@ class CFSequence(object):
     def createHypoTools(self, flags, chain, newstep):
         """ set and create HypoTools accumulated on the self.step from an input step configuration
         """
+        with ConfigurableCABehavior(): 
+            acc = ComponentAccumulator()
         if self.step.combo is None:
             return
 
@@ -174,10 +177,13 @@ class CFSequence(object):
             hypoToolConf=seq.getHypoToolConf()
             if hypoToolConf is not None: # avoid empty sequences
                 hypoToolConf.setConf( onePartChainDict )
-                myseq.hypo.addHypoTool(flags, hypoToolConf) #this creates the HypoTools
+                hypoAcc = myseq.hypo.addHypoTool(flags, hypoToolConf) #this creates the HypoTools
+                if hypoAcc: # TODO once in CA this will always return
+                    acc.merge(hypoAcc)
         chainDict = HLTMenuConfig.getChainDictFromChainName(chain)
         self.combo.createComboHypoTools(flags, chainDict, newstep.comboToolConfs)
-
+        return acc
+    
     def __repr__(self):
         return "--- CFSequence ---\n + Filter: %s \n + decisions: %s\n +  %s \n"%(\
                     compName(self.filter.Alg), self.decisions, self.step)
