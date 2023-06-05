@@ -43,8 +43,6 @@ class SmoothedWZTagger :
       SG::WriteDecorHandleKey<xAOD::JetContainer> m_decCutNtrkKey{this, "CutNtrkName", "Cut_Ntrk", "SG key for Cut_Ntrk"};
       SG::WriteDecorHandleKey<xAOD::JetContainer> m_decAcceptKey{this, "acceptName", "accept", "SG key for accept"};
 
-      /// ReadDecorHandle keys
-      SG::ReadDecorHandleKey<xAOD::JetContainer> m_readUngroomedLinkKey{this, "ParentName", "Parent", "SG key for Parent"};
 
   };
 
