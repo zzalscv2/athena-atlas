@@ -58,6 +58,7 @@ namespace ISF {
     StringArrayProperty m_whiteLists{this, "WhiteLists", {"G4particle_whitelist.txt"} }; //!< The location of the white lists
     std::vector<long int>             m_pdgId;                //!< Allowed PDG IDs
     BooleanProperty m_qs{this, "QuasiStableSim", true}; //!< Switch for quasi-stable particle simulation
+    BooleanProperty m_useShadowEvent{this, "UseShadowEvent", false, "New approach to selecting particles for simulation" };
     DoubleProperty m_minDecayRadiusQS{this, "MinimumDecayRadiusQS", 30.19*Gaudi::Units::mm}; //!< Decay radius below which QS particles should be ignored
   };
 

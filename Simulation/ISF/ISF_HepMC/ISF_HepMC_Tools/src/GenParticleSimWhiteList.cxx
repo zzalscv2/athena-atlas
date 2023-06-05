@@ -153,13 +153,13 @@ bool ISF::GenParticleSimWhiteList::pass(const HepMC::ConstGenParticlePtr& partic
       ATH_MSG_VERBOSE( "Particle " << particle << " was produced and decayed within a radius of " << m_minDecayRadiusQS << " mm.");
     }
   } // particle had daughters
-  if (!particle->end_vertex() && particle->status()==2) { // no daughters... No end vertex... Check if this isn't trouble
+  if (!m_useShadowEvent && !particle->end_vertex() && particle->status()==2) { // no daughters... No end vertex... Check if this isn't trouble
     ATH_MSG_ERROR( "Found a particle with no end vertex that does not appear in the white list." );
     ATH_MSG_ERROR( "This is VERY likely pointing to a problem with either the configuration you ");
     ATH_MSG_ERROR( "are using, or a bug in the generator.  Either way it should be fixed.  The");
     ATH_MSG_ERROR( "particle will come next, and then we will throw.");
     ATH_MSG_ERROR( particle );
-    throw std::runtime_error("GenParticleSimWhiteList: Particle with no end vertex and not in whitelist"); 
+    throw std::runtime_error("GenParticleSimWhiteList: Particle with no end vertex and not in whitelist");
   }
 
   return passFilter;
@@ -196,13 +196,13 @@ bool ISF::GenParticleSimWhiteList::pass(const HepMC::GenParticle& particle , std
       ATH_MSG_VERBOSE( "Particle " << particle << " was produced and decayed within a radius of " << m_minDecayRadiusQS << " mm.");
     }
   } // particle had daughters
-  if (!particle.end_vertex() && particle.status()==2) { // no daughters... No end vertex... Check if this isn't trouble
+  if (!m_useShadowEvent && !particle.end_vertex() && particle.status()==2) { // no daughters... No end vertex... Check if this isn't trouble
     ATH_MSG_ERROR( "Found a particle with no end vertex that does not appear in the white list." );
     ATH_MSG_ERROR( "This is VERY likely pointing to a problem with either the configuration you ");
     ATH_MSG_ERROR( "are using, or a bug in the generator.  Either way it should be fixed.  The");
     ATH_MSG_ERROR( "particle will come next, and then we will throw.");
     ATH_MSG_ERROR( particle );
-    throw std::runtime_error("GenParticleSimWhiteList: Particle with no end vertex and not in whitelist");  
+    throw std::runtime_error("GenParticleSimWhiteList: Particle with no end vertex and not in whitelist");
   }
 
   return passFilter;
