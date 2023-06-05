@@ -101,7 +101,7 @@ def fromRunArgs(runArgs):
         SetupMetaDataForStreamCfg(
             flags,
             streamToMerge,
-            mergeJob=True,
+            mergeJob=hasattr(runArgs, "fastPoolMerge") and runArgs.fastPoolMerge,
         )
     )
 
