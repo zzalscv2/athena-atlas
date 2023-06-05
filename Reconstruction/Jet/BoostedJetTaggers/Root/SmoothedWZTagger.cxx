@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/SmoothedWZTagger.h"
@@ -61,12 +61,12 @@ StatusCode SmoothedWZTagger::initialize() {
       m_weightHistogramName = m_configReader.GetValue("WeightHistogramName", "");
       m_efficiencyHistogramName = m_configReader.GetValue("EfficiencyHistogramName", "");
       m_weightFlavors = m_configReader.GetValue("WeightFlavors", "");
-    
+
       /// Get truth label name information
       m_truthLabelName = m_configReader.GetValue("TruthLabelName", "R10TruthLabel_R21Consolidated");
 
       if ( m_calibArea.compare("Local") == 0 ) {
-        m_weightConfigPath = PathResolverFindCalibFile(("$WorkDir_DIR/data/BoostedJetTaggers/SmoothedWZTaggers/"+m_weightFileName).c_str());      
+        m_weightConfigPath = PathResolverFindCalibFile(("$WorkDir_DIR/data/BoostedJetTaggers/SmoothedWZTaggers/"+m_weightFileName).c_str());
       }
       else if ( m_calibArea.find("eos") != std::string::npos ) {
         m_weightConfigPath = PathResolverFindCalibFile((m_calibArea+"/"+m_weightFileName).c_str());
@@ -75,7 +75,7 @@ StatusCode SmoothedWZTagger::initialize() {
         m_weightConfigPath = PathResolverFindCalibFile(("BoostedJetTaggers/"+m_calibArea+"/"+m_weightFileName).c_str());
       }
     }
-    
+
   }
   else { /// No config file
     /// Assume the cut functions have been set through properties.
@@ -133,21 +133,39 @@ StatusCode SmoothedWZTagger::initialize() {
 
   m_decPassD2Key = m_containerName + "." + m_decorationName + "_" + m_decPassD2Key.key();
   m_decCutD2Key = m_containerName + "." + m_decorationName + "_" + m_decCutD2Key.key();
-  
+
   ATH_CHECK( m_decPassD2Key.initialize() );
   ATH_CHECK( m_decCutD2Key.initialize() );
-  
+
   ATH_MSG_INFO( "  " << m_decPassD2Key.key() << " : pass D2 cut" );
   ATH_MSG_INFO( "  " << m_decCutD2Key.key() << " : D2 cut" );
 
   m_decPassNtrkKey = m_containerName + "." + m_decorationName + "_" + m_decPassNtrkKey.key();
   m_decCutNtrkKey = m_containerName + "." + m_decorationName + "_" + m_decCutNtrkKey.key();
-  
+
   ATH_CHECK( m_decPassNtrkKey.initialize() );
   ATH_CHECK( m_decCutNtrkKey.initialize() );
-  
+
   ATH_MSG_INFO( "  " << m_decPassNtrkKey.key() << " : pass Ntrk cut" );
   ATH_MSG_INFO( "  " << m_decCutNtrkKey.key() << " : Ntrk cut" );
+
+  m_decAcceptKey = m_containerName + "." + m_decorationName + "_" + m_decAcceptKey.key();
+  ATH_CHECK( m_decAcceptKey.initialize() );
+
+#ifndef XAOD_STANDALONE
+  if (m_suppressOutputDependence) {
+    renounce(m_decPassMassKey);
+    renounce(m_decPassD2Key);
+    renounce(m_decTaggedKey);
+    renounce(m_decCutMLowKey);
+    renounce(m_decCutMHighKey);
+    renounce(m_decCutD2Key);
+    renounce(m_decValidJetContentKey);
+    renounce(m_decValidEventContentKey);
+    renounce(m_decPassNtrkKey);
+    renounce(m_decCutNtrkKey);
+  }
+#endif
 
   m_decAcceptKey = m_containerName + "." + m_decorationName + "_" + m_decAcceptKey.key();
   ATH_CHECK( m_decAcceptKey.initialize() );
@@ -239,19 +257,19 @@ StatusCode SmoothedWZTagger::tag( const xAOD::Jet& jet ) const {
     decCutNtrk(jet) = cut_ntrk;
 
     int pv_location = findPV();
-    
+
     if(pv_location != -1){
 
       if( GetUnGroomTracks(jet, pv_location).isSuccess()){
-	
+
 	SG::ReadDecorHandle<xAOD::JetContainer, int> readNtrk500(m_readNtrk500Key);
-	
+
 	int jet_ntrk = readNtrk500(jet);
 
 	if ( jet_ntrk < cut_ntrk ) acceptData.setCutResult( "PassNtrk", true );
 	decPassNtrk(jet) = acceptData.getCutResult( "PassNtrk" );
 	passCuts = passCuts && acceptData.getCutResult( "PassNtrk" );
-          
+
       }
       else{
 	acceptData.setCutResult( "ValidJetContent", false );
@@ -297,7 +315,7 @@ StatusCode SmoothedWZTagger::tag( const xAOD::Jet& jet ) const {
   /// Get SF weight
   ATH_CHECK( getWeight( jet, (bool)acceptData, acceptData ) );
 
-  if ( m_calcSF ) { 
+  if ( m_calcSF ) {
 
     /// Create WriteDecorHandles
     SG::WriteDecorHandle<xAOD::JetContainer, float> decAccept(m_decAcceptKey);
@@ -310,4 +328,3 @@ StatusCode SmoothedWZTagger::tag( const xAOD::Jet& jet ) const {
   return StatusCode::SUCCESS;
 
 }
-

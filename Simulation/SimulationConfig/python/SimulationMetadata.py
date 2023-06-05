@@ -20,6 +20,9 @@ def fillAtlasMetadata(flags, dbFiller):
             if "Twiss" in flag and not flags.Detector.GeometryForward:
                 # The various Twiss flags should only be written out when Forward Detector simulation is enabled
                 continue
+            if "UseShadowEvent" in flag and not flags.Sim.UseShadowEvent:
+                # This flag is added temporarily to allow a new approach to quasi-stable particle simulation to be tested.
+                continue
             key = flag.split(".")[-1] #use final part of flag as the key
             value = flags._get(flag)
             if isinstance(value, FlagEnum):

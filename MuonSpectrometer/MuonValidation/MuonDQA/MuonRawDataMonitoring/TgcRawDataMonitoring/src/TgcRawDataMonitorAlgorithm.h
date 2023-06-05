@@ -111,7 +111,7 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
     int bcid{-999};
     int bunch{-999};
     int currBc{0};
-    int goodBcid{0};
+    int goodBcid0{0};
     int goodBcid1{0};
     int goodBcid2{0};
     int goodTiming{0};
@@ -125,6 +125,7 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
     int roiNum{-999};
     int isForward{-999};
     int isAside{-999};
+    double deltaR{-999};
     int deltaBcid{-999}; // BCID difference between SL and NSW
     int deltaTiming{-999}; // Signal timing difference between SL and NSW
     int R{-999};
@@ -133,7 +134,7 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
     int bcid{-999};
     int bunch{-999};
     int currBc{0};
-    int goodBcid{0};
+    int goodBcid0{0};
     int goodBcid1{0};
     int goodBcid2{0};
     int goodTiming{0};
@@ -152,7 +153,7 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
     int bcid{-999};
     int bunch{-999};
     int currBc{0};
-    int goodBcid{0};
+    int goodBcid0{0};
     int goodBcid1{0};
     int goodBcid2{0};
     int goodTiming{0};
@@ -226,6 +227,8 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
     double phi{};
     unsigned int roiWord{};
   };
+
+  double getNswRindexFromEta(const double& eta) const;
   
  private:
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
@@ -304,6 +307,7 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
   IntegerProperty m_nHitsInOtherBWTGCStrip{this,"nHitsInOtherTGCStrip",2,"Number of hits in other BW-TGC strip channels"};
   BooleanProperty m_dumpFullChannelList{this,"DumpFullChannelList",false,"Dump full channel list"};
   StringProperty m_maskChannelFileName{this,"MaskChannelFileName","","Name of file for mask channels"};
+  DoubleProperty m_NswDeltaRCut{this,"NswDeltaRCut", 20.,"Window size in delta R for NSW-TGC matching"};
 
   std::vector<double> m_extZposition;
   std::vector<CtpDecMonObj> m_CtpDecMonObj;
