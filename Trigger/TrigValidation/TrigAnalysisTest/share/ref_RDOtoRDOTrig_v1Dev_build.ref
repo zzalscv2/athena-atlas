@@ -32412,6 +32412,8 @@ HLT_xe0_cell_L1XE55:
     0: 8
   stepFeatures:
     0: 8
+HLT_xe0_cell_L1ZB:
+  eventCount: 0
 HLT_xe0_mhtpufit_em_L1XE50:
   eventCount: 8
   stepCounts:

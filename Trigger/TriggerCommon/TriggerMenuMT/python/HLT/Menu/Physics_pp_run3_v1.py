@@ -1006,6 +1006,7 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_xe0_mhtpufit_pf_L1XE55',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportLegGroup+METGroup+['RATE:CPS_XE55'], monGroups=['metMon:t0']),
         ChainProp(name='HLT_xe0_nn_L1XE55',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportLegGroup+METGroup+['RATE:CPS_XE55'], monGroups=['metMon:t0']),
 
+        ChainProp(name='HLT_xe0_cell_L1ZB',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportLegGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']), #ATR-26456
         ChainProp(name='HLT_xe0_tcpufit_L1ZB',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportLegGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']),
         ChainProp(name='HLT_xe0_trkmht_L1ZB',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportLegGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']),
         ChainProp(name='HLT_xe0_pfopufit_L1ZB',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportLegGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']),
