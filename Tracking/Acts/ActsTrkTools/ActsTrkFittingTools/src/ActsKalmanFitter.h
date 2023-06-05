@@ -47,7 +47,6 @@ namespace Trk{
 
 class ActsKalmanFitter : public extends<AthAlgTool, Trk::ITrackFitter> { 
 public:
-  using traj_Type = Acts::VectorMultiTrajectory;
 
   ActsKalmanFitter(const std::string&,const std::string&,const IInterface*);
   virtual ~ActsKalmanFitter() = default;
@@ -145,11 +144,11 @@ private:
       "Overstep limit / tolerance for the Eigen stepper (use ACTS units!)"};
 
   /// Type erased track fitter function.
-    using Fitter = Acts::KalmanFitter<Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>, traj_Type>;
+    using Fitter = Acts::KalmanFitter<Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>, ActsTrk::TrackStateBackend>;
     std::unique_ptr<Fitter> m_fitter;
 
-    Acts::KalmanFitterExtensions<traj_Type> getExtensions();
-    Acts::KalmanFitterExtensions<traj_Type> m_kfExtensions;
+    Acts::KalmanFitterExtensions<ActsTrk::TrackStateBackend> getExtensions();
+    Acts::KalmanFitterExtensions<ActsTrk::TrackStateBackend> m_kfExtensions;
 
     ActsTrk::FitterHelperFunctions::ATLASOutlierFinder m_outlierFinder{0};
     ActsTrk::FitterHelperFunctions::ReverseFilteringLogic m_reverseFilteringLogic{0};
