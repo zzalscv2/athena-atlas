@@ -19,15 +19,11 @@ EventInfoBranch::EventInfoBranch(MuonTesterTree& tree, unsigned int write_mask):
     m_writemask{write_mask} {
     if (m_writemask & WriteOpts::isMC) {
         if (m_writemask & WriteOpts::writeLHE) {
-            tree.disableBranch(m_weight.name());      
-            for (unsigned int lhe = 0; lhe < s_num_lhe ; ++lhe ) {
+            for (unsigned int lhe = 1; lhe < s_num_lhe ; ++lhe ) {
                 std::shared_ptr<ScalarBranch<double>>& new_br = m_lhe_weights[lhe];                
                 new_br = std::make_shared<ScalarBranch<double>>(tree.tree(),  "mcEventWeight_LHE_" + std::to_string(lhe),0.);
                 tree.addBranch(new_br);
-            }
-            if (m_lhe_weights.empty()) {
-                throw std::runtime_error("No LHE weights were created");
-            }
+            }            
         }
     } else {
          tree.disableBranch(m_mcChannel.name());
