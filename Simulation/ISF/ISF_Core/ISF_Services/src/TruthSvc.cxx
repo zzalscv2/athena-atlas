@@ -11,14 +11,13 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "GaudiKernel/SystemOfUnits.h"
-//
-#include "TruthUtils/HepMCHelpers.h" // for MC::findChildren(...)
 // HepMC includes
 #include "AtlasHepMC/SimpleVector.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/Relatives.h"
+#include "AtlasHepMC/MagicNumbers.h"
 // CLHEP includes
 #include "CLHEP/Geometry/Point3D.h"
 
@@ -26,6 +25,21 @@
 #include "AtlasDetDescr/AtlasRegionHelper.h"
 
 #include <sstream>
+
+
+std::vector<HepMC::GenParticlePtr> findChildren(const HepMC::GenParticlePtr& p) {
+  if (!p) return std::vector<HepMC::GenParticlePtr>();
+  const auto& v = p->end_vertex();
+  if (!v) return std::vector<HepMC::GenParticlePtr>();
+#ifdef HEPMC3
+  std::vector<HepMC::GenParticlePtr> ret = v->particles_out();
+#else
+  std::vector<HepMC::GenParticlePtr> ret;
+  for (auto pp=v->particles_out_const_begin();pp!=v->particles_out_const_end();++pp) ret.push_back(*pp);
+#endif
+  if (ret.size()==1) if (ret.at(0)->pdg_id()==p->pdg_id()) ret = findChildren(ret.at(0));
+  return ret;
+}
 
 #undef DEBUG_TRUTHSVC
 
@@ -336,7 +350,7 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
     ATH_MSG_VERBOSE("Existing vertex has " << nVertexChildren << " children. " <<
                  "Number of secondaries in current truth incident = " << numSec);
   }
-  const std::vector<HepMC::GenParticlePtr> childParticleVector = (isQuasiStableVertex) ? MC::findChildren(ti.parentParticle()) : std::vector<HepMC::GenParticlePtr>();
+  const std::vector<HepMC::GenParticlePtr> childParticleVector = (isQuasiStableVertex) ? findChildren(ti.parentParticle()) : std::vector<HepMC::GenParticlePtr>();
   std::vector<HepMC::GenParticlePtr> matchedChildParticles;
   for ( unsigned short i=0; i<numSec; ++i) {
 
