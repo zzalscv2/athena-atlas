@@ -130,7 +130,10 @@ def fillAtlasMetadata(dbFiller):
         ## Don't write out random number seeds or RunDict as metadata
         if sp in ("RandomSeedList", "RandomSeedOffset", "RunDict", "RunAndLumiOverrideList"):
             continue
-        ## Don't write out Tool and Service names
+        ## Don't write out UseShadowEvent property
+        if sp in ("UseShadowEvent"):
+            continue
+         ## Don't write out Tool and Service names
         if sp in ("TruthService"):
             continue
         ## Only store InitFunction names

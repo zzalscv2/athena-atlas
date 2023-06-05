@@ -922,6 +922,14 @@ class G4EMProcessesParticleList(JobProperty):
     allowedTypes = ['list']
     StoredValue  = [5132]
 
+class UseShadowEvent(JobProperty):
+    """
+    Use the new apporach to quasi-stable particle simulation
+    """
+    statusOn = True
+    allowedTypes = ['bool']
+    StoredValue = False
+
 ## Definition and registration of the simulation flag container
 class SimFlags(JobPropertyContainer):
     """
