@@ -19,11 +19,28 @@ echo "Running for $RUN"
 export AtlasSetup=/afs/cern.ch/atlas/software/dist/AtlasSetup
 pushd /afs/cern.ch/user/a/atlasdqm/ws/DCSCalc/prodarea > /dev/null
 source $AtlasSetup/scripts/asetup.sh 24.0.0,Athena
-source /afs/cern.ch/user/a/atlasdqm/DQCalculators/DCSCalc/prodarea/build/x86_64-centos7-gcc11-opt/setup.sh
+# Parse the major and minor of the Python version
+PyVersion=$(python --version | sed -E 's/Python ([0-9]+\.[0-9]+)\.[0-9]+/\1/')
+# Add the 'tdaq-' prefix to the TDAQ version if not present
+TdaqVersion=$TDAQ_VERSION
+if [[ ! $TdaqVersion = tdaq-* ]]; then
+    TdaqVersion=tdaq-$TdaqVersion
+fi
+# Add auth-get-sso-cookie to the path - required by pBeast's ServerProxy
+export PATH="$(echo $LCG_RELEASE_BASE/auth_get_sso_cookie/*/$BINARY_TAG/bin):$PATH"
+# Add LCG packages at the end of the Python path - auth-get-sso-cookie dependencies
+for package in $LCG_RELEASE_BASE/*/*/$BINARY_TAG/lib/python$PyVersion/site-packages; do
+    export PYTHONPATH="$PYTHONPATH:$package"
+done
+# Add TDAQ external Python packages to the Python path - pBeast and auth-get-sso-cookie dependencies
+export PYTHONPATH="$PYTHONPATH:$TDAQ_RELEASE_BASE/tdaq/$TdaqVersion/installed/external/$BINARY_TAG/lib/python$PyVersion/site-packages"
+source /afs/cern.ch/user/a/atlasdqm/DQCalculators/DCSCalc/prodarea/build/$BINARY_TAG/setup.sh
 
 export CORAL_AUTH_PATH=/afs/cern.ch/user/a/atlasdqm/private
 export CORAL_DBLOOKUP_PATH=/afs/cern.ch/user/a/atlasdqm/private
 #export FRONTIER_LOG_LEVEL=debug
+export PBEAST_SERVER_SSO_SETUP_TYPE=AutoUpdateKerberos
+export REQUESTS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt
 
 #dcsc.py -h
 dcsc.py $@ $DCSC2_SYSTEMS -r$RUN -o$DEST_DB --email-on-failure
