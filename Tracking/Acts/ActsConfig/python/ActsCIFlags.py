@@ -56,6 +56,5 @@ def actsValidateGSFFlags(flags):
 def actsArtFlags(flags):
     """flags for Reco_tf with CA used in ART test: add Acts workflow to reco sequence"""
     flags.Reco.EnableHGTDExtension = False
-    flags.Acts.doMonitoring = True
     flags.Tracking.recoChain = [TrackingComponent.AthenaChain,
                                 TrackingComponent.ActsChain]
