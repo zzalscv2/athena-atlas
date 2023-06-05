@@ -24,8 +24,8 @@
 #include "Acts/Utilities/Helpers.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
-#include "Acts/EventData/VectorMultiTrajectory.hpp"
-#include "Acts/EventData/VectorTrackContainer.hpp"
+
+#include "ActsTrkEvent/TrackContainer.h"
 
 // PACKAGE
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
@@ -65,11 +65,11 @@ StatusCode ActsGaussianSumFitter::initialize() {
   m_fitter = std::make_unique<Fitter>(std::move(propagator), std::move(bha),
               logger().cloneWithSuffix("GaussianSumFitter"));
 
-  m_gsfExtensions.updater.connect<&ActsTrk::FitterHelperFunctions::gainMatrixUpdate<traj_Type>>();
-  m_gsfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<traj_Type>>();
+  m_gsfExtensions.updater.connect<&ActsTrk::FitterHelperFunctions::gainMatrixUpdate<ActsTrk::TrackStateBackend>>();
+  m_gsfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<ActsTrk::TrackStateBackend>>();
   
   m_outlierFinder.StateChiSquaredPerNumberDoFCut = m_option_outlierChi2Cut;
-  m_gsfExtensions.outlierFinder.connect<&ActsTrk::FitterHelperFunctions::ATLASOutlierFinder::operator()<traj_Type>>(&m_outlierFinder);
+  m_gsfExtensions.outlierFinder.connect<&ActsTrk::FitterHelperFunctions::ATLASOutlierFinder::operator()<ActsTrk::TrackStateBackend>>(&m_outlierFinder);
 
   return StatusCode::SUCCESS;
 }
@@ -117,7 +117,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;
   // Set the GaussianSumFitter options
-  Acts::Experimental::GsfOptions<Acts::VectorMultiTrajectory>
+  Acts::Experimental::GsfOptions<ActsTrk::TrackStateBackend>
       gsfOptions{tgContext, mfContext, calContext,
                 m_gsfExtensions,
                 propagationOption,
@@ -139,7 +139,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
 
   Acts::TrackContainer tracks{
     Acts::VectorTrackContainer{},
-    Acts::VectorMultiTrajectory{}};
+    ActsTrk::TrackStateBackend{}};
   
   // Convert to Acts::SourceLink during iteration
   Acts::SourceLinkAdapterIterator begin{trackSourceLinks.begin()};
@@ -149,7 +149,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
   auto result = m_fitter->fit(begin, end,
       initialParams, gsfOptions, tracks);
   if (result.ok()) {
-    track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
+    track = makeTrack<Acts::VectorTrackContainer, ActsTrk::TrackStateBackend, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
   }
   return track;
 }
@@ -183,7 +183,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;
   // Set the GaussianSumFitter options
-  Acts::Experimental::GsfOptions<Acts::VectorMultiTrajectory>
+  Acts::Experimental::GsfOptions<ActsTrk::TrackStateBackend>
       gsfOptions{tgContext, mfContext, calContext,
                 m_gsfExtensions,
                 propagationOption, // Acts::LoggerWrapper{logger()},
@@ -211,7 +211,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
 
   Acts::TrackContainer tracks{
     Acts::VectorTrackContainer{},
-    Acts::VectorMultiTrajectory{}};
+    ActsTrk::TrackStateBackend{}};
 
   // Convert to Acts::SourceLink during iteration
   Acts::SourceLinkAdapterIterator begin{trackSourceLinks.begin()};
@@ -221,7 +221,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
   auto result = m_fitter->fit(begin, end,
     initialParams, gsfOptions, tracks);
   if (result.ok()) {
-    track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
+    track = makeTrack<Acts::VectorTrackContainer, ActsTrk::TrackStateBackend, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
   }
   return track;
 }
@@ -285,7 +285,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;
   // Set the GaussianSumFitter options
-  Acts::Experimental::GsfOptions<Acts::VectorMultiTrajectory>
+  Acts::Experimental::GsfOptions<ActsTrk::TrackStateBackend>
       gsfOptions{tgContext, mfContext, calContext,
                 m_gsfExtensions,
                 propagationOption, // Acts::LoggerWrapper{logger()},
@@ -315,7 +315,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
 
   Acts::TrackContainer tracks{
     Acts::VectorTrackContainer{},
-    Acts::VectorMultiTrajectory{}};
+    ActsTrk::TrackStateBackend{}};
 
   // Convert to Acts::SourceLink during iteration
   Acts::SourceLinkAdapterIterator begin{trackSourceLinks.begin()};
@@ -325,7 +325,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
   auto result = m_fitter->fit(begin, end,
     initialParams, gsfOptions, tracks);
   if (result.ok()) {
-    track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
+    track = makeTrack<Acts::VectorTrackContainer, ActsTrk::TrackStateBackend, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
   }
   return track;
 }
@@ -389,7 +389,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;
   // Set the GaussianSumFitter options
-  Acts::Experimental::GsfOptions<Acts::VectorMultiTrajectory>
+  Acts::Experimental::GsfOptions<ActsTrk::TrackStateBackend>
       gsfOptions{tgContext, mfContext, calContext,
                 m_gsfExtensions,
                 propagationOption, // Acts::LoggerWrapper{logger()},
@@ -414,7 +414,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
 
   Acts::TrackContainer tracks{
     Acts::VectorTrackContainer{},
-    Acts::VectorMultiTrajectory{}};
+    ActsTrk::TrackStateBackend{}};
 
   // Convert to Acts::SourceLink during iteration
   Acts::SourceLinkAdapterIterator begin{trackSourceLinks.begin()};
@@ -424,7 +424,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
   auto result = m_fitter->fit(begin, end,
     initialParams, gsfOptions, tracks);
   if (result.ok()) {
-    track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
+    track = makeTrack<Acts::VectorTrackContainer, ActsTrk::TrackStateBackend, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
   }
   return track;
 }

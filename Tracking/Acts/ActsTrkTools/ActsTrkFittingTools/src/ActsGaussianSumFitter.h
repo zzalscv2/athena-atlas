@@ -112,8 +112,6 @@ public:
   ///////////////////////////////////////////////////////////////////
 private:
 
-  using traj_Type = Acts::VectorMultiTrajectory;
-
   // Create a track from the fitter result
   template<typename track_container_t, typename traj_t,
            template <typename> class holder_t>
@@ -140,11 +138,11 @@ private:
   /// Type erased track fitter function.
   using Fitter = Acts::Experimental::GaussianSumFitter< Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::Navigator>,
                                                         Acts::Experimental::AtlasBetheHeitlerApprox<6, 5>,
-                                                        traj_Type>;
+                                                        ActsTrk::TrackStateBackend>;
   std::unique_ptr<Fitter> m_fitter;
 
-  Acts::Experimental::GsfExtensions<traj_Type> getExtensions();
-  Acts::Experimental::GsfExtensions<traj_Type> m_gsfExtensions;
+  Acts::Experimental::GsfExtensions<ActsTrk::TrackStateBackend> getExtensions();
+  Acts::Experimental::GsfExtensions<ActsTrk::TrackStateBackend> m_gsfExtensions;
 
   ActsTrk::FitterHelperFunctions::ATLASOutlierFinder m_outlierFinder{0};
 

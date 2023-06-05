@@ -24,9 +24,9 @@
 #include "Acts/Utilities/Helpers.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
-#include "Acts/EventData/VectorMultiTrajectory.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
 
+#include "ActsTrkEvent/TrackContainer.h"
 // PACKAGE
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometry/ActsGeometryContext.h"
@@ -63,15 +63,15 @@ StatusCode ActsKalmanFitter::initialize() {
               logger().cloneWithSuffix("KalmanFitter"));
 
 
-  m_kfExtensions.updater.connect<&ActsTrk::FitterHelperFunctions::gainMatrixUpdate<traj_Type>>();
-  m_kfExtensions.smoother.connect<&ActsTrk::FitterHelperFunctions::gainMatrixSmoother<traj_Type>>();
-  m_kfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<traj_Type>>();
+  m_kfExtensions.updater.connect<&ActsTrk::FitterHelperFunctions::gainMatrixUpdate<ActsTrk::TrackStateBackend>>();
+  m_kfExtensions.smoother.connect<&ActsTrk::FitterHelperFunctions::gainMatrixSmoother<ActsTrk::TrackStateBackend>>();
+  m_kfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<ActsTrk::TrackStateBackend>>();
 
   m_outlierFinder.StateChiSquaredPerNumberDoFCut = m_option_outlierChi2Cut;
-  m_kfExtensions.outlierFinder.connect<&ActsTrk::FitterHelperFunctions::ATLASOutlierFinder::operator()<traj_Type>>(&m_outlierFinder);
+  m_kfExtensions.outlierFinder.connect<&ActsTrk::FitterHelperFunctions::ATLASOutlierFinder::operator()<ActsTrk::TrackStateBackend>>(&m_outlierFinder);
 
   m_reverseFilteringLogic.momentumMax = m_option_ReverseFilteringPt;
-  m_kfExtensions.reverseFilteringLogic.connect<&ActsTrk::FitterHelperFunctions::ReverseFilteringLogic::operator()<traj_Type>>(&m_reverseFilteringLogic);
+  m_kfExtensions.reverseFilteringLogic.connect<&ActsTrk::FitterHelperFunctions::ReverseFilteringLogic::operator()<ActsTrk::TrackStateBackend>>(&m_reverseFilteringLogic);
 
   return StatusCode::SUCCESS;
 }
@@ -150,7 +150,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   Acts::TrackContainer tracks{
     Acts::VectorTrackContainer{},
-    Acts::VectorMultiTrajectory{}};
+    ActsTrk::TrackStateBackend{}};
   
   // Convert to Acts::SourceLink during iteration
   Acts::SourceLinkAdapterIterator begin{trackSourceLinks.begin()};
@@ -160,7 +160,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   auto result = m_fitter->fit(begin, end,           
     scaledInitialParams, kfOptions, tracks);
   if (result.ok()) {
-    track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
+    track = makeTrack<Acts::VectorTrackContainer, ActsTrk::TrackStateBackend, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
   }
   return track;
 }
@@ -219,7 +219,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   Acts::TrackContainer tracks{
     Acts::VectorTrackContainer{},
-    Acts::VectorMultiTrajectory{}};
+    ActsTrk::TrackStateBackend{}};
 
   // Convert to Acts::SourceLink during iteration
   Acts::SourceLinkAdapterIterator begin{trackSourceLinks.begin()};
@@ -229,7 +229,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   auto result = m_fitter->fit(begin, end,
     initialParams, kfOptions, tracks);
   if (result.ok()) {
-    track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
+    track = makeTrack<Acts::VectorTrackContainer, ActsTrk::TrackStateBackend, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
   }
   return track;
 }
@@ -320,7 +320,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   Acts::TrackContainer tracks{
     Acts::VectorTrackContainer{},
-    Acts::VectorMultiTrajectory{}};
+    ActsTrk::TrackStateBackend{}};
 
   // Convert to Acts::SourceLink during iteration
   Acts::SourceLinkAdapterIterator begin{trackSourceLinks.begin()};
@@ -330,7 +330,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   auto result = m_fitter->fit(begin, end,
     initialParams, kfOptions, tracks);
   if (result.ok()) {
-    track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
+    track = makeTrack<Acts::VectorTrackContainer, ActsTrk::TrackStateBackend, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
   }
   return track;
 }
@@ -429,7 +429,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   Acts::TrackContainer tracks{
     Acts::VectorTrackContainer{},
-    Acts::VectorMultiTrajectory{}};
+    ActsTrk::TrackStateBackend{}};
 
   // Convert to Acts::SourceLink during iteration
   Acts::SourceLinkAdapterIterator begin{trackSourceLinks.begin()};
@@ -439,7 +439,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   auto result = m_fitter->fit(begin, end,
     scaledInitialParams, kfOptions, tracks);
   if (result.ok()) {
-    track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
+    track = makeTrack<Acts::VectorTrackContainer, ActsTrk::TrackStateBackend, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
   }
   return track;
 }

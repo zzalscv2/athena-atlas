@@ -11,13 +11,13 @@
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Definitions/Common.hpp"
 #include "Acts/Definitions/Algebra.hpp"
-#include "Acts/EventData/MultiTrajectory.hpp"
-#include "Acts/EventData/VectorMultiTrajectory.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Surfaces/AnnulusBounds.hpp"
 #include "Acts/Surfaces/SurfaceBounds.hpp"
 #include "Acts/Surfaces/DiscSurface.hpp"
 #include "Acts/EventData/detail/TransformationBoundToFree.hpp"
+
+#include "ActsTrkEvent/TrackContainer.h"
 
 // PACKAGE
 #include "ActsGeometry/ActsDetectorElement.h"
@@ -401,7 +401,7 @@ namespace ActsTrk
 
   static void
   printTrackState(const Acts::GeometryContext &tgContext,
-                  const Acts::MultiTrajectory<Acts::VectorMultiTrajectory>::ConstTrackStateProxy &state)
+                  const Acts::MultiTrajectory<ActsTrk::TrackStateBackend>::ConstTrackStateProxy &state)
   {
     std::cout << std::setw(5) << state.index() << ' ';
     if (state.hasCalibrated())
@@ -476,12 +476,12 @@ namespace ActsTrk
     {
       const auto lastMeasurementIndex = track.tipIndex();
       // to print track states from inside outward, we need to reverse the order of visitBackwards().
-      std::vector<Acts::MultiTrajectory<Acts::VectorMultiTrajectory>::ConstTrackStateProxy> states;
+      std::vector<Acts::MultiTrajectory<ActsTrk::TrackStateBackend>::ConstTrackStateProxy> states;
       states.reserve(lastMeasurementIndex + 1); // could be an overestimate
       size_t npixel = 0, nstrip = 0;
       tracks.trackStateContainer().visitBackwards(
           lastMeasurementIndex,
-          [&states, &npixel, &nstrip](const Acts::VectorMultiTrajectory::ConstTrackStateProxy &state) -> void
+          [&states, &npixel, &nstrip](const ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
           {
             if (state.hasCalibrated())
             {
