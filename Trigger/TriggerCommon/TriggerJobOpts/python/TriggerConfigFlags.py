@@ -415,6 +415,9 @@ def createTriggerRecoFlags():
     # enable fast b-tagging for all fully calibrated HLT PFlow jets
     flags.addFlag("Trigger.Jet.fastbtagPFlow", True)
 
+    # enables or disables the addition the super ROI PV to the b-tagging
+    flags.addFlag("Trigger.Jet.fastbtagVertex", True)
+
     # enables or disables the addition of VR track jet reconstruction sequence
     flags.addFlag("Trigger.Jet.doVRJets", False)
 
