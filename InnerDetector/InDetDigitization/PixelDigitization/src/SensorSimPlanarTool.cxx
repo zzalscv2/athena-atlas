@@ -293,6 +293,8 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
   double ncharges = initialConditions[6];
   double iTotalLength = initialConditions[7];
 
+  const double oneOverNchargesTimes1e6 = 1./(1.E+6 * ncharges);
+
   //Set up physical detector properties, switch on detector material
   ATH_MSG_DEBUG("Applying planar sensor simulation");
   double sensorThickness = Module.design().thickness();
@@ -316,10 +318,11 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
   double collectionDist = 0.2 * CLHEP::mm;
   double smearScale = 1. + 0.35 * smearRand;
   double tanLorentz(0);
+  double coLorentz(0);
   if (m_radiationDamageSimulationType != RadiationDamageSimulationType::TEMPLATE_CORRECTION) {
     tanLorentz = m_lorentzAngleTool->getTanLorentzAngle(Module.identifyHash());
+    coLorentz = std::sqrt(1.0 + (tanLorentz*tanLorentz));
   }
-  double coLorentz = std::sqrt(1.0 + (tanLorentz*tanLorentz));
 
   const EBC_EVCOLL evColl = EBC_MAINEVCOLL;
   const HepMcParticleLink::PositionFlag idxFlag =
@@ -425,7 +428,7 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
 
       for (int j = 0; j < ncharges; j++) {
         // amount of energy to be converted into charges at current step
-        double energy_per_step = 1.0 * iHitRecord.second / 1.E+6 / ncharges;
+        double energy_per_step = oneOverNchargesTimes1e6 * iHitRecord.second;
         double u = CLHEP::RandFlat::shoot(rndmEngine, 0.0, 1.0);
         // need to update to std::logf when we update gcc - this is a known bug in gcc libc
         const double drifttime_e = (-1.) * (trappingTimes.first) * logf(u); //ns
@@ -566,7 +569,12 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
 
   }
   else if (m_radiationDamageSimulationType == RadiationDamageSimulationType::TEMPLATE_CORRECTION && !(Module.isDBM()) && Module.isBarrel()){ // will run radiation damage but with the template method
-    for (auto & iHitRecord : trfHitRecord) {
+
+    const PixelHistoConverter& distanceCorrectionHist = m_distanceCorrection[layer];
+    const PixelHistoConverter& lorentzCorrectionHist  = m_lorentzCorrection[layer];
+    const PixelHistoConverter& chargeCorrectionHist   = m_chargeCorrection[layer];
+
+    for (const auto & iHitRecord : trfHitRecord) {
       double eta_i = eta_0;
       double phi_i = phi_0;
       double depth_i = depth_0;
@@ -578,13 +586,14 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
 
       const double depthZ = (depth_i + 0.5*sensorThickness)*1e3; // to get it in micro meters
       
-      const double dist_electrode = m_distanceCorrection.at(layer).getContent(depthZ);
+      const double dist_electrode = distanceCorrectionHist.getContent(depthZ);
 
       // get corrected LA
-      tanLorentz = m_lorentzCorrection.at(layer).getContent(depthZ);
+      tanLorentz = lorentzCorrectionHist.getContent(depthZ);
+      coLorentz = std::sqrt(1.0 + (tanLorentz*tanLorentz));
 
       // for charge corrections
-      const double chargeCorrection = m_chargeCorrection.at(layer).getContent(depthZ);
+      const double chargeCorrection = chargeCorrectionHist.getContent(depthZ);
 
       // nonTrapping probability
       double nontrappingProbability = 1.0;
@@ -594,7 +603,7 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
 
       for (int j = 0; j < ncharges; j++) {
         // amount of energy to be converted into charges at current step
-        double energy_per_step = 1.0 * iHitRecord.second / 1.E+6 / ncharges;
+        double energy_per_step = oneOverNchargesTimes1e6 * iHitRecord.second;
         // diffusion sigma
         double rdif = this->m_diffusionConstant * std::sqrt(dist_electrode * coLorentz / 0.3);
 
@@ -634,7 +643,7 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
       }//end cycle for charge
     }//trfHitRecord.size()
   } else { // run without radiation damage
-    for (auto & iHitRecord : trfHitRecord) {
+    for (const auto & iHitRecord : trfHitRecord) {
       double eta_i = eta_0;
       double phi_i = phi_0;
       double depth_i = depth_0;
@@ -659,7 +668,7 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
 
       for (int j = 0; j < ncharges; j++) {
         // amount of energy to be converted into charges at current step
-        double energy_per_step = 1.0 * iHitRecord.second / 1.E+6 / ncharges;
+        double energy_per_step = oneOverNchargesTimes1e6 * iHitRecord.second;
         // diffusion sigma
         double rdif = this->m_diffusionConstant * std::sqrt(dist_electrode * coLorentz / 0.3);
 
