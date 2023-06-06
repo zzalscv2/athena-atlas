@@ -275,6 +275,10 @@ atlas_add_citest( ACTS_ActsGSFRefitting
     SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsGSFRefitting.sh
     LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
 
+atlas_add_citest( ACTS_ActsBenchmarkWithSpot
+    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsBenchmarkWithSpot.sh
+    LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
+
 #################################################################################
 # Trigger
 #################################################################################

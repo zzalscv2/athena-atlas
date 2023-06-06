@@ -9,7 +9,8 @@ class TrackingComponentConfigurer:
         TrackingComponent.ValidateActsClusters : "ValidateActsClusters",
         TrackingComponent.ValidateActsSpacePoints : "ValidateActsSpacePoints",
         TrackingComponent.ValidateActsSeeds : "ValidateActsSeeds",
-        TrackingComponent.ValidateActsTracks : "ValidateActsTracks"
+        TrackingComponent.ValidateActsTracks : "ValidateActsTracks",
+        TrackingComponent.BenchmarkSpot : "BenchmarkSpot"
     }
     
     def __init__(self,
@@ -173,4 +174,14 @@ class TrackingComponentConfigurer:
         self.ActsSpacePoint = True
         self.ActsSeed = True
         self.ActsTrack = True
+
+    def BenchmarkSpot(self):
+        # Very not-standard configuration
+        self.AthenaCluster = True
+        self.ActsCluster = True
+        self.AthenaToActsClusterConverter = True
+        self.ActsSpacePoint = True
+        self.ActsSeed = True
+        self.ActsToAthenaSeedConverter = True
+        self.AthenaTrack = True
 

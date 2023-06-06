@@ -31,6 +31,8 @@ class TrackingComponent(FlagEnum):
     ValidateActsSpacePoints = "ValidateActsSpacePoints" 
     ValidateActsSeeds = "ValidateActsSeeds"
     ValidateActsTracks = "ValidateActsTracks"
+    # Benchmarking
+    BenchmarkSpot = "BenchmarkSpot"
 
 
 def createTrackingConfigFlags():
