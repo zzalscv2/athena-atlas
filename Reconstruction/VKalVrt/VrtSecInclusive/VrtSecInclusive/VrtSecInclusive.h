@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // VKalVrt.h
@@ -174,6 +174,7 @@ namespace VKalVrtAthena {
       
       // Vertex reconstruction
       bool   doPVcompatibilityCut;
+      bool   doTightPVcompatibilityCut;
       bool   removeFakeVrt;
       bool   removeFakeVrtLate;
       bool   doReassembleVertices;

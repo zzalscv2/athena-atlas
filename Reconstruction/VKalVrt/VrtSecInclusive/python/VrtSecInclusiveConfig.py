@@ -1,6 +1,6 @@
 """Define method to configure VrtSecInclusive algorithm
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -57,6 +57,7 @@ def VrtSecInclusiveCfg(flags, name="VrtSecInclusive", **kwargs):
     kwargs.setdefault("DoSAloneTRT"                            , False)
     kwargs.setdefault("ImpactWrtBL"                            , True)
     kwargs.setdefault("DoPVcompatibility"                      , True)
+    kwargs.setdefault("DoTightPVcompatibility"                 , False)
     kwargs.setdefault("RemoveFake2TrkVrt"                      , True)
     kwargs.setdefault("CheckHitPatternStrategy"                , 'ExtrapolationAssist') # Either 'Classical', 'Extrapolation' or 'ExtrapolationAssist'
     kwargs.setdefault("doReassembleVertices"                   , True)
