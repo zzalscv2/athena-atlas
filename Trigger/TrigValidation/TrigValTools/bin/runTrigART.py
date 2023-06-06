@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 import sys
@@ -42,6 +42,9 @@ def get_parser():
     parser.add_argument('-n', '--testName',
                         metavar='pattern',
                         help='Run only tests with a given pattern in the name')
+    parser.add_argument('-r', '--rerun-failed',
+                        action='store_true',
+                        help='Run tests that failed previously')
     parser.add_argument('-t', '--artType',
                         metavar='type',
                         default='build',
@@ -189,7 +192,17 @@ def main():
                         format='%(levelname)-8s %(message)s',
                         level=logging.DEBUG if args.verbose else logging.INFO)
 
-    scripts = find_scripts(get_patterns(args))
+    topdir = 'runTrigART'
+    statusfile = 'results/{:s}-status.json'.format(topdir)
+
+    if args.rerun_failed:
+        with open(os.path.join(topdir,statusfile), 'r') as f:
+            all_test_results = json.load(f)[topdir]
+        failed_tests = analyse_results(all_test_results)
+        scripts = find_scripts(failed_tests)
+    else:
+        scripts = find_scripts(get_patterns(args))
+
     logging.info("The following %d tests will be executed: ", len(scripts))
     for filename in scripts:
         logging.info("    %s", os.path.basename(filename))
@@ -205,7 +218,6 @@ def main():
     if args.dryRun:
         return 0
 
-    topdir = 'runTrigART'
     success = True
     with remember_cwd():
         prep_dirs(topdir, scripts)
@@ -227,7 +239,6 @@ def main():
         logging.info("ART finished, analysing the results\n")
 
         # Read the result summary from JSON
-        statusfile = 'results/{:s}-status.json'.format(topdir)
         if not os.path.isfile(statusfile):
             logging.error("ART status.json file is missing - likely the ART runner failed!")
             exit(1)
