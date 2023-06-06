@@ -101,6 +101,16 @@ extendedFlag = 1 # --- = 0 for Standard Taggers & =1 for ExpertTaggers
 replaceAODReducedJets(reducedJetList,STDM13Seq,"STDM13", extendedFlag)
 
 
+#====================================================================
+# Custom truth jets
+#====================================================================
+if globalflags.DataSource()!='data':
+    from DerivationFrameworkJetEtMiss.JetCommon import addStandardJets
+    from JetRec.JetRecStandard import jtm
+    truth_modifiers = [jtm.truthpartondr, jtm.partontruthlabel, jtm.jetdrlabeler, jtm.trackjetdrlabeler]
+    for r in [0.4, 0.6, 0.8, 1.0]:
+        addStandardJets("AntiKt", r, "TruthCharged", 5000, mods=truth_modifiers, algseq=STDM13Seq, outputGroup="DFCommonMCTruthJets")
+
 #===================================================================
 # Tag custom or pre-built jet collections
 #===================================================================
@@ -166,8 +176,11 @@ STDM13SlimmingHelper.ExtraVariables += [AntiKt4EMTopoJetsCPContent[1].replace("A
                                        "MSOnlyExtrapolatedMuonTrackParticles.vx.vy.vz",
                                        "MuonSpectrometerTrackParticles.vx.vy.vz",
                                        "BTagging_AntiKt10LCTopoTrimmedPtFrac5SmallR20ExCoM2SubSecVtx.-vxTrackAtVertex",
-                                       "BTagging_AntiKt2TrackSecVtx.-vxTrackAtVertex"]
-
+                                       "BTagging_AntiKt2TrackSecVtx.-vxTrackAtVertex",
+                                       "AntiKt6TruthChargedJets.pt.HadronConeExclTruthLabelID.ConeTruthLabelID.PartonTruthLabelID",
+                                       "AntiKt4TruthChargedJets.pt.HadronConeExclTruthLabelID.ConeTruthLabelID.PartonTruthLabelID",
+                                       "AntiKt8TruthChargedJets.pt.HadronConeExclTruthLabelID.ConeTruthLabelID.PartonTruthLabelID",
+                                       "AntiKt10TruthChargedJets.pt.HadronConeExclTruthLabelID.ConeTruthLabelID.PartonTruthLabelID"]
 STDM13SlimmingHelper.SmartCollections += \
         ["AntiKt4EMTopoJets_BTagging201810",
          "AntiKt4EMPFlowJets_BTagging201810",
@@ -234,6 +247,14 @@ STDM13SlimmingHelper.AppendToDictionary = {
   "BTagging_AntiKt10LCTopoTrimmedPtFrac5SmallR20ExCoM2SubJFVtxAux"    :   "xAOD::BTagVertexAuxContainer",
   "BTagging_AntiKt10LCTopoTrimmedPtFrac5SmallR20ExCoM2SubSecVtx"      :   "xAOD::VertexContainer"   ,
   "BTagging_AntiKt10LCTopoTrimmedPtFrac5SmallR20ExCoM2SubSecVtxAux"   :   "xAOD::VertexAuxContainer",
+  "AntiKt4TruthChargedJets"                                           :   "xAOD::JetContainer",
+  "AntiKt4TruthChargedJetsAux"                                        :   "xAOD::JetAuxContainer",
+  "AntiKt6TruthChargedJets"                                           :   "xAOD::JetContainer",
+  "AntiKt6TruthChargedJetsAux"                                        :   "xAOD::JetAuxContainer",
+  "AntiKt8TruthChargedJets"                                           :   "xAOD::JetContainer",
+  "AntiKt8TruthChargedJetsAux"                                        :   "xAOD::JetAuxContainer",
+  "AntiKt10TruthChargedJets"                                          :   "xAOD::JetContainer",
+  "AntiKt10TruthChargedJetsAux"                                       :   "xAOD::JetAuxContainer",
 }
 #----------------------------------------------------------------------
 
