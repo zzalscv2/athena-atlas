@@ -71,6 +71,7 @@ plugin = None
 #       use nQuarksMerge=5 [4FS + final state b -> nQuarksMerge=5]
 flavourScheme = 5
 define_pj_5FS = True # Defines p and j to include b in process string with 5FS
+force_nobmass_5FS = True # Forces massless b with 5FS
 finalStateB = False # Used with 4FS
 
 from MadGraphControl.MadGraphUtilsHelpers import get_physics_short
