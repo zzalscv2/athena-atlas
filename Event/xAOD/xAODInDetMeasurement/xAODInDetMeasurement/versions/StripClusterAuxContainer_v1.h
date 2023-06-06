@@ -7,37 +7,39 @@
 
 #include <vector>
 
-#include "xAODCore/AuxContainerBase.h"
-#include "Identifier/IdentifierHash.h"
 #include "Identifier/Identifier.h"
+#include "Identifier/IdentifierHash.h"
+#include "xAODCore/AuxContainerBase.h"
+#include "xAODMeasurementBase/MeasurementDefs.h"
 
 namespace xAOD {
-    /// Auxiliary store for strip clusters
-    ///
-    class StripClusterAuxContainer_v1 : public AuxContainerBase {
-    public:
-        /// Default constructor
-        StripClusterAuxContainer_v1();
+/// Auxiliary store for strip clusters
+///
+class StripClusterAuxContainer_v1 : public AuxContainerBase {
+   public:
+    /// Default constructor
+    StripClusterAuxContainer_v1();
 
-    private:
-        /// @name Defining uncalibrated measurement parameters
-        /// @{
-        std::vector < IdentifierHash::value_type > identifierHash;
-        std::vector < std::array < float, 3 > > localPosition;
-        std::vector < std::array < float, 9 > > localCovariance;
-        /// @}
+   private:
+    /// @name Defining uncalibrated measurement parameters
+    /// @{
+    std::vector<Identifier::value_type> identifier;
+    std::vector<IdentifierHash::value_type> identifierHash;
+    std::vector<PosAccessor<1>::element_type> localPosition;
+    std::vector<CovAccessor<1>::element_type> localCovariance;
+    /// @}
 
-        /// @name Defining strip cluster parameters
-        /// @{
-        std::vector < std::array < float, 3 > > globalPosition;
-        std::vector < std::vector < Identifier::value_type > > rdoList;
-        std::vector < int > channelsInPhi;
-        /// @}
-    };
-}
+    /// @name Defining strip cluster parameters
+    /// @{
+    std::vector<PosAccessor<3>::element_type> globalPosition;
+    std::vector<std::vector<Identifier::value_type> > rdoList;
+    std::vector<int> channelsInPhi;
+    /// @}
+};
+}  // namespace xAOD
 
 // Set up the StoreGate inheritance for the class:
 #include "xAODCore/BaseInfo.h"
-SG_BASE( xAOD::StripClusterAuxContainer_v1, xAOD::AuxContainerBase );
+SG_BASE(xAOD::StripClusterAuxContainer_v1, xAOD::AuxContainerBase);
 
-#endif // XAODINDETMEASUREMENT_VERSIONS_STRIPCLUSTERAUXCONTAINER_V1_H
+#endif  // XAODINDETMEASUREMENT_VERSIONS_STRIPCLUSTERAUXCONTAINER_V1_H

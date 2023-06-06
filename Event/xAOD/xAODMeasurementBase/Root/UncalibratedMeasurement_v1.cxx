@@ -7,13 +7,11 @@
 // Local include(s):
 #include "xAODMeasurementBase/versions/UncalibratedMeasurement_v1.h"
 
-static const SG::AuxElement::Accessor< xAOD::DetectorIDHashType > identifierHashAcc( "identifierHash" );
-
-void xAOD::UncalibratedMeasurement_v1::setIdentifierHash(const xAOD::DetectorIDHashType id) {
-    identifierHashAcc(*this) = id;
-}
-
-xAOD::DetectorIDHashType xAOD::UncalibratedMeasurement_v1::identifierHash() const {
-    return identifierHashAcc(*this);
-}
-
+namespace xAOD {
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(UncalibratedMeasurement_v1,
+                                     DetectorIDHashType, identifierHash,
+                                     setIdentifierHash)
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(UncalibratedMeasurement_v1,
+                                     DetectorIdentType, identifier,
+                                     setIdentifier)
+}  // namespace xAOD
