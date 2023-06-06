@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -81,11 +81,11 @@ namespace VKalVrtAthena {
         WrkVrt wrkvrt;
         wrkvrt.selectedTrackIndices.emplace_back( itrk_id );
         wrkvrt.selectedTrackIndices.emplace_back( jtrk_id );
-        
-        if( fabs( (*itrk)->d0() ) < m_jp.twoTrkVtxFormingD0Cut && fabs( (*jtrk)->d0() ) < m_jp.twoTrkVtxFormingD0Cut ) continue;
 
         // Attempt to think the combination is incompatible by default
         m_incomp.emplace_back( std::pair<int, int>(itrk_id, jtrk_id) );
+        
+        if( std::abs( (*itrk)->d0() ) < m_jp.twoTrkVtxFormingD0Cut && std::abs( (*jtrk)->d0() ) < m_jp.twoTrkVtxFormingD0Cut ) continue;
 
         baseTracks.clear();
         baseTracks.emplace_back( *itrk );
@@ -148,8 +148,8 @@ namespace VKalVrtAthena {
         const double vPosMomAngT = ( vDist.x()*wrkvrt.vertexMom.Px()+vDist.y()*wrkvrt.vertexMom.Py() ) / vDist.perp() / wrkvrt.vertexMom.Pt();
         const double vPosMomAng3D = ( vDist.x()*wrkvrt.vertexMom.Px()+vDist.y()*wrkvrt.vertexMom.Py()+vDist.z()*wrkvrt.vertexMom.Pz() ) / (vDist.norm() * wrkvrt.vertexMom.Rho());
         
-        double dphi1 = vDist.phi() - (*itrk)->phi(); while( dphi1 > TMath::Pi() ) { dphi1 -= TMath::TwoPi(); } while( dphi1 < -TMath::Pi() ) { dphi1 += TMath::TwoPi(); }
-        double dphi2 = vDist.phi() - (*itrk)->phi(); while( dphi2 > TMath::Pi() ) { dphi2 -= TMath::TwoPi(); } while( dphi2 < -TMath::Pi() ) { dphi2 += TMath::TwoPi(); }
+        double dphi1 = TVector2::Phi_mpi_pi(vDist.phi() - (*itrk)->phi());
+        double dphi2 = TVector2::Phi_mpi_pi(vDist.phi() - (*jtrk)->phi());
         
         const double dist_fromPV = vDist.norm();
         if( m_jp.FillHist ) m_hists["2trkVtxDistFromPV"]->Fill( dist_fromPV );
@@ -267,6 +267,10 @@ namespace VKalVrtAthena {
         if( m_jp.doPVcompatibilityCut ) {
           if( cos( dphi1 ) < -0.8 && cos( dphi2 ) < -0.8 ) {
             ATH_MSG_DEBUG(" > " << __FUNCTION__ << ": failed to pass the vPos cut. (both tracks are opposite against the vertex pos)" );
+            continue;
+          }
+          if (m_jp.doTightPVcompatibilityCut && (cos( dphi1 ) < -0.8 || cos( dphi2 ) < -0.8)){
+            ATH_MSG_DEBUG(" > "<< __FUNCTION__ << ": failed to pass the tightened vPos cut. (at least one track is opposite against the vertex pos)" );
             continue;
           }
           if( vPosMomAngT < -0.8 ) {
@@ -983,8 +987,8 @@ namespace VKalVrtAthena {
           const auto& distance = hypot( impactParameters.at(0), impactParameters.at(1) );
           distances.emplace_back( distance );
           
-          if( fabs( impactParameters.at(0) ) > m_jp.reassembleMaxImpactParameterD0 ) continue;
-          if( fabs( impactParameters.at(1) ) > m_jp.reassembleMaxImpactParameterZ0 ) continue;
+          if( std::abs( impactParameters.at(0) ) > m_jp.reassembleMaxImpactParameterD0 ) continue;
+          if( std::abs( impactParameters.at(1) ) > m_jp.reassembleMaxImpactParameterZ0 ) continue;
           
           mergiableVertex[index] = ritr;
           mergiableVerticesSet.emplace( ritr );
@@ -1139,8 +1143,8 @@ namespace VKalVrtAthena {
         
         if( !getSVImpactParameters( trk, vertexPos, impactParameters, impactParErrors) ) continue;
 
-        if( fabs( impactParameters.at(0) ) / sqrt( impactParErrors.at(0) ) > m_jp.associateMaxD0Signif ) continue;
-        if( fabs( impactParameters.at(1) ) / sqrt( impactParErrors.at(1) ) > m_jp.associateMaxZ0Signif ) continue;
+        if( std::abs( impactParameters.at(0) ) / sqrt( impactParErrors.at(0) ) > m_jp.associateMaxD0Signif ) continue;
+        if( std::abs( impactParameters.at(1) ) / sqrt( impactParErrors.at(1) ) > m_jp.associateMaxZ0Signif ) continue;
         
         ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": trk " << trk
                        << ": d0 to vtx = " << impactParameters.at(k_d0)
@@ -1709,7 +1713,7 @@ namespace VKalVrtAthena {
 
         double qOverP_wrtSV    = sv_perigee->parameters() [Trk::qOverP];
         double theta_wrtSV     = sv_perigee->parameters() [Trk::theta];
-        double p_wrtSV         = 1.0 / fabs( qOverP_wrtSV );
+        double p_wrtSV         = 1.0 / std::abs( qOverP_wrtSV );
         double pt_wrtSV        = p_wrtSV * sin( theta_wrtSV );
         double eta_wrtSV       = -log( tan( theta_wrtSV/2. ) );
         double phi_wrtSV       = sv_perigee->parameters() [Trk::phi];
