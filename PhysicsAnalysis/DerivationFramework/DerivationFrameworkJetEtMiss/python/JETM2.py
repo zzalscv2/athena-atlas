@@ -143,7 +143,10 @@ def JETM2Cfg(ConfigFlags):
                                           "Electrons.neutralGlobalFELinks.chargedGlobalFELinks",
                                           "Photons.neutralGlobalFELinks",
                                           "Muons.energyLossType.EnergyLoss.ParamEnergyLoss.MeasEnergyLoss.EnergyLossSigma.MeasEnergyLossSigma.ParamEnergyLossSigmaPlus.ParamEnergyLossSigmaMinus.clusterLinks.FSR_CandidateEnergy.neutralGlobalFELinks.chargedGlobalFELinks",
-                                          "MuonSegments.x.y.z.px.py.pz"]
+                                          "MuonSegments.x.y.z.px.py.pz",
+                                          "BTagging_AntiKt4EMPFlow.jetLink",
+                                          "BTagging_AntiKtVR30Rmax4Rmin02Track.jetLink",
+                                          ]
 
     JETM2SlimmingHelper.AppendToDictionary.update({'CSSKGNeutralParticleFlowObjects': 'xAOD::FlowElementContainer',
                                                    'CSSKGNeutralParticleFlowObjectsAux': 'xAOD::ShallowAuxContainer',

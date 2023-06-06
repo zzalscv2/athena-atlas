@@ -42,37 +42,6 @@ template <class T> inline bool isDecayed(const T& p)  { return p->status() == 2;
 template <class T> inline bool isStable(const T& p)   { return p->status() == 1;}
 template <class T> inline bool isPhysical(const T& p) { return isStable<T>(p) || isDecayed<T>(p); }
 template <class T> inline bool isPhysicalHadron(const T& p) { return PID::isHadron(p->pdg_id()) && isPhysical<T>(p);}
-template <class T> inline bool fromDecay(const T& p)  {
-      if (!p) return false;
-      auto v=p->production_vertex();
-      if (!v) return false;
-#ifdef HEPMC3
-      for ( const auto& anc: v->particles_in())
-      if (isDecayed(anc) && (PID::isTau(anc->pdg_id()) || PID::isHadron(anc->pdg_id()))) return true;
-      for ( const auto& anc: v->particles_in())
-      if (fromDecay<T>(anc)) return true;
-#else
-      for (auto  anc=v->particles_in_const_begin(); anc != v->particles_in_const_end(); ++anc)
-      if (isDecayed((*anc)) && (PID::isTau((*anc)->pdg_id()) || PID::isHadron((*anc)->pdg_id()))) return true;
-      for (auto  anc=v->particles_in_const_begin(); anc != v->particles_in_const_end(); ++anc)
-      if (fromDecay<T>(*anc)) return true;
-#endif
-      return false;
-      }
-template <class T>  std::vector<T> findChildren(T p)
-      {
-      std::vector<T> ret;
-      if (!p) return ret;
-      auto v=p->end_vertex();
-      if (!v) return ret;
-#ifdef HEPMC3
-      for (const auto& pp: v->particles_out()) ret.push_back(pp);
-#else
-      for (auto pp=v->particles_out_const_begin();pp!=v->particles_out_const_end();++pp) ret.push_back(*pp);
-#endif
-      if (ret.size()==1) if (ret.at(0)->pdg_id()==p->pdg_id()) ret=findChildren(ret.at(0));
-      return ret;
-      }
 }
 
 

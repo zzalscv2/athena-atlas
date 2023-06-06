@@ -48,7 +48,7 @@ private:
     unsigned int m_writemask{0};
 
     
-    ScalarBranch<unsigned long long>& m_evtNumber{parent().newScalar<unsigned long long>("evtNumber")};
+    ScalarBranch<unsigned long long>& m_evtNumber{parent().newScalar<unsigned long long>("eventNumber")};
     ScalarBranch<uint32_t>& m_runNumber{parent().newScalar<uint32_t>("runNumber")};
 
     ScalarBranch<uint32_t>& m_lbNumber{parent().newScalar<uint32_t>("lbNumber")};
@@ -63,7 +63,7 @@ private:
     ///######################################################################
     ///                 Disabled if the job runs on data                    #
     ///######################################################################
-    ScalarBranch<uint32_t>& m_mcChannel{parent().newScalar<uint32_t>("mcChanneNumber")};
+    ScalarBranch<uint32_t>& m_mcChannel{parent().newScalar<uint32_t>("mcChannelNumber")};
     /// Removed from output if writeLHE is switched on 
     ScalarBranch<double>& m_weight{parent().newScalar<double>("mcEventWeight")};    
     std::map<unsigned int, std::shared_ptr<ScalarBranch<double>>> m_lhe_weights{};

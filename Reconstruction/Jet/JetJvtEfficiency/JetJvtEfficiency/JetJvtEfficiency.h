@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETJVTEFFICIENCYSCALEFACTORS_H_
@@ -110,6 +110,7 @@ private:
 
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_passJvtKey{this, "PassJVTKey", "passJvt",
       "SG key for passJvt decoration (including jet container name)"};
+    bool m_suppressOutputDependence;
 };
 
 } /* namespace CP */

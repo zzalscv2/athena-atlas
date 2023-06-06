@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BOOSTEDJETSTAGGERS_JSSTAGGERBASE_H
@@ -70,10 +70,10 @@ class JSSTaggerBase :   public asg::AsgTool ,
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_decValidKinRangeKey{this, "ValidKinRangeName", "ValidKinRange", "SG key for ValidKinRange"};
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_decValidJetContentKey{this, "ValidJetContentName", "ValidJetContent", "SG key for ValidJetContent"};
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_decValidEventContentKey{this, "ValidEventContentName", "ValidEventContent", "SG key for ValidEventContent"};
-    
+
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_decPassMassKey{this, "PassMassName", "PassMass", "SG key for PassMass"};
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_decPassScoreKey{this, "PassScoreName", "PassScore", "SG key for PassScore"};
-    
+
     /// Maximum number of warnings
     const int m_nWarnMax = 10;
 
@@ -153,18 +153,18 @@ class JSSTaggerBase :   public asg::AsgTool ,
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readTau21WTAKey{this, "Tau21WTAName", "Tau21_wta", "SG key for Tau21_wta"};
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readTau32WTAKey{this, "Tau32WTAName", "Tau32_wta", "SG key for Tau32_wta"};
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readTau42WTAKey{this, "Tau42WTAName", "Tau42_wta", "SG key for Tau42_wta"};
-    
+
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readECF1Key{this, "ECF1Name", "ECF1", "SG key for ECF1"};
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readECF2Key{this, "ECF2Name", "ECF2", "SG key for ECF2"};
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readECF3Key{this, "ECF3Name", "ECF3", "SG key for ECF3"};
-    
+
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readC2Key{this, "C2Name", "C2", "SG key for C2"};
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readD2Key{this, "D2Name", "D2", "SG key for D2"};
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readE3Key{this, "e3Name", "e3", "SG key for e3"};
-    
+
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readSplit12Key{this, "Split12Name", "Split12", "SG key for Split12"};
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readSplit23Key{this, "Split23Name", "Split23", "SG key for Split23"};
-    
+
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readQwKey{this, "QwName", "Qw", "SG key for Qw"};
 
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readThrustMajKey{this, "ThrustMajName", "ThrustMaj", "SG key for ThrustMaj"};
@@ -180,6 +180,8 @@ class JSSTaggerBase :   public asg::AsgTool ,
     SG::ReadDecorHandleKey<xAOD::JetContainer>  m_readParentKey{this, "ParentName", "Parent", "SG key for Parent"};
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_decNtrk500Key{this, "Ntrk500Name", "ParentJetNTrkPt500", "SG key for Ntrk500 from ungroomed jet"};
     SG::ReadDecorHandleKey<xAOD::JetContainer>  m_readNtrk500Key{this, "Ntrk500Name", "ParentJetNTrkPt500", "SG key for Ntrk500 from ungroomed jet"};
+
+    bool m_suppressOutputDependence;
 
     /// Strings for cut functions
     std::string m_strMassCutLow;
@@ -230,7 +232,7 @@ class JSSTaggerBase :   public asg::AsgTool ,
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_decWeightKey{this, "weightName", "weight", "SG key for weight"};
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_decEfficiencyKey{this, "efficiencyName", "efficiency", "SG key for efficiency"};
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_decEffSFKey{this, "effSFName", "effSF", "SG key for effSF"};
-    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decSigeffSFKey{this, "sigeffSFName", "sigeffSF", "SG key for effSF"};    
+    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decSigeffSFKey{this, "sigeffSFName", "sigeffSF", "SG key for effSF"};
 
     /// Get configReader StatusCode
     StatusCode getConfigReader();

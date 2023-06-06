@@ -351,11 +351,13 @@ def JetRoITrackJetTagSequence(flags,jetsIn,trkopt,RoIs):
     # changing the output 
     # vtxIn    = IDTrigConfig.vertex
 
+    vtxIn    = IDTrigConfig.vertex if flags.Trigger.Jet.fastbtagVertex else ""
+
     jetTrkSeq=getFastFlavourTaggingSequence(
         flags,
         f"JetRoITrackJetTag_{trkopt}_RecoSequence",
         jetsIn,
-        "",
+        vtxIn,
         tracksIn,
         addAlgs=viewAlgs+vtxAlgs,
     )

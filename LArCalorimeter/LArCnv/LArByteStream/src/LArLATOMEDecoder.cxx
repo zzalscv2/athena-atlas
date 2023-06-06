@@ -229,7 +229,7 @@ unsigned int LArLATOMEDecoder::EventProcess::decodeHeader(const uint32_t* p, uns
   Word l1IDtmp=m_l1ID;
   if(!compareOrSet(l1IDtmp, bswap_32(p[1+offset]), m_headerDecoded)) monheadererror |= (1<<monheadererrorbit++);
   if(l1IDtmp != m_l1ID){
-    ATH_MSG_WARNING( "Mon header L1ID " << l1IDtmp << " different from rod header L1ID " << m_l1ID );
+    ATH_MSG_DEBUG( "Mon header L1ID " << l1IDtmp << " different from rod header L1ID " << m_l1ID );
   }
   ATH_MSG_DEBUG( " latomeID: " << m_latomeID  << " l1ID: " << m_l1ID );
   

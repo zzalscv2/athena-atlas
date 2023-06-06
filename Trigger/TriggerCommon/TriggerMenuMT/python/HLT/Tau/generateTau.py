@@ -78,7 +78,7 @@ def _ftfCoreSeq(flags,name,is_probe_leg=False):
       prefetchRoITool.PrefetchRoIsLinkName = "prefetchRoI"
       prefetchRoITool.MergeWithOriginal    = True                                                      
 
-    fastInDetReco = InViewRecoCA('FastTau'+name,RoITool           = prefetchRoITool if extraPrefetching else newRoITool,
+    fastInDetReco = InViewRecoCA('tauFastTrack'+name,RoITool           = prefetchRoITool if extraPrefetching else newRoITool,
                                                 ViewFallThrough   = True,
                                                 RequireParentView = True,
                                                 mergeUsingFeature = True,

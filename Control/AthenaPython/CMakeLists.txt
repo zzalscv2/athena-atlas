@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaPython )
@@ -31,3 +31,17 @@ atlas_add_dictionary( AthenaPythonDict
 atlas_install_python_modules( python/*.py python/tests
                               POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/*.py share/tests/*.py )
+
+# Tests in the package:
+atlas_add_test( pyathena
+   SCRIPT athena AthenaPython/test_pyathena.py
+   POST_EXEC_SCRIPT noerror.sh )
+
+atlas_add_test( pyCA
+   SCRIPT python -m AthenaPython.tests.test_CA
+   POST_EXEC_SCRIPT noerror.sh )
+
+atlas_add_test( pyCA_pkl
+   SCRIPT athena --evtMax 2 --CA test_CA.pkl
+   DEPENDS pyCA
+   POST_EXEC_SCRIPT noerror.sh )
