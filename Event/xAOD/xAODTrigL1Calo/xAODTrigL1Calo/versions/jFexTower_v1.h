@@ -85,6 +85,9 @@ namespace xAOD {
       
       //Returns the Et of the Tower
       uint16_t jTowerEt() const;
+      
+      //Returns true if the Tower belongs to the FPGA core area
+      bool isCore() const;
 
       // Decorated variables
       

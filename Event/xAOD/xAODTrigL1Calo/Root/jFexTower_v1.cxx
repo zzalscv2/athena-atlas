@@ -80,6 +80,38 @@ uint16_t jFexTower_v1::jTowerEt() const {
     return 0;
 }
 
-
+bool jFexTower_v1::isCore() const{
+    // FPGA eta bounderies 
+    const float eta_edge[6] = { -1.6, -0.8, 0, 0.8, 1.6, 5};
+    const float phi_edge[4] = { 0.5*M_PI, M_PI, 1.5*M_PI, 2*M_PI};
+    
+    int cal_jfex = -1; 
+    int cal_fpga = -1; 
+    
+    
+    // finding the jFEX module
+    for(unsigned int leta=0; leta<6; leta++){
+        if(eta() < eta_edge[leta] ){
+            cal_jfex = leta;
+            break;
+        }
+    }
+    
+    // converts phi to [0,2pi]
+    float mphi = phi() < 0 ? 2*M_PI+phi() : phi();
+    
+    // finding FPGA number
+    for(unsigned int lphi=0; lphi<4; lphi++){
+        if(mphi < phi_edge[lphi] ){
+            cal_fpga = lphi;
+            break;
+        }
+    }
+    
+    // correcting the FPGA number to match the firmware scheme FPGA (U4) 2 -> 3 and FPGA (U3) 3 -> 2
+    cal_fpga = cal_fpga == 2 ? 3 : cal_fpga == 3 ? 2 : cal_fpga;
+    
+    return (module() == cal_jfex and fpga() == cal_fpga);
+}
 
 } // namespace xAOD

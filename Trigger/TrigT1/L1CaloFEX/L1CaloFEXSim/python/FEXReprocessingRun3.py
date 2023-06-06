@@ -22,7 +22,7 @@ if __name__ == '__main__':
     parser.add_argument('--filesInput',nargs='+',help="input files",required=True)
     parser.add_argument('--skipEvents',type=int,default=0,help="number of events to skip")
     parser.add_argument('--outputLevel',default="WARNING",choices={ 'INFO','WARNING','DEBUG','VERBOSE'})
-    parser.add_argument('--outputs',nargs='+',choices={"jFex","eFex","gFex","legacy"},required=True, help="What data to decode and output.")
+    parser.add_argument('--outputs',nargs='+',choices={"jFex","eFex","gFex","legacy","data","emulated","TOBs"},required=True, help="What data to decode and output.")
     args = parser.parse_args()
 
 
@@ -152,103 +152,115 @@ if __name__ == '__main__':
         
         
     if "jFex" in args.outputs:
-        ##################################################
-        # jFEX Simulated TOBs
-        ##################################################    
-        jFEXInputs = CompFactory.LVL1.jTowerMakerFromSuperCells('jTowerMakerFromSuperCells')
-        jFEXInputs.jSuperCellTowerMapperTool = CompFactory.LVL1.jSuperCellTowerMapper('jSuperCellTowerMapper')
-        jFEXInputs.jSuperCellTowerMapperTool.SCellMasking = not flags.Input.isMC
-        jFEX = CompFactory.LVL1.jFEXDriver('jFEXDriver')        
-        jFEX.jFEXSysSimTool = CompFactory.LVL1.jFEXSysSim('jFEXSysSimTool')
         
-        #TOBs
-        jFEX.jFEXSysSimTool.Key_jFexSRJetOutputContainer = getSimHandle( jFEX.jFEXSysSimTool.Key_jFexSRJetOutputContainer)
-        jFEX.jFEXSysSimTool.Key_jFexLRJetOutputContainer = getSimHandle( jFEX.jFEXSysSimTool.Key_jFexLRJetOutputContainer)
-        jFEX.jFEXSysSimTool.Key_jFexTauOutputContainer   = getSimHandle( jFEX.jFEXSysSimTool.Key_jFexTauOutputContainer  )
-        jFEX.jFEXSysSimTool.Key_jFexSumETOutputContainer = getSimHandle( jFEX.jFEXSysSimTool.Key_jFexSumETOutputContainer)
-        jFEX.jFEXSysSimTool.Key_jFexMETOutputContainer   = getSimHandle( jFEX.jFEXSysSimTool.Key_jFexMETOutputContainer  )
-        jFEX.jFEXSysSimTool.Key_jFexFwdElOutputContainer = getSimHandle( jFEX.jFEXSysSimTool.Key_jFexFwdElOutputContainer)
-        
-        outputEDM += addEDM('xAOD::jFexSRJetRoIContainer', 'L1_jFexSRJetRoISim')
-        outputEDM += addEDM('xAOD::jFexLRJetRoIContainer', 'L1_jFexLRJetRoISim')
-        outputEDM += addEDM('xAOD::jFexTauRoIContainer'  , 'L1_jFexTauRoISim'  )
-        outputEDM += addEDM('xAOD::jFexFwdElRoIContainer', 'L1_jFexFwdElRoISim')
-        outputEDM += addEDM('xAOD::jFexSumETRoIContainer', 'L1_jFexSumETRoISim')
-        outputEDM += addEDM('xAOD::jFexMETRoIContainer'  , 'L1_jFexMETRoISim'  ) 
-        
+        if "TOBs" in args.outputs:
+            ##################################################
+            # jFEX Simulated TOBs
+            ##################################################    
+            
+            # Testing, could be needed in the future
+            # jFEXInputs = CompFactory.LVL1.jTowerMakerFromSuperCells('jTowerMakerFromSuperCells')
+            
+            jFEXInputs = CompFactory.LVL1.jTowerMakerFromJfexTowers('jTowerMakerFromJfexTowers')
+            jFEXInputs.IsMC = flags.Input.isMC
+            jFEXInputs.jSuperCellTowerMapperTool = CompFactory.LVL1.jSuperCellTowerMapper('jSuperCellTowerMapper')
+            jFEXInputs.jSuperCellTowerMapperTool.SCellMasking = not flags.Input.isMC
+            
+            jFEX = CompFactory.LVL1.jFEXDriver('jFEXDriver')        
+            jFEX.jFEXSysSimTool = CompFactory.LVL1.jFEXSysSim('jFEXSysSimTool')
+            
+            #TOBs
+            jFEX.jFEXSysSimTool.Key_jFexSRJetOutputContainer = getSimHandle( jFEX.jFEXSysSimTool.Key_jFexSRJetOutputContainer)
+            jFEX.jFEXSysSimTool.Key_jFexLRJetOutputContainer = getSimHandle( jFEX.jFEXSysSimTool.Key_jFexLRJetOutputContainer)
+            jFEX.jFEXSysSimTool.Key_jFexTauOutputContainer   = getSimHandle( jFEX.jFEXSysSimTool.Key_jFexTauOutputContainer  )
+            jFEX.jFEXSysSimTool.Key_jFexSumETOutputContainer = getSimHandle( jFEX.jFEXSysSimTool.Key_jFexSumETOutputContainer)
+            jFEX.jFEXSysSimTool.Key_jFexMETOutputContainer   = getSimHandle( jFEX.jFEXSysSimTool.Key_jFexMETOutputContainer  )
+            jFEX.jFEXSysSimTool.Key_jFexFwdElOutputContainer = getSimHandle( jFEX.jFEXSysSimTool.Key_jFexFwdElOutputContainer)
+            
+            outputEDM += addEDM('xAOD::jFexSRJetRoIContainer', 'L1_jFexSRJetRoISim')
+            outputEDM += addEDM('xAOD::jFexLRJetRoIContainer', 'L1_jFexLRJetRoISim')
+            outputEDM += addEDM('xAOD::jFexTauRoIContainer'  , 'L1_jFexTauRoISim'  )
+            outputEDM += addEDM('xAOD::jFexFwdElRoIContainer', 'L1_jFexFwdElRoISim')
+            outputEDM += addEDM('xAOD::jFexSumETRoIContainer', 'L1_jFexSumETRoISim')
+            outputEDM += addEDM('xAOD::jFexMETRoIContainer'  , 'L1_jFexMETRoISim'  ) 
+            
 
-        #xTOBs
-        jFEX.jFEXSysSimTool.Key_xTobOutKey_jJ   = getSimHandle( jFEX.jFEXSysSimTool.Key_xTobOutKey_jJ  )
-        jFEX.jFEXSysSimTool.Key_xTobOutKey_jLJ  = getSimHandle( jFEX.jFEXSysSimTool.Key_xTobOutKey_jLJ )
-        jFEX.jFEXSysSimTool.Key_xTobOutKey_jTau = getSimHandle( jFEX.jFEXSysSimTool.Key_xTobOutKey_jTau)
-        jFEX.jFEXSysSimTool.Key_xTobOutKey_jEM  = getSimHandle( jFEX.jFEXSysSimTool.Key_xTobOutKey_jEM )    
+            #xTOBs
+            jFEX.jFEXSysSimTool.Key_xTobOutKey_jJ   = getSimHandle( jFEX.jFEXSysSimTool.Key_xTobOutKey_jJ  )
+            jFEX.jFEXSysSimTool.Key_xTobOutKey_jLJ  = getSimHandle( jFEX.jFEXSysSimTool.Key_xTobOutKey_jLJ )
+            jFEX.jFEXSysSimTool.Key_xTobOutKey_jTau = getSimHandle( jFEX.jFEXSysSimTool.Key_xTobOutKey_jTau)
+            jFEX.jFEXSysSimTool.Key_xTobOutKey_jEM  = getSimHandle( jFEX.jFEXSysSimTool.Key_xTobOutKey_jEM )    
+            
+            outputEDM += addEDM('xAOD::jFexSRJetRoIContainer', 'L1_jFexSRJetxRoISim' )
+            outputEDM += addEDM('xAOD::jFexLRJetRoIContainer', 'L1_jFexLRJetxRoISim' )
+            outputEDM += addEDM('xAOD::jFexTauRoIContainer'  , 'L1_jFexTauxRoISim'   )
+            outputEDM += addEDM('xAOD::jFexFwdElRoIContainer', 'L1_jFexFwdElxRoISim' )
+            
+            acc.addEventAlgo(jFEXInputs, sequenceName='AthAlgSeq')
+            acc.addEventAlgo(jFEX, sequenceName='AthAlgSeq')   
+            
+            
+            ##################################################
+            # jFEX Data TOBs
+            ##################################################       
+            from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexRoiByteStreamToolCfg
+            jFexRoiByteStreamTool = acc.popToolsAndMerge(jFexRoiByteStreamToolCfg(flags, 'jFexBSDecoderTool', writeBS=False))
+            
+            decoderTools += [jFexRoiByteStreamTool]
+            maybeMissingRobs += jFexRoiByteStreamTool.ROBIDs
+                    
+            outputEDM += addEDM('xAOD::jFexSRJetRoIContainer', 'L1_jFexSRJetRoI')
+            outputEDM += addEDM('xAOD::jFexLRJetRoIContainer', 'L1_jFexLRJetRoI')
+            outputEDM += addEDM('xAOD::jFexTauRoIContainer'  , 'L1_jFexTauRoI'  )
+            outputEDM += addEDM('xAOD::jFexFwdElRoIContainer', 'L1_jFexFwdElRoI')
+            outputEDM += addEDM('xAOD::jFexSumETRoIContainer', 'L1_jFexSumETRoI')
+            outputEDM += addEDM('xAOD::jFexMETRoIContainer'  , 'L1_jFexMETRoI'  )
+            
+            #xTOBs 
+            jFexxRoiByteStreamTool = acc.popToolsAndMerge(jFexRoiByteStreamToolCfg(
+                flags, 'jFexBSDecoderTool_xtobs', writeBS=False, xTOBs=True))
+            
+            decoderTools += [jFexxRoiByteStreamTool]
+            maybeMissingRobs += jFexxRoiByteStreamTool.ROBIDs
+                    
+            outputEDM += addEDM('xAOD::jFexSRJetRoIContainer', 'L1_jFexSRJetxRoI')
+            outputEDM += addEDM('xAOD::jFexLRJetRoIContainer', 'L1_jFexLRJetxRoI')
+            outputEDM += addEDM('xAOD::jFexTauRoIContainer'  , 'L1_jFexTauxRoI'  )
+            outputEDM += addEDM('xAOD::jFexFwdElRoIContainer', 'L1_jFexFwdElxRoI')
+            outputEDM += addEDM('xAOD::jFexSumETRoIContainer', 'L1_jFexSumETxRoI')
+            outputEDM += addEDM('xAOD::jFexMETRoIContainer'  , 'L1_jFexMETxRoI'  ) 
         
-        outputEDM += addEDM('xAOD::jFexSRJetRoIContainer', 'L1_jFexSRJetxRoISim' )
-        outputEDM += addEDM('xAOD::jFexLRJetRoIContainer', 'L1_jFexLRJetxRoISim' )
-        outputEDM += addEDM('xAOD::jFexTauRoIContainer'  , 'L1_jFexTauxRoISim'   )
-        outputEDM += addEDM('xAOD::jFexFwdElRoIContainer', 'L1_jFexFwdElxRoISim' )
-        
-        acc.addEventAlgo(jFEXInputs, sequenceName='AthAlgSeq')
-        acc.addEventAlgo(jFEX, sequenceName='AthAlgSeq')   
-        
-        
-        ##################################################
-        # jFEX Data TOBs
-        ##################################################       
-        from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexRoiByteStreamToolCfg
-        jFexRoiByteStreamTool = acc.popToolsAndMerge(jFexRoiByteStreamToolCfg(flags, 'jFexBSDecoderTool', writeBS=False))
-        
-        decoderTools += [jFexRoiByteStreamTool]
-        maybeMissingRobs += jFexRoiByteStreamTool.ROBIDs
-                
-        outputEDM += addEDM('xAOD::jFexSRJetRoIContainer', 'L1_jFexSRJetRoI')
-        outputEDM += addEDM('xAOD::jFexLRJetRoIContainer', 'L1_jFexLRJetRoI')
-        outputEDM += addEDM('xAOD::jFexTauRoIContainer'  , 'L1_jFexTauRoI'  )
-        outputEDM += addEDM('xAOD::jFexFwdElRoIContainer', 'L1_jFexFwdElRoI')
-        outputEDM += addEDM('xAOD::jFexSumETRoIContainer', 'L1_jFexSumETRoI')
-        outputEDM += addEDM('xAOD::jFexMETRoIContainer'  , 'L1_jFexMETRoI'  )
-        
-        #xTOBs 
-        jFexxRoiByteStreamTool = acc.popToolsAndMerge(jFexRoiByteStreamToolCfg(
-            flags, 'jFexBSDecoderTool_xtobs', writeBS=False, xTOBs=True))
-        
-        decoderTools += [jFexxRoiByteStreamTool]
-        maybeMissingRobs += jFexxRoiByteStreamTool.ROBIDs
-                
-        outputEDM += addEDM('xAOD::jFexSRJetRoIContainer', 'L1_jFexSRJetxRoI')
-        outputEDM += addEDM('xAOD::jFexLRJetRoIContainer', 'L1_jFexLRJetxRoI')
-        outputEDM += addEDM('xAOD::jFexTauRoIContainer'  , 'L1_jFexTauxRoI'  )
-        outputEDM += addEDM('xAOD::jFexFwdElRoIContainer', 'L1_jFexFwdElxRoI')
-        outputEDM += addEDM('xAOD::jFexSumETRoIContainer', 'L1_jFexSumETxRoI')
-        outputEDM += addEDM('xAOD::jFexMETRoIContainer'  , 'L1_jFexMETxRoI'  ) 
+        if "data" in args.outputs:
+            ##################################################
+            # jFEX Data Towers
+            ##################################################  
+            from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexInputByteStreamToolCfg
+            inputjFexTool = acc.popToolsAndMerge(jFexInputByteStreamToolCfg(flags, 'jFexInputBSDecoder'))
+            for module_id in inputjFexTool.ROBIDs:
+                maybeMissingRobs.append(module_id)
 
-        ##################################################
-        # jFEX Data Towers
-        ##################################################  
-        from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexInputByteStreamToolCfg
-        inputjFexTool = acc.popToolsAndMerge(jFexInputByteStreamToolCfg(flags, 'jFexInputBSDecoder'))
-        for module_id in inputjFexTool.ROBIDs:
-            maybeMissingRobs.append(module_id)
+            decoderTools += [inputjFexTool]
+            
+            # saving/adding the jTower xAOD container
+            outputEDM += addEDM('xAOD::jFexTowerContainer', inputjFexTool.jTowersWriteKey.Path)    
+            
+            
+            # Uses SCell to decorate the jTowers
+            from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CaloFEXDecoratorCfg
+            DecoratorAlgo = L1CaloFEXDecoratorCfg(flags, name = 'jFexTower2SCellDecorator', ExtraInfo=True, SCMasking=True)
+            acc.merge(DecoratorAlgo)    
 
-        decoderTools += [inputjFexTool]
-        # saving/adding the jTower xAOD container
-        outputEDM += addEDM('xAOD::jFexTowerContainer', inputjFexTool.jTowersWriteKey.Path)    
-        
-        
-        # Uses SCell to decorate the jTowers
-        from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CaloFEXDecoratorCfg
-        DecoratorAlgo = L1CaloFEXDecoratorCfg(flags, name = 'jFexTower2SCellDecorator', ExtraInfo=True, SCMasking=True)
-        acc.merge(DecoratorAlgo)    
-
-        ##################################################
-        # jFEX Emulated Towers
-        ##################################################  
-        from L1CaloFEXAlgos.FexEmulatedTowersConfig import jFexEmulatedTowersCfg
-        jFEXEmulatorAlgo = jFexEmulatedTowersCfg(flags, name = 'jFexTowerEmulator')
-        acc.merge(jFEXEmulatorAlgo) 
-                   
-        # saving/adding the emulated jTower xAOD container
-        outputEDM += addEDM('xAOD::jFexTowerContainer', "L1_jFexEmulatedTowers") 
+        if "emulated" in args.outputs:
+            ##################################################
+            # jFEX Emulated Towers
+            ##################################################  
+            from L1CaloFEXAlgos.FexEmulatedTowersConfig import jFexEmulatedTowersCfg
+            jFEXEmulatorAlgo = jFexEmulatedTowersCfg(flags, name = 'jFexTowerEmulator')
+            
+            acc.merge(jFEXEmulatorAlgo) 
+                       
+            # saving/adding the emulated jTower xAOD container
+            outputEDM += addEDM('xAOD::jFexTowerContainer', "L1_jFexEmulatedTowers") 
         
 
     if "gFex" in args.outputs:    
