@@ -28,6 +28,14 @@ namespace EL
 
 
 
+  inline TEfficiency *AnaAlgorithm ::
+  efficiency (const std::string& name) const
+  {
+    return histeff (name);
+  }
+
+
+
   template<> TObject *AnaAlgorithm ::
   hist<TObject> (const std::string& name) const;
 #endif
