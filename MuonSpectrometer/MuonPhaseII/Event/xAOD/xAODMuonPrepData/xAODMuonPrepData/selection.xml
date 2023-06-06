@@ -1,0 +1,13 @@
+<!-- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration -->
+<lcgdict>
+
+    <class name="xAOD::MdtDriftCircle_v1" />
+    <class name="xAOD::MdtDriftCircleContainer_v1"
+           id="A1A37753-0334-4D86-AB45-06DE59AF694E" />
+    <typedef name="xAOD::MdtDriftCircle" />
+    <typedef name="xAOD::MdtDriftCircleContainer" />
+    
+    <class name="xAOD::MdtDriftCircleAuxContainer_v1"
+           id="1047F7E4-504B-4277-AB0B-41B5D5775A47" />
+    <typedef name = "xAOD::MdtDriftCircleAuxContainer" />
+</lcgdict>

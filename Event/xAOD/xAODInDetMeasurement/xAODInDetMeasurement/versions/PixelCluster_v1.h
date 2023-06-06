@@ -5,119 +5,119 @@
 #ifndef XAODINDETMEASUREMENT_VERSION_PIXELCLUSTER_V1_H
 #define XAODINDETMEASUREMENT_VERSION_PIXELCLUSTER_V1_H
 
-#include "xAODMeasurementBase/versions/UncalibratedMeasurement_v1.h"
-#include "Identifier/Identifier.h"
 #include "GeoPrimitives/GeoPrimitives.h"
+#include "Identifier/Identifier.h"
+#include "xAODMeasurementBase/versions/UncalibratedMeasurement_v1.h"
 
 namespace xAOD {
 
-    /// @class PixelCluster_v1
-    /// Class describing pixel clusters
+/// @class PixelCluster_v1
+/// Class describing pixel clusters
 
-    class PixelCluster_v1 : public UncalibratedMeasurement_v1 {
+class PixelCluster_v1 : public UncalibratedMeasurement_v1 {
 
-    public:
-        using ConstVectorMap = Eigen::Map<const Eigen::Matrix<float, 3, 1>>;
-        using VectorMap = Eigen::Map<Eigen::Matrix<float, 3, 1>>;
+   public:
+    /// Default constructor
+    PixelCluster_v1() = default;
+    /// Virtual destructor
+    virtual ~PixelCluster_v1() = default;
 
-        /// Default constructor
-        PixelCluster_v1() = default;
-        /// Virtual destructor
-        virtual ~PixelCluster_v1() = default;
+    /// @name Functions to get pixel cluster properties
+    /// @{
 
-        /// @name Functions to get pixel cluster properties
-        /// @{
+    /// Returns the type of the pixel cluster as a simple enumeration
+    xAOD::UncalibMeasType type() const override final {
+        return xAOD::UncalibMeasType::PixelClusterType;
+    }
+    unsigned int numDimensions() const override final { return 2; }
 
-        /// Returns the type of the pixel cluster as a simple enumeration
-        xAOD::UncalibMeasType type() const override final {
-            return xAOD::UncalibMeasType::PixelClusterType;
-        }
+    /// Returns the global position of the pixel cluster
+    ConstVectorMap<3> globalPosition() const;
+    VectorMap<3> globalPosition();
 
-        /// Returns the global position of the pixel cluster
-        ConstVectorMap globalPosition() const;
-        VectorMap globalPosition();
+    /// Returns the list of identifiers of the channels building the cluster
+    const std::vector<Identifier> rdoList() const;
 
-        /// Returns the list of identifiers of the channels building the cluster
-        const std::vector< Identifier > rdoList() const;
+    /// Returns the dimensions of the cluster in numbers of channels in phi (x)
+    /// and eta (y) directions, respectively
+    int channelsInPhi() const;
+    int channelsInEta() const;
 
-        /// Returns the dimensions of the cluster in numbers of channels in phi (x) and eta (y) directions, respectively
-        int channelsInPhi() const;
-        int channelsInEta() const;
+    /// Returns the width of the cluster in phi (x) and eta (y) directions,
+    /// respectively
+    float widthInEta() const;
 
-	/// Returns the width of the cluster in phi (x) and eta (y) directions, respectively
-	float widthInEta() const;
+    /// Returns omegax and omegay, i.e. the charge
+    /// balance between the first and last rows and colums, respectively,
+    /// building the cluster, and are numbers between 0 and 1.
+    float omegaX() const;
+    float omegaY() const;
 
-        /// Returns omegax and omegay, i.e. the charge
-        /// balance between the first and last rows and colums, respectively,
-        /// building the cluster, and are numbers between 0 and 1.
-        float omegaX() const;
-        float omegaY() const;
+    /// Returns the list of ToT of the channels building the cluster
+    const std::vector<int>& totList() const;
+    /// Returns the sum of the ToTs of the channels building the cluster
+    int totalToT() const;
 
-        /// Returns the list of ToT of the channels building the cluster
-        const std::vector< int >& totList() const;
-        /// Returns the sum of the ToTs of the channels building the cluster
-        int totalToT() const;
+    /// Returns the list of charges of the channels building the cluster
+    const std::vector<float>& chargeList() const;
+    /// Returns the sum of the charges of the channels building the cluster
+    float totalCharge() const;
 
-        /// Returns the list of charges of the channels building the cluster
-        const std::vector< float >& chargeList() const;
-        /// Returns the sum of the charges of the channels building the cluster
-        float totalCharge() const;
+    /// Return the energy loss in the cluster in MeV
+    float energyLoss() const;
 
-        /// Return the energy loss in the cluster in MeV
-        float energyLoss() const;
+    /// Returns if the cluster is split or not
+    bool isSplit() const;
 
-        /// Returns if the cluster is split or not
-        bool isSplit() const;
+    /// Returns the splitting probabilities for the cluster
+    float splitProbability1() const;
+    float splitProbability2() const;
 
-        /// Returns the splitting probabilities for the cluster
-        float splitProbability1() const;
-        float splitProbability2() const;
+    /// Return the LVL1 accept
+    int lvl1a() const;
 
-        /// Return the LVL1 accept
-        int lvl1a() const;
+    /// @}
 
-        /// @}
+    /// @name Functions to set pixel cluster properties
+    /// @{
 
-        /// @name Functions to set pixel cluster properties
-        /// @{
+    /// Sets the list of identifiers of the channels building the cluster
+    void setRDOlist(const std::vector<Identifier>& rdolist);
 
-        /// Sets the list of identifiers of the channels building the cluster
-        void setRDOlist(const std::vector< Identifier >& rdolist);
+    /// Sets the dimensions of the cluster in numbers of channels in phi (x) and
+    /// eta (y) directions
+    void setChannelsInPhiEta(int channelsInPhi, int channelsInEta);
 
-        /// Sets the dimensions of the cluster in numbers of channels in phi (x) and eta (y) directions
-        void setChannelsInPhiEta(int channelsInPhi, int channelsInEta);
+    /// Sets the width of the cluster in eta (y) direction
+    void setWidthInEta(float widthInEta);
 
-	/// Sets the width of the cluster in eta (y) direction
-	void setWidthInEta(float widthInEta);
+    /// Sets omegax and omegay, i.e. the charge
+    /// balance between the first and last rows and colums, respectively,
+    /// building the cluster, and are numbers between 0 and 1.
+    void setOmegas(float omegax, float omegay);
 
-        /// Sets omegax and omegay, i.e. the charge
-        /// balance between the first and last rows and colums, respectively,
-        /// building the cluster, and are numbers between 0 and 1.
-        void setOmegas(float omegax, float omegay);
+    /// Sets the list of ToT of the channels building the cluster
+    void setToTlist(const std::vector<int>& tots);
 
-        /// Sets the list of ToT of the channels building the cluster
-        void setToTlist(const std::vector< int >& tots);
+    /// Sets the list of charges of the channels building the cluster
+    void setChargelist(const std::vector<float>& charges);
 
-        /// Sets the list of charges of the channels building the cluster
-        void setChargelist(const std::vector< float >& charges);
+    /// Sets the energy loss in the cluster in MeV
+    void setEnergyLoss(float dEdX);
 
-        /// Sets the energy loss in the cluster in MeV
-        void setEnergyLoss(float dEdX);
+    /// Sets if the cluster is split or not
+    void setIsSplit(bool isSplit);
 
-        /// Sets if the cluster is split or not
-        void setIsSplit(bool isSplit);
+    /// Sets the splitting probabilities for the cluster
+    void setSplitProbabilities(float prob1, float prob2);
 
-        /// Sets the splitting probabilities for the cluster
-        void setSplitProbabilities(float prob1, float prob2);
+    /// Sets the LVL1 accept
+    void setLVL1A(int lvl1a);
 
-        /// Sets the LVL1 accept
-        void setLVL1A(int lvl1a);
+    /// @}
+};
 
-        /// @}
-
-    };
-
-}
+}  // namespace xAOD
 #include "AthContainers/DataVector.h"
-DATAVECTOR_BASE( xAOD::PixelCluster_v1, xAOD::UncalibratedMeasurement_v1);
+DATAVECTOR_BASE(xAOD::PixelCluster_v1, xAOD::UncalibratedMeasurement_v1);
 #endif

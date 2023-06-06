@@ -1,0 +1,47 @@
+/*
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef XAODMEASUREMENTBASE_VERSION_UNCALIBRATEDMEASUREMENT_V1_ICC
+#define XAODMEASUREMENTBASE_VERSION_UNCALIBRATEDMEASUREMENT_V1_ICC
+
+namespace xAOD {
+/// Returns the local position of the measurement
+template <int N>
+ConstVectorMap<N> UncalibratedMeasurement_v1::localPosition() const {
+    static const PosAccessor<N> acc{"localPositionDim" + std::to_string(N)};
+    const auto& values = acc(*this);
+    assert(values.data() != nullptr);
+    return ConstVectorMap<N>{values.data()};
+}
+template <int N>
+VectorMap<N> UncalibratedMeasurement_v1::localPosition() {
+    static const PosAccessor<N> acc{"localPositionDim" + std::to_string(N)};
+    auto& values = acc(*this);
+    assert(values.data() != nullptr);
+    return VectorMap<N>{values.data()};
+}
+template <int N>
+ConstMatrixMap<N> UncalibratedMeasurement_v1::localCovariance() const {
+    static const CovAccessor<N> acc{"localCovarianceDim" + std::to_string(N)};
+    const auto& values = acc(*this);
+    assert(values.data() != nullptr);
+    return ConstMatrixMap<N>{values.data()};
+}
+template <int N>
+MatrixMap<N> UncalibratedMeasurement_v1::localCovariance() {
+    static const CovAccessor<N> acc{"localCovarianceDim" + std::to_string(N)};
+    auto& values = acc(*this);
+    assert(values.data() != nullptr);
+    return MatrixMap<N>{values.data()};
+}
+
+template <int N>
+void UncalibratedMeasurement_v1::setMeasurement(const DetectorIDHashType idHash,
+                                                MeasVector<N> locPos,
+                                                MeasMatrix<N> locCov) {
+    setIdentifierHash(idHash);
+    localPosition<N>() = std::move(locPos);
+    localCovariance<N>() = std::move(locCov);
+}
+}  // namespace xAOD
+#endif

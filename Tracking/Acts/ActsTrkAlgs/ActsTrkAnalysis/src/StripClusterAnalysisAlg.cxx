@@ -89,13 +89,13 @@ namespace ActsTrk {
     auto monitor_localX = Monitored::Collection("localX", *inputStripClusterContainer,
 						[] (const auto cluster) -> float
 						{
-						  const auto& localPos = cluster->template localPosition<2>();
+						  const auto& localPos = cluster->template localPosition<1>();
 						  return localPos(0,0);
 						});
     
     auto monitor_localCovXX = Monitored::Collection("localCovXX", *inputStripClusterContainer,
 						    [] (const auto* cluster) -> float
-						    { return cluster->template localCovariance<2>()(0, 0); });
+						    { return cluster->template localCovariance<1>()(0, 0); });
 
     auto monitor_sizeX = Monitored::Collection("sizeX", *inputStripClusterContainer,
 					       [] (const auto* cluster) -> int
