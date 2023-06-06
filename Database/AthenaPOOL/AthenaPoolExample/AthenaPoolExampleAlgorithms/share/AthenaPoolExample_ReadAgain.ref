@@ -60,8 +60,6 @@ EmptyPoolFile.root  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Param
 ##Params            DEBUG Opened container ##Params of type ROOT_Tree
 EmptyPoolFile.root  DEBUG --->Reading Param:FID=[C7040C30-3363-7D42-B1B7-E3F3B1881030]
 EmptyPoolFile.root  DEBUG --->Reading Param:PFN=[EmptyPoolFile.root]
-EmptyPoolFile.root  DEBUG --->Reading Param:POOL_VSN=[1.1]
-EmptyPoolFile.root  DEBUG --->Reading Param:FORMAT_VSN=[2.0]
 ##Params            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 PoolSvc             DEBUG createCollection() type=ImplicitCollection, connection=PFN:EmptyPoolFile.root, name=POOLContainer_DataHeader, contextID=0
 EventSelector       DEBUG No events found in: EmptyPoolFile.root skipped!!!
@@ -166,8 +164,6 @@ SimplePoolRepli...  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Param
 ##Params            DEBUG Opened container ##Params of type ROOT_Tree
 SimplePoolRepli...  DEBUG --->Reading Param:FID=[095498FF-E805-B142-9948-BD2D4AC79975]
 SimplePoolRepli...  DEBUG --->Reading Param:PFN=[SimplePoolReplica1.root]
-SimplePoolRepli...  DEBUG --->Reading Param:POOL_VSN=[1.1]
-SimplePoolRepli...  DEBUG --->Reading Param:FORMAT_VSN=[2.0]
 ##Params            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 SimplePoolRepli...  DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaDataHdr(DataHeader)
 MetaDataHdr(Dat...  DEBUG Opening
@@ -191,6 +187,7 @@ AthenaPoolAddre...  DEBUG Cannot retrieve DataHeader from DetectorStore.
 EventInfoCnvAlg...   INFO Beam spot information not available
 EventInfoCnvAlg...   INFO Will not fill beam spot information into xAOD::EventInfo
 ReadData             INFO in initialize()
+ReadData            DEBUG data dependencies:
   + INPUT   ( 'DataHeader' , 'StoreGateSvc+EventSelector' ) 
   + INPUT   ( 'ExampleHitContainer' , 'StoreGateSvc+MyHits' ) 
   + INPUT   ( 'ExampleTrackContainer' , 'StoreGateSvc+MyTracks' ) 
@@ -245,8 +242,6 @@ EmptyPoolFile.root  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Param
 ##Params            DEBUG Opened container ##Params of type ROOT_Tree
 EmptyPoolFile.root  DEBUG --->Reading Param:FID=[C7040C30-3363-7D42-B1B7-E3F3B1881030]
 EmptyPoolFile.root  DEBUG --->Reading Param:PFN=[EmptyPoolFile.root]
-EmptyPoolFile.root  DEBUG --->Reading Param:POOL_VSN=[1.1]
-EmptyPoolFile.root  DEBUG --->Reading Param:FORMAT_VSN=[2.0]
 ##Params            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 PoolSvc             DEBUG createCollection() type=ImplicitCollection, connection=PFN:EmptyPoolFile.root, name=POOLContainer_DataHeader, contextID=0
 EventSelector       DEBUG No events found in: EmptyPoolFile.root skipped!!!
@@ -715,8 +710,6 @@ EmptyPoolFile.root  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Param
 ##Params            DEBUG Opened container ##Params of type ROOT_Tree
 EmptyPoolFile.root  DEBUG --->Reading Param:FID=[C7040C30-3363-7D42-B1B7-E3F3B1881030]
 EmptyPoolFile.root  DEBUG --->Reading Param:PFN=[EmptyPoolFile.root]
-EmptyPoolFile.root  DEBUG --->Reading Param:POOL_VSN=[1.1]
-EmptyPoolFile.root  DEBUG --->Reading Param:FORMAT_VSN=[2.0]
 ##Params            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 PoolSvc             DEBUG createCollection() type=ImplicitCollection, connection=PFN:EmptyPoolFile.root, name=POOLContainer_DataHeader, contextID=0
 EventSelector       DEBUG No events found in: EmptyPoolFile.root skipped!!!
@@ -807,8 +800,6 @@ SimplePoolFile2...  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Param
 ##Params            DEBUG Opened container ##Params of type ROOT_Tree
 SimplePoolFile2...  DEBUG --->Reading Param:FID=[73F77177-D136-9344-B64D-29693F68D6C2]
 SimplePoolFile2...  DEBUG --->Reading Param:PFN=[SimplePoolFile2.root]
-SimplePoolFile2...  DEBUG --->Reading Param:POOL_VSN=[1.1]
-SimplePoolFile2...  DEBUG --->Reading Param:FORMAT_VSN=[2.0]
 ##Params            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 RootDatabase.se...  DEBUG Request tree cache 
 RootDatabase.se...  DEBUG File name SimplePoolFile2.root
@@ -1375,8 +1366,6 @@ SimplePoolFile4...  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Param
 ##Params            DEBUG Opened container ##Params of type ROOT_Tree
 SimplePoolFile4...  DEBUG --->Reading Param:FID=[298DE14D-49CF-674A-9171-CEBBD9BEC6F8]
 SimplePoolFile4...  DEBUG --->Reading Param:PFN=[SimplePoolFile4.root]
-SimplePoolFile4...  DEBUG --->Reading Param:POOL_VSN=[1.1]
-SimplePoolFile4...  DEBUG --->Reading Param:FORMAT_VSN=[2.0]
 ##Params            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 RootDatabase.se...  DEBUG Request tree cache 
 RootDatabase.se...  DEBUG File name SimplePoolFile4.root
@@ -2025,11 +2014,6 @@ ApplicationMgr       INFO Application Manager Stopped successfully
 ReadData             INFO in finalize()
 AthDictLoaderSvc     INFO in finalize...
 ToolSvc              INFO Removing all tools created by ToolSvc
-*****Chrono*****     INFO ****************************************************************************************************
-*****Chrono*****     INFO  The Final CPU consumption ( Chrono ) Table (ordered)
-*****Chrono*****     INFO ****************************************************************************************************
-*****Chrono*****     INFO ****************************************************************************************************
-ChronoStatSvc.f...   INFO  Service finalized successfully 
 ApplicationMgr       INFO Application Manager Finalized successfully
 ApplicationMgr       INFO Application Manager Terminated successfully
 Athena               INFO leaving with code 0: "successful run"
