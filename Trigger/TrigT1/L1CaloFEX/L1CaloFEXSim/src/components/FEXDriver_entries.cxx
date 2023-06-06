@@ -35,6 +35,7 @@
 #include "L1CaloFEXSim/jFEXPileupAndNoise.h"
 #include "L1CaloFEXSim/jFEXFormTOBs.h"
 #include "L1CaloFEXSim/jTowerMakerFromSuperCells.h"
+#include "../jTowerMakerFromJfexTowers.h"
 
 #include "L1CaloFEXSim/gFEXDriver.h"
 #include "L1CaloFEXSim/gFEXSysSim.h"
@@ -85,6 +86,7 @@ DECLARE_COMPONENT(jFEXForwardElecAlgo)
 DECLARE_COMPONENT(jFEXNtupleWriter)
 DECLARE_COMPONENT(jFEXFormTOBs)
 DECLARE_COMPONENT(jTowerMakerFromSuperCells)
+DECLARE_COMPONENT(jTowerMakerFromJfexTowers)
 
 DECLARE_COMPONENT(gFEXDriver)
 DECLARE_COMPONENT(gFEXSysSim)

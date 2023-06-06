@@ -98,8 +98,12 @@ void jTower::addET(float et, int layer)
 
 }
 
+void jTower::set_Et(int layer, int et){
+    m_et[layer] = et;
+}
 
-void jTower::set_TileCal_Et(int layer, float et) {
+
+void jTower::set_TileCal_Et(int layer, int et) {
 
     if (layer < 0  || layer >= s_nLayers) {
         std::stringstream errMsg;
@@ -110,7 +114,7 @@ void jTower::set_TileCal_Et(int layer, float et) {
 
     addET(et, layer);
     
-    m_et[layer] = et;
+    set_Et(layer, et);
     return;
 
 }
@@ -154,7 +158,7 @@ void jTower::Do_LAr_encoding(){
     for(uint layer=0; layer<m_et_float_raw.size(); layer++){
         unsigned int ecode = jFEXCompression::Compress( m_et_float_raw[layer] ); 
         int outET = jFEXCompression::Expand(ecode); 
-        m_et[layer] = outET;         
+        set_Et(layer,outET);
     }
 }
 
