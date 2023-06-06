@@ -7,4 +7,4 @@ atlas_subdir( TrkRefitAlg )
 atlas_add_component( TrkRefitAlg
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaBaseComps GaudiKernel TrkEventPrimitives TrkEventUtils TrkTrack TrkFitterUtils InDetReadoutGeometry StoreGateLib TrkSurfaces TrkMeasurementBase TrkParameters TrkTrackSummary TrkVertexOnTrack VxVertex TrkExInterfaces TrkFitterInterfaces TrkToolInterfaces BeamSpotConditionsData )
+                     LINK_LIBRARIES AthenaBaseComps GaudiKernel TrkEventPrimitives TrkEventUtils TrkTrack TrkFitterUtils InDetReadoutGeometry StoreGateLib TrkSurfaces TrkMeasurementBase TrkParameters TrkTrackSummary TrkVertexOnTrack VxVertex TrkExInterfaces TrkFitterInterfaces TrkToolInterfaces BeamSpotConditionsData InDetSimData InDetSimEvent InDetPrepRawData TrkTruthData InDetRIO_OnTrack InDetIdentifier)
