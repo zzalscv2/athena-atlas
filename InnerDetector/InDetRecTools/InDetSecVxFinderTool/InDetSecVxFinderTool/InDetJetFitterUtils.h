@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -139,10 +139,7 @@ namespace InDet {
     ToolHandle<Trk::IVertexLinearizedTrackFactory> m_LinearizedTrackFactory {this,"LinearizedTrackFactory","Trk::FullLinearizedTrackFactory/FullLinearizedTrackFactory",""};
     ToolHandle<Trk::IExtrapolator>  m_extrapolator {this,"Extrapolator","Trk::Extrapolator/InDetExtrapolator",""};   
 
-    bool m_extrapolatorIsAvailable;
     bool m_linearizedTrackFactoryIsAvailable;
-    
-    //ToolHandle<Trk::JetFitterInitializationHelper> m_initializationHelper;
 
   };//end class declaration
 

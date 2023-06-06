@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -10,24 +10,14 @@ from BTagging.ImprovedJetFitterRoutinesConfig import ImprovedJetFitterRoutinesCf
 def InDetJetFitterMultiStageFitCfg(flags, name, suffix="", useBTagFlagsDefaults = True, **options):
     """Sets up a JetFitterMultiStageFit  tool and returns it.
 
-    The following options have BTaggingFlags defaults:
+    The following options have defaults:
     
-    MaxNumDeleteIterations                     default:30
+    MaxNumDeleteIterations                     default: 30
     VertexProbCut                              default: 0.001
-    MaxClusteringIterations                   default: 30
+    MaxClusteringIterations                    default: 30
     UseFastClustering                          default: False
-    maxTracksForDetailedClustering             default:25
-    VertexClusteringProbabilityCut             default:0.005
-    VertexClusteringProbabilityCutWithMass     default:0.05
-    VertexClusteringProbabilityCutWithMass0010 default:0.002
-    VertexClusteringProbabilityCutWithMass1015 default:0.002
-    VertexClusteringProbabilityCutWithMass1520 default:0.050
-    VertexClusteringProbabilityCutWithMass2025 default: 0.100
-    VertexClusteringProbabilityCutWithMass2530 default:0.200
-    VertexClusteringProbabilityCutWithMass3040 default:0.500
-    VertexClusteringProbabilityCutWithMass4050 default:0.700
-    VertexClusteringProbabilityCutWithMass5060 default:0.900
-    VertexClusteringProbabilityCutWithMass6070 default:0.900
+    maxTracksForDetailedClustering             default: 25
+    VertexClusteringProbabilityCutWithMasses   default: {0.002, 0.002, 0.050, 0.100, 0.200, 0.500, 0.700, 0.900, 0.900}
 
     input:             name: The name of the tool (should be unique).
       useBTagFlagsDefaults : Whether to use BTaggingFlags defaults for options that are not specified.
@@ -39,24 +29,7 @@ def InDetJetFitterMultiStageFitCfg(flags, name, suffix="", useBTagFlagsDefaults 
         improvedJetFitterRoutines = acc.popToolsAndMerge(ImprovedJetFitterRoutinesCfg(flags, 'ImprovedJFRoutines'+suffix))
         inDetJetFitterUtils = acc.popToolsAndMerge(InDetJetFitterUtilsCfg(flags,'InDetJFUtils'+suffix))
         improvedJetFitterInitializationHelper = acc.popToolsAndMerge(ImprovedJetFitterInitializationHelperCfg(flags, 'ImprovedJFInitHelper'+suffix))
-        defaults = { 'MaxNumDeleteIterations' : 30 ,
-                     'VertexProbCut' : 0.001 ,
-                     'MaxClusteringIterations' : 30 ,
-                     'UseFastClustering' : False ,
-                     'maxTracksForDetailedClustering' : 25 ,
-                     'VertexClusteringProbabilityCut' : 0.005 ,
-                     'VertexClusteringProbabilityCutWithMass' : 0.05 ,
-                     'VertexClusteringProbabilityCutWithMass0010' : 0.002 ,
-                     'VertexClusteringProbabilityCutWithMass1015' : 0.002 ,
-                     'VertexClusteringProbabilityCutWithMass1520' : 0.050 ,
-                     'VertexClusteringProbabilityCutWithMass2025' : 0.100 ,
-                     'VertexClusteringProbabilityCutWithMass2530' : 0.200 ,
-                     'VertexClusteringProbabilityCutWithMass3040' : 0.500 ,
-                     'VertexClusteringProbabilityCutWithMass4050' : 0.700 ,
-                     'VertexClusteringProbabilityCutWithMass5060' : 0.900 ,
-                     'VertexClusteringProbabilityCutWithMass6070' : 0.900 ,
-                     'JetFitterInitializationHelper' : improvedJetFitterInitializationHelper,
-#                     'JetFitterHelper' : ,
+        defaults = { 'JetFitterInitializationHelper' : improvedJetFitterInitializationHelper,
                      'JetFitterRoutines' : improvedJetFitterRoutines,
                      'InDetJetFitterUtils' : inDetJetFitterUtils }
         for option in defaults:

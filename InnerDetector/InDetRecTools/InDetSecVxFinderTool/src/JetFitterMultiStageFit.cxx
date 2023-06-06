@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration     
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "InDetSecVxFinderTool/JetFitterMultiStageFit.h"
@@ -258,28 +258,11 @@ void JetFitterMultiStageFit::doTheFit(Trk::VxJetCandidate* myJetCandidate,
 
                 bool doMerge(false);
 
-                double vertexClusteringProbabilityCutWithMass;
+		int bin = getIndexByMass(massTwoVertex);
+                double vertexClusteringProbabilityCutWithMass =
+		  m_vertexClusteringProbabilityCutWithMasses[bin];
 
-                // surely a better way than below...
-                if (massTwoVertex < 1000.) {
-                    vertexClusteringProbabilityCutWithMass = m_vertexClusteringProbabilityCutWithMass0010;
-                } else if (massTwoVertex < 1500.) {
-                    vertexClusteringProbabilityCutWithMass = m_vertexClusteringProbabilityCutWithMass1015;
-                } else if (massTwoVertex < 2000.) {
-                    vertexClusteringProbabilityCutWithMass = m_vertexClusteringProbabilityCutWithMass1520;
-                } else if (massTwoVertex < 2500.) {
-                    vertexClusteringProbabilityCutWithMass = m_vertexClusteringProbabilityCutWithMass2025;
-                } else if (massTwoVertex < 3000.) {
-                    vertexClusteringProbabilityCutWithMass = m_vertexClusteringProbabilityCutWithMass2530;
-                } else if (massTwoVertex < 4000.) {
-                    vertexClusteringProbabilityCutWithMass = m_vertexClusteringProbabilityCutWithMass3040;
-                } else if (massTwoVertex < 5000.) {
-                    vertexClusteringProbabilityCutWithMass = m_vertexClusteringProbabilityCutWithMass4050;
-                } else if (massTwoVertex < 6000.) {
-                    vertexClusteringProbabilityCutWithMass = m_vertexClusteringProbabilityCutWithMass5060;
-                } else {
-                    vertexClusteringProbabilityCutWithMass = m_vertexClusteringProbabilityCutWithMass6070;
-                }
+		ATH_MSG_DEBUG("m="<<massTwoVertex<<" prob="<<vertexClusteringProbabilityCutWithMass);
 
                 if (probVertexExcludingPrimary > vertexClusteringProbabilityCutWithMass) {
                     doMerge = true; // why not just have doMerge = probVertexExcludingPrimary > vertexClusteringProbabilityCutWithMass ?
@@ -312,4 +295,15 @@ void JetFitterMultiStageFit::doTheFit(Trk::VxJetCandidate* myJetCandidate,
 
 
 
+}
+
+
+
+int JetFitterMultiStageFit::getIndexByMass(const double mass) const{
+  // Set mass to min/max value in case of under/overflow
+  double m = std::clamp(mass, m_massBins.front(), m_massBins.back());
+  const auto pVal = std::lower_bound(m_massBins.begin(), m_massBins.end(), m);
+  const int bin = std::distance(m_massBins.begin(), pVal);
+  ATH_MSG_DEBUG("Checking (m/bin) = (" << m << "," << bin << ")");
+  return bin;
 }
