@@ -12,8 +12,6 @@
 ***************************************************************************/
 #include "InDetConversionFinderTools/InDetConversionFinderTools.h"
 
-#include "CLHEP/Vector/ThreeVector.h"
-#include "TrkMeasurementBase/MeasurementBase.h"
 #include "AthLinks/ElementLink.h"
 #include "TrkTrack/LinkToTrack.h"
 
