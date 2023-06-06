@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration         
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -59,6 +59,8 @@ private:
     void doTheFit(Trk::VxJetCandidate* myJetCandidate,
                   bool performClustering=true) const;
 
+    int getIndexByMass(const double mass) const;
+
     ToolHandle< Trk::JetFitterInitializationHelper > m_initializationHelper {this,"JetFitterInitializationHelper","Trk::JetFitterInitializationHelper",""};
     ToolHandle< Trk::JetFitterHelper > m_helper {this,"JetFitterHelper","Trk::JetFitterHelper",""};
     ToolHandle< Trk::JetFitterRoutines > m_routines {this,"JetFitterRoutines","Trk::JetFitterRoutines",""};
@@ -74,16 +76,12 @@ private:
     Gaudi::Property< int > m_maxTracksForDetailedClustering {this,"maxTracksForDetailedClustering",25,""};
 
     Gaudi::Property< double > m_vertexClusteringProbabilityCut {this,"VertexClusteringProbabilityCut",0.005,""};
-    Gaudi::Property< double > m_vertexClusteringProbabilityCutWithMass {this,"VertexClusteringProbabilityCutWithMass",0.05,""};
-    Gaudi::Property< double > m_vertexClusteringProbabilityCutWithMass0010 {this,"VertexClusteringProbabilityCutWithMass0010",0.002,""};
-    Gaudi::Property< double > m_vertexClusteringProbabilityCutWithMass1015 {this,"VertexClusteringProbabilityCutWithMass1015",0.002,""};
-    Gaudi::Property< double > m_vertexClusteringProbabilityCutWithMass1520 {this,"VertexClusteringProbabilityCutWithMass1520",0.050,""};
-    Gaudi::Property< double > m_vertexClusteringProbabilityCutWithMass2025 {this,"VertexClusteringProbabilityCutWithMass2025",0.100,""};
-    Gaudi::Property< double > m_vertexClusteringProbabilityCutWithMass2530 {this,"VertexClusteringProbabilityCutWithMass2530",0.200,""};
-    Gaudi::Property< double > m_vertexClusteringProbabilityCutWithMass3040 {this,"VertexClusteringProbabilityCutWithMass3040",0.500,""};
-    Gaudi::Property< double > m_vertexClusteringProbabilityCutWithMass4050 {this,"VertexClusteringProbabilityCutWithMass4050",0.700,""};
-    Gaudi::Property< double > m_vertexClusteringProbabilityCutWithMass5060 {this,"VertexClusteringProbabilityCutWithMass5060",0.900,""};
-    Gaudi::Property< double > m_vertexClusteringProbabilityCutWithMass6070 {this,"VertexClusteringProbabilityCutWithMass6070",0.900,""};
+
+    DoubleArrayProperty m_vertexClusteringProbabilityCutWithMasses
+    {this, "VertexClusteringProbabilityCutWithMasses",
+	{0.002, 0.002, 0.050, 0.100, 0.200, 0.500, 0.700, 0.900, 0.900}, ""};
+    const std::vector<double> m_massBins = {1000., 1500., 2000., 2500.,
+					    3000., 4000., 5000., 6000.};
 
 };
 

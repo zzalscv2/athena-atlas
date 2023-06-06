@@ -273,7 +273,7 @@ namespace InDet {
 
     std::vector<Trk::VxTrackAtVertex> tmpVTAV;
 
-    std::vector<Trk::VxTrackAtVertex> trkAtVtx = initVxCandidate->vxTrackAtVertex();
+    const std::vector<Trk::VxTrackAtVertex> &trkAtVtx = initVxCandidate->vxTrackAtVertex();
     for (const auto& vtxTrack : trkAtVtx) {
       const Trk::TrackParameters*  vtxPer = vtxTrack.perigeeAtVertex();
       const AmgVector(5)& iv = vtxPer->parameters();

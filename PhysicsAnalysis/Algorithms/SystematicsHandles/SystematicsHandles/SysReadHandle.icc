@@ -106,6 +106,16 @@ namespace CP
 
 
 
+  template<typename T> bool SysReadHandle<T> ::
+  isValid (const CP::SystematicSet& sys) const
+  {
+    const std::string& name = getName (sys);
+    assert (m_evtStore);
+    return m_evtStore->contains<T> (name);
+  }
+
+
+
   template<typename T> CP::SystematicSet SysReadHandle<T> ::
   getInputAffecting (const ISystematicsSvc& svc) const
   {

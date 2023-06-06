@@ -34,8 +34,6 @@ def calibPebCfg(flags):
     MTCalibPebConfig.default_options.EnableL1MuonPhase1 = opts.get('EnableL1MuonPhase1', True)
     MTCalibPebConfig.default_options.EnableL1CaloLegacy = opts.get('EnableL1CaloLegacy', True)
 
-    flags.Scheduler.AutoLoadUnmetDependencies = True
-
     MTCalibPebConfig.set_flags(flags)
     flags.lock()
 

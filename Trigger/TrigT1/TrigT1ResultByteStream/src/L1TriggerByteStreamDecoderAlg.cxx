@@ -79,6 +79,8 @@ StatusCode L1TriggerByteStreamDecoderAlg::initialize() {
   ATH_CHECK(m_robDataProviderSvc.retrieve());
   if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
   ATH_CHECK(m_bsMetaDataContRHKey.initialize(SG::AllowEmpty));
+  
+  renounce(m_bsMetaDataContRHKey);
 
   // Build a list of unique ROB IDs to request in each event
   for (const auto& decoderTool : m_decoderTools) {

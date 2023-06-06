@@ -321,6 +321,14 @@ def make_summary_algs(hypo_algs):
 def hlt_seq_cfg(flags, num_chains, concurrent=False, hypo_algs=None):
     acc = ComponentAccumulator()
 
+    # Load these objects from StoreGate
+    loadFromSG = [('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
+                  ('TrigConf::L1Menu','DetectorStore+L1TriggerMenu'),
+                  ('TrigConf::HLTMenu','DetectorStore+HLTTriggerMenu')]
+
+    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+    acc.merge(SGInputLoaderCfg(flags, loadFromSG))
+
     # Sequences need to ensure that summary algs run after all hypos
     acc.addSequence(seqOR('hltTop'))
     acc.addSequence(parOR('hltHypoSeq'), parentName='hltTop')

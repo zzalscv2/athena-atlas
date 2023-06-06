@@ -131,9 +131,6 @@ namespace ISF {
     //apply eta interpolation
     double interpolateEta(const double &eta, CLHEP::HepRandomEngine* rndmEngine) const;
 
-    //helper function to convert comma separated string into vector
-    std::vector<std::string> str_to_list(const std::string & str) const;
-
     //get the infoMap from xml file based on the xmlpathname and also name of mainNode
     std::vector<std::map<std::string,std::string>> getInfoMap(std::string mainNode, const std::string &xmlFilePath);
 

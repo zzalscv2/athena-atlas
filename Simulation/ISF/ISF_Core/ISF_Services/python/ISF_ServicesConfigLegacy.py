@@ -109,6 +109,8 @@ def getGenericTruthService(name="ISF_TruthService", **kwargs):
     is_long_lived_simulation = any(x in ISF_Flags.Simulator() for x in long_lived_simulators) #FIXME this should be set in a nicer way.
     if is_long_lived_simulation:
         kwargs.setdefault('QuasiStableParticlesIncluded', True)
+    from G4AtlasApps.SimFlags import simFlags
+    kwargs.setdefault("QuasiStableParticleOverwrite", not simFlags.UseShadowEvent())
     return CfgMgr.ISF__TruthSvc(name, **kwargs)
 
 

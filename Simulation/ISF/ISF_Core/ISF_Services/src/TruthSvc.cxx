@@ -331,7 +331,7 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
   const bool isQuasiStableVertex = (classification == ISF::QS_PREDEF_VTX); // QS_DEST_VTX and QS_SURV_VTX should be treated as normal from now on.
   // add child particles to the vertex
   unsigned short numSec = ti.numberOfChildren();
-  if (isQuasiStableVertex) {
+  if (m_quasiStableParticleOverwrite && isQuasiStableVertex) {
     // Here we are checking if the existing GenVertex has the same
     // number of child particles as the truth incident.
     // FIXME should probably make this part a separate function and
@@ -350,7 +350,7 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
     ATH_MSG_VERBOSE("Existing vertex has " << nVertexChildren << " children. " <<
                  "Number of secondaries in current truth incident = " << numSec);
   }
-  const std::vector<HepMC::GenParticlePtr> childParticleVector = (isQuasiStableVertex) ? findChildren(ti.parentParticle()) : std::vector<HepMC::GenParticlePtr>();
+  const std::vector<HepMC::GenParticlePtr> childParticleVector = (m_quasiStableParticleOverwrite && isQuasiStableVertex) ? findChildren(ti.parentParticle()) : std::vector<HepMC::GenParticlePtr>();
   std::vector<HepMC::GenParticlePtr> matchedChildParticles;
   for ( unsigned short i=0; i<numSec; ++i) {
 
@@ -358,7 +358,7 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
 
     if (writeOutChild) {
       HepMC::GenParticlePtr  p = nullptr;
-      if(isQuasiStableVertex) {
+      if(m_quasiStableParticleOverwrite && isQuasiStableVertex) {
         //Find matching GenParticle in GenVertex
         const int childPDGcode= ti.childPdgCode(i);
         bool noMatch(true);
@@ -387,7 +387,8 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
       }
       else {
         // generate a new barcode for the child particle
-        Barcode::ParticleBarcode secBC = m_barcodeSvc->newSecondary( parentBC, processCode);
+        Barcode::ParticleBarcode secBC = (isQuasiStableVertex) ?
+          this->maxGeneratedParticleBarcode(ti.parentParticle()->parent_event())+1 : m_barcodeSvc->newSecondary( parentBC, processCode);
         if ( secBC == Barcode::fUndefinedBarcode) {
           if (m_ignoreUndefinedBarcodes)
             ATH_MSG_WARNING("Unable to generate new Secondary Particle Barcode. Continuing due to 'IgnoreUndefinedBarcodes'==True");

@@ -26,6 +26,8 @@ def setDefaultOnlineFlagsNewStyle(flags):
     flags.Scheduler.ShowControlFlow = False
     flags.Scheduler.ShowDataFlow = False
     flags.Scheduler.EnableVerboseViews = False
+    flags.Scheduler.AutoLoadUnmetDependencies = False
+    flags.Input.FailOnUnknownCollections = True
 
 
 def defaultOnlineFlags():

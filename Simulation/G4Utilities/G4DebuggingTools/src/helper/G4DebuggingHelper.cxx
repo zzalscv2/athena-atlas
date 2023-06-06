@@ -13,9 +13,14 @@
 #include "G4PionMinus.hh"
 #include "G4PionZero.hh"
 #include "G4Version.hh"
+#include <string_view>
 
 namespace G4DebuggingHelpers {
-
+  bool G4StrContains(const std::string_view& s, const char* v)
+  {
+    return s.find(v) != std::string_view::npos;
+  }
+  
   const G4String ClassifyParticle( const G4ParticleDefinition* def ) {
     if (def == G4Electron::Electron())
       return "e-";
@@ -61,12 +66,13 @@ namespace G4DebuggingHelpers {
     ||  nom == "PyrogelXT"
     ||  nom == "Vacuum")
       return nom;
-    else if (nom.substr(0,12)=="pix::IBL_Fwd")
+    else if (nom.compare(0,12,"pix::IBL_Fwd")==0)
       return "IBL_Fwd";
     return "other";
   }
 
-  const G4String ClassifyVolume( const G4String &nom ) {
+  const G4String ClassifyVolume( const G4String &nomstr ) {
+    std::string_view nom(nomstr); //Avoid copying characters during comparison
     if ( nom.length() >= 17 && nom.substr(13, 4) == "EMEC" ) {
       return "EMEC";
     }
@@ -99,8 +105,8 @@ namespace G4DebuggingHelpers {
          ||   ( nom.length() >= 9  && nom.substr(0, 9)  == "DriftTube" )
          ||   ( nom.length() >= 12 && nom.substr(0, 12) == "SensitiveGas" )
 #if G4VERSION_NUMBER < 1100
-         ||     nom.contains("MDT")
-         ||     nom.contains("station") ) {
+         ||     nomstr.contains("MDT")
+         ||     nomstr.contains("station") ) {
 #else
          ||     G4StrUtil::contains(nom, "MDT")
          ||     G4StrUtil::contains(nom, "station") ) {

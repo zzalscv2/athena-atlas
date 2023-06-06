@@ -118,6 +118,7 @@ namespace ISF {
     //   all parent particles if they die
 
     Gaudi::Property<bool>   m_quasiStableParticlesIncluded{this, "QuasiStableParticlesIncluded", false, ""}; //!< does this job simulate quasi-stable particles.
+    Gaudi::Property<bool>   m_quasiStableParticleOverwrite{this, "QuasiStableParticleOverwrite", true, ""}; //!< should the job be overwriting QS particles
 
   };
 }

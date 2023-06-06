@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -68,7 +68,6 @@ namespace InDet
 
   InDetJetFitterUtils::InDetJetFitterUtils(const std::string& t, const std::string& n, const IInterface*  p) :
     AthAlgTool(t,n,p),
-    m_extrapolatorIsAvailable(false),
     m_linearizedTrackFactoryIsAvailable(false)
   { 
     
@@ -102,10 +101,6 @@ namespace InDet
       if (sc.isFailure()) {
         msg(MSG::FATAL) << "Could not find Extrapolator tool." << endmsg;
         return StatusCode::FAILURE;
-      }
-      else
-      {
-        m_extrapolatorIsAvailable=true;
       }
     }
     
