@@ -58,3 +58,8 @@ def actsArtFlags(flags):
     flags.Reco.EnableHGTDExtension = False
     flags.Tracking.recoChain = [TrackingComponent.AthenaChain,
                                 TrackingComponent.ActsChain]
+
+def actsBenchmarkSpotFlags(flags):
+    """flags for Reco_tf with CA used for becnkmarking with SPOT"""
+    flags.Reco.EnableHGTDExtension = False
+    flags.Tracking.recoChain = [TrackingComponent.BenchmarkSpot]
