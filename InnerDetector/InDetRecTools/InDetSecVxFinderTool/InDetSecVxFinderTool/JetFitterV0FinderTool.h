@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration  
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETFITTER_V0FINDER_TOOL_H
@@ -90,10 +90,7 @@ namespace InDet {
 	Gaudi::Property< double > m_cutCompatibilityToPrimarySingleTrackForMatInteractions {this,"cutCompToPrimarySingleTrackForMatInterac",1e-4,""};
 	Gaudi::Property< double > m_cutCompatibilityToPrimaryBothTracksForMatInteractions {this,"cutCompToPrimaryBothTracksForMatInterac",1e-6,""};
 
-	Gaudi::Property< double > m_firstBeam_min {this,"firstBeam_min",23,""};
-	Gaudi::Property< double > m_firstBeam_max {this,"firstBeam_max",25,""};
-	Gaudi::Property< double > m_secondBeam_min {this,"secondBeam_min",23,""};
-	Gaudi::Property< double > m_secondBeam_max {this,"secondBeam_max",25,""};
+
 	Gaudi::Property< double > m_firstLayer_min {this,"firstLayer_min",34.0-2.5,""};
 	Gaudi::Property< double > m_firstLayer_max {this,"firstLayer_max",34.0+2.5,""};
 	Gaudi::Property< double > m_secondLayer_min {this,"secondLayer_min",51.5-3,""};
