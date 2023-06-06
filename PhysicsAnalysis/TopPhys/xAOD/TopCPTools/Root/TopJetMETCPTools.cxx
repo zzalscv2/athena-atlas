@@ -452,7 +452,7 @@ namespace top {
         }
 
         // hardcode the path as only one is supported
-        calibrationPathJESJER = "HIJetUncertainties/Winter2021/HIR4_GlobalReduction_SimpleJER.config";
+        calibrationPathJESJER = "HIJetUncertainties/Spring2023/HIR4_GlobalReduction_SimpleJER.config";
 
         // Check if we need different QG-fraction setups for pPb and Pbp (separated in the config by comma)
         auto qgFracFiles = std::vector<std::string>();
