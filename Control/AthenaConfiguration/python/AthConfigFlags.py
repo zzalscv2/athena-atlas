@@ -465,7 +465,7 @@ class AthConfigFlags(object):
         parser.add_argument("--mtes", type=bool, default=None, help="Run multi-threaded event service")
         parser.add_argument("--mtes-channel", type=str, default=None, help="For multi-threaded event service: the name of communication channel between athena and pilot")
         parser.add_argument("---",dest="terminator",action='store_true', help=argparse.SUPPRESS) # special hidden option required to convert option terminator -- for --help calls
-        parser.add_argument("--pmon", type=str, default=None, choices=['FastMonMT','FullMonMT'], help="Perfomance monitoring")
+        parser.add_argument("--pmon", type=str.lower, default=None, choices=['fastmonmt','fullmonmt'], help="Performance monitoring")
 
         return parser
 
@@ -612,7 +612,9 @@ class AthConfigFlags(object):
 
         if args.pmon is not None:
             self._loadDynaFlags("PerfMon")
-            self._set("PerfMon.do"+args.pmon,True)
+            dispatch = {'fastmonmt' : 'PerfMon.doFastMonMT',
+                        'fullmonmt' : 'PerfMon.doFullMonMT'}
+            self._set(dispatch[args.pmon.lower()], True)
 
         if args.mtes is not None:
             self.Exec.MTEventService = args.mtes
