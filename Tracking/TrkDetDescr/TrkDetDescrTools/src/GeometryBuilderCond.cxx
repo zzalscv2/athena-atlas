@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -117,7 +117,7 @@ StatusCode Trk::GeometryBuilderCond::initialize()
 
     // if no world materials are declared, take default ones - set vacuum 
     if (m_worldMaterialProperties.size() < 5) 
-        m_worldMaterialProperties = std::vector<double>{10.e10,10.e10,0., 0., 0.};
+        m_worldMaterialProperties = std::vector<double>{10.e10,10.e10,1e-10, 0., 0.};
 
     m_worldMaterial = Trk::Material(m_worldMaterialProperties[0],
 				    m_worldMaterialProperties[1],
