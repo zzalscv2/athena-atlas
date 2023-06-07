@@ -142,7 +142,7 @@ def GenericTruthServiceCfg(flags, name="ISF_TruthService", **kwargs):
 
     if flags.Sim.ISF.Simulator.isQuasiStable():
         kwargs.setdefault("QuasiStableParticlesIncluded", True)
-
+    kwargs.setdefault("QuasiStableParticleOverwrite", not flags.Sim.UseShadowEvent)
     svc = CompFactory.ISF.TruthSvc(name, **kwargs)
     result.addService(svc, primary=True)
     return result

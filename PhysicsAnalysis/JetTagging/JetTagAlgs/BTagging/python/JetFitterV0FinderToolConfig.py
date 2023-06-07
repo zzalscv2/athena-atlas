@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -11,7 +11,7 @@ from BTagging.JetFitterMode3dTo1dFinderConfig import JetFitterMode3dTo1dFinderCf
 def JetFitterV0FinderToolCfg(flags, name, suffix="", useBTagFlagsDefaults = True, **options):
     """Sets up a JetFitterV0FinderTool tool and returns it. 
 
-    The following options have BTaggingFlags defaults:
+    The following options have defaults:
     
     revertFromPositiveToNegativeTags                               default: False
     cutTwoTrkVtxVtxProbForBFirstSelectCriteriumA                   default: 0.05
@@ -25,10 +25,6 @@ def JetFitterV0FinderToolCfg(flags, name, suffix="", useBTagFlagsDefaults = True
     cutTwoTrkVtxLifeSignForBFirstSelectCriteriumB                  default: 1.5
     cutCompToPrimarySingleTrackForMatInterac                       default: 1e-4
     cutCompToPrimaryBothTracksForMatInterac                        default: 1e-6
-    firstBeam_min                                                  default: 23
-    firstBeam_max                                                  default:  25
-    secondBeam_min                                                 default: 23
-    secondBeam_max                                                 default: 24
     firstLayer_min                                                 default: 34.0-2.5
     firstLayer_max                                                 default: 34.0+2.5
     secondLayer_min                                                default: 51.5-3
@@ -50,32 +46,6 @@ def JetFitterV0FinderToolCfg(flags, name, suffix="", useBTagFlagsDefaults = True
         inDetJetFitterUtils = acc.popToolsAndMerge(InDetJetFitterUtilsCfg(flags,'InDetJFUtils'+suffix))
         jetFitterMode3dTo1dFinder = acc.popToolsAndMerge(JetFitterMode3dTo1dFinderCfg(flags, 'JFMode3dTo1dFinder'+suffix))
         defaults = { 'revertFromPositiveToNegativeTags' : True if (suffix=="FLIP_SIGN") else False,
-                     'cutTwoTrkVtxVtxProbForBFirstSelectCriteriumA' : 0.05 ,
-                     'cutTwoTrkVtxVtxProbForBFirstSelectCriteriumB' : 0.034 ,
-                     'cutCompatibilityPrimaryVertexSingleTrackForBFirstSelection' : 1e-1 ,
-                     'cutCompatibilityPrimaryVertexBothTracksForBFirstSelection' : 1e-2 ,
-                     'cutIPD0BothTracksForBFirstSelection' : 3.5 ,
-                     'cutIPZ0BothTracksForBFirstSelection' : 5. ,
-                     'cutPtBothTracksForBFirstSelection' : 500. ,
-                     'cutTwoTrkVtxLifeSignForBFirstSelectCriteriumA' : 1. ,
-                     'cutTwoTrkVtxLifeSignForBFirstSelectCriteriumB' : 1.5 ,
-                     'cutCompToPrimarySingleTrackForMatInterac' : 1e-4 ,
-                     'cutCompToPrimaryBothTracksForMatInterac' : 1e-6 ,
-                    'firstBeam_min' : 23 ,
-                     'firstBeam_max' :  25 ,
-                    'secondBeam_min' : 23 ,
-                     'secondBeam_max' : 24 ,
-                     'firstLayer_min' : 34.0-2.5 ,
-                     'firstLayer_max' : 34.0+2.5 ,
-                     'secondLayer_min' : 51.5-3 ,
-                     'secondLayer_max' : 51.5+3 ,
-                     'cutCompPVSinglePosLifeTrackForBSecondSelect' : 5e-2 ,
-                     'cutCompPVSingleNegLifeTrackForBSecondSelect' : 1e-2 ,
-                     'cutIPD0SigBoxSingleTrackForBSecondSelection' : 2. ,
-                     'cutIPZ0SigBoxSingleTrackForBSecondSelection' : 5. ,
-                     'cutIPD0SingleTrackForBSecondSelection' : 1.5 ,
-                     'cutIPZ0SingleTrackForBSecondSelection' : 3. ,
-                     'cutPtSingleTrackForBSecondSelection' : 750,
                      'InDetJetFitterUtils' : inDetJetFitterUtils,
                      'Mode3dFinder' : jetFitterMode3dTo1dFinder,
                      'useITkMaterialRejection' : flags.GeoModel.Run >= LHCPeriod.Run4 }

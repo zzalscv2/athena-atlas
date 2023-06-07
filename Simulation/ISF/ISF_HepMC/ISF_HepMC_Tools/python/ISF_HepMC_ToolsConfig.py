@@ -21,6 +21,7 @@ def ParticleFinalStateFilterCfg(flags, name="ISF_ParticleFinalStateFilter", **kw
 
 def ParticleSimWhiteListCfg(flags, name="ISF_ParticleSimWhiteList", **kwargs):
     result = ComponentAccumulator()
+    kwargs.setdefault("UseShadowEvent", flags.Sim.UseShadowEvent)
     result.setPrivateTools(CompFactory.ISF.GenParticleSimWhiteList(name, **kwargs))
     return result
 
@@ -36,6 +37,7 @@ def ParticleSimWhiteList_ExtraParticlesCfg(flags, name="ISF_ParticleSimWhiteList
     else:
         print ('ERROR Failed to find PDGTABLE.MeV file')
     kwargs.setdefault("WhiteLists" , whiteLists )
+    kwargs.setdefault("UseShadowEvent", flags.Sim.UseShadowEvent)
     result.setPrivateTools(CompFactory.ISF.GenParticleSimWhiteList(name, **kwargs))
     return result
 

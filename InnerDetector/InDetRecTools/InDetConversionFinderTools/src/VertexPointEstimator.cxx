@@ -11,12 +11,9 @@
 		changes : M.ELSING
 ***************************************************************************/ 
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
-#include "CLHEP/Units/SystemOfUnits.h"
-#include "TMath.h"
 
-//Do we need to replace this?
-using CLHEP::pi;
-using CLHEP::twopi;
+constexpr double pi = M_PI;
+constexpr double twopi = M_2_PI;
 
 namespace InDet {
 
@@ -408,7 +405,7 @@ namespace InDet {
         double xb = (xi1-xc2)*norm2;
         double yb = (yi1-yc2)*norm2;
         double costheta = xa*xb + ya*yb;
-        phi = M_PI-acos(costheta);
+        phi = M_PI-std::acos(costheta);
       }
     }
     return ret;
@@ -446,7 +443,7 @@ namespace InDet {
         double xb = (xi1 - xc2)/norm2;
         double yb = (yi1 - yc2)/norm2;
         double costheta = xa*xb +ya*yb;
-        double phi = TMath::Pi()-TMath::ACos(costheta);
+        double phi = M_PI-std::acos(costheta);
         ddphi = phi;
       }
     }

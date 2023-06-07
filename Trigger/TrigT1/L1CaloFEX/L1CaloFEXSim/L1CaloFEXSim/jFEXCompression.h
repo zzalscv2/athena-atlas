@@ -65,7 +65,7 @@ private:
   /** L1Calo saturated/overflow */
   static const unsigned int s_jFEXOverflow = 0xffff;
   /** Error return value */
-  static const int s_error = -999;
+  static const int s_error = -99999;
 };
 
 

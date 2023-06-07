@@ -87,7 +87,11 @@ namespace CP
     ::StatusCode retrieve (const T*& object,
                            const CP::SystematicSet& sys) const;
 
-
+    /// \brief check if the object is available
+    /// Note that this should only be used in special use cases
+    /// and may be removed in the future.
+  public:
+    bool isValid (const CP::SystematicSet& sys) const;
 
     //
     // inherited interface

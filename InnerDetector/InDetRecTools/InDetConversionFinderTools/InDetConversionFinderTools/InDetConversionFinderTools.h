@@ -27,7 +27,6 @@
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
 
-#include "TrkParticleBase/TrackParticleBaseCollection.h"
 #include "TrkTrack/TrackCollection.h"
 /*xAOD collections */
 #include "xAODTracking/TrackParticle.h"

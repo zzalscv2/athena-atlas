@@ -126,7 +126,23 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = [],deadMaterialCorrections=False, e
         acc.addEventAlgo(eFEX)
 
     if flags.Trigger.L1.dojFex:
-        jFEXInputs = CompFactory.LVL1.jTowerMakerFromSuperCells('jTowerMakerFromSuperCells')
+        
+        if not flags.Input.isMC:
+            from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexInputByteStreamToolCfg
+            inputjFexTool = acc.popToolsAndMerge(jFexInputByteStreamToolCfg(flags, 'jFexInputBSDecoderTool'))
+            
+            maybeMissingRobs = []
+            decoderTools = []
+            
+            for module_id in inputjFexTool.ROBIDs:
+                maybeMissingRobs.append(module_id)
+
+            decoderTools += [inputjFexTool]
+            decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder", DecoderTools=[inputjFexTool], MaybeMissingROBs=maybeMissingRobs)
+            acc.addEventAlgo(decoderAlg)
+        
+        jFEXInputs = CompFactory.LVL1.jTowerMakerFromJfexTowers('jTowerMakerFromJfexTowers')
+        jFEXInputs.IsMC = flags.Input.isMC
         jFEXInputs.jSuperCellTowerMapperTool = CompFactory.LVL1.jSuperCellTowerMapper('jSuperCellTowerMapper', SCell=sCellType)
         jFEXInputs.jSuperCellTowerMapperTool.SCellMasking = not flags.Input.isMC
         jFEX = CompFactory.LVL1.jFEXDriver('jFEXDriver')
