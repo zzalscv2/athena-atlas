@@ -6,6 +6,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "Gaudi/Property.h"
 #include "TriggerMatchingTool/IIParticleRetrievalTool.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
 
 #include <vector>
 
@@ -20,10 +21,11 @@ namespace Trig {
         StatusCode execute() override;
 
     private:
+        PublicToolHandle<Trig::TrigDecisionTool> m_tdt{this, "TrigDecisionTool", "", "When enabled read navigation from TDT/off by default"};
         ToolHandle<Trig::IIParticleRetrievalTool> m_toolRun2{
             this, "RetrievalToolRun2Nav", "", "The tool configured to use Run 2 format"};
         ToolHandle<Trig::IIParticleRetrievalTool> m_toolRun3{
-            this, "RetrievalToolRun3Nav", "", "The tool configured for fetching RUn 3 format"};
+            this, "RetrievalToolRun3Nav", "", "The tool configured to use Run 3 format"};
         Gaudi::Property<std::vector<std::string>> m_chains{
             this, "Chains", {}, "The chains to test"};
         Gaudi::Property<bool> m_failOnDifference{
@@ -37,8 +39,9 @@ namespace Trig {
             "Check if combinations are compatible (point to same objects)"};
 
         using CombinationsVector=std::vector<std::vector<const xAOD::IParticle *>>;
+        using CombinationsSet=std::set<std::set<const xAOD::IParticle *>>;
         StatusCode verifyCombinationsSize(const CombinationsVector& run2, const CombinationsVector& run3, const std::string& chain) const;
-        StatusCode verifyCombinationsContent(const CombinationsVector& run2, const CombinationsVector& run3, const std::string& chain) const;
+        StatusCode verifyCombinationsContent(const CombinationsSet& run2, const CombinationsSet& run3, const std::string& chain) const;
 
     }; //> end class AthAlgorithm
 }
