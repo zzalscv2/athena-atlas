@@ -77,10 +77,10 @@ def TriggerMatchingCommonRun2ToRun3Cfg(ConfigFlags, **kwargs):
     msg.info('doEDMVersionConversion is True, now scheduling conversion of Run 2 trigger navigation to Run 3')
 
     from TrigNavTools.NavConverterConfig import NavConverterCfg
-    acc.merge(NavConverterCfg(ConfigFlags))
 
     # And then run the run 3 slimming on the output of NavConverter
     triggerList = kwargs['TriggerList']
+    acc.merge(NavConverterCfg(ConfigFlags, chainsFilter = triggerList))
     from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import TrigNavSlimmingMTDerivationCfg
     acc.merge(TrigNavSlimmingMTDerivationCfg(ConfigFlags,chainsFilter=triggerList))
 
