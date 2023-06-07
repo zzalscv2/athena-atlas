@@ -99,17 +99,23 @@ echo "Reference set being used: ${DigitizationTestsVersion}"
 if [[ $rc -eq 0 ]]
 then
     # Do reference comparisons
-    art.py compare ref --mode=semi-detailed --no-diff-meta "$DigiOutFileName" "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/ReferenceFiles/$DigitizationTestsVersion/$CMTCONFIG/$DigiOutFileName"
+    art.py compare ref --mode=semi-detailed --no-diff-meta "$DigiOutFileNameCG" "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/ReferenceFiles/$DigitizationTestsVersion/$CMTCONFIG/$DigiOutFileNameCG"
     rc4=$?
-    status=$rc4
+    if [[ $status -eq 0 ]]
+    then
+        status=$rc4
+    fi
 fi
 echo "art-result: $rc4 OLDvsFixedRef"
 
 if [[ $rc -eq 0 ]]
 then
-    art.py compare grid --entries 10 "$1" "$2" --mode=semi-detailed
+    art.py compare grid --entries 10 "$1" "$2" --mode=semi-detailed --file="$DigiOutFileNameCG"
     rc5=$?
-    status=$rc5
+    if [[ $status -eq 0 ]]
+    then
+        status=$rc5
+    fi
 fi
 echo "art-result: $rc5 regression"
 
