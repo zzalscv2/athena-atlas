@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetSurveyConstraintTool/SurveyConstraintTestAlg.h"
@@ -10,8 +10,7 @@
 #include "InDetIdentifier/SCT_ID.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
-#include "GaudiKernel/IHistogramSvc.h" 
-#include "AIDA/IHistogram1D.h"
+#include "TH1F.h"
 #include "GaudiKernel/SmartDataPtr.h" 
 #include "GaudiKernel/NTuple.h"
 #include "GaudiKernel/INTupleSvc.h"
@@ -59,7 +58,7 @@ StatusCode SurveyConstraintTestAlg::initialize(){
   ATH_MSG_DEBUG( "got ID helpers from detector store (relying on GeoModel to put them)" );
 
   // book histograms
-  BookHist();
+  ATH_CHECK( BookHist() );
   CreateMisAlignNtuple();
 
 return StatusCode::SUCCESS;
@@ -178,9 +177,9 @@ ATH_MSG_INFO( "execute()" );
        if(previous_disk == m_pixid->layer_disk(Pixel_ModuleID))
          NewDisk=false;
        else NewDisk=true;
-       if (NewDisk) for (unsigned int i=0;i!=6;++i) m_h_PixEC_Align_Disk[i] -> fill(multipl*dparams[i]);
-       if (NewSector) for (unsigned int i=0;i!=6;++i) m_h_PixEC_Align_first[i] -> fill(multipl*dparams[i]);
-       else for (unsigned int i=0;i!=6;++i) m_h_PixEC_Align[i] -> fill(multipl*dparams[i]);
+       if (NewDisk) for (unsigned int i=0;i!=6;++i) m_h_PixEC_Align_Disk[i] -> Fill(multipl*dparams[i]);
+       if (NewSector) for (unsigned int i=0;i!=6;++i) m_h_PixEC_Align_first[i] -> Fill(multipl*dparams[i]);
+       else for (unsigned int i=0;i!=6;++i) m_h_PixEC_Align[i] -> Fill(multipl*dparams[i]);
        previous_disk = m_pixid->layer_disk(Pixel_ModuleID);
        previous_sector = m_SurvConstr->SectorNumber(m_pixid->phi_module(Pixel_ModuleID)); 
 
@@ -276,27 +275,44 @@ StatusCode SurveyConstraintTestAlg::finalize() {
   return StatusCode::SUCCESS;
 }
 
-void SurveyConstraintTestAlg::BookHist() {
-  m_h_PixEC_Align_Disk[0] = histoSvc()->book("/stat/MisAlign", "Misalignment Disk X [mu]", "Misalignment Disk X [mu]",100, -50.,50.);
-  m_h_PixEC_Align_Disk[1] = histoSvc()->book("/stat/MisAlign", "Misalignment Disk Y [mu]", "Misalignment Disk Y [mu]",100, -100.,100.);
-  m_h_PixEC_Align_Disk[2] = histoSvc()->book("/stat/MisAlign", "Misalignment Disk Z [mu]", "Misalignment Disk Z [mu]",100, -200.,200.);
-  m_h_PixEC_Align_Disk[3] = histoSvc()->book("/stat/MisAlign", "Misalignment Disk PhiX [mrad]", "Misalignment Disk PhiX [mrad]",100, -2.,2.);
-  m_h_PixEC_Align_Disk[4] = histoSvc()->book("/stat/MisAlign", "Misalignment Disk PhiY [mrad]", "Misalignment Disk PhiY [mrad]",100, -5.,5.);
-  m_h_PixEC_Align_Disk[5] = histoSvc()->book("/stat/MisAlign", "Misalignment Disk PhiZ [mrad]", "Misalignment Disk PhiZ [mrad]",100, -2.,2.);
+StatusCode SurveyConstraintTestAlg::BookHist() {
+  ServiceHandle<ITHistSvc> histSvc ("THistSvc", "SurveyConstraintTestAlg");
+  ATH_CHECK( histSvc.retrieve() );
 
-  m_h_PixEC_Align_first[0] = histoSvc()->book("/stat/MisAlign", "Misalignment first X [mu]", "Misalignment first X [mu]",100, -50.,50.);
-  m_h_PixEC_Align_first[1] = histoSvc()->book("/stat/MisAlign", "Misalignment first Y [mu]", "Misalignment first Y [mu]",100, -100.,100.);
-  m_h_PixEC_Align_first[2] = histoSvc()->book("/stat/MisAlign", "Misalignment first Z [mu]", "Misalignment first Z [mu]",100, -200.,200.);
-  m_h_PixEC_Align_first[3] = histoSvc()->book("/stat/MisAlign", "Misalignment first PhiX [mrad]", "Misalignment first PhiX [mrad]",100, -2.,2.);
-  m_h_PixEC_Align_first[4] = histoSvc()->book("/stat/MisAlign", "Misalignment first PhiY [mrad]", "Misalignment first PhiY [mrad]",100, -5.,5.);
-  m_h_PixEC_Align_first[5] = histoSvc()->book("/stat/MisAlign", "Misalignment first PhiZ [mrad]", "Misalignment first PhiZ [mrad]",100, -2.,2.);
+  auto book = [&] (TH1*& h,
+                   const char* name,
+                   const char* title,
+                   int nbins,
+                   float xlo,
+                   float xhi)
+  {
+    h = new TH1F (name, title, nbins, xlo, xhi);
+    const static std::string prefix = "/stat/MisAlign/";
+    return histSvc->regHist (prefix + name, h);
+  };
 
-  m_h_PixEC_Align[0] = histoSvc()->book("/stat/MisAlign", "Misalignment X [mu]", "Misalignment X [mu]",100, -50.,50.);
-  m_h_PixEC_Align[1] = histoSvc()->book("/stat/MisAlign", "Misalignment Y [mu]", "Misalignment Y [mu]",100, -100.,100.);
-  m_h_PixEC_Align[2] = histoSvc()->book("/stat/MisAlign", "Misalignment Z [mu]", "Misalignment Z [mu]",100, -200.,200.);
-  m_h_PixEC_Align[3] = histoSvc()->book("/stat/MisAlign", "Misalignment PhiX [mrad]", "Misalignment PhiX [mrad]",100, -2.,2.);
-  m_h_PixEC_Align[4] = histoSvc()->book("/stat/MisAlign", "Misalignment PhiY [mrad]", "Misalignment PhiY [mrad]",100, -5.,5.);
-  m_h_PixEC_Align[5] = histoSvc()->book("/stat/MisAlign", "Misalignment PhiZ [mrad]", "Misalignment PhiZ [mrad]",100, -2.,2.);
+  ATH_CHECK( book (m_h_PixEC_Align_Disk[0], "Misalignment Disk X [mu]", "Misalignment Disk X [mu]",100, -50.,50.) );
+  ATH_CHECK( book (m_h_PixEC_Align_Disk[1], "Misalignment Disk Y [mu]", "Misalignment Disk Y [mu]",100, -100.,100.) );
+  ATH_CHECK( book (m_h_PixEC_Align_Disk[2], "Misalignment Disk Z [mu]", "Misalignment Disk Z [mu]",100, -200.,200.) );
+  ATH_CHECK( book (m_h_PixEC_Align_Disk[3], "Misalignment Disk PhiX [mrad]", "Misalignment Disk PhiX [mrad]",100, -2.,2.) );
+  ATH_CHECK( book (m_h_PixEC_Align_Disk[4], "Misalignment Disk PhiY [mrad]", "Misalignment Disk PhiY [mrad]",100, -5.,5.) );
+  ATH_CHECK( book (m_h_PixEC_Align_Disk[5], "Misalignment Disk PhiZ [mrad]", "Misalignment Disk PhiZ [mrad]",100, -2.,2.) );
+
+  ATH_CHECK( book (m_h_PixEC_Align_first[0], "Misalignment first X [mu]", "Misalignment first X [mu]",100, -50.,50.) );
+  ATH_CHECK( book (m_h_PixEC_Align_first[1], "Misalignment first Y [mu]", "Misalignment first Y [mu]",100, -100.,100.) );
+  ATH_CHECK( book (m_h_PixEC_Align_first[2], "Misalignment first Z [mu]", "Misalignment first Z [mu]",100, -200.,200.) );
+  ATH_CHECK( book (m_h_PixEC_Align_first[3], "Misalignment first PhiX [mrad]", "Misalignment first PhiX [mrad]",100, -2.,2.) );
+  ATH_CHECK( book (m_h_PixEC_Align_first[4], "Misalignment first PhiY [mrad]", "Misalignment first PhiY [mrad]",100, -5.,5.) );
+  ATH_CHECK( book (m_h_PixEC_Align_first[5], "Misalignment first PhiZ [mrad]", "Misalignment first PhiZ [mrad]",100, -2.,2.) );
+
+  ATH_CHECK( book (m_h_PixEC_Align[0], "Misalignment X [mu]", "Misalignment X [mu]",100, -50.,50.) );
+  ATH_CHECK( book (m_h_PixEC_Align[1], "Misalignment Y [mu]", "Misalignment Y [mu]",100, -100.,100.) );
+  ATH_CHECK( book (m_h_PixEC_Align[2], "Misalignment Z [mu]", "Misalignment Z [mu]",100, -200.,200.) );
+  ATH_CHECK( book (m_h_PixEC_Align[3], "Misalignment PhiX [mrad]", "Misalignment PhiX [mrad]",100, -2.,2.) );
+  ATH_CHECK( book (m_h_PixEC_Align[4], "Misalignment PhiY [mrad]", "Misalignment PhiY [mrad]",100, -5.,5.) );
+  ATH_CHECK( book (m_h_PixEC_Align[5], "Misalignment PhiZ [mrad]", "Misalignment PhiZ [mrad]",100, -2.,2.) );
+
+  return StatusCode::SUCCESS;
 }
   //__________________________________________________________________________
 ////} // end of namespace bracket
