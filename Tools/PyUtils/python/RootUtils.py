@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils.RootUtils
 # @author Sebastien Binet
@@ -231,7 +231,7 @@ class RootFileDumper(object):
 
         return
 
-    def dump(self, tree_name, itr_entries, leaves=None):
+    def dump(self, tree_name, itr_entries, leaves=None, retvecs=False):
 
         ROOT = import_root()
         import AthenaPython.PyAthena as PyAthena
@@ -313,7 +313,7 @@ class RootFileDumper(object):
                 if not (val is None):
                     #print ("-->",val,br_name)
                     try:
-                        vals = _pythonize(val, py_name, True)
+                        vals = _pythonize(val, py_name, True, retvecs)
                     except Exception as err:
                         print ("**err** for branch [%s] val=%s (type=%s)" % (
                             br_name, val, type(val),

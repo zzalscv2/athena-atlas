@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ROOTUTILS_PYROOTINSPECTOR_H
@@ -28,7 +28,8 @@ class PyROOTInspector
   static
   PyObject* pyroot_inspect2(PyObject *obj, 
                             PyObject *obj_name,
-                            bool persistentOnly = false);
+                            bool persistentOnly = false,
+                            bool retvecs = false);
 
 };
 
