@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.Enums import FlagEnum
 class Campaign(FlagEnum):
     Unknown = ''
@@ -11,6 +11,7 @@ class Campaign(FlagEnum):
     MC21a = 'mc21a'
     MC23a = 'mc23a'
     MC23c = 'mc23c'
+    PhaseII = 'phaseII'
 
 # Campaign run numbers (only latest campaigns that do not have metadata present)
 campaign_runs = {

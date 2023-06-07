@@ -63,7 +63,16 @@ def createLArConfigFlags():
     lcf.addFlag("LAr.ROD.nnJson", "")
     lcf.addFlag("LAr.ROD.nnOutputNode", "")
     lcf.addFlag("LAr.ROD.nnInputNode", "")
+    # default LArRawSC container 
     lcf.addFlag("LAr.LATOME.DTInfoForL1","SC_ET_ID")
+    # storing SC CaloCellContainer with bcid'ed energies
+    lcf.addFlag("LAr.DT.storeET_ID",False)
+    lcf.addFlag("LAr.DT.ET_IDKey","SCell")
+    lcf.addFlag("LAr.DT.doSCMasking",True)
+    # storing SC CaloCellContainers +-1 around bcid'ed energies
+    lcf.addFlag("LAr.DT.storeET_additional",False)
+    lcf.addFlag("LAr.DT.ET_PlusKey","SCellPlus")
+    lcf.addFlag("LAr.DT.ET_MinusKey","SCellMinus")
 
     ##NoisyRO flags
     # cell quality cut

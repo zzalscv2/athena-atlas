@@ -36,7 +36,7 @@ def defineMenu():
         'L1_MU8F_2MU5VF',
 
         'L1_2MU14FCH_OVERLAY',
-        'L1_MU3V_EMPTY', 'L1_MU5VF_EMPTY', 'L1_MU3V_FIRSTEMPTY', 'L1_MU8VF_EMPTY',
+        'L1_MU3V_EMPTY', 'L1_2MU5VF_EMPTY', 'L1_MU3V_FIRSTEMPTY', 'L1_MU8VF_EMPTY',
         'L1_MU3V_UNPAIRED_ISO',        
 
         # test

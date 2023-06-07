@@ -13,7 +13,7 @@
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
 
 constexpr double pi = M_PI;
-constexpr double twopi = M_2_PI;
+constexpr double twopi = 2.*pi;
 
 namespace InDet {
 
@@ -410,7 +410,16 @@ namespace InDet {
     }
     return ret;
   }
-  
+
+  //recreate the logic of TMath::Acos
+  double internal_acos(double x)
+  {
+    if (x < -1.) return M_PI;
+    if (x >  1.) return 0;
+    return std::acos(x);
+  }
+
+
   // ----------------------------------
   double VertexPointEstimator::areaVar(double xc1, double yc1, double r1, double xc2, double yc2, double r2, double& h, double& hl, double &ddphi) 
   {
@@ -443,7 +452,7 @@ namespace InDet {
         double xb = (xi1 - xc2)/norm2;
         double yb = (yi1 - yc2)/norm2;
         double costheta = xa*xb +ya*yb;
-        double phi = M_PI-std::acos(costheta);
+        double phi = M_PI-internal_acos(costheta);
         ddphi = phi;
       }
     }

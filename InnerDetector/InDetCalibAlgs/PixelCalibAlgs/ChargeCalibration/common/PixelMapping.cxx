@@ -82,6 +82,11 @@ namespace pix{
     return;
   }
   
+  bool
+  PixelMapping::contains(const std::string & geographicalID) const{
+    return (m_internalMap.find(geographicalID) != m_internalMap.end());
+  }
+  
   int 
   PixelMapping::nModules() const{
     return m_internalMap.size();

@@ -88,9 +88,6 @@ namespace Barcode {
     ParticleBarcode                               m_secondaryIncrement;
     ParticleBarcode                               m_currentSecondary;
 
-    /** barcode offset for each regeneration of updated particles */
-    ParticleBarcode                               m_particleRegenerationIncrement;
-
     /** throw error messages if a possible overflow is detected */
     bool                                          m_doUnderOverflowChecks;
 

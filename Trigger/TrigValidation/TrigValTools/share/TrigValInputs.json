@@ -131,8 +131,8 @@
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TriggerTest/mc21.900341.Epos_LHC_minbias_inelastic.recon.RDO.e8341_s3775_r13634_tid29010064_00/RDO.29010064._000112.pool.root.1",
-	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TriggerTest/mc21.900341.Epos_LHC_minbias_inelastic.recon.RDO.e8341_s3775_r13634_tid29010064_00/RDO.29010064._000200.pool.root.1"
+            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TriggerTest/valid1.900341.Epos_LHC_minbias_inelastic.recon.RDO.e8514_e8528_s4111_s4114_r14655_tid33662301_00/RDO.33662301._000021.pool.root.1",
+	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TriggerTest/valid1.900341.Epos_LHC_minbias_inelastic.recon.RDO.e8514_e8528_s4111_s4114_r14655_tid33662301_00/RDO.33662301._000029.pool.root.1"
         ]
     },
     "ttbar_HITS": {

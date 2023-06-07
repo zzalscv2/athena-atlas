@@ -17,7 +17,6 @@ Barcode::LegacyBarcodeSvc::LegacyBarcodeSvc(const std::string& name,ISvcLocator*
   m_firstSecondary(HepMC::SIM_BARCODE_THRESHOLD+1),
   m_secondaryIncrement(1),
   m_currentSecondary(1),
-  m_particleGenerationIncrement(HepMC::SIM_REGENERATION_INCREMENT),
   m_doUnderOverflowChecks(true)
 {
   // python properties

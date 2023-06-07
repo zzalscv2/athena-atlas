@@ -81,6 +81,8 @@ def getGenParticleFilters():
 
 
 def getInputConverter(name="ISF_InputConverter", **kwargs):
+    from G4AtlasApps.SimFlags import simFlags
+    kwargs.setdefault("UseShadowEvent", simFlags.UseShadowEvent())
     kwargs.setdefault("UseGeneratedParticleMass", False)
     kwargs.setdefault("GenParticleFilters", getGenParticleFilters())
     return CfgMgr.ISF__InputConverter(name, **kwargs)

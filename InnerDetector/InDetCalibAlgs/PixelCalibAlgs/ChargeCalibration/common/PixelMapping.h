@@ -21,6 +21,9 @@ namespace pix{
     //rewrite the function but dont change the signature too much
     void 
     mapping(const std::string & geographicalID, int *hashID, int *bec, int *layer, int *phimod, int *etamod) const;
+    
+    bool
+    contains(const std::string & geographicalID) const;
     int nModules() const;
     
   private:

@@ -295,6 +295,10 @@ def addHighMuP1Signatures(chains):
         ChainProp(name='HLT_g3_loose_LArPEBHLT_L1eEM5', stream=['LArCells'], groups=['PS:Online']+SinglePhotonGroup+SupportPhIGroup),
     ]
 
+    chainsP1['Muon'] = [    
+        ChainProp(name='HLT_mu0_muoncalib_L1MU18VFCH', stream=['Muon_Calibration'], groups=['PS:Online','RATE:Muon_Calibration','BW:Muon']),
+    ]
+
     chainsP1['Calib'] = [
         # Phase I jet inputs ATR-24411, seed needs to be checked
         #ChainProp(name='HLT_larpsall_L1jJ40', l1SeedThresholds=['jJ40'], stream=['CosmicCalo'],groups=['PS:Online','Support:PhaseI','RATE:Calibration','BW:Detector']),
