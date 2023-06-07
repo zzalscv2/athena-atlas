@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// IInputConverter.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_INTERFACES_IINPUTCONVERTER_H
 #define ISF_INTERFACES_IINPUTCONVERTER_H 1
@@ -58,11 +54,17 @@ namespace ISF {
     /** Convert selected particles from the given McEventCollection into G4PrimaryParticles
         and push them into the given G4Event */
     virtual StatusCode convertHepMCToG4Event(McEventCollection& inputGenEvents,
+                                             G4Event*& outputG4Event, McEventCollection& shadowGenEvents,
+                                             EBC_EVCOLL kindOfCollection=EBC_MAINEVCOLL) const = 0;
+
+    /** Convert selected particles from the given McEventCollection into G4PrimaryParticles
+        and push them into the given G4Event */
+    virtual StatusCode convertHepMCToG4EventLegacy(McEventCollection& inputGenEvents,
                                              G4Event*& outputG4Event,
                                              EBC_EVCOLL kindOfCollection=EBC_MAINEVCOLL) const = 0;
 
     /** Converts vector of ISF::ISFParticles to G4Event */
-    virtual G4Event* ISF_to_G4Event(const std::vector<ISF::ISFParticle*>& isp, HepMC::GenEvent *genEvent, bool useHepMC=false) const = 0;
+    virtual G4Event* ISF_to_G4Event(const std::vector<ISF::ISFParticle*>& isp, HepMC::GenEvent *genEvent, HepMC::GenEvent *shadowGenEvent=nullptr, bool useHepMC=false) const = 0;
 
   };
 

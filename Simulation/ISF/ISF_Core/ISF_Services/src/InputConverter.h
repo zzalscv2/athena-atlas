@@ -66,27 +66,40 @@ namespace ISF {
 
     /** */
     virtual StatusCode convertHepMCToG4Event(McEventCollection& inputGenEvents,
+                                             G4Event*& outputG4Event, McEventCollection& shadowGenEvents,
+                                             EBC_EVCOLL kindOfCollection=EBC_MAINEVCOLL) const override final;
+
+    virtual StatusCode convertHepMCToG4EventLegacy(McEventCollection& inputGenEvents,
                                              G4Event*& outputG4Event,
                                              EBC_EVCOLL kindOfCollection=EBC_MAINEVCOLL) const override final;
 
     /** Converts vector of ISF::ISFParticles to G4Event */
-    G4Event* ISF_to_G4Event(const std::vector<ISF::ISFParticle*>& isp, HepMC::GenEvent *genEvent, bool useHepMC=false) const override final;
+    G4Event* ISF_to_G4Event(const std::vector<ISF::ISFParticle*>& isp, HepMC::GenEvent *genEvent, HepMC::GenEvent *shadowGenEvent=nullptr, bool useHepMC=false) const override final;
 
   private:
 
     const G4ParticleDefinition* getG4ParticleDefinition(int pdgcode) const;
 
 #ifdef HEPMC3
+    G4PrimaryParticle* getDaughterG4PrimaryParticle(const HepMC::ConstGenParticlePtr& gp) const;
     G4PrimaryParticle* getDaughterG4PrimaryParticle(const HepMC::GenParticlePtr& gp, bool makeLinkToTruth=true) const;
 #else
     G4PrimaryParticle* getDaughterG4PrimaryParticle(HepMC::GenParticle& gp, bool makeLinkToTruth=true) const;
 #endif
 
-    G4PrimaryParticle* getG4PrimaryParticle(ISF::ISFParticle& isp, bool useHepMC) const;
+    G4PrimaryParticle* getG4PrimaryParticle(ISF::ISFParticle& isp, bool useHepMC, HepMC::GenEvent *shadowGenEvent) const;
 
-    void addG4PrimaryVertex(G4Event* g4evt, ISF::ISFParticle& isp, bool useHepMC) const;
+    void addG4PrimaryVertex(G4Event* g4evt, ISF::ISFParticle& isp, bool useHepMC, HepMC::GenEvent *shadowGenEvent) const;
 
+#ifdef HEPMC3
+    void processPredefinedDecays(const HepMC::ConstGenParticlePtr& genpart, ISF::ISFParticle& isp, G4PrimaryParticle* g4particle) const;
+#endif
     void processPredefinedDecays(const HepMC::GenParticlePtr& genpart, ISF::ISFParticle& isp, G4PrimaryParticle* g4particle, bool makeLinkToTruth=true) const;
+
+    bool matchedGenParticles(const HepMC::ConstGenParticlePtr& p1,
+                             const HepMC::ConstGenParticlePtr& p2) const;
+
+    HepMC::GenParticlePtr findShadowParticle(const HepMC::ConstGenParticlePtr& genParticle, HepMC::GenEvent *shadowGenEvent) const;
 
     /** Tests whether the given ISFParticle is within the Geant4 world volume */
     bool isInsideG4WorldVolume(const ISF::ISFParticle& isp, const G4VSolid* worldSolid) const;
@@ -120,6 +133,7 @@ namespace ISF {
     ToolHandleArray<IGenParticleFilter>   m_genParticleFilters;       //!< HepMC::GenParticle filters
 
     bool                                  m_quasiStableParticlesIncluded; //<! will quasi-stable particles be included in the simulation
+    BooleanProperty m_useShadowEvent{this, "UseShadowEvent", false, "New approach to selecting particles for simulation" };
 
     const Barcode::ParticleBarcode              m_barcodeGenerationIncrement = HepMC::SIM_REGENERATION_INCREMENT; //!< to be retrieved from ISF Barcode service
 
