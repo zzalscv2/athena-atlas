@@ -181,13 +181,18 @@ namespace EL
     TH3 *hist3d (const std::string& name) const;
 
 
-    /// \brief get the 3-d histogram with the given name
+    /// \brief get the efficiency histogram with the given name
+    ///
+    /// This exists with two names, since the originally chosen name doesn't
+    /// match the name used in Athena.
+    ///
     /// \par Guarantee
     ///   strong
     /// \par Failures
     ///   histogram not found
   public:
     TEfficiency *histeff (const std::string& name) const;
+    TEfficiency *efficiency (const std::string& name) const;
 
 
     /// \brief the histogram worker interface
