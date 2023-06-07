@@ -78,7 +78,7 @@ bool ISF::GenParticleInteractingFilter::pass(const HepMC::ConstGenParticlePtr& p
   const bool isNonInteracting = find(m_additionalNonInteractingParticleTypes.begin(),
                                      m_additionalNonInteractingParticleTypes.end(),
                                 pdg_id) != m_additionalNonInteractingParticleTypes.end();
-  return !(MC::isNonInteracting( particle ) || isNonInteracting) || isInteracting;
+  return !(MC::isNonInteracting( pdg_id ) || isNonInteracting) || isInteracting;
 }
 #else
 bool ISF::GenParticleInteractingFilter::pass(const HepMC::GenParticle& particle) const
@@ -90,7 +90,7 @@ bool ISF::GenParticleInteractingFilter::pass(const HepMC::GenParticle& particle)
   const bool isNonInteracting = find(m_additionalNonInteractingParticleTypes.begin(),
                                      m_additionalNonInteractingParticleTypes.end(),
                                 pdg_id) != m_additionalNonInteractingParticleTypes.end();
-  return !(MC::isNonInteracting( &particle ) || isNonInteracting) || isInteracting;
+  return !(MC::isNonInteracting( pdg_id ) || isNonInteracting) || isInteracting;
 }
 #endif
 
