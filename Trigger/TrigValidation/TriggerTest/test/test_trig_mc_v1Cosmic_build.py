@@ -20,9 +20,9 @@ precommand = ''.join([
   "doCosmics=True;",
   "doWriteBS=False;",
   "doWriteRDOTrigger=True;",
-  "from AthenaConfiguration.AllConfigFlags import ConfigFlags;ConfigFlags.Trigger.enableL1CaloPhase1=False;",
 ])
 ex.args = '-c "{:s}"'.format(precommand)
+ex.flags = ["Trigger.enableL1CaloPhase1=False"]
 
 test = Test.Test()
 test.art_type = 'build'
