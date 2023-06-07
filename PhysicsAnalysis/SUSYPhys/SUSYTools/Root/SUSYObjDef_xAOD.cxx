@@ -1436,7 +1436,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_JvtWP, "Jet.JvtWP", rEnv, "FixedEffPt"); // https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PileupJetRecommendations
   configFromFile(m_JvtPtMax, "Jet.JvtPtMax", rEnv, 60.0e3);
   configFromFile(m_JvtConfig, "Jet.JvtConfig", rEnv, "Moriond2018/");
-  configFromFile(m_jetUncertaintiesConfig, "Jet.UncertConfig", rEnv, "rel22/Winter2023_PreRec/R4_CategoryReduction_FullJER.config"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel22/
+  configFromFile(m_jetUncertaintiesConfig, "Jet.UncertConfig", rEnv, "rel22/Summer2023_PreRec/R4_CategoryReduction_FullJER.config"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel22/
   configFromFile(m_jetUncertaintiesAnalysisFile, "Jet.AnalysisFile", rEnv, "default"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2018SmallR
   configFromFile(m_jetUncertaintiesCalibArea, "Jet.UncertCalibArea", rEnv, "default"); // Defaults to default area set by tool
   configFromFile(m_jetUncertaintiesPDsmearing, "Jet.UncertPDsmearing", rEnv, false); // for non "SimpleJER" config, run the PDSmear systematics. This are labelled with an __2 if they are being used, but otherwise will have the same tree name as the JET_JER systematic trees.
