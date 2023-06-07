@@ -258,6 +258,7 @@ StatusCode MuCTPIPhase1ByteStreamAlgo::convert( const IROBDataProviderSvc::ROBF*
 		{
 			thiscand.eta = m_l1topoLUT.getCoordinates(thiscand.side, thiscand.subsystem, thiscand.num, thiscand.roi).eta;
 			thiscand.phi = m_l1topoLUT.getCoordinates(thiscand.side, thiscand.subsystem, thiscand.num, thiscand.roi).phi;
+			thiscand.mappedPt = LVL1::MuCTPIBits::RPCtoTGC_pt_map[thiscand.pt - 1];
 		}
 		else if(thiscand.type == LVL1::MuCTPIBits::SubsysID::Endcap)
 		{

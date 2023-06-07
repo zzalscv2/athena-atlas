@@ -36,6 +36,7 @@
 // For file output
 #include "GaudiKernel/ITHistSvc.h"
 #include "TH1D.h"
+#include <string_view>
 
 // #define _myDebug
 
@@ -50,6 +51,11 @@ namespace G4UA
 #else
     return G4StrUtil::contains(s, v);
 #endif
+  }
+
+  bool G4StrContains(const std::string_view& s, const char* v)
+  {
+    return s.find(v) != std::string_view::npos;
   }
 
   TestActionTimer::TestActionTimer()
@@ -266,8 +272,9 @@ namespace G4UA
 #endif
   }
 
-  int TestActionTimer::ClassifyVolume( G4String& nom ) const
+  int TestActionTimer::ClassifyVolume( G4String& nomstr ) const
   {
+    std::string_view nom(nomstr); //Avoid copying characters during comparison
     if( nom.length() >= 17 &&
         nom.substr(13,4) == "EMEC" ){
       return eEMEC;

@@ -6,10 +6,9 @@
 
 #include <AthenaKernel/getMessageSvc.h>
 #include <GaudiKernel/MsgStream.h>
-#include <MuonTesterTree/ArrayBranch.h>
 #include <MuonTesterTree/MuonTesterTree.h>
-#include <TString.h>
 
+namespace MuonVal {
 template <class T>
 ArrayBranch<T>::ArrayBranch(TTree* t, const std::string& b_name, size_t size) :
     m_tree(t), m_name(b_name), m_size(size), m_data(new T[size]), m_updated(new bool[size]) {
@@ -38,16 +37,28 @@ template <class T> void ArrayBranch<T>::reset() {
 template <class T> std::string ArrayBranch<T>::name() const { return m_name; }
 template <class T> const T& ArrayBranch<T>::operator[](size_t s) const { return get(s); }
 template <class T> void ArrayBranch<T>::set(size_t s, const T& val) {
-    if (s >= size()) { throw std::overflow_error(Form("Index %lu is out of range for %s", s, name().c_str())); }
+    if (s >= size()) { 
+        std::stringstream overflow{};
+        overflow<<"Index "<<s<<" is out of range for "<<name()<<".";
+        throw std::overflow_error(overflow.str()); 
+    }
     m_updated[s] = true;
     m_data[s] = val;
 }
 template <class T> const T& ArrayBranch<T>::get(size_t s) const {
-    if (s >= size()) { throw std::overflow_error(Form("Index %lu is out of range for %s", s, name().c_str())); }
+    if (s >= size()) { 
+        std::stringstream overflow{};
+        overflow<<"Index "<<s<<" is out of range for "<<name()<<".";
+        throw std::overflow_error(overflow.str()); 
+    }
     return m_data[s];
 }
 template <class T> T& ArrayBranch<T>::operator[](size_t s) {
-    if (s >= size()) { throw std::overflow_error(Form("Index %lu is out of range for %s", s, name().c_str())); }
+    if (s >= size()) { 
+        std::stringstream overflow{};
+        overflow<<"Index "<<s<<" is out of range for "<<name()<<".";
+        throw std::overflow_error(overflow.str()); 
+    }
     m_updated[s] = true;
     return m_data[s];
 }
@@ -58,6 +69,8 @@ template <class T> bool ArrayBranch<T>::init() {
         log << MSG::WARNING << "init() -- The branch " << name() << " is already initialized. " << endmsg;
         return true;
     }
+    std::stringstream br_name{};
+    br_name<<name()<<"["<<size()<<"]/"<<tree_data_type();
     if (name().empty() || !m_tree) {
         MsgStream log(Athena::getMessageSvc(), "ArrayBranch()");
         log << MSG::ERROR << "init() -- Empty names are forbidden. " << endmsg;
@@ -66,7 +79,7 @@ template <class T> bool ArrayBranch<T>::init() {
         MsgStream log(Athena::getMessageSvc(), "ArrayBranch()");
         log << MSG::ERROR << "init() -- The branch " << name() << " already exists in TTree  " << m_tree->GetName() << "." << endmsg;
         return false;
-    } else if (!m_tree->Branch(name().c_str(), m_data.get(), Form("%s[%lu]%s", name().c_str(), size(), tree_data_type().c_str()))) {
+    } else if (!m_tree->Branch(name().c_str(), m_data.get(), br_name.str().c_str())) {
         MsgStream log(Athena::getMessageSvc(), "ArrayBranch()");
         log << MSG::ERROR << "init() -- Could not create branch " << name() << " in TTree " << m_tree->GetName() << endmsg;
         return false;
@@ -103,5 +116,5 @@ template <class T> void ArrayBranch<T>::setDefault(const T& val) {
     m_failIfNotUpdated = false;
 }
 template <class T> std::vector<IMuonTesterBranch::DataDependency> ArrayBranch<T>::data_dependencies() { return {};}
-
+}
 #endif

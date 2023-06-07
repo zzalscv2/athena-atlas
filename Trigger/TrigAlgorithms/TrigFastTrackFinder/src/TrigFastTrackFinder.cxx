@@ -2188,6 +2188,7 @@ StatusCode TrigFastTrackFinder::finddEdxTrk(const EventContext& ctx, const Track
    SG::WriteHandle<xAOD::TrigCompositeContainer> dEdxTrkHandle(m_dEdxTrkKey, ctx);
    ATH_CHECK( dEdxTrkHandle.record(std::make_unique<xAOD::TrigCompositeContainer>(), std::make_unique<xAOD::TrigCompositeAuxContainer>()) );
    auto dEdxTrkContainer = dEdxTrkHandle.ptr();
+   dEdxTrkContainer->reserve(outputTracks.size());
 
    SG::WriteHandle<xAOD::TrigCompositeContainer> dEdxHitHandle(m_dEdxHitKey, ctx);
    ATH_CHECK( dEdxHitHandle.record(std::make_unique<xAOD::TrigCompositeContainer>(), std::make_unique<xAOD::TrigCompositeAuxContainer>()) );
@@ -2256,7 +2257,6 @@ StatusCode TrigFastTrackFinder::finddEdxTrk(const EventContext& ctx, const Track
       if( ! hpt && ! lpt ) continue;
 
       xAOD::TrigComposite *dEdxTrk = new xAOD::TrigComposite();
-      dEdxTrk->makePrivateStore();
       dEdxTrkContainer->push_back(dEdxTrk);
       dEdxTrk->setDetail<int>  ("dEdxTrk_id",     i_track);
       dEdxTrk->setDetail<float>("dEdxTrk_pt",     pt);
@@ -2273,7 +2273,6 @@ StatusCode TrigFastTrackFinder::finddEdxTrk(const EventContext& ctx, const Track
 
       for(unsigned int i=0; i<v_pixhit_dedx.size(); i++) {
 	 xAOD::TrigComposite *dEdxHit = new xAOD::TrigComposite();
-	 dEdxHit->makePrivateStore();
 	 dEdxHitContainer->push_back(dEdxHit);
 	 dEdxHit->setDetail<int>  ("dEdxHit_trkid",   i_track);
 	 dEdxHit->setDetail<float>("dEdxHit_dedx",    v_pixhit_dedx[i]);

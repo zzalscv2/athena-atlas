@@ -70,7 +70,7 @@ def TriggerTowersInputCfg(flags):
         return LVL1CaloRun2ReadBSCfg(flags)
 
 
-def L1CaloFEXSimCfg(flags, eFexTowerInputs = [],deadMaterialCorrections=False):
+def L1CaloFEXSimCfg(flags, eFexTowerInputs = [],deadMaterialCorrections=False, eFEXDebug=False):
     acc = ComponentAccumulator()
 
     # Configure SCell inputs
@@ -105,11 +105,15 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = [],deadMaterialCorrections=False):
             eFEXInputs.SecondaryInputTowers = eFexTowerInputs[1] if len(eFexTowerInputs) > 1 else ""
 
         eFEX = CompFactory.LVL1.eFEXDriver('eFEXDriver')
+        if eFEXDebug:
+            from AthenaCommon.Constants import DEBUG
+            eFEX.OutputLevel = DEBUG
         eFEX.eFEXSysSimTool = CompFactory.LVL1.eFEXSysSim('eFEXSysSimTool')
         eFEX.eFEXSysSimTool.eFEXSimTool = CompFactory.LVL1.eFEXSim('eFEXSimTool')
         eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool = CompFactory.LVL1.eFEXFPGA('eFEXFPGATool')
         eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXegAlgoTool = CompFactory.LVL1.eFEXegAlgo('eFEXegAlgoTool',dmCorr=deadMaterialCorrections) # only dmCorrections in data for now
-
+        eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauAlgoTool = CompFactory.LVL1.eFEXtauAlgo("eFEXtauAlgo")
+        eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauBDTAlgoTool = CompFactory.LVL1.eFEXtauBDTAlgo("eFEXtauBDTAlgo")
         # load noise cuts and dm corrections when running on data
         if not flags.Input.isMC:
             from IOVDbSvc.IOVDbSvcConfig import addFolders#, addFoldersSplitOnline
@@ -122,7 +126,23 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = [],deadMaterialCorrections=False):
         acc.addEventAlgo(eFEX)
 
     if flags.Trigger.L1.dojFex:
-        jFEXInputs = CompFactory.LVL1.jTowerMakerFromSuperCells('jTowerMakerFromSuperCells')
+        
+        if not flags.Input.isMC:
+            from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexInputByteStreamToolCfg
+            inputjFexTool = acc.popToolsAndMerge(jFexInputByteStreamToolCfg(flags, 'jFexInputBSDecoderTool'))
+            
+            maybeMissingRobs = []
+            decoderTools = []
+            
+            for module_id in inputjFexTool.ROBIDs:
+                maybeMissingRobs.append(module_id)
+
+            decoderTools += [inputjFexTool]
+            decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder", DecoderTools=[inputjFexTool], MaybeMissingROBs=maybeMissingRobs)
+            acc.addEventAlgo(decoderAlg)
+        
+        jFEXInputs = CompFactory.LVL1.jTowerMakerFromJfexTowers('jTowerMakerFromJfexTowers')
+        jFEXInputs.IsMC = flags.Input.isMC
         jFEXInputs.jSuperCellTowerMapperTool = CompFactory.LVL1.jSuperCellTowerMapper('jSuperCellTowerMapper', SCell=sCellType)
         jFEXInputs.jSuperCellTowerMapperTool.SCellMasking = not flags.Input.isMC
         jFEX = CompFactory.LVL1.jFEXDriver('jFEXDriver')
@@ -145,6 +165,7 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = [],deadMaterialCorrections=False):
         if flags.Trigger.L1.doeFex:
             check(eFEX.eFEXSysSimTool.Key_eFexEMOutputContainer)
             check(eFEX.eFEXSysSimTool.Key_eFexTauOutputContainer)
+            check(eFEX.eFEXSysSimTool.Key_eFexTauBDTOutputContainer)
         if flags.Trigger.L1.dojFex:
             check(jFEX.jFEXSysSimTool.Key_jFexSRJetOutputContainer)
             check(jFEX.jFEXSysSimTool.Key_jFexLRJetOutputContainer)
@@ -178,8 +199,10 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = [],deadMaterialCorrections=False):
         if flags.Trigger.L1.doeFex:
             eFEX.eFEXSysSimTool.Key_eFexEMOutputContainer=getSimHandle(eFEX.eFEXSysSimTool.Key_eFexEMOutputContainer)
             eFEX.eFEXSysSimTool.Key_eFexTauOutputContainer=getSimHandle(eFEX.eFEXSysSimTool.Key_eFexTauOutputContainer)
+            eFEX.eFEXSysSimTool.Key_eFexTauBDTOutputContainer=getSimHandle(eFEX.eFEXSysSimTool.Key_eFexTauBDTOutputContainer)
             eFEX.eFEXSysSimTool.Key_eFexEMxTOBOutputContainer=getSimHandle(eFEX.eFEXSysSimTool.Key_eFexEMxTOBOutputContainer)
             eFEX.eFEXSysSimTool.Key_eFexTauxTOBOutputContainer=getSimHandle(eFEX.eFEXSysSimTool.Key_eFexTauxTOBOutputContainer)
+            eFEX.eFEXSysSimTool.Key_eFexTauBDTxTOBOutputContainer=getSimHandle(eFEX.eFEXSysSimTool.Key_eFexTauBDTxTOBOutputContainer)
         if flags.Trigger.L1.dojFex:
             jFEX.jFEXSysSimTool.Key_jFexSRJetOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexSRJetOutputContainer)
             jFEX.jFEXSysSimTool.Key_jFexLRJetOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexLRJetOutputContainer)
@@ -225,6 +248,10 @@ if __name__ == '__main__':
                    type=int,
                    default=25,
                    help='Number of events to process if --execute is used, default=%(default)s')
+    p.add_argument('-d', '--efexdebug',
+                   action='store_true',
+                   help='Activate DEBUG mode for eFEX driver for unit tests')
+
     args = p.parse_args()
 
     ##################################################
@@ -304,7 +331,7 @@ if __name__ == '__main__':
     ##################################################
     # The configuration fragment to be tested
     ##################################################
-    acc.merge(L1CaloFEXSimCfg(flags))
+    acc.merge(L1CaloFEXSimCfg(flags, eFEXDebug=args.efexdebug))
 
     ##################################################
     # Save and optionally run the configuration

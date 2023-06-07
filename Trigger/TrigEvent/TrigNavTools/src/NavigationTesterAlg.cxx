@@ -28,7 +28,8 @@ namespace xAOD {
             << "type = " << p->type() << ", "
             << "pt = " << p->pt() << ", "
             << "eta = " << p->eta() << ", "
-            << "phi = " << p->phi()
+            << "phi = " << p->phi() << ", "
+            << "ptr = " << reinterpret_cast<const void*>(p) 
             << "]";
 
     }
@@ -58,6 +59,7 @@ namespace Trig {
 
     StatusCode NavigationTesterAlg::initialize()
     {
+        ATH_CHECK(m_tdt.retrieve());
         ATH_CHECK(m_toolRun2.retrieve());
         ATH_CHECK(m_toolRun3.retrieve());
         if (m_chains.size() == 0)
@@ -67,11 +69,10 @@ namespace Trig {
 
     StatusCode NavigationTesterAlg::execute()
     {
-	/*** TODO ***/
-        //bool good = true;
         for (const std::string &chain : m_chains)
         {
             ATH_MSG_DEBUG("Begin testing chain " << chain);
+            if (!m_tdt->isPassed(chain)) continue;
 
             // We assume that the navigation is ultimately a set of element links
             // We're comparing two types of navigation but they should both point to the same
@@ -100,14 +101,14 @@ namespace Trig {
                 ATH_CHECK(verifyCombinationsSize(vecCombinationsRun2, vecCombinationsRun3, chain));
             } 
             if ( m_verifyCombinations ) {
-                ATH_CHECK(verifyCombinationsContent(vecCombinationsRun2, vecCombinationsRun3, chain));
+                ATH_CHECK(verifyCombinationsContent(combsRun2, combsRun3, chain));
             }
             ATH_MSG_DEBUG("Verified chain " << chain);
         }
         return StatusCode::SUCCESS;
     }
     StatusCode NavigationTesterAlg::verifyCombinationsSize(const CombinationsVector& run2, const CombinationsVector& run3, const std::string& chain) const {
-        if (run2.size() > run3.size()) {
+        if (run2.size() > run3.size()) { // in Run3 we do not use decision per RoI but per object. For single RoI there is more than one object we will have more combinations in Run3
             ATH_MSG_WARNING("Issue in combination sizes for chain " << chain  
                         << " using Run 2 navigation " << run2.size() 
                         << " Run 3 navigation " << run3.size());
@@ -119,11 +120,35 @@ namespace Trig {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode NavigationTesterAlg::verifyCombinationsContent(const CombinationsVector& run2, const CombinationsVector& run3, const std::string& chain) const {
+    StatusCode NavigationTesterAlg::verifyCombinationsContent(const CombinationsSet& run2, const CombinationsSet& run3, const std::string& chain) const {
         // compare combinations
+        bool isSubset = std::includes(run3.begin(), run3.end(), run2.begin(), run2.end());
+        if (run2 != run3) 
+        {
+            ATH_MSG_WARNING("Difference in combinations between Run2 and Run3 format for chain: " << chain);
+            ATH_MSG_WARNING("Run2 combs: " << run2);
+            ATH_MSG_WARNING("Run3 combs: " << run3);
+        }
+        if (not isSubset) 
+        {
+            ATH_MSG_WARNING("NOT PASSED not isSubset failed, Run2 is not a subset of Run3 for chain: " << chain);
+            ATH_MSG_WARNING("Run2 combs: " << run2);
+            ATH_MSG_WARNING("Run3 combs: " << run3);
+            return StatusCode::FAILURE;
+        }
+
         for ( auto& combRun2: run2 ) {
             bool foundMatching = false;
-            for ( auto& combRun3 : run3 ) {                
+            for ( auto& combRun3 : run3 ) {     
+                ATH_MSG_WARNING("Available Run 2 combinations: " );
+                for ( auto& c: combRun2 ){
+                    ATH_MSG_WARNING("  " << c );
+                }
+                ATH_MSG_WARNING("Available Run 3 combinations: " );
+                for ( auto& c: combRun3 ){
+                    ATH_MSG_WARNING("  " << c );
+                }
+                ATH_MSG_WARNING("COMPARISON combRun2 == combRun3: " <<  ( combRun2 == combRun3 ));
                 if ( combRun2 == combRun3 ) {
                     ATH_MSG_DEBUG("Found matching combinations, run2 " << combRun2 
                                 << " run3 " << combRun3 );

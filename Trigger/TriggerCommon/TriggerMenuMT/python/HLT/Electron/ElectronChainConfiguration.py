@@ -6,12 +6,12 @@ log = logging.getLogger(__name__)
 
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
+from ..CommonSequences.CaloSequences import fastCaloMenuSequence 
+from ..CommonSequences.CaloSequences_FWD import fastCaloMenuSequence_FWD
 
 if isComponentAccumulatorCfg():
     pass
 else:
-    from ..CommonSequences.CaloSequences import fastCaloMenuSequence
-    from ..CommonSequences.CaloSequences_FWD import fastCaloMenuSequence_FWD
 
     from ..Electron.FastTrackingMenuSequences import fastTrackingMenuSequence, fastTrackingMenuSequence_LRT
     from ..Electron.FastElectronMenuSequences import fastElectronMenuSequence, fastElectronMenuSequence_LRT

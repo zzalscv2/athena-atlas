@@ -56,7 +56,6 @@ def RpcBytestreamDecodeCfg(flags, name="RpcRawDataProvider"):
         MuonRpcRawDataProviderTool.RpcContainerCacheKey   = MuonCacheNames.RpcCache
         MuonRpcRawDataProviderTool.WriteOutRpcSectorLogic = False
 
-    acc.addPublicTool( MuonRpcRawDataProviderTool ) # This should be removed, but now defined as PublicTool at MuFastSteering 
     
     # Setup the RAW data provider algorithm
     Muon__RpcRawDataProvider=CompFactory.Muon.RpcRawDataProvider
@@ -102,7 +101,6 @@ def TgcBytestreamDecodeCfg(flags, name="TgcRawDataProvider"):
     if flags.Muon.MuonTrigger:
         MuonTgcRawDataProviderTool.TgcContainerCacheKey   = MuonCacheNames.TgcCache
 
-    acc.addPublicTool( MuonTgcRawDataProviderTool ) # This should be removed, but now defined as PublicTool at MuFastSteering 
     
     # Setup the RAW data provider algorithm
     Muon__TgcRawDataProvider=CompFactory.Muon.TgcRawDataProvider
@@ -149,8 +147,6 @@ def MdtBytestreamDecodeCfg(flags, name="MdtRawDataProvider"):
     if flags.Muon.MuonTrigger:
         MuonMdtRawDataProviderTool.CsmContainerCacheKey = MuonCacheNames.MdtCsmCache
 
-    acc.addPublicTool( MuonMdtRawDataProviderTool ) # This should be removed, but now defined as PublicTool at MuFastSteering 
-
     # Setup the RAW data provider algorithm
     Muon__MdtRawDataProvider=CompFactory.Muon.MdtRawDataProvider
     MdtRawDataProvider = Muon__MdtRawDataProvider(name         = name,
@@ -190,8 +186,6 @@ def CscBytestreamDecodeCfg(flags, name="CscRawDataProvider"):
                                                                  RdoLocation = keyName)
     if flags.Muon.MuonTrigger:
         MuonCscRawDataProviderTool.CscContainerCacheKey = MuonCacheNames.CscCache
-
-    acc.addPublicTool( MuonCscRawDataProviderTool ) # This should be removed, but now defined as PublicTool at MuFastSteering 
     
     # Setup the RAW data provider algorithm
     Muon__CscRawDataProvider=CompFactory.Muon.CscRawDataProvider
@@ -246,8 +240,6 @@ def sTgcBytestreamDecodeCfg(flags, name="MuonsTgcRawDataProvider"):
 
     #if flags.Muon.MuonTrigger:
     #    MuonsTgcRawDataProviderTool.sTgcContainerCacheKey = MuonCacheNames.sTgcCache
-
-    acc.addPublicTool( MuonsTgcRawDataProviderTool ) # This should be removed, but now defined as PublicTool at MuFastSteering 
     
     # Setup the RAW data provider algorithm
     Muon__sTgcRawDataProvider=CompFactory.Muon.sTgcRawDataProvider
@@ -263,6 +255,28 @@ def sTgcBytestreamDecodeCfg(flags, name="MuonsTgcRawDataProvider"):
     acc.addEventAlgo(sTgcRawDataProvider,primary=True)
 
     return acc
+
+def NswTrigProcessorRodDecoderCfg(flags, name ="NswTrigProcessorDecoder", **kwargs):
+    result = ComponentAccumulator()
+    the_tool = CompFactory.Muon.NSWTP_ROD_Decoder(name = name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
+def NswTrigProccesorRawDataProviderToolCfg(flags, name = "NswTrigProcessorRawDataTool", **kwargs ):
+    result = ComponentAccumulator()
+    kwargs.setdefault("Decoder", result.popToolsAndMerge(NswTrigProcessorRodDecoderCfg(flags)))
+    kwargs.setdefault( "RdoLocation", ( flags.Overlay.BkgPrefix  if flags.Common.isOverlay else "") + "NSW_TrigProcessor_RDO" )
+    the_tool = CompFactory.Muon.NSWTP_RawDataProviderToolMT(name = name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
+def NswTrigProcByteStreamDecodeCfg(flags, name = "NswProcByteStream"):
+    result = ComponentAccumulator()
+    # Make sure muon geometry is configured
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+    result.merge(MuonGeoModelCfg(flags))
+    the_alg = CompFactory.Muon.sTgcPadTriggerRawDataProvider(name = name,
+                                                             ProviderTool = result.popToolsAndMerge(NswTrigProccesorRawDataProviderToolCfg(flags)) )
+    result.addEventAlgo(the_alg, primary = True)
+    return result
 
 def sTgcPadTriggerBytestreamDecodeCfg(flags, name="MuonsTgcPadTriggerRawDataProvider"):
 
@@ -284,14 +298,12 @@ def sTgcPadTriggerBytestreamDecodeCfg(flags, name="MuonsTgcPadTriggerRawDataProv
                                                                                 Decoder = STGCPadTriggerRodDecoder,
                                                                                 RdoLocation = keyName)
 
-    acc.addPublicTool( MuonsTgcPadTriggerRawDataProviderTool ) # This should be removed, but now defined as PublicTool at MuFastSteering
 
     # Setup the RAW data provider algorithm
-    Muon__sTgcPadTriggerRawDataProvider = CompFactory.Muon.sTgcPadTriggerRawDataProvider
-    sTgcPadTriggerRawDataProvider = Muon__sTgcPadTriggerRawDataProvider(name = name,
-                                                                        ProviderTool = MuonsTgcPadTriggerRawDataProviderTool )
+    the_alg = CompFactory.Muon.sTgcPadTriggerRawDataProvider(name = name,
+                                                             ProviderTool = MuonsTgcPadTriggerRawDataProviderTool )
 
-    acc.addEventAlgo(sTgcPadTriggerRawDataProvider, primary = True)
+    acc.addEventAlgo(the_alg, primary = True)
 
     return acc
 
@@ -331,8 +343,6 @@ def MmBytestreamDecodeCfg(flags, name="MmRawDataProvider"):
 
     #if flags.Muon.MuonTrigger:
     #    MuonMmRawDataProviderTool.RawDataContainerCacheKey = MuonCacheNames.MicromegasCache
-
-    acc.addPublicTool( MuonMmRawDataProviderTool ) # This should be removed, but now defined as PublicTool at MuFastSteering 
 
     # Setup the RAW data provider algorithm
     Muon__MmRawDataProvider = CompFactory.Muon.MM_RawDataProvider
@@ -374,16 +384,14 @@ def MuonByteStreamDecodersCfg(flags):
 
     if (flags.Detector.GeometrysTGC and flags.Detector.GeometryMM):
         # Schedule MM data decoding
-        mmdecodingAcc  = MmBytestreamDecodeCfg( flags )
-        cfg.merge( mmdecodingAcc )
+        cfg.merge( MmBytestreamDecodeCfg( flags ) )
 
         # Schedule sTGC data decoding
-        stgcdecodingAcc = sTgcBytestreamDecodeCfg( flags ) 
-        cfg.merge( stgcdecodingAcc )
+        cfg.merge( sTgcBytestreamDecodeCfg( flags )  )
 
         # Schedule sTGC Pad Trigger data decoding
-        stgcpadtriggerdecodingAcc = sTgcPadTriggerBytestreamDecodeCfg( flags )
-        cfg.merge( stgcpadtriggerdecodingAcc )
+        cfg.merge( sTgcPadTriggerBytestreamDecodeCfg( flags ) )
+        cfg.merge(NswTrigProcByteStreamDecodeCfg(flags))
 
     return cfg
 

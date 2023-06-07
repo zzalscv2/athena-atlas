@@ -39,7 +39,7 @@ bool isGenStable (const xAOD::TruthParticle& tp)
 
   return (
           ( ( tp.status()%1000 == 1) ||  
-            (tp.status()==2 && (!vertex || HepMC::is_simulation_vertex(vertex->barcode()))) || 
+            (tp.status()==2 && (!vertex || HepMC::is_simulation_vertex(vertex))) || 
             (tp.status()%1000 == 2 && tp.status() > 1000) 
             ) && (!HepMC::is_simulation_particle(tp.barcode())) 
           && !(std::abs(p_id) == 21 && tp.e()==0)
@@ -59,7 +59,7 @@ bool isGenInteracting (const xAOD::TruthParticle& tp)
 
      (((status%1000 == 1) ||
        (status%1000 == 2 && status > 1000) ||
-       (status==2 && (!vertex || HepMC::is_simulation_vertex(vertex->barcode())))) && (!HepMC::is_simulation_particle(tp.barcode())) ) &&
+       (status==2 && (!vertex || HepMC::is_simulation_vertex(vertex)))) && (!HepMC::is_simulation_particle(&tp)) ) &&
 
      !(pdg_id==12 || pdg_id==14 || pdg_id==16 ||
        (pdg_id==1000022 &&  status%1000==1 ) ||
@@ -195,7 +195,7 @@ bool egammaTruthAlg::isAccepted (const xAOD::TruthParticle& tp,
     for (size_t i = 0; i < sz; i++) {
       const xAOD::TruthParticle* child = v->outgoingParticle(i);
       if( child && child->pdgId()==id && child->barcode()!=barcode
-          && (child->barcode() <100000 ))//AV: This should be a bug
+          && (child->barcode() <HepMC::SIM_REGENERATION_INCREMENT))
       {
         return false;
       }

@@ -730,7 +730,7 @@ namespace Muon {
             MuPatHitCit hitit = fitterData.hitList.begin();
             for (; hitit != fitterData.hitList.end(); hitit++) {              
                 if ((**hitit).info().measuresPhi) break;
-                if ((**hitit).info().type == MuPatHit::MDT) {
+                if ((**hitit).info().type == MuPatHit::MDT || (**hitit).info().type == MuPatHit::sTGC) {
                     firstmdtsurf = &(**hitit).measurement().associatedSurface();
                     break;
                 }

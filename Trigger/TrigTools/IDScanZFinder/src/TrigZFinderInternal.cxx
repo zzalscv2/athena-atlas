@@ -10,12 +10,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-TrigZFinderInternal::TrigZFinderInternal( const std::string& type, const std::string& name)  
+TrigZFinderInternal::TrigZFinderInternal( const std::string& type, const std::string& name)
+  : m_type (type),
+    m_name (name)
 {
-
-  m_type = type;
-  m_name = name;
-
   m_phiBinSize       = 0.2   ;
   m_usedphiBinSize   = m_phiBinSize   ;
   m_pixOnly          = false ;

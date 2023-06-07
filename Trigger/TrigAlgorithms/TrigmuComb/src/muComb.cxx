@@ -97,7 +97,7 @@ int muComb::drptMatch(double pt, double eta, double phi, double id_pt, double id
    double tmp_deta = std::max(eta, id_eta) - std::min(eta, id_eta);
    double tmp_dphi = std::max(phi, id_phi) - std::min(phi, id_phi);
    if (tmp_dphi >= M_PI) tmp_dphi = 2 * M_PI - tmp_dphi;
-   double tmp_dr = sqrt(tmp_deta * tmp_deta + tmp_dphi * tmp_dphi);
+   double tmp_dr = std::sqrt(tmp_deta * tmp_deta + tmp_dphi * tmp_dphi);
 
    dphi      = tmp_dphi;
    deta      = tmp_deta;
@@ -114,7 +114,7 @@ int muComb::drptMatch(double pt, double eta, double phi, double id_pt, double id
          << " / " << (passDR ? "true" : "false"));
 
    if (algo == 1 && winPt > 0) {
-      double tmp_dpt = fabs(fabs(pt) - fabs(id_pt)) / Gaudi::Units::GeV; //don't use charge info
+      double tmp_dpt = std::fabs(std::fabs(pt) - std::fabs(id_pt)) / Gaudi::Units::GeV; //don't use charge info
       if (tmp_dpt > winPt) passPt = false;
       ATH_MSG_DEBUG( " REGTEST MU-ID match / dpt (GeV) / threshold (GeV) / result:"
             << " / " << tmp_dpt
@@ -126,41 +126,41 @@ int muComb::drptMatch(double pt, double eta, double phi, double id_pt, double id
    else                  return 1;
 }
 
-// muon-trk match based on Geant4 backextrapolated SA Muon matched with ID track
-// return 0 --> match,  1/2/3/4/5/6 --> no match (muon pt zero, muon angle zero, ID pt zero, fail eta match, fail phi match, fail chi2 match)
-int muComb::g4Match(const xAOD::L2StandAloneMuon* feature,
-                    double id_eta, double id_phi, double id_pt, double id_charge, double id_eeta, double id_ephi, double id_eipt,
-                    double& combPtInv, double& combPtRes, double& deta, double& dphi, double& chi2, int& ndof) const
+// get extrapolated muon properties
+// status 0 --> OK,  1/2 --> no extrapolation (muon pt zero, muon angle zero)
+ExtrapolationResult muComb::getExtrapolatedMuon(const xAOD::L2StandAloneMuon* feature) const
 {
+   ATH_MSG_DEBUG("in getExtrapolatedMuon");
+   ExtrapolationResult result;
 
    const EventContext& ctx = Gaudi::Hive::currentContext();
-   chi2 = 1.0e30;
-   ndof = 0;
 
    //muFast parameters (in MeV!)
    double phi    = feature->phiMS();
    //double eta    = feature->etaMS();
-   double theta  = 2.*atan(exp(-feature->etaMS()));
+   double theta  = 2.*std::atan(std::exp(-feature->etaMS()));
    double p      = 0.0;
-   if (sin(theta) != 0) {
-      p = (feature->pt() * Gaudi::Units::GeV) / sin(theta);
+   if (std::sin(theta) != 0) {
+      p = (feature->pt() * Gaudi::Units::GeV) / std::sin(theta);
    } else {
-      return 2; //No match if muon angle is zero
+      result.status = 2; //No match if muon angle is zero
+      return result;
    }
-   double charge = 1.0;
+   result.charge = 1.0;
    double q_over_p = 0.;
    if (p != 0.)  {
       q_over_p = 1. / p;
-      charge = p / fabs(p);
+      result.charge = p / std::fabs(p);
    } else {
-      return 1; //No match if muon Pt is zero
+      result.status = 1; //No match if muon Pt is zero
+      return result;
    }
    double pt = feature->pt() * Gaudi::Units::GeV;
    //double ptinv  = 1/pt;
    double eptinv = feature->deltaPt() * Gaudi::Units::GeV / pt / pt;
 
-   bool   isBarrel = ((feature->sAddress() != -1) ? true : false);
-   double etaShift = (isBarrel ? 0 : charge * 0.01);
+   result.isBarrel = ((feature->sAddress() != -1) ? true : false);
+   double etaShift = (result.isBarrel ? 0 : result.charge * 0.01);
    bool   doFix = kFALSE;
 
    //Superpoints
@@ -173,11 +173,11 @@ int muComb::g4Match(const xAOD::L2StandAloneMuon* feature,
    double sp2_z = feature->superPointZ(middle);
    double sp2_R = feature->superPointR(middle);
 
-   if ((fabs(sp1_R) < 1000.)) {
+   if ((std::fabs(sp1_R) < 1000.)) {
       sp1_z *= 10.;
       sp1_R *= 10.;
    }
-   if ((fabs(sp2_R) < 1300.)) {
+   if ((std::fabs(sp2_R) < 1300.)) {
       sp2_z *= 10.;
    }
 
@@ -186,21 +186,61 @@ int muComb::g4Match(const xAOD::L2StandAloneMuon* feature,
 
    if (R == 0. && z == 0.) { //treat patological endcap cases
       doFix = kTRUE;
-      if (fabs(sp2_R) > 1300.) {
+      if (std::fabs(sp2_R) > 1300.) {
          z = sp2_z;
          if (z == 0.) z = 7600.;
-         R = z * tan(theta);
-         theta  = 2.*atan(exp(-(feature->etaMS() - etaShift)));
+         R = z * std::tan(theta);
+         theta  = 2.*std::atan(std::exp(-(feature->etaMS() - etaShift)));
       }
    }
 
-   double x = R * cos(phi);
-   double y = R * sin(phi);
+   double x = R * std::cos(phi);
+   double y = R * std::sin(phi);
 
    Amg::Vector3D vertex(x, y, z);
    Trk::PerigeeSurface beamSurface;
    Trk::PerigeeSurface pgsf(vertex);
    Trk::Perigee perigeeMS(0., 0., phi, theta, q_over_p, pgsf);
+
+   std::unique_ptr<const Trk::TrackParameters> muonPerigee
+     (m_backExtrapolatorG4->extrapolate(ctx,perigeeMS, beamSurface, Trk::oppositeMomentum, true, Trk::muon));
+
+   //Protection against failing extrapolation
+   if (!muonPerigee) { //G4 probably failed, getting LUT extrapolated values
+      result.eta    = feature->eta();
+      result.phi    = feature->phi();
+   } else {
+      double extr_theta    = muonPerigee -> parameters()[Trk::theta];
+      result.phi      = muonPerigee -> parameters()[Trk::phi0];
+      result.eta      = -std::log(std::tan(extr_theta / 2.));
+      if (doFix) result.eta = -std::log(std::tan(theta / 2.));
+   }
+
+   result.eeta = muCombUtil::getG4ExtEtaRes(feature->pt(), feature->etaMS());
+   result.ephi = muCombUtil::getG4ExtPhiRes(feature->pt(), feature->etaMS());
+   result.ptinv  = 1.0e33;
+   if (pt != 0) result.ptinv = 1. / pt;
+   result.eptinv = eptinv;
+
+   result.isRpcFailure = feature->isRpcFailure();
+   result.isTgcFailure = feature->isTgcFailure();
+
+   result.status = 0; // can go ahead in matching logic
+
+   return result;
+}
+
+// muon-trk match based on Geant4 backextrapolated SA Muon matched with ID track
+// return 0 --> match,  1/2/3/4/5/6 --> no match (muon pt zero, muon angle zero, ID pt zero, fail eta match, fail phi match, fail chi2 match)
+int muComb::g4Match(const ExtrapolationResult& extr,
+                    double id_eta, double id_phi, double id_pt, double id_charge, double id_eeta, double id_ephi, double id_eipt,
+                    double& combPtInv, double& combPtRes, double& deta, double& dphi, double& chi2, int& ndof) const
+{
+   ATH_MSG_DEBUG("in g4Match");
+   if (extr.status != 0) return extr.status; // propagates the badness of the extrapolated muon, if appropriate
+
+   chi2 = 1.0e30;
+   ndof = 0;
 
    //ID parameters
    double id_eptinv_OLD = muCombUtil::getIDSCANRes(m_IDSCANRes_barrel,  m_IDSCANRes_endcap1, m_IDSCANRes_endcap2,
@@ -214,64 +254,44 @@ int muComb::g4Match(const xAOD::L2StandAloneMuon* feature,
 
    double id_eptinv = id_eipt; //now taken from Track itself ...
 
-   std::unique_ptr<const Trk::TrackParameters> muonPerigee
-     (m_backExtrapolatorG4->extrapolate(ctx,perigeeMS, beamSurface, Trk::oppositeMomentum, true, Trk::muon));
-
-   //Protection against failing extrapolation
-   double extr_eta;
-   double extr_phi;
-   if (!muonPerigee) { //G4 probably failed, getting LUT extrapolated values
-      extr_eta    = feature->eta();
-      extr_phi    = feature->phi();
-   } else {
-      double extr_theta    = muonPerigee -> parameters()[Trk::theta];
-      extr_phi      = muonPerigee -> parameters()[Trk::phi0];
-      extr_eta      = -log(tan(extr_theta / 2.));
-      if (doFix) extr_eta = -log(tan(theta / 2.));
-   }
-
-   double extr_eeta = muCombUtil::getG4ExtEtaRes(feature->pt(), feature->etaMS());
-   double extr_ephi = muCombUtil::getG4ExtPhiRes(feature->pt(), feature->etaMS());
-   double extr_ptinv  = 1.0e33;
-   if (pt != 0) extr_ptinv = 1. / pt;
-   double extr_eptinv = eptinv;
 
    //Combined muon parameters
-   combPtInv = muCombUtil::getCombinedAverage(extr_ptinv, extr_eptinv, id_ptinv, id_eptinv);
-   combPtRes = muCombUtil::getCombinedAverageSigma(extr_eptinv, id_eptinv);
-   double q_tmp = charge;
+   combPtInv = muCombUtil::getCombinedAverage(extr.ptinv, extr.eptinv, id_ptinv, id_eptinv);
+   combPtRes = muCombUtil::getCombinedAverageSigma(extr.eptinv, id_eptinv);
+   double q_tmp = extr.charge;
    if (m_ChargeStrategy == 1) q_tmp = id_charge;
    else if (m_ChargeStrategy == 2) {
-      if (1. / combPtInv > 50000.) q_tmp = charge;
+      if (1. / combPtInv > 50000.) q_tmp = extr.charge;
       else                         q_tmp = id_charge;
    }
    combPtInv *= q_tmp;
 
    //Masaki/Kunihiro treatment of TGC/RPC readout problems
-   ATH_MSG_DEBUG( " Enlarge phi matching error in case TGC/RPC readout failed. : " << feature->isRpcFailure() << " / " << feature->isTgcFailure() );
+   ATH_MSG_DEBUG( " Enlarge phi matching error in case TGC/RPC readout failed. : " << extr.isRpcFailure << " / " << extr.isTgcFailure);
 
-   if (feature->isTgcFailure() || feature->isRpcFailure()) extr_ephi *= 2.0;
+   double ephi_to_use = extr.ephi;
+   if (extr.isTgcFailure || extr.isRpcFailure) ephi_to_use *= 2.0;
 
    //Match
-   deta = muCombUtil::getDeltaEta(extr_eta, id_eta);
-   dphi = muCombUtil::getDeltaPhi(extr_phi, id_phi);
+   deta = muCombUtil::getDeltaEta(extr.eta, id_eta);
+   dphi = muCombUtil::getDeltaPhi(extr.phi, id_phi);
    int ndof_OLD = 0;
    double chi2_OLD = muCombUtil::getChi2(ndof_OLD, combPtInv, 
-                                         extr_eta, extr_eeta, extr_phi, extr_ephi, extr_ptinv, extr_eptinv,
+                                         extr.eta, extr.eeta, extr.phi, ephi_to_use, extr.ptinv, extr.eptinv,
                                          id_eta, 0.0, id_phi, 0.0, id_ptinv, id_eptinv, true);
-   chi2 = muCombUtil::getStdChi2(ndof, extr_eta, extr_eeta, extr_phi, extr_ephi, extr_ptinv, extr_eptinv,
+   chi2 = muCombUtil::getStdChi2(ndof, extr.eta, extr.eeta, extr.phi, ephi_to_use, extr.ptinv, extr.eptinv,
                               id_eta, id_eeta, id_phi, id_ephi, id_ptinv, id_eptinv, m_UseAbsPt);
 
 
    ATH_MSG_DEBUG(" REGTEST Resolution / OLDIdRes / IdRes / muFastRes / combRes:"
          << " / " << std::setw(11) << id_eptinv_OLD / Gaudi::Units::GeV
          << " / " << std::setw(11) << id_eptinv / Gaudi::Units::GeV
-         << " / " << std::setw(11) << extr_eptinv / Gaudi::Units::GeV
+         << " / " << std::setw(11) << extr.eptinv / Gaudi::Units::GeV
          << " / " << std::setw(11) << combPtRes / Gaudi::Units::GeV );
 
    ATH_MSG_DEBUG(" REGTEST Momentum / IdPt / muFastPt  / CombPt :"
          << " / " << std::setw(11) << 1. / id_ptinv / Gaudi::Units::GeV
-         << " / " << std::setw(11) << 1. / extr_ptinv / Gaudi::Units::GeV
+         << " / " << std::setw(11) << 1. / extr.ptinv / Gaudi::Units::GeV
          << " / " << std::setw(11) << 1. / combPtInv / Gaudi::Units::GeV );
 
    ATH_MSG_DEBUG(" REGTEST Chi2 / ndof // Chi2OLD / ndofOLD :"
@@ -284,22 +304,22 @@ int muComb::g4Match(const xAOD::L2StandAloneMuon* feature,
    double winEtaSigma = m_WinEta_g4;
    double winPhiSigma = m_WinPhi_g4;
    double maxChi2     = m_Chi2Max_g4;
-   if (!isBarrel) {//EC
+   if (!extr.isBarrel) {//EC
       winEtaSigma = m_WinEta_EC_g4;
       winPhiSigma = m_WinPhi_EC_g4;
       maxChi2     = m_Chi2Max_EC_g4;
    }
 
    ATH_MSG_DEBUG(" REGTEST DeltaEta / DeltaPhi / WinEta / WinPhi:"
-         << " / " << std::setw(11) << fabs(deta)
-         << " / " << std::setw(11) << fabs(dphi)
-         << " / " << std::setw(11) << m_WeightEta_g4*winEtaSigma*sqrt(extr_eeta * extr_eeta)
-         << " / " << std::setw(11) << m_WeightPhi_g4*winPhiSigma*sqrt(extr_ephi * extr_ephi) );
+         << " / " << std::setw(11) << std::fabs(deta)
+         << " / " << std::setw(11) << std::fabs(dphi)
+         << " / " << std::setw(11) << m_WeightEta_g4*winEtaSigma*std::sqrt(extr.eeta * extr.eeta)
+         << " / " << std::setw(11) << m_WeightPhi_g4*winPhiSigma*std::sqrt(ephi_to_use * ephi_to_use) );
 
-   if (fabs(deta) > m_WeightEta_g4 * winEtaSigma * sqrt(extr_eeta * extr_eeta)) {
+   if (std::fabs(deta) > m_WeightEta_g4 * winEtaSigma * std::sqrt(extr.eeta * extr.eeta)) {
       return 4;
    }
-   if (fabs(dphi) > m_WeightPhi_g4 * winPhiSigma * sqrt(extr_ephi * extr_ephi)) {
+   if (std::fabs(dphi) > m_WeightPhi_g4 * winPhiSigma * std::sqrt(ephi_to_use * ephi_to_use)) {
       return 5;
    }
    if (ndof >= m_NdofMin) {
@@ -328,7 +348,7 @@ int muComb::mfMatch(const xAOD::L2StandAloneMuon* feature,
    bool   isTS     = ((feature->rMS() <= 10.) ? true : false);
    bool   isBarrel = ((feature->sAddress() != -1) ? true : false);
 
-   double charge = pt / fabs(pt);
+   double charge = pt / std::fabs(pt);
    double ptinv  = 1. / pt;
    double eptinv = feature->deltaPt() * Gaudi::Units::GeV / pt / pt;
 
@@ -414,15 +434,15 @@ int muComb::mfMatch(const xAOD::L2StandAloneMuon* feature,
    }
 
    ATH_MSG_DEBUG(" REGTEST DeltaEta / DeltaPhi / WinEta / WinPhi:"
-         << " / " << std::setw(11) << fabs(deta)
-         << " / " << std::setw(11) << fabs(dphi)
-         << " / " << std::setw(11) << m_WeightEta*winEtaSigma*sqrt(extr_eeta * extr_eeta)
-         << " / " << std::setw(11) << m_WeightPhi*winPhiSigma*sqrt(extr_ephi * extr_ephi) );
+         << " / " << std::setw(11) << std::fabs(deta)
+         << " / " << std::setw(11) << std::fabs(dphi)
+         << " / " << std::setw(11) << m_WeightEta*winEtaSigma*std::sqrt(extr_eeta * extr_eeta)
+         << " / " << std::setw(11) << m_WeightPhi*winPhiSigma*std::sqrt(extr_ephi * extr_ephi) );
 
-   if (fabs(deta) > m_WeightEta * winEtaSigma * sqrt(extr_eeta * extr_eeta)) {
+   if (std::fabs(deta) > m_WeightEta * winEtaSigma * std::sqrt(extr_eeta * extr_eeta)) {
       return 4;
    }
-   if (fabs(dphi) > m_WeightPhi * winPhiSigma * sqrt(extr_ephi * extr_ephi)) {
+   if (std::fabs(dphi) > m_WeightPhi * winPhiSigma * std::sqrt(extr_ephi * extr_ephi)) {
       return 5;
    }
    if (ndof >= m_NdofMin) {
@@ -661,6 +681,14 @@ StatusCode muComb::execute(const EventContext& ctx) const
      int    matched_trk_idx_tmp = -1;
 
 
+     // retrieve extrapolated muon if G4 extrapolation was
+     // requested; in this way we don't compute it Ntrk times
+     // but only once per SA muon
+     ExtrapolationResult extr;
+     if (usealgo <= 0 && m_useBackExtrapolatorG4) {//Std match
+       extr = getExtrapolatedMuon(muonSA);
+     }
+
      for(const auto trkit:(*idTrackParticles)) {
 
        matched_trk_idx_tmp++;
@@ -684,12 +712,12 @@ StatusCode muComb::execute(const EventContext& ctx) const
        double e_qoverp_id = std::sqrt((trkit)->definingParametersCovMatrix()(Trk::qOverP,Trk::qOverP));
        double e_phi_id = std::sqrt((trkit)->definingParametersCovMatrix()(Trk::phi0,Trk::phi0));
        double e_theta_id = std::sqrt((trkit)->definingParametersCovMatrix()(Trk::theta,Trk::theta));
-       double tanthetaov2 = fabs(std::exp(-eta));
-       double e_eta_id = fabs(0.5 * (1./tanthetaov2 + tanthetaov2) * e_theta_id);
+       double tanthetaov2 = std::fabs(std::exp(-eta));
+       double e_eta_id = std::fabs(0.5 * (1./tanthetaov2 + tanthetaov2) * e_theta_id);
 
        double e_qoverpt_id = e_qoverp_id;
        double theta_id = (trkit)->theta();
-       if (sin(theta_id) != 0) e_qoverpt_id /= fabs(sin(theta_id)); //approximate
+       if (std::sin(theta_id) != 0) e_qoverpt_id /= std::fabs(std::sin(theta_id)); //approximate
 
        ATH_MSG_DEBUG( " Found track: "
                    << "  with pt (GeV) = " << pt_id / Gaudi::Units::GeV
@@ -705,9 +733,9 @@ StatusCode muComb::execute(const EventContext& ctx) const
                    << ", eipt = " << e_qoverpt_id );
 
        if (usealgo != 3) {
-         if ((fabs(pt_id) / Gaudi::Units::GeV) < m_PtMinTrk)       continue;
+         if ((std::fabs(pt_id) / Gaudi::Units::GeV) < m_PtMinTrk)       continue;
        }
-       if (fabs(eta_id)  > m_EtaMaxTrk)      continue;
+       if (std::fabs(eta_id)  > m_EtaMaxTrk)      continue;
 
        ATH_MSG_DEBUG(" Track selected " );
 
@@ -724,7 +752,7 @@ StatusCode muComb::execute(const EventContext& ctx) const
            imatch_tmp = mfMatch(muonSA, eta_id, phi_id, pt_id, q_id, ptinv_tmp, ptres_tmp, deta_tmp, dphi_tmp, chi2_tmp, ndof_tmp);
            if (imatch_tmp == 0) has_match_tmp = true;
          } else { //G4 match
-           imatch_tmp = g4Match(muonSA, eta_id, phi_id, pt_id, q_id, e_eta_id, e_phi_id, e_qoverpt_id, ptinv_tmp, ptres_tmp, deta_tmp, dphi_tmp, chi2_tmp, ndof_tmp);
+           imatch_tmp = g4Match(extr, eta_id, phi_id, pt_id, q_id, e_eta_id, e_phi_id, e_qoverpt_id, ptinv_tmp, ptres_tmp, deta_tmp, dphi_tmp, chi2_tmp, ndof_tmp);
            if (imatch_tmp == 0) has_match_tmp = true;
          }
        }
@@ -733,7 +761,7 @@ StatusCode muComb::execute(const EventContext& ctx) const
        if (!has_match_tmp) continue;
 
        // select nearest track
-       dr_tmp = sqrt(deta_tmp * deta_tmp + dphi_tmp * dphi_tmp);
+       dr_tmp = std::sqrt(deta_tmp * deta_tmp + dphi_tmp * dphi_tmp);
 
        if (chi2_tmp <= chi2_comb) {//Select nearest track
          has_match  = true;
@@ -751,7 +779,7 @@ StatusCode muComb::execute(const EventContext& ctx) const
      }//Tracks loop
 
      //Set monitored quantities (monitor only pt>6 GeV/c && standard matching)
-     if (usealgo == 0 && fabs(pt) >= 6.) {
+     if (usealgo == 0 && std::fabs(pt) >= 6.) {
        ptMS       = pt;
        etaMS      = eta;
        phiMS      = phi;
@@ -768,7 +796,7 @@ StatusCode muComb::execute(const EventContext& ctx) const
      if (!has_match) {
        ErrorFlagMC = 3;
        MatchFlagMC = imatch;
-       if (usealgo == 0 && fabs(pt) >= 6.)  efficiency = 0; //monitor only efficiency for mu6 && standard matching
+       if (usealgo == 0 && std::fabs(pt) >= 6.)  efficiency = 0; //monitor only efficiency for mu6 && standard matching
        ATH_MSG_DEBUG( " No matched ID tracks --> no match" );
        muonCB->setErrorFlag(ErrorFlagMC);
        muonCB->setMatchFlag(MatchFlagMC);
@@ -794,7 +822,7 @@ StatusCode muComb::execute(const EventContext& ctx) const
      ptFL        = -9999.;
      etaFL       = -9999.;
      phiFL       = -9999.;
-     if (usealgo == 0 && fabs(pt) >= 6.) {
+     if (usealgo == 0 && std::fabs(pt) >= 6.) {
        efficiency = 1;
        ptID       = pt_id / Gaudi::Units::GeV; //in GeV/c
        etaID      = eta_id;
@@ -818,7 +846,7 @@ StatusCode muComb::execute(const EventContext& ctx) const
      ATH_MSG_DEBUG( " REGTEST Combination chosen: "
                  << " usealgo / IdPt (GeV) / muonPt (GeV) / CombPt (GeV) / chi2 / ndof: " << " / " << usealgo << " / " << pt_id*q_id / Gaudi::Units::GeV << " / " << prt_pt << " / " << 1. / ptinv_comb / Gaudi::Units::GeV << " / " << chi2_comb << " / " << ndof_comb );
 
-     muonCB->setPt(fabs(1. / ptinv_comb));
+     muonCB->setPt(std::fabs(1. / ptinv_comb));
      muonCB->setEta(eta_id);
      muonCB->setPhi(phi_id);
 
@@ -827,7 +855,7 @@ StatusCode muComb::execute(const EventContext& ctx) const
 
      muonCB->setCharge(mcq);
 
-     float mcresu = fabs(ptres_comb / (ptinv_comb * ptinv_comb));
+     float mcresu = std::fabs(ptres_comb / (ptinv_comb * ptinv_comb));
      ATH_MSG_DEBUG( " SigmaPt (GeV) is: " << mcresu / Gaudi::Units::GeV );
      muonCB->setSigmaPt(mcresu);
 

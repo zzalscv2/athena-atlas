@@ -4,6 +4,7 @@
 
 #include "TopObjectSelectionTools/TruthSelectionTtres.h"
 #include "TopEvent/EventTools.h"
+#include "TruthUtils/MagicNumbers.h"
 
 namespace top {
   TruthSelectionTtres::TruthSelectionTtres() {
@@ -14,7 +15,8 @@ namespace top {
     int s = mc.status();
     int b = mc.barcode();
 
-    if (b > 100000) return false;
+    // secondary particles  
+    if (HepMC::generations(b) > 0) return false;
 
     if (p == 11 || p == 13) {
       if (s != 1) // only final electrons and muons for e-in-jet and isolation performance eval.

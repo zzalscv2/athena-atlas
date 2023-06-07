@@ -229,7 +229,7 @@ CaloClusterVertexFractionMaker::execute(const EventContext& ctx,
 
 double CaloClusterVertexFractionMaker::calculateDPhi(double phi1, double phi2) 
 {
-  double dPhi = fabs(phi1 - phi2);
+  double dPhi = std::fabs(phi1 - phi2);
   if (dPhi > M_PI) dPhi = 2.*M_PI - dPhi;
 //   if (dPhi > 3.1415926535897931) dPhi = 6.2831853071795862 - dPhi;
   return dPhi;

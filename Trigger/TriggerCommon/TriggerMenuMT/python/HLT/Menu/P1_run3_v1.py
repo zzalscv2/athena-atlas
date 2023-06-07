@@ -295,6 +295,10 @@ def addHighMuP1Signatures(chains):
         ChainProp(name='HLT_g3_loose_LArPEBHLT_L1eEM5', stream=['LArCells'], groups=['PS:Online']+SinglePhotonGroup+SupportPhIGroup),
     ]
 
+    chainsP1['Muon'] = [    
+        ChainProp(name='HLT_mu0_muoncalib_L1MU18VFCH', stream=['Muon_Calibration'], groups=['PS:Online','RATE:Muon_Calibration','BW:Muon']),
+    ]
+
     chainsP1['Calib'] = [
         # Phase I jet inputs ATR-24411, seed needs to be checked
         #ChainProp(name='HLT_larpsall_L1jJ40', l1SeedThresholds=['jJ40'], stream=['CosmicCalo'],groups=['PS:Online','Support:PhaseI','RATE:Calibration','BW:Detector']),
@@ -350,6 +354,7 @@ def addHighMuP1Signatures(chains):
     chainsP1['Streaming'] = [
         ChainProp(name='HLT_noalg_L1EM3_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'],groups=['PS:Online','RATE:Cosmic_Calo','BW:MinBias','RATE:Calibration']+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1EM7_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo','express'],groups=['PS:Online','RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1eEM9_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo','express'],groups=['PS:Online','RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup),
     ]
 
     # Random Seeded EB chains which select at the HLT based on L1 TBP bits
@@ -495,9 +500,9 @@ def addHeavyIonP1Signatures(chains):
 
     # ALFA Diffractive triggers
     chainsP1['MinBias'] = [
-        ChainProp(name='HLT_noalg_L1ALFA_Diff_Phys', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup),
-        ChainProp(name='HLT_noalg_L1ALFA_CDiff_Phys', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup),
-        ChainProp(name='HLT_noalg_L1J12_ALFA_EINE', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1ALFA_Diff_Phys', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1ALFA_CDiff_Phys', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1J12_ALFA_EINE', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup+SupportLegGroup),
 
         ChainProp(name='HLT_mb_sptrk_vetombts2in_L1ALFA_ANY', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup),
 
@@ -528,6 +533,11 @@ def addCosmicP1Signatures(chains):
         ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1J30', stream=['IDCalib'], groups=['PS:Online']+SupportLegGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']), 
         ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1XE35', stream=['IDCalib'], groups=['PS:Online']+SupportLegGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']), 
 
+        ChainProp(name='HLT_noalg_LumiPEB_L1RD0_BGRP15', l1SeedThresholds=['FSNOSEED'], stream=['PixelBeam'], groups=['PS:Online']+SupportGroup),
+        ChainProp(name='HLT_noalg_LArPEBCalib_L1eEM12L', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['PS:Online','RATE:Calibration','BW:Detector']+SupportPhIGroup),
+        ChainProp(name='HLT_larpsallem_L1eEM9_EMPTY', l1SeedThresholds=['eEM9'], stream=['CosmicCalo'],groups=['PS:Online','RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_LArPEBNoise_L1eEM9_EMPTY',  l1SeedThresholds=['eEM9'], stream=['LArCellsEmpty'],groups=['PS:Online','RATE:Calibration','BW:Detector']+SupportPhIGroup),
+
         ChainProp(name='HLT_noalg_LArPEBCalib_L1EM3', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['PS:Online','RATE:Calibration','BW:Detector']+SupportLegGroup),
         ChainProp(name='HLT_larpsallem_L1EM3_EMPTY', l1SeedThresholds=['EM3'], stream=['CosmicCalo'],groups=['PS:Online','RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportLegGroup),
         #ATR-27253,Phase-I
@@ -543,6 +553,11 @@ def addCosmicP1Signatures(chains):
     chainsP1['Streaming'] = [
         ChainProp(name='HLT_noalg_L1EM3_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'],groups=['PS:Online','RATE:Cosmic_Calo','BW:MinBias','RATE:Calibration']+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1EM7_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo','express'],groups=['PS:Online','RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1eEM9_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo','express'],groups=['PS:Online','RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup),
+    ]
+
+    chainsP1['Jet'] = [
+        ChainProp(name='HLT_j165_LArPEBHLT_L1jJ160', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['PS:Online']+SingleJetGroup+SupportPhIGroup),
     ]
 
     addP1Signatures(chains,chainsP1)

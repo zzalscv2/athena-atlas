@@ -9,7 +9,6 @@
 
 #include "GeneratorModules/GenBase.h"
 #include "GaudiKernel/ITHistSvc.h"
-#include "TruthHelper/IsGenNonInteracting.h"
 #include "TFile.h"
 #include "TH1.h"
 #include "AtlasHepMC/GenEvent.h"
@@ -93,7 +92,6 @@ public:
   std::vector<int> m_G4pdgID_tab;
   std::vector<int> m_SusyPdgID_tab;
   std::vector<int> m_uknownPDGID_tab;
-  TruthHelper::IsGenNonInteracting m_nonint;
 
   /// @todo Can we use the GenAnalysis / AthHistoAlg methods for histo management?
   ServiceHandle<ITHistSvc> m_thistSvc;

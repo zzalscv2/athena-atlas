@@ -220,7 +220,7 @@ def setupDESDMCPSkimmingAlgCfg(flags, name= "DESDMCPEventKernel", **kwargs):
 
 def DESDMCPOutputCfg(flags, **kwargs):
     result = ComponentAccumulator()
-    from AthenaConfiguration.Enums import LHCPeriod
+    from AthenaConfiguration.Enums import LHCPeriod, MetadataCategory
     isRun3 = flags.GeoModel.Run == LHCPeriod.Run3
 
     container_items = ["xAOD::EventInfo#*", "xAOD::EventAuxInfo#*",
@@ -301,7 +301,12 @@ def DESDMCPOutputCfg(flags, **kwargs):
     container_items += ["Muon::RpcPrepDataContainer#*", "Muon::TgcPrepDataContainer#*", "Muon::MdtPrepDataContainer#*"]
     ### Only add the SW containers in the corresponding geometry
     if not isRun3: container_items +=["Muon::CscPrepDataContainer#*", "Muon::CscStripPrepDataContainer#CSC_Measurements"]
-    else: container_items +=["Muon::MMPrepDataContainer#*","Muon::sTgcPrepDataContainer#*"]
+    else: container_items +=["Muon::MMPrepDataContainer#*",
+                            "Muon::sTgcPrepDataContainer#*",
+                            "xAOD::NSWTPRDOContainer#*","xAOD::NSWTPRDOAuxContainer#*",
+                            "Muon::NSW_PadTriggerDataContainer#*", 
+                            "Muon::NSW_TrigRawDataContainer#L1_NSWTrigContainer" ,
+                            ]
     
     ### RPC trigger RDO containers
     container_items += ["MuCTPI_RDO#MUCTPI_RDO", "RpcPadContainer#RPCPAD", 
@@ -312,8 +317,7 @@ def DESDMCPOutputCfg(flags, **kwargs):
                         "Muon::TgcCoinDataContainer#TrigT1CoinDataCollectionNextBC",
                         "Muon::TgcCoinDataContainer#TrigT1CoinDataCollectionNextNextBC",
                         "Muon::TgcCoinDataContainer#TrigT1CoinDataCollection"]
-     #### NSW trigger containers
-    if isRun3: container_items +=["Muon::NSW_PadTriggerDataContainer#*", "Muon::NSW_TrigRawDataContainer#L1_NSWTrigContainer" ]
+    
     
     ### Segment containers
     trk_seg_cont = ["TrkMuonSegments", "UnAssocMuonTrkSegments"]+ (["TrackMuonNSWSegments"] if isRun3 else [])
@@ -328,7 +332,19 @@ def DESDMCPOutputCfg(flags, **kwargs):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     kwargs.setdefault("ItemList", container_items)
     result.merge(OutputStreamCfg(flags, **kwargs))
-    result.merge(SetupMetaDataForStreamCfg(flags, kwargs.get("streamName"), kwargs.get("AcceptAlgs")))
+    result.merge(
+        SetupMetaDataForStreamCfg(
+            flags,
+            kwargs.get("streamName"),
+            kwargs.get("AcceptAlgs"),
+            createMetadata=[
+                    MetadataCategory.ByteStreamMetaData,
+                    MetadataCategory.CutFlowMetaData,
+                    MetadataCategory.LumiBlockMetaData,
+                    MetadataCategory.TriggerMenuMetaData,
+            ],
+        )
+    )
     return result
 
 

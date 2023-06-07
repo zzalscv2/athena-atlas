@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -58,6 +58,7 @@ StatusCode eFEXFPGA::initialize()
   ATH_CHECK(m_eTowerContainerKey.initialize());
   ATH_CHECK( m_eFEXegAlgoTool.retrieve() );
   ATH_CHECK( m_eFEXtauAlgoTool.retrieve() );
+  ATH_CHECK( m_eFEXtauBDTAlgoTool.retrieve() );
   
   
   ATH_CHECK(m_l1MenuKey.initialize());
@@ -84,7 +85,8 @@ void eFEXFPGA::reset(){
 
 StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
   m_emTobObjects.clear();
-  m_tauTobObjects.clear();
+  m_tauHeuristicTobObjects.clear();
+  m_tauBDTTobObjects.clear();
 
   SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
   if(!eTowerContainer.isValid()){
@@ -273,7 +275,15 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       };
       
       ATH_CHECK( m_eFEXtauAlgoTool->safetyTest() );
+      ATH_CHECK( m_eFEXtauBDTAlgoTool->safetyTest() );
       m_eFEXtauAlgoTool->setup(tobtable, m_efexid, m_id, ieta);
+      m_eFEXtauBDTAlgoTool->setup(tobtable, m_efexid, m_id, ieta);
+
+      if ( m_eFEXtauAlgoTool->isCentralTowerSeed() != m_eFEXtauBDTAlgoTool->isCentralTowerSeed() )
+      {
+      	ATH_MSG_FATAL("BDT tau algo and heuristic tau algo should agree on seeding for all TOBs");
+        return StatusCode::FAILURE;
+      }
 
       if (!m_eFEXtauAlgoTool->isCentralTowerSeed()){ continue; }
 
@@ -283,7 +293,9 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
 
       // Get Et of eFEX tau object in internal units (25 MeV)
       unsigned int eTauTobEt = 0;
+      unsigned int eTauBDTTobEt = 0;
       eTauTobEt = m_eFEXtauAlgoTool->getEt();
+      eTauBDTTobEt = m_eFEXtauBDTAlgoTool->getEt();
 
       // thresholds from Trigger menu
       // the menu eta runs from -25 to 24
@@ -291,6 +303,11 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       auto iso_loose  = thr_eTAU.isolation(TrigConf::Selection::WP::LOOSE, menuEta);
       auto iso_medium = thr_eTAU.isolation(TrigConf::Selection::WP::MEDIUM, menuEta);
       auto iso_tight  = thr_eTAU.isolation(TrigConf::Selection::WP::TIGHT, menuEta);  
+
+      // TODO Add corresponding entries to menu and read from there. These are fillers for now
+      auto bdt_loose = 0;
+      auto bdt_medium = 0;
+      auto bdt_tight = 0; 
 
       std::vector<unsigned int> threshRCore;
       threshRCore.push_back(iso_loose.rCore_fw());
@@ -309,6 +326,10 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       std::vector<unsigned int> rHadVec;
       m_eFEXtauAlgoTool->getRHad(rHadVec);
 
+      // BDT-based tau algorithm outputs (both 0 for heuristic algorithm)
+      unsigned int bdtScore = 0;
+      unsigned int bdtCondition = 0;
+
       // Set isolation WP
       unsigned int rCoreWP = 0;
       unsigned int rHadWP = 0;
@@ -325,6 +346,17 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
 	SetIsoWP(rCoreVec,threshRCore,rCoreWP,RcoreBitS);
 	SetIsoWP(rHadVec,threshRHad,rHadWP,RhadBitS);
       }
+      std::vector<unsigned int> threshBDT;
+      threshBDT.push_back(bdt_loose);
+      threshBDT.push_back(bdt_medium);
+      threshBDT.push_back(bdt_tight);
+      m_eFEXtauBDTAlgoTool->setThresholds(threshRHad, threshBDT, maxEtCountsTau, maxEtCountsTau);
+      // Re-compute after setting thresholds. 
+      // Threshold bits in the BDT algorithm's implementation are computed inside the algorithm class
+      m_eFEXtauBDTAlgoTool->compute();
+      eTauBDTTobEt = m_eFEXtauBDTAlgoTool->getEt();
+      bdtScore = m_eFEXtauBDTAlgoTool->getBDTScore();
+      bdtCondition = m_eFEXtauBDTAlgoTool->getBDTCondition();
 
       unsigned int seed = 0;
       seed = m_eFEXtauAlgoTool->getSeed();
@@ -337,8 +369,18 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       int phi_ind = iphi - 1;
 
       // Form the tau TOB word and xTOB words
-      uint32_t tobword = m_eFEXFormTOBsTool->formTauTOBWord(m_id, eta_ind, phi_ind, eTauTobEt, rHadWP, rCoreWP, seed, und, ptTauMinToTopoCounts);
-      std::vector<uint32_t> xtobwords = m_eFEXFormTOBsTool->formTauxTOBWords(m_efexid, m_id, eta_ind, phi_ind, eTauTobEt, rHadWP, rCoreWP, seed, und, ptTauMinToTopoCounts);
+      uint32_t tobword;
+      std::vector<uint32_t> xtobwords;
+      uint32_t tobwordBDT;
+      std::vector<uint32_t> xtobwordsBDT;
+
+      ATH_MSG_DEBUG("m_id: " << m_id << ", eta_ind: " <<eta_ind << ", phi_ind: " 
+		      <<phi_ind << ", eTauBDTTobEt: " <<eTauBDTTobEt
+		      <<", eTauTobEt: "<<eTauTobEt << ", ptTauMinToTopoCounts: " << ptTauMinToTopoCounts<< ", maxEtCountsTau: " <<maxEtCountsTau << ", bdtScore: "<<bdtScore);
+      tobwordBDT = m_eFEXFormTOBsTool->formTauBDTTOBWord(m_id, eta_ind, phi_ind, eTauBDTTobEt, rHadWP, bdtCondition, ptTauMinToTopoCounts);
+      xtobwordsBDT = m_eFEXFormTOBsTool->formTauBDTxTOBWords(m_efexid, m_id, eta_ind, phi_ind, eTauBDTTobEt, rHadWP, bdtCondition, ptTauMinToTopoCounts, bdtScore);
+      tobword = m_eFEXFormTOBsTool->formTauTOBWord(m_id, eta_ind, phi_ind, eTauTobEt, rHadWP, rCoreWP, seed, und, ptTauMinToTopoCounts);
+      xtobwords = m_eFEXFormTOBsTool->formTauxTOBWords(m_efexid, m_id, eta_ind, phi_ind, eTauTobEt, rHadWP, rCoreWP, seed, und, ptTauMinToTopoCounts);
 
       std::unique_ptr<eFEXtauTOB> tmp_tau_tob = m_eFEXtauAlgoTool->getTauTOB();
       tmp_tau_tob->setFPGAID(m_id);
@@ -349,10 +391,20 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       tmp_tau_tob->setxTobword0(xtobwords[0]);
       tmp_tau_tob->setxTobword1(xtobwords[1]);
 
+      std::unique_ptr<eFEXtauTOB> tmp_tau_tob_bdt = m_eFEXtauBDTAlgoTool->getTauTOB();
+      tmp_tau_tob_bdt->setFPGAID(m_id);
+      tmp_tau_tob_bdt->seteFEXID(m_efexid);
+      tmp_tau_tob_bdt->setEta(ieta);
+      tmp_tau_tob_bdt->setPhi(iphi);
+      tmp_tau_tob_bdt->setTobword(tobwordBDT);
+      tmp_tau_tob_bdt->setxTobword0(xtobwordsBDT[0]);
+      tmp_tau_tob_bdt->setxTobword1(xtobwordsBDT[1]);
+
       // for plotting
       if ((inputOutputCollection->getdooutput()) && ( tobword != 0 )) {
         inputOutputCollection->addValue_tau("isCentralTowerSeed", m_eFEXtauAlgoTool->isCentralTowerSeed());
         inputOutputCollection->addValue_tau("Et", m_eFEXtauAlgoTool->getEt());
+        inputOutputCollection->addValue_tau("EtBDT", m_eFEXtauBDTAlgoTool->getEt());
         inputOutputCollection->addValue_tau("Eta", ieta);
         inputOutputCollection->addValue_tau("Phi", iphi);
         const LVL1::eTower * centerTower = eTowerContainer->findTower(m_eTowersIDs[iphi][ieta]);
@@ -370,9 +422,12 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
         inputOutputCollection->addValue_tau("RHadCore", rHadVec[0]);
         inputOutputCollection->addValue_tau("RHadEnv", rHadVec[1]);
         inputOutputCollection->addValue_tau("RealRHad", m_eFEXtauAlgoTool->getRealRHad());
+        inputOutputCollection->addValue_tau("RealRHadBDT", m_eFEXtauBDTAlgoTool->getRealRHad());
         inputOutputCollection->addValue_tau("RHadWP", rHadWP);
         inputOutputCollection->addValue_tau("Seed", seed);
         inputOutputCollection->addValue_tau("UnD", und);
+        inputOutputCollection->addValue_tau("BDTScore", bdtScore);
+        inputOutputCollection->addValue_tau("BDTCondition", bdtCondition);
         inputOutputCollection->addValue_tau("eFEXID", m_efexid);
         inputOutputCollection->addValue_tau("FPGAID", m_id);
 
@@ -380,7 +435,8 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
         inputOutputCollection->fill_tau();
       }
       // Now we've finished with that object we can move it into the class results store
-      if ( tobword != 0 ) m_tauTobObjects.push_back(std::move(tmp_tau_tob));
+      if ( tobword != 0 ) m_tauHeuristicTobObjects.push_back(std::move(tmp_tau_tob));
+      if ( tobwordBDT != 0 ) m_tauBDTTobObjects.push_back(std::move(tmp_tau_tob_bdt));
 
     }
   }
@@ -423,12 +479,12 @@ std::vector<std::unique_ptr<eFEXegTOB>> eFEXFPGA::getEmTOBs()
 
 }
 
-std::vector<std::unique_ptr<eFEXtauTOB>> eFEXFPGA::getTauTOBs()
+std::vector<std::unique_ptr<eFEXtauTOB>> eFEXFPGA::getTauTOBs(std::vector< std::unique_ptr<eFEXtauTOB> >& tauTobObjects)
 {
   // TOB sorting moved to eFEXSysSim to simplify xTOB production
   // But leave this here in case more subtle requirement is uncovered in future
   /*
-  auto tobsSort = m_tauTobObjects;
+  auto tobsSort = tauTobObjects;
 
   ATH_MSG_DEBUG("number of tobs: " <<tobsSort.size() << " in FPGA: " << m_id << " before truncation");
 
@@ -447,12 +503,22 @@ std::vector<std::unique_ptr<eFEXtauTOB>> eFEXFPGA::getTauTOBs()
   // This copy seems to be needed - it won't let me pass m_tauTobOjects directly (to do with being a class member?)
   std::vector<std::unique_ptr<eFEXtauTOB>> tobsSort;
   tobsSort.clear();
-  for(auto &j : m_tauTobObjects){
+  for(auto &j : tauTobObjects){
       tobsSort.push_back(std::move(j));
   }
 
   return tobsSort;
 
+}
+
+std::vector<std::unique_ptr<eFEXtauTOB>> eFEXFPGA::getTauHeuristicTOBs()
+{
+  return getTauTOBs(m_tauHeuristicTobObjects);
+}
+
+std::vector<std::unique_ptr<eFEXtauTOB>> eFEXFPGA::getTauBDTTOBs()
+{
+  return getTauTOBs(m_tauBDTTobObjects);
 }
 
 void eFEXFPGA::SetTowersAndCells_SG(int tmp_eTowersIDs_subset[][6]){

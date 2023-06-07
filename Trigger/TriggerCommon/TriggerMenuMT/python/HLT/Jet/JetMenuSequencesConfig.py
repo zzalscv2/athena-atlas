@@ -8,14 +8,13 @@ from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 from ..CommonSequences.FullScanDefs import  trkFSRoI, em_clusters, lc_clusters
-from ..CommonSequences.CaloConfig import CaloClusterCfg
 from ..Config.MenuComponents import parOR
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 
 # Hypo tool generators
 from TrigHLTJetHypo.TrigJetHypoToolConfig import trigJetHypoToolFromDict
 from .JetPresel import caloPreselJetHypoToolFromDict, roiPreselJetHypoToolFromDict
-
+from TrigCaloRec.TrigCaloRecConfig import jetmetTopoClusteringCfg, jetmetTopoClusteringCfg_LC, HICaloTowerCfg
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 
 from AthenaCommon.Logging import logging
@@ -157,9 +156,13 @@ def hypoToolGenerator(hypoType):
 def jetCaloPreselSelCfg(flags, **jetRecoDict):
     reco = InEventRecoCA(f"jetSeqCaloPresel_{jetRecoDict['jetDefStr']}_RecoSequence", inputMaker=getCaloInputMaker())
     doLCCalib = jetRecoDict['clusterCalib']=='lcw'
-    reco.mergeReco( CaloClusterCfg(flags, doLCCalib=doLCCalib) )
-    clustersKey = lc_clusters if doLCCalib else em_clusters
-
+    if doLCCalib:
+        reco.mergeReco(jetmetTopoClusteringCfg_LC(flags, RoIs=''))
+        clustersKey = lc_clusters
+    else:
+        reco.mergeReco(jetmetTopoClusteringCfg(flags, RoIs=''))
+        clustersKey = em_clusters
+    
     from .JetRecoSequencesConfig import JetRecoCfg
     jetreco, jetsOut, jetDef = JetRecoCfg(flags, clustersKey=clustersKey, **jetRecoDict)
     reco.mergeReco(jetreco)
@@ -180,8 +183,13 @@ def jetCaloSelCfg(flags, clusterCalib):
     reco = InEventRecoCA(f"jetSeqCaloReco_{clusterCalib}_RecoSequence", inputMaker=getCaloInputMaker())
 
     doLCCalib = clusterCalib=='lcw'
-    reco.mergeReco( CaloClusterCfg(flags, doLCCalib) )
-    clustersKey = lc_clusters if doLCCalib else em_clusters
+    if doLCCalib:
+        reco.mergeReco(jetmetTopoClusteringCfg_LC(flags, RoIs=''))
+        clustersKey = lc_clusters
+    else:
+        reco.mergeReco(jetmetTopoClusteringCfg(flags, RoIs=''))
+        clustersKey = em_clusters
+
     selAcc = SelectionCA(selName(reco.name, hypoType=JetHypoAlgType.PASSTHROUGH))
     selAcc.mergeReco(reco)
     selAcc.mergeHypo(jetSelectionCfg(flags, jetDefStr="caloreco", jetsIn=None, hypoType=JetHypoAlgType.PASSTHROUGH))
@@ -202,8 +210,12 @@ def jetCaloHypoSelCfg(flags, isPerf, **jetRecoDict):
     reco = InEventRecoCA(f"jetSeqCaloHypo_{jetRecoDict['jetDefStr']}_RecoSequence", inputMaker=getCaloInputMaker())
 
     doLCCalib = jetRecoDict['clusterCalib']=='lcw'
-    reco.mergeReco( CaloClusterCfg(flags, doLCCalib) )
-    clustersKey = lc_clusters if doLCCalib else em_clusters
+    if doLCCalib:
+        reco.mergeReco(jetmetTopoClusteringCfg_LC(flags, RoIs=''))
+        clustersKey = lc_clusters
+    else:
+        reco.mergeReco(jetmetTopoClusteringCfg(flags, RoIs=''))
+        clustersKey = em_clusters
 
     if jetRecoDict["trkopt"] != "notrk":
         from .JetTrackingConfig import JetFSTrackingCfg
@@ -234,7 +246,6 @@ def jetCaloHypoMenuSequence(flags, isPerf, **jetRecoDict):
 def jetHICaloSelCfg(flags, isPerf, **jetRecoDict):
     reco = InEventRecoCA(f"jetSeqHICaloHypo_{jetRecoDict['jetDefStr']}_RecoSequence", inputMaker=getCaloInputMaker())
 
-    from ..CommonSequences.CaloConfig import HICaloTowerCfg
     reco.mergeReco( HICaloTowerCfg(flags) )
 
     from .JetHIConfig import JetHICfg

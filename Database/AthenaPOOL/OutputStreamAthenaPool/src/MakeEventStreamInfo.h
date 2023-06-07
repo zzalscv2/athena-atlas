@@ -60,5 +60,9 @@ private:
    /// Pointer to the data stores
    ServiceHandle<IMetaDataSvc> m_metaDataSvc{this, "MetaDataSvc", "MetaDataSvc"};
    ServiceHandle<StoreGateSvc> m_eventStore{this, "StoreGateSvc", "StoreGateSvc"};
+
+   /// Check if the EventStreamInfo was filled with event-specific information
+   bool m_filledEvent{false};
+
 };
 #endif

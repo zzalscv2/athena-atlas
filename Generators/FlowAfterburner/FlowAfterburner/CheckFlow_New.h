@@ -16,7 +16,7 @@
 #define CHECKFLOWNEW_H
 #include <math.h>
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "TruthHelper/GenAccessIO.h"
+#include "FlowAfterburner/GenAccessIO.h"
 
 #include "GaudiKernel/ITHistSvc.h"
 #include "TH1.h"

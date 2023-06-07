@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -119,16 +119,6 @@ Barcode::GlobalBarcodeSvc::sharedChildBarcode( Barcode::ParticleBarcode /* paren
 }
 
 
-/** Update the given barcode (e.g. after an interaction) */
-Barcode::ParticleBarcode
-Barcode::GlobalBarcodeSvc::incrementBarcode( Barcode::ParticleBarcode /* old */,
-                                             Barcode::PhysicsProcessCode /* process */)
-{
-  m_curParticle += m_secondaryIncrement;
-  return ( m_curParticle);
-}
-
-
 void Barcode::GlobalBarcodeSvc::registerLargestGenEvtParticleBC( Barcode::ParticleBarcode /* bc */)
 {
 }
@@ -150,13 +140,6 @@ Barcode::ParticleBarcode Barcode::GlobalBarcodeSvc::secondaryParticleBcOffset() 
 Barcode::VertexBarcode Barcode::GlobalBarcodeSvc::secondaryVertexBcOffset() const
 {
   return m_firstVertex;
-}
-
-
-/** Return the barcode increment for each generation of updated particles */
-Barcode::ParticleBarcode Barcode::GlobalBarcodeSvc::particleGenerationIncrement() const
-{
-  return m_particleGenerationIncrement;
 }
 
 

@@ -6,7 +6,7 @@
 
 // local include(s)
 #include "TauAnalysisTools/HelperFunctions.h"
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "TF1.h"
 
 #ifdef ASGTOOL_ATHENA

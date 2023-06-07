@@ -1,17 +1,15 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef CALIBRATEDMUONSPROVIDER
-#define CALIBRATEDMUONSPROVIDER
-
-#include <AsgAnalysisInterfaces/IPileupReweightingTool.h>
+#ifndef MUONMMC_CALIBRATEDMUONSPROVIDER_H
+#define MUONMMC_CALIBRATEDMUONSPROVIDER_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "MuonAnalysisInterfaces/IMuonCalibrationAndSmearingTool.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
+#include "StoreGate/ReadDecorHandleKey.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODMuon/MuonContainer.h"
@@ -41,8 +39,9 @@ namespace CP {
 
         /// Muon calibration tool
         ToolHandle<IMuonCalibrationAndSmearingTool> m_tool{this, "Tool", ""};
-        ToolHandle<IPileupReweightingTool> m_prwTool{this, "prwTool", ""};
         Gaudi::Property<bool> m_useRndNumber{this, "useRndRunNumber", false};
+        SG::ReadDecorHandleKey<xAOD::EventInfo> m_rndNumKey{this, "RandomNumberDecor", "EventInfo.RandomRunNumber",
+                                                            "Dependency on the random run number"};
 
     };  // class
 

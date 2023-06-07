@@ -34,20 +34,13 @@ class MuonNRPC_CablingAlg : public AthAlgorithm {
 
     using CablingData = MuonNRPC_CablingMap::CablingData;
 
-   private:
-    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
-        this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+private:
+    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+    SG::WriteCondHandleKey<MuonNRPC_CablingMap> m_writeKey{this, "WriteKey", "MuonNRPC_CablingMap", "Key of output NRPC cabling map"};
 
     SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyMap{
-        this, "MapFolders", "/MDT/CABLING/MAP_SCHEMA"};
-    SG::WriteCondHandleKey<MuonNRPC_CablingMap> m_writeKey{
-        this, "WriteKey", "MuonNRPC_CablingMap",
-        "Key of output NRPC cabling map"};
-
-    SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muonManagerKey{
-        this, "MuonManagerKey", "MuonDetectorManager",
-        "MuonManager ReadKey for IOV Range intersection"};
-
+        this, "MapFolders", "/RPC/NCABLING/JSON", "Database folder for the RPC cabling"};
+   
     Gaudi::Property<std::string> m_extJSONFile{
         this, "JSONFile", "",
         "Specify an external JSON file containing the cabling information."};

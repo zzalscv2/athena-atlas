@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  *
  * Name :       LArRAWtoSuperCell.cxx
  * PACKAGE :    LArCalorimeter/LArCell/LArRAWtoSuperCell
@@ -18,7 +18,7 @@
 #include "LArRecConditions/LArBadChannel.h"
 
 LArRAWtoSuperCell::LArRAWtoSuperCell( const std::string& name, ISvcLocator* pSvcLocator)
-  : AthReentrantAlgorithm( name, pSvcLocator)//, m_sem_mgr(0)
+  : AthReentrantAlgorithm( name, pSvcLocator)
 {
 }
 
@@ -79,8 +79,6 @@ LArRAWtoSuperCell::execute(const EventContext& context) const
 
         for(auto sc : *scells_from_sg){
                 if ( !sc ) continue;
-                // calculate the BCID for all the cells associated to the SC
-                // since this is emulation
                 Identifier off_id = cabling->cnvToIdentifier(sc->hardwareID()); 
                 const CaloDetDescrElement* dde = sem_mgr ->get_element(off_id);
 		CaloCell* cell = new CaloCell();
@@ -90,7 +88,13 @@ LArRAWtoSuperCell::execute(const EventContext& context) const
 		const std::vector< bool>& satur = sc->satur();
 		float energy(0.);
 		bool saturation(false);
-		for(unsigned int i=0;i<bcids.size();i++) if ( bcids[i]==bcid ) {energy=energies[i]; saturation = satur[i];}
+		for(unsigned int i=0;i<bcids.size();++i){ 
+                   if ( bcids[i]==bcid+m_bcidOffset ) {
+                      energy=energies[i]; 
+                      saturation = satur[i];
+                      break;
+                   }
+                }
 		// convert ET (coming from LATOMEs) into Energy and
 		// apply magic 12.5 factor
                 cell->setEnergy( 12.5*energy*cosh(cell->eta()) );

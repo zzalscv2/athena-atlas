@@ -67,6 +67,7 @@ JSSTaggerBase::JSSTaggerBase(const std::string &name) :
 		   "Name of efficiency histograms in the ROOT file" );
   declareProperty( "WeightFlavors",             m_weightFlavors = "",
 		   "List of jet flavours for which the SF is available. Divided by comma" );
+  declareProperty( "SuppressOutputDependence", m_suppressOutputDependence = false );
 }
 
 StatusCode JSSTaggerBase::initialize() {
@@ -84,7 +85,7 @@ StatusCode JSSTaggerBase::initialize() {
   m_acceptInfo.addCut( "ValidPtRangeHigh"  , "True if the jet is not too high pT" );
   m_acceptInfo.addCut( "ValidPtRangeLow"   , "True if the jet is not too low pT" );
   m_acceptInfo.addCut( "ValidEtaRange"     , "True if the jet is not too forward" );
-  
+
   m_acceptInfo.addCut( "ValidJetContent"   , "True if the jet is alright technically (e.g. all attributes necessary for tag)" );
   m_acceptInfo.addCut( "ValidEventContent" , "True if the event is alright technically (e.g. primary vertices)" );
 
@@ -173,7 +174,7 @@ StatusCode JSSTaggerBase::initialize() {
 
   m_readNtrk500Key = m_containerName + "." + m_readNtrk500Key.key();
   ATH_CHECK( m_readNtrk500Key.initialize() );
-  
+
   ATH_CHECK( m_decTaggedKey.initialize() );
   ATH_CHECK( m_decValidPtRangeHighKey.initialize() );
   ATH_CHECK( m_decValidPtRangeLowKey.initialize() );
@@ -190,56 +191,65 @@ StatusCode JSSTaggerBase::initialize() {
   ATH_MSG_INFO( "  " << m_decValidJetContentKey.key() << " : has valid jet content" );
   ATH_MSG_INFO( "  " << m_decValidEventContentKey.key() << " : has valid event content" );
 
-  if ( m_useMassCut ) {
 
-    m_decPassMassKey = m_containerName + "." + m_decorationName + "_" + m_decPassMassKey.key();
-    m_decCutMLowKey = m_containerName + "." + m_decorationName + "_" + m_decCutMLowKey.key();
-    m_decCutMHighKey = m_containerName + "." + m_decorationName + "_" + m_decCutMHighKey.key();
+  m_decPassMassKey = m_containerName + "." + m_decorationName + "_" + m_decPassMassKey.key();
+  m_decCutMLowKey = m_containerName + "." + m_decorationName + "_" + m_decCutMLowKey.key();
+  m_decCutMHighKey = m_containerName + "." + m_decorationName + "_" + m_decCutMHighKey.key();
 
-    ATH_CHECK( m_decPassMassKey.initialize() );
-    ATH_CHECK( m_decCutMLowKey.initialize() );
-    ATH_CHECK( m_decCutMHighKey.initialize() );
+  ATH_CHECK( m_decPassMassKey.initialize() );
+  ATH_CHECK( m_decCutMLowKey.initialize() );
+  ATH_CHECK( m_decCutMHighKey.initialize() );
 
-    ATH_MSG_INFO( "  " << m_decPassMassKey.key() << " : pass mass cut" );
-    ATH_MSG_INFO( "  " << m_decCutMLowKey.key() << " : lower mass cut" );
-    ATH_MSG_INFO( "  " << m_decCutMHighKey.key() << " : upper mass cut" );
+  ATH_MSG_INFO( "  " << m_decPassMassKey.key() << " : pass mass cut" );
+  ATH_MSG_INFO( "  " << m_decCutMLowKey.key() << " : lower mass cut" );
+  ATH_MSG_INFO( "  " << m_decCutMHighKey.key() << " : upper mass cut" );
 
+
+  m_decPassScoreKey = m_containerName + "." + m_decorationName + "_" + m_decPassScoreKey.key();
+  m_decScoreCutKey = m_containerName + "." + m_decorationName + "_" + m_decScoreCutKey.key();
+  m_decScoreValueKey = m_containerName + "." + m_decorationName + "_" + m_decScoreValueKey.key();
+
+  ATH_CHECK( m_decPassScoreKey.initialize() );
+  ATH_CHECK( m_decScoreCutKey.initialize() );
+  ATH_CHECK( m_decScoreValueKey.initialize() );
+
+  ATH_MSG_INFO( "  " << m_decPassScoreKey.key() << " : pass MVA score cut" );
+  ATH_MSG_INFO( "  " << m_decScoreCutKey.key() << " : MVA score cut" );
+  ATH_MSG_INFO( "  " << m_decScoreValueKey.key() << " : evaluated MVA score" );
+
+
+  m_decWeightKey = m_containerName + "." + m_decorationName + "_" + m_weightDecorationName;
+  m_decEfficiencyKey = m_containerName + "." + m_decorationName + "_" + m_decEfficiencyKey.key();
+  m_decEffSFKey = m_containerName + "." +m_decorationName + "_" + m_decEffSFKey.key();
+  m_decSigeffSFKey = m_containerName + "." +m_decorationName + "_" + m_decSigeffSFKey.key();
+
+  ATH_CHECK( m_decWeightKey.initialize() );
+  ATH_CHECK( m_decEfficiencyKey.initialize() );
+  ATH_CHECK( m_decEffSFKey.initialize() );
+  ATH_CHECK( m_decSigeffSFKey.initialize() );
+
+  ATH_MSG_INFO( "  " << m_decWeightKey.key() << " : tagging SF" );
+
+  m_readTruthLabelKey = m_containerName + "." + m_truthLabelName;
+  ATH_CHECK( m_readTruthLabelKey.initialize() );
+
+#ifndef XAOD_STANDALONE
+  if (m_suppressOutputDependence) {
+    renounce(m_decValidPtRangeHighKey);
+    renounce(m_decValidPtRangeLowKey);
+    renounce(m_decValidEtaRangeKey);
+    renounce(m_decValidKinRangeKey);
+    renounce(m_decTau21WTAKey);
+    renounce(m_decTau32WTAKey);
+    renounce(m_decTau42WTAKey);
+    renounce(m_decC2Key);
+    renounce(m_decD2Key);
+    renounce(m_decE3Key);
+    renounce(m_decL2Key);
+    renounce(m_decL3Key);
+    renounce(m_decNtrk500Key);
   }
-
-  if ( m_useScoreCut ) {
-  
-    m_decPassScoreKey = m_containerName + "." + m_decorationName + "_" + m_decPassScoreKey.key();
-    m_decScoreCutKey = m_containerName + "." + m_decorationName + "_" + m_decScoreCutKey.key();
-    m_decScoreValueKey = m_containerName + "." + m_decorationName + "_" + m_decScoreValueKey.key();
-
-    ATH_CHECK( m_decPassScoreKey.initialize() );
-    ATH_CHECK( m_decScoreCutKey.initialize() );
-    ATH_CHECK( m_decScoreValueKey.initialize() );
-
-    ATH_MSG_INFO( "  " << m_decPassScoreKey.key() << " : pass MVA score cut" );
-    ATH_MSG_INFO( "  " << m_decScoreCutKey.key() << " : MVA score cut" );
-    ATH_MSG_INFO( "  " << m_decScoreValueKey.key() << " : evaluated MVA score" );
-
-  }
-
-  if ( m_calcSF ) {
-  
-    m_decWeightKey = m_containerName + "." + m_decorationName + "_" + m_weightDecorationName;
-    m_decEfficiencyKey = m_containerName + "." + m_decorationName + "_" + m_decEfficiencyKey.key();
-    m_decEffSFKey = m_containerName + "." +m_decorationName + "_" + m_decEffSFKey.key();
-    m_decSigeffSFKey = m_containerName + "." +m_decorationName + "_" + m_decSigeffSFKey.key();
-    
-    ATH_CHECK( m_decWeightKey.initialize() );
-    ATH_CHECK( m_decEfficiencyKey.initialize() );
-    ATH_CHECK( m_decEffSFKey.initialize() );
-    ATH_CHECK( m_decSigeffSFKey.initialize() );
-    
-    ATH_MSG_INFO( "  " << m_decWeightKey.key() << " : tagging SF" );
-   
-    m_readTruthLabelKey = m_containerName + "." + m_truthLabelName;
-    ATH_CHECK( m_readTruthLabelKey.initialize() );
-  
-  }
+#endif
 
   /// Initialize SFs if they are needed
   if ( m_calcSF ) {
@@ -331,7 +341,7 @@ StatusCode JSSTaggerBase::resetCuts( asg::AcceptData &acceptData ) const {
   /// Initialize common cuts to true by default
   acceptData.setCutResult( "ValidJetContent", true );
   acceptData.setCutResult( "ValidEventContent", true );
-  
+
   acceptData.setCutResult( "ValidPtRangeHigh", true );
   acceptData.setCutResult( "ValidPtRangeLow" , true );
   acceptData.setCutResult( "ValidEtaRange"   , true );
@@ -387,7 +397,7 @@ StatusCode JSSTaggerBase::checkKinRange( const xAOD::Jet &jet, asg::AcceptData &
   SG::WriteDecorHandle<xAOD::JetContainer, bool> decValidPtRangeLow(m_decValidPtRangeLowKey);
   SG::WriteDecorHandle<xAOD::JetContainer, bool> decValidEtaRange(m_decValidEtaRangeKey);
   SG::WriteDecorHandle<xAOD::JetContainer, bool> decValidKinRange(m_decValidKinRangeKey);
- 
+
   /// Decorate kinematic pass information
   decValidPtRangeHigh(jet) = acceptData.getCutResult( "ValidPtRangeHigh" );
   decValidPtRangeLow(jet) = acceptData.getCutResult( "ValidPtRangeLow" );
@@ -467,7 +477,7 @@ int JSSTaggerBase::calculateJSSRatios( const xAOD::Jet &jet ) const {
   float C2 = -999.0;
   float D2 = -999.0;
   float e3 = -999.0;
-  
+
   float ECF1 = readECF1(jet);
   float ECF2 = readECF2(jet);
   float ECF3 = readECF3(jet);
@@ -479,7 +489,7 @@ int JSSTaggerBase::calculateJSSRatios( const xAOD::Jet &jet ) const {
   else result = 1;
 
   e3 = ECF3 / std::pow( ECF1, 3.0 );
-  
+
   decC2(jet) = C2;
   decD2(jet) = D2;
   decE3(jet) = e3;
@@ -537,7 +547,7 @@ int JSSTaggerBase::findPV() const{
 
 }
 
-/// Retrieve the Ntrk variable from the ungroomed parent jet 
+/// Retrieve the Ntrk variable from the ungroomed parent jet
 StatusCode JSSTaggerBase::GetUnGroomTracks( const xAOD::Jet &jet, int indexPV ) const {
 
   SG::WriteDecorHandle<xAOD::JetContainer, int> decNtrk500(m_decNtrk500Key);
@@ -549,16 +559,16 @@ StatusCode JSSTaggerBase::GetUnGroomTracks( const xAOD::Jet &jet, int indexPV ) 
     ElementLink<xAOD::JetContainer> linkToUngroomed = readParent(jet);
     if ( linkToUngroomed.isValid() ) {
       ungroomedJet = *linkToUngroomed;
-      
+
       static const SG::AuxElement::ConstAccessor< std::vector<int> >acc_Ntrk("NumTrkPt500");
-      
+
       if ( acc_Ntrk.isAvailable(*ungroomedJet) ) {
-	
+
 	const std::vector<int> NTrkPt500 = acc_Ntrk(*ungroomedJet);
-	
+
 	int jet_ntrk = NTrkPt500.at(indexPV);
 	decNtrk500(jet) = jet_ntrk;
-	
+
       }
       else {
 	ATH_MSG_ERROR("WARNING: Unable to retrieve Ntrk of the ungroomed parent jet. Please make sure this variable is in your derivations!!!");
@@ -594,7 +604,7 @@ StatusCode JSSTaggerBase::getWeight( const xAOD::Jet& jet, bool passSel, asg::Ac
     std::string truthLabelStr = getTruthLabelStr( jet, acceptData );
     std::tie(effSF, efficiency) = getSF( jet, truthLabelStr );
 
-    // calculate signal efficiency SF                                           
+    // calculate signal efficiency SF
     if ( m_weightHistograms.count("t_qqb") ) {
       sigeffSF = getSF(jet, "t_qqb").first;
     } else if ( m_weightHistograms.count("V_qq") ) {
@@ -633,7 +643,7 @@ StatusCode JSSTaggerBase::getWeight( const xAOD::Jet& jet, bool passSel, asg::Ac
     }
 
   }
-  
+
   else {
     weight = 1.0;
   }
@@ -644,7 +654,7 @@ StatusCode JSSTaggerBase::getWeight( const xAOD::Jet& jet, bool passSel, asg::Ac
   SG::WriteDecorHandle<xAOD::JetContainer, float> decEffSF(m_decEffSFKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> decSigeffSF(m_decSigeffSFKey);
 
-  /// Decorate values  
+  /// Decorate values
   decWeight(jet) = weight;
   decEfficiency(jet) = efficiency;
   decEffSF(jet) = effSF;

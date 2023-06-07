@@ -12,11 +12,14 @@ from .MonCounters import MenuMonCountersCollection
 
 class CTP(object):
 
-    def __init__(self):
-        self.inputConnectors = CTPInputConfig.cablingLayout()
+    def __init__(self, do_alfa=False):
+        self.inputConnectors = CTPInputConfig.cablingLayout(do_alfa)
         self.random          = Random( names = ['Random0', 'Random1', 'Random2', 'Random3'], cuts = [1, 1, 1, 1] )
         self.bunchGroupSet   = BunchGroupSet()
         self.counters        = MenuMonCountersCollection()   # monitoring counters in the menu
+
+        # Customisations via flags
+        self.do_alfa = do_alfa
 
     def setBunchGroupSetName(self, name):
         self.bunchGroupSet.name = name
@@ -39,7 +42,7 @@ class CTP(object):
             self.counters.addCounter( counter )
 
         # mark the L1 Items that they should be monitored
-        MonitorDef.applyItemCounter( menuName, menuItems )
+        MonitorDef.applyItemCounter( menuName, menuItems, self.do_alfa )
         pass
 
     def checkConnectorAvailability(self, availableConnectors, menuToLoad):

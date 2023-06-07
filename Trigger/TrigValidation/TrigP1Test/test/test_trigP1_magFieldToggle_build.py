@@ -55,7 +55,7 @@ ex_bs2.args = '-r %d -n 20 -o magField2 %s' % (run_no+2, input_file)
 
 ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
-ex.job_options = 'TrigP1Test/testHLT_magField.py'
+ex.job_options = 'TrigP1Test.MagFieldReader.run Trigger.Online.BFieldAutoConfig=False'
 ex.input = ''
 ex.max_events = 20
 ex.args = '-f raw.data -i -M -ul'

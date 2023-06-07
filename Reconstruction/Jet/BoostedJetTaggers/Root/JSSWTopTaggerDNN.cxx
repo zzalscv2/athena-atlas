@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/JSSWTopTaggerDNN.h"
@@ -17,7 +17,7 @@ JSSWTopTaggerDNN::JSSWTopTaggerDNN( const std::string& name ) :
 StatusCode JSSWTopTaggerDNN::initialize() {
 
   ATH_MSG_INFO( "Initializing JSSWTopTaggerDNN tool" );
- 
+
   /// Pt values are defined in GeV
   m_ptGeV = true;
 
@@ -99,7 +99,7 @@ StatusCode JSSWTopTaggerDNN::initialize() {
           m_strScoreCut.empty() ||
           m_strMassCutLow.empty() ||
           m_strMassCutHigh.empty() ||
-          m_decorationName.empty() || 
+          m_decorationName.empty() ||
           m_weightFileName.empty()) ||
         ((m_weightDecorationName.empty() ||
           m_weightHistogramName.empty() ||
@@ -186,6 +186,18 @@ StatusCode JSSWTopTaggerDNN::initialize() {
 
   /// Call base class initialize
   ATH_CHECK( JSSTaggerBase::initialize() );
+
+#ifndef XAOD_STANDALONE
+  if (m_suppressOutputDependence) {
+    renounce(m_decPassMassKey);
+    renounce(m_decPassScoreKey);
+    renounce(m_decTaggedKey);
+    renounce(m_decCutMLowKey);
+    renounce(m_decCutMHighKey);
+    renounce(m_decScoreCutKey);
+    renounce(m_decScoreValueKey);
+  }
+#endif
 
   ATH_MSG_INFO( "DNN Tagger tool initialized" );
 
@@ -351,11 +363,11 @@ std::map<std::string,double> JSSWTopTaggerDNN::getJetProperties( const xAOD::Jet
     DNN_inputValues["Aplanarity"] = jet.getAttribute<float>("Aplanarity");
     DNN_inputValues["ZCut12"] = jet.getAttribute<float>("ZCut12");
     DNN_inputValues["KtDR"] = jet.getAttribute<float>("KtDR");
-  
+
   }
-  
+
   else if ( m_tagClass == TAGCLASS::TopQuark ) {
-  
+
     ATH_MSG_DEBUG("Loading variables for top quark tagger");
 
     /// Create top quark read decor handles
@@ -408,7 +420,7 @@ std::map<std::string,double> JSSWTopTaggerDNN::getJetProperties( const xAOD::Jet
       DNN_inputValues["L3"] = readL3(jet);
     }
   }
-  
+
   else {
     ATH_MSG_ERROR( "Loading variables failed because the tagger type is not supported" );
   }
@@ -416,4 +428,3 @@ std::map<std::string,double> JSSWTopTaggerDNN::getJetProperties( const xAOD::Jet
   return DNN_inputValues;
 
 }
-

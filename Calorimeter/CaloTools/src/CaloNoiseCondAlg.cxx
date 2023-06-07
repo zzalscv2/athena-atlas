@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloNoiseCondAlg.h" 
@@ -27,8 +27,6 @@ StatusCode CaloNoiseCondAlg::initialize() {
     ATH_MSG_ERROR("No noise DB folder found, LArNoiseFolder, TileNoiseFolder and CaloNoiseFolder properties are all empty!");
     return StatusCode::FAILURE;
   }
-
-  ATH_CHECK( m_cablingKey.initialize() );
 
   const std::string& noiseKey=m_outputKey.key();
   if(noiseKey=="electronicNoise") {
@@ -80,10 +78,6 @@ StatusCode CaloNoiseCondAlg::execute(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
   }
 
-  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey,ctx};
-  const LArOnOffIdMapping* cabling{*cablingHdl};
-  writeHandle.addDependency(cablingHdl);
-  ATH_MSG_DEBUG("Range of LArCabling " << cablingHdl.getRange() << ", intersection:" << writeHandle.getRange());
   //Obtain AttrListsCollections for all possible folders (LAr,Tile,Calo) 
   std::vector<const CondAttrListCollection*> attrListNoise;
 
@@ -124,9 +118,9 @@ StatusCode CaloNoiseCondAlg::execute(const EventContext& ctx) const {
   }
 
   //Get LAr HVScale Corr (if requested)
-  const ILArHVScaleCorr* larHVCorr=nullptr;
+  const LArHVCorr* larHVCorr=nullptr;
   if (m_useHVCorr) {
-    SG::ReadCondHandle<ILArHVScaleCorr> larHVCorrHdl{m_hvCorrKey,ctx};
+    SG::ReadCondHandle<LArHVCorr> larHVCorrHdl{m_hvCorrKey,ctx};
     larHVCorr=*larHVCorrHdl;
      writeHandle.addDependency(larHVCorrHdl);
      ATH_MSG_DEBUG("Range of LArHVScale " << larHVCorrHdl.getRange() << ", intersection:" << writeHandle.getRange());
@@ -193,9 +187,8 @@ StatusCode CaloNoiseCondAlg::execute(const EventContext& ctx) const {
       for (unsigned i=0;i<nChansThisblob;++i) {
 	float hvcorr=1.0;
 	if (sys!=CaloNoiseHashRanges::TILE && larHVCorr) {
-	  const Identifier id =  m_caloCellID->cell_id(offset+i);
-	  const HWIdentifier hwid = cabling->createSignalChannelID(id);
-	  hvcorr=larHVCorr->HVScaleCorr(hwid);
+    const IdentifierHash oflHash(offset+i);
+	  hvcorr=larHVCorr->HVScaleCorr_oflHash(oflHash);
 	  //hvcorr might be zero in case of problems with the DCS database
 	  if (hvcorr<0.01) hvcorr=1.0;
 	}					

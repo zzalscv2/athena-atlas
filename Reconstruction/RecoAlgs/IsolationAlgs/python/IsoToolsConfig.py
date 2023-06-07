@@ -12,6 +12,7 @@ def isoTTVAToolCfg(flags,**kwargs):
     from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg
     kwargs.setdefault('name', 'ttvaToolForIso')
     kwargs.setdefault('WorkingPoint','Nonprompt_All_MaxWeight')
+    kwargs.setdefault("HardScatterLinkDeco", "")
     return TTVAToolCfg(flags,**kwargs)
 
 def TrackIsolationToolCfg(flags, **kwargs):
@@ -22,7 +23,6 @@ def TrackIsolationToolCfg(flags, **kwargs):
         kwargs['TrackSelectionTool'] = acc.popToolsAndMerge(isoTrackSelectionToolCfg(flags))
     if 'TTVATool' not in kwargs:
         kwargs['TTVATool'] = acc.popToolsAndMerge(isoTTVAToolCfg(flags))
-
     if flags.Beam.Type is BeamType.Cosmics:
         kwargs['VertexLocation'] = ''
 

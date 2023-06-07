@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COPYTRUTHPARTICLES_H
 #define COPYTRUTHPARTICLES_H
 
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "JetInterface/IJetExecuteTool.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthEventContainer.h"
@@ -35,12 +36,8 @@ public:
 
 
 protected:
-
-  /// Name of output collection
-  std::string m_outputname;
-
-  /// Minimum pT for particle selection (in MeV)
-  double m_ptmin;
+   /// Minimum pT for particle selection (in MeV)
+  Gaudi::Property<float> m_ptmin{this, "PtMin", 0. , "Minimum pT of particles to be accepted for tagging (in MeV)"};
 
   /// Key for input truth event
   SG::ReadHandleKey<xAOD::TruthEventContainer> m_truthEventKey{this, "TruthEventKey", "TruthEvents", "SG Key for input truth event container"};

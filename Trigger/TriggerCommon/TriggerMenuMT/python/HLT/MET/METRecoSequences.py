@@ -11,8 +11,9 @@ from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg
-
+from TrigCaloRec.TrigCaloRecConfig import hltCaloCellMakerCfg, jetmetTopoClusteringCfg, jetmetTopoClusteringCfg_LC
 from ..Config.MenuComponents import RecoFragmentsPool
+from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
 
 import copy
 
@@ -58,17 +59,15 @@ class CellInputConfig(AlgInputConfig):
         return []
 
     def create_sequence(self, flags, inputs, RoIs, recoDict):
-        from ..CommonSequences.CaloSequences import cellRecoSequence
-
-        cellSeq, cellName = RecoFragmentsPool.retrieve(
-            cellRecoSequence, flags, RoIs=RoIs
-        )
+        #from ..CommonSequences.CaloSequences import cellRecoSequence
+        cellSeq = algorithmCAToGlobalWrapper(hltCaloCellMakerCfg, flags = flags, name="HLTCaloCellMakerFS", roisKey=RoIs)
+                                                
+        cellName = 'CaloCellsFS'
         return cellSeq, {"Cells": cellName}
 
     def create_accumulator(self, flags, inputs, RoIs, recoDict):
-        from TrigCaloRec.TrigCaloRecConfig import hltCaloCellMakerCfg
 
-        comp_name = "HLTCaloCellMaker_FS"
+        comp_name = "HLTCaloCellMakerFS"
         acc = hltCaloCellMakerCfg(flags, name=comp_name, roisKey=RoIs)
         return acc, {"Cells": acc.getEventAlgo(comp_name).CellsName}
 
@@ -85,22 +84,24 @@ class ClusterInputConfig(AlgInputConfig):
         return []
 
     def create_sequence(self, flags, inputs, RoIs, recoDict):
-        from ..CommonSequences.CaloSequences import (
-            caloClusterRecoSequence,
-            LCCaloClusterRecoSequence,
-        )
         from ..Jet.JetRecoCommon import defineJetConstit
         from JetRecConfig.JetRecConfig import getConstitModAlg_nojetdef
 
         calib = recoDict["calib"]
+        
         if calib == "em":
-            tcSeq, clusterName = RecoFragmentsPool.retrieve(
-                caloClusterRecoSequence, flags, RoIs=RoIs
-            )
+           
+            tcSeq = algorithmCAToGlobalWrapper(jetmetTopoClusteringCfg,
+                                                 flags = flags,
+                                                 RoIs = RoIs)
+            clusterName = "HLT_TopoCaloClustersFS"
+           
         elif calib == "lcw":
-            tcSeq, clusterName = RecoFragmentsPool.retrieve(
-                LCCaloClusterRecoSequence, flags, RoIs=RoIs
-            )
+     
+            tcSeq = algorithmCAToGlobalWrapper(jetmetTopoClusteringCfg_LC,
+                                                  flags = flags,
+                                                  RoIs = RoIs)
+            clusterName = "HLT_TopoCaloClustersLCFS"
         else:
             raise ValueError(f"Invalid value for cluster calibration: {calib}")
         sequences = [tcSeq]
@@ -121,23 +122,20 @@ class ClusterInputConfig(AlgInputConfig):
         return [tcSeq], {"Clusters": clusterName}
 
     def create_accumulator(self, flags, inputs, RoIs, recoDict):
-        from ..CommonSequences.CaloConfig import CaloClusterCfg
         from ..CommonSequences.FullScanDefs import em_clusters, lc_clusters
         from ..Jet.JetRecoCommon import defineJetConstit
         from JetRecConfig.JetRecConfig import getConstitModAlg_nojetdef
 
         if recoDict["calib"] == "em":
-            doLC = False
+            acc = jetmetTopoClusteringCfg(flags, RoIs='')
             clustername = em_clusters
         elif recoDict["calib"] == "lcw":
-            doLC = True
+            acc = acc = jetmetTopoClusteringCfg_LC(flags, RoIs='')
             clustername = lc_clusters
         else:
             raise ValueError(
                 f"Invalid value for cluster calibration: {recoDict['calib']}"
             )
-
-        acc = CaloClusterCfg(flags, doLCCalib=doLC)
 
         if recoDict.get("constitmod"):
             # Force the datatype to topoclusters
@@ -174,18 +172,16 @@ class EMClusterInputConfig(AlgInputConfig):
         return []
 
     def create_sequence(self, flags, inputs, RoIs, recoDict):
-        from ..CommonSequences.CaloSequences import caloClusterRecoSequence
-
-        tcSeq, clusterName = RecoFragmentsPool.retrieve(
-            caloClusterRecoSequence, flags, RoIs=RoIs
-        )
+        tcSeq = algorithmCAToGlobalWrapper(jetmetTopoClusteringCfg,
+                                                 flags = flags,
+                                                 RoIs = RoIs)
+        clusterName = "HLT_TopoCaloClustersFS"
+        
         return [tcSeq], {"EMClusters": clusterName}
 
     def create_accumulator(self, flags, inputs, RoIs, recoDict):
-        from ..CommonSequences.CaloConfig import CaloClusterCfg
         from ..CommonSequences.FullScanDefs import em_clusters
-
-        return CaloClusterCfg(flags, doLCCalib=False), {"EMClusters": em_clusters}
+        return jetmetTopoClusteringCfg(flags, RoIs = RoIs) , {"EMClusters": em_clusters}
 
 
 default_inputs.add_input(EMClusterInputConfig())
@@ -426,7 +422,8 @@ class CVFClusterInputConfig(AlgInputConfig):
                 dzSinTheta_cut=2.0,
                 addDecoAlg=False,
                 TrackContName=inputTracks,
-                VertexContName=inputVertices,
+                VertexContName=inputVertices, 
+                HardScatterLinkDeco = ""
             ),
             ExtensionTool=ApproximateTrackToLayerTool(),
         )
@@ -497,6 +494,7 @@ class CVFClusterInputConfig(AlgInputConfig):
                         dzSinTheta_cut=2.0,
                         TrackContName=inputs["Tracks"],
                         VertexContName=inputs["Vertices"],
+                        HardScatterLinkDeco = ""
                     )
                 ),
                 ExtensionTool=CompFactory.ApproximateTrackToLayerTool(),

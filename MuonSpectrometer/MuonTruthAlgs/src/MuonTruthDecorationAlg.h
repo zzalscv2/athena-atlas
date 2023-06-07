@@ -77,7 +77,6 @@ namespace Muon {
         ToolHandle<Trk::IExtrapolator> m_extrapolator{this, "Extrapolator", "Trk::Extrapolator/AtlasExtrapolator"};
 
         Gaudi::Property<bool> m_createTruthSegment{this, "CreateTruthSegments", true};
-        Gaudi::Property<int> m_barcodeOffset{this, "BarcodeOffset", 1000000};
 
         const MuonGM::MuonDetectorManager* m_muonMgr;
     };

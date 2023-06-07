@@ -43,6 +43,21 @@ rc=$?
 status=$rc
 echo "art-result: $rc Digi_tf.py SP"
 
+rc1=-9999
+if [ $status -eq 0 ]; then
+    mv ${DigiOutFileNameSP} backup_${DigiOutFileNameSP}
+    rm PoolFileCatalog.xml
+    RDOMerge_tf.py \
+        --CA \
+        --PileUpPresampling True \
+        --inputRDOFile backup_${DigiOutFileNameSP} \
+        --outputRDO_MRGFile ${DigiOutFileNameSP}
+    rc1=$?
+    rm backup_${DigiOutFileNameSP}
+    status=$rc1
+fi
+echo "art-result: $rc1 RDOMerge_tf.py SP"
+
 Digi_tf.py \
 --multiprocess --athenaMPEventsBeforeFork 0 \
 --PileUpPresampling True \
@@ -92,24 +107,28 @@ fi
 echo "art-result: $rc3 Digi_tf.py MP fork after 1"
 
 rc4=-9999
-if [[ $status -eq 0 ]] && [[ $rc -eq 0 ]] && [[ $rc2 -eq 0 ]]
+if [[ $rc1 -eq 0 ]] && [[ $rc2 -eq 0 ]]
 then
     acmd.py diff-root ${DigiOutFileNameSP} ${DigiOutFileNameMP0} \
         --mode=semi-detailed --error-mode resilient --order-trees \
         --ignore-leaves RecoTimingObj_p1_Bkg_HITStoRDO_timings index_ref
     rc4=$?
-    status=$rc4
+    if [[ $status -eq 0 ]]; then
+        status=$rc4
+    fi
 fi
 echo "art-result: $rc4 SP vs MP fork after 0"
 
 rc5=-9999
-if [[ $status -eq 0 ]] && [[ $rc -eq 0 ]] && [[ $rc3 -eq 0 ]]
+if [[ $rc1 -eq 0 ]] && [[ $rc3 -eq 0 ]]
 then
     acmd.py diff-root ${DigiOutFileNameSP} ${DigiOutFileNameMP1} \
         --mode=semi-detailed --error-mode resilient --order-trees \
         --ignore-leaves RecoTimingObj_p1_Bkg_HITStoRDO_timings index_ref
     rc5=$?
-    status=$rc5
+    if [[ $status -eq 0 ]]; then
+        status=$rc5
+    fi
 fi
 echo "art-result: $rc5 SP vs MP fork after 1"
 

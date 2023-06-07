@@ -19,6 +19,8 @@
 // Public Methods
 // ********************************************************************* 
 /////////////////////////////////////////////////////////////////////////////
+ 
+// Pad Trigger Branch -> Testing 
 
 sTgcRawDataMonAlg::sTgcRawDataMonAlg(const std::string& name, ISvcLocator* pSvcLocator) : AthMonitorAlgorithm(name, pSvcLocator) {
   //Declare the property 
@@ -31,23 +33,42 @@ StatusCode sTgcRawDataMonAlg::initialize() {
   ATH_CHECK(m_detectorManagerKey.initialize());
   ATH_CHECK(m_meTrkKey.initialize());
   ATH_CHECK(m_residualPullCalculator.retrieve());
+  ATH_CHECK(m_muonKey.initialize());
+  ATH_CHECK(m_rdoKey.initialize(SG::AllowEmpty)); 
+  
   return StatusCode::SUCCESS;
 } 
 
 StatusCode sTgcRawDataMonAlg::fillHistograms(const EventContext& ctx) const {  
+  const int lumiblock = GetEventInfo(ctx) -> lumiBlock();
+
   SG::ReadHandle<Muon::sTgcPrepDataContainer> sTgcContainer(m_sTgcContainerKey, ctx);
   SG::ReadCondHandle<MuonGM::MuonDetectorManager> detectorManagerKey(m_detectorManagerKey, ctx); 
   SG::ReadHandle<xAOD::TrackParticleContainer> meTPContainer(m_meTrkKey, ctx);
-
+  SG::ReadHandle<xAOD::MuonContainer> muonContainer(m_muonKey, ctx);
+  
   if (!meTPContainer.isValid()) {
     ATH_MSG_FATAL("Could not get track particle container: " << m_meTrkKey.fullKey());
     return StatusCode::FAILURE;
   }
  
+  if(!m_rdoKey.key().empty()){
+    SG::ReadHandle<Muon::NSW_PadTriggerDataContainer> NSWpadTriggerContainer(m_rdoKey, ctx);
+    if (!NSWpadTriggerContainer.isValid()) {
+      ATH_MSG_FATAL("Could not get pad trigger data container: " << m_rdoKey.fullKey());
+      return StatusCode::FAILURE;
+    }
+    fillsTgcPadTriggerDataHistograms(NSWpadTriggerContainer.cptr(), lumiblock);
+  } 
+
+  if (!muonContainer.isValid()) {
+    ATH_MSG_FATAL("Could not get muon container: " << m_muonKey.fullKey());
+    return StatusCode::FAILURE;
+  }
+
   fillsTgcClusterFromTrackHistograms(meTPContainer.cptr());
- 
-  const int lumiblock = GetEventInfo(ctx) -> lumiBlock();
-  
+  fillsTgcEfficiencyHistograms(muonContainer.cptr(), detectorManagerKey.cptr());
+
   for(const Muon::sTgcPrepDataCollection* coll : *sTgcContainer) {
     for (const Muon::sTgcPrepData* prd : *coll) {
       fillsTgcOccupancyHistograms(prd, detectorManagerKey.cptr());
@@ -251,8 +272,6 @@ void sTgcRawDataMonAlg::fillsTgcClusterFromTrackHistograms(const xAOD::TrackPart
 	const std::vector<Identifier>& stripIds = prd->rdoList();
 	unsigned int csize = stripIds.size();
 	
-	if (csize < m_clusterSizeCut) continue;
-
 	std::vector<short int> stripTimesVec = prd -> stripTimes();
 	std::vector<int> stripChargesVec = prd -> stripCharges();
 
@@ -307,5 +326,283 @@ void sTgcRawDataMonAlg::fillsTgcClusterFromTrackHistograms(const xAOD::TrackPart
   }
 }
 
+void sTgcRawDataMonAlg::fillsTgcPadTriggerDataHistograms(const Muon::NSW_PadTriggerDataContainer* NSWpadTriggerObject, int lb) const {
+  for (const Muon::NSW_PadTriggerData* rdo : *NSWpadTriggerObject ) {
+    for (size_t it = 0; it < rdo -> getNumberOfTriggers(); ++it) {
+      std::vector<unsigned int> phiIds  = rdo -> getTriggerPhiIds();
+      std::vector<unsigned int> bandIds = rdo -> getTriggerBandIds();
+      std::vector<unsigned int> relBCID = rdo -> getTriggerRelBcids();
+      std::vector<unsigned int> hitpfeb = rdo -> getHitPfebs();
+
+      bool sideA = rdo -> sideA();
+      bool largeSector = rdo -> largeSector();
+      
+      int iside = (sideA) ? 1 : 0;
+      int isize = (largeSector) ? 1 : 0; 
+      
+      std::string side = GeometricSectors::sTgcSide[iside];
+      std::string size = GeometricSectors::sTgcSize[isize];
+
+      unsigned int sourceId = rdo -> getSourceid();
+      int sectorNumber = sourceidToSector(sourceId, sideA);
+      unsigned int numberOfTriggers = rdo -> getNumberOfTriggers();
+
+      auto phiIdsSidedSizedMon  = Monitored::Collection("phiIds_"  + side + "_" + size, phiIds);
+      auto bandIdsSidedSizedMon = Monitored::Collection("bandIds_" + side + "_" + size, bandIds);
+      fill("padTriggerShifter", phiIdsSidedSizedMon, bandIdsSidedSizedMon);
+
+      auto relBCIDMon = Monitored::Collection("relBCID", relBCID);
+      auto hitpfebMon = Monitored::Collection("hitpfeb", hitpfeb);
+      auto lbMon = Monitored::Scalar<int>("lb", lb);
+      auto sectorMon = Monitored::Scalar<int>("sector", sectorNumber);
+      auto numberOfTriggersMon = Monitored::Scalar<int>("numberOfTriggers", numberOfTriggers);
+      fill("padTriggerShifter", relBCIDMon, lbMon, sectorMon, numberOfTriggersMon, hitpfebMon);
+
+      auto lbPerSectorMon = Monitored::Scalar<int>("lb_" + side + "_sector_" + std::to_string(std::abs(sectorNumber)), lb);
+      auto bandIDperSectorMon = Monitored::Collection("bandIds_" + side + "_sector_" + std::to_string(std::abs(sectorNumber)), bandIds);
+      auto numberOfTriggersPerSectorMon = Monitored::Scalar<int>("numberOfTriggers_" + side + "_sector_" + std::to_string(std::abs(sectorNumber)), numberOfTriggers);
+      auto phiIdsSidedSizedPerSectorMon  = Monitored::Collection("phiIds_"  + side + "_sector_" + std::to_string(std::abs(sectorNumber)), phiIds);
+      auto bandIdsSidedSizedPerSectorMon = Monitored::Collection("bandIds_" + side + "_sector_" + std::to_string(std::abs(sectorNumber)), bandIds);
+      fill("padTriggerExpert", lbPerSectorMon, bandIDperSectorMon, numberOfTriggersPerSectorMon, phiIdsSidedSizedPerSectorMon, bandIdsSidedSizedPerSectorMon);
+    }
+  }
+}
+
+void sTgcRawDataMonAlg::fillsTgcEfficiencyHistograms(const xAOD::MuonContainer*  muonContainer, const MuonGM::MuonDetectorManager* muonDetectorManagerObject) const {
+  sTGCeff effPlots[2][3][16][2]; 
+  unsigned int stPhi = 0;
+  std::string largerSector = "", smallSector = "";
+  std::string stName = "";
+  
+  for (const xAOD::Muon* mu : *muonContainer) {
+    if(mu -> pt() < m_cutPt) continue; 
+    int author = mu -> author();
+    if(!(author == xAOD::Muon_v1::MuonType::Combined || author == xAOD::Muon_v1::MuonType::MuonStandAlone)) continue; 
+
+    const xAOD::TrackParticle* meTP = mu -> trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle);
+    if(meTP == nullptr) continue;
+
+    const Trk::Track* meTrack = meTP -> track();
+    if(!meTrack) continue;
+
+    for(const Trk::TrackStateOnSurface* trkState : *meTrack->trackStateOnSurfaces()) {
+      if (!trkState->type(Trk::TrackStateOnSurface::Measurement)) continue;
+
+      Identifier surfaceId = (trkState) -> surface().associatedDetectorElementIdentifier();
+      if(!m_idHelperSvc -> issTgc(surfaceId)) continue;
+
+      const Trk::MeasurementBase* meas = trkState->measurementOnTrack();
+      if(!meas) continue;
+      
+      const Trk::RIO_OnTrack* rot = dynamic_cast<const Trk::RIO_OnTrack*>(meas);
+      if(!rot) continue;
+
+      Identifier rot_id = rot -> identify();
+      if(!m_idHelperSvc -> issTgc(rot_id)) continue;
+      
+      stName = m_idHelperSvc -> stgcIdHelper().stationNameString(m_idHelperSvc -> stgcIdHelper().stationName(rot_id));
+      stPhi           = m_idHelperSvc -> stgcIdHelper().stationPhi(rot_id);
+      int stEta       = m_idHelperSvc -> stgcIdHelper().stationEta(rot_id);
+      int multi       = m_idHelperSvc -> stgcIdHelper().multilayer(rot_id);
+      int gap         = m_idHelperSvc -> stgcIdHelper().gasGap(rot_id);
+      int sector      = m_idHelperSvc -> sector(rot_id);
+      int channelType = m_idHelperSvc  -> stgcIdHelper().channelType(rot_id);
+      int iside       = (stEta > 0) ? 1 : 0;
+
+      if (m_idHelperSvc -> isSmallChamber(rot_id)) {
+	smallSector = stName;
+      }
+      
+      else {
+	largerSector = stName;
+      }
+      
+      const Amg::Vector3D& positionsMultiplet = (trkState) -> trackParameters() -> position();      
+      float xPosStripInMultiplet = positionsMultiplet.x();   
+      float yPosStripInMultiplet = positionsMultiplet.y();
+      float zPosStripInMultiplet = positionsMultiplet.z();
+      float rPosStripInMultiplet = std::hypot(xPosStripInMultiplet, yPosStripInMultiplet);   
+      
+      if( ! (std::find(effPlots[iside][std::abs(stEta) - 1][sector - 1][multi - 1].layerMultiplet.begin(), effPlots[iside][std::abs(stEta) - 1][sector - 1][multi - 1].layerMultiplet.end(), gap) != effPlots[iside][std::abs(stEta) - 1][sector - 1][multi - 1].layerMultiplet.end()) ) {
+	if (channelType == sTgcIdHelper::sTgcChannelTypes::Strip) {
+	  effPlots[iside][std::abs(stEta) - 1][sector - 1][multi - 1].layerMultiplet.push_back(gap);
+	  effPlots[iside][std::abs(stEta) - 1][sector - 1][multi - 1].xPosMultiplet.push_back(xPosStripInMultiplet);
+	  effPlots[iside][std::abs(stEta) - 1][sector - 1][multi - 1].yPosMultiplet.push_back(yPosStripInMultiplet);
+	  effPlots[iside][std::abs(stEta) - 1][sector - 1][multi - 1].zPosMultiplet.push_back(zPosStripInMultiplet);
+	  effPlots[iside][std::abs(stEta) - 1][sector - 1][multi - 1].rPosMultiplet.push_back(rPosStripInMultiplet);
+	}
+      }
+    }
+  }
+  
+  for (unsigned int isideIndex = 0; isideIndex <= 1; ++isideIndex) {
+    for (unsigned int stEtaIndex = 1; stEtaIndex <= 3; ++stEtaIndex) {
+      for (unsigned int sectorIndex = 1; sectorIndex <= 16; ++sectorIndex) {
+	for (unsigned int multiIndex = 1; multiIndex <= 2; ++multiIndex) { 
+	  if (effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.size() == 4) {	
+	    for (unsigned int gapIndex = 1; gapIndex <= effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.size(); ++gapIndex) {
+	      float xPos = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].xPosMultiplet.at(gapIndex - 1);
+	      float yPos = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].yPosMultiplet.at(gapIndex - 1);
+	      float rPos = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].rPosMultiplet.at(gapIndex - 1);
+	      
+	      std::string side = GeometricSectors::sTgcSide[isideIndex];
+	      int quad = (side == "A") ? stEtaIndex : -stEtaIndex;
+	      
+	      bool isValid = false;
+	      const Identifier IDeffLayerStrip = m_idHelperSvc -> stgcIdHelper().channelID((stName == "STS") ? smallSector : largerSector, quad, stPhi, multiIndex, gapIndex, sTgcIdHelper::sTgcChannelTypes::Strip, 1, isValid);
+	     
+	      if (!isValid) { 
+		ATH_MSG_DEBUG("Identifier of eff layer isn't valid"); 
+		continue;
+	      }
+	      
+	      int gasGapEff = m_idHelperSvc -> stgcIdHelper().gasGap(IDeffLayerStrip);
+	      int layerEff  = getLayer(multiIndex, gasGapEff);
+	      
+	      auto effQuestion = true;
+	      auto effQuestionMon = Monitored::Scalar<bool>("hitLayer", effQuestion);
+	      
+	      auto rPosStripmon = Monitored::Scalar<float>("rPosStrip_" + side + "_sector_" + std::to_string(sectorIndex)  + "_layer_" + std::to_string(layerEff), rPos);
+	      fill("rPosStrip_" + side + std::to_string(sectorIndex), rPosStripmon, effQuestionMon);
+	      
+	      auto xPosStripmon = Monitored::Scalar<float>("xPosStrip_" + side + "_layer_" + std::to_string(layerEff), xPos); 
+	      auto yPosStripmon = Monitored::Scalar<float>("yPosStrip_" + side + "_layer_" + std::to_string(layerEff), yPos);
+	      fill("efficiencyOverview", xPosStripmon, yPosStripmon, effQuestionMon);
+	      fill("sTgcOverview", xPosStripmon, yPosStripmon, effQuestionMon);
+	    }
+	  } // close 4 out 4 if case
+	  
+	  else if (effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.size() == 3) {
+	    std::vector<int> refLayers(4, 0);
+	    
+	    refLayers.at(effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.at(0) - 1) = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.at(0);
+	    refLayers.at(effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.at(1) - 1) = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.at(1);
+	    refLayers.at(effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.at(2) - 1) = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.at(2);
+	    
+	    int probeL1 = -999;
+	    
+	    for (long unsigned int layerIt = 0; layerIt < refLayers.size(); ++layerIt) {
+	      if (refLayers.at(layerIt) == 0) {probeL1 = layerIt + 1;}
+	    }
+	    
+	    std::string side = GeometricSectors::sTgcSide[isideIndex];
+	    int quad = (side == "A") ? stEtaIndex : -stEtaIndex;
+
+	    bool isValid = false;
+	    const Identifier idProbeL1 = m_idHelperSvc -> stgcIdHelper().channelID((stName == "STS") ? smallSector : largerSector, quad, stPhi, multiIndex, probeL1, sTgcIdHelper::sTgcChannelTypes::Strip, 1, isValid);
+	    
+	    if (!isValid) { 
+	      ATH_MSG_DEBUG("Identifier of probe L1 is invalid"); 
+	      continue;
+	    }
+
+	    Amg::Vector3D posProbeL1{Amg::Vector3D::Zero()};
+	    (muonDetectorManagerObject -> getsTgcReadoutElement(idProbeL1)) -> stripGlobalPosition(idProbeL1, posProbeL1); 
+	    float posZprobeL1 = posProbeL1.z();
+	    
+	    float xSlope = (effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].xPosMultiplet.at(0) - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].xPosMultiplet.at(1))/(effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0) - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(1));
+	    float ySlope = (effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].yPosMultiplet.at(0) - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].yPosMultiplet.at(1))/(effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0) - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(1));
+	    float rSlope = (effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].rPosMultiplet.at(0) - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].rPosMultiplet.at(1))/(effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0) - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(1));
+	    
+	    float xPosProbeLayer1 = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].xPosMultiplet.at(0) + xSlope*(posZprobeL1 - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0));
+	    float yPosProbeLayer1 = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].yPosMultiplet.at(0) + ySlope*(posZprobeL1 - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0));
+	    float rPosProbeLayer1 = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].rPosMultiplet.at(0) + rSlope*(posZprobeL1 - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0));
+	    
+	    int layerProbeL1 = getLayer(multiIndex, probeL1);
+	    
+	    auto effQuestion = false;
+	    auto effQuestionMon = Monitored::Scalar<bool>("hitLayer", effQuestion);
+	    
+	    auto rPosStripProbeL1mon = Monitored::Scalar<float>("rPosStrip_" + side + "_sector_" + std::to_string(sectorIndex)  + "_layer_" + std::to_string(layerProbeL1), rPosProbeLayer1);
+	    fill("rPosStrip_" + side + std::to_string(sectorIndex), rPosStripProbeL1mon, effQuestionMon);
+	      
+	    auto xPosStripProbeL1mon = Monitored::Scalar<float>("xPosStrip_" + side + "_layer_" + std::to_string(layerProbeL1), xPosProbeLayer1); 
+	    auto yPosStripProbeL1mon = Monitored::Scalar<float>("yPosStrip_" + side + "_layer_" + std::to_string(layerProbeL1), yPosProbeLayer1);
+	    fill("efficiencyOverview", xPosStripProbeL1mon, yPosStripProbeL1mon, effQuestionMon);
+	    fill("sTgcOverview", xPosStripProbeL1mon, yPosStripProbeL1mon, effQuestionMon);
+	    
+	  } // close 3 out 4 if case
+	  
+	  else if (effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.size() == 2) {
+	    std::vector<int> refLayers(4, 0);
+	    
+	    refLayers.at(effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.at(0) - 1) = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.at(0);
+	    refLayers.at(effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.at(1) - 1) = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.at(1);
+	      
+	    std::vector<int> probeLayers;
+	    
+	    for (long unsigned int layerIt = 0; layerIt < refLayers.size(); ++layerIt) {
+	      if (refLayers.at(layerIt) == 0) {probeLayers.push_back(layerIt + 1);}
+	    }
+	    
+	    int probeL1 = probeLayers.at(0);
+	    int probeL2 = probeLayers.at(1);
+	    
+	    std::string side = GeometricSectors::sTgcSide[isideIndex];
+	    int quad = (side == "A") ? stEtaIndex : -stEtaIndex;
+	    
+	    bool isValid = false;
+	    
+	    const Identifier idProbeL1 = m_idHelperSvc -> stgcIdHelper().channelID((stName == "STS") ? smallSector : largerSector, quad, stPhi, multiIndex, probeL1, sTgcIdHelper::sTgcChannelTypes::Strip, 1, isValid);
+	    
+	    if (!isValid) {
+	      ATH_MSG_DEBUG("Identifier of probe L1 is invalid"); 
+	      continue;
+	    }
+	      
+	    const Identifier idProbeL2 = m_idHelperSvc -> stgcIdHelper().channelID((stName == "STS") ? smallSector : largerSector, quad, stPhi, multiIndex, probeL2, sTgcIdHelper::sTgcChannelTypes::Strip, 1, isValid);
+	    
+	    if (!isValid) { 
+	      ATH_MSG_DEBUG("Identifier of probe L2 is invalid"); 
+	      continue;
+	    }
+	    
+	    Amg::Vector3D posProbeL1{Amg::Vector3D::Zero()};
+	    (muonDetectorManagerObject -> getsTgcReadoutElement(idProbeL1)) -> stripGlobalPosition(idProbeL1, posProbeL1); 
+	    float posZprobeL1 = posProbeL1.z();
+	    
+	    Amg::Vector3D posProbeL2{Amg::Vector3D::Zero()};
+	    (muonDetectorManagerObject -> getsTgcReadoutElement(idProbeL2)) -> stripGlobalPosition(idProbeL2, posProbeL2); 
+	    float posZprobeL2 = posProbeL2.z();
+	    
+	    float xSlope = (effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].xPosMultiplet.at(0) - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].xPosMultiplet.at(1))/(effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0) - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(1));
+	    float ySlope = (effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].yPosMultiplet.at(0) - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].yPosMultiplet.at(1))/(effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0) - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(1));
+	    float rSlope = (effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].rPosMultiplet.at(0) - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].rPosMultiplet.at(1))/(effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0) - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(1));
+	    
+	    float xPosProbeLayer1 = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].xPosMultiplet.at(0) + xSlope*(posZprobeL1 - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0));
+	    float yPosProbeLayer1 = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].yPosMultiplet.at(0) + ySlope*(posZprobeL1 - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0));
+	    float rPosProbeLayer1 = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].rPosMultiplet.at(0) + rSlope*(posZprobeL1 - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0));
+	    
+	    float xPosProbeLayer2 = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].xPosMultiplet.at(0) + xSlope*(posZprobeL2 - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0));
+	    float yPosProbeLayer2 = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].yPosMultiplet.at(0) + ySlope*(posZprobeL2 - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0));
+	    float rPosProbeLayer2 = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].rPosMultiplet.at(0) + rSlope*(posZprobeL2 - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0));
+	    
+	    int layerProbeL1   = getLayer(multiIndex, probeL1);    
+	    int layerProbeL2   = getLayer(multiIndex, probeL2);
+	    
+	    auto effQuestion = false;
+	    auto effQuestionMon = Monitored::Scalar<bool>("hitLayer", effQuestion);
+	    
+	    auto rPosStripProbeL1mon = Monitored::Scalar<float>("rPosStrip_" +  side  + "_sector_" + std::to_string(sectorIndex)  + "_layer_" + std::to_string(layerProbeL1), rPosProbeLayer1);
+	    fill("rPosStrip_" + side + std::to_string(sectorIndex), rPosStripProbeL1mon, effQuestionMon);
+	    
+	    auto xPosStripProbeL1mon = Monitored::Scalar<float>("xPosStrip_" + side + "_layer_" + std::to_string(layerProbeL1), xPosProbeLayer1); 
+	    auto yPosStripProbeL1mon = Monitored::Scalar<float>("yPosStrip_" + side + "_layer_" + std::to_string(layerProbeL1), yPosProbeLayer1);
+	    fill("efficiencyOverview", xPosStripProbeL1mon, yPosStripProbeL1mon, effQuestionMon);
+	    fill("sTgcOverview", xPosStripProbeL1mon, yPosStripProbeL1mon, effQuestionMon);
+	    
+	    auto rPosStripProbeL2mon = Monitored::Scalar<float>("rPosStrip_" +  side +  "_sector_" + std::to_string(sectorIndex)  + "_layer_" + std::to_string(layerProbeL2), rPosProbeLayer2);
+	    fill("rPosStrip_" + side + std::to_string(sectorIndex), rPosStripProbeL2mon, effQuestionMon);
+	    
+	    auto xPosStripProbeL2mon = Monitored::Scalar<float>("xPosStrip_" + side + "_layer_" + std::to_string(layerProbeL2), xPosProbeLayer2); 
+	    auto yPosStripProbeL2mon = Monitored::Scalar<float>("yPosStrip_" + side + "_layer_" + std::to_string(layerProbeL2), yPosProbeLayer2);
+	    fill("efficiencyOverview", xPosStripProbeL2mon, yPosStripProbeL2mon, effQuestionMon);
+	    fill("sTgcOverview", xPosStripProbeL2mon, yPosStripProbeL2mon, effQuestionMon); 
+	  } // close 2 out 4 if case 
+	} // multiIndex loop end
+      } // sectorIndex loop end
+    } // stEtaIndex loop end
+  } // isideIndex loop end
+}
 
 

@@ -12,7 +12,7 @@
 #include <TEnv.h>
 #include <TLorentzVector.h>
 #include <TString.h>
-#include <TruthUtils/PIDHelpers.h>
+#include <TruthUtils/HepMCHelpers.h>
 #include <xAODJet/JetContainer.h>
 #include <xAODTruth/TruthParticleContainer.h>
 #include <xAODTruth/TruthVertex.h>

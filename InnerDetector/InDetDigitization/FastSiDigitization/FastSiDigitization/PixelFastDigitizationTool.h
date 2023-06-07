@@ -24,6 +24,7 @@
 #include "SiClusterizationTool/ClusterMakerTool.h"
 #include "PileUpTools/PileUpMergeSvc.h"
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
+#include "PixelConditionsData/PixelOfflineCalibData.h"
 #include "PixelConditionsData/PixelDistortionData.h"
 #include "PixelReadoutGeometry/IPixelReadoutManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -144,6 +145,8 @@ private:
 
   SG::ReadCondHandleKey<PixelChargeCalibCondData> m_chargeDataKey
   {this, "PixelChargeCalibCondData", "PixelChargeCalibCondData", "Pixel charge calibration data"};
+
+  SG::ReadCondHandleKey<PixelCalib::PixelOfflineCalibData> m_offlineCalibDataKey{this, "PixelOfflineCalibData", "PixelOfflineCalibData", "Pixel offline calibration data"};
 
   SG::ReadCondHandleKey<PixelDistortionData> m_distortionKey
   {this, "PixelDistortionData", "PixelDistortionData", "Output readout distortion data"};

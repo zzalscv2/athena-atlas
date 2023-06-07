@@ -74,6 +74,9 @@ def StandaloneMuonOutputCfg(flags):
     if flags.Detector.EnablesTGC:
         esd_items += ["Muon::sTgcPrepDataContainer#STGC_Measurements"]
         esd_items += ["Muon::NSW_PadTriggerDataContainer#NSW_PadTrigger_RDO"]
+        esd_items += ["xAOD::NSWTPRDOContainer#*", "xAOD::NSWTPRDOAuxContainer#*"]
+        
+        
     if flags.Detector.EnableCSC:
         esd_items += ["Muon::CscPrepDataContainer#CSC_Clusters"]
         esd_items += ["Muon::CscStripPrepDataContainer#CSC_Measurements"]

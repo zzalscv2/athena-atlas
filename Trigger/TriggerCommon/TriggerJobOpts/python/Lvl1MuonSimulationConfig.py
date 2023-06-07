@@ -193,6 +193,7 @@ def MuonRdoToMuonDigitToolCfg(flags, name="MuonRdoToMuonDigitTool", **kwargs ):
     result = ComponentAccumulator()
     kwargs.setdefault("DecodeSTGC_RDO", flags.Detector.GeometrysTGC)
     kwargs.setdefault("DecodeMM_RDO", flags.Detector.GeometryMM)
+    kwargs.setdefault("DecodeNrpcRDO", flags.Muon.enableNRPC)
     from MuonConfig.MuonByteStreamCnvTestConfig import STgcRdoDecoderCfg, MMRdoDecoderCfg, MdtRdoDecoderCfg
     kwargs.setdefault( "stgcRdoDecoderTool", result.popToolsAndMerge(STgcRdoDecoderCfg(flags))
                          if flags.Detector.GeometrysTGC else "" )
@@ -206,6 +207,8 @@ def MuonRdoToMuonDigitToolCfg(flags, name="MuonRdoToMuonDigitTool", **kwargs ):
 def MuonRdo2DigitConfig(flags):
     acc = ComponentAccumulator()
 
+    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+    acc.merge( AtlasFieldCacheCondAlgCfg(flags) )
     # Read RPCPAD and TGCRDO from the input POOL file (for BS it comes from [Rpc|Tgc]RawDataProvider)
     suffix = "" if flags.Input.Format is Format.POOL else "_L1"
     RPCRdoName = "RPCPAD"+suffix
@@ -223,6 +226,11 @@ def MuonRdo2DigitConfig(flags):
                 ('Muon::MM_RawDataContainer','MMRDO'),
                 ('Muon::STGC_RawDataContainer','sTGCRDO')
             ]
+        if flags.Muon.enableNRPC:
+            rdoInputs += [
+                ('xAOD::NRPCRDOContainer' , 'NRPCRDO'),
+                ('xAOD::NRPCRDOAuxContainer',  'NRPCRDOAux.')
+            ]
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, Load=rdoInputs))
 
@@ -232,10 +240,7 @@ def MuonRdo2DigitConfig(flags):
     MuonRdoToMuonDigitTool = acc.popToolsAndMerge(MuonRdoToMuonDigitToolCfg(flags,DecodeRpcRDO = True,
                                                                  DecodeTgcRDO = True,
                                                                  DecodeCscRDO = False,
-                                                                 DecodeMdtRDO = False,
-                                                                 mdtRdoDecoderTool="",
-                                                                 cscRdoDecoderTool="",
-                                                                 cscCalibTool = "",
+                                                                 DecodeMdtRDO = False,                                                                
                                                                  RpcRdoContainer = RPCRdoName,
                                                                  TgcRdoContainer = TGCRdoName,
                                                                  sTgcRdoContainer = sTGCRdoName,

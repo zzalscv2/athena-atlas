@@ -45,7 +45,29 @@ TrigHitDVHypoAlg::TrigHitDVHypoAlg( const std::string& name,
 
 StatusCode TrigHitDVHypoAlg::initialize()
 {
+   m_tools_lowest_jetEt = 1000;
+   m_tools_loosest_wp   = 0;
    CHECK( m_hypoTools.retrieve() );
+   for ( auto & tool: m_hypoTools ) {
+      ATH_MSG_VERBOSE( "+++++ Hypo Tool name: " << tool->name() );
+      std::cmatch results;
+      if( std::regex_search(tool->name().c_str(),results,std::regex("hitdvjet(\\d+)_(\\w+)_")) ) {
+	 std::string sth = results[1].str();
+	 std::string swp = results[2].str();
+	 ATH_MSG_VERBOSE( "   thres = " << sth << ", wp = " << swp );
+	 int thres = std::stoi(sth);
+	 if( thres < m_tools_lowest_jetEt ) m_tools_lowest_jetEt = thres;
+	 if( swp == "loose"  && m_tools_loosest_wp >= 1 ) m_tools_loosest_wp = 1;
+	 if( swp == "medium" && m_tools_loosest_wp >= 2 ) m_tools_loosest_wp = 2;
+	 if( swp == "tight"  && m_tools_loosest_wp >= 3 ) m_tools_loosest_wp = 3;
+      }
+   }
+   ATH_MSG_INFO( "Lowest jetEt used in hypo tools = " << m_tools_lowest_jetEt << " (GeV)" );
+   ATH_MSG_INFO( "Loosest WP used in hypo tools = " << m_tools_loosest_wp << " (loose=1,medium=2,tight=3)");
+   // loose : eta<2.0, SP seed=true,  BDT eff=0.9
+   // medium: eta<2.0, SP seed=false, BDT eff=0.75
+   // tight : eta<1.0, SP seed=false, BDT eff=0.75
+
    CHECK( m_jetsKey.initialize() );
    CHECK( m_hitDVSeedKey.initialize() );
    CHECK( m_hitDVTrkKey.initialize() );
@@ -139,6 +161,17 @@ StatusCode TrigHitDVHypoAlg::execute( const EventContext& context ) const
       ATH_MSG_ERROR( "ERROR Cannot get jet container" );
       return StatusCode::FAILURE;
    }
+   bool isJetEtPassToolsCut  = false;
+   float jetEtaToolsCut = 2.0;
+   if( m_tools_loosest_wp >= 3 ) jetEtaToolsCut = 1.0;
+   for ( const xAOD::Jet* jet : *jetsContainer ) {
+      float jet_pt  = static_cast<float>(jet->pt() / Gaudi::Units::GeV );
+      float jet_eta = static_cast<float>(jet->eta());
+      if( jet_pt >= m_tools_lowest_jetEt && std::abs(jet_eta)<=jetEtaToolsCut ) {
+	 isJetEtPassToolsCut = true;
+	 break;
+      }
+   }
 
    // hitDV objects
    auto hitDVSeedHandle = SG::makeHandle(m_hitDVSeedKey, context );
@@ -205,12 +238,19 @@ StatusCode TrigHitDVHypoAlg::execute( const EventContext& context ) const
    // find seeds based on SP frac itself
    std::vector<float> spSeeds_eta;
    std::vector<float> spSeeds_phi;
-   ATH_CHECK( findSPSeeds(context, hitDVSPsContainer, spSeeds_eta, spSeeds_phi) );
-   int n_allspseeds = spSeeds_eta.size();
    std::vector<float> void_pt;
-   ATH_CHECK( selectSeedsNearby(hitDVSeedsContainer, spSeeds_eta, spSeeds_phi, void_pt) );
-   mon_n_spseeds = spSeeds_eta.size();
-   mon_n_spseedsdel = n_allspseeds - spSeeds_eta.size();
+   int n_allspseeds = 0;
+   if( m_tools_loosest_wp <= 1 ) {
+      ATH_CHECK( findSPSeeds(context, hitDVSPsContainer, spSeeds_eta, spSeeds_phi) );
+      n_allspseeds  = spSeeds_eta.size();
+      ATH_CHECK( selectSeedsNearby(hitDVSeedsContainer, spSeeds_eta, spSeeds_phi, void_pt) );
+      mon_n_spseeds = spSeeds_eta.size();
+      mon_n_spseedsdel = n_allspseeds - spSeeds_eta.size();
+   }
+   else {
+      mon_n_spseeds    = 0;
+      mon_n_spseedsdel = 0;
+   }
 
    // output EDM object
    auto hitDVContainer    = std::make_unique<xAOD::TrigCompositeContainer>();
@@ -218,31 +258,32 @@ StatusCode TrigHitDVHypoAlg::execute( const EventContext& context ) const
    hitDVContainer->setStore(hitDVContainerAux.get());
 
    xAOD::TrigCompositeContainer* dvContainer = hitDVContainer.get();
+   std::vector<TrigHitDVHypoTool::HitDVHypoInfo>  hitDVHypoInputs;
+   std::unordered_map<Decision*, size_t>          mapDecIdx;
 
    // calculate BDT and create hitDVContainer EDM
-   const float preselBDTthreshold = -0.6;
+   if( isJetEtPassToolsCut ) {
+      const float preselBDTthreshold = -0.6;
 
-   int n_passed_jet = 0;
-   int seed_type = SeedType::HLTJet;
-   ATH_CHECK( calculateBDT(context, hitDVSPsContainer, hitDVTrksContainer, jetSeeds_pt, jetSeeds_eta, jetSeeds_phi, preselBDTthreshold, seed_type, dvContainer, n_passed_jet) );
+      int n_passed_jet = 0;
+      int seed_type = SeedType::HLTJet;
+      ATH_CHECK( calculateBDT(context, hitDVSPsContainer, hitDVTrksContainer, jetSeeds_pt, jetSeeds_eta, jetSeeds_phi, preselBDTthreshold, seed_type, dvContainer, n_passed_jet) );
 
-   int n_passed_sp = 0;
-   seed_type = SeedType::SP;
-   ATH_CHECK( calculateBDT(context, hitDVSPsContainer, hitDVTrksContainer, void_pt, spSeeds_eta, spSeeds_phi, preselBDTthreshold, seed_type, dvContainer, n_passed_sp) );
+      int n_passed_sp = 0;
+      if( m_tools_loosest_wp <= 1 ) {
+	 seed_type = SeedType::SP;
+	 ATH_CHECK( calculateBDT(context, hitDVSPsContainer, hitDVTrksContainer, void_pt, spSeeds_eta, spSeeds_phi, preselBDTthreshold, seed_type, dvContainer, n_passed_sp) );
+      }
 
-   ATH_MSG_DEBUG( "nr of dv container / jet-seeded / sp-seed candidates = " << dvContainer->size() << " / " << n_passed_jet << " / " << n_passed_sp );
+      ATH_MSG_DEBUG( "nr of dv container / jet-seeded / sp-seed candidates = " << dvContainer->size() << " / " << n_passed_jet << " / " << n_passed_sp );
 
-   // Prepare inputs to HypoTool
-   std::vector<TrigHitDVHypoTool::HitDVHypoInfo>   hitDVHypoInputs;
-   std::unordered_map<Decision*, size_t>           mapDecIdx;
-
-   for ( auto dv : *dvContainer ) {
-      Decision* newDecision = TrigCompositeUtils::newDecisionIn( outputDecisions, previousDecision, TrigCompositeUtils::hypoAlgNodeName(), context);
-
-      mapDecIdx.emplace( newDecision, dv->index() );
-
-      TrigHitDVHypoTool::HitDVHypoInfo hypoInfo{ newDecision, isSPOverflow, averageMu, dv, previousDecisionIDs };
-      hitDVHypoInputs.push_back( hypoInfo );
+      // Prepare inputs to HypoTool
+      for ( auto dv : *dvContainer ) {
+	 Decision* newDecision = TrigCompositeUtils::newDecisionIn( outputDecisions, previousDecision, TrigCompositeUtils::hypoAlgNodeName(), context);
+	 mapDecIdx.emplace( newDecision, dv->index() );
+	 TrigHitDVHypoTool::HitDVHypoInfo hypoInfo{ newDecision, isSPOverflow, averageMu, dv, previousDecisionIDs };
+	 hitDVHypoInputs.push_back( hypoInfo );
+      }
    }
 
    // monitor
@@ -292,13 +333,13 @@ StatusCode TrigHitDVHypoAlg::execute( const EventContext& context ) const
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
-float TrigHitDVHypoAlg::deltaR(float eta_1, float phi_1, float eta_2, float phi_2) const
+float TrigHitDVHypoAlg::deltaR2(float eta_1, float phi_1, float eta_2, float phi_2) const
 {
    float dPhi = phi_1 - phi_2;
    if (dPhi < -TMath::Pi()) dPhi += 2*TMath::Pi();
    if (dPhi >  TMath::Pi()) dPhi -= 2*TMath::Pi();
    float dEta = eta_1 - eta_2;
-   return std::sqrt(dPhi*dPhi+dEta*dEta);
+   return (dPhi*dPhi+dEta*dEta);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -547,7 +588,7 @@ StatusCode TrigHitDVHypoAlg::calculateBDT(const EventContext& context,
 
       // loop on space points
       const int   N_LAYER = 8;
-      const float DR_TO_REF_CUT = 0.4;
+      const float DR_SQUARED_TO_REF_CUT = 0.16; // const float DR_TO_REF_CUT = 0.4;
 
       int n_sp_injet = 0;
       int n_sp_injet_usedByTrk = 0;
@@ -559,8 +600,8 @@ StatusCode TrigHitDVHypoAlg::calculateBDT(const EventContext& context,
 	 // match within dR
 	 float sp_eta = spData->getDetail<float>("hitDVSP_eta");
 	 float sp_phi = spData->getDetail<float>("hitDVSP_phi");
-	 float dr = deltaR(sp_eta,sp_phi,seed_eta,seed_phi);
-	 if( dr > DR_TO_REF_CUT ) continue;
+	 float dR2 = deltaR2(sp_eta,sp_phi,seed_eta,seed_phi);
+	 if( dR2 > DR_SQUARED_TO_REF_CUT ) continue;
 
 	 //
 	 int sp_layer = (int)spData->getDetail<int16_t>("hitDVSP_layer");
@@ -597,8 +638,8 @@ StatusCode TrigHitDVHypoAlg::calculateBDT(const EventContext& context,
 	 if( trk_ptGeV < TRK_PT_GEV_CUT ) continue;
 	 float trk_eta = trk->getDetail<float>("hitDVTrk_eta");
 	 float trk_phi = trk->getDetail<float>("hitDVTrk_phi");
-	 float dr = deltaR(trk_eta,trk_phi,seed_eta,seed_phi);
-	 if( dr > DR_TO_REF_CUT )  continue;
+	 float dR2 = deltaR2(trk_eta,trk_phi,seed_eta,seed_phi);
+	 if( dR2 > DR_SQUARED_TO_REF_CUT ) continue;
 	 n_qtrk_injet++;
       }
       ATH_MSG_DEBUG("nr of all / quality tracks matched = " << trksContainer->size() << " / " << n_qtrk_injet);
@@ -820,8 +861,8 @@ StatusCode TrigHitDVHypoAlg::findSPSeeds( const EventContext& ctx, const xAOD::T
 		return std::get<1>(lhs) > std::get<1>(rhs); } );
 
    // clustering
-   const double CLUSTCUT_DIST      = 0.2;
-   const double CLUSTCUT_SEED_FRAC = 0.9;
+   const double CLUSTCUT_DIST_SQUARED = 0.04; // const double CLUSTCUT_DIST = 0.2;
+   const double CLUSTCUT_SEED_FRAC    = 0.9;
 
    std::vector<float> seeds_wsum;
 
@@ -835,26 +876,26 @@ StatusCode TrigHitDVHypoAlg::findSPSeeds( const EventContext& ctx, const xAOD::T
 	 continue;
       }
       const int IDX_INITIAL = 100;
-      float dist_min = 100.0;
+      float dist2_min = 100.0;
       int idx_min     = IDX_INITIAL;
       for(unsigned j=0; j<seeds_eta.size(); j++) {
 	 float ceta = seeds_eta[j]/seeds_wsum[j];
 	 float cphi = seeds_phi[j]/seeds_wsum[j];
 	 // intentionally calculate in this way as phi is defined beyond -Pi/Pi (no boundary)
-	 float deta = std::fabs(ceta-eta);
-	 float dphi = std::fabs(cphi-phi);
-	 float dist = std::sqrt(dphi*dphi+deta*deta);
-	 if( dist < dist_min ) {
-	    dist_min = dist;
+	 float deta  = std::fabs(ceta-eta);
+	 float dphi  = std::fabs(cphi-phi);
+	 float dist2 = dphi*dphi+deta*deta;
+	 if( dist2 < dist2_min ) {
+	    dist2_min = dist2;
 	    idx_min  = j;
 	 }
       }
       int match_idx = IDX_INITIAL;
       if( idx_min != IDX_INITIAL ) {
-	 if( dist_min < CLUSTCUT_DIST ) { match_idx = idx_min; }
+	 if( dist2_min < CLUSTCUT_DIST_SQUARED ) { match_idx = idx_min; }
       }
       if( match_idx == IDX_INITIAL ) {
-	 if( w > CLUSTCUT_SEED_FRAC && dist_min > CLUSTCUT_DIST ) {
+	 if( w > CLUSTCUT_SEED_FRAC && dist2_min > CLUSTCUT_DIST_SQUARED ) {
 	    seeds_eta.push_back(w*eta); seeds_phi.push_back(w*phi);
 	    seeds_wsum.push_back(w);
 	 }
@@ -889,8 +930,8 @@ StatusCode TrigHitDVHypoAlg::findSPSeeds( const EventContext& ctx, const xAOD::T
 	 if( std::find(idx_to_delete.begin(),idx_to_delete.end(),j) != idx_to_delete.end() ) continue;
 	 float eta_j = seeds_eta[j];
 	 float phi_j = seeds_phi[j];
-	 float dr = deltaR(eta_i,phi_i,eta_j,phi_j);
-	 if( dr < CLUSTCUT_DIST ) idx_to_delete.push_back(j);
+	 float dR2 = deltaR2(eta_i,phi_i,eta_j,phi_j);
+	 if( dR2 < CLUSTCUT_DIST_SQUARED ) idx_to_delete.push_back(j);
       }
    }
    ATH_MSG_VERBOSE("nr of duplicated seeds to be removed = " << idx_to_delete.size());
@@ -917,17 +958,17 @@ StatusCode TrigHitDVHypoAlg::selectSeedsNearby(const xAOD::TrigCompositeContaine
 {
    std::vector<unsigned int> idx_to_delete;
    for(unsigned int idx=0; idx<jetSeeds_eta.size(); ++idx) {
+      const float DR_SQUARED_CUT_TO_FTFSEED = 0.09; // const float DR_CUT_TO_FTFSEED = 0.3;
       float eta = jetSeeds_eta[idx];
       float phi = jetSeeds_phi[idx];
-      float dRmin = 9999;
+      float dR2min = 9999;
       for ( auto seed : *hitDVSeedsContainer ) {
 	 float seed_eta  = seed->getDetail<float>("hitDVSeed_eta");
 	 float seed_phi  = seed->getDetail<float>("hitDVSeed_phi");
-	 float dR = deltaR(eta,phi,seed_eta,seed_phi);
-	 if( dR < dRmin ) dRmin = dR;
+	 float dR2 = deltaR2(eta,phi,seed_eta,seed_phi);
+	 if( dR2 < dR2min ) dR2min = dR2;
       }
-      const float DRCUT_TO_FTFSEED = 0.3;
-      if( dRmin > DRCUT_TO_FTFSEED ) idx_to_delete.push_back(idx);
+      if( dR2min > DR_SQUARED_CUT_TO_FTFSEED ) idx_to_delete.push_back(idx);
    }
    if( idx_to_delete.size() > 0 ) {
       std::sort(idx_to_delete.begin(),idx_to_delete.end());

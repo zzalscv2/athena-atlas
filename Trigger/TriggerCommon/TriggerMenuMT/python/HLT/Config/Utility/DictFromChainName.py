@@ -752,8 +752,10 @@ def dictFromChainName(flags, chainInfo):
 
 def main():
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    parser = ConfigFlags.getArgumentParser()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
+    parser = flags.getArgumentParser()
     parser.add_argument(
         'chain',
         type=str,
@@ -762,14 +764,14 @@ def main():
         '-t', '--thresholds',
         nargs='+',
         help='L1 thresholds, needed for multileg or fullscan chains')
-    args = ConfigFlags.fillFromArgs(parser=parser)
-    ConfigFlags.lock()
+    args = flags.fillFromArgs(parser=parser)
+    flags.lock()
 
     if args.thresholds:
         from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
-        cd = dictFromChainName(ConfigFlags, ChainProp(args.chain,l1SeedThresholds=args.thresholds,groups=[]))
+        cd = dictFromChainName(flags, ChainProp(args.chain,l1SeedThresholds=args.thresholds,groups=[]))
     else:
-        cd = dictFromChainName(ConfigFlags, args.chain)
+        cd = dictFromChainName(flags, args.chain)
     
     from pprint import pprint
     pprint(cd)

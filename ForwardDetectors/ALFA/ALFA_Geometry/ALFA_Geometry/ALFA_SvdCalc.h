@@ -24,7 +24,6 @@
  
 #define PRECISION1 32768
 #define PRECISION2 16384
-/*#define PI 3.1415926535897932*/
 #define MIN(x,y) ( (x) < (y) ? (x) : (y) )
 #define MAX(x,y) ((x)>(y)?(x):(y))
 #define SIGN(a, b) ((b) >= 0.0 ? fabs(a) : -fabs(a))

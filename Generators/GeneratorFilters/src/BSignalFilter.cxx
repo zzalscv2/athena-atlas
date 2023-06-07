@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // -----------------------------------------------------------------------------------------------
@@ -23,8 +23,9 @@
 // -----------------------------------------------------------------------------------------------
 
 #include "GeneratorFilters/BSignalFilter.h"
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Vector/LorentzVector.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 #include <sstream>
 
@@ -204,7 +205,7 @@ StatusCode BSignalFilter::filterEvent()
 		                            // including immediate decays of resonances.
                 {
 		  // ** Reject whole event if any of B-hadrons in the event is not decayed **
-		  if( part->status() == 1 || part->status() == 899 ) { acceptEvent = false; }
+		  if( part->status() == 1 || part->status() == HepMC::EVTGENUNDECAYEDSTATUS ) { acceptEvent = false; }
 
 #ifdef HEPMC3
 		  auto  firstParent = part->production_vertex()->particles_in().begin();
@@ -480,7 +481,7 @@ void BSignalFilter::FindAllChildren(const HepMC::ConstGenParticlePtr& mother,std
   if( (!fromFinalB) && (MC::PID::isBottomMeson(pID) || MC::PID::isBottomBaryon(pID)) )
     {
       fromFinalB = true;
-      int pID;
+      int pID{};
       for (auto thisChild = firstChild; thisChild != lastChild; ++thisChild)
 	{
 	  pID = (*thisChild)->pdg_id();
@@ -489,7 +490,10 @@ void BSignalFilter::FindAllChildren(const HepMC::ConstGenParticlePtr& mother,std
     }
 
   // ** Main loop: iterate over all children, call method recursively.
-  for (auto thisChild = firstChild; thisChild != lastChild++; ++thisChild)
+  //Note: Iterators changed between HEPMC2 and HEPMC3; the previous version
+  //was a custom iterator which could be incremented indefinitely, always returning
+  //'end' when necessary. In HEPMC3, these are standard library iterators
+  for (auto thisChild = firstChild; thisChild != lastChild; ++thisChild)
     {
       childCnt++;
       std::stringstream childCntSS; childCntSS << childCnt;

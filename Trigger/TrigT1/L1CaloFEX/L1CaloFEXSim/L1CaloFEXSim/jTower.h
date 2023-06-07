@@ -109,6 +109,9 @@ namespace LVL1 {
     /** Get vector of all ET values in MeV */
     std::vector<int> getETs() const {return m_et;};
     
+    /** Set ET value in MeV */
+    void set_Et(int layer, int et);
+    
     /** Get EM ET value in MeV */
     int getET_EM() const {return m_et[0];};
     
@@ -130,7 +133,7 @@ namespace LVL1 {
     /** Get vector of all ET values in MeV FLOAT VERSION */
     std::vector<float> getETs_float() const {return m_et_float_raw;};
 
-    void set_TileCal_Et(int cell, float et);
+    void set_TileCal_Et(int layer, int et);
 
     /** Set LAr supercell position ID **/
     void set_LAr_Et(Identifier ID, int cell, float et, int layer);

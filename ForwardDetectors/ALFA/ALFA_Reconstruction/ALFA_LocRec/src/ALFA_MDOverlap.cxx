@@ -1,31 +1,30 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_LocRec/ALFA_MDOverlap.h"
 using namespace std;
 
 ALFA_MDOverlap::ALFA_MDOverlap() :
-    AthMessaging("ALFA_MDOverlap")
+  AthMessaging("ALFA_MDOverlap"),
+  m_iRPot (0),
+  m_iTBins (0),
+  m_iRBins (0),
+  m_fbMinU (0.0),
+  m_fbMinV (0.0),
+  m_fFiberD (0.0),
+  m_fzStep (0.0),
+  m_fTLow (0.0),
+  m_fTHigh (0.0),
+  m_fRLow (0.0),
+  m_fRHigh (0.0),
+  m_fHitBU (0.0),
+  m_fHitBV (0.0),
+  m_fRecXPos (0.0),
+  m_fRecYPos (0.0),
+  m_histU_PT (nullptr),
+  m_histV_PT (nullptr)
 {
-	m_histU_PT = nullptr;
-	m_histV_PT = nullptr;
-
-	m_fFiberD = 0.0;
-	m_fHitBU  = 0.0;
-	m_fHitBV  = 0.0;
-	m_fRHigh  = 0.0;
-	m_fRLow   = 0.0;
-	m_fRecXPos= 0.0;
-	m_fRecYPos= 0.0;
-	m_fTHigh  = 0.0;
-	m_fTLow   = 0.0;
-	m_fbMinU  = 0.0;
-	m_fbMinV  = 0.0;
-	m_fzStep  = 0.0;
-	m_iRBins  = 0;
-	m_iRPot   = 0;
-	m_iTBins  = 0;
 	memset(&m_iFHits, 0, sizeof(m_iFHits));
 }
 

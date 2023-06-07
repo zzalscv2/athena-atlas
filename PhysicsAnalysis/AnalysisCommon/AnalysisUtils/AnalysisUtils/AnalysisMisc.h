@@ -17,8 +17,10 @@
 
 #include "CxxUtils/fpcompare.h"
 #include "AthContainers/DataVector.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "boost/type_traits/remove_pointer.hpp"
 #include "boost/type_traits/is_convertible.hpp"
+
 
 #ifndef XAOD_STANDALONE
 #include "CLHEP/Vector/LorentzVector.h"
@@ -126,7 +128,7 @@ namespace AnalysisUtils {
 	{
 	  for (; it != itE; ++it)
 	    {
-	      if ( (*it)->barcode() < 100000 ) // only generator particles
+	      if ( (*it)->barcode() < HepMC::SIM_BARCODE_THRESHOLD ) // only generator particles
 		{
 		  if (((*it)->pdgId()==pdg) || pdg==0 )
 		    {
@@ -193,7 +195,7 @@ namespace AnalysisUtils {
 	{
 	  for (; it != itE; ++it)
 	    {
-	      if ( (*it)->barcode() < 100000 ) // only generator particles
+	      if ( (*it)->barcode() < HepMC::SIM_BARCODE_THRESHOLD ) // only generator particles
 		{	      
 		  if (((*it)->pdgId()==pdg) || pdg==0 )
 		    {
@@ -287,7 +289,7 @@ namespace AnalysisUtils {
 	{
 	  for (; it != itE; ++it)
 	    {
-	      if ( (*it)->barcode() < 100000 ) // only generator particles
+	      if ( (*it)->barcode() < HepMC::SIM_BARCODE_THRESHOLD ) // only generator particles
 		{
 		  double rtu = Delta::R(*it,eta,phi);
 		  if ( rtu < deltaR )
@@ -346,7 +348,7 @@ namespace AnalysisUtils {
 	{
 	  for (; it != itE; ++it)
 	    {
-	      if ( (*it)->barcode() < 100000 ) // only generator particles
+	      if ( (*it)->barcode() < HepMC::SIM_BARCODE_THRESHOLD ) // only generator particles
 		{
 		  double rtu = Delta::R(*it,eta,phi);
 		  double dE  = fabs( e-(*it)->e() );

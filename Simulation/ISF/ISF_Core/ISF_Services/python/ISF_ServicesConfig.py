@@ -36,44 +36,35 @@ cppyy.include("AtlasDetDescr/AtlasRegion.h")
 def GenParticleFiltersToolCfg(flags):
     result = ComponentAccumulator()
     genParticleFilterList = []
-    acc = ParticleFinalStateFilterCfg(flags)
-    genParticleFilterList += [result.popToolsAndMerge(acc)]
+    if flags.Sim.ISF.Simulator.isQuasiStable():
+        genParticleFilterList += [result.popToolsAndMerge(ParticleSimWhiteList_ExtraParticlesCfg(flags))]
+    else:
+        genParticleFilterList += [result.popToolsAndMerge(ParticleFinalStateFilterCfg(flags))]
     if "ATLAS" in flags.GeoModel.Layout or "atlas" in flags.GeoModel.Layout:
         if flags.Beam.Type not in [BeamType.Cosmics, BeamType.TestBeam]:
-            acc = ParticlePositionFilterDynamicCfg(flags)
-            genParticleFilterList += [result.popToolsAndMerge(acc)]
+            genParticleFilterList += [result.popToolsAndMerge(ParticlePositionFilterDynamicCfg(flags))]
             if not (flags.Detector.GeometryAFP or flags.Detector.GeometryALFA or flags.Detector.GeometryFwdRegion) \
                 and not flags.Detector.GeometryCavern \
                 and flags.Sim.CavernBackground in [CavernBackground.Off, CavernBackground.Signal]:
-                acc = EtaPhiFilterCfg(flags)
-                genParticleFilterList += [result.popToolsAndMerge(acc)]
-    acc = GenParticleInteractingFilterCfg(flags)
-    genParticleFilterList += [result.popToolsAndMerge(acc)]
+                genParticleFilterList += [result.popToolsAndMerge(EtaPhiFilterCfg(flags))]
+    genParticleFilterList += [result.popToolsAndMerge(GenParticleInteractingFilterCfg(flags))]
     result.setPrivateTools(genParticleFilterList)
     return result
 
 
 def InputConverterCfg(flags, name="ISF_InputConverter", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("BarcodeSvc", result.getPrimaryAndMerge(BarcodeSvcCfg(flags)).name)
+    kwargs.setdefault("QuasiStableParticlesIncluded", flags.Sim.ISF.Simulator.isQuasiStable())
+    kwargs.setdefault("UseShadowEvent", flags.Sim.UseShadowEvent)
     kwargs.setdefault("UseGeneratedParticleMass", False)
     if "GenParticleFilters" not in kwargs:
-        acc_GenParticleFiltersList = GenParticleFiltersToolCfg(flags)
-        kwargs.setdefault("GenParticleFilters", result.popToolsAndMerge(acc_GenParticleFiltersList) )
+        kwargs.setdefault("GenParticleFilters", result.popToolsAndMerge(GenParticleFiltersToolCfg(flags)) )
     result.addService(CompFactory.ISF.InputConverter(name, **kwargs), primary = True)
     return result
 
 
 def LongLivedInputConverterCfg(flags, name="ISF_LongLivedInputConverter", **kwargs):
     result = ComponentAccumulator()
-    gpfilt = [
-        result.popToolsAndMerge(ParticleSimWhiteList_ExtraParticlesCfg(flags)),
-        result.popToolsAndMerge(ParticlePositionFilterDynamicCfg(flags)),
-        result.popToolsAndMerge(EtaPhiFilterCfg(flags)),
-        result.popToolsAndMerge(GenParticleInteractingFilterCfg(flags)),
-    ]
-    kwargs.setdefault("GenParticleFilters", gpfilt)
-    kwargs.setdefault("QuasiStableParticlesIncluded", True)
     inptCnv = result.getPrimaryAndMerge(InputConverterCfg(flags, name, **kwargs))
     result.addService(inptCnv, primary = True)
     return result
@@ -91,8 +82,6 @@ def ParticleBrokerSvcNoOrderingCfg(flags, name="ISF_ParticleBrokerSvcNoOrdering"
     kwargs.setdefault("ValidateGeoIDs", flags.Sim.ISF.ValidationMode)
     kwargs.setdefault("ValidationOutput", flags.Sim.ISF.ValidationMode)
     kwargs.setdefault("ValidationStreamName", "ParticleBroker")
-
-    kwargs.setdefault("BarcodeService", result.getPrimaryAndMerge(BarcodeSvcCfg(flags)).name)
 
     result.addService(CompFactory.ISF.ParticleBrokerDynamicOnReadIn(name, **kwargs), primary = True)
     return result
@@ -154,7 +143,7 @@ def GenericTruthServiceCfg(flags, name="ISF_TruthService", **kwargs):
 
     if flags.Sim.ISF.Simulator.isQuasiStable():
         kwargs.setdefault("QuasiStableParticlesIncluded", True)
-
+    kwargs.setdefault("QuasiStableParticleOverwrite", not flags.Sim.UseShadowEvent)
     svc = CompFactory.ISF.TruthSvc(name, **kwargs)
     result.addService(svc, primary=True)
     return result

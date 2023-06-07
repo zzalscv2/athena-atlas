@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// GenParticleSimWhiteList.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header include
 #include "GenParticleSimWhiteList.h"
@@ -14,14 +10,12 @@
 #include "AtlasHepMC/GenVertex.h"
 
 // Helper function
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 // For finding that file
 #include "PathResolver/PathResolver.h"
 
 // Units
-#include "GaudiKernel/SystemOfUnits.h"
-
 #include <fstream>
 #include <cstdlib>
 
@@ -31,10 +25,6 @@ ISF::GenParticleSimWhiteList::GenParticleSimWhiteList( const std::string& t,
                                                        const IInterface* p )
   : base_class(t,n,p)
 {
-    // different options
-    declareProperty("WhiteLists", m_whiteLists={"G4particle_whitelist.txt"});
-    declareProperty("QuasiStableSim", m_qs=true);
-    declareProperty("MinimumDecayRadiusQS", m_minDecayRadiusQS=30.19*Gaudi::Units::mm);
 }
 
 // Athena algtool's Hooks
@@ -163,13 +153,13 @@ bool ISF::GenParticleSimWhiteList::pass(const HepMC::ConstGenParticlePtr& partic
       ATH_MSG_VERBOSE( "Particle " << particle << " was produced and decayed within a radius of " << m_minDecayRadiusQS << " mm.");
     }
   } // particle had daughters
-  if (!particle->end_vertex() && particle->status()==2) { // no daughters... No end vertex... Check if this isn't trouble
+  if (!m_useShadowEvent && !particle->end_vertex() && particle->status()==2) { // no daughters... No end vertex... Check if this isn't trouble
     ATH_MSG_ERROR( "Found a particle with no end vertex that does not appear in the white list." );
     ATH_MSG_ERROR( "This is VERY likely pointing to a problem with either the configuration you ");
     ATH_MSG_ERROR( "are using, or a bug in the generator.  Either way it should be fixed.  The");
     ATH_MSG_ERROR( "particle will come next, and then we will throw.");
     ATH_MSG_ERROR( particle );
-    throw std::runtime_error("GenParticleSimWhiteList: Particle with no end vertex and not in whitelist"); 
+    throw std::runtime_error("GenParticleSimWhiteList: Particle with no end vertex and not in whitelist");
   }
 
   return passFilter;
@@ -206,13 +196,13 @@ bool ISF::GenParticleSimWhiteList::pass(const HepMC::GenParticle& particle , std
       ATH_MSG_VERBOSE( "Particle " << particle << " was produced and decayed within a radius of " << m_minDecayRadiusQS << " mm.");
     }
   } // particle had daughters
-  if (!particle.end_vertex() && particle.status()==2) { // no daughters... No end vertex... Check if this isn't trouble
+  if (!m_useShadowEvent && !particle.end_vertex() && particle.status()==2) { // no daughters... No end vertex... Check if this isn't trouble
     ATH_MSG_ERROR( "Found a particle with no end vertex that does not appear in the white list." );
     ATH_MSG_ERROR( "This is VERY likely pointing to a problem with either the configuration you ");
     ATH_MSG_ERROR( "are using, or a bug in the generator.  Either way it should be fixed.  The");
     ATH_MSG_ERROR( "particle will come next, and then we will throw.");
     ATH_MSG_ERROR( particle );
-    throw std::runtime_error("GenParticleSimWhiteList: Particle with no end vertex and not in whitelist");  
+    throw std::runtime_error("GenParticleSimWhiteList: Particle with no end vertex and not in whitelist");
   }
 
   return passFilter;
@@ -224,4 +214,3 @@ StatusCode  ISF::GenParticleSimWhiteList::finalize()
     ATH_MSG_VERBOSE("Finalizing ...");
     return StatusCode::SUCCESS;
 }
-

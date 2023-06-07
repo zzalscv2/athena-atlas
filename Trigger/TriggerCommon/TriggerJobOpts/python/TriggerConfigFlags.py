@@ -199,14 +199,20 @@ def createTriggerFlags(doTriggerRecoFlags):
     # enable CTP ByteStream conversion / simulation
     flags.addFlag('Trigger.L1.doCTP', True)
 
+    # replace Topo3 with ALFA in CTP inputs
+    flags.addFlag('Trigger.L1.doAlfaCtpin', False)
+
     # partition name used to determine online vs offline BS result writing
     flags.addFlag('Trigger.Online.partitionName', os.getenv('TDAQ_PARTITION') or '')
 
     # shortcut to check if job is running in a partition (i.e. partition name is not empty)
     flags.addFlag('Trigger.Online.isPartition', lambda prevFlags: len(prevFlags.Trigger.Online.partitionName)>0)
 
-    # use TrigMonTHistSvc
-    flags.addFlag('Trigger.Online.useOnlineTHistSvc', False)
+    flags.addFlag('Trigger.Online.useOnlineTHistSvc', False,
+                  help='Use online THistSvc')
+
+    flags.addFlag('Trigger.Online.BFieldAutoConfig', True,
+                  help='Auto-configure magnetic field from currents in IS')
 
     # write BS output file
     flags.addFlag('Trigger.writeBS', False)
@@ -409,6 +415,9 @@ def createTriggerRecoFlags():
     # enable fast b-tagging for all fully calibrated HLT PFlow jets
     flags.addFlag("Trigger.Jet.fastbtagPFlow", True)
 
+    # enables or disables the addition the super ROI PV to the b-tagging
+    flags.addFlag("Trigger.Jet.fastbtagVertex", True)
+
     # enables or disables the addition of VR track jet reconstruction sequence
     flags.addFlag("Trigger.Jet.doVRJets", False)
 
@@ -417,8 +426,8 @@ def createTriggerRecoFlags():
     flags.addFlag("Trigger.Jet.pflowCalibKey", "TrigR22Prerec")
     flags.addFlag("Trigger.Jet.emtopoCalibKey", "TrigLS2")
 
-    # Change tollerance in STEP Propagator
-    flags.addFlag("Trigger.Jet.PFlowTolerance", 1e-4)
+    # Change tolerance in STEP Propagator
+    flags.addFlag("Trigger.Jet.PFlowTolerance", 1e-2)
 
     def __httFlags():
         """Additional function delays import"""

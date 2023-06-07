@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # ********************************************************************
 # EGammaLRTConfig.py
@@ -29,13 +29,14 @@ def EGammaLRTCfg(ConfigFlags):
     # ELECTRON CHARGE SELECTION
     # ====================================================================
     if not hasattr(acc, "ElectronChargeIDSelectorLoose"):
-        from ElectronPhotonSelectorTools.AsgElectronChargeIDSelectorToolConfig import AsgElectronChargeIDSelectorToolCfg
-        ElectronChargeIDSelector = acc.popToolsAndMerge(AsgElectronChargeIDSelectorToolCfg(
-            ConfigFlags,
-            name="ElectronChargeIDSelectorLoose"))
-        ElectronChargeIDSelector.primaryVertexContainer = "PrimaryVertices"
-        ElectronChargeIDSelector.TrainingFile = "ElectronPhotonSelectorTools/ChargeID/ECIDS_20180731rel21Summer2018.root"
-        acc.addPublicTool(ElectronChargeIDSelector)
+        if ConfigFlags.Derivation.Egamma.addECIDS:
+            from ElectronPhotonSelectorTools.AsgElectronChargeIDSelectorToolConfig import AsgElectronChargeIDSelectorToolCfg
+            ElectronChargeIDSelector = acc.popToolsAndMerge(AsgElectronChargeIDSelectorToolCfg(
+                ConfigFlags,
+                name="ElectronChargeIDSelectorLoose"))
+            ElectronChargeIDSelector.primaryVertexContainer = "PrimaryVertices"
+            ElectronChargeIDSelector.TrainingFile = "ElectronPhotonSelectorTools/ChargeID/ECIDS_20180731rel21Summer2018.root"
+            acc.addPublicTool(ElectronChargeIDSelector)
 
     # ====================================================================
     # AUGMENTATION TOOLS
@@ -46,18 +47,16 @@ def EGammaLRTCfg(ConfigFlags):
     # TODO same as above, update with central ID
 
     # decorate electrons with the output of ECIDS
-    LRTElectronPassECIDS = acc.getPrimaryAndMerge(EGElectronLikelihoodToolWrapperCfg(
-        ConfigFlags,
-        name="LRTElectronPassECIDS",
-        EGammaElectronLikelihoodTool=ElectronChargeIDSelector,
-        EGammaFudgeMCTool="",
-        CutType="",
-        StoreGateEntryName="DFCommonElectronsECIDS",
-        ContainerName="LRTElectrons",
-        StoreTResult=True))
-
-
-
+    if ConfigFlags.Derivation.Egamma.addECIDS:
+        LRTElectronPassECIDS = acc.getPrimaryAndMerge(EGElectronLikelihoodToolWrapperCfg(
+            ConfigFlags,
+            name="LRTElectronPassECIDS",
+            EGammaElectronLikelihoodTool=ElectronChargeIDSelector,
+            EGammaFudgeMCTool="",
+            CutType="",
+            StoreGateEntryName="DFCommonElectronsECIDS",
+            ContainerName="LRTElectrons",
+            StoreTResult=True))
 
     # decorate central electrons and photons with a flag to tell the the
     # candidates are affected by the crack bug in mc16a and data 2015+2016
@@ -79,21 +78,20 @@ def EGammaLRTCfg(ConfigFlags):
         isMC=ConfigFlags.Input.isMC))
 
     # list of all the decorators so far
-    LRTEGAugmentationTools = [LRTElectronPassECIDS,
-                              LRTElectronPassCrackVeto,
+    LRTEGAugmentationTools = [LRTElectronPassCrackVeto,
                               LRTElectronAmbiguity]
+    if ConfigFlags.Derivation.Egamma.addECIDS:
+        LRTEGAugmentationTools.extend([LRTElectronPassECIDS])
 
     # ==================================================
     # Truth Related tools
     if ConfigFlags.Input.isMC:
-        simBarcodeOffset = ConfigFlags.Sim.SimBarcodeOffset
 
         # Decorate Electron with bkg electron type/origin
         from MCTruthClassifier.MCTruthClassifierConfig import MCTruthClassifierCfg
         BkgElectronMCTruthClassifier = acc.popToolsAndMerge(MCTruthClassifierCfg(
             ConfigFlags,
             name="BkgElectronMCTruthClassifier",
-            barcodeG4Shift = simBarcodeOffset+1,
             ParticleCaloExtensionTool = ""))
         acc.addPublicTool(BkgElectronMCTruthClassifier)
 
@@ -102,7 +100,6 @@ def EGammaLRTCfg(ConfigFlags):
             ConfigFlags,
             name="BkgLRTElectronClassificationTool",
             MCTruthClassifierTool=BkgElectronMCTruthClassifier,
-            barcodeCut=simBarcodeOffset,
             ElectronContainerName="LRTElectrons"))
         LRTEGAugmentationTools.append(BkgLRTElectronClassificationTool)
 

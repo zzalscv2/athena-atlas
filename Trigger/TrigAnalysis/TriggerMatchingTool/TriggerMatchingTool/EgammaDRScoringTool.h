@@ -22,6 +22,11 @@ namespace Trig {
         virtual float score(
                 const xAOD::IParticle &online,
                 const xAOD::IParticle &offline) const override;
+
+    private:
+        /// Use decorated cluster information
+        bool m_useClusterDecorator;
+
     }; //> end class EgammaDRScoringTool
 } //> end namespace Trig
 

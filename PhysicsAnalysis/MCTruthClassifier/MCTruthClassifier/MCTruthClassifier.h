@@ -20,7 +20,8 @@ CREATED:  Sep 2007
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthVertex.h"
 // For making PID selections easier
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 #ifndef XAOD_ANALYSIS
 #include "GaudiKernel/ToolHandle.h"
@@ -190,9 +191,9 @@ private:
   static bool fromHadron(const xAOD::TruthParticle* p, const xAOD::TruthParticle *hadptr, bool &fromTau, bool &fromBSM);
 
   //
-  MCTruthPartClassifier::ParticleOrigin defHadronType(long);
+  MCTruthPartClassifier::ParticleOrigin defHadronType(int);
   static bool isHadron(const xAOD::TruthParticle*);
-  static MCTruthPartClassifier::ParticleType defTypeOfHadron(long);
+  static MCTruthPartClassifier::ParticleType defTypeOfHadron(int);
   static MCTruthPartClassifier::ParticleOrigin convHadronTypeToOrig(MCTruthPartClassifier::ParticleType pType,
                                                                     int motherPDG);
   //
@@ -242,8 +243,7 @@ private:
 
   float m_pTChargePartCut;
   float m_pTNeutralPartCut;
-  long m_barcodeShift;
-  long m_barcodeG4Shift;
+  const long m_barcodeShift = HepMC::SIM_REGENERATION_INCREMENT;
   bool m_inclG4part;
   bool m_inclEgammaPhoton;
   bool m_inclEgammaFwrdEle;

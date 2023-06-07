@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_TRACKTRUTHSELECTORTOOL_H
@@ -40,7 +40,7 @@ private:
   float m_maxEta;
   float m_maxPt;
   float m_minPt;
-  float m_maxBarcode;
+  bool m_requireOnlyPrimary;
   bool m_requireCharged;
   bool m_requireStatus1;
   // max decay radius for secondaries [mm];

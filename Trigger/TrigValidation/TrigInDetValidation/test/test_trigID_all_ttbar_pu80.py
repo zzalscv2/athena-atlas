@@ -5,6 +5,8 @@
 # art-type: grid
 # art-include: master/Athena
 # art-include: 23.0/Athena
+# art-input: valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4116_s4114_r14664_tid33428383_00
+# art-input-nfiles: 8
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt
@@ -33,9 +35,11 @@ Events  = 4000
 Threads = 8 
 Slots   = 8
 Input   = 'ttbar_pu80'    # defined in TrigValTools/share/TrigValInputs.json  
+GridFiles = True
 
-preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDV_cond_fix.py' #conditions fix for ATR-23982. In future find a more recent RDO
-postinclude_file = 'RAWtoALL:TrigInDetValidation.TIDV_cond_fix'
+# the conditions override is needed because the RDO was produced with a single beamspot
+preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDV_singlebeamspot.py'
+postinclude_file = 'RAWtoALL:TrigInDetValidation.TIDV_singlebeamspot'
 
 Jobs = [ ( "Offline",     " TIDAdata-run3-offline.dat      -r Offline -o data-hists-offline.root" ),
          ( "OfflineVtx",  " TIDAdata-run3-offline-vtx.dat  -r Offline -o data-hists-offline-vtx.root" ) ]
@@ -55,4 +59,3 @@ Comp = [ ( "L2muon",       "L2muon",      "data-hists-offline.root",      " -c T
    
 from AthenaCommon.Include import include 
 include("TrigInDetValidation/TrigInDetValidation_Base.py")
-

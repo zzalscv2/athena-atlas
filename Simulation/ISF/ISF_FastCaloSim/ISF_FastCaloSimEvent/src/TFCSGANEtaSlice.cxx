@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -25,11 +25,12 @@
 TFCSGANEtaSlice::TFCSGANEtaSlice() {}
 
 TFCSGANEtaSlice::TFCSGANEtaSlice(int pid, int etaMin, int etaMax,
-                                 const TFCSGANXMLParameters &param) {
-  m_pid = pid;
-  m_etaMin = etaMin;
-  m_etaMax = etaMax;
-  m_param = param;
+                                 const TFCSGANXMLParameters &param)
+  : m_pid (pid),
+    m_etaMin (etaMin),
+    m_etaMax (etaMax),
+    m_param (param)
+{
 }
 
 TFCSGANEtaSlice::~TFCSGANEtaSlice() {

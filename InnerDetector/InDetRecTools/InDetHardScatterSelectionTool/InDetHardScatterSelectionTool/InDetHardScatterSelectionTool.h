@@ -144,7 +144,7 @@ namespace InDet {
     FloatProperty m_trkMaxPt{this, "trkMaxPt", 10045000, "max track pt"};
  
     /// The decoration name of the ElementLink to the hardscatter vertex (applied to xAOD::EventInfo)
-    SG::ReadDecorHandleKey<xAOD::EventInfo> m_hardScatterDecoKey;
+    SG::ReadDecorHandleKey<xAOD::EventInfo> m_hardScatterDecoKey{this, "VertexScatterKey", "" , "Overwrriten in the configuration step by the <HardScatterLinkDeco> property"};
 
     /// @}
 

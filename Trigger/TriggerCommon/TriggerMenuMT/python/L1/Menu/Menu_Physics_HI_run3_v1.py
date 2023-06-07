@@ -32,7 +32,7 @@ def defineMenu():
         'L1_2MU5VF_3MU3V', 'L1_2MU8VF',
 
         'L1_2MU14FCH_OVERLAY',
-        'L1_MU3V_EMPTY', 'L1_MU5VF_EMPTY', 'L1_MU3V_FIRSTEMPTY', 'L1_MU8VF_EMPTY',
+        'L1_MU3V_EMPTY', 'L1_2MU5VF_EMPTY', 'L1_MU3V_FIRSTEMPTY', 'L1_MU8VF_EMPTY',
         'L1_MU3V_UNPAIRED_ISO',
 
         ##
@@ -269,8 +269,8 @@ def defineMenu():
         'L1_LAR-ZEE', 'L1_LAR-ZEE-eEM',
 
         #ATR-17320
-        'L1_CEP-CjJ100',
-        'L1_CEP-CjJ90' ,
+        # 'L1_CEP-CjJ100',
+        # 'L1_CEP-CjJ90' ,
 
         #ATR-21371
         'L1_ALFA_ANY',

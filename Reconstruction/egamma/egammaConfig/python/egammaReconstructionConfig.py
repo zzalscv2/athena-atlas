@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """
           Instantiate the EGamma reconstruction.
@@ -14,6 +14,11 @@ def egammaReconstructionCfg(flags, name="egammaReconstruction"):
     mlog.info('Starting EGamma reconstruction configuration')
 
     acc = ComponentAccumulator()
+
+    if flags.HeavyIon.Egamma.doSubtractedClusters:
+        from HIJetRec.HIEgammaRecConfigCA import (
+            HIEgammaRecCfg)
+        acc.merge(HIEgammaRecCfg(flags))
 
     # Add e/gamma tracking algorithms
     if flags.Egamma.doTracking:
@@ -31,12 +36,20 @@ def egammaReconstructionCfg(flags, name="egammaReconstruction"):
             EMVertexBuilderCfg)
         acc.merge(EMVertexBuilderCfg(flags))
 
+    from egammaAlgs.egammaTopoClusterCopierConfig import (
+        egammaTopoClusterCopierCfg)
+    acc.merge(egammaTopoClusterCopierCfg(flags))
+
     # Add algorithms to produce
     # xAOD Electrons and Photons
     if flags.Egamma.doCentral:
         from egammaAlgs.egammaRecBuilderConfig import (
             egammaRecBuilderCfg)
-        acc.merge(egammaRecBuilderCfg(flags))
+        if flags.HeavyIon.Egamma.doSubtractedClusters:
+            acc.merge(egammaRecBuilderCfg(
+                flags, InputClusterContainerName=flags.HeavyIon.Egamma.CaloTopoCluster))
+        else:
+            acc.merge(egammaRecBuilderCfg(flags))
 
         from egammaAlgs.egammaSuperClusterBuilderConfig import (
             electronSuperClusterBuilderCfg, photonSuperClusterBuilderCfg)

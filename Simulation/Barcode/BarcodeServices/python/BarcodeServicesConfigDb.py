@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """
 Configuration database for BarcodeServices
@@ -15,12 +15,5 @@ addService("BarcodeServices.BarcodeServicesConfigLegacy.getMC15aBarcodeSvc"     
 addService("BarcodeServices.BarcodeServicesConfigLegacy.getMC15aPlusBarcodeSvc"     ,  "Barcode_MC15aPlusBarcodeSvc"     )
 addService("BarcodeServices.BarcodeServicesConfigLegacy.getMC15aPlusLLPBarcodeSvc"  ,  "Barcode_MC15aPlusLLPBarcodeSvc"  )
 addService("BarcodeServices.BarcodeServicesConfigLegacy.getMC15BarcodeSvc"          ,  "Barcode_MC15BarcodeSvc"          )
-addService("BarcodeServices.BarcodeServicesConfigLegacy.getMC16BarcodeSvc"          ,  "Barcode_MC16BarcodeSvc"          )
-addService("BarcodeServices.BarcodeServicesConfigLegacy.getMC16LLPBarcodeSvc"       ,  "Barcode_MC16LLPBarcodeSvc"       )
-addService("BarcodeServices.BarcodeServicesConfigLegacy.getMC18BarcodeSvc"          ,  "Barcode_MC18BarcodeSvc"          )
-addService("BarcodeServices.BarcodeServicesConfigLegacy.getMC18LLPBarcodeSvc"       ,  "Barcode_MC18LLPBarcodeSvc"       )
-addService("BarcodeServices.BarcodeServicesConfigLegacy.getPhysicsProcessBarcodeSvc",  "Barcode_PhysicsProcessBarcodeSvc")
-addService("BarcodeServices.BarcodeServicesConfigLegacy.getGlobalBarcodeService"    ,  "Barcode_GlobalBarcodeService"    )
-addService("BarcodeServices.BarcodeServicesConfigLegacy.getLegacyBarcodeService"    ,  "Barcode_LegacyBarcodeService"    )
 addService("BarcodeServices.BarcodeServicesConfigLegacy.getValidationBarcodeSvc"    ,  "Barcode_ValidationBarcodeSvc"    )
-
+addService("BarcodeServices.BarcodeServicesConfigLegacy.getBarcodeSvc"    ,  "BarcodeSvc"    )

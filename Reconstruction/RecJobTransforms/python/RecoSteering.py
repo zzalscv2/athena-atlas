@@ -69,7 +69,14 @@ def RecoSteering(flags):
         from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
         acc.merge(InDetTrackRecoCfg(flags))
         log.info("---------- Configured tracking")
-
+    
+    # HI
+    acc.flagPerfmonDomain('HI')
+    if flags.Reco.EnableHI:
+        from HIRecConfig.HIRecConfig import HIRecCfg
+        acc.merge(HIRecCfg(flags))
+        log.info("---------- Configured Heavy Ion reconstruction")
+    
     # HGTD
     acc.flagPerfmonDomain('HGTD')
     if flags.Reco.EnableHGTDExtension:
@@ -180,13 +187,6 @@ def RecoSteering(flags):
         acc.merge(CaloRingerSteeringCfg(flags))
         log.info("---------- Configured Calo Rings")
 
-    # HI
-    acc.flagPerfmonDomain('HI')
-    if flags.Reco.EnableHI:
-        from HIRecConfig.HIRecConfig import HIRecCfg
-        acc.merge(HIRecCfg(flags))
-        log.info("---------- Configured Heavy Ion reconstruction")
-
     # AFP
     acc.flagPerfmonDomain('AFP')
     if flags.Detector.EnableAFP:
@@ -201,12 +201,12 @@ def RecoSteering(flags):
         acc.merge(LucidRecCfg(flags))
         log.info("---------- Configured Lucid reconstruction")
 
-    # ZDC under construction but disabled as per APR-90
-    #acc.flagPerfmonDomain('ZDC')
-    #if flags.Reco.EnableZDC:
-    #    from ForwardRec.ZDCRecConfig import ZDCRecCfg
-    #    acc.merge(ZDCRecCfg(flags))
-    #    log.info("---------- Configured ZDC reconstruction")
+    # ZDC 
+    acc.flagPerfmonDomain('ZDC')
+    if flags.Reco.EnableZDC:
+        from ZdcRec.ZdcRecConfig import ZdcRecCfg
+        acc.merge(ZdcRecCfg(flags))
+        log.info("---------- Configured ZDC reconstruction")
 
     # Monitoring
     acc.flagPerfmonDomain('DQM')

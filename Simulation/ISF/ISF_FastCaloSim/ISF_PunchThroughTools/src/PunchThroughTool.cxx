@@ -12,7 +12,8 @@
 #include <algorithm>
 #include <vector>
 #include <numeric>
-
+#include <string_view>
+#include <charconv>
 
 // standard C libraries
 #include <cmath>
@@ -741,77 +742,57 @@ std::vector<double> ISF::PunchThroughTool::dotProduct(const std::vector<std::vec
     return result;
 }
 
-std::vector<std::string> ISF::PunchThroughTool::str_to_list(const std::string & str) const
+template<typename T>
+std::vector<T> str_to_list(const std::string_view str)
 {
-    std::vector<std::string> v;
-    std::stringstream ss(str); 
-    while (ss.good()) {
-        std::string substr;
-        std::getline(ss, substr, ',');
-        v.push_back(substr);
+    constexpr char delimiters = ',';
+    std::vector<T> tokens;
+    // Skip delimiters at beginning.
+    std::string_view::size_type lastPos = str.find_first_not_of(delimiters, 0);
+    // Find first "non-delimiter".
+    std::string_view::size_type pos = str.find_first_of(delimiters, lastPos);
+
+    while (std::string_view::npos != pos || std::string_view::npos != lastPos) {
+        // Found a token, add it to the vector.
+        std::string_view numbStr = str.substr(lastPos, pos - lastPos);
+        T num = -9999;
+        std::from_chars(numbStr.data(), numbStr.data() + numbStr.size(), num);
+        tokens.push_back(num);
+        // Skip delimiters.  Note the "not_of"
+        lastPos = str.find_first_not_of(delimiters, pos);
+        // Find next "non-delimiter"
+        pos = str.find_first_of(delimiters, lastPos);
     }
-    return v;
+    return tokens;
 }
 
 int ISF::PunchThroughTool::passedParamIterator(int pid, double eta, const std::vector<std::map<std::string, std::string>> &mapvect) const
 {
     //convert the pid to absolute value and string for query
-    std::string pidStrSingle = std::to_string(std::abs(pid));
-    //initialize holder vector for pid string
-    std::vector<std::string> v;
-    //vector to hold filtered iterator of info mapvect
-    std::vector<int> elemNoForPid;
+    int pidStrSingle = std::abs(pid);
     //STEP 1
     //filter items matching pid first
 
     for (unsigned int i = 0; i < mapvect.size(); i++){
-        std::string pidStr = mapvect[i].at("pidStr");
-        v = str_to_list(pidStr);        
-        if(std::find(v.begin(), v.end(),pidStrSingle)!=v.end()){
-            // create a vector of positions in map satisfying (in loop)
-            elemNoForPid.push_back(i);
-        }        
-    }
-    //STEP 2
-    //then from that vector find the map element
-    //loop again this time for each of the map element, loop over the different etamins and etamaxs
-    std::string etaMaxsStr, etaMinsStr;
-    std::vector<std::string> etaMinsVect, etaMaxsVect;
-    std::vector<int> matchedCondVect;
-    double etaMinToCompare, etaMaxToCompare;
-    for (unsigned int i = 0; i < elemNoForPid.size(); i++){
-        etaMinsStr = mapvect[elemNoForPid[i]].at("etaMins");
-        etaMaxsStr = mapvect[elemNoForPid[i]].at("etaMaxs");
-        etaMinsVect = str_to_list(etaMinsStr);
-        etaMaxsVect = str_to_list(etaMaxsStr);   
-        std::vector<std::tuple<double, double>> etaRangesVect;
+        const std::string &pidStr = mapvect[i].at("pidStr");
+        auto v = str_to_list<int>(pidStr);
+        if(std::find(v.begin(), v.end(),pidStrSingle)==v.end()) continue;
+        const std::string &etaMinsStr = mapvect[i].at("etaMins");
+        const std::string &etaMaxsStr = mapvect[i].at("etaMaxs");
+        std::vector<double> etaMinsVect = str_to_list<double>(etaMinsStr);
+        std::vector<double> etaMaxsVect = str_to_list<double>(etaMaxsStr);
+        assert(etaMaxsVect.size() == etaMinsVect.size());
         for (unsigned int j = 0; j < etaMinsVect.size(); j++){ // assume size etaMinsVect == etaMaxsVect
-            etaRangesVect.push_back({std::stod(etaMinsVect[j]),std::stod(etaMaxsVect[j])});    
-        }
-        //make comparison
-        for (unsigned int k = 0; k < etaRangesVect.size(); k++){ // assume size etaMinsVect == etaMaxsVect
-          etaMinToCompare = std::get<0>(etaRangesVect[k]);
-          etaMaxToCompare = std::get<1>(etaRangesVect[k]);
+          double etaMinToCompare = etaMinsVect[j];
+          double etaMaxToCompare = etaMaxsVect[j];
           if((eta >= etaMinToCompare) && (eta < etaMaxToCompare)){
             //PASS CONDITION
             //then choose the passing one and note it's iterator
-            matchedCondVect.push_back(elemNoForPid[i]); //in case more than 1 match (ambiguous case)
+            return (i); //in case more than 1 match (ambiguous case)
           }
         }
     }
-    //STEP 3
-    //always take the first element in the mapvect as the pca (in case it is ambiguos)
-    int matchedIt; //matchedIterator
-    if((matchedCondVect.size() >= 1)){
-      matchedIt = matchedCondVect[0];
-    }
-    //if none found, set the iterator to the first (provided pca is not empty)
-    else{
-      //FAIL CONDITION
-      matchedIt = 0;      
-    }
-    //return the match
-    return matchedIt;
+    return 0;
 }
 
 std::vector<std::map<std::string, std::string>> ISF::PunchThroughTool::getInfoMap(std::string mainNode, const std::string &xmlFilePath){
@@ -1384,19 +1365,17 @@ double ISF::PunchThroughTool::getFloatAfterPatternInStr(const char *cstr, const 
 {
   double num = 0.;
 
-  const std::string str( cstr);
-  const std::string pattern( cpattern);
-  const size_t pos = str.find(cpattern);
+  const std::string_view str( cstr);
+  const std::string_view pattern( cpattern);
+  const size_t pos = str.find(pattern);
 
   if ( pos == std::string::npos)
     {
       ATH_MSG_WARNING("[ punchthrough ] unable to retrieve floating point number from string");
       return -999999999999.;
     }
-
-  std::istringstream iss( cstr+pos+pattern.length());
-  iss >> std::dec >> num;
-
+  const std::string_view substring = str.substr(pos+pattern.length());
+  std::from_chars(substring.data(), substring.data() + substring.size(), num);
   return num;
 }
 

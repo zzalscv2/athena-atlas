@@ -56,11 +56,13 @@ def xAODReadCfg(flags, AccessMode=xAODAccessMode.CLASS_ACCESS):
 
     result.addService(CompFactory.ProxyProviderSvc("ProxyProviderSvc",ProviderNames=[ "MetaDataSvc"]))
     result.addService(
-        CompFactory.Athena.xAODEventSelector('EventSelector',
+        CompFactory.Athena.xAODEventSelector(
+            name='EventSelector',
             InputCollections=flags.Input.Files,
             SkipEvents=flags.Exec.SkipEvents,
             AccessMode=AccessMode,
-            ReadMetaDataWithPool=True
+            ReadMetaDataWithPool=True,
+            printEventProxyWarnings=False,
             ))
     evSel = result.getService("EventSelector")
 

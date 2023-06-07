@@ -237,6 +237,8 @@ class ATLAS_NOT_THREAD_SAFE xAODEventSelector :
 
   bool m_printPerfStats = false; //should we monitor the touched input branches?
 
+  bool m_printEventProxyWarnings = true;
+
 #ifndef XAOD_ANALYSIS
   //these are here just for compatibility with RecExCommon ... we were trying to use this selector in recexcommon jobs for a bit
   StringProperty m_collectionType;

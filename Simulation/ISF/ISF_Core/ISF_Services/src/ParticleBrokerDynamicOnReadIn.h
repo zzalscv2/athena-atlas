@@ -21,7 +21,6 @@
 #include "ISF_Event/EntryLayer.h"
 #include "ISF_Event/ISFParticleContainer.h"
 #include "ISF_Event/ISFParticleOrderedQueue.h"
-#include "BarcodeInterfaces/IBarcodeSvc.h"
 
 // AtlasDetDescr
 #include "AtlasDetDescr/AtlasRegion.h"
@@ -144,9 +143,6 @@ namespace ISF {
       /** Screen output refinement */
       std::string                               m_screenOutputPrefix;
       std::string                               m_screenEmptyPrefix;
-
-      /** barcode service */
-      ServiceHandle<Barcode::IBarcodeSvc>       m_barcodeSvc; //!< barcode service      
 
        /** Benchmarking */
       bool                                      m_doSelectorCPUMon; //!< whether we use PMonUtils or not

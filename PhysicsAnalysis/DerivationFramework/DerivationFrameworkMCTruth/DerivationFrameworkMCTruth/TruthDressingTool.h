@@ -24,7 +24,6 @@ namespace DerivationFramework {
       TruthDressingTool(const std::string& t, const std::string& n, const IInterface* p);
       ~TruthDressingTool();
       StatusCode initialize();
-      StatusCode finalize();
       virtual StatusCode addBranches() const;
 
     private:
@@ -34,6 +33,8 @@ namespace DerivationFramework {
       /// ReadHandleKey for particles to be dressed
       SG::ReadHandleKey<xAOD::TruthParticleContainer> m_dressParticlesKey
          {this, "dressParticlesKey", "TruthParticles", "ReadHandleKey for input particles to be dressed.  If taus are selected, everything in this input key will be used"};
+      /// Ensure that the algorithm is scheduled after the truth classifier
+      SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_truthClassKey{this, "truthClassifierKey", "", "Will be over written during initialize"};
       /// WriteDecorHandleKeys for decorations
       SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_decorator_eKey
          {this, "e_dressed", "TruthParticles.e_dressed", "e_dressed decoration"};

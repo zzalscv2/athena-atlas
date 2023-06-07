@@ -65,15 +65,12 @@ def jetHIEventShapeSequence(configFlags, clustersKey, towerKey):
     ESFiller.UseClusters=True
     
     #Add weight tool to filler tool
-    from AthenaConfiguration.Enums import LHCPeriod
     from HIEventUtils.HIEventUtilsConf import HITowerWeightTool
     TWTool=HITowerWeightTool()
     TWTool.ApplyCorrection=True
     TWTool.ConfigDir='HIJetCorrection/'
-    if configFlags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2]:
-        TWTool.InputFile='cluster.geo.HIJING_2018.root'
-    else:
-        TWTool.InputFile='cluster.geo.DATA_PbPb_2022.root'
+    from HIJetRec.HIJetRecUtilsCA import getHIClusterGeoWeightFile
+    TWTool.InputFile=getHIClusterGeoWeightFile(configFlags)
 
     from AthenaCommon.AppMgr import ToolSvc
     ToolSvc += HITowerWeightTool()
@@ -168,12 +165,6 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
     jetHIRecSeq += conf2toConfigurable( jetRecAlg )
 
     associationName = "%s_DR8Assoc" % (clustersKey)
-    stdJetModifiers.update(
-        # we give a function as PtMin : it will be evaluated when instantiating the tool (modspec will come alias usage like "Filter:10000" --> PtMin=100000) 
-        HLTHIJetAssoc = JetModifier("HIJetDRAssociationTool","HIJetDRAssociation", ContainerKey=clustersKey, DeltaR=0.8, AssociationName=associationName), 
-        HLTHIJetMaxOverMean = JetModifier("HIJetMaxOverMeanTool","HIJetMaxOverMean", JetContainer = jetsFullName_Unsub), 
-        HLTHIJetDiscrim = JetModifier("HIJetDiscriminatorTool","HIJetDiscriminator", MaxOverMeanCut = 4, MinimumETMaxCut=3000), 
-    )
 
     jetsInUnsub = recordable(jetsFullName_Unsub)
 
@@ -187,6 +178,12 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
     jetDef_seed0 = jetDef.clone()
     jetDef_seed0.suffix = jetDef.suffix.replace("Unsubtracted", "seed0")
     jetsFullName_seed0 = jetDef_seed0.fullname()
+    stdJetModifiers.update(
+        # we give a function as PtMin : it will be evaluated when instantiating the tool (modspec will come alias usage like "Filter:10000" --> PtMin=100000) 
+        HLTHIJetAssoc = JetModifier("HIJetDRAssociationTool","HIJetDRAssociation", ContainerKey=clustersKey, DeltaR=0.8, AssociationName=associationName),
+        HLTHIJetMaxOverMean = JetModifier("HIJetMaxOverMeanTool","HIJetMaxOverMean", JetContainer = jetsFullName_seed0),
+        HLTHIJetDiscrim = JetModifier("HIJetDiscriminatorTool","HIJetDiscriminator", MaxOverMeanCut = 4, MinimumETMaxCut=3000),
+    )
     jetDef_seed0.modifiers=["HLTHIJetAssoc", "HLTHIJetMaxOverMean", "HLTHIJetDiscrim", "Filter:5000"]
     copySeed0Alg = getJetCopyAlg(jetsin=jetsInUnsub,jetsoutdef=jetDef_seed0,decorations=[],shallowcopy=False,shallowIO=False,monTool=monTool)
     jetHIRecSeq += copySeed0Alg
@@ -304,11 +301,8 @@ def HLTAddIteration(configFlags, seed_container,shape_name,clustersKey, **kwargs
 
     if 'sub_tool' in kwargs.keys() : sub_tool=kwargs['sub_tool']
     else :
-        from AthenaConfiguration.Enums import LHCPeriod
-        if configFlags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2]:
-            weightInputFile='cluster.geo.HIJING_2018.root'
-        else:
-            weightInputFile='cluster.geo.DATA_PbPb_2022.root'
+        from HIJetRec.HIJetRecUtilsCA import getHIClusterGeoWeightFile
+        weightInputFile=getHIClusterGeoWeightFile(configFlags)
 
         HIJetClusterSubtractorTool=CompFactory.HIJetClusterSubtractorTool
         sub_tool=HIJetClusterSubtractorTool("HLTHIJetClusterSubtractor", ConfigDir='HIJetCorrection/', InputFile=weightInputFile)
@@ -388,11 +382,8 @@ def HLTMakeModulatorTool(mod_key, **kwargs):
     return mod
 
 def HLTHIJetClusterSubtractorGetter(configFlags):
-    from AthenaConfiguration.Enums import LHCPeriod
-    if configFlags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2]:
-        weightInputFile='cluster.geo.HIJING_2018.root'
-    else:
-        weightInputFile='cluster.geo.DATA_PbPb_2022.root'
+    from HIJetRec.HIJetRecUtilsCA import getHIClusterGeoWeightFile
+    weightInputFile=getHIClusterGeoWeightFile(configFlags)
 
     HIJetClusterSubtractorTool = CompFactory.HIJetClusterSubtractorTool
     sub_tool = HIJetClusterSubtractorTool("HLTHIJetClusterSubtractor", ConfigDir='HIJetCorrection/', InputFile=weightInputFile)

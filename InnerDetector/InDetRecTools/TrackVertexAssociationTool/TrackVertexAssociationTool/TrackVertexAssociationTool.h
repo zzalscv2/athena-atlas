@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKVERTEXASSOCIATIONTOOL_H
@@ -12,6 +12,7 @@
 // Framework includes
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/CurrentContext.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "AthLinks/ElementLink.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/ReadDecorHandleKey.h"
@@ -19,7 +20,7 @@
 
 // EDM includes
 #include "xAODEventInfo/EventInfo.h"
-#include "xAODTracking/TrackParticleFwd.h"
+#include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/TrackParticleContainerFwd.h"
 #include "xAODTracking/VertexFwd.h"
 #include "xAODTracking/VertexContainerFwd.h"
@@ -106,36 +107,36 @@ namespace CP {
 
     /// @name The properties that can be defined via the python job options
     /// @{
+    Gaudi::Property<std::string> m_wp{this, "WorkingPoint", "Old_Nominal", 
+                                      "Working point to operate on."};
 
-    /// Working Point to operate on.
-    std::string m_wp;
+    Gaudi::Property<float> m_d0_cut{this, "d0_cut", -1.,
+                                   "Cut on d0. Not applied if set to -1."};
 
-    /// Cut on d0. Not applied if set to -1.
-    float m_d0_cut;
+    Gaudi::Property<bool> m_use_d0sig{this, "use_d0sig", false, 
+                                      "Flag to cut on d0sig instead of d0."};
 
-    /// Flag to cut on d0sig instead of d0.
-    bool m_use_d0sig;
+    Gaudi::Property<float> m_d0sig_cut{this, "d0sig_cut", -1., 
+                                       "Cut on d0Sig. Not applied if set to -1."};
 
-    /// Cut on d0Sig. Not applied if set to -1.
-    float m_d0sig_cut;
-
-    /// Cut on |dz*sinTheta| (in mm).  Not applied if set to -1.
-    float m_dzSinTheta_cut;
-
-    /// Flag to cut on d0sig instead of d0.
-    bool m_doUsedInFit;
-
-    /// Flag to switch priority to match the primary vertex instead of closest vertex.
-    bool m_doPVPriority;
+    Gaudi::Property<float> m_dzSinTheta_cut{this, "dzSinTheta_cut", -1.,
+                                          "Cut on |dz*sinTheta| (in mm). Not applied if set to -1." };
 
     /// Flag to cut on d0sig instead of d0.
-    bool m_requirePriVtx;
+    Gaudi::Property<bool> m_doUsedInFit{this, "doUsedInFit", false,
+                          "Control whether to allow for a MatchStatus of UsedInFit."};
+
+    Gaudi::Property<bool> m_doPVPriority{this, "doPVPriority", false, 
+                        "Control whether to give priority to matching to PV instead of closest vertex."};
+
+    Gaudi::Property<bool> m_requirePriVtx{this, "requirePriVtx", false,
+      "Control whether a vertex must be VxType::PriVtx in order for a track (not UsedInFit) to be uniquely matched to it."};
 
     /// The decoration name of the ElementLink to the hardscatter vertex (found on xAOD::EventInfo)
-    std::string m_hardScatterDeco;
+    Gaudi::Property<std::string> m_hardScatterDeco{this, "HardScatterLinkDeco", "hardScatterVertexLink"};
 
-    /// xAOD::TrackParticleContaier name (for building the accessors below)
-    std::string m_trkContName;
+    /// The name of the xAOD::TrackParticleContainer to access the AMVF vertices+weights for (not actually read).
+    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trkKey{this, "TrackContName", "InDetTrackParticles"};
 
     /// @}
 
@@ -148,20 +149,25 @@ namespace CP {
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo {this, "EventInfo", "EventInfo", "EventInfo key"};
 
     /// AMVF vertices decoration key
-    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_vtxDecoKey;
+    Gaudi::Property<std::string> m_vtxDecoName{this, "AMVFVerticesDeco", "TTVA_AMVFVertices",
+                                  "The per-track decoration name of the vector of AMVF used-in-fit vertex ElementLinks."};
+    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_vtxDecoKey{this, "AMVFVerticesKey", "" , "Overwritten with the <AMVFVerticesDeco> property"};
     /// AMVF vertices decoration accessor
-    std::unique_ptr<AMVFVerticesAcc> m_vtxDecoAcc;
+    std::unique_ptr<AMVFVerticesAcc> m_vtxDecoAcc{nullptr};
 
     /// AMVF weights decoration key
-    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_wgtDecoKey;
+    Gaudi::Property<std::string> m_wgtDecoName{this, "AMVFWeightsDeco", "TTVA_AMVFWeights",
+                              "The per-track decoration name of the vector of AMVF used-in-fit annealing weights." };
+    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_wgtDecoKey{this, "MVWeightKey", "" , "Overwritten with the <AMVFWeightsDeco> property"};
     /// AMVF weights decoration accessor
-    std::unique_ptr<AMVFWeightsAcc> m_wgtDecoAcc;
+    std::unique_ptr<AMVFWeightsAcc> m_wgtDecoAcc{nullptr};
 
     /// Hardscatter vertex link key
-    SG::ReadDecorHandleKey<xAOD::EventInfo> m_hardScatterDecoKey;
+    SG::ReadDecorHandleKey<xAOD::EventInfo> m_hardScatterDecoKey{this, "HardScatterLinkDecoKey" ,"" , 
+                                            "Will be overwritten with the <HardScatterLinkDeco> property"};
 
     /// Stored WorkingPoint class
-    std::unique_ptr<WorkingPoint> m_applicator;
+    std::unique_ptr<WorkingPoint> m_applicator{nullptr};
 
     /// @}
 

@@ -11,8 +11,6 @@
 
 #include "xAODTruth/TruthParticle.h"
 
-// #include "TruthHelper/IsGenInteracting.h"
-// #include "TruthHelper/IsGenStable.h"
 
 
 #include <map>
@@ -75,10 +73,7 @@ protected:
 
   std::string m_selectionModeName;
   SelectionMode m_selectionMode;
-  
-  // TruthHelper::IsGenInteracting isInteracting;
-  // TruthHelper::IsGenStable      isStable;
-  
+
   typedef std::map< int, long long >  PDGList;
   PDGList m_pdgList;
   

@@ -60,7 +60,7 @@ StatusCode HTTReadRawRandomHitsTool::readData(HTTEventInputHeader* header, bool 
 
   // Truth Info
   HTTOptionalEventInfo optional;
-  int maxbarcode = 0; // to scale up barcodes!
+  int mbc = 0; // to scale up barcodes!
 
   // --- Copy old data
   if (doReset)
@@ -71,7 +71,7 @@ StatusCode HTTReadRawRandomHitsTool::readData(HTTEventInputHeader* header, bool 
     {
       for (auto truthtrack : header->optional().getTruthTracks())
         {
-	        if (truthtrack.getBarcode() > maxbarcode) maxbarcode = truthtrack.getBarcode();
+	        if (truthtrack.getBarcode() > mbc) mbc = truthtrack.getBarcode();
       	  optional.addTruthTrack(truthtrack);
         }
 
@@ -85,12 +85,12 @@ StatusCode HTTReadRawRandomHitsTool::readData(HTTEventInputHeader* header, bool 
   // --- Copy new data
   for (auto truthtrack : m_eventHeader->optional().getTruthTracks())
     {
-      truthtrack.setBarcode(truthtrack.getBarcode() + maxbarcode);
+      truthtrack.setBarcode(truthtrack.getBarcode() + mbc);
       optional.addTruthTrack(truthtrack);
     }
   for (auto offlinetrack : m_eventHeader->optional().getOfflineTracks()) 
     {
-      offlinetrack.setBarcode(offlinetrack.getBarcode() + maxbarcode);
+      offlinetrack.setBarcode(offlinetrack.getBarcode() + mbc);
       optional.addOfflineTrack(offlinetrack);
     }
 
@@ -103,9 +103,9 @@ StatusCode HTTReadRawRandomHitsTool::readData(HTTEventInputHeader* header, bool 
         {
 	        HTTMultiTruth origtruth = rawhit.getTruth();
       	  HTTMultiTruth mt;
-      	  HTTMultiTruth::Barcode uniquecode(rawhit.getEventIndex(),rawhit.getBarcode()+maxbarcode);
+      	  HTTMultiTruth::Barcode uniquecode(rawhit.getEventIndex(),rawhit.getBarcode()+mbc);
       	  mt.maximize(uniquecode, rawhit.getBarcodePt());
-      	  rawhit.setBarcode(rawhit.getBarcode() + maxbarcode);
+      	  rawhit.setBarcode(rawhit.getBarcode() + mbc);
       	  rawhit.setTruth(mt);
         }
       header->addHit(rawhit);

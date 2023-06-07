@@ -297,8 +297,8 @@ namespace ISFTesting {
     ASSERT_EQ( -200001, HepMC::barcode(generated) );
 #ifdef HEPMC3
     ASSERT_EQ( 1021, generated->status() );
-    ASSERT_EQ( 1, generated->particles_in().size());
-    ASSERT_EQ( 0, generated->particles_out().size());
+    ASSERT_EQ( 1u, generated->particles_in().size());
+    ASSERT_EQ( 0u, generated->particles_out().size());
     ASSERT_EQ( inParticle3, *(generated->particles_in().cbegin()));
 #else
     ASSERT_EQ( 1021, generated->id() );
@@ -371,8 +371,8 @@ namespace ISFTesting {
     ASSERT_EQ( -200001, HepMC::barcode(generated) ); // by construction at the moment
 #ifdef HEPMC3
     ASSERT_EQ( 1021, generated->status() );
-    ASSERT_EQ( 1, generated->particles_in().size());
-    ASSERT_EQ( 0, generated->particles_out().size());
+    ASSERT_EQ( 1u, generated->particles_in().size());
+    ASSERT_EQ( 0u, generated->particles_out().size());
     ASSERT_EQ( inParticle3, *(generated->particles_in().cbegin()));
 #else
     ASSERT_EQ( 1021, generated->id() );
@@ -482,8 +482,8 @@ namespace ISFTesting {
     ASSERT_EQ( -200001, HepMC::barcode(generated) ); // by construction at the moment
 #ifdef HEPMC3
     ASSERT_EQ( 1021, generated->status() );
-    ASSERT_EQ( 1, generated->particles_in().size());
-    ASSERT_EQ( 0, generated->particles_out().size());
+    ASSERT_EQ( 1u, generated->particles_in().size());
+    ASSERT_EQ( 0u, generated->particles_out().size());
     ASSERT_EQ( inParticle3, *(generated->particles_in().cbegin()));
 #else
     ASSERT_EQ( 1021, generated->id() );
@@ -565,8 +565,8 @@ namespace ISFTesting {
     ASSERT_EQ( -200001, HepMC::barcode(generated) ); // by construction at the moment
 #ifdef HEPMC3
     ASSERT_EQ( 1021, generated->status() );
-    ASSERT_EQ( 1, generated->particles_in().size());
-    ASSERT_EQ( 0, generated->particles_out().size());
+    ASSERT_EQ( 1u, generated->particles_in().size());
+    ASSERT_EQ( 0u, generated->particles_out().size());
     ASSERT_EQ( inParticle3, *(generated->particles_in().cbegin()));
 #else
     ASSERT_EQ( 1021, generated->id() );
@@ -657,9 +657,9 @@ namespace ISFTesting {
     ASSERT_EQ( -200001, HepMC::barcode(generated) ); // by construction at the moment
 #ifdef HEPMC3
     ASSERT_EQ( 1021, generated->status() );
-    ASSERT_EQ( 1, generated->particles_in().size());
+    ASSERT_EQ( 1u, generated->particles_in().size());
     ASSERT_EQ( inParticle3, *(generated->particles_in().cbegin()));
-    ASSERT_EQ( 1, generated->particles_out().size());
+    ASSERT_EQ( 1u, generated->particles_out().size());
     ASSERT_EQ( inParticle5, *(generated->particles_out().cbegin()));
 #else
     ASSERT_EQ( 1021, generated->id() );

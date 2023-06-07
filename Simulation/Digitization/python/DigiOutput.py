@@ -2,6 +2,7 @@
 
 #from AthenaCommon import CfgMgr
 #from AthenaCommon.CfgGetter import getPrivateTool
+from MuonRecExample.MuonRecFlags import muonRecFlags
 
 def getStreamRDO_ItemList(log):
 
@@ -199,6 +200,10 @@ def getStreamRDO_ItemList(log):
             StreamRDO_ItemList+=["MdtCsmContainer#*"]
         if DetFlags.writeRDOPool.RPC_on():
             StreamRDO_ItemList+=["RpcPadContainer#*"]
+            if muonRecFlags.doNRPCs():
+                StreamRDO_ItemList+=["xAOD::NRPCRDOContainer#*"]
+                StreamRDO_ItemList+=["xAOD::NRPCRDOAuxContainer#*"]
+       
         if DetFlags.writeRDOPool.TGC_on():
             StreamRDO_ItemList+=["TgcRdoContainer#*"]
         if DetFlags.writeRDOPool.sTGC_on():

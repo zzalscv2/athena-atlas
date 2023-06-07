@@ -30,7 +30,7 @@ def InDetGlobalPrimaryVertexMonAlgCfg(helper, alg, **kwargs):
 
     varName = 'm_PvN;pvN' #done
     title = 'Total number of vertices (primary and pile up);Total number of vertices;Events'
-    pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=50, xmin=-0.5, xmax=49.5)
+    pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=60, xmin=-0.5, xmax=59.5)
 
     varName = 'm_nPriVtx;pvNPriVtx' #done
     title = 'Number of primary vertices;Number of primary vertices;Events'
@@ -38,18 +38,18 @@ def InDetGlobalPrimaryVertexMonAlgCfg(helper, alg, **kwargs):
 
     varName = 'm_nPileupVtx;pvNPileupVtx' #done
     title   = 'Number of pileup vertices;Number of pile up vertices;Events'
-    pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=40, xmin=-0.5, xmax=39.5)
+    pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=50, xmin=-0.5, xmax=49.5)
     
     varName = 'm_PvErrX;pvErrX'  #done
     title   = 'Primary vertex: #sigma_{x}; #sigma_{x} (mm);Events'
     pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=100, xmin=0., xmax=0.015)
   
     varName = 'm_PvErrY;pvErrY'  #done
-    title   = 'Primary vertex: #sigma_{x}; #sigma_{y} (mm);Events'
+    title   = 'Primary vertex: #sigma_{y}; #sigma_{y} (mm);Events'
     pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=100, xmin=0., xmax=0.015)
 
     varName = 'm_PvErrZ;pvErrZ'   #done
-    title   = 'Primary vertex: #sigma_{z}; #sigma_{y} (mm);Events'
+    title   = 'Primary vertex: #sigma_{z}; #sigma_{z} (mm);Events'
     pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=100, xmin=0., xmax=0.1)
 
     varName = 'm_PvChiSqDoF;pvChiSqDof'   #done

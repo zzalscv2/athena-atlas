@@ -52,27 +52,6 @@ inline bool SimBarCode::isNonUniqueSecondary() const {
   return m_barCode<=0;
 }
 
-// //____________________________________________________________________
-// inline bool SimBarCode::pdgCodesCompatible(const SimBarCode& o) const
-// {
-//   return m_pdgCode == o.m_pdgCode;//fixme
-//   //  return m_pdgCode == o.m_pdgCode || m_pdgCode == unknownPDG || o.m_pdgCode == unknownPDG;
-// }
-
-// //____________________________________________________________________
-// inline bool SimBarCode::operator==(const SimBarCode& o) const
-// {
-//   if (m_barCode != o.m_barCode || m_evtIndex != o.m_evtIndex)
-//     return false;
-//   return pdgCodesCompatible(o);
-// }
-
-// //____________________________________________________________________
-// inline bool SimBarCode::operator!=(const SimBarCode& o) const
-// {
-//   return !(*this==o);
-// }
-
 //____________________________________________________________________
 inline bool SimBarCode::operator<(const SimBarCode& o) const
 {

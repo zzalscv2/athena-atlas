@@ -25,21 +25,11 @@ using namespace std;
 namespace CP {
 
 BaseTrackVertexAssociationTool::BaseTrackVertexAssociationTool(const std::string& name)
-    : AsgTool(name),
-    m_d0sig_cut(-1),
-    m_dzSinTheta_cut(-1),
-    m_hardScatterDeco("hardScatterVertexLink")
+    : AsgTool(name) { }
 
-{
-  declareProperty("d0sig_cut", m_d0sig_cut);
-  declareProperty("dzSinTheta_cut", m_dzSinTheta_cut);
-  declareProperty("HardScatterLinkDeco", m_hardScatterDeco, "The decoration name of the ElementLink to the hardscatter vertex (found on xAOD::EventInfo)");
-}
-
-StatusCode BaseTrackVertexAssociationTool::initialize()
-{
+StatusCode BaseTrackVertexAssociationTool::initialize() {
   ATH_CHECK( m_eventInfo.initialize() );
-  m_hardScatterDecoKey = SG::ReadDecorHandleKey<xAOD::EventInfo>(m_eventInfo.key() + m_hardScatterDeco);
+  m_hardScatterDecoKey = m_eventInfo.key() + "." + m_hardScatterDeco;
   ATH_CHECK(m_hardScatterDecoKey.initialize());
 
   ATH_MSG_INFO("Cut on d0 significance: " << m_d0sig_cut << "\t(d0sig_cut)");

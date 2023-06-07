@@ -2,7 +2,7 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, conf2toConfigurable
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
 from AthenaCommon.CFElements import seqOR, parOR
@@ -136,7 +136,8 @@ def set_flags(flags, options=default_options):
 
 def l1_seq_cfg(flags, options=default_options):
     from HLTSeeding.HLTSeedingConfig import HLTSeedingCfg
-    acc = HLTSeedingCfg(flags, seqName='l1Seq')
+    acc = HLTSeedingCfg(flags)
+
     l1_decoder_alg = acc.getEventAlgo('HLTSeeding')
     l1_decoder_alg.prescaler = CompFactory.PrescalingEmulationTool()
 
@@ -317,8 +318,16 @@ def make_summary_algs(hypo_algs):
     return [summary, summMaker]
 
 
-def hlt_seq_cfg(flags, num_chains, concurrent=False, hackCA2Global=False, hypo_algs=None):
+def hlt_seq_cfg(flags, num_chains, concurrent=False, hypo_algs=None):
     acc = ComponentAccumulator()
+
+    # Load these objects from StoreGate
+    loadFromSG = [('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
+                  ('TrigConf::L1Menu','DetectorStore+L1TriggerMenu'),
+                  ('TrigConf::HLTMenu','DetectorStore+HLTTriggerMenu')]
+
+    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+    acc.merge(SGInputLoaderCfg(flags, loadFromSG))
 
     # Sequences need to ensure that summary algs run after all hypos
     acc.addSequence(seqOR('hltTop'))
@@ -333,14 +342,6 @@ def hlt_seq_cfg(flags, num_chains, concurrent=False, hackCA2Global=False, hypo_a
     acc.addEventAlgo(hypo_algs, sequenceName='hltHypoSeq')
     acc.addEventAlgo(summary_algs, sequenceName='hltEndSeq')
     acc.merge(hlt_result_ca)
-
-    # Hack to work around a shortcoming of CA2GlobalWrapper when a component
-    # has an empty ToolHandle and CA adds a tool to the handle
-    if hackCA2Global:
-        from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-        from AthenaCommon.Configurable import ConfigurableCABehavior
-        with ConfigurableCABehavior(target_state=0):
-            svcMgr.HltEventLoopMgr.ResultMaker = conf2toConfigurable(acc.getService('HltEventLoopMgr').ResultMaker)
 
     return acc
 

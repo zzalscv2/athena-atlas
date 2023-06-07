@@ -19,9 +19,10 @@ precommand = ''.join([
    "setMenu='Dev_pp_run3_v1_TriggerValidation_prescale';",
    "doWriteBS=False;",
    "doWriteRDOTrigger=True;",
-   "from AthenaConfiguration.AllConfigFlags import ConfigFlags;ConfigFlags.IOVDb.GlobalTag='OFLCOND-RUN12-SDR-31';from IOVDbSvc.CondDB import conddb;conddb.addOverride('/PIXEL/PixelModuleFeMask','PixelModuleFeMask-SIM-MC16-000-03');conddb.addOverride('/TRT/Calib/PID_NN', 'TRTCalibPID_NN_v1');ConfigFlags.Trigger.enableL1CaloPhase1=False;"
+   "from IOVDbSvc.CondDB import conddb; conddb.addOverride('/Indet/Beampos','IndetBeampos-RunDep-MC21-BestKnowledge-002');"
 ])
 ex.args = '-c "{:s}"'.format(precommand)
+# the conditions override is needed because the RDO was produced with a single beamspot
 
 test = Test.Test()
 test.art_type = 'build'

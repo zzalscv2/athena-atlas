@@ -31,6 +31,8 @@
 
 #include "boost/algorithm/string.hpp"
 #include <algorithm>
+#include <iomanip>
+#include <sstream>
 
 //______________________________________________________________________________
 // Initialize the service.
@@ -40,10 +42,6 @@ StatusCode AthenaPoolCnvSvc::initialize() {
    ATH_CHECK(dmcsvc.retrieve());
    // Retrieve PoolSvc
    ATH_CHECK(m_poolSvc.retrieve());
-   // Retrieve ChronoStatSvc
-   if (m_enableChronoStat) {
-      ATH_CHECK(m_chronoStatSvc.retrieve());
-   }
    // Retrieve ClassIDSvc
    ATH_CHECK(m_clidSvc.retrieve());
    // Retrieve InputStreamingTool (if configured)
@@ -108,8 +106,6 @@ StatusCode AthenaPoolCnvSvc::initialize() {
    if (!processPoolAttributes(m_inputAttr, "", IPoolSvc::kInputStream, false, true, true).isSuccess()) {
       ATH_MSG_DEBUG("setInputAttribute failed setting POOL domain attributes.");
    }
-   m_doChronoStat = m_skipFirstChronoCommit.value() ? false : true;
-   m_doChronoStat &= m_enableChronoStat.value();
 
    // Load these dictionaries now, so we don't need to try to do so
    // while multiple threads are running.
@@ -150,14 +146,21 @@ StatusCode AthenaPoolCnvSvc::finalize() {
    if (!m_clidSvc.release().isSuccess()) {
       ATH_MSG_WARNING("Cannot release ClassIDSvc.");
    }
-   // Release ChronoStatSvc
-   if (!m_chronoStatSvc.release().isSuccess()) {
-      ATH_MSG_WARNING("Cannot release ChronoStatSvc.");
-   }
    // Release PoolSvc
    if (!m_poolSvc.release().isSuccess()) {
       ATH_MSG_WARNING("Cannot release PoolSvc.");
    }
+   // Print Performance Statistics
+   // The pattern AthenaPoolCnvSvc.*PerfStats is ignored in AtlasTest/TestTools/share/post.sh
+   const std::string msgPrefix{"PerfStats "};
+   ATH_MSG_INFO(msgPrefix << std::string(40, '-'));
+   ATH_MSG_INFO(msgPrefix << "Timing Measurements for AthenaPoolCnvSvc");
+   ATH_MSG_INFO(msgPrefix << std::string(40, '-'));
+   for(const auto& [key, value] : m_chronoMap) {
+      ATH_MSG_INFO(msgPrefix << "| " << std::left << std::setw(15) << key << " | "
+                        << std::right << std::setw(15) << std::fixed << std::setprecision(0) << value << " ms |");
+   }
+   ATH_MSG_INFO(msgPrefix << std::string(40, '-'));
 
    m_cnvs.clear();
    m_cnvs.shrink_to_fit();
@@ -192,9 +195,8 @@ StatusCode AthenaPoolCnvSvc::createObj(IOpaqueAddress* pAddress, DataObject*& re
       objName += '#';
       objName += *(pAddress->par() + 1);
    }
-   if (m_doChronoStat) {
-      m_chronoStatSvc->chronoStart("cObj_" + objName);
-   }
+   // StopWatch listens from here until the end of this current scope
+   PMonUtils::BasicStopWatch stopWatch("cObj_" + objName, m_chronoMap);
    if (!m_persSvcPerInputType.empty()) { // Use separate PersistencySvc for each input data type
       TokenAddress* tokAddr = dynamic_cast<TokenAddress*>(pAddress);
       if (tokAddr != nullptr && tokAddr->getToken() != nullptr && (boost::starts_with(tokAddr->getToken()->contID(), m_persSvcPerInputType.value() + "(") || boost::starts_with(tokAddr->getToken()->contID(), m_persSvcPerInputType.value() + "_"))) {
@@ -212,9 +214,6 @@ StatusCode AthenaPoolCnvSvc::createObj(IOpaqueAddress* pAddress, DataObject*& re
    }
    // Forward to base class createObj
    StatusCode status = ::AthCnvSvc::createObj(pAddress, refpObject);
-   if (m_doChronoStat) {
-      m_chronoStatSvc->chronoStop("cObj_" + objName);
-   }
    return(status);
 }
 //______________________________________________________________________________
@@ -230,9 +229,8 @@ StatusCode AthenaPoolCnvSvc::createRep(DataObject* pObject, IOpaqueAddress*& ref
       objName += '#';
       objName += pObject->registry()->name();
    }
-   if (m_doChronoStat) {
-      m_chronoStatSvc->chronoStart("cRep_" + objName);
-   }
+   // StopWatch listens from here until the end of this current scope
+   PMonUtils::BasicStopWatch stopWatch("cRep_" + objName, m_chronoMap);
    StatusCode status = StatusCode::FAILURE;
    if (pObject->clID() == 1) {
       // No transient object was found use cnv to write default persistent object
@@ -249,9 +247,6 @@ StatusCode AthenaPoolCnvSvc::createRep(DataObject* pObject, IOpaqueAddress*& ref
          ATH_MSG_FATAL(e.what());
       }
    }
-   if (m_doChronoStat) {
-      m_chronoStatSvc->chronoStop("cRep_" + objName);
-   }
    return(status);
 }
 //______________________________________________________________________________
@@ -267,9 +262,8 @@ StatusCode AthenaPoolCnvSvc::fillRepRefs(IOpaqueAddress* pAddress, DataObject* p
       objName += '#';
       objName += pObject->registry()->name();
    }
-   if (m_doChronoStat) {
-      m_chronoStatSvc->chronoStart("fRep_" + objName);
-   }
+   // StopWatch listens from here until the end of this current scope
+   PMonUtils::BasicStopWatch stopWatch("fRep_" + objName, m_chronoMap);
    StatusCode status = StatusCode::FAILURE;
    if (pObject->clID() == 1) {
       // No transient object was found use cnv to write default persistent object
@@ -285,9 +279,6 @@ StatusCode AthenaPoolCnvSvc::fillRepRefs(IOpaqueAddress* pAddress, DataObject* p
       } catch(std::runtime_error& e) {
          ATH_MSG_FATAL(e.what());
       }
-   }
-   if (m_doChronoStat) {
-      m_chronoStatSvc->chronoStop("fRep_" + objName);
    }
    return(status);
 }
@@ -460,120 +451,118 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
             if (m_useDetailChronoStat.value()) {
                std::string objName(placementStr); //FIXME, better descriptor
             }
-            if (m_doChronoStat) {
-               m_chronoStatSvc->chronoStart("cRep_" + objName);
-            }
-            std::string tokenStr = placementStr;
-            std::string contName = strstr(placementStr, "[CONT=");
-            tokenStr.erase(tokenStr.find("[CONT=")); //throws if [CONT= not found
-            tokenStr.append(contName, contName.find(']') + 1);
-            contName = contName.substr(6, contName.find(']') - 6);
-            std::string className = strstr(placementStr, "[PNAME=");
-            className = className.substr(7, className.find(']') - 7);
-            RootType classDesc = RootType::ByNameNoQuiet(className);
-            void* obj = nullptr;
-            std::ostringstream oss2;
-            oss2 << std::dec << num;
-            std::string::size_type len = m_metadataContainerProp.value().size();
-            if (len > 0 && contName.compare(0, len, m_metadataContainerProp.value()) == 0
-		            && contName[len] == '(') {
-               ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
-               // For Metadata, before moving to next client, fire file incidents
-               if (m_metadataClient != num) {
-                  if (m_metadataClient != 0) {
-                     std::ostringstream oss1;
-                     oss1 << std::dec << m_metadataClient;
-                     std::string memName = "SHM[NUM=" + oss1.str() + "]";
-                     FileIncident beginInputIncident(name(), "BeginInputFile", memName);
-                     incSvc->fireIncident(beginInputIncident);
-                     FileIncident endInputIncident(name(), "EndInputFile", memName);
-                     incSvc->fireIncident(endInputIncident);
+            // StopWatch listens from here until the end of this current scope
+            {
+               PMonUtils::BasicStopWatch stopWatch("cRep_" + objName, m_chronoMap);
+               std::string tokenStr = placementStr;
+               std::string contName = strstr(placementStr, "[CONT=");
+               tokenStr.erase(tokenStr.find("[CONT=")); //throws if [CONT= not found
+               tokenStr.append(contName, contName.find(']') + 1);
+               contName = contName.substr(6, contName.find(']') - 6);
+               std::string className = strstr(placementStr, "[PNAME=");
+               className = className.substr(7, className.find(']') - 7);
+               RootType classDesc = RootType::ByNameNoQuiet(className);
+               void* obj = nullptr;
+               std::ostringstream oss2;
+               oss2 << std::dec << num;
+               std::string::size_type len = m_metadataContainerProp.value().size();
+               if (len > 0 && contName.compare(0, len, m_metadataContainerProp.value()) == 0
+		               && contName[len] == '(') {
+                  ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
+                  // For Metadata, before moving to next client, fire file incidents
+                  if (m_metadataClient != num) {
+                     if (m_metadataClient != 0) {
+                        std::ostringstream oss1;
+                        oss1 << std::dec << m_metadataClient;
+                        std::string memName = "SHM[NUM=" + oss1.str() + "]";
+                        FileIncident beginInputIncident(name(), "BeginInputFile", memName);
+                        incSvc->fireIncident(beginInputIncident);
+                        FileIncident endInputIncident(name(), "EndInputFile", memName);
+                        incSvc->fireIncident(endInputIncident);
+                     }
+                     m_metadataClient = num;
                   }
-                  m_metadataClient = num;
-               }
-               // Retrieve MetaDataSvc
-               ServiceHandle<IMetaDataSvc> metadataSvc("MetaDataSvc", name());
-               ATH_CHECK(metadataSvc.retrieve());
-               sc = metadataSvc->shmProxy(std::string(placementStr) + "[NUM=" + oss2.str() + "]");
-               if (sc.isRecoverable()) {
-                  ATH_MSG_WARNING("MetaDataSvc::shmProxy() no proxy added.");
-               } else if (sc.isFailure()) {
-                  ATH_MSG_FATAL("MetaDataSvc::shmProxy() failed!");
-                  return abortSharedWrClients(num);
-               }
-            } else {
-               Token readToken;
-               readToken.setOid(Token::OID_t(num, 0));
-               readToken.setAuxString("[PNAME=" + className + "]");
-               this->setObjPtr(obj, &readToken); // Pull/read Object out of shared memory
-               if (len == 0 || contName.compare(0, len, m_metadataContainerProp.value()) != 0) {
-                  // Write object
-                  Placement placement;
-                  placement.fromString(placementStr); placementStr = nullptr;
-                  std::unique_ptr<Token> token(registerForWrite(&placement, obj, classDesc));
-                  if (token == nullptr) {
-                     ATH_MSG_ERROR("Failed to write Data for: " << className);
+                  // Retrieve MetaDataSvc
+                  ServiceHandle<IMetaDataSvc> metadataSvc("MetaDataSvc", name());
+                  ATH_CHECK(metadataSvc.retrieve());
+                  sc = metadataSvc->shmProxy(std::string(placementStr) + "[NUM=" + oss2.str() + "]");
+                  if (sc.isRecoverable()) {
+                     ATH_MSG_WARNING("MetaDataSvc::shmProxy() no proxy added.");
+                  } else if (sc.isFailure()) {
+                     ATH_MSG_FATAL("MetaDataSvc::shmProxy() failed!");
                      return abortSharedWrClients(num);
                   }
-                  tokenStr = token->toString();
-                  if (className == "DataHeader_p6") {
-                     // Found DataHeader
-                     GenericAddress address(POOL_StorageType, ClassID_traits<DataHeader>::ID(),
-                                            tokenStr, placement.auxString());
-                     // call DH converter to add the ref to DHForm (stored earlier) and to itself
-                     if (!DHcnv->updateRep(&address, static_cast<DataObject*>(obj)).isSuccess()) {
-                        ATH_MSG_ERROR("Failed updateRep for obj = " << tokenStr);
+               } else {
+                  Token readToken;
+                  readToken.setOid(Token::OID_t(num, 0));
+                  readToken.setAuxString("[PNAME=" + className + "]");
+                  this->setObjPtr(obj, &readToken); // Pull/read Object out of shared memory
+                  if (len == 0 || contName.compare(0, len, m_metadataContainerProp.value()) != 0) {
+                     // Write object
+                     Placement placement;
+                     placement.fromString(placementStr); placementStr = nullptr;
+                     std::unique_ptr<Token> token(registerForWrite(&placement, obj, classDesc));
+                     if (token == nullptr) {
+                        ATH_MSG_ERROR("Failed to write Data for: " << className);
                         return abortSharedWrClients(num);
                      }
-                     dataHeaderSeen = true;
-                     // This dataHeaderID is used in DataHeaderCnv to index the DataHeaderForm cache.
-                     // It must be unique per worker per stream so that we have a correct DataHeader(Form) association.
-                     // This is achieved by building it as "CONTID/WORKERID/DBID".
-                     // CONTID, e.g., POOLContainer(DataHeader), allows us to distinguish data and metadata headers,
-                     // WORKERID allows us to distinguish AthenaMP workers,
-                     // and DBID allows us to distinguish streams.
-                     dataHeaderID = token->contID();
-                     dataHeaderID += '/';
-                     dataHeaderID += oss2.str();
-                     dataHeaderID += '/';
-                     dataHeaderID += token->dbID().toString();
-                  } else if (dataHeaderSeen) {
-                     dataHeaderSeen = false;
-                     // next object after DataHeader - may be a DataHeaderForm
-                     // in any case we need to call the DH converter to update the DHForm Ref
-                     if (className == "DataHeaderForm_p6") {
-                        // Tell DataHeaderCnv that it should use a new DHForm
+                     tokenStr = token->toString();
+                     if (className == "DataHeader_p6") {
+                        // Found DataHeader
                         GenericAddress address(POOL_StorageType, ClassID_traits<DataHeader>::ID(),
-                                               tokenStr, dataHeaderID);
-                        if (!DHcnv->updateRepRefs(&address, static_cast<DataObject*>(obj)).isSuccess()) {
-                           ATH_MSG_ERROR("Failed updateRepRefs for obj = " << tokenStr);
+                                               tokenStr, placement.auxString());
+                        // call DH converter to add the ref to DHForm (stored earlier) and to itself
+                        if (!DHcnv->updateRep(&address, static_cast<DataObject*>(obj)).isSuccess()) {
+                           ATH_MSG_ERROR("Failed updateRep for obj = " << tokenStr);
                            return abortSharedWrClients(num);
                         }
-                     } else {
-                        // Tell DataHeaderCnv that it should use the old DHForm
-                        GenericAddress address(0, 0, "", dataHeaderID);
-                        if (!DHcnv->updateRepRefs(&address, nullptr).isSuccess()) {
-                           ATH_MSG_ERROR("Failed updateRepRefs for DataHeader");
-                           return abortSharedWrClients(num);
+                        dataHeaderSeen = true;
+                        // This dataHeaderID is used in DataHeaderCnv to index the DataHeaderForm cache.
+                        // It must be unique per worker per stream so that we have a correct DataHeader(Form) association.
+                        // This is achieved by building it as "CONTID/WORKERID/DBID".
+                        // CONTID, e.g., POOLContainer(DataHeader), allows us to distinguish data and metadata headers,
+                        // WORKERID allows us to distinguish AthenaMP workers,
+                        // and DBID allows us to distinguish streams.
+                        dataHeaderID = token->contID();
+                        dataHeaderID += '/';
+                        dataHeaderID += oss2.str();
+                        dataHeaderID += '/';
+                        dataHeaderID += token->dbID().toString();
+                     } else if (dataHeaderSeen) {
+                        dataHeaderSeen = false;
+                        // next object after DataHeader - may be a DataHeaderForm
+                        // in any case we need to call the DH converter to update the DHForm Ref
+                        if (className == "DataHeaderForm_p6") {
+                           // Tell DataHeaderCnv that it should use a new DHForm
+                           GenericAddress address(POOL_StorageType, ClassID_traits<DataHeader>::ID(),
+                                                  tokenStr, dataHeaderID);
+                           if (!DHcnv->updateRepRefs(&address, static_cast<DataObject*>(obj)).isSuccess()) {
+                              ATH_MSG_ERROR("Failed updateRepRefs for obj = " << tokenStr);
+                              return abortSharedWrClients(num);
+                           }
+                        } else {
+                           // Tell DataHeaderCnv that it should use the old DHForm
+                           GenericAddress address(0, 0, "", dataHeaderID);
+                           if (!DHcnv->updateRepRefs(&address, nullptr).isSuccess()) {
+                              ATH_MSG_ERROR("Failed updateRepRefs for DataHeader");
+                              return abortSharedWrClients(num);
+                           }
                         }
                      }
-                  }
-                  if (className != "Token" && className != "DataHeaderForm_p6" && !classDesc.IsFundamental()) {
-                     commitCache.insert(std::pair<void*, RootType>(obj, classDesc));
+                     if (className != "Token" && className != "DataHeaderForm_p6" && !classDesc.IsFundamental()) {
+                        commitCache.insert(std::pair<void*, RootType>(obj, classDesc));
+                     }
                   }
                }
-            }
-            // Send Token back to Client
-            sc = streamingTool->lockObject(tokenStr.c_str(), num);
-            while (sc.isRecoverable()) {
+               // Send Token back to Client
                sc = streamingTool->lockObject(tokenStr.c_str(), num);
-            }
-            if (!sc.isSuccess()) {
-               ATH_MSG_ERROR("Failed to lock Data for " << tokenStr);
-               return abortSharedWrClients(-1);
-            }
-            if (m_doChronoStat) {
-               m_chronoStatSvc->chronoStop("cRep_" + objName);
+               while (sc.isRecoverable()) {
+                  sc = streamingTool->lockObject(tokenStr.c_str(), num);
+               }
+               if (!sc.isSuccess()) {
+                  ATH_MSG_ERROR("Failed to lock Data for " << tokenStr);
+                  return abortSharedWrClients(-1);
+               }
             }
             sc = streamingTool->clearObject(&placementStr, num);
             while (sc.isRecoverable()) {
@@ -619,9 +608,8 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
       ATH_MSG_DEBUG("commitOutput SKIPPED for metadata-only server: " << outputConnectionSpec);
       return(StatusCode::SUCCESS);
    }
-   if (m_doChronoStat) {
-      m_chronoStatSvc->chronoStart("commitOutput");
-   }
+   // StopWatch listens from here until the end of this current scope
+   PMonUtils::BasicStopWatch stopWatch("commitOutput", m_chronoMap);
    std::unique_lock<std::mutex> lock(m_mutex);
    if (outputConnection.empty()) {
       outputConnection = fileName;
@@ -686,11 +674,6 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
       ATH_MSG_WARNING("FileSize > " << m_domainMaxFileSize <<  " for " << outputConnection);
       return(StatusCode::RECOVERABLE);
    }
-   if (m_doChronoStat) {
-      m_chronoStatSvc->chronoStop("commitOutput");
-   }
-   // Prepare chrono for next commit
-   m_doChronoStat = m_enableChronoStat.value();
    return(StatusCode::SUCCESS);
 }
 
@@ -734,9 +717,8 @@ IPoolSvc* AthenaPoolCnvSvc::getPoolSvc() {
 }
 //______________________________________________________________________________
 Token* AthenaPoolCnvSvc::registerForWrite(Placement* placement, const void* obj, const RootType& classDesc) {
-   if (m_doChronoStat) {
-      m_chronoStatSvc->chronoStart("cRepR_ALL");
-   }
+   // StopWatch listens from here until the end of this current scope
+   PMonUtils::BasicStopWatch stopWatch("cRepR_ALL", m_chronoMap);
    if (m_makeStreamingToolClient.value() > 0 && !m_outputStreamingTool.empty() && !m_outputStreamingTool[0]->isServer() && !m_outputStreamingTool[0]->isClient()) {
       if (!makeClient(m_makeStreamingToolClient.value()).isSuccess()) {
          ATH_MSG_ERROR("Could not make AthenaPoolCnvSvc a Share Client");
@@ -867,17 +849,13 @@ Token* AthenaPoolCnvSvc::registerForWrite(Placement* placement, const void* obj,
          token = m_poolSvc->registerForWrite(placement, obj, classDesc);
       }
    }
-   if (m_doChronoStat) {
-      m_chronoStatSvc->chronoStop("cRepR_ALL");
-   }
    return(token);
 }
 //______________________________________________________________________________
 void AthenaPoolCnvSvc::setObjPtr(void*& obj, const Token* token) {
    ATH_MSG_VERBOSE("Requesting object for: " << token->toString());
-   if (m_doChronoStat) {
-      m_chronoStatSvc->chronoStart("cObjR_ALL");
-   }
+   // StopWatch listens from here until the end of this current scope
+   PMonUtils::BasicStopWatch stopWatchOuter("cObjR_ALL", m_chronoMap);
    if (m_makeStreamingToolClient.value() > 0 && !m_inputStreamingTool.empty() && !m_inputStreamingTool->isServer() && !m_inputStreamingTool->isClient()) {
       if (!makeClient(-m_makeStreamingToolClient.value()).isSuccess()) {
          ATH_MSG_ERROR("Could not make AthenaPoolCnvSvc a Share Client");
@@ -925,18 +903,17 @@ void AthenaPoolCnvSvc::setObjPtr(void*& obj, const Token* token) {
          ATH_MSG_ERROR("Failed to lock Data for " << token->toString());
          obj = nullptr;
       } else {
-         if (m_doChronoStat) {
-            m_chronoStatSvc->chronoStart("gObj_ALL");
-         }
          void* buffer = nullptr;
          std::size_t nbytes = 0;
-         StatusCode sc = m_inputStreamingTool->getObject(&buffer, nbytes);
-         while (sc.isRecoverable()) {
-            // sleep
+         StatusCode sc = StatusCode::FAILURE;
+         // StopWatch listens from here until the end of this current scope
+         {
+            PMonUtils::BasicStopWatch stopWatchInner("gObj_ALL", m_chronoMap);
             sc = m_inputStreamingTool->getObject(&buffer, nbytes);
-         }
-         if (m_doChronoStat) {
-            m_chronoStatSvc->chronoStop("gObj_ALL");
+            while (sc.isRecoverable()) {
+               // sleep
+               sc = m_inputStreamingTool->getObject(&buffer, nbytes);
+            }
          }
          if (!sc.isSuccess()) {
             ATH_MSG_ERROR("Failed to get Data for " << token->toString());
@@ -953,9 +930,6 @@ void AthenaPoolCnvSvc::setObjPtr(void*& obj, const Token* token) {
    } else if (token->dbID() != Guid::null()) {
       ATH_MSG_VERBOSE("Requesting object for: " << token->toString());
       m_poolSvc->setObjPtr(obj, token);
-   }
-   if (m_doChronoStat) {
-      m_chronoStatSvc->chronoStop("cObjR_ALL");
    }
 }
 //______________________________________________________________________________
@@ -1184,9 +1158,8 @@ StatusCode AthenaPoolCnvSvc::readData() {
       if (m_useDetailChronoStat.value()) {
          objName = token.classID().toString();
       }
-      if (m_doChronoStat) {
-         m_chronoStatSvc->chronoStart("cObj_" + objName);
-      }
+      // StopWatch listens from here until the end of this current scope
+      PMonUtils::BasicStopWatch stopWatchInner("cObj_" + objName, m_chronoMap);
       this->setObjPtr(instance, &token);
       // Serialize object via ROOT
       RootType cltype(pool::DbReflex::forGuid(token.classID()));
@@ -1211,9 +1184,6 @@ StatusCode AthenaPoolCnvSvc::readData() {
       if (!m_inputStreamingTool->putObject(nullptr, 0, num).isSuccess()) {
          ATH_MSG_ERROR("Could not share object for: " << token.toString());
          return(StatusCode::FAILURE);
-      }
-      if (m_doChronoStat) {
-         m_chronoStatSvc->chronoStop("cObj_" + objName);
       }
    } else if (token.dbID() != Guid::null()) {
       std::string returnToken;

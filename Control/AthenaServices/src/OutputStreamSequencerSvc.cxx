@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file OutputStreamSequencerSvc.cxx
@@ -93,11 +93,12 @@ bool    OutputStreamSequencerSvc::inUse() const {
 //__________________________________________________________________________
 void OutputStreamSequencerSvc::handle(const Incident& inc)
 {
-   ATH_MSG_INFO("handle incident type " << inc.type());
-
    auto slot = Gaudi::Hive::currentContext().slot();
-   if( slot == EventContext::INVALID_CONTEXT_ID )  slot = 0;
+   bool has_context = ( slot != EventContext::INVALID_CONTEXT_ID );
+   // in AthenaSP there is no context so go with the first slot
+   if( !has_context )  slot = 0;
    m_lastIncident = inc.type();
+   ATH_MSG_INFO("Handling incident of type " << m_lastIncident );
 
    if( inc.type() == incidentName() ) {  // NextEventRange 
       std::string rangeID;
@@ -135,9 +136,12 @@ void OutputStreamSequencerSvc::handle(const Incident& inc)
             // MN - late resize, is there a better place for it?
             m_rangeIDinSlot.resize( std::max(slot+1, Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents()) );
          }
-         m_rangeIDinSlot[ slot ] = rangeID;
-         // remember range ID for next events in the same range
+         // from now on new events will use the new rangeID
          m_currentRangeID = rangeID;
+         // for ESMT these incidents are asynchronous, so wait for BeginProcessing to update the range map
+         if( not inConcurrentEventsMode() or has_context ) {
+            m_rangeIDinSlot[ slot ] = rangeID;
+         }
       }
       if( not inConcurrentEventsMode() and not fileInc ) {
          // non-file incident case (filename=="") in regular SP LoopMgr
@@ -159,7 +163,6 @@ void OutputStreamSequencerSvc::handle(const Incident& inc)
       }
       m_rangeIDinSlot[ slot ] = m_currentRangeID;
    }
-
 }
 
 //__________________________________________________________________________

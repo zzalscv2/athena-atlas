@@ -158,7 +158,16 @@ def InDetGlobalLRTMonAlg_TrackSelectionToolCfg(flags, name="InDetGlobalLRTMonAlg
     kwargs.setdefault("maxNPixelHoles", 1)
     return InDetTrackSelectionTool_TrackTools_Cfg(flags, name, **kwargs)
 
-
+def HI_InDetTrackSelectionToolForHITrackJetsCfg(flags, name="TrackSelHI", **kwargs):
+    """Provides track selection tool for HI track jet reconstruction."""
+    acc = ComponentAccumulator()
+    kwargs.setdefault("minNSiHits", 7)
+    kwargs.setdefault("maxAbsEta", 2.5)
+    kwargs.setdefault("maxNSiHoles", 2)
+    kwargs.setdefault("maxNPixelHoles", 1)
+    kwargs.setdefault("minPt", 4000.)
+    acc.setPrivateTools(CompFactory.InDet.InDetTrackSelectionTool(name, **kwargs))
+    return acc
 
 ###############################################
 #####  Configs for Sec Vtx  #####

@@ -23,7 +23,7 @@ Muon::nsw::NSWTriggerCommonDecoder::NSWTriggerCommonDecoder (const eformat::read
 
   uint32_t nWords = robFrag.rod_ndata (); //total number of words (32-bit word)
   const uint32_t *bs = robFrag.rod_data (); //point directly to the first data element
-  const uint32_t *pp = const_cast <uint32_t *> (bs); //pointer moving
+  const uint32_t *pp = bs; //pointer moving
 
   uint32_t wCount(0); // data-element (32-bit word) counter; it will increment according to each elink output
 

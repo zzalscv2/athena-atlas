@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Includes from this package
@@ -7,6 +7,7 @@
 
 // FrameWork includes
 #include "AthLinks/ElementLink.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "AsgDataHandles/ReadHandle.h"
 #include "AsgDataHandles/ReadDecorHandle.h"
 #include "AsgTools/CurrentContext.h"
@@ -33,35 +34,15 @@
 namespace CP {
 
 MVATrackVertexAssociationTool::MVATrackVertexAssociationTool(const std::string& name) :
-  AsgTool(name),
-  m_fileName(""),
-  m_inputNames({}),
-  m_inputTypes({}),
-  m_outputName(""),
-  m_isSequential(true),
-  m_wp("Tight"),
-  m_cut(-1.0),
-  m_usePathResolver(true),
-  m_hardScatterDeco("hardScatterVertexLink")
-{
-  declareProperty("NetworkFileName",     m_fileName,        "Name of the input lwtnn network file.");
-  declareProperty("InputNames",          m_inputNames,      "Vector of the network's input variable names (std::vector<std::string>).");
-  declareProperty("InputTypes",          m_inputTypes,      "Vector of the network's input variable evaluator types (std::vector<CP::MVAEvaluatorInput::Input>).");
-  declareProperty("OutputNodeName",      m_outputName,      "Name of the output node to cut on for TVA.");
-  declareProperty("IsSequential",        m_isSequential,    "Is the network sequential (true) or functional (false).");
-  declareProperty("WorkingPoint",        m_wp,              "TVA working point to apply.");
-  declareProperty("OutputCut",           m_cut,             "TVA cut value on the output value (set manually with \"Custom\" WP).");
-  declareProperty("UsePathResolver",     m_usePathResolver, "Use the PathResolver for finding the input lwtnn network file.");
-  declareProperty("HardScatterLinkDeco", m_hardScatterDeco, "The decoration name of the ElementLink to the hardscatter vertex (found on xAOD::EventInfo)");
-}
-
+  AsgTool(name) {}
+ 
 StatusCode MVATrackVertexAssociationTool::initialize() {
 
   ATH_MSG_INFO("Initializing MVATrackVertexAssociationTool.");
 
   // Init EventInfo and hardscatter vertex link deco
   ATH_CHECK(m_eventInfo.initialize());
-  m_hardScatterDecoKey = SG::ReadDecorHandleKey<xAOD::EventInfo>(m_eventInfo.key() + m_hardScatterDeco);
+  m_hardScatterDecoKey = m_eventInfo.key() +"." + m_hardScatterDeco;
   ATH_CHECK(m_hardScatterDecoKey.initialize());
 
   // Init network

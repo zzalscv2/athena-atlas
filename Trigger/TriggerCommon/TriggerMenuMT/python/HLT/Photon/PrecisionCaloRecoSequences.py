@@ -11,28 +11,40 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 log = logging.getLogger(__name__)
 
 
+def precisionCaloPhotonVDVCfg(name, InViewRoIs, ion=False):
+    acc = ComponentAccumulator()
+    TrigEgammaKeys = getTrigEgammaKeys(ion=ion)
+    dataObjects= [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s'%InViewRoIs ),
+                  ( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' ),
+                  ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' )]
+    if ion:
+        dataObjects += [( 'xAOD::HIEventShapeContainer' , 'StoreGateSvc+' + TrigEgammaKeys.egEventShape ),
+                        ( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' ),
+                        ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' )]
+
+    precisionCaloPhotonVDV = CompFactory.AthViews.ViewDataVerifier(name)
+    precisionCaloPhotonVDV.DataObjects = dataObjects
+    acc.addEventAlgo(precisionCaloPhotonVDV)
+    return acc
+
 def precisionCaloRecoSequence(flags, RoIs, name = None, ion=False):
 
     acc = ComponentAccumulator()
 
     TrigEgammaKeys = getTrigEgammaKeys(ion = ion)
-
     log.debug('flags = %s',flags)
     log.debug('RoIs = %s',RoIs)
 
-    from TrigCaloRec.TrigCaloRecConfig import hltCaloTopoClusteringCfg, hltCaloTopoClusteringHICfg
+    acc.merge(precisionCaloPhotonVDVCfg(name+'VDV',RoIs,ion))
+
+    from TrigCaloRec.TrigCaloRecConfig import egammaTopoClusteringCfg, hltCaloTopoClusteringHICfg
     
     if ion:
         topoCluster = hltCaloTopoClusteringHICfg(flags,
-                                                 namePrefix='',
                                                  CellsName = "CaloCells",
                                                  roisKey=RoIs)
     else:
-        topoCluster = hltCaloTopoClusteringCfg(flags,
-                                               namePrefix='',
-                                               nameSuffix='RoI',
-                                               CellsName = "CaloCells",
-                                               roisKey=RoIs) 
+        topoCluster = egammaTopoClusteringCfg(flags, RoIs) 
     acc.merge(topoCluster)
     tag = 'HI' if ion is True else '' 
     

@@ -69,6 +69,9 @@ if DetFlags.overlay.MDT_on() or DetFlags.overlay.CSC_on() or DetFlags.overlay.RP
         if not overlayFlags.isDataOverlay():
             job += CfgGetter.getAlgorithm("RpcTruthOverlay")
         job += CfgGetter.getAlgorithm("RpcDigitToRpcRDO")
+        from MuonRecExample.MuonRecFlags import muonRecFlags
+        if muonRecFlags.doNRPCs():
+            job += CfgGetter.getAlgorithm("NrpcDigitToNrpcRDO")
 
     if DetFlags.overlay.TGC_on():
         job += CfgGetter.getAlgorithm("TgcRdoToTgcDigitAlg")

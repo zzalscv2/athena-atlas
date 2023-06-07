@@ -3,6 +3,7 @@
 */
 
 #include "TruthConverters/xAODtoHepMCTool.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 xAODtoHepMCTool::xAODtoHepMCTool(const std::string &name)
     : asg::AsgTool(name),
@@ -129,7 +130,7 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
     }
 
     // skip particles with barcode which are Geant4 secondaries
-    if (HepMC::is_simulation_particle(xPart->barcode()))
+    if (HepMC::is_simulation_particle(xPart))
       continue;
 
       // Create GenParticle
@@ -141,8 +142,8 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
 #endif
     int bcpart = xPart->barcode();
 
-    // status 10902 should be treated just as status 2
-    if (hepmcParticle->status() == 10902)
+    // status HepMC::SPECIALSTATUS should be treated just as status 2
+    if (hepmcParticle->status() == HepMC::SPECIALSTATUS)
       hepmcParticle->set_status(2);
 
     // Get the production and decay vertices
@@ -150,7 +151,7 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
     {
       const xAOD::TruthVertex *xAODProdVtx = xPart->prodVtx();
       // skip production vertices which are Geant4 secondaries
-      if (HepMC::is_simulation_vertex(xAODProdVtx->barcode()))
+      if (HepMC::is_simulation_vertex(xAODProdVtx))
         continue;
       bool prodVtxSeenBefore(false); // is this new?
       auto hepmcProdVtx = vertexHelper(xAODProdVtx, vertexMap, prodVtxSeenBefore);
@@ -183,10 +184,10 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
     }
 
     if (xPart->hasDecayVtx())
-    {
+    {   
       const xAOD::TruthVertex *xAODDecayVtx = xPart->decayVtx();
       // skip decay vertices which are Geant4 secondaries
-      if (HepMC::is_simulation_vertex(xAODDecayVtx->barcode()))
+      if (HepMC::is_simulation_vertex(xAODDecayVtx))
       {
 /// Avoid double deletion
 #ifndef HEPMC3
@@ -281,9 +282,8 @@ HepMC::GenVertexPtr xAODtoHepMCTool::createHepMCVertex(const xAOD::TruthVertex *
   return genVertex;
 }
 
-// Print xAODTruth Event. The printout is particle oriented, unlike the
-// HepMC particle/vertex printout. Geant and pileup particles with
-// barcode>100000 are omitted.
+// Print xAODTruth Event. The printout is particle oriented, unlike the HepMC particle/vertex printout. Regenerated Geant (i.e. ones surving an interaction) and pileup particles (e.g. suppressed pileup barcodes), with barcode > 1000000 are omitted. Thus we output only the original particles created in Geant4. 
+
 void xAODtoHepMCTool::printxAODEvent(const xAOD::TruthEvent *event, const xAOD::EventInfo *eventInfo) const
 {
 
@@ -304,7 +304,7 @@ void xAODtoHepMCTool::printxAODEvent(const xAOD::TruthEvent *event, const xAOD::
     if (part == nullptr)
       continue;
     int bc = part->barcode();
-    if (bc > 100000)
+    if (HepMC::generations(bc) > 0)
       continue;
     int id = part->pdgId();
     if (id != 25)

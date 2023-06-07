@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -106,10 +106,9 @@ std::vector<HWIdentifier>::const_iterator beg = onlineId->channel_begin();
 std::vector<HWIdentifier>::const_iterator end = onlineId->channel_end  ();
 for(  ;  beg != end;  ++beg ){
 	HWIdentifier hwid = mcsym.ZPhiSymOnl(*beg);
-	if ( m_indexset.find ( hwid ) == m_indexset.end() ){
-		m_indexset[hwid]=count;
-		count++;
-	} 
+        if ( m_indexset.try_emplace (hwid, count).second ) {
+          ++count;
+        }
 } // end of loop over online IDs
 int indexsetmax = m_indexset.size();
 // the extra indexsetmax is used for invalid cells

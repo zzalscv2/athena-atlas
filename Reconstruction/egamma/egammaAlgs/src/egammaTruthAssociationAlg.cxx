@@ -12,6 +12,7 @@
 #include "xAODEgamma/EgammaxAODHelpers.h"
 #include "xAODTruth/xAODTruthHelpers.h"
 
+#include "AtlasHepMC/MagicNumbers.h"
 
 #include <memory>
 
@@ -178,7 +179,7 @@ egammaTruthAssociationAlg::isPromptEgammaParticle(
 
   if ((truth->pdgId() != 22 && abs(truth->pdgId()) != 11) ||
       truth->status() == 2 || truth->status() == 3 ||
-      truth->barcode() > m_barcodeOffset || truth->pt() < m_minPt) {
+      HepMC::is_simulation_particle(truth) || truth->pt() < m_minPt) {
     return false;
   }
   IMCTruthClassifier::Info mcinfo(ctx);
@@ -254,7 +255,7 @@ egammaTruthAssociationAlg::getEgammaTruthParticle(
     return nullptr;
   }
   // Find the original truth particle for electrons from conversions
-  for (unsigned int i = 0; i < 100 && truth && truth->barcode() > 200e3; ++i) {
+  for (unsigned int i = 0; i < 100 && truth && HepMC::is_simulation_particle(truth); ++i) {
     if (truth->prodVtx() && truth->prodVtx()->nIncomingParticles()) {
       truth = truth->prodVtx()->incomingParticle(0);
     } else {

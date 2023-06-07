@@ -63,7 +63,6 @@ namespace Trk {
         
         Gaudi::Property<size_t>                     m_minNdof{this, "MinDegreesOfFreedom", 6};                   //!< checks min degrees of freedom if bigger -1
         Gaudi::Property<bool>                       m_onlyPrimaries{this, "OnlyPrimaries", false};             //!< restrict track creation to primaries
-        Gaudi::Property<int>                        m_primaryBarcodeCutOff{this, "PrimaryBarcodeCutOff", 100000};      //!< primary barcode cut off
         Gaudi::Property<unsigned int>               m_minSiHits{this, "MinSiHits", 7};                 //!< min number of Si hits for refit
         Gaudi::Property<unsigned int>               m_minSiHitsForward{this, "MinSiHitsForward", 7};          //!< min number of Si hits for refit in forward region (ITk specific)
         Gaudi::Property<float>                      m_forwardBoundary{this, "ForwardBoundary", 2.5};           //!< Boundary eta value defining the forward region

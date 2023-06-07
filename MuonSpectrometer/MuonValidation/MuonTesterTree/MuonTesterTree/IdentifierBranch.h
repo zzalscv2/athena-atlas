@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONIDENTIFIERBRANCH_H
 #define MUONTESTER_MUONIDENTIFIERBRANCH_H
@@ -8,6 +8,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #include <MuonTesterTree/MuonTesterBranch.h>
 #include <MuonTesterTree/VectorBranch.h>
 
+namespace MuonVal {
 /// Class to dump the basic properties of an Identifier into an n-tuple
 ///  StationName -> BIS, BIL, etc.
 ///  StationIndex -> stationName expressed as integer
@@ -114,5 +115,6 @@ private:
     VectorBranch<uint8_t>& m_multiplet{parent().newVector<uint8_t>(name() + "_multiplet")};
     VectorBranch<uint16_t>& m_channel{parent().newVector<uint16_t>(name() + "_channel")};
 };
+}
 #endif
 #endif

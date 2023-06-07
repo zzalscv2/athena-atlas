@@ -50,7 +50,8 @@ private:
   Gaudi::Property<std::vector<uint32_t>> m_maybeMissingRobsProp {
     this, "MaybeMissingROBs", {},
     "List of ROB IDs allowed to be missing. If a decoder tool requests one of these "
-    "and it is not available in the event, no errors will be reported"
+    "and it is not available in the event, no errors will be reported",
+    "appendList<T>"
   };
   /// Set behaviour for non-zero ROB status words
   Gaudi::Property<std::string> m_robStatusCheckLevel {

@@ -68,6 +68,20 @@ def createLumiBlockMetaData(flags):
         ]
     return tools, result
 
+def createTriggerMenuMetaData(flags):
+    tools = MetaDataHelperLists()
+    result = ComponentAccumulator()
+    tools.mdTools.append(
+        CompFactory.xAODMaker.TriggerMenuMetaDataTool("TriggerMenuMetaDataTool")
+    )
+    tools.mdItems += [
+        "xAOD::TriggerMenuContainer#*",
+        "xAOD::TriggerMenuAuxContainer#*",
+        "xAOD::TriggerMenuJsonContainer#*",
+        "xAOD::TriggerMenuJsonAuxContainer#*",
+    ]
+    return tools, result
+
 
 def createTruthMetaData(flags):
     tools = MetaDataHelperLists()
@@ -113,15 +127,9 @@ def propagateMetaData(flags, streamName="", category=None, *args, **kwargs):
 
     elif category == MetadataCategory.TriggerMenuMetaData:
         if any("TriggerMenu" in item for item in flags.Input.MetadataItems):
-            tools.mdTools.append(
-                CompFactory.xAODMaker.TriggerMenuMetaDataTool("TriggerMenuMetaDataTool")
-            )
-            tools.mdItems += [
-                "xAOD::TriggerMenuContainer#*",
-                "xAOD::TriggerMenuAuxContainer#*",
-                "xAOD::TriggerMenuJsonContainer#*",
-                "xAOD::TriggerMenuJsonAuxContainer#*",
-            ]
+            _tools, _ = createTriggerMenuMetaData(flags)
+            tools.mdTools = _tools.mdTools
+            tools.mdItems = _tools.mdItems
 
     elif category == MetadataCategory.TruthMetaData:
         if "TruthMetaData" in flags.Input.MetadataItems:
@@ -194,6 +202,15 @@ def SetupMetaDataForStreamCfg(
             helperLists += lists
             result.merge(caConfig)
 
+        # copy EventStreamInfo for merging jobs
+        # TODO: add dedicated metadata category for EventStreamInfo
+        # and factor out MakeEventStreamInfo from OutputStreamConfig
+        if kwargs.get("mergeJob", False):
+            helperLists.mdTools += [
+                CompFactory.CopyEventStreamInfo(
+                    f"Stream{streamName}_CopyEventStreamInfo"
+                ),
+            ]
     for md in createMetadata:
         try:
             lists, caConfig = globals()[f"create{md.name}"](

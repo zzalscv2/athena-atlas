@@ -162,7 +162,7 @@ if __name__=='__main__':
             _l1Names += ['L1_MBTSC' + str(counter) for counter in range(0, 16)]
             parser.set_defaults(lvl1Logic='Or', lvl1Origin='TBP', lvl1Items=_l1Items, lvl1Names=_l1Names,
                                 keyCount=1000, groupName='TileMBTSMon', useMbtsTrigger = True)
-        elif any([args.tmdb, args.tmdbDigits]):
+        else:
             parser.set_defaults(postProcessingInterval=100)
 
     args, _ = parser.parse_known_args()
@@ -196,8 +196,10 @@ if __name__=='__main__':
             if args.partition in ['TileMon']:
                 flags.Trigger.triggerConfig = 'DB:{:s}:{:d},{:d},{:d},{:d}'.format('TRIGGERDB_RUN3', 3185, 4357, 4219, 2543)
             else:
+                beamType = flags.Beam.Type
                 from AthenaConfiguration.AutoConfigOnlineRecoFlags import autoConfigOnlineRecoFlags
                 autoConfigOnlineRecoFlags(flags, args.partition)
+                flags.Beam.Type = beamType
 
     else:
         if args.filesInput:
@@ -221,7 +223,7 @@ if __name__=='__main__':
             flags.Input.Files = defaultTestFiles.RAW_RUN2
 
     runNumber = flags.Input.RunNumber[0]
-    flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-01-00' if not flags.Input.isMC and runNumber >= 411938 else 'ATLAS-R2-2016-01-00-01'
+    flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-02-00' if not flags.Input.isMC and runNumber >= 411938 else 'ATLAS-R2-2016-01-00-01'
 
     if not flags.Output.HISTFileName:
         flags.Output.HISTFileName = 'tilemon_{}.root'.format(runNumber)
@@ -229,11 +231,11 @@ if __name__=='__main__':
     if args.online:
         flags.Common.isOnline = True
     if flags.Common.isOnline:
-        flags.IOVDb.GlobalTag = 'CONDBR2-HLTP-2022-02' if runNumber > 232498 else 'COMCOND-HLTP-004-02'
+        flags.IOVDb.GlobalTag = 'CONDBR2-HLTP-2023-01' if runNumber > 232498 else 'COMCOND-HLTP-004-02'
         flags.DQ.Environment = 'online'
         flags.DQ.FileKey = ''
     else:
-        flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2022-09' if runNumber > 232498 else 'COMCOND-BLKPA-RUN1-06'
+        flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2023-01' if runNumber > 232498 else 'COMCOND-BLKPA-RUN1-06'
 
     if any([args.laser, args.cis]):
         if args.laser:

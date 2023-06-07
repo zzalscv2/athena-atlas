@@ -79,7 +79,7 @@ namespace Simulation
   {
     if ( angle1<1e-10 ) angle1 = 1e-10; // to avoid divide_by_zero errors
     double temp(1.0-std::fabs(displacement)/m_bunchLength);
-    return std::sqrt(3.1415)/2 * std::erf(angle1*temp)/angle1 *
+    return 1.0/M_2_SQRTPI * std::erf(angle1*temp)/angle1 *
            std::exp( -pow(angle2*displacement/m_bunchLength, 2) ) *
            heaviside(temp);
   }

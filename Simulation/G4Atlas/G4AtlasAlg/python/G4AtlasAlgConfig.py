@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from G4AtlasServices.G4AtlasServicesConfig import DetectorGeometrySvcCfg, PhysicsListSvcCfg
 from ISF_Services.ISF_ServicesConfig import TruthServiceCfg, InputConverterCfg
 from ISF_Services.ISF_ServicesCoreConfig import GeoIDSvcCfg
@@ -51,6 +51,9 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
 
     #input converter
     kwargs.setdefault("InputConverter", result.getPrimaryAndMerge(InputConverterCfg(flags)).name)
+    if flags.Sim.ISF.Simulator.isQuasiStable():
+        from BeamEffects.BeamEffectsAlgConfig import ZeroLifetimePositionerCfg
+        kwargs.setdefault("QuasiStablePatcher", result.getPrimaryAndMerge(ZeroLifetimePositionerCfg(flags)).name )
 
     #sensitive detector master tool
     SensitiveDetector = result.popToolsAndMerge(SensitiveDetectorMasterToolCfg(flags))

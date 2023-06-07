@@ -896,12 +896,6 @@ double Trk::SimpleAmbiguityProcessorTool::originalMomentum( const HepMC::GenEven
   // Calculate initial energy of electron. Should be the first particle
   HepMC::GenParticle* initialParticle = *( genEvent->particles_begin() );
 
-  // Double check - should come from vertex barcode = -1 & have id 10001. Particle must also be defined
-  //if ( !initialParticle || initialParticle->production_vertex()->barcode() != -1 || initialParticle->barcode() != 10001 )
-  //  msg(MSG::WARNING) << "Inconsistency between initial particle and initial vertex" << endmsg;
-
-  //Hep3Vector& initial3Momentum = initialParticle->momentum();
-
   double initialMomentum = initialParticle->momentum().perp();
 
   //  const Trk::TrackParameters* initialPerigeeParameters = m_truthToTrack->makePerigeeParameters(initialParticle);

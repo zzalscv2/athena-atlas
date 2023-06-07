@@ -50,7 +50,6 @@ ISF::ParticleBrokerDynamicOnReadIn::ParticleBrokerDynamicOnReadIn(const std::str
   m_simSelector(),
   m_simSelectorSet(),
   m_screenOutputPrefix("isf >> "),
-  m_barcodeSvc("", name),
   m_doSelectorCPUMon(false),
   m_benchPDGCode(0),
   m_benchGeoID(0),
@@ -75,10 +74,6 @@ ISF::ParticleBrokerDynamicOnReadIn::ParticleBrokerDynamicOnReadIn(const std::str
   declareProperty("ValidateGeoIDs"             , m_validateGeoID        );
   // collect and print cpu monitoring information
   declareProperty("SimSelectorCPUMonitoring"   , m_doSelectorCPUMon     );
-  // The Particle/Vertex BarcodeService used in ISF to store barcode info
-  declareProperty("BarcodeService"             , m_barcodeSvc,
-                  "The Particle/Vertex BarcodeService used in ISF" );
-
   // write out validation info
   declareProperty( "ValidationOutput",
                    m_validationOutput = false,
@@ -129,14 +124,6 @@ StatusCode ISF::ParticleBrokerDynamicOnReadIn::initialize()
                   << (m_geoIDSvc.empty() ? "<not configured>" : m_geoIDSvc.typeAndName()) );
     // store a quick-access-pointer (removes GaudiOverhead)
     m_geoIDSvcQuick = &(*m_geoIDSvc);
-  }
-
-  // retrieve the barcode service
-  if ( m_barcodeSvc.retrieve().isFailure() ) {
-    ATH_MSG_FATAL( m_barcodeSvc.propertyName() << ": Failed to retrieve service " << m_barcodeSvc.type());
-    return StatusCode::FAILURE;
-  } else {
-    ATH_MSG_INFO( m_barcodeSvc.propertyName()  << ": Retrieved service " << m_barcodeSvc.type());
   }
 
   // setup CPU Benchmarks

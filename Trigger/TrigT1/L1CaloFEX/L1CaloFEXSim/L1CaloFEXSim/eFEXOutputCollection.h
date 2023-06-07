@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -100,7 +100,7 @@ namespace LVL1 {
     std::vector<std::map<std::string, float>*> m_allvalues_eg;
     /// tau related values of a TOB
     std::map<std::string, float> m_values_tem_tau;
-    /// rau related values of all TOBs in an event
+    /// tau related values of all TOBs in an event
     std::vector<std::map<std::string, float>*> m_allvalues_tau;
   };
 }

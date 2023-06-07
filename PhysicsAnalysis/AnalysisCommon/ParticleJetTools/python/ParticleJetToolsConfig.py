@@ -22,10 +22,8 @@ except ModuleNotFoundError:
 # Putting MCTruthClassifier here as we needn't stick jet configs in really foreign packages
 def getMCTruthClassifier():
     # Assume mc15 value
-    firstSimCreatedBarcode = 200000
     truthclassif = CompFactory.MCTruthClassifier(
-        "JetMCTruthClassifier",
-        barcodeG4Shift=firstSimCreatedBarcode,
+        "JetMCTruthClassifier"
         )
     if not isAnalysisRelease() :
         truthclassif.xAODTruthLinkVector= ""
@@ -65,16 +63,10 @@ def getCopyTruthLabelParticles(truthtype):
 def getCopyTruthJetParticles(modspec, cflags):
     truthclassif = getMCTruthClassifier()
 
-    barCodeFromMetadata=2
-    # Input file is EVNT
-    if "McEventCollection#GEN_EVENT" in cflags.Input.TypedCollections:
-        barCodeFromMetadata=0
-
     truthpartcopy = CompFactory.CopyTruthJetParticles(
         "truthpartcopy"+modspec,
         OutputName="JetInputTruthParticles"+modspec,
-        MCTruthClassifier=truthclassif,
-        BarCodeFromMetadata=barCodeFromMetadata)
+        MCTruthClassifier=truthclassif)
     if modspec=="NoWZ":
         truthpartcopy.IncludePromptLeptons=False
         truthpartcopy.IncludePromptPhotons=False
@@ -85,8 +77,9 @@ def getCopyTruthJetParticles(modspec, cflags):
         truthpartcopy.IncludePromptPhotons=True
         truthpartcopy.IncludeMuons=True
         truthpartcopy.IncludeNeutrinos=True
-        truthpartcopy.FSRPhotonCone=-1.
         truthpartcopy.DressingDecorationName='dressedPhoton'
+        ### Declare the dependency on the photon dressing. Needed to run the tool with avalanche scheduler
+        truthpartcopy.ExtraInputs = [( 'xAOD::TruthParticleContainer' , 'StoreGateSvc+TruthParticles.dressedPhoton' )]
     if modspec=="Charged":
         truthpartcopy.ChargedParticlesOnly=True
     return truthpartcopy

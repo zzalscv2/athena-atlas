@@ -425,6 +425,8 @@ if rec.doHeavyIon():
     ConfigFlags.Egamma.Keys.Input.CaloCells = 'SubtractedCells'
     ConfigFlags.Egamma.doCentral = True
     ConfigFlags.Egamma.doForward = False
+    # keep singular "...Cluster" for legacy config
+    ConfigFlags.HeavyIon.Egamma.UncalibCaloTopoCluster = "SubtractedCaloTopoCluster"
     # This is a trick : in HeavyIon, egammaTopoClusterCopier is run two times
     # one on the unsubtracted clusters (in SystemRec_config.py),
     # the other on subtracted clusters (in HIegamma_jobO).

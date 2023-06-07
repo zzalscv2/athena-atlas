@@ -52,6 +52,5 @@ def MuonTruthDecorationAlgCfg(flags, name="MuonTruthDecorationAlg", **kwargs):
 
 def MuonTruthAssociationAlgCfg(flags, name="MuonTruthAssociationAlg", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("BarcodeOffset", flags.Sim.RegenerationIncrement)
     result.addEventAlgo(CompFactory.MuonTruthAssociationAlg(name, **kwargs))
     return result

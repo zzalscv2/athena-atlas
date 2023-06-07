@@ -83,13 +83,13 @@ void ZdcAnalysisTool::initializeTriggerEffs(unsigned int runNumber)
 
     if (!m_zdcTriggerEfficiency)
     {
-        ATH_MSG_INFO("Creating new ZDCTriggerEfficiency");
+        ATH_MSG_DEBUG("Creating new ZDCTriggerEfficiency");
         m_zdcTriggerEfficiency.reset (new ZDCTriggerEfficiency());
     }
 
     std::string filename = PathResolverFindCalibFile( ("ZdcAnalysis/" + m_zdcTriggerEffParamsFileName) );
-    ATH_MSG_INFO ("Found trigger config file " << filename);
-    ATH_MSG_INFO("Opening trigger efficiency file " << filename);
+    ATH_MSG_DEBUG ("Found trigger config file " << filename);
+    ATH_MSG_DEBUG("Opening trigger efficiency file " << filename);
 
     std::unique_ptr<TFile> file (TFile::Open(filename.c_str(), "READ"));
     if (file == nullptr || file->IsZombie())
@@ -100,7 +100,7 @@ void ZdcAnalysisTool::initializeTriggerEffs(unsigned int runNumber)
 
     //file->Print();
 
-    ATH_MSG_INFO("Reading in trigger efficiencies");
+    ATH_MSG_DEBUG("Reading in trigger efficiencies");
 
     std::stringstream Aalpha_name;
     Aalpha_name << "A_alpha_" << runNumber;
@@ -181,7 +181,7 @@ void ZdcAnalysisTool::initializeTriggerEffs(unsigned int runNumber)
     effparamsCorrCoeffs[0] = {cov_C_alpha_beta, cov_C_alpha_theta, cov_C_beta_theta};
     effparamsCorrCoeffs[1] = {cov_A_alpha_beta, cov_A_alpha_theta, cov_A_beta_theta};
 
-    ATH_MSG_INFO("Trying to set parameters and errors at " << m_zdcTriggerEfficiency);
+    ATH_MSG_DEBUG("Trying to set parameters and errors at " << m_zdcTriggerEfficiency);
 
     m_zdcTriggerEfficiency->SetEffParamsAndErrors(effparams, effparamErrors);
     m_zdcTriggerEfficiency->SetEffParamCorrCoeffs(effparamsCorrCoeffs);
@@ -225,7 +225,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeLHCf2022()
     }
   }
   
-  ATH_MSG_INFO( "LHCF2022: delta t cut, value low = " << deltaT0CutLow[0][0] << ", high = " << deltaT0CutHigh[0][0] );
+  ATH_MSG_DEBUG( "LHCF2022: delta t cut, value low = " << deltaT0CutLow[0][0] << ", high = " << deltaT0CutHigh[0][0] );
   
   ZDCDataAnalyzer::ZDCModuleFloatArray HGOverFlowADC = {{{{4000, 4000, 4000, 4000}}, {{4000, 4000, 4000, 4000}}}};
   ZDCDataAnalyzer::ZDCModuleFloatArray HGUnderFlowADC = {{{{1, 1, 1, 1}}, {{1, 1, 1, 1}}}};
@@ -318,7 +318,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeDefault()
         }
     }
 
-    ATH_MSG_INFO( "Default: delta t cut, value low = " << deltaT0CutLow[0][0] << ", high = " << deltaT0CutHigh[0][0] );
+    ATH_MSG_DEBUG( "Default: delta t cut, value low = " << deltaT0CutLow[0][0] << ", high = " << deltaT0CutHigh[0][0] );
 
     ZDCDataAnalyzer::ZDCModuleFloatArray HGOverFlowADC = {{{{800, 800, 800, 800}}, {{800, 800, 800, 800}}}};
     ZDCDataAnalyzer::ZDCModuleFloatArray HGUnderFlowADC = {{{{10, 10, 10, 10}}, {{10, 10, 10, 10}}}};
@@ -871,7 +871,7 @@ StatusCode ZdcAnalysisTool::initialize()
 
 
     if (m_forceCalibRun > -1) {
-        ATH_MSG_INFO("CAREFUL: forcing calibration run/LB =" << m_forceCalibRun << "/" << m_forceCalibLB);
+        ATH_MSG_DEBUG("CAREFUL: forcing calibration run/LB =" << m_forceCalibRun << "/" << m_forceCalibLB);
 
         if (m_forceCalibLB < 0) {
             ATH_MSG_ERROR("Invalid settings: Forced run > 0 but lumi block < 0");
@@ -911,36 +911,36 @@ StatusCode ZdcAnalysisTool::initialize()
     //
 
     ATH_MSG_INFO("Configuration: " << m_configuration);
-    ATH_MSG_INFO("FlipEMDelay: " << m_flipEMDelay);
-    ATH_MSG_INFO("LowGainOnly: " << m_lowGainOnly);
+    ATH_MSG_DEBUG("FlipEMDelay: " << m_flipEMDelay);
+    ATH_MSG_DEBUG("LowGainOnly: " << m_lowGainOnly);
 
-    ATH_MSG_INFO("Using Combined delayed and undelayed samples: " << m_combineDelay);
+    ATH_MSG_DEBUG("Using Combined delayed and undelayed samples: " << m_combineDelay);
 
-    ATH_MSG_INFO("WriteAux: " << m_writeAux);
-    ATH_MSG_INFO("AuxSuffix: " << m_auxSuffix);
-    ATH_MSG_INFO("DoCalib: " << m_doCalib);
-    ATH_MSG_INFO("ForceCalibRun: " << m_forceCalibRun);
-    ATH_MSG_INFO("ForceCalibLB: " << m_forceCalibLB);
-    ATH_MSG_INFO("NumSampl: " << m_numSample);
-    ATH_MSG_INFO("DeltaTSample: " << m_deltaTSample);
-    ATH_MSG_INFO("Presample: " << m_presample);
-    ATH_MSG_INFO("PeakSample: " << m_peakSample);
-    ATH_MSG_INFO("Peak2ndDerivThresh: " << m_Peak2ndDerivThresh);
+    ATH_MSG_DEBUG("WriteAux: " << m_writeAux);
+    ATH_MSG_DEBUG("AuxSuffix: " << m_auxSuffix);
+    ATH_MSG_DEBUG("DoCalib: " << m_doCalib);
+    ATH_MSG_DEBUG("ForceCalibRun: " << m_forceCalibRun);
+    ATH_MSG_DEBUG("ForceCalibLB: " << m_forceCalibLB);
+    ATH_MSG_DEBUG("NumSampl: " << m_numSample);
+    ATH_MSG_DEBUG("DeltaTSample: " << m_deltaTSample);
+    ATH_MSG_DEBUG("Presample: " << m_presample);
+    ATH_MSG_DEBUG("PeakSample: " << m_peakSample);
+    ATH_MSG_DEBUG("Peak2ndDerivThresh: " << m_Peak2ndDerivThresh);
 
-    if (m_combineDelay)  ATH_MSG_INFO("DelayDeltaT: " << m_delayDeltaT);
+    if (m_combineDelay)  ATH_MSG_DEBUG("DelayDeltaT: " << m_delayDeltaT);
 
-    ATH_MSG_INFO("T0: " << m_t0);
-    ATH_MSG_INFO("Tau1: " << m_tau1);
-    ATH_MSG_INFO("Tau2: " << m_tau2);
-    ATH_MSG_INFO("FixTau1: " << m_fixTau1);
-    ATH_MSG_INFO("FixTau2: " << m_fixTau2);
-    ATH_MSG_INFO("DeltaTCut: " << m_deltaTCut);
-    ATH_MSG_INFO("ChisqRatioCut: " << m_ChisqRatioCut);
+    ATH_MSG_DEBUG("T0: " << m_t0);
+    ATH_MSG_DEBUG("Tau1: " << m_tau1);
+    ATH_MSG_DEBUG("Tau2: " << m_tau2);
+    ATH_MSG_DEBUG("FixTau1: " << m_fixTau1);
+    ATH_MSG_DEBUG("FixTau2: " << m_fixTau2);
+    ATH_MSG_DEBUG("DeltaTCut: " << m_deltaTCut);
+    ATH_MSG_DEBUG("ChisqRatioCut: " << m_ChisqRatioCut);
 
     ATH_CHECK( m_eventInfoKey.initialize());
 
     if (m_writeAux && m_auxSuffix != "") {
-        ATH_MSG_INFO("suffix string = " << m_auxSuffix);
+        ATH_MSG_DEBUG("suffix string = " << m_auxSuffix);
     }
 
     m_init = true;
@@ -949,7 +949,7 @@ StatusCode ZdcAnalysisTool::initialize()
 
 StatusCode ZdcAnalysisTool::configureNewRun(unsigned int runNumber)
 {
-    ATH_MSG_INFO("Setting up new run " << runNumber);
+    ATH_MSG_DEBUG("Setting up new run " << runNumber);
 
     // We do nothing for the default configuration
     //
@@ -969,7 +969,9 @@ StatusCode ZdcAnalysisTool::configureNewRun(unsigned int runNumber)
 
 StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& moduleContainer, const xAOD::ZdcModuleContainer& moduleSumContainer)
 {
-  
+
+  if (moduleContainer.size()==0) return StatusCode::SUCCESS; // if no modules, do nothing
+
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
   if (!eventInfo.isValid()) return StatusCode::FAILURE;
     
@@ -1048,7 +1050,7 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 	  }
 	else
 	  {
-	    ATH_MSG_INFO("Unknown LHC Run " << m_LHCRun);
+	    ATH_MSG_WARNING("Unknown LHC Run " << m_LHCRun);
 	    return StatusCode::FAILURE;
 	  }
 
@@ -1086,7 +1088,7 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
     m_zdcDataAnalyzer->FinishEvent();
     
     ATH_MSG_DEBUG("Adding variables with suffix=" + m_auxSuffix);
-    
+
     for (const auto zdcModule : moduleContainer)
     {
 
@@ -1133,25 +1135,25 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 
     for (const auto zdc_sum: moduleSumContainer)
       {
-	    int iside = (zdc_sum->zdcSide()==-1) ? 0 : 1;
-
-        float calibEnergy = getCalibModuleSum(iside);
-        zdc_sum->auxdecor<float>("CalibEnergy"+m_auxSuffix) = calibEnergy;
-        float calibEnergyErr = getCalibModuleSumErr(iside);
-        zdc_sum->auxdecor<float>("CalibEnergyErr"+m_auxSuffix) = calibEnergyErr;
-
-        float uncalibSum = getUncalibModuleSum(iside);
-        zdc_sum->auxdecor<float>("UncalibSum"+m_auxSuffix) = uncalibSum;
-        float uncalibSumErr = getUncalibModuleSumErr(iside);
-        zdc_sum->auxdecor<float>("UncalibSumErr"+m_auxSuffix) = uncalibSumErr;
-
-        float finalEnergy = calibEnergy;
-
-        zdc_sum->auxdecor<float>("FinalEnergy"+m_auxSuffix) = finalEnergy;
-        zdc_sum->auxdecor<float>("AverageTime"+m_auxSuffix) = getAverageTime(iside);
-        zdc_sum->auxdecor<unsigned int>("Status"+m_auxSuffix) = !sideFailed(iside);
-        zdc_sum->auxdecor<unsigned int>("ModuleMask"+m_auxSuffix) = (getModuleMask() >> (4 * iside)) & 0xF;
-    }
+	int iside = (zdc_sum->zdcSide()==-1) ? 0 : 1;
+	
+	float calibEnergy = getCalibModuleSum(iside);
+	zdc_sum->auxdecor<float>("CalibEnergy"+m_auxSuffix) = calibEnergy;
+	float calibEnergyErr = getCalibModuleSumErr(iside);
+	zdc_sum->auxdecor<float>("CalibEnergyErr"+m_auxSuffix) = calibEnergyErr;
+	
+	float uncalibSum = getUncalibModuleSum(iside);
+	zdc_sum->auxdecor<float>("UncalibSum"+m_auxSuffix) = uncalibSum;
+	float uncalibSumErr = getUncalibModuleSumErr(iside);
+	zdc_sum->auxdecor<float>("UncalibSumErr"+m_auxSuffix) = uncalibSumErr;
+	
+	float finalEnergy = calibEnergy;
+	
+	zdc_sum->auxdecor<float>("FinalEnergy"+m_auxSuffix) = finalEnergy;
+	zdc_sum->auxdecor<float>("AverageTime"+m_auxSuffix) = getAverageTime(iside);
+	zdc_sum->auxdecor<unsigned int>("Status"+m_auxSuffix) = !sideFailed(iside);
+	zdc_sum->auxdecor<unsigned int>("ModuleMask"+m_auxSuffix) = (getModuleMask() >> (4 * iside)) & 0xF;
+      }
 
     return StatusCode::SUCCESS;
 }
@@ -1178,7 +1180,7 @@ void ZdcAnalysisTool::setEnergyCalibrations(unsigned int runNumber)
         for (int imod = 0; imod < 4; imod++)
         {
             sprintf(name, "ZDC_Gcalib_run%u_s%d_m%d", runNumber, iside, imod);
-            ATH_MSG_INFO("Searching for graph " << name);
+            ATH_MSG_DEBUG("Searching for graph " << name);
             TGraph* g = (TGraph*) fCalib->GetObjectChecked(name, "TGraph");
             if (!g && m_doCalib)
             {
@@ -1254,7 +1256,7 @@ StatusCode ZdcAnalysisTool::reprocessZdc()
 {
     if (!m_init)
     {
-        ATH_MSG_INFO("Tool not initialized!");
+        ATH_MSG_WARNING("Tool not initialized!");
         return StatusCode::FAILURE;
     }
     m_eventReady = false;

@@ -51,6 +51,8 @@ StatusCode MakeEventStreamInfo::initialize() {
       m_dataHeaderKey.setValue(parentAlg->name());
    }
 
+   m_filledEvent = false;
+
    return(StatusCode::SUCCESS);
 }
 //___________________________________________________________________________
@@ -115,18 +117,26 @@ StatusCode MakeEventStreamInfo::postExecute() {
       pEventStream->insertItemList(dhe.getPrimaryClassID(), dhe.getKey());
    }
    pEventStream->insertEventType( evtype );
+
+   m_filledEvent = true;
+
    return(StatusCode::SUCCESS);
 }
 //___________________________________________________________________________
 StatusCode MakeEventStreamInfo::preFinalize() {
-   if( !m_metaDataSvc->tryRetrieve<EventStreamInfo>(m_key.value()) ) {
-      EventStreamInfo* pEventStream = new EventStreamInfo();
-      if( m_metaDataSvc->record(pEventStream, m_key.value()).isFailure() ) {
-         ATH_MSG_ERROR("Could not register EventStreamInfo object");
-         return(StatusCode::FAILURE);
-      }
-   }
-   return(StatusCode::SUCCESS);
+  EventStreamInfo* pEventStream = m_metaDataSvc->tryRetrieve<EventStreamInfo>(m_key.value());
+  if (!pEventStream) {
+    auto esinfo_up = std::make_unique<EventStreamInfo>();
+    pEventStream = esinfo_up.get();
+    ATH_CHECK(m_metaDataSvc->record(std::move(esinfo_up), m_key.value()));
+  }
+  if (!m_filledEvent) {
+    // insert non-event information (processingTags)
+    // to EventStreamInfo if we have not processed any event
+
+    pEventStream->insertProcessingTag(m_dataHeaderKey.value());
+  }
+  return (StatusCode::SUCCESS);
 }
 //___________________________________________________________________________
 StatusCode MakeEventStreamInfo::finalize() {

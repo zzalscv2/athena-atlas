@@ -9,18 +9,17 @@
 //    email                 : nicholas.andrew.luongo@cern.ch
 //*************************************************************************
 
-#include <iostream>
 
 #include "L1CaloFEXSim/eFEXtauAlgo.h"
 #include "L1CaloFEXSim/eFEXtauTOB.h"
 #include "L1CaloFEXSim/eTower.h"
+#include <vector>
+#include <algorithm>  //for std::copy
 
   // default constructor for persistency
 LVL1::eFEXtauAlgo::eFEXtauAlgo(const std::string& type, const std::string& name, const IInterface* parent):
-    AthAlgTool(type, name, parent)
-  {
-    declareInterface<IeFEXtauAlgo>(this);
-  }
+    eFEXtauAlgoBase(type, name, parent)
+  {  }
 
   /** Destructor */
 LVL1::eFEXtauAlgo::~eFEXtauAlgo()
@@ -30,18 +29,9 @@ LVL1::eFEXtauAlgo::~eFEXtauAlgo()
 StatusCode LVL1::eFEXtauAlgo::initialize()
 {
   ATH_CHECK(m_eTowerContainerKey.initialize());
+
+  ATH_MSG_INFO("tau Algorithm version: heuristic");
   return StatusCode::SUCCESS;
-}
-
-StatusCode LVL1::eFEXtauAlgo::safetyTest(){
-
-  SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
-  if(!eTowerContainer.isValid()){
-    ATH_MSG_FATAL("Could not retrieve eTowerContainer " << m_eTowerContainerKey.key() );
-    return StatusCode::FAILURE;
-  }
-  return StatusCode::SUCCESS;
-
 }
 
 void LVL1::eFEXtauAlgo::setup(int inputTable[3][3], int efex_id, int fpga_id, int central_eta){
@@ -66,92 +56,9 @@ std::unique_ptr<LVL1::eFEXtauTOB> LVL1::eFEXtauAlgo::getTauTOB()
   tob->setBitwiseEt(getBitwiseEt());
   tob->setIso(getRealRCore());
   tob->setSeedUnD(getUnD());
+  tob->setBDTScore(0);
+  tob->setIsBDTAlgo(0);
   return tob;
-}
-
-// Build arrays holding cell ETs for each layer plus entire tower
-void LVL1::eFEXtauAlgo::buildLayers(int efex_id, int fpga_id, int central_eta)
-{
-
-  SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
-
-  for(unsigned int ieta = 0; ieta < 3; ieta++)
-  {
-    for(unsigned int iphi = 0; iphi < 3; iphi++)
-    {
-      if (((efex_id%3 == 0) && (fpga_id == 0) && (central_eta == 0) && (ieta == 0)) || ((efex_id%3 == 2) && (fpga_id == 3) && (central_eta == 5) && (ieta == 2))) 
-      {
-	      m_twrcells[ieta][iphi] = 0;
-	      m_em0cells[ieta][iphi] = 0;
-	      m_em3cells[ieta][iphi] = 0;
-	      m_hadcells[ieta][iphi] = 0;
-	      for(unsigned int i = 0; i < 4; i++)
-        {  
-	        m_em1cells[4 * ieta + i][iphi] = 0;
-	        m_em2cells[4 * ieta + i][iphi] = 0;
-        }
-      } 
-      else 
-      {  
-	      const LVL1::eTower * tmpTower = eTowerContainer->findTower(m_eFexalgoTowerID[iphi][ieta]);
-	      m_twrcells[ieta][iphi] = tmpTower->getTotalET();
-	      m_em0cells[ieta][iphi] = tmpTower->getLayerTotalET(0);
-	      m_em3cells[ieta][iphi] = tmpTower->getLayerTotalET(3);
-	      m_hadcells[ieta][iphi] = tmpTower->getLayerTotalET(4);
-	      for(unsigned int i = 0; i < 4; i++)
-        {  
-	        m_em1cells[4 * ieta + i][iphi] = tmpTower->getET(1, i);
-	        m_em2cells[4 * ieta + i][iphi] = tmpTower->getET(2, i);
-        }
-      }
-    }
-  }
-  m_cellsSet = true;
-}
-
-// Check if central tower qualifies as a seed tower for the tau algorithm
-bool LVL1::eFEXtauAlgo::isCentralTowerSeed()
-{
-  // Need layer cell ET arrays to be built
-  if (m_cellsSet == false){
-    ATH_MSG_DEBUG("Layers not built, cannot accurately determine if a seed tower.");
-  }
-  
-  bool out = true;
-  
-  // Get central tower ET
-  unsigned int centralET = m_twrcells[1][1];
-  
-  // Loop over all cells and check that the central tower is a local maximum
-  for (unsigned int beta = 0; beta < 3; beta++)
-  {
-    for (unsigned int bphi = 0; bphi < 3; bphi++)
-    {
-      // Don't need to compare central cell with itself
-      if ((beta == 1) && (bphi == 1)){
-        continue;
-      }
-      
-      // Cells to the up and right must have strictly lesser ET
-      if (((beta == 2) && (bphi == 0)) || ((beta == 2) && (bphi == 1)) || ((beta == 2) && (bphi == 2)) || ((beta == 1) && (bphi == 2)))
-      {
-        if (centralET <= m_twrcells[beta][bphi])
-        {
-          out = false;
-        }
-      }
-      // Cells down and to the left must have lesser or equal ET. If strictly lesser would create zero TOB if two adjacent cells had equal energy
-      else if (((beta == 0) && (bphi == 0)) || ((beta == 0) && (bphi == 1)) || ((beta == 0) && (bphi == 2)) || ((beta == 1) && (bphi == 0)))
-      { 
-        if (centralET < m_twrcells[beta][bphi])
-        {
-          out = false;
-        }
-      }
-    }
-  }
-  
-  return out;
 }
 
 // Calculate reconstructed ET value
@@ -262,30 +169,6 @@ unsigned int LVL1::eFEXtauAlgo::rCoreEnv()
 
 }
 
-void LVL1::eFEXtauAlgo::getRCore(std::vector<unsigned int> & rCoreVec)
-{
-  unsigned int core = rCoreCore();
-  unsigned int env = rCoreEnv();
-
-  rCoreVec.push_back(core);
-  rCoreVec.push_back(env);
-
-}
-
-// Calculate float isolation variable
-float LVL1::eFEXtauAlgo::getRealRCore()
-{
-  unsigned int core = rCoreCore();
-  unsigned int env = rCoreEnv();
-
-  unsigned int num = core;
-  unsigned int denom = core + env;
-
-  float out = denom ? (float)num / (float)denom : 0;
-
-  return out;
-}
-
 unsigned int LVL1::eFEXtauAlgo::rHadCore()
 {
   if (m_cellsSet == false){
@@ -340,30 +223,6 @@ unsigned int LVL1::eFEXtauAlgo::rHadEnv()
 
 }
 
-// Calculate the hadronic fraction isolation variable
-void LVL1::eFEXtauAlgo::getRHad(std::vector<unsigned int> & rHadVec)
-{
-  unsigned int core = rHadCore();
-  unsigned int env = rHadEnv();
-
-  rHadVec.push_back(core);
-  rHadVec.push_back(env);
-
-}
-
-float LVL1::eFEXtauAlgo::getRealRHad()
-{
-  unsigned int core = rHadCore();
-  unsigned int env = rHadEnv();
-
-  unsigned int num = core;
-  unsigned int denom = core + env;
-
-  float out = denom ? (float)num / (float)denom : 0;
-
-  return out;
-
-}
 // Set the off phi value used to calculate ET and isolation
 void LVL1::eFEXtauAlgo::setUnDAndOffPhi()
 {
@@ -404,7 +263,6 @@ void LVL1::eFEXtauAlgo::getSums(unsigned int seed, bool UnD,
 
 }
 
-
 // Find the supercell seed eta value, must be in central cell so in the range 4-7 inclusive
 void LVL1::eFEXtauAlgo::setSupercellSeed()
 {
@@ -440,3 +298,4 @@ unsigned int LVL1::eFEXtauAlgo::getSeed()
 {
     return m_seed;
 }
+

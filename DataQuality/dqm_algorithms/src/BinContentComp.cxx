@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -108,6 +108,7 @@ dqm_algorithms::BinContentComp::execute(	const std::string & name,
   bool lessthan = (bool) dqm_algorithms::tools::GetFirstFromMap( "LessThan", config.getParameters(), 0);
   const bool publish = (bool) dqm_algorithms::tools::GetFirstFromMap( "PublishBins", config.getParameters(), 0);
   const int  maxpublish = (int) dqm_algorithms::tools::GetFirstFromMap( "MaxPublish", config.getParameters(), 20); 
+  const bool publishHistogram = (bool) dqm_algorithms::tools::GetFirstFromMap( "PublishHistogram", config.getParameters(), 1);
   const bool normref = (bool) dqm_algorithms::tools::GetFirstFromMap( "NormRef", config.getParameters(), 0);
   const double maxdiffabs = dqm_algorithms::tools::GetFirstFromMap( "MaxDiffAbs", config.getParameters(), -1); 
   const double maxdiffrel = dqm_algorithms::tools::GetFirstFromMap( "MaxDiffRel", config.getParameters(), -1);
@@ -140,16 +141,18 @@ dqm_algorithms::BinContentComp::execute(	const std::string & name,
   
   dqm_core::Result* result = new dqm_core::Result();
   double refcont =0;
-  TH1* resulthisto;
-  if (histogram->InheritsFrom("TH2")) {
-        resulthisto=(TH1*)(histogram->Clone());
-  } else if (histogram->InheritsFrom("TH1")) {
-        resulthisto=(TH1*)(histogram->Clone());
-  } else {
-    throw dqm_core::BadConfig( ERS_HERE, name, "does not inherit from TH1" );
-  } 
+  TH1* resulthisto = nullptr;
+  if (publishHistogram) {
+    if (histogram->InheritsFrom("TH2")) {
+      resulthisto=(TH1*)(histogram->Clone());
+    } else if (histogram->InheritsFrom("TH1")) {
+      resulthisto=(TH1*)(histogram->Clone());
+    } else {
+      throw dqm_core::BadConfig( ERS_HERE, name, "does not inherit from TH1" );
+    } 
 
-     resulthisto->Reset();
+    resulthisto->Reset();
+  }
 
    if (refhist && normref) {
       double ratio=histogram->GetEntries()/refhist->GetEntries();
@@ -211,7 +214,7 @@ dqm_algorithms::BinContentComp::execute(	const std::string & name,
 	if (lessthan && diff > 0. ) continue;  
 	
 	if ( (std::abs(sigma) > bin_threshold) && (std::abs(diff) > maxdiffabs) && (std::abs(reldiff) > maxdiffrel) ){
-          resulthisto->SetBinContent(i,j,inputcont);
+          if (resulthisto) resulthisto->SetBinContent(i,j,inputcont);
 	  ++count;
 	  if (publish && count<maxpublish){
             dqm_algorithms::tools::PublishBin(histogram,i,j,inputcont,result);
@@ -232,7 +235,7 @@ dqm_algorithms::BinContentComp::execute(	const std::string & name,
   
   result->tags_["NBins"] = count;
   result->tags_["NSkippedBins"] = nSkippedBins;
-  result->object_ =  (boost::shared_ptr<TObject>)(TObject*)(resulthisto);
+  if (resulthisto) result->object_ =  (boost::shared_ptr<TObject>)(TObject*)(resulthisto);
 
   if (gthreshold > rthreshold) {
      if ( count >= gthreshold ) {
@@ -276,6 +279,7 @@ dqm_algorithms::BinContentComp::printDescription(std::ostream& out)
   out<<"Optional Parameter: GreaterThan: check only for bins which are GreaterThan average (set to 1)"<<std::endl; 
   out<<"Optional Parameter: LessThan: check only for bins which are LessThan average (set to 1)"<<std::endl; 
   out<<"Optional Parameter: PublishBins: Save bins which are different from average in Result (set to 1)"<<std::endl; 
+  out<<"Optional Parameter: PublishHistogram: Save histogram with bins that are different from average in Result (by default: 1)"<<std::endl; 
   out<<"Optional Parameter: MaxPublish: Max number of bins to save (default 20)"<<std::endl; 
    out<<"Optional Parameter: NormRef: Normalize reference histogram to checked histogram statistics before checking bin contents (set to 1)"<<std::endl;
   out<<"Optional Parameter: MaxDiffAbs: test fails if NBins more than NSigma away and NBins more than MaxDiffAbs (absolut difference) away"<<std::endl; 

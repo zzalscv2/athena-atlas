@@ -163,8 +163,11 @@ class AthConfigFlags(object):
         return hash(str(self._flagdict.items()))
 
     def __getattr__(self, name):
+        # Avoid infinite recursion looking up our own attributes
+        _flagdict = object.__getattribute__(self, "_flagdict")
+
         # First try to get an already loaded flag or category
-        if self.hasFlag(name):
+        if name in _flagdict:
             return self._get(name)
 
         if self.hasCategory(name):
@@ -174,7 +177,7 @@ class AthConfigFlags(object):
         self._loadDynaFlags(name)
 
         # Try again
-        if self.hasFlag(name):
+        if name in _flagdict:
             return self._get(name)
 
         if self.hasCategory(name):
@@ -459,8 +462,10 @@ class AthConfigFlags(object):
         parser.add_argument("--threads", type=int, default=None, help="Run with given number of threads (use 0 for serial execution)")
         parser.add_argument('--concurrent-events', type=int, default=None, help='number of concurrent events for AthenaMT')
         parser.add_argument("--nprocs", type=int, default=None, help="Run AthenaMP with given number of worker processes")
+        parser.add_argument("--mtes", type=bool, default=None, help="Run multi-threaded event service")
+        parser.add_argument("--mtes-channel", type=str, default=None, help="For multi-threaded event service: the name of communication channel between athena and pilot")
         parser.add_argument("---",dest="terminator",action='store_true', help=argparse.SUPPRESS) # special hidden option required to convert option terminator -- for --help calls
-        parser.add_argument("--pmon", type=str, default=None, choices=['FastMonMT','FullMonMT'], help="Perfomance monitoring")
+        parser.add_argument("--pmon", type=str.lower, default=None, choices=['fastmonmt','fullmonmt'], help="Performance monitoring")
 
         return parser
 
@@ -568,12 +573,16 @@ class AthConfigFlags(object):
         if args.filesInput is not None:
             self.Input.Files = [] # remove generic
             for f in args.filesInput:
-                for ffile in f.split(","):
-                    if '*' in ffile: # handle wildcard
-                        import glob
-                        self.Input.Files += glob.glob(ffile)
-                    else:
-                        self.Input.Files += [ffile]
+                #because of argparse used with nargs+, fileInput will also swallow arguments meant to be flags
+                if "=" in f:
+                    leftover.append(f)
+                else:
+                    for ffile in f.split(","):
+                        if '*' in ffile: # handle wildcard
+                            import glob
+                            self.Input.Files += glob.glob(ffile)
+                        else:
+                            self.Input.Files += [ffile]
 
         if args.loglevel is not None:
             from AthenaCommon import Constants
@@ -588,6 +597,12 @@ class AthConfigFlags(object):
 
         if args.threads is not None:
             self.Concurrency.NumThreads = args.threads
+            #Work-around a possible inconsistency of NumThreads and NumConcurrentEvents that may
+            #occur when these values are set by the transforms and overwritten by --athenaopts .. 
+            #See also ATEAM-907
+            if args.concurrent_events is None and self.Concurrency.NumConcurrentEvents==0:
+                self.Concurrency.NumConcurrentEvents = args.threads
+
 
         if args.concurrent_events is not None:
             self.Concurrency.NumConcurrentEvents = args.concurrent_events
@@ -597,7 +612,15 @@ class AthConfigFlags(object):
 
         if args.pmon is not None:
             self._loadDynaFlags("PerfMon")
-            self._set("PerfMon.do"+args.pmon,True)
+            dispatch = {'fastmonmt' : 'PerfMon.doFastMonMT',
+                        'fullmonmt' : 'PerfMon.doFullMonMT'}
+            self._set(dispatch[args.pmon.lower()], True)
+
+        if args.mtes is not None:
+            self.Exec.MTEventService = args.mtes
+
+        if args.mtes_channel is not None:
+            self.Exec.MTEventServiceChannel = args.mtes_channel
 
         #All remaining arguments are assumed to be key=value pairs to set arbitrary flags:
         for arg in leftover:

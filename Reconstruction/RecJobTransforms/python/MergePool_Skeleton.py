@@ -2,6 +2,11 @@
 
 def fromRunArgs(runArgs):
 
+    """ This is the main skeleton for merging POOL files generically.
+    Currently it handles (D)AOD/(D)ESD files, but can be extended in the future.
+    That'll mostly entail configuring extra components needed for TP conversion (if any).
+    """
+
     # Setup logging
     from AthenaCommon.Logging import logging
     log = logging.getLogger('MergePool_Skeleton')
@@ -19,68 +24,36 @@ def fromRunArgs(runArgs):
     flags = initConfigFlags()
     commonRunArgsToFlags(runArgs, flags)
 
-    # This will be used to store the stream type that's being merged
-    streamToMerge = None
+    # First let's find the input/output files
+    inputFile, outputFile = None, None
 
-    # First deal w/ the generic case
-    if hasattr(runArgs, 'inputPOOL_MRG_INPUTFile'):
-        # Cache the input file type from runArgs
-        fileType = runArgs.inputPOOL_MRG_INPUTFileType
-        if fileType == 'AOD':
-            # See if we're dealing w/ a DAOD file instead of a primary AOD one
-            # Extract stream from filename since it's not stored in the runArgs
-            # We MUST find a better way of doing this...
-            import re
-            m = re.search(r'DAOD_[A-Z,0-9]+', runArgs.inputPOOL_MRG_INPUTFile[0])
-            if m:
-                fileType = m.group(0)
-        elif fileType == 'ESD':
-            # Here do something if we'd like to treat DESDs differently like DAODs
-            # Currently DESDs are treated as primary ESDs
-            pass
+    for attr in dir(runArgs):
+        if attr.startswith('input') and attr.endswith('File'):
+            inputFile = getattr(runArgs, attr)
+        elif attr.startswith('output') and attr.endswith('File'):
+            outputFile = getattr(runArgs, attr)
 
-        # Now set the input file name appropriately
-        setattr(runArgs, f'input{fileType}File', runArgs.inputPOOL_MRG_INPUTFile)
+    if not inputFile or not outputFile:
+        raise RuntimeError('Could NOT determine the input/output files!')
 
-        # Now set the output file name appropriately
-        if hasattr(runArgs, 'outputPOOL_MRG_OUTPUTFile'):
-            setattr(runArgs, f'output{fileType}_MRGFile', runArgs.outputPOOL_MRG_OUTPUTFile)
-        else:
-            raise RuntimeError('Please provide an output POOL file (via --outputPOOL_MRG_OUTPUTFile)')
+    # Now set the input files before we attempt to read the processing tags
+    flags.Input.Files = inputFile
 
-    # Deal w/ the AOD specific case
-    if hasattr(runArgs, 'inputAODFile'):
-        streamToMerge = 'AOD'
-        flags.Input.Files = runArgs.inputAODFile
-        if hasattr(runArgs, 'outputAOD_MRGFile'):
-            flags.Output.AODFileName = runArgs.outputAOD_MRGFile
-        else:
-            raise RuntimeError('Please provide an output AOD file (via --outputAOD_MRGFile)')
+    # Now figure out what stream type we're trying to merge
+    streamToMerge = flags.Input.ProcessingTags[0].removeprefix('Stream') if flags.Input.ProcessingTags else None
 
-    # Deal w/ the ESD specific case
-    if hasattr(runArgs, 'inputESDFile'):
-        streamToMerge = 'ESD'
-        flags.Input.Files = runArgs.inputESDFile
-        if hasattr(runArgs, 'outputESD_MRGFile'):
-            flags.Output.ESDFileName = runArgs.outputESD_MRGFile
-        else:
-            raise RuntimeError('Please provide an output ESD file (via --outputESD_MRGFile)')
-
-    # DAOD comes in many flavours, so automate transforming this into a 'standard' AOD argument
-    DAOD_Input_Key = [ k for k in dir(runArgs) if k.startswith('inputDAOD') and k.endswith('File') ]
-    if len(DAOD_Input_Key) == 1:
-        streamToMerge = DAOD_Input_Key[0].removeprefix('input').removesuffix('File')
-        flags.Input.Files = getattr(runArgs, DAOD_Input_Key[0])
-        if hasattr(runArgs, f'output{streamToMerge}_MRGFile'):
-            flags.addFlag(f'Output.{streamToMerge}FileName', getattr(runArgs, f'output{streamToMerge}_MRGFile'))
-            flags.addFlag(f'Output.doWrite{streamToMerge}', True)
-            flags.Output.doWriteDAOD = True
-        else:
-            raise RuntimeError(f'Please provide an output {streamToMerge} file (via --output{streamToMerge}_MRGFile)')
-
-    # Double check we have something to merge
     if not streamToMerge:
-        raise RuntimeError('Could not figure out what stream type is being merged [allowed: ESD, AOD, or any DAOD type]')
+        raise RuntimeError('Could NOT determine the stream type!')
+
+    # Now set the output file name and add additional flags
+    # that are necessary for the derived formats
+    if 'DAOD' in streamToMerge or 'DESD' in streamToMerge:
+        flags.addFlag(f'Output.{streamToMerge}FileName', outputFile)
+        flags.addFlag(f'Output.doWrite{streamToMerge}', True)
+        if 'DAOD' in streamToMerge:
+            flags.Output.doWriteDAOD = True
+    else:
+        setattr(flags.Output, f'{streamToMerge}FileName', outputFile)
 
     # Setup perfmon flags from runargs
     from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
@@ -95,7 +68,7 @@ def fromRunArgs(runArgs):
     log.info('**** Processing preExec')
     processPreExec(runArgs, flags)
 
-    # To respect --athenaopts 
+    # To respect --athenaopts
     log.info('**** Processing athenaopts')
     flags.fillFromArgs()
 
@@ -128,6 +101,7 @@ def fromRunArgs(runArgs):
         SetupMetaDataForStreamCfg(
             flags,
             streamToMerge,
+            mergeJob=hasattr(runArgs, "fastPoolMerge") and runArgs.fastPoolMerge,
         )
     )
 

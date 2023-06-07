@@ -285,6 +285,11 @@ jFexInputProvider::fillXE(TCS::TopoInputEvent& inputEvent) const {
     int jFexNumber = jFexRoI->jFexNumber();
     int fpgaNumber = jFexRoI->fpgaNumber();  
 
+    int hemisphere = fpgaNumber == 0 ? -1 : 1; //Note: flipped to produce the right sign
+
+    ExTopo = hemisphere * ExTopo;
+    EyTopo = hemisphere * EyTopo;
+
     global_ExTopo += ExTopo;
     global_EyTopo += EyTopo;
 

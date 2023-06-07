@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include(s):
@@ -39,6 +39,7 @@ namespace CP
             m_sagittaCorrConst_mcID[year] = MCP::CalibInitializer::createSagittaCorrMap(year, MCP::TrackType::ID, m_release, "mc");
             m_sagittaCorrConst_mcME[year] = MCP::CalibInitializer::createSagittaCorrMap(year, MCP::TrackType::ME, m_release, "mc");
             m_sagittaCorrConst_mcCB[year] = MCP::CalibInitializer::createSagittaCorrMap(year, MCP::TrackType::CB, m_release, "mc");
+            ATH_MSG_VERBOSE("Sagitta initilised: Year " <<m_release);
         }
 
         m_currentParameters = nullptr;
@@ -208,43 +209,65 @@ namespace CP
                     corrections.push_back(corr);
                 }
 
-                // if data/MC apply 50% of resbiasMap with the extra res bias added
+                // 100% of resbiasMap added as res bias 
                 double corr =  corrMap->at(MCP::SagittaCorrection::Residual__1up)->getCalibConstant(trk);
-                corr *= (0.5 * scale);
+                corr *= scale;
                 ATH_MSG_VERBOSE("Residual corr: "<<corr);
-
-                // Extra scaling to cover for non-closure in the forward and transition region
-                // As seen in the Rel 21 validation of the sagitta correction
-                // It is only concetrateed in a few high eta bin. Idea is to apply a linearly increasing sys
-                // Till it reach 450 GeV and then to flatten it. 
-                // The value is choosen in an arbitrary fashion. To be replaced and fixed, once we have a better idea of 
-                double deltas = m_extraRebiasSys;
-                if (deltas > 0) {
-                    if (eta > 2 || (eta > -2 && eta < -1.05)) {
-                        if (pT > 450.0)
-                            deltas += std::abs(450.0 - 45) / 100 * deltas;  // Above 450 GeV flat
-                        else
-                            deltas += std::abs(pT - 45) / 100 * deltas;
-                    }
-                    if (eta < -2 || (eta < 2 && eta> 1.5)) {
-                        if (pT > 450.0)
-                            deltas += std::abs(450.0 - 45) / 200 * deltas;  // Above 450 GeV flat
-                        else
-                            deltas += std::abs(pT - 45) / 200 * deltas;
-                    }
-                }
-                if (m_currentParameters->SagittaBias == MCP::SystVariation::Up) {
-                    corr += deltas;
-                } else if (m_currentParameters->SagittaBias == MCP::SystVariation::Down) {
-                    corr -= deltas;
-                }
-                ATH_MSG_VERBOSE("Deltas corr: "<<deltas);
 
                 // If eta dependant, set the p2 to 0, if it not in the given eta slices
                 if ((m_currentParameters->SagittaEtaSlice == MCP::SystVariation::Up) && eta < 0) corr = 0;
                 if ((m_currentParameters->SagittaEtaSlice == MCP::SystVariation::Down) && eta > 0) corr = 0;
 
                 corrections.push_back(corr);
+                ATH_MSG_VERBOSE("final corr: "<<corr);
+            }
+            else if(m_currentParameters->SagittaGlobal != MCP::SystVariation::Default)
+            {
+                int scale = (m_currentParameters->SagittaGlobal ==  MCP::SystVariation::Up) ? 1: -1;
+
+                double deltas = m_extraRebiasSys;
+                // systematic for Run3 data 2022
+                if (trk.year==MCP::DataYear::Data22)  deltas = 1.2 * deltas;
+                double corr = deltas * scale;
+                ATH_MSG_VERBOSE("Deltas corr: "<<deltas);
+
+                corrections.push_back(corr);
+                ATH_MSG_VERBOSE("final corr: "<<corr);
+ 
+            }
+            else if(m_currentParameters->SagittaPtExtra != MCP::SystVariation::Default)
+            {
+                int scale = (m_currentParameters->SagittaPtExtra ==  MCP::SystVariation::Up) ? 1: -1;
+
+                // Extra scaling to cover for non-closure in the forward and transition region
+                // As seen in the Rel 21 validation of the sagitta correction
+                // It is only concetrateed in a few high eta bin. Idea is to apply a linearly increasing sys
+                // Till it reach 450 GeV and then to flatten it. 
+                // The value is chosen in an arbitrary fashion. To be replaced and fixed, once we have a better idea of 
+                double corr = 0;
+                double deltas = 0.00002;
+                if (eta > 2 || (eta > -2 && eta < -1.05)) {
+                    if (pT > 450.0)
+                        corr += std::abs(450.0 - 45) / 100 * deltas;  // Above 450 GeV flat
+                    else
+                        corr += std::abs(pT - 45) / 100 * deltas;
+                }
+                if (eta < -2 || (eta < 2 && eta> 1.5)) {
+                    if (pT > 450.0)
+                        corr += std::abs(450.0 - 45) / 200 * deltas;  // Above 450 GeV flat
+                    else
+                        corr += std::abs(pT - 45) / 200 * deltas;
+                }
+                // Systematics for Run3 2022 data
+                if ( (trk.year==MCP::DataYear::Data22) && pT > 100.0) {
+                    if (eta < 0 && eta> -0.5) corr += 2.1*deltas;
+                    else if (eta < -1.05) corr += 1.1*deltas;
+                    else if (eta > 0.5 ) corr += 0.8*deltas;
+                }
+                ATH_MSG_VERBOSE("Deltas corr: "<<deltas);
+
+
+                corrections.push_back(corr*scale);
                 ATH_MSG_VERBOSE("final corr: "<<corr);
 
             }
@@ -424,10 +447,14 @@ namespace CP
             result.insert(SystematicVariation("MUON_SAGITTA_RESBIAS", -1));
         }
 
-        
         result.insert(SystematicVariation("MUON_SAGITTA_DATASTAT", 1));
         result.insert(SystematicVariation("MUON_SAGITTA_DATASTAT", -1));
         
+        result.insert(SystematicVariation("MUON_SAGITTA_GLOBAL", 1));
+        result.insert(SystematicVariation("MUON_SAGITTA_GLOBAL", -1));
+
+        result.insert(SystematicVariation("MUON_SAGITTA_PTEXTRA", 1));
+        result.insert(SystematicVariation("MUON_SAGITTA_PTEXTRA", -1));
 
         return result;
     }
@@ -438,6 +465,8 @@ namespace CP
     {
         param.SagittaRho        = MCP::SystVariation::Default;
         param.SagittaBias       = MCP::SystVariation::Default;
+        param.SagittaGlobal     = MCP::SystVariation::Default;
+        param.SagittaPtExtra    = MCP::SystVariation::Default;
         param.SagittaDataStat   = MCP::SystVariation::Default;
         param.SagittaEtaSlice   = MCP::SystVariation::Default;
 
@@ -453,6 +482,20 @@ namespace CP
 
         if      (syst == SystematicVariation("MUON_SAGITTA_RESBIAS",  1)) param.SagittaBias = MCP::SystVariation::Down;
         else if (syst == SystematicVariation("MUON_SAGITTA_RESBIAS", -1)) param.SagittaBias = MCP::SystVariation::Up;
+        else if (!syst.empty()) return StatusCode::FAILURE;
+
+        // Sagitta Residual Global Bias systematics
+        syst = systConfig.getSystematicByBaseName("MUON_SAGITTA_GLOBAL");
+
+        if      (syst == SystematicVariation("MUON_SAGITTA_GLOBAL",  1)) param.SagittaGlobal = MCP::SystVariation::Down;
+        else if (syst == SystematicVariation("MUON_SAGITTA_GLOBAL", -1)) param.SagittaGlobal = MCP::SystVariation::Up;
+        else if (!syst.empty()) return StatusCode::FAILURE;
+
+        // Sagitta Residual Bias systematics pt extrapolation
+        syst = systConfig.getSystematicByBaseName("MUON_SAGITTA_PTEXTRA");
+
+        if      (syst == SystematicVariation("MUON_SAGITTA_PTEXTRA",  1)) param.SagittaPtExtra = MCP::SystVariation::Down;
+        else if (syst == SystematicVariation("MUON_SAGITTA_PTEXTRA", -1)) param.SagittaPtExtra = MCP::SystVariation::Up;
         else if (!syst.empty()) return StatusCode::FAILURE;
 
         // Sagitta Residual Bias systematics
@@ -495,6 +538,8 @@ namespace CP
         //
         ATH_MSG_DEBUG("Systematic variation's parameters, SagittaRho: " << param.SagittaRho);
         ATH_MSG_DEBUG("Systematic variation's parameters, SagittaBias: " << param.SagittaBias);
+        ATH_MSG_DEBUG("Systematic variation's parameters, SagittaGlobal: " << param.SagittaGlobal);
+        ATH_MSG_DEBUG("Systematic variation's parameters, SagittaPtExtra: " << param.SagittaPtExtra);
         ATH_MSG_DEBUG("Systematic variation's parameters, SagittaDataStat: " << param.SagittaDataStat);
         ATH_MSG_DEBUG("Systematic variation's parameters, SagittaEtaSlice: " << param.SagittaEtaSlice);
 

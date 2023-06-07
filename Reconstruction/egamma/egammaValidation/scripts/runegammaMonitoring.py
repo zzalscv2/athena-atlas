@@ -14,7 +14,14 @@ parser.add_argument("-m", "--maxEvents", default=60000, type=int,
                     help="The number of events to run. -1 runs all events.")
 parser.add_argument("-p", "--particleType", default='electron', type=str,
                     help="The particle type. electron or gamma")
+parser.add_argument("-fwd", "--addFwd", default='False', type=str,
+                    help="Also run on fwd electrons")
 args = parser.parse_args()
+
+addFwd = True if args.addFwd == 'True' else False
+if args.particleType == 'gamma' and addFwd:
+    print('Fwd electrons can only be read in an electron run')
+    addFwd = False
 
 # Configure
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -41,7 +48,7 @@ acc.merge(TileGMCfg(flags))
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 acc.merge(PoolReadCfg(flags))
 from egammaValidation.egammaMonitoringConfig import egammaMonitoringCfg
-acc.merge(egammaMonitoringCfg(flags, particleType = args.particleType))
+acc.merge(egammaMonitoringCfg(flags, particleType = args.particleType, addFwd = addFwd))
 
 # Execute and finish
 sc = acc.run(maxEvents=args.maxEvents)

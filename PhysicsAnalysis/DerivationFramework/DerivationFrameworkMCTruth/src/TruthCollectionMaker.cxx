@@ -26,9 +26,6 @@
 DerivationFramework::TruthCollectionMaker::TruthCollectionMaker(const std::string& t,
                                                                 const std::string& n,
                                                                 const IInterface* p)
-//m_do_compress = true: removes particles with the same pdgId in a decay chain (but keeps first and last)
-//m_do_sherpa = true: checks if there are truth W bosons in the current record.  If not, tries to combine W daughters to create one.
-//Disclaimer: m_do_sherpa currently only works for W+jets.  It will not work for Z+jets for dibosons (coming soon).
   : ExpressionParserUser<AthAlgTool>(t,n,p)
   , m_ntotpart(0)
   , m_npasspart(0)

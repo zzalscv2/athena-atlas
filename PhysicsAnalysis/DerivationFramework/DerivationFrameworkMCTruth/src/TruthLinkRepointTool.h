@@ -11,6 +11,8 @@
 
 // Types for functions. Note these are typedefs, so can't forward reference.
 #include "xAODTruth/TruthParticleContainer.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteDecorHandleKeyArray.h"
 
 // STL includes
 #include <string>
@@ -23,14 +25,19 @@ namespace DerivationFramework {
       TruthLinkRepointTool(const std::string& t, const std::string& n, const IInterface* p);
       ~TruthLinkRepointTool();
       virtual StatusCode addBranches() const override final;
+      virtual StatusCode initialize() override final;
 
     private:
       /// Parameter: input collection key
-      std::string m_recoKey;
+      SG::ReadHandleKey<xAOD::IParticleContainer> m_recoKey{this,"RecoCollection", "Muons", 
+                                            "Name of reco collection for decoration"};
       /// Parameter: output decoration
-      std::string m_decOutput;
+      Gaudi::Property<std::string> m_decOutput{this, "OutputDecoration",
+                                  "TruthLink", "Name of the output decoration on the reco object"};
       /// Parameter: target collection
-      std::vector<std::string> m_targetKeys;
+      SG::ReadHandleKeyArray<xAOD::TruthParticleContainer> m_targetKeys{this, "TargetCollections", {"TruthMuons","TruthPhotons","TruthElectrons"}, "Name of target truth collections"};
+      
+      SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_decorKey{this, "TargetDecorKeys", "", "Will be overwritten during initialize"};
       // Helper function for finding matching truth particle and warning consistently
       static int find_match(const xAOD::TruthParticle* p, const xAOD::TruthParticleContainer* c) ;
   }; 

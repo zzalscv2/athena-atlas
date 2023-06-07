@@ -122,6 +122,11 @@ namespace xAOD {
       /// Function printing the I/O statistics of the current process
       void printIOStats() const;
 
+      /// Function to silence warnings associated with broken element
+      /// links. These appear harmless so long as you don't actually
+      /// try to access the links (which will cause other errors).
+      void setPrintEventProxyWarnings(bool);
+
       /// @name Setup functions
       /// @{
 
@@ -279,6 +284,7 @@ namespace xAOD {
                           ::Bool_t overwrite = kFALSE,
                           ::Bool_t metadata = kFALSE,
                           ::Bool_t isOwner = kTRUE );
+
    protected:
       /// Function for retrieving an output object in a non-template way
       void* getOutputObject( SG::sgkey_t key,
@@ -463,6 +469,9 @@ namespace xAOD {
 
       /// Container name re-mapping rules
       std::unordered_map< std::string, std::string > m_nameRemapping;
+
+      /// Option to silence common warnings that seem to be harmless
+      Bool_t m_printEventProxyWarnings = true;
 
       /// @name Variable(s) used in the IProxyDict implementation
       /// @{

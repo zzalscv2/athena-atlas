@@ -9,9 +9,6 @@
 #include <vector>
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/AlgTool.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonRIO_OnTrack/MuonClusterOnTrack.h"
 #include "MuonReadoutGeometry/ArrayHelper.h"
@@ -184,10 +181,16 @@ namespace Muon {
         Gaudi::Property<bool> m_ipConstraint{this, "IPConstraint", true};  // use a ip perigee(0,0) constraint in the segment fit
         Gaudi::Property<double> m_maxClustDist{this, "ClusterDistance", 5.};
         Gaudi::Property<int> m_nOfSeedLayers{this, "NOfSeedLayers", 1};
-        Gaudi::Property<float> m_maxNumberOfMMHitsPerLayer{this, "maxNumberOfMMHitsPerLayer", 75, "If the average number of MM hits per layer exceeds this number MM segment reco is suspended for this pattern"};
 
 
         Gaudi::Property<bool> m_useStereoSeeding{this, "SeedMMStereos", true};
+        /// Protection against slobbering Micromega events
+        Gaudi::Property<unsigned int> m_ocupMmBinWidth{this, "MmOccupancyBinWidth", 100, 
+        "Size of the channel window to group the MicroMegaCluster"};
+        Gaudi::Property<unsigned int> m_ocupMmNumPerBin{this, "MmOccupancySingleCut", 5, 
+        "Cut on the number of MicroMega clusters in a particular occupancy bin"};
+        Gaudi::Property<unsigned int> m_ocupMmNumPerPair{this, "MmOccupancyPairCut", 7,
+        "Cut on the number of MicroMega clusters in two neighbouring occupancy bins"};
     public:
         using SeedMeasurement = NSWSeed::SeedMeasurement;
         using MeasVec = NSWSeed::MeasVec;
@@ -211,6 +214,9 @@ namespace Muon {
         template <size_t N>
         std::string printSeed(const std::array<SeedMeasurement, N>& seed) const;
         std::string print(const SeedMeasurement& meas) const;
+        std::string print(const MeasVec& clusters) const;
+        std::string print(const LayerMeasVec& sortedVec) const;
+        
 
         
     private:
@@ -277,9 +283,13 @@ namespace Muon {
             TooWide
 
         };
-        /// Checks whether the two measurements are compatible within the IP constraint
-        
+        /// Checks whether the two measurements are compatible within the IP constraint        
         ChannelConstraint compatiblyFromIP(const SeedMeasurement& meas1, const SeedMeasurement& meas2) const;
+
+        /// @brief  Removes clusters from high activity areas in the detector
+        MeasVec vetoBursts( MeasVec && clustInLay ) const;
+
+        
 
     };
 

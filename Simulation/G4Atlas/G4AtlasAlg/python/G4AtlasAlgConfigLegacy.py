@@ -1,6 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
-from __future__ import print_function
-
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon import CfgMgr
 
 def getG4AtlasAlg(name='G4AtlasAlg', **kwargs):
@@ -40,6 +38,11 @@ def getG4AtlasAlg(name='G4AtlasAlg', **kwargs):
 
     kwargs.setdefault('TruthRecordService', simFlags.TruthStrategy.TruthServiceName())
     kwargs.setdefault('GeoIDSvc', 'ISF_GeoIDSvc')
+
+    from ISF_Config.ISF_jobProperties import ISF_Flags
+    if ISF_Flags.Simulator.isQuasiStable():
+        kwargs.setdefault('InputConverter', 'ISF_LongLivedInputConverter')
+        kwargs.setdefault('QuasiStablePatcher', 'ZeroLifetimePositioner')
 
     ## G4AtlasAlg verbosities (available domains = Navigator, Propagator, Tracking, Stepping, Stacking, Event)
     ## Set stepper verbose = 1 if the Athena logging level is <= DEBUG

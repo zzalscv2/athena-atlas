@@ -72,7 +72,7 @@ StatusCode MuonRdoToMuonDigitTool::initialize() {
     ATH_CHECK(m_stgcRdoDecoderTool.retrieve(DisableTool{!m_decodesTgcRDO}));
     ATH_CHECK(m_mmRdoDecoderTool.retrieve(DisableTool{!m_decodeMmRDO}));
 
-   ATH_CHECK(m_DetectorManagerKey.initialize());
+    ATH_CHECK(m_DetectorManagerKey.initialize());
    
 
     return StatusCode::SUCCESS;
@@ -715,6 +715,7 @@ StatusCode MuonRdoToMuonDigitTool::decodeNRpcRDO(const EventContext& ctx, RpcDig
         
         /// Fill the cabling object
         CablingData conv_obj{};
+        conv_obj.subDetector = rdo->subdetector();
         conv_obj.tdcSector = rdo->tdcsector();
         conv_obj.tdc = rdo->tdc();
         conv_obj.channelId = rdo->channel();
@@ -761,4 +762,3 @@ StatusCode MuonRdoToMuonDigitTool::decodeNRpcRDO(const EventContext& ctx, RpcDig
     }
     return StatusCode::SUCCESS;
 }
-    

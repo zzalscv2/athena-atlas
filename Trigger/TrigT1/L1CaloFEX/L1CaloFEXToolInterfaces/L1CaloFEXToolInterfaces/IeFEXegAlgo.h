@@ -37,6 +37,7 @@ Interface definition for eFEXegAlgo
     virtual void getRealPhi(float & phi) = 0;
     virtual void getRealEta(float & eta) = 0;
     virtual std::unique_ptr<eFEXegTOB> geteFEXegTOB() = 0;
+    virtual void getClusterCells(std::vector<unsigned int> &cellETs) = 0;
     virtual unsigned int getET() = 0;
     virtual unsigned int dmCorrection(unsigned int ET, unsigned int layer) = 0;
     virtual void getWindowET(int layer, int jPhi, int SCID, unsigned int &) = 0;

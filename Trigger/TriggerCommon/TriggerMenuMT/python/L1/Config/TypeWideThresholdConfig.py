@@ -115,13 +115,13 @@ def getConfig_eEM():
     bitshift_rhad = 3
     bitshift_wstot = 5   
     reta_fw_loose = 72
-    reta_fw_medium = 81
-    reta_fw_tight = 92
+    reta_fw_medium = 92
+    reta_fw_tight = 106
     rhad_fw_loose = 92
-    rhad_fw_medium = 126
+    rhad_fw_medium = 192
     rhad_fw_tight = 192
     wstot_fw_loose = 8
-    wstot_fw_medium = 16
+    wstot_fw_medium = 29
     wstot_fw_tight = 29 
     # based on https://indico.cern.ch/event/1035198/contributions/4378014/attachments/2251846/3820098/20210526_l1calo_TGM.pdf
     confObj["workingPoints"]["Loose"] = [
@@ -401,9 +401,9 @@ def getConfig_gLJ():
     confObj = odict()
     confObj["ptMinToTopo1"] = 6 
     confObj["ptMinToTopo2"] = 6 
-    confObj["seedThrA"] = 3 
-    confObj["seedThrB"] = 3 
-    confObj["seedThrC"] = 3 
+    confObj["seedThrA"] = 20
+    confObj["seedThrB"] = 20
+    confObj["seedThrC"] = 20 
     confObj["rhoTowerMinA"] = -9.6 
     confObj["rhoTowerMinB"] = -9.6 
     confObj["rhoTowerMinC"] = -9.6 
@@ -454,9 +454,9 @@ def getConfig_jTE():
 
 def getConfig_gXE():
     confObj = odict()
-    confObj["seedThrA"] = 25 
-    confObj["seedThrB"] = 25 
-    confObj["seedThrC"] = 25 
+    confObj["seedThrA"] = 24 
+    confObj["seedThrB"] = 24 
+    confObj["seedThrC"] = 24 
     confObj["XERHO_sigmaPosA"] = 3 
     confObj["XERHO_sigmaPosB"] = 3 
     confObj["XERHO_sigmaPosC"] = 3 

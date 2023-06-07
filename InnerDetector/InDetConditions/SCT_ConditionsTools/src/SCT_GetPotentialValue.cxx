@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_ConditionsTools/SCT_GetPotentialValue.h"
-#include <array>
+
 
 double 
 getPotentialValue(const int ix, const int iy){
-  constexpr double potentialArray[81][115] = {
+  static constexpr double potentialArray[81][115] = {
   //--- PotentialArray[81][115] 
   //      ix = 0 -  80 : 5um step, 40um - 440 um
   //      iy = 0 - 114 : 2.5um step, 0um - 285 um

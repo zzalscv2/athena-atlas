@@ -34,6 +34,7 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ISvcLocator.h"
@@ -42,7 +43,6 @@
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/DataHandle.h"
 #include "GeneratorObjects/McEventCollection.h"
-#include "HepPDT/ParticleData.hh"
 #include "HepPID/ParticleName.hh"
 
 #include "AthenaKernel/RNGWrapper.h"
@@ -75,8 +75,6 @@ EvtInclusiveDecay::EvtInclusiveDecay(const std::string& name, ISvcLocator* pSvcL
   declareProperty("allowAllKnownDecays", m_allowAllKnownDecays=true);
   declareProperty("allowDefaultBDecays", m_allowDefaultBDecays=true);
   declareProperty("whiteList",m_whiteList);
-
-  declareProperty("DecayedParticleStatus", m_decayedStatus=2);
 
   // Level of output
   declareProperty("printHepMCBeforeEvtGen", m_printHepMCBeforeEvtGen=false);
@@ -134,7 +132,6 @@ StatusCode EvtInclusiveDecay::initialize() {
   msg(MSG::INFO) << "* prohibitRemoveSelfDecay = " << m_prohibitRemoveSelfDecay << endmsg;
   msg(MSG::INFO) << "* allowAllKnownDecays     = " << m_allowAllKnownDecays << endmsg;
   msg(MSG::INFO) << "* allowDefaultBDecays     = " << m_allowDefaultBDecays << endmsg;
-  msg(MSG::INFO) << "Decayed particle status   = " << m_decayedStatus << endmsg;
   msg(MSG::INFO) << "User selection parameters:" << endmsg;
   msg(MSG::INFO) << "* applyUserSelection             = " << m_applyUserSelection << endmsg;
   msg(MSG::INFO) << "* userSelRequireOppositeSignedMu = " << m_userSelRequireOppositeSignedMu << endmsg;
@@ -480,7 +477,7 @@ void EvtInclusiveDecay::removeDecayTree(HepMC::GenEvent* hepMC, HepMC::GenPartic
 // The following status codes are used:
 //
 // status == 1     - undecayed particle (also for particles that are not supposed to decay)
-// status == m_decayedStatus (default 2)   - particle decayed by EvtGen
+// status == 2   - particle decayed by EvtGen
 // status == 899   - particle was supposed to be decayed by EvtGen, but found no decay channel
 //
 // Note that if a particle with an existing decay tree but no defined decay channels
@@ -496,7 +493,7 @@ void EvtInclusiveDecay::decayParticle(HepMC::GenEvent* hepMC, HepMC::GenParticle
 
   // Remove existing decay tree, if any, and flag particle as being decayed by EvtGen
   removeDecayTree(hepMC,part);
-  part->set_status(899);
+  part->set_status(HepMC::EVTGENUNDECAYEDSTATUS);
 
   // Create EvtGen version of part and have EvtGen decay it.
   // Since EvtGen uses GeV, convert particles momentum from MeV to GeV.
@@ -518,7 +515,7 @@ void EvtInclusiveDecay::decayParticle(HepMC::GenEvent* hepMC, HepMC::GenParticle
   EvtVector4R treeStart(ct_s,x_s,y_s,z_s);
   // Add new decay tree to hepMC, converting back from GeV to MeV.
   addEvtGenDecayTree(hepMC, part, evtPart, treeStart, 1000.);
-  if(evtPart->getNDaug() !=0) part->set_status(m_decayedStatus);
+  if(evtPart->getNDaug() !=0) part->set_status(2);
   evtPart->deleteTree();
 }
 
@@ -546,7 +543,7 @@ void EvtInclusiveDecay::addEvtGenDecayTree(HepMC::GenEvent* hepMC, HepMC::GenPar
       double pz=(evtPart->getDaug(it)->getP4Lab()).get(3) * momentumScaleFactor;
       int id=EvtPDL::getStdHep(evtPart->getDaug(it)->getId());
       int status=1;
-      if(evtPart->getDaug(it)->getNDaug() != 0) status=m_decayedStatus;
+      if(evtPart->getDaug(it)->getNDaug() != 0) status=2;
       HepMC::GenParticlePtr daughter = HepMC::newGenParticlePtr(HepMC::FourVector(px,py,pz,e),id,status);
       end_vtx->add_particle_out(daughter);
       addEvtGenDecayTree(hepMC, daughter, evtPart->getDaug(it), treeStart, momentumScaleFactor);
@@ -855,7 +852,7 @@ std::string EvtInclusiveDecay::pdgName(HepMC::ConstGenParticlePtr p, bool status
          ((barcodeList==0) && isToBeDecayed(p,false)) )
       buf << "\033[7m";   // reverse
     if (p->status() != 1) {
-      if (p->status() == m_decayedStatus)
+      if (p->status() == 2)
         buf << "\033[33m";   // yellow
       else
         buf << "\033[31m";   // red
@@ -876,7 +873,7 @@ std::string EvtInclusiveDecay::pdgName(HepMC::ConstGenParticlePtr p, bool status
          ((barcodeList==0) && isToBeDecayed(p,false)) )
       buf << "\033[7m";   // reverse
     if (p->status() != 1) {
-      if (p->status() == m_decayedStatus)
+      if (p->status() == 2)
         buf << "\033[33m";   // yellow
       else
         buf << "\033[31m";   // red

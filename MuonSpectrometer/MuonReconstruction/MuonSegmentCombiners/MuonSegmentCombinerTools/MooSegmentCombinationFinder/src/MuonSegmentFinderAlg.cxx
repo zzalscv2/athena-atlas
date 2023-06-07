@@ -244,6 +244,7 @@ void MuonSegmentFinderAlg::createNSWSegments(const EventContext& ctx,
             if (!cl) continue;           
             else if (!m_doMMSegments && m_idHelperSvc->isMM(cl->identify())) continue;
             else if (!m_doSTgcSegments && m_idHelperSvc->issTgc(cl->identify())) continue;
+            else if (m_removeUsedNswHits && cache.usedHits.count(cl->identify())) continue;
             const Muon::MuonClusterOnTrack* newCluster = m_clusterCreator->createRIO_OnTrack(*cl, cl->globalPosition());
             if (!newCluster) continue;
             std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>>& clusters = clustersPerSector[sector];

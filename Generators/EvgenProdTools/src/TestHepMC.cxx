@@ -5,7 +5,8 @@
 
 #include "EvgenProdTools/TestHepMC.h"
 #include "GaudiKernel/DataSvc.h"
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "PathResolver/PathResolver.h"
 
 // For find
@@ -517,7 +518,7 @@ StatusCode TestHepMC::execute() {
       int first_dig = ppdgid;
       while (first_dig > 9) first_dig /= 10;
 
-      if ((pstatus == 1 ) && (!pitr->end_vertex()) && (!m_nonint.operator()(pitr)) && (!pid.isNucleus()) && (first_dig != 9) ) {
+      if ((pstatus == 1 ) && (!pitr->end_vertex()) && (MC::isSimInteracting(pitr)) && (!pid.isNucleus()) && (first_dig != 9) ) {
 
         int known_byG4 = 0;
         std::vector<int>::size_type count =0;

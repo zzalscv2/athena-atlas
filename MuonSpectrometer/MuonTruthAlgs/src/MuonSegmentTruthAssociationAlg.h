@@ -49,7 +49,6 @@ namespace Muon {
         SG::ReadHandleKey<CscSimDataCollection> m_cscSimData{this, "CSC_SDO_Container", "CSC_SDO", "CSC SDO"};
         SG::ReadHandleKey<TrackRecordCollection> m_trackRecord{this, "TrackRecord", "MuonEntryLayerFilter", "Track Record Collection"};
 
-        Gaudi::Property<int> m_barcodeOffset{this, "BarcodeOffset", 1000000, "barcode offset for matching truth particles"};
     };
 
 }  // namespace Muon

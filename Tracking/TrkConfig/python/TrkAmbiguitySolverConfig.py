@@ -149,7 +149,6 @@ def TrkAmbiguitySolver_TRT_Cfg(
         SimpleAmbiguityProcessorTool_TRT_Cfg(
             flags,
             ClusterSplitProbContainer=ClusterSplitProbContainer))
-    acc.addPublicTool(InDetTRT_SeededAmbiguityProcessor)
 
     kwargs.setdefault("TrackInput", 'ScoredMapInDetTRT_SeededAmbiguityScore')
     kwargs.setdefault("TrackOutput", 'ResolvedTRTSeededTracks')

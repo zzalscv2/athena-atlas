@@ -5,7 +5,6 @@
 # art-include: 21.0/Athena
 # art-include: 21.0-TrigMC/Athena
 # art-include: master/Athena
-# art-include: 23.0/Athena
 # art-include: 22.0/Athena
 # art-include: 22.0-mc20/Athena
 # art-include: 21.3/Athena

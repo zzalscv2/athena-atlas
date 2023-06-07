@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -28,6 +28,9 @@ Interface definition for eFEXFormTOBs
 
     virtual uint32_t formTauTOBWord(int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) = 0;
     virtual std::vector<uint32_t> formTauxTOBWords(int &, int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) = 0;
+
+    virtual uint32_t formTauBDTTOBWord(int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) = 0;
+    virtual std::vector<uint32_t> formTauBDTxTOBWords(int &, int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) = 0;
 
     virtual uint32_t formEmTOBWord(int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) = 0;
     virtual std::vector<uint32_t> formEmxTOBWords(int &, int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) = 0;

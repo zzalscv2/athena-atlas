@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM includes
@@ -7,6 +7,8 @@
 // Local includes
 #include "AssociationUtils/OverlapRemovalDefs.h"
 #include "AssociationUtils/OverlapRemovalGenUseAlg.h"
+#include "AsgDataHandles/ReadHandle.h"
+#include "AsgTools/CurrentContext.h"
 
 namespace
 {
@@ -20,42 +22,7 @@ namespace
 //-----------------------------------------------------------------------------
 OverlapRemovalGenUseAlg::OverlapRemovalGenUseAlg(const std::string& name,
 		ISvcLocator* svcLoc)
-	: EL::AnaAlgorithm(name, svcLoc),
-	m_orTool("OverlapRemovalTool", this)
-{
-    declareProperty("OverlapRemovalTool", m_orTool);
-    declareProperty("SelectionLabel", m_selectionLabel="selected",
-                    "Input label for the OverlapRemovalTool");
-    declareProperty("OverlapLabel", m_overlapLabel="overlaps",
-                    "Output label for the OverlapRemovalTool");
-    declareProperty("DefaultValue", m_defaultValue=true,
-                    "Default value for objects failing OR");
-    declareProperty("JetKey", m_jetKey="AntiKt4EMTopoJets",
-                    "StoreGate/TEvent key for jets");
-    declareProperty("BJetLabel", m_bJetLabel="",
-                    "Input label for b-tagged jets");
-    declareProperty("ElectronKey", m_electronKey="Electrons",
-                    "StoreGate/TEvent key for electrons");
-    declareProperty("ElectronLabel", m_electronLabel="DFCommonElectronsLHLoose",
-                    "Input label for passing electrons");
-    declareProperty("PhotonKey", m_photonKey="Photons",
-                    "StoreGate/TEvent key for photons");
-    declareProperty("PhotonLabel", m_photonLabel="DFCommonPhotonsIsEMLoose",
-                    "Input label for passing photons");
-    declareProperty("MuonKey", m_muonKey="Muons",
-                    "StoreGate/TEvent key for muons");
-    declareProperty("MuonLabel", m_muonLabel="DFCommonMuonPassIDCuts",
-                    "Input label for passing muons");
-    declareProperty("TauKey", m_tauKey="TauJets",
-                    "StoreGate/TEvent key for taus");
-    declareProperty("TauLabel", m_tauLabel="DFCommonTausLoose",
-                    "Input label for passing taus");
-    declareProperty("PtCut", m_ptCut = 20.0,
-                    "Minimum pt for consideration");
-    declareProperty("EtaCut", m_etaCut = 4.5,
-                    "Maximum eta for consideration");
-
-}
+	: EL::AnaAlgorithm(name, svcLoc) { }
 
 
 //-----------------------------------------------------------------------------
@@ -67,7 +34,24 @@ StatusCode OverlapRemovalGenUseAlg::initialize()
 
 	// Try to retrieve the tool
 	ATH_CHECK( m_orTool.retrieve() );
-
+  m_jetKey.declareDependency(m_bJetLabel);
+  m_electronKey.declareDependency(m_electronLabel);
+  m_photonKey.declareDependency(m_photonLabel);
+  m_muonKey.declareDependency(m_muonLabel);
+  m_tauKey.declareDependency(m_tauLabel);
+  
+  m_jetKey.declareOutput(m_overlapLabel);
+  m_electronKey.declareOutput(m_overlapLabel);
+  m_photonKey.declareOutput(m_overlapLabel);
+  m_muonKey.declareOutput(m_overlapLabel);
+  m_tauKey.declareOutput(m_overlapLabel);
+  ATH_CHECK(m_jetKey.initialize());
+  ATH_CHECK(m_electronKey.initialize());
+  ATH_CHECK(m_muonKey.initialize());
+  ATH_CHECK(m_vtxKey.initialize());
+  ATH_CHECK(m_photonKey.initialize(m_photonKey.empty()));
+  ATH_CHECK(m_tauKey.initialize(m_tauKey.empty()));
+  
 	return StatusCode::SUCCESS;
 }
 
@@ -76,44 +60,66 @@ StatusCode OverlapRemovalGenUseAlg::initialize()
 //-----------------------------------------------------------------------------
 StatusCode OverlapRemovalGenUseAlg::execute()
 {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
     // Electrons
-    const xAOD::ElectronContainer* electrons = 0;
-    ATH_CHECK( evtStore()->retrieve(electrons, m_electronKey) );
+    SG::ReadHandle<xAOD::ElectronContainer> electrons{m_electronKey, ctx};
+    if (!electrons.isValid()) {
+      ATH_MSG_FATAL("Failed to retrieve electron container "<<m_electronKey.key());
+      return StatusCode::FAILURE;
+    }
     applySelection(*electrons);
     // Muons
-    const xAOD::MuonContainer* muons = 0;
-    ATH_CHECK( evtStore()->retrieve(muons, m_muonKey) );
+    SG::ReadHandle<xAOD::MuonContainer> muons{m_muonKey, ctx};
+    if (!muons.isValid()) {
+      ATH_MSG_FATAL("Failed to retrieve muon container "<<m_muonKey.key());
+      return StatusCode::FAILURE;
+    }
     applySelection(*muons);
     // Jets
-    const xAOD::JetContainer* jets = 0;
-    ATH_CHECK( evtStore()->retrieve(jets, m_jetKey) );
+    SG::ReadHandle<xAOD::JetContainer> jets{m_jetKey, ctx};
+    if (!jets.isValid()) {
+      ATH_MSG_FATAL("Failed to retrieve jet container "<<m_jetKey.key());
+      return StatusCode::FAILURE;
+    }
     applySelection(*jets);
     // Taus
-    const xAOD::TauJetContainer* taus = 0;
+    const xAOD::TauJetContainer* taus{nullptr};
     if(!m_tauKey.empty()) {
-        ATH_CHECK( evtStore()->retrieve(taus, m_tauKey) );
+        SG::ReadHandle<xAOD::TauJetContainer> readHandle{m_tauKey, ctx};
+        if (!readHandle.isValid()) {
+            ATH_MSG_FATAL("Failed to retrieve TauJetContainer "<<m_tauKey.key());
+            return StatusCode::FAILURE;
+        }
+        taus = readHandle.cptr();
         applySelection(*taus);
     }
-    // Photons
-    const xAOD::PhotonContainer* photons = 0;
+    const xAOD::PhotonContainer* photons{nullptr};
     if(!m_photonKey.empty()) {
-        ATH_CHECK( evtStore()->retrieve(photons, m_photonKey) );
+        SG::ReadHandle<xAOD::PhotonContainer> readHandle{m_photonKey, ctx};
+        if (!readHandle.isValid()) {
+            ATH_MSG_FATAL("Failed to retrieve PhotonContainer "<<m_photonKey.key());
+            return StatusCode::FAILURE;
+        }
+        photons = readHandle.cptr();
         applySelection(*photons);
     }
 
     // Primary Vertices
-    const xAOD::VertexContainer* vertices = nullptr;
-    int checkVtx = 0;
-    if(evtStore()->retrieve(vertices, "PrimaryVertices").isSuccess()) {
-        for(auto vtx : *vertices) {
-            if(vtx->vertexType() == xAOD::VxType::PriVtx)
-                checkVtx = 1;
-        }
+    SG::ReadHandle<xAOD::VertexContainer> vertices{m_vtxKey, ctx};
+    if (!vertices.isValid()) {
+       ATH_MSG_FATAL("Failed to retrieve primary vertex container "<<m_vtxKey.key());
+       return StatusCode::FAILURE;
     }
+    bool checkVtx = false;
+    for(const xAOD::Vertex* vtx : *vertices) {
+        if(vtx->vertexType() == xAOD::VxType::PriVtx)
+            checkVtx = true;
+    }
+    
 
-    if(checkVtx==1){
+    if(checkVtx) {
         // Apply the overlap removal
-        ATH_CHECK( m_orTool->removeOverlaps(electrons, muons, jets, taus, photons) );}
+        ATH_CHECK( m_orTool->removeOverlaps(electrons.cptr(), muons.cptr(), jets.cptr(), taus, photons) );}
     else{
         // Reset all decorations to failing
         ATH_MSG_DEBUG("No primary vertices found, cannot do overlap removal! Will return all fails.");
@@ -146,8 +152,7 @@ StatusCode OverlapRemovalGenUseAlg::execute()
 // Reset output decoration
 //---------------------------------------------------------------------------
 	template<class ContainerType>
-void OverlapRemovalGenUseAlg::setDefaultDecorations(const ContainerType& container)
-{
+void OverlapRemovalGenUseAlg::setDefaultDecorations(const ContainerType& container) {
 	const static ort::inputDecorator_t defaultDec(m_overlapLabel);
 	for(auto obj : container){
 		defaultDec(*obj) = m_defaultValue; //default to all objects being overlaps if we can't get primary vertices. Ensures the event cleaning decision fails.
@@ -161,7 +166,7 @@ void OverlapRemovalGenUseAlg::setDefaultDecorations(const ContainerType& contain
 	template<class ContainerType>
 void OverlapRemovalGenUseAlg::applySelection(const ContainerType& container)
 {
-	const static ort::inputDecorator_t selDec(m_selectionLabel);
+	const ort::inputDecorator_t selDec(m_selectionLabel);
 	for(auto obj : container){
 		selDec(*obj) = selectObject(*obj);
         ATH_MSG_VERBOSE("  Obj " << obj->index() << " of type " << obj->type()

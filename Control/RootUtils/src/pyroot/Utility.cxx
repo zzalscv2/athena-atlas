@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file RootUtils/src/pyroot/Utility.cxx
@@ -36,29 +36,21 @@ int GetBuffer( PyObject* pyobject, char tc, int size, void*& buf, Bool_t check )
 
    PySequenceMethods* seqmeths = Py_TYPE(pyobject)->tp_as_sequence;
    if ( seqmeths != 0 && bufprocs != 0
-#if  PY_VERSION_HEX < 0x03000000
-        && bufprocs->bf_getwritebuffer != 0
-        && (*(bufprocs->bf_getsegcount))( pyobject, 0 ) == 1
-#else
         && bufprocs->bf_getbuffer != 0
-#endif
       ) {
 
    // get the buffer
-#if PY_VERSION_HEX < 0x03000000
-      Py_ssize_t buflen = (*(bufprocs->bf_getwritebuffer))( pyobject, 0, &buf );
-#else
       Py_buffer bufinfo;
       (*(bufprocs->bf_getbuffer))( pyobject, &bufinfo, PyBUF_WRITABLE );
       buf = (char*)bufinfo.buf;
       Py_ssize_t buflen = bufinfo.len;
-#endif
 
       if ( buf && check == kTRUE ) {
       // determine buffer compatibility (use "buf" as a status flag)
          PyObject* pytc = PyObject_GetAttrString( pyobject, "typecode");
          if ( pytc != 0 ) {     // for array objects
-            if ( PyROOT_PyUnicode_AsString( pytc )[0] != tc )
+            const char* s = PyUnicode_AsUTF8AndSize( pytc, nullptr );
+            if ( s && s[0] != tc )
                buf = 0;         // no match
             Py_DECREF( pytc );
          } else if ( seqmeths->sq_length &&
@@ -74,9 +66,11 @@ int GetBuffer( PyObject* pyobject, char tc, int size, void*& buf, Bool_t check )
          // clarify error message
             PyObject* pytype = 0, *pyvalue = 0, *pytrace = 0;
             PyErr_Fetch( &pytype, &pyvalue, &pytrace );
-            PyObject* pyvalue2 = PyROOT_PyUnicode_FromFormat(
+            const char* s = PyUnicode_AsUTF8AndSize( pyvalue, nullptr );
+            if (!s) s = "(null)";
+            PyObject* pyvalue2 = PyUnicode_FromFormat(
                (char*)"%s and given element size (%ld) do not match needed (%d)",
-               PyROOT_PyUnicode_AsString( pyvalue ),
+               s,
                seqmeths->sq_length ? (Long_t)(buflen / (*(seqmeths->sq_length))( pyobject )) : (Long_t)buflen,
                size );
             Py_DECREF( pyvalue );
@@ -108,27 +102,23 @@ PyObject* rootModule()
 
 TClass* objectIsA (PyObject* obj)
 {
-  PyObject* repr = PyObject_Repr (obj);
-  if (!repr) return nullptr;
-  const char* s = PyROOT_PyUnicode_AsString (repr);
-  if (*s == '<') ++s;
-  if (strncmp (s, "ROOT.", 5) == 0)
-    s += 5;
-  if (strncmp (s, "cppyy.gbl.", 10) == 0)
-    s += 10;
-  const char* p = strstr (s, " object ");
-  if (!p) return nullptr;
-  std::string name;
-  name.reserve (p-s + 10);
-  while (s < p) {
-    if (*s == '.')
-      name += "::";
-    else
-      name += *s;
-    ++s;
+  TClass* cls = nullptr;
+  PyObject* attr = PyObject_GetAttrString ((PyObject*)Py_TYPE(obj), "__cpp_name__");
+  if (attr) {
+    PyObject* buf = PyUnicode_AsASCIIString (attr);
+    if (buf) {
+      char* s = PyBytes_AsString (buf);
+      if (*s == '<') ++s;
+      if (strncmp (s, "ROOT.", 5) == 0)
+        s += 5;
+      if (strncmp (s, "cppyy.gbl.", 10) == 0)
+        s += 10;
+      cls = TClass::GetClass (s);
+      Py_DECREF(buf);
+    }
+    Py_DECREF(attr);
   }
-  TClass* cls = TClass::GetClass (name.c_str());
-  Py_DECREF (repr);
+  PyErr_Clear();
   return cls;
 }
 

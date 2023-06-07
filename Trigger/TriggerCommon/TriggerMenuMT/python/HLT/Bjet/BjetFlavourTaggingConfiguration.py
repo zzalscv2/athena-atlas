@@ -85,6 +85,14 @@ def getFastFlavourTagging( flags, inputJets, inputVertex, inputTracks, isPFlow=F
             trackIpPrefix=trackIpPrefix,
             )
         )
+        if inputVertex:
+            ca.merge(
+            BTagTrackAugmenterAlgCfg(
+                flags,
+                TrackCollection=inputTracks,
+                PrimaryVertexCollectionName=inputVertex,
+            )
+        )
 
     # now we associate the tracks to the jet
     ## JetParticleAssociationAlgCfg uses a shrinking cone.
@@ -145,8 +153,24 @@ def getFastFlavourTagging( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                     **{f'GN120230327_p{x}': f'fastGN120230327_p{x}' for x in 'cub'},
                     'btagIp_': trackIpPrefix,
                 }
+            ],
+            [
+                'BTagging/20230223trig/dipz/antikt4emtopo/network.json',
+                {
+                    'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
+                    'btagIp_': trackIpPrefix,
+                }
             ]
         ]
+        if inputVertex: 
+            dl2_configs += [
+                [
+                 'BTagging/20230331trig/gn1/antikt4empflow/network.onnx',
+                {
+                    'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
+                },   
+                ]
+            ]
 
     # not all the keys that the NN requests are declaired. This will
     # cause an algorithm stall if we don't explicetly tell it that it

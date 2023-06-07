@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPTracker/Particle.h"
@@ -25,7 +25,7 @@ namespace FPTracker{
     m_outOfAperture(m_position.perp2()>FPTrackerConstants::beamPipeRadius2 ? true:false){
   }
   
-  Point  Particle::position()         const { return m_position; }
+  const Point&  Particle::position()  const { return m_position; }
   Point& Particle::position()               { return m_position; }
   Point  Particle::positionRelBeam()  const { return m_position +  m_beamCoordinateShift; }
 
@@ -49,7 +49,7 @@ namespace FPTracker{
   TransversePoint Particle::transversePosition() const{
     return m_position.transverse();
   }
-  Point  Particle::direction()        const {return m_direction;}
+  const Point&  Particle::direction()        const {return m_direction;}
   Point& Particle::direction()              {return m_direction;}
   double Particle::z()                const {return m_position.z();}
   double& Particle::z()                     {return m_position[2];}

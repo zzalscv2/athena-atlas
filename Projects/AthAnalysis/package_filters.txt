@@ -29,6 +29,8 @@
 + Event/xAOD/xAODTruthCnv
 + Event/xAOD/xAODEventInfoCnv
 - Event/xAOD/.*Cnv
+- Event/xAOD/xAODMuonRDO
+- Event/xAOD/xAODMuonRDOAthenaPool
 + Event/xAOD/.*
 
 # Others:
@@ -139,6 +141,10 @@
 #+ Reconstruction/RecoTools/IsolationTool
 + Reconstruction/RecoTools/RecoToolInterfaces
 + MuonSpectrometer/MuonValidation/MuonTesterTree
+
+# Lightweight performance measurement utils
++ Tools/PmbCxxUtils
+
 ### Here follows the Athena-specific parts of the analysis release
 
 # Core Athena (would like to reduce) :

@@ -1,15 +1,31 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from AthenaCommon.CFElements import parOR
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
-
 #logging
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
+def precisionPhotonVDVCfg(name, InViewRoIs, ion=False):
+    acc = ComponentAccumulator()
+    TrigEgammaKeys = getTrigEgammaKeys(ion=ion)
+    caloClusters = TrigEgammaKeys.precisionPhotonCaloClusterContainer
+    dataObjects = [( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % caloClusters ),
+                              ( 'EgammaRecContainer', 'StoreGateSvc+%s' % TrigEgammaKeys.precisionPhotonSuperClusterCollection),
+                              ( 'CaloCellContainer' , 'StoreGateSvc+CaloCells' ),
+                              ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
+                              ]
+    if ion:
+        dataObjects += [( 'CaloCellContainer' , 'StoreGateSvc+CorrectedRoICaloCells' )]
+
+    precisionPhotonVDV = CompFactory.AthViews.ViewDataVerifier(name)
+    precisionPhotonVDV.DataObjects = dataObjects
+    acc.addEventAlgo(precisionPhotonVDV)
+    return acc
 
 
-def precisionPhotonRecoSequence(flags, RoIs, ion=False):
+def precisionPhotonRecoSequence(flags, RoIs, name = None, ion=False):
     """ With this function we will setup the sequence of offline EgammaAlgorithms so to make a photon for TrigEgamma 
 
     Sequence of algorithms is the following:
@@ -20,68 +36,34 @@ def precisionPhotonRecoSequence(flags, RoIs, ion=False):
           https://gitlab.cern.ch/atlas/athena/blob/master/Reconstruction/egamma/egammaAlgs/src/topoEgammaBuilder.cxx
     """
 
-    TrigEgammaKeys = getTrigEgammaKeys(ion=ion)
-
     log.debug('precisionPhotonRecoSequence(RoIs = %s)',RoIs)
 
-    tag = '_ion' if ion is True else ''
-
-    # First the data verifiers:
-    # Here we define the data dependencies. What input needs to be available for the Fexs (i.e. TopoClusters from precisionCalo) in order to run
-    import AthenaCommon.CfgMgr as CfgMgr
-
-    caloClusters = TrigEgammaKeys.precisionPhotonCaloClusterContainer
-
-    ViewVerify = CfgMgr.AthViews__ViewDataVerifier("PrecisionPhotonPhotonViewDataVerifier" + tag)
-    ViewVerify.DataObjects = [( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % caloClusters ),
-                              ( 'EgammaRecContainer', 'StoreGateSvc+%s' % TrigEgammaKeys.precisionPhotonSuperClusterCollection),
-                              ( 'CaloCellContainer' , 'StoreGateSvc+CaloCells' ),
-                              ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
-                              ]
-#                              ( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % TrigEgammaKeys.precisionTopoClusterContainer), # this is for the calo isolation tool 
-                              #( 'xAOD::EventShape' , 'StoreGateSvc+TrigIsoEventShape' ),
-                              #( 'xAOD::IParticleContainer' , 'StoreGateSvc+HLT_TopoCaloClustersFS'),
-                              #( 'PseudoJetContainer' , 'StoreGateSvc+PseudoJetTrigEMTopo' )
-                              #( 'CaloCellContainer' , 'StoreGateSvc+CaloCellsFS' ),
-                              
-    if ion is True: ViewVerify.DataObjects.append(( 'CaloCellContainer' , 'StoreGateSvc+CorrectedRoICaloCells' ))
-
+    acc= ComponentAccumulator()
+    
     # Retrieve the factories now
-    from TriggerMenuMT.HLT.Photon.TrigPhotonFactories import TrigTopoEgammaPhotons_HI, TrigTopoEgammaPhotons
+    from TriggerMenuMT.HLT.Photon.TrigPhotonFactoriesCfg import TrigTopoEgammaPhotonCfg, TrigTopoEgammaPhotonCfg_HI
 
     log.debug('retrieve(precisionPhotonRecoSequence,None,RoIs = %s)',RoIs)
+    
+    acc.merge(precisionPhotonVDVCfg(name+'VDV',RoIs,ion))
 
+    if ion:
+        TrigTopoEgammaPhoton = TrigTopoEgammaPhotonCfg_HI(flags)
+    else:
+        TrigTopoEgammaPhoton = TrigTopoEgammaPhotonCfg(flags)
 
-    # The sequence of these algorithms
-    thesequence = parOR( "precisionPhotonAlgs" + tag) # This thing creates the sequence with name precisionPhotonAlgs
-    thesequence += ViewVerify
-
-    # Now do the PSeudoJetAlgorithm to run over FS TopoClusters configured outside this EventView. FSTopoClusters is setup in PrecisionPhotonMenuSequences.py.
-    egammaPhotonAlgo = TrigTopoEgammaPhotons_HI if ion is True else TrigTopoEgammaPhotons
-    trigTopoEgammaAlgo = egammaPhotonAlgo('TrigTopoEgammaPhotons' +tag)
-    trigTopoEgammaAlgo.InputPhotonRecCollectionName = TrigEgammaKeys.precisionPhotonSuperClusterCollection # input from precision calo
-    trigTopoEgammaAlgo.PhotonOutputName             = TrigEgammaKeys.precisionPhotonContainer # output
-    thesequence += trigTopoEgammaAlgo
-
-    collectionOut = trigTopoEgammaAlgo.PhotonOutputName
-
+    acc.merge(TrigTopoEgammaPhoton)
 
     #online monitoring for topoEgammaBuilder
-    from TriggerMenuMT.HLT.Photon.TrigPhotonFactories import PrecisionPhotonTopoMonitorCfg
-    PrecisionPhotonRecoMonAlgo = PrecisionPhotonTopoMonitorCfg(flags, 'PrecisionPhotonTopoEgammaBuilder' + tag)
-    PrecisionPhotonRecoMonAlgo.PhotonKey = trigTopoEgammaAlgo.PhotonOutputName
-    #PrecisionPhotonRecoMonAlgo.IsoVarKeys = [ '%s.topoetcone20' % trigTopoEgammaAlgo.PhotonOutputName, '%s.topoetcone40' % trigTopoEgammaAlgo.PhotonOutputName]
-    thesequence += PrecisionPhotonRecoMonAlgo
+    from TriggerMenuMT.HLT.Photon.TrigPhotonFactoriesCfg import PrecisionPhotonTopoMonitorCfg
+    PrecisionPhotonTopoRecoMonAlgo = PrecisionPhotonTopoMonitorCfg(flags,ion=ion)
+    acc.merge(PrecisionPhotonTopoRecoMonAlgo)
 
     #online monitoring for TrigPhotonSuperClusterBuilder
-    from TriggerMenuMT.HLT.Photon.TrigPhotonFactories import PrecisionPhotonSuperClusterMonitorCfg
-    PrecisionPhotonSuperClusterMonAlgo = PrecisionPhotonSuperClusterMonitorCfg(flags, 'PrecisionPhotonSuperClusterBuilder' + tag)
-    PrecisionPhotonSuperClusterMonAlgo.InputEgammaRecContainerName = TrigEgammaKeys.precisionPhotonSuperClusterCollection
-    thesequence += PrecisionPhotonSuperClusterMonAlgo
+    from TriggerMenuMT.HLT.Photon.TrigPhotonFactoriesCfg import PrecisionPhotonSuperClusterMonitorCfg
+    PrecisionPhotonSuperClusterMonAlgo = PrecisionPhotonSuperClusterMonitorCfg(flags, ion=ion)
+    acc.merge(PrecisionPhotonSuperClusterMonAlgo)
 
-    return (thesequence, collectionOut)
-
-
-
+    return acc
 
 

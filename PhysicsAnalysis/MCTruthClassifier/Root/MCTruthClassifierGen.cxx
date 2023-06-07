@@ -132,8 +132,8 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
                 << " has valid ReadHandle ");
 
   int iParticlePDG = thePart->pdgId();
-  // status=10902 in Pythia?
-  if (thePart->status() != 1 && thePart->status() != 2 && thePart->status() != 10902) {
+  // status=HepMC::SPECIALSTATUS in Pythia?
+  if (thePart->status() != 1 && thePart->status() != 2 && thePart->status() != HepMC::SPECIALSTATUS) {
     return std::make_pair(GenParticle, partOrig);
   }
   bool isPartHadr = isHadron(thePart);
@@ -160,7 +160,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
     return std::make_pair(OtherBSMParticle, partOrig);
   }
 
-  if (thePart->status() == 10902 &&
+  if (thePart->status() == HepMC::SPECIALSTATUS &&
       (abs(iParticlePDG) != 11 && abs(iParticlePDG) != 13 && abs(iParticlePDG) != 15 && abs(iParticlePDG) != 22) &&
       !isPartHadr) {
     return std::make_pair(GenParticle, partOrig);
@@ -196,7 +196,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
     }
   }
 
-  if (partOriVert == nullptr && thePart->barcode() > m_barcodeShift) {
+  if (partOriVert == nullptr && HepMC::is_simulation_particle(thePart)) {
     return std::make_pair(NonPrimary, partOrig);
   }
   if (partOriVert == nullptr && MC::PID::isElectron(iParticlePDG)) {
@@ -255,7 +255,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
     }
   }
 
-  if (motherPDG == iParticlePDG && motherStatus == 3 && thePart->status() == 10902)
+  if (motherPDG == iParticlePDG && motherStatus == 3 && thePart->status() == HepMC::SPECIALSTATUS)
     return std::make_pair(GenParticle, partOrig);
 
   if (MC::PID::isElectron(iParticlePDG)) {
@@ -393,7 +393,7 @@ std::tuple<unsigned int, const xAOD::TruthParticle*> MCTruthClassifier::defOrigO
 
   bool uncat = 0, fromHad = 0, fromTau = 0;
   bool isPhysical = (status == 1 || status == 2);
-  bool isGeant = std::abs(thePart->barcode()) >= m_barcodeG4Shift;
+  bool isGeant = HepMC::is_simulation_particle(thePart);
   bool isBSM = MC::PID::isBSM(thePart->pdgId());
   bool fromBSM = isBSM; // just to initialise
 
@@ -431,11 +431,11 @@ bool MCTruthClassifier::fromHadron(const xAOD::TruthParticle* p,
     // should this really go into parton-level territory?
     // probably depends where BSM particles are being decayed
     fromBSM |= MC::PID::isBSM(parent->pdgId());
-    // sometimes Athena replaces status 2 with 10902, see e.g.
+    // sometimes Athena replaces status 2 with HepMC::SPECIALSTATUS, see e.g.
     // PhysicsAnalysis/TruthParticleID/McParticleTools/src/EtaPtFilterTool.cxx#L374
     // not at all clear why and unfortunately there's no documentation in the code
     const int st = parent->status();
-    if (st > 2 && st != 10902)  return false;
+    if (st > 2 && st != HepMC::SPECIALSTATUS)  return false;
     fromTau |= abs(parent->pdgId()) == 15;
     if (isHadron(parent)) {
       if (!hadptr)  hadptr = parent; // assumes linear hadron parentage
@@ -1914,8 +1914,6 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
   //-- dijets and min bias
   if (numOfParents == 1 && motherStatus == 3) {
 
-    //  const xAOD::TruthParticle* thePhotMoth = (*mcEventItr)->barcode_to_particle(motherBarcode);
-    //  const xAOD::TruthVertex*   MothOriVert = thePhotMoth->prodVtx();
     if (mothOriVert != nullptr && abs(mothOriVert->barcode()) == 5)
       return FSRPhot;
 
@@ -2576,7 +2574,7 @@ MCTruthClassifier::convHadronTypeToOrig(ParticleType pType, int motherPDG)
 }
 //---------------------------------------------------------------------------------
 ParticleOrigin
-MCTruthClassifier::defHadronType(long pdg)
+MCTruthClassifier::defHadronType(int pdg)
 {
   //---------------------------------------------------------------------------------
   // Special case
@@ -2617,7 +2615,7 @@ MCTruthClassifier::defHadronType(long pdg)
 
 //---------------------------------------------------------------------------------
 ParticleType
-MCTruthClassifier::defTypeOfHadron(long pdg)
+MCTruthClassifier::defTypeOfHadron(int pdg)
 {
   //---------------------------------------------------------------------------------
   // Note that this differs from the above by return type -- should we be more clear?
@@ -2701,7 +2699,7 @@ MCTruthClassifier::isHadron(const xAOD::TruthParticle* thePart)
 
   bool isPartHadron = false;
   if (thePart != nullptr) {
-    long pdg = thePart->pdgId();
+    int pdg = thePart->pdgId();
     isPartHadron = MC::PID::isHadron(pdg);
     //--exclude protons from beam
     if (pdg == 2212 && thePart->status() == 3)
@@ -2747,7 +2745,7 @@ MCTruthClassifier::getMother(const xAOD::TruthParticle* thePart) const
       ATH_MSG_WARNING("getMother:: infinite while");
       break;
     }
-  } while (MothOriVert != nullptr && MotherPDG == partPDG && partBarcode < m_barcodeG4Shift &&
+  } while (MothOriVert != nullptr && MotherPDG == partPDG && !HepMC::is_simulation_particle(partBarcode) &&
            MothOriVert != partOriVert);
 
   ATH_MSG_DEBUG("succeded getMother");
@@ -2772,7 +2770,7 @@ MCTruthClassifier::findEndVert(const xAOD::TruthParticle* thePart) const
         if (((itrDaug->barcode() % m_barcodeShift == thePart->barcode() % m_barcodeShift) ||
              // brem on generator level for tau
              (EndVert->nOutgoingParticles() == 1 && EndVert->nIncomingParticles() == 1 &&
-              itrDaug->barcode() < m_barcodeG4Shift && thePart->barcode() < m_barcodeG4Shift)) &&
+              !HepMC::is_simulation_particle(itrDaug) && !HepMC::is_simulation_particle(thePart))) &&
             itrDaug->pdgId() == thePart->pdgId()) {
           samePart = true;
           pVert = itrDaug->decayVtx();
@@ -2806,7 +2804,7 @@ MCTruthClassifier::defOutComeOfElectron(const xAOD::TruthParticle* thePart) cons
   int ElecOutNumOfElec(0);
 
   int NumOfHadr(0);
-  long EndDaugType(0);
+  int EndDaugType(0);
   NumOfElecDaug = EndVert->nOutgoingParticles();
   for (unsigned int ipOut = 0; ipOut < EndVert->nOutgoingParticles(); ipOut++) {
     if (!EndVert->outgoingParticle(ipOut))
@@ -2849,7 +2847,7 @@ MCTruthClassifier::defOutComeOfMuon(const xAOD::TruthParticle* thePart) const
   int NumOfMuonNeutr(0);
 
   int NumOfElec(0);
-  long EndDaugType(0);
+  int EndDaugType(0);
 
   NumOfMuDaug = EndVert->nOutgoingParticles();
   for (unsigned int ipOut = 0; ipOut < EndVert->nOutgoingParticles(); ipOut++) {
@@ -2910,7 +2908,7 @@ MCTruthClassifier::defOutComeOfTau(const xAOD::TruthParticle* thePart, Info* inf
   std::vector<const xAOD::TruthParticle*> tauFinalStatePart = findFinalStatePart(EndVert);
 
   for (auto& i : tauFinalStatePart) {
-    long pdg = i->pdgId();
+    int pdg = i->pdgId();
     if (MC::PID::isElectron(pdg))
       NumOfElec++;
     else if (MC::PID::isMuon(pdg))

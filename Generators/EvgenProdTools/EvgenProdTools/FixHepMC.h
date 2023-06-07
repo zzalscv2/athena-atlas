@@ -39,6 +39,7 @@ private:
   bool isPID0(const HepMC::ConstGenParticlePtr& p) const;
   bool isNonTransportableInDecayChain(const HepMC::ConstGenParticlePtr& p) const;
   bool isLoop(const HepMC::ConstGenParticlePtr& p) const;
+  bool fromDecay(const HepMC::ConstGenParticlePtr& p) const;
   //@}
 
   /// @name Config properties

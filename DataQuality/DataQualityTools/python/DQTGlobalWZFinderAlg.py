@@ -30,8 +30,8 @@ def DQTGlobalWZFinderAlgConfig(flags):
 	monAlg.zCutLow = 66.0
 	monAlg.zCutHigh = 116.0
 	monAlg.muonMaxEta = muonSelectionTool.MaxEta
-	monAlg.Z_ee_trigger = {"HLT_e26_lhtight_ivarloose_L1EM22VHI", "HLT_e60_lhmedium_L1EM22VHI"}
-	monAlg.Z_mm_trigger = {"HLT_mu24_ivarmedium_L1MU14FCH", "HLT_mu50_L1MU14FCH"}
+	monAlg.Z_ee_trigger = ["HLT_e26_lhtight_ivarloose_L1eEM26M", "HLT_e28_lhtight_ivarloose_L1eEM28M", "HLT_e60_lhmedium_L1eEM26M", "HLT_e140_lhloose_L1eEM26M", "HLT_e300_etcut_L1eEM26M", "HLT_e60_lhmedium_L1eEM28M", "HLT_e140_lhloose_L1eEM28M", "HLT_e300_etcut_L1eEM28M"]
+	monAlg.Z_mm_trigger = ["HLT_mu24_ivarmedium_L1MU14FCH", "HLT_mu50_L1MU14FCH", "HLT_mu24_ivarmedium_L1MU18VFCH", "HLT_mu50_L1MU18VFCH"]
 
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -67,7 +67,7 @@ PyObject* CPPInstanceReduce( PyObject* self, PyObject* )
   // the buffer contents; use a string for the class name, used when casting
   // on reading back in
   PyObject* res2 = PyTuple_New( 2 );
-  PyTuple_SET_ITEM( res2, 0, PyROOT_PyUnicode_FromStringAndSize( buf.Buffer(), buf.Length() ) );
+  PyTuple_SET_ITEM( res2, 0, PyUnicode_FromStringAndSize( buf.Buffer(), buf.Length() ) );
   PyTuple_SET_ITEM( res2, 1, pyname );
 
   PyObject* result = PyTuple_New( 2 );
@@ -89,13 +89,13 @@ PyObject* CPPInstanceExpand( PyObject*, PyObject* args )
   PyObject* pybuf = 0;
   const char* clname = 0;
   if ( ! PyArg_ParseTuple( args, const_cast< char* >( "O!s:__expand__" ),
-           &PyROOT_PyUnicode_Type, &pybuf, &clname ) )
+           &PyUnicode_Type, &pybuf, &clname ) )
     return 0;
 
   // use the PyString macros to by-pass error checking; do not adopt the buffer,
   // as the local TBufferFile can go out of scope (there is no copying)
   TBufferFile buf( TBuffer::kRead,
-                   PyROOT_PyUnicode_GET_SIZE( pybuf ),
+                   PyUnicode_GET_SIZE( pybuf ),
                    (char*)PyGetString( pybuf ).first.c_str(),
                    kFALSE );
 
@@ -118,7 +118,7 @@ void PyROOTPickle::Initialize( PyObject* libpyroot_pymodule, PyObject* cppinstan
   static PyMethodDef s_pdefExp = { (char*)"_ObjectProxy__expand__",
             (PyCFunction)CPPInstanceExpand, METH_VARARGS, (char*)"internal function" };
 
-  PyObject* pymname = PyROOT_PyUnicode_FromString( PyModule_GetName( libpyroot_pymodule ) );
+  PyObject* pymname = PyUnicode_FromString( PyModule_GetName( libpyroot_pymodule ) );
   gExpand = PyCFunction_NewEx( &s_pdefExp, NULL, pymname );
   Py_DECREF( pymname );
   Bool_t isOk = PyObject_SetAttrString( libpyroot_pymodule, s_pdefExp.ml_name, gExpand ) == 0;

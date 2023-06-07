@@ -11,8 +11,6 @@ from AthenaCommon import CfgMgr
 from AthenaCommon.SystemOfUnits import MeV
 
 def getParticleHelper(name="ISF_ParticleHelper", **kwargs):
-    from G4AtlasApps.SimFlags import simFlags
-    kwargs.setdefault("BarcodeSvc"             , simFlags.TruthStrategy.BarcodeServiceName())
     return CfgMgr.ISF__ParticleHelper(name, **kwargs)
 
 def getMemoryMonitor(name="ISF_MemoryMonitor", **kwargs):
@@ -21,8 +19,6 @@ def getMemoryMonitor(name="ISF_MemoryMonitor", **kwargs):
 def getMC12EntryLayerFilter(name="ISF_MC12EntryLayerFilter", **kwargs):
     kwargs.setdefault('AllowOnlyDefinedBarcodes'          , True    )
     kwargs.setdefault('AllowOnlyLegacyPrimaries'          , False   )
-    kwargs.setdefault('LegacyParticleGenerationIncrement' , 1000000 )
-    kwargs.setdefault('LegacyFirstSecondaryBarcode'       , 200001  )
     return CfgMgr.ISF__GenericBarcodeFilter(name, **kwargs)
 
 def getMC12LLPEntryLayerFilter(name="ISF_MC12LLPEntryLayerFilter", **kwargs):

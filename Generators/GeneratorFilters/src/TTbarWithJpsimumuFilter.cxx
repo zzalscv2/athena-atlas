@@ -47,19 +47,11 @@ StatusCode TTbarWithJpsimumuFilter::filterEvent() {
         // Loop over all truth particles in the event
         // ===========================================
         for(const auto& part: *genEvt) {
-            if(HepMC::is_simulation_particle(part)) break;
-            
-            int pdgid = std::abs(part->pdg_id());
-            // don't loose time checking all if one found
-            if (pdgid == 443) {
-               if(!isLeptonDecay(part,13)) continue;
-            } else {
-               continue;
-            }
-
+            if (std::abs(part->pdg_id())!=443) continue;
+            if (HepMC::is_simulation_particle(part)) continue;
+            if(!isLeptonDecay(part,13)) continue;
             if ( !passJpsiSelection(part) ) continue;
             isjpsi=true;
-
         } /// loop on particles
 
     } // loop on events (only one at evgen - no PU)

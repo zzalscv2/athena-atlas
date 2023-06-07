@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -17,18 +17,21 @@ namespace {
 
 TClass* objectIsA (PyObject* obj)
 {
-  PyObject* repr = PyObject_Repr (obj);
-  if (!repr) return nullptr;
-  std::string str = RootUtils::PyGetString (repr).first;
-  const char* s = str.c_str();
-  if (*s == '<') ++s;
-  if (strncmp (s, "ROOT.", 5) == 0)
-    s += 5;
-  const char* p = strstr (s, " object ");
-  if (!p) return nullptr;
-  std::string name (s, p-s);
-  TClass* cls = TClass::GetClass (name.c_str());
-  Py_DECREF (repr);
+  TClass* cls = nullptr;
+  PyObject* attr = PyObject_GetAttrString ((PyObject*)Py_TYPE(obj), "__cpp_name__");
+  if (attr) {
+    const char* s = PyUnicode_AsUTF8AndSize (attr, nullptr);
+    if (s) {
+      if (*s == '<') ++s;
+      if (strncmp (s, "ROOT.", 5) == 0)
+        s += 5;
+      if (strncmp (s, "cppyy.gbl.", 10) == 0)
+        s += 10;
+      cls = TClass::GetClass (s);
+    }
+    Py_XDECREF (attr);
+  }
+  PyErr_Clear();
   return cls;
 }
 
@@ -187,11 +190,7 @@ namespace SG {
   {
     // Don't do this if don't have a valid thread state.
     // (With py3, the interpreter gets shut down before global dtors run...)
-#if PY_VERSION_HEX >= 0x03000000
     if (_PyThreadState_UncheckedGet())
-#else
-    if (PyThreadState_GET())
-#endif
     {
       Py_DECREF(m_aliases);
       Py_DECREF(m_clids);

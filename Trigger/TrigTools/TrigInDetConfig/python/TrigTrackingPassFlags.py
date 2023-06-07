@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 import AthenaCommon.SystemOfUnits as Units
 
-from InDetConfig.TrackingPassFlags import createTrackingPassFlags,createITkTrackingPassFlags
+from TrkConfig.TrackingPassFlags import createTrackingPassFlags,createITkTrackingPassFlags
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 
 def signatureSpecificSettingOfFlags(flags,mode):

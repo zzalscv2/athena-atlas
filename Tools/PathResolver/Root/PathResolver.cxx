@@ -30,6 +30,63 @@
 namespace bf = boost::filesystem;
 using namespace std;
 
+namespace {
+  enum class DevAreaResponse {
+    DEFAULT,
+    THROW,
+    SILENT,
+    INFO,
+    WARNING,
+    ERROR,
+  };
+  const std::string pathResolverEnvVar = "PATHRESOLVER_DEVAREARESPONSE";
+  DevAreaResponse getDevAreaResponse(
+    const std::string& varname = pathResolverEnvVar)
+  {
+    const char* env = std::getenv(varname.c_str());
+    if (env == nullptr) return DevAreaResponse::DEFAULT;
+    std::string envstr(env);
+#define TRYSTR(string) if (envstr == #string) return DevAreaResponse::string
+    TRYSTR(THROW);
+    TRYSTR(SILENT);
+    TRYSTR(DEFAULT);
+    TRYSTR(INFO);
+    TRYSTR(WARNING);
+    TRYSTR(ERROR);
+#undef TRYSTR
+    throw std::runtime_error(
+      varname + " set to '" + envstr + "', not sure what to do. "
+      "Option are DEFAULT, THROW, INFO, WARNING, ERROR, or SILENT");
+  }
+
+  void checkForDev(asg::AsgMessaging& asgmsg,
+                   const std::string& logical_file_name,
+                   const std::string& envvar = pathResolverEnvVar) {
+    DevAreaResponse dev_area_response = getDevAreaResponse(envvar);
+    asgmsg.msg(MSG::DEBUG) << "Trying to locate " << logical_file_name << endmsg;
+    if(logical_file_name.compare(0, 4, "dev/")==0 &&
+       dev_area_response != DevAreaResponse::SILENT)
+    {
+      auto level = MSG::ERROR;
+#ifdef XAOD_ANALYSIS
+      level = MSG::WARNING;
+#endif
+      switch(dev_area_response) {
+      case DevAreaResponse::INFO: level = MSG::INFO; break;
+      case DevAreaResponse::WARNING: level = MSG::WARNING; break;
+      case DevAreaResponse::ERROR: level = MSG::ERROR; break;
+      default: /* do nothing use the cases above */ ;
+      }
+      asgmsg.msg(level) << "Locating dev file " << logical_file_name << ". Do not let this propagate to a release" << endmsg;
+      if (dev_area_response == DevAreaResponse::THROW) {
+        throw std::runtime_error(
+          "dev area file " + logical_file_name + " is not allowed! "
+          "to override this error set the environment variable " +
+          envvar + " to SILENT, DEFAULT, INFO, WARNING, or ERROR");
+      }
+    }
+  }
+}
 
 static const char* const path_separator = ",:";
 std::atomic<MSG::Level> PathResolver::m_level=MSG::INFO; 
@@ -325,15 +382,7 @@ std::string PathResolverFindDataFile (const std::string& logical_file_name)
 
 std::string PathResolver::find_calib_file (const std::string& logical_file_name)
 {
-  msg(MSG::DEBUG) << "Trying to locate " << logical_file_name << endmsg;
-  if(logical_file_name.compare(0, 4, "dev/")==0) {
-#ifdef XAOD_ANALYSIS
-    msg(MSG::WARNING)
-#else
-    msg(MSG::ERROR) 
-#endif
-      << "Locating dev file " << logical_file_name << ". Do not let this propagate to a release" << endmsg;
-  }
+  checkForDev(asgMsg(), logical_file_name);
   //expand filename before finding .. 
   TString tmpString(logical_file_name);
   gSystem->ExpandPathName(tmpString);
@@ -362,15 +411,7 @@ std::string PathResolver::find_calib_file (const std::string& logical_file_name)
 
 std::string PathResolver::find_calib_directory (const std::string& logical_file_name)
 {
-  msg(MSG::DEBUG) <<"Trying to locate " << logical_file_name << endmsg;
-  if(logical_file_name.compare(0, 4, "dev/")==0) {
-#ifdef XAOD_ANALYSIS
-    msg(MSG::WARNING)
-#else
-    msg(MSG::ERROR) 
-#endif
-     << "Locating dev directory " << logical_file_name << ". Do not let this propagate to a release" << endmsg;
-  }
+  checkForDev(asgMsg(), logical_file_name);
   //expand filename before finding 
   TString tmpString(logical_file_name);
   gSystem->ExpandPathName(tmpString);

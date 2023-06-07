@@ -49,14 +49,17 @@ void TruthElectronHistograms::fill(const xAOD::TruthParticle *truth, const xAOD:
 
   if (!electron || m_reducedHistSet) return;
 
-  const xAOD::TrackParticle* track  = electron->trackParticle(); 
+  const xAOD::TrackParticle* track = electron->trackParticle();
+
+  // This can happen if we use it for forwardElectron
+  if (!track) return;
 
   float dphires2(0.);
   float dphi2(0.);
   float deta2(0);
 
   if (electron->trackCaloMatchValue(dphires2, xAOD::EgammaParameters::deltaPhiRescaled2 )) histoMap["deltaPhiRescaled2"]->Fill(dphires2);
-  if (electron->trackCaloMatchValue(dphi2, xAOD::EgammaParameters::deltaPhi2 ))    histoMap["deltaPhi2"]->Fill(dphi2);
+  if (electron->trackCaloMatchValue(dphi2, xAOD::EgammaParameters::deltaPhi2 )) histoMap["deltaPhi2"]->Fill(dphi2);
   if (electron->trackCaloMatchValue(deta2, xAOD::EgammaParameters::deltaEta2 )) histoMap["deltaEta2"]->Fill(deta2);
 
   float d0 = track->d0(); 
@@ -65,11 +68,11 @@ void TruthElectronHistograms::fill(const xAOD::TruthParticle *truth, const xAOD:
   float vard0 = track->definingParametersCovMatrix()(0, 0);
 
   if (vard0 > 0) {
-     histoMap["d0Oversigmad0"]->Fill(d0/sqrtf(vard0)); 
+    histoMap["d0Oversigmad0"]->Fill(d0/sqrtf(vard0));
   }
   
   if (truth_qp > 0) {
-   histoMap["qOverp_resolution"]->Fill((reco_qp-truth_qp)/truth_qp);
+    histoMap["qOverp_resolution"]->Fill((reco_qp-truth_qp)/truth_qp);
   }
   
 

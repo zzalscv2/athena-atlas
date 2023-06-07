@@ -118,7 +118,7 @@ void ZmumuValidationExample::bookHistograms()
   const int fnQoverPtBins = 100;
   
   const double eta_bound = 2.5;
-  const double phi_bound = 3.1415;
+  const double phi_bound = M_PI;
   const double p_bound = 0.5;
   const double pt_bound = 15;
   

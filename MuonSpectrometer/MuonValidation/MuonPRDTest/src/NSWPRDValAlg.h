@@ -1,25 +1,17 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef NSWPRDVALALG_H
-#define NSWPRDVALALG_H
-
-#include <memory>
-#include <vector>
+#ifndef MUONPRDTEST_NSWPRDVALALG_H
+#define MUONPRDTEST_NSWPRDVALALG_H
 
 #include "AthenaBaseComps/AthHistogramAlgorithm.h"
+
 #include "EDM_object.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "MuEntryVariables.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonTesterTree/MuonTesterTree.h"
 #include "TGCcablingInterface/ITGCcablingSvc.h"
 #include "MuonCSC_CnvTools/ICSC_RDO_Decoder.h"
-#include "TTree.h"
-
-class ITHistSvc;
 
 class NSWPRDValAlg : public AthHistogramAlgorithm {
 public:
@@ -38,17 +30,10 @@ public:
         EDM_object& oData,
         const TString& branch_name);  // This function couples the branch of the NSW validation Ntuple with the EDM object.
 
-private:
-    std::vector<std::unique_ptr<ValAlgVariables>> m_testers;
-    MuonTesterTree m_tree{"NSWValTree", "NSWPRDValAlg"};
+private:    
+    MuonVal::MuonTesterTree m_tree{"NSWValTree", "NSWPRDValAlg"};
 
-    // MuonDetectorManager from the Detector Store (to be used only at initialize)
-    const MuonGM::MuonDetectorManager* m_muonDetMgrDS{nullptr};
     const ITGCcablingSvc* m_tgcCabling{nullptr};
-
-    // MuonDetectorManager from the conditions store
-    SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_DetectorManagerKey{this, "DetectorManagerKey", "MuonDetectorManager",
-                                                                            "Key of input MuonDetectorManager condition data"};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     PublicToolHandle<Muon::ICSC_RDO_Decoder> m_csc_decoder{this, "CscRDODecoder", "Muon::CscRDO_Decoder/CSC_RDODecoder"};

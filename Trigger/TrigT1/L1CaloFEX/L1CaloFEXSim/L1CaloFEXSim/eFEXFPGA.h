@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -56,7 +56,11 @@ namespace LVL1 {
     virtual void SetIsoWP(std::vector<unsigned int> &, std::vector<unsigned int> &, unsigned int &, unsigned int &) override ;
 
     virtual std::vector <std::unique_ptr<eFEXegTOB>> getEmTOBs() override ;
-    virtual std::vector <std::unique_ptr<eFEXtauTOB>> getTauTOBs() override ;
+    virtual std::vector <std::unique_ptr<eFEXtauTOB>> getTauHeuristicTOBs() override ;
+    virtual std::vector <std::unique_ptr<eFEXtauTOB>> getTauBDTTOBs() override ;
+
+  private:
+    std::vector<std::unique_ptr<eFEXtauTOB>> getTauTOBs(std::vector< std::unique_ptr<eFEXtauTOB> >& tauTobObjects);
 
     /** Internal data */
   private:
@@ -65,7 +69,8 @@ namespace LVL1 {
     int m_id;
     int m_efexid;
     std::vector< std::unique_ptr<eFEXegTOB> > m_emTobObjects;
-    std::vector< std::unique_ptr<eFEXtauTOB> > m_tauTobObjects;
+    std::vector< std::unique_ptr<eFEXtauTOB> > m_tauHeuristicTobObjects;
+    std::vector< std::unique_ptr<eFEXtauTOB> > m_tauBDTTobObjects;
     int m_eTowersIDs [10][6];
 
     SG::ReadHandleKey<TrigConf::L1Menu> m_l1MenuKey{
@@ -79,6 +84,11 @@ namespace LVL1 {
     ToolHandle<IeFEXtauAlgo> m_eFEXtauAlgoTool {
       this, "eFEXtauAlgoTool", "LVL1::eFEXtauAlgo", 
 	"Tool that runs the eFEX tau algorithm"};
+
+    ToolHandle<IeFEXtauAlgo> m_eFEXtauBDTAlgoTool {
+      this, "eFEXtauBDTAlgoTool", "LVL1::eFEXtauBDTAlgo", 
+	"Tool that runs the eFEX BDT tau algorithm"};
+
     ToolHandle<IeFEXegAlgo> m_eFEXegAlgoTool {
       this, "eFEXegAlgoTool", "LVL1::eFEXegAlgo", 
 	"Tool that runs the eFEX e/gamma algorithm"};

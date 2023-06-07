@@ -8,7 +8,28 @@
 /// Provides the HepMC tools from the external MCUtils header package,
 /// ATLAS-specific HepMC functions not suitable for MCUtils.
 
-#include "TruthUtils/PIDHelpers.h"
+#include "MCUtils/PIDUtils.h"
+namespace MC {
+
+  // Use the MCUtils and HEPUtils functions as if they were defined in the ATLAS MC and MC::PID namespaces
+  using namespace MCUtils;
+  using namespace HEPUtils;
+
+
+  /// @brief Identify if the particle with given PDG ID would not interact with the detector, i.e. not a neutrino or WIMP
+  inline bool isNonInteracting(int pid) {
+    return !(PID::isStrongInteracting(pid) || PID::isEMInteracting(pid));
+  }
+
+  /// @brief Identify if the particle with given PDG ID would produce ID tracks but not shower in the detector if stable
+  inline bool isChargedNonShowering(int pid) {
+    if (PID::isMuon(pid)) return true;
+    if (PID::isSUSY(pid)) return true; //(meta)stable charginos, R-hadrons etc
+     return false;
+   }
+
+}
+#if !defined(XAOD_STANDALONE)
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
@@ -17,113 +38,10 @@
 namespace MC
 {
 using namespace MCUtils::PID;
-#ifdef HEPMC3
-inline bool hasNoChildren(const HepMC::ConstGenVertexPtr& v) {return v->particles_out().size() == 0; }
-inline bool hasNoParents(const HepMC::ConstGenVertexPtr& v) {return v->particles_in().size() == 0; }
-inline bool isDisconnected(const HepMC::ConstGenVertexPtr& v) {return (v->particles_in().size() == 0) && (v->particles_out().size() == 0); }
-#else
-inline bool hasNoChildren(HepMC::ConstGenVertexPtr v) {return v->particles_out_size() == 0; }
-inline bool hasNoParents(HepMC::ConstGenVertexPtr v) {return v->particles_in_size() == 0; }
-inline bool isDisconnected(HepMC::ConstGenVertexPtr v) {return (v->particles_in_size() == 0) && (v->particles_out_size() == 0); }
-
-//---->//This is copied from MCUtils
-  /// @name Event reduction functions
-  //@{
-
-  /// Remove an unwanted particle from the event, collapsing the graph structure consistently
-  inline void reduce(HepMC::GenEvent* ge, HepMC::GenParticle* gp) {
-    // Do nothing if for some reason this particle is not actually in this event
-    if (gp->parent_event() != ge) return;
-
-    // Get start and end vertices
-    HepMC::GenVertex* vstart = gp->production_vertex();
-    HepMC::GenVertex* vend = gp->end_vertex();
-
-    // Disconnect the unwanted particle from its vertices and delete it
-    if (vstart != NULL) vstart->remove_particle(gp);
-    if (vend != NULL) vend->remove_particle(gp);
-    delete gp;
-
-    // If start/end vertices are valid and distinct, and this was the only particle that
-    // connected them, then reassign the end vertex decay products to the start vertex
-    // and rewrite the vertex position as most appropriate.
-    /// @note The disconnected end vertex will be picked up by the final "sweeper" loop if necessary.
-    /// @note We do the reassigning this way since GV::add_particle_*() modifies the end vertex
-    if (vstart != NULL && vend != NULL && vend != vstart) {
-      bool is_only_link = true;
-      for (auto pchild=vstart->particles_out_const_begin();pchild!=vstart->particles_out_const_end();++pchild) {
-        if ((*pchild)->end_vertex() == vend) is_only_link = false;
-      }
-      if (is_only_link) {
-        if (vend->position() != HepMC::FourVector())
-          vstart->set_position(vend->position()); //< @todo Always use end position if defined... ok?
-        while (vend->particles_out_size() > 0) {
-          vstart->add_particle_out(*vend->particles_out_const_begin());
-        }
-        while (vend->particles_in_size() > 0) {
-          vstart->add_particle_in(*vend->particles_in_const_begin());
-        }
-      }
-    }
-
-    // Sweep up any vertices orphaned by the particle removal
-    /// @todo Can we be a bit more efficient rather than having to run over all vertices every time?
-    ///       Or allow disabling of this clean-up, with a single clean being run at the end of filtering.
-    /// @todo Use neater looping via vertices_match (or iterated vertex_match)
-    /// @todo Also look for and report changes in number of no-parent and no-child vertices
-    std::vector<HepMC::GenVertex*> orphaned_vtxs;
-    for (HepMC::GenEvent::vertex_const_iterator vi = ge->vertices_begin(); vi != ge->vertices_end(); ++vi) {
-      if ((*vi)->particles_in_size() == 0 && (*vi)->particles_out_size() == 0) orphaned_vtxs.push_back(*vi);
-    }
-    for (HepMC::GenVertex* gv : orphaned_vtxs) delete gv;
-  }
-
-  /// Remove unwanted particles from the event, collapsing the graph structure consistently
-  inline void reduce(HepMC::GenEvent* ge, std::vector<HepMC::GenParticlePtr> toremove) {
-    while (toremove.size()) {
-      auto gp = toremove.back();
-      toremove.pop_back();
-      reduce(ge, gp);
-    }
-  }
-//<----//This is copied from MCUtils
-#endif
-
 template <class T> inline bool isDecayed(const T& p)  { return p->status() == 2;}
 template <class T> inline bool isStable(const T& p)   { return p->status() == 1;}
 template <class T> inline bool isPhysical(const T& p) { return isStable<T>(p) || isDecayed<T>(p); }
 template <class T> inline bool isPhysicalHadron(const T& p) { return PID::isHadron(p->pdg_id()) && isPhysical<T>(p);}
-template <class T> inline bool fromDecay(const T& p)  {
-      if (!p) return false;
-      auto v=p->production_vertex();
-      if (!v) return false;
-#ifdef HEPMC3
-      for ( const auto& anc: v->particles_in())
-      if (isDecayed(anc) && (PID::isTau(anc->pdg_id()) || PID::isHadron(anc->pdg_id()))) return true;
-      for ( const auto& anc: v->particles_in())
-      if (fromDecay<T>(anc)) return true;
-#else
-      for (auto  anc=v->particles_in_const_begin(); anc != v->particles_in_const_end(); ++anc)
-      if (isDecayed((*anc)) && (PID::isTau((*anc)->pdg_id()) || PID::isHadron((*anc)->pdg_id()))) return true;
-      for (auto  anc=v->particles_in_const_begin(); anc != v->particles_in_const_end(); ++anc)
-      if (fromDecay<T>(*anc)) return true;
-#endif
-      return false;
-      }
-template <class T>  std::vector<T> findChildren(T p)
-      {
-      std::vector<T> ret;
-      if (!p) return ret;
-      auto v=p->end_vertex();
-      if (!v) return ret;
-#ifdef HEPMC3
-      for (const auto& pp: v->particles_out()) ret.push_back(pp);
-#else
-      for (auto pp=v->particles_out_const_begin();pp!=v->particles_out_const_end();++pp) ret.push_back(*pp);
-#endif
-      if (ret.size()==1) if (ret.at(0)->pdg_id()==p->pdg_id()) ret=findChildren(ret.at(0));
-      return ret;
-      }
 }
 
 
@@ -152,15 +70,8 @@ namespace MC {
   /// @brief Identify if the particle is considered stable at the post-detector-sim stage
   inline bool isSimStable(const HepMC::ConstGenParticlePtr& p) {
     if (p->status() != 1) return false;
-    if (isGenStable(p)) return p->end_vertex() == NULL;
+    if (isGenStable(p)) return p->end_vertex() == nullptr;
     return true;
-  }
-
-  /// @brief Identify if the particle is considered stable at the post-detector-sim stage
-  /// @todo I'm sure this shouldn't be exactly the same as isGenStable, but it is...
-  /// @deprecated Use isSimulStable: this function _will_ be removed!
-  inline bool isGenSimulStable(const HepMC::ConstGenParticlePtr& p) {
-    return isSimStable(p);
   }
 
   /// @brief Identify if the particle would not interact with the detector, i.e. not a neutrino or WIMP
@@ -174,13 +85,9 @@ namespace MC {
     return !MC::isNonInteracting(p);
   }
 
-  /// @brief Oddly-named alias for isSimInteracting
-  /// @deprecated Use isSimInteracting: this function _will_ be removed!
-  inline bool isGenInteracting(const HepMC::ConstGenParticlePtr& p) {
-    return isSimInteracting(p);
-  }
 
   //@}
 
 }
+#endif
 #endif

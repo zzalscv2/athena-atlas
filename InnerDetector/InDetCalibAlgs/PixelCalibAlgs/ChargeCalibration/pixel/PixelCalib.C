@@ -20,13 +20,40 @@
 //======================================================================
 
 #include "../common/PixelMapping.h"
-#include  <filesystem>
+#include "TROOT.h"
+#include "TKey.h"
+#include "TString.h"
+#include "TFile.h"
+#include "TH1F.h"
+#include "TF1.h"
+#include "TH2F.h"
+#include "TDirectoryFile.h"
+#include "TGraphErrors.h"
+
+
+
+#include <array>
+#include <iostream>
+#include <string>
+#include <map>
+#include <filesystem>
+
+#ifdef ATLAS_GCC_CHECKERS
+  #include "CxxUtils/checker_macros.h"
+  ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
+#endif
 
 namespace fs = std::filesystem;
 using pix::PixelMapping; 
 
+enum ChipSettings{THR_NORM, THR_RMS_NORM, THR_SIG_NORM, TIM_NORM, 
+                  THR_LONG, THR_RMS_LONG, THR_SIG_LONG, TIM_LONG,
+                  THR_GANG, THR_RMS_GANG, THR_SIG_GANG, TIM_GANG,
+                  NSETTINGS};
+typedef std::array<float, NSETTINGS> OneChipSettings;
+typedef std::array<OneChipSettings, 16> OneModuleSettings;
 //obviously inefficient; will rethink this later
-typedef std::map<std::string,std::map<std::string,std::map<std::string, float> > > ValueMap_t;
+typedef std::map<std::string,OneModuleSettings > ValueMap_t;
 
 
 double funcTot(double* x, double* par) {
@@ -48,8 +75,8 @@ std::string getDatetodayStr() {
   const tm* localTime = localtime(&t);
   std::stringstream s;
   s << "20" << localTime->tm_year - 100;
-  s << setw(2) << setfill('0') << localTime->tm_mon + 1;
-  s << setw(2) << setfill('0') << localTime->tm_mday;
+  s << std::setw(2) << std::setfill('0') << localTime->tm_mon + 1;
+  s << std::setw(2) << std::setfill('0') << localTime->tm_mday;
   return s.str();
 }
 
@@ -100,6 +127,7 @@ chipId(int whichPart, int iphi, int ieta){
       circ = 1;
     }
   }
+  if (circ>15) circ = -1;//error
   return circ;
 }
 
@@ -132,8 +160,15 @@ pixelType(int whichPart, int iphi, int ieta){
   return pixtype;
 }
 
+TIter
+getRodIterator(const TFile & inputFile){
+  TDirectoryFile* scanDir = (TDirectoryFile*)((TKey*)inputFile.GetListOfKeys()->First())->ReadObj();
+  TList* rodKeyList = (TList*)scanDir->GetListOfKeys();
+  return TIter(rodKeyList);
+}
+
 bool 
-fillThresholdCalibration(ValueMap_t & pcdMap, const std::string & inThrFile, const int WhichPart, const int ncol, const int nrow){
+fillThresholdCalibration(const PixelMapping &pm, ValueMap_t & pcdMap, const std::string & inThrFile, const int WhichPart, const int ncol, const int nrow){
   if (inThrFile.empty()) return false;
   TFile riThrFile(inThrFile.c_str(),"READ");
   if (not riThrFile.IsOpen()){
@@ -150,21 +185,9 @@ fillThresholdCalibration(ValueMap_t & pcdMap, const std::string & inThrFile, con
   TH1F h1dThr("h1dThr","",200,0,6000);
   TH1F h1dSig("h1dSig","",200,0,500);
 
-  TDirectoryFile* scanDir = (TDirectoryFile*)((TKey*)riThrFile.GetListOfKeys()->First())->ReadObj();
-  TList* rodKeyList = (TList*)scanDir->GetListOfKeys();
-  TIter rodItr(rodKeyList);
+  TIter rodItr = getRodIterator(riThrFile);
   TKey* rodKey;
-  if (not fs::exists("../common/mapping.csv")){
-    std::cout<< "Mapping problem!"<<std::endl;
-    return false;
-  }
-  PixelMapping pixmap("../common/mapping.csv");
-  if (pixmap.nModules() == 2048){
-    std::cout<< "Mapping file opened ok"<<std::endl;
-  } else {
-    std::cout<< "Mapping problem!"<<std::endl;
-    return false;
-  }
+ 
   while ((rodKey=(TKey*)rodItr())) {
     TString rodName(rodKey->GetName());
     TDirectoryFile* rodDir = (TDirectoryFile*)rodKey->ReadObj();
@@ -175,15 +198,7 @@ fillThresholdCalibration(ValueMap_t & pcdMap, const std::string & inThrFile, con
       TString modName(modKey->GetName());
       std::string modStr(modKey->GetName());
       if (moduleNotInPart(WhichPart, modStr)) continue;
-      // get module map
-      int hashID = -1;
-      int bec = -1;
-      int layer = -1;
-      int phi_module = -1;
-      int eta_module = -1;
-      pixmap.mapping(modStr, &hashID, &bec, &layer, &phi_module, &eta_module);
-
-      TString st(modName(3, 3));
+      if (not pm.contains(modStr)) continue;
       TString chi2HistDirPath = modName + "/" + chi2HistName + "/A0/B0";
       TDirectoryFile *chi2HistDir = (TDirectoryFile *)rodDir->Get(chi2HistDirPath);
       TH2F *h2dChi2 = (TH2F *)((TKey *)chi2HistDir->GetListOfKeys()->First())->ReadObj();
@@ -265,7 +280,7 @@ fillThresholdCalibration(ValueMap_t & pcdMap, const std::string & inThrFile, con
           // Identify FE chip ID
           // Simply, in the calibration, the FEs are aligned from bottom left corner (0,0) with anti-clock-wise direction.
           int circ = chipId(WhichPart, iphi, ieta);
-          if ((circ < 0) or (circ>15)) continue;
+          if (circ < 0) continue;
 
           // normal pixels
           int pixtype = pixelType(WhichPart, iphi, ieta);
@@ -278,33 +293,19 @@ fillThresholdCalibration(ValueMap_t & pcdMap, const std::string & inThrFile, con
           possibleSigArrays[pixtype]->Fill(sig);
         }
       }
-      auto insertToMap = [&](int idx, const std::string &pixTypeName){
-        const std::string iname = "I"+std::to_string(idx);
-        const std::array<std::string,3> arr{"Thr", "ThrRms", "ThrSig"};
-        if (pixTypeName == "Norm"){ 
-          pcdMap[modStr][iname][arr[0] + pixTypeName] = h1dThrNormArr[idx].GetMean();
-          pcdMap[modStr][iname][arr[1] + pixTypeName] = h1dThrNormArr[idx].GetRMS();
-          pcdMap[modStr][iname][arr[2] + pixTypeName] = h1dSigNormArr[idx].GetMean();
-        } else if (pixTypeName == "Long"){
-          pcdMap[modStr][iname][arr[0] + pixTypeName] = h1dThrLongArr[idx].GetMean();
-          pcdMap[modStr][iname][arr[1] + pixTypeName] = h1dThrLongArr[idx].GetRMS();
-          pcdMap[modStr][iname][arr[2] + pixTypeName] = h1dSigLongArr[idx].GetMean();
+     
+      for (int idx=0;idx!=16;++idx){
+        pcdMap[modStr][idx][THR_NORM] = h1dThrNormArr[idx].GetMean();
+        pcdMap[modStr][idx][THR_RMS_NORM] = h1dThrNormArr[idx].GetRMS();
+        pcdMap[modStr][idx][THR_SIG_NORM] = h1dSigNormArr[idx].GetMean();
+
+        pcdMap[modStr][idx][THR_LONG] = h1dThrLongArr[idx].GetMean();
+        pcdMap[modStr][idx][THR_RMS_LONG] = h1dThrLongArr[idx].GetRMS();
+        pcdMap[modStr][idx][THR_SIG_LONG] = h1dSigLongArr[idx].GetMean();
         
-        } else if (pixTypeName == "Gang"){
-          pcdMap[modStr][iname][arr[0] + pixTypeName] = h1dThrGangArr[idx].GetMean();
-          pcdMap[modStr][iname][arr[1] + pixTypeName] = h1dThrGangArr[idx].GetRMS();
-          pcdMap[modStr][iname][arr[2] + pixTypeName] = h1dSigGangArr[idx].GetMean();
-        }
-      };
-      
-      for (int i=0;i!=16;++i){
-        insertToMap(i, "Norm");
-      }
-      for (int i=0;i!=16;++i){
-        insertToMap(i, "Long");
-      }
-      for (int i=0;i!=16;++i){
-        insertToMap(i, "Gang");
+        pcdMap[modStr][idx][THR_GANG] = h1dThrGangArr[idx].GetMean();
+        pcdMap[modStr][idx][THR_RMS_GANG] = h1dThrGangArr[idx].GetRMS();
+        pcdMap[modStr][idx][THR_SIG_GANG] = h1dSigGangArr[idx].GetMean();
       }
     }
   }
@@ -312,7 +313,7 @@ fillThresholdCalibration(ValueMap_t & pcdMap, const std::string & inThrFile, con
 }
 
 bool
-fillTimingCalibration(ValueMap_t & timMap, const std::string & inTimFile, const int WhichPart, const int ncol, const int nrow){
+fillTimingCalibration(const PixelMapping & pm, ValueMap_t & timMap, const std::string & inTimFile, const int WhichPart, const int ncol, const int nrow){
   if (inTimFile.empty()) return false;
   TFile riTimFile(inTimFile.c_str(),"READ");
   if (not riTimFile.IsOpen()){
@@ -322,18 +323,10 @@ fillTimingCalibration(ValueMap_t & timMap, const std::string & inTimFile, const 
     std::cout<<"File "<<inTimFile<<" opened."<<std::endl;
   }
   TString timHistName = "SCURVE_MEAN";
-
-  TDirectoryFile* scanDir = (TDirectoryFile*)((TKey*)riTimFile.GetListOfKeys()->First())->ReadObj();
-  TList* rodKeyList = (TList*)scanDir->GetListOfKeys();
-  TIter rodItr(rodKeyList);
+ 
+  TIter rodItr=getRodIterator(riTimFile);
   TKey* rodKey;
-  PixelMapping pixmap("../common/mapping.csv");
-  if (pixmap.nModules() == 2048){
-    std::cout<< "Mapping file opened ok"<<std::endl;
-  } else {
-    std::cout<< "Mapping problem!"<<std::endl;
-    return false;
-  }
+ 
   const int nbins=300;
   const float timLo = 1000.;
   const float timHi =7000.;
@@ -351,38 +344,22 @@ fillTimingCalibration(ValueMap_t & timMap, const std::string & inTimFile, const 
     while ((modKey=(TKey*)modItr())) {
       TString modName(modKey->GetName());
       std::string modStr(modKey->GetName());
+      if (moduleNotInPart(WhichPart, modStr)) continue;
       if (modName=="DSP_ERRORS") { continue; }
-
-      // get module map
-      int hashID = -1;
-      int bec = -1;
-      int layer = -1;
-      int phi_module = -1;
-      int eta_module = -1;
-      pixmap.mapping(modStr, &hashID, &bec, &layer, &phi_module, &eta_module);
       //
-      if (hashID == -1) continue; //module not in mapping
+      if (not pm.contains(modStr)) continue;
       //
-      TString st(modName(3,3));
       TString timHistDirPath = modName + "/" + timHistName + "/A0/B0";
       TDirectoryFile* timHistDir = (TDirectoryFile*)rodDir->Get(timHistDirPath);
       TH2F* h2dTim = (TH2F*)((TKey*)timHistDir->GetListOfKeys()->First())->ReadObj();
       std::array<TH1F, 16> h1dTimNormArr;
-      int idx = 0;
-      for (auto &thisHisto:h1dTimNormArr){
-        thisHisto = TH1F(formName("h1dTim", "Norm", idx++), "",nbins, timLo, timHi);
-      }
-      idx = 0;
       std::array<TH1F, 16> h1dTimLongArr;
-      for (auto &thisHisto:h1dTimLongArr){
-        thisHisto = TH1F(formName("h1dTim", "Long", idx++), "",nbins, timLo, timHi);
-      }
-      idx=0;
       std::array<TH1F, 16> h1dTimGangArr;
-      for (auto &thisHisto:h1dTimGangArr){
-        thisHisto = TH1F(formName("h1dTim", "Gang", idx++), "", nbins, timLo, timHi);
+      for (int i=0;i!=16;++i){
+        h1dTimNormArr[i] = TH1F(formName("h1dTim", "Norm", i), "",nbins, timLo, timHi);
+        h1dTimLongArr[i] = TH1F(formName("h1dTim", "Long", i), "",nbins, timLo, timHi);
+        h1dTimGangArr[i] = TH1F(formName("h1dTim", "Gang", i), "", nbins, timLo, timHi);
       }
-
       for (int ieta=0; ieta<ncol; ieta++) {
         for (int iphi=0; iphi<nrow; iphi++) {
           float tim = h2dTim->GetBinContent(ieta+1,iphi+1);
@@ -391,7 +368,7 @@ fillTimingCalibration(ValueMap_t & timMap, const std::string & inTimFile, const 
           // Identify FE chip ID
           // Simply, in the calibration, the FEs are aligned from bottom left corner (0,0) with anti-clock-wise direction.
           int circ = chipId(WhichPart, iphi, ieta);
-          if ((circ < 0) or (circ>15)) continue;
+          if (circ < 0) continue;
           // normal pixels
           int pixtype = pixelType(WhichPart, iphi, ieta);
 
@@ -408,11 +385,11 @@ fillTimingCalibration(ValueMap_t & timMap, const std::string & inTimFile, const 
         }
       }
       for (int i=0;i!=16;++i){
-        const std::string n="I"+std::to_string(i);
-        timMap[modStr][n]["TimNorm"] = h1dTimNormArr[i].GetMean();
-        timMap[modStr][n]["TimLong"] = h1dTimLongArr[i].GetMean();
-        timMap[modStr][n]["TimGang"] = h1dTimGangArr[i].GetMean();
+        timMap[modStr][i][TIM_NORM] = h1dTimNormArr[i].GetMean();
+        timMap[modStr][i][TIM_LONG] = h1dTimLongArr[i].GetMean();
+        timMap[modStr][i][TIM_GANG] = h1dTimGangArr[i].GetMean();
       }
+
     }
   }
   return true;
@@ -429,7 +406,7 @@ void PixelCalib(bool test=false) {
 
   BARREL:
     THR: 67465 (Note that this is only a SHORT threshold.)
-    TOT CALIB: 67502 & 67504 (Inner and outter half's of the detector.)
+    TOT CALIB: 67502 & 67504 (Inner and outer halves of the detector.)
 
   DISK:
     THR: 67482
@@ -456,6 +433,15 @@ void PixelCalib(bool test=false) {
     std::cout<<"Unrecognised part"<<std::endl;
     return;
   }
+  //
+  PixelMapping pixmap("../common/mapping.csv");
+  if (pixmap.nModules() == 2048){
+    std::cout<< "Mapping file opened ok"<<std::endl;
+  } else {
+    std::cout<< "Mapping problem!"<<std::endl;
+    return;
+  }
+  //
   std::string inThrFile = "";
   std::string inTimFile = "";
   std::string inTotFile = "";
@@ -558,13 +544,13 @@ void PixelCalib(bool test=false) {
   }
   
   //pcd map passed by reference and will be updated with the result
-  if (not fillThresholdCalibration(pcdMap, inThrFile, WhichPart, ncol, nrow)){
+  if (not fillThresholdCalibration(pixmap, pcdMap, inThrFile, WhichPart, ncol, nrow)){
     std::cout<<"The threshold calibration from file "<<inThrFile<<" was not successful"<<std::endl;
     fclose(outputfile);
     return;
   }
   //
-  if (not fillTimingCalibration(timMap, inTimFile, WhichPart, ncol, nrow)){
+  if (not fillTimingCalibration(pixmap, timMap, inTimFile, WhichPart, ncol, nrow)){
     std::cout<<"The timing calibration from file "<<inTimFile<<" was not successful"<<std::endl;
     fclose(outputfile);
     return;
@@ -585,18 +571,9 @@ void PixelCalib(bool test=false) {
     TString totSigHistName = "TOT_SIGMA";
     TH1F h1dTot7("h1dTot7","",64,0,16);
     TH1F h1dTotSig7("h1dTotSig7","",100,0,1);
-    TDirectoryFile* scanDir = (TDirectoryFile*)((TKey*)riTotFile.GetListOfKeys()->First())->ReadObj();
-    TList* rodKeyList = (TList*)scanDir->GetListOfKeys();
-    TIter rodItr(rodKeyList);
+
+    TIter rodItr=getRodIterator(riTotFile);
     TKey* rodKey;
-    PixelMapping pixmap("../common/mapping.csv");
-    if (pixmap.nModules() == 2048){
-      std::cout<< "Mapping file opened ok"<<std::endl;
-    } else {
-      std::cout<< "Mapping problem!"<<std::endl;
-      fclose(outputfile);
-      return;
-    }
     while ((rodKey=(TKey*)rodItr())) {
       TString rodName(rodKey->GetName());
       TDirectoryFile* rodDir = (TDirectoryFile*)rodKey->ReadObj();
@@ -607,16 +584,9 @@ void PixelCalib(bool test=false) {
       while ((modKey=(TKey*)modItr())) {
         TString modName(modKey->GetName());
         std::string modStr(modKey->GetName());
-        TString st(modName(3,3));
+        if (moduleNotInPart(WhichPart, modStr)) continue;
         // get module map
-
-        int hashID = -1;
-        int bec = -1;
-        int layer = -1;
-        int phi_module = -1;
-        int eta_module = -1;
-        pixmap.mapping(modStr, &hashID, &bec, &layer, &phi_module, &eta_module);
-        if (hashID == -1) continue; //module not in mapping
+        if (not pixmap.contains(modStr)) continue;
         constexpr int nChips = 16;
         std::array<std::array<float, ncharge>, nChips> totArrI{};
         std::array<std::array<float, ncharge>, nChips> totErrArrI{};
@@ -625,9 +595,12 @@ void PixelCalib(bool test=false) {
         std::array<std::array<float, ncharge>, nChips> totLongArrI{};
         std::array<std::array<float, ncharge>, nChips> totErrLongArrI{};
         //
-        int nbins=255;
-        float totLo=0.;
-        float totHi=255.;
+        int nbins = 255;
+        float totLo = 0.;
+        float totHi = 255.;
+        int sigNBins = 100;
+        float sigLo = 0.;
+        float sigHi = 1.;
         for (int c=0; c<ncharge; ++c) {
           
           //std::cout<<"DEBUG: Proceeding with charge "<<c<<std::endl;
@@ -642,43 +615,20 @@ void PixelCalib(bool test=false) {
           TH2F* h2dTotSig = (TH2F*)((TKey*)totSigHistDir->GetListOfKeys()->First())->ReadObj();
           
           std::array<TH1F, 16> h1dTotI;
-          std::string prefix = "h1dTotI";
-          for (int i=0;i!=16;++i){
-            TString histoName(prefix + std::to_string(i));
-            h1dTotI[i] = TH1F(histoName,"", nbins, totLo, totHi);
-          }
-          //
-          nbins = 100;
-          float sigLo=0.;
-          float sigHi=1.;
-          prefix = "h1dTotSigI";
           std::array<TH1F, 16> h1dTotSigI;
-          for (int i=0;i!=16;++i){
-            TString histoName(prefix + std::to_string(i));
-            h1dTotSigI[i] = TH1F(histoName,"", nbins, sigLo, sigHi);
-          }
-          //
           std::array<TH1F, 16> h1dTotLongI;
-          nbins=255;
-          totLo=0.;
-          totHi=255.;
-          prefix = "h1dTotLongI";
-          for (int i=0;i!=16;++i){
-            TString histoName(prefix + std::to_string(i));
-            h1dTotLongI[i] = TH1F(histoName,"", nbins, totLo, totHi);
-          }
-          //
-          nbins = 100;
-          sigLo=0.;
-          sigHi=1.;
-          prefix = "h1dTotSigLongI";
           std::array<TH1F, 16> h1dTotSigLongI;
           for (int i=0;i!=16;++i){
-            TString histoName(prefix + std::to_string(i));
-            h1dTotSigLongI[i] = TH1F(histoName,"", nbins, sigLo, sigHi);
+            const auto iStr = std::to_string(i);
+            TString histoName("h1dTotI" + iStr);
+            h1dTotI[i] = TH1F(histoName,"", nbins, totLo, totHi);
+            histoName = "h1dTotSigI" + iStr;
+            h1dTotSigI[i] = TH1F(histoName,"", sigNBins, sigLo, sigHi);
+            histoName  = "h1dTotLongI" + iStr;
+            h1dTotLongI[i] = TH1F(histoName,"", nbins, totLo, totHi);
+            histoName = "h1dTotSigLongI" + iStr;
+            h1dTotSigLongI[i] = TH1F(histoName,"", sigNBins, sigLo, sigHi);
           }
-          //
-         
           for (int ieta=0; ieta<ncol; ieta++) {
             for (int iphi=0; iphi<nrow; iphi++) {
               float tot = h2dTot->GetBinContent(ieta+1,iphi+1);
@@ -693,7 +643,7 @@ void PixelCalib(bool test=false) {
               // Identify FE chip ID
               // Simply, in the calibration, the FEs are aligned from bottom left corner (0,0) with anti-clock-wise direction.
               int circ = chipId(WhichPart, iphi, ieta);
-              if ((circ < 0) or (circ>15)) continue;
+              if (circ < 0) continue;
 
               // normal pixels
               int pixtype = pixelType(WhichPart, iphi, ieta);
@@ -812,7 +762,7 @@ void PixelCalib(bool test=false) {
           }
         }
         for (int idx=0;idx !=nChips;++idx){
-           const auto thisArray = badcalI[idx];
+           const auto &thisArray = badcalI[idx];
            badcalI_max[idx] = *(std::max_element(thisArray.begin(), thisArray.end()));
         }
         std::array<std::vector<Double_t>, nChips> chargeArrI_re;
@@ -822,16 +772,13 @@ void PixelCalib(bool test=false) {
         std::array<std::vector<Double_t>, nChips> totSigArrI_re;
         std::array<std::vector<Double_t>, nChips> totSigErrArrI_re;
        
-
-        for(int i=0; i < ncharge; i++){
-          for (int idx=0;idx != nChips;++idx){
-            chargeArrI_re[idx].push_back(chargeArr[i]);
-            chargeErrArrI_re[idx].push_back(chargeErrArr[i]);
-            totArrI_re[idx].push_back(totArrI[idx][i]);
-            totErrArrI_re[idx].push_back(totErrArrI[idx][i]);
-            totSigArrI_re[idx].push_back(totSigArrI[idx][i]);
-            totSigErrArrI_re[idx].push_back(totSigErrArrI[idx][i]);
-          }
+        for (int idx=0;idx != nChips;++idx){
+          chargeArrI_re[idx].assign(chargeArr, chargeArr + ncharge);
+          chargeErrArrI_re[idx].assign(chargeErrArr, chargeErrArr + ncharge);
+          totArrI_re[idx].assign(totArrI[idx].begin(), totArrI[idx].end());
+          totErrArrI_re[idx].assign(totErrArrI[idx].begin(), totErrArrI[idx].end());
+          totSigArrI_re[idx].assign(totSigArrI[idx].begin(), totSigArrI[idx].end());
+          totSigErrArrI_re[idx].assign(totSigErrArrI[idx].begin(), totSigErrArrI[idx].end());
         }
 
         const double chi2_error = 0.05;
@@ -853,28 +800,21 @@ void PixelCalib(bool test=false) {
                 find_max[i]=(std::abs(1 - ((parAI[idx] * parEI[idx] - parCI[idx] * totArrI_re[idx][i]) / (totArrI_re[idx][i] - parAI[idx])) / chargeArrI_re[idx][i]));
               }
               std::vector<Double_t>::iterator iter = std::max_element(find_max.begin(), find_max.end());
-              size_t n_max = std::distance(find_max.begin(), iter);
+              int n_max = static_cast<int>(std::distance(find_max.begin(), iter));
             
               ncharge_re = ncharge_re - 1;
-              if ( n_max == ncharge_re - 1 || n_max == ncharge_re - 2 ){
-                fprintf(outputfile, "%d", (int) chargeArrI_re[idx][ncharge_re]);
-                fprintf(outputfile, " ");
-                chargeArrI_re[idx].erase(chargeArrI_re[idx].begin() + ncharge_re);
-                totArrI_re[idx].erase(totArrI_re[idx].begin() + ncharge_re);
-                totSigArrI_re[idx].erase(totSigArrI_re[idx].begin() + ncharge_re);
-                chargeErrArrI_re[idx].erase(chargeErrArrI_re[idx].begin() + ncharge_re);
-                totErrArrI_re[idx].erase(totErrArrI_re[idx].begin() + ncharge_re);
-                totSigErrArrI_re[idx].erase(totSigErrArrI_re[idx].begin() + ncharge_re);
-              } else {
-                fprintf(outputfile, "%d", (int) chargeArrI_re[idx][n_max]);
-                fprintf(outputfile, " ");
-                chargeArrI_re[idx].erase(chargeArrI_re[idx].begin() + n_max);
-                totArrI_re[idx].erase(totArrI_re[idx].begin() + n_max);
-                totSigArrI_re[idx].erase(totSigArrI_re[idx].begin() + n_max);
-                chargeErrArrI_re[idx].erase(chargeErrArrI_re[idx].begin() + n_max);
-                totErrArrI_re[idx].erase(totErrArrI_re[idx].begin() + n_max);
-                totSigErrArrI_re[idx].erase(totSigErrArrI_re[idx].begin() + n_max);
-              }
+              auto numToErase = n_max;
+              if ((ncharge_re - n_max)<=2) numToErase = ncharge_re;
+              //
+              fprintf(outputfile, "%d", (int) chargeArrI_re[idx][numToErase]);
+              fprintf(outputfile, " ");
+              chargeArrI_re[idx].erase(chargeArrI_re[idx].begin() + numToErase);
+              totArrI_re[idx].erase(totArrI_re[idx].begin() + numToErase);
+              totSigArrI_re[idx].erase(totSigArrI_re[idx].begin() + numToErase);
+              chargeErrArrI_re[idx].erase(chargeErrArrI_re[idx].begin() + numToErase);
+              totErrArrI_re[idx].erase(totErrArrI_re[idx].begin() + numToErase);
+              totSigErrArrI_re[idx].erase(totSigErrArrI_re[idx].begin() + numToErase);
+              //
               grTotI[idx]= TGraphErrors(ncharge_re, chargeArrI_re[idx].data(), totArrI_re[idx].data(), chargeErrArrI_re[idx].data(), totErrArrI_re[idx].data());
               std::string idxStr = std::to_string(idx);
               TString suffix("__grTotI" + idxStr);
@@ -903,45 +843,27 @@ void PixelCalib(bool test=false) {
               for(int i = qthresh; i < ncharge_re; i++){
                 badcalI[idx][i] = std::abs( 1 - ( (parAI[idx] * parEI[idx] - parCI[idx] * totArrI_re[idx][i]) / (totArrI_re[idx][i] - parAI[idx]) ) / chargeArrI_re[idx][i] );
               }
-              badcalI_max[idx] = *max_element(badcalI[idx].begin(), badcalI[idx].begin() + 10);
+              badcalI_max[idx] = *std::max_element(badcalI[idx].begin(), badcalI[idx].begin() + 10);
             }
           }
           fprintf(outputfile, "]");
         }
         fprintf(outputfile, "\n");
-
-        if (WhichPart != 0){
-          std::cout << modStr << std::endl;
-          for (int idx=0;idx!=nChips;++idx){
-            const std::string chipName="I"+std::to_string(idx);
-            std::cout << chipName <<" "
-            << int(pcdMap[modStr][chipName]["ThrNorm"]) << " " << int(pcdMap[modStr][chipName]["ThrRmsNorm"]) << " "
-            << int(pcdMap[modStr][chipName]["ThrSigNorm"]) << " " << int(timMap[modStr][chipName]["TimNorm"]) << " "
-            << int(pcdMap[modStr][chipName]["ThrLong"]) << " " << int(pcdMap[modStr][chipName]["ThrRmsLong"]) << " "
-            << int(pcdMap[modStr][chipName]["ThrSigLong"]) << " " << int(timMap[modStr][chipName]["TimLong"]) << " "
-            << int(pcdMap[modStr][chipName]["ThrGang"]) << " " << int(pcdMap[modStr][chipName]["ThrRmsGang"]) << " "
-            << int(pcdMap[modStr][chipName]["ThrSigGang"]) << " " << int(timMap[modStr][chipName]["TimGang"]) << " "
-            << parAI[idx] << " " << parEI[idx] << " " << parCI[idx] << " "
-            << parLongAI[idx] << " " << parLongEI[idx] << " " << parLongCI[idx] << " "
-            << parP0I[idx]<< " " << parP1I[idx]
-            << std::endl;
-          }
-        } else {
-          std::cout << modStr << std::endl;
-          for (int idx=0;idx!=2;++idx){ //only two ?
-            const std::string chipName="I"+std::to_string(idx);
-            std::cout << chipName <<" "
-            << int(pcdMap[modStr][chipName]["ThrNorm"]) << " " << int(pcdMap[modStr][chipName]["ThrRmsNorm"]) << " "
-            << int(pcdMap[modStr][chipName]["ThrSigNorm"]) << " " << int(timMap[modStr][chipName]["TimNorm"]) << " "
-            << int(pcdMap[modStr][chipName]["ThrLong"]) << " " << int(pcdMap[modStr][chipName]["ThrRmsLong"]) << " "
-            << int(pcdMap[modStr][chipName]["ThrSigLong"]) << " " << int(timMap[modStr][chipName]["TimLong"]) << " "
-            << int(pcdMap[modStr][chipName]["ThrGang"]) << " " << int(pcdMap[modStr][chipName]["ThrRmsGang"]) << " "
-            << int(pcdMap[modStr][chipName]["ThrSigGang"]) << " " << int(timMap[modStr][chipName]["TimGang"]) << " "
-            << parAI[idx] << " " << parEI[idx] << " " << parCI[idx] << " "
-            << parLongAI[idx] << " " << parLongEI[idx] << " " << parLongCI[idx] << " "
-            << parP0I[idx]<< " " << parP1I[idx]
-            << std::endl;
-          }
+        const int n = (WhichPart == 0)? 2:nChips;
+        std::cout << modStr << std::endl;
+        for (int idx=0;idx!=n;++idx){
+          const std::string chipName="I"+std::to_string(idx);
+          std::cout << chipName <<" "
+          << int(pcdMap[modStr][idx][THR_NORM]) << " " << int(pcdMap[modStr][idx][THR_RMS_NORM]) << " "
+          << int(pcdMap[modStr][idx][THR_SIG_NORM]) << " " << int(timMap[modStr][idx][TIM_NORM]) << " "
+          << int(pcdMap[modStr][idx][THR_LONG]) << " " << int(pcdMap[modStr][idx][THR_RMS_LONG]) << " "
+          << int(pcdMap[modStr][idx][THR_SIG_LONG]) << " " << int(timMap[modStr][idx][TIM_LONG]) << " "
+          << int(pcdMap[modStr][idx][THR_GANG]) << " " << int(pcdMap[modStr][idx][THR_RMS_GANG]) << " "
+          << int(pcdMap[modStr][idx][THR_SIG_GANG]) << " " << int(timMap[modStr][idx][TIM_GANG]) << " "
+          << parAI[idx] << " " << parEI[idx] << " " << parCI[idx] << " "
+          << parLongAI[idx] << " " << parLongEI[idx] << " " << parLongCI[idx] << " "
+          << parP0I[idx]<< " " << parP1I[idx]
+          << std::endl;
         }
       }
     }
@@ -950,54 +872,7 @@ void PixelCalib(bool test=false) {
 }
 
 
-
-//===========================================================
-// This getFEID method should not be used in the calibration
-// because the mapping convention is totally different between
-// actual detector alignment and calibrtion.
-//===========================================================
-// Identify FE chip ID in athena
-void getFEID(int iphi, int ieta, int phi_module, int *circ, int *pixtype) {
-
-  int rowsPerFE = 164;    // FEI3
-  int columnsPerFE = 18;  // FEI3
-  int rowsFGanged = 153;  // FEI3
-  int rowsLGanged = 159;  // FEI3
-
-  int row = -1;
-  int col = -1;
-  if (phi_module%2 == 0) {
-    iphi = 2*rowsPerFE-iphi-1;
-  }
-  if (iphi >= rowsPerFE) {
-    col = columnsPerFE-1-ieta%columnsPerFE;   // 17 -> 0
-    row = 2*rowsPerFE-1-iphi;                 // 159 -> 0
-    *circ = (int)((8-1)-(ieta/columnsPerFE)); // 7 -> 0
-  }
-  else {
-    col = ieta%columnsPerFE;                  // 0 -> 17
-    row = iphi;                               // 0 -> 159
-    *circ = (int)(ieta/columnsPerFE)+8;       // 8 -> 15
-  }
-
-  // Check if long(ganged) or normal sensor
-  if (col>0 && col<columnsPerFE-1) {
-    if (row>=rowsFGanged-1 && row<=rowsLGanged) {
-      *pixtype = (row-rowsFGanged+1)%2+1; // 1 inter ganged pixel; 2 ganged pixel
-    }
-    else {
-      *pixtype = 0;
-    }
-  }
-  else if (col==0 || col==columnsPerFE-1) {
-    if (row>=rowsFGanged-1) {
-      *pixtype = 2; // treat long ganged (3) as ganged
-    }
-    else {
-      *pixtype = 1; // long
-    }
-  }
-  else {
-    *pixtype = 0; // treat it as normal
-  }
+int main(){
+  PixelCalib(false);
+  return 0;
 }

@@ -15,7 +15,14 @@ ex.type = 'athena'
 ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
 ex.input = 'data_lowmu'
 ex.threads = 1
-ex.args = '-c "setMenu=\'PhysicsP1_pp_lowMu_run3_v1\';doL1Sim=True;doWriteBS=False;doWriteRDOTrigger=True;"'
+precommand = ''.join([
+  "setMenu=\'PhysicsP1_pp_lowMu_run3_v1\';",
+  "doL1Sim=True;",
+  "doWriteBS=False;",
+  "doWriteRDOTrigger=True;",
+  "doAlfaCtpin=True;",
+])
+ex.args = '-c "{:s}"'.format(precommand)
 
 test = Test.Test()
 test.art_type = 'build'

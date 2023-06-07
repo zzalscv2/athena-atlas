@@ -178,13 +178,26 @@ class HypoAlgNode(AlgNode):
         from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu 
         log.debug("Adding HypoTool %s for chain %s to %s", hypoToolConf.name, hypoToolConf.chainDict['chainName'], self.Alg.getName())        
         try:
-            self.Alg.HypoTools = self.Alg.HypoTools + [hypoToolConf.create(flags)]  # see ATEAM-773
+            result = hypoToolConf.create(flags)
+            if isinstance(result, ComponentAccumulator):
+                tool = result.popPrivateTools()
+                assert not isinstance(tool, list), "Can not handle list of tools"
+                if not isCAMenu():
+                    # do not do this in CA, use unconverted tool
+                    tool = conf2toConfigurable(tool)
+                    self.Alg.HypoTools = self.Alg.HypoTools + [tool]  # see ATEAM-773
+                else:
+                    self.Alg.HypoTools.append(tool)
+                return result
+            else:
+                self.Alg.HypoTools = self.Alg.HypoTools + [result]  # see ATEAM-773
             if isCAMenu():
                 assert isinstance(self.Alg.HypoTools[-1], GaudiConfig2._configurables.Configurable), "The Hypo Tool for {} is not Configurable2".format(hypoToolConf.chainDict['chainName'])
 
         except NoHypoToolCreated as e:
             log.debug("%s returned empty tool: %s", hypoToolConf.name, e)
-
+        return None
+    
     def setPreviousDecision(self,prev):
         self.previous.append(prev)
         return self.addInput(prev)
@@ -1068,13 +1081,20 @@ class SelectionCA(ComponentAccumulator):
         super( SelectionCA, self ).__init__()   
 
         self.stepViewSequence = seqAND(self.name)
-        self.addSequence(self.stepViewSequence)
+        
 
-    def mergeReco(self, recoCA, robPrefetchCA=None):
-        self.addEventAlgo(recoCA.inputMaker(), sequenceName=self.stepViewSequence.name)
+    def mergeReco(self, recoCA, robPrefetchCA=None, upSequenceCA=None):        
+        ''' upSequenceCA is the user CA to run before the recoCA'''
+        ca=ComponentAccumulator()
+        ca.addSequence(self.stepViewSequence)
+        ca.addEventAlgo(recoCA.inputMaker(), sequenceName=self.stepViewSequence.name)
         if robPrefetchCA:
-             self.merge(robPrefetchCA, self.stepViewSequence.name)
-        self.merge(recoCA, sequenceName=self.stepViewSequence.name)
+            ca.merge(robPrefetchCA, self.stepViewSequence.name)
+        ca.merge(recoCA, sequenceName=self.stepViewSequence.name)
+        if upSequenceCA:
+            self.merge(upSequenceCA)
+        self.merge(ca)        
+        
 
     def mergeHypo(self, other):
         """To be used when the hypo alg configuration comes with auxiliary tools/services"""

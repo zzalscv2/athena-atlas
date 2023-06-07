@@ -50,6 +50,7 @@ class SimulationFlavour(FlagEnum):
     ATLFAST3MT_QS = 'ATLFAST3MT_QS'
     ATLFAST3F_G4MS = 'ATLFAST3F_G4MS'
     AtlasG4 = 'AtlasG4' # Outside ISF
+    AtlasG4_QS = 'AtlasG4_QS' # Outside ISF
 
     def isFullSim(self):
         return 'FullG4' in self.value or 'PassBackG4' in self.value or 'AtlasG4' in self.value

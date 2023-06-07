@@ -404,7 +404,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     # Output stream    
     L1CaloItemList = L1CaloSlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, streamNameStem, ItemList=L1CaloItemList, AcceptAlgs=["DFL1CALO_KERN"]))
-    acc.merge(SetupMetaDataForStreamCfg(flags, streamNameStem, AcceptAlgs=["DFL1CALO_KERN"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, streamNameStem, AcceptAlgs=["DFL1CALO_KERN"], createMetadata=[MetadataCategory.CutFlowMetaData,MetadataCategory.TriggerMenuMetaData]))
 
     return acc
 
@@ -418,18 +418,24 @@ def addEfexTOBs(slimminghelper, allVariables, postFix = ""):
          "L1_eEMRoI"+postFix+"Aux" : "xAOD::eFexEMRoIAuxContainer",
          "L1_eTauRoI"+postFix : "xAOD::eFexTauRoIContainer",
          "L1_eTauRoI"+postFix+"Aux" : "xAOD::eFexTauRoIAuxContainer",
+         "L1_eTauBDTRoI"+postFix : "xAOD::eFexTauRoIContainer",
+         "L1_eTauBDTRoI"+postFix+"Aux" : "xAOD::eFexTauRoIAuxContainer",
          "L1_cTauRoI"+postFix : "xAOD::eFexTauRoIContainer",
          "L1_cTauRoI"+postFix+"Aux" : "xAOD::eFexTauRoIAuxContainer",
          "L1_eEMxRoI"+postFix : "xAOD::eFexEMRoIContainer",
          "L1_eEMxRoI"+postFix+"Aux" : "xAOD::eFexEMRoIAuxContainer",
          "L1_eTauxRoI"+postFix : "xAOD::eFexTauRoIContainer",
-         "L1_eTauxRoI"+postFix+"Aux" : "xAOD::eFexTauRoIAuxContainer"} )    
+         "L1_eTauxRoI"+postFix+"Aux" : "xAOD::eFexTauRoIAuxContainer",
+         "L1_eTauBDTxRoI"+postFix : "xAOD::eFexTauRoIContainer",
+         "L1_eTauBDTxRoI"+postFix+"Aux" : "xAOD::eFexTauRoIAuxContainer"} )    
 
     allVariables += ["L1_eEMRoI" + postFix,
                      "L1_eTauRoI" + postFix,
+                     "L1_eTauBDTRoI" + postFix,
                      "L1_cTauRoI" + postFix,
                      "L1_eEMxRoI" + postFix,
-                     "L1_eTauxRoI" + postFix]
+                     "L1_eTauxRoI" + postFix,
+                     "L1_eTauBDTxRoI" + postFix]
     
     return slimminghelper, allVariables
 

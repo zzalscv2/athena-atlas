@@ -29,6 +29,14 @@ StatusCode JfexMonitorAlgorithm::initialize() {
   ATH_CHECK( m_jFexMETContainerKey.initialize()   );  
   ATH_CHECK( m_jFexSumEtContainerKey.initialize()   );  
 
+  // TOBs may come from trigger bytestream - renounce from scheduler
+  renounce(m_jFexLRJetContainerKey);
+  renounce(m_jFexSRJetContainerKey);
+  renounce(m_jFexTauContainerKey);
+  renounce(m_jFexFwdElContainerKey);
+  renounce(m_jFexMETContainerKey);
+  renounce(m_jFexSumEtContainerKey);
+
   return AthMonitorAlgorithm::initialize();
 }
 
@@ -172,13 +180,16 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
     fill(m_packageName,jFexEMModule,jFexEMFPGA,jFexEMEt,jFexEMeta,jFexEMphi,jFexEMeta_glo,jFexEMphi_glo,jFexEMIso,jFexEMf1,jFexEMf2);
   }
 
-  int metx = 0;
-  int mety = 0;
+  float metx = 0;
+  float mety = 0;
   for(const xAOD::jFexMETRoI* jFexMETRoI : *jFexMETContainer){
     jFexMETX =jFexMETRoI->tobEx();
     jFexMETY =jFexMETRoI->tobEy();
-    metx += jFexMETRoI->tobEx();
-    mety += jFexMETRoI->tobEy();
+    if(jFexMETRoI->tobEtScale() != 0){
+        metx += jFexMETRoI->Ex()/jFexMETRoI->tobEtScale();
+        mety += jFexMETRoI->Ey()/jFexMETRoI->tobEtScale();        
+    }
+    
     fill(m_packageName,jFexMETX,jFexMETY);
   }
   if(jFexMETContainer->size()>0){
@@ -203,5 +214,3 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
     
   return StatusCode::SUCCESS;
 }
-
-

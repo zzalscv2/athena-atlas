@@ -1,7 +1,5 @@
-// Dear emacs, this is -*- c++ -*-
-
 /*
- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef ISOLATIONSELECTION_IISOLATIONSELECTIONTOOL_H
@@ -53,10 +51,10 @@ namespace CP {
         virtual const asg::AcceptInfo& getMuonAcceptInfo() const = 0;
         virtual const asg::AcceptInfo& getObjAcceptInfo() const = 0;
 
-        virtual const std::vector<IsolationWP*>& getMuonWPs() const = 0;
-        virtual const std::vector<IsolationWP*>& getElectronWPs() const = 0;
-        virtual const std::vector<IsolationWP*>& getPhotonWPs() const = 0;
-        virtual const std::vector<IsolationWP*>& getObjWPs() const = 0;
+        virtual const std::vector<std::unique_ptr<IsolationWP>>& getMuonWPs() const = 0;
+        virtual const std::vector<std::unique_ptr<IsolationWP>>& getElectronWPs() const = 0;
+        virtual const std::vector<std::unique_ptr<IsolationWP>>& getPhotonWPs() const = 0;
+        virtual const std::vector<std::unique_ptr<IsolationWP>>& getObjWPs() const = 0;
     };
 }  // namespace CP
 #endif

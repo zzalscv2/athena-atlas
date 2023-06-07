@@ -13,23 +13,20 @@
 #include "GaudiKernel/IPartPropSvc.h"
 
 // CLHEP/HepMC includes
-#include "TruthHelper/IsGenStable.h"
-#include "TruthHelper/IsGenInteracting.h"
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "GeneratorObjects/McEventCollection.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "CLHEP/Vector/LorentzVector.h"
 
 // McParticle includes
 #include "McParticleEvent/TruthEtIsolationsContainer.h"
-#include "McParticleUtils/McUtils.h"
 
 // McParticleTools includes
 #include "TruthIsolationTool.h"
 
-using namespace TruthHelper;
 using CLHEP::GeV;
 
 using CLHEP::HepLorentzVector;
@@ -193,13 +190,10 @@ TruthIsolationTool::buildEtIsolations( const std::string& mcEvtName,
     return StatusCode::RECOVERABLE;
   }
 
-  static const IsGenStable isStable;
-  static const IsGenInteracting isInteracting;
-
   // create a reduced list of particles
   GenParticles_t particles;
   for ( const auto& i: *genEvt) {
-    if ( isStable(i) && isInteracting(i) ) {
+    if ( MC::isGenStable(i) && MC::isSimInteracting(i) ) {
       particles.push_back( i );
     }
   }
@@ -214,7 +208,7 @@ TruthIsolationTool::buildEtIsolations( const std::string& mcEvtName,
     // Not for documentation particle
     const bool doComputeIso = ( ( ida == 22 && pt > m_ptGamMin ) ||
                                 ida == 11 || ida == 13 || ida == 15 ) &&
-                                sta != 3 && isInteracting(i);
+                                sta != 3 && MC::isSimInteracting(i);
     if ( doComputeIso ) {
       computeIso( particles, i, etIsols, partSel );
     }
@@ -229,7 +223,6 @@ TruthIsolationTool::computeIso( const GenParticles_t& particles,
 				TruthEtIsolations& etIsolations, 
 				ITruthIsolationTool::ParticleSelect partSel  )
 {
-  static const IsGenInteracting isInteracting;
   const HepLorentzVector hlv = ::svToLv(part->momentum());
   const int ida = std::abs(part->pdg_id());
 
@@ -244,8 +237,7 @@ TruthIsolationTool::computeIso( const GenParticles_t& particles,
       continue;
     }
     if( partSel == ITruthIsolationTool::UseChargedOnly ) {
-      double particleCharge = McUtils::chargeFromPdgId(particle->pdg_id(),
-						       m_pdt);
+      double particleCharge = MC::charge(particle->pdg_id());
       if( std::abs(particleCharge)<1.e-2 )
 	continue;
     }
@@ -268,9 +260,9 @@ TruthIsolationTool::computeIso( const GenParticles_t& particles,
   auto decVtx = part->end_vertex();
   if (ida == 15 && decVtx) {
     for (const auto& child:  *decVtx) {
-      if ( isInteracting(child) ) {
+      if ( MC::isSimInteracting(child) ) {
 	if( partSel == ITruthIsolationTool::UseChargedOnly ) {
-	  double particleCharge = McUtils::chargeFromPdgId(child->pdg_id(),m_pdt);
+	  double particleCharge = MC::charge(child->pdg_id());
 	  if( std::abs(particleCharge)<1.e-2 )
 	    continue;
 	}

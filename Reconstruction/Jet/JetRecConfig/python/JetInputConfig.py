@@ -41,21 +41,18 @@ def buildJetInputTruthGEN(parentjetdef, truthmod):
     truthmod = truthmod or ""
 
     # recopy config from GeneratorFilters/share/common/GenerateTruthJets.py
-    truthClassifier = CompFactory.MCTruthClassifier("JetMCTruthClassifier",
-                                                                   barcodeG4Shift=1000000) # or 200k? Doesn't matter anyway?
+    truthClassifier = CompFactory.MCTruthClassifier("JetMCTruthClassifier") 
 
     if truthmod == "":
         truthpartcopy = CompFactory.CopyTruthJetParticles("truthpartcopy",
                                                                    OutputName="JetInputTruthParticlesGEN",
-                                                                   MCTruthClassifier=truthClassifier,
-                                                                   BarCodeFromMetadata=0)
+                                                                   MCTruthClassifier=truthClassifier)
     elif truthmod=="NoWZ":
  
         truthpartcopy = CompFactory.CopyTruthJetParticles("truthpartcopywz",
                                                                      OutputName="JetInputTruthParticlesGENNoWZ",
                                                                      MCTruthClassifier=truthClassifier,
-                                                                     IncludePromptLeptons=False,
-                                                                     BarCodeFromMetadata=0)
+                                                                     IncludePromptLeptons=False)
         
     return _buildJetAlgForInput("truthpartcopy_"+truthmod,
                                 tools = [ truthpartcopy ]

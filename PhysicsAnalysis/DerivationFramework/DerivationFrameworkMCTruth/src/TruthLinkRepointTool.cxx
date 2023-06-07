@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -16,95 +16,65 @@
 #include "xAODEgamma/PhotonContainer.h"
 #include "xAODTruth/xAODTruthHelpers.h"
 #include "xAODTruth/TruthParticleContainer.h"
-#include <string>
-#include <vector>
+#include "StoreGate/ReadHandle.h"
 
 // Constructor
 DerivationFramework::TruthLinkRepointTool::TruthLinkRepointTool(const std::string& t,
         const std::string& n,
         const IInterface* p ) :
-    AthAlgTool(t,n,p)
-{
+    AthAlgTool(t,n,p) {
   declareInterface<DerivationFramework::IAugmentationTool>(this);
-
-  declareProperty ("RecoCollection", m_recoKey = "Muons", "Name of reco collection for decoration");
-  declareProperty ("OutputDecoration", m_decOutput = "TruthLink", "Name of the output decoration on the reco object");
-  declareProperty ("TargetCollections", m_targetKeys = {"TruthMuons","TruthPhotons","TruthElectrons"}, "Name of target truth collections");
+}
+StatusCode DerivationFramework::TruthLinkRepointTool::initialize(){
+  ATH_CHECK(m_recoKey.initialize());
+  if (m_decOutput.value().empty()) {
+     ATH_MSG_FATAL("Please enter a a valid output decorator");
+     return StatusCode::FAILURE;
+  }
+  ATH_CHECK(m_targetKeys.initialize());
+  m_decorKey = m_recoKey.key() + "." + m_decOutput;
+  ATH_CHECK(m_decorKey.initialize());
+  return StatusCode::SUCCESS;
 }
 
 // Destructor
-DerivationFramework::TruthLinkRepointTool::~TruthLinkRepointTool() {
-}
+DerivationFramework::TruthLinkRepointTool::~TruthLinkRepointTool() = default;
 
 // Function to do dressing, implements interface in IAugmentationTool
-StatusCode DerivationFramework::TruthLinkRepointTool::addBranches() const
-{
+StatusCode DerivationFramework::TruthLinkRepointTool::addBranches() const {
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   // Retrieve the truth collections
-  std::vector<const xAOD::TruthParticleContainer*> target(m_targetKeys.size(),nullptr);
-  for (size_t i=0;i<m_targetKeys.size();++i) ATH_CHECK(evtStore()->retrieve(target[i], m_targetKeys[i]));
+  std::vector<const xAOD::TruthParticleContainer*> targets{};
+  targets.reserve(m_targetKeys.size());
+  
+  const SG::AuxElement::Decorator< ElementLink<xAOD::TruthParticleContainer> > output_decorator(m_decOutput);
 
-  SG::AuxElement::Decorator< ElementLink<xAOD::TruthParticleContainer> > output_decorator(m_decOutput);
-
-  // Handle separate cases: Photons, Electrons, Muons, Jets
-  if (std::string::npos!=m_recoKey.find("Electron")){
-    const xAOD::ElectronContainer* inputCont(nullptr);
-    ATH_CHECK(evtStore()->retrieve(inputCont, m_recoKey));
-    for (const auto *input : *inputCont){
-      const xAOD::TruthParticle* truthPart = xAOD::TruthHelpers::getTruthParticle(*input); 
-      int index = -1;
-      for (size_t i=0;i<m_targetKeys.size() && index<0 && truthPart;++i){
-        index = find_match(truthPart,target[i]);
-        if (index>=0) output_decorator(*input) = ElementLink<xAOD::TruthParticleContainer>(*(target[i]),index);
-      }
-      if (index<0){
-        if (truthPart){
-          ATH_MSG_DEBUG("No particle with barcode " << truthPart->barcode() << " PDG ID " << truthPart->pdgId() 
-                       << " pT=" << truthPart->pt()*0.001 << " GeV and status " << truthPart->status() 
-                       << " found in " << m_targetKeys.size() << " target containers");
-        }
-        output_decorator(*input) = ElementLink<xAOD::TruthParticleContainer>();
-      }
-    } // Loop over input particles
-  } else if (std::string::npos!=m_recoKey.find("Photon")){
-    const xAOD::PhotonContainer* inputCont(nullptr);
-    ATH_CHECK(evtStore()->retrieve(inputCont, m_recoKey));
-    for (const auto *input : *inputCont){
-      const xAOD::TruthParticle* truthPart = xAOD::TruthHelpers::getTruthParticle(*input);
-      int index = -1;
-      for (size_t i=0;i<m_targetKeys.size() && index<0 && truthPart;++i){
-        index = find_match(truthPart,target[i]);
-        if (index>=0) output_decorator(*input) = ElementLink<xAOD::TruthParticleContainer>(*(target[i]),index);
-      }
-      if (index<0){
-        if (truthPart){
-          ATH_MSG_DEBUG("No particle with barcode " << truthPart->barcode() << " PDG ID " << truthPart->pdgId()
-                       << " pT=" << truthPart->pt()*0.001 << " GeV and status " << truthPart->status()
-                       << " found in " << m_targetKeys.size() << " target containers");
-        }
-        output_decorator(*input) = ElementLink<xAOD::TruthParticleContainer>();
-      }
-    } // Loop over input particles
-  } else if (std::string::npos!=m_recoKey.find("Muon")){
-    const xAOD::MuonContainer* inputCont(nullptr);
-    ATH_CHECK(evtStore()->retrieve(inputCont, m_recoKey));
-    for (const auto *input : *inputCont){
-      const xAOD::TruthParticle* truthPart = xAOD::TruthHelpers::getTruthParticle(*input);
-      int index = -1;
-      for (size_t i=0;i<m_targetKeys.size() && index<0 && truthPart;++i){
-        index = find_match(truthPart,target[i]);
-        if (index>=0) output_decorator(*input) = ElementLink<xAOD::TruthParticleContainer>(*(target[i]),index);
-      }
-      if (index<0){
-        if (truthPart){
-          ATH_MSG_DEBUG("No particle with barcode " << truthPart->barcode() << " PDG ID " << truthPart->pdgId()
-                       << " pT=" << truthPart->pt()*0.001 << " GeV and status " << truthPart->status()
-                       << " found in " << m_targetKeys.size() << " target containers");
-        }
-        output_decorator(*input) = ElementLink<xAOD::TruthParticleContainer>();
-      }
-    } // Loop over input particles
+  for (const SG::ReadHandleKey<xAOD::TruthParticleContainer>& key : m_targetKeys) {
+    SG::ReadHandle<xAOD::TruthParticleContainer> readHandle{key, ctx};
+    if (!readHandle.isValid()) {
+      ATH_MSG_FATAL("Failed to retrieve "<<key.fullKey());
+      return StatusCode::FAILURE;
+    }
+    targets.emplace_back(readHandle.cptr());
   }
-
+  
+  
+  SG::ReadHandle<xAOD::IParticleContainer> inputCont{m_recoKey, ctx};
+  if (!inputCont.isValid()) {
+    ATH_MSG_FATAL("Failed to retrive "<<m_recoKey.fullKey());
+    return StatusCode::FAILURE;
+  }
+  for ( const xAOD::IParticle* input : *inputCont) {
+    const xAOD::TruthParticle* truthPart = xAOD::TruthHelpers::getTruthParticle(*input);
+    output_decorator(*input) = ElementLink<xAOD::TruthParticleContainer>{};
+    for (const xAOD::TruthParticleContainer* target : targets) {
+        int index = find_match(truthPart, target);
+        
+        if (index >=0) output_decorator(*input) = ElementLink<xAOD::TruthParticleContainer>(*target, index);
+        
+    }
+  }
+  
   return StatusCode::SUCCESS;
 }
 

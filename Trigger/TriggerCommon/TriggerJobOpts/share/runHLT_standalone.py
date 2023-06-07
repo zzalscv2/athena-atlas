@@ -1,4 +1,3 @@
-
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 ################################################################################
 # TriggerJobOpts/runHLT_standalone.py
@@ -63,6 +62,7 @@ opt_obsolete = ['setDetDescr',
                 'setGlobalTag',
                 'doL1Unpacking',
                 'enableL1MuonPhase1',
+                'enableL1CaloPhase1',
                 'enableL1CaloLegacy',
                 'enableL1TopoDump',
                 'enableL1TopoBWSimulation',
@@ -71,6 +71,7 @@ opt_obsolete = ['setDetDescr',
                 'doID',
                 'doCalo',
                 'doMuon',
+                'BFieldAutoConfig',
 ]
 
 ################################################################################
@@ -96,7 +97,8 @@ for option in defaultOptions:
 
 for option in opt_obsolete:
     if option in globals():
-        log.error("%s is not supported anymore. Set the relevant flag instead.", option)
+        log.error("%s is not supported anymore. Set the relevant ConfigFlag instead.", option)
+        theApp.exit(1)
 
 import re
 
@@ -162,6 +164,10 @@ flags.Muon.MuonTrigger = True # Setup muon reconstruction for trigger
 flags.Detector.GeometryALFA = False
 flags.Detector.GeometryFwdRegion = False
 flags.Detector.GeometryLucid = False
+
+from MuonRecExample.MuonRecFlags import muonRecFlags
+flags.Muon.enableNRPC = muonRecFlags.doNRPCs()
+    
 
 # Increase scheduler checks and verbosity
 flags.Scheduler.CheckDependencies = True
@@ -236,13 +242,9 @@ if opt.doWriteBS:
 # Modifiers
 #-------------------------------------------------------------
 # Setup list of modifiers
-# Common modifiers for MC and data
 setModifiers = []
-
-if not flags.Input.isMC:  # data modifiers
-    setModifiers += ['BFieldAutoConfig']
-
 modifierList=[]
+
 from TrigConfigSvc.TrigConfMetaData import TrigConfMetaData
 meta = TrigConfMetaData()
 
@@ -597,8 +599,9 @@ include("TriggerTest/disableChronoStatSvcPrintout.py")
 #-------------------------------------------------------------
 # MessageSvc
 #-------------------------------------------------------------
-svcMgr.MessageSvc.Format = "% F%40W%C%4W%R%e%s%8W%R%T %0W%M"
-svcMgr.MessageSvc.enableSuppression = False
+if not flags.Trigger.Online.isPartition:   # athenaHLT already sets this
+    svcMgr.MessageSvc.Format = "% F%40W%C%4W%R%e%s%8W%R%T %0W%M"
+    svcMgr.MessageSvc.enableSuppression = False
 
 if flags.Input.isMC:
     # Disable spurious warnings from HepMcParticleLink, ATR-21838

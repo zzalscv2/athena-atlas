@@ -8,8 +8,7 @@
 // Calculate isolation at truth level for given lists of truth particles
 
 #include "DerivationFrameworkMCTruth/TruthIsolationTool.h"
-#include "HepPID/ParticleIDMethods.hh"
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include <vector>
 #include <string>
 #include <algorithm>

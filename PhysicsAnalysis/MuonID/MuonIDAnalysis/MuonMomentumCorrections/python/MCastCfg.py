@@ -20,8 +20,7 @@ def setupMCastToolCfg(flags, name="MuonMomentumCorrections", **kwargs):
 def setupCalibratedMuonProviderCfg(flags, name="CalibratedMuonProvider", calibMode = 1, **kwargs):
     acc = ComponentAccumulator()    
     ### prw tool configuration
-    if "prwTool" in kwargs:
-        kwargs.setdefault( "useRndRunNumber", True)
+    kwargs.setdefault("useRndRunNumber", flags.Input.isMC)
     useRndNumber =  kwargs["useRndRunNumber"] if "useRndRunNumber" in kwargs else False
     kwargs.setdefault("Tool", acc.popToolsAndMerge(setupMCastToolCfg(flags,
                                                                      calibMode = calibMode,
@@ -32,8 +31,7 @@ def setupCalibratedMuonProviderCfg(flags, name="CalibratedMuonProvider", calibMo
     return acc
 def setupCalibratedTracksProviderCfg(flags, name="CalibratedMuonTracksProvider",calibMode = 1, **kwargs):
     acc = ComponentAccumulator()
-    if "prwTool" in kwargs:
-        kwargs.setdefault( "useRndRunNumber", True)
+    kwargs.setdefault("useRndRunNumber", flags.Input.isMC)
     useRndNumber =  kwargs["useRndRunNumber"] if "useRndRunNumber" in kwargs else False
     kwargs.setdefault("Tool", acc.popToolsAndMerge(setupMCastToolCfg(flags,
                                                                      calibMode = calibMode,

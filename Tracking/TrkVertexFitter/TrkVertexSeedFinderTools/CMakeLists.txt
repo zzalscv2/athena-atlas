@@ -10,7 +10,7 @@ atlas_add_library( TrkVertexSeedFinderToolsLib
                    TrkVertexSeedFinderTools/*.h
                    INTERFACE
                    PUBLIC_HEADERS TrkVertexSeedFinderTools
-                   LINK_LIBRARIES AthenaKernel GaudiKernel AthenaBaseComps TrkVertexFitterInterfaces
+                   LINK_LIBRARIES TruthUtils AthenaKernel GaudiKernel AthenaBaseComps TrkVertexFitterInterfaces
                    TrkVertexSeedFinderUtilsLib xAODEventInfo GeneratorObjects AtlasHepMCLib CxxUtils )
 
 # Component(s) in the package:
@@ -20,7 +20,7 @@ atlas_add_component( TrkVertexSeedFinderTools
                      INCLUDE_DIRS ${HEPPDT_INCLUDE_DIRS}
                      LINK_LIBRARIES ${HEPPDT_LIBRARIES} AtlasHepMCLib EventPrimitives GaudiKernel GeneratorObjects
                      GeoPrimitives StoreGateLib TestTools TrkEventPrimitives TrkParameters TrkTrack
-                     TrkVertexFitterInterfaces TrkVertexSeedFinderToolsLib TrkVertexSeedFinderUtilsLib TruthHelper )
+                     TrkVertexFitterInterfaces TrkVertexSeedFinderToolsLib TrkVertexSeedFinderUtilsLib )
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )

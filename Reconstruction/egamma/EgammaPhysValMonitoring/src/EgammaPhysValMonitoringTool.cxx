@@ -151,7 +151,7 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
 
       //--electrons
       if (std::abs(truthParticle->pdgId()) == 11 &&
-          truthParticle->status() == 1 && truthParticle->barcode() < HepMC::SIM_REGENERATION_INCREMENT) {
+          truthParticle->status() == 1 && HepMC::generations(truthParticle) < 1) {
         m_oElectronValidationPlots.m_oTruthIsoPlots.fill(*truthParticle,
                                                          *eventInfo);
         m_oElectronValidationPlots.m_oTruthPromptElecPlots.fill(*truthParticle,
@@ -160,7 +160,7 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
 
       //--photons
       if (std::abs(truthParticle->pdgId()) == 22 &&
-          truthParticle->status() == 1 && truthParticle->barcode() < HepMC::SIM_REGENERATION_INCREMENT) {
+          truthParticle->status() == 1 && HepMC::generations(truthParticle) < 1) {
         m_oPhotonValidationPlots.m_oTruthIsoPlots.fill(*truthParticle,
                                                        *eventInfo);
         //-- filling conversions
@@ -262,7 +262,7 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
       //--electrons
       if (std::abs(truthallParticle->pdgId()) == 11 &&
           truthallParticle->status() == 1 &&
-          truthallParticle->barcode() < HepMC::SIM_REGENERATION_INCREMENT) {
+          HepMC::generations(truthallParticle) == 0) {
 
 #ifdef MCTRUTHCLASSIFIER_CONST
         auto type =
@@ -295,7 +295,7 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
       //--photons
       if (std::abs(truthallParticle->pdgId()) == 22 &&
           truthallParticle->status() == 1 &&
-          truthallParticle->barcode() < HepMC::SIM_REGENERATION_INCREMENT) {
+          HepMC::generations(truthallParticle) == 0) {
 
 #ifdef MCTRUTHCLASSIFIER_CONST
         auto type =
@@ -358,9 +358,8 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
     //---------LRTElectrons----------------------
     if(!m_lrtelectronContainerKey.empty()){
       if (!fillLRTElecHistograms(truthParticles.ptr(), eventInfo.ptr())) {
-	ATH_MSG_ERROR("Filling lrt elecectron hists  failed " << name()
-		      << "...");
-	return StatusCode::FAILURE;
+        ATH_MSG_ERROR("Filling lrt elecectron hists  failed " << name() << "...");
+        return StatusCode::FAILURE;
       }
     }
 
@@ -542,9 +541,7 @@ StatusCode EgammaPhysValMonitoringTool::fillLRTElecHistograms(const xAOD::TruthP
   return StatusCode::SUCCESS;
 }
 
-//-------------------------------------------------------------------
 StatusCode EgammaPhysValMonitoringTool::fillRecoFrwdElecHistograms(const xAOD::TruthParticleContainer* truthParticles, const xAOD::EventInfo* eventInfo)
-//-------------------------------------------------------------------
 {
   ATH_MSG_DEBUG ("Filling reco frwd electron hists " << name() << "...");
 

@@ -22,6 +22,11 @@ bool dummy;   // somewhere to put unused variables and stop stupid warnings
 using std::cout;
 using std::endl;
 using std::string;
+using std::to_string;
+// barcode threshold (SIM_BARCODE_THRESHOLD) for simulated particles (was previously set to 100000 in this code), taken from AtlasHepMC/MagicNumbers.h
+const int SIM_BARCODE_THRESHOLD = 200000 
+const TString SIM_BC_THRESHOLD=std::to_string(SIM_BARCODE_THRESHOLD);
+
 void doall_setup (const char* name, const int compile= 0, const char* subdir= 0);
 bool doall_doit (const string& doplot, const string& routine);
 string doall_filename (const string& dir, const string& name, const string& ext);
@@ -78,24 +83,24 @@ int doall (const string & file= "InDetRecStatistics.root",
     break;
   case 2:    // TrackSelector cuts for data
     cutset_data=  "track_passSelectorCuts>0";
-    cutset_truth= "abs(track_truth_eta)<2.5&&track_truth_barcode<100000&&abs(1/track_truth_qoverpt)>1000";
-    cutset_mc=    "abs(mctrack_eta)<2.5&&mctrack_barcode<100000&&abs(1/mctrack_qoverpt)>1000";
+    cutset_truth= "abs(track_truth_eta)<2.5&&track_truth_barcode<"+SIM_BC_THRESHOLD+"&&abs(1/track_truth_qoverpt)>1000";
+    cutset_mc= "abs(mctrack_eta)<2.5&&mctrack_barcode<"+SIM_BC_THRESHOLD+"&&abs(1/mctrack_qoverpt)>1000";
     cutset_hit=   "hit_recindex>=0&&track_passSelectorCuts[hit_recindex]>0";
     primary=      true;
     match=        0.8;
     break;
   case 3:    // "standard cuts" from InDetTrackingPerformanceCuts TWiki page, but no impact cuts, since those should be WRT PV, which we don't have. Use IDRS primary cuts instead.
     cutset_data=  "track_npixhits+track_nscthits>=7";
-    cutset_truth= "abs(track_truth_eta)<2.5&&track_truth_barcode<100000&&abs(1/track_truth_qoverpt)>1000";
-    cutset_mc=    "abs(mctrack_eta)<2.5&&mctrack_barcode<100000&&abs(1/mctrack_qoverpt)>1000";
+    cutset_truth= "abs(track_truth_eta)<2.5&&track_truth_barcode<"+SIM_BC_THRESHOLD+"&&abs(1/track_truth_qoverpt)>1000";
+    cutset_mc="abs(mctrack_eta)<2.5&&mctrack_barcode<"+SIM_BC_THRESHOLD+"&&abs(1/mctrack_qoverpt)>1000";
     cutset_hit=   "hit_recindex>=0&&track_npixhits[hit_recindex]+track_nscthits[hit_recindex]>=7";
     primary=      true;
     match=        0.8;
     break;
   case 4:    // "standard cuts" closer to InDetTrackingPerformanceCuts TWiki page, but which primary vertex to use? track_truth_beginvertex is not right for cutset_data, because there may be no associated truth
     cutset_data=  "track_npixhits+track_nscthits>=7&&abs(track_d0+delta_d0(track_truth_phi,track_truth_beginvertexx,track_truth_beginvertexy))<2&&abs((track_z0-track_truth_beginvertexz)*sin(track_theta))<10";
-    cutset_truth= "abs(track_truth_eta)<2.5&&track_truth_barcode<100000&&abs(track_truth_d0+delta_d0(track_truth_phi,track_truth_beginvertexx,track_truth_beginvertexy))<2&&abs(1/track_truth_qoverpt)>1000";
-    cutset_mc=    "abs(mctrack_eta)<2.5&&mctrack_barcode<100000&&abs(mctrack_d0+delta_d0(mctrack_phi,mctrack_beginvertexx,mctrack_beginvertexy))<2&&abs(1/mctrack_qoverpt)>1000";
+    cutset_truth= "abs(track_truth_eta)<2.5&&track_truth_barcode<"+SIM_BC_THRESHOLD+"&&abs(track_truth_d0+delta_d0(track_truth_phi,track_truth_beginvertexx,track_truth_beginvertexy))<2&&abs(1/track_truth_qoverpt)>1000";
+    cutset_mc=  "abs(mctrack_eta)<2.5&&mctrack_barcode<"+SIM_BC_THRESHOLD+"&&abs(mctrack_d0+delta_d0(mctrack_phi,mctrack_beginvertexx,mctrack_beginvertexy))<2&&abs(1/mctrack_qoverpt)>1000";
     cutset_hit=   "hit_recindex>=0&&track_npixhits[hit_recindex]+track_nscthits[hit_recindex]>=7&&abs(track_d0[hit_recindex]+delta_d0(track_truth_phi[hit_recindex],track_truth_beginvertexx[hit_recindex],track_truth_beginvertexy[hit_recindex]))<2&&abs((track_z0[hit_recindex]-track_truth_beginvertexz[hit_recindex])*sin(track_theta[hit_recindex]))<10";
     primary=      false;
     match=        0.8;

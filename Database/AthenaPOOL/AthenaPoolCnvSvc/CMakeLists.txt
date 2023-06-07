@@ -13,7 +13,7 @@ atlas_add_library( AthenaPoolCnvSvcLib
    PUBLIC_HEADERS AthenaPoolCnvSvc
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} AthContainers AthLinks AthenaBaseComps AthenaKernel AthenaPoolUtilities CxxUtils DataModelRoot GaudiKernel PersistentDataModel PoolSvcLib StorageSvc TPTools
+   LINK_LIBRARIES ${Boost_LIBRARIES} AthContainers AthLinks AthenaBaseComps AthenaKernel AthenaPoolUtilities CxxUtils DataModelRoot GaudiKernel PmbCxxUtils PersistentDataModel PoolSvcLib StorageSvc TPTools
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainersInterfaces AthContainersRoot RootUtils SGTools StoreGateLib )
 
 atlas_add_component( AthenaPoolCnvSvc

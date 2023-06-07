@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////
@@ -366,7 +366,7 @@ NSWHitsTree::NSWHitsTree(TTree *tree) : fChain(0)
       f->GetObject("NSWHitsTree",tree);
 
    }
-   Init(tree);
+   NSWHitsTree::Init(tree);
 }
 
 NSWHitsTree::~NSWHitsTree()

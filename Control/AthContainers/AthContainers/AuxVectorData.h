@@ -1,10 +1,8 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: AuxVectorData.h 793052 2017-01-19 15:05:28Z ssnyder $
 /**
  * @file AthContainers/AuxVectorData.h
  * @author scott snyder <snyder@bnl.gov>
@@ -169,6 +167,11 @@ class AuxVectorData
 #endif // not XAOD_STANDALONE
 {
 public:
+  /// Spans over auxiliary variables.
+  template <class T> using span = typename AuxDataTraits<T>::span;
+  template <class T> using const_span = typename AuxDataTraits<T>::const_span;
+
+
   /// Constructor.
   AuxVectorData();
 
@@ -590,6 +593,72 @@ public:
    * Errors are signaled by raising an exception.
    */
   void* getDataArray (SG::auxid_t auxid);
+
+
+  /**
+   * @brief Return a span over an aux data item.
+   * @param auxid The desired aux data item.
+   *
+   * This will return a span containing the value of the requested
+   * auxiliary variable for all elements in the container.
+   * If the item doesn't exist, it will be created.
+   * Errors are signaled by raising an exception.
+   * Note that the @c value_type of the span is not necessarily @c T;
+   * an example is @c bool for which we return a span of @c char.
+   */
+  template <class T>
+  span<T> getDataSpan (const std::string& name);
+
+
+  /**
+   * @brief Return a span over an aux data item.
+   * @param auxid The desired aux data item.
+   *
+   * This will return a span containing the value of the requested
+   * auxiliary variable for all elements in the container.
+   * If the item doesn't exist, it will be created.
+   * Errors are signaled by raising an exception.
+   * Note that the @c value_type of the span is not necessarily @c T;
+   * an example is @c bool for which we return a span of @c char.
+   */
+  template <class T>
+  const_span<T> getDataSpan (const std::string& name) const;
+
+
+  /**
+   * @brief Return a span over an aux data item.
+   * @param auxid The desired aux data item.
+   *
+   * This will return a span containing the value of the requested
+   * auxiliary variable for all elements in the container.
+   * If the item doesn't exist, it will be created.
+   * Errors are signaled by raising an exception.
+   * Note that the @c value_type of the span is not necessarily @c T;
+   * an example is @c bool for which we return a span of @c char.
+   */
+  template <class T>
+  const_span<T> getConstDataSpan (const std::string& name) const;
+
+
+  /**
+   * @brief Return a span over an aux data item for a decoration.
+   * @param auxid The desired aux data item.
+   *
+   * This will return a span containing the value of the requested
+   * auxiliary variable for all elements in the container.
+   * If the item doesn't exist, it will be created.
+   * Errors are signaled by raising an exception.
+   * Note that the @c value_type of the span is not necessarily @c T;
+   * an example is @c bool for which we return a span of @c char.
+   *
+   * The difference between @c getDecorationSpan and @c getDataSpan is that
+   * @c getDecorationSpan takes a const container as input, but returns
+   * a span over non-const objects.  This will only succeed if either the
+   * container is not locked or the item was first accessed
+   * as a decoration.
+   */
+  template <class T>
+  span<T> getDecorationSpan (const std::string& name) const;
 
 
 protected:

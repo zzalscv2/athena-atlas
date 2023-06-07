@@ -5,12 +5,10 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.SystemOfUnits import MeV
-from BarcodeServices.BarcodeServicesConfig import BarcodeSvcCfg
 
 
 def ParticleHelperCfg(flags, name="ISF_ParticleHelper", **kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("BarcodeSvc", acc.getPrimaryAndMerge(BarcodeSvcCfg(flags)).name)
     acc.setPrivateTools(CompFactory.ISF.ParticleHelper(name, **kwargs))
     return acc
 
@@ -49,8 +47,6 @@ def MC12EntryLayerFilterCfg(flags, name="ISF_MC12EntryLayerFilter", **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("AllowOnlyDefinedBarcodes", True)
     kwargs.setdefault("AllowOnlyLegacyPrimaries", False)
-    kwargs.setdefault("LegacyParticleGenerationIncrement", 1000000)
-    kwargs.setdefault("LegacyFirstSecondaryBarcode", 200001)
     acc.setPrivateTools(CompFactory.ISF.GenericBarcodeFilter(name, **kwargs))
     return acc
 

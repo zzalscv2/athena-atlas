@@ -24,6 +24,7 @@ class TrigTauCaloRoiUpdater : public AthReentrantAlgorithm {
 
  private:
   Gaudi::Property< float > m_dRForCenter {this,"dRForCenter",0.2,"Delta R from the center of ROI"};
+  Gaudi::Property< float > m_z0HalfWidth  {this,"z0HalfWidth",-999,"z0 Half width for tracking"};
   Gaudi::Property< float > m_etaHalfWidth {this,"etaHalfWidth",0.1,"eta Half width for tracking"};
   Gaudi::Property< float > m_phiHalfWidth {this,"phiHalfWidth",0.1,"phi Half width for tracking"};
 

@@ -8,7 +8,7 @@
 
 // Core include(s):
 #include "AthLinks/ElementLink.h"
-#include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 // EDM include(s):
 #include "xAODTau/TauxAODHelpers.h"

@@ -8,6 +8,7 @@ from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
 from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
 from MuonConfig.MuonByteStreamCnvTestConfig import RpcDigitToRpcRDOCfg
+from MuonConfig.MuonByteStreamCnvTestConfig import NrpcDigitToNrpcRDOCfg
 from MuonConfig.MuonCablingConfig import RPCCablingConfigCfg
 from Digitization.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
 from Digitization.PileUpToolsConfig import PileUpToolsCfg
@@ -122,6 +123,8 @@ def RPC_OutputCfg(flags):
     acc = ComponentAccumulator()
     if flags.Output.doWriteRDO:
         ItemList = ["RpcPadContainer#*"]
+        if flags.Muon.enableNRPC:
+            ItemList += [ 'xAOD::NRPCRDOContainer#NRPCRDO' , 'xAOD::NRPCRDOAuxContainer#NRPCRDOAux.' ]
         if flags.Digitization.EnableTruth:
             ItemList += ["MuonSimDataCollection#*"]
             acc.merge(TruthDigitizationOutputCfg(flags))
@@ -175,4 +178,7 @@ def RPC_DigitizationDigitToRDOCfg(flags):
     acc = RPC_DigitizationCfg(flags)
     acc.merge(RPCCablingConfigCfg(flags))
     acc.merge(RpcDigitToRpcRDOCfg(flags))
+    if flags.Muon.enableNRPC:
+        acc.merge(NrpcDigitToNrpcRDOCfg(flags))
     return acc
+

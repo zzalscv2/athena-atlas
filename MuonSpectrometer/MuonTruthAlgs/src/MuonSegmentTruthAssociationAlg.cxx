@@ -10,6 +10,7 @@
 #include "xAODMuon/MuonSegmentAuxContainer.h"
 #include "xAODTruth/TruthParticleAuxContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 namespace Muon {
 
@@ -210,7 +211,7 @@ namespace Muon {
                     continue;
                 }
                 // match barcodes
-                if (barcode % m_barcodeOffset == truthParticle->barcode()) {
+                if (barcode % HepMC::SIM_REGENERATION_INCREMENT == truthParticle->barcode()) {
                     ATH_MSG_DEBUG("Matched reconstructed segment: barcode " << barcode << " layer "
                                                                             << Muon::MuonStationIndex::chName(chIndex));
                     recoLink.toPersistent();

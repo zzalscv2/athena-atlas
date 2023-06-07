@@ -30,9 +30,7 @@ StatusCode MuonNRPC_CablingAlg::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
     const bool ext_json = !m_extJSONFile.value().empty();
     /// Only load the readout geometry if an external JSON file is defined
-    ATH_CHECK(m_muonManagerKey.initialize(ext_json));
     ATH_CHECK(m_readKeyMap.initialize(!ext_json));
-
     return StatusCode::SUCCESS;
 }
 
@@ -52,21 +50,14 @@ StatusCode MuonNRPC_CablingAlg::execute() {
                          "out of order.");
         return StatusCode::SUCCESS;
     }
+    writeCablingHandle.addDependency(EventIDRange(IOVInfiniteRange::infiniteRunLB()));
 
     ATH_MSG_INFO("Load the Nrpc cabling");
     std::unique_ptr<MuonNRPC_CablingMap> writeCdo{
         std::make_unique<MuonNRPC_CablingMap>()};
 
     /// If the JSON file is defined use the readout geometry as IOV definition
-    if (!m_extJSONFile.value().empty()) {
-        SG::ReadCondHandle<MuonGM::MuonDetectorManager> muonDependency{
-            m_muonManagerKey, ctx};
-        if (!muonDependency.isValid()) {
-            ATH_MSG_FATAL("Failed to retrieve the detector manager "
-                          << m_muonManagerKey.fullKey());
-            return StatusCode::FAILURE;
-        }
-        writeCablingHandle.addDependency(muonDependency);
+    if (!m_extJSONFile.value().empty()) {        
         std::ifstream in_json{m_extJSONFile};
         if (!in_json.good()) {
             ATH_MSG_FATAL("Failed to open external JSON file "

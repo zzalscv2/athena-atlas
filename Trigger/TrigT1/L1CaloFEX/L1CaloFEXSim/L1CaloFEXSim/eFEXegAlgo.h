@@ -53,6 +53,7 @@ namespace LVL1 {
     virtual void getRealPhi(float & phi) override;
     virtual void getRealEta(float & eta) override;
     virtual std::unique_ptr<eFEXegTOB> geteFEXegTOB() override;
+    virtual void getClusterCells(std::vector<unsigned int> &cellETs) override;
     virtual unsigned int getET() override;
     virtual unsigned int dmCorrection(unsigned int ET, unsigned int layer) override;
     virtual void getWindowET(int layer, int jPhi, int SCID, unsigned int &) override;

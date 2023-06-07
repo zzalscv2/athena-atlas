@@ -31,7 +31,7 @@ precommand = ''.join([
   "setMenu='PhysicsP1_pp_lowMu_run3_v1';",
   "doWriteBS=False;",
   "doWriteRDOTrigger=True;",
-  "from AthenaConfiguration.AllConfigFlags import ConfigFlags;ConfigFlags.IOVDb.GlobalTag='OFLCOND-MC21-SDR-RUN3-07'"
+  "doAlfaCtpin=True;"
 ])
 ex.args = '-c "{:s}"'.format(precommand)
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef NSWstudies_match_h
@@ -16,15 +16,16 @@ class Flocalize {
 private:
 public:
   
-   Flocalize (const std::string & i_stationName, int i_stationEta, int i_stationPhi, int i_multiplet, int i_gas_gap, int i_channel, int i_channel_type, int i_matchedchannel) {
-      stationName = i_stationName;
-      stationEta = i_stationEta;
-      stationPhi = i_stationPhi;
-      multiplet = i_multiplet;
-      gas_gap = i_gas_gap;
-      channel_type = i_channel_type;
-      channel = i_channel;
-      matchedchannel = i_matchedchannel;
+   Flocalize (const std::string & i_stationName, int i_stationEta, int i_stationPhi, int i_multiplet, int i_gas_gap, int i_channel, int i_channel_type, int i_matchedchannel) :
+     stationName (i_stationName),
+     stationEta (i_stationEta),
+     stationPhi (i_stationPhi),
+     multiplet (i_multiplet),
+     gas_gap (i_gas_gap),
+     channel_type (i_channel_type),
+     channel (i_channel),
+     matchedchannel (i_matchedchannel)
+  {
    }
    //To do: oveload == operator?
    bool isEqual(Flocalize _other) {

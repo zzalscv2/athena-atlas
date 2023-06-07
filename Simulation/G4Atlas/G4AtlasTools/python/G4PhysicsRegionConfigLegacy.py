@@ -229,11 +229,16 @@ def getDeadMaterialPhysicsRegionTool(name='DeadMaterialPhysicsRegionTool', **kwa
     volumeList = []
     currentRun = getLHCRun()
     sectionList = []
+    from G4AtlasApps.SimFlags import simFlags
     if currentRun in ["RUN1"]:
-        sectionList = list(range(16,49)) # does not include 49
+        # Avoid overlap with BeampipeFwdCut Region (ATLASSIM-6426)
+        endRange = 47 if simFlags.BeamPipeSimMode.statusOn and simFlags.BeamPipeSimMode() != "Normal" else 49
+        sectionList = list(range(16,endRange)) # does not include endRange
         sectionList += [ 51, 52, 53, 54 ]
     else:
-        sectionList = list(range(191,200)) # does not include 200
+        # Avoid overlap with BeampipeFwdCut Region (ATLASSIM-6426)
+        endRange = 198 if simFlags.BeamPipeSimMode.statusOn and simFlags.BeamPipeSimMode() != "Normal" else 200
+        sectionList = list(range(191,endRange)) # does not include endRange
         if currentRun not in ["RUN2", "RUN3", "RUN4"]:
             print('getDeadMaterialPhysicsRegionTool: WARNING check that RUN2 beampipe volume names are correct for this geometry tag')
     for section in sectionList:

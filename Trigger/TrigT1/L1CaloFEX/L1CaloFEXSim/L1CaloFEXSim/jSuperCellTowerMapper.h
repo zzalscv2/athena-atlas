@@ -36,7 +36,7 @@ class jSuperCellTowerMapper: public AthAlgTool, virtual public IjSuperCellTowerM
   
   virtual StatusCode AssignSuperCellsToTowers(std::unique_ptr<jTowerContainer> & my_jTowerContainerRaw) override;
   virtual StatusCode AssignTriggerTowerMapper(std::unique_ptr<jTowerContainer> & my_jTowerContainerRaw) override;
-  virtual StatusCode AssignPileupAndNoiseValues (std::unique_ptr<jTowerContainer> & my_jTowerContainerRaw,TH1F *jTowerArea_hist, TH1I *Firmware2BitwiseID,TH1I *BinLayer,TH1F *EtaCoords,TH1F *PhiCoords) override;
+  
   
   virtual void reset() override;
 

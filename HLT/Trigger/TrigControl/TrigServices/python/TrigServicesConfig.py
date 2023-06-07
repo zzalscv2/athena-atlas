@@ -17,7 +17,7 @@ def getMessageSvc(flags, msgSvcType="TrigMessageSvc"):
    msgsvc = CompFactory.getComp(msgSvcType)(
       "MessageSvc",
       OutputLevel = flags.Exec.OutputLevel,
-      Format    = "%t  % F%40W%C%4W%R%e%s%8W%R%T %0W%M",
+      Format    = "%t  % F%40W%C%6W%R%e%4W%s%8W%R%T %0W%M",
       ErsFormat = "%S: %M",
       printEventIDLevel = WARNING,
 
@@ -104,7 +104,11 @@ def getHltROBDataProviderSvc(flags, name='ROBDataProviderSvc'):
 
 def getHltEventLoopMgr(flags, name='HltEventLoopMgr'):
    '''online event loop manager'''
-   svc = CompFactory.HltEventLoopMgr(name)
+   svc = CompFactory.HltEventLoopMgr(
+      name,
+      setMagFieldFromPtree = flags.Trigger.Online.BFieldAutoConfig
+   )
+
    svc.MonTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
 
    svc.MonTool.defineHistogram('TotalTime', path='EXPERT', type='TH1F',

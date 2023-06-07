@@ -59,16 +59,6 @@ class ToroidsOff(_modifier):
         condSeq = AthSequencer("AthCondSeq")
         condSeq.AtlasFieldMapCondAlg.MapToroCurrent = 0
 
-
-class BFieldAutoConfig(_modifier):
-    """
-    Read field currents from configuration ptree (athenaHLT)
-    """
-    def postSetup(self, flags):
-        if hasattr(svcMgr,'HltEventLoopMgr'):
-            svcMgr.HltEventLoopMgr.setMagFieldFromPtree = True
-
-
 class forceConditions(_modifier):
     """
     Force all conditions (except prescales) to match run from input file
@@ -223,3 +213,16 @@ class doRuntimeNaviVal(_modifier):
     def preSetup(self, flags):
         log.info("Enabling Runtime Trigger Navigation Validation")
         flags.Trigger.doRuntimeNaviVal = True
+
+
+###############################################################
+# L1 menu configuration
+###############################################################
+
+class doAlfaCtpin(_modifier):
+    """
+    Substitute AlfaCtpin for Topo3
+    """
+    def preSetup(self, flags):
+        log.info("Replacing Topo3 CTP input with AlfaCtpin")
+        flags.Trigger.L1.doAlfaCtpin = True

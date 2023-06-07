@@ -61,22 +61,10 @@ StatusCode xAODTTbarWithJpsimumuFilter::filterEvent()
         for (unsigned int iPart = 0; iPart < nPart; ++iPart)
         {
             const xAOD::TruthParticle *pitr = (*itr)->truthParticle(iPart);
-
-            if (HepMC::is_simulation_particle(pitr->barcode()))
-                break;
-            int pdgid = abs(pitr->pdgId());
-            // don't loose time checking all if one found
-            if (pdgid == 443)
-            {
-                if (!isLeptonDecay(pitr, 13))
-                    continue;
-            }
-            else
-            {
-                continue;
-            }
-            if (!passJpsiSelection(pitr))
-                continue;
+            if (std::abs(pitr->pdgId())!=443) continue;
+            if (HepMC::is_simulation_particle(pitr)) continue;
+            if(!isLeptonDecay(pitr, 13)) continue;
+            if (!passJpsiSelection(pitr)) continue;
             isjpsi = true;
 
         } /// loop on particles
@@ -96,12 +84,9 @@ bool xAODTTbarWithJpsimumuFilter::isLeptonDecay(const xAOD::TruthParticle *part,
     auto end = part->decayVtx();
     if (!end)
         return true;
-    int partbarcode = part->barcode();
     for (size_t thisChild_id = 0; thisChild_id < end->nOutgoingParticles(); thisChild_id++)
     {
         auto p = end->outgoingParticle(thisChild_id);
-        if (partbarcode > p->barcode())
-            continue;
         if (std::abs(p->pdgId()) != type)
             return false;
     }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetJvtEfficiency/JetJvtEfficiency.h"
@@ -50,6 +50,7 @@ JetJvtEfficiency::JetJvtEfficiency( const std::string& name): asg::AsgTool( name
     // Allow to configure NNJvt Tool directly instead via WP property
     declareProperty( "NNJvtParamFile",            m_NNJvtParamFile= ""                                            );
     declareProperty( "NNJvtCutFile",              m_NNJvtCutFile= ""                                              );
+    declareProperty( "SuppressOutputDependence",  m_suppressOutputDependence = true                               );
     // Legacy properties, kept for backwards compatibility
     declareProperty( "JetJvtMomentName",          m_jetJvtMomentName   = "Jvt"                                    );
 
@@ -70,6 +71,11 @@ StatusCode JetJvtEfficiency::initialize(){
   }
 
   ATH_CHECK(m_passJvtKey.initialize());
+  #ifndef XAOD_STANDALONE
+    if (m_suppressOutputDependence) {
+      renounce (m_passJvtKey);
+    }
+  #endif
 
   // Configure for NNJvt mode
   if (m_taggingAlg == JvtTagger::NNJvt){
@@ -119,6 +125,7 @@ StatusCode JetJvtEfficiency::initialize(){
       ATH_CHECK(config_NNjvt.setProperty("NNParamFile", m_NNJvtParamFile));
       ATH_CHECK(config_NNjvt.setProperty("NNCutFile", m_NNJvtCutFile));
       ATH_CHECK(config_NNjvt.setProperty("SuppressInputDependence", true)); // otherwise decorations can't be accessed properly
+      ATH_CHECK(config_NNjvt.setProperty("SuppressOutputDependence", m_suppressOutputDependence));
       ATH_CHECK(config_NNjvt.makePrivateTool(m_NNJvtTool_handle));
     }
     ATH_CHECK(m_NNJvtTool_handle.retrieve());

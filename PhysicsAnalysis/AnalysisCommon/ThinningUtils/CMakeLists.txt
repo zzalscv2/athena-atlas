@@ -12,7 +12,7 @@ endif()
 # Component(s) in the package:
 atlas_add_component(ThinningUtils
    src/*.h src/*.cxx src/components/*.cxx
-   LINK_LIBRARIES AthContainers AthLinks AthenaBaseComps StoreGateLib EventInfo xAODBase
+   LINK_LIBRARIES AthContainers AtlasHepMCLib AthLinks AthenaBaseComps StoreGateLib EventInfo xAODBase
    xAODCaloEvent xAODEgamma xAODJet xAODMuon xAODParticleEvent xAODPFlow xAODTau
    xAODTracking xAODTruth GaudiKernel InDetReadoutGeometry TRT_ReadoutGeometry ExpressionEvaluationLib MCTruthClassifierLib DerivationFrameworkInterfaces ${extra_libs})
 

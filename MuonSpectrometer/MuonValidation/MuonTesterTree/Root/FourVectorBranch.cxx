@@ -1,8 +1,9 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonTesterTree/FourVectorBranch.h>
 
+namespace MuonVal {
 PtEtaPhiEBranch::PtEtaPhiEBranch(MuonTesterTree& tree, const std::string& vec_name) : MuonTesterBranch(tree, vec_name) {}
 void PtEtaPhiEBranch::push_back(const float pt, const float eta, const float phi, const float e) {
     m_pt += pt;
@@ -52,4 +53,5 @@ void CartesFourVecBranch::set(const float x, const float y, const float z, const
     m_y[pos] = y;
     m_z[pos] = z;
     m_t[pos] = t;
+}
 }

@@ -92,7 +92,7 @@ class MonitorDef:
 
 
     @staticmethod
-    def applyItemCounter( menuName, items ):
+    def applyItemCounter( menuName, items, do_alfa=False ):
         """
         this functions marks the items that should be monitored by setting the corresponding monitoring flags
         e.g. to "LF:000|HF:111" for high frequency monitoring of TBP, TAP, and TAV.
@@ -176,28 +176,38 @@ class MonitorDef:
                 "L1_gMHT500",
                 # Combined
                 "L1_2eEM10L_MU8F", "L1_MU3V_jJ40",
-                # L1Topo
+                # L1Topo (Topo2 always in)
                 "L1_BTAG-MU3VjJ40", "L1_BTAG-MU5VFjJ50",
                 "L1_LAR-ZEE-eEM",
                 "L1_JPSI-1M5-eEM9", "L1_JPSI-1M5-eEM15",
                 "L1_BPH-0M9-eEM9-eEM7", "L1_BPH-0M9-eEM9-eEM7_MU5VF",
-                "L1_LLP-RO-eEM", "L1_LLP-NOMATCH-eEM",
-                "L1_SC111-CjJ40",
                 "L1_cTAU30M_2cTAU20M_DR-eTAU30MeTAU20M",
                 "L1_DY-BOX-2MU3VF", "L1_DY-BOX-MU5VFMU3V",
-                "L1_LFV-eEM10L-MU8VF", "L1_LFV-eEM15L-MU5VF", "L1_LFV-MU5VF",
-                "L1_jMJJ-700", "L1_jMJJ-300-NFF", "L1_jMJJ-500-NFF",
+                "L1_LFV-MU5VF",
+                "L1_jMJJ-700",
                 "L1_10DR-MU14FCH-MU5VF_EMPTY",
                 "L1_BPH-0M10-3MU3V", "L1_BPH-0M10-3MU3VF",
-                "L1_ZAFB-25DPHI-eEM18M",
                 "L1_DPHI-M70-2eEM12M",
             ]
 
+            alfa_monitems = [
+                "L1_ALFA_ANY",
+                "L1_ALFA_B7L1U", "L1_ALFA_B7L1L",
+                "L1_ALFA_A7L1U", "L1_ALFA_A7L1L",
+                "L1_ALFA_A7R1U", "L1_ALFA_A7R1L",
+                "L1_ALFA_B7R1U", "L1_ALFA_B7R1L",
+            ]
+            topo3_monitems = [
+                "L1_ZAFB-25DPHI-eEM18M",
+                "L1_SC111-CjJ40",
+                "L1_jMJJ-300-NFF", "L1_jMJJ-500-NFF",
+                "L1_LFV-eEM10L-MU8VF", "L1_LFV-eEM15L-MU5VF",
+                "L1_LLP-RO-eEM", "L1_LLP-NOMATCH-eEM",
+            ]
             # Add triggers that are not in the MC menu
             if 'MC' not in menuName:
                 monItems[TBP|TAP|TAV] += [
                     # Detector items
-                    # "L1_ALFA_ANY", "L1_ALFA_B7L1U", "L1_ALFA_B7L1L", "L1_ALFA_A7L1U", "L1_ALFA_A7L1L", "L1_ALFA_A7R1U", "L1_ALFA_A7R1L", "L1_ALFA_B7R1U", "L1_ALFA_B7R1L",
                     # "L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_AND",
                     "L1_LUCID_A", "L1_LUCID_C",
                     "L1_CALREQ2",
@@ -250,6 +260,7 @@ class MonitorDef:
                     #
                     "L1_eTAU20L", "L1_eTAU35", "L1_eTAU40HM",
                 ]
+
         else: # HI menu
             monItems[TBP|TAP|TAV] = [
                 "L1_EM12", # keep for LUMI group
@@ -307,13 +318,6 @@ class MonitorDef:
                 "L1_AFP_A_OR_C_UNPAIRED_NONISO",
                 "L1_AFP_A_OR_C_jJ20",
                 "L1_AFP_A_OR_C_jJ30",
-                # ALFA
-                "L1_ALFA_ANY",
-                "L1_ALFA_A7L1L", "L1_ALFA_A7L1U", "L1_ALFA_A7R1L", "L1_ALFA_A7R1U",
-                "L1_ALFA_B7L1L", "L1_ALFA_B7L1U", "L1_ALFA_B7R1L", "L1_ALFA_B7R1U",
-                "L1_ALFA_ELAST15", "L1_ALFA_ELAST18",
-                "L1_ALFA_SYST9", "L1_ALFA_SYST10", "L1_ALFA_SYST11",
-                "L1_ALFA_SYST12", "L1_ALFA_SYST17", "L1_ALFA_SYST18",
                 # LUCID
                 "L1_LUCID_A", "L1_LUCID_C",
                 # ZDC
@@ -344,7 +348,6 @@ class MonitorDef:
                 "L1_MBTS_1_1_EMPTY", "L1_MBTS_1_1_UNPAIRED_ISO",
                 "L1_MBTS_2_2", "L1_MBTS_3_3", "L1_MBTS_4_4",
                 "L1_MBTS_1_VTE50", "L1_MBTS_1_1_VTE50", "L1_MBTS_1_VTE200",
-                "L1_MBTS_1_A_ALFA_C", "L1_MBTS_1_C_ALFA_A",
                 "L1_MBTS_1_ZDC_A_VZDC_C_VTE200",
                 "L1_MBTS_1_ZDC_C_VZDC_A_VTE200",
                 # LAr Zee
@@ -360,7 +363,7 @@ class MonitorDef:
                 "L1_MU14FCH", "L1_MU14FCHR", "L1_MU15VFCH",
                 "L1_MU3V_EMPTY",
                 "L1_MU3V_FIRSTEMPTY",
-                "L1_MU5VF_EMPTY",
+                "L1_2MU5VF_EMPTY",
                 "L1_2MU3V", "L1_2MU5VF",
                 "L1_2MU8F",
                 "L1_MU5VF_2MU3V",
@@ -370,8 +373,6 @@ class MonitorDef:
                 "L1_2MU14FCH_OVERLAY",
                 # Mu+X
                 "L1_MU3V_J12",
-                "L1_MU3V_ALFA_ANY",
-                "L1_MU3V_ALFA_EINE",
                 "L1_MU3V_VTE50",
                 "L1_MU5VF_VTE50",
                 "L1_MU5VF_AFP_A_OR_C",
@@ -381,9 +382,6 @@ class MonitorDef:
                 #"L1_EM3", 
                 "L1_EM10", "L1_EM20VHI",
                 "L1_EM7_VTE200",
-                #"L1_EM3_ALFA_ANY",
-                #"L1_EM3_ALFA_EINE",
-                #"L1_2EM3_ALFA_EINE",
                 #"L1_EM7_AFP_A_OR_C",
                 # Tau
                 "L1_TAU8", "L1_TAU12IM",
@@ -398,7 +396,6 @@ class MonitorDef:
                 "L1_2J15",
                 "L1_J12_EMPTY",
                 "L1_J40_XE50",
-                "L1_J12_ALFA_ANY", "L1_J12_ALFA_EINE", "L1_J12_VTE200",
                 # TE
                 "L1_TE3", "L1_TE5",
                 "L1_TE20", "L1_TE50",
@@ -431,9 +428,6 @@ class MonitorDef:
                 "L1_TE3p0ETA49_ZDC_A_VZDC_C_VTE200",
                 "L1_TE3p0ETA49_ZDC_C_VZDC_A_VTE200",
                 #
-                "L1_TE5_ALFA_ANY",
-                "L1_TE5_ALFA_EINE",
-                #
                 "L1_VTE20", "L1_VTE50", "L1_VTE200",
                 # TRT
                 "L1_TRT_VTE50", "L1_TRT_VTE200", "L1_TRT_VTE20",
@@ -463,6 +457,34 @@ class MonitorDef:
                 "L1_J30_VTE200", "L1_J100_VTE200", 
                 "L1_XE35_VTE200", "L1_XE50_VTE200",
                 ]
+
+            alfa_monitems = [
+                # ALFA
+                "L1_ALFA_ANY",
+                "L1_ALFA_A7L1L", "L1_ALFA_A7L1U", "L1_ALFA_A7R1L", "L1_ALFA_A7R1U",
+                "L1_ALFA_B7L1L", "L1_ALFA_B7L1U", "L1_ALFA_B7R1L", "L1_ALFA_B7R1U",
+                "L1_ALFA_ELAST15", "L1_ALFA_ELAST18",
+                "L1_ALFA_SYST9", "L1_ALFA_SYST10", "L1_ALFA_SYST11",
+                "L1_ALFA_SYST12", "L1_ALFA_SYST17", "L1_ALFA_SYST18",
+                "L1_MBTS_1_A_ALFA_C", "L1_MBTS_1_C_ALFA_A",
+                "L1_MU3V_ALFA_ANY",
+                "L1_MU3V_ALFA_EINE",
+                #"L1_EM3_ALFA_ANY",
+                #"L1_EM3_ALFA_EINE",
+                #"L1_2EM3_ALFA_EINE",
+                "L1_J12_ALFA_ANY", "L1_J12_ALFA_EINE", "L1_J12_VTE200",
+                #
+                "L1_TE5_ALFA_ANY",
+                "L1_TE5_ALFA_EINE",
+            ]
+            topo3_monitems = []
+
+        # Switch between active CTP input connections
+        if do_alfa:
+            monItems[TBP|TAP|TAV] += alfa_monitems
+        else:
+            monItems[TBP|TAP|TAV] += topo3_monitems
+
 
         monItemsHF[TBP|TAP|TAV] = [
            "L1_BCM_AC_UNPAIRED_ISO",

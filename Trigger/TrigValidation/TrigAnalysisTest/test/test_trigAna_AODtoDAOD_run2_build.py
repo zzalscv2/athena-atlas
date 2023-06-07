@@ -13,6 +13,8 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 aod2daod = ExecStep.ExecStep('AODtoDAOD')
 aod2daod.type = 'Derivation_tf'
 aod2daod.input = 'data_run2_reco_run3_AOD'
+aod2daod.skip_events = 0
+aod2daod.max_events = -1
 aod2daod.explicit_input = True
 aod2daod.args = ' --formats=PHYS --outputDAODFile=DAOD.pool.root --CA True'
 aod2daod.args += ' --preExec="ConfigFlags.Trigger.doEDMVersionConversion=True;"'

@@ -3,7 +3,6 @@
 #
 
 from AthenaCommon.Logging import logging
-from AthenaCommon.GlobalFlags import globalflags
 log = logging.getLogger(__name__)
 
 ### Output data name ###
@@ -445,6 +444,8 @@ def VDVEFMuCBCfg(flags, RoIs, name):
                     ( 'Muon::sTgcPrepDataContainer' , 'StoreGateSvc+STGC_Measurements') ]
   if flags.Input.isMC:
     dataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
+  else:
+    dataObjects += [( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
 
   alg = CompFactory.AthViews.ViewDataVerifier( name = "VDVMuEFCB_"+name,
                                                DataObjects = dataObjects)
@@ -462,7 +463,8 @@ def VDVPrecMuTrkCfg(flags, name):
 
   if not flags.Input.isMC:
     dataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
-                    ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' )]
+                    ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' ),
+                    ( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
 
   alg = CompFactory.AthViews.ViewDataVerifier( name = vdvName,
                                                DataObjects = dataObjects)
@@ -666,7 +668,7 @@ def muEFInsideOutRecoSequence(flags, RoIs, name):
     cbMuonName = cbMuonName+"_Late"
     theInsideOutRecoAlg = algorithmCAToGlobalWrapper(MuGirlStauAlgCfg, flags, name="TrigMuonLateInsideOutRecoAlg_"+name,InDetCandidateLocation="InDetCandidates_"+name)
     insideoutcreatoralg = algorithmCAToGlobalWrapper(StauCreatorAlgCfg, flags, name="TrigLateMuonCreatorAlg_"+name, TagMaps=["stauTagMap"],InDetCandidateLocation="InDetCandidates_"+name,
-                                         MuonContainerLocation = cbMuonName, MonTool = MuonCreatorAlgMonitoring("LateMuonCreatorAlg_"+name))
+                                         MuonContainerLocation = cbMuonName, MonTool = MuonCreatorAlgMonitoring(flags, "LateMuonCreatorAlg_"+name))
   else:
     inDetExtensionAlg = algorithmCAToGlobalWrapper(MuonInDetToMuonSystemExtensionAlgCfg, flags, name="TrigInDetMuonExtensionAlg_"+name, InputInDetCandidates="InDetCandidates_"+name,
                                                           WriteInDetCandidates="InDetCandidatesSystemExtended_"+name)
@@ -707,11 +709,13 @@ def efmuisoRecoSequence( flags, RoIs, Muons, doMSiso=False ):
                              ( 'xAOD::MuonContainer' , 'StoreGateSvc+IsoViewMuons'+name )]
 
   # Make sure required objects are still available at whole-event level
-  if not globalflags.InputFormat.is_bytestream():
+  if flags.Input.isMC:
     from AthenaCommon.AlgSequence import AlgSequence
     topSequence = AlgSequence()
     viewVerify.DataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
     topSequence.SGInputLoader.Load += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
+  else:
+    viewVerify.DataObjects += [( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
 
   for viewAlg in viewAlgs:
     efmuisoRecoSequence += viewAlg
@@ -731,7 +735,8 @@ def efmuisoRecoSequence( flags, RoIs, Muons, doMSiso=False ):
   from TrigMuonEF.TrigMuonEFConfig import TrigMuonEFTrackIsolationAlgCfg
   trigEFmuIso = algorithmCAToGlobalWrapper(TrigMuonEFTrackIsolationAlgCfg,flags,name="TrigEFMuIso"+name, requireCombinedMuon = not doMSiso, 
                                            MuonEFContainer = Muons,IdTrackParticles = PTTrackParticles[-1], MuonContName = muNames.EFIsoMuonName+name,
-                                           ptcone02Name = "%s.ptcone02" % Muons, ptcone03Name = "%s.ptcone03" % Muons)
+                                           ptcone02Name = muNames.EFIsoMuonName+name + ".ptcone02",
+                                           ptcone03Name = muNames.EFIsoMuonName+name + ".ptcone03")
 
   efmuisoRecoSequence += trigEFmuIso
 
