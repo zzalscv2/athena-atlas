@@ -47,6 +47,10 @@ else:
                 l_equals = (l_nocomment.split("=")[-1]).split(" ")
                 if not set(['g', 'u', 'c', 'd', 's', 'b', 'u~', 'c~', 'd~', 's~', 'b~']) <= set(l_equals):
                     raise RuntimeError('Invalid definition found for p or j in process string while using 5FS')
+    if force_nobmass_5FS:
+        if masses.get('5',0.0) != 0.0:
+            raise RuntimeError('Non-zero mass found for b while using 5FS')
+        masses['5'] = 0.0
 
 # systematic variation
 if 'scup' in phys_short:
