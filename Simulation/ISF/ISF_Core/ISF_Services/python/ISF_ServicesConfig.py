@@ -55,6 +55,7 @@ def GenParticleFiltersToolCfg(flags):
 def InputConverterCfg(flags, name="ISF_InputConverter", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("QuasiStableParticlesIncluded", flags.Sim.ISF.Simulator.isQuasiStable())
+    kwargs.setdefault("UseShadowEvent", flags.Sim.UseShadowEvent)
     kwargs.setdefault("UseGeneratedParticleMass", False)
     if "GenParticleFilters" not in kwargs:
         kwargs.setdefault("GenParticleFilters", result.popToolsAndMerge(GenParticleFiltersToolCfg(flags)) )
