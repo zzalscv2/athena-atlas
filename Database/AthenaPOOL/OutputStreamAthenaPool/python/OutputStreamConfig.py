@@ -7,7 +7,7 @@ from AthenaCommon.Logging import logging
 
 
 def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
-                    disableEventTag=False, trigNavThinningSvc=None,
+                    disableEventTag=False, trigNavThinningSvc=None, takeItemsFromInput=False,
                     AcceptAlgs=[], HelperTools=[]):
    eventInfoKey = "EventInfo"
    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
@@ -65,6 +65,11 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
       OutputFile=fileName,
       HelperTools=HelperTools,
    )
+   if takeItemsFromInput:
+      # Avoid explicitly setting the property unless we want to set it
+      # to True (default in C++ is False). This avoids CA merge
+      # conflicts.
+      outputStream.TakeItemsFromInput = True
    outputStream.AcceptAlgs += AcceptAlgs
    outputStream.ExtraOutputs += [("DataHeader", f"StoreGateSvc+{outputStreamName}")]
    if flags.Scheduler.CheckOutputUsage and flags.Concurrency.NumThreads > 0:

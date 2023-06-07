@@ -70,8 +70,7 @@ def fromRunArgs(runArgs):
     cfg.merge(DetDescrCnvSvcCfg(flags))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    cfg.merge(OutputStreamCfg(flags, 'HITS', disableEventTag="xAOD::EventInfo#EventInfo" not in flags.Input.TypedCollections))
-    cfg.getEventAlgo('OutputStreamHITS').TakeItemsFromInput = True
+    cfg.merge(OutputStreamCfg(flags, 'HITS', disableEventTag=("xAOD::EventInfo#EventInfo" not in flags.Input.TypedCollections), takeItemsFromInput = True))
 
     # Add in-file MetaData
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
