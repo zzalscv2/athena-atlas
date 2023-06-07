@@ -419,15 +419,12 @@ StatusCode MdtVsRpcRawDataValAlg::fillHistograms() {
                                 histo_flag = false;
                             }
                         }
-                        if (histo_flag) {
-                            // booking if necessary
-                            imdt_station =
-                                MuonDetMgr->mdtStationName(irpcstationName);
-                            if (imdt_station < 0)
-                                continue;
+                        if (histo_flag) {     
+                            bool is_valid{false};                      
                             const Identifier mdt_id = mdtIdHelper.channelID(
-                                imdt_station, irpcstationEta, irpcstationPhi,
-                                imdt_multi_near, 1, 1);
+                                irpcstationName, irpcstationEta, irpcstationPhi,
+                                imdt_multi_near, 1, 1, is_valid);
+                            if (!is_valid) continue;
                             imdt_eta = irpcstationEta;
                             imdt_phi = irpcstationPhi;
                             NetaTubes = 0;
