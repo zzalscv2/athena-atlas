@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -144,9 +144,6 @@ private:
   bool m_allowDefaultBDecays;
   std::vector<int> m_whiteList;
   std::set<int> m_whiteListSet;   // filed from m_whilteList for speed optimization
-
-  /// The status of decayed particles
-  int m_decayedStatus;
 
   bool m_printHepMCBeforeEvtGen;
   bool m_printHepMCAfterEvtGen;

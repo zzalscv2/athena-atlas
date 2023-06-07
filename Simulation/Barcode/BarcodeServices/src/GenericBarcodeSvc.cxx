@@ -18,7 +18,6 @@ Barcode::GenericBarcodeSvc::GenericBarcodeSvc(const std::string& name,ISvcLocato
   m_firstSecondary(HepMC::SIM_BARCODE_THRESHOLD+1),
   m_secondaryIncrement(1),
   m_currentSecondary(1),
-  m_particleRegenerationIncrement(HepMC::SIM_REGENERATION_INCREMENT),
   m_doUnderOverflowChecks(true),
   m_encodePhysicsProcess(false)
 {
