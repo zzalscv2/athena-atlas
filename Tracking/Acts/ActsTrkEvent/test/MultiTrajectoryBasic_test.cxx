@@ -196,6 +196,12 @@ struct EmptyMTJ {  // setup empty MTJ
   std::unique_ptr<ActsTrk::ConstMultiTrajectory> ro_mtj;
 };
 
+BOOST_AUTO_TEST_CASE(OwningMTJ) {
+  std::cout << "constructing owning MTJ\n";
+  ActsTrk::MutableMultiTrajectory mtj;
+  // ActsTrk::ConstMultiTrajectory cmtj; // this should not compile  (undefined reference)
+}
+
 // cppcheck-suppress syntaxError
 BOOST_FIXTURE_TEST_CASE(Fill, EmptyMTJ) {
   BOOST_CHECK(mtj->has_backends());
