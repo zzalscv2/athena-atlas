@@ -445,7 +445,8 @@ def HitsToxAODCopierCfg(flags):
 
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
     # for the available content of this collection, consult the HitsToxAODCopier.cxx
-    toRecod = [ "xAOD::BaseContainer#PixelHits", "xAOD::AuxContainerBase#PixelHitsAux.col.row.tot.eta_module.phi_module.layer_disk.barrel_ec.detid" ]
+    toRecod = [ "xAOD::BaseContainer#PixelHits", "xAOD::AuxContainerBase#PixelHitsAux.col.row.tot.eta_module.phi_module.layer_disk.barrel_ec.detid",
+            "xAOD::BaseContainer#StripHits", "xAOD::AuxContainerBase#StripHitsAux.strip.side.eta_module.phi_module.layer_disk.barrel_ec.detid"  ]
     ca.merge(addToAOD(flags, toRecod))
     ca.merge(addToESD(flags, toRecod))
 
