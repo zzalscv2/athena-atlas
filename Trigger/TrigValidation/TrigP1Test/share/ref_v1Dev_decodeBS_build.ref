@@ -1202,11 +1202,11 @@ HLT_3mu6_bTau_L13MU5VF:
   eventCount: 0
 HLT_3mu6_bUpsi_L13MU5VF:
   eventCount: 0
+HLT_3mu6_msonly_L12MU5VF_EMPTY:
+  eventCount: 0
 HLT_3mu6_msonly_L13MU5VF:
   eventCount: 0
 HLT_3mu6_msonly_L1MU3V_UNPAIRED_ISO:
-  eventCount: 0
-HLT_3mu6_msonly_L1MU5VF_EMPTY:
   eventCount: 0
 HLT_3mu8_msonly_L13MU5VF:
   eventCount: 0
@@ -3502,13 +3502,13 @@ HLT_g140_loose_tau20_mediumRNN_tracktwoMVA_probe_03dRAB_L1eEM26M:
   eventCount: 0
 HLT_g140_loose_tau20_mediumRNN_tracktwoMVA_probe_03dRAB_L1eEM28M:
   eventCount: 0
+HLT_g15_loose_2mu10_msonly_L12MU5VF_EMPTY:
+  eventCount: 0
 HLT_g15_loose_2mu10_msonly_L12MU8F:
   eventCount: 0
 HLT_g15_loose_2mu10_msonly_L1MU3V_EMPTY:
   eventCount: 0
 HLT_g15_loose_2mu10_msonly_L1MU3V_UNPAIRED_ISO:
-  eventCount: 0
-HLT_g15_loose_2mu10_msonly_L1MU5VF_EMPTY:
   eventCount: 0
 HLT_g15_loose_L1EM10VH:
   eventCount: 3
@@ -3522,13 +3522,13 @@ HLT_g15_loose_L1EM10VH:
     1: 6
     2: 5
     3: 3
+HLT_g15_loose_L1eEM10L_2mu10_msonly_L12MU5VF_EMPTY:
+  eventCount: 0
 HLT_g15_loose_L1eEM10L_2mu10_msonly_L12MU8F:
   eventCount: 0
 HLT_g15_loose_L1eEM10L_2mu10_msonly_L1MU3V_EMPTY:
   eventCount: 0
 HLT_g15_loose_L1eEM10L_2mu10_msonly_L1MU3V_UNPAIRED_ISO:
-  eventCount: 0
-HLT_g15_loose_L1eEM10L_2mu10_msonly_L1MU5VF_EMPTY:
   eventCount: 0
 HLT_g15_loose_L1eEM12L:
   eventCount: 3
