@@ -2168,7 +2168,7 @@ FastShowerCellBuilderTool::process (CaloCellContainer* theCellContainer,
         break;
       }
       if(m_invisibles[i]==0) {
-        if(MC::isNonInteracting(par)) {
+        if(MC::isNonInteracting(par->pdg_id())) {
           do_simul_state[barcodepar]=invisibleTruthHelper;
           break;
         }
