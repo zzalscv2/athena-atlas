@@ -11,6 +11,8 @@
 #include "CxxUtils/checker_macros.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
+#include "CxxUtils/starts_with.h"
+
 #include "Python.h"
 
 // ROOT includes
@@ -133,7 +135,8 @@ void
 recurse_pyinspect(PyObject *pyobj,
                   PyObject *pyobj_name,
                   PyObject *&pystack,
-                  bool persistentOnly)
+                  bool persistentOnly,
+                  bool retvecs)
 {
   // handle non-pyroot objects
   if (!TPython::CPPInstance_Check(pyobj)) {
@@ -147,9 +150,37 @@ recurse_pyinspect(PyObject *pyobj,
     return;
   }
 
+  static const std::unordered_set<std::string> vecnames {
+    "vector<float>",
+    "std::vector<float>",
+    "vector<double>",
+    "std::vector<double>",
+    "vector<int>",
+    "std::vector<int>",
+    "vector<unsigned int>",
+    "std::vector<unsigned int>",
+    "vector<short>",
+    "std::vector<short>",
+    "vector<unsigned short>",
+    "std::vector<unsigned short>",
+    "vector<char>",
+    "std::vector<char>",
+    "vector<unsigned char>",
+    "std::vector<unsigned char>",
+    "vector<long>",
+    "std::vector<long>",
+    "vector<unsigned long>",
+    "std::vector<unsigned long>",
+    "vector<long long>",
+    "std::vector<long long>",
+    "vector<unsigned long long>",
+    "std::vector<unsigned long long>",
+  };
   TClass *tcls = RootUtils::objectIsA(pyobj);
+  std::string clsname = tcls ? tcls->GetName() : "";
   if (0 == tcls ||
-      (tcls->IsTObject() && strcmp(tcls->GetName(), "TLorentzVector") != 0))
+      (tcls->IsTObject() && clsname != "TLorentzVector") ||
+      (retvecs && vecnames.count (clsname) > 0))
   {
     PyObject *val = PyTuple_New(2);
     PyObject *v0 = pyobj_name; Py_INCREF(v0);
@@ -162,7 +193,7 @@ recurse_pyinspect(PyObject *pyobj,
   }
   void *obj = TPython::CPPInstance_AsVoidPtr(pyobj);
 
-  if (!strcmp(tcls->GetName(), "string")) {
+  if (clsname == "string") {
     std::string *str = (std::string*)obj;
     PyObject *val= PyTuple_New(2);
     PyObject *v0 = pyobj_name; Py_INCREF(v0);
@@ -174,14 +205,13 @@ recurse_pyinspect(PyObject *pyobj,
     return;
   }
 
-  TString tstring = tcls->GetName();
-  if (tstring.BeginsWith("pair<") ||
-      tstring.BeginsWith("std::pair<")) {
+  if (CxxUtils::starts_with (clsname, "pair<") ||
+      CxxUtils::starts_with (clsname, "std::pair<")) {
     {
       PyObject *v0 = PyUnicode_FromString("first");
       PyObject *v1 = PyObject_GetAttrString(pyobj, "first");
       PyObject *v1_name = ::new_pylist(pyobj_name, v0);
-      recurse_pyinspect(v1, v1_name, pystack, persistentOnly);
+      recurse_pyinspect(v1, v1_name, pystack, persistentOnly, retvecs);
       Py_DECREF(v1_name);
       Py_DECREF(v0);
       Py_DECREF(v1);
@@ -191,7 +221,7 @@ recurse_pyinspect(PyObject *pyobj,
       PyObject *v0 = PyUnicode_FromString("second");
       PyObject *v1 = PyObject_GetAttrString(pyobj, "second");
       PyObject *v1_name = ::new_pylist(pyobj_name, v0);
-      recurse_pyinspect(v1, v1_name, pystack, persistentOnly);
+      recurse_pyinspect(v1, v1_name, pystack, persistentOnly, retvecs);
       Py_DECREF(v1_name);
       Py_DECREF(v1);
       Py_DECREF(v0);
@@ -201,9 +231,9 @@ recurse_pyinspect(PyObject *pyobj,
 
   Int_t hdr = 0;
   if (PySequence_Check(pyobj)) {
-    if (!strcmp(tcls->GetName(), "CLHEP::Hep3Vector") ||
-        !strcmp(tcls->GetName(), "TLorentzVector") ||
-        !strcmp(tcls->GetName(), "TVector3"))
+    if (clsname == "CLHEP::Hep3Vector" ||
+        clsname == "TLorentzVector" ||
+        clsname == "TVector3")
     {
       hdr = 0;
     } else {
@@ -218,7 +248,7 @@ recurse_pyinspect(PyObject *pyobj,
   const Int_t nmembers = members ? members->GetEntries() : 0;
 
 #if PYROOT_INSPECTOR_DBG
-  std::cerr << "==[" << tcls->GetName() << "]== (#mbrs:"
+  std::cerr << "==[" << clsname << "]== (#mbrs:"
             << nmembers 
             << " #stl:" << hdr /*PySequence_Size(pyobj)*/
             << ")...\n";
@@ -242,14 +272,14 @@ recurse_pyinspect(PyObject *pyobj,
     //    then with python 3, pyroot will try to convert its contents
     //    to a unicode string object, which will likely fail.
     Py_ssize_t nelems = PySequence_Size(pyobj);
-    if (strcmp(tcls->GetName(), "TileCellVec") == 0 ||
-        strcmp(tcls->GetName(), "vector<char>") == 0)
+    if (clsname == "TileCellVec" ||
+        clsname == "vector<char>")
     {
       for (Py_ssize_t i = 0; i < nelems; ++i) {
         PyObject *pyidx = PyLong_FromLong(i);
         PyObject *itr = PySequence_GetItem(pyobj, i);
         PyObject *itr_name = ::new_pylist(pyobj_name, pyidx);
-        recurse_pyinspect(itr, itr_name, pystack, persistentOnly);
+        recurse_pyinspect(itr, itr_name, pystack, persistentOnly, retvecs);
         Py_XDECREF(itr_name);
         Py_XDECREF(pyidx);
         Py_XDECREF(itr);
@@ -266,7 +296,7 @@ recurse_pyinspect(PyObject *pyobj,
         while (nelems-- && (item = PyIter_Next(iter))) {
           PyObject *pyidx = PyLong_FromLong(i++);
           PyObject *itr_name = ::new_pylist(pyobj_name, pyidx);
-          recurse_pyinspect(item, itr_name, pystack, persistentOnly);
+          recurse_pyinspect(item, itr_name, pystack, persistentOnly, retvecs);
           Py_XDECREF(itr_name);
           Py_XDECREF(pyidx);
           Py_DECREF(item);
@@ -332,7 +362,7 @@ recurse_pyinspect(PyObject *pyobj,
     }
 
     PyObject *this_name = ::new_pylist(pyobj_name, py_mbr_name);
-    recurse_pyinspect(py_mbr, this_name, pystack, persistentOnly);
+    recurse_pyinspect(py_mbr, this_name, pystack, persistentOnly, retvecs);
     Py_DECREF(this_name);
     Py_DECREF(py_mbr_name);
     Py_DECREF(py_mbr);
@@ -497,10 +527,11 @@ PyROOTInspector::pyroot_inspect(PyObject* pyobj,
 PyObject*
 PyROOTInspector::pyroot_inspect2(PyObject *pyobj,
                                  PyObject *pyobj_name,
-                                 bool persistentOnly /*= false*/)
+                                 bool persistentOnly /*= false*/,
+                                 bool retvecs /*= false*/)
 {
   PyObject *pystack = PyList_New(0);
-  ::recurse_pyinspect(pyobj, pyobj_name, pystack, persistentOnly);
+  ::recurse_pyinspect(pyobj, pyobj_name, pystack, persistentOnly, retvecs);
   return pystack;
 }
 
