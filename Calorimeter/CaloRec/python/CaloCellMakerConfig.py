@@ -61,6 +61,11 @@ def CaloCellMakerCfg(flags):
     result.merge(addToESD(flags, outputContainers))
     result.merge(addToAOD(flags, outputContainers))
 
+    # Add a SuperCell container creation, if asked by flags
+    if flags.LAr.DT.storeET_ID or flags.LAr.DT.storeET_additional:
+       from LArConfiguration.LArSuperCellConfig import LArSuperCellCfg
+       result.merge(LArSuperCellCfg(flags))
+
     return result
 
  
