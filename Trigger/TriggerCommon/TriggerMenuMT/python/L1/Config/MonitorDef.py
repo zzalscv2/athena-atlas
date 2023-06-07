@@ -363,7 +363,7 @@ class MonitorDef:
                 "L1_MU14FCH", "L1_MU14FCHR", "L1_MU15VFCH",
                 "L1_MU3V_EMPTY",
                 "L1_MU3V_FIRSTEMPTY",
-                "L1_MU5VF_EMPTY",
+                "L1_2MU5VF_EMPTY",
                 "L1_2MU3V", "L1_2MU5VF",
                 "L1_2MU8F",
                 "L1_MU5VF_2MU3V",
