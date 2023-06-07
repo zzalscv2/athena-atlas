@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -62,6 +62,7 @@ private:
   SG::ReadCondHandleKey<LArBadChannelCont> m_bcContKey
     {this, "LArBadChannelKey", "LArBadChannelSC", "Key of the LArBadChannelCont SC" };
 
+  IntegerProperty m_bcidOffset {this, "BCIDOffset", 0, "offset from bcid'ed energy"};
   //Identifier helper
   const LArOnline_SuperCellID* m_laronline_id = nullptr;
 

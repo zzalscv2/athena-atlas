@@ -12,11 +12,11 @@ template <class T> VectorBranch<T>::VectorBranch(TTree* tree, const std::string&
 
 template <class T> VectorBranch<T>::VectorBranch(MuonTesterTree& tree, const std::string& name) : MuonTesterBranch(tree, name) {}
 template <class T> VectorBranch<T>::VectorBranch(TTree* tree, const std::string& name, const T& def) : VectorBranch<T>(tree, name) {
-    setDefault(def);
+    VectorBranch<T>::setDefault(def);
 }
 template <class T>
 VectorBranch<T>::VectorBranch(MuonTesterTree& tree, const std::string& name, const T& def) : VectorBranch<T>(tree, name) {
-    setDefault(def);
+    VectorBranch<T>::setDefault(def);
 }
 
 template <class T> bool VectorBranch<T>::fill(const EventContext&) {

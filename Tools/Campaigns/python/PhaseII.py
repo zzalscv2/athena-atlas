@@ -1,8 +1,10 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+from Campaigns.Utils import Campaign
 
 def PhaseIIPileUpBase(flags, collisions=200):
     """Phase-II Upgrade / Run 4 flags for MC with pile-up"""
     flags.Beam.NumberOfCollisions = collisions
+    flags.Input.MCCampaign = Campaign.PhaseII
 
     flags.GeoModel.Align.Dynamic = False  # no dynamic alignment for now
 
@@ -112,6 +114,7 @@ def PhaseIIPileUpMC21a(flags):
 def PhaseIINoPileUp(flags):
     """Phase-II Upgrade / Run 4 flags for MC without pile-up"""
     flags.Beam.NumberOfCollisions = 0.
+    flags.Input.MCCampaign = Campaign.PhaseII
 
     flags.GeoModel.Align.Dynamic = False  # no dynamic alignment for now
 
@@ -123,10 +126,11 @@ def PhaseIINoPileUp(flags):
 
 def PhaseIISimulationNoIoV(flags):
     """Phase-II Upgrade / Run 4 flags for simulation"""
+    flags.Input.MCCampaign = Campaign.PhaseII
+
     from SimulationConfig.SimEnums import TruthStrategy
     flags.Sim.PhysicsList = 'FTFP_BERT_ATL'
     flags.Sim.TruthStrategy = TruthStrategy.MC15aPlus
-
     flags.Sim.TightMuonStepping = True
 
     from SimuJobTransforms.SimulationHelpers import enableBeamPipeKill, enableFrozenShowersFCalOnly

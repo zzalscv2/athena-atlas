@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
 
 #include "EvgenProdTools/FixHepMC.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include "AtlasHepMC/GenVertex.h"
+#include "AtlasHepMC/GenEvent.h"
 
 
 FixHepMC::FixHepMC(const std::string& name, ISvcLocator* pSvcLocator)
@@ -419,9 +421,9 @@ StatusCode FixHepMC::execute() {
     int num_noparent_vtxs_orig = 0;
     int num_nochild_vtxs_orig = 0;
     for (auto v = evt->vertices_begin(); v != evt->vertices_end(); ++v) {
-      if (v->particles_in_size()==0&&v->particles_out_size()==0) num_orphan_vtxs_orig++;
-      if (v->particles_in_size()==0) num_noparent_vtxs_orig++;
-      if (v->particles_out_size()==0) num_nochild_vtxs_orig++;
+      if (HepMC::particles_in_size(*v)==0&&HepMC::particles_out_size(*v)==0) num_orphan_vtxs_orig++;
+      if (HepMC::particles_in_size(*v)==0) num_noparent_vtxs_orig++;
+      if (HepMC::particles_out_size(*v)==0) num_nochild_vtxs_orig++;
     }
     // Clean!
     int signal_vertex_bc = evt->signal_process_vertex() ? evt->signal_process_vertex()->barcode() : 0;
@@ -437,9 +439,9 @@ StatusCode FixHepMC::execute() {
     int num_noparent_vtxs_filt = 0;
     int num_nochild_vtxs_filt = 0;
     for (auto v = evt->vertices_begin(); v != evt->vertices_end(); ++v) {
-      if (v->particles_in_size()==0&&v->particles_out_size()==0) num_orphan_vtxs_filt++;
-      if (v->particles_in_size()==0) num_noparent_vtxs_filt++;
-      if (v->particles_out_size()==0) num_nochild_vtxs_filt++;
+      if (HepMC::particles_in_size(*v)==0&&HepMC::particles_out_size(*v)==0) num_orphan_vtxs_filt++;
+      if (HepMC::particles_in_size(*v)==0) num_noparent_vtxs_filt++;
+      if (HepMC::particles_out_size(*v)==0) num_nochild_vtxs_filt++;
     }
 
     // Write out the change in the number of particles

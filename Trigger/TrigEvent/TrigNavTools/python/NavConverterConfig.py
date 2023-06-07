@@ -4,12 +4,17 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+# from AthenaCommon.Constants import DEBUG  # uncomment for the easy usage while testing with DEBUG
 from AthenaCommon.Logging import logging
 log = logging.getLogger("NavConverterConfig")
 
 
-def NavConverterCfg(flags):
+def NavConverterCfg(flags, chainsFilter = []):
     """Configures Run 1/2 to Run 3 navigation conversion algorithm for all triggers"""
+
+    # this is intentionally commented and left for further filtering
+    # chainsFilter = list(filter(lambda x : "tau" not in x, chainList))
+    chainsFilter = ['HLT_mu4'] # single chain passing tests overwriting chainsFilter
 
     acc = ComponentAccumulator()
 
@@ -21,7 +26,7 @@ def NavConverterCfg(flags):
 
     r2ToR3OutputName = getRun3NavigationContainerFromInput(flags)
 
-    cnvAlg = CompFactory.Run2ToRun3TrigNavConverterV2("TrigRun2ToRun3NavConverter")
+    cnvAlg = CompFactory.Run2ToRun3TrigNavConverterV2("TrigRun2ToRun3NavConverter") # optional: OutputLevel = DEBUG
     cnvAlg.TrigDecisionTool = tdt
     cnvAlg.TrigNavReadKey = ""
     cnvAlg.TrigConfigSvc = tdt.TrigConfigSvc
@@ -38,15 +43,14 @@ def NavConverterCfg(flags):
     types = [ t for t in edm ]
     log.info("Assuming these collections are relevant for trigger: %s", " ".join(types))
     cnvAlg.Collections = types
-    # example of chain collection: comment if all chains are to be processed
-    cnvAlg.Chains = ["HLT_mu4"]
-    cnvAlg.doCompression = True
+    cnvAlg.Chains = chainsFilter
+    cnvAlg.doCompression = False # set True for compression
     acc.addEventAlgo(cnvAlg)
 
-    checker = CompFactory.Trig.NavigationTesterAlg()
+    checker = CompFactory.Trig.NavigationTesterAlg(FailOnDifference = True, TrigDecisionTool = tdt) # optional: OutputLevel = DEBUG
     checker.RetrievalToolRun2Nav = CompFactory.Trig.IParticleRetrievalTool()
+    
     # in conversion job  Run2 TDT is setup as default, we need to setup an alternative to access Run 3 format
-
     run3tdt = CompFactory.Trig.TrigDecisionTool("Run3TrigDecisionTool",
                                                 HLTSummary = r2ToR3OutputName,
                                                 NavigationFormat = 'TrigComposite',
@@ -54,7 +58,7 @@ def NavConverterCfg(flags):
                                                 TrigConfigSvc = tdt.TrigConfigSvc)
     acc.addPublicTool(run3tdt)
     checker.RetrievalToolRun3Nav = CompFactory.Trig.R3IParticleRetrievalTool(TrigDecisionTool = run3tdt)
-    checker.Chains=['HLT_e26_lhtight_nod0_e15_etcut_L1EM7_Zee', 'HLT_mu4'] #TODO automate this
+    checker.Chains = chainsFilter
     acc.addEventAlgo(checker)
 
     return acc

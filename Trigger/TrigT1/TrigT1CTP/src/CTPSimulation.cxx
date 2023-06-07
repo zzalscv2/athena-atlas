@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./CTPSimulation.h"
@@ -18,6 +18,7 @@
 
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "AthenaMonitoringKernel/HistogramDef.h"
+#include "CxxUtils/starts_with.h"
 #include "CxxUtils/checker_macros.h"
 
 #include "CLHEP/Random/RandomEngine.h"
@@ -624,7 +625,7 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
          continue;
       }
       uint64_t cable {0};
-      if (connName.find("Legacy")==0) { // legacy topo
+      if (CxxUtils::starts_with (connName, "Legacy")) { // legacy topo
          if (m_iKeyLegacyTopo.empty() || !m_doL1CaloLegacy )
          {
             continue;

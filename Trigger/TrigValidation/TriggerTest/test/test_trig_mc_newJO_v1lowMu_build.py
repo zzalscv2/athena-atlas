@@ -20,7 +20,6 @@ ex.args += ' Trigger.triggerMenuSetup="PhysicsP1_pp_lowMu_run3_v1"'
 ex.args += ' Trigger.disableChains=[]'  # Do not disable any chains
 ex.args += ' Trigger.doRuntimeNaviVal=True'
 ex.args += ' Trigger.L1.doAlfaCtpin=True'
-ex.args += ' IOVDb.GlobalTag="OFLCOND-MC21-SDR-RUN3-07"'
 ex.prmon = False
 
 test = Test.Test()
