@@ -239,6 +239,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_WTaggerTool.setProperty("IsMC",!isData()));
       ATH_CHECK( m_WTaggerTool.setProperty("TruthBosonContainerName", "TruthBoson") );  // Set this if you are using a TRUTH3 style truth boson container;
       ATH_CHECK( m_WTaggerTool.setProperty("TruthTopQuarkContainerName", "TruthTop") );  // Set this if you are using a TRUTH3 style truth boson container;
+#ifndef XAOD_STANDALONE
+      ATH_CHECK( m_WTaggerTool.setProperty("SuppressOutputDependence", true) );
+#endif
       ATH_CHECK( m_WTaggerTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_WTaggerTool.retrieve() );
     } else if (m_WTaggerTool.isUserConfigured()) ATH_CHECK(m_WTaggerTool.retrieve());
@@ -251,6 +254,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_ZTaggerTool.setProperty("IsMC",!isData()));
       ATH_CHECK( m_ZTaggerTool.setProperty("TruthBosonContainerName", "TruthBoson") );  // Set this if you are using a TRUTH3 style truth boson container;
       ATH_CHECK( m_ZTaggerTool.setProperty("TruthTopQuarkContainerName", "TruthTop") );  // Set this if you are using a TRUTH3 style truth boson container;
+#ifndef XAOD_STANDALONE
+      ATH_CHECK( m_ZTaggerTool.setProperty("SuppressOutputDependence", true) );
+#endif
       ATH_CHECK( m_ZTaggerTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_ZTaggerTool.retrieve() );
     } else if (m_ZTaggerTool.isUserConfigured()) ATH_CHECK(m_ZTaggerTool.retrieve());
@@ -263,6 +269,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_TopTaggerTool.setProperty("IsMC",!isData()));
       ATH_CHECK( m_TopTaggerTool.setProperty("TruthBosonContainerName", "TruthBoson") );  // Set this if you are using a TRUTH3 style truth boson container;
       ATH_CHECK( m_TopTaggerTool.setProperty("TruthTopQuarkContainerName", "TruthTop") );  // Set this if you are using a TRUTH3 style truth boson container;
+#ifndef XAOD_STANDALONE
+      ATH_CHECK( m_TopTaggerTool.setProperty("SuppressOutputDependence", true) );
+#endif
       ATH_CHECK( m_TopTaggerTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_TopTaggerTool.retrieve() );
     } else if (m_TopTaggerTool.isUserConfigured()) ATH_CHECK(m_TopTaggerTool.retrieve());
@@ -471,6 +480,10 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         return StatusCode::FAILURE;
       }
 
+#ifndef XAOD_STANDALONE
+      ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("SuppressInputDependence", true) );
+      ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("SuppressOutputDependence", true) );
+#endif
       ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("WorkingPoint", m_JvtWP) );
       ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("MaxPtForJvt", m_JvtPtMax) );
       ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("ScaleFactorDecorationName", "jvtscalefact") ); // set decoration name
