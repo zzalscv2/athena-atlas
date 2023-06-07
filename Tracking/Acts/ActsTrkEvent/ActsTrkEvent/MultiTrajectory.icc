@@ -17,13 +17,34 @@ ActsTrk::MultiTrajectory<RWState>::MultiTrajectory(
 template <bool RWState>
 template <bool OtherRWState>
 ActsTrk::MultiTrajectory<RWState>::MultiTrajectory(
-    const MultiTrajectory<OtherRWState>& other) 
+    const MultiTrajectory<OtherRWState>& other)
     : m_trackStates(other.m_trackStates),
       m_trackParameters(other.m_trackParameters),
       m_trackJacobians(other.m_trackJacobians),
       m_trackMeasurements(other.m_trackMeasurements) {
-  for ( auto& decoration: other.m_decorations) {
+  if (other.m_trackStatesAux or other.m_trackParametersAux or
+      other.m_trackJacobiansAux or other.m_trackMeasurementsAux) {
+    throw std::runtime_error(
+        "ActsTrk::MultiTrajectory that was default constructed can not be "
+        "copied");
+  }
+  for (auto& decoration : other.m_decorations) {
     m_decorations.push_back(decoration);
+  }
+}
+template <bool RWState>
+ActsTrk::MultiTrajectory<RWState>::~MultiTrajectory() {
+  // this is MTJ owning backends
+  if (m_trackStatesAux or m_trackParametersAux or m_trackJacobiansAux or
+      m_trackMeasurementsAux) {
+    delete m_trackStatesAux;
+    delete m_trackParametersAux;
+    delete m_trackJacobiansAux;
+    delete m_trackMeasurementsAux;
+    delete m_trackStates;
+    delete m_trackParameters;
+    delete m_trackJacobians;
+    delete m_trackMeasurements;
   }
 }
 
@@ -86,7 +107,6 @@ ActsTrk::MultiTrajectory<RWState>::addTrackState_impl(
   if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Smoothed)) {
     state->setSmoothed(addParam());
   }
-
 
   state->setCalibrated(kInvalid);
   if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Calibrated)) {
@@ -205,7 +225,9 @@ const std::any ActsTrk::MultiTrajectory<RWState>::component_impl(
     case "jacobian"_hash:
       return trackStates[istate]->jacobianPtr();
     case "projector"_hash:
-      return trackMeasurements().at(trackStates[istate]->calibrated())->projectorPtr();
+      return trackMeasurements()
+          .at(trackStates[istate]->calibrated())
+          ->projectorPtr();
     case "calibrated"_hash: {
       return trackStates[istate]->calibratedPtr();
     }
@@ -249,7 +271,9 @@ std::any ActsTrk::MultiTrajectory<RWState>::component_impl(
     case "jacobian"_hash:
       return (*m_trackStates)[istate]->jacobianPtr();
     case "projector"_hash:
-      return trackMeasurements().at((*m_trackStates)[istate]->calibrated())->projectorPtr();
+      return trackMeasurements()
+          .at((*m_trackStates)[istate]->calibrated())
+          ->projectorPtr();
     case "calibrated"_hash:
       return (*m_trackStates)[istate]->calibratedPtr();
     case "calibratedCov"_hash:
@@ -268,18 +292,20 @@ std::any ActsTrk::MultiTrajectory<RWState>::component_impl(
 }
 
 /**
-   * Implementation of uncalibrated link fetch
-*/ 
+ * Implementation of uncalibrated link fetch
+ */
 template <bool RWState>
-typename Acts::SourceLink ActsTrk::MultiTrajectory<RWState>::getUncalibratedSourceLink_impl(ActsTrk::MultiTrajectory<RWState>::IndexType istate) const{
+typename Acts::SourceLink
+ActsTrk::MultiTrajectory<RWState>::getUncalibratedSourceLink_impl(
+    ActsTrk::MultiTrajectory<RWState>::IndexType istate) const {
   auto el = trackStates()[istate]->uncalibratedMeasurementLink();
   auto geoID = trackStates()[istate]->geometryId();
   return Acts::SourceLink(geoID, el);
 }
 template <bool RWState>
-ATH_MEMBER_REQUIRES_DEF(RWState == ActsTrk::IsReadWrite,
-                      Acts::SourceLink)
-ActsTrk::MultiTrajectory<RWState>::getUncalibratedSourceLink_impl(ActsTrk::MultiTrajectory<RWState>::IndexType istate) {
+ATH_MEMBER_REQUIRES_DEF(RWState == ActsTrk::IsReadWrite, Acts::SourceLink)
+ActsTrk::MultiTrajectory<RWState>::getUncalibratedSourceLink_impl(
+    ActsTrk::MultiTrajectory<RWState>::IndexType istate) {
   auto el = trackStates()[istate]->uncalibratedMeasurementLink();
   auto geoID = trackStates()[istate]->geometryId();
   return Acts::SourceLink(geoID, el);
@@ -364,14 +390,14 @@ const std::any ActsTrk::MultiTrajectory<RWState>::decorationGetter(
                                // for const AuxElements, here we shield
 }
 
-
 // Implementation of shareFrom
 template <bool RWState>
-void ActsTrk::MultiTrajectory<RWState>::shareFrom_impl(ActsTrk::MultiTrajectory<RWState>::IndexType iself,
-                                           ActsTrk::MultiTrajectory<RWState>::IndexType iother,
-                                           Acts::TrackStatePropMask shareSource,
-                                           Acts::TrackStatePropMask shareTarget) {
-  auto self  = (*m_trackStates)[iself];
+void ActsTrk::MultiTrajectory<RWState>::shareFrom_impl(
+    ActsTrk::MultiTrajectory<RWState>::IndexType iself,
+    ActsTrk::MultiTrajectory<RWState>::IndexType iother,
+    Acts::TrackStatePropMask shareSource,
+    Acts::TrackStatePropMask shareTarget) {
+  auto self = (*m_trackStates)[iself];
   auto other = (*m_trackStates)[iother];
 
   assert(ACTS_CHECK_BIT(this->getTrackState(iother).getMask(), shareSource) &&
@@ -422,4 +448,3 @@ void ActsTrk::MultiTrajectory<RWState>::shareFrom_impl(ActsTrk::MultiTrajectory<
       throw std::domain_error{"Unable to share this component"};
   }
 }
-
