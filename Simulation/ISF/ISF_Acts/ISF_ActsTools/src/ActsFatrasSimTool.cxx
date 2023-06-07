@@ -70,7 +70,7 @@ StatusCode ISF::ActsFatrasSimTool::simulate(
 StatusCode ISF::ActsFatrasSimTool::simulateVector(
     const ISFParticleVector& particles,
     ISFParticleContainer& secondaries,
-    McEventCollection* /*mcEventCollection*/) {
+    McEventCollection* /*mcEventCollection*/, McEventCollection *) {
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
   m_randomEngine->setSeed(m_randomEngineName, ctx);

@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_ISIMULATORTOOL_H
@@ -29,7 +29,7 @@ public:
   virtual StatusCode simulate(ISFParticle& isp, ISFParticleContainer& secondaries, McEventCollection* mcEventCollection) = 0;
 
   /** Simulation call for vectors of particles*/
-  virtual StatusCode simulateVector(const ISFParticleVector &particles, ISFParticleContainer& secondaries, McEventCollection* mcEventCollection) = 0;
+  virtual StatusCode simulateVector(const ISFParticleVector &particles, ISFParticleContainer& secondaries, McEventCollection *mcEventCollection, McEventCollection *shadowTruth=nullptr) = 0;
 
   /** Create data containers for an event */
   virtual StatusCode setupEvent(const EventContext&) = 0;

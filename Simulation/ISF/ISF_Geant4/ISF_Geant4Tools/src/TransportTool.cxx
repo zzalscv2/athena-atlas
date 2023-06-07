@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -272,11 +272,17 @@ StatusCode iGeant4::G4TransportTool::simulate( ISF::ISFParticle& isp, ISF::ISFPa
 }
 
 //________________________________________________________________________
-StatusCode iGeant4::G4TransportTool::simulateVector( const ISF::ISFParticleVector& particles, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection) {
+StatusCode iGeant4::G4TransportTool::simulateVector( const ISF::ISFParticleVector& particles, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection, McEventCollection *shadowTruth) {
 
   ATH_MSG_DEBUG (name() << ".simulateVector(...) : Received a vector of " << particles.size() << " particles for simulation.");
   /** Process ParticleState from particle stack */
-  G4Event* inputEvent = m_inputConverter->ISF_to_G4Event(particles, genEvent(mcEventCollection));
+  G4Event* inputEvent{};
+  if (shadowTruth && !shadowTruth->empty()) {
+    inputEvent = m_inputConverter->ISF_to_G4Event(particles, genEvent(mcEventCollection), shadowTruth->back());
+  }
+  else{
+    inputEvent = m_inputConverter->ISF_to_G4Event(particles, genEvent(mcEventCollection));
+  }
   if (!inputEvent) {
     ATH_MSG_ERROR("ISF Event conversion failed ");
     return StatusCode::FAILURE;
