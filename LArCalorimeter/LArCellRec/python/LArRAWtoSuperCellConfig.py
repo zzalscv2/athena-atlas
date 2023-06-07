@@ -1,11 +1,11 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
 from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
 
-def LArRAWtoSuperCellCfg(configFlags,mask=True,SCellContainerOut="SCell_ET"):
+def LArRAWtoSuperCellCfg(configFlags,name='LArRAWtoSuperCell', mask=True,SCellContainerOut="SCell_ET",bcidShift=0):
     result=ComponentAccumulator()
     from AthenaCommon.Logging import logging
     mlog = logging.getLogger( 'LArRAWtoSuperCellCfg:' )
@@ -24,11 +24,13 @@ def LArRAWtoSuperCellCfg(configFlags,mask=True,SCellContainerOut="SCell_ET"):
     else :
        LArBadChannelKey=""
     result.merge(LArBadChannelCfg(configFlags,isSC=True,tag="LARBadChannelsBadChannelsSC-RUN3-UPD1-00") )
+
+    algo = CompFactory.LArRAWtoSuperCell(name,SCellContainerOut=SCellContainerOut,LArBadChannelKey=LArBadChannelKey,BCIDOffset=bcidShift)
     if ( SCInput == ""):
        mlog.info("Not setting SCInput container name")
-       algo = CompFactory.LArRAWtoSuperCell(SCellContainerOut=SCellContainerOut,LArBadChannelKey=LArBadChannelKey)
     else :
        mlog.info("Setting SCInput container name to %s",SCInput)
-       algo = CompFactory.LArRAWtoSuperCell(SCellContainerIn=SCInput, SCellContainerOut=SCellContainerOut,LArBadChannelKey=LArBadChannelKey)
+       algo.SCellContainerIn = SCInput
     result.addEventAlgo(algo)
+       
     return result
