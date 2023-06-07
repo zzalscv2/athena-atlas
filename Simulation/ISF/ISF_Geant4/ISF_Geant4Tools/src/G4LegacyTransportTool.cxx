@@ -252,7 +252,7 @@ StatusCode iGeant4::G4LegacyTransportTool::simulate( ISF::ISFParticle& isp, ISF:
 }
 
 //________________________________________________________________________
-StatusCode iGeant4::G4LegacyTransportTool::simulateVector( const ISF::ISFParticleVector& particles, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection) {
+StatusCode iGeant4::G4LegacyTransportTool::simulateVector( const ISF::ISFParticleVector& particles, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection, McEventCollection*) {
 
   ATH_MSG_DEBUG (name() << ".simulateVector(...) : Received a vector of " << particles.size() << " particles for simulation.");
   /** Process ParticleState from particle stack */

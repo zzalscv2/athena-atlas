@@ -180,7 +180,7 @@ public:
   MOCK_METHOD0(finalize, StatusCode());
   MOCK_METHOD1(setupEvent, StatusCode(const EventContext&));
   MOCK_METHOD3(simulate, StatusCode(ISF::ISFParticle&, ISF::ISFParticleContainer&, McEventCollection*));
-  MOCK_METHOD3(simulateVector, StatusCode(const ISF::ISFParticleVector&, ISF::ISFParticleContainer&, McEventCollection*));
+  MOCK_METHOD4(simulateVector, StatusCode(const ISF::ISFParticleVector&, ISF::ISFParticleContainer&, McEventCollection*, McEventCollection*));
   MOCK_METHOD1(releaseEvent, StatusCode(const EventContext&));
   MOCK_CONST_METHOD1(bid, int(const ISF::ISFParticle&));
 
@@ -822,7 +822,7 @@ protected:
                                        );
 
     ASSERT_NE( m_mockSimulatorTool, nullptr );
-    EXPECT_CALL( *m_mockSimulatorTool, simulateVector(::testing::_,::testing::_,::testing::_) )
+    EXPECT_CALL( *m_mockSimulatorTool, simulateVector(::testing::_,::testing::_,::testing::_,::testing::_) )
       .Times(1)
       .WillOnce(::testing::Return(StatusCode::SUCCESS));
 

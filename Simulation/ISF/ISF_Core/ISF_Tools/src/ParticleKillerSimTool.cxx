@@ -29,7 +29,7 @@ StatusCode ISF::ParticleKillerSimTool::simulate( ISFParticle& isp, ISFParticleCo
   return StatusCode::SUCCESS;
 }
 
-StatusCode ISF::ParticleKillerSimTool::simulateVector(const ISFParticleVector& particles, ISFParticleContainer& secondaries, McEventCollection* mcEventCollection) {
+StatusCode ISF::ParticleKillerSimTool::simulateVector(const ISFParticleVector& particles, ISFParticleContainer& secondaries, McEventCollection* mcEventCollection, McEventCollection *) {
   for (auto isp : particles) {
     ATH_CHECK(simulate(*isp, secondaries, mcEventCollection));
   }
