@@ -599,8 +599,9 @@ include("TriggerTest/disableChronoStatSvcPrintout.py")
 #-------------------------------------------------------------
 # MessageSvc
 #-------------------------------------------------------------
-svcMgr.MessageSvc.Format = "% F%40W%C%4W%R%e%s%8W%R%T %0W%M"
-svcMgr.MessageSvc.enableSuppression = False
+if not flags.Trigger.Online.isPartition:   # athenaHLT already sets this
+    svcMgr.MessageSvc.Format = "% F%40W%C%4W%R%e%s%8W%R%T %0W%M"
+    svcMgr.MessageSvc.enableSuppression = False
 
 if flags.Input.isMC:
     # Disable spurious warnings from HepMcParticleLink, ATR-21838
