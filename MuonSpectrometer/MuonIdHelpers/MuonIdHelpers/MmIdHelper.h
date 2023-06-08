@@ -95,8 +95,8 @@ public:
 
     Identifier pcbID(int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int pcb) const;
     Identifier pcbID(int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int pcb, bool& isValid) const;
-    Identifier pcbID(std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int pcb) const;
-    Identifier pcbID(std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int pcb, bool& isValid) const;
+    Identifier pcbID(const std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int pcb) const;
+    Identifier pcbID(const std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int pcb, bool& isValid) const;
     Identifier pcbID(const Identifier& channelID, int pcb) const;
     Identifier pcbID(const Identifier& channelID, int pcb, bool& isValid) const;
     Identifier pcbID(const Identifier& channelID) const;
