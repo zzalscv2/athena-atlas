@@ -60,8 +60,9 @@ def BPHY24Cfg(ConfigFlags):
         TrackParticleLocation       = ["InDetTrackParticles", "InDetLargeD0TrackParticles"],
         OutputTrackParticleLocation = "InDetWithLRTTrackParticles",
         CreateViewColllection       = True))
+    acc.addPublicTool(BPHY24TrackParticleMergerTool)
  
-    LRTMergeAug = CompFactory.DerivationFramework.CommonAugmentation("InDetLRTMerge", AugmentationTools = [BPHY24TrackParticleMergerTool])
+    LRTMergeAug = CompFactory.DerivationFramework.CommonAugmentation("BPHY24InDetLRTMerge", AugmentationTools = [BPHY24TrackParticleMergerTool])
     acc.addEventAlgo(LRTMergeAug)
     mainIDInput = "InDetWithLRTTrackParticles"
     BPHY24_Finder_DiMuon = CompFactory.Analysis.JpsiFinder( name    = "BPHY24_Finder_DiMuon",
@@ -217,7 +218,8 @@ def BPHY24Cfg(ConfigFlags):
                                            V0ContainerName = V0ContainerName,
                                            KshortContainerName = KshortContainerName,
                                            LambdaContainerName = LambdaContainerName,
-                                           LambdabarContainerName = LambdabarContainerName)),
+                                           LambdabarContainerName = LambdabarContainerName,
+                                           RelinkTracks = ["InDetTrackParticles", "InDetLargeD0TrackParticles"])),
               Decorator              = V0Decorator,
               V0ContainerName        = V0ContainerName,
               KshortContainerName    = KshortContainerName,
@@ -227,9 +229,11 @@ def BPHY24Cfg(ConfigFlags):
 
     augsList += [BPHY24_Reco_V0Finder]
     outVtxList += ['BPHY24RecoKshortCandidates']
+    outVtxList += ["BPHY24RecoV0Candidates"]
     thinTrkVtxList += ['BPHY24RecoKshortCandidates']
     thinPassFlagsList += [ "" ] # TODO: is this really needed?
     finalCandidateList += ["BPHY24RecoKshortCandidates"]
+    finalCandidateList += ["BPHY24RecoV0Candidates"]
     JpsiV0VertexFit = CompFactory.Trk.TrkVKalVrtFitter(
                                   name                 = "JpsiV0VertexFit",
                                   Extrapolator         = acc.popToolsAndMerge(InDetExtrapolatorCfg(ConfigFlags)),
@@ -256,7 +260,8 @@ def BPHY24Cfg(ConfigFlags):
         RefPVContainerName      = "BPHY24RefittedPrimaryVertices_mm",
         JpsiVertices            = "BPHY24_DiMuon_Candidates",
         CascadeVertexCollections= ["BPHY24JpsimmKshortCascadeSV2", "BPHY24JpsimmKshortCascadeSV1"],
-        V0Vertices              = "BPHY24RecoV0Candidates")
+        V0Vertices              = "BPHY24RecoV0Candidates",
+        V0TrackContainerName    = mainIDInput)
 
     augsList += [BPHY24JpsimmKshort]
     outVtxList += BPHY24JpsimmKshort.CascadeVertexCollections
@@ -284,7 +289,8 @@ def BPHY24Cfg(ConfigFlags):
         RefPVContainerName      = "BPHY24RefittedPrimaryVertices_ee",
         JpsiVertices            = "BPHY24_DiElectron_Candidates",
         CascadeVertexCollections= ["BPHY24JpsieeKshortCascadeSV2", "BPHY24JpsieeKshortCascadeSV1"],
-        V0Vertices              = "BPHY24RecoV0Candidates")
+        V0Vertices              = "BPHY24RecoV0Candidates",
+        V0TrackContainerName    = mainIDInput)
 
     augsList += [BPHY24JpsieeKshort]
     finalCandidateList += BPHY24JpsieeKshort.CascadeVertexCollections
@@ -312,19 +318,18 @@ def BPHY24Cfg(ConfigFlags):
     TrackIsoTool = acc.popToolsAndMerge(TrackIsolationToolCfg(ConfigFlags,
                                                               TrackSelectionTool = TrackSelTool,
                                                               TTVATool = TTVATool))
-
     acc.addPublicTool(TrackIsoTool)
     BPHY24TrackIsolationDecoratorBtoKee = CompFactory.DerivationFramework.VertexTrackIsolation(
       name                            = "BPHY24TrackIsolationDecoratorBtoKee",
       TrackIsoTool                    = TrackIsoTool,
-      TrackContainer                  = mainIDInput,
+      TrackContainer                  = "InDetTrackParticles",
       InputVertexContainer            = "BPHY24JpsieeKshortCascadeSV1",
       FixElecExclusion                = True,
       IncludeV0                       = True)
     BPHY24TrackIsolationDecoratorBtoKmumu = CompFactory.DerivationFramework.VertexTrackIsolation(
       name                            = "BPHY24TrackIsolationDecoratorBtoKmumu ",
       TrackIsoTool                    = TrackIsoTool,
-      TrackContainer                  = mainIDInput,
+      TrackContainer                  = "InDetTrackParticles",
       InputVertexContainer            = "BPHY24JpsimmKshortCascadeSV1",
       FixElecExclusion                = False,
       IncludeV0                       = True)
@@ -348,7 +353,7 @@ def BPHY24Cfg(ConfigFlags):
     BPHY24TrackIsolationDecoratorKshort = CompFactory.DerivationFramework.VertexTrackIsolation(
       name                            = "BPHY24TrackIsolationDecoratorKshort",
       TrackIsoTool                    = TrackIsoTool,
-      TrackContainer                  = "InDetLargeD0TrackParticles",
+      TrackContainer                  = "InDetTrackParticles",
       InputVertexContainer            = "BPHY24RecoKshortCandidates",
       FixElecExclusion                = False,
       IncludeV0                       = False)
@@ -441,10 +446,10 @@ def BPHY24Cfg(ConfigFlags):
           name                   = "BPHY24_Thin_Egamma",
           SGKey                  = "Electrons",
           StreamName = streamName,
-          InDetTrackParticlesKey = "InDetTrackParticles")
+          InDetTrackParticlesKey = mainIDInput)
     thinList += [BPHY24_Thin_Egamma]
     
-      # Primary vertices
+       # Primary vertices
     BPHY24_Thin_PV = CompFactory.DerivationFramework.BPhysPVThinningTool( name                 = "BPHY24_Thin_PV",
                                                                  CandidateCollections = finalCandidateList,
                                                                  StreamName = streamName,
@@ -505,6 +510,7 @@ def BPHY24Cfg(ConfigFlags):
     BPHY24SlimmingHelper.SmartCollections = [ "Electrons", "Muons", "InDetTrackParticles", "InDetLargeD0TrackParticles" ]
     
     # Full combined muon-ID tracks
+    AllVariables += ["InDetLargeD0TrackParticles"]
     AllVariables += [ "CombinedMuonTrackParticles" ]
     AllVariables += [ "ExtrapolatedMuonTrackParticles" ]
     ExtraVariables += [ "Muons.etaLayer1Hits.etaLayer2Hits.etaLayer3Hits.etaLayer4Hits.phiLayer1Hits.phiLayer2Hits.phiLayer3Hits.phiLayer4Hits",
