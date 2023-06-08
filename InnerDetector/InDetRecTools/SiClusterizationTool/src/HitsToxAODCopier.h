@@ -6,7 +6,9 @@
 
 // Framework includes
 #include <InDetIdentifier/PixelID.h>
+#include "InDetIdentifier/SCT_ID.h"
 #include <InDetRawData/PixelRDO_Container.h>
+#include <InDetRawData/SCT_RDO_Container.h>
 #include <StoreGate/ReadHandleKey.h>
 #include <StoreGate/WriteHandleKey.h>
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -33,12 +35,24 @@ class HitsToxAODCopier : public AthReentrantAlgorithm {
  private:
   ToolHandle<InDet::PixelRDOTool> m_pixelRDOTool{this, "PixelRDOTool",
                                                  "InDet::PixelRDOTool"};
-  SG::ReadHandleKey<PixelRDO_Container> m_rdoContainerKey{
-      this, "PixelRDOContainerKey", "PixelRDOs"};
-  SG::WriteHandleKey<xAOD::BaseContainer> m_outputKey{
-      this, "OutputCollectionKey", "PixelHits", "name of output container"};
+  SG::ReadHandleKey<PixelRDO_Container> m_pixelRdoContainerKey{
+      this, "PixelRDOContainerKey", "ITkPixelRDOs"};
+  SG::ReadHandleKey<SCT_RDO_Container> m_stripRdoContainerKey{
+      this, "StripRDOContainerKey", "ITkStripRDOs"};
 
-  const PixelID* m_idHelper = nullptr;
+  SG::WriteHandleKey<xAOD::BaseContainer> m_pixelOutputKey{
+      this, "PixelOutputCollectionKey", "PixelHits", "name of output container"};
+
+  SG::WriteHandleKey<xAOD::BaseContainer> m_stripOutputKey{
+      this, "StripOutputCollectionKey", "StripHits", "name of output container"};
+
+  const PixelID* m_pixelIdHelper = nullptr;
+  const SCT_ID* m_stripIdHelper = nullptr;
+
+
+  StatusCode exportPixel(const EventContext& context) const;
+  StatusCode exportStrip(const EventContext& context) const;
+
 };
 }  // namespace InDet
 #endif  // SICLUSTERIZATIONTOOL_HITSTOXAODCOPIER_H

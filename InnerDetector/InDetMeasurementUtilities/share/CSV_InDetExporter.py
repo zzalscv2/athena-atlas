@@ -57,8 +57,13 @@ class CSVDumper:
         for container in self.dict_variables_types.keys():
             dict_lists = {}
             dict_container = self.dict_variables_types[container]
-            for var,fmt in dict_container.items():
+            try:                    
                 tp  = getattr(self.tree, container)
+            except Exception:
+                print(".. Missing ", container)
+                continue
+
+            for var,fmt in dict_container.items():
                 sp  = asarray(  tp.getConstDataSpan[ fmt ]( var ) )
                 
                 if "ArrayFloat3" in fmt:  # Needed extra coding with dealing with xAOD::ArrayFloat3 instead of standard C++ array
@@ -98,6 +103,7 @@ if __name__ == "__main__":
     dict_variables_types = {
         #All obtained AuxElement content using the HitsToxAODCopier tool
         "PixelHits": { "col": "int", "row": "int", "tot": "int", "eta_module": "int", "phi_module": "int", "layer_disk": "int", "barrel_ec": "int", "detid": "unsigned long"},
+        "StripHits": { "strip": "int", "side": "int", "eta_module": "int", "phi_module": "int", "layer_disk": "int", "barrel_ec": "int", "detid": "unsigned long"},
         
         #https://gitlab.cern.ch/atlas/athena/-/blob/master/Event/xAOD/xAODInDetMeasurement/xAODInDetMeasurement/versions/PixelClusterAuxContainer_v1.h
         "ITkPixelClusters": {"globalPosition":"std::array<float,3>", "channelsInPhi":"int", "channelsInEta":"int", "widthInEta":"float", "omegaX":"float", "omegaY":"float", "totalToT":"int", "totalCharge":"float",   "energyLoss":"float", "splitProbability1":"float", "splitProbability2":"float", "lvl1a":"int", "localPosition":"std::array<float,3>", "localCovariance":"std::array<float,9>"},
