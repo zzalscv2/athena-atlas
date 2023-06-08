@@ -118,11 +118,10 @@ if __name__=='__main__':
     outputType="AOD"
     toRecord = ["xAOD::TrigCompositeContainer#HLTNav_All", "xAOD::TrigCompositeAuxContainer#HLTNav_AllAux.",
                 "xAOD::TrigCompositeContainer#HLTNav_Summary", "xAOD::TrigCompositeAuxContainer#HLTNav_SummaryAux."]
-    outputCfg = OutputStreamCfg(flags, outputType, ItemList=toRecord, disableEventTag=True)
+    outputCfg = OutputStreamCfg(flags, outputType, ItemList=toRecord, disableEventTag=True, takeItemsFromInput = True)
     streamAlg = outputCfg.getEventAlgo("OutputStream"+outputType)
     # need to expand possible options for the OutputStreamCfg to be able to pass also the metadata containers
     streamAlg.MetadataItemList += ["xAOD::TriggerMenuContainer#TriggerMenu", "xAOD::TriggerMenuAuxContainer#TriggerMenuAux."]
-    streamAlg.TakeItemsFromInput = True
     cfg.addPublicTool(CompFactory.xAODMaker.TriggerMenuMetaDataTool("TriggerMenuMetaDataTool"))
     cfg.addService( CompFactory.MetaDataSvc("MetaDataSvc", MetaDataTools = [cfg.getPublicTool("TriggerMenuMetaDataTool")]))
 

@@ -64,10 +64,10 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.L1MuonSim.EmulateNSW', False)
 
     # Enable NSW MM trigger
-    flags.addFlag('Trigger.L1MuonSim.doMMTrigger', False)
+    flags.addFlag('Trigger.L1MuonSim.doMMTrigger', True)
 
     # Enable NSW sTGC pad trigger
-    flags.addFlag('Trigger.L1MuonSim.doPadTrigger', False)
+    flags.addFlag('Trigger.L1MuonSim.doPadTrigger', True)
 
     # Enable NSW sTGC strip trigger
     flags.addFlag('Trigger.L1MuonSim.doStripTrigger', False)
@@ -82,10 +82,10 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.L1MuonSim.WritesTGCBranches', False)
 
     # Enable the veto mode of the NSW-TGC coincidence
-    flags.addFlag('Trigger.L1MuonSim.NSWVetoMode', False)
+    flags.addFlag('Trigger.L1MuonSim.NSWVetoMode', True)
 
     # Enable TGC-RPC BIS78 coincidence
-    flags.addFlag('Trigger.L1MuonSim.doBIS78', False)
+    flags.addFlag('Trigger.L1MuonSim.doBIS78', True)
 
     # Offline CondDB tag for RPC/TGC coincidence window in rerunLVL1 on data
     flags.addFlag('Trigger.L1MuonSim.CondDBOffline', 'OFLCOND-MC16-SDR-RUN2-04')
@@ -311,9 +311,6 @@ def createTriggerFlags(doTriggerRecoFlags):
 
     # name of the trigger menu
     flags.addFlag('Trigger.triggerMenuSetup', 'MC_pp_run3_v1_BulkMCProd_prescale')
-
-    # modify the slection of chains that are run (default run all), see more in GenerateMenuMT_newJO
-    flags.addFlag('Trigger.triggerMenuModifier', ['all'])
 
     # debug output from control flow generation
     flags.addFlag('Trigger.generateMenuDiagnostics', False)

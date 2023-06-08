@@ -49,7 +49,7 @@ namespace ISF {
     virtual StatusCode setParticleBroker( IParticleBroker *broker) = 0;
 
     /** Simulation call for vectors of particles*/
-    virtual StatusCode simulateVector(const ISFParticleVector &particles, McEventCollection* mcEventCollection) = 0;
+    virtual StatusCode simulateVector(const ISFParticleVector &particles, McEventCollection* mcEventCollection, McEventCollection *shadowTruth=nullptr) = 0;
 
     /** Simulation call for individual particles*/
     virtual StatusCode simulate(ISFParticle& isp, McEventCollection* mcEventCollection) = 0;

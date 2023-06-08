@@ -47,12 +47,12 @@ if __name__ == "__main__":
         "Muon"     : ["^Muon", "^TileMuObj", "^MS", "^SlowMuons", ".*Stau", "(.*)MuonTrackParticles$", "MUCTPI_RDO", "^RPC", "^TGC", "^MDT", "^CSC", "^sTGC", "^MM", ".*MuonMeasurements$", "^ExtrapolatedMuonTracks", "^CombinedMuonTracks", "^NCB_MuonSegments", "^UnAssocMuonSegments", "^EMEO_Muons", "^EMEO_MuonSpectrometerTrackParticles", "^xAODNSWSegments"],
         "BTag"     : ["^BTag"],
         "HGTD"     : ["^HGTD"],
-        "InDet"    : ["^InDet", "^PrimaryVertices", "^ComTime_TRT", "^Pixel", "^TRT", "^SCT", "^BCM", "^CTP", "^Tracks", "^ResolvedForwardTracks", "^SplitClusterAmbiguityMap", "^SoftBVrt"],
+        "InDet"    : ["^InDet", "^PrimaryVertices", "^ComTime_TRT", "^Pixel", "^TRT", "^SCT", "^BCM", "^CTP", "^Tracks", "^ResolvedForwardTracks", "^SplitClusterAmbiguityMap", "^SoftBVrt","^BLMHits"],
         "ITk"      : ["^ITk"],
         "Jet"      : ["^CamKt", "^AntiKt", "^Jet(?!.*ParticleFlowObjects$)","^LCOriginTopoClusters","^EMOriginTopoClusters"],
         "CaloTopo" : ["CaloCalTopoCluster", "CaloCalFwdTopoTowers"],
-        "Calo"     : ["^LAr", "^AllCalo", "^AODCellContainer", "^MBTSContainer", "^CaloCompactCellContainer", "^CaloEntryLayer", "^E4prContainer", "^TileHitVec", "^TileCellVec", "^TileDigits"],
-        "Truth"    : ["^Truth", "Truth$", "TruthMap$", "TruthCollection$", "^PRD_MultiTruth", "TracksTruth$", ".*TrackTruth$", "TrackTruthCollection", "^HardScatter", "BornLeptons"],
+        "Calo"     : ["^LAr", "^AllCalo", "^AODCellContainer", "^MBTSContainer", "^CaloCompactCellContainer", "^CaloEntryLayer", "^E4prContainer", "^TileHitVec", "^TileCellVec", "^TileDigits", "^MBTSHits"],
+        "Truth"    : ["^Truth", "Truth$", "TruthMap$", "TruthCollection$", "^PRD_MultiTruth", "TracksTruth$", ".*TrackTruth$", "TrackTruthCollection", "^HardScatter", "BornLeptons",".*ExitLayer$",".*EntryLayer$"],
         "AFP"      : ["^AFP"],
         "LRT"      : ["^LRT", "(.*)LRT$", "(.*)LRTTrackParticles$", "(.*)LargeD0TrackParticles$"],
         "caloringer"      : ["(.*)Ring"],
@@ -168,6 +168,9 @@ if __name__ == "__main__":
 
             br = ttree.GetBranch( d.name )
             d_name = d.name
+            mbkg = re.match("(.*)Bkg_",d.name)
+            if mbkg:
+               d.name   = re.sub("Bkg_","",d.name)
             if br:
                 m = re.match( "(.*)_[pv]._", d.name )
                 m1 = re.match( "(.*)_tlp._", d.name )

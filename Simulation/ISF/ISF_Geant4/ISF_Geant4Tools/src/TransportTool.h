@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_GEANT4TOOLS_TRANSPORTTOOL_H
@@ -84,7 +84,7 @@ namespace iGeant4
 
     virtual StatusCode simulate( ISF::ISFParticle& isp, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection ) override;
 
-    virtual StatusCode simulateVector( const ISF::ISFParticleVector& particles, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection ) override;
+    virtual StatusCode simulateVector( const ISF::ISFParticleVector& particles, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection, McEventCollection *shadowTruth=nullptr ) override;
 
     virtual StatusCode setupEvent(const EventContext&) override;
 

@@ -479,19 +479,13 @@ def triggerPOOLOutputCfg(flags):
 
 
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-        acc.merge(OutputStreamCfg(flags, outputType, ItemList=itemsToRecord, disableEventTag=True, 
+        acc.merge(OutputStreamCfg(flags, outputType, ItemList=itemsToRecord, disableEventTag=True, takeItemsFromInput=(outputType == 'RDO'),
                                     MetadataItemList=[ "xAOD::TriggerMenuJsonContainer#*", "xAOD::TriggerMenuJsonAuxContainer#*" ]))
         alg = acc.getEventAlgo("OutputStream"+outputType)
         # Ensure OutputStream runs after TrigDecisionMakerMT and xAODMenuWriterMT
         alg.ExtraInputs += [
             ("xAOD::TrigDecision", str(decmaker.TrigDecisionKey)),
             ("xAOD::TrigConfKeys", metadataOutputs)] + xRoIBResultOutputs
-
-        # Keep input RDO objects in the output RDO_TRIG file
-        if outputType == 'RDO':
-            alg.TakeItemsFromInput = True #TODO, make the OutputStreamCfg accepting modifier for this
-
-
 
     return acc
 

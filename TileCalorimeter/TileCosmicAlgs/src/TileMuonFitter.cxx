@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -92,7 +92,7 @@ const CaloCell_ID::SUBCALO TileMuonFitter::m_caloIndex = CaloCell_ID::TILE;
 //
 // Constructor
 //
-TileMuonFitter::TileMuonFitter(std::string name, ISvcLocator* pSvcLocator)
+TileMuonFitter::TileMuonFitter(const std::string& name, ISvcLocator* pSvcLocator)
     : AthAlgorithm(name, pSvcLocator)
   , m_tileID(nullptr)
   , m_tileHWID(nullptr)

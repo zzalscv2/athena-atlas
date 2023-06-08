@@ -186,31 +186,30 @@ monitoring_topo = [
 # Chains inside the ​Physics_pp_run3_v1.py menu:
 ######  
 
-primary_single_ele = ['HLT_e26_lhtight_ivarloose_L1EM22VHI',
-                'HLT_e26_lhtight_ivarmedium_L1EM22VHI',
-                'HLT_e28_lhtight_ivarloose_L1EM22VHI',
-                'HLT_e60_lhmedium_L1EM22VHI',
-                'HLT_e140_lhloose_L1EM22VHI',
-        ]
+primary_single_ele = [
+        'HLT_e26_lhtight_ivarloose_L1eEM26M',
+        'HLT_e26_lhtight_ivarloose_L1eEM26T',
+        'HLT_e28_lhtight_ivarloose_L1eEM28M',
+        'HLT_e60_lhmedium_L1eEM26M',
+        'HLT_e140_lhloose_L1eEM26M']
 
 primary_double_pho = [
-        'HLT_2g20_tight_icaloloose_L12EM15VHI',
-        'HLT_2g22_tight_L12EM15VHI',
-        'HLT_g35_medium_g25_medium_L12EM20VH',
-        'HLT_2g50_loose_L12EM20VH',
+        'HLT_2g22_tight_L12eEM18M',
+        'HLT_g35_medium_g25_medium_L12eEM24L',
+        'HLT_2g50_loose_L12eEM24L',
         ]
 
-monitoring_Zee = ['HLT_e26_lhtight_e14_etcut_probe_50invmAB130_L1EM22VHI',
-                'HLT_e26_lhtight_e14_etcut_L1EM22VHI',
+monitoring_Zee = ['HLT_e26_lhtight_e14_etcut_probe_50invmAB130_L1eEM26M',
+                'HLT_e26_lhtight_e14_etcut_L1eEM26M',
                 'HLT_e26_lhtight_e14_etcut_probe_50invmAB130_L1eEM26M',
                 'HLT_e26_lhtight_e14_etcut_L1eEM26M'
                 ] + primary_single_ele
 
 monitoring_Jpsiee = [
-        'HLT_e5_lhtight_e9_etcut_1invmAB5_L1JPSI-1M5-EM7',
-        'HLT_e5_lhtight_e14_etcut_1invmAB5_L1JPSI-1M5-EM12',
-        'HLT_e9_lhtight_e4_etcut_1invmAB5_L1JPSI-1M5-EM7',
-        'HLT_e14_lhtight_e4_etcut_1invmAB5_L1JPSI-1M5-EM12',
-        'HLT_e10_lhvloose_L1EM7',
-        'HLT_e14_lhvloose_L1EM10VH'
+        'HLT_e5_lhtight_e9_etcut_1invmAB5_L1JPSI-1M5-eEM9',
+        'HLT_e5_lhtight_e14_etcut_1invmAB5_L1JPSI-1M5-eEM15',
+        'HLT_e9_lhtight_e4_etcut_1invmAB5_L1JPSI-1M5-eEM9',
+        'HLT_e14_lhtight_e4_etcut_1invmAB5_L1JPSI-1M5-eEM15',
+        'HLT_e10_lhvloose_L1eEM9',
+        'HLT_e14_lhvloose_L1eEM12L'
         ]

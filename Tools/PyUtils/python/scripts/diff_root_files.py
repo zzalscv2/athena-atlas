@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils.scripts.diff_root_files
 # @purpose check that 2 ROOT files have same content (containers and sizes).
@@ -35,6 +35,41 @@ def _is_summary():
 def _is_exit_early():
     global g_args
     return g_args.error_mode == 'bailout'
+
+# Possibly compare two vectors.  If nan_equal, then consider NaNs to be equal.
+# Returns None if we have two matching vectors.
+# If we have two vectors that differ at some element, return that index.
+# Otherwise return -1 (inputs not vectors, etc).
+_vectypes = {'std::vector<float>',
+             'std::vector<double>',
+             'std::vector<int>',
+             'std::vector<unsigned int>',
+             'std::vector<long>',
+             'std::vector<unsigned long>',
+             'std::vector<short>',
+             'std::vector<unsigned short>',
+             'std::vector<char>',
+             'std::vector<unsigned char>',
+             'std::vector<long long>',
+             'std::vector<unsigned long long>'}
+def _vecdiff (v1, v2, nan_equal):
+    if getattr(type(type(v1)), '__cpp_name__', None) not in _vectypes:
+        return -1
+    if type(v1) is not type(v2): return -1
+    sz = v1.size()
+    if sz != v2.size(): return -1
+    if nan_equal:
+        isnan_ = isnan
+        for i in range (sz):
+            val1 = v1[i]
+            val2 = v2[i]
+            if not (val1 == val2 or (isnan_(val1) and isnan_(val2))):
+                return i
+    else:
+        for i in range (sz):
+            if v1[i] != v2[i]:
+                return i
+    return None
 
 @acmdlib.command(name='diff-root')
 @acmdlib.argument('old',
@@ -370,8 +405,8 @@ def main(args):
             itr_entries_new = itr_entries
 
         branches = sorted(branches)
-        old_dump_iter = fold.dump(args.tree_name, itr_entries_old, branches)
-        new_dump_iter = fnew.dump(args.tree_name, itr_entries_new, branches)
+        old_dump_iter = fold.dump(args.tree_name, itr_entries_old, branches, True)
+        new_dump_iter = fnew.dump(args.tree_name, itr_entries_new, branches, True)
 
         def leafname_fromdump(entry):
             if entry is None:
@@ -425,6 +460,16 @@ def main(args):
                 tree_name, ientry, iname, iold = d_old
             if d_new:
                 tree_name, jentry, jname, inew = d_new
+
+            idiff = _vecdiff (iold, inew, args.nan_equal)
+            if idiff is None:
+                n_good += 1
+                continue
+            elif idiff >= 0:
+                iold = iold[idiff]
+                inew = inew[idiff]
+                iname = iname[:-1] + [idiff] + iname[-1:]
+                jname = jname[:-1] + [idiff] + jname[-1:]
 
             # for regression testing we should have NAN == NAN
             if args.nan_equal:

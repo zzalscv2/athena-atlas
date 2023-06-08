@@ -920,12 +920,23 @@ unsigned processTaus( TrigTrackSelector& selectorRef,
 						(*tau)->type(),
 						tauid );
 
-      bool trk_added;
+      bool trk_added = false;
+
       for ( unsigned i=N ; i-- ; )  {
 #       ifdef XAODTAU_TAUTRACK_H
-        trk_added = selectorRef.selectTrack((*tau)->track(i)->track());
+	
+        std::vector< ElementLink<xAOD::TrackParticleContainer> > alink = (*tau)->track(i)->trackLinks();
+	
+	trk_added = false;
+	
+	for ( size_t ilink=0 ; ilink<alink.size() ; ilink++ ) {
+	  if ( alink[ilink].isValid() ) trk_added = selectorRef.selectTrack((*alink[ilink]));
+	}
+	/// the previous version of the code ...
+	//        trk_added = selectorRef.selectTrack((*tau)->track(i)->track());
+	/// used the link to the Trk::Track
 #       else
-        trk_added = selectorRef.selectTrack((*tau)->track(i));
+	trk_added = selectorRef.selectTrack((*tau)->track(i));
 #       endif
 	if ( trk_added ) tauobj.addChild( selectorRef.tracks().back()->id() );
       }

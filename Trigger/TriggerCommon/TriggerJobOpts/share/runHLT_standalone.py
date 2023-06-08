@@ -27,12 +27,7 @@ class opt:
     createHLTMenuExternally = False   # Set to True if the menu is build manually outside runHLT_standalone.py
     endJobAfterGenerate = False       # Finish job after menu generation
     forceEnableAllChains = False      # if True, all HLT chains will run even if the L1 item is false
-    enableL1NSWVetoMode = True        # Enable TGC-NSW coincidence veto mode: ConfigFlags.Trigger.L1MuonSim.NSWVetoMode
-    enableL1NSWMMTrigger = True       # Enable MM trigger for TGC-NSW coincidence : ConfigFlags.Trigger.L1MuonSim.doMMTrigger
-    enableL1NSWPadTrigger = True      # Enable sTGC Pad trigger for TGC-NSW coincidence : ConfigFlags.Trigger.L1MuonSim.doPadTrigger
-    enableL1NSWStripTrigger = False   # Enable sTGC Strip trigger for TGC-NSW coincidence : ConfigFlags.Trigger.L1MuonSim.doStripTrigger
-    enableL1RPCBIS78    = True        # Enable TGC-RPC BIS78 coincidence : ConfigFlags.Trigger.L1MuonSim.doBIS78
-#Individual slice flags
+    #Individual slice flags:
     doCalibSlice        = True
     doTestSlice         = True
     doHeavyIonSlice     = True
@@ -72,6 +67,11 @@ opt_obsolete = ['setDetDescr',
                 'doCalo',
                 'doMuon',
                 'BFieldAutoConfig',
+                'enableL1NSWVetoMode',
+                'enableL1NSWMMTrigger',
+                'enableL1NSWPadTrigger',
+                'enableL1NSWStripTrigger',
+                'enableL1RPCBIS78',
 ]
 
 ################################################################################
@@ -205,11 +205,6 @@ if flags.Input.Format is Format.BS or opt.doL1Sim:
 
 # Translate a few other flags
 flags.Trigger.doLVL1 = opt.doL1Sim
-flags.Trigger.L1MuonSim.NSWVetoMode = opt.enableL1NSWVetoMode
-flags.Trigger.L1MuonSim.doMMTrigger = opt.enableL1NSWMMTrigger
-flags.Trigger.L1MuonSim.doPadTrigger = opt.enableL1NSWPadTrigger
-flags.Trigger.L1MuonSim.doStripTrigger = opt.enableL1NSWStripTrigger
-flags.Trigger.L1MuonSim.doBIS78 = opt.enableL1RPCBIS78
 
 #-------------------------------------------------------------
 # Switch off CPS mechanism if we only run selected
