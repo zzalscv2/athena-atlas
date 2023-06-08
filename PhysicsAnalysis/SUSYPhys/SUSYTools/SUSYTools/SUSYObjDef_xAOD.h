@@ -550,7 +550,6 @@ namespace ST {
     std::string m_autoconfigPRWFile;
     bool m_autoconfigPRWCombinedmode;
     bool m_autoconfigPRWRPVmode;
-    std::string m_autoconfigPRWHFFilter;
     std::string m_autoconfigPRWRtags;
     std::string m_mcCampaign;
     int m_mcChannel;
@@ -559,6 +558,7 @@ namespace ST {
     std::vector<std::string> m_prwLcalcFiles;
     std::string m_prwActualMu2017File;
     std::string m_prwActualMu2018File;
+    std::string m_prwActualMu2022File;
 
     double m_prwDataSF;
     double m_prwDataSF_UP;

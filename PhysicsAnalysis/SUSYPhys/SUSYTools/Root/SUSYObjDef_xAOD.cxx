@@ -146,7 +146,6 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_autoconfigPRWFile(""),
     m_autoconfigPRWCombinedmode(false),
     m_autoconfigPRWRPVmode(false),
-    m_autoconfigPRWHFFilter(""),
     m_autoconfigPRWRtags(""),
     m_mcCampaign(""),
     m_mcChannel(-99),
@@ -592,7 +591,6 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   declareProperty( "AutoconfigurePRWToolFile", m_autoconfigPRWFile ); // e.g. DSID407xxx/pileup_mc16a_dsid407352_FS.root
   declareProperty( "AutoconfigurePRWToolCombinedmode", m_autoconfigPRWCombinedmode );
   declareProperty( "AutoconfigurePRWToolRPVmode", m_autoconfigPRWRPVmode );
-  declareProperty( "AutoconfigurePRWToolHFFilter", m_autoconfigPRWHFFilter );
   declareProperty( "AutoconfigurePRWToolRtags", m_autoconfigPRWRtags );
   declareProperty( "mcCampaign",           m_mcCampaign );
   declareProperty( "mcChannel",            m_mcChannel );
@@ -600,6 +598,7 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   declareProperty( "PRWLumiCalcFiles",     m_prwLcalcFiles );
   declareProperty( "PRWActualMu2017File",  m_prwActualMu2017File );
   declareProperty( "PRWActualMu2018File",  m_prwActualMu2018File );
+  declareProperty( "PRWActualMu2022File",  m_prwActualMu2022File );
   declareProperty( "PRWDataScaleFactor",   m_prwDataSF);
   declareProperty( "PRWDataScaleFactorUP", m_prwDataSF_UP);
   declareProperty( "PRWDataScaleFactorDOWN", m_prwDataSF_DW);
@@ -910,10 +909,10 @@ StatusCode SUSYObjDef_xAOD::initialize() {
 
   // autoconfigure PRW tool if m_autoconfigPRW==true
   if (m_autoconfigPRWPath == "dev/PileupReweighting/share/")
-    ATH_CHECK( autoconfigurePileupRWTool(m_autoconfigPRWPath, m_autoconfigPRWFile, true, m_autoconfigPRWRPVmode, m_autoconfigPRWCombinedmode, m_autoconfigPRWHFFilter) );
+    ATH_CHECK( autoconfigurePileupRWTool(m_autoconfigPRWPath, m_autoconfigPRWFile, true, m_autoconfigPRWRPVmode, m_autoconfigPRWCombinedmode) );
   else
     // need to set a full path if you don't use the one in CVMFS
-    ATH_CHECK( autoconfigurePileupRWTool(m_autoconfigPRWPath, m_autoconfigPRWFile, false, m_autoconfigPRWRPVmode, m_autoconfigPRWCombinedmode, m_autoconfigPRWHFFilter) );
+    ATH_CHECK( autoconfigurePileupRWTool(m_autoconfigPRWPath, m_autoconfigPRWFile, false, m_autoconfigPRWRPVmode, m_autoconfigPRWCombinedmode) );
 
   ATH_CHECK( m_outElectronLocation.initialize() );
   ATH_CHECK( m_outMuonLocation.initialize() );
@@ -928,7 +927,7 @@ StatusCode SUSYObjDef_xAOD::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfilesDir, const std::string& PRWfileName, bool usePathResolver, bool RPVLLmode, bool Combinedmode, const std::string& HFFilter ) {
+StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfilesDir, const std::string& PRWfileName, bool usePathResolver, bool RPVLLmode, bool Combinedmode, const std::string& /*  HFFilter */ ) {
 
   std::string prwConfigFile("");
 
@@ -944,9 +943,9 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
     const xAOD::FileMetaData* fmd = nullptr;
 
     // configure PRW rtag options from m_autoconfigPRWRtags string
-    // e.g. "mc16a:r9364_r11505_r11285,mc16c:r9781,mc16d:r10201_r11506_r11279,mc16e:r10724_r11507_r11249,mc16ans:r10740_r10832_r10847_r11008_r11036,mc16dns:r10739_r10833_r10848_r11009_r11037,mc16ens:r10790_r11038_r11265"
+    // e.g. "mc20a:r13167_r13297,mc20d_r13144_r13298,mc20e:r13145,mc21a:r13829,mc23a:r14622"
     std::map<std::string,std::vector<std::string>> PRWRtags = {};
-    std::string allcampaigns = "mc16a.mc16c.mc16d.mc16e.mc20a.mc20d.mc20e.mc21a.mc16ans.mc16dns.mc16ens";
+    std::string allcampaigns = "mc20a.mc20d.mc20e.mc21a.mc23a";
     bool standard_like = true;
     for ( const auto& campaign_rtags : split( m_autoconfigPRWRtags, "," ) ) {                                          // split string by ","
        std::string icampaign = campaign_rtags.substr(0, campaign_rtags.find(":"));                              // first field = campaign, split by ":"
@@ -1000,7 +999,7 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
       return StatusCode::FAILURE;
 #else
 
-      if ( m_mcCampaign == "mc16a" || m_mcCampaign == "mc16c" || m_mcCampaign == "mc16d" || m_mcCampaign == "mc16e") {
+      if ( m_mcCampaign == "mc20a" || m_mcCampaign == "mc20d" || m_mcCampaign == "mc20e" || m_mcCampaign == "mc21a" || m_mcCampaign == "mc23a") {
 	// First see if the user set the mcCampaign/run number by property (hopefully temporary workaround)
 	if ( m_mcChannel > 0) {
 	  ATH_MSG_WARNING( "autoconfigurePileupRWTool(): access to FileMetaData failed -> getting the mc channel number (DSID) and campaign from configuration." );
@@ -1040,45 +1039,36 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
     if (RPVLLmode) prwConfigFile = TString(prwConfigFile).ReplaceAll(".root","_rpvll.root").Data();
 
     // PRW file specified by user
-    // e.g. DSID407xxx/pileup_mc16a_dsid407352_FS.root
+    // e.g. DSID700xxx/pileup_mc20a_dsid700015_FS.root
     if (!PRWfileName.empty()) {
       prwConfigFile = PRWfilesDir + PRWfileName;
       ATH_MSG_INFO( "autoconfigurePileupRWTool(): PRW file was specifed by user: " << prwConfigFile.data() );
-    }
-
-    // Patch for MC16 Znunu metadata bug  (updated 2019.05.30)
-    if (!HFFilter.empty() && dsid>=366001 && dsid<= 366008) {
-      ATH_MSG_WARNING ("Samples metadata for Znunu samples is corrupted! Remapping to grab the correct RPW file. Only MC16e is supported for now.");
-      if (HFFilter == "BFilter") {
-        prwConfigFile = TString(prwConfigFile).ReplaceAll(std::to_string(DSID_INT),std::to_string(DSID_INT+9)).Data();
-      } else if (HFFilter == "CFilterBVeto") {
-        prwConfigFile = TString(prwConfigFile).ReplaceAll(std::to_string(DSID_INT),std::to_string(DSID_INT+18)).Data();
-      } else if (HFFilter == "CVetoBVeto") {
-        prwConfigFile = TString(prwConfigFile).ReplaceAll(std::to_string(DSID_INT),std::to_string(DSID_INT+27)).Data();
-      } else {
-        ATH_MSG_ERROR ("Heavy flavor filter naming is wrong and cannot re-map dsid! SHould be BFilter, CFilterBVeto, or CVetoBVeto.");
-        return StatusCode::FAILURE;
-      }
     }
 
     m_prwConfFiles.clear();
 
     // Combined mode can be only used when running with full data with the same MC samples
     if (Combinedmode) {
-      prwConfigFile = TString(prwConfigFile).ReplaceAll(mcCampaignMD,"mc16a").Data();
+      if (mcCampaignMD.find("mc20") == std::string::npos) {
+        ATH_MSG_ERROR( "autoconfigurePileupRWTool(): combined mode currently onlys supported for mc20! Impossible to autoconfigure PRW. Aborting." );
+        return StatusCode::FAILURE;
+      }
+      prwConfigFile = TString(prwConfigFile).ReplaceAll(mcCampaignMD,"mc20a").Data();
       m_prwConfFiles.push_back( prwConfigFile );
-      prwConfigFile = TString(prwConfigFile).ReplaceAll("mc16a","mc16d").Data();
+      prwConfigFile = TString(prwConfigFile).ReplaceAll("mc20a","mc20d").Data();
       m_prwConfFiles.push_back( prwConfigFile );
-      prwConfigFile = TString(prwConfigFile).ReplaceAll("mc16d","mc16e").Data();
+      prwConfigFile = TString(prwConfigFile).ReplaceAll("mc20d","mc20e").Data();
       m_prwConfFiles.push_back( prwConfigFile );
       m_prwConfFiles.push_back( PathResolverFindCalibFile(m_prwActualMu2017File) );
       m_prwConfFiles.push_back( PathResolverFindCalibFile(m_prwActualMu2018File) );
     } else {
       m_prwConfFiles.push_back( prwConfigFile );
-      if ( mcCampaignMD == "mc16c" || mcCampaignMD == "mc16d") {
+      if ( mcCampaignMD == "mc20d") {
         m_prwConfFiles.push_back( PathResolverFindCalibFile(m_prwActualMu2017File) );
-      } else if (mcCampaignMD == "mc16e") {
+      } else if (mcCampaignMD == "mc20e") {
         m_prwConfFiles.push_back( PathResolverFindCalibFile(m_prwActualMu2018File) );
+      } else if (mcCampaignMD == "mc21a" || mcCampaignMD == "mc23a") {
+        m_prwConfFiles.push_back( PathResolverFindCalibFile(m_prwActualMu2022File) );
       }
     }
     prwConfigFile = usePathResolver ? PathResolverFindCalibFile(prwConfigFile) : prwConfigFile;
@@ -1560,6 +1550,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   //
   configFromFile(m_prwActualMu2017File, "PRW.ActualMu2017File", rEnv, "GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.actualMu.OflLumi-13TeV-010.root");
   configFromFile(m_prwActualMu2018File, "PRW.ActualMu2018File", rEnv, "GoodRunsLists/data18_13TeV/20190219/purw.actualMu.root");
+  configFromFile(m_prwActualMu2022File, "PRW.ActualMu2022File", rEnv, "GoodRunsLists/data22_13p6TeV/20230207/purw.actualMu.2022.root");
   configFromFile(m_prwDataSF, "PRW.DataSF", rEnv, 1./1.03); // default for mc16, see: https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/ExtendedPileupReweighting#Tool_Properties
   configFromFile(m_prwDataSF_UP, "PRW.DataSF_UP", rEnv, 1./0.99); // mc16 uncertainty? defaulting to the value in PRWtool
   configFromFile(m_prwDataSF_DW, "PRW.DataSF_DW", rEnv, 1./1.07); // mc16 uncertainty? defaulting to the value in PRWtool
@@ -1568,8 +1559,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_autoconfigPRWFile, "PRW.autoconfigPRWFile", rEnv, "None");
   configFromFile(m_autoconfigPRWCombinedmode, "PRW.autoconfigPRWCombinedmode", rEnv, false);
   configFromFile(m_autoconfigPRWRPVmode, "PRW.autoconfigPRWRPVmode", rEnv, false);
-  configFromFile(m_autoconfigPRWHFFilter, "PRW.autoconfigPRWHFFilter", rEnv, "None");
-  configFromFile(m_autoconfigPRWRtags, "PRW.autoconfigPRWRtags", rEnv, "mc16a:r9364_r11505_r11285,mc16c:r9781,mc16d:r10201_r11506_r11279,mc16e:r10724_r11507_r11249,mc20a:r13167,mc20d:r13144,mc20e:r13145,mc21a:r13829,mc16ans:r10740_r10832_r10847_r11008_r11036,mc16dns:r10739_r10833_r10848_r11009_r11037,mc16ens:r10790_r11038_r11265");
+  configFromFile(m_autoconfigPRWRtags, "PRW.autoconfigPRWRtags", rEnv, "mc20a:r13167,mc20d:r13144,mc20e:r13145,mc21a:r13752_r13829,mc23a:r14622");
   //
   configFromFile(m_strictConfigCheck, "StrictConfigCheck", rEnv, false);
 
