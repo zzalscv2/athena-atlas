@@ -85,7 +85,13 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
                           LLP1LRTMaxCellDecoratorTool ]
 
     # Common augmentations
-    
+    from IsolationSelection.IsolationSelectionConfig import IsoCloseByCorrSkimmingAlgCfg, IsoCloseByCaloDecorCfg
+    acc.merge(IsoCloseByCorrSkimmingAlgCfg(ConfigFlags, ttva_wp = "Nonprompt_All_MaxWeight"))
+
+    ### Associate the close-by pflow objects and the calorimeter clusters
+    acc.merge(IsoCloseByCaloDecorCfg(ConfigFlags,
+                                    containers = ["Electrons", "Muons", "Photons", "LRTElectrons", "MuonsLRT"] ))
+
     # Reclustered jets definitions
     from JetRecConfig.JetRecConfig import registerAsInputConstit, JetRecCfg
     from JetRecConfig.StandardSmallRJets import AntiKt4Truth, AntiKt4EMTopo
@@ -109,7 +115,7 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
         AntiKt10RCTruth = JetDefinition("AntiKt",1.0,cst.AntiKt4TruthJets,
                                         ghostdefs = [],
                                         modifiers = ("Sort", "Filter:200000",),
-                                        standardRecoMode = True,   
+                                        standardRecoMode = True,
                                         lock = True
         )
 
@@ -267,7 +273,7 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
                                                                                JetKey                  = "AntiKt4EMTopoJets",
                                                                                SelectionString         = "(AntiKt4EMTopoJets.pt > 20.*GeV) && (abs(AntiKt4EMTopoJets.eta) < 2.5)",
                                                                                InDetTrackParticlesKey  = "InDetTrackParticles"))
-    
+
     LLP1FatJetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(  ConfigFlags,
                                                                                     name                    = "LLP1FatJetTPThinningTool",
                                                                                     StreamName              = kwargs['StreamName'],
@@ -311,7 +317,7 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
     if ConfigFlags.Tracking.doLargeD0:
         thinningTools.append(LLP1LRTJetTPThinningTool)
         thinningTools.append(LLP1LRTFatJetTPThinningTool)
-    
+
     # Additionnal augmentations
 
     # Compute RC substructure variables from energy clusters
@@ -348,7 +354,6 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
 def LLP1Cfg(ConfigFlags):
 
     acc = ComponentAccumulator()
-
     # Get the lists of triggers needed for trigger matching.
     # This is needed at this scope (for the slimming) and further down in the config chain
     # for actually configuring the matching, so we create it here and pass it down
@@ -431,11 +436,11 @@ def LLP1Cfg(ConfigFlags):
                                           "AntiKtVR30Rmax4Rmin02TrackJets_BTagging201903.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostTausFinal.GhostTausFinalCount",
                                           "AntiKtVR30Rmax4Rmin02TrackJets_BTagging201810.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostTausFinal.GhostTausFinalCount",
                                           "TruthPrimaryVertices.t.x.y.z.sumPt2",
-                                          "PrimaryVertices.t.x.y.z.sumPt2",
+                                          "PrimaryVertices.t.x.y.z.sumPt2.covariance",
                                           "InDetTrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.hitPattern",
                                           "InDetLargeD0TrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.hitPattern",
-                                          "GSFTrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared.hitPattern",
-                                          "LRTGSFTrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared.hitPattern",
+                                          "GSFTrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared.hitPattern.truthOrigin.truthType",
+                                          "LRTGSFTrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared.hitPattern.truthOrigin.truthType",
                                           "EventInfo.hardScatterVertexLink.timeStampNSOffset",
                                           "TauJets.dRmax.etOverPtLeadTrk",
                                           "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
@@ -453,6 +458,14 @@ def LLP1Cfg(ConfigFlags):
         LLP1SlimmingHelper.ExtraVariables += [ "InDetLargeD0TrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
         LLP1SlimmingHelper.ExtraVariables += [ "GSFTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
         LLP1SlimmingHelper.ExtraVariables += [ "LRTGSFTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
+
+    #Variables to perform close-by-correction to isolation quantities
+    iso_corr_vars = [ "IsoCloseByCorr_assocClustEta", "IsoCloseByCorr_assocClustPhi", "IsoCloseByCorr_assocClustEnergy",
+                "IsoCloseByCorr_assocClustDecor", "IsoCloseByCorr_assocPflowEta", "IsoCloseByCorr_assocPflowPhi", "IsoCloseByCorr_assocPflowEnergy",
+                "IsoCloseByCorr_assocPflowDecor"]
+
+    LLP1SlimmingHelper.ExtraVariables += ["Electrons."+(".".join(iso_corr_vars)), "LRTElectrons."+(".".join(iso_corr_vars)),
+                                           "Muons."+(".".join(iso_corr_vars)), "MuonsLRT."+(".".join(iso_corr_vars)) ]
 
 
     # Truth containers
