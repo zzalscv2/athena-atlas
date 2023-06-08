@@ -157,13 +157,13 @@ NswDcsDbData::getDataForChannel(const DcsTechType tech, const Identifier& channe
         const ChannelDcsMap& dcsMap = tech==DcsTechType::MMG ? m_data_hv_mmg : m_data_hv_mmd; // later add something like: type == DcsDataType::HV ? m_data_hv : m_data_lv;
         const unsigned int array_idx = identToModuleIdx(channelId);
         const unsigned int channel = m_mmIdHelper.channel(channelId) -1;
-        if (dcsMap.at(array_idx).channels.size() > channel && dcsMap[array_idx].channels[channel]) return dcsMap[array_idx].channels[channel].get();
+        if (dcsMap.size() > array_idx && dcsMap.at(array_idx).channels.size() > channel && dcsMap[array_idx].channels[channel]) return dcsMap[array_idx].channels[channel].get();
     } else if(tech == DcsTechType::STG){
         if(!m_stgcIdHelper.is_stgc(channelId)) return nullptr;
         const ChannelDcsMap& dcsMap = m_data_hv_stg; // later add something like: type == DcsDataType::HV ? m_data_hv_stg : m_data_lv_stg;
         const unsigned int array_idx = identToModuleIdx(channelId);
         const unsigned int channel = m_stgcIdHelper.channel(channelId) -1;
-        if (dcsMap.at(array_idx).channels.size() > channel && dcsMap[array_idx].channels[channel]) return dcsMap[array_idx].channels[channel].get();
+        if (dcsMap.size() > array_idx && dcsMap.at(array_idx).channels.size() > channel && dcsMap[array_idx].channels[channel]) return dcsMap[array_idx].channels[channel].get();
     }
     return nullptr;
 }

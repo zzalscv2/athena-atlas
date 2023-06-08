@@ -308,11 +308,11 @@ Identifier MmIdHelper::pcbID(int stationName, int stationEta, int stationPhi, in
 	int chnl = getFirstPcbChnl(stationEta,  pcb); 
 	return channelID(stationName, stationEta, stationPhi, multilayer, gasGap, chnl, isValid);
 }
-Identifier MmIdHelper::pcbID(std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int pcb) const {
+Identifier MmIdHelper::pcbID(const std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int pcb) const {
 	int chnl = getFirstPcbChnl(stationEta,  pcb); 
 	return channelID(stationName, stationEta, stationPhi, multilayer, gasGap, chnl);
 }
-Identifier MmIdHelper::pcbID(std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int pcb, bool& isValid) const {
+Identifier MmIdHelper::pcbID(const std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int pcb, bool& isValid) const {
 	int chnl = getFirstPcbChnl(stationEta,  pcb); 
 	return channelID(stationName, stationEta, stationPhi, multilayer, gasGap, chnl, isValid);
 }
