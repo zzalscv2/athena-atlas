@@ -312,9 +312,6 @@ def createTriggerFlags(doTriggerRecoFlags):
     # name of the trigger menu
     flags.addFlag('Trigger.triggerMenuSetup', 'MC_pp_run3_v1_BulkMCProd_prescale')
 
-    # modify the slection of chains that are run (default run all), see more in GenerateMenuMT_newJO
-    flags.addFlag('Trigger.triggerMenuModifier', ['all'])
-
     # debug output from control flow generation
     flags.addFlag('Trigger.generateMenuDiagnostics', False)
 

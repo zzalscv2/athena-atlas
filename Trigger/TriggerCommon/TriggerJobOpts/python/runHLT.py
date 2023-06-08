@@ -58,13 +58,7 @@ def set_flags(flags):
    ### TEMPORARY settings:
    # FIXME: disable coherent prescales during development phase to allow menu with single-chain CPS groups
    flags.Trigger.disableCPS = True
-
    flags.Trigger.enabledSignatures = ['Muon', 'Tau','MinBias','Bphysics','Egamma', 'Electron', 'Photon', 'MET', 'Jet','Bjet','Calib']
-   #--------------#
-   #Leave commented lines for tests, since this is under development
-   #flags.Trigger.triggerMenuModifier=[ 'emptyMenu','HLT_mu8_L1MU5VF']
-   #flags.Trigger.selectChains =  ['HLT_mu4_L1MU3V','HLT_mu8_L1MU5VF','HLT_2mu6_L12MU5VF', 'HLT_mu24_mu6_L1MU14FCH','HLT_mu24_mu6_probe_L1MU14FCH'] #, 'HLT_mu4_mu6_L12MU3V']
-   #--------------#
 
 
 def runHLTCfg(flags):
