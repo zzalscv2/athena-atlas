@@ -2,7 +2,7 @@
 
 def BPHY_InDetV0FinderToolCfg(flags, derivation,
                               V0ContainerName, KshortContainerName,
-                              LambdaContainerName, LambdabarContainerName,TrackParticleCollection="InDetTrackParticles",):
+                              LambdaContainerName, LambdabarContainerName,TrackParticleCollection="InDetTrackParticles",RelinkTracks=[]):
     from InDetConfig.InDetV0FinderConfig import InDetV0FinderToolCfg
     return InDetV0FinderToolCfg(flags,
                                 name = derivation + "_InDetV0FinderTool",
@@ -10,4 +10,5 @@ def BPHY_InDetV0FinderToolCfg(flags, derivation,
                                 V0ContainerName=V0ContainerName,
                                 KshortContainerName=KshortContainerName,
                                 LambdaContainerName=LambdaContainerName,
-                                LambdabarContainerName= LambdabarContainerName)
+                                LambdabarContainerName= LambdabarContainerName,
+                                RelinkTracks = RelinkTracks)
