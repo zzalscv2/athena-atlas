@@ -163,6 +163,10 @@ class CaloRecGPUConfigurator:
         #to get to the fast path.
         
         self.MissingCellsToFill = []
+        
+        self.UseOriginalCriteria = False
+        #If True, use the original criteria
+        #(which disagree with the GPU implementation)
                     
     def BasicConstantDataExporterToolConf(self, name = "ConstantDataExporter"):
         result=ComponentAccumulator()
@@ -307,6 +311,9 @@ class CaloRecGPUConfigurator:
         TopoMaker.SeedThresholdOnTAbs = self.SeedThresholdOnTAbs
         
         TopoMaker.TreatL1PredictedCellsAsGood = self.TreatL1PredictedCellsAsGood
+        
+        TopoMaker.UseGPUCriteria = not self.UseOriginalCriteria
+        
         result.setPrivateTools(TopoMaker)
         return result
         
@@ -380,6 +387,8 @@ class CaloRecGPUConfigurator:
         
         TopoSplitter.WeightingOfNegClusters = self.SplitterUseNegativeClusters
         
+        TopoSplitter.UseGPUCriteria = not self.UseOriginalCriteria
+        
         result.setPrivateTools(TopoSplitter)
         return result
       
@@ -433,6 +442,8 @@ class CaloRecGPUConfigurator:
                 TopoMoments.LArHVFraction=CompFactory.LArHVFraction(HVScaleCorrKey="LArHVScaleCorr")
             else:
                 TopoMoments.LArHVFraction=CompFactory.LArHVFraction(HVScaleCorrKey="LArHVScaleCorrRecomputed")
+        
+        TopoMoments.UseGPUCriteria = not self.UseOriginalCriteria
         
         result.setPrivateTools(TopoMoments)
         return result

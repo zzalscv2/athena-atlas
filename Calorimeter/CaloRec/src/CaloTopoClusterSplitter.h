@@ -242,6 +242,8 @@ class CaloTopoClusterSplitter: public AthAlgTool, virtual public CaloClusterColl
 
   IdentifierHash m_hashMin;
   IdentifierHash m_hashMax;
+  
+  Gaudi::Property<bool> m_useGPUCriteria {this, "UseGPUCriteria", false, "Adopt a set of criteria that is consistent with the GPU implementation."};
 };
 
 #endif // CALOTOPOCLUSTERSPLITTER_H

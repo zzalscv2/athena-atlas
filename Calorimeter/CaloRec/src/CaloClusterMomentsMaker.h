@@ -156,6 +156,9 @@ class CaloClusterMomentsMaker: public AthAlgTool, virtual public CaloClusterColl
    /**
     * @brief Transition from outer to inner wheel in EME2 */
    double m_etaInnerWheel = { 2.52 };
+
+  
+  Gaudi::Property<bool> m_useGPUCriteria {this, "UseGPUCriteria", false, "Adopt a set of criteria that is consistent with the GPU implementation."};
 };
 
 #endif // CALOCLUSTERMOMENTSMAKER_H

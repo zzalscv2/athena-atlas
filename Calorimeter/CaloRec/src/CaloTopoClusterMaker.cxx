@@ -446,14 +446,26 @@ CaloTopoClusterMaker::execute(const EventContext& ctx,
 
   // sort initial seed cells to start with the cell of largest S/N
   // this makes the resulting clusters independent of the initial
-  // ordering of the cells 
-  if ( m_seedCutsInAbsE) {
-    CaloTopoTmpHashCellSort::compareAbs<CaloTopoTmpClusterCell> compareSoverN;
-    std::sort(mySeedCells.begin(),mySeedCells.end(),compareSoverN); 
+  // ordering of the cells
+  if ( m_useGPUCriteria) {
+    if ( m_seedCutsInAbsE) {
+      CaloTopoTmpHashCellSort::compareAbsWithIndex<CaloTopoTmpClusterCell> compareSoverN;
+      std::sort(mySeedCells.begin(),mySeedCells.end(),compareSoverN); 
+    }
+    else {
+      CaloTopoTmpHashCellSort::compareWithIndex<CaloTopoTmpClusterCell> compareSoverN;
+      std::sort(mySeedCells.begin(),mySeedCells.end(),compareSoverN); 
+    }
   }
   else {
-    CaloTopoTmpHashCellSort::compare<CaloTopoTmpClusterCell> compareSoverN;
-    std::sort(mySeedCells.begin(),mySeedCells.end(),compareSoverN); 
+    if ( m_seedCutsInAbsE) {
+      CaloTopoTmpHashCellSort::compareAbs<CaloTopoTmpClusterCell> compareSoverN;
+      std::sort(mySeedCells.begin(),mySeedCells.end(),compareSoverN); 
+    }
+    else {
+      CaloTopoTmpHashCellSort::compare<CaloTopoTmpClusterCell> compareSoverN;
+      std::sort(mySeedCells.begin(),mySeedCells.end(),compareSoverN); 
+    }
   }
 
 #if 1
@@ -512,47 +524,11 @@ CaloTopoClusterMaker::execute(const EventContext& ctx,
 	opt = LArNeighbours::nextInSamp;
       }
       m_calo_id->get_neighbours(hashid,opt,theNeighbors);
-#if 0
-      if ( m_doALotOfPrintoutInFirstEvent && msgLvl(MSG::DEBUG)) {
-	Identifier myId;
-	myId = m_calo_id->cell_id((int)(mySubDet),hashid);
-	ATH_MSG_DEBUG( " Cell [" << mySubDet << "|" 
-                       << (unsigned int)hashid << "|"
-                       << m_calo_id->show_to_string(myId,0,'/') 
-                       << "] has " << theNeighbors.size() 
-                       << " neighbors:"  );
-      }
-#endif
       // loop over all neighbors of that cell (Seed Growing Algo)
       for (IdentifierHash nId : theNeighbors) {
         CaloCell_ID::SUBCALO otherSubDet =
           (CaloCell_ID::SUBCALO)m_calo_id->sub_calo(nId);
 	if ( m_subcaloUsed[otherSubDet] ) {
-#if 0
-	  if ( m_doALotOfPrintoutInFirstEvent && msgLvl(MSG::DEBUG)) {
-	    Identifier myId = m_calo_id->cell_id(nId);
-	    ATH_MSG_DEBUG(  "  NeighborCell [" << otherSubDet << "|" 
-			    << (unsigned int) nId << "|" 
-			    << m_calo_id->show_to_string(myId,0,'/') << "]" 
-                            );
-
-	    m_calo_id->get_neighbours(nId,m_nOption,theNNeighbors);
-	    if ( std::find (theNNeighbors.begin(),
-                            theNNeighbors.end(), hashid) ==theNNeighbors.end() )
-            {
-	      myId = m_calo_id->cell_id(hashid);
-	      msg(MSG::ERROR) << " Cell [" << mySubDet << "|" 
-			      << (unsigned int)hashid << "|"
-			      << m_calo_id->show_to_string(myId,0,'/') 
-			      << "] has bad neighbor cell[";
-	      myId = m_calo_id->cell_id(nId);
-	      
-	      msg() << otherSubDet << "|" << nId << "|" 
-		    << m_calo_id->show_to_string(myId,0,'/') 
-		    << "]" << endmsg;
-	    }
-	  }
-#endif
 	  HashCell neighborCell = hashCells[nId];
 	  if ( neighborCell.getCaloTopoTmpClusterCell() ) {
 	    CaloTopoTmpClusterCell* pNCell =
@@ -571,7 +547,26 @@ CaloTopoClusterMaker::execute(const EventContext& ctx,
 	      HashCluster *toKill = nullptr;
 	      HashCluster *toKeep = nullptr;
 	      if ( !otherCluster || isAboveNeighborThreshold ) {
-		if ( !otherCluster || otherCluster->size() < myCluster->size() ) {
+		
+		auto compareClusters = [&](const auto & c1, const auto & c2) {
+		  if (m_useGPUCriteria) {
+		    //The seed cell with the largest SNR wins
+		    if (m_seedCutsInAbsE) {
+		      CaloTopoTmpHashCellSort::compareAbsWithIndex<CaloTopoTmpClusterCell> compare;
+		      return compare(*(c1->begin()), *(c2->begin()));
+		    }
+		    else {
+		      CaloTopoTmpHashCellSort::compareWithIndex<CaloTopoTmpClusterCell> compare;
+		      return compare(*(c1->begin()), *(c2->begin()));
+		    }
+		  }
+		  else {
+		    //We merge the smallest cluster to the largest...
+		    return c1->size() > c2->size();
+		  }
+		};
+		
+		if ( !otherCluster || compareClusters(myCluster, otherCluster) ) {
 		  toKill = otherCluster;
 		  toKeep = myCluster;
 		}
@@ -651,7 +646,7 @@ CaloTopoClusterMaker::execute(const EventContext& ctx,
     clusColl->push_back(xAODCluster);
     xAODCluster->addCellLink(protoCluster->releaseCellLinks());//Hand over ownership to xAOD::CaloCluster
     xAODCluster->setClusterSize(m_clusterSize);
-    CaloClusterKineHelper::calculateKine(xAODCluster,false,true); //No weight at this point! 
+    CaloClusterKineHelper::calculateKine(xAODCluster,false,true, m_useGPUCriteria); //No weight at this point! 
   }
   
   tmpclus_pool.erase();

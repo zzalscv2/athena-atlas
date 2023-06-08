@@ -477,7 +477,7 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
     // energy was found before
     if (! pClusCell->getUsed() ) {
       float myEnergy = pClusCell->getSignedRatio();
-      if(m_absOpt) myEnergy=fabs(myEnergy);
+      if(m_absOpt) myEnergy=std::abs(myEnergy);
       if ( myEnergy >= m_minEnergy &&  !pClusCell->getSecondary() ) {
         int nCells=0; 
         bool isLocalMax = true;
@@ -492,12 +492,12 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
           if ( pNeighCell && pNeighCell->getParentClusterIndex() == iParent) {
             nCells++;
             if ( ((myEnergy > pNeighCell->getSignedRatio() ) && !m_absOpt)   ||
-               (m_absOpt && myEnergy > fabs(pNeighCell->getSignedRatio() ) ) || 
+               (m_absOpt && myEnergy > std::abs(pNeighCell->getSignedRatio() ) ) || 
                 pNeighCell->getSecondary()  ) { 
               // in case the neighbor cell is a 2nd local max candidate
               // it has negative energy and we set it to used only if also
               // its abs value is smaller than myEnergy
-              if (fabs(pNeighCell->getSignedRatio()) <  myEnergy ) 
+              if (std::abs(pNeighCell->getSignedRatio()) <  myEnergy ) 
                 pNeighCell->setUsed(); 
             } 
             else { 
@@ -513,7 +513,16 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
         }
       }
     }
-  } 
+  }
+
+  std::vector<CaloTopoSplitterClusterCell *> myPotentialSecondarySeeds;
+  //These will be used for ordering the secondary seeds
+  //in a way that we can ensure agrees with the GPU version,
+  //as without it we depend on the ordering of the cells
+  //within the clusters (and the order of the clusters themselves)
+  //to decide the elimination between overlapping secondary clusters.
+  myPotentialSecondarySeeds.reserve(100);
+
   // look for secondary local maxima
   if ( !m_validSecondarySamplings.empty() ) {
     allCellIter=allCellList.begin();
@@ -523,7 +532,7 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
       // energy was found before 
       if (! pClusCell->getUsed()  && pClusCell->getSecondary()) {  
 	float myEnergy = pClusCell->getSignedRatio();
-        if(m_absOpt) myEnergy=fabs(myEnergy);
+        if(m_absOpt) myEnergy=std::abs(myEnergy);
 	if ( (!m_absOpt && myEnergy <= -m_minEnergy) || (m_absOpt && myEnergy >= m_minEnergy) ) {
 	  int nCells=0;
 	  bool isLocalMax = true;
@@ -538,7 +547,7 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
 	    CaloTopoSplitterClusterCell *pNeighCell = neighborCell.getCaloTopoTmpClusterCell();
 	    if ( pNeighCell && pNeighCell->getParentClusterIndex() == iParent) {
 	      nCells++;
-	      if ( fabs(myEnergy) > fabs(pNeighCell->getSignedRatio()) ) {
+	      if ( std::abs(myEnergy) > std::abs(pNeighCell->getSignedRatio()) ) {
 		pNeighCell->setUsed();
 	      } 
 	      else {
@@ -548,6 +557,14 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
 	  }
 	  if ( nCells < m_nCells ) 
 	    isLocalMax = false;
+
+	  if (m_useGPUCriteria) {
+	    if (isLocalMax) {
+	      myPotentialSecondarySeeds.push_back(pClusCell);
+	    }
+	    continue;
+	  }
+	    
 	  // check the neighbors in all previous and all next samplings
 	  // for overlapping cells in the primary local maximum list
 	  // in case such cells exist do not consider this cell as 
@@ -681,6 +698,106 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
     (*allCellIter)->setSignedRatio(itrCell->e());
   }
 
+
+  //Declaring this here because it is used for secondary maxima elimination 
+  CaloTopoTmpHashCellSort::compareWithIndex<CaloTopoSplitterClusterCell> compareEWithIndex;
+
+  if (m_useGPUCriteria && !m_validSecondarySamplings.empty()) {
+    
+    std::sort(myPotentialSecondarySeeds.begin(), myPotentialSecondarySeeds.end(), [&](const auto & a, const auto & b) {
+      return compareEWithIndex(cellVector[(unsigned int)a->getID() - m_hashMin], cellVector[(unsigned int)b->getID() - m_hashMin]);
+    });
+      
+    //This way, we always exclude the clusters based on overlap with more energetic ones.
+    //If the more energetic ones get excluded, then the cluster would end up being excluded too
+    //(since we're always checking with the same neighbour options).
+
+    std::vector<bool> secondarySeedExclude(myPotentialSecondarySeeds.size(), false);
+
+    for (unsigned int i = 0; i < myPotentialSecondarySeeds.size(); ++i) {
+      CaloTopoSplitterClusterCell * pClusCell = myPotentialSecondarySeeds[i];
+      bool isLocalMax = true;
+      IdentifierHash hashid = pClusCell->getID();
+
+      //Avoid repeated code...
+	
+      auto check_with_neighbour_options = [&, this](const LArNeighbours::neighbourOption opt_1,
+						    const LArNeighbours::neighbourOption opt_2) {
+	if (this->m_nOption & (opt_1 | opt_2)) {
+	  theCurrentNeighbors.clear();
+	  theCurrentNeighbors.push_back(hashid);
+	    
+	  while ( isLocalMax && !theCurrentNeighbors.empty() ) {
+	      
+	    theNextNeighbors.clear();
+	    for (const IdentifierHash & currentNeighbor : theCurrentNeighbors) {
+	      
+	      theNeighbors.clear();
+	      theSuperNeighbors.clear();
+	      
+	      if ( this->m_nOption & opt_1 ) {
+		this->m_calo_id->get_neighbours(currentNeighbor, opt_1, theNeighbors);
+	      }
+	      
+	      if ( this->m_nOption & opt_2 ) {
+		this->m_calo_id->get_neighbours(currentNeighbor, opt_2, theSuperNeighbors);
+	      }
+	      
+	      theNeighbors.insert(theNeighbors.end(), theSuperNeighbors.begin(), theSuperNeighbors.end());
+	      
+	      for (const IdentifierHash nId : theNeighbors) {
+		  
+		for (const auto & seedCell: mySeedCells) {
+		  if (cellVector[(unsigned int)nId - m_hashMin] == seedCell) {
+		    return false;
+		  }
+		}
+
+		for (unsigned int j = 0; j < i; ++j) {
+		  if (cellVector[(unsigned int)nId - m_hashMin] == myPotentialSecondarySeeds[j]) {
+		    return false;
+		  }
+		}
+		  
+		bool doInclude(true);
+		    
+		for (const IdentifierHash nextNId : theNextNeighbors) {
+		  if (nextNId == nId) {
+		    doInclude = false;
+		    break;
+		  }
+		}
+		  
+		if ( doInclude ) {
+		  theNextNeighbors.push_back(nId);
+		}
+	      }
+	    }
+	      
+	    theCurrentNeighbors.swap (theNextNeighbors);
+	  }
+	}
+
+	return true;
+      };
+
+      if ( ! ( check_with_neighbour_options(LArNeighbours::prevInSamp, LArNeighbours::prevSuperCalo) &&
+	       check_with_neighbour_options(LArNeighbours::nextInSamp, LArNeighbours::nextSuperCalo)    ) ) {
+	secondarySeedExclude[i] = true;
+      }
+    }
+
+    for (unsigned int i = 0; i < myPotentialSecondarySeeds.size(); ++i) {
+      CaloTopoSplitterClusterCell * pClusCell = myPotentialSecondarySeeds[i];
+      IdentifierHash hashid = pClusCell->getID();
+      size_t iParent = pClusCell->getParentClusterIndex();
+      if ( !secondarySeedExclude[i] ) {
+	mySeedCells.push_back(cellVector[(unsigned int)hashid - m_hashMin]);
+	hasLocalMaxVector[iParent]++;
+      }
+    }
+  }
+  
   // create shared cell list for border cells between two split clusters
   std::vector<HashCell> sharedCellList;
   std::vector<HashCell> nextSharedCellList;
@@ -702,9 +819,19 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
   // this makes the resulting clusters independent of the initial
   // ordering of the cells 
 
-  CaloTopoTmpHashCellSort::compare<CaloTopoSplitterClusterCell> compareE;
-  std::sort(mySeedCells.begin(),mySeedCells.end(),compareE); 
-
+  CaloTopoTmpHashCellSort::compare<CaloTopoSplitterClusterCell> compareEOriginal;
+  
+  auto compareE = [&, this](auto && ... ps) {
+    if (this->m_useGPUCriteria) {
+      return compareEWithIndex(std::forward<decltype(ps)>(ps)...);
+    }
+    else {
+      return compareEOriginal(std::forward<decltype(ps)>(ps)...);
+    }
+  };
+  
+  std::sort(mySeedCells.begin(),mySeedCells.end(),compareE);
+  
   if ( msgLvl(MSG::DEBUG)) {
     hashCellIter= mySeedCells.begin();
     hashCellIterEnd=mySeedCells.end();
@@ -1013,8 +1140,8 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
       CaloTopoSplitterClusterCell* pClusCell = hashCellIter->getCaloTopoTmpClusterCell();
       float e1 = (pClusCell->getCaloTopoTmpHashCluster())->getEnergy();
       float e2 = (pClusCell->getSecondCaloTopoTmpHashCluster())->getEnergy();
-      if(m_absOpt) e1 = fabs(e1);
-      if(m_absOpt) e2 = fabs(e2);
+      if(m_absOpt) e1 = std::abs(e1);
+      if(m_absOpt) e2 = std::abs(e2);
       if ( e1 <= 0 ) e1 = 1*MeV;
       if ( e2 <= 0 ) e2 = 1*MeV;    
       const xAOD::CaloCluster::cell_iterator itrCell = pClusCell->getCellIterator();
@@ -1059,8 +1186,21 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
   std::vector<HashCluster *>::iterator hashClusIterEnd=myHashClusters.end();
   for (;hashClusIter!=hashClusIterEnd;++hashClusIter) {
     HashCluster * tmpCluster = (*hashClusIter);
-    if ( tmpCluster->size() > 1 ) {
+    if ( (m_useGPUCriteria && tmpCluster->getContainsLocalMax()) || tmpCluster->size() > 1 ) {
       // local maximum implies at least 2 cells are in the cluster ...
+
+      // If one is not using shared cells and the thresholds are low enough,
+      // some local maxima may be surrounded (with one cell in the middle)
+      // by other local maxima that gobble up the cells first.
+      // For this reason, it makes sense to also include those clusters
+      // as separate entities instead of merging all of them to the original (pre-split) cluster
+      // as it was being done before.
+      // In practice, since these settings would seldom be chosen
+      // and the clusters would get a very low energy,
+      // they'd get cut and not influence the results,
+      // but, when doing the CPU <-> GPU comparison,
+      // they showed up as unexpected and unexplainable differences...
+      
       std::unique_ptr<CaloProtoCluster> myCluster = std::make_unique<CaloProtoCluster>(myCellCollLink);
       ATH_MSG_DEBUG("[CaloCluster@" << myCluster.get() << "] created in <myCaloClusters>.");
       HashCluster::iterator clusCellIter=tmpCluster->begin();
@@ -1078,9 +1218,7 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
 	}	
 	myCluster->addCell(itrCell.index(),myWeight);
       }
-      //CaloClusterKineHelper::calculateKine(myCluster);
       ATH_MSG_DEBUG("[CaloCluster@" << myCluster.get() << "] size: " << myCluster->size());
-      //myCluster->setClusterSize(clusterSize);
       myCaloClusters.push_back(std::move(myCluster));
     }
     else if ( tmpCluster->size() == 1 ) {
@@ -1106,10 +1244,8 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
 	  const double myWeight = itrCell.weight();
 	  myRestClusters[tmpCluster->getParentClusterIndex()]->addCell(itrCell.index(),myWeight);
 	}
-	//CaloClusterKineHelper::calculateKine(myRestClusters[tmpCluster->getParentClusterIndex()]);
 	ATH_MSG_DEBUG("[CaloCluster@" << myRestClusters[tmpCluster->getParentClusterIndex()].get()
 		      << "] size: " << myRestClusters[tmpCluster->getParentClusterIndex()]->size());
-	//myRestClusters[tmpCluster->getParentClusterIndex()]->setClusterSize(clusterSize);
       }
     }
   }
@@ -1159,7 +1295,7 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
     clusColl->push_back(xAODCluster);
     xAODCluster->addCellLink(protoCluster->releaseCellLinks());//Hand over ownership to xAOD::CaloCluster
     xAODCluster->setClusterSize(clusterSize);
-    CaloClusterKineHelper::calculateKine(xAODCluster);
+    CaloClusterKineHelper::calculateKine(xAODCluster, true, true, m_useGPUCriteria);
     ATH_MSG_DEBUG("CaloCluster@" << xAODCluster << " pushed into "
 		  << "CaloClusterContainer@" << clusColl);
   
@@ -1171,16 +1307,16 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
     eTot+=xAODCluster->e();
     nTot+=xAODCluster->size();
     
-    if ( fabs(xAODCluster->e()) > eMax )
-      eMax = fabs(xAODCluster->e());
+    if ( std::abs(xAODCluster->e()) > eMax )
+      eMax = std::abs(xAODCluster->e());
   }
   ATH_MSG_DEBUG("Sum of all CaloClusters E = " << eTot
 		<< " MeV, NCells = " << nTot 
 		<< " (including NShared = " << nShared << " twice)");
 
-  if ( fabs(eTot) > eMax ) 
-    eMax = fabs(eTot);
-  if ( fabs(eTot-eTotOrig)>0.001*eMax ){
+  if ( std::abs(eTot) > eMax ) 
+    eMax = std::abs(eTot);
+  if ( std::abs(eTot-eTotOrig)>0.001*eMax ){
     msg(MSG::WARNING) << "Energy sum for split Clusters = " << eTot << " MeV does not equal original sum = " << eTotOrig << " MeV !" << endmsg;
   } 
   if ( abs(nTot-nShared-nTotOrig) > 0 ) {

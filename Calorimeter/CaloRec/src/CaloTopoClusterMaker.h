@@ -296,7 +296,9 @@ private:
 
 
   /// Cluster size enum. Set based on energy cut jobO
-  xAOD::CaloCluster::ClusterSize m_clusterSize; 
+  xAOD::CaloCluster::ClusterSize m_clusterSize;
+  
+  Gaudi::Property<bool> m_useGPUCriteria {this, "UseGPUCriteria", false, "Adopt a set of criteria that is consistent with the GPU implementation."};
 };
 
 #endif // CALOTOPOCLUSTERMAKER_HH
