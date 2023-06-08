@@ -176,7 +176,7 @@ namespace MuonGM {
         inline int  CscIlinesFlag() const { return m_controlCscIlines; }
         void setCscFromGM(bool x) { m_useCscIlinesFromGM = x; }
         inline bool CscFromGM() const { return m_useCscIlinesFromGM; }
-
+        
         enum readoutElementHashMax {
             MdtRElMaxHash = 2500,
             CscRElMaxHash = 130,
@@ -295,32 +295,24 @@ namespace MuonGM {
 
         // map the RPC station indices (0-NRpcStatType) back to the RpcIdHelper stationNames
         int rpcStationName(const int stationIndex) const;
-        /// Map the MDT station indeces (0-NMdtStatType) back to the MdtIdHelper station names
-        int mdtStationName(const int stationIndex) const;
-
-
+      
     private:
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{"Muon::MuonIdHelperSvc/MuonIdHelperSvc", "MuonDetectorManager"};
         void loadStationIndices();
         unsigned int rpcStationTypeIdx(const int stationName) const;  // map the RPC stationNames from the RpcIdHelper to 0-NRpcStatType
         enum RpcStatType { BML = 0, BMS, BOL, BOS, BMF, BOF, BOG, BME, BIR, BIM, BIL, BIS, UNKNOWN };
         /// Helper method to convert the Identifier into the corresponding index accessing the array
-        int rpcIdentToArrayIdx(const Identifier& id) const;
-        int mdtIdentToArrayIdx(const Identifier& id) const;
+        int rpcIdentToArrayIdx(const Identifier& id) const;        
         int tgcIdentToArrayIdx(const Identifier& id) const;
         int cscIdentToArrayIdx(const Identifier& id) const;
         int stgcIdentToArrayIdx(const Identifier& id) const;
         int mmIdenToArrayIdx(const Identifier& id) const;
+        int mdtIdentToArrayIdx(const Identifier& id) const;
 
         /// The doublet z index is required during the initialization of the
         /// detector element
         int rpcIdentToArrayIdx(const Identifier& id, int& dbz_index) const;
 
-        int cscIdentToArrayIdx(const int stationName, const int eta, const int phi, const int layer) const;
-        int mdtIdentToArrayIdx(const int stationName, const int eta, const int phi, const int multi_layer) const;
-        int tgcIdentToArrayIdx(const int stationName, const int eta, const int phi) const;
-        int stgcIdentToArrayIdx(const int isSmall, const int stEta, const int stPhi, const int ml) const;
-        int mmIdenToArrayIdx(const int isSmall, const int stEta, const int stPhi, const int ml) const;
         int m_cachingFlag{1};
         int m_cacheFillingFlag{1};
         int m_minimalgeo{0};
@@ -350,24 +342,19 @@ namespace MuonGM {
         bool m_NSWAsBuiltAsciiOverrideSTgc{false};
        
         // 115.6 kBytes.
-        static constexpr int s_NumMaxMdtElements = NMdtStatType * NMdtStatEta * NMdtStatPhi * NMdtMultilayer;
-        static constexpr int s_NumMaxCscElements = NCscStatType * NCscStatEta * NCscStatPhi * NCscChamberLayer;
         static constexpr int s_NumMaxRpcElements = NRpcStatType * NRpcStatEta * NRpcStatPhi * NDoubletR * NDoubletZ;
-        static constexpr int s_NumMaxTgcElements = NTgcStatType * NTgcStatEta * NTgcStatPhi;
+    
         static constexpr int s_NumMaxSTgcElemets = NsTgStatEta * NsTgStatPhi * NsTgChamberLayer;
         static constexpr int s_NumMaxMMElements = NMMcStatEta * NMMcStatPhi * NMMcChamberLayer;
-        std::array<std::unique_ptr<MdtReadoutElement>, s_NumMaxMdtElements> m_mdtArray;
-        std::array<std::unique_ptr<CscReadoutElement>, s_NumMaxCscElements> m_cscArray;
+        std::array<std::unique_ptr<MdtReadoutElement>, MdtRElMaxHash> m_mdtArray;
+        std::array<std::unique_ptr<CscReadoutElement>, CscRElMaxHash> m_cscArray;
+        std::array<std::unique_ptr<TgcReadoutElement>, TgcRElMaxHash> m_tgcArray;
+        
         std::array<std::unique_ptr<RpcReadoutElement>, s_NumMaxRpcElements> m_rpcArray;
-        std::array<std::unique_ptr<TgcReadoutElement>, s_NumMaxTgcElements> m_tgcArray;
         std::array<std::unique_ptr<sTgcReadoutElement>, s_NumMaxSTgcElemets> m_stgArray;
         std::array<std::unique_ptr<MMReadoutElement>, s_NumMaxMMElements> m_mmcArray;
         //
-        std::array<const MdtReadoutElement*, MdtRElMaxHash> m_mdtArrayByHash{nullptr};
-        std::array<const CscReadoutElement*, CscRElMaxHash> m_cscArrayByHash{nullptr};
         std::array<const RpcReadoutElement*, RpcRElMaxHash> m_rpcArrayByHash{nullptr};
-        std::array<const TgcReadoutElement*, TgcRElMaxHash> m_tgcArrayByHash{nullptr};
-
         std::map<std::string, std::unique_ptr<MuonStation> > m_MuonStationMap;
 
         unsigned int m_n_mdtRE{0};

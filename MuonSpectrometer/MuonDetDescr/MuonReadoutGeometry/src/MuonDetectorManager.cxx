@@ -221,14 +221,7 @@ namespace MuonGM {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(id)<<" with hash Id"
                                   <<Idhash<<" exceeding the allowed boundaries 0-"<<MdtRElMaxHash);
             throw std::runtime_error("Invalid hash assignment");
-        } else {
-            if (m_mdtArrayByHash[Idhash]) {
-                ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(id)<<" which has been added before by"<<
-                              m_idHelperSvc->toStringDetEl(m_mdtArrayByHash[Idhash]->identify()));
-                throw std::runtime_error("Double assignment of the Hash");
-            }
-            m_mdtArrayByHash[Idhash] = x;
-        }       
+        }     
         const int arrayIdx = mdtIdentToArrayIdx(id);
         if (m_mdtArray[arrayIdx]) {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(id)<<" which has been already added.");
@@ -240,12 +233,12 @@ namespace MuonGM {
 
     const MdtReadoutElement* MuonDetectorManager::getMdtReadoutElement(const Identifier& id) const {
         const int arrayIdx = mdtIdentToArrayIdx(id);
-        return m_mdtArray[arrayIdx].get();
+        return arrayIdx < 0 ? nullptr : m_mdtArray[arrayIdx].get();
     }
 
      MdtReadoutElement* MuonDetectorManager::getMdtReadoutElement(const Identifier& id) {
         const int arrayIdx = mdtIdentToArrayIdx(id);
-        return m_mdtArray[arrayIdx].get();
+        return arrayIdx < 0 ? nullptr :  m_mdtArray[arrayIdx].get();
     }
 
     void MuonDetectorManager::addCscReadoutElement(CscReadoutElement* x) {
@@ -256,15 +249,7 @@ namespace MuonGM {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(id)<<" with hash Id"
                                   <<Idhash<<" exceeding the allowed boundaries 0-"<<CscRElMaxHash);
             throw std::runtime_error("Invalid hash assignment");
-        } else {
-            if (m_cscArrayByHash[Idhash]) {
-                ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(id)<<" which has been added before by"<<
-                              m_idHelperSvc->toStringDetEl(m_cscArrayByHash[Idhash]->identify()));
-                throw std::runtime_error("Double assignment of the Hash");
-            }
-            m_cscArrayByHash[Idhash] = x;
         }
-
         const int array_idx = cscIdentToArrayIdx(id);
         if (m_cscArray[array_idx]) {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(id)<<" which has been already added.");
@@ -276,12 +261,12 @@ namespace MuonGM {
 
     const CscReadoutElement* MuonDetectorManager::getCscReadoutElement(const Identifier& id) const {
         const int array_idx = cscIdentToArrayIdx(id);
-        return m_cscArray[array_idx].get();
+        return array_idx < 0 ? nullptr :  m_cscArray[array_idx].get();
     }
 
      CscReadoutElement* MuonDetectorManager::getCscReadoutElement(const Identifier& id) {
         const int array_idx = cscIdentToArrayIdx(id);
-        return m_cscArray[array_idx].get();
+        return array_idx < 0 ? nullptr : m_cscArray[array_idx].get();
     }
     
     void MuonDetectorManager::addTgcReadoutElement(TgcReadoutElement* x) {
@@ -292,15 +277,7 @@ namespace MuonGM {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(id)<<" with hash Id"
                                   <<Idhash<<" exceeding the allowed boundaries 0-"<<TgcRElMaxHash);
             throw std::runtime_error("Invalid hash assignment");
-        }            
-        
-        if (m_tgcArrayByHash[Idhash]) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(id)<<" which has been added before by"<<
-                            m_idHelperSvc->toStringDetEl(m_tgcArrayByHash[Idhash]->identify()));
-            throw std::runtime_error("Double assignment of the Hash");
         }
-        m_tgcArrayByHash[Idhash] = x;
-
         const int array_idx = tgcIdentToArrayIdx(id);
         if (m_tgcArray[array_idx]) {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(id)<<" which has been already added.");
@@ -313,78 +290,39 @@ namespace MuonGM {
 
     const TgcReadoutElement* MuonDetectorManager::getTgcReadoutElement(const Identifier& id) const {
         const int array_idx = tgcIdentToArrayIdx(id);
-        return m_tgcArray[array_idx].get();
+        return array_idx < 0 ? nullptr : m_tgcArray[array_idx].get();
     }
     TgcReadoutElement* MuonDetectorManager::getTgcReadoutElement(const Identifier& id) {
         const int array_idx = tgcIdentToArrayIdx(id);
-        return m_tgcArray[array_idx].get();
+        return array_idx < 0 ? nullptr : m_tgcArray[array_idx].get();
     }   
     const MMReadoutElement* MuonDetectorManager::getMMReadoutElement(const Identifier& id) const {
         const int array_idx = mmIdenToArrayIdx(id);
-        return m_mmcArray[array_idx].get();
+        return array_idx < 0 ? nullptr : m_mmcArray[array_idx].get();
     }
     const sTgcReadoutElement* MuonDetectorManager::getsTgcReadoutElement(const Identifier& id) const {
         const int array_idx = stgcIdentToArrayIdx(id);
-        return m_stgArray[array_idx].get();
+        return array_idx < 0 ? nullptr : m_stgArray[array_idx].get();
     }   
     int MuonDetectorManager::mmIdenToArrayIdx(const Identifier& id) const {
         const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
-        return mmIdenToArrayIdx(idHelper.isSmall(id), idHelper.stationEta(id), idHelper.stationPhi(id),
-                                idHelper.multilayer(id));
-    }
-    int MuonDetectorManager::mmIdenToArrayIdx(const int isSmall, const int stEta, const int stPhi, const int ml) const {
-        const int steta_index = stEta + NMMcStEtaOffset - (stEta > 0);
-        const int stphi_index = 2 * (stPhi - 1) + (isSmall == 1);
-        const int ml_index = ml - 1;
-#ifndef NDEBUG
-        if (steta_index < 0 || steta_index >= NMMcStatEta) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" eta index is out of range "<<steta_index<<" allowed 0-"<<(NMMcStatEta-1));
-            throw std::runtime_error("Out of range eta index");
+        IdentifierHash hash{0};
+        if (idHelper.get_detectorElement_hash(id,hash)) {
+           ATH_MSG_WARNING("Failed to retrieve a proper hash for "<<m_idHelperSvc->toString(id));
+           return -1;
         }
-        if (stphi_index < 0 || stphi_index >= NMMcStatPhi) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" phi index is out of range "<<stphi_index<<" allowed 0-"<<(NMMcStatPhi-1));
-            throw std::runtime_error("Out of range phi index");
-        }
-        if (ml_index < 0 || ml_index >= NMMcChamberLayer) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" ml index is out of range "<<ml_index<<" allowed 0-"<<(NMMcChamberLayer-1));
-            throw std::runtime_error("Out of range multi layer index");           
-        }
-#endif
-        constexpr int C = NMMcChamberLayer;
-        constexpr int BxC = NMMcStatPhi * C;
-        const int array_idx = steta_index * BxC + stphi_index * C + ml_index;
-        return array_idx;
-    }
-    int MuonDetectorManager::stgcIdentToArrayIdx(const Identifier& id) const {
-        const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
-        return stgcIdentToArrayIdx(idHelper.isSmall(id), idHelper.stationEta(id), idHelper.stationPhi(id),
-                                   idHelper.multilayer(id));
-    }
-    int MuonDetectorManager::stgcIdentToArrayIdx(const int isSmall, const int stEta, const int stPhi, const int ml) const {
-        /// Next the array indeces
-        const int steta_index = stEta + NsTgStEtaOffset - (stEta > 0);
-        const int stphi_index = 2 * (stPhi - 1) + (isSmall == 1);
-        const int ml_index = ml - 1;
-#ifndef NDEBUG
-        if (steta_index < 0 || steta_index >= NsTgStatEta) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" eta index is out of range "<<steta_index<<" allowed 0-"<<(NsTgStatEta-1));
-            throw std::runtime_error("Out of range eta index");
-        }
-        if (stphi_index < 0 || stphi_index >= NsTgStatPhi) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" phi index is out of range "<<stphi_index<<" allowed 0-"<<(NsTgStatPhi-1));
-            throw std::runtime_error("Out of range phi index");            
-        }
-        if (ml_index < 0 || ml_index >= NsTgChamberLayer) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" ml index is out of range "<<ml_index<<" allowed 0-"<<(NsTgChamberLayer-1));
-            throw std::runtime_error("Out of range multi layer index"); 
-        }
-#endif
-        constexpr int C = NsTgChamberLayer;
-        constexpr int BxC = NsTgStatPhi * C;
-        const int array_idx = steta_index * BxC + stphi_index * C + ml_index;
-        return array_idx;
+        return static_cast<int>(hash);
     }
 
+    int MuonDetectorManager::stgcIdentToArrayIdx(const Identifier& id) const {
+        const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
+        IdentifierHash hash{0};
+        if (idHelper.get_detectorElement_hash(id,hash)) {
+           ATH_MSG_WARNING("Failed to retrieve a proper hash for "<<m_idHelperSvc->toString(id));
+           return -1;
+        }
+        return static_cast<int>(hash);
+    }
     int MuonDetectorManager::rpcIdentToArrayIdx(const Identifier& id) const {
         int dbl_z{-1};
         return rpcIdentToArrayIdx(id, dbl_z);
@@ -449,117 +387,31 @@ namespace MuonGM {
     }
     int MuonDetectorManager::mdtIdentToArrayIdx(const Identifier& id) const {
        const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
-       return mdtIdentToArrayIdx(idHelper.stationName(id), idHelper.stationEta(id), 
-                                 idHelper.stationPhi(id), idHelper.multilayer(id));
-    }
-    int MuonDetectorManager::mdtIdentToArrayIdx(const int stName, const int stEta, const int stPhi, const int ml) const {
-        int stname_index = stName;
-        if (stName == m_mdt_EIS_stName) {
-            stname_index = NMdtStatType - 4;
-        } else if (stName == m_mdt_BIM_stName) {
-            stname_index = NMdtStatType - 3;
-        } else if (stName == m_mdt_BME_stName) {
-            stname_index = NMdtStatType - 2;
-        } else if (stName == m_mdt_BMG_stName) {
-            stname_index = NMdtStatType - 1;
-        }
-        int steta_index = stEta + NMdtStEtaOffset;
-        int stphi_index = stPhi - 1;
-        int ml_index = ml - 1;
-#ifndef NDEBUG
-        if (stname_index < 0 || stname_index >= NMdtStatType) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" station name index is out of range "<<stname_index<<" allowed 0-"<<(NMdtStatType-1));
-            throw std::runtime_error("Out of range station index index"); 
-        }
-        if (steta_index < 0 || steta_index >= NMdtStatEta) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" eta index is out of range "<<steta_index<<" allowed 0-"<<(NMdtStatEta-1));
-            throw std::runtime_error("Out of range eta index");
-        }
-        if (stphi_index < 0 || stphi_index >= NMdtStatPhi) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" phi index is out of range "<<stphi_index<<" allowed 0-"<<(NMdtStatPhi-1));
-            throw std::runtime_error("Out of range phi index");
-         }
-        if (ml_index < 0 || ml_index >= NMdtMultilayer) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" multilayer index is out of range "<<ml_index<<" allowed 0-"<<(NMdtMultilayer-1));
-            throw std::runtime_error("Out of range multilayer index");
-        }
-#endif
-        /// Unfold the array by
-        /// [A][B][C][D]
-        /// a * BxCxD + b * CxD+ c*D +d
-        constexpr int D = NMdtMultilayer;
-        constexpr int CxD = NMdtStatPhi * D;
-        constexpr int BxCxD = NMdtStatEta * CxD;
-        const int arrayIdx = stname_index * BxCxD + steta_index * CxD + stphi_index * D + ml_index;
-        return arrayIdx;
+       IdentifierHash hash{0};
+       if (idHelper.get_detectorElement_hash(id,hash)) {
+           ATH_MSG_WARNING("Failed to retrieve a proper hash for "<<m_idHelperSvc->toString(id));
+           return -1;
+       }
+       return static_cast<int>(hash);
     }
     int MuonDetectorManager::tgcIdentToArrayIdx(const Identifier& id) const {
         const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
-        return tgcIdentToArrayIdx(idHelper.stationName(id), idHelper.stationEta(id), idHelper.stationPhi(id));
-    }
-    int MuonDetectorManager::tgcIdentToArrayIdx(const int stationName, const int stationEta, const int stationPhi) const {
-        const int stname_index = stationName + NTgcStatTypeOff;
-        const int zi = stationEta;
-        const int steta_index = zi + NTgcStEtaOffset - (zi > 0);
-        const int stphi_index = stationPhi - 1;
-#ifndef NDEBUG
-        if (stname_index < 0 || stname_index >= NTgcStatType) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" station name index is out of range "<<stname_index<<" allowed 0-"<<(NTgcStatType-1));
-            throw std::runtime_error("Out of range station index index");
+        IdentifierHash hash{0};
+        if (idHelper.get_detectorElement_hash(id,hash)) {
+           ATH_MSG_WARNING("Failed to retrieve a proper hash for "<<m_idHelperSvc->toString(id));
+           return -1;
         }
-        if (steta_index < 0 || steta_index >= NTgcStatEta) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" eta index is out of range "<<steta_index<<" allowed 0-"<<(NTgcStatEta-1));
-            throw std::runtime_error("Out of range eta index");
-        }
-        if (stphi_index < 0 || stphi_index >= NTgcStatPhi) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" phi index is out of range "<<stphi_index<<" allowed 0-"<<(NTgcStatPhi-1));
-            throw std::runtime_error("Out of range phi index");
-        }
-#endif
-        /// NTgcStatType * NTgcStatEta * NTgcStatPhi
-        /// Unfold the array by
-        /// [A][B][C]
-        /// a * BxC + b * C + c
-        constexpr int C = NTgcStatPhi;
-        constexpr int BxC = NTgcStatEta * C;
-        return stname_index * BxC + steta_index * C + stphi_index;
-    }
+        return static_cast<int>(hash);
+    }    
     int MuonDetectorManager::cscIdentToArrayIdx(const Identifier& id) const {
         const CscIdHelper& idHelper{m_idHelperSvc->cscIdHelper()};
-        return cscIdentToArrayIdx(idHelper.stationName(id), idHelper.stationEta(id), idHelper.stationPhi(id),
-                                  idHelper.chamberLayer(id));
+        IdentifierHash hash{0};
+        if (idHelper.get_detectorElement_hash(id,hash)) {
+           ATH_MSG_WARNING("Failed to retrieve a proper hash for "<<m_idHelperSvc->toString(id));
+           return -1;
+        }
+        return static_cast<int>(hash);
     }
-    int MuonDetectorManager::cscIdentToArrayIdx(const int stName, const int stEta, const int stPhi, const int ml) const {
-        const int stname_index = stName + NCscStatTypeOff;
-        int steta_index = stEta + NCscStEtaOffset;
-        if (steta_index == 2) steta_index = 1;
-        const int stphi_index = stPhi - 1;
-        const int ml_index = ml - 1;
-#ifndef NDEBUG
-        if (stname_index < 0 || stname_index >= NCscStatType) {
-             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" station name index is out of range "<<stname_index<<" allowed 0-"<<(NCscStatType-1));
-            throw std::runtime_error("Out of range station index index");
-        }
-        if (steta_index < 0 || steta_index >= NCscStatEta) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" eta index is out of range "<<steta_index<<" allowed 0-"<<(NCscStatEta-1));
-            throw std::runtime_error("Out of range eta index");
-        }
-        if (stphi_index < 0 || stphi_index >= NCscStatPhi) {
-           ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" phi index is out of range "<<stphi_index<<" allowed 0-"<<(NCscStatPhi-1));
-            throw std::runtime_error("Out of range phi index");
-        }
-        if (ml_index < 0 || ml_index >= NCscChamberLayer) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" multilayer index is out of range "<<ml_index<<" allowed 0-"<<(NMdtMultilayer-1));
-            throw std::runtime_error("Out of range multilayer index");
-        }
-#endif
-        constexpr int D = NCscChamberLayer;
-        constexpr int CxD = NCscStatPhi * D;
-        constexpr int BxCxD = NCscStatEta * CxD;
-        const int array_idx = stname_index * BxCxD + steta_index * CxD + stphi_index * D + ml_index;
-        return array_idx;
-    }
-
     void MuonDetectorManager::initABlineContainers() {
         m_aLineContainer.clear();
         m_bLineContainer.clear();
@@ -1287,7 +1139,7 @@ namespace MuonGM {
             return nullptr;
         }
 #endif
-        return m_mdtArrayByHash[id];
+        return m_mdtArray[id].get();
     }
 
     const RpcReadoutElement* MuonDetectorManager::getRpcReadoutElement(const IdentifierHash& id) const {
@@ -1309,7 +1161,7 @@ namespace MuonGM {
             return nullptr;
         }
 #endif
-        return m_tgcArrayByHash[id];
+        return m_tgcArray[id].get();
     }
 
     const CscReadoutElement* MuonDetectorManager::getCscReadoutElement(const IdentifierHash& id) const {
@@ -1320,7 +1172,7 @@ namespace MuonGM {
             return nullptr;
         }
 #endif
-        return m_cscArrayByHash[id];
+        return m_cscArray[id].get();
     }
 
     unsigned int MuonDetectorManager::rpcStationTypeIdx(const int stationName) const {
@@ -1368,19 +1220,7 @@ namespace MuonGM {
         m_rpcIdxToStat.insert(std::make_pair(RpcStatType::BIM, rpcHelper.stationNameIndex("BIM")));
         m_rpcIdxToStat.insert(std::make_pair(RpcStatType::BIL, rpcHelper.stationNameIndex("BIL")));
         m_rpcIdxToStat.insert(std::make_pair(RpcStatType::BIS, rpcHelper.stationNameIndex("BIS")));
-    }
-    int MuonDetectorManager::mdtStationName(const int stationIndex) const {
-        if (stationIndex == NMdtStatType - 4)
-            return m_mdt_EIS_stName;
-        else if (stationIndex == NMdtStatType - 3)
-            return  m_mdt_BIM_stName;
-        else if (stationIndex == NMdtStatType - 2)
-            return m_mdt_BME_stName ;
-        else if (stationIndex == NMdtStatType - 1)
-            return m_mdt_BMG_stName;
-        return stationIndex;
-    }
-
+    }    
     // functions that override standard condition input for tests
     void MuonDetectorManager::setNSWABLineAsciiPath(const std::string& str) { m_NSWABLineAsciiPath = str; }
     void MuonDetectorManager::setNSWAsBuiltAsciiPath(const std::string &strMM, const std::string &strSTgc) {
