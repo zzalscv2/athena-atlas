@@ -430,7 +430,7 @@ HGTD_IterativeExtensionTool::getTruthMatchedCluster(
                   ids.push_back(surf->associatedDetectorElementIdentifier());
                 });
 
-  for (const auto& collection : *container) {
+  for (const auto collection : *container) {
     // if the ID corresponding to this collection is not in the list, skip
 
     if (std::find(ids.begin(), ids.end(), collection->identify()) ==
