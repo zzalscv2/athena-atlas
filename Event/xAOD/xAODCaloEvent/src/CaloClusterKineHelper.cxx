@@ -13,6 +13,7 @@
 #include "CaloEvent/CaloPrefetch.h"
 
 #include <cmath>
+#include <limits>
 
 namespace {
 
@@ -29,7 +30,8 @@ struct CellAccum
 	     std::array<double,CaloSampling::Unknown>& the_posSamNorm,
              int& the_nBarrel,
              int& the_nEndcap,
-             double& the_timeNorm)
+             double& the_timeNorm,
+	     const bool useGPUCriteria = false)
     : EnergyInSample(),
       //      NCellsInSample(),  // will be collected in moment maker
       EtaInSample(),
@@ -44,12 +46,19 @@ struct CellAccum
       theNewEta(0),
       theNewPhi(0),
       phi0(-999),
+      maxCell(-1),
       posNorm (the_posNorm),
       posSamNorm (the_posSamNorm),
       nBarrel (the_nBarrel),
       nEndcap (the_nEndcap),
       timeNorm (the_timeNorm)
-  {}
+  {
+    if (useGPUCriteria) {
+      for (size_t i = 0; i < (size_t) CaloSampling::Unknown; ++i) {
+	MaxEnergyInSample[i] = std::numeric_limits<double>::lowest();
+      }
+    }
+  }
   double EnergyInSample[CaloSampling::Unknown];
   //  int    NCellsInSample[CaloSampling::Unknown];
   double EtaInSample[CaloSampling::Unknown];
@@ -64,7 +73,8 @@ struct CellAccum
   double theNewEta;
   double theNewPhi;
   double phi0;
-
+  int maxCell;
+  
   double& posNorm;
   std::array<double,CaloSampling::Unknown>& posSamNorm;
   int& nBarrel;
@@ -89,7 +99,7 @@ struct AccumNoWeight
   //FIXME: The template-base optimizaiton might be unnecessary b/c getting the weight of cell is now CPU-cheap
 template <class WEIGHT>
 inline
-void accumCell (const CaloClusterCellLink::const_iterator& cellIt, CellAccum& accum, const WEIGHT& w)
+void accumCell (const CaloClusterCellLink::const_iterator& cellIt, CellAccum& accum, const WEIGHT& w, const bool useGPUCriteria = false)
 {
   const CaloCell& cell=**cellIt;
   const CaloDetDescrElement* dde = cell.caloDDE();
@@ -120,10 +130,20 @@ void accumCell (const CaloClusterCellLink::const_iterator& cellIt, CellAccum& ac
 
   accum.theNewEta    += theAbsEnergy * cellEta;
   accum.theNewPhi    += theAbsEnergy * thePhi;
-  if ( accum.MaxEnergyInSample[sam] < theEnergy ) {
-    accum.MaxEnergyInSample[sam] = theEnergy;
-    accum.EtaMaxEnergyInSample[sam] = cellEta;
-    accum.PhiMaxEnergyInSample[sam] = cellPhi;
+  if (useGPUCriteria) {
+    if ( accum.MaxEnergyInSample[sam] < theEnergy || (accum.MaxEnergyInSample[sam] == theEnergy && accum.maxCell < (int) cellIt.index())  ) {
+      accum.MaxEnergyInSample[sam] = theEnergy;
+      accum.EtaMaxEnergyInSample[sam] = cellEta;
+      accum.PhiMaxEnergyInSample[sam] = cellPhi;
+      accum.maxCell = (int) cellIt.index();
+    }
+  }
+  else {
+    if ( accum.MaxEnergyInSample[sam] < theEnergy ) {
+      accum.MaxEnergyInSample[sam] = theEnergy;
+      accum.EtaMaxEnergyInSample[sam] = cellEta;
+      accum.PhiMaxEnergyInSample[sam] = cellPhi;
+    }
   }
 
   accum.posSamNorm[sam] += theAbsEnergy;
@@ -179,7 +199,7 @@ void accumCell (const CaloClusterCellLink::const_iterator& cellIt, CellAccum& ac
 
 template <class WEIGHT>
 inline
-void accumCells (const CaloClusterCellLink* cccl, CellAccum& accum, const WEIGHT& w) {
+void accumCells (const CaloClusterCellLink* cccl, CellAccum& accum, const WEIGHT& w, const bool useGPUCriteria = false) {
 
 
   CaloClusterCellLink::const_iterator it=cccl->begin();
@@ -192,27 +212,15 @@ void accumCells (const CaloClusterCellLink* cccl, CellAccum& accum, const WEIGHT
   it=cccl->begin();
   for (;it!=it_e;++it) {
     CaloPrefetch::nextDDE(it, it_e);
-    accumCell(it,accum,w);
+    accumCell(it,accum,w, useGPUCriteria);
   }
 
-
-  /*
-  for (const CaloCell* c : cl)
-    CxxUtils::prefetchObj (c);
-
-  CaloCluster::cell_iterator it = cl.begin();
-  CaloCluster::cell_iterator end = cl.end();
-  for (; it != end; ++it) {
-    CaloPrefetch::nextDDE(it, end);
-    accumCell (**it, accum, w);
-  }
-  */
 }
 
 }//end namespace
 
 
-void CaloClusterKineHelper::calculateKine(xAOD::CaloCluster* clu, const bool useweight, const bool updateLayers) {
+void CaloClusterKineHelper::calculateKine(xAOD::CaloCluster* clu, const bool useweight, const bool updateLayers, const bool useGPUCriteria) {
   //static CaloPhiRange range;
 
   // update global kinematics 
@@ -236,12 +244,12 @@ void CaloClusterKineHelper::calculateKine(xAOD::CaloCluster* clu, const bool use
 
   std::array<double,CaloSampling::Unknown> posSamNorm{};
 
-  CellAccum accum (posNorm, posSamNorm, nBarrel, nEndcap, timeNorm);
+  CellAccum accum (posNorm, posSamNorm, nBarrel, nEndcap, timeNorm, useGPUCriteria);
   //accum.theNewPhi = clu->phi(); //????
   if (useweight)
-    accumCells (cccl, accum, AccumWeight());
+    accumCells (cccl, accum, AccumWeight(), useGPUCriteria);
   else
-    accumCells (cccl, accum, AccumNoWeight());
+    accumCells (cccl, accum, AccumNoWeight(), useGPUCriteria);
   
   if ( posNorm != 0. ) {
     double inorm = 1 / posNorm;

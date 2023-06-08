@@ -66,8 +66,8 @@ def PrevAlgorithmsConfiguration(Configurator, clustersname = None):
     result.merge(CaloNoiseCondAlgCfg(Configurator.ConfigFlags,"electronicNoise"))
     
     if not Configurator.ConfigFlags.Common.isOnline:
-        from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDbCfg
-        result.merge(LArElecCalibDbCfg(Configurator.ConfigFlags,["HVScaleCorr"]))
+        from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
+        result.merge(LArElecCalibDBCfg(Configurator.ConfigFlags,["HVScaleCorr"]))
     
     return result
     
@@ -368,6 +368,8 @@ def PrepareTest(Configurator,
         parser.add_argument('-c','--outputcounts', action = 'store_true')
         parser.add_argument('-nfc','--notfillcells', action = 'store_true')
         
+        parser.add_argument('-uoc','--useoriginalcriteria', action = 'store_true')
+        
         parser.add_argument('-m','--perfmon', action = 'store_true')
         parser.add_argument('-fm','--fullmon', action = 'store_true')
                    
@@ -446,6 +448,7 @@ def PrepareTest(Configurator,
         Configurator.OutputClustersToFile = args.outputclusters
         Configurator.OutputCountsToFile = args.outputcounts
         Configurator.FillMissingCells = not args.notfillcells
+        Configurator.UseOriginalCriteria = args.useoriginalcriteria
         if allocate_as_many_as_threads:
             Configurator.NumPreAllocatedDataHolders = int(args.numthreads)
     
@@ -597,6 +600,38 @@ class PlotterConfigurator:
                                     ( (pair + "_num_unmatched_clusters",),
                                       {'type': 'TH1F', 
                                        'title': "Number of Unmatched Clusters; # of Unmatched Clusters; Number of Events",
+                                       'xbins':  21,
+                                       'xmin':  -0.5,
+                                       'xmax':   20.5,
+                                       'path': "EXPERT"}
+                                    ),
+                                    ( (pair + "_cluster_diff_cells;" + pair + "_cluster_diff_cells_zoom_0",),
+                                      {'type': 'TH1F',
+                                       'title': "Different Cell Assignments; # of Differently Assigned Cells; Number of Clusters",
+                                       'xbins':  21,
+                                       'xmin':  -25,
+                                       'xmax':   1025,
+                                       'path': "EXPERT"}
+                                    ),
+                                    ( (pair + "_cluster_diff_cells;" + pair + "_cluster_diff_cells_zoom_1",),
+                                      {'type': 'TH1F',
+                                       'title': "Different Cell Assignments; # of Differently Assigned Cells; Number of Clusters",
+                                       'xbins':  21,
+                                       'xmin':  -12.5,
+                                       'xmax':   512.5,
+                                       'path': "EXPERT"}
+                                    ),
+                                    ( (pair + "_cluster_diff_cells;" + pair + "_cluster_diff_cells_zoom_2",),
+                                      {'type': 'TH1F',
+                                       'title': "Different Cell Assignments; # of Differently Assigned Cells; Number of Clusters",
+                                       'xbins':  21,
+                                       'xmin':  -2.5,
+                                       'xmax':   102.5,
+                                       'path': "EXPERT"}
+                                    ),
+                                    ( (pair + "_cluster_diff_cells;" + pair + "_cluster_diff_cells_zoom_3",),
+                                      {'type': 'TH1F',
+                                       'title': "Different Cell Assignments; # of Differently Assigned Cells; Number of Clusters",
                                        'xbins':  21,
                                        'xmin':  -0.5,
                                        'xmax':   20.5,

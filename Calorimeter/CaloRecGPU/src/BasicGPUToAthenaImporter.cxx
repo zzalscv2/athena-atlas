@@ -369,7 +369,7 @@ StatusCode BasicGPUToAthenaImporter::convert (const EventContext & ctx,
           cluster->setClusterSize(m_clusterSize);
           if (m_useCPUPropertiesCalculation)
             {
-              CaloClusterKineHelper::calculateKine(cluster, false, true);
+              CaloClusterKineHelper::calculateKine(cluster, false, true, true);
             }
           else
             {

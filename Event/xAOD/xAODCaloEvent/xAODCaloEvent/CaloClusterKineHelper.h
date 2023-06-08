@@ -18,7 +18,7 @@ class CaloClusterKineHelper {
  public:
 
   ///Calculate cluster kinematics from contained cells
-  static void calculateKine(xAOD::CaloCluster* clu, const bool useweight=true, const bool updateLayers=true );
+  static void calculateKine(xAOD::CaloCluster* clu, const bool useweight=true, const bool updateLayers=true, const bool useGPUCriteria = false );
 
 };
 
