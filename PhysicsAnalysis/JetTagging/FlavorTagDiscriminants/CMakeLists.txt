@@ -91,6 +91,11 @@ atlas_add_dictionary( FlavorTagDiscriminantsDict
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # add onnx metadata executable
+atlas_add_executable( get-onnx-model-info
+                      util/get-onnx-model-info.cxx
+                      INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
+                      LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} )
+
 atlas_add_executable( get-onnx-metadata
                       util/get-onnx-metadata.cxx
                       INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
