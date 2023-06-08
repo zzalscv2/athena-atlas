@@ -217,6 +217,8 @@ namespace ITk
     float A = (Vt - Vb) / dU;
     float S2 = 1. + A * A;
     float B = Vb - A * Ub;
+    if (B==0)
+      return;
     float B2 = B * B;
 
     // dzdr
