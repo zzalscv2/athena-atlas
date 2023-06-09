@@ -3,16 +3,16 @@
 from GeneratorModules.EvgenAlg import EvgenAlg
 from ParticleGun.samplers import ParticleSampler
 from ParticleGun.samplers import * # noqa: F401, F403 (import into our namespace)
-# commenting out the HepMC import for now
-#try:
-#          from AthenaPython.PyAthena import HepMC3  as HepMC
-#except ImportError:
-#          from AthenaPython.PyAthena import HepMC   as HepMC  
-
 from AthenaPython.PyAthena import StatusCode
 import ROOT,random
-
-__author__ = "Andy Buckley <andy.buckley@cern.ch>"
+from cppyy.gbl import std as std
+try:
+  from AthenaPython.PyAthena import HepMC3  as HepMC
+  HepMCVersion=3
+except ImportError:
+  from AthenaPython.PyAthena import HepMC   as HepMC        
+  HepMCVersion=2
+__author__ = "Andy Buckley <andy.buckley@cern.ch>, Andrii Verbytskyi <andrii.verbytskyi@cern.ch>"
 
 class ParticleGun(EvgenAlg):
     """
@@ -24,7 +24,7 @@ class ParticleGun(EvgenAlg):
         self.samplers = [ParticleSampler()]
         self.randomStream = randomStream
         self.randomSeed = randomSeed
-
+          
     @property
     def sampler(self):
         "Get the first (and presumed only) sampler"
@@ -57,27 +57,13 @@ class ParticleGun(EvgenAlg):
             self.msg.error("Failed to set random seed.")
             return StatusCode.Failure
 
-        ## Set event weight(s)
-        # TODO: allow weighted sampling?
-        try:
-          from AthenaPython.PyAthena import HepMC3  as HepMC
-          evt.set_units(HepMC.Units.MEV, HepMC.Units.MM)
-        except ImportError:
-          from AthenaPython.PyAthena import HepMC   as HepMC
-        evt.weights().push_back(1.0)
-
+        if HepMCVersion == 2:
+          evt.weights().push_back(1.0)
         ## Make and fill particles
-        for s in self.samplers:
+          for s in self.samplers:
             particles = s.shoot()
             for p in particles:
-                ## Debug printout of particle properties
-                #print("DEBUG0 ", p.pid, p.mom.E(), p.mom.Pt(), p.mom.M())
-                #print "DEBUG1 (px,py,pz,E) = (%0.2e, %0.2e, %0.2e, %0.2e)" % (p.mom.Px(), p.mom.Py(), p.mom.Pz(), p.mom.E())
-                #print "DEBUG2 (eta,phi,pt,m) = (%0.2e, %0.2e, %0.2e, %0.2e)" % (p.mom.Eta(), p.mom.Phi(), p.mom.Pt(), p.mom.M())
-                #print "DEBUG3 (x,y,z,t) = (%0.2e, %0.2e, %0.2e, %0.2e)" % (p.pos.X(), p.pos.Y(), p.pos.Z(), p.pos.T())
-
                 ## Make particle-creation vertex
-                # TODO: do something cleverer than one vertex per particle?
                 pos = HepMC.FourVector(p.pos.X(), p.pos.Y(), p.pos.Z(), p.pos.T())
                 gv = HepMC.GenVertex(pos)
                 ROOT.SetOwnership(gv, False)
@@ -94,24 +80,41 @@ class ParticleGun(EvgenAlg):
                 ROOT.SetOwnership(gp, False)
                 gv.add_particle_out(gp)
 
+        if HepMCVersion == 3:
+          evt.set_units(HepMC.Units.MEV, HepMC.Units.MM)
+          evt.weights().push_back(1.0)
+          beamparticle1 = std.shared_ptr['HepMC3::GenParticle'](HepMC.GenParticle(HepMC.FourVector(0,0,-7000,7000),4,2212))
+          ROOT.SetOwnership(beamparticle1, False)
+          beamparticle2 = std.shared_ptr['HepMC3::GenParticle'](HepMC.GenParticle(HepMC.FourVector(0,0,7000,7000),4,2212))
+          ROOT.SetOwnership(beamparticle2, False)
+          primary = std.shared_ptr['HepMC3::GenVertex'](HepMC.GenVertex())
+          ROOT.SetOwnership(primary, False)
+          primary.add_particle_in(beamparticle1)
+          primary.add_particle_in(beamparticle2)
+          evt.add_vertex(primary)
+          #Create all the needed particles
+          for s in self.samplers:
+            particles = s.shoot()
+            for p in particles:
+                # Create the production vertex of the particle
+                gv = std.shared_ptr['HepMC3::GenVertex'](HepMC.GenVertex(HepMC.FourVector(p.pos.X(), p.pos.Y(), p.pos.Z(), p.pos.T())))
+                ROOT.SetOwnership(gv, False)
+                evt.add_vertex(gv)
+                # Create a fake particle to connect the production vertex of the particle of interest to the primary
+                fakeparticle = std.shared_ptr['HepMC3::GenParticle'](HepMC.GenParticle(HepMC.FourVector(p.mom.Px(), p.mom.Py(), p.mom.Pz(), p.mom.E()),p.pid,11))
+                ROOT.SetOwnership(fakeparticle, False)
+                gv.add_particle_in(fakeparticle)
+                primary.add_particle_out(fakeparticle)
+                # Create the particle
+                gp = std.shared_ptr['HepMC3::GenParticle'](HepMC.GenParticle(HepMC.FourVector(p.mom.Px(), p.mom.Py(), p.mom.Pz(), p.mom.E()),p.pid,1))
+                ROOT.SetOwnership(gp, False)
+                if p.mass is not None:
+                    gp.set_generated_mass(p.mass)
+                gv.add_particle_out(gp)
+          for p in evt.particles():
+            att = std.shared_ptr['HepMC3::IntAttribute'](HepMC.IntAttribute(p.id()))
+            p.add_attribute("barcode",att)
+          for v in evt.vertices():
+            att = std.shared_ptr['HepMC3::IntAttribute'](HepMC.IntAttribute(v.id()))
+            v.add_attribute("barcode",att)
         return StatusCode.Success
-
-
-## PyAthena HepMC notes
-#
-## evt.print() isn't valid syntax in Python2 due to reserved word
-# TODO: Add a Pythonisation, e.g. evt.py_print()?
-#getattr(evt, 'print')()
-#
-## How to check that the StoreGate key exists and is an McEventCollection
-# if self.sg.contains(McEventCollection, self.sgkey):
-#     print self.sgkey + " found!"
-#
-## Modifying an event other than that supplied as an arg
-# mcevts = self.sg[self.sgkey]
-# for vtx in mcevts[0].vertices: # only way to get the first vtx?!
-#     gp2 = HepMC.GenParticle()
-#     gp2.set_momentum(HepMC.FourVector(1,2,3,4))
-#     gp2.set_status(1)
-#     vtx.add_particle_out(gp2)
-#     break
