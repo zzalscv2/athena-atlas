@@ -110,8 +110,6 @@ SimplePoolFile1...  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Param
 ##Params            DEBUG Opened container ##Params of type ROOT_Tree
 SimplePoolFile1...  DEBUG --->Reading Param:FID=[F2313678-C96A-964F-89E8-08BAB39F2DA7]
 SimplePoolFile1...  DEBUG --->Reading Param:PFN=[SimplePoolFile1.root]
-SimplePoolFile1...  DEBUG --->Reading Param:POOL_VSN=[1.1]
-SimplePoolFile1...  DEBUG --->Reading Param:FORMAT_VSN=[2.0]
 ##Params            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 SimplePoolFile1...  DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaDataHdr(DataHeader)
 MetaDataHdr(Dat...  DEBUG Opening
@@ -166,9 +164,8 @@ SimplePoolFile4...  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Param
 ##Params            DEBUG Opened container ##Params of type ROOT_Tree
 SimplePoolFile4...  DEBUG --->Reading Param:FID=[298DE14D-49CF-674A-9171-CEBBD9BEC6F8]
 SimplePoolFile4...  DEBUG --->Reading Param:PFN=[SimplePoolFile4.root]
-SimplePoolFile4...  DEBUG --->Reading Param:POOL_VSN=[1.1]
-SimplePoolFile4...  DEBUG --->Reading Param:FORMAT_VSN=[2.0]
 ##Params            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
+ReadData            DEBUG data dependencies:
   + INPUT   ( 'DataHeader' , 'StoreGateSvc+EventSelector' ) 
   + INPUT   ( 'ExampleHitContainer' , 'StoreGateSvc+MyHits' ) 
   + INPUT   ( 'ExampleTrackContainer' , 'StoreGateSvc+MyTracks' ) 
@@ -249,8 +246,6 @@ SimplePoolFile4...  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Param
 ##Params            DEBUG Opened container ##Params of type ROOT_Tree
 SimplePoolFile4...  DEBUG --->Reading Param:FID=[298DE14D-49CF-674A-9171-CEBBD9BEC6F8]
 SimplePoolFile4...  DEBUG --->Reading Param:PFN=[SimplePoolFile4.root]
-SimplePoolFile4...  DEBUG --->Reading Param:POOL_VSN=[1.1]
-SimplePoolFile4...  DEBUG --->Reading Param:FORMAT_VSN=[2.0]
 ##Params            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 SimplePoolFile4...  DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] ConditionsContainerExampleHitContainer_p1(PedestalWriteData)
 ConditionsConta...  DEBUG Opening
@@ -1000,11 +995,6 @@ ReadCond             INFO in finalize()
 ReadData             INFO in finalize()
 AthDictLoaderSvc     INFO in finalize...
 ToolSvc              INFO Removing all tools created by ToolSvc
-*****Chrono*****     INFO ****************************************************************************************************
-*****Chrono*****     INFO  The Final CPU consumption ( Chrono ) Table (ordered)
-*****Chrono*****     INFO ****************************************************************************************************
-*****Chrono*****     INFO ****************************************************************************************************
-ChronoStatSvc.f...   INFO  Service finalized successfully 
 ApplicationMgr       INFO Application Manager Finalized successfully
 ApplicationMgr       INFO Application Manager Terminated successfully
 Athena               INFO leaving with code 0: "successful run"

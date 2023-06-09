@@ -45,12 +45,12 @@ AvalancheSchedulerSvc                                        0    INFO Data Depe
     o INPUT   ( 'DMTest::S2' , 'StoreGateSvc+S2alias' ) 
     o INPUT   ( 'SG::AuxElement' , 'StoreGateSvc+cinfo' ) 
   xAODTestAlg
-    o INPUT   ( 'DMTest::CVec' , 'StoreGateSvc+cvec' ) 
-    o INPUT   ( 'DMTest::S1' , 'StoreGateSvc+S2' ) 
-    o INPUT   ( 'DMTest::S2' , 'StoreGateSvc+S2' ) 
-    o INPUT   ( 'DMTest::S2' , 'StoreGateSvc+S2alias' ) 
-    o OUTPUT  ( 'DMTest::C' , 'StoreGateSvc+cinfo2' ) 
-    o OUTPUT  ( 'SG::AuxElement' , 'StoreGateSvc+cinfo2' ) 
+    o INPUT   ( 'DMTest::CVec' , 'StoreGateSvc+cvec' )  [xAODTestAlg.xAODTestWriteCInfoTool]
+    o INPUT   ( 'DMTest::S1' , 'StoreGateSvc+S2' )  [xAODTestAlg.xAODTestReadSymlinkTool]
+    o INPUT   ( 'DMTest::S2' , 'StoreGateSvc+S2' )  [xAODTestAlg.xAODTestReadSymlinkTool]
+    o INPUT   ( 'DMTest::S2' , 'StoreGateSvc+S2alias' )  [xAODTestAlg.xAODTestReadSymlinkTool]
+    o OUTPUT  ( 'DMTest::C' , 'StoreGateSvc+cinfo2' )  [xAODTestAlg.xAODTestWriteCInfoTool]
+    o OUTPUT  ( 'SG::AuxElement' , 'StoreGateSvc+cinfo2' )  [xAODTestAlg.xAODTestReadSymlinkTool]
   EndIncFiringAlg
       none
   IncidentProcAlg2
