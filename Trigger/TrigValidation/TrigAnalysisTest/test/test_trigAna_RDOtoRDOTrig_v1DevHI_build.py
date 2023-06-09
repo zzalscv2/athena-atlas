@@ -18,6 +18,7 @@ preExec = ';'.join([
   'ConfigFlags.Trigger.AODEDMSet=\'AODFULL\'',
   'ConfigFlags.Trigger.enableL1CaloPhase1=False',
   'ConfigFlags.Trigger.L1.doAlfaCtpin=True',
+  'ConfigFlags.Trigger.L1.doHeavyIonTobThresholds=True',
 ])
 
 ex = ExecStep.ExecStep()

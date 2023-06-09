@@ -473,13 +473,9 @@ class GenerateMenuMT(object, metaclass=Singleton):
                 if 'PhysicsTLA' in eventBuildType:
                     log.debug("Adding TLA Step for chain %s", mainChainDict['chainName'])
                     TLABuildingSequences.addTLAStep(flags, theChainConfig, mainChainDict)
-            
                 log.debug('Configuring event building sequence %s for chain %s', eventBuildType, mainChainDict['chainName'])
                 EventBuildingSequences.addEventBuildingSequence(flags, theChainConfig, eventBuildType, mainChainDict)
             except TypeError as ex:
-                if isCAMenu():
-                    log.warning(str(NoCAmigration("[__generateChainConfigs] EventBuilding/TLA sequences failed with CA configurables")) )                                  
-                else:
                     log.error(ex)
                     raise Exception('[__generateChainConfigs] Stopping menu generation for EventBuilding/TLA sequences. Please investigate the exception shown above.')
             

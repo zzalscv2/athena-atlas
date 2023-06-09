@@ -74,7 +74,8 @@ endfunction()
 function( atlas_test_hlt_trigger_menu menu )
    set (extra_args ${ARGN})
    atlas_add_test( "HLT_${menu}"
-                   SCRIPT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_HLTmenu.sh ${menu} ${extra_args}
+   set (pre_command "from AthenaConfiguration.AllConfigFlags import ConfigFlags; ${extra_args}")
+                   SCRIPT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_HLTmenu.sh ${menu}  -c "${pre_command}"
                    PROPERTIES TIMEOUT 800
                    PRIVATE_WORKING_DIRECTORY
                    POST_EXEC_SCRIPT "check_log.py --errors --config checklogTriggerTest.conf ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/unitTestRun_HLT_${menu}/HLT_${menu}.log" )
@@ -102,7 +103,7 @@ atlas_test_lvl1_trigger_menu( Dev_HI_run3_v1 Trigger.L1.doAlfaCtpin=True )
 # Test only most comprehensive HLT menus:
 atlas_test_hlt_trigger_menu( Dev_pp_run3_v1_HLTReprocessing_prescale )
 atlas_test_hlt_trigger_menu( Cosmic_run3_v1 )
-atlas_test_hlt_trigger_menu( Dev_HI_run3_v1 doAlfaCtpin=True )
+atlas_test_hlt_trigger_menu( Dev_HI_run3_v1 ConfigFlags.Trigger.L1.doAlfaCtpin=True )
 atlas_test_hlt_trigger_menu( Dev_pp_run4_v1_HLTReprocessing_prescale )
 
 # Test other HLT menus not included above

@@ -47,16 +47,7 @@ namespace LVL1 {
       TCS::MuonTOB createMuonTOB(const xAOD::MuonRoI & muonRoI, const std::vector<unsigned int> & rpcPtValues, const std::vector<unsigned int> & tgcPtValues) const;
       TCS::MuonTOB createMuonTOB(const MuCTPIL1TopoCandidate & roi) const;
       TCS::LateMuonTOB createLateMuonTOB(const MuCTPIL1TopoCandidate & roi) const;
-      /* 
-         @brief calculate the eta and phi L1Topo indices
 
-         The exact eta and phi coordinates are rounded according to a particular L1Topo granularity
-         Using product instead of division avoids unexpected rounding errors due to precision
-         Also, LUTs for the firmware are built using Python 3.x numpy.round(), which is different from std::round()
-         Input: x = eta/phi float values, g = inverse of eta/phi granularity
-         Output: integer eta/phi L1Topo coordinates
-      */
-      int topoIndex(float x, int g) const;
       /* 
          @brief use L1Topo convention for muon flags (1 = true/positive, -1 = false/negative, 0 = undefined)
       */

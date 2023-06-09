@@ -105,7 +105,7 @@ def createBTaggingConfigFlags():
    # Trackless approach
     btagcf.addFlag("BTagging.Trackless", False)
     btagcf.addFlag("BTagging.Trackless_JetCollection", "AntiKt4EMPFlowJets")
-    btagcf.addFlag("BTagging.Trackless_JetPtMin", 300) #in GeV
+    btagcf.addFlag("BTagging.Trackless_JetPtMin", 250) #in GeV
     btagcf.addFlag("BTagging.Trackless_dR", 0.4)
 
     # more aggressive trackless approach

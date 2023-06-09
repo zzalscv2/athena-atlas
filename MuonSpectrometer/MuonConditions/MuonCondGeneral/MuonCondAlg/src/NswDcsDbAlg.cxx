@@ -92,9 +92,11 @@ NswDcsDbAlg::loadHvData(const EventContext& ctx, const readKey_t& readKey, const
 		bool isOK = false;
 		bool found = buildChannelId(channelId, tech, chanName, isOK);
 		if(!found){
-			if(!isOK)
-				ATH_MSG_DEBUG("Could not identify valid channelId for channel "<<chanNum<<" with name "<< chanName<<"! Skipping...");
-			continue;
+			if(!isOK){
+				ATH_MSG_ERROR("Could not identify valid channelId for channel "<<chanNum<<" with name "<< chanName<<"!");
+				throw std::runtime_error("NswDcsDbAlg: Could not identify valid channelId for HV channel");
+			}
+		continue;
 		}
 
 		// payload
@@ -104,6 +106,7 @@ NswDcsDbAlg::loadHvData(const EventContext& ctx, const readKey_t& readKey, const
 		dcs_data.v0set     = *(static_cast<const float*>((atr["v0Set"]).addressOfData()));
 		dcs_data.v1set     = *(static_cast<const float*>((atr["v1Set"]).addressOfData()));
 		dcs_data.fsmState  = NswDcsDbData::getFsmStateEnum(*(static_cast<const std::string*>((atr["fsmCurrentState"]).addressOfData())));
+		ATH_MSG_DEBUG("channel " << chanName << " has fsm state " << *(static_cast<const std::string*>((atr["fsmCurrentState"]).addressOfData()))<< " has v0 state " << *(static_cast<const float*>( (atr["v0Set"]).addressOfData()))<< " has v1 " << *(static_cast<const float*>((atr["v1Set"]).addressOfData())));
 		
 		writeCdo->setData(tech, channelId, dcs_data);
 		++nChns;
@@ -140,7 +143,7 @@ NswDcsDbAlg::buildChannelId(Identifier& channelId, const DcsTechType tech0, cons
 		tech = DcsTechType::STG;
 	}
 	else {
-		ATH_MSG_DEBUG("Could not identify channel with name "<<chanName);
+		ATH_MSG_ERROR("Could not identify channel with name "<<chanName);
 		isOK = false;
 		return false;
 	}
@@ -164,7 +167,7 @@ NswDcsDbAlg::buildChannelId(Identifier& channelId, const DcsTechType tech0, cons
 	if(tech==DcsTechType::MMG){
 		int wheel         = res[1]=="A"? 1 : -1;
 		int sector        = std::stoi(res[2]);
-		int stationName   = sector%2==0 ? 55 : 56;
+		const std::string stationName   = sector%2==0 ? "MMS" : "MML";
 		int stationEta    = wheel*std::stoi(res[6]);
 		int stationPhi    = (sector-1)/2+1;
 		int multiLayer    = res[5]=="IP" ? 1 : 2;
@@ -173,6 +176,7 @@ NswDcsDbAlg::buildChannelId(Identifier& channelId, const DcsTechType tech0, cons
 		Identifier chnlId = m_idHelperSvc->mmIdHelper().pcbID(stationName, stationEta, stationPhi, multiLayer, gasGap, pcb, isValid);
 		if(!isValid){
 			ATH_MSG_DEBUG("Could not extract valid channelId for MMG channel "<<chanName);
+			ATH_MSG_DEBUG("Fields: "<< wheel << " "<<sector<<" " << stationName<< " " << stationEta<<" "<<stationPhi<<" "<<multiLayer);
 			isOK = false;
 			return false;
 		}
@@ -183,19 +187,21 @@ NswDcsDbAlg::buildChannelId(Identifier& channelId, const DcsTechType tech0, cons
 	else if(tech==DcsTechType::MMD){
 		int wheel         = res[1]=="A"? 1 : -1;
 		int sector        = std::stoi(res[2]);
-		int stationName   = sector%2==0 ? 55 : 56;
+		const std::string stationName   = sector%2==0 ? "MMS" : "MML";
 		int stationEta    = wheel*std::stoi(res[4]);
 		int stationPhi    = (sector-1)/2+1;
 		int multiLayer    = res[3]=="IP" ? 1 : 2;
 		Identifier modId  = m_idHelperSvc->mmIdHelper().elementID(stationName, stationEta, stationPhi, isValid);
 		if(!isValid){
-			ATH_MSG_DEBUG("Could not extract valid elementId for MMG channel "<<chanName);
+			ATH_MSG_DEBUG("Could not extract valid elementId for MMGD channel "<<chanName);
+			ATH_MSG_DEBUG("Fields: "<< wheel << " "<<sector<<" " << stationName<< " " << stationEta<<" "<<stationPhi<<" "<<multiLayer);
 			isOK = false;
 			return false;
 		}
 		Identifier chnlId = m_idHelperSvc->mmIdHelper().multilayerID(modId, multiLayer, isValid);
 		if(!isValid){
 			ATH_MSG_DEBUG("Could not extract valid multilayerId for MMG channel "<<chanName);
+			ATH_MSG_DEBUG("Fields: "<< wheel << " "<<sector<<" " << stationName<< " " << stationEta<<" "<<stationPhi<<" "<<multiLayer);
 			isOK = false;
 			//return false;
 		}
@@ -206,7 +212,7 @@ NswDcsDbAlg::buildChannelId(Identifier& channelId, const DcsTechType tech0, cons
 	else if(tech==DcsTechType::STG){
 		int wheel         = res[1]=="A"? 1 : -1;
 		int sector        = std::stoi(res[2]);
-		int stationName   = sector%2==0 ? 55 : 56;
+		const std::string stationName   = sector%2==0 ? "STS" : "STL";
 		int radius        = std::stoi(res[5]);
 		int stationEta    = wheel*(radius<=2 ? 1 : radius-1);
 		int channel       = radius==2 ? 100 : 1; // DCS has two HV channels for first board; store this info in channel number
@@ -216,6 +222,7 @@ NswDcsDbAlg::buildChannelId(Identifier& channelId, const DcsTechType tech0, cons
 		Identifier chnlId = m_idHelperSvc->stgcIdHelper().channelID(stationName, stationEta, stationPhi, multiLayer, gasGap, 1, channel, isValid);
 		if(!isValid){
 			ATH_MSG_DEBUG("Could not extract valid channelId for STG channel "<<chanName);
+			ATH_MSG_DEBUG("Fields: "<< wheel << " "<<sector<<" " << stationName<< " " << stationEta<<" "<<stationPhi<<" "<<multiLayer);
 			isOK = false;
 			return false;
 		}

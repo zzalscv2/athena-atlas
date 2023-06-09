@@ -7012,6 +7012,26 @@ HLT_j0_HT850XX0eta240_pf_ftf_preselcHT450_L1HT190-J15s5pETA21:
   eventCount: 0
 HLT_j0_HT850XX0eta240_pf_ftf_preselj180_L1HT190-J15s5pETA21:
   eventCount: 0
+HLT_j0_HT940_pf_ftf_preselcHT450_L1HT190-J15s5pETA21:
+  eventCount: 0
+HLT_j0_HT940_pf_ftf_preselj180_L1HT190-J15s5pETA21:
+  eventCount: 0
+HLT_j0_HT940_pf_ftf_preselj180_L1HT190-jJ40s5pETA21:
+  eventCount: 0
+HLT_j0_HT940_pf_ftf_preselj180_L1J100:
+  eventCount: 0
+HLT_j0_HT940_pf_ftf_preselj180_L1gJ160:
+  eventCount: 0
+HLT_j0_HT940_pf_ftf_preselj180_L1jJ160:
+  eventCount: 0
+HLT_j0_HT940_pf_ftf_preselj190_L1J100:
+  eventCount: 0
+HLT_j0_HT940_pf_ftf_preselj190_L1jJ160:
+  eventCount: 0
+HLT_j0_HT940_pf_ftf_preselj200_L1J100:
+  eventCount: 0
+HLT_j0_HT940_pf_ftf_preselj200_L1jJ160:
+  eventCount: 0
 HLT_j0_perf_pf_subjesgscIS_ftf_L1RD0_FILLED:
   eventCount: 44
   stepCounts:

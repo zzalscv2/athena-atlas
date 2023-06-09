@@ -44,7 +44,6 @@
 #include "CLHEP/Units/SystemOfUnits.h"
 
 #include "InDetAlignGenTools/InDetAlignFillTrack.h"
-#include "HepPDT/ParticleDataTable.hh"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 
@@ -60,7 +59,6 @@ InDetAlignFillTrack::InDetAlignFillTrack (const std::string& type,
                                           const IInterface* parent)
   : AthAlgTool(type, name, parent),
   m_ntupleSvc(nullptr),
-  m_mctable{},
   m_totaltrks(0),
   m_totalhits(0),
   m_totalPixhits(0),
@@ -131,12 +129,6 @@ StatusCode InDetAlignFillTrack::initialize() {
     IPartPropSvc* p_PartPropSvc;
     static const bool CREATEIFNOTTHERE(true);
     ATH_CHECK(svcLoc()->service("PartPropSvc", p_PartPropSvc, CREATEIFNOTTHERE));
-    //
-    m_mctable = const_cast<HepPDT::ParticleDataTable*>(p_PartPropSvc->PDT());
-    if (m_mctable == nullptr) {
-      ATH_MSG_FATAL("FillTrack: PDG table not found");
-      return StatusCode::FAILURE;
-    }
   }
   // Book Ntuple
   bookNtuple();
@@ -371,15 +363,10 @@ StatusCode InDetAlignFillTrack::FillTrack() {
 
                 for (TrackRecordCollection::const_iterator record = recordCollection->begin();
                      record != recordCollection->end(); ++record) {
-                  const HepPDT::ParticleData* particle = m_mctable->particle(abs((*record).GetPDGCode()));
-                  if (!particle) continue;
-
-                  double charge = particle->charge();
-                  if (std::abs(charge) < 0.01) continue;
-
-                  HepGeom::Point3D<double> productionVertex = (*record).GetPosition();
-                  if ((*record).GetPDGCode() < 0) charge = -charge;
                   if (std::abs((*record).GetPDGCode()) != 13) continue;
+                  HepGeom::Point3D<double> productionVertex = (*record).GetPosition();
+                  double charge = (*record).GetPDGCode() > 0 ? -1.0 : 1.0;
+                  
 
                   Amg::Vector3D direction((*record).GetMomentum().x(),
                                           (*record).GetMomentum().y(),

@@ -21,14 +21,14 @@ class L1Menu(object):
     This class holds everything that is needed to define the menu
     """
 
-    def __init__(self, menuName, do_alfa=False):
+    def __init__(self, menuName, do_alfa=False, do_HI_tob_thresholds=False):
         self.menuName = menuName
 
         # items in menu
         self.items = MenuItemsCollection()
         
         # all thresholds that are in menu (new and legacy)
-        self.thresholds = MenuThresholdsCollection()
+        self.thresholds = MenuThresholdsCollection(do_HI_tob_thresholds)
 
         # all thresholds that are in menu (new and legacy)
         self.topoAlgos = MenuTopoAlgorithmsCollection()
@@ -41,6 +41,8 @@ class L1Menu(object):
 
         # CTP Info in the menu
         self.ctp = CTP(do_alfa)
+
+        self.do_HI_tob_thresholds = do_HI_tob_thresholds
         
         if self.menuName:
             smk_psk_Name = get_smk_psk_Name(self.menuName)
@@ -374,7 +376,7 @@ class L1Menu(object):
         # collect the ptMinToTopo values
         ptMin = {}
         for thrtype in ThrType.Run3Types():
-            ttconfig = getTypeWideThresholdConfig(thrtype)
+            ttconfig = getTypeWideThresholdConfig(thrtype,self.do_HI_tob_thresholds)
             inputtype = thrtype.name
             if inputtype == 'cTAU':
                 inputtype = 'eTAU'

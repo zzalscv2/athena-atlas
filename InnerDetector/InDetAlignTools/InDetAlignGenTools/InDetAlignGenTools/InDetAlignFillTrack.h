@@ -33,10 +33,6 @@ namespace Trk {
   class ITrackParticleCreatorTool;
 }
 
-namespace HepPDT {
-  class ParticleDataTable;
-}
-
 class INTupleSvc;
 
 
@@ -59,7 +55,6 @@ class InDetAlignFillTrack: virtual public IInDetAlignFillTrack, public AthAlgToo
 
  private:
   INTupleSvc*                           m_ntupleSvc; 
-  HepPDT::ParticleDataTable             *m_mctable;
 
   // member functions
   void bookNtuple();

@@ -191,7 +191,6 @@ StatusCode PadTriggerLogicOfflineTool::compute_pad_triggers(const std::vector<st
                   int index=0;
                   for( const auto& st : candidates){
                      auto p=std::make_unique<PadTrigger>(convert(st));
-                     if (p->m_bandid == 0) continue; // don't record triggers out of eta bounds
                      p->m_triggerindex=index;
                      if (p->m_pads.empty()) continue;//don't record null triggers (rejected or empty)
                      triggers.push_back(std::move(p));
@@ -274,10 +273,8 @@ NSWL1::PadTrigger PadTriggerLogicOfflineTool::convert(const SectorTriggerCandida
     int secType=pad0->sectorType();
     int matchedBandId=ROI2BandId(std::abs(etaProjected),secType);
     pt.m_bandid = (matchedBandId < 0) ? 0 : matchedBandId+2;// Y.R Bands start from 2
-    if(pt.m_bandid == 0) {
-      ATH_MSG_WARNING("PadTrigger out of eta bands");
-      return pt;
-    }
+    if(pt.m_bandid == 0) ATH_MSG_WARNING("PadTrigger out of current eta bands");
+
      /* ======== End of band Id matching and assignment ======================= */
 
     pt.m_multiplet_id = pad0->multipletId();
@@ -300,10 +297,10 @@ NSWL1::PadTrigger PadTriggerLogicOfflineTool::convert(const SectorTriggerCandida
     float trgEtaMin=0;
     float trgEtaMax=0;
 
-    if(pt.m_isSmall){
+    if(pt.m_isSmall && matchedBandId > 0){
         trgEtaMin=m_etaBandsSmallSector.at(matchedBandId+1);
         trgEtaMax=m_etaBandsSmallSector.at(matchedBandId);
-    } else{
+    } else if(!pt.m_isSmall && matchedBandId > 0) {
         trgEtaMin=m_etaBandsLargeSector.at(matchedBandId+1);
         trgEtaMax=m_etaBandsLargeSector.at(matchedBandId);
     }

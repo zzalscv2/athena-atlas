@@ -37,7 +37,7 @@ log = logging.getLogger(__name__)
 
 class L1MenuConfig(object):
 
-    def __init__(self, menuName, inputFile = None, do_alfa = False ):
+    def __init__(self, menuName, inputFile = None, do_alfa = False, do_HI_tob_thresholds = False ):
 
         L1MenuFlags.MenuSetup = menuName
 
@@ -63,7 +63,7 @@ class L1MenuConfig(object):
 
         # menu
         L1MenuFlags.CTPVersion = 4 # this needs to be done here already, since L1Menu depends on it during init
-        self.l1menu = L1Menu(self.menuName, do_alfa)
+        self.l1menu = L1Menu(self.menuName, do_alfa, do_HI_tob_thresholds)
         self.l1menu.setBunchGroupSplitting() # store bunchgroups separate from other item inputs
 
         if not self._checkMenuExistence():

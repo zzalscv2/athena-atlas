@@ -27,7 +27,7 @@ JetHitAssociation::JetHitAssociation(const std::string& name, ISvcLocator* svclo
     		  "Name of input pixel hit collection. PixelClusters is default");
   declareProperty("inputSCTHitCollectionName", m_inputSCTHitCollectionName = "SCT_Clusters", 
     		  "Name of input SCT hit collection. SCT_Clusters is default");
-  declareProperty("jetPtThreshold", m_jetPtThreshold = 300000.0, 
+  declareProperty("jetPtThreshold", m_jetPtThreshold = 250000.0, 
     		  "Hits are saved only if they match to jets with pT > jetPtThreshold [in MeV]");
   declareProperty("dRmatchHitToJet", m_dRmatchHitToJet = 0.4, 
     		  "The radius used for matching hits to jets");

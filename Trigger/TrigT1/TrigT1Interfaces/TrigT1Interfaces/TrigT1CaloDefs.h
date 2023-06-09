@@ -31,21 +31,22 @@ public:
 
   // locations
   static const std::string CaloCellContainerLocation;
-  
+
   static const std::string TriggerTowerLocation;
   static const std::string xAODTriggerTowerLocation;
   static const std::string xAODTriggerTowerRerunLocation;
   static const std::string CPMTowerLocation;
   static const std::string JetElementLocation;
-  
+  static const std::string xAODZdcMoudleLocation;
+
   static const std::string CPMCMXDataLocation;
   static const std::string JetCMXDataLocation;
   static const std::string EnergyCMXDataLocation;
-  
+
   static const std::string CPMHitsLocation;
   static const std::string JEMHitsLocation;
   static const std::string JEMEtSumsLocation;
-  
+
   static const std::string CMMJetHitsLocation;
   static const std::string CMMEtSumsLocation;
   static const std::string CMMCPHitsLocation;
@@ -64,17 +65,18 @@ public:
   static const std::string JEPBSCollectionLocation;
   static const std::string JEPRoIBSCollectionLocation;
   static const std::string RODHeaderLocation;
-  
+
   static const std::string AtlfastCellContainerLocation;
 
   static const std::string JetROILocation;
   static const std::string EnergyROILocation;
   static const std::string EmTauROILocation;
   static const std::string JetEtROILocation;
-  
+
   static const std::string EmTauCTPLocation;
   static const std::string JetCTPLocation;
   static const std::string EnergyCTPLocation;
+  static const std::string ZdcCTPLocation;
 
   static const std::string EmTauSlinkLocation;
   static const std::string jepSlinkLocation;
@@ -83,36 +85,36 @@ public:
   static const std::string EmTauTopoTobLocation;
   static const std::string JetTopoTobLocation;
   static const std::string EnergyTopoDataLocation;
-  
+
   static const std::string CTPCaloConfigLocation;
   static const std::string CTPJetEnergyConfigLocation;
-#endif	
+#endif
 	//JetElementKey
 	static const unsigned int RegionError=999;
-	
+
 	static const double Region0EtaCentre;
 	static const double Region1EtaCentre;
 	static const double Region2EtaCentre;
 	static const double Region3EtaCentre;
 	static const double Region4EtaCentre;
 	static const double Region5EtaCentre;
-        static const int RegionERROREtaBin=81;
-        static const double RegionERROREtaCentre;
-	
+  static const int RegionERROREtaBin=81;
+  static const double RegionERROREtaCentre;
+
 	static const double Region0Width;
 	static const double Region1Width;
 	static const double Region2Width;
 	static const double Region3Width;
 	static const double Region4Width;
 	static const double Region5Width;
-	
+
 	static const double Region0Height;
 	static const double Region1Height;
 	static const double Region2Height;
 	static const double Region3Height;
 	static const double Region4Height;
 	static const double Region5Height;
-	
+
 	static const double Region5JetHeight;
 
 
@@ -137,8 +139,8 @@ static const double jemPhiSize;
 static const double jemEtaSize;
 
 //ROI word data
- 
- 
+
+
 enum Run2RoIWordTypes {
   run2JetRoIType=0,
   run2CpRoIType=1,
@@ -159,7 +161,7 @@ enum EmTauTobTypes {
   emTobType = 0,
   tauTobType = 1
 } ;
- 
+
 enum RoIType {
   CpRoIWordType=0,
   JetRoIWordType=1,
@@ -171,7 +173,7 @@ enum RoIType {
   TauRoIWordType=7,
   RoIWordTypeError=999
 }  ;
- 
+
 enum RoIWordTypes {
   cpRoIType=0,
   jetRoIType=2,

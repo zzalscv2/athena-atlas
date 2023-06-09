@@ -26,7 +26,7 @@ def cTAUfwToFlowConversion(fw):
     decimal = fw/1024
     return float("{:.2f}".format(decimal))
 
-def getTypeWideThresholdConfig(ttype):
+def getTypeWideThresholdConfig(ttype,do_HI_tob_thresholds=False):
     if isinstance(ttype, str):
         ttype = ThrType[ttype]
 
@@ -59,9 +59,9 @@ def getTypeWideThresholdConfig(ttype):
     if ttype == ThrType.gTE:
         return getConfig_gTE()
     if ttype == ThrType.EM:
-        return getConfig_EM()
+        return getConfig_EM(do_HI_tob_thresholds)
     if ttype == ThrType.TAU:
-        return getConfig_TAU()
+        return getConfig_TAU(do_HI_tob_thresholds)
     if ttype == ThrType.JET:
         return getConfig_JET()
     if ttype == ThrType.XS:
@@ -195,7 +195,7 @@ def getConfig_eEM():
                ("rhad_fw", rhad_fw_tight), ("rhad", eFEXfwToFloatConversion(rhad_fw_tight,bitshift_rhad)), 
                ("etamin", 14), ("etamax", 15), ("priority", 1)]),
     ]
-    confObj["ptMinToTopo"] = 3 
+    confObj["ptMinToTopo"] = 3
     confObj["maxEt"] = 60
     confObj["resolutionMeV"] = 100
 
@@ -483,7 +483,7 @@ def getConfig_gTE():
 
 # LEGACY
 
-def getConfig_EM():
+def getConfig_EM(do_HI_tob_thresholds):
     confObj = odict()
     confObj["isolation"] = odict()
     confObj["isolation"]["HAIsoForEMthr"] = odict([ ( "thrtype", "HAIsoForEMthr" ), ("Parametrization", []) ])
@@ -502,12 +502,12 @@ def getConfig_EM():
         odict([ ("etamax", 49), ("etamin", -49), ("isobit", 4), ("mincut", 10), ("offset", -20), ("priority", 0), ("slope", 80), ("upperlimit", 50)]),
         odict([ ("etamax", 49), ("etamin", -49), ("isobit", 5), ("mincut", 20), ("offset", -18), ("priority", 0), ("slope", 80), ("upperlimit", 50)]),
     ]
-    confObj["ptMinToTopo"] = 3
+    confObj["ptMinToTopo"] = 8 if do_HI_tob_thresholds else 3
     confObj["resolutionMeV"] = 500
     return confObj
 
 
-def getConfig_TAU():
+def getConfig_TAU(do_HI_tob_thresholds):
     confObj = odict()
     confObj["isolation"] = odict()
     confObj["isolation"]["EMIsoForTAUthr"] =  odict([ ( "thrtype", "EMIsoForTAUthr" ), ("Parametrization", []) ])
@@ -518,7 +518,7 @@ def getConfig_TAU():
         odict([ ("etamax", 49), ("etamin", -49), ("isobit", 4), ("mincut", 0), ("offset", 40), ("priority", 0), ("slope",   0), ("upperlimit", 124)]),
         odict([ ("etamax", 49), ("etamin", -49), ("isobit", 5), ("mincut", 0), ("offset", 30), ("priority", 0), ("slope", 100), ("upperlimit",  60)])
     ]
-    confObj["ptMinToTopo"] = 8
+    confObj["ptMinToTopo"] = 1 if do_HI_tob_thresholds else 8
     confObj["resolutionMeV"] = 500
     return confObj
 

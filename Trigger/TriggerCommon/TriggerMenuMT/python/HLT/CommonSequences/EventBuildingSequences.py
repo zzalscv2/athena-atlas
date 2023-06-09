@@ -5,21 +5,17 @@
 from TrigEDMConfig import DataScoutingInfo
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 from TriggerMenuMT.HLT.Menu import EventBuildingInfo
-from TriggerMenuMT.HLT.Config.MenuComponents import ChainStep, MenuSequence
-from TrigPartialEventBuilding.TrigPartialEventBuildingConf import PEBInfoWriterAlg
+from TriggerMenuMT.HLT.Config.MenuComponents import ChainStep, menuSequenceCAToGlobalWrapper, MenuSequenceCA, SelectionCA, InEventRecoCA
 from TrigPartialEventBuilding.TrigPartialEventBuildingConfig import StaticPEBInfoWriterToolCfg, RoIPEBInfoWriterToolCfg
 from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 from libpyeformat_helper import SourceIdentifier, SubDetector
 from AthenaConfiguration.ComponentAccumulator import appendCAtoAthena, conf2toConfigurable
-from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
-from AthenaCommon.CFElements import seqAND, findAlgorithm
 from AthenaCommon.Configurable import ConfigurableCABehavior
+from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from .LATOMESourceIDs import LATOMESourceIDs
 from AthenaCommon.Logging import logging
-from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
-
 log = logging.getLogger(__name__)
-
 
 def addEventBuildingSequence(flags, chain, eventBuildType, chainDict):
     '''
@@ -32,19 +28,10 @@ def addEventBuildingSequence(flags, chain, eventBuildType, chainDict):
         log.error('eventBuildType \'%s\' not found in the allowed Event Building identifiers', eventBuildType)
         return
 
-    def pebInfoWriterToolGenerator(chainDict):
-        with ConfigurableCABehavior():
-            cfg = pebInfoWriterToolCfg(flags, chainDict['chainName'], eventBuildType)
-        tool = conf2toConfigurable(cfg.popPrivateTools())
-        appendCAtoAthena(cfg)
-        return tool
-
-    inputMaker = pebInputMaker(flags, chain, eventBuildType)
-    seq = MenuSequence(flags,
-        Sequence    = pebSequence(eventBuildType, inputMaker),
-        Maker       = inputMaker,
-        Hypo        = PEBInfoWriterAlg('PEBInfoWriterAlg_' + eventBuildType),
-        HypoToolGen = pebInfoWriterToolGenerator)
+    if isComponentAccumulatorCfg():
+        seq=pebMenuSequenceCfg(flags, chain=chain, eventBuildType=eventBuildType, chainDict=chainDict)
+    else:
+        seq=menuSequenceCAToGlobalWrapper(pebMenuSequenceCfg, flags, chain=chain, eventBuildType=eventBuildType, chainDict=chainDict)
 
     if len(chain.steps)==0:
         # noalg PEB chain
@@ -62,7 +49,6 @@ def addEventBuildingSequence(flags, chain, eventBuildType, chainDict):
                          chainDicts=prevStep.stepDicts)
 
     chain.steps.append(step)
-
 
 def pebInfoWriterToolCfg(flags, name, eventBuildType):
     """Create PEBInfoWriterTool configuration for the eventBuildType"""
@@ -240,18 +226,35 @@ def pebInfoWriterToolCfg(flags, name, eventBuildType):
 
     return acc
 
+def getPEBBuildSuffix(chain, eventBuildType):
+    '''
+    Define suffix for unique configurations - prevents config clashes.
+    '''
+
+    suffix=''
+
+    _isFullscan = isFullScan(chain)
+    _isRoIBasedPEB = EventBuildingInfo.isRoIBasedPEB(eventBuildType)
+    _isNoalg = isNoAlg(chain)
+
+    if _isNoalg or not _isRoIBasedPEB: suffix+='_noSeed'
+    if _isFullscan and _isRoIBasedPEB: suffix+='_RoIBasedFS'
+
+    return suffix
 
 def pebInputMaker(flags, chain, eventBuildType):
-    # Check if we are configuring a chain with at least one full-scan leg
-    isFullscan = (mapThresholdToL1DecisionCollection('FSNOSEED') in chain.L1decisions)
 
+    suffix= getPEBBuildSuffix(chain, eventBuildType)
+
+    # Check if we are configuring a chain with at least one full-scan leg
+    isFullscan = isFullScan(chain)
     # Check if we are configuring RoI-based PEB
     _isRoIBasedPEB = EventBuildingInfo.isRoIBasedPEB(eventBuildType)
-    _isNoalg = (len(chain.steps) == 0)
+    _isNoalg = isNoAlg(chain)
 
     # Configure the InputMaker
-    maker = CompFactory.InputMakerForRoI("IMpeb_"+eventBuildType)
-    maker.RoIs = "pebInputRoI_" + eventBuildType
+    maker = CompFactory.InputMakerForRoI("IMpeb_" + eventBuildType + suffix)
+    maker.RoIs = "pebInputRoI_" + eventBuildType + suffix
     # Allow more than one feature per input RoI if we care about RoIs, and have at least one Step
     maker.mergeUsingFeature = _isRoIBasedPEB and not _isNoalg
 
@@ -270,14 +273,39 @@ def pebInputMaker(flags, chain, eventBuildType):
     return maker
 
 
-def pebSequence(eventBuildType, inputMaker):
-    # If a Configurable with the same name already exists, the below call
-    # returns the existing one. We add the inputMaker to the sequence only if
-    # it's not already there (i.e. if the sequence didn't exist before)
-    seq = seqAND("pebSequence_"+eventBuildType)
-    if findAlgorithm(seq, inputMaker.name()) != inputMaker:
-        seq += inputMaker
-    return seq
+@AccumulatorCache
+def pebSequenceCfg(eventBuildType, inputMaker):
+    # Create new sequence and add inputMaker. Sequence is cached for next call.
+    recoAcc = InEventRecoCA("pebSequence_"+eventBuildType, inputMaker=inputMaker)
+    return recoAcc
+
+
+def pebMenuSequenceCfg(flags, chain, eventBuildType, chainDict):
+    '''
+    Return the MenuSequenceCA for the PEB input maker for this chain.
+    '''
+
+    def pebInfoWriterToolGenerator(chainDict):
+        if isComponentAccumulatorCfg():
+            return pebInfoWriterToolCfg(flags, chainDict['chainName'], eventBuildType)
+        else:
+            with ConfigurableCABehavior():
+                cfg = pebInfoWriterToolCfg(flags, chainDict['chainName'], eventBuildType)
+                tool = conf2toConfigurable(cfg.popPrivateTools())
+                appendCAtoAthena(cfg)
+                return tool
+
+    suffix = getPEBBuildSuffix(chain, eventBuildType)
+
+    inputMaker = pebInputMaker(flags, chain, eventBuildType)
+    recoAcc = pebSequenceCfg(eventBuildType, inputMaker)
+    selAcc = SelectionCA("pebMainSeq_"+eventBuildType)
+    selAcc.mergeReco(recoAcc)
+    selAcc.addHypoAlgo(CompFactory.PEBInfoWriterAlg('PEBInfoWriterAlg_' + eventBuildType+suffix))
+
+    return MenuSequenceCA(flags,
+                          selAcc,
+                          HypoToolGen = pebInfoWriterToolGenerator)
 
 
 def findEventBuildingStep(chainConfig):
@@ -305,11 +333,6 @@ def alignEventBuildingSteps(chain_configs, chain_dicts):
 
     def getPebStepPosition(chainConfig):
         pebStep = findEventBuildingStep(chainConfig)
-        try:
-            if isComponentAccumulatorCfg() and pebStep is None:
-                raise NoCAmigration ("[alignTLASteps] Missing TLA sequence with CA configurables")
-        except NoCAmigration:
-            return 0
         return chainConfig.steps.index(pebStep) + 1
 
     # First loop to find the maximal PEB step positions to which we need to align
@@ -328,6 +351,17 @@ def alignEventBuildingSteps(chain_configs, chain_dicts):
             log.debug('Aligning PEB step for chain %s by adding %d empty steps', chainName, numStepsNeeded)
             chainConfig.insertEmptySteps('EmptyPEBAlign', numStepsNeeded, pebStepPosition-1)
             chainConfig.numberAllSteps()
+
+
+def isFullScan(chain):
+    '''Helper function to determine if chain is full scan'''
+    # Check if we are configuring a chain with at least one full-scan leg
+    return (mapThresholdToL1DecisionCollection('FSNOSEED') in chain.L1decisions)
+
+
+def isNoAlg(chain):
+    '''Helper function to determine if chain has HLT reco'''
+    return (len(chain.steps) == 0)
 
 
 # Unit test

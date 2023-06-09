@@ -71,11 +71,9 @@ def athenaMPOutputHandler(athenaMPFileReport, athenaMPWorkerTopDir, dataDictiona
     msg.debug("MP output handler called for report {0} and workers in {1}, data types {2}".format(athenaMPFileReport, athenaMPWorkerTopDir, list(dataDictionary)))
     outputHasBeenHandled = dict([ (dataType, False) for dataType in dataDictionary if dataDictionary[dataType] ])
 
-    # if sharedWriter mode is active ignore athenaMPFileReport
-    sharedWriter=False
-    if 'sharedWriter' in argdict and argdict['sharedWriter'].value:
-        sharedWriter=True
-        skipFileChecks=True
+    # if sharedWriter mode is active (default) ignore athenaMPFileReport
+    sharedWriter=(argdict['sharedWriter'].value if 'sharedWriter' in argdict else True)
+    skipFileChecks=sharedWriter
 
     if not sharedWriter:
         # First, see what AthenaMP told us

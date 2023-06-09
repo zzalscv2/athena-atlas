@@ -15,7 +15,7 @@ msg = logging.getLogger(__name__)
 
 # Allowable to import * from the package for which we are the test suite
 from PyJobTransforms.trfMPTools import *
-from PyJobTransforms.trfArgClasses import argList, argSubstepList, argFile
+from PyJobTransforms.trfArgClasses import argBool, argList, argSubstepList, argFile
 
 import PyJobTransforms.trfExceptions as trfExceptions
 
@@ -107,6 +107,7 @@ class AthenaMPOutputParseTests(unittest.TestCase):
         self.assertEqual(athenaMPOutputHandler("athenaMP-outputs-RAWtoESD-r2e", "athenaMP-workers-RAWtoESD-r2e", dataDict, 8), None)
         
     def test_missingMPoutputs(self):
+        argDict  = {'sharedWriter': argBool('False')}
         dataDict = {'ESD': argFile("data15_13TeV.00267167.physics_Main.recon.ESD.f594._lb0176._SFO-1._0002"),
                     'HIST_ESD_INT': argFile("tmp.HIST_ESD_INT"),
                     'DRAW_EMU': argFile("data15_13TeV.00267167.physics_Main.recon.DRAW_EMU.f594._lb0176._SFO-1._0002"),
@@ -114,9 +115,10 @@ class AthenaMPOutputParseTests(unittest.TestCase):
                     'DRAW_TAUMUH': argFile("data15_13TeV.00267167.physics_Main.recon.DRAW_TAUMUH.f594._lb0176._SFO-1._0002"),
                     'DRAW_NOTHERE': argFile("data15_13TeV.00267167.physics_Main.recon.DRAW_NOTHERE.f594._lb0176._SFO-1._0002"),
                     'DRAW_ZMUMU': argFile("data15_13TeV.00267167.physics_Main.recon.DRAW_ZMUMU.f594._lb0176._SFO-1._0002"),}
-        self.assertRaises(trfExceptions.TransformExecutionException, athenaMPOutputHandler, "athenaMP-outputs-RAWtoESD-r2e", "athenaMP-workers-RAWtoESD-r2e", dataDict, 8)
+        self.assertRaises(trfExceptions.TransformExecutionException, athenaMPOutputHandler, "athenaMP-outputs-RAWtoESD-r2e", "athenaMP-workers-RAWtoESD-r2e", dataDict, 8, argdict = argDict)
 
     def test_wrongMPoutputs(self):
+        argDict  = {'sharedWriter': argBool('False')}
         dataDict = {'ESD': argFile("data15_13TeV.00267167.physics_Main.recon.ESD.f594._lb0176._SFO-1._0002"),
                     'HIST_ESD_INT': argFile("tmp.HIST_ESD_INT"),
                     'DRAW_EMU': argFile("data15_13TeV.00267167.physics_Main.recon.DRAW_EMU.f594._lb0176._SFO-1._0002"),
@@ -124,9 +126,10 @@ class AthenaMPOutputParseTests(unittest.TestCase):
                     'DRAW_TAUMUH': argFile("data15_13TeV.00267167.physics_Main.recon.DRAW_TAUMUH.f594._lb0176._SFO-1._0002"),
                     'DRAW_NOTHERE': argFile("data15_13TeV.00267167.physics_Main.recon.DRAW_NOTHERE.f594._lb0176._SFO-1._0002"),
                     'DRAW_ZMUMU': argFile("data15_13TeV.00267167.physics_Main.recon.DRAW_ZMUMU.f594._lb0176._SFO-1._0002"),}
-        self.assertRaises(trfExceptions.TransformExecutionException, athenaMPOutputHandler, "athenaMP-outputs-RAWtoESD-r2e", "athenaMP-workers-RAWtoESD-r2e", dataDict, 20)
+        self.assertRaises(trfExceptions.TransformExecutionException, athenaMPOutputHandler, "athenaMP-outputs-RAWtoESD-r2e", "athenaMP-workers-RAWtoESD-r2e", dataDict, 20, argdict = argDict)
         
     def test_wrongMPoutputDir(self):
+        argDict  = {'sharedWriter': argBool('False')}
         dataDict = {'ESD': argFile("data15_13TeV.00267167.physics_Main.recon.ESD.f594._lb0176._SFO-1._0002"),
                     'HIST_ESD_INT': argFile("tmp.HIST_ESD_INT"),
                     'DRAW_EMU': argFile("data15_13TeV.00267167.physics_Main.recon.DRAW_EMU.f594._lb0176._SFO-1._0002"),
@@ -134,7 +137,7 @@ class AthenaMPOutputParseTests(unittest.TestCase):
                     'DRAW_TAUMUH': argFile("data15_13TeV.00267167.physics_Main.recon.DRAW_TAUMUH.f594._lb0176._SFO-1._0002"),
                     'DRAW_NOTHERE': argFile("data15_13TeV.00267167.physics_Main.recon.DRAW_NOTHERE.f594._lb0176._SFO-1._0002"),
                     'DRAW_ZMUMU': argFile("data15_13TeV.00267167.physics_Main.recon.DRAW_ZMUMU.f594._lb0176._SFO-1._0002"),}
-        self.assertRaises(trfExceptions.TransformExecutionException, athenaMPOutputHandler, "athenaMP-outputs-RAWtoESD-r2e-missing", "athenaMP-workers-RAWtoESD-r2e", dataDict, 20)
+        self.assertRaises(trfExceptions.TransformExecutionException, athenaMPOutputHandler, "athenaMP-outputs-RAWtoESD-r2e-missing", "athenaMP-workers-RAWtoESD-r2e", dataDict, 20, argdict = argDict)
         
         
 if __name__ == '__main__':
