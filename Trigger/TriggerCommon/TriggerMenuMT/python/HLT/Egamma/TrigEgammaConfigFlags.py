@@ -22,6 +22,9 @@ def createTrigEgammaConfigFlags():
     flags.addFlag('Trigger.egamma.Calib.precCaloMVAVersion'  , 'egammaMVACalib/online/v7')
     flags.addFlag('Trigger.egamma.Calib.precEgammaMVAVersion', 'egammaMVACalib/online/v7')
 
+    # calo info in extrap
+    flags.addFlag('Trigger.egamma.useCaloInfoInExtrap', False) #(True if/when becomes the default)
+
     return flags
 
 
