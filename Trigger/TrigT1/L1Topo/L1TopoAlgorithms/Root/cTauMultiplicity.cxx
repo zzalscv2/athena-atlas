@@ -9,6 +9,7 @@
 #include "L1TopoAlgorithms/cTauMultiplicity.h"
 #include "L1TopoCommon/Exception.h"
 #include "L1TopoInterfaces/Count.h"
+#include "L1TopoSimulationUtils/Conversions.h"
 
 #include "L1TopoEvent/TOBArray.h"
 #include "L1TopoEvent/cTauTOBArray.h"
@@ -160,10 +161,13 @@ TCS::cTauMultiplicity::cTauMatching(const TCS::cTauTOB * etauCand, const TCS::cT
   int eTauEtaTower;
   if (etauCand->eta()%4 >= 0 ) { eTauEtaTower = etauCand->eta() - etauCand->eta()%4; }
   else                         { eTauEtaTower = etauCand->eta() - etauCand->eta()%4 - 4; }
+  int jTauEtaTower;
+  if (jtauCand->eta()%4 >= 0 ) { jTauEtaTower = jtauCand->eta() - jtauCand->eta()%4; }
+  else                         { jTauEtaTower = jtauCand->eta() - jtauCand->eta()%4 - 4; }
 
-  int jTauEtaTower = jtauCand->eta();              // jTau eta = 4*eta_tower
-  unsigned int eTauPhiTower = etauCand->phi();     // eTau phi = 2*phi_tower 
-  unsigned int jTauPhiTower = jtauCand->phi();     // jTau phi = 2*phi_tower 
+  //int jTauEtaTower = jtauCand->eta();              // jTau eta = 4*eta_tower
+  unsigned int eTauPhiTower = etauCand->phi() >> 1;     // eTau phi = 2*phi_tower 
+  unsigned int jTauPhiTower = jtauCand->phi() >> 1;     // jTau phi = 2*phi_tower + 1 (jTau coordinates are at center of tower)
 
   matching = (eTauEtaTower == jTauEtaTower) && (eTauPhiTower == jTauPhiTower);
 
@@ -180,12 +184,24 @@ TCS::cTauMultiplicity::cTauMatching(const xAOD::eFexTauRoI & eTau, const xAOD::j
   // Return the index of the matched jTau if existent (otherwise return std::numeric_limits<size_t>::max())
   size_t i_matched{std::numeric_limits<size_t>::max()};
   size_t i_jTau{0};
-
+  
+  int eTauEtaTower;
+  if (eTau.iEtaTopo()%4 >= 0 ) { eTauEtaTower = eTau.iEtaTopo() - eTau.iEtaTopo()%4; }
+  else                         { eTauEtaTower = eTau.iEtaTopo() - eTau.iEtaTopo()%4 - 4; }
+  
   for (const xAOD::jFexTauRoI* jTau : jTauRoIs) {
 
     // eFEX: etaTower = iEta, phiTower = iPhi
     // jFEX: etaTower = globalEta, phiTower = globalPhi
-    bool matching = ( eTau.iEta() == jTau->globalEta() ) && ( static_cast<unsigned int>(eTau.iPhi()) == jTau->globalPhi() );
+    
+    int jTauEtaTopo = TSU::toTopoEta(jTau->eta());
+    int jTauEtaTower;
+    if (jTauEtaTopo%4 >= 0 ) { jTauEtaTower = jTauEtaTopo - jTauEtaTopo%4; }
+    else                     { jTauEtaTower = jTauEtaTopo - jTauEtaTopo%4 - 4; }
+  
+    unsigned int jTauPhiTower = TSU::toTopoPhi(jTau->phi()) >> 1; //ignore lowest bit as jTau coordinates are taken at tower center
+    unsigned int eTauPhiTower = static_cast<unsigned int>(eTau.iPhiTopo()) >> 1; //shift eTau location in the same way to stay consistent
+    bool matching = ( eTauEtaTower == jTauEtaTower ) && ( eTauPhiTower == jTauPhiTower );
 
     if ( matching ) {
       i_matched = i_jTau;
@@ -203,7 +219,20 @@ TCS::cTauMultiplicity::cTauMatching(const xAOD::eFexTauRoI & eTau, const xAOD::j
 
   // eFEX: etaTower = iEta, phiTower = iPhi
   // jFEX: etaTower = globalEta, phiTower = globalPhi
-  bool matching = ( eTau.iEta() == jTau.globalEta() ) && ( static_cast<unsigned int>(eTau.iPhi()) == jTau.globalPhi() );
+  
+  int eTauEtaTower;
+  if (eTau.iEtaTopo()%4 >= 0 ) { eTauEtaTower = eTau.iEtaTopo() - eTau.iEtaTopo()%4; }
+  else                         { eTauEtaTower = eTau.iEtaTopo() - eTau.iEtaTopo()%4 - 4; }
+  
+  int jTauEtaTopo = TSU::toTopoEta(jTau.eta());
+  int jTauEtaTower;
+  if (jTauEtaTopo%4 >= 0 ) { jTauEtaTower = jTauEtaTopo - jTauEtaTopo%4; }
+  else                     { jTauEtaTower = jTauEtaTopo - jTauEtaTopo%4 - 4; }
+
+  unsigned int jTauPhiTower = TSU::toTopoPhi(jTau.phi()) >> 1; //ignore lowest bit as jTau coordinates are taken at tower center
+  unsigned int eTauPhiTower = static_cast<unsigned int>(eTau.iPhiTopo()) >> 1; //shift eTau location in the same way to stay consistent
+    
+  bool matching = ( eTauEtaTower == jTauEtaTower ) && ( eTauPhiTower == jTauPhiTower );
   return matching;
 
 }

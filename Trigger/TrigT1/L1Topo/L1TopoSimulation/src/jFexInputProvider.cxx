@@ -7,6 +7,7 @@
 #include "jFexInputProvider.h"
 #include "TrigT1CaloEvent/JetROI_ClassDEF.h"
 #include "L1TopoEvent/TopoInputEvent.h"
+#include "L1TopoSimulationUtils/Conversions.h"
 #include "TrigT1CaloEvent/EnergyRoI_ClassDEF.h"
 #include "TrigT1Interfaces/TrigT1CaloDefs.h"
 
@@ -71,9 +72,9 @@ jFexInputProvider::fillEM(TCS::TopoInputEvent& inputEvent) const {
            << " tobEt: " 
            << jFexRoI->tobEt() // returns the et value of the jet in units of 200 MeV
            << " globalEta: "
-           << jFexRoI->globalEta() // returns global eta in units of 0.1
+           << jFexRoI->globalEta() // returns simplified global eta in units of 0.1 (fcal straightened out, not suitable for use in L1TopoSim)
            << " globalPhi: "
-           << jFexRoI->globalPhi() // returns global phi in units of 0.1
+           << jFexRoI->globalPhi() // returns simplified global phi in units of 0.1 (fcal straightened out, not suitable for use in L1TopoSim)
            << " tobEMIso: "
            << +jFexRoI->tobEMIso() // returns isolation bits
            << " tobEMf1: "
@@ -83,8 +84,8 @@ jFexInputProvider::fillEM(TCS::TopoInputEvent& inputEvent) const {
            );
        
     unsigned int EtTopo = jFexRoI->tobEt()*m_Et_conversion;
-    unsigned int phiTopo = jFexRoI->globalPhi()*m_phi_conversion;
-    int etaTopo = jFexRoI->globalEta()*m_eta_conversion;
+    unsigned int phiTopo = TSU::toTopoPhi(jFexRoI->phi());
+    int etaTopo = TSU::toTopoEta(jFexRoI->eta());
     unsigned int isolation = jFexRoI->tobEMIso();
     unsigned int frac1 = jFexRoI->tobEMf2();
     unsigned int frac2 = jFexRoI->tobEMf1();
@@ -133,16 +134,16 @@ jFexInputProvider::fillTau(TCS::TopoInputEvent& inputEvent) const {
 		   << " tobEt: " 
 		   << jFexRoI->tobEt() // returns the et value of the jet in units of 200 MeV
 		   << " globalEta: "
-		   << jFexRoI->globalEta() // returns global eta in units of 0.1
+		   << jFexRoI->globalEta() // returns simplified global eta in units of 0.1 (fcal straightened out, not suitable for use in L1TopoSim)
 		   << " globalPhi: "
-		   << jFexRoI->globalPhi() // returns global phi in units of 0.1
+		   << jFexRoI->globalPhi() // returns simplified global phi in units of 0.1 (fcal straightened out, not suitable for use in L1TopoSim)
 		   << " isolation: "
 		   << jFexRoI->tobIso() // returns isolation value in units of 200 MeV
 		   );
        
     unsigned int EtTopo = jFexRoI->tobEt()*m_Et_conversion;
-    unsigned int phiTopo = jFexRoI->globalPhi()*m_phi_conversion;
-    int etaTopo = jFexRoI->globalEta()*m_eta_conversion;
+    unsigned int phiTopo = TSU::toTopoPhi(jFexRoI->phi());
+    int etaTopo = TSU::toTopoEta(jFexRoI->eta());
     unsigned int isolation = jFexRoI->tobIso()*m_Et_conversion;
    
     // Avoid the events with 0 Et (events below threshold)
@@ -186,14 +187,14 @@ jFexInputProvider::fillLRJet(TCS::TopoInputEvent& inputEvent) const {
 	           << " tobEt: " 
 		   << jFexRoI->tobEt() // returns the et value of the jet in units of 200 MeV
 		   << " globalEta: "
-		   << jFexRoI->globalEta() // returns global eta in units of 0.1
+		   << jFexRoI->globalEta() // returns simplified global eta in units of 0.1 (fcal straightened out, not suitable for use in L1TopoSim)
 		   << " globalPhi: "
-		   << jFexRoI->globalPhi() // returns global phi in units of 0.1
+		   << jFexRoI->globalPhi() // returns simplified global phi in units of 0.1 (fcal straightened out, not suitable for use in L1TopoSim)
 		   );
     
     unsigned int EtTopo = jFexRoI->tobEt()*m_Et_conversion;
-    unsigned int phiTopo = jFexRoI->globalPhi()*m_phi_conversion;
-    int etaTopo = jFexRoI->globalEta()*m_eta_conversion;
+    unsigned int phiTopo = TSU::toTopoPhi(jFexRoI->phi());
+    int etaTopo = TSU::toTopoEta(jFexRoI->eta());
 
     // Avoid the events with 0 Et (events below threshold)
     if (EtTopo==0) continue;
@@ -233,14 +234,14 @@ jFexInputProvider::fillSRJet(TCS::TopoInputEvent& inputEvent) const {
 		   << " tobEt: " 
 		   << jFexRoI->tobEt() // returns the et value of the jet in units of 200 MeV
 		   << " globalEta: "
-		   << jFexRoI->globalEta() // returns global eta in units of 0.1
+		   << jFexRoI->globalEta() // returns simplified global eta in units of 0.1 (fcal straightened out, not suitable for use in L1TopoSim)
 		   << " globalPhi: "
-		   << jFexRoI->globalPhi() // returns global phi in units of 0.1
+		   << jFexRoI->globalPhi() // returns simplified global phi in units of 0.1 (fcal straightened out, not suitable for use in L1TopoSim)
 		   );
 
     unsigned int EtTopo = jFexRoI->tobEt()*m_Et_conversion;
-    unsigned int phiTopo = jFexRoI->globalPhi()*m_phi_conversion;
-    int etaTopo = jFexRoI->globalEta()*m_eta_conversion;
+    unsigned int phiTopo = TSU::toTopoPhi(jFexRoI->phi());
+    int etaTopo = TSU::toTopoEta(jFexRoI->eta());
 
     // Avoid the events with 0 Et (events below threshold)
     if (EtTopo==0) continue;

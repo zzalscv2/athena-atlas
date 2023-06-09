@@ -7,6 +7,7 @@
 #include <math.h>
 
 #include "L1TopoEvent/TopoInputEvent.h"
+#include "L1TopoSimulationUtils/Conversions.h"
 #include "TrigT1Interfaces/RecMuonRoI.h"
 #include "TrigT1Interfaces/MuCTPIL1Topo.h"
 #include "TrigT1Interfaces/MuCTPIL1TopoCandidate.h"
@@ -66,8 +67,11 @@ TCS::MuonTOB MuonInputProvider::createMuonTOB(const xAOD::MuonRoI & muonRoI, con
 
 
    float et;
-   float eta = muonRoI.eta();
-   float phi = muonRoI.phi();
+   float fEta = muonRoI.eta();
+   float fPhi = muonRoI.phi();
+
+   int etaTopo = TSU::toTopoEta(fEta);
+   unsigned int phiTopo = TSU::toTopoPhi(fPhi);
 
    // WARNING:: 
    // This uses a mapping for thrNumber : thrValue , where the thresholds
@@ -85,14 +89,11 @@ TCS::MuonTOB MuonInputProvider::createMuonTOB(const xAOD::MuonRoI & muonRoI, con
     }
 
    unsigned int EtTopo = et*10;
-   if (phi < 0) { phi += 2*M_PI;}
-   phi *= phiRescaleFactor; // 2pi -> 6.4
-   int etaTopo = topoIndex(eta,40);
-   int phiTopo = topoIndex(phi,20) % 128;
+   
 
    ATH_MSG_DEBUG("Muon ROI: " << muonRoI.getSource() << " thrvalue = " << thrNumber << " eta = " << etaTopo << " phi = " << phiTopo << " BW2or3 " << muonRoI.getBW3Coincidence() << " Good MF " << muonRoI.getGoodMF() << " Inner Coincidence " << muonRoI.getInnerCoincidence() << " Charge " << muonRoI.getCharge() << ", w   = " << MSG::hex << std::setw( 8 ) << muonRoI.getRoI() << MSG::dec);
    
-   TCS::MuonTOB muon( EtTopo, 0, etaTopo, static_cast<unsigned int>(phiTopo), muonRoI.getRoI() );
+   TCS::MuonTOB muon( EtTopo, 0, etaTopo, phiTopo, muonRoI.getRoI() );
    muon.setEtDouble(static_cast<double>(EtTopo/10.));
    muon.setEtaDouble(static_cast<double>(etaTopo/40.));
    muon.setPhiDouble(static_cast<double>(phiTopo/20.));
@@ -145,15 +146,15 @@ MuonInputProvider::createMuonTOB(const MuCTPIL1TopoCandidate & roi) const {
    // L1Topo simulation uses positive phi (from 0 to 2pi) => transform phiTopo
    float fEta = roi.geteta();
    float fPhi = roi.getphi();
+   
+   int etaTopo = TSU::toTopoEta(fEta);
+   unsigned int phiTopo = TSU::toTopoPhi(fPhi);
   
    unsigned int EtTopo = roi.getptValue()*10;
-   if (fPhi < 0) { fPhi += 2*M_PI; }
-   fPhi *= phiRescaleFactor; // 2pi -> 6.4
-   int etaTopo = topoIndex(fEta,40);
-   int phiTopo = topoIndex(fPhi,20) % 128;
+   
 
    
-   TCS::MuonTOB muon( EtTopo, 0, etaTopo, static_cast<unsigned int>(phiTopo), roi.getRoiID() );
+   TCS::MuonTOB muon( EtTopo, 0, etaTopo, phiTopo, roi.getRoiID() );
    muon.setEtDouble(static_cast<double>(EtTopo/10.));
    muon.setEtaDouble(static_cast<double>(etaTopo/40.));
    muon.setPhiDouble(static_cast<double>(phiTopo/20.));
@@ -200,16 +201,16 @@ MuonInputProvider::createLateMuonTOB(const MuCTPIL1TopoCandidate & roi) const {
 
    ATH_MSG_DEBUG("Late Muon ROI (MuCTPiToTopo):bcid=1 thr pt = " << roi.getptThresholdID() << " eta = " << roi.geteta() << " phi = " << roi.getphi() << ", w   = " << MSG::hex << std::setw( 8 ) << roi.getRoiID() << MSG::dec);
 
-   unsigned int EtTopo = roi.getptValue()*10;
-   
+   float fEta = roi.geteta();
    float fPhi = roi.getphi();
-   if (fPhi < 0) { fPhi += 2*M_PI; }
-   fPhi *= phiRescaleFactor; // 2pi -> 6.4
-   int etaTopo = topoIndex(roi.geteta(),40);
-   int phiTopo = topoIndex(fPhi,20) % 128;
+   
+   int etaTopo = TSU::toTopoEta(fEta);
+   unsigned int phiTopo = TSU::toTopoPhi(fPhi);
+
+   unsigned int EtTopo = roi.getptValue()*10;
 
  
-   TCS::LateMuonTOB muon( EtTopo, 0, etaTopo, static_cast<unsigned int>(phiTopo), roi.getRoiID() );
+   TCS::LateMuonTOB muon( EtTopo, 0, etaTopo, phiTopo, roi.getRoiID() );
 
    muon.setEtDouble(static_cast<double>(EtTopo/10.));
    muon.setEtaDouble(static_cast<double>(etaTopo/40.));
@@ -250,18 +251,6 @@ MuonInputProvider::createLateMuonTOB(const MuCTPIL1TopoCandidate & roi) const {
 
    ATH_MSG_DEBUG("LateMuon created");
    return muon;
-}
-
-int
-MuonInputProvider::topoIndex(float x, int g) const {
-  float tmp = x*g;
-  float index;
-  if ( (abs(tmp)-0.5)/2. == std::round((abs(tmp)-0.5)/2.) ) {
-    if ( tmp>0 ) { index = std::floor(tmp); }               
-    else { index = std::ceil(tmp); }                      
-  }
-  else { index = std::round(tmp); }
-  return static_cast<int>(index);
 }
 
 int

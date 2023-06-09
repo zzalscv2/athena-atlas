@@ -84,7 +84,9 @@ TCS::jJetMultiplicity::process( const TCS::InputTOBArray & input,
     const GenericTOB gtob(**jjet);
 
     // Dividing by 4 standing for converting eta from 0.025 to 0.1 granularity as it is defined in the menu as 0.1 gran.
-    bool passed = gtob.Et() > jJThr.thrValue100MeV(gtob.eta()/4);
+    // Using abs eta here as L1ThresholdBase is not symmetric under eta -> -eta (even if configured in a seemingly symmetric way due to "min <= value < max" requirement)
+    // The corresponding FW algorithm, however, explicitly supports only ranges defined w.r.t. abs(eta) and is therefore symmetric
+    bool passed = gtob.Et() > jJThr.thrValue100MeV(abs(gtob.eta()/4)); 
 
     if (passed) {
       counting++; 

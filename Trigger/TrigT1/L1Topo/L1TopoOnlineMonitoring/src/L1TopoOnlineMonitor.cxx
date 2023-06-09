@@ -405,7 +405,6 @@ StatusCode L1TopoOnlineMonitor::doHwMon( DecisionBits& decisionBits, std::vector
   triggerBits = l1topoResult->getDecisions();
   overflowBits = l1topoResult->getOverflows();
 
-  triggerBits = triggerBits & (~overflowBits);
   const std::vector<size_t> triggerBitIndicesHdw = bitsetIndices(triggerBits);
   const std::vector<size_t> overflowBitIndicesHdw = bitsetIndices(overflowBits);
   

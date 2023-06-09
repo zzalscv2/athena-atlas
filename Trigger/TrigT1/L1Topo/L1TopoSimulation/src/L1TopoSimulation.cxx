@@ -412,7 +412,6 @@ L1TopoSimulation::hardwareDecisionPhase1(const EventContext& ctx)
   hardwareDaqRobOvrflowBits = l1topoResult->getOverflows();
 
 
-  hardwareDaqRobTriggerBits = hardwareDaqRobTriggerBits & ~hardwareDaqRobOvrflowBits;
   
   m_topoSteering->setHardwareBits(hardwareDaqRobTriggerBits,
 				  hardwareDaqRobOvrflowBits);
