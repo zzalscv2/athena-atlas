@@ -21,6 +21,7 @@ def CTPSimulationCfg(flags):
                                                         eFexTauInput = "",
                                                         TopoInput = "L1TopoToCTPLocation",
                                                         LegacyTopoInput = "L1TopoLegacyToCTPLocation",
+                                                        DoZDC = flags.Trigger.doZDC,
                                                         ForceBunchGroupPattern = False if flags.Beam.Type is BeamType.Cosmics else True #to allow simulation of cosmics triggers in MC
                                                         ))
     log.info("Not all part of CTP simulation are enabled yet")

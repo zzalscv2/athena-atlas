@@ -72,7 +72,7 @@ LVL1CTP::CTPSimulation::initialize() {
    ATH_CHECK( m_iKeyTopo.initialize( !m_iKeyTopo.empty() ) );
    ATH_CHECK( m_iKeyMuctpi.initialize( ! m_iKeyMuctpi.empty() ) );
 
-   // Legacy L1Calo 
+   // Legacy L1Calo
    ATH_CHECK( m_iKeyLegacyTopo.initialize( !m_iKeyLegacyTopo.empty() &&  m_doL1CaloLegacy ) );
    ATH_CHECK( m_iKeyCtpinEM.initialize( m_doL1CaloLegacy ) );
    ATH_CHECK( m_iKeyCtpinJet.initialize( m_doL1CaloLegacy ) );
@@ -89,6 +89,9 @@ LVL1CTP::CTPSimulation::initialize() {
    ATH_CHECK( m_iKeyEFexTau.initialize( ! m_iKeyEFexTau.empty() ) );
    ATH_CHECK( m_oKeyRDO.initialize( ! m_oKeyRDO.empty() ) );
    ATH_CHECK( m_oKeySLink.initialize( ! m_oKeySLink.empty() ) );
+
+   // L1ZDC
+   ATH_CHECK(  m_iKeyZDC.initialize( ! m_iKeyZDC.empty() && m_doZDC ) );
 
    // services
    ATH_CHECK( m_histSvc.retrieve() );
@@ -289,7 +292,7 @@ LVL1CTP::CTPSimulation::setHistLabels(const TrigConf::L1Menu& l1menu) {
       for(uint fpga : {0,1}) {
          for(uint clock : {0,1}) {
             for(auto & tl : l1menu.connector(connName).triggerLines(fpga,clock)) {
-               uint flatIndex = tl.flatindex(); 
+               uint flatIndex = tl.flatindex();
                hTopo->GetXaxis()->SetBinLabel(flatIndex+1,tl.name().c_str());
             }
          }
@@ -568,7 +571,7 @@ LVL1CTP::CTPSimulation::fillInputHistograms(const EventContext& context) const {
             if( (legacyTopoInput->cableWord2(0) & mask) != 0 ) h1->Fill(i); // cable 1, clock 0
             if( (legacyTopoInput->cableWord2(1) & mask) != 0 ) h1->Fill(32 + i); // cable 1, clock 1
          }
-      }      
+      }
    }
 
    if( not m_iKeyTopo.empty() ) {
@@ -620,7 +623,8 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
    thrMultiMap.clear();
 
    std::vector<std::string> connNames = l1menu->connectorNames();
-   for( const std::string connName : {"LegacyTopo0", "LegacyTopo1", "Topo1El", "Topo2El", "Topo3El", "Topo1Opt0", "Topo1Opt1", "Topo1Opt2", "Topo1Opt3"}) {
+   for (const std::string connName : {"LegacyTopo0", "LegacyTopo1", "Topo1El", "Topo2El", "Topo3El", "Topo1Opt0", "Topo1Opt1", "Topo1Opt2", "Topo1Opt3", "CTPCAL"})
+   {
       if( find(connNames.begin(), connNames.end(), connName) == connNames.end() ) {
          continue;
       }
@@ -639,7 +643,30 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
          } else if (connName == "LegacyTopo1") {
             cable = ( (uint64_t)topoInput->cableWord2( 1 ) << 32) + topoInput->cableWord2( 0 );
          }
-      } else { // new topo
+      }
+      else if (connName.find("CTPCAL") == 0 && m_doZDC) // ZDC simulation
+      {
+         auto &conn = l1menu->connector(connName);
+         for (auto &tl : conn.triggerLines()){
+            if (tl.name().find("ZDC") == std::string::npos)
+            {
+               continue;
+            }
+         auto zdcInput = SG::makeHandle(m_iKeyZDC, context);
+         if (not zdcInput.isValid())
+         {
+            continue;
+         }
+         cable = static_cast<uint64_t>(zdcInput->cableWord0());
+         uint flatIndex = tl.flatindex();
+         uint pass = (cable & (uint64_t(0x1) << flatIndex)) == 0 ? 0 : 1;
+         thrMultiMap[tl.name()];
+         ATH_MSG_DEBUG(tl.name() << " MULT calculated mult for topo " << pass);
+         }
+         continue;
+      }
+
+       else { // new topo
          if (m_iKeyTopo.empty())
          {
             continue;
@@ -669,7 +696,7 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
          for(uint clock : {0,1}) {
             for(auto & tl : conn.triggerLines(fpga,clock)) {
                uint flatIndex = tl.flatindex();
-               uint pass = (cable & (uint64_t(0x1) << flatIndex)) == 0 ? 0 : 1;
+               uint pass = (cable & (static_cast<uint64_t>(0x1) << flatIndex)) == 0 ? 0 : 1;
                if(size_t pos = tl.name().find('['); pos == std::string::npos) {
                   thrMultiMap[tl.name()] = pass;
                   ATH_MSG_DEBUG(tl.name() << " MULT calculated mult for topo " << pass);
@@ -685,11 +712,15 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
       }
    }
    for ( auto & thr : l1menu->thresholds() ) {
-      if(thr->type() == "TOPO" or thr->type()== "R2TOPO" or thr->type() == "MULTTOPO" or thr->type() == "MUTOPO") {
+      if (thr->type() == "TOPO" or thr->type() == "R2TOPO" or thr->type() == "MULTTOPO" or thr->type() == "MUTOPO")
+      {
+         continue;
+      }
+      if( thr->type() == "ZDC" && m_doZDC ){
          continue;
       }
       // get the multiplicity for each threshold
-      unsigned int multiplicity = calculateMultiplicity( *thr, l1menu, context );
+      unsigned int multiplicity = calculateMultiplicity(*thr, l1menu, context);
       // and record in threshold--> multiplicity map (to be used for item decision)
       thrMultiMap[thr->name()] = multiplicity;
       ATH_MSG_DEBUG( thr->name()  << " MULT calculated mult for topo " << multiplicity);
@@ -973,7 +1004,6 @@ unsigned int
 LVL1CTP::CTPSimulation::calculateMultiplicity( const TrigConf::L1Threshold & confThr, const TrigConf::L1Menu * l1menu, const EventContext& context ) const {
    unsigned int multiplicity = 0;
    try {
-     //ATH_MSG_INFO("confThr.type() " << confThr.type() << " ");
       if ( confThr.type() == "EM" ) {
          multiplicity = calculateEMMultiplicity( confThr, l1menu, context );
       } else if ( confThr.type() == "TAU" ) {
@@ -988,7 +1018,6 @@ LVL1CTP::CTPSimulation::calculateMultiplicity( const TrigConf::L1Threshold & con
          multiplicity = calculateTopoMultiplicity( confThr, l1menu, context );
       } else if ( confThr.type()[0] == 'e' || confThr.type()[0] == 'c' || confThr.type()[0] == 'j' || confThr.type()[0] == 'g' ){
       	 multiplicity = calculateTopoOptMultiplicity( confThr, l1menu, context );
-	 //ATH_MSG_INFO("confThr.type() " << confThr.type() << " " << "mult:" << multiplicity);  
       }
    }
    catch(std::exception & ex) {

@@ -102,6 +102,9 @@ def createTriggerFlags(doTriggerRecoFlags):
     # Enable additional validation histograms
     flags.addFlag('Trigger.doValidationMonitoring', False)
 
+    # Enable ZDC System
+    flags.addFlag('Trigger.doZDC', False)
+
     # Checks the validity of each Decision Object produced by a HypoAlg, including all of its
     # parents all the way back to the HLTSeeding. Potentially CPU expensive.
     # also enables per step decison printouts
@@ -275,9 +278,9 @@ def createTriggerFlags(doTriggerRecoFlags):
             elif hasLocal:
                 # When running reco (doHLT == False) from RAW in a directory which already has a full suite of JSONs, assume that the user has just run the trigger manually
                 # and now wants to reconstruct the output using the menu files created when the trigger was executed, rather than reading the DB configuration for the run.
-                # A number of ART tests chain trigger then reco like this. 
+                # A number of ART tests chain trigger then reco like this.
                 _log.debug("Autoconfigured default value for running reconstruction with a pre-supplied set of trigger configuration JSON files: 'FILE'")
-                return 'FILE' 
+                return 'FILE'
             elif flags.GeoModel.Run >= LHCPeriod.Run3:
                 # When reconstructing Run 3 data the default config source is the database
                 _log.debug("Autoconfigured default value for reconstruction of Run 3 data: 'DB'")
@@ -399,7 +402,7 @@ def createTriggerRecoFlags():
         from TrigCaloRec.TrigCaloConfigFlags import createTrigCaloConfigFlags
         return createTrigCaloConfigFlags()
     flags.addFlagsCategory( 'Trigger.Calo', __trigCalo )
-     
+
     # NB: Longer term it may be worth moving these into a PF set of config flags, but right now the only ones that exist do not seem to be used in the HLT.
     # When we use component accumulators for this in the HLT maybe we should revisit this
     # PFO-muon removal option for the full-scan hadronic signatures.
@@ -410,7 +413,7 @@ def createTriggerRecoFlags():
     flags.addFlag("Trigger.FSHad.PFOMuonRemoval", "Calo")
 
     # the minimum pT threshold to use for the muon removal
-    flags.addFlag("Trigger.FSHad.PFOMuonRemovalMinPt", 10 * GeV)   
+    flags.addFlag("Trigger.FSHad.PFOMuonRemovalMinPt", 10 * GeV)
 
     # enable fast b-tagging for all fully calibrated HLT PFlow jets
     flags.addFlag("Trigger.Jet.fastbtagPFlow", True)
