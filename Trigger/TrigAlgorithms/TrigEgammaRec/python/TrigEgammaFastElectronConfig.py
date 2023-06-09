@@ -28,13 +28,14 @@ def fastElectronFexAlgCfg(flags, name="EgammaFastElectronFex_1", rois="EMRoIs"):
                                          CaloTrackdEoverPHigh=999.0,
                                          RCalBarrelFace=1470.0*mm,
                                          ZCalEndcapFace=3800.0*mm,
+                                         useCaloInfoInExtrap=flags.Trigger.egamma.useCaloInfoInExtrap,
                                          ParticleCaloExtensionTool=extTool,
                                          ElectronsName=recordable("HLT_FastElectrons"),
                                          RoIs=rois,
                                          TrackParticlesName="HLT_IDTrack_Electron_FTF",
                                          TrigEMClusterName="HLT_FastCaloEMClusters",
                                          DummyElectronsName="HLT_FastDummyElectrons"
-                                        )
+                                         )
 
     monTool = GenericMonitoringTool(flags, 'MonTool')
     monTool.defineHistogram('CaloTrackdEta', path='EXPERT', type='TH1F', title="FastElectron Hypo #Delta #eta between cluster and track;#Delta #eta;Nevents", xbins=80, xmin=-0.4, xmax=0.4)
@@ -49,3 +50,5 @@ def fastElectronFexAlgCfg(flags, name="EgammaFastElectronFex_1", rois="EMRoIs"):
 
     acc.addEventAlgo(efex)
     return acc
+
+
