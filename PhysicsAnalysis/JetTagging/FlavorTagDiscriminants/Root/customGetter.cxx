@@ -255,28 +255,36 @@ namespace {
       SG::AuxElement::ConstAccessor<unsigned char> barrel_hits("numberOfInnermostPixelLayerHits");
       SG::AuxElement::ConstAccessor<unsigned char> endcap_hits("numberOfInnermostPixelLayerEndcapHits");
       return TJGetter([barrel_hits, endcap_hits](const Tp& t, const Jet&) {
-        return barrel_hits(t) + endcap_hits(t);
+        unsigned char hits = barrel_hits(t);
+        if(endcap_hits.isAvailable(t)) hits += endcap_hits(t);
+        return hits;
       });
     }
     if (name == "numberOfNextToInnermostPixelLayerHits21p9") {
       SG::AuxElement::ConstAccessor<unsigned char> barrel_hits("numberOfNextToInnermostPixelLayerHits");
       SG::AuxElement::ConstAccessor<unsigned char> endcap_hits("numberOfNextToInnermostPixelLayerEndcapHits");
       return TJGetter([barrel_hits, endcap_hits](const Tp& t, const Jet&) {
-        return barrel_hits(t) + endcap_hits(t);
+        unsigned char hits = barrel_hits(t);
+        if(endcap_hits.isAvailable(t)) hits += endcap_hits(t);
+        return hits;
       });
     }
     if (name == "numberOfInnermostPixelLayerSharedHits21p9") {
       SG::AuxElement::ConstAccessor<unsigned char> barrel_hits("numberOfInnermostPixelLayerSharedHits");
       SG::AuxElement::ConstAccessor<unsigned char> endcap_hits("numberOfInnermostPixelLayerSharedEndcapHits");
       return TJGetter([barrel_hits, endcap_hits](const Tp& t, const Jet&) {
-        return barrel_hits(t) + endcap_hits(t);
+        unsigned char hits = barrel_hits(t);
+        if(endcap_hits.isAvailable(t)) hits += endcap_hits(t);
+        return hits;
       });
     }
     if (name == "numberOfInnermostPixelLayerSplitHits21p9") {
       SG::AuxElement::ConstAccessor<unsigned char> barrel_hits("numberOfInnermostPixelLayerSplitHits");
       SG::AuxElement::ConstAccessor<unsigned char> endcap_hits("numberOfInnermostPixelLayerSplitEndcapHits");
       return TJGetter([barrel_hits, endcap_hits](const Tp& t, const Jet&) {
-        return barrel_hits(t) + endcap_hits(t);
+        unsigned char hits = barrel_hits(t);
+        if(endcap_hits.isAvailable(t)) hits += endcap_hits(t);
+        return hits;
       });
     }
 
