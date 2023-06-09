@@ -1971,7 +1971,7 @@ return (m.muon->charge()>0);
 	    if ( data->detectorElementOut() == nullptr ) n_TgcCoin_detElementIsNull++;
 	    if ( data->posOutPtr() == nullptr ) n_TgcCoin_postOutPtrIsNull++;
 
-	    int slsector = (data->isForward()) ? ( (data->phi() + 1) % 24 + 1) : ( (data->phi() + 1) % 48 + 1); // translation from the phi index to trigger sector
+	    int slsector = (data->isForward()) ? ( data->phi() % 24 + 1) : ( (data->phi() + 1) % 48 + 1); // translation from the phi index to trigger sector
 	    if(!data->isAside()) slsector *= -1;
 
 	    if(data->type() == Muon::TgcCoinData::TYPE_UNKNOWN){ // inner muon detectors (EI/FI/Tile/NSW/RPCBIS78)
