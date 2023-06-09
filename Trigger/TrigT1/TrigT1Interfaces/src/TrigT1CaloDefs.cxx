@@ -32,6 +32,7 @@ const std::string TrigT1CaloDefs::xAODTriggerTowerLocation="xAODTriggerTowers";
 const std::string TrigT1CaloDefs::xAODTriggerTowerRerunLocation="xAODTriggerTowers_rerun";
 const std::string TrigT1CaloDefs::JetElementLocation="JetElements";
 const std::string TrigT1CaloDefs::CPMTowerLocation="CPMTowers";
+const std::string TrigT1CaloDefs::xAODZdcMoudleLocation="ZdcModules";
 
 const std::string TrigT1CaloDefs::CPMHitsLocation="CPMHits";
 const std::string TrigT1CaloDefs::JEMHitsLocation="JEMHits";
@@ -68,6 +69,7 @@ const std::string TrigT1CaloDefs::JetEtROILocation="JetEtROIs";
 const std::string TrigT1CaloDefs::EmTauCTPLocation="CaloTriggerDataLocation_EmTauCTP";
 const std::string TrigT1CaloDefs::JetCTPLocation="CaloTriggerDataLocation_JetCTP";
 const std::string TrigT1CaloDefs::EnergyCTPLocation="CaloTriggerDataLocation_EnergyCTP";
+const std::string TrigT1CaloDefs::ZdcCTPLocation = "L1ZDCtoCTPLocation";
 
 const std::string TrigT1CaloDefs::EmTauSlinkLocation="CaloTriggerDataLocation_EmTauSlink";
 const std::string TrigT1CaloDefs::jepSlinkLocation="CaloTriggerDataLocation_JEPSlink";
@@ -94,7 +96,7 @@ const double TrigT1CaloDefs::Region5EtaCentre=4.05;
 
 // TrigT1CaloDefs::RegionERROREtaBin defined in header.
 const double TrigT1CaloDefs::RegionERROREtaCentre=8.0;
-	  
+
 const double TrigT1CaloDefs::Region0Width=0.2;
 const double TrigT1CaloDefs::Region1Width=0.2;
 const double TrigT1CaloDefs::Region2Width=0.3;
@@ -114,7 +116,7 @@ const double TrigT1CaloDefs::Region5JetHeight=M_PI/16;
 
 // geometrical info
 const double TrigT1CaloDefs::cpmPhiSize=M_PI/2;
-const double TrigT1CaloDefs::cpmEtaSize=0.4;  
+const double TrigT1CaloDefs::cpmEtaSize=0.4;
 const double TrigT1CaloDefs::jemPhiSize=M_PI/2;
 const double TrigT1CaloDefs::jemEtaSize=0.8;  //note, end JEMs are larger.
 
