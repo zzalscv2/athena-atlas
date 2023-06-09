@@ -18,6 +18,7 @@ run.args += ' --filesInput='+Input.get_input(run.input).paths[0]
 run.args += ' Trigger.triggerMenuSetup="Dev_HI_run3_v1_TriggerValidation_prescale"'
 run.args += ' Trigger.doRuntimeNaviVal=True'
 run.args += ' Trigger.L1.doAlfaCtpin=True'
+run.args += ' Trigger.L1.doHeavyIonTobThresholds=True'
 run.prmon = False
 
 

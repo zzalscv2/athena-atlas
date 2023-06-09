@@ -20,7 +20,8 @@ precommand = ''.join([
   "doL1Sim=True;",
   "doWriteBS=False;",
   "doWriteRDOTrigger=True;",
-  "doAlfaCtpin=True;",
+  "from AthenaConfiguration.AllConfigFlags import ConfigFlags;",
+  "ConfigFlags.Trigger.L1.doAlfaCtpin=True;",
 ])
 ex.args = '-c "{:s}"'.format(precommand)
 

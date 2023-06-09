@@ -202,6 +202,9 @@ def createTriggerFlags(doTriggerRecoFlags):
     # replace Topo3 with ALFA in CTP inputs
     flags.addFlag('Trigger.L1.doAlfaCtpin', False)
 
+    # modify min-pt-to-Topo threshold for TOBs to HI values
+    flags.addFlag('Trigger.L1.doHeavyIonTobThresholds', lambda prevFlags: 'HI' in prevFlags.Trigger.triggerMenuSetup)
+
     # partition name used to determine online vs offline BS result writing
     flags.addFlag('Trigger.Online.partitionName', os.getenv('TDAQ_PARTITION') or '')
 
