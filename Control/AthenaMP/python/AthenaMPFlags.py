@@ -125,7 +125,7 @@ class UseSharedWriter(JobProperty):
     """
     statusOn = True
     allowedTypes = ['bool']
-    StoredValue = False
+    StoredValue = True
 
 class UseParallelCompression(JobProperty):
     """ Flag for activating event data compression in the workers
