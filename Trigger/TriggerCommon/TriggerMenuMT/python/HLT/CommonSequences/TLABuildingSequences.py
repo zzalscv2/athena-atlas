@@ -5,7 +5,6 @@ from TriggerMenuMT.HLT.Config.MenuComponents import ChainStep, menuSequenceCAToG
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from ..Jet.JetChainConfiguration import JetChainConfiguration
-from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
 from ..Photon.PrecisionPhotonTLAMenuSequenceConfig import PhotonTLAMenuSequenceCfg
 from ..Jet.JetTLASequenceConfig import JetTLAMenuSequenceCfg
 from ..Muon.MuonTLASequenceConfig import MuonTLAMenuSequenceCfg
@@ -106,11 +105,6 @@ def alignTLASteps(chain_configs, chain_dicts):
     def getTLAStepPosition(chainConfig):
         tlaStep = findTLAStep(chainConfig)
 
-        try:
-            if isComponentAccumulatorCfg() and tlaStep is None:
-                raise NoCAmigration ("[alignTLASteps] Missing TLA sequence with CA configurables")
-        except NoCAmigration:
-            return 0
         log.debug('getTLAStepPosition found step %s and return %d',tlaStep,chainConfig.steps.index(tlaStep) + 1)
         return chainConfig.steps.index(tlaStep) + 1
 
@@ -119,7 +113,7 @@ def alignTLASteps(chain_configs, chain_dicts):
         tlaStepPosition = getTLAStepPosition(chainConfig)
         if tlaStepPosition > maxTLAStepPosition:
             maxTLAStepPosition = tlaStepPosition
-    
+
     log.debug('maxTLAStepPosition=%d',maxTLAStepPosition)
     
     # Second loop to insert empty steps before the TLA steps where needed
