@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./DebugInfoCollector.h"
@@ -9,9 +9,10 @@
 
 DebugInfoCollector::DebugInfoCollector(const std::string& name,
 				       bool byTime):
-  m_name(name), m_byTime(byTime){
-  constexpr bool nanoseconds{false};  // false: units are us
-  m_timer = JetTrigTimer(nanoseconds);
+  m_name(name),
+  m_byTime(byTime),
+  m_timer(false)  // false: units are us
+{
   m_timer.start();
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_BASESIMULATIONSVC_H
@@ -68,7 +68,7 @@ namespace ISF {
     virtual ~BaseSimulationSvc() {};
 
     /** Gaudi sysInitialize() methods */
-    StatusCode sysInitialize()
+    virtual StatusCode sysInitialize() override
     {
       if ( AthService::sysInitialize().isFailure() ) {
         ATH_MSG_FATAL( m_screenOutputPrefix << " Cannot initialize AthService! Abort.");
@@ -86,11 +86,11 @@ namespace ISF {
     std::string& simSvcDescriptor() { return m_simDescr; }
 
     /** Setup Event chain - in case of a begin-of event action is needed */
-    StatusCode setupEvent()
+    virtual StatusCode setupEvent() override
     { return StatusCode::SUCCESS; }
 
     /** Release Event chain - in case of an end-of event action is needed */
-    StatusCode releaseEvent()
+   virtual  StatusCode releaseEvent() override
     { return StatusCode::SUCCESS; }
 
     /** Inform the SimulationSvc about the ParticleBroker svc */
@@ -100,7 +100,7 @@ namespace ISF {
     }
 
     /** Simulation call for vectors of particles */
-    virtual StatusCode simulateVector(const ISFParticleVector& particles, McEventCollection* mcEventCollection) {
+    virtual StatusCode simulateVector(const ISFParticleVector& particles, McEventCollection* mcEventCollection, McEventCollection *) override {
       // this implementation is a wrapper in case the simulator does
       // implement particle-vector input
       bool success = true;
@@ -118,7 +118,7 @@ namespace ISF {
     }
 
     /** Simulation call for individual particles */
-    virtual StatusCode simulate(ISFParticle& isp, McEventCollection* mcEventCollection);
+    virtual StatusCode simulate(ISFParticle& isp, McEventCollection* mcEventCollection) override;
 
     /** wrapper call to start chrono with given tag */
     const ChronoEntity* chronoStart(const IChronoSvc::ChronoTag& tag ) {

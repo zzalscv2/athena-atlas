@@ -105,7 +105,7 @@ if '__main__' in __name__:
     # Configure the output stream
     log.info('== Configuring Output Stream')
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    cfg.merge(OutputStreamCfg(flags, 'AOD'))
+    cfg.merge(OutputStreamCfg(flags, 'AOD', takeItemsFromInput=True, AcceptAlgs = ['EventFilterAlg']))
 
     # Configure metadata
     log.info('== Configuring metadata for the output stream')
@@ -115,8 +115,6 @@ if '__main__' in __name__:
     # Setup the output stream algorithm
     StreamAOD = cfg.getEventAlgo('OutputStreamAOD')
     StreamAOD.ForceRead = True
-    StreamAOD.TakeItemsFromInput = True
-    StreamAOD.AcceptAlgs = ['EventFilterAlg']
 
     # For (un)packing Cell Containers
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg

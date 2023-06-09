@@ -91,10 +91,9 @@ def fromRunArgs(runArgs):
 
     # Configure the output stream
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    cfg.merge(OutputStreamCfg(flags, streamToMerge))
+    cfg.merge(OutputStreamCfg(flags, streamToMerge, takeItemsFromInput = True))
     Stream = cfg.getEventAlgo(f'OutputStream{streamToMerge}')
     Stream.ForceRead = True
-    Stream.TakeItemsFromInput = True
     # Add in-file MetaData
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     cfg.merge(

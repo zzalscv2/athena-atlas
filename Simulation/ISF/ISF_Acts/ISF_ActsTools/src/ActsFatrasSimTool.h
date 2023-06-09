@@ -203,7 +203,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
   virtual StatusCode simulateVector(
             const ISFParticleVector& particles,
             ISFParticleContainer& secondaries,
-            McEventCollection* mcEventCollection) override;
+            McEventCollection* mcEventCollection, McEventCollection *shadowTruth=nullptr) override;
   virtual StatusCode setupEvent(const EventContext&) override {
     return StatusCode::SUCCESS; };
   virtual StatusCode releaseEvent(const EventContext&) override {

@@ -79,7 +79,7 @@ namespace iGeant4
 
     virtual StatusCode simulate( ISF::ISFParticle& isp, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection ) override;
 
-    virtual StatusCode simulateVector( const ISF::ISFParticleVector& particles, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection ) override;
+    virtual StatusCode simulateVector( const ISF::ISFParticleVector& particles, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection, McEventCollection *shadowTruth=nullptr ) override;
 
     virtual StatusCode setupEvent(const EventContext&) override;
 

@@ -642,8 +642,7 @@ def CombinedMuonOutputCfg(flags):
         esd_items += ["Trk::SegmentCollection#UnAssocMuonTrkSegments"]
     # Truth
     if flags.Input.isMC:
-        esd_items = [
-            "DetailedTrackTruthCollection#ExtrapolatedMuonTracksTruth"]
+        esd_items += ["DetailedTrackTruthCollection#ExtrapolatedMuonTracksTruth"]
         esd_items += ["DetailedTrackTruthCollection#CombinedMuonTracksTruth"]
         esd_items += ["DetailedTrackTruthCollection#ExtrapolatedMuonTrackParticlesTruth"]
         esd_items += ["DetailedTrackTruthCollection#CombinedMuonTrackParticlesTruth"]

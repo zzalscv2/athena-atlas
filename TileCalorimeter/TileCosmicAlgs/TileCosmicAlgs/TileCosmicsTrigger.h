@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -57,7 +57,7 @@ class TileTTL1Hash;
 class TileCosmicsTrigger: public AthAlgorithm {
   public:
     //Constructor
-    TileCosmicsTrigger(const std::string name, ISvcLocator* pSvcLocator);
+    TileCosmicsTrigger(const std::string& name, ISvcLocator* pSvcLocator);
 
     //Destructor 
     virtual ~TileCosmicsTrigger();

@@ -16,14 +16,12 @@ from AthenaCommon.CFElements import seqAND
 
 
 def getLArNoiseBurstRecoSequence(flags):
-    from AthenaCommon.CFElements import parOR
-    noiseBurstRecoSeq = parOR('LArNoiseRecoSeq')
-    from TriggerMenuMT.HLT.CommonSequences.CaloSequences import cellRecoSequence
-    cells_sequence, cells_name = RecoFragmentsPool.retrieve(cellRecoSequence, flags, RoIs='')
-    noiseBurstRecoSeq += cells_sequence
+    from TrigCaloRec.TrigCaloRecConfig import hltCaloCellMakerCfg
+    cells_sequence = algorithmCAToGlobalWrapper(hltCaloCellMakerCfg, flags = flags, name="HLTCaloCellMakerFS", roisKey='')[0]
+    cells_name = 'CaloCellsFS' 
     from TrigCaloHypo.TrigCaloHypoConfig import TrigLArNoiseBurstRecoAlgCfg
-    noiseBurstRecoSeq += algorithmCAToGlobalWrapper(TrigLArNoiseBurstRecoAlgCfg, flags, cells_name)[0]
-    
+    TrigLArNoiseBurstRecoAlg = algorithmCAToGlobalWrapper(TrigLArNoiseBurstRecoAlgCfg, flags, cells_name)[0]
+    noiseBurstRecoSeq = seqAND('LArNoiseRecoSeq',[cells_sequence,TrigLArNoiseBurstRecoAlg])
     return noiseBurstRecoSeq
 
 

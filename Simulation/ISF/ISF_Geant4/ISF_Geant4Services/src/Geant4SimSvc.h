@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_GEANT4SIMSVC_H
@@ -41,7 +41,7 @@ namespace iGeant4 {
     virtual StatusCode simulate(ISF::ISFParticle& isp, McEventCollection* mcEventCollection) override;
 
     /** Simulation Call for vector of ISF particles */
-    virtual StatusCode simulateVector(const ISF::ISFParticleVector& particles, McEventCollection* mcEventCollection) override;
+    virtual StatusCode simulateVector(const ISF::ISFParticleVector& particles, McEventCollection* mcEventCollection, McEventCollection *shadowTruth=nullptr) override;
 
     /** Setup Event chain - in case of a begin-of event action is needed */
     virtual StatusCode setupEvent() override;

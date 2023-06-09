@@ -161,12 +161,8 @@ acc.getPublicTool('InDetTRT_StandaloneScoringTool').LuminosityTool.averageIntera
 itemsToRecord = ['TrackCollection#CombinedInDetTracks', 'TrackCollection#DisappearingTracks', 'TrackCollection#ResolvedForwardTracks', 'TrackCollection#ExtendedLargeD0Tracks', 'InDet::TRT_DriftCircleContainer#TRT_DriftCircles', "InDet::PixelClusterContainer#PixelClusters", "InDet::SCT_ClusterContainer#SCT_Clusters"]
 
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-acc.merge(OutputStreamCfg(flags,"RDO", ItemList=itemsToRecord))
+acc.merge(OutputStreamCfg(flags,"RDO", ItemList=itemsToRecord, takeItemsFromInput=True))
 acc.getEventAlgo("EventInfoTagBuilder").EventInfoKey="Bkg_EventInfo" # see OutputStreamConfig.py
-
-# Keep input RDO objects in the output file
-streamAlg=acc.getEventAlgo("OutputStreamRDO")
-streamAlg.TakeItemsFromInput=True
 
 # -------------------------------------------------------------
 # MessageSvc

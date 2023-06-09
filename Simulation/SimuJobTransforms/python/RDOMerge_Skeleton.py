@@ -107,8 +107,7 @@ def fromRunArgs(runArgs):
         cfg.merge(MuonGeoModelCfg(flags))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    cfg.merge(OutputStreamCfg(flags, 'RDO'))
-    cfg.getEventAlgo('OutputStreamRDO').TakeItemsFromInput = True
+    cfg.merge(OutputStreamCfg(flags, 'RDO', takeItemsFromInput = True))
 
     # Silence HepMcParticleLink warnings
     from Digitization.DigitizationSteering import DigitizationMessageSvcCfg
