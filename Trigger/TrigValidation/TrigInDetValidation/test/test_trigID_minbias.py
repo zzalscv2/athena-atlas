@@ -37,6 +37,7 @@ Slots   = 8
 Input   = 'minbias'    # defined in TrigValTools/share/TrigValInputs.json  
 GridFiles = True
 ExtraAna   = " -c 'ptmin=400' "
+preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAminbias.py'
 
 Jobs = [ ( "Truth",       " TIDAdata-run3-minbias.dat                    -o data-hists.root" ),
          ( "Offline",     " TIDAdata-run3-minbias-offline.dat -r Offline -o data-hists-offline.root" ) ]
