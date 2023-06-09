@@ -1047,8 +1047,6 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 				  tobPtVsPhiYdecoded_BA = pt;
 				  fill(m_packageName, tobPtVsPhiXdecoded_BA, tobPtVsPhiYdecoded_BA);
 
-				  slices[iSlice].tob[iTOB].print();
-
 				  break;
 			  }
 			  case 1: // FW
@@ -1187,8 +1185,6 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 				  tobPtVsPhiXdecoded_BA = phiDecoded;
 				  tobPtVsPhiYdecoded_BA = pt;
 				  fill(m_packageName, tobPtVsPhiXdecoded_BA, tobPtVsPhiYdecoded_BA);
-
-				  slices[iSlice].tob[iTOB].print();
 
 				  break;
 			  }
