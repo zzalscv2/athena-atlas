@@ -8,15 +8,16 @@
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
+from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps, Input
 
-ex = ExecStep.ExecStep()
-ex.type = 'athena'
-ex.args = '--CA'
+ex = ExecStep.ExecStep('athena')
+ex.type = 'other'
 ex.input = 'data'
-ex.job_options = 'TriggerJobOpts/runHLT.py'
-ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
-            'Trigger.doRuntimeNaviVal=True']
+ex.executable = 'runHLT_standalone_newJO.py'
+ex.args  = ' --filesInput='+Input.get_input('data').paths[0]
+ex.args += ' Trigger.triggerMenuSetup="Dev_pp_run3_v1"'
+ex.args += ' Trigger.doRuntimeNaviVal=True'
+ex.prmon = False
 
 test = Test.Test()
 test.art_type = 'build'

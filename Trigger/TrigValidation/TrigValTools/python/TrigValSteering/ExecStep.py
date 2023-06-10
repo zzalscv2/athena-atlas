@@ -11,6 +11,7 @@ import re
 
 from TrigValTools.TrigValSteering.Step import Step
 from TrigValTools.TrigValSteering.Input import is_input_defined, get_input
+from TrigValTools.TrigValSteering.Common import check_job_options
 
 
 class ExecStep(Step):
@@ -25,7 +26,6 @@ class ExecStep(Step):
         self.input = None
         self.input_object = None
         self.job_options = None
-        self.flags = []
         self.threads = None
         self.concurrent_events = None
         self.forks = None
@@ -42,7 +42,6 @@ class ExecStep(Step):
         self.auto_report_result = True
         self.required = True
         self.depends_on_previous = True
-        self._isCA = False   # ComponentAccumulator job?
 
     def construct_name(self):
         if self.name and self.type == 'other':
@@ -105,8 +104,6 @@ class ExecStep(Step):
             del_env('ATHENA_NPROC_NUM')
             del_env('ATHENA_CORE_NUMBER')
 
-        self._isCA = '--CA' in self.args or (self.type=='athenaHLT' and not self.job_options.endswith('.py'))
-
     def configure_input(self):
         self.log.debug('Configuring input for step %s', self.name)
         if self.input is None:
@@ -149,6 +146,12 @@ class ExecStep(Step):
                 self.misconfig_abort('Transform %s does not accept job options', self.type)
         elif self.job_options is None or len(self.job_options) == 0:
             self.misconfig_abort('Job options not provided for this step')
+        # Check if job options exist
+        if self.job_options.endswith('.py'):  # no check for CA modules in athenaHLT
+            if check_job_options(self.job_options):
+                self.log.debug('Job options file exists: %s', self.job_options)
+            else:
+                self.misconfig_abort('Failed to find job options file %s', self.job_options)
 
     def add_precommand(self, precommand):
         if self.type == 'athena':
@@ -252,19 +255,16 @@ class ExecStep(Step):
                 if self.type == 'athenaHLT':
                     athenaopts += ' --perfmon'
                 elif self.type == 'athena':
-                    athenaopts += ' --pmon=fastmonmt'
+                    athenaopts += ' --pmon=perfmonmt'
             if self.malloc:
                 athenaopts += " --stdcmalloc "
 
         # Enable CostMonitoring/FPEAuditor
         if self.type != 'other':
             if self.costmon:
-                self.flags.append('Trigger.CostMonitoring.monitorAllEvents=True')
+                self.add_hlt_jo_modifier('from AthenaConfiguration.AllConfigFlags import ConfigFlags; ConfigFlags.Trigger.CostMonitoring.monitorAllEvents=True')
             if self.fpe_auditor:
-                if self._isCA:
-                    self.flags.append('Exec.FPE=1')
-                else:
-                    self.add_hlt_jo_modifier('fpeAuditor=True')
+                self.add_hlt_jo_modifier('fpeAuditor=True')
 
         # Run config-only if requested
         if self.config_only :
@@ -366,16 +366,6 @@ class ExecStep(Step):
         # Append job options
         if self.job_options is not None:
             self.args += ' '+self.job_options
-
-        # Append flags
-        if self.flags:
-            if not isinstance(self.flags, (list, tuple)):
-                self.misconfig_abort('Wrong type for flags. Expected list or tuple.')
-            if self._isCA:   # simply append flags to command
-                self.args += ' ' + ' '.join(self.flags)
-            else:            # for legacy set flags as pre-command
-                self.add_hlt_jo_modifier('from AthenaConfiguration.AllConfigFlags import ConfigFlags;' +
-                                         ';'.join(f'ConfigFlags.{flag}' for flag in self.flags))
 
         # Strip extra whitespace
         self.args = self.args.strip()
