@@ -8,22 +8,24 @@
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
+from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps, Input
 
 # Generate configuration run file
-ex = ExecStep.ExecStep()
-ex.type = 'athena'
-ex.args = '--CA'
-ex.input = 'ttbar'
-ex.job_options = 'TriggerJobOpts/runHLT.py'
-ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
-            'Trigger.doRuntimeNaviVal=True',
-            'Output.doWriteRDO=False'] #TODO enable once fixes issue with missing containers
+run = ExecStep.ExecStep('athena')
+run.type = 'other'
+run.input = 'ttbar'
+run.executable = 'runHLT_standalone_newJO.py'
+run.args += ' --filesInput='+Input.get_input(run.input).paths[0]
+run.args += ' Trigger.triggerMenuSetup="Dev_pp_run3_v1"'
+run.args += ' Trigger.doRuntimeNaviVal=True'
+run.args += ' Output.doWriteRDO=False' #TODO enable once fixes issue with missing containers
+run.prmon = False
+
 
 # The full test configuration
 test = Test.Test()
 test.art_type = 'build'
-test.exec_steps = [ex]
+test.exec_steps = [run]
 test.check_steps = CheckSteps.default_check_steps(test)
 
 chaindump = test.get_step("ChainDump")

@@ -28,8 +28,7 @@ ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
 ex.input = 'mc_cosmics'
 ex.threads = 4
 ex.concurrent_events = 4
-ex.args = '-c "setMenu=\'Cosmic_run3_v1\';doCosmics=True;doWriteBS=False;doWriteRDOTrigger=True;from IOVDbSvc.CondDB import conddb;conddb.addOverride(\'/PIXEL/PixelModuleFeMask\',\'PixelModuleFeMask-SIM-MC16-000-03\');conddb.addOverride(\'/TRT/Calib/PID_NN\', \'TRTCalibPID_NN_v1\');conddb.addOverride(\'/PIXEL/PixelClustering/PixelNNCalibJSON\', \'PixelNNCalibJSON-SIM-RUN2-000-02\')"'
-ex.flags = ["Trigger.enableL1CaloPhase1=False"]
+ex.args = '-c "setMenu=\'Cosmic_run3_v1\';doCosmics=True;doWriteBS=False;doWriteRDOTrigger=True;from AthenaConfiguration.AllConfigFlags import ConfigFlags;ConfigFlags.Trigger.enableL1CaloPhase1=False;from IOVDbSvc.CondDB import conddb;conddb.addOverride(\'/PIXEL/PixelModuleFeMask\',\'PixelModuleFeMask-SIM-MC16-000-03\');conddb.addOverride(\'/TRT/Calib/PID_NN\', \'TRTCalibPID_NN_v1\');conddb.addOverride(\'/PIXEL/PixelClustering/PixelNNCalibJSON\', \'PixelNNCalibJSON-SIM-RUN2-000-02\')"'
 
 test = Test.Test()
 test.art_type = 'grid'
