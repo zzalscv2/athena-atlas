@@ -358,11 +358,20 @@ def BPHY24Cfg(ConfigFlags):
       FixElecExclusion                = False,
       IncludeV0                       = False)
 
+    BPHY24TrackIsolationDecoratorV0 = CompFactory.DerivationFramework.VertexTrackIsolation(
+      name                            = "BPHY24TrackIsolationDecoratorV0",
+      TrackIsoTool                    = TrackIsoTool,
+      TrackContainer                  = "InDetTrackParticles",
+      InputVertexContainer            = "BPHY24RecoV0Candidates",
+      FixElecExclusion                = False,
+      IncludeV0                       = False)
+
     augsList += [ BPHY24TrackIsolationDecoratorBtoKee,
               BPHY24TrackIsolationDecoratorBtoKmumu,
               BPHY24TrackIsolationDecoratorJpsiee,
               BPHY24TrackIsolationDecoratorJpsimumu,
-              BPHY24TrackIsolationDecoratorKshort]
+              BPHY24TrackIsolationDecoratorKshort,
+              BPHY24TrackIsolationDecoratorV0]
 
     trigger_list = [ # Pure muon triggers
     "HLT_mu11_mu6_bDimu",
