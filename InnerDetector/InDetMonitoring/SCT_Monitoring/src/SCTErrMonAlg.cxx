@@ -714,4 +714,4 @@ double SCTErrMonAlg::calculateDetectorCoverage(const TH2F& histo, const TH2F& hi
 const unsigned int SCTErrMonAlg::s_nBinsEta = 100;
 const double SCTErrMonAlg::s_rangeEta = 2.5;
 const unsigned int SCTErrMonAlg::s_nBinsPhi = 100;
-const double SCTErrMonAlg::s_wafersThreshold = 3.0;
+const double SCTErrMonAlg::s_wafersThreshold = 4.0;

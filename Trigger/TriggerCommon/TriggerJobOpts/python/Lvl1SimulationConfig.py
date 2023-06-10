@@ -1,8 +1,8 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-## @brief this function sets up the top L1 simulation sequence 
+## @brief this function sets up the top L1 simulation sequence
 ##
-## it covers the two cases of running L1 in the MC simulation and for rerunning on data 
+## it covers the two cases of running L1 in the MC simulation and for rerunning on data
 
 
 def Lvl1SimulationCfg(flags, seqName = None):
@@ -43,7 +43,12 @@ def Lvl1SimulationCfg(flags, seqName = None):
             from L1TopoSimulation.L1TopoSimulationConfig import L1LegacyTopoSimulationCfg
             acc.merge(L1LegacyTopoSimulationCfg(flags), sequenceName='L1LegacyTopoSimSeq')
 
-    
+    if flags.Trigger.doZDC:
+        acc.addSequence(seqAND('L1ZDCSimSeq'),parentName='L1SimSeq')
+        from TrigT1ZDC.TrigT1ZDCConfig import L1ZDCSimCfg
+        acc.merge(L1ZDCSimCfg(flags), sequenceName = 'L1ZDCSimSeq')
+
+
     acc.addSequence(seqAND('L1CTPSimSeq'), parentName='L1SimSeq')
     from TrigT1CTP.CTPSimulationConfig import CTPSimulationCfg
     acc.merge(CTPSimulationCfg(flags), sequenceName="L1CTPSimSeq")

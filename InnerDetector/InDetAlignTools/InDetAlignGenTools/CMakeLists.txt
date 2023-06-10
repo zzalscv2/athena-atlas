@@ -6,7 +6,6 @@ atlas_subdir( InDetAlignGenTools )
 # External dependencies:
 find_package( CLHEP )
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
-find_package( HepPDT )
 
 atlas_add_library( InDetAlignGenToolsLib
                    InDetAlignGenTools/*.h
@@ -18,7 +17,7 @@ atlas_add_library( InDetAlignGenToolsLib
 atlas_add_component( InDetAlignGenTools
                      src/*.cxx
                      src/components/*.cxx
-                     INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} ${HEPPDT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${CLHEP_LIBRARIES} ${CORAL_LIBRARIES} ${HEPPDT_LIBRARIES} AthContainers AthenaKernel AthenaPoolUtilities AtlasDetDescr AtlasHepMCLib DetDescrConditions GaudiKernel GeoPrimitives Identifier InDetAlignGenToolsLib InDetAlignTrkInfo InDetIdentifier InDetPrepRawData ReadoutGeometryBase InDetReadoutGeometry PixelReadoutGeometryLib RegistrationServicesLib SCT_ReadoutGeometry TrackRecordLib TrkEventPrimitives TrkExInterfaces TrkFitterInterfaces TrkMeasurementBase TrkParameters TrkPrepRawData TrkRIO_OnTrack TrkToolInterfaces TrkTrack TrkTrackSummary TrkTruthData )
+                     INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
+                     LINK_LIBRARIES ${CLHEP_LIBRARIES} ${CORAL_LIBRARIES} AthContainers AthenaKernel AthenaPoolUtilities AtlasDetDescr AtlasHepMCLib DetDescrConditions GaudiKernel GeoPrimitives Identifier InDetAlignGenToolsLib InDetAlignTrkInfo InDetIdentifier InDetPrepRawData ReadoutGeometryBase InDetReadoutGeometry PixelReadoutGeometryLib RegistrationServicesLib SCT_ReadoutGeometry TrackRecordLib TrkEventPrimitives TrkExInterfaces TrkFitterInterfaces TrkMeasurementBase TrkParameters TrkPrepRawData TrkRIO_OnTrack TrkToolInterfaces TrkTrack TrkTrackSummary TrkTruthData )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

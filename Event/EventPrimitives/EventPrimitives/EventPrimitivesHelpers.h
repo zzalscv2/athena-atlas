@@ -58,6 +58,20 @@ inline bool saneCovarianceDiagonal(const AmgSymMatrix(N) & mat) {
   }
   return true;
 }
+
+inline bool saneCovarianceDiagonal(Amg::MatrixX& mat) {
+  // For now use float min 1.1754943508222875e-38
+  // This implies that (sigma(q/p)) ^2 has to be greater than
+  // than 1.1754943508222875e-38
+  constexpr double MIN_COV_EPSILON = std::numeric_limits<float>::min();
+  int dim = mat.rows();
+  for (int i = 0; i < dim; ++i) {
+    if (mat(i, i) < MIN_COV_EPSILON || !saneCovarianceElement(mat(i, i)))
+      return false;
+  }
+  return true;
+}
+
 //// Check whether all components of a vector are finite and whether the
 //// length of the vector is still within the Geneva area, i.e. 10 km
 template <int N>

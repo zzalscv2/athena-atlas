@@ -63,7 +63,8 @@ def _vecdiff (v1, v2, nan_equal):
         for i in range (sz):
             val1 = v1[i]
             val2 = v2[i]
-            if not (val1 == val2 or (isnan_(val1) and isnan_(val2))):
+            if val1 != val2 and not all(
+                    [isinstance(_, Real) and isnan_(_) for _ in (val1, val2)]):
                 return i
     else:
         for i in range (sz):

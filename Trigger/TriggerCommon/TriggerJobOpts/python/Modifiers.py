@@ -213,16 +213,3 @@ class doRuntimeNaviVal(_modifier):
     def preSetup(self, flags):
         log.info("Enabling Runtime Trigger Navigation Validation")
         flags.Trigger.doRuntimeNaviVal = True
-
-
-###############################################################
-# L1 menu configuration
-###############################################################
-
-class doAlfaCtpin(_modifier):
-    """
-    Substitute AlfaCtpin for Topo3
-    """
-    def preSetup(self, flags):
-        log.info("Replacing Topo3 CTP input with AlfaCtpin")
-        flags.Trigger.L1.doAlfaCtpin = True
