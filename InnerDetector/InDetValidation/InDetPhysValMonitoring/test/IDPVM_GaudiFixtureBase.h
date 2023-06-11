@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -18,23 +18,22 @@
 #include "TInterpreter.h"
 #include "CxxUtils/ubsan_suppress.h"
 #include <string>
+#include <mutex>
 
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY; // This test uses static gaudiIsInitialised, and is not thread safe.
 
 struct IDPVM_GaudiFixtureBase{
   ISvcLocator* svcLoc{};
-  static bool gaudiIsInitialised;
   const std::string jobOpts{};
   IDPVM_GaudiFixtureBase(const std::string & jobOptionFile = "IDPVM_Test.txt"):jobOpts(jobOptionFile){
     CxxUtils::ubsan_suppress ([]() { TInterpreter::Instance(); } );
-    if (not gaudiIsInitialised){
+    static std::once_flag flag;
+    auto init = [&]() {
       std::string fullJobOptsName="InDetPhysValMonitoring/" + jobOpts;
-      gaudiIsInitialised=Athena_test::initGaudi(fullJobOptsName, svcLoc);
-    }
+      Athena_test::initGaudi(fullJobOptsName, svcLoc);
+    };
+    std::call_once (flag, init);
   }
 };
 
-bool IDPVM_GaudiFixtureBase::gaudiIsInitialised=false;
 
 #endif
