@@ -13,7 +13,12 @@ ToolSvc.JVTEfficiencyToolWARNING Supplied SF file JetJvtEfficiency/Moriond2018/J
 
 
 
-SUSYObjDef_xAOD          WARNING *** THE ELECTRON TRIGGER SF ARE CURRENTY NOT SUPPORTED ***
+SUSYObjDef_xAOD          WARNING (AsgElectronEfficiencyCorrectionTool_trig_mixLep_*) Your selected electron Iso WP (Loose_VarRad) does not have trigger SFs defined. Falling back to FCLoose for SF calculations
+SUSYObjDef_xAOD          WARNING (AsgElectronEfficiencyCorrectionTool_trig_mixLep_*) Your selected electron Iso WP (Loose_VarRad) does not have trigger SFs defined. Falling back to FCLoose for SF calculations
+SUSYObjDef_xAOD          WARNING (AsgElectronEfficiencyCorrectionTool_trig_mixLep_*) Your selected electron Iso WP (Loose_VarRad) does not have trigger SFs defined. Falling back to FCLoose for SF calculations
+SUSYObjDef_xAOD          WARNING (AsgElectronEfficiencyCorrectionTool_trig_mixLep_*) Your selected electron Iso WP (Loose_VarRad) does not have trigger SFs defined. Falling back to FCLoose for SF calculations
+SUSYObjDef_xAOD          WARNING (AsgElectronEfficiencyCorrectionTool_trig_mixLep_*) Your selected electron Iso WP (Loose_VarRad) does not have trigger SFs defined. Falling back to FCLoose for SF calculations
+SUSYObjDef_xAOD          WARNING (AsgElectronEfficiencyCorrectionTool_trig_mixLep_*) Your selected electron Iso WP (Loose_VarRad) does not have trigger SFs defined. Falling back to FCLoose for SF calculations
 SUSYObjDef_xAOD          WARNING *** THE ELECTRON CHARGE FLIP SF ARE CURRENTY NOT SUPPORTED ***
 SUSYObjDef_xAOD          WARNING No Photon trigger SF available for FixedCutTight, using TightCaloOnly instead... Use at your own risk
 ToolSvc.TauEffTool_MediumWARNING 2022-prerec tag are pre-recommendations and still under development.

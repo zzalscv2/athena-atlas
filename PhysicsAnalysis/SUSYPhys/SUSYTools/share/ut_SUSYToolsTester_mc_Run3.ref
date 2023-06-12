@@ -13,7 +13,7 @@ ToolSvc.JVTEfficiencyToolWARNING Supplied SF file JetJvtEfficiency/Moriond2018/J
 
 
 
-SUSYObjDef_xAOD          WARNING *** THE ELECTRON TRIGGER SF ARE CURRENTY NOT SUPPORTED ***
+SUSYObjDef_xAOD          WARNING *** THE ELECTRON TRIGGER SF MIXED AND SF DILEP ARE CURRENTY NOT SUPPORTED IN RUN3 ***
 SUSYObjDef_xAOD          WARNING *** THE ELECTRON CHARGE FLIP SF ARE CURRENTY NOT SUPPORTED ***
 SUSYObjDef_xAOD          WARNING No Photon trigger SF available for FixedCutTight, using TightCaloOnly instead... Use at your own risk
 ToolSvc.TauEffTool_MediumWARNING 2022-prerec tag are pre-recommendations and still under development.

@@ -37,7 +37,7 @@ ToolSvc.JVTEfficiencyTool                         WARNING Supplied SF file JetJv
 
 
 
-SUSYToolsAlg.SUSYTools                            WARNING *** THE ELECTRON TRIGGER SF ARE CURRENTY NOT SUPPORTED ***
+SUSYToolsAlg.SUSYTools                            WARNING *** THE ELECTRON TRIGGER SF MIXED AND SF DILEP ARE CURRENTY NOT SUPPORTED IN RUN3 ***
 SUSYToolsAlg.SUSYTools                            WARNING *** THE ELECTRON CHARGE FLIP SF ARE CURRENTY NOT SUPPORTED ***
 ToolSvc.TauEffTool_Medium                         WARNING 2022-prerec tag are pre-recommendations and still under development.
 === CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT ===
