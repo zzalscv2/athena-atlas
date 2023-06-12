@@ -18,7 +18,6 @@
 
 //Gaudi Includes
 
-
 //Atlas include
 #include "eformat/FullEventFragment.h"
 #include "ByteStreamCnvSvcBase/ROBDataProviderSvc.h"
@@ -176,6 +175,7 @@ StatusCode TileTBDump::initialize() {
 
   // find TileCablingService
   m_cabling = TileCablingService::getInstance();
+  m_runPeriod = m_cabling->runPeriod();
 
   int size = m_drawerList.size();
   for (int dr = 0; dr < size; ++dr) {
@@ -214,7 +214,6 @@ StatusCode TileTBDump::finalize() {
 }
 
 StatusCode TileTBDump::execute() {
-
 
   static std::atomic<bool> notFirst = false;
   if (m_dumpOnce && notFirst) return StatusCode::SUCCESS;
@@ -552,7 +551,12 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
       const char * ch12[6] = { "aux","lba","lbc","eba","ebc","unk" };
       const char * dr56hlEB[4] = {" D6L "," D6H "," D56L"," D56H"};
       const char * dr56hlLB[4] = {" DxL "," DxH "," DxxL"," DxxH"};
-      const char ** dr56hl = (EB) ? dr56hlEB : dr56hlLB;
+
+      const char * dr56thEB[4] = {" D5  "," D6  "," D56 ", "BCID "};
+      const char * dr56thLB[4] = {" Dx  "," Dy  "," Dxy ", "BCID "};
+      const char ** dr56th = (m_runPeriod < 3) ? (EB ? dr56hlEB : dr56hlLB)
+                                               : (EB ? dr56thEB : dr56thLB);
+
       const char * tit[4] = {"TMDB digits","TMDB energy","TMDB decision","Unknown"};
 
       std::cout << std::hex << std::endl << tit[type&3] <<" fragment 0x" << type << " vers 0x"<< id << ", "
@@ -623,23 +627,46 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
             break;
 
         case 0x42:
-            nchmod = nch/nmod;
-            std::cout << "nn   name   " << dr56hl[3] << dr56hl[2]
-                      << dr56hl[1] << dr56hl[0] << std::endl; 
+          {
+            std::cout << "nn   name   TMDB   SL_Board   SL_Trigger_Sector  "
+                      << dr56th[3] << dr56th[2] << dr56th[1] << dr56th[0] << std::endl;
             result = reinterpret_cast<const unsigned short *>(data);
-            if (size!=2) ntd=size*2;
-            for (int pword=0;pword<ntd;++pword) {
-              count=(EB)?pword*3:pword*4+1;
-              unsigned short r=result[pword];
-              for(int pqword=0;pqword<4;++pqword){
-                  std::cout << std::setw(2) << pqword+pword*4 << " | " << ((count>0&&count<ntdl)?ch11[tmdb_ch1]:ch12[tmdb_ch1])
-                          << std::setfill('0') << std::setw(2) << tmdb_ch2+count
-                          << std::setfill(' ') << std::setw(5)<<((r>>3)&1) << std::setw(5)<<((r>>2)&1)
-                          << std::setw(5)<<((r>>1)&1) << std::setw(5)<<(r&1) << std::endl;
-                r>>=4;
+            if (size != 2) ntd = size * 2;
+            int nbits = m_runPeriod < 3 ? 4 : 3;
+            int tmdb = (tmdb_ch2) / 8 + 1;
+            int slb = tmdb * 3 - 1;
+            std::string tmdb_name = "TM0" + (EB ? std::to_string(tmdb) : "X");
+            for (int pword = 0; pword < ntd; ++pword) {
+              count = (EB) ? pword * 3 : pword * 4 + 1;
+              unsigned short r = result[pword];
+              int bcid = (m_runPeriod < 3) ? 0 : (r >> 12);
+              int slts1 = slb * 2 - 2;
+              int slts2 = slts1 + 1;
+              std::string slt_sectors = "  -  ";
+              if (EB) {
+                std::stringstream slts12;
+                slts12 << std::setfill(' ') << std::setw(2) << slts1 << "-"
+                       << std::setfill(' ') << std::setw(2) << std::left << slts2;
+                slt_sectors = slts12.str();
+              }
+              std::stringstream slb_name;
+              slb_name << "SL_E" << std::setfill('0') << std::setw(2) << (EB ? std::to_string(slb) : "XX");
+              for(int pqword = 0; pqword < 4; ++pqword){
+                std::cout << std::setw(2) << pqword + pword * 4 << " | "
+                          << ((count > 0 && count < ntdl) ? ch11[tmdb_ch1] : ch12[tmdb_ch1])
+                          << std::setfill('0') << std::setw(2) << tmdb_ch2 + count
+                          << std::setfill(' ')  << std::setw(6) << tmdb_name
+                          << std::setfill(' ')  << std::setw(10) << slb_name.str()
+                          << std::setfill(' ')  << std::setw(15) << slt_sectors
+                          << std::setfill(' ')  << std::setw(11) << ((m_runPeriod < 3) ? ((r >> 3) & 1) : bcid)
+                          << std::setw(5) << ((r >> 2) & 1) << std::setw(5) << ((r >> 1) & 1) << std::setw(5) << (r & 1) << std::endl;
+                r >>= nbits;
                 ++count;
-              } 
+              }
+              ++slb;
+              if (slb > 24) slb = 1;
             }
+          }
             break;
         default: 
             dump_data((uint32_t*) data, size, version, verbosity);

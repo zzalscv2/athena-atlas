@@ -75,6 +75,7 @@ class TileTBDump: public AthAlgorithm {
     ServiceHandle<IROBDataProviderSvc> m_RobSvc;
 
     const TileCablingService* m_cabling;
+    int m_runPeriod;
 
     std::vector<std::string> m_drawerList; // list of frag IDs in correct order
     std::vector<int> m_drawerType; // type of every drawer 1-4: B+, B-, EB+, EB-
