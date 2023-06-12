@@ -224,6 +224,10 @@ JETM7SlimmingHelper.AllVariables = [ "MuonSegments", "TruthVertices", "TruthEven
 # Trigger content
 JETM7SlimmingHelper.IncludeJetTriggerContent = True
 JETM7SlimmingHelper.IncludeEtMissTriggerContent = True
+JETM7SlimmingHelper.IncludeEGammaTriggerContent = True
+JETM7SlimmingHelper.IncludeMuonTriggerContent = True
+JETM7SlimmingHelper.IncludeTauTriggerContent = True
+JETM7SlimmingHelper.IncludeBPhysTriggerContent = True
 
 # Add the jet containers to the stream
 addJetOutputs(JETM7SlimmingHelper,["JETM7"], [], 
@@ -240,4 +244,3 @@ if DerivationFrameworkHasTruth:
 
 
 JETM7SlimmingHelper.AppendContentToStream(JETM7Stream)
-
