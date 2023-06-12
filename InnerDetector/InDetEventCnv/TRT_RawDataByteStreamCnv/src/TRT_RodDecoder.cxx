@@ -26,11 +26,6 @@
 
 #include "InDetByteStreamErrors/TRT_BSErrContainer.h"
 
-/*
- * TRT Specific detector manager to get layout information
- */
-#include "TRT_ReadoutGeometry/TRT_DetectorManager.h"  
-
 #include "PathResolver/PathResolver.h"
 #include <fstream>
 
@@ -106,38 +101,8 @@ StatusCode TRT_RodDecoder::initialize()
   ATH_CHECK ( m_CablingSvc.retrieve() );
   ATH_MSG_INFO( "Retrieved tool " << m_CablingSvc );
 
-
-  /*
-   * get detector manager
-   */
-  const InDetDD::TRT_DetectorManager* indet_mgr = nullptr;
-  ATH_CHECK( detStore()->retrieve(indet_mgr,"TRT") );
-
-
-
-  // get the helper
   ATH_CHECK( detStore()->retrieve(m_trt_id, "TRT_ID") );
   m_straw_layer_context = m_trt_id->straw_layer_context();
-
-
-  // get layout
-  std::string Layout;
-  Layout = indet_mgr->getLayout();
-  if ( Layout == "TestBeam" ||
-       Layout == "SR1" ||
-       Layout == "SR1-EndcapC" )
-  {
-     ATH_MSG_INFO( "Creating TRT_TB04_RawData RDOs." );
-     m_TB04_RawData = true;
-     m_LoLumRawData = false;
-  }
-  else
-  {
-     ATH_MSG_INFO( "Creating TRT_LoLumRawData RDOs." );
-     // ME: bugfix
-     m_TB04_RawData = false;
-     m_LoLumRawData = true;
-  }
 
   /*
    * Show Look At Me's
@@ -528,10 +493,6 @@ TRT_RodDecoder::int_fillExpanded( const ROBFragment* robFrag,
   //  eformat::helper::Version rodVersion(robFrag->rod_version()); 
   //  const uint16_t rodMinorVersion= rodVersion.minor(); 
 
-  // get the phasetime for CTB/Cosmics
-  int phasetime = 0;
-  if ( m_TB04_RawData ) phasetime = robFrag->rod_lvl1_trigger_type();
-
 #ifdef TRT_BSC_DEBUG
   ATH_MSG_DEBUG( "fillCollections for " << MSG::hex << robid << MSG::dec );
 #endif
@@ -656,16 +617,7 @@ TRT_RodDecoder::int_fillExpanded( const ROBFragment* robFrag,
 	}
 
       // Now the Collection is there for sure. Create RDO and push it
-      // into Collection. 
-      if ( m_TB04_RawData && ! m_LoLumRawData )
-	rdo = new TRT_TB04_RawData( idStraw, digit, phasetime );
-      else if ( m_LoLumRawData && ! m_TB04_RawData )
-	rdo = new TRT_LoLumRawData( idStraw, digit ); 
-      else
-	{
-	   ATH_MSG_FATAL( " Inconsistient setting of decoder, this is a bug" );
-	  return StatusCode::FAILURE;
-	}
+      rdo = new TRT_LoLumRawData( idStraw, digit );
 
       // add the RDO
       theColl->push_back( rdo );
@@ -716,9 +668,6 @@ TRT_RodDecoder::int_fillMinimalCompress( const ROBFragment *robFrag,
   // way or another
   //  eformat::helper::Version rodVersion(m_robFrag->rod_version()); 
   //  const uint16_t rodMinorVersion= rodVersion.minor(); 
-  
-  int phasetime = 0;
-  if ( m_TB04_RawData ) phasetime = robFrag->rod_lvl1_trigger_type();
   
 #ifdef TRT_BSC_DEBUG
   ATH_MSG_DEBUG( "fillCollection3 for " \
@@ -886,21 +835,8 @@ TRT_RodDecoder::int_fillMinimalCompress( const ROBFragment *robFrag,
       //ATH_MSG_INFO ( "idStraw: " << idStraw 
       //               << " digit: " << MSG::hex << digit << MSG::dec );
 
-      if ( m_TB04_RawData )
-      {
-	rdo = new TRT_TB04_RawData( idStraw, digit, phasetime );
-	m_Nrdos++;
-      }
-      else if ( m_LoLumRawData )
-      {
-	rdo = new TRT_LoLumRawData( idStraw, digit ); 
-	m_Nrdos++;
-      }
-      else
-      {
-	ATH_MSG_FATAL( " Inconsistient setting of decoder, this is a bug" );
-	return StatusCode::FAILURE;
-      }
+      rdo = new TRT_LoLumRawData( idStraw, digit );
+      m_Nrdos++;
       
       // get the collection
       // add the RDO
@@ -954,8 +890,6 @@ TRT_RodDecoder::int_fillFullCompress( const ROBFragment *robFrag,
   //  eformat::helper::Version rodVersion(m_robFrag->rod_version()); 
   //  const uint16_t rodMinorVersion= rodVersion.minor(); 
   
-  int phasetime = 0;
-  if ( m_TB04_RawData ) phasetime = robFrag->rod_lvl1_trigger_type();
   
 #ifdef TRT_BSC_DEBUG
   ATH_MSG_DEBUG( "fillCollection3 for " \
@@ -1177,21 +1111,8 @@ TRT_RodDecoder::int_fillFullCompress( const ROBFragment *robFrag,
       //      ATH_MSG_INFO ( "idStraw: " << idStraw 
       //		     << " digit: " << MSG::hex << digit << MSG::dec );
 
-      if ( m_TB04_RawData )
-      {
-	rdo = new TRT_TB04_RawData( idStraw, digit, phasetime );
-	m_Nrdos++;
-      }
-      else if ( m_LoLumRawData )
-      {
-	rdo = new TRT_LoLumRawData( idStraw, digit ); 
-	m_Nrdos++;
-      }
-      else
-	{
-	   ATH_MSG_FATAL( " Inconsistient setting of decoder, this is a bug" );
-	  return StatusCode::FAILURE;
-	}
+      rdo = new TRT_LoLumRawData( idStraw, digit );
+      m_Nrdos++;
       
       // get the collection
       // add the RDO
