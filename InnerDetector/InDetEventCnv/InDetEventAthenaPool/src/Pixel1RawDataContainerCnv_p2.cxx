@@ -15,7 +15,7 @@
 #include "AthAllocators/DataPool.h"
 
 
-void Pixel1RawDataContainerCnv_p2::transToPers(const PixelRDO_Container* transCont, InDetRawDataContainer_p2* persCont, MsgStream &log) 
+void Pixel1RawDataContainerCnv_p2::transToPers(const PixelRDO_Container* transCont, InDetRawDataContainer_p2* persCont, MsgStream &log)
 {
 
     // The transient model has a container holding collections and the
@@ -27,11 +27,11 @@ void Pixel1RawDataContainerCnv_p2::transToPers(const PixelRDO_Container* transCo
     //   2) all RDO
     //
     // The persistent collections, then only maintain indexes into the
-    // container's vector of all channels. 
+    // container's vector of all channels.
     //
     // So here we loop over all collection and add their channels
     // to the container's vector, saving the indexes in the
-    // collection. 
+    // collection.
 
     using TRANS = PixelRDO_Container;
 
@@ -73,7 +73,7 @@ void Pixel1RawDataContainerCnv_p2::transToPers(const PixelRDO_Container* transCo
     MSG_DEBUG(log," ***  Writing PixelRDO_Container (Pixel1RawData concrete type)");
 }
 
-void  Pixel1RawDataContainerCnv_p2::persToTrans(const InDetRawDataContainer_p2* persCont, PixelRDO_Container* transCont, MsgStream &log) 
+void  Pixel1RawDataContainerCnv_p2::persToTrans(const InDetRawDataContainer_p2* persCont, PixelRDO_Container* transCont, MsgStream &log)
 {
 
     // The transient model has a container holding collections and the
@@ -85,7 +85,7 @@ void  Pixel1RawDataContainerCnv_p2::persToTrans(const InDetRawDataContainer_p2* 
     //   2) all channels
     //
     // The persistent collections, then only maintain indexes into the
-    // container's vector of all channels. 
+    // container's vector of all channels.
     //
     // So here we loop over all collection and extract their channels
     // from the vector.
@@ -104,7 +104,7 @@ void  Pixel1RawDataContainerCnv_p2::persToTrans(const InDetRawDataContainer_p2* 
         totalChannels += nchans;
     }
     DataPool<Pixel1RawData> dataItems;
-    dataItems.reserve(totalChannels);
+    dataItems.prepareToAdd(totalChannels);
 
     for (unsigned int icoll = 0; icoll < numCollections; ++icoll) {
         const InDetRawDataCollection_p1& pcoll = persCont->m_collections[icoll];

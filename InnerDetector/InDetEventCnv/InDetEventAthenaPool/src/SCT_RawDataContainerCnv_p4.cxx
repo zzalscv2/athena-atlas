@@ -31,14 +31,14 @@ void SCT_RawDataContainerCnv_p4::transToPers(const SCT_RDO_Container* transCont,
   ///   2) all RDO
   ///
   /// The persistent collections, then only maintain indexes into the
-  /// container's vector of all channels. 
+  /// container's vector of all channels.
   ///
   /// So here we loop over all collection and add their channels
   /// to the container's vector, saving the indexes in the
-  /// collection. 
-  
+  /// collection.
+
   using TRANS = SCT_RDO_Container;
-  
+
   SCT1_RawDataCnv_p2  chan1Cnv;
   SCT3_RawDataCnv_p4  chan3Cnv(m_sctId);
   TRANS::const_iterator it_Coll     = transCont->begin();
@@ -49,7 +49,7 @@ void SCT_RawDataContainerCnv_p4::transToPers(const SCT_RDO_Container* transCont,
   int numColl = transCont->numberOfCollections();
   persCont->m_collections.resize(numColl);
 
-  /** we're going to store all the strip errors from each RDO 
+  /** we're going to store all the strip errors from each RDO
    * in vectors in the collection */
 
   for (collIndex = 0; it_Coll != it_CollEnd; ++collIndex, ++it_Coll)  {
@@ -69,7 +69,7 @@ void SCT_RawDataContainerCnv_p4::transToPers(const SCT_RDO_Container* transCont,
         InDetRawData_p2* pchan = &(persCont->m_rawdata[i + chanBegin]);
         const SCT1_RawData* chan = dynamic_cast<const SCT1_RawData*>(collection[i]);
         chan1Cnv.transToPers(chan, pchan, log);
-      }            
+      }
     } else if (m_type == 3) {
       persCont->m_sct3data.resize(chanEnd);
       for (unsigned int i = 0; i < collection.size(); ++i) {
@@ -93,7 +93,7 @@ void  SCT_RawDataContainerCnv_p4::persToTrans(const SCT_RawDataContainer_p4* per
   ///   2) all channels
   ///
   /// The persistent collections, then only maintain indexes into the
-  /// container's vector of all channels. 
+  /// container's vector of all channels.
   ///
   /// So here we loop over all collection and extract their channels
   /// from the vector.
@@ -127,7 +127,7 @@ void  SCT_RawDataContainerCnv_p4::persToTrans(const SCT_RawDataContainer_p4* per
 
   if (m_type == 1) {
     DataPool<SCT1_RawData> dataItems;
-    dataItems.reserve(totalChannels);
+    dataItems.prepareToAdd(totalChannels);
     for (unsigned int icoll = 0; icoll < numCollections; ++icoll) {
       const InDetRawDataCollection_p1& pcoll = persCont->m_collections[icoll];
       Identifier collID(pcoll.m_id);
@@ -156,7 +156,7 @@ void  SCT_RawDataContainerCnv_p4::persToTrans(const SCT_RawDataContainer_p4* per
   } // type 1
   else if (m_type == 3) {
     DataPool<SCT3_RawData> dataItems;
-    dataItems.reserve(totalChannels);
+    dataItems.prepareToAdd(totalChannels);
     for (unsigned int icoll = 0; icoll < numCollections; ++icoll) {
       const InDetRawDataCollection_p1& pcoll = persCont->m_collections[icoll];
       Identifier collID(pcoll.m_id);

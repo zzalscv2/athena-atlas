@@ -182,7 +182,7 @@ void  TRT_LoLumRawDataContainerCnv_p3::persToTrans(const InDetRawDataContainer_p
   // It resizes as needed .
   // The max number of straws is 350847 but assume
   // that we do not have 100% occupancy ~ 80%
-  dataItems.reserve(280000);
+  dataItems.prepareToAdd(280000);
 
   TRT_RDO_Collection* tcoll=nullptr;         // transient collection to be constructed
   for (unsigned int trt_collection_index=0; trt_collection_index<trt_number_of_collections; ++trt_collection_index) {
@@ -199,12 +199,12 @@ void  TRT_LoLumRawDataContainerCnv_p3::persToTrans(const InDetRawDataContainer_p
       continue;
     }
 
-    // Create the transient collection we need it to be VIEW 
+    // Create the transient collection we need it to be VIEW
     // as the ptr we will pass to it are managed by
     // a DataPool
     tcoll = new TRT_RDO_Collection(IdentifierHash(trt_collection_index));
     tcoll->clear (SG::VIEW_ELEMENTS);
-    //set identifier resize 
+    //set identifier resize
     tcoll->setIdentifier(Identifier(trt_collection_id[trt_collection_index]));
     tcoll->resize(mchans);
 
@@ -223,7 +223,7 @@ void  TRT_LoLumRawDataContainerCnv_p3::persToTrans(const InDetRawDataContainer_p
 
       //ask the pool for the next pointer
       TRT_LoLumRawData* tchan = dataItems.nextElementPtr();
-      //set the payload 
+      //set the payload
       *tchan = TRT_LoLumRawData(Identifier(trt_channel_id),pword);
 
       (*tcoll)[jchan] = tchan;
