@@ -82,12 +82,12 @@ namespace IOVDbNamespace{
       }
       if (m_isVectorPayload){
         for (json::const_iterator k=payload.begin();k!=payload.end();++k){ //k are {"0":}
-          const json f=k.value(); //channel id
+          const json& f=k.value(); //channel id
           std::vector<coral::AttributeList> tempVector;//can optimise this by pre constructing it and using 'clear'
           for (json::const_iterator i=f.begin();i!=f.end();++i){
-            const std::string keyString=i.key();
+            const std::string& keyString=i.key();
             const long long key=std::stoll(keyString);
-            auto & val=i.value();
+            const auto & val=i.value();
             for (const auto & aList:val){        
               auto r=createAttributeList(m_sharedSpec,aList);
               const auto & attList=r.attributeList();
@@ -99,8 +99,8 @@ namespace IOVDbNamespace{
         }
       } else {
         for (json::const_iterator i=payload.begin();i!=payload.end();++i){
-          const json f=i.value();
-          const std::string ks=i.key();
+          const json& f=i.value();
+          const std::string& ks=i.key();
           const long long key=std::stoll(ks);
           auto r=createAttributeList(m_sharedSpec,f);
           const auto & attList=r.attributeList();
@@ -116,7 +116,7 @@ namespace IOVDbNamespace{
   Json2Cool::parsePayloadSpec(const std::string & stringSpecification){
     if (stringSpecification.empty()) return nullptr;
     std::string input(stringSpecification);
-    auto spec = new cool::RecordSpecification();
+    auto *spec = new cool::RecordSpecification();
     
     std::string regex=R"delim(([^\s,:]*):\s?([^\s,]*),?)delim";
     boost::regex expression(regex);
@@ -250,8 +250,7 @@ namespace IOVDbNamespace{
   }
 
   
-  Json2Cool::~Json2Cool(){
-  }
+  
 
 }//end of namespace
 

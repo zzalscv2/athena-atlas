@@ -17,7 +17,7 @@ namespace IOVDbNamespace{
   std::string
   base64Encode(const coral::Blob & blob){
     //Blob::startingAddress returns a const void *, so cast to byte size
-    const auto address = static_cast<const unsigned char *>(blob.startingAddress());
+    const auto *const address = static_cast<const unsigned char *>(blob.startingAddress());
     const unsigned int nBytes = blob.size();
     return CxxUtils::base64_encode(address, nBytes);
   }

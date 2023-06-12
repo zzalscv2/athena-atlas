@@ -98,7 +98,7 @@ BOOST_FIXTURE_TEST_SUITE(IOVDbSvcFolderTypesTest , GaudiKernelFixture)
       BOOST_TEST(IOVDbNamespace::folderTypeName(fType) == "AttrListColl");
       //prepare a CondAttrListCollection for testing
       CondAttrListCollection attrListColl(true); //argument indicates it is run-lumi if true
-      auto pSpec=new coral::AttributeListSpecification;
+      auto *pSpec=new coral::AttributeListSpecification;
       pSpec->extend<int>("myInt");
       pSpec->extend<std::string>("PoolRef");
       coral::AttributeList attrList(*pSpec, true);

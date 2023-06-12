@@ -27,8 +27,9 @@
 #include "IOVDbFolder.h"
 #include "IOVDbSvc.h"
 
-#include <list>
 #include <algorithm>
+#include <list>
+#include <utility>
 
 // helper function for getting jobopt properties
 namespace {
@@ -121,21 +122,20 @@ private:
 
 LockedDatabase::LockedDatabase (cool::IDatabasePtr dbptr,
                                 const Athena::DBLock& dblock)
-  : m_dbptr (dbptr),
+  : m_dbptr (std::move(dbptr)),
     m_dblock (dblock)
 {
 }
 
 
 LockedDatabase::~LockedDatabase()
-{
-}
+= default;
 
 
 } // anonymous namespace
 
 
-IOVDbSvc::~IOVDbSvc() {}
+IOVDbSvc::~IOVDbSvc() = default;
 
 /// Identify interfaces to which this service is responsive
 StatusCode
@@ -308,7 +308,7 @@ StatusCode IOVDbSvc::finalize() {
 cool::IDatabasePtr IOVDbSvc::getDatabase(bool readOnly) {
   // get default database connection
   cool::IDatabasePtr dbconn;
-  if (m_par_defaultConnection.empty() || m_connections.size()==0) {
+  if (m_par_defaultConnection.empty() || m_connections.empty()) {
     ATH_MSG_INFO( "No default COOL database connection is available");
     dbconn.reset();
   } else {
@@ -390,22 +390,22 @@ StatusCode IOVDbSvc::preLoadAddresses(StoreID::type storeID,tadList& tlist) {
   // do not close COOL connection until next one has been opened, this enables
   // connection sharing in CORAL, so all COOL connections will use the same
   // CORAL one (althugh they will each be given a separate session)
-  IOVDbConn* oldconn=0;
+  IOVDbConn* oldconn=nullptr;
   for (const auto & pThisConnection : m_connections) {
     if (pThisConnection->nFolders()>0 || doMeta) {
       // loop over all folders using this connection
       for (const auto & thisNamePtrPair : m_foldermap) {
         IOVDbFolder* folder=thisNamePtrPair.second;
-        if (folder->conn()==pThisConnection || (folder->conn()==0 && doMeta)) {
+        if (folder->conn()==pThisConnection || (folder->conn()==nullptr && doMeta)) {
           std::unique_ptr<SG::TransientAddress> tad =
             folder->preLoadFolder( &(*m_h_tagInfoMgr), m_par_cacheRun.value(),
                                    m_par_cacheTime.value(),m_globalTag);
           if (oldconn!=pThisConnection) {
             // close old connection if appropriate
-            if (m_par_manageConnections && oldconn!=0) oldconn->setInactive();
+            if (m_par_manageConnections && oldconn!=nullptr) oldconn->setInactive();
             oldconn=pThisConnection;
           }
-          if (tad==0) {
+          if (tad==nullptr) {
             ATH_MSG_ERROR( "preLoadFolder failed for folder " << folder->folderName() );
             return StatusCode::FAILURE;
           }
@@ -433,7 +433,7 @@ StatusCode IOVDbSvc::preLoadAddresses(StoreID::type storeID,tadList& tlist) {
     doMeta=false;
   }
   // close last connection
-  if (oldconn!=0 and m_par_manageConnections) oldconn->setInactive();
+  if (oldconn!=nullptr and m_par_manageConnections) oldconn->setInactive();
 
   // some folder keys may have changed during preloadFolder due to use of
   // <key> specification in folder description string
@@ -711,7 +711,7 @@ StatusCode IOVDbSvc::signalBeginRun(const IOVTime& beginRunTime,
     if (pThisConnection->nFolders()>0) {
       //request for database activates connection
       cool::IDatabasePtr dbconn=pThisConnection->getCoolDb();
-      if (dbconn.get()==0) {
+      if (dbconn.get()==nullptr) {
         ATH_MSG_FATAL( "Conditions database connection " <<  pThisConnection->name() << " cannot be opened - STOP" );
         return StatusCode::FAILURE;
       }
@@ -775,7 +775,7 @@ void IOVDbSvc::handle( const Incident& inc) {
     Athena::DBLock dblock;
 
     const StoreClearedIncident* sinc = dynamic_cast<const StoreClearedIncident*>(&inc);
-    if( (inc.type()=="StoreCleared" && sinc!=0 && sinc->store()==&*m_h_sgSvc)
+    if( (inc.type()=="StoreCleared" && sinc!=nullptr && sinc->store()==&*m_h_sgSvc)
         or inc.type()==IncidentType::EndProcessing )
     {
        m_state=IOVDbSvc::FINALIZE_ALG;
@@ -861,7 +861,7 @@ bool IOVDbSvc::dropObject(const std::string& key, const bool resetCache) {
     IOVDbFolder* folder=itr->second;
     CLID clid=folder->clid();
     SG::DataProxy* proxy=m_h_detStore->proxy(clid,key);
-    if (proxy!=0) {
+    if (proxy!=nullptr) {
       m_h_detStore->clearProxyPayload(proxy);
       ATH_MSG_DEBUG("Dropped payload for key " << key );
       folder->setDropped(true);
@@ -1015,7 +1015,7 @@ StatusCode IOVDbSvc::setupFolders() {
   for (const auto& folderdata : allFolderdata) {
     // find the connection specification first - db or dbConnection
     // default is to use the 'default' connection
-    IOVDbConn* conn=0;
+    IOVDbConn* conn=nullptr;
     std::string connstr;
     if (folderdata.getKey("db","",connstr) || 
         folderdata.getKey("dbConnection","",connstr)) {
@@ -1028,7 +1028,7 @@ StatusCode IOVDbSvc::setupFolders() {
           break;
         }
       }
-      if (conn==0) {
+      if (conn==nullptr) {
         // create new read-onlyconnection
         conn=new IOVDbConn(connstr,true,msg());
         m_connections.push_back(conn);
