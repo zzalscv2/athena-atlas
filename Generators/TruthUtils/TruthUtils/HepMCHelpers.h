@@ -55,6 +55,18 @@ namespace MC {
     return !MC::isNonInteracting(p->pdg_id());
   }
 
+
+  template <class T> inline bool FastCaloSimIsGenSimulStable(const T&  p) {
+  int status=p->status();
+  const auto& vertex = p->end_vertex();
+  return (status%1000 == 1) ||
+          (status%1000 == 2 && status > 1000) ||
+          (status==2 && !vertex) ||
+          (status==2 && HepMC::is_simulation_vertex(vertex))
+          ;
+}
+
+
 }
 #endif
 #endif
