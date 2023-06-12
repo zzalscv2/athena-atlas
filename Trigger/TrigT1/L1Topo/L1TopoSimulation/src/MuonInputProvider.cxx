@@ -25,11 +25,6 @@
 using namespace LVL1;
 using namespace xAOD;
 
-//additional factor to stretch 2*pi -> 6.4 
-//with the then more readable granularity of 1/20 
-//this mapps phi to the integer range 0-127
-static constexpr float phiRescaleFactor = 3.2/M_PI; 
-
 MuonInputProvider::MuonInputProvider( const std::string& type, const std::string& name, 
                                       const IInterface* parent) :
    base_class(type, name, parent)
