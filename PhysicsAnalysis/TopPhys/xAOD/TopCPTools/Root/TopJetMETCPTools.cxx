@@ -39,7 +39,7 @@ namespace top {
 
     m_jetJVT_ConfigFile("JVTlikelihood_20140805.root"),
 
-    // Calibration strings for R21 only
+    // EMTopo (calibration configs for R21 only)
     m_jetAntiKt4_Data_ConfigFile("JES_MC16Recommendation_Consolidated_EMTopo_Apr2019_Rel21.config"),
     m_jetAntiKt4_Data_CalibSequence("JetArea_Residual_EtaJES_GSC_Insitu"),
 
@@ -55,15 +55,19 @@ namespace top {
     m_jetAntiKt4_MCAFII_ConfigFile("JES_MC16Recommendation_AFII_EMTopo_Apr2019_Rel21.config"),
     m_jetAntiKt4_MCAFII_CalibSequence("JetArea_Residual_EtaJES_GSC_Smear"),
 
+    // PFlow (some calibration configs are updated to R22)
+    // No R22 AF3 calibs yet
     m_jetAntiKt4_MCAFII_PFlow_ConfigFile("JES_MC16Recommendation_AFII_PFlow_Apr2019_Rel21.config"),
     m_jetAntiKt4_MCAFII_PFlow_CalibSequence("JetArea_Residual_EtaJES_GSC_Smear"),
 
+    // Phase-1 pre-recs for R22 Data & Fullsim
     m_jetAntiKt4_Data_PFlow_ConfigFile("PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"),
     m_jetAntiKt4_Data_PFlow_CalibSequence("JetArea_Residual_EtaJES_GSC_Insitu"),
 
     m_jetAntiKt4_PFlow_MCFS_ConfigFile("PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"),
     m_jetAntiKt4_PFlow_MCFS_CalibSequence("JetArea_Residual_EtaJES_GSC"),
 
+    // No JMS recommendations for R22 yet
     m_jetAntiKt4_Data_PFlow_JMS_ConfigFile("JES_JMS_MC16Recommendation_Consolidated_data_only_PFlow_July2019_Rel21.config"),
     m_jetAntiKt4_Data_PFlow_JMS_CalibSequence("JetArea_Residual_EtaJES_GSC_JMS_Insitu"),
 
@@ -131,9 +135,13 @@ namespace top {
   }
 
   StatusCode JetMETCPTools::setupJetsCalibration() {
-    // Release 21 specific
+    // R21 specific
     // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetEtmissRecommendationsR21
     // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/ApplyJetCalibrationR21
+
+    // For R22 (currently only fullsim & data without JMS)
+    // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetEtmissRecommendationsR22
+    // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/ApplyJetCalibrationR22
 
     // Get jet calibration name and erase "Jets" from the end
     const std::string caloJets_type = m_config->sgKeyJets();
@@ -284,7 +292,8 @@ namespace top {
     // Summer2019 - JES/JER update
     // Summer2021 - JMS-options
     // Winter2023_PreRec - R22 Phase-1 JES/JER pre-recs
-    std::string conference = "Winter2023_PreRec";
+    // Summer2023_PreRec - R22 Phase-1 JES/JER pre-recs improved after GSC and energy-per-layer bugfixes
+    std::string conference = "Summer2023_PreRec";
 
     // By setting calib_area to "None" we pick up the default from the JES group
     std::string calib_area = "None";
@@ -293,10 +302,15 @@ namespace top {
     const bool JERisPseudoData = (m_config->jetJERSmearingModel() == "Full_PseudoData") || (m_config->jetJERSmearingModel() == "All_PseudoData");
     std::string JERSmearModel = m_config->jetJERSmearingModel();
     std::string JMSOption = m_config->jetJMSOption();
+    bool jmsR21Override = false;  // In case some JMS option is specified, we revert to R21 recommendations
+                                  // This flags helps in suppressing additional R22-specific warnings below
+
     if (JMSOption != "None") {
       // Updated files using the JMS option are in Spring2021 - Switching and letting the user know
-      ATH_MSG_INFO("JMS not yet available for R22 pre-recs - Moving to Spring2021 R21 recommendations!");
+      ATH_MSG_WARNING("JMS not yet available for R22 pre-recs - Moving to Spring2021 R21 recommendations!");
+      jmsR21Override = true;
       conference = "Spring2021";
+
       if (JMSOption == "JMS_frozen") JMSOption = "_JMS_frozen";
       else if (JMSOption == "JMS_scaled") JMSOption = "_JMS_scaled";
       else {
@@ -316,7 +330,9 @@ namespace top {
     }
 
     // Throw out a warning if we are using the FTAG-calib only NP-Model
-    if (m_config->jetUncertainties_NPModel() == "SR_Scenario1" && JERSmearModel == "Simple") {
+    if (m_config->jetUncertainties_NPModel() == "SR_Scenario1"
+        && JERSmearModel == "Simple"
+        && !jmsR21Override) {
       ATH_MSG_WARNING(
         "\n **********************************************************************************"
         "\n * NP-Model 'SR_Scenario1' is ONLY supposed to be used for FTAG calibration work! *"
@@ -325,7 +341,8 @@ namespace top {
       );
     }
     // Check if we have necessary configs already for R22 for users to have an easy time debugging
-    else if (!(m_config->jetUncertainties_NPModel() == "CategoryReduction" && JERSmearModel == "Full")) {
+    else if ((!(m_config->jetUncertainties_NPModel() == "CategoryReduction") || !(JERSmearModel == "Full"))
+             && !jmsR21Override) {
       ATH_MSG_WARNING(
         "Incorrect JES/JER config: In R22 phase-1, only NP-Model \"CategoryReduction\" with some type of \"Full\""
         " JER-smearing is supported for analyses! Your choices might lead to a crash unless you have installed custom"
