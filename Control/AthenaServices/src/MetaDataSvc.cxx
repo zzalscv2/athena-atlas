@@ -34,7 +34,7 @@
 #include "boost/algorithm/string/predicate.hpp"
 
 namespace {
-  bool 
+  bool
   leftString(std::string & s, char sc){
     bool truncated{false};
     auto n = s.find(sc);
@@ -60,7 +60,7 @@ MetaDataSvc::MetaDataSvc(const std::string& name, ISvcLocator* pSvcLocator) : ::
 	m_clearedInputDataStore(true),
 	m_clearedOutputDataStore(false),
 	m_allowMetaDataStop(false),
-        m_outputPreprared(false),
+        m_outputPrepared(false),
 	m_persToClid(),
 	m_toolForClid() {
    // declare properties
@@ -171,11 +171,11 @@ StatusCode MetaDataSvc::finalize() {
    if (!m_addrCrtr.release().isSuccess()) {
       ATH_MSG_WARNING("Cannot release AddressCreator.");
    }
-   // Release OutputMetaDataStore 
+   // Release OutputMetaDataStore
    if (!m_outputDataStore.release().isSuccess()) {
       ATH_MSG_WARNING("Cannot release OutputMetaDataStore.");
    }
-   // Release InputMetaDataStore 
+   // Release InputMetaDataStore
    if (!m_inputDataStore.release().isSuccess()) {
       ATH_MSG_WARNING("Cannot release InputMetaDataStore.");
    }
@@ -188,7 +188,7 @@ StatusCode MetaDataSvc::stop() {
    if( m_outSeqSvc.isValid() and m_outSeqSvc->inUse() ) {
       ATH_MSG_INFO("stop(): OutputSequencer in use, not firing MetaDataStop incident");
    } else {
-      // Fire metaDataStopIncident 
+      // Fire metaDataStopIncident
       Incident metaDataStopIncident(name(), "MetaDataStop");
       m_incSvc->fireIncident(metaDataStopIncident);
    }
@@ -297,7 +297,7 @@ StatusCode MetaDataSvc::prepareOutput()
 {
    StatusCode rc(StatusCode::SUCCESS);
    // Check if already called
-   if (!m_outputPreprared) { 
+   if (!m_outputPrepared) {
       for (auto it = m_metaDataTools.begin(); it != m_metaDataTools.end(); ++it) {
          ATH_MSG_DEBUG(" calling metaDataStop for " << (*it)->name());
          if ( (*it)->metaDataStop().isFailure() ) {
@@ -309,7 +309,7 @@ StatusCode MetaDataSvc::prepareOutput()
          ATH_MSG_WARNING("Cannot release " << m_metaDataTools);
       }
    }
-   m_outputPreprared=true;
+   m_outputPrepared=true;
    return rc;
 }
 
@@ -319,7 +319,7 @@ StatusCode MetaDataSvc::prepareOutput(const std::string& outputName)
    // default to the serial implementation if no output name given
    if( outputName.empty() ) return prepareOutput();
    ATH_MSG_DEBUG( "prepareOutput('" << outputName << "')" );
-   
+
    StatusCode rc = StatusCode::SUCCESS;
    for (auto it = m_metaDataTools.begin(); it != m_metaDataTools.end(); ++it) {
       ATH_MSG_DEBUG("  calling metaDataStop for " << (*it)->name());
@@ -385,7 +385,7 @@ void MetaDataSvc::handle(const Incident& inc) {
       if(retireMetadataSource(inc).isFailure()) {
          ATH_MSG_ERROR("Could not retire metadata source " << fileName);
       }
-   } 
+   }
 }
 
 //__________________________________________________________________________
@@ -394,12 +394,12 @@ StatusCode MetaDataSvc::transitionMetaDataFile(const std::string& outputConn, bo
 {
    ATH_MSG_DEBUG("transitionMetaDataFile: " << outputConn );
 
-   // this is normally called through EndInputFile inc, simulate it for EvSvc 
+   // this is normally called through EndInputFile inc, simulate it for EvSvc
    FileIncident inc("transitionMetaDataFile", "EndInputFile", "dummyMetaInputFileName", "");
    ATH_CHECK(retireMetadataSource(inc));
 
    // Reset flag to allow calling prepareOutput again at next transition
-   m_outputPreprared = false;
+   m_outputPrepared = false;
 
    Incident metaDataStopIncident(name(), "MetaDataStop");
    m_incSvc->fireIncident(metaDataStopIncident);
@@ -423,9 +423,9 @@ StatusCode MetaDataSvc::io_reinit() {
    ATH_MSG_INFO("Dumping OutputMetaDataStore: " << m_outputDataStore->dump());
    for (auto iter = m_metaDataTools.begin(),
  	     last = m_metaDataTools.end(); iter != last; iter++) {
-      ATH_MSG_INFO("Attached MetadDataTool: " << (*iter)->name());
+      ATH_MSG_INFO("Attached MetaDataTool: " << (*iter)->name());
    }
-   m_outputPreprared = false;
+   m_outputPrepared = false;
    return(StatusCode::SUCCESS);
 }
 //__________________________________________________________________________
@@ -450,7 +450,7 @@ std::set<std::string> MetaDataSvc::getPerStreamKeysFor(const std::string& key ) 
    auto iter = m_streamKeys.find( key );
    if( iter == m_streamKeys.end() ) {
       return std::set<std::string>( {key} );
-   } 
+   }
    return iter->second;
 }
 //__________________________________________________________________________
@@ -458,7 +458,7 @@ StatusCode MetaDataSvc::addProxyToInputMetaDataStore(const std::string& tokenStr
    std::string fileName = tokenStr.substr(tokenStr.find("[FILE=") + 6);
    leftString(fileName, ']');
    std::string className = tokenStr.substr(tokenStr.find("[PNAME=") + 7);
-   leftString(className, ']'); 
+   leftString(className, ']');
    std::string contName = tokenStr.substr(tokenStr.find("[CONT=") + 6);
    leftString(contName,']');
    std::size_t pos1 = contName.find('(');
@@ -516,7 +516,7 @@ StatusCode MetaDataSvc::addProxyToInputMetaDataStore(const std::string& tokenStr
          }
          ToolHandle<IMetaDataTool> metadataTool(toolInstName);
          m_metaDataTools.push_back(metadataTool);
-         ATH_MSG_DEBUG("Added new MetadDataTool: " << metadataTool->name());
+         ATH_MSG_DEBUG("Added new MetaDataTool: " << metadataTool->name());
          if (!metadataTool.retrieve().isSuccess()) {
             ATH_MSG_FATAL("Cannot get " << toolInstName);
             return(StatusCode::FAILURE);
@@ -662,7 +662,7 @@ CLID MetaDataSvc::remapMetaContCLID( const CLID& itemID ) const
 
 void MetaDataSvc::recordHook(const std::type_info& typeInfo) {
   const std::string& typeName = System::typeinfoName(typeInfo);
-  ATH_MSG_VERBOSE("Handling recod event of type " << typeName);
+  ATH_MSG_VERBOSE("Handling record event of type " << typeName);
 
   CLID itemID = 0;
   if (m_classIDSvc->getIDOfTypeInfoName(typeName, itemID).isSuccess()) {

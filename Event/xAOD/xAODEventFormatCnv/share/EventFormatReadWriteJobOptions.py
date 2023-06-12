@@ -50,7 +50,7 @@ svcMgr.EventSelector.InputCollections = [
     "testStream0.pool.root",
 ]
 
-# propogate xAOD::EventFormat from InputMetaDataStore to MetaDataStore
+# propagate xAOD::EventFormat from InputMetaDataStore to MetaDataStore
 ToolSvc += CfgMgr.xAODMaker__EventFormatMetaDataTool(
     "EventFormatMetaDataTool",
     OutputLevel=VERBOSE,

@@ -371,7 +371,7 @@ IOVDbMetaDataTool::modifyPayload (const std::string& folderName,
         coll1->add(chan, newAttrList);
         if (!iovSizeIsZero) coll1->add(chan, coll->iovRange(chan));
         if(hasChanNames)coll1->add(chan, coll->chanName(chan));
-        ATH_MSG_DEBUG("modifyPayload: copyied attribute list for channel " << chan);
+        ATH_MSG_DEBUG("modifyPayload: copied attribute list for channel " << chan);
     }
     delete coll;
     coll = coll1;

@@ -16,7 +16,7 @@
 
 /**
  * @class CutFlowSvc
- * @brief This implementes the methods for ICutFlowSvc
+ * @brief This implements the methods for ICutFlowSvc
  */
 
 // STL includes

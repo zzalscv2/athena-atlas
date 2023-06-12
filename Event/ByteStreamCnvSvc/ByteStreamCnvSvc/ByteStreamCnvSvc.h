@@ -27,7 +27,7 @@ class FullEventAssemblerBase;
     IRODDataProviderSvc to retrieve the raw data.
 
     When writing the object data to ByteStream, an FullEventFragment is assembled
-    from lower level fragments using FullEventAssembler, and writen out to BS in commitOutput
+    from lower level fragments using FullEventAssembler, and written out to BS in commitOutput
     method through ByteStreamOutputSvc.
 */
 

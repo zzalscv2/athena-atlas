@@ -60,7 +60,7 @@ public: // Non-static members
    /// The output MetaData Store
    virtual StoreGateSvc* outputDataStore() const = 0;
 
-   /// rangeID for the current EventContext - used to index MetaContainrs - 
+   /// rangeID for the current EventContext - used to index MetaContainers - 
    virtual const std::string currentRangeID() const = 0;
 
    /// Gaudi boilerplate

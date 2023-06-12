@@ -36,7 +36,7 @@ def makeStream(name='TestStream'):
 # grab input files
 svcMgr.EventSelector.InputCollections = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CommonInputs/data16_13TeV.00311321.physics_Main.recon.AOD.r9264/AOD.11038520._000001.pool.root.1"]
 
-# propogate xAOD::EventFormat from InputMetaDataStore to MetaDataStore
+# propagate xAOD::EventFormat from InputMetaDataStore to MetaDataStore
 ToolSvc += CfgMgr.xAODMaker__FileMetaDataTool(
     "FileMetaDataTool",
     OutputLevel=DEBUG,

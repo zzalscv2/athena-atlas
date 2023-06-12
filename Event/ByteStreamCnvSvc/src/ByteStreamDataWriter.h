@@ -30,7 +30,7 @@ struct DataWriterParameters;
  *  versions of output ByteStream files. This interface will be implemented
  *  on top of the EventStorage/DataWriter (from tdaq-common) and it will only
  *  provide few methods relevant to this package. The interface is defined in
- *  terms of data structures of the current version of the EventStoreage,
+ *  terms of data structures of the current version of the EventStorage,
  *  implementations for older versions will need to translate those structures
  *  into their version-specific data.
  *
@@ -145,7 +145,7 @@ public:
 };
 
 
-/** Class containing parameters needed to initiayte DataWriter
+/** Class containing parameters needed to initiate DataWriter
  *
  *  This class is meant to given to the factory method creating data writer
  *  instances. The parameters need to be set to valid values.

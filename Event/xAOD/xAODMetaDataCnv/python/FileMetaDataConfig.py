@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-"""Configure jobs to propogate and/or create xAOD::FileMetaData
+"""Configure jobs to propagate and/or create xAOD::FileMetaData
 
-Configure the FileMetaDataTool to propogate FileMetaData into the MetaDataStore
+Configure the FileMetaDataTool to propagate FileMetaData into the MetaDataStore
 if it exists in the input. In addition configure the FileMetaDataCreatorTool to
 create xAOD::FileMetaData from the output stream. The object created for the
 output stream is written to the output file.
@@ -18,7 +18,7 @@ from AthenaServices import MetaDataSvcConfig
 
 
 def FileMetaDataCfg(flags, stream, streamName=None, key="FileMetaData"):
-    """Add tools creating and propogating xAOD::FileMetaData"""
+    """Add tools creating and propagating xAOD::FileMetaData"""
     if not streamName:
         streamName = stream.name
     result = ComponentAccumulator.ComponentAccumulator()
@@ -36,7 +36,7 @@ def FileMetaDataCfg(flags, stream, streamName=None, key="FileMetaData"):
         "xAOD::FileMetaDataAuxInfo#{}Aux.".format(key),
     ]
 
-    # Set up the tool propogating the FileMetaData
+    # Set up the tool propagating the FileMetaData
     result.merge(
         MetaDataSvcConfig.MetaDataSvcCfg(
             flags,

@@ -99,7 +99,7 @@ CutIdentifier CutFlowSvc::registerFilter( const std::string& name,
 
 
 
-// This method is probably only called by the DecionsSvc
+// This method is probably only called by the DecisionSvc
 CutIdentifier CutFlowSvc::registerTopFilter ATLAS_NOT_THREAD_SAFE ( const std::string& name,
                                              const std::string& description,
                                              unsigned int logic,
@@ -423,14 +423,14 @@ CutFlowSvc::queryInterface( const InterfaceID& riid, void** ppvi )
   if ( 0 == ppvi ) { return StatusCode::FAILURE ; }  // RETURN
   if ( ICutFlowSvc::interfaceID() == riid ) {
     *ppvi = static_cast<ICutFlowSvc*>(this);
-    addRef(); // NB! : inrement the reference count!
+    addRef(); // NB! : increment the reference count!
     return StatusCode::SUCCESS;                     // RETURN
   } else if ( IIncidentListener::interfaceID() == riid ) {
     *ppvi = static_cast<IIncidentListener*>(this);
-    addRef(); // NB! : inrement the reference count!
+    addRef(); // NB! : increment the reference count!
     return StatusCode::SUCCESS;                     // RETURN
   }
-  // Interface is not directly availible: try out a base class
+  // Interface is not directly available: try out a base class
   return AthService::queryInterface( riid, ppvi );
 }
 
