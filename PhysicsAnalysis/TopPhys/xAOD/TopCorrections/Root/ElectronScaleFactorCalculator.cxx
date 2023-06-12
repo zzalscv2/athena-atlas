@@ -337,8 +337,8 @@ namespace top {
     m_decor_recoSF = "EL_SF_Reco";
     m_decor_idSF = "EL_SF_ID_" + m_config->electronID();
     m_decor_idSF_loose = "EL_LOOSE_SF_ID_" + m_config->electronIDLoose();
-    m_decor_isoSF = "EL_SF_Iso_" + m_config->electronIsolation();
-    m_decor_isoSF_loose = "EL_LOOSE_SF_Iso_" + m_config->electronIsolationLoose();
+    m_decor_isoSF = "EL_SF_Iso_" + m_config->electronIsolationSF();
+    m_decor_isoSF_loose = "EL_LOOSE_SF_Iso_" + m_config->electronIsolationSFLoose();
     m_decor_chargeidSF = "EL_SF_ChargeID_" + m_config->electronID() + "_" + m_config->electronIsolation();
     m_decor_chargeidSF_loose = "EL_LOOSE_SF_ChargeID_" + m_config->electronIDLoose() + "_" +
                                m_config->electronIsolationLoose();
