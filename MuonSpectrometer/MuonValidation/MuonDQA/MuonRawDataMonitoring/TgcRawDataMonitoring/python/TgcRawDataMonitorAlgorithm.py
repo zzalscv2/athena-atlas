@@ -1233,18 +1233,17 @@ def TgcRawDataMonitoringConfig(inputFlags):
                                     title='InnerCoin_Evt2D_Nsw_'+side+'Endcap_SLInputVsDeltaTiming_goodBcid0;;Delta Signal Timing (Nsw - ATLAS)',
                                     path=coinPath,type='TH2F',xbins=144,xmin=-0.5,xmax=143.5,xlabels=label_slnswinput_index,ybins=11,ymin=-5.5,ymax=5.5,cutmask='coin_inner_nsw_goodBcid0')
 
-        myGroupCoin.defineHistogram('mon_lb,coin_inner_nsw_slInputIndex_'+side+'Endcap;InnerCoin_Evt2D_Nsw_'+side+'Endcap_SLInputVsLB_NswGoodTimingBcid0',
-                                    title='InnerCoin_Evt2D_Nsw_'+side+'Endcap_SLInputVsLB_NswGoodTimingBcid0;Lumi Block;',cutmask='coin_inner_nsw_goodTimingBcid0',
-                                    opt='kAddBinsDynamically', merge='merge',path=coinPath,type='TH2F',
-                                    ybins=144,ymin=-0.5,ymax=143.5,ylabels=label_slnswinput_index,xbins=100,xmin=0.5,xmax=100.5)
-        myGroupCoin.defineHistogram('mon_lb,coin_inner_nsw_slInputIndex_'+side+'Endcap;InnerCoin_Evt2D_Nsw_'+side+'Endcap_SLInputVsLB_NswGoodTimingBcid1',
-                                    title='InnerCoin_Evt2D_Nsw_'+side+'Endcap_SLInputVsLB_NswGoodTimingBcid1;Lumi Block;',cutmask='coin_inner_nsw_goodTimingBcid1',
-                                    opt='kAddBinsDynamically', merge='merge',path=coinPath,type='TH2F',
-                                    ybins=144,ymin=-0.5,ymax=143.5,ylabels=label_slnswinput_index,xbins=100,xmin=0.5,xmax=100.5)
-        myGroupCoin.defineHistogram('mon_lb,coin_inner_nsw_slInputIndex_'+side+'Endcap;InnerCoin_Evt2D_Nsw_'+side+'Endcap_SLInputVsLB_NswGoodTimingBcid2',
-                                    title='InnerCoin_Evt2D_Nsw_'+side+'Endcap_SLInputVsLB_NswGoodTimingBcid2;Lumi Block;',cutmask='coin_inner_nsw_goodTimingBcid2',
-                                    opt='kAddBinsDynamically', merge='merge',path=coinPath,type='TH2F',
-                                    ybins=144,ymin=-0.5,ymax=143.5,ylabels=label_slnswinput_index,xbins=100,xmin=0.5,xmax=100.5)
+        for bcid in ['0','1','2']:
+            myGroupCoin.defineHistogram('mon_lb,coin_inner_nsw_slInputIndex_'+side+'Endcap;InnerCoin_Evt2D_Nsw_'+side+'Endcap_SLInputVsLB_NswGoodTimingBcid'+bcid,
+                                        title='InnerCoin_Evt2D_Nsw_'+side+'Endcap_SLInputVsLB_NswGoodTimingBcid'+bcid+';Lumi Block;',cutmask='coin_inner_nsw_goodTimingBcid'+bcid,
+                                        opt='kAddBinsDynamically', merge='merge',path=coinPath,type='TH2F',
+                                        ybins=144,ymin=-0.5,ymax=143.5,ylabels=label_slnswinput_index,xbins=100,xmin=0.5,xmax=100.5)
+        for bunch in ['Prev','Curr','Next','NextNext']:
+            myGroupCoin.defineHistogram('mon_lb,coin_inner_nsw_slInputIndex_'+side+'Endcap;InnerCoin_Evt2D_Nsw_'+side+'Endcap_SLInputVsLB_Bc'+bunch,
+                                        title='InnerCoin_Evt2D_Nsw_'+side+'Endcap_SLInputVsLB_Bc'+bunch+';Lumi Block;',cutmask='coin_inner_nsw_Bc'+bunch,
+                                        opt='kAddBinsDynamically', merge='merge',path=coinPath,type='TH2F',
+                                        ybins=144,ymin=-0.5,ymax=143.5,ylabels=label_slnswinput_index,xbins=100,xmin=0.5,xmax=100.5)
+
 
     # Forward
     for side in ['A','C']:
@@ -1267,18 +1266,16 @@ def TgcRawDataMonitoringConfig(inputFlags):
                                     title='InnerCoin_Evt2D_Nsw_'+side+'Forward_SLInputVsDeltaTiming_goodBcid0;;Delta Signal Timing (Nsw - ATLAS)',
                                     path=coinPath,type='TH2F',xbins=72,xmin=-0.5,xmax=71.5,xlabels=label_slnswinput_index,ybins=11,ymin=-5.5,ymax=5.5,cutmask='coin_inner_nsw_goodBcid0')
 
-        myGroupCoin.defineHistogram('mon_lb,coin_inner_nsw_slInputIndex_'+side+'Forward;InnerCoin_Evt2D_Nsw_'+side+'Forward_SLInputVsLB_NswGoodTimingBcid0',
-                                    title='InnerCoin_Evt2D_Nsw_'+side+'Forward_SLInputVsLB_NswGoodTimingBcid0;Lumi Block;',cutmask='coin_inner_nsw_goodTimingBcid0',
-                                    opt='kAddBinsDynamically', merge='merge',path=coinPath,type='TH2F',
-                                    ybins=72,ymin=-0.5,ymax=71.5,ylabels=label_slnswinput_index,xbins=100,xmin=0.5,xmax=100.5)
-        myGroupCoin.defineHistogram('mon_lb,coin_inner_nsw_slInputIndex_'+side+'Forward;InnerCoin_Evt2D_Nsw_'+side+'Forward_SLInputVsLB_NswGoodTimingBcid1',
-                                    title='InnerCoin_Evt2D_Nsw_'+side+'Forward_SLInputVsLB_NswGoodTimingBcid1;Lumi Block;',cutmask='coin_inner_nsw_goodTimingBcid1',
-                                    opt='kAddBinsDynamically', merge='merge',path=coinPath,type='TH2F',
-                                    ybins=72,ymin=-0.5,ymax=71.5,ylabels=label_slnswinput_index,xbins=100,xmin=0.5,xmax=100.5)
-        myGroupCoin.defineHistogram('mon_lb,coin_inner_nsw_slInputIndex_'+side+'Forward;InnerCoin_Evt2D_Nsw_'+side+'Forward_SLInputVsLB_NswGoodTimingBcid2',
-                                    title='InnerCoin_Evt2D_Nsw_'+side+'Forward_SLInputVsLB_NswGoodTimingBcid2;Lumi Block;',cutmask='coin_inner_nsw_goodTimingBcid2',
-                                    opt='kAddBinsDynamically', merge='merge',path=coinPath,type='TH2F',
-                                    ybins=72,ymin=-0.5,ymax=71.5,ylabels=label_slnswinput_index,xbins=100,xmin=0.5,xmax=100.5)
+        for bcid in ['0','1','2']:
+            myGroupCoin.defineHistogram('mon_lb,coin_inner_nsw_slInputIndex_'+side+'Forward;InnerCoin_Evt2D_Nsw_'+side+'Forward_SLInputVsLB_NswGoodTimingBcid'+bcid,
+                                        title='InnerCoin_Evt2D_Nsw_'+side+'Forward_SLInputVsLB_NswGoodTimingBcid'+bcid+';Lumi Block;',cutmask='coin_inner_nsw_goodTimingBcid'+bcid,
+                                        opt='kAddBinsDynamically', merge='merge',path=coinPath,type='TH2F',
+                                        ybins=72,ymin=-0.5,ymax=71.5,ylabels=label_slnswinput_index,xbins=100,xmin=0.5,xmax=100.5)
+        for bunch in ['Prev','Curr','Next','NextNext']:
+            myGroupCoin.defineHistogram('mon_lb,coin_inner_nsw_slInputIndex_'+side+'Forward;InnerCoin_Evt2D_Nsw_'+side+'Forward_SLInputVsLB_Bc'+bunch,
+                                        title='InnerCoin_Evt2D_Nsw_'+side+'Forward_SLInputVsLB_Bc'+bunch+';Lumi Block;',cutmask='coin_inner_nsw_Bc'+bunch,
+                                        opt='kAddBinsDynamically', merge='merge',path=coinPath,type='TH2F',
+                                        ybins=72,ymin=-0.5,ymax=71.5,ylabels=label_slnswinput_index,xbins=100,xmin=0.5,xmax=100.5)
 
     ## CoinFlagC
     myGroupCoin.defineHistogram('coin_inner_tgc_coinflagC,coin_inner_tgc_roi,coin_inner_tgc_sector;InnerCoin_Eff2D_CoinFlagC_Endcap_SectorVsRoI',
