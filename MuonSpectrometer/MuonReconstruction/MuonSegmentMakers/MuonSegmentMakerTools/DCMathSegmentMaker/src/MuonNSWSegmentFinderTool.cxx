@@ -172,7 +172,7 @@ namespace Muon {
         if (m_parent->isWire(meas)){
             const sTgcPrepData* prd = dynamic_cast<const sTgcPrepData*>(meas->prepRawData());
             if (!prd) return false;
-            if (prd->detectorElement()->isEtaZero(prd->identify(), lpos_seed.y())) return false;
+            if (prd->detectorElement()->isEtaZero(prd->identify(), lpos_seed)) return false;
         }
 
         if (m_parent->isPad(meas)) {
