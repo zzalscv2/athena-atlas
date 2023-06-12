@@ -83,7 +83,7 @@ namespace ISF {
     }
 
     /** Return the simulation service descriptor */
-    std::string& simSvcDescriptor() { return m_simDescr; }
+    std::string& simSvcDescriptor() override { return m_simDescr; }
 
     /** Setup Event chain - in case of a begin-of event action is needed */
     virtual StatusCode setupEvent() override
@@ -94,7 +94,7 @@ namespace ISF {
     { return StatusCode::SUCCESS; }
 
     /** Inform the SimulationSvc about the ParticleBroker svc */
-    virtual StatusCode setParticleBroker( IParticleBroker *broker) {
+    virtual StatusCode setParticleBroker( IParticleBroker *broker) override {
       m_particleBroker = broker;
       return StatusCode::SUCCESS;
     }
