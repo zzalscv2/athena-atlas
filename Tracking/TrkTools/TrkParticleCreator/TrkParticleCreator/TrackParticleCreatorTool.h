@@ -174,6 +174,10 @@ public:
    /** Add shared hit info not computed in Trk::TrkSummary anymore*/
    void addSharedHitInformation(const Track *track, xAOD::TrackParticle& tp) const;
 
+   /** Add dummy endcap shared hit info as AuxDyn variable in case nominal shared hit info not computed (for ITk fast tracking) */
+   void addDummyEndcapSharedHitInformation(xAOD::TrackParticle& tp) const;
+
+
   /** Method to set Defining parameters of a xAOD::TrackParticle */
   void setDefiningParameters(xAOD::TrackParticle& tp,
                              const Perigee& perigee) const;
