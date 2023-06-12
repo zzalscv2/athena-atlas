@@ -363,8 +363,8 @@ namespace top {
     void print(const top::Event& event);
 
     float electronSF_Reco(const xAOD::Electron& x,
-                          const top::topSFSyst SFSyst,
-                          bool useLooseDef) const;
+                          const top::topSFSyst SFSyst
+			  ) const;
 
     float electronSF_Trigger(const xAOD::Electron& x, const top::topSFSyst SFSyst, bool useLooseDef) const;
 
