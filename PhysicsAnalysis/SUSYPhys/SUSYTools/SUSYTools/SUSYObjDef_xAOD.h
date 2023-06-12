@@ -335,7 +335,7 @@ namespace ST {
     float GetTrigPrescale(const std::string&) const override final;
     const Trig::ChainGroup* GetTrigChainGroup(const std::string&) const override final;
     std::vector<std::string> GetTriggerOR(const std::string& trigExpr) const;
-    void GetTriggerTokens(std::string, std::vector<std::string>& , std::vector<std::string>& , std::vector<std::string>& , std::vector<std::string>& ) const;
+    void GetTriggerTokens(std::string, std::vector<std::string>& , std::vector<std::string>& , std::vector<std::string>& , std::vector<std::string>& ,std::vector<std::string>& ) const;
     Trig::FeatureContainer GetTriggerFeatures(const std::string& chainName = "EF_.*", unsigned int condition = TrigDefs::Physics) const;
 
     const xAOD::EventInfo* GetEventInfo() const override final;
@@ -430,18 +430,25 @@ namespace ST {
     std::vector<std::string> m_v_trigs16_cache_singleEle;
     std::vector<std::string> m_v_trigs17_cache_singleEle;
     std::vector<std::string> m_v_trigs18_cache_singleEle;
+    std::vector<std::string> m_v_trigs22_cache_singleEle;
+
     std::vector<std::string> m_v_trigs15_cache_singleLep;
     std::vector<std::string> m_v_trigs16_cache_singleLep;
     std::vector<std::string> m_v_trigs17_cache_singleLep;
     std::vector<std::string> m_v_trigs18_cache_singleLep;
+    std::vector<std::string> m_v_trigs22_cache_singleLep;
+    
     std::vector<std::string> m_v_trigs15_cache_diLep;
     std::vector<std::string> m_v_trigs16_cache_diLep;
     std::vector<std::string> m_v_trigs17_cache_diLep;
     std::vector<std::string> m_v_trigs18_cache_diLep;
+    std::vector<std::string> m_v_trigs22_cache_diLep;
+    
     std::vector<std::string> m_v_trigs15_cache_multiLep;
     std::vector<std::string> m_v_trigs16_cache_multiLep;
     std::vector<std::string> m_v_trigs17_cache_multiLep;
     std::vector<std::string> m_v_trigs18_cache_multiLep;
+    std::vector<std::string> m_v_trigs22_cache_multiLep;
 
   protected:
 
@@ -633,6 +640,7 @@ namespace ST {
     double m_elebaselined0sig;
     double m_elebaselinez0;
     std::string m_eleEffMapFilePath;
+    std::string m_eleEffMapFilePathRun2;
 
     double m_muBaselinePt;
     double m_muBaselineEta;
@@ -861,24 +869,32 @@ namespace ST {
     std::string m_trig2016combination_singleLep;
     std::string m_trig2017combination_singleLep;
     std::string m_trig2018combination_singleLep;
+    std::string m_trig2022combination_singleLep;
+    //
     int m_trigNToys_diLep;
     std::string m_trig2015combination_diLep;
     std::string m_trig2016combination_diLep;
     std::string m_trig2017combination_diLep;
     std::string m_trig2018combination_diLep;
+    std::string m_trig2022combination_diLep;
     asg::AnaToolHandle<ITrigGlobalEfficiencyCorrectionTool> m_trigGlobalEffCorrTool_diLep;
+    //
     int m_trigNToys_multiLep;
     std::string m_trig2015combination_multiLep;
     std::string m_trig2016combination_multiLep;
     std::string m_trig2017combination_multiLep;
     std::string m_trig2018combination_multiLep;
+    std::string m_trig2022combination_multiLep;
     asg::AnaToolHandle<ITrigGlobalEfficiencyCorrectionTool> m_trigGlobalEffCorrTool_multiLep;
+    //
     int m_trigNToys_diPhoton;
     std::string m_trig2015combination_diPhoton;
     std::string m_trig2016combination_diPhoton;
     std::string m_trig2017combination_diPhoton;
     std::string m_trig2018combination_diPhoton;
+    std::string m_trig2022combination_diPhoton;
     asg::AnaToolHandle<ITrigGlobalEfficiencyCorrectionTool> m_trigGlobalEffCorrTool_diPhoton;
+    //
     asg::AnaToolHandle<TrigConf::ITrigConfigTool> m_trigConfTool;
     asg::AnaToolHandle<Trig::TrigDecisionTool> m_trigDecTool;
     asg::AnaToolHandle<Trig::IMatchingTool> m_trigMatchingTool;

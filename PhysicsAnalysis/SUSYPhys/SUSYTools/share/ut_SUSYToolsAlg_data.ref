@@ -37,7 +37,12 @@ ToolSvc.JVTEfficiencyTool                         WARNING Supplied SF file JetJv
 
 
 
-SUSYToolsAlg.SUSYTools                            WARNING *** THE ELECTRON TRIGGER SF ARE CURRENTY NOT SUPPORTED ***
+SUSYToolsAlg.SUSYTools                            WARNING (AsgElectronEfficiencyCorrectionTool_trig_mixLep_*) Your selected electron Iso WP (Loose_VarRad) does not have trigger SFs defined. Falling back to FCLoose for SF calculations
+SUSYToolsAlg.SUSYTools                            WARNING (AsgElectronEfficiencyCorrectionTool_trig_mixLep_*) Your selected electron Iso WP (Loose_VarRad) does not have trigger SFs defined. Falling back to FCLoose for SF calculations
+SUSYToolsAlg.SUSYTools                            WARNING (AsgElectronEfficiencyCorrectionTool_trig_mixLep_*) Your selected electron Iso WP (Loose_VarRad) does not have trigger SFs defined. Falling back to FCLoose for SF calculations
+SUSYToolsAlg.SUSYTools                            WARNING (AsgElectronEfficiencyCorrectionTool_trig_mixLep_*) Your selected electron Iso WP (Loose_VarRad) does not have trigger SFs defined. Falling back to FCLoose for SF calculations
+SUSYToolsAlg.SUSYTools                            WARNING (AsgElectronEfficiencyCorrectionTool_trig_mixLep_*) Your selected electron Iso WP (Loose_VarRad) does not have trigger SFs defined. Falling back to FCLoose for SF calculations
+SUSYToolsAlg.SUSYTools                            WARNING (AsgElectronEfficiencyCorrectionTool_trig_mixLep_*) Your selected electron Iso WP (Loose_VarRad) does not have trigger SFs defined. Falling back to FCLoose for SF calculations
 SUSYToolsAlg.SUSYTools                            WARNING *** THE ELECTRON CHARGE FLIP SF ARE CURRENTY NOT SUPPORTED ***
 ToolSvc.TauEffTool_Medium                         WARNING 2022-prerec tag are pre-recommendations and still under development.
 === CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT ===

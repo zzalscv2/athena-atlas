@@ -24,7 +24,7 @@ parser.add_option('-t', '--type', dest = 'type', default = 'mc20e', help = 'Job 
 parser.add_option('--AF', dest = 'AF', default = False, action = 'store_true' )
 parser.add_option('-d', '--daod', dest = 'daod', type = 'int', default = 0, help = 'input DAOD type. Do not specify for xAOD input' )
 parser.add_option('-f', '--flav', dest = 'flav', default = 'PHYS', help = 'input DAOD flavour' )
-parser.add_option('-m', '--maxEvts', dest = 'maxEvts', type = 'int', default = 500, help = 'Max events (-1 is all)' )
+parser.add_option('-m', '--maxEvts', dest = 'maxEvts', type = 'int', default = -1, help = 'Max events (-1 is all)' )
 parser.add_option('-M', '--maxEvtsManual', dest = 'maxEvtsManual', type = 'int')
 parser.add_option('-p', '--ptag', dest = 'ptag', default = 'p5226', help = 'ptag' )
 parser.add_option('--grl', dest = 'grl')
