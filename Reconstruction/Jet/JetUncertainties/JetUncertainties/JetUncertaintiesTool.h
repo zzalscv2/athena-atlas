@@ -271,6 +271,9 @@ class ATLAS_NOT_THREAD_SAFE JetUncertaintiesTool : virtual public ICPJetUncertai
 	SG::AuxElement::Accessor<float> m_accSigeffSF;
         SG::AuxElement::Accessor<float> m_accEfficiency;
 	SG::AuxElement::Accessor<bool> m_accTagResult;
+
+	// Properties for the flavour configuration
+	bool m_absEtaGluonFraction;
 };
     
 

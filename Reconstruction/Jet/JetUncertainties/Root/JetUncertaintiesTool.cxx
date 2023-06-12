@@ -104,6 +104,7 @@ JetUncertaintiesTool::JetUncertaintiesTool(const std::string& name)
     , m_accSigeffSF("temp_sigeffSF")
     , m_accEfficiency("temp_efficiency")
     , m_accTagResult("temp_accept")
+    , m_absEtaGluonFraction(true)
 {
     declareProperty("JetDefinition",m_jetDef);
     declareProperty("MCType",m_mcType);
@@ -114,6 +115,7 @@ JetUncertaintiesTool::JetUncertaintiesTool(const std::string& name)
     declareProperty("AnalysisHistPattern",m_analysisHistPattern);
     declareProperty("VariablesToShift",m_systFilters);
     declareProperty("IsData",m_isData);
+    declareProperty("AbsEtaGluonFraction",m_absEtaGluonFraction);
 
     ATH_MSG_DEBUG("Creating JetUncertaintiesTool named "<<m_name);
 
@@ -165,6 +167,7 @@ JetUncertaintiesTool::JetUncertaintiesTool(const JetUncertaintiesTool& toCopy)
     , m_accSigeffSF(toCopy.m_accSigeffSF)
     , m_accEfficiency(toCopy.m_accEfficiency)
     , m_accTagResult(toCopy.m_accTagResult)
+    , m_absEtaGluonFraction(toCopy.m_absEtaGluonFraction)
 {
     ATH_MSG_DEBUG("Creating copy of JetUncertaintiesTool named "<<m_name);
 
@@ -990,7 +993,7 @@ UncertaintyComponent* JetUncertaintiesTool::buildUncertaintyComponent(const Comp
                     component.flavourType == FlavourComp::PerJetResponse_C){
                         return new PerJetFlavourUncertaintyComponent(component);
                     }else
-                        return new FlavourUncertaintyComponent(component,m_jetDef,m_analysisFile.c_str(),m_defAnaFile.c_str(),m_path.c_str(),m_calibArea.c_str(),m_analysisHistPattern.c_str());
+                        return new FlavourUncertaintyComponent(component,m_jetDef,m_analysisFile.c_str(),m_defAnaFile.c_str(),m_path.c_str(),m_calibArea.c_str(),m_absEtaGluonFraction,m_analysisHistPattern.c_str());
                                     
             }
             else
