@@ -226,7 +226,7 @@ StatusCode SCTOverlay::execute(const EventContext& ctx) const
   // we create during this algorithm. The containers are views.
   DataPool<SCT3_RawData> dataItemsPool(ctx);
   // It resizes but lets reserve already quite a few
-  dataItemsPool.reserve(250000);
+  dataItemsPool.prepareToAdd(250000);
 
   ATH_CHECK(overlayContainer(bkgContainerPtr, signalContainer.cptr(), outputContainer.ptr(),dataItemsPool));
   ATH_MSG_DEBUG("SCT Result   = " << Overlay::debugPrint(outputContainer.ptr(), 50));

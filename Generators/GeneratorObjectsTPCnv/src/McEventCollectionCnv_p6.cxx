@@ -73,7 +73,7 @@ void McEventCollectionCnv_p6::persToTrans( const McEventCollection_p6* persObj,
   const unsigned int nParts = persObj->m_genParticles.size();
   datapools.part.prepareToAdd(nParts);
   const unsigned int nEvts = persObj->m_genEvents.size();
-  datapools.part.prepareToAdd(nEvts);
+  datapools.evt.prepareToAdd(nEvts);
 
   transObj->reserve( nEvts );
   for ( std::vector<GenEvent_p6>::const_iterator

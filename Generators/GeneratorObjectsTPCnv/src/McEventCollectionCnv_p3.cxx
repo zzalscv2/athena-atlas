@@ -28,8 +28,8 @@ McEventCollectionCnv_p3::McEventCollectionCnv_p3() :
   Base_t( )
 {}
 
-McEventCollectionCnv_p3::McEventCollectionCnv_p3( const McEventCollectionCnv_p3& rhs ) 
-  
+McEventCollectionCnv_p3::McEventCollectionCnv_p3( const McEventCollectionCnv_p3& rhs )
+
 = default;
 
 McEventCollectionCnv_p3&
@@ -60,17 +60,11 @@ void McEventCollectionCnv_p3::persToTrans( const McEventCollection_p3* persObj,
   transObj->clear(SG::VIEW_ELEMENTS);
   HepMC::DataPool datapools;
   const unsigned int nVertices = persObj->m_genVertices.size();
-  if ( datapools.vtx.capacity() - datapools.vtx.allocated() < nVertices ) {
-    datapools.vtx.reserve( datapools.vtx.allocated() + nVertices );
-  }
+  datapools.vtx.prepareToAdd(nVertices);
   const unsigned int nParts = persObj->m_genParticles.size();
-  if ( datapools.part.capacity() - datapools.part.allocated() < nParts ) {
-    datapools.part.reserve( datapools.part.allocated() + nParts );
-  }
+  datapools.part.prepareToAdd(nParts);
   const unsigned int nEvts = persObj->m_genEvents.size();
-  if ( datapools.evt.capacity() - datapools.evt.allocated() < nEvts ) {
-    datapools.evt.reserve( datapools.evt.allocated() + nEvts );
-  }
+  datapools.evt.prepareToAdd(nEvts);
 
   transObj->reserve( nEvts );
   for ( std::vector<GenEvent_p3>::const_iterator
@@ -98,7 +92,7 @@ void McEventCollectionCnv_p3::persToTrans( const McEventCollection_p3* persObj,
     const unsigned int endVtx = persEvt.m_verticesEnd;
     for ( unsigned int iVtx= persEvt.m_verticesBegin; iVtx != endVtx; ++iVtx ) {
       createGenVertex( *persObj, persObj->m_genVertices[iVtx],partToEndVtx, datapools, genEvt );
-    } 
+    }
 #else
     genEvt->m_signal_process_id     = persEvt.m_signalProcessId;
     genEvt->m_event_number          = persEvt.m_eventNbr;
@@ -173,7 +167,7 @@ HepMC::GenVertexPtr
 McEventCollectionCnv_p3::createGenVertex( const McEventCollection_p3& persEvt,
                                           const GenVertex_p3& persVtx,
                                           ParticlesMap_t& partToEndVtx,
-                                          HepMC::DataPool& datapools, HepMC::GenEvent* parent ) 
+                                          HepMC::DataPool& datapools, HepMC::GenEvent* parent )
 {
   HepMC::GenVertexPtr vtx = datapools.getGenVertex();
   if (parent) parent->add_vertex(vtx);
@@ -233,7 +227,7 @@ McEventCollectionCnv_p3::createGenVertex( const McEventCollection_p3& persEvt,
 HepMC::GenParticlePtr
 McEventCollectionCnv_p3::createGenParticle( const GenParticle_p3& persPart,
                                             ParticlesMap_t& partToEndVtx,
-                                            HepMC::DataPool& datapools, const HepMC::GenVertexPtr& parent, bool add_to_output ) 
+                                            HepMC::DataPool& datapools, const HepMC::GenVertexPtr& parent, bool add_to_output )
 {
   HepMC::GenParticlePtr p    = datapools.getGenParticle();
   if (parent) add_to_output?parent->add_particle_out(p):parent->add_particle_in(p);
