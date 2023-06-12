@@ -11,8 +11,8 @@ log = logging.getLogger(__name__)
 # Low threshold prescaled L1 items - slected at HLT based on TBP bit from L1 in random-seeded events        
 # High(er) threshold prescaled L1 items - slected at HLT based on TBP bit from L1 in random-seeded events 
 l1seeds = { 'low'  : \
-               ['L1_2EM7',\
-                'L1_EM10VH',\
+               ['L1_2eEM9',\
+                'L1_eEM12L',\
                 #'L1_EM12_XS20',\
                 'L1_J15p31ETA49',\
                 'L1_JPSI-1M5-EM12',\
@@ -20,16 +20,18 @@ l1seeds = { 'low'  : \
                 #'L1_J30p0ETA49_2J20p0ETA49',\
                 'L1_JPSI-1M5-eEM9',\
                 'L1_MU8F',\
-                'L1_ZB'],\
+                'L1_ZB',\
+                'L1_ZB_eEM18'],\
              'medium' : \
                [
                 'L1_2EM15',\
+                'L1_2eEM18L',\
                 'L1_2MU3V',\
                 'L1_BPH-0DR3-EM7J15_2MU3V',\
                 'L1_BPH-0DR3-EM7J15_MU5VF',\
                 'L1_BPH-0M9-EM7-EM5_MU5VF',\
                 'L1_BPH-2M9-2DR15-2MU5VF',\
-                'L1_BPH-2M9-0DR15-MU5VFMU3V',\
+                'L1_BPH-2M9-0DR15-C-MU5VFMU3V',\
                 'L1_BPH-8M15-0DR22-2MU5VF',\
                 'L1_BPH-8M15-0DR22-MU5VFMU3V-BO',\
                 'L1_BTAG-MU3VjJ40',\
@@ -38,8 +40,8 @@ l1seeds = { 'low'  : \
                 'L1_DY-BOX-2MU3VF',\
                 'L1_EM15VHI_2TAU12IM_J25_3J12',\
                 #'L1_EM15_XS30',\
-                'L1_EM15VH',\
-                'L1_EM20VH',\
+                'L1_eEM18L',\
+                'L1_eEM24L',\
                 'L1_EM7_MU8F',\
                 'L1_HT190-J15s5pETA21',\
                 'L1_J30p31ETA49',\
@@ -54,7 +56,7 @@ l1seeds = { 'low'  : \
                 #'L1_MU5VF_J30p0ETA49_2J20p0ETA49',\
                 'L1_TAU20IM_2TAU12IM_J25_2J20_3J12',\
                 'L1_TAU20IM_2TAU12IM_XE35',\
-                'L1_TAU40',\
+                'L1_eTAU60',\
                 'L1_XE35',
             ] 
 }
