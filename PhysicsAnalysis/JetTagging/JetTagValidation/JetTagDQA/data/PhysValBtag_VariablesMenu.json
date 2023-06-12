@@ -86,9 +86,9 @@
             "xtitle": "Number of jets",
             "ytitle": "Events",
             "path":  {"ART": "", "PHYSVAL": "global"},
-            "xbins": 21,
+            "xbins": 16,
             "xmin": -0.5,
-            "xmax": 20.5,
+            "xmax": 15.5,
             "type": "TH1D",
             "forData": "true"
         },
@@ -99,9 +99,9 @@
             "xtitle": "Number of jets",
             "ytitle": "Events",
             "path":  {"ART": "", "PHYSVAL": "global"},
-            "xbins": 21,
+            "xbins": 16,
             "xmin": -0.5,
-            "xmax": 20.5,
+            "xmax": 15.5,
             "type": "TH1D",
             "forData": "true"
         },
@@ -304,7 +304,7 @@
             "title": "RNNIP",
             "xtitle": "RNNIP px",
             "ytitle": "Jets",
-            "path":  {"ART": "bTagging", "PHYSVAL": "tagger"},
+            "path":  {"ART": "bTagging"},
             "xbins": 100,
             "xmin": 0,
             "xmax": 1,
@@ -362,7 +362,7 @@
             "title": "DL1dv00",
             "xtitle": "DL1dv00 px",
             "ytitle": "Jets",
-            "path":  {"ART": "bTagging", "PHYSVAL": "tagger"},
+            "path":  {"ART": "bTagging"},
             "xbins": 100,
             "xmin": 0,
             "xmax": 1,
@@ -392,7 +392,7 @@
             "title": "DL1r",
             "xtitle": "DL1r px",
             "ytitle": "Jets",
-            "path":  {"ART": "bTagging", "PHYSVAL": "tagger"},
+            "path":  {"ART": "bTagging"},
             "xbins": 100,
             "xmin": 0,
             "xmax": 1,
@@ -463,7 +463,7 @@
             "title": "number of IP2D tracks",
             "xtitle": "nTracks",
             "ytitle": "Jets",
-            "path":  {"ART": "bTagging", "PHYSVAL": "old_taggers"},
+            "path":  {"ART": "bTagging"},
             "xbins": 21,
             "xmin": -0.5,
             "xmax": 20.5,
@@ -575,7 +575,7 @@
             "title": "IP2D weight B of tracks",
             "xtitle": "weight B of tracks",
             "ytitle": "Tracks",
-            "path":  {"ART": "bTagging", "PHYSVAL": "old_taggers"},
+            "path":  {"ART": "bTagging"},
             "xbins": 200,
             "xmin": -2,
             "xmax": 2,
@@ -589,7 +589,7 @@
             "title": "IP2D weight C of tracks",
             "xtitle": "weight C of tracks",
             "ytitle": "Tracks",
-            "path":  {"ART": "bTagging", "PHYSVAL": "old_taggers"},
+            "path":  {"ART": "bTagging"},
             "xbins": 200,
             "xmin": -2,
             "xmax": 2,
@@ -603,7 +603,7 @@
             "title": "IP2D weight U of tracks",
             "xtitle": "weight U of tracks",
             "ytitle": "Tracks",
-            "path":  {"ART": "bTagging", "PHYSVAL": "old_taggers"},
+            "path":  {"ART": "bTagging"},
             "xbins": 200,
             "xmin": -2,
             "xmax": 2,
@@ -651,84 +651,6 @@
             "forData": "false"
         },
 
-        "llr_old_taggers": {
-            "_comment": "",
-            "title": "loglikelihoodratio of matched jets",
-            "xtitle": "loglikelihoodratio",
-            "ytitle": "Jets",
-            "path":  {"PHYSVAL": "old_taggers"},
-            "xbins": 250,
-            "xmin": -10,
-            "xmax": 40,
-            "type": "TH1D",
-            "forData": "false"
-        },
-
-        "llr_nTracksCut_old_taggers": {
-            "_comment": "",
-            "title": "loglikelihoodratio of matched jets with nTracks cut",
-            "xtitle": "loglikelihoodratio",
-            "ytitle": "Jets",
-            "path":  {"PHYSVAL": "old_taggers"},
-            "xbins": 250,
-            "xmin": -10,
-            "xmax": 40,
-            "type": "TH1D",
-            "forData": "false"
-        },
-
-        "llr_MV": {
-            "_comment": "has a different range",
-            "title": "loglikelihoodratio of matched jets",
-            "xtitle": "loglikelihoodratio",
-            "ytitle": "Jets",
-            "path":  {"PHYSVAL": "old_taggers"},
-            "xbins": 250,
-            "xmin": -1,
-            "xmax": 1,
-            "type": "TH1D",
-            "forData": "false"
-        },
-
-        "llr_nTracksCut_MV": {
-            "_comment": "has a different range",
-            "title": "loglikelihoodratio of matched jets with nTracks cut",
-            "xtitle": "loglikelihoodratio",
-            "ytitle": "Jets",
-            "path":  {"PHYSVAL": "old_taggers"},
-            "xbins": 250,
-            "xmin": -1,
-            "xmax": 1,
-            "type": "TH1D",
-            "forData": "false"
-        },
-
-        "pT_llrCut": {
-            "_comment": "",
-            "title": "p_{T} of matched jets",
-            "xtitle": "p_{T} [GeV]",
-            "ytitle": "Jets",
-            "path":  {"PHYSVAL": "tagger"},
-            "xbins": 100,
-            "xmin": 0,
-            "xmax": 1000,
-            "type": "TH1D",
-            "forData": "false"
-        },
-
-        "pT_llrCut_old_taggers": {
-            "_comment": "",
-            "title": "p_{T} of matched jets",
-            "xtitle": "p_{T} [GeV]",
-            "ytitle": "Jets",
-            "path":  {"PHYSVAL": "old_taggers"},
-            "xbins": 100,
-            "xmin": 0,
-            "xmax": 1000,
-            "type": "TH1D",
-            "forData": "false"
-        },
-
         "pT_llrCut_Zprime": {
             "_comment": "",
             "title": "p_{T} of matched jets on Zprime samples",
@@ -742,38 +664,12 @@
             "forData": "false"
         },
 
-        "pT_llrCut_Zprime_old_taggers": {
-            "_comment": "",
-            "title": "p_{T} of matched jets on Zprime samples",
-            "xtitle": "p_{T} [GeV]",
-            "ytitle": "Jets",
-            "path":  {"PHYSVAL": "old_taggers"},
-            "xbins": 100,
-            "xmin": 400,
-            "xmax": 3000,
-            "type": "TH1D",
-            "forData": "false"
-        },
-
         "Lxy_llrCut": {
             "_comment": "",
             "title": "(SV1) L_{xy} of matched jets",
             "xtitle": "L_{xy} [mm]",
             "ytitle": "Jets",
             "path":  {"PHYSVAL": "tagger"},
-            "xbins": 50,
-            "xmin": 0,
-            "xmax": 75,
-            "type": "TH1D",
-            "forData": "false"
-        },
-
-        "Lxy_llrCut_old_taggers": {
-            "_comment": "",
-            "title": "(SV1) L_{xy} of matched jets",
-            "xtitle": "L_{xy} [mm]",
-            "ytitle": "Jets",
-            "path":  {"PHYSVAL": "old_taggers"},
             "xbins": 50,
             "xmin": 0,
             "xmax": 75,
@@ -825,6 +721,19 @@
             "forEachTruthType": ["U", "B", "C", "DATA"],
             "type": "TH1D",
             "forData": "true"
+        },
+
+        "pT_llrCut": {
+            "_comment": "",
+            "title": "p_{T} of matched jets",
+            "xtitle": "p_{T} [GeV]",
+            "ytitle": "Jets",
+            "path":  {"PHYSVAL": "tagger"},
+            "xbins": 100,
+            "xmin": 0,
+            "xmax": 1000,
+            "type": "TH1D",
+            "forData": "false"
         },
 
         "track_sigz0": {
@@ -917,9 +826,9 @@
             "xtitle": "Number of tracks",
             "ytitle": "Jets",
             "path":  {"PHYSVAL": "tracks"},
-            "xbins": 40,
+            "xbins": 30,
             "xmin": 0,
-            "xmax": 40,
+            "xmax": 30,
             "forEach": ["B", "C", "Fragmentation", "Secondaries", "Pileup", "Fake", "OtherOrigin"],
             "type": "TH1D",
             "forData": "false"
@@ -945,9 +854,9 @@
             "xtitle": "Number of hits",
             "ytitle": "Tracks",
             "path":  {"ART": "BTagTrackToJetAssociator", "PHYSVAL": "tracks"},
-            "xbins": 10,
+            "xbins": 8,
             "xmin": 0,
-            "xmax": 10,
+            "xmax": 8,
             "forEachTruthType": ["U", "B", "C", "DATA"],
             "type": "TH1D",
             "forData": "true"
@@ -959,9 +868,9 @@
             "xtitle": "Number of hits",
             "ytitle": "Tracks",
             "path":  {"ART": "BTagTrackToJetAssociator", "PHYSVAL": "tracks"},
-            "xbins": 10,
+            "xbins": 8,
             "xmin": 0,
-            "xmax": 10,
+            "xmax": 8,
             "forEachTruthType": ["U", "B", "C", "DATA"],
             "type": "TH1D",
             "forData": "true"
@@ -973,9 +882,9 @@
             "xtitle": "Number of hits",
             "ytitle": "Tracks",
             "path":  {"ART": "BTagTrackToJetAssociator", "PHYSVAL": "tracks"},
-            "xbins": 10,
+            "xbins": 8,
             "xmin": 0,
-            "xmax": 10,
+            "xmax": 8,
             "forEachTruthType": ["U", "B", "C", "DATA"],
             "type": "TH1D",
             "forData": "true"
@@ -1029,9 +938,9 @@
             "xtitle": "Number of hits",
             "ytitle": "Tracks",
             "path":  {"ART": "BTagTrackToJetAssociator", "PHYSVAL": "tracks"},
-            "xbins": 10,
+            "xbins": 8,
             "xmin": 0,
-            "xmax": 10,
+            "xmax": 8,
             "forEachTruthType": ["U", "B", "C", "DATA"],
             "type": "TH1D",
             "forData": "true"

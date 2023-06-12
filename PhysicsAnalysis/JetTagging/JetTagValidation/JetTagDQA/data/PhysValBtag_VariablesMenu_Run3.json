@@ -47,7 +47,7 @@
             "title": "IP2D grade of tracks",
             "xtitle": "grade of tracks",
             "ytitle": "Tracks",
-            "path":  {"ART": "bTagging", "PHYSVAL": "old_taggers"},
+            "path":  {"ART": "bTagging"},
             "xbins": 14,
             "xmin": -0.5,
             "xmax": 13.5,
