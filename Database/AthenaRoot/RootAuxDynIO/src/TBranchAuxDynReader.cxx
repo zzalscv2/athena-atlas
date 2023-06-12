@@ -120,14 +120,23 @@ getAuxIdForAttribute(const std::string& attr, TClass *tclass, EDataType edt, boo
 } // anonymous namespace
 
 
-
 void TBranchAuxDynReader::BranchInfo::setAddress(void* data)
 {
    if( needsSE ) {
+      if( (edtyp == kULong_t or edtyp == kULong64_t or edtyp == kLong_t or edtyp == kLong64_t) and
+          (SE_edt == kULong_t or SE_edt == kULong64_t or SE_edt == kLong_t or SE_edt == kLong64_t) and
+          sizeof(Long_t) == sizeof(Long64_t) ) {
+         // There is no need to attempt ROOT schema evolution between these types (and it will not work anyhow)
+         needsSE = false;
+      }
+   }
+   if( needsSE ) {
       // reading through the TTree - allows for schema evolution
-      if( branch->GetTree()->SetBranchAddress( branch->GetName(), data,
-                                               SE_tclass, SE_edt, true) < 0 ) {
-         throw string("SetBranchAddress() failed for ") + branch->GetName();
+      int rc = branch->GetTree()->SetBranchAddress( branch->GetName(), data, SE_tclass, SE_edt, true);
+      if( rc < 0 ) {
+         std::ostringstream msg;
+         msg << "SetBranchAddress() failed for " << branch->GetName() << "  error=" << rc;
+         throw msg.str();
       }
    } else {
       branch->SetAddress(data);
@@ -238,8 +247,7 @@ TBranchAuxDynReader::getBranchInfo(const SG::auxid_t& auxid, const SG::AuxStoreI
          brInfo.status = BranchInfo::NotFound;
          return brInfo;
       }
-      EDataType    typ;
-      if( brInfo.branch->GetExpectedType( brInfo.tclass, typ) ) {
+      if( brInfo.branch->GetExpectedType( brInfo.tclass, brInfo.edtyp) ) {
          brInfo.status = BranchInfo::TypeError;
          throw string("Error getting branch type for ") + brInfo.branch->GetName();
       }
@@ -249,39 +257,40 @@ TBranchAuxDynReader::getBranchInfo(const SG::auxid_t& auxid, const SG::AuxStoreI
             brInfo.isPackedContainer = true;
 
       string elem_tname, branch_tname;
-      const std::type_info* ti = getAuxElementType( brInfo.tclass, typ, store.standalone(),
+      // AuxElement TypeID
+      const std::type_info* ti = getAuxElementType( brInfo.tclass, brInfo.edtyp, store.standalone(),
                                                     elem_tname, branch_tname );
       const std::type_info* reg_ti = r.getType(auxid);
-      const std::type_info *tinf =  store.getIOType(auxid);
-      if (not tinf){
+      // I/O / Storage TypeID
+      const std::type_info *io_tinf =  store.getIOType(auxid);
+      const std::type_info *tcls_tinf = brInfo.tclass ? brInfo.tclass->GetTypeInfo() : ti;
+      
+      if (not io_tinf){
         brInfo.status = BranchInfo::TypeError;
         throw string("Error getting IO type for AUX branch ") + brInfo.branch->GetName();
       }
-      bool different_elt_type = ti && ti != reg_ti && strcmp(ti->name(), reg_ti->name()) != 0;
-      bool different_vec_type = brInfo.tclass &&
-        (!brInfo.tclass->GetTypeInfo() || 
-         (tinf != brInfo.tclass->GetTypeInfo() && strcmp (tinf->name(), brInfo.tclass->GetTypeInfo()->name()) != 0));
-      if( different_elt_type || different_vec_type )
-      {
+      // if there is a TClass compare the whole storage types (usually vectors), because the Element type
+      // returned by CollProxy loses the pointer component and element type comparison for vector<T*> fails
+      brInfo.needsSE = brInfo.tclass ?
+         io_tinf != tcls_tinf && strcmp(io_tinf->name(), tcls_tinf->name()) != 0
+         : ti && ti != reg_ti && strcmp(ti->name(), reg_ti->name()) != 0;
+      if( brInfo.needsSE ) {
          // type in registry is different than type in the file.
-         // will need to use ROOT auto schema evolution
-         brInfo.needsSE = true;
-         if (different_elt_type) {
-           errorcheck::ReportMessage msg (MSG::INFO, ERRORCHECK_ARGS, "TBranchAuxDynReader");
-           msg << "attribute " << brInfo.attribName << " (id=" << auxid <<
-             " typename=" << SG::AuxTypeRegistry::instance().getType(auxid)->name()
-               << ") has different type than the branch " << branch_tname;
-           msg << "  Attempting schema evolution.";
-         }
-
-         brInfo.SE_tclass  = TClass::GetClass(*tinf);
+         // will need to use ROOT auto schema evolution 
+         errorcheck::ReportMessage msg (MSG::INFO, ERRORCHECK_ARGS, "TBranchAuxDynReader");
+         msg << "attribute '" << brInfo.attribName << "' (id=" << auxid
+             << " typename=" << SG::normalizedTypeinfoName(*reg_ti)
+             << ") has different type than the branch: " << branch_tname;
+         msg << "  Marking for schema evolution.";
+         
+         brInfo.SE_tclass  = TClass::GetClass(*io_tinf);
          brInfo.SE_edt = kOther_t;
          if( !brInfo.SE_tclass  ) {
-            brInfo.SE_edt = TDataType::GetType(*tinf);
+            brInfo.SE_edt = TDataType::GetType(*io_tinf);
             if( brInfo.SE_edt <=0 ) {
                brInfo.status = BranchInfo::TypeError;
                throw string("Error getting ROOT type for AUX branch ") + brInfo.branch->GetName()
-                  + " typeinfo=" + tinf->name();
+                  + " typeinfo=" + io_tinf->name();
             }
          }
       }       

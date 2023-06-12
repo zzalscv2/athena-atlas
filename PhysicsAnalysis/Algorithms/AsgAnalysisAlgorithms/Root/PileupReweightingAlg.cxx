@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -15,7 +15,7 @@ namespace {
   const static SG::ConstAuxElement::ConstAccessor<unsigned int> accRRN("RandomRunNumber");
   const static SG::ConstAuxElement::Decorator<unsigned int> decRRN("RandomRunNumber");
   const static SG::ConstAuxElement::Decorator<unsigned int> decRLBN("RandomLumiBlockNumber");
-  const static SG::ConstAuxElement::Decorator<unsigned long long> decHash("PRWHash");
+  const static SG::ConstAuxElement::Decorator<uint64_t> decHash("PRWHash");
 }
 
 //

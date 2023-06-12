@@ -77,8 +77,8 @@ namespace RootAuxDynIO
          else if( ti == typeid(Int_t) )     createBasicAuxBranch("/I");
          else if( ti == typeid(Double_t) )  createBasicAuxBranch("/D");
          else if( ti == typeid(Float_t) )   createBasicAuxBranch("/F");
-         else if( ti == typeid(Long64_t) )  createBasicAuxBranch("/L");
-         else if( ti == typeid(ULong64_t) ) createBasicAuxBranch("/l");
+         else if( ti == typeid(Long64_t)  or ti == typeid(std::int64_t) )  createBasicAuxBranch("/L");
+         else if( ti == typeid(ULong64_t) or ti == typeid(std::uint64_t) ) createBasicAuxBranch("/l");
          else if( ti == typeid(Short_t) )   createBasicAuxBranch("/S");
          else if( ti == typeid(UShort_t) )  createBasicAuxBranch("/s");
          else if( ti == typeid(Char_t) )    createBasicAuxBranch("/B");

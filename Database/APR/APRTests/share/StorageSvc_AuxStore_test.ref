@@ -1,11 +1,5 @@
 
 
-Initializing Gaudi ApplicationMgr using job opts ../share/
-ApplicationMgr    SUCCESS 
-====================================================================================================================================
-                                                   Welcome to ApplicationMgr (GaudiCoreSvc v36r9)
-                                          running on aibuild16-024.cern.ch on Tue Dec 20 10:34:47 2022
-====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
 EventLoopMgr      WARNING Unable to locate service "EventSelector" 
 EventLoopMgr      WARNING No events will be processed from external input.
@@ -17,12 +11,7 @@ Loading library test_StorageSvc_AuxStoreDict
 [OVAL] Testing the writing operations
 createStorageSvc
 startSession
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO >   Access   DbDomain     CREATE    [ROOT_All] 
 Session connect
-Domain[ROOT_All]     INFO ->  Access   DbDatabase   CREATE    [ROOT_All] 77331FE0-160F-A15E-904D-1AA331AFB134
-Domain[ROOT_All]     INFO                           pool_test.root
-RootDatabase.open    INFO pool_test.root File version:62608
 Creating objects
 Creating Shape
 StorageSvc           INFO Building shape according to reflection information using shape ID for:
@@ -41,124 +30,12 @@ Committing transaction
 Committing transaction
 Deleting written data objects
 Disconnecting StorageSvc
-pool_test.root       INFO Database being retired...
-Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   CREATE    [ROOT_All] 77331FE0-160F-A15E-904D-1AA331AFB134
 Ending Session
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     CREATE    [ROOT_All] 
 Releasing StorageSvc
 [OVAL] ...done
 [OVAL] Testing the reading operations
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
-Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 77331FE0-160F-A15E-904D-1AA331AFB134
-Domain[ROOT_All]     INFO                           pool_test.root
-RootDatabase.open    INFO pool_test.root File version:62608
-TBranchAuxDynRe...   INFO RootAuxDynIO/src/TBranchAuxDynReader.cxx:266 (FUNC): attribute withdict (id=14 typename=PN7APRTest14AClassWithDictE) has different type than the branch vector<APRTest::AClassWithDict*>  Attempting schema evolution.
-0: 0   : 0  : withdict[0]= 0x5024eb0 v=0
-1: 1   : 2  : withdict[1]= 0x518c420 v=0
-2: 2   : 4  : withdict[2]= 0x5703bb0 v=0
-3: 3   : 6  : withdict[3]= 0x5851310 v=0
-4: 4   : 8  : withdict[4]= 0x59cb480 v=0
-5: 5   : 10  : withdict[5]= 0x52ab630 v=0
-6: 6   : 12  : withdict[6]= 0x27b6270 v=0
-7: 7   : 14  : withdict[7]= 0x56b8da0 v=0
-8: 8   : 16  : withdict[8]= 0x56b6f30 v=0
-9: 9   : 18  : withdict[9]= 0x59c87a0 v=0
-0: 1000   : 5000  : withdict[0]= 0x59d1840 v=1
-1: 1001   : 5002  : withdict[1]= 0x56add90 v=1
-2: 1002   : 5004  : withdict[2]= 0x52f8850 v=1
-3: 1003   : 5006  : withdict[3]= 0x59c8860 v=1
-4: 1004   : 5008  : withdict[4]= 0x5987710 v=1
-5: 1005   : 5010  : withdict[5]= 0x56b5130 v=1
-6: 1006   : 5012  : withdict[6]= 0x58a0c40 v=1
-7: 1007   : 5014  : withdict[7]= 0x59b8f00 v=1
-8: 1008   : 5016  : withdict[8]= 0x37a1a30 v=1
-9: 1009   : 5018  : withdict[9]= 0x56a9e30 v=1
-0: 2000   : 10000  : withdict[0]= 0x59890f0 v=2
-1: 2001   : 10002  : withdict[1]= 0x4708a50 v=2
-2: 2002   : 10004  : withdict[2]= 0x50c1ea0 v=2
-3: 2003   : 10006  : withdict[3]= 0x520dce0 v=2
-4: 2004   : 10008  : withdict[4]= 0x59ce830 v=2
-5: 2005   : 10010  : withdict[5]= 0x50cfbb0 v=2
-6: 2006   : 10012  : withdict[6]= 0x5994460 v=2
-7: 2007   : 10014  : withdict[7]= 0x5997390 v=2
-8: 2008   : 10016  : withdict[8]= 0x5993550 v=2
-9: 2009   : 10018  : withdict[9]= 0x570f990 v=2
-0: 3000   : 15000  : withdict[0]= 0x58f5fc0 v=3
-1: 3001   : 15002  : withdict[1]= 0x56e9be0 v=3
-2: 3002   : 15004  : withdict[2]= 0x58f6230 v=3
-3: 3003   : 15006  : withdict[3]= 0x57fcf90 v=3
-4: 3004   : 15008  : withdict[4]= 0x59db580 v=3
-5: 3005   : 15010  : withdict[5]= 0x2863540 v=3
-6: 3006   : 15012  : withdict[6]= 0x5005e40 v=3
-7: 3007   : 15014  : withdict[7]= 0x57cfb70 v=3
-8: 3008   : 15016  : withdict[8]= 0x5675ed0 v=3
-9: 3009   : 15018  : withdict[9]= 0x58b2d60 v=3
-0: 4000   : 20000  : withdict[0]= 0x51aa0f0 v=4
-1: 4001   : 20002  : withdict[1]= 0x587b310 v=4
-2: 4002   : 20004  : withdict[2]= 0x59902c0 v=4
-3: 4003   : 20006  : withdict[3]= 0x59b9550 v=4
-4: 4004   : 20008  : withdict[4]= 0x59972c0 v=4
-5: 4005   : 20010  : withdict[5]= 0x58b76c0 v=4
-6: 4006   : 20012  : withdict[6]= 0x57e3eb0 v=4
-7: 4007   : 20014  : withdict[7]= 0x59aff20 v=4
-8: 4008   : 20016  : withdict[8]= 0x58f79b0 v=4
-9: 4009   : 20018  : withdict[9]= 0x43310b0 v=4
-0: 5000   : 25000  : withdict[0]= 0x58c8ab0 v=5
-1: 5001   : 25002  : withdict[1]= 0x58c6f00 v=5
-2: 5002   : 25004  : withdict[2]= 0x59d5e80 v=5
-3: 5003   : 25006  : withdict[3]= 0x286ae80 v=5
-4: 5004   : 25008  : withdict[4]= 0x58b5730 v=5
-5: 5005   : 25010  : withdict[5]= 0x57daba0 v=5
-6: 5006   : 25012  : withdict[6]= 0x51d2c00 v=5
-7: 5007   : 25014  : withdict[7]= 0x46acbd0 v=5
-8: 5008   : 25016  : withdict[8]= 0x52519a0 v=5
-9: 5009   : 25018  : withdict[9]= 0x520dc80 v=5
-0: 6000   : 30000  : withdict[0]= 0x52d28d0 v=6
-1: 6001   : 30002  : withdict[1]= 0x533a500 v=6
-2: 6002   : 30004  : withdict[2]= 0x59de0f0 v=6
-3: 6003   : 30006  : withdict[3]= 0x5215f50 v=6
-4: 6004   : 30008  : withdict[4]= 0x59e0ad0 v=6
-5: 6005   : 30010  : withdict[5]= 0x570f310 v=6
-6: 6006   : 30012  : withdict[6]= 0x46bec10 v=6
-7: 6007   : 30014  : withdict[7]= 0x59ac810 v=6
-8: 6008   : 30016  : withdict[8]= 0x5997570 v=6
-9: 6009   : 30018  : withdict[9]= 0x4727e90 v=6
-0: 7000   : 35000  : withdict[0]= 0x59a78e0 v=7
-1: 7001   : 35002  : withdict[1]= 0x5199170 v=7
-2: 7002   : 35004  : withdict[2]= 0x472a880 v=7
-3: 7003   : 35006  : withdict[3]= 0x520f7e0 v=7
-4: 7004   : 35008  : withdict[4]= 0x27b6020 v=7
-5: 7005   : 35010  : withdict[5]= 0x471c9c0 v=7
-6: 7006   : 35012  : withdict[6]= 0x51a9ff0 v=7
-7: 7007   : 35014  : withdict[7]= 0x470b6d0 v=7
-8: 7008   : 35016  : withdict[8]= 0x47626c0 v=7
-9: 7009   : 35018  : withdict[9]= 0x58c37d0 v=7
-0: 8000   : 40000  : withdict[0]= 0x470f770 v=8
-1: 8001   : 40002  : withdict[1]= 0x469f540 v=8
-2: 8002   : 40004  : withdict[2]= 0x340fed0 v=8
-3: 8003   : 40006  : withdict[3]= 0x4725740 v=8
-4: 8004   : 40008  : withdict[4]= 0x2878350 v=8
-5: 8005   : 40010  : withdict[5]= 0x518dbe0 v=8
-6: 8006   : 40012  : withdict[6]= 0x5513640 v=8
-7: 8007   : 40014  : withdict[7]= 0x518db50 v=8
-8: 8008   : 40016  : withdict[8]= 0x5211610 v=8
-9: 8009   : 40018  : withdict[9]= 0x50be550 v=8
-0: 9000   : 45000  : withdict[0]= 0x5326370 v=9
-1: 9001   : 45002  : withdict[1]= 0x52d4860 v=9
-2: 9002   : 45004  : withdict[2]= 0x5251b30 v=9
-3: 9003   : 45006  : withdict[3]= 0x52522d0 v=9
-4: 9004   : 45008  : withdict[4]= 0x5327680 v=9
-5: 9005   : 45010  : withdict[5]= 0x51a40c0 v=9
-6: 9006   : 45012  : withdict[6]= 0x518ca30 v=9
-7: 9007   : 45014  : withdict[7]= 0x5342590 v=9
-8: 9008   : 45016  : withdict[8]= 0x54af720 v=9
-9: 9009   : 45018  : withdict[9]= 0x52d8b40 v=9
 Objects read: 10
-pool_test.root       INFO Database being retired...
-Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 77331FE0-160F-A15E-904D-1AA331AFB134
 Closing the session
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
 [OVAL] ...done
 [OVAL] Number of floating tokens : 0
 [OVAL] Exiting...

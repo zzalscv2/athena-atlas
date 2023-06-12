@@ -1,17 +1,14 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: EventAuxInfo_v1.h 636390 2014-12-16 21:52:18Z cranshaw $
 #ifndef XAODEVENTINFO_VERSIONS_EVENTAUXINFO_V1_H
 #define XAODEVENTINFO_VERSIONS_EVENTAUXINFO_V1_H
 
 // System include(s):
-extern "C" {
-#   include <stdint.h>
-}
+#include <stdint.h>
 #include <vector>
 #include <string>
 
@@ -76,7 +73,7 @@ namespace xAOD {
       /// @name Basic event information
       /// @{
       uint32_t runNumber;
-      unsigned long long eventNumber;
+      uint64_t eventNumber;
       uint32_t lumiBlock;
       uint32_t timeStamp;
       uint32_t timeStampNSOffset;
