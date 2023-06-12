@@ -725,6 +725,7 @@ TrackParticleCreatorTool::createParticle(const EventContext& ctx,
     addExpectedHitInformation(track->perigeeParameters(), *trackparticle);
     addOutlierHitInformation(track->trackStateOnSurfaces(), *trackparticle);
     if(m_doSharedSiHits || m_doSharedTRTHits) addSharedHitInformation(track, *trackparticle);
+    else if(m_doITk) addDummyEndcapSharedHitInformation(*trackparticle);
   }
 
   const auto* beamspot = CacheBeamSpotData(ctx);
@@ -1259,6 +1260,22 @@ TrackParticleCreatorTool::addSharedHitInformation(const Track *track, xAOD::Trac
   }
 
 }
+
+
+void
+TrackParticleCreatorTool::addDummyEndcapSharedHitInformation(xAOD::TrackParticle& tp) const
+{
+
+  uint8_t nInPixSharedEndcapHits = 0, nNInPixSharedEndcapHits = 0;
+  uint8_t nInPixSplitEndcapHits = 0, nNInPixSplitEndcapHits = 0;
+
+  tp.setSummaryValue(nInPixSplitEndcapHits,   xAOD::numberOfInnermostPixelLayerSplitEndcapHits);
+  tp.setSummaryValue(nNInPixSplitEndcapHits,  xAOD::numberOfNextToInnermostPixelLayerSplitEndcapHits);
+  tp.setSummaryValue(nInPixSharedEndcapHits,  xAOD::numberOfInnermostPixelLayerSharedEndcapHits);
+  tp.setSummaryValue(nNInPixSharedEndcapHits, xAOD::numberOfNextToInnermostPixelLayerSharedEndcapHits);
+
+}
+
 
 const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo&
 TrackParticleCreatorTool::getClusterSplittingProbability(const InDet::PixelCluster* pix) const
