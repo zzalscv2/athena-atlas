@@ -82,7 +82,7 @@ namespace xAODMaker {
 
       /// @}
 
-      /// @name Objects accummulating the merged metadata
+      /// @name Objects accumulating the merged metadata
       /// @{
 
       /// The merged trigger menu container

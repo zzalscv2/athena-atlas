@@ -114,7 +114,7 @@ class ByteStreamEventStorageOutputSvc :
 
   //!< stream name for multiple output
   Gaudi::Property<std::string> m_bsOutputStreamName{this, "BSOutputStreamName",
-    name(), "stream name for muliple output"};
+    name(), "stream name for multiple output"};
 
   //! use this string for filename, not from the "AgreedFileName"
   Gaudi::Property<std::string> m_simpleFileName{this, "SimpleFileName", "",
@@ -167,7 +167,7 @@ class ByteStreamEventStorageOutputSvc :
   std::mutex m_dataWriterMutex;
 
  private:  // internal helper functions
-  /// reinitialize the service when a @c fork() occured/was-issued
+  /// reinitialize the service when a @c fork() occurred/was-issued
   StatusCode reinit();
 
   /// initialize EventStorage's DataWriter

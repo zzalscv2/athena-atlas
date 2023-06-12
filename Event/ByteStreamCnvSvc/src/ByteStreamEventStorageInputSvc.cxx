@@ -398,7 +398,7 @@ ByteStreamEventStorageInputSvc::generateDataHeader()
     ATH_MSG_DEBUG("ByteStream File GUID:              " << m_fileGUID);
     ATH_MSG_DEBUG("ByteStream Event Position in File: " << m_evtFileOffset);
 
-    // To accomodate for skipEvents option in EventSelector
+    // To accommodate for skipEvents option in EventSelector
     // While skipping BS event Selector does not return SUCCESS code,
     // just advances silently through events. So SG content is not refreshed
     // Lets do refresh of the event header here
@@ -411,7 +411,7 @@ ByteStreamEventStorageInputSvc::generateDataHeader()
     std::unique_ptr<DataHeader> dataHeader = std::make_unique<DataHeader>();
     // Declare header primary
     dataHeader->setStatus(DataHeader::Input);
-    //add the data header elenebt self reference to the object vector
+    //add the data header element self reference to the object vector
     dataHeader->insert(*std::move(dataHeaderElement));
     // Set processTag
     dataHeader->setProcessTag(dataHeaderElement->getKey());
@@ -444,7 +444,7 @@ ByteStreamEventStorageInputSvc::generateDataHeader()
       dataHeader->insert(element);
     }
 
-    // Record new data header.Boolean flags will allow it's deletionin case
+    // Record new data header.Boolean flags will allow it's deletion in case
     // of skipped events.
     ATH_CHECK(m_storeGate->record<DataHeader>(dataHeader.release(),
           "ByteStreamDataHeader", true, false, true));
@@ -531,7 +531,7 @@ ByteStreamEventStorageInputSvc::getBlockIterator(const std::string& fileName)
     return std::make_pair(-1,"END");
   }
 
-  // Initilaize offset vector
+  // Initialize offset vector
   m_evtOffsets.resize(m_reader->eventsInFile(), -1);
   m_evtOffsets.clear();
 

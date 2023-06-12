@@ -303,7 +303,7 @@ StatusCode EventSelectorByteStream::openNewRun(lock_t& lock) const {
       return(StatusCode::FAILURE);
    }
    std::string blockname = *m_inputCollectionsIterator;
-   // try to open a file, if failure go to next FIXME: PVG: silient failure?
+   // try to open a file, if failure go to next FIXME: PVG: silent failure?
    //long nev = m_eventSource->getBlockIterator(blockname);
    auto nevguid = m_eventSource->getBlockIterator(blockname);
    long nev = nevguid.first;
@@ -752,7 +752,7 @@ StatusCode EventSelectorByteStream::seek(Context& /* it */, int evtNum) const {
    // event in current file
    {
       int delta = (evtNum - m_firstEvt[m_fileCount] + 1) - m_eventSource->positionInBlock();
-      ATH_MSG_DEBUG("Seeking event " << evtNum << " in current file wiht delta " << delta);
+      ATH_MSG_DEBUG("Seeking event " << evtNum << " in current file with delta " << delta);
       if ( delta == 0 ) { // current event
          // nothing to do
       }

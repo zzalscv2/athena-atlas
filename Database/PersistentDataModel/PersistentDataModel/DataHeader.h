@@ -143,9 +143,9 @@ public: // Non-static members
    bool isInput() const;
 
    /// Set ProcessTag for DataHeader.
-   /// @param processTag [IN] string containing PorcessTag.
+   /// @param processTag [IN] string containing ProcessTag.
    void setProcessTag(const std::string& processTag);
-   /// @return the string containing PorcessTag for the DataHeader.
+   /// @return the string containing ProcessTag for the DataHeader.
    const std::string& getProcessTag() const;
 
    /// @return the number of elements in the "DataObject" vector.
@@ -159,11 +159,11 @@ public: // Non-static members
 
    /// Insert a new element into the "DataObject" vector.
    /// @param sgAddress [IN] pointer to the TransientAddress of the DataObject.
-   /// @param pTag [IN] string to overwrite key meber of the DataHeaderElement
+   /// @param pTag [IN] string to overwrite key member of the DataHeaderElement
    void insert(const SG::TransientAddress* sgAddress, IOpaqueAddress* tokAddress = 0, const std::string& pTag = "");
    /// Insert a new element into the "DataObject" vector.
    /// @param proxy [IN] pointer to the DataProxy for the DataObject.
-   /// @param pTag [IN] string to overwrite key meber of the DataHeaderElement
+   /// @param pTag [IN] string to overwrite key member of the DataHeaderElement
    void insert(const SG::DataProxy* proxy, IOpaqueAddress* tokAddress = 0, const std::string& pTag = "");
    /// Insert a new element into the "DataObject" vector.
    /// @param dhe [IN] reference to the DataHeaderElement to be inserted.

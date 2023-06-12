@@ -42,7 +42,7 @@ public:
    StatusCode finalize();
 
    /// Specify which data store and conversion service to use
-   /// and whether to extend provenence
+   /// and whether to extend provenance
    ///   Only use if one wants to override jobOptions
    StatusCode connectServices(const std::string& dataStore,
 	   const std::string& cnvSvc,

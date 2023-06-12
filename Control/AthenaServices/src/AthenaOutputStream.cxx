@@ -65,7 +65,7 @@ namespace {
    *
    * Normally, when an object is selected for writing via ItemList,
    * the object is written as its dynamic type (the type by which it was
-   * originally recorded in Storegate) rather than as the type written
+   * originally recorded in StoreGate) rather than as the type written
    * in the ItemList.  This is because the selection works by forming
    * a list of @DataObject instances; once this list is formed, the
    * types used to select the list are no longer used.
@@ -733,7 +733,7 @@ StatusCode AthenaOutputStream::addItemObjects(const SG::FolderItem& item,
                                               SG::SelectionVetoes& vetoes,
                                               SG::CompressionInfo& compInfo)
 {
-   // anything after a dot is a list of dynamic Aux attrubutes, separated by dots
+   // anything after a dot is a list of dynamic Aux attributes, separated by dots
    size_t dotpos = item.key().find('.');
    string item_key, aux_attr;
    if( dotpos != string::npos ) {

@@ -84,7 +84,7 @@ public:
     /// store. Normally, this method is called at the
     /// BeginInputFile incident. However, this explicit call allows the
     /// transfer to occur during the initialization phase, which
-    /// occurs before BegininputFile incident.
+    /// occurs before BeginInputFile incident.
     virtual StatusCode processInputFileMetaData(const std::string& fileName) override;
 
     virtual IOVMetaDataContainer* findMetaDataContainer(const std::string& folderName) const override final;

@@ -110,7 +110,7 @@ namespace xAODMaker {
                                                m_outputKey + "Aux." ) );
       }
 
-      // Retrun gracefully:
+      // Return gracefully:
       return StatusCode::SUCCESS;
    }
 
