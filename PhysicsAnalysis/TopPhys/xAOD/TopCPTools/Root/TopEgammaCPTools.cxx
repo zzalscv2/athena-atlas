@@ -743,7 +743,7 @@ IAsgElectronEfficiencyCorrectionTool*
       tool = asg::ToolStore::get<IAsgElectronEfficiencyCorrectionTool>(name);
     } else {
       tool = new AsgElectronEfficiencyCorrectionTool(name);
-      if (!m_config->isRun3() && (trigger_key != "" && trigger_key != "None")) {
+      if (!m_config->isRun3()) {
         top::check(asg::setProperty(tool, "MapFilePath", "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"), "Failed to set MapFilePath to " + name);
       } else {
         if (map_path != "UseEgammaRecommended") {
