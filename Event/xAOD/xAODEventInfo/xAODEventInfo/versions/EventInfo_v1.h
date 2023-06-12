@@ -1,17 +1,14 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: EventInfo_v1.h 727083 2016-03-01 15:20:50Z krasznaa $
 #ifndef XAODEVENTINFO_VERSIONS_EVENTINFO_V1_H
 #define XAODEVENTINFO_VERSIONS_EVENTINFO_V1_H
 
 // System include(s):
-extern "C" {
-#   include <stdint.h>
-}
+#include <stdint.h>  // global namespace typenames
 #include <set>
 #include <vector>
 #include <string>
@@ -43,9 +40,6 @@ namespace xAOD {
    ///
    /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    ///
-   /// $Revision: 727083 $
-   /// $Date: 2016-03-01 16:20:50 +0100 (Tue, 01 Mar 2016) $
-   ///
    class EventInfo_v1 : public SG::AuxElement {
 
    public:
@@ -66,9 +60,9 @@ namespace xAOD {
       void setRunNumber( uint32_t value );
 
       /// The current event's event number
-      unsigned long long eventNumber() const;
+      uint64_t eventNumber() const;
       /// Set the current event's event number
-      void setEventNumber( unsigned long long value );
+      void setEventNumber( uint64_t value );
 
       /// The current event's luminosity block number
       uint32_t lumiBlock() const;
@@ -140,9 +134,9 @@ namespace xAOD {
       void setMCChannelNumber( uint32_t value );
 
       /// The MC generator's event number
-      unsigned long long mcEventNumber() const;
+      uint64_t mcEventNumber() const;
       /// Set the MC generator's event number
-      void setMCEventNumber( unsigned long long value );
+      void setMCEventNumber( uint64_t value );
 
       /// The weights of all the MC events used in the simulation
       const std::vector< float >& mcEventWeights() const;
@@ -247,8 +241,8 @@ namespace xAOD {
 
       /// Unique pile-up mixture identifier definition
       struct PileUpMixtureID {
-         unsigned long long lowBits{};
-         unsigned long long highBits{};
+         uint64_t lowBits{};
+         uint64_t highBits{};
       };
 
       /// Unique pile-up mixture identifier
@@ -257,14 +251,14 @@ namespace xAOD {
       void setPileUpMixtureID( const PileUpMixtureID &value );
 
       /// Unique pile-up mixture identifier low bits
-      unsigned long long pileUpMixtureIDLowBits() const;
+      uint64_t pileUpMixtureIDLowBits() const;
       /// Set unique pile-up mixture identifier low bits
-      void setPileUpMixtureIDLowBits( unsigned long long value );
+      void setPileUpMixtureIDLowBits( uint64_t value );
 
       /// Unique pile-up mixture identifier high bits
-      unsigned long long pileUpMixtureIDHighBits() const;
+      uint64_t pileUpMixtureIDHighBits() const;
       /// Set unique pile-up mixture identifier high bits
-      void setPileUpMixtureIDHighBits( unsigned long long value );
+      void setPileUpMixtureIDHighBits( uint64_t value );
 
       /// Enumerator describing the types of pileup events
       enum PileUpType {

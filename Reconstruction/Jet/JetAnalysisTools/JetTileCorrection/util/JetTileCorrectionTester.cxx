@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @file JetTileCorrectionTester.cxx
@@ -121,7 +121,7 @@ int main( int argc, char* argv[] )
     const xAOD::EventInfo* evtInfo = 0;
     CHECK( event.retrieve(evtInfo, "EventInfo") );
     if ( entry%100==0 ){
-      Info(APP_NAME, "===>>>  Processing entry %lli, run %u, event %llu  <<<===",
+      Info(APP_NAME, "===>>>  Processing entry %lli, run %u, event %lu  <<<===",
 	   entry, evtInfo->runNumber(), evtInfo->eventNumber());
     }
     

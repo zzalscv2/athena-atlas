@@ -26,12 +26,14 @@ public :
 
       TBranch*      branch = 0;
       TClass*       tclass = 0;
+      EDataType     edtyp  = kOther_t;
 
+      // to handle type differences
+      bool          needsSE   = false;
       TClass*       SE_tclass = 0;
-      EDataType     SE_edt = kOther_t;
+      EDataType     SE_edt    = kOther_t;
     
       bool          isPackedContainer = false;
-      bool          needsSE = false;
       enum Status   status = NotInitialized;
 
       SG::auxid_t   auxid;

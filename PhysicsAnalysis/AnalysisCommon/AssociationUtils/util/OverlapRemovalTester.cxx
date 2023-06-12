@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @file OverlapRemovalTester.cxx
@@ -264,7 +264,7 @@ int main(int argc, char* argv[])
     // Print some event information for fun
     const xAOD::EventInfo* evtInfo = nullptr;
     CHECK( event.retrieve(evtInfo, "EventInfo") );
-    Info(APP_NAME, "===>>>  Processing entry %lli, run %u, event %llu  <<<===",
+    Info(APP_NAME, "===>>>  Processing entry %lli, run %u, event %lu  <<<===",
          entry, evtInfo->runNumber(), evtInfo->eventNumber());
 
     // Get electrons

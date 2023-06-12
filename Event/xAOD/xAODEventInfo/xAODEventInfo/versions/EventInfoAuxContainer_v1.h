@@ -1,17 +1,14 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: EventInfoAuxContainer_v1.h 636390 2014-12-16 21:52:18Z cranshaw $
 #ifndef XAODEVENTINFO_VERSIONS_EVENTINFOAUXCONTAINER_V1_H
 #define XAODEVENTINFO_VERSIONS_EVENTINFOAUXCONTAINER_V1_H
 
 // System include(s):
-extern "C" {
-#   include <stdint.h>
-}
+#include <stdint.h>
 #include <vector>
 #include <string>
 
@@ -76,7 +73,7 @@ namespace xAOD {
       /// @name Basic event information
       /// @{
       std::vector< uint32_t > runNumber;
-      std::vector< unsigned long long > eventNumber;
+      std::vector< uint64_t > eventNumber;
       std::vector< uint32_t > lumiBlock;
       std::vector< uint32_t > timeStamp;
       std::vector< uint32_t > timeStampNSOffset;
@@ -111,14 +108,14 @@ namespace xAOD {
       /// @name Monte-Carlo information
       /// @{
       std::vector< uint32_t > mcChannelNumber;
-      std::vector< unsigned long long > mcEventNumber;
+      std::vector< uint64_t > mcEventNumber;
       std::vector< std::vector< float > > mcEventWeights;
       /// @}
 
       /// @name Pileup information
       /// @{
-      std::vector< unsigned long long > pileUpMixtureIDLowBits;
-      std::vector< unsigned long long > pileUpMixtureIDHighBits;
+      std::vector< uint64_t > pileUpMixtureIDLowBits;
+      std::vector< uint64_t > pileUpMixtureIDHighBits;
       /// @}
 
       /// Keep track of the event status flags.

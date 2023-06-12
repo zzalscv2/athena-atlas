@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration -->
+<!-- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration -->
 <lcgdict>
 
    <!-- "Single" vector type(s). -->
@@ -6,6 +6,8 @@
    <class name="std::vector<signed char>" />
    <class name="std::vector<unsigned char>" />
    <class name="std::vector<uint32_t>" />
+   <class name="std::vector<uint64_t>" />
+   <class name="std::vector<unsigned long long>" />
 
    <!-- "Double" vector type(s). -->
    <class name="std::vector<std::vector<bool> >" />

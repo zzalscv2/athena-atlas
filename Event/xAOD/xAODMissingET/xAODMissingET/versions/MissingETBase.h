@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODMISSINGET_VERSIONS_MISSINGETBASE_H
@@ -33,7 +33,7 @@ namespace MissingETBase
     /*! @brief Namespace for generally used type definitions */
     namespace Types
     {
-      typedef unsigned long long                   bitmask_t;         /*!< @brief Type for status word bit mask */
+      typedef uint64_t                             bitmask_t;         /*!< @brief Type for status word bit mask */
       typedef std::vector<bitmask_t>               bitmask_vector_t;  /*!< @brief Type for vector of status word bit masks */
       typedef boost::tuples::tuple<size_t,size_t>  indexedlink_t;     /*!< @brief Type for links defined as index pairs */ 
     } // namespace MissingETBase::Types

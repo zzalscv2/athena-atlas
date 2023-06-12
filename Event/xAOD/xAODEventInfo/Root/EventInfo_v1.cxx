@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021, 2019, 2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -67,6 +67,12 @@ namespace xAODEventInfoPrivate {
       return;
    }
 
+   // register attributes' types early (before I/O) for schema evolution
+   static const SG::AuxElement::Accessor< uint64_t > accEvNum( "eventNumber" );
+   static const SG::AuxElement::Accessor< uint64_t > accMcEvNum( "mcEventNumber" );
+   static const SG::AuxElement::Accessor< uint64_t > accLow( "pileUpMixtureIDLowBits" );
+   static const SG::AuxElement::Accessor< uint64_t > accHigh( "pileUpMixtureIDHighBits" );
+
 } // private namespace
 
 namespace xAOD {
@@ -114,7 +120,7 @@ namespace xAOD {
 
    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( EventInfo_v1, uint32_t,
                                          runNumber, setRunNumber )
-   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( EventInfo_v1, unsigned long long,
+   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( EventInfo_v1, uint64_t,
                                          eventNumber, setEventNumber )
    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( EventInfo_v1, uint32_t,
                                          lumiBlock, setLumiBlock )
@@ -189,7 +195,7 @@ namespace xAOD {
                                       detDescrTags, setDetDescrTags )
    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( EventInfo_v1, uint32_t,
                                          mcChannelNumber, setMCChannelNumber )
-   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( EventInfo_v1, unsigned long long,
+   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( EventInfo_v1, uint64_t,
                                          mcEventNumber, setMCEventNumber )
    AUXSTORE_OBJECT_SETTER_AND_GETTER( EventInfo_v1, std::vector< float >,
                                       mcEventWeights, setMCEventWeights )
@@ -405,22 +411,20 @@ namespace xAOD {
       return;
    }
 
-   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( EventInfo_v1, unsigned long long,
+   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( EventInfo_v1, uint64_t,
                                          pileUpMixtureIDLowBits,
                                          setPileUpMixtureIDLowBits )
-   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( EventInfo_v1, unsigned long long,
+   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( EventInfo_v1, uint64_t,
                                          pileUpMixtureIDHighBits,
                                          setPileUpMixtureIDHighBits )
 
    EventInfo_v1::PileUpMixtureID EventInfo_v1::pileUpMixtureID() const {
 
-      static const Accessor< unsigned long long > accLow( "pileUpMixtureIDLowBits" );
-      static const Accessor< unsigned long long > accHigh( "pileUpMixtureIDHighBits" );
-
       PileUpMixtureID id{};
 
       // We need to check if the values are actually stored
-      if ( accLow.isAvailable( *this ) && accHigh.isAvailable( *this ) ) {
+      if ( xAODEventInfoPrivate::accLow.isAvailable( *this )
+             && xAODEventInfoPrivate::accHigh.isAvailable( *this ) ) {
          id.lowBits = pileUpMixtureIDLowBits();
          id.highBits = pileUpMixtureIDHighBits();
       }
