@@ -111,51 +111,6 @@ StatusCode StripDetectorTool::clear()
   return StatusCode::SUCCESS;
 }
 
-
-StatusCode StripDetectorTool::registerCallback ATLAS_NOT_THREAD_SAFE ()
-{
-  //
-  //  Register call-back for software alignment
-  //
-  if (m_alignable) {
-    if (detStore()->contains<AlignableTransformContainer>(m_alignmentFolderName)) {
-      ATH_MSG_DEBUG("Registering callback on AlignableTransformContainer with folder " << m_alignmentFolderName);
-      const DataHandle<AlignableTransformContainer> atc;
-      StatusCode sc = detStore()->regFcn(&IGeoModelTool::align, dynamic_cast<IGeoModelTool *>(this), atc, m_alignmentFolderName);
-      if (sc.isFailure()) {
-        ATH_MSG_ERROR("Could not register callback on AlignableTransformContainer with folder "
-                      << m_alignmentFolderName);
-        return StatusCode::FAILURE;
-      }
-    } else {
-      ATH_MSG_WARNING("Unable to register callback on AlignableTransformContainer with folder "
-                      << m_alignmentFolderName << ", Alignment disabled (only if no Run2 scheme is loaded)!");
-    }
-  } else {
-    ATH_MSG_INFO("Alignment disabled. No callback registered");
-    // We return failure otherwise it will try and register a GeoModelSvc callback associated with this callback.
-  }
-  return StatusCode::SUCCESS;
-}
-
-
-StatusCode StripDetectorTool::align(IOVSVC_CALLBACK_ARGS_P(I, keys)){
-  //
-  // The call-back routine, which just calls the real call-back routine from the manager.
-  //
-  if (!m_detManager) {
-    ATH_MSG_WARNING("Manager does not exist");
-    return StatusCode::FAILURE;
-  }
-  if (m_alignable) {
-    return m_detManager->align(I, keys);
-  } else {
-    ATH_MSG_DEBUG("Alignment disabled. No alignments applied");
-    return StatusCode::SUCCESS;
-  }
-}
-
-
 void StripDetectorTool::doNumerology(InDetDD::SCT_DetectorManager * manager)
 {
   ATH_MSG_INFO("\n\nSCT Numerology:\n===============\n\nNumber of parts is " << m_waferTree.nParts() << "\n");

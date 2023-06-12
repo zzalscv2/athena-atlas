@@ -35,8 +35,6 @@ public:
   virtual ~StripDetectorTool() = default;
   virtual StatusCode create() override final;
   virtual StatusCode clear() override final;
-  virtual StatusCode registerCallback ATLAS_NOT_THREAD_SAFE () override final;
-  virtual StatusCode align(IOVSVC_CALLBACK_ARGS_P(I,keys)) override final;
 
 private:
   const InDetDD::SCT_DetectorManager *m_detManager{};
