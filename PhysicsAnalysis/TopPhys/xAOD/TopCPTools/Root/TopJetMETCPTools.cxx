@@ -377,6 +377,8 @@ namespace top {
     // Summer2022 - JES precision flavour unc. update
 
     std::string conference = "Summer2019";
+    bool use_abs_gfrac_eta = true;  // Whether to use absolute gluon fraction eta for uncertainties
+                                    // (needs to be set to false for pPb/Pbp)
     std::string qgFracFile = m_config->jetUncertainties_QGFracFile();  // Need to process this later on for HI-setups
 
     std::string JMSOption = m_config->jetJMSOption();
@@ -454,6 +456,12 @@ namespace top {
         // hardcode the path as only one is supported
         calibrationPathJESJER = "HIJetUncertainties/Spring2023/HIR4_GlobalReduction_SimpleJER.config";
 
+        // Setup non-absolute eta for these asymmetric collisions
+        if (m_config->isHI_pPb() || m_config->isHI_Pbp()) {
+            ATH_MSG_INFO("Switching to signed gluon fraction eta for asymmetric pPb/Pbp collisions");
+            use_abs_gfrac_eta = false;
+        }
+
         // Check if we need different QG-fraction setups for pPb and Pbp (separated in the config by comma)
         auto qgFracFiles = std::vector<std::string>();
         tokenize(qgFracFile, qgFracFiles, ",", true);
@@ -493,8 +501,8 @@ namespace top {
                                                          calibrationPathJESJER,
                                                          nullptr,
                                                          qgFracFile,
-                                                         calib_area
-                                                         );
+                                                         calib_area,
+                                                         use_abs_gfrac_eta);
       // setup the pseudodata tool when required
       if (JERisPseudoData) {
         m_jetUncertaintiesToolPseudoData = setupJetUncertaintiesTool("JetUncertaintiesToolPseudoData",
@@ -504,8 +512,8 @@ namespace top {
                                                                      calibrationPathJESJER,
                                                                      nullptr,
                                                                      qgFracFile,
-                                                                     calib_area
-                                                                     );
+                                                                     calib_area,
+                                                                     use_abs_gfrac_eta);
 
       }
     
@@ -658,8 +666,8 @@ namespace top {
 
       m_jetUncertaintiesToolLargeR
         = setupJetUncertaintiesTool("JetUncertaintiesToolLargeR",
-				    jetCalibrationNameLargeR, 
-                                    MC_type, 
+                                    jetCalibrationNameLargeR,
+                                    MC_type,
                                     m_config->isMC(),
                                     configDir + "/R10_" + largeRJESJERJMS_unc_config + ".config",
                                     nullptr,
@@ -676,7 +684,7 @@ namespace top {
                                       configDir + "/R10_" + largeRJESJERJMS_unc_config + ".config",
                                       nullptr,
                                       "",
-                                      calibArea);      
+                                      calibArea);
       } 
 
       if (!m_config->isSystNominal(m_config->systematics()))
@@ -873,15 +881,15 @@ namespace top {
   }
 
   ICPJetUncertaintiesTool*
-  JetMETCPTools::setupJetUncertaintiesTool(const std::string& name,
-                                           const std::string& jet_def,
-                                           const std::string& mc_type,
+  JetMETCPTools::setupJetUncertaintiesTool(const std::string &name,
+                                           const std::string &jet_def,
+                                           const std::string &mc_type,
                                            bool isMC,
-                                           const std::string& config_file,
-                                           std::vector<std::string>* variables,
-                                           const std::string& analysis_file,
-                                           const std::string& calib_area
-                                           ) {
+                                           const std::string &config_file,
+                                           std::vector<std::string> *variables,
+                                           const std::string &analysis_file,
+                                           const std::string &calib_area,
+                                           bool use_abs_gfrac_eta) {
     ICPJetUncertaintiesTool* tool = nullptr;
 
     if (asg::ToolStore::contains<ICPJetUncertaintiesTool>(name)) {
@@ -927,6 +935,8 @@ namespace top {
         top::check(asg::setProperty(tool, "CalibArea", calib_area),
                    "Failed to set CalibArea " + calib_area);
       }
+      top::check(asg::setProperty(tool, "AbsEtaGluonFraction", use_abs_gfrac_eta),
+                 "Failed to set AbsEtaGluonFraction for " + name);
       top::check(tool->initialize(), "Failed to initialize " + name);
     }
     return tool;

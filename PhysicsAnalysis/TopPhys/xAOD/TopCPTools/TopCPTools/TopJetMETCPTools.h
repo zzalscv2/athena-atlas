@@ -131,14 +131,15 @@ namespace top {
 
 
     ICPJetUncertaintiesTool*
-    setupJetUncertaintiesTool(const std::string& name,
-                              const std::string& jet_def,
-                              const std::string& mc_type,
+    setupJetUncertaintiesTool(const std::string &name,
+                              const std::string &jet_def,
+                              const std::string &mc_type,
                               bool isMC,
-                              const std::string& config_file,
-                              std::vector<std::string>* variables,
-                              const std::string& analysis_file = "",
-                              const std::string& calib_area = "None");
+                              const std::string &config_file,
+                              std::vector<std::string> *variables,
+                              const std::string &analysis_file = "",
+                              const std::string &calib_area = "None",
+                              bool use_abs_gfrac_eta = true);
 
     IJetSelector* setupJetCleaningTool(const std::string& WP);
     ECUtils::IEventCleaningTool* setupJetEventCleaningTool(const std::string& WP,
