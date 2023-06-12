@@ -21,7 +21,6 @@
 
 #include "../src/IovStore.h"
 #include <stdexcept>
-namespace utf = boost::unit_test;
 
 using namespace IOVDbNamespace;
 

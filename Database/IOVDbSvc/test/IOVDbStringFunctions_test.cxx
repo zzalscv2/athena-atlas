@@ -25,7 +25,7 @@
 
 
 
-typedef std::pair<int, int> ChanRange;
+using ChanRange = std::pair<int, int>;
 BOOST_TEST_DONT_PRINT_LOG_VALUE( ChanRange )
 
 BOOST_AUTO_TEST_SUITE(IOVDbStringFunctionsTest)

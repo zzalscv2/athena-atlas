@@ -32,7 +32,7 @@ namespace IOVDbNamespace{
   std::string
   getGeoAtlasVersion(){
     std::string version{};
-    IGeoModelSvc* geomodel=0;
+    IGeoModelSvc* geomodel=nullptr;
     ISvcLocator* svcLocator=Gaudi::svcLocator();
     if (not svcLocator or StatusCode::SUCCESS!=svcLocator->service("GeoModelSvc",geomodel)) {
       throw std::runtime_error("The GeoModelSvc could not be retrieved in TagFunctions.cxx getGeoAtlasVersion()");
@@ -43,7 +43,7 @@ namespace IOVDbNamespace{
   }
   
   std::optional<bool>
-  checkTagLock(const cool::IFolderPtr fptr, const std::string & tag){
+  checkTagLock(const cool::IFolderPtr& fptr, const std::string & tag){
     try {
       return (fptr->tagLockStatus(tag)==cool::HvsTagLock::LOCKED); 
     } catch (cool::Exception& e) {

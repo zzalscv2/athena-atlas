@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_SUITE(Json2CoolTest)
     BOOST_CHECK(b.empty() == false);
   }
   BOOST_AUTO_TEST_CASE(convertedProperties){
-    auto pSpec=new coral::AttributeListSpecification;
+    auto *pSpec=new coral::AttributeListSpecification;
     pSpec->extend<std::string>("PoolRef");
     coral::AttributeList attrList(*pSpec, true);
     //MUST use string literal suffix 's' to set the value to a string
@@ -66,16 +66,16 @@ BOOST_AUTO_TEST_SUITE(Json2CoolTest)
   
   BOOST_AUTO_TEST_CASE(parsePayloadSpec){
     const std::string testSpecString="crate: UChar, ROB: Int32, BCIDOffset: Int16, AName: String255";
-    auto referenceSpec = new cool::RecordSpecification();
+    auto *referenceSpec = new cool::RecordSpecification();
     referenceSpec->extend("crate", StorageType::UChar);
     referenceSpec->extend("ROB", StorageType::Int32);
     referenceSpec->extend("BCIDOffset", StorageType::Int16);
     referenceSpec->extend("AName", StorageType::String255);
-    auto returnedSpec = Json2Cool::parsePayloadSpec(testSpecString);
+    auto *returnedSpec = Json2Cool::parsePayloadSpec(testSpecString);
     BOOST_CHECK(*(returnedSpec) == *static_cast<const cool::IRecordSpecification*>(referenceSpec));
   }
   BOOST_AUTO_TEST_CASE(createAttributeList){
-    auto referenceSpec = new cool::RecordSpecification();
+    auto *referenceSpec = new cool::RecordSpecification();
     referenceSpec->extend("crate", StorageType::UChar);
     referenceSpec->extend("ROB", StorageType::Int32);
     referenceSpec->extend("BCIDOffset", StorageType::Int16);

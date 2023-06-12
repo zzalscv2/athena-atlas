@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_SUITE(BasicFolderTest)
   BOOST_AUTO_TEST_CASE(addPayloadByChannelNumber){
     BasicFolder b;
     //need a coral::AttributeList argument
-    auto pSpec=new coral::AttributeListSpecification;
+    auto *pSpec=new coral::AttributeListSpecification;
     pSpec->extend<int>("myInt");
     pSpec->extend<std::string>("PoolRef");
     coral::AttributeList attrList(*pSpec, true);
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_SUITE(BasicFolderTest)
   BOOST_AUTO_TEST_CASE(addPayloadWithChannelName){
     BasicFolder b;
     //need a coral::AttributeList argument
-    auto pSpec=new coral::AttributeListSpecification;
+    auto *pSpec=new coral::AttributeListSpecification;
     pSpec->extend<int>("myInt");
     pSpec->extend<std::string>("PoolRef");
     coral::AttributeList attrList(*pSpec, true);
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_SUITE(BasicFolderTest)
     BasicFolder b;
     b.setVectorPayloadFlag(true);
     //need a coral::AttributeList argument
-    auto pSpec=new coral::AttributeListSpecification;
+    auto *pSpec=new coral::AttributeListSpecification;
     pSpec->extend<int>("myInt");
     pSpec->extend<std::string>("PoolRef");
     coral::AttributeList attrList(*pSpec, true);
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_SUITE(BasicFolderTest)
     BasicFolder b;
     b.setVectorPayloadFlag(true);
     //need a coral::AttributeList argument
-    auto pSpec=new coral::AttributeListSpecification;
+    auto *pSpec=new coral::AttributeListSpecification;
     pSpec->extend<int>("myInt");
     pSpec->extend<std::string>("PoolRef");
     coral::AttributeList attrList(*pSpec, true);
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_SUITE(BasicFolderTest)
   BOOST_AUTO_TEST_CASE(checkChannelIds){
     BasicFolder b;
     //need a coral::AttributeList argument
-    auto pSpec=new coral::AttributeListSpecification;
+    auto *pSpec=new coral::AttributeListSpecification;
     pSpec->extend<int>("myInt");
     pSpec->extend<std::string>("PoolRef");
     coral::AttributeList attrList(*pSpec, true);

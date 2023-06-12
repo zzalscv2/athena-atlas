@@ -26,7 +26,7 @@ IOVDbConn::IOVDbConn(const std::string& dbname, const bool readOnly,
    //nop
 }
 
-IOVDbConn::~IOVDbConn() {}
+IOVDbConn::~IOVDbConn() = default;
 
 cool::IDatabasePtr IOVDbConn::getCoolDb() {
   // only open if not already activated
