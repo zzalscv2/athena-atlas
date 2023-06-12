@@ -24,3 +24,5 @@ y_lab_occ_CSide=['#phi1 MMS','#phi1 MML','#phi2 MMS','#phi2 MML','#phi3 MMS','#p
 y_lab_occ_lb=['ml1 gap1']+label_empty*7+['ml1 gap2']+label_empty*7+['ml1 gap3']+label_empty*7+['ml1 gap4']+label_empty*7+['ml2 gap1']+label_empty*7+['ml2 gap2']+label_empty*7+['ml2 gap3']+label_empty*7+['ml2 gap4']+label_empty*7
 
 x_lab_mpv = ['ml1 gp1', 'ml1 gp2', 'ml1 gp3', 'ml1 gp4', 'ml2 gp1', 'ml2 gp2', 'ml2 gp3', 'ml2 gp4']
+
+x_layer_in_sector = ['Sector0']+label_empty*7+['Sector1']+label_empty*7+['Sector2']+label_empty*7+['Sector3']+label_empty*7+['Sector4']+label_empty*7+['Sector5']+label_empty*7+['Sector6']+label_empty*7+['Sector7']+label_empty*7+['Sector8']+label_empty*7+['Sector9']+label_empty*7+['Sector10']+label_empty*7+['Sector11']+label_empty*7+['Sector12']+label_empty*7+['Sector13']+label_empty*7+['Sector14']+label_empty*7+['Sector15']+label_empty*7
