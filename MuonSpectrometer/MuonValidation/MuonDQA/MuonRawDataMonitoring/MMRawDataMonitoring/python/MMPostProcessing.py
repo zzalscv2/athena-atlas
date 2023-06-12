@@ -236,7 +236,7 @@ def add_layer_lines(inputs):
         putLine(h1, 80, 0.5, 80, 16.5, offset=0, c=2)
         putLine(h1, 96, 0.5, 96, 16.5, offset=0, c=2)
         putLine(h1, 112, 0.5, 112, 16.5, offset=0, c=2)
-
+        
         h2 = inputs[0][1][1].Clone()
         putLine(h2, 16, 0.5, 16, 16.5, offset=0, c=2)
         putLine(h2, 32, 0.5, 32, 16.5, offset=0, c=2)
