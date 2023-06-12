@@ -4,7 +4,8 @@ from TriggerMenuMT.HLT.Config.MenuComponents import AlgNode
 from TriggerMenuMT.HLT.Config.ControlFlow.MenuComponentsNaming import CFNaming
 from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import isComboHypoAlg
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, appendCAtoAthena
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.CFElements import compName, findAlgorithmByPredicate, parOR, seqAND
 from AthenaCommon.Configurable import ConfigurableCABehavior
@@ -178,8 +179,12 @@ class CFSequence(object):
             if hypoToolConf is not None: # avoid empty sequences
                 hypoToolConf.setConf( onePartChainDict )
                 hypoAcc = myseq.hypo.addHypoTool(flags, hypoToolConf) #this creates the HypoTools
-                if hypoAcc: # TODO once in CA this will always return
-                    acc.merge(hypoAcc)
+                if isinstance(hypoAcc, ComponentAccumulator):
+                    if isCAMenu():
+                        acc.merge(hypoAcc)
+                    else:
+                        appendCAtoAthena(hypoAcc)
+
         chainDict = HLTMenuConfig.getChainDictFromChainName(chain)
         self.combo.createComboHypoTools(flags, chainDict, newstep.comboToolConfs)
         return acc
