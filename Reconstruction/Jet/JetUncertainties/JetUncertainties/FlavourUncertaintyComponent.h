@@ -20,6 +20,7 @@ class FlavourUncertaintyComponent : public UncertaintyComponent
                                     const TString defaultAnalysisRootFileName,
                                     const TString path,
                                     const TString calibArea,
+                                    const bool absEtaGluonFraction,
                                     const TString analysisHistPattern=""
                                     );
         FlavourUncertaintyComponent(const FlavourUncertaintyComponent& toCopy);
@@ -51,6 +52,7 @@ class FlavourUncertaintyComponent : public UncertaintyComponent
         const TString m_path;
         const TString m_calibArea;
         const bool m_absEta;
+        const bool m_absEtaGluonFraction;
         const TString m_secondUncName;
 
         std::string m_largeRJetTruthLabelName;

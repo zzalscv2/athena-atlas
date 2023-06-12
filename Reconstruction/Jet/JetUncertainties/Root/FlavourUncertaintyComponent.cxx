@@ -26,6 +26,7 @@ FlavourUncertaintyComponent::FlavourUncertaintyComponent(const std::string& name
     , m_analysisHistPattern("")
     , m_defAnaFileName("")
     , m_absEta(false)
+    , m_absEtaGluonFraction(true)
     , m_secondUncName("")
     , m_largeRJetTruthLabelName("")
     , m_largeRJetTruthLabels()
@@ -46,6 +47,7 @@ FlavourUncertaintyComponent::FlavourUncertaintyComponent(   const ComponentHelpe
                                                             const TString defaultAnalysisRootFileName,
                                                             const TString path,
                                                             const TString calibArea,
+                                                            const bool absEtaGluonFraction,
                                                             const TString analysisHistPattern
                                                             )
     : UncertaintyComponent(component,component.flavourType == FlavourComp::Composition ? 2 : 1)
@@ -57,6 +59,7 @@ FlavourUncertaintyComponent::FlavourUncertaintyComponent(   const ComponentHelpe
     , m_path(path)
     , m_calibArea(calibArea)
     , m_absEta(CompParametrization::isAbsEta(component.parametrization))
+    , m_absEtaGluonFraction(absEtaGluonFraction)
     , m_secondUncName(component.uncNames.size()>1 ? component.uncNames.at(1) : "")
     , m_largeRJetTruthLabelName(component.LargeRJetTruthLabelName)
     , m_largeRJetTruthLabels(component.LargeRJetTruthLabels)
@@ -85,6 +88,7 @@ FlavourUncertaintyComponent::FlavourUncertaintyComponent(const FlavourUncertaint
     , m_path(toCopy.m_path)
     , m_calibArea(toCopy.m_calibArea)
     , m_absEta(toCopy.m_absEta)
+    , m_absEtaGluonFraction(toCopy.m_absEtaGluonFraction)
     , m_secondUncName(toCopy.m_secondUncName)
     , m_largeRJetTruthLabelName(toCopy.m_largeRJetTruthLabelName)
     , m_largeRJetTruthLabels(toCopy.m_largeRJetTruthLabels)
@@ -524,13 +528,13 @@ double FlavourUncertaintyComponent::getBJESUncertainty(const xAOD::Jet& jet, con
 double FlavourUncertaintyComponent::getGluonFraction(const double pT, const double eta, const int nJets) const
 {
     // nJets value checking is done in checkNjetsInput
-    return m_gluonFractionHists.at(nJets)->getValue(pT,fabs(eta));
+    return m_gluonFractionHists.at(nJets)->getValue(pT,m_absEtaGluonFraction ? std::abs(eta) : eta);
 }
 
 double FlavourUncertaintyComponent::getGluonFractionError(const double pT, const double eta, const int nJets) const
 {
     // nJets value checking is done in checkNjetsInput
-    return m_gluonFractionErrorHists.at(nJets)->getValue(pT,fabs(eta));
+    return m_gluonFractionErrorHists.at(nJets)->getValue(pT,m_absEtaGluonFraction ? std::abs(eta) : eta);
 }
 
 double FlavourUncertaintyComponent::getGluonResponseDifference(const double pT, const double eta) const
