@@ -847,8 +847,10 @@ namespace top {
         } else if (m_config->METSignifSoftTermParam().compare("TSTParam")==0) {
           softTerm = met::TSTParam;
         } else {
-          ATH_MSG_ERROR("top::JetMETCPTools: Unkown SoftTermParam for MetSignificance");
-          // TODO actually throw some error here, though we should not get here since config restricts this to one of the three options above
+          ATH_MSG_ERROR("top::JetMETCPTools: Unknown SoftTermParam for MetSignificance"
+                        " (Available options: Random, PthardParam and TSTParam) : "
+                        + m_config->METSignifSoftTermParam());
+          return StatusCode::FAILURE;
         }
         top::check(metSignificance->setProperty("SoftTermParam", softTerm),   "Failed to set MetSignificance::SoftTermParam!");
         top::check(metSignificance->setProperty("DoPhiReso",     true),                   "Failed to set MetSignificance::DoPhiReso!");
