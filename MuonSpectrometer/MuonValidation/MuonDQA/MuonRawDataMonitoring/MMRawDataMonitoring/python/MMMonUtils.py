@@ -19,7 +19,7 @@ def getMMLabelX(x):
         return labelx
 
 def get_MPV_charge(histo):
-        flandau = TF1("flandau","landau",0,1200)
+        flandau = TF1("flandau","landau",0,800)
         histo.Fit("flandau","QRN")
         mpv = flandau.GetParameter(1)
         return mpv

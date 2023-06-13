@@ -893,7 +893,7 @@ def _extract_fields_fmd(interface=None, aux=None):
     """Turn static FileMetaData content into dictionary
 
     This function takes the FileMetaData_v1 and FileMetaDataAuxInfo_v1 objects.
-    It makes sure the the interface object uses the auxiary object as store.
+    It makes sure the the interface object uses the auxiliary object as store.
     Next the two static variables of FileMetaDataAuxInfo_v1 are retrieved and
     added to the dictionary that is returned.
         Args:
@@ -912,7 +912,7 @@ def _extract_fields_fmd(interface=None, aux=None):
         "runNumbers": ROOT.std.vector('unsigned int')(),
         "lumiBlocks": ROOT.std.vector('unsigned int')(),
     }
-    # Note: using this for dynamic attributes retruns empty content
+    # Note: using this for dynamic attributes returns empty content
     for k, v in metaContent.items():
         try:
             interface.value(getattr(interface, k), v)

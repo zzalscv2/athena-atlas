@@ -212,6 +212,7 @@ def CopyPixelClusterContainerAlgCfg(flags, **kwargs):
 
     kwargs.setdefault("InputKey", "PixelClusters")
     kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix+"PixelClusters")
+    kwargs.setdefault("ExtraInputs", [('InDetDD::SiDetectorElementCollection', 'ConditionStore+PixelDetectorElementCollection')])
 
     alg = CompFactory.CopyPixelClusterContainer("CopyPixelClusterContainer", **kwargs)
     acc.addEventAlgo(alg)
@@ -225,6 +226,7 @@ def CopySCT_ClusterContainerAlgCfg(flags, **kwargs):
 
     kwargs.setdefault("InputKey", "SCT_Clusters")
     kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix+"SCT_Clusters")
+    kwargs.setdefault("ExtraInputs", [('InDetDD::SiDetectorElementCollection', 'ConditionStore+SCT_DetectorElementCollection')])
 
     alg = CompFactory.CopySCT_ClusterContainer("CopySCT_ClusterContainer", **kwargs)
     acc.addEventAlgo(alg)
@@ -238,6 +240,7 @@ def CopyTRT_DriftCircleContainerAlgCfg(flags, **kwargs):
 
     kwargs.setdefault("InputKey", "TRT_DriftCircles")
     kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix+"TRT_DriftCircles")
+    kwargs.setdefault("ExtraInputs", [('InDetDD::TRT_DetElementContainer' , 'ConditionStore+TRT_DetElementContainer')])
 
     alg = CompFactory.CopyTRT_DriftCircleContainer("CopyTRT_DriftCircleContainer", **kwargs)
     acc.addEventAlgo(alg)
@@ -251,6 +254,19 @@ def CopyTrackCollectionAlgCfg(flags, collectionName, **kwargs):
 
     kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix + collectionName)
     kwargs.setdefault("InputKey", collectionName)
+    extra_inputs = []
+    if flags.Detector.GeometryPixel:
+        extra_inputs.append(('InDetDD::SiDetectorElementCollection', 'ConditionStore+PixelDetectorElementCollection'))
+    if flags.Detector.GeometrySCT:
+        extra_inputs.append(('InDetDD::SiDetectorElementCollection', 'ConditionStore+SCT_DetectorElementCollection'))
+    if flags.Detector.GeometryTRT:
+        extra_inputs.append(( 'InDetDD::TRT_DetElementContainer' , 'ConditionStore+TRT_DetElementContainer' ))
+    if flags.Detector.GeometryITkPixel:
+        extra_inputs.append(( 'InDetDD::SiDetectorElementCollection' , 'ConditionStore+ITkPixelDetectorElementCollection' ))
+    if flags.Detector.GeometryITkStrip:
+        extra_inputs.append(( 'InDetDD::SiDetectorElementCollection' , 'ConditionStore+ITkStripDetectorElementCollection' ))
+
+    kwargs.setdefault("ExtraInputs", extra_inputs)
 
     alg = CompFactory.CopyTrackCollection("CopyTrackCollection"+collectionName, **kwargs)
     acc.addEventAlgo(alg)

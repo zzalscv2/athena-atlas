@@ -68,7 +68,7 @@ class FileMetaDataCreatorTool
 
   /// Fill the FileMetaData with event information
   ///
-  /// Use information from @c xAOD::EventIngo to fill
+  /// Use information from @c xAOD::EventInfo to fill
   /// xAOD::FileMetaData::mcProcID and @c DataHeader to set
   /// xAOD::FileMetaData::dataType
   StatusCode postExecute() override;
@@ -132,18 +132,18 @@ class FileMetaDataCreatorTool
   /// Use MetaDataSvc store interface to support output in EventService
   ServiceHandle< IMetaDataSvc > m_metaDataSvc{"MetaDataSvc", name()};
 
-  /// Use MetaDataSvc store interface to support output in EventService
+  /// Access to the input metadata store
   ServiceHandle< StoreGateSvc > m_inputMetaDataStore{
     "InputMetaDataStore", name()};
 
-  /// Use MetaDataSvc store interface to support output in EventService
+  /// Access to TagInfoMgr for tags
   ServiceHandle< ITagInfoMgr > m_tagInfoMgr{
     "TagInfoMgr", name()};
 
   /// Update from Simulation Parameters and TagInfo
   StatusCode updateFromNonEvent();
 
-  /// helper method to update FileMetaDataProprty with some checks
+  /// helper method to update FileMetaDataProperty with some checks
   void set(const xAOD::FileMetaData::MetaDataType, bool);
   void set(const xAOD::FileMetaData::MetaDataType, float);
   void set(const xAOD::FileMetaData::MetaDataType, const std::string&);

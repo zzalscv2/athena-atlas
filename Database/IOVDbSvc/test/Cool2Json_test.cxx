@@ -136,7 +136,7 @@ BOOST_FIXTURE_TEST_SUITE(Cool2JsonTestSetup , GaudiKernelFixture)
       BOOST_CHECK(testObject.iov() == referenceIov);
       BOOST_CHECK(testObject.nchans() == 1);
       BOOST_CHECK(testObject.iovBase() == "run-lumi");
-      BOOST_CHECK(testObject.tag() == "");
+      BOOST_CHECK(testObject.tag().empty());
       
     }
   BOOST_AUTO_TEST_SUITE_END()

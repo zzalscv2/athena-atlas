@@ -2804,6 +2804,22 @@ return (m.muon->charge()>0);
 	  return (m.goodTiming==1 && m.goodBcid2==1);
 	});
       tgcCoin_variables.push_back(coin_inner_nsw_goodTimingBcid2);
+      auto coin_inner_nsw_BcPrev=Monitored::Collection("coin_inner_nsw_BcPrev",tgcTrigNswMap,[](const TgcTrigNsw&m){
+	  return m.deltaTiming==-1;
+	});
+      tgcCoin_variables.push_back(coin_inner_nsw_BcPrev);
+      auto coin_inner_nsw_BcCurr=Monitored::Collection("coin_inner_nsw_BcCurr",tgcTrigNswMap,[](const TgcTrigNsw&m){
+	  return m.deltaTiming==0;
+	});
+      tgcCoin_variables.push_back(coin_inner_nsw_BcCurr);
+      auto coin_inner_nsw_BcNext=Monitored::Collection("coin_inner_nsw_BcNext",tgcTrigNswMap,[](const TgcTrigNsw&m){
+	  return m.deltaTiming==1;
+	});
+      tgcCoin_variables.push_back(coin_inner_nsw_BcNext);
+      auto coin_inner_nsw_BcNextNext=Monitored::Collection("coin_inner_nsw_BcNextNext",tgcTrigNswMap,[](const TgcTrigNsw&m){
+	  return m.deltaTiming==2;
+	});
+      tgcCoin_variables.push_back(coin_inner_nsw_BcNextNext);
 
       // Tile inner coincidence
       auto coin_inner_tile_slSector=Monitored::Collection("coin_inner_tile_slSector",tgcTrigTileMap,[](const TgcTrigTile&m){

@@ -9,13 +9,13 @@ from TriggerMenuMT.HLT.Config.MenuComponents import ChainStep, menuSequenceCAToG
 from TrigPartialEventBuilding.TrigPartialEventBuildingConfig import StaticPEBInfoWriterToolCfg, RoIPEBInfoWriterToolCfg
 from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 from libpyeformat_helper import SourceIdentifier, SubDetector
-from AthenaConfiguration.ComponentAccumulator import appendCAtoAthena, conf2toConfigurable
 from AthenaCommon.Configurable import ConfigurableCABehavior
 from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from .LATOMESourceIDs import LATOMESourceIDs
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
+
 
 def addEventBuildingSequence(flags, chain, eventBuildType, chainDict):
     '''
@@ -286,14 +286,8 @@ def pebMenuSequenceCfg(flags, chain, eventBuildType, chainDict):
     '''
 
     def pebInfoWriterToolGenerator(chainDict):
-        if isComponentAccumulatorCfg():
+        with ConfigurableCABehavior():
             return pebInfoWriterToolCfg(flags, chainDict['chainName'], eventBuildType)
-        else:
-            with ConfigurableCABehavior():
-                cfg = pebInfoWriterToolCfg(flags, chainDict['chainName'], eventBuildType)
-                tool = conf2toConfigurable(cfg.popPrivateTools())
-                appendCAtoAthena(cfg)
-                return tool
 
     suffix = getPEBBuildSuffix(chain, eventBuildType)
 

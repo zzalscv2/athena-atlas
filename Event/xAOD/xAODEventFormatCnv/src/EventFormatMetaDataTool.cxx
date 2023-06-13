@@ -65,7 +65,7 @@ StatusCode
 
 StatusCode
     EventFormatMetaDataTool::metaDataStop() {
-      // wait for threads currenly writing to finish
+      // wait for threads currently writing to finish
       std::lock_guard< std::mutex > guard(m_outputMutex);
 
       return StatusCode::SUCCESS;

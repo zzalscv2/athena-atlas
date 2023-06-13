@@ -12,4 +12,4 @@ LArAccumulatedCalibDigitContainer::LArAccumulatedCalibDigitContainer(SG::Ownersh
 {}
 
 LArAccumulatedCalibDigitContainer::~LArAccumulatedCalibDigitContainer() 
-{}
+= default;

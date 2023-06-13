@@ -372,6 +372,8 @@ def addHighMuP1Signatures(chains):
         ChainProp(name='HLT_noalg_L1FIRSTEMPTY_noPS', l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:Online']+ ["RATE:EnhancedBias", "BW:Detector"]+SupportLegGroup ),
         ChainProp(name='HLT_noalg_L1UNPAIRED_ISO_noPS', l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:Online']+ ["RATE:EnhancedBias", "BW:Detector"]+SupportLegGroup ),
         ChainProp(name='HLT_noalg_L1UNPAIRED_NONISO_noPS', l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:Online']+ ["RATE:EnhancedBias", "BW:Detector"]+SupportLegGroup),
+
+        ChainProp(name='HLT_noalg_eb_L1All', l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:Online']+["RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
     ]
 
     chainsP1['Beamspot'] = [

@@ -135,8 +135,7 @@ StatusCode TRTOverlay::execute(const EventContext& ctx) const
   // we create during this algorithm. The containers are
   // views.
   DataPool<TRT_LoLumRawData> dataItemsPool(ctx);
-  //It resizes but lets reserve already quite a few
-  dataItemsPool.reserve(300000);
+  dataItemsPool.prepareToAdd(200000);
 
   // Creating output RDO container
   SG::WriteHandle<TRT_RDO_Container> outputContainer(m_outputKey, ctx);

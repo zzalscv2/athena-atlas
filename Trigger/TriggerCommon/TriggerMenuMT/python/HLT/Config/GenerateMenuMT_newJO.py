@@ -1,16 +1,14 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 import itertools
 
-from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFConfig import decisionTreeFromChains, sequenceScanner
-
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaCommon.CFElements import seqAND
 from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
 from TriggerMenuMT.HLT.Config.Utility.MenuAlignmentTools import MenuAlignment
 
-
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
+
 
 _isCAMenu = False
 def isCAMenu():
@@ -111,6 +109,8 @@ def makeHLTTree(flags):
     """
     Generate appropriate Control Flow Graph wiht all HLT algorithms
     """
+    from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFConfig import decisionTreeFromChains, sequenceScanner
+
     log.info("newJO version of makeHLTTree")
     acc = ComponentAccumulator()
     

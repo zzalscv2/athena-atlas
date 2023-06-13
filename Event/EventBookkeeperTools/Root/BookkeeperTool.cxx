@@ -331,7 +331,7 @@ StatusCode BookkeeperTool::loadXAODMetaData()
   if (itTruthMetaDataPtr == metaDataContainer->end()) {
 #ifdef XAOD_STANDALONE
     m_numberOfWeightVariations = 1;
-    ATH_MSG_DEBUG("Could not load weight meta data! Assumming 1 variation.");
+    ATH_MSG_DEBUG("Could not load weight meta data! Assuming 1 variation.");
     return StatusCode::SUCCESS;
 #else
     ATH_MSG_DEBUG("Could not load weight meta data from TruthMetaData!");

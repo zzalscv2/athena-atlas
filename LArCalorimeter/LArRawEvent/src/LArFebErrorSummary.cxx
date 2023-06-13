@@ -12,12 +12,10 @@ const std::string LArFebErrorSummary::m_errorStrings[N_LArFebErrorType] = {
 
 
 //Constructor
-LArFebErrorSummary::LArFebErrorSummary() {
-
-}
+LArFebErrorSummary::LArFebErrorSummary() = default;
 
 LArFebErrorSummary::~LArFebErrorSummary() 
-{}
+= default;
 
 uint16_t LArFebErrorSummary::feb_error(HWIdentifier id) const 
 { 
@@ -54,7 +52,6 @@ const std::map<unsigned int,uint16_t>& LArFebErrorSummary::get_all_febs() const
 void  LArFebErrorSummary::clear()
 {
   m_feb_errors.clear(); 
-  return; 
 }
 
 
@@ -65,7 +62,7 @@ std::string LArFebErrorSummary::error_to_string(uint16_t error )
     {
       if ( error & (1<<i) )
 	{
-	  if (str_err!="") str_err+=":" ; 
+	  if (!str_err.empty()) str_err+=":" ; 
 	  str_err = str_err+m_errorStrings[i];
 	}
     }

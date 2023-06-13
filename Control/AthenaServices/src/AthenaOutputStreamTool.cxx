@@ -87,7 +87,7 @@ StatusCode AthenaOutputStreamTool::initialize() {
       m_processTag.setValue(m_dataHeaderKey);
    }
 
-   { // handle the AttrKey overwite
+   { // handle the AttrKey overwrite
      const std::string keyword = "[AttributeListKey=";
      std::string::size_type pos = m_outputName.value().find(keyword);
      if( (pos != std::string::npos) ) {
@@ -212,7 +212,7 @@ StatusCode AthenaOutputStreamTool::connectOutput(const std::string& outputName) 
    m_dataHeader = new DataHeader();
    m_dataHeader->setProcessTag(m_processTag);
 
-   // Retrieve all existing DataHeaders from StroreGate
+   // Retrieve all existing DataHeaders from StoreGate
    const DataHeader* dh = nullptr;
    std::vector<std::string> dhKeys;
    m_store->keys<DataHeader>(dhKeys);

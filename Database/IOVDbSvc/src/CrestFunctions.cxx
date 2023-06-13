@@ -89,7 +89,7 @@ namespace IOVDbNamespace{
         reply = myCrestClient.findAllIovs(tag).dump();
       } catch (std::exception & e){
         std::cout<<__FILE__<<":"<<__LINE__<< ": "<<e.what()<<" while trying to find the IOVs"<<std::endl;
-        return std::vector<IovHashPair>();
+        return {};
       }
     }
     return extractIovAndHash(reply);
@@ -192,7 +192,7 @@ namespace IOVDbNamespace{
     std::sregex_iterator it(textRep.begin(), textRep.end(), r);
     std::sregex_iterator end;
     for (;it!=end;++it){
-      std::smatch  m= *it;
+      const std::smatch&  m= *it;
       if (not m.empty()){ 
         list.push_back(std::stoll(m[1].str()));
         //chomp the last backslash
@@ -229,8 +229,7 @@ namespace IOVDbNamespace{
   
   std::pair<std::vector<cool::ChannelId> , std::vector<std::string>>
   channelListForTag(const std::string & tag, const bool testing){
-    const auto channelListTag=tag;
-    std::string reply{R"delim([{"chansize":8,"colsize":5,"description":"{\"dbname\":\"CONDBR2\",\"nodeFullpath\":\"/LAR/BadChannelsOfl/BadChannels\",\"schemaName\":\"COOLOFL_LAR\"}","insertionTime":"2022-05-26T16:40:32+0000","tagInfo":"{\"channel_list\":[{\"0\":\"\"},{\"1\":\"\"},{\"2\":\"\"},{\"3\":\"\"},{\"4\":\"\"},{\"5\":\"\"},{\"6\":\"\"},{\"7\":\"\"}],\"node_description\":\"<timeStamp>run-lumi</timeStamp><addrHeader><address_header service_type=\\\"71\\\" clid=\\\"1238547719\\\" /></addrHeader><typeName>CondAttrListCollection</typeName>\",\"payload_spec\":\"ChannelSize:UInt32,StatusWordSize:UInt32,Endianness:UInt32,Version:UInt32,Blob:Blob64k\"}","tagName":"LARBadChannelsOflBadChannels-RUN2-UPD4-21"}])delim"};
+       std::string reply{R"delim([{"chansize":8,"colsize":5,"description":"{\"dbname\":\"CONDBR2\",\"nodeFullpath\":\"/LAR/BadChannelsOfl/BadChannels\",\"schemaName\":\"COOLOFL_LAR\"}","insertionTime":"2022-05-26T16:40:32+0000","tagInfo":"{\"channel_list\":[{\"0\":\"\"},{\"1\":\"\"},{\"2\":\"\"},{\"3\":\"\"},{\"4\":\"\"},{\"5\":\"\"},{\"6\":\"\"},{\"7\":\"\"}],\"node_description\":\"<timeStamp>run-lumi</timeStamp><addrHeader><address_header service_type=\\\"71\\\" clid=\\\"1238547719\\\" /></addrHeader><typeName>CondAttrListCollection</typeName>\",\"payload_spec\":\"ChannelSize:UInt32,StatusWordSize:UInt32,Endianness:UInt32,Version:UInt32,Blob:Blob64k\"}","tagName":"LARBadChannelsOflBadChannels-RUN2-UPD4-21"}])delim"};
     if (not testing){
      auto myCrestClient = Crest::CrestClient(urlBase());
      reply= myCrestClient.getTagMetaInfo(tag).dump();
@@ -260,7 +259,7 @@ namespace IOVDbNamespace{
   }
   
   std::map<std::string, std::string>
-  getGlobalTagMap(const std::string globaltag){
+  getGlobalTagMap(const std::string& globaltag){
     std::map<std::string, std::string> tagmap;
     try{
       auto crestClient = Crest::CrestClient(urlBase());

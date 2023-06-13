@@ -90,9 +90,9 @@ namespace IOVDbNamespace {
     const std::string m_desc;
     const std::string m_spec;
     unsigned int m_nchans;
-    std::string formatCvp(const cool::IObjectIteratorPtr & itr);
-    std::string formatAttrList(const cool::IObjectIteratorPtr & itr);
-    std::string formatPoolRef(const  cool::IObjectIteratorPtr & itr);
+    static std::string formatCvp(const cool::IObjectIteratorPtr & itr);
+    static std::string formatAttrList(const cool::IObjectIteratorPtr & itr);
+    static std::string formatPoolRef(const  cool::IObjectIteratorPtr & itr);
   };
   
   

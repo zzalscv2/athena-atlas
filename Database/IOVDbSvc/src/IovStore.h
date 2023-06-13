@@ -54,7 +54,7 @@ namespace IOVDbNamespace{
     ///Extend upper cache bound to the minimum 'until' time; return whether this changes its value
     bool extendCacheHi();
   private:
-    std::pair<bool,bool> straddling(const Iov_t & iov, const Iov_t & bounds) const;
+    static std::pair<bool,bool> straddling(const Iov_t & iov, const Iov_t & bounds) ;
     ///main vector of iovs
     std::vector<Iov_t> m_iovs{};
     ///cache bounds, 'since', 'until', corresponds to m_cachestart, m_cachestop in original

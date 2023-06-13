@@ -18,24 +18,24 @@
 */
 
 class LArRawSC  {
-  
+
  private:
-  
+
   /** @brief Online Identifier */
   HWIdentifier m_hardwareID{};
-  
+
   /** @brief Latome channel */
   short m_chan = 0;
-  
+
   /** @brief LATOME source Id*/
   unsigned int m_sourceId = 0U;
 
   /** @brief vector of energies */
   std::vector < int > m_energies;
-  
+
   /** @brief vector of bcids */
   std::vector < unsigned short > m_BCId;
-  
+
   /** @brief vector of saturation flags */
   std::vector < bool > m_satur;
 
@@ -55,57 +55,64 @@ class LArRawSC  {
   bool m_pedOverflow{};
 
  public:
-  /** @brief constructor 
+  /** @brief constructor
       @param[in] channel_value  Online identifier
       @param[in] gain_value  Gain
       @param[in] sample_value Reference of vector with ADC samples
   */
-  LArRawSC(const HWIdentifier & channel_value, const short chan, const unsigned int sourceId, const std::vector < int > & energies, const std::vector<unsigned short>& bcids, std::vector<bool>& satur):
-    m_hardwareID(channel_value), m_chan(chan),m_sourceId(sourceId), m_energies(energies), m_BCId(bcids), m_satur(satur), m_ofcaOverflow(false), m_ofcbOverflow(false), m_pedOverflow(false){}
+  LArRawSC(const HWIdentifier& channel_value, const short chan,
+           const unsigned int sourceId, const std::vector<int>& energies,
+           const std::vector<unsigned short>& bcids, std::vector<bool>& satur)
+      : m_hardwareID(channel_value),
+        m_chan(chan),
+        m_sourceId(sourceId),
+        m_energies(energies),
+        m_BCId(bcids),
+        m_satur(satur),
+        m_ofcaOverflow(false),
+        m_ofcbOverflow(false),
+        m_pedOverflow(false) {}
 
-  LArRawSC(const HWIdentifier & channel_value,
-           const short chan,
-           const unsigned int sourceId,
-           std::vector < int > && energies,
-           std::vector < unsigned short > && bcids,
-           std::vector < bool > && satur)
-    : m_hardwareID(channel_value),
-      m_chan(chan),
-      m_sourceId(sourceId),
-      m_energies(std::move(energies)),
-      m_BCId(std::move(bcids)),
-      m_satur(std::move(satur)),
-      m_ofcaOverflow(false),
-      m_ofcbOverflow(false),
-      m_pedOverflow(false)
-  {}
-    
-    /** @return HWIdentifier */
-    const HWIdentifier & hardwareID() const {return m_hardwareID; }
+  LArRawSC(const HWIdentifier& channel_value, const short chan,
+           const unsigned int sourceId, std::vector<int>&& energies,
+           std::vector<unsigned short>&& bcids, std::vector<bool>&& satur)
+      : m_hardwareID(channel_value),
+        m_chan(chan),
+        m_sourceId(sourceId),
+        m_energies(std::move(energies)),
+        m_BCId(std::move(bcids)),
+        m_satur(std::move(satur)),
+        m_ofcaOverflow(false),
+        m_ofcbOverflow(false),
+        m_pedOverflow(false) {}
 
-    /** @return channel */
-    short chan() const { return m_chan; }
+  /** @return HWIdentifier */
+  const HWIdentifier& hardwareID() const { return m_hardwareID; }
 
-    /** @return source Id value */
-    unsigned int SourceId() const {return m_sourceId;}
+  /** @return channel */
+  short chan() const { return m_chan; }
 
-    /** @return number of samples */
-    int nsamples() const { return m_energies.size(); }
+  /** @return source Id value */
+  unsigned int SourceId() const { return m_sourceId; }
 
-    /** @return a reference to a stl vector containing the energies values */
-    const std::vector < int > & energies() const { return m_energies; }
+  /** @return number of samples */
+  int nsamples() const { return m_energies.size(); }
 
-    /** @return a reference to a stl vector containing the bcid values */
-    const std::vector < unsigned short > & bcids() const { return m_BCId; }
+  /** @return a reference to a stl vector containing the energies values */
+  const std::vector<int>& energies() const { return m_energies; }
 
-    /** @return a reference to a stl vector containing the saturation flags */
-    const std::vector < bool > & satur() const { return m_satur; }
+  /** @return a reference to a stl vector containing the bcid values */
+  const std::vector<unsigned short>& bcids() const { return m_BCId; }
 
-    /** @return a reference to a stl vector containing the energies*taus */
-    const std::vector < int > & tauEnergies() const { return m_tauEnergies; }
+  /** @return a reference to a stl vector containing the saturation flags */
+  const std::vector<bool>& satur() const { return m_satur; }
 
-    /** @return true if the channel passes the tau selection */
-    const std::vector < bool > & passTauSelection() const { return m_passTauSelection; }
+  /** @return a reference to a stl vector containing the energies*taus */
+  const std::vector<int>& tauEnergies() const { return m_tauEnergies; }
+
+  /** @return true if the channel passes the tau selection */
+  const std::vector<bool>& passTauSelection() const {
+    return m_passTauSelection; }
 
     /** @return OFCa Overflow */
     bool ofcaOverflow() const { return m_ofcaOverflow; }
@@ -119,7 +126,7 @@ class LArRawSC  {
 
     /** @brief Conversion operator to a std::string <br> Can be used in a cast operation : (std::string) digit <br> */
     virtual operator std::string() const;
-    
+
     /** @brief Set energies .
         @param[in] samples  vector of energies
     */
@@ -148,10 +155,10 @@ class LArRawSC  {
     void setPedOverflow(bool overflow){ m_pedOverflow=overflow; }
 
     /** @brief Destructor */
-    virtual ~LArRawSC() { }
+    virtual ~LArRawSC() = default;
 
     /** @brief default constructor for persistency */
-    LArRawSC();
+    LArRawSC() = default;
 };
 
 #endif //LArRawSC_H

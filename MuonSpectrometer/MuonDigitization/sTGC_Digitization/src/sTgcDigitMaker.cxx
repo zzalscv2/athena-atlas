@@ -291,7 +291,7 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
     // Transform STL and STS to 0 and 1 respectively
     int stNameInt = (stationName=="STL") ? 0 : 1;
     // If inside eta0 bin of QL1/QS1, remove 1 from eta index
-    int etaZero = detEl->isEtaZero(tempId, hitOnSurface_wire.y()) ? 1 : 0;
+    int etaZero = detEl->isEtaZero(tempId, posOnSurf_wire) ? 1 : 0;
     float efficiency = getChamberEfficiency(stNameInt, std::abs(stationEta)-etaZero, stationPhi-1, multiPlet-1, gasGap-1);
     // Lose Hits to match HV efficiency
     if (CLHEP::RandFlat::shoot(rndmEngine,0.0,1.0) > efficiency) return nullptr;

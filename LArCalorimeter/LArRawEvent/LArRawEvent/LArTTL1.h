@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // * author : Fabienne Ledroit                                                     *
@@ -17,44 +17,44 @@
 
 /**
 @class LArTTL1
-@brief Liquid Argon TT L1 sum base class 
+@brief Liquid Argon TT L1 sum class
 
- * It's a TES object which is readonly 
+ * It's a TES object which is readonly
 
 @author Fabienne Ledroit
  *
- * sampleValues contains 7 samplings. 
+ * sampleValues contains 7 samplings.
  */
 
-class LArTTL1  {
+class LArTTL1 final{
 
 public:
 
 
     /** Constructor <br><br>
      * Beware that sampleValues is a reference to a STL vector of float's <br>
-     * which is filled by a series of push_back calls .<br> 
+     * which is filled by a series of push_back calls .<br>
      * Using another construction method of this vector will fail . <br>
      * Now carries both online and offline Id. One is to be removed when we decide which one <br><br> */
-    LArTTL1(const HWIdentifier& onlineId, const Identifier& offlineId, const std::vector<float>& sampleValues); 
+    LArTTL1(const HWIdentifier& onlineId, const Identifier& offlineId, const std::vector<float>& sampleValues);
 
     /**  return LArTTChannelID (online Id)   */
-    const HWIdentifier & ttOnlineID() const; 
+    const HWIdentifier & ttOnlineID() const;
 
     /** return TT offline Identifier */
-    const Identifier & ttOfflineID() const; 
+    const Identifier & ttOfflineID() const;
 
     /** return number of samples */
-    short nsamples() const; 
+    short nsamples() const;
 
     /** return a reference to a stl vector containing the sample values */
-    const std::vector<float> & samples() const; 
+    const std::vector<float> & samples() const;
 
     /** Destructor */
-    virtual ~LArTTL1();
+    ~LArTTL1() = default;
 
     /** default constructor for persistency */
-    LArTTL1();
+    LArTTL1() = default;
 
 private:
 

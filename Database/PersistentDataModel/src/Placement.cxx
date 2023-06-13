@@ -14,13 +14,13 @@ Placement::Placement() : m_technology(0L), m_fileName(""), m_containerName("") {
 
 const std::string Placement::toString() const {
    char text[128];
-   sprintf(text, fmt_tech, m_technology);
+   int s = sprintf(text, fmt_tech, m_technology);
    std::string str = "[FILE=";
    str += m_fileName;
    str += "][CONT=";
    str += m_containerName;
    str += ']';
-   str += text;
+   str.append(text, s);
    str += m_auxString;
    return str;
 }
