@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRawEvent/LArAccumulatedDigit.h"
-#include <math.h>
+#include <cmath>
 #include <iostream>
 
 /** default constructor for persistency */
@@ -11,36 +11,32 @@ LArAccumulatedDigit::LArAccumulatedDigit() :
   m_gain(CaloGain::UNKNOWNGAIN),  m_nTrigger(0)
 {}
 
-LArAccumulatedDigit::LArAccumulatedDigit(HWIdentifier & channel_value, 
-					 CaloGain::CaloGain gain_value, 
-					 const std::vector<uint64_t>& sampleSum_value, 
+LArAccumulatedDigit::LArAccumulatedDigit(HWIdentifier & channel_value,
+					 CaloGain::CaloGain gain_value,
+					 const std::vector<uint64_t>& sampleSum_value,
 					 const std::vector< uint64_t >& sampleSquare_value,
 					 uint32_t nTrigger_value) :
   m_hardwareID(channel_value), m_gain(gain_value), m_nTrigger(nTrigger_value)  {
-  
+
   const size_t nS=sampleSum_value.size();
   m_sampleSum.resize(nS);
-  for (size_t i=0;i<nS;++i) 
+  for (size_t i=0;i<nS;++i)
     m_sampleSum[i]=(uint64_t)sampleSum_value[i];
 
-  
+
   const size_t nSS=sampleSquare_value.size();
   m_sampleSquare.resize(nSS);
-  for (size_t i=0;i<nSS;++i) 
+  for (size_t i=0;i<nSS;++i)
     m_sampleSquare[i]=(uint64_t)sampleSquare_value[i];
 }
 
-  /** @brief Constructor (second type)*/      
+  /** @brief Constructor (second type)*/
 LArAccumulatedDigit::LArAccumulatedDigit(HWIdentifier & channel_value)
   : m_hardwareID (channel_value),
     m_gain       ((CaloGain::CaloGain) 0),
     m_nTrigger   (0)
 {
 }
-
-/** Destructor */
-LArAccumulatedDigit::~LArAccumulatedDigit() {}
-
 
 float LArAccumulatedDigit::mean(int n_min, int n_max) const {
   //float mean;
@@ -65,9 +61,9 @@ float LArAccumulatedDigit::mean(int n_min, int n_max) const {
   return x/n;
 }
 
-float LArAccumulatedDigit::RMS(int n_min, int n_max) const 
+float LArAccumulatedDigit::RMS(int n_min, int n_max) const
 {
-  unsigned imin=0; 
+  unsigned imin=0;
   const size_t nS=m_sampleSum.size();
   if(nS==0) return 0.;
   if(n_min>0 && (unsigned)n_min<nS) imin=n_min;
@@ -76,8 +72,8 @@ float LArAccumulatedDigit::RMS(int n_min, int n_max) const
 
   const double n    = (imax-imin+1)*m_nTrigger;
   if(n<=0) return 0;
-  if(m_sampleSquare.size()<1) return 0;
-  
+  if(m_sampleSquare.empty()) return 0;
+
   uint64_t x=0;
   for(size_t i=imin;i<=imax;i++)
     x += m_sampleSum[i];
@@ -101,7 +97,7 @@ bool LArAccumulatedDigit::setAddDigit(const std::vector<short>& digit) {
     m_sampleSquare.resize(nS,0);
     m_sampleSum.resize(nS,0);
   }// end if object empty
-   
+
 
   for (size_t i=0;i<nS;++i) {
     m_sampleSum[i]+=digit[i];
@@ -115,9 +111,9 @@ bool LArAccumulatedDigit::setAddDigit(const std::vector<short>& digit) {
 
 
 bool LArAccumulatedDigit::setAddSubStep(const CaloGain::CaloGain gain_value,
-                                        const HWIdentifier chid, 
+                                        const HWIdentifier chid,
 					const std::vector<uint64_t>& sampleSum,
-                                        const std::vector <uint64_t>& sampleSquare, 
+                                        const std::vector <uint64_t>& sampleSquare,
 					const unsigned nTrigger)
 {
   size_t i;
@@ -128,20 +124,20 @@ bool LArAccumulatedDigit::setAddSubStep(const CaloGain::CaloGain gain_value,
     m_gain=gain_value;
     m_hardwareID=chid;
   }
-  
+
 
   const size_t n = sampleSquare.size();
   if(n!=sampleSum.size())
     return false; // Can not accumulate if nsamples differs
   if(n!=m_sampleSum.size() || n!=m_sampleSquare.size()) {
-    if(m_nTrigger!=0) 
+    if(m_nTrigger!=0)
       return false; // Can not accumulate if nsamples differs
     m_sampleSquare.resize(n,0);
     m_sampleSum.resize(n,0);
   }
   for(i=0;i<n;++i)
     m_sampleSum[i] += sampleSum[i];
-  
+
   for(i=0;i<n;i++)
     m_sampleSquare[i] += sampleSquare[i];
 
@@ -150,7 +146,7 @@ bool LArAccumulatedDigit::setAddSubStep(const CaloGain::CaloGain gain_value,
 }
 
 
-void LArAccumulatedDigit::setAddSubStep(CaloGain::CaloGain gain_value, std::vector<uint64_t> sampleSum, 
+void LArAccumulatedDigit::setAddSubStep(CaloGain::CaloGain gain_value, std::vector<uint64_t> sampleSum,
 					std::vector <uint64_t> sampleSquare, unsigned nTrigger)
 {
   std::vector<uint64_t> tmpSum;
@@ -166,7 +162,7 @@ void LArAccumulatedDigit::setAddSubStep(CaloGain::CaloGain gain_value, std::vect
   if(n!=sampleSum.size())
     return; // Can not accumulate if nsamples differs
   if(n!=nS) {
-    if(m_nTrigger!=0) 
+    if(m_nTrigger!=0)
       return; // Can not accumulate if nsamples differs
     m_sampleSquare.resize(n,0);
     m_sampleSum.resize(n,0);
@@ -177,7 +173,7 @@ void LArAccumulatedDigit::setAddSubStep(CaloGain::CaloGain gain_value, std::vect
     tmpSum[i] = sampleSum[i];
     m_sampleSum[i] += sampleSum[i];
   }
-  
+
   tmpSquare.resize(n,0);
   for(i=0;i<n;i++) {
     tmpSquare[i] = sampleSquare[i];
@@ -189,7 +185,7 @@ void LArAccumulatedDigit::setAddSubStep(CaloGain::CaloGain gain_value, std::vect
   tmpSquare.clear();
 }
 
-void LArAccumulatedDigit::setAddSubStep(CaloGain::CaloGain gain_value, std::vector<int64_t> sampleSum, 
+void LArAccumulatedDigit::setAddSubStep(CaloGain::CaloGain gain_value, std::vector<int64_t> sampleSum,
 					std::vector <int64_t> sampleSquare, unsigned nTrigger,
 					int32_t base)
 {
@@ -207,7 +203,7 @@ void LArAccumulatedDigit::setAddSubStep(CaloGain::CaloGain gain_value, std::vect
   if(n!=sampleSum.size())
     return; // Can not accumulate if nsamples differs
   if(n!=nS) {
-    if(m_nTrigger!=0) 
+    if(m_nTrigger!=0)
       return; // Can not accumulate if nsamples differs
     m_sampleSquare.resize(n,0);
     m_sampleSum.resize(n,0);
@@ -218,14 +214,14 @@ void LArAccumulatedDigit::setAddSubStep(CaloGain::CaloGain gain_value, std::vect
     tmpSum[i] = (uint64_t) (sampleSum[i]+tmpBase);
     m_sampleSum[i] += tmpSum[i];
   }
-  
+
   tmpBase = static_cast<int64_t>(base)*base;
   tmpSquare.resize(n,0);
   for(i=0;i<n;i++) {
     tmpSquare[i] = (uint64_t) (sampleSquare[i]+tmpBase);
     m_sampleSquare[i] += tmpSquare[i];
   }
-  
+
   m_nTrigger += nTrigger;
 
   tmpSum.clear();
@@ -233,7 +229,7 @@ void LArAccumulatedDigit::setAddSubStep(CaloGain::CaloGain gain_value, std::vect
 }
 
 
-void LArAccumulatedDigit::getCov(std::vector<float>& cov, int normalize) const 
+void LArAccumulatedDigit::getCov(std::vector<float>& cov, int normalize) const
 {
   cov.clear();
   const double n    = m_nTrigger;
@@ -265,7 +261,7 @@ void LArAccumulatedDigit::getCov(std::vector<float>& cov, int normalize) const
   //Normalize covariance elements if required
   const double norm = m_sampleSquare[0]/(n*nS)-mean*mean;
   //norm = sqrt(norm*norm);
-  if (norm==0.0) 
+  if (norm==0.0)
     cov.assign(nS-1,0.0);
   else {
     const double inv_norm = 1. / norm;
@@ -275,6 +271,5 @@ void LArAccumulatedDigit::getCov(std::vector<float>& cov, int normalize) const
   }
 
   mean2.clear();
-  return;
 }
 

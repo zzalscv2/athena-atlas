@@ -29,11 +29,7 @@ LArFebHeader::LArFebHeader(const HWIdentifier febid):m_FEBId(febid) {
    m_NbSamples=0;
    m_OfflineChecksum=0;
    m_OnlineChecksum=1;
-   return;
 }
-
-LArFebHeader::~LArFebHeader() 
-{}
 
 int LArFebHeader::degray(unsigned int x)
 { // like explained in: http://mathworld.wolfram.com/GrayCode.html

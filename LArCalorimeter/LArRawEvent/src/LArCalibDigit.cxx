@@ -6,7 +6,7 @@
 
 /** Destructor */
 LArCalibDigit::~LArCalibDigit()
-{}
+= default;
 
 /** default constructor for persistency */
 LArCalibDigit::LArCalibDigit()
