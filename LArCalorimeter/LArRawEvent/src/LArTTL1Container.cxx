@@ -9,5 +9,5 @@ DataVector<LArTTL1>()
 { }
 
 LArTTL1Container::~LArTTL1Container() 
-{ }
+= default;
 

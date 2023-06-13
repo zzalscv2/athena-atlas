@@ -5,4 +5,4 @@
 #include "LArRawEvent/LArCalibDigitContainer.h"
 
 LArCalibDigitContainer::~LArCalibDigitContainer()
-{}
+= default;

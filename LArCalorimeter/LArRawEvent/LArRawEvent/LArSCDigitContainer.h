@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARSCDIGITCONTAINER_H
@@ -21,12 +21,12 @@ class LArSCDigitContainer : public DataVector<LArSCDigit> {
   /**
    @brief constructor
    */
-  LArSCDigitContainer() : DataVector<LArSCDigit>() { }
-  
-/**
-   @brief destructor 
+  LArSCDigitContainer() : DataVector<LArSCDigit>() {};
+
+  /**
+   @brief destructor
   */
-  virtual ~LArSCDigitContainer();
+  virtual ~LArSCDigitContainer() = default;
 } ;
 
 

@@ -3,13 +3,13 @@
 */
 
 #include "LArRawEvent/LArAccumulatedCalibDigit.h"
-#include <math.h>
+#include <cmath>
 #include <iostream>
 #include <limits>
 
 /** Destructor */
 LArAccumulatedCalibDigit::~LArAccumulatedCalibDigit()
-{}
+= default;
 
 
 float LArAccumulatedCalibDigit::mean(const size_t i) const {
@@ -81,7 +81,7 @@ void LArAccumulatedCalibDigit::setSample2Sum(const std::vector < uint64_t >& sam
 
 bool LArAccumulatedCalibDigit::setAddDigit(const std::vector<short>& samples) {
    const size_t nS=samples.size();
-   if (m_sampleSum.size()==0 && m_sample2Sum.size()==0) {
+   if (m_sampleSum.empty() && m_sample2Sum.empty()) {
      m_sampleSum.resize(nS,0);
      m_sample2Sum.resize(nS,0);
    }
@@ -115,7 +115,7 @@ bool LArAccumulatedCalibDigit::setAddSubStep(const std::vector < uint64_t >& sam
  
   const size_t nS=sampleSum.size();
 
-  if (m_sampleSum.size()==0 && m_sample2Sum.size()==0) {
+  if (m_sampleSum.empty() && m_sample2Sum.empty()) {
       m_sampleSum.resize(nS,0);
       m_sample2Sum.resize(nS,0);
   }

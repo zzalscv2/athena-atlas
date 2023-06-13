@@ -11,4 +11,4 @@ LArAccumulatedDigitContainer::LArAccumulatedDigitContainer(SG::OwnershipPolicy o
 {}
 
 LArAccumulatedDigitContainer::~LArAccumulatedDigitContainer() 
-{}
+= default;

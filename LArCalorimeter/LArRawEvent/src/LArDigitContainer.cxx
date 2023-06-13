@@ -4,7 +4,7 @@
 
 #include "LArRawEvent/LArDigitContainer.h"
 #include "AthenaKernel/BaseInfo.h"
-#include <stdio.h>
+#include <cstdio>
 #include <typeinfo>
 
 
