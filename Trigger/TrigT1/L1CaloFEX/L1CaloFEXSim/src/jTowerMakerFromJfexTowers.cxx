@@ -33,22 +33,6 @@
 
 namespace LVL1 {
     
-struct color {
-    const char* RED      ="\033[1;31m";
-    const char* ORANGE   ="\033[1;38;5;208m";
-    const char* YELLOW   ="\033[1;33m";
-    const char* GREEN    ="\033[1;32m";
-    const char* BLUE     ="\033[1;34m";
-    const char* PURPLE   ="\033[1;35m";
-    const char* END      ="\033[0m";
-    const char* B_BLUE   ="\033[1;44m";
-    const char* B_PURPLE ="\033[1;45m";
-    const char* B_ORANGE ="\033[1;48;5;208;30m";
-    const char* B_GRAY   ="\033[1;100m";
-    const char* B_RED    ="\033[1;41m";
-    const char* B_GREEN  ="\033[1;42m";
-} const C;
-
 jTowerMakerFromJfexTowers::jTowerMakerFromJfexTowers(const std::string& name, ISvcLocator* pSvcLocator)
     :  AthAlgorithm(name, pSvcLocator)
 {}
