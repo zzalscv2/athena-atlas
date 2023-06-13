@@ -9,6 +9,7 @@
 
 #include "ParticleHistograms.h"
 
+class TH2D;
 namespace egammaMonitoring{
 
   class RecoElectronHistograms : public ParticleHistograms
@@ -17,7 +18,9 @@ namespace egammaMonitoring{
   public:
 
     // Electron Plot(s)
-    using ParticleHistograms::ParticleHistograms;   
+    using ParticleHistograms::ParticleHistograms;
+
+    std::map<std::string, TH2D*> histoMap2D;
     
     StatusCode initializePlots();
 

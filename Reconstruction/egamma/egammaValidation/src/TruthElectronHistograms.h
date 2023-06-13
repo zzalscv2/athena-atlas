@@ -9,7 +9,7 @@
 #include "xAODEgamma/Electron.h"
 #include "ParticleHistograms.h"
 
-class StatusCode;
+class TH2D;
 
 namespace egammaMonitoring {
 
@@ -27,6 +27,8 @@ namespace egammaMonitoring {
     
     void fill(const xAOD::TruthParticle* truth, const xAOD::Electron* el = nullptr) ;
     virtual ~TruthElectronHistograms(){};
+
+    std::map<std::string, TH2D*> histoMap2D;
 
   private:    
 
