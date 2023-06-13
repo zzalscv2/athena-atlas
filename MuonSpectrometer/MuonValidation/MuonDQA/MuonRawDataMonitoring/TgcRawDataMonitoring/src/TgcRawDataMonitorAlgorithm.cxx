@@ -2754,6 +2754,14 @@ return (m.muon->charge()>0);
 	  return m.currBc;
 	});
       tgcCoin_variables.push_back(coin_inner_nsw_currBc);
+      auto coin_inner_nsw_endcap_currBc=Monitored::Collection("coin_inner_nsw_endcap_currBc",tgcTrigNswMap,[](const TgcTrigNsw&m){
+	  return (m.isForward==0 && m.currBc==1);
+	});
+      tgcCoin_variables.push_back(coin_inner_nsw_endcap_currBc);
+      auto coin_inner_nsw_forward_currBc=Monitored::Collection("coin_inner_nsw_forward_currBc",tgcTrigNswMap,[](const TgcTrigNsw&m){
+	  return (m.isForward==1 && m.currBc==1);
+	});
+      tgcCoin_variables.push_back(coin_inner_nsw_forward_currBc);
       auto coin_inner_nsw_goodBcid0=Monitored::Collection("coin_inner_nsw_goodBcid0",tgcTrigNswMap,[](const TgcTrigNsw&m){
 	  return m.goodBcid0;
 	});
