@@ -108,11 +108,11 @@ def addAthenaArguments(parser, maxEventsDefaultSubstep='first', addValgrind=True
                         metavar='N', group='Athena',
                         help='Set AthenaMP to fork after processing N events (default is to fork immediately after '
                         'initialisation')
-    parser.add_argument('--sharedWriter', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),
+    parser.add_argument('--sharedWriter', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=False),
                         metavar='BOOL', group='Athena', nargs='?', const=trfArgClasses.argBool('True'),
                         help='SharedWriter mode active')
     parser.add_argument('--parallelCompression',
-                        type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),
+                        type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=False),
                         metavar='BOOL', group='Athena', nargs='?', const=trfArgClasses.argBool('True'),
                         help='Delegate event data compression to the workers while using SharedWriter')
     parser.add_argument('--eventService', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),

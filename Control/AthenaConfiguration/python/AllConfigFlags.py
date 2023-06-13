@@ -129,7 +129,7 @@ def initConfigFlags():
     acf.addFlag('MP.ReadEventOrders', False)
     acf.addFlag('MP.EventOrdersFile', 'athenamp_eventorders.txt')
     acf.addFlag('MP.UseSharedReader', False)
-    acf.addFlag('MP.UseSharedWriter', True)
+    acf.addFlag('MP.UseSharedWriter', False)
     acf.addFlag('MP.UseParallelCompression', True)
 
     acf.addFlag('Common.MsgSourceLength',50) #Length of the source-field in the format str of MessageSvc
