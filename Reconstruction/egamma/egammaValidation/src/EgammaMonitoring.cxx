@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EgammaMonitoring.h"
@@ -15,10 +15,7 @@
 #include "xAODEgamma/EgammaxAODHelpers.h"
 
 EgammaMonitoring::EgammaMonitoring(const std::string &name, ISvcLocator *pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator){
-    declareProperty("sampleType", m_sampleType = "Unknown",
-		    "Descriptive name for the processed type of particle");
-}
+  AthAlgorithm(name, pSvcLocator) {}
 
 // ******
 
@@ -57,32 +54,36 @@ StatusCode EgammaMonitoring::initialize() {
 
   if ("electron" == m_sampleType) {
 
+    recoElectronAll = std::make_unique<egammaMonitoring::RecoElectronHistograms>(
+      "recoElectronAll","Electrons Reco Electron",
+      "/MONITORING/recoElectronAll/", rootHistSvc);
+
     truthElectronAll = std::make_unique<egammaMonitoring::TruthElectronHistograms>(
-        "truthElectronAll","All Truth Electrons", "/MONITORING/truthElectronAll/", rootHistSvc);
+      "truthElectronAll","All Truth Electrons", "/MONITORING/truthElectronAll/", rootHistSvc);
 
     truthPromptElectronAll = std::make_unique<egammaMonitoring::TruthElectronHistograms>(
-        "truthPromptElectronAll","All Truth Prompt Electrons", "/MONITORING/truthPromptElectronAll/", rootHistSvc);
+      "truthPromptElectronAll","All Truth Prompt Electrons", "/MONITORING/truthPromptElectronAll/", rootHistSvc);
 
     truthElectronRecoElectronAll = std::make_unique<egammaMonitoring::TruthElectronHistograms>(
-        "truthElectronRecoElectronAll","Truth Electrons Reco Electron", "/MONITORING/truthElectronRecoElectronAll/", rootHistSvc);
+      "truthElectronRecoElectronAll","Truth Electrons Reco Electron", "/MONITORING/truthElectronRecoElectronAll/", rootHistSvc);
 
     truthPromptElectronWithTrack = std::make_unique<egammaMonitoring::TruthElectronHistograms>(
-        "truthPromptElectronWithTrack","Truth Prompt Electrons With Track", "/MONITORING/truthPromptElectronWithTrack/", rootHistSvc);
+      "truthPromptElectronWithTrack","Truth Prompt Electrons With Track", "/MONITORING/truthPromptElectronWithTrack/", rootHistSvc);
 
     truthPromptElectronWithGSFTrack = std::make_unique<egammaMonitoring::TruthElectronHistograms>(
-        "truthPromptElectronWithGSFTrack","Truth Prompt Electrons With GSFTrack", "/MONITORING/truthPromptElectronWithGSFTrack/", rootHistSvc);
+      "truthPromptElectronWithGSFTrack","Truth Prompt Electrons With GSFTrack", "/MONITORING/truthPromptElectronWithGSFTrack/", rootHistSvc);
 
     truthPromptElectronWithReco = std::make_unique<egammaMonitoring::TruthElectronHistograms>(
-        "truthPromptElectronWithReco","Truth Prompt Electrons With GSFTrack", "/MONITORING/truthPromptElectronWithReco/", rootHistSvc);
+      "truthPromptElectronWithReco","Truth Prompt Electrons With GSFTrack or just with a fwd cluster", "/MONITORING/truthPromptElectronWithReco/", rootHistSvc);
 
-    recoElectronAll = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::RecoElectronHistograms(
-      "recoElectronAll","Electrons Reco Electron", "/MONITORING/recoElectronAll/", rootHistSvc));
+    truthPromptElectronWithRecoTrack = std::make_unique<egammaMonitoring::TruthElectronHistograms>(
+      "truthPromptElectronWithRecoTrack","Truth Prompt Electrons With GSFTrack", "/MONITORING/truthPromptElectronWithRecoTrack/", rootHistSvc);
 
     truthRecoElectronLooseLH = std::make_unique<egammaMonitoring::TruthElectronHistograms>(
       "truthRecoElectronLooseLH","LLH Electrons Reco Electron", "/MONITORING/truthRecoElectronLooseLH/", rootHistSvc);
 
     truthRecoElectronMediumLH = std::make_unique<egammaMonitoring::TruthElectronHistograms>(
-        "truthRecoElectronMediumLH","MLH Electrons Reco Electron", "/MONITORING/truthRecoElectronMediumLH/", rootHistSvc);
+      "truthRecoElectronMediumLH","MLH Electrons Reco Electron", "/MONITORING/truthRecoElectronMediumLH/", rootHistSvc);
 
     truthRecoElectronTightLH = std::make_unique<egammaMonitoring::TruthElectronHistograms>(
       "truthRecoElectronTightLH","TLH Electrons Reco Electron", "/MONITORING/truthRecoElectronTightLH/", rootHistSvc);
@@ -97,188 +98,156 @@ StatusCode EgammaMonitoring::initialize() {
     ATH_CHECK(truthPromptElectronWithTrack->initializePlots(true));
     ATH_CHECK(truthPromptElectronWithGSFTrack->initializePlots(true));
     ATH_CHECK(truthPromptElectronWithReco->initializePlots());
+    ATH_CHECK(truthPromptElectronWithRecoTrack->initializePlots());
   } // electron Hists
 
   if ("gamma" == m_sampleType) {
 
-    recoPhotonAll = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::RecoPhotonHistograms(
-        "recoPhotonAll","Reco Photon", "/MONITORING/recoPhotonAll/", rootHistSvc));
+    recoPhotonAll = std::make_unique<egammaMonitoring::RecoPhotonHistograms>(
+      "recoPhotonAll","Reco Photon", "/MONITORING/recoPhotonAll/", rootHistSvc);
 
     clusterConvPhoton = std::make_unique<egammaMonitoring::ClusterHistograms>(
-    "clusterConvPhoton","Clusters from Converted Photons", "/MONITORING/clusterConvPhoton/", rootHistSvc);
+      "clusterConvPhoton","Clusters from Converted Photons", "/MONITORING/clusterConvPhoton/", rootHistSvc);
 
     clusterConvPhotonSi = std::make_unique<egammaMonitoring::ClusterHistograms>(
-    "clusterConvPhotonSi","Clusters from Converted Photons - Si", "/MONITORING/clusterConvPhotonSi/", rootHistSvc);
+      "clusterConvPhotonSi","Clusters from Converted Photons - Si", "/MONITORING/clusterConvPhotonSi/", rootHistSvc);
 
     clusterConvPhotonSiSi = std::make_unique<egammaMonitoring::ClusterHistograms>(
-    "clusterConvPhotonSiSi","Clusters from Converted Photons - SiSi", "/MONITORING/clusterConvPhotonSiSi/", rootHistSvc);
+      "clusterConvPhotonSiSi","Clusters from Converted Photons - SiSi", "/MONITORING/clusterConvPhotonSiSi/", rootHistSvc);
    
     clusterConvPhotonTRT = std::make_unique<egammaMonitoring::ClusterHistograms>(
-    "clusterConvPhotonTRT","Clusters from Converted Photons - TRT", "/MONITORING/clusterConvPhotonTRT/", rootHistSvc);
+      "clusterConvPhotonTRT","Clusters from Converted Photons - TRT", "/MONITORING/clusterConvPhotonTRT/", rootHistSvc);
 
     clusterConvPhotonTRTTRT = std::make_unique<egammaMonitoring::ClusterHistograms>(
-    "clusterConvPhotonTRTTRT","Clusters from Converted Photons - TRTTRT", "/MONITORING/clusterConvPhotonTRTTRT/", rootHistSvc);
- 
+      "clusterConvPhotonTRTTRT","Clusters from Converted Photons - TRTTRT", "/MONITORING/clusterConvPhotonTRTTRT/", rootHistSvc);
+
     clusterConvPhotonSiTRT = std::make_unique<egammaMonitoring::ClusterHistograms>(
-    "clusterConvPhotonSiTRT","Clusters from Converted Photons - SiTRT", "/MONITORING/clusterConvPhotonSiTRT/", rootHistSvc);
-    
-    
+      "clusterConvPhotonSiTRT","Clusters from Converted Photons - SiTRT", "/MONITORING/clusterConvPhotonSiTRT/", rootHistSvc);
+
     clusterUnconvPhoton = std::make_unique<egammaMonitoring::ClusterHistograms>(
-    "clusterUnconvPhoton","Clusters from Converted Photons", "/MONITORING/clusterUnconvPhoton/", rootHistSvc);
+      "clusterUnconvPhoton","Clusters from Converted Photons", "/MONITORING/clusterUnconvPhoton/", rootHistSvc);
 
+    truthPhotonAll = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "truthPhotonAll","truthPhotonAll", "/MONITORING/truthPhotonAll/", rootHistSvc);
 
-    truthPhotonAll = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-        "truthPhotonAll","truthPhotonAll", "/MONITORING/truthPhotonAll/", rootHistSvc));
+    truthPhotonAllUnconv = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "truthPhotonAllUnconv","truthPhotonAllUnconv", "/MONITORING/truthPhotonAllUnconv/", rootHistSvc);
 
-    truthPhotonAllUnconv = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-        "truthPhotonAllUnconv","truthPhotonAllUnconv", "/MONITORING/truthPhotonAllUnconv/", rootHistSvc));
+    truthPhotonAllConv = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "truthPhotonAllConv","truthPhotonAllConv", "/MONITORING/truthPhotonAllConv/", rootHistSvc);
 
-    truthPhotonAllConv = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-        "truthPhotonAllConv","truthPhotonAllConv", "/MONITORING/truthPhotonAllConv/", rootHistSvc));
+    truthPhotonRecoPhoton = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "truthPhotonRecoPhoton","truthPhotonRecoPhoton", "/MONITORING/truthPhotonRecoPhoton/", rootHistSvc);
 
-    truthPhotonRecoPhoton = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-        "truthPhotonRecoPhoton","truthPhotonRecoPhoton", "/MONITORING/truthPhotonRecoPhoton/", rootHistSvc));
+    truthPhotonRecoPhotonOrElectron = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "truthPhotonRecoPhotonOrElectron","truthPhotonRecoPhotonOrElectron", "/MONITORING/truthPhotonRecoPhotonOrElectron/", rootHistSvc);
 
-    truthPhotonRecoPhotonOrElectron = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-        "truthPhotonRecoPhotonOrElectron","truthPhotonRecoPhotonOrElectron", "/MONITORING/truthPhotonRecoPhotonOrElectron/", rootHistSvc));
+    truthPhotonConvPhoton = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "truthConvPhoton","truthConvPhoton", "/MONITORING/truthConvPhoton/", rootHistSvc);
 
-    truthPhotonConvPhoton = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-        "truthConvPhoton","truthConvPhoton", "/MONITORING/truthConvPhoton/", rootHistSvc));
+    truthPhotonConvRecoConv = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "truthConvRecoConv","truthConvRecoConv", "/MONITORING/truthConvRecoConv/", rootHistSvc);
 
-    truthPhotonConvRecoConv = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-        "truthConvRecoConv","truthConvRecoConv", "/MONITORING/truthConvRecoConv/", rootHistSvc));
+    truthPhotonConvRecoConv1Si = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "truthConvRecoConv1Si","truthConvRecoConv1Si", "/MONITORING/truthConvRecoConv1Si/", rootHistSvc);
 
-    truthPhotonConvRecoConv1Si = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-        "truthConvRecoConv1Si","truthConvRecoConv1Si", "/MONITORING/truthConvRecoConv1Si/", rootHistSvc));
+    truthPhotonConvRecoConv1TRT = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "truthConvRecoConv1TRT","truthConvRecoConv1TRT", "/MONITORING/truthConvRecoConv1TRT/", rootHistSvc);
 
-    truthPhotonConvRecoConv1TRT = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-        "truthConvRecoConv1TRT","truthConvRecoConv1TRT", "/MONITORING/truthConvRecoConv1TRT/", rootHistSvc));
+    truthPhotonConvRecoConv2Si = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "truthConvRecoConv2Si","truthConvRecoConv2Si", "/MONITORING/truthConvRecoConv2Si/", rootHistSvc);
 
-    truthPhotonConvRecoConv2Si = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-        "truthConvRecoConv2Si","truthConvRecoConv2Si", "/MONITORING/truthConvRecoConv2Si/", rootHistSvc));
+    truthPhotonConvRecoConv2TRT = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "truthConvRecoConv2TRT","truthConvRecoConv2TRT", "/MONITORING/truthConvRecoConv2TRT/", rootHistSvc);
 
-    truthPhotonConvRecoConv2TRT = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-        "truthConvRecoConv2TRT","truthConvRecoConv2TRT", "/MONITORING/truthConvRecoConv2TRT/", rootHistSvc));
+    truthPhotonConvRecoConv2SiTRT = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "truthConvRecoConv2SiTRT","truthConvRecoConv2SiTRT", "/MONITORING/truthConvRecoConv2SiTRT/", rootHistSvc);
 
-    truthPhotonConvRecoConv2SiTRT = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-        "truthConvRecoConv2SiTRT","truthConvRecoConv2SiTRT", "/MONITORING/truthConvRecoConv2SiTRT/", rootHistSvc));
+    truthPhotonConvRecoUnconv= std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "truthConvRecoUnconv","truthConvRecoUnconv", "/MONITORING/truthConvRecoUnconv/", rootHistSvc);
 
-    truthPhotonConvRecoUnconv= std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-        "truthConvRecoUnconv","truthConvRecoUnconv", "/MONITORING/truthConvRecoUnconv/", rootHistSvc));
+    truthPhotonUnconvPhoton= std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "truthUnconvPhoton","truthUnconvPhoton", "/MONITORING/truthUnconvPhoton/", rootHistSvc);
 
-    truthPhotonUnconvPhoton= std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-        "truthUnconvPhoton","truthUnconvPhoton", "/MONITORING/truthUnconvPhoton/", rootHistSvc));
+    truthPhotonUnconvRecoConv= std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "truthUnconvRecoConv","truthUnconvRecoConv", "/MONITORING/truthUnconvRecoConv/", rootHistSvc);
 
-    truthPhotonUnconvRecoConv= std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-        "truthUnconvRecoConv","truthUnconvRecoConv", "/MONITORING/truthUnconvRecoConv/", rootHistSvc));
+    truthPhotonUnconvRecoConv1Si = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "truthUnconvRecoConv1Si","truthUnconvRecoConv1Si", "/MONITORING/truthUnconvRecoConv1Si/", rootHistSvc);
 
-    truthPhotonUnconvRecoConv1Si = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-        "truthUnconvRecoConv1Si","truthUnconvRecoConv1Si", "/MONITORING/truthUnconvRecoConv1Si/", rootHistSvc));
+    truthPhotonUnconvRecoConv1TRT = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "truthUnconvRecoConv1TRT","truthUnconvRecoConv1TRT", "/MONITORING/truthUnconvRecoConv1TRT/", rootHistSvc);
 
-    truthPhotonUnconvRecoConv1TRT = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-        "truthUnconvRecoConv1TRT","truthUnconvRecoConv1TRT", "/MONITORING/truthUnconvRecoConv1TRT/", rootHistSvc));
+    truthPhotonUnconvRecoConv2Si = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "truthUnconvRecoConv2Si","truthUnconvRecoConv2Si", "/MONITORING/truthUnconvRecoConv2Si/", rootHistSvc);
 
-    truthPhotonUnconvRecoConv2Si = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-        "truthUnconvRecoConv2Si","truthUnconvRecoConv2Si", "/MONITORING/truthUnconvRecoConv2Si/", rootHistSvc));
+    truthPhotonUnconvRecoConv2TRT = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "truthUnconvRecoConv2TRT","truthUnconvRecoConv2TRT", "/MONITORING/truthUnconvRecoConv2TRT/", rootHistSvc);
 
-    truthPhotonUnconvRecoConv2TRT = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-        "truthUnconvRecoConv2TRT","truthUnconvRecoConv2TRT", "/MONITORING/truthUnconvRecoConv2TRT/", rootHistSvc));
+    truthPhotonUnconvRecoConv2SiTRT = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "truthUnconvRecoConv2SiTRT","truthUnconvRecoConv2SiTRT", "/MONITORING/truthUnconvRecoConv2SiTRT/", rootHistSvc);
 
-    truthPhotonUnconvRecoConv2SiTRT = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-        "truthUnconvRecoConv2SiTRT","truthUnconvRecoConv2SiTRT", "/MONITORING/truthUnconvRecoConv2SiTRT/", rootHistSvc));
+    truthPhotonUnconvRecoUnconv = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "truthUnconvRecoUnconv","truthUnconvRecoUnconv", "/MONITORING/truthUnconvRecoUnconv/", rootHistSvc);
 
-    truthPhotonUnconvRecoUnconv = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-        "truthUnconvRecoUnconv","truthUnconvRecoUnconv", "/MONITORING/truthUnconvRecoUnconv/", rootHistSvc));
+    recoPhotonUnconvLooseLH = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "recoPhotonUnconvLooseLH","LLH Photons Reco Photon", "/MONITORING/recoPhotonUnconvLooseLH/", rootHistSvc);
 
-    recoPhotonUnconvLooseLH = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-      "recoPhotonUnconvLooseLH","LLH Photons Reco Photon", "/MONITORING/recoPhotonUnconvLooseLH/", rootHistSvc));
+    recoPhotonUnconvTightLH = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "recoPhotonUnconvTightLH","TLH Photons Reco Photon", "/MONITORING/recoPhotonUnconvTightLH/", rootHistSvc);
 
-    recoPhotonUnconvTightLH = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-      "recoPhotonUnconvTightLH","TLH Photons Reco Photon", "/MONITORING/recoPhotonUnconvTightLH/", rootHistSvc));
+    recoPhotonConvLooseLH = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "recoPhotonConvLooseLH","LLH Photons Reco Photon", "/MONITORING/recoPhotonConvLooseLH/", rootHistSvc);
 
-    recoPhotonConvLooseLH = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-      "recoPhotonConvLooseLH","LLH Photons Reco Photon", "/MONITORING/recoPhotonConvLooseLH/", rootHistSvc));
+    recoPhotonConvTightLH = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "recoPhotonConvTightLH","LLH Photons Reco Photon", "/MONITORING/recoPhotonConvTightLH/", rootHistSvc);
 
-    recoPhotonConvTightLH = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-      "recoPhotonConvTightLH","LLH Photons Reco Photon", "/MONITORING/recoPhotonConvTightLH/", rootHistSvc));
+    recoPhotonUnconvIsoFixedCutTight = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "recoPhotonUnconvIsoFixedCutTight","Isolation Fixed Cut Tight Photons Reco Photon", "/MONITORING/recoPhotonUnconvIsoFixedCutTight/", rootHistSvc);
 
-    recoPhotonUnconvIsoFixedCutTight = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-    "recoPhotonUnconvIsoFixedCutTight","Isolation Fixed Cut Tight Photons Reco Photon", "/MONITORING/recoPhotonUnconvIsoFixedCutTight/", rootHistSvc));
+    recoPhotonUnconvIsoFixedCutTightCaloOnly = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "recoPhotonUnconvIsoFixedCutTightCaloOnly","Isolation Fixed Cut Tight Calo Only Photons Reco Photon", "/MONITORING/recoPhotonUnconvIsoFixedCutTightCaloOnly/", rootHistSvc);
 
-    recoPhotonUnconvIsoFixedCutTightCaloOnly = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-    "recoPhotonUnconvIsoFixedCutTightCaloOnly","Isolation Fixed Cut Tight Calo Only Photons Reco Photon", "/MONITORING/recoPhotonUnconvIsoFixedCutTightCaloOnly/", rootHistSvc));
+    recoPhotonUnconvIsoFixedCutLoose = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "recoPhotonUnconvIsoFixedCutLoose","Isolation Fixed Cut Loose Photons Reco Photon", "/MONITORING/recoPhotonUnconvIsoFixedCutLoose/", rootHistSvc);
 
-    recoPhotonUnconvIsoFixedCutLoose = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-    "recoPhotonUnconvIsoFixedCutLoose","Isolation Fixed Cut Loose Photons Reco Photon", "/MONITORING/recoPhotonUnconvIsoFixedCutLoose/", rootHistSvc));
+    recoPhotonConvIsoFixedCutTight = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "recoPhotonConvIsoFixedCutTight","Isolation Fixed Cut Tight Photons Reco Photon", "/MONITORING/recoPhotonConvIsoFixedCutTight/", rootHistSvc);
 
-    recoPhotonConvIsoFixedCutTight = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-    "recoPhotonConvIsoFixedCutTight","Isolation Fixed Cut Tight Photons Reco Photon", "/MONITORING/recoPhotonConvIsoFixedCutTight/", rootHistSvc));
+    recoPhotonConvIsoFixedCutTightCaloOnly = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "recoPhotonConvIsoFixedCutTightCaloOnly","Isolation Fixed Cut Tight Calo Only Photons Reco Photon", "/MONITORING/recoPhotonConvIsoFixedCutTightCaloOnly/", rootHistSvc);
 
-    recoPhotonConvIsoFixedCutTightCaloOnly = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-    "recoPhotonConvIsoFixedCutTightCaloOnly","Isolation Fixed Cut Tight Calo Only Photons Reco Photon", "/MONITORING/recoPhotonConvIsoFixedCutTightCaloOnly/", rootHistSvc));
+    recoPhotonConvIsoFixedCutLoose = std::make_unique<egammaMonitoring::TruthPhotonHistograms>(
+      "recoPhotonConvIsoFixedCutLoose","Isolation Fixed Cut Loose Photons Reco Photon", "/MONITORING/recoPhotonConvIsoFixedCutLoose/", rootHistSvc);
 
-    recoPhotonConvIsoFixedCutLoose = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TruthPhotonHistograms(
-    "recoPhotonConvIsoFixedCutLoose","Isolation Fixed Cut Loose Photons Reco Photon", "/MONITORING/recoPhotonConvIsoFixedCutLoose/", rootHistSvc));
+    // for the track monitoring, consider
+    // 4 track types (TRTSA or not, highpt or not) and
+    // 4 truth matching types (all / e / not e / pion / no truth match)
+    static const std::string typeMatch[5] = { "", "MatchElectron", "NotElectron", "MatchPion", "NotMatched" };
+    static const std::string typeTrk[2]   = { "", "TRT" };
+    static const std::string ptTrk[2]     = { "", "highpT" };
+    static const std::string ctypeMatch[5] = { "", " match to electrons", " not matched to electrons", " match to pions", " not matched" };
+    static const std::string ctypeTrk[2]   = { "", " TRTSA" };
+    static const std::string cptTrk[2]     = { "", " pT > 3 GeV" };
 
-    InDetTracks = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TrackHistograms(
-    "InDetTracks","InDet Tracks", "/MONITORING/InDetTracks/", rootHistSvc));
+    for (int im = 0; im < 5; im++) {
+      std::string mN = typeMatch[im];
+      for (int it = 0; it < 2; it++) {
+	std::string tN = typeTrk[it];
+	for (int ip = 0; ip < 2; ip++) {
+	  std::string pN = ptTrk[ip];
 
-    InDetTracksMatchElectron = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TrackHistograms(
-    "InDetTracksMatchElectron","InDet Tracks matched to electrons", "/MONITORING/InDetTracksMatchElectron/", rootHistSvc));
+	  std::string nN = "InDetTracks" + typeTrk[it] + typeMatch[im] + ptTrk[ip];
+	  std::string fN = "/MONITORING/"+nN+"/";
+	  std::string cN = "InDet Tracks" + ctypeTrk[it] + ctypeMatch[im] + cptTrk[ip];
 
-    InDetTracksNotElectron = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TrackHistograms(
-    "InDetTracksNotElectron","InDet Tracks not matched to electrons", "/MONITORING/InDetTracksNotElectron/", rootHistSvc));
-
-    InDetTracksMatchPion = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TrackHistograms(
-    "InDetTracksMatchPion","InDet Tracks matched to pions", "/MONITORING/InDetTracksMatchPion/", rootHistSvc));
-
-    InDetTracksNotMatched = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TrackHistograms(
-    "InDetTracksNotMatched","InDet Tracks not matched", "/MONITORING/InDetTracksNotMatched/", rootHistSvc));
-
-    InDetTracksTRT = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TrackHistograms(
-    "InDetTracksTRT","InDet Tracks TRTSA", "/MONITORING/InDetTracksTRT/", rootHistSvc));
-
-    InDetTracksTRTMatchElectron = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TrackHistograms(
-    "InDetTracksTRTMatchElectron","InDet Tracks TRTSA matched to electrons", "/MONITORING/InDetTracksTRTMatchElectron/", rootHistSvc));
-
-    InDetTracksTRTNotElectron = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TrackHistograms(
-    "InDetTracksTRTNotElectron","InDet Tracks TRTSA not matched to electrons", "/MONITORING/InDetTracksTRTNotElectron/", rootHistSvc));
-
-    InDetTracksTRTMatchPion = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TrackHistograms(
-    "InDetTracksTRTMatchPion","InDet Tracks TRTSA matched to pions", "/MONITORING/InDetTracksTRTMatchPion/", rootHistSvc));
-
-    InDetTracksTRTNotMatched = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TrackHistograms(
-    "InDetTracksTRTNotMatched","InDet Tracks TRTSA not matched", "/MONITORING/InDetTracksTRTNotMatched/", rootHistSvc));
-
-    InDetTrackshighpT = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TrackHistograms(
-    "InDetTrackshighpT","InDet Tracks pT > 3 GeV", "/MONITORING/InDetTrackshighpT/", rootHistSvc));
-
-    InDetTracksMatchElectronhighpT = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TrackHistograms(
-    "InDetTracksMatchElectronhighpT","InDet Tracks matched to electrons pT > 3 GeV", "/MONITORING/InDetTracksMatchElectronhighpT/", rootHistSvc));
-
-    InDetTracksNotElectronhighpT = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TrackHistograms(
-    "InDetTracksNotElectronhighpT","InDet Tracks not matched to electrons pT > 3 GeV", "/MONITORING/InDetTracksNotElectronhighpT/", rootHistSvc));
-
-    InDetTracksMatchPionhighpT = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TrackHistograms(
-    "InDetTracksMatchPionhighpT","InDet Tracks matched to pions pT > 3 GeV", "/MONITORING/InDetTracksMatchPionhighpT/", rootHistSvc));
-
-    InDetTracksNotMatchedhighpT = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TrackHistograms(
-    "InDetTracksNotMatchedhighpT","InDet Tracks not matched pT > 3 GeV", "/MONITORING/InDetTracksNotMatchedhighpT/", rootHistSvc));
-
-    InDetTracksTRThighpT = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TrackHistograms(
-    "InDetTracksTRThighpT","InDet Tracks TRTSA pT > 3 GeV", "/MONITORING/InDetTracksTRThighpT/", rootHistSvc));
-
-    InDetTracksTRTMatchElectronhighpT = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TrackHistograms(
-    "InDetTracksTRTMatchElectronhighpT","InDet Tracks TRTSA matched to electrons pT > 3 GeV", "/MONITORING/InDetTracksTRTMatchElectronhighpT/", rootHistSvc));
-
-    InDetTracksTRTNotElectronhighpT = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TrackHistograms(
-    "InDetTracksTRTNotElectronhighpT","InDet Tracks TRTSA not matched to electrons pT > 3 GeV", "/MONITORING/InDetTracksTRTNotElectronhighpT/", rootHistSvc));
-
-    InDetTracksTRTMatchPionhighpT = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TrackHistograms(
-    "InDetTracksTRTMatchPionhighpT","InDet Tracks TRTSA matched to pions pT > 3 GeV", "/MONITORING/InDetTracksTRTMatchPionhighpT/", rootHistSvc));
-
-    InDetTracksTRTNotMatchedhighpT = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::TrackHistograms(
-    "InDetTracksTRTNotMatchedhighpT","InDet Tracks TRTSA not matched pT > 3 GeV", "/MONITORING/InDetTracksTRTNotMatchedhighpT/", rootHistSvc));
+	  ATH_MSG_INFO("Creating histograms for " << nN);
+	  mapTrkHistograms[nN] = std::make_unique<egammaMonitoring::TrackHistograms>(
+	    nN.c_str(), cN.c_str(),fN.c_str(),rootHistSvc);
+	  ATH_CHECK(mapTrkHistograms[nN]->initializePlots());
+	}
+      }
+    }
 
     ATH_CHECK(recoPhotonAll->initializePlots());
     ATH_CHECK(truthPhotonAll->initializePlots());
@@ -320,27 +289,6 @@ StatusCode EgammaMonitoring::initialize() {
     ATH_CHECK(clusterConvPhotonTRTTRT->initializePlots());
     ATH_CHECK(clusterConvPhotonSiTRT->initializePlots());
     ATH_CHECK(clusterUnconvPhoton->initializePlots());
-
-    ATH_CHECK(InDetTracks->initializePlots());
-    ATH_CHECK(InDetTracksMatchElectron->initializePlots());
-    ATH_CHECK(InDetTracksNotElectron->initializePlots());
-    ATH_CHECK(InDetTracksMatchPion->initializePlots());
-    ATH_CHECK(InDetTracksNotMatched->initializePlots());
-    ATH_CHECK(InDetTracksTRT->initializePlots());
-    ATH_CHECK(InDetTracksTRTMatchElectron->initializePlots());
-    ATH_CHECK(InDetTracksTRTNotElectron->initializePlots());
-    ATH_CHECK(InDetTracksTRTMatchPion->initializePlots());
-    ATH_CHECK(InDetTracksTRTNotMatched->initializePlots());
-    ATH_CHECK(InDetTrackshighpT->initializePlots());
-    ATH_CHECK(InDetTracksMatchElectronhighpT->initializePlots());
-    ATH_CHECK(InDetTracksNotElectronhighpT->initializePlots());
-    ATH_CHECK(InDetTracksMatchPionhighpT->initializePlots());
-    ATH_CHECK(InDetTracksNotMatchedhighpT->initializePlots());
-    ATH_CHECK(InDetTracksTRThighpT->initializePlots());
-    ATH_CHECK(InDetTracksTRTMatchElectronhighpT->initializePlots());
-    ATH_CHECK(InDetTracksTRTNotElectronhighpT->initializePlots());
-    ATH_CHECK(InDetTracksTRTMatchPionhighpT->initializePlots());
-    ATH_CHECK(InDetTracksTRTNotMatchedhighpT->initializePlots());
 
   } // gamma Hists
 
@@ -610,6 +558,7 @@ StatusCode EgammaMonitoring::execute() {
       if (toFill) {
 	foundPromptElectron = true;
 	truthPromptElectronWithReco->fill(elTruth,elrec);
+	truthPromptElectronWithRecoTrack->fill(elTruth,elrec); // yes the same. This is different for fwd
 	if (m_LooseLH->accept(elrec))
 	  truthRecoElectronLooseLH->fill(elTruth,elrec);
 	if (m_MediumLH->accept(elrec))
@@ -627,6 +576,7 @@ StatusCode EgammaMonitoring::execute() {
 	if (!el)
 	  continue;
 
+	recoElectronAll->fill(*el);
 	bool toFill = false;
 
 	const xAOD::TruthParticle *truth = xAOD::TruthHelpers::getTruthParticle(*el);
@@ -652,12 +602,17 @@ StatusCode EgammaMonitoring::execute() {
 	}
 	if (toFill) {
 	  if (foundPromptElectron) {
-	    ATH_MSG_WARNING("A fwd electron also reconstructed as central "
-			    "true eta = " << elTruth->eta() << " event = "
-			    << eventInfo->eventNumber());
+	    ATH_MSG_DEBUG("A fwd electron also reconstructed as central "
+			  "true eta = " << elTruth->eta() << " event = "
+			  << eventInfo->eventNumber());
+	    m_CenFwdOverlap[0]++;
+	    if (el->nTrackParticles() > 0)
+	      m_CenFwdOverlap[1]++;
 	  } else {
 	    foundPromptElectron = true;
 	    truthPromptElectronWithReco->fill(elTruth,el);
+	    if (el->nTrackParticles() > 0)
+	      truthPromptElectronWithRecoTrack->fill(elTruth,el);
 	  }
 	}
       } // loop on fwdEl
@@ -791,43 +746,43 @@ StatusCode EgammaMonitoring::execute() {
     //loop over InDetTrackParticles
     for (const auto *tp : *InDetTPs) {
 
-      InDetTracks->fill(*tp, mu);
-      if (matchedToElectron(*tp)) InDetTracksMatchElectron->fill(*tp, mu);
+      mapTrkHistograms["InDetTracks"]->fill(*tp, mu);
+      if (matchedToElectron(*tp)) mapTrkHistograms["InDetTracksMatchElectron"]->fill(*tp, mu);
       else {
-	InDetTracksNotElectron->fill(*tp, mu);
-	if (matchedToPion(*tp)) InDetTracksMatchPion->fill(*tp, mu);
-	else if (notMatchedToTruth(*tp)) InDetTracksNotMatched->fill(*tp, mu);
+	mapTrkHistograms["InDetTracksNotElectron"]->fill(*tp, mu);
+	if (matchedToPion(*tp)) mapTrkHistograms["InDetTracksMatchPion"]->fill(*tp, mu);
+	else if (notMatchedToTruth(*tp)) mapTrkHistograms["InDetTracksNotMatched"]->fill(*tp, mu);
       }
       if (tp->pt() > 3000.){
-        InDetTrackshighpT->fill(*tp, mu);
+        mapTrkHistograms["InDetTrackshighpT"]->fill(*tp, mu);
         if (matchedToElectron(*tp)) {
-          InDetTracksMatchElectronhighpT->fill(*tp, mu);
+          mapTrkHistograms["InDetTracksMatchElectronhighpT"]->fill(*tp, mu);
         } else {
-          InDetTracksNotElectronhighpT->fill(*tp, mu);
+          mapTrkHistograms["InDetTracksNotElectronhighpT"]->fill(*tp, mu);
 	  if (matchedToPion(*tp)){
-	    InDetTracksMatchPionhighpT->fill(*tp, mu);
+	    mapTrkHistograms["InDetTracksMatchPionhighpT"]->fill(*tp, mu);
 	  }
 	  else if (notMatchedToTruth(*tp)){
-	    InDetTracksNotMatchedhighpT->fill(*tp, mu);
+	    mapTrkHistograms["InDetTracksNotMatchedhighpT"]->fill(*tp, mu);
 	  }
 	}
       }
 
       if (xAOD::EgammaHelpers::numberOfSiHits(tp)==0) { //TRTSA tracks
-	InDetTracksTRT->fill(*tp, mu);
-	if (matchedToElectron(*tp)) InDetTracksTRTMatchElectron->fill(*tp, mu);
+	mapTrkHistograms["InDetTracksTRT"]->fill(*tp, mu);
+	if (matchedToElectron(*tp)) mapTrkHistograms["InDetTracksTRTMatchElectron"]->fill(*tp, mu);
 	else {
-	  InDetTracksTRTNotElectron->fill(*tp, mu);
-	  if (matchedToPion(*tp)) InDetTracksTRTMatchPion->fill(*tp, mu);
-	  else if (notMatchedToTruth(*tp)) InDetTracksTRTNotMatched->fill(*tp, mu);
+	  mapTrkHistograms["InDetTracksTRTNotElectron"]->fill(*tp, mu);
+	  if (matchedToPion(*tp)) mapTrkHistograms["InDetTracksTRTMatchPion"]->fill(*tp, mu);
+	  else if (notMatchedToTruth(*tp)) mapTrkHistograms["InDetTracksTRTNotMatched"]->fill(*tp, mu);
 	}
 	if (tp->pt() > 3000.){
-	  InDetTracksTRThighpT->fill(*tp, mu);
-	  if (matchedToElectron(*tp)) InDetTracksTRTMatchElectronhighpT->fill(*tp, mu);
+	  mapTrkHistograms["InDetTracksTRThighpT"]->fill(*tp, mu);
+	  if (matchedToElectron(*tp)) mapTrkHistograms["InDetTracksTRTMatchElectronhighpT"]->fill(*tp, mu);
 	  else {
-	    InDetTracksTRTNotElectronhighpT->fill(*tp, mu);
-	    if (matchedToPion(*tp)) InDetTracksTRTMatchPionhighpT->fill(*tp, mu);
-	    else if (notMatchedToTruth(*tp)) InDetTracksTRTNotMatchedhighpT->fill(*tp, mu);
+	    mapTrkHistograms["InDetTracksTRTNotElectronhighpT"]->fill(*tp, mu);
+	    if (matchedToPion(*tp)) mapTrkHistograms["InDetTracksTRTMatchPionhighpT"]->fill(*tp, mu);
+	    else if (notMatchedToTruth(*tp)) mapTrkHistograms["InDetTracksTRTNotMatchedhighpT"]->fill(*tp, mu);
 	  }
 	}
       }
@@ -843,14 +798,21 @@ StatusCode EgammaMonitoring::execute() {
 
 StatusCode EgammaMonitoring::finalize() {
 
+
   if ("electron" == m_sampleType) {
+
+    ATH_MSG_INFO("Number of events with electron reconstructed "
+		 "as both Central and Forward "
+		 << m_CenFwdOverlap[0]
+		 << " and with a track for the Forward "
+		 << m_CenFwdOverlap[1]);
 
     egammaMonitoring::EfficiencyPlot trackEfficiency("trackingEfficiency", "/MONITORING/trackingEfficiency/", rootHistSvc );
     ATH_CHECK(trackEfficiency.divide(truthPromptElectronWithTrack.get(), truthPromptElectronAll.get()));
     egammaMonitoring::EfficiencyPlot GSFEfficiency("GSFEfficiency", "/MONITORING/GSFEfficiency/", rootHistSvc );
     ATH_CHECK(GSFEfficiency.divide(truthPromptElectronWithGSFTrack.get(),truthPromptElectronWithTrack.get()));
     egammaMonitoring::EfficiencyPlot matchingEfficiency("matchingEfficiency", "/MONITORING/matchingEfficiency/", rootHistSvc );
-    ATH_CHECK(matchingEfficiency.divide(truthPromptElectronWithReco.get(), truthPromptElectronWithGSFTrack.get()));
+    ATH_CHECK(matchingEfficiency.divide(truthPromptElectronWithRecoTrack.get(), truthPromptElectronWithGSFTrack.get()));
     egammaMonitoring::EfficiencyPlot reconstructionEfficiency("reconstructionEfficiency", "/MONITORING/reconstructionEfficiency/", rootHistSvc );
     ATH_CHECK(reconstructionEfficiency.divide(truthPromptElectronWithReco.get(), truthPromptElectronAll.get()));
     egammaMonitoring::EfficiencyPlot recoElectronLooseLHEfficiency("recoElectronLooseLHEfficiency", "/MONITORING/recoElectronLooseLHEfficiency/", rootHistSvc );
@@ -858,7 +820,7 @@ StatusCode EgammaMonitoring::finalize() {
     egammaMonitoring::EfficiencyPlot recoElectronMediumLHEfficiency("recoElectronMediumLHEfficiency", "/MONITORING/recoElectronMediumLHEfficiency/", rootHistSvc );
     ATH_CHECK(recoElectronMediumLHEfficiency.divide(truthRecoElectronMediumLH.get(), truthPromptElectronAll.get()));
     egammaMonitoring::EfficiencyPlot recoElectronTightLHEfficiency("recoElectronTightLHEfficiency", "/MONITORING/recoElectronTightLHEfficiency/", rootHistSvc );
-    ATH_CHECK(recoElectronTightLHEfficiency.divide( truthRecoElectronTightLH.get(), truthPromptElectronAll.get()));
+    ATH_CHECK(recoElectronTightLHEfficiency.divide(truthRecoElectronTightLH.get(), truthPromptElectronAll.get()));
 
   }
 
