@@ -197,13 +197,13 @@ class TileTBAANtuple: public AthAlgorithm {
         return 1; //error
     }
 
-    void checkIsPropertySetup(float property, std::string name) {
+    void checkIsPropertySetup(float property, const std::string& name) {
       if (property < NOT_SETUP) {
         ATH_MSG_ERROR("The following property should be set up via JO: " << name);
       }
     }
 
-    void setupPropertyDefaultValue(float property, float defaultValue, std::string name) {
+    void setupPropertyDefaultValue(float property, float defaultValue, const std::string& name) {
       if (property < NOT_SETUP) {
         property = defaultValue;
         ATH_MSG_INFO("The following property is not set up via JO, using default value: " << name << "=" << defaultValue);

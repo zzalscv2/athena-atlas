@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_PUNCHTHROUGHTOOLS_SRC_PUNCHTHROUGHTOOL_H
@@ -132,7 +132,7 @@ namespace ISF {
     double interpolateEta(const double &eta, CLHEP::HepRandomEngine* rndmEngine) const;
 
     //get the infoMap from xml file based on the xmlpathname and also name of mainNode
-    std::vector<std::map<std::string,std::string>> getInfoMap(std::string mainNode, const std::string &xmlFilePath);
+    std::vector<std::map<std::string,std::string>> getInfoMap(const std::string& mainNode, const std::string &xmlFilePath);
 
     //decide the pca / cdf part to read based on pdgId and eta
     int passedParamIterator(int pid, double eta, const std::vector<std::map<std::string,std::string>> &mapvect) const;

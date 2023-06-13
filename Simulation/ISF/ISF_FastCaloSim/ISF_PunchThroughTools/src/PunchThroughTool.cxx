@@ -795,7 +795,7 @@ int ISF::PunchThroughTool::passedParamIterator(int pid, double eta, const std::v
     return 0;
 }
 
-std::vector<std::map<std::string, std::string>> ISF::PunchThroughTool::getInfoMap(std::string mainNode, const std::string &xmlFilePath){
+std::vector<std::map<std::string, std::string>> ISF::PunchThroughTool::getInfoMap(const std::string& mainNode, const std::string &xmlFilePath){
     std::vector<std::map<std::string, std::string>>  xml_info;
     xmlDocPtr doc = xmlParseFile( xmlFilePath.c_str() );
 
@@ -839,7 +839,7 @@ StatusCode ISF::PunchThroughTool::initializeInversePCA(const std::string & inver
     ATH_MSG_INFO( "[ punchthrough ] Loading inversePCA: " << inversePCAConfigFile);
 
     //check info first
-    m_xml_info_pca = getInfoMap("PCAinverse",inversePCAConfigFile.c_str());
+    m_xml_info_pca = getInfoMap("PCAinverse",inversePCAConfigFile);
 
     //do the saving
     for (unsigned int i = 0; i < m_xml_info_pca.size(); i++) {
@@ -901,7 +901,7 @@ StatusCode ISF::PunchThroughTool::initializeInverseCDF(const std::string & inver
     ATH_MSG_INFO( "[ punchthrough ] Loading inverse CDF: " << inverseCdfConfigFile);
 
     //check info first
-    m_xml_info_cdf = getInfoMap("CDFMappings",inverseCdfConfigFile.c_str());
+    m_xml_info_cdf = getInfoMap("CDFMappings",inverseCdfConfigFile);
 
     //do the saving
     for (unsigned int i = 0; i < m_xml_info_cdf.size(); i++) {
