@@ -1154,6 +1154,7 @@ def make_peeker(meta_dict):
                 'specialConfiguration',
                 'mc_campaign',
                 'hepmc_version',
+                'generators',
             ]
             for item in list(meta_dict[filename]['/TagInfo']):
                 if item not in keys_to_keep:

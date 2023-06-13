@@ -478,14 +478,9 @@ if not dsid.isdigit():
 svcMgr.EventSelector.RunNumber = int(dsid)
 
 ## Include information about generators in metadata
-gennamesvers=[]
-for item in gennames:
-       genera = item.upper()
-       generat = genera+"VER"
-       if (generat in os.environ):
-           gennamesvers.append(item+"(v."+os.environ[generat]+")")
-       else:
-           gennamesvers.append(item)
+from GeneratorConfig.Versioning import generatorsGetInitialVersionedDictionary, generatorsVersionedStringList
+gendict = generatorsGetInitialVersionedDictionary(gennames)
+gennamesvers = generatorsVersionedStringList(gendict)
 
 import EventInfoMgt.EventInfoMgtInit
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"hepmc_version": "HepMC" + str(os.environ['HEPMCVER'])})

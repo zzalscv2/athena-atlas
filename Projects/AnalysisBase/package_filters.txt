@@ -50,6 +50,7 @@
 - Event/xAOD/xAODMuonRDO
 + Event/xAOD/.*
 + ForwardDetectors/ZDC/ZdcAnalysis
++ Generators/GeneratorConfig
 + Generators/TruthUtils
 + InnerDetector/InDetRecTools/InDetTrackSelectionTool
 + InnerDetector/InDetRecTools/TrackVertexAssociationTool
