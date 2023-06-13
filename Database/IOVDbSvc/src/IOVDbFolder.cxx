@@ -109,7 +109,7 @@ IOVDbFolder::IOVDbFolder(IOVDbConn* conn,
   // syntax is A:B,C:D,E:F
   // :B implies zero lower limit, A: implies zero upper limit
   std::string chanspec;
-  if (folderprop.getKey("channelSelection","",chanspec) && chanspec!="") {
+  if (folderprop.getKey("channelSelection","",chanspec) && !chanspec.empty()) {
     m_chanrange=IOVDbNamespace::parseChannelSpec<cool::ChannelId>(chanspec);
     // explicit setting of channel selection
     // push to the channel selection
@@ -154,16 +154,16 @@ IOVDbFolder::IOVDbFolder(IOVDbConn* conn,
 }
 
 IOVDbFolder::~IOVDbFolder() {
-  if (m_cachespec!=0) m_cachespec->release();
+  if (m_cachespec!=nullptr) m_cachespec->release();
 }
 
 void IOVDbFolder::useFileMetaData() {
   // enable folder from FLMD at given connection
   m_useFileMetaData = true;
   // if previously connected to a real DB connection, remove association
-  if (m_conn!=0) {
+  if (m_conn!=nullptr) {
     m_conn->decUsage();
-    m_conn=0;
+    m_conn=nullptr;
   }
 }
 
@@ -252,8 +252,8 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     std::vector<IOV2Index> iov2IndexVect;                  // Temporary vector for sorting IOV_SINCE values
     iov2IndexVect.reserve(crestIOVs.size());
     size_t hashInd{0};
-    for(auto crestIOV : crestIOVs) {
-      iov2IndexVect.push_back(IOV2Index(std::stoull(crestIOV.first),hashInd++));
+    for(const auto& crestIOV : crestIOVs) {
+      iov2IndexVect.emplace_back(std::stoull(crestIOV.first),hashInd++);
     }
 
     std::sort(iov2IndexVect.begin(),iov2IndexVect.end(),
@@ -268,13 +268,13 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     size_t nIOVs = iov2IndexVect.size();
     iovHashVect.reserve(nIOVs);
     for(size_t ind=0; ind<nIOVs-1; ++ind) {
-      iovHashVect.push_back(IOVHash(IovStore::Iov_t(iov2IndexVect[ind].first
+      iovHashVect.emplace_back(IovStore::Iov_t(iov2IndexVect[ind].first
 						    , iov2IndexVect[ind+1].first)
-				    , crestIOVs[iov2IndexVect[ind].second].second));
+				    , crestIOVs[iov2IndexVect[ind].second].second);
     }
-    iovHashVect.push_back(IOVHash(IovStore::Iov_t(iov2IndexVect[nIOVs-1].first
+    iovHashVect.emplace_back(IovStore::Iov_t(iov2IndexVect[nIOVs-1].first
 						  , cool::ValidityKeyMax)
-				  , crestIOVs[iov2IndexVect[nIOVs-1].second].second));
+				  , crestIOVs[iov2IndexVect[nIOVs-1].second].second);
     
     // End of the CREST IOV conversion routine
     // *** *** *** *** *** ***
@@ -387,7 +387,7 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
   } else {
     // for run/LB indexed folders and cache of at least one run
     // align the query to the run start
-    if (m_timestamp==false && m_cachelength>=IOVDbNamespace::ALL_LUMI_BLOCKS) {
+    if (!m_timestamp && m_cachelength>=IOVDbNamespace::ALL_LUMI_BLOCKS) {
       changedCacheLo=vkey & (0x7FFFFFFFLL << 32);
     } else {
       changedCacheLo=vkey;
@@ -407,7 +407,7 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
   } else {
     vectorPayload = (m_foldertype ==CoraCool) or (m_foldertype == CoolVector);
   }
-  if (m_cachespec==0) {
+  if (m_cachespec==nullptr) {
     // on first init, guess size based on channel count
     unsigned int estsize=m_nchan;
     if (m_cachehint > 0) {
@@ -477,9 +477,9 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
             const unsigned int istart=m_cacheattr.size();
             for (CoraCoolObject::const_iterator pitr=obj->begin();pitr!=obj->end(); ++pitr) {
               // setup shared specification on first store
-              if (m_cachespec==0) setSharedSpec(*pitr);
+              if (m_cachespec==nullptr) setSharedSpec(*pitr);
               // use the shared specification in storing the payload
-              m_cacheattr.push_back(coral::AttributeList(*m_cachespec,true));
+              m_cacheattr.emplace_back(*m_cachespec,true);
               m_cacheattr.back().fastCopyData(*pitr);
               m_nbytesread+=IOVDbNamespace::attributeListSize(*pitr);
             }
@@ -504,12 +504,12 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
             } else{
               ATH_MSG_INFO("File "<<fabricatedName<<" created.");
             }
-            myFile<<json.open();
-            myFile<<json.description()<<json.delimiter()<<std::endl;
-            myFile<<json.payloadSpec()<<json.delimiter()<<std::endl;
-            myFile<<json.iov()<<json.delimiter()<<std::endl;
+            myFile<<IOVDbNamespace::Cool2Json::open();
+            myFile<<json.description()<<IOVDbNamespace::Cool2Json::delimiter()<<std::endl;
+            myFile<<json.payloadSpec()<<IOVDbNamespace::Cool2Json::delimiter()<<std::endl;
+            myFile<<json.iov()<<IOVDbNamespace::Cool2Json::delimiter()<<std::endl;
             myFile<<json.payload()<<std::endl;
-            myFile<<json.close();
+            myFile<<IOVDbNamespace::Cool2Json::close();
           }
           while (itr->goToNext()) {
             const cool::IObject& ref=itr->currentRef();
@@ -525,9 +525,9 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
               for (cool::IRecordVector::const_iterator vitr=pvec->begin();vitr!=pvec->end();++vitr) {
                 const coral::AttributeList& atrlist=(*vitr)->attributeList();
                 // setup shared specification on first store
-                if (m_cachespec==0) setSharedSpec(atrlist);
+                if (m_cachespec==nullptr) setSharedSpec(atrlist);
                 // use the shared specification in storing the payload
-                m_cacheattr.push_back(coral::AttributeList(*m_cachespec,true));
+                m_cacheattr.emplace_back(*m_cachespec,true);
                 m_cacheattr.back().fastCopyData(atrlist);
                 m_nbytesread+=IOVDbNamespace::attributeListSize(atrlist);
               }
@@ -540,9 +540,9 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
               // standard COOL retrieve
               const coral::AttributeList& atrlist=ref.payload().attributeList();
               // setup shared specification on first store
-              if (m_cachespec==0) setSharedSpec(atrlist);
+              if (m_cachespec==nullptr) setSharedSpec(atrlist);
               // use the shared specification in storing the payload
-              m_cacheattr.push_back(coral::AttributeList(*m_cachespec,true));
+              m_cacheattr.emplace_back(*m_cachespec,true);
               m_cacheattr[iadd].fastCopyData(atrlist);
               ++iadd;
               m_nbytesread+=IOVDbNamespace::attributeListSize(atrlist);
@@ -573,8 +573,8 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
         const auto & vPayload = basicFolder.getVectorPayload(chan);
         const unsigned int istart=m_cacheattr.size();
         for (const auto & attList:vPayload){
-          if (m_cachespec==0) setSharedSpec(attList);
-          m_cacheattr.push_back(coral::AttributeList(*m_cachespec,true));// maybe needs to be cleared before
+          if (m_cachespec==nullptr) setSharedSpec(attList);
+          m_cacheattr.emplace_back(*m_cachespec,true);// maybe needs to be cleared before
           m_cacheattr.back().fastCopyData(attList);
           m_nbytesread+=IOVDbNamespace::attributeListSize(attList);
         }
@@ -583,7 +583,7 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
         ++iadd;
       } else {
         auto const & attList = basicFolder.getPayload(chan);
-        if (m_cachespec==0) setSharedSpec(attList);
+        if (m_cachespec==nullptr) setSharedSpec(attList);
         const coral::AttributeList c(*m_cachespec,true);
         m_cacheattr.push_back(c);// maybe needs to be cleared before
         m_cacheattr.back().fastCopyData(attList);
@@ -630,7 +630,7 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
 
 bool IOVDbFolder::loadCacheIfDbChanged(const cool::ValidityKey vkey,
                                        const std::string& globalTag, 
-                                       cool::IDatabasePtr /*dbPtr*/,
+                                       const cool::IDatabasePtr& /*dbPtr*/,
                                        const ServiceHandle<IIOVSvc>& iovSvc) {
   ATH_MSG_DEBUG( "IOVDbFolder::recheck with DB for folder " << m_foldername<< " validitykey: " << vkey );
   if (m_iovs.empty()) {
@@ -708,7 +708,7 @@ IOVDbFolder::specialCacheUpdate(CoraCoolObject & obj, const ServiceHandle<IIOVSv
   const unsigned int istart=m_cacheattr.size();
   for (CoraCoolObject::const_iterator pitr=obj.begin(); pitr!=obj.end();++pitr) {
     // use the shared specification in storing the payload
-    m_cacheattr.push_back(coral::AttributeList(*m_cachespec,true));
+    m_cacheattr.emplace_back(*m_cachespec,true);
     m_cacheattr.back().fastCopyData(*pitr);
     m_nbytesread+=IOVDbNamespace::attributeListSize(*pitr);
   }
@@ -734,7 +734,7 @@ IOVDbFolder::specialCacheUpdate(const cool::IObject& ref,const ServiceHandle<IIO
   const coral::AttributeList& atrlist = ref.payload().attributeList();
   // use the shared specification in storing the payload
   const unsigned int istart=m_cacheattr.size();
-  m_cacheattr.push_back(coral::AttributeList(*m_cachespec,true));// maybe needs to be cleared before
+  m_cacheattr.emplace_back(*m_cachespec,true);// maybe needs to be cleared before
   m_cacheattr.back().fastCopyData(atrlist);
   m_nbytesread+=IOVDbNamespace::attributeListSize(atrlist);
   if (m_foldertype==CoolVector) {
@@ -762,9 +762,9 @@ IOVDbFolder::getAddress(const cool::ValidityKey reftime,
   ++m_ncacheread;
   // will produce strAddress and one pointer type depending on folder data
   std::string strAddress;
-  AthenaAttributeList* attrList=0;
-  CondAttrListCollection* attrListColl=0;
-  CondAttrListVec* attrListVec=0;
+  AthenaAttributeList* attrList=nullptr;
+  CondAttrListCollection* attrListColl=nullptr;
+  CondAttrListVec* attrListVec=nullptr;
   cool::ValidityKey naystart=0;
   cool::ValidityKey naystop=cool::ValidityKeyMax;
   if( m_useFileMetaData ) {    
@@ -1182,7 +1182,7 @@ IOVDbFolder::clearCache() {
 }
 
 bool 
-IOVDbFolder::resolveTag(cool::IFolderPtr fptr,const std::string& globalTag) {
+IOVDbFolder::resolveTag(const cool::IFolderPtr& fptr,const std::string& globalTag) {
   // resolve the tag 
   // if specified in job options or already-processed override use that,
   // else use global tag

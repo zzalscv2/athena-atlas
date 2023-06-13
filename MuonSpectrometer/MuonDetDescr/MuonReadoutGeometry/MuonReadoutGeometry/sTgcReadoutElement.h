@@ -82,8 +82,10 @@ namespace MuonGM {
         /** pad global corners */
         bool padGlobalCorners(const Identifier& id, std::array<Amg::Vector3D, 4>& gcorners) const;
 
-        /** is eta=0 of QL1 or QS1? */
-        bool isEtaZero(const Identifier& id, double posY) const;
+        /** is eta=0 of QL1 or QS1?
+            Support for Strip and Pad cathodes is valid when the
+            Strip, Pad and Wire surfaces have the same dimensions. */
+        bool isEtaZero(const Identifier& id, const Amg::Vector2D& localPosition) const;
 
         /** number of layers in phi/eta projection */
         virtual int numberOfLayers(bool) const override final;
@@ -343,15 +345,27 @@ namespace MuonGM {
         return true;
     }
 
-    inline bool sTgcReadoutElement::isEtaZero(const Identifier& id, double posY) const {
-        // This function returns true if we are in the eta 0 region of QL1/QS1
+    // This function returns true if we are in the eta 0 region of QL1/QS1
+    inline bool sTgcReadoutElement::isEtaZero(const Identifier& id, const Amg::Vector2D& localPosition) const {
+        const sTgcIdHelper* idHelper = manager()->stgcIdHelper();
 
-        const MuonChannelDesign* design = getDesign(id);
-        if (!design) return false;
+        // False if not a QL1 or QS1 quadruplet
+        if (std::abs(idHelper->stationEta(id)) != 1) return false; 
 
-        if (design->wireCutout == 0.) return false;  // Not QL1 / QS1
+        const MuonChannelDesign*
+        wireDesign = (idHelper->channelType(id) == sTgcIdHelper::sTgcChannelTypes::Wire) ?
+                     getDesign(id) :
+                     getDesign(idHelper->channelID(id,
+                                                   idHelper->multilayer(id),
+                                                   idHelper->gasGap(id),
+                                                   sTgcIdHelper::sTgcChannelTypes::Wire,
+                                                   1));
+        if (!wireDesign) return false;
 
-        if (posY < 0.5 * design->xSize() - design->wireCutout) return true;
+        // Require the x coordinate for strips, and the y coordinate for wires and pads
+        double lpos = (idHelper->channelType(id) == sTgcIdHelper::sTgcChannelTypes::Strip) ?
+                      localPosition.x() : localPosition.y();
+        if (lpos < 0.5 * wireDesign->xSize() - wireDesign->wireCutout) return true;
 
         return false;
     }

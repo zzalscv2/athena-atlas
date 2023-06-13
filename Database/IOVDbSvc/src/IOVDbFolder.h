@@ -128,14 +128,14 @@ public:
   // with start > previously used start
   bool loadCacheIfDbChanged(const cool::ValidityKey vkey,
                             const std::string& globalTag,
-                            cool::IDatabasePtr dbPtr,
+                            const cool::IDatabasePtr& dbPtr,
                             const ServiceHandle<IIOVSvc>& iovSvc);
         
 private:
   // clear cache vectors
   void clearCache();
   // resolve tag in given folder, using global tag if needed
-  bool resolveTag(cool::IFolderPtr fptr, const std::string& globalTag);
+  bool resolveTag(const cool::IFolderPtr& fptr, const std::string& globalTag);
   // interpret given tag as a magic tag
   bool magicTag(std::string& tag);
   // call metadata writing tool for given list and range

@@ -18,6 +18,6 @@ atlas_add_component( TRT_RawDataByteStreamCnv
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${CORAL_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${COOL_LIBRARIES} ${CORAL_LIBRARIES} AthenaBaseComps AthenaKernel AthenaPoolUtilities ByteStreamCnvSvcBaseLib ByteStreamCnvSvcLib ByteStreamData CxxUtils GaudiKernel IRegionSelector Identifier InDetByteStreamErrors InDetIdentifier InDetRawData PathResolver StoreGateLib TRT_CablingLib TRT_RawDataByteStreamCnvLib TRT_ReadoutGeometry TrigSteeringEvent )
+                     LINK_LIBRARIES ${COOL_LIBRARIES} ${CORAL_LIBRARIES} AthenaBaseComps AthenaKernel AthenaPoolUtilities ByteStreamCnvSvcBaseLib ByteStreamCnvSvcLib ByteStreamData CxxUtils GaudiKernel IRegionSelector Identifier InDetByteStreamErrors InDetIdentifier InDetRawData PathResolver StoreGateLib TRT_CablingLib TRT_RawDataByteStreamCnvLib TrigSteeringEvent )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

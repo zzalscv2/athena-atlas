@@ -25,7 +25,7 @@ namespace IOVDbNamespace {
   public:
     
     Json2Cool(std::istream & stream, BasicFolder & b, const std::string &specString, const IovStore::Iov_t* iov = nullptr);
-    ~Json2Cool();
+    ~Json2Cool() = default;
     
     static cool::Record 
     createAttributeList(cool::RecordSpecification * pSpec, const nlohmann::json & j);
@@ -35,9 +35,9 @@ namespace IOVDbNamespace {
     
   private:
     void init(std::istream & stream, const std::string & specString, const IovStore::Iov_t* iov);
-    cool::RecordSpecification * m_sharedSpec;
+    cool::RecordSpecification * m_sharedSpec = nullptr;
     //
-    bool m_isVectorPayload;
+    bool m_isVectorPayload = false;
     //
     BasicFolder &m_basicFolder;
     

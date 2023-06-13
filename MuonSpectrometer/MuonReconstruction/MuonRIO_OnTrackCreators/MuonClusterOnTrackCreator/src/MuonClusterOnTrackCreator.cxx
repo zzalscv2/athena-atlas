@@ -262,7 +262,7 @@ namespace Muon {
             Amg::Vector2D localPos(lp[Trk::locX], lp[Trk::locY]);
 
             // Dont make RIO On tracks for sTGC wires in inner Q1
-            if (m_idHelperSvc->stgcIdHelper().channelType(MClus->identify()) == sTgcIdHelper::Wire && MClus->detectorElement()->isEtaZero(MClus->identify(), lp[Trk::locY]))
+            if (m_idHelperSvc->stgcIdHelper().channelType(MClus->identify()) == sTgcIdHelper::Wire && MClus->detectorElement()->isEtaZero(MClus->identify(), lp))
               return nullptr;
 
             // Wires are already considered in the above check. Dont remove them here

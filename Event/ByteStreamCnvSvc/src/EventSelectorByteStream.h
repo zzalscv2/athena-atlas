@@ -155,7 +155,7 @@ private: // internal member functions
    StatusCode fillAttributeListImpl(coral::AttributeList *attrList, const std::string &suffix, bool copySource,
                                     lock_t& lock) const;
 
-   /// Reinitialize the service when a @c fork() occured/was-issued
+   /// Reinitialize the service when a @c fork() occurred/was-issued
    StatusCode reinit(lock_t& lock);
    StatusCode openNewRun(lock_t& lock) const;
    void nextFile(lock_t& lock) const;

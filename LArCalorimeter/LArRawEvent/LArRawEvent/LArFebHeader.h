@@ -9,7 +9,7 @@
 #include <stdint.h>
 
 
-/** 
+/**
 @class LArFebHeader
 @brief Holds information from the FEB Header
 
@@ -19,13 +19,13 @@
 
 class LArFebHeader
 {
- public: 
-  
+ public:
+
   /** @brief Constructor with FEB Id*/
   LArFebHeader(const HWIdentifier febid);
 
   /** @brief Destructor */
-  ~LArFebHeader();
+  ~LArFebHeader() = default;
 
   /** @brief get the FEBId */
   inline HWIdentifier FEBId() const {return m_FEBId;}
@@ -98,7 +98,7 @@ class LArFebHeader
   inline bool CheckErrorBCId() const { return m_RodHeader.BCId!=((m_BCId+1)&0xfff); }
 
   /** @brief set the format version */
-  inline void SetFormatVersion(const uint32_t formatVersion) 
+  inline void SetFormatVersion(const uint32_t formatVersion)
     { m_RodHeader.FormatVersion=formatVersion; return; }
 
   /** @brief set the source Id */
@@ -184,10 +184,10 @@ class LArFebHeader
  private:
 
   /** @brief like explained in: http://mathworld.wolfram.com/GrayCode.html */
-  int degray(unsigned int x);
+  static int degray(unsigned int x);
 
   /** @brief Feb Identifier */
-  const HWIdentifier m_FEBId;  
+  const HWIdentifier m_FEBId;
 
   /** @brief  ROD-Header, always present (is part of the FEB-Header) */
   struct {
@@ -207,10 +207,10 @@ class LArFebHeader
   } m_DspHeader{};
 
   /** @brief FEB EventId */
-  uint16_t m_ELVL1Id; 
+  uint16_t m_ELVL1Id;
 
   /** @brief FEB BCId */
-  uint16_t m_BCId;    
+  uint16_t m_BCId;
 
   uint16_t m_Results1Size;
   uint16_t m_Results2Size;
@@ -222,19 +222,19 @@ class LArFebHeader
   uint32_t m_OfflineChecksum;
 
   /** @brief ROD Status word */
-  uint32_t m_Status;  
+  uint32_t m_Status;
 
   /** @brief SCA number for each samples */
-  std::vector<uint16_t> m_SCA; 
+  std::vector<uint16_t> m_SCA;
 
   /** @brief FEB Control word 1 */
-  std::vector<uint16_t> m_Ctrl1;    
+  std::vector<uint16_t> m_Ctrl1;
 
   /** @Brief FEB Control word 2 */
-  std::vector<uint16_t> m_Ctrl2;  
+  std::vector<uint16_t> m_Ctrl2;
 
   /** @brief FEB Control word 3 */
-  std::vector<uint16_t> m_Ctrl3;  
+  std::vector<uint16_t> m_Ctrl3;
 };
 
 #endif

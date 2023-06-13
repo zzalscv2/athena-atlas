@@ -3,7 +3,7 @@
 #define BYTESTREAMCNVSVC_BYTESTREAMOUTPUTSVC_H
 
 /** @file ByteStreamOutputSvc.h
- *  @brief This file contains the class definition for the ByteStreamOutputSvcr
+ *  @brief This file contains the class definition for the ByteStreamOutputSvc
  *         class.
  *  @author Peter van Gemmeren <gemmeren@anl.gov>
  *  $Id: ByteStreamOutputSvc.h,v 1.51 2009-03-03 16:03:22 gemmeren Exp $

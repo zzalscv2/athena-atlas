@@ -88,13 +88,13 @@ class EventFormatStreamHelperTool : public extends< AthAlgTool, IAthenaOutputToo
 
   StatusCode collectFormatMetadata();
 
-  /** @brief look up hash coresponding to primary class ID
+  /** @brief look up hash corresponding to primary class ID
 
       We can retrieve the list of all class IDs and hashes corresponding to an
       element in the output stream. The two collections should be of the same
       size. Element one of the @p classIDs corresponds to element one of the
       @p hashes and so on. This function steps through the two collections and
-      retruns the hash corresponding to the classID matching the
+      returns the hash corresponding to the classID matching the
       @p primaryClassID.
 
       @param [in] primaryClassID  the primary class ID

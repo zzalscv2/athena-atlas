@@ -105,7 +105,7 @@ StatusCode PixelOverlay::execute(const EventContext& ctx) const
   // we create during this algorithm. The containers are views.
   DataPool<Pixel1RawData> dataItemsPool(ctx);
   // It resizes but lets reserve already quite a few
-  dataItemsPool.reserve(100000);
+  dataItemsPool.prepareToAdd(100000);
   ATH_CHECK(overlayContainer(bkgContainerPtr, signalContainer.cptr(), outputContainer.ptr(), dataItemsPool));
   ATH_MSG_DEBUG("Pixel Result   = " << Overlay::debugPrint(outputContainer.ptr()));
 

@@ -4,7 +4,6 @@
 
 #include <memory>
 #include "TRTRawDataProvider.h"
-#include "TRT_ReadoutGeometry/TRT_DetectorManager.h"  
 
 using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 

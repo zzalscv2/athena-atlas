@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_SUITE(CoolFunctionsTest)
   //
   BOOST_AUTO_TEST_CASE(attrList2Spec){
     //need a coral::AttributeList argument
-      auto pSpec=new coral::AttributeListSpecification;
+      auto *pSpec=new coral::AttributeListSpecification;
       pSpec->extend<int>("myInt");
       pSpec->extend<std::string>("PoolRef");
       coral::AttributeList attrList(*pSpec, true);
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_SUITE(CoolFunctionsTest)
   //
   BOOST_AUTO_TEST_CASE(attributeSize){
     //need a coral::Attribute argument
-    auto pSpec=new coral::AttributeListSpecification;
+    auto *pSpec=new coral::AttributeListSpecification;
     pSpec->extend<int>("myInt");
     pSpec->extend<std::string>("PoolRef");
     coral::AttributeList attrList(*pSpec, true);
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_SUITE(CoolFunctionsTest)
   //
   BOOST_AUTO_TEST_CASE(typeSizeIsKnown){
     //need a coral::Attribute argument
-    auto pSpec=new coral::AttributeListSpecification;
+    auto *pSpec=new coral::AttributeListSpecification;
     pSpec->extend<int>("myInt");
     pSpec->extend<std::string>("PoolRef");
     coral::AttributeList attrList(*pSpec, true);
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_SUITE(CoolFunctionsTest)
   //
   BOOST_AUTO_TEST_CASE(attributeListSize){
     //needs coral::AttributeList argument
-    auto pSpec=new coral::AttributeListSpecification;
+    auto *pSpec=new coral::AttributeListSpecification;
     pSpec->extend<int>("myInt");
     pSpec->extend<int>("anotherInt");
     pSpec->extend<std::string>("PoolRef");

@@ -6,9 +6,7 @@
 
 namespace IOVDbNamespace{
 
-  IovStore::IovStore(){ 
-
-  }
+  IovStore::IovStore()= default;
   ///Constructor, cache bounds set to supplied parameter
   IovStore::IovStore(const IovStore::Iov_t & cacheBounds):m_cacheBounds(cacheBounds){
     //
@@ -68,7 +66,7 @@ namespace IOVDbNamespace{
   }
   
   std::pair<bool,bool> 
-  IovStore::straddling(const Iov_t & iov, const Iov_t & bounds) const{
+  IovStore::straddling(const Iov_t & iov, const Iov_t & bounds) {
     std::pair<bool, bool> straddles(false, false);
     straddles.first = (iov.first<=bounds.first) and (iov.second>bounds.first);
     straddles.second = (iov.first<bounds.second) and (iov.second>bounds.second);

@@ -226,8 +226,7 @@ void IOVDbParser::clean() {
     m_keys.erase(it);
     m_keys["db"]=std::move(connection);
   }
-  return;
-}
+  }
 
 
 unsigned 
@@ -236,7 +235,7 @@ IOVDbParser::applyOverrides(const IOVDbParser& other, MsgStream & log) {
   for (const auto& otherKeyValue : other.m_keys) {
     const std::string& otherKey=otherKeyValue.first;
     const std::string& otherValue=otherKeyValue.second;
-    if (!otherKey.size()) continue; //Ignore Foldername
+    if (otherKey.empty()) continue; //Ignore Foldername
     if (otherKey=="prefix") continue; //Ignore prefix
     KeyValMap::iterator it=m_keys.find(otherKey);
     if (it==m_keys.end()) {
@@ -326,7 +325,7 @@ IOVDbParser::toString() const {
   auto it=m_keys.begin();
   auto it_e=m_keys.end();
   for (;it!=it_e;++it) {
-    if (it->first.size()==0) continue;
+    if (it->first.empty()) continue;
     retval << "[" << it->first << ":" << it->second << "] "; 
   }
   return retval.str();

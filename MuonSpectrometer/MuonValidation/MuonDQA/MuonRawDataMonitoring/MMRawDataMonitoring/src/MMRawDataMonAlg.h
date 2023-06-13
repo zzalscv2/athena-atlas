@@ -104,6 +104,7 @@ class MMRawDataMonAlg: public AthMonitorAlgorithm {
   Gaudi::Property<bool> m_do_mm_overview{this,"do_mm_overview",true};
   Gaudi::Property<bool> m_do_stereoCorrection{this,"do_stereoCorrection",false};
   Gaudi::Property<float> m_cut_pt{this,"cut_pt",15000};
+  Gaudi::Property<bool> m_doDetailedHists{this,"doDetailedHists",true};
 
 };    
 #endif

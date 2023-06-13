@@ -9,8 +9,8 @@
 
 #include "GaudiKernel/MsgStream.h"
 
+#include "InDetIdentifier/TRT_ID.h"
 
-#include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 
 #include "TRT_RodEncoder.h"
 

@@ -110,7 +110,7 @@ StatusCode LumiBlockMetaDataTool::beginInputFile(const SG::SourceID&)
     const xAOD::LumiBlockRangeContainer* lbrange =nullptr;
     StatusCode sc = m_pInputStore->retrieve(lbrange,m_LBColl_name);
     if (!sc.isSuccess()) {
-      ATH_MSG_INFO( "Could not find unfinished xAOD::LumiBlockRangeContainer in input metatdata store" );
+      ATH_MSG_INFO( "Could not find unfinished xAOD::LumiBlockRangeContainer in input metadata store" );
       return StatusCode::SUCCESS;
     }
     ATH_MSG_INFO( "xAOD::LumiBlockRangeContainer size" << lbrange->size() );
@@ -124,7 +124,7 @@ StatusCode LumiBlockMetaDataTool::beginInputFile(const SG::SourceID&)
     const xAOD::LumiBlockRangeContainer* lbrange =nullptr;
     StatusCode sc = m_pInputStore->retrieve(lbrange,m_unfinishedLBColl_name);
     if (!sc.isSuccess()) {
-      ATH_MSG_INFO( "Could not find unfinished xAOD::LumiBlockRangeContainer in input metatdata store" );
+      ATH_MSG_INFO( "Could not find unfinished xAOD::LumiBlockRangeContainer in input metadata store" );
       return StatusCode::SUCCESS;
     }
     ATH_MSG_INFO( "xAOD::LumiBlockRangeContainer size" << lbrange->size() );
@@ -138,7 +138,7 @@ StatusCode LumiBlockMetaDataTool::beginInputFile(const SG::SourceID&)
     const xAOD::LumiBlockRangeContainer* lbrange =nullptr;
     StatusCode sc = m_pInputStore->retrieve(lbrange,m_suspectLBColl_name);
     if (!sc.isSuccess()) {
-      ATH_MSG_INFO( "Could not find suspect xAOD::LumiBlockRangeContainer in input metatdata store" );
+      ATH_MSG_INFO( "Could not find suspect xAOD::LumiBlockRangeContainer in input metadata store" );
       return StatusCode::SUCCESS;
     }
     ATH_MSG_INFO( "xAOD::LumiBlockRangeContainer size" << lbrange->size() );

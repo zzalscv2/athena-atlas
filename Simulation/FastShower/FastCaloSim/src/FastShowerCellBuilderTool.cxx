@@ -80,17 +80,6 @@
 
 using MCparticleCollection = std::vector<HepMC::ConstGenParticlePtr> ;
 
-bool FastCaloSimIsGenSimulStable(const HepMC::ConstGenParticlePtr&  p) {
-  int status=p->status();
-  const auto& vertex = p->end_vertex();
-  return (status%1000 == 1) ||
-          (status%1000 == 2 && status > 1000) ||
-          (status==2 && !vertex) ||
-          (status==2 && HepMC::is_simulation_vertex(vertex))
-          ;
-}
-
-
 
 FastShowerCellBuilderTool::FastShowerCellBuilderTool(const std::string& type, const std::string& name, const IInterface* parent)
   : BasicCellBuilderTool(type, name, parent)
@@ -2131,7 +2120,7 @@ FastShowerCellBuilderTool::process (CaloCellContainer* theCellContainer,
         }
 #endif
     }
-  auto last_good = std::remove_if(particles.begin(), particles.end(),[](auto & part) { return FastCaloSimIsGenSimulStable(part) == false; });
+  auto last_good = std::remove_if(particles.begin(), particles.end(),[](auto & part) { return MC::FastCaloSimIsGenSimulStable(part) == false; });
   particles.erase(last_good, particles.end());
 
 

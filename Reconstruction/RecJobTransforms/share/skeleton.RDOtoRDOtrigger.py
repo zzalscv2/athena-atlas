@@ -8,18 +8,20 @@
 from AthenaCommon.Include import include
 from AthenaCommon.Logging import logging
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
 from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
 from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
 from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
 
 log = logging.getLogger('skeleton.RDOtoRDOtrigger')
 
+ConfigFlags = flags  # backwards compatibility
+
 ##################################################
 # Ensure AthenaMT is used as running Trigger requires the MT scheduler
 ##################################################
 from AthenaCommon.ConcurrencyFlags import jobproperties as cfjp
-if cfjp.ConcurrencyFlags.NumThreads() == 0 and ConfigFlags.Concurrency.NumThreads == 0:
+if cfjp.ConcurrencyFlags.NumThreads() == 0 and flags.Concurrency.NumThreads == 0:
     raise RuntimeError('RDOtoRDOTrigger requires AthenaMT, but serial Athena was used. Please use threads=1 or more')
 
 ##################################################
@@ -45,8 +47,8 @@ def getFromRunArgs(propName, failIfMissing=True):
 
 # Input/Output
 athenaCommonFlags.FilesInput = getFromRunArgs('inputRDOFile')
-ConfigFlags.Input.Files = getFromRunArgs('inputRDOFile')
-ConfigFlags.Output.RDOFileName = getFromRunArgs('outputRDO_TRIGFile')
+flags.Input.Files = getFromRunArgs('inputRDOFile')
+flags.Output.RDOFileName = getFromRunArgs('outputRDO_TRIGFile')
 
 # Max/skip events
 athenaCommonFlags.EvtMax = getFromRunArgs('maxEvents', False) or -1
@@ -54,17 +56,17 @@ athenaCommonFlags.SkipEvents = getFromRunArgs('skipEvents', False) or 0
 
 #conditions/geometry setup for runHLT_standalone
 try:
-    ConfigFlags.IOVDb.GlobalTag = getFromRunArgs("conditionsTag")
+    flags.IOVDb.GlobalTag = getFromRunArgs("conditionsTag")
 except RuntimeError:
     pass  # don't set the flag if not specified
 
 try:
-    ConfigFlags.GeoModel.AtlasVersion = getFromRunArgs("geometryVersion")
+    flags.GeoModel.AtlasVersion = getFromRunArgs("geometryVersion")
 except RuntimeError:
     pass  # don't set the flag if not specified
 
 # PerfMon setup (ATR-25439)
-setPerfmonFlagsFromRunArgs(ConfigFlags, ra)
+setPerfmonFlagsFromRunArgs(flags, ra)
 
 ##################################################
 # Parse preExec / preInclude
@@ -95,7 +97,7 @@ include("TriggerJobOpts/runHLT_standalone.py")
 ##################################################
 # Translate old concurrency flags to new for PerfMon
 # - do that only here as runHLT_standalone must be independent of these flags
-flagsForPerfMon = ConfigFlags.clone()
+flagsForPerfMon = flags.clone()
 flagsForPerfMon.Concurrency.NumProcs = cfjp.ConcurrencyFlags.NumProcs()
 flagsForPerfMon.Concurrency.NumThreads = cfjp.ConcurrencyFlags.NumThreads()
 flagsForPerfMon.Concurrency.NumConcurrentEvents = cfjp.ConcurrencyFlags.NumConcurrentEvents()

@@ -76,11 +76,10 @@ def AthenaMPCfg(flags):
     chunk_size = getChunkSize(flags)
 
     # Configure Strategy
-    from AthenaPoolCnvSvc.PoolWriteConfig import _getStreamsFromFlags
     debug_worker = flags.Concurrency.DebugWorkers
     event_range_channel = flags.MP.EventRangeChannel
     use_shared_reader = flags.MP.UseSharedReader
-    use_shared_writer = flags.MP.UseSharedWriter and _getStreamsFromFlags(flags)
+    use_shared_writer = flags.MP.UseSharedWriter
 
     if flags.MP.Strategy == 'SharedQueue' or flags.MP.Strategy == 'RoundRobin':
         if use_shared_reader:
@@ -109,12 +108,16 @@ def AthenaMPCfg(flags):
             result.addService(evSel)
 
         if use_shared_writer:
-            AthenaSharedMemoryTool = CompFactory.AthenaSharedMemoryTool
-            outputStreamingTool = AthenaSharedMemoryTool("OutputStreamingTool_0",
-                                                         SharedMemoryName=f"OutputStream{str(os.getpid())}")
+            if any((flags.Output.doWriteESD,
+                    flags.Output.doWriteAOD,
+                    flags.Output.doWriteDAOD,
+                    flags.Output.doWriteRDO)) or flags.Output.HITSFileName!='':
+                AthenaSharedMemoryTool = CompFactory.AthenaSharedMemoryTool
+                outputStreamingTool = AthenaSharedMemoryTool("OutputStreamingTool_0",
+                                                             SharedMemoryName=f"OutputStream{str(os.getpid())}")
 
-            from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
-            result.merge(AthenaPoolCnvSvcCfg(flags,
+                from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
+                result.merge(AthenaPoolCnvSvcCfg(flags,
                                                  OutputStreamingTool=[outputStreamingTool]))
 
         queue_provider = CompFactory.SharedEvtQueueProvider(UseSharedReader=use_shared_reader,

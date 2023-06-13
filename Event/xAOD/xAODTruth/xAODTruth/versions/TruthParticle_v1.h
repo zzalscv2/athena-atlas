@@ -51,6 +51,9 @@ namespace xAOD {
       void setPdgId( int pid );
       /// PDG ID code
       int pdgId() const;
+
+      /// PDG ID code
+      inline int pdg_id() const  { return pdgId();}
       /// Absolute PDG ID code (often useful)
       int absPdgId() const;
 
@@ -74,6 +77,10 @@ namespace xAOD {
       bool hasProdVtx() const;
       /// The production vertex of this particle
       const TruthVertex_v1* prodVtx() const;
+
+      /// The production vertex of this particle
+      inline const TruthVertex_v1* production_vertex() const { return prodVtx();}
+
       /// The production vertex link of this particle
       const ElementLink< TruthVertexContainer >& prodVtxLink() const;
       /// Set the production vertex of the particle
@@ -83,6 +90,10 @@ namespace xAOD {
       bool hasDecayVtx() const;
       /// The decay vertex of this particle
       const TruthVertex_v1* decayVtx() const;
+
+      /// The decay vertex of this particle
+      inline const TruthVertex_v1* end_vertex() const { return decayVtx();}
+
       /// The decay vertex link of this particle
       const ElementLink< TruthVertexContainer >& decayVtxLink() const;
       /// Set the decay vertex of the particle

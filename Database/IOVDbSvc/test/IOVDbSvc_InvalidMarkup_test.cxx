@@ -29,7 +29,6 @@
 
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
-namespace utf = boost::unit_test;
 
 struct GaudiKernelFixture:public GaudiKernelFixtureBase{
   GaudiKernelFixture():GaudiKernelFixtureBase("IOVDbSvc_InvalidMarkup.txt"){
@@ -47,7 +46,7 @@ struct TestFolderFixture:public TestFolderFixtureBase{
 //Basic tests that the service can be retrieved
 BOOST_AUTO_TEST_SUITE(IOVDbSvcTest )
   GaudiKernelFixture g;
-  const auto & svcLoc=g.svcLoc;
+  const auto & svcLoc=GaudiKernelFixture::svcLoc;
   ServiceHandle<IIOVDbSvc> iovdbsvc ("IOVDbSvc", "test");
 
   BOOST_AUTO_TEST_CASE( SanityCheck ){

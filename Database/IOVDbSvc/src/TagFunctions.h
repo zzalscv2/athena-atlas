@@ -21,7 +21,7 @@ namespace IOVDbNamespace{
   
   ///Check whether a tag is locked on a folder, if possible
   std::optional<bool>
-  checkTagLock(const cool::IFolderPtr fptr, const std::string & tag);
+  checkTagLock(const cool::IFolderPtr& fptr, const std::string & tag);
   
   std::string
   resolveUsingTagInfo(const std::string & tag, const ITagInfoMgr *tagInfoMgr);

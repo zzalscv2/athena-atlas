@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <typeinfo>
@@ -7,20 +7,9 @@
 #include "LArRawEvent/LArRawSC.h"
 
 
-// default constructor 
-LArRawSC::LArRawSC()  {}
-
 LArRawSC::operator std::string() const{
-
- //char stNumberOfSamples[30];
- //sprintf( stNumberOfSamples , "# of samples = %d " , this->nsamples() ) ;
- 
- 
- std::string digitString = typeid( *this ).name(); 
- 
+ std::string digitString = typeid( *this ).name();
  return digitString ;
-
-
 }
 
 // set method

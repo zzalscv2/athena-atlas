@@ -71,25 +71,16 @@ void McEventCollectionCnv_p4::persToTrans( const McEventCollection_p4* persObj,
 
   // elements are managed by DataPool
   if (!m_isPileup)
-    {
-      transObj->clear(SG::VIEW_ELEMENTS);
-    }
+  {
+    transObj->clear(SG::VIEW_ELEMENTS);
+  }
   HepMC::DataPool datapools;
   const unsigned int nVertices = persObj->m_genVertices.size();
-  if ( datapools.vtx.capacity() - datapools.vtx.allocated() < nVertices )
-    {
-      datapools.vtx.reserve( datapools.vtx.allocated() + nVertices );
-    }
+  datapools.vtx.prepareToAdd(nVertices);
   const unsigned int nParts = persObj->m_genParticles.size();
-  if ( datapools.part.capacity() - datapools.part.allocated() < nParts )
-    {
-      datapools.part.reserve( datapools.part.allocated() + nParts );
-    }
+  datapools.part.prepareToAdd(nParts);
   const unsigned int nEvts = persObj->m_genEvents.size();
-  if ( datapools.evt.capacity() - datapools.evt.allocated() < nEvts )
-    {
-      datapools.evt.reserve( datapools.evt.allocated() + nEvts );
-    }
+  datapools.evt.prepareToAdd(nEvts);
 
   transObj->reserve( nEvts );
   for ( std::vector<GenEvent_p4>::const_iterator
@@ -577,7 +568,7 @@ McEventCollectionCnv_p4::createGenParticle( const GenParticle_p4& persPart,
 
 #ifdef HEPMC3
 void McEventCollectionCnv_p4::writeGenVertex( const HepMC::ConstGenVertexPtr& vtx,
-                                              McEventCollection_p4& persEvt ) 
+                                              McEventCollection_p4& persEvt )
 {
   const HepMC::FourVector& position = vtx->position();
   auto A_weights=vtx->attribute<HepMC3::VectorDoubleAttribute>("weights");
@@ -585,7 +576,7 @@ void McEventCollectionCnv_p4::writeGenVertex( const HepMC::ConstGenVertexPtr& vt
   std::vector<float> weights;
   if (A_weights) {
     auto weights_d = A_weights->value();
-    for (auto& w: weights_d) weights.push_back(w); 
+    for (auto& w: weights_d) weights.push_back(w);
   }
   persEvt.m_genVertices.emplace_back( position.x(),
                                                 position.y(),
@@ -656,7 +647,7 @@ void McEventCollectionCnv_p4::writeGenVertex( const HepMC::GenVertex& vtx,
 
 #ifdef HEPMC3
 int McEventCollectionCnv_p4::writeGenParticle( const HepMC::ConstGenParticlePtr& p,
-                                               McEventCollection_p4& persEvt ) 
+                                               McEventCollection_p4& persEvt )
 {
   const HepMC::FourVector& mom = p->momentum();
   const double ene = mom.e();

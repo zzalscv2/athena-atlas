@@ -46,12 +46,12 @@ class SvcFactory;
  * @brief Manages the content of the metadata stores
  *
  * This service orchestrates the reading of metadata from input files and its
- * propogation to the output with the help of the IMetaDataTool interfaces in
+ * propagation to the output with the help of the IMetaDataTool interfaces in
  * @c m_metaDataTools. The MetaDataSvc
  * reacts to BeginInputFile and EndInputFile incidents. It relies on the
- * AthenaPoolCnvSvc (or whatever persistnecy service) to call the the
+ * AthenaPoolCnvSvc (or whatever persistency service) to call the the
  * appropriate
- * prepareOutput method when commiting the MetaDataStore content to the output
+ * prepareOutput method when committing the MetaDataStore content to the output
  * file.
  *
  * On BeginInputFile it clears the InputMetaDataStore and populates it with
@@ -67,7 +67,7 @@ class SvcFactory;
  * and adds the content of their MetaDataStore to the shared
  * InputMetaDataStore. This is done by the client calling @c shmProxy for each
  * object to be added to the MetaDataStore. Afterwards the client *must* also
- * fire BeingInputFile and EndInputFile incidents to allow the MetaDataTools
+ * fire BeginInputFile and EndInputFile incidents to allow the MetaDataTools
  * to move their objects from the InputMetaDataStore to the MetaDataStore
  * taking care of possible merges.
  *
@@ -115,7 +115,7 @@ class MetaDataSvc : public ::AthService,
   /** finalize the metadata service at the end of the job */
   virtual StatusCode finalize() override;
   /**@}*/
-  
+
   /**
    * \ingroup InputFileMetaData Methods implementing file transitions
    * @{
@@ -226,7 +226,7 @@ class MetaDataSvc : public ::AthService,
 
   /** react to file incidents.
    * calls @c newMetadataSource on BeginInputFile and @c retireMetadataSource
-   * on EndInputFile. Does 
+   * on EndInputFile. Does
    * @param incident is expected to be BeginInputFile or EndInputFile
    */
   virtual void handle(const Incident& incident) override;
@@ -236,7 +236,7 @@ class MetaDataSvc : public ::AthService,
   StatusCode transitionMetaDataFile(const std::string& outputConn, bool disconnect);
 
   /** Implements IIoComponent interface
-   * sets m_outputPreprared to false and prints some information.
+   * sets m_outputPrepared to false and prints some information.
    * @return SUCCESS
    * @see IIoComponent
    */
@@ -290,9 +290,9 @@ class MetaDataSvc : public ::AthService,
    * Note that the MetaDataTool corresponding to the object is looked up via
    * classID and created if not found in m_metaDataTools. Some special handling
    * for the EventFormat, EventStreamInfo, and FileMetaData tools should ensure
-   * proper propogation ---this part seems fragile.
+   * proper propagation ---this part seems fragile.
    *
-   * This function may called directly or when a BeginInputFile incident is
+   * This function may be called directly or when a BeginInputFile incident is
    * fired.
    *
    * \addtogroup SupportSharedWriter
@@ -319,16 +319,16 @@ class MetaDataSvc : public ::AthService,
   bool m_clearedInputDataStore;
   bool m_clearedOutputDataStore;
   bool m_allowMetaDataStop;
-  bool m_outputPreprared;
+  bool m_outputPrepared;
   std::map<std::string, CLID> m_persToClid;
   std::map<CLID, std::string> m_toolForClid;
 
   std::set<CLID>        m_handledClasses;
-  /// marker string for embedding stream name in MetaData object keys for SharedWriter server 
+  /// marker string for embedding stream name in MetaData object keys for SharedWriter server
   const std::string     m_streamInKeyMark = "__STREAM[";
-  
+
   std::map< std::string, std::set<std::string> > m_streamKeys;
-   
+
  private:  // properties
   /// MetaDataContainer, POOL container name for MetaData.
   StringProperty m_metaDataCont;

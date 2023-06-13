@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-"""Configure jobs to propogate and/or create xAOD::EventFormat
+"""Configure jobs to propagate and/or create xAOD::EventFormat
 
-Configure the EventFormatMetaDataTool to propogate EventFormat into the
+Configure the EventFormatMetaDataTool to propagate EventFormat into the
 MetaDataStore if it exists in the input. In addition configure the
 EventFormatStreamHelperTool to create a new xAOD::EventFormat for the
 output stream. The object created for the output stream is written to the
@@ -22,14 +22,14 @@ from AthenaServices import MetaDataSvcConfig
 
 
 def EventFormatCfg(flags, stream, streamName=None, key=None):
-    """Add tools creating and propogating xAOD::FileMetaData
-    
+    """Add tools creating and propagating xAOD::FileMetaData
+
     Creates the IAthenaOutputStreamTool to create a xAOD::EventFormat for the
     outputstream. It also adds a MetaDataSvc configuration with the
     MetaDataTool that copies the xAOD::EventFormat from the InputMetaDataStore
     to the MetaDataStore. The output stream is configured to write out only the
     object created by the IAthenaOutputStreamTool.
-    
+
     Args:
         flags: The AthConfigFlags for this job
         stream: An AthenaOutputStream to generate the xAOD::EventFormat for
@@ -59,7 +59,7 @@ def EventFormatCfg(flags, stream, streamName=None, key=None):
         f"xAOD::EventFormat#{key}",
     ]
 
-    # Set up the tool propogating the FileMetaData
+    # Set up the tool propagating the FileMetaData
     result.merge(
         MetaDataSvcConfig.MetaDataSvcCfg(
             flags,

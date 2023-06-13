@@ -23,7 +23,7 @@ namespace xAODMaker {
 
 /// Tool propagating xAOD::FileMetaData from input to output
 ///
-/// This tool propogates the xAOD::FileMetaData object from the input files to
+/// This tool propagates the xAOD::FileMetaData object from the input files to
 /// the MetaDataStore in Athena. It requires the input to contain the
 /// information in an xAOD format. The tool will emit a warning if the file
 /// metadata between inputs does not match.
@@ -70,7 +70,7 @@ class FileMetaDataTool
   /// @}
 
  private:
-  /// (optional) list of keys to propogate from input to output.
+  /// (optional) list of keys to propagate from input to output.
   /// Leaving this empty means the tool will copy all keys. Default: empty
   std::vector< std::string > m_keys;
 
