@@ -18,4 +18,10 @@ atlas_add_component( TileTBRec
 # Install files from the package:
 atlas_install_joboptions( share/*.py )
 atlas_install_runtime( share/TileEtaCTB.txt )
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
+# Tests:
+atlas_add_test( TileTBDumpConfig_test
+                SCRIPT python -m TileTBRec.TileTBDumpConfig
+                PROPERTIES TIMEOUT 300
+                POST_EXEC_SCRIPT nopost.sh)
