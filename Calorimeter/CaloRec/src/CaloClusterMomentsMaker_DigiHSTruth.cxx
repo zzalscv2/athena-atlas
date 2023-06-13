@@ -255,7 +255,7 @@ StatusCode CaloClusterMomentsMaker_DigiHSTruth::initialize()
 
 //#############################################################################
 
-namespace CaloClusterMomentsMaker_detail {
+namespace CaloClusterMomentsMaker_DigiHSTruth_detail {
 
 struct cellinfo {
   double x;
@@ -270,7 +270,7 @@ struct cellinfo {
   CaloCell_ID::CaloSample sample;
 };
 
-} // namespace CaloClusterMomentsMaker_detail
+} // namespace CaloClusterMomentsMaker_DigiHSTruth_detail
 
 StatusCode
 CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
@@ -354,7 +354,7 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
   // That way, we don't need to delete and reallocate them
   // each time through the loop.
 
-  std::vector<CaloClusterMomentsMaker_detail::cellinfo> cellinfo;
+  std::vector<CaloClusterMomentsMaker_DigiHSTruth_detail::cellinfo> cellinfo;
   std::vector<double> maxSampE (CaloCell_ID::Unknown);
   std::vector<double> myMoments(m_validMoments.size(),0);
   std::vector<double> myNorms(m_validMoments.size(),0);
@@ -500,7 +500,7 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 
 	if ( myCDDE && ene > 0. && weight > 0) {
 	  // get all geometric information needed ...
-          CaloClusterMomentsMaker_detail::cellinfo& ci = cellinfo[ncell];
+          CaloClusterMomentsMaker_DigiHSTruth_detail::cellinfo& ci = cellinfo[ncell];
 	  ci.x      = myCDDE->x();
 	  ci.y      = myCDDE->y();
 	  ci.z      = myCDDE->z();
@@ -556,7 +556,7 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 	if ( ncell > 2 ) {
 	  Eigen::Matrix3d C=Eigen::Matrix3d::Zero();
 	  for(i=0;i<ncell;i++) {
-            const CaloClusterMomentsMaker_detail::cellinfo& ci = cellinfo[i];
+            const CaloClusterMomentsMaker_DigiHSTruth_detail::cellinfo& ci = cellinfo[i];
             const double e2 = ci.energy * ci.energy;
             
 	    C(0,0) += e2*(ci.x-xc)*(ci.x-xc);
@@ -654,7 +654,7 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 	double commonNorm = 0;
         double phi0 = ncell > 0 ? cellinfo[0].phi : 0;
 	for(i=0;i<ncell;i++) {
-          const CaloClusterMomentsMaker_detail::cellinfo& ci = cellinfo[i];
+          const CaloClusterMomentsMaker_DigiHSTruth_detail::cellinfo& ci = cellinfo[i];
 	  // loop over all valid moments
 	  commonNorm += ci.energy;
 	  for(size_t iMoment = 0, size = m_validMoments.size();
