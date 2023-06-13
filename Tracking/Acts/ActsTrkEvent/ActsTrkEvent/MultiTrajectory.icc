@@ -32,8 +32,9 @@ ActsTrk::MultiTrajectory<RWState>::MultiTrajectory(
     m_decorations.push_back(decoration);
   }
 }
+namespace ActsTrk {
 template <bool RWState>
-ActsTrk::MultiTrajectory<RWState>::~MultiTrajectory() {
+MultiTrajectory<RWState>::~MultiTrajectory() {
   // this is MTJ owning backends
   if (m_trackStatesAux or m_trackParametersAux or m_trackJacobiansAux or
       m_trackMeasurementsAux) {
@@ -47,6 +48,7 @@ ActsTrk::MultiTrajectory<RWState>::~MultiTrajectory() {
     delete m_trackMeasurements;
   }
 }
+} // namespace ActsTrk
 
 template <bool RWState>
 bool ActsTrk::MultiTrajectory<RWState>::has_backends() const {
