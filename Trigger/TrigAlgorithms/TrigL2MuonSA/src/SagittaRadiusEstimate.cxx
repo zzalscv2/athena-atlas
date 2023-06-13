@@ -164,7 +164,7 @@ StatusCode TrigL2MuonSA::SagittaRadiusEstimate::setSagittaRadius(const TrigRoiDe
         
     rad = superPoints[0]->R;
     theta = std::atan2(rad,(double)std::abs(superPoints[0]->Z));
-    signZ = superPoints[0]->Z/std::abs(superPoints[0]->Z);
+    signZ = (std::abs(superPoints[0]->Z) > ZERO_LIMIT)? superPoints[0]->Z/std::abs(superPoints[0]->Z): 1.;
 
     trackPattern.etaMap = (-std::log(std::tan(theta/2.)))*signZ;
 
