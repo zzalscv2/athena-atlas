@@ -1678,7 +1678,7 @@ namespace AtlasRoot {
       if (m_gain_tool_run2) { // recipe for run 2, see ATLASEG-44
         if(m_useL2GainInterpolation)m_gain_tool_run2->setInterpolation();
         daL2MediumGainSwitch = m_gain_tool_run2->getUncertainty(cl_etaCalo, Et, ptype, m_useL2GainCorrection,egGain::GainUncertainty::GainType::MEDIUM);
-        if (var == egEnergyCorr::Scale::L2GainDown) daL2MediumGainSwitch *= -1;
+        if (var == egEnergyCorr::Scale::L2MediumGainDown) daL2MediumGainSwitch *= -1;
         ATH_MSG_DEBUG("L2 gain Medium uncertainty: " <<  daL2MediumGainSwitch);
       }
       else {
@@ -1691,7 +1691,7 @@ namespace AtlasRoot {
       if (m_gain_tool_run2) { // recipe for run 2, see ATLASEG-44
         if(m_useL2GainInterpolation)m_gain_tool_run2->setInterpolation();
         daL2LowGainSwitch = m_gain_tool_run2->getUncertainty(cl_etaCalo, Et, ptype, m_useL2GainCorrection,egGain::GainUncertainty::GainType::LOW);
-        if (var == egEnergyCorr::Scale::L2GainDown) daL2LowGainSwitch *= -1;
+        if (var == egEnergyCorr::Scale::L2LowGainDown) daL2LowGainSwitch *= -1;
         ATH_MSG_DEBUG("L2 gain Low uncertainty: " <<  daL2LowGainSwitch);
       }
       else {
