@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSelectorTool/InDetIsoTrackSelectorTool.h"
@@ -45,6 +45,9 @@ InDet::InDetIsoTrackSelectorTool::~InDetIsoTrackSelectorTool()
 //_______________________________________________________________________________
 StatusCode InDet::InDetIsoTrackSelectorTool::initialize()
 {
+
+  m_d0Significance2 = m_d0Significance * m_d0Significance;
+  m_z0Significance2 = m_z0Significance * m_z0Significance;
 
   // get the extrapolator
   if ( m_extrapolator.retrieve().isFailure() ){
@@ -126,32 +129,34 @@ bool InDet::InDetIsoTrackSelectorTool::decision(const Trk::AtaStraightLine& atl,
   double z0ref_wrtBL   = atl.parameters()[Trk::z0] * sinThetaRef;
   if (m_robustCuts){
         // check d0 cut with respect to BL
-        passed = (d0track_wrtBL*d0track_wrtBL < m_d0max*m_d0max);
+        passed = std::abs(d0track_wrtBL) < m_d0max;
         ATH_MSG_VERBOSE("TrackParameters " << ( passed  ? "passed" : "did not pass" ) << " d0 cut wrt BL :  " 
                                  <<  d0track_wrtBL << " (cut is : | " << m_d0max << " | ).");
         // check z0 cut with respect to reference
-        passed = ( (z0track_wrtBL-z0ref_wrtBL)*(z0track_wrtBL-z0ref_wrtBL) < m_z0stMax*m_z0stMax );
+        passed = std::abs(z0track_wrtBL-z0ref_wrtBL) < m_z0stMax;
         ATH_MSG_VERBOSE("TrackParameters " << ( passed  ? "passed" : "did not pass" ) << " z0 " << ( m_applySinThetaCorrection ? "*sin(theta)" : "") 
                                  << " cut wrt reference :" 
                                  <<  (z0track_wrtBL-z0ref_wrtBL) << " (cut is : | " << m_z0stMax << " | ).");
   } else {
         // cast to measured parameters
         if (!trackAtBL->covariance()){
-            ATH_MSG_VERBOSE("Can not apply signficance cut on Parameters w/o Error. Ignore Track.");
+            ATH_MSG_VERBOSE("Can not apply significance cut on Parameters w/o Error. Ignore Track.");
             return false;
         }
         // get the error on the track
         double covTrackD0    = (*trackAtBL->covariance())(Trk::d0,Trk::d0);
         double covTrackZ0    = (*trackAtBL->covariance())(Trk::z0,Trk::z0);
-        // check d0 signficiance cut with respect to BL
-        passed = (d0track_wrtBL*d0track_wrtBL)/(covTrackD0) < m_d0Significance*m_d0Significance;
-        ATH_MSG_VERBOSE("TrackParameters " << ( passed  ? "passed" : "did not pass" ) << " d0 signficance cut wrt BL :  " 
-                                 <<  (d0track_wrtBL*d0track_wrtBL)/(covTrackD0) << " (cut is : | " << m_d0Significance << " | ).");
+        // check d0 significiance cut with respect to BL
+        double d0sig2 = (d0track_wrtBL*d0track_wrtBL)/covTrackD0;
+        passed = d0sig2 < m_d0Significance2;
+        ATH_MSG_VERBOSE("TrackParameters " << ( passed  ? "passed" : "did not pass" ) << " d0 significance^2 cut wrt BL :  "
+			<<  d0sig2 << " (cut is : | " << m_d0Significance2 << " | ).");
         double deltaZ = z0ref_wrtBL - z0track_wrtBL;
+        double z0Err2 = covTrackZ0;
         if (m_applySinThetaCorrection){
 	    double covTrackTheta = (*trackAtBL->covariance())(Trk::theta,Trk::theta);
 	    double covTrackZ0Theta = (*trackAtBL->covariance())(Trk::z0,Trk::theta);
-            // check z0 signficance cut with respect to reference -- apply theta projection into longitudinal track frame
+            // check z0 significance cut with respect to reference -- apply theta projection into longitudinal track frame
             double cosTheta = cos(trackAtBL->parameters()[Trk::theta]);
             // derivatives + apply jacobian transormation
             double dZIPdTheta = deltaZ*cosTheta;
@@ -160,18 +165,12 @@ bool InDet::InDetIsoTrackSelectorTool::decision(const Trk::AtaStraightLine& atl,
             double DZ02 = dZIPdz0*dZIPdz0*covTrackZ0;
             double DThetaZ0 = 2.*dZIPdTheta*dZIPdz0*covTrackZ0Theta;
             // check for it
-            double newZ0Err = DTheta2 + DZ02 + DThetaZ0;
-            passed = (deltaZ*deltaZ)/(newZ0Err) < m_z0Significance*m_z0Significance;
-            ATH_MSG_VERBOSE("TrackParameters " << ( passed  ? "passed" : "did not pass" ) << " z0*sin(theta) signficance cut wrt BL :  " 
-                                      <<  (deltaZ*deltaZ)/(newZ0Err) << " (cut is : | " << m_z0Significance << " | ).");            
-            
-        } else {
-            // check z0 signficiance cut with respect to BL
-            passed = (deltaZ*deltaZ)/(covTrackZ0) < m_z0Significance*m_z0Significance;
-            ATH_MSG_VERBOSE("TrackParameters " << ( passed  ? "passed" : "did not pass" ) << " z0 signficance cut wrt BL :  " 
-                                     <<  (deltaZ*deltaZ)/(covTrackZ0) << " (cut is : | " << m_z0Significance << " | ).");
-            
+            z0Err2 = DTheta2 + DZ02 + DThetaZ0;
         }
+        double z0sig2 = (deltaZ*deltaZ)/(z0Err2);
+        passed = z0sig2 < m_z0Significance2;
+        ATH_MSG_VERBOSE("TrackParameters " << ( passed  ? "passed" : "did not pass" ) << " z0*sin(theta) significance cut wrt BL :  "
+			<<  z0sig2 << " (cut is : | " << m_z0Significance2 << " | ).");
   }
   // memory cleanup
   delete trackAtBL;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef InDetIsoTrackSelectorTool_InDetIsoTrackSelectorTool_H
@@ -59,7 +59,9 @@ namespace InDet
       /** Sophisticated cut window setting : d0/z0 significance - only when robustCuts off*/
       double                                m_d0Significance;
       double                                m_z0Significance;
-      
+      double                                m_d0Significance2;
+      double                                m_z0Significance2;
+
       ToolHandle<Trk::IExtrapolator>        m_extrapolator;      //<! Extrapolator tool
       /** Extra checks on hits & holes */
       ToolHandle<Trk::ITrackSelectorTool>   m_trackSelector;     //!< track selector tool
