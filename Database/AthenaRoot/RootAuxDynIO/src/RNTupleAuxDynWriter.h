@@ -20,6 +20,7 @@ namespace SG { class IAuxStoreIO; }
 namespace RootAuxDynIO
 {
    using RFieldBase    = ROOT::Experimental::Detail::RFieldBase;
+   using RFieldValue   = ROOT::Experimental::Detail::RFieldValue;
    using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
    using RNTupleModel  = ROOT::Experimental::RNTupleModel;
    using REntry        = ROOT::Experimental::REntry;
@@ -46,19 +47,22 @@ namespace RootAuxDynIO
       int                  m_rowN = 0;
       /// Count how many APR Containers are writing to this RNTuple (more than one makes a Group)
       int                  m_clients = 0;
+      bool                 m_needsCommit = false;
 
 
       RNTupleAuxDynWriter(TFile* file, const std::string& ntupleName, int compression);
 
+      /// Create a new empty RNTuple row with the current model (fields)
       void  makeNewEntry();
 
-      /// handle writing of dynamic xAOD attributes of an object - called from RootTreeContainer::writeObject()
+      /// handle writing of dynamic xAOD attributes of an object - called from Container::writeObject()
       //  throws exceptions
       virtual int writeAuxAttributes( const std::string& base_branch, SG::IAuxStoreIO* store, size_t /*rows_written*/ ) override final;
 
+      /// Add a new field to the RNTuple, collect the data pointer for the commit
       void addAttribute( const std::string& field_name, const std::string& attr_type, void* attr_data );
 
-      /// Add a new field to the RNTuple - for now only allowed before the first write
+      /// Add a new field to the RNTuple
       virtual void addField( const std::string& field_name, const std::string& attr_type ) override;
 
       /// Supply data address for a given field
@@ -70,10 +74,13 @@ namespace RootAuxDynIO
 
       virtual size_t size() const override { return m_rowN; }
 
-      virtual bool needsCommit() override final { return m_entry or m_model; }
+      /// Check if any data needs to be committed
+      virtual bool needsCommit() const override final { return m_needsCommit; }
 
+      /// Is this RNTuple used by more than one APR container?
       virtual bool isGrouped() const override final { return m_clients > 1; }
 
+      /// Keep track of how many APR containers are writing to this RNTuple
       virtual void increaseClientCount() override final { m_clients++; }
 
       virtual void close() override;
