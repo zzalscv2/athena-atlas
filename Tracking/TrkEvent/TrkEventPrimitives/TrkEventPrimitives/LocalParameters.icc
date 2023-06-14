@@ -2,6 +2,18 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 namespace Trk {
+
+template <size_t N>
+LocalParameters::LocalParameters(
+    const std::array<Trk::DefinedParameter,N>& parms)
+    : Amg::VectorX(N), m_parameterkey(0) {
+  static_assert(N > 0 && N <= 5, "Number of params required to be >0 and <=5");
+  for (size_t idx = 0; idx < N; ++idx) {
+    Amg::VectorX::operator[](idx) = parms[idx].first;
+    m_parameterkey |= 1 << int(parms[idx].second);
+  }
+}
+
 inline LocalParameters*
 LocalParameters::clone() const
 {
