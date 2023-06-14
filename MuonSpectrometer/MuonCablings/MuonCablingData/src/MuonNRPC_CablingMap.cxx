@@ -28,7 +28,7 @@ MuonNRPC_CablingMap::MuonNRPC_CablingMap() {
 
 MuonNRPC_CablingMap::~MuonNRPC_CablingMap() = default;
 
-bool MuonNRPC_CablingMap::convert(const CablingData& cabling_data,
+bool MuonNRPC_CablingMap::convert(const NrpcCablingData& cabling_data,
                                   Identifier& id, bool check_valid) const {
     bool valid{!check_valid};
     id =
@@ -47,7 +47,7 @@ bool MuonNRPC_CablingMap::convert(const CablingData& cabling_data,
 }
 
 bool MuonNRPC_CablingMap::convert(const Identifier& module_id,
-                                  CablingData& cabling_data) const {
+                                  NrpcCablingData& cabling_data) const {
     if (!m_rpcIdHelper->is_rpc(module_id))
         return false;
     cabling_data.stationIndex = m_rpcIdHelper->stationName(module_id);
@@ -62,76 +62,66 @@ bool MuonNRPC_CablingMap::convert(const Identifier& module_id,
     return true;
 }
 
-bool MuonNRPC_CablingMap::getOfflineId(CablingData& cabling_map,
+bool MuonNRPC_CablingMap::getOfflineId(NrpcCablingData& cabling_map,
                                        MsgStream& log) const {
     // Identify the chamber
     OnlToOfflMap::const_iterator itr = m_onToOffline.find(cabling_map);
     if (itr == m_onToOffline.end()) {
         log << MSG::ERROR << "getOfflineId() -- The detector "
-            << static_cast<NrpcCablingOnData&>(cabling_map) << " is unknown"
+            << static_cast<const NrpcCablingOnlineID&>(cabling_map) << " is unknown"
             << endmsg;
         return false;
     }
-    cabling_map.NrpcCablingOffData::operator=(itr->second);
-    cabling_map.strip = itr->first.firstStrip + cabling_map.channelId - 1;
+    cabling_map.NrpcCablingOfflineID::operator=(itr->second);
+    cabling_map.strip = itr->first.firstStrip + cabling_map.channelId - itr->first.firstChannel;
     if (log.level() <= MSG::DEBUG) {
-        log << MSG::ALWAYS << " getOfflineId() -- Successfully converted "
-            << cabling_map << endmsg;
+        log << MSG::ALWAYS << " getOfflineId() -- Successfully converted " << cabling_map << endmsg;
     }
     return true;
 }
 
 /** get the online id from the offline id */
-bool MuonNRPC_CablingMap::getOnlineId(CablingData& cabling_map,
+bool MuonNRPC_CablingMap::getOnlineId(NrpcCablingData& cabling_map,
                                       MsgStream& log) const {
-    OfflToOnlMap::const_iterator itr = m_offToOnline.find(cabling_map);
+    if (log.level()<= MSG::DEBUG) {
+        log<<MSG::ALWAYS<<__FILE__<<":"<<__LINE__<<" getOnlineId() - Test: "<<cabling_map<<endmsg;
+    }    
+    const NrpcCablingOfflineID& offId{cabling_map};
+    OfflToOnlMap::const_iterator itr = m_offToOnline.find(offId);
     if (itr == m_offToOnline.end()) {
-        log << MSG::ERROR << "getOnlineId() -- The offline identifier "
-            << static_cast<const NrpcCablingOffData&>(cabling_map)
-            << " is unknown " << endmsg;
+        log << MSG::ERROR <<__FILE__<<":"<<__LINE__<< " getOnlineId() -- The offline identifier "
+            << offId << " is unknown " << endmsg;
         return false;
     }
-    const std::set<NrpcCablingOnData>& onlineCards = itr->second;
-    for (const NrpcCablingOnData& card : onlineCards) {
+    const NrpcCablOnDataByStripSet::const_iterator onlineCardItr = itr->second.find(cabling_map);
+    if (onlineCardItr != itr->second.end()) {
+        const NrpcCablOnDataByStrip& onlineCard = (*onlineCardItr);
+        /// Assign the TDC / tdcSector / subDetector ID
+        static_cast<NrpcCablingOnlineID&>(cabling_map) = onlineCard;
+        cabling_map.channelId = (cabling_map.strip - onlineCard.firstStrip) + onlineCard.firstChannel;
         if (log.level() <= MSG::DEBUG) {
-            log << MSG::ALWAYS << " getOnlineId() -- Test card " << card
-                << " first strip: " << static_cast<int>(card.firstStrip)
-                << " last strip: " << static_cast<int>(card.lastStrip)
-                << endmsg;
+            log <<MSG::ALWAYS<<__FILE__<<":"<<__LINE__
+                <<" getOnlineId()  -- Card "<<onlineCard<<" matches... Deduced channel "
+                <<static_cast<int>(cabling_map.channelId)<<endmsg;
         }
-        if (stripReadByCard(card, cabling_map.strip)) {
-            cabling_map.channelId = (cabling_map.strip - card.firstStrip) + 1;
-            cabling_map.NrpcCablingOnData::operator=(card);
-            if (log.level() <= MSG::DEBUG) {
-                log << MSG::ALWAYS
-                    << "getOnlineId() -- Successfully converted channel "
-                    << cabling_map << endmsg;
-            }
-            return true;
-        }
+        
+        return true;
     }
-    log << MSG::ERROR
-        << "getOnlineId() -- No tdc channel could be found for the object "
-        << static_cast<const NrpcCablingOffData&>(cabling_map)
+    log << MSG::ERROR <<__FILE__<<":"<<__LINE__
+        << " getOnlineId() -- No tdc channel could be found for the object "
+        << static_cast<const NrpcCablingOfflineID&>(cabling_map)
         << " strip: " << static_cast<int>(cabling_map.strip) << endmsg;
     return false;
 }
-inline bool MuonNRPC_CablingMap::stripReadByCard(const NrpcCablingOnData& card,
-                                                 uint16_t strip) const {
-    return card.firstStrip <= strip && card.lastStrip >= strip;
-}
 
-bool MuonNRPC_CablingMap::insertChannels(const CablingData& cabling_data,
+bool MuonNRPC_CablingMap::insertChannels(const NrpcCablingCoolData& cabling_data,
                                          MsgStream& log) {
     // Check that the channel is not overwritten
     if (log.level() <= MSG::DEBUG) {
         log << MSG::ALWAYS << "insertChannels() -- Insert new channel "
-            << cabling_data
-            << " firstStrip: " << static_cast<int>(cabling_data.firstStrip)
-            << " lastStrip: " << static_cast<int>(cabling_data.lastStrip)
-            << endmsg;
-    }
-    if (!m_offToOnline[cabling_data].insert(cabling_data).second) {
+            << cabling_data << endmsg;
+    }  
+    if (!m_offToOnline[cabling_data].emplace(cabling_data).second) {
         log << MSG::ERROR
             << "insertChannels() -- Failed to fill the offline -> online map "
             << endmsg;
@@ -139,7 +129,7 @@ bool MuonNRPC_CablingMap::insertChannels(const CablingData& cabling_data,
             << " --- Old: " << (*m_offToOnline[cabling_data].find(cabling_data))
             << endmsg;
         log << MSG::ERROR << " --- New: "
-            << static_cast<const NrpcCablingOnData&>(cabling_data) << endmsg;
+            << static_cast<const NrpcCablingOnlineID&>(cabling_data) << endmsg;
         return false;
     }
     if (!m_onToOffline[cabling_data]) {
@@ -148,11 +138,11 @@ bool MuonNRPC_CablingMap::insertChannels(const CablingData& cabling_data,
         log << MSG::ERROR
             << "insertChannels() -- The online to offline map is already "
                "booked for identifier "
-            << static_cast<const NrpcCablingOnData&>(cabling_data) << endmsg;
+            << static_cast<const NrpcCablingOnlineID&>(cabling_data) << endmsg;
         log << MSG::ERROR << " -- Old: " << m_onToOffline[cabling_data]
             << endmsg;
         log << MSG::ERROR << " -- New: "
-            << static_cast<const NrpcCablingOffData&>(cabling_data) << endmsg;
+            << static_cast<const NrpcCablingOfflineID&>(cabling_data) << endmsg;
         return false;
     }
     return true;
@@ -162,46 +152,11 @@ bool MuonNRPC_CablingMap::finalize(MsgStream& log) {
         log << MSG::ERROR << "finalize() -- No data has been loaded " << endmsg;
         return false;
     }
-    /// First check that the map does not have any overlapping channels
-    for (const auto& [chambChannel, cards] : m_offToOnline) {
-        if (log.level() <= MSG::VERBOSE) {
-            log << MSG::VERBOSE << "Check mapping consistency of "
-                << chambChannel << endmsg;
-        }
-        for (const NrpcCablingOnData& card : cards) {
-            /// Check whether the first and last strips are non-zero and that
-            /// the first strip is actually smaller than the last one
-            if (!card.firstStrip || !card.lastStrip ||
-                card.firstStrip > card.lastStrip) {
-                log << MSG::ERROR << "finalize() -- Invalid card detected for "
-                    << chambChannel << endmsg;
-                log << MSG::ERROR << card << static_cast<int>(card.firstStrip)
-                    << " lastStrip: " << static_cast<int>(card.lastStrip)
-                    << endmsg;
-                return false;
-            }
-            if (std::count_if(
-                    cards.begin(), cards.end(),
-                    [this, &card](const NrpcCablingOnData& other_crd) {
-                        return stripReadByCard(other_crd, card.firstStrip) ||
-                               stripReadByCard(other_crd, card.lastStrip);
-                    }) > 1) {
-                log << MSG::ERROR
-                    << "finalize() -- Detected readout overlap for "
-                    << chambChannel << endmsg;
-                log << MSG::ERROR << "The strips of card " << card
-                    << static_cast<int>(card.firstStrip)
-                    << " lastStrip: " << static_cast<int>(card.lastStrip)
-                    << " are read by another one" << endmsg;
-                return false;
-            }
-        }
-    }
     /// Generate the ROB maps
-    CablingData RobOffId{};
+    NrpcCablingData RobOffId{};
     RobOffId.strip = 1;
     for (const auto& [card, chamber] : m_onToOffline) {
-        static_cast<NrpcCablingOffData&>(RobOffId) = chamber;
+        static_cast<NrpcCablingOfflineID&>(RobOffId) = chamber;
         Identifier chId{0};
         if (!convert(RobOffId, chId, true)) {
             log << MSG::ERROR
