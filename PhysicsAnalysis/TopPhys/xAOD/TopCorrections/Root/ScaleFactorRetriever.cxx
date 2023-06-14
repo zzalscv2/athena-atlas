@@ -293,7 +293,7 @@ namespace top {
       if (sf.size() != sf_aux.size()) ATH_MSG_ERROR(
           "ScaleFactorRetriever::electronSFSystVariationVector error in size of vector of electron SFs");
       double oldSF = 1.;
-      if (SFComp == top::topSFComp::RECO) oldSF = electronSF_Reco(*elPtr, top::topSFSyst::nominal, retrieveLoose);
+      if (SFComp == top::topSFComp::RECO) oldSF = electronSF_Reco(*elPtr, top::topSFSyst::nominal);
       if (SFComp == top::topSFComp::ID) oldSF = electronSF_ID(*elPtr, electronID, top::topSFSyst::nominal, retrieveLoose);
       if (SFComp == top::topSFComp::ISOLATION) oldSF = electronSF_Isol(*elPtr, electronIso, top::topSFSyst::nominal, retrieveLoose);
 
@@ -334,7 +334,7 @@ namespace top {
           !elPtr->auxdataConst<char>("passPreORSelection")) continue; // in case one want the tight SFs in the loose
                                                                       // tree, need to only take the tight leptons
 
-      reco *= electronSF_Reco(*elPtr, SFSyst, retrieveLoose);
+      reco *= electronSF_Reco(*elPtr, SFSyst);
       id *= electronSF_ID(*elPtr, electronID, SFSyst, retrieveLoose);
       isol *= electronSF_Isol(*elPtr, electronIso, SFSyst, retrieveLoose);
       chargeid *= electronSF_ChargeID(*elPtr, electronID, electronIso, SFSyst, retrieveLoose);
@@ -466,12 +466,13 @@ namespace top {
   }
 
   float ScaleFactorRetriever::electronSF_Reco(const xAOD::Electron& x,
-                                              const top::topSFSyst SFSyst,
-                                              bool useLooseDef) const {
+                                              const top::topSFSyst SFSyst
+					      ) const {
     float sf(1.);
     
     std::string prefix="EL";
-    if(useLooseDef) prefix+="_LOOSE";
+    // the reco SF is the same for tight and loose electrons
+    // no special handling of the loose collection needed here
 
     if (x.isAvailable<float>(prefix+"_SF_Reco")) {
       sf = x.auxdataConst<float>(prefix+"_SF_Reco");
