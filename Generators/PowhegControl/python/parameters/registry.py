@@ -491,7 +491,7 @@ class Registry(metaclass=Singleton):
         self.add_default("skiprmngrid", 0, hidden=True, description="skip calculation of rmngrid. [1:enabled]")
         self.add_default("SLHA", "'input_parameters.slha'", frozen=True, description="name of the SLHA input-file")
         self.add_default("SM", 1, description="Include SM contribution in Drell-Yan LeptoQuark production. [0:disabled; 1:enabled]")
-        self.add_default("smartsig", 1, frozen=True, description="remember equal amplitudes. [0:disabled]")
+        self.add_default("smartsig", 1, description="remember equal amplitudes. [0:disabled]")
         self.add_default("smear", 0, frozen=True, description="LQ-s-chan smearing [0:disabled]")
         self.add_default("Smass", powheg_atlas_common.mass.s, description="s-quark mass in GeV")
         self.add_default("smincuts", -1, description="[-1:use Powheg default]")
