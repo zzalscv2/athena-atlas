@@ -128,7 +128,7 @@ def defineInputsMenu():
             None, None, 
 
             # gLJ thresholds for commissioning
-            'gLJ80', 'gLJ100', 'gLJ140', 'gLJ160',
+            'gLJ80p0ETA25', 'gLJ100p0ETA25', 'gLJ140p0ETA25', 'gLJ160p0ETA25',
 
             # gLJ thresholds for production
             'gLJSPARE1', 'gLJSPARE2', 'gLJSPARE3', 'gLJSPARE4',
@@ -136,12 +136,12 @@ def defineInputsMenu():
             None, 
 
             # gJ thresholds for commissioning
-            ('gJ20',3), ('gJ30',3), ('gJ40',3), 
+            ('gJ20p0ETA25',3), ('gJ20p25ETA49',3), 
 
-            (None,3),
+            (None,3), (None,3),
 
-            'gJ50', 'gJ100', 
-            'gJ160',
+            'gJ50p0ETA25', 'gJ100p0ETA25', 
+            'gJ400p0ETA25',
 
         ]
     })

@@ -216,15 +216,15 @@ def addPhysicsP1Chains(chains):
         ChainProp(name='HLT_noalg_L1jLJ80',         l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SupportPhIGroup+JetPhaseIStreamersGroup),
         ChainProp(name='HLT_noalg_L1jLJ120',        l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SupportPhIGroup+JetPhaseIStreamersGroup),
 
-        ChainProp(name='HLT_noalg_L1gJ20',          l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SupportPhIGroup+JetPhaseIStreamersGroup),
-        ChainProp(name='HLT_noalg_L1gJ30',          l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SupportPhIGroup+JetPhaseIStreamersGroup),
-        ChainProp(name='HLT_noalg_L1gJ40',          l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SupportPhIGroup+JetPhaseIStreamersGroup),
-        ChainProp(name='HLT_noalg_L1gJ50',          l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SupportPhIGroup+JetPhaseIStreamersGroup),
-        ChainProp(name='HLT_noalg_L1gJ100',         l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SupportPhIGroup+JetPhaseIStreamersGroup),
+        ChainProp(name='HLT_noalg_L1gJ20p0ETA25',          l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SupportPhIGroup+JetPhaseIStreamersGroup),
+        ChainProp(name='HLT_noalg_L1gJ20p25ETA49',          l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SupportPhIGroup+JetPhaseIStreamersGroup),
+        ChainProp(name='HLT_noalg_L1gJ20p0ETA25_EMPTY',          l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SupportPhIGroup+JetPhaseIStreamersGroup),
+        ChainProp(name='HLT_noalg_L1gJ50p0ETA25',          l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SupportPhIGroup+JetPhaseIStreamersGroup),
+        ChainProp(name='HLT_noalg_L1gJ100p0ETA25',         l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SupportPhIGroup+JetPhaseIStreamersGroup),
 
-        ChainProp(name='HLT_noalg_L1gLJ80',         l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SupportPhIGroup+JetPhaseIStreamersGroup),
-        ChainProp(name='HLT_noalg_L1gLJ100',        l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SupportPhIGroup+JetPhaseIStreamersGroup),
-        ChainProp(name='HLT_noalg_L1gLJ140',        l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SupportPhIGroup+JetPhaseIStreamersGroup),
+        ChainProp(name='HLT_noalg_L1gLJ80p0ETA25',         l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SupportPhIGroup+JetPhaseIStreamersGroup),
+        ChainProp(name='HLT_noalg_L1gLJ100p0ETA25',        l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SupportPhIGroup+JetPhaseIStreamersGroup),
+        ChainProp(name='HLT_noalg_L1gLJ140p0ETA25',        l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SupportPhIGroup+JetPhaseIStreamersGroup),
 
         ChainProp(name='HLT_noalg_L1jXE70',         l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SupportPhIGroup+METPhaseIStreamersGroup),
         ChainProp(name='HLT_noalg_L1jXE80',         l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SupportPhIGroup+METPhaseIStreamersGroup),
