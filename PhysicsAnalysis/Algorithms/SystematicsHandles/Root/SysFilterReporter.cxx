@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -35,7 +35,7 @@ namespace CP
 
 
   SysFilterReporter ::
-  ~SysFilterReporter () noexcept
+  ~SysFilterReporter ()
   {
     ANA_MSG_DEBUG ("setting systematics-filter-passed flag to " << m_passed << " for " << m_sys.name());
     if (m_passed)

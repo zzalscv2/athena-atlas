@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -57,10 +57,8 @@ namespace CP
 
 
     /// \brief standard destructor
-    /// \par Guarantee
-    ///   no-fail
   public:
-    ~SysFilterReporter () noexcept;
+    ~SysFilterReporter ();
 
 
     /// \brief report the filter decision
