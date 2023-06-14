@@ -397,7 +397,9 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
   auto statusDataWordPerLumiBlockMUCTPIX = Monitored::Scalar<int>("statusDataWordPerLumiBlockMUCTPIX",0);
   auto statusDataWordPerLumiBlockMUCTPIY = Monitored::Scalar<int>("statusDataWordPerLumiBlockMUCTPIY",0);
   // MUCTPI-specific
-  auto candCount = Monitored::Scalar<int>("candCount",0);
+  auto candCount     = Monitored::Scalar<int>("candCount",0);
+  auto candCountVsLBX = Monitored::Scalar<int>("candCountVsLBX",0);
+  auto candCountVsLBY = Monitored::Scalar<int>("candCountVsLBY",0);
   auto candPtBAX = Monitored::Scalar<int>("candPtBAX",0);
   auto candPtECX = Monitored::Scalar<int>("candPtECX",0);
   auto candPtFWX = Monitored::Scalar<int>("candPtFWX",0);
@@ -628,8 +630,8 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 	  {
 		  errorSummaryMUCTPI=2;
 		  fill(m_packageName, errorSummaryMUCTPI);
-          errorSummaryPerLumiBlockMUCTPIY=2;
-          errorSummaryPerLumiBlockMUCTPIX=currentLumiBlock;
+      errorSummaryPerLumiBlockMUCTPIY=2;
+      errorSummaryPerLumiBlockMUCTPIX=currentLumiBlock;
 		  fill(m_packageName, errorSummaryPerLumiBlockMUCTPIX, errorSummaryPerLumiBlockMUCTPIY);
 	  }
 
@@ -639,6 +641,10 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 	  {
 		  candCount = header_candCount;
 		  fill(m_packageName,candCount);
+
+		  candCountVsLBY = header_candCount;
+		  candCountVsLBX = currentLumiBlock;
+		  fill(m_packageName,candCountVsLBX,candCountVsLBY);
 	  }
 
       n_cand_veto=0;
