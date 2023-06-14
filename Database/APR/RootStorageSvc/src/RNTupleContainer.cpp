@@ -31,12 +31,16 @@
 #include <ROOT/RNTupleModel.hxx>
 #include <ROOT/RNTuple.hxx>
 #include <ROOT/REntry.hxx>
+#include <algorithm>
+
+#include "TInterpreter.h"
+#include <TROOT.h>
+
 using RNTupleModel = ROOT::Experimental::RNTupleModel;
 using RNTupleReader = ROOT::Experimental::RNTupleReader;
 using REntry = ROOT::Experimental::REntry;
 using RFieldValue = ROOT::Experimental::Detail::RFieldValue;
 
-#include <algorithm>
 using std::string;
 
 using namespace pool;
@@ -62,8 +66,6 @@ namespace {
    ErrorHandlerFunc_t ErrorHandlerInit::m_oldHandler ATLAS_THREAD_SAFE;
 } // namespace
 
-#include "TInterpreter.h"
-#include <TROOT.h>
 namespace {
    /* Parse header files with typedefs to builtin C++ types (not classes) because genreflex does not
       allow them in rootmap files and ROOT does not know were to find them on its own
