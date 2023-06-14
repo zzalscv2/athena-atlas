@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 
@@ -21,5 +21,5 @@ find_package( GTest )
 atlas_add_test( gt_ISelectionAccessor
    SOURCES test/gt_ISelectionAccessor.cxx
    INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
-   LINK_LIBRARIES ${GTEST_LIBRARIES} AsgTestingLib SelectionHelpersLib xAODJet
+   LINK_LIBRARIES ${GTEST_LIBRARIES} AsgTestingLib SelectionHelpersLib xAODJet CxxUtils
    POST_EXEC_SCRIPT nopost.sh )
