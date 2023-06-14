@@ -23,11 +23,8 @@ namespace LVL1{
       static const InterfaceID& interfaceID ( ) ;
       virtual StatusCode safetyTest() = 0;
       virtual void setup(int inputTable[7][7], int inputTableDisplaced[7][7]) = 0;
-      virtual int realValue(int ID, int eta) =0;
       virtual bool isSeedLocalMaxima() = 0;
       virtual void buildSeeds() = 0;
-      virtual unsigned int getRealPhi(unsigned int TTID ) =0;
-      virtual int getRealEta(unsigned int TTID ) =0;
       virtual unsigned int getTTowerET(unsigned int TTID ) = 0;
       virtual unsigned int getSmallClusterET() =0;
       virtual unsigned int getSmallETRing() =0;

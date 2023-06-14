@@ -97,7 +97,7 @@ StatusCode jTowerMakerFromJfexTowers::execute()
             data_jTowerContainer = jDataTowerContainer->empty() ? &jEmulatedTowerContainer : &jDataTowerContainer;
         }
         
-        ATH_MSG_DEBUG("Collection used to build the jTower for simulation: " << (*data_jTowerContainer).key() << "with size: "<<(*data_jTowerContainer)->size() << ". Expected towers 17920" );
+        ATH_MSG_DEBUG("Collection used to build the jTower for simulation: " << (*data_jTowerContainer).key() << "with size: "<<(*data_jTowerContainer)->size() << ". Expected towers 17920");
 
         for(const xAOD::jFexTower* my_jTower : *(*data_jTowerContainer) ) {
 
@@ -129,6 +129,7 @@ StatusCode jTowerMakerFromJfexTowers::execute()
         }
     }
     else{
+        ATH_MSG_DEBUG("Falling into the legacy path");
         ATH_CHECK(m_jSuperCellTowerMapperTool->AssignSuperCellsToTowers(local_jTowerContainerRaw));
         ATH_CHECK(m_jSuperCellTowerMapperTool->AssignTriggerTowerMapper(local_jTowerContainerRaw));        
     }

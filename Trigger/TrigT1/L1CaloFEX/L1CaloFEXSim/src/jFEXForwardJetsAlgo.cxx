@@ -160,7 +160,6 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJets
                 }
                 else if(elemCorr > 0 and elemCorr2 > 0){
                     iAmJet = (isLM(myTTIDKey) and condCorr2(myTTIDKey)) or (isLMabove(myTTIDKey) and condCorr(myTTIDKey));
-
                 }
                 
                 if(iAmJet){
@@ -258,7 +257,7 @@ bool LVL1::jFEXForwardJetsAlgo::isLM(unsigned int TTID){
     for (const auto& Gtt : it_seed_map->second ){
         //checking if the Central seed has strictly more energy than its neighbours
         int tmpEt = SumEtSeed(Gtt);
-        if( CentralSeedEt <= tmpEt ){
+        if( !(CentralSeedEt > tmpEt) ){
             greater = false;
             break;
         }
@@ -278,9 +277,9 @@ bool LVL1::jFEXForwardJetsAlgo::isLM(unsigned int TTID){
 
     bool greaterEqual = true;
     for (const auto& Gtt : it_seed_map->second ){
-        //checking if the Central seed has strictly more energy than its neighbours
+        //checking if the Central seed has more energy or equal than its neighbours
         int tmpEt = SumEtSeed(Gtt);
-        if( CentralSeedEt < tmpEt ){
+        if( !(CentralSeedEt >= tmpEt) ){
             greaterEqual = false;
             break;
         }
@@ -335,15 +334,17 @@ bool LVL1::jFEXForwardJetsAlgo::condCorr(unsigned int TTID){
     
     // If there is no TT to check then the Et of central is always bigger :D
     if( (it_seed_map->second).size() == 0){
+        ATH_MSG_FATAL("Elements=0 in condCorr function for element"<< TTID <<". This should never happend. REPORT IT!");
         return true;
     }
     
     int centralEt = getEt(TTID);
+    int centralSeed = SumEtSeed(TTID);
     
     for (const auto& Gtt : it_seed_map->second ){
         //Checking if central Et is always strictly greater than the previous TT Et 
         int tmpEt = getEt(Gtt);
-        if(centralEt <= tmpEt ){
+        if( !(centralEt > tmpEt || centralSeed == SumEtSeed(Gtt) ) ){
             return false;
         }
     }
@@ -372,10 +373,14 @@ bool LVL1::jFEXForwardJetsAlgo::condCorr2(unsigned int TTID){
     }
     
     int centralEt = getEt(TTID);
+    int centralSeed = SumEtSeed(TTID);
+    
     for (const auto& Gtt : it_seed_map->second ){
         //Checking if central Et is always greater or equal than the previous TT Et 
         int tmpEt = getEt(Gtt);
-        if(centralEt < tmpEt ){
+        
+        //(central >= 1stElem or seedcentral > seed1stElem) and ( central >= 2stElem or seedcentral > seed2stElem)
+        if( !( centralEt >= tmpEt || centralSeed > SumEtSeed(Gtt) ) ){
             return false;
         }
     }

@@ -39,9 +39,6 @@ namespace LVL1 {
 
     virtual StatusCode safetyTest() override;
     virtual void setup(int inputTable[7][7], int inputTableDisplaced[7][7]) override;
-    virtual int realValue(int ID, int eta) override;
-    virtual unsigned int getRealPhi(unsigned int TTID ) override;
-    virtual int getRealEta(unsigned int TTID ) override;   
     virtual unsigned int getTTowerET(unsigned int TTID ) override;
     virtual void buildSeeds() override; 
     virtual bool isSeedLocalMaxima() override; 
@@ -50,8 +47,6 @@ namespace LVL1 {
     virtual unsigned int getTTIDcentre() override;
     virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  override;
     
-protected:
-
   private:
         SG::ReadHandleKey<LVL1::jTowerContainer> m_jTowerContainerKey {this, "MyjTowers", "jTowerContainer", "Input container for jTowers"};
         int m_jFEXalgoTowerID[7][7] = {{0}};

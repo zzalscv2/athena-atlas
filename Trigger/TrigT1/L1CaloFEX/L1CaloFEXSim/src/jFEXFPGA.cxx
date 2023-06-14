@@ -247,9 +247,10 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
         m_jFEXSmallRJetAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
         m_jFEXLargeRJetAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
         m_jFEXtauAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
-     
+        
         for(int mphi = 8; mphi < FEXAlgoSpaceDefs::jFEX_algoSpace_height-8; mphi++) {
             for(int meta = 8; meta < FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width-8; meta++) {
+                
                 //definition of arrays
                 int TT_seed_ID[3][3]= {{0}};
                 int TT_First_ETring[36]= {0};
