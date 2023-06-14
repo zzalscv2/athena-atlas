@@ -77,7 +77,7 @@ namespace NSWL1{
 
 
 
-    bool SingleWedgePadTrigger::isInTransitionRegion() const{
+    bool SingleWedgePadTrigger::isInTransitionRegion(std::pair<double,double> Zratio) const{
         Polygon ROI=padOverlap3(this->pads());
         if(area(ROI)==0) return false;
         float phi0=m_pads[0]->sectorType()==1 ? (M_PI/4)*(m_pads[0]->sectorId()-1) : (M_PI/8)+(M_PI/4)*(m_pads[0]->sectorId()-1);
@@ -93,8 +93,8 @@ namespace NSWL1{
          float TransitonLarge[7] ={2144,2278,3294,3483,4406,4596,ROILocalY};
         if(m_pads[0]->multipletId()==2){
             for(int i= 0; i<6; i++){
-                TransitonSmall[i] = TransitonSmall[i]*1.048; //Z5/Z1 ratio
-                TransitonLarge[i] = TransitonLarge[i]*1.044;
+                TransitonSmall[i] = TransitonSmall[i]*Zratio.second; //Z5/Z1 ratio
+                TransitonLarge[i] = TransitonLarge[i]*Zratio.first;
             }
         }
 
