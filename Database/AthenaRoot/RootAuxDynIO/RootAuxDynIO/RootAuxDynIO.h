@@ -126,7 +126,7 @@ namespace RootAuxDynIO
 
       virtual size_t size() const = 0;
 
-      /// Add a new field to the RNTuple - for now only allowed before the first write
+      /// Add a new field to the RNTuple
       virtual void addField( const std::string& field_name, const std::string& attr_type ) = 0;
 
       /// Supply data address for a given field
@@ -143,7 +143,7 @@ namespace RootAuxDynIO
       virtual bool isGrouped() const = 0;
       
       /// is there a need to call commit()?
-      virtual bool needsCommit() = 0;
+      virtual bool needsCommit() const = 0;
 
       /// Call Fill() on the ROOT object used by this writer
       virtual int commit() = 0;

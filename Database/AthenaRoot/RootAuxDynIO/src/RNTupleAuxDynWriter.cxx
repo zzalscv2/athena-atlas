@@ -59,26 +59,14 @@ namespace RootAuxDynIO
    int RNTupleAuxDynWriter::writeAuxAttributes( const std::string& base_name, SG::IAuxStoreIO* store, size_t /*rows_written*/ )
    {
       const SG::auxid_set_t selection = store->getSelectedAuxIDs();
-      ATH_MSG_VERBOSE("Writing " << base_name << " with " << selection.size() << " Dynamic attributes");
+      ATH_MSG_DEBUG("Writing " << base_name << " with " << selection.size() << " Dynamic attributes");
 
       for(SG::auxid_t id : selection) {
-         const std::type_info* attr_typeinfo = store->getIOType(id);
-         const std::string attr_type = SG::normalizedTypeinfoName( *attr_typeinfo );
+         const std::string attr_type = SG::normalizedTypeinfoName( *store->getIOType(id) );
          const std::string attr_name = SG::AuxTypeRegistry::instance().getName(id);
-         void* attr_data ATLAS_THREAD_SAFE = const_cast<void*>( store->getIOData(id) );
          const std::string field_name = RootAuxDynIO::auxFieldName( attr_name, base_name );
+         void* attr_data ATLAS_THREAD_SAFE = const_cast<void*>( store->getIOData(id) );
 
-         // Ignore 'late' AuxDyn attributes until beckfilling is implemented
-         static std::set<std::string> goodBranches ATLAS_THREAD_SAFE, badBranches ATLAS_THREAD_SAFE;
-         if( m_model )  goodBranches.insert(field_name);
-         else {
-            if( goodBranches.count(field_name) == 0 ) {
-               if( badBranches.insert(field_name).second ) {
-                  ATH_MSG_WARNING("ignoring late attribute " << field_name);
-               }
-               continue;
-            }
-         }
          addAttribute( field_name, attr_type, attr_data );
       }
       return 0;  // MN: can get bytes written only when calling Fill() at commit
@@ -102,37 +90,35 @@ namespace RootAuxDynIO
          m_entry->CaptureValue( field->CaptureValue( attr_data ) );
       }
 #else
-      if( m_model ) {
-         // first event - only update NTuple Model and store tha data pointer locally
-         // fill the RNTuple entry when the entire model is defined (in writeEntry)
-         m_attrDataMap[ field_name ] = attr_data;
-         ATH_MSG_VERBOSE("Adding new attribute column, name="<< field_name << " of type " << attr_type);
-         auto field = RFieldBase::Create(field_name, attr_type).Unwrap();
-         m_model->AddField( std::move(field) );
+      if( m_attrDataMap.find(field_name) == m_attrDataMap.end() ) {
+         addField(field_name, attr_type);
       }
-      else {
-         addFieldValue(field_name, attr_data);
-      }
+      addFieldValue(field_name, attr_data);
 #endif
    }
-
 
    /// Add a new field to the RNTuple - for now only allowed before the first write
    /// Used for data objects from RNTupleContainer, not for dynamic attributes
    void RNTupleAuxDynWriter::addField( const std::string& field_name, const std::string& attr_type )
    {
-      if( !m_model ) {
-         // first write was already done, cannot add new fields any more
-         throw std::runtime_error( std::string("Attempt to add new field to RNTuple after the first write. name: ")
-                              + field_name + " type: " + attr_type );
-      }
       if( m_attrDataMap.find(field_name) != m_attrDataMap.end() ) {
          throw std::runtime_error( std::string("Attempt to add existing field.  name: ")
                               + field_name + "new type: " + attr_type );
       }
-      ATH_MSG_VERBOSE("Adding new object column, name="<< field_name << " of type " << attr_type);
+      ATH_MSG_DEBUG("Adding new object column, name="<< field_name << " of type " << attr_type);
       auto field = RFieldBase::Create(field_name, attr_type).Unwrap();
-      m_model->AddField( std::move(field) );
+      if( !m_model ) {
+#if ROOT_VERSION_CODE > ROOT_VERSION( 6, 27, 0 )
+         // first write was already done, need to update the model
+         ATH_MSG_DEBUG("Adding late attribute " << field_name);
+         auto updater = m_ntupleWriter->CreateModelUpdater();
+         updater->BeginUpdate();
+         updater->AddField( std::move(field) );
+         updater->CommitUpdate();
+#endif
+      } else {
+         m_model->AddField( std::move(field) );
+      }
       m_attrDataMap[ field_name ] = nullptr;
    }
 
@@ -146,57 +132,62 @@ namespace RootAuxDynIO
          msg <<"Attempt to write unknown Field with name: '" << field_name << std::ends;
          throw std::runtime_error( msg.str() );
       }
-      if( !m_model ) {
          // already started writing
-         if( !m_entry ) makeNewEntry();
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 27, 0 )
-         ATH_MSG_VERBOSE("Setting field data for field: " << field_name );
-         m_entry->CaptureValueUnsafe( field_name, attr_data );
-#else
+#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 27, 0 )
+      if( !m_model ) {
          // MN: ROOT 6.26 version not tested
+         if( !m_entry ) makeNewEntry();
          RFieldBase* field = m_ntupleFieldMap[ field_name ];
          m_entry->CaptureValue( field->CaptureValue( attr_data ) );
-#endif
       }
+#endif
       field_iter->second = attr_data;
+      m_needsCommit = true;
    }   
 
 
    int RNTupleAuxDynWriter::commit()
    {
-      ATH_MSG_VERBOSE("Commit");
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 27, 0 )
-      if( m_model ) {
-         makeNewEntry();
-         // attach the attribute values rememberd internally during model creation
-         for( const auto& attr: m_attrDataMap ) {
-            ATH_MSG_VERBOSE("Setting field data for field: " << attr.first << "  data=" << std::hex << attr.second << std::dec );
-            m_entry->CaptureValueUnsafe( attr.first, attr.second );
-         }
-      }
-
       // write only if there was data added, ignore empty commits
-      int num_bytes = 0;
-      if( m_entry ) {
-         for( auto& attr: m_attrDataMap ) {
-            if( !attr.second ) {
-               ATH_MSG_VERBOSE("Generating default object for field: " << attr.first );
-               // MN: the default object created here needs to be deleted - should use REntry::AddValue()
-               attr.second = m_entry->GetValue(attr.first).GetField()->GenerateValue().GetRawPtr();
-               m_entry->CaptureValueUnsafe( attr.first, attr.second );
-            } else {
-               // the value here was already added in addFieldValue, now just clear the "flag"
-               attr.second = nullptr;
-            }
-         }
-         num_bytes += m_ntupleWriter->Fill( *m_entry );
-         m_entry.reset();
-         for( auto& field : m_attrDataMap ) field.second = nullptr;
-         m_rowN++;
+      if( !needsCommit() ) {
+         ATH_MSG_DEBUG("Empty Commit");
+         return 0;
       }
+      ATH_MSG_DEBUG("Commit");
+      if( !m_entry ) makeNewEntry();
+
+      std::vector<RFieldValue> generatedValues;
+      int num_bytes = 0;
+      for( auto& attr: m_attrDataMap ) {
+         ATH_MSG_VERBOSE("Setting data ptr for field: " << attr.first << "  data=" << std::hex << attr.second << std::dec );
+         if( !attr.second ) {
+            ATH_MSG_DEBUG("Generating default object for field: " << attr.first );
+            // MN: the default object created here needs to be deleted - should use REntry::AddValue()
+            generatedValues.emplace_back( m_entry->GetValue(attr.first).GetField()->GenerateValue() );
+            m_entry->CaptureValueUnsafe( attr.first, generatedValues.back().GetRawPtr() );
+         } else {
+            // attach the attribute values rememberd internally
+            m_entry->CaptureValueUnsafe( attr.first, attr.second );
+            // set NULL so we don't try to delete it
+            attr.second = nullptr;
+         }
+      }
+      num_bytes += m_ntupleWriter->Fill( *m_entry );
+      ATH_MSG_DEBUG("Filled RNTuple Row, bytes written: " << num_bytes);
+
+      // delete the generated default fields
+      for( auto& val : generatedValues ) {
+         val.GetField()->DestroyValue(val);
+      }
+      generatedValues.clear();
+      m_entry.reset();
+      m_needsCommit = false;
+      m_rowN++;
 
       return num_bytes;
 #else
+      ATH_MSG_WARNING("Commit not implemented for this ROOT version");
       return 0;
 #endif
    }
