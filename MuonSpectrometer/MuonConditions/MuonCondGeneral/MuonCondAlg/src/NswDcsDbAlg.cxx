@@ -88,6 +88,10 @@ NswDcsDbAlg::loadHvData(const EventContext& ctx, const readKey_t& readKey, const
 		// channel ID and name
 		const unsigned int chanNum  = itr->first;
 		const std::string& chanName = readCdo->chanName(chanNum);
+		if(chanName.empty()){
+			ATH_MSG_DEBUG("Channel number "<< chanNum <<"has empty name");
+			continue;
+		}
 		Identifier channelId{0};
 		bool isOK = false;
 		bool found = buildChannelId(channelId, tech, chanName, isOK);
