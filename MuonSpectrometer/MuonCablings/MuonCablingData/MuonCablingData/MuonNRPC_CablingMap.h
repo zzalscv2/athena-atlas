@@ -22,7 +22,6 @@ class MuonNRPC_CablingMap {
    public:
     /** typedef to implement the csm mapping to ROB */
     /* mapping from hashid to ROB identifier as Subdetector+Rodid */
-    using CablingData = NrpcCablingData;
     using ChamberToROBMap = std::map<IdentifierHash, uint32_t>;
     using ROBToChamberMap = std::map<uint32_t, std::vector<IdentifierHash>>;
     using ListOfROB = std::vector<uint32_t>;
@@ -30,21 +29,21 @@ class MuonNRPC_CablingMap {
     ~MuonNRPC_CablingMap();
 
     /** return the offline id given the online id */
-    bool getOfflineId(CablingData& cabling_data, MsgStream& log) const;
+    bool getOfflineId(NrpcCablingData& cabling_data, MsgStream& log) const;
 
     /** return the online id given the offline id */
-    bool getOnlineId(CablingData& cabling_data, MsgStream& log) const;
+    bool getOnlineId(NrpcCablingData& cabling_data, MsgStream& log) const;
     /** converts the cabling data into an identifier. The check valid argument
      * optionally enables the check that the returned identifier is actually
      * well defined within the ranges but is also slow */
-    bool convert(const CablingData& cabling_data, Identifier& id,
+    bool convert(const NrpcCablingData& cabling_data, Identifier& id,
                  bool check_valid = true) const;
     /** converts the identifier into a cabling data object. Returns false if the
      * Identifier is not Nrpc */
-    bool convert(const Identifier& id, CablingData& cabling_data) const;
+    bool convert(const Identifier& id, NrpcCablingData& cabling_data) const;
 
     /// Inserts a cabling object into the map
-    bool insertChannels(const CablingData& cabling_data, MsgStream& log);
+    bool insertChannels(const NrpcCablingCoolData& cabling_data, MsgStream& log);
     /// Performs consistency checks for the cabling data (I.e. looking for 0
     /// strips and overlaps)
     bool finalize(MsgStream& log);
@@ -60,9 +59,8 @@ class MuonNRPC_CablingMap {
                                                          MsgStream& log) const;
 
    private:
-    using OnlToOfflMap = std::map<NrpcCablingOnData, NrpcCablingOffData>;
-    using OfflToOnlMap =
-        std::map<NrpcCablingOffData, std::set<NrpcCablingOnData>>;
+    using OnlToOfflMap = std::map<NrpcCablOnDataByTdc, NrpcCablingOfflineID, std::less<>>;
+    using OfflToOnlMap = std::map<NrpcCablingOfflineID, NrpcCablOnDataByStripSet, std::less<>>;
     /// Map to cache the online -> offline conversions
     OnlToOfflMap m_onToOffline{};
     /// Map to cache the offline -> online conversions
@@ -71,9 +69,7 @@ class MuonNRPC_CablingMap {
     ChamberToROBMap m_chambROBs{};
     ROBToChamberMap m_ROBHashes{};
 
-    bool stripReadByCard(const NrpcCablingOnData& card, uint16_t strip) const;
-
-    /** Pointer to the RpcIdHelper */
+   /** Pointer to the RpcIdHelper */
     const RpcIdHelper* m_rpcIdHelper{};
 };
 

@@ -180,7 +180,10 @@ def getInput_geantinos(name="ISF_Input_geantinos", **kwargs):
 def getKernel_GenericSimulator(name="ISF_Kernel_GenericSimulator", **kwargs):
     kwargs.setdefault("InputHardScatterCollection", "BeamTruthEvent")
     kwargs.setdefault("OutputHardScatterTruthCollection", "TruthEvent")
-    kwargs.setdefault("InputConverter", "ISF_InputConverter")
+    if ISF_Flags.Simulator.isQuasiStable():
+        kwargs.setdefault('InputConverter', 'ISF_LongLivedInputConverter')
+        kwargs.setdefault('QuasiStablePatcher', 'ZeroLifetimePositioner')
+    kwargs.setdefault('InputConverter', 'ISF_InputConverter')
     kwargs.setdefault("ParticleBroker", ISF_Flags.ParticleBroker())
     from G4AtlasApps.SimFlags import simFlags
     kwargs.setdefault("TruthRecordService", simFlags.TruthStrategy.TruthServiceName())
@@ -199,7 +202,11 @@ def getKernel_GenericSimulatorMT(name="ISF_Kernel_GenericSimulatorMT", **kwargs)
     kwargs.setdefault("OutputTruthCollection", "TruthEvent" )
     kwargs.setdefault("ParticleKillerTool", "ISF_ParticleKillerTool" )
     kwargs.setdefault("GeoIDSvc", "ISF_GeoIDSvc" )
-    kwargs.setdefault("InputConverter", "ISF_InputConverter")
+    if ISF_Flags.Simulator.isQuasiStable():
+        kwargs.setdefault('InputConverter', 'ISF_LongLivedInputConverter')
+        kwargs.setdefault('QuasiStablePatcher', 'ZeroLifetimePositioner')
+    kwargs.setdefault('InputConverter', 'ISF_InputConverter')
+
     from G4AtlasApps.SimFlags import simFlags
     kwargs.setdefault("TruthRecordService", simFlags.TruthStrategy.TruthServiceName())
     kwargs.setdefault("AlwaysUseGeoIDSvc", False)
@@ -287,8 +294,6 @@ def getKernel_FullG4_QS(name="ISF_Kernel_FullG4_QS", **kwargs):
     kwargs.setdefault("CaloSimulationSelectors"     , [ 'ISF_DefaultLongLivedGeant4Selector' ] )
     kwargs.setdefault("MSSimulationSelectors"       , [ 'ISF_DefaultLongLivedGeant4Selector' ] )
     kwargs.setdefault("CavernSimulationSelectors"   , [ 'ISF_DefaultParticleKillerSelector'  ] )
-    kwargs.setdefault("InputConverter"              ,   'ISF_LongLivedInputConverter'          )
-    kwargs.setdefault("QuasiStablePatcher"          , 'ZeroLifetimePositioner')
     return getKernel_GenericG4Only(name, **kwargs)
 
 ############## Simulator: FullG4_longLived ###############
@@ -299,7 +304,6 @@ def getKernel_FullG4_LongLived(name="ISF_Kernel_FullG4_LongLived", **kwargs): # 
 def getKernel_FullG4MT_QS(name="ISF_Kernel_FullG4MT_QS", **kwargs):
     kwargs.setdefault("SimulationTools", ["ISF_ParticleKillerTool",
                                           "ISF_LongLivedGeant4Tool"])
-    kwargs.setdefault("InputConverter", 'ISF_LongLivedInputConverter')
     return getKernel_GenericG4OnlyMT(name, **kwargs)
 
 ############## Simulator: FullG4MT_longLived ###############
@@ -412,8 +416,6 @@ def getKernel_ATLFAST3_QS(name="ISF_Kernel_ATLFAST3_QS", **kwargs):
                                                        'ISF_DefaultFastCaloSimV2Selector' ] )
     kwargs.setdefault("MSSimulationSelectors"      , [ 'ISF_DefaultAFII_QS_Geant4Selector' ]            )
     kwargs.setdefault("CavernSimulationSelectors"  , [ 'ISF_DefaultParticleKillerSelector'  ]           )
-    kwargs.setdefault("InputConverter"             , 'ISF_LongLivedInputConverter'                      )
-    kwargs.setdefault("QuasiStablePatcher"         , 'ZeroLifetimePositioner'                           )
     from G4AtlasApps.SimFlags import simFlags
     simFlags.SimulationFlavour = "ATLFAST3_QS"
     return getKernel_GenericSimulator(name, **kwargs)
@@ -437,8 +439,6 @@ def getKernel_ATLFAST3MT_QS(name="ISF_Kernel_ATLFAST3MT_QS", **kwargs):
                                                        'AFII_QS_Geant4Tool'])
     kwargs.setdefault("ParticleOrderingTool"       , 'ISF_ParticleOrderingTool' )
     kwargs.setdefault('EntryLayerTool'             , 'ISF_AFIIEntryLayerToolMT')
-    kwargs.setdefault("InputConverter"             , 'ISF_LongLivedInputConverter')
-    kwargs.setdefault("QuasiStablePatcher"         , 'ZeroLifetimePositioner' )
     from G4AtlasApps.SimFlags import simFlags
     simFlags.SimulationFlavour = "ATLFAST3MT_QS"
     return getKernel_GenericSimulatorMT(name, **kwargs)
@@ -545,8 +545,6 @@ def getKernel_ATLFASTII_QS(name="ISF_Kernel_ATLFASTII_QS", **kwargs):
                                                        'ISF_DefaultLegacyAFIIFastCaloSimSelector' ] )
     kwargs.setdefault("MSSimulationSelectors"      , [ 'ISF_DefaultAFII_QS_Geant4Selector' ]            )
     kwargs.setdefault("CavernSimulationSelectors"  , [ 'ISF_DefaultParticleKillerSelector'  ]           )
-    kwargs.setdefault("InputConverter"             , 'ISF_LongLivedInputConverter'                      )
-    kwargs.setdefault("QuasiStablePatcher"         , 'ZeroLifetimePositioner'                           )
     from G4AtlasApps.SimFlags import simFlags
     simFlags.SimulationFlavour = "ATLFASTII_QS"
     return getKernel_GenericSimulator(name, **kwargs)

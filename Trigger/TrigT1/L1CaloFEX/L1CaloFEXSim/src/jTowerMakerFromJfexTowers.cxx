@@ -33,22 +33,6 @@
 
 namespace LVL1 {
     
-struct color {
-    const char* RED      ="\033[1;31m";
-    const char* ORANGE   ="\033[1;38;5;208m";
-    const char* YELLOW   ="\033[1;33m";
-    const char* GREEN    ="\033[1;32m";
-    const char* BLUE     ="\033[1;34m";
-    const char* PURPLE   ="\033[1;35m";
-    const char* END      ="\033[0m";
-    const char* B_BLUE   ="\033[1;44m";
-    const char* B_PURPLE ="\033[1;45m";
-    const char* B_ORANGE ="\033[1;48;5;208;30m";
-    const char* B_GRAY   ="\033[1;100m";
-    const char* B_RED    ="\033[1;41m";
-    const char* B_GREEN  ="\033[1;42m";
-} const C;
-
 jTowerMakerFromJfexTowers::jTowerMakerFromJfexTowers(const std::string& name, ISvcLocator* pSvcLocator)
     :  AthAlgorithm(name, pSvcLocator)
 {}
@@ -113,7 +97,7 @@ StatusCode jTowerMakerFromJfexTowers::execute()
             data_jTowerContainer = jDataTowerContainer->empty() ? &jEmulatedTowerContainer : &jDataTowerContainer;
         }
         
-        ATH_MSG_DEBUG("Collection used to build the jTower for simulation: " << (*data_jTowerContainer).key() << "with size: "<<(*data_jTowerContainer)->size() << ". Expected towers 17920" );
+        ATH_MSG_DEBUG("Collection used to build the jTower for simulation: " << (*data_jTowerContainer).key() << "with size: "<<(*data_jTowerContainer)->size() << ". Expected towers 17920");
 
         for(const xAOD::jFexTower* my_jTower : *(*data_jTowerContainer) ) {
 
@@ -145,6 +129,7 @@ StatusCode jTowerMakerFromJfexTowers::execute()
         }
     }
     else{
+        ATH_MSG_DEBUG("Falling into the legacy path");
         ATH_CHECK(m_jSuperCellTowerMapperTool->AssignSuperCellsToTowers(local_jTowerContainerRaw));
         ATH_CHECK(m_jSuperCellTowerMapperTool->AssignTriggerTowerMapper(local_jTowerContainerRaw));        
     }

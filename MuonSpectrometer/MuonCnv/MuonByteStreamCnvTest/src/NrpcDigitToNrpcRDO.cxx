@@ -100,7 +100,7 @@ StatusCode NrpcDigitToNrpcRDO::execute(const EventContext& ctx) const {
 
             ATH_MSG_DEBUG("Convert RPC digit "<<m_idHelperSvc->toString(channelId));
             
-            MuonNRPC_CablingMap::CablingData cabling_data{};
+            NrpcCablingData cabling_data{};
             /// Load the identifier into the cabling data
             if (!cabling_ptr->convert(channelId, cabling_data)) {
                 ATH_MSG_FATAL("Found a non NRPC identifier " << m_idHelperSvc->toString(channelId));

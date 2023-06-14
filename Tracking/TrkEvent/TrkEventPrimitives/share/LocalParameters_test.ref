@@ -94,7 +94,7 @@ Expansion Matrix
 AsVector: 
 3
 4
-From size 3 vector
+From size 3 array
 ------> 3D
 Dimension 3
 ParameterKey 7
@@ -112,7 +112,7 @@ AsVector:
 1
 2
 3
-From size 4 vector
+From size 4 array
 ------> 4D
 Dimension 4
 ParameterKey 15

@@ -17,8 +17,7 @@
 InDet::TotPixelClusterSplitter::TotPixelClusterSplitter(const std::string & type, const std::string & name, const IInterface * parent) :
   base_class(type, name, parent),
   m_minPixels(3),
-  m_maxPixels(25),
-  m_doLongPixels(true)
+  m_maxPixels(25)
 {
 }
 

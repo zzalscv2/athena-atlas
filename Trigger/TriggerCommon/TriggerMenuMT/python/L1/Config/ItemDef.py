@@ -728,17 +728,17 @@ class ItemDef:
         MenuItem('L1_jLJ180'        ).setLogic( d.jLJ180       & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jLJ200'        ).setLogic( d.jLJ200       & physcond).setTriggerType(TT.calo) # Not in commissioning
 
-        MenuItem('L1_gJ20'         ).setLogic( d.gJ20        & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_gJ30'         ).setLogic( d.gJ30        & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_gJ40'         ).setLogic( d.gJ40        & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_gJ50'         ).setLogic( d.gJ50        & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_gJ100'        ).setLogic( d.gJ100       & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_gJ160'        ).setLogic( d.gJ160       & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_gJ20p0ETA25'         ).setLogic( d.gJ200ETA25        & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_gJ20p25ETA49'         ).setLogic( d.gJ2025ETA49        & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_gJ20p0ETA25_EMPTY'         ).setLogic( d.gJ200ETA25        & cosmiccond).setTriggerType(TT.calo)
+        MenuItem('L1_gJ50p0ETA25'         ).setLogic( d.gJ500ETA25        & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_gJ100p0ETA25'        ).setLogic( d.gJ1000ETA25       & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_gJ400p0ETA25'        ).setLogic( d.gJ4000ETA25       & physcond).setTriggerType(TT.calo)
 
-        MenuItem('L1_gLJ80'         ).setLogic( d.gLJ80        & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_gLJ100'        ).setLogic( d.gLJ100       & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_gLJ140'        ).setLogic( d.gLJ140       & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_gLJ160'        ).setLogic( d.gLJ160       & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_gLJ80p0ETA25'         ).setLogic( d.gLJ800ETA25        & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_gLJ100p0ETA25'        ).setLogic( d.gLJ1000ETA25       & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_gLJ140p0ETA25'        ).setLogic( d.gLJ1400ETA25       & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_gLJ160p0ETA25'        ).setLogic( d.gLJ1600ETA25       & physcond).setTriggerType(TT.calo)
 
         MenuItem('L1_jEM20'         ).setLogic( d.jEM20        & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jEM20M'        ).setLogic( d.jEM20M       & physcond).setTriggerType(TT.calo)

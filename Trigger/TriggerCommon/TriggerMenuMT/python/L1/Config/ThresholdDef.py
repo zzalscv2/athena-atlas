@@ -230,16 +230,20 @@ class ThresholdDef:
             jLJetThreshold('jLJSPARE%i' % thrV, 'jLJ').addThrValue(thrVal_SPARE)
 
         # gJET (default range)
-        for thrV in [20, 30, 40, 50, 100, 160]:
-            gJetThreshold('gJ%i' % thrV, 'gJ').setEt(get_threshold_cut('gJ', thrV))
+        for thrV in [20, 50, 100, 400]:
+            ThresholdDef.addJetVaryingThrValues( gJetThreshold('gJ%ip0ETA25' % thrV, 'gJ'), pt=get_threshold_cut('gJ', thrV), shift_set=0, rangemin=0, rangemax=25)
+
+        # gJET (forward)
+        for thrV in [20]:
+            ThresholdDef.addJetVaryingThrValues( gJetThreshold('gJ%ip25ETA49' % thrV, 'gJ'), pt=get_threshold_cut('gJ', thrV), shift_set=0, rangemin=25, rangemax=49)
 
         # gLJET (default range)
         for thrV in [80, 100, 140, 160]:
-            gLJetThreshold('gLJ%i' % thrV, 'gLJ').setEt(get_threshold_cut('gLJ',  thrV))
+            ThresholdDef.addJetVaryingThrValues( gLJetThreshold('gLJ%ip0ETA25' % thrV, 'gLJ'), pt=get_threshold_cut('gLJ', thrV), shift_set=0, rangemin=0, rangemax=25)  
 
         # gLJET SPARES
         for thrV in range(1,5):
-            gLJetThreshold('gLJSPARE%i' % thrV, 'gLJ').setEt(thrVal_SPARE)
+            gLJetThreshold('gLJSPARE%i' % thrV, 'gLJ').addThrValue(thrVal_SPARE)
 
         # gXE
         gXE_cuts = [70, 100]

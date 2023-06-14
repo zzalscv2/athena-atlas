@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef egammaValidation_EgammaMonitoring_H
@@ -58,6 +58,7 @@ public:
   std::unique_ptr<egammaMonitoring::IsolationHistograms> isolationAll;
 
   // electrons
+  std::unique_ptr<egammaMonitoring::RecoElectronHistograms> recoElectronAll;
   std::unique_ptr<egammaMonitoring::TruthElectronHistograms> truthElectronAll;
   std::unique_ptr<egammaMonitoring::TruthElectronHistograms>
     truthPromptElectronAll;
@@ -69,7 +70,8 @@ public:
     truthPromptElectronWithGSFTrack;
   std::unique_ptr<egammaMonitoring::TruthElectronHistograms>
     truthPromptElectronWithReco;
-  std::unique_ptr<egammaMonitoring::IHistograms> recoElectronAll;
+  std::unique_ptr<egammaMonitoring::TruthElectronHistograms>
+    truthPromptElectronWithRecoTrack;
   std::unique_ptr<egammaMonitoring::TruthElectronHistograms>
     truthRecoElectronLooseLH;
   std::unique_ptr<egammaMonitoring::TruthElectronHistograms>
@@ -125,29 +127,7 @@ public:
     recoPhotonConvIsoFixedCutTightCaloOnly;
   std::unique_ptr<egammaMonitoring::IHistograms> recoPhotonConvIsoFixedCutLoose;
 
-  std::unique_ptr<egammaMonitoring::IHistograms> InDetTracks;
-  std::unique_ptr<egammaMonitoring::IHistograms> InDetTracksMatchElectron;
-  std::unique_ptr<egammaMonitoring::IHistograms> InDetTracksNotElectron;
-  std::unique_ptr<egammaMonitoring::IHistograms> InDetTracksMatchPion;
-  std::unique_ptr<egammaMonitoring::IHistograms> InDetTracksNotMatched;
-  std::unique_ptr<egammaMonitoring::IHistograms> InDetTracksTRT;
-  std::unique_ptr<egammaMonitoring::IHistograms> InDetTracksTRTMatchElectron;
-  std::unique_ptr<egammaMonitoring::IHistograms> InDetTracksTRTNotElectron;
-  std::unique_ptr<egammaMonitoring::IHistograms> InDetTracksTRTMatchPion;
-  std::unique_ptr<egammaMonitoring::IHistograms> InDetTracksTRTNotMatched;
-
-  std::unique_ptr<egammaMonitoring::IHistograms> InDetTrackshighpT;
-  std::unique_ptr<egammaMonitoring::IHistograms> InDetTracksMatchElectronhighpT;
-  std::unique_ptr<egammaMonitoring::IHistograms> InDetTracksNotElectronhighpT;
-  std::unique_ptr<egammaMonitoring::IHistograms> InDetTracksMatchPionhighpT;
-  std::unique_ptr<egammaMonitoring::IHistograms> InDetTracksNotMatchedhighpT;
-  std::unique_ptr<egammaMonitoring::IHistograms> InDetTracksTRThighpT;
-  std::unique_ptr<egammaMonitoring::IHistograms>
-    InDetTracksTRTMatchElectronhighpT;
-  std::unique_ptr<egammaMonitoring::IHistograms>
-    InDetTracksTRTNotElectronhighpT;
-  std::unique_ptr<egammaMonitoring::IHistograms> InDetTracksTRTMatchPionhighpT;
-  std::unique_ptr<egammaMonitoring::IHistograms> InDetTracksTRTNotMatchedhighpT;
+  std::map<std::string,std::unique_ptr<egammaMonitoring::TrackHistograms>> mapTrkHistograms;
 
   // Histos
   // General Info
@@ -161,7 +141,8 @@ public:
 
 private:
   /// Sample name ///
-  std::string m_sampleType;
+  Gaudi::Property<std::string> m_sampleType
+    { this, "sampleType", "Unknown", "electron or gamma" };
 
   /// Selector tools
   // electron ID
@@ -218,6 +199,8 @@ private:
   static bool matchedToElectron(const xAOD::TrackParticle& tp);
   static bool matchedToPion(const xAOD::TrackParticle& tp);
   static bool notMatchedToTruth(const xAOD::TrackParticle& tp);
+
+  int m_CenFwdOverlap[2] = { 0, 0 };
 };
 
 #endif

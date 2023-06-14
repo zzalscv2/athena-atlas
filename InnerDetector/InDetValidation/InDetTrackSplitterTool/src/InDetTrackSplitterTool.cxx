@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -538,8 +538,7 @@ Trk::PseudoMeasurementOnTrack const* InDet::InDetTrackSplitterTool::makePConstra
   /** Define the constraint parameter
    */
   Trk::DefinedParameter inputPMeasurement(perigee->parameters()[Trk::qOverP],Trk::qOverP);
-  std::vector<Trk::DefinedParameter> constraints;
-  constraints.push_back(inputPMeasurement);
+  std::array<Trk::DefinedParameter,1> constraints = {inputPMeasurement};
 
   /** Define the uncertainty on the constraint parameter*/
   Amg::MatrixX constraintErrMatrix(1,1);
@@ -567,9 +566,7 @@ Trk::PseudoMeasurementOnTrack const* InDet::InDetTrackSplitterTool::makeThetaZ0C
    */
   Trk::DefinedParameter inputTheta0Measurement(perigee->parameters()[Trk::theta],Trk::theta);
   Trk::DefinedParameter inputZ0Measurement(perigee->parameters()[Trk::z0],Trk::z0);
-  std::vector<Trk::DefinedParameter> constraints;
-  constraints.push_back(inputZ0Measurement);
-  constraints.push_back(inputTheta0Measurement);
+  std::array<Trk::DefinedParameter,2> constraints = {inputZ0Measurement, inputTheta0Measurement};
   
   /** Define the uncertainty on the constraint parameters
    */

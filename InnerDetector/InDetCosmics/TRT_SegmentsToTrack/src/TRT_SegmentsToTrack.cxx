@@ -794,10 +794,7 @@ void InDet::TRT_SegmentsToTrack::combineSegments(const EventContext& ctx) const
 		double locz=-200.;
 		if ((count2==firstechit && firstechit!=0) || (count2==lastechit && firstechit==0)) locz=200;
 		Trk::DefinedParameter dp(locz,Trk::locZ);
-		std::vector<Trk::DefinedParameter> defPar;
-		defPar.push_back(dp);
-
-		Trk::LocalParameters par(defPar);
+		Trk::LocalParameters par(dp);
 
 		Amg::MatrixX cov(1,1);
 		cov(0,0) = 16./12. ; // take actual length of straw instead !!!!!
