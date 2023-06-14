@@ -20,6 +20,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "TDataMember.h"
 #include "TDataType.h"
 #include "TVirtualCollectionProxy.h"
+#include "TClassEdit.h"
 
 #include "Utility.h"
 
@@ -227,6 +228,31 @@ recurse_pyinspect(PyObject *pyobj,
       Py_DECREF(v0);
     }
     return;
+  }
+
+  // Most xAOD objects don't have any persistent data members.
+  // Try to detect that and skip the actual iteration over the
+  // container in that case.
+  if (CxxUtils::starts_with (clsname, "DataVector<xAOD::")) {
+    TClassEdit::TSplitType split (clsname.c_str());
+    if (split.fElements.size()  > 1) {
+      TClass* eltcls = TClass::GetClass (split.fElements[1].c_str());
+      if (eltcls) {
+        TList *members = eltcls->GetListOfDataMembers();
+        const Int_t nmembers = members ? members->GetEntries() : 0;
+        bool nomem = true;
+        for (Int_t j = 0; j<nmembers; ++j) {
+          TDataMember *mbr = (TDataMember*)(members->At(j));
+          if (!persistentOnly || mbr->IsPersistent()) {
+            nomem = false;
+            break;
+          }
+        }
+        if (nomem) {
+          return;
+        }
+      }
+    }
   }
 
   Int_t hdr = 0;
