@@ -68,50 +68,19 @@ void LVL1::jFEXSmallRJetAlgo::setup(int inputTable[7][7], int inputTableDisplace
     }
 }
 
-
-int LVL1::jFEXSmallRJetAlgo::realValue(int ID, int eta){
-
-  return ((int)(ID/pow(10,5)) % 10) % 2==0 ?  eta : -eta ;
-  
-}
-
-
 //Gets the ET for the TT. This ET is EM + HAD
 unsigned int LVL1::jFEXSmallRJetAlgo::getTTowerET(unsigned int TTID ) {
-   if(TTID == 0) {
+    if(TTID == 0) {
         return 0;
-    } 
-    
-    if(m_map_Etvalues.find(TTID) != m_map_Etvalues.end()) {
-       return m_map_Etvalues[TTID][0];
     }
-    
+
+    if(m_map_Etvalues.find(TTID) != m_map_Etvalues.end()) {
+        return m_map_Etvalues[TTID][0];
+    }
+
     //we shouldn't arrive here
     return 0;
-    
 }
-
-//Gets Phi of the TT
-unsigned int LVL1::jFEXSmallRJetAlgo::getRealPhi(unsigned int TTID ) {
-    if(TTID == 0) {
-        return 0;
-    }
-    SG::ReadHandle<jTowerContainer> jTowerContainer(m_jTowerContainerKey/*,ctx*/);
-
-    unsigned int phi = jTowerContainer->findTower(TTID)->phi();
-    return phi;
-}
-//Gets Eta of the TT
-int LVL1::jFEXSmallRJetAlgo::getRealEta(unsigned int TTID ) {
-    if(TTID == 0) {
-        return 0;
-    }
-    SG::ReadHandle<jTowerContainer> jTowerContainer(m_jTowerContainerKey/*,ctx*/);
-    const LVL1::jTower * tmpTower = jTowerContainer->findTower(TTID);
-    return realValue(TTID,tmpTower->eta());
-}
-
-
 
 //this function calculates seed for a given TT
 void LVL1::jFEXSmallRJetAlgo::buildSeeds()
@@ -126,7 +95,7 @@ void LVL1::jFEXSmallRJetAlgo::buildSeeds()
                 for(int ieta = -1; ieta < 2; ieta++) {
                     //for that TT, build the seed
                     //here we sum TT ET to calculate seed
-                    seedTotalET += getTTowerET(m_jFEXalgoTowerID[mphi + iphi][meta + ieta]);
+                    seedTotalET           += getTTowerET(m_jFEXalgoTowerID          [mphi + iphi][meta + ieta]);
                     seedTotalET_displaced += getTTowerET(m_jFEXalgoTowerID_displaced[mphi + iphi][meta + ieta]);
                 }
             }
@@ -168,8 +137,10 @@ bool LVL1::jFEXSmallRJetAlgo::CalculateLM(int mymatrix[5][5]) {
 //check if central TT is a local maxima
 bool LVL1::jFEXSmallRJetAlgo::isSeedLocalMaxima() {
     
-    bool isCentralLM   = CalculateLM(m_jFEXalgoSearchWindowSeedET) && (getTTowerET(m_jFEXalgoTowerID[3][3]) >= getTTowerET(m_jFEXalgoTowerID[4][2]));
-    bool isDisplacedLM = CalculateLM(m_jFEXalgoSearchWindowSeedET_displaced) && (getTTowerET(m_jFEXalgoTowerID[3][3]) >  getTTowerET(m_jFEXalgoTowerID[2][4]));
+    
+    bool isCentralLM   = CalculateLM(m_jFEXalgoSearchWindowSeedET) && (getTTowerET(m_jFEXalgoTowerID[3][3]) >= getTTowerET(m_jFEXalgoTowerID[4][2])) && m_jFEXalgoSearchWindowSeedET[2][2] > m_jFEXalgoSearchWindowSeedET_displaced[3][3];
+    
+    bool isDisplacedLM = CalculateLM(m_jFEXalgoSearchWindowSeedET_displaced) && (getTTowerET(m_jFEXalgoTowerID[3][3]) >  getTTowerET(m_jFEXalgoTowerID[2][4])) && m_jFEXalgoSearchWindowSeedET[2][2] == m_jFEXalgoSearchWindowSeedET_displaced[2][2];
     
     if(isCentralLM || isDisplacedLM){
         return true;

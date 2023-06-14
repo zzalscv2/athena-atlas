@@ -116,7 +116,6 @@ void LVL1::jFEXmetAlgo::buildBarrelmet()
     for(uint iphi=0;iphi<m_FPGA.size();iphi++){
         for(uint ieta=0;ieta<m_FPGA[iphi].size();ieta++){
             m_met[iphi]+=getTTowerET(m_FPGA[iphi][ieta]);
-            
         }
         const LVL1::jTower * tmpTower = m_jTowerContainer->findTower(m_FPGA[iphi][0]);
         m_met_angle[iphi]=tmpTower->centrephi_toPI();
@@ -191,6 +190,7 @@ void LVL1::jFEXmetAlgo::buildMetXComponent()
     m_met_Xcoord.clear();
     m_met_Xcoord.resize(m_met.size(),0);
     //computing the X and Y component of MET
+    
     for(uint iphi=0;iphi<m_met.size();iphi++){
         int cos = std::round(std::cos(m_met_angle[iphi]) * m_firmware_scale * m_hemisphere); 
         m_met_Xcoord[iphi]= m_met[iphi]*cos;
@@ -200,7 +200,6 @@ void LVL1::jFEXmetAlgo::buildMetXComponent()
     for(auto met_val : m_met_Xcoord){
         m_Totalmet_Xcoord += met_val;
     }
-    
 }
 
 //return the X component of the Met
@@ -215,7 +214,6 @@ void LVL1::jFEXmetAlgo::buildMetYComponent()
         
     m_met_Ycoord.clear();
     m_met_Ycoord.resize(m_met.size(),0);
-    
     //computing the X and Y component of MET
     for(uint iphi=0;iphi<m_met.size();iphi++){
         int sin = std::round(std::sin(m_met_angle[iphi]) * m_firmware_scale * m_hemisphere) ; 

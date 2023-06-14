@@ -42,7 +42,7 @@ class jFEXFormTOBs : public AthAlgTool, virtual public IjFEXFormTOBs {
         /** Internal data */
     private:
 
-        int Get_calibrated_SRj_ET(int, int );
+        int Get_calibrated_SRj_ET(int, int, int );
 
 };
 
