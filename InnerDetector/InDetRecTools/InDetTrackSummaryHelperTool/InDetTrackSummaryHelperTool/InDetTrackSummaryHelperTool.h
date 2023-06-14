@@ -125,7 +125,6 @@ private:
   BooleanProperty m_usePixel{ this, "usePixel", true };
   BooleanProperty m_useSCT{ this, "useSCT", true };
   BooleanProperty m_useTRT{ this, "useTRT", true };
-  BooleanProperty m_overwriteidsummary{ this, "OverwriteIDSummary", false };
 };
 
 }
