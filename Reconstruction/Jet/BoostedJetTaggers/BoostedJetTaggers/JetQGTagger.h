@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETQGTAGGER_H
@@ -87,7 +87,7 @@ namespace CP {
       TH2D* m_fake_hquark;
       TH2D* m_fake_hgluon;
 
-      StatusCode loadHist(TH2D *&hist,std::string filename,std::string histname);
+      StatusCode loadHist(TH2D *&hist,const std::string& filename,const std::string& histname);
 
       std::string m_taggername;
       std::string m_topofile;
@@ -117,7 +117,7 @@ namespace CP {
 
       /// WriteDecorHandle keys
       SG::WriteDecorHandleKey<xAOD::JetContainer> m_decTagKey{this, "TagName", "Tag", "SG key for Tag"};
-      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decWeightKey{this, "WeightName", "Weight", "SG key for Weight"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_qgDecWeightKey{this, "QGWeightName", "Weight", "SG key for Weight"};
   
   };
 

@@ -65,7 +65,7 @@ namespace CP {
     declareProperty( "TaggerDecorationName", m_tagger_decoration_name = "qgTagger");
 
 
-    applySystematicVariation(SystematicSet()).ignore();
+    JetQGTagger::applySystematicVariation(SystematicSet()).ignore();
   
   }
 
@@ -109,10 +109,10 @@ namespace CP {
     ATH_MSG_INFO( "  " << m_weight_decoration_name << " : Scale factor weight given the number of tracks" );
     
     m_decTagKey = m_containerName + "." + m_tagger_decoration_name;
-    m_decWeightKey = m_containerName + "." + m_weight_decoration_name;
+    m_qgDecWeightKey = m_containerName + "." + m_weight_decoration_name;
 
     ATH_CHECK( m_decTagKey.initialize() );
-    ATH_CHECK( m_decWeightKey.initialize() );
+    ATH_CHECK( m_qgDecWeightKey.initialize() );
 
     /// ReadDecorHandles for Ntrk variables
     m_readNumTrkPt500PVKey = m_containerName + "." + m_readNumTrkPt500PVKey.key();
@@ -326,7 +326,7 @@ namespace CP {
       }
 
       // decorate the cut value if specified
-      SG::WriteDecorHandle<xAOD::JetContainer, float> decWeight(m_decWeightKey);
+      SG::WriteDecorHandle<xAOD::JetContainer, float> decWeight(m_qgDecWeightKey);
       decWeight(jet) = jetWeight;
     }
 
@@ -334,7 +334,7 @@ namespace CP {
 
     // decorate the cut value if specified
     SG::WriteDecorHandle<xAOD::JetContainer, float> decTag(m_decTagKey);
-    SG::WriteDecorHandle<xAOD::JetContainer, float> decWeight(m_decWeightKey);
+    SG::WriteDecorHandle<xAOD::JetContainer, float> decWeight(m_qgDecWeightKey);
 
     decTag(jet) = jetNTrack;
     decWeight(jet) = jetWeight;
@@ -697,7 +697,7 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode JetQGTagger::loadHist(TH2D *&hist,std::string fname,std::string histname){
+  StatusCode JetQGTagger::loadHist(TH2D *&hist,const std::string& fname,const std::string& histname){
 
     std::string filename = PathResolverFindCalibFile( ("BoostedJetTaggers/"+m_calibArea+fname).c_str() );
     ATH_MSG_INFO("CALIB FILE: " << filename << " histo: " << histname);

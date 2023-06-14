@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/JSSTaggerBase.h"
@@ -665,7 +665,7 @@ StatusCode JSSTaggerBase::getWeight( const xAOD::Jet& jet, bool passSel, asg::Ac
 }
 
 /// Get scale factor and efficiency
-std::pair<double, double> JSSTaggerBase::getSF( const xAOD::Jet& jet, std::string truthLabelStr ) const {
+std::pair<double, double> JSSTaggerBase::getSF( const xAOD::Jet& jet, const std::string& truthLabelStr ) const {
 
   if ( !passKinRange(jet) ) return std::make_pair( 1.0, 1.0 );
 
