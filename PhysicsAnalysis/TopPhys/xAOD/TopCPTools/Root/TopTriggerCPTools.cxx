@@ -186,12 +186,14 @@ namespace top {
         }
       };
 
+    bool doTightTools=(m_config->doTightEvents() || (m_config->doLooseEvents() && m_config->applyTightSFsInLooseTree()));
+
     // Get trigger strings from configuration
     std::map<std::string, std::string> triggerCombination, triggerCombinationLoose;
     std::vector<std::string> electronSystematics, muonSystematics, photonSystematics, electronToolNames, muonToolNames, photonToolNames;
     std::unordered_map<std::string, std::vector<std::pair<std::string, int> > > const emptymap;
     std::unordered_map<std::string, std::vector<std::pair<std::string, int> > > const&
-    triggersByPeriod = (m_config->doTightEvents() ? m_config->getGlobalTriggers() : emptymap),
+    triggersByPeriod = (doTightTools ? m_config->getGlobalTriggers() : emptymap),
       triggersByPeriodLoose = (m_config->doLooseEvents() ? m_config->getGlobalTriggersLoose() : emptymap);
 
     std::unordered_map<std::string, std::set<std::string> > electronLegsByPeriod, electronLegsByPeriodLoose, photonLegsByPeriod, photonLegsByPeriodLoose;
@@ -201,7 +203,7 @@ namespace top {
     // Get quality
     std::string electronID, electronIDLoose, electronIsolation, electronIsolationLoose, muonQuality, muonQualityLoose;
     std::string photonIso, photonIsoLoose;
-    if (m_config->doTightEvents()) {
+    if (doTightTools) {
       electronID = m_config->electronID();
       electronIsolation = m_config->electronIsolationSF();
       muonQuality = m_config->muonQuality();
@@ -315,8 +317,8 @@ namespace top {
     // Create muon trigger SF tool
     ToolHandleArray<CP::IMuonTriggerScaleFactors> muonTools;
     ToolHandleArray<CP::IMuonTriggerScaleFactors> muonToolsLoose;
-
-    if (m_config->doTightEvents()) {
+    
+    if (doTightTools) {
       if (muonQuality != "None") top::check(m_muonTool.setProperty("MuonQuality",
                                                                    muonQuality), "Failed to set MuonQuality");
       top::check(m_muonTool.setProperty("AllowZeroSF", true), "Failed to set AllowZeroSF");
@@ -371,7 +373,7 @@ namespace top {
 
     static const std::string mapPath = "PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map2.txt";
     if (photonKey != "" || photonKeyLoose != "") {
-      if (m_config->doTightEvents()) {
+      if (doTightTools) {
         nTools = 0;
         top::check(CheckPhotonIsolation(photonIso), "Unsupported photon isolation for photon triggers provided: " + photonIso);
         for (auto& y_t : photonLegsByPeriod) {
@@ -464,7 +466,7 @@ namespace top {
     for (auto kv: triggerCombinationLoose) ATH_MSG_DEBUG("TRIG (LOOSE): " << kv.first << " -> " << kv.second);
 
     // Make the global trigger tool
-    if (m_config->doTightEvents()) {
+    if (doTightTools) {
       TrigGlobalEfficiencyCorrectionTool* globalTriggerEffTool = new TrigGlobalEfficiencyCorrectionTool("TrigGlobalEfficiencyCorrectionTool::TrigGlobal");
       top::check(globalTriggerEffTool->setProperty("ElectronEfficiencyTools", electronEffTools), "Failed to attach electron efficiency tools");
       top::check(globalTriggerEffTool->setProperty("ElectronScaleFactorTools", electronSFTools), "Failed to attach electron scale factor tools");
