@@ -133,7 +133,7 @@ class W_EW(PowhegV2):
         self.add_keyword("par_diexp")
         self.add_keyword("par_dijexp")
         self.add_keyword("parallelstage")
-        self.add_keyword("pdfreweight")
+        self.add_keyword("pdfreweight", 0)
         self.add_keyword("phsp_Wm")
         self.add_keyword("phsp_Ww")
         self.add_keyword("powhegv2opt")

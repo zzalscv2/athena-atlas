@@ -130,7 +130,7 @@ class Z_EW(PowhegV2):
         self.add_keyword("par_diexp")
         self.add_keyword("par_dijexp")
         self.add_keyword("parallelstage")
-        self.add_keyword("pdfreweight")
+        self.add_keyword("pdfreweight", 0)
         self.add_keyword("photoninduced")
         self.add_keyword("phsp_Zm")
         self.add_keyword("phsp_Zw")
