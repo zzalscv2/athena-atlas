@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONSEGMENTMAKETOOLINTERFACES_MUON_IMUONPATTERNCALIBRATION_H
@@ -36,6 +36,7 @@ namespace Muon {
             const MdtVecVec& mdts() const {return m_mdts;}
 
             void push_back(std::unique_ptr<const MuonClusterOnTrack> cl){
+                // cppcheck-suppress danglingLifetime
                 m_clusters.push_back(cl.get());
                 m_garbage.push_back(std::move(cl));
             }
