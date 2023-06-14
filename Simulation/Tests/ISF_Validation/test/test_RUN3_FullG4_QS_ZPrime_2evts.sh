@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# art-description: MC23-style simulation using FullG4_QS (13 TeV Zprime input - needs updating)
+# art-description: MC23-style simulation using FullG4_QS (13.6 TeV Zprime input)
 # art-type: build
 # art-include: 22.0/Athena
 # art-include: 22.0/AthSimulation
@@ -17,7 +17,7 @@ Sim_tf.py \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
 --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoV.py' \
 --geometryVersion 'default:ATLAS-R3S-2021-03-02-00_VALIDATION' \
---inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/EVNT.04607198._000001.pool.root.1" \
+--inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc23_13p6TeV.800030.Py8EG_A14NNPDF23LO_flatpT_Zprime_Extended.evgen.EVNT.e8514.33116368._004446.pool.root.1' \
 --outputHITSFile "test.HITS.pool.root" \
 --maxEvents 2
 
