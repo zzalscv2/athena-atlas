@@ -187,7 +187,7 @@ StatusCode PadTriggerLogicOfflineTool::compute_pad_triggers(const std::vector<st
                        fillGeometricInformation(pod);
                        trgpads.push_back(pod);
                   }
-                  const std::vector<SectorTriggerCandidate> candidates = m_tdrLogic.buildSectorTriggers(trgpads);
+                  const std::vector<SectorTriggerCandidate> candidates = m_tdrLogic.buildSectorTriggers(trgpads,m_Zratio);
                   int index=0;
                   for( const auto& st : candidates){
                      auto p=std::make_unique<PadTrigger>(convert(st));
@@ -492,6 +492,15 @@ NSWL1::PadTrigger PadTriggerLogicOfflineTool::convert(const SectorTriggerCandida
       std::pair<double,double> phiRange(phimin,phimax);
       m_phiTable[hashId]=phiRange;
 
+	if((sector_l=='L' && m_Zratio.first==0) || (sector_l=='S' && m_Zratio.second==0)) {
+	double ratio=1/pos.z();
+	Id=helper->multilayerID(Id,2);
+	const MuonGM::sTgcReadoutElement* module2 = m_detManager->getsTgcReadoutElement(Id);
+	Amg::Vector3D pos2 = module2->center();
+	ratio*=pos2.z();
+	if(sector_l=='L') m_Zratio.first=ratio;
+	else if(sector_l=='S') m_Zratio.second=ratio;
+	}
     }
 
   }

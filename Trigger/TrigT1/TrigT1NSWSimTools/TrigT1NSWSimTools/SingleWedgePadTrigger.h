@@ -64,7 +64,7 @@ namespace NSWL1 {
       first pad DG In the future, we might want to use some geometric
       pad info (center?)...good enough for now
      */
-    bool isInTransitionRegion() const;
+    bool isInTransitionRegion(std::pair<double,double> Zratio) const;
     bool is4outOf4Layers() const { return (m_pads.size()==4); }
     bool is3outOf4Layers() const { return (m_pads.size()==3); }
     SingleWedgePadTrigger& setCombined() { m_alreadyCombined=true; return *this;}
