@@ -15,50 +15,50 @@
  * This class is used to store @c CaloCell objects in an compressed
  * manner. The actual data is stored as a @c vector<unsigned short>.
  * Each compact cell therefor must provide its data in
- * multiples of 16bit @c shorts. 
+ * multiples of 16bit @c shorts.
  */
 
 #include "AthenaKernel/CLASS_DEF.h"
 #include <vector>
 
-class CaloCompactCell 
+class CaloCompactCell final
 {
-  
+
  public:
-  
-  /** @brief value type for the compact @c CaloCell data 
+
+  /** @brief value type for the compact @c CaloCell data
    *
    *  Each CompactCell holds a multiple of this data type. This type
-   *  must have the length of 16 bits. 
+   *  must have the length of 16 bits.
    */
-  typedef unsigned short  value_type; 
-  
+  typedef unsigned short  value_type;
+
   /** @brief mask to project all bits of the value_type defined above.*/
-  enum MASKS {WORDMASK = 0xFFFF}; 
-  
+  enum MASKS {WORDMASK = 0xFFFF};
+
  private:
   /** @brief vector containing the compactified CaloCell information.*/
   std::vector<value_type> m_compactData;
-  
+
  public:
-  /** 
+  /**
    * @brief Constructor.
    * @param theCompactData The vector holding the compact @c CaloCell data
    */
    CaloCompactCell(const std::vector<value_type> & theCompactData):
     m_compactData(theCompactData)
   { };
-  
-  virtual ~CaloCompactCell() { };
-  
-  /** 
+
+  ~CaloCompactCell()  = default;
+
+  /**
    * @brief returns the vector of compactified CaloCell data.
-   * @return a const reference to the vector holding the compact data 
+   * @return a const reference to the vector holding the compact data
    */
   inline const std::vector<value_type> & getData() const {
     return m_compactData;
   };
-  
+
 };
 
 CLASS_DEF(CaloCompactCell, 107078417, 1)
