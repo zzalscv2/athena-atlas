@@ -58,11 +58,6 @@ namespace InDet
       inline void setMinPixels(unsigned int minPix);
       inline void setMaxPixels(unsigned int maxPix);
 
-      /** Use the value "true" to activate code that will handle long normal pixels as well as short normal pixels. 
-          The current default value for m_doLongPixels is "true".
-      */
-      inline void setDoLongPixels(bool yesOrNo);
-
     private:
       /** Determine a pixel's type. Even numbers have normal eta-pitch, odd numbers have long eta pitch.
 
@@ -95,8 +90,6 @@ namespace InDet
       /** Maximum size of cluster for which splitting will be attempted. */
       unsigned int m_maxPixels;
 
-      /** Indicates whether or not to consider long pixels. */
-      bool m_doLongPixels;
   };
 
   inline void TotPixelClusterSplitter::setMinPixels(unsigned int minPix)
@@ -111,11 +104,6 @@ namespace InDet
     return;
   }
 
-  inline void TotPixelClusterSplitter::setDoLongPixels(bool yesOrNo)
-  {
-    m_doLongPixels = yesOrNo;
-    return;
-  }
 }
 
 #endif
