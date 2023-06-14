@@ -9,12 +9,14 @@
 
 // Atlas includes
 #include "AsgDataHandles/ReadHandleKey.h"
+#include "AsgDataHandles/ReadDecorHandleKey.h"
 #include "AsgTools/AsgTool.h"
 #include "EgammaAnalysisInterfaces/IAsgElectronLikelihoodTool.h"
 #include "PATCore/AcceptData.h"
 #include "xAODEgamma/ElectronFwd.h"
 #include "xAODHIEvent/HIEventShapeContainer.h"
 #include "xAODTracking/VertexContainer.h"
+#include "xAODEventInfo/EventInfo.h"
 
 class EventContext;
 
@@ -129,8 +131,14 @@ public:
 
   // Private methods
 private:
+  /// Get IP variable based on user configuration
+  double getIpVariable(double mu, const EventContext& ctx) const;
+
   /// Get the number of primary vertices
   unsigned int getNPrimVertices(const EventContext& ctx) const;
+
+  /// Get the average mu 
+  double getAverageMu(const EventContext& ctx) const;
 
   /// Get the FCal ET for centrality determination (for HI collisions)
   double getFcalEt(const EventContext& ctx) const;
@@ -173,6 +181,9 @@ private:
   /// Flag to toggle the correction of deltaEta1 for the pear shape distortion of the LAr
   bool m_correctDeltaEta = false;
 
+  // Whether to use average mu instead of NPV
+  bool m_useAverageMu = false;
+
   ///  read handle key to heavy ion container
   SG::ReadHandleKey<xAOD::HIEventShapeContainer> m_HIESContKey{
     this,
@@ -189,6 +200,12 @@ private:
     "The primary vertex container name"
   };
 
+  ///  read handle key to averager mu 
+  SG::ReadDecorHandleKey<xAOD::EventInfo> m_avgMuKey {
+    this, "averageInteractionsPerCrossingKey",
+    "EventInfo.averageInteractionsPerCrossing",
+    "Decoration for Average Interaction Per Crossing"
+  };
 }; // End: class definition
 
 #endif

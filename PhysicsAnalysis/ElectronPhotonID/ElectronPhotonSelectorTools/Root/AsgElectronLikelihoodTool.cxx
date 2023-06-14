@@ -26,6 +26,7 @@
 #include "xAODTracking/Vertex.h"
 // Framework includes
 #include "AsgDataHandles/ReadHandle.h"
+#include "AsgDataHandles/ReadDecorHandle.h"
 #include "AsgTools/CurrentContext.h"
 #include "PathResolver/PathResolver.h"
 #include "TEnv.h"
@@ -64,6 +65,9 @@ AsgElectronLikelihoodTool::AsgElectronLikelihoodTool(const std::string& myname)
   declareProperty("skipDeltaPoverP",
                   m_skipDeltaPoverP = false,
                   "If true, it wil skip the check of deltaPoverP");
+  declareProperty("useAverageMu", 
+                  m_useAverageMu=false,
+                  "Whether to use average mu instead of NPV." );                  
 }
 
 AsgElectronLikelihoodTool::~AsgElectronLikelihoodTool()
@@ -210,6 +214,12 @@ AsgElectronLikelihoodTool::initialize()
     // if true, deltaEta1 will be corrected for the pear shape distortion of the
     // LAr
     m_correctDeltaEta = env.GetValue("doCorrectDeltaEta", false);
+    
+    if (m_rootTool->m_doCentralityTransform && m_useAverageMu) {
+        ATH_MSG_ERROR("Cannot use centrality transform and average mu "
+            << "at the same time as they affect the same variable");
+        return StatusCode::FAILURE;
+    }
   } else { // Error if it cant find the conf
     ATH_MSG_ERROR("Could not find configuration file");
     return StatusCode::FAILURE;
@@ -218,6 +228,9 @@ AsgElectronLikelihoodTool::initialize()
 
   // Setup primary vertex key handle
   ATH_CHECK(m_primVtxContKey.initialize(m_usePVCont));
+  // Setup average mu key handle
+  ATH_CHECK(m_avgMuKey.initialize(m_useAverageMu));
+
   // Setup HI container key handle (must come after init from env)
   bool doCentralityTransform = m_rootTool->m_doCentralityTransform;
   ATH_CHECK(
@@ -361,18 +374,10 @@ AsgElectronLikelihoodTool::accept(const EventContext& ctx,
 
   } // if not calo ONly
 
-  // Get the number of primary vertices or FCal ET in this event
-  bool doCentralityTransform = m_rootTool->m_doCentralityTransform;
-  if (mu < 0) { // use npv if mu is negative (not given)
-    if (doCentralityTransform)
-      ip = static_cast<double>(m_useCaloSumsCont ? this->getFcalEt(ctx)
-                                                 : m_fcalEtDefault);
-    else
-      ip = static_cast<double>(m_usePVCont ? this->getNPrimVertices(ctx)
-                                           : m_nPVdefault);
-  } else {
-    ip = mu;
-  }
+  // Get the number of primary vertices,
+  // avg mu or FCal ET in this event,
+  // depending on user configuration
+  ip = getIpVariable(mu, ctx);
 
   // for now don't cache.
   double likelihood = calculate(ctx, el, ip);
@@ -450,20 +455,8 @@ AsgElectronLikelihoodTool::accept(const EventContext& ctx,
   uint8_t ambiguityBit(0);
 
   // Get the pileup or centrality information
-  double ip(0);
+  double ip = getIpVariable(mu, ctx);
 
-  bool doCentralityTransform = m_rootTool->m_doCentralityTransform;
-  if (mu < 0) { // use npv if mu is negative (not given)
-    if (doCentralityTransform)
-      ip = static_cast<double>(m_useCaloSumsCont ? this->getFcalEt(ctx)
-                                                 : m_fcalEtDefault);
-    else
-      ip = static_cast<double>(m_usePVCont ? this->getNPrimVertices(ctx)
-                                           : m_nPVdefault);
-
-  } else {
-    ip = mu;
-  }
   // for now don't cache.
   double likelihood = calculate(ctx, eg, ip);
 
@@ -693,20 +686,11 @@ AsgElectronLikelihoodTool::calculate(const EventContext& ctx,
     }
   }
 
-  // Get the number of primary vertices or FCal ET in this event
+  // Get the number of primary vertices, avg mu or FCal ET in this event,
+  // depending on user configuration
   double ip = static_cast<double>(m_nPVdefault);
 
-  bool doCentralityTransform = m_rootTool->m_doCentralityTransform;
-  if (mu < 0) { // use npv if mu is negative (not given)
-    if (doCentralityTransform)
-      ip = static_cast<double>(m_useCaloSumsCont ? this->getFcalEt(ctx)
-                                                 : m_fcalEtDefault);
-    else
-      ip = static_cast<double>(m_usePVCont ? this->getNPrimVertices(ctx)
-                                           : m_nPVdefault);
-  } else {
-    ip = mu;
-  }
+  ip = getIpVariable(mu, ctx);
 
   if (!allFound) {
     ATH_MSG_ERROR(
@@ -844,19 +828,7 @@ AsgElectronLikelihoodTool::calculate(const EventContext& ctx,
   }
 
   // Get the pileup or centrality information
-  double ip(0);
-
-  bool doCentralityTransform = m_rootTool->m_doCentralityTransform;
-  if (mu < 0) { // use npv if mu is negative (not given)
-    if (doCentralityTransform)
-      ip = static_cast<double>(m_useCaloSumsCont ? this->getFcalEt(ctx)
-                                                 : m_fcalEtDefault);
-    else
-      ip = static_cast<double>(m_usePVCont ? this->getNPrimVertices(ctx)
-                                           : m_nPVdefault);
-  } else {
-    ip = mu;
-  }
+  double ip = getIpVariable(mu, ctx);
 
   if (!allFound) {
     ATH_MSG_ERROR(
@@ -925,6 +897,25 @@ AsgElectronLikelihoodTool::calculate(const EventContext& ctx,
   return -999;
 }
 
+// Helper method to get IP variable
+// Can be either NPV, <mu> or fcal Et
+// depending on user configuration.
+double AsgElectronLikelihoodTool::getIpVariable(double mu, const EventContext& ctx) const
+{
+  if (mu < 0) { // determine variable if mu is negative (not given)
+    bool doCentralityTransform = m_rootTool->m_doCentralityTransform;
+    if (doCentralityTransform)
+      return static_cast<double>(m_useCaloSumsCont ? this->getFcalEt(ctx)
+                                                 : m_fcalEtDefault);
+    else if (m_useAverageMu)
+      return this->getAverageMu(ctx);
+    else
+      return static_cast<double>(m_usePVCont ? this->getNPrimVertices(ctx)
+                                           : m_nPVdefault);
+  } 
+  return mu;
+}
+
 // Helper method to get the number of primary vertices
 // We don't want to iterate over all vertices in the event for each electron!!!
 unsigned int
@@ -942,6 +933,19 @@ AsgElectronLikelihoodTool::getNPrimVertices(const EventContext& ctx) const
       nVtx++;
   }
   return nVtx;
+}
+
+// Helper method to get the average mu
+// Defined to use the same definition as
+// TrigEgammaPrecisionElectronHypoAlg
+double AsgElectronLikelihoodTool::getAverageMu(const EventContext &ctx) const
+{
+  SG::ReadDecorHandle<xAOD::EventInfo,float> eventInfoDecor(m_avgMuKey, ctx);
+  if(!eventInfoDecor.isPresent()) {
+    ATH_MSG_WARNING("Cannot find " << m_avgMuKey.key()
+		    << ", returning 0");
+  }
+  return eventInfoDecor(0);
 }
 
 // Helper method to get FCal ET for centrality determination
