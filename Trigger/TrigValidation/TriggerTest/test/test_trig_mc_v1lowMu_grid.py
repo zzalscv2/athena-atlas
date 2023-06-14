@@ -31,7 +31,7 @@ precommand = ''.join([
   "setMenu='PhysicsP1_pp_lowMu_run3_v1';",
   "doWriteBS=False;",
   "doWriteRDOTrigger=True;",
-  "ConfigFlags.Trigger.L1.doAlfaCtpin=True;",
+  "from AthenaConfiguration.AllConfigFlags import ConfigFlags;ConfigFlags.Trigger.L1.doAlfaCtpin=True;",
 ])
 ex.args = '-c "{:s}"'.format(precommand)
 
