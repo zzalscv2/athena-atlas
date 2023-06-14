@@ -25,3 +25,8 @@ atlas_add_test( TileTBDumpConfig_test
                 SCRIPT python -m TileTBRec.TileTBDumpConfig
                 PROPERTIES TIMEOUT 300
                 POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( TileTBStatConfig_test
+                SCRIPT python -m TileTBRec.TileTBStatConfig
+                PROPERTIES TIMEOUT 300
+                POST_EXEC_SCRIPT nopost.sh)
