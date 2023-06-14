@@ -701,7 +701,7 @@ StatusCode MuonRdoToMuonDigitTool::decodeNRpcRDO(const EventContext& ctx, RpcDig
         ATH_MSG_FATAL("Failed to retrieve the readout geometry "<<muonDetMgr.fullKey());
         return StatusCode::FAILURE;
     }    
-    using CablingData = MuonNRPC_CablingMap::CablingData;
+    using CablingData = NrpcCablingData;
     const RpcIdHelper& id_helper = m_idHelperSvc->rpcIdHelper();
         
     /// Prepare the ouput container map

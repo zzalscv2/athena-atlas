@@ -114,6 +114,8 @@ StatusCode MuonNRPC_CablingAlg::payLoadJSON(MuonNRPC_CablingMap& cabling_map,
         cabl_data.tdc = cabl_payload["tdc"];
         cabl_data.firstStrip = cabl_payload["firstStrip"];
         cabl_data.lastStrip = cabl_payload["lastStrip"];
+        cabl_data.firstChannel = cabl_payload["firstTdcChan"];
+        cabl_data.lastChannel = cabl_payload["lastTdcChan"];
         if (!cabling_map.insertChannels(cabl_data, msgStream())) {
             return StatusCode::FAILURE;
         }

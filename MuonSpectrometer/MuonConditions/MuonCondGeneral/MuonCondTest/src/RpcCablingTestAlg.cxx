@@ -80,7 +80,7 @@ StatusCode RpcCablingTestAlg::execute(){
               ATH_MSG_DEBUG("Successfully converted offline -> online "<<cabl_data);
               CablingData onl_data{};  
               /// Construct the cabling online identifier
-              onl_data.NrpcCablingOnData::operator=(cabl_data);
+              onl_data.NrpcCablingOnlineID::operator=(cabl_data);
               onl_data.channelId = cabl_data.channelId;
               if (!cabling->getOfflineId(onl_data, msgStream())) {
                  return StatusCode::FAILURE;
@@ -92,7 +92,7 @@ StatusCode RpcCablingTestAlg::execute(){
                 failure = true;
               }
               Identifier backChanId{0};
-              if (!cabling->convert(onl_data, backChanId,true)){
+              if (!cabling->convert(onl_data, backChanId, true)){
                  ATH_MSG_FATAL("Failed to translate back the cabling object"<<onl_data<<" to an Identifier");
                  return StatusCode::FAILURE;
               }
@@ -102,6 +102,7 @@ StatusCode RpcCablingTestAlg::execute(){
                   failure = true;
               }
               n_success += (!failure);
+              if (failure) return StatusCode::FAILURE;
           }
         }
       }

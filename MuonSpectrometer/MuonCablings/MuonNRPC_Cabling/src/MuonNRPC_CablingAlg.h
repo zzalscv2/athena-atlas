@@ -32,7 +32,7 @@ class MuonNRPC_CablingAlg : public AthAlgorithm {
     virtual StatusCode initialize() override;
     virtual StatusCode execute() override;
 
-    using CablingData = MuonNRPC_CablingMap::CablingData;
+    using CablingData = NrpcCablingCoolData;
 
 private:
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
