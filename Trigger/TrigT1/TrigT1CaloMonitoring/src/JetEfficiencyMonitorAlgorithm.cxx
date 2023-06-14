@@ -70,10 +70,14 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
   //DEFINITIONS and extracting variables from the python config file!
   bool use_emulated_gfex_trig =  m_emulated;
   bool use_passed_before_prescale =  m_passedb4Prescale;
-  std::string  bootstrap_trigger = m_bootstrap_reference_trigger;
-  std::string  HLTbootstrap_trigger = m_HLTbootstrap_reference_trigger;
-  std::vector<std::string> muon_triggers = m_muon_reference_triggers;
-  std::vector<std::string> HLTrandom_triggers = m_HLTrandom_reference_triggers;
+  const std::string& HLTbootstrap_trigger = m_HLTbootstrap_reference_trigger.value();
+  const std::string& bootstrap_trigger = m_bootstrap_reference_trigger.value();
+  const std::vector<std::string>& muon_triggers = m_muon_reference_triggers.value();
+   const std::vector<std::string>& HLTrandom_triggers = m_HLTrandom_reference_triggers.value();
+  // std::string  bootstrap_trigger = m_bootstrap_reference_trigger;
+  // std::string  HLTbootstrap_trigger = m_HLTbootstrap_reference_trigger;
+  // std::vector<std::string> muon_triggers = m_muon_reference_triggers;
+  // std::vector<std::string> HLTrandom_triggers = m_HLTrandom_reference_triggers;
   std::vector<std::string> gFex_types {"leadingGfex_SmallRadiusTOB", "leadingGfex_LargeRadiusTOB"};
   
   
@@ -129,7 +133,7 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
   //definition of variables for the offlineSRJet_maxEta_minPt_requirement and offlineLRJet_maxEta_minPt_requirement
   //these just force us to have a minimum pt, and limited eta region for our efficiency checks 
   constexpr int minPt = 10*GeV;
-  constexpr float maxEta = 2.8;
+  constexpr float maxEta = 2.5;
   
   std::map<std::string, SG::ReadHandle<xAOD::gFexJetRoIContainer>> gFEX_Container {
     //this naming is a bit misleading but it allows us to easily check the LR and SR gfex TOB contianers 
