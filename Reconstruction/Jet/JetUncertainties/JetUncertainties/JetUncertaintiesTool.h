@@ -194,7 +194,6 @@ class JetUncertaintiesTool :    virtual public ICPJetUncertaintiesTool,
 	std::string m_name_SigeffSF;
 	std::string m_name_Efficiency;
 	std::string m_name_TagResult;
-        bool m_absEtaGluonFraction;
         // bool m_flavourJetByJet;
 
         // Information to read in and store from the config file
@@ -272,6 +271,9 @@ class JetUncertaintiesTool :    virtual public ICPJetUncertaintiesTool,
 	SG::AuxElement::Accessor<float> m_accSigeffSF;
 	SG::AuxElement::Accessor<float> m_accEfficiency;
 	SG::AuxElement::Accessor<int> m_accTagResult;
+
+	// Properties for the flavour configuration
+	bool m_absEtaGluonFraction;
 };
     
 
