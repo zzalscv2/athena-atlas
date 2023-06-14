@@ -417,8 +417,13 @@ else:
     ConfigFlags.Reco.EnablePFlow = False
         
 HIDict = {}
+if rec.doHIP():
+    from HIRecConfig.HIModeFlags import HIPmode
+    HIPmode(ConfigFlags)
 if rec.doHeavyIon():
     # This is copy from the old style to the new
+    from HIRecConfig.HIModeFlags import HImode
+    HImode(ConfigFlags)
     # We need to have HI flags to do it nicer
     ConfigFlags.Egamma.Keys.Input.TopoClusters = 'SubtractedCaloTopoCluster'
     ConfigFlags.Egamma.Keys.Internal.EgammaTopoClusters = 'SubtractedEgammaTopoCluster'
