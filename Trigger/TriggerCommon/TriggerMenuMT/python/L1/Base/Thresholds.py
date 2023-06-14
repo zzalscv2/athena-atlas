@@ -891,34 +891,67 @@ class gJetThreshold( Threshold ):
 
     def __init__(self, name, ttype = 'gJ', mapping = -1):
         super(gJetThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='gJ' else 2)
-        self.et = None
 
-    def setEt(self, et):
-        """Et value in GeV"""
-        self.et = et
+    def addThrValue(self, value, *args, **kwargs):
+        defargs = ThresholdValue.getDefaults(self.ttype.name)
+        posargs = dict(zip(['etamin', 'etamax', 'phimin', 'phimax', 'priority'], args))
+
+        p = deepcopy(defargs)
+        p.update(posargs)
+        p.update(kwargs)
+
+        thrv = ThresholdValue(self.ttype, value,
+                              etamin = p['etamin'], etamax=p['etamax'], phimin=p['phimin'], phimax=p['phimax'],
+                              priority = p['priority'], name = self.name+'full')
+
+        self.thresholdValues.append(thrv)
         return self
 
     def json(self):
         confObj = odict()
-        confObj["value"] = self.et
         confObj["mapping"] = self.mapping
+        confObj["thrValues"] = []
+        for thrV in self.thresholdValues:
+            tvco = odict()
+            tvco["value"] = thrV.value
+            tvco["etamin"] = thrV.etamin
+            tvco["etamax"] = thrV.etamax
+            tvco["priority"] = thrV.priority
+            confObj["thrValues"].append( tvco )
         return confObj
+
 
 class gLJetThreshold( Threshold ):
 
     def __init__(self, name, ttype = 'gLJ', mapping = -1):
         super(gLJetThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='gLJ' else 2)
-        self.et = None
 
-    def setEt(self, et):
-        """Et value in GeV"""
-        self.et = et
+    def addThrValue(self, value, *args, **kwargs):
+        defargs = ThresholdValue.getDefaults(self.ttype.name)
+        posargs = dict(zip(['etamin', 'etamax', 'phimin', 'phimax', 'priority'], args))
+
+        p = deepcopy(defargs)
+        p.update(posargs)
+        p.update(kwargs)
+
+        thrv = ThresholdValue(self.ttype, value,
+                              etamin = p['etamin'], etamax=p['etamax'], phimin=p['phimin'], phimax=p['phimax'],
+                              priority = p['priority'], name = self.name+'full')
+
+        self.thresholdValues.append(thrv)
         return self
 
     def json(self):
         confObj = odict()
-        confObj["value"] = self.et
         confObj["mapping"] = self.mapping
+        confObj["thrValues"] = []
+        for thrV in self.thresholdValues:
+            tvco = odict()
+            tvco["value"] = thrV.value
+            tvco["etamin"] = thrV.etamin
+            tvco["etamax"] = thrV.etamax
+            tvco["priority"] = thrV.priority
+            confObj["thrValues"].append( tvco )
         return confObj
 
 

@@ -148,10 +148,10 @@ def defineMenu():
         'L1_jEM20', 'L1_jEM20M',   
 
         # gJ
-        'L1_gJ20', 'L1_gJ30', 'L1_gJ40', 'L1_gJ50', 'L1_gJ100', 'L1_gJ160',
+        'L1_gJ20p0ETA25', 'L1_gJ20p0ETA25_EMPTY', 'L1_gJ20p25ETA49', 'L1_gJ50p0ETA25', 'L1_gJ100p0ETA25', 'L1_gJ400p0ETA25',
 
         # gLJ
-        'L1_gLJ80', 'L1_gLJ100', 'L1_gLJ140', 'L1_gLJ160',
+        'L1_gLJ80p0ETA25', 'L1_gLJ100p0ETA25', 'L1_gLJ140p0ETA25', 'L1_gLJ160p0ETA25',
 
         # LAr saturation
         'L1_LArSaturation',
