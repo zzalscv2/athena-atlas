@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // @file AddTRTMomConstr.cxx
@@ -269,9 +269,7 @@ const Trk::TrackStateOnSurface* AddTRTMomConstr::findinnertrthit( const Trk::Tra
 const Trk::PseudoMeasurementOnTrack* AddTRTMomConstr::createPMfromSi ( const Trk::Perigee* mp ) {
   Trk::DefinedParameter z0   ( mp->parameters()[Trk::z0],    Trk::z0    ) ;
   Trk::DefinedParameter theta( mp->parameters()[Trk::theta], Trk::theta ) ;
-  std::vector<Trk::DefinedParameter> defPar ;
-  defPar.push_back( z0    ) ;
-  defPar.push_back( theta ) ;
+  std::array<Trk::DefinedParameter, 2> defPar = {z0, theta};
   if( !mp->covariance() )  return nullptr;
   Trk::LocalParameters  parFromSi( defPar ) ;
   AmgSymMatrix(2) covFromSi;
@@ -299,11 +297,9 @@ const Trk::PseudoMeasurementOnTrack* AddTRTMomConstr::createPMfromTRT( const Trk
   Trk::DefinedParameter z0TRT    ( mpSi->parameters()[Trk::z0],                 Trk::z0     ) ; //!< from Si
   Trk::DefinedParameter thetaTRT ( mpSi->parameters()[Trk::theta],              Trk::theta  ) ; //!< from Si
   Trk::DefinedParameter qOvewPTRT( mpTRT->parameters()[Trk::qOverP]*m_thetaCorr, Trk::qOverP ) ; //!< from TRT
-  std::vector<Trk::DefinedParameter> parFromTRT_vec ;
-  parFromTRT_vec.push_back( z0TRT     ) ;
-  parFromTRT_vec.push_back( thetaTRT  ) ;
-  parFromTRT_vec.push_back( qOvewPTRT ) ;
-  Trk::LocalParameters  parFromTRT( parFromTRT_vec ) ;
+  std::array<Trk::DefinedParameter, 3> parFromTRT_vec = {z0TRT, thetaTRT,
+                                                         qOvewPTRT};
+  Trk::LocalParameters parFromTRT(parFromTRT_vec);
   double A = 1e6 ; // scale up the errorfor z0 and theta to avoid double-counting when including the PM
   
   

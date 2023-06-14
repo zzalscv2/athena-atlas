@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSegment/MuonSegment.h"
@@ -93,11 +93,11 @@ MuonSegment::MuonSegment(const Amg::Vector2D& locSegPos,
 
   double phi = m_globalDirection.phi();
   double theta = m_globalDirection.theta();
-  std::vector<Trk::DefinedParameter> pars;
-  pars.emplace_back(locSegPos[Trk::locX], Trk::locX);
-  pars.emplace_back(locSegPos[Trk::locY], Trk::locY);
-  pars.emplace_back(phi, Trk::phi);
-  pars.emplace_back(theta, Trk::theta);
+  std::array<Trk::DefinedParameter, 4> pars = {
+      {{locSegPos[Trk::locX], Trk::locX},
+       {locSegPos[Trk::locY], Trk::locY},
+       {phi, Trk::phi},
+       {theta, Trk::theta}}};
   m_localParams = Trk::LocalParameters(pars);
 }
 
