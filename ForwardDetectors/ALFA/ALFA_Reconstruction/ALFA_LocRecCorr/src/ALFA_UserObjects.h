@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_USEROBJECTS_H
@@ -8,7 +8,6 @@
 #include <iostream>
 #include <list>
 
-using namespace std;
 
 typedef struct _ODHIT
 {
@@ -29,7 +28,7 @@ typedef struct _MDHIT
 
 typedef struct _FIBERS
 {
-	list<int> ListFibers;
+	std::list<int> ListFibers;
 } FIBERS, *PFIBERS;
 
 typedef struct _ODRESULT
