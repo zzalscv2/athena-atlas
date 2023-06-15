@@ -319,8 +319,8 @@ def TrigMETMonConfig(inputFlags):
     #sume_bins_log=40 #sumE_log
     #sume_min_log=-1.875
     #sume_max_log=6.125
-    phi_bins=100 # phi
-    phi_bins_2d=24 # phi
+    phi_bins=64 # phi, used to be 100
+    phi_bins_2d=32 # phi, used to be 24
     phi_min=-3.1416
     phi_max=3.1416
     eta_bins_2d=24# eta
