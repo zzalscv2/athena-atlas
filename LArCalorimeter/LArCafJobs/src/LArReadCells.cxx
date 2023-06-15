@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCafJobs/LArReadCells.h"
@@ -9,6 +9,7 @@
 #include "Identifier/Identifier.h"
 #include "Identifier/HWIdentifier.h"
 
+#include "CaloIdentifier/CaloIdManager.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloGeoHelpers/CaloSampling.h"
 #include "CaloEvent/CaloCell.h"
@@ -70,8 +71,9 @@ StatusCode LArReadCells::initialize() {
   m_tree->Branch("HwidCell", m_HwidCell.data(),"hwidCell[ncells]/I");
   m_tree->Branch("ADC",m_ADC.data(),"ADC[ncells][32]/F");
 
-  ATH_CHECK(detStore()->retrieve(m_caloIdMgr));
-  m_calo_id      = m_caloIdMgr->getCaloCell_ID();
+  const CaloIdManager* caloIdMgr = nullptr;
+  ATH_CHECK(detStore()->retrieve(caloIdMgr));
+  m_calo_id      = caloIdMgr->getCaloCell_ID();
   ATH_CHECK( detStore()->retrieve(m_lar_online_id, "LArOnlineID") );
 
   ATH_CHECK( m_cablingKey.initialize() );

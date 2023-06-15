@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -8,7 +8,6 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 
-#include "CaloIdentifier/CaloIdManager.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "LArIdentifier/LArOnlineID.h"
 #include "LArElecCalib/ILArPedestal.h"
@@ -34,7 +33,6 @@ class  ATLAS_NOT_THREAD_SAFE LArReadCells: public ::AthAlgorithm {
    Gaudi::Property<double> m_etcut2{this,"etCut2",7500.,"Et cut to dump cells from second layer"};
    Gaudi::Property< std::string > m_outStream{this, "output","SPLASH", "to which stream write the ntuple"};
 
-   const DataHandle<CaloIdManager> m_caloIdMgr;
    const CaloCell_ID*       m_calo_id = nullptr;
 
 
