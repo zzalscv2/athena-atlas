@@ -44,9 +44,9 @@ void pretty_print_table(
       }
     }
     shape_str += "]";
-
+    size_t l = shape_str.length();
     shape_strs.push_back(std::move(shape_str));
-    max_length_shape = std::max(max_length_shape, shape_str.length());
+    max_length_shape = std::max(max_length_shape, l);
   }
 
   int line_length = max_length_name + 4 + 10 + 3 + max_length_shape;
@@ -54,6 +54,7 @@ void pretty_print_table(
   std::cout << h_line << std::endl; 
 
   // header
+  std::ios_base::fmtflags f( std::cout.flags() ); //save cout format flags
   std::cout << std::left << std::setw(max_length_name + 4) << " name";
   std::cout << std::setw(10) << "type";
   std::cout << "shape" << std::endl;
@@ -66,6 +67,7 @@ void pretty_print_table(
     std::cout << shape_strs.at(i) << std::endl;
   }   
   std::cout << h_line << std::endl; 
+  std::cout.flags( f );//restore format
 }
 
 
