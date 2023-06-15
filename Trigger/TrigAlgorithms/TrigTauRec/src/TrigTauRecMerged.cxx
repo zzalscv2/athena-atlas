@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigTauRecMerged.h"
@@ -40,29 +40,39 @@ StatusCode TrigTauRecMerged::initialize()
 {
   ATH_MSG_DEBUG("TrigTauRecMerged::initialize()");
 
-  for(const auto& tool : m_commonTools) {
-    ATH_CHECK( tool.retrieve() );
-  } 
+  if ( m_tools.begin() == m_tools.end() ) {
+    ATH_MSG_DEBUG(" no tools given for this algorithm.");
+    return StatusCode::FAILURE;
+  }
 
-  for(const auto& tool : m_vertexFinderTools) {
-    ATH_CHECK( tool.retrieve() );
-  } 
+  ATH_MSG_DEBUG("List of tools in execution sequence:");
 
-  for(const auto& tool : m_trackFinderTools) {
-    ATH_CHECK( tool.retrieve() );
-  } 
+  for(const auto& tool : m_tools) {
+    // make sure the key of the container in tauRecTool are the same
+    // need to set the property before the initialization of tools
+    if (tool.name().find("VertexFinder") != std::string::npos) {
+      ATH_CHECK( AAH::setProperty(tool, "Key_trackPartInputContainer",m_tracksKey.key()) );
+      ATH_CHECK( AAH::setProperty(tool, "Key_vertexInputContainer",m_vertexKey.key()) );
+    }
+    else if (tool.name().find("TrackFinder") != std::string::npos) {
+      ATH_CHECK( AAH::setProperty(tool, "Key_trackPartInputContainer",m_tracksKey.key()) );
+    }
 
-  for(const auto& tool : m_vertexVarsTools) {
-    ATH_CHECK( tool.retrieve() );
-  } 
+    StatusCode p_sc = tool.retrieve();
+    if( p_sc.isFailure() ) {
+      ATH_MSG_DEBUG("Cannot find tool named <" << tool << ">");
+      return StatusCode::FAILURE;
+    }
+    else {
+      ATH_MSG_DEBUG("Add timer for tool "<< tool.type() <<" "<< tool.name());
+    }
+  }
 
-  for(const auto& tool : m_idTools) {
-    ATH_CHECK( tool.retrieve() );
-  } 
-
-  ATH_CHECK( m_monTool.retrieve() );
+  if ( not m_monTool.name().empty() ) {
+    ATH_CHECK( m_monTool.retrieve() );
+  }
   
-  ATH_MSG_DEBUG("Initialising Handle Keys");
+  ATH_MSG_DEBUG("Initialising HandleKeys");
   ATH_CHECK(m_roIInputKey.initialize());
   ATH_CHECK(m_clustersKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_tracksKey.initialize(SG::AllowEmpty));
@@ -78,8 +88,7 @@ StatusCode TrigTauRecMerged::initialize()
 
 StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
 {
-
-  ATH_MSG_DEBUG("Executing " << this->name());
+  ATH_MSG_DEBUG("Execution");
 
   // variables to initialize and keep values for monitoring variables
   std::vector<unsigned char> calo_errors(0);
@@ -182,6 +191,10 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
                    RNNJetScore_1p, RNNJetScoreSigTrans_1p,RNNJetScore_mp,RNNJetScoreSigTrans_mp,Cluster_et_log, Cluster_dEta, Cluster_dPhi, Cluster_log_SECOND_R,
                    Cluster_SECOND_LAMBDA, Cluster_CENTER_LAMBDA, RNN_tracknumber, EF_vertex_x, EF_vertex_y, EF_vertex_z, EF_calo_errors, EF_track_errors, Track_pt_log, Track_dEta, Track_dPhi, Track_z0sinThetaTJVA_abs_log, Track_d0_abs_log, Track_nIBLHitsAndExp,
                    Track_nPixelHitsPlusDeadSensors, Track_nSCTHitsPlusDeadSensors, clustersMeanCenterLambda, clustersMeanFirstEngDens, clustersMeanEMProbability, clustersMeanSecondLambda, clustersMeanPresamplerFrac); 
+
+
+  // Retrieve store.
+  ATH_MSG_DEBUG("Executing TrigTauRecMerged");
 
   // Get RoiDescriptor
   SG::ReadHandle< TrigRoiDescriptorCollection > roisHandle = SG::makeHandle( m_roIInputKey, ctx );
@@ -374,234 +387,258 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
 
   ATH_MSG_DEBUG(" roidescriptor roiword " << roiDescriptor->roiWord() << " saved " << p_tau->ROIWord() );
 
+  StatusCode processStatus = StatusCode::SUCCESS;
+
+  ATH_MSG_DEBUG(" initialize all good ");
+
   //-------------------------------------------------------------------------
   // loop over booked tau tools
   //-------------------------------------------------------------------------
+  processStatus = StatusCode::SUCCESS;
   
   // dummy container passed to TauVertexVariables, not used in trigger though
   xAOD::VertexContainer dummyVxCont;
+ 
+  ATH_MSG_DEBUG("Starting tool loop with seed jet");
 
-  for (const auto& tool: m_vertexFinderTools){
+  for (const auto& tool : m_tools) {
+    // loop stops only when Failure indicated by one of the tools
     ATH_MSG_DEBUG("Starting Tool: " <<  tool->name() );
-    ATH_CHECK(tool->executeVertexFinder(*p_tau,RoIVxContainer));
-  }
+    // time in the various tools
 
-  ATH_MSG_DEBUG("Starting Tool: " <<  m_commonTools[0]->name() );
-  ATH_CHECK(m_commonTools[0]->execute( *p_tau));
-
-  for (const auto& tool: m_trackFinderTools){
-    ATH_MSG_DEBUG("Starting Tool: " <<  tool->name() );
-    ATH_CHECK(tool->executeTrackFinder(*p_tau, *tauTrackHandle));
-  }
-
-  for (unsigned int i=1; i< m_commonTools.size(); i++) {
-    ATH_MSG_DEBUG("Starting Tool: " <<  m_commonTools[i]->name() );
-    ATH_CHECK(m_commonTools[i]->execute(*p_tau));
-  }
-
-  for (const auto& tool: m_vertexVarsTools){
-    ATH_MSG_DEBUG("Starting Tool: " <<  tool->name() );
-    ATH_CHECK(tool->executeVertexVariables(*p_tau, dummyVxCont));
-  }
-
-  for (const auto& tool: m_idTools) {
-    ATH_MSG_DEBUG("Starting Tool: " <<  tool->name() );
-    ATH_CHECK(tool->execute(*p_tau));
+    if (tool->type() == "TauVertexFinder" ) {
+      processStatus = tool->executeVertexFinder(*p_tau,RoIVxContainer);
+    }
+    else if (tool->type() == "TauTrackFinder") {
+      processStatus = tool->executeTrackFinder(*p_tau, *tauTrackHandle);
+    }
+    else if (tool->type() == "TauVertexVariables" ) {
+      processStatus = tool->executeVertexVariables(*p_tau, dummyVxCont);
+    }
+    else {
+      processStatus = tool->execute( *p_tau );
+    }
+    
+    if ( !processStatus.isFailure() ) {
+      ATH_MSG_DEBUG(" "<< tool->name() << " executed successfully ");
+      ATH_MSG_DEBUG(" Roi: " << roiDescriptor->roiId()
+		    << " Tau eta: " << p_tau->eta() << " Tau phi: " << p_tau->phi()
+		    << " Tau pT : "<< p_tau->pt());
+    }
+    else {
+      ATH_MSG_DEBUG(" "<< tool->name() << " execution failed ");
+      break;
+    }
   }
 
   ATH_MSG_DEBUG("This tau has " << p_tau->allTracks() << " tracks linked");
 
-  float fJetEnergy = (*p_tau->jetLink())->e();
-  ATH_MSG_DEBUG("Roi: jet e "<< fJetEnergy);
-        
-  if( fJetEnergy < 0.00001 ) {
-    ATH_MSG_DEBUG("Roi: changing eta phi to L1 ones due to energy negative (PxPyPzE flips eta and phi)");
-    ATH_MSG_DEBUG("Roi: this is probably not needed anymore, method PxPyPzE has been corrected");
-          
-    p_tau->setP4(p_tau->pt(), roiDescriptor->eta(), roiDescriptor->phi(), p_tau->m());
-          
-    ATH_MSG_DEBUG("Roi: " << roiDescriptor->roiId()
-      	    << " Tau eta: " << p_tau->eta()
-      	    << " Tau phi: " << p_tau->phi()
-      	    << " Tau pT : "<< p_tau->pt());
+  //check status
+  if ( !processStatus.isSuccess() )  {   // some problem
+    ATH_MSG_DEBUG("The tau object has NOT been registered in the tau container");
+
+    xAOD::TauJet* bad_tau = outputTauHandle->back();
+    ATH_MSG_DEBUG("Deleting " << bad_tau->nAllTracks() << " tracks associated with tau");
+    tauTrackHandle->erase(tauTrackHandle->end()-bad_tau->nAllTracks(), tauTrackHandle->end());
+
+    outputTauHandle->pop_back();
+
+    ATH_MSG_DEBUG("Clean up done after jet seed");  
   }
+  else {
 
-  // get tau detail variables for Monitoring
+    float fJetEnergy = (*p_tau->jetLink())->e();
+    ATH_MSG_DEBUG("Roi: jet e "<< fJetEnergy);
+	  
+    if( fJetEnergy < 0.00001 ) {
+      ATH_MSG_DEBUG("Roi: changing eta phi to L1 ones due to energy negative (PxPyPzE flips eta and phi)");
+      ATH_MSG_DEBUG("Roi: this is probably not needed anymore, method PxPyPzE has been corrected");
+	    
+      p_tau->setP4(p_tau->pt(), roiDescriptor->eta(), roiDescriptor->phi(), p_tau->m());
+	    
+      ATH_MSG_DEBUG("Roi: " << roiDescriptor->roiId()
+		    << " Tau eta: " << p_tau->eta()
+		    << " Tau phi: " << p_tau->phi()
+		    << " Tau pT : "<< p_tau->pt());
+    }
 
-  numTrack = p_tau->nTracks();
-  nWideTrk = p_tau->nTracksIsolation();
-  p_tau->detail(xAOD::TauJetParameters::numCells, nCells);
-  p_tau->detail(xAOD::TauJetParameters::nChargedTracks, nTracks);
-  p_tau->detail(xAOD::TauJetParameters::trkAvgDist, trkAvgDist);
-  p_tau->detail(xAOD::TauJetParameters::etOverPtLeadTrk, etovPtLead);
-  p_tau->detail(xAOD::TauJetParameters::EMRadius, emRadius);
-  p_tau->detail(xAOD::TauJetParameters::hadRadius, hadRadius);
-  p_tau->detail(xAOD::TauJetParameters::isolFrac, IsoFrac);
-  p_tau->detail(xAOD::TauJetParameters::centFrac, centFrac);
-  p_tau->detail(xAOD::TauJetParameters::ipSigLeadTrk, ipSigLeadTrk);
-  p_tau->detail(xAOD::TauJetParameters::trFlightPathSig, trFlightPathSig);
-  p_tau->detail(xAOD::TauJetParameters::dRmax, dRmax);
-  p_tau->detail(xAOD::TauJetParameters::massTrkSys, massTrkSys);
-        
-  p_tau->detail(xAOD::TauJetParameters::PSSFraction, PSSFraction);
-  p_tau->detail(xAOD::TauJetParameters::EMPOverTrkSysP, EMPOverTrkSysP);
-  p_tau->detail(xAOD::TauJetParameters::ChPiEMEOverCaloEME, ChPiEMEOverCaloEME);
-  p_tau->detail(xAOD::TauJetParameters::innerTrkAvgDist, innerTrkAvgDist);	 
-  p_tau->detail(xAOD::TauJetParameters::SumPtTrkFrac, SumPtTrkFrac);
+    // get tau detail variables for Monitoring
 
-  massTrkSys /= Gaudi::Units::GeV;
-  p_tau->detail(xAOD::TauJetParameters::etEMAtEMScale, EtEm);
-  EtEm /= Gaudi::Units::GeV;
-  p_tau->detail(xAOD::TauJetParameters::etHadAtEMScale, EtHad);
-  EtHad /= Gaudi::Units::GeV;
-  Et            = EtEm + EtHad;
-  EtFinal       = p_tau->pt()/Gaudi::Units::GeV;
-  
-  EtaEF = p_tau->eta();
-  PhiEF = p_tau->phi();
-        
-  if( Et !=0) EMFrac =  EtEm/ Et ;
+    numTrack = p_tau->nTracks();
+    nWideTrk = p_tau->nTracksIsolation();
+    p_tau->detail(xAOD::TauJetParameters::numCells, nCells);
+    p_tau->detail(xAOD::TauJetParameters::nChargedTracks, nTracks);
+    p_tau->detail(xAOD::TauJetParameters::trkAvgDist, trkAvgDist);
+    p_tau->detail(xAOD::TauJetParameters::etOverPtLeadTrk, etovPtLead);
+    p_tau->detail(xAOD::TauJetParameters::EMRadius, emRadius);
+    p_tau->detail(xAOD::TauJetParameters::hadRadius, hadRadius);
+    p_tau->detail(xAOD::TauJetParameters::isolFrac, IsoFrac);
+    p_tau->detail(xAOD::TauJetParameters::centFrac, centFrac);
+    p_tau->detail(xAOD::TauJetParameters::ipSigLeadTrk, ipSigLeadTrk);
+    p_tau->detail(xAOD::TauJetParameters::trFlightPathSig, trFlightPathSig);
+    p_tau->detail(xAOD::TauJetParameters::dRmax, dRmax);
+    p_tau->detail(xAOD::TauJetParameters::massTrkSys, massTrkSys);
+	  
+    p_tau->detail(xAOD::TauJetParameters::PSSFraction, PSSFraction);
+    p_tau->detail(xAOD::TauJetParameters::EMPOverTrkSysP, EMPOverTrkSysP);
+    p_tau->detail(xAOD::TauJetParameters::ChPiEMEOverCaloEME, ChPiEMEOverCaloEME);
+    p_tau->detail(xAOD::TauJetParameters::innerTrkAvgDist, innerTrkAvgDist);	 
+    p_tau->detail(xAOD::TauJetParameters::SumPtTrkFrac, SumPtTrkFrac);
 
-  EtaL1 = roiDescriptor->eta();
-  PhiL1 = roiDescriptor->phi();	  
-  dEta =  EtaEF - roiDescriptor->eta();
-  dPhi =  PhiEF - roiDescriptor->phi();
-  if(dPhi<-M_PI) dPhi += 2.0*M_PI;
-  if(dPhi>M_PI)  dPhi -= 2.0*M_PI;
+    massTrkSys /= Gaudi::Units::GeV;
+    p_tau->detail(xAOD::TauJetParameters::etEMAtEMScale, EtEm);
+    EtEm /= Gaudi::Units::GeV;
+    p_tau->detail(xAOD::TauJetParameters::etHadAtEMScale, EtHad);
+    EtHad /= Gaudi::Units::GeV;
+    Et            = EtEm + EtHad;
+    EtFinal       = p_tau->pt()/Gaudi::Units::GeV;
+    
+    EtaEF = p_tau->eta();
+    PhiEF = p_tau->phi();
+	  
+    if( Et !=0) EMFrac =  EtEm/ Et ;
 
- 
-  float pre_mEflowApprox;
-  p_tau->detail(xAOD::TauJetParameters::mEflowApprox, pre_mEflowApprox);  
-  mEflowApprox = std::log10(std::max(pre_mEflowApprox, 140.0f));
+    EtaL1 = roiDescriptor->eta();
+    PhiL1 = roiDescriptor->phi();	  
+    dEta =  EtaEF - roiDescriptor->eta();
+    dPhi =  PhiEF - roiDescriptor->phi();
+    if(dPhi<-M_PI) dPhi += 2.0*M_PI;
+    if(dPhi>M_PI)  dPhi -= 2.0*M_PI;
 
-  float pre_ptRatioEflowApprox;
-  p_tau->detail(xAOD::TauJetParameters::ptRatioEflowApprox, pre_ptRatioEflowApprox);
-  ptRatioEflowApprox = std::min(pre_ptRatioEflowApprox, 4.0f);
-  
-  pt_jetseed_log  = std::log10(p_tau->ptJetSeed());
-
-  ptDetectorAxis  =  std::min(p_tau->ptDetectorAxis() / 1000.0, 10000.0);
-  ptDetectorAxis_log  =  std::log10(std::min(p_tau->ptDetectorAxis() / 1000.0, 10000.0));
- 
-  etaDetectorAxis  = p_tau->etaDetectorAxis();   
-
-  if( p_tau->nTracks() > 0 ) {
-    ipSigLeadTrk = std::abs(p_tau->track(0)->d0SigTJVA());
-  }
-
-  // track variables monitoring 
-  for( auto track : p_tau->allTracks()){
-  
-      RNN_tracknumber += 1;
-      track_pt_log.push_back(std::log10( track->pt()));
-      track_dEta.push_back(track->eta()- p_tau->eta()); 
-      track_dPhi.push_back(track->p4().DeltaPhi(p_tau->p4()));
-      track_z0sinThetaTJVA_abs_log.push_back(track->z0sinThetaTJVA(*p_tau));
-      track_d0_abs_log.push_back(std::log10( std::abs(track->track()->d0()) + 1e-6));
-
-      uint8_t inner_pixel_hits, inner_pixel_exp;                    
-      const auto success1_innerPixel_hits = track->track()->summaryValue(inner_pixel_hits, xAOD::numberOfInnermostPixelLayerHits);                        
-      const auto success2_innerPixel_exp = track->track()->summaryValue(inner_pixel_exp, xAOD::expectInnermostPixelLayerHit);                                       
-      float nIBLHitsAndExp = -999;                                              
-      if (success1_innerPixel_hits && success2_innerPixel_exp) {nIBLHitsAndExp=inner_pixel_exp ? inner_pixel_hits : 1.;};        
-      track_nIBLHitsAndExp.push_back(nIBLHitsAndExp);
-
-      uint8_t pixel_hits, pixel_dead;                                    
-      const auto success1_pixel_hits = track->track()->summaryValue(pixel_hits, xAOD::numberOfPixelHits);          
-      const auto success2_pixel_dead = track->track()->summaryValue(pixel_dead, xAOD::numberOfPixelDeadSensors);                           
-      float nPixelHitsPlusDeadSensor = -999;                                         
-      if (success1_pixel_hits && success2_pixel_dead) {nPixelHitsPlusDeadSensor=pixel_hits + pixel_dead;};                      
-      track_nPixelHitsPlusDeadSensors.push_back(nPixelHitsPlusDeadSensor);
-
-      uint8_t sct_hits, sct_dead;                                       
-      const auto success1_sct_hits = track->track()->summaryValue(sct_hits, xAOD::numberOfSCTHits);                   
-      const auto success2_sct_dead = track->track()->summaryValue(sct_dead, xAOD::numberOfSCTDeadSensors);                           
-      float nSCTHitsPlusDeadSensors = -999;     
-      if (success1_sct_hits && success2_sct_dead) {nSCTHitsPlusDeadSensors=sct_hits + sct_dead;};                               
-      track_nSCTHitsPlusDeadSensors.push_back(nSCTHitsPlusDeadSensors);
-  }
-
-  RNN_clusternumber = p_tau->clusters().size();
-
-  // cluster variables monitoring
-  for ( auto cluster : p_tau->clusters()){
-
-      auto cls = dynamic_cast<const xAOD::CaloCluster*>(cluster);
-
-      cluster_et_log.push_back(std::log10( cls->et()));
-      cluster_dEta.push_back( cls->eta()- p_tau->eta());
-      cluster_dPhi.push_back( cls ->p4().DeltaPhi(p_tau->p4()));
    
-      double log_second_R = -999.;
-      const auto success_SECOND_R = cls->retrieveMoment(xAOD::CaloCluster::MomentType::SECOND_R,log_second_R);
-      if (success_SECOND_R) log_second_R = std::log10(log_second_R + 0.1);
-      cluster_log_SECOND_R.push_back(log_second_R);
+    float pre_mEflowApprox;
+    p_tau->detail(xAOD::TauJetParameters::mEflowApprox, pre_mEflowApprox);  
+    mEflowApprox = std::log10(std::max(pre_mEflowApprox, 140.0f));
 
-      double second_lambda = -999.;
-      const auto success_SECOND_LAMBDA = cls->retrieveMoment(xAOD::CaloCluster::MomentType::SECOND_LAMBDA, second_lambda);
-      if (success_SECOND_LAMBDA) second_lambda = std::log10(second_lambda + 0.1);
-      cluster_SECOND_LAMBDA.push_back(second_lambda);
+    float pre_ptRatioEflowApprox;
+    p_tau->detail(xAOD::TauJetParameters::ptRatioEflowApprox, pre_ptRatioEflowApprox);
+    ptRatioEflowApprox = std::min(pre_ptRatioEflowApprox, 4.0f);
+    
+    pt_jetseed_log  = std::log10(p_tau->ptJetSeed());
 
-      double center_lambda = -999.;
-      const auto success_CENTER_LAMBDA = cls->retrieveMoment(xAOD::CaloCluster::MomentType::CENTER_LAMBDA, center_lambda);
-      if (success_CENTER_LAMBDA) center_lambda = std::log10(center_lambda + 1e-6);
-      cluster_CENTER_LAMBDA.push_back(center_lambda);     
-  }
-
-  // monitoring tau vertex
-  if( p_tau->vertexLink().isValid() && p_tau->vertex() && p_tau->vertex()->vertexType() != xAOD::VxType::NoVtx ){
-      EF_vertex_x = p_tau->vertex()->x();
-      EF_vertex_y = p_tau->vertex()->y();       
-      EF_vertex_z = p_tau->vertex()->z();
-  }
-
-  ATH_MSG_DEBUG(" Roi: " << roiDescriptor->roiId()
-      	  << " Tau being saved eta: " << EtaEF << " Tau phi: " << PhiEF
-      	  << " wrt L1 dEta "<< dEta<<" dPhi "<<dPhi
-      	  << " Tau Et (GeV): "<< EtFinal);
-        
-  // monitor RNN score
-  if(p_tau->hasDiscriminant(xAOD::TauJetParameters::RNNJetScore)){
-      if(p_tau->nTracks() == 0){
-         RNNJetScore_0p = p_tau->discriminant(xAOD::TauJetParameters::RNNJetScore);
-      } else if (p_tau->nTracks() == 1) {
-         RNNJetScore_1p = p_tau->discriminant(xAOD::TauJetParameters::RNNJetScore);
-      } else {
-         RNNJetScore_mp = p_tau->discriminant(xAOD::TauJetParameters::RNNJetScore);
-      }
-  }
+    ptDetectorAxis  =  std::min(p_tau->ptDetectorAxis() / 1000.0, 10000.0);
+    ptDetectorAxis_log  =  std::log10(std::min(p_tau->ptDetectorAxis() / 1000.0, 10000.0));
+   
+    etaDetectorAxis  = p_tau->etaDetectorAxis();   
  
-  if(p_tau->hasDiscriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans)){
-      if(p_tau->nTracks() == 0){
-         RNNJetScoreSigTrans_0p = p_tau->discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans);
-      } else if (p_tau->nTracks() == 1){
-         RNNJetScoreSigTrans_1p = p_tau->discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans);
-      } else {
-         RNNJetScoreSigTrans_mp = p_tau->discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans);
-      }
+    if( p_tau->nTracks() > 0 ) {
+      ipSigLeadTrk = std::abs(p_tau->track(0)->d0SigTJVA());
+    }
+
+    // track variables monitoring 
+    for( auto track : p_tau->allTracks()){
+    
+        RNN_tracknumber += 1;
+        track_pt_log.push_back(std::log10( track->pt()));
+        track_dEta.push_back(track->eta()- p_tau->eta()); 
+        track_dPhi.push_back(track->p4().DeltaPhi(p_tau->p4()));
+        track_z0sinThetaTJVA_abs_log.push_back(track->z0sinThetaTJVA(*p_tau));
+        track_d0_abs_log.push_back(std::log10( std::abs(track->track()->d0()) + 1e-6));
+
+        uint8_t inner_pixel_hits, inner_pixel_exp;                    
+        const auto success1_innerPixel_hits = track->track()->summaryValue(inner_pixel_hits, xAOD::numberOfInnermostPixelLayerHits);                        
+        const auto success2_innerPixel_exp = track->track()->summaryValue(inner_pixel_exp, xAOD::expectInnermostPixelLayerHit);                                       
+        float nIBLHitsAndExp = -999;                                              
+        if (success1_innerPixel_hits && success2_innerPixel_exp) {nIBLHitsAndExp=inner_pixel_exp ? inner_pixel_hits : 1.;};        
+        track_nIBLHitsAndExp.push_back(nIBLHitsAndExp);
+
+        uint8_t pixel_hits, pixel_dead;                                    
+        const auto success1_pixel_hits = track->track()->summaryValue(pixel_hits, xAOD::numberOfPixelHits);          
+        const auto success2_pixel_dead = track->track()->summaryValue(pixel_dead, xAOD::numberOfPixelDeadSensors);                           
+        float nPixelHitsPlusDeadSensor = -999;                                         
+        if (success1_pixel_hits && success2_pixel_dead) {nPixelHitsPlusDeadSensor=pixel_hits + pixel_dead;};                      
+        track_nPixelHitsPlusDeadSensors.push_back(nPixelHitsPlusDeadSensor);
+
+        uint8_t sct_hits, sct_dead;                                       
+        const auto success1_sct_hits = track->track()->summaryValue(sct_hits, xAOD::numberOfSCTHits);                   
+        const auto success2_sct_dead = track->track()->summaryValue(sct_dead, xAOD::numberOfSCTDeadSensors);                           
+        float nSCTHitsPlusDeadSensors = -999;     
+        if (success1_sct_hits && success2_sct_dead) {nSCTHitsPlusDeadSensors=sct_hits + sct_dead;};                               
+        track_nSCTHitsPlusDeadSensors.push_back(nSCTHitsPlusDeadSensors);
+    }
+
+    RNN_clusternumber = p_tau->clusters().size();
+
+    // cluster variables monitoring
+    for ( auto cluster : p_tau->clusters()){
+
+        auto cls = dynamic_cast<const xAOD::CaloCluster*>(cluster);
+
+        cluster_et_log.push_back(std::log10( cls->et()));
+        cluster_dEta.push_back( cls->eta()- p_tau->eta());
+        cluster_dPhi.push_back( cls ->p4().DeltaPhi(p_tau->p4()));
+     
+        double log_second_R = -999.;
+        const auto success_SECOND_R = cls->retrieveMoment(xAOD::CaloCluster::MomentType::SECOND_R,log_second_R);
+        if (success_SECOND_R) log_second_R = std::log10(log_second_R + 0.1);
+        cluster_log_SECOND_R.push_back(log_second_R);
+
+        double second_lambda = -999.;
+        const auto success_SECOND_LAMBDA = cls->retrieveMoment(xAOD::CaloCluster::MomentType::SECOND_LAMBDA, second_lambda);
+        if (success_SECOND_LAMBDA) second_lambda = std::log10(second_lambda + 0.1);
+        cluster_SECOND_LAMBDA.push_back(second_lambda);
+
+        double center_lambda = -999.;
+        const auto success_CENTER_LAMBDA = cls->retrieveMoment(xAOD::CaloCluster::MomentType::CENTER_LAMBDA, center_lambda);
+        if (success_CENTER_LAMBDA) center_lambda = std::log10(center_lambda + 1e-6);
+        cluster_CENTER_LAMBDA.push_back(center_lambda);     
+    }
+
+    // monitoring tau vertex
+    if( p_tau->vertexLink().isValid() && p_tau->vertex() && p_tau->vertex()->vertexType() != xAOD::VxType::NoVtx ){
+        EF_vertex_x = p_tau->vertex()->x();
+        EF_vertex_y = p_tau->vertex()->y();       
+        EF_vertex_z = p_tau->vertex()->z();
+    }
+
+    ATH_MSG_DEBUG(" Roi: " << roiDescriptor->roiId()
+		  << " Tau being saved eta: " << EtaEF << " Tau phi: " << PhiEF
+		  << " wrt L1 dEta "<< dEta<<" dPhi "<<dPhi
+		  << " Tau Et (GeV): "<< EtFinal);
+	  
+    // monitor RNN score
+    if(p_tau->hasDiscriminant(xAOD::TauJetParameters::RNNJetScore)){
+        if(p_tau->nTracks() == 0){
+           RNNJetScore_0p = p_tau->discriminant(xAOD::TauJetParameters::RNNJetScore);
+        } else if (p_tau->nTracks() == 1) {
+           RNNJetScore_1p = p_tau->discriminant(xAOD::TauJetParameters::RNNJetScore);
+        } else {
+           RNNJetScore_mp = p_tau->discriminant(xAOD::TauJetParameters::RNNJetScore);
+        }
+    }
+   
+    if(p_tau->hasDiscriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans)){
+        if(p_tau->nTracks() == 0){
+           RNNJetScoreSigTrans_0p = p_tau->discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans);
+        } else if (p_tau->nTracks() == 1){
+           RNNJetScoreSigTrans_1p = p_tau->discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans);
+        } else {
+           RNNJetScoreSigTrans_mp = p_tau->discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans);
+        }
+    }
+
+    // monitor BRT variables
+
+    // use dummy variable to temporarily store results retrieved from tau EDM before final assignment
+    float avariable = 0.;
+
+    bool test = p_tau->detail(xAOD::TauJetParameters::ClustersMeanCenterLambda, avariable);
+    if(test) clustersMeanCenterLambda = avariable;
+
+    test = p_tau->detail(xAOD::TauJetParameters::ClustersMeanFirstEngDens, avariable);
+    if(test) clustersMeanFirstEngDens = avariable;
+
+    test = p_tau->detail(xAOD::TauJetParameters::ClustersMeanEMProbability, avariable);
+    if(test) clustersMeanEMProbability = avariable;
+
+    test = p_tau->detail(xAOD::TauJetParameters::ClustersMeanSecondLambda, avariable);
+    if(test) clustersMeanSecondLambda = avariable;
+
+    test = p_tau->detail(xAOD::TauJetParameters::ClustersMeanPresamplerFrac, avariable);
+    if(test) clustersMeanPresamplerFrac = avariable;
+ 
+    ++Ncand;
   }
-
-  // monitor BRT variables
-
-  // use dummy variable to temporarily store results retrieved from tau EDM before final assignment
-  float avariable = 0.;
-
-  bool test = p_tau->detail(xAOD::TauJetParameters::ClustersMeanCenterLambda, avariable);
-  if(test) clustersMeanCenterLambda = avariable;
-
-  test = p_tau->detail(xAOD::TauJetParameters::ClustersMeanFirstEngDens, avariable);
-  if(test) clustersMeanFirstEngDens = avariable;
-
-  test = p_tau->detail(xAOD::TauJetParameters::ClustersMeanEMProbability, avariable);
-  if(test) clustersMeanEMProbability = avariable;
-
-  test = p_tau->detail(xAOD::TauJetParameters::ClustersMeanSecondLambda, avariable);
-  if(test) clustersMeanSecondLambda = avariable;
-
-  test = p_tau->detail(xAOD::TauJetParameters::ClustersMeanPresamplerFrac, avariable);
-  if(test) clustersMeanPresamplerFrac = avariable;
-
-  ++Ncand;
 
   //-------------------------------------------------------------------------
   // all done, register the tau Container in TDS.
@@ -611,7 +648,7 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
   ATH_MSG_DEBUG("Output TauJetTrackContainer size:"<< tauTrackHandle->size());
   
   
-  ATH_MSG_DEBUG("Recorded a tau container with name: " << m_trigtauRecOutKey);
+  ATH_MSG_DEBUG("Recorded a tau container: HLT_TrigTauRecMerged");
   ATH_MSG_DEBUG("the tau object has been registered in the tau container");
   
   return StatusCode::SUCCESS;
