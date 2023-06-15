@@ -3,7 +3,6 @@
 */
 
 #include "EmptyCellBuilderTool.h"
-#include "FastCaloSim/FastSimCell.h"
 
 #include "AthAllocators/DataPool.h"
 
@@ -11,11 +10,11 @@
 #include "CaloEvent/CaloCellContainer.h"
 #include "TileEvent/TileCell.h"
 
-EmptyCellBuilderTool::EmptyCellBuilderTool(const std::string& type, 
-					   const std::string& name, 
+EmptyCellBuilderTool::EmptyCellBuilderTool(const std::string& type,
+					   const std::string& name,
 					   const IInterface* parent)
   : base_class(type, name, parent)
-{ 
+{
 }
 
 StatusCode EmptyCellBuilderTool::initialize()
@@ -50,26 +49,23 @@ void EmptyCellBuilderTool::create_empty_calo(const EventContext& ctx,
     check_exist=true;
     ATH_MSG_DEBUG("  CaloCells do already exist: check required when creating!");
   }
-  
+
   int ncreate=0;
   int nfound=0;
   double E_tot=0;
   double Et_tot=0;
 
-  #if FastCaloSim_project_release_v1 == 12
-  #else  
-    DataPool<FastSimTileCell> CellsPTile(10000);
-    DataPool<FastSimCaloCell> CellsPCalo(190000);
-    ATH_MSG_DEBUG("before: CellsPTile.capacity()="<<CellsPTile.capacity()<<" CellsPTile.allocated()="<<CellsPTile.allocated());
-    ATH_MSG_DEBUG("before: CellsPCalo.capacity()="<<CellsPCalo.capacity()<<" CellsPCalo.allocated()="<<CellsPCalo.allocated());
-  #endif
+  DataPool<TileCell> CellsPTile(10000);
+  DataPool<CaloCell> CellsPCalo(190000);
+  ATH_MSG_DEBUG("before: CellsPTile.capacity()="<<CellsPTile.capacity()<<" CellsPTile.allocated()="<<CellsPTile.allocated());
+  ATH_MSG_DEBUG("before: CellsPCalo.capacity()="<<CellsPCalo.capacity()<<" CellsPCalo.allocated()="<<CellsPCalo.allocated());
 
   for(const CaloDetDescrElement* theDDE : caloDDM->element_range()) {
     if(theDDE) {
       CaloCell* theCaloCell=0;
-      
+
       if(check_exist) theCaloCell=(CaloCell*)(theCellContainer->findCell(theDDE->calo_hash()));
-      
+
       if(theCaloCell) {
         theCaloCell->setGain(CaloGain::INVALIDGAIN);
         E_tot+=theCaloCell->energy();
@@ -77,30 +73,22 @@ void EmptyCellBuilderTool::create_empty_calo(const EventContext& ctx,
         ++nfound;
       } else {
         CaloCell_ID::SUBCALO calo=theDDE->getSubCalo();
-        #if FastCaloSim_project_release_v1 == 12
-          if(calo==CaloCell_ID::TILE) {
-            theCaloCell=new FastSimTileCell();
-          } else {
-            theCaloCell=new FastSimCaloCell();
-          }
-        #else  
-          if(calo==CaloCell_ID::TILE) {
-            theCaloCell = CellsPTile.nextElementPtr();
-          } else {
-            theCaloCell = CellsPCalo.nextElementPtr();
-          }
+        if (calo == CaloCell_ID::TILE) {
+          theCaloCell = CellsPTile.nextElementPtr();
+        } else {
+          theCaloCell = CellsPCalo.nextElementPtr();
+        }
 
-          theCaloCell->setEnergy(0);
-          theCaloCell->setTime(0);
-          theCaloCell->setQuality(1.0);
-          theCaloCell->setGain(CaloGain::INVALIDGAIN);
-          theCaloCell->setCaloDDE(theDDE);
-        #endif  
+        theCaloCell->setEnergy(0);
+        theCaloCell->setTime(0);
+        theCaloCell->setQuality(1.0);
+        theCaloCell->setGain(CaloGain::INVALIDGAIN);
+        theCaloCell->setCaloDDE(theDDE);
 
         theCellContainer->push_back(theCaloCell);
         ++ncreate;
-      }  
-    }  
+      }
+    }
   }
 
   ATH_MSG_DEBUG(ncreate<<" cells created, "<<nfound<<" cells already found: size="<<theCellContainer->size()<<" e="<<E_tot<<" ; et="<<Et_tot<<". Now initialize and order calo...");
@@ -114,9 +102,9 @@ void EmptyCellBuilderTool::create_empty_calo(const EventContext& ctx,
   else if (theCellContainer->size()==hashMax)  {
     ATH_MSG_DEBUG("CaloCellContainer size " << theCellContainer->size() << " correspond to hashMax : " << hashMax);
     theCellContainer->setHasTotalSize(true);
-  } 	
+  }
   else {
-    ATH_MSG_WARNING("CaloCellContainer size " << theCellContainer->size() 
+    ATH_MSG_WARNING("CaloCellContainer size " << theCellContainer->size()
 	<< " larger than hashMax ! Too many cells ! " << hashMax);
 
   }
@@ -126,14 +114,14 @@ void EmptyCellBuilderTool::create_empty_calo(const EventContext& ctx,
     ATH_MSG_DEBUG("CaloCellContainer ordered and complete");
     theCellContainer->setIsOrderedAndComplete(true);
     theCellContainer->setIsOrdered(true);
-  } else {	
+  } else {
     ATH_MSG_DEBUG("CaloCellContainer not ordered or incomplete");
     theCellContainer->setIsOrderedAndComplete(false);
     // check whether in order
     if (theCellContainer->checkOrdered()){
       ATH_MSG_DEBUG("CaloCellContainer ordered");
       theCellContainer->setIsOrdered(true);
-    } else {	
+    } else {
       ATH_MSG_DEBUG("CaloCellContainer not ordered");
       theCellContainer->setIsOrdered(false);
     }
@@ -141,10 +129,7 @@ void EmptyCellBuilderTool::create_empty_calo(const EventContext& ctx,
 
   if (!theCellContainer->isOrdered()) theCellContainer->order();
 
-  #if FastCaloSim_project_release_v1 == 12
-  #else  
     ATH_MSG_DEBUG("before: CellsPTile.capacity()="<<CellsPTile.capacity()<<" CellsPTile.allocated()="<<CellsPTile.allocated());
     ATH_MSG_DEBUG("before: CellsPCalo.capacity()="<<CellsPCalo.capacity()<<" CellsPCalo.allocated()="<<CellsPCalo.allocated());
-  #endif  
 }
 
