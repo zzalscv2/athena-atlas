@@ -66,26 +66,11 @@ AddNoiseCellBuilderTool::process (CaloCellContainer* theCellContainer,
       if(!theDDE) continue;
 
       CaloGain::CaloGain gain=m_estimatedGain->estimatedGain (ctx, *cell,ICaloEstimatedGainTool::Step::CELLS);
-
-#if FastCaloSim_project_release_v1 == 12
-      CaloCell_ID::SUBCALO calo=theDDE->getSubCalo();
-      if(calo==CaloCell_ID::TILE) {
-        ((FastSimTileCell*)cell)->setGain(gain);
-      } else {
-        ((FastSimCaloCell*)cell)->setGain(gain);
-      }
-#else
       cell->setGain(gain);
-#endif
 
       if(m_donoise) {
         double sigma = noise->getNoise (cell->caloDDE()->calo_hash(), cell->gain());
         double enoise=CLHEP::RandGaussZiggurat::shoot(randomEngine,0.0,1.0)*sigma;
-        /*
-          if(cell->energy()>1000) {
-          ATH_MSG_DEBUG("sample="<<cell->caloDDE()->getSampling()<<" eta="<<cell->eta()<<" phi="<<cell->phi()<<" gain="<<gain<<" e="<<cell->energy()<<" sigma="<<sigma<<" enoise="<<enoise);
-          }
-        */
         cell->setEnergy(cell->energy()+enoise);
       }
       E_tot+=cell->energy();

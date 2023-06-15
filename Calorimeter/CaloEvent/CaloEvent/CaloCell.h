@@ -5,28 +5,27 @@
 #ifndef CALOEVENT_CALOCELL_H
 #define CALOEVENT_CALOCELL_H
 
-/** 
+/**
    @class CaloCell
    @brief Data object for each calorimeter readout cell.
-  
-   CaloCell is a class with nearly all information on a calorimeter cell 
-in a given event. It has 4-momentum behavior through P4EEtaPhiMBase 
-inheritance, and Navigable behavior through INavigable4Momentum,
-   and NavigableTerminalNode inheritance.
-Further static information can be obtained through the CaloDetDescrElement 
-obtained with caloDDE() method. 
- CaloCell is a base class to LArCell (which is identical) and TileCell.
 
-    
+   CaloCell is a class with nearly all information on a calorimeter cell
+   in a given event. It has 4-momentum behavior through P4EEtaPhiMBase
+   inheritance, and Navigable behavior through INavigable4Momentum,
+   and NavigableTerminalNode inheritance.
+   Further static information can be obtained through the CaloDetDescrElement
+   obtained with caloDDE() method.
+   CaloCell is a base class to LArCell and TileCell.
+
+
    @author Hong Ma
    @author David Rousseau
    @author Peter Loch
  */
 
-
-//  Update: 
+//  Update:
 //    Jan 10 2001 HMA
-//          ordor of static/virtual/const 
+//          ordor of static/virtual/const
 //    Nov 12 2001 EDF
 //          Inherit from Navigible.  Now CaloCell has a pure virtual method
 //          and can not be instantiated directly.
@@ -63,36 +62,36 @@ public:
 
   /** @brief Legacy constructor */
   CaloCell(const CaloDetDescrElement* caloDDE,
-           float energy, 
-	   float time, 
-	   double quality,
-	   CaloGain::CaloGain gain);
+           float energy,
+           float time,
+           double quality,
+           CaloGain::CaloGain gain);
 
   /** @brief Main constructor */
   CaloCell(const CaloDetDescrElement* caloDDE,
-           float energy, 
-	   float time, 
-	   uint16_t quality,
-	   uint16_t provenance,
-	   CaloGain::CaloGain gain);
+           float energy,
+           float time,
+           uint16_t quality,
+           uint16_t provenance,
+           CaloGain::CaloGain gain);
 
 
   /** @brief Legacy constructor for MBTS cells which doesn't use caloDDE to get ID */
   CaloCell(const CaloDetDescrElement* caloDDE,
            const Identifier & ID,
-           float energy, 
-  	   float time, 
-	   double quality,
-	   CaloGain::CaloGain gain);
+           float energy,
+           float time,
+           double quality,
+           CaloGain::CaloGain gain);
 
   /** @brief Main constructor for MBTS cells which doesn't use caloDDE to get ID */
   CaloCell(const CaloDetDescrElement* caloDDE,
            const Identifier & ID,
-           float energy, 
-	   float time, 
-	   uint16_t quality,
-	   uint16_t provenance,
-	   CaloGain::CaloGain gain);
+           float energy,
+           float time,
+           uint16_t quality,
+           uint16_t provenance,
+           CaloGain::CaloGain gain);
 
 
   /** @brief default destructor */
@@ -101,60 +100,59 @@ public:
   /** @brief For initializing a cell we get from a @c DataPool. */
   void assign (const CaloDetDescrElement* caloDDE,
                const Identifier & ID,
-               float energy, 
-               float time, 
+               float energy,
+               float time,
                uint16_t quality,
                uint16_t provenance,
                CaloGain::CaloGain gain);
 
   /** @brief get energy (data member) */
-  virtual double energy () const final;
+  double energy () const;
   /** @brief get phi (through CaloDetDescrElement) */
-  virtual double phi    () const final;
+  virtual double phi    () const override final;
   /** @brief get eta (through CaloDetDescrElement) */
-  virtual double eta    () const final;
+  virtual double eta    () const override final;
   /** @brief get sin(theta) (through CaloDetDescrElement) */
-  virtual double sinTh  () const final;
+  virtual double sinTh  () const override final;
   /** @brief get cos(theta) (derived from sinTh) */
-  virtual double cosTh  () const final;
+  virtual double cosTh  () const override final;
   /** @brief get sin(phi)  */
-  virtual double sinPhi  () const final;
+  virtual double sinPhi  () const override final;
   /** @brief get cos(phi)  */
-  virtual double cosPhi  () const final;
+  virtual double cosPhi  () const override final;
   /** @brief get cottan(theta)  */
-  virtual double cotTh  () const final;
+  virtual double cotTh  () const override final;
   /** @brief get mass (hardcoded to be null) */
-  virtual double m      () const final;
+  virtual double m      () const override final;
   /** @brief get energy (data member) (synonym to method energy() */
-  virtual double e      () const final;
+  virtual double e      () const override final;
   /** @brief get et  */
-  virtual double et     () const final;
+  virtual double et     () const override final;
   /** @brief get x (through CaloDetDescrElement) */
-  virtual float x      () const final;
+  float x      () const;
   /** @brief get y (through CaloDetDescrElement) */
-  virtual float y      () const final;
+  float y      () const;
   /** @brief get z (through CaloDetDescrElement) */
-  virtual float z      () const final;
+  float z      () const;
 
-  /** @brief get ID (from cached data member) 
+  /** @brief get ID (from cached data member)
    *  non-virtual and inline for fast access */
   Identifier    ID     () const ;
 
-  // TODO: These can probably be made non-virtual.
   /** @brief get time (data member) */
-  virtual float        time   () const final;
+  float        time   () const;
   /** @brief get quality (data member) */
-  virtual uint16_t     quality() const  final;
+  uint16_t     quality() const;
   /** @brief get provenance (data member) */
-  virtual uint16_t     provenance() const  final;
+  uint16_t     provenance() const;
   /** @brief get gain (data member ) */
-  virtual CaloGain::CaloGain  gain()    const  final;
+  CaloGain::CaloGain  gain()  const;
 
   /** @brief check is cell is dead */
   virtual bool badcell() const;
 
   /** @brief get pointer to CaloDetDescrElement (data member) */
-  const CaloDetDescrElement* caloDDE() const; 
+  const CaloDetDescrElement* caloDDE() const;
 
   /** @brief set pointer to CaloDetDescrElement */
   virtual void setCaloDDE (const CaloDetDescrElement* caloDDE);
@@ -173,22 +171,22 @@ public:
   virtual void setQuality (double quality);
 
  /** @brief set Provenance */
-  virtual void setProvenance (uint16_t prov);
+  void setProvenance (uint16_t prov);
 
   /** @brief set gain */
-  virtual void setGain(CaloGain::CaloGain gain=CaloGain::INVALIDGAIN); 
+  void setGain(CaloGain::CaloGain gain=CaloGain::INVALIDGAIN);
 
   /** set 4Momentum (will throw exception since cannot be implemented) */
-  virtual void set4Mom (const I4Momentum * const theI4Mom ) ;
+  virtual void set4Mom (const I4Momentum * const theI4Mom ) override final;
 
   /** set 4Momentum (will throw exception since cannot be implemented) */
-  virtual void set4Mom (const I4Momentum & theI4Mom);
+  virtual void set4Mom (const I4Momentum & theI4Mom) override final;
 
   /** set 4Momentum (will throw exception since cannot be implemented) */
-  virtual void set4Mom (const CLHEP::HepLorentzVector & theHlv ) ;
+  virtual void set4Mom (const CLHEP::HepLorentzVector & theHlv ) override final;
 
 
-  /** @brief clone a CaloCell */ 
+  /** @brief clone a CaloCell */
   virtual std::unique_ptr<CaloCell> clone() const;
 
   /** @brief Fast method to change the identity of a cell. */
@@ -199,16 +197,16 @@ public:
   void set (float energy,
             float time,
             uint16_t quality,
-	    uint16_t provenance,
+            uint16_t provenance,
             CaloGain::CaloGain gain);
- 
+
 
  /** @brief Fast method to change the data of a cell. OBSOLETE*/
   void set (float energy,
             float time,
             double quality,
             CaloGain::CaloGain gain);
-  
+
 
 protected:
 
@@ -223,12 +221,12 @@ protected:
   // in inlined code.)
   /** @brief quality */
 #ifdef __REFLEX__
-    int  m_quality ; 
+    int  m_quality ;
 #   define m_qualProv ((uint16_t*)&m_quality)
 #   define m_tileQual ((uint8_t*)&m_quality)
 #else
   union {
-    int  m_quality = 0 ; 
+    int  m_quality = 0 ;
     uint16_t m_qualProv[2];
     uint8_t m_tileQual[4];
   };
@@ -237,8 +235,8 @@ protected:
   Identifier  m_ID      ;
   /** @brief gain */
   CaloGain::CaloGain m_gain ;
-  /** @brief pointer to static CaloDetDescrElement to access information that does 
-   *  not change from event to event */  
+  /** @brief pointer to static CaloDetDescrElement to access information that does
+   *  not change from event to event */
   const CaloDetDescrElement* m_caloDDE  ;
 
 };
@@ -247,9 +245,9 @@ protected:
 // inlines
 
 inline CaloCell::CaloCell()
-    : 
+    :
     m_energy(0),
-    m_time(0),	
+    m_time(0),
     m_quality(0),
     m_gain(CaloGain::UNKNOWNGAIN),
     m_caloDDE(0)
@@ -260,8 +258,8 @@ inline CaloCell::CaloCell()
 inline
 void CaloCell::assign(const CaloDetDescrElement* caloDDE,
                         const Identifier & ID,
-                        float   energy, 
-                        float   time, 
+                        float   energy,
+                        float   time,
                         uint16_t   quality,
                         uint16_t   provenance,
                         CaloGain::CaloGain gain)
@@ -279,7 +277,7 @@ void CaloCell::assign(const CaloDetDescrElement* caloDDE,
 
 
 inline Identifier CaloCell::ID() const {
-  return m_ID; 
+  return m_ID;
 }
 
 
@@ -304,16 +302,16 @@ std::size_t navigationHash (const CaloCell* p)
 }
 
 inline
-const CaloDetDescrElement* CaloCell::caloDDE() const{ 
+const CaloDetDescrElement* CaloCell::caloDDE() const{
    return m_caloDDE;
 }
 
 
 inline
 double CaloCell::energy() const
-{                                          
-  return m_energy;                         
-}                                          
+{
+  return m_energy;
+}
 
 inline
 double CaloCell::e() const
@@ -324,34 +322,34 @@ double CaloCell::e() const
 
 inline
 double CaloCell::m() const
-{ 
+{
   // zero mass by convention
   return 0.;
 }
 
 
 inline
-uint16_t CaloCell::quality() const 
+uint16_t CaloCell::quality() const
 {
   return m_qualProv[0];
 }
 
 inline
-uint16_t CaloCell::provenance() const 
+uint16_t CaloCell::provenance() const
 {
   // cppcheck-suppress objectIndex
   return m_qualProv[1];
 }
 
 inline
-CaloGain::CaloGain CaloCell::gain() const 
+CaloGain::CaloGain CaloCell::gain() const
 {
   return m_gain;
 }
 
 
 inline
-float CaloCell::time() const 
+float CaloCell::time() const
 {
   return m_time;
 }
@@ -359,49 +357,49 @@ float CaloCell::time() const
 
 inline
 double CaloCell::phi() const
-{ 
+{
   return m_caloDDE->phi();
 }
 
 
 inline
 double CaloCell::eta() const
-{ 
+{
   return m_caloDDE->eta();
 }
 
 
 inline
 double CaloCell::sinTh() const
-{ 
+{
   return m_caloDDE->sinTh();
 }
 
 
 inline
 double CaloCell::cosTh() const
-{ 
+{
   return m_caloDDE->cosTh();
 }
 
 
 inline
 double CaloCell::cotTh() const
-{ 
+{
   return m_caloDDE->cotTh();
 }
 
 
 inline
 double CaloCell::sinPhi() const
-{ 
+{
   return m_caloDDE->sinPhi();
 }
 
 
 inline
 double CaloCell::cosPhi() const
-{ 
+{
   return m_caloDDE->cosPhi();
 }
 
@@ -413,21 +411,21 @@ CaloCell::et() const
 
 inline
 float CaloCell::x() const
-{ 
+{
   return m_caloDDE->x();
 }
 
 
 inline
 float CaloCell::y() const
-{ 
+{
   return m_caloDDE->y();
 }
 
 
 inline
 float CaloCell::z() const
-{ 
+{
   return m_caloDDE->z();
 }
 

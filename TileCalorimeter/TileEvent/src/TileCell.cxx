@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -15,7 +15,7 @@
 //     12June02  Completely changed by Zhifang Wu
 //
 //  BUGS:
-//    
+//
 //
 //*****************************************************************************
 
@@ -42,7 +42,6 @@ TileCell::TileCell( )
   , m_eneDiff(0.0)
   , m_timeDiff(0.0)
 {
-   // DO: Nothing, Default  
 }
 
 TileCell::TileCell(const CaloDetDescrElement* const & caloDDE,
@@ -51,28 +50,28 @@ TileCell::TileCell(const CaloDetDescrElement* const & caloDDE,
   : CaloCell(caloDDE,energy,time,quality,provenance,gain)
   , m_eneDiff(energy)
   , m_timeDiff(0.0)
-{ 
+{
 }
 
 TileCell::TileCell(const CaloDetDescrElement* const & caloDDE,
-                   const Identifier & cell_ID, 
+                   const Identifier & cell_ID,
                    float energy, float time, uint16_t quality,
                    uint16_t provenance, CaloGain::CaloGain gain)
   : CaloCell(caloDDE,cell_ID,energy,time,quality,provenance,gain)
   , m_eneDiff(energy)
   , m_timeDiff(0.0)
-{ 
+{
 }
 
 TileCell::TileCell(const CaloDetDescrElement* const & caloDDE,
                    float ene1, float ene2, float time1, float time2,
-                   int qual1, int qual2, int qbit1, int qbit2, 
+                   int qual1, int qual2, int qbit1, int qbit2,
                    int gain1, int gain2)
   : CaloCell(caloDDE,ene1+ene2,(time1+time2)/2.0, 0, 0,
              (CaloGain::CaloGain) ( 0xFFFFFFF0 | (static_cast<unsigned int>(gain2) << 2) | (gain1 & 3) ))
   , m_eneDiff(ene1-ene2)
   , m_timeDiff((time1-time2)/2.)
-{ 
+{
   m_tileQual[0] = std::min(255,abs(qual1));
   // cppcheck-suppress objectIndex
   m_tileQual[1] = std::min(255,abs(qual2));
@@ -90,14 +89,14 @@ TileCell::TileCell(const TileCell *cell)
 }
 
 TileCell::TileCell(const CaloDetDescrElement* const & caloDDE,
-                   const Identifier & cell_ID, 
+                   const Identifier & cell_ID,
                    float energy, float time, uint16_t quality,
                    uint16_t provenance, CaloGain::CaloGain gain,
                    float eneDiff, float timeDiff)
   : CaloCell(caloDDE,cell_ID,energy,time,quality,provenance,gain)
   , m_eneDiff(eneDiff)
   , m_timeDiff(timeDiff)
-{ 
+{
 }
 
 TileCell::~TileCell()
@@ -105,7 +104,7 @@ TileCell::~TileCell()
 
 // clone this cell
 std::unique_ptr<CaloCell> TileCell::clone() const
-{ 
+{
   return std::make_unique<TileCell>(this->caloDDE(),
 				    this->ID(),
 				    this->energy(),
@@ -113,7 +112,7 @@ std::unique_ptr<CaloCell> TileCell::clone() const
 				    this->quality(),
 				    this->provenance(),
 				    this->gain(),
-				    this->eneDiff(), 
+				    this->eneDiff(),
 				    this->timeDiff());
 }
 
@@ -122,7 +121,7 @@ std::unique_ptr<CaloCell> TileCell::clone() const
 // Set attributes
 //=========================
 void TileCell::setEnergy(float ene)
-{ 
+{
    m_energy  = ene;
 
    // cells with single PMT should always have zero energy in second PMT
@@ -137,76 +136,62 @@ void TileCell::setEnergy(float e1, float e2)
    m_eneDiff = e1-e2;
    m_energy  = e1+e2;
 }
-void TileCell::setEnergy(float e1, float e2, int gain1, int gain2)
-{ 
-  setEnergy_nonvirt(e1, e2, gain1, gain2);
-}
 
 void TileCell::addEnergy(float ene)
-{ 
+{
    m_energy  += ene;
 }
 void TileCell::scaleEnergy(float scale)
-{ 
+{
    m_energy  *= scale;
    m_eneDiff *= scale;
 }
 void TileCell::addEnergy(float e, int pmt, int gain)
-{ 
+{
   if (pmt > 0) { // second pmt
     m_eneDiff -= e;
     m_gain = (CaloGain::CaloGain)( (m_gain & 0xFFFFFFF3) | ((gain & 3) << 2)  );
   } else { // first PMT
     m_eneDiff += e;
     m_gain = (CaloGain::CaloGain)( (m_gain & 0xFFFFFFFC) | ( gain & 3 ) );
-   }  
+   }
   m_energy += e;
 }
 
-void TileCell::setTime(float t)
-{ 
-  setTime_nonvirt(t);
-}
 void TileCell::setTime(float t, int pmt) // works only for second PMT in a cell
-{ 
+{
   if (pmt > 0) { // second pmt in a cell with index "1",
     m_time = (m_time + t)/2.;
     m_timeDiff = m_time - t;
   } else { // second in a cell pmt with index "0"
     m_time = (t + m_time)/2.;
     m_timeDiff = t - m_time;
-  }  
-}
-
-void TileCell::setQuality(unsigned char qual, unsigned char qbit, int pmt)
-{ 
-  setQuality_nonvirt(qual, qbit, pmt);
+  }
 }
 
 void TileCell::setQuality(uint16_t quality)
-{ 
+{
   CaloCell::setQuality(quality);
 }
 
 void TileCell::setQuality(double quality)
-{ 
+{
   CaloCell::setQuality(quality);
 }
 
 int TileCell::gain1(void) const
-{ 
+{
   int gain = m_gain & 3;
-  
+
   return ( ( gain < 2) ? gain : CaloGain::INVALIDGAIN);
 }
 
 int TileCell::gain2(void) const
-{ 
+{
   int gain = (m_gain >> 2) & 3;
 
   return ( ( gain < 2) ? gain : CaloGain::INVALIDGAIN);
 }
-
 
 //=========================
 // Supporting functions
