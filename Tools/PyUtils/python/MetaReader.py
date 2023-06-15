@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from __future__ import absolute_import
 import os
@@ -24,6 +24,8 @@ regexXAODTriggerMenu = re.compile(r'^DataVector<xAOD::TriggerMenu(_v\d+)?>$') # 
 regexXAODTriggerMenuAux = re.compile(r'^xAOD::TriggerMenuAuxContainer(_v\d+)?$') # Run 2
 regexXAODTriggerMenuJson = re.compile(r'^DataVector<xAOD::TriggerMenuJson(_v\d+)?>$') # Run 3
 regexXAODTriggerMenuJsonAux = re.compile(r'^xAOD::TriggerMenuJsonAuxContainer(_v\d+)?$') # Run 3
+regexXAODTruthMetaData = re.compile(r'^DataVector<xAOD::TruthMetaData(_v\d+)?>$')
+regexXAODTruthMetaDataAux = re.compile(r'^xAOD::TruthMetaDataAuxContainer(_v\d+)?$')
 regex_cppname = re.compile(r'^([\w:]+)(<.*>)?$')
 # regex_persistent_class = re.compile(r'^([a-zA-Z]+_p\d+::)*[a-zA-Z]+_p\d+$')
 regex_persistent_class = re.compile(r'^([a-zA-Z]+(_[pv]\d+)?::)*[a-zA-Z]+_[pv]\d+$')
@@ -191,6 +193,8 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                         'CutBookkeepersAux.': 'xAOD::CutBookkeeperAuxContainer_v1',
                         'FileMetaData': '*',
                         'FileMetaDataAux.': 'xAOD::FileMetaDataAuxInfo_v1',
+                        'TruthMetaData': '*',
+                        'TruthMetaDataAux.': 'xAOD::TruthMetaDataAuxContainer_v1',
                         'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLT': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format ESD
                         'xAOD::TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_HLTAux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
                         'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLTMonitoring': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format ESD
@@ -243,6 +247,8 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                         meta_dict[filename]['metadata_items'][name] = 'EventStreamInfo'
                     elif regexXAODFileMetaData.match(class_name):
                         meta_dict[filename]['metadata_items'][name] = 'FileMetaData'
+                    elif regexXAODTruthMetaData.match(class_name):
+                        meta_dict[filename]['metadata_items'][name] = 'TruthMetaData'
                     else:
                         meta_dict[filename]['metadata_items'][name] = class_name
 
@@ -296,6 +302,10 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                         persistent_instances[name] = ROOT.xAOD.FileMetaData_v1()
                     elif regexXAODFileMetaDataAux.match(class_name):
                         persistent_instances[name] = ROOT.xAOD.FileMetaDataAuxInfo_v1()
+                    elif regexXAODTruthMetaData.match(class_name):
+                        persistent_instances[name] = ROOT.xAOD.TruthMetaDataContainer_v1()
+                    elif regexXAODTruthMetaDataAux.match(class_name):
+                        persistent_instances[name] = ROOT.xAOD.TruthMetaDataAuxContainer_v1()
 
                     if name in persistent_instances:
                         branch.SetAddress(ROOT.AddressOf(persistent_instances[name]))
@@ -365,6 +375,11 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                     elif (key == 'xAOD::FileMetaData_v1_FileMetaData'
                           and 'xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.' in persistent_instances):
                         aux = persistent_instances['xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.']
+                    elif (key == 'TruthMetaData'
+                          and 'TruthMetaDataAux.' in persistent_instances):
+                        aux = persistent_instances['TruthMetaDataAux.']
+                    elif key == 'TruthMetaDataAux.':
+                        continue   # Extracted using the interface object
                     elif 'Menu' in key and key.endswith('Aux.'):
                         continue   # Extracted using the interface object
 
@@ -689,6 +704,8 @@ def _convert_value(value, aux = None):
                 return _extract_fields_cbk(interface=value, aux=aux)
             elif cl.__cpp_name__ == 'xAOD::FileMetaData_v1':
                 return _extract_fields_fmd(interface=value, aux=aux)
+            elif cl.__cpp_name__ == 'DataVector<xAOD::TruthMetaData_v1>':
+                return _extract_fields_tmd(interface=value, aux=aux)
 
             elif cl.__cpp_name__ == 'DataVector<xAOD::TriggerMenu_v1>' :
                 return _extract_fields_triggermenu(interface=value, aux=aux)
@@ -862,7 +879,7 @@ def _extract_fields_cbk(interface=None, aux=None):
     """Extract CutBookkeeper content into dictionary
 
     This function takes the CutBookkeeperContainer_v1 and CutBookkeeperAuxContainer_v1 objects.
-    It makes sure the the interface object uses the auxiary object as store.
+    It makes sure the the interface object uses the auxiliary object as store.
         Args:
             interface (CutBookkeeperContainer_v1):     the interface class
             aux       (CutBookkeeperAuxContainer_v1):  auxiliary container object
@@ -922,6 +939,39 @@ def _extract_fields_fmd(interface=None, aux=None):
     result = {k: str(v) for k, v in metaContent.items() if type(v) is ROOT.std.string}
     result.update({k: list(v) for k, v in metaContent.items() if type(v) is ROOT.std.vector('unsigned int')})
     return result
+
+
+def _extract_fields_tmd(interface=None, aux=None):
+    """Extract TruthMetaData content into dictionary
+
+    This function takes the TruthMetaDataContainer_v1 and TruthMetaDataAuxContainer_v1 objects.
+    It makes sure the the interface object uses the auxiliary object as store.
+        Args:
+            interface (TruthMetaDataContainer_v1):     the interface class
+            aux       (TruthMetaDataAuxContainer_v1):  auxiliary container object
+        Returns
+            dict
+    """
+    if not interface or not aux:
+        return {}
+    interface.setStore(aux)
+
+    # return the first as we do not really expect more than one
+    for tmd in interface:
+        result = {
+            'mcChannelNumber': tmd.mcChannelNumber(),
+            'weightNames': list(tmd.weightNames()),
+            'lhefGenerator': str(tmd.lhefGenerator()),
+            'generators': str(tmd.generators()),
+            'evgenProcess': str(tmd.evgenProcess()),
+            'evgenTune': str(tmd.evgenTune()),
+            'hardPDF': str(tmd.hardPDF()),
+            'softPDF': str(tmd.softPDF()),
+        }
+        return result
+
+    return {}
+
 
 """ Note: Deprecated. Legacy support for Run 2 AODs produced in release 21 or in release 22 prior to April 2021
 """
@@ -1120,6 +1170,15 @@ def make_peeker(meta_dict):
                 if item not in keys_to_keep:
                     meta_dict[filename]['CutBookkeepers'].pop(item)
 
+        if 'TruthMetaData' in file_content:
+            keys_to_keep = [
+                'mcChannelNumber',
+                'weightNames',
+            ]
+            for item in list(meta_dict[filename]['TruthMetaData']):
+                if item not in keys_to_keep:
+                    meta_dict[filename]['TruthMetaData'].pop(item)
+
     return meta_dict
 
 
@@ -1192,8 +1251,12 @@ def promote_keys(meta_dict, mode):
                 if 'dataType' in md[key]:
                     md['processingTags'] = [md[key]['dataType']]
 
-                if mode == 'peeker' and 'productionRelease' in md[key]:
-                    md['AtlasRelease'] = md[key]['productionRelease']
+                if mode == 'peeker':
+                    if 'productionRelease' in md[key]:
+                        md['AtlasRelease'] = md[key]['productionRelease']
+                    
+                    if 'generatorsInfo' in md[key]:
+                        md['generators']  = md[key]['generatorsInfo']
 
                 if mode == 'lite':
                     meta_dict[filename].pop(key)
@@ -1202,6 +1265,10 @@ def promote_keys(meta_dict, mode):
         if '/TagInfo' in file_content:
             md.update(md['/TagInfo'])
             md.pop('/TagInfo')
+
+        if '/Generation/Parameters' in file_content:
+            md.update(md['/Generation/Parameters'])
+            md.pop('/Generation/Parameters')
 
         if '/Simulation/Parameters' in file_content:
             md.update(md['/Simulation/Parameters'])
