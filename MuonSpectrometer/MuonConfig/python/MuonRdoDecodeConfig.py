@@ -82,11 +82,7 @@ def RpcRDODecodeCfg(flags, name="RpcRdoToRpcPrepData", **kwargs):
     kwargs.setdefault("RegSel_RPC", acc.popToolsAndMerge(regSelTool_RPC_Cfg(flags)))
 
     if flags.Muon.MuonTrigger:
-        # Set the algorithm to RoI mode
-        kwargs.setdefault("DoSeededDecoding", True)
         kwargs.setdefault("PrintPrepData", False)
-        from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
-        kwargs.setdefault("RoIs", mapThresholdToL1RoICollection("MU"))
 
     # Add the RDO -> PRD alorithm
     acc.addEventAlgo(CompFactory.RpcRdoToRpcPrepData(name, **kwargs))
@@ -114,11 +110,7 @@ def TgcRDODecodeCfg(flags, name="TgcRdoToTgcPrepData", **kwargs):
     kwargs.setdefault("RegSel_TGC", acc.popToolsAndMerge(regSelTool_TGC_Cfg(flags)))
 
     if flags.Muon.MuonTrigger:
-        # Set the algorithm to RoI mode
-        kwargs.setdefault("DoSeededDecoding", True)
         kwargs.setdefault("PrintPrepData", False)
-        from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
-        kwargs.setdefault("RoIs", mapThresholdToL1RoICollection("MU"))
 
     # Add the RDO -> PRD alorithm
     acc.addEventAlgo(CompFactory.TgcRdoToTgcPrepData(name, **kwargs))
@@ -161,8 +153,8 @@ def StgcRDODecodeCfg(flags, name="StgcRdoToStgcPrepData", **kwargs):
     # Get the RDO -> PRD tool
     kwargs.setdefault("DecodingTool", acc.popToolsAndMerge(StgcRdoToPrepDataToolCfg(flags)))
     # add RegSelTool
-    # from RegionSelector.RegSelToolConfig import regSelTool_STGC_Cfg
-    # kwargs.setdefault("RegSel_STGC", acc.popToolsAndMerge(regSelTool_STGC_Cfg(flags)))
+    from RegionSelector.RegSelToolConfig import regSelTool_STGC_Cfg
+    kwargs.setdefault("RegionSelectorTool", acc.popToolsAndMerge(regSelTool_STGC_Cfg(flags)))
 
     # Add the RDO -> PRD alorithm
     acc.addEventAlgo(CompFactory.StgcRdoToStgcPrepData(name, **kwargs))
@@ -195,8 +187,8 @@ def MMRDODecodeCfg(flags, name="MM_RdoToMM_PrepData", **kwargs):
     if flags.Muon.MuonTrigger:
         kwargs.setdefault("PrintPrepData", False)
     # add RegSelTool
-    # from RegionSelector.RegSelToolConfig import regSelTool_MM_Cfg
-    # kwargs.setdefault("RegSel_MM", acc.popToolsAndMerge(regSelTool_MM_Cfg(flags)))
+    from RegionSelector.RegSelToolConfig import regSelTool_MM_Cfg
+    kwargs.setdefault("RegionSelectorTool", acc.popToolsAndMerge(regSelTool_MM_Cfg(flags)))
 
     # Add the RDO -> PRD alorithm
     acc.addEventAlgo(CompFactory.MM_RdoToMM_PrepData(name, **kwargs))
@@ -225,11 +217,7 @@ def MdtRDODecodeCfg(flags, name="MdtRdoToMdtPrepData", **kwargs):
     kwargs.setdefault("RegSel_MDT", acc.popToolsAndMerge(regSelTool_MDT_Cfg(flags)))
 
     if flags.Muon.MuonTrigger:
-        # Set the algorithm to RoI mode
-        kwargs.setdefault("DoSeededDecoding", True)
         kwargs.setdefault("PrintPrepData", False)
-        from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
-        kwargs.setdefault("RoIs", mapThresholdToL1RoICollection("MU"))
 
     # Add the RDO -> PRD alorithm
     acc.addEventAlgo(CompFactory.MdtRdoToMdtPrepData(name, **kwargs))
@@ -260,10 +248,7 @@ def CscRDODecodeCfg(flags, name="CscRdoToCscPrepData", **kwargs):
 
     if flags.Muon.MuonTrigger:
         # Set the algorithm to RoI mode
-        kwargs.setdefault("DoSeededDecoding", True)
         kwargs.setdefault("PrintPrepData", False)
-        from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
-        kwargs.setdefault("RoIs", mapThresholdToL1RoICollection("MU"))
 
     # Add the RDO -> PRD alorithm
     acc.addEventAlgo(CompFactory.CscRdoToCscPrepData(name, **kwargs))
