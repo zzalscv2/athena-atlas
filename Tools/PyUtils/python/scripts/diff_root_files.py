@@ -220,7 +220,6 @@ def main(args):
                                                'EventInfo_p4_McEventInfo',
                                                'EventInfo_p4_ByteStreamEventInfo']}
 
-        @cache
         def find_attrs():
             """Find the relevant attributes for reading the event number"""
             for ii, jj in eiDict.items():
@@ -230,18 +229,26 @@ def main(args):
             else:
                 return None, None
 
+        tree.GetEntry(0)
+        attr1, attr2 = find_attrs()
+        if attr1 is None or attr2 is None:
+            msg.error('Cannot read event info, will bail out.')
+            msg.error(f"Tried attributes {attr1} and {attr2}")
+            return []
+        attrs = [attr1] + attr2.split()
+
+        tree.SetBranchStatus ('*', 0)
+        tree.SetBranchStatus (attr1, 1)
+
         for idx in range(0, nevts):
             if idx % 100 == 0:
                 msg.debug('Read {} events from the input so far'.format(idx))
             tree.GetEntry(idx)
-            attr1, attr2 = find_attrs()
-            if attr1 is None or attr2 is None:
-                msg.error('Cannot read event info, will bail out.')
-                msg.error(f"Tried attributes {attr1} and {attr2}")
-                break
-            event_number = reduce(getattr, [attr1] + attr2.split(), tree)
+            event_number = reduce(getattr, attrs, tree)
             msg.debug('Idx : EvtNum {:10d} : {}'.format(idx,event_number))
             dict_in[idx] = event_number
+
+        tree.SetBranchStatus ('*', 1)
 
         # Sort the dictionary by event numbers
         dict_out = OrderedDict(sorted(dict_in.items(), key=operator.itemgetter(1), reverse = reverse_order))

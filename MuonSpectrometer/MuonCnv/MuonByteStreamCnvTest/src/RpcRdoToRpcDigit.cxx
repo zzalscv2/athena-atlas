@@ -132,7 +132,6 @@ StatusCode RpcRdoToRpcDigit::decodeNRpc(const EventContext& ctx, RpcDigitContain
         ATH_MSG_FATAL("Failed to retrieve the readout geometry "<<muonDetMgr.fullKey());
         return StatusCode::FAILURE;
     }
-    using CablingData = MuonNRPC_CablingMap::CablingData;
     const RpcIdHelper& id_helper = m_idHelperSvc->rpcIdHelper();
     std::map<IdentifierHash, std::unique_ptr<RpcDigitCollection>> digit_map{};
     /// Loop over the container
@@ -142,7 +141,7 @@ StatusCode RpcRdoToRpcDigit::decodeNRpc(const EventContext& ctx, RpcDigitContain
                 rdo->time()<<", ToT: "<<rdo->timeoverthr());
         
         /// Fill the cabling object
-        CablingData conv_obj{};
+        NrpcCablingData conv_obj{};
         conv_obj.tdcSector = rdo->tdcsector();
         conv_obj.tdc = rdo->tdc();
         conv_obj.channelId = rdo->channel();

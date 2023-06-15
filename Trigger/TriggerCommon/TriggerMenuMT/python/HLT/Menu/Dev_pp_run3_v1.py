@@ -396,7 +396,7 @@ def getDevSignatures():
         ChainProp(name='HLT_2j330_a10t_lcw_jes_35smcINF_L1J100', groups=DevGroup+MultiJetGroup, l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_2j330_a10sd_cssk_pf_jes_ftf_35smcINF_presel2j225_L1SC111-CJ15', groups=DevGroup+MultiJetGroup+LegacyTopoGroup, l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_2j330_a10sd_cssk_pf_jes_ftf_35smcINF_presel2j225_L1jLJ140', groups=DevGroup+MultiJetGroup, l1SeedThresholds=['FSNOSEED']),
-        ChainProp(name='HLT_2j330_a10sd_cssk_pf_jes_ftf_35smcINF_presel2j225_L1gLJ140', groups=DevGroup+MultiJetGroup, l1SeedThresholds=['FSNOSEED']),
+#        ChainProp(name='HLT_2j330_a10sd_cssk_pf_jes_ftf_35smcINF_presel2j225_L1gLJ140', groups=DevGroup+MultiJetGroup, l1SeedThresholds=['FSNOSEED']),
 
         ]
 

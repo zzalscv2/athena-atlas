@@ -11,21 +11,23 @@
 
 #include "EventPrimitives/EventPrimitives.h"
 #include "GeoPrimitives/GeoPrimitives.h"
-// TRK
+//
 #include "TrkEventPrimitives/ParamDefs.h"
 #include "TrkEventPrimitives/DefinedParameter.h"
 #include "TrkEventPrimitives/ProjectionMatricesSet.h"
-// maths
+//
 #include <cmath>
+#include <array>
 
 class MsgStream;
 
 class LocalParametersCnv_p1;
 
-/** standard namespace for Tracking*/
 namespace Trk {
 
   /**@class LocalParameters
+
+    @author Andreas.Salzburger@cern.ch
 
      Class inheriting from HepVector for 1-5 dimensional parameter vectors.
      It holds a  static const projection matrices set
@@ -91,7 +93,6 @@ namespace Trk {
      </table>
 
     The accessors are optimized for full track parameters, 1 dim  and 2 dim local parameters.
-    @author Andreas.Salzburger@cern.ch
     */
 
   class LocalParameters : public Amg::VectorX {
@@ -107,9 +108,6 @@ namespace Trk {
       LocalParameters& operator=(LocalParameters&&) = default;
       ~LocalParameters() = default;
 
-      /**Default constructor with dimension */
-      LocalParameters(int dim);
-
       /**Explicit constructor for 1-dimensional vector */
       LocalParameters(const DefinedParameter& one);
 
@@ -123,8 +121,12 @@ namespace Trk {
       /**Explicit constructor for full 5 parameter vector - respect the order*/
       LocalParameters(double locone, double loctwo, double tphi, double ttheta, double tqOverp);
 
-      /**Dynamical constructor */
-      LocalParameters(const std::vector<DefinedParameter>& );
+      /**constructor for N Dim size known at compile time */
+      template <size_t N>
+      LocalParameters(const std::array<DefinedParameter,N>& parms);
+
+      /**constructor for N Dim size not known at compile time  */
+      LocalParameters(const std::vector<DefinedParameter>& parms);
 
       /**Pseudo-constructor */
       LocalParameters* clone() const;
@@ -153,16 +155,20 @@ namespace Trk {
       /**Write data members */
       double & operator[](ParamDefs par);
 
-        /**Retrieve specified parameter (const version). There is NO check to see if a parameter is contained,
-        so consider using contains(ParamDefs par) to make sure it is actually defined for this object.
-        @param par Parameters requested to be return
-        @return Value of stored parameter (or undefined, if the parameter is not used in this object i.e. be SURE it is!) */
+      /**Retrieve specified parameter (const version). There is NO check to see
+      if a parameter is contained, so consider using contains(ParamDefs par) to
+      make sure it is actually defined for this object.
+      @param par Parameters requested to be return
+      @return Value of stored parameter (or undefined, if the parameter is not
+      used in this object i.e. be SURE it is!) */
       double get(ParamDefs par) const;
 
-        /**Retrieve specified parameter. There is NO check to see if a parameter is contained,
-        so consider using contains(ParamDefs par) to make sure it is actually defined for this object.
-        @param par Parameters requested to be return
-        @return Value of stored parameter (or undefined, if the parameter is not used in this object i.e. be SURE it is!) */
+      /**Retrieve specified parameter. There is NO check to see if a parameter
+      is contained, so consider using contains(ParamDefs par) to make sure it is
+      actually defined for this object.
+      @param par Parameters requested to be return
+      @return Value of stored parameter (or undefined, if the parameter is not
+      used in this object i.e. be SURE it is!) */
       double get(ParamDefs par);
 
       /**Overload of << operator for both, MsgStream and std::ostream for debug output*/

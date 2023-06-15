@@ -3,10 +3,6 @@
 # Declare the package name:
 atlas_subdir( TruthUtils )
 
-# (Mandatory) External dependencies:
-find_package( HEPUtils )
-find_package( MCUtils )
-
 # Decide what to do about HepMC(3) / AtlasHepMC.
 set( extra_libs )
 if( NOT XAOD_STANDALONE )
@@ -18,8 +14,7 @@ endif()
 atlas_add_library( TruthUtils
    TruthUtils/*.h Root/*.cxx
    PUBLIC_HEADERS TruthUtils
-   INCLUDE_DIRS ${HEPUTILS_INCLUDE_DIRS} ${MCUTILS_INCLUDE_DIRS}
-   LINK_LIBRARIES ${HEPUTILS_LIBRARIES} ${MCUTILS_LIBRARIES} ${extra_libs}
+   LINK_LIBRARIES  ${extra_libs}
    )
 
 # Dictionary
@@ -36,12 +31,6 @@ atlas_install_runtime( util/generator-weights.py )
 
 # Install files from the package:
 atlas_install_runtime( share/*.txt )
-
-if( NOT XAOD_STANDALONE )
- set( TruthUtilsEnvironment_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-   CACHE PATH "Location of TruthUtilsEnvironment.cmake" )
- find_package( TruthUtilsEnvironment )
-endif()
 
 # Run tests:
 atlas_add_test( WeightHelpersTest

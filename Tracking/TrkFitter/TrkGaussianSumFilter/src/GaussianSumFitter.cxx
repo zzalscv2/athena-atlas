@@ -1,5 +1,5 @@
 /*§
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -880,7 +880,7 @@ Trk::GaussianSumFitter::smootherFit(
   Trk::FitQualityOnSurface fitQuality;
   std::unique_ptr<Trk::MeasurementBase> firstSmootherMeasurementOnTrack =
     smootherPredictionMultiStateOnSurface->measurementOnTrack()->uniqueClone();
-  
+
   if (!firstSmootherMeasurementOnTrack) {
     ATH_MSG_WARNING(
       "Initial state on surface in smoother does not have an associated "
@@ -936,7 +936,7 @@ Trk::GaussianSumFitter::smootherFit(
   ++trackStateOnSurface;
   // The is the last one we will see
   auto lasttrackStateOnSurface = forwardTrajectory.rend() - 1;
-  // TSOS that the cluster measuremenet will added on. 
+  // TSOS that the cluster measuremenet will added on.
   auto secondLastTrackStateOnSurface = forwardTrajectory.rend() - 2;
   // This will be the next tsos that we will push to the
   // smoothedTrajectory DataVector (that takes ownership)
@@ -1112,9 +1112,7 @@ Trk::GaussianSumFitter::addCCOT(
   covMatrix(0, 0) = 1e6;
 
   Trk::DefinedParameter locX(0, Trk::locX);
-  std::vector<Trk::DefinedParameter> defPar;
-  defPar.push_back(locX);
-  Trk::LocalParameters locpars(defPar);
+  Trk::LocalParameters locpars(locX);
 
   auto pseudoMeasurement = std::make_unique<Trk::PseudoMeasurementOnTrack>(
     locpars, covMatrix, *currentSurface);

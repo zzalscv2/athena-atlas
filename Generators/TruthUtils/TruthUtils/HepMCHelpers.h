@@ -3,16 +3,28 @@
 */
 #ifndef TRUTHUTILS_HEPMCHELPERS_H
 #define TRUTHUTILS_HEPMCHELPERS_H
+#include <vector>
+#include <cmath>
+#include <algorithm>
+#include <array>
+#include <cstdlib>
 /// @file
 ///
 /// Provides the HepMC tools from the external MCUtils header package,
 /// ATLAS-specific HepMC functions not suitable for MCUtils.
 
-#include "MCUtils/PIDUtils.h"
-namespace MC {
+namespace MCUtils
+{
+namespace PID
+{
+#include "AtlasPID.h"
+}
+}
 
-  using namespace MCUtils;
-  using namespace HEPUtils;
+namespace MC
+{
+using namespace MCUtils;
+using namespace MCUtils::PID;
 
   /// @brief Identify if the particle with given PDG ID would not interact with the detector, i.e. not a neutrino or WIMP
   inline bool isNonInteracting(int pid) { return !(PID::isStrongInteracting(pid) || PID::isEMInteracting(pid)); }
@@ -20,6 +32,7 @@ namespace MC {
   /// @brief Identify if the particle with given PDG ID would produce ID tracks but not shower in the detector if stable
   inline bool isChargedNonShowering(int pid) { return (PID::isMuon(pid) || PID::isSUSY(pid)); }
 }
+
 #if !defined(XAOD_STANDALONE)
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"

@@ -67,8 +67,8 @@ class InDetAmbiScoringTool : virtual public Trk::ITrackScoringTool,
   int m_maxDblHoles, m_maxPixHoles, m_maxSCT_Holes,  m_maxHits, m_maxSigmaChi2, m_maxTrtRatio, m_maxTrtFittedRatio,
     m_maxB_LayerHits, m_maxPixelHits, m_maxPixLay,  m_maxGangedFakes;
   std::vector<double> m_factorDblHoles, m_factorPixHoles, m_factorSCT_Holes,  m_factorHits,
-    m_factorSigmaChi2, m_factorB_LayerHits, m_factorPixelHits, m_factorPixLay, m_factorHoles, m_factorGangedFakes;
-  std::vector<double> m_boundsSigmaChi2, m_boundsHits,
+    m_factorSigmaChi2, m_factorB_LayerHits, m_factorPixelHits, m_factorPixLay, m_factorGangedFakes;
+  std::vector<double> m_boundsSigmaChi2,
     m_boundsTrtRatio, m_factorTrtRatio, m_boundsTrtFittedRatio, m_factorTrtFittedRatio;
 
   /** Returns minimum number of expected TRT drift circles depending on eta. */

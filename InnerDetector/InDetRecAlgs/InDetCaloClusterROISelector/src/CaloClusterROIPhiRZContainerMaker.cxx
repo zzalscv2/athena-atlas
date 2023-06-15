@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "InDetCaloClusterROISelector/CaloClusterROIPhiRZContainerMaker.h"
@@ -208,8 +208,7 @@ Trk::LocalParameters CaloClusterROIPhiRZContainerMaker::getClusterLocalParameter
     double z = tantheta == 0 ? 0. : r / tantheta;
     Trk::DefinedParameter locRPhi(r * phi, Trk::locRPhi);
     Trk::DefinedParameter locZ(z, Trk::locZ);
-    std::vector<Trk::DefinedParameter> defPar{ locRPhi, locZ};
-    return Trk::LocalParameters(defPar);
+    return Trk::LocalParameters(locRPhi, locZ);
   } else {
     // Local paramters of a disk are
     // Trk::locR   = 0
@@ -218,8 +217,7 @@ Trk::LocalParameters CaloClusterROIPhiRZContainerMaker::getClusterLocalParameter
     double r = z * tantheta;
     Trk::DefinedParameter locR(r, Trk::locR);
     Trk::DefinedParameter locPhi(phi, Trk::locPhi);
-    std::vector<Trk::DefinedParameter> defPar {locR, locPhi} ;
-    return Trk::LocalParameters(defPar);
+    return Trk::LocalParameters(locR, locPhi);
   }
 }
 

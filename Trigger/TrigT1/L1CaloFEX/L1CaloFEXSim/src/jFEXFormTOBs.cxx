@@ -37,7 +37,7 @@ uint32_t jFEXFormTOBs::formTauTOB(int jFEX, int iPhi, int iEta, int EtClus, int 
     
     int eta = iEta-8; // needed to substract 8 to be in the FPGA core area
     int phi = iPhi-8; // needed to substract 8 to be in the FPGA core area
-    int sat = 1; //1 bit for saturation flag, not coded yet
+    int sat = 0;
     
     // correcting C-side. mirror symmetry
     if(jFEX == 1 || jFEX == 2){
@@ -69,9 +69,8 @@ uint32_t jFEXFormTOBs::formTauTOB(int jFEX, int iPhi, int iEta, int EtClus, int 
 
 }    
 
-int jFEXFormTOBs::Get_calibrated_SRj_ET(int Energy, int jfex){
+int jFEXFormTOBs::Get_calibrated_SRj_ET(int Energy, int jfex, int res){
     
-/***********    MAYBE WILL BE NEEDED IN THE FUTURE... DO NOT REMOVE FOR NOW   
     int Et_edge[8] = {20,30,40,50,65,80,110,150};
     int et_range = -1;
     
@@ -88,12 +87,15 @@ int jFEXFormTOBs::Get_calibrated_SRj_ET(int Energy, int jfex){
         et_range = 8;
     }
     
-    int et = (Energy * FEXAlgoSpaceDefs::SRJ_Calib_params[jfex][et_range]) >> 7;
+    int calib = FEXAlgoSpaceDefs::SRJ_Calib_params[jfex][et_range];
+    
+    //Converting into 200MeV scale
+    int et_200Mev = std::floor(1.0*Energy/res);
+    
+    //Applying the calibration
+    int et = std::floor( (1.0*et_200Mev*calib)/(1<<7) );
+    
     return et;
-*/
-
-    return Energy * FEXAlgoSpaceDefs::SRJ_Calib_params[jfex];
-
 }
 
 
@@ -104,7 +106,7 @@ uint32_t jFEXFormTOBs::formSRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, in
     unsigned int phi = 0;
     unsigned int jFEXSmallRJetTOBEt = 0;
     int Res = 0; // 11 bits reserved
-    int Sat = 1; //  1 bit for saturation. Set to 1 when jet energy is saturated
+    int Sat = 0;
 
     if(jFEX == 1 || jFEX == 2) {
 
@@ -144,10 +146,7 @@ uint32_t jFEXFormTOBs::formSRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, in
     }
     
     // COMENTED FOR NOW, Appliying jet calibration
-    jFEXSmallRJetTOBEt = Get_calibrated_SRj_ET(EtClus,jFEX)/Resolution;
-    
-    //In the firmware the calibration is not applied yet.
-    //jFEXSmallRJetTOBEt = EtClus/Resolution;
+    jFEXSmallRJetTOBEt = Get_calibrated_SRj_ET(EtClus,jFEX, Resolution);
     
     if(jFEXSmallRJetTOBEt > 0x7ff) {
         jFEXSmallRJetTOBEt = 0x7ff;
@@ -172,7 +171,7 @@ uint32_t jFEXFormTOBs::formLRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, in
     unsigned int phi = 0;
     unsigned int jFEXLargeRJetTOBEt = 0;
     int Res = 0; // 9 bits reserved
-    int Sat = 1; //  1 bit for saturation. Set to 1 when jet energy is saturated
+    int Sat = 0;
 
     if(jFEX == 1 || jFEX == 2) {
 
@@ -238,14 +237,12 @@ uint32_t jFEXFormTOBs::formSumETTOB(int ETlow, int EThigh, int Resolution )
     if (etlow > 0x7fff) { //0x7fff is 15 bits
         ATH_MSG_DEBUG("sumEtlow saturated: " << etlow );
         etlow = 0x7fff;
-        satlow=1;
     }
 
     unsigned int ethigh = EThigh/Resolution;
     if (ethigh > 0x7fff) { //0x7fff is 15 bits
         ATH_MSG_DEBUG("sumEthigh saturated: " << ethigh );
         ethigh = 0x7fff;
-        sathigh=1;
     }
 
     //create basic tobword with 32 bits

@@ -97,7 +97,7 @@ def TgcRawDataMonitoringConfig(inputFlags):
     myGroupCommon.defineHistogram('mon_lb;TgcMon_LuminosityBlock',title='Luminosity Block;Luminosity Block;Number of events',
                                   path=commonPath,type='TH1F',xbins=10,xmin=0,xmax=10,opt='kAddBinsDynamically', merge='merge')
     myGroupCommon.defineHistogram('mon_bcid;TgcMon_BCID',title='BCID;BCID;Number of events',
-                                  path=commonPath,type='TH1F',xbins=4001,xmin=-0.5,xmax=4000.5)
+                                  path=commonPath,type='TH1F',xbins=4096,xmin=-0.5,xmax=4095.5)
     myGroupCommon.defineHistogram('mon_pileup;TgcMon_Pileup',title='Pileup;Pileup;Number of events',
                                   path=commonPath,type='TH1F',xbins=101,xmin=-0.5,xmax=100.5)
     myGroupCommon.defineHistogram('mon_primvtx_z;TgcMon_PrimaryVertexZ',title='Primary Vertex Z;Primary Vertex Z [mm];Number of events',
@@ -1102,13 +1102,16 @@ def TgcRawDataMonitoringConfig(inputFlags):
             if (Det != 'Nsw' and Region == '') or (Det == 'Nsw' and Region != ''):
                 myGroupCoin.defineHistogram('coin_inner_'+det+'_slSector'+region+',coin_inner_'+det+'_deltaBcid;InnerCoin_Evt2D_'+Det+Region+'_SectorVsDeltaBcid',
                                             title='InnerCoin_Evt2D_'+Det+Region+'_SectorVsDeltaBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Delta Bcid ('+Det+' - ATLAS)',
-                                            path=coinPath,type='TH2F',xbins=nsectors*2+1,xmin=-1*nsectors-0.5,xmax=nsectors+0.5,ybins=11,ymin=-5.5,ymax=5.5)
+                                            path=coinPath,type='TH2F',xbins=nsectors*2+1,xmin=-1*nsectors-0.5,xmax=nsectors+0.5,ybins=31,ymin=-15.5,ymax=15.5)
                 myGroupCoin.defineHistogram('coin_inner_'+det+'_slSector'+region+',coin_inner_'+det+'_deltaTiming;InnerCoin_Evt2D_'+Det+Region+'_SectorVsDeltaTiming',
                                             title='InnerCoin_Evt2D_'+Det+Region+'_SectorVsDeltaTiming;SL Trigger Sector +1  (>0 for A, <0 for C);Delta Signal Timing',
                                             path=coinPath,type='TH2F',xbins=nsectors*2+1,xmin=-1*nsectors-0.5,xmax=nsectors+0.5,ybins=11,ymin=-5.5,ymax=5.5)
                 myGroupCoin.defineHistogram('coin_inner_'+det+'_slSector'+region+',coin_inner_'+det+'_deltaBcid;InnerCoin_Evt2D_'+Det+Region+'_SectorVsDeltaBcid_BcCurr',
                                             title='InnerCoin_Evt2D_'+Det+Region+'_SectorVsDeltaBcid_BcCurr;SL Trigger Sector +1  (>0 for A, <0 for C);Delta Bcid ('+Det+' - ATLAS)',
-                                            path=coinPath,type='TH2F',cutmask='coin_inner_'+det+'_currBc',xbins=nsectors*2+1,xmin=-1*nsectors-0.5,xmax=nsectors+0.5,ybins=11,ymin=-5.5,ymax=5.5)
+                                            path=coinPath,type='TH2F',cutmask='coin_inner_'+det+'_currBc',xbins=nsectors*2+1,xmin=-1*nsectors-0.5,xmax=nsectors+0.5,ybins=31,ymin=-15.5,ymax=15.5)
+                myGroupCoin.defineHistogram('mon_bcid,coin_inner_'+det+'_deltaBcid;InnerCoin_Evt2D_'+Det+Region+'_BcidVsDeltaBcid_BcCurr',
+                                            title='InnerCoin_Evt2D_'+Det+Region+'_BcidVsDeltaBcid_BcCurr;Bcid;Delta Bcid ('+Det+' - ATLAS)',
+                                            path=coinPath,type='TH2F',cutmask='coin_inner_'+det+region+'_currBc',xbins=4096,xmin=-0.5,xmax=4095.5,ybins=31,ymin=-15.5,ymax=15.5)
                 myGroupCoin.defineHistogram('coin_inner_'+det+'_slSector'+region+',coin_inner_'+det+'_deltaTiming;InnerCoin_Evt2D_'+Det+Region+'_SectorVsDeltaTiming_goodBcid0',
                                             title='InnerCoin_Evt2D_'+Det+Region+'_SectorVsDeltaTiming_goodBcid0;SL Trigger Sector +1  (>0 for A, <0 for C);Delta Signal Timing',
                                             path=coinPath,type='TH2F',cutmask='coin_inner_'+det+'_goodBcid0',xbins=nsectors*2+1,xmin=-1*nsectors-0.5,xmax=nsectors+0.5,ybins=11,ymin=-5.5,ymax=5.5)
@@ -1221,14 +1224,14 @@ def TgcRawDataMonitoringConfig(inputFlags):
                     label_slnswinput_index.append(label)
         myGroupCoin.defineHistogram('coin_inner_nsw_slInputIndex_'+side+'Endcap,coin_inner_nsw_deltaBcid;InnerCoin_Evt2D_Nsw_'+side+'Endcap_SLInputVsDeltaBcid',
                                     title='InnerCoin_Evt2D_Nsw_'+side+'Endcap_SLInputVsDeltaBcid;;Delta Bcid (Nsw - ATLAS)',
-                                    path=coinPath,type='TH2F',xbins=144,xmin=-0.5,xmax=143.5,xlabels=label_slnswinput_index,ybins=11,ymin=-5.5,ymax=5.5)
+                                    path=coinPath,type='TH2F',xbins=144,xmin=-0.5,xmax=143.5,xlabels=label_slnswinput_index,ybins=31,ymin=-15.5,ymax=15.5)
         myGroupCoin.defineHistogram('coin_inner_nsw_slInputIndex_'+side+'Endcap,coin_inner_nsw_deltaTiming;InnerCoin_Evt2D_Nsw_'+side+'Endcap_SLInputVsDeltaTiming',
                                     title='InnerCoin_Evt2D_Nsw_'+side+'Endcap_SLInputVsDeltaTiming;;Delta Signal Timing (Nsw - ATLAS)',
                                     path=coinPath,type='TH2F',xbins=144,xmin=-0.5,xmax=143.5,xlabels=label_slnswinput_index,ybins=11,ymin=-5.5,ymax=5.5)
 
         myGroupCoin.defineHistogram('coin_inner_nsw_slInputIndex_'+side+'Endcap,coin_inner_nsw_deltaBcid;InnerCoin_Evt2D_Nsw_'+side+'Endcap_SLInputVsDeltaBcid_goodTiming',
                                     title='InnerCoin_Evt2D_Nsw_'+side+'Endcap_SLInputVsDeltaBcid_goodTiming;;Delta Bcid (Nsw - ATLAS)',
-                                    path=coinPath,type='TH2F',xbins=144,xmin=-0.5,xmax=143.5,xlabels=label_slnswinput_index,ybins=11,ymin=-5.5,ymax=5.5,cutmask='coin_inner_nsw_goodTiming')
+                                    path=coinPath,type='TH2F',xbins=144,xmin=-0.5,xmax=143.5,xlabels=label_slnswinput_index,ybins=31,ymin=-15.5,ymax=15.5,cutmask='coin_inner_nsw_goodTiming')
         myGroupCoin.defineHistogram('coin_inner_nsw_slInputIndex_'+side+'Endcap,coin_inner_nsw_deltaTiming;InnerCoin_Evt2D_Nsw_'+side+'Endcap_SLInputVsDeltaTiming_goodBcid0',
                                     title='InnerCoin_Evt2D_Nsw_'+side+'Endcap_SLInputVsDeltaTiming_goodBcid0;;Delta Signal Timing (Nsw - ATLAS)',
                                     path=coinPath,type='TH2F',xbins=144,xmin=-0.5,xmax=143.5,xlabels=label_slnswinput_index,ybins=11,ymin=-5.5,ymax=5.5,cutmask='coin_inner_nsw_goodBcid0')
@@ -1254,14 +1257,14 @@ def TgcRawDataMonitoringConfig(inputFlags):
                 label_slnswinput_index.append(label)
         myGroupCoin.defineHistogram('coin_inner_nsw_slInputIndex_'+side+'Forward,coin_inner_nsw_deltaBcid;InnerCoin_Evt2D_Nsw_'+side+'Forward_SLInputVsDeltaBcid',
                                     title='InnerCoin_Evt2D_Nsw_'+side+'Forward_SLInputVsDeltaBcid;;Delta Bcid (Nsw - ATLAS)',
-                                    path=coinPath,type='TH2F',xbins=72,xmin=-0.5,xmax=71.5,xlabels=label_slnswinput_index,ybins=11,ymin=-5.5,ymax=5.5)
+                                    path=coinPath,type='TH2F',xbins=72,xmin=-0.5,xmax=71.5,xlabels=label_slnswinput_index,ybins=31,ymin=-15.5,ymax=15.5)
         myGroupCoin.defineHistogram('coin_inner_nsw_slInputIndex_'+side+'Forward,coin_inner_nsw_deltaTiming;InnerCoin_Evt2D_Nsw_'+side+'Forward_SLInputVsDeltaTiming',
                                     title='InnerCoin_Evt2D_Nsw_'+side+'Forward_SLInputVsDeltaTiming;;Delta Signal Timing (Nsw - ATLAS)',
                                     path=coinPath,type='TH2F',xbins=72,xmin=-0.5,xmax=71.5,xlabels=label_slnswinput_index,ybins=11,ymin=-5.5,ymax=5.5)
 
         myGroupCoin.defineHistogram('coin_inner_nsw_slInputIndex_'+side+'Forward,coin_inner_nsw_deltaBcid;InnerCoin_Evt2D_Nsw_'+side+'Forward_SLInputVsDeltaBcid_goodTiming',
                                     title='InnerCoin_Evt2D_Nsw_'+side+'Forward_SLInputVsDeltaBcid_goodTiming;;Delta Bcid (Nsw - ATLAS)',
-                                    path=coinPath,type='TH2F',xbins=72,xmin=-0.5,xmax=71.5,xlabels=label_slnswinput_index,ybins=11,ymin=-5.5,ymax=5.5,cutmask='coin_inner_nsw_goodTiming')
+                                    path=coinPath,type='TH2F',xbins=72,xmin=-0.5,xmax=71.5,xlabels=label_slnswinput_index,ybins=31,ymin=-15.5,ymax=15.5,cutmask='coin_inner_nsw_goodTiming')
         myGroupCoin.defineHistogram('coin_inner_nsw_slInputIndex_'+side+'Forward,coin_inner_nsw_deltaTiming;InnerCoin_Evt2D_Nsw_'+side+'Forward_SLInputVsDeltaTiming_goodBcid0',
                                     title='InnerCoin_Evt2D_Nsw_'+side+'Forward_SLInputVsDeltaTiming_goodBcid0;;Delta Signal Timing (Nsw - ATLAS)',
                                     path=coinPath,type='TH2F',xbins=72,xmin=-0.5,xmax=71.5,xlabels=label_slnswinput_index,ybins=11,ymin=-5.5,ymax=5.5,cutmask='coin_inner_nsw_goodBcid0')

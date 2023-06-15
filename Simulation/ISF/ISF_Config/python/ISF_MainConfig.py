@@ -64,9 +64,6 @@ def Kernel_GenericSimulatorMTCfg(flags, name="ISF_Kernel_GenericSimulatorMT", **
     if "GeoIDSvc" not in kwargs:
         kwargs.setdefault("GeoIDSvc", acc.getPrimaryAndMerge(GeoIDSvcCfg(flags)).name)
 
-    if "InputConverter" not in kwargs:
-        kwargs.setdefault("InputConverter", acc.getPrimaryAndMerge(InputConverterCfg(flags)).name)
-
     if "TruthRecordService" not in kwargs:
         kwargs.setdefault("TruthRecordService", acc.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
 
@@ -90,9 +87,15 @@ def Kernel_GenericSimulatorMTCfg(flags, name="ISF_Kernel_GenericSimulatorMT", **
         # Needed to ensure that DeadMaterialCalibrationHitsMerger is scheduled correctly.
         kwargs.setdefault("ExtraOutputs", [( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitActive_DEAD' ), ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitDeadMaterial_DEAD' ), ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitInactive_DEAD' )])
 
-    if "QuasiStablePatcher" not in kwargs and flags.Sim.ISF.Simulator.isQuasiStable():
-        from BeamEffects.BeamEffectsAlgConfig import ZeroLifetimePositionerCfg
-        kwargs.setdefault("QuasiStablePatcher", acc.getPrimaryAndMerge(ZeroLifetimePositionerCfg(flags)) )
+    if flags.Sim.ISF.Simulator.isQuasiStable():
+        if "QuasiStablePatcher" not in kwargs:
+            from BeamEffects.BeamEffectsAlgConfig import ZeroLifetimePositionerCfg
+            kwargs.setdefault("QuasiStablePatcher", acc.getPrimaryAndMerge(ZeroLifetimePositionerCfg(flags)) )
+        if "InputConverter" not in kwargs:
+            kwargs.setdefault("InputConverter", acc.getPrimaryAndMerge(LongLivedInputConverterCfg(flags)).name)
+    elif "InputConverter" not in kwargs:
+        kwargs.setdefault("InputConverter", acc.getPrimaryAndMerge(InputConverterCfg(flags)).name)
+
     if flags.Sim.ISF.ReSimulation:
         acc.addSequence(AthSequencer('SimSequence'), parentName='AthAlgSeq') # TODO make the name configurable?
         acc.addEventAlgo(CompFactory.ISF.SimKernelMT(name, **kwargs), 'SimSequence') # TODO make the name configurable?
@@ -150,8 +153,6 @@ def Kernel_FullG4MT_QSCfg(flags, name="ISF_Kernel_FullG4MT_QS", **kwargs):
         acc.popToolsAndMerge(ParticleKillerToolCfg(flags)),
         acc.popToolsAndMerge(LongLivedGeant4ToolCfg(flags))
     ])
-
-    kwargs.setdefault("InputConverter", acc.getPrimaryAndMerge(LongLivedInputConverterCfg(flags)).name)
 
     acc.merge(Kernel_GenericG4OnlyMTCfg(flags, name, **kwargs))
     return acc
@@ -298,7 +299,6 @@ def Kernel_ATLFAST3MTCfg(flags, name="ISF_Kernel_ATLFAST3MT", **kwargs):
 
 def Kernel_ATLFAST3MT_QSCfg(flags, name="ISF_Kernel_ATLFAST3MT_QS", **kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("InputConverter", acc.getPrimaryAndMerge(LongLivedInputConverterCfg(flags)).name)
     kwargs.setdefault("ParticleOrderingTool"       ,   acc.popToolsAndMerge(ParticleOrderingToolCfg(flags)))
 
     tool = acc.popToolsAndMerge(AFIIEntryLayerToolMTCfg(flags))
@@ -357,7 +357,13 @@ def Kernel_GenericSimulatorCfg(flags, name="ISF_Kernel_GenericSimulator", **kwar
     if "ParticleBroker" not in kwargs:
         kwargs.setdefault("ParticleBroker", acc.getPrimaryAndMerge(AFIIParticleBrokerSvcCfg(flags)).name)
 
-    if "InputConverter" not in kwargs:
+    if flags.Sim.ISF.Simulator.isQuasiStable():
+        if "QuasiStablePatcher" not in kwargs:
+            from BeamEffects.BeamEffectsAlgConfig import ZeroLifetimePositionerCfg
+            kwargs.setdefault("QuasiStablePatcher", acc.getPrimaryAndMerge(ZeroLifetimePositionerCfg(flags)) )
+        if "InputConverter" not in kwargs:
+            kwargs.setdefault("InputConverter", acc.getPrimaryAndMerge(LongLivedInputConverterCfg(flags)).name)
+    elif "InputConverter" not in kwargs:
         kwargs.setdefault("InputConverter", acc.getPrimaryAndMerge(InputConverterCfg(flags)).name)
 
     kwargs.setdefault("InputHardScatterCollection", "BeamTruthEvent")

@@ -168,9 +168,6 @@ if __name__ == "__main__":
 
             br = ttree.GetBranch( d.name )
             d_name = d.name
-            mbkg = re.match("(.*)Bkg_",d.name)
-            if mbkg:
-               d.name   = re.sub("Bkg_","",d.name)
             if br:
                 m = re.match( "(.*)_[pv]._", d.name )
                 m1 = re.match( "(.*)_tlp._", d.name )
@@ -213,8 +210,12 @@ if __name__ == "__main__":
                 for pattern in categoryStrings[ categ ]:
                     # print d.name, d_name, pair, type(d.name), type(d_name), type(pair[0])
                     m = None
+                    d_name_c=d_name
+                    mbkg = re.match("(.*)Bkg_",d_name)
+                    if mbkg:
+                       d_name_c   = re.sub("Bkg_","",d_name)
                     try:
-                        m = re.match(pattern, d_name)
+                        m = re.match(pattern, d_name_c)
                     except TypeError:
                         pass
                     if m:

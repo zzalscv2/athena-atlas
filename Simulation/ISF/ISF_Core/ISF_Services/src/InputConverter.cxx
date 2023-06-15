@@ -210,14 +210,14 @@ ISF::InputConverter::getSelectedParticles(HepMC::GenEvent& evnt, bool legacyOrde
         std::copy_if (vtx->particles_out().begin(),
                       vtx->particles_out().end(),
                       std::back_inserter(passedGenParticles),
-                      [this](HepMC::GenParticlePtr p){return p->attribute<HepMC3::IntAttribute>("ShadowParticleId");});
+                      [](HepMC::GenParticlePtr p){return p->attribute<HepMC3::IntAttribute>("ShadowParticleId");});
       }
     }
     else {
       std::copy_if (allGenPartBegin,
                     allGenPartEnd,
                     std::back_inserter(passedGenParticles),
-                    [this](HepMC::GenParticlePtr p){return p->attribute<HepMC3::IntAttribute>("ShadowParticleId");});
+                    [](HepMC::GenParticlePtr p){return p->attribute<HepMC3::IntAttribute>("ShadowParticleId");});
     }
   }
   else {

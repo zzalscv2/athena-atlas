@@ -50,7 +50,6 @@ namespace {
     std::vector<float> xPosMultiplet;
     std::vector<float> yPosMultiplet;
     std::vector<float> zPosMultiplet;
-    std::vector<float> rPosMultiplet;
   };
 }
 

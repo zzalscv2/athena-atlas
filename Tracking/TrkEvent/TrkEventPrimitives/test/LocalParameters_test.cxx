@@ -78,10 +78,10 @@ void test2() {
 }
 
 void test3() {
-  std::cout << "From size 3 vector" << '\n';
-  std::vector<Trk::DefinedParameter> tmp{Trk::DefinedParameter{1, Trk::d0},
-                                         Trk::DefinedParameter{2, Trk::z0},
-                                         Trk::DefinedParameter{3, Trk::phi0}};
+  std::cout << "From size 3 array" << '\n';
+  std::array<Trk::DefinedParameter, 3> tmp{Trk::DefinedParameter{1, Trk::d0},
+                                           Trk::DefinedParameter{2, Trk::z0},
+                                           Trk::DefinedParameter{3, Trk::phi0}};
   std::cout << "------> 3D" << '\n';
   Trk::LocalParameters dim3(tmp);
   std::cout << "Dimension " << dim3.dimension() << '\n';
@@ -92,11 +92,11 @@ void test3() {
 }
 
 void test4() {
-  std::cout << "From size 4 vector" << '\n';
-  std::vector<Trk::DefinedParameter> tmp{Trk::DefinedParameter{1, Trk::d0},
-                                         Trk::DefinedParameter{2, Trk::z0},
-                                         Trk::DefinedParameter{3, Trk::phi0},
-                                         Trk::DefinedParameter{4, Trk::theta}};
+  std::cout << "From size 4 array" << '\n';
+  std::array<Trk::DefinedParameter, 4> tmp{
+      Trk::DefinedParameter{1, Trk::d0}, Trk::DefinedParameter{2, Trk::z0},
+      Trk::DefinedParameter{3, Trk::phi0},
+      Trk::DefinedParameter{4, Trk::theta}};
   std::cout << "------> 4D" << '\n';
   Trk::LocalParameters dim4(tmp);
   std::cout << "Dimension " << dim4.dimension() << '\n';

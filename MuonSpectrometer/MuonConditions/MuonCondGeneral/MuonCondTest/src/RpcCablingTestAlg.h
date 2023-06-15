@@ -22,7 +22,7 @@ public:
     virtual StatusCode execute() override;
     virtual unsigned int cardinality() const override final{return 1;}
 
-    using CablingData = MuonNRPC_CablingMap::CablingData;
+    using CablingData = NrpcCablingData;
 
 private:
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
