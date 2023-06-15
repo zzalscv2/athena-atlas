@@ -45,7 +45,8 @@
 #include "TileByteStream/TileRawChannel2Bytes2.h" 
 #include "TileByteStream/TileRawChannel2Bytes4.h" 
 #include "TileByteStream/TileRawChannel2Bytes5.h" 
-
+#include <vector>
+#include <map>
 
 class IROBDataProviderSvc;
 class TileCablingService;
@@ -53,7 +54,7 @@ class TileCondToolOfcCool;
 class TileCondToolTiming;
 class TileCondToolEmscale;
 
-#include <vector>
+
 
 class TileTBDump: public AthAlgorithm {
   public:
