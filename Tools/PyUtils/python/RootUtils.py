@@ -231,7 +231,7 @@ class RootFileDumper(object):
 
         return
 
-    def dump(self, tree_name, itr_entries, leaves=None, retvecs=False):
+    def dump(self, tree_name, itr_entries, leaves=None, retvecs=False, sortleaves=True):
 
         ROOT = import_root()
         import AthenaPython.PyAthena as PyAthena
@@ -275,6 +275,11 @@ class RootFileDumper(object):
         else:
             itr_entries = range(itr_entries)
                 
+        list_ = list
+        map_ = map
+        str_ = str
+        isinstance_ = isinstance
+
         for ientry in itr_entries:
             hdr = ":: entry [%05i]..." % (ientry,)
             #print (hdr)
@@ -320,8 +325,12 @@ class RootFileDumper(object):
                             ))
                         self.allgood = False
                         print (err)
-                    for o in sorted(vals, key = lambda x: '.'.join(s for s in x[0] if isinstance(s, str))):
-                        n = list(map(str, o[0]))
+                    if sortleaves:
+                        viter = sorted(vals, key = lambda x: '.'.join(s for s in x[0] if isinstance_(s, str_)))
+                    else:
+                        viter = vals
+                    for o in viter:
+                        n = list_(map_(str_, o[0]))
                         v = o[1]
                         yield tree_name, ientry, n, v
 
