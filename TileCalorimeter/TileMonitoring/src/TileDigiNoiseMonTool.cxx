@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -197,7 +197,7 @@ StatusCode TileDigiNoiseMonTool::fillHistograms() {
                     << " BCID = " << m_evtBCID
                     << " lvl1 = 0x" << std::hex << m_lvl1info << std::dec;
     
-    const DataHandle<xAOD::EventInfo> eventInfo;
+    const xAOD::EventInfo* eventInfo = nullptr;
     if (evtStore()->retrieve(eventInfo).isSuccess()) {
       const std::vector<xAOD::EventInfo::StreamTag>& evtStreamTags = eventInfo->streamTags();
       if (!evtStreamTags.empty()) {
