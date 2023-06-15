@@ -107,7 +107,9 @@ StatusCode RpcTrackAnaAlg::initRpcPanel() {
 
         const unsigned int ngasgap = 2;
         const unsigned int doubletZ = readoutEl->getDoubletZ();
-        const unsigned int doubletPhi = readoutEl->getDoubletPhi();
+        if (readoutEl->getDoubletPhi() != 1) {
+            continue;
+        }
 
         const Identifier readEl_id = readoutEl->identify();
 
@@ -123,57 +125,59 @@ StatusCode RpcTrackAnaAlg::initRpcPanel() {
             continue;  // Will be changed to include BIS
         }
 
-        for (unsigned gasgap = 1; gasgap <= ngasgap; ++gasgap) {
-            std::shared_ptr<GasGapData> gap = std::make_shared<GasGapData>(
-                *m_idHelperSvc, readoutEl, doubletZ, doubletPhi, gasgap);
+        for (unsigned doubletPhi = 1; doubletPhi <= 2; ++doubletPhi) {
+            for (unsigned gasgap = 1; gasgap <= ngasgap; ++gasgap) {
+                std::shared_ptr<GasGapData> gap = std::make_shared<GasGapData>(
+                    *m_idHelperSvc, readoutEl, doubletZ, doubletPhi, gasgap);
 
-            std::pair<int, int> st_dbR = std::make_pair(stName, gap->doubletR);
-            m_gasGapData[st_dbR].push_back(gap);
+                std::pair<int, int> st_dbR = std::make_pair(stName, gap->doubletR);
+                m_gasGapData[st_dbR].push_back(gap);
 
-            std::shared_ptr<RpcPanel> rpcPanel_eta = std::make_shared<RpcPanel>(
-                *m_idHelperSvc, readoutEl, doubletZ, doubletPhi, gasgap, 0);
-            ATH_CHECK(setPanelIndex(rpcPanel_eta));
+                std::shared_ptr<RpcPanel> rpcPanel_eta = std::make_shared<RpcPanel>(
+                    *m_idHelperSvc, readoutEl, doubletZ, doubletPhi, gasgap, 0);
+                ATH_CHECK(setPanelIndex(rpcPanel_eta));
 
-            std::shared_ptr<RpcPanel> rpcPanel_phi = std::make_shared<RpcPanel>(
-                *m_idHelperSvc, readoutEl, doubletZ, doubletPhi, gasgap, 1);
-            ATH_CHECK(setPanelIndex(rpcPanel_phi));
+                std::shared_ptr<RpcPanel> rpcPanel_phi = std::make_shared<RpcPanel>(
+                    *m_idHelperSvc, readoutEl, doubletZ, doubletPhi, gasgap, 1);
+                ATH_CHECK(setPanelIndex(rpcPanel_phi));
 
-            if (rpcPanel_eta->panel_valid) {
-                ATH_MSG_DEBUG(" Panel  stationName:"
-                              << rpcPanel_eta->stationName
-                              << " stationEta:" << rpcPanel_eta->stationEta
-                              << " stationPhi:" << rpcPanel_eta->stationPhi
-                              << " doubletR:" << rpcPanel_eta->doubletR
-                              << "doubletZ:" << rpcPanel_eta->doubletZ
-                              << " doubletPhi:" << rpcPanel_eta->doubletPhi
-                              << " gasGap:" << rpcPanel_eta->gasGap
-                              << " measPhi:" << rpcPanel_eta->measPhi);
+                if (rpcPanel_eta->panel_valid) {
+                    ATH_MSG_DEBUG(" Panel  stationName:"
+                                  << rpcPanel_eta->stationName
+                                  << " stationEta:" << rpcPanel_eta->stationEta
+                                  << " stationPhi:" << rpcPanel_eta->stationPhi
+                                  << " doubletR:" << rpcPanel_eta->doubletR
+                                  << "doubletZ:" << rpcPanel_eta->doubletZ
+                                  << " doubletPhi:" << rpcPanel_eta->doubletPhi
+                                  << " gasGap:" << rpcPanel_eta->gasGap
+                                  << " measPhi:" << rpcPanel_eta->measPhi);
 
-                m_rpcPanelMap.insert(
-                    std::map<Identifier, std::shared_ptr<RpcPanel>>::value_type(
-                        rpcPanel_eta->panelId, rpcPanel_eta));
-                nValidPanel++;
+                    m_rpcPanelMap.insert(
+                        std::map<Identifier, std::shared_ptr<RpcPanel>>::value_type(
+                            rpcPanel_eta->panelId, rpcPanel_eta));
+                    nValidPanel++;
+                }
+
+                if (rpcPanel_phi->panel_valid) {
+                    ATH_MSG_DEBUG(" Panel  stationName:"
+                                  << rpcPanel_phi->stationName
+                                  << " stationEta:" << rpcPanel_phi->stationEta
+                                  << " stationPhi:" << rpcPanel_phi->stationPhi
+                                  << " doubletR:" << rpcPanel_phi->doubletR
+                                  << "doubletZ:" << rpcPanel_phi->doubletZ
+                                  << " doubletPhi:" << rpcPanel_phi->doubletPhi
+                                  << " gasGap:" << rpcPanel_phi->gasGap
+                                  << " measPhi:" << rpcPanel_phi->measPhi);
+
+                    m_rpcPanelMap.insert(
+                        std::map<Identifier, std::shared_ptr<RpcPanel>>::value_type(
+                            rpcPanel_phi->panelId, rpcPanel_phi));
+                    nValidPanel++;
+                }
+
+                gap->RpcPanel_eta_phi = std::make_pair(rpcPanel_eta, rpcPanel_phi);
+                ++nTriedPanel;
             }
-
-            if (rpcPanel_phi->panel_valid) {
-                ATH_MSG_DEBUG(" Panel  stationName:"
-                              << rpcPanel_phi->stationName
-                              << " stationEta:" << rpcPanel_phi->stationEta
-                              << " stationPhi:" << rpcPanel_phi->stationPhi
-                              << " doubletR:" << rpcPanel_phi->doubletR
-                              << "doubletZ:" << rpcPanel_phi->doubletZ
-                              << " doubletPhi:" << rpcPanel_phi->doubletPhi
-                              << " gasGap:" << rpcPanel_phi->gasGap
-                              << " measPhi:" << rpcPanel_phi->measPhi);
-
-                m_rpcPanelMap.insert(
-                    std::map<Identifier, std::shared_ptr<RpcPanel>>::value_type(
-                        rpcPanel_phi->panelId, rpcPanel_phi));
-                nValidPanel++;
-            }
-
-            gap->RpcPanel_eta_phi = std::make_pair(rpcPanel_eta, rpcPanel_phi);
-            ++nTriedPanel;
         }
     }
 
@@ -548,7 +552,7 @@ StatusCode RpcTrackAnaAlg::fillMuonExtrapolateEff(
                     continue;
 
                 int thr = std::min(7, roi->getThrNumber());
-                for (int i_thr = 1; i_thr < thr; i_thr++) {
+                for (int i_thr = 1; i_thr <= thr; i_thr++) {
                     isMatcheds[i_thr - 1] = true;
                 }
             }
@@ -655,7 +659,10 @@ StatusCode RpcTrackAnaAlg::fillHistPRD(const EventContext& ctx) const {
             const int measphi = rpcIdHelper.measuresPhi(id);
 
             auto temp_panel = std::make_unique<RpcPanel>(
-                rpcData->detectorElement()->identify(), rpcIdHelper);
+                    *m_idHelperSvc, rpcData->detectorElement(), 
+                    rpcIdHelper.doubletZ(id), rpcIdHelper.doubletPhi(id), 
+                    rpcIdHelper.gasGap(id), rpcIdHelper.measuresPhi(id));
+
             std::map<Identifier, std::shared_ptr<RpcPanel>>::const_iterator
                 i_panel = m_rpcPanelMap.find(temp_panel->panelId);
             if (i_panel == m_rpcPanelMap.end()) {

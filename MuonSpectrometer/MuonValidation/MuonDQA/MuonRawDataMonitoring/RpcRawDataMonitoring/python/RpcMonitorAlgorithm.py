@@ -57,7 +57,7 @@ def RpcMonitoringConfig(inputFlags):
                         title='Number of Event;Luminosity Block;N Event',
                         type='TH1I', 
                         path='RpcOccupancy',
-                        xbins=1200, xmin=0.5, xmax=1200.5)
+                        xbins=2000, xmin=0.5, xmax=2000.5)
 
     myGroup_track.defineHistogram('prdTime', 
                         title="Number of RPC Hit;Time;NHit",
@@ -94,12 +94,12 @@ def RpcMonitoringConfig(inputFlags):
                 title='Number of RPC Hit;Luminosity Block;Panel Index;NHit',
                 type='TH2I', 
                 path='RpcOccupancy',
-                xbins=1200, xmin=0.5, xmax=1200.5, ybins=8592, ymin=-0.5, ymax=8591.5)
+                xbins=2000, xmin=0.5, xmax=2000.5, ybins=8592, ymin=-0.5, ymax=8591.5)
     myGroup_track.defineHistogram('LB;NPRDHitVSLB_All', 
                 title="Number of RPC Hit;Luminosity Block;NHit",
                 type='TH1I', 
                 path='RpcOccupancy',
-                xbins=1200, xmin=0.5, xmax=1200.5)
+                xbins=2000, xmin=0.5, xmax=2000.5)
 
     ######################################################################################################
     ## Rpc Track Analysis
@@ -110,7 +110,7 @@ def RpcMonitoringConfig(inputFlags):
                             title='Number of RPC hits for muons decayed from Z candidates;Luminosity Block;#phi sector(- for C side, + for A side);NHit',
                             type='TH2I', 
                             path=trackPath,
-                            xbins=1200, xmin=0.5, xmax=1200.5, ybins=33, ymin=-16.5, ymax=16.5)
+                            xbins=2000, xmin=0.5, xmax=2000.5, ybins=33, ymin=-16.5, ymax=16.5)
 
     ## probe muon with Z tag&probe method
     myGroup_track.defineHistogram('muPt_MuonFromZ;Pt_MuonFromZ',
@@ -187,7 +187,7 @@ def RpcMonitoringConfig(inputFlags):
                             title='Panels detection efficiency for muons decayed from Z candidates;Luminosity Block;Efficiency',
                             type='TEfficiency',
                             path=trackPath,
-                            xbins=1200, xmin=0.5, xmax=1200.5)
+                            xbins=2000, xmin=0.5, xmax=2000.5)
                             
     myGroup_track.defineHistogram('isOutTime_prd,panelInd_prd;OuttimeHitFraction_PRDHit', 
                             title='Fraction of out-of-time hits for muons decayed from Z candidates;Panel Index;Fraction of out-of-time hits',
@@ -299,13 +299,6 @@ def RpcMonitoringConfig(inputFlags):
                 type='TEfficiency',
                 path='L1Trigger',
                 xbins=32,xmin=-3.1415926,xmax=3.1415926)
-
-    array_triggerThr.defineHistogram('muEta_l1,muPhi_l1;L1TriggerEffNum', 
-                type='TH2D', 
-                title='L1 Trigger Efficiency Numerator for {0};#eta;#phi;NMuon for {0}',
-                path='L1Trigger',
-                xbins=42,xmin=-1.05,     xmax=1.05,
-                ybins=32,ymin=-3.1415926,ymax=3.1415926)
 
     array_triggerThr.defineHistogram('passTrigger_plateau,muEta_l1,muPhi_l1;L1TriggerEff_eta_phi',
                 title='L1 Trigger Efficiency for {0};#eta;#phi;#epsilon for {0}',
