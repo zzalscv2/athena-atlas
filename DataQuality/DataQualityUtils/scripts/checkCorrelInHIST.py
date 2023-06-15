@@ -10,6 +10,8 @@ import argparse
 import xmlrpc.client
 from DataQualityUtils import pathExtract         
 import ctypes
+import sqlite3
+
 
 import ROOT as R
 
@@ -20,9 +22,12 @@ nLB = 8000
 
 dqmpassfile="/afs/cern.ch/user/l/larmon/public/atlasdqmpass.txt"
 
+conn = None
+cursor = None
+
 # Some definitions for wildcards which can be used for input plot lists
 wildcards = {}
-wildcardplots = ["CellOccupancyVsEtaPhi", "fractionOverQthVsEtaPhi","DatabaseNoiseVsEtaPhi"]
+wildcardplots = ["CellOccupancyVsEtaPhi", "fractionOverQthVsEtaPhi","DatabaseNoiseVsEtaPhi","CellAvgEnergyVsEtaPhi"]
 
 for plot in wildcardplots:
   wildcards[plot] = {}
@@ -270,7 +275,7 @@ def getSummary(histos, correls, fractionNonZero):
         already.append(corr)
 
 
-def topNBins(h,topn,bins,h_fracQth=None):
+def topNBins(histname,h,topn,bins,h_fracQth=None):
   content = []
   binx = []
   biny = []
@@ -309,11 +314,27 @@ def topNBins(h,topn,bins,h_fracQth=None):
       if (abs(binx[ind][0]) > 1.4 or abs(binx[ind][2]) > 1.4) and int(sam)>1:
         thissam = str(int(sam)-1)
         thisprop = thisprop.replace("SAM="+sam, "SAM="+thissam)
-    printstr = thisprop+" ETA between "+str(format(binx[ind][0],".4f"))+" and "+str(format(binx[ind][2],".4f"))+" and PHI between "+str(format(biny[ind][0],".4f"))+" and "+str(format(biny[ind][2],".4f"))+" (content = "+str(content[ind])
+    printstr = thisprop+" ETA between "+str(format(binx[ind][0],".4f"))+" and "+str(format(binx[ind][2],".4f"))+" and PHI between "+str(format(biny[ind][0],".4f"))+" and "+str(format(biny[ind][2],".4f"))
+
+    ONL_ID = []
+    if "LArCellMon" in histname:
+      conn = sqlite3.connect('/afs/cern.ch/user/l/larmon/public/prod/LArIdtranslator/LArId.db')
+      conn.row_factory  = sqlite3.Row
+      cursor = conn.cursor()
+      cmd = 'select distinct LARID.ONL_ID from LARID where '
+      cmd += printstr.replace("DET","LARID.DET").replace("SAM","LARID.SAM").replace("ETA","LARID.ETA").replace("PHI","LARID.PHI")
+      cursor.execute(cmd)
+      all_row = cursor.fetchall()
+      ONL_ID=[hex(all_row[i]['ONL_ID']) for i in range(len(all_row))]
+      
+    
+
+    printstr += " (content = "+str(content[ind])
     if h_fracQth is not None:
       printstr += " & /Qth = "+str(format(fracQthContent[ind],".3f"))
     printstr += ")"
-
+    if len(ONL_ID) != 0:
+      printstr += " ONL_ID = "+(", ".join(ONL_ID))
     print(printstr)
 
 
@@ -406,7 +427,8 @@ if __name__ == "__main__":
   runFilePath = "root://eosatlas.cern.ch/%s"%(mergedFilePath).rstrip()
   if ("FILE NOT FOUND" in runFilePath):
     print("No merged file found for this run")
-    print("HINT: check if there is a folder like","/eos/atlas/atlastier0/rucio/"+args.tag+"/physics_CosmicCalo/00"+str(args.runNumber)+"/"+args.tag+".00"+str(args.runNumber)+".physics_CosmicCalo.*."+args.amiTag)
+    print("pathExtract.returnEosHistPath( "+str(args.runNumber)+", "+str( args.stream)+", "+str(args.amiTag)+", "+str(args.tag)+" )")
+    print("HINT: check if there is a folder like","/eos/atlas/atlastier0/rucio/"+args.tag+"/physics_"+args.stream+"/00"+str(args.runNumber)+"/"+args.tag+".00"+str(args.runNumber)+".physics_"+args.stream+".*."+args.amiTag)
   else:
       print("I have found the merged HIST file %s"%(runFilePath))
       drawngroup = {}
@@ -495,7 +517,7 @@ if __name__ == "__main__":
               tmp_bin = histos[hist]["merged"].FindBin(iX,iY)
               if (tmp_bin not in histos[hist]["regionBins"]):
                 histos[hist]["regionBins"].append(tmp_bin)
-          topNBins(histos[hist]["merged"],args.topN,histos[hist]["regionBins"], QthHist)
+          topNBins(hist,histos[hist]["merged"],args.topN,histos[hist]["regionBins"], QthHist)
         # Draw a box on each of the plots, highlighting the region that we will compare
         histos[hist]["box"].SetLineColor(R.kRed+1)
         histos[hist]["box"].SetLineWidth(3)
@@ -522,7 +544,7 @@ if __name__ == "__main__":
 
   if isinstance(lbFilePathList,str) and "NOT FOUND" in lbFilePathList:
     print("Could not find per-LB files for this run")
-    print("HINT: check if there is a folder like","/eos/atlas/atlastier0/tzero/prod/"+args.tag+"/physics_CosmicCalo/00"+str(args.runNumber)+"/"+args.tag+".00"+str(args.runNumber)+".physics_CosmicCalo.*."+args.amiTag)
+    print("HINT: check if there is a folder like","/eos/atlas/atlastier0/tzero/prod/"+args.tag+"/physics_"+args.stream+"/00"+str(args.runNumber)+"/"+args.tag+".00"+str(args.runNumber)+".physics_"+args.stream+".*."+args.amiTag)
     sys.exit()
 
   print("I have found %d unmerged HIST files"%(len(lbFilePathList)))
