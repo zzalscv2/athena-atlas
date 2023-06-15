@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "DecisionSummaryMakerAlg.h"
 #include "TrigCompositeUtils/HLTIdentifier.h"
@@ -86,15 +86,8 @@ StatusCode DecisionSummaryMakerAlg::execute(const EventContext& context) const {
     }
 
     for ( const Decision* decisionObject: *handle ) {
-      // Get passing chains from this decisionObject
-      DecisionIDContainer passingIDs;
-      decisionIDs(decisionObject, passingIDs);
-
       // Filter out chains for which this is NOT the final step of their processing
-      DecisionIDContainer passingFinalIDs;
-      std::set_intersection( passingIDs.begin(), passingIDs.end(),
-          thisCollFilter->second.begin(), thisCollFilter->second.end(),
-          std::inserter(passingFinalIDs, passingFinalIDs.begin() ) ); // should be faster than remove_if
+      const DecisionIDContainer& passingFinalIDs = passedDecisionIDs(decisionObject, thisCollFilter->second);
 
       if (passingFinalIDs.empty()) {
         continue;

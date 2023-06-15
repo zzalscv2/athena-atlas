@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // DecisionHandling includes
@@ -15,6 +15,7 @@ using TrigCompositeUtils::DecisionIDContainer;
 using TrigCompositeUtils::DecisionID;
 using TrigCompositeUtils::decisionIDs;
 using TrigCompositeUtils::insertDecisionIDs;
+using TrigCompositeUtils::passedDecisionIDs;
 using TrigCompositeUtils::createAndStore;
 using TrigCompositeUtils::newDecisionIn;
 using TrigCompositeUtils::filterNodeName;
@@ -195,15 +196,10 @@ size_t RoRSeqFilter::copyPassing( const DecisionContainer& input,
   size_t passCounter = 0;
   for (const Decision* inputDecision : input) {
 
-    DecisionIDContainer objDecisions;      
-    decisionIDs( inputDecision, objDecisions );
+    ATH_MSG_DEBUG("Number of positive decisions for this input is " << decisionIDs(inputDecision).size()
+                  <<". Applying filter of size " << topass.size());
 
-    ATH_MSG_DEBUG("Number of positive decisions for this input is " << objDecisions.size() <<". Now Filtering...." );
-
-    DecisionIDContainer intersection;
-    std::set_intersection( topass.begin(), topass.end(),
-         objDecisions.begin(), objDecisions.end(),
-         std::inserter(intersection, intersection.end()) );
+    const DecisionIDContainer& intersection = passedDecisionIDs(inputDecision, topass);
 
     if ( not intersection.empty() ) {      
       // This sets up the 'self' link & the 'seed' link (seeds from inputDecision)
@@ -211,11 +207,11 @@ size_t RoRSeqFilter::copyPassing( const DecisionContainer& input,
 
       // Copy accross only the DecisionIDs which have passed through this Filter for this Decision object. 
       // WARNING: Still need to 100% confirm if the correct set to propagate forward is objDecisions or intersection.
-      // Tim M changing this from objDecisions (all IDs) -> intersection (only passed IDs) Feb 19
+      // Tim M changing this from inputDecisions (all IDs) -> intersection (only passed IDs) Feb 19
       insertDecisionIDs(intersection, decisionCopy);     
       passCounter ++;
-      ATH_MSG_DEBUG("Input satisfied at least one filtering chain. Chain(s) passing:");
       if (msgLvl(MSG::DEBUG)){
+        ATH_MSG_DEBUG("Input satisfied at least one filtering chain. Chain(s) passing:");
       	for ( DecisionID id : intersection ) {
 	       ATH_MSG_DEBUG( " -- " << HLT::Identifier( id ) );
 	      }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // See similar workaround the lack of CLID in standalone releases in TrigComposite_v1.h
@@ -108,7 +108,7 @@ namespace TrigCompositeUtils {
 
   bool isAnyIDPassing( const Decision* d,  const DecisionIDContainer& required ) {
     for ( DecisionID id : readOnlyAccessor( *d ) ) {
-      if ( required.count( id ) > 0 ) {
+      if ( required.find( id ) != required.end() ) {
         return true;
       }
     }
@@ -116,7 +116,7 @@ namespace TrigCompositeUtils {
   }
 
   bool passed( DecisionID id, const DecisionIDContainer& idSet ) {
-    return idSet.count( id ) != 0;
+    return idSet.find( id ) != idSet.end();
   }
 
 #if !defined(XAOD_STANDALONE) && !defined(XAOD_ANALYSIS) // Full athena
@@ -351,7 +351,7 @@ namespace TrigCompositeUtils {
         DecisionIDContainer activeChainsPassedByThisDecision;
         decisionIDs(d, activeChainsPassedByThisDecision);
         for (const DecisionID checkID : chainsToCheck) {
-          if (activeChainsPassedByThisDecision.count(checkID) == 0 && // I was REJECTED here ...
+          if (activeChainsPassedByThisDecision.find(checkID) == activeChainsPassedByThisDecision.end() && // I was REJECTED here ...
               activeChainsIntoThisDecision.count(checkID) == 1) { // ... but PASSSED by all my inputs
             output.push_back(d);
             break;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigCompositeUtils_TrigCompositeUtils_h
@@ -154,7 +154,14 @@ namespace TrigCompositeUtils {
    * @brief return true if there is no positive decision stored
    **/
   bool allFailed( const Decision* d );
-  
+
+  /**
+   * @brief return DecisionIDs in Decision object that match the required ones
+   * @arg \c required is a container of (values convertable to) DecisionIDs
+   **/
+  template<typename T>
+  DecisionIDContainer passedDecisionIDs( const Decision* d, const T& required );
+
   /**
    * @brief Checks if any of the DecisionIDs passed in arg required is availble in Decision object
    **/
