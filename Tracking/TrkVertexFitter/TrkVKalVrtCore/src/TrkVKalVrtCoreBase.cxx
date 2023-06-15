@@ -30,7 +30,8 @@ namespace Trk {
       m_vrtMassTot(-1),
       m_vrtMassError(-1),
       m_cascadeEvent(nullptr),
-      vk_forcft()
+      vk_forcft(),
+      m_frozenVersionForBTagging(false)
   { 
   }
   VKalVrtControl::VKalVrtControl(const VKalVrtControl & src)
@@ -38,7 +39,8 @@ namespace Trk {
       m_vrtMassTot(src.m_vrtMassTot),
       m_vrtMassError(src.m_vrtMassError),
       m_cascadeEvent(src.m_cascadeEvent),
-      vk_forcft(src.vk_forcft)
+      vk_forcft(src.vk_forcft),
+      m_frozenVersionForBTagging(src.m_frozenVersionForBTagging)
   { 
   }
 

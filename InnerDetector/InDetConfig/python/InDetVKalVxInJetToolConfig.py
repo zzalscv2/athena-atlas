@@ -12,8 +12,8 @@ def TCTDecorCheckInToolCfg(flags, name="TCTDecorCheckInTool", **kwargs):
     kwargs.setdefault("JetCollection","AntiKt4EMPFlowJets")
     
     from TrkConfig.TrkVKalVrtFitterConfig import TrkVKalVrtFitterCfg
-    VertexFitterTool = acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags,"VertexFitterTool"))
-    kwargs.setdefault("TrackClassificationTool",acc.popToolsAndMerge(InDetTrkInJetTypeCfg(flags,name="TrkInJetType",JetCollection=kwargs["JetCollection"],VertexFitterTool=VertexFitterTool)))
+    VertexFitter = acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags,"VKalVrtFitter"))
+    kwargs.setdefault("TrackClassificationTool",acc.popToolsAndMerge(InDetTrkInJetTypeCfg(flags,name="TrkInJetType",JetCollection=kwargs["JetCollection"],VertexFitterTool=VertexFitter)))
                  
     acc.addEventAlgo(CompFactory.TCTDecorCheckInTool(name, **kwargs))
     return acc
@@ -28,12 +28,17 @@ def InDetTrkInJetTypeCfg(flags, name="TrkInJetType", **kwargs):
 def InDetVKalVxInJetToolCfg(flags, name="InDetVKalVxInJetTool", **kwargs):
     acc = ComponentAccumulator()
 
+    from TrkConfig.TrkVKalVrtFitterConfig import BTAG_TrkVKalVrtFitterCfg
+    VertexFitter = acc.popToolsAndMerge(BTAG_TrkVKalVrtFitterCfg(flags,"VKalVrtFitter"))
+
     if "TrackClassTool" not in kwargs:
          kwargs.setdefault("TrackClassTool", acc.popToolsAndMerge(
-             InDetTrkInJetTypeCfg(flags)))
+             InDetTrkInJetTypeCfg(flags,VertexFitterTool=VertexFitter)))
 
     kwargs.setdefault("ExistIBL", flags.GeoModel.Run in [LHCPeriod.Run2, LHCPeriod.Run3])
     kwargs.setdefault("getNegativeTag", "Flip" in name)
+    kwargs.setdefault("UseFrozenVersion", True)
+    kwargs.setdefault("VertexFitterTool", VertexFitter)
 
     if flags.GeoModel.Run >= LHCPeriod.Run4:
         from InDetConfig.InDetEtaDependentCutsConfig import IDEtaDependentCuts_SV1_SvcCfg

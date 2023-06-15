@@ -54,7 +54,8 @@ TrkVKalVrtFitter:: TrkVKalVrtFitter(const std::string& type,
     m_usePointingCnst(false),
     m_useZPointingCnst(false),
     m_usePassNear(false),
-    m_usePassWithTrkErr(false)
+    m_usePassWithTrkErr(false),
+    m_frozenVersionForBTagging(false)
    {
     declareInterface<IVertexFitter>(this);
     declareInterface<ITrkVKalVrtFitter>(this);
@@ -93,6 +94,7 @@ TrkVKalVrtFitter:: TrkVKalVrtFitter(const std::string& type,
     declareProperty("useZPointingCnst",       m_useZPointingCnst);
     declareProperty("usePassNearCnst",        m_usePassNear);
     declareProperty("usePassWithTrkErrCnst",  m_usePassWithTrkErr);
+    declareProperty("FrozenVersionForBTagging",  m_frozenVersionForBTagging);
 //
 
 /*--------------------------------------------------------------------------*/
@@ -177,6 +179,7 @@ StatusCode TrkVKalVrtFitter::initialize()
     if(msgLvl(MSG::DEBUG))msg(MSG::DEBUG)<< "TrkVKalVrtFitter initialize() successful" << endmsg;
     if(msgLvl(MSG::DEBUG)){
        msg(MSG::DEBUG)<< "TrkVKalVrtFitter configuration:" << endmsg;
+       msg(MSG::DEBUG)<< "   Frozen version for BTagging:          "<< m_frozenVersionForBTagging <<endmsg;
        msg(MSG::DEBUG)<< "   A priori vertex constraint:           "<< m_useAprioriVertex <<endmsg;
        msg(MSG::DEBUG)<< "   Angle dTheta=0 constraint:            "<< m_useThetaCnst <<endmsg;
        msg(MSG::DEBUG)<< "   Angle dPhi=0 constraint:              "<< m_usePhiCnst <<endmsg;
@@ -254,6 +257,7 @@ void TrkVKalVrtFitter::initState (const EventContext& ctx, State& state) const
   state.m_Robustness = m_Robustness;
   state.m_RobustScale = m_RobustScale;
   state.m_MassInputParticles = m_c_MassInputParticles;
+  state.m_frozenVersionForBTagging = m_frozenVersionForBTagging;
 }
 
 /** Interface for MeasuredPerigee with starting point */
