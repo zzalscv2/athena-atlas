@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisJiveXML/ElectronRetriever.h"
@@ -27,8 +27,7 @@ namespace JiveXML {
     //Only declare the interface
     declareInterface<IDataRetriever>(this);
 
-    m_sgKey = "ElectronAODCollection";
-    declareProperty("StoreGateKey", m_sgKey, 
+    declareProperty("StoreGateKey", m_sgKey= "ElectronAODCollection", 
         "Collection to be first in output, shown in Atlantis without switching");
   }
    
@@ -63,7 +62,7 @@ namespace JiveXML {
 //        return StatusCode::WARNING;
     }
       
-    for (; iterator!=end; iterator++) {
+    for (; iterator!=end; ++iterator) {
        if (iterator.key()!=m_sgKey) {
           if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve all " << dataTypeName() << " (" << iterator.key() << ")" << endmsg;
             DataMap data = getData(&(*iterator));

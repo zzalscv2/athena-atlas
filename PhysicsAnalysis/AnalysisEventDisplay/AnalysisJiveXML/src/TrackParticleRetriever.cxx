@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisJiveXML/TrackParticleRetriever.h"
@@ -150,7 +150,7 @@ namespace JiveXML {
       }
 
       //Next loop over all collections
-      for (; trackCollIter!=trackCollEnd; trackCollIter++) {
+      for (; trackCollIter!=trackCollEnd; ++trackCollIter) {
 
 	//hack to avoid double, as 'find' (further below) fails.
 	if ( trackCollIter.key() == m_PriorityTrackCollection ){ continue; }

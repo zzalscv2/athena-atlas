@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisJiveXML/CompositeParticleRetriever.h"
@@ -23,13 +23,13 @@ namespace JiveXML {
    **/
   CompositeParticleRetriever::CompositeParticleRetriever(const std::string& type,const std::string& name,const IInterface* parent):
     AthAlgTool(type,name,parent),
-    m_typeName("CompositeParticle"){
+    m_typeName("CompositeParticle")
+  {
 
     //Only declare the interface
     declareInterface<IDataRetriever>(this);
 
-    m_sgKey = "AllObjects";
-    declareProperty("StoreGateKey", m_sgKey, 
+    declareProperty("StoreGateKey", m_sgKey = "AllObjects", 
         "Collection to be first in output, shown in Atlantis without switching");
   }
    
@@ -64,7 +64,7 @@ namespace JiveXML {
 //        return StatusCode::WARNING;
     }
       
-    for (; iterator!=end; iterator++) {
+    for (; iterator!=end; ++iterator) {
        if (iterator.key()!=m_sgKey) {
           if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve all " << dataTypeName() << " (" << iterator.key() << ")" << endmsg;
             DataMap data = getData(&(*iterator));

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisJiveXML/AODCaloClusterRetriever.h"
@@ -26,8 +26,7 @@ namespace JiveXML {
     //Only declare the interface
     declareInterface<IDataRetriever>(this);
     
-    m_sgKeyFavourite = "egClusterCollection";
-    declareProperty("FavouriteClusterCollection" ,m_sgKeyFavourite,
+    declareProperty("FavouriteClusterCollection" ,m_sgKeyFavourite= "egClusterCollection",
         "Collection to be first in output, shown in Atlantis without switching");
     declareProperty("OtherClusterCollections" ,m_otherKeys,
         "Other collections to be retrieved. If list left empty, all available retrieved");
@@ -83,7 +82,7 @@ namespace JiveXML {
 //        return false;
       }
       
-      for (; iterator!=end; iterator++) {
+      for (; iterator!=end; ++iterator) {
 
         std::string::size_type position = iterator.key().find("HLTAutoKey",0);
         if ( m_doWriteHLT ){ position = 99; } // override SG key find
