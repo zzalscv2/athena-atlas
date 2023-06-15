@@ -57,6 +57,8 @@ namespace Trk{
     if(state.m_usePassNear)      state.m_vkalFitControl.setUsePassNear(1);
     if(state.m_usePassWithTrkErr)state.m_vkalFitControl.setUsePassNear(2);
 
+    if(state.m_frozenVersionForBTagging)state.m_vkalFitControl.m_frozenVersionForBTagging=true;
+
     if(m_IterationPrecision>0.) state.m_vkalFitControl.setIterationPrec(m_IterationPrecision);
     if(m_IterationNumber)  state.m_vkalFitControl.setIterationNum(m_IterationNumber);
  }

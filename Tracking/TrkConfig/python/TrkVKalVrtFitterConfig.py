@@ -63,3 +63,15 @@ def V0VKalVrtFitterCfg(flags, name="V0VKalVrtFitter", **kwargs):
 def JpsiV0VertexFitCfg(flags, name="JpsiV0VertexFit", **kwargs):
     kwargs.setdefault("CascadeCnstPrecision", 1e-6)
     return BPHY_TrkVKalVrtFitterCfg(flags, name, **kwargs)
+
+def BTAG_TrkVKalVrtFitterCfg(flags, name="BTAG_TrkVKalVrtFitter",**kwargs):
+    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+    acc = AtlasFieldCacheCondAlgCfg(flags) # To produce AtlasFieldCacheCondObj
+    myargs = kwargs.copy()
+    myargs.setdefault("FirstMeasuredPoint", False)
+    myargs.setdefault("FrozenVersionForBTagging", True)
+    if "Extrapolator" in myargs:
+       del myargs["Extrapolator"]
+    acc.setPrivateTools(CompFactory.Trk.TrkVKalVrtFitter(name, **myargs))
+    return acc
+

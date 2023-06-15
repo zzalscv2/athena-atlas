@@ -89,6 +89,7 @@ namespace Trk {
        CascadeEvent * m_cascadeEvent=nullptr;       
      public:
        ForCFT vk_forcft;
+       bool m_frozenVersionForBTagging = false;
   };
 
 } // end of namespace bracket

@@ -9,12 +9,10 @@
 
 namespace Trk {
 
-
-//extern void digx(double*, double*, double*, long int , long int );
  
 extern void vkGetEigVect(const double ci[], double d[], double vect[], int n);
 
-void robtest(VKVertex * vk, long int ifl)
+void robtest(VKVertex * vk, int ifl, int nIteration=10)
 {
     long int i, j, k, kk, it;
     double rob, res, c[5], darg, absX, roba[5];
@@ -40,26 +38,15 @@ void robtest(VKVertex * vk, long int ifl)
     double    Scl = vk->vk_fitterControl->vk_forcft.RobustScale;  //Tuning constant
     double    C;                          // Breakdown constant
 
+    if(!vk->vk_fitterControl->m_frozenVersionForBTagging)Scl *= (1.+exp(3.-nIteration)); //Annealing
+
     if ( ifl == 0) {                               /* FILLING OF EIGENVALUES AND VECTORS */
-	for (it = 0; it < NTRK ; ++it) {               /* RESTORE MATRIX */
+        for (it = 0; it < NTRK ; ++it) {               /* RESTORE MATRIX */
             VKTrack *trk=vk->TrackList[it].get();
             if(trk->Id < 0) continue;  // Not a real track
-	    //k = 0;   double dest[5][5];
-	    //for (i = 0; i < 5; ++i) {
-	    //for (j = 0; j <= i; ++j) {
-	    //      dest[i][j] = trk->WgtM[k];
-	    //      dest[j][i] = trk->WgtM[k];
-	    //	  ++k;
-	    //	}
-	    //}
-	    //digx(&dest[0][0], &(vk->TrackList[it]->e[0]), &(vk->TrackList[it]->v[0][0]), 5, 1);
             vkGetEigVect(trk->WgtM, trk->e ,&(trk->v[0][0]), 5);
-	}
-//std::cout.precision(9); std::cout<<"Rob="<<irob<<'\n';
-//std::cout<<" Ini="<<vk->TrackList[0]->WgtM[0]<<", "<<vk->TrackList[0]->WgtM[1]<<", "<<vk->TrackList[0]->WgtM[2]
-//            <<", "<<vk->TrackList[0]->WgtM[3]<<", "<<vk->TrackList[0]->WgtM[4]<<", "<<vk->TrackList[0]->WgtM[5]
-//            <<", "<<vk->TrackList[0]->WgtM[6]<<", "<<vk->TrackList[0]->WgtM[7]<<", "<<vk->TrackList[0]->WgtM[8]<<'\n';
-	return;
+        }
+        return;
     }
 /* -- */
     double    halfPi=M_PI/2.;
@@ -74,9 +61,6 @@ void robtest(VKVertex * vk, long int ifl)
           c[3] +=   trk->rmnd[k] * trk->v[3][k];
           c[4] +=   trk->rmnd[k] * trk->v[4][k];
         }
-//std::cout<<"rm="<<trk->rmnd[0]<<", "<<trk->rmnd[1]<<", "<<trk->rmnd[2]<<
-//            ", "<<trk->rmnd[3]<<", "<<trk->rmnd[4]<<", "<<'\n';
-//std::cout<<" c="<<c[0]<<", "<<c[1]<<", "<<c[2]<<", "<<c[3]<<", "<<c[4]<<", "<<'\n';
 	for (k = 0; k < 5; ++k) {
 	  darg = c[k]*c[k]*trk->e[k];
 	  if(darg < 1.e-10) darg = 1.e-10;
@@ -102,7 +86,6 @@ void robtest(VKVertex * vk, long int ifl)
           roba[k] = rob;
           if(rob>0.99)roba[k] = 1.; //To improve precision
 	}
-//std::cout<<"robn="<<roba[0]<<", "<<roba[1]<<", "<<roba[2]<<", "<<roba[3]<<", "<<roba[4]<<", "<<irob<<'\n';
 	for (i = 0; i < 5; ++i) if(roba[i]<1.e-3)roba[i]=1.e-3;
 	kk = 0;
 	for (i = 0; i < 5; ++i) {
@@ -118,9 +101,6 @@ void robtest(VKVertex * vk, long int ifl)
 	vk->vk_fitterControl->vk_forcft.robres[it] = roba[0] * roba[1] * roba[2] * roba[3] * roba[4];
 	if(vk->vk_fitterControl->vk_forcft.robres[it]>1.)vk->vk_fitterControl->vk_forcft.robres[it]=1.;
     }
-//std::cout<<" Fin="<<vk->TrackList[0]->WgtM[0]<<", "<<vk->TrackList[0]->WgtM[1]<<", "<<vk->TrackList[0]->WgtM[2]
-//            <<", "<<vk->TrackList[0]->WgtM[3]<<", "<<vk->TrackList[0]->WgtM[4]<<", "<<vk->TrackList[0]->WgtM[5]
-//            <<", "<<vk->TrackList[0]->WgtM[6]<<", "<<vk->TrackList[0]->WgtM[7]<<", "<<vk->TrackList[0]->WgtM[8]<<'\n';
 } 
 
 

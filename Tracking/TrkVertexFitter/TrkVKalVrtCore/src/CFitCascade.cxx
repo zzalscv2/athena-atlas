@@ -41,7 +41,7 @@ extern std::array<double, 4> getFitParticleMom( const VKTrack *, double);
 extern void setFittedMatrices(const double * , long int , std::vector<int> &, std::vector< std::vector<double> > &, CascadeEvent& );
 extern std::vector<double> transformCovar(int , double **, const std::vector<double>& );
 extern double cfVrtDstSig( VKVertex * , bool );
-extern void robtest(VKVertex * , long int );
+extern void robtest(VKVertex * , int ifl, int nIteration=10);
 
 extern int fixPseudoTrackPt(long int NPar, double * fullMtx, double * LSide, CascadeEvent&);
 extern void getNewCov(const double *OldCov, const double* Der, double* Cov, long int DIM) noexcept;
@@ -368,8 +368,8 @@ int processCascade(CascadeEvent & cascadeEvent_ )
           vpderiv(vk->passWithTrkCov, vk->FVC.Charge, dparst, vk->fitCovXYZMom, 
              vk->FVC.vrt, vk->FVC.covvrt, vk->FVC.cvder, vk->FVC.ywgt, vk->FVC.rv0, (vk->vk_fitterControl).get());
        }
-       if (vk->vk_fitterControl->vk_forcft.irob != 0) {robtest(vk, 0);}  // ROBUSTIFICATION new data structure
-       if (vk->vk_fitterControl->vk_forcft.irob != 0) {robtest(vk, 1);}  // ROBUSTIFICATION new data structure
+       if (vk->vk_fitterControl->vk_forcft.irob != 0) {robtest(vk, 0, Iter);}  // ROBUSTIFICATION new data structure
+       if (vk->vk_fitterControl->vk_forcft.irob != 0) {robtest(vk, 1, Iter);}  // ROBUSTIFICATION new data structure
        IERR = fitVertexCascade( vk, 1 );   if(IERR) break;              //with passNear for last vertex in cascade if needed
        IERR = setVTrackMass(vk);           if(IERR) break;               //mass of combined particle
 //

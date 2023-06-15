@@ -169,7 +169,7 @@ int fitVertex(VKVertex * vk)
     extern int cfInv5(double *cov, double *wgt );
     extern void cfTrkCovarCorr(double *cov);
     extern void applyConstraints(VKVertex * vk);
-    extern void robtest(VKVertex * , long int );
+    extern void robtest(VKVertex * , int ifl, int nIteration=10);
 
 //
 //    New datastructure
@@ -312,8 +312,8 @@ int fitVertex(VKVertex * vk)
 	    trk = vk->TrackList[tk].get(); protectCurvatureSign( trk->refPerig[4], trk->fitP[2] , trk->WgtM);
         }
 /*--------------------------------  Now the fit itself -----------------*/
-	if (vrtForCFT.irob != 0) {robtest(vk, 0);}  // ROBUSTIFICATION new data structure
-	if (vrtForCFT.irob != 0) {robtest(vk, 1);}  // ROBUSTIFICATION new data structure
+	if (vrtForCFT.irob != 0) {robtest(vk, 0, it);}  // ROBUSTIFICATION new data structure
+	if (vrtForCFT.irob != 0) {robtest(vk, 1, it);}  // ROBUSTIFICATION new data structure
         for( tk=0; tk<NTRK; tk++){
 	  trk = vk->TrackList[tk].get(); 
 	  trk->iniP[0]=trk->cnstP[0]=trk->fitP[0];   //use fitted track parameters as initial guess
@@ -339,7 +339,7 @@ int fitVertex(VKVertex * vk)
 	chi22s = chi21s * 1.01 + 10.; //for safety 
 	if ( vShift < 10.*vkalShiftToTrigExtrapolation) {              // REASONABLE DISPLACEMENT - RECALCULATE
 /* ROBUSTIFICATION */
-	  if (vrtForCFT.irob != 0) {robtest(vk, 1);}  // ROBUSTIFICATION new data structure
+	  if (vrtForCFT.irob != 0) {robtest(vk, 1, it+1);}  // ROBUSTIFICATION new data structure
 //Reset mag.field
           for( i=0; i<3; i++) dparst[i]=vk->refIterV[i]+vk->fitV[i]; // fitted vertex at global frame
           vrtForCFT.localbmag=myMagFld.getMagFld(dparst,(vk->vk_fitterControl).get());
@@ -382,14 +382,17 @@ int fitVertex(VKVertex * vk)
   /*---------------------Normal convergence--------------------*/
         double PrecLimit = std::min(chi22s*1.e-4, vrtForCFT.IterationPrecision);
 //std::cout<<"Convergence="<< chi2df <<"<"<<PrecLimit<<" cnst="<<cnstRemnants<<"<"<<ConstraintAccuracy<<'\n';
-	if ((chi2df < PrecLimit) && (vShift < 0.001) && it>1 && (cnstRemnants<ConstraintAccuracy)){
-	   double dstFromExtrapPnt=sqrt(vk->fitV[0]*vk->fitV[0] + vk->fitV[1]*vk->fitV[1]+ vk->fitV[2]*vk->fitV[2]);
-	   if( dstFromExtrapPnt>vkalShiftToTrigExtrapolation/2. && it < vrtForCFT.IterationNumber-15){
-	     forcedExtrapolation=true;
-	     continue;          // Make another extrapolation exactly to found vertex position
-           }
-	   break;
-        }
+	if(     ( vk->vk_fitterControl->m_frozenVersionForBTagging &&  it>1 )
+	     || (!vk->vk_fitterControl->m_frozenVersionForBTagging && (it>3||vrtForCFT.irob==0) ) ){
+	  if((chi2df < PrecLimit) && (vShift < 0.001) && (cnstRemnants<ConstraintAccuracy)){
+	    double dstFromExtrapPnt=sqrt(vk->fitV[0]*vk->fitV[0] + vk->fitV[1]*vk->fitV[1]+ vk->fitV[2]*vk->fitV[2]);
+	    if( dstFromExtrapPnt>vkalShiftToTrigExtrapolation/2. && it < vrtForCFT.IterationNumber-15){
+	      forcedExtrapolation=true;
+	      continue;          // Make another extrapolation exactly to found vertex position
+            }
+	    break;
+          }
+	}
 	chi2min = std::min(chi2min,chi22s);
 	if ((chi2min*100. < chi22s) && (chi22s>std::max( (2*NTRK-3)*10., 100.)) && (it>5)){
 	   //std::cout<<" DIVERGENCE="<<chi22s<<" Ratio="<<chi22s/chi2min<<'\n';

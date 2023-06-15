@@ -351,6 +351,7 @@ namespace Trk{
         bool m_useZPointingCnst;
         bool m_usePassNear;
         bool m_usePassWithTrkErr;
+	bool m_frozenVersionForBTagging;
         void initCnstList();
 
         //  Track material effects control
@@ -426,6 +427,7 @@ namespace Trk{
         bool m_useZPointingCnst = false;
         bool m_usePassNear = false;
         bool m_usePassWithTrkErr = false;
+        bool m_frozenVersionForBTagging = false;
 
         std::vector<double> m_VertexForConstraint;
         std::vector<double> m_CovVrtForConstraint;
