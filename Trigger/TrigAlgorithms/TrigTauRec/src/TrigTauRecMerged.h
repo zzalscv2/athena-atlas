@@ -1,6 +1,5 @@
-
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGTAUREC_TRIGTAURECMERGED_H
@@ -57,12 +56,8 @@ class TrigTauRecMerged: public AthReentrantAlgorithm {
     NoVtxCont=1
   };
 
-  /** internal tool stores */
-  const ToolHandleArray<ITauToolBase> m_commonTools{this, "ComTools", {}, "List of ITauToolBase tools"};
-  const ToolHandleArray<ITauToolBase> m_vertexFinderTools{this, "VFTools", {}, "Vertex Finder tools"};
-  const ToolHandleArray<ITauToolBase> m_trackFinderTools{this, "TFTools", {}, "Track Finder tools"};
-  const ToolHandleArray<ITauToolBase> m_vertexVarsTools{this, "VVTools", {}, "Vertex Variables tools"};
-  const ToolHandleArray<ITauToolBase> m_idTools{this, "IDTools", {}, "Vertex Variables tools"};
+  /** internal tool store */
+  const ToolHandleArray<ITauToolBase> m_tools{this, "Tools", {}, "List of ITauToolBase tools"};
 
   // Monitoring tool
   const ToolHandle< GenericMonitoringTool > m_monTool { this, "MonTool", "", "Monitoring tool" };
