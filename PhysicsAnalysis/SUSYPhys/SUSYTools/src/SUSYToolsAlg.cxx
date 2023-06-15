@@ -1168,7 +1168,10 @@ StatusCode SUSYToolsAlg::execute() {
           if(iwbin < syst_weights["Jet"].size()) {  weight_jets->SetBinContent(iwbin+1, weight_jets->GetBinContent(iwbin+1)+jet_weight); }
         }
       }
-
+      else{ //data
+        weight_jets->SetBinContent(1, 1.);
+        weight_btags->SetBinContent(1, 1.);
+      }    
       event_weight *= jet_weight;
       event_weight *= btag_weight;
       ATH_MSG_DEBUG("Combined b-tagging scale factor: " << btag_weight);
