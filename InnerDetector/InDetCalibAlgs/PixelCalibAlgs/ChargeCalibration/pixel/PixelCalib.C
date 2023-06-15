@@ -37,6 +37,9 @@
 #include <string>
 #include <map>
 #include <filesystem>
+#include <stdexcept>
+#include <functional>
+#include <tuple>
 
 #ifdef ATLAS_GCC_CHECKERS
   #include "CxxUtils/checker_macros.h"
@@ -53,7 +56,10 @@ enum ChipSettings{THR_NORM, THR_RMS_NORM, THR_SIG_NORM, TIM_NORM,
 typedef std::array<float, NSETTINGS> OneChipSettings;
 typedef std::array<OneChipSettings, 16> OneModuleSettings;
 //obviously inefficient; will rethink this later
-typedef std::map<std::string,OneModuleSettings > ValueMap_t;
+typedef std::map<TString,OneModuleSettings > ValueMap_t;
+//module histograms
+typedef std::array<TH1F, 16> OneModuleHistograms_t;
+typedef std::array<OneModuleHistograms_t *,3> PixelTypeHistograms_t;
 
 
 double funcTot(double* x, double* par) {
@@ -80,37 +86,19 @@ std::string getDatetodayStr() {
   return s.str();
 }
 
-bool 
-moduleNotInPart(int whichPart, const std::string & modName){
+bool
+moduleInPart(int whichPart, const TString & modName){
   if (modName == "DSP_ERRORS"){
-    return true;
+    return false;
   }
-  auto notStartsWith=[&modName](const std::string & startsWith)->bool{
-    const auto s=startsWith.size();
-    return (modName.substr(0,s) != startsWith);
-  };
-  if (whichPart == 0){
-    if (notStartsWith("LI")) return true;
-  }
-  if (whichPart == 1){
-    if (notStartsWith("L0")) return true;
-  }
-  if (whichPart == 2){
-    if (notStartsWith("L1") and notStartsWith("L2")) return true;
-  }
-  if (whichPart == 3){
-    if (notStartsWith("D")) return true;
-  }
-  if (whichPart == 4){
-    if (notStartsWith("L1")) return true;
-   
-  }
-  if (whichPart == 5){
-    if (notStartsWith("L2")) return true;
-  }
-  return false;
+  static const std::array<TString, 6> prefixes{"LI", "L0", "L1", "D", "L1", "L2"};
+  bool result = modName.BeginsWith(prefixes[whichPart]);
+  if (whichPart == 2) result = (result or modName.BeginsWith("L2"));
+  return result;
 }
 
+// Identify FE chip ID
+// Simply, in the calibration, the FEs are aligned from bottom left corner (0,0) with anti-clock-wise direction.
 int 
 chipId(int whichPart, int iphi, int ieta){
   int circ = -1;
@@ -134,26 +122,18 @@ chipId(int whichPart, int iphi, int ieta){
 int
 pixelType(int whichPart, int iphi, int ieta){
   int pixtype = 0;
-  if (whichPart != 0)
-  {
-    if (ieta % 18 == 0 || ieta % 18 == 17)
-    {
+  if (whichPart != 0){
+    if (ieta % 18 == 0 || ieta % 18 == 17){
       pixtype = 1;
     } // define long pixels
-    if (iphi > 152 && iphi < 160 && iphi % 2 == 1)
-    {
+    if (iphi > 152 && iphi < 160 && iphi % 2 == 1){
       pixtype = 2;
     } // define ganged pixels
-    if (iphi > 159 && iphi < 167 && iphi % 2 == 0)
-    {
+    if (iphi > 159 && iphi < 167 && iphi % 2 == 0){
       pixtype = 2;
     }
-  }
-  // IBL
-  else
-  {
-    if (ieta == 0 || ieta == 79 || ieta == 80 || ieta == 159)
-    {
+  } else /*IBL */{
+    if (ieta == 0 || ieta == 79 || ieta == 80 || ieta == 159){
       pixtype = 1;
     } // define long pixels
   }
@@ -167,8 +147,158 @@ getRodIterator(const TFile & inputFile){
   return TIter(rodKeyList);
 }
 
+TIter
+getModuleIterator( TDirectoryFile* rodDir){
+    TList* modKeyList = (TList*)rodDir->GetListOfKeys();
+    return TIter(modKeyList);
+}
+
+TH2F *
+get2DHistogramFromPath( TDirectoryFile* rodDir, const TString & moduleName, const TString & histName, int charge=-1){
+  TString suffix = (charge<0)?(""):(TString("/C") + charge);
+  TString fullHistoPath = moduleName + "/" + histName + "/A0/B0" + suffix;
+  TDirectoryFile *histDir = (TDirectoryFile *)rodDir->Get(fullHistoPath);
+  TH2F *pTH2 = (TH2F *)((TKey *)histDir->GetListOfKeys()->First())->ReadObj();
+  return pTH2;
+}
+
+OneModuleHistograms_t
+sixteenHistograms(const TString & titlePrefix, int nBins, float lo, float hi){
+  OneModuleHistograms_t result;
+  for (int i=0;i!=16;++i){
+    TString title = titlePrefix + i;
+    result[i] = TH1F(title, "", nBins, lo, hi);
+  }
+  return result;
+}
+void
+resetHistograms(std::array<TH1F,16> & histogramArray){
+  for (auto & thisHisto: histogramArray){
+    thisHisto.Reset("ICESM");
+  }
+}
+
+struct LegacyFitParameters{
+  float A{};
+  float C{};
+  float E{};
+  //
+  void
+  extractFromFit(const TF1 & fit){
+    A=fit.GetParameter(0);
+    E=fit.GetParameter(1);
+    C=fit.GetParameter(2);
+  }
+  // 
+  float
+  predictedCharge(float tot) const {
+    return (E * A - tot * C) / (tot - A);
+  }
+  //
+  template <typename ValType>
+  float anomaly(ValType tot, ValType charge) const{
+    return std::abs( 1.f - predictedCharge(tot) / charge );
+  }
+  //
+  void
+  invalidate(){
+    A = 0;
+    E = -28284.3;
+    C = 0;
+  }
+};
+
+struct LinearFitParameters{
+  float P0{};
+  float P1{};
+  void
+   extractFromFit(const TF1 & fit){
+     P0 = fit.GetParameter(0);
+     P1 = fit.GetParameter(1);
+   }
+};
+
+template <size_t N>
+std::pair<float, int>
+findMaxAnomaly(const LegacyFitParameters & fitParams, const std::array<float, N> & totArray, const std::array<float, N> & chargeArray, size_t qthresh, bool inFirstTen=false){
+  std::array<float, N> badcalI{};
+  for (size_t c=qthresh; c<N; ++c){
+    badcalI[c] = fitParams.anomaly(totArray[c], chargeArray[c]);
+  }
+  const auto endIterator = inFirstTen ? badcalI.begin() + 10 : badcalI.end();
+  auto startIterator = badcalI.begin() + qthresh;
+  const auto maxIt = std::max_element(startIterator, endIterator);
+  const int n = static_cast<int>(std::distance(badcalI.begin(), maxIt));
+  return {*maxIt, n};
+}
+
+std::pair<float, int> 
+findMaxAnomaly(const LegacyFitParameters & fitParams, const std::vector<double> & totArray, const std::vector<double> & chargeArray, size_t qthresh, bool inFirstTen=false){
+  const auto N=chargeArray.size();
+  std::vector<float> badcalI(chargeArray.size(), 0.f);
+  for (size_t c=qthresh; c<N; ++c){
+    badcalI[c] = fitParams.anomaly( totArray[c], chargeArray[c]);
+  }
+  const auto endIterator = inFirstTen ? badcalI.begin() + 10: badcalI.end();
+  auto startIterator = badcalI.begin() + qthresh;
+  if ((endIterator > badcalI.end()) or (startIterator > endIterator)){
+    throw std::runtime_error("iterator anomaly in findMaxAnomaly (vector version)");
+  }
+  const auto maxIt = std::max_element(startIterator, endIterator);
+  const int n = static_cast<int>(std::distance(badcalI.begin(), maxIt));
+  return {*maxIt, n};
+}
+
+std::pair<int,int>
+numRowsAndColumns(int whichPart){
+  typedef std::pair<int, int> RowCol_t;
+  static constexpr std::array<RowCol_t,2> validAnswers{RowCol_t{336, 160}, RowCol_t{320, 144}};
+  return (whichPart == 0) ? validAnswers[0] : validAnswers[1];
+}
+
+//get data from 2D histogram on file into local 1D histogram, with sigma histo
+void
+getData(TH2F * source, TH2F* sigmaSource, PixelTypeHistograms_t possibleHistograms, 
+    PixelTypeHistograms_t possibleSigmaHistograms, int whichPart, 
+    std::function<bool(float)> cut, 
+    std::function<bool(float)> sigCut = [](float){return false;}){
+  const auto [nrow,ncol] =  numRowsAndColumns(whichPart);
+  for (int ieta = 0; ieta < ncol; ieta++){
+    for (int iphi = 0; iphi < nrow; iphi++){
+      float thr = source->GetBinContent(ieta + 1, iphi + 1);
+      float sig = sigmaSource->GetBinContent(ieta + 1, iphi + 1);
+      if (cut(thr) or sigCut(sig)) continue; 
+      int circ = chipId(whichPart, iphi, ieta);
+      if (circ < 0) continue;
+      int pixtype = pixelType(whichPart, iphi, ieta);
+      //possibleHistograms[pixType] returns a pointer to one module's worth of TH1F histograms
+      (*possibleHistograms[pixtype])[circ].Fill(thr);
+      (*possibleSigmaHistograms[pixtype])[circ].Fill(sig);
+    }
+  }
+  return;
+}
+
+//get data from 2D histogram on file into local 1D histogram, with no sigma histo
+void
+getData(TH2F * source, PixelTypeHistograms_t possibleHistograms,  int whichPart, std::function<bool(float)> cut){
+  const auto [nrow,ncol] =  numRowsAndColumns(whichPart);
+  for (int ieta = 0; ieta < ncol; ieta++){
+    for (int iphi = 0; iphi < nrow; iphi++){
+      float thr = source->GetBinContent(ieta + 1, iphi + 1);
+      if (cut(thr)) continue; 
+      int circ = chipId(whichPart, iphi, ieta);
+      if (circ < 0) continue;
+      int pixtype = pixelType(whichPart, iphi, ieta);
+      //possibleHistograms[pixType] returns a pointer to one module's worth of TH1F histograms
+      (*possibleHistograms[pixtype])[circ].Fill(thr);
+    }
+  }
+  return;
+}
+
 bool 
-fillThresholdCalibration(const PixelMapping &pm, ValueMap_t & pcdMap, const std::string & inThrFile, const int WhichPart, const int ncol, const int nrow){
+fillThresholdCalibration(const PixelMapping &pm, ValueMap_t & pcdMap, const std::string & inThrFile, const int whichPart){
   if (inThrFile.empty()) return false;
   TFile riThrFile(inThrFile.c_str(),"READ");
   if (not riThrFile.IsOpen()){
@@ -178,134 +308,68 @@ fillThresholdCalibration(const PixelMapping &pm, ValueMap_t & pcdMap, const std:
     std::cout<<"File "<<inThrFile<<" opened."<<std::endl;
   }
     
-  TString chi2HistName = "SCURVE_CHI2";
-  TString thrHistName = "SCURVE_MEAN";
-  TString sigHistName = "SCURVE_SIGMA";
-  TH1F h1dChi2("h1dChi2","",200,0,1);
-  TH1F h1dThr("h1dThr","",200,0,6000);
-  TH1F h1dSig("h1dSig","",200,0,500);
-
+  //unused, here for documentation of file content:
+  //const TString chi2HistName = "SCURVE_CHI2";
+  const TString thrHistName = "SCURVE_MEAN";
+  const TString sigHistName = "SCURVE_SIGMA";
+  
+  const int nbins=200;
+  const float thrLo=0.;
+  const float thrHi=6000.;
+  const float sigLo=0.;
+  const float sigHi=500;
+  //
+  OneModuleHistograms_t h1dThrNormArr = sixteenHistograms("h1dThrNormI", nbins, thrLo, thrHi);
+  OneModuleHistograms_t h1dSigNormArr = sixteenHistograms("h1dSigNormI", nbins, sigLo, sigHi);
+  OneModuleHistograms_t h1dThrLongArr = sixteenHistograms("h1dThrLongI", nbins, thrLo, thrHi);
+  OneModuleHistograms_t h1dSigLongArr = sixteenHistograms("h1dSigLongI", nbins, sigLo, sigHi);
+  OneModuleHistograms_t h1dThrGangArr = sixteenHistograms("h1dThrGangI", nbins, thrLo, thrHi);
+  OneModuleHistograms_t h1dSigGangArr = sixteenHistograms("h1dSigGangI", nbins, sigLo, sigHi);
+  //
+  PixelTypeHistograms_t possibleHistograms{&h1dThrNormArr, &h1dThrLongArr, &h1dThrGangArr};
+  PixelTypeHistograms_t possibleSigmaHistograms{&h1dSigNormArr, &h1dSigLongArr, &h1dSigGangArr};
+  //
   TIter rodItr = getRodIterator(riThrFile);
   TKey* rodKey;
- 
   while ((rodKey=(TKey*)rodItr())) {
-    TString rodName(rodKey->GetName());
     TDirectoryFile* rodDir = (TDirectoryFile*)rodKey->ReadObj();
-    TList* modKeyList = (TList*)rodDir->GetListOfKeys();
-    TIter modItr(modKeyList);
     TKey* modKey;
+    TIter modItr=getModuleIterator(rodDir);
+    
     while ((modKey=(TKey*)modItr())) {
       TString modName(modKey->GetName());
-      std::string modStr(modKey->GetName());
-      if (moduleNotInPart(WhichPart, modStr)) continue;
-      if (not pm.contains(modStr)) continue;
-      TString chi2HistDirPath = modName + "/" + chi2HistName + "/A0/B0";
-      TDirectoryFile *chi2HistDir = (TDirectoryFile *)rodDir->Get(chi2HistDirPath);
-      TH2F *h2dChi2 = (TH2F *)((TKey *)chi2HistDir->GetListOfKeys()->First())->ReadObj();
-      // chi2HistMap[modName] = h2dChi2;
-      TString thrHistDirPath = modName + "/" + thrHistName + "/A0/B0";
-      TDirectoryFile *thrHistDir = (TDirectoryFile *)rodDir->Get(thrHistDirPath);
-      TH2F *h2dThr = (TH2F *)((TKey *)thrHistDir->GetListOfKeys()->First())->ReadObj();
-      // thrHistMap[modName] = h2dThr;
-      TString sigHistDirPath = modName + "/" + sigHistName + "/A0/B0";
-      TDirectoryFile *sigHistDir = (TDirectoryFile *)rodDir->Get(sigHistDirPath);
-      TH2F *h2dSig = (TH2F *)((TKey *)sigHistDir->GetListOfKeys()->First())->ReadObj();
-      // sigHistMap[modName] = h2dSig;
-      std::array<TH1F, 16> h1dThrNormArr;
-      int nbins=200;
-      float thrLo=0.;
-      float thrHi=6000.;
-      const std::string  thrNormHistoPrefix="h1dThrNormI";
-      int idx=0;
-      for (auto & thisHisto: h1dThrNormArr){
-        const TString histoName(thrNormHistoPrefix+std::to_string(idx++));
-        thisHisto = TH1F(histoName,"",nbins, thrLo, thrHi);
-      }
+      if ( not moduleInPart(whichPart, modName)) continue;
+      if (not pm.contains(std::string(modName))) continue;
+      TH2F *h2dThr = get2DHistogramFromPath(rodDir,modName, "SCURVE_MEAN");
+      TH2F *h2dSig = get2DHistogramFromPath(rodDir,modName, "SCURVE_SIGMA");
       //
-      std::array<TH1F, 16> h1dSigNormArr;
-      float sigLo=0.;
-      float sigHi=500.;
-      const std::string  sigNormHistoPrefix="h1dSigNormI";
-      idx=0;
-      for (auto & thisHisto: h1dSigNormArr){
-        const TString histoName(sigNormHistoPrefix+std::to_string(idx++));
-        thisHisto = TH1F(histoName,"",nbins, sigLo, sigHi);
-      }
+      resetHistograms(h1dThrNormArr);
+      resetHistograms(h1dSigNormArr);
+      resetHistograms(h1dThrLongArr);
+      resetHistograms(h1dSigLongArr);
+      resetHistograms(h1dThrGangArr);
+      resetHistograms(h1dSigGangArr);
       //
-      std::array<TH1F, 16> h1dThrLongArr;
-      const std::string  thrLongHistoPrefix="h1dThrLongI";
-      idx=0;
-      for (auto & thisHisto: h1dThrLongArr){
-        const TString histoName(thrLongHistoPrefix+std::to_string(idx++));
-        thisHisto = TH1F(histoName,"",nbins, thrLo, thrHi);
-      }
+      auto cut = [](float thr)->bool{
+        return (thr == 0.f || thr > 10000.f);
+      };
+      auto sigCut = [](float sig)->bool{
+        return (sig == 0.f || sig > 1000.f);
+      };
+      getData(h2dThr, h2dSig, possibleHistograms, possibleSigmaHistograms, whichPart, cut, sigCut);
       //
-      std::array<TH1F, 16> h1dSigLongArr;
-      const std::string  sigLongHistoPrefix="h1dSigLongI";
-      idx=0;
-      for (auto & thisHisto: h1dSigLongArr){
-        const TString histoName (sigLongHistoPrefix+std::to_string(idx++));
-        thisHisto = TH1F(histoName,"",nbins, sigLo, sigHi);
-      }
-      //
-      std::array<TH1F, 16> h1dThrGangArr;
-      const std::string  thrGangHistoPrefix="h1dThrGangI";
-      idx=0;
-      for (auto & thisHisto: h1dThrGangArr){
-        const TString histoName(thrGangHistoPrefix+std::to_string(idx++));
-        thisHisto = TH1F(histoName,"",nbins, thrLo, thrHi);
-      }
-      //
-      std::array<TH1F, 16> h1dSigGangArr;
-      const std::string  sigGangHistoPrefix="h1dSigGangI";
-      idx=0;
-      for (auto & thisHisto: h1dSigGangArr){
-        const TString histoName(sigGangHistoPrefix+std::to_string(idx++));
-        thisHisto = TH1F(histoName,"",nbins, sigLo, sigHi);
-      }
-      
-
-      for (int ieta = 0; ieta < ncol; ieta++){
-        for (int iphi = 0; iphi < nrow; iphi++){
-          float chi2 = h2dChi2->GetBinContent(ieta + 1, iphi + 1);
-          float thr = h2dThr->GetBinContent(ieta + 1, iphi + 1);
-          float sig = h2dSig->GetBinContent(ieta + 1, iphi + 1);
-          h1dChi2.Fill(chi2);
-          h1dThr.Fill(thr);
-          h1dSig.Fill(sig);
-
-          if (thr == 0 || thr > 10000 || sig == 0 || sig > 1000)
-            continue; // || chi2 > 0.5 || chi2 <= 0) continue;
-
-          // Identify FE chip ID
-          // Simply, in the calibration, the FEs are aligned from bottom left corner (0,0) with anti-clock-wise direction.
-          int circ = chipId(WhichPart, iphi, ieta);
-          if (circ < 0) continue;
-
-          // normal pixels
-          int pixtype = pixelType(WhichPart, iphi, ieta);
-          //==================
-          // Fill information
-          //==================
-          const std::array<TH1F*,3> possibleThrArrays{&h1dThrNormArr[circ], &h1dThrLongArr[circ], &h1dThrGangArr[circ]};
-          const std::array<TH1F*,3> possibleSigArrays{&h1dSigNormArr[circ], &h1dSigLongArr[circ], &h1dSigGangArr[circ]};
-          possibleThrArrays[pixtype]->Fill(thr);
-          possibleSigArrays[pixtype]->Fill(sig);
-        }
-      }
-     
       for (int idx=0;idx!=16;++idx){
-        pcdMap[modStr][idx][THR_NORM] = h1dThrNormArr[idx].GetMean();
-        pcdMap[modStr][idx][THR_RMS_NORM] = h1dThrNormArr[idx].GetRMS();
-        pcdMap[modStr][idx][THR_SIG_NORM] = h1dSigNormArr[idx].GetMean();
+        pcdMap[modName][idx][THR_NORM] = h1dThrNormArr[idx].GetMean();
+        pcdMap[modName][idx][THR_RMS_NORM] = h1dThrNormArr[idx].GetRMS();
+        pcdMap[modName][idx][THR_SIG_NORM] = h1dSigNormArr[idx].GetMean();
 
-        pcdMap[modStr][idx][THR_LONG] = h1dThrLongArr[idx].GetMean();
-        pcdMap[modStr][idx][THR_RMS_LONG] = h1dThrLongArr[idx].GetRMS();
-        pcdMap[modStr][idx][THR_SIG_LONG] = h1dSigLongArr[idx].GetMean();
+        pcdMap[modName][idx][THR_LONG] = h1dThrLongArr[idx].GetMean();
+        pcdMap[modName][idx][THR_RMS_LONG] = h1dThrLongArr[idx].GetRMS();
+        pcdMap[modName][idx][THR_SIG_LONG] = h1dSigLongArr[idx].GetMean();
         
-        pcdMap[modStr][idx][THR_GANG] = h1dThrGangArr[idx].GetMean();
-        pcdMap[modStr][idx][THR_RMS_GANG] = h1dThrGangArr[idx].GetRMS();
-        pcdMap[modStr][idx][THR_SIG_GANG] = h1dSigGangArr[idx].GetMean();
+        pcdMap[modName][idx][THR_GANG] = h1dThrGangArr[idx].GetMean();
+        pcdMap[modName][idx][THR_RMS_GANG] = h1dThrGangArr[idx].GetRMS();
+        pcdMap[modName][idx][THR_SIG_GANG] = h1dSigGangArr[idx].GetMean();
       }
     }
   }
@@ -313,7 +377,7 @@ fillThresholdCalibration(const PixelMapping &pm, ValueMap_t & pcdMap, const std:
 }
 
 bool
-fillTimingCalibration(const PixelMapping & pm, ValueMap_t & timMap, const std::string & inTimFile, const int WhichPart, const int ncol, const int nrow){
+fillTimingCalibration(const PixelMapping & pm, ValueMap_t & timMap, const std::string & inTimFile, const int whichPart){
   if (inTimFile.empty()) return false;
   TFile riTimFile(inTimFile.c_str(),"READ");
   if (not riTimFile.IsOpen()){
@@ -330,72 +394,36 @@ fillTimingCalibration(const PixelMapping & pm, ValueMap_t & timMap, const std::s
   const int nbins=300;
   const float timLo = 1000.;
   const float timHi =7000.;
-  const std::array<std::string,3> pixTypeNames={"Norm", "Long", "Gang"};
-  auto formName=[](const std::string &prefix, const std::string & pixType, int idx)->TString{
-    TString histoName(prefix+pixType+"I"+std::to_string(idx));
-    return histoName;
-  };
+ 
   while ((rodKey=(TKey*)rodItr())) {
-    TString rodName(rodKey->GetName());
     TDirectoryFile* rodDir = (TDirectoryFile*)rodKey->ReadObj();
-    TList* modKeyList = (TList*)rodDir->GetListOfKeys();
-    TIter modItr(modKeyList);
+    TIter modItr = getModuleIterator(rodDir);
     TKey* modKey;
     while ((modKey=(TKey*)modItr())) {
-      TString modName(modKey->GetName());
-      std::string modStr(modKey->GetName());
-      if (moduleNotInPart(WhichPart, modStr)) continue;
-      if (modName=="DSP_ERRORS") { continue; }
+      const TString modName(modKey->GetName());
+      if ( not moduleInPart(whichPart, modName)) continue;
+      if (not pm.contains(std::string(modName))) continue;
       //
-      if (not pm.contains(modStr)) continue;
-      //
-      TString timHistDirPath = modName + "/" + timHistName + "/A0/B0";
-      TDirectoryFile* timHistDir = (TDirectoryFile*)rodDir->Get(timHistDirPath);
-      TH2F* h2dTim = (TH2F*)((TKey*)timHistDir->GetListOfKeys()->First())->ReadObj();
-      std::array<TH1F, 16> h1dTimNormArr;
-      std::array<TH1F, 16> h1dTimLongArr;
-      std::array<TH1F, 16> h1dTimGangArr;
+      TH2F* h2dTim = get2DHistogramFromPath(rodDir,modName, timHistName);
+      OneModuleHistograms_t h1dTimNormArr = sixteenHistograms("h1dTimNormI", nbins, timLo, timHi);
+      OneModuleHistograms_t h1dTimLongArr = sixteenHistograms("h1dTimLongI", nbins, timLo, timHi);
+      OneModuleHistograms_t h1dTimGangArr = sixteenHistograms("h1dTimGangI", nbins, timLo, timHi);
+      PixelTypeHistograms_t possibleHistograms{&h1dTimNormArr, &h1dTimLongArr, &h1dTimGangArr};
+      auto cut = [](float tim)->bool{
+        return (tim < 0.5f);
+      };
+      getData(h2dTim, possibleHistograms, whichPart, cut);
       for (int i=0;i!=16;++i){
-        h1dTimNormArr[i] = TH1F(formName("h1dTim", "Norm", i), "",nbins, timLo, timHi);
-        h1dTimLongArr[i] = TH1F(formName("h1dTim", "Long", i), "",nbins, timLo, timHi);
-        h1dTimGangArr[i] = TH1F(formName("h1dTim", "Gang", i), "", nbins, timLo, timHi);
+        timMap[modName][i][TIM_NORM] = h1dTimNormArr[i].GetMean();
+        timMap[modName][i][TIM_LONG] = h1dTimLongArr[i].GetMean();
+        timMap[modName][i][TIM_GANG] = h1dTimGangArr[i].GetMean();
       }
-      for (int ieta=0; ieta<ncol; ieta++) {
-        for (int iphi=0; iphi<nrow; iphi++) {
-          float tim = h2dTim->GetBinContent(ieta+1,iphi+1);
-          if (tim<0.5) { continue; }
-
-          // Identify FE chip ID
-          // Simply, in the calibration, the FEs are aligned from bottom left corner (0,0) with anti-clock-wise direction.
-          int circ = chipId(WhichPart, iphi, ieta);
-          if (circ < 0) continue;
-          // normal pixels
-          int pixtype = pixelType(WhichPart, iphi, ieta);
-
-          //==================
-          // Fill information
-          //==================
-          if (pixtype==1) {
-            h1dTimLongArr[circ].Fill(tim);
-          } else if (pixtype==0) {
-            h1dTimNormArr[circ].Fill(tim);
-          } else if (pixtype==2) {
-            h1dTimGangArr[circ].Fill(tim);
-          }
-        }
-      }
-      for (int i=0;i!=16;++i){
-        timMap[modStr][i][TIM_NORM] = h1dTimNormArr[i].GetMean();
-        timMap[modStr][i][TIM_LONG] = h1dTimLongArr[i].GetMean();
-        timMap[modStr][i][TIM_GANG] = h1dTimGangArr[i].GetMean();
-      }
-
     }
   }
   return true;
 }
 
-void PixelCalib(bool test=false) {
+void PixelCalib() {
   std::cout<<"Starting calibration macro"<<std::endl;
   /*  Calibration during TS2 September 19, 2017
   IBL:
@@ -422,14 +450,10 @@ void PixelCalib(bool test=false) {
      Endcap : 4500e
 
   */
-  
-  
-  
-
  //******************************************************************
-  int WhichPart = 1; // 0=IBL, 1=BLayer, 2=L1L2, 3=disk, 4=L1, 5=L2;
+  static constexpr int whichPart = 1; // 0=IBL, 1=BLayer, 2=L1L2, 3=disk, 4=L1, 5=L2;
  //******************************************************************
-  if ((WhichPart<0) or (WhichPart>5)) {
+  if ((whichPart<0) or (whichPart>5)) {
     std::cout<<"Unrecognised part"<<std::endl;
     return;
   }
@@ -441,97 +465,44 @@ void PixelCalib(bool test=false) {
     std::cout<< "Mapping problem!"<<std::endl;
     return;
   }
-  //
-  std::string inThrFile = "";
-  std::string inTimFile = "";
-  std::string inTotFile = "";
-
-  std::string Output = "";
-  std::string modHead = "";
-
   // selecting inputs file
-  if (WhichPart==0) {
-     std::cout << "Running on IBL" << std::endl;
-     inThrFile = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202207_ALL/SCAN_S000087723.root";
-     inTimFile = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202207_ALL/SCAN_S000087726.root";
-     inTotFile = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202207_ALL/SCAN_S000087714.root";
-     Output = "Out_IBL";
-  }
-  if (WhichPart==1) {
-     std::cout << "Running on BLayer" << std::endl;
-     inThrFile = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202207_ALL/SCAN_S000087719.root";
-     inTimFile = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202207_ALL/SCAN_S000087717.root";
-     inTotFile = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202207_ALL/SCAN_S000087710.root";
-     if (test){
-       std::cout<<"Selected test files with small samples of input are used"<<std::endl;
-       inThrFile = "../../test/SAMPLE_S000087719.root";
-       inTimFile = "../../test/SAMPLE_S000087717.root";
-       inTotFile = "../../test/SAMPLE_S000087710.root";
-     }
-     Output = "Out_BLayer";
-  }
-  if (WhichPart==2) {
-     std::cout << "Running on L1L2" << std::endl; //usally 2 scan, not merging the root life but the txt file
-     inThrFile = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202207_ALL/SCAN_S000087719.root";
-     inTimFile = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202207_ALL/SCAN_S000087717.root";
-     inTotFile = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202207_ALL/SCAN_S000087710.root";
-     Output = "Out_L1L2";
-  }
-  if (WhichPart==3) {
-     std::cout << "Running on Disk" << std::endl;
-     inThrFile = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202207_ALL/SCAN_S000087719.root";
-     inTimFile = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202207_ALL/SCAN_S000087717.root";
-     inTotFile = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202207_ALL/SCAN_S000087710.root";
-     Output = "Out_Disk";
-  }
-  if (WhichPart==4) {
-     std::cout << "Running on L1" << std::endl;
-     inThrFile = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202207_ALL/SCAN_S000087719.root";
-     inTimFile = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202207_ALL/SCAN_S000087717.root";
-     inTotFile = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202207_ALL/SCAN_S000087710.root";
-     Output = "Out_L1";
-  }
-  if (WhichPart==5) {
-     std::cout << "Running on L2" << std::endl;
-     inThrFile = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202207_ALL/SCAN_S000087719.root";
-     inTimFile = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202207_ALL/SCAN_S000087717.root";
-     inTotFile = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202207_ALL/SCAN_S000087710.root";
-     Output = "Out_L2";
-  }
+  const std::string filepath{"/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202207_ALL/"};
+  const std::string suffix{".root"};
+  const std::array<std::string, 6> 
+  thresholdFiles{"SCAN_S000087723","SCAN_S000087719","SCAN_S000087719", "SCAN_S000087719","SCAN_S000087719","SCAN_S000087719"};
+  //
+  const std::array<std::string, 6> 
+  timingFiles{"SCAN_S000087726", "SCAN_S000087717", "SCAN_S000087717", "SCAN_S000087717", "SCAN_S000087717", "SCAN_S000087717"};
+  //
+  const std::array<std::string, 6> 
+  totFiles{"SCAN_S000087714", "SCAN_S000087710", "SCAN_S000087710", "SCAN_S000087710", "SCAN_S000087710", "SCAN_S000087710"};
+  //
+  const std::array<std::string, 6> 
+  messages{"Running on IBL", "Running on BLayer", "Running on L1L2", "Running on Disk", "Running on L1", "Running on L2"};
+  std::cout<<messages[whichPart]<<std::endl;
+  const std::string inThrFile = filepath + thresholdFiles[whichPart] + suffix;
+  const std::string inTimFile = filepath + timingFiles[whichPart] + suffix;
+  const std::string inTotFile = filepath + totFiles[whichPart] + suffix;
 
   // Set 2-parameter mode
   bool Fit2Parameter = false;
   double fixAparam = 1000.0;    // fix parameter A as 1000.0 (default)
 
   // selecting Q threshold
-  std::array<int, 6> possibleThresholds={8,5,5,5,5,5};
-  int qthresh = possibleThresholds[WhichPart];
- 
-
-  int nrow = -1;     // y-axis
-  int ncol = -1; // x-axis
-  if (WhichPart == 0)
-  {
-    nrow = 336;
-    ncol = 160;
-  }else{
-    nrow = 320; // y-axis
-    ncol = 144; // x-axis
-  }
-
+  static constexpr std::array<size_t, 6> possibleThresholds={8,5,5,5,5,5};
+  static constexpr size_t qthresh = possibleThresholds[whichPart];
+    
   // PIXEL
-  constexpr int ncharge = 21;  // injected charges
-  float chargeArr[ncharge]    = {3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000, 12000, 14000, 16000, 18000, 20000, 25000};
-  float chargeErrArr[ncharge] = {   0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,     0,     0,     0,     0};
+  static constexpr int ncharge = 21;  // injected charges
+  static constexpr std::array<float, ncharge> chargeArr{   3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000, 12000, 14000, 16000, 18000, 20000, 25000};
+  static constexpr std::array<float, ncharge> chargeErrArr{   0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,     0,     0,     0,     0};
   // IBL
-//  const int ncharge = 22;  // # of injected charges
-//  float chargeArr[ncharge] = {1400, 1500, 1750, 2000, 2500, 3000, 3500, 4000, 5000, 6000, 8000, 10000, 12000, 14000, 16000, 18000, 20000, 22000, 24000, 26000, 28000, 30000};
-//  float chargeErrArr[ncharge] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
+  //  const int ncharge = 22;  // # of injected charges
+  //  float chargeArr[ncharge] = {1400, 1500, 1750, 2000, 2500, 3000, 3500, 4000, 5000, 6000, 8000, 10000, 12000, 14000, 16000, 18000, 20000, 22000, 24000, 26000, 28000, 30000};
+  //  float chargeErrArr[ncharge] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
   ValueMap_t pcdMap;
   ValueMap_t timMap;
-
 
   FILE *outputfile;
   std::string summaryName = getDatetodayStr();
@@ -544,13 +515,13 @@ void PixelCalib(bool test=false) {
   }
   
   //pcd map passed by reference and will be updated with the result
-  if (not fillThresholdCalibration(pixmap, pcdMap, inThrFile, WhichPart, ncol, nrow)){
+  if (not fillThresholdCalibration(pixmap, pcdMap, inThrFile, whichPart)){
     std::cout<<"The threshold calibration from file "<<inThrFile<<" was not successful"<<std::endl;
     fclose(outputfile);
     return;
   }
   //
-  if (not fillTimingCalibration(pixmap, timMap, inTimFile, WhichPart, ncol, nrow)){
+  if (not fillTimingCalibration(pixmap, timMap, inTimFile, whichPart)){
     std::cout<<"The timing calibration from file "<<inTimFile<<" was not successful"<<std::endl;
     fclose(outputfile);
     return;
@@ -569,24 +540,18 @@ void PixelCalib(bool test=false) {
     }
     TString totHistName = "TOT_MEAN";
     TString totSigHistName = "TOT_SIGMA";
-    TH1F h1dTot7("h1dTot7","",64,0,16);
-    TH1F h1dTotSig7("h1dTotSig7","",100,0,1);
-
+   
     TIter rodItr=getRodIterator(riTotFile);
     TKey* rodKey;
     while ((rodKey=(TKey*)rodItr())) {
-      TString rodName(rodKey->GetName());
       TDirectoryFile* rodDir = (TDirectoryFile*)rodKey->ReadObj();
-      TList* modKeyList = (TList*)rodDir->GetListOfKeys();
-      TIter modItr(modKeyList);
+      TIter modItr = getModuleIterator(rodDir);
       TKey* modKey;
-
       while ((modKey=(TKey*)modItr())) {
-        TString modName(modKey->GetName());
-        std::string modStr(modKey->GetName());
-        if (moduleNotInPart(WhichPart, modStr)) continue;
+        const TString modName(modKey->GetName());
+        if (not moduleInPart(whichPart, modName)) continue;
         // get module map
-        if (not pixmap.contains(modStr)) continue;
+        if (not pixmap.contains(std::string(modName))) continue;
         constexpr int nChips = 16;
         std::array<std::array<float, ncharge>, nChips> totArrI{};
         std::array<std::array<float, ncharge>, nChips> totErrArrI{};
@@ -595,72 +560,27 @@ void PixelCalib(bool test=false) {
         std::array<std::array<float, ncharge>, nChips> totLongArrI{};
         std::array<std::array<float, ncharge>, nChips> totErrLongArrI{};
         //
-        int nbins = 255;
-        float totLo = 0.;
-        float totHi = 255.;
-        int sigNBins = 100;
-        float sigLo = 0.;
-        float sigHi = 1.;
+        constexpr int nbins = 255;
+        constexpr float totLo = 0.;
+        constexpr float totHi = 255.;
+        constexpr int sigNBins = 100;
+        constexpr float sigLo = 0.;
+        constexpr float sigHi = 1.;
+        
         for (int c=0; c<ncharge; ++c) {
-          
-          //std::cout<<"DEBUG: Proceeding with charge "<<c<<std::endl;
-          TString totHistDirPath = modName + "/" + totHistName + "/A0/B0/C";
-          totHistDirPath += c;
-          TDirectoryFile* totHistDir = (TDirectoryFile*)rodDir->Get(totHistDirPath);
-          if (not totHistDir) continue;
-          TH2F* h2dTot = (TH2F*)((TKey*)totHistDir->GetListOfKeys()->First())->ReadObj();
-          TString totSigHistDirPath = modName + "/" + totSigHistName + "/A0/B0/C";
-          totSigHistDirPath += c;
-          TDirectoryFile* totSigHistDir = (TDirectoryFile*)rodDir->Get(totSigHistDirPath);
-          TH2F* h2dTotSig = (TH2F*)((TKey*)totSigHistDir->GetListOfKeys()->First())->ReadObj();
-          
-          std::array<TH1F, 16> h1dTotI;
-          std::array<TH1F, 16> h1dTotSigI;
-          std::array<TH1F, 16> h1dTotLongI;
-          std::array<TH1F, 16> h1dTotSigLongI;
-          for (int i=0;i!=16;++i){
-            const auto iStr = std::to_string(i);
-            TString histoName("h1dTotI" + iStr);
-            h1dTotI[i] = TH1F(histoName,"", nbins, totLo, totHi);
-            histoName = "h1dTotSigI" + iStr;
-            h1dTotSigI[i] = TH1F(histoName,"", sigNBins, sigLo, sigHi);
-            histoName  = "h1dTotLongI" + iStr;
-            h1dTotLongI[i] = TH1F(histoName,"", nbins, totLo, totHi);
-            histoName = "h1dTotSigLongI" + iStr;
-            h1dTotSigLongI[i] = TH1F(histoName,"", sigNBins, sigLo, sigHi);
-          }
-          for (int ieta=0; ieta<ncol; ieta++) {
-            for (int iphi=0; iphi<nrow; iphi++) {
-              float tot = h2dTot->GetBinContent(ieta+1,iphi+1);
-              float totSig = h2dTotSig->GetBinContent(ieta+1,iphi+1);
-              if (tot<0.1) { continue; }
-              // monitoring
-              if (c == 7) {
-                h1dTot7.Fill(tot);
-                h1dTotSig7.Fill(totSig);
-              }
-
-              // Identify FE chip ID
-              // Simply, in the calibration, the FEs are aligned from bottom left corner (0,0) with anti-clock-wise direction.
-              int circ = chipId(WhichPart, iphi, ieta);
-              if (circ < 0) continue;
-
-              // normal pixels
-              int pixtype = pixelType(WhichPart, iphi, ieta);
-
-              //==================
-              // Fill information
-              //==================
-
-              if (pixtype>0) {
-                h1dTotLongI[circ].Fill(tot);
-                h1dTotSigLongI[circ].Fill(totSig);
-              } else {
-                h1dTotI[circ].Fill(tot);
-                h1dTotSigI[circ].Fill(totSig);
-              }
-            }
-          }
+          TH2F* h2dTot = get2DHistogramFromPath(rodDir,modName, totHistName, c);
+          TH2F* h2dTotSig = get2DHistogramFromPath(rodDir,modName, totSigHistName, c);
+          OneModuleHistograms_t h1dTotI = sixteenHistograms("h1dTotI",nbins, totLo, totLo);
+          OneModuleHistograms_t h1dTotSigI = sixteenHistograms("h1dTotSigI", sigNBins, sigLo, sigHi);
+          OneModuleHistograms_t h1dTotLongI = sixteenHistograms("h1dTotLongI", nbins, totLo, totHi);
+          OneModuleHistograms_t h1dTotSigLongI = sixteenHistograms("h1dTotSigLongI", sigNBins, sigLo, sigHi);
+          //as in original code, only distinguish between 'normal' and not 'normal'
+          PixelTypeHistograms_t possibleHistograms{&h1dTotI, &h1dTotLongI, &h1dTotLongI};
+          PixelTypeHistograms_t possibleSigmaHistograms{&h1dTotSigI, &h1dTotSigLongI, &h1dTotSigLongI};
+          auto cut = [](float tot)->bool{
+            return (tot < 0.1f);
+          };
+          getData(h2dTot, h2dTotSig, possibleHistograms, possibleSigmaHistograms, whichPart, cut);
           for (int i=0;i!=16;++i){
             totArrI[i][c] = h1dTotI[i].GetMean();
             totErrArrI[i][c] = h1dTotI[i].GetMeanError();
@@ -675,95 +595,69 @@ void PixelCalib(bool test=false) {
         }
         float FitStartingPoint = chargeArr[qthresh]-100;
         
-        
         std::array<TGraphErrors, nChips> grTotI;
         std::array<TGraphErrors, nChips> grTotSigI;
         std::array<TF1, nChips> f1TotI;
         std::array<TF1, nChips> f1DispI;
-        std::array<float, nChips> parAI{};
-        std::array<float, nChips> parEI{};
-        std::array<float, nChips> parCI{};
-        std::array<float, nChips> parP0I{};
-        std::array<float, nChips> parP1I{};
+        std::array<LegacyFitParameters, nChips> fitParams{};
+        std::array<LinearFitParameters, nChips> linearFitParams{};
         //
+        const TString totGraphPrefix = modName + "__grTotI";
+        const TString sigmaGraphPrefix = modName + "__grTotSigI";
+        const TString f1TotNamePrefix("f1TotI");
+        const TString f1DispNamePrefix("f1DispI");
         for (int idx=0;idx!=nChips;++idx){
-          std::string idxStr=std::to_string(idx);
-          TString grTotSuffix("__grTotI" + idxStr);
-          TString grTotSigSuffix ("__grTotSigI" + idxStr);
-          TString grTotName = modName + grTotSuffix;
-          TString grTotSigName = modName + grTotSigSuffix;
           //
-          
-          grTotI[idx]=TGraphErrors(ncharge, chargeArr, totArrI[idx].data(), chargeErrArr, totErrArrI[idx].data());
-          grTotI[idx].SetName(grTotName);
-          grTotSigI[idx]= TGraphErrors(ncharge, chargeArr, totSigArrI[idx].data(), chargeErrArr, totSigErrArrI[idx].data());
-          grTotSigI[idx].SetName(grTotSigName);
+          grTotI[idx]=TGraphErrors(ncharge, chargeArr.data(), totArrI[idx].data(), chargeErrArr.data(), totErrArrI[idx].data());
+          grTotI[idx].SetName(totGraphPrefix + idx);
+          grTotSigI[idx]= TGraphErrors(ncharge, chargeArr.data(), totSigArrI[idx].data(), chargeErrArr.data(), totSigErrArrI[idx].data());
+          grTotSigI[idx].SetName(sigmaGraphPrefix + idx);
           //
-          TString f1TotName("f1TotI" + idxStr);
-          TString f1DispName("f1DispI" + idxStr);
-          f1TotI[idx] = TF1(f1TotName,funcTot, FitStartingPoint, chargeArr[ncharge-1]+100, 3);
-          f1DispI[idx] = TF1(f1DispName,funcDisp, FitStartingPoint, chargeArr[ncharge-1]+100, 2);
+          f1TotI[idx] = TF1(f1TotNamePrefix + idx,funcTot, FitStartingPoint, chargeArr[ncharge-1]+100, 3);
+          f1DispI[idx] = TF1(f1DispNamePrefix + idx,funcDisp, FitStartingPoint, chargeArr[ncharge-1]+100, 2);
           gROOT->GetListOfFunctions()->Add(&f1TotI[idx]);
           gROOT->GetListOfFunctions()->Add(&f1DispI[idx]);
           if (Fit2Parameter) { f1TotI[idx].FixParameter(0,fixAparam); }  // 2-parameter fitting mode
+          //
           grTotI[idx].Fit(&(f1TotI[idx]),"MRQ");
           grTotSigI[idx].Fit(&(f1DispI[idx]),"MRQ");
           //
-          parAI[idx] = f1TotI[idx].GetParameter(0);
-          parEI[idx] = f1TotI[idx].GetParameter(1);
-          parCI[idx] = f1TotI[idx].GetParameter(2);
-          parP0I[idx] = f1DispI[idx].GetParameter(0);
-          parP1I[idx] = f1DispI[idx].GetParameter(1);
+          fitParams[idx].extractFromFit(f1TotI[idx]);
+          linearFitParams[idx].extractFromFit(f1DispI[idx]);
         }
         //
         std::array<TGraphErrors, nChips> grTotLongI;
         std::array<TGraphErrors, nChips> grTotLongSigI;
         std::array<TF1, nChips> f1TotLongI;
         std::array<TF1, nChips> f1DispLongI;
-        std::array<float, nChips> parLongAI{};
-        std::array<float, nChips> parLongEI{};
-        std::array<float, nChips> parLongCI{};
-        std::array<float, nChips> parLongP0I{};
-        std::array<float, nChips> parLongP1I{};
+        std::array<LegacyFitParameters, nChips> longFitParams{};
+        std::array<LinearFitParameters, nChips> longLinearFitparams{};
+        //
+        const TString totLongGraphPrefix = modName + "__grTotLongI";
+        const TString sigmaLongGraphPrefix = modName + "__grTotLongSigI";
+        const TString f1TotLongPrefix("f1TotLongI");
+        const TString f1DispLongPrefix("f1DispLongI");
         for (int idx=0;idx!=nChips;++idx){
-          const std::string idxStr = std::to_string(idx);
-          TString grTotSuffix("__grTotLongI" + idxStr);
-          TString grTotSigSuffix ("__grTotLongSigI" + idxStr);
-          TString grTotName = modName + grTotSuffix;
-          TString grTotSigName = modName + grTotSigSuffix;
-          //
-          grTotLongI[idx]=TGraphErrors(ncharge, chargeArr, totLongArrI[idx].data(), chargeErrArr, totErrLongArrI[idx].data());
-          grTotLongI[idx].SetName(grTotName);
+          grTotLongI[idx]=TGraphErrors(ncharge, chargeArr.data(), totLongArrI[idx].data(), chargeErrArr.data(), totErrLongArrI[idx].data());
+          grTotLongI[idx].SetName(totLongGraphPrefix + idx);
           //NB original code not using 'Long' version of totSigArrI
-          grTotLongSigI[idx] = TGraphErrors(ncharge, chargeArr, totSigArrI[idx].data(), chargeErrArr, totSigErrArrI[idx].data());
-          grTotSigI[idx].SetName(grTotSigName);
+          grTotLongSigI[idx] = TGraphErrors(ncharge, chargeArr.data(), totSigArrI[idx].data(), chargeErrArr.data(), totSigErrArrI[idx].data());
+          grTotSigI[idx].SetName(sigmaLongGraphPrefix + idx);
           //
-          TString f1TotName("f1TotLongI" + idxStr);
-          TString f1DispName("f1DispLongI" + idxStr);
-          f1TotLongI[idx]=TF1(f1TotName,funcTot, FitStartingPoint, chargeArr[ncharge-1]+100, 3);
-          f1DispLongI[idx]=TF1(f1DispName,funcDisp, FitStartingPoint, chargeArr[ncharge-1]+100, 2);
+          f1TotLongI[idx]=TF1(f1TotLongPrefix + idx,funcTot, FitStartingPoint, chargeArr[ncharge-1]+100, 3);
+          f1DispLongI[idx]=TF1(f1DispLongPrefix +idx,funcDisp, FitStartingPoint, chargeArr[ncharge-1]+100, 2);
           gROOT->GetListOfFunctions()->Add(&f1TotLongI[idx]);
           gROOT->GetListOfFunctions()->Add(&f1DispLongI[idx]);
           if (Fit2Parameter) { f1TotLongI[idx].FixParameter(0,fixAparam); }  // 2-parameter fitting mode
           grTotLongI[idx].Fit(&f1TotLongI[idx],"MRQ");
           grTotLongSigI[idx].Fit(&f1DispLongI[idx],"MRQ");
           //
-          parLongAI[idx] = f1TotLongI[idx].GetParameter(0);
-          parLongEI[idx] = f1TotLongI[idx].GetParameter(1);
-          parLongCI[idx] = f1TotLongI[idx].GetParameter(2);
-          parLongP0I[idx] = f1DispLongI[idx].GetParameter(0);
-          parLongP1I[idx] = f1DispLongI[idx].GetParameter(1);
+          longFitParams[idx].extractFromFit(f1TotLongI[idx]);
+          longLinearFitparams[idx].extractFromFit(f1DispLongI[idx]);
         }
-        std::array<std::array<float, ncharge>, nChips> badcalI{};
         std::array<float, nChips>  badcalI_max{};
-        for (int c=qthresh; c<ncharge; ++c){
-          for (int idx=0;idx !=nChips;++idx){
-             badcalI[idx][c] = std::abs( 1 - ( (parAI[idx] * parEI[idx] - parCI[idx] * totArrI[idx][c]) / (totArrI[idx][c] - parAI[idx]) ) / chargeArr[c] );
-          }
-        }
         for (int idx=0;idx !=nChips;++idx){
-           const auto &thisArray = badcalI[idx];
-           badcalI_max[idx] = *(std::max_element(thisArray.begin(), thisArray.end()));
+          std::tie(badcalI_max[idx], std::ignore) = findMaxAnomaly(fitParams[idx], totArrI[idx], chargeArr, qthresh);
         }
         std::array<std::vector<Double_t>, nChips> chargeArrI_re;
         std::array<std::vector<Double_t>, nChips> chargeErrArrI_re;
@@ -773,8 +667,8 @@ void PixelCalib(bool test=false) {
         std::array<std::vector<Double_t>, nChips> totSigErrArrI_re;
        
         for (int idx=0;idx != nChips;++idx){
-          chargeArrI_re[idx].assign(chargeArr, chargeArr + ncharge);
-          chargeErrArrI_re[idx].assign(chargeErrArr, chargeErrArr + ncharge);
+          chargeArrI_re[idx].assign(chargeArr.begin(), chargeArr.end());
+          chargeErrArrI_re[idx].assign(chargeErrArr.begin(), chargeErrArr.end());
           totArrI_re[idx].assign(totArrI[idx].begin(), totArrI[idx].end());
           totErrArrI_re[idx].assign(totErrArrI[idx].begin(), totErrArrI[idx].end());
           totSigArrI_re[idx].assign(totSigArrI[idx].begin(), totSigArrI[idx].end());
@@ -782,7 +676,7 @@ void PixelCalib(bool test=false) {
         }
 
         const double chi2_error = 0.05;
-        fprintf(outputfile, "%s", modStr.c_str());
+        fprintf(outputfile, "%s", modName.Data());
         
         for (int idx=0;idx!=nChips;++idx){
           fprintf(outputfile, "\n");
@@ -790,18 +684,11 @@ void PixelCalib(bool test=false) {
           fprintf(outputfile, "[ ");
           while(badcalI_max[idx] > chi2_error){
             if (ncharge_re < ncharge/2.0){
-              parAI[idx] = 0;
-              parEI[idx] = -28284.3;
-              parCI[idx] = 0;
+              fitParams[idx].invalidate();
               break;
             }else{
-              std::vector<Double_t> find_max(ncharge_re, 0.);//fills vector with zeroes
-              for(int i = qthresh; i < ncharge_re; i++){
-                find_max[i]=(std::abs(1 - ((parAI[idx] * parEI[idx] - parCI[idx] * totArrI_re[idx][i]) / (totArrI_re[idx][i] - parAI[idx])) / chargeArrI_re[idx][i]));
-              }
-              std::vector<Double_t>::iterator iter = std::max_element(find_max.begin(), find_max.end());
-              int n_max = static_cast<int>(std::distance(find_max.begin(), iter));
-            
+              int n_max{};
+              std::tie(std::ignore, n_max) = findMaxAnomaly(fitParams[idx], totArrI_re[idx], chargeArrI_re[idx], qthresh);
               ncharge_re = ncharge_re - 1;
               auto numToErase = n_max;
               if ((ncharge_re - n_max)<=2) numToErase = ncharge_re;
@@ -816,53 +703,39 @@ void PixelCalib(bool test=false) {
               totSigErrArrI_re[idx].erase(totSigErrArrI_re[idx].begin() + numToErase);
               //
               grTotI[idx]= TGraphErrors(ncharge_re, chargeArrI_re[idx].data(), totArrI_re[idx].data(), chargeErrArrI_re[idx].data(), totErrArrI_re[idx].data());
-              std::string idxStr = std::to_string(idx);
-              TString suffix("__grTotI" + idxStr);
-              TString histoName(modName + suffix);
-              grTotI[idx].SetName(histoName);
+              grTotI[idx].SetName(totGraphPrefix + idx);
               grTotSigI[idx] = TGraphErrors (ncharge_re, chargeArrI_re[idx].data(), totSigArrI_re[idx].data(), chargeErrArrI_re[idx].data(), totSigErrArrI_re[idx].data());
-              TString sigSuffix ( "__grTotSigI" + idxStr);
-              TString sigHistoName(modName+sigSuffix);
-              grTotSigI[idx].SetName(sigHistoName);
-              TString f1TotName("f1TotI" + idxStr);
-              f1TotI[idx] = TF1 (f1TotName,funcTot, FitStartingPoint, chargeArrI_re[idx][ncharge_re-1]+100, 3);
-              TString f1DispName("f1DispI" + idxStr);
-              f1DispI[idx] = TF1(f1DispName,funcDisp, FitStartingPoint, chargeArrI_re[idx][ncharge_re-1]+100, 2);
+              grTotSigI[idx].SetName(sigmaGraphPrefix + idx);
+              f1TotI[idx] = TF1 (f1TotNamePrefix + idx,funcTot, FitStartingPoint, chargeArrI_re[idx][ncharge_re-1]+100, 3);
+              f1DispI[idx] = TF1(f1DispNamePrefix + idx,funcDisp, FitStartingPoint, chargeArrI_re[idx][ncharge_re-1]+100, 2);
               if (Fit2Parameter) { f1TotI[idx].FixParameter(0,fixAparam); }  // 2-parameter fitting mode
               gROOT->GetListOfFunctions()->Add(&f1TotI[idx]);
               gROOT->GetListOfFunctions()->Add(&f1DispI[idx]);
               grTotI[idx].Fit(&f1TotI[idx],"MRQ");
               grTotSigI[idx].Fit(&f1DispI[idx],"MRQ");
-              parAI[idx] = f1TotI[idx].GetParameter(0);
-              parEI[idx] = f1TotI[idx].GetParameter(1);
-              parCI[idx] = f1TotI[idx].GetParameter(2);
-              parP0I[idx] = f1DispI[idx].GetParameter(0);
-              parP1I[idx] = f1DispI[idx].GetParameter(1);
-              //
-              badcalI[idx].fill(0.);
-              for(int i = qthresh; i < ncharge_re; i++){
-                badcalI[idx][i] = std::abs( 1 - ( (parAI[idx] * parEI[idx] - parCI[idx] * totArrI_re[idx][i]) / (totArrI_re[idx][i] - parAI[idx]) ) / chargeArrI_re[idx][i] );
-              }
-              badcalI_max[idx] = *std::max_element(badcalI[idx].begin(), badcalI[idx].begin() + 10);
+              fitParams[idx].extractFromFit(f1TotI[idx]);
+              linearFitParams[idx].extractFromFit(f1DispI[idx]);
+              constexpr bool inFirstTen = true;
+              std::tie(badcalI_max[idx], std::ignore) = findMaxAnomaly(fitParams[idx], totArrI_re[idx], chargeArrI_re[idx], qthresh, inFirstTen);
             }
           }
           fprintf(outputfile, "]");
         }
         fprintf(outputfile, "\n");
-        const int n = (WhichPart == 0)? 2:nChips;
-        std::cout << modStr << std::endl;
+        const int n = (whichPart == 0)? 2:nChips;
+        std::cout << modName << std::endl;
         for (int idx=0;idx!=n;++idx){
           const std::string chipName="I"+std::to_string(idx);
           std::cout << chipName <<" "
-          << int(pcdMap[modStr][idx][THR_NORM]) << " " << int(pcdMap[modStr][idx][THR_RMS_NORM]) << " "
-          << int(pcdMap[modStr][idx][THR_SIG_NORM]) << " " << int(timMap[modStr][idx][TIM_NORM]) << " "
-          << int(pcdMap[modStr][idx][THR_LONG]) << " " << int(pcdMap[modStr][idx][THR_RMS_LONG]) << " "
-          << int(pcdMap[modStr][idx][THR_SIG_LONG]) << " " << int(timMap[modStr][idx][TIM_LONG]) << " "
-          << int(pcdMap[modStr][idx][THR_GANG]) << " " << int(pcdMap[modStr][idx][THR_RMS_GANG]) << " "
-          << int(pcdMap[modStr][idx][THR_SIG_GANG]) << " " << int(timMap[modStr][idx][TIM_GANG]) << " "
-          << parAI[idx] << " " << parEI[idx] << " " << parCI[idx] << " "
-          << parLongAI[idx] << " " << parLongEI[idx] << " " << parLongCI[idx] << " "
-          << parP0I[idx]<< " " << parP1I[idx]
+          << int(pcdMap[modName][idx][THR_NORM]) << " " << int(pcdMap[modName][idx][THR_RMS_NORM]) << " "
+          << int(pcdMap[modName][idx][THR_SIG_NORM]) << " " << int(timMap[modName][idx][TIM_NORM]) << " "
+          << int(pcdMap[modName][idx][THR_LONG]) << " " << int(pcdMap[modName][idx][THR_RMS_LONG]) << " "
+          << int(pcdMap[modName][idx][THR_SIG_LONG]) << " " << int(timMap[modName][idx][TIM_LONG]) << " "
+          << int(pcdMap[modName][idx][THR_GANG]) << " " << int(pcdMap[modName][idx][THR_RMS_GANG]) << " "
+          << int(pcdMap[modName][idx][THR_SIG_GANG]) << " " << int(timMap[modName][idx][TIM_GANG]) << " "
+          << fitParams[idx].A << " " << fitParams[idx].E << " " << fitParams[idx].C << " "
+          << longFitParams[idx].A << " " << longFitParams[idx].E << " " << longFitParams[idx].C << " "
+          << linearFitParams[idx].P0<< " " << linearFitParams[idx].P1
           << std::endl;
         }
       }
@@ -871,8 +744,7 @@ void PixelCalib(bool test=false) {
   fclose(outputfile);
 }
 
-
 int main(){
-  PixelCalib(false);
+  PixelCalib();
   return 0;
 }
