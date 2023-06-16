@@ -116,7 +116,7 @@ else
   python $ftag_merge_DQA/$ftag_merge_script --pattern "*BTAG_PHYSVAL*"  --output NTUP_BTAG_MERGE_PHYSVAL.root -d BTag
 fi
 
-root -l -b -q $ftag_merge_DQA/$ftag_roc_script\(\"ttbar\",\"EMTopo\",\"NTUP_BTAG_MERGE_PHYSVAL.root\",\"NTUP_BTAG_MERGE_PHYSVAL.root\",\"ROC_NTUP_BTAG_MERGE_PHYSVAL.root\",\{\"IP2D\",\"IP3D\",\"SV1\",\"DL1dv00\",\"GN1\"\}\)
+root -l -b -q $ftag_merge_DQA/$ftag_roc_script\(\"ttbar\",\"EMTopo\",\"NTUP_BTAG_MERGE_PHYSVAL.root\",\"NTUP_BTAG_MERGE_PHYSVAL.root\",\"ROC_NTUP_BTAG_MERGE_PHYSVAL.root\",\{\"IP3D\",\"SV1\",\"DL1dv00\",\"GN1\"\}\)
 hadd NTUP_MERGE_PHYSVAL.root NTUP_PHYSVAL.root NTUP_BTAG_MERGE_PHYSVAL.root ROC_NTUP_BTAG_MERGE_PHYSVAL.root
 
 checkstep "Merging and post processing"

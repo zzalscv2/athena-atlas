@@ -1301,8 +1301,6 @@
      <graph name="rejVsEff_BTag_AntiKt4EMTopoJets_tagger_DL1dv00_b_matched_weight_ctag" type="TGraphErrors" plotopts="logy" tests="KS"/>
      <graph name="rejVsEff_BTag_AntiKt4EMTopoJets_tagger_GN1_b_matched_weight" type="TGraphErrors" plotopts="logy" tests="KS"/>
      <graph name="rejVsEff_BTag_AntiKt4EMTopoJets_tagger_GN1_b_matched_weight_ctag" type="TGraphErrors" plotopts="logy" tests="KS"/>
-     <graph name="rejVsEff_BTag_AntiKt4EMTopoJets_old_taggers_IP2D_b_matched_weight" type="TGraphErrors" plotopts="logy" tests="KS"/>
-     <graph name="rejVsEff_BTag_AntiKt4EMTopoJets_old_taggers_IP2D_b_matched_weight_ctag" type="TGraphErrors" plotopts="logy" tests="KS"/>
     </TDirectory>
     -->
     <TDirectory name="AntiKt4EMTopoJets">
