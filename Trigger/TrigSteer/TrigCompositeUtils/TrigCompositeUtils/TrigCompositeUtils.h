@@ -218,6 +218,13 @@ namespace TrigCompositeUtils {
    * @return Index of the leg, e.g. leg002_HLT_mu50_L1MU20 would return 2. Returns -1 if not a leg identifier or 0 if a chain identifier.
    **/
   int32_t getIndexFromLeg(const HLT::Identifier& legIdentifier); 
+
+ /**
+   * @brief Extract the numeric index of a leg identifier.
+   * @param name The name of the HLT::Identifier corresponding to the specific leg.
+   * @return Index of the leg, e.g. leg002_HLT_mu50_L1MU20 would return 2. Returns -1 if not a leg identifier or 0 if a chain identifier.
+   **/
+  int32_t getIndexFromLeg(const std::string& name);
  
 /**
    * @brief Recognise whether the chain ID is a leg ID
@@ -227,11 +234,25 @@ namespace TrigCompositeUtils {
   bool isLegId(const HLT::Identifier& legIdentifier);
 
 /**
+   * @brief Recognise whether the chain ID is a leg ID
+   * @param name The name of the HLT::Identifier corresponding to the specific ID.
+   * @return True if leg-ID, else false
+   **/
+  bool isLegId(const std::string& name);
+
+/**
    * @brief Recognise whether the HLT identifier corresponds to a whole chain
    * @param chainIdentifier The HLT::Identifier corresponding to the specific ID.
    * @return True if chain-ID, else false
    **/
   bool isChainId(const HLT::Identifier& chainIdentifier);
+
+/**
+   * @brief Recognise whether the HLT identifier corresponds to a whole chain
+   * @param name The name of the HLT::Identifier corresponding to the specific ID.
+   * @return True if chain-ID, else false
+   **/
+  bool isChainId(const std::string& name);
     
   /**
    * @brief traverses Decision object links for another Decision object fulfilling the prerequisite specified by the filter
