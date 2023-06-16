@@ -64,29 +64,37 @@ def JetEfficiencyMonitoringConfig(inputFlags):
     #################################################################
     #################################################################
 
-    JetEfficiencyMonAlg.RandomReferenceTrigger= "L1_RD0_FILLED" #trigger that does not depend on depend on the jets
-    random_reference_trigger =  JetEfficiencyMonAlg.RandomReferenceTrigger
-    
+    #define the various reference triggers
+    hltRandom_reference_triggers = ['HLT_j0_perf_L1RD0_FILLED', 'HLT_j0_perf_pf_ftf_L1RD0_FILLED']
+    JetEfficiencyMonAlg.HLTRandomReferenceTriggers = hltRandom_reference_triggers
+
+    muon_reference_triggers = ["L1_MU14FCH", "L1_MU18VFCH",
+    "L1_MU8F_TAU20IM", "L1_2MU8F", "L1_MU8VF_2MU5VF", "L1_3MU3VF",
+    "L1_MU5VF_3MU3VF", "L1_4MU3V", "L1_2MU5VF_3MU3V",
+    "L1_RD0_FILLED"]
+    JetEfficiencyMonAlg.MuonReferenceTriggers = muon_reference_triggers
 
     JetEfficiencyMonAlg.BootstrapReferenceTrigger='L1_J15' 
     bootstrap_trigger = JetEfficiencyMonAlg.BootstrapReferenceTrigger
 
+    JetEfficiencyMonAlg.HLTBootstrapReferenceTrigger='HLT_noalg_L1J20' 
+    HLTbootstrap_trigger = JetEfficiencyMonAlg.HLTBootstrapReferenceTrigger
 
     mainDir = 'L1Calo'
     trigPath = 'JetEfficiency/'
     distributionPath = 'Distributions/'
     noRefPath = 'NoReferenceTrigger/'
     muonRefPath = 'MuonReferenceTrigger/'
-    randomRefPath = 'RandomReferenceTrigger/'
+    randomRefPath = 'RandomHLTReferenceTrigger/'
     bsRefPath = 'BootstrapReferenceTrigger/'
+    bsHLTRefPath = 'BootstrapHLTReferenceTrigger/'
     GeV = 1000
 
     # add monitoring algorithm to group, with group name and main directory
     myGroup = helper.addGroup(JetEfficiencyMonAlg, groupName , mainDir)
-    single_triggers = ['L1_J15', 'L1_J20', 'L1_J25', 'L1_J30', 'L1_J40', 'L1_J50', 'L1_J75',
-                       'L1_J85', 'L1_J100', 'L1_J120', 'L1_J200', 'L1_J300', 'L1_J400', 
-                       'L1_J40_XE50', 'L1_J40_XE60', 'L1_eEM15', 'L1_eEM22M', 'L1_eTAU20L']
-    multijet_triggers = ['L1_J85_3J30', 'L1_3J50', 'L1_4J15', 'L1_4J20', 'L1_2J15_XE55', 'L1_2J50_XE40']
+    single_triggers = ['L1_J20', 'L1_J25', 'L1_J30', 'L1_J40', 'L1_J50', 'L1_J75',
+                       'L1_J85', 'L1_J100', 'L1_J120',  'L1_J400']
+    multijet_triggers = ['L1_J85_3J30', 'L1_3J50', 'L1_4J15', 'L1_4J20']
     LR_triggers = ['L1_SC111-CJ15']
     
     gfex_SR_triggers = ['L1_gJ20','L1_gJ30','L1_gJ40','L1_gJ50', 'L1_gJ100']
@@ -110,11 +118,12 @@ def JetEfficiencyMonitoringConfig(inputFlags):
         prescale_title_add = " "
 
     reference_titles = {"Muon" : ' wrt muon triggers',
-                        "Random": ' wrt random trigger ' + random_reference_trigger, 
+                        "RandomHLT": ' wrt HLT random chain ' + hltRandom_reference_triggers[0] + ' and ' + hltRandom_reference_triggers[1], 
                         "No": '', 
-                        "Bootstrap": ' wrt bootstrap trigger ' + bootstrap_trigger }
-    reference_paths = {"Muon" : muonRefPath, "Random": randomRefPath, 
-                       "No": noRefPath,  "Bootstrap":  bsRefPath }
+                        "Bootstrap": ' wrt bootstrap trigger ' + bootstrap_trigger,
+                        "BootstrapHLT": ' wrt HLT bootstrap chain ' + HLTbootstrap_trigger }
+    reference_paths = {"Muon" : muonRefPath, "RandomHLT": randomRefPath, 
+                       "No": noRefPath,  "Bootstrap":  bsRefPath, "BootstrapHLT": bsHLTRefPath }
     references = list(reference_titles.keys())
 
 
@@ -151,7 +160,7 @@ def JetEfficiencyMonitoringConfig(inputFlags):
     myGroup.defineHistogram('raw_pt',title='pT for all leading offline jets (with no trigger requirments);PT [MeV];Events',
                             path=trigPath + distributionPath,xbins=nbins["pt"],xmin=binmin["pt"], xmax=binmax["pt"])
 
-    myGroup.defineHistogram('eta',  title='Eta Distribution of offline jets for random reference trigger ' + random_reference_trigger +';#eta; Count',
+    myGroup.defineHistogram('eta',  title='Eta Distribution of offline jets for HLT random chain ' + hltRandom_reference_triggers[0] + ' and ' + hltRandom_reference_triggers[1] + ';#eta; Count',
                                 path=trigPath + distributionPath,xbins=nbins["eta"],xmin=binmin["eta"], xmax=binmax["eta"])
     
 
@@ -162,7 +171,6 @@ def JetEfficiencyMonitoringConfig(inputFlags):
             for r in references: #iteratate through the refernce trigger options
                 for p in properties: 
                     
-
                     if emulated and (("gJ" in t) or ("gLJ" in t)): 
                         eff_plot_title = title_for_prop[p] + ' Efficiency' + prescale_title_add + 'of ' + trigger_title_modifiers[tgroup] + ' for EMULATED trigger ' + t + reference_titles[r]+';'+xlabel_for_prop[p]+'; Efficiency '
                         dist_plot_title = title_for_prop[p] + ' distribution' + prescale_title_add + 'of '+ trigger_title_modifiers[tgroup] +' for EMULATED trigger ' + t +';'+xlabel_for_prop[p]+'; Count '

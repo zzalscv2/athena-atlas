@@ -60,7 +60,7 @@ class L1TdrStgcTriggerLogic : public AthMessaging {
 
         */
         
-        std::vector<SectorTriggerCandidate> buildSectorTriggers(const std::vector<std::shared_ptr<PadOfflineData>> &pads) const;
+        std::vector<SectorTriggerCandidate> buildSectorTriggers(const std::vector<std::shared_ptr<PadOfflineData>> &pads, std::pair<double,double> Zratio) const;
         /// simulate efficiency by dropping random pads (their indices)
         std::vector< size_t > removeRandomPadIndices(const std::vector< size_t > &padIndices) const;
         /**

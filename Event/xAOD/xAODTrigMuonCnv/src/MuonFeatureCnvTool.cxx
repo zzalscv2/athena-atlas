@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id:$
@@ -9,10 +9,13 @@
 #include "xAODTrigMuon/TrigMuonDefs.h"
 
 #include "TrigMuonEvent/MuonFeature.h"
+#include "TrigMuonEvent/MuonFeatureContainer.h"
 #include "TrigMuonEvent/MuonFeatureDetails.h"
+#include "TrigMuonEvent/MuonFeatureDetailsContainer.h"
 
 // Local include(s):
 #include "MuonFeatureCnvTool.h"
+#include <vector>
 
 MuonFeatureCnvTool::MuonFeatureCnvTool( const std::string& type,
                                         const std::string& name,

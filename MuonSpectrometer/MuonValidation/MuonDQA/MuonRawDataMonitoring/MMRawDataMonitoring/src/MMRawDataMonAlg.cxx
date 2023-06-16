@@ -32,8 +32,6 @@
 
 namespace {
 
-	static constexpr double const toDeg = 180/M_PI;
-
 	//1e=1.6X10-4 fC
 	static constexpr double conversion_charge=1.6E-04;
 

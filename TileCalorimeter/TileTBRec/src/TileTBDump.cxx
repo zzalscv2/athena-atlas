@@ -105,7 +105,8 @@ std::string cern_local_time(time_t unix_time)
 TileTBDump::TileTBDump(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
   , m_RobSvc("ROBDataProviderSvc", name)
-  , m_cabling(0)
+  , m_cabling(nullptr)
+  , m_runPeriod(0)
   , m_tileToolTiming("TileCondToolTiming")
   , m_tileCondToolOfcCool("TileCondToolOfcCool")
   , m_tileToolEmscale("TileCondToolEmscale")
@@ -151,6 +152,7 @@ TileTBDump::TileTBDump(const std::string& name, ISvcLocator* pSvcLocator)
   m_sizeOverhead = 3;
   m_unit = -1;
   m_digi_mode = 0;
+  
 }
 
 

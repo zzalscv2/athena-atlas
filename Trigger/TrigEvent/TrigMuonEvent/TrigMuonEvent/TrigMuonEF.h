@@ -1,21 +1,22 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMUONEVENT_TRIGMUONEF_H
 #define TRIGMUONEVENT_TRIGMUONEF_H
 
-// STL include(s):
-#include <string>
-#include <map>
+
 
 // Gaudi/Athena include(s):
 #include "EventKernel/INavigable4Momentum.h"
 #include "FourMom/P4IPtCotThPhiM.h"
 #include "Navigation/NavigableTerminalNode.h"
 #include "AthenaKernel/CLASS_DEF.h"
+// STL include(s):
+#include <string>
+#include <map>
 
 // Forward declaration(s):
 class MsgStream;
@@ -88,6 +89,5 @@ void diff( const TrigMuonEF& a, const TrigMuonEF& b,
 
 CLASS_DEF( TrigMuonEF , 60689128 , 1 )
 
-#include "TrigMuonEvent/TrigMuonEFContainer.h"
 
 #endif // TRIGMUONEVENT_TRIGMUONEF_H

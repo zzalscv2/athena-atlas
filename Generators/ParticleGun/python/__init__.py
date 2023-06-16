@@ -92,6 +92,8 @@ class ParticleGun(EvgenAlg):
           primary.add_particle_in(beamparticle1)
           primary.add_particle_in(beamparticle2)
           evt.add_vertex(primary)
+          evt.add_beam_particle(beamparticle1)
+          evt.add_beam_particle(beamparticle2)
           #Create all the needed particles
           for s in self.samplers:
             particles = s.shoot()

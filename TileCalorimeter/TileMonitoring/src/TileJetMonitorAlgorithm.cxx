@@ -363,8 +363,9 @@ bool TileJetMonitorAlgorithm::isGoodChannel(int ros, int module, int channel, ui
 
   if ((module < 0) || (module >= (int) TileCalibUtils::MAX_DRAWER)) return false;  // invalid module number
 
-  if (m_cabling->channel2hole(ros, channel) <= 0) 
+  if (m_cabling->isDisconnected(ros, module, channel)) {
     return false; // non-existing PMT (empty hole)
+  }
 
   if (((qbit & TileCell::MASK_BADCH) != 0) || // masked as bad
       ((qbit & TileCell::MASK_TIME) != TileCell::MASK_TIME) ||  // flagged

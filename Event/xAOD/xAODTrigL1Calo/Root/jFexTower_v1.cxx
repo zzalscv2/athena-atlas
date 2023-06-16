@@ -29,12 +29,30 @@ AUXSTORE_OBJECT_MOVE                ( jFexTower_v1, std::vector<uint16_t> , et_c
 AUXSTORE_OBJECT_SETTER_AND_GETTER   ( jFexTower_v1, std::vector<char> , isjTowerSat , setIsjTowerSat )
 AUXSTORE_OBJECT_MOVE                ( jFexTower_v1, std::vector<char> , isjTowerSat , setIsjTowerSat )
 
-// SETTER and GETTERs for the decorations
-AUXSTORE_OBJECT_SETTER_AND_GETTER   ( jFexTower_v1, std::vector<float> , SCellEt , setSCellEt )
-AUXSTORE_OBJECT_MOVE                ( jFexTower_v1, std::vector<float> , SCellEt , setSCellEt )
-AUXSTORE_OBJECT_SETTER_AND_GETTER   ( jFexTower_v1, std::vector<int>   , SCellID , setSCellID )
-AUXSTORE_OBJECT_MOVE                ( jFexTower_v1, std::vector<int>   , SCellID , setSCellID )
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, int                , TileEt  , setTileEt  )
+// SETTER and GETTERs for the DECORATED variables!
+
+AUXSTORE_OBJECT_SETTER_AND_GETTER   ( jFexTower_v1, std::vector<float> , SCellEt   , setSCellEt    )
+AUXSTORE_OBJECT_MOVE                ( jFexTower_v1, std::vector<float> , SCellEt   , setSCellEt    )
+AUXSTORE_OBJECT_SETTER_AND_GETTER   ( jFexTower_v1, std::vector<float> , SCellEta  , setSCellEta   )
+AUXSTORE_OBJECT_MOVE                ( jFexTower_v1, std::vector<float> , SCellEta  , setSCellEta   )
+AUXSTORE_OBJECT_SETTER_AND_GETTER   ( jFexTower_v1, std::vector<float> , SCellPhi  , setSCellPhi   )
+AUXSTORE_OBJECT_MOVE                ( jFexTower_v1, std::vector<float> , SCellPhi  , setSCellPhi   )
+AUXSTORE_OBJECT_SETTER_AND_GETTER   ( jFexTower_v1, std::vector<int>   , SCellID   , setSCellID    )
+AUXSTORE_OBJECT_MOVE                ( jFexTower_v1, std::vector<int>   , SCellID   , setSCellID    )
+AUXSTORE_OBJECT_SETTER_AND_GETTER   ( jFexTower_v1, std::vector<bool>  , SCellMask , setSCellMask  )
+AUXSTORE_OBJECT_MOVE                ( jFexTower_v1, std::vector<bool>  , SCellMask , setSCellMask  )
+
+
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, int  , TileEt  , setTileEt  )
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, float, TileEta , setTileEta )
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, float, TilePhi , setTilePhi )
+
+
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, int  , jtowerEtMeV , setjtowerEtMeV )
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, float, SCellEtMeV  , setSCellEtMeV  )
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, float, TileEtMeV   , setTileEtMeV   )
+
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, int, emulated_jtowerEt , setemulated_jtowerEt )
 
 
 /// initialize

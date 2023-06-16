@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // See similar workaround the lack of CLID in standalone releases in TrigComposite_v1.h
@@ -108,7 +108,7 @@ namespace TrigCompositeUtils {
 
   bool isAnyIDPassing( const Decision* d,  const DecisionIDContainer& required ) {
     for ( DecisionID id : readOnlyAccessor( *d ) ) {
-      if ( required.count( id ) > 0 ) {
+      if ( required.find( id ) != required.end() ) {
         return true;
       }
     }
@@ -116,7 +116,7 @@ namespace TrigCompositeUtils {
   }
 
   bool passed( DecisionID id, const DecisionIDContainer& idSet ) {
-    return idSet.count( id ) != 0;
+    return idSet.find( id ) != idSet.end();
   }
 
 #if !defined(XAOD_STANDALONE) && !defined(XAOD_ANALYSIS) // Full athena
@@ -165,44 +165,57 @@ namespace TrigCompositeUtils {
 
 
   HLT::Identifier createLegName(const HLT::Identifier& chainIdentifier, size_t counter) {
-    if (!isChainId(chainIdentifier)) {
+    const std::string& name = chainIdentifier.name();
+    if (!isChainId(name)) {
       throw std::runtime_error("TrigCompositeUtils::createLegName chainIdentifier '"+chainIdentifier.name()+"' does not start 'HLT_'");
     }
     if (counter > 999) {
       throw std::runtime_error("TrigCompositeUtils::createLegName Leg counters above 999 are invalid.");
     }
     std::stringstream legStringStream;
-    legStringStream << "leg" << std::setfill('0') << std::setw(3) << counter << "_" << chainIdentifier.name();
+    legStringStream << "leg" << std::setfill('0') << std::setw(3) << counter << "_" << name;
     return HLT::Identifier( legStringStream.str() );
   }
 
-  
+
   HLT::Identifier getIDFromLeg(const HLT::Identifier& legIdentifier) {
-    if (isChainId(legIdentifier)){
+    const std::string& name = legIdentifier.name();
+    if (isChainId(name)){
       return legIdentifier;
-    } else if (isLegId(legIdentifier)){
-      return HLT::Identifier(legIdentifier.name().substr(7));
+    } else if (isLegId(name)){
+      return HLT::Identifier(name.substr(7));
     } else{
-      throw std::runtime_error("TrigCompositeUtils::getIDFromLeg legIdentifier '"+legIdentifier.name()+"' does not start with 'HLT_' or 'leg' ");
+      throw std::runtime_error("TrigCompositeUtils::getIDFromLeg legIdentifier '"+name+"' does not start with 'HLT_' or 'leg' ");
     }
   }
 
   int32_t getIndexFromLeg(const HLT::Identifier& legIdentifier) {
-    if (isChainId(legIdentifier)){
-      return 0;
-    } else if (!isLegId(legIdentifier)) {
-      return -1;
-    }
-    return std::stoi( legIdentifier.name().substr(3,3) ); 
+    return getIndexFromLeg(legIdentifier.name());
   }
 
-  
+  int32_t getIndexFromLeg(const std::string& name) {
+    if (isChainId(name)){
+      return 0;
+    } else if (!isLegId(name)) {
+      return -1;
+    }
+    return std::stoi( name.substr(3,3) ); 
+  }
+
   bool isLegId(const HLT::Identifier& legIdentifier) {
-    return (legIdentifier.name().substr(0,3) == "leg");
+    return isLegId(legIdentifier.name());
+  }
+  
+  bool isLegId(const std::string& name) {
+    return (name.rfind("leg", 0) != std::string::npos);
   }
 
   bool isChainId(const HLT::Identifier& chainIdentifier) {
-    return (chainIdentifier.name().substr(0,4) == "HLT_");
+    return isChainId(chainIdentifier.name());
+  }
+
+  bool isChainId(const std::string& name) {
+    return (name.rfind("HLT_", 0) != std::string::npos);
   }
   
   
@@ -351,7 +364,7 @@ namespace TrigCompositeUtils {
         DecisionIDContainer activeChainsPassedByThisDecision;
         decisionIDs(d, activeChainsPassedByThisDecision);
         for (const DecisionID checkID : chainsToCheck) {
-          if (activeChainsPassedByThisDecision.count(checkID) == 0 && // I was REJECTED here ...
+          if (activeChainsPassedByThisDecision.find(checkID) == activeChainsPassedByThisDecision.end() && // I was REJECTED here ...
               activeChainsIntoThisDecision.count(checkID) == 1) { // ... but PASSSED by all my inputs
             output.push_back(d);
             break;
@@ -728,7 +741,7 @@ namespace TrigCompositeUtils {
         // Skip any that will not provide IParticle features
         if (legMultiplicities[legIdx] == 0)
           continue;
-        HLT::Identifier legID = createLegName(chainName, legIdx);
+        HLT::Identifier legID = createLegName(HLT::Identifier(chainName), legIdx);
         std::vector<LinkInfo<xAOD::IParticleContainer>> legFeatures;
         for (const LinkInfo<xAOD::IParticleContainer>& info : features)
           if (passed(legID.numeric(), info.decisions))
