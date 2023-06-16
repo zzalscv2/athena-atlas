@@ -77,6 +77,9 @@ public:
   /// Return surface associated with this identifier, which should come from the
   virtual const Acts::Surface &surface() const final override;
 
+  /// Mutable surface to this detector element
+  virtual Acts::Surface &surface() final override;
+
   /// Return a shared pointer on the ATLAS surface associated with this
   /// identifier,
   const Trk::Surface &atlasSurface() const;
@@ -104,7 +107,7 @@ private:
   ///  Thickness of this detector element
   double m_thickness{0.};
   /// Corresponding Surface
-  std::shared_ptr<const Acts::Surface> m_surface{};
+  std::shared_ptr<Acts::Surface> m_surface{};
   std::vector<std::shared_ptr<const Acts::Surface>> m_surfaces{};
 
   CxxUtils::CachedValue<Acts::Transform3> m_defTransform{};

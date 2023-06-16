@@ -6,6 +6,6 @@
 #include "../ActsKalmanFitter.h"
 #include "../ActsGaussianSumFitter.h"
 
-DECLARE_COMPONENT( ActsKalmanFitter )
-DECLARE_COMPONENT( ActsGaussianSumFitter )
+DECLARE_COMPONENT( ActsTrk::ActsKalmanFitter )
+DECLARE_COMPONENT( ActsTrk::ActsGaussianSumFitter )
 

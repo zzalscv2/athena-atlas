@@ -270,16 +270,10 @@ std::any ActsTrk::MultiTrajectory<RWState>::component_impl(
       return (*m_trackStates)[istate]->filteredPtr();
     case "smoothed"_hash:
       return (*m_trackStates)[istate]->smoothedPtr();
-    case "jacobian"_hash:
-      return (*m_trackStates)[istate]->jacobianPtr();
     case "projector"_hash:
       return trackMeasurements()
           .at((*m_trackStates)[istate]->calibrated())
           ->projectorPtr();
-    case "calibrated"_hash:
-      return (*m_trackStates)[istate]->calibratedPtr();
-    case "calibratedCov"_hash:
-      return (*m_trackStates)[istate]->calibratedPtr();
     case "measdim"_hash:
       return (*m_trackStates)[istate]->measDimPtr();
     default: {

@@ -72,7 +72,7 @@ public:
   ActsPropagationOutput
   propagationSteps(const EventContext& ctx,
                    const Acts::BoundTrackParameters& startParameters,
-                   Acts::NavigationDirection navDir = Acts::NavigationDirection::Forward,
+                   Acts::Direction navDir = Acts::Direction::Forward,
                    double pathLimit = std::numeric_limits<double>::max(),
                    Trk::ParticleHypothesis particleHypo = Trk::pion) const override;
 
@@ -80,7 +80,7 @@ public:
   std::optional<const Acts::CurvilinearTrackParameters>
   propagate(const EventContext& ctx,
             const Acts::BoundTrackParameters& startParameters,
-            Acts::NavigationDirection navDir = Acts::NavigationDirection::Forward,
+            Acts::Direction navDir = Acts::Direction::Forward,
             double pathLimit = std::numeric_limits<double>::max(),
             Trk::ParticleHypothesis particleHypo = Trk::pion) const override;
 
@@ -89,7 +89,7 @@ public:
   propagationSteps(const EventContext& ctx,
                    const Acts::BoundTrackParameters& startParameters,
                    const Acts::Surface& target,
-                   Acts::NavigationDirection navDir = Acts::NavigationDirection::Forward,
+                   Acts::Direction navDir = Acts::Direction::Forward,
                    double pathLimit = std::numeric_limits<double>::max(),
                    Trk::ParticleHypothesis particleHypo = Trk::pion) const override;
 
@@ -98,7 +98,7 @@ public:
   propagate(const EventContext& ctx,
             const Acts::BoundTrackParameters& startParameters,
             const Acts::Surface& target,
-            Acts::NavigationDirection navDir = Acts::NavigationDirection::Forward,
+            Acts::Direction navDir = Acts::Direction::Forward,
             double pathLimit = std::numeric_limits<double>::max(),
             Trk::ParticleHypothesis particleHypo = Trk::pion) const override;
 

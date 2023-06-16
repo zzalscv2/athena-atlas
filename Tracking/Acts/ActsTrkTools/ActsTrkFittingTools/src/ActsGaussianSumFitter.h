@@ -5,59 +5,48 @@
 #ifndef ACTSGEOMETRY_ACTSGAUSSIANSUMFITTER_H
 #define ACTSGEOMETRY_ACTSGAUSSIANSUMFITTER_H
 
-#include "ActsFitterHelperFunctions.h"
 
-// ATHENA
+
+// ATHENA 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkFitterInterfaces/ITrackFitter.h"
-#include "TrkToolInterfaces/IBoundaryCheckTool.h"
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
+#include "TrkToolInterfaces/IBoundaryCheckTool.h"
 
 // ACTS
-#include "Acts/EventData/TrackContainer.hpp"
-#include "Acts/EventData/TrackParameters.hpp"
-#include "Acts/EventData/VectorTrackContainer.hpp"
-#include "Acts/Geometry/GeometryIdentifier.hpp"
-#include "Acts/MagneticField/MagneticFieldProvider.hpp"
-#include "Acts/Propagator/MultiEigenStepperLoop.hpp"
-#include "Acts/Propagator/Propagator.hpp"
-#include "Acts/TrackFitting/BetheHeitlerApprox.hpp"
+#include "Acts/EventData/VectorMultiTrajectory.hpp"
+#include "Acts/Geometry/GeometryContext.hpp"
+#include "Acts/Utilities/Result.hpp"
 #include "Acts/TrackFitting/GaussianSumFitter.hpp"
+#include "Acts/Propagator/Propagator.hpp"
+#include "Acts/Propagator/MultiEigenStepperLoop.hpp"
+#include "Acts/Propagator/Navigator.hpp"
+#include "Acts/TrackFitting/BetheHeitlerApprox.hpp"
 #include "Acts/TrackFitting/GsfOptions.hpp"
+#include "Acts/Utilities/Logger.hpp"
 
 // PACKAGE
 #include "ActsTrkEvent/TrackContainer.h"
-#include "ActsTrkEventCnv/IActsToTrkConverterTool.h"
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsTrkEventCnv/IActsToTrkConverterTool.h"
+#include "ActsFitterHelperFunctions.h"
 
 // STL
 #include <string>
-#include <memory>//unique_ptr
-#include <limits>//for numeric_limits
-#include <cmath> //std::abs
+#include <memory>
 
-class EventContext;
-
-namespace Trk{
-  class Track;
-}
+namespace ActsTrk {
 
 class ActsGaussianSumFitter : public extends<AthAlgTool, Trk::ITrackFitter> {
 public:
   
-  ActsGaussianSumFitter(const std::string&,const std::string&,const IInterface*);
+  ActsGaussianSumFitter(const std::string&, const std::string&, const IInterface*);
   virtual ~ActsGaussianSumFitter() = default;
 
   // standard Athena methods
   virtual StatusCode initialize() override;
-  virtual StatusCode finalize() override;
-  /*
-   * Bring in default impl with
-   * EventContext for now
-  */
-  using Trk::ITrackFitter::fit;
 
   //! refit a track
   virtual std::unique_ptr<Trk::Track> fit(
@@ -111,15 +100,29 @@ public:
   // Private methods:
   ///////////////////////////////////////////////////////////////////
 private:
+  Acts::Experimental::GsfOptions<ActsTrk::TrackStateBackend> prepareOptions(const Acts::GeometryContext& tgContext,
+									    const Acts::MagneticFieldContext& mfContext,
+									    const Acts::CalibrationContext& calContext,
+									    const Acts::PerigeeSurface& surface) const;
+  
+  std::unique_ptr<Trk::Track> performFit(const EventContext& ctx,
+					 const Acts::GeometryContext& tgContext,
+					 const Acts::Experimental::GsfOptions<ActsTrk::TrackStateBackend>& gsfOptions,
+					 const std::vector<ATLASSourceLink>& trackSourceLinks,
+					 const Acts::BoundTrackParameters& initialParams) const;
 
   // Create a track from the fitter result
-  template<typename track_container_t, typename traj_t,
-           template <typename> class holder_t>
   std::unique_ptr<Trk::Track> makeTrack(const EventContext& ctx, 
-          Acts::GeometryContext& tgContext, 
+          const Acts::GeometryContext& tgContext, 
           ActsTrk::TrackContainer& tracks,
-          Acts::Result<ActsTrk::TrackContainer::TrackProxy, std::error_code>& fitResult) const;
+          Acts::Result<typename ActsTrk::TrackContainer::TrackProxy, std::error_code>& fitResult) const;
 
+  const Acts::Experimental::GsfExtensions<ActsTrk::TrackStateBackend>& getExtensions() const;
+
+  /// Private access to the logger
+  const Acts::Logger& logger() const;
+
+ private:
   ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "ActsExtrapolationTool"};
   ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
   ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", "ActsToTrkConverterTool"};
@@ -141,20 +144,16 @@ private:
                                                         ActsTrk::TrackStateBackend>;
   std::unique_ptr<Fitter> m_fitter;
 
-  Acts::Experimental::GsfExtensions<ActsTrk::TrackStateBackend> getExtensions();
   Acts::Experimental::GsfExtensions<ActsTrk::TrackStateBackend> m_gsfExtensions;
 
   ActsTrk::FitterHelperFunctions::ATLASOutlierFinder m_outlierFinder{0};
-
-  /// Private access to the logger
-  const Acts::Logger& logger() const {
-    return *m_logger;
-  }
 
   /// logging instance
   std::unique_ptr<const Acts::Logger> m_logger;
 
 }; // end of namespace
+
+}
 
 #endif
 

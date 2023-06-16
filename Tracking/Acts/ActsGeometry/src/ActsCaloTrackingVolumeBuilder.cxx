@@ -204,13 +204,13 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
   // Attach that volume array to the calo inner cover
   ATH_MSG_VERBOSE("Glueing " << calo->volumeName() << " inner cover to " << idOutVolArray->arrayObjects().size() << " volumes");
   std::const_pointer_cast<BoundarySurface>(calo->boundarySurfaces().at(Acts::tubeInnerCover))
-    ->attachVolumeArray(idOutVolArray, Acts::NavigationDirection::Backward);
+    ->attachVolumeArray(idOutVolArray, Acts::Direction::Backward);
   // Loop through the array and attach their boundary surfaces to the calo
   for(const auto& idVol : idOutVolArray->arrayObjects()){
     ATH_MSG_VERBOSE("Glueing outer cover of " << idVol->volumeName()
     << " to inner cover of " << calo->volumeName());
     std::const_pointer_cast<BoundarySurface>(idVol->boundarySurfaces().at(Acts::tubeOuterCover))
-      ->attachVolume(calo.get(), Acts::NavigationDirection::Forward);
+      ->attachVolume(calo.get(), Acts::Direction::Forward);
   }
 
   // Glue positive XY face of ID to inner positive XY face of Calo.
@@ -219,13 +219,13 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
   ATH_MSG_VERBOSE("Glueing " << calo->volumeName() << " positive inner cutout disc to "
       << idPosXYVolArray->arrayObjects().size() << " volumes");
   std::const_pointer_cast<BoundarySurface>(calo->boundarySurfaces().at(Acts::index5))
-    ->attachVolumeArray(idPosXYVolArray, Acts::NavigationDirection::Backward);
+    ->attachVolumeArray(idPosXYVolArray, Acts::Direction::Backward);
   // Other way round, attach ID volumes to calo
   for(const auto& idVol : idPosXYVolArray->arrayObjects()){
     ATH_MSG_VERBOSE("Glueing positive XY face of " << idVol->volumeName()
     << " to positive inner coutout disc of " << calo->volumeName());
     std::const_pointer_cast<BoundarySurface>(idVol->boundarySurfaces().at(Acts::positiveFaceXY))
-      ->attachVolume(calo.get(), Acts::NavigationDirection::Forward);
+      ->attachVolume(calo.get(), Acts::Direction::Forward);
   }
 
   // Glue negative XY face of ID to inner negative XY face of Calo.
@@ -234,13 +234,13 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
   ATH_MSG_VERBOSE("Glueing " << calo->volumeName() << " negative inner cutout disc to "
       << idNegXYVolArray->arrayObjects().size() << " volumes");
   std::const_pointer_cast<BoundarySurface>(calo->boundarySurfaces().at(Acts::index4))
-    ->attachVolumeArray(idNegXYVolArray, Acts::NavigationDirection::Forward);
+    ->attachVolumeArray(idNegXYVolArray, Acts::Direction::Forward);
   // Other way round, attach ID volumes to calo
   for(const auto& idVol : idNegXYVolArray->arrayObjects()){
     ATH_MSG_VERBOSE("Glueing negative XY face of " << idVol->volumeName()
     << " to negative inner coutout disc of " << calo->volumeName());
     std::const_pointer_cast<BoundarySurface>(idVol->boundarySurfaces().at(Acts::negativeFaceXY))
-      ->attachVolume(calo.get(), Acts::NavigationDirection::Backward);
+      ->attachVolume(calo.get(), Acts::Direction::Backward);
   }
 
   // For navigational purposes we need to create three pseudo container cylinders.

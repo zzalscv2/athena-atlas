@@ -53,10 +53,10 @@ def ActsFitterCfg(flags, name: str = "ActsKalmanFitter", **kwargs):
         )
 
     if flags.Acts.trackFitterType is TrackFitterType.KalmanFitter:    # This flag is by default set to KalmanFitter
-        result.setPrivateTools(CompFactory.ActsKalmanFitter(name, **kwargs))
+        result.setPrivateTools(CompFactory.ActsTrk.ActsKalmanFitter(name, **kwargs))
     elif flags.Acts.trackFitterType is TrackFitterType.GaussianSumFitter:
         name = name.replace("KalmanFitter", "GaussianSumFitter")
-        result.setPrivateTools(CompFactory.ActsGaussianSumFitter(name, **kwargs))
+        result.setPrivateTools(CompFactory.ActsTrk.ActsGaussianSumFitter(name, **kwargs))
 
     return result
 

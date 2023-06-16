@@ -20,7 +20,7 @@ namespace ActsTrk::FitterHelperFunctions {
   template<typename trajectory_t>
   Acts::Result<void> gainMatrixUpdate(const Acts::GeometryContext& gctx,
                     typename Acts::MultiTrajectory<trajectory_t>::TrackStateProxy trackState, 
-                    Acts::NavigationDirection direction, 
+                    Acts::Direction direction, 
                     const Acts::Logger& logger) {
     Acts::GainMatrixUpdater updater;
     return updater.template operator()<trajectory_t>(gctx, trackState, direction, logger);
