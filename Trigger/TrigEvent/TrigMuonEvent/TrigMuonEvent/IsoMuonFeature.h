@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*******************************************************
@@ -221,6 +221,5 @@ void diff( const IsoMuonFeature& a, const IsoMuonFeature& b,
 CLASS_DEF( IsoMuonFeature , 110010498 , 1 )
 CLASS_DEF( DataVector<IsoMuonFeature> , 247013301 , 1 )
 
-#include "TrigMuonEvent/IsoMuonFeatureContainer.h"
 
 #endif // TRIGMUONEVENT_ISO_MUON_FEATURE_H

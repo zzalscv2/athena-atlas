@@ -8,6 +8,7 @@
 #include "xAODTrigMuon/L2IsoMuon.h"
 
 #include "TrigMuonEvent/IsoMuonFeature.h"
+#include "TrigMuonEvent/IsoMuonFeatureContainer.h"
 
 // Local include(s):
 #include "IsoMuonFeatureContainerCnvTool.h"
