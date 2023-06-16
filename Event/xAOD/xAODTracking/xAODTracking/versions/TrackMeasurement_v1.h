@@ -101,10 +101,10 @@ namespace xAOD {
 
          * Define projector access
          **/
-        const unsigned long long& projector() const;
-        const unsigned long long* projectorPtr() const;
-        unsigned long long* projectorPtr();
-        void setProjector( const unsigned long long& m);
+        const std::uint64_t& projector() const;
+        const std::uint64_t* projectorPtr() const;
+				std::uint64_t* projectorPtr();
+        void setProjector( const std::uint64_t& m);
 
         /**
          * @brief expands sizes of internal vectors for the data storage

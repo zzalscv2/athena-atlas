@@ -45,6 +45,8 @@ namespace Trk{
   class Track;
 }
 
+namespace ActsTrk {
+
 class ActsKalmanFitter : public extends<AthAlgTool, Trk::ITrackFitter> { 
 public:
 
@@ -53,12 +55,6 @@ public:
 
   // standard Athena methods
   virtual StatusCode initialize() override;
-  virtual StatusCode finalize() override;
-  /*
-   * Bring in default impl with
-   * EventContext for now
-  */
-  using Trk::ITrackFitter::fit;
 
   //! refit a track
   virtual std::unique_ptr<Trk::Track> fit(
@@ -114,8 +110,6 @@ public:
 private:
 
   // Create a track from the fitter result
-  template<typename track_container_t, typename traj_t,
-           template <typename> class holder_t>
   std::unique_ptr<Trk::Track> makeTrack(const EventContext& ctx, 
           Acts::GeometryContext& tgContext, 
           ActsTrk::TrackContainer& tracks,
@@ -163,5 +157,6 @@ private:
 
 }; // end of namespace
 
+}
 #endif
 

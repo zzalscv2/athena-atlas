@@ -44,7 +44,7 @@ namespace ActsTrk
     return os.str();
   }
 
-  static std::string trackStateName(Acts::TrackStateType trackState)
+  static std::string trackStateName(Acts::ConstTrackStateType trackStateType)
   {
     static constexpr std::array<std::tuple<bool, Acts::TrackStateFlag, char>, 6> trackStateNames{{
         {false, Acts::TrackStateFlag::ParameterFlag, '-'},
@@ -57,7 +57,7 @@ namespace ActsTrk
     std::string s;
     for (const auto &[b, f, c] : trackStateNames)
     {
-      if (trackState[f] == b)
+      if (trackStateType.test(f) == b)
         s += c;
     }
     return s;
@@ -408,7 +408,7 @@ namespace ActsTrk
     {
       std::cout << std::setw(3) << state.calibratedSize() << 'D';
     }
-    else if (state.typeFlags()[Acts::TrackStateFlag::HoleFlag])
+    else if (state.typeFlags().test(Acts::TrackStateFlag::HoleFlag))
     {
       std::cout << std::setw(4) << "hole";
     }

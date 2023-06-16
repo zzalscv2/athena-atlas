@@ -23,16 +23,16 @@ namespace xAOD {
                                         setUncalibratedMeasurementLink)
 
     AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackMeasurement_v1,
-                                        unsigned long long,
+                                        std::uint64_t,
                                         projector,
                                         setProjector)
 
-    const unsigned long long* TrackMeasurement_v1::projectorPtr() const {
-        static const ConstAccessor<unsigned long long> acc("projector");
+    const std::uint64_t* TrackMeasurement_v1::projectorPtr() const {
+        static const ConstAccessor<std::uint64_t> acc("projector");
         return &(acc(*this));
     }
-    unsigned long long* TrackMeasurement_v1::projectorPtr() {
-        static const Accessor<unsigned long long> acc("projector");
+    std::uint64_t* TrackMeasurement_v1::projectorPtr() {
+        static const Accessor<std::uint64_t> acc("projector");
          return &(acc(*this));
     }
 

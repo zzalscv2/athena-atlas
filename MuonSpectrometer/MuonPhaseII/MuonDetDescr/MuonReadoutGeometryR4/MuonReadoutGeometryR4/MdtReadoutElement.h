@@ -83,6 +83,7 @@ class MdtReadoutElement : public MuonReadoutElement {
     double thickness() const override final;
     /// Overload from the Acts::DetectorElement (dummy implementation)
     const Acts::Surface& surface() const override final;
+    Acts::Surface& surface() override final;
 
     StatusCode initElement() override final;
     /// Returns the multi layer of the MdtReadoutElement

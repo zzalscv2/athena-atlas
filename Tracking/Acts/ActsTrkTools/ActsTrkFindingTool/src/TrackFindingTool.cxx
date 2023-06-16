@@ -60,8 +60,8 @@ namespace
 
   static Acts::Result<void>
   gainMatrixUpdate(const Acts::GeometryContext &gctx,
-                   typename Acts::MultiTrajectory<ActsTrk::TrackStateBackend>::TrackStateProxy trackState,
-                   Acts::NavigationDirection direction,
+		   typename Acts::MultiTrajectory<ActsTrk::TrackStateBackend>::TrackStateProxy trackState,
+                   Acts::Direction direction,
                    const Acts::Logger &logger)
   {
     Acts::GainMatrixUpdater updater;
@@ -448,7 +448,7 @@ namespace ActsTrk
             std::unique_ptr<const Trk::TrackParameters> parm;
 
             // State is a hole (no associated measurement), use predicted parameters
-            if (flag[Acts::TrackStateFlag::HoleFlag])
+            if (flag.test(Acts::TrackStateFlag::HoleFlag))
             {
               const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
                                                          state.predicted(),
@@ -483,7 +483,7 @@ namespace ActsTrk
               typePattern.set(Trk::TrackStateOnSurface::Hole);
             }
             // The state was tagged as an outlier or (TODO!) was missed in the reverse filtering, use filtered parameters
-            else if (flag[Acts::TrackStateFlag::OutlierFlag]
+            else if (flag.test(Acts::TrackStateFlag::OutlierFlag)
                      //  || (fitResult.reversed &&     // TODO!
                      //      std::find(fitResult.passedAgainSurfaces.begin(),
                      //                fitResult.passedAgainSurfaces.end(),

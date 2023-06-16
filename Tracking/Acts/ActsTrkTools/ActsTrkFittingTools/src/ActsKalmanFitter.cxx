@@ -36,6 +36,7 @@
 #include <vector>
 
 
+namespace ActsTrk {
 
 ActsKalmanFitter::ActsKalmanFitter(const std::string& t,const std::string& n,
                                 const IInterface* p) :
@@ -76,13 +77,6 @@ StatusCode ActsKalmanFitter::initialize() {
   return StatusCode::SUCCESS;
 }
 
-// finalize
-StatusCode ActsKalmanFitter::finalize()
-{
-  ATH_MSG_INFO ("finalize() successful in " << name());
-  return StatusCode::SUCCESS;
-}
-
 // refit a track
 // -------------------------------------------------------
 std::unique_ptr<Trk::Track>
@@ -97,13 +91,13 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   // protection against not having measurements on the input track
   if (!inputTrack.measurementsOnTrack() || inputTrack.measurementsOnTrack()->size() < 2) {
-    ATH_MSG_INFO ("called to refit empty track or track with too little information, reject fit");
+    ATH_MSG_DEBUG("called to refit empty track or track with too little information, reject fit");
     return nullptr;
   }
 
   // protection against not having track parameters on the input track
   if (!inputTrack.trackParameters() || inputTrack.trackParameters()->empty()) {
-    ATH_MSG_INFO ("input fails to provide track parameters for seeding the KF, reject fit");
+    ATH_MSG_DEBUG("input fails to provide track parameters for seeding the KF, reject fit");
     return nullptr;
   }
 
@@ -130,7 +124,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext,inputTrack,elementCollection);
   // protection against error in the conversion from Atlas masurement to Acts source link
   if (trackSourceLinks.empty()) {
-    ATH_MSG_INFO("input contain measurement but no source link created, probable issue with the converter, reject fit ");
+    ATH_MSG_DEBUG("input contain measurement but no source link created, probable issue with the converter, reject fit ");
     return track;
   }
 
@@ -160,7 +154,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   auto result = m_fitter->fit(begin, end,           
     scaledInitialParams, kfOptions, tracks);
   if (result.ok()) {
-    track = makeTrack<Acts::VectorTrackContainer, ActsTrk::TrackStateBackend, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
+    track = makeTrack(ctx, tgContext, tracks, result);
   }
   return track;
 }
@@ -178,7 +172,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   // protection against not having measurements on the input track
   if (inputMeasSet.size() < 2) {
-    ATH_MSG_INFO ("called to refit empty measurement set or a measurement set with too little information, reject fit");
+    ATH_MSG_DEBUG("called to refit empty measurement set or a measurement set with too little information, reject fit");
     return nullptr;
   }
 
@@ -211,7 +205,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   }
   // protection against error in the conversion from Atlas masurement to Acts source link
   if (trackSourceLinks.empty()) {
-    ATH_MSG_INFO("input contain measurement but no source link created, probable issue with the converter, reject fit ");
+    ATH_MSG_DEBUG("input contain measurement but no source link created, probable issue with the converter, reject fit ");
     return track;
   }
 
@@ -229,7 +223,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   auto result = m_fitter->fit(begin, end,
     initialParams, kfOptions, tracks);
   if (result.ok()) {
-    track = makeTrack<Acts::VectorTrackContainer, ActsTrk::TrackStateBackend, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
+    track = makeTrack(ctx, tgContext, tracks, result);
   }
   return track;
 }
@@ -243,7 +237,7 @@ ActsKalmanFitter::fit(const EventContext& /*ctx*/,
                        const Trk::RunOutlierRemoval /*runOutlier*/,
                        const Trk::ParticleHypothesis /*prtHypothesis*/) const
 {
-  ATH_MSG_INFO ("Fit of PrepRawDataSet not yet implemented");
+  ATH_MSG_DEBUG("Fit of PrepRawDataSet not yet implemented");
   return nullptr;
 }
 
@@ -263,19 +257,19 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   // protection, if empty MeasurementSet
   if (addMeasColl.empty()) {
-    ATH_MSG_WARNING( "client tries to add an empty MeasurementSet to the track fit." );
+    ATH_MSG_DEBUG( "client tries to add an empty MeasurementSet to the track fit." );
     return fit(ctx,inputTrack);
   }
 
   // protection against not having measurements on the input track
   if (!inputTrack.measurementsOnTrack() || (inputTrack.measurementsOnTrack()->size() < 2 && addMeasColl.empty())) {
-    ATH_MSG_INFO ("called to refit empty track or track with too little information, reject fit");
+    ATH_MSG_DEBUG("called to refit empty track or track with too little information, reject fit");
     return nullptr;
   }
 
   // protection against not having track parameters on the input track
   if (!inputTrack.trackParameters() || inputTrack.trackParameters()->empty()) {
-    ATH_MSG_INFO ("input fails to provide track parameters for seeding the KF, reject fit");
+    ATH_MSG_DEBUG("input fails to provide track parameters for seeding the KF, reject fit");
     return nullptr;
   }
 
@@ -314,7 +308,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   }
   // protection against error in the conversion from Atlas masurement to Acts source link
   if (trackSourceLinks.empty()) {
-    ATH_MSG_INFO("input contain measurement but no source link created, probable issue with the converter, reject fit ");
+    ATH_MSG_DEBUG("input contain measurement but no source link created, probable issue with the converter, reject fit ");
     return track;
   }
 
@@ -330,7 +324,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   auto result = m_fitter->fit(begin, end,
     initialParams, kfOptions, tracks);
   if (result.ok()) {
-    track = makeTrack<Acts::VectorTrackContainer, ActsTrk::TrackStateBackend, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
+    track = makeTrack(ctx, tgContext, tracks, result);
   }
   return track;
 }
@@ -345,7 +339,7 @@ ActsKalmanFitter::fit(const EventContext& /*ctx*/,
                        const Trk::ParticleHypothesis /*matEffects*/) const
 {
 
-  ATH_MSG_INFO ("Fit of Track with additional PrepRawDataSet not yet implemented");
+  ATH_MSG_DEBUG("Fit of Track with additional PrepRawDataSet not yet implemented");
   return nullptr;
 }
 
@@ -364,19 +358,19 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   // protection, if empty track2
   if (!intrk2.measurementsOnTrack()) {
-    ATH_MSG_WARNING( "input #2 is empty try to fit track 1 alone" );
+    ATH_MSG_DEBUG( "input #2 is empty try to fit track 1 alone" );
     return fit(ctx,intrk1);
   }
 
   // protection, if empty track1
   if (!intrk1.measurementsOnTrack()) {
-    ATH_MSG_WARNING( "input #1 is empty try to fit track 2 alone" );
+    ATH_MSG_DEBUG( "input #1 is empty try to fit track 2 alone" );
     return fit(ctx,intrk2);
   }
 
   // protection against not having track parameters on the input track
   if (!intrk1.trackParameters() || intrk1.trackParameters()->empty()) {
-    ATH_MSG_INFO ("input #1 fails to provide track parameters for seeding the KF, reject fit");
+    ATH_MSG_DEBUG("input #1 fails to provide track parameters for seeding the KF, reject fit");
     return nullptr;
   }
 
@@ -408,7 +402,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   trackSourceLinks.insert(trackSourceLinks.end(), trackSourceLinks2.begin(), trackSourceLinks2.end());
   // protection against error in the conversion from Atlas masurement to Acts source link
   if (trackSourceLinks.empty()) {
-    ATH_MSG_INFO("input contain measurement but no source link created, probable issue with the converter, reject fit ");
+    ATH_MSG_DEBUG("input contain measurement but no source link created, probable issue with the converter, reject fit ");
     return track;
   }
 
@@ -439,13 +433,11 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   auto result = m_fitter->fit(begin, end,
     scaledInitialParams, kfOptions, tracks);
   if (result.ok()) {
-    track = makeTrack<Acts::VectorTrackContainer, ActsTrk::TrackStateBackend, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
+    track = makeTrack(ctx, tgContext, tracks, result);
   }
   return track;
 }
 
-template<typename track_container_t, typename traj_t,
-         template <typename> class holder_t>
 std::unique_ptr<Trk::Track> 
 ActsKalmanFitter::makeTrack(const EventContext& ctx,
           Acts::GeometryContext& tgContext,
@@ -504,7 +496,7 @@ ActsKalmanFitter::makeTrack(const EventContext& ctx,
     std::unique_ptr<const Trk::TrackParameters> parm;
 
     // State is a hole (no associated measurement), use predicted parameters      
-    if (flag[Acts::TrackStateFlag::HoleFlag]){
+    if (flag.test(Acts::TrackStateFlag::HoleFlag)){
       ATH_MSG_VERBOSE("State is a hole (no associated measurement), use predicted parameters");
       const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
              state.predicted(),
@@ -530,8 +522,7 @@ ActsKalmanFitter::makeTrack(const EventContext& ctx,
       typePattern.set(Trk::TrackStateOnSurface::Hole);
     }
     // The state was tagged as an outlier or was missed in the reverse filtering, use filtered parameters
-    else if (flag[Acts::TrackStateFlag::OutlierFlag] or
-             state.template component<std::uint32_t, Acts::hashString("smoothed")>() == Acts::MultiTrajectoryTraits::kInvalid) {
+    else if (flag.test(Acts::TrackStateFlag::OutlierFlag) or !state.hasSmoothed()) {
       ATH_MSG_VERBOSE("The state was tagged as an outlier or was missed in the reverse filtering, use filtered parameters");
       const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
              state.filtered(),
@@ -597,3 +588,4 @@ ActsKalmanFitter::makeTrack(const EventContext& ctx,
   return newtrack;
 }
 
+}

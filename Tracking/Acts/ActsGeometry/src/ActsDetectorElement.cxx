@@ -284,6 +284,10 @@ const Acts::Surface &ActsDetectorElement::surface() const {
   return (*m_surface);
 }
 
+Acts::Surface &ActsDetectorElement::surface() {
+  return (*m_surface);
+}
+
 const Trk::Surface &ActsDetectorElement::atlasSurface() const {
   if (const auto *detElem =
           dynamic_cast<const InDetDD::SiDetectorElement *>(m_detElement);

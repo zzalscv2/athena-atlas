@@ -241,13 +241,15 @@ class MultiTrajectory final
    */
 
   inline typename ConstTrackStateProxy::Covariance jacobian_impl(
-      IndexType index) const {
-    return trackJacobians().at(index)->jacEigen();
+      IndexType istate) const {
+    xAOD::TrackStateIndexType jacIdx = (*m_trackStates)[istate]->jacobian();
+    return trackJacobians().at(jacIdx)->jacEigen();
   }
   ATH_MEMBER_REQUIRES(RWState == IsReadWrite,
                       typename TrackStateProxy::Covariance)
-  jacobian_impl(IndexType index) {
-    return trackJacobians().at(index)->jacEigen();
+  jacobian_impl(IndexType istate) {
+    xAOD::TrackStateIndexType jacIdx = (*m_trackStates)[istate]->jacobian();
+    return trackJacobians().at(jacIdx)->jacEigen();
   }
 
   /**
@@ -260,14 +262,17 @@ class MultiTrajectory final
   template <std::size_t measdim>
   inline typename ConstTrackStateProxy::template Measurement<measdim>
   measurement_impl(IndexType index) const {
-    return trackMeasurements().at(index)->template measEigen<measdim>();
+    xAOD::TrackStateIndexType measIdx = (*m_trackStates)[index]->calibrated();
+    return trackMeasurements().at(measIdx)->template measEigen<measdim>();
   }
   template <std::size_t measdim, bool Enable = true>
   std::enable_if_t<Enable && (RWState == IsReadWrite),
                    typename TrackStateProxy::template Measurement<measdim>>
   measurement_impl(IndexType index) {
-    return trackMeasurements().at(index)->template measEigen<measdim>();
+    xAOD::TrackStateIndexType measIdx = (*m_trackStates)[index]->calibrated();
+    return trackMeasurements().at(measIdx)->template measEigen<measdim>();
   }
+
   /**
    * @brief obtain measurements covariance for a state at given index
    *
@@ -278,14 +283,16 @@ class MultiTrajectory final
   template <std::size_t measdim>
   inline typename ConstTrackStateProxy::template MeasurementCovariance<measdim>
   measurementCovariance_impl(IndexType index) const {
-    return trackMeasurements().at(index)->template covMatrixEigen<measdim>();
+    xAOD::TrackStateIndexType measIdx = (*m_trackStates)[index]->calibrated();
+    return trackMeasurements().at(measIdx)->template covMatrixEigen<measdim>();
   }
   template <std::size_t measdim, bool Enable = true>
   std::enable_if_t<
       Enable && (RWState == IsReadWrite),
       typename TrackStateProxy::template MeasurementCovariance<measdim>>
   measurementCovariance_impl(IndexType index) {
-    return trackMeasurements().at(index)->template covMatrixEigen<measdim>();
+    xAOD::TrackStateIndexType measIdx = (*m_trackStates)[index]->calibrated();
+    return trackMeasurements().at(measIdx)->template covMatrixEigen<measdim>();
   }
 
   /**

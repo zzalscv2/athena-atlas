@@ -138,7 +138,7 @@ ActsExtrapolationTool::initialize()
 ActsPropagationOutput
 ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
                                         const Acts::BoundTrackParameters& startParameters,
-                                        Acts::NavigationDirection navDir /*= Acts::NavigationDirection::Forward*/,
+                                        Acts::Direction navDir /*= Acts::Direction::Forward*/,
                                         double pathLimit /*= std::numeric_limits<double>::max()*/,
                                         Trk::ParticleHypothesis particleHypo /*= Trk::pion*/) const
 {
@@ -217,7 +217,7 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
 std::optional<const Acts::CurvilinearTrackParameters>
 ActsExtrapolationTool::propagate(const EventContext& ctx,
                                  const Acts::BoundTrackParameters& startParameters,
-                                 Acts::NavigationDirection navDir /*= Acts::NavigationDirection::Forward*/,
+                                 Acts::Direction navDir /*= Acts::Direction::Forward*/,
                                  double pathLimit /*= std::numeric_limits<double>::max()*/,
                                  Trk::ParticleHypothesis particleHypo /*= Trk::pion*/) const
 {
@@ -272,7 +272,7 @@ ActsPropagationOutput
 ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
                                         const Acts::BoundTrackParameters& startParameters,
                                         const Acts::Surface& target,
-                                        Acts::NavigationDirection navDir /*= Acts::NavigationDirection::Forward*/,
+                                        Acts::Direction navDir /*= Acts::Direction::Forward*/,
                                         double pathLimit /*= std::numeric_limits<double>::max()*/,
                                         Trk::ParticleHypothesis particleHypo /*= Trk::pion*/) const
 {
@@ -343,7 +343,7 @@ std::optional<const Acts::BoundTrackParameters>
 ActsExtrapolationTool::propagate(const EventContext& ctx,
                                  const Acts::BoundTrackParameters& startParameters,
                                  const Acts::Surface& target,
-                                 Acts::NavigationDirection navDir /*= Acts::NavigationDirection::Forward*/,
+                                 Acts::Direction navDir /*= Acts::Direction::Forward*/,
                                  double pathLimit /*= std::numeric_limits<double>::max()*/,
                                  Trk::ParticleHypothesis particleHypo /*= Trk::pion*/) const
 {

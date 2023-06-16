@@ -76,6 +76,13 @@ const Acts::Surface& MdtReadoutElement::surface() const{
    return *dummy;
 }
 
+Acts::Surface& MdtReadoutElement::surface() {
+   std::shared_ptr<Acts::Surface> dummy{Acts::Surface::makeShared<Acts::PlaneSurface>(Amg::Vector3D::UnitX(), 
+                                                                                      Amg::Vector3D::UnitY())};
+   ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<"I am a dummy method ");
+   return *dummy;
+}
+
 Amg::Vector3D MdtReadoutElement::globalTubePos(const ActsGeometryContext& ctx,
                                 const IdentifierHash& hash) const {
     return localToGlobalTrans(ctx) * localTubePos(hash);
