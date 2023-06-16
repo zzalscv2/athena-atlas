@@ -942,6 +942,8 @@ def _extract_fields_fmd(interface=None, aux=None):
 
 
 def _extract_fields_tmd(interface=None, aux=None):
+    import ROOT
+    BadAuxVarException = ROOT.SG.ExcBadAuxVar
     """Extract TruthMetaData content into dictionary
 
     This function takes the TruthMetaDataContainer_v1 and TruthMetaDataAuxContainer_v1 objects.
@@ -957,20 +959,46 @@ def _extract_fields_tmd(interface=None, aux=None):
     interface.setStore(aux)
 
     # return the first as we do not really expect more than one
+    result = {}
     for tmd in interface:
-        result = {
-            'mcChannelNumber': tmd.mcChannelNumber(),
-            'weightNames': list(tmd.weightNames()),
-            'lhefGenerator': str(tmd.lhefGenerator()),
-            'generators': str(tmd.generators()),
-            'evgenProcess': str(tmd.evgenProcess()),
-            'evgenTune': str(tmd.evgenTune()),
-            'hardPDF': str(tmd.hardPDF()),
-            'softPDF': str(tmd.softPDF()),
-        }
-        return result
+        result['mcChannelNumber'] = tmd.mcChannelNumber()
 
-    return {}
+        try:
+            result['weightNames'] = list(tmd.weightNames())
+        except BadAuxVarException:
+            result['weightNames'] = []
+
+        try:
+            result['lhefGenerator'] = str(tmd.lhefGenerator())
+        except BadAuxVarException:
+            result['lhefGenerator'] = ''
+    
+        try:
+            result['generators'] = str(tmd.generators())
+        except BadAuxVarException:
+            result['generators'] = ''
+    
+        try:
+            result['evgenProcess'] = str(tmd.evgenProcess())
+        except BadAuxVarException:
+            result['evgenProcess'] = ''
+    
+        try:
+            result['evgenTune'] = str(tmd.evgenTune())
+        except BadAuxVarException:
+            result['evgenTune'] = ''
+    
+        try:
+            result['hardPDF'] = str(tmd.hardPDF())
+        except BadAuxVarException:
+            result['hardPDF'] = ''
+    
+        try:
+            result['softPDF'] = str(tmd.softPDF())
+        except BadAuxVarException:
+            result['softPDF'] = ''
+
+    return result
 
 
 """ Note: Deprecated. Legacy support for Run 2 AODs produced in release 21 or in release 22 prior to April 2021
