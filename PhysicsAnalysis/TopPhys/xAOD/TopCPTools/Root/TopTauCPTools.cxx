@@ -94,6 +94,8 @@ namespace top {
 
                                  if (s == "NotLoose") return TauAnalysisTools::JETIDBDTNOTLOOSE;
 
+				 if (s == "RNNVeryLoose") return TauAnalysisTools::JETIDRNNVERYLOOSE;
+
                                  if (s == "RNNLoose") return TauAnalysisTools::JETIDRNNLOOSE;
 
                                  if (s == "RNNMedium") return TauAnalysisTools::JETIDRNNMEDIUM;
