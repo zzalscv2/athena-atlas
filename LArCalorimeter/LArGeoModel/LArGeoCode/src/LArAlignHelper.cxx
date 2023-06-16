@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArGeoCode/LArAlignHelper.h"
@@ -130,7 +130,9 @@ StatusCode LArAlignHelper::applyAlignments(const ServiceHandle<StoreGateSvc>& de
   // !!! NB! The code assumes that StoredPhysVol-s are used only by LAr
   //         This has been true ever since the StorePhysVol-s were invented.
   //
-  for(const std::string& key : detStore->keys<StoredPhysVol>()) {
+  std::vector<std::string> keys;
+  detStore->keys<StoredPhysVol> (keys);
+  for(const std::string& key : keys) {
     StoredPhysVol* storedPV = detStore->tryRetrieve<StoredPhysVol>(key);
     ATH_MSG_DEBUG("Building position caches for StoredPhysVol :" << key);
     if(storedPV) {
