@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -58,6 +58,10 @@ char find_typecode (const std::type_info& ti)
     return 'I';
   else if (ti == typeid (UInt_t))
     return 'i';
+  else if (ti == typeid (Long_t))
+    return 'G';
+  else if (ti == typeid (ULong_t))
+    return 'g';
   else if (ti == typeid (Float_t))
     return 'F';
   else if (ti == typeid (Double_t))

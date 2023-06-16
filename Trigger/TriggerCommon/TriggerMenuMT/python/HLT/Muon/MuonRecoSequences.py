@@ -10,7 +10,6 @@ from TrigEDMConfig.TriggerEDMRun3 import recordable
 from MuonConfig.MuonBytestreamDecodeConfig import RpcBytestreamDecodeCfg, TgcBytestreamDecodeCfg, MdtBytestreamDecodeCfg, CscBytestreamDecodeCfg, sTgcBytestreamDecodeCfg, MmBytestreamDecodeCfg
 from MuonConfig.MuonRdoDecodeConfig import RpcRDODecodeCfg, TgcRDODecodeCfg, MdtRDODecodeCfg, CscRDODecodeCfg, CscClusterBuildCfg, StgcRDODecodeCfg, MMRDODecodeCfg
 from MuonConfig.MuonRdoDecodeConfig import MuonPrdCacheNames
-from RegionSelector.RegSelToolConfig import regSelTool_RPC_Cfg, regSelTool_TGC_Cfg, regSelTool_MDT_Cfg, regSelTool_CSC_Cfg, regSelTool_STGC_Cfg, regSelTool_MM_Cfg
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -121,66 +120,38 @@ def MuDataPrepViewDataVerifierCfg(flags):
 def muonDecodeCfg(flags, RoIs):
 
     acc = ComponentAccumulator()
-    RegSelTool_RPC = acc.popToolsAndMerge(regSelTool_RPC_Cfg(flags))
-    RegSelTool_TGC = acc.popToolsAndMerge(regSelTool_TGC_Cfg(flags))
-    RegSelTool_MDT = acc.popToolsAndMerge(regSelTool_MDT_Cfg(flags))
-    if flags.Detector.GeometryCSC:
-        RegSelTool_CSC = acc.popToolsAndMerge(regSelTool_CSC_Cfg(flags))
-    if flags.Detector.GeometrysTGC and flags.Detector.GeometryMM:
-      RegSelTool_STGC = acc.popToolsAndMerge(regSelTool_STGC_Cfg(flags))
-      RegSelTool_MM = acc.popToolsAndMerge(regSelTool_MM_Cfg(flags))
     doSeededDecoding =True
     if 'FSRoI' in RoIs:
       doSeededDecoding = False
     acc.merge(MuDataPrepViewDataVerifierCfg(flags))
     # Get RPC BS decoder
     if not flags.Input.isMC:
-        rpcAcc = RpcBytestreamDecodeCfg( flags, name = "RpcRawDataProvider_"+RoIs )
-        rpcAcc.getEventAlgo("RpcRawDataProvider_"+RoIs).RoIs = RoIs
-        rpcAcc.getEventAlgo("RpcRawDataProvider_"+RoIs).DoSeededDecoding = doSeededDecoding
-        rpcAcc.getEventAlgo("RpcRawDataProvider_"+RoIs).RegionSelectionTool = RegSelTool_RPC
-        acc.merge( rpcAcc )
+      rpcAcc = RpcBytestreamDecodeCfg( flags, name = "RpcRawDataProvider_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding )
+      acc.merge( rpcAcc )
     # Get RPC RDO convertor
-    rpcAcc = RpcRDODecodeCfg( flags, name= "RpcRdoToRpcPrepData_"+RoIs )
-    rpcAcc.getEventAlgo("RpcRdoToRpcPrepData_"+RoIs).RoIs = RoIs
-    rpcAcc.getEventAlgo("RpcRdoToRpcPrepData_"+RoIs).DoSeededDecoding = doSeededDecoding
+    rpcAcc = RpcRDODecodeCfg( flags, name= "RpcRdoToRpcPrepData_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding )
     acc.merge( rpcAcc )
     # Get TGC BS decoder
     if not flags.Input.isMC:
-        tgcAcc = TgcBytestreamDecodeCfg( flags, name="TgcRawDataProvider_"+RoIs )
-        tgcAcc.getEventAlgo("TgcRawDataProvider_"+RoIs).RoIs = RoIs
-        tgcAcc.getEventAlgo("TgcRawDataProvider_"+RoIs).DoSeededDecoding = doSeededDecoding
-        tgcAcc.getEventAlgo("TgcRawDataProvider_"+RoIs).RegionSelectionTool = RegSelTool_TGC
+        tgcAcc = TgcBytestreamDecodeCfg( flags, name="TgcRawDataProvider_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding )
         acc.merge( tgcAcc )
     # Get TGC RDO convertor
-    tgcAcc = TgcRDODecodeCfg( flags, name="TgcRdoToTgcPrepData_"+RoIs )
-    tgcAcc.getEventAlgo("TgcRdoToTgcPrepData_"+RoIs).RoIs = RoIs
-    tgcAcc.getEventAlgo("TgcRdoToTgcPrepData_"+RoIs).DoSeededDecoding = doSeededDecoding
+    tgcAcc = TgcRDODecodeCfg( flags, name="TgcRdoToTgcPrepData_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding )
     acc.merge( tgcAcc )
     # Get MDT BS decoder
     if not flags.Input.isMC:
-        mdtAcc = MdtBytestreamDecodeCfg( flags, name="MdtRawDataProvider_"+RoIs )
-        mdtAcc.getEventAlgo("MdtRawDataProvider_"+RoIs).RoIs = RoIs
-        mdtAcc.getEventAlgo("MdtRawDataProvider_"+RoIs).DoSeededDecoding = doSeededDecoding
-        mdtAcc.getEventAlgo("MdtRawDataProvider_"+RoIs).RegionSelectionTool = RegSelTool_MDT
+        mdtAcc = MdtBytestreamDecodeCfg( flags, name="MdtRawDataProvider_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding )
         acc.merge( mdtAcc )
     # Get MDT RDO convertor
-    mdtAcc = MdtRDODecodeCfg( flags, name="MdtRdoToMdtPrepData_"+RoIs )
-    mdtAcc.getEventAlgo("MdtRdoToMdtPrepData_"+RoIs).RoIs = RoIs
-    mdtAcc.getEventAlgo("MdtRdoToMdtPrepData_"+RoIs).DoSeededDecoding = doSeededDecoding
+    mdtAcc = MdtRDODecodeCfg( flags, name="MdtRdoToMdtPrepData_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding )
     acc.merge( mdtAcc )
     # Get CSC BS decoder
     if flags.Detector.GeometryCSC:
         if not flags.Input.isMC:
-            cscAcc = CscBytestreamDecodeCfg( flags, name="CscRawDataProvider_"+RoIs )
-            cscAcc.getEventAlgo("CscRawDataProvider_"+RoIs).RoIs = RoIs
-            cscAcc.getEventAlgo("CscRawDataProvider_"+RoIs).DoSeededDecoding = doSeededDecoding
-            cscAcc.getEventAlgo("CscRawDataProvider_"+RoIs).RegionSelectionTool = RegSelTool_CSC
+            cscAcc = CscBytestreamDecodeCfg( flags, name="CscRawDataProvider_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding )
             acc.merge( cscAcc )
         # Get CSC RDO convertor
-        cscAcc = CscRDODecodeCfg( flags, name="CscRdoToCscPrepData_"+RoIs )
-        cscAcc.getEventAlgo("CscRdoToCscPrepData_"+RoIs).RoIs = RoIs
-        cscAcc.getEventAlgo("CscRdoToCscPrepData_"+RoIs).DoSeededDecoding = doSeededDecoding
+        cscAcc = CscRDODecodeCfg( flags, name="CscRdoToCscPrepData_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding )
         acc.merge( cscAcc )
         # Get CSC cluster builder
         cscAcc = CscClusterBuildCfg( flags, name="CscThresholdClusterBuilder_"+RoIs )
@@ -188,26 +159,15 @@ def muonDecodeCfg(flags, RoIs):
     #sTGC and MM BS decoder
     if flags.Detector.GeometrysTGC and flags.Detector.GeometryMM:
       if not flags.Input.isMC:
-        stgcAcc = sTgcBytestreamDecodeCfg(flags, name="sTgcRawDataProvider_"+RoIs)
-        stgcAcc.getEventAlgo("sTgcRawDataProvider_"+RoIs).RoIs = RoIs
-        stgcAcc.getEventAlgo("sTgcRawDataProvider_"+RoIs).DoSeededDecoding = doSeededDecoding
-        stgcAcc.getEventAlgo("sTgcRawDataProvider_"+RoIs).RegionSelectionTool = RegSelTool_STGC
+        stgcAcc = sTgcBytestreamDecodeCfg(flags, name="sTgcRawDataProvider_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding)
         acc.merge( stgcAcc )
-        mmAcc = MmBytestreamDecodeCfg(flags, name="MMRawDataProvider_"+RoIs)
-        mmAcc.getEventAlgo("MMRawDataProvider_"+RoIs).RoIs = RoIs
-        mmAcc.getEventAlgo("MMRawDataProvider_"+RoIs).DoSeededDecoding = doSeededDecoding
-        mmAcc.getEventAlgo("MMRawDataProvider_"+RoIs).RegionSelectionTool = RegSelTool_MM
+        mmAcc = MmBytestreamDecodeCfg(flags, name="MMRawDataProvider_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding)
         acc.merge( mmAcc )
       #sTGC and MM RDO converter
-      stgcAcc = StgcRDODecodeCfg( flags, name="StgcRdoToStgcPrepData_"+RoIs )
-      stgcAcc.getEventAlgo("StgcRdoToStgcPrepData_"+RoIs).RoIs = RoIs
-      stgcAcc.getEventAlgo("StgcRdoToStgcPrepData_"+RoIs).DoSeededDecoding = doSeededDecoding
-      stgcAcc.getEventAlgo("StgcRdoToStgcPrepData_"+RoIs).RegionSelectorTool = RegSelTool_STGC
+      stgcAcc = StgcRDODecodeCfg( flags, name="StgcRdoToStgcPrepData_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding )
       acc.merge( stgcAcc )
-      mmAcc = MMRDODecodeCfg( flags, name="MMRdoToMMPrepData_"+RoIs )
-      mmAcc.getEventAlgo("MMRdoToMMPrepData_"+RoIs).RoIs = RoIs
-      mmAcc.getEventAlgo("MMRdoToMMPrepData_"+RoIs).DoSeededDecoding = doSeededDecoding
-      mmAcc.getEventAlgo("MMRdoToMMPrepData_"+RoIs).RegionSelectorTool = RegSelTool_MM
+
+      mmAcc = MMRDODecodeCfg( flags, name="MMRdoToMMPrepData_"+RoIs, RoIs =  RoIs, DoSeededDecoding = doSeededDecoding)
       acc.merge( mmAcc )
 
     return acc

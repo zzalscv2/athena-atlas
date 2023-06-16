@@ -338,6 +338,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
       // e.g. for the chain: HLT_2g25_loose_g20 the multiplicities are: [2, 1]
       // 
       ATH_MSG_DEBUG("CHAIN " << chainName << " needs legs: " << multiplicities );
+      std::vector<unsigned int> teIdsLastHealthyStep;
 
       for (auto ptrHLTSignature : ptrChain->signatures())
         {
@@ -354,19 +355,20 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
             }
             lastSeenId = ptrHLTTE->id();
           }
-          const bool isLastStep = ptrHLTSignature == ptrChain->signatures().back();
 
           ATH_MSG_DEBUG("TE multiplicities seen in this step " << teCounts);
           if ( multiplicities == teCounts ) {
+            teIdsLastHealthyStep = teIds;
             ATH_MSG_DEBUG("There is a match, will assign chain leg IDs to TEs " << teCounts);
             for ( size_t legNumber = 0; legNumber < teIds.size(); ++ legNumber){
               HLT::Identifier chainLegId = TrigCompositeUtils::createLegName(chainId, legNumber);
               allTEs[teIds[legNumber]].insert(chainLegId);
-              if ( isLastStep ) {
-                finalTEs[teIds[legNumber]].insert(chainLegId);
-              }
             }
-          }
+          } 
+        }
+        for ( size_t legNumber = 0; legNumber < teIdsLastHealthyStep.size(); ++ legNumber ) {
+          HLT::Identifier chainLegId = TrigCompositeUtils::createLegName(chainId, legNumber);
+          finalTEs[teIdsLastHealthyStep[legNumber]].insert(chainLegId);
         }
     }
 
@@ -821,7 +823,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::createSFNodes(const ConvProxySet_t &con
                                                        const TEIdToChainsMap_t &terminalIds, const EventContext &context) const
 {
   // make node & link it properly
-  auto makeSFNode = [&decisions, &context](auto lastDecisionNode, auto chainIds)
+  auto makeSingleSFNode = [&decisions, &context](auto lastDecisionNode, auto chainIds)
   {
     auto sfNode = TrigCompositeUtils::newDecisionIn(&decisions);
     sfNode->setName("SF");
@@ -832,8 +834,23 @@ StatusCode Run2ToRun3TrigNavConverterV2::createSFNodes(const ConvProxySet_t &con
       TrigCompositeUtils::addDecisionID(chainId, sfNode);
       TrigCompositeUtils::addDecisionID(chainId, decisions.at(0));
     }
-
     return sfNode;
+  };
+  auto makeSFNodes = [&decisions, &context, makeSingleSFNode](auto proxy) 
+  {
+      if (proxy->hNode.empty())
+      { // nothing has passed, so link to the IM node
+        // TODO make sure it needs to be done like that
+        makeSingleSFNode(proxy->imNode, proxy->runChains);
+      }
+      else
+      {
+        // makeSFNode(proxy->hNode[0], TCU::decisionIDs(proxy->hNode[0])); // not using passChains as there may be additional filtering
+        for (auto &hNode : proxy->hNode)
+        {
+          makeSingleSFNode(hNode, proxy->passChains); // using passChains
+        }
+      }
   };
 
   for (auto proxy : convProxies)
@@ -841,19 +858,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::createSFNodes(const ConvProxySet_t &con
     // associate terminal nodes to filter nodes,
     if (proxy->children.empty())
     { // the H modes are terminal
-      if (proxy->hNode.empty())
-      { // nothing has passed, so link to the IM node
-        // TODO make sure it needs to be done like that
-        makeSFNode(proxy->imNode, proxy->runChains);
-      }
-      else
-      {
-        // makeSFNode(proxy->hNode[0], TCU::decisionIDs(proxy->hNode[0])); // not using passChains as there may be additional filtering
-        for (auto &hNode : proxy->hNode)
-        {
-          makeSFNode(hNode, proxy->passChains); // using passChains
-        }
-      }
+      makeSFNodes(proxy);
     }
     else
     {
@@ -865,12 +870,12 @@ StatusCode Run2ToRun3TrigNavConverterV2::createSFNodes(const ConvProxySet_t &con
         auto whereInMap = terminalIds.find(teId);
         if (whereInMap != terminalIds.end())
         {
-          toRetain.insert(toRetain.begin(), whereInMap->second.begin(), whereInMap->second.end());
+          toRetain.insert(toRetain.end(), whereInMap->second.begin(), whereInMap->second.end());
         }
       }
       if (not toRetain.empty())
       {
-        makeSFNode(proxy->imNode, toRetain);
+        makeSFNodes(proxy);
       }
     }
   }
@@ -1157,9 +1162,9 @@ StatusCode Run2ToRun3TrigNavConverterV2::allProxiesConnected(const ConvProxySet_
 {
   for (auto p : proxies)
   {
-    if (p->children.empty() and p->parents.empty())
+    if (p->children.empty() and p->parents.empty() and not p->runChains.empty())
     {
-      ATH_MSG_ERROR("Orphanted proxy");
+      ATH_MSG_ERROR("Orphanted proxy N chains run:" << p->runChains.size());
       return StatusCode::FAILURE;
     }
   }

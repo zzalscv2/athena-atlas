@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FastCaloSimHit/FastHitConv.h"
@@ -144,10 +144,11 @@ StatusCode FastHitConv::finaliseEvent()
                      << (*m_storeGateFastCalo).dump() );
       const EventInfo *evt(nullptr);
       CHECK(evtStore()->retrieve(evt,"MyEvent"));
-      const EventInfo* newEvt=new EventInfo(*evt);
+      auto newEvt = std::make_unique<EventInfo>(*evt);
+      //const EventInfo* newEvt=new EventInfo(*evt);
       PileUpEventInfo *pOverEvent(nullptr);
       CHECK(evtStore()->retrieve(pOverEvent,"OverlayEvent"));
-      pOverEvent->addSubEvt(0, PileUpTimeEventIndex::Signal, newEvt, &(*m_storeGateFastCalo));
+      pOverEvent->addSubEvt(0, PileUpTimeEventIndex::Signal, std::move(newEvt), &(*m_storeGateFastCalo));
       ATH_MSG_DEBUG (" StoreGate structure at end of event (after recording collections): \n "
                      << evtStore()->dump() );
     }

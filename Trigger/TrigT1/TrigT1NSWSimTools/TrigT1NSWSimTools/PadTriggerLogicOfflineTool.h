@@ -93,6 +93,7 @@ namespace NSWL1 {
         const std::vector<float> m_etaBandsSmallSector;
 
         std::map<IdentifierHash, std::pair<double,double> > m_phiTable;
+	std::pair<double,double> m_Zratio;
 
         ServiceHandle<IIncidentSvc> m_incidentSvc{this, "IncidentSvc", "IncidentSvc"};  //!< Athena/Gaudi incident Service
         const MuonGM::MuonDetectorManager* m_detManager;        //!< MuonDetectorManager

@@ -115,13 +115,10 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
         
         uint32_t jFexID = jTower->jFEXtowerID();
         uint8_t  source = jTower->Calosource();
-        uint16_t jFexEt = 0;
+        int jFexEt = 0;
         uint16_t jFexEtencoded = 0;
         
-        if(source < 7){
-            jFexEt = jTower->jTowerEt();
-        }
-        else{
+        if(source >=7){
             ATH_MSG_WARNING("Undefined source element: "<<source);
         }
         
@@ -197,6 +194,7 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
             }
             SCellEt = tmpSCellEt;
             jFexEtencoded = jFEXCompression::Compress( tmpSCellEt );
+            jFexEt        = jFEXCompression::Expand( jTower->jTowerEt() );
         }
         else if(source == 1){
             
@@ -225,9 +223,10 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
                 TileEta       = (it_TileID2ptr->second)->eta();
                 float phi     = (it_TileID2ptr->second)->phi() < M_PI ? (it_TileID2ptr->second)->phi() : (it_TileID2ptr->second)->phi()-2*M_PI;
                 TilePhi       = phi;    
+                
             }           
             
-            
+            jFexEt = jTower->jTowerEt()*500; // cf 500 since it is cpET 
 
         }
         
@@ -259,7 +258,7 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
         SG::WriteDecorHandle<xAOD::jFexTowerContainer, float > TileEtMeV       (m_TileEtMeVdecorKey   , ctx);
                 
         
-        jTowerEtMeV     (*jTower) = static_cast<int>( jFEXCompression::Expand(jFexEt) );
+        jTowerEtMeV     (*jTower) = jFexEt;
         SCellEtMeV      (*jTower) = SCellEt;
         TileEtMeV       (*jTower) = TileEt;
         

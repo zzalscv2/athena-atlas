@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AsgMessaging/MessageCheck.h"
@@ -292,5 +292,16 @@ namespace TrigCompositeUtils {
     return;
   }
 
+
+  template<typename T>
+  DecisionIDContainer passedDecisionIDs( const Decision* d, const T& required ) {
+    DecisionIDContainer passed;
+    for ( DecisionID id : decisionIDs( d ) ) {
+      if ( required.find(id) != required.end() ) {
+        passed.insert(id);
+      }
+    }
+    return passed;
+  }
 
 }

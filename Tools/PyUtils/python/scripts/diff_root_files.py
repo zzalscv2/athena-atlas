@@ -413,8 +413,8 @@ def main(args):
             itr_entries_new = itr_entries
 
         branches = sorted(branches)
-        old_dump_iter = fold.dump(args.tree_name, itr_entries_old, branches, True)
-        new_dump_iter = fnew.dump(args.tree_name, itr_entries_new, branches, True)
+        old_dump_iter = fold.dump(args.tree_name, itr_entries_old, branches, True, False)
+        new_dump_iter = fnew.dump(args.tree_name, itr_entries_new, branches, True, False)
 
         def leafname_fromdump(entry):
             if entry is None:

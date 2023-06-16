@@ -89,23 +89,63 @@ namespace xAOD {
       //Returns true if the Tower belongs to the FPGA core area
       bool isCore() const;
 
+
+
+
       // Decorated variables
       
       /// Information about SCell Ets
-      const std::vector<float>& SCellEt() const; /// getter for Aux SCell Et
-      void setSCellEt(const std::vector<float>&); /// setter for the above
-      void setSCellEt(std::vector<float>&&); /// setter for the above  
+      const std::vector<float>& SCellEt() const; /// getter
+      void setSCellEt(const std::vector<float>&); /// setter
+      void setSCellEt(std::vector<float>&&); /// setter
+      
+      /// Information about SCell Etas
+      const std::vector<float>& SCellEta() const; /// getter
+      void setSCellEta(const std::vector<float>&); /// setter
+      void setSCellEta(std::vector<float>&&); /// setter
+      
+      /// Information about SCell Phis
+      const std::vector<float>& SCellPhi() const; /// getter
+      void setSCellPhi(const std::vector<float>&); /// setter
+      void setSCellPhi(std::vector<float>&&); /// setter
       
       /// Information about SCell IDs
-      const std::vector<int>& SCellID() const; /// getter for Aux SCell IDs
-      void setSCellID(const std::vector<int>&); /// setter for the above
-      void setSCellID(std::vector<int>&&); /// setter for the above  
+      const std::vector<int>& SCellID() const; /// getter
+      void setSCellID(const std::vector<int>&); /// setter
+      void setSCellID(std::vector<int>&&); /// setter
+      
+      /// Information about SCell Masking
+      const std::vector<bool>& SCellMask() const; /// getter
+      void setSCellMask(const std::vector<bool>&); /// setter
+      void setSCellMask(std::vector<bool>&&); /// setter
       
       /// Information about Tile Et
-      int TileEt() const; /// getter for Aux Tile Et
-      void setTileEt(int); /// setter for the above
+      int TileEt() const; /// getter
+      void setTileEt(int); /// setter
       
-
+      /// Information about Tile Eta
+      float TileEta() const; /// getter
+      void setTileEta(float); /// setter
+      
+      /// Information about Tile Phi
+      float TilePhi() const; /// getter
+      void setTilePhi(float); /// setter
+      
+      /// Information about jTower Et in MeV
+      int jtowerEtMeV() const; /// getter
+      void setjtowerEtMeV(int); /// setter
+      
+      /// Information about SCell Et in MeV
+      float SCellEtMeV() const; /// getter
+      void setSCellEtMeV(float); /// setter
+      
+      /// Information about Tile Et in MeV
+      float TileEtMeV() const; /// getter
+      void setTileEtMeV(float); /// setter
+      
+      /// Information about jTower Et Encoded! (LAr and Tile encoding is different!)
+      int emulated_jtowerEt() const; /// getter
+      void setemulated_jtowerEt(int); /// setter
 
 
       void initialize(  const float Eta,const float Phi);

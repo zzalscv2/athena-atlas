@@ -339,7 +339,7 @@ namespace NSWL1{
       }
     }
     //-------------------------------------
-    std::vector<SectorTriggerCandidate> L1TdrStgcTriggerLogic::buildSectorTriggers(const std::vector< std::shared_ptr<PadOfflineData> > &pads) const {
+    std::vector<SectorTriggerCandidate> L1TdrStgcTriggerLogic::buildSectorTriggers(const std::vector< std::shared_ptr<PadOfflineData> > &pads, std::pair<double,double> Zratio) const {
 
         std::vector<SectorTriggerCandidate> secTrigCand;
 
@@ -416,7 +416,7 @@ namespace NSWL1{
                          ATH_MSG_DEBUG("Inner SingleWedge trigger already combined, skipping");
                         continue;
                     }
-                    else if ((it.is4outOf4Layers()||it.is3outOf4Layers()) && it.isInTransitionRegion()){
+                    else if ((it.is4outOf4Layers()||it.is3outOf4Layers()) && it.isInTransitionRegion(Zratio)){
                         secTrigCand.emplace_back(it.setCombined());
                     }
                 }
@@ -425,7 +425,7 @@ namespace NSWL1{
                          ATH_MSG_DEBUG("Outer SingleWedge trigger already combined, skipping");
                         continue;
                     }
-                    else if ((ot.is4outOf4Layers()||ot.is3outOf4Layers()) && ot.isInTransitionRegion()){
+                    else if ((ot.is4outOf4Layers()||ot.is3outOf4Layers()) && ot.isInTransitionRegion(Zratio)){
                         secTrigCand.emplace_back(ot.setCombined());
                     }
                 }

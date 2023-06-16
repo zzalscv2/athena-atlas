@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DecisionHandling/ComboHypo.h"
@@ -101,13 +101,9 @@ StatusCode ComboHypo::copyDecisions( const Combo::LegDecisionsMap & passingLegs,
 
       for (const Decision* inputDecision : *inputHandle) {
         auto thisEL = TrigCompositeUtils::decisionToElementLink(inputDecision, context);
-        DecisionIDContainer inputDecisionIDs;
-        decisionIDs( inputDecision, inputDecisionIDs );
 
         // from all positive decision in the input only the ones that survived counting are passed over
-        DecisionIDContainer common;      
-        std::set_intersection( inputDecisionIDs.begin(), inputDecisionIDs.end(), passing.begin(), passing.end(),
-          std::inserter( common, common.end() ) );
+        const DecisionIDContainer& common = passedDecisionIDs(inputDecision, passing);
 
         // check if this EL is in the combination map for the passing decIDs:
         ATH_MSG_DEBUG("Searching this element in the map: ("<<thisEL.dataID() << " , " << thisEL.index()<<")");

@@ -614,10 +614,6 @@ namespace JetTagDQA{
     m_IP3D_pc = bookHistogram("IP3D_pc", "IP3D_pc", m_sParticleType);
     m_IP3D_pu = bookHistogram("IP3D_pu", "IP3D_pu", m_sParticleType);
 
-    m_RNNIP_pb = bookHistogram("RNNIP_pb", "RNNIP_pb", m_sParticleType);
-    m_RNNIP_pc = bookHistogram("RNNIP_pc", "RNNIP_pc", m_sParticleType);
-    m_RNNIP_pu = bookHistogram("RNNIP_pu", "RNNIP_pu", m_sParticleType);
-
     m_DIPS_pb = bookHistogram("DIPS_pb", "DIPS_pb", m_sParticleType);
     m_DIPS_pc = bookHistogram("DIPS_pc", "DIPS_pc", m_sParticleType);
     m_DIPS_pu = bookHistogram("DIPS_pu", "DIPS_pu", m_sParticleType);
@@ -632,12 +628,6 @@ namespace JetTagDQA{
     m_IP3D_nTracks_l = bookHistogram("IP3D_NTracks_l", "IP3D_nTracks", m_sParticleType, "l-jets -");
     m_IP3D_nTracks_muon = bookHistogram("IP3D_NTracks_muon", "IP3D_nTracks", m_sParticleType, "jets with muon -");
 
-    m_IP2D_nTracks_incl = bookHistogram("IP2D_NTracks_incl", "IP2D_nTracks", m_sParticleType);
-    m_IP2D_nTracks_b = bookHistogram("IP2D_NTracks_b", "IP2D_nTracks", m_sParticleType, "b-jets -");
-    m_IP2D_nTracks_c = bookHistogram("IP2D_NTracks_c", "IP2D_nTracks", m_sParticleType, "c-jets -");
-    m_IP2D_nTracks_l = bookHistogram("IP2D_NTracks_l", "IP2D_nTracks", m_sParticleType, "l-jets -");
-    m_IP2D_nTracks_muon = bookHistogram("IP2D_NTracks_muon", "IP2D_nTracks", m_sParticleType, "jets with muon -");
-
     m_nGTinSV1_incl = bookHistogram("SV1_nGoodTracks_incl", "SV1_nGoodTracks", m_sParticleType);
     m_nGTinSV1_b = bookHistogram("SV1_nGoodTracks_b", "SV1_nGoodTracks", m_sParticleType, "b-jets -");
     m_nGTinSV1_c = bookHistogram("SV1_nGoodTracks_c", "SV1_nGoodTracks", m_sParticleType, "c-jets -");
@@ -650,24 +640,16 @@ namespace JetTagDQA{
     m_DL1dv01_pb = bookHistogram("DL1dv01_pb", "DL1dv01_pb", m_sParticleType);
     m_DL1dv01_pc = bookHistogram("DL1dv01_pc", "DL1dv01_pc", m_sParticleType);
     m_DL1dv01_pu = bookHistogram("DL1dv01_pu", "DL1dv01_pu", m_sParticleType);
-    m_DL1r_pb = bookHistogram("DL1r_pb", "DL1r_pb", m_sParticleType);
-    m_DL1r_pc = bookHistogram("DL1r_pc", "DL1r_pc", m_sParticleType);
-    m_DL1r_pu = bookHistogram("DL1r_pu", "DL1r_pu", m_sParticleType);
 
     m_GN1_pb = bookHistogram("GN1_pb", "GN1_pb", m_sParticleType);
     m_GN1_pc = bookHistogram("GN1_pc", "GN1_pc", m_sParticleType);
     m_GN1_pu = bookHistogram("GN1_pu", "GN1_pu", m_sParticleType);
 
     m_IP3D_gradeOfTracks_incl = bookHistogram("IP3D_gradeOfTracks_incl", "IP3D_gradeOfTracks", m_sParticleType);
-    m_IP2D_gradeOfTracks_incl = bookHistogram("IP2D_gradeOfTracks_incl", "IP2D_gradeOfTracks", m_sParticleType);
     m_IP3D_gradeOfTracks_b = bookHistogram("IP3D_gradeOfTracks_b", "IP3D_gradeOfTracks", m_sParticleType, "b-jets -");
-    m_IP2D_gradeOfTracks_b = bookHistogram("IP2D_gradeOfTracks_b", "IP2D_gradeOfTracks", m_sParticleType, "b-jets -");
     m_IP3D_gradeOfTracks_c = bookHistogram("IP3D_gradeOfTracks_c", "IP3D_gradeOfTracks", m_sParticleType, "c-jets -");
-    m_IP2D_gradeOfTracks_c = bookHistogram("IP2D_gradeOfTracks_c", "IP2D_gradeOfTracks", m_sParticleType, "c-jets -");
     m_IP3D_gradeOfTracks_l = bookHistogram("IP3D_gradeOfTracks_l", "IP3D_gradeOfTracks", m_sParticleType, "l-jets -");
-    m_IP2D_gradeOfTracks_l = bookHistogram("IP2D_gradeOfTracks_l", "IP2D_gradeOfTracks", m_sParticleType, "l-jets -");
     m_IP3D_gradeOfTracks_muon = bookHistogram("IP3D_gradeOfTracks_muon", "IP3D_gradeOfTracks", m_sParticleType, "jets with muon -");
-    m_IP2D_gradeOfTracks_muon = bookHistogram("IP2D_gradeOfTracks_muon", "IP2D_gradeOfTracks", m_sParticleType, "jets with muon -");
 
     m_tmpD0 = bookHistogram("IP3D_valD0wrtPVofTracks", "IP3D_d0wrtPVOfTracks", m_sParticleType);
     m_tmpZ0 = bookHistogram("IP3D_valZ0wrtPVofTracks", "IP3D_z0wrtPVOfTracks", m_sParticleType);
@@ -676,9 +658,6 @@ namespace JetTagDQA{
     m_IP3D_weightBofTracks = bookHistogram("IP3D_weightBofTracks", "IP3D_weightBOfTracks", m_sParticleType);
     m_IP3D_weightCofTracks = bookHistogram("IP3D_weightCofTracks", "IP3D_weightCOfTracks", m_sParticleType);
     m_IP3D_weightUofTracks = bookHistogram("IP3D_weightUofTracks", "IP3D_weightUOfTracks", m_sParticleType);
-    m_IP2D_weightBofTracks = bookHistogram("IP2D_weightBofTracks", "IP2D_weightBOfTracks", m_sParticleType);
-    m_IP2D_weightCofTracks = bookHistogram("IP2D_weightCofTracks", "IP2D_weightCOfTracks", m_sParticleType);
-    m_IP2D_weightUofTracks = bookHistogram("IP2D_weightUofTracks", "IP2D_weightUOfTracks", m_sParticleType);    
 
     // B hadron Lxy
     m_Truth_Lxy_b = bookHistogram("Truth_Lxy_b", "Truth_Lxy_b", m_sParticleType, "b-jets - ");
@@ -1222,9 +1201,6 @@ namespace JetTagDQA{
     for( unsigned int i=0; i<IP3D_gradeOfTracks.size(); i++){
       BTaggingValidationPlots::fillHistoWithTruthCases(IP3D_gradeOfTracks.at(i), m_IP3D_gradeOfTracks_incl, m_IP3D_gradeOfTracks_b, m_IP3D_gradeOfTracks_c, m_IP3D_gradeOfTracks_l, m_IP3D_gradeOfTracks_muon, truth_label, has_muon, event);
     }
-    for( unsigned int i=0; i<IP2D_gradeOfTracks.size(); i++){
-      BTaggingValidationPlots::fillHistoWithTruthCases(IP2D_gradeOfTracks.at(i), m_IP2D_gradeOfTracks_incl, m_IP2D_gradeOfTracks_b, m_IP2D_gradeOfTracks_c, m_IP2D_gradeOfTracks_l, m_IP2D_gradeOfTracks_muon, truth_label, has_muon, event);
-    }
 
     // d0, z0 and significances
     std::vector<float> tmpD0       = btag->auxdata<std::vector<float> >("IP3D_valD0wrtPVofTracks");
@@ -1251,10 +1227,6 @@ namespace JetTagDQA{
     for( unsigned int i=0; i<IP3D_weightBofTracks.size(); i++) m_IP3D_weightBofTracks->Fill(IP3D_weightBofTracks.at(i), event->beamSpotWeight());
     for( unsigned int i=0; i<IP3D_weightCofTracks.size(); i++) m_IP3D_weightCofTracks->Fill(IP3D_weightCofTracks.at(i), event->beamSpotWeight());
     for( unsigned int i=0; i<IP3D_weightUofTracks.size(); i++) m_IP3D_weightUofTracks->Fill(IP3D_weightUofTracks.at(i), event->beamSpotWeight());
-    // IP2D
-    for( unsigned int i=0; i<IP2D_weightBofTracks.size(); i++) m_IP2D_weightBofTracks->Fill(IP2D_weightBofTracks.at(i), event->beamSpotWeight());
-    for( unsigned int i=0; i<IP2D_weightCofTracks.size(); i++) m_IP2D_weightCofTracks->Fill(IP2D_weightCofTracks.at(i), event->beamSpotWeight());
-    for( unsigned int i=0; i<IP2D_weightUofTracks.size(); i++) m_IP2D_weightUofTracks->Fill(IP2D_weightUofTracks.at(i), event->beamSpotWeight());
 
 
     // number of IP2D & IP3D tracks
@@ -1265,7 +1237,6 @@ namespace JetTagDQA{
     try{ nIP3DTracks = btag->nIP3D_TrackParticles(); }
     catch(std::exception& exception){ nIP3DTracks = -1; }
 
-    BTaggingValidationPlots::fillHistoWithTruthCases(nIP2DTracks, m_IP2D_nTracks_incl, m_IP2D_nTracks_b, m_IP2D_nTracks_c, m_IP2D_nTracks_l, m_IP2D_nTracks_muon, truth_label, has_muon, event);
     BTaggingValidationPlots::fillHistoWithTruthCases(nIP3DTracks, m_IP3D_nTracks_incl, m_IP3D_nTracks_b, m_IP3D_nTracks_c, m_IP3D_nTracks_l, m_IP3D_nTracks_muon, truth_label, has_muon, event);
 
     // Get IP3D pb, pu, pc 
@@ -1308,9 +1279,6 @@ namespace JetTagDQA{
     } else {
 	RNNIP_pc = -1;
     }
-    m_RNNIP_pb->Fill(RNNIP_pb, event->beamSpotWeight());
-    m_RNNIP_pu->Fill(RNNIP_pu, event->beamSpotWeight());
-    m_RNNIP_pc->Fill(RNNIP_pc, event->beamSpotWeight());
 
     double weight_RNNIP = log( RNNIP_pb / ( RNNIP_pc * m_RNNIP_fc + RNNIP_pu * (1-m_RNNIP_fc) ) );
 
@@ -1427,9 +1395,6 @@ namespace JetTagDQA{
     } else {
 	DL1r_pc = -1;
     }
-    m_DL1r_pb->Fill(DL1r_pb, event->beamSpotWeight());
-    m_DL1r_pu->Fill(DL1r_pu, event->beamSpotWeight());
-    m_DL1r_pc->Fill(DL1r_pc, event->beamSpotWeight());
 
     // get the GN1 vars
     double GN1_pb, GN1_pu, GN1_pc;
@@ -1608,13 +1573,10 @@ namespace JetTagDQA{
   void BTaggingValidationPlots::setTaggerInfos(){
     // list of all taggers
     m_taggers.push_back("IP3D");
-    m_taggers.push_back("IP2D");
-    m_taggers.push_back("RNNIP");
     m_taggers.push_back("DIPS");
     m_taggers.push_back("SV1");
     m_taggers.push_back("DL1dv00");
     m_taggers.push_back("DL1dv01");
-    m_taggers.push_back("DL1r");
     m_taggers.push_back("GN1");
 
     // list of all truth labels

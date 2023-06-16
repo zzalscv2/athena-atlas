@@ -43,9 +43,9 @@ atlas_add_executable( MakeReferenceFile
 
    
 atlas_add_test( PixelMapping_test
-   SOURCES ChargeCalibration/common/PixelMapping.cxx test/PixelMapping_test.cxx
+   SOURCES test/PixelMapping_test.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} PathResolver
+   LINK_LIBRARIES ${Boost_LIBRARIES} PathResolver PixelCalibAlgsLib
    POST_EXEC_SCRIPT "nopost.sh"
 )
 

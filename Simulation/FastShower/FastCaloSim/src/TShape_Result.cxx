@@ -9,12 +9,14 @@
 #include "TSpline.h"
 #include "TH1F.h"
 #include "TBuffer.h"
-#include <cmath>
+
 
 #include "CxxUtils/checker_macros.h"
 #include "FastCaloSimAthenaPool/FastShowerInfo.h"
 #include <exception>
 #include <stdexcept> // out_of_range exception
+#include <cmath>
+#include <algorithm> // for std::clamp
 
 using namespace std;
 
@@ -288,17 +290,12 @@ Double_t TShape_Result::f_2DSpline(double dxfcx_mm,double dyfcy_mm) const
   double d2=dxfcx_mm2 + dyfcy_mm2;
   double d=TMath::Sqrt(d2);
   
-/*
-  double max_aspect=2;
-  double d=f_2DSpline_getd(dxfcx_mm,dyfcy_mm,40,max_aspect);
-*/  
+
   double exp=SplineEval( static_cast<const TSpline3*>(m_fitsplines_EnergyDistribution) , d , 0 , m_fitsplines_EnergyDistribution_maxx);
   if(exp<-20) exp=-20;
   if(exp>3) exp=3;
 
-//  double rs=reletascale()*dxfcx_mm/cutoff_eta();
 
-//  double val=TMath::Exp( exp + rs );
   double val=TMath::Exp( exp );
   
   return val;
@@ -316,7 +313,6 @@ Double_t TShape_Result::CellIntegralEtaPhi(const CaloDetDescrElement& cell,const
   double cx=cell.eta();
   double cy=cell.phi();
 
-//  int calosample=calosample();
 
   double dy_border_mod=cellbordersmearing();
   double dy_border=0;
@@ -329,8 +325,6 @@ Double_t TShape_Result::CellIntegralEtaPhi(const CaloDetDescrElement& cell,const
 
   double dy_slopedist=(cell.dphi()-dy_border)/2;
   if(dy_slopedist<0) dy_slopedist=0;
-  double slope_weight;
-//  double dxh = cell.deta()/2;
 
   double cell_width_factor=1+cell_width_eta()+fabs(direction_factor)*cell_width_eta1()+fabs(direction_factor)*fabs(direction_factor)*cell_width_eta2();
   if(cell_width_factor<0.02) cell_width_factor=0.02;
@@ -339,26 +333,11 @@ Double_t TShape_Result::CellIntegralEtaPhi(const CaloDetDescrElement& cell,const
   double dxh=(cell.deta()*cell_width_factor)/2;
   
   
-//   if(dxh*1000000 < 0. ){
-//     cout << "dxh  = " << dxh << endl;
-//     cout << "dxh*10^6  = " << dxh*1000000<< endl;
-//   }
-//   if(dxh !=0){
-//     dxh *= (1+reldeta_width()*direction_factor);
-//       if(dxh < 0.0){
-//         cout << "dxh_mod  = " << dxh << endl;
-//         cout << "dxh_mod*10^6  = " << dxh*1000000 << endl;
-//         cout << "direction_factor*100 = " << direction_factor*100 << endl;
-//         cout << "reldeta_width = " << reldeta_width() << endl;
-//       }
-//   }
+
   double dyh=(cell.dphi()+dy_border)/2;
   
-//   double fcx=eta_center(eta,distfactor,direction_factor*sign);
-//   double fcy=phi_center(phi);
   // Jakobi factor : dtheta/deta=-2*exp(-eta)/(1+exp(-2eta))
   double eta_jakobi=eta_jakobi_factor(fcx);
-//  double phi_dist2r=1.0/TMath::CosH(fcx);
   double phi_dist2r=1.0;
   double dist000=TMath::Sqrt(cell.r()*cell.r()+cell.z()*cell.z());
   double celldx=cell.deta()*eta_jakobi*dist000;
@@ -375,7 +354,6 @@ Double_t TShape_Result::CellIntegralEtaPhi(const CaloDetDescrElement& cell,const
   }
   
   const int nx=TMath::Max(TMath::Nint(celldx/m_integral_eta_scale),3);
-  //if(calosample() ==1 ) nx=TMath::Max(TMath::Nint(celldx/m_integral_eta_scale),10);
   const int ny=TMath::Max(TMath::Nint(celldy/m_integral_phi_scale),2);
   double norm=nx*ny;
   norm/=4*dxh*dyh;
@@ -384,17 +362,7 @@ Double_t TShape_Result::CellIntegralEtaPhi(const CaloDetDescrElement& cell,const
   double sx=sxh*2;
   double sy=syh*2;
 
-  /*
-  if(cell_width_factor>3 && TMath::Abs(cx-fcx)<cell.deta()/2 && TMath::Abs(cy-fcy)<cell.dphi()/2) {
-    cout << "cx = " << cx << " cy = " << cy << endl;
-    cout << "cdeta/2 = " << cell.deta()/2 << "cdphi/2 = " << cell.dphi()/2<< endl;
-    cout << "dxh_mod  = " << dxh << endl;
-    cout << "direction_factor*100 = " << direction_factor*100 << endl;
-    cout << "cell_width_eta = " << cell_width_eta() << endl;
-    cout << "cell_width_eta1 = " << cell_width_eta1() << endl;
-    cout << "cell_width_eta2 = " << cell_width_eta2() << endl;
-  }
-  */
+  
 
   if(std::isnan(fcx) || std::isnan(fcy)) {
     cout<<"=================================="<<endl;
@@ -441,11 +409,10 @@ Double_t TShape_Result::CellIntegralEtaPhi(const CaloDetDescrElement& cell,const
       val*=f_2DSpline(dxfcx_mm,dyfcy_mm);
       
       if(dy_border>0) {
-        slope_weight=1-(TMath::Abs(y-cy)-dy_slopedist)/dy_border;
-        if(slope_weight<0) slope_weight=0;
-        if(slope_weight>1) slope_weight=1;
+        double slope_weight=1-(TMath::Abs(y-cy)-dy_slopedist)/dy_border;
+        slope_weight = std::clamp(slope_weight, 0.,1.);
         val*=slope_weight;
-      } else slope_weight=1;
+      }
       
       if(HasShapeFactor()) {
         float deta_cellunits=dxfcx_mm/celldx;
@@ -457,7 +424,6 @@ Double_t TShape_Result::CellIntegralEtaPhi(const CaloDetDescrElement& cell,const
 
       integ+=val;
       
-//      if(CellIntegralEtaPhi_doprint) cout<<"    sp "<<ix<<","<<iy<<" dxfcx="<<dxfcx<<" dyfcy="<<dyfcy<<" val="<<val;
       
       if( Sqr(dxfcx_mm/m_cutoff_eta) + Sqr(dyfcy_mm/m_cutoff_phi) < 1) {
         ein_wide  +=val;
@@ -469,7 +435,6 @@ Double_t TShape_Result::CellIntegralEtaPhi(const CaloDetDescrElement& cell,const
 
   integ/=norm; 
   ein_wide/=norm;
-//  if(integ < 0.00001) cout <<" integ very small:  integ*10^8  = "<< integ*100000000 << endl;
   return integ;
 }
 

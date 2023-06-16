@@ -8,10 +8,14 @@ from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 @AccumulatorCache
 def tauCaloRoiUpdaterCfg(flags, inputRoIs, clusters):
     acc = ComponentAccumulator()
+    newflags = flags.Trigger.InDetTracking.tauCore
     alg                               = CompFactory.TrigTauCaloRoiUpdater("TauCaloRoiUpdater",
-                                        RoIInputKey     = inputRoIs,
-                                        RoIOutputKey    = 'UpdatedCaloRoI',
-                                        CaloClustersKey = clusters)
+                                        etaHalfWidth                  = newflags.etaHalfWidth,
+                                        phiHalfWidth                  = newflags.phiHalfWidth,
+                                        z0HalfWidth                   = newflags.zedHalfWidth,
+                                        RoIInputKey                   = inputRoIs,
+                                        RoIOutputKey                  = 'UpdatedCaloRoI',
+                                        CaloClustersKey               = clusters)
     acc.addEventAlgo(alg)
     return acc
 

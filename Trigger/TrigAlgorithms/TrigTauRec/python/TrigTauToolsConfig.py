@@ -22,7 +22,7 @@ def trigTauVertexFinderCfg(flags,name=''):
     acc.setPrivateTools(TauVertexFinder)
     return acc
 
-def trigTauTrackFinderCfg(flags,name='',TrackParticlesContainer=''):
+def trigTauTrackFinderCfg(flags,name=''):
     acc = ComponentAccumulator()
 
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
@@ -70,7 +70,7 @@ def trigTauTrackFinderCfg(flags,name='',TrackParticlesContainer=''):
                                     MaxJetDrWide                    = 0.4,
                                     TrackSelectorToolTau            = TrigTauInDetTrackSelectorTool,
                                     TrackToVertexTool               = TrigTauTrackToVertexTool,
-                                    Key_trackPartInputContainer     = TrackParticlesContainer,
+                                    Key_trackPartInputContainer     = "",
                                     maxDeltaZ0wrtLeadTrk            = 0.75*mm, #in mm
                                     removeTracksOutsideZ0wrtLeadTrk = True,
                                     ParticleCaloExtensionTool       = TrigTauParticleCaloExtensionTool,
