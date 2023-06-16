@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1Base/VP1Msg.h"
@@ -58,6 +58,47 @@ inline bool VP1SGAccessHelper::retrieve( const T* & t, const QString& key ) cons
 
 template <typename T>
 inline bool VP1SGAccessHelper::retrieve(const DataHandle<T>& begin, const DataHandle<T>& end, const bool&silent )
+{
+
+  if (VP1Msg::verbose())
+    messageVerbose("retrieve(DataHandle<"+QString(typeid(T).name())+">,DataHandle<"
+		   +QString(typeid(T).name())+">) called.");
+  if (!storeGate()) {
+    QString str("ERROR Does not have StoreGate pointer. Returning null pointer.");
+    silent ? messageVerbose(str) : message(str);
+    return false;
+  }
+
+  bool exception = true;
+  StatusCode sc;
+  try {
+    sc = storeGate()->retrieve(begin,end);
+    exception = false;
+  } catch (const std::runtime_error& e) {
+    exception = true;
+  }
+  if (exception) {
+    QString str("ERROR: Exception thrown during call to StoreGateSvc::retrieve(DataHandle<"
+		+QString(typeid(T).name())+">,DataHandle<"+QString(typeid(T).name())+">)"); 
+    silent ? messageVerbose(str) : message(str);
+    sc.isFailure();//To make sure it is checked.
+    return false;
+  }
+  if (sc.isFailure()) {
+    QString str( "ERROR: Failed StoreGateSvc::retrieve(DataHandle<"
+		 +QString(typeid(T).name())+">,DataHandle<"
+		 +QString(typeid(T).name())+">)");
+    silent ? messageVerbose(str) : message(str);
+    return false;
+  }
+
+  if (VP1Msg::verbose())
+    messageVerbose("Successfully retrieved datahandles to "+QString(typeid(T).name())+".");
+  return true;
+}
+
+template <typename T>
+inline bool VP1SGAccessHelper::retrieve(SG::ConstIterator<T>& begin, SG::ConstIterator<T>& end, bool silent )
 {
 
   if (VP1Msg::verbose())
