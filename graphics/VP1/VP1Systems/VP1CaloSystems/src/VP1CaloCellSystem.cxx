@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1CaloSystems/VP1CaloCellSystem.h"
@@ -580,7 +580,8 @@ void VP1CaloCellSystem::buildEventSceneGraph(StoreGateSvc* sg, SoSeparator *root
 
 	// ---------------- Retrieve calo cells from SG ---------------------
 	// Check for SG keys
-	std::vector<std::string> strCaloCellKeys = sg->keys<CaloCellContainer>();
+	std::vector<std::string> strCaloCellKeys;
+        sg->keys<CaloCellContainer>(strCaloCellKeys);
 	firstKey = strCaloCellKeys.begin();
 	lastKey = strCaloCellKeys.end();
 
@@ -633,7 +634,8 @@ void VP1CaloCellSystem::buildEventSceneGraph(StoreGateSvc* sg, SoSeparator *root
 	if(!m_clockwork->noLArDigitsEvent) {
 		// Get keys for LArDigitContainers in the Store Gate
 		// If we have more than one container then it means we have All and/or Thinned and/or IIC -> use All if available, otherwise use Thinned
-		std::vector<std::string> strLArDigitKeys = sg->keys<LArDigitContainer>();
+		std::vector<std::string> strLArDigitKeys;
+                sg->keys<LArDigitContainer>(strLArDigitKeys);
 		firstKey = strLArDigitKeys.begin();
 		lastKey = strLArDigitKeys.end();
 
@@ -680,7 +682,8 @@ void VP1CaloCellSystem::buildEventSceneGraph(StoreGateSvc* sg, SoSeparator *root
 	if(!m_clockwork->noTileDigitsEvent) {
 		// Get keys for TileDigitContainers in the Store Gate
 		// If we have more than one container then use the first one and issue a warning message
-		std::vector<std::string> strTileDigitKeys = sg->keys<TileDigitsContainer>();
+		std::vector<std::string> strTileDigitKeys;
+                sg->keys<TileDigitsContainer>(strTileDigitKeys);
 		firstKey = strTileDigitKeys.begin();
 		lastKey = strTileDigitKeys.end();
 
@@ -699,7 +702,8 @@ void VP1CaloCellSystem::buildEventSceneGraph(StoreGateSvc* sg, SoSeparator *root
 				m_clockwork->controller->EnableDigitsCheckbox(true);
 
 				// ------------ Tile Raw Channels (pulses) ------------------
-				std::vector<std::string> strTileRawchanKeys = sg->keys<TileRawChannelContainer>();
+				std::vector<std::string> strTileRawchanKeys;
+                                sg->keys<TileRawChannelContainer>(strTileRawchanKeys);
 				firstKey = strTileRawchanKeys.begin();
 				lastKey = strTileRawchanKeys.end();
 
