@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // *****************************************************************************
@@ -25,8 +25,6 @@
 
 #include <vector>
 #include <string>
-#include <map>
-#include <math.h>
 
 class TileMuFeature 
 { 
@@ -110,6 +108,5 @@ void diff( const TileMuFeature& a, const TileMuFeature& b, std::map< std::string
 CLASS_DEF(TileMuFeature,             1503,     0)
 CLASS_DEF(DataVector<TileMuFeature>, 49567812, 0)
 
-#include "TrigMuonEvent/TileMuFeatureContainer.h"
 
 #endif    

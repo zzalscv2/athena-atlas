@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMUONEVENT_MUON_FEATURE_H
@@ -127,6 +127,5 @@ void diff( const MuonFeature& left, const MuonFeature& right,
 CLASS_DEF(MuonFeature, 1500, 1)
 CLASS_DEF(DataVector<MuonFeature>, 227312873, 1)
 
-#include "TrigMuonEvent/MuonFeatureContainer.h"
 
 #endif // TRIGMUONEVENT_MUON_FEATURE_H

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMUONEVENT_MUON_FEATURE_DETAILS_H
@@ -8,7 +8,7 @@
 
 #include <vector>
 #include <string>
-#include <iostream>
+#include <iosfwd>
 #include <stdint.h>
 
 // Gaudi/Athena include(s):
@@ -694,6 +694,5 @@ std::ostream& operator<< (std::ostream& s, const MuonFeatureDetails& d );
 CLASS_DEF(MuonFeatureDetails, 262323491, 1)
 CLASS_DEF(DataVector<MuonFeatureDetails>, 3346390, 1)
 
-#include "TrigMuonEvent/MuonFeatureDetailsContainer.h"
 
 #endif
