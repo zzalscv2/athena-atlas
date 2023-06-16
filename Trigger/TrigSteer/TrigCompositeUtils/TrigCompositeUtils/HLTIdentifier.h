@@ -29,7 +29,7 @@ public:
   /**
    * @brief constructs identifier from human redable name
    **/  
-  Identifier( const std::string& stringID );
+  explicit Identifier( const std::string& stringID );
 
   /**
    * @brief Construct wiht numeric ID

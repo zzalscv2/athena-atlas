@@ -165,44 +165,57 @@ namespace TrigCompositeUtils {
 
 
   HLT::Identifier createLegName(const HLT::Identifier& chainIdentifier, size_t counter) {
-    if (!isChainId(chainIdentifier)) {
+    const std::string& name = chainIdentifier.name();
+    if (!isChainId(name)) {
       throw std::runtime_error("TrigCompositeUtils::createLegName chainIdentifier '"+chainIdentifier.name()+"' does not start 'HLT_'");
     }
     if (counter > 999) {
       throw std::runtime_error("TrigCompositeUtils::createLegName Leg counters above 999 are invalid.");
     }
     std::stringstream legStringStream;
-    legStringStream << "leg" << std::setfill('0') << std::setw(3) << counter << "_" << chainIdentifier.name();
+    legStringStream << "leg" << std::setfill('0') << std::setw(3) << counter << "_" << name;
     return HLT::Identifier( legStringStream.str() );
   }
 
-  
+
   HLT::Identifier getIDFromLeg(const HLT::Identifier& legIdentifier) {
-    if (isChainId(legIdentifier)){
+    const std::string& name = legIdentifier.name();
+    if (isChainId(name)){
       return legIdentifier;
-    } else if (isLegId(legIdentifier)){
-      return HLT::Identifier(legIdentifier.name().substr(7));
+    } else if (isLegId(name)){
+      return HLT::Identifier(name.substr(7));
     } else{
-      throw std::runtime_error("TrigCompositeUtils::getIDFromLeg legIdentifier '"+legIdentifier.name()+"' does not start with 'HLT_' or 'leg' ");
+      throw std::runtime_error("TrigCompositeUtils::getIDFromLeg legIdentifier '"+name+"' does not start with 'HLT_' or 'leg' ");
     }
   }
 
   int32_t getIndexFromLeg(const HLT::Identifier& legIdentifier) {
-    if (isChainId(legIdentifier)){
-      return 0;
-    } else if (!isLegId(legIdentifier)) {
-      return -1;
-    }
-    return std::stoi( legIdentifier.name().substr(3,3) ); 
+    return getIndexFromLeg(legIdentifier.name());
   }
 
-  
+  int32_t getIndexFromLeg(const std::string& name) {
+    if (isChainId(name)){
+      return 0;
+    } else if (!isLegId(name)) {
+      return -1;
+    }
+    return std::stoi( name.substr(3,3) ); 
+  }
+
   bool isLegId(const HLT::Identifier& legIdentifier) {
-    return (legIdentifier.name().substr(0,3) == "leg");
+    return isLegId(legIdentifier.name());
+  }
+  
+  bool isLegId(const std::string& name) {
+    return (name.rfind("leg", 0) != std::string::npos);
   }
 
   bool isChainId(const HLT::Identifier& chainIdentifier) {
-    return (chainIdentifier.name().substr(0,4) == "HLT_");
+    return isChainId(chainIdentifier.name());
+  }
+
+  bool isChainId(const std::string& name) {
+    return (name.rfind("HLT_", 0) != std::string::npos);
   }
   
   
@@ -728,7 +741,7 @@ namespace TrigCompositeUtils {
         // Skip any that will not provide IParticle features
         if (legMultiplicities[legIdx] == 0)
           continue;
-        HLT::Identifier legID = createLegName(chainName, legIdx);
+        HLT::Identifier legID = createLegName(HLT::Identifier(chainName), legIdx);
         std::vector<LinkInfo<xAOD::IParticleContainer>> legFeatures;
         for (const LinkInfo<xAOD::IParticleContainer>& info : features)
           if (passed(legID.numeric(), info.decisions))
