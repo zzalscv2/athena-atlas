@@ -381,29 +381,9 @@ StatusCode PileUpMTAlg::execute() {
     }
 
     // Setup tools
-    // Account for existing subevents
-    std::map<int, int> existing_subevt_bc_counts{};
-    for (const auto& se : overlaidEvt->subEvents()) {
-        existing_subevt_bc_counts[se.time() / m_BCSpacing]++;
-    }
     for (auto&& tool : m_puTools) {
-        // First figure out how many events we need to run on
-        unsigned int n_evts = 0;
-        for (int bc = m_earliestDeltaBC; bc <= m_latestDeltaBC; ++bc) {
-            if (tool->toProcess(bc * m_BCSpacing)) {
-                std::size_t bc_idx = bc - m_earliestDeltaBC;
-                n_evts += existing_subevt_bc_counts[bc];
-                n_evts += n_low_pt[bc_idx];
-                n_evts += n_high_pt[bc_idx];
-                n_evts += m_numCavern;
-                n_evts += n_beam_halo[bc_idx];
-                n_evts += n_beam_gas[bc_idx];
-            }
-        }
-        ATH_MSG_DEBUG(tool.name() << " will handle " << n_evts << " events");
-        // Setup the tool
+        // Reset filter -- Don't know if this is necessary
         tool->resetFilter();
-        ATH_CHECK(tool->prepareEvent(ctx, n_evts));
     }
 
     // Now add the events
@@ -462,55 +442,32 @@ StatusCode PileUpMTAlg::execute() {
         }
     }
 
-    // Sort so we can go 1 BC at a time
-    ranges::stable_sort(const_cast<std::vector<SubEvent>&>(overlaidEvt->subEvents()),
-                        ranges::less{}, &SubEvent::time);
-    auto subevt_bc_intervals = rv::group_by(overlaidEvt->subEvents(),
-                                            [](const SubEvent& lhs, const SubEvent& rhs) {
-                                                return lhs.time() == rhs.time();
-                                            })
-                               | ranges::to<std::vector>;
     for (auto&& tool : m_puTools) {
-        for (const auto& bc_interval : subevt_bc_intervals) {
-            const SubEventIterator start_evt = bc_interval.begin();
-            const SubEventIterator end_evt = bc_interval.end();
-            if (!tool->toProcess(start_evt->time())) {
-                continue;
-            }
-            try {
-                ATH_CHECK(tool->processBunchXing(start_evt->time(), start_evt, end_evt));
-            }
-            catch (const std::exception& e) {
-                ATH_MSG_ERROR("Caught exception processing subevent: " << e.what() << ", TOOL: "
-                                                                       << tool.name() << ", BC: " << start_evt->time());
-                const auto evt_ids =
-                    ranges::make_subrange(start_evt, end_evt) |
-                    rv::transform([](const SubEvent& sev) {
-                      return fmt::format("({}, {})", sev.ptr()->runNumber(),
-                                         sev.ptr()->eventNumber());
-                    }) |
-                    ranges::to<std::vector>;
-                const std::string evts = fmt::format("[{}]", fmt::join(evt_ids, ", "));
-                ATH_MSG_ERROR(
-                    "Exception occured in one of these events: " << evts);
-                return StatusCode::FAILURE;
-            }
-        }
         try {
-            // Merge event
-            ATH_CHECK(tool->mergeEvent(ctx));
-        }
-        catch (const std::exception& e) {
-            ATH_MSG_ERROR("Caught exception merging event: " << e.what()
-                                                             << ", TOOL: " << tool.name());
+            ATH_CHECK(tool->processAllSubEvents(ctx));
+        } catch (const std::exception& e) {
+            ATH_MSG_ERROR("Caught exception running " << tool.name() << ": "
+                                                      << e.what());
+            const auto evt_ids =
+                overlaidEvt->subEvents() |
+                rv::transform([](const SubEvent& sev) {
+                  return fmt::format("({}, {})", sev.ptr()->runNumber(),
+                                     sev.ptr()->eventNumber());
+                }) |
+                ranges::to<std::vector>;
+            const std::string evts =
+                fmt::format("[{}]", fmt::join(evt_ids, ", "));
+            ATH_MSG_ERROR("Exception occured in one of these events: " << evts);
+            return StatusCode::FAILURE;
         }
         // Propagate filter result
         if (!tool->filterPassed()) {
             setFilterPassed(false);
         }
     }
-    ATH_MSG_DEBUG(fmt::format("***** Took {:%OMm %OSs} to process all subevents",
-                              std::chrono::high_resolution_clock::now() - now));
+    ATH_MSG_DEBUG(
+        fmt::format("***** Took {:%OMm %OSs} to process all subevents",
+                    std::chrono::high_resolution_clock::now() - now));
     //
     // Save hash (direct copy from PileUpEventLoopMgr)
     PileUpHashHelper pileUpHashHelper;
