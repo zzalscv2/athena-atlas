@@ -21,7 +21,6 @@
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "CLHEP/Vector/ThreeVector.h"
-#include "StoreGate/DataHandle.h"
 #include "GeneratorObjects/McEventCollection.h"
 #include "GaudiKernel/IPartPropSvc.h"
 #include "VP1Utils/VP1ParticleData.h"
@@ -220,7 +219,7 @@ void VP1MCSystem::create( StoreGateSvc* /*detstore*/ )
 void VP1MCSystem::refresh( StoreGateSvc* )
 {
   //erase();
-  const DataHandle<McEventCollection> iter,endColl;
+  SG::ConstIterator<McEventCollection> iter,endColl;
   if (VP1SGAccessHelper(this).retrieve(iter,endColl)) {
     for (;iter!=endColl;++iter) {
       DataVector<HepMC::GenEvent>::const_iterator e;
