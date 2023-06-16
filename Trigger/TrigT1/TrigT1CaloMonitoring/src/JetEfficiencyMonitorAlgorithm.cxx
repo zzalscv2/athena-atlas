@@ -74,10 +74,6 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
   const std::string& bootstrap_trigger = m_bootstrap_reference_trigger.value();
   const std::vector<std::string>& muon_triggers = m_muon_reference_triggers.value();
    const std::vector<std::string>& HLTrandom_triggers = m_HLTrandom_reference_triggers.value();
-  // std::string  bootstrap_trigger = m_bootstrap_reference_trigger;
-  // std::string  HLTbootstrap_trigger = m_HLTbootstrap_reference_trigger;
-  // std::vector<std::string> muon_triggers = m_muon_reference_triggers;
-  // std::vector<std::string> HLTrandom_triggers = m_HLTrandom_reference_triggers;
   std::vector<std::string> gFex_types {"leadingGfex_SmallRadiusTOB", "leadingGfex_LargeRadiusTOB"};
   
   
