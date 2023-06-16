@@ -110,10 +110,15 @@ namespace top {
     const xAOD::TruthParticle* getTruthMuonAssociatedToRecoMuon(const xAOD::Muon* muon)
     {
       if(!muon) return 0;
-      const xAOD::TrackParticle* track = muon->primaryTrackParticle();
-      if(!track) return 0;
       
-      const xAOD::TruthParticle* truthmu= xAOD::TruthHelpers::getTruthParticle(*track);      
+      const xAOD::TruthParticle* truthmu=xAOD::TruthHelpers::getTruthParticle(*muon);
+      if(!truthmu)
+      {
+        const xAOD::TrackParticle* track = muon->trackParticle( xAOD::Muon::InnerDetectorTrackParticle );
+        if(!track) track=muon->primaryTrackParticle();
+        if(track) truthmu= xAOD::TruthHelpers::getTruthParticle(*track);
+      }
+
       if(!truthmu) return 0;
       if(!truthmu->isMuon()) return 0; //note that the truth particle associated with a muon can be e.g. a pion/kaon in some cases (since pion/kaon decays are not done at generator level, but at simulation level), we ignore these cases
       
