@@ -244,22 +244,22 @@ bool PRDCollHandleBase::Imp::actualLoad()
   /////////////////////////////////////////////////////////////////////////
   // In case the container was created incorrectly we must fallback to a different method of getting the prds:
   bool fallback(false);
-  const DataHandle<typename T::base_value_type> firstElementD, lastElementD;
+  SG::ConstIterator<typename T::base_value_type> firstElementD, lastElementD;
   if ( container->size()!=0 && container->begin()==lastElement ) {
-    //This is either an empty container, or it is a case of an incorrectly created container which we must get by datahandles.
-    theclass->messageDebug("Retrieved empty container. This might be misleading. Now going to attempt to load prds via datahandles instead.");
+    //This is either an empty container, or it is a case of an incorrectly created container which we must get by SG::ConstIterator's.
+    theclass->messageDebug("Retrieved empty container. This might be misleading. Now going to attempt to load prds via iterators instead.");
     if (VP1SGContentsHelper(theclass->systemBase()).getKeys<T>().count()!=1) {
       theclass->messageDebug("But seems that there is not exactly one collection of type "+QString(typeid(T).name())
         +", so we won't attempt that anyway!! Thus we assume there there are simply no prd's.");
     } else {
       if(sg_access.retrieve(firstElementD, lastElementD,true)) {
         if (firstElementD==lastElementD) {
-          theclass->messageDebug("No prd's found when accessed by datahandles either. It seems that there really are just no prds in this collection.");
+          theclass->messageDebug("No prd's found when accessed by iterators either. It seems that there really are just no prds in this collection.");
         } else {
           fallback = true;
         }
       } else {
-        theclass->messageDebug("Failed retrieval by datahandles. We take that as a sign that there really are just no prds in this collection ");
+        theclass->messageDebug("Failed retrieval by iterators. We take that as a sign that there really are just no prds in this collection ");
       }
     }
   }
@@ -306,8 +306,8 @@ bool PRDCollHandleBase::Imp::actualLoad()
 
   } else {
 
-    for ( const DataHandle<typename T::base_value_type>& elementD(firstElementD); elementD!=lastElementD; ++elementD ) {
-      prd = (*elementD).begin(), prdLast = (*elementD).end();
+    for (; firstElementD!=lastElementD; ++firstElementD ) {
+      prd = firstElementD->begin(), prdLast = firstElementD->end();
       for ( ; prd!=prdLast ; ++prd) {
         ++iprds;
         if (!*prd) {
