@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -123,7 +123,7 @@ TileHWIDDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
     }
 
     // Pass a pointer to the container to the Persistency service by reference.
-    pObj = StoreGateSvc::asStorable(tilehw_id);
+    pObj = SG::asStorable(tilehw_id);
 
     return StatusCode::SUCCESS; 
 
