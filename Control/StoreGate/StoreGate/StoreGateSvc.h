@@ -60,11 +60,6 @@
 
 #include "GaudiKernel/IIncidentListener.h"
 
-#ifdef SG_DEPRECATION_WARNINGS
-# define SG_DEPRECATED __attribute__((deprecated))
-#else
-# define SG_DEPRECATED
-#endif
 
 //forward declarations
 namespace SG {
@@ -1018,58 +1013,6 @@ private:
                          const std::string& /*key*/,
                          const SG::NoAuxStore*) const;
   
-
-public:
-  ///////////////////////////////////////////////////////////////////////
-  /// \name Obsolete and Deprecated methods 
-  //@{
-  /// DEPRECATED: Retrieve the default object into a const DataHandle
-  template <typename T> 
-  StatusCode SG_DEPRECATED retrieve ATLAS_NOT_THREAD_SAFE (const DataHandle<T>& handle) const;
-
-  /// DEPRECATED: Retrieve the default object into a DataHandle
-  template <typename T> 
-  StatusCode SG_DEPRECATED retrieve ATLAS_NOT_THREAD_SAFE (DataHandle<T>& handle) const;
-
-  /// DEPRECATED: Retrieve an object with "key", into a const DataHandle
-  template <typename T, typename TKEY> 
-  StatusCode SG_DEPRECATED retrieve ATLAS_NOT_THREAD_SAFE (const DataHandle<T>& handle, const TKEY& key) const;
-  /// DEPRECATED: Retrieve an object with "key", into a DataHandle
-  template <typename T, typename TKEY> 
-  StatusCode SG_DEPRECATED retrieve ATLAS_NOT_THREAD_SAFE (DataHandle<T>& handle, const TKEY& key) const;
-
-  /// DEPRECATED Retrieve all objects of type T: use iterators version instead
-  template <typename T> 
-  StatusCode SG_DEPRECATED retrieve ATLAS_NOT_THREAD_SAFE (const DataHandle<T>& begin, 
-                                                           const DataHandle<T>& end) const;
-  /// DEPRECATED, use version taking ref to vector
-  template <typename T>
-  std::vector<std::string> //FIXME inefficient. Should take ref to vector
-  SG_DEPRECATED keys(bool allKeys = false) const;
- 
-  /// DEPRECATED, use version taking ref to vector
-  std::vector<std::string> //FIXME inefficient. Should take ref to vector 
-  SG_DEPRECATED keys(const CLID& id, bool allKeys = false) const;
-
-  /// DEPRECATED:  use recordAddress instead
-  StatusCode SG_DEPRECATED createProxy(IOpaqueAddress* pAddress, bool clearAddressFlag=true) {
-    return recordAddress(pAddress, clearAddressFlag);
-  }  
-
-  /// DEPRECATED put a dobj pointer in a bucket as appropriate
-  /// see AthenaKernel/StorableConversion.h for replacement
-  template <typename T>
-  static 
-  DataObject* SG_DEPRECATED asStorable(T* pDObj);
-
-  /// DEPRECATED gets a dobj pointer from a bucket as appropriate
-  /// see AthenaKernel/StorableConversion.h for replacement
-  template <typename T>
-  static 
-  bool SG_DEPRECATED fromStorable(DataObject* pObject, T*& pData);
-
-  //@}
-
 
 private:
   StoreGateSvc (const StoreGateSvc&);
