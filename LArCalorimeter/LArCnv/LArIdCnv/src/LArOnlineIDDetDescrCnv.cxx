@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -115,7 +115,7 @@ LArOnlineIDDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
     }
 
     // Pass a pointer to the container to the Persistency service by reference.
-    pObj = StoreGateSvc::asStorable(online_id);
+    pObj = SG::asStorable(online_id);
 
     return StatusCode::SUCCESS; 
 
