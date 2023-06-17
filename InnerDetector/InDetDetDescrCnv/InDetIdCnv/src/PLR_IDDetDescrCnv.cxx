@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -165,7 +165,7 @@ PLR_IDDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
     }
 
     // Pass a pointer to the container to the Persistency service by reference.
-    pObj = StoreGateSvc::asStorable(m_plrId);
+    pObj = SG::asStorable(m_plrId);
 
     return StatusCode::SUCCESS;
 }
