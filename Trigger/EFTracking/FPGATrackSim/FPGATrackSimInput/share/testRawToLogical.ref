@@ -1,0 +1,502 @@
+Tue Jun 13 16:43:28 CEST 2023
+Preloading tcmalloc_minimal.so
+Py:Athena            INFO using release [WorkDir-24.0.6] [x86_64-centos7-gcc11-opt] [Kill-HTT/45db40f] -- built on [2023-06-12T2128]
+Py:Athena            INFO including file "AthenaCommon/Preparation.py"
+Py:Athena            INFO including file "AthenaCommon/Atlas.UnixStandardJob.py"
+Py:Athena            INFO executing ROOT6Setup
+Py:Athena            INFO including file "AthenaCommon/Execution.py"
+Py:Athena            INFO including file "FPGATrackSimInput/FPGATrackSimRawToLogicalHitsWrapperAlg_jobOptions.py"
+Py:FPGATrackSimRawToLogicalHitsWrapperAlg    INFO OutFPGATrackSim file ['fpgatracksim_loghits_wrap.OUT.root'] 
+Py:Athena            INFO including file "AthenaCommon/runbatch.py"
+Py:ConfigurableDb    INFO Read module info for 5239 configurables from 13 genConfDb files
+Py:ConfigurableDb WARNING Found 1 duplicates among the 13 genConfDb files :
+Py:ConfigurableDb WARNING --------------------------------------------------
+Py:ConfigurableDb WARNING   -<component name>: <module> - [ <duplicates> ]
+Py:ConfigurableDb WARNING --------------------------------------------------
+Py:ConfigurableDb WARNING   -FPGATrackSimRawHitsWrapperAlg: FPGATrackSimSGInput.FPGATrackSimSGInputConf - ['FPGATrackSimInput.FPGATrackSimInputConf', 'FPGATrackSimInput.FPGATrackSimInputConf']
+ApplicationMgr    SUCCESS 
+====================================================================================================================================
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v36r13)
+                                          running on lxplus725.cern.ch on Tue Jun 13 16:43:42 2023
+====================================================================================================================================
+ApplicationMgr       INFO Application Manager Configured successfully
+AthDictLoaderSvc     INFO in initialize...
+AthDictLoaderSvc     INFO acquired Dso-registry
+ClassIDSvc           INFO getRegistryEntries: read 3092 CLIDRegistry entries for module ALL
+CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 8(Floating point exception) 14(Alarm clock) 
+AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
+FPGATrackSimLog...  DEBUG Property update for OutputLevel : new value = 2
+FPGATrackSimLog...  DEBUG Property update for OutputLevel : new value = 2
+FPGATrackSimLog...  DEBUG Opening file  /eos/atlas/atlascerngroupdisk/det-htt/HTTsim/ATLAS-P2-RUN4-01-01-00/single_mu.root in READ mode
+FPGATrackSimLog...   INFO Input file: /eos/atlas/atlascerngroupdisk/det-htt/HTTsim/ATLAS-P2-RUN4-01-01-00/single_mu.root has 100 event entries
+FPGATrackSimLog...   INFO Getting branch and set EventHeader
+FPGATrackSimLog...  DEBUG Initialized in READ MODE
+FPGATrackSimLog...  DEBUG Property update for OutputLevel : new value = 2
+FPGATrackSimLog...  DEBUG Opening file fpgatracksim_loghits_wrap.OUT.root in RECREATE mode.
+FPGATrackSimLog...   INFO Creating empty branches in output file
+FPGATrackSimLog...  DEBUG Property update for OutputLevel : new value = 2
+FPGATrackSimEve...   INFO Creating the slices object
+FPGATrackSimEve...   INFO FPGATrackSimEventSelectionSvc::initialize(): regionID =  'regionID':0, min = {phi:0.3 q/pt:-0.001 d0:-2 z0:-150 eta:0.1}, max = {phi:0.5 q/pt:0.001 d0:2 z0:150 eta:0.3}, sampleType = singleMuons, withPU = 0
+Package.UserCode     INFO Reading /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/map_file/ATLAS-P2-ITK-22-02-00.pmap
+Package.UserCode     INFO Allocating map for geometry ATLAS-P2-ITK-22-02-00 diskIndex size=5
+Package.UserCode     INFO Using 8 logical layers and 9 coordinates
+Package.UserCode     INFO Reading /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/map_file/ATLAS-P2-ITK-22-02-00.pmap
+Package.UserCode     INFO Allocating map for geometry ATLAS-P2-ITK-22-02-00 diskIndex size=5
+Package.UserCode     INFO Using 13 logical layers and 18 coordinates
+Package.UserCode     INFO Reading /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/map_file/rmaps/eta0103phi0305_ATLAS-P2-ITK-22-02-00.rmap
+Package.UserCode     INFO Reading /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/map_file/rmaps/eta0103phi0305_ATLAS-P2-ITK-22-02-00.rmap
+Package.UserCode     INFO Reading /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/zslicemaps/ATLAS-P2-ITK-22-02-00/eta0103phi0305_KeyLayer-strip_barrel_2_extra03_trim_0_001_NSlices-6.rmap
+Package.UserCode     INFO Reading module LUT/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/map_file/ITk.global-to-local.moduleidmap
+Package.UserCode     INFO Reading module LUT/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/map_file/ITk.global-to-local.moduleidmap
+Package.UserCode     INFO Opened file: /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/map_file/NN_DNN_Region_0p1_0p3_HTTFake_HTTTrueMu_SingleP_8L_Nom_v6.json
+FPGATrackSimLog...   INFO SaveOptional= 'SaveOptional':2
+FPGATrackSimLog...  DEBUG Configured to process 1 towers
+FPGATrackSimLog...  DEBUG List of Towers: , 0
+FPGATrackSimLog...  DEBUG Property update for OutputLevel : new value = 2
+FPGATrackSimLog...   INFO Clustering is enabled
+FPGATrackSimLog...  DEBUG input handles: 0
+FPGATrackSimLog...  DEBUG output handles: 0
+FPGATrackSimLog...  DEBUG Adding private ToolHandle tool FPGATrackSimLogicalHitsWrapperAlg.FPGATrackSimInputHeaderTool (FPGATrackSimInputHeaderTool)
+FPGATrackSimLog...  DEBUG Adding private ToolHandle tool FPGATrackSimLogicalHitsWrapperAlg.FPGATrackSimWriteOutput (FPGATrackSimOutputHeaderTool)
+FPGATrackSimLog...  DEBUG Adding private ToolHandle tool FPGATrackSimLogicalHitsWrapperAlg.FPGATrackSimClusteringTool (FPGATrackSimClusteringTool)
+FPGATrackSimLog...  DEBUG Adding private ToolHandle tool FPGATrackSimLogicalHitsWrapperAlg.FPGATrackSimRawToLogicalHitsTool (FPGATrackSimRawToLogicalHitsTool)
+ApplicationMgr       INFO Application Manager Initialized successfully
+ApplicationMgr       INFO Application Manager Started successfully
+AthenaEventLoopMgr   INFO   ===>>>  start of run 1    <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
+FPGATrackSimLog...  DEBUG Asked Event 0 in this file; current total is 0
+FPGATrackSimLog...   INFO 0
+FPGATrackSimLog...  DEBUG Reading event  Event 38001 	Run 242000
+FPGATrackSimLog...  DEBUG Event: Event 38001 	Run 242000	Optional: nOfflineClusters: 14, nOfflineTracks: 1, nTruthTracks: 1
+	Nhits=21
+ 0  type=unmapped tech=pixel zone=posEndcap etamod=4 phimod=12 physLayer=0 eta=13 phi=292
+ 1  type=unmapped tech=pixel zone=posEndcap etamod=4 phimod=12 physLayer=0 eta=12 phi=292
+ 2  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=12 physLayer=0 eta=90 phi=302
+ 3  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=12 physLayer=0 eta=90 phi=303
+ 4  type=unmapped tech=pixel zone=posEndcap etamod=6 phimod=12 physLayer=0 eta=182 phi=315
+ 5  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=12 physLayer=0 eta=290 phi=330
+ 6  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=12 physLayer=0 eta=289 phi=330
+ 7  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=13 physLayer=0 eta=70 phi=40
+ 8  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=13 physLayer=0 eta=70 phi=41
+ 9  type=unmapped tech=pixel zone=posEndcap etamod=6 phimod=13 physLayer=0 eta=161 phi=21
+ 10  type=unmapped tech=pixel zone=posEndcap etamod=12 phimod=14 physLayer=2 eta=89 phi=290
+ 11  type=unmapped tech=pixel zone=posEndcap etamod=12 phimod=14 physLayer=2 eta=89 phi=291
+ 12  type=unmapped tech=pixel zone=posEndcap etamod=13 phimod=14 physLayer=2 eta=281 phi=280
+ 13  type=unmapped tech=pixel zone=posEndcap etamod=14 phimod=14 physLayer=2 eta=497 phi=267
+ 14  type=unmapped tech=pixel zone=posEndcap etamod=15 phimod=14 physLayer=2 eta=745 phi=253
+ 15  type=unmapped tech=pixel zone=posEndcap etamod=15 phimod=14 physLayer=2 eta=744 phi=253
+ 16  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=6 physLayer=4 eta=256 phi=653
+ 17  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=6 physLayer=4 eta=255 phi=653
+ 18  type=unmapped tech=pixel zone=posEndcap etamod=6 phimod=6 physLayer=4 eta=578 phi=679
+ 19  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=7 physLayer=4 eta=229 phi=2
+ 20  type=unmapped tech=pixel zone=posEndcap etamod=6 phimod=9 physLayer=6 eta=386 phi=385
+
+FPGATrackSimLog...  DEBUG Mapping 21 hits using stage 1
+FPGATrackSimLog...  DEBUG Getting Event Event 38001 	Run 242000
+FPGATrackSimLog...  DEBUG Created 1 towers. Now map Hits
+Package.UserCode    ERROR /afs/cern.ch/work/j/jahreda/athena_renamehtt/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 6 element in m_diskIndex which is of size 5
+FPGATrackSimLog...  DEBUG Event: Event 38001 	Run 242000	Optional: nOfflineClusters: 14, nOfflineTracks: 1, nTruthTracks: 1
+	NTowers: 1
+ 0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
+
+
+FPGATrackSimLog...  DEBUG Produced 0 clusters
+FPGATrackSimLog...   INFO Ending with 0 clusters
+FPGATrackSimLog...  DEBUG Writing data in TTree
+FPGATrackSimLog...  DEBUG Wrote Event 0 in first stage header event Event 38001 	Run 242000
+FPGATrackSimLog...  DEBUG n.roads_1st = 0
+FPGATrackSimLog...  DEBUG n.roads_2nd = 0
+FPGATrackSimLog...  DEBUG n.tracks_1st = 0
+FPGATrackSimLog...  DEBUG n.tracks_2nd = 0
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #1 1 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #1 1 events processed so far  <<<===
+FPGATrackSimLog...  DEBUG Asked Event 1 in this file; current total is 1
+FPGATrackSimLog...   INFO 1
+FPGATrackSimLog...  DEBUG Reading event  Event 38005 	Run 242000
+FPGATrackSimLog...  DEBUG Event: Event 38005 	Run 242000	Optional: nOfflineClusters: 12, nOfflineTracks: 1, nTruthTracks: 1
+	Nhits=14
+ 0  type=unmapped tech=pixel zone=negEndcap etamod=12 phimod=7 physLayer=0 eta=26 phi=53
+ 1  type=unmapped tech=pixel zone=negEndcap etamod=13 phimod=7 physLayer=0 eta=101 phi=37
+ 2  type=unmapped tech=pixel zone=negEndcap etamod=13 phimod=7 physLayer=0 eta=100 phi=37
+ 3  type=unmapped tech=pixel zone=negEndcap etamod=14 phimod=7 physLayer=0 eta=187 phi=18
+ 4  type=unmapped tech=pixel zone=negEndcap etamod=14 phimod=7 physLayer=0 eta=187 phi=19
+ 5  type=unmapped tech=pixel zone=negEndcap etamod=12 phimod=8 physLayer=0 eta=38 phi=298
+ 6  type=unmapped tech=pixel zone=negEndcap etamod=13 phimod=8 physLayer=0 eta=114 phi=309
+ 7  type=unmapped tech=pixel zone=negEndcap etamod=14 phimod=8 physLayer=0 eta=201 phi=321
+ 8  type=unmapped tech=pixel zone=negEndcap etamod=4 phimod=13 physLayer=1 eta=83 phi=199
+ 9  type=unmapped tech=pixel zone=negEndcap etamod=5 phimod=13 physLayer=1 eta=220 phi=199
+ 10  type=unmapped tech=pixel zone=negEndcap etamod=21 phimod=8 physLayer=2 eta=175 phi=104
+ 11  type=unmapped tech=pixel zone=negEndcap etamod=22 phimod=8 physLayer=2 eta=373 phi=73
+ 12  type=unmapped tech=pixel zone=negEndcap etamod=21 phimod=9 physLayer=2 eta=171 phi=662
+ 13  type=unmapped tech=pixel zone=negEndcap etamod=22 phimod=9 physLayer=2 eta=369 phi=693
+
+FPGATrackSimLog...  DEBUG Mapping 14 hits using stage 1
+FPGATrackSimLog...  DEBUG Getting Event Event 38005 	Run 242000
+FPGATrackSimLog...  DEBUG Created 1 towers. Now map Hits
+FPGATrackSimLog...  DEBUG Event: Event 38005 	Run 242000	Optional: nOfflineClusters: 12, nOfflineTracks: 1, nTruthTracks: 1
+	NTowers: 1
+ 0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
+
+
+FPGATrackSimLog...  DEBUG Produced 0 clusters
+FPGATrackSimLog...   INFO Ending with 0 clusters
+FPGATrackSimLog...  DEBUG Writing data in TTree
+FPGATrackSimLog...  DEBUG Wrote Event 1 in first stage header event Event 38005 	Run 242000
+FPGATrackSimLog...  DEBUG n.roads_1st = 0
+FPGATrackSimLog...  DEBUG n.roads_2nd = 0
+FPGATrackSimLog...  DEBUG n.tracks_1st = 0
+FPGATrackSimLog...  DEBUG n.tracks_2nd = 0
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #1 2 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #3, run #1 2 events processed so far  <<<===
+FPGATrackSimLog...  DEBUG Asked Event 2 in this file; current total is 2
+FPGATrackSimLog...   INFO 2
+FPGATrackSimLog...  DEBUG Reading event  Event 38014 	Run 242000
+FPGATrackSimLog...  DEBUG Event: Event 38014 	Run 242000	Optional: nOfflineClusters: 14, nOfflineTracks: 1, nTruthTracks: 1
+	Nhits=32
+ 0  type=unmapped tech=pixel zone=barrel etamod=4 phimod=7 physLayer=0 eta=57 phi=52
+ 1  type=unmapped tech=pixel zone=barrel etamod=4 phimod=7 physLayer=0 eta=58 phi=52
+ 2  type=unmapped tech=pixel zone=barrel etamod=4 phimod=7 physLayer=0 eta=59 phi=52
+ 3  type=unmapped tech=pixel zone=barrel etamod=4 phimod=11 physLayer=1 eta=743 phi=311
+ 4  type=unmapped tech=pixel zone=barrel etamod=4 phimod=11 physLayer=1 eta=742 phi=311
+ 5  type=unmapped tech=pixel zone=barrel etamod=4 phimod=11 physLayer=1 eta=741 phi=311
+ 6  type=unmapped tech=pixel zone=barrel etamod=7 phimod=17 physLayer=2 eta=157 phi=654
+ 7  type=unmapped tech=pixel zone=barrel etamod=7 phimod=17 physLayer=2 eta=156 phi=654
+ 8  type=unmapped tech=pixel zone=barrel etamod=7 phimod=17 physLayer=2 eta=155 phi=654
+ 9  type=unmapped tech=pixel zone=barrel etamod=7 phimod=17 physLayer=2 eta=155 phi=653
+ 10  type=unmapped tech=pixel zone=barrel etamod=7 phimod=17 physLayer=2 eta=154 phi=653
+ 11  type=unmapped tech=pixel zone=barrel etamod=7 phimod=17 physLayer=2 eta=153 phi=653
+ 12  type=unmapped tech=pixel zone=barrel etamod=6 phimod=18 physLayer=2 eta=692 phi=13
+ 13  type=unmapped tech=pixel zone=barrel etamod=6 phimod=18 physLayer=2 eta=691 phi=13
+ 14  type=unmapped tech=pixel zone=barrel etamod=6 phimod=18 physLayer=2 eta=690 phi=13
+ 15  type=unmapped tech=pixel zone=barrel etamod=6 phimod=18 physLayer=2 eta=689 phi=13
+ 16  type=unmapped tech=pixel zone=barrel etamod=6 phimod=18 physLayer=2 eta=688 phi=13
+ 17  type=unmapped tech=pixel zone=barrel etamod=9 phimod=24 physLayer=3 eta=252 phi=344
+ 18  type=unmapped tech=pixel zone=barrel etamod=9 phimod=24 physLayer=3 eta=251 phi=344
+ 19  type=unmapped tech=pixel zone=barrel etamod=9 phimod=24 physLayer=3 eta=250 phi=344
+ 20  type=unmapped tech=pixel zone=barrel etamod=9 phimod=24 physLayer=3 eta=249 phi=344
+ 21  type=unmapped tech=pixel zone=barrel etamod=9 phimod=24 physLayer=3 eta=248 phi=344
+ 22  type=unmapped tech=pixel zone=posEndcap etamod=1 phimod=30 physLayer=7 eta=374 phi=695
+ 23  type=unmapped tech=pixel zone=posEndcap etamod=1 phimod=31 physLayer=7 eta=376 phi=29
+ 24  type=unmapped tech=pixel zone=posEndcap etamod=1 phimod=31 physLayer=7 eta=375 phi=29
+ 25  type=unmapped tech=strip zone=barrel etamod=96 phimod=15 physLayer=0 eta=0 phi=323
+ 26  type=unmapped tech=strip zone=barrel etamod=100 phimod=15 physLayer=1 eta=0 phi=339
+ 27  type=unmapped tech=strip zone=barrel etamod=100 phimod=15 physLayer=1 eta=0 phi=340
+ 28  type=unmapped tech=strip zone=barrel etamod=136 phimod=21 physLayer=2 eta=0 phi=934
+ 29  type=unmapped tech=strip zone=barrel etamod=140 phimod=21 physLayer=3 eta=0 phi=956
+ 30  type=unmapped tech=strip zone=barrel etamod=46 phimod=30 physLayer=4 eta=0 phi=568
+ 31  type=unmapped tech=strip zone=barrel etamod=46 phimod=30 physLayer=5 eta=0 phi=596
+
+FPGATrackSimLog...  DEBUG Mapping 32 hits using stage 1
+FPGATrackSimLog...  DEBUG Getting Event Event 38014 	Run 242000
+FPGATrackSimLog...  DEBUG Created 1 towers. Now map Hits
+Package.UserCode    ERROR /afs/cern.ch/work/j/jahreda/athena_renamehtt/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 7 element in m_diskIndex which is of size 5
+Package.UserCode    ERROR /afs/cern.ch/work/j/jahreda/athena_renamehtt/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 7 element in m_diskIndex which is of size 5
+Package.UserCode    ERROR /afs/cern.ch/work/j/jahreda/athena_renamehtt/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 7 element in m_diskIndex which is of size 5
+FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=1 PLayer=0 section=0
+FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=2 PLayer=2 section=0
+FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=3 PLayer=3 section=0
+FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=4 PLayer=4 section=0
+FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=5 PLayer=5 section=0
+FPGATrackSimLog...  DEBUG Found 5 missing mapped hits in this event
+FPGATrackSimLog...  DEBUG Event: Event 38014 	Run 242000	Optional: nOfflineClusters: 14, nOfflineTracks: 1, nTruthTracks: 1
+	NTowers: 1
+ 0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
+
+
+FPGATrackSimLog...  DEBUG Produced 0 clusters
+FPGATrackSimLog...   INFO Ending with 0 clusters
+FPGATrackSimLog...  DEBUG Writing data in TTree
+FPGATrackSimLog...  DEBUG Wrote Event 2 in first stage header event Event 38014 	Run 242000
+FPGATrackSimLog...  DEBUG n.roads_1st = 0
+FPGATrackSimLog...  DEBUG n.roads_2nd = 0
+FPGATrackSimLog...  DEBUG n.tracks_1st = 0
+FPGATrackSimLog...  DEBUG n.tracks_2nd = 0
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #3, run #1 3 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #4, run #1 3 events processed so far  <<<===
+FPGATrackSimLog...  DEBUG Asked Event 3 in this file; current total is 3
+FPGATrackSimLog...   INFO 3
+FPGATrackSimLog...  DEBUG Reading event  Event 38015 	Run 242000
+FPGATrackSimLog...  DEBUG Event: Event 38015 	Run 242000	Optional: nOfflineClusters: 15, nOfflineTracks: 1, nTruthTracks: 1
+	Nhits=23
+ 0  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=13 physLayer=0 eta=64 phi=321
+ 1  type=unmapped tech=pixel zone=posEndcap etamod=8 phimod=13 physLayer=0 eta=146 phi=334
+ 2  type=unmapped tech=pixel zone=posEndcap etamod=8 phimod=13 physLayer=0 eta=146 phi=335
+ 3  type=unmapped tech=pixel zone=posEndcap etamod=9 phimod=13 physLayer=0 eta=242 phi=350
+ 4  type=unmapped tech=pixel zone=posEndcap etamod=9 phimod=13 physLayer=0 eta=242 phi=351
+ 5  type=unmapped tech=pixel zone=posEndcap etamod=10 phimod=13 physLayer=0 eta=343 phi=367
+ 6  type=unmapped tech=pixel zone=posEndcap etamod=10 phimod=13 physLayer=0 eta=342 phi=367
+ 7  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=14 physLayer=0 eta=69 phi=63
+ 8  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=14 physLayer=0 eta=68 phi=63
+ 9  type=unmapped tech=pixel zone=posEndcap etamod=8 phimod=14 physLayer=0 eta=151 phi=48
+ 10  type=unmapped tech=pixel zone=posEndcap etamod=9 phimod=14 physLayer=0 eta=246 phi=30
+ 11  type=unmapped tech=pixel zone=posEndcap etamod=10 phimod=14 physLayer=0 eta=346 phi=12
+ 12  type=unmapped tech=pixel zone=posEndcap etamod=10 phimod=14 physLayer=0 eta=346 phi=11
+ 13  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=23 physLayer=1 eta=319 phi=133
+ 14  type=unmapped tech=pixel zone=posEndcap etamod=15 phimod=15 physLayer=2 eta=139 phi=395
+ 15  type=unmapped tech=pixel zone=posEndcap etamod=16 phimod=15 physLayer=2 eta=318 phi=397
+ 16  type=unmapped tech=pixel zone=posEndcap etamod=17 phimod=15 physLayer=2 eta=520 phi=398
+ 17  type=unmapped tech=pixel zone=posEndcap etamod=17 phimod=15 physLayer=2 eta=520 phi=399
+ 18  type=unmapped tech=pixel zone=posEndcap etamod=18 phimod=15 physLayer=2 eta=750 phi=400
+ 19  type=unmapped tech=pixel zone=posEndcap etamod=8 phimod=8 physLayer=4 eta=159 phi=599
+ 20  type=unmapped tech=pixel zone=posEndcap etamod=8 phimod=8 physLayer=4 eta=158 phi=599
+ 21  type=unmapped tech=pixel zone=posEndcap etamod=9 phimod=8 physLayer=4 eta=472 phi=621
+ 22  type=unmapped tech=pixel zone=posEndcap etamod=9 phimod=8 physLayer=4 eta=472 phi=620
+
+FPGATrackSimLog...  DEBUG Mapping 23 hits using stage 1
+FPGATrackSimLog...  DEBUG Getting Event Event 38015 	Run 242000
+FPGATrackSimLog...  DEBUG Created 1 towers. Now map Hits
+getLayerSection(siTech=1, DZ=1, layer=75) out of bounds
+getLayerSection(siTech=1, DZ=1, layer=75) out of bounds
+getLayerSection(siTech=1, DZ=1, layer=75) out of bounds
+getLayerSection(siTech=1, DZ=1, layer=75) out of bounds
+FPGATrackSimLog...  DEBUG Event: Event 38015 	Run 242000	Optional: nOfflineClusters: 15, nOfflineTracks: 1, nTruthTracks: 1
+	NTowers: 1
+ 0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
+
+
+FPGATrackSimLog...  DEBUG Produced 0 clusters
+FPGATrackSimLog...   INFO Ending with 0 clusters
+FPGATrackSimLog...  DEBUG Writing data in TTree
+FPGATrackSimLog...  DEBUG Wrote Event 3 in first stage header event Event 38015 	Run 242000
+FPGATrackSimLog...  DEBUG n.roads_1st = 0
+FPGATrackSimLog...  DEBUG n.roads_2nd = 0
+FPGATrackSimLog...  DEBUG n.tracks_1st = 0
+FPGATrackSimLog...  DEBUG n.tracks_2nd = 0
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #4, run #1 4 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #5, run #1 4 events processed so far  <<<===
+FPGATrackSimLog...  DEBUG Asked Event 4 in this file; current total is 4
+FPGATrackSimLog...   INFO 4
+FPGATrackSimLog...  DEBUG Reading event  Event 38016 	Run 242000
+FPGATrackSimLog...  DEBUG Event: Event 38016 	Run 242000	Optional: nOfflineClusters: 30, nOfflineTracks: 1, nTruthTracks: 1
+	Nhits=82
+ 0  type=unmapped tech=pixel zone=barrel etamod=4 phimod=8 physLayer=0 eta=31 phi=305
+ 1  type=unmapped tech=pixel zone=barrel etamod=4 phimod=8 physLayer=0 eta=35 phi=306
+ 2  type=unmapped tech=pixel zone=barrel etamod=4 phimod=8 physLayer=0 eta=32 phi=305
+ 3  type=unmapped tech=pixel zone=barrel etamod=4 phimod=8 physLayer=0 eta=33 phi=305
+ 4  type=unmapped tech=pixel zone=barrel etamod=4 phimod=8 physLayer=0 eta=34 phi=305
+ 5  type=unmapped tech=pixel zone=barrel etamod=4 phimod=8 physLayer=0 eta=34 phi=306
+ 6  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=604 phi=480
+ 7  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=615 phi=478
+ 8  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=614 phi=478
+ 9  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=613 phi=478
+ 10  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=612 phi=478
+ 11  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=611 phi=478
+ 12  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=610 phi=478
+ 13  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=609 phi=478
+ 14  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=603 phi=481
+ 15  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=617 phi=478
+ 16  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=603 phi=480
+ 17  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=616 phi=478
+ 18  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=602 phi=480
+ 19  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=607 phi=481
+ 20  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=606 phi=481
+ 21  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=605 phi=481
+ 22  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=604 phi=481
+ 23  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=608 phi=478
+ 24  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=607 phi=478
+ 25  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=606 phi=478
+ 26  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=18 physLayer=2 eta=468 phi=220
+ 27  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=18 physLayer=2 eta=629 phi=141
+ 28  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=18 physLayer=2 eta=628 phi=141
+ 29  type=unmapped tech=pixel zone=posEndcap etamod=1 phimod=18 physLayer=2 eta=380 phi=249
+ 30  type=unmapped tech=pixel zone=posEndcap etamod=2 phimod=18 physLayer=2 eta=439 phi=360
+ 31  type=unmapped tech=pixel zone=posEndcap etamod=2 phimod=18 physLayer=2 eta=439 phi=359
+ 32  type=unmapped tech=pixel zone=posEndcap etamod=3 phimod=18 physLayer=2 eta=245 phi=250
+ 33  type=unmapped tech=pixel zone=posEndcap etamod=3 phimod=18 physLayer=2 eta=244 phi=250
+ 34  type=unmapped tech=pixel zone=posEndcap etamod=3 phimod=18 physLayer=2 eta=244 phi=251
+ 35  type=unmapped tech=pixel zone=posEndcap etamod=4 phimod=18 physLayer=2 eta=387 phi=215
+ 36  type=unmapped tech=pixel zone=posEndcap etamod=4 phimod=18 physLayer=2 eta=387 phi=214
+ 37  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=18 physLayer=2 eta=48 phi=156
+ 38  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=18 physLayer=2 eta=48 phi=157
+ 39  type=unmapped tech=pixel zone=posEndcap etamod=6 phimod=18 physLayer=2 eta=359 phi=226
+ 40  type=unmapped tech=pixel zone=posEndcap etamod=6 phimod=18 physLayer=2 eta=358 phi=226
+ 41  type=unmapped tech=pixel zone=posEndcap etamod=6 phimod=18 physLayer=2 eta=358 phi=225
+ 42  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=142 phi=382
+ 43  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=141 phi=382
+ 44  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=141 phi=381
+ 45  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=137 phi=372
+ 46  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=137 phi=371
+ 47  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=137 phi=370
+ 48  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=136 phi=370
+ 49  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=136 phi=369
+ 50  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=276 phi=330
+ 51  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=277 phi=330
+ 52  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=277 phi=331
+ 53  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=278 phi=332
+ 54  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=278 phi=333
+ 55  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=140 phi=381
+ 56  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=279 phi=333
+ 57  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=279 phi=334
+ 58  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=294 phi=339
+ 59  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=296 phi=339
+ 60  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=297 phi=339
+ 61  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=297 phi=338
+ 62  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=298 phi=338
+ 63  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=299 phi=338
+ 64  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=300 phi=338
+ 65  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=301 phi=338
+ 66  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=21 physLayer=3 eta=364 phi=411
+ 67  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=21 physLayer=3 eta=365 phi=411
+ 68  type=unmapped tech=pixel zone=posEndcap etamod=3 phimod=29 physLayer=5 eta=265 phi=344
+ 69  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=37 physLayer=7 eta=473 phi=277
+ 70  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=37 physLayer=7 eta=473 phi=276
+ 71  type=unmapped tech=strip zone=barrel etamod=164 phimod=18 physLayer=0 eta=0 phi=517
+ 72  type=unmapped tech=strip zone=barrel etamod=168 phimod=18 physLayer=1 eta=0 phi=558
+ 73  type=unmapped tech=strip zone=posEndcap etamod=1030251365 phimod=21 physLayer=0 eta=0 phi=818
+ 74  type=unmapped tech=strip zone=posEndcap etamod=1030251365 phimod=21 physLayer=1 eta=0 phi=876
+ 75  type=unmapped tech=strip zone=posEndcap etamod=1635018016 phimod=43 physLayer=2 eta=0 phi=45
+ 76  type=unmapped tech=strip zone=posEndcap etamod=1635018016 phimod=43 physLayer=3 eta=0 phi=121
+ 77  type=unmapped tech=strip zone=posEndcap etamod=1685024105 phimod=43 physLayer=4 eta=0 phi=52
+ 78  type=unmapped tech=strip zone=posEndcap etamod=1685024105 phimod=43 physLayer=5 eta=0 phi=146
+ 79  type=unmapped tech=strip zone=posEndcap etamod=1282636136 phimod=43 physLayer=6 eta=0 phi=66
+ 80  type=unmapped tech=strip zone=posEndcap etamod=1282636136 phimod=43 physLayer=7 eta=0 phi=166
+ 81  type=unmapped tech=strip zone=posEndcap etamod=1919252833 phimod=43 physLayer=8 eta=0 phi=229
+
+FPGATrackSimLog...  DEBUG Mapping 82 hits using stage 1
+FPGATrackSimLog...  DEBUG Getting Event Event 38016 	Run 242000
+FPGATrackSimLog...  DEBUG Created 1 towers. Now map Hits
+Package.UserCode    ERROR /afs/cern.ch/work/j/jahreda/athena_renamehtt/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 5 element in m_diskIndex which is of size 5
+Package.UserCode    ERROR /afs/cern.ch/work/j/jahreda/athena_renamehtt/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 7 element in m_diskIndex which is of size 5
+Package.UserCode    ERROR /afs/cern.ch/work/j/jahreda/athena_renamehtt/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 7 element in m_diskIndex which is of size 5
+FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=1 PLayer=0 section=0
+FPGATrackSimLog...  DEBUG Found 1 missing mapped hits in this event
+FPGATrackSimLog...  DEBUG Event: Event 38016 	Run 242000	Optional: nOfflineClusters: 30, nOfflineTracks: 1, nTruthTracks: 1
+	NTowers: 1
+ 0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
+
+
+FPGATrackSimLog...  DEBUG Produced 0 clusters
+FPGATrackSimLog...   INFO Ending with 0 clusters
+FPGATrackSimLog...  DEBUG Writing data in TTree
+FPGATrackSimLog...  DEBUG Wrote Event 4 in first stage header event Event 38016 	Run 242000
+FPGATrackSimLog...  DEBUG n.roads_1st = 0
+FPGATrackSimLog...  DEBUG n.roads_2nd = 0
+FPGATrackSimLog...  DEBUG n.tracks_1st = 0
+FPGATrackSimLog...  DEBUG n.tracks_2nd = 0
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #5, run #1 5 events processed so far  <<<===
+ApplicationMgr       INFO Application Manager Stopped successfully
+FPGATrackSimEve...   INFO FPGATrackSimEventSelectionSvc::finalize()
+AthDictLoaderSvc     INFO in finalize...
+ToolSvc              INFO Removing all tools created by ToolSvc
+FPGATrackSimLog...   INFO finalize: closing files
+******************************************************************************
+*Tree    :FPGATrackSimLogicalEventTree: data                                                   *
+*Entries :        5 : Total =           21048 bytes  File  Size =          0 *
+*        :          : Tree compression factor =   1.00                       *
+******************************************************************************
+*Br    0 :FPGATrackSimLogicalEventInputHeader_1st :                          *
+*         | FPGATrackSimLogicalEventInputHeader                              *
+*Entries :        5 : Total  Size=      18335 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br    1 :FPGATrackSimLogicalEventOutputHeader :                             *
+*         | FPGATrackSimLogicalEventOutputHeader                             *
+*Entries :        5 : Total  Size=       2247 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+FPGATrackSimLog...   INFO Contains 5 entries, over 5 events run
+FPGATrackSimLog...   INFO finalize: closing files
+ApplicationMgr       INFO Application Manager Finalized successfully
+ApplicationMgr       INFO Application Manager Terminated successfully
+Py:Athena            INFO leaving with code 0: "successful run"
+Produced file fpgatracksim_loghits_wrap.OUT.root, now read it back
+Tue Jun 13 16:43:44 CEST 2023
+Preloading tcmalloc_minimal.so
+Py:Athena            INFO using release [WorkDir-24.0.6] [x86_64-centos7-gcc11-opt] [Kill-HTT/45db40f] -- built on [2023-06-12T2128]
+Py:Athena            INFO including file "AthenaCommon/Preparation.py"
+Py:Athena            INFO including file "AthenaCommon/Atlas.UnixStandardJob.py"
+Py:Athena            INFO executing ROOT6Setup
+Py:Athena            INFO including file "AthenaCommon/Execution.py"
+Py:Athena            INFO including file "FPGATrackSimInput/FPGATrackSimReadLogicalHitsAlg_jobOptions.py"
+Py:FPGATrackSimReadLogicalHitsAlg    INFO Input file ['fpgatracksim_loghits_wrap.OUT.root']
+Py:Athena            INFO including file "AthenaCommon/runbatch.py"
+Py:ConfigurableDb    INFO Read module info for 5239 configurables from 13 genConfDb files
+Py:ConfigurableDb WARNING Found 1 duplicates among the 13 genConfDb files :
+Py:ConfigurableDb WARNING --------------------------------------------------
+Py:ConfigurableDb WARNING   -<component name>: <module> - [ <duplicates> ]
+Py:ConfigurableDb WARNING --------------------------------------------------
+Py:ConfigurableDb WARNING   -FPGATrackSimRawHitsWrapperAlg: FPGATrackSimSGInput.FPGATrackSimSGInputConf - ['FPGATrackSimInput.FPGATrackSimInputConf', 'FPGATrackSimInput.FPGATrackSimInputConf']
+ApplicationMgr    SUCCESS 
+====================================================================================================================================
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v36r13)
+                                          running on lxplus725.cern.ch on Tue Jun 13 16:43:55 2023
+====================================================================================================================================
+ApplicationMgr       INFO Application Manager Configured successfully
+AthDictLoaderSvc     INFO in initialize...
+AthDictLoaderSvc     INFO acquired Dso-registry
+ClassIDSvc           INFO getRegistryEntries: read 3092 CLIDRegistry entries for module ALL
+CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 8(Floating point exception) 14(Alarm clock) 
+AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
+FPGATrackSimRea...  DEBUG Property update for OutputLevel : new value = 2
+FPGATrackSimRea...  DEBUG Property update for OutputLevel : new value = 2
+FPGATrackSimRea...  DEBUG Opening file fpgatracksim_loghits_wrap.OUT.root in READ mode.
+FPGATrackSimRea...   INFO Input file: fpgatracksim_loghits_wrap.OUT.root has 5 event entries.
+FPGATrackSimRea...  DEBUG Initialized in READ MODE
+FPGATrackSimRea...  DEBUG input handles: 0
+FPGATrackSimRea...  DEBUG output handles: 0
+FPGATrackSimRea...  DEBUG Adding private ToolHandle tool FPGATrackSimReadLogicalHitsAlg.FPGATrackSimReadInput (FPGATrackSimOutputHeaderTool)
+ApplicationMgr       INFO Application Manager Initialized successfully
+ApplicationMgr       INFO Application Manager Started successfully
+AthenaEventLoopMgr   INFO   ===>>>  start of run 1    <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
+FPGATrackSimRea...  DEBUG Asked Event 0 in this file; current total is 0
+FPGATrackSimRea...  DEBUG Asked in first stage header event: Event 38001 	Run 242000
+FPGATrackSimRea...  DEBUG n.roads_1st = 0
+FPGATrackSimRea...  DEBUG n.tracks_1st = 0
+FPGATrackSimRea...  DEBUG Event: Event 38001 	Run 242000	Optional: nOfflineClusters: 14, nOfflineTracks: 1, nTruthTracks: 1
+	NTowers: 1
+ 0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
+
+
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #1 1 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #1 1 events processed so far  <<<===
+FPGATrackSimRea...  DEBUG Asked Event 1 in this file; current total is 1
+FPGATrackSimRea...  DEBUG Asked in first stage header event: Event 38005 	Run 242000
+FPGATrackSimRea...  DEBUG n.roads_1st = 0
+FPGATrackSimRea...  DEBUG n.tracks_1st = 0
+FPGATrackSimRea...  DEBUG Event: Event 38005 	Run 242000	Optional: nOfflineClusters: 12, nOfflineTracks: 1, nTruthTracks: 1
+	NTowers: 1
+ 0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
+
+
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #1 2 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #3, run #1 2 events processed so far  <<<===
+FPGATrackSimRea...  DEBUG Asked Event 2 in this file; current total is 2
+FPGATrackSimRea...  DEBUG Asked in first stage header event: Event 38014 	Run 242000
+FPGATrackSimRea...  DEBUG n.roads_1st = 0
+FPGATrackSimRea...  DEBUG n.tracks_1st = 0
+FPGATrackSimRea...  DEBUG Event: Event 38014 	Run 242000	Optional: nOfflineClusters: 14, nOfflineTracks: 1, nTruthTracks: 1
+	NTowers: 1
+ 0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
+
+
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #3, run #1 3 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #4, run #1 3 events processed so far  <<<===
+FPGATrackSimRea...  DEBUG Asked Event 3 in this file; current total is 3
+FPGATrackSimRea...  DEBUG Asked in first stage header event: Event 38015 	Run 242000
+FPGATrackSimRea...  DEBUG n.roads_1st = 0
+FPGATrackSimRea...  DEBUG n.tracks_1st = 0
+FPGATrackSimRea...  DEBUG Event: Event 38015 	Run 242000	Optional: nOfflineClusters: 15, nOfflineTracks: 1, nTruthTracks: 1
+	NTowers: 1
+ 0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
+
+
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #4, run #1 4 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #5, run #1 4 events processed so far  <<<===
+FPGATrackSimRea...  DEBUG Asked Event 4 in this file; current total is 4
+FPGATrackSimRea...  DEBUG Asked in first stage header event: Event 38016 	Run 242000
+FPGATrackSimRea...  DEBUG n.roads_1st = 0
+FPGATrackSimRea...  DEBUG n.tracks_1st = 0
+FPGATrackSimRea...  DEBUG Event: Event 38016 	Run 242000	Optional: nOfflineClusters: 30, nOfflineTracks: 1, nTruthTracks: 1
+	NTowers: 1
+ 0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
+
+
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #5, run #1 5 events processed so far  <<<===
+ApplicationMgr       INFO Application Manager Stopped successfully
+AthDictLoaderSvc     INFO in finalize...
+ToolSvc              INFO Removing all tools created by ToolSvc
+FPGATrackSimRea...   INFO finalize: closing files
+ApplicationMgr       INFO Application Manager Finalized successfully
+ApplicationMgr       INFO Application Manager Terminated successfully
+Py:Athena            INFO leaving with code 0: "successful run"

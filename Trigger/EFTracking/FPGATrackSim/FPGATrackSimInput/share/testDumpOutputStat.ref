@@ -1,0 +1,82 @@
+Py:FPGATrackSimDumpOutputStatAlg    INFO Output file ['httsim_output.root']
+|-Members                        = ['FPGATrackSimDumpOutputStatAlg/FPGATrackSimDumpOutputStatAlg']  (default: [])
+|=/***** Algorithm FPGATrackSimDumpOutputStatAlg/FPGATrackSimDumpOutputStatAlg *****************************************
+| \----- (End of Algorithm FPGATrackSimDumpOutputStatAlg/FPGATrackSimDumpOutputStatAlg) --------------------------------
+FPGATrackSimDumpOutputSt...   INFO FPGATrackSimDumpOutputStatAlg::initialize()
+FPGATrackSimDumpOutputSt...  DEBUG Initialized in READ MODE
+FPGATrackSimDumpOutputSt...  DEBUG Opening file httsim_output.root in RECREATE mode.
+FPGATrackSimDumpOutputSt...   INFO Creating empty branches in output file
+FPGATrackSimDumpOutputSt...  DEBUG Adding private ToolHandle tool FPGATrackSimDumpOutputStatAlg.FPGATrackSimReadInput (FPGATrackSimOutputHeaderTool)
+FPGATrackSimDumpOutputSt...  DEBUG Adding private ToolHandle tool FPGATrackSimDumpOutputStatAlg.FPGATrackSimWriteOutput (FPGATrackSimOutputHeaderTool)
+FPGATrackSimDumpOutputSt...  DEBUG Running on event 
+FPGATrackSimDumpOutputSt...  DEBUG Asked Event 0 in this file; current total is 0
+FPGATrackSimDumpOutputSt...  DEBUG Asked in first stage header event: Event 100007001 	Run 242000
+FPGATrackSimDumpOutputSt...  DEBUG n.roads_1st = 15
+FPGATrackSimDumpOutputSt...  DEBUG n.tracks_1st = 15
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=0        SECTOR1=978      BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007001 HITMAP=511      TYPE=0   NMISS=0  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=1        SECTOR1=978      BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007001 HITMAP=495      TYPE=0   NMISS=1  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=2        SECTOR1=978      BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007001 HITMAP=383      TYPE=0   NMISS=1  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=3        SECTOR1=978      BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007001 HITMAP=508      TYPE=0   NMISS=2  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=4        SECTOR1=978      BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007001 HITMAP=255      TYPE=0   NMISS=1  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=5        SECTOR1=2658     BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007001 HITMAP=503      TYPE=0   NMISS=1  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=6        SECTOR1=3258     BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007001 HITMAP=495      TYPE=0   NMISS=1  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=7        SECTOR1=5158     BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007001 HITMAP=508      TYPE=0   NMISS=2  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=8        SECTOR1=8519     BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007001 HITMAP=507      TYPE=0   NMISS=1  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=9        SECTOR1=9470     BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007001 HITMAP=511      TYPE=0   NMISS=0  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=10       SECTOR1=9470     BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007001 HITMAP=495      TYPE=0   NMISS=1  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=11       SECTOR1=18557    BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007001 HITMAP=507      TYPE=0   NMISS=1  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=12       SECTOR1=19816    BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007001 HITMAP=511      TYPE=0   NMISS=0  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=13       SECTOR1=19816    BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007001 HITMAP=383      TYPE=0   NMISS=1  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=14       SECTOR1=25190    BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007001 HITMAP=255      TYPE=0   NMISS=1  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=0        SECTOR1=-1       BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007001 HITMAP=262143   TYPE=0   NMISS=0  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=1        SECTOR1=-1       BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007001 HITMAP=262095   TYPE=0   NMISS=2  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=2        SECTOR1=-1       BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007001 HITMAP=262140   TYPE=0   NMISS=2  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=3        SECTOR1=-1       BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007001 HITMAP=260095   TYPE=0   NMISS=1  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=4        SECTOR1=-1       BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007001 HITMAP=262131   TYPE=0   NMISS=2  
+FPGATrackSimDumpOutputSt...  DEBUG Writing data in TTree
+FPGATrackSimDumpOutputSt...  DEBUG Wrote Event 0 in first stage header event Event 100007001 	Run 242000
+FPGATrackSimDumpOutputSt...  DEBUG n.roads_1st = 15
+FPGATrackSimDumpOutputSt...  DEBUG n.roads_2nd = 5
+FPGATrackSimDumpOutputSt...  DEBUG n.tracks_1st = 15
+FPGATrackSimDumpOutputSt...  DEBUG n.tracks_2nd = 5
+FPGATrackSimDumpOutputSt...  DEBUG Running on event 
+FPGATrackSimDumpOutputSt...  DEBUG Asked Event 1 in this file; current total is 1
+FPGATrackSimDumpOutputSt...  DEBUG Asked in first stage header event: Event 100007018 	Run 242000
+FPGATrackSimDumpOutputSt...  DEBUG n.roads_1st = 5
+FPGATrackSimDumpOutputSt...  DEBUG n.tracks_1st = 5
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=0        SECTOR1=16185    BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007018 HITMAP=511      TYPE=0   NMISS=0  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=1        SECTOR1=16185    BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007018 HITMAP=507      TYPE=0   NMISS=1  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=2        SECTOR1=33439    BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007018 HITMAP=507      TYPE=0   NMISS=1  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=3        SECTOR1=44304    BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007018 HITMAP=511      TYPE=0   NMISS=0  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=4        SECTOR1=48352    BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007018 HITMAP=255      TYPE=0   NMISS=1  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=0        SECTOR1=-1       BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007018 HITMAP=262140   TYPE=0   NMISS=2  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=1        SECTOR1=-1       BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007018 HITMAP=262095   TYPE=0   NMISS=2  
+FPGATrackSimDumpOutputSt...  DEBUG Writing data in TTree
+FPGATrackSimDumpOutputSt...  DEBUG Wrote Event 1 in first stage header event Event 100007018 	Run 242000
+FPGATrackSimDumpOutputSt...  DEBUG n.roads_1st = 5
+FPGATrackSimDumpOutputSt...  DEBUG n.roads_2nd = 2
+FPGATrackSimDumpOutputSt...  DEBUG n.tracks_1st = 5
+FPGATrackSimDumpOutputSt...  DEBUG n.tracks_2nd = 2
+FPGATrackSimDumpOutputSt...  DEBUG Running on event 
+FPGATrackSimDumpOutputSt...  DEBUG Asked Event 2 in this file; current total is 2
+FPGATrackSimDumpOutputSt...  DEBUG Asked in first stage header event: Event 100007024 	Run 242000
+FPGATrackSimDumpOutputSt...  DEBUG n.roads_1st = 8
+FPGATrackSimDumpOutputSt...  DEBUG n.tracks_1st = 8
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=0        SECTOR1=1578     BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007024 HITMAP=507      TYPE=0   NMISS=1  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=1        SECTOR1=1967     BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007024 HITMAP=511      TYPE=0   NMISS=0  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=2        SECTOR1=1967     BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007024 HITMAP=503      TYPE=0   NMISS=1  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=3        SECTOR1=1967     BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007024 HITMAP=479      TYPE=0   NMISS=1  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=4        SECTOR1=1967     BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007024 HITMAP=508      TYPE=0   NMISS=2  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=5        SECTOR1=2216     BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007024 HITMAP=508      TYPE=0   NMISS=2  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=6        SECTOR1=14946    BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007024 HITMAP=508      TYPE=0   NMISS=2  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=7        SECTOR1=17119    BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007024 HITMAP=503      TYPE=0   NMISS=1  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=0        SECTOR1=-1       BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007024 HITMAP=262143   TYPE=0   NMISS=0  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=1        SECTOR1=-1       BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007024 HITMAP=262140   TYPE=0   NMISS=2  
+FPGATrackSimDumpOutputSt...  DEBUG TRACK: ID=2        SECTOR1=-1       BANK=-1       BARCODE=10001  BARCODE_F=1         EVENT=100007024 HITMAP=262131   TYPE=0   NMISS=2  
+FPGATrackSimDumpOutputSt...  DEBUG Writing data in TTree
+FPGATrackSimDumpOutputSt...  DEBUG Wrote Event 2 in first stage header event Event 100007024 	Run 242000
+FPGATrackSimDumpOutputSt...  DEBUG n.roads_1st = 8
+FPGATrackSimDumpOutputSt...  DEBUG n.roads_2nd = 3
+FPGATrackSimDumpOutputSt...  DEBUG n.tracks_1st = 8
+FPGATrackSimDumpOutputSt...  DEBUG n.tracks_2nd = 3
+FPGATrackSimDumpOutputSt...   INFO Contains 3 entries, over 3 events run
