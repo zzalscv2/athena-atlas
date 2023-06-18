@@ -432,11 +432,11 @@ def createTriggerRecoFlags():
     # Change tolerance in STEP Propagator
     flags.addFlag("Trigger.Jet.PFlowTolerance", 1e-2)
 
-    def __httFlags():
+    def __fpgatracksimFlags():
         """Additional function delays import"""
-        from TrigHTTConfTools.HTTConfigFlags import createHTTConfigFlags
-        return createHTTConfigFlags()
-    flags.addFlagsCategory("Trigger.HTT", __httFlags, prefix=True )
+        from FPGATrackSimConfTools.FPGATrackSimConfigFlags import createFPGATrackSimConfigFlags
+        return createFPGATrackSimConfigFlags() 
+    flags.addFlagsCategory("Trigger.FPGATrackSim", __fpgatracksimFlags, prefix=True )
 
     # L1 MUCTPI trigger flags
     def __muctpiFlags():
