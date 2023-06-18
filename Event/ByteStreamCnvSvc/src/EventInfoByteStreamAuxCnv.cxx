@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EventInfoByteStreamAuxCnv.h"
@@ -262,7 +262,7 @@ StatusCode EventInfoByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr, DataObjec
 
   // record EventInfo
   evtInfo.setEventFlags(xAOD::EventInfo::Core, m_robDataProvider->getEventStatus());
-  pObj = StoreGateSvc::asStorable(pEvtInfoAux);
+  pObj = SG::asStorable(pEvtInfoAux);
 
   ATH_MSG_DEBUG(" New xAOD::EventAuxInfo made, run/event= " << runNumber 
 		<< " " << eventNumber

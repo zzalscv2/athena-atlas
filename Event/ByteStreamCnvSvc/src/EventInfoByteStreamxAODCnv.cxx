@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EventInfoByteStreamxAODCnv.h"
@@ -67,7 +67,7 @@ StatusCode EventInfoByteStreamxAODCnv::createObj(IOpaqueAddress* pAddr, DataObje
   xAOD::EventInfo* pEvtInfo = new xAOD::EventInfo();
   DataLink<xAOD::EventAuxInfo> link(nmAux);
   pEvtInfo->setStore(link);
-  pObj = StoreGateSvc::asStorable(pEvtInfo);
+  pObj = SG::asStorable(pEvtInfo);
 
   ATH_MSG_DEBUG(" New EventInfo made, run/event= " << pEvtInfo->runNumber() << " " << pEvtInfo->eventNumber());
 
