@@ -35,8 +35,6 @@ TCS::SimpleCone::SimpleCone(const std::string & name) : DecisionAlg(name)
    defineParameter("NumRegisters", 2); 
    defineParameter("MaxRSqr",10*10);
    defineParameter("MinET",0);
-   defineParameter("MinEta",0);
-   defineParameter("MaxEta",31);
    defineParameter("MinSumET",0,0);
    defineParameter("MinSumET",0,1);
    defineParameter("MinSumET",0,2);
@@ -56,14 +54,10 @@ TCS::SimpleCone::initialize() {
    if(parameter("MaxTob").value() > 0) p_NumberLeading1 = parameter("MaxTob").value();
    p_R2 = parameter("MaxRSqr").value();
    p_MinET  = parameter("MinET").value();
-   p_EtaMin = parameter("MinEta").value();
-   p_EtaMax = parameter("MaxEta").value();
 
    TRG_MSG_INFO("MaxTob          : " << p_NumberLeading1);
    TRG_MSG_INFO("MaxRSqr         : " << p_R2);
    TRG_MSG_INFO("MinET          : " << p_MinET);
-   TRG_MSG_INFO("EtaMin         : " << p_EtaMin);
-   TRG_MSG_INFO("EtaMax         : " << p_EtaMax);
    for(unsigned int i=0; i<numberOutputBits(); ++i) {
       p_MinSumET[i] = parameter("MinSumET", i).value();
       TRG_MSG_INFO("SimpleCone " << i << " : " << p_MinSumET[i]);
@@ -109,8 +103,6 @@ TCS::SimpleCone::process( const std::vector<TCS::TOBArray const *> & input,
        tob != input[0]->end() && distance(input[0]->begin(), tob) < p_NumberLeading1;
        ++tob) {
 
-    if( parType_t(std::abs((*tob)->eta())) > p_EtaMax ) continue; // Eta cut
-    if( parType_t(std::abs((*tob)->eta())) < p_EtaMin ) continue; // Eta cut
     if( parType_t((*tob)->Et()) <= p_MinET ) continue; // E_T cut
 
     TRG_MSG_DEBUG("Jet : ET = " << (*tob)->Et());      
@@ -122,17 +114,12 @@ TCS::SimpleCone::process( const std::vector<TCS::TOBArray const *> & input,
 	 ++tob1) {
 	  
       if( tob1 == tob ) continue; // Avoid double counting of central jet 
-      if( parType_t(std::abs((*tob1)->eta())) > p_EtaMax ) continue; // Eta cut
-      if( parType_t(std::abs((*tob1)->eta())) < p_EtaMin ) continue; // Eta cut
       if( parType_t((*tob1)->Et()) <= p_MinET ) continue; // E_T cut
       
-      double deta = ( (*tob)->etaDouble() - (*tob1)->etaDouble() );
-      double dphi = fabs( (*tob)->phiDouble() - (*tob1)->phiDouble() );
-      if(dphi>M_PI)
-	dphi = 2*M_PI - dphi;
-      
-      if ( 100 * ((dphi)*(dphi) + (deta)*(deta) ) > p_R2) continue; // Exclude jets outside cone
-      
+      unsigned int deltaR2 = calcDeltaR2BW( *tob1, *tob );
+
+      if (deltaR2 > p_R2) continue; // Exclude jets outside cone
+
       tmp_SumET += (*tob1)->Et();
     }
 
