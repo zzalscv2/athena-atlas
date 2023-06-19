@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <memory>
@@ -39,13 +39,13 @@ StatusCode TRTRawDataProvider::initialize() {
   // Get the TRT Helper
   ATH_CHECK(detStore()->retrieve(m_trt_id, "TRT_ID"));
 
-  
+
   if (m_roiSeeded) {
     ATH_CHECK( m_roiCollectionKey.initialize() );
     ATH_CHECK(m_regionSelector.retrieve());
   }
   else {//Only need cabling if not using RoIs
-    // Retrieve id mapping 
+    // Retrieve id mapping
     ATH_CHECK(m_CablingSvc.retrieve());
     ATH_CHECK( m_roiCollectionKey.initialize(false) ); //Clear if unneeded
     m_regionSelector.disable();
@@ -66,7 +66,8 @@ StatusCode TRTRawDataProvider::execute(const EventContext& ctx) const
 {
   SG::WriteHandle<TRT_RDO_Container> rdoContainer(m_rdoContainerKey, ctx);
   if( m_rdoCacheKey.empty() ) {
-    rdoContainer = std::make_unique<TRT_RDO_Container>(m_trt_id->straw_hash_max(), EventContainers::Mode::OfflineFast); 
+    rdoContainer = std::make_unique<TRT_RDO_Container>(m_trt_id->straw_hash_max(), EventContainers::Mode::OfflineFast);
+
   }
   else{
     SG::UpdateHandle<TRT_RDO_Cache> updateh(m_rdoCacheKey, ctx);
@@ -77,7 +78,7 @@ StatusCode TRTRawDataProvider::execute(const EventContext& ctx) const
 
   std::unique_ptr<TRT_BSErrContainer> bsErrCont=std::make_unique<TRT_BSErrContainer>();
 
-  std::vector<uint32_t> listOfRobs; 
+  std::vector<uint32_t> listOfRobs;
   if (!m_roiSeeded) {
     listOfRobs = m_CablingSvc->getAllRods();
   }
@@ -101,9 +102,17 @@ StatusCode TRTRawDataProvider::execute(const EventContext& ctx) const
   ATH_MSG_DEBUG( "Number of ROB fragments " << listOfRobf.size() );
 
   // ask TRTRawDataProviderTool to decode it and to fill the IDC
-  if (m_rawDataTool->convert(listOfRobf,&(*rdoContainer),bsErrCont.get(),ctx).isFailure())
-    ATH_MSG_WARNING( "BS conversion into RDOs failed" );
-
+  if(rdoContainer->hasExternalCache()){ // online case
+    if (m_rawDataTool->convert(listOfRobf,&(*rdoContainer),bsErrCont.get(), nullptr, ctx).isFailure()){
+      ATH_MSG_WARNING( "BS conversion into RDOs failed for online/external cache mode" );
+    }
+  }else{ //offline case
+    DataPool<TRT_LoLumRawData> dataItemsPool(ctx);
+    dataItemsPool.prepareToAdd(150000); //some large default size it can expand
+     if (m_rawDataTool->convert(listOfRobf,&(*rdoContainer),bsErrCont.get(),&dataItemsPool, ctx).isFailure()){
+      ATH_MSG_WARNING( "BS conversion into RDOs failed for offline mode" );
+    }
+  }
   ATH_MSG_DEBUG( "Number of Collections in IDC " << rdoContainer->numberOfCollections() );
 
 

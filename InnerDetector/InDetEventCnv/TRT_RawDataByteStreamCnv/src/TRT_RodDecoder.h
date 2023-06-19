@@ -9,7 +9,7 @@
 /*
  * Base class
  */
-#include "AthenaBaseComps/AthAlgTool.h"  
+#include "AthenaBaseComps/AthAlgTool.h"
 
 /*
  * Interface class for this Tool
@@ -58,12 +58,12 @@
 
 class TRT_RodDecoder : public extends<AthAlgTool, ITRT_RodDecoder>
 {
-public: 
+public:
   //! constructor
   TRT_RodDecoder(const std::string& type, const std::string& name,
                  const IInterface* parent ) ;
-  //! destructor 
-  virtual ~TRT_RodDecoder(); 
+  //! destructor
+  virtual ~TRT_RodDecoder();
   //! initialize
   virtual StatusCode initialize() override;
   //! finalize
@@ -73,6 +73,7 @@ public:
   virtual StatusCode fillCollection ( const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* robFrag,
 				      TRT_RDO_Container* rdoIdc,
 				      TRT_BSErrContainer* bserr,
+              DataPool<TRT_LoLumRawData>* dataItemsPool,
 				      const std::vector<IdentifierHash>* vecHash = 0) const override;
 
 
@@ -100,7 +101,7 @@ public:
    const int m_maxCompressionVersion;
    int m_forceRodVersion;
 
-   const TRT_ID*               m_trt_id;   
+   const TRT_ID*               m_trt_id;
    IdContext                   m_straw_layer_context;
 
    BooleanProperty m_TB04_RawData;   // true to create TRT_TB04_RawData RDOs
@@ -139,27 +140,30 @@ public:
 
    //! private methods
 private:
+ StatusCode int_fillExpanded(
+     const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* robFrag,
+     TRT_RDO_Container* rodIdc, DataPool<TRT_LoLumRawData>* dataItemsPool,
+     const std::vector<IdentifierHash>* vecHash = 0) const;
 
-   StatusCode int_fillExpanded ( const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* robFrag,
-				TRT_RDO_Container* rodIdc,
-				const std::vector<IdentifierHash>* vecHash = 0) const;
+ StatusCode int_fillMinimalCompress(
+     const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* robFrag,
+     TRT_RDO_Container* rdoIdo, DataPool<TRT_LoLumRawData>* dataItemsPool,
+     const std::vector<IdentifierHash>* vecHash = 0) const;
 
-   StatusCode int_fillMinimalCompress ( const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* robFrag,
-				       TRT_RDO_Container* rdoIdo,
-				       const std::vector<IdentifierHash>* vecHash = 0) const;
+ StatusCode int_fillFullCompress(
+     const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* robFrag,
+     TRT_RDO_Container* rdoIdo, DataPool<TRT_LoLumRawData>* dataItemsPool,
+     const t_CompressTable& Ctable,
+     const std::vector<IdentifierHash>* vecHash = 0) const;
 
-   StatusCode int_fillFullCompress ( const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* robFrag,
-				     TRT_RDO_Container* rdoIdo,
-				     const t_CompressTable& Ctable,
-				     const std::vector<IdentifierHash>* vecHash = 0) const;
+ StatusCode ReadCompressTableFile(const std::string& TableFilename);
+ StatusCode ReadCompressTableDB(std::string Tag);
 
-   StatusCode ReadCompressTableFile( const std::string& TableFilename );
-   StatusCode ReadCompressTableDB( std::string Tag );
+ mutable SG::SlotSpecificObj<std::atomic<EventContext::ContextEvt_t> >
+     m_lastPrint ATLAS_THREAD_SAFE;
 
-   mutable SG::SlotSpecificObj<std::atomic<EventContext::ContextEvt_t> > m_lastPrint ATLAS_THREAD_SAFE;
-
-   mutable std::atomic<unsigned int> m_skip{};
-   mutable std::atomic<unsigned int> m_accept{};
+ mutable std::atomic<unsigned int> m_skip{};
+ mutable std::atomic<unsigned int> m_accept{};
 };
 
 #endif

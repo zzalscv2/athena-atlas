@@ -17,13 +17,13 @@
 #include "InDetRawData/TRT_RDO_Container.h"
 #include "TRT_RawDataByteStreamCnv/ITRTRawDataProviderTool.h"
 #include "TRT_Cabling/ITRT_CablingSvc.h"
-#include "IRegionSelector/IRegSelTool.h" 
+#include "IRegionSelector/IRegSelTool.h"
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "InDetByteStreamErrors/TRT_BSErrContainer.h"
-          
+
 #include <string>
 
 class TRTRawDataProviderTool;
@@ -49,17 +49,17 @@ public:
 
   //! Destructor
   ~TRTRawDataProvider()
-    {   
+    {
     }
 
 private:
 
   ToolHandle<IRegSelTool>             m_regionSelector { this, "RegSelTool", "RegSelTool/RegSelTool_TRT" }
-;     
+;
   ServiceHandle<IROBDataProviderSvc>  m_robDataProvider;
   ToolHandle<ITRTRawDataProviderTool> m_rawDataTool;
   ServiceHandle<ITRT_CablingSvc>     m_CablingSvc;
-  const TRT_ID*                      m_trt_id; 
+  const TRT_ID*                      m_trt_id;
 
   bool m_roiSeeded;
   SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey;
