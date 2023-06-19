@@ -385,7 +385,7 @@ def adaptiveMultiVertexFinderTool_builder( signature, config ) :
         actsExtrapolationTool = CfgMgr.ActsExtrapolationTool("ActsExtrapolationTool")
         actsExtrapolationTool.TrackingGeometryTool = actsTrackingGeometryTool
         
-        from ActsTrkPriVtxFinderTool.ActsTrkPriVtxFinderToolConf import ActsTrk__AdaptiveMultiPriVtxFinderTool
+        from ActsVertexReconstruction.ActsVertexReconstructionConf import ActsTrk__AdaptiveMultiPriVtxFinderTool
 
         vertexFinderTool = ActsTrk__AdaptiveMultiPriVtxFinderTool(name  = "ActsAdaptiveMultiPriVtxFinderTool" + signature,
                                                                   TrackSelector      = trackSelectorTool,
