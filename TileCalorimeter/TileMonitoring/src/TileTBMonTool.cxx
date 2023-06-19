@@ -414,17 +414,17 @@ StatusCode TileTBMonTool::procHistograms() {
 void TileTBMonTool::fillHitMap(int side, int section, int module, int tower, int sample, double energy) {
 
 
-  static int cellHitMapEB[3][17] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 6, 9, 12, 15, 19} // A12, A13, A14, A15, A16
+  static const int cellHitMapEB[3][17] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 6, 9, 12, 15, 19} // A12, A13, A14, A15, A16
                                     , {0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 7, 10, 13, 16, 19, 0} // C10, B11, B12, B13, B14, B15
                                     , {0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 4, 12, 12, 19, 0, 0, 0}}; // D4, D5, D6
   
-  static int cellHitMapLB[4][11] = {{1, 8, 15, 22, 30, 36, 43, 51, 60, 69, 77} // A1, A2, A3, A4, A5, A6, A7, A8, A9, A10
+  static const int cellHitMapLB[4][11] = {{1, 8, 15, 22, 30, 36, 43, 51, 60, 69, 77} // A1, A2, A3, A4, A5, A6, A7, A8, A9, A10
                                     , {1, 9, 17, 24, 32, 40, 49, 58, 68, 77, 0} // B1, B2, B3, B4, B5, B6, B7, B8, B9,
                                     , {1, 10, 19, 28, 37, 47, 57, 67, 77, 0, 0} // C1, C2, C3, C4, C5, C6, C7, C8
                                     , {1, 11, 11, 31, 31, 53, 53, 77, 0, 0, 0}}; // D0, D1, D2, D3
 
-  static double yLB[] = {5.0, 15.0, 30.0, 40.0};
-  static double yEB[] = {0.5, 1.5, 2.5, 3.5, 4.5};
+  static const double yLB[] = {5.0, 15.0, 30.0, 40.0};
+  static const double yEB[] = {0.5, 1.5, 2.5, 3.5, 4.5};
 
   int index(sample);
 
@@ -456,7 +456,7 @@ void TileTBMonTool::fillHitMap(int side, int section, int module, int tower, int
         m_tileTBHitMapEBC02->Fill(x, y, energy);
       }
 
-      if (sample != TileID::SAMP_A && tower > 8) { // A & D4
+      if (sample != TileID::SAMP_A && tower > 8 && tower < 16) { // A & D4
         
         if (tower != 9) y = yEB[index * 2 - 1]; // C10
         else y = yEB[index * 2 + 1]; // D & B
