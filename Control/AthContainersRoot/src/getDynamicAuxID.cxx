@@ -14,7 +14,7 @@
 #include "AthContainers/AuxTypeRegistry.h"
 #include "TClass.h"
 #include "TROOT.h"
-#include "boost/algorithm/string/predicate.hpp"
+#include "CxxUtils/starts_with.h"
 
 
 namespace SG {
@@ -78,7 +78,7 @@ SG::auxid_t getDynamicAuxID (const std::type_info& ti,
   // resource usage that implies, that can lead to crashes in dbg
   // builds due to cling bugs.
   std::string tn = elementTypeName;
-  if (boost::starts_with (tn, "std::vector<"))
+  if (CxxUtils::starts_with (tn, "std::vector<"))
     tn.erase (0, 5);
   std::string fac_class_name = "SG::AuxTypeVectorFactory<" +
     tn + ",allocator<" + tn;

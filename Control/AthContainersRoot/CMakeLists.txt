@@ -5,14 +5,13 @@ atlas_subdir( AthContainersRoot )
 
 # External dependencies:
 find_package( ROOT COMPONENTS Core Tree )
-find_package( Boost )
 
 # Component(s) in the package:
 atlas_add_library( AthContainersRoot
                    src/*.cxx
                    PUBLIC_HEADERS AthContainersRoot
-                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} AthContainers AthLinks CxxUtils RootUtils
+                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} 
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthLinks CxxUtils RootUtils
                    LINK_LIBRARIES AthenaKernel GaudiKernel AthContainersInterfaces )
 
 
