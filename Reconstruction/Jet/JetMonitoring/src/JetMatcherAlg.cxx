@@ -9,13 +9,13 @@
 
 JetMatcherAlg::JetMatcherAlg( const std::string& name, ISvcLocator* pSvcLocator ) : AthReentrantAlgorithm(name,pSvcLocator)
 {
-  declareProperty("JetContainerName1"  ,m_jetContainerKey1="NONE");
-  declareProperty("JetContainerName2"  ,m_jetContainerKey2="NONE");
+  declareProperty("JetContainerName1"  ,m_jetContainerKey1="");
+  declareProperty("JetContainerName2"  ,m_jetContainerKey2="");
 
-  declareProperty("L1JetContainerName1",m_l1jetContainerKey1="NONE");
-  declareProperty("L1jFexSRJetRoIContainerName",m_jFexSRJetRoIKey="NONE");
-  declareProperty("L1jFexLRJetRoIContainerName",m_jFexLRJetRoIKey="NONE");
-  declareProperty("L1gFexJetRoIContainerName",m_gFexJetRoIKey="NONE");
+  declareProperty("L1JetContainerName1",m_l1jetContainerKey1="");
+  declareProperty("L1jFexSRJetRoIContainerName",m_jFexSRJetRoIKey="");
+  declareProperty("L1jFexLRJetRoIContainerName",m_jFexLRJetRoIKey="");
+  declareProperty("L1gFexJetRoIContainerName",m_gFexJetRoIKey="");
 }
 
 //**********************************************************************
@@ -39,7 +39,7 @@ StatusCode JetMatcherAlg::initialize() {
   
   ATH_MSG_INFO(" Initializing " << name());
 
-  if (m_jetContainerKey2.key() == "NONE") {
+  if ( m_jetContainerKey2.key().empty() ) {
 
     std::string msg = "JetContainerKey2 has not been configured correctly - "
       "has value NONE";
@@ -50,33 +50,33 @@ StatusCode JetMatcherAlg::initialize() {
       
   int key_count{0};
 
-  if (m_jetContainerKey1.key() != "NONE") {
+  if (!m_jetContainerKey1.key().empty()) {
     ++key_count;
     m_matchType = MatchType::xAODJet;
     ATH_MSG_INFO("will match xAODJet to xAODJet");
   }
 
-  if (m_l1jetContainerKey1.key() != "NONE") {
+  if (!m_l1jetContainerKey1.key().empty()) {
     ++key_count;
     m_matchType = MatchType::JetRoI;
     ATH_MSG_INFO("will match JetRoI (L1)  to xAODJet");
   }
 
-  if (m_jFexSRJetRoIKey.key() != "NONE") {
+  if (!m_jFexSRJetRoIKey.key().empty()) {
     ++key_count;
     m_matchType = MatchType::jFexSRJetRoI;
     ATH_MSG_INFO("will match jFexSRJetRoI (L1)  to xAODJet");
   }
 
   
-  if (m_jFexLRJetRoIKey.key() != "NONE") {
+  if (!m_jFexLRJetRoIKey.key().empty()) {
     ++key_count;
     m_matchType = MatchType::jFexLRJetRoI;
     ATH_MSG_INFO("will match jFexLRJetRoI (L1)  to xAODJet");
   }
 
   
-  if (m_gFexJetRoIKey.key() != "NONE") {
+  if (!m_gFexJetRoIKey.key().empty()) {
     ++key_count;
     m_matchType = MatchType::gFexJetRoI;
     ATH_MSG_INFO("will match gFexSRJetRoI (L1)  to xAODJet");
@@ -106,12 +106,12 @@ StatusCode JetMatcherAlg::initialize() {
   }
   
 
-  ATH_CHECK( m_jetContainerKey1.initialize() );
-  ATH_CHECK( m_jetContainerKey2.initialize() );
-  ATH_CHECK( m_l1jetContainerKey1.initialize() );
-  ATH_CHECK( m_jFexSRJetRoIKey.initialize() );
-  ATH_CHECK( m_jFexLRJetRoIKey.initialize() );
-  ATH_CHECK( m_gFexJetRoIKey.initialize() );
+  ATH_CHECK( m_jetContainerKey1.initialize( SG::AllowEmpty ) );
+  ATH_CHECK( m_jetContainerKey2.initialize( SG::AllowEmpty ) );
+  ATH_CHECK( m_l1jetContainerKey1.initialize( SG::AllowEmpty ) );
+  ATH_CHECK( m_jFexSRJetRoIKey.initialize( SG::AllowEmpty ) );
+  ATH_CHECK( m_jFexLRJetRoIKey.initialize( SG::AllowEmpty ) );
+  ATH_CHECK( m_gFexJetRoIKey.initialize( SG::AllowEmpty ) );
 
   ATH_CHECK(set_xAODJet_varHandleKeys());
   ATH_CHECK(set_JetRoI_varHandleKeys());
