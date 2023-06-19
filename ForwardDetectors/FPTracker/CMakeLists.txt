@@ -6,7 +6,7 @@
 atlas_subdir( FPTracker )
 
 # External dependencies:
-find_package( Boost COMPONENTS program_options filesystem thread system )
+find_package( Boost COMPONENTS program_options)
 
 # this line failed automatic conversion in cmt2cmake :
 # macro_prepend fpTrackerMainlinkopts " $(Boost_linkopts_program_options) "

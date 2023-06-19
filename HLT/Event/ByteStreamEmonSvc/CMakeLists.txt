@@ -6,7 +6,7 @@
 atlas_subdir( ByteStreamEmonSvc )
 
 # External dependencies:
-find_package( Boost COMPONENTS filesystem thread system unit_test_framework )
+find_package( Boost COMPONENTS regex unit_test_framework )
 find_package( tdaq COMPONENTS emon ohroot owl is omniORB4 omnithread oh )
 
 # Component(s) in the package:
