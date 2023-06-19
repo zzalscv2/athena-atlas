@@ -96,10 +96,10 @@ def main():
             
     # print results
     JOsErrors=[]
-    print ""
-    print "---------------------"
-    print "jobOptions and release:"
-    print "---------------------"
+    print("")
+    print("---------------------")
+    print("jobOptions and release:")
+    print("---------------------")
     
     #Checking jobOptions
     JOsList=getJOsList(JOsDict)
@@ -137,7 +137,7 @@ def main():
                 retcode = subprocess.Popen(svnexcomm, shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE).communicate()
                 svnJOs=retcode[0].split()
                 if len(retcode[1]):
-                    print retcode[1]
+                    print(retcode[1])
                     logerr("","ERROR: Problem reading from SVN")
                     raise RuntimeError("Problem reading from SVN")
     
@@ -183,8 +183,8 @@ def main():
     
     
     if len(JOsErrors):
-        print "---------------------"            
-        print "MISSING JOs:"
+        print("---------------------")            
+        print("MISSING JOs:")
         for i in JOsErrors:
             if i == "including file \"MC15.":
                 #do nothing
@@ -195,10 +195,10 @@ def main():
     
     ###
     generateErrors=[]
-    print ""
-    print "---------------------"
-    print "Generate params:"
-    print "---------------------"
+    print("")
+    print("---------------------")
+    print("Generate params:")
+    print("---------------------")
     for key in generateDict:
         name=key
         val=generateDict[key]
@@ -214,18 +214,18 @@ def main():
             loginfo( '- '+name+' = ',"".join(val))
     
     if len(generateErrors):
-        print "---------------------"            
-        print "MISSING Generate params:"
+        print("---------------------")            
+        print("MISSING Generate params:")
         for i in generateErrors:
             logerr("","ERROR: %s is missing!"%i)
             
     
     ###
     metaDataErrors=[]
-    print ""
-    print "---------------------"            
-    print "Metadata:"
-    print "---------------------"
+    print("")
+    print("---------------------")            
+    print("Metadata:")
+    print("---------------------")
     for key in metaDataDict:
         name=key
         val=metaDataDict[key]
@@ -240,8 +240,8 @@ def main():
             loginfo( '- '+name+' = ',"".join(val))
     
     if len(metaDataErrors):
-        print "---------------------"            
-        print "MISSING Metadata:"
+        print("---------------------")            
+        print("MISSING Metadata:")
         for i in metaDataErrors:
             if i=="weights":
                 loginfo("INFO:","%s is missing"%i)
@@ -251,10 +251,10 @@ def main():
     
     ####
     perfMonErrors=[]
-    print ""
-    print "---------------------"
-    print "Performance metrics:"
-    print "---------------------"
+    print("")
+    print("---------------------")
+    print("Performance metrics:")
+    print("---------------------")
     for key in perfMonDict:
         name=key
         val=perfMonDict[key]
@@ -283,10 +283,10 @@ def main():
     
     
     if len(perfMonErrors):
-        print "---------------------"            
-        print "MISSING Performance metric:"
+        print("---------------------")            
+        print("MISSING Performance metric:")
         for i in perfMonErrors:
-            print "ERROR: %s is missing!"%i
+            print("ERROR: %s is missing!"%i)
             
     
     
@@ -299,10 +299,10 @@ def main():
         }
     
     testErrors=[]
-    print ""
-    print "---------------------"
-    print "Event tests:"
-    print "---------------------"
+    print("")
+    print("---------------------")
+    print("Event tests:")
+    print("---------------------")
     for dictkey in testDict:
         for key in testDict[dictkey]:
             name=key
@@ -340,8 +340,8 @@ def main():
                 loginfo( '- '+dictkey+" "+name+' = ',"".join(val))
     
     if len(testErrors):
-        print "---------------------"            
-        print "Failed tests:"
+        print("---------------------")            
+        print("Failed tests:")
         for i in testErrors:
             if i =="SimTimeEstimate RUN INFORMATION":
                 logwarn("","WARNING: %s is missing!"%i)
@@ -351,10 +351,10 @@ def main():
     
     ## Add equivalent lumi information
     if opts.TOTAL_EVENTS:
-        print ""
-        print ""
-        print "---------------------"            
-        print " Others:"
+        print("")
+        print("")
+        print("---------------------")            
+        print(" Others:")
     
     if opts.TOTAL_EVENTS:
         xs_nb=float(metaDataDict['cross-section (nb)'][0])
@@ -370,16 +370,16 @@ def main():
         loginfo("- Number of jobs:",int(opts.TOTAL_EVENTS)/minevents)
     
     if not opts.TOTAL_EVENTS or opts.NO_SVN:
-        print ""
-        print ""
-        print "---------------------"        
-        print "Incomplete:"
+        print("")
+        print("")
+        print("---------------------")        
+        print("Incomplete:")
         if not opts.TOTAL_EVENTS:
             logwarn("","WARNING: --Ntotal (-N) flag is not used - total number of events not given - impossible to calculated effective lumi.")
         if opts.NO_SVN:
             logwarn("","WARNING: --nosvn (-x) flag is used - could not check that SVN JOs are registered or whether release is blacklisted.")
     
-    print ""
+    print("")
     return 
     
 
@@ -404,7 +404,7 @@ def checkBlackList(branch,cache,MCJobOptions,outnamedir,JOsList) :
     for l in JOsList:
         if "MC15." in l:
             aJOs.append(l)   
-    print "JOSH",aJOs
+    print("JOSH",aJOs)
     ## Black List Caches MC15
     blacklist = 'svn export svn+ssh://svn.cern.ch/reps/atlasoff/Generators/'+MCJobOptions+'/trunk/common/BlackList_caches.txt'
     tmpblackfile = "%s/BlackList_caches.txt" % (outnamedir)
@@ -469,13 +469,13 @@ class bcolors:
         self.ENDC = ''
 
 def loginfo(out1,out2):
-    print str(out1),bcolors.OKBLUE + str(out2) + bcolors.ENDC
+    print(str(out1),bcolors.OKBLUE + str(out2) + bcolors.ENDC)
 def loggood(out1,out2):
-    print str(out1),bcolors.OKGREEN + str(out2) + bcolors.ENDC
+    print(str(out1),bcolors.OKGREEN + str(out2) + bcolors.ENDC)
 def logerr(out1,out2):
-    print str(out1),bcolors.FAIL + str(out2) + bcolors.ENDC
+    print(str(out1),bcolors.FAIL + str(out2) + bcolors.ENDC)
 def logwarn(out1,out2):
-    print str(out1),bcolors.WARNING + str(out2) + bcolors.ENDC
+    print(str(out1),bcolors.WARNING + str(out2) + bcolors.ENDC)
 
 # find identifiers and variables in log file lines
 def checkLine(line, lineIdentifier, dict, splitby ):
