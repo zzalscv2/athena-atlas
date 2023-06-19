@@ -17,7 +17,7 @@ mv submitDir/hist-*.root ./hist-mc21a_DAOD_PHYSLITE.root
 
 echo "Running DCube post-processing"
 
-tName="MC21a"
+tName="mc21a"
 dcubeRef=/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/SUSYTools/ART/References/hist-mc21a_DAOD_PHYSLITE-rel22.root
 dcubeXml=/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/SUSYTools/ART/xml/dcube_config_master_rel22_Run3.xml
 

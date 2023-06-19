@@ -9,7 +9,7 @@
 # Create empty pool file
 art.py createpoolfile
 
-echo "Running SUSYTools test: 'share/athena SUSYTools/jobOptions.py - --testCampaign mc20e --testFormat PHYSLITE'"
+echo "Running SUSYTools test: 'share/athena SUSYTools/jobOptions.py - --testCampaign mc21a --testFormat PHYSLITE'"
 athena SUSYTools/jobOptions.py --evtMax 2000 - --testCampaign mc21a --testFormat PHYSLITE
 echo  "art-result: $? TEST"
 
