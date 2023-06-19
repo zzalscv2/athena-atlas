@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -37,8 +37,9 @@ namespace InDet{
   /**@class SCT_ClusterOnTrack
   Specific class to represent the SCT measurements.
   It does not currently extend the interface of InDet::SiClusterOnTrack.
-     
+
   @author Veronique.Boisvert@cern.ch, Edward.Moyse@cern.ch, Andreas.Salzburger@cern.ch
+  @author Christos Aanstopoulos (AthenaMT)
    */
   class SCT_ClusterOnTrack final : public SiClusterOnTrack {
 
@@ -46,75 +47,66 @@ namespace InDet{
       friend class  Trk::ITrkEventCnvTool;
       /**For POOL only. Do not use*/
       SCT_ClusterOnTrack();
-      /**Copy constructor*/
-      SCT_ClusterOnTrack(const SCT_ClusterOnTrack &) = default;
+      // copy constructor
+      SCT_ClusterOnTrack( const SCT_ClusterOnTrack& rot) = default;
+      // move constructor
+      SCT_ClusterOnTrack( SCT_ClusterOnTrack&& rot) = default;
+      /**Assignment operator*/
+      SCT_ClusterOnTrack &operator=(const SCT_ClusterOnTrack &) = default;
+      /**Default move assigment operator*/
+      SCT_ClusterOnTrack &operator=(SCT_ClusterOnTrack &&) = default;
+      /** Destructor */
+      virtual ~SCT_ClusterOnTrack() = default;
 
-    /** Constructor with parameters :
-      RIO/PrepRawData pointer, LocalPosition*, LocalErrorMatrix*, idDE&
-      The base class owns local position, error matrix, this class owns global pos. 
+    /** Constructors with parameters :
+      RIO/PrepRawData pointer, LocalPosition, LocalErrorMatrix, idDE&
+      The base class owns local position, error matrix, this class owns global pos.
       Everything else is owned elsewhere. */
-      SCT_ClusterOnTrack( const InDet::SCT_Cluster* RIO, 
-                          const Trk::LocalParameters* locpars, 
-                          const Amg::MatrixX* locerr, 
+      SCT_ClusterOnTrack( const InDet::SCT_Cluster* RIO,
+                          const Trk::LocalParameters& locpars,
+                          const Amg::MatrixX& locerr,
                           const IdentifierHash& idDE,
-                          bool isbroad=false); 
-                        
-	  /** Constructor with parameters :
-      RIO/PrepRawData pointer, LocalPosition*, LocalErrorMatrix*, idDE&,
+                          bool isbroad=false);
+
+      SCT_ClusterOnTrack( const InDet::SCT_Cluster* RIO,
+                          Trk::LocalParameters&& locpars,
+                          Amg::MatrixX&& locerr,
+                          const IdentifierHash& idDE,
+                          bool isbroad=false);
+
+      /** Constructors with parameters :
+      RIO/PrepRawData pointer, LocalPosition, LocalErrorMatrix, idDE&,
       Global Position
-      The base class owns local position, error matrix, this class owns global pos. 
+      The base class owns local position, error matrix, this class owns global pos.
       Everything else is owned elsewhere. */
-      SCT_ClusterOnTrack( const InDet::SCT_Cluster* RIO, 
-                          const Trk::LocalParameters* locpars, 
-                          const Amg::MatrixX* locerr, 
+      SCT_ClusterOnTrack( const InDet::SCT_Cluster* RIO,
+                          const Trk::LocalParameters& locpars,
+                          const Amg::MatrixX& locerr,
                           const IdentifierHash& idDE,
                           const Amg::Vector3D& globalPosition,
-                          bool isbroad=false); 
-      
-    /** Constructor with parameters :
-      RIO/PrepRawData pointer, LocalPosition*, LocalErrorMatrix*, idDE&
-      The base class owns local position, error matrix, this class owns global pos. 
-      Everything else is owned elsewhere. */
-      SCT_ClusterOnTrack( const InDet::SCT_Cluster* RIO, 
-                          const Trk::LocalParameters& locpars, 
-                          const Amg::MatrixX& locerr, 
-                          const IdentifierHash& idDE,
-                          bool isbroad=false); 
-                        
-	  /** Constructor with parameters :
-      RIO/PrepRawData pointer, LocalPosition*, LocalErrorMatrix*, idDE&,
-      Global Position
-      The base class owns local position, error matrix, this class owns global pos. 
-      Everything else is owned elsewhere. */
-      SCT_ClusterOnTrack( const InDet::SCT_Cluster* RIO, 
-                          const Trk::LocalParameters& locpars, 
-                          const Amg::MatrixX& locerr, 
+                          bool isbroad=false);
+
+      SCT_ClusterOnTrack( const InDet::SCT_Cluster* RIO,
+                          Trk::LocalParameters&& locpars,
+                          Amg::MatrixX&& locerr,
                           const IdentifierHash& idDE,
                           const Amg::Vector3D& globalPosition,
-                          bool isbroad=false); 
+                          bool isbroad=false);
+
 
       /*
        * Constuctor used by P->T converter.
        * The P->T converter calls the
        * setValues method to complete the object
-       * e.g set/reset the DetectorElement 
+       * e.g set/reset the DetectorElement
        */
       SCT_ClusterOnTrack( const ElementLinkToIDCSCT_ClusterContainer& RIO,
-                          const Trk::LocalParameters& locpars, 
-                          const Amg::MatrixX& locerr, 
+                          const Trk::LocalParameters& locpars,
+                          const Amg::MatrixX& locerr,
                           IdentifierHash idDE,
                           const Identifier& id,
                           bool isbroad,
                           double positionAlongStrip);
-
-      /**Assignment operator*/
-      SCT_ClusterOnTrack &operator=(const SCT_ClusterOnTrack &) = default;
-      /**Default move assigment operator*/
-      SCT_ClusterOnTrack &operator=(SCT_ClusterOnTrack &&) = default;
-
-      /** Destructor */
-      virtual ~SCT_ClusterOnTrack() = default;
-     
       /** Pseudo-constructor */
       virtual SCT_ClusterOnTrack* clone() const override final;
 
@@ -135,16 +127,16 @@ namespace InDet{
       virtual const InDet::SCT_Cluster* prepRawData() const override final;
 
     const ElementLinkToIDCSCT_ClusterContainer& prepRawDataLink() const;
-     
-  
+
+
     /** returns the detector element, assoicated with the PRD of this class
       - fullfills the Trk::RIO_OnTrack interface
      */
       virtual const InDetDD::SiDetectorElement* detectorElement() const override final;
-    
+
       /**returns some information about this RIO_OnTrack.*/
-      virtual MsgStream&    dump( MsgStream& out ) const override final;	
-	
+      virtual MsgStream&    dump( MsgStream& out ) const override final;
+
       /**returns some information about this RIO_OnTrack.*/
       virtual std::ostream& dump( std::ostream& out ) const override final;
 
@@ -165,34 +157,34 @@ namespace InDet{
       double m_positionAlongStrip;
   };
 
-  inline SCT_ClusterOnTrack* SCT_ClusterOnTrack::clone() const 
-  { 
-    return new SCT_ClusterOnTrack(*this); 
+  inline SCT_ClusterOnTrack* SCT_ClusterOnTrack::clone() const
+  {
+    return new SCT_ClusterOnTrack(*this);
   }
-    
+
   inline const SCT_Cluster* SCT_ClusterOnTrack::prepRawData() const
-  { 
+  {
     // somehow one has to ask first if it is valid ... otherwise it always returns 0 ...
     if (m_rio.isValid()) return m_rio.cachedElement();
     else return 0;
-  }  
-  
+  }
+
   inline const ElementLinkToIDCSCT_ClusterContainer&
   SCT_ClusterOnTrack::prepRawDataLink() const
   {
     return m_rio;
   }
-    
+
   inline const InDetDD::SiDetectorElement* SCT_ClusterOnTrack::detectorElement() const
-  { 
-    return m_detEl; 
+  {
+    return m_detEl;
   }
 
   inline double SCT_ClusterOnTrack::positionAlongStrip() const
   {
     return m_positionAlongStrip;
   }
-      
+
 
 }//end of namespace definitions
 

@@ -273,17 +273,17 @@ InDet::SCT_ClusterOnTrackTool::correct
     locpar[Trk::locX] += correction;
   }
   bool isbroad = m_option_errorStrategy == 0;
-  return new InDet::SCT_ClusterOnTrack(SC, locpar, cov, iH, glob, isbroad);
+  return new InDet::SCT_ClusterOnTrack(SC, std::move(locpar), std::move(cov), iH, glob, isbroad);
 }
 
 double
 InDet::SCT_ClusterOnTrackTool::getCorrection(double phi, int nstrip) {
-  float corr1[30] = {
+  constexpr float corr1[30] = {
     0.3, 0.8, 1.1, 1.5, 1.9, 1.9, 2.1, 2.4, 2.3, 2.6,
     2.6, 2.7, 2.8, 2.7, 2.5, 2.6, 2.8, 2.6, 2.6, 2.7,
     2.2, 1.8, 1.8, 1.6, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0
   };
-  float corr2[30] = {
+  constexpr float corr2[30] = {
     0.0, 0.0, 0.0, 1.0, 1.5, 1.7, 1.7, 2.3, 2.1, 2.5,
     2.5, 2.7, 2.7, 2.9, 3.0, 3.0, 3.0, 3.0, 3.4, 3.4,
     3.0, 3.2, 2.6, 2.6, 3.0, 2.7, 2.5, 2.4, 1.7, 1.3
@@ -312,7 +312,7 @@ InDet::SCT_ClusterOnTrackTool::getCorrection(double phi, int nstrip) {
 
 double
 InDet::SCT_ClusterOnTrackTool::getError(double phi, int nstrip) {
-  float sigma1[60] = {
+  constexpr float sigma1[60] = {
     22.1, 21.8, 21.4, 21.0, 20.5, 20.0, 19.6, 19.1, 18.5, 18.0,
     17.4, 17.0, 16.4, 15.8, 15.4, 14.9, 14.4, 14.1, 13.3, 13.1,
     12.9, 12.4, 12.6, 12.2, 12.3, 12.6, 13.4, 14.2, 15.6, 19.3,
@@ -320,7 +320,7 @@ InDet::SCT_ClusterOnTrackTool::getError(double phi, int nstrip) {
     57.5, 56.3, 64.5, 65.7, 66.1, 69.4, 74.8, 78.3, 78.8, 79.8,
     73.5, 73.8, 75.8, 84.3, 87.0, 99.9, 86.3, 0.0, 0.0, 0.0
   };
-  float sigma2[60] = {
+  constexpr float sigma2[60] = {
     22.2, 20.3, 18.8, 16.0, 14.6, 13.8, 12.9, 12.9, 12.7, 12.3,
     12.7, 12.6, 13.0, 13.3, 14.0, 14.6, 15.3, 15.9, 16.6, 17.6,
     18.4, 19.3, 19.9, 20.5, 21.0, 21.2, 21.5, 21.4, 21.3, 21.3,
@@ -328,7 +328,7 @@ InDet::SCT_ClusterOnTrackTool::getError(double phi, int nstrip) {
     34.6, 41.6, 48.5, 52.3, 54.5, 58.4, 61.8, 66.7, 69.9, 72.1,
     78.9, 79.2, 81.8, 80.9, 87.5, 99.2, 0.0, 0.0, 0.0, 0.0
   };
-  float sigma3[60] = {
+  constexpr float sigma3[60] = {
     70.1, 73.6, 71.7, 66.9, 68.3, 66.8, 66.2, 64.8, 66.6, 63.3,
     63.3, 60.4, 59.0, 57.1, 56.4, 54.4, 54.2, 54.4, 50.3, 48.9,
     48.1, 41.9, 38.0, 31.8, 28.3, 23.1, 23.0, 20.3, 18.5, 17.6,
@@ -336,7 +336,7 @@ InDet::SCT_ClusterOnTrackTool::getError(double phi, int nstrip) {
     22.7, 22.4, 24.3, 24.8, 24.6, 27.0, 29.8, 37.0, 47.7, 49.3,
     58.2, 60.2, 66.8, 70.8, 77.3, 80.6, 0.0, 0.0, 0.0, 0.0
   };
-  float sigma4[60] = {
+  constexpr float sigma4[60] = {
     103.2, 100.4, 100.7, 101.2, 107.4, 100.6, 100.9, 100.4, 96.3, 98.2,
     96.7, 94.5, 96.9, 91.7, 90.5, 89.5, 86.3, 90.6, 82.4, 89.3,
     87.3, 77.6, 75.7, 77.2, 77.3, 84.1, 80.1, 66.9, 73.7, 72.3,
@@ -344,7 +344,7 @@ InDet::SCT_ClusterOnTrackTool::getError(double phi, int nstrip) {
     18.8, 21.6, 18.6, 20.3, 22.7, 23.3, 24.1, 22.4, 24.7, 24.7,
     27.3, 30.4, 37.0, 46.4, 59.4, 62.6, 65.3, 0.0, 0.0, 0.0
   };
-  float sigma5[60] = {
+  constexpr float sigma5[60] = {
     150.9, 139.7, 133.9, 139.8, 141.4, 134.9, 138.4, 129.3, 137.9, 128.7,
     132.4, 130.1, 124.2, 115.8, 131.4, 115.2, 128.7, 112.8, 130.7, 129.0,
     115.8, 101.3, 115.9, 116.1, 121.7, 109.9, 110.0, 97.2, 96.4, 107.3,
