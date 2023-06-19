@@ -16,7 +16,7 @@ MonitoredRange::MonitoredRange(const std::string& name, TrigCostAnalysis* parent
   m_seenLB()
 {
   std::string hisSvcName = getName() + "_walltime";
-  std::unique_ptr<TProfile> hist = std::make_unique<TProfile>(hisSvcName.c_str(), "Walltime;;Seconds", 1000, 0, 1000);
+  std::unique_ptr<TProfile> hist = std::make_unique<TProfile>(hisSvcName.c_str(), "Walltime;;Seconds", 5000, 0, 5000);
   m_cachedLifetimeHistPtr = bookGetPointer(hist.release()); // Now owned by HistSvc
 }
 
