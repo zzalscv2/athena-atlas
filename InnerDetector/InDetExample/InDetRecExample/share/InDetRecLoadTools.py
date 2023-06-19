@@ -800,7 +800,7 @@ if (InDetFlags.doVertexFinding() or InDetFlags.doVertexFindingForMonitoring()) o
                                                                       do3dSplitting     = InDetFlags.doPrimaryVertex3DFinding())
     else:
       from ActsGeometry.ActsTrackingGeometryTool import ActsTrackingGeometryTool
-      from ActsTrkPriVtxFinderTool.ActsTrkPriVtxFinderToolConf import ActsTrk__AdaptiveMultiPriVtxFinderTool
+      from ActsVertexReconstruction.ActsVertexReconstructionConf import ActsTrk__AdaptiveMultiPriVtxFinderTool
       actsTrackingGeometryTool = getattr(ToolSvc,"ActsTrackingGeometryTool")
       actsExtrapolationTool = CfgMgr.ActsExtrapolationTool("ActsExtrapolationTool")
       actsExtrapolationTool.TrackingGeometryTool = actsTrackingGeometryTool
@@ -837,7 +837,7 @@ if (InDetFlags.doVertexFinding() or InDetFlags.doVertexFindingForMonitoring()) o
       # --- ACTS IVF configured with Full Billoir Vertex Fitter  
       #
       from ActsGeometry.ActsTrackingGeometryTool import ActsTrackingGeometryTool
-      from ActsTrkPriVtxFinderTool.ActsTrkPriVtxFinderToolConf import ActsTrk__IterativePriVtxFinderTool
+      from ActsVertexReconstruction.ActsVertexReconstructionConf import ActsTrk__IterativePriVtxFinderTool
       actsTrackingGeometryTool = getattr(ToolSvc,"ActsTrackingGeometryTool")
       actsExtrapolationTool = CfgMgr.ActsExtrapolationTool("ActsExtrapolationTool")
       actsExtrapolationTool.TrackingGeometryTool = actsTrackingGeometryTool
