@@ -33,8 +33,8 @@ BPHY13JpsiFinder = Analysis__JpsiFinder(
     assumeDiMuons               = True,  # If true, will assume dimu hypothesis and use PDG value for mu mass
     trackThresholdPt            = 2500.,
     invMassUpper                = 12500.,
-    invMassLower                = 2000.,
-    Chi2Cut                     = 200.,
+    invMassLower                = 800.,
+    Chi2Cut                     = 50.,
     oppChargesOnly	        = True,
     atLeastOneComb              = True,
     useCombinedMeasurement      = False, # Only takes effect if combOnly=True	
@@ -99,12 +99,12 @@ BPHY13Plus2Tracks = Analysis__JpsiPlus2Tracks(
     ManualMassHypo                      = [ 105.658, 105.658, 105.658, 105.658 ],
     trkThresholdPt			= 1500.,
     trkMaxEta			        = 2.5,
-    oppChargesOnly                      = False,
+    oppChargesOnly                      = True,
     DiTrackMassUpper                    = 12500.,
-    DiTrackMassLower                    = 2000.,
+    DiTrackMassLower                    = 800.,
     TrkQuadrupletMassUpper              = 25000.,
     TrkQuadrupletMassLower              = 0.,
-    Chi2Cut                             = 200.,
+    Chi2Cut                             = 50.,
     JpsiContainerKey                    = "BPHY13OniaCandidates",
     TrackParticleCollection             = "InDetTrackParticles",
     MuonsUsedInJpsi			= "Muons",
@@ -151,7 +151,7 @@ if do_blinding:
         VtxMassHypo                = 6900.0, # for decay time
         MassMin                    = 7500.,
         MassMax                    = 9000.,
-        Chi2Max                    = 200.)
+        Chi2Max                    = 50.)
     
     ToolSvc += BPHY13_Select1_FourTrack
     print      BPHY13_Select1_FourTrack
@@ -164,7 +164,7 @@ if do_blinding:
         VtxMassHypo                = 6900.0, # for decay time
         MassMin                    = 10000.,
         MassMax                    = 12000.,
-        Chi2Max                    = 200.)
+        Chi2Max                    = 50.)
 
     ToolSvc += BPHY13_Select2_FourTrack
     print      BPHY13_Select2_FourTrack
@@ -177,7 +177,7 @@ if do_blinding:
         VtxMassHypo                = 6900.0,  #for decay time
         MassMin                    = 14000.,
         MassMax                    = 17500.,
-        Chi2Max                    = 200.)
+        Chi2Max                    = 50.)
 
     ToolSvc += BPHY13_Select3_FourTrack
     print      BPHY13_Select3_FourTrack
@@ -190,7 +190,7 @@ if do_blinding:
         VtxMassHypo                = 6900.0,  #for decay time
         MassMin                    = 19500.,
         MassMax                    = 25000.,
-        Chi2Max                    = 200.)
+        Chi2Max                    = 50.)
 
     ToolSvc += BPHY13_Select4_FourTrack
     print      BPHY13_Select4_FourTrack
@@ -207,7 +207,7 @@ elif do_unblinding1 or do_unblinding2:
             VtxMassHypo                = 6900.0, # for decay time
             MassMin                    = 0.,
             MassMax                    = 7500.,
-            Chi2Max                    = 200.)
+            Chi2Max                    = 50.)
     
         ToolSvc += BPHY13_Select1_FourTrack
         print      BPHY13_Select1_FourTrack
@@ -220,7 +220,7 @@ elif do_unblinding1 or do_unblinding2:
             VtxMassHypo                = 6900.0, # for decay time
             MassMin                    = 9000.,
             MassMax                    = 10000.,
-            Chi2Max                    = 200.)
+            Chi2Max                    = 50.)
 
         ToolSvc += BPHY13_Select2_FourTrack
         print      BPHY13_Select2_FourTrack
@@ -236,7 +236,7 @@ elif do_unblinding1 or do_unblinding2:
             VtxMassHypo                = 6900.0,  #for decay time
             MassMin                    = 12000.,
             MassMax                    = 14000.,
-            Chi2Max                    = 200.)
+            Chi2Max                    = 50.)
 
         ToolSvc += BPHY13_Select3_FourTrack
         print      BPHY13_Select3_FourTrack
@@ -249,7 +249,7 @@ elif do_unblinding1 or do_unblinding2:
             VtxMassHypo                = 6900.0,  #for decay time
             MassMin                    = 17500.,
             MassMax                    = 19500.,
-            Chi2Max                    = 200.)
+            Chi2Max                    = 50.)
 
         ToolSvc += BPHY13_Select4_FourTrack
         print      BPHY13_Select4_FourTrack
@@ -262,7 +262,7 @@ else:
         VtxMassHypo                = 6900.0, # for decay time
         MassMin                    = 0.,
         MassMax                    = 25000.,
-        Chi2Max                    = 200.)
+        Chi2Max                    = 50.)
 
     ToolSvc += BPHY13_Select_FourTrack
     print      BPHY13_Select_FourTrack
@@ -317,7 +317,7 @@ BPHY13_Select_TwoMuon          = DerivationFramework__Select_onia2mumu(
     VtxMassHypo                = 3096.916,
     MassMin                    = 2000.,
     MassMax                    = 3600.,
-    Chi2Max                    = 200)
+    Chi2Max                    = 50)
 
 ToolSvc += BPHY13_Select_TwoMuon
 print      BPHY13_Select_TwoMuon
@@ -345,7 +345,7 @@ BPHY13_Select_TwoTrack         = DerivationFramework__Select_onia2mumu(
     VtxMassHypo                = 3096.916,
     MassMin                    = 2000.,
     MassMax                    = 3600.,
-    Chi2Max                    = 200)
+    Chi2Max                    = 50)
 
 ToolSvc += BPHY13_Select_TwoTrack
 print      BPHY13_Select_TwoTrack
@@ -374,7 +374,7 @@ BPHY13_Select_TwoMuonHi        = DerivationFramework__Select_onia2mumu(
     VtxMassHypo                = 9460.30,
     MassMin                    = 8500.,
     MassMax                    = 11000.,
-    Chi2Max                    = 200)
+    Chi2Max                    = 50)
 
 ToolSvc += BPHY13_Select_TwoMuonHi
 print      BPHY13_Select_TwoMuonHi
@@ -402,7 +402,7 @@ BPHY13_Select_TwoTrackHi       = DerivationFramework__Select_onia2mumu(
     VtxMassHypo                = 9460.30,
     MassMin                    = 8500.,
     MassMax                    = 11000.,
-    Chi2Max                    = 200)
+    Chi2Max                    = 50)
 
 ToolSvc += BPHY13_Select_TwoTrackHi
 print      BPHY13_Select_TwoTrackHi
@@ -431,7 +431,7 @@ BPHY13_Select_TwoMuonMed       = DerivationFramework__Select_onia2mumu(
     VtxMassHypo                = 3686.10,
     MassMin                    = 3300.0,
     MassMax                    = 4500.0,
-    Chi2Max                    = 200)
+    Chi2Max                    = 50)
 
 ToolSvc += BPHY13_Select_TwoMuonMed
 print      BPHY13_Select_TwoMuonMed
@@ -459,10 +459,66 @@ BPHY13_Select_TwoTrackMed      = DerivationFramework__Select_onia2mumu(
     VtxMassHypo                = 3686.10,
     MassMin                    = 3300.,
     MassMax                    = 4500.,
-    Chi2Max                    = 200)
+    Chi2Max                    = 50)
 
 ToolSvc += BPHY13_Select_TwoTrackMed
 print      BPHY13_Select_TwoTrackMed
+
+BPHY13_Revertex_2muLow         = DerivationFramework__ReVertex(
+    name                       = "BPHY13_Revertex_2muLow",
+    InputVtxContainerName      = "BPHY13FourTrack",
+    TrackIndices               = [ 0, 1 ],
+    RefitPV                    = True,
+    RefPVContainerName         = "BPHY13RefittedPrimaryVertices", # use existing refitted PVs
+    UseMassConstraint          = False,
+    VertexMass                 = 1019.461,
+    MassInputParticles         = [105.658, 105.658],
+    TrkVertexFitterTool           = BPHY13VertexFit,
+    OutputVtxContainerName     = "BPHY13TwoMuonLow")
+
+ToolSvc += BPHY13_Revertex_2muLow
+print      BPHY13_Revertex_2muLow
+
+BPHY13_Select_TwoMuonLow       = DerivationFramework__Select_onia2mumu(
+    name                       = "BPHY13_Select_TwoMuonLow",
+    HypothesisName             = "TwoMuonsLow",
+    InputVtxContainerName      = "BPHY13TwoMuonLow",
+    TrkMasses                  = [105.658, 105.658],
+    VtxMassHypo                = 1019.461,
+    MassMin                    = 800.0,
+    MassMax                    = 1270.0,
+    Chi2Max                    = 50)
+
+ToolSvc += BPHY13_Select_TwoMuonLow
+print      BPHY13_Select_TwoMuonLow
+
+BPHY13_Revertex_2trkLow        = DerivationFramework__ReVertex(
+    name                       = "BPHY13_Revertex_2trkLow",
+    InputVtxContainerName      = "BPHY13FourTrack",
+    TrackIndices               = [ 2, 3 ],
+    RefitPV                    = True,
+    RefPVContainerName         = "BPHY13RefittedPrimaryVertices", # use existing refitted PVs
+    UseMassConstraint          = False,
+    VertexMass                 = 1019.461,
+    MassInputParticles         = [105.658, 105.658],
+    TrkVertexFitterTool           = BPHY13VertexFit,
+    OutputVtxContainerName     = "BPHY13TwoTrackLow")
+
+ToolSvc += BPHY13_Revertex_2trkLow
+print      BPHY13_Revertex_2trkLow
+
+BPHY13_Select_TwoTrackLow      = DerivationFramework__Select_onia2mumu(
+    name                       = "BPHY13_Select_TwoTrackLow",
+    HypothesisName             = "TwoTracksLow",
+    InputVtxContainerName      = "BPHY13TwoTrackLow",
+    TrkMasses                  = [105.658, 105.658],
+    VtxMassHypo                = 1019.461,
+    MassMin                    = 800.0,
+    MassMax                    = 1270.0,
+    Chi2Max                    = 50)
+
+ToolSvc += BPHY13_Select_TwoTrackLow
+print      BPHY13_Select_TwoTrackLow
 
 #--------------------------------------------------------------------
 ## 7/ select the event. We only want to keep events that contain certain vertices which passed certain selection.
@@ -473,7 +529,7 @@ print      BPHY13_Select_TwoTrackMed
 ##    where "ContainerName" is output container from some Reco_* tool, "HypoName" is the hypothesis name setup in some "Select_*"
 ##    tool and "count" is the number of candidates passing the selection you want to keep. 
 
-expression = "( count(BPHY13TwoMuon.passed_TwoMuons) + count(BPHY13TwoTrack.passed_TwoTracks) > 1 || count(BPHY13TwoMuonMed.passed_TwoMuonsMed) + count(BPHY13TwoTrackMed.passed_TwoTracksMed) > 1 || count(BPHY13TwoMuon.passed_TwoMuons) + count(BPHY13TwoTrackMed.passed_TwoTracksMed) > 1 || count(BPHY13TwoMuonMed.passed_TwoMuonsMed) + count(BPHY13TwoTrack.passed_TwoTracks) > 1 || count(BPHY13TwoMuonHi.passed_TwoMuonsHi) + count(BPHY13TwoTrackHi.passed_TwoTracksHi) > 0 )"
+expression = "( count(BPHY13TwoMuon.passed_TwoMuons) + count(BPHY13TwoTrack.passed_TwoTracks) > 1 || count(BPHY13TwoMuonMed.passed_TwoMuonsMed) + count(BPHY13TwoTrackMed.passed_TwoTracksMed) > 1 || count(BPHY13TwoMuon.passed_TwoMuons) + count(BPHY13TwoTrackMed.passed_TwoTracksMed) > 1 || count(BPHY13TwoMuonMed.passed_TwoMuonsMed) + count(BPHY13TwoTrack.passed_TwoTracks) > 1 || count(BPHY13TwoMuonHi.passed_TwoMuonsHi) + count(BPHY13TwoTrackHi.passed_TwoTracksHi) > 0 || count(BPHY13TwoMuonLow.passed_TwoMuonsLow) + count(BPHY13TwoTrackLow.passed_TwoTracksLow) > 1 || count(BPHY13TwoMuonLow.passed_TwoMuonsLow) + count(BPHY13TwoTrack.passed_TwoTracks) > 1 || count(BPHY13TwoMuon.passed_TwoMuons) + count(BPHY13TwoTrackLow.passed_TwoTracksLow) > 1 || count(BPHY13TwoMuonLow.passed_TwoMuonsLow) + count(BPHY13TwoTrackMed.passed_TwoTracksMed) > 1 || count(BPHY13TwoMuonMed.passed_TwoMuonsMed) + count(BPHY13TwoTrackLow.passed_TwoTracksLow) > 1 )"
 
 if do_blinding or (do_unblinding1 and do_unblinding2):
     expression = expression + " && count(BPHY13FourTrack.passed_FourTracks1)+count(BPHY13FourTrack.passed_FourTracks2)+count(BPHY13FourTrack.passed_FourTracks3)+count(BPHY13FourTrack.passed_FourTracks4) > 0"
@@ -523,7 +579,7 @@ elif do_unblinding2:
 else:
     augmentation_tools += [BPHY13_Select_FourTrack]
 
-augmentation_tools += [BPHY13TrackIsolationDecorator, BPHY13_Revertex_2mu, BPHY13_Select_TwoMuon, BPHY13_Revertex_2trk, BPHY13_Select_TwoTrack, BPHY13_Revertex_2muHi, BPHY13_Select_TwoMuonHi, BPHY13_Revertex_2trkHi, BPHY13_Select_TwoTrackHi, BPHY13_Revertex_2muMed, BPHY13_Select_TwoMuonMed, BPHY13_Revertex_2trkMed, BPHY13_Select_TwoTrackMed]
+augmentation_tools += [BPHY13TrackIsolationDecorator, BPHY13_Revertex_2mu, BPHY13_Select_TwoMuon, BPHY13_Revertex_2trk, BPHY13_Select_TwoTrack, BPHY13_Revertex_2muHi, BPHY13_Select_TwoMuonHi, BPHY13_Revertex_2trkHi, BPHY13_Select_TwoTrackHi, BPHY13_Revertex_2muMed, BPHY13_Select_TwoMuonMed, BPHY13_Revertex_2trkMed, BPHY13_Select_TwoTrackMed, BPHY13_Revertex_2muLow, BPHY13_Select_TwoMuonLow, BPHY13_Revertex_2trkLow, BPHY13_Select_TwoTrackLow]
 
 DerivationFrameworkJob += CfgMgr.DerivationFramework__DerivationKernel(
     "BPHY13Kernel",
@@ -609,6 +665,16 @@ BPHY13_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY13_Revertex_2tr
 BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY13_Revertex_2trkMed.OutputVtxContainerName]
 ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
 BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY13_Revertex_2trkMed.OutputVtxContainerName]
+
+BPHY13_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY13_Revertex_2muLow.OutputVtxContainerName]
+BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY13_Revertex_2muLow.OutputVtxContainerName]
+## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
+BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY13_Revertex_2muLow.OutputVtxContainerName]
+
+BPHY13_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY13_Revertex_2trkLow.OutputVtxContainerName]
+BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY13_Revertex_2trkLow.OutputVtxContainerName]
+## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
+BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY13_Revertex_2trkLow.OutputVtxContainerName]
 
 
 # Truth information for MC only

@@ -597,6 +597,18 @@ list_2trk0trk_psiMass = [Psi2Smass, Psi2Smass, Psi2Smass, Psi2Smass, Psi2Smass,
                          B0mass, B0mass, B0mass, B0mass, B0mass,
                          B0mass, B0mass, B0mass, B0mass, B0mass,
                          Upsi2Smass, Upsi2Smass, Upsi2Smass, Upsi2Smass, Upsi2Smass]
+list_2trk0trk_dau3Mass = [Pimass, Pimass, Pimass, Pimass, Pimass,
+                         Pimass, Pimass, Pimass, Pimass, Pimass,
+                         Kmass, Kmass, Kmass, Kmass, Kmass,
+                         Kmass, Kmass, Kmass, Kmass, Kmass,
+                         Pimass, Pimass, Pimass, Pimass, Pimass,
+                         Pimass, Pimass, Pimass, Pimass, Pimass]
+list_2trk0trk_dau4Mass = [Pimass, Pimass, Pimass, Pimass, Pimass,
+                         Pimass, Pimass, Pimass, Pimass, Pimass,
+                         Kmass, Kmass, Kmass, Kmass, Kmass,
+                         Pimass, Pimass, Pimass, Pimass, Pimass,
+                         Kmass, Kmass, Kmass, Kmass, Kmass,
+                         Pimass, Pimass, Pimass, Pimass, Pimass]
 list_2trk0trk_jpsi2Mass = [Phimass, Jpsimass, Psi2Smass, Upsimass, Upsi2Smass,
                            Phimass, Jpsimass, Psi2Smass, Upsimass, Upsi2Smass,
                            Phimass, Jpsimass, Psi2Smass, Upsimass, Upsi2Smass,
@@ -627,6 +639,8 @@ for i in range(len(list_2trk0trk_obj)):
     list_2trk0trk_obj[i].RefPVContainerName       = "BPHY23"+list_2trk0trk_hypo[i]+"RefPrimaryVertices"
     list_2trk0trk_obj[i].CascadeVertexCollections = ["BPHY23"+list_2trk0trk_hypo[i]+"CascadeVtx1","BPHY23"+list_2trk0trk_hypo[i]+"CascadeVtx2","BPHY23"+list_2trk0trk_hypo[i]+"CascadeVtx3"]
     list_2trk0trk_obj[i].RefitPV                  = True
+    list_2trk0trk_obj[i].Vtx1Daug3MassHypo        = list_2trk0trk_dau3Mass[i]
+    list_2trk0trk_obj[i].Vtx1Daug4MassHypo        = list_2trk0trk_dau4Mass[i]
     list_2trk0trk_obj[i].ApplyJpsiMassConstraint  = True
     list_2trk0trk_obj[i].JpsiMass                 = list_2trk0trk_jpsiMass[i]
     list_2trk0trk_obj[i].ApplyPsiMassConstraint   = True
@@ -659,6 +673,10 @@ list_1trk0trk_psiMass = [Zcmass, Zcmass, Zcmass, Zcmass, Zcmass,
                          Bpmmass, Bpmmass, Bpmmass, Bpmmass, Bpmmass,
                          Dspmmass, Dspmmass, Dspmmass, Dspmmass, Dspmmass,
                          Dpmmass, Dpmmass, Dpmmass, Dpmmass, Dpmmass]
+list_1trk0trk_dau3Mass = [Pimass, Pimass, Pimass, Pimass, Pimass,
+                         Kmass, Kmass, Kmass, Kmass, Kmass,
+                         Pimass, Pimass, Pimass, Pimass, Pimass,
+                         Pimass, Pimass, Pimass, Pimass, Pimass]
 list_1trk0trk_jpsi2Mass = [Phimass, Jpsimass, Psi2Smass, Upsimass, Upsi2Smass,
                            Phimass, Jpsimass, Psi2Smass, Upsimass, Upsi2Smass,
                            Phimass, Jpsimass, Psi2Smass, Upsimass, Upsi2Smass,
@@ -685,6 +703,7 @@ for i in range(len(list_1trk0trk_obj)):
     list_1trk0trk_obj[i].RefPVContainerName       = "BPHY23"+list_1trk0trk_hypo[i]+"RefPrimaryVertices"
     list_1trk0trk_obj[i].CascadeVertexCollections = ["BPHY23"+list_1trk0trk_hypo[i]+"CascadeVtx1","BPHY23"+list_1trk0trk_hypo[i]+"CascadeVtx2","BPHY23"+list_1trk0trk_hypo[i]+"CascadeVtx3"]
     list_1trk0trk_obj[i].RefitPV                  = True
+    list_1trk0trk_obj[i].Vtx1Daug3MassHypo        = list_1trk0trk_dau3Mass[i]
     if list_1trk0trk_jpsiMass[i] != Phimass:
         list_1trk0trk_obj[i].ApplyJpsiMassConstraint  = True
         list_1trk0trk_obj[i].JpsiMass                 = list_1trk0trk_jpsiMass[i]
@@ -719,6 +738,10 @@ list_1trk1trk_psi1Mass = [Zcmass, Zcmass, Zcmass, Zcmass,
                           Bpmmass, Bpmmass, Bpmmass,
                           Dspmmass, Dspmmass,
                           Dpmmass]
+list_1trk1trk_p1dau3Mass = [Pimass, Pimass, Pimass, Pimass,
+                           Kmass, Kmass, Kmass,
+                           Pimass, Pimass,
+                           Pimass]
 list_1trk1trk_jpsi2Mass = [Jpsimass, Jpsimass, Phimass, Phimass,
                            Jpsimass, Phimass, Phimass,
                            Phimass, Phimass,
@@ -727,6 +750,10 @@ list_1trk1trk_psi2Mass = [Zcmass, Bpmmass, Dspmmass, Dpmmass,
                           Bpmmass, Dspmmass, Dpmmass,
                           Dspmmass, Dpmmass,
                           Dpmmass]
+list_1trk1trk_p2dau3Mass = [Pimass, Kmass, Pimass, Pimass,
+                           Kmass, Pimass, Pimass,
+                           Pimass, Pimass,
+                           Pimass]
 
 from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__PsiPlusPsiCascade
 
@@ -755,6 +782,8 @@ for i in range(len(list_1trk1trk_obj)):
     list_1trk1trk_obj[i].RefPVContainerName       = "BPHY23"+list_1trk1trk_hypo[i]+"RefPrimaryVertices"
     list_1trk1trk_obj[i].CascadeVertexCollections = ["BPHY23"+list_1trk1trk_hypo[i]+"CascadeVtx1","BPHY23"+list_1trk1trk_hypo[i]+"CascadeVtx2","BPHY23"+list_1trk1trk_hypo[i]+"CascadeVtx3"]
     list_1trk1trk_obj[i].RefitPV                  = True
+    list_1trk1trk_obj[i].Vtx1Daug3MassHypo        = list_1trk1trk_p1dau3Mass[i]
+    list_1trk1trk_obj[i].Vtx2Daug3MassHypo        = list_1trk1trk_p2dau3Mass[i]
     if list_1trk1trk_jpsi1Mass[i] != Phimass:
         list_1trk1trk_obj[i].ApplyJpsi1MassConstraint = True
         list_1trk1trk_obj[i].Jpsi1Mass                = list_1trk1trk_jpsi1Mass[i]
@@ -802,6 +831,18 @@ list_2trk1trk_psi1Mass = [Psi2Smass, Psi2Smass, Psi2Smass, Psi2Smass,
                           B0mass, B0mass, B0mass, B0mass,
                           B0mass, B0mass, B0mass, B0mass,
                           Upsi2Smass, Upsi2Smass, Upsi2Smass, Upsi2Smass]
+list_2trk1trk_p1dau3Mass = [Pimass, Pimass, Pimass, Pimass,
+                            Pimass, Pimass, Pimass, Pimass,
+                            Kmass, Kmass, Kmass, Kmass,
+                            Kmass, Kmass, Kmass, Kmass,
+                            Pimass, Pimass, Pimass, Pimass,
+                            Pimass, Pimass, Pimass, Pimass]
+list_2trk1trk_p1dau4Mass = [Pimass, Pimass, Pimass, Pimass,
+                            Pimass, Pimass, Pimass, Pimass,
+                            Kmass, Kmass, Kmass, Kmass,
+                            Pimass, Pimass, Pimass, Pimass,
+                            Kmass, Kmass, Kmass, Kmass,
+                            Pimass, Pimass, Pimass, Pimass]
 list_2trk1trk_jpsi2Mass = [Jpsimass, Jpsimass, Phimass, Phimass,
                            Jpsimass, Jpsimass, Phimass, Phimass,
                            Jpsimass, Jpsimass, Phimass, Phimass,
@@ -814,6 +855,12 @@ list_2trk1trk_psi2Mass = [Zcmass, Bpmmass, Dspmmass, Dpmmass,
                           Zcmass, Bpmmass, Dspmmass, Dpmmass,
                           Zcmass, Bpmmass, Dspmmass, Dpmmass,
                           Zcmass, Bpmmass, Dspmmass, Dpmmass]
+list_2trk1trk_p2dau3Mass = [Pimass, Kmass, Pimass, Pimass,
+                            Pimass, Kmass, Pimass, Pimass,
+                            Pimass, Kmass, Pimass, Pimass,
+                            Pimass, Kmass, Pimass, Pimass,
+                            Pimass, Kmass, Pimass, Pimass,
+                            Pimass, Kmass, Pimass, Pimass]
 
 list_2trk1trk_obj = []
 for hypo in list_2trk1trk_hypo:
@@ -839,6 +886,9 @@ for i in range(len(list_2trk1trk_obj)):
     list_2trk1trk_obj[i].RefPVContainerName       = "BPHY23"+list_2trk1trk_hypo[i]+"RefPrimaryVertices"
     list_2trk1trk_obj[i].CascadeVertexCollections = ["BPHY23"+list_2trk1trk_hypo[i]+"CascadeVtx1","BPHY23"+list_2trk1trk_hypo[i]+"CascadeVtx2","BPHY23"+list_2trk1trk_hypo[i]+"CascadeVtx3"]
     list_2trk1trk_obj[i].RefitPV                  = True
+    list_2trk1trk_obj[i].Vtx1Daug3MassHypo        = list_2trk1trk_p1dau3Mass[i]
+    list_2trk1trk_obj[i].Vtx1Daug4MassHypo        = list_2trk1trk_p1dau4Mass[i]
+    list_2trk1trk_obj[i].Vtx2Daug3MassHypo        = list_2trk1trk_p2dau3Mass[i]
     list_2trk1trk_obj[i].ApplyJpsi1MassConstraint = True
     list_2trk1trk_obj[i].Jpsi1Mass                = list_2trk1trk_jpsi1Mass[i]
     list_2trk1trk_obj[i].ApplyPsi1MassConstraint  = True
@@ -884,6 +934,18 @@ list_2trk2trk_psi1Mass = [Psi2Smass, Psi2Smass, Psi2Smass, Psi2Smass, Psi2Smass,
                           B0mass, B0mass, B0mass,
                           B0mass, B0mass,
                           Upsi2Smass]
+list_2trk2trk_p1dau3Mass = [Pimass, Pimass, Pimass, Pimass, Pimass, Pimass,
+                            Pimass, Pimass, Pimass, Pimass, Pimass,
+                            Kmass, Kmass, Kmass, Kmass,
+                            Kmass, Kmass, Kmass,
+                            Pimass, Pimass,
+                            Pimass]
+list_2trk2trk_p1dau4Mass = [Pimass, Pimass, Pimass, Pimass, Pimass, Pimass,
+                            Pimass, Pimass, Pimass, Pimass, Pimass,
+                            Kmass, Kmass, Kmass, Kmass,
+                            Pimass, Pimass, Pimass,
+                            Kmass, Kmass,
+                            Pimass]
 list_2trk2trk_jpsi2Mass = [Jpsimass, Jpsimass, Jpsimass, Jpsimass, Jpsimass, Upsimass,
                            Jpsimass, Jpsimass, Jpsimass, Jpsimass, Upsimass,
                            Jpsimass, Jpsimass, Jpsimass, Upsimass,
@@ -896,6 +958,18 @@ list_2trk2trk_psi2Mass = [Psi2Smass, X3872mass, Bs0mass, B0mass, B0mass, Upsi2Sm
                           B0mass, B0mass, Upsi2Smass,
                           B0mass, Upsi2Smass,
                           Upsi2Smass]
+list_2trk2trk_p2dau3Mass = [Pimass, Pimass, Kmass, Kmass, Pimass, Pimass,
+                            Pimass, Kmass, Kmass, Pimass, Pimass,
+                            Kmass, Kmass, Pimass, Pimass,
+                            Kmass, Pimass, Pimass,
+                            Pimass, Pimass,
+                            Pimass]
+list_2trk2trk_p2dau4Mass = [Pimass, Pimass, Kmass, Pimass, Kmass,  Pimass,
+                            Pimass, Kmass, Pimass, Kmass,  Pimass,
+                            Kmass, Pimass, Kmass,  Pimass,
+                            Pimass, Kmass, Pimass,
+                            Kmass, Pimass,
+                            Pimass]
 
 list_2trk2trk_obj = []
 for hypo in list_2trk2trk_hypo:
@@ -922,6 +996,10 @@ for i in range(len(list_2trk2trk_obj)):
     list_2trk2trk_obj[i].RefPVContainerName       = "BPHY23"+list_2trk2trk_hypo[i]+"RefPrimaryVertices"
     list_2trk2trk_obj[i].CascadeVertexCollections = ["BPHY23"+list_2trk2trk_hypo[i]+"CascadeVtx1","BPHY23"+list_2trk2trk_hypo[i]+"CascadeVtx2","BPHY23"+list_2trk2trk_hypo[i]+"CascadeVtx3"]
     list_2trk2trk_obj[i].RefitPV                  = True
+    list_2trk2trk_obj[i].Vtx1Daug3MassHypo        = list_2trk2trk_p1dau3Mass[i]
+    list_2trk2trk_obj[i].Vtx1Daug4MassHypo        = list_2trk2trk_p1dau4Mass[i]
+    list_2trk2trk_obj[i].Vtx2Daug3MassHypo        = list_2trk2trk_p2dau3Mass[i]
+    list_2trk2trk_obj[i].Vtx2Daug4MassHypo        = list_2trk2trk_p2dau4Mass[i]
     list_2trk2trk_obj[i].ApplyJpsi1MassConstraint = True
     list_2trk2trk_obj[i].Jpsi1Mass                = list_2trk2trk_jpsi1Mass[i]
     list_2trk2trk_obj[i].ApplyPsi1MassConstraint  = True
