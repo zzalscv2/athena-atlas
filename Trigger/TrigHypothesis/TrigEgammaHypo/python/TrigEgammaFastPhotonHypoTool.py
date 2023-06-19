@@ -12,6 +12,7 @@ class TrigEgammaFastPhotonHypoToolConfig:
                            'medium'   , 
                            'loose'    , 
                            'etcut'    , 
+                           'nopid'    ,
                            ]
 
   def same( self, val ):
@@ -86,7 +87,7 @@ class TrigEgammaFastPhotonHypoToolConfig:
   # Compile the chain
   #
   def compile(self, flags):
-    if self.pidname() in ('etcut', 'ion'):
+    if self.pidname() in ('etcut', 'ion', 'nopid'):
         self.etcut()
     elif 'noalg' == self.pidname():
         self.nocut()
