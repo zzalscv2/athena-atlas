@@ -59,14 +59,23 @@ def saveMetadata(inputFile, argsMetadata={}, processingWarnings=[], doTRPDetails
     metadata.append({'BaseEventWeight' : metatree.BaseEventWeight})
 
     if doTRPDetails:
-        detailsPerLb = readDetailsFromTRP(inputFile, metatree.runNumber, maxRanges)
+        # First run with new physics deadtime item https://gitlab.cern.ch/atlas-tdaq-oks/p1/tdaq-10-00-00/-/commit/31c7c6e6b9f3c796c97cf4a61e76818d7da410df
+        if metatree.runNumber >= 452028:
+            dtItem = "L1_eEM26M--enabled"
+        else:
+            dtItem = "L1_TAU8--enabled"
+        detailsPerLb = readDetailsFromTRP(inputFile, metatree.runNumber, maxRanges, dtItem)
         if detailsPerLb:
             for detail in detailsPerLb["Global"]:
                 metadata.append({detail : detailsPerLb["Global"][detail]})
             metadata.append({"LumiblockDetails" : detailsPerLb["PerLb"]})
-            metadata[1]['Details'] += " Monitored time: {0} - {1} avg <mu> {2} deadtime {3}".format(
+            if metadata[1]['Details']:
+                metadata[1]['Details'] += " "
+            else:
+                metadata[1]['Details'] = ""
+            metadata[1]['Details'] += "Monitored time: {0} - {1} max <mu> {2} deadtime {3}".format(
                 detailsPerLb["Global"]["DataRangeStart"], detailsPerLb["Global"]["DataRangeEnd"], 
-                detailsPerLb["Global"]["GlobalMeanPileup"], detailsPerLb["Global"]["GlobalMeanDeadtime"])
+                detailsPerLb["Global"]["GlobalMaxPileup"], detailsPerLb["Global"]["GlobalMeanDeadtime"])
         else:
             log.error("Reading lumiblock details for TRP failed!")
 
@@ -287,7 +296,7 @@ def readHLTConfigKeysFromAMI(amiTag):
     return configMetadata
 
 
-def readDetailsFromTRP(inputFile, runNumber, maxRanges, itemName="L1_TAU8--enabled", server="https://atlasop.cern.ch"):
+def readDetailsFromTRP(inputFile, runNumber, maxRanges, itemName="L1_eEM26M--enabled", server="https://atlasop.cern.ch"):
     log.info("Reading run details from TRP")
 
     import ROOT

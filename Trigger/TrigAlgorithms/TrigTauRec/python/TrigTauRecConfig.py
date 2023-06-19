@@ -30,21 +30,29 @@ def trigTauRecMergedPrecisionMVACfg(flags, name='', inputRoIs='', tracks=''):
 
     # prepare tools 
     tools = []
+    vftools = []
+    tftools = []
+    vvtools = []
+    idtools = []
+
 
     from TrigTauRec.TrigTauToolsConfig import (trigTauVertexFinderCfg, trigTauTrackFinderCfg, tauVertexVariablesCfg, trigTauJetRNNEvaluatorCfg, trigTauWPDecoratorJetRNNCfg)
 
     # Associate RoI vertex or Beamspot to tau - don't use TJVA
-    tools.append(acc.popToolsAndMerge(trigTauVertexFinderCfg(flags,name='TrigTau_TauVertexFinder')))
+    vftools.append(acc.popToolsAndMerge(trigTauVertexFinderCfg(flags,name='TrigTau_TauVertexFinder')))
     
     # Set LC energy scale (0.2 cone) and intermediate axis (corrected for vertex: useless at trigger)       
     tools.append(CompFactory.TauAxisSetter(name='TrigTau_TauAxis',VertexCorrection = False)) 
 
     # tightened to 0.75 mm for tracktwoMVA (until the track BDT can be used)
-    tools.append(acc.popToolsAndMerge(trigTauTrackFinderCfg(flags,name='TrigTauTightDZ_TauTrackFinder')))
+    tftools.append(acc.popToolsAndMerge(trigTauTrackFinderCfg(flags,name='TrigTauTightDZ_TauTrackFinder',TrackParticlesContainer=tracks)))
 
     # Decorate the clusters
     tools.append(CompFactory.TauClusterFinder(name='TrigTau_TauClusterFinder',UseOriginalCluster = False))
     tools.append(CompFactory.TauVertexedClusterDecorator(name='TrigTau_TauVertexedClusterDecorator',SeedJet = ''))
+
+    # Calculate cell-based quantities: strip variables, EM and Had energies/radii, centFrac, isolFrac and ring energies
+    tools.append(CompFactory.TauCellVariables(name='TrigTau_CellVariables',VertexCorrection = False))
 
     # Compute MVA TES (ATR-17649), stores MVA TES as default tau pt()                                                            
     tools.append(CompFactory.MvaTESVariableDecorator(name='TrigTau_MvaTESVariableDecorator',
@@ -56,33 +64,34 @@ def trigTauRecMergedPrecisionMVACfg(flags, name='', inputRoIs='', tracks=''):
                                              WeightFileName = flags.Trigger.Offline.Tau.MvaTESConfig))
     acc.addPublicTool(tools[-1])
 
-    # Calculate cell-based quantities: strip variables, EM and Had energies/radii, centFrac, isolFrac and ring energies
-    tools.append(CompFactory.TauCellVariables(name='TrigTau_CellVariables',VertexCorrection = False))
-
-    tools.append(acc.popToolsAndMerge(tauVertexVariablesCfg(flags,name='TrigTau_TauVertexVariables')))
+    vvtools.append(acc.popToolsAndMerge(tauVertexVariablesCfg(flags,name='TrigTau_TauVertexVariables')))
 
     # Variables combining tracking and calorimeter information
-    tools.append(CompFactory.TauCommonCalcVars(name='TrigTau_TauCommonCalcVars'))
+    idtools.append(CompFactory.TauCommonCalcVars(name='TrigTau_TauCommonCalcVars'))
 
     # Cluster-based sub-structure, with dRMax also
-    tools.append(CompFactory.TauSubstructureVariables(name='TrigTau_TauSubstructure',VertexCorrection = False))
+    idtools.append(CompFactory.TauSubstructureVariables(name='TrigTau_TauSubstructure',VertexCorrection = False))
 
     # RNN tau ID, either nominal or LLP
-    tools.append(acc.popToolsAndMerge(trigTauJetRNNEvaluatorCfg(flags,name="TrigTau_TauJetRNNEvaluator",LLP=doLLP)))
-    acc.addPublicTool(tools[-1])
+    idtools.append(acc.popToolsAndMerge(trigTauJetRNNEvaluatorCfg(flags,name="TrigTau_TauJetRNNEvaluator",LLP=doLLP)))
+    acc.addPublicTool(idtools[-1])
 
     # flattened RNN score and WP
-    tools.append(acc.popToolsAndMerge(trigTauWPDecoratorJetRNNCfg(flags,name="TrigTau_TauWPDecoratorJetRNN",LLP=doLLP)))
-    acc.addPublicTool(tools[-1])
+    idtools.append(acc.popToolsAndMerge(trigTauWPDecoratorJetRNNCfg(flags,name="TrigTau_TauWPDecoratorJetRNN",LLP=doLLP)))
+    acc.addPublicTool(idtools[-1])
 
-    for tool in tools:
+    for tool in (tools + vftools + tftools + vvtools + idtools):
         tool.inTrigger = True
         tool.calibFolder = flags.Trigger.Offline.Tau.tauRecToolsCVMFSPath
 
     from TrigTauRec.TrigTauRecMonitoring import tauMonitoringPrecisionMVA
 
     alg = CompFactory.TrigTauRecMerged("TrigTauRecMerged_TauPrecision_Precision"+postfix,
-                                       Tools=tools,
+                                       ComTools = tools,
+                                       VFTools  = vftools,
+                                       TFTools  = tftools,
+                                       VVTools  = vvtools,
+                                       IDTools  = idtools, 
                                        MonTool =  tauMonitoringPrecisionMVA(flags),
                                        Key_trigTauTrackInputContainer  = "HLT_tautrack_dummy",
                                        Key_trigTauJetInputContainer    = "HLT_TrigTauRecMerged_CaloMVAOnly",
@@ -137,7 +146,7 @@ def trigTauRecMergedCaloOnlyMVACfg(flags):
     from TrigTauRec.TrigTauRecMonitoring import tauMonitoringCaloOnlyMVA
 
     alg = CompFactory.TrigTauRecMerged("TrigTauRecMerged_TauCaloOnlyMVA",
-                                        Tools=tools,
+                                        ComTools = tools,
                                         MonTool = tauMonitoringCaloOnlyMVA(flags),
                                         Key_trackPartInputContainer = '',
                                         Key_trigJetSeedOutputKey = 'HLT_jet_seed',

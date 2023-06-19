@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -31,6 +31,8 @@
 #include "ModifySlices.h"
 
 #include "CpByteStreamV2Tool.h"
+
+#include "CxxUtils/starts_with.h"
 
 namespace LVL1BS
 {
@@ -528,10 +530,8 @@ StatusCode CpByteStreamV2Tool::convertBs(
 {
     LocalData ld;
 
-    const static std::string flag("Overlap");
-    const std::string::size_type pos = sgKey.find(flag);
     ld.coreOverlap =
-        (pos == std::string::npos || pos != sgKey.length() - flag.length()) ? 0 : 1;
+      CxxUtils::ends_with (sgKey, "Overlap") || CxxUtils::ends_with (sgKey, "OverlapAux.");
 
     const bool debug = msgLvl(MSG::DEBUG);
     if (debug) msg(MSG::DEBUG);

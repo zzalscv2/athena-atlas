@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
 
 # Declare the package name:
 atlas_subdir( TrigConfHLTUtils )
@@ -18,3 +18,9 @@ atlas_add_executable( trigconf_string2hash
   LINK_LIBRARIES TrigConfHLTUtilsLib )
 
 atlas_install_python_modules( python/*.py )
+
+# Tests:
+atlas_add_test( string2hash
+  SOURCES test/test_string2hash.cxx
+  LINK_LIBRARIES TrigConfHLTUtilsLib
+  POST_EXEC_SCRIPT nopost.sh )

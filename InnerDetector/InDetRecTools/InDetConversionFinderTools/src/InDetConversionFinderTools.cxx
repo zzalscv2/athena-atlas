@@ -57,44 +57,44 @@ InDetConversionFinderTools::InDetConversionFinderTools(const std::string& t,
       ATH_MSG_FATAL("Failed to retrieve tool " << m_iVertexFitter);
       return StatusCode::FAILURE;
     }
-    ATH_MSG_INFO("Retrieved tool " << m_iVertexFitter);
+    ATH_MSG_DEBUG("Retrieved tool " << m_iVertexFitter);
 
     /* Get the track pairs selector tool from ToolSvc */
     if (m_trackPairsSelector.retrieve().isFailure()) {
       ATH_MSG_FATAL("Failed to retrieve tool " << m_trackPairsSelector);
       return StatusCode::FAILURE;
     }
-    ATH_MSG_INFO("Retrieved tool " << m_trackPairsSelector);
+    ATH_MSG_DEBUG("Retrieved tool " << m_trackPairsSelector);
 
     /* Get the vertex point estimator tool from ToolSvc */
     if (m_vertexEstimator.retrieve().isFailure()) {
       ATH_MSG_FATAL("Failed to retrieve tool " << m_vertexEstimator);
       return StatusCode::FAILURE;
     }
-    ATH_MSG_INFO("Retrieved tool " << m_vertexEstimator);
+    ATH_MSG_DEBUG("Retrieved tool " << m_vertexEstimator);
 
     /* Get the postselector tool from ToolSvc */
     if (m_postSelector.retrieve().isFailure()) {
       ATH_MSG_FATAL("Failed to retrieve tool " << m_postSelector);
       return StatusCode::FAILURE;
     }
-    ATH_MSG_INFO("Retrieved tool " << m_postSelector);
+    ATH_MSG_DEBUG("Retrieved tool " << m_postSelector);
 
     /* Get the single track conversion tool from ToolSvc */
     if (m_singleTrkConvTool.retrieve().isFailure()) {
       ATH_MSG_FATAL("Failed to retrieve tool " << m_singleTrkConvTool);
       return StatusCode::FAILURE;
     }
-    ATH_MSG_INFO("Retrieved tool " << m_singleTrkConvTool);
+    ATH_MSG_DEBUG("Retrieved tool " << m_singleTrkConvTool);
 
     /* Get the track selector tool from ToolSvc */
     if (m_trkSelector.retrieve().isFailure()) {
       ATH_MSG_FATAL("Failed to retrieve tool " << m_trkSelector);
       return StatusCode::FAILURE;
     }
-    ATH_MSG_INFO("Retrieved tool " << m_trkSelector);
+    ATH_MSG_DEBUG("Retrieved tool " << m_trkSelector);
 
-    ATH_MSG_INFO("Initialization successful");
+    ATH_MSG_DEBUG("Initialization successful");
     return StatusCode::SUCCESS;
   }
   

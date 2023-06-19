@@ -37,6 +37,9 @@
 <!-- Number of tracks vs MU -->
 <!ENTITY EXPMU "100">
 <!ENTITY EXPTRK "2000">
+<!-- PU density plots -->
+<!ENTITY NBINSPUDENS "4">
+<!ENTITY PUDENSMAX "2.0">
 <!-- histogram definitions common to Run2 and ITk -->
 <!ENTITY Common SYSTEM "InDetPVMPlotDefCommon.xml">
 ]>

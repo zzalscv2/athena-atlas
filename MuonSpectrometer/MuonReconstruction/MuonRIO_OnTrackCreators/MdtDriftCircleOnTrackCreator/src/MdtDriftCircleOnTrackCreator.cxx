@@ -19,7 +19,6 @@
 #include "TrkSurfaces/StraightLineSurface.h"
 #include "TrkDistortedSurfaces/DistortedSurface.h"
 
-#include <boost/assign/std/vector.hpp>
 
 Muon::MdtDriftCircleOnTrackCreator::MdtDriftCircleOnTrackCreator(const std::string& ty,const std::string& na,const IInterface* pa) :
     AthAlgTool(ty,na,pa)  {

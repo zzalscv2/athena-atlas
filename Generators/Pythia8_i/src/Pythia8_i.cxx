@@ -6,13 +6,13 @@
 #include "Pythia8_i/UserResonanceFactory.h"
 #include "PathResolver/PathResolver.h"
 
-#include "PathResolver/PathResolver.h"
 #include "GeneratorObjects/McEventCollection.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
 // calls to fortran routines
 #include "AthenaKernel/RNGWrapper.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 #include <sstream>
 // For limits
@@ -663,7 +663,7 @@ void Pythia8_i::addLHEToHepMC(HepMC::GenEvent *evt){
   m_pythiaToHepMC.fill_next_event(m_pythia->process, procEvent, evt->event_number(), &m_pythia->info, &m_pythia->settings);
 
   for(auto  p: *procEvent){
-    p->set_status(1003);
+    p->set_status(HepMC::PYTHIA8LHESTATUS);
   }
 
   //This code and the HepMC2 version below assume a correct input, e.g. beams[0]->end_vertex() exists.
@@ -687,7 +687,7 @@ void Pythia8_i::addLHEToHepMC(HepMC::GenEvent *evt){
 
   for(HepMC::GenEvent::particle_iterator p = procEvent->particles_begin();
       p != procEvent->particles_end(); ++p){
-    (*p)->set_status(1003);
+    (*p)->set_status(HepMC::PYTHIA8LHESTATUS);
   }
 
   std::vector<HepMC::GenParticle*> beams;

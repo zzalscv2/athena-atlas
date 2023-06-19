@@ -18,8 +18,8 @@ atlas_add_library( LArStrHelper
 atlas_add_component( LArMonitoring
                      src/*.cxx
                      src/components/*.cxx
-                     INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} CaloDetDescrLib CaloGeoHelpers CaloIdentifier AthenaMonitoringLib  Identifier LArIdentifier LArRawEvent LArRecConditions LArCablingLib TrigDecisionToolLib LumiBlockCompsLib CaloConditions AthenaKernel AthenaPoolUtilities xAODEventInfo LArCOOLConditions LArRawConditions LArRecEvent LArStrHelper )
+                     INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} CaloDetDescrLib CaloGeoHelpers CaloIdentifier AthenaMonitoringLib  Identifier LArIdentifier LArRawEvent LArRecConditions LArCablingLib TrigDecisionToolLib LumiBlockCompsLib CaloConditions AthenaKernel AthenaPoolUtilities xAODEventInfo LArCOOLConditions LArRawConditions LArRecEvent LArStrHelper )
 
 atlas_add_dictionary( LArStrHelperDict
                       LArMonitoring/LArStrHelperDict.h

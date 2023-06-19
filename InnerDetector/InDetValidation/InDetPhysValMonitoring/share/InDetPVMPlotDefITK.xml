@@ -41,6 +41,9 @@
 <!ENTITY EXPTRK "3000">
 <!ENTITY ETABINS2D "256">
 <!ENTITY PHIBINS2D "160">
+<!-- PU density plots -->
+<!ENTITY NBINSPUDENS "9">
+<!ENTITY PUDENSMAX "4.5">
 <!-- histogram definitions common to Run2 and ITk -->
 <!ENTITY Common SYSTEM "InDetPVMPlotDefCommon.xml">
 ]>

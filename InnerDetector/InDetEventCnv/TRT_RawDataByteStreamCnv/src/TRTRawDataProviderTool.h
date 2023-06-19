@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_RAWDATABYTESTREAMCNV_TRTRAWDATAPROVIDERTOOL_H
@@ -8,7 +8,8 @@
 #include "TRT_RawDataByteStreamCnv/ITRTRawDataProviderTool.h"
 
 #include "AthenaKernel/SlotSpecificObj.h"
-#include "ByteStreamData/RawEvent.h" 
+
+#include "ByteStreamData/RawEvent.h"
 #include "InDetRawData/InDetTimeCollection.h"
 #include "TRT_RawDataByteStreamCnv/ITRT_RodDecoder.h"
 #include "StoreGate/WriteHandleKey.h"
@@ -31,7 +32,7 @@ class TRTRawDataProviderTool : public extends<AthAlgTool, ITRTRawDataProviderToo
   TRTRawDataProviderTool( const std::string& type, const std::string& name,
 			  const IInterface* parent ) ;
 
-  //! destructor 
+  //! destructor
   virtual ~TRTRawDataProviderTool() ;
 
   //! initialize
@@ -39,16 +40,17 @@ class TRTRawDataProviderTool : public extends<AthAlgTool, ITRTRawDataProviderToo
 
   //! finalize
   virtual StatusCode finalize() override;
-  
+
   //! this is the main decoding method
   virtual StatusCode convert(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs,
 			     TRT_RDO_Container* rdoIdc,
 			     TRT_BSErrContainer* bsErrCont,
+           DataPool<TRT_LoLumRawData>* dataItemsPool,
            const EventContext& ctx
 			     ) const override;
 
-private: 
-  ToolHandle<ITRT_RodDecoder>  m_decoder;   
+private:
+  ToolHandle<ITRT_RodDecoder>  m_decoder;
 
   SG::WriteHandleKey<InDetTimeCollection> m_lvl1idkey{this,"LVL1IDKey","TRT_LVL1ID","TRT_LVL1ID out-key"};
   SG::WriteHandleKey<InDetTimeCollection> m_bcidkey{this,"BCIDKey","TRT_BCID","TRT_BCID out-key"};

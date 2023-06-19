@@ -57,7 +57,13 @@ class TrigTauRecMerged: public AthReentrantAlgorithm {
   };
 
   /** internal tool store */
-  const ToolHandleArray<ITauToolBase> m_tools{this, "Tools", {}, "List of ITauToolBase tools"};
+  const ToolHandleArray<ITauToolBase> m_commonTools{this, "ComTools", {}, "List of ITauToolBase tools"};
+  const ToolHandleArray<ITauToolBase> m_vertexFinderTools{this, "VFTools", {}, "Vertex Finder tools"};
+  const ToolHandleArray<ITauToolBase> m_trackFinderTools{this, "TFTools", {}, "Track Finder tools"};
+  const ToolHandleArray<ITauToolBase> m_vertexVarsTools{this, "VVTools", {}, "Vertex Variables tools"};
+  const ToolHandleArray<ITauToolBase> m_idTools{this, "IDTools", {}, "Vertex Variables tools"};
+
+
 
   // Monitoring tool
   const ToolHandle< GenericMonitoringTool > m_monTool { this, "MonTool", "", "Monitoring tool" };

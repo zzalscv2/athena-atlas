@@ -293,7 +293,7 @@ def pebMenuSequenceCfg(flags, chain, eventBuildType, chainDict):
 
     inputMaker = pebInputMaker(flags, chain, eventBuildType)
     recoAcc = pebSequenceCfg(eventBuildType, inputMaker)
-    selAcc = SelectionCA("pebMainSeq_"+eventBuildType)
+    selAcc = SelectionCA("pebMainSeq_"+eventBuildType+suffix)
     selAcc.mergeReco(recoAcc)
     selAcc.addHypoAlgo(CompFactory.PEBInfoWriterAlg('PEBInfoWriterAlg_' + eventBuildType+suffix))
 

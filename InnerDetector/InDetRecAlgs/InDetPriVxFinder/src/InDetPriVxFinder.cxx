@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -32,25 +32,19 @@ InDetPriVxFinder::InDetPriVxFinder
     /* Get the VertexFinderTool */
     if ( m_VertexFinderTool.retrieve().isFailure() )
     {
-      msg(MSG::FATAL) << "Failed to retrieve tool " << m_VertexFinderTool << endmsg;
+      ATH_MSG_FATAL("Failed to retrieve tool " << m_VertexFinderTool);
       return StatusCode::FAILURE;
     }
-    else
-    {
-      msg(MSG::INFO) << "Retrieved tool " << m_VertexFinderTool << endmsg;
-    }
+    ATH_MSG_DEBUG("Retrieved tool " << m_VertexFinderTool);
 
     /*Get the Vertex Merging Tool*/
     if (m_doVertexMerging) {
       if ( m_VertexMergingTool.retrieve().isFailure() )
       {
-        msg(MSG::FATAL) << "Failed to retrieve tool " << m_VertexMergingTool << endmsg;
+        ATH_MSG_FATAL("Failed to retrieve tool " << m_VertexMergingTool);
         return StatusCode::FAILURE;
       }
-      else
-      {
-        msg(MSG::INFO) << "Retrieved tool " << m_VertexMergingTool << endmsg;
-      }
+      ATH_MSG_DEBUG("Retrieved tool " << m_VertexMergingTool);
     } else {
       m_VertexMergingTool.disable();
     }
@@ -59,12 +53,12 @@ InDetPriVxFinder::InDetPriVxFinder
     if (m_doVertexSorting) {
       if ( m_VertexCollectionSortingTool.retrieve().isFailure() )
       {
-        msg(MSG::FATAL) << "Failed to retrieve tool " << m_VertexCollectionSortingTool << endmsg;
+        ATH_MSG_FATAL("Failed to retrieve tool " << m_VertexCollectionSortingTool);
         return StatusCode::FAILURE;
       }
       else
       {
-        msg(MSG::INFO) << "Retrieved tool " << m_VertexCollectionSortingTool << endmsg;
+        ATH_MSG_VERBOSE("Retrieved tool " << m_VertexCollectionSortingTool);
       }
     } else {
       m_VertexCollectionSortingTool.disable();

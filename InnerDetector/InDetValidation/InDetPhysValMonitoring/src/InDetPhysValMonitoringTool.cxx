@@ -868,11 +868,11 @@ InDetPhysValMonitoringTool::getTruthVertices() const {
 
   if (doHS) {
     if (not m_truthEventName.key().empty()) {
-      ATH_MSG_VERBOSE("Getting TruthEvents container.");
+      ATH_MSG_VERBOSE("Getting HS TruthEvents container.");
       SG::ReadHandle<xAOD::TruthEventContainer> truthEventContainer(m_truthEventName);
       if (truthEventContainer.isValid()) {
         for (const auto *const evt : *truthEventContainer) {
-          truthVtx = evt->nTruthVertices()>0 ? evt->truthVertex(0) : nullptr;
+          truthVtx = evt->signalProcessVertex();
           if (truthVtx) {
             truthHSVertices.push_back(truthVtx);
           }
@@ -886,11 +886,20 @@ InDetPhysValMonitoringTool::getTruthVertices() const {
 
   if (doPU) {
     if (not m_truthPileUpEventName.key().empty()) {
-      ATH_MSG_VERBOSE("Getting TruthEvents container.");
+      ATH_MSG_VERBOSE("Getting PU TruthEvents container.");
       SG::ReadHandle<xAOD::TruthPileupEventContainer> truthPileupEventContainer(m_truthPileUpEventName);
       if (truthPileupEventContainer.isValid()) {
         for (const auto *const evt : *truthPileupEventContainer) {
-          truthVtx = evt->nTruthVertices()>0 ? evt->truthVertex(0) : nullptr;
+          // Get the PU vertex
+          // In all cases tested i_vtx=2 for PU
+          // but better to keep something generic
+          truthVtx = nullptr;
+          size_t i_vtx = 0; size_t n_vtx = evt->nTruthVertices();
+          while(!truthVtx && i_vtx<n_vtx){
+            truthVtx = evt->truthVertex(i_vtx);
+            i_vtx++;
+          }
+
           if (truthVtx) {
             truthPUVertices.push_back(truthVtx);
           }
