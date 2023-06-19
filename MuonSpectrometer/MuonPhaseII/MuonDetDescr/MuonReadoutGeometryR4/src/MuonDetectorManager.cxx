@@ -21,7 +21,8 @@
         if (new_element) {                                                     \
             ATH_MSG_FATAL("The detector element "                              \
                           << m_idHelperSvc->toStringDetEl(element->identify()) \
-                          << " has already been added before");                \
+                          << " has already been added before "                  \
+                          <<m_idHelperSvc->toStringDetEl(new_element->identify())); \
             return StatusCode::FAILURE;                                        \
         }                                                                      \
         new_element = std::move(element);                                      \

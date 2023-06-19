@@ -5,6 +5,7 @@
 
 #include <charconv>
 #include <limits>
+#include <functional>
 
 namespace MuonGMR4 {
 /// We should remove the MdtStringUtils class at some point
@@ -29,6 +30,15 @@ std::vector<std::string> tokenize(const std::string& str,
         //<< std::endl;
     }
     return tokens;
+}
+std::vector<double> tokenizeDouble(const std::string& the_str,
+                                   const std::string& delimiter){
+    const std::vector<std::string> strTokens = tokenize(the_str, delimiter);
+    std::vector<double> toReturn{};
+    std::transform(strTokens.begin(), strTokens.end(), std::back_inserter(toReturn), [](const std::string& token){
+        return stof(token);
+    });
+    return toReturn;
 }
 int atoi(std::string_view str) {
     int result{std::numeric_limits<int>::max()};

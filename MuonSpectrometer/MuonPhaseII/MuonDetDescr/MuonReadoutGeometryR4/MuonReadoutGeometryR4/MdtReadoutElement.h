@@ -3,31 +3,17 @@
 */
 #ifndef MUONREADOUTGEOMETRYR4_MDTREADOUTELEMENT_H
 #define MUONREADOUTGEOMETRYR4_MDTREADOUTELEMENT_H
-#include "MuonReadoutGeometryR4/MuonReadoutElement.h"
+
+#include <MuonReadoutGeometryR4/MuonReadoutElement.h>
+#include <MuonReadoutGeometryR4/MdtCutOut.h>
+
 
 namespace MuonGMR4 {
 
 class MdtReadoutElement : public MuonReadoutElement {
 
    public:
-    /// Cut defintion of the 
-    struct CutOut {
-        /// Cutout on the left site of the chamber (positive Y)
-        double leftY{0.};
-        /// Cutout on the right site of the chamber (negative Y)
-        double rightY{0.};
-        /// Layer in which the cut out is applied
-        unsigned int layer{0};
-        /// First tube affected by the cutout
-        unsigned int firstTube{0};
-        /// Last tube affected by the cutout (Inclusive)
-        unsigned int lastTube{0};
-        /// Smaller operator
-        bool operator<(const CutOut& other) const {
-            if (layer != other.layer) return layer < other.layer;
-            return lastTube < other.firstTube;
-        }
-    };
+    
     /// Set of parameters to describe a MDT chamber
     struct parameterBook {
         /// Number of tubes per layer
@@ -66,7 +52,7 @@ class MdtReadoutElement : public MuonReadoutElement {
         /// steps, where nTubes have the same length.
         unsigned int tubesPerStep{0};
         /// set of cut outs
-        std::set<CutOut> cutouts{}; 
+        MdtCutOuts cutouts{}; 
     };
 
     struct defineArgs : public MuonReadoutElement::defineArgs,
@@ -133,6 +119,9 @@ class MdtReadoutElement : public MuonReadoutElement {
 
     Amg::Vector3D readOutPos(const ActsGeometryContext& ctx,
                              const IdentifierHash& measId) const;
+    
+    /// Returns the Mdt tube length including the dead areas of the endplugs & dead length
+    double tubeLength(const IdentifierHash& hash) const;
 
    private:
         /// Returns the tube position in the chamber coordinate frame
