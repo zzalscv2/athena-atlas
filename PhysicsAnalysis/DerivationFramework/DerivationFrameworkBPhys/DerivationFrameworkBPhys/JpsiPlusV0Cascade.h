@@ -16,7 +16,7 @@
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include <vector>
 #include "xAODEventInfo/EventInfo.h"
-
+#include "xAODTracking/TrackParticleContainer.h"
 
 namespace Trk {
     class IVertexFitter;
@@ -90,6 +90,8 @@ namespace DerivationFramework {
         StatusCode initialize() override;
         StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer ) const;
         virtual StatusCode addBranches() const override;
+        SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_RelinkContainers{this, "RelinkTracks", {}, "Track Containers if they need to be relinked through indirect use" };
+
     };
 }
 

@@ -65,6 +65,7 @@ def BPHY24Cfg(ConfigFlags):
     LRTMergeAug = CompFactory.DerivationFramework.CommonAugmentation("BPHY24InDetLRTMerge", AugmentationTools = [BPHY24TrackParticleMergerTool])
     acc.addEventAlgo(LRTMergeAug)
     mainIDInput = "InDetWithLRTTrackParticles"
+    originalTrackCond = ["InDetTrackParticles", "InDetLargeD0TrackParticles","GSFTrackParticles"]
     BPHY24_Finder_DiMuon = CompFactory.Analysis.JpsiFinder( name    = "BPHY24_Finder_DiMuon",
                                              muAndMu                     = True,
                                              muAndTrack                  = False,
@@ -219,7 +220,7 @@ def BPHY24Cfg(ConfigFlags):
                                            KshortContainerName = KshortContainerName,
                                            LambdaContainerName = LambdaContainerName,
                                            LambdabarContainerName = LambdabarContainerName,
-                                           RelinkTracks = ["InDetTrackParticles", "InDetLargeD0TrackParticles"])),
+                                           RelinkTracks =originalTrackCond)),
               Decorator              = V0Decorator,
               V0ContainerName        = V0ContainerName,
               KshortContainerName    = KshortContainerName,
@@ -261,7 +262,8 @@ def BPHY24Cfg(ConfigFlags):
         JpsiVertices            = "BPHY24_DiMuon_Candidates",
         CascadeVertexCollections= ["BPHY24JpsimmKshortCascadeSV2", "BPHY24JpsimmKshortCascadeSV1"],
         V0Vertices              = "BPHY24RecoV0Candidates",
-        V0TrackContainerName    = mainIDInput)
+        V0TrackContainerName    = mainIDInput,
+        RelinkTracks = originalTrackCond)
 
     augsList += [BPHY24JpsimmKshort]
     outVtxList += BPHY24JpsimmKshort.CascadeVertexCollections
@@ -290,7 +292,8 @@ def BPHY24Cfg(ConfigFlags):
         JpsiVertices            = "BPHY24_DiElectron_Candidates",
         CascadeVertexCollections= ["BPHY24JpsieeKshortCascadeSV2", "BPHY24JpsieeKshortCascadeSV1"],
         V0Vertices              = "BPHY24RecoV0Candidates",
-        V0TrackContainerName    = mainIDInput)
+        V0TrackContainerName    = mainIDInput,
+        RelinkTracks = originalTrackCond)
 
     augsList += [BPHY24JpsieeKshort]
     finalCandidateList += BPHY24JpsieeKshort.CascadeVertexCollections

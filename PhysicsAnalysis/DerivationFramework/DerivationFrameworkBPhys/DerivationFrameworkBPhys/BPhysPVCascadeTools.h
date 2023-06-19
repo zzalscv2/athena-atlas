@@ -104,6 +104,7 @@ namespace DerivationFramework {
        Amg::Vector3D DocaExtrapToBeamSpot(const std::vector<TLorentzVector> &mom, const xAOD::BPhysHelper &obj) const;
 
        static void PrepareVertexLinks(Trk::VxCascadeInfo *result,  const xAOD::TrackParticleContainer* importedTrackCollection);
+       static void PrepareVertexLinks(Trk::VxCascadeInfo *result,  const std::vector<const xAOD::TrackParticleContainer*>& );
 
        StatusCode FillCandwithRefittedVertices( bool refitPV,
 					      const xAOD::VertexContainer* pvContainer, xAOD::VertexContainer* refPvContainer,

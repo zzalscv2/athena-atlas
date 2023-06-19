@@ -70,6 +70,7 @@ namespace DerivationFramework {
         m_mass_jpsi     = BPhysPVCascadeTools::getParticleMass(pdt, PDG::J_psi);
         m_mass_b0       = BPhysPVCascadeTools::getParticleMass(pdt, PDG::B0);
         m_mass_lambdaB  = BPhysPVCascadeTools::getParticleMass(pdt, PDG::Lambda_b0);
+        ATH_CHECK(m_RelinkContainers.initialize());
 
         return StatusCode::SUCCESS;
     }
@@ -468,6 +469,13 @@ namespace DerivationFramework {
            mass_v0 = m_mass_lambda;
            Masses.push_back(m_mass_lambda);
         }
+        const EventContext& ctx = Gaudi::Hive::currentContext();
+        std::vector<const xAOD::TrackParticleContainer*> trackCols;
+        for(const auto &str : m_RelinkContainers){
+           SG::ReadHandle<xAOD::TrackParticleContainer> handle(str,ctx);
+           trackCols.push_back(handle.cptr());
+        }
+
 
         for(auto jpsi : *jpsiContainer) { //Iterate over Jpsi vertices
 
@@ -544,19 +552,8 @@ namespace DerivationFramework {
 
               if (result != NULL) {
                 // reset links to original tracks
-                auto &collection = result->vertices();
-                std::vector<std::pair<xAOD::Vertex*, const xAOD::TrackParticleContainer*>> zip = {{collection[0], v0TrackContainer},{collection[1], jpsiTrackContainer}};
-                for(auto & pair : zip) {
-                  auto& v = pair.first; auto& c = pair.second;
-                  std::vector<ElementLink<DataVector<xAOD::TrackParticle> > > newLinkVector;
-                  for(unsigned int i=0; i< v->trackParticleLinks().size(); i++) {
-                    ElementLink<DataVector<xAOD::TrackParticle> > mylink=v->trackParticleLinks()[i]; // makes a copy (non-const) 
-                    mylink.setStorableObject(*c, true);
-                    newLinkVector.push_back( mylink ); 
-                  }
-                  v->clearTracks();
-                  v->setTrackParticleLinks( newLinkVector );
-                }
+                if(trackCols.empty()) BPhysPVCascadeTools::PrepareVertexLinks(result.get(), v0TrackContainer);
+                else                  BPhysPVCascadeTools::PrepareVertexLinks(result.get(), trackCols);
 
                 ATH_MSG_DEBUG("storing tracks " << ((result->vertices())[0])->trackParticle(0) << ", "
                                                 << ((result->vertices())[0])->trackParticle(1) << ", "
@@ -588,6 +585,8 @@ namespace DerivationFramework {
 
         return StatusCode::SUCCESS;
     }
+
+
 
 }
 

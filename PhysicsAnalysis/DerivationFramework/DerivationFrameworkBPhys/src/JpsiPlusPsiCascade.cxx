@@ -142,7 +142,7 @@ namespace DerivationFramework {
 
     for(unsigned int ic=0; ic<cascadeinfoContainer.size(); ic++) {
       Trk::VxCascadeInfo* cascade_info = cascadeinfoContainer[ic];
-      if(cascade_info==nullptr) ATH_MSG_ERROR("CascadeInfo is null");
+      assert(cascade_info!=nullptr);
 
       Trk::VxCascadeInfo* cascade_info_noConstr = cascadeinfoContainer_noConstr[ic];
 

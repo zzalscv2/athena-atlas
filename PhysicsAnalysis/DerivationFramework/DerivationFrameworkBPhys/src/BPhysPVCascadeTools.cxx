@@ -218,6 +218,31 @@ void DerivationFramework::BPhysPVCascadeTools::PrepareVertexLinks(Trk::VxCascade
     }
 }
 
+void DerivationFramework::BPhysPVCascadeTools::PrepareVertexLinks(Trk::VxCascadeInfo *result,  const std::vector<const xAOD::TrackParticleContainer*>& trackCols )
+{
+    auto &collection = result->vertices();
+    for(auto  v : collection) {
+      std::vector<ElementLink<DataVector<xAOD::TrackParticle> > > newLinkVector;
+      for(auto mylink : v->trackParticleLinks()) {
+        const xAOD::TrackParticle* myptr= *mylink;
+        const xAOD::TrackParticleContainer* foundcontainer = nullptr;
+        for(auto col : trackCols){
+           if(std::find(col->begin(), col->end(), myptr) != col->end()){
+            foundcontainer =col;
+            break;
+           }
+        }
+        if(foundcontainer == nullptr){
+          throw std::runtime_error("Could not find track in original containers");
+        }
+        mylink.setStorableObject(*foundcontainer, true);
+        newLinkVector.push_back( mylink ); 
+      }
+      v->clearTracks();
+      v->setTrackParticleLinks( newLinkVector );
+    }
+}
+
 std::vector<const xAOD::TrackParticle*> DerivationFramework::BPhysPVCascadeTools::CollectAllChargedTracks(const std::vector<xAOD::Vertex*> &cascadeVertices)
 {
   std::vector<const xAOD::TrackParticle*> exclTrk;
