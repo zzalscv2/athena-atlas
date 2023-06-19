@@ -7,8 +7,9 @@
 
 
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "AthAllocators/DataPool.h"
 #include "Identifier/IdentifierHash.h"
-#include "ByteStreamData/RawEvent.h" 
+#include "ByteStreamData/RawEvent.h"
 #include "InDetRawData/TRT_RDO_Container.h"
 
 
@@ -22,12 +23,13 @@ class TRT_BSErrContainer;
 class ITRT_RodDecoder : virtual public IAlgTool
 {
 
-public: 
+public:
   DeclareInterfaceID( ITRT_RodDecoder, 1, 0 );
   //! the method to fill the IDC
   virtual StatusCode fillCollection ( const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* robFrag,
 				      TRT_RDO_Container* rdoIdc,
 				      TRT_BSErrContainer* bsErr,
+              DataPool<TRT_LoLumRawData>* dataItemsPool,
 				      const std::vector<IdentifierHash>* vecHash = 0 ) const = 0;
 
 

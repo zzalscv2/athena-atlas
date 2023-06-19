@@ -197,6 +197,7 @@ StatusCode
 TRT_RodDecoder::fillCollection ( const ROBFragment* robFrag,
 				 TRT_RDO_Container* rdoIdc,
 				 TRT_BSErrContainer* bsErr,
+         DataPool<TRT_LoLumRawData>* dataItemsPool,
 				 const std::vector<IdentifierHash>* vecHash ) const
 {
   // update compression tables
@@ -259,7 +260,7 @@ TRT_RodDecoder::fillCollection ( const ROBFragment* robFrag,
   if ( 3 < RodBlockVersion && m_maxCompressionVersion >= RodBlockVersion )     // Full Compression
   {
     if ( m_CompressionTables[RodBlockVersion] )
-      sc = int_fillFullCompress( robFrag, rdoIdc, 
+      sc = int_fillFullCompress( robFrag, rdoIdc, dataItemsPool, 
 				 *m_CompressionTables[RodBlockVersion],
 				 vecHash );  
     else
@@ -282,9 +283,9 @@ TRT_RodDecoder::fillCollection ( const ROBFragment* robFrag,
     }
   }
   else if ( 3 == RodBlockVersion )
-    sc = int_fillMinimalCompress( robFrag, rdoIdc, vecHash );
+    sc = int_fillMinimalCompress( robFrag, rdoIdc, dataItemsPool, vecHash );
   else if ( (2 == RodBlockVersion) || (1 == RodBlockVersion) )
-    sc = int_fillExpanded( robFrag, rdoIdc, vecHash );
+    sc = int_fillExpanded( robFrag, rdoIdc, dataItemsPool, vecHash );
   else if ( 0 == RodBlockVersion )
   {
     if ( 0 == robFrag->rod_ndata() )
@@ -299,7 +300,7 @@ TRT_RodDecoder::fillCollection ( const ROBFragment* robFrag,
       return StatusCode::FAILURE;
     }
 
-    sc = int_fillExpanded( robFrag, rdoIdc, vecHash );
+    sc = int_fillExpanded( robFrag, rdoIdc, dataItemsPool, vecHash );
   }
   else
   {
@@ -353,10 +354,6 @@ TRT_RodDecoder::fillCollection ( const ROBFragment* robFrag,
            }
         }
 
-      //     cout << "TRT v_size: " << v_size << " & n_status: " << n_status << endl;
-      
-      //     for (uint32_t ii=0; ii<v_size; ii++)
-      //     	cout << "TRT vint[" << ii << "] = " << hex << vint[ii] << dec << endl;
       
 	uint32_t i=1;
 	while( i < n_status )
@@ -373,8 +370,6 @@ TRT_RodDecoder::fillCollection ( const ROBFragment* robFrag,
 		  
 	      uint32_t Index = (rod_SourceID << 8) | DTMROC_index;
 		  
-		  //	      cout << i << "/" << j << ":" << hex << Index << dec << " " 
-		  //		   << hex << DTMROC_head << dec << ": " << endl;
 		  
 	      if ( DTMROC_head )
 	      {
@@ -386,22 +381,18 @@ TRT_RodDecoder::fillCollection ( const ROBFragment* robFrag,
 		      
 		if ( m_lookAtSidErrors && D_sid )
 		{
-		  //		    cout << "sid ";
 		  bsErr->add_sid_error( Index );
 		  sid_errors++;
 		}
 		      
 		if ( m_lookAtErrorErrors && D_error )
 		{
-		  //		    cout << "err ";
 		  bsErr->add_error_error( Index );
 		  error_errors++;
 		}
 		      
 		if ( m_lookAtL1idErrors && (D_L1ID != (rod_L1ID & 0x7)) )
 		{
-		  //		    cout << "l1(" << hex << D_L1ID << "/" 
-		  //			 << (rod_L1ID & 0x7) << dec;
 		  bsErr->add_l1id_error( Index, D_L1ID );
 		  l1id_errors++;
 		}
@@ -419,8 +410,6 @@ TRT_RodDecoder::fillCollection ( const ROBFragment* robFrag,
 
 		if ( m_lookAtBcidErrors && (D_BCID != expected_BCID) )
 		{
-		  //		    cout << "bc(" << hex << D_BCID << "/" 
-		  //			 << expected_BCID << dec;
 		  bsErr->add_bcid_error( Index, D_BCID );
 		  bcid_errors++;
 		}
@@ -452,8 +441,6 @@ TRT_RodDecoder::fillCollection ( const ROBFragment* robFrag,
       
       if ( errorWord )
       { 
-	 //	 std::cout << "ROD id: " << std:: hex <<  rod_SourceID
-	 //		   << "errorWord: " << errorWord << std::dec << std::endl;
 	 sc=StatusCode::RECOVERABLE;
       }
       
@@ -483,6 +470,7 @@ TRT_RodDecoder::fillCollection ( const ROBFragment* robFrag,
 StatusCode
 TRT_RodDecoder::int_fillExpanded( const ROBFragment* robFrag,
 				  TRT_RDO_Container* rdoIdc,
+          DataPool<TRT_LoLumRawData>* dataItemsPool,
 				  const std::vector<IdentifierHash>* vecHash ) const
 {
   // get the ROBid
@@ -503,7 +491,6 @@ TRT_RodDecoder::int_fillExpanded( const ROBFragment* robFrag,
   IdentifierHash   idHash, skipHash=0xffffffff,lastHash=0xffffffff;
   const Identifier NULLId(0);
 
-  TRT_RDORawData*                   rdo     = 0;
 
   // get the data of the fragment
   OFFLINE_FRAGMENTS_NAMESPACE::PointerType vint;
@@ -608,7 +595,11 @@ TRT_RodDecoder::int_fillExpanded( const ROBFragment* robFrag,
 			  << " does not exist, create it " );
 #endif
 	  // create new collection
-          theColl = std::make_unique<TRT_RDO_Collection> ( idHash );
+     theColl = std::make_unique<TRT_RDO_Collection> ( idHash );
+     if(dataItemsPool){
+       // If we use pool then the pool will own the elements
+       theColl->clear(SG::VIEW_ELEMENTS);
+     }
 	  // get identifier from the hash, this is not nice
 	  Identifier ident;
 	  m_trt_id->get_id(idHash,ident,&m_straw_layer_context);
@@ -617,7 +608,14 @@ TRT_RodDecoder::int_fillExpanded( const ROBFragment* robFrag,
 	}
 
       // Now the Collection is there for sure. Create RDO and push it
-      rdo = new TRT_LoLumRawData( idStraw, digit );
+      TRT_LoLumRawData*                   rdo     = nullptr;
+      if(!dataItemsPool){
+        rdo = new TRT_LoLumRawData( idStraw, digit );
+      }
+      else{
+        rdo = dataItemsPool->nextElementPtr();
+        (*rdo) = TRT_LoLumRawData( idStraw, digit );
+      }
 
       // add the RDO
       theColl->push_back( rdo );
@@ -660,6 +658,7 @@ TRT_RodDecoder::int_fillExpanded( const ROBFragment* robFrag,
 StatusCode
 TRT_RodDecoder::int_fillMinimalCompress( const ROBFragment *robFrag,
 					TRT_RDO_Container* rdoIdc,
+          DataPool<TRT_LoLumRawData>* dataItemsPool,
 					const std::vector<IdentifierHash>* vecHash) const
 {
   uint32_t robid = robFrag->rod_source_id();
@@ -679,9 +678,6 @@ TRT_RodDecoder::int_fillMinimalCompress( const ROBFragment *robFrag,
   Identifier       idStraw;
   IdentifierHash   idHash, skipHash=0xffffffff, lastHash=0xffffffff;
   const Identifier NULLId(0);
-  
-  TRT_RDORawData*                   rdo     = 0;
-
   
   // get the data of the fragment
   OFFLINE_FRAGMENTS_NAMESPACE::PointerType vint;
@@ -821,7 +817,11 @@ TRT_RodDecoder::int_fillMinimalCompress( const ROBFragment *robFrag,
 			  << " does not exist, create it " );
 #endif
 	  // create new collection
-          theColl = std::make_unique<TRT_RDO_Collection> ( idHash );
+     theColl = std::make_unique<TRT_RDO_Collection> ( idHash );
+     if(dataItemsPool){
+       // If we use pool then the pool will own the elements
+       theColl->clear(SG::VIEW_ELEMENTS);
+     }
 	  // get identifier from the hash, this is not nice
 	  Identifier ident;
 	  m_trt_id->get_id( idHash, ident, &m_straw_layer_context );
@@ -834,8 +834,14 @@ TRT_RodDecoder::int_fillMinimalCompress( const ROBFragment *robFrag,
 
       //ATH_MSG_INFO ( "idStraw: " << idStraw 
       //               << " digit: " << MSG::hex << digit << MSG::dec );
-
-      rdo = new TRT_LoLumRawData( idStraw, digit );
+      TRT_LoLumRawData*                   rdo     = nullptr;
+      if(!dataItemsPool){
+        rdo = new TRT_LoLumRawData( idStraw, digit );
+      }
+      else{
+        rdo = dataItemsPool->nextElementPtr();
+        (*rdo) = TRT_LoLumRawData( idStraw, digit );
+      }
       m_Nrdos++;
       
       // get the collection
@@ -876,6 +882,7 @@ TRT_RodDecoder::int_fillMinimalCompress( const ROBFragment *robFrag,
 StatusCode
 TRT_RodDecoder::int_fillFullCompress( const ROBFragment *robFrag,
 				      TRT_RDO_Container* rdoIdc,
+              DataPool<TRT_LoLumRawData>* dataItemsPool,
 				      const t_CompressTable& Ctable,
 				      const std::vector<IdentifierHash>* vecHash) const
 {
@@ -901,8 +908,6 @@ TRT_RodDecoder::int_fillFullCompress( const ROBFragment *robFrag,
   Identifier       idStraw;
   IdentifierHash   idHash, skipHash=0xffffffff, lastHash=0xffffffff;
   const Identifier NULLId(0);
-  
-  TRT_RDORawData*                   rdo     = 0;
   
   // get the data of the fragment
   OFFLINE_FRAGMENTS_NAMESPACE::PointerType vint;
@@ -1012,7 +1017,6 @@ TRT_RodDecoder::int_fillFullCompress( const ROBFragment *robFrag,
 
     if ( word )
     {
-      //      std::cout << "PTK: " << bufferOffset << " : " << out_ptr << " : " << word << std::endl;
 
       // get data word
       digit = word;                       // We only use 27 bits
@@ -1097,7 +1101,11 @@ TRT_RodDecoder::int_fillFullCompress( const ROBFragment *robFrag,
 			  << " does not exist, create it " );
 #endif
 	  // create new collection
-          theColl = std::make_unique<TRT_RDO_Collection> ( idHash );
+     theColl = std::make_unique<TRT_RDO_Collection> ( idHash );
+     if(dataItemsPool){
+       // If we use pool then the pool will own the elements
+       theColl->clear(SG::VIEW_ELEMENTS);
+     }
 	  // get identifier from the hash, this is not nice
 	  Identifier ident;
 	  m_trt_id->get_id( idHash, ident, &m_straw_layer_context );
@@ -1110,8 +1118,14 @@ TRT_RodDecoder::int_fillFullCompress( const ROBFragment *robFrag,
 
       //      ATH_MSG_INFO ( "idStraw: " << idStraw 
       //		     << " digit: " << MSG::hex << digit << MSG::dec );
-
-      rdo = new TRT_LoLumRawData( idStraw, digit );
+      TRT_LoLumRawData*   rdo     = nullptr;
+      if(!dataItemsPool){
+        rdo = new TRT_LoLumRawData( idStraw, digit );
+      }
+      else{
+        rdo = dataItemsPool->nextElementPtr();
+        (*rdo) = TRT_LoLumRawData( idStraw, digit );
+      }
       m_Nrdos++;
       
       // get the collection
