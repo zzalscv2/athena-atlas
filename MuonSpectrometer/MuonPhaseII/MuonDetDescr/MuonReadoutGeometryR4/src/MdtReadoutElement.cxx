@@ -110,6 +110,10 @@ Amg::Transform3D MdtReadoutElement::toTubeFrame(const IdentifierHash& hash) cons
    static const Amg::Transform3D rotation{Amg::getRotateY3D(-M_PI_2) * Amg::getRotateZ3D(-M_PI_2)};
    return Amg::Translation3D{localTubePos(hash)}*rotation;
 }
+double MdtReadoutElement::tubeLength(const IdentifierHash& hash) const {
+  MdtCutOuts::const_iterator cut_itr = m_pars.cutouts.find(hash);
+  return 2.*m_pars.shortHalfX - (cut_itr != m_pars.cutouts.end() ? cut_itr->leftX + cut_itr->rightX : 0. );
+}
 
         
 }  // namespace MuonGMR4

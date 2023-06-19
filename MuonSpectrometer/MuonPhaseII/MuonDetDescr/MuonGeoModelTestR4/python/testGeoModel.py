@@ -48,7 +48,8 @@ if __name__=="__main__":
             system("xrdcp {source} MuonGeometryDB.db".format(source = args.geoModelFile))
         args.geoModelFile = "MuonGeometryDB.db"
 
-    flags.GeoModel.SQLiteDB = args.geoModelFile 
+    flags.GeoModel.SQLiteDB = args.geoModelFile
+    #flags.GeoModel.AtlasVersion ="ATLAS-P2-RUN4-01-00-00"
     
     flags.Detector.GeometryCSC = False
     flags.Detector.GeometrysTGC = False
@@ -63,12 +64,15 @@ if __name__=="__main__":
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
     geoModelSvc = cfg.getPrimaryAndMerge(GeoModelCfg(flags))
     from MuonGeoModelR4.MuonGeoModelConfig import MuonDetectorToolCfg
-    from AthenaCommon.Constants import VERBOSE
-    geoModelSvc.DetectorTools =[cfg.popToolsAndMerge(MuonDetectorToolCfg(flags,OutputLevel= VERBOSE))]
+    #from AthenaCommon.Constants import VERBOSE
+    geoModelSvc.DetectorTools =[cfg.popToolsAndMerge(MuonDetectorToolCfg(flags,#OutputLevel= VERBOSE
+    ))]
     ####    
     DetDescCnvSvc = cfg.getService("DetDescrCnvSvc")
     DetDescCnvSvc.IdDictFromRDB = False
     DetDescCnvSvc.MuonIDFileName="IdDictParser/IdDictMuonSpectrometer_R.10.00.xml"
+    DetDescCnvSvc.MuonIDFileName="IdDictParser/IdDictMuonSpectrometer_R.09.03.xml"
+    
     cfg.merge(GeoModelMdtTestCfg(flags))
     
     cfg.printConfig(withDetails=True, summariseProps=True)

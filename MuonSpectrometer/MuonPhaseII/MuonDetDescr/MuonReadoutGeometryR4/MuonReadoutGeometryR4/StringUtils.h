@@ -11,9 +11,13 @@
 
 namespace MuonGMR4 {
 
+/// Searches the string for the given delimiter and constructs a 
+/// vector of tokens
 std::vector<std::string> tokenize(const std::string& the_str,
                                   const std::string& delimiters);
 
+std::vector<double> tokenizeDouble(const std::string& the_str,
+                                   const std::string& delimiter);
 int atoi(std::string_view str);
 
 double atof(std::string_view str);
