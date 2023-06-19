@@ -2,8 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTS_PIXEL_CLUSTERING_TOOL_H
-#define ACTS_PIXEL_CLUSTERING_TOOL_H
+#ifndef ACTSTRK_DATAPREPARATION_PIXEL_CLUSTERING_TOOL_H
+#define ACTSTRK_DATAPREPARATION_PIXEL_CLUSTERING_TOOL_H
 
 
 #include "ActsTrkToolInterfaces/IPixelClusteringTool.h"

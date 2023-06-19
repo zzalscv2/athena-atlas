@@ -2,8 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSTRKCLUSTERIZATION_STRIPCLUSTERIZATIONALG_H
-#define ACTSTRKCLUSTERIZATION_STRIPCLUSTERIZATIONALG_H
+#ifndef ACTSTRK_DATAPREPARATION_STRIPCLUSTERIZATIONALG_H
+#define ACTSTRK_DATAPREPARATION_STRIPCLUSTERIZATIONALG_H
 
 #include <ActsTrkToolInterfaces/IStripClusteringTool.h>
 #include <AthenaBaseComps/AthReentrantAlgorithm.h>
