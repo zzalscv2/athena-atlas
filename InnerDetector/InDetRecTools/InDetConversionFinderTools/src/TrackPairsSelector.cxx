@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -77,19 +77,19 @@ namespace InDet {
 
     /* Get the track selector tool from ToolSvc */
     if ( m_helpertool.retrieve().isFailure() ) {
-      msg(MSG::ERROR) << "Failed to retrieve tool " << m_helpertool << endmsg;
+      ATH_MSG_ERROR("Failed to retrieve tool " << m_helpertool);
       return StatusCode::FAILURE;
     }
-      msg(MSG::INFO) << "Retrieved tool " << m_helpertool << endmsg;
-
+    ATH_MSG_DEBUG("Retrieved tool " << m_helpertool);
 
     /* Get the distance tool from ToolsSvc */
     if(m_distanceTool.retrieve().isFailure()) {
-      msg(MSG::ERROR) << "Could not get " << m_distanceTool << endmsg; return StatusCode::FAILURE;
+      ATH_MSG_ERROR("Could not get " << m_distanceTool);
+      return StatusCode::FAILURE;
     }
-      msg(MSG::INFO) << "Got the distance tool " << m_distanceTool << endmsg;
+    ATH_MSG_DEBUG("Got the distance tool " << m_distanceTool);
 
-    msg(MSG::INFO) << "Initialization successful" << endmsg;
+    ATH_MSG_DEBUG("Initialization successful");
     return StatusCode::SUCCESS;
   }
 
