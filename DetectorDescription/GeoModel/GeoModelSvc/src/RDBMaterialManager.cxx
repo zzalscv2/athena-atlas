@@ -22,7 +22,7 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
-#include "boost/algorithm/string/predicate.hpp"
+#include "CxxUtils/starts_with.h"
 
 #include <algorithm>
 #include <iostream>
@@ -435,77 +435,77 @@ const GeoMaterial*  RDBMaterialManager:: getMaterial(const std::string &name) {
   if (pmaterial!= NULL) 
       return pmaterial;
 
-  if(boost::starts_with(name, "std"))
+  if(CxxUtils::starts_with(name, "std"))
     {
       detector = "std";
       tmp_materials = m_stdmaterials;
       tmp_matcomponents = m_stdmatcomponents;
       data_id = "STDMATERIALS_DATA_ID";
     }
-  else if(boost::starts_with(name, "trt"))
+  else if(CxxUtils::starts_with(name, "trt"))
     {
       detector = "trt";
       tmp_materials = m_trtmaterials;
       tmp_matcomponents = m_trtmatcomponents;
       data_id = "TRTMATERIALS_DATA_ID";
     }
-  else if(boost::starts_with(name, "LAr"))
+  else if(CxxUtils::starts_with(name, "LAr"))
     {
       detector = "LAr";
       tmp_materials = m_larmaterials;
       tmp_matcomponents = m_larmatcomponents;
       data_id = "LARMATERIALS_DATA_ID";
     }
-  else if(boost::starts_with(name, "muo"))
+  else if(CxxUtils::starts_with(name, "muo"))
     {
       detector = "muo";
       tmp_materials = m_muomaterials;
       tmp_matcomponents = m_muomatcomponents;
       data_id = "MUOMATERIALS_DATA_ID";
     }
-  else if(boost::starts_with(name, "pixtb"))
+  else if(CxxUtils::starts_with(name, "pixtb"))
     {
       detector = "pixtb";
       tmp_materials = m_pixtbmaterials;
       tmp_matcomponents = m_pixtbmatcomponents;
       data_id = "PIXELTBMATERIALS_DATA_ID";
     }
-  else if(boost::starts_with(name, "pix"))
+  else if(CxxUtils::starts_with(name, "pix"))
     {
       detector = "pix";
       tmp_materials = m_pixmaterials;
       tmp_matcomponents = m_pixmatcomponents;
       data_id = "PIXMATERIALS_DATA_ID";
     }
-  else if(boost::starts_with(name, "sct"))
+  else if(CxxUtils::starts_with(name, "sct"))
     {
       detector = "sct";
       tmp_materials = m_sctmaterials;
       tmp_matcomponents = m_sctmatcomponents;
       data_id = "SCTMATERIALS_DATA_ID";
     }
-  else if(boost::starts_with(name, "indet"))
+  else if(CxxUtils::starts_with(name, "indet"))
     {
       detector = "indet";
       tmp_materials = m_indetmaterials;
       tmp_matcomponents = m_indetmatcomponents;
       data_id = "INDETMATERIALS_DATA_ID";
     }
-  else if(boost::starts_with(name, "shield"))
+  else if(CxxUtils::starts_with(name, "shield"))
     {
       detector = "shield";
       tmp_materials = m_shieldmaterials;
       tmp_matcomponents = m_shieldmatcomponents;
       data_id = "SHIELDMATERIALS_DATA_ID";
     }
-  else if(boost::starts_with(name, "tile"))
+  else if(CxxUtils::starts_with(name, "tile"))
     {
       detector = "tile";
       tmp_materials = m_tilematerials;
       tmp_matcomponents = m_tilematcomponents;
       data_id = "TILEMATERIALS_DATA_ID";
     }
-  else if(boost::starts_with(name, "toro"))
+  else if(CxxUtils::starts_with(name, "toro"))
     {
       detector = "toro";
       tmp_materials = m_toromaterials;
