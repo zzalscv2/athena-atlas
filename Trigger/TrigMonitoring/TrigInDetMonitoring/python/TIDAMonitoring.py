@@ -330,7 +330,7 @@ def TIDAbjet( flags, key, toolkey, tools, monlevel, mcTruth ) :
         from TrigInDetMonitoring.TIDAChains import getchains
         
         chains = getchains( flags, 
-                            [ "HLT_j.*boffperf.*presel.*:key=HLT_IDTrack_JetSuper_FTF:roi=HLT_Roi_JetSuper",
+                            [ "HLT_j.*presel.*:key=HLT_IDTrack_JetSuper_FTF:roi=HLT_Roi_JetSuper:vtx=HLT_IDVertex_JetSuper",
                               "HLT_j.*boffperf.*:key=HLT_IDTrack_Bjet_FTF",
                               "HLT_j.*boffperf.*:key=HLT_IDTrack_Bjet_IDTrig", 
                               "HLT_j45_pf_ftf_preselj20_L1J15:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
