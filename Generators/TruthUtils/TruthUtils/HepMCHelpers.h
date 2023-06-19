@@ -13,18 +13,13 @@
 /// Provides the HepMC tools from the external MCUtils header package,
 /// ATLAS-specific HepMC functions not suitable for MCUtils.
 
-namespace MCUtils
+namespace MC
 {
 namespace PID
 {
 #include "AtlasPID.h"
 }
-}
-
-namespace MC
-{
-using namespace MCUtils;
-using namespace MCUtils::PID;
+using namespace PID;
 
   /// @brief Identify if the particle with given PDG ID would not interact with the detector, i.e. not a neutrino or WIMP
   inline bool isNonInteracting(int pid) { return !(PID::isStrongInteracting(pid) || PID::isEMInteracting(pid)); }
@@ -41,7 +36,6 @@ using namespace MCUtils::PID;
 #include "AtlasHepMC/MagicNumbers.h"
 namespace MC {
 
-  using namespace MCUtils::PID;
 
   template <class T> inline bool isDecayed(const T& p)  { return p->status() == 2;}
   template <class T> inline bool isStable(const T& p)   { return p->status() == 1;}

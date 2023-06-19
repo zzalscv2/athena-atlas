@@ -6,6 +6,11 @@
 #include <algorithm>
 #include <array>
 #include <cstdlib>
+/** Implementation of classification functions according to PDG2022.
+ *  https://pdg.lbl.gov/2023/reviews/rpp2022-rev-monte-carlo-numbering.pdf
+ * This code is also available at https://gitlab.cern.ch/averbyts/atlaspid
+ */
+
 class DecodedPID: public std::pair<int,std::vector<int>> {
 public:
 inline DecodedPID(const int& p){
@@ -62,9 +67,11 @@ static const int KPLUS = 321;
 static const int PI0 = 111;
 static const int K0L = 130;
 static const int K0S = 310;
-static const int K0X = 210;///FIXME!!!!
+/// This is not a standard, but it seems some generators use 210 for K0
+static const int K0 = 210;
 
 static const int JPSI = 443;
+static const int PROTON = 2212;
 /// PDG rule 8:
 /// The pomeron and odderon trajectories and a generic reggeon trajectory
 /// of states in QCD areassigned codes 990, 9990, and 110 respectively
@@ -202,11 +209,11 @@ template<> inline bool isDiquark(const DecodedPID& p){
 /// nq1= 0 and nq2 >= nq3. The special case K0L is the sole exception to this rule. 
 /// PDG rule 5C:
 /// The special numbers 310 and 130 are given to the K0S and K0L respectively.
-/// APID: The special code K0X is used when a generator uses K0S/K0L
+/// APID: The special code K0 is used when a generator uses K0S/K0L
 template<> inline bool isMeson(const DecodedPID& p){
   if (std::abs(p.pid()) == K0S) return true;
   if (std::abs(p.pid()) == K0L) return true;
-  if (std::abs(p.pid()) == K0X) return true;
+  if (std::abs(p.pid()) == K0) return true;
   if (p.last() % 2 != 1 ) return false;
   if (p.max_digit(1,3) >= 6 ) return false;
   if (p.max_digit(1,3) == 0 ) return false;
@@ -245,13 +252,12 @@ template<> inline bool isBaryon(const DecodedPID& p){
     if (p(0) == 2 && p(1) == 0 && p.last() == 4 ) return true;
     if (p(0) == 2 && p(1) == 1 && p.last() == 2 ) return true;
 
-//MY!!!
     if (p(0) == 1 && p(1) == 0 && p.last() == 4 ) return true;
     if (p(0) == 1 && p(1) == 0 && p.last() == 6 ) return true;
     if (p(0) == 2 && p(1) == 0 && p.last() == 6 ) return true;
     if (p(0) == 2 && p(1) == 0 && p.last() == 8 ) return true;
   }
-//MY!!
+
   if (p.ndigits() == 5 ) {
     if (p(0) == 2 && p.last() == 2 ) return true;
     if (p(0) == 2 && p.last() == 4 ) return true;
@@ -294,7 +300,7 @@ template<> inline bool isTetraquark(const DecodedPID& p){
 /// 1000922350. To avoid ambiguities, nuclear codes should not be applied to a singlehadron, 
 /// like p,n or Λ0, where quark-contents-based codes already exist.
 template<> inline bool isNucleus(const DecodedPID& p){
-  if (std::abs(p.pid()) == 2212) return true;
+  if (std::abs(p.pid()) == PROTON) return true;
   return (p.ndigits() == 10 &&  p(0) == 1 &&  p(1) == 0 );
 }
 /// APID: graviton and all Higgs extensions are BSM
@@ -337,12 +343,12 @@ template<class T> inline bool hasQuark(const T& p, const int& q);
 
 template<> inline bool hasQuark(const DecodedPID& p, const int& q){
   if (isQuark(p.pid())) { return (std::abs(p.pid()) == q );}
-  if (isMeson(p)) {  return *(p.second.rbegin()+1) == q ||*(p.second.rbegin()+2) ==q;}
-  if (isDiquark(p)) {  auto i = std::find(p.second.rbegin()+1,p.second.rbegin()+3,q); if (i!=p.second.rbegin()+3) return true;}
-  if (isBaryon(p)) { auto i = std::find(p.second.rbegin()+1,p.second.rbegin()+4,q); if (i!=p.second.rbegin()+4) return true;}
-  if (isTetraquark(p)) { auto i = std::find(p.second.rbegin()+1,p.second.rbegin()+5,q); if (i!=p.second.rbegin()+5) return true;}
-  if (isPentaquark(p)) { auto i = std::find(p.second.rbegin()+1,p.second.rbegin()+6,q); if (i!=p.second.rbegin()+6) return true;}
-  if (isNucleus(p)) { return q==3 && p(2)>0;}
+  if (isMeson(p)) {  return *(p.second.rbegin() + 1) == q ||*(p.second.rbegin()+2) ==q;}
+  if (isDiquark(p)) {  auto i = std::find(p.second.rbegin() + 1,p.second.rbegin()+3,q); return (i!=p.second.rbegin()+3);}
+  if (isBaryon(p)) { auto i = std::find(p.second.rbegin() + 1,p.second.rbegin()+4,q); return (i!=p.second.rbegin()+4);}
+  if (isTetraquark(p)) { auto i = std::find(p.second.rbegin() + 1,p.second.rbegin()+5,q); return (i!=p.second.rbegin()+5);}
+  if (isPentaquark(p)) { auto i = std::find(p.second.rbegin() + 1,p.second.rbegin()+6,q); return (i!=p.second.rbegin()+6);}
+  if (isNucleus(p) && p.first != PROTON) { return q==3 && p(2) > 0;}
   return false;
 }
 
@@ -396,7 +402,7 @@ template<class T> inline bool isNeutral( const T& p){ return charge3(p) == 0;}
 template<> inline int charge3(const DecodedPID& p) {
   auto ap = std::abs(p.pid());
   if (ap < TABLESIZE ) return p.pid() > 0 ? triple_charge.at(ap) : -triple_charge.at(ap);
-  if (ap == K0X) return 0;
+  if (ap == K0) return 0;
   size_t nq = 0;
   int sign = 1;
   int signmult = 1;
@@ -429,5 +435,4 @@ template<class T> inline bool isStrongInteracting(const T& p);
 template<> inline bool isStrongInteracting(const int& p) { return (isGluon(p) || isQuark(p) || isDiquark(p) || isLeptoQuark(p) || isHadron(p));}
 
 template<class T> inline bool isParton(const T& p) { return isQuark(p)||isGluon(p);}
-
 #endif
