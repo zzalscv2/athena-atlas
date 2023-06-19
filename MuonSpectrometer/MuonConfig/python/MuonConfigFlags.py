@@ -112,7 +112,7 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.Calib.mdtMode", "ntuple")  
     
     # Muon Align flags
-
+    
     mcf.addFlag("Muon.Align.UseALines", lambda prevFlags: (_muonAlignMode(prevFlags)))
     mcf.addFlag("Muon.Align.UseBLines", lambda prevFlags: 'all' if _muonAlignMode(prevFlags) else 'none') # Can be ['none','all','barrel','endcaps']
     mcf.addFlag("Muon.Align.UseILines", lambda prevFlags: (_muonAlignMode(prevFlags)))
@@ -121,6 +121,7 @@ def createMuonConfigFlags():
     # Muon Trigger Flags
     mcf.addFlag("Muon.MuonTrigger", False) 
     mcf.addFlag("Muon.SAMuonTrigger", False) 
+    mcf.addFlag("Muon.disableNSWForL2SA", False) 
 
     mcf.addFlag("Muon.enableAlignment",lambda flags: (flags.Common.Project is not Project.AthSimulation \
                                                       and (flags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.FastChain] or flags.Overlay.DataOverlay)))
