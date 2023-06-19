@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALIGNINTERFACES_IGEOMETRYMANAGERTOOL_H
@@ -103,18 +103,18 @@ class IGeometryManagerTool : virtual public IAlgTool {
  protected:
 
   /** pointer to module list to which the modules are added */
-  Trk::AlignModuleList * m_alignModuleListPtr;
+  Trk::AlignModuleList * m_alignModuleListPtr = nullptr;
 
   /** pointer to vector of hashMaps to which the elements are added */
-  std::vector<Trk::AlignModuleList *> * m_idHashToAlignModuleMapsPtr;
+  std::vector<Trk::AlignModuleList *> * m_idHashToAlignModuleMapsPtr = nullptr;
 
-  int m_hashCounter;  //!< variable for setting the idHash of the AlignModules
+  int m_hashCounter = 0;  //!< variable for setting the idHash of the AlignModules
 
-  std::ostream * m_logStream; //!< logfile output stream
+  std::ostream * m_logStream = nullptr; //!< logfile output stream
 
-  int m_alignLevel;         //!< alignment level
-  int m_alignLevelBarrel;   //!< alignment level
-  int m_alignLevelEndcaps;  //!< alignment level
+  int m_alignLevel = 0;         //!< alignment level
+  int m_alignLevelBarrel = 0;   //!< alignment level
+  int m_alignLevelEndcaps = 0;  //!< alignment level
 
 }; // end class definition
   

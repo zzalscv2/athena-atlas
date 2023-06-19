@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALIGNINTERFACES_IFILLNTUPLETOOL_IH
@@ -73,7 +73,7 @@ namespace Trk {
     virtual StatusCode fillNtuple() = 0;
 
   protected:
-    std::ostream * m_logStream; //!< logfile output stream
+    std::ostream * m_logStream = nullptr; //!< logfile output stream
 
   }; // end class definition
   
