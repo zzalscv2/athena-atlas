@@ -147,6 +147,12 @@ def main(args):
 
     global g_args
     g_args = args
+
+    # We allocate many python objects at once.
+    # Running GC less often by jacking up the threshold speeds things up
+    # considerably.
+    import gc
+    gc.set_threshold (100000)
     
     import PyUtils.RootUtils as ru
     root = ru.import_root()  # noqa: F841
