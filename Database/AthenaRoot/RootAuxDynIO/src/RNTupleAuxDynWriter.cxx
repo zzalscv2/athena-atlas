@@ -108,7 +108,7 @@ namespace RootAuxDynIO
       ATH_MSG_DEBUG("Adding new object column, name="<< field_name << " of type " << attr_type);
       auto field = RFieldBase::Create(field_name, attr_type).Unwrap();
       if( !m_model ) {
-#if ROOT_VERSION_CODE > ROOT_VERSION( 6, 27, 0 )
+#if ROOT_VERSION_CODE > ROOT_VERSION( 6, 29, 0 )
          // first write was already done, need to update the model
          ATH_MSG_DEBUG("Adding late attribute " << field_name);
          auto updater = m_ntupleWriter->CreateModelUpdater();
