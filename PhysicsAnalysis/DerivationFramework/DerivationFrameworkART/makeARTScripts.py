@@ -11,20 +11,17 @@ formatList = ["PHYSVAL","PHYS","PHYSLITE",
               "JETM1","JETM2","JETM3","JETM4","JETM5","JETM6","JETM10","JETM11","JETM12","JETM14",
               "IDTR2",
               "EGAM1","EGAM2","EGAM3","EGAM4","EGAM5","EGAM7","EGAM8","EGAM9","EGAM10",
-              "FTAG1","FTAG2",
+              "FTAG1","FTAG2","FTAG3",
               "BPHY1","BPHY2","BPHY3","BPHY4","BPHY5","BPHY6","BPHY10","BPHY15","BPHY16","BPHY18","BPHY21","BPHY22",
               "BPHY23","BPHY24",
-              "STDM7"
+              "STDM7",
+              "TRIG8"
 ]
 
 truthFormatList = ["TRUTH0", "TRUTH1", "TRUTH3"]
 
 trainList = [
-              ["EGAM1","EGAM2","EGAM5","EGAM10"],
-              ["EGAM3","EGAM4","JETM4"],
-              ["EGAM7","JETM3","STDM7"],
-              ["EGAM8","EGAM9","JETM1","LLP1"],
-              ["JETM6","FTAG2"]
+              ["EGAM1","EGAM2","EGAM3","EGAM4","EGAM5","EGAM7","EGAM8","EGAM9","EGAM10","JETM1","JETM3","JETM4","JETM6","FTAG1","FTAG2","FTAG3","IDTR2","TRIG8","LLP1","STDM7","HIGG1D1"]
 ]
 
 
@@ -50,6 +47,8 @@ def generateText(formatName,label,inputFile,isTruth,isMC,nEvents,useLegacy):
    outputFile.write("#!/bin/sh"+"\n")
    outputFile.write("\n")
    outputFile.write("# art-include: master/Athena"+"\n")
+   if (formatName.find("EGAM")!=-1 or formatName.find("JETM")!=-1 or formatName.find("FTAG")!=-1 or formatName.find("IDTR")!=-1 or formatName.find("TRIG")!=-1 or (formatName.find("PHYS")!=-1 and formatName.find("PHYSLITE")==-1)):
+      outputFile.write("# art-include: 23.0/Athena"+"\n")
    outputFile.write("# art-description: DAOD building "+formatName+" "+label+"\n")
    outputFile.write("# art-type: grid"+"\n")
    outputFile.write("# art-output: *.pool.root"+"\n")
