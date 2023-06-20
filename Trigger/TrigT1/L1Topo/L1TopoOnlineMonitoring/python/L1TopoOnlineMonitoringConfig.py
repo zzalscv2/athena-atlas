@@ -150,6 +150,9 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp, doMultComp):
     alg.MonTool.defineHistogram('TopoSim', path='EXPERT', type='TH1I',
                                     title='Simulation Results for L1Topo', xbins=128, xlabels=label_topo_all,
                                     xmin=0, xmax=128)
+    alg.MonTool.defineHistogram('TopoSim_overflows', path='EXPERT', type='TH1I',
+                                    title='Overflow Simulation Results for L1Topo', xbins=128, xlabels=label_topo_all,
+                                    xmin=0, xmax=128)
 
     if doHwMonCtp:
         alg.MonTool.defineHistogram('TopoCTP', path='EXPERT', type='TH1I',
@@ -178,6 +181,17 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp, doMultComp):
                                         ylabels=ylabels,
                                         xmin=0, xmax=32,
                                         ymin=0, ymax=len(ylabels))
+        ylabelsOF = ['#frac{HdwOFnotSimOF}{HdwOF}','#frac{SimOFnotHdwOF}{SimOF}','#frac{HdwOFandSimOF}{HdwOForSimOF}','#frac{HdwOF}{SimOF}']
+        for topo in [(0,'2a'),(1,'2b'),(2,'3a'),(3,'3b')]:
+            name_OF = f'Phase1TopoTrigger_{topo[0]},Phase1TopoMissMatch_{topo[0]};Ph1Topo{topo[1]}_overflows'
+            title_OF = f'Phase1 Topo{topo[1]} Overflow Miss/Matches Summary'
+            alg.MonTool.defineHistogram(name_OF, path='EXPERT', type='TH2F',
+                                        title=title_OF,xbins=32,ybins=4,
+                                        weight=f'Phase1TopoOFWeight_{topo[0]}',
+                                        xlabels=label_topo_all[topo[0]*32:(topo[0]+1)*32],
+                                        ylabels=ylabelsOF,
+                                        xmin=0, xmax=32,
+                                        ymin=0, ymax=len(ylabelsOF))
 
     if doHwMon:
         alg.MonTool.defineHistogram('HdwResults', path='EXPERT', type='TH1I',
