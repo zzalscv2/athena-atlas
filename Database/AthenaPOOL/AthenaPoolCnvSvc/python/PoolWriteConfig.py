@@ -72,8 +72,8 @@ def PoolWriteCfg(flags):
         "AOD"            : [2, 1,  100, 0, 0],
         "DAOD_PHYSVAL"   : [5, 5,  100, 0, 1],
         "DAOD_PHYS"      : [5, 5,  500, 0, 1],
-        "DAOD_PHYSLITE"  : [5, 5, 1000, 1, 1],
-        "D2AOD_PHYSLITE" : [5, 5, 1000, 1, 1],
+        "DAOD_PHYSLITE"  : [5, 5,  500, 1, 1],
+        "D2AOD_PHYSLITE" : [5, 5,  500, 1, 1],
     }
 
     # Loop over all streams and set the appropriate attributes
