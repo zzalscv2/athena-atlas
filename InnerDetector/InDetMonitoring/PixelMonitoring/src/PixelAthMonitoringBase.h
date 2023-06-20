@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef PIXELATHMONITORINGBASE_H
@@ -37,7 +37,7 @@ const std::string pixBaseLayersLabel[PixLayers::NBASELAYERS] = {
   "ECA", "ECC", "BLayer", "Layer1", "Layer2", "IBL"
 };
 const float inv_nmod_per_layer[PixLayers::COUNT] = {
-  1. / 144., 1. / 144., 1. / 286., 1. / 494., 1. / 676., 1. / 336., 1. / 112.
+  1.f / 144.f, 1.f / 144.f, 1.f / 286.f, 1.f / 494.f, 1.f / 676.f, 1.f / 336.f, 1.f / 112.f
 };
 const int clusterToTMinCut[PixLayers::COUNT] = {
   15, 15, 15, 15, 15, 4, 4
