@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -130,9 +130,8 @@ StatusCode InDet::TRT_DriftCircleToolCosmics::initialize()
   if ( m_driftFunctionTool.retrieve().isFailure() ) {
     ATH_MSG_FATAL(m_driftFunctionTool.propertyName() << ": Failed to retrieve tool " << m_driftFunctionTool.type());
     return StatusCode::FAILURE;
-  } else {
-    ATH_MSG_INFO(m_driftFunctionTool.propertyName() << ": Retrieved tool " << m_driftFunctionTool.type());
   }
+  ATH_MSG_DEBUG(m_driftFunctionTool.propertyName() << ": Retrieved tool " << m_driftFunctionTool.type());
 
   // Get TRT ID helper
   sc = detStore()->retrieve(m_trtid,"TRT_ID");
@@ -145,9 +144,8 @@ StatusCode InDet::TRT_DriftCircleToolCosmics::initialize()
     if ( m_ConditionsSummary.retrieve().isFailure() ) {
       ATH_MSG_FATAL("Failed to retrieve "<< m_ConditionsSummary);
       return StatusCode::FAILURE;
-    } else {
-      ATH_MSG_INFO( "Retrieved service " << m_ConditionsSummary);
     }
+    ATH_MSG_DEBUG( "Retrieved service " << m_ConditionsSummary);
   }
 
   // Initialize Read handle key
