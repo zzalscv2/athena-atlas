@@ -48,27 +48,24 @@ StatusCode InDet::SiCombinatorialTrackFinder_xk::initialize()
   if ( m_proptool.retrieve().isFailure() ) {
     ATH_MSG_FATAL("Failed to retrieve tool " << m_proptool);
     return StatusCode::FAILURE;
-  } else {
-    ATH_MSG_INFO("Retrieved tool " << m_proptool);
   }
+  ATH_MSG_DEBUG("Retrieved tool " << m_proptool);
 
   // Get updator tool
   //
   if ( m_updatortool.retrieve().isFailure() ) {
     ATH_MSG_FATAL("Failed to retrieve tool " << m_updatortool);
     return StatusCode::FAILURE;
-  } else {
-    ATH_MSG_INFO("Retrieved tool " << m_updatortool);
   }
+  ATH_MSG_DEBUG("Retrieved tool " << m_updatortool);
 
   // Get RIO_OnTrack creator
   //
   if ( m_riocreator.retrieve().isFailure() ) {
     ATH_MSG_FATAL("Failed to retrieve tool " << m_riocreator);
     return StatusCode::FAILURE;
-  } else {
-    ATH_MSG_INFO("Retrieved tool " << m_riocreator);
   }
+  ATH_MSG_DEBUG("Retrieved tool " << m_riocreator);
 
   // disable pixel/SCT conditions summary tool: pixel/SCT are not used, the status event data is used and not being validated
   ATH_CHECK( m_pixelCondSummaryTool.retrieve( DisableTool{!m_usePIX || (!m_pixelDetElStatus.empty() && !VALIDATE_STATUS_ARRAY_ACTIVATED)} ) );
@@ -76,12 +73,10 @@ StatusCode InDet::SiCombinatorialTrackFinder_xk::initialize()
   //
   // Get InDetBoundaryCheckTool
   if ( m_boundaryCheckTool.retrieve().isFailure() ) {
-      ATH_MSG_FATAL("Failed to retrieve tool " << m_boundaryCheckTool);
-      return StatusCode::FAILURE;
-    }
-  else {
-    ATH_MSG_INFO("Retrieved tool " << m_boundaryCheckTool);
+    ATH_MSG_FATAL("Failed to retrieve tool " << m_boundaryCheckTool);
+    return StatusCode::FAILURE;
   }
+  ATH_MSG_DEBUG("Retrieved tool " << m_boundaryCheckTool);
 
 
 
