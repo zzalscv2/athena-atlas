@@ -171,11 +171,11 @@ def getHistoInfo(objectType, runNumber):
     histoType = "1d_integralAbove_Occupancy"
     histoName = "Number of tight forward electrons"
 
-  elif objectType == "forwardElectronEtaPhi": # Release 22 : Missing histogram
-    histoPath  = {"single":runstr+"/egamma/forwardElectrons/forwardElectronEtaPhi"}
-    histoLegend = {"single":"All candidates"}
+  elif objectType == "HLT_TausRoIs":
+    histoPath  = {"single":runstr+"/HLT/ResultMon/HLT_Taus/HLT_TausRoIs"}
+    histoLegend = {"single":""}
     histoType = "2d_etaPhi_Occupancy"
-    histoName = "Forward electrons"
+    histoName = "HLT TausRoIs"
 
   elif objectType == "NumberHLTJet": # Release 22 : Missing histogram
     histoPath  = {"HLTJet":runstr+"/HLT/JetMon/HLT/10j40_L14J20/HLTJet_n"}

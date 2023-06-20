@@ -15,7 +15,7 @@ from ROOT import TH1F,TProfile
 from ROOT import TCanvas
 from ROOT import kTeal
 from ROOT import gStyle,gROOT,gPad
-from ROOT import kYellow,kOrange,kRed,kBlue,kPink,kMagenta,kGreen,kSpring,kViolet,kAzure,kCyan,kTeal,kBlack,kWhite
+from ROOT import kYellow,kOrange,kRed,kBlue,kPink,kMagenta,kGreen,kSpring,kViolet,kAzure,kCyan,kTeal,kBlack,kWhite,kGray
 gROOT.SetBatch(False)
 
 sys.path.append("/afs/cern.ch/user/l/larmon/public/prod/Misc")
@@ -24,6 +24,8 @@ from DeMoLib import retrieveYearTagProperties,returnPeriod,plotStack,MakeTH1,Mak
 
 from DQUtils import fetch_iovs
 
+from argparse import RawTextHelpFormatter,ArgumentParser
+
 global debug
 debug = False
 #debug = True
@@ -31,10 +33,6 @@ debug = False
 ########################################################################
 ########################################################################
 # Main script
-import os,sys  
-
-from argparse import RawTextHelpFormatter,ArgumentParser
-
 from DQDefects import DefectsDB
 
 parser = ArgumentParser(description='',formatter_class=RawTextHelpFormatter)
@@ -161,7 +159,9 @@ colorPalette = {"Pixel":kViolet-4,
                 "Lumi":kBlue-9,
                 "Global":kCyan,
                 "IDGlobal":kMagenta+2,
+                "BTag":kPink+9,
                 "CaloCP":kGreen+3,
+                "MuonCP":kGray,
                 "All":kBlack}
 
 for iSyst in systemList2:
