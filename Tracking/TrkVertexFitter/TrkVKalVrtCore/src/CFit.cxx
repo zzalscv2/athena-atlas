@@ -159,7 +159,7 @@ int fitVertex(VKVertex * vk)
     double aermd[6],tmpd[6]={0.};  // temporary arrays
     double tmpPer[5],tmpCov[15], tmpWgt[15];
     double VrtMomCov[21],PartMom[4];
-    double cnstRemnants=0., iniCnstRem=0.;
+    double cnstRemnants=0., iniCnstRem=1.e-12;
     double newVrtXYZ[3];
 
     const double ConstraintAccuracy=1.e-4;
@@ -421,7 +421,7 @@ int fitVertex(VKVertex * vk)
             cnstRemnants +=  fabs( vk->ConstraintList[ii]->aa[ic] ); } }
         if(it==1){ if(cnstRemnants>0.){iniCnstRem=cnstRemnants;}else{iniCnstRem=1.e-12;} }
         if(it==10){   
-	  if( cnstRemnants/iniCnstRem > 0.1 && cnstRemnants > 0.1){ 
+	  if(cnstRemnants > 0.1 && cnstRemnants/iniCnstRem > 0.1 ){ 
             IERR = -6; return IERR;           /* Constraints are not resolved. Stop fit */
           }
         }         
