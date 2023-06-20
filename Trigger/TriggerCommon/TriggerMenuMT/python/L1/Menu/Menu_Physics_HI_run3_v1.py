@@ -14,9 +14,14 @@ def defineMenu():
         ##
         # single EM
         ##
-        'L1_EM8VH', 'L1_EM10', 'L1_EM10VH', 'L1_EM12', 'L1_EM14', 'L1_EM15', 'L1_EM16', 'L1_EM18VH', 'L1_EM20VH', 'L1_EM20VHI', 'L1_EM22',
-        'L1_EM22VHI',
-        'L1_EM20VH_FIRSTEMPTY',
+        #'L1_EM8VH', 'L1_EM10', 
+        'L1_EM10VH', 
+        #'L1_EM14', 
+        'L1_EM15', 
+        #'L1_EM16','L1_EM18VH', 
+        #'L1_EM20VHI', 'L1_EM22',
+        #'L1_EM22VHI',
+        #'L1_EM20VH_FIRSTEMPTY',
         # new calo
         'L1_eEM1', 'L1_eEM2',
         'L1_eEM5', 'L1_eEM9', 'L1_eEM18', 'L1_eEM15',
@@ -38,8 +43,8 @@ def defineMenu():
         ##
         # combined lepton (e and mu)
         ##
-        'L1_2EM10', 'L1_2EM15', 'L1_2EM16',
-        'L1_2EM20VH',
+        #'L1_2EM10', 'L1_2EM15', 'L1_2EM16',
+        #'L1_2EM20VH',
         # new calo
         #'L1_2eEM7', 'L1_2eEM9', 'L1_2eEM15',
         'L1_2eEM12L', 'L1_2eEM18L',
@@ -118,7 +123,7 @@ def defineMenu():
         'L1_TAU1_TE3_VTE200', 'L1_TAU1_TE5_VTE200',
         'L1_TAU1_VTE200', 'L1_TAU1_VTE200_EMPTY',
         'L1_2TAU1_VTE200', 'L1_2TAU1_VTE50',
-        'L1_EM7_VTE200',
+        #'L1_EM7_VTE200',
         
         #UPC - new EM
         'L1_eEM1_VjTE200', 'L1_2eEM1_VjTE200', 'L1_2eEM2_VjTE200', 'L1_2eEM1_VjTE200_GAP_AANDC',
@@ -292,7 +297,7 @@ def defineMenu():
         # 'L1_DPHI-2eEM5_VTE5p24ETA49_ALFA_EINE',
         'L1_TRT_ALFA_ANY', 'L1_TRT_ALFA_EINE',
         'L1_J12_ALFA_ANY_UNPAIRED_ISO',
-        ]
+    ]
 
 
 

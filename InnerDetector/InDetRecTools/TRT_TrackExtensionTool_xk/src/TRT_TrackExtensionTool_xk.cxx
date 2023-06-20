@@ -107,27 +107,27 @@ StatusCode InDet::TRT_TrackExtensionTool_xk::initialize()
   // Get RIO_OnTrack creator with drift time information
   //
   ATH_CHECK(m_riontrackD.retrieve());
-  ATH_MSG_INFO( "Retrieved tool " << m_riontrackD);
+  ATH_MSG_DEBUG("Retrieved tool " << m_riontrackD);
   
   // Get RIO_OnTrack creator without drift time information
   //
   ATH_CHECK(m_riontrackN.retrieve());
-  ATH_MSG_INFO("Retrieved tool " << m_riontrackN ) ;
+  ATH_MSG_DEBUG("Retrieved tool " << m_riontrackN ) ;
 
   // Get detector elements road maker tool
   //
   ATH_CHECK(m_roadtool.retrieve());
-  ATH_MSG_INFO( "Retrieved tool " << m_roadtool);
+  ATH_MSG_DEBUG("Retrieved tool " << m_roadtool);
 
   // Get propagator tool
   //
   ATH_CHECK(m_proptool.retrieve());
-  ATH_MSG_INFO( "Retrieved tool " << m_proptool);
+  ATH_MSG_DEBUG("Retrieved tool " << m_proptool);
 
   // Get updator tool
   //
   ATH_CHECK(m_updatortool.retrieve());
-  ATH_MSG_INFO("Retrieved tool " << m_updatortool);
+  ATH_MSG_DEBUG("Retrieved tool " << m_updatortool);
 
   // Get segment selector tool
   //

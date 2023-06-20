@@ -35,26 +35,23 @@ float HITowerWeightTool::getWeightMag(float eta, float phi, int sample) const
 }
 
 
-float HITowerWeightTool::getEtaPhiResponse(float eta, float phi, const EventContext& ctx) const
+float HITowerWeightTool::getEtaPhiResponse(float eta, float phi, int runIndex) const
 {
-  int my_runIndex=getRunIndex(ctx);
-  if(my_runIndex<=0)  return 1;
+  if(runIndex<=0)  return 1;
 
   int eb=std::as_const(m_h3EtaPhiResponse)->GetXaxis()->FindFixBin(eta);
   int pb=std::as_const(m_h3EtaPhiResponse)->GetYaxis()->FindFixBin(phi);
-  float rv=m_h3EtaPhiResponse->GetBinContent(eb,pb,my_runIndex);
-  return rv;
+  return m_h3EtaPhiResponse->GetBinContent(eb,pb,runIndex);
 }
 
 
-float HITowerWeightTool::getEtaPhiOffset(float eta, float phi, const EventContext& ctx) const
+float HITowerWeightTool::getEtaPhiOffset(float eta, float phi, int runIndex) const
 {
-  int my_runIndex=getRunIndex(ctx);
-  if(my_runIndex<=0) return 0;
+  if(runIndex<=0) return 0;
 
   int eb=std::as_const(m_h3EtaPhiOffset)->GetXaxis()->FindFixBin(eta);
   int pb=std::as_const(m_h3EtaPhiOffset)->GetYaxis()->FindFixBin(phi);
-  return m_h3EtaPhiOffset->GetBinContent(eb,pb,my_runIndex)*std::cosh(eta);
+  return m_h3EtaPhiOffset->GetBinContent(eb,pb,runIndex)*std::cosh(eta);
 }
 
 
@@ -70,19 +67,34 @@ int HITowerWeightTool::getRunIndex(const EventContext& ctx) const
   auto itr=m_runMap.find(run_number);
   if(itr==m_runMap.end())
   {
-    //trying generic run number <=> no run dependence
-    run_number = 226000;
-    auto itrg=m_runMap.find(run_number);
-    if(itrg==m_runMap.end())
+    //trying generic run numbers <=> no run dependence
+    for(auto run_number : m_defaultRunNumbers)
     {
-      ATH_MSG_WARNING("No generic calibration or calibration for " << run_number << " is avaliable. Doing no eta-phi correction.");
-      return 0;
+      auto itrg=m_runMap.find(run_number);
+      if(itrg!=m_runMap.end())
+      {
+        ATH_MSG_DEBUG("Using run " << run_number << " generic calibration for eta-phi correction.");
+        return itrg->second;
+      }
+    }
+
+    if(m_defaultRunNumbers.empty())
+    {
+      ATH_MSG_WARNING("No calibration for " << run_number << " is avaliable and no generic run numbers were set. Doing no eta-phi correction.");
     }
     else
     {
-      ATH_MSG_DEBUG("Using generic calibration for eta-phi correction.");
-      return itrg->second;
+      std::string str_defaultRunNumbers="";
+      for(auto run_number : m_defaultRunNumbers)
+      {
+        str_defaultRunNumbers+=std::to_string(run_number)+", ";
+      }
+      str_defaultRunNumbers.resize(str_defaultRunNumbers.length()-2);
+
+      ATH_MSG_WARNING("No calibration for " << run_number << " is avaliable; no generic calibration for runs "<<str_defaultRunNumbers<<". Doing no eta-phi correction.");
     }
+
+    return 0;
   }
   else 
   {

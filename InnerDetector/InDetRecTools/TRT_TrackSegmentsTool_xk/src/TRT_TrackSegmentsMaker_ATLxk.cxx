@@ -75,8 +75,9 @@ StatusCode InDet::TRT_TrackSegmentsMaker_ATLxk::initialize()
   // Get tTools servise
   //
   IToolSvc* toolSvc;
-  if ((sc=service("ToolSvc", toolSvc)).isFailure())  {
-    msg(MSG::FATAL)<<"Toll service not found !"<<endmsg; return sc;
+  if((sc=service("ToolSvc", toolSvc)).isFailure()){
+    ATH_MSG_FATAL("Tool service not found !");
+    return sc;
   }
 
   // Initiate magnetic field properties
@@ -90,21 +91,19 @@ StatusCode InDet::TRT_TrackSegmentsMaker_ATLxk::initialize()
 
   // Get propagator tool
   //
-  if( m_propTool.retrieve().isFailure()) {
-    msg(MSG::FATAL)<<"Failed to retrieve tool "<< m_propTool <<endmsg;
+  if(m_propTool.retrieve().isFailure()) {
+    ATH_MSG_FATAL("Failed to retrieve tool "<< m_propTool);
     return StatusCode::FAILURE;
-  } else {
-     msg(MSG::INFO) << "Retrieved tool " << m_propTool << endmsg;
   }
+  ATH_MSG_DEBUG("Retrieved tool " << m_propTool);
 
   // Get tool for track extension to TRT
   //
-  if( m_extensionTool.retrieve().isFailure()) {
-    msg(MSG::FATAL)<<"Failed to retrieve tool "<< m_extensionTool <<endmsg;
+  if(m_extensionTool.retrieve().isFailure()) {
+    ATH_MSG_FATAL("Failed to retrieve tool "<< m_extensionTool);
     return StatusCode::FAILURE;
-  } else {
-    msg(MSG::INFO) << "Retrieved tool " << m_extensionTool << endmsg;
   }
+  ATH_MSG_DEBUG("Retrieved tool " << m_extensionTool);
 
   // PRD-to-track association (optional)
   ATH_CHECK( m_prdToTrackMap.initialize( !m_prdToTrackMap.key().empty()));
@@ -112,7 +111,7 @@ StatusCode InDet::TRT_TrackSegmentsMaker_ATLxk::initialize()
 
   // TRT
   if (detStore()->retrieve(m_trtid, "TRT_ID").isFailure()) {
-    msg(MSG::FATAL) << "Could not get TRT ID helper" << endmsg;
+    ATH_MSG_FATAL("Could not get TRT ID helper");
     return StatusCode::FAILURE;
   }
 
@@ -243,8 +242,8 @@ InDet::TRT_TrackSegmentsMaker_ATLxk::newRegion
   // Get drift cilrcles collection
   //
   SG::ReadHandle<InDet::TRT_DriftCircleContainer> trtcontainer(m_trtname, ctx);
-  if(not trtcontainer.isValid() && msgLvl(MSG::DEBUG)) {
-    msg(MSG::DEBUG)<<"Could not get TRT_DriftCircleContainer"<<endmsg;
+  if(not trtcontainer.isValid()) {
+    ATH_MSG_DEBUG("Could not get TRT_DriftCircleContainer");
   }
 
   SG::ReadHandle<Trk::PRDtoTrackMap>  prd_to_track_map;

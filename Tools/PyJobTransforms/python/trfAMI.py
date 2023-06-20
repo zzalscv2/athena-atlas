@@ -94,7 +94,7 @@ class TrfConfig(object):
                             separator=':'
                         string += " " + k
                         for vk, vv in v.items():
-                            string += " " + vk + separator + vv
+                            string += " " + vk + separator + str(vv)
                 elif isinstance(v, (list, tuple)):
                     # athenaopts are special - space separated
                     if "athenaopts" in k:

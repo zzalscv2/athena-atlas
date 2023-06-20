@@ -114,8 +114,6 @@ StatusCode InDet::TRT_TrackSegmentsMaker_ECcosmics::initialize()
 {
   StatusCode sc = AthAlgTool::initialize(); 
 
-  
-  
   // Initialize ReadHandle
   ATH_CHECK(m_trtname.initialize());
 
@@ -130,9 +128,8 @@ StatusCode InDet::TRT_TrackSegmentsMaker_ECcosmics::initialize()
   if( m_riomakerD.retrieve().isFailure()) {
     ATH_MSG_FATAL("Failed to retrieve tool "<< m_riomakerD);
     return StatusCode::FAILURE;
-  } else {
-    ATH_MSG_INFO("Retrieved tool " << m_riomakerD);
   }
+  ATH_MSG_DEBUG("Retrieved tool " << m_riomakerD);
 
   // Get RIO_OnTrack creator without drift time information
   //
@@ -140,9 +137,8 @@ StatusCode InDet::TRT_TrackSegmentsMaker_ECcosmics::initialize()
   if( m_riomakerN.retrieve().isFailure()) {
     ATH_MSG_FATAL("Failed to retrieve tool "<< m_riomakerN);
     return StatusCode::FAILURE;
-  } else {
-    ATH_MSG_INFO("Retrieved tool " << m_riomakerN);
   }
+  ATH_MSG_DEBUG("Retrieved tool " << m_riomakerN);
 
   // optional PRD to track association map
   //

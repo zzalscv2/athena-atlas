@@ -72,6 +72,16 @@ private:
   std::unique_ptr<float[]> m_countHdw;
   std::unique_ptr<float[]> m_countSim;
   std::unique_ptr<float[]> m_countAny;
+  std::unique_ptr<float[]> m_overflow_rateHdwNotSim;
+  std::unique_ptr<float[]> m_overflow_rateSimNotHdw;
+  std::unique_ptr<float[]> m_overflow_rateHdwAndSim;
+  std::unique_ptr<float[]> m_overflow_rateHdwSim;
+  std::unique_ptr<float[]> m_overflow_countHdwNotSim;
+  std::unique_ptr<float[]> m_overflow_countSimNotHdw;
+  std::unique_ptr<float[]> m_overflow_countHdwSim;
+  std::unique_ptr<float[]> m_overflow_countHdw;
+  std::unique_ptr<float[]> m_overflow_countSim;
+  std::unique_ptr<float[]> m_overflow_countAny;
 
   std::vector<unsigned> m_ctpIds;
 

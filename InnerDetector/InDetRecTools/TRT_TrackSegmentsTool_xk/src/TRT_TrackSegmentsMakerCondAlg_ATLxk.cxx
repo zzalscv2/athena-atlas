@@ -54,17 +54,16 @@ StatusCode InDet::TRT_TrackSegmentsMakerCondAlg_ATLxk::initialize()
   // Get propagator tool
   //
   if( m_propTool.retrieve().isFailure()) {
-    msg(MSG::FATAL)<<"Failed to retrieve tool "<< m_propTool <<endmsg;
+    ATH_MSG_FATAL("Failed to retrieve tool "<< m_propTool);
     return StatusCode::FAILURE;
-  } else {
-    msg(MSG::INFO) << "Retrieved tool " << m_propTool << endmsg;
   }
+  ATH_MSG_DEBUG("Retrieved tool " << m_propTool);
 
   magneticFieldInit();
 
   // Get TRT ID                                                                                             
   if (detStore()->retrieve(m_trtid, "TRT_ID").isFailure()) {
-    msg(MSG::FATAL) << "Could not get TRT ID helper" << endmsg;
+    ATH_MSG_FATAL("Could not get TRT ID helper");
     return StatusCode::FAILURE;
   }
 

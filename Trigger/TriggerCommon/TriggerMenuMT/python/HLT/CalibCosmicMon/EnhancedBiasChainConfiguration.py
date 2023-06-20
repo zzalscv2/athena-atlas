@@ -24,7 +24,6 @@ l1seeds = { 'low'  : \
                 'L1_ZB_eEM18'],\
              'medium' : \
                [
-                'L1_2EM15',\
                 'L1_2eEM18L',\
                 'L1_2MU3V',\
                 'L1_BPH-0DR3-EM7J15_2MU3V',\
@@ -42,7 +41,6 @@ l1seeds = { 'low'  : \
                 #'L1_EM15_XS30',\
                 'L1_eEM18L',\
                 'L1_eEM24L',\
-                'L1_EM7_MU8F',\
                 'L1_HT190-J15s5pETA21',\
                 'L1_J30p31ETA49',\
                 'L1_J40p0ETA25_2J15p31ETA49',\

@@ -68,7 +68,7 @@ StatusCode InDet::TRT_TrackExtensionToolCosmics::initialize()
   //
   IToolSvc* toolSvc;
   if ((sc=service("ToolSvc", toolSvc)).isFailure())  {
-    msg(MSG::FATAL)<<"Toll service not found !"<<endmsg;
+    ATH_MSG_FATAL("Tool service not found !");
     return StatusCode::FAILURE;
   }
 
@@ -76,27 +76,24 @@ StatusCode InDet::TRT_TrackExtensionToolCosmics::initialize()
   // Get RIO_OnTrack creator with drift time information
   //
   if(m_riontrackD.retrieve().isFailure()) {
-    msg(MSG::FATAL)<<"Failed to retrieve tool "<< m_riontrackD <<endmsg;
+    ATH_MSG_FATAL("Failed to retrieve tool "<< m_riontrackD);
     return StatusCode::FAILURE;
-  } else {
-    msg(MSG::INFO) << "Retrieved tool " << m_riontrackD << endmsg;
   }
+  ATH_MSG_DEBUG("Retrieved tool " << m_riontrackD);
 
   // Get RIO_OnTrack creator without drift time information
   //
   if(m_riontrackN.retrieve().isFailure()) {
-    msg(MSG::FATAL)<<"Failed to retrieve tool "<< m_riontrackN <<endmsg;
+    ATH_MSG_FATAL("Failed to retrieve tool "<< m_riontrackN);
     return StatusCode::FAILURE;
-  } else {
-    msg(MSG::INFO) << "Retrieved tool " << m_riontrackN << endmsg;
   }
-
+  ATH_MSG_DEBUG("Retrieved tool " << m_riontrackN);
 
   ATH_CHECK( m_extrapolator.retrieve() );
   ATH_CHECK( m_propagator.retrieve() );
 
   if ((detStore()->retrieve(m_trtid)).isFailure()) {
-    msg(MSG::FATAL) << "Problem retrieving TRTID helper" << endmsg;
+    ATH_MSG_FATAL("Problem retrieving TRTID helper");
     return StatusCode::FAILURE;
   }
 

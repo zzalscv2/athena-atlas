@@ -120,15 +120,14 @@ class MonitorDef:
                 "L1_3MU3V", "L1_MU5VF_3MU3VF", "L1_4MU3V",
                 ## Legacy L1 items
                 # L1Calo
-                "L1_EM12", # keep for LUMI group
-                "L1_EM3", "L1_EM15", "L1_EM20VH", "L1_EM22VHI", "L1_EM24VHI", "L1_2EM15VHI",
+                "L1_EM3", "L1_EM15", 
                 "L1_TAU8", "L1_TAU20IM", "L1_TAU100",
                 "L1_J30", "L1_J75", "L1_J100", "L1_J400",
                 "L1_J15p31ETA49", "L1_J30p31ETA49",
                 "L1_J45p0ETA21_3J15p0ETA25", "L1_4J15p0ETA25",
                 "L1_XE35", "L1_XE45", "L1_XE50", "L1_XE55", "L1_XE300",
                 # Combined
-                "L1_EM15VH_MU8F", "L1_MU3V_J12",
+                "L1_MU3V_J12",
                 # L1Topo
                 "L1_BPH-0DR3-EM7J15_MU5VF", "L1_HT190-J15s5pETA21", "L1_LLP-RO", # Board 0 FPGA 0
                 "L1_MJJ-500-NFF",                                                # Board 0 FPGA 1
@@ -263,7 +262,6 @@ class MonitorDef:
 
         else: # HI menu
             monItems[TBP|TAP|TAV] = [
-                "L1_EM12", # keep for LUMI group
                 # Random
                 "L1_RD0_FILLED",
                 # Detector
@@ -378,11 +376,6 @@ class MonitorDef:
                 "L1_MU5VF_AFP_A_OR_C",
                 "L1_2MU3V_VTE50",
                 # Legacy L1Calo
-                # EM
-                #"L1_EM3", 
-                "L1_EM10", "L1_EM20VHI",
-                "L1_EM7_VTE200",
-                #"L1_EM7_AFP_A_OR_C",
                 # Tau
                 "L1_TAU8", "L1_TAU12IM",
                 "L1_TAU1_TE3_VTE200",
@@ -469,9 +462,6 @@ class MonitorDef:
                 "L1_MBTS_1_A_ALFA_C", "L1_MBTS_1_C_ALFA_A",
                 "L1_MU3V_ALFA_ANY",
                 "L1_MU3V_ALFA_EINE",
-                #"L1_EM3_ALFA_ANY",
-                #"L1_EM3_ALFA_EINE",
-                #"L1_2EM3_ALFA_EINE",
                 "L1_J12_ALFA_ANY", "L1_J12_ALFA_EINE", "L1_J12_VTE200",
                 #
                 "L1_TE5_ALFA_ANY",

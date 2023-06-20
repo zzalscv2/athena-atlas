@@ -47,21 +47,16 @@ namespace FlavorTagDiscriminants {
     virtual std::set<std::string> getAuxInputKeys() const;
     virtual std::set<std::string> getConstituentAuxInputKeys() const;
 
-    std::shared_ptr<const OnnxUtil> m_onnxUtil;
-
   private:
 
-    GNNConfig::Config m_config_gnn;
+    std::shared_ptr<const OnnxUtil> m_onnxUtil;
 
     SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer>> m_jetLink;
     std::string m_input_node_name;
     std::vector<internal::VarFromBTag> m_varsFromBTag;
     std::vector<internal::VarFromJet> m_varsFromJet;
     std::vector<internal::TrackSequenceBuilder> m_trackSequenceBuilders;
-    internal::OutNode m_decorators_float;
-    internal::OutNodeVecChar m_decorators_vecchar;
-    internal::OutNodeVecFloat m_decorators_vecfloat;
-    internal::OutNodeTrackLinks m_decorators_tracklinks;
+    std::map<std::string, internal::OutNode> m_decorators;
     float m_defaultValue;
 
     FTagDataDependencyNames m_dataDependencyNames;

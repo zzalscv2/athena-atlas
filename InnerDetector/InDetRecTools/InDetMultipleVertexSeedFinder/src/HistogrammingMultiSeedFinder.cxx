@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetMultipleVertexSeedFinder/HistogrammingMultiSeedFinder.h"
@@ -19,28 +19,32 @@ namespace InDet
  
   if(m_trkFilter.retrieve().isFailure())
   {
-   msg(MSG::ERROR)<<" Unable to retrieve "<<m_trkFilter<<endmsg;
+   ATH_MSG_ERROR(" Unable to retrieve "<<m_trkFilter);
    return StatusCode::FAILURE;
-  }else msg(MSG::INFO)<<"Track summary tool retrieved"<<endmsg; 
+  }
+  ATH_MSG_DEBUG("Track summary tool retrieved");
    
   if(m_cleaningTool.retrieve().isFailure())
   {
-   msg(MSG::ERROR)<<" Unable to retrieve "<<m_cleaningTool<<endmsg;
+   ATH_MSG_ERROR(" Unable to retrieve "<<m_cleaningTool);
    return StatusCode::FAILURE;
-  }else msg(MSG::INFO)<<"Cluster cleaning tool retrieved"<<endmsg;  
+  }
+  ATH_MSG_DEBUG("Cluster cleaning tool retrieved");
    
   ATH_CHECK(m_beamSpotKey.initialize());
   if(m_vtxSeedFinder.retrieve().isFailure())
   {
-    msg(MSG::ERROR) << "Unable to retrieve " << m_vtxSeedFinder <<endmsg;
-    return StatusCode::FAILURE;
-  }else msg(MSG::INFO)<< "Vertex seed finder retriever" << endmsg; 
+   ATH_MSG_ERROR("Unable to retrieve " << m_vtxSeedFinder);
+   return StatusCode::FAILURE;
+  }
+  ATH_MSG_DEBUG("Vertex seed finder retriever");
  
   if ( m_extrapolator.retrieve().isFailure() ) 
   {                              
-   msg(MSG::ERROR) << "Failed to retrieve tool " << m_extrapolator << endmsg;
+   ATH_MSG_ERROR("Failed to retrieve tool " << m_extrapolator);
    return StatusCode::FAILURE;                                                  
-  } else msg(MSG::INFO) << "Retrieved tool " << m_extrapolator << endmsg;
+  }
+  ATH_MSG_DEBUG("Retrieved tool " << m_extrapolator);
                 
   return StatusCode::SUCCESS;
  }//end of initialize mtehod
@@ -64,16 +68,16 @@ namespace InDet
   declareProperty("IgnoreBeamSpot",	m_ignoreBeamSpot);
 
 
-//track filter  
+  //track filter
   declareProperty("TrackSelector", m_trkFilter );
 
-//cleaning tool
+  //cleaning tool
   declareProperty("CleaningTool",  m_cleaningTool);
 
-//vertex finder tool (needed when no beam spot is available)
+  //vertex finder tool (needed when no beam spot is available)
   declareProperty("VertexSeedFinder",m_vtxSeedFinder);
 
-//extrapolator
+  //extrapolator
   declareProperty("Extrapolator",m_extrapolator); 
  }//end of constructor
 
@@ -83,44 +87,44 @@ namespace InDet
  std::vector< std::vector<const Trk::Track *> > HistogrammingMultiSeedFinder::seeds(const std::vector<const Trk::Track*>& tracks )const
  {
   const EventContext& ctx = Gaudi::Hive::currentContext();
- //step 1: preselection 
+
+  //step 1: preselection
   std::vector<const Trk::Track*> preselectedTracks(0);
   std::vector<const Trk::Track*>::const_iterator tr = tracks.begin();
   std::vector<const Trk::Track*>::const_iterator tre = tracks.end(); 
   
-//beamposition
+  //beamposition
   SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
 
-  Trk::RecVertex beamrecposition(beamSpotHandle->beamVtx());  
-  if(msgLvl(MSG::DEBUG))msg(MSG::DEBUG)<<"Beam spot position is: "<< beamrecposition.position()<<endmsg;
+  Trk::RecVertex beamrecposition(beamSpotHandle->beamVtx());
+  ATH_MSG_DEBUG("Beam spot position is: "<< beamrecposition.position());
   for(;tr!=tre;++tr) if(m_trkFilter->decision(**tr,&beamrecposition)) preselectedTracks.push_back(*tr);
   Trk::Vertex* beamposition=&beamrecposition;
   
   if (m_ignoreBeamSpot)
   {
     Trk::Vertex* myVertex=new Trk::Vertex(m_vtxSeedFinder->findSeed(tracks));
-    if(msgLvl(MSG::DEBUG))msg(MSG::DEBUG)<<
-                              " vtx seed x: " << myVertex->position().x() << 
-                              " vtx seed y: " << myVertex->position().y() << 
-                              " vtx seed z: " << myVertex->position().z() << endmsg;
+    ATH_MSG_DEBUG(" vtx seed x: " << myVertex->position().x() <<
+		  " vtx seed y: " << myVertex->position().y() <<
+		  " vtx seed z: " << myVertex->position().z());
     beamposition=myVertex;
   }
 
-//step 2: histogramming tracks
-//output container  
+  //step 2: histogramming tracks
+  //output container
   std::vector< std::vector<const Trk::Track *> > result(0);
   if(!preselectedTracks.empty())
   { 
    std::map<unsigned int, std::vector<const Trk::Track *> > histo;  
   
-//getting the bin size  
+   //getting the bin size
    double bin_size  = 2. * m_histoRange/ m_nBins;
   
    std::vector<const Trk::Track*>::const_iterator p_tr = preselectedTracks.begin();
    std::vector<const Trk::Track*>::const_iterator p_tre = preselectedTracks.end();
    
    
-//creating a perigee surfce to extrapolate tracks
+   //creating a perigee surfce to extrapolate tracks
    Trk::PerigeeSurface perigeeSurface(beamposition->position());   
   
    for(;p_tr != p_tre; ++p_tr)
@@ -130,8 +134,7 @@ namespace InDet
 
      double currentTrackZ0 = lexPerigee->parameters()[Trk::z0];
      delete lexPerigee;
-     //    double currentTrackZ0 =
-     //    (*p_tr)->perigeeParameters()->parameters()[Trk::z0];
+
      unsigned int bin_number =
        int(floor((currentTrackZ0 + m_histoRange) / bin_size)) + 1;
 
@@ -140,108 +143,94 @@ namespace InDet
      std::map<unsigned int, std::vector<const Trk::Track*>>::iterator map_pos =
        histo.find(bin_number);
      if (map_pos != histo.end()) {
-
-       // this bin already exists, adding entry
-       map_pos->second.push_back(*p_tr);
-    }else{
-    
-//this bin is not their yet, adding bin  
-     std::vector<const Trk::Track *> tmp_vec(0);
-     tmp_vec.push_back(*p_tr);
-     histo.insert( std::map<unsigned int, std::vector<const Trk::Track *> >::value_type(bin_number, tmp_vec));
+      // this bin already exists, adding entry
+      map_pos->second.push_back(*p_tr);
+     }else{
+      //this bin is not their yet, adding bin
+      std::vector<const Trk::Track *> tmp_vec(0);
+      tmp_vec.push_back(*p_tr);
+      histo.insert( std::map<unsigned int, std::vector<const Trk::Track *> >::value_type(bin_number, tmp_vec));
     }//end of checking bin existence     
    }//end of loop over all sorted tracks
 
-//------------------------- Debug output -------------------------------------------------------------------
-//debug output: checking the bin contents of the histogram 
-/*  std::cout<<"**********Checking the histogram ************"<<std::endl;
-  for(std::map<unsigned int, std::vector<const Trk::Track *> >::iterator i = histo.begin(); i != histo.end(); ++i)
-  {
-   std::cout<<"Currennt bin N "<< i->first<<std::endl;
-   std::cout<<"Containes entries: "<< i->second.size()<<std::endl;  
-  }//end of debug histogram check
-*/  
-//------------------------- End of debug output -------------------------------------------------------------------
+   //------------------------- Debug output -------------------------------------------------------------------
+   //debug output: checking the bin contents of the histogram
+   /*  std::cout<<"**********Checking the histogram ************"<<std::endl;
+       for(std::map<unsigned int, std::vector<const Trk::Track *> >::iterator i = histo.begin(); i != histo.end(); ++i)
+       {
+       std::cout<<"Currennt bin N "<< i->first<<std::endl;
+       std::cout<<"Containes entries: "<< i->second.size()<<std::endl;
+       }//end of debug histogram check
+   */
+   //------------------------- End of debug output -------------------------------------------------------------------
    
-//step 3: merging clusters    
-//bins closer to each other than several empty bins become 
-//parts of the same cluster  
+   //step 3: merging clusters
+   //bins closer to each other than several empty bins become
+   //parts of the same cluster
 
-  std::vector<std::vector<const Trk::Track *> > preClusters(0);
-  std::vector<const Trk::Track *> tmp_cluster(0);
-  unsigned int previous_bin = histo.begin()->first;
-  for(auto & i : histo)
-  {
-   unsigned int current_bin = i.first;
-   if((current_bin - previous_bin)>m_sepNBins )
-   {
-   
-//forming a new cluster   
-    preClusters.push_back(tmp_cluster);
-    tmp_cluster.clear();
-   } 
-   
-// in any case filling tracks into this bin.   
-   for(const auto *j : i.second) tmp_cluster.push_back(j); 
-   previous_bin = current_bin;
-  }//end of loop over the map entries
-  preClusters.push_back(tmp_cluster);
+   std::vector<std::vector<const Trk::Track *> > preClusters(0);
+   std::vector<const Trk::Track *> tmp_cluster(0);
+   unsigned int previous_bin = histo.begin()->first;
+   for(auto & i : histo){
+    unsigned int current_bin = i.first;
+    if((current_bin - previous_bin)>m_sepNBins ){
+     //forming a new cluster
+     preClusters.push_back(tmp_cluster);
+     tmp_cluster.clear();
+    }
 
-//step 4 iterative cleaning of formed clusters  
-  for(const auto & preCluster : preClusters)
-  {
-   if(preCluster.size()>m_nRemaining)
-   {
-    std::vector<const Trk::Track *> tracks_to_clean = preCluster;  
-    bool clean_again = false;
-    do
-    {
-     std::pair<std::vector<const Trk::Track *>, std::vector<const Trk::Track *> > clusterAndOutl = 
-                                               m_cleaningTool->clusterAndOutliers(tracks_to_clean, beamposition);
+    // in any case filling tracks into this bin.
+    for(const auto *j : i.second) tmp_cluster.push_back(j);
+    previous_bin = current_bin;
+   }//end of loop over the map entries
+   preClusters.push_back(tmp_cluster);
+
+   //step 4 iterative cleaning of formed clusters
+   for(const auto & preCluster : preClusters){
+    if(preCluster.size()>m_nRemaining){
+     std::vector<const Trk::Track *> tracks_to_clean = preCluster;
+     bool clean_again = false;
+     do{
+      std::pair<std::vector<const Trk::Track *>, std::vector<const Trk::Track *> > clusterAndOutl =
+	m_cleaningTool->clusterAndOutliers(tracks_to_clean, beamposition);
+
+      //if core size is miningfull, storing it
+      std::vector<const Trk::Track *> core_cluster = clusterAndOutl.first;
+      std::vector<const Trk::Track *> core_outl = clusterAndOutl.second;
       
-//if core size is miningfull, storing it 
-     std::vector<const Trk::Track *> core_cluster = clusterAndOutl.first;
-     std::vector<const Trk::Track *> core_outl = clusterAndOutl.second;    
-      
-//--------------Debug output-----------------------------------------------------
-//      std::cout<<"Cleaning iteration "<<clean_count<<std::endl;
-//      std::cout<<"Reduced cluster size: "<<core_cluster.size()<<std::endl;
-//      std::cout<<"Outliers size:        "<<core_outl.size()<<std::endl;
-//      ++clean_count;           
-//-------------------End of debug output -----------------------------------------
-     if(core_cluster.empty())
-     {
-    
-      msg(MSG::INFO)  << "Core cluster has 0 size, remaining tracks are discarded. "<< endmsg;
-      clean_again = false;
-     }else{
-      
-//storing clusters with >1 track (optional)      
-      if(core_cluster.size()>1) result.push_back(core_cluster);	
-      
-//checking the outliers, whether more cleaning is to be done      
-      if(core_outl.size()>m_nRemaining)
-      {
-       clean_again = true;
-       tracks_to_clean.clear();
-       tracks_to_clean = core_outl;
-	
-      }else if(core_outl.size()>1)
-      {
+      //--------------Debug output-----------------------------------------------------
+      //      std::cout<<"Cleaning iteration "<<clean_count<<std::endl;
+      //      std::cout<<"Reduced cluster size: "<<core_cluster.size()<<std::endl;
+      //      std::cout<<"Outliers size:        "<<core_outl.size()<<std::endl;
+      //      ++clean_count;
+      //-------------------End of debug output -----------------------------------------
+
+      if(core_cluster.empty()){
+       ATH_MSG_INFO("Core cluster has 0 size, remaining tracks are discarded.");
        clean_again = false;
-     
-       msg(MSG::INFO)  << "There were remaining outliers of size: "<< core_outl.size()<< endmsg;
-       msg(MSG::INFO)  << "Not evident, whether these tracks form a cluster. Rejected..."<< endmsg;	
-      }else  clean_again = false;//end of outlier size check  
-     }//end of core cluster 0 check     
-    }while(clean_again);//end of loop
-   }else if(preCluster.size()==2){
-    
-//case of two track cluster. accepting without cleaning  
-    result.push_back(preCluster);
-   }//end of cluster size check
-  }//end of loop over all the preclusters
- }//end of  preselection not zero check
+      }else{
+       //storing clusters with >1 track (optional)
+       if(core_cluster.size()>1) result.push_back(core_cluster);
+       //checking the outliers, whether more cleaning is to be done
+       if(core_outl.size()>m_nRemaining){
+        clean_again = true;
+        tracks_to_clean.clear();
+        tracks_to_clean = core_outl;
+       }else if(core_outl.size()>1){
+        clean_again = false;
+        ATH_MSG_INFO("There were remaining outliers of size: "<< core_outl.size());
+        ATH_MSG_INFO("Not evident, whether these tracks form a cluster. Rejected...");
+       }else clean_again = false;//end of outlier size check 
+      }//end of core cluster 0 check
+     }while(clean_again);//end of loop
+
+    }else if(preCluster.size()==2){
+     //case of two track cluster. accepting without cleaning
+     result.push_back(preCluster);
+    }//end of cluster size check
+   }//end of loop over all the preclusters
+  }//end of  preselection not zero check
+
   if (m_ignoreBeamSpot) delete beamposition;
   return result; 
  }//end of seed finding method
@@ -249,21 +238,20 @@ namespace InDet
  std::vector< std::vector<const Trk::TrackParticleBase *> > HistogrammingMultiSeedFinder::seeds(const std::vector<const Trk::TrackParticleBase*>& tracks )const
  {
   const EventContext& ctx = Gaudi::Hive::currentContext(); 
-//step 1: preselection 
+
+  //step 1: preselection
   std::vector<const Trk::TrackParticleBase*> preselectedTracks(0);
   std::vector<const Trk::TrackParticleBase*>::const_iterator tr = tracks.begin();
   std::vector<const Trk::TrackParticleBase*>::const_iterator tre = tracks.end();
   
-//beamposition
+  //beamposition
   SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey,ctx };
   Trk::RecVertex beamrecposition(beamSpotHandle->beamVtx());    
   for(;tr!=tre;++tr) if(m_trkFilter->decision(**tr, &beamrecposition)) preselectedTracks.push_back(*tr);
-  if(msgLvl(MSG::DEBUG))msg(MSG::DEBUG)<<"Beam spot position is: "<< beamrecposition.position()<<endmsg;
+  ATH_MSG_DEBUG("Beam spot position is: "<< beamrecposition.position());
   Trk::Vertex* beamposition=&beamrecposition;
 
-
-  if (m_ignoreBeamSpot)
-  {
+  if(m_ignoreBeamSpot){
     std::vector<const Trk::TrackParameters*> perigeeList;
     std::vector<const Trk::TrackParticleBase*>::const_iterator trackBegin=tracks.begin();
     std::vector<const Trk::TrackParticleBase*>::const_iterator trackEnd=tracks.end();
@@ -274,141 +262,122 @@ namespace InDet
     
     Trk::Vertex* myVertex=new Trk::Vertex(m_vtxSeedFinder->findSeed(perigeeList));
 
-    if(msgLvl(MSG::DEBUG))msg(MSG::DEBUG)<<
-                              " vtx seed x: " << myVertex->position().x() << 
-                              " vtx seed y: " << myVertex->position().y() << 
-                              " vtx seed z: " << myVertex->position().z() << endmsg;
+    ATH_MSG_DEBUG(" vtx seed x: " << myVertex->position().x() <<
+		  " vtx seed y: " << myVertex->position().y() <<
+		  " vtx seed z: " << myVertex->position().z());
     beamposition=myVertex;
-
   }
 
   std::vector< std::vector<const Trk::TrackParticleBase *> > result(0);
   
-  if(!preselectedTracks.empty())
-  { 
+  if(!preselectedTracks.empty()){
    std::map<unsigned int, std::vector<const Trk::TrackParticleBase *> > histo;  
   
-//getting the bin size  
+   //getting the bin size
    double bin_size  = 2.* m_histoRange/ m_nBins;
    
-   if(msgLvl(MSG::DEBUG))msg(MSG::DEBUG)<<"Beam spot position is: "<< beamposition->position()<<endmsg;
+   ATH_MSG_DEBUG("Beam spot position is: "<< beamposition->position());
 
-//getting a perigee surface to be  used
+   //getting a perigee surface to be  used
    Trk::PerigeeSurface perigeeSurface(beamposition->position());
 
    std::vector<const Trk::TrackParticleBase*>::const_iterator p_tr = preselectedTracks.begin();
    std::vector<const Trk::TrackParticleBase*>::const_iterator p_tre = preselectedTracks.end();
-   for(;p_tr != p_tre; ++p_tr)
-   {
+   for(;p_tr != p_tre; ++p_tr){
+    const Trk::TrackParameters* lexPerigee =
+      m_extrapolator
+      ->extrapolate(ctx, (*p_tr)->definingParameters(), perigeeSurface, Trk::anyDirection, true, Trk::pion)
+      .release();
+    double currentTrackZ0 = lexPerigee->parameters()[Trk::z0];
+    delete lexPerigee;
 
-     const Trk::TrackParameters* lexPerigee =
-       m_extrapolator
-         ->extrapolate(ctx, (*p_tr)->definingParameters(), perigeeSurface, Trk::anyDirection, true, Trk::pion)
-         .release();
-     double currentTrackZ0 = lexPerigee->parameters()[Trk::z0];
-     delete lexPerigee;
+    unsigned int bin_number =
+      int(floor((currentTrackZ0 + m_histoRange) / bin_size)) + 1;
 
-     //    double currentTrackZ0 = (*p_tr)->perigee()->parameters()[Trk::z0];
-     unsigned int bin_number =
-       int(floor((currentTrackZ0 + m_histoRange) / bin_size)) + 1;
-
-     // now checking whether this bin entry already exists and adding track, if
-     // not, creating one.
-     std::map<unsigned int,
-              std::vector<const Trk::TrackParticleBase*>>::iterator map_pos =
-       histo.find(bin_number);
-     if (map_pos != histo.end()) {
-
-       // this bin already exists, adding entry
-       map_pos->second.push_back(*p_tr);
+    // now checking whether this bin entry already exists and adding track, if
+    // not, creating one.
+    std::map<unsigned int,
+	     std::vector<const Trk::TrackParticleBase*>>::iterator map_pos =
+      histo.find(bin_number);
+    if (map_pos != histo.end()) {
+     // this bin already exists, adding entry
+     map_pos->second.push_back(*p_tr);
     }else{
-    
-//this bin is not their yet, adding bin  
+     //this bin is not their yet, adding bin
      std::vector<const Trk::TrackParticleBase *> tmp_vec(0);
      tmp_vec.push_back(*p_tr);
      histo.insert( std::map<unsigned int, std::vector<const Trk::TrackParticleBase *> >::value_type(bin_number, tmp_vec));
     }//end of checking bin existence         
    }//end of loop over all sorted track particles
    
-//step 3: merging clusters    
-//bins closer to each other than several empty bins become 
-//parts of the same cluster  
+   //step 3: merging clusters
+   //bins closer to each other than several empty bins become
+   //parts of the same cluster
 
    std::vector<std::vector<const Trk::TrackParticleBase *> > preClusters(0);
    std::vector<const Trk::TrackParticleBase *> tmp_cluster(0);
    unsigned int previous_bin = histo.begin()->first;
-   for(auto & i : histo)
-   {
+   for(auto & i : histo){
     unsigned int current_bin = i.first;
-    if((current_bin - previous_bin)>m_sepNBins )
-    {
-   
-//forming a new cluster   
+    if((current_bin - previous_bin)>m_sepNBins){
+     //forming a new cluster
      preClusters.push_back(tmp_cluster);
      tmp_cluster.clear();
     }  
-   
-// in any case filling tracks into this bin.   
+
+    // in any case filling tracks into this bin.
     for(const auto *j : i.second) tmp_cluster.push_back(j); 
     previous_bin = current_bin;
    }//end of loop over the map entries
    preClusters.push_back(tmp_cluster);
 
-  //step 4 iterative cleaning of formed clusters  
-  for(const auto & preCluster : preClusters)
-  {
-   if(preCluster.size()>m_nRemaining)
-   {
-    std::vector<const Trk::TrackParticleBase *> tracks_to_clean = preCluster;  
-    bool clean_again = false;
-    do
-    {
-     std::pair<std::vector<const Trk::TrackParticleBase *>, std::vector<const Trk::TrackParticleBase *> > clusterAndOutl = 
-                                               m_cleaningTool->clusterAndOutliers(tracks_to_clean, beamposition);
+   //step 4 iterative cleaning of formed clusters
+   for(const auto & preCluster : preClusters){
+    if(preCluster.size()>m_nRemaining){
+     std::vector<const Trk::TrackParticleBase *> tracks_to_clean = preCluster;
+     bool clean_again = false;
+     do {
+      std::pair<std::vector<const Trk::TrackParticleBase *>, std::vector<const Trk::TrackParticleBase *> > clusterAndOutl =
+	m_cleaningTool->clusterAndOutliers(tracks_to_clean, beamposition);
       
-//if core size is miningfull, storing it 
-     std::vector<const Trk::TrackParticleBase *> core_cluster = clusterAndOutl.first;
-     std::vector<const Trk::TrackParticleBase *> core_outl = clusterAndOutl.second;    
-      
-//--------------Debug output-----------------------------------------------------
-//      std::cout<<"Cleaning iteration "<<clean_count<<std::endl;
-//      std::cout<<"Reduced cluster size: "<<core_cluster.size()<<std::endl;
-//      std::cout<<"Outliers size:        "<<core_outl.size()<<std::endl;
-//      ++clean_count;           
-//-------------------End of debug output -----------------------------------------
-      if(core_cluster.empty())
-      {
-       MsgStream log(msgSvc(), name());
-       msg(MSG::INFO)  << "Core cluster has 0 size, remaining tracks are discarded. "<< endmsg;
+      //if core size is miningfull, storing it
+      std::vector<const Trk::TrackParticleBase *> core_cluster = clusterAndOutl.first;
+      std::vector<const Trk::TrackParticleBase *> core_outl = clusterAndOutl.second;
+
+      //--------------Debug output-----------------------------------------------------
+      //      std::cout<<"Cleaning iteration "<<clean_count<<std::endl;
+      //      std::cout<<"Reduced cluster size: "<<core_cluster.size()<<std::endl;
+      //      std::cout<<"Outliers size:        "<<core_outl.size()<<std::endl;
+      //      ++clean_count;
+      //-------------------End of debug output -----------------------------------------
+
+      if(core_cluster.empty()){
+       ATH_MSG_INFO("Core cluster has 0 size, remaining tracks are discarded.");
        clean_again = false;
       }else{
-      
-//storing clusters with >1 track (optional)      
+       //storing clusters with >1 track (optional)
        if(core_cluster.size()>1) result.push_back(core_cluster);	
       
-//checking the outliers, whether more cleaning is to be done      
-       if(core_outl.size()>m_nRemaining)
-       {
+       //checking the outliers, whether more cleaning is to be done
+       if(core_outl.size()>m_nRemaining){
         clean_again = true;
         tracks_to_clean.clear();
         tracks_to_clean = core_outl;
-	
-       }else if(core_outl.size()>1)
-       {
+       }else if(core_outl.size()>1){
         clean_again = false;
-        MsgStream log(msgSvc(), name());
-        msg(MSG::INFO)  << "There were remaining outliers of size: "<< core_outl.size()<< endmsg;
-        msg(MSG::INFO)  << "Not evident, whether these tracks form a cluster. Rejected..."<< endmsg;	
-       }else  clean_again = false;//end of outlier size check  
-      }//end of core cluster 0 check     
+        ATH_MSG_INFO("There were remaining outliers of size: "<< core_outl.size());
+        ATH_MSG_INFO("Not evident, whether these tracks form a cluster. Rejected...");	
+       }else clean_again = false;//end of outlier size check
+      }//end of core cluster 0 check
      }while(clean_again);//end of loop
+
     }else if(preCluster.size()==2){
-    
-//case of two track cluster. accepting without cleaning  
-    result.push_back(preCluster);
+     //case of two track cluster. accepting without cleaning
+     result.push_back(preCluster);
     }//end of cluster size check
    }//end of loop over all the preclusters
   }//end of preselected trackparticles non zero check
+
   if (m_ignoreBeamSpot) delete beamposition;
   return result; 
  }//end of method working on the TrackParticleBase's
@@ -416,204 +385,166 @@ namespace InDet
 
   std::vector< std::vector<const Trk::TrackParameters *> > HistogrammingMultiSeedFinder::seeds(const std::vector<const xAOD::TrackParticle*>& tracks )const
   {
-   // std::cout<<"Number of tracks received: "<<tracks.size()<<std::endl;
    const EventContext& ctx = Gaudi::Hive::currentContext();
-  //step 1: preselection 
-  std::vector<const xAOD::TrackParticle*> preselectedTracks(0);
-  
-//selecting with respect to the beam spot
 
+   //step 1: preselection
+   std::vector<const xAOD::TrackParticle*> preselectedTracks(0);
 
-  xAOD::Vertex * beamposition = new xAOD::Vertex();
-  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey,ctx };
-
-  beamposition->setPosition(beamSpotHandle->beamVtx().position());
-  beamposition->setCovariancePosition(beamSpotHandle->beamVtx().covariancePosition());
-  // for(;tr!=tre;++tr) if(m_trkFilter->decision(**tr, &beamrecposition)) preselectedTracks.push_back(*tr);
-  // if(msgLvl(MSG::DEBUG))msg(MSG::DEBUG)<<"Beam spot position is: "<< beamrecposition.position()<<endmsg;
-  //Trk::Vertex* beamposition=&beamrecposition;
+   //selecting with respect to the beam spot
+   xAOD::Vertex * beamposition = new xAOD::Vertex();
+   SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey,ctx };
+   beamposition->setPosition(beamSpotHandle->beamVtx().position());
+   beamposition->setCovariancePosition(beamSpotHandle->beamVtx().covariancePosition());
 
    for (const auto *track : tracks) {
      if (m_trkFilter->decision(*track,beamposition)) preselectedTracks.push_back(track);
    }
-   
 
+   std::vector<const Trk::TrackParameters*> perigeeList;
+   std::vector<const xAOD::TrackParticle*>::const_iterator trackBegin=tracks.begin();
+   std::vector<const xAOD::TrackParticle*>::const_iterator trackEnd=tracks.end();
+   for (std::vector<const xAOD::TrackParticle*>::const_iterator trackIter=trackBegin;trackIter!=trackEnd;++trackIter){
+    perigeeList.push_back(&((*trackIter)->perigeeParameters()));
+   }
+
+   Trk::RecVertex* myVertex=new Trk::RecVertex(m_vtxSeedFinder->findSeed(perigeeList));
+
+   if (m_ignoreBeamSpot){
+    ATH_MSG_DEBUG(" vtx seed x: " << myVertex->position().x() <<
+		  " vtx seed y: " << myVertex->position().y() <<
+		  " vtx seed z: " << myVertex->position().z());
+    beamposition->setPosition(myVertex->position());
+    beamposition->setCovariancePosition(myVertex->covariancePosition());
+   }
   
-    std::vector<const Trk::TrackParameters*> perigeeList;
-    std::vector<const xAOD::TrackParticle*>::const_iterator trackBegin=tracks.begin();
-    std::vector<const xAOD::TrackParticle*>::const_iterator trackEnd=tracks.end();
-    for (std::vector<const xAOD::TrackParticle*>::const_iterator trackIter=trackBegin;trackIter!=trackEnd;++trackIter)
-    {
-      perigeeList.push_back(&((*trackIter)->perigeeParameters()));
-    }
-  
-    Trk::RecVertex* myVertex=new Trk::RecVertex(m_vtxSeedFinder->findSeed(perigeeList));
+   //step 2: sorting in z0
+   //output container
+   std::vector< std::vector<const Trk::TrackParameters *> > result(0);
+   if(!preselectedTracks.empty()){
+    std::map<unsigned int, std::vector<const xAOD::TrackParticle *> > histo;
+	
+    //getting the bin size
+    double bin_size  = 2.* m_histoRange/ m_nBins;
 
-    if (m_ignoreBeamSpot)
-      {
-	
-	if(msgLvl(MSG::DEBUG))msg(MSG::DEBUG)<<
-				" vtx seed x: " << myVertex->position().x() << 
-				" vtx seed y: " << myVertex->position().y() << 
-				" vtx seed z: " << myVertex->position().z() << endmsg;
-	beamposition->setPosition(myVertex->position());
-	beamposition->setCovariancePosition(myVertex->covariancePosition());
-	//hmm, will this leak? I think so.
-      }
+    ATH_MSG_DEBUG("Beam spot position is: "<< beamposition->position());
 
- // std::cout<<"Number after pre-selection : "<<preselectedTracks.size()<<std::endl;
-  
-    //step 2: sorting in z0
-    //output container  
-    std::vector< std::vector<const Trk::TrackParameters *> > result(0);
-    if(!preselectedTracks.empty())
-      {  
-	std::map<unsigned int, std::vector<const xAOD::TrackParticle *> > histo;  
+    //getting a perigee surface to be  used
+    Trk::PerigeeSurface perigeeSurface(beamposition->position());
 	
-	//getting the bin size  
-	double bin_size  = 2.* m_histoRange/ m_nBins;
-	
-	if(msgLvl(MSG::DEBUG))msg(MSG::DEBUG)<<"Beam spot position is: "<< beamposition->position()<<endmsg;
-	
-	//getting a perigee surface to be  used
-	Trk::PerigeeSurface perigeeSurface(beamposition->position());
-	
-	std::vector<const xAOD::TrackParticle*>::const_iterator p_tr = preselectedTracks.begin();
-	std::vector<const xAOD::TrackParticle*>::const_iterator p_tre = preselectedTracks.end();
-	for(;p_tr != p_tre; ++p_tr)
-	  {
+    std::vector<const xAOD::TrackParticle*>::const_iterator p_tr = preselectedTracks.begin();
+    std::vector<const xAOD::TrackParticle*>::const_iterator p_tre = preselectedTracks.end();
+    for(;p_tr != p_tre; ++p_tr){
+     const Trk::TrackParameters* lexPerigee =
+       m_extrapolator->extrapolate(ctx, (*p_tr)->perigeeParameters(),
+				   perigeeSurface, Trk::anyDirection, true, Trk::pion)
+       .release();
+     double currentTrackZ0 = lexPerigee->parameters()[Trk::z0];
+     delete lexPerigee;
 
-          const Trk::TrackParameters* lexPerigee =
-            m_extrapolator->extrapolate(ctx, (*p_tr)->perigeeParameters(), 
-                                        perigeeSurface, Trk::anyDirection, true, Trk::pion)
-              .release();
-          double currentTrackZ0 = lexPerigee->parameters()[Trk::z0];
-          delete lexPerigee;
+     unsigned int bin_number =
+       int(floor((currentTrackZ0 + m_histoRange) / bin_size)) + 1;
 
-          //    double currentTrackZ0 =
-          //    (*p_tr)->perigee()->parameters()[Trk::z0];
-          unsigned int bin_number =
-            int(floor((currentTrackZ0 + m_histoRange) / bin_size)) + 1;
+     // now checking whether this bin entry already exists and adding
+     // track, if not, creating one.
+     std::map<unsigned int,
+	      std::vector<const xAOD::TrackParticle*>>::iterator map_pos =
+       histo.find(bin_number);
+     if (map_pos != histo.end()) {
+      // this bin already exists, adding entry
+       map_pos->second.push_back(*p_tr);
+     }else{
+      //this bin is not their yet, adding bin
+      std::vector<const xAOD::TrackParticle *> tmp_vec(0);
+      tmp_vec.push_back(*p_tr);
+      histo.insert( std::map<unsigned int, std::vector<const xAOD::TrackParticle *> >::value_type(bin_number, tmp_vec));
+     }//end of checking bin existence
+    }//end of loop over all sorted track particles
+	
+    //step 3: merging clusters
+    //bins closer to each other than several empty bins become
+    //parts of the same cluster
+	
+    std::vector<std::vector<const xAOD::TrackParticle *> > preClusters(0);
+    std::vector<const xAOD::TrackParticle *> tmp_cluster(0);
+    unsigned int previous_bin = histo.begin()->first;
+    for(auto & i : histo){
+     unsigned int current_bin = i.first;
+     if((current_bin - previous_bin)>m_sepNBins){
+      //forming a new cluster
+      preClusters.push_back(tmp_cluster);
+      tmp_cluster.clear();
+     }
+     // in any case filling tracks into this bin.
+     for(const auto *j : i.second) tmp_cluster.push_back(j);
+     previous_bin = current_bin;
+    }//end of loop over the map entries
+    preClusters.push_back(tmp_cluster);
 
-          // now checking whether this bin entry already exists and adding
-          // track, if not, creating one.
-          std::map<unsigned int,
-                   std::vector<const xAOD::TrackParticle*>>::iterator map_pos =
-            histo.find(bin_number);
-          if (map_pos != histo.end()) {
+    for(const auto & preCluster : preClusters){
 
-            // this bin already exists, adding entry
-            map_pos->second.push_back(*p_tr);
-	      }else{
-	      
-	      //this bin is not their yet, adding bin  
-	      std::vector<const xAOD::TrackParticle *> tmp_vec(0);
-	      tmp_vec.push_back(*p_tr);
-	      histo.insert( std::map<unsigned int, std::vector<const xAOD::TrackParticle *> >::value_type(bin_number, tmp_vec));
-	    }//end of checking bin existence         
-	  }//end of loop over all sorted track particles
-	
-	//step 3: merging clusters    
-	//bins closer to each other than several empty bins become 
-	//parts of the same cluster  
-	
-	std::vector<std::vector<const xAOD::TrackParticle *> > preClusters(0);
-	std::vector<const xAOD::TrackParticle *> tmp_cluster(0);
-	unsigned int previous_bin = histo.begin()->first;
-	for(auto & i : histo)
-	  {
-	    unsigned int current_bin = i.first;
-	    if((current_bin - previous_bin)>m_sepNBins )
-	      {
-	   
-		//forming a new cluster   
-		preClusters.push_back(tmp_cluster);
-		tmp_cluster.clear();
-	      }  
-	    
-	    // in any case filling tracks into this bin.   
-	    for(const auto *j : i.second) tmp_cluster.push_back(j); 
-	    previous_bin = current_bin;
-	  }//end of loop over the map entries
-	preClusters.push_back(tmp_cluster);
-	
+     //------------------------------Debug code -------------------------------------------------------
+     /*    std::vector<const Trk::Track *>::const_iterator cb = i->begin();
+	   std::vector<const Trk::Track *>::const_iterator ce = i->end();
+	   std::cout<<"*********Starting next cluster of size "<<i->size()<<std::endl;
+	   for(;cb!=ce;++cb)
+	   {
+	   std::cout<<"Track Z0 in cluster: "<<(*cb)->perigeeParameters()->parameters()[Trk::z0]<<std::endl;
+	   }//end of loop over the cluster entries
+     */
+     //-------------------------------end of debug code-------------------------------------------------
    
-   for(const auto & preCluster : preClusters)
-     {    
-//------------------------------Debug code -------------------------------------------------------   
-/*    std::vector<const Trk::Track *>::const_iterator cb = i->begin();
-    std::vector<const Trk::Track *>::const_iterator ce = i->end();
-    std::cout<<"*********Starting next cluster of size "<<i->size()<<std::endl;
-    for(;cb!=ce;++cb)
-    {
-     std::cout<<"Track Z0 in cluster: "<<(*cb)->perigeeParameters()->parameters()[Trk::z0]<<std::endl;
-    }//end of loop over the cluster entries
-*/    
-//-------------------------------end of debug code-------------------------------------------------
-   
-   if(preCluster.size()>m_nRemaining)
-    {
-    
-//iterative cleaning until outlying tracks remain 
-     std::vector<const xAOD::TrackParticle *> tracks_to_clean = preCluster;  
-     bool clean_again = false;
-//     unsigned int clean_count = 1; 
-     do
-     {
-      std::pair<std::vector<const Trk::TrackParameters *>, 
-      std::vector<const xAOD::TrackParticle *> > clusterAndOutl = m_cleaningTool->clusterAndOutliers(tracks_to_clean, beamposition);
+     if(preCluster.size()>m_nRemaining){
+      //iterative cleaning until outlying tracks remain
+      std::vector<const xAOD::TrackParticle *> tracks_to_clean = preCluster;
+      bool clean_again = false;
+      do{
+       std::pair<std::vector<const Trk::TrackParameters *>,
+		 std::vector<const xAOD::TrackParticle *> > clusterAndOutl = m_cleaningTool->clusterAndOutliers(tracks_to_clean, beamposition);
       
-//if core size is miningfull, storing it 
-      std::vector<const Trk::TrackParameters *> core_cluster = clusterAndOutl.first;
-      std::vector<const xAOD::TrackParticle *> core_outl = clusterAndOutl.second;    
-      
-//--------------Debug output-----------------------------------------------------
-//      std::cout<<"Cleaning iteration "<<clean_count<<std::endl;
-//      std::cout<<"Reduced cluster size: "<<core_cluster.size()<<std::endl;
-//      std::cout<<"Outliers size:        "<<core_outl.size()<<std::endl;
-//      ++clean_count;           
-//-------------------End of debug output -----------------------------------------
-      if(core_cluster.empty())
-      {
-      
-       msg(MSG::INFO)  << "Core cluster has 0 size, remaining tracks are discarded. "<< endmsg;
-       clean_again = false;
-      }else{
-      
-//storing clusters with >1 track (optional)      
-	if(core_cluster.size()>1) result.push_back(core_cluster);	
-      
-//checking the outliers, whether more cleaning is to be done      
-       if(core_outl.size()>m_nRemaining)
-       {
-        clean_again = true;
-        tracks_to_clean.clear();
-        tracks_to_clean = core_outl;
-	
-       }else if(core_outl.size()>1)
-       {
+       //if core size is miningfull, storing it
+       std::vector<const Trk::TrackParameters *> core_cluster = clusterAndOutl.first;
+       std::vector<const xAOD::TrackParticle *> core_outl = clusterAndOutl.second;
+
+       //--------------Debug output-----------------------------------------------------
+       //      std::cout<<"Cleaning iteration "<<clean_count<<std::endl;
+       //      std::cout<<"Reduced cluster size: "<<core_cluster.size()<<std::endl;
+       //      std::cout<<"Outliers size:        "<<core_outl.size()<<std::endl;
+       //      ++clean_count;
+       //-------------------End of debug output -----------------------------------------
+
+       if(core_cluster.empty()){
+        ATH_MSG_INFO("Core cluster has 0 size, remaining tracks are discarded.");
         clean_again = false;
-        msg(MSG::INFO)  << "There were remaining outliers of size: "<< core_outl.size()<< endmsg;
-        msg(MSG::INFO)  << "Not evident, whether these tracks form a cluster. Rejected..."<< endmsg;
-	
-       }else  clean_again = false;//end of outlier size check  
-      }//end of core cluster 0 check   
-     
-     }while(clean_again);//end of loop
-             
-    }else if(preCluster.size()==2)
-     {
-      //case of two track cluster. accepting without cleaning  
-       std::vector<const Trk::TrackParameters *> twotrack;
-       twotrack.push_back(&(preCluster[0]->perigeeParameters()));
-       twotrack.push_back(&(preCluster[1]->perigeeParameters()));
+       }else{
+        //storing clusters with >1 track (optional)
+        if(core_cluster.size()>1) result.push_back(core_cluster);	
+
+        //checking the outliers, whether more cleaning is to be done
+        if(core_outl.size()>m_nRemaining){
+         clean_again = true;
+         tracks_to_clean.clear();
+         tracks_to_clean = core_outl;
+        }else if(core_outl.size()>1){
+         clean_again = false;
+         ATH_MSG_INFO("There were remaining outliers of size: "<< core_outl.size());
+         ATH_MSG_INFO("Not evident, whether these tracks form a cluster. Rejected...");
+	}else clean_again = false;//end of outlier size check
+       }//end of core cluster 0 check   
+
+      }while(clean_again);//end of loop
+
+     }else if(preCluster.size()==2){
+      //case of two track cluster. accepting without cleaning
+      std::vector<const Trk::TrackParameters *> twotrack;
+      twotrack.push_back(&(preCluster[0]->perigeeParameters()));
+      twotrack.push_back(&(preCluster[1]->perigeeParameters()));
       result.push_back(twotrack);
-	
-      }//end of cluster size check
-   }//end of loop over all the clusters
-  }//end of preselection size check 
-    delete beamposition; 
-    delete myVertex;
-  return result;
+     }//end of cluster size check
+    }//end of loop over all the clusters
+   }//end of preselection size check
+   delete beamposition;
+   delete myVertex;
+   return result;
   }
+
 }//end of namespace definitions

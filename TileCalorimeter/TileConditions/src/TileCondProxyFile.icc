@@ -15,7 +15,7 @@
 #include "PathResolver/PathResolver.h"
 
 #include "CoralBase/Blob.h"
-#include "boost/algorithm/string/predicate.hpp"
+#include "CxxUtils/starts_with.h"
 
 #include <fstream>
 
@@ -82,7 +82,7 @@ StatusCode TileCondProxyFile<T>::fillCalibData(TileCalibData<T>& calibData,
   while (std::getline(file, line)) {
 
     //=== read the objVersion specifier
-    if (boost::algorithm::starts_with (line, "OBJVERSION") && objVersion < 0) {
+    if (CxxUtils::starts_with (line, "OBJVERSION") && objVersion < 0) {
       std::istringstream iss(line);
       std::string dummy;
       iss >> dummy >> objVersion;
