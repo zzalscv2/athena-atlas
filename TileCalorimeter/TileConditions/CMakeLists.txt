@@ -7,17 +7,16 @@ atlas_subdir( TileConditions )
 find_package( CLHEP )
 find_package( CORAL COMPONENTS CoralBase )
 find_package( ROOT COMPONENTS Matrix )
-find_package( Boost )
 
 # Component(s) in the package:
 atlas_add_library( TileConditionsLib
                    src/*.cxx
                    PUBLIC_HEADERS TileConditions
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-                   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
+                   PRIVATE_INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel AthenaPoolUtilities CaloConditions CaloIdentifier CxxUtils GaudiKernel Identifier StoreGateLib TileCalibBlobObjs TileIdentifier
-                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${CORAL_LIBRARIES} CaloDetDescrLib GeoModelInterfaces PathResolver TileDetDescr )
+                   PRIVATE_LINK_LIBRARIES ${CORAL_LIBRARIES} CaloDetDescrLib GeoModelInterfaces PathResolver TileDetDescr )
 
 atlas_add_component( TileConditions
                      src/components/*.cxx

@@ -12,11 +12,12 @@ class IHITowerWeightTool : virtual public IAlgTool {
   public:
     DeclareInterfaceID(IHITowerWeightTool, 1, 0);
 
-    virtual float getEtaPhiResponse(float eta, float phi, const EventContext& ctx) const = 0;
-    virtual float getEtaPhiOffset(float eta, float phi, const EventContext& ctx) const = 0;
+    virtual float getEtaPhiResponse(float eta, float phi, int runIndex) const = 0;
+    virtual float getEtaPhiOffset(float eta, float phi, int runIndex) const = 0;
     virtual float getWeight(float eta, float phi, int sampling) const = 0;
     virtual float getWeightEta(float eta, float phi, int sampling) const = 0;
     virtual float getWeightPhi(float eta, float phi, int sampling) const = 0;
     virtual float getWeightMag(float eta, float phi, int sampling) const = 0;
+    virtual int getRunIndex(const EventContext& ctx) const = 0;
 };
 #endif

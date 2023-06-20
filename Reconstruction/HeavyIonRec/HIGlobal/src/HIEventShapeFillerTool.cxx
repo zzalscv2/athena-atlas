@@ -100,6 +100,11 @@ StatusCode HIEventShapeFillerTool::fillCollectionFromClusterContainer(std::uniqu
   SG::AuxElement::Decorator< float > cm_decorator("HIMag");
 
   constexpr float area_cluster = HI::TowerBins::getBinArea();
+  int runIndex = -1;
+  if(!theClusters->empty() && m_towerWeightTool)
+  {
+    runIndex = m_towerWeightTool->getRunIndex(ctx);
+  }
 
   for (auto cl : *theClusters)
   {
@@ -111,7 +116,7 @@ StatusCode HIEventShapeFillerTool::fillCollectionFromClusterContainer(std::uniqu
     float weight = 1;
     if (m_towerWeightTool)
     {
-      float recip = m_towerWeightTool->getEtaPhiResponse(eta, phi, ctx);
+      float recip = m_towerWeightTool->getEtaPhiResponse(eta, phi, runIndex);
       if (recip != 0.) weight = 1. / recip;
     }
     weight_vector->push_back(weight);

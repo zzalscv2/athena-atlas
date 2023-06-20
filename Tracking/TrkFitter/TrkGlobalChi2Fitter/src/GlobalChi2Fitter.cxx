@@ -286,15 +286,24 @@ namespace Trk {
   StatusCode GlobalChi2Fitter::finalize() {
 
     ATH_MSG_INFO(m_fit_status[S_FITS] << " attempted track fits");
-    ATH_MSG_INFO(m_fit_status[S_SUCCESSFUL_FITS] << " successful track fits");
-    ATH_MSG_INFO(m_fit_status[S_MAT_INV_FAIL] << " track fits failed because of a matrix inversion failure");
-    ATH_MSG_INFO(m_fit_status[S_NOT_ENOUGH_MEAS] << " tracks were rejected by the outlier logic");
-    ATH_MSG_INFO(m_fit_status[S_PROPAGATION_FAIL] << " track fits failed because of a propagation failure");
-    ATH_MSG_INFO(m_fit_status[S_INVALID_ANGLES] << " track fits failed because of an invalid angle (theta/phi)");
-    ATH_MSG_INFO(m_fit_status[S_NOT_CONVERGENT] << " track fits failed because the fit did not converge");
-    ATH_MSG_INFO(m_fit_status[S_HIGH_CHI2] << " tracks did not pass the chi^2 cut");
-    ATH_MSG_INFO(m_fit_status[S_LOW_MOMENTUM] << " tracks were killed by the energy loss update"); 
-    
+    if (m_fit_status[S_FITS] > 0) {
+      ATH_MSG_INFO(m_fit_status[S_SUCCESSFUL_FITS] << " successful track fits");
+      ATH_MSG_INFO(m_fit_status[S_MAT_INV_FAIL]
+                   << " track fits failed because of a matrix inversion failure");
+      ATH_MSG_INFO(m_fit_status[S_NOT_ENOUGH_MEAS]
+                   << " tracks were rejected by the outlier logic");
+      ATH_MSG_INFO(m_fit_status[S_PROPAGATION_FAIL]
+                   << " track fits failed because of a propagation failure");
+      ATH_MSG_INFO(m_fit_status[S_INVALID_ANGLES]
+                   << " track fits failed because of an invalid angle (theta/phi)");
+      ATH_MSG_INFO(m_fit_status[S_NOT_CONVERGENT]
+                   << " track fits failed because the fit did not converge");
+      ATH_MSG_INFO(m_fit_status[S_HIGH_CHI2]
+                   << " tracks did not pass the chi^2 cut");
+      ATH_MSG_INFO(m_fit_status[S_LOW_MOMENTUM]
+                   << " tracks were killed by the energy loss update");
+    }
+
     return StatusCode::SUCCESS;
   }
 

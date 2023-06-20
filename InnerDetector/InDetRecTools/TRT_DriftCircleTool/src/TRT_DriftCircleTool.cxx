@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -97,24 +97,20 @@ StatusCode InDet::TRT_DriftCircleTool::initialize()
 
   StatusCode sc = AthAlgTool::initialize(); 
 
- 
-
   // Get DriftFunction tool servise
   //
   if ( m_driftFunctionTool.retrieve().isFailure() ) {
     ATH_MSG_FATAL(  m_driftFunctionTool.propertyName() << ": Failed to retrieve tool " << m_driftFunctionTool.type() );
     return StatusCode::FAILURE;
-  } else {
-    ATH_MSG_INFO(  m_driftFunctionTool.propertyName() << ": Retrieved tool " << m_driftFunctionTool.type() );
   }
+  ATH_MSG_DEBUG(  m_driftFunctionTool.propertyName() << ": Retrieved tool " << m_driftFunctionTool.type() );
 
   if(m_useConditionsStatus || m_useConditionsHTStatus){
     if ( m_ConditionsSummary.retrieve().isFailure() ) {
     ATH_MSG_FATAL( "Failed to retrieve "<< m_ConditionsSummary);
       return StatusCode::FAILURE;
-    } else {
-      ATH_MSG_INFO( "Retrieved tool " << m_ConditionsSummary);
     }
+    ATH_MSG_DEBUG( "Retrieved tool " << m_ConditionsSummary);
   }
 
   // Get TRT ID helper

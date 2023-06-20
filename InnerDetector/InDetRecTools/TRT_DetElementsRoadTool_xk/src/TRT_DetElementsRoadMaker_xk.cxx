@@ -73,7 +73,7 @@ StatusCode InDet::TRT_DetElementsRoadMaker_xk::initialize()
   else m_fieldModeEnum = Trk::FullField;
   // Get propagator tool
   ATH_CHECK (m_proptool.retrieve());
-  ATH_MSG_INFO("Retrieved tool " << m_proptool);
+  ATH_MSG_DEBUG("Retrieved tool " << m_proptool);
   ATH_CHECK(m_roadDataKey.initialize());
   ATH_CHECK( m_fieldCacheCondObjInputKey.initialize() );
 

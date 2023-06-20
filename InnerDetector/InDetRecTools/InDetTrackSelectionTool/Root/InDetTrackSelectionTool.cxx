@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
@@ -272,11 +272,11 @@ StatusCode InDet::InDetTrackSelectionTool::initialize() {
     m_trackSumToolAvailable = false;
     if (!m_trackSumTool.empty()) {
       ATH_CHECK( m_trackSumTool.retrieve() );
-      ATH_MSG_INFO( "Track summary tool retrieved." );
+      ATH_MSG_DEBUG( "Track summary tool retrieved." );
       m_trackSumToolAvailable = true;
     }
     ATH_CHECK( m_extrapolator.retrieve() );
-    ATH_MSG_INFO( "Retrieved tool " << m_extrapolator );
+    ATH_MSG_DEBUG( "Retrieved tool " << m_extrapolator );
   } else {
     m_extrapolator.disable();
     m_trackSumTool.disable();

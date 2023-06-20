@@ -290,4 +290,5 @@ def generateCFChains(flags, opt):
         comboStep_et_mufast           = makeChainStep("Step1_et_mufast", [fastCaloSeq, muFast], multiplicity=[1,1])
 
         menu.chainsInMenu['Combined'] = [
-            makeChain(flags, name='HLT_e3_etcut_mu6_L1EM7_MU8F', L1Thresholds=["EM7", "MU8F"],  ChainSteps=[comboStep_et_mufast ])]
+            makeChain(flags, name='HLT_e3_etcut_mu6_L12eEM10L_MU8F', L1Thresholds=["eEM10L", "MU8F"],  ChainSteps=[comboStep_et_mufast ])
+        ]

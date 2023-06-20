@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSelectorTool/InDetDetailedTrackSelectorTool.h"
@@ -166,20 +166,20 @@ namespace InDet
     ATH_CHECK(m_beamSpotKey.initialize(!m_useEventInfoBs));
     ATH_CHECK(m_eventInfo_key.initialize(m_useEventInfoBs));
     if (m_useEtaDepententMinHitTrt || m_useEtaDepententMinHitTrtWithOutliers){
-	    if(m_trtDCTool.empty()) {
-	      ATH_MSG_ERROR(" Eta dependent cut on number of TRT hits requested but TrtDCCutTool not specified. ");
-	      return StatusCode::FAILURE;
-	    } else if(m_trtDCTool.retrieve().isFailure()) {
-	      ATH_MSG_ERROR(" Unable to retrieve tool "<<m_trtDCTool);
-	      return StatusCode::FAILURE;
-	    }
-	    ATH_MSG_INFO("Retrieved tool "<<m_trtDCTool);
-	    if(m_useEtaDepententMinHitTrt){
-	      ATH_MSG_INFO("Using eta dependent cut on number of TRT hits.");
-	    }
-	    if(m_useEtaDepententMinHitTrtWithOutliers){
-	      ATH_MSG_INFO("Using eta dependent cut on number of TRT hits + outliers.");
-	    }
+      if(m_trtDCTool.empty()) {
+	ATH_MSG_ERROR(" Eta dependent cut on number of TRT hits requested but TrtDCCutTool not specified. ");
+	return StatusCode::FAILURE;
+      } else if(m_trtDCTool.retrieve().isFailure()) {
+	ATH_MSG_ERROR(" Unable to retrieve tool "<<m_trtDCTool);
+	return StatusCode::FAILURE;
+      }
+      ATH_MSG_DEBUG("Retrieved tool "<<m_trtDCTool);
+      if(m_useEtaDepententMinHitTrt){
+	ATH_MSG_INFO("Using eta dependent cut on number of TRT hits.");
+      }
+      if(m_useEtaDepententMinHitTrtWithOutliers){
+	ATH_MSG_INFO("Using eta dependent cut on number of TRT hits + outliers.");
+      }
     }else{
       m_trtDCTool.disable();
     }

@@ -5,7 +5,7 @@
 #include <string.h>
 #include <sstream>
 #include <stdexcept>
-#include "boost/algorithm/string/predicate.hpp"
+#include "CxxUtils/starts_with.h"
 
 // ROOT include(s):
 #include <TError.h>
@@ -1577,7 +1577,7 @@ namespace xAOD {
          // resource usage that implies, that can lead to crashes in dbg
          // builds due to cling bugs.
          std::string tn = Utils::getTypeName( *ti );
-         if (boost::starts_with (tn, "std::vector<"))
+         if (CxxUtils::starts_with (tn, "std::vector<"))
            tn.erase (0, 5);
          std::string fac_class_name = "SG::AuxTypeVectorFactory<" +
              tn + ",allocator<" + tn;

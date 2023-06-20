@@ -136,17 +136,6 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_e28_lhtight_ivarloose_noringer_L1eEM12L', groups=PrimaryPhIGroup+SingleElectronGroup),
         ChainProp(name='HLT_e60_lhmedium_noringer_L1eEM12L', groups=PrimaryPhIGroup+SingleElectronGroup),
 
-        ChainProp(name='HLT_2e10_lhvloose_L12EM7', groups=PrimaryLegGroup+MultiElectronGroup), ##ATTENTION: Using legacy L1
-        ChainProp(name='HLT_2e11_lhvloose_L12EM7', groups=PrimaryLegGroup+MultiElectronGroup), ##ATTENTION: Using legacy L1
-        ChainProp(name='HLT_2e12_lhvloose_L12EM7', groups=PrimaryLegGroup+MultiElectronGroup), ##ATTENTION: Using legacy L1
-        ChainProp(name='HLT_2e13_lhvloose_L12EM7', groups=PrimaryLegGroup+MultiElectronGroup), ##ATTENTION: Using legacy L1
-        ChainProp(name='HLT_2e14_lhvloose_L12EM7', groups=PrimaryLegGroup+MultiElectronGroup), ##ATTENTION: Using legacy L1
-        ChainProp(name='HLT_2e15_lhvloose_L12EM7', groups=PrimaryLegGroup+MultiElectronGroup), ##ATTENTION: Using legacy L1
-
-        ChainProp(name='HLT_2e10_lhloose_noringer_L12EM7', groups=SingleElectronGroup),##ATTENTION: Using legacy L1
-        ChainProp(name='HLT_2e12_lhloose_noringer_L12EM7', groups=SingleElectronGroup),##ATTENTION: Using legacy L1
-        ChainProp(name='HLT_2e15_lhloose_noringer_L12EM7', groups=SingleElectronGroup),##ATTENTION: Using legacy L1
-
         ChainProp(name='HLT_g100_loose_L1eEM12L', groups=PrimaryPhIGroup+SinglePhotonGroup),
         ChainProp(name='HLT_g100_medium_L1eEM12L', groups=PrimaryPhIGroup+SinglePhotonGroup),
         ChainProp(name='HLT_g120_loose_L1eEM12L', groups=PrimaryPhIGroup+SinglePhotonGroup),

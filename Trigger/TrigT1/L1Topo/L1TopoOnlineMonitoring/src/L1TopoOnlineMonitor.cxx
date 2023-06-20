@@ -54,6 +54,16 @@ StatusCode L1TopoOnlineMonitor::initialize() {
   m_countHdw.reset(new float[s_nTopoCTPOutputs]);
   m_countSim.reset(new float[s_nTopoCTPOutputs]);
   m_countAny.reset(new float[s_nTopoCTPOutputs]);
+  m_overflow_rateHdwNotSim.reset(new float[s_nTopoCTPOutputs]);
+  m_overflow_rateSimNotHdw.reset(new float[s_nTopoCTPOutputs]);
+  m_overflow_rateHdwAndSim.reset(new float[s_nTopoCTPOutputs]);
+  m_overflow_rateHdwSim.reset(new float[s_nTopoCTPOutputs]);
+  m_overflow_countHdwNotSim.reset(new float[s_nTopoCTPOutputs]);
+  m_overflow_countSimNotHdw.reset(new float[s_nTopoCTPOutputs]);
+  m_overflow_countHdwSim.reset(new float[s_nTopoCTPOutputs]);
+  m_overflow_countHdw.reset(new float[s_nTopoCTPOutputs]);
+  m_overflow_countSim.reset(new float[s_nTopoCTPOutputs]);
+  m_overflow_countAny.reset(new float[s_nTopoCTPOutputs]);
 
   for (size_t i=0;i<s_nTopoCTPOutputs;i++){
     m_rateHdwNotSim[i] = 0;
@@ -66,6 +76,16 @@ StatusCode L1TopoOnlineMonitor::initialize() {
     m_countHdw[i] = 0;
     m_countSim[i] = 0;
     m_countAny[i] = 0;
+    m_overflow_rateHdwNotSim[i] = 0;
+    m_overflow_rateSimNotHdw[i] = 0;
+    m_overflow_rateHdwAndSim[i] = 0;
+    m_overflow_rateHdwSim[i] = 0;
+    m_overflow_countHdwNotSim[i] = 0;
+    m_overflow_countSimNotHdw[i] = 0;
+    m_overflow_countHdwSim[i] = 0;
+    m_overflow_countHdw[i] = 0;
+    m_overflow_countSim[i] = 0;
+    m_overflow_countAny[i] = 0;
   }
 
   ATH_CHECK(m_l1topoKey.initialize());
@@ -157,21 +177,23 @@ StatusCode L1TopoOnlineMonitor::doSimMon( DecisionBits& decisionBits, std::vecto
   ATH_MSG_DEBUG("----got L1Topo container: " << cont.key());
 
   std::bitset<s_nTopoCTPOutputs>& triggerBitsSim = DecisionBits::createBits(decisionBits.triggerBitsSim);
+  std::bitset<s_nTopoCTPOutputs>& overflowBitsSim = DecisionBits::createBits(decisionBits.overflowBitsSim);
   std::unordered_map<unsigned,std::bitset<s_nTopoCTPOutputs>> multWeightsMap;
   for(const auto l1topo_dec : * cont){
     ATH_MSG_DEBUG( "Reading L1Topo EDM:: Connection ID: " << l1topo_dec->connectionId() << " Clock: " << l1topo_dec->clock() << " Bit-length: " << l1topo_dec->bitWidth() << " Word: " << l1topo_dec->topoWord() << " Word64: " << l1topo_dec->topoWord64() );
-    
 
     if (l1topo_dec->bitWidth() == 32) {
       std::vector<unsigned> topoword;
       for(unsigned int i=0; i<32; ++i) {
-	uint32_t mask = 0x1; mask <<= i;
-	if ((l1topo_dec->topoWord() & mask) !=0)
-	  {
-	    topoword.push_back(32*l1topo_dec->clock()+i);
-	    uint32_t pos = 32*(l1topo_dec->clock()+(l1topo_dec->connectionId()==2 ? 0 : 2))+i;
-	    triggerBitsSim[pos] = ((!decisionBits.triggerBits.has_value() || m_forceCTPasHdw) && m_ctpIds[pos]>=512) ? false : true;
-	  }
+        uint32_t mask = 0x1; mask <<= i;
+        if ((l1topo_dec->topoWord() & mask) !=0) {
+          topoword.push_back(32*l1topo_dec->clock()+i);
+          uint32_t pos = 32*(l1topo_dec->clock()+(l1topo_dec->connectionId()==2 ? 0 : 2))+i;
+          triggerBitsSim[pos] = ((!decisionBits.triggerBits.has_value() || m_forceCTPasHdw) && m_ctpIds[pos]>=512) ? false : true;
+          if (l1topo_dec->topoWordOverflow() != 0) {
+            overflowBitsSim[pos] = ((!decisionBits.overflowBitsSim.has_value() || m_forceCTPasHdw) && m_ctpIds[pos]>=512) ? false : true;
+          }
+        }
       }
       std::string name = "CableElec_";
       name += std::to_string(l1topo_dec->connectionId());
@@ -180,11 +202,11 @@ StatusCode L1TopoOnlineMonitor::doSimMon( DecisionBits& decisionBits, std::vecto
     }
     else if (l1topo_dec->bitWidth() == 64) {
       for (size_t i=0;i<64;i++) {
-	unsigned index = i+l1topo_dec->clock()*64;
-	uint64_t mask = 0x1; mask <<= i;
-	if ((l1topo_dec->topoWord64() & mask) !=0) {
-	  multWeightsMap[static_cast<unsigned>(l1topo_dec->connectionId() - 4)].set(index);
-	}
+        unsigned index = i+l1topo_dec->clock()*64;
+        uint64_t mask = 0x1; mask <<= i;
+        if ((l1topo_dec->topoWord64() & mask) !=0) {
+          multWeightsMap[static_cast<unsigned>(l1topo_dec->connectionId() - 4)].set(index);
+        }
       }
     }
     else {
@@ -199,9 +221,9 @@ StatusCode L1TopoOnlineMonitor::doSimMon( DecisionBits& decisionBits, std::vecto
     for (auto startbit : m_startbit[key]) {
       unsigned count = 0;
       for (size_t i=0;i<startbit.second;i++){
-	if (multWeightsMap[key][startbit.first+i]) {
-	  count += 1 * pow(2,i);
-	}
+        if (multWeightsMap[key][startbit.first+i]) {
+          count += 1 * pow(2,i);
+        }
       }
       vecCount.push_back(count);
       vecIndices.push_back(indices);
@@ -215,9 +237,11 @@ StatusCode L1TopoOnlineMonitor::doSimMon( DecisionBits& decisionBits, std::vecto
   }
   
   std::vector<size_t> triggerBitIndicesSim = bitsetIndices(triggerBitsSim);
+  std::vector<size_t> overflowBitIndicesSim = bitsetIndices(overflowBitsSim);
   auto monTopoSim = Monitored::Collection("TopoSim", triggerBitIndicesSim);
+  auto monTopoSimOverflow = Monitored::Collection("TopoSim_oveflows", overflowBitIndicesSim);
   Monitored::Group(m_monTool,monTopoSim);
-
+  Monitored::Group(m_monTool,monTopoSimOverflow);
   
   return StatusCode::SUCCESS;
 }
@@ -442,6 +466,13 @@ StatusCode L1TopoOnlineMonitor::doComp( DecisionBits& decisionBits ) const {
   std::bitset<s_nTopoCTPOutputs> triggerBitsHdwSim = triggerBitsHdw & triggerBitsSim;
   std::bitset<s_nTopoCTPOutputs> triggerBitsAny = triggerBitsHdw | triggerBitsSim;
 
+  std::bitset<s_nTopoCTPOutputs>& overflowBitsSim = decisionBits.overflowBitsSim.value();
+  std::bitset<s_nTopoCTPOutputs>& overflowBitsHdw = decisionBits.overflowBits.value();
+  std::bitset<s_nTopoCTPOutputs> overflowBitsSimNotHdw = overflowBitsSim & (~overflowBitsHdw);
+  std::bitset<s_nTopoCTPOutputs> overflowBitsHdwNotSim = overflowBitsHdw & (~overflowBitsSim);
+  std::bitset<s_nTopoCTPOutputs> overflowBitsHdwSim = overflowBitsHdw & overflowBitsSim;
+  std::bitset<s_nTopoCTPOutputs> overflowBitsAny = overflowBitsHdw | overflowBitsSim;
+
   std::vector<size_t> triggerBitIndicesSimNotHdw = bitsetIndices(triggerBitsSimNotHdw);
   std::vector<size_t> triggerBitIndicesHdwNotSim = bitsetIndices(triggerBitsHdwNotSim);
   auto monSimNotHdw = Monitored::Collection("SimNotHdwL1TopoResult", triggerBitIndicesSimNotHdw);
@@ -450,49 +481,85 @@ StatusCode L1TopoOnlineMonitor::doComp( DecisionBits& decisionBits ) const {
   Monitored::Group(m_monTool, monSimNotHdw, monHdwNotSim);
 
   float rate=0;
+  float rate_overflow=0;
   for (size_t i=0;i<4;i++) {
     auto mon_trig = Monitored::Scalar<unsigned>("Phase1TopoTrigger_"+std::to_string(i));
     auto mon_match = Monitored::Scalar<unsigned>("Phase1TopoMissMatch_"+std::to_string(i));
     auto mon_weight = Monitored::Scalar<float>("Phase1TopoWeight_"+std::to_string(i));
+    auto mon_OFweight = Monitored::Scalar<float>("Phase1TopoOFWeight_"+std::to_string(i));
     for (size_t j=0;j<32;j++) {
-      m_countHdwNotSim[32*i+j]+=triggerBitsHdwNotSim[32*i+j];
-      m_countSimNotHdw[32*i+j]+=triggerBitsSimNotHdw[32*i+j];
-      m_countHdwSim[32*i+j]+=triggerBitsHdwSim[32*i+j];
-      m_countHdw[32*i+j]+=triggerBitsHdw[32*i+j];
-      m_countSim[32*i+j]+=triggerBitsSim[32*i+j];
-      m_countAny[32*i+j]+=triggerBitsAny[32*i+j];
-      
+      mon_trig = static_cast<unsigned>(j);
+      if (overflowBitsHdw[32*i+j] == 1 || overflowBitsSim[32*i+j] == 1) {
+        m_overflow_countHdwNotSim[32*i+j]+=overflowBitsHdwNotSim[32*i+j];
+        m_overflow_countSimNotHdw[32*i+j]+=overflowBitsSimNotHdw[32*i+j];
+        m_overflow_countHdwSim[32*i+j]+=overflowBitsHdwSim[32*i+j];
+        m_overflow_countHdw[32*i+j]+=overflowBitsHdw[32*i+j];
+        m_overflow_countSim[32*i+j]+=overflowBitsSim[32*i+j];
+        m_overflow_countAny[32*i+j]+=overflowBitsAny[32*i+j];
+      }
+      else {
+        m_countHdwNotSim[32*i+j]+=triggerBitsHdwNotSim[32*i+j];
+        m_countSimNotHdw[32*i+j]+=triggerBitsSimNotHdw[32*i+j];
+        m_countHdwSim[32*i+j]+=triggerBitsHdwSim[32*i+j];
+        m_countHdw[32*i+j]+=triggerBitsHdw[32*i+j];
+        m_countSim[32*i+j]+=triggerBitsSim[32*i+j];
+        m_countAny[32*i+j]+=triggerBitsAny[32*i+j];
+      }     
       rate = m_countHdw[32*i+j]>0 ? m_countHdwNotSim[32*i+j]/m_countHdw[32*i+j] : 0;
       if (rate != m_rateHdwNotSim[32*i+j]) {
-	mon_trig = static_cast<unsigned>(j);
-	mon_match = 0;
-	mon_weight = rate-m_rateHdwNotSim[32*i+j];
-	m_rateHdwNotSim[32*i+j] = rate;
-	Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
+        mon_match = 0;
+        mon_weight = rate-m_rateHdwNotSim[32*i+j];
+        m_rateHdwNotSim[32*i+j] = rate;
+        Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
+      }
+      rate_overflow = m_overflow_countHdw[32*i+j]>0 ? m_overflow_countHdwNotSim[32*i+j]/m_overflow_countHdw[32*i+j] : 0;
+      if (rate_overflow != m_overflow_rateHdwNotSim[32*i+j]) {
+        mon_match = 0;
+        mon_OFweight = rate_overflow-m_overflow_rateHdwNotSim[32*i+j];
+        m_overflow_rateHdwNotSim[32*i+j] = rate_overflow;
+        Monitored::Group(m_monTool, mon_trig, mon_match, mon_OFweight);
       }
       rate = m_countSim[32*i+j]>0 ? m_countSimNotHdw[32*i+j]/m_countSim[32*i+j] : 0;
       if (rate != m_rateSimNotHdw[32*i+j]) {
-	mon_trig = static_cast<unsigned>(j);
-	mon_match = 1;
-	mon_weight = rate-m_rateSimNotHdw[32*i+j];
-	m_rateSimNotHdw[32*i+j] = rate;
-	Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
+        mon_match = 1;
+        mon_weight = rate-m_rateSimNotHdw[32*i+j];
+        m_rateSimNotHdw[32*i+j] = rate;
+        Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
+      }
+      rate_overflow = m_overflow_countSim[32*i+j]>0 ? m_overflow_countSimNotHdw[32*i+j]/m_overflow_countSim[32*i+j] : 0;
+      if (rate_overflow != m_overflow_rateSimNotHdw[32*i+j]) {
+        mon_match = 1;
+        mon_OFweight = rate_overflow-m_overflow_rateSimNotHdw[32*i+j];
+        m_overflow_rateSimNotHdw[32*i+j] = rate_overflow;
+        Monitored::Group(m_monTool, mon_trig, mon_match, mon_OFweight);
       }
       rate = m_countAny[32*i+j]>0 ? m_countHdwSim[32*i+j]/m_countAny[32*i+j] : 0;
       if (rate != m_rateHdwAndSim[32*i+j]) {
-	mon_trig = static_cast<unsigned>(j);
-	mon_match = 2;
-	mon_weight = rate-m_rateHdwAndSim[32*i+j];
-	m_rateHdwAndSim[32*i+j] = rate;
-	Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
+        mon_match = 2;
+        mon_weight = rate-m_rateHdwAndSim[32*i+j];
+        m_rateHdwAndSim[32*i+j] = rate;
+        Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
+      }
+      rate_overflow = m_overflow_countAny[32*i+j]>0 ? m_overflow_countHdwSim[32*i+j]/m_overflow_countAny[32*i+j] : 0;
+      if (rate_overflow != m_overflow_rateHdwAndSim[32*i+j]) {
+        mon_match = 2;
+        mon_OFweight = rate_overflow-m_overflow_rateHdwAndSim[32*i+j];
+        m_overflow_rateHdwAndSim[32*i+j] = rate_overflow;
+        Monitored::Group(m_monTool, mon_trig, mon_match, mon_OFweight);
       }
       rate = m_countSim[32*i+j]>0 ? m_countHdw[32*i+j]/m_countSim[32*i+j] : 0;
       if (rate != m_rateHdwSim[32*i+j]) {
-	mon_trig = static_cast<unsigned>(j);
-	mon_match = 3;
-	mon_weight = rate-m_rateHdwSim[32*i+j];
-	m_rateHdwSim[32*i+j] = rate;
-	Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
+        mon_match = 3;
+        mon_weight = rate-m_rateHdwSim[32*i+j];
+        m_rateHdwSim[32*i+j] = rate;
+        Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
+      }
+      rate_overflow = m_overflow_countSim[32*i+j]>0 ? m_overflow_countHdw[32*i+j]/m_overflow_countSim[32*i+j] : 0;
+      if (rate_overflow != m_overflow_rateHdwSim[32*i+j]) {
+        mon_match = 3;
+        mon_OFweight = rate_overflow-m_overflow_rateHdwSim[32*i+j];
+        m_overflow_rateHdwSim[32*i+j] = rate_overflow;
+        Monitored::Group(m_monTool, mon_trig, mon_match, mon_OFweight);
       }
     }
   }
@@ -558,13 +625,13 @@ std::vector<unsigned> L1TopoOnlineMonitor::getCtpIds( const TrigConf::L1Menu& l1
   for( const auto & item : l1menu ) {
     std::string definition = item.definition();
     if (definition.substr(0,5) == "TOPO_" &&
-	definition.find(' ') == std::string::npos) {
+    definition.find(' ') == std::string::npos) {
       std::string trigger = definition.substr(0, definition.find('['));
       auto pos = std::find(labelsTopoEl.begin(),labelsTopoEl.end(),trigger);
       if (pos != labelsTopoEl.end()) {
-	ATH_MSG_DEBUG("Found one CTP; ,CTPId: " << item.ctpId() << " ,Name: " << item.name() << " ,Definition: " << definition);
-	unsigned index = std::distance(labelsTopoEl.begin(),pos);
-	ctpIds[index]=item.ctpId();
+        ATH_MSG_DEBUG("Found one CTP; ,CTPId: " << item.ctpId() << " ,Name: " << item.name() << " ,Definition: " << definition);
+        unsigned index = std::distance(labelsTopoEl.begin(),pos);
+        ctpIds[index]=item.ctpId();
       }
     }
   }

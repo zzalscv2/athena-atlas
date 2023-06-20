@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef InDetTestPixelLayerTool_H
@@ -149,8 +149,6 @@ private:
   const PixelID* m_pixelId;
 
   bool m_checkActiveAreas;
-  bool m_configured;
-
   bool m_checkDeadRegions;
   bool m_checkDisabledFEs;
   double m_phiRegionSize;

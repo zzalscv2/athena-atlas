@@ -5,7 +5,7 @@
 //michael.pitt@cern.ch
 
 // System include(s):
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
@@ -36,7 +36,7 @@ int main (int argc, const char * argv[]) {
 	}	
 	
 	// Check the input file:
-	if(!boost::filesystem::exists(argv[1])){
+	if(!std::filesystem::exists(argv[1])){
 	  printf("Error: file %s not exists\n",argv[1]);
 	  return 0;
 	}
