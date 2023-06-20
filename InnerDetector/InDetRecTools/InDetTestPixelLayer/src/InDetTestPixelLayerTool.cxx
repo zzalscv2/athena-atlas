@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -33,7 +33,6 @@ InDetTestPixelLayerTool::InDetTestPixelLayerTool(const std::string& name,
   : AthAlgTool(name, n, p)
   , m_idHelper(nullptr)
   , m_pixelId(nullptr)
-  , m_configured(false)
 {
   declareInterface<IInDetTestPixelLayerTool>(this);
   declareProperty("CheckActiveAreas", m_checkActiveAreas = false);
@@ -42,16 +41,12 @@ InDetTestPixelLayerTool::InDetTestPixelLayerTool(const std::string& name,
   declareProperty("PhiRegionSize", m_phiRegionSize = 3.);
   declareProperty("EtaRegionSize", m_etaRegionSize = 3.);
   declareProperty("GoodFracCut", m_goodFracCut = 0.5);
-  declareProperty("OuterRadius" ,m_outerRadius = 230.);
+  declareProperty("OuterRadius", m_outerRadius = 230.);
 }
 
 StatusCode
 InDetTestPixelLayerTool::initialize()
 {
-
-  StatusCode sc = AthAlgTool::initialize();
-  if (sc.isFailure())
-    return sc;
 
   // retrieve ID helpers:
   if (detStore()->retrieve(m_idHelper, "AtlasID").isFailure()) {
@@ -59,36 +54,22 @@ InDetTestPixelLayerTool::initialize()
     return StatusCode::FAILURE;
   }
 
-  sc = detStore()->retrieve(m_pixelId, "PixelID");
-  if (sc.isFailure()) {
-    ATH_MSG_INFO("Could not get PixelID helper !");
+  if (detStore()->retrieve(m_pixelId, "PixelID").isFailure()) {
+    ATH_MSG_FATAL("Could not get PixelID helper !");
     return StatusCode::FAILURE;
   }
 
-  m_configured = true;
-  if (m_extrapolator.empty()) {
-    ATH_MSG_INFO("Extrapolator not configured ");
-    m_configured = false;
-  } else {
-    if (m_extrapolator.retrieve().isFailure()) {
-      ATH_MSG_FATAL("Failed to retrieve tool " << m_extrapolator);
-      return StatusCode::FAILURE;
-    } else {
-      ATH_MSG_INFO("Retrieved tool " << m_extrapolator);
-    }
+  if (m_extrapolator.retrieve().isFailure()) {
+    ATH_MSG_FATAL("Failed to retrieve tool " << m_extrapolator);
+    return StatusCode::FAILURE;
   }
+  ATH_MSG_DEBUG("Retrieved tool " << m_extrapolator);
 
-  ATH_CHECK(
-    m_pixelCondSummaryTool.retrieve(DisableTool{ !m_pixelDetElStatus.empty() && !VALIDATE_STATUS_ARRAY_ACTIVATED }));
+  ATH_CHECK(m_pixelCondSummaryTool.retrieve(DisableTool{
+	!m_pixelDetElStatus.empty() && !VALIDATE_STATUS_ARRAY_ACTIVATED }));
   ATH_CHECK(m_pixelDetElStatus.initialize(!m_pixelDetElStatus.empty()));
   if (!m_pixelDetElStatus.empty()) {
     ATH_CHECK(m_pixelReadout.retrieve());
-  }
-
-  if (!m_configured) {
-    ATH_MSG_INFO( "you are using an unconfigured tool");
-    ATH_MSG_INFO("will not be able to extrapolate to the pixelLayer");
-    ATH_MSG_INFO("the values from the track summary will be returned");
   }
 
   return StatusCode::SUCCESS;
@@ -153,13 +134,6 @@ InDet::InDetTestPixelLayerTool::expectHitInPixelLayer(
   int pixel_layer,
   bool checkBarrelOnly) const
 {
-
-  if (!m_configured) {
-    ATH_MSG_WARNING(
-      "Unconfigured tool, unable to compute expectHitInPixelLayer");
-    return false;
-  }
-
   bool expect_hit = false; /// will be set to true if at least one good module is passed
 
   std::vector<std::unique_ptr<const Trk::TrackParameters>> pixelLayerParam;
@@ -298,13 +272,6 @@ InDet::InDetTestPixelLayerTool::getFracGood(
   const Trk::TrackParameters* trackpar,
   int pixel_layer) const
 {
-
-  if (!m_configured) {
-    ATH_MSG_WARNING(
-      "Unconfigured tool, unable to compute expectHitInPixelLayer");
-    return -6.;
-  }
-
   std::vector<std::unique_ptr<const Trk::TrackParameters>> pixelLayerParam;
   if (!this->getPixelLayerParameters(trackpar, pixelLayerParam))
     return -5.;
@@ -464,11 +431,6 @@ InDet::InDetTestPixelLayerTool::getTrackStateOnPixelLayerInfo(
 {
 
   infoList.clear();
-
-  if (!m_configured) {
-    ATH_MSG_WARNING("Unconfigured tool, unable to compute PixelLayer info");
-    return false;
-  }
 
   std::vector<std::unique_ptr<const Trk::TrackParameters>> pixelLayerParam;
   if (!getPixelLayerParameters(trackpar, pixelLayerParam))
@@ -716,19 +678,19 @@ InDet::InDetTestPixelLayerTool::getFracGood(
   if (design) {
     design->distanceToDetectorEdge(LocPos, etaDist, phiDist);
     if (phiDist < 0)
-      locx += (fabs(phiDist) + 1e-6); /// not exactly on the edge
+      locx += (std::abs(phiDist) + 1e-6); /// not exactly on the edge
     if (etaDist < 0)
-      locy += (fabs(etaDist) + 1e-6);
+      locy += (std::abs(etaDist) + 1e-6);
     design->distanceToDetectorEdge(startLocPostmp, etaDist, phiDist);
     if (phiDist < 0)
-      startLocX += (fabs(phiDist) + 1e-6); /// not exactly on the edge
+      startLocX += (std::abs(phiDist) + 1e-6); /// not exactly on the edge
     if (etaDist < 0)
-      startLocY += (fabs(etaDist) + 1e-6);
+      startLocY += (std::abs(etaDist) + 1e-6);
     design->distanceToDetectorEdge(endLocPostmp, etaDist, phiDist);
     if (phiDist < 0)
-      endLocX -= (fabs(phiDist) + 1e-6);
+      endLocX -= (std::abs(phiDist) + 1e-6);
     if (etaDist < 0)
-      endLocY -= (fabs(etaDist) + 1e-6);
+      endLocY -= (std::abs(etaDist) + 1e-6);
   }
 
   LocPos = Amg::Vector2D(locx, locy);
