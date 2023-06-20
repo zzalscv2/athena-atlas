@@ -94,7 +94,7 @@ def generateEmuEvents():
     data['l1muroi'][1]   =  '2,0.5,0,MU5VF; 3,0.5,0,MU5VF;'
     data['msmu'][1]      = 'eta:-1.2,phi:0.7,pt:1500,pt2:1500; eta:-1.1,phi:0.6,pt:1500,pt2:1500;'
 
-    # event 2: 2e+ 3mu : HLT_TestChain5_ev1_TestChain8_ev1_2TestChain6_mv1_L1_2EM8VH_MU8F, HLT_TestChain6_mv1_TestChain10_ev1_L1EM7_MU8F
+    # event 2: 2e+ 3mu : HLT_TestChain5_ev1_TestChain8_ev1_2TestChain6_mv1_L1_2EM8VH_MU8F, HLT_TestChain6_mv1_TestChain10_ev1_L12eEM10L_MU8F
     data['ctp'] [2]      =  'HLT_TestChain6_mv1_L1MU5VF \
                              HLT_TestChain8_mv1_L1MU8F \
                              HLT_TestChain10_mv2_L1MU8F \
@@ -102,8 +102,8 @@ def generateEmuEvents():
                              HLT_TestChain5_ev1_L1EM3 \
                              HLT_TestChain8_ev1_L1EM3 \
                              HLT_TestChain6_mEmpty2_L1MU5VF \
-                             HLT_TestChain6_mv1_TestChain10_ev1_L1EM7_MU8F \
-                             HLT_TestChain6_mv2_TestChain8_ev2_L1EM7_MU8F \
+                             HLT_TestChain6_mv1_TestChain10_ev1_L12eEM10L_MU8F \
+                             HLT_TestChain6_mv2_TestChain8_ev2_L12eEM10L_MU8F \
                              HLT_2TestChain6_mv1_L12MU5VF \
                              HLT_2TestChain6_mEmpty1_L12MU5VF \
                              HLT_TestChain6_mv1_TestChain10_mv1_L12MU5VF \
@@ -119,14 +119,14 @@ def generateEmuEvents():
     data['l1muroi'][2]   =  '2,0.5,0,MU5VF,MU8VF; 3,0.5,0,MU5VF,MU8F,MU8VF;2.2,0.6,0,MU5VF;'
     data['msmu'][2]      =  'eta:-1.2,phi:0.7,pt:6500,pt2:8500; eta:-1.1,phi:0.6,pt:10500,pt2:8500;eta:-1.1,phi:0.6,pt:8500,pt2:8500;'
 
-    #event 3: 1e + 1mu; HLT_TestChain6_mv1_TestChain10_ev1_L1EM7_MU8F does not pass because of e10
+    #event 3: 1e + 1mu; HLT_TestChain6_mv1_TestChain10_ev1_L12eEM10L_MU8F does not pass because of e10
     data['ctp'] [3]      =  'HLT_TestChain20_mv1_L1MU8F \
                              HLT_TestChain10_mv1_L1MU8F \
                              HLT_TestChain8_mv1_L1MU8F \
                              HLT_TestChain8_mv1step_L1MU5VF \
                              HLT_TestChain8_ev1_L1EM3 \
-                             HLT_TestChain6_mv1_TestChain10_ev1_L1EM7_MU8F\
-                             HLT_TestChain6_mv2_TestChain8_ev2_L1EM7_MU8F'
+                             HLT_TestChain6_mv1_TestChain10_ev1_L12eEM10L_MU8F\
+                             HLT_TestChain6_mv2_TestChain8_ev2_L12eEM10L_MU8F'
     data['l1emroi'][3]   =  '1,1.5,0,EM3,EM7;'
     data['emclusters'][3]=  'eta:-0.6,phi:1.7,et:9000;'
     data['l1muroi'][3]   =  '2,-0.1,0,MU5VF,MU8F,MU8VF;'
@@ -267,13 +267,13 @@ def generateChainsManually(flags, maskbit=0x7):
 
         CombChains =[
             # This is an example of a chain running in "serial"
-            makeChain(flags, name='HLT_TestChain6_mv1_TestChain10_ev1_L1EM7_MU8F',  L1Thresholds=["MU5VF","EM3"], ChainSteps=[
+            makeChain(flags, name='HLT_TestChain6_mv1_TestChain10_ev1_L12eEM10L_MU8F',  L1Thresholds=["MU5VF","EM3"], ChainSteps=[
                 makeChainStep("Step1_mu_em_serial", [mu11, emptySeq1], multiplicity=[1,1]),
                 makeChainStep("Step2_mu_em_serial", [emptySeq2, el21], multiplicity=[1,1]),
                 makeChainStep("Step3_mu_em_serial", multiplicity=[]),
                 makeChainStep("Step4_mu_em_serial", [mu41, el41],  multiplicity=[1,1])] ),
 
-            makeChain(flags, name='HLT_TestChain6_mv2_TestChain8_ev2_L1EM7_MU8F', L1Thresholds=["MU5VF","EM3"], ChainSteps=[
+            makeChain(flags, name='HLT_TestChain6_mv2_TestChain8_ev2_L12eEM10L_MU8F', L1Thresholds=["MU5VF","EM3"], ChainSteps=[
                 makeChainStep("Step1_mu2_em", [mu12, el11], multiplicity=[1,1]),
                 makeChainStep("Step2_mu_em", [mu21, el21], multiplicity=[1,1])] ),
 
