@@ -53,18 +53,16 @@ StatusCode InDet::SiTrackMaker_xk::initialize()
   if ( m_roadmaker.retrieve().isFailure() ) {
     ATH_MSG_FATAL( "Failed to retrieve tool " << m_roadmaker );
     return StatusCode::FAILURE;
-  } else {
-    ATH_MSG_INFO( "Retrieved tool " << m_roadmaker );
   }
+  ATH_MSG_DEBUG( "Retrieved tool " << m_roadmaker );
 
   /// Get combinatorial track finder tool
   ///
   if ( m_tracksfinder.retrieve().isFailure() ) {
     ATH_MSG_FATAL( "Failed to retrieve tool " << m_tracksfinder );
     return StatusCode::FAILURE;
-  } else {
-    ATH_MSG_INFO( "Retrieved tool " << m_tracksfinder );
   }
+  ATH_MSG_DEBUG( "Retrieved tool " << m_tracksfinder );
 
   /// Get seed to track conversion tool
   /// This is used if we want to write out the seeds for
@@ -73,10 +71,8 @@ StatusCode InDet::SiTrackMaker_xk::initialize()
     if (m_seedtrack.retrieve().isFailure()) {
       ATH_MSG_FATAL( "Failed to retrieve tool " << m_seedtrack );
       return StatusCode::FAILURE;
-
-    } else {
-      ATH_MSG_INFO( "Retrieved tool " << m_seedtrack );
     }
+    ATH_MSG_DEBUG( "Retrieved tool " << m_seedtrack );
   } else {
     m_seedtrack.disable();
   }
