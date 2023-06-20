@@ -330,11 +330,11 @@ void FPGATrackSimHitFilteringTool::FilterHits(std::vector<FPGATrackSimHit> &hits
       fill_nearby_hits(innerHit.first, hits_to_filter_outer, nearby_outer_hits);
 
       // get cut values to apply
-      float cut_p, cut_m;
-      fill_cut_values(innerHit.first, cut_p, cut_m);
+      float cut_m, cut_p;
+      fill_cut_values(innerHit.first, cut_m, cut_p);
 
       for (const auto &outerHit : nearby_outer_hits) {
-        bool hitPassed = check_hit_stub(innerHit.first, outerHit.first, cut_p, cut_m);
+        bool hitPassed = check_hit_stub(innerHit.first, outerHit.first, cut_m, cut_p);
         if(hitPassed) {
           // will have duplicates. Maybe interesting to count them, so remove later
           passed_inner_hits.push_back(innerHit);
