@@ -49,7 +49,7 @@ def muFastAlgSequenceCfg(flags, is_probe_leg=False):
     acc = ComponentAccumulator()
     seql2sa = seqAND("L2MuonSASeq")
     acc.addSequence(seql2sa)
-    muFastRecoSeq = muFastRecoSequenceCfg( flags, viewName+'RoIs', doFullScanID= isCosmic(flags), extraLoads=extraLoads )
+    muFastRecoSeq = muFastRecoSequenceCfg( muonflags, viewName+'RoIs', doFullScanID= isCosmic(flags), extraLoads=extraLoads )
     sequenceOut = muNames.L2SAName
     acc.merge(muFastRecoSeq, sequenceName=seql2sa.name)
 
@@ -58,14 +58,14 @@ def muFastAlgSequenceCfg(flags, is_probe_leg=False):
     acc.addSequence(seqFilter)
     from TrigMuonEF.TrigMuonEFConfig import MuonChainFilterAlgCfg
     MultiTrackChains = getMultiTrackChainNames()
-    MultiTrackChainFilter = MuonChainFilterAlgCfg(flags, "SAFilterMultiTrackChains", ChainsToFilter = MultiTrackChains, 
+    MultiTrackChainFilter = MuonChainFilterAlgCfg(muonflags, "SAFilterMultiTrackChains", ChainsToFilter = MultiTrackChains, 
                                                   InputDecisions = filterInput,
                                                   L2MuFastContainer = muNames.L2SAName+"l2mtmode", 
                                                   L2MuCombContainer = muNames.L2CBName+"l2mtmode",
                                                   WriteMuFast = True, NotGate = True)
 
     acc.merge(MultiTrackChainFilter, sequenceName=seqFilter.name)
-    muFastl2mtRecoSeq = muFastRecoSequenceCfg( flags, viewName+'RoIs', doFullScanID= isCosmic(flags), l2mtmode=True )
+    muFastl2mtRecoSeq = muFastRecoSequenceCfg( muonflags, viewName+'RoIs', doFullScanID= isCosmic(flags), l2mtmode=True )
     acc.merge(muFastl2mtRecoSeq, sequenceName=seqFilter.name)
     recoSA.mergeReco(acc)
 
@@ -92,7 +92,7 @@ def muFastCalibAlgSequenceCfg(flags, is_probe_leg=False):
     recoSA.mergeReco(muonDecodeCfg(muonflags,RoIs=viewName+'RoIs'))
 
     from .MuonRecoSequences  import  isCosmic
-    muFastRecoSeq = muFastRecoSequenceCfg( flags, viewName+'RoIs', doFullScanID= isCosmic(flags), calib=True )
+    muFastRecoSeq = muFastRecoSequenceCfg( muonflags, viewName+'RoIs', doFullScanID= isCosmic(flags), calib=True )
     sequenceOut = muNames.L2SAName+"Calib"
     recoSA.mergeReco(muFastRecoSeq)
 
@@ -168,6 +168,7 @@ def muCombAlgSequence(flags):
     newRoITool = ViewCreatorFetchFromViewROITool()
     newRoITool.RoisWriteHandleKey = recordable("HLT_Roi_L2SAMuon") #RoI collection recorded to EDM
     newRoITool.InViewRoIs = muNames.L2forIDName #input RoIs from L2 SA views
+    muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
 
     ### get ID tracking and muComb reco sequences ###
     from .MuonRecoSequences  import muFastRecoSequenceCfg, muCombRecoSequence, muonIDFastTrackingSequenceCfg, muonIDCosmicTrackingSequence, isCosmic
@@ -227,7 +228,7 @@ def muCombAlgSequence(flags):
 
     # for Inside-out L2SA
     from .MuonRecoSequences  import isCosmic
-    muFastIORecoSequence = algorithmCAToGlobalWrapper(muFastRecoSequenceCfg,flags, l2muCombViewsMaker.InViewRoIs, doFullScanID=isCosmic(flags) , InsideOutMode=True)
+    muFastIORecoSequence = algorithmCAToGlobalWrapper(muFastRecoSequenceCfg, muonflags, l2muCombViewsMaker.InViewRoIs, doFullScanID=isCosmic(flags) , InsideOutMode=True)
     sequenceOutL2SAIO = muNames.L2SAName+"IOmode"
     insideoutMuonChainFilter = MuonChainFilterAlg("FilterInsideOutMuonChains")
     insideoutMuonChains = getInsideOutMuonChainNames()

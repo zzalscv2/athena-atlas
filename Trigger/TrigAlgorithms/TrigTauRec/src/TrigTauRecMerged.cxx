@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigTauRecMerged.h"
@@ -40,39 +40,36 @@ StatusCode TrigTauRecMerged::initialize()
 {
   ATH_MSG_DEBUG("TrigTauRecMerged::initialize()");
 
-  if ( m_tools.begin() == m_tools.end() ) {
-    ATH_MSG_DEBUG(" no tools given for this algorithm.");
+  if ( m_commonTools.begin() == m_commonTools.end() ) {
+    ATH_MSG_ERROR(" no tools given for this algorithm.");
     return StatusCode::FAILURE;
   }
 
-  ATH_MSG_DEBUG("List of tools in execution sequence:");
+  for(const auto& tool : m_commonTools) {
+    ATH_CHECK( tool.retrieve() );
+  } 
 
-  for(const auto& tool : m_tools) {
-    // make sure the key of the container in tauRecTool are the same
-    // need to set the property before the initialization of tools
-    if (tool.name().find("VertexFinder") != std::string::npos) {
-      ATH_CHECK( AAH::setProperty(tool, "Key_trackPartInputContainer",m_tracksKey.key()) );
-      ATH_CHECK( AAH::setProperty(tool, "Key_vertexInputContainer",m_vertexKey.key()) );
-    }
-    else if (tool.name().find("TrackFinder") != std::string::npos) {
-      ATH_CHECK( AAH::setProperty(tool, "Key_trackPartInputContainer",m_tracksKey.key()) );
-    }
+  for(const auto& tool : m_vertexFinderTools) {
+    ATH_CHECK( tool.retrieve() );
+  } 
 
-    StatusCode p_sc = tool.retrieve();
-    if( p_sc.isFailure() ) {
-      ATH_MSG_DEBUG("Cannot find tool named <" << tool << ">");
-      return StatusCode::FAILURE;
-    }
-    else {
-      ATH_MSG_DEBUG("Add timer for tool "<< tool.type() <<" "<< tool.name());
-    }
-  }
+  for(const auto& tool : m_trackFinderTools) {
+    ATH_CHECK( tool.retrieve() );
+  } 
+
+  for(const auto& tool : m_vertexVarsTools) {
+    ATH_CHECK( tool.retrieve() );
+  } 
+
+  for(const auto& tool : m_idTools) {
+    ATH_CHECK( tool.retrieve() );
+  } 
 
   if ( not m_monTool.name().empty() ) {
     ATH_CHECK( m_monTool.retrieve() );
   }
   
-  ATH_MSG_DEBUG("Initialising HandleKeys");
+  ATH_MSG_DEBUG("Initialising Handle Keys");
   ATH_CHECK(m_roIInputKey.initialize());
   ATH_CHECK(m_clustersKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_tracksKey.initialize(SG::AllowEmpty));
@@ -387,48 +384,96 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
 
   ATH_MSG_DEBUG(" roidescriptor roiword " << roiDescriptor->roiWord() << " saved " << p_tau->ROIWord() );
 
-  StatusCode processStatus = StatusCode::SUCCESS;
-
-  ATH_MSG_DEBUG(" initialize all good ");
-
   //-------------------------------------------------------------------------
   // loop over booked tau tools
   //-------------------------------------------------------------------------
-  processStatus = StatusCode::SUCCESS;
+
+  StatusCode processStatus = StatusCode::SUCCESS;
   
   // dummy container passed to TauVertexVariables, not used in trigger though
-  xAOD::VertexContainer dummyVxCont;
- 
-  ATH_MSG_DEBUG("Starting tool loop with seed jet");
+  xAOD::VertexContainer dummyVxCont; 
 
-  for (const auto& tool : m_tools) {
-    // loop stops only when Failure indicated by one of the tools
+  for (const auto& tool: m_vertexFinderTools){
     ATH_MSG_DEBUG("Starting Tool: " <<  tool->name() );
-    // time in the various tools
 
-    if (tool->type() == "TauVertexFinder" ) {
-      processStatus = tool->executeVertexFinder(*p_tau,RoIVxContainer);
-    }
-    else if (tool->type() == "TauTrackFinder") {
-      processStatus = tool->executeTrackFinder(*p_tau, *tauTrackHandle);
-    }
-    else if (tool->type() == "TauVertexVariables" ) {
-      processStatus = tool->executeVertexVariables(*p_tau, dummyVxCont);
-    }
-    else {
-      processStatus = tool->execute( *p_tau );
-    }
-    
+    processStatus = tool->executeVertexFinder(*p_tau,RoIVxContainer);
+
     if ( !processStatus.isFailure() ) {
       ATH_MSG_DEBUG(" "<< tool->name() << " executed successfully ");
-      ATH_MSG_DEBUG(" Roi: " << roiDescriptor->roiId()
-		    << " Tau eta: " << p_tau->eta() << " Tau phi: " << p_tau->phi()
-		    << " Tau pT : "<< p_tau->pt());
-    }
-    else {
+    } else {
       ATH_MSG_DEBUG(" "<< tool->name() << " execution failed ");
       break;
     }
+
+  }
+
+  if ( !processStatus.isFailure() ) {
+     ATH_MSG_DEBUG("Starting Tool: " <<  m_commonTools[0]->name() );
+     processStatus = m_commonTools[0]->execute( *p_tau);
+  }
+
+  for (const auto& tool: m_trackFinderTools){
+
+    if( !processStatus.isFailure() ) ATH_MSG_DEBUG("Starting Tool: " <<  tool->name() );
+    else break;
+
+    processStatus = tool->executeTrackFinder(*p_tau, *tauTrackHandle);
+
+    if ( !processStatus.isFailure() ) {
+      ATH_MSG_DEBUG(" "<< tool->name() << " executed successfully ");
+    } else {
+      ATH_MSG_DEBUG(" "<< tool->name() << " execution failed ");
+      break;
+    }
+
+  }
+
+  for (unsigned int i=1; i< m_commonTools.size(); i++) {
+
+    if( !processStatus.isFailure() ) ATH_MSG_DEBUG("Starting Tool: " <<  m_commonTools[i]->name() );
+    else break;
+
+    processStatus = m_commonTools[i]->execute(*p_tau);
+
+    if ( !processStatus.isFailure() ) {
+      ATH_MSG_DEBUG(" "<< m_commonTools[i]->name() << " executed successfully ");
+    } else {
+      ATH_MSG_DEBUG(" "<< m_commonTools[i]->name() << " execution failed ");
+      break;
+    }
+
+  }
+
+  for (const auto& tool: m_vertexVarsTools){
+
+    if( !processStatus.isFailure() ) ATH_MSG_DEBUG("Starting Tool: " <<  tool->name() );
+    else break;
+
+    processStatus = tool->executeVertexVariables(*p_tau, dummyVxCont);
+
+    if ( !processStatus.isFailure() ) {
+      ATH_MSG_DEBUG(" "<< tool->name() << " executed successfully ");
+    } else {
+      ATH_MSG_DEBUG(" "<< tool->name() << " execution failed ");
+      break;
+    }
+
+  }
+
+  for (const auto& tool: m_idTools) {
+
+    if( !processStatus.isFailure() ) ATH_MSG_DEBUG("Starting Tool: " <<  tool->name() );
+    else break;
+
+    processStatus = tool->execute(*p_tau);
+
+    if ( !processStatus.isFailure() ) {
+      ATH_MSG_DEBUG(" "<< tool->name() << " executed successfully ");
+    } else {
+      ATH_MSG_DEBUG(" "<< tool->name() << " execution failed ");
+      break;
+    }
+
   }
 
   ATH_MSG_DEBUG("This tau has " << p_tau->allTracks() << " tracks linked");

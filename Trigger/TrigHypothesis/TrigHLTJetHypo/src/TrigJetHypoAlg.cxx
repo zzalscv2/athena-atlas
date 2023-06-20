@@ -93,6 +93,7 @@ TrigJetHypoAlg::decide(const xAOD::JetContainer* jets,
   // this will record the chains which the jet passes.
 
   std::vector<std::pair<const xAOD::Jet*,Decision*>> jetHypoInputs;
+  jetHypoInputs.reserve(jets->size());
 
   if(m_doPresel) {
     // In the preselection case, we create only one DecisionObject, which links

@@ -42,6 +42,7 @@ class TrigEgammaPrecisionPhotonHypoToolConfig:
   __operation_points  = [  'tight'    , 
                            'medium'   , 
                            'loose'    , 
+                           'nopid'    ,
                            ]
 
   def __init__(self, name, monGroups, cpart, tool=None):
@@ -61,6 +62,7 @@ class TrigEgammaPrecisionPhotonHypoToolConfig:
     tool.dETACLUSTERthr = 0.1
     tool.dPHICLUSTERthr = 0.1
     tool.PidName        = ""
+    tool.DoNoPid    = False
 
     self.__tool = tool
     self.__log.debug( 'Chain     :%s', self.__name )
@@ -88,6 +90,13 @@ class TrigEgammaPrecisionPhotonHypoToolConfig:
     self.tool().dETACLUSTERthr = 9999.
     self.tool().dPHICLUSTERthr = 9999.
 
+  def noPid(self):
+    self.tool().DoNoPid = True
+    self.__log.debug( 'Configure noPid' )
+    self.tool().ETthr          = same( self.etthr()*GeV, self.tool())
+    # No other cuts applied
+    self.tool().dETACLUSTERthr = 9999.
+    self.tool().dPHICLUSTERthr = 9999.
 
   def nominal(self):
     if not self.pidname() in self.__operation_points:
@@ -102,6 +111,8 @@ class TrigEgammaPrecisionPhotonHypoToolConfig:
 
     if 'etcut' == self.pidname():
       self.etcut()
+    elif 'nopid' == self.pidname():
+      self.noPid()
 
     else:
       self.nominal()

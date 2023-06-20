@@ -928,79 +928,79 @@
   <y title="Entries"/>
 </h>
 <h id="vx_nReco_vs_nTruth_inclusive" type="TProfile" title="Number of reco vertices (INCLUSIVE) vs Number of interactions">
-  <x title="Number of interactions" n="81" lo="-0.5" hi="80.5"/>
-  <y title="Number of reco vertices" lo="0.0" hi="60.0"/>
+  <x title="Number of interactions" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of reco vertices" lo="0.0" hi="&EXPMU;"/>
 </h>
 <h id="vx_nReco_vs_nTruth_matched" type="TProfile" title="Number of reco vertices (MATCHED) vs Number of interactions">
-  <x title="Number of interactions" n="81" lo="-0.5" hi="80.5"/>
-  <y title="Number of reco vertices" lo="0.0" hi="60.0"/>
+  <x title="Number of interactions" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of reco vertices" lo="0.0" hi="&EXPMU;"/>
 </h>
 <h id="vx_nReco_vs_nTruth_merged" type="TProfile" title="Number of reco vertices (MERGED) vs Number of interactions">
-  <x title="Number of interactions" n="81" lo="-0.5" hi="80.5"/>
-  <y title="Number of reco vertices" lo="0.0" hi="60.0"/>
+  <x title="Number of interactions" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of reco vertices" lo="0.0" hi="&EXPMU;"/>
 </h>
 <h id="vx_nReco_vs_nTruth_split" type="TProfile" title="Number of reco vertices (SPLIT) vs Number of interactions">
-  <x title="Number of interactions" n="81" lo="-0.5" hi="80.5"/>
-  <y title="Number of reco vertices" lo="0.0" hi="60.0"/>
+  <x title="Number of interactions" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of reco vertices" lo="0.0" hi="&EXPMU;"/>
 </h>
 <h id="vx_nReco_vs_nTruth_fake" type="TProfile" title="Number of reco vertices (FAKE) vs Number of interactions">
-  <x title="Number of interactions" n="81" lo="-0.5" hi="80.5"/>
-  <y title="Number of reco vertices" lo="0.0" hi="60.0"/>
+  <x title="Number of interactions" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of reco vertices" lo="0.0" hi="&EXPMU;"/>
 </h>
 <h id="vx_nReco_vs_nTruth_dummy" type="TProfile" title="Number of reco vertices (DUMMY) vs Number of interactions">
-  <x title="Number of interactions" n="81" lo="-0.5" hi="80.5"/>
-  <y title="Number of reco vertices" lo="0.0" hi="60.0"/>
+  <x title="Number of interactions" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of reco vertices" lo="0.0" hi="&EXPMU;"/>
 </h>
 <h id="vx_nReco_vs_nTruth_clean" type="TProfile" title="Number of reco vertices (CLEAN) vs Number of interactions">
-  <x title="Number of interactions" n="81" lo="-0.5" hi="80.5"/>
-  <y title="Number of reco vertices" lo="0.0" hi="60.0"/>
+  <x title="Number of interactions" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of reco vertices" lo="0.0" hi="&EXPMU;"/>
 </h>
 <h id="vx_nReco_vs_nTruth_lowpu" type="TProfile" title="Number of reco vertices (LOWPU) vs Number of interactions">
-  <x title="Number of interactions" n="81" lo="-0.5" hi="80.5"/>
-  <y title="Number of reco vertices" lo="0.0" hi="60.0"/>
+  <x title="Number of interactions" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of reco vertices" lo="0.0" hi="&EXPMU;"/>
 </h>
 <h id="vx_nReco_vs_nTruth_highpu" type="TProfile" title="Number of reco vertices (HIGHPU) vs Number of interactions">
-  <x title="Number of interactions" n="81" lo="-0.5" hi="80.5"/>
-  <y title="Number of reco vertices" lo="0.0" hi="60.0"/>
+  <x title="Number of interactions" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of reco vertices" lo="0.0" hi="&EXPMU;"/>
 </h>
 <h id="vx_nReco_vs_nTruth_hssplit" type="TProfile" title="Number of reco vertices (HSSPLIT) vs Number of interactions">
-  <x title="Number of interactions" n="81" lo="-0.5" hi="80.5"/>
-  <y title="Number of reco vertices" lo="0.0" hi="60.0"/>
+  <x title="Number of interactions" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of reco vertices" lo="0.0" hi="&EXPMU;"/>
 </h>
 <h id="vx_nReco_vs_nTruth_none" type="TProfile" title="Number of reco vertices (NONE) vs Number of interactions">
-  <x title="Number of interactions" n="81" lo="-0.5" hi="80.5"/>
-  <y title="Number of reco vertices" lo="0.0" hi="60.0"/>
+  <x title="Number of interactions" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of reco vertices" lo="0.0" hi="&EXPMU;"/>
 </h>
 <h id="vx_hs_reco_eff" type="TEfficiency" title="HS vertex reconstruction efficiency">
-  <x title="Local PU density [vertices/mm]" n="4" lo="0.0" hi="2.0"/>
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
   <y title="HS vertex reconstruction efficiency" lo="0.8" hi="1.2"/>
 </h>
 <h id="vx_hs_sel_eff" type="TEfficiency" title="HS vertex selection efficiency (sum[pt,track^2])">
-  <x title="Local PU density [vertices/mm]" n="4" lo="0.0" hi="2.0"/>
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
   <y title="HS vertex selection efficiency" lo="0.6" hi="1.2"/>
 </h>
 <h id="vx_hs_reco_long_reso" type="TProfile" title="Reco Longitudinal Resolution">
-  <x title="Local PU density [vertices/mm]" n="4" lo="0.0" hi="2.0"/>
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
   <y title="Reco longitudinal resolution [mm]" lo="0.0" hi="1.0"/>
 </h>
 <h id="vx_hs_reco_trans_reso" type="TProfile" title="Reco Transverse Resolution">
-  <x title="Local PU density [vertices/mm]" n="4" lo="0.0" hi="2.0"/>
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
   <y title="Reco transverse resolution [mm]" lo="0.0" hi="1.0"/>
 </h>
 <h id="vx_hs_truth_long_reso_vs_PU" type="TH2" title="Truth Longitudinal Resolution vs. PU (2D)">
-  <x title="Local PU density [vertices/mm]" n="4" lo="0.0" hi="2.0"/>
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
   <y title="|Reco-truth| longitudinal resolution [mm]" n="20" lo="-0.08" hi="0.08"/>
 </h>
 <h id="vx_hs_truth_trans_reso_vs_PU" type="TH2" title="Truth Transverse Resolution vs. PU (2D)">
-  <x title="Local PU density [vertices/mm]" n="4" lo="0.0" hi="2.0"/>
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
    <y title="|Reco-truth| transverse resolution [mm]" n="40" lo="-0.08" hi="0.08"/>
 </h>
 <h id="vx_hs_truth_long_pull_vs_PU" type="TH2" title="Truth Longitudinal Pull vs. PU (2D)">
-  <x title="Local PU density [vertices/mm]" n="4" lo="0.0" hi="2.0"/>
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
   <y title="|Reco-truth| longitudinal resolution [mm]" n="100" lo="-5.0" hi="5.0"/>
 </h>
 <h id="vx_hs_truth_trans_pull_vs_PU" type="TH2" title="Truth Transverse Pull vs. PU (2D)">
-  <x title="Local PU density [vertices/mm]" n="4" lo="0.0" hi="2.0"/>
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
   <y title="|Reco-truth| transverse resolution [mm]" n="100" lo="-5.0" hi="5.0"/>
 </h>
 <h id="vx_hs_truth_long_pull_vs_nTrk" type="TH2" title="Truth Longitudinal Pull vs. nTrk (2D)">
@@ -1020,37 +1020,37 @@
   <y title="|Reco-truth| longitudinal resolution [mm]" n="40" lo="-0.08" hi="0.08"/>
 </h>
 <h id="vx_hs_truth_long_reso" type="TH1" title="Truth Longitudinal Resolution">
-  <x title="Local PU density [vertices/mm]" n="4" lo="0.0" hi="2.0"/>
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
   <y title="|Reco-truth| longitudinal resolution [mm]" lo="0.0" hi="1.0"/>
 </h>
 <h id="vx_hs_truth_trans_reso" type="TH1" title="Truth Transverse Resolution">
-  <x title="Local PU density [vertices/mm]" n="4" lo="0.0" hi="2.0"/>
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
   <y title="|Reco-truth| transverse resolution [mm]" lo="0.0" hi="1.0"/>
 </h>
 
 
 <h id="vx_TYPE_truth_reso_z_vs_PU" type="TH2" title="Vertex Resolution vs PU Density">
-  <x title="Local PU density [vertices/mm]" n="4" lo="0.0" hi="2.0"/>
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
   <y title="|Reco_z-truth_z| [mm]" n="60" lo="-0.2" hi="0.2"/>
 </h>
 <h id="vx_TYPE_truth_reso_x_vs_PU" type="TH2" title="Vertex Resolution vs PU Density">
-  <x title="Local PU density [vertices/mm]" n="4" lo="0.0" hi="2.0"/>
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
   <y title="|Reco_x-truth_x| [mm]" n="60" lo="-0.1" hi="0.1"/>
 </h>
 <h id="vx_TYPE_truth_reso_y_vs_PU" type="TH2" title="Vertex Resolution vs PU Density">
-  <x title="Local PU density [vertices/mm]" n="4" lo="0.0" hi="2.0"/>
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
   <y title="|Reco_y-truth_y| [mm]" n="60" lo="-0.1" hi="0.1"/>
 </h>
 <h id="vx_TYPE_truth_pull_z_vs_PU" type="TH2" title="Vertex Pull vs PU Density">
-  <x title="Local PU density [vertices/mm]" n="4" lo="0.0" hi="2.0"/>
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
   <y title="|Reco_z-truth_z|/err_z" n="60" lo="-5.0" hi="5.0"/>
 </h>
 <h id="vx_TYPE_truth_pull_x_vs_PU" type="TH2" title="Vertex Pull vs PU Density">
-  <x title="Local PU density [vertices/mm]" n="4" lo="0.0" hi="2.0"/>
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
   <y title="|Reco_x-truth_x|/err_x" n="60" lo="-5.0" hi="5.0"/>
 </h>
 <h id="vx_TYPE_truth_pull_y_vs_PU" type="TH2" title="Vertex Pull vs PU Density">
-  <x title="Local PU density [vertices/mm]" n="4" lo="0.0" hi="2.0"/>
+  <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
   <y title="|Reco_y-truth_y|/err_y" n="60" lo="-5.0" hi="5.0"/>
 </h>
 
@@ -1149,39 +1149,39 @@
 </h>
 <!-- New Expert plots for Vertex classifications  -->
 <h id="vx_ntracks_matched" type="TH1" title="Number of tracks for matched PU vertices with sum pt > 0">
-  <x title="Number of Matched PU Vertices" n="150" lo="0.0" hi="150"/>
+  <x title="Number of Matched PU Vertices" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Tracks" />
 </h>
 <h id="vx_ntracks_merged" type="TH1" title="Number of tracks for merged PU vertices with sum pt > 0">
-  <x title="Number of Merged PU Vertices" n="150" lo="0.0" hi="150"/>
+  <x title="Number of Merged PU Vertices" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Tracks" />
 </h>
 <h id="vx_ntracks_split" type="TH1" title="Number of tracks for split PU vertices with sum pt > 0">
-  <x title="Number of Split PU Vertices" n="150" lo="0.0" hi="150"/>
+  <x title="Number of Split PU Vertices" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Tracks" />
 </h>
 <h id="vx_ntracks_HS_matched" type="TH1" title="Number of tracks for matched HS vertices with sum pt > 0">
-  <x title="Number of Matched HS Vertices" n="150" lo="0.0" hi="150"/>
+  <x title="Number of Matched HS Vertices" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Tracks" />
 </h>
 <h id="vx_ntracks_HS_merged" type="TH1" title="Number of tracks for merged HS vertices with sum pt > 0">
-  <x title="Number of Merged HS Vertices" n="150" lo="0.0" hi="150"/>
+  <x title="Number of Merged HS Vertices" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Tracks" />
 </h>
 <h id="vx_ntracks_HS_split" type="TH1" title="Number of tracks for split HS vertices with sum pt > 0">
-  <x title="Number of Matched HS Vertices" n="150" lo="0.0" hi="150"/>
+  <x title="Number of Matched HS Vertices" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Tracks" />
 </h>
 <h id="vx_ntracks_ALL_matched" type="TH1" title="Number of tracks for ALL matched vertices with sum pt > 20GeV">
-  <x title="Number of Matched ALL Vertices" n="150" lo="0.0" hi="150"/>
+  <x title="Number of Matched ALL Vertices" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Tracks" />
 </h>
 <h id="vx_ntracks_ALL_merged" type="TH1" title="Number of tracks for ALL merged vertices with sum pt > 20GeV">
-  <x title="Number of Merged ALL Vertices" n="150" lo="0.0" hi="150"/>
+  <x title="Number of Merged ALL Vertices" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Tracks" />
 </h>
 <h id="vx_ntracks_ALL_split" type="TH1" title="Number of tracks for ALL split vertices with sum pt > 20GeV">
-  <x title="Number of Matched ALL Vertices" n="150" lo="0.0" hi="150"/>
+  <x title="Number of Matched ALL Vertices" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Tracks" />
 </h>
 <h id="vx_sumpT_matched" type="TH1" title="SumPt of tracks for matched PU vertices with sum pt > 0">

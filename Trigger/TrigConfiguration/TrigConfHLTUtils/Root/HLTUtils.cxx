@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -118,20 +118,12 @@ const std::string HLTUtils::hash2string( HLTHash hash, const std::string& catego
   return cacc_hash->second;
 }
 
-void HLTUtils::hashes2file( const std::string& fileName) {
+void HLTUtils::hashes2file( const std::string& fileName ) {
   std::ofstream fout(fileName);
 
-  HLTUtils::CategoryMap_t::const_iterator cat_begin = HLTUtils::s_allHashesByCategory.begin(); 
-  HLTUtils::CategoryMap_t::const_iterator cat_end = HLTUtils::s_allHashesByCategory.end();
-
-  for (HLTUtils::CategoryMap_t::const_iterator cat_it = cat_begin; cat_it != cat_end; ++cat_it) {
-    const std::string category = cat_it->first;
+  for (const auto& [category, hashes] : s_allHashesByCategory) {
     fout << s_newCategory << std::endl << category << std::endl;
-    HLTUtils::HashMap_t::const_iterator hash_begin = cat_it->second.begin(); 
-    HLTUtils::HashMap_t::const_iterator hash_end = cat_it->second.end();
-    for (HLTUtils::HashMap_t::const_iterator hash_it = hash_begin; hash_it != hash_end; ++hash_it) {
-      const HLTHash hash = hash_it->first;
-      std::string name = hash_it->second;
+    for (auto [hash, name] : hashes) {  // by value on purpose
       name.erase(std::remove(name.begin(), name.end(), '\n'), name.end()); // Remove any line breaks
       fout << hash << std::endl << name << std::endl;
     }

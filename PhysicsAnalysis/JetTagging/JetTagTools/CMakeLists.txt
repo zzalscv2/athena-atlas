@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( JetTagTools )
@@ -15,8 +15,7 @@ atlas_add_library( JetTagToolsLib
     src/HistoHelperRoot.cxx src/NewLikelihoodTool.cxx
     src/BasicTrackGradeFactory.cxx src/DetailedTrackGradeFactory.cxx
     src/GradedTrack.cxx src/IPTag.cxx
-    src/SVForIPTool.cxx src/SVTag.cxx src/JetFitterTag.cxx
-    src/JetFitterNtupleWriter.cxx src/JetFitterNNTool.cxx
+    src/SVForIPTool.cxx src/SVTag.cxx 
     src/JetFitterInputWriter.cxx src/JetFitterDummyClassifier.cxx
     src/MV2Tag.cxx
     src/JetFitterVariablesFactory.cxx src/MSVVariablesFactory.cxx

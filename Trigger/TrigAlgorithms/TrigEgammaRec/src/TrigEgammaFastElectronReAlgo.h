@@ -91,7 +91,7 @@ class TrigEgammaFastElectronReAlgo : public AthReentrantAlgorithm  {
     Gaudi::Property<float> m_ZCAL {this,  "ZCalEndcapFace",     3800.0*Gaudi::Units::mm, "z of the inner face of endcap calorimeter"};
 
     Gaudi::Property<bool> m_useCaloInfoInExtrap{
-        this, "useCaloInfoInExtrap", false,
+        this, "useCaloInfoInExtrap", true,
         "use knowledge of the cluster in extrapolation"};
 
     //

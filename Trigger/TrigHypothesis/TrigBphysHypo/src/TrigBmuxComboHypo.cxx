@@ -68,7 +68,7 @@ StatusCode TrigBmuxComboHypo::initialize() {
 
   // allowed IDs to filter out incoming decisions at L2 level
   for (const auto& item : triggerMultiplicityMap()) {
-    const HLT::Identifier id = HLT::Identifier::fromToolName(item.first);
+    const HLT::Identifier id = HLT::Identifier(item.first);
     m_allowedIDs.insert(id.numeric());
     if (item.second.size() > 1) {
       for (size_t i = 0; i < item.second.size(); i++) {

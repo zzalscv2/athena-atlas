@@ -519,7 +519,12 @@ const xAOD::TruthVertex* InDetPerfPlot_VertexTruthMatching::getTruthVertex(const
                 if (truthEventLink.isValid()) {
                     truthEvent = static_cast<const xAOD::TruthEvent*>(*truthEventLink);
                     if (truthEvent) {
-                        truthVtx = truthEvent->truthVertex(0);
+                        size_t i_vtx = 0;
+                        size_t n_vtx = truthEvent->nTruthVertices();
+                        while(!truthVtx && i_vtx<n_vtx){
+                          truthVtx = truthEvent->truthVertex(i_vtx);
+                          i_vtx++;
+                        }
                     }
                 }
             }

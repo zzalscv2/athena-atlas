@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALIGNINTERFACES_IDERIVCALCTOOL_IH
@@ -77,7 +77,7 @@ namespace Trk {
 
   private:
     
-    int  m_solveOption;
+    int  m_solveOption = 0;
             
   }; // end of class
   

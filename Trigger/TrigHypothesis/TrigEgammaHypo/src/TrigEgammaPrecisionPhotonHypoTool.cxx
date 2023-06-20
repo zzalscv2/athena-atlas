@@ -30,6 +30,7 @@ StatusCode TrigEgammaPrecisionPhotonHypoTool::initialize()
   ATH_MSG_DEBUG( "ETthr          = " << m_eTthr    );
   ATH_MSG_DEBUG( "dPHICLUSTERthr = " << m_dphicluster );
   ATH_MSG_DEBUG( "dETACLUSTERthr = " << m_detacluster );
+  ATH_MSG_DEBUG( "DoNoPid        = " << m_doNoPid );
   
    if ( m_etabin.empty() ) {
     ATH_MSG_ERROR(  " There are no cuts set (EtaBins property is an empty list)" );
@@ -158,6 +159,10 @@ bool TrigEgammaPrecisionPhotonHypoTool::decide( const ITrigEgammaPrecisionPhoton
   }
   mon_ET = ET; 
   PassedCuts = PassedCuts + 1; // ET_em
+  if(m_doNoPid){
+    pass = true;
+    return pass;
+  }
   
   if(input.pidDecorator.count(m_pidName)){
     pass = input.pidDecorator.at(m_pidName);

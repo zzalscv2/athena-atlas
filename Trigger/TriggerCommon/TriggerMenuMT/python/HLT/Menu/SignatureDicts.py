@@ -703,7 +703,7 @@ PhotonChainParts = {
     'hypoInfo'       : '',
     'recoAlg'        : [],
     'FSinfo'         : [],
-    'addInfo'        : ['etcut',],
+    'addInfo'        : ['etcut','nopid'],
     'sigFolder'     : ['Egamma'],
     'subSigs'       : ['Photon'],
     'topo'          : AllowedTopos_g,

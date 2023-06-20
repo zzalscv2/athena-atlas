@@ -1703,19 +1703,27 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 // Initialise trigger tools
 
   if (!m_trigDecTool.isUserConfigured()) {
-    m_trigConfTool.setTypeAndName("TrigConf::xAODConfigTool/xAODConfigTool");
-    ATH_CHECK(m_trigConfTool.retrieve() );
 
     // The decision tool
     m_trigDecTool.setTypeAndName("Trig::TrigDecisionTool/TrigDecisionTool");
-    ATH_CHECK( m_trigDecTool.setProperty("ConfigTool", m_trigConfTool.getHandle()) );
     ATH_CHECK( m_trigDecTool.setProperty("TrigDecisionKey", "xTrigDecision") );
     if (m_isRun3) {
       ATH_CHECK( m_trigDecTool.setProperty("NavigationFormat", "TrigComposite") );
       ATH_CHECK( m_trigDecTool.setProperty("HLTSummary", "HLTNav_Summary_DAODSlimmed") );
     }
     ATH_CHECK( m_trigDecTool.setProperty("OutputLevel", this->msg().level()) );
+
+#ifndef XAOD_STANDALONE // Athena and AthAnalysis
+    // Clear the default tool handle to cause a fallback on the config service
+    ATH_CHECK( m_trigDecTool.setProperty("ConfigTool", ""));
+#else // AnalysisBase
+    m_trigConfTool.setTypeAndName("TrigConf::xAODConfigTool/xAODConfigTool");
+    ATH_CHECK(m_trigConfTool.retrieve() );
+    ATH_CHECK( m_trigDecTool.setProperty("ConfigTool", m_trigConfTool.getHandle()) );
+#endif
+
     ATH_CHECK( m_trigDecTool.retrieve() );
+
   } else  ATH_CHECK( m_trigDecTool.retrieve() );
 
   if (m_isRun3) {

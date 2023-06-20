@@ -31,11 +31,8 @@ Trk::TrackSlimmer::initialize()
     ATH_MSG_ERROR("Failed to retrieve TrkTrackSlimmingTool tool "
                   << m_slimTool);
     return StatusCode::FAILURE;
-  } else {
-    ATH_MSG_INFO("Retrieved tool " << m_slimTool);
   }
   ATH_CHECK(m_trackLocation.initialize());
-
   return StatusCode::SUCCESS;
 }
 
