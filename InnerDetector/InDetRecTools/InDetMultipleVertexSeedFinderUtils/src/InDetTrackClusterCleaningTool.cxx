@@ -16,13 +16,12 @@ namespace InDet
  StatusCode InDetTrackClusterCleaningTool::initialize()
  {
   if ( m_extrapolator.retrieve().isFailure() ) 
-  {                              
-   msg(MSG::ERROR) << "Failed to retrieve tool " << m_extrapolator << endmsg;
+  {
+   ATH_MSG_ERROR("Failed to retrieve tool " << m_extrapolator);
    return StatusCode::FAILURE;                                                  
-  } else {                                                                       
-   msg(MSG::INFO) << "Retrieved tool " << m_extrapolator << endmsg;
-  }    
- 
+  }
+  ATH_MSG_DEBUG("Retrieved tool " << m_extrapolator);
+
   return StatusCode::SUCCESS;
  }//end of initialize method
     
@@ -33,7 +32,7 @@ namespace InDet
   declareInterface<InDetTrackClusterCleaningTool>(this);  
   declareProperty("nStandDeviations",        m_zOffset = 3.0);
 
-//extrapolator
+  //extrapolator
   declareProperty("Extrapolator",m_extrapolator);  
  }//end of constructor 
 
@@ -53,7 +52,7 @@ namespace InDet
   unsigned int cluster_size = 0;
   Trk::PerigeeSurface perigeeSurface(reference->position());
   
-//first getting the cluster center  
+  //first getting the cluster center
   for(std::vector<const Trk::Track*>::const_iterator i = inb; i != ine; ++i)
   {
    const Trk::TrackParameters * perigee =
@@ -65,22 +64,23 @@ namespace InDet
    if(perigee)
    { 
     z_center += perigee->parameters()[Trk::z0];
-    msg(MSG::DEBUG)<<"Adding parameters: "<<perigee->parameters()[Trk::z0] <<endmsg;
+    ATH_MSG_DEBUG("Adding parameters: "<<perigee->parameters()[Trk::z0]);
     ++cluster_size;
    }else{
-    msg(MSG::WARNING)<<" The TrackParticleBase provided does not contain perigee parameters"<<endmsg;
+    ATH_MSG_WARNING("The TrackParticleBase provided does not contain perigee parameters");
    }//end of perigee security check
   }//end of loop definig the center of a cluster
-  msg(MSG::DEBUG)<<"Z center is: "<<z_center<<" for  tracks: "<<cluster_size<<endmsg;
-  
+
+  ATH_MSG_DEBUG("Z center is: "<<z_center<<" for  tracks: "<<cluster_size);
+
   if(cluster_size != 0) {
     z_center = z_center/cluster_size;
   }
    
-//discarding outlying tracks
+  //discarding outlying tracks
   for(std::vector<const Trk::Track*>::const_iterator i = inb; i != ine; ++i)
   {
-     //here we want to make an extrapolation
+    //here we want to make an extrapolation
     const Trk::TrackParameters * measPerigee = 
       m_extrapolator->extrapolateTrack(
        ctx, **i, perigeeSurface, Trk::anyDirection, true, Trk::pion).release();
@@ -92,14 +92,14 @@ namespace InDet
        
        double sigma_z0 = Amg::error(*cov,Trk::z0);
     
-//if the track is closer than several standard deviations, keep it    
-       if(fabs(z_center-z0)< sigma_z0*m_zOffset) clusterSeed.push_back(*i); 
+       //if the track is closer than several standard deviations, keep it
+       if(std::abs(z_center-z0)< sigma_z0*m_zOffset) clusterSeed.push_back(*i);
 
-//declare it an outlier otherwise
+       //declare it an outlier otherwise
        else outliers.push_back(*i);
      }else{
       outliers.push_back(*i);
-      msg(MSG::WARNING)  << "This track has no meas perigee. Regarded as outlyer" << endmsg;
+      ATH_MSG_WARNING("This track has no meas perigee. Regarded as outlyer");
      }//end of meas perigee protection check
   }//end of selection loop over all the tracks  
   
@@ -123,11 +123,11 @@ namespace InDet
   
   unsigned int cluster_size = 0;
   
-  msg(MSG::DEBUG)<<"Receiving a cluster of size: "<< cluster.size()<<endmsg;
+  ATH_MSG_DEBUG("Receiving a cluster of size: "<< cluster.size());
   
   Trk::PerigeeSurface perigeeSurface(reference->position());
    
-//first getting the cluster center  
+  //first getting the cluster center
   for(std::vector<const Trk::TrackParticleBase*>::const_iterator i = inb; i != ine; ++i)
   {
    const Trk::TrackParameters * perigee =
@@ -141,19 +141,20 @@ namespace InDet
    if(perigee)
    { 
     z_center += perigee->parameters()[Trk::z0];
-    msg(MSG::DEBUG)<<"Adding parameters: "<<perigee->parameters()[Trk::z0] <<endmsg;
+    ATH_MSG_DEBUG("Adding parameters: "<<perigee->parameters()[Trk::z0]);
     ++cluster_size;
    }else{
-    msg(MSG::WARNING)<<" The TrackParticleBase provided does not contain perigee parameters"<<endmsg;
+     ATH_MSG_WARNING(" The TrackParticleBase provided does not contain perigee parameters");
    }//end of perigee security check
   }//end of loop definig the center of a cluster
-  msg(MSG::DEBUG)<<"Z center is: "<<z_center<<" for  tracks: "<<cluster_size<<endmsg;
+
+  ATH_MSG_DEBUG("Z center is: "<<z_center<<" for  tracks: "<<cluster_size);
   
   if(cluster_size != 0) {
     z_center = z_center/cluster_size;
   }
 
-  msg(MSG::DEBUG)<<"Looping over the cluster" <<endmsg;
+  ATH_MSG_DEBUG("Looping over the cluster");
 
   for(std::vector<const Trk::TrackParticleBase*>::const_iterator i = inb; i != ine; ++i)
   {
@@ -171,110 +172,108 @@ namespace InDet
     const AmgSymMatrix(5) * cov = measPerigee->covariance();    
     double sigma_z0 = Amg::error(*cov,Trk::z0);
 
-    msg(MSG::DEBUG)<<"Perigee Z0 and corresponding sigma "<<z0<<" "<<sigma_z0<<endmsg;
-    msg(MSG::DEBUG)<<"Center of the cluster "<<z_center<<endmsg;
-    msg(MSG::DEBUG)<<"Offset "<<m_zOffset<<endmsg;
-    msg(MSG::DEBUG)<<"discriminant "<<fabs(z_center-z0)<<" "<< sigma_z0*m_zOffset <<endmsg;
+    ATH_MSG_DEBUG("Perigee Z0 and corresponding sigma "<<z0<<" "<<sigma_z0);
+    ATH_MSG_DEBUG("Center of the cluster "<<z_center);
+    ATH_MSG_DEBUG("Offset "<<m_zOffset);
+    ATH_MSG_DEBUG("discriminant "<<std::abs(z_center-z0)<<" "<< sigma_z0*m_zOffset);
 
-//if the track is closer than several standard deviations, keep it    
-    if(fabs(z_center-z0)< sigma_z0*m_zOffset) clusterSeed.push_back(*i); 
+    //if the track is closer than several standard deviations, keep it
+    if(std::abs(z_center-z0)< sigma_z0*m_zOffset) clusterSeed.push_back(*i);
 
-//declare it an outlier otherwise
+    //declare it an outlier otherwise
     else outliers.push_back(*i);
    }else{
     outliers.push_back(*i);
-    msg(MSG::WARNING)  << "This track has no meas perigee. Regarded as outlyer" << endmsg;
+    ATH_MSG_WARNING("This track has no meas perigee. Regarded as outlyer");
    }//end of measured perigee check
   }//end of separation loop
-  
+
   std::pair<std::vector<const Trk::TrackParticleBase*>,std::vector<const Trk::TrackParticleBase*> > result(clusterSeed, outliers);
   return result;
  }
 
- std::pair<std::vector<const Trk::TrackParameters *>, 
-	   std::vector<const xAOD::TrackParticle *> >  InDetTrackClusterCleaningTool::clusterAndOutliers(std::vector<const xAOD::TrackParticle *> cluster, const xAOD::Vertex * reference) const
-	   {
-	     const EventContext& ctx = Gaudi::Hive::currentContext(); 
-	     std::vector<const Trk::TrackParameters*> clusterSeed(0);
-	     std::vector<const xAOD::TrackParticle*> outliers(0);
+  std::pair<std::vector<const Trk::TrackParameters *>,
+	    std::vector<const xAOD::TrackParticle *> >  InDetTrackClusterCleaningTool::clusterAndOutliers(std::vector<const xAOD::TrackParticle *> cluster, const xAOD::Vertex * reference) const
+  {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    std::vector<const Trk::TrackParameters*> clusterSeed(0);
+    std::vector<const xAOD::TrackParticle*> outliers(0);
 	     
-	     double z_center = 0;
+    double z_center = 0;
 	     
-	     std::vector<const xAOD::TrackParticle*>::const_iterator inb = cluster.begin();
-	     std::vector<const xAOD::TrackParticle*>::const_iterator ine = cluster.end();
+    std::vector<const xAOD::TrackParticle*>::const_iterator inb = cluster.begin();
+    std::vector<const xAOD::TrackParticle*>::const_iterator ine = cluster.end();
 	     
-	     unsigned int cluster_size = 0;
+    unsigned int cluster_size = 0;
 	     
-	     msg(MSG::DEBUG)<<"Receiving a cluster of size: "<< cluster.size()<<endmsg;
+    ATH_MSG_DEBUG("Receiving a cluster of size: "<< cluster.size());
+
+    Trk::PerigeeSurface perigeeSurface(reference->position());
 	     
-	     Trk::PerigeeSurface perigeeSurface(reference->position());
-	     
-	     //first getting the cluster center  
-	     for(std::vector<const xAOD::TrackParticle*>::const_iterator i = inb; i != ine; ++i)
-	       {
-           const Trk::TrackParameters * perigee(nullptr);
+    //first getting the cluster center
+    for(std::vector<const xAOD::TrackParticle*>::const_iterator i = inb; i != ine; ++i){
+      const Trk::TrackParameters * perigee(nullptr);
 		 
-           perigee = m_extrapolator->extrapolate(ctx,
-                                                 (*i)->perigeeParameters(),
-                                                 perigeeSurface,
-                                                 Trk::anyDirection,
-                                                 true, Trk::pion).release();
+      perigee = m_extrapolator->extrapolate(ctx,
+					    (*i)->perigeeParameters(),
+					    perigeeSurface,
+					    Trk::anyDirection,
+					    true, Trk::pion).release();
 		 
-		 if(perigee)
-		   { 
-		     z_center += perigee->parameters()[Trk::z0];
-		     msg(MSG::DEBUG)<<"Adding parameters: "<<perigee->parameters()[Trk::z0] <<endmsg;
-		     ++cluster_size;
-		   }else{
-		   msg(MSG::WARNING)<<" The TrackParticleBase provided does not contain perigee parameters"<<endmsg;
-		 }//end of perigee security check
-	       }//end of loop definig the center of a cluster
-	     msg(MSG::DEBUG)<<"Z center is: "<<z_center<<" for  tracks: "<<cluster_size<<endmsg;
+      if(perigee){
+	z_center += perigee->parameters()[Trk::z0];
+	ATH_MSG_DEBUG("Adding parameters: "<<perigee->parameters()[Trk::z0]);
+	++cluster_size;
+      }else{
+	ATH_MSG_WARNING("The TrackParticleBase provided does not contain perigee parameters");
+      }//end of perigee security check
+    }//end of loop definig the center of a cluster
+
+    ATH_MSG_DEBUG("Z center is: "<<z_center<<" for  tracks: "<<cluster_size);
 	     
-	     if(cluster_size != 0) {
-	       z_center = z_center/cluster_size;
-	     }
+    if(cluster_size != 0) {
+      z_center = z_center/cluster_size;
+    }
 	     
-	     msg(MSG::DEBUG)<<"Looping over the cluster" <<endmsg;
+    ATH_MSG_DEBUG("Looping over the cluster");
 	     
-	     for(std::vector<const xAOD::TrackParticle*>::const_iterator i = inb; i != ine; ++i)
-	       {
-		 const Trk::TrackParameters * measPerigee(nullptr);
-		 measPerigee = m_extrapolator->extrapolate(ctx,
-                                               (*i)->perigeeParameters(),
-                                               perigeeSurface,
-                                               Trk::anyDirection,
-                                               true, 
-                                               Trk::pion).release();
-		 
-		 if(nullptr!=measPerigee)
-		   {
-		     double z0 = measPerigee->parameters()[Trk::z0];
-		     const AmgSymMatrix(5) * cov = measPerigee->covariance();    
-		     double sigma_z0 = Amg::error(*cov,Trk::z0);
+    for(std::vector<const xAOD::TrackParticle*>::const_iterator i = inb; i != ine; ++i)
+      {
+	const Trk::TrackParameters * measPerigee(nullptr);
+	measPerigee = m_extrapolator->extrapolate(ctx,
+						  (*i)->perigeeParameters(),
+						  perigeeSurface,
+						  Trk::anyDirection,
+						  true,
+						  Trk::pion).release();
+
+	if(nullptr!=measPerigee)
+	  {
+	    double z0 = measPerigee->parameters()[Trk::z0];
+	    const AmgSymMatrix(5) * cov = measPerigee->covariance();
+	    double sigma_z0 = Amg::error(*cov,Trk::z0);
 		     
-		     msg(MSG::DEBUG)<<"Perigee Z0 and corresponding sigma "<<z0<<" "<<sigma_z0<<endmsg;
-		     msg(MSG::DEBUG)<<"Center of the cluster "<<z_center<<endmsg;
-		     msg(MSG::DEBUG)<<"Offset "<<3.0<<endmsg;
-		     msg(MSG::DEBUG)<<"discriminant "<<fabs(z_center-z0)<<" "<< sigma_z0*3.0 <<endmsg;
+	    ATH_MSG_DEBUG("Perigee Z0 and corresponding sigma "<<z0<<" "<<sigma_z0);
+	    ATH_MSG_DEBUG("Center of the cluster "<<z_center);
+	    ATH_MSG_DEBUG("Offset "<<3.0);
+	    ATH_MSG_DEBUG("discriminant "<<std::abs(z_center-z0)<<" "<< sigma_z0*3.0);
 		     
-		     //if the track is closer than several standard deviations, keep it    
-		     if(fabs(z_center-z0)< sigma_z0*3.0) clusterSeed.push_back(&((*i)->perigeeParameters())); 
+	    //if the track is closer than several standard deviations, keep it
+	    if(std::abs(z_center-z0)< sigma_z0*3.0) clusterSeed.push_back(&((*i)->perigeeParameters()));
 		     
-		     //declare it an outlier otherwise
-		     else outliers.push_back(*i);
-		   }else{
-		   outliers.push_back(*i);
-		   msg(MSG::WARNING)  << "This track has no meas perigee. Regarded as outlyer" << endmsg;
-		 }//end of measured perigee check
-	       }//end of separation loop
+	    //declare it an outlier otherwise
+	    else outliers.push_back(*i);
+	  }else{
+	  outliers.push_back(*i);
+	  ATH_MSG_WARNING("This track has no meas perigee. Regarded as outlyer");
+	}//end of measured perigee check
+      }//end of separation loop
 	     
-	     std::pair<std::vector<const Trk::TrackParameters *>, 
-	       std::vector<const xAOD::TrackParticle *> > result(clusterSeed, outliers);
-	     return result;
-  
-}
-  
-  
+    std::pair<std::vector<const Trk::TrackParameters *>,
+	      std::vector<const xAOD::TrackParticle *> > result(clusterSeed, outliers);
+    return result;
+
+  }
+
 }//end of namespace definitions
 
