@@ -20,6 +20,7 @@ namespace FitFunctions {
   #include "FitFunctions/L1TT/d0Fitparam_N.C"
   #include "FitFunctions/L1TT/z0Fitparam_N.C"
   #include "FitFunctions/L1TT/MoreFitParam_N.C"
+  #include "FitFunctions/L1TT/effFitparam_N.C"
 }
  
 
@@ -128,6 +129,11 @@ double curvRefFunc(double eta __attribute__((unused)),double pt __attribute__((u
     return 1.;// no reference to scale
   }
 
+double effFunc(double eta,double pt,int verbose)
+  {
+    // add here other d0 res functions
+    return FitFunctions::getEffParam_N(eta,pt,verbose);
+  }
 
   void InitArray(double *a,int n,const double in[])
   {
@@ -166,14 +172,14 @@ double curvRefFunc(double eta __attribute__((unused)),double pt __attribute__((u
       
     double abseta=std::abs(eta);
     double abspt=std::abs(1.0/curv); //GeV
-    if (verbose) printf("Smearer::AddTrack : d0=%f, z0=%f, qOverPt=%f, eta=%f, phi=%f pt=%f\n", d0, z0, curv, eta,phi, abspt);
+    if (verbose) printf("Smearer::AddTrack : d0=%f, z0=%f, qOverPt=%f, eta=%f, phi=%f, pt=%f\n", d0, z0, curv, eta,phi, abspt);
  
     bool condition = (abspt>m_inPtCut) &&
       (d0RefFunc(abseta,abspt,verbose)>0.0) &&
       (d0ResFunc(abseta,abspt,verbose)>0.0) &&
       (z0RefFunc(abseta,abspt,verbose)>0.0) &&
       (z0ResFunc(abseta,abspt,verbose)>0.0);
-    
+
     if (!condition)
       return;
     
@@ -202,7 +208,12 @@ double curvRefFunc(double eta __attribute__((unused)),double pt __attribute__((u
 
 
     double avgntracks=(m_nominalEfficiency> m_FMatches)?m_nominalEfficiency: m_FMatches;
-    int ntracks=( m_myRandom->Rndm()<m_nominalEfficiency)?1:0;
+    double eff = m_nominalEfficiency;
+    if (m_parameterizedEfficiency) {
+      eff = eff * effFunc(abseta,abspt,verbose);
+    }
+    
+    int ntracks=( m_myRandom->Rndm()<eff)?1:0;
     
     if (m_produceFakes)
       {
@@ -217,6 +228,7 @@ double curvRefFunc(double eta __attribute__((unused)),double pt __attribute__((u
     if (verbose) printf("Now producing %d tracks\n", ntracks);
     for (int i=0;i<ntracks;i++)
       {
+
         // Creating close track
         double gend0,genz0, geneta, genphi, gencurv;
         gend0= m_myRandom->Gaus(d0,d0res);
@@ -297,6 +309,11 @@ double curvRefFunc(double eta __attribute__((unused)),double pt __attribute__((u
     m_nominalEfficiency=epsilon;
   }
 
+  void SetParameterizedEfficiency(bool param = false)
+  {
+    m_parameterizedEfficiency=param;
+  }
+
   std::vector<EFTrackingSmearing::FTS_Track> Tracks;
   double z0(int idx)  {return Tracks[idx].z0();};
   double d0(int idx)  {return Tracks[idx].d0();};
@@ -333,6 +350,7 @@ double curvRefFunc(double eta __attribute__((unused)),double pt __attribute__((u
   double m_SigmaScaleFactor = 1.0;//Note: This is an *integer property* in EFTrackingSmearingAlg.h
   double m_nominalEfficiency = 0.95;
 
+  bool m_parameterizedEfficiency = false;
   bool m_includeFakesInResolutionCalculation =  false;
   bool m_fakeKillerEnable = false;
   bool m_useCoinToss = false;

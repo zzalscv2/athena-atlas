@@ -36,6 +36,8 @@ class EFTrackingSmearingAlg: public ::AthHistogramAlgorithm {
   DoubleProperty   m_SetResolutionPtCutOff {this, "SetResolutionPtCutOff", 0., "Set ptCutoff off for semaring"};
   DoubleProperty   m_inputTracksPtCut      {this, "InputTracksPtCutGeV", 4.0, "Set input track pT cut"};
   DoubleProperty   m_outputTracksPtCut     {this, "OutputTracksPtCutGeV", 4.0, "Set the output track pT cut"};
+  DoubleProperty   m_smearedTrackEfficiency{this, "SmearedTrackEfficiency", 1.0, "Set track efficiency for smearing"};
+  BooleanProperty  m_parameterizedTrackEfficiency{this, "ParameterizedTrackEfficiency", false, "Enable parameterized efficiency for smearing"};
   BooleanProperty  m_enableMonitoring      {this, "EnableMonitoring", false, "Enable debugging monitoring of the algorithm"};
   // these are for fake emulations
   BooleanProperty  m_EnableFakes      {this,"IncludeDuplicatesAndFakes",false,"Enable fake track production"};

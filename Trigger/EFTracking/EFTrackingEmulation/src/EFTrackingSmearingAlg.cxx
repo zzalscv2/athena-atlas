@@ -102,6 +102,8 @@ StatusCode EFTrackingSmearingAlg::initialize() {
   ATH_MSG_INFO("------- inputTracksPtCut [GeV]: "<<m_inputTracksPtCut);
   ATH_MSG_INFO("------- outputTracksPtCut [GeV]: "<<m_outputTracksPtCut);
   ATH_MSG_INFO("------- SmearingSigma: "<<m_SigmaScaleFactor);  
+  ATH_MSG_INFO("------- trackEfficiency: "<<m_smearedTrackEfficiency);  
+  ATH_MSG_INFO("------- parameterizedEfficiency: "<<m_parameterizedTrackEfficiency);  
   ATH_MSG_INFO("------- UseResolutionPtCutOff: "<<m_UseResolutionPtCutOff);
   ATH_MSG_INFO("------- SetResolutionPtCutOff: "<<m_SetResolutionPtCutOff);
   ATH_MSG_INFO("------- EnableMonitoring:" <<m_enableMonitoring);
@@ -123,6 +125,8 @@ StatusCode EFTrackingSmearingAlg::initialize() {
   m_mySmearer = (void *) new FakeTrackSmearer(smearerName.c_str(), m_RandomSeed,msgLvl (MSG::DEBUG));
   ((FakeTrackSmearer *) m_mySmearer)->SetInputTracksPtCut(m_inputTracksPtCut);
   ((FakeTrackSmearer *) m_mySmearer)->SetOutputTracksPtCut(m_outputTracksPtCut);
+  ((FakeTrackSmearer *) m_mySmearer)->SetTrackingEfficiency(m_smearedTrackEfficiency);
+  ((FakeTrackSmearer *) m_mySmearer)->SetParameterizedEfficiency(m_parameterizedTrackEfficiency);
   ((FakeTrackSmearer *) m_mySmearer)->SetSigmaScaleFactor(m_SigmaScaleFactor.value());
   ((FakeTrackSmearer *) m_mySmearer)->UseResolutionPtCutOff(m_UseResolutionPtCutOff.value());
   ((FakeTrackSmearer *) m_mySmearer)->SetResolutionPtCutOff(m_SetResolutionPtCutOff.value());

@@ -18,6 +18,8 @@ def EFTrackingSmearingCfg(flags, name = "EFTrackingSmearingAlg", **kwargs):
       OutputLevel = INFO,
       OutputTrackParticleContainer = "InDetTrackParticles_smeared_SF"+str(kwargs['smearFactor']),
       InputTrackParticleContainer = kwargs['InputTrackParticle'],
+      SmearedTrackEfficiency = kwargs['trackEfficiency'],
+      ParameterizedTrackEfficiency = kwargs['parameterizeEfficiency'],
       SmearingScaleFactor = kwargs['smearFactor'],
       InputTracksPtCutGeV = kwargs['trkpTCut'],
       EnableMonitoring = kwargs['EnableMonitoring'],
@@ -50,6 +52,7 @@ if __name__ == "__main__":
     acc.merge(PoolReadCfg(flags))
     
     smearer = EFTrackingSmearingCfg("test", trkpTCut=1, smearFactor=1, InputTrackParticle="InDetTrackParticles",
+                                    trackEfficiency=1., parameterizeEfficiency=True,
                                     EnableMonitoring=True)
     acc.merge(smearer)    
     acc.wasMerged()
