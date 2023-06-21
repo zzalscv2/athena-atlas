@@ -157,7 +157,7 @@ void FPGATrackSimPlaneMap::seek(ifstream & fin, unsigned region)
 void FPGATrackSimPlaneMap::readLayers(ifstream & fin, uint32_t stage)
 {
     // Initialize read variables
-    int BEC, physLayer, physDisk, logiLayer = 0, logiLayer1, logiLayer2, stereo, nDim = 0;
+    int BEC{}, physLayer{}, physDisk{}, logiLayer{}, logiLayer1{}, logiLayer2{}, stereo{}, nDim{};
     string line, silicon, planeKey1, planeKey2, stereoKey;
     bool ok = true;
 

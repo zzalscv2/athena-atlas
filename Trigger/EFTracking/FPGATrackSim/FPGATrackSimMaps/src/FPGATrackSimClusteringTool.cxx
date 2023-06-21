@@ -5,21 +5,15 @@
 #include "FPGATrackSimClusteringTool.h"
 #include "FPGATrackSimObjects/FPGATrackSimMultiTruth.h"
 #include "FPGATrackSimObjects/FPGATrackSimConstants.h"
-#include <map>
-#include <memory>
-#include <vector>
 #include <algorithm>
 #include <cmath>
-#include <cassert>
-#include <iostream>
-#include <iomanip>
-#include <stack>
-#include <queue>
 
-//For deciding eta || phi columns in modules
-const unsigned int ETA = 1;
-const unsigned int PHI = 0;
 
+namespace{
+ //For deciding eta || phi columns in modules
+ constexpr unsigned int ETA = 1;
+ constexpr unsigned int PHI = 0;
+}
 
 FPGATrackSimClusteringTool::FPGATrackSimClusteringTool(const std::string& algname, const std::string &name, const IInterface *ifc) :
   base_class(algname, name, ifc)
@@ -97,8 +91,7 @@ void FPGATrackSimClusteringTool::Clustering(std::vector<FPGATrackSimHit> moduleH
       FPGATrackSimCluster cluster;
       if(hit.isPixel()){
 	is_clustered_hit = FPGATrackSimCLUSTERING::updatePixelCluster(cluster, hit, true);
-      }
-      if(hit.isStrip()){
+      } else if(hit.isStrip()){
 	is_clustered_hit = FPGATrackSimCLUSTERING::updateStripCluster(cluster, hit, true);
       }
       //Put this cluster into the output hits. Will update it in place.

@@ -17,6 +17,8 @@
 #include "FPGATrackSimMaps/FPGATrackSimClusteringToolI.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimObjects/FPGATrackSimCluster.h"
+#include <vector>
+#include <memory>
 
 namespace FPGATrackSimCLUSTERING {
   void attachTruth(std::vector<FPGATrackSimHit> &);
