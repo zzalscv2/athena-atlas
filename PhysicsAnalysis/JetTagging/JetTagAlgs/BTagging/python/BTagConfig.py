@@ -83,6 +83,20 @@ def GetTaggerTrainingMap(inputFlags, jet_collection_list):
         "AntiKt10UFOCSSKSoftDropBeta100Zcut10": [
             "BTagging/20230413/gn2xv00/antikt10ufo/network.onnx",
             "BTagging/20230413/gn2xwithmassv00/antikt10ufo/network.onnx",
+        ],
+        "AntiKt4HI": [
+            "BTagging/201903/rnnip/antikt4empflow/network.json",
+            "BTagging/201903/dl1r/antikt4empflow/network.json",
+            "BTagging/20210519r22/dl1r/antikt4empflow/network.json",
+            "BTagging/20210729/dipsLoose/antikt4empflow/network.json",  # old r22 trainings
+            "BTagging/20210729/dips/antikt4empflow/network.json",
+            "BTagging/20210824r22/dl1dLoose/antikt4empflow/network.json",  # ?~@~\recommended tagger?~@~] which is DL1dLoose20210824r22 named DL1dv00 in EDM
+            "BTagging/20210824r22/dl1d/antikt4empflow/network.json",
+            "BTagging/20210824r22/dl1r/antikt4empflow/network.json",
+            "BTagging/20220314/dipsLoose/antikt4empflow/network.json",  # new r22 training
+            "BTagging/20220509/dl1dLoose/antikt4empflow/network.json",  # new "recommended tagger" named DL1dv01 in EDM
+            "BTagging/20220509/gn1/antikt4empflow/network.onnx",
+            "BTagging/20230306/gn2v00/antikt4empflow/network.onnx",
         ]
     }
 
@@ -130,6 +144,11 @@ def RetagRenameInputContainerCfg(suffix, JetCollectionShort, tracksKey='InDetTra
 def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow']):
 
     result=ComponentAccumulator()
+ 
+    if inputFlags.Reco.EnableHI:   
+        JetCollection=['AntiKt4HI']     
+        if not inputFlags.HeavyIon.Egamma.doSubtractedClusters:
+            JetCollection.extend(['AntiKt4EMTopo','AntiKt4EMPFlow'])
 
     # Can only configure b-tagging for collisions; not cosmics, etc.
     if inputFlags.Beam.Type is not BeamType.Collisions:
