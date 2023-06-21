@@ -21,60 +21,14 @@
 #include "GaudiKernel/SystemOfUnits.h"
 
 #include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 using Gaudi::Units::GeV;
 using Gaudi::Units::MeV;
 
 
-namespace {
 
 
-bool isGenStable (const xAOD::TruthParticle& tp)
-{
-  // get generator id 
-  int p_id = tp.pdgId();
-
-  const xAOD::TruthVertex* vertex = tp.hasDecayVtx() ? tp.decayVtx() : 0;
-  // we want to keep primary particle with status==2 but without vertex in HepMC
-
-  return (
-          ( ( tp.status()%1000 == 1) ||  
-            (tp.status()==2 && (!vertex || HepMC::is_simulation_vertex(vertex))) || 
-            (tp.status()%1000 == 2 && tp.status() > 1000) 
-            ) && (!HepMC::is_simulation_particle(tp.barcode())) 
-          && !(std::abs(p_id) == 21 && tp.e()==0)
-          ) ? true:false;    
-}
-
-
-bool isGenInteracting (const xAOD::TruthParticle& tp)
-{
-  int status = tp.status();
-  int pdg_id = abs(tp.pdgId());
-  const xAOD::TruthVertex* vertex = tp.hasDecayVtx() ? tp.decayVtx() : 0;
-  // we want to keep primary particle with status==2 but without vertex in HepMC
-
-  return
-    (
-
-     (((status%1000 == 1) ||
-       (status%1000 == 2 && status > 1000) ||
-       (status==2 && (!vertex || HepMC::is_simulation_vertex(vertex)))) && (!HepMC::is_simulation_particle(&tp)) ) &&
-
-     !(pdg_id==12 || pdg_id==14 || pdg_id==16 ||
-       (pdg_id==1000022 &&  status%1000==1 ) ||
-       (pdg_id==5100022 &&  status%1000==1 ) ||
-       (pdg_id==1000024 &&  status%1000==1 ) ||
-       (pdg_id==39 &&  status%1000==1 ) ||
-       (pdg_id==1000039 &&  status%1000==1 ) ||
-       (pdg_id==5000039 &&  status%1000==1 ))
-
-     )
-    ? true:false;
-}
-
-
-}
 
 
 namespace D3PD {
@@ -185,8 +139,8 @@ bool egammaTruthAlg::isAccepted (const xAOD::TruthParticle& tp,
 
   if (fabs(tp.eta()) > m_etaMax) return false;
 
-  if (!isGenStable (tp)) return false;
-  if (!isGenInteracting (tp)) return false;
+  if (!MC::egammaTruthAlg_isGenStable (&tp)) return false;
+  if (!MC::egammaTruthAlg_isGenInteracting (&tp)) return false;
 
   // Remove electrons/gammas decaying into themselves
   if( tp.hasDecayVtx() ) {
@@ -224,8 +178,8 @@ float egammaTruthAlg::computeIso (const xAOD::TruthParticle& tp,
   TLorentzVector sum;
   for (const xAOD::TruthParticle* p : cont) {
     if (p == &tp || p->barcode() == tp.barcode()) continue;
-    if (!isGenStable (*p)) continue;
-    if (!isGenInteracting (*p)) continue;
+    if (!MC::egammaTruthAlg_isGenStable (p)) continue;
+    if (!MC::egammaTruthAlg_isGenInteracting (p)) continue;
     if (tp.p4().DeltaR (p->p4()) < m_isoCone)
       sum += p->p4();
   }

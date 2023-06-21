@@ -86,8 +86,7 @@ StatusCode TruthParticleFakerTool::fill (const HepMC::GenParticle& p)
   }
 
   if ( !last &&
-       p.status()%1000 != 1 &&
-       !(p.status()%1000 == 2 && p.status()>1000) &&
+       p.status()!= 1 &&
        !(p.status()==2 && (!endvertex || HepMC::is_simulation_vertex(endvertex)) ) ) {
     return StatusCode(IBlockFillerTool::EMPTY);
   }
