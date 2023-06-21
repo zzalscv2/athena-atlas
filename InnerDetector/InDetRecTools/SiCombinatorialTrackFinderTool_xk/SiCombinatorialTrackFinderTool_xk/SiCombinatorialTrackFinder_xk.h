@@ -237,12 +237,8 @@ namespace InDet {
 
       static bool spacePointsToClusters(
           const std::vector<const Trk::SpacePoint*>&,
-          std::vector<const InDet::SiCluster*>&);
-
-      static bool spacePointsToClusters(
-          const std::vector<const Trk::SpacePoint*>&,
           std::vector<const InDet::SiCluster*>&,
-          std::vector<const InDetDD::SiDetectorElement*>&);
+          std::optional<std::reference_wrapper<std::vector<const InDetDD::SiDetectorElement*>>> = std::nullopt);
 
       void detectorElementLinks(
           std::vector<const InDetDD::SiDetectorElement*>&,
