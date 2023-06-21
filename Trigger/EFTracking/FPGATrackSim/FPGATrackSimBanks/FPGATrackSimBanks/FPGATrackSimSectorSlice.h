@@ -20,11 +20,12 @@
  */
 
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
-#include "FPGATrackSimObjects/FPGATrackSimTypes.h"
+#include "FPGATrackSimObjects/FPGATrackSimTypes.h" //typedef for sector_t
+#include <vector>
+#include <utility> //for std::pair
+class TClonesArray;
 
-#include <TROOT.h>
-#include <TClonesArray.h>
-#include <TMath.h>
+
 
 
 class FPGATrackSimSectorSlice

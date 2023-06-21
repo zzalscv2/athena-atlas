@@ -8,29 +8,29 @@
  */
 
 #include "FPGATrackSimBanks/FPGATrackSimSectorSlice.h"
-#include "FPGATrackSimObjects/FPGATrackSimTypes.h"
+
 
 #include <TFile.h>
 #include <TTree.h>
 #include <TBits.h>
+#include <TClonesArray.h>
 #include <AsgMessaging/MessageCheck.h>
 
-#include <iostream>
 
 using namespace asg::msgUserCode;
 
 
 void largest_region_wrap(std::vector<bool> const & good_bin, int & i_lower, int & i_upper);
 
-
-// Max is exclusive
-int clamp(int bin, int min, int max)
-{
-    if (bin < min) return min;
-    else if (bin >= max) return max - 1;
-    else return bin;
+namespace{
+  // Max is exclusive
+  int clamp(int bin, int min, int max)
+  {
+      if (bin < min) return min;
+      if (bin >= max) return max - 1;
+      return bin;
+  }
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constructor/Initialization
@@ -75,8 +75,17 @@ FPGATrackSimSectorSlice::FPGATrackSimSectorSlice(std::string const & filepath)
     else
       m_bits_eta = dynamic_cast<TClonesArray*>(slice_file->Get("c_bits_ctheta"));
 
-
+    if (not m_bits_eta){
+      ANA_MSG_ERROR("m_bits_eta is null in FPGATrackSimSectorSlice constructor");
+      delete slice_file;
+      return;
+    }
     TTree *slice_tree = dynamic_cast<TTree*>(slice_file->Get("bin_info"));
+    if (not slice_tree){
+      ANA_MSG_ERROR("slice_tree is null in FPGATrackSimSectorSlice constructor");
+      delete slice_file;
+      return;
+    }
 
     slice_tree->SetBranchAddress("qOverPt_max", &m_max.qOverPt);
     slice_tree->SetBranchAddress("d0_max",        &m_max.d0);
@@ -130,19 +139,19 @@ void FPGATrackSimSectorSlice::addSectorToSlice(sector_t sector, FPGATrackSimTrac
     int bin;
 
     bin = clamp(bins.phi, 0, m_nBins.phi);
-    dynamic_cast<TBits*>(m_bits_phi->UncheckedAt(bin))->SetBitNumber(sector);
+    static_cast<TBits*>(m_bits_phi->UncheckedAt(bin))->SetBitNumber(sector);
 
     bin = clamp(bins.qOverPt, 0, m_nBins.qOverPt);
-    dynamic_cast<TBits*>(m_bits_c->UncheckedAt(bin))->SetBitNumber(sector);
+    static_cast<TBits*>(m_bits_c->UncheckedAt(bin))->SetBitNumber(sector);
 
     bin = clamp(bins.d0, 0, m_nBins.d0);
-    dynamic_cast<TBits*>(m_bits_d0->UncheckedAt(bin))->SetBitNumber(sector);
+    static_cast<TBits*>(m_bits_d0->UncheckedAt(bin))->SetBitNumber(sector);
 
     bin = clamp(bins.z0, 0, m_nBins.z0);
-    dynamic_cast<TBits*>(m_bits_z0->UncheckedAt(bin))->SetBitNumber(sector);
+    static_cast<TBits*>(m_bits_z0->UncheckedAt(bin))->SetBitNumber(sector);
 
     bin = clamp(bins.eta, 0, m_nBins.eta);
-    dynamic_cast<TBits*>(m_bits_eta->UncheckedAt(bin))->SetBitNumber(sector);
+    static_cast<TBits*>(m_bits_eta->UncheckedAt(bin))->SetBitNumber(sector);
 }
 
 
