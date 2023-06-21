@@ -55,7 +55,7 @@ def vertexFinder_builder( flags, signature, config, inputTracks, outputVertices,
     # the actual tool which finds the vertices ...
     # and actual place which choose between iterative and adaptive vertex finder tools
     if adaptiveVertexing :
-        vertexFinderTool = adaptiveMultiVertexFinderTool_builder( signature, config ) 
+        vertexFinderTool = adaptiveMultiVertexFinderTool_builder( flags, signature, config ) 
     else :   
         vertexFinderTool = iterativeVertexFinderTool_builder( signature, config ) 
 
@@ -297,7 +297,7 @@ def vertexMonitoringTool_builder( flags, signature, config ) :
 #------------------------------------------------------------------------------------------------------------------
 
 # create the actual vertex finder tool ...
-def adaptiveMultiVertexFinderTool_builder( signature, config ) : 
+def adaptiveMultiVertexFinderTool_builder( flags, signature, config ) : 
 
     from AthenaCommon.Logging import logging
     log = logging.getLogger("InDetVtx")
@@ -361,24 +361,12 @@ def adaptiveMultiVertexFinderTool_builder( signature, config ) :
         
         log.info( "ID Trigger: using Acts vertex" ) 
         
-        # Don't actually need to check whether the ActsGeometry has been configured, because it is 
-        # included at the top level once the module is loaded, but we add the explicit check and the 
-        # possibility to create it for  the impossible case that it is not there to avoid getting the python
-        # warning that we have included a function that is not then used.
+        from ActsConfig.ActsTrkGeometryConfig import ActsTrackingGeometryToolCfg
+        from AthenaConfiguration.LegacySupport import CAtoGlobalWrapper, conf2toConfigurable
+        actsTrackingGeometryToolCfg = CAtoGlobalWrapper(ActsTrackingGeometryToolCfg,flags)
 
-        # it would perhaps be better is the acts geometry were instead configured in some function that could
-        # be called by any tool that actually needed it to be configured, then we would avoid this python error 
-        # without unecessary python code 
-
-        from ActsGeometry.ActsTrackingGeometryTool import ConfiguredActsTrackingGeometry
-        
-        if not hasattr(ToolSvc, "ActsTrackingGeometryTool"):
-            log.info( "ID Trigger: creating new acts geometry" )
-            actsTrackingGeometryTool = ConfiguredActsTrackingGeometry(name = "ActsTrackingGeometryTool")            
-            ToolSvc += actsTrackingGeometryTool
-   
         # add it to the ServiceManager
-        actsTrackingGeometryTool = getattr(ToolSvc,"ActsTrackingGeometryTool")
+        actsTrackingGeometryTool = conf2toConfigurable(actsTrackingGeometryToolCfg.popPrivateTools())
 
         import AthenaCommon.CfgMgr as CfgMgr
     
