@@ -227,7 +227,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     TIME(m_tlrt);
 
-    FPGATrackSimDataFlowInfo* dataFlowInfo = new FPGATrackSimDataFlowInfo();
+    auto dataFlowInfo = std::make_unique<FPGATrackSimDataFlowInfo>();
 
     // Second stage fitting
     std::vector<FPGATrackSimRoad*> roads_2nd;
@@ -238,10 +238,10 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     }
 
     // Calculate data flow quantities
-    ATH_CHECK(m_dataFlowTool->calculateDataFlow(dataFlowInfo, m_logicEventHeader_1st, m_clusters_1st, roads_1st, tracks_1st, roads_2nd, tracks_2nd));
+    ATH_CHECK(m_dataFlowTool->calculateDataFlow(dataFlowInfo.get(), m_logicEventHeader_1st, m_clusters_1st, roads_1st, tracks_1st, roads_2nd, tracks_2nd));
 
     // Write the output and reset
-    ATH_CHECK(writeOutputData(roads_1st, tracks_1st, roads_2nd, tracks_2nd, dataFlowInfo));
+    ATH_CHECK(writeOutputData(roads_1st, tracks_1st, roads_2nd, tracks_2nd, dataFlowInfo.get()));
 
     if (m_doHoughRootOutput) {
       ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, m_logicEventHeader_1st->optional().getTruthTracks(), m_logicEventHeader_1st->optional().getOfflineTracks()));
@@ -320,7 +320,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     if (m_runSecondStage) m_logicEventHeader_2nd->reset();
 
     TIME(m_tfin);
-
+    
     return StatusCode::SUCCESS;
 }
 

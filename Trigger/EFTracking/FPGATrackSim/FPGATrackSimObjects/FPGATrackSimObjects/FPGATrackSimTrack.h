@@ -10,6 +10,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 #include <vector>
 #include <TObject.h>
+#include <iosfwd>
 
 class FPGATrackSimTrack : public TObject {
 
@@ -107,44 +108,44 @@ public:
 
 private:
 
-  TrackCorrType m_trackCorrType; // type of correction to make for track coordinates
-  TrackStage m_trackStage; // Is this a 1st stage or second stage track?
-  bool m_doDeltaGPhis; // if it uses the delta phis method for fitting
+  TrackCorrType m_trackCorrType = TrackCorrType::None; // type of correction to make for track coordinates
+  TrackStage m_trackStage = TrackStage::FIRST; // Is this a 1st stage or second stage track?
+  bool m_doDeltaGPhis = false; // if it uses the delta phis method for fitting
 
-  int m_bankID; // Bank ID of the road related to this track
-  int m_patternID; // TODO add documentation
-  int m_firstSectorID; // Sector identifier in the first stage tracking
-  int m_secondSectorID; // Sector identifier in thesecond stage tracking
-  int m_trackID; // Unique track ID in this bank
+  int m_bankID = -1; // Bank ID of the road related to this track
+  int m_patternID = 0; // TODO add documentation
+  int m_firstSectorID = -1; // Sector identifier in the first stage tracking
+  int m_secondSectorID = -1; // Sector identifier in thesecond stage tracking
+  int m_trackID = -1; // Unique track ID in this bank
 
   int m_IdealGeoCorr = 0; // 
 
   float m_houghX = 0.0F; // phi0 from FPGATrackSimRoad_Hough
   float m_houghY = 0.0F; // QOverPt from FPGATrackSimRoad_Hough
-  float m_qoverpt; // charge over pT
-  float m_d0; // impact paramter in the ATLAS reference system
-  float m_phi; // phi of the track
-  float m_z0; // z0 in standard ATLAS reference system
-  float m_eta; // eta of the track
-  float m_chi2; // chi2 of the track
-  float m_origchi2; // In the case of majority recovery, this is the chi2 of
+  float m_qoverpt = 0.0F; // charge over pT
+  float m_d0 = 0.0F; // impact paramter in the ATLAS reference system
+  float m_phi = 0.0F; // phi of the track
+  float m_z0 = 0.0F; // z0 in standard ATLAS reference system
+  float m_eta = 0.0F; // eta of the track
+  float m_chi2 = 0.0F; // chi2 of the track
+  float m_origchi2 = 0.0F; // In the case of majority recovery, this is the chi2 of
 
   //TODO: Switch to matchedhits mask
-  unsigned int m_nmissing; // number of missing coordinates
-  unsigned int m_typemask; // set on in bits related to the step recovery were used, ex.: 0 no recovery, 01, rec 1st step, 11, recovery in the 1st and the 2nd stage
-  unsigned int m_hitmap;
+  unsigned int m_nmissing = 0; // number of missing coordinates
+  unsigned int m_typemask = 0; // set on in bits related to the step recovery were used, ex.: 0 no recovery, 01, rec 1st step, 11, recovery in the 1st and the 2nd stage
+  unsigned int m_hitmap = 0;
 
   std::vector<FPGATrackSimHit> m_hits; //[m_nlayers] hits associated to the track
 
-  signed long m_eventindex; // matched particle event index
-  signed long m_barcode; // matched geant particle barcode
-  float m_barcode_frac; // largest "matching fraction" with any "good"
+  signed long m_eventindex = -1; // matched particle event index
+  signed long m_barcode = -1; // matched geant particle barcode
+  float m_barcode_frac = 0.0F; // largest "matching fraction" with any "good"
                         // geant particle, corresponding to the
                         // particle with m_barcode
 
   // Overlap removal member
   // There is currently only one algorithm
-  unsigned int m_ORcode; // Each digit should represent pass/fail(1/0) result from a specific OR algorithm
+  unsigned int m_ORcode = 1; // Each digit should represent pass/fail(1/0) result from a specific OR algorithm
 
   ClassDef(FPGATrackSimTrack, 2)
 };

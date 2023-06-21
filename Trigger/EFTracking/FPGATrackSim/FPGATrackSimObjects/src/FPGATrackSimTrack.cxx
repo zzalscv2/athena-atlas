@@ -2,34 +2,26 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <iostream>
-#include <iomanip>
-#include <TMath.h>
+
 
 #include "FPGATrackSimObjects/FPGATrackSimTrack.h"
 #include "FPGATrackSimObjects/FPGATrackSimConstants.h"
-
+#include <iostream>
+#include <iomanip>
+#include <TMath.h>
 using namespace std;
 
 ClassImp(FPGATrackSimTrack)
 // first stage only
 
-FPGATrackSimTrack::FPGATrackSimTrack() :
-  m_doDeltaGPhis(false),
-  m_bankID(-1), m_patternID(0), m_firstSectorID(-1), m_secondSectorID(-1), m_trackID(-1),
-  m_qoverpt(0), m_d0(0), m_phi(0), m_z0(0),
-  m_eta(0), m_chi2(0), m_origchi2(0),
-  m_nmissing(0),
-  m_typemask(0), m_hitmap(0),
-  m_hits(0x0),
-  m_eventindex(-1), m_barcode(-1), m_barcode_frac(0.), m_ORcode(1)
+FPGATrackSimTrack::FPGATrackSimTrack()
 {
   // nothing to do here
 }
 
 FPGATrackSimTrack::~FPGATrackSimTrack()
 {
-  if (m_hits.size() > 0) m_hits.clear();
+  if (not m_hits.empty() ) m_hits.clear();
 }
 
 std::vector<float> FPGATrackSimTrack::getCoords(unsigned ilayer) const
