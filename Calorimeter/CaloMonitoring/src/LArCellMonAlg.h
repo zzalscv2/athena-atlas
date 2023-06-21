@@ -36,7 +36,6 @@ namespace Trig {
 
 class CaloCell;
 class TileID;
-class CaloCell_ID;
 
 
 class LArCellMonAlg : public CaloMonAlgBase {
@@ -144,39 +143,13 @@ private:
   StringArrayProperty  m_doEtaPhiAvgTimeNames{this, "DoEtaPhiAvgTimeNames", {},"Turns on 'totTime' and total 'Occupancy' plots. The ratio will be computed at post-processing stage"};
   StringArrayProperty  m_doEtaPhiFractionPastTthNames{this, "DoEtaPhiFractionPastTthNames", {}};
 
-  //enums to help with the conversion of Layer, partitions and such:
-  //Enumerate layers 
-  enum LayerEnum{EMBPA=0, EMBPC, EMB1A, EMB1C, EMB2A, EMB2C, EMB3A, EMB3C,
-		 HEC0A, HEC0C, HEC1A, HEC1C, HEC2A, HEC2C, HEC3A, HEC3C,
-		 EMECPA,EMECPC,EMEC1A,EMEC1C,EMEC2A,EMEC2C,EMEC3A,EMEC3C,
-		 FCAL1A,FCAL1C,FCAL2A,FCAL2C,FCAL3A,FCAL3C,MAXLAYER};
+  
 
-  //Enumerate layer-types, ignoring sides. Useful for configuration that is per-definition symmetric 
-  enum LayerEnumNoSides{EMBPNS=0, EMB1NS, EMB2NS, EMB3NS, HEC0NS, HEC1NS, HEC2NS, HEC3NS,
-			EMECPNS,EMEC1NS,EMEC2NS,EMEC3NS,FCAL1NS,FCAL2NS,FCAL3NS,MAXLYRNS};
 
   FloatArrayProperty   m_thresholdsProp[MAXLYRNS];
 
   //Enumerate partitions
   enum PartitionEnum{EMBA,EMBC,EMECA,EMECC,HECA,HECC,FCALA,FCALC,MAXPARTITIONS};
-
-
-
-  //Mapping of CaloCell nomencature to CaloCellMonitoring nomencature
-  const std::map<unsigned,LayerEnumNoSides> m_caloSamplingToLyrNS{ 
-    {CaloSampling::PreSamplerB, EMBPNS},{CaloSampling::EMB1,EMB1NS},{CaloSampling::EMB2,EMB2NS},{CaloSampling::EMB3,EMB3NS},         //LAr Barrel
-    {CaloSampling::PreSamplerE, EMECPNS},{CaloSampling::EME1,EMEC1NS}, {CaloSampling::EME2,EMEC2NS}, {CaloSampling::EME3,EMEC3NS},   //LAr Endcap     
-    {CaloSampling::HEC0,HEC0NS}, {CaloSampling::HEC1,HEC1NS}, {CaloSampling::HEC2,HEC2NS}, {CaloSampling::HEC3,HEC3NS},              //Hadronic endcap
-    {CaloSampling::FCAL0,FCAL1NS}, {CaloSampling::FCAL1,FCAL2NS}, {CaloSampling::FCAL2,FCAL3NS}                                      //FCAL
-  };
-
-  //Mapping of layers to the partition the layer belongs to
-  const std::array<PartitionEnum,MAXLAYER> m_layerEnumtoPartitionEnum{{
-      EMBA, EMBC,  EMBA,  EMBC,  EMBA,  EMBC,  EMBA,  EMBC,
-      HECA, HECC,  HECA,  HECC,  HECA,  HECC,  HECA,   HECC,
-      EMECA, EMECC, EMECA, EMECC, EMECA, EMECC, EMECA, EMECC,
-      FCALA, FCALC, FCALA, FCALC, FCALA, FCALC
-	}};
   
 
   //Private methods: Initialization and job-option interpretation
@@ -226,15 +199,20 @@ private:
 
   };
 
+
+  
+ //Mapping of layers to the partition the layer belongs to
+  const std::array<PartitionEnum,MAXLAYER> m_layerEnumtoPartitionEnum{{
+      EMBA, EMBC,  EMBA,  EMBC,  EMBA,  EMBC,  EMBA,  EMBC,
+      HECA, HECC,  HECA,  HECC,  HECA,  HECC,  HECA,   HECC,
+      EMECA, EMECC, EMECA, EMECC, EMECA, EMECC, EMECA, EMECC,
+      FCALA, FCALC, FCALA, FCALC, FCALA, FCALC
+       }};
+
   //Private methods: Histogram filling
   StatusCode createPerJobHistograms(const CaloCellContainer* cellcont, const CaloNoise *noisep) const;
   void checkTriggerAndBeamBackground(bool passBeamBackgroundRemoval, std::vector<threshold_t> &thresholds) const;
   void sporadicNoiseCandidate(const CaloCell* cell, const LArCellMonAlg::LayerEnum iLyr,const float threshold, const LArOnOffIdMapping* cabling) const;
-
-  //Helpers for histogram filling
-  void getHistoCoordinates(const CaloDetDescrElement* dde, float& celleta, float& cellphi, unsigned& iLyr, unsigned& iLyrNS) const; 
-
-  // other private variables
  
   // bad channel mask  
   LArBadChannelMask m_bcMask;
@@ -245,7 +223,6 @@ private:
   // Identifer helpers and such
 
   const LArOnlineID* m_LArOnlineIDHelper;
-  const CaloCell_ID* m_calo_id;
 
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
   SG::ReadCondHandleKey<LArBadChannelCont> m_BCKey {this, "BadChanKey", "LArBadChannel", "SG key for LArBadChan object"};
