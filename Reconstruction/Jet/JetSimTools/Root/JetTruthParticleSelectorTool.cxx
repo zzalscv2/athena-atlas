@@ -17,33 +17,12 @@
 #include "JetUtils/JetDistances.h"
 
 #include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace {
   // TEMPORARY recopy some helper from TruthHelper and GeneratorUtils packages. 
   // We'll have to use this package when they work properly with xAOD.
 
-  inline bool isStable(const xAOD::TruthParticle* p) {
-    if (HepMC::is_simulation_particle(p)) return false; // This particle is from G4
-    if (p->pdgId() == 21 && p->p4().E() == 0) return false; //< Workaround for a gen bug?
-    return ((p->status() % 1000 == 1) || //< Fully stable, even if marked that way by G4
-            (p->status() % 1000 == 2 && p->hasDecayVtx() && p->decayVtx() != nullptr && HepMC::is_simulation_vertex(p->decayVtx()))); //< Gen-stable with G4 decay
-    /// @todo Add a no-descendants-from-G4 check?
-  }
-  
-
-  bool isInteracting( const xAOD::TruthParticle* const p){
-      if (! isStable(p)) return false;
-      const int apid = std::abs(p->pdgId() );
-      if (apid == 12 || apid == 14 || apid == 16) return false;
-      if (p->status() % 1000 == 1 &&
-          (apid == 1000022 || apid == 1000024 || apid == 5100022 ||
-           apid == 39 || apid == 1000039 || apid == 5000039)) return false;
-      return true;      
-    }
-
-  bool isMuon(const xAOD::TruthParticle* truthPart) {
-    return ( std::abs(truthPart->pdgId()) == 13) ;        
-  }
 
   bool isWZDecay(const xAOD::TruthParticle* p) {
     int pdg_id = std::abs(p->pdgId() );
@@ -257,16 +236,16 @@ bool JetTruthParticleSelectorTool::selector(const xAOD::TruthParticle* truthPart
   switch( m_selectionMode) { // For now only 4 modes used in practice for jets...
                              // a switch statement is probably not optimal here...
   case StableNoMuonNoNu:
-    result =( isInteracting(truthPart) && passKinematics(truthPart) && !isMuon(truthPart) );
+    result =( MC::jettruthparticleselectortool_isInteracting(truthPart) && passKinematics(truthPart) && !MC::isMuon(truthPart->pdg_id()) );
     break;
   case NuOnly:
-    result= ( isStable(truthPart) && passKinematics(truthPart) && !isInteracting(truthPart) );
+    result= ( MC::jettruthparticleselectortool_isStable(truthPart) && passKinematics(truthPart) && !MC::jettruthparticleselectortool_isInteracting(truthPart) );
     break;
   case MuonOnly:
-    result = isMuon(truthPart);
+    result = MC::isMuon(truthPart->pdg_id());
     break;
   case NoWZDecay:
-    result = ( isStable(truthPart) && passKinematics(truthPart) &&
+    result = ( MC::jettruthparticleselectortool_isStable(truthPart) && passKinematics(truthPart) &&
                !isWZDecay(truthPart, m_wzLeptons, m_wzPhotonCone*m_wzPhotonCone) &&
                !isLeptonFromTau(truthPart) );
     break;

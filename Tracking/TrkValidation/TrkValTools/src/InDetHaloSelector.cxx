@@ -15,6 +15,7 @@
 #include "HepPDT/ParticleData.hh"
 #include "GaudiKernel/IPartPropSvc.h"
 #include "AtlasHepMC/GenParticle.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "GeneratorObjects/McEventCollection.h"
 
 Trk::InDetHaloSelector::InDetHaloSelector(const std::string& type, const std::string& name,
@@ -67,10 +68,10 @@ Trk::InDetHaloSelector::selectGenSignal (const McEventCollection* SimTracks) con
     for (const auto& particle: *genEvent) {
 
       // 1) require stable particle from generation or simulation
-      if ((particle->status()%1000) != 1 )    continue;
+      if (!MC::isStable(particle))    continue;
 
       int   pdgCode         = particle->pdg_id();
-      if (std::abs(pdgCode) > 1000000000 ) continue; // ignore nuclei from hadronic interactions
+      if (MC::isNucleus(pdgCode)) continue; // ignore nuclei from hadronic interactions
       const HepPDT::ParticleData* pd = m_particleDataTable->particle(std::abs(pdgCode));
       ATH_MSG_DEBUG( "Checking particle " <<  particle );
       if (!pd) { // nuclei excluded, still problems with a given type?

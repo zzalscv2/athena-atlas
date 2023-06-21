@@ -334,7 +334,7 @@ Chains2Monitor['MT'] = {
                            'RefChain': 'NONE',
                            'OfflineColl': 'NONE'},
 
-  'HLT_j0_HT1000_pf_ftf_preselj180_L1HT190-J15s5pETA21': {'HLTColl': 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',
+  'HLT_j0_HT1000_pf_ftf_preselcHT450_L1HT190-J15s5pETA21': {'HLTColl': 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',
                                                           'RefChain': 'NONE',
                                                           'OfflineColl': 'NONE'},
 

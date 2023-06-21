@@ -31,7 +31,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "CoralBase/Attribute.h"
 #include "CoralBase/AttributeList.h"
 #include "CoralKernel/Context.h"
-#include "boost/algorithm/string/predicate.hpp"
+#include "CxxUtils/starts_with.h"
 
 #include <algorithm>
 #include <cstdlib> 
@@ -1039,7 +1039,7 @@ int main(int argc, char ** argv)
 	  transferTag(proxySrc,proxyTarg,verbose,currentTag);
 
 	  // If we are transferring new ATLAS tag, then add it to the tag cache
-	  if(boost::starts_with (currentTag, "ATLAS-")) {
+	  if(CxxUtils::starts_with (currentTag, "ATLAS-")) {
 	    coral::AttributeList inputData4Caching;
 	    inputData4Caching.extend<std::string>( "ROOTTAG" );
 	    inputData4Caching[0].data<std::string>() = currentTag;

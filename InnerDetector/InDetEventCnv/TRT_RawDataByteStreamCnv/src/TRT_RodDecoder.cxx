@@ -75,8 +75,7 @@ TRT_RodDecoder::TRT_RodDecoder
  * destructor  
  * ----------------------------------------------------------
  */
-TRT_RodDecoder::~TRT_RodDecoder()
-{}
+TRT_RodDecoder::~TRT_RodDecoder() = default;
 
 
 /* ----------------------------------------------------------
@@ -122,7 +121,7 @@ StatusCode TRT_RodDecoder::initialize()
 
   if ( m_loadCompressTableFile )
   {
-    if  ( m_LoadCompressTableVersions.size() == 0 ) 
+    if  ( m_LoadCompressTableVersions.empty() ) 
     {
       m_LoadCompressTableVersions.push_back( 4 );
     }
@@ -1744,9 +1743,10 @@ TRT_RodDecoder::update() const
        }
 #endif /* NOTDEF */
 
+       int ctable_version = Ctable->m_TableVersion;
        ATH_MSG_INFO( "Loaded Compress Table Version: " <<
-		     Ctable->m_TableVersion );
-       m_CompressionTables[Ctable->m_TableVersion].set (std::move(Ctable));
+                     ctable_version);
+       m_CompressionTables[ctable_version].set (std::move(Ctable));
 
 
        ++catrIt;

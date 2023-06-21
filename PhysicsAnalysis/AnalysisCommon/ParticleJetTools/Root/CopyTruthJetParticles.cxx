@@ -55,17 +55,16 @@ bool CopyTruthJetParticles::classifyJetInput(const xAOD::TruthParticle* tp,
   if (pdgid==21 && tp->e()==0) return false; // Work around for an old generator bug
 
   // -- changed for dark jet clustering -- //
-  //if ( tp->status() %1000 !=1 ) return false; // Stable!
-  if ( tp->status()%1000!=1 && !m_includeDark ) return false; // dark hadrons will not be status 1
+  if ( tp->status() != 1 && !m_includeDark ) return false; // dark hadrons will not be status 1
   // ----------------------------------- //
   
   // Easy classifiers by PDG ID
-  if(MC::PID::isNeutrino(pdgid)) {
+  if(MC::isNeutrino(pdgid)) {
     if (!m_includeNu) return false;
   } else {
     if (!m_includeBSMNonInt && MC::isNonInteracting(pdgid)) return false;
   }
-  if (!m_includeMu && abs(pdgid)==13) return false;
+  if (!m_includeMu && MC::isMuon(pdgid)) return false;
 
   // Already built a list of prompt leptons, just use it here
   if (!m_includePromptLeptons && std::find(promptLeptons.begin(),promptLeptons.end(),tp)!=promptLeptons.end()){

@@ -307,11 +307,6 @@ def main(args):
             else:
                 return False
 
-        @cache
-        def skip_leaf_entry(entry2, skip_leaves):
-            leafname = '.'.join([s for s in entry2 if not s.isdigit()])
-            return skip_leaf (leafname, skip_leaves)
-
         skipset = frozenset(args.ignore_leaves)
         old_leaves = infos['old']['leaves'] - infos['new']['leaves']
         old_leaves = set(
@@ -346,7 +341,6 @@ def main(args):
         skip_leaves = [ l.rstrip('.') for l in old_leaves | new_leaves | set(args.ignore_leaves) ]
         for l in skip_leaves:
             msg.debug('skipping [%s]', l)
-        skip_leaves = frozenset (skip_leaves)
         
         oldBranches = set(b.GetName().rstrip('\0') for b in fold.tree.GetListOfBranches())
         newBranches = set(b.GetName().rstrip('\0') for b in fnew.tree.GetListOfBranches())
@@ -427,8 +421,6 @@ def main(args):
         branches = sorted(branches)
         old_dump_iter = fold.dump(args.tree_name, itr_entries_old, branches, True, False)
         new_dump_iter = fnew.dump(args.tree_name, itr_entries_new, branches, True, False)
-        old_skip_dict = {}
-        new_skip_dict = {}
 
         def leafname_fromdump(entry):
             if entry is None:
@@ -442,34 +434,18 @@ def main(args):
             else:
                 return [int(s) for s in entry[2] if s.isdigit()]
 
-        def reach_next(dump_iter, skip_leaves, skip_dict, leaves_prefix=None):
+        def reach_next(dump_iter, skip_leaves, leaves_prefix=None):
             keep_reading = True
             while keep_reading:
                 try:
                     entry = next(dump_iter)
                 except StopIteration:
                     return None
-
-                # Calling leafname_fromdump is expensive.  When we can,
-                # try to make the skip decision using just the first element
-                # in entry[2].  skip_dict maps from entry[2] values to either
-                # -1 if some branch with this entry prefix is being skipped
-                # or the event index at which we first saw this value.
-                # If we get to a different index and no branches with
-                # this prefix have been skipped, then we can assume that
-                # none of them are.
-                entry2_orig = entry[2][0]
-                skip = skip_dict.setdefault (entry2_orig, entry[1])
-                if skip > 0 and skip != entry[1]:
-                    # Old entry --- we can assume no skipping.
-                    return entry
-
                 entry[2][0] = entry[2][0].rstrip('.\0')  # clean branch name
                 if leaves_prefix:
                     entry[2][0] = entry[2][0].replace(leaves_prefix, '')
-                if not skip_leaf(leafname_fromdump(entry), skip_leaves):
+                if not skip_leaf(leafname_fromdump(entry), tuple(set(skip_leaves))):
                     return entry
-                skip_dict[entry2_orig] = -1
                 msg.debug('SKIP: {}'.format(leafname_fromdump(entry)))
             pass
 
@@ -480,9 +456,9 @@ def main(args):
         
         while True:
             if read_old:
-                d_old = reach_next(old_dump_iter, skip_leaves, old_skip_dict, args.leaves_prefix)
+                d_old = reach_next(old_dump_iter, skip_leaves, args.leaves_prefix)
             if read_new:
-                d_new = reach_next(new_dump_iter, skip_leaves, new_skip_dict, args.leaves_prefix)
+                d_new = reach_next(new_dump_iter, skip_leaves, args.leaves_prefix)
                 
             if not d_new and not d_old:
                 break

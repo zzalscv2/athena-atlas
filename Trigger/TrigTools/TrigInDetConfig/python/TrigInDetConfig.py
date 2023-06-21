@@ -75,15 +75,16 @@ def trackFTFConverterCfg(flags, signature):
 
 
 def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_view=True ):
-  if inflags.Detector.GeometryITk:
-    from TrigInDetConfig.TrigInDetConfigITk import ITktrigInDetFastTrackingCfg
-    return  ITktrigInDetFastTrackingCfg( inflags, roisKey, signatureName, in_view )
- 
-  """ Generates precision fast tracking config, it is a primary config function """
-  log = logging.getLogger("trigInDetFastTrackingCfg")
 
+  log = logging.getLogger("trigInDetFastTrackingCfg")
   from TrigInDetConfig.utils import getFlagsForActiveConfig
   flags = getFlagsForActiveConfig(inflags, signatureName, log)
+
+  if flags.Detector.GeometryITk:
+    from TrigInDetConfig.TrigInDetConfigITk import ITktrigInDetFastTrackingCfg
+    return  ITktrigInDetFastTrackingCfg( flags, roisKey, signatureName, in_view )
+ 
+  """ Generates precision fast tracking config, it is a primary config function """
 
   from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
   seq = InDetTrigSequence(flags, 
