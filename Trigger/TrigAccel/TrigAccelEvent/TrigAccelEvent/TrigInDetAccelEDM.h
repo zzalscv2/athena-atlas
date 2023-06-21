@@ -11,10 +11,10 @@ namespace TrigAccel {
 
   //A. GPU-accelerated track seeding
   
-  constexpr unsigned int MAX_SILICON_LAYERS           = 50;
-  constexpr unsigned int MAX_NUMBER_PIX_MODULES       = 2100;
-  constexpr unsigned int MAX_NUMBER_SCT_MODULES       = 8200;
-  constexpr unsigned int MAX_NUMBER_SPACEPOINTS       = 100000;
+  constexpr unsigned int MAX_SILICON_LAYERS           = 216;
+  constexpr unsigned int MAX_NUMBER_PIX_MODULES       = 6300;
+  constexpr unsigned int MAX_NUMBER_SCT_MODULES       = 24600;
+  constexpr unsigned int MAX_NUMBER_SPACEPOINTS       = 300000;
   constexpr unsigned int MAX_PHI_SLICES               = 100;
   constexpr unsigned int MAX_NUMBER_OUTPUT_SEEDS      = 100000;
   
