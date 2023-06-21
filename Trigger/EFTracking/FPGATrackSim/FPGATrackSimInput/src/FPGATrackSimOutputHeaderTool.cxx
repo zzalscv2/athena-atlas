@@ -173,6 +173,9 @@ StatusCode FPGATrackSimOutputHeaderTool::writeData(FPGATrackSimLogicalEventInput
   
   if (m_eventInputHeader_1st) {
     ATH_MSG_DEBUG ("Wrote Event " << m_event << " in first stage header event " << m_eventInputHeader_1st->event());
+  } else {
+    ATH_MSG_ERROR("m_eventInputHeader_1st is null in FPGATrackSimOutputHeaderTool::writeData");
+    return StatusCode::FAILURE;
   }
   if (m_runSecondStage && m_eventInputHeader_2nd) {
     ATH_MSG_DEBUG ("Wrote Event " << m_event << " in second stage header event " << m_eventInputHeader_2nd->event());
@@ -182,12 +185,15 @@ StatusCode FPGATrackSimOutputHeaderTool::writeData(FPGATrackSimLogicalEventInput
     ATH_MSG_DEBUG ("n.roads_2nd = "  << m_eventOutputHeader->nFPGATrackSimRoads_2nd());
     ATH_MSG_DEBUG ("n.tracks_1st = " << m_eventOutputHeader->nFPGATrackSimTracks_1st());
     ATH_MSG_DEBUG ("n.tracks_2nd = " << m_eventOutputHeader->nFPGATrackSimTracks_2nd());
+  } else {
+    ATH_MSG_ERROR("m_eventOutputHeader is null in FPGATrackSimOutputHeaderTool::writeData");
+    return StatusCode::FAILURE;
   }
   
   m_event++;
 
   m_eventInputHeader_1st->reset();
-  if (m_runSecondStage) m_eventInputHeader_2nd->reset();
+  if (m_runSecondStage and m_eventInputHeader_2nd) m_eventInputHeader_2nd->reset();
   m_eventOutputHeader->reset();
 
   return StatusCode::SUCCESS;
