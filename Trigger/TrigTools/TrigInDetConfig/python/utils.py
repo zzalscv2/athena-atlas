@@ -6,6 +6,13 @@ from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 import logging
 
 
+def getInDetFlagsForSignature(flags: AthConfigFlags, config_name: str):
+    return flags.cloneAndReplace(
+        "Tracking.ActiveConfig",
+        ("Trigger.ITkTracking." if flags.Detector.GeometryITk else "Trigger.InDetTracking.") + config_name
+    )
+
+
 def getFlagsForActiveConfig(
     flags: AthConfigFlags, config_name: str, log: logging.Logger
 ):
@@ -45,5 +52,6 @@ def getFlagsForActiveConfig(
             config_name,
         )
     return flags.cloneAndReplace(
-        "Tracking.ActiveConfig", "Trigger.InDetTracking." + config_name
+        "Tracking.ActiveConfig",
+        ("Trigger.ITkTracking." if flags.Detector.GeometryITk else "Trigger.InDetTracking.") + config_name
     )

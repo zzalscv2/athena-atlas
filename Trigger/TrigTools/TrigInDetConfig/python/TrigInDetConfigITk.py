@@ -6,17 +6,18 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 def ITkftfCfg(flags, roisKey, signature, signatureName):
+
     acc = ComponentAccumulator()
-    
+
     from TrkConfig.TrkTrackSummaryToolConfig import ITkTrackSummaryToolCfg
     ITkTrackSummaryTool = acc.popToolsAndMerge(ITkTrackSummaryToolCfg(flags))
     acc.addPublicTool(ITkTrackSummaryTool)
 
     from InDetConfig.SiCombinatorialTrackFinderToolConfig import ITkSiCombinatorialTrackFinder_xkCfg
     CombinatorialTrackFinderTool = acc.popToolsAndMerge(ITkSiCombinatorialTrackFinder_xkCfg(flags,
-                                                                                                name="ITkTrigSiComTrackFinder",
-                                                                                                PixelClusterContainer='ITkTrigPixelClusters',
-                                                                                                SCT_ClusterContainer='ITkTrigStripClusters'))
+                                                                                            name="ITkTrigSiComTrackFinder_"+signature,
+                                                                                            PixelClusterContainer='ITkTrigPixelClusters',
+                                                                                            SCT_ClusterContainer='ITkTrigStripClusters'))
 
     from InDetConfig.SiTrackMakerConfig import ITkSiTrackMaker_xkCfg
     ITkSiTrackMakerTool = acc.popToolsAndMerge(ITkSiTrackMaker_xkCfg(flags, name = "ITkTrigSiTrackMaker_FTF"+signature, useBremModel = False, CombinatorialTrackFinder = CombinatorialTrackFinderTool) )
@@ -27,7 +28,7 @@ def ITkftfCfg(flags, roisKey, signature, signatureName):
     from RegionSelector.RegSelToolConfig import (regSelTool_ITkStrip_Cfg, regSelTool_ITkPixel_Cfg)
     pixRegSelTool = acc.popToolsAndMerge( regSelTool_ITkPixel_Cfg( flags) )
     sctRegSelTool = acc.popToolsAndMerge( regSelTool_ITkStrip_Cfg( flags) )
-    
+
     acc.addPublicTool( CompFactory.TrigL2LayerNumberToolITk( name = "TrigL2LayerNumberToolITk_FTF",UseNewLayerScheme = True) )
     acc.addPublicTool( CompFactory.TrigL2LayerNumberToolITk( "TrigL2LayerNumberToolITk_FTF" ) )
 
@@ -42,6 +43,7 @@ def ITkftfCfg(flags, roisKey, signature, signatureName):
                                                                     layerNumberTool   = acc.getPublicTool("TrigL2LayerNumberToolITk_FTF") ) )
 
     from TrigFastTrackFinder.TrigFastTrackFinderConfig import TrigFastTrackFinderMonitoringArg
+
     monTool = TrigFastTrackFinderMonitoringArg(flags, name = "trigfasttrackfinder_" + signature, doResMon=False)
 
     ftf = CompFactory.TrigFastTrackFinder(
@@ -79,12 +81,9 @@ def ITkftfCfg(flags, roisKey, signature, signatureName):
 
     return acc
 
-def ITktrigInDetFastTrackingCfg( inflags, roisKey, signatureName, in_view ):
+def ITktrigInDetFastTrackingCfg( flags, roisKey, signatureName, in_view ):
     """ Generates precision fast tracking config, it is a primary config function """
 
-    flags = inflags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkMainPass")
-    trigflags = flags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.ITkTracking."+signatureName)
-    
     #If signature specified add suffix to the name of each algorithms
     signature =  ("_" + signatureName if signatureName else '').lower()
 
@@ -123,20 +122,21 @@ def ITktrigInDetFastTrackingCfg( inflags, roisKey, signatureName, in_view ):
 
     from InDetConfig.SiSpacePointFormationConfig import ITkTrigSiTrackerSpacePointFinderCfg
     acc.merge(ITkTrigSiTrackerSpacePointFinderCfg(flags, signature=signature))
+    acc.merge(ITkftfCfg(flags, roisKey, signature, signatureName))
 
-    acc.merge(ITkftfCfg(trigflags, roisKey, signature, signatureName))
-
+    print(" done acc.merge(ITkftfCfg for signature ",signature," signatureName ", signatureName)
+    
     from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
     acc.merge(ITkTrackParticleCnvAlgCfg(
-        trigflags,
+        flags,
         name = "ITkTrigTrackParticleCnvAlg"+signature,
-        TrackContainerName = trigflags.Tracking.ActiveConfig.trkTracks_FTF,
-        xAODTrackParticlesFromTracksContainerName = trigflags.Tracking.ActiveConfig.tracks_FTF))
+        TrackContainerName = flags.Tracking.ActiveConfig.trkTracks_FTF,
+        xAODTrackParticlesFromTracksContainerName = flags.Tracking.ActiveConfig.tracks_FTF))
     
 
     if flags.Output.doWriteAOD:
         from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
-        acc.merge(addToAOD(trigflags, ["xAOD::TrackParticleContainer#HLT_IDTrack_Muon_FTF"]))
+        acc.merge(addToAOD(flags, ["xAOD::TrackParticleContainer#HLT_IDTrack_Muon_FTF"]))
 
     return acc
 

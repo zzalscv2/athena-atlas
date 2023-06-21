@@ -394,8 +394,8 @@ def createTriggerRecoFlags():
     flags.addFlagsCategory( 'Trigger.InDetTracking', __idTrk )
 
     def __idITk():
-        from TrigInDetConfig.TrigTrackingPassFlagsITk import createTrigTrackingPassFlagsITk
-        return createTrigTrackingPassFlagsITk()
+        from TrigInDetConfig.TrigTrackingPassFlags import createTrigTrackingPassFlags
+        return createTrigTrackingPassFlags(mode='ITk')
     flags.addFlagsCategory( 'Trigger.ITkTracking', __idITk )
 
     def __trigCalo():
