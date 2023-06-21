@@ -43,7 +43,7 @@ StatusCode
 TRTRawContByteStreamCnv::createRepConst(DataObject* pObj, IOpaqueAddress*& pAddr)  const
 {
   // get IDC for TRT Raw Data
-  TRT_RDO_Container* cont=0; 
+  TRT_RDO_Container* cont=nullptr; 
   SG::fromStorable(pObj, cont); 
   if(!cont){
     ATH_MSG_ERROR( " Can not cast to TRTRawContainer " );
