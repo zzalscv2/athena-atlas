@@ -301,7 +301,10 @@ StatusCode DQTGlobalWZFinderAlg::fillHistograms( const EventContext& ctx ) const
        TLorentzVector Zee = (leadingEle->p4() + subleadingEle->p4());
        auto mass = Scalar("mass", Zee.M());
        auto Zeecharge = Scalar("Zeecharge", leadingEle->charge() + subleadingEle->charge());
-       bool passTrig = trigChainsArePassed(m_Z_ee_trigger) || !m_doTrigger;
+       bool passTrig = true;
+       if (m_doTrigger){
+	 passTrig = trigChainsArePassed(m_Z_ee_trigger);
+       }
        bool inMassWindow = (mass > m_zCutLow*GeV && mass < m_zCutHigh*GeV);
        auto osel = Scalar<bool>("osel", false);
        auto ssel = Scalar<bool>("ssel", false);
@@ -339,7 +342,10 @@ StatusCode DQTGlobalWZFinderAlg::fillHistograms( const EventContext& ctx ) const
        auto mass = Scalar("mass", Zmumu.M());
        auto Zmumucharge = Scalar("Zmumucharge", leadingMuZ->charge() + subleadingMuZ->charge());
        // potentially ignore trigger...
-       bool oktrig = trigChainsArePassed(m_Z_mm_trigger) || !m_doTrigger;
+       bool oktrig = true;
+       if (m_doTrigger){
+	 oktrig = trigChainsArePassed(m_Z_mm_trigger);
+       }
        bool inMassWindow = (mass > m_zCutLow*GeV && mass < m_zCutHigh*GeV);
        auto osmu = Scalar<bool>("osmu", false);
        auto ssmu = Scalar<bool>("ssmu", false);
