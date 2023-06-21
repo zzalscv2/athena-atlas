@@ -9,5 +9,6 @@ atlas_add_library( TrkEventUtils
                    PUBLIC_HEADERS TrkEventUtils
                    LINK_LIBRARIES AthenaKernel GeoPrimitives EventPrimitives Identifier TrkSurfaces TrkEventPrimitives 
                    TrkMeasurementBase TrkParameters TrkPrepRawData TrkRIO_OnTrack TrkTrack AthAllocators
-                   PRIVATE_LINK_LIBRARIES AtlasDetDescr TrkCompetingRIOsOnTrack TrkPseudoMeasurementOnTrack TrkSegment TrkSpacePoint TrkVertexOnTrack )
+                   PRIVATE_LINK_LIBRARIES AtlasDetDescr TrkCompetingRIOsOnTrack TrkPseudoMeasurementOnTrack 
+                   TrkSegment TrkSpacePoint TrkVertexOnTrack )
 
