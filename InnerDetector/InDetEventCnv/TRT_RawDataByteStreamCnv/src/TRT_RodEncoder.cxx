@@ -28,7 +28,7 @@ TRT_RodEncoder::TRT_RodEncoder()
 
 /** destructor 
 */ 
-TRT_RodEncoder::~TRT_RodEncoder() {}
+TRT_RodEncoder::~TRT_RodEncoder() = default;
 
 /** for a given ROD fragment, convert TRT RDOs to a vector of 32bit words
  */
