@@ -15,17 +15,14 @@
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 
-// ACTS CORE
-#include "Acts/Geometry/TrackingGeometry.hpp"
-#include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
-#include "Acts/TrackFinding/MeasurementSelector.hpp"
+// ACTS
+#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsTrkEvent/TrackContainer.h"
+#include "ActsTrkEventCnv/IActsToTrkConverterTool.h"
 
 // PACKAGE
 #include "src/ITrackStatePrinter.h"
-#include "ActsTrkEvent/TrackContainer.h"
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
-#include "ActsTrkEventCnv/IActsToTrkConverterTool.h"
 
 // Other
 #include <memory>
@@ -48,9 +45,12 @@ namespace ActsTrk
     // Interface
     virtual StatusCode
     findTracks(const EventContext &ctx,
-               const std::vector<std::pair<UncalibratedMeasurementContainerPtr, const InDetDD::SiDetectorElementCollection *>> &measurements,
+               const Measurements &measurements,
                const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
-               ::TrackCollection &tracksContainer) const override;
+               ::TrackCollection &tracksContainer,
+               const char *seedType = "") const override;
+
+    virtual std::unique_ptr<ActsTrk::ITrackFindingTool::Measurements> initMeasurements(size_t numMeasurements) const override;
 
   private:
     // Tools
@@ -81,15 +81,10 @@ namespace ActsTrk
     makeRIO_OnTrack(const xAOD::UncalibratedMeasurement &uncalibMeas,
                     const Trk::TrackParameters *parm) const;
 
-    // Access Acts::CombinatorialKalmanFilter using "pointer to implementation"
-    // so we don't have to instantiate the heavily templated class in the header.
+    // Access Acts::CombinatorialKalmanFilter etc using "pointer to implementation"
+    // so we don't have to instantiate the heavily templated classes in the header.
     struct CKF_pimpl;
     std::unique_ptr<CKF_pimpl> m_trackFinder;
-
-    // CKF configuration
-    Acts::PropagatorPlainOptions m_pOptions;
-    std::unique_ptr<Acts::MeasurementSelector> m_measurementSelector;
-    Acts::CombinatorialKalmanFilterExtensions<ActsTrk::TrackStateBackend> m_ckfExtensions;
 
     // statistics
     mutable std::atomic<size_t> m_nTotalSeeds{0};

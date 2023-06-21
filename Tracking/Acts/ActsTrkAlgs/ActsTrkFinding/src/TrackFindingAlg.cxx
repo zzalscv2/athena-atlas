@@ -31,7 +31,8 @@ namespace ActsTrk
     ATH_CHECK(m_stripClusterContainerKey.initialize());
     ATH_CHECK(m_pixelDetEleCollKey.initialize());
     ATH_CHECK(m_stripDetEleCollKey.initialize());
-    ATH_CHECK(m_estimatedTrackParametersKey.initialize());
+    ATH_CHECK(m_pixelEstimatedTrackParametersKey.initialize());
+    ATH_CHECK(m_stripEstimatedTrackParametersKey.initialize());
     ATH_CHECK(m_tracksKey.initialize());
 
     if (not m_monTool.empty())
@@ -52,11 +53,17 @@ namespace ActsTrk
     // ================================================== //
 
     // SEEDS
-    ATH_MSG_DEBUG("Reading input collection with key " << m_estimatedTrackParametersKey.key());
-    SG::ReadHandle<ActsTrk::BoundTrackParametersContainer> estimatedTrackParametersHandle = SG::makeHandle(m_estimatedTrackParametersKey, ctx);
-    ATH_CHECK(estimatedTrackParametersHandle.isValid());
-    const ActsTrk::BoundTrackParametersContainer *estimatedTrackParameters = estimatedTrackParametersHandle.get();
-    ATH_MSG_DEBUG("Retrieved " << estimatedTrackParameters->size() << " input elements from key " << m_estimatedTrackParametersKey.key());
+    ATH_MSG_DEBUG("Reading input collection with key " << m_pixelEstimatedTrackParametersKey.key());
+    SG::ReadHandle<ActsTrk::BoundTrackParametersContainer> pixelEstimatedTrackParametersHandle = SG::makeHandle(m_pixelEstimatedTrackParametersKey, ctx);
+    ATH_CHECK(pixelEstimatedTrackParametersHandle.isValid());
+    const ActsTrk::BoundTrackParametersContainer *pixelEstimatedTrackParameters = pixelEstimatedTrackParametersHandle.get();
+    ATH_MSG_DEBUG("Retrieved " << pixelEstimatedTrackParameters->size() << " input elements from key " << m_pixelEstimatedTrackParametersKey.key());
+
+    ATH_MSG_DEBUG("Reading input collection with key " << m_stripEstimatedTrackParametersKey.key());
+    SG::ReadHandle<ActsTrk::BoundTrackParametersContainer> stripEstimatedTrackParametersHandle = SG::makeHandle(m_stripEstimatedTrackParametersKey, ctx);
+    ATH_CHECK(stripEstimatedTrackParametersHandle.isValid());
+    const ActsTrk::BoundTrackParametersContainer *stripEstimatedTrackParameters = stripEstimatedTrackParametersHandle.get();
+    ATH_MSG_DEBUG("Retrieved " << stripEstimatedTrackParameters->size() << " input elements from key " << m_stripEstimatedTrackParametersKey.key());
 
     // MEASUREMENTS
     ATH_MSG_DEBUG("Reading input collection with key " << m_pixelClusterContainerKey.key());
@@ -93,6 +100,14 @@ namespace ActsTrk
     }
     ATH_MSG_DEBUG("Retrieved " << stripDetEleColl->size() << " input condition elements from key " << m_stripDetEleCollKey.key());
 
+    // convert all measurements to source links, so the CKF can find them from either strip or pixel seeds.
+
+    auto measurements = m_trackFindingTool->initMeasurements(pixelClusterContainer->size() + stripClusterContainer->size());
+    ATH_MSG_DEBUG("Create " << pixelClusterContainer->size() << " source links from pixel measurements");
+    measurements->addMeasurements(ctx, pixelClusterContainer, pixelDetEleColl);
+    ATH_MSG_DEBUG("Create " << stripClusterContainer->size() << " source links from strip measurements");
+    measurements->addMeasurements(ctx, stripClusterContainer, stripDetEleColl);
+
     // ================================================== //
     // ===================== OUTPUTS ==================== //
     // ================================================== //
@@ -105,14 +120,26 @@ namespace ActsTrk
     // ===================== COMPUTATION ================ //
     // ================================================== //
 
-    // Perform the track finding for all initial parameters
-    ATH_MSG_DEBUG("Invoke track finding with " << estimatedTrackParameters->size() << " seeds.");
+    // Perform the track finding for all initial parameters.
+    // Start with strips where the occupancy is lower (will become relevant when we add duplicate removal)
+    if (!stripEstimatedTrackParameters->empty())
+    {
+      ATH_CHECK(m_trackFindingTool->findTracks(ctx,
+                                               *measurements,
+                                               *stripEstimatedTrackParameters,
+                                               *trackPtrs,
+                                               "strip"));
+    }
 
-    ATH_CHECK(m_trackFindingTool->findTracks(ctx,
-                                             {{pixelClusterContainer, pixelDetEleColl},
-                                              {stripClusterContainer, stripDetEleColl}},
-                                             *estimatedTrackParameters,
-                                             *trackPtrs));
+    if (!pixelEstimatedTrackParameters->empty())
+    {
+      ATH_CHECK(m_trackFindingTool->findTracks(ctx,
+                                               *measurements,
+                                               *pixelEstimatedTrackParameters,
+                                               *trackPtrs,
+                                               "pixel"));
+    }
+
     ATH_MSG_DEBUG("    \\__ Created " << trackPtrs->size() << " tracks");
 
     // ================================================== //

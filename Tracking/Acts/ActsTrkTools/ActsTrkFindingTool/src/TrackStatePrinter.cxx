@@ -460,8 +460,14 @@ namespace ActsTrk
                                  const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
                                  const Acts::BoundTrackParameters &seed,
                                  size_t iseed,
-                                 size_t ntracks) const
+                                 size_t ntracks,
+                                 size_t head,
+                                 const char *seedType) const
   {
+    if (head)
+    {
+      ATH_MSG_INFO("CKF results for " << head << ' ' << seedType << " seeds:");
+    }
     printHeader(1);
     std::cout << std::setw(5) << iseed << ' '
               << std::left
@@ -514,43 +520,36 @@ namespace ActsTrk
 
   void
   TrackStatePrinter::printSourceLinks(const EventContext &ctx,
-                                      const Acts::GeometryContext &tgContext,
                                       const std::vector<ATLASUncalibSourceLink> &sourceLinks,
-                                      const std::vector<size_t> &ncoll) const
+                                      size_t type,
+                                      size_t offset) const
   {
     auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
+    Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
 
-    std::vector<std::vector<MeasurementInfo>> measurementIndices(ncoll.size());
-    size_t icoll = 0, jcoll = 0, index = 0;
+    std::vector<MeasurementInfo> measurementIndex;
+    measurementIndex.reserve(sourceLinks.size());
+    size_t index = offset;
     for (auto &sl : sourceLinks)
     {
-      while (jcoll++ >= ncoll.at(icoll))
-      {
-        jcoll = 0;
-        ++icoll;
-      }
-      if (measurementIndices.at(icoll).empty())
-      {
-        measurementIndices.at(icoll).reserve(ncoll.at(icoll));
-      }
-      measurementIndices.at(icoll).push_back({index++, &sl, {}});
+      measurementIndex.push_back({index++, &sl, {}});
     }
 
-    addSpacePoints(ctx, measurementIndices);
+    addSpacePoints(ctx, measurementIndex, type);
 
-    printHeader(0);
-    for (auto &measurementIndex : measurementIndices)
+    if (offset == 0)
     {
-      for (auto &measurementInfo : measurementIndex)
-      {
-        printSourceLink(tgContext, *trackingGeometry, measurementInfo);
-      }
+      ATH_MSG_INFO("CKF input measurements:");
+      printHeader(0);
+    }
+    for (auto &measurementInfo : measurementIndex)
+    {
+      printSourceLink(tgContext, *trackingGeometry, measurementInfo);
     }
   }
 
-  void TrackStatePrinter::addSpacePoints(const EventContext &ctx, std::vector<std::vector<MeasurementInfo>> &measurementIndices) const
+  void TrackStatePrinter::addSpacePoints(const EventContext &ctx, std::vector<MeasurementInfo> &measurementIndex, size_t type) const
   {
-    ATH_MSG_DEBUG("Retrieving SpacePoint elements from " << m_spacePointKey.size() << " input collections...");
     size_t icoll = 0;
     for (auto &spacePointKey : m_spacePointKey)
     {
@@ -560,11 +559,8 @@ namespace ActsTrk
         continue;
       }
       auto spType = m_spacePointType[icoll++];
-      if (!(spType < measurementIndices.size()))
-      {
-        ATH_MSG_WARNING("Invalid spacePointType (" << spType << ") for SpacePoint collection '" << spacePointKey.key() << "'");
+      if (spType != type)
         continue;
-      }
       ATH_MSG_DEBUG("Retrieving from input SpacePoint collection '" << spacePointKey.key() << "' ...");
       SG::ReadHandle<xAOD::SpacePointContainer> handle = SG::makeHandle(spacePointKey, ctx);
       if (!handle.isValid())
@@ -577,14 +573,14 @@ namespace ActsTrk
       {
         for (auto imeas : sp->measurementIndexes())
         {
-          if (!(imeas < measurementIndices[spType].size()))
+          if (!(imeas < measurementIndex.size()))
           {
             ATH_MSG_WARNING("Invalid measurement index (" << imeas << ") for SpacePoint at ("
                                                           << sp->globalPosition()[0] << ',' << sp->globalPosition()[1] << ',' << sp->globalPosition()[2]
                                                           << ") in collection '" << spacePointKey.key() << "'");
             continue;
           }
-          auto &meas = measurementIndices[spType][imeas];
+          auto &meas = measurementIndex[imeas];
           auto &measSp = std::get<std::vector<const xAOD::SpacePoint *>>(meas);
           if (measSp.empty())
           {
