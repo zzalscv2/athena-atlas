@@ -19,10 +19,13 @@
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Definitions/Common.hpp"
 #include "Acts/Definitions/Algebra.hpp"
+#include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
 #include "Acts/MagneticField/MagneticFieldProvider.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/TrackFinding/SourceLinkAccessorConcept.hpp"
+#include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
+#include "Acts/TrackFinding/MeasurementSelector.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Propagator/EigenStepper.hpp"
 #include "Acts/Propagator/Navigator.hpp"
@@ -60,7 +63,7 @@ namespace
 
   static Acts::Result<void>
   gainMatrixUpdate(const Acts::GeometryContext &gctx,
-		   typename Acts::MultiTrajectory<ActsTrk::TrackStateBackend>::TrackStateProxy trackState,
+                   typename Acts::MultiTrajectory<ActsTrk::TrackStateBackend>::TrackStateProxy trackState,
                    Acts::Direction direction,
                    const Acts::Logger &logger)
   {
@@ -202,6 +205,19 @@ namespace
   using Propagator = Acts::Propagator<Stepper, Navigator>;
   using CKF = Acts::CombinatorialKalmanFilter<Propagator, ActsTrk::TrackStateBackend>;
 
+  // Small holder class to keep CKF and related objects.
+  // Keep a unique_ptr<CKF_pimpl> in TrackFindingTool, so we don't have to expose the
+  // Acts class definitions to in TrackFindingTool.h.
+  struct CKF_config
+  {
+    // CKF algorithm
+    CKF ckf;
+    // CKF configuration
+    Acts::MeasurementSelector measurementSelector;
+    Acts::PropagatorPlainOptions pOptions;
+    Acts::CombinatorialKalmanFilterExtensions<ActsTrk::TrackStateBackend> ckfExtensions;
+  };
+
   // get Athena SiDetectorElement from Acts surface
   static const InDetDD::SiDetectorElement *actsToDetElem(const Acts::Surface &surface)
   {
@@ -213,14 +229,57 @@ namespace
     return dynamic_cast<const InDetDD::SiDetectorElement *>(actsElement->upstreamDetectorElement());
   }
 
+  // Helper class to convert xAOD::PixelClusterContainer or xAOD::StripClusterContainer to UncalibSourceLinkMultiset.
+  struct Measurements_impl : public ActsTrk::ITrackFindingTool::Measurements
+  {
+
+    Measurements_impl(size_t numMeasurements, const ActsTrk::IActsToTrkConverterTool *converterTool, const ActsTrk::ITrackStatePrinter *trackStatePrinter)
+        : m_numMeasurements(numMeasurements), m_ATLASConverterTool(converterTool), m_trackStatePrinter(trackStatePrinter)
+    {
+      m_sourceLinks.reserve(m_numMeasurements);
+      m_elementsCollection.reserve(m_numMeasurements);
+    }
+
+    void addMeasurements(const EventContext &ctx, const ActsTrk::UncalibratedMeasurementContainerPtr &clusterContainer, const InDetDD::SiDetectorElementCollection *detElems) override
+    {
+      size_t ncoll = 0u;
+      size_t offset = m_sourceLinks.size();
+      std::vector<ATLASUncalibSourceLink> sourceLinksVec;
+      std::visit([&](auto &&clusterContainerVar)
+                 {
+                    ncoll = clusterContainerVar->size();
+                    if (m_trackStatePrinter) sourceLinksVec.reserve(ncoll);
+                    for (auto *measurement : *clusterContainerVar)
+                    {
+                      auto sl = m_ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(*detElems, *measurement, m_elementsCollection);
+                      m_sourceLinks.insert(m_sourceLinks.end(), sl);
+                      if (m_trackStatePrinter) sourceLinksVec.push_back(sl);
+                    } },
+                 clusterContainer);
+      if (m_trackStatePrinter)
+      {
+        m_trackStatePrinter->printSourceLinks(ctx, sourceLinksVec, clusterContainer.index(), offset);
+        std::cout << std::flush;
+      }
+    }
+
+    const UncalibSourceLinkMultiset &sourceLinks() const { return m_sourceLinks; }
+
+  private:
+    size_t m_numMeasurements = 0;
+    const ActsTrk::IActsToTrkConverterTool *m_ATLASConverterTool = nullptr;
+    const ActsTrk::ITrackStatePrinter *m_trackStatePrinter = nullptr;
+    UncalibSourceLinkMultiset m_sourceLinks;
+    std::vector<ATLASUncalibSourceLink::ElementsType> m_elementsCollection;
+  };
+
 } // anonymous namespace
 
 /// =========================================================================
 namespace ActsTrk
 {
-  struct TrackFindingTool::CKF_pimpl : public CKF
+  struct TrackFindingTool::CKF_pimpl : public CKF_config
   {
-    using CKF::CKF;
   };
 
   TrackFindingTool::TrackFindingTool(const std::string &type,
@@ -268,18 +327,18 @@ namespace ActsTrk
     cfg.resolveSensitive = true;
     Navigator navigator(cfg);
     Propagator propagator(std::move(stepper), std::move(navigator), logger().cloneWithSuffix("Prop"));
-    m_trackFinder.reset(new CKF_pimpl(std::move(propagator), logger().cloneWithSuffix("CKF")));
-
-    m_pOptions.maxSteps = m_maxPropagationStep;
 
     Acts::MeasurementSelector::Config measurementSelectorCfg{{Acts::GeometryIdentifier(),
                                                               {m_etaBins, m_chi2CutOff, m_numMeasurementsCutOff}}};
-    m_measurementSelector.reset(new Acts::MeasurementSelector{measurementSelectorCfg});
 
-    m_ckfExtensions.updater.connect<&gainMatrixUpdate>();
-    m_ckfExtensions.smoother.connect<&gainMatrixSmoother>();
-    m_ckfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<ActsTrk::TrackStateBackend, ATLASUncalibSourceLink>>();
-    m_ckfExtensions.measurementSelector.connect<&Acts::MeasurementSelector::select<ActsTrk::TrackStateBackend>>(m_measurementSelector.get());
+    m_trackFinder.reset(static_cast<CKF_pimpl *>(new CKF_config{{std::move(propagator), logger().cloneWithSuffix("CKF")}, measurementSelectorCfg, {}, {}}));
+
+    m_trackFinder->pOptions.maxSteps = m_maxPropagationStep;
+
+    m_trackFinder->ckfExtensions.updater.connect<&gainMatrixUpdate>();
+    m_trackFinder->ckfExtensions.smoother.connect<&gainMatrixSmoother>();
+    m_trackFinder->ckfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<ActsTrk::TrackStateBackend, ATLASUncalibSourceLink>>();
+    m_trackFinder->ckfExtensions.measurementSelector.connect<&Acts::MeasurementSelector::select<ActsTrk::TrackStateBackend>>(&m_trackFinder->measurementSelector);
 
     return StatusCode::SUCCESS;
   }
@@ -294,50 +353,25 @@ namespace ActsTrk
     return StatusCode::SUCCESS;
   }
 
+  std::unique_ptr<ActsTrk::ITrackFindingTool::Measurements>
+  ActsTrk::TrackFindingTool::initMeasurements(size_t numMeasurements) const
+  {
+    return std::unique_ptr<ActsTrk::ITrackFindingTool::Measurements>(new Measurements_impl(numMeasurements,
+                                                                                           &*m_ATLASConverterTool,
+                                                                                           m_trackStatePrinter.empty() ? nullptr : &*m_trackStatePrinter));
+  }
+
   StatusCode
   TrackFindingTool::findTracks(const EventContext &ctx,
-                               const std::vector<std::pair<UncalibratedMeasurementContainerPtr, const InDetDD::SiDetectorElementCollection *>> &measurements,
+                               const Measurements &measurements,
                                const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
-                               ::TrackCollection &tracksContainer) const
+                               ::TrackCollection &tracksContainer,
+                               const char *seedType) const
   {
     ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
 
-    std::vector<size_t> ncoll;
-    ncoll.reserve(measurements.size());
-
-    std::transform(measurements.begin(), measurements.end(), std::back_inserter(ncoll),
-                   [](const auto &m)
-                   { return std::visit([](auto &&v) -> size_t
-                                       { return v->size(); },
-                                       m.first); });
-
-    auto numMeasurements = std::accumulate(ncoll.begin(), ncoll.end(), size_t{0u});
-    ATH_MSG_DEBUG("Create " << numMeasurements << " source links");
-
-    UncalibSourceLinkMultiset sourceLinks;
-    sourceLinks.reserve(numMeasurements);
-    std::vector<ATLASUncalibSourceLink> sourceLinksVec;
-    if (!m_trackStatePrinter.empty())
-      sourceLinksVec.reserve(numMeasurements);
-
-    std::vector<ATLASUncalibSourceLink::ElementsType> elementsCollection;
-    elementsCollection.reserve(numMeasurements);
-
-    for (auto &[clusterContainerVar, detElemsBind] : measurements)
-    {
-      auto *detElems = detElemsBind; // structured bindings can't be captured in C++17
-      std::visit([&](auto &&clusterContainer)
-                 {
-
-                    for (auto *measurement : *clusterContainer)
-                    {
-		      auto sl = m_ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(*detElems, *measurement, elementsCollection);
-
-                      sourceLinks.insert(sourceLinks.end(), sl);
-                      if (!m_trackStatePrinter.empty()) sourceLinksVec.push_back(sl);
-                    } },
-                 clusterContainerVar);
-    }
+    // Get measurement source links. We cast to Measurements_impl to give access to this file's local data members.
+    auto meas = dynamic_cast<const Measurements_impl &>(measurements);
 
     // Construct a perigee surface as the target surface
     auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
@@ -348,7 +382,7 @@ namespace ActsTrk
     Acts::CalibrationContext calContext = Acts::CalibrationContext();
 
     UncalibSourceLinkAccessor slAccessor;
-    slAccessor.container = &sourceLinks;
+    slAccessor.container = &meas.sourceLinks();
     Acts::SourceLinkAccessorDelegate<UncalibSourceLinkAccessor::Iterator> slAccessorDelegate;
     slAccessorDelegate.connect<&UncalibSourceLinkAccessor::range>(&slAccessor);
 
@@ -358,17 +392,18 @@ namespace ActsTrk
                                mfContext,
                                calContext,
                                slAccessorDelegate,
-                               m_ckfExtensions,
-                               m_pOptions,
+                               m_trackFinder->ckfExtensions,
+                               m_trackFinder->pOptions,
                                &(*pSurface));
 
     // Perform the track finding for all initial parameters
-    ATH_MSG_DEBUG("Invoke track finding with " << estimatedTrackParameters.size() << " seeds.");
+    ATH_MSG_DEBUG("Invoke track finding with " << estimatedTrackParameters.size() << ' ' << seedType << " seeds.");
 
     Acts::TrackContainer tc{Acts::VectorTrackContainer{},
                             ActsTrk::TrackStateBackend{}};
 
     m_nTotalSeeds += estimatedTrackParameters.size();
+    size_t addTracks = 0;
 
     // Loop over the track finding results for all initial parameters
     for (std::size_t iseed = 0; iseed < estimatedTrackParameters.size(); ++iseed)
@@ -376,38 +411,33 @@ namespace ActsTrk
       // Get the Acts tracks, given this seed
       // Result here contains a vector of TrackProxy objects
 
-      auto result = m_trackFinder->findTracks(*estimatedTrackParameters[iseed], options, tc);
+      auto result = m_trackFinder->ckf.findTracks(*estimatedTrackParameters[iseed], options, tc);
 
       // The result for this seed
       if (not result.ok())
       {
-        ATH_MSG_WARNING("Track finding failed for seed " << iseed << " with error" << result.error());
+        ATH_MSG_WARNING("Track finding failed for " << seedType << " seed " << iseed << " with error" << result.error());
         ++m_nFailedSeeds;
         continue;
       }
       // Get the track finding output and add to tracksContainer
       size_t ntracks = makeTracks(ctx, tgContext, tc, result.value(), tracksContainer);
+      addTracks += ntracks;
 
       if (!m_trackStatePrinter.empty())
       {
-        if (iseed == 0)
-        {
-          ATH_MSG_INFO("CKF input measurements:");
-          m_trackStatePrinter->printSourceLinks(ctx, tgContext, sourceLinksVec, ncoll);
-          ATH_MSG_INFO("CKF results for " << estimatedTrackParameters.size() << " seeds:");
-        }
-        m_trackStatePrinter->printTracks(tgContext, tc, result.value(), *estimatedTrackParameters[iseed], iseed, ntracks);
+        m_trackStatePrinter->printTracks(tgContext, tc, result.value(), *estimatedTrackParameters[iseed], iseed, ntracks, iseed == 0 ? estimatedTrackParameters.size() : 0, seedType);
         std::cout << std::flush;
       }
 
       if (ntracks == 0)
       {
-        ATH_MSG_WARNING("Track finding found no track candidates for seed " << iseed);
+        ATH_MSG_WARNING("Track finding found no track candidates for " << seedType << " seed " << iseed);
         ++m_nFailedSeeds;
       }
     }
 
-    ATH_MSG_DEBUG("Completed track finding with " << tracksContainer.size() << " track candidates.");
+    ATH_MSG_DEBUG("Completed " << seedType << " track finding with " << addTracks << " track candidates.");
 
     return StatusCode::SUCCESS;
   }

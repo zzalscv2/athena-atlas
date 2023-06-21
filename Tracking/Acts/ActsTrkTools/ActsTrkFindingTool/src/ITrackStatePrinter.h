@@ -33,9 +33,9 @@ namespace ActsTrk
 
     virtual void
     printSourceLinks(const EventContext &ctx,
-                     const Acts::GeometryContext &tgContext,
                      const std::vector<ATLASUncalibSourceLink> &sourceLinks,
-                     const std::vector<size_t> &ncoll) const = 0;
+                     size_t type,
+                     size_t offset) const = 0;
 
     virtual void
     printTracks(const Acts::GeometryContext &tgContext,
@@ -43,7 +43,9 @@ namespace ActsTrk
                 const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
                 const Acts::BoundTrackParameters &seed,
                 size_t iseed,
-                size_t ntracks) const = 0;
+                size_t ntracks,
+                size_t head,
+                const char *seedType = "") const = 0;
   };
 
 } // namespace

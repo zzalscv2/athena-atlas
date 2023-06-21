@@ -31,13 +31,22 @@ namespace ActsTrk
       : virtual public IAlgTool
   {
   public:
+    // Class to hold the measurement source links. This is created by TrackFindingTool::initMeasurements().
+    struct Measurements
+    {
+      virtual void addMeasurements(const EventContext &ctx, const UncalibratedMeasurementContainerPtr &clusterContainer, const InDetDD::SiDetectorElementCollection *detElems) = 0;
+    };
+
     DeclareInterfaceID(ITrackFindingTool, 1, 0);
 
     virtual StatusCode
     findTracks(const EventContext &ctx,
-               const std::vector<std::pair<UncalibratedMeasurementContainerPtr, const InDetDD::SiDetectorElementCollection *>> &measurements,
+               const Measurements &measurements,
                const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
-               ::TrackCollection &tracksContainer) const = 0;
+               ::TrackCollection &tracksContainer,
+               const char *seedType = "") const = 0;
+
+    virtual std::unique_ptr<Measurements> initMeasurements(size_t numMeasurements) const = 0;
   };
 
 } // namespace

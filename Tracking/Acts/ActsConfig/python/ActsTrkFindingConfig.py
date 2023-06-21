@@ -4,6 +4,8 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 # Tools
+
+
 def ActsTrkFindingToolCfg(
     flags, name: str = "ActsTrackFindingTool", **kwargs
 ) -> ComponentAccumulator:
@@ -18,15 +20,15 @@ def ActsTrkFindingToolCfg(
     kwargs.setdefault(
         "TrackingGeometryTool",
         acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
-    )  # PrivateToolHandle                                                                                                                                                                                                                                                                                                                                                                                                                                       
+    )  # PrivateToolHandle
     kwargs.setdefault(
         "ExtrapolationTool",
         acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
-    )  # PrivateToolHandle                                                                                                                                                                                                                                                                                                                                                                                                                                       
+    )  # PrivateToolHandle
     from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
     kwargs.setdefault(
         "SummaryTool", acc.popToolsAndMerge(InDetTrackSummaryToolCfg(flags))
-    )  # PrivateToolHandle                                                                                                                                                                                                                                                                                                                                                                                                                                       
+    )  # PrivateToolHandle
     from ActsConfig.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
     kwargs.setdefault(
         "ATLASConverterTool",
@@ -59,7 +61,8 @@ def ActsTrkFindingToolCfg(
 
         kwargs.setdefault(
             "RotCreatorTool",
-            acc.popToolsAndMerge(RotCreatorCfg(flags, name="ActsRotCreatorTool")),
+            acc.popToolsAndMerge(RotCreatorCfg(
+                flags, name="ActsRotCreatorTool")),
         )
 
     if flags.Acts.doPrintTrackStates:
@@ -70,6 +73,7 @@ def ActsTrkFindingToolCfg(
 
     acc.setPrivateTools(CompFactory.ActsTrk.TrackFindingTool(name, **kwargs))
     return acc
+
 
 def ActsTrackStatePrinterCfg(
     flags, name: str = "TrackStatePrinter", **kwargs
@@ -90,23 +94,32 @@ def ActsTrackStatePrinterCfg(
     return acc
 
 # ACTS only algorithm
+
+
 def ActsTrkFindingCfg(flags, name: str = "ActsTrkFindingAlg", **kwargs):
     acc = ComponentAccumulator()
 
     # tools
     if "TrackFindingTool" not in kwargs:
-        kwargs["TrackFindingTool"] = acc.popToolsAndMerge(ActsTrkFindingToolCfg(flags))
+        kwargs["TrackFindingTool"] = acc.popToolsAndMerge(
+            ActsTrkFindingToolCfg(flags))
 
     kwargs.setdefault("PixelClusterContainerKey", "ITkPixelClusters")
     kwargs.setdefault("StripClusterContainerKey", "ITkStripClusters")
-    kwargs.setdefault("PixelDetectorElements", "ITkPixelDetectorElementCollection")
-    kwargs.setdefault("StripDetectorElements", "ITkStripDetectorElementCollection")
-    kwargs.setdefault("InputEstimatedTrackParameters", "ITkPixelEstimatedTrackParams")
+    kwargs.setdefault("PixelDetectorElements",
+                      "ITkPixelDetectorElementCollection")
+    kwargs.setdefault("StripDetectorElements",
+                      "ITkStripDetectorElementCollection")
+    kwargs.setdefault("PixelEstimatedTrackParameters",
+                      "ITkPixelEstimatedTrackParams")
+    kwargs.setdefault("StripEstimatedTrackParameters",
+                      "ITkStripEstimatedTrackParams")
     kwargs.setdefault("TracksLocation", "SiSPSeededActsTracks")
 
     if flags.Acts.doMonitoring:
         from ActsConfig.ActsTrkMonitoringConfig import ActsTrkFindingMonitoringCfg
-        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkFindingMonitoringCfg(flags)))
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(
+            ActsTrkFindingMonitoringCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.TrackFindingAlg(name, **kwargs))
     return acc
