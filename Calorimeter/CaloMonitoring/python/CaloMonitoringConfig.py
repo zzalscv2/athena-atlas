@@ -27,6 +27,9 @@ def CaloMonitoringCfg(flags):
         from CaloMonitoring.LArCellMonAlg import LArCellMonConfig
         acc.merge( LArCellMonConfig(flags) )
 
+        from CaloMonitoring.LArClusterCellMonAlg import LArClusterCellMonConfig
+        acc.merge( LArClusterCellMonConfig(flags) )
+
         # FIXME could not be included yet, some trigger configurations are missing
         #from CaloMonitoring.CaloBaselineMonAlg import CaloBaselineMonConfig
         #acc.merge( CaloBaselineMonConfig(flags,False) )

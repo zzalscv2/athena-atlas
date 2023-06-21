@@ -109,3 +109,23 @@ def divideByAcceptedEvts(inputs):
     cl.Scale(100.0/thenorm)
     
     return [cl]
+
+
+def simpleDivideByAcceptedEvts(inputs,titleToReplace="",replaceTitWith=""):
+    """ This function divides the input histogram by the number of accepted events"""
+    assert len(inputs) == 1 #Expect only one match 
+    assert len(inputs[0][1]) == 2 # pair of (regex-match,list-of-hists)
+    
+    cl=inputs[0][1][0].Clone() #First histogram of the list of histgrams in the pair 
+    
+    hnorm = inputs[0][1][1]    #Second histogram in the list of histograms is the number of events
+    theNorm=hnorm.GetBinContent(1)
+    if theNorm>1:
+        cl.Scale(100.0/theNorm)
+
+    if titleToReplace!="":
+        tit = cl.GetTitle()
+        tit = tit.replace(titleToReplace,replaceTitWith)
+        cl.SetTitle(tit)
+
+    return [cl]
