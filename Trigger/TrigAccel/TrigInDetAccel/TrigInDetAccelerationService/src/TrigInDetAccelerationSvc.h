@@ -68,6 +68,7 @@ class TrigInDetAccelerationSvc : public extends<AthService, ITrigInDetAccelerati
 
   int m_nDCs;
   std::string m_moduleName;
+  bool m_useITkGeometry;
   void* m_libHandle; //for OffloadFactory
   TrigAccel::WorkFactory* m_pWF;
   ServiceHandle<StoreGateSvc> m_detStore; 
@@ -78,6 +79,11 @@ class TrigInDetAccelerationSvc : public extends<AthService, ITrigInDetAccelerati
   bool exportGeometryInformation(const std::map<std::tuple<short,short,short>, std::vector<PhiEtaHash> >&) const;
   bool extractGeometryInformation(std::map<std::tuple<short,short,short>, std::vector<PhiEtaHash> >&);
 
+  bool extractITkGeometryInformation(std::map<std::tuple<short, short, int, int>, std::vector<PhiEtaHash> >&);
+  bool exportITkGeometryInformation(const std::map<std::tuple<short,short, int, int>,std::vector<PhiEtaHash> >& hashMap) const;
+
+  // Index 0 stores mapping from a position (barrel_ec, subdetid, new_vol, new_lay) index to it's position in barrel/endcap
+  // Index 1 and 2 stores mapping from subdetector's PhiEtaHash to the position index
   std::vector<short> m_layerInfo[3];
 
   mutable std::mutex m_workMutex;
