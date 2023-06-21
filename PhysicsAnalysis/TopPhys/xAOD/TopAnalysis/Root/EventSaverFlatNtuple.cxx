@@ -467,6 +467,11 @@ namespace top {
         systematicTree->makeOutputVariable(m_weight_pileup, "weight_pileup");
         systematicTree->makeOutputVariable(m_weight_leptonSF, "weight_leptonSF");
 
+	// electron ChargeID SF only if ECIDS is on
+	if (m_useElectronChargeIDSelection) systematicTree->makeOutputVariable(m_weight_indiv_SF_EL_ChargeID, "weight_indiv_SF_EL_ChargeID");
+	// electron ChargeMisID SF by default
+	systematicTree->makeOutputVariable(m_weight_indiv_SF_EL_ChargeMisID, "weight_indiv_SF_EL_ChargeMisID");
+
         if (m_config->useFwdElectrons()) systematicTree->makeOutputVariable(m_weight_fwdElSF, "weight_fwdElSF");
 
         if (m_config->usePhotons()) systematicTree->makeOutputVariable(m_weight_photonSF, "weight_photonSF");
@@ -808,10 +813,10 @@ namespace top {
           systematicTree->makeOutputVariable(m_weight_indiv_SF_EL_Isol, "weight_indiv_SF_EL_Isol");
           systematicTree->makeOutputVariable(m_weight_indiv_SF_EL_Isol_UP, "weight_indiv_SF_EL_Isol_UP");
           systematicTree->makeOutputVariable(m_weight_indiv_SF_EL_Isol_DOWN, "weight_indiv_SF_EL_Isol_DOWN");
-          systematicTree->makeOutputVariable(m_weight_indiv_SF_EL_ChargeID, "weight_indiv_SF_EL_ChargeID");
-          systematicTree->makeOutputVariable(m_weight_indiv_SF_EL_ChargeID_UP, "weight_indiv_SF_EL_ChargeID_UP");
-          systematicTree->makeOutputVariable(m_weight_indiv_SF_EL_ChargeID_DOWN, "weight_indiv_SF_EL_ChargeID_DOWN");
-          systematicTree->makeOutputVariable(m_weight_indiv_SF_EL_ChargeMisID, "weight_indiv_SF_EL_ChargeMisID");
+	  if (m_useElectronChargeIDSelection) {
+	    systematicTree->makeOutputVariable(m_weight_indiv_SF_EL_ChargeID_UP, "weight_indiv_SF_EL_ChargeID_UP");
+	    systematicTree->makeOutputVariable(m_weight_indiv_SF_EL_ChargeID_DOWN, "weight_indiv_SF_EL_ChargeID_DOWN");
+	  }
           systematicTree->makeOutputVariable(m_weight_indiv_SF_EL_ChargeMisID_STAT_UP,
                                              "weight_indiv_SF_EL_ChargeMisID_STAT_UP");
           systematicTree->makeOutputVariable(m_weight_indiv_SF_EL_ChargeMisID_STAT_DOWN,
@@ -2040,6 +2045,12 @@ namespace top {
       m_weight_pileup = m_sfRetriever->pileupSF(event);
 
       m_weight_leptonSF = m_sfRetriever->leptonSF(event, top::topSFSyst::nominal);
+
+      // Electron ChargeID SF only with ECIDS
+      if (m_useElectronChargeIDSelection) m_weight_indiv_SF_EL_ChargeID = m_sfRetriever->electronSF(event, top::topSFSyst::nominal, top::topSFComp::CHARGEID);
+      // Electron ChargeMisID SF by default
+      m_weight_indiv_SF_EL_ChargeMisID = m_sfRetriever->electronSF(event, top::topSFSyst::nominal, top::topSFComp::CHARGEMISID);
+
       if (m_config->useFwdElectrons()) m_weight_fwdElSF = m_sfRetriever->fwdElectronSF(event, top::topSFSyst::nominal);
 
       if (m_config->useTaus()) m_weight_tauSF = m_sfRetriever->tauSF(event, top::topSFSyst::nominal);
@@ -2214,10 +2225,10 @@ namespace top {
         m_weight_indiv_SF_EL_Isol = m_sfRetriever->electronSF(event, top::topSFSyst::nominal, top::topSFComp::ISOLATION);
         m_weight_indiv_SF_EL_Isol_UP = m_sfRetriever->electronSF(event, top::topSFSyst::EL_SF_Isol_UP, top::topSFComp::ISOLATION);
         m_weight_indiv_SF_EL_Isol_DOWN = m_sfRetriever->electronSF(event, top::topSFSyst::EL_SF_Isol_DOWN, top::topSFComp::ISOLATION);
-        m_weight_indiv_SF_EL_ChargeID = m_sfRetriever->electronSF(event, top::topSFSyst::nominal, top::topSFComp::CHARGEID);
-        m_weight_indiv_SF_EL_ChargeID_UP = m_sfRetriever->electronSF(event, top::topSFSyst::EL_SF_ChargeID_UP, top::topSFComp::CHARGEID);
-        m_weight_indiv_SF_EL_ChargeID_DOWN = m_sfRetriever->electronSF(event, top::topSFSyst::EL_SF_ChargeID_DOWN, top::topSFComp::CHARGEID);
-        m_weight_indiv_SF_EL_ChargeMisID = m_sfRetriever->electronSF(event, top::topSFSyst::nominal, top::topSFComp::CHARGEMISID);
+	if (m_useElectronChargeIDSelection) {
+	  m_weight_indiv_SF_EL_ChargeID_UP = m_sfRetriever->electronSF(event, top::topSFSyst::EL_SF_ChargeID_UP, top::topSFComp::CHARGEID);
+	  m_weight_indiv_SF_EL_ChargeID_DOWN = m_sfRetriever->electronSF(event, top::topSFSyst::EL_SF_ChargeID_DOWN, top::topSFComp::CHARGEID);
+	}
         m_weight_indiv_SF_EL_ChargeMisID_STAT_UP = m_sfRetriever->electronSF(event, top::topSFSyst::EL_SF_ChargeMisID_STAT_UP, top::topSFComp::CHARGEMISID);
         m_weight_indiv_SF_EL_ChargeMisID_STAT_DOWN = m_sfRetriever->electronSF(event, top::topSFSyst::EL_SF_ChargeMisID_STAT_DOWN, top::topSFComp::CHARGEMISID);
         m_weight_indiv_SF_EL_ChargeMisID_SYST_UP = m_sfRetriever->electronSF(event, top::topSFSyst::EL_SF_ChargeMisID_SYST_UP, top::topSFComp::CHARGEMISID);
