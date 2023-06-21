@@ -794,7 +794,7 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         float hlt_Ex = hlt_met->ex()/Gaudi::Units::GeV;
         float hlt_Ey = hlt_met->ey()/Gaudi::Units::GeV;
         float hlt_Et = std::sqrt(hlt_Ex*hlt_Ex + hlt_Ey*hlt_Ey);
-        if (L1_roiMet_Et > 55.) {
+        if (L1_roiMet_Et > 50.) {
           auto met_presel_Et = Monitored::Scalar<float>(alg+"_presel_Et", static_cast<float>(hlt_Et));
           fill(tool,met_presel_Et);
         }
@@ -999,7 +999,7 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         auto met_sumEt = Monitored::Scalar<float>(alg+"_sumEt", static_cast<float>(hlt_sumEt));
         fill(tool,met_Ex,met_Ey,met_Et,met_sumEt);
         ATH_MSG_DEBUG(alg << ": hlt_Et = " << hlt_Et);
-        if (L1_roiMet_Et > 55.) {
+        if (L1_roiMet_Et > 50.) {
           auto met_presel_Et = Monitored::Scalar<float>(alg+"_presel_Et", static_cast<float>(hlt_Et));
           fill(tool,met_presel_Et);
         }
