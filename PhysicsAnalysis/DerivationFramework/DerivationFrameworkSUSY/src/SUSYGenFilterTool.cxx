@@ -7,19 +7,11 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODJet/JetContainer.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace DerivationFramework {
 
   using namespace MCTruthPartClassifier;
-
-  static bool isNonInteracting(int pid) {
-    const int apid = std::abs(pid);
-    if (apid == 12 || apid == 14 || apid == 16) return true; //< neutrinos
-    if (apid == 1000022 || apid == 1000024 || apid == 5100022) return true; // SUSY & KK photon and Z partners
-    if (apid == 39 || apid == 1000039 || apid == 5000039) return true; //< gravitons: standard, SUSY and KK
-    if (apid == 9000001 || apid == 9000002 || apid == 9000003 || apid == 9000004 || apid == 9000005 || apid == 9000006) return true; //< exotic particles from monotop model
-    return false;
-  }
 
   static const SG::AuxElement::Decorator<float> dec_genFiltHT("GenFiltHT");
   static const SG::AuxElement::Decorator<float> dec_genFiltMET("GenFiltMET");
@@ -137,7 +129,7 @@ namespace DerivationFramework {
       int pdgid = tp->pdgId();
       if (HepMC::is_simulation_particle(tp)) continue; // Particle is from G4
       if (pdgid==21 && tp->e()==0) continue; // Work around for an old generator bug
-      if ( tp->status() %1000 !=1 ) continue; // Stable!
+      if ( !MC::isStable(tp) ) continue; // Stable!
 
       if ((std::abs(pdgid)==11 || std::abs(pdgid)==13) && tp->pt()>m_MinLepPt && std::fabs(tp->eta())<m_MaxLepEta) {
 	if( isPrompt(tp) ) {
@@ -150,7 +142,7 @@ namespace DerivationFramework {
 	}
       }
 
-      if (isNonInteracting(pdgid) && isPrompt(tp) ) {
+      if (MC::DerivationFramework_isNonInteracting(tp) && isPrompt(tp) ) {
 	ATH_MSG_VERBOSE("Found prompt nonInteracting particle with pt " << tp->pt()
 			<< ", eta " << tp->eta()
 			<< ", phi " << tp->phi()

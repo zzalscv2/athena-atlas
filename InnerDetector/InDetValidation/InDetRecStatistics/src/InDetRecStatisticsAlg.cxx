@@ -20,6 +20,7 @@
 #include "GaudiKernel/IPartPropSvc.h"
 #include "HepPDT/ParticleData.hh"
 #include "CLHEP/Units/SystemOfUnits.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include <cmath>
 #include <memory>
 #include <ostream>
@@ -567,7 +568,7 @@ selectGenSignal  (const McEventCollection* SimTracks,
 #endif
       for (const auto& particle: *genEvent){
 	  // require stable particle from generation or simulation
-	  if ((particle->status()%1000) != 1 ) continue;
+	  if (!MC::isStable(particle)) continue;
 	  int   pdgCode = particle->pdg_id();
 	  const HepPDT::ParticleData* pd = m_particleDataTable->particle(std::abs(pdgCode));
 	  if (!pd) {

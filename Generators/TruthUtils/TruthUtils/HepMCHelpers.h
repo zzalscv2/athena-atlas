@@ -62,16 +62,89 @@ namespace MC {
     return !MC::isNonInteracting(p->pdg_id());
   }
 
-
+/* The functions below should be unified */
   template <class T> inline bool FastCaloSimIsGenSimulStable(const T&  p) {
   int status=p->status();
   const auto& vertex = p->end_vertex();
-  return (status%1000 == 1) ||
-          (status%1000 == 2 && status > 1000) ||
+  return (status == 1) ||
           (status==2 && !vertex) ||
           (status==2 && HepMC::is_simulation_vertex(vertex))
           ;
+
 }
+
+  template <class T> inline bool jettruthparticleselectortool_isStable( const T& p) {
+    if (HepMC::is_simulation_particle(p)) return false; // This particle is from G4
+    if (p->pdgId() == 21 && p->p4().E() == 0) return false; //< Workaround for a gen bug?
+    return ((p->status() == 1) || //< Fully stable, even if marked that way by G4
+            (p->status() == 2 && p->hasDecayVtx() && p->decayVtx() != nullptr && HepMC::is_simulation_vertex(p->decayVtx()))); //< Gen-stable with G4 decay
+  }
+  
+
+  template <class T> inline bool jettruthparticleselectortool_isInteracting( const T& p){
+      if (! jettruthparticleselectortool_isStable(p)) return false;
+      const int apid = std::abs(p->pdgId() );
+      if (apid == 12 || apid == 14 || apid == 16) return false;
+      if (p->status() == 1 &&
+          (apid == 1000022 || apid == 1000024 || apid == 5100022 ||
+           apid == 39 || apid == 1000039 || apid == 5000039)) return false;
+      return true;      
+    }
+
+  template <class T> inline bool DerivationFramework_isNonInteracting(const T& p) {
+    const int apid = std::abs(p->pdg_id());
+    if (apid == 12 || apid == 14 || apid == 16) return true; //< neutrinos
+    if (apid == 1000022 || apid == 1000024 || apid == 5100022) return true; // SUSY & KK photon and Z partners
+    if (apid == 39 || apid == 1000039 || apid == 5000039) return true; //< gravitons: standard, SUSY and KK
+    if (apid == 9000001 || apid == 9000002 || apid == 9000003 || apid == 9000004 || apid == 9000005 || apid == 9000006) return true; //< exotic particles from monotop model
+    return false;
+  }
+
+
+
+  template <class T> inline bool egammaTruthAlg_isGenStable (const T& tp)
+{
+  // get generator id 
+  int p_id = tp->pdg_id();
+
+  auto vertex = tp->end_vertex();
+  // we want to keep primary particle with status==2 but without vertex in HepMC
+
+  return (
+          ( ( tp->status() == 1) ||  
+            (tp->status()==2 && (!vertex || HepMC::is_simulation_vertex(vertex))) 
+            ) && (!HepMC::is_simulation_particle(tp)) 
+          && !(std::abs(p_id) == 21 && tp->e()==0)
+          );    
+}
+
+
+  template <class T> inline bool egammaTruthAlg_isGenInteracting (const T&  tp)
+{
+  int status = tp->status();
+  int pdg_id = abs(tp->pdg_id());
+  auto vertex = tp->end_vertex();
+  // we want to keep primary particle with status==2 but without vertex in HepMC
+
+  return
+    (
+
+     (((status == 1) ||
+       (status==2 && (!vertex || HepMC::is_simulation_vertex(vertex)))) && (!HepMC::is_simulation_particle(tp)) ) &&
+
+     !(pdg_id==12 || pdg_id==14 || pdg_id==16 ||
+       (pdg_id==1000022 &&  status==1 ) ||
+       (pdg_id==5100022 &&  status==1 ) ||
+       (pdg_id==1000024 &&  status==1 ) ||
+       (pdg_id==39 &&  status==1 ) ||
+       (pdg_id==1000039 &&  status==1 ) ||
+       (pdg_id==5000039 &&  status==1 ))
+
+     );
+}
+
+
+
 
 
 }
