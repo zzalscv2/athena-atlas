@@ -7,6 +7,11 @@
   <class name="LArBadChannelCont" />
   <class name="CondCont<LArBadChannelCont>" />
 
+  <class name="LArHVIdMapping" />
+  <class name="CondCont<LArHVIdMapping>" />
+
+  <class name="LArCalibLineMapping" />
+  <class name="CondCont<LArCalibLineMapping>" />
 
 </lcgdict>
 
