@@ -61,5 +61,9 @@ from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 acc=MainServicesCfg(flags)
 
 acc.merge (testCfg (flags))
+
+#Want to see all verbose messages in this test
+acc.getService("MessageSvc").enableSuppression = False
+
 acc.run(1)
 
