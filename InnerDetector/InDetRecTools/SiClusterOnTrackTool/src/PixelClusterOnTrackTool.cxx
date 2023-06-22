@@ -535,7 +535,10 @@ InDet::PixelClusterOnTrackTool::correctDefault
                                     element->identify());
   }
   bool isbroad = m_errorStrategy == 0;
-  return new InDet::PixelClusterOnTrack(pix, locpar, cov, iH, glob, pix->gangedPixel(), isbroad);
+  return new InDet::PixelClusterOnTrack(pix,
+                                        std::move(locpar),
+                                        std::move(cov), iH,
+                                        glob, pix->gangedPixel(), isbroad);
 }
 
 void

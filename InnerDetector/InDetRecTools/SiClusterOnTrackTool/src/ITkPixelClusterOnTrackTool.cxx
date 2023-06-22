@@ -346,7 +346,9 @@ PixelClusterOnTrackTool::correctDefault
                                     element->identify());
   }
   bool isbroad = m_errorStrategy == 0;
-  return new InDet::PixelClusterOnTrack(pix, locpar, cov, iH, glob, pix->gangedPixel(), isbroad);
+  return new InDet::PixelClusterOnTrack(pix, std::move(locpar),
+                                        std::move(cov),
+                                        iH, glob, pix->gangedPixel(), isbroad);
 }
 
 
@@ -443,7 +445,9 @@ PixelClusterOnTrackTool::correctNN
   const Amg::Vector3D &glob = element->globalPosition(centroid);
 
 
-  return new InDet::PixelClusterOnTrack(pixelPrepCluster, locpar, cov, iH,
+  return new InDet::PixelClusterOnTrack(pixelPrepCluster,
+                                        std::move(locpar),
+                                        std::move(cov), iH,
                                         glob,
                                         pixelPrepCluster->gangedPixel(),
                                         false);
