@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //**************************************************************************
@@ -103,7 +103,8 @@ private:
   double applyPhotoStatistics(double energy, Identifier pmt_id, CLHEP::HepRandomEngine* engine, const TileSamplingFraction* samplingFraction, int drawerIdx);
   void findAndMergeE1(TileHitCollection* coll, int frag_id, TileHitNonConstContainer* hitCont);
   void findAndMergeMBTS(TileHitCollection* coll, int frag_id, TileHitNonConstContainer* hitCont);
-
+  void findAndMergeMultipleHitsInChannel(std::unique_ptr<TileHitNonConstContainer>& hitCont);
+  void mergeExtraHitToChannelHit(TileHit* extraHit, TileHit* channelHit);
 
   Gaudi::Property<bool> m_onlyUseContainerName{this, "OnlyUseContainerName", true, "Don't use the ReadHandleKey directly. Just extract the container name from it."};
   StringArrayProperty m_inputKeys{this, "TileHitVectors", {"TileHitVec"},
@@ -149,6 +150,8 @@ private:
       "DigiTruth reconstruction"};                       //!
   Gaudi::Property<bool> m_usePhotoStatistics{this,
       "usePhotoStatistics", true, "Simulate photo statistics effect (default=true)"};
+  Gaudi::Property<bool> m_mergeMultipleHitsInChannel{this, "MergeMultipleHitsInChannel", true,
+      "Find and merge multiple hits for the same channel in container (default=true)"};
   PublicToolHandle<ITriggerTime> m_triggerTimeTool{this, "TriggerTimeTool", "",
       "Name of trigger time tool (default='')"}; //!< tool to take the time from
 
