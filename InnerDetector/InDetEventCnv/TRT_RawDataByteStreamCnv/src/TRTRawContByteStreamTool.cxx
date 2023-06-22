@@ -27,17 +27,13 @@ TRTRawContByteStreamTool::TRTRawContByteStreamTool
 {
   declareInterface< ITRTRawContByteStreamTool  >( this );
   declareProperty("RodBlockVersion",m_RodBlockVersion=3);
-
-  return;
 }
 
 // ------------------------------------------------------------------------
 // destructor 
  
 TRTRawContByteStreamTool::~TRTRawContByteStreamTool()
-{
-   return;
-}
+= default;
  
 // ------------------------------------------------------------------------
 // initialize the tool
@@ -98,7 +94,7 @@ TRTRawContByteStreamTool::convert(TRT_RDO_Container* cont) const
   {
     const TRTRawCollection* coll = (*it_coll) ;
 
-    if ( 0 != coll )
+    if ( nullptr != coll )
     {
       // Collection Id
       Identifier id = coll->identify() ;

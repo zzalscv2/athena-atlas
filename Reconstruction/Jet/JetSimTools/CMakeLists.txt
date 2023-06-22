@@ -7,7 +7,7 @@ atlas_subdir( JetSimTools )
 atlas_add_component( JetSimTools
                      Root/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AsgTools xAODTruth JetUtils AtlasHepMCLib)
+                     LINK_LIBRARIES AsgTools xAODTruth JetUtils AtlasHepMCLib TruthUtils)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

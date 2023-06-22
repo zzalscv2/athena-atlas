@@ -77,3 +77,20 @@ Input: [ 'CaloMonitoring/LArCellMon_NoTrigSel/2d_Occupancy/CellOccupancyVsEtaPhi
 Output: [ 'CaloMonitoring/LArCellMon_NoTrigSel/2d_Occupancy/PercentCellOccupancyVsEtaPhi_{lay}{side}_{thr}' ]
 Function: CaloMonitoring.CaloMonTransforms.divideByAcceptedEvts
 Description: 2D_percentage_occupancy
+
+
+#2D percentage of cells contributing to clusters
+---
+Input: [ 'CaloMonitoring/LArClusterCellMon/ClusterCell/NClusteredCells_(?P<lay>EMBP|EMB1|EMB2|EMB3|HEC0|HEC1|HEC2|HEC3|EMECP|EMEC1|EMEC2|EMEC3|FCAL1|FCAL2|FCAL3)(?P<side>A|C)','CaloMonitoring/LArClusterCellMon/Summary/eventCounter' ]
+Output: [ 'CaloMonitoring/LArClusterCellMon/ClusterCell/PercentClusteredCells_{lay}{side}' ]
+Function: CaloMonitoring.CaloMonTransforms.simpleDivideByAcceptedEvts
+Parameters: { titleToReplace : 'Total' , replaceTitWith : 'Average' }
+Description: 2D_cluster_cell
+
+#1D percentage of cells contributing to clusters
+---
+Input: ['CaloMonitoring/LArClusterCellMon/Summary/cellhash','CaloMonitoring/LArClusterCellMon/Summary/eventCounter' ]
+Output: [ 'CaloMonitoring/LArClusterCellMon/Summary/cellhashPercent' ]
+Function: CaloMonitoring.CaloMonTransforms.simpleDivideByAcceptedEvts
+Parameters: { titleToReplace : 'Total' , replaceTitWith : 'Average' }
+Description: 1D_cluster_cell

@@ -7,6 +7,7 @@ from AthenaConfiguration.Enums import BeamType, Format
 from TrigmuComb.TrigmuCombConfig import l2MuCombRecoCfg, l2MuCombHypoCfg
 from TrigMuonHypo.TrigMuonHypoConfig import TrigmuCombHypoToolFromDict, TrigMuonEFCombinerHypoToolFromDict, TrigMuonEFTrackIsolationHypoToolFromDict
 from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
+from TrigInDetConfig.utils import getInDetFlagsForSignature
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -143,7 +144,7 @@ def _muCombStepSeq(flags, is_probe_leg=False):
 
 def muCombSequence(flags, is_probe_leg=False):
     muonflagsCB = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon').cloneAndReplace('MuonCombined', 'Trigger.Offline.Combined.MuonCombined')    
-    muonflagsCBid = muonflagsCB.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.muon")
+    muonflagsCBid = getInDetFlagsForSignature(muonflagsCB,'muon')
     selAcc = _muCombStepSeq(muonflagsCBid, is_probe_leg=is_probe_leg)
     return MenuSequenceCA(flags, selAcc, HypoToolGen = TrigmuCombHypoToolFromDict)
     
@@ -245,7 +246,7 @@ def _muEFCBStepSeq(flags, name='RoI', is_probe_leg=False):
 
 def muEFCBSequence(flags, is_probe_leg=False):
     muonflagsCB = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon').cloneAndReplace('MuonCombined', 'Trigger.Offline.Combined.MuonCombined')
-    muonflagsCBid = muonflagsCB.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.muon")        
+    muonflagsCBid = getInDetFlagsForSignature(muonflagsCB,'muon')
     selAccEFCB = _muEFCBStepSeq(muonflagsCBid, name='RoI', is_probe_leg=is_probe_leg)
     return MenuSequenceCA(flags, selAccEFCB, HypoToolGen = TrigMuonEFCombinerHypoToolFromDict)    
 

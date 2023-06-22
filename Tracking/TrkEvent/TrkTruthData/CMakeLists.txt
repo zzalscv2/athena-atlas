@@ -6,7 +6,8 @@ atlas_subdir( TrkTruthData )
 # Component(s) in the package:
 atlas_add_library( TrkTruthData
                    PUBLIC_HEADERS TrkTruthData
-                   LINK_LIBRARIES AthLinks AthContainers AthenaKernel GeoPrimitives Identifier GeneratorObjects TrkTrack )
+                   LINK_LIBRARIES AthLinks AthContainers AthAllocators AthenaKernel 
+                   GeoPrimitives Identifier GeneratorObjects TrkTrack )
 
 atlas_add_dictionary( TrkTruthDataDict
                       src/TrkTruthDataDict.h

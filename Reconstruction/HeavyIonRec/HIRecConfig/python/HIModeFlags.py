@@ -6,6 +6,8 @@ def HImode(flags):
     flags.Reco.EnableJet=False
     flags.Reco.EnableMet=False
     flags.Reco.EnableCaloRinger=False
+    flags.Reco.EnableBTagging=True
+    flags.Jet.WriteToAOD=True # this is to save btagging to xAOD
     flags.HeavyIon.Egamma.doSubtractedClusters=True
     flags.HeavyIon.Jet.ApplyTowerEtaPhiCorrection=True
     flags.HeavyIon.Jet.HarmonicsForSubtraction=[2,3,4]
@@ -17,9 +19,10 @@ def HIPmode(flags):
     flags.Reco.EnableHI=True
     flags.Reco.EnableTau=False
     flags.Reco.EnableJet=True
-    flags.Jet.WriteToAOD=True # this is to save "standard" jets to xAOD
+    flags.Jet.WriteToAOD=True # this is to save "standard" jets and btagging to xAOD
     flags.Reco.EnableMet=False
     flags.Reco.EnableCaloRinger=False
+    flags.Reco.EnableBTagging=True
     flags.HeavyIon.Egamma.doSubtractedClusters=False
     flags.HeavyIon.Jet.ApplyTowerEtaPhiCorrection=False
     flags.HeavyIon.Jet.HarmonicsForSubtraction=[]

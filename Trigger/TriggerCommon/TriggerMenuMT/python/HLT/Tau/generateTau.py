@@ -6,6 +6,8 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 
+from TrigInDetConfig.utils import getInDetFlagsForSignature
+
 @AccumulatorCache
 def _caloSeq(flags, is_probe_leg=False):
     selAcc = SelectionCA('CaloTau', isProbe=is_probe_leg)
@@ -116,13 +118,14 @@ def _ftfCoreSeq(flags,name,is_probe_leg=False):
     return (selAcc , menuCA)
 
 def tauFTFTauCoreSeq(flags, is_probe_leg=False):
-    newflags = flags.cloneAndReplace('Tracking.ActiveConfig','Trigger.InDetTracking.tauCore')
+    newflags = getInDetFlagsForSignature(flags,'tauCore')
+
     name='Core'
     (selAcc , menuCA) = _ftfCoreSeq(newflags,name,is_probe_leg)
     return menuCA 
 
 def tauFTFTauLRTSeq(flags, is_probe_leg=False):
-    newflags = flags.cloneAndReplace('Tracking.ActiveConfig','Trigger.InDetTracking.tauLRT')
+    newflags = getInDetFlagsForSignature(flags,'tauLRT')
     name='LRT'
     (selAcc , menuCA) = _ftfCoreSeq(newflags,name,is_probe_leg)
     return menuCA 
@@ -150,7 +153,6 @@ def _ftfTauIsoSeq(flags,name,is_probe_leg=False):
     selAcc.mergeReco(fastInDetReco)
     hypoAlg = CompFactory.TrigTrackPreSelHypoAlg('TrackPreSelHypoAlg_PassBy'+name,
                                                     trackcollection = flags.Tracking.ActiveConfig.trkTracks_FTF )
-
     selAcc.addHypoAlgo(hypoAlg)
 
     from TrigTauHypo.TrigTauHypoTool import TrigTauTrackHypoToolFromDict
@@ -158,13 +160,15 @@ def _ftfTauIsoSeq(flags,name,is_probe_leg=False):
     return (selAcc , menuCA)
 
 def tauFTFTauIsoSeq(flags, is_probe_leg=False):
-    newflags = flags.cloneAndReplace('Tracking.ActiveConfig','Trigger.InDetTracking.tauIso')
+    newflags = getInDetFlagsForSignature(flags,'tauIso')
+
     name = 'Iso'
     (selAcc , menuCA) = _ftfTauIsoSeq(newflags,name,is_probe_leg)
     return menuCA
 
 def tauFTFTauIsoBDTSeq(flags, is_probe_leg=False):
-    newflags = flags.cloneAndReplace('Tracking.ActiveConfig','Trigger.InDetTracking.tauIsoBDT')
+    newflags = getInDetFlagsForSignature(flags,'tauIsoBDT')
+
     name = 'IsoBDT'
     (selAcc , menuCA) = _ftfTauIsoSeq(newflags,name,is_probe_leg)
     return menuCA

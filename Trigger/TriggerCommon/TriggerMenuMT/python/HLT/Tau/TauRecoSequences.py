@@ -11,6 +11,7 @@ from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
 from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si, ROBPrefetchingAlgCfg_Calo
 from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
 import AthenaCommon.CfgMgr as CfgMgr
+from TrigInDetConfig.utils import getInDetFlagsForSignature
 
 
 #Retrieve short name for tau signature that can be used as suffix to be appended to the names of alg/tools
@@ -99,7 +100,7 @@ def tauIdSequence(flags, RoIs, name):
 
     tauIdSequence+= ViewVerifyId
 
-    newflags = flags.cloneAndReplace("Tracking.ActiveConfig","Trigger.InDetTracking."+IDTrigConfig.name)
+    newflags = getInDetFlagsForSignature(flags,IDTrigConfig.name)
 
     from TrigTauRec.TrigTauRecConfig import trigTauRecMergedPrecisionMVACfg
     tauPrecisionAlg = algorithmCAToGlobalWrapper(trigTauRecMergedPrecisionMVACfg, newflags, name, inputRoIs = RoIs, tracks = IDTrigConfig.tracks_IDTrig())[0]

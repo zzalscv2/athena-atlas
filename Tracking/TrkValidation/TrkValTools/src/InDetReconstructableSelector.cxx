@@ -15,6 +15,7 @@
 #include "HepPDT/ParticleData.hh"
 #include "GaudiKernel/IPartPropSvc.h"
 #include "AtlasHepMC/GenParticle.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "GeneratorObjects/McEventCollection.h"
 
 Trk::InDetReconstructableSelector::InDetReconstructableSelector(const std::string& type, const std::string& name,
@@ -82,7 +83,7 @@ Trk::InDetReconstructableSelector::selectGenSignal (const McEventCollection* Sim
 
 
       // 1) require stable particle from generation or simulation
-      if ((particle->status()%1000) != 1 )    continue;
+      if (!MC::isStable(particle))    continue;
 
       if(particle->production_vertex() == nullptr) {
         ATH_MSG_WARNING ("GenParticle without production vertex - simulation corrupt? ");
@@ -100,7 +101,7 @@ Trk::InDetReconstructableSelector::selectGenSignal (const McEventCollection* Sim
                std::abs(particle->production_vertex()->position().z())    > m_maxZStartPrimary ) ) continue;
 
         int   pdgCode         = particle->pdg_id();
-        if (std::abs(pdgCode) > 1000000000 ) continue; // ignore nuclei from hadronic interactions
+        if (MC::isNucleus(pdgCode)) continue; // ignore nuclei from hadronic interactions
         const HepPDT::ParticleData* pd = m_particleDataTable->particle(std::abs(pdgCode));
 
         if (!pd) { // nuclei excluded, still problems with a given type?

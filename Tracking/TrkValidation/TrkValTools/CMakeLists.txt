@@ -13,7 +13,7 @@ atlas_add_library( TrkValToolsLib
                    INTERFACE
                    INCLUDE_DIRS ${HEPPDT_INCLUDE_DIRS}
                    PUBLIC_HEADERS TrkValTools
-                   LINK_LIBRARIES ${HEPPDT_LIBRARIES} GaudiKernel AthenaBaseComps TrkValInterfaces TrkFitterInterfaces StoreGateLib xAODEventInfo TrkParameters TrkValEvent AtlasHepMCLib TrkEventPrimitives TrkTrack AthContainers )
+                   LINK_LIBRARIES ${HEPPDT_LIBRARIES} GaudiKernel AthenaBaseComps TrkValInterfaces TrkFitterInterfaces StoreGateLib xAODEventInfo TrkParameters TrkValEvent AtlasHepMCLib TrkEventPrimitives TrkTrack AthContainers TruthUtils)
 
 # Component(s) in the package:
 atlas_add_component( TrkValTools

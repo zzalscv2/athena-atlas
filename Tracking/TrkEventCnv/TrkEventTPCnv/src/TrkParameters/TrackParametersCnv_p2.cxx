@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -28,46 +28,47 @@
 
 #include <cassert>
 #include <iostream>
-//static bool debug=false;
-static const uint8_t CURVILINEAR=15;
 
-void TrackParametersCnv_p2::persToTrans( const Trk :: TrackParameters_p2 * /**persObj*/, Trk :: TrackParameters    * /**transObj*/, MsgStream& /**log*/ ) {
-  throw std::runtime_error("TrackParametersCnv_p2::persToTrans shouldn't be called any more!");
+void TrackParametersCnv_p2::persToTrans(
+    const Trk ::TrackParameters_p2* /**persObj*/,
+    Trk ::TrackParameters* /**transObj*/, MsgStream& /**log*/) {
+  throw std::runtime_error(
+      "TrackParametersCnv_p2::persToTrans shouldn't be called any more!");
 }
 
-Trk::TrackParameters* TrackParametersCnv_p2::createTransient( const Trk::TrackParameters_p2 * persObj,MsgStream& log){
-
+Trk::TrackParameters* TrackParametersCnv_p2::createTransient(
+    const Trk::TrackParameters_p2* persObj, MsgStream& log) {
   // ---- Covariance matrix
- std::optional<AmgSymMatrix(5)> cov = std::nullopt;
-  auto transcov = 
-    std::unique_ptr<AmgSymMatrix(5)>(transErrorMatrix(persObj, log));
- if(transcov){
+  std::optional<AmgSymMatrix(5)> cov = std::nullopt;
+  auto transcov =
+      std::unique_ptr<AmgSymMatrix(5)>(transErrorMatrix(persObj, log));
+  if (transcov) {
     cov = (*transcov);
- }
+  }
   // ---- Parameters
   Trk::TrackParameters    *transObj=nullptr;
   unsigned int size=persObj->m_parameters.size();
-  if (size==7){
-    // FIXME - at some point we need to think about ExtendedParameters here, but that's not necessary yet...
-    // Could just do the check persObj->m_surfaceType==CURVILINEAR but don't want to risk breaking reading of existing samples.
-    // Update this code when/if we handle ExtendedParameters
+  if (size==7){ // size 7 means we chose to write
+                // as a Curvillinear representation
+                // In principle we could check
+                // the persObject for Trk::SurfaceType::Curvilinear
     AmgVector(7) parameters;
     for (unsigned int i=0; i<size; ++i) parameters[i]=persObj->m_parameters[i];
     transObj= new Trk::CurvilinearParameters(parameters, cov);
     return transObj;
   } else {
-    // Okay, not curvilinear & so we need to have a surface to handle local->global transformations etc
-    // ---- Surfaces 
-    //get surface type
+    // Not a curvilinear representation.
+    // We need to have a surface to handle local->global transformations etc/
+    // Get surface type
     Trk::SurfaceType type = static_cast<Trk::SurfaceType>(persObj->m_surfaceType);
-    
-    // get surface & fill parameter vector
+    // Get surface & fill parameter vector
     const Trk::Surface* surface = transSurface(persObj, type, log);
     AmgVector(5) parameters;
-    for (unsigned int i=0; i<size; ++i) parameters[i]=persObj->m_parameters[i];
-    
+    for (unsigned int i = 0; i < size; ++i){
+      parameters[i] = persObj->m_parameters[i];
+    }
+    // Now create concrete parameters ...
     if (surface){
-      // Now create concrete parameters ...
       if (type == Trk::SurfaceType::Perigee) {
         transObj = new Trk::Perigee(
           parameters, static_cast<const Trk::PerigeeSurface*>(surface), cov);
@@ -101,7 +102,6 @@ AmgSymMatrix(5)* TrackParametersCnv_p2::transErrorMatrix(const Trk :: TrackParam
     cov = new AmgSymMatrix(5);
     Trk::ErrorMatrix dummy;
     fillTransFromPStore( &m_emConverter, persObj->m_errorMatrix, &dummy, log );
-    // EigenHelpers::vectorToEigenMatrix(dummy.values, *cov, "TrackParametersCnv_p2");
     Amg::expand(dummy.values.begin(), dummy.values.end(), *cov);
   }
   return cov;
@@ -115,11 +115,8 @@ TrackParametersCnv_p2::transSurface(const Trk ::TrackParameters_p2* persObj,
   const Trk::Surface* surface = nullptr;
   // check if surface had transform.
   if (!persObj->m_transform.empty()){
-    //if (debug) std::cout<<"Reading in parameters with FREE surface type ="<<type<<std::endl;
-
     auto transform = std::make_unique<Amg::Transform3D>();
     EigenHelpers::vectorToEigenTransform3D( persObj->m_transform, *transform.get());
-
     // recreate free surface
     if (type==Trk::SurfaceType::Perigee) {
       surface = new Trk::PerigeeSurface(*transform);
@@ -127,17 +124,15 @@ TrackParametersCnv_p2::transSurface(const Trk ::TrackParameters_p2* persObj,
       surface = new Trk::PlaneSurface(*transform);
     } else if (type==Trk::SurfaceType::Line){
       surface = new Trk::StraightLineSurface(*transform);
-    } 
-      
+    }
     if (!surface){
       log << MSG::WARNING << "Free surface of type=" << static_cast<int>(type)
           << " isn't currently supported in TrackParametersCnv_p2" << endmsg;
       return nullptr;
     }
   } else {
-
     // Surface must have belonged to a ReadoutElement, or some part of the geometry or have a nominal/default perigee surface.
-    if (type!=Trk::SurfaceType::Perigee) {		
+    if (type!=Trk::SurfaceType::Perigee) {
       Identifier id=Identifier32(persObj->m_associatedDetElementId);
       if (!id.get_compact() && persObj->m_associatedDetElementId != 0)
         id = Identifier(persObj->m_associatedDetElementId);
@@ -157,38 +152,39 @@ TrackParametersCnv_p2::transSurface(const Trk ::TrackParameters_p2* persObj,
   return surface;
 }
 
-void TrackParametersCnv_p2::transToPers( const Trk :: TrackParameters    *transObj, Trk :: TrackParameters_p2 *persObj, MsgStream& log) {
-  bool isCurvilinear = (dynamic_cast<const Trk::CurvilinearParameters*>(transObj)!=nullptr);
+void TrackParametersCnv_p2::transToPers(const Trk ::TrackParameters* transObj,
+                                        Trk ::TrackParameters_p2* persObj,
+                                        MsgStream& log) {
+
+  bool isCurvilinear = (transObj->type() == Trk::Curvilinear);
   bool deleteAtEnd = false;
   if (isCurvilinear){
     convertTransCurvilinearToPers(transObj,persObj);
-    persObj->m_surfaceType = CURVILINEAR;
-    
     // Not bothering with Surface here - not relevant for curvilinear
   } else {
-    // normal track parameters - check if the type is 'permitted' to be written, if not, convert to curvilinear
+    // normal track parameters - check if the type is 'permitted' to be written.
     if (isPersistifiableType(transObj)) {
       unsigned int nRows = transObj->parameters().rows();
-      persObj->m_parameters.resize( nRows); 
+      persObj->m_parameters.resize( nRows);
       for( unsigned int i = 0; i < nRows; i++ ){
-        persObj->m_parameters[i]   = transObj->parameters()[i];      
+        persObj->m_parameters[i]   = transObj->parameters()[i];
       }
       fillPersSurface(transObj, persObj, log);
-    } else {
-      //if (debug) log<<MSG::WARNING<<"Received parameters with non-supported surface. Will convert to curvilinear. TransObj="<<*transObj<<endmsg;
+    } else {  // if not, convert to curvilinear
       std::optional<AmgSymMatrix(5)> newcov = std::nullopt;
-      if (transObj->covariance()){
+      if (transObj->covariance()) {
         newcov = *(transObj->covariance());
       }
-      const Trk::CurvilinearParameters* curvilinear = 
-        new Trk::CurvilinearParameters(transObj->position(), transObj->momentum(), transObj->charge(), 
-                                       newcov);
-      transObj = curvilinear; 
-      deleteAtEnd = true; // Because the curvilinear will leak otherwise (the original parameters will be deleted when SG is wiped)
-      convertTransCurvilinearToPers(transObj,persObj);
+      const Trk::CurvilinearParameters* curvilinear =
+          new Trk::CurvilinearParameters(transObj->position(),
+                                         transObj->momentum(),
+                                         transObj->charge(), newcov);
+      transObj = curvilinear;
+      deleteAtEnd = true;  // Because the curvilinear will leak otherwise
+      convertTransCurvilinearToPers(transObj, persObj);
     }
   }
-  
+
   // Errormatrix
   if (transObj->covariance()){
     Trk::ErrorMatrix pMat;
@@ -196,19 +192,24 @@ void TrackParametersCnv_p2::transToPers( const Trk :: TrackParameters    *transO
     persObj->m_errorMatrix = toPersistent( &m_emConverter, &pMat, log );
   }
 
-  //transObj->m_position.setZero();
-  //transObj->m_momentum.setZero();
-  if (deleteAtEnd) delete transObj;
+  if (deleteAtEnd) {
+    delete transObj;
+  }
 }
 
-void TrackParametersCnv_p2::convertTransCurvilinearToPers(const Trk :: TrackParameters    *transObj, Trk :: TrackParameters_p2 *persObj) {
-  // Curvilinear: here we store the 3 position + 3 momentum, rather than the 5 parameters (this avoids writing the surface)
-  persObj->m_parameters.resize(7); 
-  for (unsigned int i=0; i<3 ; ++i){
-    persObj->m_parameters[i]   = transObj->position()[i];
-    persObj->m_parameters[i+3] = transObj->momentum()[i];
+void TrackParametersCnv_p2::convertTransCurvilinearToPers(
+    const Trk ::TrackParameters* transObj, Trk ::TrackParameters_p2* persObj) {
+  // Curvilinear: here we store the 3 position + 3 momentum, rather than the 5
+  // parameters.
+  // This avoids writing the surface
+  persObj->m_parameters.resize(7);
+  for (unsigned int i = 0; i < 3; ++i) {
+    persObj->m_parameters[i] = transObj->position()[i];
+    persObj->m_parameters[i + 3] = transObj->momentum()[i];
   }
   persObj->m_parameters[6] = transObj->charge();
+  // And lets remember to always set the type of the surface
+  persObj->m_surfaceType = static_cast<uint8_t>(Trk::SurfaceType::Curvilinear);
 }
 
 bool TrackParametersCnv_p2::isPersistifiableType(const Trk :: TrackParameters    *transObj) {
@@ -236,10 +237,6 @@ void TrackParametersCnv_p2::fillPersSurface(const Trk :: TrackParameters    *tra
                                              persObj->m_transform);
     }
   }
-
-  // Debug info
-  //if (surf->isFree() && debug) std::cout<<"Writing out parameters with det element (free) surface type ="<<surf->type()<<std::endl;
-  //if (surf->owner() == Trk::TGOwn && debug) std::cout<<"Writing out parameters with TGOwn surface type ="<<surf->type()<<std::endl;
 }
 
 

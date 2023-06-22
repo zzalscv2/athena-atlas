@@ -37,7 +37,7 @@ TRTRawDataProviderTool::TRTRawDataProviderTool
 // destructor
 
 TRTRawDataProviderTool::~TRTRawDataProviderTool()
-{}
+= default;
 
 // -------------------------------------------------------
 // initialize
@@ -78,7 +78,7 @@ StatusCode TRTRawDataProviderTool::convert(const std::vector<const ROBFragment*>
 
   static std::atomic_int DecodeErrCount = 0;
 
-  if(vecRobs.size() == 0)
+  if(vecRobs.empty())
      return StatusCode::SUCCESS;
 
 

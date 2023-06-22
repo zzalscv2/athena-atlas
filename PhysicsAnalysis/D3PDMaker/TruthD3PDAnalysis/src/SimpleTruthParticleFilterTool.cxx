@@ -65,8 +65,7 @@ SimpleTruthParticleFilterTool::isAccepted (const HepMC::ConstGenParticlePtr& p)
   }
 
   if ( !last && // is it the last tau? (not a tau or not last -> last=false )
-       p->status()%1000 != 1 &&
-       !(p->status()%1000 == 2 && p->status()>1000) &&
+       p->status() != 1 &&
        !(p->status()==2 && (!p->end_vertex() || HepMC::is_simulation_vertex(p->end_vertex())) ) ) {
     return false;
   }
