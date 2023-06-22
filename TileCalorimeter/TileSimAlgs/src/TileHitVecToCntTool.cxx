@@ -412,10 +412,11 @@ void TileHitVecToCntTool::processHitVectorForPileUp(const TileHitVector* inputHi
       if (time < m_maxHitTime){
         pHit->add(ener, time, m_deltaT);
         if(m_doDigiTruth){
-					if(isSignal)
-          pHit_DigiHSTruth->add(ener, time, m_deltaT);
-					else
-          pHit_DigiHSTruth->add(0,time, m_deltaT);
+          if(isSignal) {
+            pHit_DigiHSTruth->add(ener, time, m_deltaT);
+          } else {
+            pHit_DigiHSTruth->add(0,time, m_deltaT);
+          }
         }
       }
 
@@ -447,13 +448,13 @@ void TileHitVecToCntTool::processHitVectorForPileUp(const TileHitVector* inputHi
       eHitTot += ener;
 
       if (time < m_maxHitTime){
-          pHit->add(ener, time, m_deltaT);
-          if(m_doDigiTruth){
-						if(isSignal)
-	            pHit_DigiHSTruth->add(ener, time, m_deltaT);
-						else
-							pHit_DigiHSTruth->add(0, time, m_deltaT);
-          }
+        pHit->add(ener, time, m_deltaT);
+        if(m_doDigiTruth){
+          if(isSignal)
+            pHit_DigiHSTruth->add(ener, time, m_deltaT);
+          else
+            pHit_DigiHSTruth->add(0, time, m_deltaT);
+        }
       }
 
       if (msgLvl(MSG::VERBOSE))
@@ -861,8 +862,12 @@ StatusCode TileHitVecToCntTool::mergeEvent(const EventContext& ctx) {
 
     ATH_MSG_DEBUG(" nHitUni=" << nHitUni << " eHitInTime="<< eHitInTime);
   } else {
-    //    ATH_MSG_DEBUG ( " nHit=" << nHit
-    //                    << " eHitTot=" << eHitTot );
+    if (m_mergeMultipleHitsInChannel) {
+      findAndMergeMultipleHitsInChannel(m_hits);
+      if (m_doDigiTruth) {
+        findAndMergeMultipleHitsInChannel(m_hits_DigiHSTruth);
+      }
+    }
   }
 
   if (m_run2plus) {
@@ -900,16 +905,20 @@ StatusCode TileHitVecToCntTool::mergeEvent(const EventContext& ctx) {
 
   TileHitNonConstContainer::iterator collIt_DigiHSTruth; 
   TileHitNonConstContainer::iterator endColl_DigiHSTruth;
-	if(m_doDigiTruth) collIt_DigiHSTruth = m_hits_DigiHSTruth->begin();
-	if(m_doDigiTruth) endColl_DigiHSTruth = m_hits_DigiHSTruth->end();
+  if(m_doDigiTruth) {
+    collIt_DigiHSTruth = m_hits_DigiHSTruth->begin();
+    endColl_DigiHSTruth = m_hits_DigiHSTruth->end();
+  }
 
   for (std::unique_ptr<TileHitCollection>& coll : *m_hits ) {
     TileHitCollection* coll_DigiHSTruth;
     TileHitCollection::iterator hitItr_DigiHSTruth;
     TileHitCollection::iterator hitEnd_DigiHSTruth;
-    if(m_doDigiTruth) coll_DigiHSTruth = (*collIt_DigiHSTruth).get();
-    if(m_doDigiTruth) hitItr_DigiHSTruth = coll_DigiHSTruth->begin();
-    if(m_doDigiTruth) hitEnd_DigiHSTruth = coll_DigiHSTruth->end();
+    if(m_doDigiTruth) {
+      coll_DigiHSTruth = (*collIt_DigiHSTruth).get();
+      hitItr_DigiHSTruth = coll_DigiHSTruth->begin();
+      hitEnd_DigiHSTruth = coll_DigiHSTruth->end();
+    }
 
     HWIdentifier drawer_id = m_tileHWID->drawer_id(coll->identify());
     int ros = m_tileHWID->ros(drawer_id);
@@ -1205,4 +1214,53 @@ void TileHitVecToCntTool::findAndMergeMBTS(TileHitCollection* coll, int frag_id,
       hitCont->push_back(toHit);
     }
   }
+}
+
+void TileHitVecToCntTool::findAndMergeMultipleHitsInChannel(std::unique_ptr<TileHitNonConstContainer>& hitCont) {
+  for (std::unique_ptr<TileHitCollection>& coll : *hitCont) {
+    int module = coll->identify() & 0x3F;
+    std::vector<TileHit*> hits(48, nullptr);
+    std::vector<std::unique_ptr<TileHit>> otherModuleHits;
+    coll->erase(std::remove_if(coll->begin(), coll->end(),
+                               [this, &hits, &otherModuleHits, module] (TileHit* hit) {
+                                 Identifier pmt_id = hit->pmt_ID();
+                                 int channel = m_tileHWID->channel(hit->pmt_HWID());
+                                 TileHit* channelHit = hits[channel];
+                                 if (channelHit) {
+                                   mergeExtraHitToChannelHit(hit, channelHit);
+                                   return true;
+                                 } else if ((m_tileTBID->is_tiletb(pmt_id) && (m_tileTBID->phi(pmt_id) % 2 == 1))
+                                            || m_tileID->module(pmt_id) != module) {
+                                   otherModuleHits.push_back(std::make_unique<TileHit>(*hit));
+                                   return true;
+                                 } else {
+                                   hits[channel] = hit;
+                                   return false;
+                                 }}),
+                coll->end());
+
+    for (std::unique_ptr<TileHit>& hit : otherModuleHits) {
+      int channel = m_tileHWID->channel(hit->pmt_HWID());
+      TileHit* channelHit = hits[channel];
+      if (channelHit) {
+        mergeExtraHitToChannelHit(hit.get(), channelHit);
+      } else {
+        hits[channel] = hit.get();
+        coll->push_back(std::move(hit));
+      }
+    }
+  }
+}
+
+void TileHitVecToCntTool::mergeExtraHitToChannelHit(TileHit* extraHit, TileHit* channelHit) {
+
+  ATH_MSG_DEBUG("Found extra hit for channel Id: "
+                << m_tileID->to_string(extraHit->pmt_ID(), -1) << ", will be merged to "
+                << m_tileID->to_string(channelHit->pmt_ID(), -1));
+  ATH_MSG_VERBOSE("Before merging => " << (std::string) (*extraHit));
+  ATH_MSG_VERBOSE("Before merging => " << (std::string) (*channelHit));
+
+  channelHit->add(extraHit, 0.1);
+
+  ATH_MSG_VERBOSE("After merging => " << (std::string) (*channelHit));
 }
