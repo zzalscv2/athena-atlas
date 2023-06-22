@@ -328,33 +328,37 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 		jetZ1 = zPrmVtx;
 		
 		auto btaggingLinkInfo = TrigCompositeUtils::findLink<xAOD::BTaggingContainer>(jetLinkInfo.source, m_btaggingLinkName); // TM 2021-10-30 
-		ATH_CHECK( btaggingLinkInfo.isValid() ) ;
-		const xAOD::BTagging* btag = *(btaggingLinkInfo.link);
-		
-		double GN1_pu(0.), GN1_pc(0.), GN1_pb(0.);
-		btag->pu("GN120220813",GN1_pu);
-		ATH_MSG_DEBUG("        GN1_pu: " << GN1_pu);
-		btag->pc("GN120220813",GN1_pc);
-		ATH_MSG_DEBUG("        GN1_pc: " << GN1_pc);
-		btag->pb("GN120220813",GN1_pb);
-		ATH_MSG_DEBUG("        GN1_pb: " << GN1_pb);
-		theLLR = LLR (GN1_pu, GN1_pc, GN1_pb, GN1_mv);
-		theLLR_GN1 = theLLR;
-		if ( !theLLR ) GN1_mv=-100.;
-		ATH_MSG_DEBUG("        GN1_mv: " << GN1_mv << " LLR: " << theLLR); 
-		
-		double DL1d_pu(0.), DL1d_pc(0.), DL1d_pb(0.);
-		btag->pu("DL1d20211216",DL1d_pu);
-		ATH_MSG_DEBUG("        DL1d_pu: " << DL1d_pu);
-		btag->pc("DL1d20211216",DL1d_pc);
-		ATH_MSG_DEBUG("        DL1d_pc: " << DL1d_pc);
-		btag->pb("DL1d20211216",DL1d_pb);
-		ATH_MSG_DEBUG("        DL1d_pb: " << DL1d_pb);
-		theLLR = LLR (DL1d_pu, DL1d_pc, DL1d_pb, DL1d_mv);
-		theLLR_DL1d = theLLR;
-		if ( !theLLR ) DL1d_mv=-100.;
-		ATH_MSG_DEBUG("        DL1d_mv: " << DL1d_mv << " LLR: " << theLLR); 
-		
+
+		if ( btaggingLinkInfo.isValid() ) {
+
+		  const xAOD::BTagging* btag = *(btaggingLinkInfo.link);
+		  
+		  double GN1_pu(0.), GN1_pc(0.), GN1_pb(0.);
+		  btag->pu("GN120220813",GN1_pu);
+		  ATH_MSG_DEBUG("        GN1_pu: " << GN1_pu);
+		  btag->pc("GN120220813",GN1_pc);
+		  ATH_MSG_DEBUG("        GN1_pc: " << GN1_pc);
+		  btag->pb("GN120220813",GN1_pb);
+		  ATH_MSG_DEBUG("        GN1_pb: " << GN1_pb);
+		  theLLR = LLR (GN1_pu, GN1_pc, GN1_pb, GN1_mv);
+		  theLLR_GN1 = theLLR;
+		  if ( !theLLR ) GN1_mv=-100.;
+		  ATH_MSG_DEBUG("        GN1_mv: " << GN1_mv << " LLR: " << theLLR); 
+		  
+		  double DL1d_pu(0.), DL1d_pc(0.), DL1d_pb(0.);
+		  btag->pu("DL1d20211216",DL1d_pu);
+		  ATH_MSG_DEBUG("        DL1d_pu: " << DL1d_pu);
+		  btag->pc("DL1d20211216",DL1d_pc);
+		  ATH_MSG_DEBUG("        DL1d_pc: " << DL1d_pc);
+		  btag->pb("DL1d20211216",DL1d_pb);
+		  ATH_MSG_DEBUG("        DL1d_pb: " << DL1d_pb);
+		  theLLR = LLR (DL1d_pu, DL1d_pc, DL1d_pb, DL1d_mv);
+		  theLLR_DL1d = theLLR;
+		  if ( !theLLR ) DL1d_mv=-100.;
+		  ATH_MSG_DEBUG("        DL1d_mv: " << DL1d_mv << " LLR: " << theLLR);
+		  
+		}
+
 	      }// if ijet==0
 	      
 	      ijet++;

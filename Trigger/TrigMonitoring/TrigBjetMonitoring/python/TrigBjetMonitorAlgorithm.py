@@ -77,7 +77,7 @@ def TrigBjetMonConfig(inputFlags):
         bjet_triglist.append(chain)
     log.info (" ==> bjet_triglist:  %s", bjet_triglist)
 
-    # Check if BeamType is 'collosions'
+    # Check if BeamType is 'collisions'
     # P.Onyisi's suggestion
     from AthenaConfiguration.Enums import BeamType
     CollisionRun = (inputFlags.Beam.Type == BeamType.Collisions)
@@ -107,9 +107,11 @@ def TrigBjetMonConfig(inputFlags):
     # Add a GMT for the other example monitor algorithm
     #shifterGroup = helper.addGroup(shifterTrigBjetMonAlg,'TrigBjetMonitor','HLT/BjetMon/Shifter/')
 
+
     ### STEP 5 ###
     # Configure histograms
     #NB! The histograms defined here must match the ones in the cxx file exactly
+
 
     # Offline PV histograms - common for all trigger chains
 
