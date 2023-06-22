@@ -3,7 +3,7 @@
 */
 
 #include "TrigCompositeUtils/AlgToChainTool.h"
-#include "boost/algorithm/string/predicate.hpp"
+#include "CxxUtils/starts_with.h"
 
 #ifndef XAOD_STANDALONE
 
@@ -42,7 +42,7 @@ StatusCode TrigCompositeUtils::AlgToChainTool::start() {
     for ( const auto& sequencer : hltMenuHandle->sequencers() ) {
         for ( const std::string& algorithm : sequencer.second ) {
             // PassFilter is for empty steps - will never be associated with a chain
-            if (boost::starts_with (algorithm, "PassFilter")) continue;
+            if (CxxUtils::starts_with (algorithm, "PassFilter")) continue;
 
             // Save just second part of algorithm ex. RoRSeqFilter/FFastCaloElectron -> FFastCaloElectron
             m_algToSequencersMap[algorithm.substr(algorithm.find('/') + 1)]
@@ -128,7 +128,7 @@ StatusCode TrigCompositeUtils::AlgToChainTool::getAllActiveSequences( const Even
 
         // Optimize
         auto foundKey = std::find_if(m_cachedEventStoreKeys.begin(), m_cachedEventStoreKeys.end(), [&](const std::string& key) {
-            return boost::starts_with(key, filterName);
+            return CxxUtils::starts_with(key, filterName);
         });
 
         if (foundKey != m_cachedEventStoreKeys.end() ){
@@ -186,12 +186,12 @@ std::set<TrigCompositeUtils::DecisionID> TrigCompositeUtils::AlgToChainTool::ret
     for ( const std::string& key : keys ) {
 
         // Look for given collection
-        if ( !collectionName.empty() && (!boost::starts_with(key, collectionName)) ){
+        if ( !collectionName.empty() && (!CxxUtils::starts_with(key, collectionName)) ){
             continue;
         }
 
         // Get data from any nav collection
-        if( collectionName.empty() && (!boost::starts_with(key, "HLTNav") || key == "HLTNav_Summary") ) {
+        if( collectionName.empty() && (!CxxUtils::starts_with(key, "HLTNav") || key == "HLTNav_Summary") ) {
             continue;
         }
 
