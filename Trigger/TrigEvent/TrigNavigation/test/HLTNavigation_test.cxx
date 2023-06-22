@@ -20,8 +20,6 @@
 #include "TrigNavigation/Navigation.h"
 #include "TrigNavigation/Navigation.icc"
 
-#include <boost/type_traits/is_same.hpp>
-#include  <boost/type_traits/remove_const.hpp>
 #include "TrigSerializeCnvSvc/TrigSerializeConverter.h"
 
 #include "TestTypes.h"

@@ -13,8 +13,6 @@
 
 #include "Navigation/AthenaBarCodeImpl.h"
 
-#include "boost/type_traits/is_same.hpp"
-#include "boost/static_assert.hpp"
 #include <typeinfo>
 #include <iostream>
 #include <cassert>
