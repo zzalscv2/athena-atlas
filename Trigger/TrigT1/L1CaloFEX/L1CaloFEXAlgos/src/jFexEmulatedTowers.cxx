@@ -29,7 +29,10 @@ namespace LVL1 {
 jFexEmulatedTowers::jFexEmulatedTowers(const std::string& name, ISvcLocator* svc) : AthReentrantAlgorithm(name, svc){}
 
 StatusCode jFexEmulatedTowers::initialize() {
-    ATH_MSG_INFO( "L1CaloFEXTools/jFexEmulatedTowers::initialize()");
+    
+    ATH_MSG_INFO( "Initializing L1CaloFEXTools/jFexEmulatedTowers algorithm with name: "<< name());
+    ATH_MSG_INFO( "Writting into SG key: "<< m_jTowersWriteKey);
+    
     ATH_CHECK( m_SCellKey.initialize() );
     ATH_CHECK( m_triggerTowerKey.initialize() );
     ATH_CHECK( m_jTowersWriteKey.initialize() );
@@ -65,7 +68,7 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
     //---jTower EDM
     SG::WriteHandle<xAOD::jFexTowerContainer> jTowersContainer(m_jTowersWriteKey, ctx);
     ATH_CHECK(jTowersContainer.record(std::make_unique<xAOD::jFexTowerContainer>(), std::make_unique<xAOD::jFexTowerAuxContainer>()));
-    ATH_MSG_DEBUG("Recorded jFexEmulatedDataTower container with key " << jTowersContainer.key());
+    ATH_MSG_DEBUG("Recorded jFexEmulatedTower container with key " << jTowersContainer.key());
      
     if(ScellContainer->empty() || triggerTowerContainer->empty() ){
         ATH_MSG_WARNING("Cannot fill jTowers here, at least one container is empty. ScellContainer.size="<<ScellContainer->size() << " or triggerTowerContainer.size=" << triggerTowerContainer->size() );
