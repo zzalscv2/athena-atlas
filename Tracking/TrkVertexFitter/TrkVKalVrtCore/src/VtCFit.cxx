@@ -439,6 +439,7 @@ namespace Trk {
      }
 
 /*   covariance matrix on vertex coordinates */
+    if(wa[0]<0 || wa[2]<0 || wa[5]<0) return -2; // Matrix elements must be positive!
     IERR=cfdinv(wa, &(vk->fitVcov[0]), -3);
     if (IERR) {IERR=cfdinv(wa, &(vk->fitVcov[0]), 3);}  // last safety 
     if ( !vk->passNearVertex ) {  if (IERR) return IERR; } // If nothing helps - detect failure (not for passNearVertex!!!)
