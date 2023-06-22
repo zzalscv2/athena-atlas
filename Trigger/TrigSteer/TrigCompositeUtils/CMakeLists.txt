@@ -3,7 +3,6 @@
 # Declare the package name.
 atlas_subdir( TrigCompositeUtils )
 
-find_package( Boost )
 
 # Set up the (non-)standalone compilation.
 set( extra_libs )
@@ -15,7 +14,6 @@ endif()
 atlas_add_library( TrigCompositeUtilsLib
   TrigCompositeUtils/*.h TrigCompositeUtils/*.icc Root/*.cxx
   PUBLIC_HEADERS TrigCompositeUtils
-  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES TrigConfHLTUtilsLib CxxUtils AsgMessagingLib AsgDataHandlesLib AsgTools TrigDecisionInterface xAODBase xAODTrigger TrigConfHLTData ${extra_libs}
   PRIVATE_LINK_LIBRARIES TrigSteeringEvent )
 
