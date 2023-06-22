@@ -88,6 +88,11 @@ def getPhysicsHISignatures():
         # ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_E3_AND_E3',     l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+['PS:Online', 'PS:NoHLTReprocessing']),
         # ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C',       l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+['PS:Online', 'PS:NoHLTReprocessing']),
 
+        # ATR-23602: ALFA Minbias track triggers with/without TRT
+        ChainProp(name='HLT_mb_sptrk_vetombts2in_L1TRT_ALFA_EINE',  l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+['PS:Online', 'PS:NoHLTReprocessing']),
+        ChainProp(name='HLT_mb_sptrk_vetombts2in_L1TRT_ALFA_ANY',   l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+['PS:Online', 'PS:NoHLTReprocessing']),
+        ChainProp(name='HLT_mb_sptrk_vetombts2in_L1ALFA_EINE',     l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+['PS:Online', 'PS:NoHLTReprocessing']),
+        ChainProp(name='HLT_mb_sptrk_vetombts2in_L1ALFA_ANY',      l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+['PS:Online', 'PS:NoHLTReprocessing']),
     ]
 
 
@@ -113,6 +118,9 @@ def getPhysicsHISignatures():
         ChainProp(name="HLT_noalg_L1MU5VF", l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportGroup),
         ChainProp(name='HLT_noalg_L1J12',   l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:Online']+SupportLegGroup),
 
+        # Streamers for monitoring TRT fast-OR
+        ChainProp(name='HLT_noalg_L1TRT_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+['PS:Online']),
+        ChainProp(name='HLT_noalg_L1TRT_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+['PS:Online']),
 
         #ZDC streamer for LHCf+ZDC special run ATR-26051
         #Commented out for the 2022 Nov Pb+Pb test run as the corresponding L1 ZDC items were commented out in the L1 menu
