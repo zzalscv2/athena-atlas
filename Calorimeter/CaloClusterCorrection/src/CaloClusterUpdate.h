@@ -56,9 +56,13 @@ class CaloClusterUpdate : public CaloClusterCorrection
 
  private:
 
+  // Weight more layer 1 in eta average
+  Gaudi::Property<float> m_w1
+    { this, "layer1_weight", 3, "layer 1 additional weight in eta average" };
+
   // If true, the total cluster energy is set to the sum of all layer energies.
   Constant<bool> m_update_energy
-  { this, "update_energy", "Should cluster total energy be updated?" };
+    { this, "update_energy", "Should cluster total energy be updated?" };
 };
 
 

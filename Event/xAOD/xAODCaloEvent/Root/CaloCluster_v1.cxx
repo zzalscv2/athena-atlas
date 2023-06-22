@@ -657,7 +657,12 @@ namespace xAOD {
        float eSum=eBarrel + eEndcap;
        if (eSum > 100 /*MeV*/) {
 	 //E-weighted average ...
-         return (eBarrel * etaBarrel + eEndcap * etaEndcap) / (eBarrel + eEndcap);
+	 if ((eBarrel > 0 && eEndcap > 0) || (eBarrel < 0 && eEndcap < 0))
+	   return (eBarrel * etaBarrel + eEndcap * etaEndcap) / eSum;
+	 else if (eBarrel > 0)
+	   return etaBarrel;
+	 else
+	   return etaEndcap;
        }//else eSum==0 case, should never happen
        return (0.5 * (etaBarrel + etaEndcap));
     }
@@ -686,8 +691,13 @@ namespace xAOD {
        float phiBarrel=phiSample(barrelSample);
        float phiEndcap=phiSample(endcapSample);
        if (eSum != 0.0) {
-         float phiSum = eSum * phiBarrel + eEndcap * CaloPhiRange::diff(phiEndcap, phiBarrel);
-         return CaloPhiRange::fix(phiSum / (eBarrel + eEndcap));
+	 if ((eBarrel > 0 && eEndcap > 0) || (eBarrel < 0 && eEndcap < 0)) {
+	   float phiSum = eSum * phiBarrel + eEndcap * CaloPhiRange::diff(phiEndcap, phiBarrel);
+	   return CaloPhiRange::fix(phiSum / eSum);
+	 } else if (eBarrel > 0)
+	   return phiBarrel;
+	 else
+	   return phiEndcap;
        }
        // energy==0 case, should never happen
        return CaloPhiRange::fix(0.5 * (phiBarrel + phiEndcap));
