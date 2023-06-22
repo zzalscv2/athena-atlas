@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -33,6 +33,28 @@ InDet::PixelClusterOnTrack::PixelClusterOnTrack(
   m_globalPosition = associatedSurface().localToGlobal(localParameters());
 }
 
+InDet::PixelClusterOnTrack::PixelClusterOnTrack(
+  const InDet::PixelCluster* RIO,
+  Trk::LocalParameters&& locpars,
+  Amg::MatrixX&& locerr,
+  const IdentifierHash& idDE,
+  bool,
+  bool isbroad)
+  : // call base class constructor
+  InDet::SiClusterOnTrack(std::move(locpars),
+                          std::move(locerr),
+                          idDE, RIO->identify(), isbroad)
+  , m_hasClusterAmbiguity(RIO->isAmbiguous())
+  , m_isFake(RIO->isFake())
+  , m_energyLoss(RIO->energyLoss())
+  , m_detEl(RIO->detectorElement())
+{
+  m_rio.setElement(RIO);
+  // Set global position
+  m_globalPosition = associatedSurface().localToGlobal(localParameters());
+}
+
+
 // Constructor with parameters
 InDet::PixelClusterOnTrack::PixelClusterOnTrack(
   const InDet::PixelCluster* RIO,
@@ -57,11 +79,37 @@ InDet::PixelClusterOnTrack::PixelClusterOnTrack(
   m_rio.setElement(RIO);
 }
 
+// Constructor with parameters
+InDet::PixelClusterOnTrack::PixelClusterOnTrack(
+  const InDet::PixelCluster* RIO,
+  Trk::LocalParameters&& locpars,
+  Amg::MatrixX&& locerr,
+  const IdentifierHash& idDE,
+  const Amg::Vector3D& globalPosition,
+  bool,
+  bool isbroad)
+  : // call base class constructor
+  InDet::SiClusterOnTrack(std::move(locpars),
+                          std::move(locerr),
+                          idDE,
+                          RIO->identify(),
+                          globalPosition,
+                          isbroad)
+  , m_hasClusterAmbiguity(RIO->isAmbiguous())
+  , m_isFake(RIO->isFake())
+  , m_energyLoss(RIO->energyLoss())
+  , m_detEl(RIO->detectorElement())
+{
+  m_rio.setElement(RIO);
+}
+
+
+
 //P->T constructor
 InDet::PixelClusterOnTrack::PixelClusterOnTrack
   ( const ElementLinkToIDCPixelClusterContainer& RIO,
-    const Trk::LocalParameters& locpars, 
-    const Amg::MatrixX& locerr, 
+    const Trk::LocalParameters& locpars,
+    const Amg::MatrixX& locerr,
     const IdentifierHash& idDE,
     const Identifier& id,
     float energyLoss,
@@ -78,12 +126,8 @@ InDet::PixelClusterOnTrack::PixelClusterOnTrack
   // The setting of the global position
   // happens via the setValues method
 }
-    
 
 
-// Destructor:
-InDet::PixelClusterOnTrack::~PixelClusterOnTrack()
-= default;
 
 // Default constructor:
 InDet::PixelClusterOnTrack::PixelClusterOnTrack()
@@ -101,8 +145,8 @@ InDet::PixelClusterOnTrack::PixelClusterOnTrack()
 
 const Trk::Surface& InDet::PixelClusterOnTrack::associatedSurface() const
 { return ( detectorElement()->surface()); }
-      
-              
+
+
 void InDet::PixelClusterOnTrack::setValues(const Trk::TrkDetElementBase* detEl, const Trk::PrepRawData* /*prd*/)
 {
     //set detector element
@@ -113,7 +157,7 @@ void InDet::PixelClusterOnTrack::setValues(const Trk::TrkDetElementBase* detEl, 
     }
 }
 
-  
+
 
 MsgStream& InDet::PixelClusterOnTrack::dump( MsgStream& sl ) const
 {
