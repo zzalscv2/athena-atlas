@@ -901,24 +901,11 @@ void InDet::SiCombinatorialTrackFinder_xk::magneticFieldInit()
 }
 
 ///////////////////////////////////////////////////////////////////
-// Convert space points to clusters
+// Convert space points to clusters and (for Run 4) detector elements 
 ///////////////////////////////////////////////////////////////////
 
 bool InDet::SiCombinatorialTrackFinder_xk::spacePointsToClusters
-(const std::vector<const Trk::SpacePoint*>& Sp, std::vector<const InDet::SiCluster*>& Sc) 
-{
-
-  std::vector<const InDetDD::SiDetectorElement*> DE;
-  return spacePointsToClusters(Sp,Sc,DE);
-
-}
-
-///////////////////////////////////////////////////////////////////
-// Convert space points to clusters and detector elements
-///////////////////////////////////////////////////////////////////
-
-bool InDet::SiCombinatorialTrackFinder_xk::spacePointsToClusters
-(const std::vector<const Trk::SpacePoint*>& Sp, std::vector<const InDet::SiCluster*>& Sc, std::vector<const InDetDD::SiDetectorElement*>& DE)
+(const std::vector<const Trk::SpacePoint*>& Sp, std::vector<const InDet::SiCluster*>& Sc, std::optional<std::reference_wrapper<std::vector<const InDetDD::SiDetectorElement*>>> DE)
 {
   Sc.reserve(Sp.size());
   /// loop over all SP
@@ -947,11 +934,12 @@ bool InDet::SiCombinatorialTrackFinder_xk::spacePointsToClusters
 
   /// here we reject cases where two subsequent clusters are on the same
   /// detector element
-  DE.reserve(Sc.size());
+  if (DE) {
+    DE->get().reserve(Sc.size());
+  }
   for (; cluster != endClusters; ++cluster) {
 
      const InDetDD::SiDetectorElement* de = (*cluster)->detectorElement();
-     DE.push_back(de);
 
      nextCluster = cluster;
      ++nextCluster;
@@ -959,6 +947,9 @@ bool InDet::SiCombinatorialTrackFinder_xk::spacePointsToClusters
         if (de == (*nextCluster)->detectorElement()){
           return false;
         }
+     }
+     if (DE) {
+       DE->get().push_back(de);
      }
   }
   return true;
