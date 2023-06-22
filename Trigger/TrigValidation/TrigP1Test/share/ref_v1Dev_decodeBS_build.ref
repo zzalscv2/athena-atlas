@@ -4649,6 +4649,30 @@ HLT_g50_tight_xe40_cell_xe70_pfopufit_80mTAC_L1eEM28M:
     0: 1
   stepFeatures:
     0: 1
+HLT_g5_nopid_L1EM3:
+  eventCount: 30
+  stepCounts:
+    0: 37
+    1: 37
+    2: 31
+    3: 30
+  stepFeatures:
+    0: 139
+    1: 139
+    2: 87
+    3: 59
+HLT_g5_nopid_L1eEM5:
+  eventCount: 24
+  stepCounts:
+    0: 25
+    1: 25
+    2: 24
+    3: 24
+  stepFeatures:
+    0: 58
+    1: 58
+    2: 61
+    3: 58
 HLT_g60_loose_L1eEM26M:
   eventCount: 0
   stepCounts:

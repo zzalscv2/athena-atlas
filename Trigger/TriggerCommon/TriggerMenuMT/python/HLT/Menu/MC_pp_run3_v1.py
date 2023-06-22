@@ -143,6 +143,10 @@ def getMCSignatures():
         #------------ hipTRT trigger, ATR-22603
         ChainProp(name='HLT_g0_hiptrt_L1eEM26M' , groups=SinglePhotonGroup), 
 
+        # ATR-27780
+        ChainProp(name='HLT_g5_nopid_L1EM3', groups=SinglePhotonGroup+['PS:NoBulkMCProd']),
+        ChainProp(name='HLT_g5_nopid_L1eEM5', groups=SinglePhotonGroup+['PS:NoBulkMCProd']),
+
         #ATR-25764 - adding Photon chains with different isolation WPs
         ChainProp(name='HLT_g25_tight_icaloloose_L1eEM26M', groups=SinglePhotonGroup, monGroups=['egammaMon:shifter']),
         ChainProp(name='HLT_g25_tight_icalotight_L1eEM26M', groups=SinglePhotonGroup, monGroups=['egammaMon:shifter']),
