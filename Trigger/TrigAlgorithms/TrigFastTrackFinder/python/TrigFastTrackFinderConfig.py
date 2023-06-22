@@ -203,7 +203,8 @@ def TrigFastTrackFinderMonitoringArg(flags, name, doResMon):
     addTrackHistograms(montool, name)
     if doResMon:
         addResidualHistograms(montool)
-    if name=='jet':
+    uttMode = flags.Tracking.ActiveConfig.doHitDV or flags.Tracking.ActiveConfig.doDisappearingTrk
+    if uttMode:
         addUTTHistograms(montool)
 
     return montool

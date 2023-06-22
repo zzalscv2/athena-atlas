@@ -929,8 +929,6 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
     idx++;
   }
   
-  mnt_timer_Total.stop();
-
   if( outputTracks.empty() ) {
     ATH_MSG_DEBUG("REGTEST / No tracks reconstructed");
   }
@@ -973,6 +971,8 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
   fillMon(outputTracks, *vertices, roi, ctx);
 
   mnt_roi_lastStageExecuted = 7;
+
+  mnt_timer_Total.stop();
 
   return StatusCode::SUCCESS;
 }
@@ -1646,58 +1646,77 @@ StatusCode TrigFastTrackFinder::findHitDV(const EventContext& ctx, const std::ve
    // space points
    int n_sp           = 0;
    int n_sp_usedByTrk = 0;
-   std::vector<float> v_sp_eta;
-   std::vector<float> v_sp_r;
-   std::vector<float> v_sp_phi;
-   std::vector<int>   v_sp_layer;
-   std::vector<bool>  v_sp_isPix;
-   std::vector<bool>  v_sp_isSct;
-   std::vector<int>   v_sp_usedTrkId;
 
    std::unordered_map<Identifier, int> umap_sp_identifier;
+   umap_sp_identifier.reserve(1.3*convertedSpacePoints.size());//up to 2 Identifiers per spacepoint, end up with 1.3 from measurements
+
+   auto add_to_sp_map = [&](const Trk::PrepRawData* prd) {
+     if (prd) {
+       Identifier id_prd =  prd->identify();
+       if( umap_sp_identifier.find(id_prd) == umap_sp_identifier.end() ) {
+         umap_sp_identifier.insert(std::make_pair(id_prd,-1));
+       }
+     }
+   };
 
    for(unsigned int iSp=0; iSp<convertedSpacePoints.size(); ++iSp) {
       bool isPix = convertedSpacePoints[iSp].isPixel();
       bool isSct = convertedSpacePoints[iSp].isSCT();
       if( ! isPix && ! isSct ) continue;
       const Trk::SpacePoint* sp = convertedSpacePoints[iSp].offlineSpacePoint();
-      std::vector<const Trk::PrepRawData*> prds;
-      prds.reserve(2);
-      if(sp->clusterList().first !=nullptr)  prds.push_back(sp->clusterList().first);
-      if(sp->clusterList().second!=nullptr)  prds.push_back(sp->clusterList().second);
-      for(const Trk::PrepRawData* prd : prds) {
-	 Identifier id_prd =  prd->identify();
-	 if( umap_sp_identifier.find(id_prd) == umap_sp_identifier.end() ) {
-	    umap_sp_identifier.insert(std::make_pair(id_prd,-1));
-	 }
-      }
+      add_to_sp_map(sp->clusterList().first);
+      add_to_sp_map(sp->clusterList().second);
    }
    int n_id_usedByTrack = 0;
    for(auto it=umap_sp_identifier.begin(); it!=umap_sp_identifier.end(); ++it) {
-      Identifier id_sp = it->first;
-      if( umap_fittedTrack_identifier.find(id_sp) != umap_fittedTrack_identifier.end() ) {
-	 umap_sp_identifier[id_sp] = umap_fittedTrack_identifier[id_sp];
-	 ++n_id_usedByTrack;
-      }
+     Identifier id_sp = it->first;
+     if( umap_fittedTrack_identifier.find(id_sp) != umap_fittedTrack_identifier.end() ) {
+       umap_sp_identifier[id_sp] = umap_fittedTrack_identifier[id_sp];
+       ++n_id_usedByTrack;
+     }
    }
    ATH_MSG_DEBUG("Nr of SPs / Identifiers (all) / Identifiers (usedByTrack) = " << convertedSpacePoints.size() << " / " << umap_sp_identifier.size() << " / " << n_id_usedByTrack);
+
+   auto sp_map_used_id = [&](const Trk::PrepRawData* prd) {
+     int usedTrack_id = -1;
+     if (prd) {
+       Identifier id_prd =  prd->identify();
+       if( umap_sp_identifier.find(id_prd) != umap_sp_identifier.end() ) {
+         usedTrack_id = umap_sp_identifier[id_prd];
+       }
+     }
+     return usedTrack_id;
+   };
+
+   std::vector<float> v_sp_eta;
+   v_sp_eta.reserve(convertedSpacePoints.size());
+   std::vector<float> v_sp_r;
+   v_sp_r.reserve(convertedSpacePoints.size());
+   std::vector<float> v_sp_phi;
+   v_sp_phi.reserve(convertedSpacePoints.size());
+   std::vector<int>   v_sp_layer;
+   v_sp_layer.reserve(convertedSpacePoints.size());
+   std::vector<bool>  v_sp_isPix;
+   v_sp_isPix.reserve(convertedSpacePoints.size());
+   std::vector<bool>  v_sp_isSct;
+   v_sp_isSct.reserve(convertedSpacePoints.size());
+   std::vector<int>   v_sp_usedTrkId;
+   v_sp_usedTrkId.reserve(convertedSpacePoints.size());
 
    for(unsigned int iSp=0; iSp<convertedSpacePoints.size(); ++iSp) {
       bool isPix = convertedSpacePoints[iSp].isPixel();
       bool isSct = convertedSpacePoints[iSp].isSCT();
       if( ! isPix && ! isSct ) continue;
       const Trk::SpacePoint* sp = convertedSpacePoints[iSp].offlineSpacePoint();
-      std::vector<const Trk::PrepRawData*> prds;
-      prds.reserve(2);
-      if(sp->clusterList().first !=nullptr)  prds.push_back(sp->clusterList().first);
-      if(sp->clusterList().second!=nullptr)  prds.push_back(sp->clusterList().second);
-      int usedTrack_id = -1;
-      for(const Trk::PrepRawData* prd : prds) {
-	 Identifier id_prd =  prd->identify();
-	 if( umap_sp_identifier.find(id_prd) != umap_sp_identifier.end() ) {
-	    int trkid = umap_sp_identifier[id_prd];
-	    if( trkid != -1 ) usedTrack_id = trkid;
-	 }
+      
+      int usedTrack_id  = -1;
+      int usedTrack_id_first = sp_map_used_id(sp->clusterList().first);
+      if (usedTrack_id_first != -1) {
+        usedTrack_id = usedTrack_id_first;
+      }
+      int usedTrack_id_second = sp_map_used_id(sp->clusterList().second);
+      if (usedTrack_id_second != -1) {
+        usedTrack_id = usedTrack_id_second;
       }
 
       //
