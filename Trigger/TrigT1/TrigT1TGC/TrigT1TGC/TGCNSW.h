@@ -38,7 +38,6 @@ class TGCNSW : public AthMessaging {
 
   void print() const;
 
- protected:
   std::shared_ptr<NSWTrigOut> m_buffer[LVL1TGC::TGCSide::kNSide][NumberOfNSWTriggerProcesser];  // buffer[Side][NSW TP]
 };
 
