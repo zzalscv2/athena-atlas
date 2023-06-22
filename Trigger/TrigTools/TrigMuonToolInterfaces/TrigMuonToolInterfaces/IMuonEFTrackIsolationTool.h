@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef _TRIGMUONEF_IMUONEFTRACKISOLATIONTOOL_H__
-#define _TRIGMUONEF_IMUONEFTRACKISOLATIONTOOL_H__
+#ifndef TRIGMUONEF_IMUONEFTRACKISOLATIONTOOL_H
+#define TRIGMUONEF_IMUONEFTRACKISOLATIONTOOL_H
 
 // include base class
 #include "GaudiKernel/IAlgTool.h"
@@ -31,7 +31,7 @@ class IMuonEFTrackIsolationTool : virtual public IAlgTool {
  public:
   
   /// Function where the isolation should be calculated for an L2 muon & FTK tracks (xAOD version)                                                                                       
-  virtual StatusCode calcTrackIsolation(const xAOD::Muon* efmuon, const xAOD::TrackParticleContainer* idtrks, const std::vector<double> conesizes, std::vector<double>& results, std::vector<double>* dzvals, std::vector<double>* drvals, std::vector<double>* selfremoval) const =0;
+  virtual StatusCode calcTrackIsolation(const xAOD::Muon* efmuon, const xAOD::TrackParticleContainer* idtrks, const std::vector<double>& conesizes, std::vector<double>& results, std::vector<double>* dzvals, std::vector<double>* drvals, std::vector<double>* selfremoval) const =0;
 
   /// Retrieve interface ID
   static const InterfaceID& interfaceID() { return IID_IMuonEFTrackIsolationTool;}
@@ -39,4 +39,4 @@ class IMuonEFTrackIsolationTool : virtual public IAlgTool {
 };
 
 
-#endif //_TRIGMUONEF_IMUONEFTRACKISOLATIONTOOL_H__
+#endif //TRIGMUONEF_IMUONEFTRACKISOLATIONTOOL_H
