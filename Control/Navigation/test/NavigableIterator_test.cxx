@@ -19,9 +19,7 @@
 #include "AthenaKernel/CLASS_DEF.h"
 #include "TestTools/initGaudi.h"
 #include "GaudiKernel/Bootstrap.h"
-
-#include "boost/type_traits/is_same.hpp"
-#include "boost/static_assert.hpp"
+#include <type_traits>
 #include <typeinfo>
 
 
@@ -47,21 +45,21 @@ template <class NAV>
 void test0()
 {
   typedef typename NAV::object_iter iter;
-  BOOST_STATIC_ASSERT(
-    (boost::is_same<typename std::iterator_traits<iter>::difference_type,
+  static_assert(
+    (std::is_same<typename std::iterator_traits<iter>::difference_type,
                     ptrdiff_t>::value));
-  BOOST_STATIC_ASSERT(
-    (boost::is_same<typename std::iterator_traits<iter>::value_type,
+  static_assert(
+    (std::is_same<typename std::iterator_traits<iter>::value_type,
                     const Payload*>::value));
-  BOOST_STATIC_ASSERT(
-    (boost::is_same<typename std::iterator_traits<iter>::reference,
+  static_assert(
+    (std::is_same<typename std::iterator_traits<iter>::reference,
                     const Payload*>::value));
   typedef const Payload* ptr_t;
-  BOOST_STATIC_ASSERT(
-    (boost::is_same<typename std::iterator_traits<iter>::pointer,
+  static_assert(
+    (std::is_same<typename std::iterator_traits<iter>::pointer,
                     ptr_t*>::value));
-  BOOST_STATIC_ASSERT(
-    (boost::is_same<typename std::iterator_traits<iter>::iterator_category,
+  static_assert(
+    (std::is_same<typename std::iterator_traits<iter>::iterator_category,
                     std::random_access_iterator_tag>::value));
 }
 
