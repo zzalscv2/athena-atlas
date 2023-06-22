@@ -39,7 +39,19 @@ StatusCode TrigL2MuonSA::FtfRoadDefiner::defineRoad(const xAOD::TrackParticle* i
   double aw_ftf[3]={0.,0.,0.}; // slope of FTF Road for Inner/Middle/Outer
   double bw_ftf[3]={0.,0.,0.}; // intercept of FTF Road for Inner/Middle/Outer
   // Inner
-  auto extFtfInner = extTrack( idtrack, 4700., 7500., muonRoad.ext_ftf_flag[0][0]);
+
+  bool CylinderFirst = (std::abs(idtrack->eta()) < 1.05);
+
+  double innerCylinderZ = 7500.;
+  double middleCylinderZ = 14000.;
+  double outerCylinderZ = 21500.;
+  if(idtrack->eta() < 0) {
+    innerCylinderZ = -innerCylinderZ;
+    middleCylinderZ = -middleCylinderZ;
+    outerCylinderZ = -outerCylinderZ;
+  }
+
+  auto extFtfInner = extTrack( CylinderFirst, idtrack, 4700., innerCylinderZ, muonRoad.ext_ftf_flag[0][0]);
   if( !extFtfInner ) {
     ATH_MSG_DEBUG("extrapolated track parameters on BarrelInner is null");
   } else {
@@ -52,38 +64,50 @@ StatusCode TrigL2MuonSA::FtfRoadDefiner::defineRoad(const xAOD::TrackParticle* i
     bw_ftf[0] = extFtfInnerR - (aw_ftf[0])*extFtfInnerZ;
     muonRoad.r_ftf[0][0] = extFtfInnerR;
     muonRoad.z_ftf[0][0] = extFtfInnerZ;
-  }
 
-  // Middle
-  auto extFtfMiddle = extTrack( idtrack , 7300., 14000., muonRoad.ext_ftf_flag[1][0]);
-  if( !extFtfMiddle ) {
-    ATH_MSG_DEBUG("extrapolated track parameters on BarrelMiddle is null");
-  } else {
-    extFtfMiddleEta = extFtfMiddle->eta();
-    extFtfMiddlePhi = extFtfMiddle->position().phi();
-    extFtfMiddleZ = extFtfMiddle->position().z();
-    extFtfMiddleR = std::hypot(extFtfMiddle->position().x(), extFtfMiddle->position().y());
-    ATH_MSG_DEBUG("extFtfMiddleEta: " << extFtfMiddleEta << ", extFtfMiddlePhi: " << extFtfMiddlePhi << ", extFtfMiddleZ: " << extFtfMiddleZ << ", extFtfMiddleR: " << extFtfMiddleR);
-    aw_ftf[1] = std::tan(2*std::atan(std::exp(-extFtfMiddleEta)));
-    bw_ftf[1] = extFtfMiddleR - (aw_ftf[1])*extFtfMiddleZ;
-    muonRoad.r_ftf[1][0] = extFtfMiddleR;
-    muonRoad.z_ftf[1][0] = extFtfMiddleZ;
-  }
+    // Middle
+    if(muonRoad.ext_ftf_flag[0][0]==0||
+       muonRoad.ext_ftf_flag[0][0]==3)
+      CylinderFirst = true;
+    else
+      CylinderFirst = false;
 
-  // Outer
-  auto extFtfOuter = extTrack( idtrack , 9800., 21500., muonRoad.ext_ftf_flag[2][0]);
-  if( !extFtfOuter ) {
-    ATH_MSG_DEBUG("extrapolated track parameters on BarrelOuter is null");
-  } else {
-    extFtfOuterEta = extFtfOuter->eta();
-    extFtfOuterPhi = extFtfOuter->position().phi();
-    extFtfOuterZ = extFtfOuter->position().z();
-    extFtfOuterR = std::hypot(extFtfOuter->position().x(), extFtfOuter->position().y());
-    ATH_MSG_DEBUG("extFtfOuterEta: " << extFtfOuterEta << ", extFtfOuterPhi: " << extFtfOuterPhi << ", extFtfOuterZ: " << extFtfOuterZ << ", extFtfOuterR: " << extFtfOuterR);
-    aw_ftf[2] = std::tan(2*std::atan(std::exp(-extFtfOuterEta)));
-    bw_ftf[2] = extFtfOuterR - (aw_ftf[2])*extFtfOuterZ;
-    muonRoad.r_ftf[2][0] = extFtfOuterR;
-    muonRoad.z_ftf[2][0] = extFtfOuterZ;
+    auto extFtfMiddle = extTrack( CylinderFirst, *extFtfInner, 7300., middleCylinderZ, muonRoad.ext_ftf_flag[1][0]);
+    if( !extFtfMiddle ) {
+      ATH_MSG_DEBUG("extrapolated track parameters on BarrelMiddle is null");
+    } else {
+      extFtfMiddleEta = extFtfMiddle->eta();
+      extFtfMiddlePhi = extFtfMiddle->position().phi();
+      extFtfMiddleZ = extFtfMiddle->position().z();
+      extFtfMiddleR = std::hypot(extFtfMiddle->position().x(), extFtfMiddle->position().y());
+      ATH_MSG_DEBUG("extFtfMiddleEta: " << extFtfMiddleEta << ", extFtfMiddlePhi: " << extFtfMiddlePhi << ", extFtfMiddleZ: " << extFtfMiddleZ << ", extFtfMiddleR: " << extFtfMiddleR);
+      aw_ftf[1] = std::tan(2*std::atan(std::exp(-extFtfMiddleEta)));
+      bw_ftf[1] = extFtfMiddleR - (aw_ftf[1])*extFtfMiddleZ;
+      muonRoad.r_ftf[1][0] = extFtfMiddleR;
+      muonRoad.z_ftf[1][0] = extFtfMiddleZ;
+
+      // Outer
+      if(muonRoad.ext_ftf_flag[1][0]==0||
+	 muonRoad.ext_ftf_flag[1][0]==3)
+	CylinderFirst = true;
+      else
+	CylinderFirst = false;
+
+      auto extFtfOuter = extTrack( CylinderFirst, *extFtfMiddle, 9800., outerCylinderZ, muonRoad.ext_ftf_flag[2][0]);
+      if( !extFtfOuter ) {
+	ATH_MSG_DEBUG("extrapolated track parameters on BarrelOuter is null");
+      } else {
+	extFtfOuterEta = extFtfOuter->eta();
+	extFtfOuterPhi = extFtfOuter->position().phi();
+	extFtfOuterZ = extFtfOuter->position().z();
+	extFtfOuterR = std::hypot(extFtfOuter->position().x(), extFtfOuter->position().y());
+	ATH_MSG_DEBUG("extFtfOuterEta: " << extFtfOuterEta << ", extFtfOuterPhi: " << extFtfOuterPhi << ", extFtfOuterZ: " << extFtfOuterZ << ", extFtfOuterR: " << extFtfOuterR);
+	aw_ftf[2] = std::tan(2*std::atan(std::exp(-extFtfOuterEta)));
+	bw_ftf[2] = extFtfOuterR - (aw_ftf[2])*extFtfOuterZ;
+	muonRoad.r_ftf[2][0] = extFtfOuterR;
+	muonRoad.z_ftf[2][0] = extFtfOuterZ;
+      }
+    }
   }
 
   muonRoad.extFtfMiddleEta = extFtfMiddleEta;
@@ -144,61 +168,129 @@ StatusCode TrigL2MuonSA::FtfRoadDefiner::defineRoad(const xAOD::TrackParticle* i
 // --------------------------------------------------------------------------------
 
 // extrapolate a FTF track to MS in order to define FTF Road
-std::unique_ptr<const Trk::TrackParameters> TrigL2MuonSA::FtfRoadDefiner::extTrack( const xAOD::TrackParticle* trk, const double R, const double halflength, int& extFlag ) const 
+std::unique_ptr<const Trk::TrackParameters> TrigL2MuonSA::FtfRoadDefiner::extTrack( const bool CylinderFirst, const xAOD::TrackParticle* trk, const double R, const double Z, int& extFlag ) const
 {
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
   const bool boundaryCheck = true;
-  bool bCylinder = false;
-  bool bDisk = false;
-
-  double Z = ( trk->eta()>0 )? halflength:-halflength;
 
   // Cylinder
   std::unique_ptr<const Trk::CylinderSurface> barrel = std::make_unique<const Trk::CylinderSurface>( R, Z );
-  std::unique_ptr<const Trk::TrackParameters> param1( m_extrapolator->extrapolate(ctx, 
-                                                                                  trk->perigeeParameters(), 
-                                                                                  *barrel, 
-                                                                                  Trk::anyDirection, boundaryCheck, Trk::muon) );
-  if(param1){
-    bCylinder = true;
-    ATH_MSG_DEBUG("Cylinder -> eta: " << param1->eta() << ", phi: " << param1->position().phi() << ", Z: " << param1->position().z() << ", Rms: " << std::hypot(param1->position().x(), param1->position().y()));
-  } else {
-    ATH_MSG_DEBUG("Cylinder -> extrapolated track parameters on Cylinder is null");
-  }
 
   // Disk
   Amg::Transform3D matrix = Amg::Transform3D( Amg::Vector3D( 0.,0.,Z ) );
-
   std::unique_ptr<const Trk::DiscSurface> disc = std::make_unique<const Trk::DiscSurface>( matrix, 0, R );
-  std::unique_ptr<const Trk::TrackParameters> param2( m_extrapolator->extrapolate(ctx, 
-                                                                                  trk->perigeeParameters(), 
-                                                                                  *disc, 
-                                                                                  Trk::anyDirection, boundaryCheck, Trk::muon) );
-  if(param2){
-    bDisk = true;
-    ATH_MSG_DEBUG("Disk     -> eta: " << param2->eta() << ", phi: " << param2->position().phi() << ", Z: " << param2->position().z() << ", Rms: " << std::hypot(param2->position().x(), param2->position().y()));
-  } else {
-    ATH_MSG_DEBUG("Disk     -> extrapolated track parameters on Disk is null");
-  }
 
   ATH_MSG_DEBUG("R: " << R << ", Z: " << Z);
-  ATH_MSG_DEBUG("bCylinder:" << bCylinder << ", bDisk:" << bDisk );
 
-
-  if ( bCylinder && bDisk ){
-    extFlag = 0;
-    return param1;
-  } else if ( bCylinder && !bDisk){
-    extFlag = 1;
-    return param1;
-  } else if ( !bCylinder && bDisk){
-    extFlag = 2;
-    return param2;
-  } else {
-    extFlag = 3;
-    return param1;
+  if(CylinderFirst) {
+    std::unique_ptr<const Trk::TrackParameters> param1( m_extrapolator->extrapolate(ctx,
+										    trk->perigeeParameters(),
+										    *barrel,
+										    Trk::anyDirection, boundaryCheck, Trk::muon) );
+    if(param1){
+      ATH_MSG_DEBUG("Cylinder -> eta: " << param1->eta() << ", phi: " << param1->position().phi() << ", Z: " << param1->position().z() << ", Rms: " << std::hypot(param1->position().x(), param1->position().y()));
+      extFlag = 0;
+      return param1;
+    }
+    // Cylinder failed, try Disk
+    std::unique_ptr<const Trk::TrackParameters> param2( m_extrapolator->extrapolate(ctx,
+										    trk->perigeeParameters(),
+										    *disc,
+										    Trk::anyDirection, boundaryCheck, Trk::muon) );
+    if(param2){
+      ATH_MSG_DEBUG("Disk     -> eta: " << param2->eta() << ", phi: " << param2->position().phi() << ", Z: " << param2->position().z() << ", Rms: " << std::hypot(param2->position().x(), param2->position().y()));
+      extFlag = 1;
+      return param2;
+    }
   }
+  else { // Endcap First
+    std::unique_ptr<const Trk::TrackParameters> param2( m_extrapolator->extrapolate(ctx,
+										    trk->perigeeParameters(),
+										    *disc,
+										    Trk::anyDirection, boundaryCheck, Trk::muon) );
+    if(param2){
+      ATH_MSG_DEBUG("Disk     -> eta: " << param2->eta() << ", phi: " << param2->position().phi() << ", Z: " << param2->position().z() << ", Rms: " << std::hypot(param2->position().x(), param2->position().y()));
+      extFlag = 2;
+      return param2;
+    }
+    // Disk failed, try Cylinder
+    std::unique_ptr<const Trk::TrackParameters> param1( m_extrapolator->extrapolate(ctx,
+										    trk->perigeeParameters(),
+										    *barrel,
+										    Trk::anyDirection, boundaryCheck, Trk::muon) );
+    if(param1){
+      ATH_MSG_DEBUG("Cylinder -> eta: " << param1->eta() << ", phi: " << param1->position().phi() << ", Z: " << param1->position().z() << ", Rms: " << std::hypot(param1->position().x(), param1->position().y()));
+      extFlag = 3;
+      return param1;
+    }
+  }
+
+  extFlag = 4;
+
+  return nullptr;
+}
+
+// extrapolate a FTF track to MS in order to define FTF Road
+std::unique_ptr<const Trk::TrackParameters> TrigL2MuonSA::FtfRoadDefiner::extTrack( const bool CylinderFirst, const Trk::TrackParameters& param, const double R, const double Z, int& extFlag ) const
+{
+
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  const bool boundaryCheck = true;
+
+  // Cylinder
+  std::unique_ptr<const Trk::CylinderSurface> barrel = std::make_unique<const Trk::CylinderSurface>( R, Z );
+
+  // Disk
+  Amg::Transform3D matrix = Amg::Transform3D( Amg::Vector3D( 0.,0.,Z ) );
+  std::unique_ptr<const Trk::DiscSurface> disc = std::make_unique<const Trk::DiscSurface>( matrix, 0, R );
+
+  ATH_MSG_DEBUG("R: " << R << ", Z: " << Z);
+
+  if(CylinderFirst) {
+    std::unique_ptr<const Trk::TrackParameters> param1( m_extrapolator->extrapolate(ctx,
+										    param,
+										    *barrel,
+										    Trk::anyDirection, boundaryCheck, Trk::muon) );
+    if(param1){
+      ATH_MSG_DEBUG("Cylinder -> eta: " << param1->eta() << ", phi: " << param1->position().phi() << ", Z: " << param1->position().z() << ", Rms: " << std::hypot(param1->position().x(), param1->position().y()));
+      extFlag = 0;
+      return param1;
+    }
+    // Cylinder failed, try Disk
+    std::unique_ptr<const Trk::TrackParameters> param2( m_extrapolator->extrapolate(ctx,
+										    param,
+										    *disc,
+										    Trk::anyDirection, boundaryCheck, Trk::muon) );
+    if(param2){
+      ATH_MSG_DEBUG("Disk     -> eta: " << param2->eta() << ", phi: " << param2->position().phi() << ", Z: " << param2->position().z() << ", Rms: " << std::hypot(param2->position().x(), param2->position().y()));
+      extFlag = 1;
+      return param2;
+    }
+  }
+  else { // Endcap First
+    std::unique_ptr<const Trk::TrackParameters> param2( m_extrapolator->extrapolate(ctx,
+										    param,
+										    *disc,
+										    Trk::anyDirection, boundaryCheck, Trk::muon) );
+    if(param2){
+      ATH_MSG_DEBUG("Disk     -> eta: " << param2->eta() << ", phi: " << param2->position().phi() << ", Z: " << param2->position().z() << ", Rms: " << std::hypot(param2->position().x(), param2->position().y()));
+      extFlag = 2;
+      return param2;
+    }
+    // Disk failed, try Cylinder
+    std::unique_ptr<const Trk::TrackParameters> param1( m_extrapolator->extrapolate(ctx,
+										    param,
+										    *barrel,
+										    Trk::anyDirection, boundaryCheck, Trk::muon) );
+    if(param1){
+      ATH_MSG_DEBUG("Cylinder -> eta: " << param1->eta() << ", phi: " << param1->position().phi() << ", Z: " << param1->position().z() << ", Rms: " << std::hypot(param1->position().x(), param1->position().y()));
+      extFlag = 3;
+      return param1;
+    }
+  }
+
+  extFlag = 4;
 
   return nullptr;
 }
