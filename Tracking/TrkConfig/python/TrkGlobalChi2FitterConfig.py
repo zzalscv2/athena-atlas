@@ -4,6 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
 import AthenaCommon.SystemOfUnits as Units
+from TrkConfig.TrkConfigFlags import PrimaryPassConfig
 
 # The Global Chi2 is the main/reference general
 # track fitter in ATLAS
@@ -97,11 +98,11 @@ def InDetGlobalChi2FitterCfg(flags, name='InDetGlobalChi2Fitter', **kwargs):
             flags.Tracking.useBroadSCTClusterErrors):
         kwargs.setdefault('RecalibrateSilicon', False)
 
-    if flags.Tracking.doRobustReco:
+    if flags.Tracking.PrimaryPassConfig is PrimaryPassConfig.RobustReco:
         kwargs.setdefault('OutlierCut', 10.0)
         kwargs.setdefault('TrackChi2PerNDFCut', 20)
 
-    if (flags.Tracking.doRobustReco or
+    if (flags.Tracking.PrimaryPassConfig is PrimaryPassConfig.RobustReco or
             flags.Beam.Type is BeamType.Cosmics):
         kwargs.setdefault('MaxOutliers', 99)
 
@@ -146,7 +147,8 @@ def InDetGlobalChi2FitterTRTCfg(
 
     kwargs.setdefault("OutlierCut", 5)
     kwargs.setdefault("MaxOutliers",
-                      99 if (flags.Tracking.doRobustReco or
+                      99 if (flags.Tracking.PrimaryPassConfig is (
+                          PrimaryPassConfig.RobustReco) or
                              flags.Beam.Type is BeamType.Cosmics)
                       else 10)
     kwargs.setdefault("ReintegrateOutliers", False)
