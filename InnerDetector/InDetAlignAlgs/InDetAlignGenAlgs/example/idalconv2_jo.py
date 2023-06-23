@@ -7,16 +7,12 @@ theApp.setup( MONTECARLO )
 include( "AthenaPoolCnvSvc/AthenaPool_jobOptions.py" )
 include ( "IOVDbSvc/IOVDbSvc_jobOptions.py" )
 IOVDbSvc=Service("IOVDbSvc")
-#IOVDbSvc.dbConnection="impl=conddb;techno=mysql;atlobk02.cern.ch:conditions_ctb_2004:conditions:conditions"
-#IOVDbSvc.dbConnection="impl=cool;techno=sqlite;schema=mysqlfile.db;X:TBPROD"
 
 PoolSvc = Service( "PoolSvc" )
 #PoolSvc.ReadCatalog+= [ "file:PoolFileCatalog.xml","file:poolcond/poolcond.xml"]
 Service("PoolSvc").ReadCatalog= ["file:PoolFileCatalog.xml",
  "xmlcatalog_http://atlas.web.cern.ch/Atlas/GROUPS/DATABASE/project/catrep/condcat.xml"]
 
-#ctbcon="<dbConnection>impl=conddb;techno=mysql;atlobk02.cern.ch:conditions_ctb_2004:conditions:conditions</dbConnection>"
-#ctbcon="<dbConnection>impl=cool;techno=oracle;schema=ATLAS_COOL_INDET;ATLAS_COOLPROD:TBMCPROD:ATLAS_COOL_READER:COOLRED4PRO</dbConnection>"
 ctbcon="<dbConnection>impl=cool;techno=sqlite;schema=sqlite/TBMCPROD.db;X:TBMCPROD</dbConnection>"
 IOVDbSvc.Folders+=[ ctbcon+" /Indet/Align"]
 
@@ -33,7 +29,6 @@ include("InDetTBRecExample/InDetTBSetFlags_jobOptions.py")
 InDetTBFlags.TRT=False
 include ("AtlasGeoModel/SetGeometryVersion.py")
 include ("AtlasGeoModel/GeoModelInit.py")
-#include ("InDetTBRecExample/InDetTB2004DetDescr_jobOptions.py")
 GeoModelSvc.PixelTBDetectorTool.Alignable=TRUE
 GeoModelSvc.SCT_TBDetectorTool.Alignable=TRUE
 NovaCnvSvc.Host = "atlasdbdev.cern.ch"
@@ -86,7 +81,6 @@ EventSelector.InitialTimeStamp  = 0
 EventSelector.TimeStampInterval = 5
 theApp.EvtMax                   = 1
 
-#IOVDbSvc.GlobalTag="SiTBAlign03"
 IOVDbSvc.GlobalTag="nominal"
 IOVDbSvc.OutputLevel=1
 
