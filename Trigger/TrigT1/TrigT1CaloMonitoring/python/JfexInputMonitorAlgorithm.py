@@ -44,73 +44,114 @@ def JfexInputMonitoringConfig(inputFlags):
 
     # add monitoring algorithm to group, with group name and main directory 
     myGroup = helper.addGroup(JfexInputMonAlg, groupName , mainDir)
+    DecorGroup    = helper.addGroup(JfexInputMonAlg, groupName+"_decorated"     , mainDir)
+    DecorAllGroup = helper.addGroup(JfexInputMonAlg, groupName+"_decorated_all" , mainDir)
+    EmulatedGroup = helper.addGroup(JfexInputMonAlg, groupName+"_emulated"   , mainDir)
+    DetailsGroup  = []
+    DetailsEncodedGroup  = []
+    for i in range(7):
+        DetailsGroup.append( helper.addGroup(JfexInputMonAlg, groupName+"_details_"+str(i)   , mainDir))
+        DetailsEncodedGroup.append( helper.addGroup(JfexInputMonAlg, groupName+"_detailsEncoded_"+str(i)   , mainDir))
+        
+        if(i == 1):
+            DetailsGroup[i].defineHistogram('DataEt,EmuSum;SumSCell_vs_Data_'+Calosource_names[i], title='Data Et vs Tile Et ('+ Calosource_names[i]+'); Data Et [GeV]; Tile Et [GeV]',
+                            type='TH2F',path=trigPath+"expert/", xbins=200,xmin=0,xmax=100,ybins=200,ymin=0,ymax=100)
+                            
+            DetailsEncodedGroup[i].defineHistogram('DataEt,EmuSum;Encoded_SumSCell_vs_Data_'+Calosource_names[i], title='Data Et vs Tile Et ('+ Calosource_names[i]+'); Data Et [Encoded]; Tile Et [Encoded]',
+                            type='TH2F',path=trigPath+"expert/", xbins=100,xmin=0,xmax=100,ybins=100,ymin=0,ymax=100)
+        else:    
+            DetailsGroup[i].defineHistogram('DataEt,EmuSum;SumSCell_vs_Data_'+Calosource_names[i], title='Data vs SCell Sum Et ('+ Calosource_names[i]+'); Data Et [MeV]; SCell Sum Et [MeV]',
+                            type='TH2F',path=trigPath+"expert/", xbins=160,xmin=-2000,xmax=2000,ybins=160,ymin=-2000,ymax=2000)
+                            
+            DetailsEncodedGroup[i].defineHistogram('DataEt,EmuSum;Encoded_SumSCell_vs_Data_'+Calosource_names[i], title='Data vs SCell Sum Et ('+ Calosource_names[i]+'); Data Et [Encoded]; SCell Sum Et [Encoded]',
+                            type='TH2F',path=trigPath+"expert/", xbins=4100,xmin=0,xmax=4100,ybins=4100,ymin=0,ymax=4100)
+        
+        
 
-    # histograms of gFex tower variables
+    myGroup.defineHistogram('region,type;DataErrors', title='jFEX Data mismatches per region; Region; Type',
+                            type='TH2F',path=trigPath, xbins=7,xmin=0,xmax=7,ybins=2,ymin=0,ymax=2,xlabels=Calosource_names,ylabels=["Invalid codes","Data mismatch"])
+
+    myGroup.defineHistogram('TowerEtaInvalid,TowerPhiInvalid;2Dmap_InvalidCodes', title='jFex DataTower Invalid Et codes; #eta; #phi',
+                            type='TH2F',path=trigPath, **eta_phi_bins)
+                            
+    DecorGroup.defineHistogram('TowerEta,TowerPhi;2Dmap_DataVsDecorated', title='Input Data vs Decorator; #eta; #phi',
+                            type='TH2F',path=trigPath, **eta_phi_bins)
+                            
+    DecorGroup.defineHistogram('DataEt,SCellSum;SumSCell_vs_Data', title='Data vs SCell Sum Et (unmatching); Data Et [MeV]; SCell Sum Et [MeV]',
+                            type='TH2F',path=trigPath, xbins=160,xmin=-2000,xmax=2000,ybins=160,ymin=-2000,ymax=2000)
+                            
+    DecorAllGroup.defineHistogram('DataEt,SCellSum;SumSCell_vs_Data_all', title='Data vs SCell Sum Et (all Towers); Data Et [MeV]; SCell Sum Et [MeV]',
+                            type='TH2F',path=trigPath, xbins=160,xmin=-2000,xmax=2000,ybins=160,ymin=-2000,ymax=2000)
+                            
+    DecorGroup.defineHistogram('DataEt,frac_SCellSum;frac_SumSCell_vs_Data', title='Data vs (Et_{SCell}-Et_{Data})/Et_{Data} (no invalid codes); Data Et [MeV]; (Et_{SCell}-Et_{Data})/Et_{Data}',
+                            type='TH2F',path=trigPath, xbins=160,xmin=-2000,xmax=2000,ybins=100,ymin=-20,ymax=20)
+                            
+    EmulatedGroup.defineHistogram('TowerEta,TowerPhi;2Dmap_DataVsEmulated', title='Input Data vs Emulated data; #eta; #phi',
+                            type='TH2F',path=trigPath, **eta_phi_bins)
+                            
+    # histograms of jFex tower variables (content of the container)
     myGroup.defineHistogram('NJfexTowers;h_nJfexTowers', title='Number of jFex towers',
-                            type='TH1I', path=trigPath, xbins=2000,xmin=0,xmax=20000)
+                            type='TH1I', path=trigPath+"Content/", xbins=2000,xmin=0,xmax=20000)
 
     myGroup.defineHistogram('TowerEta;h_TowerEta', title='jFex Tower Eta',
-                            type='TH1F', path=trigPath, xbins=100,xmin=-5.0,xmax=5.0)
+                            type='TH1F', path=trigPath+"Content/", xbins=100,xmin=-5.0,xmax=5.0)
 
     myGroup.defineHistogram('TowerPhi;h_TowerPhi', title='jFex Tower Phi',
-                            type='TH1F', path=trigPath, **phi_bins)
+                            type='TH1F', path=trigPath+"Content/", **phi_bins)
 
     myGroup.defineHistogram('TowerEta,TowerPhi;h_TowerEtaPhiMap', title='jFex Tower Eta vs Phi',
-                            type='TH2F',path=trigPath, **eta_phi_bins)
-
-    myGroup.defineHistogram('TowerEtaInvalid,TowerPhiInvalid;h_TowerEtaPhiInvalids', title='jFex Tower Invalid Et codes; Eta vs Phi Map',
-                            type='TH2F',path=trigPath, **eta_phi_bins)
+                            type='TH2F',path=trigPath+"Content/", **eta_phi_bins)
 
     myGroup.defineHistogram('TowerGlobalEta;h_TowerGlobalEta', title='jFex Tower Global Eta',
-                            type='TH1I', path=trigPath, xbins=100,xmin=-50,xmax=50)
+                            type='TH1I', path=trigPath+"Content/", xbins=100,xmin=-50,xmax=50)
 
     myGroup.defineHistogram('TowerGlobalPhi;h_TowerGlobalPhi', title='jFex Tower Global Phi',
-                            type='TH1F', path=trigPath, xbins=67,xmin=-1,xmax=65)
+                            type='TH1F', path=trigPath+"Content/", xbins=67,xmin=-1,xmax=65)
 
     myGroup.defineHistogram('TowerGlobalEta,TowerGlobalPhi;h_TowerGlobalEtaPhiMap', title='jFex Tower Global Eta vs Phi',
-                            type='TH2I',path=trigPath, xbins=100,xmin=-50,xmax=50,ybins=67,ymin=-1,ymax=65)
+                            type='TH2I',path=trigPath+"Content/", xbins=100,xmin=-50,xmax=50,ybins=67,ymin=-1,ymax=65)
 
     myGroup.defineHistogram('TowerModule;h_TowerModule', title='jFex Tower Module Number',
-                            type='TH1I', path=trigPath, xbins=6,xmin=0,xmax=6)
+                            type='TH1I', path=trigPath+"Content/", xbins=6,xmin=0,xmax=6)
   
     myGroup.defineHistogram('TowerFpga;h_TowerFpga', title='jFex Tower FPGA Number',
-                            type='TH1I', path=trigPath, xbins=4,xmin=0,xmax=4,xlabels=FPGA_names)
+                            type='TH1I', path=trigPath+"Content/", xbins=4,xmin=0,xmax=4,xlabels=FPGA_names)
 
     myGroup.defineHistogram('TowerChannel;h_TowerChannel', title='jFex Tower Channel Number',
-                            type='TH1I', path=trigPath, xbins=60,xmin=0,xmax=60)
+                            type='TH1I', path=trigPath+"Content/", xbins=60,xmin=0,xmax=60)
 
     myGroup.defineHistogram('TowerDataID;h_TowerDataID', title='jFex Tower Data ID',
-                            type='TH1I', path=trigPath, xbins=16,xmin=0,xmax=16)
+                            type='TH1I', path=trigPath+"Content/", xbins=16,xmin=0,xmax=16)
 
     myGroup.defineHistogram('TowerSimulationID;h_TowerSimulationID', title='jFex Tower Simulation ID',
-                            type='TH1F', path=trigPath, xbins=1000,xmin=0,xmax=1500000.0)
+                            type='TH1F', path=trigPath+"Content/", xbins=1000,xmin=0,xmax=1500000.0)
 
     myGroup.defineHistogram('TowerCalosource;h_TowerCalosource', title='jFex Tower Calo Source',
-                            type='TH1I', path=trigPath, xbins=7,xmin=0,xmax=7,xlabels=Calosource_names)
+                            type='TH1I', path=trigPath+"Content/", xbins=7,xmin=0,xmax=7,xlabels=Calosource_names)
 
     myGroup.defineHistogram('TowerEtcount_barrel;h_TowerEtcount_barrel', title='jFex Tower Et Barrel',
-                            type='TH1I', path=trigPath, xbins=4096,xmin=0,xmax=4096)
+                            type='TH1I', path=trigPath+"Content/", xbins=4096,xmin=0,xmax=4096)
 
     myGroup.defineHistogram('TowerEtcount_tile;h_TowerEtcount_tile', title='jFex Tower Et Tile',
-                            type='TH1I', path=trigPath, xbins=4096,xmin=0,xmax=4096)
+                            type='TH1I', path=trigPath+"Content/", xbins=4096,xmin=0,xmax=4096)
 
     myGroup.defineHistogram('TowerEtcount_emec;h_TowerEtcount_emec', title='jFex Tower Et EMEC',
-                            type='TH1I', path=trigPath, xbins=4096,xmin=0,xmax=4096)
+                            type='TH1I', path=trigPath+"Content/", xbins=4096,xmin=0,xmax=4096)
 
     myGroup.defineHistogram('TowerEtcount_hec;h_TowerEtcount_hec', title='jFex Tower Et HEC',
-                            type='TH1I', path=trigPath, xbins=4096,xmin=0,xmax=4096)
+                            type='TH1I', path=trigPath+"Content/", xbins=4096,xmin=0,xmax=4096)
 
     myGroup.defineHistogram('TowerEtcount_fcal1;h_TowerEtcount_fcal1', title='jFex Tower Et FCAL1',
-                            type='TH1I', path=trigPath, xbins=4096,xmin=0,xmax=4096)
+                            type='TH1I', path=trigPath+"Content/", xbins=4096,xmin=0,xmax=4096)
 
     myGroup.defineHistogram('TowerEtcount_fcal2;h_TowerEtcount_fcal2', title='jFex Tower Et FCAL2',
-                            type='TH1I', path=trigPath, xbins=4096,xmin=0,xmax=4096)
+                            type='TH1I', path=trigPath+"Content/", xbins=4096,xmin=0,xmax=4096)
 
     myGroup.defineHistogram('TowerEtcount_fcal3;h_TowerEtcount_fcal3', title='jFex Tower Et FCAL3',
-                            type='TH1I', path=trigPath, xbins=4096,xmin=0,xmax=4096)
+                            type='TH1I', path=trigPath+"Content/", xbins=4096,xmin=0,xmax=4096)
 
     myGroup.defineHistogram('TowerSaturationflag;h_TowerSaturationflag', title='jFex Tower Saturation FLag',
-                            type='TH1I', path=trigPath, xbins=2,xmin=0,xmax=2)
+                            type='TH1I', path=trigPath+"Content/", xbins=2,xmin=0,xmax=2)
 
   
     acc = helper.result()
@@ -122,12 +163,24 @@ if __name__=='__main__':
     # set input file and config options
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     import glob
+    
+    import argparse
+    parser = argparse.ArgumentParser(prog='python -m TrigT1CaloMonitoring.JfexInputMonitoringAlgorithm',
+                                   description="""Used to run jFEX Monitoring\n\n
+                                   Example: python -m TrigT1CaloMonitoring.JfexInputMonitoringAlgorithm --filesInput file.root.\n
+                                   Overwrite inputs using standard athena opts --filesInput, evtMax etc. see athena --help""")
+    parser.add_argument('--evtMax',type=int,default=-1,help="number of events")
+    parser.add_argument('--filesInput',nargs='+',help="input files",required=True)
+    parser.add_argument('--skipEvents',type=int,default=0,help="number of events to skip")
+    args = parser.parse_args()
 
-    inputs = glob.glob('data22_13p6TeV.00440613.physics_Main.daq.RAW._lb0180-0189.data')
 
     flags = initConfigFlags()
-    flags.Input.Files = inputs
-    flags.Output.HISTFileName = 'ExampleMonitorOutput_LVL1_MC.root'
+    flags.Input.Files = [file for x in args.filesInput for file in glob.glob(x)]
+    flags.Output.HISTFileName = 'jFexInputData_Monitoring.root'
+    
+    flags.Exec.MaxEvents = args.evtMax
+    flags.Exec.SkipEvents = args.skipEvents    
 
     flags.lock()
     flags.dump() # print all the configs
@@ -142,9 +195,4 @@ if __name__=='__main__':
 
     JfexInputMonitorCfg = JfexInputMonitoringConfig(flags)
     cfg.merge(JfexInputMonitorCfg)
-
-    # options - print all details of algorithms, very short summary 
-    cfg.printConfig(withDetails=False, summariseProps = True)
-
-    nevents=10
-    cfg.run(nevents)
+    cfg.run()

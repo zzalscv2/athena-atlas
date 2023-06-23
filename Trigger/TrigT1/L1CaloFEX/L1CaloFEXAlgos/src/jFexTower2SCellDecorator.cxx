@@ -29,7 +29,9 @@ namespace LVL1 {
 jFexTower2SCellDecorator::jFexTower2SCellDecorator(const std::string& name, ISvcLocator* svc) : AthReentrantAlgorithm(name, svc){}
 
 StatusCode jFexTower2SCellDecorator::initialize() {
-    ATH_MSG_INFO( "L1CaloFEXTools/jFexTower2SCellDecorator::initialize()");
+    
+    ATH_MSG_INFO( "Initializing L1CaloFEXTools/jFexTower2SCellDecorator algorithm with name: "<< name());
+    ATH_MSG_INFO( "Decorating SG key: "<< m_jTowersReadKey);
     
     ATH_CHECK( m_SCellKey.initialize() );
     ATH_CHECK( m_triggerTowerKey.initialize() );

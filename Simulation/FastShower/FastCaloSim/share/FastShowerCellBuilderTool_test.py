@@ -189,7 +189,7 @@ class TestAlg (Alg):
         return StatusCode.Success
 
 
-    def add_particle (self, vtx, pdgid, pt, eta, phi, status=2002):
+    def add_particle (self, vtx, pdgid, pt, eta, phi, status=2):
         e = pt * math.cosh(eta)
         pz= pt * math.sinh(eta)
         v = HepMC.FourVector (pt*math.cos(phi), pt*math.sin(phi), pz, e)

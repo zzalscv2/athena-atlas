@@ -2,10 +2,13 @@
 
 import AthenaCommon.SystemOfUnits as Units
 from AthenaConfiguration.Enums import LHCPeriod, FlagEnum
+from TrkConfig.TrkConfigFlags import PrimaryPassConfig
+
 
 class VertexSortingSetup(FlagEnum):
     SumPt2Sorting = 'SumPt2Sorting'
     SumPtSorting = 'SumPtSorting'
+
 
 class VertexSetup(FlagEnum):
     IVF = 'IterativeFinding'
@@ -187,12 +190,13 @@ def createPriVertexingFlags():
     def vertexSetup(pcf):
         if pcf.Reco.EnableHI:
             return VertexSetup.FastIVF
-        elif (pcf.Tracking.doHighPileup or
-              pcf.Tracking.doMinBias or
+        elif (pcf.Tracking.doMinBias or
               pcf.Tracking.doLowMu or
-              pcf.Tracking.doRobustReco or
-              pcf.Tracking.doVtxLumi or
-              pcf.Tracking.doVtxBeamSpot):
+              pcf.Tracking.PrimaryPassConfig in [
+                  PrimaryPassConfig.VtxLumi,
+                  PrimaryPassConfig.VtxBeamSpot,
+                  PrimaryPassConfig.HighPileup,
+                  PrimaryPassConfig.RobustReco]):
             return VertexSetup.IVF
         else: # Default
             return VertexSetup.ActsGaussAMVF
@@ -202,9 +206,10 @@ def createPriVertexingFlags():
     # string to store the type of sorting algorithm to separate signal and pile-up vertices.
     flags.addFlag("sortingSetup", VertexSortingSetup.SumPt2Sorting, enum=VertexSortingSetup)
     flags.addFlag("useBeamConstraint", lambda pcf:
-                  not(pcf.Tracking.doVtxLumi
-                      or pcf.Tracking.doVtxBeamSpot
-                      or pcf.Tracking.doRobustReco))
+                  not(pcf.Tracking.PrimaryPassConfig in [
+                      PrimaryPassConfig.VtxLumi,
+                      PrimaryPassConfig.VtxBeamSpot,
+                      PrimaryPassConfig.RobustReco]))
 
     def maxD0(pcf):
         if pcf.Detector.GeometryITk:
@@ -221,7 +226,7 @@ def createPriVertexingFlags():
         if pcf.Detector.GeometryITk:
             return 3
         else:
-            if pcf.Tracking.doRobustReco:
+            if pcf.Tracking.PrimaryPassConfig is PrimaryPassConfig.RobustReco:
                 return 0
             else: # Default ID
                 return 1

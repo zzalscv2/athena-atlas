@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -20,6 +20,7 @@
 #include "ISF_Interfaces/IEntryLayerTool.h"
 #include "ISF_Interfaces/ITruthSvc.h"
 #include "ISF_Interfaces/IParticleOrderingTool.h"
+#include "ISF_Interfaces/IGenEventFilter.h"
 
 // DetectorDescription
 #include "AtlasDetDescr/AtlasRegion.h"
@@ -96,8 +97,11 @@ private:
   SG::WriteHandleKey<TrackRecordCollection> m_muonEntryLayerKey{this, "MuonEntryLayerKey", "MuonEntryLayer", ""};
   SG::WriteHandleKey<TrackRecordCollection> m_muonExitLayerKey{this, "MuonExitLayerKey", "MuonExitLayer", ""};
 
+  BooleanProperty m_useShadowEvent{this, "UseShadowEvent", false, "New approach to selecting particles for simulation" };
   /// Force geoID recalculation for each particle
   Gaudi::Property<bool> m_forceGeoIDSvc{this, "AlwaysUseGeoIDSvc", false, "Force geoID recalculation for each particle" };
+
+  ToolHandle<IGenEventFilter>  m_truthPreselectionTool{this, "TruthPreselectionTool", "", "Tool for filtering out quasi-stable particle daughters"};
 
   /// Input converter service (from Generator->ISF particle types)
   ServiceHandle<IInputConverter> m_inputConverter{this, "InputConverter", "", "Input McEventCollection->ISFParticleContainer conversion service."};

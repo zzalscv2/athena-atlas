@@ -36,6 +36,7 @@
 #include "ISF_Interfaces/ITruthSvc.h"
 #include "ISF_Interfaces/IGeoIDSvc.h"
 #include "ISF_Interfaces/IInputConverter.h"
+#include "ISF_Interfaces/IGenEventFilter.h"
 
 /// @class G4AtlasAlg
 /// @brief Primary Athena algorithm for ATLAS simulation.
@@ -126,6 +127,7 @@ private:
   /// Activate multi-threading configuration
   Gaudi::Property<bool> m_useMT{this,"MultiThreading",  false, "Multi-threading specific settings"};
   Gaudi::Property<bool> m_activateParallelGeometries{this, "ActivateParallelWorlds", false, "Toggle on/off the G4 parallel geometry system"};
+  BooleanProperty m_useShadowEvent{this, "UseShadowEvent", false, "New approach to selecting particles for simulation" };
   /// Random number service
   ServiceHandle<IAthRNGSvc> m_rndmGenSvc{this, "AtRndmGenSvc", "AthRNGSvc", ""}; // TODO rename property
   /// Random Stream Name
@@ -139,6 +141,8 @@ private:
 
   /// Quasi-Stable Particle Simulation Patcher
   ServiceHandle<Simulation::IZeroLifetimePatcher> m_qspatcher{this, "QuasiStablePatcher", "", "Quasi-Stable Particle Simulation Patcher"};
+
+  ToolHandle<ISF::IGenEventFilter>  m_truthPreselectionTool{this, "TruthPreselectionTool", "", "Tool for filtering out quasi-stable particle daughters"};
 
   /// Service to convert ISF_Particles into a G4Event
   ServiceHandle<ISF::IInputConverter> m_inputConverter{this, "InputConverter", "ISF_InputConverter", ""};

@@ -103,22 +103,54 @@ StatusCode JetConstituentModSequence::initialize() {
       // TODO: This assumes a PFlow-style neutral and charged collection.
       //       More general FlowElements (e.g. CaloClusters) may necessitate a rework here later.
 
+      const std::string subString = "ParticleFlowObjects";
+      const std::string subStringCharged = "ChargedParticleFlowObjects";
+      const std::string subStringNeutral = "NeutralParticleFlowObjects";
+
       std::string inputContainerBase = m_inputContainer;
       std::string outputContainerBase = m_outputContainer;
 
-      // Know what the user means if they give the full input/output container name in this format
-      size_t pos = inputContainerBase.find("ParticleFlowObjects");
-      if(pos != std::string::npos) inputContainerBase.erase(pos);
+      m_inChargedFEKey = inputContainerBase;
+      m_inNeutralFEKey = inputContainerBase;
 
-      pos = outputContainerBase.find("ParticleFlowObjects");
-      if(pos != std::string::npos) outputContainerBase.erase(pos);
+      m_outChargedFEKey = outputContainerBase;
+      m_outNeutralFEKey = outputContainerBase;
+      
+      //For both the input and output container basenames we first check if the string
+      //contains "ParticleFlowObjects". If it does we swap this for "ChargedParticleFlowObjects"
+      //and "NeutralParticleFlowObjects" respectively. If it doesn't we just append these two
+      //substrings to the end of the strings.
 
-      m_inChargedFEKey = inputContainerBase + "ChargedParticleFlowObjects";
-      m_inNeutralFEKey = inputContainerBase + "NeutralParticleFlowObjects";
+      size_t pos = inputContainerBase.find(subString);
+      if(pos != std::string::npos) {
+        std::string inChargedString = m_inChargedFEKey.key();
+        m_inChargedFEKey = inChargedString.replace(pos,subString.size(),subStringCharged);
+        std::string inNeutralString = m_inNeutralFEKey.key();
+        m_inNeutralFEKey = inNeutralString.replace(pos,subString.size(),subStringNeutral);
+      }
+      else {
+        m_inChargedFEKey = inputContainerBase + subStringCharged;
+        m_inNeutralFEKey = inputContainerBase + subStringNeutral;
+      }
 
-      m_outChargedFEKey = outputContainerBase + "ChargedParticleFlowObjects";
-      m_outNeutralFEKey = outputContainerBase + "NeutralParticleFlowObjects";
-      m_outAllFEKey = outputContainerBase + "ParticleFlowObjects";
+      pos = outputContainerBase.find(subString);
+      if(pos != std::string::npos) {
+        std::string outChargedString = m_outChargedFEKey.key();
+        m_outChargedFEKey = outChargedString.replace(pos,subString.size(),subStringCharged);
+        std::string outNeutralString = m_outNeutralFEKey.key();
+        m_outNeutralFEKey = outNeutralString.replace(pos,subString.size(),subStringNeutral);
+      }
+      else{
+        m_outChargedFEKey = outputContainerBase + subStringCharged;
+        m_outNeutralFEKey = outputContainerBase + subStringNeutral;
+      }
+
+      //The all FE container is a bit different. If the input container base contains
+      //"ParticleFlowObjects" we do nothing, otherwise we add this string onto the end.
+      pos = outputContainerBase.find(subString);  
+      if(pos == std::string::npos) m_outAllFEKey = outputContainerBase + subString;
+      else m_outAllFEKey = outputContainerBase;
+
 
       ATH_CHECK(m_inChargedFEKey.initialize());
       ATH_CHECK(m_inNeutralFEKey.initialize());

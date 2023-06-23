@@ -22,6 +22,7 @@ class TrigBjetMonitorAlgorithm : public AthMonitorAlgorithm {
  private:
   Gaudi::Property<bool> m_doRandom {this,"RandomHist",true};
   Gaudi::Property<bool> m_collisionRun{this, "CollisionRun", true};
+
   Gaudi::Property<std::string> m_btaggingLinkName{this, "BtaggingLinkName", "btag"}; // TM 2021-10-30
   Gaudi::Property<bool> m_expressStreamFlag{this, "ExpressStreamFlag", false}; // TM 2022-09-14
 

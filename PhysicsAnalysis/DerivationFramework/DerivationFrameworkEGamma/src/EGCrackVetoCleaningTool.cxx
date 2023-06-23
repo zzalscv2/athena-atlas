@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -52,7 +52,7 @@ EGCrackVetoCleaningTool::addBranches() const
     bool maybeBug = clu->hasSampling(CaloSampling::EMB2) &&
                     clu->hasSampling(CaloSampling::EME2);
     const std::vector<const xAOD::CaloCluster*> assocC =
-      xAOD::EgammaHelpers::getAssociatedTopoClusters(clu);    
+      xAOD::EgammaHelpers::getAssociatedTopoClusters(clu);
     double dRsatMax = -1.;
     if (assocC.size() > 1) {
       for (const xAOD::CaloCluster* sclu : assocC) {

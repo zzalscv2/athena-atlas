@@ -90,6 +90,7 @@ def signatureSpecificSettingOfFlags(flags,mode):
 
   flags.addFlag("refitROT", True) 
   flags.addFlag("trtExtensionType", "xf") 
+  flags.addFlag("doBremRecovery", False)  #setTrue for electron once validated
 
 
     

@@ -13,6 +13,11 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
     """Return ComponentAccumulator configured for Atlas G4 simulation, without output"""
     # wihout output
     result = ComponentAccumulator()
+    kwargs.setdefault("UseShadowEvent", flags.Sim.UseShadowEvent)
+    if flags.Sim.UseShadowEvent and "TruthPreselectionTool" not in kwargs:
+        from ISF_HepMC_Tools.ISF_HepMC_ToolsConfig import TruthPreselectionToolCfg
+        kwargs.setdefault( "TruthPreselectionTool", result.popToolsAndMerge(TruthPreselectionToolCfg(flags)) )
+
     kwargs.setdefault("DetGeoSvc", result.getPrimaryAndMerge(DetectorGeometrySvcCfg(flags)).name)
 
     kwargs.setdefault("InputTruthCollection", "BeamTruthEvent") #tocheck -are these string inputs?

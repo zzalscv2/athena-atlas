@@ -174,9 +174,9 @@ class TestTestBeam(unittest.TestCase):
 
 
     def test___G4AtlasAlg_ListOfSetProperties(self):
-        expected_list = ['AtRndmGenSvc', 'DetGeoSvc', 'DetStore', 'EventInfo', 'EvtStore', 'ExtraInputs', 'ExtraOutputs', 'FastSimMasterTool',
+        expected_list = ['AtRndmGenSvc', 'DetGeoSvc', 'DetStore', 'TruthPreselectionTool', 'EventInfo', 'EvtStore', 'ExtraInputs', 'ExtraOutputs', 'FastSimMasterTool',
             'G4Commands', 'GeoIDSvc', 'InputConverter', 'InputTruthCollection', 'MultiThreading', 'NeededResources', 'OutputTruthCollection',
-            'PhysicsListSvc', 'QuasiStablePatcher', 'RandomGenerator', 'RecordFlux', 'ReleaseGeoModel', 'SenDetMasterTool', 'TruthRecordService', 'UserActionSvc', 
+            'PhysicsListSvc', 'QuasiStablePatcher', 'RandomGenerator', 'RecordFlux', 'ReleaseGeoModel', 'SenDetMasterTool', 'TruthRecordService', 'UseShadowEvent', 'UserActionSvc', 
             'UserLimitsSvc', 'Verbosities', 'UserActionTools']
         g4atlasalg = self._job_config_dict['G4AtlasAlg']
         actual_list = g4atlasalg.keys()

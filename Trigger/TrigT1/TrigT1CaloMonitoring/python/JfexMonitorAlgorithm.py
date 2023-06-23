@@ -20,14 +20,14 @@ def JfexMonitoringConfig(inputFlags):
     # add any steering
     groupName = 'JfexMonitor' # the monitoring group name is also used for the package name
     JfexMonAlg.PackageName = groupName
-
+    
     mainDir = 'L1Calo'
     trigPath = 'Jfex/'
 
     # add monitoring algorithm to group, with group name and main directory 
     myGroup = helper.addGroup(JfexMonAlg, groupName , mainDir)
 
-    # define gfex histograms
+    # define jfex histograms
     
     FPGA_names = ["U1","U2","U4","U3"]
     Modules_names = ["jFEX 0","jFEX 1","jFEX 2","jFEX 3","jFEX 4","jFEX 5"]
@@ -223,6 +223,7 @@ if __name__=='__main__':
     parser = argparse.ArgumentParser(prog='python -m TrigT1CaloMonitoring.JfexMonitorAlgorithm',
                                    description="""Used to run jFEX Monitoring\n\n
                                    Example: python -m TrigT1CaloMonitoring.JfexMonitorAlgorithm --filesInput file.root --skipEvents 0 --evtMax 100""")
+                                   
     parser.add_argument('--evtMax',type=int,default=-1,help="number of events")
     parser.add_argument('--filesInput',nargs='+',help="input files",required=True)
     parser.add_argument('--skipEvents',type=int,default=0,help="number of events to skip")
@@ -231,7 +232,7 @@ if __name__=='__main__':
 
     flags = initConfigFlags()
     flags.Input.Files = [file for x in args.filesInput for file in glob.glob(x)]
-    flags.Output.HISTFileName = 'jFEX_MonitorOutput_L1Calo.root'
+    flags.Output.HISTFileName = 'jFexTOB_Monitoring.root'
     
     flags.Exec.MaxEvents = args.evtMax
     flags.Exec.SkipEvents = args.skipEvents    
@@ -249,4 +250,5 @@ if __name__=='__main__':
 
     JfexMonitorCfg = JfexMonitoringConfig(flags)
     cfg.merge(JfexMonitorCfg)
+    
     cfg.run()

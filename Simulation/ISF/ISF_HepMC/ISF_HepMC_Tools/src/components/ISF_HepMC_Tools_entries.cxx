@@ -10,6 +10,7 @@
 #include "../LLPTruthStrategy.h"
 #include "../ValidationTruthStrategy.h"
 #include "../KeepChildrenTruthStrategy.h"
+#include "../TruthPreselectionTool.h"
 
 DECLARE_COMPONENT( ISF::CylinderVolumeTruthStrategy )
 DECLARE_COMPONENT( ISF::GenericTruthStrategy )
@@ -23,4 +24,5 @@ DECLARE_COMPONENT( ISF::GenParticleSimQuasiStableFilter )
 DECLARE_COMPONENT( ISF::LLPTruthStrategy )
 DECLARE_COMPONENT( ISF::ValidationTruthStrategy )
 DECLARE_COMPONENT( ISF::KeepChildrenTruthStrategy )
+DECLARE_COMPONENT( ISF::TruthPreselectionTool )
 

@@ -52,6 +52,14 @@ MuonInputProvider::initialize() {
    if (!m_MuonL1RoILocation.key().empty())
      {m_MuonL1RoILocation = m_MuonL1RoILocation.key() + "FromMuonRoI";}
    CHECK(m_MuonL1RoILocation.initialize(!m_MuonL1RoILocation.key().empty()));
+
+
+  //LateMuon from muonRoI
+  if(!m_MuonL1RoILocationPlusOne.key().empty()){
+    m_MuonL1RoILocationPlusOne = m_MuonL1RoILocationPlusOne.key() + "FromMuonRoI1";
+  }
+  CHECK(m_MuonL1RoILocationPlusOne.initialize(!m_MuonL1RoILocationPlusOne.key().empty()));
+
    
    if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
 
@@ -190,6 +198,75 @@ MuonInputProvider::createMuonTOB(const MuCTPIL1TopoCandidate & roi) const {
    return muon;
 }
 
+
+TCS::LateMuonTOB MuonInputProvider::createLateMuonTOB(const xAOD::MuonRoI & muonRoI, const std::vector<unsigned int> & rpcPtValues, const std::vector<unsigned int> & tgcPtValues) const {
+
+
+   float et;
+   float eta = muonRoI.eta();
+   float phi = muonRoI.phi();
+
+   int etaTopo = TSU::toTopoEta(eta);
+   unsigned int phiTopo = TSU::toTopoPhi(phi);
+
+   // WARNING:: 
+   // Also uses mapping for thrNumber : thrValue , see above.
+   int thrNumber = muonRoI.getThrNumber();
+
+   if (muonRoI.getSource() == xAOD::MuonRoI::RoISource::Barrel) { //RPC
+      et = rpcPtValues[thrNumber]; //map is in GeV
+    } else {
+      et = tgcPtValues[thrNumber]; //map is in GeV
+    }
+
+   unsigned int EtTopo = et*10;
+
+   ATH_MSG_DEBUG("LateMuon ROI: " << muonRoI.getSource() << " thrvalue = " << thrNumber << " eta = " << etaTopo << " phi = " << phiTopo << " BW2or3 " << muonRoI.getBW3Coincidence() << " Good MF " << muonRoI.getGoodMF() << " Inner Coincidence " << muonRoI.getInnerCoincidence() << " Charge " << muonRoI.getCharge() << ", w   = " << MSG::hex << std::setw( 8 ) << muonRoI.getRoI() << MSG::dec);
+
+   TCS::LateMuonTOB muon( EtTopo, 0, etaTopo, static_cast<unsigned int>(phiTopo), muonRoI.getRoI() );
+   muon.setEtDouble(static_cast<double>(EtTopo/10.));
+   muon.setEtaDouble(static_cast<double>(etaTopo/40.));
+   muon.setPhiDouble(static_cast<double>(phiTopo/20.));
+
+   // Muon flags
+   if ( muonRoI.getSource() != xAOD::MuonRoI::RoISource::Barrel) { // TGC ( endcap (E) + forward (F) )
+      muon.setBW2or3( topoFlag(muonRoI.getBW3Coincidence()) ); //Needs checking if this is the right flag
+      muon.setInnerCoin( topoFlag(muonRoI.getInnerCoincidence()) );
+      muon.setGoodMF( topoFlag(muonRoI.getGoodMF()) );
+      muon.setCharge( topoFlag(muonRoI.getCharge()) );
+      muon.setIs2cand( 0 );
+      muon.setIsTGC( 1 );
+   }
+   else { // RPC ( barrel (B) )
+      muon.setBW2or3( 0 );
+      muon.setInnerCoin( 0 );
+      muon.setGoodMF( 0 );
+      muon.setCharge( 0 );
+      muon.setIs2cand( topoFlag(muonRoI.isMoreCandInRoI()) );  //Needs checking if this is the right flag
+      muon.setIsTGC( 0 );
+   }
+
+   auto mon_hLateMuonPt = Monitored::Scalar("LateMuonTOBPt", muon.EtDouble());
+   auto mon_hLateMuonPtTGC = Monitored::Scalar("LateMuonTOBPtTGC", muon.EtDouble());
+   auto mon_hLateMuonPtRPC = Monitored::Scalar("LateMuonTOBPtRPC", muon.EtDouble());
+   auto mon_hLateMuonEta = Monitored::Scalar("LateMuonTOBEta",muon.eta());
+   auto mon_hLateMuonPhi = Monitored::Scalar("LateMuonTOBPhi",muon.phi());
+   auto mon_hLateMuonBW2or3 = Monitored::Scalar("LateMuonTOBBW2or3",muon.bw2or3());
+   auto mon_hLateMuonInnerCoin = Monitored::Scalar("LateMuonTOBInnerCoin",muon.innerCoin());
+   auto mon_hLateMuonGoodMF = Monitored::Scalar("LateMuonTOBGoodMF",muon.goodMF());
+   auto mon_hLateMuonCharge = Monitored::Scalar("LateMuonTOBCharge",muon.charge());
+   auto mon_hLateMuonIs2cand = Monitored::Scalar("LateMuonTOBIs2cand",muon.is2cand());
+   auto mon_hLateMuonIsTGC = Monitored::Scalar("LateMuonTOBIsTGC",muon.isTGC());
+   Monitored::Group(m_monTool, mon_hLateMuonPt, mon_hLateMuonEta, mon_hLateMuonPhi, mon_hLateMuonBW2or3, mon_hLateMuonInnerCoin, mon_hLateMuonGoodMF, mon_hLateMuonCharge, mon_hLateMuonIs2cand, mon_hLateMuonIsTGC);
+   if ( muon.isTGC() ) { Monitored::Group(m_monTool, mon_hLateMuonPtTGC); }
+   else                { Monitored::Group(m_monTool, mon_hLateMuonPtRPC); }
+
+   ATH_MSG_DEBUG("LateMuon created");
+   return muon;
+
+}
+
+
 TCS::LateMuonTOB
 MuonInputProvider::createLateMuonTOB(const MuCTPIL1TopoCandidate & roi) const {
 
@@ -274,6 +351,22 @@ MuonInputProvider::fillTopoInputEvent(TCS::TopoInputEvent& inputEvent) const {
 
             inputEvent.addMuon( MuonInputProvider::createMuonTOB( *muonRoi, rpcPtValues, tgcPtValues) );
 
+         }
+
+         // Also add LateMuons:
+         if(not m_MuonL1RoILocationPlusOne.key().empty()) {
+
+            const EventContext& ctx = Gaudi::Hive::currentContext();
+            SG::ReadHandle<xAOD::MuonRoIContainer> latemuonROIs (m_MuonL1RoILocationPlusOne, ctx);
+
+            if( latemuonROIs.isValid() ) {
+
+               ATH_MSG_DEBUG( "Contains L1Topo LateMuons L1Muctpi object from StoreGate!" );
+
+               for(const auto muonRoi : *muonROIs) {
+                  inputEvent.addLateMuon( MuonInputProvider::createLateMuonTOB( *muonRoi, rpcPtValues, tgcPtValues) );
+               }
+            }
          }
       } else{
 

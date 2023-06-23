@@ -23,9 +23,12 @@ private:
   StringProperty m_packageName{this,"PackageName","JfexInputMonitor","group name for histograming"};
 
   // container keys including steering parameter and description
-  SG::ReadHandleKey<xAOD::jFexTowerContainer> m_jFexTowerContainerKey{this, "jFexTowerContainer","L1_jFexDataTowers","SG key of the input jFex Tower container"};  
+  SG::ReadHandleKey<xAOD::jFexTowerContainer> m_jFexDataTowerKey    {this, "jFexDataTower"    ,"L1_jFexDataTowers"     ,"SG key of the input jFex Tower container"};  
+  SG::ReadHandleKey<xAOD::jFexTowerContainer> m_jFexEmulatedTowerKey{this, "jFexEmulatedTower","L1_jFexEmulatedTowers" ,"SG key of the emulated jFex Tower container"};  
   
   unsigned int m_InvalidCode = 4095;
-
+  
+  int codedVal(int, int) const;
+  
 };
 #endif

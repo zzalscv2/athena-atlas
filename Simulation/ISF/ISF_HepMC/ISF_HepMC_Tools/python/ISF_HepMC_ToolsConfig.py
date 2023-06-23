@@ -1,6 +1,6 @@
 """ComponentAccumulator HepMC tools configurations for ISF
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -19,11 +19,19 @@ def ParticleFinalStateFilterCfg(flags, name="ISF_ParticleFinalStateFilter", **kw
     result.setPrivateTools(CompFactory.ISF.GenParticleFinalStateFilter(name, **kwargs))
     return result
 
+
 def ParticleSimWhiteListCfg(flags, name="ISF_ParticleSimWhiteList", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("UseShadowEvent", flags.Sim.UseShadowEvent)
     result.setPrivateTools(CompFactory.ISF.GenParticleSimWhiteList(name, **kwargs))
     return result
+
+
+def GenParticleSimQuasiStableFilterCfg(flags, name="ISF_GenParticleSimQuasiStableFilter", **kwargs):
+    result = ComponentAccumulator()
+    result.setPrivateTools(CompFactory.ISF.GenParticleSimQuasiStableFilter(name, **kwargs))
+    return result
+
 
 def ParticleSimWhiteList_ExtraParticlesCfg(flags, name="ISF_ParticleSimWhiteList_ExtraParticles", **kwargs):
     result = ComponentAccumulator()
@@ -41,12 +49,14 @@ def ParticleSimWhiteList_ExtraParticlesCfg(flags, name="ISF_ParticleSimWhiteList
     result.setPrivateTools(CompFactory.ISF.GenParticleSimWhiteList(name, **kwargs))
     return result
 
+
 def ParticlePositionFilterCfg(flags, name="ISF_ParticlePositionFilter", **kwargs):
     result = ComponentAccumulator()
     # ParticlePositionFilter
     kwargs.setdefault("GeoIDService", result.getPrimaryAndMerge(GeoIDSvcCfg(flags)).name)
     result.setPrivateTools(CompFactory.ISF.GenParticlePositionFilter(name, **kwargs))
     return result
+
 
 def ParticlePositionFilterIDCfg(flags, name="ISF_ParticlePositionFilterID", **kwargs):
     # importing Reflex dictionary to access AtlasDetDescr::AtlasRegion enum
@@ -56,6 +66,7 @@ def ParticlePositionFilterIDCfg(flags, name="ISF_ParticlePositionFilterID", **kw
 
     kwargs.setdefault("CheckRegion"  , [ AtlasRegion.fAtlasID ] )
     return ParticlePositionFilterCfg(flags, name, **kwargs)
+
 
 def ParticlePositionFilterCaloCfg(flags, name="ISF_ParticlePositionFilterCalo", **kwargs):
     # importing Reflex dictionary to access AtlasDetDescr::AtlasRegion enum
@@ -67,6 +78,7 @@ def ParticlePositionFilterCaloCfg(flags, name="ISF_ParticlePositionFilterCalo", 
                                             AtlasRegion.fAtlasForward,
                                             AtlasRegion.fAtlasCalo ] )
     return ParticlePositionFilterCfg(flags, name, **kwargs)
+
 
 def ParticlePositionFilterMSCfg(name="ISF_ParticlePositionFilterMS", **kwargs):
     # importing Reflex dictionary to access AtlasDetDescr::AtlasRegion enum
@@ -80,6 +92,7 @@ def ParticlePositionFilterMSCfg(name="ISF_ParticlePositionFilterMS", **kwargs):
                                             AtlasRegion.fAtlasMS ] )
     return ParticlePositionFilterCfg(name, **kwargs)
 
+
 def ParticlePositionFilterWorldCfg(flags, name="ISF_ParticlePositionFilterWorld", **kwargs):
     # importing Reflex dictionary to access AtlasDetDescr::AtlasRegion enum
     import ROOT, cppyy
@@ -91,6 +104,7 @@ def ParticlePositionFilterWorldCfg(flags, name="ISF_ParticlePositionFilterWorld"
                                             AtlasRegion.fAtlasMS,
                                             AtlasRegion.fAtlasCavern ] )
     return ParticlePositionFilterCfg(flags, name, **kwargs)
+
 
 def ParticlePositionFilterDynamicCfg(flags, name="ISF_ParticlePositionFilterDynamic", **kwargs):
     # automatically choose the best fitting filter region
@@ -104,12 +118,14 @@ def ParticlePositionFilterDynamicCfg(flags, name="ISF_ParticlePositionFilterDyna
     else:
       return ParticlePositionFilterWorldCfg(flags, name, **kwargs)
 
+
 def GenParticleInteractingFilterCfg(flags, name="ISF_GenParticleInteractingFilter", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("AdditionalInteractingParticleTypes", eval(flags.Input.SpecialConfiguration.get("InteractingPDGCodes", "[]")))
     kwargs.setdefault("AdditionalNonInteractingParticleTypes", eval(flags.Input.SpecialConfiguration.get("NonInteractingPDGCodes", "[]")))
     result.setPrivateTools(CompFactory.ISF.GenParticleInteractingFilter(name, **kwargs))
     return result
+
 
 def EtaPhiFilterCfg(flags, name="ISF_EtaPhiFilter", **kwargs):
     result = ComponentAccumulator()
@@ -120,6 +136,35 @@ def EtaPhiFilterCfg(flags, name="ISF_EtaPhiFilter", **kwargs):
     kwargs.setdefault("MaxApplicableRadius", 30*mm)
 
     result.setPrivateTools(CompFactory.ISF.GenParticleGenericFilter(name, **kwargs))
+    return result
+
+
+def GenParticleFilterToolsCfg(flags):
+    result = ComponentAccumulator()
+    genParticleFilterList = []
+    if flags.Sim.ISF.Simulator.isQuasiStable():
+        genParticleFilterList += [result.popToolsAndMerge(ParticleSimWhiteList_ExtraParticlesCfg(flags))]
+    else:
+        genParticleFilterList += [result.popToolsAndMerge(ParticleFinalStateFilterCfg(flags))]
+    if "ATLAS" in flags.GeoModel.Layout or "atlas" in flags.GeoModel.Layout:
+        from AthenaConfiguration.Enums import BeamType
+        if flags.Beam.Type not in [BeamType.Cosmics, BeamType.TestBeam]:
+            genParticleFilterList += [result.popToolsAndMerge(ParticlePositionFilterDynamicCfg(flags))]
+            from SimulationConfig.SimEnums import CavernBackground
+            if not (flags.Detector.GeometryAFP or flags.Detector.GeometryALFA or flags.Detector.GeometryFwdRegion) \
+                and not flags.Detector.GeometryCavern \
+                and flags.Sim.CavernBackground in [CavernBackground.Off, CavernBackground.Signal]:
+                genParticleFilterList += [result.popToolsAndMerge(EtaPhiFilterCfg(flags))]
+    genParticleFilterList += [result.popToolsAndMerge(GenParticleInteractingFilterCfg(flags))]
+    result.setPrivateTools(genParticleFilterList)
+    return result
+
+
+def TruthPreselectionToolCfg(flags, name="TruthPreselectionTool", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault( "GenParticleFilters", result.popToolsAndMerge(GenParticleFilterToolsCfg(flags)) )
+    kwargs.setdefault("QuasiStableParticleFilter", result.popToolsAndMerge(GenParticleSimQuasiStableFilterCfg(flags)))
+    result.setPrivateTools(CompFactory.ISF.TruthPreselectionTool(name, **kwargs))
     return result
 
 #--------------------------------------------------------------------------------------------------

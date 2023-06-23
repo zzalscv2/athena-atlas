@@ -4649,6 +4649,30 @@ HLT_g50_tight_xe40_cell_xe70_pfopufit_80mTAC_L1eEM28M:
     0: 1
   stepFeatures:
     0: 1
+HLT_g5_nopid_L1EM3:
+  eventCount: 30
+  stepCounts:
+    0: 37
+    1: 37
+    2: 31
+    3: 30
+  stepFeatures:
+    0: 139
+    1: 139
+    2: 87
+    3: 59
+HLT_g5_nopid_L1eEM5:
+  eventCount: 24
+  stepCounts:
+    0: 25
+    1: 25
+    2: 24
+    3: 24
+  stepFeatures:
+    0: 58
+    1: 58
+    2: 61
+    3: 58
 HLT_g60_loose_L1eEM26M:
   eventCount: 0
   stepCounts:
@@ -6186,6 +6210,14 @@ HLT_j70_j50a_j0_DJMASS1000j50dphi200x400deta_L1jMJJ-500-NFF:
 HLT_j70_j50a_j0_DJMASS1000j50dphi240_xe90_tcpufit_xe50_cell_L1MJJ-500-NFF:
   eventCount: 0
 HLT_j70_j50a_j0_DJMASS1000j50dphi240_xe90_tcpufit_xe50_cell_L1jMJJ-500-NFF:
+  eventCount: 0
+HLT_j70a_j50a_2j30a_SHARED_2j30_0eta290_020jvt_bdl1d70_j0_DJMASS1000j50_pf_ftf_presela60XXa40XX2a25_L1MJJ-500-NFF:
+  eventCount: 0
+HLT_j70a_j50a_2j30a_SHARED_2j30_0eta290_020jvt_bgn170_j0_DJMASS1000j50_pf_ftf_presela60XXa40XX2a25_L1MJJ-500-NFF:
+  eventCount: 0
+HLT_j70a_j50a_2j35a_SHARED_2j30_0eta290_020jvt_bdl1d70_j0_DJMASS1000j50_pf_ftf_presela60XXa40XX2a25_L1MJJ-500-NFF:
+  eventCount: 0
+HLT_j70a_j50a_2j35a_SHARED_2j30_0eta290_020jvt_bgn170_j0_DJMASS1000j50_pf_ftf_presela60XXa40XX2a25_L1MJJ-500-NFF:
   eventCount: 0
 HLT_j70a_j50a_2j35a_SHARED_2j35_0eta290_020jvt_bdl1d70_j0_DJMASS1000j50_pf_ftf_presela60XXa40XX2a25_L1MJJ-500-NFF:
   eventCount: 0

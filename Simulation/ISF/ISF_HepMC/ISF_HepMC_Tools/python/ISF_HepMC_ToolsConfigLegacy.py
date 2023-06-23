@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """
 Tools configurations for ISF
@@ -122,6 +122,35 @@ def getEtaPhiFilter(name="ISF_EtaPhiFilter", **kwargs):
     kwargs.setdefault('MaxEta' , EtaRange)
     kwargs.setdefault('MaxApplicableRadius', 30*mm)
     return CfgMgr.ISF__GenParticleGenericFilter(name, **kwargs)
+
+
+def getGenParticleFilters(isQS=False):
+    genParticleFilterList = []
+    from G4AtlasApps.SimFlags import simFlags
+    if isQS:
+        genParticleFilterList = [simFlags.ParticleSimWhiteList.get_Value()]
+    else:
+        genParticleFilterList = ['ISF_ParticleFinalStateFilter'] # not used for Quasi-stable particle simulation
+    from G4AtlasApps.SimFlags import simFlags
+    if "ATLAS" in simFlags.SimLayout():
+        from AthenaCommon.BeamFlags import jobproperties
+        if jobproperties.Beam.beamType() != "cosmics":
+            genParticleFilterList += ['ISF_ParticlePositionFilterDynamic']
+            from AthenaCommon.DetFlags import DetFlags
+            if not (DetFlags.geometry.AFP_on() or DetFlags.geometry.ALFA_on() or DetFlags.geometry.FwdRegion_on()) and\
+               (not simFlags.CavernBG.statusOn or simFlags.CavernBG.get_Value() == 'Signal') and\
+               not (simFlags.SimulateCavern.statusOn and simFlags.SimulateCavern.get_Value()):
+                genParticleFilterList += ['ISF_EtaPhiFilter']
+    genParticleFilterList += ['ISF_GenParticleInteractingFilter']
+    return genParticleFilterList
+
+
+def getTruthPreselectionTool(name="TruthPreselectionTool", **kwargs):
+    from ISF_Config.ISF_jobProperties import ISF_Flags
+    kwargs.setdefault( "GenParticleFilters", getGenParticleFilters(ISF_Flags.Simulator.isQuasiStable()) )
+    kwargs.setdefault( "QuasiStableParticleFilter", "ISF_GenParticleSimQuasiStableFilter" )
+    return CfgMgr.ISF__TruthPreselectionTool(name, **kwargs)
+
 
 #--------------------------------------------------------------------------------------------------
 ## Truth Strategies

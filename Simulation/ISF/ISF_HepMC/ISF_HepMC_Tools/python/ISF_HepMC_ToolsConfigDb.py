@@ -13,6 +13,8 @@ addTool("ISF_HepMC_Tools.ISF_HepMC_ToolsConfigLegacy.getParticlePositionFilterWo
 addTool("ISF_HepMC_Tools.ISF_HepMC_ToolsConfigLegacy.getParticlePositionFilterDynamic",       "ISF_ParticlePositionFilterDynamic")
 addTool("ISF_HepMC_Tools.ISF_HepMC_ToolsConfigLegacy.getGenParticleInteractingFilter",        "ISF_GenParticleInteractingFilter")
 addTool("ISF_HepMC_Tools.ISF_HepMC_ToolsConfigLegacy.getEtaPhiFilter",                        "ISF_EtaPhiFilter")
+
+addTool("ISF_HepMC_Tools.ISF_HepMC_ToolsConfigLegacy.getTruthPreselectionTool", "TruthPreselectionTool")
 ## Truth Strategies
 addTool("ISF_HepMC_Tools.ISF_HepMC_ToolsConfigLegacy.getTruthStrategyGroupID",                "ISF_MCTruthStrategyGroupID")
 addTool("ISF_HepMC_Tools.ISF_HepMC_ToolsConfigLegacy.getTruthStrategyGroupID_MC15",           "ISF_MCTruthStrategyGroupID_MC15")
