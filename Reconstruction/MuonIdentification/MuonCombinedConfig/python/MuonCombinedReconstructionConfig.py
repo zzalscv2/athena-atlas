@@ -177,6 +177,7 @@ def MuonInDetToMuonSystemExtensionAlgCfg(flags, name="MuonInDetToMuonSystemExten
     muon_ext_tool = result.popToolsAndMerge(
         MuonSystemExtensionToolCfg(flags))
     kwargs.setdefault("MuonSystemExtensionTool", muon_ext_tool)
+    kwargs.setdefault("noNSWforSeeding", True)
     kwargs.setdefault("WriteStauCandidates", "InDetCandidatesStausPrompt"
                       if flags.Tracking.doLargeD0 else "InDetCandidatesStaus")
 
