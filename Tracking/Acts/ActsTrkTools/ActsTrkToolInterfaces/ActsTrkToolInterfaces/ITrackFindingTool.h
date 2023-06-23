@@ -34,6 +34,7 @@ namespace ActsTrk
     // Class to hold the measurement source links. This is created by TrackFindingTool::initMeasurements().
     struct Measurements
     {
+      virtual ~Measurements() = default;
       virtual void addMeasurements(const EventContext &ctx, const UncalibratedMeasurementContainerPtr &clusterContainer, const InDetDD::SiDetectorElementCollection *detElems) = 0;
     };
 
