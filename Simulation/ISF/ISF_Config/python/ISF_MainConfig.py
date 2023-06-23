@@ -54,6 +54,10 @@ AthSequencer=CompFactory.AthSequencer
 # MT
 def Kernel_GenericSimulatorMTCfg(flags, name="ISF_Kernel_GenericSimulatorMT", **kwargs):
     acc = ComponentAccumulator()
+    kwargs.setdefault("UseShadowEvent", flags.Sim.UseShadowEvent)
+    if flags.Sim.UseShadowEvent and "TruthPreselectionTool" not in kwargs:
+        from ISF_HepMC_Tools.ISF_HepMC_ToolsConfig import TruthPreselectionToolCfg
+        kwargs.setdefault( "TruthPreselectionTool", acc.popToolsAndMerge(TruthPreselectionToolCfg(flags)) )
 
     if "ParticleKillerTool" not in kwargs:
         tool = acc.popToolsAndMerge(ParticleKillerToolCfg(flags))
@@ -344,6 +348,10 @@ def Kernel_ATLFAST3MT_QSCfg(flags, name="ISF_Kernel_ATLFAST3MT_QS", **kwargs):
 
 def Kernel_GenericSimulatorCfg(flags, name="ISF_Kernel_GenericSimulator", **kwargs):
     acc = ComponentAccumulator()
+    kwargs.setdefault("UseShadowEvent", flags.Sim.UseShadowEvent)
+    if flags.Sim.UseShadowEvent and "TruthPreselectionTool" not in kwargs:
+        from ISF_HepMC_Tools.ISF_HepMC_ToolsConfig import TruthPreselectionToolCfg
+        kwargs.setdefault( "TruthPreselectionTool", acc.popToolsAndMerge(TruthPreselectionToolCfg(flags)) )
 
     if "TruthRecordService" not in kwargs:
         kwargs.setdefault("TruthRecordService", acc.getPrimaryAndMerge(TruthServiceCfg(flags)).name)

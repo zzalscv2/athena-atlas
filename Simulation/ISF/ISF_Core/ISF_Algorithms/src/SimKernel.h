@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_ALGS_SIMKERNEL_H
@@ -20,6 +20,7 @@
 #include "ISF_Event/SimSvcID.h"
 #include "ISF_Interfaces/ISimulationSelector.h"
 #include "ISF_Interfaces/IInputConverter.h"
+#include "ISF_Interfaces/IGenEventFilter.h"
 
 // DetectorDescription
 #include "AtlasDetDescr/AtlasRegion.h"
@@ -87,6 +88,7 @@ namespace ISF {
         generator truth collection into output simulation truth collection */
     StatusCode prepareInput(SG::ReadHandle<McEventCollection>& inputTruth,
                             SG::WriteHandle<McEventCollection>& outputTruth,
+                            std::unique_ptr<McEventCollection>& shadowTruth,
                             ISFParticleContainer& simParticles) const;
 
 
@@ -96,6 +98,10 @@ namespace ISF {
     SG::WriteHandle<McEventCollection>   m_outputHardScatterTruth;//!< output hard scatter truth collection
     SG::WriteHandle<McEventCollection>   m_outputPileupTruth;     //!< output pileup truth collection
     ServiceHandle<IInputConverter>       m_inputConverter;        //!< input->ISFParticle converter
+
+    ToolHandle<IGenEventFilter>  m_truthPreselectionTool{this, "TruthPreselectionTool", "", "Tool for filtering out quasi-stable particle daughters"};
+
+    BooleanProperty m_useShadowEvent{this, "UseShadowEvent", false, "New approach to selecting particles for simulation" };
 
     /** Central particle broker service */
     ServiceHandle<IParticleBroker>       m_particleBroker;

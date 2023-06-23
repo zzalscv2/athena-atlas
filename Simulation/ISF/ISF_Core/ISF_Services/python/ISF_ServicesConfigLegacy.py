@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """
 Service configurations for ISF
@@ -63,27 +63,11 @@ def getAFIIGeoIDSvc(name="ISF_AFIIGeoIDSvc", **kwargs):
     return getGeoIDSvc(name, **kwargs)
 
 
-def getGenParticleFilters():
-    genParticleFilterList = []
-    genParticleFilterList = ['ISF_ParticleFinalStateFilter'] # not used for Quasi-stable particle simulation
-    from G4AtlasApps.SimFlags import simFlags
-    if "ATLAS" in simFlags.SimLayout():
-        from AthenaCommon.BeamFlags import jobproperties
-        if jobproperties.Beam.beamType() != "cosmics":
-            genParticleFilterList += ['ISF_ParticlePositionFilterDynamic']
-            from AthenaCommon.DetFlags import DetFlags
-            if not (DetFlags.geometry.AFP_on() or DetFlags.geometry.ALFA_on() or DetFlags.geometry.FwdRegion_on()) and\
-               (not simFlags.CavernBG.statusOn or simFlags.CavernBG.get_Value() == 'Signal') and\
-               not (simFlags.SimulateCavern.statusOn and simFlags.SimulateCavern.get_Value()):
-                genParticleFilterList += ['ISF_EtaPhiFilter']
-    genParticleFilterList += ['ISF_GenParticleInteractingFilter']
-    return genParticleFilterList
-
-
 def getInputConverter(name="ISF_InputConverter", **kwargs):
     from G4AtlasApps.SimFlags import simFlags
     kwargs.setdefault("UseShadowEvent", simFlags.UseShadowEvent())
     kwargs.setdefault("UseGeneratedParticleMass", False)
+    from ISF_HepMC_Tools.ISF_HepMC_ToolsConfigLegacy import getGenParticleFilters
     kwargs.setdefault("GenParticleFilters", getGenParticleFilters())
     return CfgMgr.ISF__InputConverter(name, **kwargs)
 

@@ -6,6 +6,9 @@ def getG4AtlasAlg(name='G4AtlasAlg', **kwargs):
     kwargs.setdefault("OutputTruthCollection", "TruthEvent")
     ## Killing neutrinos
     from G4AtlasApps.SimFlags import simFlags
+    kwargs.setdefault("UseShadowEvent", simFlags.UseShadowEvent())
+    if simFlags.UseShadowEvent() and "TruthPreselectionTool" not in kwargs:
+        kwargs.setdefault( "TruthPreselectionTool", "TruthPreselectionTool" )
     if hasattr(simFlags, 'ReleaseGeoModel') and simFlags.ReleaseGeoModel.statusOn:
         ## Don't drop the GeoModel
         kwargs.setdefault('ReleaseGeoModel' ,simFlags.ReleaseGeoModel.get_Value())
