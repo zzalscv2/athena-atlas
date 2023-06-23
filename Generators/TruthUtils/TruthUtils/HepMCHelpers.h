@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <array>
 #include <cstdlib>
+#include "TruthUtils/MagicNumbers.h"
+
 /// @file
 ///
 /// Provides the HepMC tools from the external MCUtils header package,
@@ -26,16 +28,6 @@ using namespace PID;
 
   /// @brief Identify if the particle with given PDG ID would produce ID tracks but not shower in the detector if stable
   inline bool isChargedNonShowering(int pid) { return (PID::isMuon(pid) || PID::isSUSY(pid)); }
-}
-
-#if !defined(XAOD_STANDALONE)
-#include "AtlasHepMC/GenEvent.h"
-#include "AtlasHepMC/GenParticle.h"
-#include "AtlasHepMC/GenVertex.h"
-#include "AtlasHepMC/Relatives.h"
-#include "AtlasHepMC/MagicNumbers.h"
-namespace MC {
-
 
   template <class T> inline bool isDecayed(const T& p)  { return p->status() == 2;}
   template <class T> inline bool isStable(const T& p)   { return p->status() == 1;}
@@ -75,5 +67,4 @@ namespace MC {
 
 
 }
-#endif
 #endif

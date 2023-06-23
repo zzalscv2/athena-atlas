@@ -247,11 +247,12 @@ namespace xAOD {
    //         Implementation of the particle species decoder functions
    //
 
-/// Helper macro to implement the functions that rely in functions from MC::PID
+/// Helper macro to implement the functions that rely in functions from MC:: namespace.
 #define MC_PID_HELPER( TYPE, FNAME )      \
    TYPE TruthParticle_v1::FNAME() const { \
-      return MC::PID::FNAME( pdgId() );   \
+      return MC::FNAME( pdgId() );   \
    }
+
 
    MC_PID_HELPER( double, charge )
    MC_PID_HELPER( int, threeCharge )
@@ -307,10 +308,9 @@ namespace xAOD {
 
 // Forget about this macro:
 #undef MC_PID_HELPER
-   bool TruthParticle_v1::isGenStable() const {
-    if (status() != 1) return false;
-    return !HepMC::is_simulation_particle(this);   
-   };
+   bool TruthParticle_v1::isGenStable() const { return MC::isGenStable(this);};
+
+
 
    //
    /////////////////////////////////////////////////////////////////////////////
