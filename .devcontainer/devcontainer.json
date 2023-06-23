@@ -14,7 +14,6 @@
         "vscode": {
             "settings": {
                 "terminal.integrated.shell.linux": "/bin/bash",
-                "git.path": "/opt/rh/sclo-git25/root/usr/bin/git",
                 "python.envFile": "${workspaceFolder}/../build/env.txt",
                 "python.linting.enabled": true,
                 "python.linting.pylintEnabled": false,

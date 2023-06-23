@@ -33,5 +33,8 @@ USER atlas
 WORKDIR /home/atlas
 RUN echo "cat /etc/motd" >> /home/atlas/.bashrc
 
+# Add git to path, so that .gitconfig copy works properly
+ENV PATH="${PATH}:/opt/rh/sclo-git212/root/usr/bin/"
+
 # Set up the command to run when starting the image.
 CMD /bin/bash
