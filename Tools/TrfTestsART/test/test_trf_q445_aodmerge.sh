@@ -14,12 +14,11 @@ Reco_tf.py \
     --outputAODFile myAOD.MT.pool.root
 rc1=$?
 AODMerge_tf.py \
+    --CA 'True' \
     --autoConfiguration 'everything' \
-    --fastPoolMerge 'False' \
-    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --inputAODFile myAOD.MT.pool.root \
     --outputAODFile Merged.MT.AOD.pool.root \
-    --multithreaded="True"
+    --multithreaded="True" # Note that this doesn't gain us much...
 rc2=$?
 
 # Compare EventData in the merged files
@@ -27,7 +26,7 @@ rc3=1
 rc4=1
 if [[ $rc1 -eq 0 ]] && [[ $rc2 -eq 0 ]]; then
   # EventData
-  acmd diff-root --nan-equal --order-trees myAOD.MT.pool.root Merged.MT.AOD.pool.root
+  acmd diff-root --exact-branches --nan-equal --order-trees myAOD.MT.pool.root Merged.MT.AOD.pool.root
   rc3=$?
   meta-diff -x diff -s myAOD.MT.pool.root Merged.MT.AOD.pool.root -d file_guid file_size
   rc4=$?
