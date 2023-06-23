@@ -115,6 +115,9 @@ StatusCode ISF::SimKernelMT::initialize() {
   ATH_CHECK( m_muonExitLayerKey.initialize() );
 
   ATH_CHECK( m_inputConverter.retrieve() );
+  if ( not m_truthPreselectionTool.empty() ) {
+    ATH_CHECK(m_truthPreselectionTool.retrieve());
+  }
 
   ATH_CHECK ( m_truthRecordSvc.retrieve() );
 
@@ -145,14 +148,31 @@ StatusCode ISF::SimKernelMT::execute() {
     return StatusCode::FAILURE;
   }
 
-  // copy input Evgen collection to output Truth collection
+  // create output Truth collection
   SG::WriteHandle<McEventCollection> outputTruth(m_outputTruthKey, ctx);
-  outputTruth = std::make_unique<McEventCollection>(*inputEvgen);
-
-  // Apply QS patch if required
-  if ( not m_qspatcher.empty() ) {
-    for (HepMC::GenEvent* currentGenEvent : *outputTruth ) {
-      ATH_CHECK(m_qspatcher->applyWorkaround(*currentGenEvent));
+  std::unique_ptr<McEventCollection> shadowTruth{};
+  if (m_useShadowEvent) {
+    outputTruth = std::make_unique<McEventCollection>();
+    // copy input Evgen collection to shadow Truth collection
+    shadowTruth = std::make_unique<McEventCollection>(*inputEvgen);
+    for (HepMC::GenEvent* currentGenEvent : *shadowTruth ) {
+      // Apply QS patch if required
+      if ( not m_qspatcher.empty() ) {
+        ATH_CHECK(m_qspatcher->applyWorkaround(*currentGenEvent));
+      }
+      // Copy GenEvent and remove daughters of quasi-stable particles to be simulated
+      std::unique_ptr<HepMC::GenEvent> outputEvent = m_truthPreselectionTool->filterGenEvent(*currentGenEvent);
+      outputTruth->push_back(outputEvent.release());
+    }
+  }
+  else {
+    // copy input Evgen collection to output Truth collection
+    outputTruth = std::make_unique<McEventCollection>(*inputEvgen);
+    // Apply QS patch if required
+    if ( not m_qspatcher.empty() ) {
+      for (HepMC::GenEvent* currentGenEvent : *outputTruth ) {
+        ATH_CHECK(m_qspatcher->applyWorkaround(*currentGenEvent));
+      }
     }
   }
 
@@ -239,7 +259,7 @@ StatusCode ISF::SimKernelMT::execute() {
 
     ATH_MSG_VERBOSE("Selected " << particles.size() << " particles to be processed by " << lastSimulator->name());
     // Run the simulation
-    ATH_CHECK( lastSimulator->simulateVector( particles, newSecondaries, outputTruth.ptr() ) );
+    ATH_CHECK( lastSimulator->simulateVector( particles, newSecondaries, outputTruth.ptr(), shadowTruth.get() ) );
     ATH_MSG_VERBOSE(lastSimulator->name() << " returned " << newSecondaries.size() << " new particles to be added to the queue." );
     // Register returned particles with the entry layer tool, set their order and enqueue them
     for ( auto* secondary : newSecondaries ) {
