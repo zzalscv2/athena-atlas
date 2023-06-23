@@ -64,9 +64,13 @@ class CSVDumper:
                 continue
 
             for var,fmt in dict_container.items():
-                sp  = asarray(  tp.getConstDataSpan[ fmt ]( var ) )
+                try:
+                    sp  = asarray(  tp.getConstDataSpan[ fmt ]( var ) )
+                except Exception:
+                    # This is for the case arrays are either empty or have some trouble when accessed via getConstDataSpan. Used in excepction as makes the code slower
+                    sp  = asarray( [ getattr(element, var)() for element in tp ] )
                 
-                if "ArrayFloat3" in fmt:  # Needed extra coding with dealing with xAOD::ArrayFloat3 instead of standard C++ array
+                if "ArrayFloat3" in fmt and len(sp) > 0:  # Needs extra coding when dealing with xAOD::ArrayFloat3 instead of standard C++ array
                     sp = array( list( map(self.ArrayFloat3_to_CppArray, sp) ) )
                     
                 if sp.ndim == 1:
@@ -87,6 +91,8 @@ class CSVDumper:
 
 if __name__ == "__main__":
 
+    from InDetMeasurementUtilities.CSV_DictFormats import CSV_DictFormats 
+
     parser = ArgumentParser()
     parser.add_argument('--inputAOD', type=str, default="")
     parser.add_argument('--outputDir', type=str, default="")
@@ -100,29 +106,9 @@ if __name__ == "__main__":
     if args.outputDir == "":
         raise Exception("No outputDir was provided!")
     
-    dict_variables_types = {
-        #All obtained AuxElement content using the HitsToxAODCopier tool
-        "PixelHits": { "col": "int", "row": "int", "tot": "int", "eta_module": "int", "phi_module": "int", "layer_disk": "int", "barrel_ec": "int", "detid": "unsigned long"},
-        "StripHits": { "strip": "int", "side": "int", "eta_module": "int", "phi_module": "int", "layer_disk": "int", "barrel_ec": "int", "detid": "unsigned long"},
-        
-        #https://gitlab.cern.ch/atlas/athena/-/blob/master/Event/xAOD/xAODInDetMeasurement/xAODInDetMeasurement/versions/PixelClusterAuxContainer_v1.h
-        "ITkPixelClusters": {"globalPosition":"std::array<float,3>", "channelsInPhi":"int", "channelsInEta":"int", "widthInEta":"float", "omegaX":"float", "omegaY":"float", "totalToT":"int", "totalCharge":"float",   "energyLoss":"float", "splitProbability1":"float", "splitProbability2":"float", "lvl1a":"int", "localPosition":"std::array<float,3>", "localCovariance":"std::array<float,9>"},
-        # ITkPixelClusters.isSplit is char with all ''? Keeping out for the moment
-
-        #https://gitlab.cern.ch/atlas/athena/-/blob/master/Event/xAOD/xAODInDetMeasurement/xAODInDetMeasurement/versions/StripClusterAuxContainer_v1.h
-        "ITkStripClusters": {"globalPosition":"std::array<float,3>", "channelsInPhi":"int", "localPosition":"std::array<float,3>", "localCovariance":"std::array<float,9>"},
-
-        #https://gitlab.cern.ch/atlas/athena/-/blob/master/Event/xAOD/xAODInDetMeasurement/xAODInDetMeasurement/versions/SpacePoint_v1.h
-        "ITkStripSpacePoints": {"globalPosition":"std::array<float,3>", "radius":"float", "varianceR":"float", "varianceZ":"float", "topHalfStripLength":"float", "bottomHalfStripLength":"float", "topStripDirection":"xAOD::ArrayFloat3", "bottomStripDirection":"xAOD::ArrayFloat3", "stripCenterDistance":"xAOD::ArrayFloat3", "topStripCenter":"xAOD::ArrayFloat3"},
-
-        #https://gitlab.cern.ch/atlas/athena/-/blob/master/Event/xAOD/xAODInDetMeasurement/xAODInDetMeasurement/versions/SpacePoint_v1.h
-        "ITkPixelSpacePoints": {"globalPosition":"std::array<float,3>", "radius":"float", "varianceR":"float", "varianceZ":"float"},
-
-    }
-
     Dumper = CSVDumper(inputAOD=args.inputAOD,
                        outputDir=args.outputDir,
-                       dict_variables_types=dict_variables_types,
+                       dict_variables_types=CSV_DictFormats,
                        treename=args.treename,
                        nEvents=args.nEvents)
     Dumper.Run()
