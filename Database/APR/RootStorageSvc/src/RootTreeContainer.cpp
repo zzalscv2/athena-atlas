@@ -494,7 +494,6 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
       }
       IDbDatabase* idb = dbH.info();
       m_rootDb = dynamic_cast<RootDatabase*>(idb);
-      TDirectory::TContext dirCtxt(m_rootDb ? m_rootDb->file() : gDirectory);
       if (m_rootDb)
          m_tree = (TTree*)m_rootDb->file()->Get(treeName.c_str());
 
