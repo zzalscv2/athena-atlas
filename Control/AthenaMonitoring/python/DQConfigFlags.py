@@ -86,7 +86,7 @@ def getDataType(flags):
     from AthenaConfiguration.Enums import BeamType
     if flags.Input.isMC:
         return DQDataType.MC
-    elif (False): # this is the HI test, needs HI flags
+    elif flags.Reco.EnableHI:
         return DQDataType.HeavyIon
     elif flags.Beam.Type is BeamType.Cosmics:
         return DQDataType.Cosmics
