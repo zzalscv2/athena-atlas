@@ -2,6 +2,8 @@
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType
+from TrkConfig.TrkConfigFlags import PrimaryPassConfig
+
 
 def createInDetConfigFlags():
     icf = AthConfigFlags()
@@ -15,8 +17,8 @@ def createInDetConfigFlags():
 
     # defines if the X1X mode is used for the offline or not
     icf.addFlag("InDet.selectSCTIntimeHits", lambda prevFlags: (
-        not(prevFlags.Beam.Type is BeamType.Cosmics or \
-            prevFlags.Tracking.doVtxBeamSpot)))
+        not(prevFlags.Beam.Type is BeamType.Cosmics or
+            prevFlags.Tracking.PrimaryPassConfig is PrimaryPassConfig.VtxBeamSpot)))
     icf.addFlag("InDet.useDCS", True)
     icf.addFlag("InDet.usePixelDCS", lambda prevFlags: (
         prevFlags.InDet.useDCS and prevFlags.Detector.EnablePixel))

@@ -16,31 +16,8 @@ def CombinedTrackingPassFlagSets(flags):
     flags_set = []
 
     # Primary Pass
-    if flags.Tracking.doVtxLumi:
-        flags = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                      "Tracking.VtxLumiPass")
-    elif flags.Tracking.doVtxBeamSpot:
-        flags = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                      "Tracking.VtxBeamSpotPass")
-    elif flags.Beam.Type is BeamType.Cosmics:
-        flags = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                      "Tracking.CosmicsPass")
-    elif flags.Reco.EnableHI:
-        flags = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                      "Tracking.HeavyIonPass")
-    elif flags.Tracking.doHighPileup:
-        flags = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                      "Tracking.HighPileupPass")
-    elif flags.Tracking.doMinBias:
-        flags = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                      "Tracking.MinBiasPass")
-    elif flags.Tracking.doRobustReco:
-        flags = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                      "Tracking.RobustRecoPass")
-    else:
-        flags = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                      "Tracking.MainPass")
-
+    flags = flags.cloneAndReplace("Tracking.ActiveConfig",
+                                  flags.Tracking.PrimaryPassConfig.value)
     flags_set += [flags]
 
     # LRT pass

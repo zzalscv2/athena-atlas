@@ -18,15 +18,8 @@ def CombinedTrackingPassFlagSets(flags):
     flags_set = []
 
     # Primary Pass
-    if flags.Tracking.useITkFTF:
-        flags = flags.cloneAndReplace("Tracking.ActiveConfig", 
-                                      "Tracking.ITkFTFPass")
-    elif flags.Tracking.doITkFastTracking:
-        flags = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                      "Tracking.ITkFastPass")
-    else:
-        flags = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                      "Tracking.ITkMainPass")
+    flags = flags.cloneAndReplace("Tracking.ActiveConfig",
+                                  flags.Tracking.ITkPrimaryPassConfig.value)
     flags_set += [flags]
 
     # LRT
