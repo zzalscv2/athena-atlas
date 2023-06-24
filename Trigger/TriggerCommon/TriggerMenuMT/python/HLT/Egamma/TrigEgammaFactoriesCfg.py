@@ -82,21 +82,43 @@ def CaloFillRectangularClusterCfg(flags, **kwargs):
         result.setPrivateTools(CompFactory.CaloFillRectangularCluster(**kwargs))
         return result
 
-def TrigCaloIsolationToolCfg(flags, ion):
+def TrigCaloIsolationToolCfg_HI(flags):
         acc = ComponentAccumulator()
-        if ion:
-            name = "TrigCaloIsolationToolHI"
-        else:
-            name = "TrigCaloIsolationTool"
+        name = "TrigCaloIsolationToolHI"
         from CaloIdentifier import SUBCALO
         tool = CompFactory.xAOD.CaloIsolationTool(name = name,
-                                                   CaloFillRectangularClusterTool  = acc.popToolsAndMerge(CaloFillRectangularClusterCfg(flags,name="trigegamma_CaloFillRectangularCluster")),
-                                                   ClustersInConeTool              = acc.popToolsAndMerge(TrigCaloClustersInConeToolCfg(flags,ion=ion)),
+                                                   CaloFillRectangularClusterTool  = acc.popToolsAndMerge(CaloFillRectangularClusterCfg(flags,name="trigegamma_CaloFillRectangularCluster_HI")),
+                                                   ClustersInConeTool              = acc.popToolsAndMerge(TrigCaloClustersInConeToolCfg(flags,ion=True)),
                                                    FlowElementsInConeTool          = None,
                                                    ParticleCaloExtensionTool       = None,
                                                    IsoLeakCorrectionTool           = acc.popToolsAndMerge(TrigCaloIsoCorrectionToolCfg(flags)),
                                                    ParticleCaloCellAssociationTool = None,
                                                    saveOnlyRequestedCorrections    = True,
+                                                   InitializeReadHandles           = False,
+                                                   doEnergyDensityCorrection       = True,
+                                                   UseEMScale                      = True,
+                                                   EMCaloNums                      = [SUBCALO.LAREM],
+                                                   HadCaloNums                     = [SUBCALO.LARHEC, SUBCALO.TILE])
+        acc.setPrivateTools(tool)
+        return acc
+
+def TrigCaloIsolationToolCfg(flags):
+        acc = ComponentAccumulator()
+        name = "TrigCaloIsolationTool"
+        from CaloIdentifier import SUBCALO
+        tool = CompFactory.xAOD.CaloIsolationTool(name = name,
+                                                   CaloFillRectangularClusterTool  = acc.popToolsAndMerge(CaloFillRectangularClusterCfg(flags,name="trigegamma_CaloFillRectangularCluster")),
+                                                   ClustersInConeTool              = acc.popToolsAndMerge(TrigCaloClustersInConeToolCfg(flags,ion=False)),
+                                                   FlowElementsInConeTool          = None,
+                                                   ParticleCaloExtensionTool     = None,
+                                                   IsoLeakCorrectionTool           = acc.popToolsAndMerge(TrigCaloIsoCorrectionToolCfg(flags)),
+                                                   ParticleCaloCellAssociationTool = None,
+                                                   saveOnlyRequestedCorrections    = True,
+                                                   InitializeReadHandles           = True,
+                                                   TopoClusterEDCentralContainer   = 'TrigIsoEventShape',
+                                                   TopoClusterEDForwardContainer   = 'TrigIsoEventShape',
+                                                   EFlowEDCentralContainer         = 'TrigIsoEventShape',
+                                                   EFlowEDForwardContainer         = 'TrigIsoEventShape',
                                                    EMCaloNums                      = [SUBCALO.LAREM],
                                                    HadCaloNums                     = [SUBCALO.LARHEC, SUBCALO.TILE])
         acc.setPrivateTools(tool)
@@ -108,15 +130,17 @@ def TrigPhotonIsoBuilderCfg(flags, ion = False):
         if ion:
             name = 'TrigPhotonIsolationBuilderHI'
             TrigEgammaKeys = getTrigEgammaKeys(ion=ion)
+            TrigCaloIsolationTool = TrigCaloIsolationToolCfg_HI(flags)
         else:
             name = 'TrigPhotonIsolationBuilder'
             TrigEgammaKeys = getTrigEgammaKeys()
+            TrigCaloIsolationTool = TrigCaloIsolationToolCfg(flags)
 
         from xAODPrimitives.xAODIso import xAODIso as isoPar
         TrigPhotonIsolationBuilder = CompFactory.IsolationBuilder(name                  = name,
                                                                   PhotonCollectionContainerName = TrigEgammaKeys.precisionPhotonContainer,
                                                                   CaloCellIsolationTool = None,
-                                                                  CaloTopoIsolationTool = acc.popToolsAndMerge(TrigCaloIsolationToolCfg(flags=flags,ion=ion)),
+                                                                  CaloTopoIsolationTool = acc.popToolsAndMerge(TrigCaloIsolationTool),
                                                                   PFlowIsolationTool    = None,
                                                                   TrackIsolationTool    = None, 
                                                                   PhIsoTypes            = [[isoPar.topoetcone20, isoPar.topoetcone30, isoPar.topoetcone40]],
@@ -169,4 +193,5 @@ def TrigEgammaFSEventDensitySequenceCfg(flags, name = 'TrigEgammaFSEventDensityS
         acc.merge(TrigEgammaPseudoJetAlgCfg(flags))
         acc.merge(TrigIsoEventShapeAlgCfg(flags))
         return acc
+
 

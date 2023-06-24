@@ -1,11 +1,10 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-#!/usr/bin/env python
-#====================================================================
+# ====================================================================
 # EGAM1.py
 # This defines DAOD_EGAM1, a skimmed DAOD format for Run 3.
 # Z->ee reduction for central electrons - for electron ID and calibration
-# It requires the flag EGAM1 in Derivation_tf.py   
-#====================================================================
+# It requires the flag EGAM1 in Derivation_tf.py
+# ====================================================================
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -14,37 +13,43 @@ from AthenaConfiguration.Enums import MetadataCategory
 from AthenaCommon.SystemOfUnits import MeV
 
 from DerivationFrameworkEGamma.PhotonsCPDetailedContent import (
-    PhotonsCPDetailedContent )
+    PhotonsCPDetailedContent,
+)
 
 from DerivationFrameworkEGamma.TriggerContent import (
-    ExtraContainersTrigger, ExtraContainersElectronTrigger )
-
+    ExtraContainersTrigger,
+    ExtraContainersElectronTrigger,
+)
 
 
 def EGAM1SkimmingToolCfg(flags):
-    '''Configure the EGAM1 skimming tool'''
+    """Configure the EGAM1 skimming tool"""
     acc = ComponentAccumulator()
 
-    expression = ' || '.join([
-        '(count( EGAM1_DiElectronMass1 > 50.0*GeV ) >= 1)',
-        '(count( EGAM1_DiElectronMass2 > 50.0*GeV ) >= 1)',
-        '(count( EGAM1_DiElectronMass3 > 50.0*GeV ) >= 1)',
-        '(count( EGAM1_ElectronPhotonMass > 50.0*GeV )>=1)'
-    ])
-    print('EGAM1 skimming expression: ', expression)
+    expression = " || ".join(
+        [
+            "(count( EGAM1_DiElectronMass1 > 50.0*GeV ) >= 1)",
+            "(count( EGAM1_DiElectronMass2 > 50.0*GeV ) >= 1)",
+            "(count( EGAM1_DiElectronMass3 > 50.0*GeV ) >= 1)",
+            "(count( EGAM1_ElectronPhotonMass > 50.0*GeV )>=1)",
+        ]
+    )
+    print("EGAM1 skimming expression: ", expression)
 
-    acc.setPrivateTools( CompFactory.DerivationFramework.xAODStringSkimmingTool(
-        name = 'EGAM1SkimmingTool',
-        expression = expression) )
-    
-    return(acc)                          
+    acc.setPrivateTools(
+        CompFactory.DerivationFramework.xAODStringSkimmingTool(
+            name="EGAM1SkimmingTool", expression=expression
+        )
+    )
+
+    return acc
 
 
 def EGAM1ZeeMassTool1Cfg(flags):
-    '''Configure the EGAM1 ee invariant mass augmentation tool 1'''
+    """Configure the EGAM1 ee invariant mass augmentation tool 1"""
     acc = ComponentAccumulator()
 
-    # ====================================================================    
+    # ====================================================================
     # 1. di-electron invariant mass for events passing the Z->ee
     #    selection for the e-gamma calibration, based on single e trigger
     #
@@ -54,32 +59,37 @@ def EGAM1ZeeMassTool1Cfg(flags):
     #    mee>50 GeV (cut applied in skimming step later)
     # ====================================================================
 
-    requirement_tag = ' && '.join(['(Electrons.DFCommonElectronsLHTight)',
-                                   '(Electrons.pt > 24.5*GeV)'])
+    requirement_tag = " && ".join(
+        ["(Electrons.DFCommonElectronsLHTight)", "(Electrons.pt > 24.5*GeV)"]
+    )
 
-    requirement_probe = ' && '.join(['(Electrons.DFCommonElectronsLHMedium)',
-                                     '(Electrons.pt > 19.5*GeV)'])
+    requirement_probe = " && ".join(
+        ["(Electrons.DFCommonElectronsLHMedium)", "(Electrons.pt > 19.5*GeV)"]
+    )
 
-    acc.setPrivateTools( CompFactory.DerivationFramework.EGInvariantMassTool(
-        name = 'EGAM1_ZEEMassTool1',
-        Object1Requirements = requirement_tag,
-        Object2Requirements = requirement_probe,
-        StoreGateEntryName = 'EGAM1_DiElectronMass1',
-        Mass1Hypothesis = 0.511*MeV,
-        Mass2Hypothesis = 0.511*MeV,
-        Container1Name = 'Electrons',
-        Container2Name = 'Electrons',
-        CheckCharge = True,
-        DoTransverseMass = False,
-        MinDeltaR=0.0) )
+    acc.setPrivateTools(
+        CompFactory.DerivationFramework.EGInvariantMassTool(
+            name="EGAM1_ZEEMassTool1",
+            Object1Requirements=requirement_tag,
+            Object2Requirements=requirement_probe,
+            StoreGateEntryName="EGAM1_DiElectronMass1",
+            Mass1Hypothesis=0.511 * MeV,
+            Mass2Hypothesis=0.511 * MeV,
+            Container1Name="Electrons",
+            Container2Name="Electrons",
+            CheckCharge=True,
+            DoTransverseMass=False,
+            MinDeltaR=0.0,
+        )
+    )
 
     return acc
 
 
 def EGAM1ZeeMassTool2Cfg(flags):
-    '''Configure the EGAM1 ee invariant mass augmentation tool 2'''
+    """Configure the EGAM1 ee invariant mass augmentation tool 2"""
     acc = ComponentAccumulator()
-    
+
     # ====================================================================
     # 2. di-electron invariant mass for events passing the Z->e selection
     #    for the e-gamma calibration, based on di-electron triggers
@@ -89,27 +99,31 @@ def EGAM1ZeeMassTool2Cfg(flags):
     #    mee>50 GeV (cut applied in skimming step later)
     # ====================================================================
 
-    requirement = ' && '.join(['(Electrons.DFCommonElectronsLHMedium)',
-                               '(Electrons.pt > 19.5*GeV)'])
+    requirement = " && ".join(
+        ["(Electrons.DFCommonElectronsLHMedium)", "(Electrons.pt > 19.5*GeV)"]
+    )
 
-    acc.setPrivateTools( CompFactory.DerivationFramework.EGInvariantMassTool(   
-        name = 'EGAM1_ZEEMassTool2',
-        Object1Requirements = requirement,
-        Object2Requirements = requirement,
-        StoreGateEntryName = 'EGAM1_DiElectronMass2',
-        Mass1Hypothesis = 0.511*MeV,
-        Mass2Hypothesis = 0.511*MeV,
-        Container1Name = 'Electrons',
-        Container2Name = 'Electrons',
-        CheckCharge = True,
-        DoTransverseMass = False,
-        MinDeltaR = 0.0) )
+    acc.setPrivateTools(
+        CompFactory.DerivationFramework.EGInvariantMassTool(
+            name="EGAM1_ZEEMassTool2",
+            Object1Requirements=requirement,
+            Object2Requirements=requirement,
+            StoreGateEntryName="EGAM1_DiElectronMass2",
+            Mass1Hypothesis=0.511 * MeV,
+            Mass2Hypothesis=0.511 * MeV,
+            Container1Name="Electrons",
+            Container2Name="Electrons",
+            CheckCharge=True,
+            DoTransverseMass=False,
+            MinDeltaR=0.0,
+        )
+    )
 
     return acc
 
 
 def EGAM1ZeeMassTool3Cfg(flags):
-    '''Configure the EGAM1 ee invariant mass augmentation tool 3'''
+    """Configure the EGAM1 ee invariant mass augmentation tool 3"""
     acc = ComponentAccumulator()
 
     # ====================================================================
@@ -123,29 +137,33 @@ def EGAM1ZeeMassTool3Cfg(flags):
     #    mee>50 GeV (cut applied in skimming step later)
     # ====================================================================
 
-    requirement_tag = ' && '.join(['(Electrons.DFCommonElectronsLHMedium)',
-                                   '(Electrons.pt > 24.5*GeV)'])
+    requirement_tag = " && ".join(
+        ["(Electrons.DFCommonElectronsLHMedium)", "(Electrons.pt > 24.5*GeV)"]
+    )
 
-    requirement_probe = 'Electrons.pt > 4*GeV'
+    requirement_probe = "Electrons.pt > 4*GeV"
 
-    acc.setPrivateTools( CompFactory.DerivationFramework.EGInvariantMassTool(
-        name = 'EGAM1_ZEEMassTool3',
-        Object1Requirements = requirement_tag,
-        Object2Requirements = requirement_probe,
-        StoreGateEntryName = 'EGAM1_DiElectronMass3',
-        Mass1Hypothesis = 0.511*MeV,
-        Mass2Hypothesis = 0.511*MeV,
-        Container1Name = 'Electrons',
-        Container2Name = 'Electrons',
-        CheckCharge = False,
-        DoTransverseMass = False,
-        MinDeltaR = 0.0) )
+    acc.setPrivateTools(
+        CompFactory.DerivationFramework.EGInvariantMassTool(
+            name="EGAM1_ZEEMassTool3",
+            Object1Requirements=requirement_tag,
+            Object2Requirements=requirement_probe,
+            StoreGateEntryName="EGAM1_DiElectronMass3",
+            Mass1Hypothesis=0.511 * MeV,
+            Mass2Hypothesis=0.511 * MeV,
+            Container1Name="Electrons",
+            Container2Name="Electrons",
+            CheckCharge=False,
+            DoTransverseMass=False,
+            MinDeltaR=0.0,
+        )
+    )
 
     return acc
 
-        
+
 def EGAM1ZegMassToolCfg(flags):
-    '''Configure the EGAM1 e+photon mass augmentation tool'''
+    """Configure the EGAM1 e+photon mass augmentation tool"""
     acc = ComponentAccumulator()
 
     # ====================================================================
@@ -160,60 +178,64 @@ def EGAM1ZegMassToolCfg(flags):
     #    mey>50 GeV (cut applied in skimming step later)
     # ====================================================================
 
-    requirement_tag = ' && '.join(['(Electrons.DFCommonElectronsLHMedium)',
-                                   '(Electrons.pt > 24.5*GeV)'])
+    requirement_tag = " && ".join(
+        ["(Electrons.DFCommonElectronsLHMedium)", "(Electrons.pt > 24.5*GeV)"]
+    )
 
-    requirement_probe = 'DFCommonPhotons_et > 14.5*GeV'
+    requirement_probe = "DFCommonPhotons_et > 14.5*GeV"
 
-    acc.setPrivateTools( CompFactory.DerivationFramework.EGInvariantMassTool(
-        name = 'EGAM1_ZEGMassTool',
-        Object1Requirements = requirement_tag,
-        Object2Requirements = requirement_probe,
-        StoreGateEntryName = 'EGAM1_ElectronPhotonMass',
-        Mass1Hypothesis = 0.511*MeV,
-        Mass2Hypothesis = 0.511*MeV,
-        Container1Name = 'Electrons',
-        Container2Name = 'Photons',
-        Pt2BranchName = 'DFCommonPhotons_et',
-        Eta2BranchName = 'DFCommonPhotons_eta',
-        Phi2BranchName = 'DFCommonPhotons_phi',
-        CheckCharge = False,
-        DoTransverseMass = False,
-        MinDeltaR = 0.0) )
+    acc.setPrivateTools(
+        CompFactory.DerivationFramework.EGInvariantMassTool(
+            name="EGAM1_ZEGMassTool",
+            Object1Requirements=requirement_tag,
+            Object2Requirements=requirement_probe,
+            StoreGateEntryName="EGAM1_ElectronPhotonMass",
+            Mass1Hypothesis=0.511 * MeV,
+            Mass2Hypothesis=0.511 * MeV,
+            Container1Name="Electrons",
+            Container2Name="Photons",
+            Pt2BranchName="DFCommonPhotons_et",
+            Eta2BranchName="DFCommonPhotons_eta",
+            Phi2BranchName="DFCommonPhotons_phi",
+            CheckCharge=False,
+            DoTransverseMass=False,
+            MinDeltaR=0.0,
+        )
+    )
     return acc
 
 
-
 # Main algorithm config
-def EGAM1KernelCfg(ConfigFlags, name='EGAM1Kernel', **kwargs):
-    '''Configure the derivation framework driving algorithm (kernel) 
-       for EGAM1'''
+def EGAM1KernelCfg(ConfigFlags, name="EGAM1Kernel", **kwargs):
+    """Configure the derivation framework driving algorithm (kernel)
+    for EGAM1"""
     acc = ComponentAccumulator()
-
 
     # Schedule extra jets collections
     from JetRecConfig.StandardSmallRJets import AntiKt4PV0Track
     from JetRecConfig.JetRecConfig import JetRecCfg
     from JetRecConfig.JetConfigFlags import jetInternalFlags
+
     jetList = [AntiKt4PV0Track]
     jetInternalFlags.isRecoJob = True
-    for jd in jetList: acc.merge(JetRecCfg(ConfigFlags,jd))
-
+    for jd in jetList:
+        acc.merge(JetRecCfg(ConfigFlags, jd))
 
     # Common augmentations
-    from DerivationFrameworkPhys.PhysCommonConfig import (
-        PhysCommonAugmentationsCfg )
-    acc.merge( PhysCommonAugmentationsCfg(
-        ConfigFlags,
-        TriggerListsHelper = kwargs['TriggerListsHelper'] ) )
-    
+    from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
+
+    acc.merge(
+        PhysCommonAugmentationsCfg(
+            ConfigFlags, TriggerListsHelper=kwargs["TriggerListsHelper"]
+        )
+    )
 
     # EGAM1 augmentations
     augmentationTools = []
 
-    #====================================================================
+    # ====================================================================
     # ee and egamma invariant masses
-    #====================================================================   
+    # ====================================================================
     EGAM1ZeeMassTool1 = acc.popToolsAndMerge(EGAM1ZeeMassTool1Cfg(ConfigFlags))
     acc.addPublicTool(EGAM1ZeeMassTool1)
     augmentationTools.append(EGAM1ZeeMassTool1)
@@ -229,12 +251,14 @@ def EGAM1KernelCfg(ConfigFlags, name='EGAM1Kernel', **kwargs):
     EGAM1ZegMassTool = acc.popToolsAndMerge(EGAM1ZegMassToolCfg(ConfigFlags))
     acc.addPublicTool(EGAM1ZegMassTool)
     augmentationTools.append(EGAM1ZegMassTool)
-    
-    #====================================================================
+
+    # ====================================================================
     # Max Cell energy and time
-    #====================================================================
+    # ====================================================================
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
-        MaxCellDecoratorCfg )
+        MaxCellDecoratorCfg,
+    )
+
     MaxCellDecorator = acc.popToolsAndMerge(MaxCellDecoratorCfg(ConfigFlags))
     acc.addPublicTool(MaxCellDecorator)
     augmentationTools.append(MaxCellDecorator)
@@ -242,42 +266,43 @@ def EGAM1KernelCfg(ConfigFlags, name='EGAM1Kernel', **kwargs):
     # ====================================================================
     # Cell reweighter
     # ====================================================================
-    
 
     # ====================================================================
     # Gain and cluster energies per layer decoration tool
     # ====================================================================
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
-        GainDecoratorCfg, ClusterEnergyPerLayerDecoratorCfg )
+        GainDecoratorCfg,
+        ClusterEnergyPerLayerDecoratorCfg,
+    )
+
     GainDecoratorTool = acc.popToolsAndMerge(GainDecoratorCfg(ConfigFlags))
     acc.addPublicTool(GainDecoratorTool)
     augmentationTools.append(GainDecoratorTool)
 
-    # might need some modification when cell-level reweighting is implemented 
+    # might need some modification when cell-level reweighting is implemented
     # (see share/EGAM1.py)
-    cluster_sizes = (3,7), (5,5), (7,11)
+    cluster_sizes = (3, 7), (5, 5), (7, 11)
     for neta, nphi in cluster_sizes:
-        cename = 'ClusterEnergyPerLayerDecorator_%sx%s' % (neta, nphi)
+        cename = "ClusterEnergyPerLayerDecorator_%sx%s" % (neta, nphi)
         ClusterEnergyPerLayerDecorator = acc.popToolsAndMerge(
             ClusterEnergyPerLayerDecoratorCfg(
-                ConfigFlags,
-                neta = neta,
-                nphi=nphi,
-                name=cename ))
+                ConfigFlags, neta=neta, nphi=nphi, name=cename
+            )
+        )
         acc.addPublicTool(ClusterEnergyPerLayerDecorator)
         augmentationTools.append(ClusterEnergyPerLayerDecorator)
-    
 
     # thinning tools
     thinningTools = []
-    streamName = kwargs['StreamName']    
+    streamName = kwargs["StreamName"]
 
     # Track thinning
     if ConfigFlags.Derivation.Egamma.doTrackThinning:
-
         from DerivationFrameworkInDet.InDetToolsConfig import (
-            TrackParticleThinningCfg, MuonTrackParticleThinningCfg, 
-            TauTrackParticleThinningCfg )
+            TrackParticleThinningCfg,
+            MuonTrackParticleThinningCfg,
+            TauTrackParticleThinningCfg,
+        )
 
         TrackThinningKeepElectronTracks = True
         TrackThinningKeepPhotonTracks = True
@@ -288,169 +313,206 @@ def EGAM1KernelCfg(ConfigFlags, name='EGAM1Kernel', **kwargs):
         TrackThinningKeepPVTracks = True
 
         # Tracks associated with Electrons
-        if (TrackThinningKeepElectronTracks):
-            EGAM1ElectronTPThinningTool = \
+        if TrackThinningKeepElectronTracks:
+            EGAM1ElectronTPThinningTool = (
                 CompFactory.DerivationFramework.EgammaTrackParticleThinning(
-                    name = 'EGAM1ElectronTPThinningTool',
-                    StreamName = streamName,
-                    SGKey = 'Electrons',
-                    GSFTrackParticlesKey = 'GSFTrackParticles',
-                    InDetTrackParticlesKey = 'InDetTrackParticles',
-                    SelectionString = 'Electrons.pt > 0*GeV',
-                    BestMatchOnly = True,
-                    ConeSize = 0.3)
+                    name="EGAM1ElectronTPThinningTool",
+                    StreamName=streamName,
+                    SGKey="Electrons",
+                    GSFTrackParticlesKey="GSFTrackParticles",
+                    InDetTrackParticlesKey="InDetTrackParticles",
+                    SelectionString="Electrons.pt > 0*GeV",
+                    BestMatchOnly=True,
+                    ConeSize=0.3,
+                )
+            )
             acc.addPublicTool(EGAM1ElectronTPThinningTool)
             thinningTools.append(EGAM1ElectronTPThinningTool)
 
         # Tracks associated with Electrons (all tracks, large cone, for track
         # isolation studies of the selected electrons)
-        if (TrackThinningKeepAllElectronTracks):
-            EGAM1ElectronTPThinningTool2 = \
+        if TrackThinningKeepAllElectronTracks:
+            EGAM1ElectronTPThinningTool2 = (
                 CompFactory.DerivationFramework.EgammaTrackParticleThinning(
-                    name = 'EGAM1ElectronTPThinningTool2',
-                    StreamName = streamName,
-                    SGKey = 'Electrons',
-                    GSFTrackParticlesKey = 'GSFTrackParticles',
-                    InDetTrackParticlesKey = 'InDetTrackParticles',
-                    SelectionString = 'Electrons.pt > 4*GeV',
-                    BestMatchOnly = False,
-                    ConeSize = 0.6)
+                    name="EGAM1ElectronTPThinningTool2",
+                    StreamName=streamName,
+                    SGKey="Electrons",
+                    GSFTrackParticlesKey="GSFTrackParticles",
+                    InDetTrackParticlesKey="InDetTrackParticles",
+                    SelectionString="Electrons.pt > 4*GeV",
+                    BestMatchOnly=False,
+                    ConeSize=0.6,
+                )
+            )
             acc.addPublicTool(EGAM1ElectronTPThinningTool2)
             thinningTools.append(EGAM1ElectronTPThinningTool2)
-            
+
         # Tracks associated with Photons
-        if (TrackThinningKeepPhotonTracks):
-            EGAM1PhotonTPThinningTool = \
+        if TrackThinningKeepPhotonTracks:
+            EGAM1PhotonTPThinningTool = (
                 CompFactory.DerivationFramework.EgammaTrackParticleThinning(
-                    name = 'EGAM1PhotonTPThinningTool',
-                    StreamName = streamName,
-                    SGKey = 'Photons',
-                    GSFTrackParticlesKey = 'GSFTrackParticles',
-                    InDetTrackParticlesKey = 'InDetTrackParticles',
-                    GSFConversionVerticesKey = 'GSFConversionVertices',
-                    SelectionString = 'Photons.pt > 0*GeV',
-                    BestMatchOnly = True,
-                    ConeSize = 0.3)
+                    name="EGAM1PhotonTPThinningTool",
+                    StreamName=streamName,
+                    SGKey="Photons",
+                    GSFTrackParticlesKey="GSFTrackParticles",
+                    InDetTrackParticlesKey="InDetTrackParticles",
+                    GSFConversionVerticesKey="GSFConversionVertices",
+                    SelectionString="Photons.pt > 0*GeV",
+                    BestMatchOnly=True,
+                    ConeSize=0.3,
+                )
+            )
             acc.addPublicTool(EGAM1PhotonTPThinningTool)
             thinningTools.append(EGAM1PhotonTPThinningTool)
 
         # Tracks associated with Jets
-        if (TrackThinningKeepJetTracks):
-            EGAM1JetTPThinningTool = \
+        if TrackThinningKeepJetTracks:
+            EGAM1JetTPThinningTool = (
                 CompFactory.DerivationFramework.JetTrackParticleThinning(
-                    name = 'EGAM1JetTPThinningTool',
-                    StreamName = streamName,
-                    JetKey = 'AntiKt4EMPFlowJets',
-                    InDetTrackParticlesKey = 'InDetTrackParticles')
+                    name="EGAM1JetTPThinningTool",
+                    StreamName=streamName,
+                    JetKey="AntiKt4EMPFlowJets",
+                    InDetTrackParticlesKey="InDetTrackParticles",
+                )
+            )
             acc.addPublicTool(EGAM1JetTPThinningTool)
             thinningTools.append(EGAM1JetTPThinningTool)
 
         # Tracks associated with Muons
-        if (TrackThinningKeepMuonTracks):
-            EGAM1MuonTPThinningTool = \
-                acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(
+        if TrackThinningKeepMuonTracks:
+            EGAM1MuonTPThinningTool = acc.getPrimaryAndMerge(
+                MuonTrackParticleThinningCfg(
                     ConfigFlags,
-                    name = 'EGAM1MuonTPThinningTool',
-                    StreamName = streamName,
-                    MuonKey = 'Muons',
-                    InDetTrackParticlesKey = 'InDetTrackParticles') )
+                    name="EGAM1MuonTPThinningTool",
+                    StreamName=streamName,
+                    MuonKey="Muons",
+                    InDetTrackParticlesKey="InDetTrackParticles",
+                )
+            )
             thinningTools.append(EGAM1MuonTPThinningTool)
 
         # Tracks associated with Taus
-        if (TrackThinningKeepTauTracks):
-            EGAM1TauTPThinningTool = \
-                acc.getPrimaryAndMerge(TauTrackParticleThinningCfg(
+        if TrackThinningKeepTauTracks:
+            EGAM1TauTPThinningTool = acc.getPrimaryAndMerge(
+                TauTrackParticleThinningCfg(
                     ConfigFlags,
-                    name = 'EGAM1TauTPThinningTool',
-                    StreamName = streamName,
-                    TauKey = 'TauJets',
-                    ConeSize = 0.6,
-                    InDetTrackParticlesKey = 'InDetTrackParticles',
-                    DoTauTracksThinning    = True,
-                    TauTracksKey           = 'TauTracks') )
+                    name="EGAM1TauTPThinningTool",
+                    StreamName=streamName,
+                    TauKey="TauJets",
+                    ConeSize=0.6,
+                    InDetTrackParticlesKey="InDetTrackParticles",
+                    DoTauTracksThinning=True,
+                    TauTracksKey="TauTracks",
+                )
+            )
             thinningTools.append(EGAM1TauTPThinningTool)
 
         # Tracks from primary vertex
-        thinning_expression = ' && '.join([
-            '(InDetTrackParticles.DFCommonTightPrimary)',
-            '(abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm)', 
-            '(InDetTrackParticles.pt > 10*GeV)'])
-        if (TrackThinningKeepPVTracks):
-            EGAM1TPThinningTool = \
-                acc.getPrimaryAndMerge(TrackParticleThinningCfg(
+        thinning_expression = " && ".join(
+            [
+                "(InDetTrackParticles.DFCommonTightPrimary)",
+                "(abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta)<3*mm)",
+                "(InDetTrackParticles.pt>10*GeV)",
+            ]
+        )
+        if TrackThinningKeepPVTracks:
+            EGAM1TPThinningTool = acc.getPrimaryAndMerge(
+                TrackParticleThinningCfg(
                     ConfigFlags,
-                    name = 'EGAM1TPThinningTool',
-                    StreamName = streamName,
-                    SelectionString = thinning_expression,
-                    InDetTrackParticlesKey = 'InDetTrackParticles') )
+                    name="EGAM1TPThinningTool",
+                    StreamName=streamName,
+                    SelectionString=thinning_expression,
+                    InDetTrackParticlesKey="InDetTrackParticles",
+                )
+            )
             thinningTools.append(EGAM1TPThinningTool)
-
 
     # keep topoclusters around electrons
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
-        CaloClusterThinningCfg )
-    EGAM1CCTCThinningTool = acc.getPrimaryAndMerge(CaloClusterThinningCfg(
-        ConfigFlags,
-        name = 'EGAM1CCTCThinningTool',
-        StreamName = streamName,
-        SGKey = 'Electrons',
-        SelectionString = 'Electrons.pt>4*GeV',
-        TopoClCollectionSGKey = 'CaloCalTopoClusters',
-        ConeSize = 0.5) )
-    thinningTools.append(EGAM1CCTCThinningTool)
+        CaloClusterThinningCfg,
+    )
 
+    EGAM1CCTCThinningTool = acc.getPrimaryAndMerge(
+        CaloClusterThinningCfg(
+            ConfigFlags,
+            name="EGAM1CCTCThinningTool",
+            StreamName=streamName,
+            SGKey="Electrons",
+            SelectionString="Electrons.pt>4*GeV",
+            TopoClCollectionSGKey="CaloCalTopoClusters",
+            ConeSize=0.5,
+        )
+    )
+    thinningTools.append(EGAM1CCTCThinningTool)
 
     # truth thinning
     if ConfigFlags.Input.isMC:
         # W, Z and Higgs
-        truth_cond_WZH = ' && '.join(['(abs(TruthParticles.pdgId) >= 23)',
-                                      '(abs(TruthParticles.pdgId) <= 25)'])
+        truth_cond_WZH = " && ".join(
+            ["(abs(TruthParticles.pdgId) >= 23)", "(abs(TruthParticles.pdgId) <= 25)"]
+        )
         # Leptons
-        truth_cond_lep = ' && '.join(['(abs(TruthParticles.pdgId) >= 11)',
-                                      '(abs(TruthParticles.pdgId) <= 16)'])
+        truth_cond_lep = " && ".join(
+            ["(abs(TruthParticles.pdgId) >= 11)", "(abs(TruthParticles.pdgId) <= 16)"]
+        )
         # Top quark
-        truth_cond_top = '(abs(TruthParticles.pdgId) ==  6)'
+        truth_cond_top = "(abs(TruthParticles.pdgId) ==  6)"
         # Photon
-        truth_cond_gam = ' && '.join(['(abs(TruthParticles.pdgId) == 22)',
-                                      '(TruthParticles.pt > 1*GeV)'])
+        truth_cond_gam = " && ".join(
+            ["(abs(TruthParticles.pdgId) == 22)", "(TruthParticles.pt > 1*GeV)"]
+        )
         # stable particles
-        truth_cond_finalState = ' && '.join(['(TruthParticles.status == 1)',
-                                           '(TruthParticles.barcode < 200000)'])
-        truth_expression = '( ' + truth_cond_WZH        + ' ) || ' + \
-                           '( ' + truth_cond_lep        + ' ) || ' + \
-                           '( ' + truth_cond_top        + ' ) || ' + \
-                           '( ' + truth_cond_gam        + ' ) || ' + \
-                           '( ' + truth_cond_finalState + ' )'
-        print('EGAM1 truth thinning expression: ', truth_expression)
+        truth_cond_finalState = " && ".join(
+            ["(TruthParticles.status == 1)", "(TruthParticles.barcode < 200000)"]
+        )
+        truth_expression = (
+            "( "
+            + truth_cond_WZH
+            + " ) || "
+            + "( "
+            + truth_cond_lep
+            + " ) || "
+            + "( "
+            + truth_cond_top
+            + " ) || "
+            + "( "
+            + truth_cond_gam
+            + " ) || "
+            + "( "
+            + truth_cond_finalState
+            + " )"
+        )
+        print("EGAM1 truth thinning expression: ", truth_expression)
 
-        EGAM1TruthThinningTool = \
-            CompFactory.DerivationFramework.GenericTruthThinning(
-                name = 'EGAM1TruthThinningTool',
-                StreamName = streamName,
-                ParticleSelectionString = truth_expression,
-                PreserveDescendants = False,
-                PreserveGeneratorDescendants = True,
-                PreserveAncestors = True)
+        EGAM1TruthThinningTool = CompFactory.DerivationFramework.GenericTruthThinning(
+            name="EGAM1TruthThinningTool",
+            StreamName=streamName,
+            ParticleSelectionString=truth_expression,
+            PreserveDescendants=False,
+            PreserveGeneratorDescendants=True,
+            PreserveAncestors=True,
+        )
         acc.addPublicTool(EGAM1TruthThinningTool)
         thinningTools.append(EGAM1TruthThinningTool)
-
 
     # skimming
     skimmingTool = acc.popToolsAndMerge(EGAM1SkimmingToolCfg(ConfigFlags))
     acc.addPublicTool(skimmingTool)
 
-
     # setup the kernel
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name,
-                                      SkimmingTools = [skimmingTool],
-                                      AugmentationTools = augmentationTools,
-                                      ThinningTools = thinningTools) )
+    acc.addEventAlgo(
+        CompFactory.DerivationFramework.DerivationKernel(
+            name,
+            SkimmingTools=[skimmingTool],
+            AugmentationTools=augmentationTools,
+            ThinningTools=thinningTools,
+        )
+    )
 
     return acc
 
 
 def EGAM1Cfg(ConfigFlags):
-
     acc = ComponentAccumulator()
 
     # Get the lists of triggers needed for trigger matching.
@@ -459,25 +521,31 @@ def EGAM1Cfg(ConfigFlags):
     # it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run
     # multiple times in a train
-    
+
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
+
     EGAM1TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # configure skimming/thinning/augmentation tools
-    acc.merge(EGAM1KernelCfg(ConfigFlags,
-                             name = 'EGAM1Kernel',
-                             StreamName = 'StreamDAOD_EGAM1',
-                             TriggerListsHelper = EGAM1TriggerListsHelper))
-    
+    acc.merge(
+        EGAM1KernelCfg(
+            ConfigFlags,
+            name="EGAM1Kernel",
+            StreamName="StreamDAOD_EGAM1",
+            TriggerListsHelper=EGAM1TriggerListsHelper,
+        )
+    )
 
     # configure slimming
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
+
     EGAM1SlimmingHelper = SlimmingHelper(
-        'EGAM1SlimmingHelper',
-        NamesAndTypes = ConfigFlags.Input.TypedCollections,
-        ConfigFlags = ConfigFlags)
+        "EGAM1SlimmingHelper",
+        NamesAndTypes=ConfigFlags.Input.TypedCollections,
+        ConfigFlags=ConfigFlags,
+    )
 
     # ------------------------------------------
     # containers for which we save all variables
@@ -485,83 +553,94 @@ def EGAM1Cfg(ConfigFlags):
 
     # baseline
     EGAM1SlimmingHelper.AllVariables = [
-        'Electrons',
-        'GSFTrackParticles',
-        'egammaClusters',
-        'CaloCalTopoClusters' ]
-    
+        "Electrons",
+        "GSFTrackParticles",
+        "egammaClusters",
+        "CaloCalTopoClusters",
+    ]
+
     # for trigger studies we also add trigger containers
     MenuType = None
     if ConfigFlags.Trigger.EDMVersion == 2:
-        MenuType = 'Run2'
+        MenuType = "Run2"
     elif ConfigFlags.Trigger.EDMVersion == 3:
-        MenuType = 'Run3'
+        MenuType = "Run3"
     else:
-        MenuType = ''
+        MenuType = ""
     EGAM1SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
     EGAM1SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
-    
+
     # and on MC we also add:
     if ConfigFlags.Input.isMC:
-        EGAM1SlimmingHelper.AllVariables +=[
-            'TruthEvents', 
-            'TruthParticles',
-            'TruthVertices',
-            'egammaTruthParticles'
+        EGAM1SlimmingHelper.AllVariables += [
+            "TruthEvents",
+            "TruthParticles",
+            "TruthVertices",
+            "egammaTruthParticles",
         ]
-
 
     # -------------------------------------------
     # containers that we slim
     # -------------------------------------------
 
-    # first add variables from smart-slimming 
+    # first add variables from smart-slimming
     # adding only also those for which we add all variables since
-    # the XXXCPContent.py files also bring in some extra variables 
+    # the XXXCPContent.py files also bring in some extra variables
     # for other collections
-    EGAM1SlimmingHelper.SmartCollections = ['Electrons',
-                                            'Photons',
-                                            'Muons',
-                                            'TauJets', 
-                                            'PrimaryVertices',
-                                            'InDetTrackParticles',
-                                            'AntiKt4EMPFlowJets',
-                                            'BTagging_AntiKt4EMPFlow',
-                                            'MET_Baseline_AntiKt4EMPFlow',
-                                            ]
+    EGAM1SlimmingHelper.SmartCollections = [
+        "Electrons",
+        "Photons",
+        "Muons",
+        "TauJets",
+        "PrimaryVertices",
+        "InDetTrackParticles",
+        "AntiKt4EMPFlowJets",
+        "BTagging_AntiKt4EMPFlow",
+        "MET_Baseline_AntiKt4EMPFlow",
+    ]
     if ConfigFlags.Input.isMC:
-        EGAM1SlimmingHelper.SmartCollections += ['AntiKt4TruthJets',
-                                                 'AntiKt4TruthDressedWZJets']
+        EGAM1SlimmingHelper.SmartCollections += [
+            "AntiKt4TruthJets",
+            "AntiKt4TruthDressedWZJets",
+        ]
 
     # then add extra variables:
 
     # muons
     EGAM1SlimmingHelper.ExtraVariables += [
-        'Muons.ptcone20.ptcone30.ptcone40.etcone20.etcone30.etcone40' ]
+        "Muons.ptcone20.ptcone30.ptcone40.etcone20.etcone30.etcone40"
+    ]
 
     # conversion vertices
     EGAM1SlimmingHelper.ExtraVariables += [
-        'GSFConversionVertices.x.y.z.px.py.pz.pt1.pt2.etaAtCalo.phiAtCalo',
-        'GSFConversionVertices.trackParticleLinks' ]
+        "GSFConversionVertices.x.y.z.px.py.pz.pt1.pt2.etaAtCalo.phiAtCalo",
+        "GSFConversionVertices.trackParticleLinks",
+    ]
 
     # primary vertices
-    EGAM1SlimmingHelper.ExtraVariables += [
-        'PrimaryVertices.sumPt2' ]
+    EGAM1SlimmingHelper.ExtraVariables += ["PrimaryVertices.sumPt2"]
 
     # track jets
     EGAM1SlimmingHelper.ExtraVariables += [
-        'AntiKt4PV0TrackJets.pt.eta.phi.e.m.btaggingLink.constituentLinks' ]
+        "AntiKt4PV0TrackJets.pt.eta.phi.e.m.btaggingLink.constituentLinks"
+    ]
 
     # energy density
-    EGAM1SlimmingHelper.ExtraVariables += [ 
-        'TopoClusterIsoCentralEventShape.Density',
-        'TopoClusterIsoForwardEventShape.Density',
-        'NeutralParticleFlowIsoCentralEventShape.Density',
-        'NeutralParticleFlowIsoForwardEventShape.Density']
+    EGAM1SlimmingHelper.ExtraVariables += [
+        "TopoClusterIsoCentralEventShape.Density",
+        "TopoClusterIsoForwardEventShape.Density",
+        "NeutralParticleFlowIsoCentralEventShape.Density",
+        "NeutralParticleFlowIsoForwardEventShape.Density",
+    ]
 
     from DerivationFrameworkEGamma import EGammaIsoConfig
-    pflowIsoVar,densityList,densityDict,acc1 = \
-        EGammaIsoConfig.makeEGammaCommonIsoCfg(ConfigFlags)
+
+    (
+        pflowIsoVar,
+        densityList,
+        densityDict,
+        acc1,
+    ) = EGammaIsoConfig.makeEGammaCommonIsoCfg(ConfigFlags)
     acc.merge(acc1)
     EGAM1SlimmingHelper.AppendToDictionary.update(densityDict)
     EGAM1SlimmingHelper.ExtraVariables += densityList
@@ -571,28 +650,32 @@ def EGAM1Cfg(ConfigFlags):
 
     # photons: gain and cluster energy per layer
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
-        getGainDecorations, getClusterEnergyPerLayerDecorations )
-    gainDecorations = getGainDecorations(acc, 'EGAM1Kernel')
-    print('EGAM1 gain decorations: ', gainDecorations)
+        getGainDecorations,
+        getClusterEnergyPerLayerDecorations,
+    )
+
+    gainDecorations = getGainDecorations(acc, "EGAM1Kernel")
+    print("EGAM1 gain decorations: ", gainDecorations)
     EGAM1SlimmingHelper.ExtraVariables.extend(gainDecorations)
-    clusterEnergyDecorations = getClusterEnergyPerLayerDecorations(
-        acc, 'EGAM1Kernel' )
-    print('EGAM1 cluster energy decorations: ', clusterEnergyDecorations)
+    clusterEnergyDecorations = getClusterEnergyPerLayerDecorations(acc, "EGAM1Kernel")
+    print("EGAM1 cluster energy decorations: ", clusterEnergyDecorations)
     EGAM1SlimmingHelper.ExtraVariables.extend(clusterEnergyDecorations)
 
     # truth
     if ConfigFlags.Input.isMC:
         EGAM1SlimmingHelper.ExtraVariables += [
-            'MuonTruthParticles.e.px.py.pz.status.pdgId.truthOrigin.truthType' ]
+            "MuonTruthParticles.e.px.py.pz.status.pdgId.truthOrigin.truthType"
+        ]
 
         EGAM1SlimmingHelper.ExtraVariables += [
-            'Photons.truthOrigin.truthType.truthParticleLink' ]
+            "Photons.truthOrigin.truthType.truthParticleLink"
+        ]
 
     # Add event info
     if ConfigFlags.Derivation.Egamma.doEventInfoSlimming:
-        EGAM1SlimmingHelper.SmartCollections.append('EventInfo')
+        EGAM1SlimmingHelper.SmartCollections.append("EventInfo")
     else:
-        EGAM1SlimmingHelper.AllVariables += ['EventInfo']    
+        EGAM1SlimmingHelper.AllVariables += ["EventInfo"]
 
     # Add egamma trigger objects
     EGAM1SlimmingHelper.IncludeEGammaTriggerContent = True
@@ -601,39 +684,57 @@ def EGAM1Cfg(ConfigFlags):
     # Run 2
     if ConfigFlags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
-            AddRun2TriggerMatchingToSlimmingHelper )
+            AddRun2TriggerMatchingToSlimmingHelper,
+        )
+
         AddRun2TriggerMatchingToSlimmingHelper(
-            SlimmingHelper = EGAM1SlimmingHelper, 
-            OutputContainerPrefix = 'TrigMatch_',
-            TriggerList = EGAM1TriggerListsHelper.Run2TriggerNamesNoTau)
+            SlimmingHelper=EGAM1SlimmingHelper,
+            OutputContainerPrefix="TrigMatch_",
+            TriggerList=EGAM1TriggerListsHelper.Run2TriggerNamesNoTau,
+        )
     # Run 3
     if ConfigFlags.Trigger.EDMVersion == 3:
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import (
-            AddRun3TrigNavSlimmingCollectionsToSlimmingHelper )
+            AddRun3TrigNavSlimmingCollectionsToSlimmingHelper,
+        )
+
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(EGAM1SlimmingHelper)
         # Run 2 is added here temporarily to allow testing/comparison/debugging
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
-            AddRun2TriggerMatchingToSlimmingHelper )
+            AddRun2TriggerMatchingToSlimmingHelper,
+        )
+
         AddRun2TriggerMatchingToSlimmingHelper(
-            SlimmingHelper = EGAM1SlimmingHelper, 
-            OutputContainerPrefix = 'TrigMatch_',
-            TriggerList = EGAM1TriggerListsHelper.Run3TriggerNamesNoTau)
+            SlimmingHelper=EGAM1SlimmingHelper,
+            OutputContainerPrefix="TrigMatch_",
+            TriggerList=EGAM1TriggerListsHelper.Run3TriggerNamesNoTau,
+        )
 
     # Add full CellContainer
     EGAM1SlimmingHelper.StaticContent = [
-        'CaloCellContainer#AllCalo',
-        'CaloClusterCellLinkContainer#egammaClusters_links']
-    
+        "CaloCellContainer#AllCalo",
+        "CaloClusterCellLinkContainer#egammaClusters_links",
+    ]
+
     EGAM1ItemList = EGAM1SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags,
-                              'DAOD_EGAM1',
-                              ItemList = EGAM1ItemList,
-                              AcceptAlgs = ['EGAM1Kernel']))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, 'DAOD_EGAM1',
-                                        AcceptAlgs=['EGAM1Kernel'],
-                                        createMetadata=[
-                                            MetadataCategory.CutFlowMetaData,
-                                            MetadataCategory.TruthMetaData,
-                                        ]))
+    acc.merge(
+        OutputStreamCfg(
+            ConfigFlags,
+            "DAOD_EGAM1",
+            ItemList=EGAM1ItemList,
+            AcceptAlgs=["EGAM1Kernel"],
+        )
+    )
+    acc.merge(
+        SetupMetaDataForStreamCfg(
+            ConfigFlags,
+            "DAOD_EGAM1",
+            AcceptAlgs=["EGAM1Kernel"],
+            createMetadata=[
+                MetadataCategory.CutFlowMetaData,
+                MetadataCategory.TruthMetaData,
+            ],
+        )
+    )
 
     return acc

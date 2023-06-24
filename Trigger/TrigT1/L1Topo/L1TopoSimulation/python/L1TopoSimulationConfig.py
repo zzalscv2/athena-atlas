@@ -56,6 +56,7 @@ def L1LegacyTopoSimulationCfg(flags):
     topoSimAlg.MuonInputProvider.locationMuCTPItoL1Topo = ""
     topoSimAlg.MuonInputProvider.locationMuCTPItoL1Topo1 = ""
     topoSimAlg.MuonInputProvider.locationMuonRoI = ""
+    topoSimAlg.MuonInputProvider.locationMuonRoI1 = ""
     topoSimAlg.MuonInputProvider.ROIBResultLocation = ""
 
     acc.addEventAlgo(topoSimAlg)
@@ -75,6 +76,7 @@ def L1TopoSimulationCfg(flags, doMonitoring=True):
     Simply, if muons are simulated, we will use MuCTPIL1Topo, if decoded MuonRoI
     """
     muProvider.locationMuonRoI = ""
+    muProvider.locationMuonRoI1 = ""
                                                     
     #Configure the MuonRoiTools for the MIP
     from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import RPCRecRoiToolCfg, TGCRecRoiToolCfg
@@ -146,6 +148,7 @@ def L1TopoSimulationOldStyleCfg(flags, isLegacy):
         topoSimSeq.MuonInputProvider.locationMuCTPItoL1Topo = ""
         topoSimSeq.MuonInputProvider.locationMuCTPItoL1Topo1 = ""
         topoSimSeq.MuonInputProvider.locationMuonRoI = ""
+        topoSimSeq.MuonInputProvider.locationMuonRoI1 = ""
     else:
 
         from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import RPCRecRoiToolCfg, TGCRecRoiToolCfg
@@ -153,6 +156,7 @@ def L1TopoSimulationOldStyleCfg(flags, isLegacy):
         topoSimSeq.MuonInputProvider.RecRpcRoiTool = acc.popToolsAndMerge(RPCRecRoiToolCfg(flags))
         topoSimSeq.MuonInputProvider.RecTgcRoiTool = acc.popToolsAndMerge(TGCRecRoiToolCfg(flags))
         topoSimSeq.MuonInputProvider.locationMuonRoI = ""
+        topoSimSeq.MuonInputProvider.locationMuonRoI1 = ""
         appendCAtoAthena(acc)
 
     return topoSimSeq
@@ -177,6 +181,7 @@ def L1TopoSimulationStandaloneCfg(flags, outputEDM=[], doMuons = False):
             muProvider.locationMuCTPItoL1Topo1 = ""
         else:
             muProvider.locationMuonRoI = ""
+            muProvider.locationMuonRoI1 = ""
 
         #Configure the MuonRoiTools for the MIP
         from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import RPCRecRoiToolCfg, TGCRecRoiToolCfg

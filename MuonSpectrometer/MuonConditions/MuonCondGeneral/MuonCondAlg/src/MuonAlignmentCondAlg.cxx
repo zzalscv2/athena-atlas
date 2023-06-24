@@ -545,11 +545,13 @@ StatusCode MuonAlignmentCondAlg::loadAlignABLines(const std::string& folderName,
             ATH_MSG_VERBOSE("stationName  " << stationName);
             if (stationType.at(0) == 'M') {
                 // micromegas case
+                if(!m_idHelperSvc->hasMM()) continue;  // skip if geometry does not include MMs (e.g. RUN1 or RUN2 data or RUN3 muon calibration stream)
                 id = m_idHelperSvc->mmIdHelper().elementID(stationName, jzz, jff);
                 id = m_idHelperSvc->mmIdHelper().multilayerID(id, job);
                 ATH_MSG_VERBOSE("identifier being assigned is " << m_idHelperSvc->mmIdHelper().show_to_string(id));
             } else if (stationType.at(0) == 'S') {
                 // sTGC case
+                if(!m_idHelperSvc->hasSTGC()) continue;  // skip if geometry does not include MMs (e.g. RUN1 or RUN2 data or RUN3 muon calibration stream)
                 id = m_idHelperSvc->stgcIdHelper().elementID(stationName, jzz, jff);
                 id = m_idHelperSvc->stgcIdHelper().multilayerID(id, job);
                 ATH_MSG_VERBOSE("identifier being assigned is " << m_idHelperSvc->stgcIdHelper().show_to_string(id)); 
@@ -1187,11 +1189,13 @@ StatusCode MuonAlignmentCondAlg::setALinesFromAscii(ALineMapContainer* writeALin
 	Identifier id;
 	if (name[0] == 'M') {
 	  // micromegas case
+      if(!m_idHelperSvc->hasMM()) continue;  // skip if geometry does not include MMs (e.g. RUN1 or RUN2 data or RUN3 muon calibration stream)
 	  stationName = m_idHelperSvc->mmIdHelper().stationNameIndex(name);
 	  id = m_idHelperSvc->mmIdHelper().elementID(stationName, jzz, jff);
 	  id = m_idHelperSvc->mmIdHelper().multilayerID(id, obj);
 	} else if (name[0] == 'S') {
 	  // sTGC case
+      if(!m_idHelperSvc->hasSTGC()) continue;  // skip if geometry does not include MMs (e.g. RUN1 or RUN2 data or RUN3 muon calibration stream)
 	  stationName = m_idHelperSvc->stgcIdHelper().stationNameIndex(name);
 	  id = m_idHelperSvc->stgcIdHelper().elementID(stationName, jzz, jff);
 	  id = m_idHelperSvc->stgcIdHelper().multilayerID(id, obj);

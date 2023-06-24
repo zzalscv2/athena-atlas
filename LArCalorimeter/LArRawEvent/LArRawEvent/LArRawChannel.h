@@ -17,59 +17,64 @@
 @class LArRawChannel
 @brief Liquid Argon ROD output object base class
 
-This class holds the output of a liquid argon channel when it is 
-processed through the RODS  
-* 
+This class holds the output of a liquid argon channel when it is
+processed through the RODS
+*
 * Objects of this type are readonly <br>
 * @author Kin Yip
 *
 * ----------------------------
-* move to DataVector 
-*  Hong Ma 
-* @version 00-00-02  
+* move to DataVector
+*  Hong Ma
+* @version 00-00-02
 *
 * -----------------------------
 * Add raw channel gain information   25/09/2003
 *  G.Unal
 *
 * ----------------------------
-* Move to HWIdentifier 10/2/2004 
+* Move to HWIdentifier 10/2/2004
 *  W. Lampl
 *
 */
-class LArRawChannel {
+class LArRawChannel final{
 
 public:
 
     /** @brief default constructor for persistenty */
     LArRawChannel();
+    /** @brief Default copy/move ctor/assignment*/
+    LArRawChannel(const LArRawChannel&) = default;
+    LArRawChannel(LArRawChannel&&) = default;
+    LArRawChannel& operator=(const LArRawChannel&) = default;
+    LArRawChannel& operator=(LArRawChannel&&) = default;
+    /** @brief destructor  */
+    ~LArRawChannel() = default;
 
-    /** @brief useful constructor 
+
+    /** @brief useful constructor
         @param[in] chan_id   Online identifier of channel
         @param[in] energy    Energy in MeV
         @param[in] time      time in ps
         @param[in] quality   Quality from pulse reconstruction
         @param[in] provenance Provenance of pulse reconstruction
-        @param[in] gain      Gain 
+        @param[in] gain      Gain
     */
-    LArRawChannel( HWIdentifier chan_id, 
-                   int energy, 
-                   int time, 
-                   uint16_t quality, 
+    LArRawChannel( HWIdentifier chan_id,
+                   int energy,
+                   int time,
+                   uint16_t quality,
                    uint16_t provenance,
                    CaloGain::CaloGain gain);
-    
 
-    /** @brief destructor  */
-    virtual ~LArRawChannel()                    { };
 
     /** @return online identifier */
     HWIdentifier        identify() const;
 
     /** @return online identifier */
-    HWIdentifier        channelID() const; 
+    HWIdentifier        channelID() const;
     const HWIdentifier& hardwareID() const;
-  
+
     /** @return energy in MeV (rounded to integer) */
     int                 energy() const;
 
@@ -100,11 +105,11 @@ private:
 // at runtime.  So, hide the union from reflex.  (Only m_quality is used
 // in inlined code.)
 #ifdef __REFLEX__
-    int  m_quality ; 
+    int  m_quality ;
 #   define m_qualProv ((uint16_t*)&m_quality)
 #else
     union {
-     int  m_quality ; 
+     int  m_quality ;
      uint16_t m_qualProv[2];
     };
 #endif
@@ -114,58 +119,58 @@ private:
 
 };
 
-  
+
 ///  inlines
 
 inline
-LArRawChannel::LArRawChannel() 
-        : 
-        m_channelID(0), 
-        m_energy(0), 
-        m_time(0), 
-        m_quality(0), 
-        m_gain(CaloGain::CaloGain(4)) 
+LArRawChannel::LArRawChannel()
+        :
+        m_channelID(0),
+        m_energy(0),
+        m_time(0),
+        m_quality(0),
+        m_gain(CaloGain::CaloGain(4))
 { }
 
 inline
-LArRawChannel::LArRawChannel( HWIdentifier chan_id, 
-                              int energy, 
-                              int time, 
-                              uint16_t quality, 
+LArRawChannel::LArRawChannel( HWIdentifier chan_id,
+                              int energy,
+                              int time,
+                              uint16_t quality,
                               uint16_t provenance,
                               CaloGain::CaloGain gain)
     :
-        m_channelID(chan_id), 
-        m_energy(energy), 
-        m_time(time), 
+        m_channelID(chan_id),
+        m_energy(energy),
+        m_time(time),
         m_gain(gain)
 { m_qualProv[0] = quality;
   // cppcheck-suppress objectIndex
   m_qualProv[1] = provenance;
-} 
+}
 
 inline
-HWIdentifier 
+HWIdentifier
 LArRawChannel::identify() const { return m_channelID ; }
 
 inline
-HWIdentifier 
-LArRawChannel::channelID() const { return m_channelID; }  
+HWIdentifier
+LArRawChannel::channelID() const { return m_channelID; }
 
 inline
-const HWIdentifier & 
+const HWIdentifier &
 LArRawChannel::hardwareID() const {return m_channelID; }
 
 inline
-int 
-LArRawChannel::energy() const { return m_energy; } 
+int
+LArRawChannel::energy() const { return m_energy; }
 
 inline
-int 
+int
 LArRawChannel::time() const { return m_time; }
 
 inline
-uint16_t 
+uint16_t
 LArRawChannel::quality() const { return m_qualProv[0]; }
 
 inline
@@ -177,7 +182,7 @@ LArRawChannel::provenance() const
 }
 
 inline
-CaloGain::CaloGain 
+CaloGain::CaloGain
 LArRawChannel::gain() const { return m_gain;}
 
 #endif

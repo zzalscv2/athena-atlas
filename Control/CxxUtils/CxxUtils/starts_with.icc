@@ -59,6 +59,7 @@ bool starts_with (const std::string& s, const std::string& prefix)
  *
  * Returns true if null-terminated byte string @c s starts with @c suffix.
  */
+inline
 bool ends_with (const char* s, const char* suffix){
   const size_t size_s = strlen(s);
   const size_t size_suffix = strlen(suffix);
@@ -73,6 +74,7 @@ bool ends_with (const char* s, const char* suffix){
  *
  * Returns true if string @c s starts with @c suffix.
  */
+inline
 bool ends_with (const std::string& s, const char* suffix){
   const size_t size_s =  s.size();
   const size_t size_suffix = strlen(suffix);

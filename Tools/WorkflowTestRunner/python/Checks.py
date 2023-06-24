@@ -115,7 +115,8 @@ class FrozenTier0PolicyCheck(WorkflowCheck):
 
         reference_path: Path = test.reference_path
         diff_rules_path: Path = self.setup.diff_rules_path
-        diff_rules_filename: str = f"{test.ID}_{self.format}_diff-exclusion-list.txt"
+        diff_rules_exclusion_filename: str = f"{test.ID}_{self.format}_diff-exclusion-list.txt"
+        diff_rules_interest_filename: str = f"{test.ID}_{self.format}_diff-interest-list.txt"
         diff_rules_file = None
 
         # Read references from CVMFS
@@ -131,29 +132,39 @@ class FrozenTier0PolicyCheck(WorkflowCheck):
 
         self.logger.info(f"Reading the reference file from location {reference_path}")
 
-        # try to get the exclusion list
+        # try to get the exclusion list or the list of branches of interest
+        branches_of_interest = False
         if self.setup.diff_rules_path is None:
-            diff_rules_local_path = test.validation_path / diff_rules_filename
-            subprocess.Popen(["/bin/bash", "-c", f"cd {test.validation_path}; get_files -remove -data {diff_rules_filename}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-            if not diff_rules_local_path.exists():
-                self.logger.info(f"No '{diff_rules_local_path}' file in the release.")
-            else:
-                diff_rules_file = diff_rules_local_path
+            diff_rules_exclusion_local_path = test.validation_path / diff_rules_exclusion_filename
+            diff_rules_interest_local_path = test.validation_path / diff_rules_interest_filename
+            subprocess.Popen(["/bin/bash", "-c", f"cd {test.validation_path}; get_files -remove -data {diff_rules_exclusion_filename}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+            subprocess.Popen(["/bin/bash", "-c", f"cd {test.validation_path}; get_files -remove -data {diff_rules_interest_filename}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+            if not diff_rules_exclusion_local_path.exists() and not diff_rules_interest_local_path.exists():
+                self.logger.info(f"Neither '{diff_rules_exclusion_local_path}' nor '{diff_rules_interest_local_path}' files exist in the release.")
+            elif diff_rules_exclusion_local_path.exists():
+                diff_rules_file = diff_rules_exclusion_local_path
+            elif diff_rules_interest_local_path.exists():
+                diff_rules_file = diff_rules_interest_local_path
+                branches_of_interest = True
 
         if diff_rules_file is None and diff_rules_path is not None:
-            diff_rules_file = diff_rules_path / diff_rules_filename
+            diff_rules_file = diff_rules_path / diff_rules_exclusion_filename
+            if not diff_rules_file.exists():
+                diff_rules_file = diff_rules_path / diff_rules_interest_filename
+                if diff_rules_file.exists():
+                    branches_of_interest = True
 
         if diff_rules_file is not None and diff_rules_file.exists():
             self.logger.info(f"Reading the diff rules file from location {diff_rules_file}")
-            exclusion_list = []
+            diff_root_list = []
             with diff_rules_file.open() as f:
                 for line in f:
                     stripped_line = line.rstrip()
                     if stripped_line and stripped_line[0] != '#':
-                        exclusion_list.append(r"'{}'".format(stripped_line))
+                        diff_root_list.append(r"'{}'".format(stripped_line))
         else:
             self.logger.info("No diff rules file exists, using the default list")
-            exclusion_list = [r"'index_ref'", r"'(.*)_timings(.*)'", r"'(.*)_mems(.*)'"]
+            diff_root_list = [r"'index_ref'", r"'(.*)_timings(.*)'", r"'(.*)_mems(.*)'"]
 
         file_name = f"my{self.format}.pool.root"
         if test.type == WorkflowType.Derivation:
@@ -161,14 +172,15 @@ class FrozenTier0PolicyCheck(WorkflowCheck):
         reference_file = reference_path / file_name
         validation_file = test.validation_path / file_name
         log_file = test.validation_path / f"diff-root-{test.ID}.{self.format}.log"
-        exclusion_list = " ".join(exclusion_list)
+        diff_root_list = " ".join(diff_root_list)
+        diff_root_mode = "--branches-of-interest" if branches_of_interest else "--ignore-leaves"
 
         # TODO: temporary due to issues with some tests
         extra_args = ""
         if test.type != WorkflowType.AF3:
             extra_args = "--order-trees"
 
-        comparison_command = f"acmd.py diff-root {reference_file} {validation_file} {extra_args} --nan-equal --exact-branches --mode semi-detailed --error-mode resilient --ignore-leaves {exclusion_list} --entries {self.max_events} > {log_file} 2>&1"
+        comparison_command = f"acmd.py diff-root {reference_file} {validation_file} {extra_args} --nan-equal --exact-branches --mode semi-detailed --error-mode resilient {diff_root_mode} {diff_root_list} --entries {self.max_events} > {log_file} 2>&1"
         output, error = subprocess.Popen(["/bin/bash", "-c", comparison_command], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
         output, error = output.decode("utf-8"), error.decode("utf-8")
 

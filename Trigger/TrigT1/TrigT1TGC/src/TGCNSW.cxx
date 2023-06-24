@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration 
 */
 
 
@@ -49,8 +49,17 @@ StatusCode TGCNSW::retrieve(SG::ReadHandleKey<Muon::NSW_TrigRawDataContainer> ke
 }
 
 
-std::shared_ptr<const NSWTrigOut> TGCNSW::getOutput(LVL1TGCTrigger::TGCRegionType region ,int side,int TGC_TriggerSector) const
-{
+std::shared_ptr<const NSWTrigOut> 
+TGCNSW::getOutput(LVL1TGCTrigger::TGCRegionType region ,int side,int TGC_TriggerSector) const
+{ 
+  auto indexIsOk = [this](int idx)->bool{
+    if (not ((idx >=0 ) and (idx < NumberOfNSWTriggerProcesser))){
+      ATH_MSG_ERROR("index out of range in TGCNSW::getOutput");
+      return false;
+    }
+    return true;
+  };
+    
   std::shared_ptr<NSWTrigOut> trigNSW_output;
   trigNSW_output.reset(new NSWTrigOut());
   trigNSW_output->clear();
@@ -64,12 +73,15 @@ std::shared_ptr<const NSWTrigOut> TGCNSW::getOutput(LVL1TGCTrigger::TGCRegionTyp
       NSW_TriggerSector=15;
     }
 
+    //
     // SL input 0-1
+    if (not indexIsOk(NSW_TriggerSector)) return nullptr;
     *trigNSW_output+=*m_buffer[side][NSW_TriggerSector];
     // SL input 2-3
     if ( NSW_TriggerSector == 15 ) {
       *trigNSW_output+=*m_buffer[side][0];
     } else {
+      if (not indexIsOk(NSW_TriggerSector + 1)) return nullptr;
       *trigNSW_output+=*m_buffer[side][NSW_TriggerSector+1];    
     }
     
@@ -83,6 +95,7 @@ std::shared_ptr<const NSWTrigOut> TGCNSW::getOutput(LVL1TGCTrigger::TGCRegionTyp
       *trigNSW_output+=*m_buffer[side][0];    
     } else {
       ////and for 4-5, 10-11, 16-17, 22-23, 28-29, 34-35, 40-41
+      if (not indexIsOk(NSW_TriggerSector + 2)) return nullptr;
       *trigNSW_output+=*m_buffer[side][NSW_TriggerSector+2];
     }
     
@@ -101,15 +114,18 @@ std::shared_ptr<const NSWTrigOut> TGCNSW::getOutput(LVL1TGCTrigger::TGCRegionTyp
       NSW_TriggerSector=0;
 
     //// SL input 0-1
+    if (not indexIsOk(NSW_TriggerSector)) return nullptr;
     *trigNSW_output+=*m_buffer[side][NSW_TriggerSector];
     //// SL input 2-3, 4-5
     if(TGC_TriggerSector==0 || TGC_TriggerSector==1){
       *trigNSW_output+=*m_buffer[side][0];
       *trigNSW_output+=*m_buffer[side][1];
     }else if(TGC_TriggerSector==22 || TGC_TriggerSector==23){
+      if (not indexIsOk(NSW_TriggerSector + 1)) return nullptr;
       *trigNSW_output+=*m_buffer[side][NSW_TriggerSector+1];
       *trigNSW_output+=*m_buffer[side][0];
     }else{
+      if (not indexIsOk(NSW_TriggerSector + 2)) return nullptr;
       *trigNSW_output+=*m_buffer[side][NSW_TriggerSector+1];
       *trigNSW_output+=*m_buffer[side][NSW_TriggerSector+2];
     }    

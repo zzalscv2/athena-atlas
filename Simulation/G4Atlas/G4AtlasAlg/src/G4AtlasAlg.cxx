@@ -101,6 +101,9 @@ StatusCode G4AtlasAlg::initialize ATLAS_NOT_THREAD_SAFE ()
   ATH_CHECK( m_eventInfoKey.initialize() );
 
   ATH_CHECK(m_inputConverter.retrieve());
+  if ( not m_truthPreselectionTool.empty() ) {
+    ATH_CHECK(m_truthPreselectionTool.retrieve());
+  }
 
   if ( not m_qspatcher.empty() ) {
     ATH_CHECK( m_qspatcher.retrieve() );
@@ -346,22 +349,35 @@ StatusCode G4AtlasAlg::execute()
   ATH_MSG_DEBUG("Found input GenEvent collection " << inputTruthCollection.name() << " in store " << inputTruthCollection.store());
   // create the output Truth collection
   SG::WriteHandle<McEventCollection> outputTruthCollection(m_outputTruthCollectionKey);
-  ATH_CHECK(outputTruthCollection.record(std::make_unique<McEventCollection>(*inputTruthCollection)));
-  if (!outputTruthCollection.isValid()) {
-    ATH_MSG_FATAL("Unable to record output GenEvent collection " << outputTruthCollection.name() << " in store " << outputTruthCollection.store());
-    return StatusCode::FAILURE;
+  std::unique_ptr<McEventCollection> shadowTruth{};
+  if (m_useShadowEvent) {
+    outputTruthCollection = std::make_unique<McEventCollection>();
+    // copy input Evgen collection to shadow Truth collection
+    shadowTruth = std::make_unique<McEventCollection>(*inputTruthCollection);
+    for (HepMC::GenEvent* currentGenEvent : *shadowTruth ) {
+      // Apply QS patch if required
+      if ( not m_qspatcher.empty() ) {
+        ATH_CHECK(m_qspatcher->applyWorkaround(*currentGenEvent));
+      }
+      // Copy GenEvent and remove daughters of quasi-stable particles to be simulated
+      std::unique_ptr<HepMC::GenEvent> outputEvent = m_truthPreselectionTool->filterGenEvent(*currentGenEvent);
+      outputTruthCollection->push_back(outputEvent.release());
+    }
   }
-  // Apply QS patch if required
-  if ( not m_qspatcher.empty() ) {
-    for (HepMC::GenEvent* currentGenEvent : *outputTruthCollection ) {
-      ATH_CHECK(m_qspatcher->applyWorkaround(*currentGenEvent));
+  else {
+    // copy input Evgen collection to output Truth collection
+    outputTruthCollection = std::make_unique<McEventCollection>(*inputTruthCollection);
+    // Apply QS patch if required
+    if ( not m_qspatcher.empty() ) {
+      for (HepMC::GenEvent* currentGenEvent : *outputTruthCollection ) {
+        ATH_CHECK(m_qspatcher->applyWorkaround(*currentGenEvent));
+      }
     }
   }
 
-
   ATH_MSG_DEBUG("Recorded output GenEvent collection " << outputTruthCollection.name() << " in store " << outputTruthCollection.store());
   G4Event *inputEvent{};
-  ATH_CHECK( m_inputConverter->convertHepMCToG4EventLegacy(*outputTruthCollection, inputEvent, HepMcParticleLink::find_enumFromKey(outputTruthCollection.name())) );
+  ATH_CHECK( m_inputConverter->convertHepMCToG4Event(*outputTruthCollection, inputEvent, *shadowTruth, HepMcParticleLink::find_enumFromKey(outputTruthCollection.name())) );
 
   bool abort = false;
   // Worker run manager

@@ -198,7 +198,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
          "Photons":"xAOD::PhotonContainer", "PhotonsAux":"xAOD::PhotonAuxContainer",
          "TauJets":"xAOD::TauJetContainer", "TauJetsAux":"xAOD::TauJetAuxContainer"}
     )
-    AllVariables += ["AntiKt4EMPFlowJets","Muons","Photons"] 
+    AllVariables += ["AntiKt4EMPFlowJets","AntiKt10LCTopoJets","Muons","Photons"] 
     # TauJets require smart slimming in order not to cause issues
     SmartCollections += ["TauJets"]
 
@@ -341,7 +341,9 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
          "JetElementsOverlap":"xAOD::JetElementContainer",
          "JetElementsOverlapAux":"xAOD::JetElementAuxContainer",
          "L1TopoRawData":"xAOD::L1TopoRawDataContainer",
-         "L1TopoRawDataAux":"xAOD::L1TopoRawDataAuxContainer"}
+         "L1TopoRawDataAux":"xAOD::L1TopoRawDataAuxContainer",
+         "L1_Phase1L1TopoRAWData":"xAOD::L1TopoRawDataContainer",
+         "L1_Phase1L1TopoRAWDataAux":"xAOD::L1TopoRawDataAuxContainer"}
     )
     AllVariables += ["CPMTobRoIs",
                      "CPMTobRoIsRoIB",
@@ -351,7 +353,8 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
                      "xAODTriggerTowers",
                      "JetElements",
                      "JetElementsOverlap",
-                     "L1TopoRawData"]
+                     "L1TopoRawData",
+                     "L1_Phase1L1TopoRAWData"]
 
     
     # Phase 1

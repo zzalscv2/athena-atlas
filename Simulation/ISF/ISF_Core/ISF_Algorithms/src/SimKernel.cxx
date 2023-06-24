@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ISF_Algs includes
@@ -138,6 +138,11 @@ StatusCode ISF::SimKernel::initialize()
   //
   for ( short geoID=AtlasDetDescr::fFirstAtlasRegion; geoID<AtlasDetDescr::fNumAtlasRegions ; ++geoID) {
     ATH_CHECK ( initSimSvcs(m_simSelectors[geoID]) );
+  }
+
+  ATH_CHECK( m_inputConverter.retrieve() );
+  if ( not m_truthPreselectionTool.empty() ) {
+    ATH_CHECK(m_truthPreselectionTool.retrieve());
   }
 
   if(!m_qspatcher.empty()) {
@@ -331,10 +336,12 @@ StatusCode ISF::SimKernel::execute()
   // read and convert input
   //  a. hard-scatter
   ISFParticleContainer simParticles{}; // particles for ISF simulation
-  ATH_CHECK( prepareInput(m_inputHardScatterEvgen, m_outputHardScatterTruth, simParticles) );
+  std::unique_ptr<McEventCollection> shadowTruth{};
+  std::unique_ptr<McEventCollection> shadowPileUpTruth{};
+  ATH_CHECK( prepareInput(m_inputHardScatterEvgen, m_outputHardScatterTruth, shadowTruth, simParticles) );
   //  b. pileup
   if (!m_inputPileupEvgen.key().empty()) {
-    ATH_CHECK( prepareInput(m_inputPileupEvgen, m_outputPileupTruth, simParticles) );
+    ATH_CHECK( prepareInput(m_inputPileupEvgen, m_outputPileupTruth, shadowPileUpTruth, simParticles) );
   }
 
   // -----------------------------------------------------------------------------------------------
@@ -431,7 +438,7 @@ StatusCode ISF::SimKernel::execute()
       // correct if Geant4 simulation were to be used for pile-up Hits
       // in Fast Chain.
       ATH_MSG_VERBOSE("Selected " << particles.size() << " particles to be processed by " <<  m_simSvcNames[simID]);
-      if (m_simSvcs[simID]->simulateVector(particles, m_outputHardScatterTruth.ptr()).isFailure()) {
+      if (m_simSvcs[simID]->simulateVector(particles, m_outputHardScatterTruth.ptr(), shadowTruth.get()).isFailure()) {
         ATH_MSG_WARNING( "Simulation of particles failed in Simulator: " << m_simSvcNames[simID]);
       }
       ATH_MSG_VERBOSE(m_simSvcNames[simID] << " returned " << m_particleBroker->numParticles()-numParticlesLeftInBroker << " new particles to be added to the queue." );
@@ -520,6 +527,7 @@ StatusCode ISF::SimKernel::execute()
     generator truth collection into output simulation truth collection */
 StatusCode ISF::SimKernel::prepareInput(SG::ReadHandle<McEventCollection>& inputTruth,
                                         SG::WriteHandle<McEventCollection>& outputTruth,
+                                        std::unique_ptr<McEventCollection>& shadowTruth,
                                         ISFParticleContainer& simParticles) const {
 
   if (!inputTruth.isValid()) {
@@ -527,13 +535,29 @@ StatusCode ISF::SimKernel::prepareInput(SG::ReadHandle<McEventCollection>& input
     return StatusCode::FAILURE;
   }
 
-  // create copy
-  outputTruth = std::make_unique<McEventCollection>(*inputTruth);
+  if (m_useShadowEvent) {
+    outputTruth = std::make_unique<McEventCollection>();
+    // copy input Evgen collection to shadow Truth collection
+    shadowTruth = std::make_unique<McEventCollection>(*inputTruth);
+    for (HepMC::GenEvent* currentGenEvent : *shadowTruth ) {
+      // Apply QS patch if required
+      if ( not m_qspatcher.empty() ) {
+        ATH_CHECK(m_qspatcher->applyWorkaround(*currentGenEvent));
+      }
+      // Copy GenEvent and remove daughters of quasi-stable particles to be simulated
+      std::unique_ptr<HepMC::GenEvent> outputEvent = m_truthPreselectionTool->filterGenEvent(*currentGenEvent);
+      outputTruth->push_back(outputEvent.release());
+    }
+  }
+  else {
+    // copy input Evgen collection to output Truth collection
+    outputTruth = std::make_unique<McEventCollection>(*inputTruth);
 
-  // Apply QS patch if required
-  if(!m_qspatcher.empty()) {
-    for (HepMC::GenEvent* currentGenEvent : *outputTruth ) {
-      ATH_CHECK(m_qspatcher->applyWorkaround(*currentGenEvent));
+    // Apply QS patch if required
+    if(!m_qspatcher.empty()) {
+      for (HepMC::GenEvent* currentGenEvent : *outputTruth ) {
+        ATH_CHECK(m_qspatcher->applyWorkaround(*currentGenEvent));
+      }
     }
   }
   ATH_CHECK( m_inputConverter->convert(*outputTruth, simParticles, HepMcParticleLink::find_enumFromKey(outputTruth.name())) );

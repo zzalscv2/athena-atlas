@@ -111,6 +111,7 @@ def MuonCombinedInDetCandidateAlg( name="MuonCombinedInDetCandidateAlg",**kwargs
 def MuonInDetToMuonSystemExtensionAlg(name= "MuonInDetToMuonSystemExtensionAlg", **kwargs):
     kwargs.setdefault("MuonSystemExtensionTool", getPublicTool("MuonSystemExtensionTool"))
     kwargs.setdefault("WriteStauCandidates", "InDetCandidatesStausPrompt")
+    kwargs.setdefault("noNSWforSeeding", True)
     return CfgMgr.MuonInDetToMuonSystemExtensionAlg(name,**kwargs) 
 
 def MuonInDetToMuonSystemExtensionAlg_LRT(name= "MuonInDetToMuonSystemExtensionAlg_LRT", **kwargs):
@@ -120,6 +121,7 @@ def MuonInDetToMuonSystemExtensionAlg_LRT(name= "MuonInDetToMuonSystemExtensionA
     kwargs.setdefault("WriteStauCandidates","InDetCandidatesStausLRT")
     
     kwargs.setdefault("CombinedTagMap", "muidcoTagMap_LRT")
+    kwargs.setdefault("noNSWforSeeding", True)
     return CfgMgr.MuonInDetToMuonSystemExtensionAlg(name,**kwargs) 
 
 def MuonInDetExtensionMergerAlg(name="MuonInDetExtensionMergerAlg", **kwargs):

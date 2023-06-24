@@ -2,6 +2,7 @@
 #  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 
+
 def LVL1CaloMonitoringConfig(flags):
     '''Function to call l1calo DQ monitoring algorithms'''
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -91,14 +92,53 @@ def LVL1CaloMonitoringConfig(flags):
             #gfex input monitoring 
             from TrigT1CaloMonitoring.GfexInputMonitorAlgorithm import GfexInputMonitoringConfig
             result.merge(GfexInputMonitoringConfig(flags))
-
-            #jfex input monitoring 
+            
+            #############################
+            #           jFEX
+            #############################
+            
+            #jfex monitoring for input data
+            from L1CaloFEXAlgos.FexEmulatedTowersConfig import jFexEmulatedTowersCfg
+            result.merge(jFexEmulatedTowersCfg(flags,"jFexEmulatedTowerMaker"))
+            
             from TrigT1CaloMonitoring.JfexInputMonitorAlgorithm import JfexInputMonitoringConfig
             result.merge(JfexInputMonitoringConfig(flags))
+            
+            #jfex monitoring for Data Vs Simulation
+            from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexInputByteStreamToolCfg
+            inputjFexTool = result.popToolsAndMerge(jFexInputByteStreamToolCfg(flags, 'jFexInputBSDecoderTool'))
+            
+            maybeMissingRobs = []
+            decoderTools = []
+            
+            for module_id in inputjFexTool.ROBIDs:
+                maybeMissingRobs.append(module_id)
 
+            decoderTools += [inputjFexTool]
+            from AthenaConfiguration.ComponentFactory import CompFactory
+            decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder", DecoderTools=[inputjFexTool], MaybeMissingROBs=maybeMissingRobs)
+            result.addEventAlgo(decoderAlg)     
+            
+            from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CaloFEXDecoratorCfg
+            result.merge(L1CaloFEXDecoratorCfg(flags,"jFexTower2SCellDecorator"))
+            
+            from L1CaloFEXSim.L1CaloFEXSimCfg import L1CaloFEXSimCfg
+            result.merge(L1CaloFEXSimCfg(flags))
+            
+            from TrigT1CaloMonitoring.JfexSimMonitorAlgorithm import JfexSimMonitoringConfig
+            JfexSimMonitoring = JfexSimMonitoringConfig(flags)
+            result.merge(JfexSimMonitoring)
+            
+            #jfex monitoring for Data Tobs
+            from TrigT1CaloMonitoring.JfexMonitorAlgorithm import JfexMonitoringConfig
+            JfexMonitoring = JfexMonitoringConfig(flags)
+            result.merge(JfexMonitoring)
+            
             # jet monitoring
             from TrigT1CaloMonitoring.JetEfficiencyMonitorAlgorithm import JetEfficiencyMonitoringConfig
             result.merge(JetEfficiencyMonitoringConfig(flags))
+            
+            result.printConfig( withDetails= True )
 
 
     # algorithms for validation checks

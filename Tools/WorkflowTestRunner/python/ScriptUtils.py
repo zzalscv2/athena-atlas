@@ -94,10 +94,11 @@ def setup_parser() -> ArgumentParser:
                           help="Specify the head directory for running the validation tests. The default is ${PWD}")
     advanced.add_argument("--reference-path", type=str, dest="reference_run_path", default="",
                           help="Specify the head directory for running the reference tests. The default is /tmp/${USER}")
-    advanced.add_argument("-z", "--exclusion-lists", type=str, dest="diff_rules_path", default=None,
+    advanced.add_argument("-z", "--exclusion-lists", "--interest-lists", type=str, dest="diff_rules_path", default=None,
                           help="""Specify the directory that contains the lists of variables that will be omitted
                                 while comparing the outputs. The default is ./ and the format of the files is
-                                ${test}_${format}_diff-exclusion-list.txt, e.g. q445_AOD_diff-exclusion-list.txt.
+                                ${test}_${format}_diff-exclusion-list.txt, e.g. q445_AOD_diff-exclusion-list.txt or
+                                ${test}_${format}_diff-interest-list.txt, e.g. q445_AOD_diff-interest-list.txt.
                                 The file should contain one regexp per line.""")
     advanced.add_argument("--no-output-checks", action="store_true", dest="disable_output_checks", default=False,
                           help="Disable output checks")

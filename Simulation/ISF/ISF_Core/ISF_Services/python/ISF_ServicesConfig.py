@@ -1,14 +1,11 @@
 """ComponentAccumulator service configuration for ISF
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import BeamType
-from SimulationConfig.SimEnums import CavernBackground, TruthStrategy
+from SimulationConfig.SimEnums import TruthStrategy
 from ISF_HepMC_Tools.ISF_HepMC_ToolsConfig import (
-    ParticleFinalStateFilterCfg, ParticlePositionFilterDynamicCfg,
-    EtaPhiFilterCfg, GenParticleInteractingFilterCfg,
     KeepLLPDecayChildrenStrategyCfg,
     KeepLLPHadronicInteractionChildrenStrategyCfg,
     TruthStrategyGroupID_MC15Cfg,
@@ -19,7 +16,6 @@ from ISF_HepMC_Tools.ISF_HepMC_ToolsConfig import (
     TruthStrategyGroupIDCfg,
     TruthStrategyGroupIDHadIntCfg,
     TruthStrategyGroupCaloMuBremCfg,
-    ParticleSimWhiteList_ExtraParticlesCfg,
     ValidationTruthStrategyCfg
 )
 from BarcodeServices.BarcodeServicesConfig import BarcodeSvcCfg
@@ -33,32 +29,14 @@ import ROOT,cppyy
 cppyy.include("AtlasDetDescr/AtlasRegion.h")
 
 
-def GenParticleFiltersToolCfg(flags):
-    result = ComponentAccumulator()
-    genParticleFilterList = []
-    if flags.Sim.ISF.Simulator.isQuasiStable():
-        genParticleFilterList += [result.popToolsAndMerge(ParticleSimWhiteList_ExtraParticlesCfg(flags))]
-    else:
-        genParticleFilterList += [result.popToolsAndMerge(ParticleFinalStateFilterCfg(flags))]
-    if "ATLAS" in flags.GeoModel.Layout or "atlas" in flags.GeoModel.Layout:
-        if flags.Beam.Type not in [BeamType.Cosmics, BeamType.TestBeam]:
-            genParticleFilterList += [result.popToolsAndMerge(ParticlePositionFilterDynamicCfg(flags))]
-            if not (flags.Detector.GeometryAFP or flags.Detector.GeometryALFA or flags.Detector.GeometryFwdRegion) \
-                and not flags.Detector.GeometryCavern \
-                and flags.Sim.CavernBackground in [CavernBackground.Off, CavernBackground.Signal]:
-                genParticleFilterList += [result.popToolsAndMerge(EtaPhiFilterCfg(flags))]
-    genParticleFilterList += [result.popToolsAndMerge(GenParticleInteractingFilterCfg(flags))]
-    result.setPrivateTools(genParticleFilterList)
-    return result
-
-
 def InputConverterCfg(flags, name="ISF_InputConverter", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("QuasiStableParticlesIncluded", flags.Sim.ISF.Simulator.isQuasiStable())
     kwargs.setdefault("UseShadowEvent", flags.Sim.UseShadowEvent)
     kwargs.setdefault("UseGeneratedParticleMass", False)
     if "GenParticleFilters" not in kwargs:
-        kwargs.setdefault("GenParticleFilters", result.popToolsAndMerge(GenParticleFiltersToolCfg(flags)) )
+        from ISF_HepMC_Tools.ISF_HepMC_ToolsConfig import GenParticleFilterToolsCfg
+        kwargs.setdefault("GenParticleFilters", result.popToolsAndMerge(GenParticleFilterToolsCfg(flags)) )
     result.addService(CompFactory.ISF.InputConverter(name, **kwargs), primary = True)
     return result
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """
 Tools configurations for ISF
@@ -186,6 +186,9 @@ def getKernel_GenericSimulator(name="ISF_Kernel_GenericSimulator", **kwargs):
     kwargs.setdefault('InputConverter', 'ISF_InputConverter')
     kwargs.setdefault("ParticleBroker", ISF_Flags.ParticleBroker())
     from G4AtlasApps.SimFlags import simFlags
+    kwargs.setdefault("UseShadowEvent", simFlags.UseShadowEvent())
+    if simFlags.UseShadowEvent() and "TruthPreselectionTool" not in kwargs:
+        kwargs.setdefault( "TruthPreselectionTool", "TruthPreselectionTool" )
     kwargs.setdefault("TruthRecordService", simFlags.TruthStrategy.TruthServiceName())
     kwargs.setdefault("MemoryMonitoringTool", "ISF_MemoryMonitor")
     kwargs.setdefault("DoCPUMonitoring", ISF_Flags.DoTimeMonitoring())
@@ -208,6 +211,10 @@ def getKernel_GenericSimulatorMT(name="ISF_Kernel_GenericSimulatorMT", **kwargs)
     kwargs.setdefault('InputConverter', 'ISF_InputConverter')
 
     from G4AtlasApps.SimFlags import simFlags
+    kwargs.setdefault("UseShadowEvent", simFlags.UseShadowEvent())
+    if simFlags.UseShadowEvent() and "TruthPreselectionTool" not in kwargs:
+        kwargs.setdefault( "TruthPreselectionTool", "TruthPreselectionTool" )
+
     kwargs.setdefault("TruthRecordService", simFlags.TruthStrategy.TruthServiceName())
     kwargs.setdefault("AlwaysUseGeoIDSvc", False)
     #kwargs.setdefault("MemoryMonitoringTool", "ISF_MemoryMonitor")
