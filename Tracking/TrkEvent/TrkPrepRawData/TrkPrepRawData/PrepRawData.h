@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -70,6 +70,7 @@ public:
   PrepRawData(PrepRawData&&) noexcept = default;
   PrepRawData& operator=(const PrepRawData&) = default;
   PrepRawData& operator=(PrepRawData&&) noexcept = default;
+  virtual ~PrepRawData(); //default in .cxx
 
   /** Full Constructor using lvalue references
       @param clusId Identifier of the tube, strip etc which has produced this
@@ -108,9 +109,6 @@ public:
   PrepRawData(const Identifier& clusId,
               const Amg::Vector2D& locpos,
               Amg::MatrixX&& locerr);
-
-  /** Destructor:*/
-  virtual ~PrepRawData();
 
   /** return the identifier*/
   Identifier identify() const;
