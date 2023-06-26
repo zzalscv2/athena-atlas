@@ -25,6 +25,7 @@
 #include "GaudiKernel/IIoComponent.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/FileIncident.h"
 
 // Forward declarations
 class IAddressCreator;
