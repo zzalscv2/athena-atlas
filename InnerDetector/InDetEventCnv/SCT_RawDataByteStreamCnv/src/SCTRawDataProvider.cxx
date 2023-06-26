@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCTRawDataProvider.h"
@@ -152,10 +152,18 @@ StatusCode SCTRawDataProvider::execute(const EventContext& ctx) const
     }
   }
 
+  std::unique_ptr<DataPool<SCT3_RawData>> dataItemsPool = nullptr;
+  if(!externalCacheRDO){
+    dataItemsPool = std::make_unique<DataPool<SCT3_RawData>>(ctx);
+    dataItemsPool->reserve(10000);  // Some large default size
+  }
   // Ask SCTRawDataProviderTool to decode it and to fill the IDC
   StatusCode statConv = m_rawDataTool->convert(vecROBFrags,
 					       *(rdoContainer.ptr()),
-					       *bsIDCErrContainer,ctx);
+					       *bsIDCErrContainer,
+                 dataItemsPool.get(),
+                 ctx);
+
   if (statConv.isFailure() && statConv != StatusCode::RECOVERABLE) {
     ATH_MSG_WARNING("BS conversion into RDOs failed");
     return statConv;
