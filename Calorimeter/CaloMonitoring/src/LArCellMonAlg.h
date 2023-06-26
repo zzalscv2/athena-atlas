@@ -182,7 +182,7 @@ private:
   //Private methods: Initialization and job-option interpretation
   StatusCode initThresh();
   void setLArCellBinning();
-  static bool isThrListed(std::vector<std::string> vec, const std::string& s) ;
+  static bool isThrListed(const std::vector<std::string>& vec, const std::string& s) ;
   //void resetInternals();
 
   static std::string strToLower(const std::string& input) ;

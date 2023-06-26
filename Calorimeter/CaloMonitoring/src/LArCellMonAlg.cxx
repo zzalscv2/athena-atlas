@@ -692,7 +692,7 @@ std::string  LArCellMonAlg::strToLower(const std::string& input) {
   return output;
 }
 
- bool LArCellMonAlg::isThrListed(std::vector<std::string> vec, const std::string& s) {
+ bool LArCellMonAlg::isThrListed(const std::vector<std::string>& vec, const std::string& s) {
    return (std::find(vec.begin(),vec.end(),s)!=vec.end());
  }
 
