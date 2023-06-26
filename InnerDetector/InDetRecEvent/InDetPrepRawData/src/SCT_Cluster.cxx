@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -48,47 +48,7 @@ SCT_Cluster::SCT_Cluster(const Identifier& RDOId,
   , m_hitsInThirdTimeBin(0)
 {}
 
-// Default constructor:
-SCT_Cluster::SCT_Cluster()
-  : SiCluster()
-{
-  m_hitsInThirdTimeBin = 0;
-}
-
-// copy constructor:
-SCT_Cluster::SCT_Cluster(const SCT_Cluster& RIO)
-  : SiCluster(RIO)
-{
-  m_hitsInThirdTimeBin = RIO.hitsInThirdTimeBin();
-}
-
-// move constructor:
-SCT_Cluster::SCT_Cluster(SCT_Cluster&& RIO) noexcept
-  : SiCluster(std::move(RIO))
-  , m_hitsInThirdTimeBin(RIO.m_hitsInThirdTimeBin)
-{}
-
-// assignment operator
-SCT_Cluster&
-SCT_Cluster::operator=(const SCT_Cluster& RIO)
-{
-  if (&RIO != this) {
-    SiCluster::operator=(RIO);
-    m_hitsInThirdTimeBin = RIO.m_hitsInThirdTimeBin;
-  }
-  return *this;
-}
-
-// move operator
-SCT_Cluster&
-SCT_Cluster::operator=(SCT_Cluster&& RIO) noexcept
-{
-  if (&RIO != this) {
-    m_hitsInThirdTimeBin = RIO.m_hitsInThirdTimeBin;
-    SiCluster::operator=(std::move(RIO));
-  }
-  return *this;
-}
+SCT_Cluster::~SCT_Cluster() = default;
 
 MsgStream&    operator << (MsgStream& stream,    const SCT_Cluster& prd)
 {
