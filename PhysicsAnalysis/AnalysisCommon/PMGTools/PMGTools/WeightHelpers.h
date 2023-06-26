@@ -12,7 +12,7 @@
 
 #include <string>
 
-namespace MC
+namespace PMGTools
 {
 
 /// \brief the prefix for generator weights
