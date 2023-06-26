@@ -11,7 +11,7 @@
 #include "ElectronEfficiencyCorrection/AsgElectronEfficiencyCorrectionTool.h"
 #include "ElectronEfficiencyCorrection/ElRecomFileHelpers.h"
 // Library includes
-#include <boost/algorithm/string.hpp>
+#include <algorithm>
 #include <cfloat>
 #include <iostream>
 #include <string>
@@ -945,7 +945,7 @@ AsgElectronEfficiencyCorrectionTool::get_simType_from_metadata(
                                                     "SimulationFlavour",
                                                     simType,
                                                     inputMetaStore()));
-      boost::to_upper(simType);
+      std::transform(simType.begin(), simType.end(), simType.begin(), ::toupper);
       result = (simType.find("ATLFASTII") == std::string::npos)
                  ? PATCore::ParticleDataType::Full
                  : PATCore::ParticleDataType::Fast;
@@ -967,7 +967,7 @@ AsgElectronEfficiencyCorrectionTool::get_simType_from_metadata(
       return StatusCode::SUCCESS;
     } else {
       ATH_MSG_DEBUG("sim type = " + simType);
-      boost::to_upper(simType);
+       std::transform(simType.begin(), simType.end(), simType.begin(), ::toupper);
       result = (simType.find("ATLFASTII") == std::string::npos)
                  ? PATCore::ParticleDataType::Full
                  : PATCore::ParticleDataType::Fast;
