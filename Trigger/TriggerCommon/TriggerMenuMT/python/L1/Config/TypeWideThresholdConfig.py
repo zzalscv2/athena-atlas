@@ -8,6 +8,68 @@ log = logging.getLogger(__name__)
 from ..Base.ThresholdType import ThrType
 from .FexThresholdParameters import eta_dependent_cuts
 
+class ValueWithEtaDependence(object):
+    """
+        Class to encode a working point with eta dependence
+        - Initialised with a list of prioritised cut values
+        - Converts to a mapping from eta bin to highest priority cut
+        - Logic should match that in ValueWithEtaDependence
+          defined in L1ThresholdBase.h
+    """
+
+    def __init__(
+        self,
+        variable: str,
+        working_point: str,
+        values_with_prio: list,
+        eta_range: list = (-49,49,1),
+    ):
+        self.variable = variable
+        self.working_point = working_point
+        self.name =  f"{working_point}.{variable}"
+        self.values_with_prio = values_with_prio
+        self.eta_range = eta_range
+        self.eta_to_value = {}
+        # Get value with highest priority for which
+        # etabin lies in [etamin,etamax)
+        for etabin in range(*eta_range):
+            current_priority = -1
+            for v in values_with_prio:
+                priority_value = None
+                if (
+                    etabin >= v["etamin"]
+                    and etabin < v["etamax"]
+                ):
+                    if v["priority"] == current_priority:
+                        raise ValueError(f"{v} overlaps another value {priority_value} with same priority {current_priority}")
+                    if v["priority"] > current_priority:
+                        current_priority = v["priority"]
+                        priority_value = v
+                        self.eta_to_value[etabin] = v[self.variable]
+
+# Facilitate enforcement of an ordering principle for working points:
+# T >= M >= L in all eta bins, to avoid ambiguity in outcome from
+# alg implementations [ATR-27796]
+def leq_all_eta(lhs: ValueWithEtaDependence, rhs: ValueWithEtaDependence):
+    for (k,v) in lhs.eta_to_value.items():
+        if v>rhs.eta_to_value[k]:
+            log.error(f"{lhs.name} ({v}) > {rhs.name} ({rhs.eta_to_value[k]}) for eta bin {k}")
+            return False
+    return True
+
+# Enforce the ordering principle above either for eta-dependent/independent cuts
+# Treat as a single uniform value if conf does not have etamin,etamax fields
+def validate_ordering(var, wpl, wpg, conf):
+    if "etamin" in conf[wpl][0]:
+        _lesser = ValueWithEtaDependence(var,wpl,conf[wpl])
+        _greater = ValueWithEtaDependence(var,wpg,conf[wpg])
+        assert leq_all_eta(_lesser,_greater), f"Working point ordering violated for {_lesser.name}, {_greater.name}"
+    else:
+        assert len(conf[wpl])==1 and len(conf[wpg])==1, (
+            f"Unsupported comparison between eta-dependent and eta-independent WPs {wpl}.{var}, {wpg}.{var}"
+        )
+        assert conf[wpl][0][var] <= conf[wpg][0][var], f"Working point ordering violated: {wpl}.{var} > {wpg}.{var}"
+
 # eFEX conversions based on https://indico.cern.ch/event/1026972/contributions/4312070/attachments/2226175/3772176/Copy%20of%20Reta_Threshold_Setting.pdf
 # ATR-23596
 def eFEXfwToFloatConversion(fw,bitshift):
@@ -138,16 +200,8 @@ def getConfig_eEM():
                ("wstot_fw", 0), ("wstot", 0), 
                ("rhad_fw", rhad_fw_loose), ("rhad", eFEXfwToFloatConversion(rhad_fw_loose,bitshift_rhad)), 
                ("etamin",  24), ("etamax", 49), ("priority", 0)]),
-        # Exclude crack region
-        odict([("reta_fw", reta_fw_loose), ("reta", eFEXfwToFloatConversion(reta_fw_loose,bitshift_reta)), 
-               ("wstot_fw", 0), ("wstot", 0), 
-               ("rhad_fw", rhad_fw_loose), ("rhad", eFEXfwToFloatConversion(rhad_fw_loose,bitshift_rhad)), 
-               ("etamin", -15), ("etamax", -14), ("priority", 1)]),
-        odict([("reta_fw", reta_fw_loose), ("reta", eFEXfwToFloatConversion(reta_fw_loose,bitshift_reta)), 
-               ("wstot_fw", 0), ("wstot", 0), 
-               ("rhad_fw", rhad_fw_loose), ("rhad", eFEXfwToFloatConversion(rhad_fw_loose,bitshift_rhad)), 
-               ("etamin",  14), ("etamax", 15), ("priority", 1)]),
-               # another item can be added with higher priority to set eta-dependent cuts
+        # More granular cuts from -24 to 25 are specified in FexThresholdParameters
+        # with priority 2
     ]
     confObj["workingPoints"]["Medium"] = [
         odict([("reta_fw", reta_fw_medium), ("reta", eFEXfwToFloatConversion(reta_fw_medium,bitshift_reta)), 
@@ -162,16 +216,7 @@ def getConfig_eEM():
                ("wstot_fw", 0), ("wstot", 0), 
                ("rhad_fw", rhad_fw_medium), ("rhad", eFEXfwToFloatConversion(rhad_fw_medium,bitshift_rhad)), 
                ("etamin",  24), ("etamax", 49), ("priority", 0)]),
-        # Exclude crack region
-        odict([("reta_fw", reta_fw_medium), ("reta", eFEXfwToFloatConversion(reta_fw_medium,bitshift_reta)), 
-               ("wstot_fw", 0), ("wstot", 0), 
-               ("rhad_fw", rhad_fw_medium), ("rhad", eFEXfwToFloatConversion(rhad_fw_medium,bitshift_rhad)), 
-               ("etamin", -15), ("etamax", -14), ("priority", 1)]),
-        odict([("reta_fw", reta_fw_medium), ("reta", eFEXfwToFloatConversion(reta_fw_medium,bitshift_reta)), 
-               ("wstot_fw", 0), ("wstot", 0), 
-               ("rhad_fw", rhad_fw_medium), ("rhad", eFEXfwToFloatConversion(rhad_fw_medium,bitshift_rhad)), 
-               ("etamin", 14), ("etamax", 15), ("priority", 1)]),
-
+        # More granular cuts from -24 to 25 are specified in FexThresholdParameters
     ]
     confObj["workingPoints"]["Tight"] = [
         odict([("reta_fw", reta_fw_tight), ("reta", eFEXfwToFloatConversion(reta_fw_tight,bitshift_reta)), 
@@ -186,7 +231,7 @@ def getConfig_eEM():
                ("wstot_fw", 0), ("wstot", 0), 
                ("rhad_fw", rhad_fw_tight), ("rhad", eFEXfwToFloatConversion(rhad_fw_tight,bitshift_rhad)), 
                ("etamin",  24), ("etamax", 49), ("priority", 0)]),
-        # More granular cuts are specified in FexThresholdParameters
+        # More granular cuts from -24 to 25 are specified in FexThresholdParameters
     ]
     confObj["ptMinToTopo"] = 3
     confObj["maxEt"] = 60
@@ -223,6 +268,11 @@ def getConfig_eEM():
                 if "_fw" in ssthr_i:
                      if not isinstance(ssthr[ssthr_i], int):
                           raise RuntimeError("Threshold %s in eEM configuration is not an integer!", ssthr_i )
+
+    # Check that T >= M >= L [ATR-27796]
+    for var in ["reta_fw","rhad_fw","wstot_fw"]:
+        validate_ordering(var,"Loose","Medium",confObj["workingPoints"])
+        validate_ordering(var,"Medium","Tight",confObj["workingPoints"])
 
     return confObj
 
@@ -275,6 +325,11 @@ def getConfig_jEM():
                      if not isinstance(ssthr[ssthr_i], int):
                           raise RuntimeError("Threshold %s in jEM configuration is not an integer!", ssthr_i )
 
+    # Check that T >= M >= L [ATR-27796]
+    for var in ["iso_fw","frac_fw","frac2_fw"]:
+        validate_ordering(var,"Loose","Medium",confObj["workingPoints"])
+        validate_ordering(var,"Medium","Tight",confObj["workingPoints"])
+
     return confObj
 
 def getConfig_eTAU():
@@ -319,6 +374,12 @@ def getConfig_eTAU():
                 if "_fw" in ssthr_i:
                      if not isinstance(ssthr[ssthr_i], int):
                           raise RuntimeError("Threshold %s in eTAU configuration is not an integer!", ssthr_i )
+
+    # Check that T >= M >= L [ATR-27796]
+    for var in ["rCore_fw","rHad_fw"]:
+        validate_ordering(var,"Loose","Medium",confObj["workingPoints"])
+        validate_ordering(var,"Medium","Tight",confObj["workingPoints"])
+
     return confObj
 
 def getConfig_cTAU():
@@ -346,6 +407,12 @@ def getConfig_cTAU():
                 if "_fw" in ssthr_i:
                      if not isinstance(ssthr[ssthr_i], int):
                           raise RuntimeError("Threshold %s in cTAU configuration is not an integer!", ssthr_i )
+
+    # Check that T >= M >= L [ATR-27796]
+    # Ordering is inverted here: larger value is looser
+    for var in ["isolation_fw"]:
+        validate_ordering(var,"Medium","Loose",confObj["workingPoints"])
+        validate_ordering(var,"Tight","Medium",confObj["workingPoints"])
     return confObj
 
 def getConfig_jTAU():
@@ -383,6 +450,12 @@ def getConfig_jTAU():
                 if "_fw" in ssthr_i:
                      if not isinstance(ssthr[ssthr_i], int):
                           raise RuntimeError("Threshold %s in jTAU configuration is not an integer!", ssthr_i )
+
+    # Check that T >= M >= L [ATR-27796]
+    # Ordering is inverted here: larger value is looser
+    for var in ["isolation_fw"]:
+        validate_ordering(var,"Medium","Loose",confObj["workingPoints"])
+        validate_ordering(var,"Tight","Medium",confObj["workingPoints"])
     return confObj
 
 def getConfig_jJ():
