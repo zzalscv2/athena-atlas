@@ -69,14 +69,6 @@ private:
   //Enumerate partitions
   enum PartitionEnum{EMBA,EMBC,EMECA,EMECC,HECA,HECC,FCALA,FCALC,MAXPARTITIONS};
 
-  //Mapping of layers to the partition the layer belongs to
-  const std::array<PartitionEnum,MAXLAYER> m_layerEnumtoPartitionEnum{{
-      EMBA, EMBC,  EMBA,  EMBC,  EMBA,  EMBC,  EMBA,  EMBC,
-      HECA, HECC,  HECA,  HECC,  HECA,  HECC,  HECA,   HECC,
-      EMECA, EMECC, EMECA, EMECC, EMECA, EMECC, EMECA, EMECC,
-      FCALA, FCALC, FCALA, FCALC, FCALA, FCALC
-	}};
-  
   void checkTrigger() const;
 
   const LArOnlineID* m_onlineID{nullptr};  
