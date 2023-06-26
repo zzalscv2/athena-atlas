@@ -19,4 +19,11 @@ def MuonDetectorToolCfg(flags, name="MuonDetectorToolR4", **kwargs):
     result.setPrivateTools(the_tool)
     return result
 
+def MuonGeoModelCfg(flags):
+    result = ComponentAccumulator()
+    from AtlasGeoModel.GeoModelConfig import GeoModelCfg
+    geoModelSvc = result.getPrimaryAndMerge(GeoModelCfg(flags))
+    geoModelSvc.DetectorTools+=[result.popToolsAndMerge(MuonDetectorToolCfg(flags))]
+    return result
+
 

@@ -202,6 +202,10 @@ def MuonGeoModelToolCfg(flags):
 
 
 def MuonGeoModelCfg(flags, forceDisableAlignment=False):
+    if flags.Muon.setupGeoModelXML:
+        from MuonGeoModelR4.MuonGeoModelConfig import MuonGeoModelCfg as MuonGeoModelCfgR4
+        return MuonGeoModelCfgR4(flags)
+    
     acc = MuonGeoModelToolCfg(flags)
 
     if flags.Muon.enableAlignment and not forceDisableAlignment:
