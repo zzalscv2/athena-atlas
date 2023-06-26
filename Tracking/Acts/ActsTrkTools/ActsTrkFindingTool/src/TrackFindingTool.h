@@ -47,7 +47,8 @@ namespace ActsTrk
     findTracks(const EventContext &ctx,
                const Measurements &measurements,
                const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
-               ::TrackCollection &tracksContainer,
+               ActsTrk::TrackContainer &tracksContainer, 
+               ::TrackCollection &tracksCollection,
                const char *seedType = "") const override;
 
     virtual std::unique_ptr<ActsTrk::ITrackFindingTool::Measurements> initMeasurements(size_t numMeasurements) const override;

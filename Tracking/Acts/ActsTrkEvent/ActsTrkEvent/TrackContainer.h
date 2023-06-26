@@ -10,10 +10,13 @@
 
 namespace ActsTrk
 {
+  using TrackBackend = Acts::VectorTrackContainer;
+  using ConstTrackBackend = Acts::ConstVectorTrackContainer;
   using TrackStateBackend =  Acts::VectorMultiTrajectory;
   using ConstTrackStateBackend =  Acts::ConstVectorMultiTrajectory;
-  using TrackContainer = Acts::TrackContainer<Acts::VectorTrackContainer, TrackStateBackend, Acts::detail::ValueHolder>;
-  using ConstTrackContainer = Acts::TrackContainer<Acts::ConstVectorTrackContainer, ConstTrackStateBackend, Acts::detail::ValueHolder>;
+  using TrackContainer = Acts::TrackContainer<TrackBackend, TrackStateBackend, Acts::detail::ValueHolder>;
+  using ConstTrackContainer = Acts::TrackContainer<ConstTrackBackend, ConstTrackStateBackend, Acts::detail::ValueHolder>;
 }
-
+#include "AthenaKernel/CLASS_DEF.h"
+CLASS_DEF( ActsTrk::ConstTrackContainer , 1080995907 , 1 )
 #endif

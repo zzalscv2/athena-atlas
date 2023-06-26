@@ -11,6 +11,7 @@
 // Athena
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GaudiKernel/EventContext.h"
+#include "ActsTrkEvent/TrackContainer.h"
 #include "TrkTrack/TrackCollection.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
@@ -40,11 +41,23 @@ namespace ActsTrk
 
     DeclareInterfaceID(ITrackFindingTool, 1, 0);
 
+
+    /**
+     * @brief invoke track finding procedure
+     * 
+     * @param ctx - event context
+     * @param measurements - measurements container
+     * @param estimatedTrackParameters - estimates
+     * @param tracksContainer - output tracks
+     * @param tracksCollection - auxiliary output for downstream tools compatibility (to be removed in the future)
+     * @param hint on which tracks (strip or pixel) are to be looked for
+     */
     virtual StatusCode
     findTracks(const EventContext &ctx,
                const Measurements &measurements,
                const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
-               ::TrackCollection &tracksContainer,
+               ActsTrk::TrackContainer &tracksContainer,
+               ::TrackCollection & tracksCollection,
                const char *seedType = "") const = 0;
 
     virtual std::unique_ptr<Measurements> initMeasurements(size_t numMeasurements) const = 0;
