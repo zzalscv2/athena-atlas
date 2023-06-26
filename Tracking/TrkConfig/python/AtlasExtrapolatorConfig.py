@@ -156,7 +156,6 @@ def TrigPFlowExtrapolatorCfg(flags, name='HLT_PFlowExtrapolator'):
     # precision) of the extrapolation. 
     result = ComponentAccumulator()
 
-    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
     PFlowExtrapolator = result.popToolsAndMerge(
         AtlasExtrapolatorCfg(flags, name))
 
