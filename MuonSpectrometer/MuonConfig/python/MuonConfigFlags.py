@@ -35,20 +35,19 @@ def createMuonConfigFlags():
     mcf=AthConfigFlags()
 
     # stages of processing
+    # 0. Geometry
+
+    ### Load the GeoModel XML detector factory & MuonReaoudGeometryR4
+    mcf.addFlag("Muon.setupGeoModelXML", False)
+
     # 1. Digitization
     mcf.addFlag("Muon.doDigitization",True)
-    mcf.addFlag("Muon.doFastDigitization",False)
-    mcf.addFlag("Muon.doPseudoTracking",False)
-
-    # 2. Reco MuonRecFlags
-    
+    # 2. Reco MuonRecFlags    
     mcf.addFlag("Muon.doTGCClusterSegmentFinding", False) # Run cluster segment finding
     mcf.addFlag("Muon.doRPCClusterSegmentFinding", False) # Run cluster segment finding
     mcf.addFlag("Muon.prdToxAOD", False) # Run clusterization
     mcf.addFlag("Muon.rpcRawToxAOD", False) # Add RPC RDO to xAOD
     mcf.addFlag("Muon.doMSVertex", True) # Run MS vertex (arXiv:1311.7070)
-    # mcf.addFlag("Muon.doDigitization", False) # TODO rename? Re-run muon digitization on-the-fly just before reconstruction. Needs DIGITS as input file.
-    # mcf.addFlag("Muon.doSegmentsOnly", False) # Stop reconstruction after segment making. Typically used when making Calibration Ntuple. TODO surely redundant?
     mcf.addFlag("Muon.doSegmentT0Fit",lambda prevFlags : prevFlags.Beam.Type is not BeamType.Collisions) # Fit MDT segments using a variable t0. Used for cosmics and single beam to compensate for large errors on the trigger time.
     mcf.addFlag("Muon.enableErrorTuning",True) # turn on error tuning to account for misalignments
     mcf.addFlag("Muon.useLooseErrorTuning",False) 
