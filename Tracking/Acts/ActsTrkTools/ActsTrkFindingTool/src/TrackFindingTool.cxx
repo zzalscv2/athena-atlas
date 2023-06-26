@@ -365,7 +365,8 @@ namespace ActsTrk
   TrackFindingTool::findTracks(const EventContext &ctx,
                                const Measurements &measurements,
                                const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
-                               ::TrackCollection &tracksContainer,
+                               ActsTrk::TrackContainer &tracksContainer, 
+                               ::TrackCollection &tracksCollection,
                                const char *seedType) const
   {
     ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
@@ -399,9 +400,6 @@ namespace ActsTrk
     // Perform the track finding for all initial parameters
     ATH_MSG_DEBUG("Invoke track finding with " << estimatedTrackParameters.size() << ' ' << seedType << " seeds.");
 
-    Acts::TrackContainer tc{Acts::VectorTrackContainer{},
-                            ActsTrk::TrackStateBackend{}};
-
     m_nTotalSeeds += estimatedTrackParameters.size();
     size_t addTracks = 0;
 
@@ -411,7 +409,7 @@ namespace ActsTrk
       // Get the Acts tracks, given this seed
       // Result here contains a vector of TrackProxy objects
 
-      auto result = m_trackFinder->ckf.findTracks(*estimatedTrackParameters[iseed], options, tc);
+      auto result = m_trackFinder->ckf.findTracks(*estimatedTrackParameters[iseed], options, tracksContainer);
 
       // The result for this seed
       if (not result.ok())
@@ -420,13 +418,13 @@ namespace ActsTrk
         ++m_nFailedSeeds;
         continue;
       }
-      // Get the track finding output and add to tracksContainer
-      size_t ntracks = makeTracks(ctx, tgContext, tc, result.value(), tracksContainer);
+      // Get the track finding output and add to tracksCollection
+      size_t ntracks = makeTracks(ctx, tgContext, tracksContainer, result.value(), tracksCollection);
       addTracks += ntracks;
 
       if (!m_trackStatePrinter.empty())
       {
-        m_trackStatePrinter->printTracks(tgContext, tc, result.value(), *estimatedTrackParameters[iseed], iseed, ntracks, iseed == 0 ? estimatedTrackParameters.size() : 0, seedType);
+        m_trackStatePrinter->printTracks(tgContext, tracksContainer, result.value(), *estimatedTrackParameters[iseed], iseed, ntracks, iseed == 0 ? estimatedTrackParameters.size() : 0, seedType);
         std::cout << std::flush;
       }
 
@@ -446,9 +444,9 @@ namespace ActsTrk
   size_t
   TrackFindingTool::makeTracks(const EventContext &ctx,
                                const Acts::GeometryContext &tgContext,
-                               const ActsTrk::TrackContainer &tracks,
+                               const ActsTrk::TrackContainer &tracksContainer,
                                const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
-                               ::TrackCollection &tracksContainer) const
+                               ::TrackCollection &tracksCollection) const
   {
     size_t ntracks = 0;
     for (auto &track : fitResult)
@@ -462,7 +460,7 @@ namespace ActsTrk
 
       std::vector<std::unique_ptr<const Acts::BoundTrackParameters>> actsSmoothedParam;
       // Loop over all the output state to create track state
-      tracks.trackStateContainer().visitBackwards(
+      tracksContainer.trackStateContainer().visitBackwards(
           lastMeasurementIndex,
           [&](const ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
           {
@@ -589,7 +587,7 @@ namespace ActsTrk
         newtrack->trackSummary()->update(Trk::numberOfSCTDeadSensors, numberOfDeadSCT);
       }
       m_trkSummaryTool->updateTrackSummary(ctx, *newtrack, true);
-      tracksContainer.push_back(std::move(newtrack));
+      tracksCollection.push_back(std::move(newtrack));
       ++ntracks;
     }
 

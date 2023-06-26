@@ -34,6 +34,7 @@ namespace ActsTrk
     ATH_CHECK(m_pixelEstimatedTrackParametersKey.initialize());
     ATH_CHECK(m_stripEstimatedTrackParametersKey.initialize());
     ATH_CHECK(m_tracksKey.initialize());
+    ATH_CHECK(m_tracksContainerKey.initialize());
 
     if (not m_monTool.empty())
       ATH_CHECK(m_monTool.retrieve());
@@ -113,8 +114,13 @@ namespace ActsTrk
     // ================================================== //
 
     SG::WriteHandle<::TrackCollection> trackHandle = SG::makeHandle(m_tracksKey, ctx);
-    ATH_MSG_DEBUG("    \\__ Tracks Container `" << m_tracksKey.key() << "` created ...");
-    auto trackPtrs = std::make_unique<::TrackCollection>();
+    auto trackCollection = std::make_unique<::TrackCollection>();
+    ATH_MSG_DEBUG("    \\__ Tracks Collection `" << m_tracksKey.key() << "` created ...");
+
+    auto trackContainerHandle = SG::makeHandle(m_tracksContainerKey, ctx);
+    Acts::TrackContainer trackContainer{Acts::VectorTrackContainer{},
+                                        ActsTrk::TrackStateBackend{}};
+    ATH_MSG_DEBUG("    \\__ Tracks Container `" << m_tracksContainerKey.key() << "` created ...");
 
     // ================================================== //
     // ===================== COMPUTATION ================ //
@@ -127,7 +133,8 @@ namespace ActsTrk
       ATH_CHECK(m_trackFindingTool->findTracks(ctx,
                                                *measurements,
                                                *stripEstimatedTrackParameters,
-                                               *trackPtrs,
+                                               trackContainer,
+                                               *trackCollection.get(),
                                                "strip"));
     }
 
@@ -136,18 +143,26 @@ namespace ActsTrk
       ATH_CHECK(m_trackFindingTool->findTracks(ctx,
                                                *measurements,
                                                *pixelEstimatedTrackParameters,
-                                               *trackPtrs,
+                                               trackContainer,
+                                               *trackCollection.get(),
                                                "pixel"));
     }
 
-    ATH_MSG_DEBUG("    \\__ Created " << trackPtrs->size() << " tracks");
+    ATH_MSG_DEBUG("    \\__ Created " << trackCollection->size() << " tracks");
 
     // ================================================== //
     // ===================== STORE OUTPUT =============== //
     // ================================================== //
+    // TODO once have final version of containers, they need to have movable backends also here
+    ActsTrk::ConstTrackStateBackend trackStateBackend(trackContainer.trackStateContainer());
+    ActsTrk::ConstTrackBackend trackBackend(trackContainer.container());
+    auto constTrackContainer = std::make_unique<ActsTrk::ConstTrackContainer>(std::move(trackBackend), std::move(trackStateBackend));
+    ATH_CHECK(trackContainerHandle.record(std::move(constTrackContainer)));
+
+
 
     ATH_MSG_DEBUG("Storing Track Collection " << m_tracksKey.key());
-    ATH_CHECK(trackHandle.record(std::move(trackPtrs)));
+    ATH_CHECK(trackHandle.record(std::move(trackCollection)));
 
     return StatusCode::SUCCESS;
   }
