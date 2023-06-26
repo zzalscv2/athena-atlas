@@ -21,9 +21,6 @@ class EFTrackingSmearingAlg: public ::AthHistogramAlgorithm {
 
  private: 
 
-  std::string m_inputTrackContainerName;
-  std::string m_outputTrackContainerName;
-
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_inputTrackParticleKey { this, "InputTrackParticleContainer", "InDetTrackParticles_tosmear",
                                                                           "key for retrieval of input TrackParticles" };
 
