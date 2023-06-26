@@ -2,8 +2,8 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
 from argparse import ArgumentParser
-from TruthUtils.WeightHelpers import weightNameCleanup, weightNameWithPrefix
-
+from PMGTools.WeightHelpers import weightNameCleanup, weightNameWithPrefix
+print(dir(PMGTools.WeightHelpers))
 parser = ArgumentParser(prog='generator-weights')
 parser.add_argument('weights', metavar='weights', type=str, nargs="+",
                     help="specify the list of weights")

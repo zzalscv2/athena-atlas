@@ -6,5 +6,9 @@
   <class name="PMGTools::PMGSherpa22VJetsWeightTool" />
   <class name="PMGTools::PMGSherpaVjetsSysTool" />
   <class name="PMGTools::PMGTruthWeightTool" />
+  <function name="PMGTools::weightNameCleanup" />
+  <function name="PMGTools::weightNameWithPrefix" />
+
+  <struct name="PMGTools::ROOT6_NamespaceAutoloadHook" />
 
 </lcgdict>

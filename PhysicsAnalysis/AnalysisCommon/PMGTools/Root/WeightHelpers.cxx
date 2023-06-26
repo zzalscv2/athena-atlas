@@ -9,10 +9,10 @@
 #include <algorithm>
 #include <string>
 #include <vector>
-#include "TruthUtils/WeightHelpers.h"
+#include "PMGTools/WeightHelpers.h"
 
 
-namespace MC
+namespace PMGTools
 {
 
 std::string weightNameCleanup(const std::string &name)
