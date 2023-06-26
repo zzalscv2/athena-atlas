@@ -51,8 +51,8 @@ def defineMenu():
 
         
         # combined mu - jet
-        'L1_MU3V_J12','L1_MU3V_J15', 
-        'L1_MU3V_jJ20', 'L1_MU3V_jJ30', 'L1_MU3V_jJ40',
+        'L1_MU3V_J12',
+        'L1_MU3V_jJ20',
 
         'L1_TAU8', 'L1_TAU60', 'L1_TAU12IM', 'L1_TAU20IM',
         'L1_TAU8_EMPTY',
@@ -88,9 +88,9 @@ def defineMenu():
  
          # calo
         'L1_TE3', 'L1_TE5', # also for HMT triggers
-        'L1_TE20', 'L1_TE50',
+        'L1_TE10', 'L1_TE20', 'L1_TE50',
         'L1_TE100', 'L1_TE200',
-        'L1_TE10000', 'L1_TE12000',
+        'L1_TE12000',
         'L1_TE3p0ETA49', 'L1_TE7p0ETA49',
         'L1_TE600p0ETA49', 'L1_TE1500p0ETA49', 'L1_TE3000p0ETA49', 'L1_TE3500p0ETA49', 'L1_TE6500p0ETA49', 'L1_TE8000p0ETA49',
         'L1_TE50_VTE600p0ETA49',
@@ -100,10 +100,11 @@ def defineMenu():
         'L1_TE3500p0ETA49_OVERLAY', 'L1_TE6500p0ETA49_OVERLAY', 'L1_TE8000p0ETA49_OVERLAY',
         
         # new calo
-        'L1_gTE200',
         'L1_jTE200',
         # additional jTE items for 2023 heavy ion runs
+        'L1_jTE10',
         'L1_jTE20','L1_jTE50',
+        'L1_jTE100',
         'L1_jTE600',
         'L1_jTE1500',
         'L1_jTE3000',
@@ -130,9 +131,9 @@ def defineMenu():
         
         #UPC - calo, MBTS, calo  
         'L1_ZDC_XOR_VTE200', 'L1_VZDC_A_VZDC_C_TE5_VTE200',
-        'L1_ZDC_A_VZDC_C_VTE200', 'L1_ZDC_C_VZDC_A_VTE200',
-        'L1_MBTS_1_ZDC_A_VZDC_C_VTE200', 'L1_MBTS_1_ZDC_C_VZDC_A_VTE200',
-        'L1_TE3p0ETA49_ZDC_A_VZDC_C_VTE200', 'L1_TE3p0ETA49_ZDC_C_VZDC_A_VTE200', 'L1_TE5_ZDC_A_VZDC_C_VTE200','L1_TE5_ZDC_C_VZDC_A_VTE200','L1_TE20_ZDC_A_VZDC_C_VTE200', 'L1_TE20_ZDC_C_VZDC_A_VTE200', 
+        'L1_ZDC_A_VZDC_C_VTE200', 'L1_VZDC_A_ZDC_C_VTE200',
+        'L1_MBTS_1_ZDC_A_VZDC_C_VTE200', 'L1_MBTS_1_VZDC_A_ZDC_C_VTE200',
+        
         #UPC - calo, MBTS - legacy
         'L1_MBTS_1_VTE50',
         'L1_MBTS_1_1_VTE50',
@@ -147,7 +148,7 @@ def defineMenu():
         'L1_TRT_VjTE50', 'L1_TRT_VjTE50_GAP_AANDC',
         #UPC - calo only - legacy
         'L1_VTE20',
-        'L1_VTE50', 'L1_TE3_VTE50', 'L1_TE5_VTE50',
+        'L1_VTE50', 'L1_TE3_VTE50',
         'L1_TE5_VTE20',
         'L1_VTE200', 'L1_TE3_VTE200', 'L1_TE5_VTE200', 'L1_TE20_VTE200', 'L1_TE50_VTE200',
         'L1_J12_VTE200',
@@ -162,40 +163,102 @@ def defineMenu():
 
         # ZDC
         'L1_ZDC_A','L1_ZDC_C','L1_ZDC_A_C',
-        'L1_ZDC_AND', 'L1_ZDC_XOR',
+        'L1_ZDC_XOR',
         'L1_ZDC_C_VZDC_A', 'L1_ZDC_A_VZDC_C',
-        # ZDC and calo
-        'L1_ZDC_A_C_VTE50',
 
         # Run3 ZDC items for heavy ion runs 
-        # Commented out for more CTP space for 2022 Nov heavy ion test run (ATR-26405) 
-        # They are needed for scheduled 2023 5 TeV pp and Pb+Pb runs, so not removed from the menu
-        #'L1_VZDC_A_VZDC_C',
-        #'L1_1TO4ZDC_A_VZDC_C',
-        #'L1_VZDC_A_1TO4ZDC_C',
-        #'L1_1TO4ZDC_A_1TO4ZDC_C',
-        #'L1_5ZDC_A_VZDC_C',
-        #'L1_VZDC_A_5ZDC_C',
-        #'L1_ZDC_1TO4XOR5',
-        #'L1_5ZDC_A_5ZDC_C',
+        'L1_VZDC_A_VZDC_C', #comb0
+        'L1_1ZDC_A_VZDC_C', #comb1
+        'L1_VZDC_A_1ZDC_C', #comb2
+        'L1_1ZDC_A_1ZDC_C', #comb3
+        'L1_5ZDC_A_VZDC_C', #comb4
+        'L1_VZDC_A_5ZDC_C', #comb5
+        'L1_ZDC_1XOR5',     #comb6
+        'L1_5ZDC_A_5ZDC_C', #comb7
+        
+        #ZDC and legacy calo
+        'L1_1ZDC_A_1ZDC_C_VTE200', 'L1_ZDC_1XOR5_VTE200',
+        'L1_MBTS_1_1ZDC_A_1ZDC_C_VTE200', 'L1_MBTS_1_ZDC_1XOR5_VTE200',
+        'L1_VZDC_A_ZDC_C_TE3_VTE200', 'L1_1ZDC_A_1ZDC_C_TE3_VTE200',
+        'L1_ZDC_1XOR5_TE3_VTE200', 'L1_ZDC_A_VZDC_C_TE3_VTE200',
+        'L1_VZDC_A_ZDC_C_TE5_VTE200', 'L1_1ZDC_A_1ZDC_C_TE5_VTE200',
+        'L1_ZDC_1XOR5_TE5_VTE200', 'L1_ZDC_A_VZDC_C_TE5_VTE200',
+        'L1_MBTS_1_ZDC_XOR_VTE200', 
+        'L1_ZDC_XOR_TE3_VTE200', 'L1_ZDC_XOR_TE5_VTE200',
+        'L1_MBTS_2_VZDC_A_ZDC_C_VTE200', 'L1_MBTS_2_1ZDC_A_1ZDC_C_VTE200',
+        'L1_MBTS_2_ZDC_1XOR5_VTE200', 'L1_MBTS_2_ZDC_A_VZDC_C_VTE200',
+         
+        'L1_ZDC_5XOR_TE5_VTE200', 'L1_ZDC_XOR4_TE5_VTE200',
+        'L1_VZDC_A_VZDC_C_TE5_VTE200_UNPAIRED_ISO', 'L1_ZDC_XOR_TE5_VTE200_UNPAIRED_ISO',
+        'L1_5ZDC_A_5ZDC_C_TE5_VTE200', 'L1_VZDC_A_VZDC_C_VTE200',
+        'L1_VZDC_A_VZDC_C_TE5', 'L1_ZDC_XOR_TE5',
+
+        'L1_ZDC_A_C_VTE10', 'L1_ZDC_XOR_VTE10', 'L1_ZDC_A_C_UNPAIRED_ISO',
+        'L1_ZDC_A_C_UNPAIRED_NONISO', 'L1_ZDC_A_C_VTE10_EMPTY',
+
+        'L1_TAU1_VZDC_A_VZDC_C_VTE100', 'L1_TAU1_ZDC_XOR4_VTE100',
+        'L1_TAU2_VZDC_A_VZDC_C_VTE100', 'L1_TAU2_ZDC_XOR4_VTE100',
+        'L1_TRT_VZDC_A_VZDC_C_VTE50', 'L1_TRT_VZDC_A_VZDC_C_VTE20',
+
+        'L1_ZDC_XOR4_VTE50', 'L1_VZDC_A_VZDC_C_VTE50', 'L1_1ZDC_A_1ZDC_C_VTE50',
+
+        #ZDC and phase-1 calo
+        'L1_1ZDC_A_1ZDC_C_VjTE200', 'L1_ZDC_1XOR5_VjTE200',
+        'L1_ZDC_XOR_VjTE200', 
+        'L1_MBTS_1_VZDC_A_ZDC_C_VjTE200_GAP_A', 'L1_MBTS_1_1ZDC_A_1ZDC_C_VjTE200_GAP_A', 
+        'L1_MBTS_1_ZDC_1XOR5_VjTE200_GAP_A', 'L1_MBTS_1_ZDC_A_VZDC_C_VjTE200_GAP_C',
+        'L1_MBTS_1_1ZDC_A_1ZDC_C_VjTE200_GAP_C', 'L1_MBTS_1_ZDC_1XOR5_VjTE200_GAP_C',
+        'L1_VZDC_A_ZDC_C_jTE3_VjTE200_GAP_A', 'L1_1ZDC_A_1ZDC_C_jTE3_VjTE200_GAP_A',
+        'L1_ZDC_1XOR5_jTE3_VjTE200_GAP_A', 'L1_ZDC_A_VZDC_C_jTE3_VjTE200_GAP_C',
+        'L1_1ZDC_A_1ZDC_C_jTE3_VjTE200_GAP_C', 'L1_ZDC_1XOR5_jTE3_VjTE200_GAP_C',
+        'L1_VZDC_A_ZDC_C_jTE5_VjTE200_GAP_A', 'L1_1ZDC_A_1ZDC_C_jTE5_VjTE200_GAP_A',
+        'L1_ZDC_1XOR5_jTE5_VjTE200_GAP_A', 'L1_ZDC_A_VZDC_C_jTE5_VjTE200_GAP_C',
+        'L1_1ZDC_A_1ZDC_C_jTE5_VjTE200_GAP_C', 'L1_ZDC_1XOR5_jTE5_VjTE200_GAP_C',
+        'L1_MBTS_1_1ZDC_A_1ZDC_C_VjTE200', 'L1_MBTS_1_ZDC_1XOR5_VjTE200',
+        'L1_MBTS_1_ZDC_XOR_VjTE200',
+        'L1_1ZDC_A_1ZDC_C_jTE3_VjTE200', 'L1_ZDC_1XOR5_jTE3_VjTE200',
+        'L1_ZDC_XOR_jTE3_VjTE200', 'L1_1ZDC_A_1ZDC_C_jTE5_VjTE200',
+        'L1_ZDC_1XOR5_jTE5_VjTE200', 'L1_ZDC_XOR_jTE5_VjTE200',
+        'L1_VZDC_A_ZDC_C_VjTE200_GAP_A', 'L1_1ZDC_A_1ZDC_C_VjTE200_GAP_A',
+        'L1_ZDC_1XOR5_VjTE200_GAP_A', 'L1_ZDC_A_VZDC_C_VjTE200_GAP_C',
+        'L1_1ZDC_A_1ZDC_C_VjTE200_GAP_C', 'L1_ZDC_1XOR5_VjTE200_GAP_C',
+        'L1_MBTS_2_VZDC_A_ZDC_C_VjTE200_GAP_A', 'L1_MBTS_2_1ZDC_A_1ZDC_C_VjTE200_GAP_A',
+        'L1_MBTS_2_ZDC_1XOR5_VjTE200_GAP_A', 'L1_MBTS_2_ZDC_A_VZDC_C_VjTE200_GAP_C',
+        'L1_MBTS_2_1ZDC_A_1ZDC_C_VjTE200_GAP_C', 'L1_MBTS_2_ZDC_1XOR5_VjTE200_GAP_C',
+
+        'L1_VZDC_A_VZDC_C_jTE5_VjTE200', 'L1_ZDC_5XOR_jTE5_VjTE200',
+        'L1_ZDC_XOR4_jTE5_VjTE200', 
+        'L1_VZDC_A_VZDC_C_jTE5_VjTE200_UNPAIRED_ISO', 'L1_ZDC_XOR_jTE5_VjTE200_UNPAIRED_ISO',
+        'L1_5ZDC_A_5ZDC_C_jTE5_VjTE200', 'L1_VZDC_A_VZDC_C_VjTE200',
+        'L1_VZDC_A_VZDC_C_jTE5', 'L1_ZDC_XOR_jTE5',
+
+        'L1_ZDC_A_C_VjTE10', 'L1_ZDC_XOR_VjTE10', 'L1_ZDC_A_C_VjTE10_EMPTY',
+        'L1_ZDC_A_C_VjTE10_UNPAIRED_ISO', 'L1_ZDC_A_C_VjTE10_UNPAIRED_NONISO',
+
+        'L1_eEM1_VZDC_A_VZDC_C_VjTE100_GAP_AANDC', 'L1_eEM1_ZDC_XOR4_VjTE100_GAP_AANDC',
+        'L1_eEM2_VZDC_A_VZDC_C_VjTE100_GAP_AANDC', 'L1_eEM2_ZDC_XOR4_VjTE100_GAP_AANDC',
+        'L1_TRT_VZDC_A_VZDC_C_VjTE50_GAP_AANDC', 'L1_TRT_VZDC_A_VZDC_C_VjTE20_GAP_AANDC',
+
+
+        'L1_ZDC_XOR4_VjTE50_GAP_AANDC', 'L1_VZDC_A_VZDC_C_VjTE50_GAP_AANDC',
+        'L1_1ZDC_A_1ZDC_C_VjTE50_GAP_AANDC', 'L1_VZDC_A_VZDC_C_VjTE200_GAP_AANDC',
         
         
+
         # VDM
 
         # ZDC bits and comb for debugging
-        # Commented out for more CTP space for 2022 Nov heavy ion test run (ATR-26405) 
-        # They are needed for scheduled 2023 5 TeV pp and Pb+Pb runs, so not removed from the menu
-        #'L1_ZDC_BIT2',
-        #'L1_ZDC_BIT1',
-        #'L1_ZDC_BIT0',
-        #'L1_ZDC_COMB0',
-        #'L1_ZDC_COMB1',
-        #'L1_ZDC_COMB2',
-        #'L1_ZDC_COMB3',
-        #'L1_ZDC_COMB4',
-        #'L1_ZDC_COMB5',
-        #'L1_ZDC_COMB6',
-        #'L1_ZDC_COMB7',
+        'L1_ZDC_BIT2',
+        'L1_ZDC_BIT1',
+        'L1_ZDC_BIT0',
+        'L1_ZDC_COMB0',
+        'L1_ZDC_COMB1',
+        'L1_ZDC_COMB2',
+        'L1_ZDC_COMB3',
+        'L1_ZDC_COMB4',
+        'L1_ZDC_COMB5',
+        'L1_ZDC_COMB6',
+        'L1_ZDC_COMB7',
 
         # ZDC items for LHCf+ZDC special run ATR-26051
         # Commented out for more CTP space for 2022 Nov heavy ion test run (ATR-26405) 
@@ -296,6 +359,7 @@ def defineMenu():
         'L1_EM3_ALFA_ANY', 'L1_EM3_ALFA_EINE', 'L1_2EM3_ALFA_EINE',
         # 'L1_DPHI-2eEM5_VTE5p24ETA49_ALFA_EINE',
         'L1_TRT_ALFA_ANY', 'L1_TRT_ALFA_EINE',
+        'L1_ALFA_EINE',
         'L1_J12_ALFA_ANY_UNPAIRED_ISO',
     ]
 
