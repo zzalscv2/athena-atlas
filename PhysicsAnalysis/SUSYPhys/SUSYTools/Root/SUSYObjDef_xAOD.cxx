@@ -83,6 +83,7 @@
 // system includes
 #include <fstream>
 #include <regex>
+#include <algorithm>
 
 namespace ST {
 
@@ -834,7 +835,7 @@ StatusCode SUSYObjDef_xAOD::initialize() {
     if (!local_isData) {
       std::string simFlavour = "";
       ATH_CHECK( AthAnalysisHelper::retrieveMetadata("/Simulation/Parameters", "SimulationFlavour", simFlavour, inputMetaStore() ) );
-      boost::to_upper(simFlavour);
+       std::transform(simFlavour.begin(), simFlavour.end(), simFlavour.begin(), ::toupper);
       local_isAtlfast = (simFlavour.find("ATLFASTII") != std::string::npos);
     }
     if (local_isData) {m_dataSource = Data;}
