@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCTRawDataProviderTool.h"
@@ -29,6 +29,7 @@ StatusCode SCTRawDataProviderTool::initialize()
 StatusCode SCTRawDataProviderTool::convert(std::vector<const ROBFragment*>& vecROBFrags,
                                            SCT_RDO_Container& rdoIDCont,
                                            IDCInDetBSErrContainer& errs,
+                                           DataPool<SCT3_RawData>* dataItemsPool,
                                            const EventContext& ctx) const
 {
   if (vecROBFrags.empty()) return StatusCode::SUCCESS;
@@ -39,7 +40,7 @@ StatusCode SCTRawDataProviderTool::convert(std::vector<const ROBFragment*>& vecR
   StatusCode sc{StatusCode::SUCCESS};
   for (const ROBFragment* robFrag : vecROBFrags) {
     // get the ID of this ROB/ROD
-    sc = m_decoder->fillCollection(*robFrag, rdoIDCont, errs, ctx);
+    sc = m_decoder->fillCollection(*robFrag, rdoIDCont, errs, dataItemsPool, ctx);
     if (sc == StatusCode::FAILURE) {
       if (m_decodeErrCount <= 100) {
         if (100 == m_decodeErrCount) {
