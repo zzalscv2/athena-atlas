@@ -32,3 +32,7 @@ atlas_add_test( TileCaloCellMonAlg_test
                 SCRIPT python -m CaloMonitoring.TileCalCellMonAlg
                 PROPERTIES TIMEOUT 300
                 POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( LArCellMonBinning_test
+                SCRIPT python -m CaloMonitoring.LArCellBinning_test 
+                POST_EXEC_SCRIPT nopost.sh)
