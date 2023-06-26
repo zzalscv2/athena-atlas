@@ -51,7 +51,7 @@ def TRT_Standalone_SegmentToTrackToolCfg(flags, name ='InDetTRT_Standalone_Segme
     return acc
 
 
-def TRT_TrackSegment_SegmentToTrackTool_Cfg(flags, name ='InDetTRT_TrackSegment_SegmentToTrackTool',  **kwargs):
+def TRT_TrackSegment_SegmentToTrackToolCfg(flags, name ='InDetTRT_TrackSegment_SegmentToTrackTool',  **kwargs):
     acc = ComponentAccumulator()
 
     if "ScoringTool" not in kwargs:
