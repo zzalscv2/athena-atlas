@@ -96,9 +96,12 @@ EFTrackingSmearingAlg::~EFTrackingSmearingAlg() {}
 StatusCode EFTrackingSmearingAlg::initialize() {
   ATH_MSG_INFO ("Initializing " << name() << "...");
 
+  ATH_CHECK( m_inputTrackParticleKey.initialize() );
+  ATH_CHECK( m_outputTrackParticleKey.initialize() );
+
   ATH_MSG_INFO("########## EFTrackingSmearingAlg Configurations are ########## ");
-  ATH_MSG_INFO("------- InputTrackContainerName: "<<m_inputTrackContainerName);
-  ATH_MSG_INFO("------- OutputTrackContainerName: "<<m_outputTrackContainerName);
+  ATH_MSG_INFO("------- InputTrackParticleKey: "<<m_inputTrackParticleKey.key());
+  ATH_MSG_INFO("------- OutputTrackParticleKey: "<<m_outputTrackParticleKey.key());
   ATH_MSG_INFO("------- inputTracksPtCut [GeV]: "<<m_inputTracksPtCut);
   ATH_MSG_INFO("------- outputTracksPtCut [GeV]: "<<m_outputTracksPtCut);
   ATH_MSG_INFO("------- SmearingSigma: "<<m_SigmaScaleFactor);  
@@ -115,13 +118,10 @@ StatusCode EFTrackingSmearingAlg::initialize() {
   ATH_MSG_INFO("------- IncludeFakesInResolutionCalculation: "<<m_IncludeFakesInResolutionCalculation);
   ATH_MSG_INFO("########## EFTrackingSmearingAlg Configurations: That's it. ########## ");
 
-  ATH_MSG_INFO("Will output new track container with name "<<m_outputTrackContainerName);
-
-  ATH_CHECK( m_inputTrackParticleKey.initialize() );
-  ATH_CHECK( m_outputTrackParticleKey.initialize() );
+  ATH_MSG_INFO("Will output new track container with name "<<m_outputTrackParticleKey.key());
 
   // configure the Smearer
-  std::string smearerName = m_outputTrackContainerName+"_smearer";
+  std::string smearerName = m_outputTrackParticleKey.key()+"_smearer";
   m_mySmearer = (void *) new FakeTrackSmearer(smearerName.c_str(), m_RandomSeed,msgLvl (MSG::DEBUG));
   ((FakeTrackSmearer *) m_mySmearer)->SetInputTracksPtCut(m_inputTracksPtCut);
   ((FakeTrackSmearer *) m_mySmearer)->SetOutputTracksPtCut(m_outputTracksPtCut);
@@ -176,7 +176,8 @@ StatusCode EFTrackingSmearingAlg::execute() {
   }
 
   SG::WriteHandle<xAOD::TrackParticleContainer> outputTracks_handle( m_outputTrackParticleKey, getContext() );
-  auto outputTracks = std::make_unique<xAOD::TrackParticleContainer>();
+  ATH_CHECK( outputTracks_handle.record( std::make_unique<xAOD::TrackParticleContainer>(), std::make_unique<xAOD::TrackParticleAuxContainer>() ) );
+  auto outputTracks = outputTracks_handle.ptr();
   
   // clear the smearear
   FakeTrackSmearer *mySmearer=(FakeTrackSmearer *) m_mySmearer;
@@ -321,7 +322,6 @@ StatusCode EFTrackingSmearingAlg::execute() {
         trackno++;
       }
 
-  CHECK( outputTracks_handle.record( std::move( outputTracks ) ) );
   ATH_MSG_DEBUG ("End of loop track #"<<n_input_tracks<<" ---> "<<" "<< n_output_tracks
               <<" "<<n_output_narrow_tracks<<" "<<n_output_broad_tracks);
   if (m_enableMonitoring) {
