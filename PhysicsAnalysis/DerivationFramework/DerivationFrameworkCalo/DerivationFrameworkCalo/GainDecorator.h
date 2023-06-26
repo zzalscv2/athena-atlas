@@ -40,6 +40,7 @@ public:
 
   struct calculation
   {
+    std::map<std::pair<int, int>, float> EnoW;
     std::map<std::pair<int, int>, float> E;
     std::map<std::pair<int, int>, uint8_t> nCells;
   };
@@ -61,6 +62,7 @@ private:
 
   // Name of the decorations
   std::map<std::pair<int, int>, std::string> m_names_E;
+  std::map<std::pair<int, int>, std::string> m_names_rnoW;
   std::map<std::pair<int, int>, std::string> m_names_nCells;
 
   SG::WriteDecorHandleKeyArray<xAOD::EgammaContainer>
