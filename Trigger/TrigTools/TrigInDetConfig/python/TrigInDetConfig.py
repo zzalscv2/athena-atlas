@@ -176,7 +176,9 @@ def trigInDetPrecisionTrackingCfg( inflags, rois, signatureName, in_view=True ):
   """ Generates precision tracking config, it is a primary config function """
 
   acc = ComponentAccumulator()
-  flags = inflags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking."+signatureName)
+  log = logging.getLogger("trigInDetPrecisionTrackingCfg")
+  from TrigInDetConfig.utils import getFlagsForActiveConfig
+  flags = getFlagsForActiveConfig(inflags, signatureName, log)
 
   from .InDetTrigCollectionKeys import TrigPixelKeys
   if in_view:
@@ -210,6 +212,15 @@ def trigInDetPrecisionTrackingCfg( inflags, rois, signatureName, in_view=True ):
 
   return acc
 
+def trigInDetVertexingCfg(flags, inputTracks, outputVtx):
+  
+  acc = ComponentAccumulator()
+
+  from InDetConfig.InDetPriVxFinderConfig import InDetTrigPriVxFinderCfg
+  acc.merge(InDetTrigPriVxFinderCfg(flags, inputTracks = inputTracks, outputVtx =outputVtx))
+
+  return acc
+
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
@@ -222,8 +233,11 @@ if __name__ == "__main__":
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     acc = MainServicesCfg( flags )
     roisKey = "ElectronRoIs"
-    acc.merge( trigInDetFastTrackingCfg( flags, roisKey=roisKey, signatureName="Electron" ) )
-    acc.merge( trigInDetPrecisionTrackingCfg( flags, rois=roisKey, signatureName="Electron", in_view=True) )
+    
+    flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.electron")
+    acc.merge( trigInDetFastTrackingCfg( flags, roisKey=roisKey, signatureName="electron" ) )
+    acc.merge( trigInDetPrecisionTrackingCfg( flags, rois=roisKey, signatureName="electron", in_view=True) )
+    acc.merge( trigInDetVertexingCfg( flags, inputTracks=flags.Tracking.ActiveConfig.tracks_FTF, outputVtx="testVtx") )
 
 
     acc.printConfig(withDetails=True, summariseProps=True)

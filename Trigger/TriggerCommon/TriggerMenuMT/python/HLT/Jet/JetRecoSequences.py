@@ -15,6 +15,7 @@ from TrigCaloRec.TrigCaloRecConfig import jetmetTopoClusteringCfg, jetmetTopoClu
 from eflowRec.PFHLTSequence import PFHLTSequence
 from eflowRec.PFHLTSequence import trackvtxcontainers
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
+from TrigInDetConfig.utils import getInDetFlagsForSignature
 from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking, makeInDetTrigFastTrackingNoView
 from TrigInDetConfig.InDetTrigVertices import makeInDetTrigVertices
 from .JetTrackingConfig import addJetTTVA
@@ -307,20 +308,21 @@ def getFastFlavourTaggingSequence( flags, name, inputJets, inputVertex, inputTra
 def JetFSTrackingSequence(flags,trkopt,RoIs):
 
     IDTrigConfig = getInDetTrigConfig( 'jet' )
-
-    viewAlgs = makeInDetTrigFastTrackingNoView(flags, config = IDTrigConfig, rois=RoIs)
+    flagsWithTrk = getInDetFlagsForSignature(flags,IDTrigConfig.name)
+    
+    viewAlgs = makeInDetTrigFastTrackingNoView(flagsWithTrk, config = IDTrigConfig, rois=RoIs)
 
     # add the collections for the eflowRec reconstriction in the trigger
     trackvtxcontainers[trkopt] =  ( IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex_jet ) 
 
-    vtxAlgs = makeInDetTrigVertices( flags, "jet", IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex_jet, IDTrigConfig, IDTrigConfig.adaptiveVertex_jet )
+    vtxAlgs = makeInDetTrigVertices( flagsWithTrk, "jet", IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex_jet, IDTrigConfig, IDTrigConfig.adaptiveVertex_jet )
 
     # now run the actual vertex finders and TTVA tools
     if IDTrigConfig.vertex_jet != IDTrigConfig.vertex:
-        vtxAlgs += makeInDetTrigVertices( flags, "amvf", IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex, IDTrigConfig, IDTrigConfig.adaptiveVertex )
+        vtxAlgs += makeInDetTrigVertices( flagsWithTrk, "amvf", IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex, IDTrigConfig, IDTrigConfig.adaptiveVertex )
 
     jetTrkSeq = parOR(f"JetFSTracking_{trkopt}_RecoSequence", viewAlgs+vtxAlgs)
-    addJetTTVA( flags, jetTrkSeq, trkopt, IDTrigConfig, verticesname=IDTrigConfig.vertex_jet,  adaptiveVertex=IDTrigConfig.adaptiveVertex_jet )
+    addJetTTVA( flagsWithTrk, jetTrkSeq, trkopt, IDTrigConfig, verticesname=IDTrigConfig.vertex_jet,  adaptiveVertex=IDTrigConfig.adaptiveVertex_jet )
 
     return jetTrkSeq
 
@@ -338,11 +340,12 @@ def getFastFtaggedJetCopyAlg(flags,jetsIn,jetRecoDict):
 def JetRoITrackJetTagSequence(flags,jetsIn,trkopt,RoIs):
 
     IDTrigConfig = getInDetTrigConfig( 'jetSuper' )
-
-    viewAlgs, viewVerify = makeInDetTrigFastTracking(flags, config = IDTrigConfig, rois=RoIs)
+    flagsWithTrk = getInDetFlagsForSignature(flags,IDTrigConfig.name)
+    
+    viewAlgs, viewVerify = makeInDetTrigFastTracking(flagsWithTrk, config = IDTrigConfig, rois=RoIs)
     viewVerify.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs ),( 'xAOD::JetContainer' , 'StoreGateSvc+%s' % jetsIn)]
 
-    vtxAlgs = makeInDetTrigVertices( flags, "jetSuper", IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex, IDTrigConfig, IDTrigConfig.adaptiveVertex )
+    vtxAlgs = makeInDetTrigVertices( flagsWithTrk, "jetSuper", IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex, IDTrigConfig, IDTrigConfig.adaptiveVertex )
 
     tracksIn = IDTrigConfig.tracks_FTF()
 
@@ -354,7 +357,7 @@ def JetRoITrackJetTagSequence(flags,jetsIn,trkopt,RoIs):
     vtxIn    = IDTrigConfig.vertex if flags.Trigger.Jet.fastbtagVertex else ""
 
     jetTrkSeq=getFastFlavourTaggingSequence(
-        flags,
+        flagsWithTrk,
         f"JetRoITrackJetTag_{trkopt}_RecoSequence",
         jetsIn,
         vtxIn,

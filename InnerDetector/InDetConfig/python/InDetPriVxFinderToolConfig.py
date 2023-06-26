@@ -57,7 +57,6 @@ def GaussAdaptiveMultiFindingCfg(flags,
 def TrigGaussAdaptiveMultiFindingCfg(
         flags,
         name="InDetTrigAdaptiveMultiPriVxFinderTool",
-        signature="",
         **kwargs):
     acc = ComponentAccumulator()
 
@@ -65,18 +64,15 @@ def TrigGaussAdaptiveMultiFindingCfg(
         from InDetConfig.InDetTrackSelectionToolConfig import (
             TrigVtxInDetTrackSelectionCfg)
         kwargs.setdefault("TrackSelector", acc.popToolsAndMerge(
-            TrigVtxInDetTrackSelectionCfg(flags, signature = signature)))
-
-    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-    config = getInDetTrigConfig(signature)
+            TrigVtxInDetTrackSelectionCfg(flags)))
 
     kwargs.setdefault("useBeamConstraint", True)
-    kwargs.setdefault("TracksMaxZinterval", config.TracksMaxZinterval)
-    kwargs.setdefault("addSingleTrackVertices", config.addSingleTrackVertices)
+    kwargs.setdefault("TracksMaxZinterval", flags.Tracking.ActiveConfig.TracksMaxZinterval)
+    kwargs.setdefault("addSingleTrackVertices", flags.Tracking.ActiveConfig.addSingleTrackVertices)
     kwargs.setdefault("do3dSplitting", True) # NB: comment from original function suggests that this should be flags.InDet.doPrimaryVertex3DFinding
 
     acc.setPrivateTools(acc.popToolsAndMerge(
-        GaussAdaptiveMultiFindingCfg(flags, name+signature, **kwargs)))
+        GaussAdaptiveMultiFindingCfg(flags, name+flags.Tracking.ActiveConfig.input_name, **kwargs)))
     return acc
 
 def IterativeFindingBaseCfg(flags,
@@ -159,7 +155,6 @@ def GaussIterativeFindingCfg(flags,
 
 def TrigGaussIterativeFindingCfg(flags,
                                  name="InDetTrigPriVxFinderTool",
-                                 signature="",
                                  **kwargs):
     acc = ComponentAccumulator()
 
@@ -172,7 +167,7 @@ def TrigGaussIterativeFindingCfg(flags,
         from InDetConfig.InDetTrackSelectionToolConfig import (
             TrigVtxInDetTrackSelectionCfg)
         kwargs.setdefault("TrackSelector", acc.popToolsAndMerge(
-            TrigVtxInDetTrackSelectionCfg(flags, signature = signature)))
+            TrigVtxInDetTrackSelectionCfg(flags)))
 
     from InDetTrigRecExample.TrigInDetConfiguredVtxCuts import (
         ConfiguredTrigVtxCuts)
@@ -184,7 +179,7 @@ def TrigGaussIterativeFindingCfg(flags,
     kwargs.setdefault("MaxTracks", vtx_cuts.MaxTracks())
 
     acc.setPrivateTools(acc.popToolsAndMerge(
-        GaussIterativeFindingCfg(flags, name+signature, **kwargs)))
+        GaussIterativeFindingCfg(flags, name+flags.Tracking.ActiveConfig.input_name, **kwargs)))
     return acc
 
 def ActsGaussAdaptiveMultiFindingCfg(flags,
@@ -222,7 +217,6 @@ def ActsGaussAdaptiveMultiFindingCfg(flags,
 def TrigActsGaussAdaptiveMultiFindingCfg(
         flags,
         name="ActsAdaptiveMultiPriVtxFinderTool",
-        signature="",
         **kwargs):
     acc = ComponentAccumulator()
 
@@ -230,19 +224,16 @@ def TrigActsGaussAdaptiveMultiFindingCfg(
         from InDetConfig.InDetTrackSelectionToolConfig import (
             TrigVtxInDetTrackSelectionCfg)
         kwargs.setdefault("TrackSelector", acc.popToolsAndMerge(
-            TrigVtxInDetTrackSelectionCfg(flags, signature=signature)))
-
-    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-    config = getInDetTrigConfig(signature)
+            TrigVtxInDetTrackSelectionCfg(flags)))
 
     kwargs.setdefault("useBeamConstraint", True)
     kwargs.setdefault("useSeedConstraint", False)
-    kwargs.setdefault("tracksMaxZinterval", config.TracksMaxZinterval)
+    kwargs.setdefault("tracksMaxZinterval", flags.Tracking.ActiveConfig.TracksMaxZinterval)
     kwargs.setdefault("do3dSplitting", False)
-    kwargs.setdefault("addSingleTrackVertices", config.addSingleTrackVertices)
+    kwargs.setdefault("addSingleTrackVertices", flags.Tracking.ActiveConfig.addSingleTrackVertices)
 
     acc.setPrivateTools(acc.popToolsAndMerge(
-        ActsGaussAdaptiveMultiFindingCfg(flags, name+signature, **kwargs)))
+        ActsGaussAdaptiveMultiFindingCfg(flags, name+flags.Tracking.ActiveConfig.input_name, **kwargs)))
     return acc
 
 def ActsIterativeFindingCfg(flags,
@@ -288,17 +279,12 @@ def VertexFinderToolCfg(flags, **kwargs):
     elif flags.Tracking.PriVertex.setup == VertexSetup.ActsGaussAMVF:
         return ActsGaussAdaptiveMultiFindingCfg(flags, **kwargs)
 
-def TrigVertexFinderToolCfg(flags, signature="", **kwargs):
+def TrigVertexFinderToolCfg(flags, **kwargs):
 
-    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-    config = getInDetTrigConfig(signature)
-
-    if config.vertexSetup == VertexSetup.ActsGaussAMVF:
-        return TrigActsGaussAdaptiveMultiFindingCfg(
-            flags, signature=signature, **kwargs)
-    elif config.vertexSetup == VertexSetup.GaussAMVF:
-        return TrigGaussAdaptiveMultiFindingCfg(
-            flags, signature=signature, **kwargs)
-    elif config.vertexSetup == VertexSetup.GaussIVF:
-        return TrigGaussIterativeFindingCfg(
-            flags, signature=signature, **kwargs)
+    if flags.Tracking.ActiveConfig.adaptiveVertex and \
+       flags.Tracking.ActiveConfig.adaptiveVertex:
+        return TrigActsGaussAdaptiveMultiFindingCfg(flags, **kwargs)
+    elif flags.Tracking.ActiveConfig.adaptiveVertex:
+        return TrigGaussAdaptiveMultiFindingCfg(flags, **kwargs)
+    else:
+        return TrigGaussIterativeFindingCfg(flags, **kwargs)

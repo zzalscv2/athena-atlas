@@ -63,34 +63,6 @@ if DetFlags.haveRIO.TRT_on() :
         print (     InDetTrigTRT_ElectronPidTool)
 
 
-from InDetRecExample.TrackingCommon import makePublicTool,makeName
-@makePublicTool
-def getInDetTrigFullLinearizedTrackFactory(name='InDetFullLinearizedTrackFactory', **kwargs) :
-    the_name                    = makeName( name, kwargs)
-    if 'Extrapolator' not in kwargs :
-      from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigExtrapolator
-      kwargs.setdefault('Extrapolator', InDetTrigExtrapolator) # @TODO AtlasExtrapolator ?
-
-    from TrkVertexFitterUtils.TrkVertexFitterUtilsConf import Trk__FullLinearizedTrackFactory
-    return Trk__FullLinearizedTrackFactory(the_name, **kwargs)
-
-@makePublicTool
-def getInDetTrigTrackToVertexIPEstimator(name='InDetTrackToVertexIPEstimator', **kwargs) :
-    the_name                    = makeName( name, kwargs)
-    if 'Extrapolator' not in kwargs :
-      from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigExtrapolator
-      kwargs.setdefault('Extrapolator', InDetTrigExtrapolator) # @TODO AtlasExtrapolator ?
-    if 'LinearizedTrackFactory' not in kwargs :
-        kwargs.setdefault('LinearizedTrackFactory', getInDetTrigFullLinearizedTrackFactory() )
-    from TrkVertexFitterUtils.TrkVertexFitterUtilsConf import Trk__TrackToVertexIPEstimator
-    return Trk__TrackToVertexIPEstimator( the_name, **kwargs)
-
-
-# from TrkVertexFitterUtils.TrkVertexFitterUtilsConf import Trk__DetAnnealingMaker
-# InDetTrigAnnealingMaker = Trk__DetAnnealingMaker(name = "InDetTrigTrkAnnealingMaker")
-# #TODO this setting is different in the R3 legacy
-# InDetTrigAnnealingMaker.SetOfTemperatures = [64.,16.,4.,2.,1.5,1.] # not default
-# ToolSvc += InDetTrigAnnealingMaker
 
                             
 
