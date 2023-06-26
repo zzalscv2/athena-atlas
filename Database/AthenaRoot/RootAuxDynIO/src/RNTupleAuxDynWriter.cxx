@@ -157,15 +157,17 @@ namespace RootAuxDynIO
       ATH_MSG_DEBUG("Commit");
       if( !m_entry ) makeNewEntry();
 
-      std::vector<RFieldValue> generatedValues;
       int num_bytes = 0;
       for( auto& attr: m_attrDataMap ) {
          ATH_MSG_VERBOSE("Setting data ptr for field: " << attr.first << "  data=" << std::hex << attr.second << std::dec );
          if( !attr.second ) {
             ATH_MSG_DEBUG("Generating default object for field: " << attr.first );
-            // MN: the default object created here needs to be deleted - should use REntry::AddValue()
-            generatedValues.emplace_back( m_entry->GetValue(attr.first).GetField()->GenerateValue() );
-            m_entry->CaptureValueUnsafe( attr.first, generatedValues.back().GetRawPtr() );
+            RFieldValue& val = m_generatedValues[attr.first];
+            if( !val.GetRawPtr() ) {
+               // create a default object, remember it for potential later reuse
+               val = m_entry->GetValue(attr.first).GetField()->GenerateValue();
+            }
+            m_entry->CaptureValueUnsafe( attr.first, val.GetRawPtr() );
          } else {
             // attach the attribute values rememberd internally
             m_entry->CaptureValueUnsafe( attr.first, attr.second );
@@ -176,11 +178,6 @@ namespace RootAuxDynIO
       num_bytes += m_ntupleWriter->Fill( *m_entry );
       ATH_MSG_DEBUG("Filled RNTuple Row, bytes written: " << num_bytes);
 
-      // delete the generated default fields
-      for( auto& val : generatedValues ) {
-         val.GetField()->DestroyValue(val);
-      }
-      generatedValues.clear();
       m_entry.reset();
       m_needsCommit = false;
       m_rowN++;
@@ -194,8 +191,14 @@ namespace RootAuxDynIO
 
 
    void RNTupleAuxDynWriter::close() {
+      // delete the generated default fields
+      for( auto& nameval : m_generatedValues ) {
+         nameval.second.GetField()->DestroyValue(nameval.second);
+      }
+      m_generatedValues.clear();
       m_ntupleWriter.reset(); m_entry.reset(); m_model.reset(); m_rowN=0;
    }
+
 
    RNTupleAuxDynWriter::~RNTupleAuxDynWriter() {}
 

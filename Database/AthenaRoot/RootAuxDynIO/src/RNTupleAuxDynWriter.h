@@ -49,6 +49,9 @@ namespace RootAuxDynIO
       int                  m_clients = 0;
       bool                 m_needsCommit = false;
 
+      /// default-constructed objects to fill out blanks
+      std::map<std::string, RFieldValue> m_generatedValues;
+
 
       RNTupleAuxDynWriter(TFile* file, const std::string& ntupleName, int compression);
 
