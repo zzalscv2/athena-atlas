@@ -124,6 +124,7 @@ class TrigInDetReco(ExecStep):
                 chains += "'HLT_j45_pf_ftf_preselj20_L1jJ40',"
 #               chains += "'HLT_j45_subjesgscIS_ftf_boffperf_split_L1J20',"
                 chains += "'HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1J20',"
+#               chains += "'HLT_j75_0eta290_020jvt_bdl1r60_3j75_pf_ftf_preselj50b85XX3j50_L14J20',"
                 flags  += 'doBjetSlice=True;'
             if ( i=='fsjet' or i=='fs' or i=='jet' ) :
                 chains += "'HLT_j45_pf_ftf_preselj20_L1J15',"
