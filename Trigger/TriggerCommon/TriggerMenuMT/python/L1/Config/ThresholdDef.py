@@ -273,7 +273,7 @@ class ThresholdDef:
 
         # ENERGY SPARES
         # decrement jXE spares for addtional heavy ion jTE thresholds
-        for thrV in range(1,19):
+        for thrV in range(1,17):
             XEThreshold('jXESPARE%i' % thrV, 'jXE').setXE(thrVal_SPAREXE)
 
         jXE_cuts = [100]
@@ -287,7 +287,7 @@ class ThresholdDef:
 
         # jTE
         # additional heavy ion jTE threhsolds
-        for thrV in [3,5,20,50,200,600,1500,3000]:
+        for thrV in [3,5,10,20,50,100,200,600,1500,3000]:
             TEThreshold('jTE%i' % thrV, 'jTE').setTE(thrV)
 
         for thrV in [200,]:
