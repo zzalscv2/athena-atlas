@@ -67,6 +67,46 @@ def InTimeOnlyMcEventCollCfg(flags, name="InTimeOnlyMcEventCollTool", **kwargs):
     return acc
 
 
+def GenericSimpleMergeMcEventCollCfg(flags, name="MergeMcEventCollTool", **kwargs):
+    acc = ComponentAccumulator()
+    if flags.Digitization.DoXingByXingPileUp: # PileUpTool approach
+        kwargs.setdefault("PileUpMergeSvc", "")
+    else: # 'Algorithm' approach (consider all bunch-crossings at once)
+        kwargs.setdefault("PileUpMergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags)).name)
+    kwargs.setdefault("OnlySaveSignalTruth", False)
+    kwargs.setdefault("OverrideEventNumbers", True)
+    kwargs.setdefault("TruthCollInputKey", "TruthEvent")
+    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+        kwargs.setdefault("TruthCollOutputKey", flags.Overlay.BkgPrefix + "TruthEvent")
+    else:
+        kwargs.setdefault("TruthCollOutputKey", "TruthEvent")
+    tool = CompFactory.SimpleMergeMcEventCollTool(name, **kwargs)
+    acc.merge(PileUpToolsCfg(flags, PileUpTools=tool))
+    return acc
+
+
+def SimpleMergeMcEventCollCfg(flags, name="MergeMcEventCollTool", **kwargs):
+    if flags.Digitization.DoXingByXingPileUp: # PileUpTool approach
+        kwargs.setdefault("FirstXing", -30000)
+        kwargs.setdefault("LastXing",   30000)
+    return GenericSimpleMergeMcEventCollCfg(flags, name, **kwargs)
+
+
+def SignalOnlySimpleMergeMcEventCollCfg(flags, name="SignalOnlyMcEventCollTool", **kwargs):
+    if flags.Digitization.DoXingByXingPileUp: # PileUpTool approach
+        kwargs.setdefault("FirstXing", 0)
+        kwargs.setdefault("LastXing",  0)
+    kwargs.setdefault("OnlySaveSignalTruth", True)
+    return GenericSimpleMergeMcEventCollCfg(flags, name, **kwargs)
+
+
+def InTimeOnlySimpleMergeMcEventCollCfg(flags, name="InTimeOnlyMcEventCollTool", **kwargs):
+    if flags.Digitization.DoXingByXingPileUp: # PileUpTool approach
+        kwargs.setdefault("FirstXing", 0)
+        kwargs.setdefault("LastXing",  0)
+    return GenericSimpleMergeMcEventCollCfg(flags, name, **kwargs)
+
+
 # The earliest bunch crossing time for which interactions will be sent
 # to the Truth jet merging code. See discussions in ATLASSIM-3837.
 def TruthJet_FirstXing():

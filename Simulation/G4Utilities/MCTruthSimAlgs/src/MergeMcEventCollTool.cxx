@@ -203,7 +203,7 @@ StatusCode MergeMcEventCollTool::processAllSubEvents(const EventContext& /*ctx*/
   while (timedTruthListIter != endOfTimedTruthList) {
     const PileUpTimeEventIndex& currentPileUpTimeEventIndex(timedTruthListIter->first);
     const McEventCollection *pBackgroundMcEvtColl(&*(timedTruthListIter->second));
-    if (!processEvent(pBackgroundMcEvtColl, currentPileUpTimeEventIndex.time(), currentPileUpTimeEventIndex.index()).isSuccess()) {
+    if (!processEvent(pBackgroundMcEvtColl, currentPileUpTimeEventIndex.time(), currentPileUpTimeEventIndex.index(), static_cast<int>(currentPileUpTimeEventIndex.type())).isSuccess()) {
       ATH_MSG_ERROR ("Failed to process McEventCollection." );
       return StatusCode::FAILURE;
     }
@@ -249,7 +249,7 @@ StatusCode MergeMcEventCollTool::processBunchXing(int bunchXing,
       return StatusCode::FAILURE;
     }
 
-    if (!processEvent(pMEC,iEvt->time(),iEvt->index()).isSuccess()) {
+    if (!processEvent(pMEC,iEvt->time(),iEvt->index(), static_cast<int>(iEvt->type())).isSuccess()) {
       ATH_MSG_ERROR ("processBunchXing: Failed to process McEventCollection." );
       return StatusCode::FAILURE;
     }
@@ -315,7 +315,10 @@ StatusCode MergeMcEventCollTool::processFirstSubEvent(const McEventCollection *p
   m_pOvrlMcEvColl = new McEventCollection(*pMcEvtColl);
   m_signal_event_number = m_pOvrlMcEvColl->at(0)->event_number();
   m_pOvrlMcEvColl->at(0)->set_event_number(-2); //Set this to zero for the purposes of sorting. (restore after sorting).
-
+#ifdef HEPMC3
+  m_pOvrlMcEvColl->at(0)->add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(0));
+  m_pOvrlMcEvColl->at(0)->add_attribute("PileUpType",std::make_shared<HepMC3::IntAttribute>(0));
+#endif
   updateClassificationMap(HepMC::signal_process_id(m_pOvrlMcEvColl->at(0)), m_pOvrlMcEvColl->at(0)->event_number(), 0,- 1, true);
   m_newevent=false; //Now the McEventCollection and classification map are not empty this should be set to false.
   ATH_MSG_DEBUG( "execute: copied original event McEventCollection" );
@@ -369,7 +372,7 @@ bool MergeMcEventCollTool::isTruthFiltertedMcEventCollection(const McEventCollec
   return false;
 }
 
-StatusCode MergeMcEventCollTool::processEvent(const McEventCollection *pMcEvtColl, const double currentEventTime, const int currentBkgEventIndex) {
+StatusCode MergeMcEventCollTool::processEvent(const McEventCollection *pMcEvtColl, const double currentEventTime, const int currentBkgEventIndex, int pileupType) {
   ATH_MSG_VERBOSE ( "processEvent()" );
   if(m_newevent) return processFirstSubEvent(pMcEvtColl);
 
@@ -382,7 +385,7 @@ StatusCode MergeMcEventCollTool::processEvent(const McEventCollection *pMcEvtCol
   //Examine the properties of the GenEvent - if it looks like a TruthFiltered background event (contains a Geantino?!) 
   //then save the whole event as below, otherwise do the usual classification.
   if(isTruthFiltertedMcEventCollection(pMcEvtColl)) {
-    if ( processTruthFilteredEvent(pMcEvtColl,  currentEventTime, currentBkgEventIndex).isSuccess() ) {
+    if ( processTruthFilteredEvent(pMcEvtColl,  currentEventTime, currentBkgEventIndex, pileupType).isSuccess() ) {
       ++m_nBkgEventsReadSoFar;
       return StatusCode::SUCCESS;
     }
@@ -391,7 +394,7 @@ StatusCode MergeMcEventCollTool::processEvent(const McEventCollection *pMcEvtCol
     }
   }
   else {
-    if ( processUnfilteredEvent(pMcEvtColl,  currentEventTime, currentBkgEventIndex).isSuccess() ) {
+    if ( processUnfilteredEvent(pMcEvtColl,  currentEventTime, currentBkgEventIndex, pileupType).isSuccess() ) {
       ++m_nBkgEventsReadSoFar;
       return StatusCode::SUCCESS;
     }
@@ -420,13 +423,19 @@ StatusCode MergeMcEventCollTool::saveHeavyIonInfo(const McEventCollection *pMcEv
   return StatusCode::SUCCESS;
 }
 
-StatusCode MergeMcEventCollTool::processTruthFilteredEvent(const McEventCollection *pMcEvtColl, const double currentEventTime, const int currentBkgEventIndex) {
+StatusCode MergeMcEventCollTool::processTruthFilteredEvent(const McEventCollection *pMcEvtColl, const double currentEventTime, const int currentBkgEventIndex, int pileupType) {
   //insert the GenEvent into the overlay McEventCollection.
-  ATH_MSG_VERBOSE ( "processTruthFilteredEvent()" );
+  ATH_MSG_VERBOSE ( "processTruthFilteredEvent(): Event Type: " << pileupType );
   ATH_CHECK(this->saveHeavyIonInfo(pMcEvtColl));
   m_pOvrlMcEvColl->at(m_startingIndexForBackground+m_nBkgEventsReadSoFar)=new HepMC::GenEvent(**(pMcEvtColl->begin()));
   HepMC::GenEvent& currentBackgroundEvent(*(m_pOvrlMcEvColl->at(m_startingIndexForBackground+m_nBkgEventsReadSoFar)));
   HepMC::fillBarcodesAttribute(&currentBackgroundEvent);
+#ifdef HEPMC3
+  const int bunchCrossingTime=static_cast<int>(currentEventTime);
+  currentBackgroundEvent.add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime));
+  currentBackgroundEvent.add_attribute("PileUpType",std::make_shared<HepMC3::IntAttribute>(pileupType));
+#endif
+
   currentBackgroundEvent.set_event_number(currentBkgEventIndex);
   puType currentGenEventClassification(RESTOFMB);
   if ( std::abs(currentEventTime)<51.0 ) {
@@ -438,8 +447,8 @@ StatusCode MergeMcEventCollTool::processTruthFilteredEvent(const McEventCollecti
   return StatusCode::SUCCESS;
 }
 
-StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection *pMcEvtColl, const double currentEventTime, const int currentBkgEventIndex) {
-  ATH_MSG_VERBOSE ( "processUnfilteredEvent()" );
+StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection *pMcEvtColl, const double currentEventTime, const int currentBkgEventIndex, int pileupType) {
+  ATH_MSG_VERBOSE ( "processUnfilteredEvent() Event Type: " << pileupType );
   ATH_CHECK(this->saveHeavyIonInfo(pMcEvtColl));
   const HepMC::GenEvent& currentBackgroundEvent(**(pMcEvtColl->begin()));         //background event
   //handle the slimming case
@@ -450,6 +459,9 @@ StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection 
   //insert the GenEvent into the overlay McEventCollection.
   //for configs with pile-up truth, also need to propagate barcodes to GenEvent
   HepMC::GenEvent* evt = m_onlySaveSignalTruth ? new HepMC::GenEvent() : new HepMC::GenEvent(currentBackgroundEvent);
+  const int bunchCrossingTime=static_cast<int>(currentEventTime);
+  evt->add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime));
+  evt->add_attribute("PileUpType",std::make_shared<HepMC3::IntAttribute>(pileupType));
   //AV Not sure if one should add the vertex here
   evt->set_event_number(currentBkgEventIndex);
   evt->add_vertex(pCopyOfGenVertex);

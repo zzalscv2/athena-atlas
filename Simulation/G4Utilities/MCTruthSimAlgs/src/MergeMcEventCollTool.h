@@ -54,13 +54,13 @@ private:
   typedef enum puType { INTIME, OUTOFTIME, RESTOFMB, CAVERN, NOPUTYPE } puType;
 
   //** Add the required information from the current GenEvent to the output McEventCollection
-  StatusCode processEvent(const McEventCollection *pMcEvtColl, const double currentEventTime, const int currentBkgEventIndex);
+  StatusCode processEvent(const McEventCollection *pMcEvtColl, const double currentEventTime, const int currentBkgEventIndex, int pileupType);
   //** Special case of processEvent for the first (signal) GenEvent
   StatusCode processFirstSubEvent(const McEventCollection *pMcEvtColl);
   //** Add the required sub-set of the information from the current GenEvent to the output McEventCollection
-  StatusCode processUnfilteredEvent(const McEventCollection *pMcEvtColl, const double currentEventTime, const int currentBkgEventIndex);
+  StatusCode processUnfilteredEvent(const McEventCollection *pMcEvtColl, const double currentEventTime, const int currentBkgEventIndex, int pileupType);
   //** This is for events which have already been truth-filtered. Add the whole GenEvent to the output McEventCollection
-  StatusCode processTruthFilteredEvent(const McEventCollection *pMcEvtColl, const double currentEventTime, const int currentBkgEventIndex);
+  StatusCode processTruthFilteredEvent(const McEventCollection *pMcEvtColl, const double currentEventTime, const int currentBkgEventIndex, int pileupType);
   //** Remove any empty background GenEvents from the output McEventCollection
   StatusCode compressOutputMcEventCollection();
   //** Print out detailed debug info if required.
