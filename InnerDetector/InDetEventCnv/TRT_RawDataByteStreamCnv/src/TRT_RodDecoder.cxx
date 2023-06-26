@@ -2,32 +2,28 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-
-
 #include "TRT_RodDecoder.h"
 
 #include "CoralBase/Attribute.h"
 // COOL API include files (CoolKernel)
+#include "CoolApplication/DatabaseSvcFactory.h"
 #include "CoolKernel/DatabaseId.h"
 #include "CoolKernel/Exception.h"
-#include "CoolKernel/IDatabaseSvc.h"
 #include "CoolKernel/IDatabase.h"
+#include "CoolKernel/IDatabaseSvc.h"
 #include "CoolKernel/IFolder.h"
 #include "CoolKernel/IObject.h"
 #include "CoolKernel/IObjectIterator.h"
 #include "CoolKernel/Record.h"
 #include "CoolKernel/RecordSpecification.h"
-#include "CoolApplication/DatabaseSvcFactory.h"
 // COOL API include files (CoolApplication)
-#include "CoolApplication/Application.h"
-#include "StoreGate/ReadCondHandle.h"
-#include "AthenaPoolUtilities/AthenaAttributeList.h"
-
-
-#include "InDetByteStreamErrors/TRT_BSErrContainer.h"
-
-#include "PathResolver/PathResolver.h"
 #include <fstream>
+
+#include "AthenaPoolUtilities/AthenaAttributeList.h"
+#include "CoolApplication/Application.h"
+#include "InDetByteStreamErrors/TRT_BSErrContainer.h"
+#include "PathResolver/PathResolver.h"
+#include "StoreGate/ReadCondHandle.h"
 
 using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 
@@ -36,131 +32,119 @@ using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
  * -------------------------------------------------------
  */
 
-TRT_RodDecoder::TRT_RodDecoder
-( const std::string& type, const std::string& name,const IInterface* parent )
-  :  base_class              ( type,name,parent ),
-     m_CablingSvc            ( "TRT_CablingSvc", name ),
-     //     m_bsErrSvc              ( "TRT_ByteStream_ConditionsSvc", name ),
-     m_recordBSErrors        ( true ),
-     m_lookAtSidErrors       ( true ),
-     m_lookAtErrorErrors     ( false ),
-     m_lookAtL1idErrors      ( true ),
-     m_lookAtBcidErrors      ( true ),
-     m_lookAtMissingErrors   ( true ),
-     m_loadCompressTableFile ( false ),
-     m_loadCompressTableDB   ( true ),
-     m_maxCompressionVersion ( 255 ),
-     m_forceRodVersion       ( -1 ),
-     m_trt_id                ( nullptr ),
-     m_eventTypeIsSim        ( false ),
-     //     m_Nsymbols              ( 0 ),
-     m_escape_marker         ( 0x8000000 ),
-     m_Nrdos                 ( 0 )
+TRT_RodDecoder::TRT_RodDecoder(const std::string& type, const std::string& name,
+                               const IInterface* parent)
+    : base_class(type, name, parent),
+      m_CablingSvc("TRT_CablingSvc", name),
+      m_recordBSErrors(true),
+      m_lookAtSidErrors(true),
+      m_lookAtErrorErrors(false),
+      m_lookAtL1idErrors(true),
+      m_lookAtBcidErrors(true),
+      m_lookAtMissingErrors(true),
+      m_loadCompressTableFile(false),
+      m_loadCompressTableDB(true),
+      m_maxCompressionVersion(255),
+      m_forceRodVersion(-1),
+      m_trt_id(nullptr),
+      m_eventTypeIsSim(false),
+      m_escape_marker(0x8000000),
+      m_Nrdos(0)
 
 {
-  declareProperty ( "TRT_Cabling", m_CablingSvc );
-  declareProperty ( "RecordByteStreamErrors", m_recordBSErrors );
-  declareProperty ( "LookAtSidErrors",        m_lookAtSidErrors );
-  declareProperty ( "LookAtErrorErrors",      m_lookAtErrorErrors );
-  declareProperty ( "LookAtL1idErrors",       m_lookAtL1idErrors );
-  declareProperty ( "LookAtBcidErrors",       m_lookAtBcidErrors );
-  declareProperty ( "LookAtMissingErrors",    m_lookAtMissingErrors );
-  declareProperty ( "LoadCompressTableFile",  m_loadCompressTableFile );
-  declareProperty ( "LoadCompressTableDB",    m_loadCompressTableDB );
-  declareProperty ( "ForceRodVersion",        m_forceRodVersion );
-  declareProperty ( "LoadCompressTableVersions", m_LoadCompressTableVersions );
+  declareProperty("TRT_Cabling", m_CablingSvc);
+  declareProperty("RecordByteStreamErrors", m_recordBSErrors);
+  declareProperty("LookAtSidErrors", m_lookAtSidErrors);
+  declareProperty("LookAtErrorErrors", m_lookAtErrorErrors);
+  declareProperty("LookAtL1idErrors", m_lookAtL1idErrors);
+  declareProperty("LookAtBcidErrors", m_lookAtBcidErrors);
+  declareProperty("LookAtMissingErrors", m_lookAtMissingErrors);
+  declareProperty("LoadCompressTableFile", m_loadCompressTableFile);
+  declareProperty("LoadCompressTableDB", m_loadCompressTableDB);
+  declareProperty("ForceRodVersion", m_forceRodVersion);
+  declareProperty("LoadCompressTableVersions", m_LoadCompressTableVersions);
 }
 
 /* ----------------------------------------------------------
- * destructor  
+ * destructor
  * ----------------------------------------------------------
  */
 TRT_RodDecoder::~TRT_RodDecoder() = default;
-
 
 /* ----------------------------------------------------------
  * initialize
  * ----------------------------------------------------------
  */
 
-StatusCode TRT_RodDecoder::initialize()
-{
-  ATH_MSG_DEBUG( " initialize " );
+StatusCode TRT_RodDecoder::initialize() {
+  ATH_MSG_DEBUG(" initialize ");
 
-  ATH_CHECK( AlgTool::initialize() );
+  ATH_CHECK(AlgTool::initialize());
 
-  m_CompressionTables.resize (m_maxCompressionVersion+1);
+  m_CompressionTables.resize(m_maxCompressionVersion + 1);
   for (std::atomic<EventContext::ContextEvt_t>& evt : m_lastPrint) {
     evt = EventContext::INVALID_CONTEXT_EVT;
   }
 
   /*
-   * Retrieve id mapping 
+   * Retrieve id mapping
    */
-  ATH_CHECK ( m_CablingSvc.retrieve() );
-  ATH_MSG_INFO( "Retrieved tool " << m_CablingSvc );
+  ATH_CHECK(m_CablingSvc.retrieve());
+  ATH_MSG_INFO("Retrieved tool " << m_CablingSvc);
 
-  ATH_CHECK( detStore()->retrieve(m_trt_id, "TRT_ID") );
+  ATH_CHECK(detStore()->retrieve(m_trt_id, "TRT_ID"));
   m_straw_layer_context = m_trt_id->straw_layer_context();
 
   /*
    * Show Look At Me's
    */
-  ATH_MSG_INFO( "Look at Sid Errors    : " << m_lookAtSidErrors );
-  ATH_MSG_INFO( "Look at Error Errors  : " << m_lookAtErrorErrors );
-  ATH_MSG_INFO( "Look at L1ID Errors   : " << m_lookAtL1idErrors );
-  ATH_MSG_INFO( "Look at BCID Errors   : " << m_lookAtBcidErrors );
-  ATH_MSG_INFO( "Look at Missing Errors: " << m_lookAtMissingErrors );
+  ATH_MSG_INFO("Look at Sid Errors    : " << m_lookAtSidErrors);
+  ATH_MSG_INFO("Look at Error Errors  : " << m_lookAtErrorErrors);
+  ATH_MSG_INFO("Look at L1ID Errors   : " << m_lookAtL1idErrors);
+  ATH_MSG_INFO("Look at BCID Errors   : " << m_lookAtBcidErrors);
+  ATH_MSG_INFO("Look at Missing Errors: " << m_lookAtMissingErrors);
 
   // m_loadCompressTableDB is set to (globalflags.DataSource()!='geant4') in JO
-  if(m_loadCompressTableDB) {
-     ATH_CHECK(m_CompressKey.initialize());
-  }else{
-    m_eventTypeIsSim=true;
+  if (m_loadCompressTableDB) {
+    ATH_CHECK(m_CompressKey.initialize());
+  } else {
+    m_eventTypeIsSim = true;
   }
 
-  if ( m_loadCompressTableFile )
-  {
-    if  ( m_LoadCompressTableVersions.empty() ) 
-    {
-      m_LoadCompressTableVersions.push_back( 4 );
+  if (m_loadCompressTableFile) {
+    if (m_LoadCompressTableVersions.empty()) {
+      m_LoadCompressTableVersions.push_back(4);
     }
 
     std::vector<int>::iterator it;
 
-    for ( it=m_LoadCompressTableVersions.begin() ; 
-	  it < m_LoadCompressTableVersions.end(); ++it )
-     {
-       if ( (*it < 4) || (*it > m_maxCompressionVersion) )
-       {
-	 ATH_MSG_INFO( "Not reading bad Compress Table Version: " << *it );
-       }
-       else
-       {
-	 std::ostringstream ssVersion;
-	 ssVersion << *it;
-	 std::string compressTableFile = "Compress_Table-" + ssVersion.str() + ".dat";
+    for (it = m_LoadCompressTableVersions.begin();
+         it < m_LoadCompressTableVersions.end(); ++it) {
+      if ((*it < 4) || (*it > m_maxCompressionVersion)) {
+        ATH_MSG_INFO("Not reading bad Compress Table Version: " << *it);
+      } else {
+        std::ostringstream ssVersion;
+        ssVersion << *it;
+        std::string compressTableFile =
+            "Compress_Table-" + ssVersion.str() + ".dat";
 
-	 ATH_MSG_INFO( "Reading Compress Table: " << compressTableFile );
+        ATH_MSG_INFO("Reading Compress Table: " << compressTableFile);
 
-	 ATH_CHECK( ReadCompressTableFile( compressTableFile ) );
-       }
-     }
+        ATH_CHECK(ReadCompressTableFile(compressTableFile));
+      }
+    }
   }
 
-
-  if ( m_forceRodVersion > 0 )
-  {
-    ATH_MSG_WARNING( "****************************" );
-    ATH_MSG_WARNING( "****************************" );
-    ATH_MSG_WARNING( "* Forcing ROD Version to " << m_forceRodVersion << " *" );
-    ATH_MSG_WARNING( "****************************" );
-    ATH_MSG_WARNING( "****************************" );
+  if (m_forceRodVersion > 0) {
+    ATH_MSG_WARNING("****************************");
+    ATH_MSG_WARNING("****************************");
+    ATH_MSG_WARNING("* Forcing ROD Version to " << m_forceRodVersion << " *");
+    ATH_MSG_WARNING("****************************");
+    ATH_MSG_WARNING("****************************");
   }
 
   return StatusCode::SUCCESS;
 }
-
 
 /* ----------------------------------------------------------
  * finalize
@@ -168,17 +152,17 @@ StatusCode TRT_RodDecoder::initialize()
  */
 StatusCode TRT_RodDecoder::finalize() {
 
-  ATH_MSG_VERBOSE( "in TRT_RodDecoder::finalize" );
-  if (m_skip>0) {
-     ATH_MSG_INFO( "Number of TRT RDOs created: " << m_Nrdos << " hashes: accept " << m_accept << " skipped " << m_skip );
-  }
-  else {
-     ATH_MSG_INFO( "Number of TRT RDOs created: " << m_Nrdos );
+  ATH_MSG_VERBOSE("in TRT_RodDecoder::finalize");
+  if (m_skip > 0) {
+    ATH_MSG_INFO("Number of TRT RDOs created: " << m_Nrdos << " hashes: accept "
+                                                << m_accept << " skipped "
+                                                << m_skip);
+  } else {
+    ATH_MSG_INFO("Number of TRT RDOs created: " << m_Nrdos);
   }
 
   return StatusCode::SUCCESS;
 }
-
 
 /* ----------------------------------------------------------
  * main method to fill the collections into the IDC
@@ -192,43 +176,32 @@ StatusCode TRT_RodDecoder::finalize() {
  * If the version is none of these we complain and return FAILURE.
  * ----------------------------------------------------------
  */
-StatusCode
-TRT_RodDecoder::fillCollection ( const ROBFragment* robFrag,
-				 TRT_RDO_Container* rdoIdc,
-				 TRT_BSErrContainer* bsErr,
-         DataPool<TRT_LoLumRawData>* dataItemsPool,
-				 const std::vector<IdentifierHash>* vecHash ) const
-{
+StatusCode TRT_RodDecoder::fillCollection(
+    const ROBFragment* robFrag, TRT_RDO_Container* rdoIdc,
+    TRT_BSErrContainer* bsErr, DataPool<TRT_LoLumRawData>* dataItemsPool,
+    const std::vector<IdentifierHash>* vecHash) const {
   // update compression tables
   StatusCode sc;
-  if(m_loadCompressTableDB) sc = update(); 
+  if (m_loadCompressTableDB)
+    sc = update();
 
-  int    RodBlockVersion          = (robFrag->rod_version() & 0xff);
+  int RodBlockVersion = (robFrag->rod_version() & 0xff);
 
-  if ( m_forceRodVersion > 0 )
+  if (m_forceRodVersion > 0)
     RodBlockVersion = m_forceRodVersion;
 
   uint32_t robid = robFrag->rod_source_id();
 
-  //  ATH_MSG_INFO( "fC: robid = " 
-  //		<< MSG::hex 
-  //		<< robid << " L1ID = " << robFrag->rod_lvl1_id()
-  //		<< MSG::dec );
-
   /*
    * Save non-zero rob status to TRT BS Conditions Services
    */
-  if ( robFrag->nstatus() )
-  { 
+  if (robFrag->nstatus()) {
     const uint32_t* rob_status;
     robFrag->status(rob_status);
 
-    if ( *rob_status )
-    {
+    if (*rob_status) {
 
-      bsErr->add_rob_error( robFrag->rob_source_id(), *rob_status ); 
-      
-
+      bsErr->add_rob_error(robFrag->rob_source_id(), *rob_status);
 
       /*
        * This is a hack to only print once per event.
@@ -237,219 +210,193 @@ TRT_RodDecoder::fillCollection ( const ROBFragment* robFrag,
       const EventContext& ctx{Gaudi::Hive::currentContext()};
       std::atomic<EventContext::ContextEvt_t>* evt = m_lastPrint.get();
       EventContext::ContextEvt_t lastEvt = *evt;
-      while (lastEvt != ctx.evt() && !evt->compare_exchange_strong (lastEvt, ctx.evt()))
-        ;
+
+      while (lastEvt != ctx.evt() &&
+             !evt->compare_exchange_strong(lastEvt, ctx.evt()));
+
       if (lastEvt != ctx.evt()) {  // New event in this slot
         *evt = ctx.evt();
-	ATH_MSG_INFO( "Non-Zero ROB status word for ROB " 
-		      << MSG::hex 
-		      << robFrag->rob_source_id() 
-		      << " ( " << *rob_status << " ) "
-		      << MSG::dec
-		      << "  Skipping decoding..." );
+        ATH_MSG_INFO("Non-Zero ROB status word for ROB "
+                     << MSG::hex << robFrag->rob_source_id() << " ( "
+                     << *rob_status << " ) " << MSG::dec
+                     << "  Skipping decoding...");
       }
 
-      sc = StatusCode::RECOVERABLE;   // XXX - Evil, but cannot trust anything
+      sc = StatusCode::RECOVERABLE;  // XXX - Evil, but cannot trust anything
       return sc;
     }
   }
-
 
   // get version to decide which method to use to decode !
-  if ( 3 < RodBlockVersion && m_maxCompressionVersion >= RodBlockVersion )     // Full Compression
+  if (3 < RodBlockVersion &&
+      m_maxCompressionVersion >= RodBlockVersion)  // Full Compression
   {
-    if ( m_CompressionTables[RodBlockVersion] )
-      sc = int_fillFullCompress( robFrag, rdoIdc, dataItemsPool, 
-				 *m_CompressionTables[RodBlockVersion],
-				 vecHash );  
-    else
-    {
-      if ( m_err_count_fillCollection < 100 )
-      {
-	ATH_MSG_WARNING( "Rod Version: " << RodBlockVersion		\
-			 << ", but Compression Table not loaded!  ROD ID = " \
-			 << MSG::hex << robid << MSG::dec );
-	m_err_count_fillCollection++;
+    if (m_CompressionTables[RodBlockVersion])
+      sc = int_fillFullCompress(robFrag, rdoIdc, dataItemsPool,
+                                *m_CompressionTables[RodBlockVersion], vecHash);
+    else {
+      if (m_err_count_fillCollection < 100) {
+        ATH_MSG_WARNING("Rod Version: "
+                        << RodBlockVersion
+                        << ", but Compression Table not loaded!  ROD ID = "
+                        << MSG::hex << robid << MSG::dec);
+        m_err_count_fillCollection++;
+      } else if (100 == m_err_count_fillCollection) {
+        ATH_MSG_WARNING("Too many Rod Version messages.  "
+                        << "Turning message off.");
+        m_err_count_fillCollection++;
       }
-      else if ( 100 == m_err_count_fillCollection )
-      {
-	ATH_MSG_WARNING( "Too many Rod Version messages.  "	\
-			 << "Turning message off." );
-	m_err_count_fillCollection++;
-      }
-      
+
       sc = StatusCode::FAILURE;
     }
-  }
-  else if ( 3 == RodBlockVersion )
-    sc = int_fillMinimalCompress( robFrag, rdoIdc, dataItemsPool, vecHash );
-  else if ( (2 == RodBlockVersion) || (1 == RodBlockVersion) )
-    sc = int_fillExpanded( robFrag, rdoIdc, dataItemsPool, vecHash );
-  else if ( 0 == RodBlockVersion )
-  {
-    if ( 0 == robFrag->rod_ndata() )
+  } else if (3 == RodBlockVersion) {
+    sc = int_fillMinimalCompress(robFrag, rdoIdc, dataItemsPool, vecHash);
+  } else if ((2 == RodBlockVersion) || (1 == RodBlockVersion)) {
+    sc = int_fillExpanded(robFrag, rdoIdc, dataItemsPool, vecHash);
+  } else if (0 == RodBlockVersion) {
+    if (0 == robFrag->rod_ndata()) {
       return sc;
+    }
 
-
-    if (! m_eventTypeIsSim)
-    {
-       ATH_MSG_FATAL( "ROD Format Version Number is ZERO.  " \
-	    << "and event_type is not EventType::IS_SIMULATION, " \
-	    << "ROD ID = " << MSG::hex << robid << MSG::dec );
+    if (!m_eventTypeIsSim) {
+      ATH_MSG_FATAL("ROD Format Version Number is ZERO.  "
+                    << "and event_type is not EventType::IS_SIMULATION, "
+                    << "ROD ID = " << MSG::hex << robid << MSG::dec);
       return StatusCode::FAILURE;
     }
 
-    sc = int_fillExpanded( robFrag, rdoIdc, dataItemsPool, vecHash );
+    sc = int_fillExpanded(robFrag, rdoIdc, dataItemsPool, vecHash);
+  } else {
   }
-  else
-  {
-  }
-  
+
   /*
-   * Decode Status Block, only if we have a modern block and 
+   * Decode Status Block, only if we have a modern block and
    * are OK at this point
    */
-  if ( (RodBlockVersion >= 2) && (sc == StatusCode::SUCCESS) )
-    {
+  if ((RodBlockVersion >= 2) && (sc == StatusCode::SUCCESS)) {
+    /*
+     * Error counters
+     */
+    int sid_errors = 0;
+    int error_errors = 0;
+    int l1id_errors = 0;
+    int bcid_errors = 0;
+    int missing_errors = 0;
+
+    if (m_recordBSErrors) {
+      uint32_t rod_L1ID = robFrag->rod_lvl1_id();
+      uint32_t rod_BCID = robFrag->rod_bc_id();
+      uint32_t rod_SourceID = robFrag->rod_source_id();
+
+      OFFLINE_FRAGMENTS_NAMESPACE::PointerType vint;
+      robFrag->rod_status(vint);
+
+      int v_index = 0;
+
       /*
-       * Error counters
+       * skip mandatory status word
        */
-      int sid_errors     = 0;
-      int error_errors   = 0;
-      int l1id_errors    = 0;
-      int bcid_errors    = 0;
-      int missing_errors = 0;
+      // uint32_t mandatory = vint[v_index++];
+      v_index++;
 
-      if ( m_recordBSErrors )
-      {
-	uint32_t rod_L1ID = robFrag->rod_lvl1_id();
-	uint32_t rod_BCID = robFrag->rod_bc_id();
-	uint32_t rod_SourceID = robFrag->rod_source_id();
-      
-	OFFLINE_FRAGMENTS_NAMESPACE::PointerType vint;
-	robFrag->rod_status( vint );
-      
-	int v_index=0;
-      
-	/*
-	 * skip mandatory status word
-	 */
-	//uint32_t mandatory = vint[v_index++];
-	v_index++;
-      
-	uint32_t n_status = vint[v_index++];
+      uint32_t n_status = vint[v_index++];
 
-        if (n_status > robFrag->rod_nstatus() ) {
-           if (n_status > robFrag->rod_fragment_size_word()) {
-              ATH_MSG_WARNING("Rejecting fragment because the number of status words exceeds the fragement size: "
-                              << n_status << " > " << robFrag->rod_fragment_size_word()
-                              << " (nstatus from fragment header = " << robFrag->rod_nstatus()  << ")");
-              return StatusCode::RECOVERABLE;
-           }
-           else {
-              ATH_MSG_WARNING("The number of status words exceeds the number of status words marked in the header: "
-                              << n_status << " !< " << robFrag->rod_nstatus()
-                              << " (fragment size = " << robFrag->rod_fragment_size_word() << ")");
-           }
+      if (n_status > robFrag->rod_nstatus()) {
+        if (n_status > robFrag->rod_fragment_size_word()) {
+          ATH_MSG_WARNING(
+              "Rejecting fragment because the number of status words exceeds "
+              "the fragement size: "
+              << n_status << " > " << robFrag->rod_fragment_size_word()
+              << " (nstatus from fragment header = " << robFrag->rod_nstatus()
+              << ")");
+          return StatusCode::RECOVERABLE;
+        } else {
+          ATH_MSG_WARNING(
+              "The number of status words exceeds the number of status words "
+              "marked in the header: "
+              << n_status << " !< " << robFrag->rod_nstatus()
+              << " (fragment size = " << robFrag->rod_fragment_size_word()
+              << ")");
+        }
+      }
+
+      uint32_t i = 1;
+      while (i < n_status) {
+        uint32_t word = vint[v_index++];
+
+        for (int j = 0; j < 2; j++) {
+          uint32_t stat = (word >> (16 * j)) & 0xffff;
+          if (stat)  // Skip 0 words, bug in ROD???
+          {
+            int DTMROC_index = stat & 0x7f;
+            int DTMROC_head = (stat >> 7) & 0x1ff;
+
+            uint32_t Index = (rod_SourceID << 8) | DTMROC_index;
+
+            if (DTMROC_head) {
+              int D_sid = DTMROC_head & 0x100;
+              uint32_t D_L1ID = (DTMROC_head >> 5) & 0x7;
+              uint32_t D_BCID = (DTMROC_head >> 1) & 0xf;
+              int D_error = !(DTMROC_head & 1);
+
+              if (m_lookAtSidErrors && D_sid) {
+                bsErr->add_sid_error(Index);
+                sid_errors++;
+              }
+
+              if (m_lookAtErrorErrors && D_error) {
+                bsErr->add_error_error(Index);
+                error_errors++;
+              }
+
+              if (m_lookAtL1idErrors && (D_L1ID != (rod_L1ID & 0x7))) {
+                bsErr->add_l1id_error(Index, D_L1ID);
+                l1id_errors++;
+              }
+
+              /*
+               * We need to account for the fact that we EXPECT the BCIDs
+               * to be off by 12 for the first 7*16 bunch crossing due to
+               * the way our timing works.  ugh!
+               */
+              uint32_t expected_BCID;
+              if (rod_BCID < 7 * 16) {
+                expected_BCID = (rod_BCID + 12) & 0xf;
+              } else {
+                expected_BCID = rod_BCID & 0xf;
+              }
+              if (m_lookAtBcidErrors && (D_BCID != expected_BCID)) {
+                bsErr->add_bcid_error(Index, D_BCID);
+                bcid_errors++;
+              }
+            } else if (m_lookAtMissingErrors) {
+              bsErr->add_missing_error(Index);
+              missing_errors++;
+            }
+          }  // end of non-zero status check
         }
 
-      
-	uint32_t i=1;
-	while( i < n_status )
-	{
-	  uint32_t word = vint[v_index++];
-	  
-	  for ( int j=0; j<2; j++ )
-	  {
-	    uint32_t stat = (word >> (16*j)) & 0xffff;
-	    if ( stat )   // Skip 0 words, bug in ROD???
-	    {
-	      int DTMROC_index = stat & 0x7f;
-	      int DTMROC_head = (stat >> 7) & 0x1ff;
-		  
-	      uint32_t Index = (rod_SourceID << 8) | DTMROC_index;
-		  
-		  
-	      if ( DTMROC_head )
-	      {
-		int D_sid = DTMROC_head & 0x100;
-		uint32_t D_L1ID = (DTMROC_head >> 5) & 0x7;
-		uint32_t D_BCID = (DTMROC_head >> 1) & 0xf;
-		int D_error = !(DTMROC_head & 1);
-		      
-		      
-		if ( m_lookAtSidErrors && D_sid )
-		{
-		  bsErr->add_sid_error( Index );
-		  sid_errors++;
-		}
-		      
-		if ( m_lookAtErrorErrors && D_error )
-		{
-		  bsErr->add_error_error( Index );
-		  error_errors++;
-		}
-		      
-		if ( m_lookAtL1idErrors && (D_L1ID != (rod_L1ID & 0x7)) )
-		{
-		  bsErr->add_l1id_error( Index, D_L1ID );
-		  l1id_errors++;
-		}
+        i++;
+      }  // End of loop over status words
+    }    // End of if on m_recordBSErrors
 
-		/*
-		 * We need to account for the fact that we EXPECT the BCIDs
-		 * to be off by 12 for the first 7*16 bunch crossing due to
-		 * the way our timing works.  ugh!
-		 */
-		uint32_t expected_BCID;
-		if ( rod_BCID < 7*16 )
-		  expected_BCID = (rod_BCID + 12) & 0xf;
-		else
-		  expected_BCID = rod_BCID & 0xf;
+    uint32_t errorWord = 0;
 
-		if ( m_lookAtBcidErrors && (D_BCID != expected_BCID) )
-		{
-		  bsErr->add_bcid_error( Index, D_BCID );
-		  bcid_errors++;
-		}
-	      } 
-	      else if ( m_lookAtMissingErrors )
-	      {
-		//		 cout << "mis ";
-		bsErr->add_missing_error( Index );
-		missing_errors++;
-	      }
-		  
-	      //	      cout << endl;
-	    } // end of non-zero status check
-	  }
-	  
-	  i++;
-	} // End of loop over status words
-      }   // End of if on m_recordBSErrors
+    errorWord = l1id_errors;
+    errorWord |= (bcid_errors << 7);
+    errorWord |= (missing_errors << 14);
+    errorWord |= (error_errors << 21);
+    if (sid_errors > 0xf)
+      sid_errors = 0xf;
+    errorWord |= ((static_cast<uint32_t>(sid_errors) & 0xf)
+                  << 28);  // Only report first 15
 
-      uint32_t errorWord = 0;
-      
-      errorWord  = l1id_errors;
-      errorWord |= (bcid_errors << 7);
-      errorWord |= (missing_errors << 14);
-      errorWord |= (error_errors << 21);
-      if ( sid_errors > 0xf ) 
-	sid_errors = 0xf;
-      errorWord |= ((static_cast<uint32_t>(sid_errors) & 0xf) << 28);   // Only report first 15
-      
-      if ( errorWord )
-      { 
-	 sc=StatusCode::RECOVERABLE;
-      }
-      
+    if (errorWord) {
+      sc = StatusCode::RECOVERABLE;
     }
-
-  //  ATH_MSG_INFO( "out of fillCollection: robid = " << MSG::hex << robid << MSG::dec );
-  
-    return sc;
+  }
+  return sc;
 }
-
 
 /* ----------------------------------------------------------
  * internal method to fill the collections into the IDC, used for
@@ -466,169 +413,155 @@ TRT_RodDecoder::fillCollection ( const ROBFragment* robFrag,
  * FAILURE.
  * ----------------------------------------------------------
  */
-StatusCode
-TRT_RodDecoder::int_fillExpanded( const ROBFragment* robFrag,
-				  TRT_RDO_Container* rdoIdc,
-          DataPool<TRT_LoLumRawData>* dataItemsPool,
-				  const std::vector<IdentifierHash>* vecHash ) const
-{
+StatusCode TRT_RodDecoder::int_fillExpanded(
+    const ROBFragment* robFrag, TRT_RDO_Container* rdoIdc,
+    DataPool<TRT_LoLumRawData>* dataItemsPool,
+    const std::vector<IdentifierHash>* vecHash) const {
   // get the ROBid
   uint32_t robid = robFrag->rod_source_id();
 
   // get the ROD version. It could be used to decode the data in one
   // way or another
-  //  eformat::helper::Version rodVersion(robFrag->rod_version()); 
-  //  const uint16_t rodMinorVersion= rodVersion.minor(); 
+  //  eformat::helper::Version rodVersion(robFrag->rod_version());
+  //  const uint16_t rodMinorVersion= rodVersion.minor();
 
 #ifdef TRT_BSC_DEBUG
-  ATH_MSG_DEBUG( "fillCollections for " << MSG::hex << robid << MSG::dec );
+  ATH_MSG_DEBUG("fillCollections for " << MSG::hex << robid << MSG::dec);
 #endif
-  
-  uint32_t         word;
-  uint32_t         digit;
-  Identifier       idStraw;
-  IdentifierHash   idHash, skipHash=0xffffffff,lastHash=0xffffffff;
-  const Identifier NULLId(0);
 
+  uint32_t word;
+  uint32_t digit;
+  Identifier idStraw;
+  IdentifierHash idHash, skipHash = 0xffffffff, lastHash = 0xffffffff;
+  const Identifier NULLId(0);
 
   // get the data of the fragment
   OFFLINE_FRAGMENTS_NAMESPACE::PointerType vint;
-  robFrag->rod_data( vint );
+  robFrag->rod_data(vint);
 
-  std::unordered_map<IdentifierHash, std::unique_ptr<TRT_RDO_Collection> > colls;
-  
+  std::unordered_map<IdentifierHash, std::unique_ptr<TRT_RDO_Collection> >
+      colls;
+
   // loop over the data in the fragment
   unsigned int i;
-  uint32_t     v_size       = robFrag->rod_ndata();
-  int          bufferOffset = -1;
-  for ( i=0; i<v_size; i++ )
-    {
-      // increment offest
-      bufferOffset++;
+  uint32_t v_size = robFrag->rod_ndata();
+  int bufferOffset = -1;
+  for (i = 0; i < v_size; i++) {
+    // increment offest
+    bufferOffset++;
 
-      // get the raw data bit word
-      word  = vint[i];
-      // mask it
-      digit = word & 0x07ffffff;          // We only use 27 bits
-      if ( !digit ) continue;             // Empty Straw
-
-      
-#ifdef TRT_BSC_DEBUG
-      ATH_MSG_VERBOSE( (hex) << robid << " " << bufferOffset << " " << word \
-		       << " " << idHash << (dec) << " " << m_trt_id->print_to_string(idStraw) )
-#endif
-      
-      // Make an Identifier for the RDO and get the IdHash
-      idStraw = m_CablingSvc->getIdentifier( (eformat::SubDetector) 0 /*unused*/, robid, 
-					    bufferOffset, idHash );
-
-      if ( NULLId == idStraw )
-	{
-#ifdef TRT_BSC_DEBUG
-	   ATH_MSG_DEBUG( "Null Identifier for bufferOffset " \
-			  << bufferOffset << " word " << MSG::hex << word \
-			  << MSG::dec )
-#endif
-	  continue;
-	}
+    // get the raw data bit word
+    word = vint[i];
+    // mask it
+    digit = word & 0x07ffffff;  // We only use 27 bits
+    if (!digit)
+      continue;  // Empty Straw
 
 #ifdef TRT_BSC_DEBUG
-      ATH_MSG_DEBUG( " Collection ID = " << idHash  \
-	     << " Straw ID = " << m_trt_id->show_to_string( idStraw ) );
+    ATH_MSG_VERBOSE((hex) << robid << " " << bufferOffset << " " << word << " "
+                          << idHash << (dec) << " "
+                          << m_trt_id->print_to_string(idStraw))
 #endif
-      
-      // this option is for the trigger, if there is a vecHash* given, test it !
-      if (vecHash)
-	{
-	  if (idHash == skipHash)
-	    {
-#ifdef TRT_BSC_DEBUG
-	       ATH_MSG_DEBUG( "Collection for Hash not to be decoded, skip" );
-#endif
-	      continue;
-	    }
-	  else if (idHash != lastHash)
-	    {
-#ifdef TRT_BSC_DEBUG
-	       ATH_MSG_DEBUG( "New hash, see if we should decode it" );
-#endif
-	      lastHash = idHash;
-	      // maybe the new hash is not in the list, so test it
-	      std::vector<IdentifierHash>::const_iterator p = find(vecHash->begin(),vecHash->end(),idHash);
-	      if (p == vecHash->end())
-		{
-#ifdef TRT_BSC_DEBUG
-		   ATH_MSG_DEBUG( "Collection for Hash not to be decoded, skip" );
-#endif
-		  // remember this one, so that we do not find(...) forever
-		  skipHash = idHash;
-		  continue;
-		}
-	    }
-	}
-      else {
-	  if (idHash == skipHash)
-	    {
-               ++m_skip;
-#ifdef TRT_BSC_DEBUG
-	       ATH_MSG_DEBUG( "Collection for Hash not to be decoded, skip" );
-#endif
-	      continue;
-	    }
-          ++m_accept;
 
+    // Make an Identifier for the RDO and get the IdHash
+    idStraw = m_CablingSvc->getIdentifier((eformat::SubDetector)0 /*unused*/,
+                                          robid, bufferOffset, idHash);
+
+    if (NULLId == idStraw) {
+#ifdef TRT_BSC_DEBUG
+      ATH_MSG_DEBUG("Null Identifier for bufferOffset "
+                    << bufferOffset << " word " << MSG::hex << word << MSG::dec)
+#endif
+      continue;
+    }
+
+#ifdef TRT_BSC_DEBUG
+    ATH_MSG_DEBUG(" Collection ID = " << idHash << " Straw ID = "
+                                      << m_trt_id->show_to_string(idStraw));
+#endif
+
+    // this option is for the trigger, if there is a vecHash* given, test it !
+    if (vecHash) {
+      if (idHash == skipHash) {
+#ifdef TRT_BSC_DEBUG
+        ATH_MSG_DEBUG("Collection for Hash not to be decoded, skip");
+#endif
+        continue;
+      } else if (idHash != lastHash) {
+#ifdef TRT_BSC_DEBUG
+        ATH_MSG_DEBUG("New hash, see if we should decode it");
+#endif
+        lastHash = idHash;
+        // maybe the new hash is not in the list, so test it
+        std::vector<IdentifierHash>::const_iterator p =
+            find(vecHash->begin(), vecHash->end(), idHash);
+        if (p == vecHash->end()) {
+#ifdef TRT_BSC_DEBUG
+          ATH_MSG_DEBUG("Collection for Hash not to be decoded, skip");
+#endif
+          // remember this one, so that we do not find(...) forever
+          skipHash = idHash;
+          continue;
+        }
       }
-      // Skip if this collection has already been done.
-      if (rdoIdc->indexFindPtr (idHash)) {
+    } else {
+      if (idHash == skipHash) {
+        ++m_skip;
+#ifdef TRT_BSC_DEBUG
+        ATH_MSG_DEBUG("Collection for Hash not to be decoded, skip");
+#endif
         continue;
       }
-    
-      // get the collection
-      std::unique_ptr<TRT_RDO_Collection>& theColl = colls[idHash];
+      ++m_accept;
+    }
+    // Skip if this collection has already been done.
+    if (rdoIdc->indexFindPtr(idHash)) {
+      continue;
+    }
 
-      // Check if the Collection is already created.
-      if ( !theColl  )
-	{
+    // get the collection
+    std::unique_ptr<TRT_RDO_Collection>& theColl = colls[idHash];
+
+    // Check if the Collection is already created.
+    if (!theColl) {
 #ifdef TRT_BSC_DEBUG
-	   ATH_MSG_DEBUG( " Collection ID = " << idHash \
-			  << " does not exist, create it " );
+      ATH_MSG_DEBUG(" Collection ID = " << idHash
+                                        << " does not exist, create it ");
 #endif
-	  // create new collection
-     theColl = std::make_unique<TRT_RDO_Collection> ( idHash );
-     if(dataItemsPool){
-       // If we use pool then the pool will own the elements
-       theColl->clear(SG::VIEW_ELEMENTS);
-     }
-	  // get identifier from the hash, this is not nice
-	  Identifier ident;
-	  m_trt_id->get_id(idHash,ident,&m_straw_layer_context);
-	  // get the Identifier to be nice to downstream clients
-	  theColl->setIdentifier(ident);
-	}
-
-      // Now the Collection is there for sure. Create RDO and push it
-      TRT_LoLumRawData*                   rdo     = nullptr;
-      if(!dataItemsPool){
-        rdo = new TRT_LoLumRawData( idStraw, digit );
+      // create new collection
+      theColl = std::make_unique<TRT_RDO_Collection>(idHash);
+      if (dataItemsPool) {
+        // If we use pool then the pool will own the elements
+        theColl->clear(SG::VIEW_ELEMENTS);
       }
-      else{
-        rdo = dataItemsPool->nextElementPtr();
-        (*rdo) = TRT_LoLumRawData( idStraw, digit );
-      }
+      // get identifier from the hash, this is not nice
+      Identifier ident;
+      m_trt_id->get_id(idHash, ident, &m_straw_layer_context);
+      // get the Identifier to be nice to downstream clients
+      theColl->setIdentifier(ident);
+    }
 
-      // add the RDO
-      theColl->push_back( rdo );
-      
-    } // End of loop over all words in ROD
+    // Now the Collection is there for sure. Create RDO and push it
+    TRT_LoLumRawData* rdo = nullptr;
+    if (!dataItemsPool) {
+      rdo = new TRT_LoLumRawData(idStraw, digit);
+    } else {
+      rdo = dataItemsPool->nextElementPtr();
+      (*rdo) = TRT_LoLumRawData(idStraw, digit);
+    }
+
+    // add the RDO
+    theColl->push_back(rdo);
+
+  }  // End of loop over all words in ROD
 
   // add collections into IDC
   for (auto& p : colls) {
-    ATH_CHECK( rdoIdc->addOrDelete (std::move(p.second), p.first) );
+    ATH_CHECK(rdoIdc->addOrDelete(std::move(p.second), p.first));
   }
-  
+
   return StatusCode::SUCCESS;
 }
-
 
 /* ----------------------------------------------------------
  * internal method to fill the collections into the IDC, used for
@@ -636,7 +569,7 @@ TRT_RodDecoder::int_fillExpanded( const ROBFragment* robFrag,
  *
  * This is a reduced case of Full Compression Mode.  Straw words that
  * are 0 are compressed to 1 bit: "1".  Everything else is expanded by
- * prepending 5 "0" bits to the literal straw word.  
+ * prepending 5 "0" bits to the literal straw word.
  *
  * Note that the input data words are filled "backwords": from LSB to
  * MSB.  For literal straw words, this means that we reading from LSB
@@ -654,209 +587,204 @@ TRT_RodDecoder::int_fillExpanded( const ROBFragment* robFrag,
  * ----------------------------------------------------------
  */
 
-StatusCode
-TRT_RodDecoder::int_fillMinimalCompress( const ROBFragment *robFrag,
-					TRT_RDO_Container* rdoIdc,
-          DataPool<TRT_LoLumRawData>* dataItemsPool,
-					const std::vector<IdentifierHash>* vecHash) const
-{
+StatusCode TRT_RodDecoder::int_fillMinimalCompress(
+    const ROBFragment* robFrag, TRT_RDO_Container* rdoIdc,
+    DataPool<TRT_LoLumRawData>* dataItemsPool,
+    const std::vector<IdentifierHash>* vecHash) const {
   uint32_t robid = robFrag->rod_source_id();
-  
+
   // get the ROD version. It could be used to decode the data in one
   // way or another
-  //  eformat::helper::Version rodVersion(m_robFrag->rod_version()); 
-  //  const uint16_t rodMinorVersion= rodVersion.minor(); 
-  
+  //  eformat::helper::Version rodVersion(m_robFrag->rod_version());
+  //  const uint16_t rodMinorVersion= rodVersion.minor();
+
 #ifdef TRT_BSC_DEBUG
-  ATH_MSG_DEBUG( "fillCollection3 for " \
-		 << MSG::hex << robid << MSG::dec );
+  ATH_MSG_DEBUG("fillCollection3 for " << MSG::hex << robid << MSG::dec);
 #endif
-  
-  uint32_t         word;
-  uint32_t         digit;
-  Identifier       idStraw;
-  IdentifierHash   idHash, skipHash=0xffffffff, lastHash=0xffffffff;
+
+  uint32_t word;
+  uint32_t digit;
+  Identifier idStraw;
+  IdentifierHash idHash, skipHash = 0xffffffff, lastHash = 0xffffffff;
   const Identifier NULLId(0);
-  
+
   // get the data of the fragment
   OFFLINE_FRAGMENTS_NAMESPACE::PointerType vint;
-  robFrag->rod_data( vint );
-  
-  std::unordered_map<IdentifierHash, std::unique_ptr<TRT_RDO_Collection> > colls;
+  robFrag->rod_data(vint);
 
-  int bit=0;
+  std::unordered_map<IdentifierHash, std::unique_ptr<TRT_RDO_Collection> >
+      colls;
+
+  int bit = 0;
   int v;
-  
+
   // loop over the data in the fragment and decode the bits
-  unsigned int in_ptr       = 0;
-  unsigned int out_ptr      = 0;
-  int          bufferOffset = -1;
-  uint32_t     v_size       = robFrag->rod_ndata();
+  unsigned int in_ptr = 0;
+  unsigned int out_ptr = 0;
+  int bufferOffset = -1;
+  uint32_t v_size = robFrag->rod_ndata();
 
-  //  ATH_MSG_WARNING( "vint[" << in_ptr << "] = " << MSG::hex << vint[in_ptr] << MSG::dec );
+  //  ATH_MSG_WARNING( "vint[" << in_ptr << "] = " << MSG::hex << vint[in_ptr]
+  //  << MSG::dec );
 
-  while ( (in_ptr < v_size) && (out_ptr < 1920) )    // XXX -- avoid HardCode!
-    {
-      // increment buffer offset
-      bufferOffset++;
-      out_ptr++;
+  while ((in_ptr < v_size) && (out_ptr < 1920))  // XXX -- avoid HardCode!
+  {
+    // increment buffer offset
+    bufferOffset++;
+    out_ptr++;
 
-      // get the next word from the bits
-      word = 0;
-      v    = (vint[in_ptr] >> bit) & 0x1;
-      bit++;
-      if ( bit > 31 ) {
-	in_ptr++;
-	bit = 0;
-	//  ATH_MSG_WARNING( "vint[" << in_ptr << "] = " << MSG::hex << vint[in_ptr] << MSG::dec );
+    // get the next word from the bits
+    word = 0;
+    v = (vint[in_ptr] >> bit) & 0x1;
+    bit++;
+    if (bit > 31) {
+      in_ptr++;
+      bit = 0;
+      //  ATH_MSG_WARNING( "vint[" << in_ptr << "] = " << MSG::hex <<
+      //  vint[in_ptr] << MSG::dec );
+    }
+    if (v)
+      continue;
+    else {
+      for (int i = 0; i < 4; i++) {  // Look for 4 more 0's
+        v = (vint[in_ptr] >> bit) & 0x1;
+        bit++;
+        if (bit > 31) {
+          in_ptr++;
+          bit = 0;
+          //  ATH_MSG_WARNING( "vint[" << in_ptr << "] = " << MSG::hex <<
+          //  vint[in_ptr] << MSG::dec );
+        }
+        if (v) {
+          if (m_err_count_int_fillMinimalCompress < 100) {
+            ATH_MSG_WARNING("Invalid ByteStream, ROD ID = " << MSG::hex << robid
+                                                            << MSG::dec);
+            m_err_count_int_fillMinimalCompress++;
+          } else if (100 == m_err_count_int_fillMinimalCompress) {
+            ATH_MSG_WARNING("Too many Invalid ByteStream messages  "
+                            << "Turning message off.");
+            m_err_count_int_fillMinimalCompress++;
+          }
+          return StatusCode::RECOVERABLE;
+        }
       }
-      if ( v ) continue;
-      else {
-	for ( int i=0; i<4; i++ ) {          // Look for 4 more 0's
-	  v = (vint[in_ptr] >> bit) & 0x1;
-	  bit++;
-	  if ( bit > 31 ) {
-	    in_ptr++;
-	    bit = 0;
-	    //  ATH_MSG_WARNING( "vint[" << in_ptr << "] = " << MSG::hex << vint[in_ptr] << MSG::dec );
-	  }
-	  if ( v ) {
-	    if ( m_err_count_int_fillMinimalCompress < 100 ) {
-	       ATH_MSG_WARNING( "Invalid ByteStream, ROD ID = " \
-				<< MSG::hex << robid << MSG::dec );
-	      m_err_count_int_fillMinimalCompress++;
-	    } else if ( 100 == m_err_count_int_fillMinimalCompress ) {
-	       ATH_MSG_WARNING( "Too many Invalid ByteStream messages  " \
-				<< "Turning message off." );
-	      m_err_count_int_fillMinimalCompress++;
-	    }
-	    return StatusCode::RECOVERABLE;
-	  }
-	}
-	for ( int i=0; i<27; i++ ) {
-	  word = word  | (((vint[in_ptr] >> bit) & 0x1) << i);
-	  bit++;
-	  if ( bit > 31 ) {
-	    in_ptr++;
-	    bit = 0;
-	    //  ATH_MSG_WARNING( "vint[" << in_ptr << "] = " << MSG::hex << vint[in_ptr] << MSG::dec );
-	  }
-	}
+      for (int i = 0; i < 27; i++) {
+        word = word | (((vint[in_ptr] >> bit) & 0x1) << i);
+        bit++;
+        if (bit > 31) {
+          in_ptr++;
+          bit = 0;
+          //  ATH_MSG_WARNING( "vint[" << in_ptr << "] = " << MSG::hex <<
+          //  vint[in_ptr] << MSG::dec );
+        }
       }
-      
-      // get data word
-      digit = word;                       // We only use 27 bits
+    }
 
-      
-#ifdef TRT_BSC_DEBUG
-      ATH_MSG_VERBOSE( (hex) << robid << " " << bufferOffset << " " << word \
-		       << " " << idHash << (dec) << " " << m_trt_id->print_to_string(idStraw) );
-#endif
-    
-      // Make an Identifier for the RDO and get the IdHash
-      idStraw = m_CablingSvc->getIdentifier( (eformat::SubDetector) 0 /*unused*/, robid, 
-					    bufferOffset, idHash );
-
-      if ( NULLId == idStraw )
-	{
-#ifdef TRT_BSC_DEBUG
-	   ATH_MSG_DEBUG( "Null Identifier for bufferOffset " << bufferOffset );
-#endif
-	continue;
-      }
+    // get data word
+    digit = word;  // We only use 27 bits
 
 #ifdef TRT_BSC_DEBUG
-      ATH_MSG_DEBUG( " Collection ID = " << idHash  \
-		    << " Straw ID = " << m_trt_id->show_to_string( idStraw ) );
+    ATH_MSG_VERBOSE((hex) << robid << " " << bufferOffset << " " << word << " "
+                          << idHash << (dec) << " "
+                          << m_trt_id->print_to_string(idStraw));
 #endif
-      
-      // this option is for the trigger, if there is a vecHash* given, test it !
-      if (vecHash)
-	{
-	  if (idHash == skipHash)
-	    {
+
+    // Make an Identifier for the RDO and get the IdHash
+    idStraw = m_CablingSvc->getIdentifier((eformat::SubDetector)0 /*unused*/,
+                                          robid, bufferOffset, idHash);
+
+    if (NULLId == idStraw) {
 #ifdef TRT_BSC_DEBUG
-	       ATH_MSG_DEBUG( "Collection for Hash not to be decoded, skip" );
+      ATH_MSG_DEBUG("Null Identifier for bufferOffset " << bufferOffset);
 #endif
-	      continue;
-	    }
-	  else if (idHash != lastHash)
-	    {
+      continue;
+    }
+
 #ifdef TRT_BSC_DEBUG
-	       ATH_MSG_DEBUG( "New hash, see if we should decode it" );
+    ATH_MSG_DEBUG(" Collection ID = " << idHash << " Straw ID = "
+                                      << m_trt_id->show_to_string(idStraw));
 #endif
-	      lastHash = idHash;
-	      // maybe the new hash is not in the list, so test it
-	      std::vector<IdentifierHash>::const_iterator p = find(vecHash->begin(),vecHash->end(),idHash);
-	      if (p == vecHash->end())
-		{
+
+    // this option is for the trigger, if there is a vecHash* given, test it !
+    if (vecHash) {
+      if (idHash == skipHash) {
 #ifdef TRT_BSC_DEBUG
-		   ATH_MSG_DEBUG( "Collection for Hash not to be decoded, skip" );
+        ATH_MSG_DEBUG("Collection for Hash not to be decoded, skip");
 #endif
-		  // remember this one, so that we do not find(...) forever
-		  skipHash = idHash;
-		  continue;
-		}
-	    }
-	}
-      
-      // Skip if this collection has already been done.
-      if (rdoIdc->indexFindPtr (idHash)) {
         continue;
-      }
-    
-      // get the collection
-      std::unique_ptr<TRT_RDO_Collection>& theColl = colls[idHash];
-      
-      // Check if the Collection is already created.
-      if (  !theColl )
-	{
+      } else if (idHash != lastHash) {
 #ifdef TRT_BSC_DEBUG
-	   ATH_MSG_DEBUG( " Collection ID = " << idHash \
-			  << " does not exist, create it " );
+        ATH_MSG_DEBUG("New hash, see if we should decode it");
 #endif
-	  // create new collection
-     theColl = std::make_unique<TRT_RDO_Collection> ( idHash );
-     if(dataItemsPool){
-       // If we use pool then the pool will own the elements
-       theColl->clear(SG::VIEW_ELEMENTS);
-     }
-	  // get identifier from the hash, this is not nice
-	  Identifier ident;
-	  m_trt_id->get_id( idHash, ident, &m_straw_layer_context );
-	  // get the Identifier to be nice to downstream clients
-	  theColl->setIdentifier(ident);
-	}
-      
-      // Now the Collection is there for sure. Create RDO and push it
-      // into Collection. 
+        lastHash = idHash;
+        // maybe the new hash is not in the list, so test it
+        std::vector<IdentifierHash>::const_iterator p =
+            find(vecHash->begin(), vecHash->end(), idHash);
+        if (p == vecHash->end()) {
+#ifdef TRT_BSC_DEBUG
+          ATH_MSG_DEBUG("Collection for Hash not to be decoded, skip");
+#endif
+          // remember this one, so that we do not find(...) forever
+          skipHash = idHash;
+          continue;
+        }
+      }
+    }
 
-      //ATH_MSG_INFO ( "idStraw: " << idStraw 
-      //               << " digit: " << MSG::hex << digit << MSG::dec );
-      TRT_LoLumRawData*                   rdo     = nullptr;
-      if(!dataItemsPool){
-        rdo = new TRT_LoLumRawData( idStraw, digit );
+    // Skip if this collection has already been done.
+    if (rdoIdc->indexFindPtr(idHash)) {
+      continue;
+    }
+
+    // get the collection
+    std::unique_ptr<TRT_RDO_Collection>& theColl = colls[idHash];
+
+    // Check if the Collection is already created.
+    if (!theColl) {
+#ifdef TRT_BSC_DEBUG
+      ATH_MSG_DEBUG(" Collection ID = " << idHash
+                                        << " does not exist, create it ");
+#endif
+      // create new collection
+      theColl = std::make_unique<TRT_RDO_Collection>(idHash);
+      if (dataItemsPool) {
+        // If we use pool then the pool will own the elements
+        theColl->clear(SG::VIEW_ELEMENTS);
       }
-      else{
-        rdo = dataItemsPool->nextElementPtr();
-        (*rdo) = TRT_LoLumRawData( idStraw, digit );
-      }
-      m_Nrdos++;
-      
-      // get the collection
-      // add the RDO
-      theColl->push_back( rdo );
-      
-    }  //   End of loop over all words in ROD
-  
+      // get identifier from the hash, this is not nice
+      Identifier ident;
+      m_trt_id->get_id(idHash, ident, &m_straw_layer_context);
+      // get the Identifier to be nice to downstream clients
+      theColl->setIdentifier(ident);
+    }
+
+    // Now the Collection is there for sure. Create RDO and push it
+    // into Collection.
+
+    // ATH_MSG_INFO ( "idStraw: " << idStraw
+    //                << " digit: " << MSG::hex << digit << MSG::dec );
+    TRT_LoLumRawData* rdo = nullptr;
+    if (!dataItemsPool) {
+      rdo = new TRT_LoLumRawData(idStraw, digit);
+    } else {
+      rdo = dataItemsPool->nextElementPtr();
+      (*rdo) = TRT_LoLumRawData(idStraw, digit);
+    }
+    m_Nrdos++;
+
+    // get the collection
+    // add the RDO
+    theColl->push_back(rdo);
+
+  }  //   End of loop over all words in ROD
+
   // add collections into IDC
   for (auto& p : colls) {
-    ATH_CHECK( rdoIdc->addOrDelete (std::move(p.second), p.first) );
+    ATH_CHECK(rdoIdc->addOrDelete(std::move(p.second), p.first));
   }
-  
+
   return StatusCode::SUCCESS;
 }
-
 
 /* ----------------------------------------------------------
  * internal method to fill the collections into the IDC, used for
@@ -878,881 +806,754 @@ TRT_RodDecoder::int_fillMinimalCompress( const ROBFragment *robFrag,
  * ----------------------------------------------------------
  */
 
-StatusCode
-TRT_RodDecoder::int_fillFullCompress( const ROBFragment *robFrag,
-				      TRT_RDO_Container* rdoIdc,
-              DataPool<TRT_LoLumRawData>* dataItemsPool,
-				      const t_CompressTable& Ctable,
-				      const std::vector<IdentifierHash>* vecHash) const
-{
+StatusCode TRT_RodDecoder::int_fillFullCompress(
+    const ROBFragment* robFrag, TRT_RDO_Container* rdoIdc,
+    DataPool<TRT_LoLumRawData>* dataItemsPool, const t_CompressTable& Ctable,
+    const std::vector<IdentifierHash>* vecHash) const {
   int phase;
-  for ( phase=0; phase<2; phase++ )
-  {
+  for (phase = 0; phase < 2; phase++) {
 
-  uint32_t robid = robFrag->rod_source_id();
-  
-  // get the ROD version. It could be used to decode the data in one
-  // way or another
-  //  eformat::helper::Version rodVersion(m_robFrag->rod_version()); 
-  //  const uint16_t rodMinorVersion= rodVersion.minor(); 
-  
-  
+    uint32_t robid = robFrag->rod_source_id();
+
+    // get the ROD version. It could be used to decode the data in one
+    // way or another
+    //  eformat::helper::Version rodVersion(m_robFrag->rod_version());
+    //  const uint16_t rodMinorVersion= rodVersion.minor();
+
 #ifdef TRT_BSC_DEBUG
-  ATH_MSG_DEBUG( "fillCollection3 for " \
-		 << MSG::hex << robid << MSG::dec );
+    ATH_MSG_DEBUG("fillCollection3 for " << MSG::hex << robid << MSG::dec);
 #endif
-  
-  uint32_t         word;
-  uint32_t         digit;
-  Identifier       idStraw;
-  IdentifierHash   idHash, skipHash=0xffffffff, lastHash=0xffffffff;
-  const Identifier NULLId(0);
-  
-  // get the data of the fragment
-  OFFLINE_FRAGMENTS_NAMESPACE::PointerType vint;
-  robFrag->rod_data( vint );
-  
-  std::unordered_map<IdentifierHash, std::unique_ptr<TRT_RDO_Collection> > colls;
 
-  int bit=0;
-  int v,l;
-  int i;
-  
-  // loop over the data in the fragment and decode the bits
-  unsigned int in_ptr       = 0;
-  unsigned int out_ptr      = 0;
-  int          bufferOffset = -1;
-  uint32_t     v_size       = robFrag->rod_ndata();
+    uint32_t word;
+    uint32_t digit;
+    Identifier idStraw;
+    IdentifierHash idHash, skipHash = 0xffffffff, lastHash = 0xffffffff;
+    const Identifier NULLId(0);
 
-  //  ATH_MSG_WARNING( "vint[" << in_ptr << "] = " << MSG::hex << vint[in_ptr] << MSG::dec );
+    // get the data of the fragment
+    OFFLINE_FRAGMENTS_NAMESPACE::PointerType vint;
+    robFrag->rod_data(vint);
 
-  while ( (in_ptr < v_size) && (out_ptr < 1920) )    // XXX -- avoid HardCode!
-  {
-    // increment buffer offset
-    bufferOffset++;
-    out_ptr++;
+    std::unordered_map<IdentifierHash, std::unique_ptr<TRT_RDO_Collection> >
+        colls;
 
-    // get the next word from the bits
-    word = 0;
-    v    = (vint[in_ptr] >> bit) & 0x1;
-    bit++;
-    if ( bit > 31 ) 
+    int bit = 0;
+    int v, l;
+    int i;
+
+    // loop over the data in the fragment and decode the bits
+    unsigned int in_ptr = 0;
+    unsigned int out_ptr = 0;
+    int bufferOffset = -1;
+    uint32_t v_size = robFrag->rod_ndata();
+
+    //  ATH_MSG_WARNING( "vint[" << in_ptr << "] = " << MSG::hex << vint[in_ptr]
+    //  << MSG::dec );
+
+    while ((in_ptr < v_size) && (out_ptr < 1920))  // XXX -- avoid HardCode!
     {
-      in_ptr++;
-      bit = 0;
-      //  ATH_MSG_WARNING( "vint[" << in_ptr << "] = " << MSG::hex << vint[in_ptr] << MSG::dec );
-    }
-    l = 1;
+      // increment buffer offset
+      bufferOffset++;
+      out_ptr++;
 
-    //ATH_MSG_INFO( "l, firstcode, v " << l << " " 
-    //		  << MSG::hex << Ctable.m_firstcode[l] << " " << v << MSG::dec );
-
-    while ( v < Ctable.m_firstcode[l] )
-    {
-      v = 2 * v + ((vint[in_ptr] >> bit) & 0x1);
-      
+      // get the next word from the bits
+      word = 0;
+      v = (vint[in_ptr] >> bit) & 0x1;
       bit++;
-      if ( bit > 31 ) 
-      {
-	in_ptr++;
-	bit = 0;
-	//  ATH_MSG_WARNING( "vint[" << in_ptr << "] = " << MSG::hex << vint[in_ptr] << MSG::dec );
+      if (bit > 31) {
+        in_ptr++;
+        bit = 0;
+        //  ATH_MSG_WARNING( "vint[" << in_ptr << "] = " << MSG::hex <<
+        //  vint[in_ptr] << MSG::dec );
+      }
+      l = 1;
+
+      // ATH_MSG_INFO( "l, firstcode, v " << l << " "
+      //		  << MSG::hex << Ctable.m_firstcode[l] << " " << v <<
+      // MSG::dec );
+
+      while (v < Ctable.m_firstcode[l]) {
+        v = 2 * v + ((vint[in_ptr] >> bit) & 0x1);
+
+        bit++;
+        if (bit > 31) {
+          in_ptr++;
+          bit = 0;
+          //  ATH_MSG_WARNING( "vint[" << in_ptr << "] = " << MSG::hex <<
+          //  vint[in_ptr] << MSG::dec );
+        }
+
+        l++;
+
+        // ATH_MSG_INFO( "l, firstcode, v " << l << " "
+        //		  << MSG::hex << Ctable.m_firstcode[l] << " " << v <<
+        // MSG::dec );
       }
 
-      l++;
+      int idx = Ctable.m_lengths_integral[l] + (v - Ctable.m_firstcode[l]);
 
-      //ATH_MSG_INFO( "l, firstcode, v " << l << " " 
-      //		  << MSG::hex << Ctable.m_firstcode[l] << " " << v << MSG::dec );
+      // ATH_MSG_INFO ( "lengths_int, idx, syms " <<
+      //	   Ctable.m_lengths_integral[l] << " " << idx << " " << MSG::hex
+      //<< 	   idx << " " << Ctable.m_syms[idx] << MSG::dec );
+
+      if (idx <= Ctable.m_Nsymbols)
+        word = Ctable.m_syms[idx];
+      else {
+        if (m_err_count_int_fillFullCompress < 100) {
+          ATH_MSG_WARNING("Invalid ByteStream, ROD ID = " << MSG::hex << robid
+                                                          << MSG::dec);
+          m_err_count_int_fillFullCompress++;
+        } else if (100 == m_err_count_int_fillFullCompress) {
+          ATH_MSG_WARNING("Too many Invalid ByteStream messages  "
+                          << "Turning message off.");
+          m_err_count_int_fillFullCompress++;
+        }
+
+        return StatusCode::RECOVERABLE;
+      }
+
+      /*
+       * Handle case of escaped literal
+       */
+      if (word == m_escape_marker) {
+        word = 0;
+        for (i = 0; i < 27; i++) {
+          word = word | (((vint[in_ptr] >> bit) & 0x1) << i);
+          bit++;
+          if (bit > 31) {
+            in_ptr++;
+            bit = 0;
+          }
+        }
+      }
+
+      if (1 == phase) {
+
+        if (word) {
+
+          // get data word
+          digit = word;  // We only use 27 bits
+
+#ifdef TRT_BSC_DEBUG
+          ATH_MSG_VERBOSE((hex) << robid << " " << bufferOffset << " " << word
+                                << " " << idHash << (dec) << " "
+                                << m_trt_id->print_to_string(idStraw));
+#endif
+
+          // Make an Identifier for the RDO and get the IdHash
+          idStraw = m_CablingSvc->getIdentifier(
+              (eformat::SubDetector)0 /*unused*/, robid, bufferOffset, idHash);
+
+          if (NULLId == idStraw) {
+#ifdef TRT_BSC_DEBUG
+            ATH_MSG_DEBUG("Null Identifier for bufferOffset " << bufferOffset);
+#endif
+            continue;
+          }
+
+#ifdef TRT_BSC_DEBUG
+          ATH_MSG_DEBUG(" Collection ID = "
+                        << idHash
+                        << " Straw ID = " << m_trt_id->show_to_string(idStraw));
+#endif
+
+          // this option is for the trigger, if there is a vecHash* given, test
+          // it !
+          if (vecHash) {
+            if (idHash == skipHash) {
+#ifdef TRT_BSC_DEBUG
+              ATH_MSG_DEBUG("Collection for Hash not to be decoded, skip");
+#endif
+              continue;
+            } else if (idHash != lastHash) {
+#ifdef TRT_BSC_DEBUG
+              ATH_MSG_DEBUG("New hash, see if we should decode it");
+#endif
+              lastHash = idHash;
+              // maybe the new hash is not in the list, so test it
+              std::vector<IdentifierHash>::const_iterator p =
+                  find(vecHash->begin(), vecHash->end(), idHash);
+              if (p == vecHash->end()) {
+#ifdef TRT_BSC_DEBUG
+                ATH_MSG_DEBUG("Collection for Hash not to be decoded, skip");
+#endif
+                // remember this one, so that we do not find(...) forever
+                skipHash = idHash;
+                continue;
+              }
+            }
+          } else {
+            if (idHash == skipHash) {
+              ++m_skip;
+#ifdef TRT_BSC_DEBUG
+              ATH_MSG_DEBUG("Collection for Hash not to be decoded, skip");
+#endif
+              continue;
+            }
+            ++m_accept;
+          }
+
+          // Skip if this collection has already been done.
+          if (rdoIdc->indexFindPtr(idHash)) {
+            continue;
+          }
+
+          // get the collection
+          std::unique_ptr<TRT_RDO_Collection>& theColl = colls[idHash];
+
+          // Check if the Collection is already created.
+          if (!theColl) {
+#ifdef TRT_BSC_DEBUG
+            ATH_MSG_DEBUG(" Collection ID = " << idHash
+                                              << " does not exist, create it ");
+#endif
+            // create new collection
+            theColl = std::make_unique<TRT_RDO_Collection>(idHash);
+            if (dataItemsPool) {
+              // If we use pool then the pool will own the elements
+              theColl->clear(SG::VIEW_ELEMENTS);
+            }
+            // get identifier from the hash, this is not nice
+            Identifier ident;
+            m_trt_id->get_id(idHash, ident, &m_straw_layer_context);
+            // get the Identifier to be nice to downstream clients
+            theColl->setIdentifier(ident);
+          }
+          // Now the Collection is there for sure. Create RDO and push it
+          // into Collection.
+          TRT_LoLumRawData* rdo = nullptr;
+          if (!dataItemsPool) {
+            rdo = new TRT_LoLumRawData(idStraw, digit);
+          } else {
+            rdo = dataItemsPool->nextElementPtr();
+            (*rdo) = TRT_LoLumRawData(idStraw, digit);
+          }
+          m_Nrdos++;
+
+          // get the collection
+          // add the RDO
+          theColl->push_back(rdo);
+        }
+      }  // if phase == 1
+    }    //   End of loop over all words in ROD
+
+    // add collections into IDC
+    for (auto& p : colls) {
+      ATH_CHECK(rdoIdc->addOrDelete(std::move(p.second), p.first));
     }
 
-    int idx = Ctable.m_lengths_integral[l] + (v - Ctable.m_firstcode[l]);
-
-    //ATH_MSG_INFO ( "lengths_int, idx, syms " << 
-    //	   Ctable.m_lengths_integral[l] << " " << idx << " " << MSG::hex <<
-    //	   idx << " " << Ctable.m_syms[idx] << MSG::dec );
-
-    if ( idx <= Ctable.m_Nsymbols )
-      word = Ctable.m_syms[idx];
-    else
-    {
-      if ( m_err_count_int_fillFullCompress < 100 ) 
-      {
-	ATH_MSG_WARNING( "Invalid ByteStream, ROD ID = "		\
-			 << MSG::hex << robid << MSG::dec );
-	m_err_count_int_fillFullCompress++;
-      }
-      else if ( 100 == m_err_count_int_fillFullCompress ) 
-      {
-	ATH_MSG_WARNING( "Too many Invalid ByteStream messages  "	\
-			 << "Turning message off." );
-	m_err_count_int_fillFullCompress++;
-      }
-
+    if ((out_ptr != 1920) || ((in_ptr == v_size) && bit != 0) ||
+        ((in_ptr == (v_size - 1)) && (bit == 0)) || (in_ptr < (v_size - 1))) {
+      ATH_MSG_WARNING("Decode error: "
+                      << "L1ID = " << MSG::hex << robFrag->rod_lvl1_id()
+                      << " ROD = " << robFrag->rod_source_id() << MSG::dec
+                      << " bit = " << bit << "  " << in_ptr << " / " << v_size
+                      << " : " << out_ptr << " / 1920");
       return StatusCode::RECOVERABLE;
     }
-
-
-    /*
-     * Handle case of escaped literal
-     */
-    if ( word == m_escape_marker )
-    {
-      word = 0;
-      for ( i=0; i<27; i++ )
-      {
-	word = word  | (((vint[in_ptr] >> bit) & 0x1) << i);
-	bit++;
-	if ( bit > 31 )
-	{
-	  in_ptr++;
-	  bit = 0;
-	}
-      }
-    }
-
-
-    if ( 1 == phase )
-    {
-
-    if ( word )
-    {
-
-      // get data word
-      digit = word;                       // We only use 27 bits
-
-      
-#ifdef TRT_BSC_DEBUG
-      ATH_MSG_VERBOSE( (hex) << robid << " " << bufferOffset << " " << word \
-		       << " " << idHash << (dec) << " " << m_trt_id->print_to_string(idStraw) );
-#endif
-    
-      // Make an Identifier for the RDO and get the IdHash
-      idStraw = m_CablingSvc->getIdentifier( (eformat::SubDetector) 0 /*unused*/, robid, 
-					    bufferOffset, idHash );
-    
-      if ( NULLId == idStraw )
-	{
-#ifdef TRT_BSC_DEBUG
-	   ATH_MSG_DEBUG( "Null Identifier for bufferOffset " << bufferOffset );
-#endif
-	continue;
-      }
-
-#ifdef TRT_BSC_DEBUG
-      ATH_MSG_DEBUG( " Collection ID = " << idHash  \
-		    << " Straw ID = " << m_trt_id->show_to_string( idStraw ) );
-#endif
-      
-      // this option is for the trigger, if there is a vecHash* given, test it !
-      if (vecHash)
-	{
-	  if (idHash == skipHash)
-	    {
-#ifdef TRT_BSC_DEBUG
-	       ATH_MSG_DEBUG( "Collection for Hash not to be decoded, skip" );
-#endif
-	      continue;
-	    }
-	  else if (idHash != lastHash)
-	    {
-#ifdef TRT_BSC_DEBUG
-	       ATH_MSG_DEBUG( "New hash, see if we should decode it" );
-#endif
-	      lastHash = idHash;
-	      // maybe the new hash is not in the list, so test it
-	      std::vector<IdentifierHash>::const_iterator p = find(vecHash->begin(),vecHash->end(),idHash);
-	      if (p == vecHash->end())
-		{
-#ifdef TRT_BSC_DEBUG
-		   ATH_MSG_DEBUG( "Collection for Hash not to be decoded, skip" );
-#endif
-		  // remember this one, so that we do not find(...) forever
-		  skipHash = idHash;
-		  continue;
-		}
-	    }
-	}
-      else {
-         if (idHash == skipHash)
-	    {
-               ++m_skip;
-#ifdef TRT_BSC_DEBUG
-	       ATH_MSG_DEBUG( "Collection for Hash not to be decoded, skip" );
-#endif
-               continue;
-	    }
-         ++m_accept;
-      }
-
-      // Skip if this collection has already been done.
-      if (rdoIdc->indexFindPtr (idHash)) {
-        continue;
-      }
-    
-      // get the collection
-      std::unique_ptr<TRT_RDO_Collection>& theColl = colls[idHash];
-      
-      // Check if the Collection is already created.
-      if ( !theColl )
-	{
-#ifdef TRT_BSC_DEBUG
-	   ATH_MSG_DEBUG( " Collection ID = " << idHash \
-			  << " does not exist, create it " );
-#endif
-	  // create new collection
-     theColl = std::make_unique<TRT_RDO_Collection> ( idHash );
-     if(dataItemsPool){
-       // If we use pool then the pool will own the elements
-       theColl->clear(SG::VIEW_ELEMENTS);
-     }
-	  // get identifier from the hash, this is not nice
-	  Identifier ident;
-	  m_trt_id->get_id( idHash, ident, &m_straw_layer_context );
-	  // get the Identifier to be nice to downstream clients
-	  theColl->setIdentifier(ident);
-	}
-      
-      // Now the Collection is there for sure. Create RDO and push it
-      // into Collection. 
-
-      //      ATH_MSG_INFO ( "idStraw: " << idStraw 
-      //		     << " digit: " << MSG::hex << digit << MSG::dec );
-      TRT_LoLumRawData*   rdo     = nullptr;
-      if(!dataItemsPool){
-        rdo = new TRT_LoLumRawData( idStraw, digit );
-      }
-      else{
-        rdo = dataItemsPool->nextElementPtr();
-        (*rdo) = TRT_LoLumRawData( idStraw, digit );
-      }
-      m_Nrdos++;
-      
-      // get the collection
-      // add the RDO
-      theColl->push_back( rdo );
-    }
-    } // if phase == 1
-  }  //   End of loop over all words in ROD
-
-  // add collections into IDC
-  for (auto& p : colls) {
-    ATH_CHECK( rdoIdc->addOrDelete (std::move(p.second), p.first) );
-  }
-
-  //  ATH_MSG_INFO( "Input: " << in_ptr << " / " << v_size << "   Output: " << out_ptr << " / 1920" );
-
-  if ( (out_ptr != 1920) || ((in_ptr == v_size) && bit != 0) ||
-       ((in_ptr == (v_size - 1)) && (bit == 0)) || (in_ptr < (v_size -1)) )
-  {
-    ATH_MSG_WARNING( "Decode error: " 
-		     << "L1ID = " << MSG::hex << robFrag->rod_lvl1_id()
-		     << " ROD = " << robFrag->rod_source_id() << MSG::dec
-		     << " bit = " << bit << "  "
-		     << in_ptr << " / " << v_size 
-		     << " : " << out_ptr << " / 1920" );
-    return StatusCode::RECOVERABLE;
-  }
-
   }
 
   return StatusCode::SUCCESS;
 }
 
-
 /*
  * Read Compression Table from file
  */
-StatusCode
-TRT_RodDecoder::ReadCompressTableFile(  const std::string& 
+StatusCode TRT_RodDecoder::ReadCompressTableFile(const std::string&
 #ifdef TRT_READCOMPTABLE_FILE
-TableFilename
+                                                     TableFilename
 #endif
- )
-{  
-   ATH_MSG_FATAL( "Reading Compression Table from File is not supported anymore!" );
+) {
+  ATH_MSG_FATAL(
+      "Reading Compression Table from File is not supported anymore!");
 
-   return StatusCode::FAILURE;
+  return StatusCode::FAILURE;
 
 #ifdef TRT_READCOMPTABLE_FILE
 
   auto t_CompressTable Ctable = std::make_unique<t_CompressTable>();
 
-  ATH_MSG_INFO( "Reading Compress Table File: " << TableFilename );
+  ATH_MSG_INFO("Reading Compress Table File: " << TableFilename);
 
-  std::string file = PathResolver::find_file ( TableFilename, "DATAPATH" );
-  std::ifstream inFile ( file.c_str() );
+  std::string file = PathResolver::find_file(TableFilename, "DATAPATH");
+  std::ifstream inFile(file.c_str());
 
-  if (!inFile.is_open())
-  {
-     ATH_MSG_FATAL( "Could not open Compression Table File " 
-		    << TableFilename );
-     return StatusCode::FAILURE;
+  if (!inFile.is_open()) {
+    ATH_MSG_FATAL("Could not open Compression Table File " << TableFilename);
+    return StatusCode::FAILURE;
   }
-
 
 #define MAXLINE 1024
 
   char line[MAXLINE];
-  char *tok;
+  char* tok;
 
-  int *lengths=0;                // Array of codeword lengths
-  int *codewords=0;              // Array of codewords
-
+  int* lengths = 0;    // Array of codeword lengths
+  int* codewords = 0;  // Array of codewords
 
   Ctable->m_Nsymbols = 0;
 
-  while( ! inFile.eof() )
-  {
-    inFile.getline( line, MAXLINE );
+  while (!inFile.eof()) {
+    inFile.getline(line, MAXLINE);
 
-    tok = strtok( line, " \t\n<" );
-    if ( ! tok )
+    tok = strtok(line, " \t\n<");
+    if (!tok)
       continue;
 
-
     /*************************************/
-    if ( ! strncmp( tok, "Version", 7 ) )
-    {
-      tok = strtok( NULL, " \t\n" );
-      Ctable->m_TableVersion = atoi( tok );
+    if (!strncmp(tok, "Version", 7)) {
+      tok = strtok(NULL, " \t\n");
+      Ctable->m_TableVersion = atoi(tok);
 
-      ATH_MSG_DEBUG( "Table Version = " << Ctable->m_TableVersion );
+      ATH_MSG_DEBUG("Table Version = " << Ctable->m_TableVersion);
 
-      tok = strtok( NULL, " \t\n" );
-      if ( ! tok )
-      {
-	inFile.getline( line, MAXLINE );
+      tok = strtok(NULL, " \t\n");
+      if (!tok) {
+        inFile.getline(line, MAXLINE);
 
-	tok = strtok( line, " \t\n" );
+        tok = strtok(line, " \t\n");
       }
 
-      if ( strncmp( tok, ">", 1 ) )
-      {
-	ATH_MSG_WARNING( "Invalid file format in Version!" );
-	inFile.close();
+      if (strncmp(tok, ">", 1)) {
+        ATH_MSG_WARNING("Invalid file format in Version!");
+        inFile.close();
 
-	if ( lengths )
-	  delete[] lengths;
+        if (lengths)
+          delete[] lengths;
 
-	if( codewords )
-	  delete[] codewords;
+        if (codewords)
+          delete[] codewords;
 
-	return StatusCode::FAILURE;
+        return StatusCode::FAILURE;
       }
 
-      Ctable->m_syms       = std::make_unique< unsigned int[] >( Ctable->m_Nsymbols );
+      Ctable->m_syms = std::make_unique<unsigned int[]>(Ctable->m_Nsymbols);
 
-      if ( lengths )
-	 delete[] lengths;
-      lengths    = new int[ Ctable->m_Nsymbols ];
+      if (lengths)
+        delete[] lengths;
+      lengths = new int[Ctable->m_Nsymbols];
 
-      if ( codewords )
-	 delete[] codewords;
-      codewords  = new int[ Ctable->m_Nsymbols ];
+      if (codewords)
+        delete[] codewords;
+      codewords = new int[Ctable->m_Nsymbols];
     }
 
-
     /*************************************/
-    if ( ! strncmp( tok, "Nsymbols", 8 ) )
-    {
-      tok = strtok( NULL, " \t\n" );
-      Ctable->m_Nsymbols = atoi( tok );
+    if (!strncmp(tok, "Nsymbols", 8)) {
+      tok = strtok(NULL, " \t\n");
+      Ctable->m_Nsymbols = atoi(tok);
 
-      ATH_MSG_DEBUG( "Nsymbols = " << Ctable->m_Nsymbols );
+      ATH_MSG_DEBUG("Nsymbols = " << Ctable->m_Nsymbols);
 
-      tok = strtok( NULL, " \t\n" );
-      if ( ! tok )
-      {
-	inFile.getline( line, MAXLINE );
+      tok = strtok(NULL, " \t\n");
+      if (!tok) {
+        inFile.getline(line, MAXLINE);
 
-	tok = strtok( line, " \t\n" );
+        tok = strtok(line, " \t\n");
       }
 
-      if ( strncmp( tok, ">", 1 ) )
-      {
-	ATH_MSG_WARNING( "Invalid file format in Nsymbols!" );
-	inFile.close();
+      if (strncmp(tok, ">", 1)) {
+        ATH_MSG_WARNING("Invalid file format in Nsymbols!");
+        inFile.close();
 
-	if ( lengths )
-	  delete[] lengths;
+        if (lengths)
+          delete[] lengths;
 
-	if( codewords )
-	  delete[] codewords;
+        if (codewords)
+          delete[] codewords;
 
-	return StatusCode::FAILURE;
+        return StatusCode::FAILURE;
       }
 
-      Ctable->m_syms       = std::make_unique< unsigned int[] >( Ctable->m_Nsymbols );
+      Ctable->m_syms = std::make_unique<unsigned int[]>(Ctable->m_Nsymbols);
 
-      if ( lengths )
-	 delete[] lengths;
-      lengths    = new int[ Ctable->m_Nsymbols ];
+      if (lengths)
+        delete[] lengths;
+      lengths = new int[Ctable->m_Nsymbols];
 
-      if ( codewords )
-	 delete[] codewords;
-      codewords  = new int[ Ctable->m_Nsymbols ];
+      if (codewords)
+        delete[] codewords;
+      codewords = new int[Ctable->m_Nsymbols];
     }
 
-
     /*************************************/
-    if ( ! strncmp( tok, "syms", 4 ) )
-    {
+    if (!strncmp(tok, "syms", 4)) {
 
-      if ( ! Ctable->m_syms )
-      {
-	ATH_MSG_WARNING( "Invalid file format Nsymbols must come first!" );
-	inFile.close();
-	
-	if ( lengths )
-	  delete[] lengths;
+      if (!Ctable->m_syms) {
+        ATH_MSG_WARNING("Invalid file format Nsymbols must come first!");
+        inFile.close();
 
-	if( codewords )
-	  delete[] codewords;
+        if (lengths)
+          delete[] lengths;
 
-	return StatusCode::FAILURE;
+        if (codewords)
+          delete[] codewords;
+
+        return StatusCode::FAILURE;
       }
 
-      int i=0;
+      int i = 0;
 
-      tok = strtok( NULL, " \t\n" );
-      while( i < Ctable->m_Nsymbols )
-      {
-	while ( (tok) && (i < Ctable->m_Nsymbols) )
-	{
-	  Ctable->m_syms[i++] = atoi( tok );
-	  tok = strtok( NULL, " \t\n" );
-	}
+      tok = strtok(NULL, " \t\n");
+      while (i < Ctable->m_Nsymbols) {
+        while ((tok) && (i < Ctable->m_Nsymbols)) {
+          Ctable->m_syms[i++] = atoi(tok);
+          tok = strtok(NULL, " \t\n");
+        }
 
-	if ( !tok )
-	{
-	  inFile.getline( line, MAXLINE );
-	  tok = strtok( line, " \t\n" );
-	}
+        if (!tok) {
+          inFile.getline(line, MAXLINE);
+          tok = strtok(line, " \t\n");
+        }
       }
 
-      if ( strncmp( tok, ">", 1 ) )
-      {
-	ATH_MSG_WARNING( "Invalid file format in syms!" );
-	inFile.close();
+      if (strncmp(tok, ">", 1)) {
+        ATH_MSG_WARNING("Invalid file format in syms!");
+        inFile.close();
 
-	if ( lengths )
-	  delete[] lengths;
+        if (lengths)
+          delete[] lengths;
 
-	if( codewords )
-	  delete[] codewords;
+        if (codewords)
+          delete[] codewords;
 
-	return StatusCode::FAILURE;
+        return StatusCode::FAILURE;
       }
     }
 
     /*************************************/
-    if ( ! strncmp( tok, "codewords", 9 ) )
-    {
-      if ( ! codewords )
-      {
-	ATH_MSG_WARNING( "Invalid file format Nsymbols must come first!" );
-	inFile.close();
-	
-	if ( lengths )
-	  delete[] lengths;
+    if (!strncmp(tok, "codewords", 9)) {
+      if (!codewords) {
+        ATH_MSG_WARNING("Invalid file format Nsymbols must come first!");
+        inFile.close();
 
-	return StatusCode::FAILURE;
+        if (lengths)
+          delete[] lengths;
+
+        return StatusCode::FAILURE;
       }
 
+      int i = 0;
 
-      int i=0;
+      tok = strtok(NULL, " \t\n");
+      while (i < Ctable->m_Nsymbols) {
+        while ((tok) && (i < Ctable->m_Nsymbols)) {
+          codewords[i++] = atoi(tok);
+          tok = strtok(NULL, " \t\n");
+        }
 
-      tok = strtok( NULL, " \t\n" );
-      while( i < Ctable->m_Nsymbols )
-      {
-	while ( (tok) && (i < Ctable->m_Nsymbols) )
-	{
-	  codewords[i++] = atoi( tok );
-	  tok = strtok( NULL, " \t\n" );
-	}
-
-	if ( !tok )
-	{
-	  inFile.getline( line, MAXLINE );
-	  tok = strtok( line, " \t\n" );
-	}
+        if (!tok) {
+          inFile.getline(line, MAXLINE);
+          tok = strtok(line, " \t\n");
+        }
       }
 
-      if ( strncmp( tok, ">", 1 ) )
-      {
-	ATH_MSG_WARNING( "Invalid file format in codewords!" );
-	inFile.close();
+      if (strncmp(tok, ">", 1)) {
+        ATH_MSG_WARNING("Invalid file format in codewords!");
+        inFile.close();
 
-	if ( lengths )
-	  delete[] lengths;
+        if (lengths)
+          delete[] lengths;
 
-	if( codewords )
-	  delete[] codewords;
+        if (codewords)
+          delete[] codewords;
 
-	return StatusCode::FAILURE;
+        return StatusCode::FAILURE;
       }
-
-    }
-
-
-    /*************************************/
-    if ( ! strncmp( tok, "firstcode",9 ) )
-    {
-      int i=1;
-
-      tok = strtok( NULL, " \t\n" );
-      while( i < 33 )
-      {
-	while ( (tok) && (i < 33) )
-	{
-	  Ctable->m_firstcode[i++] = atoi( tok );
-	  tok = strtok( NULL, " \t\n" );
-	}
-
-	if ( !tok )
-	{
-	  inFile.getline( line, MAXLINE );
-	  tok = strtok( line, " \t\n" );
-	}
-      }
-
-      if ( strncmp( tok, ">", 1 ) )
-      {
-	ATH_MSG_WARNING( "Invalid file format in firstcode" );
-	inFile.close();
-
-	if ( lengths )
-	  delete[] lengths;
-
-	if( codewords )
-	  delete[] codewords;
-
-	return StatusCode::FAILURE;
-      }
-
-    }
-
-
-    /*************************************/
-    if ( ! strncmp( tok, "lengths_integral", 16 ) )
-    {
-      int i=1;
-
-      tok = strtok( NULL, " \t\n" );
-      while( i < 33 )
-      {
-	while ( (tok) && (i < 33) )
-	{
-	  Ctable->m_lengths_integral[i++] = atoi( tok );
-	  tok = strtok( NULL, " \t\n" );
-	}
-
-	if ( !tok )
-	{
-	  inFile.getline( line, MAXLINE );
-	  tok = strtok( line, " \t\n" );
-	}
-      }
-
-      if ( strncmp( tok, ">", 1 ) )
-      {
-	ATH_MSG_WARNING( "Invalid file format in lengths_integral!" );
-	inFile.close();
-
-	if ( lengths )
-	  delete[] lengths;
-
-	if( codewords )
-	  delete[] codewords;
-
-	return StatusCode::FAILURE;
-      }
-
     }
 
     /*************************************/
-    if ( ! strncmp( tok, "lengths", 7 ) )
-    {
-      if ( ! lengths )
-      {
-	ATH_MSG_WARNING( "Invalid file format Nsymbols must come first!" );
-	inFile.close();
-	
-	if( codewords )
-	  delete[] codewords;
+    if (!strncmp(tok, "firstcode", 9)) {
+      int i = 1;
 
-	return StatusCode::FAILURE;
+      tok = strtok(NULL, " \t\n");
+      while (i < 33) {
+        while ((tok) && (i < 33)) {
+          Ctable->m_firstcode[i++] = atoi(tok);
+          tok = strtok(NULL, " \t\n");
+        }
+
+        if (!tok) {
+          inFile.getline(line, MAXLINE);
+          tok = strtok(line, " \t\n");
+        }
       }
 
-      int i=0;
+      if (strncmp(tok, ">", 1)) {
+        ATH_MSG_WARNING("Invalid file format in firstcode");
+        inFile.close();
 
-      tok = strtok( NULL, " \t\n" );
-      while( i < Ctable->m_Nsymbols )
-      {
-	while ( (tok) && (i < Ctable->m_Nsymbols) )
-	{
-	  lengths[i++] = atoi( tok );
-	  tok = strtok( NULL, " \t\n" );
-	}
+        if (lengths)
+          delete[] lengths;
 
-	if ( !tok )
-	{
-	  inFile.getline( line, MAXLINE );
-	  tok = strtok( line, " \t\n" );
-	}
+        if (codewords)
+          delete[] codewords;
+
+        return StatusCode::FAILURE;
       }
-
-      if ( strncmp( tok, ">", 1 ) )
-      {
-	ATH_MSG_WARNING( "Invalid file format in lengths!" );
-	inFile.close();
-
-	if ( lengths )
-	  delete[] lengths;
-
-	if( codewords )
-	  delete[] codewords;
-
-	return StatusCode::FAILURE;
-      }
-
     }
 
+    /*************************************/
+    if (!strncmp(tok, "lengths_integral", 16)) {
+      int i = 1;
+
+      tok = strtok(NULL, " \t\n");
+      while (i < 33) {
+        while ((tok) && (i < 33)) {
+          Ctable->m_lengths_integral[i++] = atoi(tok);
+          tok = strtok(NULL, " \t\n");
+        }
+
+        if (!tok) {
+          inFile.getline(line, MAXLINE);
+          tok = strtok(line, " \t\n");
+        }
+      }
+
+      if (strncmp(tok, ">", 1)) {
+        ATH_MSG_WARNING("Invalid file format in lengths_integral!");
+        inFile.close();
+
+        if (lengths)
+          delete[] lengths;
+
+        if (codewords)
+          delete[] codewords;
+
+        return StatusCode::FAILURE;
+      }
+    }
+
+    /*************************************/
+    if (!strncmp(tok, "lengths", 7)) {
+      if (!lengths) {
+        ATH_MSG_WARNING("Invalid file format Nsymbols must come first!");
+        inFile.close();
+
+        if (codewords)
+          delete[] codewords;
+
+        return StatusCode::FAILURE;
+      }
+
+      int i = 0;
+
+      tok = strtok(NULL, " \t\n");
+      while (i < Ctable->m_Nsymbols) {
+        while ((tok) && (i < Ctable->m_Nsymbols)) {
+          lengths[i++] = atoi(tok);
+          tok = strtok(NULL, " \t\n");
+        }
+
+        if (!tok) {
+          inFile.getline(line, MAXLINE);
+          tok = strtok(line, " \t\n");
+        }
+      }
+
+      if (strncmp(tok, ">", 1)) {
+        ATH_MSG_WARNING("Invalid file format in lengths!");
+        inFile.close();
+
+        if (lengths)
+          delete[] lengths;
+
+        if (codewords)
+          delete[] codewords;
+
+        return StatusCode::FAILURE;
+      }
+    }
   }
 
   inFile.close();
 
+  if (!codewords || !lengths) {
+    ATH_MSG_WARNING("Invalid file format Nsymbols must come first!");
 
-
-  if ( ! codewords || ! lengths )
-  {
-    ATH_MSG_WARNING( "Invalid file format Nsymbols must come first!" );
-	
-    if ( lengths )
+    if (lengths)
       delete[] lengths;
 
-    if( codewords )
+    if (codewords)
       delete[] codewords;
 
     return StatusCode::FAILURE;
   }
-
-
 
   /*
    * Recover escape info from the table
    */
-  int i=Ctable->m_Nsymbols-1;
-  int escape_length=0;
+  int i = Ctable->m_Nsymbols - 1;
+  int escape_length = 0;
   //  uint32_t escape_codeword;  // Set but not used
 
-  while ( (m_escape_marker != Ctable->m_syms[i]) && (i >=0) )
+  while ((m_escape_marker != Ctable->m_syms[i]) && (i >= 0))
     i--;
 
-  if ( i < 0 )
-  {
-    ATH_MSG_WARNING( "Escape code not found!" );
+  if (i < 0) {
+    ATH_MSG_WARNING("Escape code not found!");
 
-    if ( lengths )
+    if (lengths)
       delete[] lengths;
 
-    if( codewords )
+    if (codewords)
       delete[] codewords;
 
     return StatusCode::FAILURE;
-  }
-  else
-  {
-     //    escape_codeword = codewords[i];   // Set but not used
+  } else {
+    //    escape_codeword = codewords[i];   // Set but not used
     escape_length = lengths[i];
 
-    if ( escape_length != 5 )
-      ATH_MSG_WARNING( "WARNING!  Escape code length is " << escape_length \
-		       << " rather than 5!" );
+    if (escape_length != 5)
+      ATH_MSG_WARNING("WARNING!  Escape code length is " << escape_length
+                                                         << " rather than 5!");
   }
 
 #ifdef PRINT_TABLE
-  for ( int j=0; j<Ctable->m_Nsymbols; j++ )
-  {
-    ATH_MSG_INFO( "Table: " << j << " " 
-		  << lengths[j] << " "  
-		  << MSG::hex << codewords[j] << " " 
-		  << Ctable->m_syms[j] << std::dec );
+  for (int j = 0; j < Ctable->m_Nsymbols; j++) {
+    ATH_MSG_INFO("Table: " << j << " " << lengths[j] << " " << MSG::hex
+                           << codewords[j] << " " << Ctable->m_syms[j]
+                           << std::dec);
   }
-#endif // PRINT_TABLE
+#endif  // PRINT_TABLE
 
-  if ( lengths )
+  if (lengths)
     delete[] lengths;
 
-  if( codewords )
+  if (codewords)
     delete[] codewords;
 
-
-  if ( Ctable->m_TableVersion  > m_maxCompressionVersion )
-  {
-    ATH_MSG_WARNING( "Invalid Compression Table Version: " <<
-		     Ctable->m_TableVersion );
+  if (Ctable->m_TableVersion > m_maxCompressionVersion) {
+    ATH_MSG_WARNING(
+        "Invalid Compression Table Version: " << Ctable->m_TableVersion);
 
     return StatusCode::FAILURE;
   }
 
-
-  if ( m_CompressionTables[Ctable->m_TableVersion] ) 
-  {
-    ATH_MSG_WARNING( "Table " << Ctable->m_TableVersion 
-		     << " already loaded!  Not overwriting" );
+  if (m_CompressionTables[Ctable->m_TableVersion]) {
+    ATH_MSG_WARNING("Table " << Ctable->m_TableVersion
+                             << " already loaded!  Not overwriting");
+  } else {
+    ATH_MSG_INFO("Loaded Compress Table Version: " << Ctable->m_TableVersion);
+    m_CompressionTables[Ctable->m_TableVersion].store(std::move(Ctable))
   }
-  else
-  {
-    ATH_MSG_INFO( "Loaded Compress Table Version: " << Ctable->m_TableVersion );
-    m_CompressionTables[Ctable->m_TableVersion].store (std::move(Ctable))
-  }
-
 
   return StatusCode::SUCCESS;
 
 #endif /* TRT_READCOMPTABLE_FILE */
-
 }
-
-
 
 /*
  * Read Compression Table from DB on IOV change
  */
-StatusCode
-TRT_RodDecoder::update() const
-{  
+StatusCode TRT_RodDecoder::update() const {
   /*
    * function to update compression table when condDB data changes:
    */
 
-
   SG::ReadCondHandle<CondAttrListCollection> rst(m_CompressKey);
   const CondAttrListCollection* catrlist = *rst;
-  if(!catrlist) {
-    ATH_MSG_ERROR( "No Compression Table found in condDB " );
+  if (!catrlist) {
+    ATH_MSG_ERROR("No Compression Table found in condDB ");
     return StatusCode::FAILURE;
   }
 
+  CondAttrListCollection::const_iterator catrIt(catrlist->begin());
+  CondAttrListCollection::const_iterator last_catr(catrlist->end());
 
-    CondAttrListCollection::const_iterator catrIt (catrlist->begin());
-    CondAttrListCollection::const_iterator last_catr (catrlist->end());
+  while (catrIt != last_catr) {
+    const coral::AttributeList& atrlist = catrIt->second;
 
-    while ( catrIt != last_catr )
-    {
-       const coral::AttributeList& atrlist = catrIt->second;
-     
+    int TableVersion = (atrlist)["Version"].data<cool::Int32>();
 
-       int TableVersion = (atrlist)["Version"].data<cool::Int32>();
+    if (TableVersion > m_maxCompressionVersion) {
+      ATH_MSG_WARNING("Invalid Compression Table Version: " << TableVersion);
 
-       if ( TableVersion  > m_maxCompressionVersion )
-       {
-	 ATH_MSG_WARNING( "Invalid Compression Table Version: " <<
-			  TableVersion );
+      ++catrIt;
 
-	 ++catrIt;
+      continue;
+    }
 
-	 continue;
-       }
+    if (m_CompressionTables[TableVersion]) {
+      ATH_MSG_DEBUG("Table " << TableVersion
+                             << " already loaded!  Not overwriting");
+      ++catrIt;
 
+      continue;
+    }
 
-       if ( m_CompressionTables[TableVersion] ) 
-       {
-	 ATH_MSG_DEBUG( "Table " << TableVersion 
-			  << " already loaded!  Not overwriting" );
-         ++catrIt;
+    auto Ctable = std::make_unique<t_CompressTable>();
+    Ctable->m_TableVersion = TableVersion;
+    Ctable->m_Nsymbols = (atrlist)["Nsymbols"].data<cool::Int32>();
+    ATH_MSG_DEBUG("Nsymbols = " << Ctable->m_Nsymbols);
 
-	 continue;
-       }
+    Ctable->m_syms = std::make_unique<unsigned int[]>(Ctable->m_Nsymbols);
 
+    const cool::Blob16M& blob = (atrlist)["syms"].data<cool::Blob16M>();
 
-       auto Ctable = std::make_unique<t_CompressTable>();
-       Ctable->m_TableVersion = TableVersion;
-       Ctable->m_Nsymbols = (atrlist)["Nsymbols"].data<cool::Int32>();
-       ATH_MSG_DEBUG( "Nsymbols = " << Ctable->m_Nsymbols );
+    if (blob.size() !=
+        (unsigned int)(Ctable->m_Nsymbols * sizeof(unsigned int))) {
+      ATH_MSG_ERROR("Unexpected size of symbol table! ( "
+                    << blob.size() << " != "
+                    << (Ctable->m_Nsymbols * sizeof(unsigned int)) << " )");
 
+      return StatusCode::FAILURE;
+    }
 
-       Ctable->m_syms       = std::make_unique< unsigned int[] >( Ctable->m_Nsymbols );
+    const unsigned char* BlobStart =
+        static_cast<const unsigned char*>(blob.startingAddress());
+    int j = 0;
+    for (int i = 0; (i < blob.size()) && (j < Ctable->m_Nsymbols);
+         i += sizeof(unsigned int)) {
+      Ctable->m_syms[j++] = *((unsigned int*)(BlobStart + i));
+    }
 
-       const cool::Blob16M& blob = (atrlist)["syms"].data<cool::Blob16M> ();
+    std::istringstream iss((atrlist)["firstcode"].data<cool::String4k>());
+    std::string tok;
+    int i = 1;
+    while (getline(iss, tok, ' ') && (i < CTABLE_FC_LENGTH)) {
+      Ctable->m_firstcode[i++] = atoi(tok.c_str());
+    }
 
-       if ( blob.size() != (unsigned int) (Ctable->m_Nsymbols * sizeof(unsigned int)) )
-       {
-	  ATH_MSG_ERROR( "Unexpected size of symbol table! ( " << blob.size()
-			 << " != " 
-			 << (Ctable->m_Nsymbols * sizeof(unsigned int))
-			 << " )" );
-
-	  return StatusCode::FAILURE;
-       }
-
-       const unsigned char* BlobStart =
-	  static_cast<const unsigned char*> (blob.startingAddress());
-       int j = 0;
-       for (int i = 0; (i < blob.size()) && (j < Ctable->m_Nsymbols);
-	    i += sizeof(unsigned int))
-       {
-	  Ctable->m_syms[j++] = *((unsigned int*) (BlobStart + i));
-       }
-
-       std::istringstream 
-	  iss((atrlist)["firstcode"].data<cool::String4k>());
-       std::string tok;
-       int i = 1;
-       while ( getline(iss, tok, ' ') && (i < CTABLE_FC_LENGTH) ) 
-       {
-	  Ctable->m_firstcode[i++] = atoi(tok.c_str());
-       }
-
-
-       std::istringstream 
-	  iss2((atrlist)["lengths_integral"].data<cool::String4k>());
-       i = 1;
-       while ( getline(iss2, tok, ' ') && (i < CTABLE_LI_LENGTH) ) 
-       {
-	  Ctable->m_lengths_integral[i++] = atoi(tok.c_str());
-       }
-
+    std::istringstream iss2(
+        (atrlist)["lengths_integral"].data<cool::String4k>());
+    i = 1;
+    while (getline(iss2, tok, ' ') && (i < CTABLE_LI_LENGTH)) {
+      Ctable->m_lengths_integral[i++] = atoi(tok.c_str());
+    }
 
 #ifdef NOTDEF
-       if ( 0 )
-       {
-	  ATH_MSG_INFO( "Compress Table Version : " << Ctable->m_TableVersion );
-	  ATH_MSG_INFO( "Compress Table Nsymbols: " << Ctable->m_Nsymbols );
+    if (0) {
+      ATH_MSG_INFO("Compress Table Version : " << Ctable->m_TableVersion);
+      ATH_MSG_INFO("Compress Table Nsymbols: " << Ctable->m_Nsymbols);
 
-	  int i;
-	  for ( i=0; i<32; i++ )
-	     ATH_MSG_INFO( "Compress Table firstcode  : " << i 
-			   << " " << Ctable->m_firstcode[i] );
+      int i;
+      for (i = 0; i < 32; i++)
+        ATH_MSG_INFO("Compress Table firstcode  : " << i << " "
+                                                    << Ctable->m_firstcode[i]);
 
-	  for ( i=0; i<32; i++ )
-	     ATH_MSG_INFO( "Compress Table lengths_int: " << i
-			   << " " << Ctable->m_lengths_integral[i] );
+      for (i = 0; i < 32; i++)
+        ATH_MSG_INFO("Compress Table lengths_int: "
+                     << i << " " << Ctable->m_lengths_integral[i]);
 
+      for (i = 0; i < 10; i++)
+        ATH_MSG_INFO("Compress Table syms: " << i << " " << Ctable->m_syms[i]);
 
-	  for ( i=0; i<10; i++ )
-	     ATH_MSG_INFO( "Compress Table syms: " << i
-			   << " " << Ctable->m_syms[i] );
+      ATH_MSG_INFO("Compress Table syms: [...]");
 
-	  ATH_MSG_INFO( "Compress Table syms: [...]" );
-
-	  for ( i=0; i<10; i++ )
-	     ATH_MSG_INFO( "Compress Table syms: " << (Ctable->m_Nsymbols - 10 + i)
-			   << " " << Ctable->m_syms[(Ctable->m_Nsymbols - 10 + i)] );
-       }
+      for (i = 0; i < 10; i++)
+        ATH_MSG_INFO("Compress Table syms: "
+                     << (Ctable->m_Nsymbols - 10 + i) << " "
+                     << Ctable->m_syms[(Ctable->m_Nsymbols - 10 + i)]);
+    }
 #endif /* NOTDEF */
 
-       int ctable_version = Ctable->m_TableVersion;
-       ATH_MSG_INFO( "Loaded Compress Table Version: " <<
-                     ctable_version);
-       m_CompressionTables[ctable_version].set (std::move(Ctable));
+    int ctable_version = Ctable->m_TableVersion;
+    ATH_MSG_INFO("Loaded Compress Table Version: " << ctable_version);
+    m_CompressionTables[ctable_version].set(std::move(Ctable));
 
-
-       ++catrIt;
-
-    }
+    ++catrIt;
+  }
 
   return StatusCode::SUCCESS;
 }
-
