@@ -4,7 +4,7 @@
 atlas_subdir( AthenaServices )
 
 # External dependencies:
-find_package( Boost COMPONENTS thread )
+find_package( Boost COMPONENTS thread unit_test_framework)
 find_package( CLHEP )
 find_package( Python COMPONENTS Development )
 find_package( yampl )
@@ -59,6 +59,12 @@ atlas_add_test( DelayedConditionsCleanerSvc_test
 atlas_add_test( ThinningCacheTool_test
    SOURCES test/ThinningCacheTool_test.cxx
    LINK_LIBRARIES TestTools AsgTools AthenaKernel GaudiKernel EventInfo AthenaBaseComps )
+   
+atlas_add_test( MetaDataSvc_test
+   SOURCES test/MetaDataToolStub.h test/MetaDataSvc_test.cxx src/MetaDataSvc.cxx src/OutputStreamSequencerSvc.cxx 
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+   LINK_LIBRARIES TestTools  AthenaKernel GaudiKernel StoreGateLib  PersistencySvc AthenaBaseComps RootAuxDynIO ${Boost_LIBRARIES} 
+   POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( AthTPCnvSvc
    SCRIPT athena.py AthenaServices/AthTPCnvSvc_test.py
@@ -90,4 +96,5 @@ atlas_install_joboptions( share/AthTPCnvSvc_test.py
    share/RCUSvc_test.txt
    share/DelayedConditionsCleanerSvc_test.txt
    share/ThinningCacheTool_test.txt
-   share/MTES_test.py )
+   share/MTES_test.py 
+   share/MetaDataSvc_test.txt )

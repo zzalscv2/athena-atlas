@@ -31,6 +31,7 @@
 #include "../DelayedConditionsCleanerSvc.h"
 #include "../DecisionAlg.h"
 #include "../AthReadAlg.h"
+#include "../../test/MetaDataToolStub.h"
 
 DECLARE_COMPONENT( AthenaOutputStream )
 DECLARE_COMPONENT( AthenaConditionStream )
@@ -64,3 +65,4 @@ DECLARE_COMPONENT( Athena::ConditionsCleanerSvc )
 DECLARE_COMPONENT( Athena::DelayedConditionsCleanerSvc )
 DECLARE_COMPONENT( DecisionAlg )
 DECLARE_COMPONENT( AthReadAlg )
+DECLARE_COMPONENT( MetaDataToolStub )
