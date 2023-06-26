@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CopyMcEventCollection.h"
-
+#include "AtlasHepMC/HeavyIon.h"
 
 CopyMcEventCollection::CopyMcEventCollection(const std::string &name, ISvcLocator *pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator)
@@ -66,6 +66,26 @@ StatusCode CopyMcEventCollection::execute(const EventContext& ctx) const
   for (McEventCollection::const_iterator it = signalContainer->begin(); it != signalContainer->end(); ++it) {
     HepMC::GenEvent* copiedEvent = new HepMC::GenEvent(**it);
     HepMC::fillBarcodesAttribute(copiedEvent);
+#ifdef HEPMC3
+    auto bunchCrossingTime = (*it)->attribute<HepMC3::IntAttribute>("BunchCrossingTime");
+    if (bunchCrossingTime) {
+      copiedEvent->add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime->value()));
+    }
+    auto pileupType = (*it)->attribute<HepMC3::IntAttribute>("PileUpType");
+    if (pileupType) {
+      copiedEvent->add_attribute("PileUpType",std::make_shared<HepMC3::IntAttribute>(pileupType->value()));
+    }
+#endif
+    if (!copiedEvent->heavy_ion() && (*it)->heavy_ion()) {
+      // It should be clarified if we want to get a copy or the
+      // content.
+#ifdef HEPMC3
+      HepMC::GenHeavyIonPtr hinew=std::make_shared<HepMC::GenHeavyIon>(*((*it)->heavy_ion()));
+      copiedEvent->set_heavy_ion(hinew);
+#else
+      copiedEvent->set_heavy_ion(*((*it)->heavy_ion()));
+#endif
+    }
     outputContainer->push_back(copiedEvent);
   }
 
@@ -73,11 +93,32 @@ StatusCode CopyMcEventCollection::execute(const EventContext& ctx) const
   if (!m_bkgInputKey.key().empty()) {
     McEventCollection::const_iterator it = bkgContainerPtr->begin();
     if (m_removeBkgHardScatterTruth.value()) {
+      // Do not copy the single particle neutrino GenEvent.
       ++it;
     }
     for ( ; it != bkgContainerPtr->end(); ++it) {
       HepMC::GenEvent* copiedEvent = new HepMC::GenEvent(**it);
       HepMC::fillBarcodesAttribute(copiedEvent);
+#ifdef HEPMC3
+      auto bunchCrossingTime = (*it)->attribute<HepMC3::IntAttribute>("BunchCrossingTime");
+      if (bunchCrossingTime) {
+        copiedEvent->add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime->value()));
+      }
+      auto pileupType = (*it)->attribute<HepMC3::IntAttribute>("PileUpType");
+      if (pileupType) {
+        copiedEvent->add_attribute("PileUpType",std::make_shared<HepMC3::IntAttribute>(pileupType->value()));
+      }
+#endif
+      if (!copiedEvent->heavy_ion() && (*it)->heavy_ion()) {
+        // It should be clarified if we want to get a copy or the
+        // content.
+#ifdef HEPMC3
+        HepMC::GenHeavyIonPtr hinew=std::make_shared<HepMC::GenHeavyIon>(*((*it)->heavy_ion()));
+        copiedEvent->set_heavy_ion(hinew);
+#else
+        copiedEvent->set_heavy_ion(*((*it)->heavy_ion()));
+#endif
+      }
       outputContainer->push_back(copiedEvent);
     }
   }
