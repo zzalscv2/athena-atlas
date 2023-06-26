@@ -5,6 +5,84 @@
 #include "PixelConditionsData/PixelDistortionData.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "TMath.h"
+#include "CxxUtils/restrict.h"
+
+namespace {
+
+
+//TMath is not constexpr
+std::array<double, 21> BinomialCache() {
+  double b0 = TMath::Binomial(20, 0);
+  double b1 = TMath::Binomial(20, 1);
+  double b2 = TMath::Binomial(20, 2);
+  double b3 = TMath::Binomial(20, 3);
+  double b4 = TMath::Binomial(20, 4);
+  double b5 = TMath::Binomial(20, 5);
+  double b6 = TMath::Binomial(20, 6);
+  double b7 = TMath::Binomial(20, 7);
+  double b8 = TMath::Binomial(20, 8);
+  double b9 = TMath::Binomial(20, 9);
+  double b10 = TMath::Binomial(20, 10);
+
+  std::array<double, 21> res = {b0, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10,
+                                b9, b8, b7, b6, b5, b4, b3, b2, b1, b0};
+
+  return res;
+}
+
+//We just have a static const array in the anonymous
+//as cache
+const std::array<double, 21> s_binomialCache = BinomialCache();
+
+template <int N>
+double bernstein_grundpolynom(const double *t, const int i) {
+  static_assert(s_binomialCache.size() > N,
+                " Binomial cache must be larger than N");
+
+  return s_binomialCache[i] * TMath::Power(*t, i) *
+         TMath::Power(1. - *t, N - i);
+}
+
+double bernstein_bezier(const double* ATH_RESTRICT u,
+                        const double* ATH_RESTRICT v, const float *P) {
+  constexpr int n = 20;
+  constexpr int m = 20;
+  static_assert(n==m,
+                "n has to be equal to m");
+
+
+  double r = 0.;
+
+  //So here we calculate the 21+21 polynomial values we need
+  //for the inputs u , v for 0....n each (m==n)
+  std::array<double,n+1> bernstein_grundpolynomU{};
+  std::array<double,m+1> bernstein_grundpolynomV{};
+  for (int i = 0; i <= n; ++i) {
+    bernstein_grundpolynomU[i] = bernstein_grundpolynom<n>(u, i);
+    bernstein_grundpolynomV[i] = bernstein_grundpolynom<m>(v, i);
+  }
+
+
+  for (int i = 0; i <= n; ++i) {
+
+    //the one we passed u and  0 ....n
+    const double bernstein_grundpolynom_i = bernstein_grundpolynomU[i];
+
+    for (int j = 0; j <= m; ++j) {
+
+      const int k = (i * (m + 1)) + j;
+      if (P[k] < -998.9){
+        continue;
+      }
+
+      //the one we passed v and  0 ....n
+      const double bernstein_grundpolynom_j = bernstein_grundpolynomV[j];
+      r += bernstein_grundpolynom_i * bernstein_grundpolynom_j * P[k];
+    }
+  }
+  return r;
+}
+}  // namespace
 
 std::vector<float> PixelDistortionData::getDistortionMap(uint32_t hashID) const {
   int distosize;
@@ -13,8 +91,8 @@ std::vector<float> PixelDistortionData::getDistortionMap(uint32_t hashID) const 
 
   std::vector<float> map(distosize, 0.0);
   auto itr = m_distortionMap.find(hashID);
-  if (itr!=m_distortionMap.end()) { 
-    return itr->second; 
+  if (itr!=m_distortionMap.end()) {
+    return itr->second;
   }
   return map;
 }
@@ -39,10 +117,10 @@ Amg::Vector2D PixelDistortionData::correction(uint32_t hashID, const Amg::Vector
   // direction vector is too small.
   if (std::fabs(direction.z())<1.*CLHEP::micrometer) { return nullCorrection; }
 
-  // If a particle has a too shallow trajectory with respect to the 
-  // module direction, it is likely to be a secondary particle and no 
+  // If a particle has a too shallow trajectory with respect to the
+  // module direction, it is likely to be a secondary particle and no
   // shift should be applied.
-  double invtanphi = direction.x()/direction.z(); 
+  double invtanphi = direction.x()/direction.z();
   double invtaneta = direction.y()/direction.z();
   if (sqrt(invtanphi*invtanphi+invtaneta*invtaneta)>100.0) { return nullCorrection; }
 
@@ -78,12 +156,12 @@ Amg::Vector2D PixelDistortionData::correction(uint32_t hashID, const Amg::Vector
   double localetaCor = -localZ * invtaneta;
   double localphiCor = -localZ * invtanphi;
 
-  // In earlies code version there was a bug in the sign of the correction. 
-  // In MC this was not seen as reco just corrects back what was done in digitization. 
+  // In earlies code version there was a bug in the sign of the correction.
+  // In MC this was not seen as reco just corrects back what was done in digitization.
   // In order to maintain backward compatibilty in older MC we need to reproduce this wrong behaviour.
   if (getVersion()==0) { localphiCor = -localphiCor; }
-  
-  return Amg::Vector2D(localphiCor, localetaCor); 
+
+  return Amg::Vector2D(localphiCor, localetaCor);
 }
 
 Amg::Vector2D PixelDistortionData::correctReconstruction(uint32_t hashID, const Amg::Vector2D & locpos, const Amg::Vector3D & direction) const {
@@ -98,7 +176,7 @@ Amg::Vector2D PixelDistortionData::correctSimulation(uint32_t hashID, const Amg:
   return newlocpos;
 }
 
-double PixelDistortionData::getInSituZ(const double localeta, const double eta_size, const double localphi, const double phi_size, const float *disto) 
+double PixelDistortionData::getInSituZ(const double localeta, const double eta_size, const double localphi, const double phi_size, const float *disto)
 {
   double etaHalfRangeBB = eta_size * 10. / 21.;
   double phiHalfRangeBB = phi_size * 10. / 21.;
@@ -127,7 +205,7 @@ double PixelDistortionData::getInSituZ(const double localeta, const double eta_s
   return bernstein_bezier(&eta, &phi, disto);
 }
 
-double PixelDistortionData::getSurveyZ(const double localeta, const double localphi, const float *disto) 
+double PixelDistortionData::getSurveyZ(const double localeta, const double localphi, const float *disto)
 {
   const double xFE = 22.0 * CLHEP::millimeter; // Distance between the 2 Front-End line, where bows have been measured
   const double yFE = 60.8 * CLHEP::millimeter; // Length of the active surface of each module
@@ -150,29 +228,7 @@ double PixelDistortionData::getSurveyZ(const double localeta, const double local
   return z1 + ((z2 - z1) / xFE) * (localphi + xFE / 2.);
 }
 
-double PixelDistortionData::bernstein_grundpolynom(const double *t, const int n, const int i) 
-{
-  return TMath::Binomial(n, i) * TMath::Power(*t, i) * TMath::Power(1. - *t, n - i);
-}
-
-double PixelDistortionData::bernstein_bezier(const double *u, const double *v, const float *P) 
-{
-  int n = 20;
-  int m = 20;
-  double r = 0.;
-
-  for (int i = 0; i <= n; ++i) {
-    for (int j = 0; j <= m; ++j) {
-      int k = (i * (m + 1)) + j;
-      if (P[k] < -998.9) continue;
-      r += bernstein_grundpolynom(u, n, i) * bernstein_grundpolynom(v, m, j) * P[k];
-    }
-  }
-
-  return r;
-}
-
-bool PixelDistortionData::isOldParam(const unsigned long long ull_id) 
+bool PixelDistortionData::isOldParam(const unsigned long long ull_id)
 {
   // Only pixel modules can have the old parametrisation
   if (ull_id < 0x240000000000000) return false;
@@ -181,7 +237,7 @@ bool PixelDistortionData::isOldParam(const unsigned long long ull_id)
   return true;
 }
 
-bool PixelDistortionData::isIBL3D(const unsigned long long ull_id) 
+bool PixelDistortionData::isIBL3D(const unsigned long long ull_id)
 {
   // Stave 1
   if (ull_id >= 0x200000000000000 && ull_id <= 0x200180000000000) return true;
