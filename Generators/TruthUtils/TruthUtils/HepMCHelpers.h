@@ -64,26 +64,27 @@ namespace MC {
 
 /* The functions below should be unified */
   template <class T> inline bool FastCaloSimIsGenSimulStable(const T&  p) {
-  int status=p->status();
-  const auto& vertex = p->end_vertex();
-  return (status == 1) ||
+    const int status=p->status();
+    const auto vertex = p->end_vertex();
+    return (status == 1) ||
           (status==2 && !vertex) ||
           (status==2 && HepMC::is_simulation_vertex(vertex))
           ;
-
-}
+  }
 
   template <class T> inline bool jettruthparticleselectortool_isStable( const T& p) {
     if (HepMC::is_simulation_particle(p)) return false; // This particle is from G4
-    if (p->pdgId() == 21 && p->p4().E() == 0) return false; //< Workaround for a gen bug?
-    return ((p->status() == 1) || //< Fully stable, even if marked that way by G4
-            (p->status() == 2 && p->hasDecayVtx() && p->decayVtx() != nullptr && HepMC::is_simulation_vertex(p->decayVtx()))); //< Gen-stable with G4 decay
+    if (p->pdg_id() == 21 && p->p4().E() == 0) return false; //< Workaround for a gen bug?
+    const int status=p->status();
+    const auto vertex = p->end_vertex();
+    return ((status == 1) || //< Fully stable, even if marked that way by G4
+            (status == 2 && vertex && HepMC::is_simulation_vertex(vertex))); //< Gen-stable with G4 decay
   }
   
 
-  template <class T> inline bool jettruthparticleselectortool_isInteracting( const T& p){
+  template <class T> inline bool jettruthparticleselectortool_isInteracting( const T& p) {
       if (! jettruthparticleselectortool_isStable(p)) return false;
-      const int apid = std::abs(p->pdgId() );
+      const int apid = std::abs(p->pdg_id() );
       if (apid == 12 || apid == 14 || apid == 16) return false;
       if (p->status() == 1 &&
           (apid == 1000022 || apid == 1000024 || apid == 5100022 ||
@@ -100,52 +101,38 @@ namespace MC {
     return false;
   }
 
-
-
-  template <class T> inline bool egammaTruthAlg_isGenStable (const T& tp)
-{
-  // get generator id 
-  int p_id = tp->pdg_id();
-
-  auto vertex = tp->end_vertex();
+  template <class T> inline bool egammaTruthAlg_isGenStable (const T& p) {
+    const int apid = std::abs(p->pdg_id());
+    const auto vertex = p->end_vertex();
+    const int status = p->status();
   // we want to keep primary particle with status==2 but without vertex in HepMC
-
-  return (
-          ( ( tp->status() == 1) ||  
-            (tp->status()==2 && (!vertex || HepMC::is_simulation_vertex(vertex))) 
-            ) && (!HepMC::is_simulation_particle(tp)) 
-          && !(std::abs(p_id) == 21 && tp->e()==0)
+    return (
+          ( ( status == 1) ||  
+            (status==2 && (!vertex || HepMC::is_simulation_vertex(vertex))) 
+            ) && (!HepMC::is_simulation_particle(p)) 
+          && !(apid == 21 && p->e()==0)
           );    
-}
+  }
 
 
-  template <class T> inline bool egammaTruthAlg_isGenInteracting (const T&  tp)
-{
-  int status = tp->status();
-  int pdg_id = abs(tp->pdg_id());
-  auto vertex = tp->end_vertex();
+  template <class T> inline bool egammaTruthAlg_isGenInteracting (const T& p){
+    const int status = p->status();
+    const int apid = abs(p->pdg_id());
+    const auto vertex = p->end_vertex();
   // we want to keep primary particle with status==2 but without vertex in HepMC
-
-  return
+    return
     (
-
      (((status == 1) ||
-       (status==2 && (!vertex || HepMC::is_simulation_vertex(vertex)))) && (!HepMC::is_simulation_particle(tp)) ) &&
-
-     !(pdg_id==12 || pdg_id==14 || pdg_id==16 ||
-       (pdg_id==1000022 &&  status==1 ) ||
-       (pdg_id==5100022 &&  status==1 ) ||
-       (pdg_id==1000024 &&  status==1 ) ||
-       (pdg_id==39 &&  status==1 ) ||
-       (pdg_id==1000039 &&  status==1 ) ||
-       (pdg_id==5000039 &&  status==1 ))
-
+       (status==2 && (!vertex || HepMC::is_simulation_vertex(vertex)))) && (!HepMC::is_simulation_particle(p)) ) &&
+     !(apid==12 || apid==14 || apid==16 ||
+       (apid==1000022 &&  status==1 ) ||
+       (apid==5100022 &&  status==1 ) ||
+       (apid==1000024 &&  status==1 ) ||
+       (apid==39 &&  status==1 ) ||
+       (apid==1000039 &&  status==1 ) ||
+       (apid==5000039 &&  status==1 ))
      );
-}
-
-
-
-
+  }
 
 }
 #endif
