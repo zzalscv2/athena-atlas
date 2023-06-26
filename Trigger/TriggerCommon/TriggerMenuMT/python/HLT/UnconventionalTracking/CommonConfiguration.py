@@ -15,15 +15,17 @@ def getCommonInDetFullScanSequence(flags):
     InputMakerAlg=getTrackingInputMaker("ftf")
 
     from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
+    from TrigInDetConfig.utils import getInDetFlagsForSignature
     IDTrigConfig = getInDetTrigConfig("jet")
+    flagsWithTrk = getInDetFlagsForSignature(flags,IDTrigConfig.name)
 
     from ..CommonSequences.FullScanDefs import trkFSRoI
     from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTrackingNoView
-    TrkInputNoViewAlg = makeInDetTrigFastTrackingNoView(flags, config=IDTrigConfig, rois=trkFSRoI)
+    TrkInputNoViewAlg = makeInDetTrigFastTrackingNoView(flagsWithTrk, config=IDTrigConfig, rois=trkFSRoI)
 
     from TrigInDetConfig.InDetTrigVertices import makeInDetTrigVertices
     
-    vtxAlgs = makeInDetTrigVertices(flags, "jet", IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex_jet, IDTrigConfig, adaptiveVertex=IDTrigConfig.adaptiveVertex_jet)
+    vtxAlgs = makeInDetTrigVertices(flagsWithTrk, "jet", IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex_jet, IDTrigConfig, adaptiveVertex=IDTrigConfig.adaptiveVertex_jet)
     prmVtx = vtxAlgs[-1]
 
     TrkSeq = [InputMakerAlg,TrkInputNoViewAlg, prmVtx]

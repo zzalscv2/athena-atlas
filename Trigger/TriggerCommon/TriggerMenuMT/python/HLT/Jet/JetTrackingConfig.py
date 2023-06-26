@@ -8,6 +8,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, conf2toConfigurable
 
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
+from TrigInDetConfig.utils import getFlagsForActiveConfig
 from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
 from InDetConfig.InDetPriVxFinderConfig import InDetTrigPriVxFinderCfg
 from InDetUsedInVertexFitTrackDecorator.UsedInVertexFitTrackDecoratorCfg import getUsedInVertexFitTrackDecoratorAlg
@@ -70,10 +71,17 @@ def JetFSTrackingCfg(flags, trkopt, RoIs):
     acc = ComponentAccumulator()
     acc.addSequence(parOR(seqname))
 
+    IDTrigConfig = getInDetTrigConfig( 'jet' )
+
+    from AthenaCommon.Logging import logging
+    log = logging.getLogger(__name__)
+
+    flagsWithTrk = getFlagsForActiveConfig(flags, 'jet', log)
+
     assert trkopt == "ftf"
     acc.merge(
         trigInDetFastTrackingCfg(
-            flags,
+            flagsWithTrk,
             RoIs,
             signatureName="jet",
             in_view=False
@@ -83,15 +91,13 @@ def JetFSTrackingCfg(flags, trkopt, RoIs):
 
     # get the jetContext for trkopt (and build it if not existing yet)
     jetContext, trkKeys = retrieveJetContext(trkopt)
-    IDTrigConfig = getInDetTrigConfig( 'jet' )
 
     acc.merge(
         InDetTrigPriVxFinderCfg(
-            flags,
+            flagsWithTrk,
+            inputTracks = jetContext["Tracks"],
+            outputVtx = jetContext["Vertices"],
             name="InDetTrigPriVxFinder_jetFS",
-            signature = "jet",
-            TracksName = jetContext["Tracks"],
-            VxCandidatesOutputName = jetContext["Vertices"]
         ),
         seqname
     )
@@ -150,9 +156,14 @@ def JetRoITrackingCfg(flags, jetsIn, trkopt, RoIs):
 
     assert trkopt == "roiftf"
     IDTrigConfig = getInDetTrigConfig( 'jetSuper' )
+
+    from AthenaCommon.Logging import logging
+    log = logging.getLogger(__name__)
+    flagsWithTrk = getFlagsForActiveConfig(flags, 'jet', log)
+
     acc.merge(
         trigInDetFastTrackingCfg(
-            flags,
+            flagsWithTrk,
             RoIs,
             signatureName="jetSuper",
             in_view=True
@@ -161,11 +172,10 @@ def JetRoITrackingCfg(flags, jetsIn, trkopt, RoIs):
 
     acc.merge(
         InDetTrigPriVxFinderCfg(
-            flags,
+            flagsWithTrk,
+            inputTracks = IDTrigConfig.tracks_FTF(),
+            outputVtx =   IDTrigConfig.vertex,
             name="InDetTrigPriVxFinderjetSuper",
-            signature = "jetSuper",
-            TracksName = IDTrigConfig.tracks_FTF(),
-            VxCandidatesOutputName = IDTrigConfig.vertex
         )
     )
 
