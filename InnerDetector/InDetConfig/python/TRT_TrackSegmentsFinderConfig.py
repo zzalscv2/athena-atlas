@@ -71,9 +71,9 @@ def TRT_TrackSegmentsFinder_TrackSegments_Cfg(flags, name = 'InDetTRT_TrackSegme
 
     if "SegmentsMakerTool" not in kwargs:
         from InDetConfig.TRT_TrackSegmentsToolConfig import (
-            TRT_TrackSegmentsMaker_ATLxk_TrackSegments_Cfg)
+            TRT_TrackSegmentsMaker_ATLxk_TrackSegmentsCfg)
         kwargs.setdefault("SegmentsMakerTool", acc.popToolsAndMerge(
-            TRT_TrackSegmentsMaker_ATLxk_TrackSegments_Cfg(flags)))
+            TRT_TrackSegmentsMaker_ATLxk_TrackSegmentsCfg(flags)))
 
     kwargs.setdefault("SegmentsLocation", "TRTSegmentsTRT")
 

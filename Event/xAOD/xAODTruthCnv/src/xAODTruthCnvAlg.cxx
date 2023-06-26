@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/errorcheck.h"
@@ -35,6 +35,13 @@
 
 #include "xAODTruthCnvAlg.h"
 
+bool isSeparatorGenEvent(const HepMC::GenEvent *genEvt) {
+  // Separator defined by pid==0 and eventNumber==-1 as per
+  // https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/PileupDigitization#Arrangement_of_Truth_Information
+  const int pid = HepMC::signal_process_id(genEvt);
+  const int eventNumber = genEvt->event_number();
+  return (pid==0 && eventNumber==-1);
+}
 
 using namespace std;
 
@@ -168,21 +175,51 @@ namespace xAODMaker {
             
 	// (1) Build TruthEvents
 	ATH_MSG_DEBUG("Number of GenEvents in this Athena event = " << mcColl->size());
+        bool newAttributesPresent(false);
 	for (unsigned int cntr = 0; cntr < mcColl->size(); ++cntr) {
 	  const HepMC::GenEvent* genEvt = (*mcColl)[cntr];
 	  bool isSignalProcess(false);
-	  if (cntr==0) isSignalProcess=true;
+	  if (cntr==0) {
+            isSignalProcess=true;
+            auto bunchCrossingTime = genEvt->attribute<HepMC3::IntAttribute>("BunchCrossingTime");
+            if (bunchCrossingTime) {
+              newAttributesPresent = true;
+              ATH_MSG_VERBOSE("New attributes present.");
+            }
+            else {
+              ATH_MSG_VERBOSE("New attributes missing.");
+            }
+          }
 	  if (cntr>0) {
-	    // Handle pile-up events
-	    // If in-time pileup only is requested, loop stops when
-	    // the separator between out-of-time and in-time is reached
-	    // Separator defined by pid==0 and eventNumber==-1 as per
-	    // https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/PileupDigitization#Arrangement_of_Truth_Information
-	    if (!m_doInTimePileUp && !m_doAllPileUp) break;
-	    isSignalProcess=false;
-	    int pid = HepMC::signal_process_id(genEvt);
-	    int eventNumber = genEvt->event_number();
-	    if (m_doInTimePileUp && pid==0 && eventNumber==-1) break; // stop at the separator
+            // Handle pile-up events
+            if (!m_doInTimePileUp && !m_doAllPileUp) break;
+            isSignalProcess=false;
+            auto bunchCrossingTime = genEvt->attribute<HepMC3::IntAttribute>("BunchCrossingTime");
+            if (bunchCrossingTime) {
+              // New approach based on checking the bunch crossing
+              // time directly.
+              if (m_doInTimePileUp && std::abs(bunchCrossingTime->value()) > 0) {
+                // Skip out-of-time pile-up events
+                continue;
+              }
+            }
+            else {
+              // Old approach based on McEventCollection structure. If
+              // in-time pileup only is requested, loop stops when the
+              // separator GenEvent between out-of-time and in-time is
+              // reached
+              if (m_doInTimePileUp && isSeparatorGenEvent(genEvt)) {
+                if (newAttributesPresent) {
+                  // Old structure with new Attributes?! Check all
+                  // GenEvents just in case.
+                  ATH_MSG_VERBOSE("New-style, but seeing separator GenEvents");
+                  continue;
+                }
+                // Old structure - stop at the first separator
+                // GenEvent.
+                break;
+              }
+            }
 	  }
                 
 	  xAOD::TruthEvent* xTruthEvent = new xAOD::TruthEvent();

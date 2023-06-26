@@ -22,7 +22,7 @@
 #include "PATInterfaces/SystematicRegistry.h"
 #include "PathResolver/PathResolver.h"
 #include "xAODMetaData/FileMetaData.h"
-#include <boost/algorithm/string.hpp>
+#include <algorithm>
 
 #ifndef ROOTCORE
 #include "AthAnalysisBaseComps/AthAnalysisHelper.h"
@@ -613,7 +613,7 @@ StatusCode EgammaCalibrationAndSmearingTool::get_simflavour_from_metadata(PATCor
       if (dataType == "IS_SIMULATION") {
           std::string simType("");
           ATH_CHECK(AthAnalysisHelper::retrieveMetadata("/Simulation/Parameters", "SimulationFlavour", simType, inputMetaStore()));
-          boost::to_upper(simType);
+           std::transform(simType.begin(), simType.end(), simType.begin(), ::toupper);
           result = (simType.find("ATLFASTII")==std::string::npos) ?  PATCore::ParticleDataType::Full : PATCore::ParticleDataType::Fast;
           return StatusCode::SUCCESS;
       }
@@ -634,7 +634,7 @@ StatusCode EgammaCalibrationAndSmearingTool::get_simflavour_from_metadata(PATCor
       }
       else {
           ATH_MSG_DEBUG("sim type = " + simType);
-          boost::to_upper(simType);
+          std::transform(simType.begin(), simType.end(), simType.begin(), ::toupper);
           result = (simType.find("ATLFASTII")==std::string::npos) ?  PATCore::ParticleDataType::Full : PATCore::ParticleDataType::Fast;
           return StatusCode::SUCCESS;
       }

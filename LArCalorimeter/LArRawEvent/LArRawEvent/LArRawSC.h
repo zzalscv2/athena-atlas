@@ -17,7 +17,7 @@
    represents the output of the LATOME
 */
 
-class LArRawSC  {
+class LArRawSC  final{
 
  private:
 
@@ -154,11 +154,17 @@ class LArRawSC  {
     /** @set pedestal Overflow */
     void setPedOverflow(bool overflow){ m_pedOverflow=overflow; }
 
-    /** @brief Destructor */
-    virtual ~LArRawSC() = default;
-
     /** @brief default constructor for persistency */
     LArRawSC() = default;
+    /** @brief default copy/move assignement */
+    LArRawSC(const LArRawSC&) = default;
+    LArRawSC(LArRawSC&&) = default;
+    LArRawSC& operator=(const LArRawSC&) = default;
+    LArRawSC& operator=(LArRawSC&&) = default;
+    /** @brief Destructor */
+    ~LArRawSC() = default;
+
+
 };
 
 #endif //LArRawSC_H

@@ -367,6 +367,8 @@ StatusCode G4AtlasAlg::execute()
   else {
     // copy input Evgen collection to output Truth collection
     outputTruthCollection = std::make_unique<McEventCollection>(*inputTruthCollection);
+    // empty shadow Truth collection
+    shadowTruth = std::make_unique<McEventCollection>();
     // Apply QS patch if required
     if ( not m_qspatcher.empty() ) {
       for (HepMC::GenEvent* currentGenEvent : *outputTruthCollection ) {

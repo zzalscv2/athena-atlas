@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -17,6 +17,8 @@
 #include "InDetRawData/SCT_RDO_Container.h"
 #include "ByteStreamData/RawEvent.h"
 #include "InDetByteStreamErrors/IDCInDetBSErrContainer.h"
+
+#include "AthAllocators/DataPool.h"
 
 #include <vector>
 
@@ -37,6 +39,7 @@ class ISCT_RodDecoder : virtual public IAlgTool
   virtual StatusCode fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment&,
                                     SCT_RDO_Container&,
                                     IDCInDetBSErrContainer& errs,
+                                    DataPool<SCT3_RawData>* dataItemsPool,
                                     const EventContext& ctx,
                                     const std::vector<IdentifierHash>* vecHash = nullptr) const = 0;
 };

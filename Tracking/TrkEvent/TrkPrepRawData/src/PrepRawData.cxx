@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -64,8 +64,6 @@ PrepRawData::PrepRawData(const Identifier& clusId,
   m_rdoList.push_back(clusId);
 }
 
-PrepRawData::~PrepRawData() = default;
-
 // Default constructor:
 PrepRawData::PrepRawData()
   : Trk::ObjectCounter<Trk::PrepRawData>()
@@ -76,6 +74,8 @@ PrepRawData::PrepRawData()
   , m_indexAndHash()
 {
 }
+
+PrepRawData::~PrepRawData() = default;
 
 MsgStream&
 PrepRawData::dump(MsgStream& stream) const

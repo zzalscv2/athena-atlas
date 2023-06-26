@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETRAWDATABYTESTREAM_SCT_RODDECODER_H 
@@ -108,6 +108,7 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
   virtual StatusCode fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag,
                                     SCT_RDO_Container& rdoIDCont,
                                     IDCInDetBSErrContainer& errs,
+                                    DataPool<SCT3_RawData>* dataItemsPool,
                                     const EventContext& ctx,
                                     const std::vector<IdentifierHash>* vecHash = nullptr) const override;
 
@@ -206,6 +207,7 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
     void setCollection(const SCT_ID* sctID,
                        const IdentifierHash& waferHash,
                        SCT_RDO_Container& rdoIDCont,
+                       DataPool<SCT3_RawData>* dataItemsPool,
                        SCT_RodDecoderErrorsHelper& errs) {
       linkIDHash = waferHash;
       collID = sctID->wafer_id(linkIDHash);
@@ -219,6 +221,10 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
         else { // Create a new collection for linkIDHash
           std::unique_ptr<SCT_RDO_Collection> rdoColl{std::make_unique<SCT_RDO_Collection>(linkIDHash)};
           rdoColl->setIdentifier(collID);
+          if(dataItemsPool){
+          //pool will own
+            rdoColl->clear(SG::VIEW_ELEMENTS);
+          }
           rdoCollMap[linkIDHash] = std::move(rdoColl);
           errs.noerror(linkIDHash); // make sure the error information is filled for this hash
         }
@@ -242,7 +248,8 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
    */
   int makeRDO(const bool isOld,
               SharedData& data,
-              CacheHelper& cache) const;
+              CacheHelper& cache,
+              DataPool<SCT3_RawData>* dataItemsPool) const;
 
   /**
    * @brief Add an error for each wafer in the problematic ROD
@@ -293,6 +300,7 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
                            const uint32_t robID,
                            SharedData& data,
                            SCT_RDO_Container& rdoIDCont,
+                           DataPool<SCT3_RawData>* dataItemsPool,
                            CacheHelper& cache,
                            SCT_RodDecoderErrorsHelper& errs,
                            bool& hasError,
@@ -314,6 +322,7 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
                                       const uint32_t robID,
                                       SharedData& data,
                                       SCT_RDO_Container& rdoIDCont,
+                                      DataPool<SCT3_RawData>* dataItemsPool,
                                       CacheHelper& cache,
                                       SCT_RodDecoderErrorsHelper& errs,
                                       bool& hasError,
@@ -334,6 +343,7 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
                                  const uint32_t robID,
                                  SharedData& data,
                                  SCT_RDO_Container& rdoIDCont,
+                                 DataPool<SCT3_RawData>* dataItemsPool,
                                  CacheHelper& cache,
                                  SCT_RodDecoderErrorsHelper& errs,
                                  bool& hasError,
@@ -354,6 +364,7 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
                                 const uint32_t robID,
                                 SharedData& data,
                                 SCT_RDO_Container& rdoIDCont,
+                                DataPool<SCT3_RawData>* dataItemsPool,
                                 CacheHelper& cache,
                                 SCT_RodDecoderErrorsHelper& errs,
                                 bool& hasError,

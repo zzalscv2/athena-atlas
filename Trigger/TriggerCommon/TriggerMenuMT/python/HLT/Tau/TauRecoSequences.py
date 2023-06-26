@@ -100,10 +100,10 @@ def tauIdSequence(flags, RoIs, name):
 
     tauIdSequence+= ViewVerifyId
 
-    newflags = getInDetFlagsForSignature(flags,IDTrigConfig.name)
+    flagsWithTrk = getInDetFlagsForSignature(flags,IDTrigConfig.name)
 
     from TrigTauRec.TrigTauRecConfig import trigTauRecMergedPrecisionMVACfg
-    tauPrecisionAlg = algorithmCAToGlobalWrapper(trigTauRecMergedPrecisionMVACfg, newflags, name, inputRoIs = RoIs, tracks = IDTrigConfig.tracks_IDTrig())[0]
+    tauPrecisionAlg = algorithmCAToGlobalWrapper(trigTauRecMergedPrecisionMVACfg, flagsWithTrk, name, inputRoIs = RoIs, tracks = IDTrigConfig.tracks_IDTrig())[0]
 
     tauIdSequence += tauPrecisionAlg
 
@@ -117,6 +117,7 @@ def precTrackSequence( flags, RoIs , name):
     signatureName, signatureNameID = _getTauSignatureShort( name )
     from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
     IDTrigConfig = getInDetTrigConfig( signatureNameID )
+    flagsWithTrk = getInDetFlagsForSignature(flags,IDTrigConfig.name)
 
     ViewVerifyTrk = CfgMgr.AthViews__ViewDataVerifier("tauViewDataVerifier_"+signatureName)
     ViewVerifyTrk.DataObjects = [( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+%s' % IDTrigConfig.tracks_FTF() ),
@@ -130,7 +131,7 @@ def precTrackSequence( flags, RoIs , name):
     from AthenaCommon.AlgSequence import AlgSequence
     topSequence = AlgSequence()
 
-    if not flags.Input.isMC:
+    if not flagsWithTrk.Input.isMC:
       ViewVerifyTrk.DataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
                                  ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' ) ,
                                  ( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
@@ -146,10 +147,10 @@ def precTrackSequence( flags, RoIs , name):
     from TrigInDetConfig.InDetTrigPrecisionTracking import makeInDetTrigPrecisionTracking
     #When run in a different view than FTF some data dependencies needs to be loaded through verifier
     #Pass verifier as an argument and it will automatically append necessary DataObjects@NOTE: Don't provide any verifier if loaded in the same view as FTF
-    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( flags, config = IDTrigConfig, verifier = ViewVerifyTrk, rois = RoIs )
+    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( flagsWithTrk, config = IDTrigConfig, verifier = ViewVerifyTrk, rois = RoIs )
 
     from TrigInDetConfig.InDetTrigVertices import makeInDetTrigVertices
-    vtxAlg = makeInDetTrigVertices( flags,
+    vtxAlg = makeInDetTrigVertices( flagsWithTrk,
                                     whichSignature       = signatureName,
                                     inputTrackCollection = IDTrigConfig.tracks_IDTrig(),
                                     outputVtxCollection  = IDTrigConfig.vertex,

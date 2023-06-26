@@ -32,11 +32,9 @@ class PixelDistortionData {
     Amg::Vector2D correctSimulation(uint32_t hashID, const Amg::Vector2D & locpos, const Amg::Vector3D & direction) const;
     static double getInSituZ(const double localeta, const double eta_size, const double localphi, const double phi_size, const float *disto) ;
     static double getSurveyZ(const double localeta, const double localphi, const float *disto) ;
-    static double bernstein_grundpolynom(const double *t, const int n, const int i) ;
-    static double bernstein_bezier(const double *u, const double *v, const float *P) ;
     static bool isOldParam(const unsigned long long ull_id) ;
     static bool isIBL3D(const unsigned long long ull_id) ;
- 
+
     void clear();
 
   private:

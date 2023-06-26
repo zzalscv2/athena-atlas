@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -19,6 +19,7 @@
 
 #include "GaudiKernel/IAlgTool.h"
 
+#include "AthAllocators/DataPool.h"
 /** 
  * @class ISCTRawDataProviderTool
  *
@@ -40,6 +41,7 @@ class ISCTRawDataProviderTool : virtual public IAlgTool
   virtual StatusCode convert(std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>&,
                              SCT_RDO_Container&,
                              IDCInDetBSErrContainer& errs,
+                             DataPool<SCT3_RawData>* dataItemsPool,
                              const EventContext& ctx) const = 0;
 
 };

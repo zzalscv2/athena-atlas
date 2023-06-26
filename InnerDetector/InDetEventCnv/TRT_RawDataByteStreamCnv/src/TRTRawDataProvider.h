@@ -48,24 +48,23 @@ public:
     { return StatusCode::SUCCESS;}
 
   //! Destructor
-  ~TRTRawDataProvider()
-    {
-    }
+  virtual ~TRTRawDataProvider() = default;
 
 private:
+ ToolHandle<IRegSelTool> m_regionSelector{this, "RegSelTool",
+                                          "RegSelTool/RegSelTool_TRT"};
+ Gaudi::Property<bool> m_useDataPoolWithCache{this, "useDataPoolWithCache",
+                                              false, "use DataPool With Cache"};
+ ServiceHandle<IROBDataProviderSvc> m_robDataProvider;
+ ToolHandle<ITRTRawDataProviderTool> m_rawDataTool;
+ ServiceHandle<ITRT_CablingSvc> m_CablingSvc;
+ const TRT_ID* m_trt_id;
 
-  ToolHandle<IRegSelTool>             m_regionSelector { this, "RegSelTool", "RegSelTool/RegSelTool_TRT" }
-;
-  ServiceHandle<IROBDataProviderSvc>  m_robDataProvider;
-  ToolHandle<ITRTRawDataProviderTool> m_rawDataTool;
-  ServiceHandle<ITRT_CablingSvc>     m_CablingSvc;
-  const TRT_ID*                      m_trt_id;
-
-  bool m_roiSeeded;
-  SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey;
-  SG::WriteHandleKey<TRT_RDO_Container> m_rdoContainerKey;
-  SG::WriteHandleKey<TRT_BSErrContainer> m_bsErrContKey;
-  SG::UpdateHandleKey<TRT_RDO_Cache> m_rdoCacheKey;
+ bool m_roiSeeded;
+ SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey;
+ SG::WriteHandleKey<TRT_RDO_Container> m_rdoContainerKey;
+ SG::WriteHandleKey<TRT_BSErrContainer> m_bsErrContKey;
+ SG::UpdateHandleKey<TRT_RDO_Cache> m_rdoCacheKey;
 
 };
 

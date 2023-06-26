@@ -11,8 +11,6 @@
 #include "TauAnalysisTools/Enums.h"
 #include "TauAnalysisTools/SharedFilesVersion.h"
 
-#include <boost/algorithm/string.hpp>
-
 namespace TauAnalysisTools
 {
 
@@ -703,7 +701,7 @@ StatusCode TauEfficiencyCorrectionsTool::beginInputFile()
     std::string simType("");
     bool result = fmd->value( xAOD::FileMetaData::simFlavour , simType );
     // if no result -> no simFlavor metadata, so must be data
-    if(result) boost::to_upper(simType);
+    if(result)  std::transform(simType.begin(), simType.end(), simType.begin(), ::toupper);
     
     if (simType.find("ATLFASTII")!=std::string::npos && !m_sAFII)
       ATH_MSG_WARNING("Input file is fast simulation but you are _not_ using AFII corrections and uncertainties, you should set \"isAFII\" to \"true\"");

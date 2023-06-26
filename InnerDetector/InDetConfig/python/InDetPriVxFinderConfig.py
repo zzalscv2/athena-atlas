@@ -38,17 +38,19 @@ def InDetPriVxFinderCfg(flags, name="InDetPriVxFinder", **kwargs):
     acc.addEventAlgo(CompFactory.InDet.InDetPriVxFinder(name, **kwargs))
     return acc
 
-def InDetTrigPriVxFinderCfg(flags, name="InDetTrigPriVxFinder",
-                            signature="",
+def InDetTrigPriVxFinderCfg(flags, inputTracks, outputVtx, name="InDetTrigPriVxFinder",
                             **kwargs):
 
     acc = ComponentAccumulator()
 
+    kwargs["TracksName"] = inputTracks
+    kwargs["VxCandidatesOutputName"] = outputVtx
+    
     if "VertexFinderTool" not in kwargs:
         from InDetConfig.InDetPriVxFinderToolConfig import (
             TrigVertexFinderToolCfg)
         kwargs.setdefault("VertexFinderTool", acc.popToolsAndMerge(
-            TrigVertexFinderToolCfg(flags, signature=signature)))
+            TrigVertexFinderToolCfg(flags)))
 
     if "VertexCollectionSortingTool" not in kwargs:
         from TrkConfig.TrkVertexToolsConfig import (
@@ -63,7 +65,8 @@ def InDetTrigPriVxFinderCfg(flags, name="InDetTrigPriVxFinder",
 
     kwargs.setdefault("doVertexSorting", True)
 
-    acc.addEventAlgo(CompFactory.InDet.InDetPriVxFinder(name, **kwargs))
+    acc.addEventAlgo(CompFactory.InDet.InDetPriVxFinder(name+flags.Tracking.ActiveConfig.input_name,
+                                                        **kwargs))
     return acc
 
 

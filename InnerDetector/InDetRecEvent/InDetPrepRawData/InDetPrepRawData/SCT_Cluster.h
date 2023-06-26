@@ -1,14 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
- ///////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
 // SCT_Cluster.h
 //   Header file for class SCT_Cluster
-///////////////////////////////////////////////////////////////////
-// Class derived from SiCluster to given a different class type
-// as a trick to get the convertors working. Does not really 
-// externd SiCluster.
 ///////////////////////////////////////////////////////////////////
 // Version 1.0 23/07/2004 John Baines
 ///////////////////////////////////////////////////////////////////
@@ -39,15 +35,18 @@ class SCT_Cluster final : public SiCluster {
  public:
 
   /// Constructor without parameters
-  SCT_Cluster();
+  SCT_Cluster() = default;
   /// Copy constructor
-  SCT_Cluster(const SCT_Cluster &);
+  SCT_Cluster(const SCT_Cluster &) = default;
   /// Move constructor
-  SCT_Cluster(SCT_Cluster &&) noexcept;
+  SCT_Cluster(SCT_Cluster &&) noexcept = default;
   /// Assignment operator
-  SCT_Cluster &operator=(const SCT_Cluster &);
+  SCT_Cluster &operator=(const SCT_Cluster &) = default;
   /// Move assignment operator
-  SCT_Cluster &operator=(SCT_Cluster &&) noexcept;
+  SCT_Cluster &operator=(SCT_Cluster &&) noexcept = default;
+  /// Destructor:
+  virtual ~SCT_Cluster(); //default in dtor
+
 
   /**
    * Constructor with parameters using pointer of Amg::MatrixX.
@@ -100,7 +99,7 @@ class SCT_Cluster final : public SiCluster {
 private:
   /// Some information about timing - which strips had 010 and which 011 for
   /// first 16 strips in a cluster.
-  uint16_t m_hitsInThirdTimeBin;
+  uint16_t m_hitsInThirdTimeBin = 0;
 
 };
 

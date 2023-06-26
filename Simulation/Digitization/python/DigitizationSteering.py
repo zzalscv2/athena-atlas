@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Main steering for the digitization jobs
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -35,6 +35,15 @@ from RunDependentSimComps.PileUpUtils import pileupInputCollections
 
 from AthenaCommon.Logging import logging
 logDigiSteering = logging.getLogger('DigitizationSteering')
+
+def HepMCVersion():
+    try:
+        from AthenaPython.PyAthena import HepMC3 # noqa: F401
+        HepMCVersion=3
+    except ImportError:
+        HepMCVersion=2
+    return HepMCVersion
+
 
 def DigitizationMainServicesCfg(flags):
     """Configure main digitization services"""
@@ -89,10 +98,17 @@ def DigitizationMainContentCfg(flags):
 
     # Signal-only truth information
     if flags.Digitization.PileUp:
+        if HepMCVersion() == 3:
+            from MCTruthSimAlgs.MCTruthSimAlgsConfig import SimpleMergeMcEventCollCfg as MergeMcEventCollCfg
+            from MCTruthSimAlgs.MCTruthSimAlgsConfig import InTimeOnlySimpleMergeMcEventCollCfg as InTimeOnlyMergeMcEventCollCfg
+            from MCTruthSimAlgs.MCTruthSimAlgsConfig import SignalOnlySimpleMergeMcEventCollCfg as SignalOnlyMergeMcEventCollCfg
+        else:
+            from MCTruthSimAlgs.MCTruthSimAlgsConfig import (
+                MergeMcEventCollCfg,
+                InTimeOnlyMergeMcEventCollCfg,
+                SignalOnlyMergeMcEventCollCfg,
+            )
         from MCTruthSimAlgs.MCTruthSimAlgsConfig import (
-            MergeMcEventCollCfg,
-            InTimeOnlyMcEventCollCfg,
-            SignalOnlyMcEventCollCfg,
             MergeAntiKt4TruthJetsCfg,
             MergeAntiKt6TruthJetsCfg,
             MergeTruthParticlesCfg,
@@ -103,9 +119,9 @@ def DigitizationMainContentCfg(flags):
             if flags.Digitization.DigiSteeringConf=="StandardPileUpToolsAlg":
                 acc.merge(MergeMcEventCollCfg(flags))
             elif flags.Digitization.DigiSteeringConf=="StandardInTimeOnlyTruthPileUpToolsAlg":
-                acc.merge(InTimeOnlyMcEventCollCfg(flags))
+                acc.merge(InTimeOnlyMergeMcEventCollCfg(flags))
             else:
-                acc.merge(SignalOnlyMcEventCollCfg(flags))
+                acc.merge(SignalOnlyMergeMcEventCollCfg(flags))
         if flags.Digitization.EnableTruth:
             puCollections = pileupInputCollections(flags.Digitization.PU.LowPtMinBiasInputCols)
             if "AntiKt4TruthJets" in puCollections:

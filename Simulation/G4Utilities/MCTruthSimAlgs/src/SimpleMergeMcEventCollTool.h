@@ -48,20 +48,24 @@ public:
   virtual StatusCode processAllSubEvents(const EventContext& ctx) override final;
 
 private:
+  //** Ensure that any GenEvent::HeavyIon info is stored in the signal GenEvent.
+  StatusCode saveHeavyIonInfo(const McEventCollection *pMcEvtColl, McEventCollection *outputMcEventCollection);
   //** Add the required information from the current GenEvent to the output McEventCollection
-  StatusCode processEvent(const McEventCollection *pMcEvtColl, McEventCollection *outputMcEventCollection);
-  //** Special case of processEvent for the first (signal) GenEvent
-  StatusCode processFirstSubEvent(const McEventCollection *pMcEvtColl, McEventCollection *outputMcEventCollection);
+  StatusCode processEvent(const McEventCollection *pMcEvtColl, McEventCollection *outputMcEventCollection, const int currentBkgEventIndex, int bunchCrossingTime, int pileupType);
   //** Print out detailed debug info if required.
   void printDetailsOfMergedMcEventCollection(McEventCollection *outputMcEventCollection) const;
   //** Handle for the PileUpMergeSvc (provides input McEventCollections)
   ServiceHandle<PileUpMergeSvc> m_pMergeSvc{this, "PileUpMergeSvc", "PileUpMergeSvc", ""};
-  //** Writing to StoreGate safely in MT
-  SG::WriteHandle<McEventCollection> m_outputMcEventCollection{};
-  //** Writing to StoreGate safely in MT
-  SG::WriteHandleKey<McEventCollection> m_truthCollOutputKey{this, "TruthCollOutputKey","TruthEvent",""};
+  StringProperty m_truthCollOutputKey{this, "TruthCollOutputKey", "TruthEvent", "Name of output McEventCollection"};
+  McEventCollection* m_outputMcEventCollection{};
   //** Name of input McEventCollection
-  Gaudi::Property<std::string> m_truthCollInputKey{this, "TruthCollInputKey", "TruthEvent", ""};
+  StringProperty m_truthCollInputKey{this, "TruthCollInputKey", "TruthEvent", ""};
+  //** Override the event numbers to be the current background event index
+  BooleanProperty m_overrideEventNumbers{this, "OverrideEventNumbers", false, ""};
+  //** Just save the Signal GenEvent
+  BooleanProperty m_onlySaveSignalTruth{this, "OnlySaveSignalTruth", false, "Just save the Signal GenEvent"};
+  //** Bool to indicate that the next GenEvent is a new signal event
+  bool m_newevent{true};
   //** The total number of GenEvents that will be passed for the current signal event
   unsigned int m_nInputMcEventColls{0};
   //** How many background events have been read so far for this signal event

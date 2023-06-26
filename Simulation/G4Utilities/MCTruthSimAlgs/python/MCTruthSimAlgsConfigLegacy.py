@@ -49,9 +49,11 @@ def MergeMcEventCollTool(name="MergeMcEventCollTool", **kwargs):
     if digitizationFlags.doXingByXingPileUp(): # PileUpTool approach
         kwargs.setdefault("FirstXing", -30000)
         kwargs.setdefault("LastXing",   30000)
-    keys =['SimpleMerge', 'NewMerge']
+    keys = ['SimpleMerge', 'NewMerge']
     if set(keys).isdisjoint(set(digitizationFlags.experimentalDigi())):
         kwargs.setdefault("DoSlimming", False)
+    keys = ['NewMerge']
+    if set(keys).isdisjoint(set(digitizationFlags.experimentalDigi())):
         kwargs.setdefault("OnlySaveSignalTruth", False)
     return genericMergeMcEventCollTool(name, **kwargs)
 
@@ -59,7 +61,7 @@ def SignalOnlyMcEventCollTool(name="SignalOnlyMcEventCollTool", **kwargs):
     if digitizationFlags.doXingByXingPileUp(): # PileUpTool approach
         kwargs.setdefault("FirstXing", 0)
         kwargs.setdefault("LastXing",  0)
-    keys =['SimpleMerge', 'NewMerge']
+    keys = ['NewMerge']
     if set(keys).isdisjoint(set(digitizationFlags.experimentalDigi())):
         kwargs.setdefault("OnlySaveSignalTruth", True)
     return genericMergeMcEventCollTool(name, **kwargs)
@@ -68,9 +70,11 @@ def InTimeOnlyMcEventCollTool(name="InTimeOnlyMcEventCollTool", **kwargs):
     if digitizationFlags.doXingByXingPileUp(): # PileUpTool approach
         kwargs.setdefault("FirstXing", 0)
         kwargs.setdefault("LastXing",  0)
-    keys =['SimpleMerge', 'NewMerge']
+    keys = ['SimpleMerge', 'NewMerge']
     if set(keys).isdisjoint(set(digitizationFlags.experimentalDigi())):
         kwargs.setdefault("DoSlimming", False)
+    keys = ['NewMerge']
+    if set(keys).isdisjoint(set(digitizationFlags.experimentalDigi())):
         kwargs.setdefault("OnlySaveSignalTruth", False)
     return genericMergeMcEventCollTool(name, **kwargs)
 
