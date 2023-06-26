@@ -199,11 +199,7 @@ def getTopoCalibMoments(flags):
     TopoCalibMoments = CaloCalibClusterMomentsMaker2 ("TopoCalibMoments")
     TopoCalibMoments.MomentsNames = ["ENG_CALIB_TOT"
                                      ,"ENG_CALIB_OUT_L"
-                                     #,"ENG_CALIB_OUT_M"
-                                     # ,"ENG_CALIB_OUT_T"
-                                     # ,"ENG_CALIB_DEAD_L"
-                                     # ,"ENG_CALIB_DEAD_M"
-                                     # ,"ENG_CALIB_DEAD_T"
+                                     ,"ENG_CALIB_OUT_T"
                                      ,"ENG_CALIB_EMB0"
                                      ,"ENG_CALIB_EME0"
                                      ,"ENG_CALIB_TILEG3"
@@ -353,6 +349,11 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
 
     momentsMaker=result.popToolsAndMerge(getTopoMoments(flags))
     CaloTopoCluster.ClusterCorrectionTools += [momentsMaker]
+
+    if flags.Calo.TopoCluster.doCalibHitMoments:
+        calibHitsMomentsMaker=getTopoCalibMoments(flags)
+        CaloTopoCluster.ClusterCorrectionTools += [calibHitsMomentsMaker]
+
     CaloTopoCluster.ClustersOutputName=clustersname
     
     if doLCCalib:
@@ -363,6 +364,7 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
 
         from CaloRec.CaloTopoClusterConfig import caloTopoCoolFolderCfg
         result.merge(caloTopoCoolFolderCfg(flags))
+
 
     result.addEventAlgo(CaloTopoCluster,primary=True)
 
@@ -393,6 +395,26 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
                        ,"CELL_SIGNIFICANCE"
                        ,"PTD"
                        ,"MASS"]
+
+    if flags.Calo.TopoCluster.writeCalibHitClusterMoments:
+        AODMoments += ["ENG_CALIB_TOT"
+                       ,"ENG_CALIB_OUT_L"
+                       ,"ENG_CALIB_OUT_T"
+                       ,"ENG_CALIB_EMB0"
+                       ,"ENG_CALIB_EME0"
+                       ,"ENG_CALIB_TILEG3"
+                       ,"ENG_CALIB_DEAD_TOT"
+                       ,"ENG_CALIB_DEAD_EMB0"
+                       ,"ENG_CALIB_DEAD_TILE0"
+                       ,"ENG_CALIB_DEAD_TILEG3"
+                       ,"ENG_CALIB_DEAD_EME0"
+                       ,"ENG_CALIB_DEAD_HEC0"
+                       ,"ENG_CALIB_DEAD_FCAL"
+                       ,"ENG_CALIB_DEAD_LEAKAGE"
+                       ,"ENG_CALIB_DEAD_UNCLASS"
+                       ,"ENG_CALIB_FRAC_EM"
+                       ,"ENG_CALIB_FRAC_HAD"
+                       ,"ENG_CALIB_FRAC_REST"]
 
 
     from OutputStreamAthenaPool.OutputStreamConfig import addToAOD, addToESD
