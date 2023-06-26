@@ -13,7 +13,6 @@
 #include <string>
 #include <typeinfo>
 
-#include <boost/static_assert.hpp>
 
 #include "GaudiKernel/ClassID.h"
 #include "GaudiKernel/DataObject.h"
