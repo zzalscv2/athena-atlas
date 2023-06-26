@@ -102,16 +102,18 @@ StatusCode TRTRawDataProvider::execute(const EventContext& ctx) const
   ATH_MSG_DEBUG( "Number of ROB fragments " << listOfRobf.size() );
 
   // ask TRTRawDataProviderTool to decode it and to fill the IDC
-  if(rdoContainer->hasExternalCache()){ // online case
-    if (m_rawDataTool->convert(listOfRobf,&(*rdoContainer),bsErrCont.get(), nullptr, ctx).isFailure()){
-      ATH_MSG_WARNING( "BS conversion into RDOs failed for online/external cache mode" );
-    }
-  }else{ //offline case
-    DataPool<TRT_LoLumRawData> dataItemsPool(ctx);
-    dataItemsPool.prepareToAdd(150000); //some large default size it can expand
-     if (m_rawDataTool->convert(listOfRobf,&(*rdoContainer),bsErrCont.get(),&dataItemsPool, ctx).isFailure()){
-      ATH_MSG_WARNING( "BS conversion into RDOs failed for offline mode" );
-    }
+  const bool hasExternalCache = rdoContainer->hasExternalCache();
+  std::unique_ptr<DataPool<TRT_LoLumRawData>> dataItemsPool = nullptr;
+  if (!hasExternalCache) {
+      dataItemsPool = std::make_unique<DataPool<TRT_LoLumRawData>>(ctx);
+      dataItemsPool->reserve(100000);  // Some large default size 
+  }else if(m_useDataPoolWithCache){
+    dataItemsPool = std::make_unique<DataPool<TRT_LoLumRawData>>(ctx);
+    //this is  per view so let it expand on its own in blocks
+  }
+
+  if (m_rawDataTool->convert(listOfRobf,&(*rdoContainer),bsErrCont.get(), dataItemsPool.get(), ctx).isFailure()){
+    ATH_MSG_WARNING( "BS conversion into RDOs failed" );
   }
   ATH_MSG_DEBUG( "Number of Collections in IDC " << rdoContainer->numberOfCollections() );
 
