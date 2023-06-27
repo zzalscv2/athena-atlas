@@ -432,6 +432,9 @@ def createTriggerRecoFlags():
     # Change tolerance in STEP Propagator
     flags.addFlag("Trigger.Jet.PFlowTolerance", 1e-2)
 
+    # Defines the working point for the TVA algorithm
+    flags.addFlag("Trigger.Jet.TrackVtxAssocWP", "Custom") # offline default is "Nonprompt_All_MaxWeight"
+
     def __httFlags():
         """Additional function delays import"""
         from TrigHTTConfTools.HTTConfigFlags import createHTTConfigFlags
