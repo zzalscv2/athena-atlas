@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_RodDecoder.h"
@@ -167,6 +167,7 @@ StatusCode SCT_RodDecoder::finalize()
 StatusCode SCT_RodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag,
                                           SCT_RDO_Container& rdoIDCont,
                                           IDCInDetBSErrContainer& errorsIDC,
+                                          DataPool<SCT3_RawData>* dataItemsPool,
                                           const EventContext& ctx,
                                           const std::vector<IdentifierHash>* vecHash) const
 {
@@ -264,7 +265,7 @@ StatusCode SCT_RodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROB
       bool hasError{false};
       if (((data16[n]>>13) & 0x7) == 0x1) { // Header
         bool breakNow{false};
-        ATH_CHECK(processHeader(data16[n], robID, data, rdoIDCont, cache, errs, hasError, breakNow,ctx));
+        ATH_CHECK(processHeader(data16[n], robID, data, rdoIDCont, dataItemsPool, cache, errs, hasError, breakNow,ctx));
         if (hasError) sc = StatusCode::RECOVERABLE;
         if (breakNow) break;
         continue;
@@ -279,17 +280,17 @@ StatusCode SCT_RodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROB
         }
         m_nHits++;
         if (superCondensedMode) { // Super-condensed mode:
-          ATH_CHECK(processSuperCondensedHit(data16[n], robID, data, rdoIDCont, cache, errs, hasError, ctx));
+          ATH_CHECK(processSuperCondensedHit(data16[n], robID, data, rdoIDCont, dataItemsPool, cache, errs, hasError, ctx));
           if (hasError) sc = StatusCode::RECOVERABLE;
           continue;
         }
         else if (data.condensedMode) { // Condensed mode
-          ATH_CHECK(processCondensedHit(data16[n], robID, data, rdoIDCont, cache, errs, hasError,ctx));
+          ATH_CHECK(processCondensedHit(data16[n], robID, data, rdoIDCont, dataItemsPool, cache, errs, hasError,ctx));
           if (hasError) sc = StatusCode::RECOVERABLE;
           continue;
         }
         else { // Expanded mode
-          ATH_CHECK(processExpandedHit(data16[n], robID, data, rdoIDCont, cache, errs, hasError,ctx));
+          ATH_CHECK(processExpandedHit(data16[n], robID, data, rdoIDCont, dataItemsPool, cache, errs, hasError,ctx));
           if (hasError) sc = StatusCode::RECOVERABLE;
           continue;
         }
@@ -321,7 +322,7 @@ StatusCode SCT_RodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROB
   // Create the last RDO of the last link of the event
   if (data.isStripValid()) {
      if (not data.isSaved(false) and data.isOldStripValid()) {
-        const int rdoMade{makeRDO(false, data, cache)};
+        const int rdoMade{makeRDO(false, data, cache, dataItemsPool)};
         if (rdoMade == -1) {
            sc = StatusCode::RECOVERABLE;
            ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
@@ -358,7 +359,8 @@ StatusCode SCT_RodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROB
 
 int SCT_RodDecoder::makeRDO(const bool isOld,
                             SharedData& data,
-                            CacheHelper& cache) const
+                            CacheHelper& cache,
+                            DataPool<SCT3_RawData>* dataItemsPool) const
 {
   // If the link is already decoded, RDO will not be created.
   SCT_RDO_Collection* rdoColl{data.rdoCollMap[data.linkIDHash].get()};
@@ -412,7 +414,14 @@ int SCT_RodDecoder::makeRDO(const bool isOld,
 
   // Now the Collection is there for sure. Create RDO and push it into Collection.
   m_nRDOs++;
-  rdoColl->push_back(std::make_unique<SCT3_RawData>(digitID, rawDataWord, &(data.errorHit)));
+
+  if(dataItemsPool){
+    SCT3_RawData* sct_rdo = dataItemsPool->nextElementPtr();
+    (*sct_rdo) = SCT3_RawData(digitID, rawDataWord, &(data.errorHit));
+    rdoColl->push_back(sct_rdo);
+  }else{
+    rdoColl->push_back(std::make_unique<SCT3_RawData>(digitID, rawDataWord, &(data.errorHit)));
+  }
   return 1;
 }
 
@@ -450,8 +459,8 @@ StatusCode SCT_RodDecoder::addSingleError(const IdentifierHash& hashID,
 
   errs.add(hashID, error);
 
-  if ((not (error>=SCT_ByteStreamErrors::ABCDError_Chip0 and error<=SCT_ByteStreamErrors::ABCDError_Chip5)) and
-      (not (error>=SCT_ByteStreamErrors::TempMaskedChip0 and error<=SCT_ByteStreamErrors::TempMaskedChip5))) {
+  if ((error<SCT_ByteStreamErrors::ABCDError_Chip0 || error>SCT_ByteStreamErrors::ABCDError_Chip5) and
+      (error<SCT_ByteStreamErrors::TempMaskedChip0 || error>SCT_ByteStreamErrors::TempMaskedChip5)) {
     std::pair<bool, bool> badLinks{m_configTool->badLinks(hashID)};
     int side{m_sctID->side(m_sctID->wafer_id(hashID))};
     bool result{(side==0 ? badLinks.first : badLinks.second) and (badLinks.first xor badLinks.second)};
@@ -638,6 +647,7 @@ StatusCode SCT_RodDecoder::processHeader(const uint16_t inData,
                                          const uint32_t robID,
                                          SharedData& data,
                                          SCT_RDO_Container& rdoIDCont,
+                                         DataPool<SCT3_RawData>* dataItemsPool,
                                          CacheHelper& cache,
                                          SCT_RodDecoderErrorsHelper& errs,
                                          bool& hasError,
@@ -653,7 +663,7 @@ StatusCode SCT_RodDecoder::processHeader(const uint16_t inData,
   if (data.isStripValid()) {
      if (not data.isSaved(false) and data.isOldStripValid()) {
 
-        const int rdoMade{makeRDO(false, data, cache)};
+        const int rdoMade{makeRDO(false, data, cache, dataItemsPool)};
         if (rdoMade == -1) {
            hasError = true;
            ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
@@ -685,7 +695,7 @@ StatusCode SCT_RodDecoder::processHeader(const uint16_t inData,
   else {
     hash = m_cabling->getHashFromOnlineId(onlineID, ctx);
     if (hash.is_valid()) {
-       data.setCollection(m_sctID, hash, rdoIDCont, errs);
+       data.setCollection(m_sctID, hash, rdoIDCont, dataItemsPool, errs);
     }
     else {
        std::stringstream msg;
@@ -749,6 +759,7 @@ StatusCode SCT_RodDecoder::processSuperCondensedHit(const uint16_t inData,
                                                     const uint32_t robID,
                                                     SharedData& data,
                                                     SCT_RDO_Container& rdoIDCont,
+                                                    DataPool<SCT3_RawData>* dataItemsPool,
                                                     CacheHelper& cache,
                                                     SCT_RodDecoderErrorsHelper& errs,
                                                     bool& hasError,
@@ -780,7 +791,7 @@ StatusCode SCT_RodDecoder::processSuperCondensedHit(const uint16_t inData,
   if ((data.side==1) and ((data.linkNumber%2)==0)) {
     if (((data.strip!=data.oldStrip) or (data.side!=data.oldSide)) and (data.groupSize>0)) {
       // If it is a new cluster, make RDO with the previous cluster
-       const int rdoMade{makeRDO(true, data, cache)};
+       const int rdoMade{makeRDO(true, data, cache, dataItemsPool)};
        if (rdoMade == -1) {
           hasError = true;
           ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
@@ -796,7 +807,7 @@ StatusCode SCT_RodDecoder::processSuperCondensedHit(const uint16_t inData,
   else if ((data.side==0) and ((data.linkNumber%2)!=0)) {
     if (((data.strip!=data.oldStrip) or (data.side!=data.oldSide)) and (data.groupSize>0)) {
       // If it is a new cluster, make RDO with the previous cluster
-       const int rdoMade{makeRDO(true, data, cache)};
+       const int rdoMade{makeRDO(true, data, cache, dataItemsPool)};
        if (rdoMade == -1) {
           hasError = true;
           ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
@@ -816,7 +827,7 @@ StatusCode SCT_RodDecoder::processSuperCondensedHit(const uint16_t inData,
        hasError = true;
        return sc;
     }
-    data.setCollection(m_sctID, id_hash, rdoIDCont, errs);
+    data.setCollection(m_sctID, id_hash, rdoIDCont, dataItemsPool, errs);
   }
 
   if (data.groupSize == 0)  {
@@ -825,7 +836,7 @@ StatusCode SCT_RodDecoder::processSuperCondensedHit(const uint16_t inData,
 
   if ((data.strip!=data.oldStrip) or (data.side!=data.oldSide)) {
     // If it is a new cluster, make RDO with the previous cluster
-     const int rdoMade{makeRDO(true, data, cache)};
+     const int rdoMade{makeRDO(true, data, cache, dataItemsPool)};
      if (rdoMade == -1) {
         hasError = true;
         ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
@@ -844,6 +855,7 @@ StatusCode SCT_RodDecoder::processCondensedHit(const uint16_t inData,
                                                const uint32_t robID,
                                                SharedData& data,
                                                SCT_RDO_Container& rdoIDCont,
+                                               DataPool<SCT3_RawData>* dataItemsPool,
                                                CacheHelper& cache,
                                                SCT_RodDecoderErrorsHelper& errs,
                                                bool& hasError,
@@ -869,7 +881,7 @@ StatusCode SCT_RodDecoder::processCondensedHit(const uint16_t inData,
   if ((data.side==1) and ((data.linkNumber%2)==0)) {
     if (((data.strip!=data.oldStrip) or (data.side!=data.oldSide)) and (data.groupSize>0)) {
       // If it is a new cluster, make RDO with the previous cluster
-      const int rdoMade{makeRDO(true, data, cache)};
+      const int rdoMade{makeRDO(true, data, cache, dataItemsPool)};
       if (rdoMade == -1) {
         hasError = true;
         ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
@@ -885,7 +897,7 @@ StatusCode SCT_RodDecoder::processCondensedHit(const uint16_t inData,
   else if ((data.side==0) and ((data.linkNumber%2)!=0)) {
     if (((data.strip!=data.oldStrip) or (data.side!=data.oldSide)) and (data.groupSize>0)) {
       // If it is a new cluster, make RDO with the previous cluster
-      const int rdoMade{makeRDO(true, data, cache)};
+      const int rdoMade{makeRDO(true, data, cache, dataItemsPool)};
       if (rdoMade == -1) {
         hasError = true;
         ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
@@ -900,7 +912,7 @@ StatusCode SCT_RodDecoder::processCondensedHit(const uint16_t inData,
   }
   if (secondSide) {
     const uint32_t onlineID{(robID & 0xFFFFFF) | (data.linkNumber << 24)};
-    data.setCollection(m_sctID, m_cabling->getHashFromOnlineId(onlineID, ctx), rdoIDCont, errs);
+    data.setCollection(m_sctID, m_cabling->getHashFromOnlineId(onlineID, ctx), rdoIDCont, dataItemsPool, errs);
   }
 
   if (data.groupSize == 0)  {
@@ -911,7 +923,7 @@ StatusCode SCT_RodDecoder::processCondensedHit(const uint16_t inData,
     m_singleCondHitNumber++;
     if ((data.strip!=data.oldStrip) or (data.side!=data.oldSide)) {
       // If it is a new cluster, make RDO with the previous cluster
-      const int rdoMade{makeRDO(true, data, cache)};
+      const int rdoMade{makeRDO(true, data, cache, dataItemsPool)};
       if (rdoMade == -1) {
         hasError = true;
         ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
@@ -943,7 +955,7 @@ StatusCode SCT_RodDecoder::processCondensedHit(const uint16_t inData,
     m_pairedCondHitNumber++;
     if ((data.strip!=data.oldStrip) or (data.side!=data.oldSide)) {
       // If it is a new cluster, make RDO with the previous cluster
-      const int rdoMade{makeRDO(true, data, cache)};
+      const int rdoMade{makeRDO(true, data, cache, dataItemsPool)};
       if (rdoMade == -1) {
         hasError = true;
         ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
@@ -977,6 +989,7 @@ StatusCode SCT_RodDecoder::processExpandedHit(const uint16_t inData,
                                               const uint32_t robID,
                                               SharedData& data,
                                               SCT_RDO_Container& rdoIDCont,
+                                              DataPool<SCT3_RawData>* dataItemsPool,
                                               CacheHelper& cache,
                                               SCT_RodDecoderErrorsHelper& errs,
                                               bool& hasError,
@@ -1011,10 +1024,10 @@ StatusCode SCT_RodDecoder::processExpandedHit(const uint16_t inData,
     }
     if (secondSide) {
       const uint32_t onlineID{(robID & 0xFFFFFF) | (data.linkNumber << 24)};
-      data.setCollection(m_sctID, m_cabling->getHashFromOnlineId(onlineID, ctx), rdoIDCont, errs);
+      data.setCollection(m_sctID, m_cabling->getHashFromOnlineId(onlineID, ctx), rdoIDCont, dataItemsPool, errs);
     }
     data.groupSize = 1;
-    const int rdoMade{makeRDO(false, data, cache)};
+    const int rdoMade{makeRDO(false, data, cache, dataItemsPool)};
     if (rdoMade == -1) {
       hasError = true;
       ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
@@ -1037,7 +1050,7 @@ StatusCode SCT_RodDecoder::processExpandedHit(const uint16_t inData,
       data.strip++;
       data.timeBin = (inData & 0x7);
       data.groupSize = 1;
-      const int rdoMade1{makeRDO(false, data, cache)};
+      const int rdoMade1{makeRDO(false, data, cache, dataItemsPool)};
       if (rdoMade1 == -1) {
         hasError = true;
         ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
@@ -1048,7 +1061,7 @@ StatusCode SCT_RodDecoder::processExpandedHit(const uint16_t inData,
       // Second hit from the pair
       data.strip++;
       data.timeBin = ((inData >> 4) & 0x7);
-      const int rdoMade2{makeRDO(false, data, cache)};
+      const int rdoMade2{makeRDO(false, data, cache, dataItemsPool)};
       if (rdoMade2 == -1) {
         hasError = true;
         ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
@@ -1069,7 +1082,7 @@ StatusCode SCT_RodDecoder::processExpandedHit(const uint16_t inData,
       data.strip++;
       data.timeBin = (inData & 0x7);
       data.groupSize = 1;
-      const int rdoMade{makeRDO(false, data, cache)};
+      const int rdoMade{makeRDO(false, data, cache, dataItemsPool)};
       if (rdoMade == -1) {
         hasError = true;
         ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));

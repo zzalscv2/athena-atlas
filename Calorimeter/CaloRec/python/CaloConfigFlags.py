@@ -33,6 +33,8 @@ def createCaloConfigFlags():
     ccf.addFlag("Calo.TopoCluster.writeExtendedClusterMoments", True)
     ccf.addFlag("Calo.TopoCluster.CalibrationHitDecorationName","calclus_NLeadingTruthParticleBarcodeEnergyPairs")
     ccf.addFlag("Calo.TopoCluster.addCalibrationHitDecoration",False)
+    ccf.addFlag("Calo.TopoCluster.doCalibHitMoments",False)
+    ccf.addFlag("Calo.TopoCluster.writeCalibHitClusterMoments",False)
     ccf.addFlag("Calo.TopoCluster.doCellWeightCalib", False)
 
     #### Cluster correction flags:

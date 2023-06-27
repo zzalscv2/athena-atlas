@@ -118,10 +118,6 @@ def TrigVtxInDetTrackSelectionCfg(flags, name="InDetTrigDetailedTrackSelectionTo
     cuts = ConfiguredTrigVtxCuts()
     cuts.printInfo()
 
-    signature = kwargs.pop("signature","")
-    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-    config = getInDetTrigConfig(signature)
-
     acc = ComponentAccumulator()
 
     kwargs.setdefault("CutLevel", cuts.TrackCutLevel())
@@ -138,11 +134,13 @@ def TrigVtxInDetTrackSelectionCfg(flags, name="InDetTrigDetailedTrackSelectionTo
     kwargs.setdefault("maxNPixelHoles", cuts.nHolesPix())
     kwargs.setdefault("minNSctHits", cuts.nHitSct())
     kwargs.setdefault("minNTrtHits", cuts.nHitTrt())
-    kwargs.setdefault("minNSiHits", config.minNSiHits_vtx if config.minNSiHits_vtx is not None
+    kwargs.setdefault("minNSiHits", flags.Tracking.ActiveConfig.minNSiHits_vtx  \
+                      if flags.Tracking.ActiveConfig.minNSiHits_vtx is not None \
                       else cuts.nHitSi())
     # N.B. Legacy config used to set extrapolator + trackSummary tools but since UseTrkTrackTools is not set to True, they're not used in the InDetTrackSelectionTool
 
-    acc.setPrivateTools(CompFactory.InDet.InDetTrackSelectionTool(name+signature, **kwargs))
+    acc.setPrivateTools(CompFactory.InDet.InDetTrackSelectionTool(
+        name+flags.Tracking.ActiveConfig.input_name, **kwargs))
     return acc
 
 def Tau_InDetTrackSelectionToolForTJVACfg(flags, name="tauRec_InDetTrackSelectionToolForTJVA", **kwargs):

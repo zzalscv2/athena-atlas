@@ -836,7 +836,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::createSFNodes(const ConvProxySet_t &con
     }
     return sfNode;
   };
-  auto makeSFNodes = [&decisions, &context, makeSingleSFNode](auto proxy) 
+  auto makeSFNodes = [makeSingleSFNode](auto proxy)
   {
       if (proxy->hNode.empty())
       { // nothing has passed, so link to the IM node

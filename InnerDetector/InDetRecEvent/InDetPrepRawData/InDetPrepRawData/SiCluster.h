@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -63,6 +63,8 @@ public:
   SiCluster& operator=(const SiCluster&) = default;
   /// Move assignment operator
   SiCluster& operator=(SiCluster&&) = default;
+  /// Destructor:
+  virtual ~SiCluster(); //default in dtor
 
   /**
    * Constructor with parameters using ref or omitting  Amg::MatrixX.
@@ -114,9 +116,6 @@ public:
             const InDet::SiWidth& width,
             const InDetDD::SiDetectorElement* detEl,
             Amg::MatrixX&& locErrMat);
-
-  /// Destructor:
-  virtual ~SiCluster();
 
   /**
    * @name Virtual methods

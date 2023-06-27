@@ -15,7 +15,11 @@ def TileL2BuilderCfg(flags, **kwargs):
     """
 
     kwargs.setdefault('name', 'TileL2Builder')
-    kwargs.setdefault('TileRawChannelContainer', 'TileRawChannelCnt')
+
+    rawChannelContainer = 'TileRawChannelCnt'
+    if (flags.Input.isMC or flags.Overlay.DataOverlay):
+        rawChannelContainer = flags.Tile.RawChannelContainer
+    kwargs.setdefault('TileRawChannelContainer', rawChannelContainer)
 
     acc = ComponentAccumulator()
 

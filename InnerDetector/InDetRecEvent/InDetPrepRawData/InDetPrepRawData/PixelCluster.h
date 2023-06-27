@@ -54,7 +54,7 @@ namespace InDet{
     PixelCluster(PixelCluster &&) = default;
     PixelCluster & operator=(const PixelCluster & rhs) = default;
     PixelCluster & operator=(PixelCluster && rhs) = default;
-    
+    virtual ~PixelCluster(); //default in .cxx
 
     // legacy constructor with no ToT not LVL1 information
     PixelCluster( 

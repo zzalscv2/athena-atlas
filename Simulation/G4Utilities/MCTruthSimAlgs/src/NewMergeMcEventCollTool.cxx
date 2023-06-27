@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "NewMergeMcEventCollTool.h"
@@ -61,7 +61,8 @@ StatusCode NewMergeMcEventCollTool::processBunchXing(int /*bunchXing*/,
     ATH_CHECK(seStore.retrieve(pMEC, m_truthCollInputKey.value()));
     ATH_MSG_VERBOSE( this->name()<<"::processBunchXing: SubEvt McEventCollection from StoreGate " << seStore.name() << " of PileUpType " << iEvt->type() );
     if(m_pileUpType==iEvt->type()) {
-      ATH_CHECK(this->processEvent(pMEC, m_outputMcEventCollection.ptr(), iEvt->time()));
+      ATH_CHECK(this->processEvent(pMEC, m_outputMcEventCollection.ptr(),
+                                   static_cast<int>(iEvt->type()), iEvt->time()));
     }
     ++iEvt;
   }
@@ -102,7 +103,7 @@ StatusCode NewMergeMcEventCollTool::processAllSubEvents(const EventContext& ctx)
     ATH_MSG_VERBOSE( this->name()<<"::processBunchXing: SubEvt McEventCollection of PileUpType " << timedTruthListIter->first.type() );
     if(m_pileUpType==timedTruthListIter->first.type()) {
       const McEventCollection *pBackgroundMcEvtColl(&*(timedTruthListIter->second));
-      ATH_CHECK(this->processEvent(pBackgroundMcEvtColl,outputMcEventCollection.ptr(),timedTruthListIter->first.time()));
+      ATH_CHECK(this->processEvent(pBackgroundMcEvtColl, outputMcEventCollection.ptr(), static_cast<int>(timedTruthListIter->first.type()), timedTruthListIter->first.time()));
     }
     ++timedTruthListIter;
   } //timed colls
@@ -111,9 +112,9 @@ StatusCode NewMergeMcEventCollTool::processAllSubEvents(const EventContext& ctx)
   return StatusCode::SUCCESS;
 }
 
-StatusCode NewMergeMcEventCollTool::processEvent(const McEventCollection *pMcEvtColl, McEventCollection *outputMcEventCollection, long timeOffset)
+StatusCode NewMergeMcEventCollTool::processEvent(const McEventCollection *pMcEvtColl, McEventCollection *outputMcEventCollection, int pileupType, long timeOffset)
 {
-  ATH_MSG_VERBOSE(  this->name()<<"::processEvent()" );
+  ATH_MSG_VERBOSE(  this->name()<<"::processEvent() Event Type: " << pileupType );
   if (!outputMcEventCollection) {
     ATH_MSG_ERROR( this->name()<<"::processEvent() was passed an null output McEventCollection pointer." );
     return StatusCode::FAILURE;
@@ -128,6 +129,9 @@ StatusCode NewMergeMcEventCollTool::processEvent(const McEventCollection *pMcEvt
 #ifdef HEPMC3
       HepMC::GenEvent * evt = new HepMC::GenEvent(c_evt);
       HepMC::fillBarcodesAttribute(evt);
+      const int bunchCrossingTime=static_cast<int>(timeOffset);
+      evt->add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime));
+      evt->add_attribute("PileUpType",std::make_shared<HepMC3::IntAttribute>(pileupType));
       for (const auto&  itVer:  evt->vertices()) {
         HepMC::FourVector newPos(itVer->position().x(),itVer->position().y(),itVer->position().z(),itVer->position().t()+timeOffset);
         itVer->set_position(newPos);

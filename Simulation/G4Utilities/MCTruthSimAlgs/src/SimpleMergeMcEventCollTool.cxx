@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SimpleMergeMcEventCollTool.h"
 #include "GeneratorObjects/McEventCollection.h"
 #include "PileUpTools/PileUpMergeSvc.h"
 #include "StoreGate/StoreGateSvc.h"
+#include "AtlasHepMC/HeavyIon.h"
 #include <fstream>
 
 SimpleMergeMcEventCollTool::SimpleMergeMcEventCollTool(const std::string& type,
@@ -25,10 +26,11 @@ StatusCode SimpleMergeMcEventCollTool::initialize()
 }
 
 /// PileUpTools Approach
-StatusCode SimpleMergeMcEventCollTool::prepareEvent(const EventContext& ctx, unsigned int nInputEvents)
+StatusCode SimpleMergeMcEventCollTool::prepareEvent(const EventContext& /*ctx*/, unsigned int nInputEvents)
 {
   ATH_MSG_VERBOSE ( "prepareEvent()" );
-  m_nBkgEventsReadSoFar=0;
+  m_nBkgEventsReadSoFar = 0;
+  m_newevent = true;
 
   //Check we are getting at least one event
   m_nInputMcEventColls = nInputEvents;
@@ -40,19 +42,7 @@ StatusCode SimpleMergeMcEventCollTool::prepareEvent(const EventContext& ctx, uns
     }
   ATH_MSG_DEBUG( "prepareEvent: there are " << m_nInputMcEventColls << " subevents in this event.");
 
-  if (!m_outputMcEventCollection.isValid()) {
-    // Would be nice to avoid having the WriteHandle as a member
-    // variable, but this is the only way to allow multiple function
-    // calls to add information to the version of the
-    // McEventCollection in the output StoreGate
-    m_outputMcEventCollection = SG::makeHandle(m_truthCollOutputKey, ctx);
-    ATH_CHECK(m_outputMcEventCollection.record(std::make_unique<McEventCollection>()));
-  }
-  else {
-    ATH_MSG_ERROR("WriteHandle already valid??");
-    return StatusCode::FAILURE;
-  }
-
+  m_outputMcEventCollection = nullptr;
   return StatusCode::SUCCESS;
 }
 
@@ -68,7 +58,17 @@ StatusCode SimpleMergeMcEventCollTool::processBunchXing(int /*bunchXing*/,
       const McEventCollection *pMEC(nullptr);
       ATH_CHECK(seStore.retrieve(pMEC, m_truthCollInputKey));
       ATH_MSG_DEBUG ("processBunchXing: SubEvt McEventCollection from StoreGate " << seStore.name() );
-      ATH_CHECK(this->processEvent(pMEC, m_outputMcEventCollection.ptr()));
+      if (!m_outputMcEventCollection) {
+        m_outputMcEventCollection = new McEventCollection();
+        ATH_CHECK(evtStore()->record(m_outputMcEventCollection, m_truthCollOutputKey));
+      }
+      ATH_CHECK(this->processEvent(
+                                   pMEC,
+                                   m_outputMcEventCollection,
+                                   iEvt->index(),
+                                   static_cast<int>(iEvt->time()),
+                                   static_cast<int>(iEvt->type())
+                                   ));
       ++iEvt;
     }
   return StatusCode::SUCCESS;
@@ -82,15 +82,15 @@ StatusCode SimpleMergeMcEventCollTool::mergeEvent(const EventContext& /*ctx*/)
       ATH_MSG_WARNING( "mergeEvent: Expected " << m_nInputMcEventColls << " subevents, but only saw " << m_nBkgEventsReadSoFar+1 << "! The job will probably crash now..." );
       return StatusCode::FAILURE;
     }
-  if(msgLvl(MSG::VERBOSE)) { this->printDetailsOfMergedMcEventCollection(m_outputMcEventCollection.ptr()); }
+  if(msgLvl(MSG::VERBOSE)) { this->printDetailsOfMergedMcEventCollection(m_outputMcEventCollection); }
   return StatusCode::SUCCESS;
 }
 
 /// Algorithm Approach
-StatusCode SimpleMergeMcEventCollTool::processAllSubEvents(const EventContext& ctx)
+StatusCode SimpleMergeMcEventCollTool::processAllSubEvents(const EventContext& /*ctx*/)
 {
   ATH_MSG_VERBOSE ( "processAllSubEvents()" );
-  SG::WriteHandle<McEventCollection> outputMcEventCollection(m_truthCollOutputKey, ctx);
+  SG::WriteHandle<McEventCollection> outputMcEventCollection(m_truthCollOutputKey.value());
   ATH_CHECK(outputMcEventCollection.record(std::make_unique<McEventCollection>()));
 
   //first get the list of McEventCollections
@@ -114,8 +114,15 @@ StatusCode SimpleMergeMcEventCollTool::processAllSubEvents(const EventContext& c
   //loop over the McEventCollections (each one assumed to containing exactly one GenEvent) of the various input events
   while (timedTruthListIter != endOfTimedTruthList)
     {
+      const PileUpTimeEventIndex& currentPileUpTimeEventIndex(timedTruthListIter->first); //time() , type()
       const McEventCollection *pBackgroundMcEvtColl(&*(timedTruthListIter->second));
-      ATH_CHECK(this->processEvent(pBackgroundMcEvtColl,outputMcEventCollection.ptr()));
+      ATH_CHECK(this->processEvent(
+                                   pBackgroundMcEvtColl,
+                                   outputMcEventCollection.ptr(),
+                                   currentPileUpTimeEventIndex.index(),
+                                   static_cast<int>(currentPileUpTimeEventIndex.time()),
+                                   static_cast<int>(currentPileUpTimeEventIndex.type())
+                                   ));
       ++timedTruthListIter;
     } //timed colls
 
@@ -125,9 +132,25 @@ StatusCode SimpleMergeMcEventCollTool::processAllSubEvents(const EventContext& c
 
 /// Common methods
 
-StatusCode SimpleMergeMcEventCollTool::processEvent(const McEventCollection *pMcEvtColl, McEventCollection *outputMcEventCollection)
+StatusCode SimpleMergeMcEventCollTool::saveHeavyIonInfo(const McEventCollection *pMcEvtColl, McEventCollection *outputMcEventCollection)
 {
-  ATH_MSG_VERBOSE ( "processEvent()" );
+  if (outputMcEventCollection->at(0)->heavy_ion()) return StatusCode::SUCCESS;
+  if (pMcEvtColl->at(0)->heavy_ion())
+    {
+//It should be clarified if we want to get a copy or the content
+#ifdef HEPMC3
+     HepMC::GenHeavyIonPtr hinew=std::make_shared<HepMC::GenHeavyIon>(*(pMcEvtColl->at(0)->heavy_ion()));
+     outputMcEventCollection->at(0)->set_heavy_ion(hinew);
+#else
+      outputMcEventCollection->at(0)->set_heavy_ion(*(pMcEvtColl->at(0)->heavy_ion()));
+#endif
+    }
+  return StatusCode::SUCCESS;
+}
+
+StatusCode SimpleMergeMcEventCollTool::processEvent(const McEventCollection *pMcEvtColl, McEventCollection *outputMcEventCollection, const int currentBkgEventIndex, int bunchCrossingTime, int pileupType)
+{
+  ATH_MSG_VERBOSE ( "processEvent() Event Type: " << pileupType << ", BunchCrossingTime: " << bunchCrossingTime );
   if (!outputMcEventCollection) {
     ATH_MSG_ERROR( this->name()<<"::processEvent() was passed an null output McEventCollection pointer." );
     return StatusCode::FAILURE;
@@ -137,18 +160,27 @@ StatusCode SimpleMergeMcEventCollTool::processEvent(const McEventCollection *pMc
     return StatusCode::FAILURE;
   }
 
-  if (pMcEvtColl->empty())
-    {
-      ++m_nBkgEventsReadSoFar;
-      return StatusCode::SUCCESS;
-    }
+  if ( pMcEvtColl->empty() || (m_onlySaveSignalTruth && !m_newevent) ) {
+    ++m_nBkgEventsReadSoFar;
+    return StatusCode::SUCCESS;
+  }
+
   //GenEvt is there
 
   const HepMC::GenEvent& currentBackgroundEvent(**(pMcEvtColl->begin()));
   // FIXME no protection against multiple GenEvents having the same event number
   HepMC::GenEvent* copiedEvent = new HepMC::GenEvent(currentBackgroundEvent);
+  if (m_overrideEventNumbers) {
+    copiedEvent->set_event_number(currentBkgEventIndex);
+  }
   HepMC::fillBarcodesAttribute(copiedEvent);
-  outputMcEventCollection->push_back(copiedEvent);
+#ifdef HEPMC3
+  copiedEvent->add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime));
+  copiedEvent->add_attribute("PileUpType",std::make_shared<HepMC3::IntAttribute>(pileupType));
+#endif
+   outputMcEventCollection->push_back(copiedEvent);
+  ATH_CHECK(this->saveHeavyIonInfo(pMcEvtColl, outputMcEventCollection));
+   m_newevent = false;
   ++m_nBkgEventsReadSoFar;
   return StatusCode::SUCCESS;
 }

@@ -8,7 +8,6 @@ __doc__    = "ConfigSettingsBase"
 
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 from AthenaCommon.SystemOfUnits import GeV
-from TrkConfig.VertexFindingFlags import VertexSetup
 
 class _ConfigSettingsBase() :
    def __init__( self ) :
@@ -301,19 +300,6 @@ class _ConfigSettingsBase() :
    @property
    def actsVertex_jet(self):
        return self._actsVertex_jet
-
-   # For new CA config
-   # Separate adaptive + ACTS flags could ultimately be cleaned up
-   # once legacy config is deprecated
-   @property
-   def vertexSetup(self):
-      if self._adaptiveVertex:
-         if self._actsVertex:
-            return VertexSetup.ActsGaussAMVF
-         else:
-            return VertexSetup.GaussAMVF
-      else:
-         return VertexSetup.GaussIVF
 
    @property
    def addSingleTrackVertices(self):

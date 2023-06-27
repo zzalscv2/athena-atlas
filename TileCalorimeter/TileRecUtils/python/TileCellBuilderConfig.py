@@ -61,6 +61,8 @@ def TileCellBuilderCfg(flags, **kwargs):
         tileRawChannelContainerDSP = tileRawChannelCorrectionAlg.OutputRawChannelContainer
         kwargs['TileDSPRawChannelContainer'] = tileRawChannelContainerDSP
         acc.merge( corrAlgAcc )
+    else:
+        kwargs.setdefault('mergeChannels', False)
 
     TileCellBuilder=CompFactory.TileCellBuilder
     acc.setPrivateTools( TileCellBuilder(**kwargs) )

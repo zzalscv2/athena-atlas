@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -213,12 +213,13 @@ namespace InDet{
     {
     }
     
+    //default dtor
+    PixelCluster::~PixelCluster() = default;
+
     bool 
     PixelCluster::type(Trk::PrepRawDataType type) const{
       return (type == Trk::PrepRawDataType::PixelCluster or type == Trk::PrepRawDataType::SiCluster);
     }
-
-    
 
     MsgStream& PixelCluster::dump( MsgStream&    stream) const
     {
