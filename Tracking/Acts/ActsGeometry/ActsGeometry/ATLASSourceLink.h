@@ -80,13 +80,13 @@ public:
   friend constexpr bool operator==(const ATLASSourceLinkGeneric &lhs,
                                    const ATLASSourceLinkGeneric &rhs)
   {
-    return lhs.m_atlasHit == rhs.m_atlasHit;
+    return &lhs.atlasHit() == &rhs.atlasHit();
   }
 
   friend constexpr bool operator!=(const ATLASSourceLinkGeneric &lhs,
                                    const ATLASSourceLinkGeneric &rhs)
   {
-    return lhs.m_atlasHit != rhs.m_atlasHit;
+    return &lhs.atlasHit() != &rhs.atlasHit();
   }
 };
 

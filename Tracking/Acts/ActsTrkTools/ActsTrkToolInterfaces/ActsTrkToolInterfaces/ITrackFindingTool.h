@@ -18,6 +18,7 @@
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 
 // ACTS EDM
+#include "ActsTrkEvent/Seed.h"
 #include "ActsTrkEvent/TrackParameters.h"
 
 // OTHER
@@ -36,29 +37,32 @@ namespace ActsTrk
     struct Measurements
     {
       virtual ~Measurements() = default;
-      virtual void addMeasurements(const EventContext &ctx, const UncalibratedMeasurementContainerPtr &clusterContainer, const InDetDD::SiDetectorElementCollection *detElems) = 0;
+      virtual void addMeasurements(size_t type, const EventContext &ctx, const UncalibratedMeasurementContainerPtr &clusterContainer, const InDetDD::SiDetectorElementCollection *detElems) = 0;
     };
 
     DeclareInterfaceID(ITrackFindingTool, 1, 0);
 
-
     /**
      * @brief invoke track finding procedure
-     * 
+     *
      * @param ctx - event context
      * @param measurements - measurements container
      * @param estimatedTrackParameters - estimates
+     * @param seeds - spacepoint triplet seeds
      * @param tracksContainer - output tracks
      * @param tracksCollection - auxiliary output for downstream tools compatibility (to be removed in the future)
-     * @param hint on which tracks (strip or pixel) are to be looked for
+     * @param seedCollectionIndex - index of seeds in measurements
+     * @param seedType name of type of seeds (strip or pixel) - only used for messages
      */
     virtual StatusCode
     findTracks(const EventContext &ctx,
                const Measurements &measurements,
                const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
+               const ActsTrk::SeedContainer *seeds,
                ActsTrk::TrackContainer &tracksContainer,
-               ::TrackCollection & tracksCollection,
-               const char *seedType = "") const = 0;
+               ::TrackCollection &tracksCollection,
+               size_t seedCollectionIndex,
+               const char *seedType) const = 0;
 
     virtual std::unique_ptr<Measurements> initMeasurements(size_t numMeasurements) const = 0;
   };

@@ -15,6 +15,7 @@
 #include "ActsTrkToolInterfaces/ITrackFindingTool.h"
 
 // ACTS
+#include "ActsTrkEvent/Seed.h"
 #include "ActsTrkEvent/TrackParameters.h"
 #include "ActsTrkEvent/TrackContainer.h"
 #include "ActsTrkEventCnv/IActsToTrkConverterTool.h"
@@ -56,11 +57,14 @@ namespace ActsTrk
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey{this, "PixelDetectorElements", "", "input SiDetectorElementCollection for Pixel"};
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_stripDetEleCollKey{this, "StripDetectorElements", "", "input SiDetectorElementCollection for Strip"};
 
+    SG::ReadHandleKey<ActsTrk::SeedContainer> m_pixelSeedsKey{this, "PixelSeeds", "", "Pixel Seeds"};
+    SG::ReadHandleKey<ActsTrk::SeedContainer> m_stripSeedsKey{this, "StripSeeds", "", "Strip Seeds"};
+
     SG::ReadHandleKey<ActsTrk::BoundTrackParametersContainer> m_pixelEstimatedTrackParametersKey{this, "PixelEstimatedTrackParameters", "", "estimated track parameters from pixel seeding"};
     SG::ReadHandleKey<ActsTrk::BoundTrackParametersContainer> m_stripEstimatedTrackParametersKey{this, "StripEstimatedTrackParameters", "", "estimated track parameters from strip seeding"};
+
     SG::WriteHandleKey<::TrackCollection> m_tracksKey{this, "TracksLocation", "SiSPSeededActsTracks", "Output track collection"};
     SG::WriteHandleKey<ActsTrk::ConstTrackContainer> m_tracksContainerKey{this, "ACTSTracksLocation", "SiSPSeededActsTrackContainer", "Output track collection (ActsTrk variant)"};
-
   };
 
 } // namespace

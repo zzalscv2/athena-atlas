@@ -45,6 +45,7 @@ def createActsConfigFlags():
     # Track finding
     actscf.addFlag('Acts.doRotCorrection', True)
     actscf.addFlag('Acts.doPrintTrackStates', False)
+    actscf.addFlag('Acts.skipDuplicateSeeds', True)
 
     # Track fitting
     actscf.addFlag('Acts.writeTrackCollection', False) # save to file (ESD, AOD) the Resolved and Refitted track collections

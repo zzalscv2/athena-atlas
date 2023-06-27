@@ -12,6 +12,7 @@ def ActsTrkFindingToolCfg(
     acc = ComponentAccumulator()
 
     kwargs.setdefault("maxPropagationStep", 10000)
+    kwargs.setdefault("skipDuplicateSeeds", flags.Acts.skipDuplicateSeeds)
     kwargs.setdefault("etaBins", [])
     kwargs.setdefault("chi2CutOff", [15.0])
     kwargs.setdefault("numMeasurementsCutOff", [10])
@@ -114,6 +115,8 @@ def ActsTrkFindingCfg(flags, name: str = "ActsTrkFindingAlg", **kwargs):
                       "ITkPixelEstimatedTrackParams")
     kwargs.setdefault("StripEstimatedTrackParameters",
                       "ITkStripEstimatedTrackParams")
+    kwargs.setdefault('PixelSeeds', 'ITkPixelSeeds')
+    kwargs.setdefault('StripSeeds', 'ITkStripSeeds')
     kwargs.setdefault("TracksLocation", "SiSPSeededActsTracks")
 
     if flags.Acts.doMonitoring:

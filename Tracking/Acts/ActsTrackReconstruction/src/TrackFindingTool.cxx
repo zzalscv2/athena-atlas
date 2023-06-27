@@ -44,6 +44,7 @@
 
 // Other
 #include <boost/container/flat_set.hpp>
+#include <boost/container/flat_map.hpp>
 #include <sstream>
 #include <functional>
 #include <tuple>
@@ -238,39 +239,48 @@ namespace
     {
       m_sourceLinks.reserve(m_numMeasurements);
       m_elementsCollection.reserve(m_numMeasurements);
+      m_sourceLinksVec.reserve(2);
+      m_measurementOffset.reserve(2);
     }
 
-    void addMeasurements(const EventContext &ctx, const ActsTrk::UncalibratedMeasurementContainerPtr &clusterContainer, const InDetDD::SiDetectorElementCollection *detElems) override
+    void addMeasurements(size_t type, const EventContext &ctx, const ActsTrk::UncalibratedMeasurementContainerPtr &clusterContainer, const InDetDD::SiDetectorElementCollection *detElems) override
     {
-      size_t ncoll = 0u;
-      size_t offset = m_sourceLinks.size();
-      std::vector<ATLASUncalibSourceLink> sourceLinksVec;
+      // the following is just in case we call addMeasurements out of order or not for 2 types of measurements
+      if (!(type < m_sourceLinksVec.size()))
+        m_sourceLinksVec.resize(type + 1);
+      if (!(type < m_measurementOffset.size()))
+        m_measurementOffset.resize(type + 1);
+      m_measurementOffset[type] = m_sourceLinks.size();
+
       std::visit([&](auto &&clusterContainerVar)
                  {
-                    ncoll = clusterContainerVar->size();
-                    if (m_trackStatePrinter) sourceLinksVec.reserve(ncoll);
+                    m_sourceLinksVec[type].reserve(clusterContainerVar->size());
                     for (auto *measurement : *clusterContainerVar)
                     {
                       auto sl = m_ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(*detElems, *measurement, m_elementsCollection);
                       m_sourceLinks.insert(m_sourceLinks.end(), sl);
-                      if (m_trackStatePrinter) sourceLinksVec.push_back(sl);
+                      m_sourceLinksVec[type].push_back(sl);
                     } },
                  clusterContainer);
+
       if (m_trackStatePrinter)
       {
-        m_trackStatePrinter->printSourceLinks(ctx, sourceLinksVec, clusterContainer.index(), offset);
-        std::cout << std::flush;
+        m_trackStatePrinter->printSourceLinks(ctx, m_sourceLinksVec[type], type, m_measurementOffset[type]);
       }
     }
 
     const UncalibSourceLinkMultiset &sourceLinks() const { return m_sourceLinks; }
+    const std::vector<ATLASUncalibSourceLink> &sourceLinkVec(size_t type) const { return m_sourceLinksVec[type]; }
+    size_t measurementOffset(size_t type) const { return m_measurementOffset[type]; }
 
   private:
     size_t m_numMeasurements = 0;
     const ActsTrk::IActsToTrkConverterTool *m_ATLASConverterTool = nullptr;
     const ActsTrk::ITrackStatePrinter *m_trackStatePrinter = nullptr;
     UncalibSourceLinkMultiset m_sourceLinks;
+    std::vector<std::vector<ATLASUncalibSourceLink>> m_sourceLinksVec;
     std::vector<ATLASUncalibSourceLink::ElementsType> m_elementsCollection;
+    std::vector<size_t> m_measurementOffset;
   };
 
 } // anonymous namespace
@@ -280,6 +290,86 @@ namespace ActsTrk
 {
   struct TrackFindingTool::CKF_pimpl : public CKF_config
   {
+  };
+
+  struct TrackFindingTool::DuplicateSeedDetector
+  {
+    // Identify duplicate seeds: seeds where all measurements were already located in a previously followed trajectory.
+    // Currently local to findTracks(), so won't remove duplicate seeds between pixels and strips.
+    DuplicateSeedDetector(const ActsTrk::SeedContainer *seeds, const std::vector<ATLASUncalibSourceLink> &measurements, bool enabled)
+        : m_disabled(!enabled || !seeds),
+          m_nUsedMeasurements(enabled && seeds ? seeds->size() : 0u, 0u),
+          m_nSeedMeasurements(enabled && seeds ? seeds->size() : 0u, 0u),
+          m_isDuplicateSeed(enabled && seeds ? seeds->size() : 0u, false)
+    {
+      if (m_disabled)
+        return;
+      m_seedIndex.reserve(6 * seeds->size()); // 6 hits/seed for strips (3 for pixels)
+      size_t iseed = 0;
+      for (const auto *seed : *seeds)
+      {
+        if (!seed)
+          continue;
+        for (auto *sp : seed->sp())
+        {
+          for (auto imeasurement : sp->measurementIndexes())
+          {
+            if (!(imeasurement < measurements.size()))
+              continue;
+            m_seedIndex.insert({&measurements[imeasurement].atlasHit(), iseed});
+            ++m_nSeedMeasurements[iseed];
+          }
+        }
+        ++iseed;
+      }
+    }
+
+    void newTrajectory()
+    {
+      if (m_disabled || m_nextSeed == m_nUsedMeasurements.size())
+        return;
+      auto beg = m_nUsedMeasurements.begin();
+      if (m_nextSeed < m_nUsedMeasurements.size())
+        std::advance(beg, m_nextSeed);
+      std::fill(beg, m_nUsedMeasurements.end(), 0u);
+    }
+
+    void addMeasurement(const ATLASUncalibSourceLink &sl)
+    {
+      if (m_disabled || m_nextSeed == m_nUsedMeasurements.size())
+        return;
+      for (auto [iiseed, eiseed] = m_seedIndex.equal_range(&sl.atlasHit()); iiseed != eiseed; ++iiseed)
+      {
+        size_t iseed = iiseed->second;
+        assert(iseed < m_nUsedMeasurements.size());
+        if (iseed < m_nextSeed || m_isDuplicateSeed[iseed])
+          continue;
+        if (++m_nUsedMeasurements[iseed] >= m_nSeedMeasurements[iseed])
+        {
+          assert(m_nUsedMeasurements[iseed] == m_nSeedMeasurements[iseed]); // shouldn't ever find more
+          m_isDuplicateSeed[iseed] = true;
+        }
+      }
+    }
+
+    // Assumes isDuplicate(iseed) is called for monotonically increasing iseed - for as long as DuplicateSeedDetector exists.
+    bool isDuplicate(size_t iseed)
+    {
+      if (m_disabled || !(iseed < m_isDuplicateSeed.size()))
+        return false;
+      // If iseed not increasing, we will miss some duplicate seeds, but won't exclude needed seeds.
+      if (iseed >= m_nextSeed)
+        m_nextSeed = iseed + 1;
+      return m_isDuplicateSeed[iseed];
+    }
+
+  private:
+    bool m_disabled = false;
+    boost::container::flat_multimap<const xAOD::UncalibratedMeasurement *, size_t> m_seedIndex;
+    std::vector<size_t> m_nUsedMeasurements;
+    std::vector<size_t> m_nSeedMeasurements;
+    std::vector<bool> m_isDuplicateSeed;
+    size_t m_nextSeed = 0u;
   };
 
   TrackFindingTool::TrackFindingTool(const std::string &type,
@@ -296,6 +386,7 @@ namespace ActsTrk
     ATH_MSG_DEBUG("Initializing " << name() << "...");
     ATH_MSG_DEBUG("Properties Summary:");
     ATH_MSG_DEBUG("   " << m_maxPropagationStep);
+    ATH_MSG_DEBUG("   " << m_skipDuplicateSeeds);
     ATH_MSG_DEBUG("   " << m_etaBins);
     ATH_MSG_DEBUG("   " << m_chi2CutOff);
     ATH_MSG_DEBUG("   " << m_numMeasurementsCutOff);
@@ -348,8 +439,11 @@ namespace ActsTrk
   {
     ATH_MSG_INFO(name() << " statistics:");
     ATH_MSG_INFO("- total seeds: " << m_nTotalSeeds);
+    ATH_MSG_INFO("- duplicate seeds: " << m_nDuplicateSeeds);
     ATH_MSG_INFO("- failed seeds: " << m_nFailedSeeds);
+    ATH_MSG_INFO("- output tracks: " << m_nOutputTracks);
     ATH_MSG_INFO("- failure ratio: " << static_cast<double>(m_nFailedSeeds) / m_nTotalSeeds);
+    ATH_MSG_INFO("- duplication ratio: " << static_cast<double>(m_nDuplicateSeeds) / m_nTotalSeeds);
     return StatusCode::SUCCESS;
   }
 
@@ -365,11 +459,19 @@ namespace ActsTrk
   TrackFindingTool::findTracks(const EventContext &ctx,
                                const Measurements &measurements,
                                const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
-                               ActsTrk::TrackContainer &tracksContainer, 
+                               const ActsTrk::SeedContainer *seeds,
+                               ActsTrk::TrackContainer &tracksContainer,
                                ::TrackCollection &tracksCollection,
+                               size_t seedCollectionIndex,
                                const char *seedType) const
   {
     ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
+
+    if (seeds && seeds->size() != estimatedTrackParameters.size())
+    {
+      // should be the same, but we can cope if not
+      ATH_MSG_WARNING("Have " << seeds->size() << " " << seedType << " seeds, but " << estimatedTrackParameters.size() << "estimated track parameters");
+    }
 
     // Get measurement source links. We cast to Measurements_impl to give access to this file's local data members.
     auto meas = dynamic_cast<const Measurements_impl &>(measurements);
@@ -403,13 +505,37 @@ namespace ActsTrk
     m_nTotalSeeds += estimatedTrackParameters.size();
     size_t addTracks = 0;
 
+    DuplicateSeedDetector duplicateSeedDetector(seeds, meas.sourceLinkVec(seedCollectionIndex), m_skipDuplicateSeeds);
+    size_t measurementOffset = meas.measurementOffset(seedCollectionIndex);
+
     // Loop over the track finding results for all initial parameters
     for (std::size_t iseed = 0; iseed < estimatedTrackParameters.size(); ++iseed)
     {
+      if (!estimatedTrackParameters[iseed])
+      {
+        ATH_MSG_WARNING("No " << seedType << " seed " << iseed);
+        ++m_nFailedSeeds;
+        continue;
+      }
+
+      const Acts::BoundTrackParameters &initialParameters = *estimatedTrackParameters[iseed];
+
+      if (!m_trackStatePrinter.empty() && seeds)
+      {
+        m_trackStatePrinter->printSeed(tgContext, *(*seeds)[iseed], initialParameters, measurementOffset, iseed, iseed == 0 ? estimatedTrackParameters.size() : 0, seedType);
+      }
+
+      if (duplicateSeedDetector.isDuplicate(iseed))
+      {
+        ATH_MSG_DEBUG("skip " << seedType << " seed " << iseed << " - already found");
+        ++m_nDuplicateSeeds;
+        continue;
+      }
+
       // Get the Acts tracks, given this seed
       // Result here contains a vector of TrackProxy objects
 
-      auto result = m_trackFinder->ckf.findTracks(*estimatedTrackParameters[iseed], options, tracksContainer);
+      auto result = m_trackFinder->ckf.findTracks(initialParameters, options, tracksContainer);
 
       // The result for this seed
       if (not result.ok())
@@ -419,13 +545,12 @@ namespace ActsTrk
         continue;
       }
       // Get the track finding output and add to tracksCollection
-      size_t ntracks = makeTracks(ctx, tgContext, tracksContainer, result.value(), tracksCollection);
+      size_t ntracks = makeTracks(ctx, tgContext, tracksContainer, result.value(), tracksCollection, duplicateSeedDetector);
       addTracks += ntracks;
 
       if (!m_trackStatePrinter.empty())
       {
-        m_trackStatePrinter->printTracks(tgContext, tracksContainer, result.value(), *estimatedTrackParameters[iseed], iseed, ntracks, iseed == 0 ? estimatedTrackParameters.size() : 0, seedType);
-        std::cout << std::flush;
+        m_trackStatePrinter->printTracks(tgContext, tracksContainer, result.value(), meas.sourceLinkVec(seedCollectionIndex), measurementOffset);
       }
 
       if (ntracks == 0)
@@ -434,6 +559,8 @@ namespace ActsTrk
         ++m_nFailedSeeds;
       }
     }
+
+    m_nOutputTracks += addTracks;
 
     ATH_MSG_DEBUG("Completed " << seedType << " track finding with " << addTracks << " track candidates.");
 
@@ -446,7 +573,8 @@ namespace ActsTrk
                                const Acts::GeometryContext &tgContext,
                                const ActsTrk::TrackContainer &tracksContainer,
                                const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
-                               ::TrackCollection &tracksCollection) const
+                               ::TrackCollection &tracksCollection,
+                               TrackFindingTool::DuplicateSeedDetector &duplicateSeedDetector) const
   {
     size_t ntracks = 0;
     for (auto &track : fitResult)
@@ -457,6 +585,7 @@ namespace ActsTrk
       // initialise the number of dead Pixel and Acts strip
       int numberOfDeadPixel = 0;
       int numberOfDeadSCT = 0;
+      duplicateSeedDetector.newTrajectory();
 
       std::vector<std::unique_ptr<const Acts::BoundTrackParameters>> actsSmoothedParam;
       // Loop over all the output state to create track state
@@ -541,6 +670,7 @@ namespace ActsTrk
             if (state.hasUncalibratedSourceLink())
             {
               auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
+              duplicateSeedDetector.addMeasurement(sl);
               const xAOD::UncalibratedMeasurement &uncalibMeas = sl.atlasHit();
               measState = makeRIO_OnTrack(uncalibMeas, parm.get());
             }
