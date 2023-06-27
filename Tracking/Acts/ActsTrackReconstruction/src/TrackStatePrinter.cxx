@@ -151,7 +151,7 @@ namespace ActsTrk
     }
     if (type == 1)
     {
-      std::cout << std::setw(22) << "GeometryId / stats" << ' '
+      std::cout << std::setw(22) << "GeometryId/meas/stats" << ' '
                 << std::right
                 << std::setw(10) << "loc0" << ' '
                 << std::setw(10) << "loc1" << ' '
@@ -401,8 +401,19 @@ namespace ActsTrk
 
   static void
   printTrackState(const Acts::GeometryContext &tgContext,
-                  const Acts::MultiTrajectory<ActsTrk::TrackStateBackend>::ConstTrackStateProxy &state)
+                  const Acts::MultiTrajectory<ActsTrk::TrackStateBackend>::ConstTrackStateProxy &state,
+                  const std::vector<ATLASUncalibSourceLink> &measurements,
+                  size_t measurementOffset)
   {
+    ptrdiff_t index = -1;
+    if (state.hasUncalibratedSourceLink())
+    {
+      auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
+      auto it = std::find(measurements.begin(), measurements.end(), sl);
+      if (it != measurements.end())
+        index = std::distance(measurements.begin(), it) + measurementOffset;
+    }
+
     std::cout << std::setw(5) << state.index() << ' ';
     if (state.hasCalibrated())
     {
@@ -418,9 +429,16 @@ namespace ActsTrk
     }
     std::cout << ' '
               << std::left
-              << std::setw(21) << actsSurfaceName(state.referenceSurface()) << ' '
-              << std::setw(22) << to_string(state.referenceSurface().geometryId()) << ' '
-              << std::right;
+              << std::setw(21) << actsSurfaceName(state.referenceSurface()) << ' ';
+    if (index >= 0)
+    {
+      std::cout << std::setw(22) << index << ' ';
+    }
+    else
+    {
+      std::cout << std::setw(22) << to_string(state.referenceSurface().geometryId()) << ' ';
+    }
+    std::cout << std::right;
     printParameters(state.referenceSurface(), tgContext, state.parameters());
     std::cout << ' '
               << std::fixed
@@ -455,29 +473,55 @@ namespace ActsTrk
   }
 
   void
-  TrackStatePrinter::printTracks(const Acts::GeometryContext &tgContext,
-                                 const ActsTrk::TrackContainer &tracks,
-                                 const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
-                                 const Acts::BoundTrackParameters &seed,
-                                 size_t iseed,
-                                 size_t ntracks,
-                                 size_t head,
-                                 const char *seedType) const
+  TrackStatePrinter::printSeed(const Acts::GeometryContext &tgContext,
+                               const ActsTrk::Seed &seed,
+                               const Acts::BoundTrackParameters &initialParameters,
+                               size_t measurementOffset,
+                               size_t iseed,
+                               size_t head,
+                               const char *seedType) const
   {
     if (head)
     {
       ATH_MSG_INFO("CKF results for " << head << ' ' << seedType << " seeds:");
     }
     printHeader(1);
+
+    std::ostringstream os;
+    size_t nos = 0;
+    for (const auto *sp : seed.sp())
+    {
+      size_t nom = 0;
+      for (auto index : sp->measurementIndexes())
+      {
+        if (nom > 0)
+          os << '+';
+        else if (nos > 0)
+          os << ',';
+        ++nos;
+        ++nom;
+        os << measurementOffset + index;
+      }
+    }
+
     std::cout << std::setw(5) << iseed << ' '
               << std::left
               << std::setw(4) << "seed" << ' '
-              << std::setw(21) << actsSurfaceName(seed.referenceSurface()) << ' '
-              << std::setw(22) << to_string("#traj=", fitResult.size(), ", #trk=", ntracks) << ' '
+              << std::setw(21) << actsSurfaceName(initialParameters.referenceSurface()) << ' '
+              << std::setw(22) << to_string(os.str()) << ' '
               << std::right;
-    printParameters(seed.referenceSurface(), tgContext, seed.parameters());
-    std::cout << '\n';
+    printParameters(initialParameters.referenceSurface(), tgContext, initialParameters.parameters());
+    std::cout << '\n'
+              << std::flush;
+  }
 
+  void
+  TrackStatePrinter::printTracks(const Acts::GeometryContext &tgContext,
+                                 const ActsTrk::TrackContainer &tracks,
+                                 const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
+                                 const std::vector<ATLASUncalibSourceLink> &measurements,
+                                 size_t measurementOffset) const
+  {
     for (auto &track : fitResult)
     {
       const auto lastMeasurementIndex = track.tipIndex();
@@ -506,16 +550,17 @@ namespace ActsTrk
                 << std::left
                 << std::setw(4) << "parm" << ' '
                 << std::setw(21) << actsSurfaceName(per.referenceSurface()) << ' '
-                << std::setw(22) << to_string("#pix=", npixel, ", #strip=", nstrip) << ' '
+                << std::setw(22) << to_string("#hit=", npixel, '/', nstrip, ", #tj=", fitResult.size()) << ' '
                 << std::right;
       printParameters(per.referenceSurface(), tgContext, per.parameters());
       std::cout << '\n';
 
       for (auto i = states.size(); i > 0;)
       {
-        printTrackState(tgContext, states[--i]);
+        printTrackState(tgContext, states[--i], measurements, measurementOffset);
       }
     }
+    std::cout << std::flush;
   }
 
   void
@@ -546,6 +591,7 @@ namespace ActsTrk
     {
       printSourceLink(tgContext, *trackingGeometry, measurementInfo);
     }
+    std::cout << std::flush;
   }
 
   void TrackStatePrinter::addSpacePoints(const EventContext &ctx, std::vector<MeasurementInfo> &measurementIndex, size_t type) const

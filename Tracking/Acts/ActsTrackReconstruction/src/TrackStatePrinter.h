@@ -44,14 +44,20 @@ namespace ActsTrk
                      size_t offset) const override;
 
     void
+    printSeed(const Acts::GeometryContext &tgContext,
+              const ActsTrk::Seed &seed,
+              const Acts::BoundTrackParameters &initialParameters,
+              size_t measurementOffset,
+              size_t iseed,
+              size_t head,
+              const char *seedType) const override;
+
+    void
     printTracks(const Acts::GeometryContext &tgContext,
                 const ActsTrk::TrackContainer &tracks,
                 const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
-                const Acts::BoundTrackParameters &seed,
-                size_t iseed,
-                size_t ntracks,
-                size_t head,
-                const char *seedType = "") const override;
+                const std::vector<ATLASUncalibSourceLink> &measurements,
+                size_t measurementOffset) const override;
 
     using MeasurementInfo = std::tuple<size_t,
                                        const ATLASUncalibSourceLink *,

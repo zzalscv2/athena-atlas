@@ -27,12 +27,22 @@ namespace ActsTrk
     ATH_CHECK(m_trackFindingTool.retrieve());
 
     // Read and Write handles
-    ATH_CHECK(m_pixelClusterContainerKey.initialize());
-    ATH_CHECK(m_stripClusterContainerKey.initialize());
-    ATH_CHECK(m_pixelDetEleCollKey.initialize());
-    ATH_CHECK(m_stripDetEleCollKey.initialize());
-    ATH_CHECK(m_pixelEstimatedTrackParametersKey.initialize());
-    ATH_CHECK(m_stripEstimatedTrackParametersKey.initialize());
+    if (!m_pixelSeedsKey.empty())
+      ATH_CHECK(m_pixelSeedsKey.initialize());
+    if (!m_stripSeedsKey.empty())
+      ATH_CHECK(m_stripSeedsKey.initialize());
+    if (!m_pixelClusterContainerKey.empty())
+      ATH_CHECK(m_pixelClusterContainerKey.initialize());
+    if (!m_stripClusterContainerKey.empty())
+      ATH_CHECK(m_stripClusterContainerKey.initialize());
+    if (!m_pixelDetEleCollKey.empty())
+      ATH_CHECK(m_pixelDetEleCollKey.initialize());
+    if (!m_stripDetEleCollKey.empty())
+      ATH_CHECK(m_stripDetEleCollKey.initialize());
+    if (!m_pixelEstimatedTrackParametersKey.empty())
+      ATH_CHECK(m_pixelEstimatedTrackParametersKey.initialize());
+    if (!m_stripEstimatedTrackParametersKey.empty())
+      ATH_CHECK(m_stripEstimatedTrackParametersKey.initialize());
     ATH_CHECK(m_tracksKey.initialize());
     ATH_CHECK(m_tracksContainerKey.initialize());
 
@@ -53,61 +63,113 @@ namespace ActsTrk
     // ===================== INPUTS ===================== //
     // ================================================== //
 
-    // SEEDS
-    ATH_MSG_DEBUG("Reading input collection with key " << m_pixelEstimatedTrackParametersKey.key());
-    SG::ReadHandle<ActsTrk::BoundTrackParametersContainer> pixelEstimatedTrackParametersHandle = SG::makeHandle(m_pixelEstimatedTrackParametersKey, ctx);
-    ATH_CHECK(pixelEstimatedTrackParametersHandle.isValid());
-    const ActsTrk::BoundTrackParametersContainer *pixelEstimatedTrackParameters = pixelEstimatedTrackParametersHandle.get();
-    ATH_MSG_DEBUG("Retrieved " << pixelEstimatedTrackParameters->size() << " input elements from key " << m_pixelEstimatedTrackParametersKey.key());
+    // SEED PARAMETERS
+    const ActsTrk::BoundTrackParametersContainer *pixelEstimatedTrackParameters = nullptr;
+    if (!m_pixelEstimatedTrackParametersKey.empty())
+    {
+      ATH_MSG_DEBUG("Reading input collection with key " << m_pixelEstimatedTrackParametersKey.key());
+      SG::ReadHandle<ActsTrk::BoundTrackParametersContainer> pixelEstimatedTrackParametersHandle = SG::makeHandle(m_pixelEstimatedTrackParametersKey, ctx);
+      ATH_CHECK(pixelEstimatedTrackParametersHandle.isValid());
+      pixelEstimatedTrackParameters = pixelEstimatedTrackParametersHandle.get();
+      ATH_MSG_DEBUG("Retrieved " << pixelEstimatedTrackParameters->size() << " input elements from key " << m_pixelEstimatedTrackParametersKey.key());
+    }
 
-    ATH_MSG_DEBUG("Reading input collection with key " << m_stripEstimatedTrackParametersKey.key());
-    SG::ReadHandle<ActsTrk::BoundTrackParametersContainer> stripEstimatedTrackParametersHandle = SG::makeHandle(m_stripEstimatedTrackParametersKey, ctx);
-    ATH_CHECK(stripEstimatedTrackParametersHandle.isValid());
-    const ActsTrk::BoundTrackParametersContainer *stripEstimatedTrackParameters = stripEstimatedTrackParametersHandle.get();
-    ATH_MSG_DEBUG("Retrieved " << stripEstimatedTrackParameters->size() << " input elements from key " << m_stripEstimatedTrackParametersKey.key());
+    const ActsTrk::BoundTrackParametersContainer *stripEstimatedTrackParameters = nullptr;
+    if (!m_stripEstimatedTrackParametersKey.empty())
+    {
+      ATH_MSG_DEBUG("Reading input collection with key " << m_stripEstimatedTrackParametersKey.key());
+      SG::ReadHandle<ActsTrk::BoundTrackParametersContainer> stripEstimatedTrackParametersHandle = SG::makeHandle(m_stripEstimatedTrackParametersKey, ctx);
+      ATH_CHECK(stripEstimatedTrackParametersHandle.isValid());
+      stripEstimatedTrackParameters = stripEstimatedTrackParametersHandle.get();
+      ATH_MSG_DEBUG("Retrieved " << stripEstimatedTrackParameters->size() << " input elements from key " << m_stripEstimatedTrackParametersKey.key());
+    }
+
+    // SEED TRIPLETS
+    const ActsTrk::SeedContainer *pixelSeeds = nullptr;
+    if (!m_pixelSeedsKey.empty())
+    {
+      ATH_MSG_DEBUG("Reading input collection with key " << m_pixelSeedsKey.key());
+      SG::ReadHandle<ActsTrk::SeedContainer> pixelSeedsHandle = SG::makeHandle(m_pixelSeedsKey, ctx);
+      ATH_CHECK(pixelSeedsHandle.isValid());
+      pixelSeeds = pixelSeedsHandle.get();
+      ATH_MSG_DEBUG("Retrieved " << pixelSeeds->size() << " input elements from key " << m_pixelSeedsKey.key());
+    }
+
+    const ActsTrk::SeedContainer *stripSeeds = nullptr;
+    if (!m_stripSeedsKey.empty())
+    {
+      ATH_MSG_DEBUG("Reading input collection with key " << m_stripSeedsKey.key());
+      SG::ReadHandle<ActsTrk::SeedContainer> stripSeedsHandle = SG::makeHandle(m_stripSeedsKey, ctx);
+      ATH_CHECK(stripSeedsHandle.isValid());
+      stripSeeds = stripSeedsHandle.get();
+      ATH_MSG_DEBUG("Retrieved " << stripSeeds->size() << " input elements from key " << m_stripSeedsKey.key());
+    }
 
     // MEASUREMENTS
-    ATH_MSG_DEBUG("Reading input collection with key " << m_pixelClusterContainerKey.key());
-    SG::ReadHandle<xAOD::PixelClusterContainer> pixelClusterContainerHandle = SG::makeHandle(m_pixelClusterContainerKey, ctx);
-    ATH_CHECK(pixelClusterContainerHandle.isValid());
-    const xAOD::PixelClusterContainer *pixelClusterContainer = pixelClusterContainerHandle.get();
-    ATH_MSG_DEBUG("Retrieved " << pixelClusterContainer->size() << " input elements from key " << m_pixelClusterContainerKey.key());
-
-    ATH_MSG_DEBUG("Reading input collection with key " << m_stripClusterContainerKey.key());
-    SG::ReadHandle<xAOD::StripClusterContainer> stripClusterContainerHandle = SG::makeHandle(m_stripClusterContainerKey, ctx);
-    ATH_CHECK(stripClusterContainerHandle.isValid());
-    const xAOD::StripClusterContainer *stripClusterContainer = stripClusterContainerHandle.get();
-    ATH_MSG_DEBUG("Retrieved " << stripClusterContainer->size() << " input elements from key " << m_stripClusterContainerKey.key());
-
-    ATH_MSG_DEBUG("Reading input condition data with key " << m_pixelDetEleCollKey.key());
-    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleCollHandle(m_pixelDetEleCollKey, ctx);
-    ATH_CHECK(pixelDetEleCollHandle.isValid());
-    const InDetDD::SiDetectorElementCollection *pixelDetEleColl = pixelDetEleCollHandle.retrieve();
-    if (pixelDetEleColl == nullptr)
+    const xAOD::PixelClusterContainer *pixelClusterContainer = nullptr;
+    if (!m_pixelClusterContainerKey.empty())
     {
-      ATH_MSG_FATAL(m_pixelDetEleCollKey.fullKey() << " is not available.");
-      return StatusCode::FAILURE;
+      ATH_MSG_DEBUG("Reading input collection with key " << m_pixelClusterContainerKey.key());
+      SG::ReadHandle<xAOD::PixelClusterContainer> pixelClusterContainerHandle = SG::makeHandle(m_pixelClusterContainerKey, ctx);
+      ATH_CHECK(pixelClusterContainerHandle.isValid());
+      pixelClusterContainer = pixelClusterContainerHandle.get();
+      ATH_MSG_DEBUG("Retrieved " << pixelClusterContainer->size() << " input elements from key " << m_pixelClusterContainerKey.key());
     }
-    ATH_MSG_DEBUG("Retrieved " << pixelDetEleColl->size() << " input condition elements from key " << m_pixelDetEleCollKey.key());
 
-    ATH_MSG_DEBUG("Reading input condition data with key " << m_stripDetEleCollKey.key());
-    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> stripDetEleCollHandle(m_stripDetEleCollKey, ctx);
-    ATH_CHECK(stripDetEleCollHandle.isValid());
-    const InDetDD::SiDetectorElementCollection *stripDetEleColl = stripDetEleCollHandle.retrieve();
-    if (stripDetEleColl == nullptr)
+    const xAOD::StripClusterContainer *stripClusterContainer = nullptr;
+    if (!m_stripClusterContainerKey.empty())
     {
-      ATH_MSG_FATAL(m_stripDetEleCollKey.fullKey() << " is not available.");
-      return StatusCode::FAILURE;
+      ATH_MSG_DEBUG("Reading input collection with key " << m_stripClusterContainerKey.key());
+      SG::ReadHandle<xAOD::StripClusterContainer> stripClusterContainerHandle = SG::makeHandle(m_stripClusterContainerKey, ctx);
+      ATH_CHECK(stripClusterContainerHandle.isValid());
+      stripClusterContainer = stripClusterContainerHandle.get();
+      ATH_MSG_DEBUG("Retrieved " << stripClusterContainer->size() << " input elements from key " << m_stripClusterContainerKey.key());
     }
-    ATH_MSG_DEBUG("Retrieved " << stripDetEleColl->size() << " input condition elements from key " << m_stripDetEleCollKey.key());
+
+    const InDetDD::SiDetectorElementCollection *pixelDetEleColl = nullptr;
+    if (!m_pixelDetEleCollKey.empty())
+    {
+      ATH_MSG_DEBUG("Reading input condition data with key " << m_pixelDetEleCollKey.key());
+      SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleCollHandle(m_pixelDetEleCollKey, ctx);
+      ATH_CHECK(pixelDetEleCollHandle.isValid());
+      pixelDetEleColl = pixelDetEleCollHandle.retrieve();
+      if (pixelDetEleColl == nullptr)
+      {
+        ATH_MSG_FATAL(m_pixelDetEleCollKey.fullKey() << " is not available.");
+        return StatusCode::FAILURE;
+      }
+      ATH_MSG_DEBUG("Retrieved " << pixelDetEleColl->size() << " input condition elements from key " << m_pixelDetEleCollKey.key());
+    }
+
+    const InDetDD::SiDetectorElementCollection *stripDetEleColl = nullptr;
+    if (!m_stripDetEleCollKey.empty())
+    {
+      ATH_MSG_DEBUG("Reading input condition data with key " << m_stripDetEleCollKey.key());
+      SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> stripDetEleCollHandle(m_stripDetEleCollKey, ctx);
+      ATH_CHECK(stripDetEleCollHandle.isValid());
+      stripDetEleColl = stripDetEleCollHandle.retrieve();
+      if (stripDetEleColl == nullptr)
+      {
+        ATH_MSG_FATAL(m_stripDetEleCollKey.fullKey() << " is not available.");
+        return StatusCode::FAILURE;
+      }
+      ATH_MSG_DEBUG("Retrieved " << stripDetEleColl->size() << " input condition elements from key " << m_stripDetEleCollKey.key());
+    }
 
     // convert all measurements to source links, so the CKF can find them from either strip or pixel seeds.
 
-    auto measurements = m_trackFindingTool->initMeasurements(pixelClusterContainer->size() + stripClusterContainer->size());
-    ATH_MSG_DEBUG("Create " << pixelClusterContainer->size() << " source links from pixel measurements");
-    measurements->addMeasurements(ctx, pixelClusterContainer, pixelDetEleColl);
-    ATH_MSG_DEBUG("Create " << stripClusterContainer->size() << " source links from strip measurements");
-    measurements->addMeasurements(ctx, stripClusterContainer, stripDetEleColl);
+    auto measurements = m_trackFindingTool->initMeasurements((pixelClusterContainer ? pixelClusterContainer->size() : 0) +
+                                                             (stripClusterContainer ? stripClusterContainer->size() : 0));
+    if (pixelClusterContainer && pixelDetEleColl)
+    {
+      ATH_MSG_DEBUG("Create " << pixelClusterContainer->size() << " source links from pixel measurements");
+      measurements->addMeasurements(0, ctx, pixelClusterContainer, pixelDetEleColl);
+    }
+    if (stripClusterContainer && stripDetEleColl)
+    {
+      ATH_MSG_DEBUG("Create " << stripClusterContainer->size() << " source links from strip measurements");
+      measurements->addMeasurements(1, ctx, stripClusterContainer, stripDetEleColl);
+    }
 
     // ================================================== //
     // ===================== OUTPUTS ==================== //
@@ -127,25 +189,31 @@ namespace ActsTrk
     // ================================================== //
 
     // Perform the track finding for all initial parameters.
-    // Start with strips where the occupancy is lower (will become relevant when we add duplicate removal)
-    if (!stripEstimatedTrackParameters->empty())
-    {
-      ATH_CHECK(m_trackFindingTool->findTracks(ctx,
-                                               *measurements,
-                                               *stripEstimatedTrackParameters,
-                                               trackContainer,
-                                               *trackCollection.get(),
-                                               "strip"));
-    }
-
-    if (!pixelEstimatedTrackParameters->empty())
+    // Until the CKF can do a backward search, start with the pixel seeds
+    // (will become relevant when we can remove pixel/strip duplicates).
+    // Afterwards, we could start with strips where the occupancy is lower.
+    if (pixelEstimatedTrackParameters && !pixelEstimatedTrackParameters->empty())
     {
       ATH_CHECK(m_trackFindingTool->findTracks(ctx,
                                                *measurements,
                                                *pixelEstimatedTrackParameters,
+                                               pixelSeeds,
                                                trackContainer,
                                                *trackCollection.get(),
+                                               0,
                                                "pixel"));
+    }
+
+    if (stripEstimatedTrackParameters && !stripEstimatedTrackParameters->empty())
+    {
+      ATH_CHECK(m_trackFindingTool->findTracks(ctx,
+                                               *measurements,
+                                               *stripEstimatedTrackParameters,
+                                               stripSeeds,
+                                               trackContainer,
+                                               *trackCollection.get(),
+                                               1,
+                                               "strip"));
     }
 
     ATH_MSG_DEBUG("    \\__ Created " << trackCollection->size() << " tracks");
@@ -158,8 +226,6 @@ namespace ActsTrk
     ActsTrk::ConstTrackBackend trackBackend(trackContainer.container());
     auto constTrackContainer = std::make_unique<ActsTrk::ConstTrackContainer>(std::move(trackBackend), std::move(trackStateBackend));
     ATH_CHECK(trackContainerHandle.record(std::move(constTrackContainer)));
-
-
 
     ATH_MSG_DEBUG("Storing Track Collection " << m_tracksKey.key());
     ATH_CHECK(trackHandle.record(std::move(trackCollection)));

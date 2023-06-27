@@ -18,6 +18,7 @@
 
 // PACKAGE
 #include "ActsGeometry/ATLASSourceLink.h"
+#include "ActsTrkEvent/Seed.h"
 #include "ActsTrkEvent/TrackContainer.h"
 
 // Other
@@ -38,14 +39,20 @@ namespace ActsTrk
                      size_t offset) const = 0;
 
     virtual void
+    printSeed(const Acts::GeometryContext &tgContext,
+              const ActsTrk::Seed &seed,
+              const Acts::BoundTrackParameters &initialParameters,
+              size_t measurementOffset,
+              size_t iseed,
+              size_t head,
+              const char *seedType) const = 0;
+
+    virtual void
     printTracks(const Acts::GeometryContext &tgContext,
                 const ActsTrk::TrackContainer &tracks,
                 const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
-                const Acts::BoundTrackParameters &seed,
-                size_t iseed,
-                size_t ntracks,
-                size_t head,
-                const char *seedType = "") const = 0;
+                const std::vector<ATLASUncalibSourceLink> &measurements,
+                size_t measurementOffset) const = 0;
   };
 
 } // namespace

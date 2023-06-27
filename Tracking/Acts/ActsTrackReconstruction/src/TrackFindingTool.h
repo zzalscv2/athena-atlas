@@ -47,9 +47,11 @@ namespace ActsTrk
     findTracks(const EventContext &ctx,
                const Measurements &measurements,
                const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
+               const ActsTrk::SeedContainer *seeds,
                ActsTrk::TrackContainer &tracksContainer, 
                ::TrackCollection &tracksCollection,
-               const char *seedType = "") const override;
+               size_t seedCollectionIndex,
+               const char *seedType) const override;
 
     virtual std::unique_ptr<ActsTrk::ITrackFindingTool::Measurements> initMeasurements(size_t numMeasurements) const override;
 
@@ -65,18 +67,21 @@ namespace ActsTrk
 
     // Configuration
     Gaudi::Property<unsigned int> m_maxPropagationStep{this, "maxPropagationStep", 1000, "Maximum number of steps for one propagate call"};
+    Gaudi::Property<bool> m_skipDuplicateSeeds{this, "skipDuplicateSeeds", true, "skip duplicate seeds before calling CKF"};
     // Selection cuts for associating measurements with predicted track parameters on a surface.
     Gaudi::Property<std::vector<double>> m_etaBins{this, "etaBins", {}, "MeasurementSelector: bins in |eta| to specify variable selections"};
     Gaudi::Property<std::vector<double>> m_chi2CutOff{this, "chi2CutOff", {std::numeric_limits<double>::max()}, "MeasurementSelector: maximum local chi2 contribution"};
     Gaudi::Property<std::vector<size_t>> m_numMeasurementsCutOff{this, "numMeasurementsCutOff", {1}, "MeasurementSelector: maximum number of associated measurements on a single surface"};
 
     // Create tracks from one seed's CKF result, appending to tracksContainer
+    class DuplicateSeedDetector;
     size_t
     makeTracks(const EventContext &ctx,
                const Acts::GeometryContext &tgContext,
                const ActsTrk::TrackContainer &tracks,
                const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitOutput,
-               ::TrackCollection &tracksContainer) const;
+               ::TrackCollection &tracksContainer,
+               DuplicateSeedDetector &duplicateSeedDetector) const;
 
     std::unique_ptr<const Trk::MeasurementBase>
     makeRIO_OnTrack(const xAOD::UncalibratedMeasurement &uncalibMeas,
@@ -90,6 +95,8 @@ namespace ActsTrk
     // statistics
     mutable std::atomic<size_t> m_nTotalSeeds{0};
     mutable std::atomic<size_t> m_nFailedSeeds{0};
+    mutable std::atomic<size_t> m_nDuplicateSeeds{0};
+    mutable std::atomic<size_t> m_nOutputTracks{0};
 
     /// Private access to the logger
     const Acts::Logger &logger() const
