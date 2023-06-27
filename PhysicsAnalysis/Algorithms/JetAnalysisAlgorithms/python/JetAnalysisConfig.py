@@ -205,7 +205,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.efficiencyTool.TaggingAlg = ROOT.CP.JvtTagger.NNJvt
             alg.efficiencyTool.WorkingPoint = 'FixedEffPt'
             alg.truthJetCollection = 'AntiKt4TruthDressedWZJets'
-            alg.selection = 'jvt_selection'
+            alg.selection = 'jvt_selection,as_char'
             alg.scaleFactorDecoration = 'jvt_effSF_%SYS%'
             # Disable scale factor decorations if running on data
             # We still want to run the JVT selection
@@ -232,7 +232,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.truthJetCollection = 'AntiKt4TruthDressedWZJets'
             alg.dofJVT = True
             alg.fJVTStatus = 'passFJVT,as_char'
-            alg.selection = 'fjvt_selection'
+            alg.selection = 'fjvt_selection,as_char'
             alg.scaleFactorDecoration = 'fjvt_effSF_%SYS%'
             # Disable scale factor decorations if running on data
             # We still want to run the JVT selection
