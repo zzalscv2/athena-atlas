@@ -392,6 +392,8 @@ namespace top {
         config->setIsAFII(false);
       } else if (simFlavour == "FullG4_QS") {
         config->setIsAFII(false);
+      } else if (simFlavour == "FullG4_LongLived") {
+	config->setIsAFII(false);
       } else if (simFlavour == "ATLFASTII") {
         config->setIsAFII(true);
       } else if (simFlavour == "ATLFAST3_QS") {
