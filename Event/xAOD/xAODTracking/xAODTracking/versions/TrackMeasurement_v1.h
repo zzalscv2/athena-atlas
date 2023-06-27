@@ -11,8 +11,6 @@
 #include "EventPrimitives/EventPrimitives.h"
 
 
-static const SG::AuxElement::Accessor<std::vector<double>> measAcc("meas");
-static const SG::AuxElement::Accessor<std::vector<double>> covMatrixAcc("covMatrix");
 
 namespace xAOD {
     /**
@@ -25,48 +23,50 @@ namespace xAOD {
         /**
          * access track Measurements vector of const element
          **/
-	template<std::size_t measdim = 6>
-	  Eigen::Map<const Eigen::Matrix<double, measdim, 1>> measEigen() const {
-	  return Eigen::Map<const Eigen::Matrix<double, measdim, 1>>{measAcc(*this).data()}; 
-	}
-        /**
-         * access Measurements of non const element
-         **/
-	template<std::size_t measdim = 6>
-	  Eigen::Map<Eigen::Matrix<double, measdim, 1>> measEigen() {
-	  return Eigen::Map<Eigen::Matrix<double, measdim, 1>>{measAcc(*this).data()}; 
-	}
+        template<std::size_t measdim = 6>
+          Eigen::Map<const Eigen::Matrix<double, measdim, 1>> measEigen() const {
+          return Eigen::Map<const Eigen::Matrix<double, measdim, 1>>{measAcc(*this).data()};
+        }
 
         /**
-         * access track Measurements as plain vector
-         **/
-        const std::vector<double>& meas() const;
+        * access Measurements of non const element
+        **/
+        template<std::size_t measdim = 6>
+          Eigen::Map<Eigen::Matrix<double, measdim, 1>> measEigen() {
+          return Eigen::Map<Eigen::Matrix<double, measdim, 1>>{measAcc(*this).data()};
+        }
+
         /**
-         * access set Measurements from plain vector
-         **/
+        * access track Measurements as plain vector
+        **/
+        const std::vector<double>& meas() const;
+
+        /**
+        * access set Measurements from plain vector
+        **/
         void setMeas( const std::vector<double>& m);
 
+        /**
+        * access track covariance matrix (flattened, rows layout) of const element
+        **/
+        template<std::size_t measdim = 6>
+          Eigen::Map<const Eigen::Matrix<double, measdim, measdim>> covMatrixEigen() const {
+          return Eigen::Map<const Eigen::Matrix<double, measdim, measdim>>{covMatrixAcc(*this).data()};
+        }
 
         /**
-         * access track covariance matrix (flattened, rows layout) of const element
-         **/
-	template<std::size_t measdim = 6>
-	  Eigen::Map<const Eigen::Matrix<double, measdim, measdim>> covMatrixEigen() const {
-	  return Eigen::Map<const Eigen::Matrix<double, measdim, measdim>>{covMatrixAcc(*this).data()};
-	}
-
-        /**
-         * access track covariance matrix (flattened, rows layout)
-         **/
-	template<std::size_t measdim = 6>
-	  Eigen::Map<Eigen::Matrix<double, measdim, measdim>> covMatrixEigen() {
-	  return Eigen::Map<Eigen::Matrix<double, measdim, measdim>> {covMatrixAcc(*this).data()};
-	}
+        * access track covariance matrix (flattened, rows layout)
+        **/
+        template<std::size_t measdim = 6>
+          Eigen::Map<Eigen::Matrix<double, measdim, measdim>> covMatrixEigen() {
+          return Eigen::Map<Eigen::Matrix<double, measdim, measdim>> {covMatrixAcc(*this).data()};
+        }
 
         /**
          * access track covariance as plain vector
          **/
         const std::vector<double>& covMatrix() const;
+
         /**
          * access set covariance from plain vector
          **/
@@ -81,7 +81,7 @@ namespace xAOD {
 
         /**
          * @brief return pointer to uncalibrated measurement if the underlying link is valid
-         * 
+         *
          * @return const UncalibratedMeasurement* or nullptr
          */
         const UncalibratedMeasurement* uncalibratedMeasurement() const;
@@ -93,8 +93,8 @@ namespace xAOD {
 
 
         /**
-        The quantities measured by detector, are functions of the state vector, corrupted by a measurement noise. 
-        However the state vector is normally not observed directly. The projector is mapping from the  state 
+        The quantities measured by detector, are functions of the state vector, corrupted by a measurement noise.
+        However the state vector is normally not observed directly. The projector is mapping from the  state
         vector to the mesured quantities. In our case the projector is linear, i.e. represented by a matrix of ‘ones’.
         The projector matrix is coded by the bits of "unsigned long long" variable and the conversion to/from
         matrix is done in Acts.
@@ -113,10 +113,13 @@ namespace xAOD {
          */
         void resize(size_t sz = 6);
 
-	/**
-	 * @brief retrieve the size of the internal vectors for the data storage
-	 */
-	size_t size() const;
+        /**
+        * @brief retrieve the size of the internal vectors for the data storage
+        */
+        size_t size() const;
+      private:
+        static const SG::AuxElement::Accessor<std::vector<double>> measAcc;
+        static const SG::AuxElement::Accessor<std::vector<double>> covMatrixAcc;
     };
 }
 #endif
