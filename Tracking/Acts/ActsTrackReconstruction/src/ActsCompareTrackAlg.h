@@ -23,6 +23,8 @@ class TTree;
 class TH1;
 class TH1F;
 
+namespace ActsTrk {
+
 class ActsCompareTrackAlg : public AthAlgorithm {
 public:
   ActsCompareTrackAlg (const std::string& name, ISvcLocator* pSvcLocator);
@@ -119,5 +121,7 @@ private:
     TH1F** m_cov_comparison{};
 
 };
+
+} // namespace 
 
 #endif 

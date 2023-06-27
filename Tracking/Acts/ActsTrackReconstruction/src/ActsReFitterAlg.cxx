@@ -18,6 +18,8 @@
 
 using namespace Acts::UnitLiterals;
 
+namespace ActsTrk {
+
 ActsReFitterAlg::ActsReFitterAlg(const std::string &name,
                                    ISvcLocator *pSvcLocator)
     : AthReentrantAlgorithm(name, pSvcLocator){}
@@ -93,4 +95,6 @@ StatusCode ActsReFitterAlg::execute(const EventContext &ctx) const {
   ATH_MSG_DEBUG ("Saving tracks");
   ATH_CHECK(SG::WriteHandle<TrackCollection>(m_newTrackName, ctx).record(std::move(new_track_collection)));
   return StatusCode::SUCCESS;
+}
+
 }

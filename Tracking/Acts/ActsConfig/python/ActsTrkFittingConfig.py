@@ -71,7 +71,7 @@ def ActsReFitterAlgCfg(flags, name="ActsReFitterAlg", **kwargs):
     kwargs.setdefault("TrackName", "ResolvedTracks")
 
     result.addEventAlgo(
-        CompFactory.ActsReFitterAlg(
+        CompFactory.ActsTrk.ActsReFitterAlg(
             name=name,
             **kwargs,
         )
