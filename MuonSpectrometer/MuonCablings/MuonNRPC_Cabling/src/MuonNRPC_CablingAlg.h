@@ -18,7 +18,6 @@
 #include "GaudiKernel/IChronoStatSvc.h"
 #include "MuonCablingData/MuonNRPC_CablingMap.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 

@@ -4,21 +4,18 @@
 
 #include "MuonMDT_CablingAlg.h"
 
-#include <stdlib.h>
-
 #include <fstream>
 #include <map>
-#include <string>
-
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
+#include "AthenaKernel/IOVInfiniteRange.h"
 #include "CoralBase/Attribute.h"
 #include "CoralBase/AttributeListSpecification.h"
 #include "MuonCondSvc/MdtStringUtils.h"
 #include "MuonIdHelpers/MdtIdHelper.h"
 #include "PathResolver/PathResolver.h"
 #include "SGTools/TransientAddress.h"
-#include "nlohmann/json.hpp"
+
 
 using DataSource = MuonMDT_CablingMap::DataSource;
 
@@ -30,7 +27,6 @@ StatusCode MuonMDT_CablingAlg::initialize() {
     ATH_CHECK(m_readKeyMap.initialize());
     ATH_CHECK(m_writeKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
-    ATH_CHECK(m_muonManagerKey.initialize(!m_mezzJSON.value().empty() || !m_chambJSON.value().empty()));    
     return StatusCode::SUCCESS;
 }
 
@@ -45,6 +41,7 @@ StatusCode MuonMDT_CablingAlg::execute() {
                                     << " if multiple concurrent events are being processed out of order.");
         return StatusCode::SUCCESS;
     }
+    writeHandle.addDependency(EventIDRange(IOVInfiniteRange::infiniteRunLB()));
     ATH_MSG_INFO("Load the Mdt cabling");
     std::unique_ptr<MuonMDT_CablingMap> writeCdo{std::make_unique<MuonMDT_CablingMap>()};
 
@@ -59,8 +56,16 @@ StatusCode MuonMDT_CablingAlg::execute() {
 StatusCode MuonMDT_CablingAlg::loadCablingSchema(const EventContext& ctx, SG::WriteCondHandle<MuonMDT_CablingMap>& writeHandle,
                                                  MuonMDT_CablingMap& cabling_map)  const {
     
-    if (m_useJSONFormat || m_chambJSON.value().size()){
-        return loadCablingSchemaFromJSON(ctx, writeHandle, cabling_map);
+    if (m_chambJSON.value().size()){
+        std::ifstream in_json{m_chambJSON};
+        if (!in_json.good()) {
+            ATH_MSG_FATAL("Failed to open external JSON file "<<m_chambJSON);
+            return StatusCode::FAILURE;
+        }
+        nlohmann::json payload{};
+        in_json >> payload;
+        ATH_CHECK(loadCablingSchemaFromJSON( std::move(payload), cabling_map));  
+        return StatusCode::SUCCESS;
     }
     SG::ReadCondHandle<CondAttrListCollection> readHandleMap{m_readKeyMap, ctx};
     if (!readHandleMap.isValid()) {
@@ -69,10 +74,14 @@ StatusCode MuonMDT_CablingAlg::loadCablingSchema(const EventContext& ctx, SG::Wr
     }
     writeHandle.addDependency(readHandleMap);
     
-    ATH_MSG_INFO("Size of CondAttrListCollection " << readHandleMap.fullKey() << " readCdoMap->size()= " << readHandleMap->size());
+    ATH_MSG_INFO("Size of CondAttrListCollection " << readHandleMap.fullKey() 
+                  << " readCdoMap->size()= " << readHandleMap->size());
    
     ATH_MSG_VERBOSE("Collection CondAttrListCollection CLID " << readHandleMap->clID());
-
+    if (m_useJSONFormat) {
+        ATH_MSG_FATAL("Mechanism to read the JSON database needs to be implemented...");
+        return StatusCode::FAILURE;
+    }
     // access to Map Schema Table to obtained the Map
     CondAttrListCollection::const_iterator itrMap;
     for (itrMap = readHandleMap->begin(); itrMap != readHandleMap->end(); ++itrMap) {
@@ -256,8 +265,16 @@ bool MuonMDT_CablingAlg::extractLayerInfo(std::vector<std::string>& info_map, Ca
 
 StatusCode MuonMDT_CablingAlg::loadMezzanineSchema(const EventContext& ctx,SG::WriteCondHandle<MuonMDT_CablingMap>& writeHandle,
                                                     MuonMDT_CablingMap& cabling_map) const{
-    if (m_useJSONFormat || m_mezzJSON.value().size()){
-        return loadMezzanineFromJSON(ctx, writeHandle, cabling_map);
+    if (m_mezzJSON.value().size()){
+        std::ifstream in_json{m_mezzJSON};
+        if (!in_json.good()) {
+            ATH_MSG_FATAL("Failed to open external JSON file "<<m_mezzJSON);
+            return StatusCode::FAILURE;
+        }
+        nlohmann::json payload{};
+        in_json >> payload;
+        ATH_CHECK(loadMezzanineFromJSON(std::move(payload), cabling_map)); 
+        return StatusCode::SUCCESS;
     }
 
     /// Read Cond Handle
@@ -268,8 +285,13 @@ StatusCode MuonMDT_CablingAlg::loadMezzanineSchema(const EventContext& ctx,SG::W
     }
     writeHandle.addDependency(readHandleMez);
 
-    ATH_MSG_INFO("Size of CondAttrListCollection " << readHandleMez.fullKey() << " readCdoMez->size()= " << readHandleMez->size());
-   
+    ATH_MSG_INFO("Size of CondAttrListCollection " << readHandleMez.fullKey() 
+                  << " readCdoMez->size()= " << readHandleMez->size());
+    
+    if (m_useJSONFormat) {
+        ATH_MSG_FATAL("The reading of the JSON file from the database needs to come");
+        return StatusCode::FAILURE;
+    }
     CondAttrListCollection::const_iterator itrMez;
     for (itrMez = readHandleMez->begin(); itrMez != readHandleMez->end(); ++itrMez) {
         const coral::AttributeList& atr = itrMez->second;
@@ -291,32 +313,7 @@ StatusCode MuonMDT_CablingAlg::loadMezzanineSchema(const EventContext& ctx,SG::W
     }    
     return StatusCode::SUCCESS;
 }
-StatusCode MuonMDT_CablingAlg::loadMezzanineFromJSON(const EventContext& ctx, SG::WriteCondHandle<MuonMDT_CablingMap>& writeHandle,
-                                MuonMDT_CablingMap& cabling_map) const {
-    
-    if (m_mezzJSON.value().size()) {
-        SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{m_muonManagerKey, ctx};
-        if (!detMgr.isValid()) {
-            ATH_MSG_FATAL("Failed to load the muon detector manager "<<m_muonManagerKey.fullKey());
-            return StatusCode::FAILURE;
-        }
-        writeHandle.addDependency(detMgr);
-        std::ifstream in_json{m_mezzJSON};
-        if (!in_json.good()) {
-            ATH_MSG_FATAL("Failed to open external JSON file "<<m_mezzJSON);
-            return StatusCode::FAILURE;
-        }
-        std::string json_content{};
-        while(std::getline(in_json, json_content)){
-            ATH_CHECK(loadMezzanineFromJSON( json_content, cabling_map));  
-        }
-    }
-    return StatusCode::SUCCESS;
-}
-StatusCode MuonMDT_CablingAlg::loadMezzanineFromJSON(const std::string& theJSON, MuonMDT_CablingMap& cabling_map) const {
-    if (theJSON.empty()) return StatusCode::SUCCESS;
-    nlohmann::json payload = nlohmann::json::parse(theJSON);
-
+StatusCode MuonMDT_CablingAlg::loadMezzanineFromJSON(nlohmann::json&& payload, MuonMDT_CablingMap& cabling_map) const {
     using MezzMapping = MdtMezzanineCard::Mapping;
     for (const auto &cabl_chan : payload.items()) {
         nlohmann::json mezz_payload = cabl_chan.value();
@@ -328,34 +325,7 @@ StatusCode MuonMDT_CablingAlg::loadMezzanineFromJSON(const std::string& theJSON,
     }
     return StatusCode::SUCCESS;
 }
-
-StatusCode MuonMDT_CablingAlg::loadCablingSchemaFromJSON(const EventContext& ctx,
-                                         SG::WriteCondHandle<MuonMDT_CablingMap>& writeHandle,
-                                         MuonMDT_CablingMap& cabling_map) const {
-
-    if (m_chambJSON.value().size()) {
-        SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{m_muonManagerKey, ctx};
-        if (!detMgr.isValid()) {
-            ATH_MSG_FATAL("Failed to load the muon detector manager "<<m_muonManagerKey.fullKey());
-            return StatusCode::FAILURE;
-        }
-        writeHandle.addDependency(detMgr);
-        std::ifstream in_json{m_chambJSON};
-        if (!in_json.good()) {
-            ATH_MSG_FATAL("Failed to open external JSON file "<<m_chambJSON);
-            return StatusCode::FAILURE;
-        }
-        std::string json_content{};
-        while(std::getline(in_json, json_content)){
-            ATH_CHECK(loadCablingSchemaFromJSON( json_content, cabling_map));  
-        }
-    }
-    return StatusCode::SUCCESS;
-}
-
-StatusCode MuonMDT_CablingAlg::loadCablingSchemaFromJSON(const std::string& theJSON, MuonMDT_CablingMap& cabling_map) const {
-    if (theJSON.empty()) return StatusCode::SUCCESS;
-    nlohmann::json payload = nlohmann::json::parse(theJSON);
+StatusCode MuonMDT_CablingAlg::loadCablingSchemaFromJSON(nlohmann::json&& payload, MuonMDT_CablingMap& cabling_map) const {
     const MdtIdHelper& id_helper = m_idHelperSvc->mdtIdHelper();
     for (const auto &db_channel : payload.items()) {
         nlohmann::json ms_payload = db_channel.value();
