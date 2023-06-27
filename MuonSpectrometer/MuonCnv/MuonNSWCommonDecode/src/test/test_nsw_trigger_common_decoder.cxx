@@ -846,10 +846,6 @@ int test_nsw_trigger_common_decoder_loop (Params &params, Statistics &statistics
 
 	for (const std::string &filename : params.file_names)
 	{
-
-		char *buf = nullptr;
-		unsigned int size = 0;
-
 		TFile* outfile = nullptr;
 		TTree* outtree = nullptr; //no need for a smart pointer for ttrees, given root behaviour (deleting ttree's when closing files)
 
@@ -874,6 +870,9 @@ int test_nsw_trigger_common_decoder_loop (Params &params, Statistics &statistics
 		else {
 			while (!reader->endOfFile () && (params.max_events == 0 || statistics.nevents < params.max_events))
 			{
+				char *buf = nullptr;
+				unsigned int size = 0;
+
 				try
 				{
 					DRError err = reader->getData (size, &buf);
@@ -882,7 +881,7 @@ int test_nsw_trigger_common_decoder_loop (Params &params, Statistics &statistics
 					{
 						std::cout << "Cannot get data properly from file" << data_file_name.c_str () << "; skipping it!" << std::endl;
 						anyBrokenFile = true;
-						if (buf) delete buf;
+						if (buf) delete [] buf;
 						break;
 					}
 
@@ -895,7 +894,7 @@ int test_nsw_trigger_common_decoder_loop (Params &params, Statistics &statistics
 					if ( test_nsw_trigger_common_decoder_event (f, data, params, statistics) )
 					{
 						std::cout << "Cannot decode properly event " << statistics.nevents << "; skipping it!" <<std::endl;
-						if (buf) delete buf;
+						if (buf) delete [] buf;
 						continue;
 					}
 
@@ -914,11 +913,11 @@ int test_nsw_trigger_common_decoder_loop (Params &params, Statistics &statistics
 				{
 					std::cout << "Exception!" << std::endl;
 					std::cout << error.what() << std::endl;
-					if (buf) delete buf;
+					if (buf) delete [] buf;
 					break;
 				}
 
-				if (buf) delete buf;
+				if (buf) delete [] buf;
 			}
 		}
 
