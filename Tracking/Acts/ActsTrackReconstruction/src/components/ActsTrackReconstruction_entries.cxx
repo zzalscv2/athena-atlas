@@ -18,8 +18,9 @@
 // Algs
 DECLARE_COMPONENT( ActsTrk::SeedingAlg )
 DECLARE_COMPONENT( ActsTrk::TrackFindingAlg )
-DECLARE_COMPONENT( ActsReFitterAlg ) // FIX-ME
-DECLARE_COMPONENT( ActsCompareTrackAlg ) // FIX-ME
+DECLARE_COMPONENT( ActsTrk::ActsReFitterAlg )
+DECLARE_COMPONENT( ActsTrk::ActsCompareTrackAlg )
+
 // Tools
 DECLARE_COMPONENT( ActsTrk::SeedingTool )
 DECLARE_COMPONENT( ActsTrk::OrthogonalSeedingTool )

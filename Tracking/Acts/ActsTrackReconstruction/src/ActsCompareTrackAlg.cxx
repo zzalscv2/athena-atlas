@@ -25,6 +25,7 @@
 #include <vector>
 #include <fstream>
 
+namespace ActsTrk {
 
 ActsCompareTrackAlg::ActsCompareTrackAlg(const std::string &name,
                                          ISvcLocator *pSvcLocator)
@@ -323,4 +324,6 @@ StatusCode ActsCompareTrackAlg::finalize()
 {
   msg(MSG::INFO) << "ActsCompareTrackAlg::finalize()" << endmsg;
   return StatusCode::SUCCESS;
+}
+
 }

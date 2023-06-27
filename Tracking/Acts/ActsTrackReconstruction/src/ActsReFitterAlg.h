@@ -27,6 +27,8 @@
 
 class EventContext;
 
+namespace ActsTrk {
+
 class ActsReFitterAlg : public AthReentrantAlgorithm {
 public:
   ActsReFitterAlg (const std::string& name, ISvcLocator* pSvcLocator);
@@ -43,5 +45,7 @@ private:
   mutable std::mutex m_writeMutex{};
 
 };
+
+} // namespace
 
 #endif 
