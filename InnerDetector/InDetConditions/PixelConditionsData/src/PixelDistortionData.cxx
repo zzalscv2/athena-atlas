@@ -89,11 +89,11 @@ std::vector<float> PixelDistortionData::getDistortionMap(uint32_t hashID) const 
   if (m_version < 2) distosize = 3;
   else distosize = 441;
 
-  std::vector<float> map(distosize, 0.0);
   auto itr = m_distortionMap.find(hashID);
   if (itr!=m_distortionMap.end()) {
     return itr->second;
   }
+  std::vector<float> map(distosize, 0.0);
   return map;
 }
 
