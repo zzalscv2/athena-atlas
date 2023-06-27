@@ -502,7 +502,9 @@ def addHeavyIonP1Signatures(chains):
         ChainProp(name='HLT_noalg_L1ALFA_CDiff_Phys', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1J12_ALFA_EINE', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup+SupportLegGroup),
 
+        # ATR-23602: ALFA Minbias track triggers with/without TRT
         ChainProp(name='HLT_mb_sptrk_vetombts2in_L1ALFA_ANY', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_mb_sptrk_vetombts2in_L1ALFA_EINE', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup),
 
         ChainProp(name='HLT_mb_sptrk_vetombts2in_L1TRT_ALFA_EINE', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup),
         ChainProp(name='HLT_mb_sptrk_vetombts2in_L1TRT_ALFA_ANY', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup),
