@@ -10,7 +10,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def NSWPRDValAlgRecoCfg(flags, name = "NSWPRDValAlg", **kwargs):
     result = ComponentAccumulator()
 
-    histSvc = CompFactory.THistSvc(Output=["NSWPRDValAlg DATAFILE='NSWPRDValAlg.digi.ntuple.root' OPT='RECREATE'"])
+    histSvc = CompFactory.THistSvc(Output=["NSWPRDValAlg DATAFILE='NSWPRDValAlg.reco.ntuple.root' OPT='RECREATE'"])
     result.addService(histSvc) 
 
     kwargs.setdefault("doTruth", True)
