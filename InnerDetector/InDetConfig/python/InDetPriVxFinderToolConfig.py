@@ -195,6 +195,7 @@ def VertexFinderToolCfg(flags, **kwargs):
         return ActsGaussAdaptiveMultiFindingCfg(flags, **kwargs)
 
 def TrigVertexFinderToolCfg(flags, **kwargs):
+    from ActsConfig.ActsTrkPriVxFinderConfig import TrigActsGaussAdaptiveMultiFindingCfg
 
     if flags.Tracking.ActiveConfig.adaptiveVertex and \
        flags.Tracking.ActiveConfig.adaptiveVertex:
