@@ -202,16 +202,22 @@ def addJetTTVA( flags, jetseq, trkopt, config, verticesname=None, adaptiveVertex
 
     # *****************************
     # Track-vtx association.
+    custom_ttva = {}
+    if flags.Trigger.Jet.TrackVtxAssocWP=="Custom":
+        custom_ttva = dict(
+            d0_cut       = 2.0, 
+            dzSinTheta_cut = 2.0, 
+        )
+
     jettrkprepalg = JetRecToolsConfig.getJetTrackVtxAlg(
         trkopt, algname="jetalg_TrackPrep"+trkopt,
         # # parameters for the CP::TrackVertexAssociationTool (or the TrackVertexAssociationTool.getTTVAToolForReco function) :
-        #WorkingPoint = "Nonprompt_All_MaxWeight", # this is the new default in offline (see also CHS configuration in StandardJetConstits.py)
-        WorkingPoint = "Custom",
-        d0_cut       = 2.0, 
-        dzSinTheta_cut = 2.0, 
+        WorkingPoint = flags.Trigger.Jet.TrackVtxAssocWP, # e.g. "Custom", or "Nonprompt_All_MaxWeight" (new default in offline - see also CHS configuration in StandardJetConstits.py)
         doPVPriority = adaptiveVertex,
         # schedules track decoration alg with used-in-fit links
-        add2Seq = jetseq
+        add2Seq = jetseq,
+        # Option to set custom TTVA cuts
+        **custom_ttva
     )
 
     # Pseudojets for ghost tracks

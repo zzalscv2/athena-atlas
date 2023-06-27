@@ -53,7 +53,7 @@ def peb_writer():
   option['stream-name'] = {'short': 's', 'arg': True,
                            'default': None,
                            'group': 'Stream Tag',
-                           'description': 'Name of stream which should be written out'}
+                           'description': 'Name(s) of stream(s) which should be written out, e.g. "stream1,stream2,stream3"'}
 
   option['project-tag'] = {'short': 'p', 'arg': True,
                            'default': None,
@@ -112,6 +112,11 @@ def peb_writer():
   runNumber       = dr.runNumber() 
   outputDirectory = kwargs['output-dir']
   streamName      = kwargs['stream-name']
+  # check if multiple streams should be written to the same output file (used in debug recovery) 
+  streamNames_out = streamName.split(',')
+  if len(streamNames_out) > 1:
+    streamName = 'accepted'
+
   if kwargs['project-tag'] is not None:
     projectTag      = kwargs['project-tag']
   if kwargs['lumi-block'] != -1:
@@ -149,7 +154,7 @@ def peb_writer():
     streamTags = e.stream_tag()
     logging.debug(' === New Event nr = %s (Run,Global ID) = (%d,%d) === ', totalEvents_in,e.run_no(),e.global_id())
     for tag in streamTags:
-      if tag.name == streamName:
+      if tag.name in streamNames_out:
         # the event should be written out        
         logging.debug(' Matching event found for stream tag = %s', tag)
         logging.debug('      Stream Tag:Robs = %s', [hex(r) for r in tag.robs])

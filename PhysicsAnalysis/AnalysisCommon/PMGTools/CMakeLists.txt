@@ -48,6 +48,12 @@ if( NOT XAOD_STANDALONE )
       PMGAnalysisInterfacesLib PMGToolsLib xAODJet xAODTruth ${xaod_access_lib} )
 endif()
 
+# Python module
+atlas_install_python_modules( python/*.py )
+
+# Install helper utility
+atlas_install_runtime( util/generator-weights.py )
+
 # Test(s) in the package:
 #
 # ... for AnalysisBase
@@ -72,3 +78,8 @@ atlas_add_test( ut_PMGTruthWeightTool_test
    LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib AsgTools PMGAnalysisInterfacesLib PMGToolsLib xAODTruth ${xaod_access_lib}
    POST_EXEC_SCRIPT nopost.sh )
 endif()
+
+# Run tests:
+#atlas_add_test( WeightHelpersTest
+#                SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/testWeightHelpers.py
+#                POST_EXEC_SCRIPT nopost.sh )

@@ -138,6 +138,19 @@ class trigRecoExecutor(athenaExecutor):
             else:
                 msg.info("Flag outputHIST_DEBUGSTREAMMONFile not defined - debug stream analysis will not run.")
 
+        # The following is needed to avoid conflicts in finding BS files prduced by running the HLT step
+        # and those already existing in the working directory
+        if 'BS' in self.conf.dataDictionary or 'DRAW_TRIGCOST' in self.conf.dataDictionary or 'HIST_DEBUGSTREAMMON' in self.conf.dataDictionary:
+            # expected string based on knowing that the format will be of form: ####._HLTMPPy_####.data
+            expectedOutputFileName = '*_HLTMPPy_*.data'
+            # list of filenames of files matching expectedOutputFileName
+            matchedOutputFileNames = self._findOutputFiles(expectedOutputFileName)
+            # check there are no file matches
+            if len(matchedOutputFileNames) > 0:
+                msg.error(f'Directoy already contains files with expected output name format ({expectedOutputFileName}), please remove/rename these first: {matchedOutputFileNames}')
+                raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'),
+                    f'Directory already contains files with expected output name format {expectedOutputFileName}, please remove/rename these first: {matchedOutputFileNames}')
+
 
         # Call athenaExecutor parent as the above overrides what athenaExecutor would have done
         super(athenaExecutor, self).preExecute(input, output)
@@ -230,11 +243,13 @@ class trigRecoExecutor(athenaExecutor):
 
     # run trigbs_extractStream.py to split a stream out of the BS file
     # renames the split file afterwards
-    def _splitBSfile(self, outputStream, allStreamsFileName, splitFileName):
-        msg.info('Splitting stream %s from BS file', outputStream)
+    def _splitBSfile(self, streamsList, allStreamsFileName, splitFileName):
+        # merge list of streams
+        outputStreams = ','.join(str(stream) for stream in streamsList)
+        msg.info('Splitting stream %s from BS file', outputStreams)
         splitStreamFailure = 0
         try:
-            cmd = 'trigbs_extractStream.py -s ' + outputStream + ' ' + allStreamsFileName
+            cmd = 'trigbs_extractStream.py -s ' + outputStreams + ' ' + allStreamsFileName
             msg.info('running command for splitting (in original asetup env): %s', cmd)
             splitStreamFailure = subprocess.call(cmd, shell=True)
             msg.debug('trigbs_extractStream.py splitting return code %s', splitStreamFailure)
@@ -369,7 +384,9 @@ class trigRecoExecutor(athenaExecutor):
 
             # check there are file matches and rename appropriately
             if len(matchedOutputFileNames) == 0:
-                msg.error('no BS files created with expected name: %s', expectedOutputFileName)
+                msg.error('No BS files created with expected name: %s - please check for earlier failures', expectedOutputFileName)
+                raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'),
+                    f'No BS files created with expected name: {expectedOutputFileName} - please check for earlier failures')
             else:
                 # if only one BS file was created
                 if len(matchedOutputFileNames) == 1:
@@ -392,7 +409,7 @@ class trigRecoExecutor(athenaExecutor):
 
                 # First check if we want to produce the COST DRAW output
                 if 'DRAW_TRIGCOST' in self.conf.dataDictionary:
-                    splitFailed = self._splitBSfile('CostMonitoring', BSFile, self.conf.dataDictionary['DRAW_TRIGCOST'].value[0])
+                    splitFailed = self._splitBSfile(['CostMonitoring'], BSFile, self.conf.dataDictionary['DRAW_TRIGCOST'].value[0])
                     if(splitFailed):
                         raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'),
                             'Did not produce any BS file when selecting CostMonitoring stream with trigbs_extractStream.py in file')
@@ -405,7 +422,7 @@ class trigRecoExecutor(athenaExecutor):
                 if 'BS' in self.conf.dataDictionary:
                     argInDict = self.conf.dataDictionary['BS']
                     # If a stream (not All) is selected, then slim the orignal (many stream) BS output to the particular stream
-                    if 'streamSelection' in self.conf.argdict and self.conf.argdict['streamSelection'].value != "All":
+                    if 'streamSelection' in self.conf.argdict and self.conf.argdict['streamSelection'].value[0] != "All":
                         splitFailed = self._splitBSfile(self.conf.argdict['streamSelection'].value, BSFile, argInDict.value[0])
                         if(splitFailed):
                             raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'),

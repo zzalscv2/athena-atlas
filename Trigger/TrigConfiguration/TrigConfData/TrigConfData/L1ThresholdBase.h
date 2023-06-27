@@ -27,7 +27,7 @@ namespace TrigConf {
     * A vector of RangeValue objects describes this eta
     * dependence. Each entry has an eta-range and a corresponding cut
     * value. Overlapping ranges are resolved by looking at the
-    * priority (smaller wins)
+    * priority (larger wins)
     *
     * Use case: for instance the L1 EM thresholds change as a function of eta.
     */

@@ -84,10 +84,10 @@ namespace NSWL1{
         if(phi0>M_PI) phi0-=2*M_PI;
         float ROIx=centroid(ROI).x();
         float ROIy=centroid(ROI).y(); //YR 8-18 using the center local Y of the ROI for the decision if in the TR
-        float ROIr=sqrt(ROIx*ROIx+ROIy*ROIy);
-        float ROIphi=atan2(ROIy,ROIx);
-        float ROILocalPhi=abs(ROIphi-phi0);
-        float ROILocalY=ROIr*cos(ROILocalPhi);
+
+	auto vector = std::unique_ptr<ROOT::Math::DisplacementVector2D<ROOT::Math::Cartesian2D<float>>>(new ROOT::Math::DisplacementVector2D<ROOT::Math::Cartesian2D<float>>(ROIx,ROIy));
+	float ROILocalY=(vector->R())*std::cos(std::abs(vector->Phi()-phi0));
+
         bool isTr=false;
          float TransitonSmall[7] ={2104,2243,3248,3445,4216,4411,ROILocalY}; // YR should be taken from the XML (H1 active_max, H2 active min... projected from 7 to 1)
          float TransitonLarge[7] ={2144,2278,3294,3483,4406,4596,ROILocalY};

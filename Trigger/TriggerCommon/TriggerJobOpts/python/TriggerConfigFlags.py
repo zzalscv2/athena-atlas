@@ -431,6 +431,8 @@ def createTriggerRecoFlags():
 
     # Change tolerance in STEP Propagator
     flags.addFlag("Trigger.Jet.PFlowTolerance", 1e-2)
+    
+    flags.addFlag("Trigger.Jet.TrackVtxAssocWP", "Custom") # offline default is "Nonprompt_All_MaxWeight"
 
     def __fpgatracksimFlags():
         """Additional function delays import"""

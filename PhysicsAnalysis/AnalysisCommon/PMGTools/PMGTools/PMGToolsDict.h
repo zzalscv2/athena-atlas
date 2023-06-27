@@ -14,5 +14,5 @@
 #include "PMGTools/PMGSherpa22VJetsWeightTool.h"
 #include "PMGTools/PMGSherpaVjetsSysTool.h"
 #include "PMGTools/PMGTruthWeightTool.h"
-
+#include "PMGTools/WeightHelpers.h"
 #endif // PMGTOOLS_PMGTOOLSDICT_H

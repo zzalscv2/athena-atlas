@@ -19,7 +19,8 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
-#include "MuonReadoutGeometry/MuonDetectorManager.h"
+#include "nlohmann/json.hpp"
+
 
 class MuonMDT_CablingAlg : public AthAlgorithm {
 public:
@@ -47,21 +48,14 @@ private:
     StatusCode loadMezzanineSchema(const EventContext& ctx,SG::WriteCondHandle<MuonMDT_CablingMap>& writeHandle,
                                    MuonMDT_CablingMap& cabling_map) const;
     
-    StatusCode loadMezzanineFromJSON(const EventContext& ctx,SG::WriteCondHandle<MuonMDT_CablingMap>& writeHandle,
-                                     MuonMDT_CablingMap& cabling_map) const;
-    
-    StatusCode loadMezzanineFromJSON(const std::string& payload, MuonMDT_CablingMap& cabling_map) const;
+    StatusCode loadMezzanineFromJSON(nlohmann::json&& payload, MuonMDT_CablingMap& cabling_map) const;
     
     /// Load the cabling schema of the tubes
 
     StatusCode loadCablingSchema(const EventContext& ctx,SG::WriteCondHandle<MuonMDT_CablingMap>& writeHandle,
                                  MuonMDT_CablingMap& cabling_map) const;
-
-    StatusCode loadCablingSchemaFromJSON(const EventContext& ctx,
-                                         SG::WriteCondHandle<MuonMDT_CablingMap>& writeHandle,
-                                         MuonMDT_CablingMap& cabling_map) const;
-
-    StatusCode loadCablingSchemaFromJSON(const std::string& payload, MuonMDT_CablingMap& cabling_map) const;
+    
+    StatusCode loadCablingSchemaFromJSON(nlohmann::json&& payload, MuonMDT_CablingMap& cabling_map) const;
     
     Gaudi::Property<std::string> m_mezzJSON{this, "MezzanineJSON", "" , 
                                             "External JSON file to read the mezzanine mapping from"};
@@ -71,9 +65,6 @@ private:
 
     Gaudi::Property<bool> m_useJSONFormat{this, "UseJSONFormat", false, 
                                           "Read out the cabling database JSON based"};
-    
-    SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muonManagerKey{this, "MuonManagerKey", "MuonDetectorManager", 
-                                                                       "MuonManager ReadKey for IOV Range intersection"};
 
 };
 

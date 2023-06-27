@@ -12,7 +12,7 @@
 // Local include(s):
 #include <PATInterfaces/SystematicRegistry.h>
 #include <RootCoreUtils/StringUtil.h>
-#include <TruthUtils/WeightHelpers.h>
+#include <PMGTools/WeightHelpers.h>
 #include <xAODEventInfo/EventInfo.h>
 #include <xAODMetaData/FileMetaData.h>
 
@@ -217,7 +217,7 @@ namespace PMGTools
       m_weightNames.push_back(truthWeightNames.at(idx));
       m_weightIndices[truthWeightNames.at(idx)] = idx;
 
-      std::string sysName = MC::weightNameWithPrefix(truthWeightNames.at(idx));
+      std::string sysName = weightNameWithPrefix(truthWeightNames.at(idx));
       if (!sysName.empty()) {
         ANA_CHECK (m_calibCache.add(CP::SystematicVariation(sysName),idx));
       }
@@ -246,7 +246,7 @@ namespace PMGTools
       m_weightNames.push_back(kv.first);
       m_weightIndices[kv.first] = kv.second;
 
-      std::string sysName = MC::weightNameWithPrefix(kv.first);
+      std::string sysName = weightNameWithPrefix(kv.first);
       if (!sysName.empty()) {
         ANA_CHECK (m_calibCache.add(CP::SystematicVariation(sysName), kv.second));
       }

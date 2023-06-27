@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
-
-from TruthUtils.WeightHelpers import generatorWeightsPrefix, weightNameCleanup, weightNameWithPrefix
+import ROOT
+from ROOT.PMGTools import  weightNameCleanup, weightNameWithPrefix, generatorWeightsPrefix
 
 test_weights = [
     ('PDF set = ABC', 'PDF_ABC', 'GEN_PDF_ABC'),

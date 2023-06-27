@@ -147,9 +147,9 @@ int test_nsw_common_decoder_end (const Statistics &statistics)
   for (auto f : statistics.elapsed_vector_event)
     elapsed_average_event += f;
 
-  nhits_average /= statistics.nhits.size ();
-  elapsed_average /= statistics.elapsed_vector.size ();
-  elapsed_average_event /= statistics.elapsed_vector_event.size ();
+  nhits_average /= statistics.nhits.size () ? statistics.nhits.size () : 1;
+  elapsed_average /= statistics.elapsed_vector.size () ? statistics.elapsed_vector.size () : 1;
+  elapsed_average_event /= statistics.elapsed_vector_event.size () ? statistics.elapsed_vector_event.size () : 1;
 
   std::cout << "Total event number                = " << statistics.nevents << std::endl;
   std::cout << "Total event number for statistics = " << statistics.stat_events << std::endl;
@@ -459,9 +459,6 @@ int test_nsw_common_decoder_loop (const Params &params, Statistics &statistics)
 
   for (const std::string &filename : params.file_names)
   {
-    char *buf = nullptr;
-    unsigned int size = 0;
-
     std::string data_file_name (filename);
 
     std::cout << "Reading file " << data_file_name << std::endl;
@@ -475,6 +472,9 @@ int test_nsw_common_decoder_loop (const Params &params, Statistics &statistics)
 
     while (!reader->endOfFile () && (params.max_events == 0 || statistics.nevents < params.max_events))
     {
+      char *buf = nullptr;
+      unsigned int size = 0;
+
       try
       {
         DRError err = reader->getData (size, &buf);
@@ -483,7 +483,7 @@ int test_nsw_common_decoder_loop (const Params &params, Statistics &statistics)
         {
           ers::fatal (ers::File (ERS_HERE, data_file_name.c_str ()));
           errcode = ERR_GENERIC;
-          if (buf) delete buf;
+          if (buf) delete [] buf;
           break;
         }
 
@@ -493,7 +493,7 @@ int test_nsw_common_decoder_loop (const Params &params, Statistics &statistics)
         if ((errcode = test_nsw_common_decoder_event (f, params, statistics)) != ERR_NOERR)
         {
           ers::error (ers::File (ERS_HERE, data_file_name.c_str ()));
-          if (buf) delete buf;
+          if (buf) delete [] buf;
           continue;
         }
 
@@ -504,11 +504,11 @@ int test_nsw_common_decoder_loop (const Params &params, Statistics &statistics)
       {
         ers::error (ers::File (ERS_HERE, data_file_name.c_str (), ex));
         errcode = ERR_GENERIC;
-        if (buf) delete buf;
+        if (buf) delete [] buf;
         break;
       }
 
-      if (buf) delete buf;
+      if (buf) delete [] buf;
     }
   }
 

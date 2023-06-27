@@ -49,9 +49,10 @@ hornerEvaluate(const std::array<double, N>& a, const double& x)
     return (((a[0] * x + a[1]) * x + a[2]) * x + a[3]) * x + a[4];
   } else if constexpr (order == 5) {
     return ((((a[0] * x + a[1]) * x + a[2]) * x + a[3]) * x + a[4]) * x + a[5];
-  } else { // leave the fallback for now
-    double result = 0;
-    for (size_t i = 0; i < N; ++i) {
+  } else {  // start from the last one we have
+    double result =
+        ((((a[0] * x + a[1]) * x + a[2]) * x + a[3]) * x + a[4]) * x + a[5];
+    for (size_t i = 6; i < N; ++i) {
       result = result * x + a[i];
     }
     return result;
