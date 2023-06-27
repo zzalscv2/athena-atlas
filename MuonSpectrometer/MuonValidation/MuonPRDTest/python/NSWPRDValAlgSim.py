@@ -11,7 +11,7 @@ from AthenaCommon.Constants import INFO
 def NSWPRDValAlgSimCfg(flags, name = "NSWPRDValAlg", **kwargs):
     result = ComponentAccumulator()
 
-    histSvc = CompFactory.THistSvc(Output=["NSWPRDValAlg DATAFILE='NSWPRDValAlg.digi.ntuple.root' OPT='RECREATE'"])
+    histSvc = CompFactory.THistSvc(Output=["NSWPRDValAlg DATAFILE='NSWPRDValAlg.sim.ntuple.root' OPT='RECREATE'"])
     result.addService(histSvc) 
 
     kwargs.setdefault("OutputLevel", INFO)
