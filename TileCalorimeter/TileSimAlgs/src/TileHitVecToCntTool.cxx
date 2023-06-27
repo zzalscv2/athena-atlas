@@ -978,9 +978,9 @@ StatusCode TileHitVecToCntTool::mergeEvent(const EventContext& ctx) {
   //    ATH_MSG_DEBUG ( " No hits, skip this event "  );
   //  }
 
-	if(m_doDigiTruth){
+  if(m_doDigiTruth){
     auto hits_DigiHSTruth = std::make_unique<TileHitContainer>
-                 (false, m_pileUp ? SG::VIEW_ELEMENTS : SG::OWN_ELEMENTS);
+      (false, m_pileUp ? SG::VIEW_ELEMENTS : SG::OWN_ELEMENTS);
     size_t hashId_DigiHSTruth = 0;
     for (std::unique_ptr<TileHitCollection>& coll : *m_hits_DigiHSTruth ) {
       ATH_CHECK(hits_DigiHSTruth->addCollection (coll.release(), hashId_DigiHSTruth++));
@@ -1218,19 +1218,24 @@ void TileHitVecToCntTool::findAndMergeMBTS(TileHitCollection* coll, int frag_id,
 
 void TileHitVecToCntTool::findAndMergeMultipleHitsInChannel(std::unique_ptr<TileHitNonConstContainer>& hitCont) {
   for (std::unique_ptr<TileHitCollection>& coll : *hitCont) {
-    int module = coll->identify() & 0x3F;
+
+    int frag_id = coll->identify();
+    int module = frag_id & 0x3F;
+    IdentifierHash frag_hash = m_fragHashFunc(frag_id);
     std::vector<TileHit*> hits(48, nullptr);
     std::vector<std::unique_ptr<TileHit>> otherModuleHits;
     coll->erase(std::remove_if(coll->begin(), coll->end(),
-                               [this, &hits, &otherModuleHits, module] (TileHit* hit) {
+                               [this, &hits, &otherModuleHits, module, frag_hash] (TileHit* hit) {
                                  Identifier pmt_id = hit->pmt_ID();
                                  int channel = m_tileHWID->channel(hit->pmt_HWID());
                                  TileHit* channelHit = hits[channel];
                                  if (channelHit) {
                                    mergeExtraHitToChannelHit(hit, channelHit);
                                    return true;
-                                 } else if ((m_tileTBID->is_tiletb(pmt_id) && (m_tileTBID->phi(pmt_id) % 2 == 1))
-                                            || m_tileID->module(pmt_id) != module) {
+                                 } else if (m_run2plus // Special case for merged E1 and MBTS in Run 2+ geometries, which will be merged finally correctly later
+                                            && ((m_E1merged[frag_hash] && m_tileID->module(pmt_id) != module
+                                                 && m_tileID->tower(pmt_id) == E1_TOWER && m_tileID->sample(pmt_id) == TileID::SAMP_E)  // Merged E1 in Run 2+ from other module
+                                                || (m_MBTSmerged[frag_hash] && m_tileTBID->is_tiletb(pmt_id) && (m_tileTBID->phi(pmt_id) % 2 == 1)))) { // Merged MBTS in Run 2+ from other module
                                    otherModuleHits.push_back(std::make_unique<TileHit>(*hit));
                                    return true;
                                  } else {
