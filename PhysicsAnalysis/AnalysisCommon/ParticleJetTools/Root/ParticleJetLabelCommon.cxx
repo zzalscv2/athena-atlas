@@ -17,7 +17,7 @@ namespace {
       // nullptr would indicate a broken truth record, but the rest of
       // the code lets this pass silently so we'll do the same here.
       if (!child) return nullptr;
-      if (MC::PID::hasCharm(child->pdgId())) {
+      if (MC::hasCharm(child->pdgId())) {
         return getCharmChild(child);
       }
     }

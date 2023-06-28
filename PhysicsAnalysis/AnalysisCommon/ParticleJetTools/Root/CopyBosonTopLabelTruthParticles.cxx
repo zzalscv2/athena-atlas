@@ -21,10 +21,10 @@ CopyBosonTopLabelTruthParticles::CopyBosonTopLabelTruthParticles(const std::stri
 
 // Unnamed namespace for helpers: only visible to this compilation unit
 namespace {
-  inline bool isWBoson(const xAOD::TruthParticle* tp) { return (abs(tp->pdgId()) == MC::PID::WPLUSBOSON); }
-  inline bool isZBoson(const xAOD::TruthParticle* tp) { return (abs(tp->pdgId()) == MC::PID::Z0BOSON); }
-  inline bool isHBoson(const xAOD::TruthParticle* tp) { return (abs(tp->pdgId()) == MC::PID::HIGGSBOSON); }
-  inline bool isTQuark(const xAOD::TruthParticle* tp) { return (abs(tp->pdgId()) == MC::PID::TQUARK); }
+  inline bool isWBoson(const xAOD::TruthParticle* tp) { return (abs(tp->pdgId()) == MC::WPLUSBOSON); }
+  inline bool isZBoson(const xAOD::TruthParticle* tp) { return (abs(tp->pdgId()) == MC::Z0BOSON); }
+  inline bool isHBoson(const xAOD::TruthParticle* tp) { return (abs(tp->pdgId()) == MC::HIGGSBOSON); }
+  inline bool isTQuark(const xAOD::TruthParticle* tp) { return (abs(tp->pdgId()) == MC::TQUARK); }
 
   template <typename FN>
   inline bool isFinalWith(const xAOD::TruthParticle* tp, const FN& f) {

@@ -28,7 +28,7 @@ StatusCode MissingEtFilter::filterEvent() {
       // We want Missing Transverse Momentum, not "Missing Transverse Energy"
       if (MC::isNonInteracting(pitr->pdg_id()) || (m_useChargedNonShowering && MC::isChargedNonShowering(pitr->pdg_id()))) {
         bool addpart = true;
-        if(!m_useHadronicNu && MC::PID::isNeutrino(pitr->pdg_id()) && !(fromWZ(pitr) || fromTau(pitr)) ) {
+        if(!m_useHadronicNu && MC::isNeutrino(pitr->pdg_id()) && !(fromWZ(pitr) || fromTau(pitr)) ) {
           addpart = false; // ignore neutrinos from hadron decays
         }
         if(addpart) {
@@ -64,8 +64,8 @@ bool MissingEtFilter::fromWZ(const HepMC::ConstGenParticlePtr& part ) const
 #ifdef HEPMC3
   for (const auto& iter: part->production_vertex()->particles_in()){
     int parent_pdgid = iter->pdg_id();
-    if (MC::PID::isW(parent_pdgid) || MC::PID::isZ(parent_pdgid)) return true;
-    if (MC::PID::isHadron( parent_pdgid ) ) return false;
+    if (MC::isW(parent_pdgid) || MC::isZ(parent_pdgid)) return true;
+    if (MC::isHadron( parent_pdgid ) ) return false;
     if ( std::abs( parent_pdgid ) < 9 ) return true;
     if ( parent_pdgid == part->pdg_id() ) return fromWZ( iter );
   }
@@ -73,8 +73,8 @@ bool MissingEtFilter::fromWZ(const HepMC::ConstGenParticlePtr& part ) const
   for (HepMC::GenVertex::particles_in_const_iterator iter=part->production_vertex()->particles_in_const_begin(); 
        iter!=part->production_vertex()->particles_in_const_end();++iter){
     int parent_pdgid = (*iter)->pdg_id();
-    if (MC::PID::isW(parent_pdgid) || MC::PID::isZ(parent_pdgid)) return true;
-    if (MC::PID::isHadron( parent_pdgid ) ) return false;
+    if (MC::isW(parent_pdgid) || MC::isZ(parent_pdgid)) return true;
+    if (MC::isHadron( parent_pdgid ) ) return false;
     if ( std::abs( parent_pdgid ) < 9 ) return true;
     if ( parent_pdgid == part->pdg_id() ) return fromWZ( *iter );
   }
@@ -98,7 +98,7 @@ bool MissingEtFilter::fromTau(const HepMC::ConstGenParticlePtr& part ) const
   for (const auto& iter: part->production_vertex()->particles_in()){
     int parent_pdgid = iter->pdg_id();
     if ( std::abs( parent_pdgid ) == 15  && fromWZ(iter)) return true;
-    if (MC::PID::isHadron( parent_pdgid ) || std::abs( parent_pdgid ) < 9 ) return false;
+    if (MC::isHadron( parent_pdgid ) || std::abs( parent_pdgid ) < 9 ) return false;
     if ( parent_pdgid == part->pdg_id() ) return fromTau( iter );
   }
 #else
@@ -106,7 +106,7 @@ bool MissingEtFilter::fromTau(const HepMC::ConstGenParticlePtr& part ) const
        iter!=part->production_vertex()->particles_in_const_end();++iter){
     int parent_pdgid = (*iter)->pdg_id();
     if ( std::abs( parent_pdgid ) == 15  && fromWZ(*iter)) return true;
-    if (MC::PID::isHadron( parent_pdgid ) || std::abs( parent_pdgid ) < 9 ) return false;
+    if (MC::isHadron( parent_pdgid ) || std::abs( parent_pdgid ) < 9 ) return false;
     if ( parent_pdgid == part->pdg_id() ) return fromTau( *iter );
   }
 #endif
