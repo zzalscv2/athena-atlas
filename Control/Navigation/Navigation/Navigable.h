@@ -73,7 +73,7 @@
 #include <utility>  // pair
 
 // boost include (pointer arbitration)
-#include <boost/any.hpp>
+#include <any>
 
 // i/o
 #include <iostream>
@@ -176,7 +176,7 @@ class Navigable : virtual public INavigable
 
   // forwarding of parameters included
   virtual void fillToken(INavigationToken& navToken, 
-			 const boost::any& parentParameter) const;
+			 const std::any& parentParameter) const;
 
   //////////////////////////////////
   // Add data objects or elements //
@@ -333,9 +333,9 @@ class Navigable : virtual public INavigable
 
   // forwarding the query to constituents: w/ parameter 
   virtual void toKidsAfterAccept(INavigationToken& navToken, 
-				 const boost::any& aParameter) const;
+				 const std::any& aParameter) const;
   virtual void toKidsAfterReject(INavigationToken& navToken, 
-				 const boost::any& aParameter) const;
+				 const std::any& aParameter) const;
 
   ///////////////////////////
   // Internal data storage //

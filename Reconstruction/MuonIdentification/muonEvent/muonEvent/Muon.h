@@ -100,7 +100,7 @@ class Muon : public ParticleImpl<
   /** navigation method */
   virtual void fillToken( INavigationToken & thisToken ) const;
   /** navigation method */
-  virtual void fillToken( INavigationToken & thisToken, const boost::any& ) const;
+  virtual void fillToken( INavigationToken & thisToken, const std::any& ) const;
 
   /** return the primary author of this Muon - the algorithm that is most likely to
       reconstruct prompt muons with high purity */

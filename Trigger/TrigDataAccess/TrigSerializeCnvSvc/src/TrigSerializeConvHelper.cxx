@@ -118,7 +118,7 @@ StatusCode TrigSerializeConvHelper::createObj(const std::string &clname, IOpaque
   ptr = 0;
   ATH_MSG_DEBUG("in TrigSerializeConvHelper::createObj for clname " << clname << " is xAOD? " << (isxAOD?"yes":"no"));
 
-  //could alse get DATA (perhaps as boost::any) from the IOA
+  //could alse get DATA (perhaps as std::any) from the IOA
   TrigStreamAddress *addr = dynamic_cast<TrigStreamAddress*>(iAddr);
   if (!addr) {
     ATH_MSG_WARNING("createObj cast failed");

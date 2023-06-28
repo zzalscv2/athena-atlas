@@ -31,6 +31,7 @@
 #include "tauEvent/TauCommonExtraDetails.h"
 #include "tauEvent/TauDetailsContainer.h"
 #include <algorithm> //for remove_if
+#include <any>
 
 
 
@@ -290,7 +291,7 @@ namespace Analysis
 
     // Fill navigation token
     void TauJet :: fillToken(INavigationToken &token,
-            const boost::any &weight) const
+            const std::any &weight) const
     {
         // Check if one requested for tracks
         NavigationToken<Rec::TrackParticle> *trackToken =
@@ -311,7 +312,7 @@ namespace Analysis
                 const Rec::TrackParticle *track = this->track(i);
                 if(track)
                     altTrackToken->setObject(
-                            track, boost :: any_cast<double>(weight));
+                            track, std::any_cast<double>(weight));
             }
             return;
         }
@@ -330,7 +331,7 @@ namespace Analysis
         if(altJetToken != 0) {
             if(jet != 0)
                 altJetToken->setObject(
-                        jet, boost :: any_cast<double>(weight));
+                        jet, std::any_cast<double>(weight));
             return;
         }
         // The token is not supported by this object, passing token

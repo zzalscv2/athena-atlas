@@ -213,7 +213,7 @@ egamma::fillToken(INavigationToken& theToken) const
 ///////////////////////////////
 
 void egamma::fillToken(INavigationToken& theToken,
-		       const boost::any& theWeight) const
+		       const std::any& theWeight) const
 {
   bool checkFlag = false;
 
@@ -243,7 +243,7 @@ void egamma::fillToken(INavigationToken& theToken,
 	    {
 	      // no weight change in propagation
 	      parTrackToken->setObject(aTrack,
-				       boost::any_cast<double>(theWeight));
+				       std::any_cast<double>(theWeight));
 	      checkFlag = true;
 	    }
 	}
@@ -275,7 +275,7 @@ void egamma::fillToken(INavigationToken& theToken,
 	  if ( parClusToken != nullptr )
 	    {
 	      parClusToken->setObject(aCluster,
-				      boost::any_cast<double>(theWeight));
+				      std::any_cast<double>(theWeight));
 	      checkFlag = true;
 	    }
 	}

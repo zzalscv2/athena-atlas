@@ -94,7 +94,7 @@ class Nav4MomWrapper : virtual public INavigable4Momentum,
 
   void fillToken( INavigationToken & thisToken ) const;
   void fillToken( INavigationToken & thisToken, 
-		  const boost::any& weight ) const;
+		  const std::any& weight ) const;
 
   /** @}
    */
@@ -336,7 +336,7 @@ inline
 void 
 Nav4MomWrapper<Navigable_t,
 	       P4Momentum_t>::fillToken( INavigationToken& thisToken,
-					 const boost::any& weight ) const
+					 const std::any& weight ) const
 {
   return NavWrapper<Navigable_t>::fillToken(thisToken, weight);
 }

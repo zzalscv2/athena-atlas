@@ -117,8 +117,8 @@ and it is expected that user code will use these wrappers.
 !  - Use void*, and keep track of the type separately.
 !    This is what's done in the current implementation.
 !
-!  - Use something like boost::any.
-!    This would simplify the code considerably, but boost::any has
+!  - Use something like std::any.
+!    This would simplify the code considerably, but std::any has
 !    considerably more overhead.
 !
 ! Generally, the interfaces here that produce objects have a method
@@ -158,7 +158,7 @@ and it is expected that user code will use these wrappers.
 ! };
 !
 !
-! TODO: Consider switching to boost::any, or something similar.
+! TODO: Consider switching to std::any, or something similar.
 !       Need to analyze the time/space cost in more detail.
 !       This will likely require extending the core DataBucket
 !       interface in such a way that everything will need
