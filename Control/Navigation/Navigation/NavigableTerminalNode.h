@@ -11,7 +11,7 @@
 
 #include "Navigation/INavigable.h"
 
-#include <boost/any.hpp>
+#include <any>
 
 //template<>
 //class Navigable< NavigationDefaults::TerminalNode >
@@ -29,6 +29,6 @@ class NavigableTerminalNode : virtual public INavigable
 
   // implement INavigable::fillToken(...) as "do-nothing"
   virtual void fillToken( INavigationToken & ) const { };
-  virtual void fillToken( INavigationToken &, const boost::any& ) const { };
+  virtual void fillToken( INavigationToken &, const std::any& ) const { };
 };
 #endif

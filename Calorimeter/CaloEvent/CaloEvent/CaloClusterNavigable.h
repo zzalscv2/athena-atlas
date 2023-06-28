@@ -138,7 +138,7 @@ class CaloClusterNavigable : virtual public INavigable
   virtual void fillToken(INavigationToken& iToken) const;
   /** \brief  fill token for navigation */ 
   virtual void fillToken(INavigationToken& iToken,
-			 const boost::any& rPar) const;
+			 const std::any& rPar) const;
 
   virtual bool isCellLinkValid() const ; 
 
@@ -395,7 +395,7 @@ void CaloClusterNavigable::fillToken(INavigationToken& iToken) const
 
 inline void 
 CaloClusterNavigable::fillToken(INavigationToken& iToken,
-			     const boost::any& rPar) const
+			     const std::any& rPar) const
 {
   if ( this->getCellLink() )
     (this->getCellLink())->fillToken(iToken,rPar);

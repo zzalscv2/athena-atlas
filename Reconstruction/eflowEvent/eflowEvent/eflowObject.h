@@ -48,7 +48,7 @@ PURPOSE:  eflow object data class
 
 ////////////////////////////////////////////////////////////////////
 // temporary for navigation !!
-#include <boost/any.hpp>
+#include <any>
 
 class VxCandidate;
 
@@ -167,7 +167,7 @@ class eflowObject : public P4EEtaPhiM, virtual public INavigable4Momentum
       this->fillToken(thisToken,double(1.0));
     }
   virtual void fillToken(INavigationToken& thisToken, 
-			 const boost::any& aRelation ) const;
+			 const std::any& aRelation ) const;
 
   std::vector<CaloClusterContainer*>::iterator firstClusContainer() { return  m_eflowClusContainers.begin(); }
   std::vector<CaloClusterContainer*>::iterator lastClusContainer() { return  m_eflowClusContainers.end(); }

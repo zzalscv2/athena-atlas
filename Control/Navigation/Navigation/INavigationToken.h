@@ -18,9 +18,7 @@
 
 class INavigable;
 
-namespace boost {
-  class any; 
-}
+#include <any>
 
 class INavigationToken
 {
@@ -35,7 +33,7 @@ class INavigationToken
   // 
   virtual bool trySetObject(const INavigable* child) = 0;
   virtual bool trySetObject(const INavigable* child,
-			    const boost::any& relPar) = 0; 
+			    const std::any& relPar) = 0; 
 
 };
 #endif

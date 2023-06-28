@@ -40,7 +40,7 @@ namespace Analysis
       
       void fillToken(INavigationToken&) const { };
       
-      void fillToken(INavigationToken&, const boost::any&) const { };
+      void fillToken(INavigationToken&, const std::any&) const { };
       
       // Set functions
       void set_muon(const MuonContainer* theContainer,

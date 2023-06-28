@@ -134,7 +134,7 @@ template <typename CHILD, typename CHILDPAR, typename HASH>
 bool
 NavigationToken<CHILD,CHILDPAR,HASH>::trySetObject(const
 						   INavigable* theObject,
-						   const boost::any& theWeight)
+						   const std::any& theWeight)
 {
   // See if this is the correct type.
   // Cache the last complete type we rejected, to cut down on the
@@ -144,7 +144,7 @@ NavigationToken<CHILD,CHILDPAR,HASH>::trySetObject(const
     return false;
   const_child_ptr thePtr = dynamic_cast<const_child_ptr>(theObject);
   try {
-    CHILDPAR myWeight(boost::any_cast<CHILDPAR>(theWeight));
+    CHILDPAR myWeight(std::any_cast<CHILDPAR>(theWeight));
     if ( thePtr != 0 ) 
       {
 	setObject(thePtr,myWeight);

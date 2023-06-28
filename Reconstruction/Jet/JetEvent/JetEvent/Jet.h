@@ -368,7 +368,7 @@ public:
   virtual void fillToken(INavigationToken& navToken) const;
   /** @brief Object navigation support, relational parameter */
   virtual void fillToken(INavigationToken& navToken, 
-			 const boost::any& par) const;
+			 const std::any& par) const;
 
 protected:
 
