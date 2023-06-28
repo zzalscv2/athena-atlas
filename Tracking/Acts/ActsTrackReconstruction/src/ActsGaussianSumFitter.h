@@ -30,7 +30,7 @@
 #include "ActsTrkEvent/TrackContainer.h"
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
-#include "ActsTrkEventCnv/IActsToTrkConverterTool.h"
+#include "ActsEventCnv/IActsToTrkConverterTool.h"
 #include "ActsFitterHelperFunctions.h"
 
 // STL

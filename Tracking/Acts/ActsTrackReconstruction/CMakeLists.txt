@@ -23,7 +23,7 @@ atlas_add_component( ActsTrackReconstruction
                        ActsGeometryInterfacesLib
                        SiSPSeededTrackFinderData
 		       AthenaMonitoringKernelLib
-                       ActsTrkEventCnvLib
+                       ActsEventCnvLib
 		       ActsInteropLib
 		       InDetRecToolInterfaces
 		       xAODInDetMeasurement

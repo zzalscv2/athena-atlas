@@ -96,5 +96,5 @@ def RunConversion():
 
 if __name__ == "__main__":
     # To run this, do e.g.
-    # python -m ActsTrkEventCnv.ActsTrkEventCnvConfig --threads=1
+    # python -m ActsEventCnv.ActsEventCnvConfig --threads=1
     RunConversion()

@@ -2,8 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSTRKEVENTCNV_ActsToTrkConverterTool_H
-#define ACTSTRKEVENTCNV_ActsToTrkConverterTool_H
+#ifndef ACTSEVENTCNV_ActsToTrkConverterTool_H
+#define ACTSEVENTCNV_ActsToTrkConverterTool_H
 
 #include <tuple>
 
@@ -20,7 +20,7 @@
 #include "xAODTracking/TrackMeasurementContainer.h"
 
 // PACKAGE
-#include "ActsTrkEventCnv/IActsToTrkConverterTool.h"
+#include "ActsEventCnv/IActsToTrkConverterTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "Acts/EventData/TrackParameters.hpp"
 

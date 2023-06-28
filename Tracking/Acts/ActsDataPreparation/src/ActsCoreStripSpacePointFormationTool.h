@@ -5,7 +5,7 @@
 #ifndef ACTSTRK_DATAPREPARATION_ACTSCORESTRIPSPACEPOINTFORMATIONTOOL_H
 #define ACTSTRK_DATAPREPARATION_ACTSCORESTRIPSPACEPOINTFORMATIONTOOL_H
 
-#include "ActsTrkEventCnv/IActsToTrkConverterTool.h"
+#include "ActsEventCnv/IActsToTrkConverterTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"

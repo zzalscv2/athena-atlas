@@ -1,16 +1,16 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
-atlas_subdir(ActsTrkEventCnv)
+atlas_subdir(ActsEventCnv)
 
 # External dependencies:
 find_package(Acts COMPONENTS Core)
 
 # Component(s) in the package:
-atlas_add_library(ActsTrkEventCnvLib
-    ActsTrkEventCnv/*.h
+atlas_add_library(ActsEventCnvLib
+    ActsEventCnv/*.h
     src/*.cxx
-    PUBLIC_HEADERS ActsTrkEventCnv
+    PUBLIC_HEADERS ActsEventCnv
     INTERFACE
     LINK_LIBRARIES
     ActsCore
@@ -24,11 +24,11 @@ atlas_add_library(ActsTrkEventCnvLib
     ActsTrkEventLib
 )
 
-atlas_add_component(ActsTrkEventCnv
+atlas_add_component(ActsEventCnv
     src/ActsToTrkConverterTool.cxx
     src/components/*.cxx
     LINK_LIBRARIES
-    ActsTrkEventCnvLib
+    ActsEventCnvLib
     AthenaBaseComps
     AthenaKernel
     TrkGeometry
@@ -37,7 +37,7 @@ atlas_add_component(ActsTrkEventCnv
     TrkExUtils
 )
 
-atlas_add_test(ActsTrkEventCnvTest
+atlas_add_test(ActsEventCnvTest
     SCRIPT test/testConversion.py
     PROPERTIES TIMEOUT 900
     POST_EXEC_SCRIPT noerror.sh)

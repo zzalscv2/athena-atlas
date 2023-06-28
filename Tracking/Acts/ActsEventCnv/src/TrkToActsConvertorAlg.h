@@ -6,7 +6,7 @@
 #define TRKTOACTSCONVERTORALG_H
 
 
-#include "ActsTrkEventCnv/IActsToTrkConverterTool.h"
+#include "ActsEventCnv/IActsToTrkConverterTool.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkTrack/TrackCollection.h"

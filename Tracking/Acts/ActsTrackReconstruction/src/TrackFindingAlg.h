@@ -18,7 +18,7 @@
 #include "ActsTrkEvent/Seed.h"
 #include "ActsTrkEvent/TrackParameters.h"
 #include "ActsTrkEvent/TrackContainer.h"
-#include "ActsTrkEventCnv/IActsToTrkConverterTool.h"
+#include "ActsEventCnv/IActsToTrkConverterTool.h"
 
 // Athena
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
