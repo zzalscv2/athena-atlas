@@ -15,7 +15,7 @@
 #include "ActsTrkToolInterfaces/ISeedingTool.h"
 #include "ActsTrkToolInterfaces/ITrackParamsEstimationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
-#include "ActsTrkEventCnv/IActsToTrkConverterTool.h"
+#include "ActsEventCnv/IActsToTrkConverterTool.h"
 
 // Athena
 #include "BeamSpotConditionsData/BeamSpotData.h"

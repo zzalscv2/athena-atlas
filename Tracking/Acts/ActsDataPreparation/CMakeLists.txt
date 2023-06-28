@@ -26,7 +26,7 @@ atlas_add_component( ActsDataPreparation
 			SiClusterizationToolLib
 		     	xAODInDetMeasurement
 			ActsTrkEventLib
-			ActsTrkEventCnvLib
+			ActsEventCnvLib
 			BeamSpotConditionsData
 			MagFieldConditions
 			SCT_ReadoutGeometry                     

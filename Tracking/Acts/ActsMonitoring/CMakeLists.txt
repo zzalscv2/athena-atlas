@@ -26,7 +26,7 @@ atlas_add_component( ActsMonitoring
 			ReadoutGeometryBase 
 			InDetReadoutGeometry 
 			SCT_ReadoutGeometry 
-			ActsTrkEventCnvLib
+			ActsEventCnvLib
 			TrkValHistUtils )
 
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

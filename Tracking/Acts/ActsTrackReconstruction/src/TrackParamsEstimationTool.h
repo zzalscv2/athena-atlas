@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSTRKSEEDINGTOOL_TRACKPARAMSESTIMATIONTOOL_H
-#define ACTSTRKSEEDINGTOOL_TRACKPARAMSESTIMATIONTOOL_H 1
+#ifndef ACTSTRACKRECONSTRUCTION_TRACKPARAMSESTIMATIONTOOL_H
+#define ACTSTRACKRECONSTRUCTION_TRACKPARAMSESTIMATIONTOOL_H
 
 // ATHENA
 #include "ActsTrkToolInterfaces/ITrackParamsEstimationTool.h"
