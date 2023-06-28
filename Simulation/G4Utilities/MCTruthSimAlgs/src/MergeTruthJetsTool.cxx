@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MergeTruthJetsTool.h"
@@ -47,7 +47,7 @@ StatusCode MergeTruthJetsTool::processBunchXing(int bunchXing,
   SubEventIterator iEvt(bSubEvents);
   while (iEvt != eSubEvents) {
     const xAOD::JetContainer* inputJetContainer(nullptr);
-    if (m_pMergeSvc->retrieveSingleSubEvtData(m_inputJetCollKey, inputJetContainer,
+    if (m_pMergeSvc->retrieveSingleSubEvtData(m_inputJetCollKey.value(), inputJetContainer,
                                               bunchXing, iEvt).isSuccess()) {
       ATH_MSG_VERBOSE("Found an xAOD::JetContainer in storeGate.");
       if ( !inputJetContainer ) {
@@ -133,7 +133,7 @@ StatusCode MergeTruthJetsTool::processAllSubEvents(const EventContext& /*ctx*/)
 
   typedef PileUpMergeSvc::TimedList<xAOD::JetContainer>::type TruthJetList;
   TruthJetList truthList;
-  if ( (m_pMergeSvc->retrieveSubEvtsData(m_inputJetCollKey, truthList)).isSuccess() ) {
+  if ( (m_pMergeSvc->retrieveSubEvtsData(m_inputJetCollKey.value(), truthList)).isSuccess() ) {
     if (!truthList.empty()) {
       //now merge all collections into one
       TruthJetList::const_iterator jetColl_iter(truthList.begin());
