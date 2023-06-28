@@ -128,7 +128,7 @@ StatusCode TRTFastDigitizationTool::processBunchXing( int bunchXing,
   using TimedHitCollList = PileUpMergeSvc::TimedList<TRTUncompressedHitCollection>::type;
   TimedHitCollList hitCollList;
 
-  if (!(m_mergeSvc->retrieveSubSetEvtData(m_trtHitCollectionKey, hitCollList, bunchXing,
+  if (!(m_mergeSvc->retrieveSubSetEvtData(m_trtHitCollectionKey.value(), hitCollList, bunchXing,
                                           bSubEvents, eSubEvents).isSuccess()) &&
       hitCollList.empty()) {
     ATH_MSG_ERROR("Could not fill TimedHitCollList");
@@ -430,7 +430,7 @@ StatusCode TRTFastDigitizationTool::processAllSubEvents(const EventContext& ctx)
 
   HitCollectionTimedList hitCollectionTimedList;
   unsigned int numberOfSimHits = 0;
-  if ( m_mergeSvc->retrieveSubEvtsData( m_trtHitCollectionKey, hitCollectionTimedList, numberOfSimHits ).isFailure() && hitCollectionTimedList.empty() ) {
+  if ( m_mergeSvc->retrieveSubEvtsData( m_trtHitCollectionKey.value(), hitCollectionTimedList, numberOfSimHits ).isFailure() && hitCollectionTimedList.empty() ) {
     ATH_MSG_ERROR( "Could not fill HitCollectionTimedList" );
     return StatusCode::FAILURE;
   }
