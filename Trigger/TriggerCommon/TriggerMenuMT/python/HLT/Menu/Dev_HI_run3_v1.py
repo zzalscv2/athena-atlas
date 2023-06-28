@@ -84,6 +84,34 @@ def getDevHISignatures():
 
     chains['Egamma'] += [
         # ElectronChains----------
+        #--------- legacy supporting electron chains
+        ChainProp(name='HLT_e15_etcut_ion_L1EM12', stream=[HardProbesStream] ,groups=SingleElectronGroup+SupportLegGroup),
+        ChainProp(name='HLT_e18_etcut_ion_L1EM15', stream=[HardProbesStream] ,groups=SingleElectronGroup+SupportLegGroup),
+        ChainProp(name='HLT_e20_etcut_ion_L1EM15', stream=[HardProbesStream] ,groups=SingleElectronGroup+SupportLegGroup),
+        ChainProp(name='HLT_e30_etcut_ion_L1EM15', stream=[HardProbesStream] ,groups=SingleElectronGroup+SupportLegGroup),
+        ChainProp(name='HLT_e50_etcut_ion_L1EM15', stream=[HardProbesStream] ,groups=SingleElectronGroup+SupportLegGroup),
+        ChainProp(name='HLT_e20_idperf_loose_nogsf_ion_L1EM15', stream=[HardProbesStream, 'express'], groups=SingleElectronGroup+SupportLegGroup, monGroups=['idMon:t0']),
+
+
+        #--------- legacy physics electon chains
+        ChainProp(name='HLT_e15_lhloose_nogsf_ion_L1EM12',  stream=[HardProbesStream, 'express'], groups=SingleElectronGroup+PrimaryLegGroup, monGroups=['egammaMon:online','egammaMon:shifter_tag','egammaMon:val']),
+        ChainProp(name='HLT_e15_loose_nogsf_ion_L1EM12',    stream=[HardProbesStream, 'express'], groups=SingleElectronGroup+PrimaryLegGroup, monGroups=['egammaMon:online','egammaMon:shifter_tag','egammaMon:val']),
+        ChainProp(name='HLT_e15_lhmedium_nogsf_ion_L1EM12', stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_e15_medium_nogsf_ion_L1EM12',   stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryLegGroup),
+
+        ChainProp(name='HLT_e18_lhloose_nogsf_ion_L1EM15',  stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryLegGroup, monGroups=['egammaMon:shifter_tp']),
+        ChainProp(name='HLT_e18_loose_nogsf_ion_L1EM15',    stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryLegGroup, monGroups=['egammaMon:shifter_tp']),
+        ChainProp(name='HLT_e18_lhmedium_nogsf_ion_L1EM15', stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_e18_medium_nogsf_ion_L1EM15',   stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryLegGroup),
+
+        ChainProp(name='HLT_e20_lhloose_nogsf_ion_L1EM15',  stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_e20_lhmedium_nogsf_ion_L1EM15', stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_e20_loose_nogsf_ion_L1EM15',    stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_e20_medium_nogsf_ion_L1EM15',   stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryLegGroup),
+
+        ChainProp(name='HLT_2e20_loose_nogsf_ion_L12EM15',  stream=[HardProbesStream], groups=MultiElectronGroup+PrimaryLegGroup),
+
+
         #--------- phase-1 supporting electron chains
         # replace L1eEM9 with L1eEM15 and L1eEM15 with eEM18, ATR-26366
         ChainProp(name='HLT_e13_etcut_ion_L1eEM12L', stream=[HardProbesStream] ,groups=SingleElectronGroup+SupportPhIGroup),
@@ -108,6 +136,24 @@ def getDevHISignatures():
         
         
         # PhotonChains----------
+        #----------- legacy support photon chains
+        ChainProp(name='HLT_g13_etcut_ion_L1EM10', stream=[HardProbesStream], groups=SinglePhotonGroup+SupportLegGroup),
+        ChainProp(name='HLT_g18_etcut_ion_L1EM10', stream=[HardProbesStream], groups=SinglePhotonGroup+SupportLegGroup),
+        ChainProp(name='HLT_g28_etcut_ion_L1EM10', stream=[HardProbesStream], groups=SinglePhotonGroup+SupportLegGroup),
+        #g15_etcut and g20_etcut have high thresholds, not sure they are needed, to be followed up
+        ChainProp(name='HLT_g15_etcut_ion_L1EM12', stream=[HardProbesStream], groups=SinglePhotonGroup+SupportLegGroup),
+        ChainProp(name='HLT_g20_etcut_ion_L1EM12', stream=[HardProbesStream], groups=SinglePhotonGroup+SupportLegGroup),
+        ChainProp(name='HLT_g18_etcut_L1EM10',     stream=[HardProbesStream], groups=SinglePhotonGroup+SupportLegGroup),
+        ChainProp(name='HLT_g20_loose_L1EM12',     stream=[HardProbesStream], groups=SinglePhotonGroup+SupportLegGroup),
+
+        #----------- legacy primary photon chains
+        ChainProp(name='HLT_g15_loose_ion_L1EM10',  stream=[HardProbesStream, 'express'], groups=SinglePhotonGroup+PrimaryLegGroup, monGroups=['egammaMon:online','egammaMon:shifter','egammaMon:val']),
+        ChainProp(name='HLT_g15_loose_ion_L1EM12',  stream=[HardProbesStream], groups=SinglePhotonGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_g20_loose_ion_L1EM12',  stream=[HardProbesStream, 'express'], groups=SinglePhotonGroup+PrimaryLegGroup, monGroups=['egammaMon:online','egammaMon:shifter','egammaMon:val']),
+        ChainProp(name='HLT_g30_loose_ion_L1EM15',  stream=[HardProbesStream], groups=SinglePhotonGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_g50_loose_ion_L1EM15',  stream=[HardProbesStream], groups=SinglePhotonGroup+PrimaryLegGroup),
+
+
         #----------- phase-1 support photon chains
         ChainProp(name='HLT_g13_etcut_ion_L1eEM12L', stream=[HardProbesStream], groups=SinglePhotonGroup+SupportPhIGroup),
         ChainProp(name='HLT_g18_etcut_ion_L1eEM12L', stream=[HardProbesStream], groups=SinglePhotonGroup+SupportPhIGroup),
@@ -595,7 +641,10 @@ def getDevHISignatures():
         
         ChainProp(name='HLT_noalg_L1jJ20',   l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1jJ30',   l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=MinBiasGroup+SupportPhIGroup),
-        
+
+        ChainProp(name='HLT_noalg_L1EM12',  l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=MinBiasGroup+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1EM15',  l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=MinBiasGroup+SupportLegGroup),
+
         ChainProp(name='HLT_noalg_L1eEM5',  l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1eEM15',  l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1eEM18',  l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=MinBiasGroup+SupportLegGroup),
