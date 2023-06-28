@@ -157,6 +157,9 @@ class ItemDef:
         MenuItem('L1_EM20VH'    ).setLogic( d.EM20VH     & physcond).setTriggerType( TT.calo )
         MenuItem('L1_EM18VHI'   ).setLogic( d.EM18VHI    & physcond).setTriggerType( TT.calo )
         MenuItem('L1_EM15VHI'   ).setLogic( d.EM15VHI    & physcond).setTriggerType( TT.calo )
+        #heavy-ions ATR-27791
+        MenuItem('L1_EM10'      ).setLogic( d.EM10       & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_2EM15'      ).setLogic( d.EM15.x(2)       & physcond).setTriggerType( TT.calo )
 
         # Phase-I
         MenuItem('L1_eEM1'      ).setLogic( d.eEM1       & physcond).setTriggerType( TT.calo )
@@ -824,6 +827,8 @@ class ItemDef:
         MenuItem('L1_jTEFWDA100' ).setLogic( d.jTEFWDA100 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jTEFWDC100' ).setLogic( d.jTEFWDC100 & physcond).setTriggerType(TT.calo)
         # additional jTE items for 2023 heavy ion runs
+        MenuItem('L1_jTE3'     ).setLogic( d.jTE3  & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_jTE5'     ).setLogic( d.jTE5  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jTE10'     ).setLogic( d.jTE10  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jTE20'     ).setLogic( d.jTE20  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jTE50'     ).setLogic( d.jTE50  & physcond).setTriggerType(TT.calo)
