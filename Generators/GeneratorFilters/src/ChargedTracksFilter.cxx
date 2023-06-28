@@ -31,7 +31,7 @@ StatusCode ChargedTracksFilter::filterEvent() {
 
       // Particle's charge
       int pID = part->pdg_id();
-      double pCharge = MC::PID::charge(pID);
+      double pCharge = MC::charge(pID);
 
       // Count tracks in specified acceptance
       const double pT = part->momentum().perp();

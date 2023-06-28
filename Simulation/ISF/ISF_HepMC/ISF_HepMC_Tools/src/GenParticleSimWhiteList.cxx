@@ -126,7 +126,7 @@ bool ISF::GenParticleSimWhiteList::pass(const HepMC::GenParticle& particle) cons
 bool ISF::GenParticleSimWhiteList::pass(const HepMC::ConstGenParticlePtr& particle , std::vector<int> & used_vertices ) const
 {
   // See if the particle is in the white list
-  bool passFilter = std::binary_search( m_pdgId.begin() , m_pdgId.end() , particle->pdg_id() ) || MC::PID::isNucleus( particle->pdg_id() );
+  bool passFilter = std::binary_search( m_pdgId.begin() , m_pdgId.end() , particle->pdg_id() ) || MC::isNucleus( particle->pdg_id() );
   // Remove documentation particles
   passFilter = passFilter && particle->status()<3;
   // Test all daughter particles
@@ -168,7 +168,7 @@ bool ISF::GenParticleSimWhiteList::pass(const HepMC::ConstGenParticlePtr& partic
 bool ISF::GenParticleSimWhiteList::pass(const HepMC::GenParticle& particle , std::vector<int> & used_vertices ) const
 {
   // See if the particle is in the white list
-  bool passFilter = std::binary_search( m_pdgId.begin() , m_pdgId.end() , particle.pdg_id() ) || MC::PID::isNucleus( particle.pdg_id() );
+  bool passFilter = std::binary_search( m_pdgId.begin() , m_pdgId.end() , particle.pdg_id() ) || MC::isNucleus( particle.pdg_id() );
   // Remove documentation particles
   passFilter = passFilter && particle.status()<3;
   // Test all daughter particles

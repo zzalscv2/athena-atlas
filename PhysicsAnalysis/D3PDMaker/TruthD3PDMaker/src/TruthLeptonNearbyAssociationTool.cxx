@@ -79,7 +79,7 @@ StatusCode TruthLeptonNearbyAssociationTool::fill (const TruthParticle& p)
         if (dR2>=0.09) continue; // Save a little time
 
         // Isolation section - exclude neutrinos
-        if (!MC::PID::isNeutrino( currentGenParticle->pdg_id() ) ){
+        if (!MC::isNeutrino( currentGenParticle->pdg_id() ) ){
           *m_iso03 = (*m_iso03)+currentGenParticle->momentum().perp();
           if (dR2<0.04) *m_iso02 = (*m_iso02)+currentGenParticle->momentum().perp();
         }

@@ -8,7 +8,7 @@
 #include <cmath>       /* remainder and M_PI */
 
 // Event Kernel include
-#include "TruthUtils/HepMCHelpers.h" // for MC::PID::isElectron(...) and others
+#include "TruthUtils/HepMCHelpers.h" // for MC::isElectron(...) and others
 
 // EDM include(s):
 #include "xAODCore/AuxStoreAccessorMacros.h"
@@ -27,7 +27,6 @@ namespace xAOD {
   CompositeParticle_v1::CompositeParticle_v1()
     : IParticle() {
   }
-
 
   /////////////////////////////////////////////////////////////////////////////
   //
@@ -770,10 +769,10 @@ namespace xAOD {
     return n;                                                                                    \
   }
 
-  NUM_TRUTHPARTS(nTruthPhotons,MC::PID::isPhoton)
-  NUM_TRUTHPARTS(nTruthElectrons,MC::PID::isElectron)
-  NUM_TRUTHPARTS(nTruthMuons,MC::PID::isMuon)
-  NUM_TRUTHPARTS(nTruthTaus,MC::PID::isTau)
+  NUM_TRUTHPARTS(nTruthPhotons,MC::isPhoton)
+  NUM_TRUTHPARTS(nTruthElectrons,MC::isElectron)
+  NUM_TRUTHPARTS(nTruthMuons,MC::isMuon)
+  NUM_TRUTHPARTS(nTruthTaus,MC::isTau)
 
   std::size_t CompositeParticle_v1::nTruthLeptons() const {
     return this->nTruthElectrons() + this->nTruthMuons() + this->nTruthTaus();
@@ -1058,10 +1057,10 @@ namespace xAOD {
     return n;                                                                                    \
   }
 
-  NUM_OTHERTRUTHPARTS(nOtherTruthPhotons,MC::PID::isPhoton)
-  NUM_OTHERTRUTHPARTS(nOtherTruthElectrons,MC::PID::isElectron)
-  NUM_OTHERTRUTHPARTS(nOtherTruthMuons,MC::PID::isMuon)
-  NUM_OTHERTRUTHPARTS(nOtherTruthTaus,MC::PID::isTau)
+  NUM_OTHERTRUTHPARTS(nOtherTruthPhotons,MC::isPhoton)
+  NUM_OTHERTRUTHPARTS(nOtherTruthElectrons,MC::isElectron)
+  NUM_OTHERTRUTHPARTS(nOtherTruthMuons,MC::isMuon)
+  NUM_OTHERTRUTHPARTS(nOtherTruthTaus,MC::isTau)
 
   std::size_t CompositeParticle_v1::nOtherTruthLeptons() const {
     return this->nOtherTruthElectrons() + this->nOtherTruthMuons() + this->nOtherTruthTaus();
@@ -1099,11 +1098,6 @@ namespace xAOD {
 
   // End: Functions implementing handling of other constituents
   /////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
 
   void CompositeParticle_v1::toPersistent() {
     if( partLinksAcc.isAvailableWritable( *this ) ) {

@@ -28,7 +28,7 @@ StatusCode xAODMETFilter::filterEvent() {
   unsigned int nParticles = xTruthParticleContainer->size();
   for (unsigned int iPart=0; iPart<nParticles; ++iPart) {
     const xAOD::TruthParticle* missingETparticle = (*xTruthParticleContainer)[iPart];
-    if (!m_useHadronicNu && MC::PID::isNeutrino(missingETparticle->pdgId()) &&
+    if (!m_useHadronicNu && MC::isNeutrino(missingETparticle->pdgId()) &&
     !(missingETparticle->auxdata<bool>("isFromWZ") || missingETparticle->auxdata<bool>("isFromTau")) ) continue;
     sumx += missingETparticle->px();
     sumy += missingETparticle->py();

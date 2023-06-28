@@ -42,7 +42,7 @@ StatusCode SoftLeptonInJetFilter::filterEvent() {
         if (isElectron(pitr)) {
           for (auto thisParent: pitr->production_vertex()->particles_in()) {
             int parentID = std::abs(thisParent->pdg_id());
-            if ( MC::PID::isBottomMeson(parentID) || MC::PID::isBottomBaryon(parentID) || MC::PID::isCharmMeson(parentID) || MC::PID::isCharmBaryon(parentID) ) {
+            if ( MC::isBottomMeson(parentID) || MC::isBottomBaryon(parentID) || MC::isCharmMeson(parentID) || MC::isCharmBaryon(parentID) ) {
               eta_e[NLeptons] = pitr->momentum().pseudoRapidity();
               phi_e[NLeptons] = pitr->momentum().phi();
               NLeptons++;
@@ -64,7 +64,7 @@ StatusCode SoftLeptonInJetFilter::filterEvent() {
           lastParent  = (*pitr)->production_vertex()->particles_end(HepMC::parents);
           for (thisParent = firstParent; thisParent != lastParent++; ++thisParent) {
             int parentID = abs((*thisParent)->pdg_id());
-            if ( MC::PID::isBottomMeson(parentID) || MC::PID::isBottomBaryon(parentID) || MC::PID::isCharmMeson(parentID) || MC::PID::isCharmBaryon(parentID) ) {
+            if ( MC::isBottomMeson(parentID) || MC::isBottomBaryon(parentID) || MC::isCharmMeson(parentID) || MC::isCharmBaryon(parentID) ) {
               eta_e[NLeptons] = (*pitr)->momentum().pseudoRapidity();
               phi_e[NLeptons] = (*pitr)->momentum().phi();
               NLeptons++;

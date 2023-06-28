@@ -138,7 +138,7 @@ StatusCode xAODHTFilter::filterEvent()
           continue;
         int pdgid = theParticle->pdgId();
 
-        if (m_UseNu && MC::PID::isNeutrino(pdgid) && (theParticle->isGenStable()))
+        if (m_UseNu && MC::isNeutrino(pdgid) && (theParticle->isGenStable()))
         {
           if (fromWZ(theParticle) || fromTau(theParticle))
           {
@@ -203,9 +203,9 @@ bool xAODHTFilter::fromWZ(const xAOD::TruthParticle *part) const
   {
     const xAOD::TruthParticle *incoming_particle = part->prodVtx()->incomingParticle(iPart);
     int parent_pdgid = incoming_particle->pdgId();
-    if (MC::PID::isW(parent_pdgid) || MC::PID::isZ(parent_pdgid))
+    if (MC::isW(parent_pdgid) || MC::isZ(parent_pdgid))
       return true;
-    if (MC::PID::isHadron(parent_pdgid))
+    if (MC::isHadron(parent_pdgid))
       return false;
     if (std::abs(parent_pdgid) < 9)
       return true;
@@ -235,7 +235,7 @@ bool xAODHTFilter::fromTau(const xAOD::TruthParticle *part) const
     int parent_pdgid = incoming_particle->pdgId();
     if (std::abs(parent_pdgid) == 15 && fromWZ(incoming_particle))
       return true;
-    if (MC::PID::isHadron(parent_pdgid) || std::abs(parent_pdgid) < 9)
+    if (MC::isHadron(parent_pdgid) || std::abs(parent_pdgid) < 9)
       return false;
     if (parent_pdgid == incoming_particle->pdgId())
       return fromTau(incoming_particle);

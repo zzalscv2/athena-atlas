@@ -131,8 +131,8 @@ bool xAODTruthParticleSlimmerMET::fromWZ( const xAOD::TruthParticle* part ) cons
   {
     const xAOD::TruthParticle* incoming_particle = part->prodVtx()->incomingParticle(iPart); 
     int parent_pdgid = incoming_particle->pdgId();
-    if (MC::PID::isW(parent_pdgid) || MC::PID::isZ(parent_pdgid)) return true;
-    if (MC::PID::isHadron( parent_pdgid ) ) return false;
+    if (MC::isW(parent_pdgid) || MC::isZ(parent_pdgid)) return true;
+    if (MC::isHadron( parent_pdgid ) ) return false;
     if ( std::abs( parent_pdgid ) < 9 ) return true;
     if ( parent_pdgid == part->pdgId() ) return fromWZ( incoming_particle );
   }
@@ -158,7 +158,7 @@ bool xAODTruthParticleSlimmerMET::fromTau( const xAOD::TruthParticle* part ) con
     const xAOD::TruthParticle* incoming_particle = part->prodVtx()->incomingParticle(iPart); 
     int parent_pdgid = incoming_particle->pdgId();
     if ( std::abs( parent_pdgid ) == 15  && fromWZ(incoming_particle)) return true;
-    if (MC::PID::isHadron( parent_pdgid ) || std::abs( parent_pdgid ) < 9 ) return false;
+    if (MC::isHadron( parent_pdgid ) || std::abs( parent_pdgid ) < 9 ) return false;
     if ( parent_pdgid == incoming_particle->pdgId() ) return fromTau( incoming_particle );
   }
   return false;
