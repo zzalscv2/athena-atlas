@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSTRKTOOLINTERFACES_IPIXELPIXELCLUSTERINGTOOL_H
-#define ACTSTRKTOOLINTERFACES_IPIXELPIXELCLUSTERINGTOOL_H
+#ifndef ACTSTOOLINTERFACES_IPIXELPIXELCLUSTERINGTOOL_H
+#define ACTSTOOLINTERFACES_IPIXELPIXELCLUSTERINGTOOL_H
 
 #include <GaudiKernel/IAlgTool.h>
 #include <InDetIdentifier/PixelID.h>

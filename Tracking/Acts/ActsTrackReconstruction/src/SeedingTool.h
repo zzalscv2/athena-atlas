@@ -13,7 +13,7 @@
 
 
 // ATHENA
-#include "ActsTrkToolInterfaces/ISeedingTool.h"
+#include "ActsToolInterfaces/ISeedingTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 // ACTS CORE

@@ -12,7 +12,7 @@
 #include "GaudiKernel/ToolHandle.h"
 
 // Tools
-#include "ActsTrkToolInterfaces/ITrackFindingTool.h"
+#include "ActsToolInterfaces/ITrackFindingTool.h"
 
 // ACTS
 #include "ActsTrkEvent/Seed.h"

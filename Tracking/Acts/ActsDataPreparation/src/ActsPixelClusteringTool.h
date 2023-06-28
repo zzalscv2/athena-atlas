@@ -6,7 +6,7 @@
 #define ACTSTRK_DATAPREPARATION_PIXEL_CLUSTERING_TOOL_H
 
 
-#include "ActsTrkToolInterfaces/IPixelClusteringTool.h"
+#include "ActsToolInterfaces/IPixelClusteringTool.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetRawData/InDetRawDataCollection.h"
 #include "InDetRawData/PixelRDORawData.h"

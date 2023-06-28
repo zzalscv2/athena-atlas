@@ -18,7 +18,7 @@ atlas_add_component( ActsTrackReconstruction
                        BeamSpotConditionsData
                        ActsCore
                        ActsTrkEventLib
-                       ActsTrkToolInterfacesLib
+                       ActsToolInterfacesLib
                        MagFieldConditions
                        ActsGeometryInterfacesLib
                        SiSPSeededTrackFinderData

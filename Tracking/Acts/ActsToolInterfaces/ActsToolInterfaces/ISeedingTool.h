@@ -2,8 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSTRKTOOLINTERFACES_ISEEDINGTOOL_H
-#define ACTSTRKTOOLINTERFACES_ISEEDINGTOOL_H 1
+#ifndef ACTSTOOLINTERFACES_ISEEDINGTOOL_H
+#define ACTSTOOLINTERFACES_ISEEDINGTOOL_H
 
 // Athena 
 #include "GaudiKernel/IAlgTool.h"

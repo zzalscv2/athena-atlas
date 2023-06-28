@@ -5,7 +5,7 @@
 #ifndef ACTSTRK_DATAPREPARATION_STRIPCLUSTERIZATIONALG_H
 #define ACTSTRK_DATAPREPARATION_STRIPCLUSTERIZATIONALG_H
 
-#include <ActsTrkToolInterfaces/IStripClusteringTool.h>
+#include <ActsToolInterfaces/IStripClusteringTool.h>
 #include <AthenaBaseComps/AthReentrantAlgorithm.h>
 #include <AthenaMonitoringKernel/GenericMonitoringTool.h>
 #include <GaudiKernel/ToolHandle.h>

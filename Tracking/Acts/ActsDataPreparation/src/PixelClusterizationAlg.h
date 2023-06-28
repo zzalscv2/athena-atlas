@@ -5,7 +5,7 @@
 #ifndef ACTSTRK_DATAPREPARATION_PIXELCLUSTERIZATIONALG_H
 #define ACTSTRK_DATAPREPARATION_PIXELCLUSTERIZATIONALG_H
 
-#include <ActsTrkToolInterfaces/IPixelClusteringTool.h>
+#include <ActsToolInterfaces/IPixelClusteringTool.h>
 #include <AthenaBaseComps/AthReentrantAlgorithm.h>
 #include <AthenaMonitoringKernel/GenericMonitoringTool.h>
 #include <GaudiKernel/ToolHandle.h>

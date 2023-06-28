@@ -7,7 +7,7 @@
 
 // BASE
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "ActsTrkToolInterfaces/ITrackFindingTool.h"
+#include "ActsToolInterfaces/ITrackFindingTool.h"
 
 // ATHENA
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"

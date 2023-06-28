@@ -12,8 +12,8 @@
 #include "GaudiKernel/ToolHandle.h"
 
 // Tools
-#include "ActsTrkToolInterfaces/ISeedingTool.h"
-#include "ActsTrkToolInterfaces/ITrackParamsEstimationTool.h"
+#include "ActsToolInterfaces/ISeedingTool.h"
+#include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
 

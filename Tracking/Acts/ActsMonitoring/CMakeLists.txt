@@ -20,7 +20,7 @@ atlas_add_component( ActsMonitoring
 		     	AthenaMonitoringKernelLib 
 			AthenaMonitoringLib 
 			TrkTruthData 
-			ActsTrkToolInterfacesLib 
+			ActsToolInterfacesLib 
 			InDetRecToolInterfaces
 		     	PixelReadoutGeometryLib 
 			ReadoutGeometryBase 

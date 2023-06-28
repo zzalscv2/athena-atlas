@@ -13,7 +13,7 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
-#include "ActsTrkToolInterfaces/IPixelSpacePointFormationTool.h"
+#include "ActsToolInterfaces/IPixelSpacePointFormationTool.h"
 
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 
