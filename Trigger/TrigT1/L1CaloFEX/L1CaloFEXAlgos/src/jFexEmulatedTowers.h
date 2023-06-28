@@ -55,6 +55,7 @@ class jFexEmulatedTowers : public AthReentrantAlgorithm{
         
         //property for jFEX mapping
         Gaudi::Property<bool> m_apply_masking {this, "SCellMasking", true, "Applies masking. Only use for data"};
+        Gaudi::Property<bool> m_doThinning    {this, "DoThinning"  , true, "Remove overlapped towers. Only FPGA Core region is saved"};
         
         //property for jFEX mapping
         Gaudi::Property<std::string> m_jFEX2Scellmapping {this, "jFEX2SCmapping"  , PathResolver::find_calib_file("L1CaloFEXByteStream/2022-10-19/jfex_SCID.txt")  , "Text file to convert from simulation ID to SuperCell Identifier"};
@@ -74,8 +75,7 @@ class jFexEmulatedTowers : public AthReentrantAlgorithm{
         // hash the index into one integer in the format 0xJFCCT (hexadecimal)
         constexpr static unsigned int mapIndex(unsigned int jfex, unsigned int fpga, unsigned int channel, unsigned int tower);
         std::unordered_map<unsigned int, std::array<float,6> > m_Firm2Tower_map; /// {map index, {IDsimulation,eta,phi,source,iEta,iPhi}}
-
-
+        
 };
 }
 #endif

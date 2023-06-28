@@ -44,6 +44,13 @@ jFexInputByteStreamTool::jFexInputByteStreamTool(const std::string& type,
     : base_class(type, name, parent) {}
 
 StatusCode jFexInputByteStreamTool::initialize() {
+
+    ATH_MSG_INFO( "Initializing L1CaloFEXByteStream/jFexInputByteStreamTool algorithm with name: "<< name());
+    ATH_MSG_INFO( "Reading into SG key: "<< m_jTowersReadKey);
+    ATH_MSG_INFO( "Writting into SG key: "<< m_jTowersWriteKey);
+    ATH_MSG_INFO( "Thinnig towers: "<< m_doThinning);    
+    
+    
     // Conversion mode for jTowers
     ConversionMode jTowersmode = getConversionMode(m_jTowersReadKey, m_jTowersWriteKey, msg());
     ATH_CHECK(jTowersmode!=ConversionMode::Undefined);
@@ -252,7 +259,11 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                     
                     //initilize the jTower EDM
                     jTowersContainer->push_back( std::make_unique<xAOD::jFexTower>() );
-                    jTowersContainer->back()->initialize(eta, phi, iEta, iPhi, IDsim, source, vtower_ET, jfex, fpga, channel, idata, vtower_SAT );                    
+                    jTowersContainer->back()->initialize(eta, phi, iEta, iPhi, IDsim, source, vtower_ET, jfex, fpga, channel, idata, vtower_SAT );
+
+                    if( m_doThinning && !jTowersContainer->back()->isCore() ){
+                        jTowersContainer->pop_back(); 
+                    }                    
                 }
                 
                 // keeping this for future x-checks
