@@ -30,8 +30,10 @@ jFexEmulatedTowers::jFexEmulatedTowers(const std::string& name, ISvcLocator* svc
 
 StatusCode jFexEmulatedTowers::initialize() {
     
-    ATH_MSG_INFO( "Initializing L1CaloFEXTools/jFexEmulatedTowers algorithm with name: "<< name());
+    ATH_MSG_INFO( "Initializing L1CaloFEXAlgos/jFexEmulatedTowers algorithm with name: "<< name());
     ATH_MSG_INFO( "Writting into SG key: "<< m_jTowersWriteKey);
+    ATH_MSG_INFO( "SCell masking: "<< m_apply_masking);
+    ATH_MSG_INFO( "Thinnig towers: "<< m_doThinning);
     
     ATH_CHECK( m_SCellKey.initialize() );
     ATH_CHECK( m_triggerTowerKey.initialize() );
@@ -191,11 +193,14 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
         vtower_SAT.clear();
         
         //Needs to be updated with Saturation flag from LAr CaloCell container, not ready yet!
-        vtower_SAT.push_back(jTower_sat);     
+        vtower_SAT.push_back(jTower_sat);  
         
         jTowersContainer->push_back( std::make_unique<xAOD::jFexTower>() );
-        jTowersContainer->back()->initialize(eta, phi, iEta, iPhi, IDSimulation, source, vtower_ET, jfex, fpga, channel, tower, vtower_SAT );                
+        jTowersContainer->back()->initialize(eta, phi, iEta, iPhi, IDSimulation, source, vtower_ET, jfex, fpga, channel, tower, vtower_SAT ); 
         
+        if( m_doThinning && !jTowersContainer->back()->isCore() ){
+            jTowersContainer->pop_back(); 
+        }
     }
     
     // Return gracefully
