@@ -17,7 +17,7 @@ public:
   friend class TgcRdoCnv_p4;
 
 private:
-  uint16_t m_version;
+  uint16_t m_version{0};
 
   // ID of this instance
   uint16_t m_id{0};
