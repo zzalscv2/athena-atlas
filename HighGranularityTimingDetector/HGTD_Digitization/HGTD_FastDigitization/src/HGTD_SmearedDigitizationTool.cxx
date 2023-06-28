@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_FastDigitization/src/HGTD_SmearedDigitizationTool.cxx
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -136,7 +136,7 @@ HGTD_SmearedDigitizationTool::setupTimedHitCollection() {
   TimedHitCollList_t hit_coll_list;
   unsigned int num_si_hits(0);
   if (!(m_merge_svc
-            ->retrieveSubEvtsData(m_si_hit_collection_name, hit_coll_list,
+            ->retrieveSubEvtsData(m_si_hit_collection_name.value(), hit_coll_list,
                                   num_si_hits)
             .isSuccess()) and
       hit_coll_list.size() == 0) {
