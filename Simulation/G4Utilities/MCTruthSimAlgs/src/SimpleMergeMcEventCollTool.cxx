@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SimpleMergeMcEventCollTool.h"
@@ -96,7 +96,7 @@ StatusCode SimpleMergeMcEventCollTool::processAllSubEvents(const EventContext& c
   //first get the list of McEventCollections
   typedef PileUpMergeSvc::TimedList<McEventCollection>::type TimedTruthList;
   TimedTruthList truthList;
-  ATH_CHECK(m_pMergeSvc->retrieveSubEvtsData(m_truthCollInputKey, truthList));
+  ATH_CHECK(m_pMergeSvc->retrieveSubEvtsData(m_truthCollInputKey.value(), truthList));
 
   m_nBkgEventsReadSoFar=0;
 
