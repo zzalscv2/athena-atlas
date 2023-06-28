@@ -36,7 +36,7 @@
 #include <iterator>
 #include <typeinfo>
 
-#include <boost/any.hpp>
+#include <any>
 
 struct NavigationTokenIteratorTag
   : public std::bidirectional_iterator_tag
@@ -264,7 +264,7 @@ class NavigationToken : public INavigationToken
  virtual bool trySetObject( const INavigable* theObject );
 
  virtual bool trySetObject( const INavigable* theObject,
-			    const boost::any& theWeight);
+			    const std::any& theWeight);
 
 
  ////////////////////////////////

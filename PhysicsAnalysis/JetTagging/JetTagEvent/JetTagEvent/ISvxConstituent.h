@@ -74,7 +74,7 @@ namespace Analysis
 
       /* dummy method for INavigable */
       virtual void fillToken( INavigationToken & /* thisToken */, 
-			      const boost::any& /* weight */ ) const  {
+			      const std::any& /* weight */ ) const  {
 	return;
       }
       

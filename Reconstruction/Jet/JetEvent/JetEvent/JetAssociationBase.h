@@ -41,7 +41,7 @@ class JetAssociationBase : public virtual INavigable
   
   //  virtual void fillToken(INavigationToken&) const { };
   
-  //  virtual void fillToken(INavigationToken&, const boost::any&) const { };
+  //  virtual void fillToken(INavigationToken&, const std::any&) const { };
   
 protected:
   friend class Analysis::TrackAssociationCnv_p1;

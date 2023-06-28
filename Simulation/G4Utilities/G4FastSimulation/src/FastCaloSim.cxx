@@ -62,7 +62,7 @@ G4bool FastCaloSim::IsApplicable(const G4ParticleDefinition& particleType)
   bool isPhoton   = &particleType == G4Gamma::GammaDefinition();
   bool isElectron = &particleType == G4Electron::ElectronDefinition();
   bool isPositron = &particleType == G4Positron::PositronDefinition();
-  bool isHadron   = MC::PID::isHadron(particleType.GetPDGEncoding());
+  bool isHadron   = MC::isHadron(particleType.GetPDGEncoding());
 
   // FastCaloSim is applicable if it is photon, electron, positron or any hadron
   bool IsApplicable = isPhoton || isElectron || isPositron || isHadron;

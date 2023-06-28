@@ -8,7 +8,7 @@
 #include "Navigation/INavigationToken.h"
 #include "Navigation/NavigableTerminalNode.h"
 
-#include <boost/any.hpp>
+#include <any>
 
 template<class NAVIMPL>
 class NavWrapper 
@@ -55,7 +55,7 @@ public:
    *  This is the implementation of the \a INavigable interface.
    */
   virtual void fillToken(INavigationToken& navToken, 
-			 const boost::any& parentParameter) const
+			 const std::any& parentParameter) const
   { m_nav.fillToken(navToken, parentParameter); }
 
   //////////////////////////////////
@@ -208,7 +208,7 @@ public:
   /*!{ \brief Do-nothing visitor */
   virtual void fillToken(INavigationToken& /*rToken*/) const { };
   virtual void fillToken(INavigationToken& /*rToken*/,
-			 const boost::any& /*rPar*/  ) const { };
+			 const std::any& /*rPar*/  ) const { };
   /*!}*/
 };
 /*! \class NavWrapper<NavigableTerminalNode>

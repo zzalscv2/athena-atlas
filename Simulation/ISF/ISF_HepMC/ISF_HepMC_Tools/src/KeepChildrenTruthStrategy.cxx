@@ -77,7 +77,7 @@ bool ISF::KeepChildrenTruthStrategy::pass( ITruthIncident& ti) const {
   // check whether parent PDG code matches with any of the given ones
   // Could require BSM parents and hit BSM, or give a list and be on the list
   // Or require neither and apply to everything
-  if ( !( (m_bsmParent && MC::PID::isBSM(abs(ti.parentPdgCode()))) || // BSM parent and parent is BSM
+  if ( !( (m_bsmParent && MC::isBSM(abs(ti.parentPdgCode()))) || // BSM parent and parent is BSM
           (m_parentPdgCodes.size() && m_parentPdgCodes.find(ti.parentPdgCode())==m_parentPdgCodes.end()) || // Explicit list and parent in the list
           (!m_bsmParent && !m_parentPdgCodes.size()) ) ){ // Neither BSM parent nor explicit list -- allow all
     return false;

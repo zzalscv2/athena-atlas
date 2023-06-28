@@ -1127,8 +1127,8 @@ namespace top {
         // If the mother particle is a "physical decayed" particle (HepMC
         //   status code) and a hadron, then return false.
         if (mother->status() == 2 &&
-            (MC::PID::isHadron(motherPdgId) ||
-             (bTauIsHadron && MC::PID::isTau(motherPdgId)))) {
+            (MC::isHadron(motherPdgId) ||
+             (bTauIsHadron && MC::isTau(motherPdgId)))) {
           return false;
         }
 

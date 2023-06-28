@@ -96,7 +96,7 @@ StatusCode SimpleMergeMcEventCollTool::processAllSubEvents(const EventContext& /
   //first get the list of McEventCollections
   typedef PileUpMergeSvc::TimedList<McEventCollection>::type TimedTruthList;
   TimedTruthList truthList;
-  ATH_CHECK(m_pMergeSvc->retrieveSubEvtsData(m_truthCollInputKey, truthList));
+  ATH_CHECK(m_pMergeSvc->retrieveSubEvtsData(m_truthCollInputKey.value(), truthList));
 
   m_nBkgEventsReadSoFar=0;
 

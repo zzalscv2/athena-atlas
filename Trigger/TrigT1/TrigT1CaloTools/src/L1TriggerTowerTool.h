@@ -13,7 +13,7 @@
 #ifndef L1TRIGGERTOWERTOOL_H
 #define L1TRIGGERTOWERTOOL_H
 
-#include <boost/any.hpp>
+#include <any>
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/IIncidentListener.h"
@@ -163,9 +163,9 @@ namespace LVL1
       L1CaloDerivedRunParsContainer* m_derivedRunParsContainer = nullptr;
       L1CaloRunParametersContainer* m_runParametersContainer = nullptr;
       
-      boost::any m_conditionsContainer;
+      std::any m_conditionsContainer;
       // one of L1CaloPprDisabledChannelContainer{,Run2}*
-      boost::any m_disabledChannelContainer;
+      std::any m_disabledChannelContainer;
       
       /// For the fine time monitoring
       L1CaloPpmFineTimeRefsContainer* m_dbFineTimeRefsTowers; 

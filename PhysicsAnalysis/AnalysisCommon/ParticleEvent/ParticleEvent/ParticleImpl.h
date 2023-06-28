@@ -19,7 +19,7 @@
 #include <ostream>
 
 // boost
-#include <boost/any.hpp> // for navigable stuff
+#include <any> // for navigable stuff
 
 #include "AthLinks/ElementLink.h"
 
@@ -104,7 +104,7 @@ class ParticleImpl : public IParticle
   void fillToken( INavigationToken & thisToken ) const;
   virtual
   void fillToken( INavigationToken & thisToken,
-		  const boost::any& weight ) const;
+		  const std::any& weight ) const;
 
   /** @}
    */
@@ -421,7 +421,7 @@ void
 ParticleImpl<INavigable_t,
 	     I4Momentum_t,
 	     IParticle_t>::fillToken( INavigationToken & thisToken,
-				      const boost::any& weight ) const
+				      const std::any& weight ) const
 {
   m_nav.fillToken( thisToken, weight );
 }

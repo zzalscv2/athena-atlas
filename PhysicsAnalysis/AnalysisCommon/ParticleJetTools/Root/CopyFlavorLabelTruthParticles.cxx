@@ -21,11 +21,11 @@ CopyFlavorLabelTruthParticles::CopyFlavorLabelTruthParticles(const std::string& 
 
 // Unnamed namespace for helpers: only visible to this compilation unit
 namespace {
-  inline bool isBQuark(const xAOD::TruthParticle* tp) { return (abs(tp->pdgId()) == MC::PID::BQUARK); }
-  inline bool isCQuark(const xAOD::TruthParticle* tp) { return (abs(tp->pdgId()) == MC::PID::CQUARK); }
-  inline bool isBHadron(const xAOD::TruthParticle* tp) { return MC::PID::isBottomHadron(tp->pdgId()); }
-  inline bool isCHadron(const xAOD::TruthParticle* tp) { return MC::PID::isCharmHadron(tp->pdgId()); }
-  inline bool isTau(const xAOD::TruthParticle* tp) { return MC::PID::isTau(tp->pdgId()); }
+  inline bool isBQuark(const xAOD::TruthParticle* tp) { return (abs(tp->pdgId()) == MC::BQUARK); }
+  inline bool isCQuark(const xAOD::TruthParticle* tp) { return (abs(tp->pdgId()) == MC::CQUARK); }
+  inline bool isBHadron(const xAOD::TruthParticle* tp) { return MC::isBottomHadron(tp->pdgId()); }
+  inline bool isCHadron(const xAOD::TruthParticle* tp) { return MC::isCharmHadron(tp->pdgId()); }
+  inline bool isTau(const xAOD::TruthParticle* tp) { return MC::isTau(tp->pdgId()); }
 
   template <typename FN>
   inline bool isFinalWith(const xAOD::TruthParticle* tp, const FN& f) {

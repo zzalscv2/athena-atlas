@@ -38,7 +38,7 @@ UPDATED:   8th April 2004 (P Loch) implement new navigation scheme
 
 ////////////////////////////////////////////////////////////////////
 // temporary for navigation !!
-#include <boost/any.hpp>
+#include <any>
 
 eflowObject::eflowObject()
   : P4EEtaPhiM(0.,0.,0.,0.),
@@ -141,7 +141,7 @@ void eflowObject::addTrack(const ElementLink<Rec::TrackParticleContainer>& track
 
 void
 eflowObject::fillToken(INavigationToken& thisToken,
-		       const boost::any& aRelation) const
+		       const std::any& aRelation) const
 {
   //---------------------------------------------------------------------------
   // eflowObject can honor several queries:
@@ -157,7 +157,7 @@ eflowObject::fillToken(INavigationToken& thisToken,
   
   // parameter type checking
   double weight;
-  try        { weight = boost::any_cast<double>(aRelation); } 
+  try        { weight = std::any_cast<double>(aRelation); } 
   catch(...) { return; }
 
   //////////////////////////

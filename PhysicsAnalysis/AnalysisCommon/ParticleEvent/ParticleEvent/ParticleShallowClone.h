@@ -183,7 +183,7 @@ namespace Analysis
     virtual void fillToken(INavigationToken&) const;
 
     /// Implement method from INavigable (forwareded to the orignal "master" particle)
-    virtual void fillToken(INavigationToken&, const boost::any&) const;
+    virtual void fillToken(INavigationToken&, const std::any&) const;
 
     
 
@@ -340,7 +340,7 @@ void Analysis::ParticleShallowClone::fillToken(INavigationToken& theToken) const
 }
 
 inline 
-void Analysis::ParticleShallowClone::fillToken(INavigationToken& theToken, const boost::any& theOther) const
+void Analysis::ParticleShallowClone::fillToken(INavigationToken& theToken, const std::any& theOther) const
 {
   (*m_masterLink)->fillToken(theToken, theOther);
   return;

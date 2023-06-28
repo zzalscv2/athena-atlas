@@ -1027,7 +1027,7 @@ void Muon::fillToken(INavigationToken& theToken) const
 ///////////////////////////////
 
 void Muon::fillToken(INavigationToken& theToken,
-			 const boost::any& theWeight) const
+			 const std::any& theWeight) const
 {
   bool checkFlag = false;
 
@@ -1055,7 +1055,7 @@ void Muon::fillToken(INavigationToken& theToken,
 	(&theToken);
       if ( parTrackToken != nullptr )	    {
 	parTrackToken->setObject(aTrack,
-				 boost::any_cast<double>(theWeight));
+				 std::any_cast<double>(theWeight));
 	checkFlag = true;
       }
     }
@@ -1086,7 +1086,7 @@ void Muon::fillToken(INavigationToken& theToken,
 	  (&theToken);
 	if ( parTrackToken != nullptr )	    {
 	  parTrackToken->setObject(aTrack,
-				   boost::any_cast<double>(theWeight));
+				   std::any_cast<double>(theWeight));
 	  checkFlag = true;
 	}
       }
@@ -1117,7 +1117,7 @@ void Muon::fillToken(INavigationToken& theToken,
 	  (&theToken);
 	if ( parTrackToken != nullptr )	    {
 	  parTrackToken->setObject(aTrack,
-				   boost::any_cast<double>(theWeight));
+				   std::any_cast<double>(theWeight));
 	  checkFlag = true;
 	}
       }

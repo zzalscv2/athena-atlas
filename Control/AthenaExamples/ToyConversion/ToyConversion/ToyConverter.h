@@ -34,7 +34,7 @@ public:
 
   // per->tran
   StatusCode createObj(IOpaqueAddress*, DataObject *& pO) {
-    //could alse get DATA (perhaps as boost::any) from the IOA
+    //could alse get DATA (perhaps as std::any) from the IOA
     pO = SG::asStorable(new DATA);
     return StatusCode::SUCCESS;
   }

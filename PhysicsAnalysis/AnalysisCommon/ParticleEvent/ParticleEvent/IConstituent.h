@@ -58,7 +58,7 @@ namespace Analysis
 
       // from INavigable we also have
       //virtual void fillToken( INavigationToken & thisToken ) const = 0; 
-      //virtual void fillToken( INavigationToken & thisToken, const boost::any& ) const = 0; 
+      //virtual void fillToken( INavigationToken & thisToken, const std::any& ) const = 0; 
 
 
     }

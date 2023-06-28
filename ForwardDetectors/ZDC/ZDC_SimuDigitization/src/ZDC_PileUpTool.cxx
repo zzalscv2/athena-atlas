@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -68,7 +68,7 @@ StatusCode ZDC_PileUpTool::processAllSubEvents(const EventContext& ctx) {
   TimedStripHitCollList StripHitCollList;
   TimedPixelHitCollList PixelHitCollList;
   
-  if (m_mergeSvc->retrieveSubEvtsData(m_SimStripHitCollectionName, StripHitCollList).isFailure()) { 
+  if (m_mergeSvc->retrieveSubEvtsData(m_SimStripHitCollectionName.value(), StripHitCollList).isFailure()) { 
 
     ATH_MSG_FATAL ( "Could not fill TimedStripHitCollList" ); return StatusCode::FAILURE; 
   }
@@ -76,7 +76,7 @@ StatusCode ZDC_PileUpTool::processAllSubEvents(const EventContext& ctx) {
   
   ATH_MSG_DEBUG ( " PileUp: Merge " << StripHitCollList.size() << " ZDC_SimStripHit_Collection with key " << m_SimStripHitCollectionName );
   
-  if (m_mergeSvc->retrieveSubEvtsData(m_SimPixelHitCollectionName, PixelHitCollList).isFailure()) { 
+  if (m_mergeSvc->retrieveSubEvtsData(m_SimPixelHitCollectionName.value(), PixelHitCollList).isFailure()) { 
 
     ATH_MSG_FATAL ( "Could not fill TimedPixelHitCollList" ); return StatusCode::FAILURE; 
   }

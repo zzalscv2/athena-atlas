@@ -10,9 +10,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace boost {
-  class any;
-}
+#include <any>
 
 class INavigationToken;
 
@@ -25,7 +23,7 @@ class INavigable
   // enforce fillToken(,) method in derived classes!
   virtual void fillToken( INavigationToken & thisToken ) const = 0;
   virtual void fillToken( INavigationToken & thisToken, 
-			  const boost::any& weight ) const = 0;
+			  const std::any& weight ) const = 0;
 
 };
 #endif

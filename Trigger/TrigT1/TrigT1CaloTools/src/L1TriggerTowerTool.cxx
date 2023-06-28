@@ -155,7 +155,7 @@ void L1TriggerTowerTool::handle(const Incident& inc)
 
 namespace { // helper function
   template<class T>
-  StatusCode retrieveGeneric ATLAS_NOT_THREAD_SAFE (ServiceHandle<L1CaloCondSvc>& svc, boost::any& target) {
+  StatusCode retrieveGeneric ATLAS_NOT_THREAD_SAFE (ServiceHandle<L1CaloCondSvc>& svc, std::any& target) {
     T* C = nullptr;
     CHECK_WITH_CONTEXT(svc->retrieve(C), "L1TriggerTowerTool");
     target = C;
@@ -163,7 +163,7 @@ namespace { // helper function
   }
 
   template<class T, class FolderMap>
-  StatusCode retrieveGenericWithFolders ATLAS_NOT_THREAD_SAFE (ServiceHandle<L1CaloCondSvc>& svc, const FolderMap& fmap, boost::any& target) {
+  StatusCode retrieveGenericWithFolders ATLAS_NOT_THREAD_SAFE (ServiceHandle<L1CaloCondSvc>& svc, const FolderMap& fmap, std::any& target) {
     T* C = nullptr;
     CHECK_WITH_CONTEXT(svc->retrieve(C, fmap), "L1TriggerTowerTool");
     target = C;
@@ -238,9 +238,9 @@ StatusCode L1TriggerTowerTool::retrieveConditions()
     if(verbose) {
       ATH_MSG_VERBOSE( "Retrieved ConditionsContainer" );
       if(is_run2){
-        boost::any_cast<L1CaloPprConditionsContainerRun2*>(m_conditionsContainer)->dump();
+        std::any_cast<L1CaloPprConditionsContainerRun2*>(m_conditionsContainer)->dump();
       } else{
-        boost::any_cast<L1CaloPprConditionsContainer*>(m_conditionsContainer)->dump();
+        std::any_cast<L1CaloPprConditionsContainer*>(m_conditionsContainer)->dump();
       }
     }
 
@@ -258,9 +258,9 @@ StatusCode L1TriggerTowerTool::retrieveConditions()
     ATH_MSG_VERBOSE( "Retrieved DisabledChannelContainer" );
     if (verbose) {
       if(is_run2)
-        boost::any_cast<L1CaloPprDisabledChannelContainerRun2*>(m_disabledChannelContainer)->dump();
+        std::any_cast<L1CaloPprDisabledChannelContainerRun2*>(m_disabledChannelContainer)->dump();
       else
-        boost::any_cast<L1CaloPprDisabledChannelContainer*>(m_disabledChannelContainer)->dump();
+        std::any_cast<L1CaloPprDisabledChannelContainer*>(m_disabledChannelContainer)->dump();
     }
 
   } else {
@@ -556,8 +556,8 @@ void L1TriggerTowerTool::bcid(const std::vector<int> &filter, const std::vector<
 
 namespace { // helper function
   template<class T>
-  const std::vector<short int>* getFirCoefficients(unsigned int coolId, boost::any& C) {
-    auto settings = boost::any_cast<T*>(C)->pprConditions(coolId);
+  const std::vector<short int>* getFirCoefficients(unsigned int coolId, std::any& C) {
+    auto settings = std::any_cast<T*>(C)->pprConditions(coolId);
     if(!settings) return nullptr;
     return &(settings->firCoefficients());
   }
@@ -570,7 +570,7 @@ void L1TriggerTowerTool::fir(const std::vector<int> &digits, const L1CaloCoolCha
 {   
   /// Get coefficients from COOL DB
   std::vector<int> firCoeffs;
-  if(!m_conditionsContainer.empty()) {
+  if(m_conditionsContainer.has_value()) {
     const std::vector<short int>* hwCoeffs;
     if(isRun2())
       hwCoeffs = getFirCoefficients<L1CaloPprConditionsContainerRun2>(channelId.id(), m_conditionsContainer);
@@ -633,8 +633,8 @@ void L1TriggerTowerTool::fir(const std::vector<int> &digits, const std::vector<i
 
 namespace {
   template<typename T>
-  unsigned int getStrategy(boost::any& C) {
-    return boost::any_cast<T*>(C)->peakFinderCond();
+  unsigned int getStrategy(std::any& C) {
+    return std::any_cast<T*>(C)->peakFinderCond();
   }
 }
 
@@ -642,7 +642,7 @@ namespace {
 void L1TriggerTowerTool::peakBcid(const std::vector<int> &fir, const L1CaloCoolChannelId& /*channelId*/, std::vector<int> &output)
 {
   unsigned int strategy = 0;
-  if(!m_conditionsContainer.empty()) {
+  if(m_conditionsContainer.has_value()) {
     if(isRun2())
       strategy = getStrategy<L1CaloPprConditionsContainerRun2>(m_conditionsContainer);
     else
@@ -682,8 +682,8 @@ void L1TriggerTowerTool::peakBcid(const std::vector<int> &fir, unsigned int stra
 
 namespace { // helper function
   template<class T>
-  std::tuple<bool, int, int, int> getSaturation(unsigned int coolId, boost::any& C) {
-    auto settings = boost::any_cast<T*>(C)->pprConditions(coolId);
+  std::tuple<bool, int, int, int> getSaturation(unsigned int coolId, std::any& C) {
+    auto settings = std::any_cast<T*>(C)->pprConditions(coolId);
     if(!settings) return std::make_tuple(false, 0, 0, 0);
     return std::make_tuple(true, settings->satBcidLevel(), settings->satBcidThreshLow(), 
                            settings->satBcidThreshHigh());
@@ -696,7 +696,7 @@ void L1TriggerTowerTool::satBcid(const std::vector<int> &digits, const L1CaloCoo
   int satLevel = 0;
   int satLow   = 0;
   int satHigh  = 0;
-  if (!m_conditionsContainer.empty()) {
+  if (m_conditionsContainer.has_value()) {
     bool available = false;
     if(isRun2())
       std::tie(available, satLevel, satLow, satHigh) = getSaturation<L1CaloPprConditionsContainerRun2>(channelId.id(), m_conditionsContainer);
@@ -761,15 +761,15 @@ void L1TriggerTowerTool::satBcid(const std::vector<int> &digits, int satLow, int
 /** Evaluate BCID decision range */
 namespace {
   template<typename T>
-  unsigned int getDecisionSource(boost::any& C) {
-    return boost::any_cast<T*>(C)->decisionSource();
+  unsigned int getDecisionSource(std::any& C) {
+    return std::any_cast<T*>(C)->decisionSource();
   }
 }
 
 void L1TriggerTowerTool::bcidDecisionRange(const std::vector<int>& lutInput, const std::vector<int>& digits, const L1CaloCoolChannelId& channelId, std::vector<int> &output)
 {
   int decisionSource = 0;
-  if (!m_conditionsContainer.empty()) {
+  if (m_conditionsContainer.has_value()) {
     if(isRun2()) decisionSource = getDecisionSource<L1CaloPprConditionsContainerRun2>(m_conditionsContainer);
     else decisionSource = getDecisionSource<L1CaloPprConditionsContainer>(m_conditionsContainer);
 
@@ -788,8 +788,8 @@ void L1TriggerTowerTool::bcidDecisionRange(const std::vector<int>& lutInput, con
 /** Evaluate BCID decision based on BCID word, ET range and channel ID */
 namespace { // helper function
   template<class T>
-  std::tuple<unsigned int, unsigned int, unsigned int> getBcidDecision(boost::any& C) {
-    auto CC = boost::any_cast<T*>(C);
+  std::tuple<unsigned int, unsigned int, unsigned int> getBcidDecision(std::any& C) {
+    auto CC = std::any_cast<T*>(C);
     return std::make_tuple(CC->bcidDecision1(), CC->bcidDecision2(), CC->bcidDecision3());
   }
 } // anonymous namespace
@@ -798,7 +798,7 @@ void L1TriggerTowerTool::bcidDecision(const std::vector<int> &bcidResults, const
   unsigned int decision1 = 0;
   unsigned int decision2 = 0;
   unsigned int decision3 = 0;
-  if(!m_conditionsContainer.empty()) {
+  if(m_conditionsContainer.has_value()) {
     if(isRun2())
       std::tie(decision1, decision2, decision3) = getBcidDecision<L1CaloPprConditionsContainerRun2>(m_conditionsContainer);
     else
@@ -850,8 +850,8 @@ void L1TriggerTowerTool::lut(const std::vector<int> &fir, const L1CaloCoolChanne
     ATH_MSG_WARNING("::lut: Run-2 data - behaviour undefined!");
   }
 
-  if(!m_conditionsContainer.empty()) {
-    auto conditionsContainer = boost::any_cast<L1CaloPprConditionsContainer*>(m_conditionsContainer);
+  if(m_conditionsContainer.has_value()) {
+    auto conditionsContainer = std::any_cast<L1CaloPprConditionsContainer*>(m_conditionsContainer);
     const L1CaloPprConditions* settings = conditionsContainer->pprConditions(channelId.id());
     if (settings) {
       strategy = settings->lutStrategy();
@@ -892,8 +892,8 @@ void L1TriggerTowerTool::cpLut(const std::vector<int> &fir, const L1CaloCoolChan
     ATH_MSG_WARNING("::cpLut: Run-1 data - behaviour undefined!");
   }
 
-  if(!m_conditionsContainer.empty()) {
-    auto conditionsContainer = boost::any_cast<L1CaloPprConditionsContainerRun2*>(m_conditionsContainer);
+  if(m_conditionsContainer.has_value()) {
+    auto conditionsContainer = std::any_cast<L1CaloPprConditionsContainerRun2*>(m_conditionsContainer);
     const L1CaloPprConditionsRun2* settings = conditionsContainer->pprConditions(channelId.id());
     if (settings) {
       startBit = settings->firStartBit();
@@ -962,8 +962,8 @@ void L1TriggerTowerTool::jepLut(const std::vector<int> &fir, const L1CaloCoolCha
     ATH_MSG_WARNING("::jepLut: Run-1 data - behaviour undefined!");
   }
 
-  if(!m_conditionsContainer.empty()) {
-    auto conditionsContainer = boost::any_cast<L1CaloPprConditionsContainerRun2*>(m_conditionsContainer);
+  if(m_conditionsContainer.has_value()) {
+    auto conditionsContainer = std::any_cast<L1CaloPprConditionsContainerRun2*>(m_conditionsContainer);
     const L1CaloPprConditionsRun2* settings = conditionsContainer->pprConditions(channelId.id());
     if (settings) {
       startBit = settings->firStartBit();
@@ -1113,8 +1113,8 @@ void L1TriggerTowerTool::applyEtRange(const std::vector<int>& lut, const std::ve
 /** Identify BCID decision range */
 namespace { // helper function
   template<class T>
-  std::tuple<bool, int, int> getBcidEnergyRange(unsigned int coolId, boost::any& C) {
-    auto settings = boost::any_cast<T*>(C)->pprConditions(coolId);
+  std::tuple<bool, int, int> getBcidEnergyRange(unsigned int coolId, std::any& C) {
+    auto settings = std::any_cast<T*>(C)->pprConditions(coolId);
     if(!settings) return std::make_tuple(false, 0, 0);
     return std::make_tuple(true, settings->bcidEnergyRangeLow(), settings->bcidEnergyRangeHigh());
   }
@@ -1124,7 +1124,7 @@ void L1TriggerTowerTool::etRange(const std::vector<int> &et, const L1CaloCoolCha
 {
   int energyLow  = 0;
   int energyHigh = 0;
-  if (!m_conditionsContainer.empty()) {
+  if (m_conditionsContainer.has_value()) {
     bool available = false;
     if(isRun2())
       std::tie(available, energyLow, energyHigh) = getBcidEnergyRange<L1CaloPprConditionsContainerRun2>(channelId.id(), m_conditionsContainer);
@@ -1161,8 +1161,8 @@ void L1TriggerTowerTool::etRange(const std::vector<int> &et, int energyLow, int 
 /** Truncate FIR results for LUT input */
 namespace { // helper function
   template<class T>
-  std::tuple<bool, int> getFirStartBit(unsigned int coolId, boost::any& C) {
-    auto settings = boost::any_cast<T*>(C)->pprConditions(coolId);
+  std::tuple<bool, int> getFirStartBit(unsigned int coolId, std::any& C) {
+    auto settings = std::any_cast<T*>(C)->pprConditions(coolId);
     if(!settings) return std::make_tuple(false, 0);
     return std::make_tuple(true, settings->firStartBit());
   }
@@ -1171,7 +1171,7 @@ namespace { // helper function
 void L1TriggerTowerTool::dropBits(const std::vector<int> &fir, const L1CaloCoolChannelId& channelId, std::vector<int> &output)
 {
   unsigned int start = 0;
-  if(!m_conditionsContainer.empty()) {
+  if(m_conditionsContainer.has_value()) {
     bool available = false;
     if(isRun2())
       std::tie(available, start) = getFirStartBit<L1CaloPprConditionsContainerRun2>(channelId.id(), m_conditionsContainer);
@@ -1214,7 +1214,7 @@ void L1TriggerTowerTool::firParams(const L1CaloCoolChannelId& channelId, std::ve
 {   
   /// Get coefficients from COOL DB
   firCoeffs.clear();
-  if(!m_conditionsContainer.empty()) {
+  if(m_conditionsContainer.has_value()) {
     const std::vector<short int>* hwCoeffs = nullptr;
     if(isRun2())
       hwCoeffs = getFirCoefficients<L1CaloPprConditionsContainerRun2>(channelId.id(), m_conditionsContainer);
@@ -1251,7 +1251,7 @@ void L1TriggerTowerTool::bcidParams(const L1CaloCoolChannelId& channelId, int &e
   satLow             = 0;
   satHigh            = 0;
   
-  if(!m_conditionsContainer.empty()) {
+  if(m_conditionsContainer.has_value()) {
     using std::get;
     std::tuple<unsigned int, unsigned int, unsigned int> bcidDecision;
     std::tuple<bool, int, int> bcidEnergyRange;
@@ -1309,8 +1309,8 @@ void L1TriggerTowerTool::lutParams(const L1CaloCoolChannelId& channelId, int &st
     ATH_MSG_WARNING("::lutParams: Run-2 data - behaviour undefined!");
   }
  
-  if(!m_conditionsContainer.empty()) {
-    auto conditionsContainer = boost::any_cast<L1CaloPprConditionsContainer*>(m_conditionsContainer);
+  if(m_conditionsContainer.has_value()) {
+    auto conditionsContainer = std::any_cast<L1CaloPprConditionsContainer*>(m_conditionsContainer);
 
     const L1CaloPprConditions* settings = conditionsContainer->pprConditions(channelId.id());
     if (settings) {
@@ -1350,8 +1350,8 @@ void L1TriggerTowerTool::cpLutParams(const L1CaloCoolChannelId& channelId, int& 
     ATH_MSG_WARNING("::cpLutParams: Run-1 data - behaviour undefined!");
   }
 
-  if(!m_conditionsContainer.empty()) {
-    auto conditionsContainer = boost::any_cast<L1CaloPprConditionsContainerRun2*>(m_conditionsContainer);
+  if(m_conditionsContainer.has_value()) {
+    auto conditionsContainer = std::any_cast<L1CaloPprConditionsContainerRun2*>(m_conditionsContainer);
 
     const L1CaloPprConditionsRun2* settings = conditionsContainer->pprConditions(channelId.id());
     if(settings) {
@@ -1407,8 +1407,8 @@ void L1TriggerTowerTool::jepLutParams(const L1CaloCoolChannelId& channelId, int&
     ATH_MSG_WARNING("::jepLutParams: Run-1 data - behaviour undefined!");
   }
 
-  if(!m_conditionsContainer.empty()) {
-    auto conditionsContainer = boost::any_cast<L1CaloPprConditionsContainerRun2*>(m_conditionsContainer);
+  if(m_conditionsContainer.has_value()) {
+    auto conditionsContainer = std::any_cast<L1CaloPprConditionsContainerRun2*>(m_conditionsContainer);
 
     const L1CaloPprConditionsRun2* settings = conditionsContainer->pprConditions(channelId.id());
     if(settings) {
@@ -1535,8 +1535,8 @@ L1CaloCoolChannelId L1TriggerTowerTool::channelID(const Identifier& id)
 /** Return saturation override flag for given channel & et range */
 namespace { // helper function
   template<class T>
-  std::tuple<bool, bool, bool> getSatOverride(boost::any& C) {
-    auto CC = boost::any_cast<T*>(C);
+  std::tuple<bool, bool, bool> getSatOverride(std::any& C) {
+    auto CC = std::any_cast<T*>(C);
     return std::make_tuple(CC->satOverride1(), CC->satOverride2(), CC->satOverride3());
   }
 } // anonymous namespace
@@ -1544,7 +1544,7 @@ namespace { // helper function
 bool L1TriggerTowerTool::satOverride(int range, const L1CaloCoolChannelId& /*channelId*/)
 {
   bool override = false;
-  if(!m_conditionsContainer.empty()) {
+  if(m_conditionsContainer.has_value()) {
     std::tuple<bool, bool, bool> satOverride;
     if(isRun2())
       satOverride = getSatOverride<L1CaloPprConditionsContainerRun2>(m_conditionsContainer);
@@ -1575,10 +1575,10 @@ bool L1TriggerTowerTool::disabledChannel(const L1CaloCoolChannelId& channelId, u
 {
   bool isDisabled = false;
   noiseCut = 0;
-  if(!m_disabledChannelContainer.empty()) {
+  if(m_disabledChannelContainer.has_value()) {
     const L1CaloPprDisabledChannel* disabledChan = nullptr;
-    if(isRun2()) disabledChan = boost::any_cast<L1CaloPprDisabledChannelContainerRun2*>(m_disabledChannelContainer)->pprDisabledChannel(channelId.id());
-    else disabledChan = boost::any_cast<L1CaloPprDisabledChannelContainer*>(m_disabledChannelContainer)->pprDisabledChannel(channelId.id());
+    if(isRun2()) disabledChan = std::any_cast<L1CaloPprDisabledChannelContainerRun2*>(m_disabledChannelContainer)->pprDisabledChannel(channelId.id());
+    else disabledChan = std::any_cast<L1CaloPprDisabledChannelContainer*>(m_disabledChannelContainer)->pprDisabledChannel(channelId.id());
 
     if (disabledChan) {
       if (!disabledChan->disabledBits()) {

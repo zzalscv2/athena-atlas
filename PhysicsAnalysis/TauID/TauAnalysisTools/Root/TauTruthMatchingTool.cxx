@@ -314,8 +314,8 @@ xAOD::TauJetParameters::DecayMode TauTruthMatchingTool::getDecayMode(const xAOD:
     return xAOD::TauJetParameters::Mode_Error;
   }
 
-  int iCharged = getNTauDecayParticles(xTruthTau,MC::PID::PIPLUS, true) + getNTauDecayParticles(xTruthTau,MC::PID::KPLUS, true);
-  int iNeutral = getNTauDecayParticles(xTruthTau,MC::PID::PI0, true);
+  int iCharged = getNTauDecayParticles(xTruthTau,MC::PIPLUS, true) + getNTauDecayParticles(xTruthTau,MC::KPLUS, true);
+  int iNeutral = getNTauDecayParticles(xTruthTau,MC::PI0, true);
   if (iCharged == 1)
   {
     if (iNeutral == 0) return xAOD::TauJetParameters::DecayMode::Mode_1p0n;

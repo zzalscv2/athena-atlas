@@ -1,28 +1,47 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelConditionsData/PixelDistortionData.h"
 #include "CLHEP/Units/SystemOfUnits.h"
-#include "TMath.h"
 #include "CxxUtils/restrict.h"
 
+#include "cmath"
 namespace {
 
+//constexpr binomial
+//copied over from TMath but in constxpr
+//fashion
+constexpr double Binomial(int n, int k) {
 
-//TMath is not constexpr
-std::array<double, 21> BinomialCache() {
-  double b0 = TMath::Binomial(20, 0);
-  double b1 = TMath::Binomial(20, 1);
-  double b2 = TMath::Binomial(20, 2);
-  double b3 = TMath::Binomial(20, 3);
-  double b4 = TMath::Binomial(20, 4);
-  double b5 = TMath::Binomial(20, 5);
-  double b6 = TMath::Binomial(20, 6);
-  double b7 = TMath::Binomial(20, 7);
-  double b8 = TMath::Binomial(20, 8);
-  double b9 = TMath::Binomial(20, 9);
-  double b10 = TMath::Binomial(20, 10);
+  if (n < 0 || k < 0 || n < k) {
+    return std::numeric_limits<double>::signaling_NaN();
+  }
+  if (k == 0 || n == k) {
+    return 1;
+  }
+
+  int k1 = std::min(k, n - k);
+  int k2 = n - k1;
+  double fact = k2 + 1;
+  for (double i = k1; i > 1.; --i) {
+    fact *= (k2 + i) / i;
+  }
+  return fact;
+}
+
+constexpr std::array<double, 21> BinomialCache() {
+  constexpr double b0 = Binomial(20, 0);
+  constexpr double b1 = Binomial(20, 1);
+  constexpr double b2 = Binomial(20, 2);
+  constexpr double b3 = Binomial(20, 3);
+  constexpr double b4 = Binomial(20, 4);
+  constexpr double b5 = Binomial(20, 5);
+  constexpr double b6 = Binomial(20, 6);
+  constexpr double b7 = Binomial(20, 7);
+  constexpr double b8 = Binomial(20, 8);
+  constexpr double b9 = Binomial(20, 9);
+  constexpr double b10 = Binomial(20, 10);
 
   std::array<double, 21> res = {b0, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10,
                                 b9, b8, b7, b6, b5, b4, b3, b2, b1, b0};
@@ -30,26 +49,22 @@ std::array<double, 21> BinomialCache() {
   return res;
 }
 
-//We just have a static const array in the anonymous
-//as cache
-const std::array<double, 21> s_binomialCache = BinomialCache();
+// We just have a static const array in the anonymous
+// as cache
+constexpr std::array<double, 21> s_binomialCache = BinomialCache();
 
 template <int N>
-double bernstein_grundpolynom(const double *t, const int i) {
+double bernstein_grundpolynom(const double t, const int i) {
   static_assert(s_binomialCache.size() > N,
                 " Binomial cache must be larger than N");
 
-  return s_binomialCache[i] * TMath::Power(*t, i) *
-         TMath::Power(1. - *t, N - i);
+  return s_binomialCache[i] * std::pow(t, i) * std::pow(1. - t, N - i);
 }
 
-double bernstein_bezier(const double* ATH_RESTRICT u,
-                        const double* ATH_RESTRICT v, const float *P) {
+double bernstein_bezier(const double u, const double v, const float *P) {
   constexpr int n = 20;
   constexpr int m = 20;
-  static_assert(n==m,
-                "n has to be equal to m");
-
+  static_assert(n == m, "n has to be equal to m");
 
   double r = 0.;
 
@@ -202,7 +217,7 @@ double PixelDistortionData::getInSituZ(const double localeta, const double eta_s
   } else {
     phi = localphi / phiRangeBB + 0.5;
   }
-  return bernstein_bezier(&eta, &phi, disto);
+  return bernstein_bezier(eta, phi, disto);
 }
 
 double PixelDistortionData::getSurveyZ(const double localeta, const double localphi, const float *disto)

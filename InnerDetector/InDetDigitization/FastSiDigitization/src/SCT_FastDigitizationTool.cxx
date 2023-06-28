@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FastSiDigitization/SCT_FastDigitizationTool.h"
@@ -122,7 +122,7 @@ StatusCode SCT_FastDigitizationTool::processBunchXing(int bunchXing,
   using TimedHitCollList = PileUpMergeSvc::TimedList<SiHitCollection>::type;
   TimedHitCollList hitCollList;
 
-  if (!(m_mergeSvc->retrieveSubSetEvtData(m_inputObjectName, hitCollList, bunchXing,
+  if (!(m_mergeSvc->retrieveSubSetEvtData(m_inputObjectName.value(), hitCollList, bunchXing,
                                           bSubEvents, eSubEvents).isSuccess()) &&
       hitCollList.empty()) {
     ATH_MSG_ERROR("Could not fill TimedHitCollList");
@@ -159,7 +159,7 @@ StatusCode SCT_FastDigitizationTool::processAllSubEvents(const EventContext& ctx
   //this is a list<pair<time_t, DataLink<SCTUncompressedHitCollection> > >
   TimedHitCollList hitCollList;
   unsigned int numberOfSimHits(0);
-  if ( !(m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList, numberOfSimHits).isSuccess()) && hitCollList.empty() )
+  if ( !(m_mergeSvc->retrieveSubEvtsData(m_inputObjectName.value(), hitCollList, numberOfSimHits).isSuccess()) && hitCollList.empty() )
     {
       ATH_MSG_ERROR ( "Could not fill TimedHitCollList" );
       return StatusCode::FAILURE;
