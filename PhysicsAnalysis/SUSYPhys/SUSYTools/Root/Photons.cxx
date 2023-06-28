@@ -112,8 +112,8 @@ StatusCode SUSYObjDef_xAOD::FillPhoton(xAOD::Photon& input, float ptcut, float e
   if (m_egammaCalibTool->applyCorrection(input)  != CP::CorrectionCode::Ok)
     ATH_MSG_ERROR("FillPhoton: EgammaCalibTool applyCorrection failed");
 
-  //disable if (m_isoCorrTool->applyCorrection(input)  != CP::CorrectionCode::Ok)
-  //disable   ATH_MSG_ERROR("FillPhoton: IsolationCorrectionTool applyCorrection failed");
+  if (m_isoCorrTool->applyCorrection(input)  != CP::CorrectionCode::Ok)
+    ATH_MSG_ERROR("FillPhoton: IsolationCorrectionTool applyCorrection failed");
 
   ATH_MSG_VERBOSE( "FillPhoton: post-calibration pt=" << input.pt() );
 

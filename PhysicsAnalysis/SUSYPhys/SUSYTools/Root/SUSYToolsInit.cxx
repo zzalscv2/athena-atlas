@@ -1849,9 +1849,12 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
     if ( !m_isoCorrTool.isUserConfigured() ) {
       m_isoCorrTool.setTypeAndName("CP::IsolationCorrectionTool/IsoCorrTool");
+      ATH_CHECK( m_isoCorrTool.setProperty( "ToolVer", "REL22") );
       ATH_CHECK( m_isoCorrTool.setProperty( "IsMC", !isData()) );
       ATH_CHECK( m_isoCorrTool.setProperty( "AFII_corr", isAtlfast()) );
-      ATH_CHECK( m_isoCorrTool.setProperty("OutputLevel", this->msg().level()) );
+      ATH_CHECK( m_isoCorrTool.setProperty( "Apply_SC_leakcorr", false) );
+      ATH_CHECK( m_isoCorrTool.setProperty( "CorrFile", "IsolationCorrections/v6/isolation_ptcorrections_rel22_mc20.root") );
+      ATH_CHECK( m_isoCorrTool.setProperty( "OutputLevel", this->msg().level()) );
       ATH_CHECK( m_isoCorrTool.retrieve() );
     } else  ATH_CHECK( m_isoCorrTool.retrieve() );
 
