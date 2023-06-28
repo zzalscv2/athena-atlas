@@ -287,9 +287,8 @@ StatusCode SUSYObjDef_xAOD::FillElectron(xAOD::Electron& input, float etcut, flo
   if ( m_egammaCalibTool->applyCorrection(input) != CP::CorrectionCode::Ok)
     ATH_MSG_ERROR( "FillElectron: EgammaCalibTool applyCorrection failed ");
 
-  //disable no longer needed for electrons since the correcion is applied in AOD
-  //disable if (m_isoCorrTool->applyCorrection(input)  != CP::CorrectionCode::Ok)
-  //disable  ATH_MSG_ERROR("FillElectron: IsolationCorrectionTool applyCorrection failed");
+  if (m_isoCorrTool->applyCorrection(input)  != CP::CorrectionCode::Ok)
+    ATH_MSG_ERROR("FillElectron: IsolationCorrectionTool applyCorrection failed");
 
   ATH_MSG_VERBOSE( "FillElectron: post-calibration pt=" << input.pt() );
 
