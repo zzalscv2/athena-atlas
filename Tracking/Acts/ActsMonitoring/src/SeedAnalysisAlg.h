@@ -25,7 +25,7 @@
 #include "MagFieldElements/AtlasFieldCache.h"
 
 #include "GaudiKernel/ToolHandle.h"
-#include "ActsTrkToolInterfaces/ITrackParamsEstimationTool.h"
+#include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "ActsTrkEventCnv/IActsToTrkConverterTool.h"
 

@@ -13,7 +13,7 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
-#include "ActsTrkToolInterfaces/IStripSpacePointFormationTool.h"
+#include "ActsToolInterfaces/IStripSpacePointFormationTool.h"
 
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "SiSpacePointFormation/SiElementPropertiesTable.h"

@@ -6,7 +6,7 @@
 #define ACTSTRK_ORTHOGONALSEEDINGTOOL_SEEDINGTOOL_H 1
 
 // ATHENA
-#include "ActsTrkToolInterfaces/ISeedingTool.h"
+#include "ActsToolInterfaces/ISeedingTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 // ACTS CORE

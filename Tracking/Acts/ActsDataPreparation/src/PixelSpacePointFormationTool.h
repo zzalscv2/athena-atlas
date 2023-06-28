@@ -6,7 +6,7 @@
 #define ACTSTRK_DATAPREPARATION_PIXELSPACEPOINTFORMATIONTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "ActsTrkToolInterfaces/IPixelSpacePointFormationTool.h"
+#include "ActsToolInterfaces/IPixelSpacePointFormationTool.h"
 
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"

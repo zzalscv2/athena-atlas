@@ -9,7 +9,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "GaudiKernel/ToolHandle.h"
-#include "ActsTrkToolInterfaces/ISeedingTool.h"
+#include "ActsToolInterfaces/ISeedingTool.h"
 
 #include "BeamSpotConditionsData/BeamSpotData.h"
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"

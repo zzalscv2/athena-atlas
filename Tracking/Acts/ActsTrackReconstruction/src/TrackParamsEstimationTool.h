@@ -6,7 +6,7 @@
 #define ACTSTRACKRECONSTRUCTION_TRACKPARAMSESTIMATIONTOOL_H
 
 // ATHENA
-#include "ActsTrkToolInterfaces/ITrackParamsEstimationTool.h"
+#include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 namespace ActsTrk {

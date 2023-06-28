@@ -6,7 +6,7 @@
 #define ACTSTRK_DATAPREPARATION_ACTSTRKSTRIPSPACEPOINTFORMATIONTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "ActsTrkToolInterfaces/IStripSpacePointFormationTool.h"
+#include "ActsToolInterfaces/IStripSpacePointFormationTool.h"
 #include "StripInformationHelper.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "SiSpacePointFormation/SiElementPropertiesTable.h"

@@ -11,7 +11,7 @@
 #include <Acts/Clusterization/Clusterization.hpp>
 
 #include <AthenaBaseComps/AthAlgTool.h>
-#include <ActsTrkToolInterfaces/IStripClusteringTool.h>
+#include <ActsToolInterfaces/IStripClusteringTool.h>
 #include <InDetConditionsSummaryService/IInDetConditionsTool.h>
 #include <InDetIdentifier/SCT_ID.h>
 #include <InDetRawData/InDetRawDataCollection.h>
