@@ -87,12 +87,6 @@ def getPhysicsHISignatures():
         # ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_E2_AND_E3',     l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+['PS:Online', 'PS:NoHLTReprocessing']),
         # ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_E3_AND_E3',     l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+['PS:Online', 'PS:NoHLTReprocessing']),
         # ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C',       l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+['PS:Online', 'PS:NoHLTReprocessing']),
-
-        # ATR-23602: ALFA Minbias track triggers with/without TRT
-        ChainProp(name='HLT_mb_sptrk_vetombts2in_L1TRT_ALFA_EINE',  l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+['PS:Online', 'PS:NoHLTReprocessing']),
-        ChainProp(name='HLT_mb_sptrk_vetombts2in_L1TRT_ALFA_ANY',   l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+['PS:Online', 'PS:NoHLTReprocessing']),
-        ChainProp(name='HLT_mb_sptrk_vetombts2in_L1ALFA_EINE',     l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+['PS:Online', 'PS:NoHLTReprocessing']),
-        ChainProp(name='HLT_mb_sptrk_vetombts2in_L1ALFA_ANY',      l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+['PS:Online', 'PS:NoHLTReprocessing']),
     ]
 
 
@@ -105,7 +99,7 @@ def getPhysicsHISignatures():
         #Run2-style Heavy Ion ZDC streamers
         ChainProp(name='HLT_noalg_L1ZDC_A', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+['PS:Online']+SupportGroup),
         ChainProp(name='HLT_noalg_L1ZDC_C', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+['PS:Online']+SupportGroup),
-        ChainProp(name='HLT_noalg_L1ZDC_AND', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+['PS:Online']+SupportGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_A_C', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+['PS:Online']+SupportGroup),
 
 
         ChainProp(name='HLT_noalg_mb_L1MBTS_1',   l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+['PS:Online']),

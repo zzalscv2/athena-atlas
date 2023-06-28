@@ -12,7 +12,7 @@
 #include "TrigT1NSWSimTools/TriggerTypes.h"
 
 
-#include "TVector3.h"
+#include "Math/Vector2D.h"
 
 #include <string>
 #include <vector>
@@ -70,7 +70,6 @@ namespace NSWL1 {
     SingleWedgePadTrigger& setCombined() { m_alreadyCombined=true; return *this;}
     bool alreadyCombined() const { return m_alreadyCombined; }
     const std::vector<std::shared_ptr<PadOfflineData>>& pads() const {return m_pads;}
-    TVector3 direction() const;
   private:
     std::string m_pattern;
     EtaPhiHalf m_halfPadIndices;

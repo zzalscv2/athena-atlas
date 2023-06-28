@@ -42,13 +42,15 @@ DerivationFramework::GainDecorator::GainDecorator(const std::string& t,
                    std::to_string(layer));
       name.replace(
         name.find("{gain}"), std::string("{gain}").size(), kv.second);
-      std::string name_E(name), name_nCells(name);
+      std::string name_E(name), name_rnoW(name), name_nCells(name);
       name_E.replace(name_E.find("{info}"), std::string("{info}").size(), "E");
+      name_rnoW.replace(name_rnoW.find("{info}"), std::string("{info}").size(), "rnoW");
       name_nCells.replace(
         name_nCells.find("{info}"), std::string("{info}").size(), "nCells");
 
       std::pair<int, int> key(kv.first, layer);
       m_names_E[key] = name_E;
+      m_names_rnoW[key] = name_rnoW;
       m_names_nCells[key] = name_nCells;
     }
 
@@ -86,6 +88,8 @@ DerivationFramework::GainDecorator::initialize()
         m_SGKey_electrons_decorations.emplace_back(containerKey + "." +
                                                    m_names_E[key]);
         m_SGKey_electrons_decorations.emplace_back(containerKey + "." +
+                                                   m_names_rnoW[key]);
+        m_SGKey_electrons_decorations.emplace_back(containerKey + "." +
                                                    m_names_nCells[key]);
       }
     }
@@ -102,6 +106,8 @@ DerivationFramework::GainDecorator::initialize()
         std::pair<int, int> key(kv.first, layer);
         m_SGKey_photons_decorations.emplace_back(containerKey + "." +
                                                  m_names_E[key]);
+        m_SGKey_photons_decorations.emplace_back(containerKey + "." +
+                                                 m_names_rnoW[key]);
         m_SGKey_photons_decorations.emplace_back(containerKey + "." +
                                                  m_names_nCells[key]);
       }
@@ -136,6 +142,8 @@ DerivationFramework::GainDecorator::addBranches() const
     // Setup vectors of photon decorations
     std::vector<SG::WriteDecorHandle<xAOD::EgammaContainer, float>>
       decorations_E;
+    std::vector<SG::WriteDecorHandle<xAOD::EgammaContainer, float>>
+      decorations_rnoW;
     std::vector<SG::WriteDecorHandle<xAOD::EgammaContainer, char>>
       decorations_nCells;
     int i(0);
@@ -144,10 +152,13 @@ DerivationFramework::GainDecorator::addBranches() const
         std::pair<int, int> key(kv.first, layer);
         decorations_E.emplace_back(
           SG::WriteDecorHandle<xAOD::EgammaContainer, float>(
-            m_SGKey_photons_decorations[i * 2], ctx));
+            m_SGKey_photons_decorations[i * 3], ctx));
+        decorations_rnoW.emplace_back(
+          SG::WriteDecorHandle<xAOD::EgammaContainer, float>(
+            m_SGKey_photons_decorations[i * 3 + 1], ctx));
         decorations_nCells.emplace_back(
           SG::WriteDecorHandle<xAOD::EgammaContainer, char>(
-            m_SGKey_photons_decorations[i * 2 + 1], ctx));
+            m_SGKey_photons_decorations[i * 3 + 2], ctx));
         i++;
       }
     }
@@ -161,6 +172,8 @@ DerivationFramework::GainDecorator::addBranches() const
         for (const auto layer : m_layers) {
           std::pair<int, int> key(kv.first, layer);
           decorations_E[i](*photon) = res.E[key];
+          decorations_rnoW[i](*photon) =
+	    res.EnoW[key] != 0 ? res.E[key]/res.EnoW[key] : 1;
           decorations_nCells[i](*photon) = res.nCells[key];
           i++;
         }
@@ -180,6 +193,8 @@ DerivationFramework::GainDecorator::addBranches() const
     // Setup vectors of electron decorations
     std::vector<SG::WriteDecorHandle<xAOD::EgammaContainer, float>>
       decorations_E;
+    std::vector<SG::WriteDecorHandle<xAOD::EgammaContainer, float>>
+      decorations_rnoW;
     std::vector<SG::WriteDecorHandle<xAOD::EgammaContainer, char>>
       decorations_nCells;
     int i(0);
@@ -188,10 +203,13 @@ DerivationFramework::GainDecorator::addBranches() const
         std::pair<int, int> key(kv.first, layer);
         decorations_E.emplace_back(
           SG::WriteDecorHandle<xAOD::EgammaContainer, float>(
-            m_SGKey_electrons_decorations[i * 2], ctx));
+            m_SGKey_electrons_decorations[i * 3], ctx));
+        decorations_rnoW.emplace_back(
+          SG::WriteDecorHandle<xAOD::EgammaContainer, float>(
+            m_SGKey_electrons_decorations[i * 3 + 1], ctx));
         decorations_nCells.emplace_back(
           SG::WriteDecorHandle<xAOD::EgammaContainer, char>(
-            m_SGKey_electrons_decorations[i * 2 + 1], ctx));
+            m_SGKey_electrons_decorations[i * 3 + 2], ctx));
         i++;
       }
     }
@@ -205,6 +223,8 @@ DerivationFramework::GainDecorator::addBranches() const
         for (const auto layer : m_layers) {
           std::pair<int, int> key(kv.first, layer);
           decorations_E[i](*electron) = res.E[key];
+          decorations_rnoW[i](*electron) =
+	    res.EnoW[key] != 0 ? res.E[key]/res.EnoW[key] : 1;
           decorations_nCells[i](*electron) = res.nCells[key];
           i++;
         }
@@ -223,23 +243,29 @@ DerivationFramework::GainDecorator::decorateObject(
   // Compute energy and number of cells per gain per layer
   // Set the initial values to 0 (needed?)
   DerivationFramework::GainDecorator::calculation result;
-  for (const auto& kv : m_names_E)
+  for (const auto& kv : m_names_E) {
     result.E[kv.first] = 0.;
-  for (const auto& kv : m_names_nCells)
+    result.EnoW[kv.first] = 0.;
     result.nCells[kv.first] = 0;
+  }
 
   // Skip the computation for missing cell links (like topo-seeded photons)
   // but decorate anyway
   const CaloClusterCellLink* cellLinks =
     egamma->caloCluster() ? egamma->caloCluster()->getCellLinks() : nullptr;
   if (cellLinks) {
-    for (const CaloCell* cell : *cellLinks) {
+    CaloClusterCellLink::const_iterator it = cellLinks->begin(),
+      itE = cellLinks->end();
+    for (; it != itE; it++) {
+      const CaloCell *cell = *it;
       if (!cell)
         continue;
       std::pair<int, int> key(static_cast<int>(cell->gain()), getLayer(cell));
       // Increment the corresponding entry (not important if it is not
       // initialised)
-      result.E[key] += cell->energy();
+      double weight = it.weight();
+      result.E[key] += cell->energy()*weight;
+      result.EnoW[key] += cell->energy();
       result.nCells[key]++;
     }
   }

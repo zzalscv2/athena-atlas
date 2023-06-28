@@ -454,7 +454,7 @@ def BSMonitoringConfig(inputFlags):
         myGroup.defineHistogram('forwardSectorIDRoiPhiX;forwardSectorIDRoiPhi', title='Sector ID for forward (matched cand only); Sector ID',
         path=monROIPath,xbins=48,xmin=-0.5,xmax=47.5,opt='kAlwaysCreate')
 
-    else:
+    else: #=> is Run3 here below
 
         errorSummaryCTPBinLabels = [   # .cxx indices
         "CTP/ROD BCID Offset",     #1
@@ -585,7 +585,7 @@ def BSMonitoringConfig(inputFlags):
         myGroup.defineHistogram('candPtBAX;candPtBA', title='BA cand pT;pT index;candidates', path=monPath,xbins=6, xmin=0.5, xmax=6.5, opt='kAlwaysCreate')
         myGroup.defineHistogram('candPtECX;candPtEC', title='EC cand pT;pT index;candidates', path=monPath,xbins=15,xmin=0.5,xmax=15.5,opt='kAlwaysCreate')
         myGroup.defineHistogram('candPtFWX;candPtFW', title='FW cand pT;pT index;candidates', path=monPath,xbins=15,xmin=0.5,xmax=15.5,opt='kAlwaysCreate')
-        myGroup.defineHistogram('candCount',title='Candidates distrib. per event (central slice);candidates',type='TH1I',path=monPath,xbins=candidateWordsPerTimeslice,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candCount',title='Candidates distrib. per event (central slice);candidates',type='TH1I',path=monPath,xbins=candidateWordsPerTimeslice,duration='' if inputFlags.Common.isOnline else 'lb',opt='kAlwaysCreate')
         myGroup.defineHistogram('candCountVsLBX,candCountVsLBY;candCountVsLB',title='Candidates distrib. per event (central slice) vs LB;candidates',type='TH2I',path=monPath,ybins=candidateWordsPerTimeslice,opt='kAlwaysCreate')
 
         monPath="/MUCTPI/Cand/Expert"

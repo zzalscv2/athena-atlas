@@ -136,8 +136,8 @@ def addTriggerArgs(parser):
     # select output stream in  BS file
     ## athenaHLT writes All streams into one file, but this can't be proceesed by standard reco if it contains events in only PEB streams
     ## by defualt selects the Main stream, as likely the most needed option, but can ber reverted to All or any other stream chosen
-    parser.add_argument('--streamSelection', type=trfArgClasses.argFactory(trfArgClasses.argString, runarg=True),
-                        help='select output stream in  BS file (default: \"Main\"). Specify \"All\" to disable splitting (standard reco will fail on any events with only PEB data)', group='Trigger', default=trfArgClasses.argString("Main", runarg=True))
+    parser.add_argument('--streamSelection', nargs='+', type=trfArgClasses.argFactory(trfArgClasses.argList, runarg=True),
+                        help='select output streams in produced BS file (default: \"Main\"). Specify \"All\" to disable splitting (standard reco will fail on any events with only PEB data)', group='Trigger', default=trfArgClasses.argList("Main", runarg=True))
     # HLT out histogram file, if defined renames expert-monitoring file that is produced automatically
     parser.add_argument('--outputHIST_HLTMONFile', nargs='+',
                         type=trfArgClasses.argFactory(trfArgClasses.argHISTFile, io='output', runarg=True, countable=False),

@@ -12,7 +12,7 @@ atlas_add_component( MuonMM_Cabling
                      src/components/*.cxx
                      INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps AthenaKernel GaudiKernel StoreGateLib MuonIdHelpersLib 
-                                    MuonCablingData AthenaPoolUtilities MuonCondSvcLib PathResolver MuonReadoutGeometry SGTools )
+                                    MuonCablingData AthenaPoolUtilities MuonCondSvcLib PathResolver SGTools )
 
 
 # Install files from the package:

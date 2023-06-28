@@ -320,20 +320,19 @@ class MonitorDef:
                 "L1_LUCID_A", "L1_LUCID_C",
                 # ZDC
                 # Basic inputs
-                #"L1_ZDC_BIT0", "L1_ZDC_BIT1", "L1_ZDC_BIT2",
-                #"L1_ZDC_COMB0", "L1_ZDC_COMB1", "L1_ZDC_COMB2", "L1_ZDC_COMB3",
-                #"L1_ZDC_COMB4", "L1_ZDC_COMB5", "L1_ZDC_COMB6", "L1_ZDC_COMB7",
+                "L1_ZDC_BIT0", "L1_ZDC_BIT1", "L1_ZDC_BIT2",
+                "L1_ZDC_COMB0", "L1_ZDC_COMB1", "L1_ZDC_COMB2", "L1_ZDC_COMB3",
+                "L1_ZDC_COMB4", "L1_ZDC_COMB5", "L1_ZDC_COMB6", "L1_ZDC_COMB7",
                 #
-                #"L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_A_C",
+                "L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_A_C",
                 #"L1_ZDC_AND", "L1_ZDC_A_AND_C",
                 #"L1_ZDC_E1_AND_E1", "L1_ZDC_E2_AND_E2", "L1_ZDC_E2_AND_E3", "L1_ZDC_E3_AND_E3",
                 #"L1_ZDC_E1_AND_E2ORE3", 
                 #"L1_ZDC_OR", "L1_ZDC_OR_EMPTY", "L1_ZDC_OR_UNPAIRED_ISO",
                 #"L1_ZDC_XOR_E1_E3", "L1_ZDC_XOR_E2",
                 # Vetos
-                "L1_ZDC_A_C_VTE50",
                 "L1_ZDC_A_VZDC_C_VTE200",
-                "L1_ZDC_C_VZDC_A_VTE200",
+                "L1_VZDC_A_ZDC_C_VTE200",
                 "L1_VZDC_A_VZDC_C_TE5_VTE200",
                 # LHCF
                 "L1_LHCF",
@@ -347,7 +346,7 @@ class MonitorDef:
                 "L1_MBTS_2_2", "L1_MBTS_3_3", "L1_MBTS_4_4",
                 "L1_MBTS_1_VTE50", "L1_MBTS_1_1_VTE50", "L1_MBTS_1_VTE200",
                 "L1_MBTS_1_ZDC_A_VZDC_C_VTE200",
-                "L1_MBTS_1_ZDC_C_VZDC_A_VTE200",
+                "L1_MBTS_1_VZDC_A_ZDC_C_VTE200",
                 # LAr Zee
                 "L1_LAR-ZEE",
                 "L1_LAR-ZEE-eEM",
@@ -393,12 +392,11 @@ class MonitorDef:
                 "L1_TE3", "L1_TE5",
                 "L1_TE20", "L1_TE50",
                 "L1_TE100", "L1_TE200",
-                "L1_TE10000", "L1_TE12000",
+                "L1_TE12000",
                 #
                 "L1_TE3_VTE200",
                 "L1_TE3_VTE50",
                 "L1_TE5_VTE20",
-                "L1_TE5_VTE50",
                 "L1_TE5_VTE200",
                 "L1_TE20_VTE200",
                 "L1_TE50_VTE200",
@@ -413,13 +411,11 @@ class MonitorDef:
                 "L1_TE6500p0ETA49_OVERLAY",
                 "L1_TE8000p0ETA49_OVERLAY",
                 #
-                "L1_TE5_ZDC_A_VZDC_C_VTE200",
-                "L1_TE5_ZDC_C_VZDC_A_VTE200",
-                "L1_TE20_ZDC_A_VZDC_C_VTE200",
-                "L1_TE20_ZDC_C_VZDC_A_VTE200",
+                "L1_ZDC_A_VZDC_C_TE5_VTE200",
+                "L1_VZDC_A_ZDC_C_TE5_VTE200",
                 #
-                "L1_TE3p0ETA49_ZDC_A_VZDC_C_VTE200",
-                "L1_TE3p0ETA49_ZDC_C_VZDC_A_VTE200",
+                "L1_ZDC_A_VZDC_C_TE3_VTE200",
+                "L1_VZDC_A_ZDC_C_TE3_VTE200",
                 #
                 "L1_VTE20", "L1_VTE50", "L1_VTE200",
                 # TRT
@@ -440,7 +436,6 @@ class MonitorDef:
                 "L1_jJ40p31ETA49", "L1_jJ50p31ETA49", "L1_jJ60p31ETA49",
                 "L1_jJ90p31ETA49",
                 #
-                "L1_gTE200",
                 "L1_jTE200",
                 #
                 "L1_eEM9_AFP_A_AND_C", "L1_eEM9_AFP_A_OR_C",

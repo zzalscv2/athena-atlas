@@ -129,7 +129,10 @@ def TRIG8KernelCfg(ConfigFlags, name='TRIG8Kernel', **kwargs):
 
     triggers = [t for t in trig_all for k in idtrig_keys if k in t]
     for veto in idtrig_veto:
-        triggers.remove(veto)
+        try:
+            triggers.remove(veto)
+        except ValueError:
+            print(f"Warning, {veto} already removed from trigger list.")
 
     #remove duplicates
     triggers = sorted(list(set(triggers)))
