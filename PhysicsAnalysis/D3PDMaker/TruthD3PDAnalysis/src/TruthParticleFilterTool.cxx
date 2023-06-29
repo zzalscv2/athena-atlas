@@ -16,7 +16,7 @@
 #include "AthenaKernel/errorcheck.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include <algorithm>

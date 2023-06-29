@@ -13,7 +13,7 @@
  * **/
 
 #include "DumpAll.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "CaloEvent/CaloCellContainer.h"
 #include "LArRawEvent/LArDigitContainer.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"

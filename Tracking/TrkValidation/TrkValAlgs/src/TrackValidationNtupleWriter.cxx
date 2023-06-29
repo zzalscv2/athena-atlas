@@ -16,7 +16,7 @@
 #include "TrkTrack/Track.h"
 
 #include "AtlasHepMC/GenParticle.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "TrkValEvent/GenParticleJet.h"
 #include "TrkToolInterfaces/ITruthToTrack.h"
 

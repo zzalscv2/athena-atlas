@@ -10,7 +10,7 @@ class TrigInDetTrack{};
 #include "TrigStorageDefinitions/EDM_TypeInformation.h"
 #include "TrigStorageDefinitions/EDM_TypeInfoMethods.h"
 #include "TrigStorageDefinitions/EDM_TypeInfo.h"
-#include <boost/type_traits.hpp>
+#include <typeinfo>
 #include <iostream>
 
 class TrigInDetTrackCollection : public DataVector<TrigInDetTrack>{};

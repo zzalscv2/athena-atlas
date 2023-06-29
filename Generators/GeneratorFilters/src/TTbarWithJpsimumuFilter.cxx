@@ -4,7 +4,7 @@
 #include "GeneratorFilters/TTbarWithJpsimumuFilter.h"
 
 #include "GaudiKernel/MsgStream.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 //--------------------------------------------------------------------------
 TTbarWithJpsimumuFilter::TTbarWithJpsimumuFilter(const std::string& fname,

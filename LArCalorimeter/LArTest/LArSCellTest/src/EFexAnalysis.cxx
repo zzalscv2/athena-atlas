@@ -18,7 +18,7 @@
 #include "TFile.h"
 #include "TH1F.h"
 #include "TH2F.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "xAODTrigCalo/TrigEMClusterContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODEgamma/ElectronContainer.h"

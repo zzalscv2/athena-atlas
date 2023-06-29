@@ -3,7 +3,7 @@
 */
 
 #include "TrigT1NSWSimTools/MMLoadVariables.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 MMLoadVariables::MMLoadVariables(StoreGateSvc* evtStore, const MuonGM::MuonDetectorManager* detManager, const MmIdHelper* idhelper):
    AthMessaging(Athena::getMessageSvc(), "MMLoadVariables") {

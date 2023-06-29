@@ -12,7 +12,7 @@
 #include "G4EventManager.hh"
 #include "TrackWriteFastSim/TrackFastSimSD.h"
 
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 NeutronFastSim::NeutronFastSim(const std::string& name, const std::string& fsSDname, const double etaCut, const double timeCut)
   : G4VFastSimulationModel(name)

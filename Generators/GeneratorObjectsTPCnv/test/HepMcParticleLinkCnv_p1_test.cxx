@@ -14,7 +14,7 @@
 #include <iostream>
 // HepMC includes
 #include "AtlasHepMC/GenEvent.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 // CLHEP includes
 #include "CLHEP/Units/SystemOfUnits.h"

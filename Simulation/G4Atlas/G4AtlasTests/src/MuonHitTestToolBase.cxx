@@ -12,7 +12,7 @@
 #include "TH2D.h"
 #include <math.h>
 
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 MuonHitTestToolBase::MuonHitTestToolBase(const std::string& type, const std::string& name, const IInterface* parent)
   : SimTestToolBase(type, name, parent),

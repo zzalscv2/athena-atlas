@@ -25,7 +25,7 @@
 #include "GeneratorFilters/xAODBSignalFilter.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Vector/LorentzVector.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 #include <sstream>
 

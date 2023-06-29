@@ -31,7 +31,7 @@
 
 #include <iostream>
 
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 using CLHEP::GeV;
 using namespace std;

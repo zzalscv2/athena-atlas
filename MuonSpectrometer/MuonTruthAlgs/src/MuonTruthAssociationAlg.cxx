@@ -12,7 +12,7 @@
 #include "TrkTrack/TrackStateOnSurface.h"
 #include "MuonCombinedEvent/TagBase.h"
 #include "FourMomUtils/xAODP4Helpers.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 using namespace xAOD::P4Helpers;
 namespace {
     constexpr unsigned int dummy_unsigned = 999;

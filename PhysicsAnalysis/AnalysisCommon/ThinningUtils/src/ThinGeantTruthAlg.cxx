@@ -34,7 +34,7 @@
 // Standard includes
 #include <cstdlib>
 
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 StatusCode
 ThinGeantTruthAlg::initialize()

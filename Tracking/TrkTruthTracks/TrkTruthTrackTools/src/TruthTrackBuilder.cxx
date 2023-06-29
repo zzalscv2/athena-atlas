@@ -20,7 +20,7 @@
 // HepMC
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "HepPDT/ParticleDataTable.hh"
 
 #include "AtlasDetDescr/AtlasDetectorID.h"

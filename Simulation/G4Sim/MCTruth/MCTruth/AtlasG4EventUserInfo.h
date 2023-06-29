@@ -7,7 +7,7 @@
 
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "G4ThreeVector.hh"
 #include "G4VUserEventInformation.hh"
 

@@ -21,7 +21,7 @@
 // CLHEP
 #include "GeoPrimitives/GeoPrimitives.h"
 
-#include "AtlasHepMC/MagicNumbers.h" // for crazyParticleBarcode
+#include "TruthUtils/MagicNumbers.h" // for crazyParticleBarcode
 
 McEventCollectionFilter::McEventCollectionFilter(const std::string &name, ISvcLocator *pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator)

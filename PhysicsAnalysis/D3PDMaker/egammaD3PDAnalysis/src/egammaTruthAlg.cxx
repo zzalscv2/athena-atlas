@@ -20,7 +20,7 @@
 #include "StoreGate/WriteHandle.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "TruthUtils/HepMCHelpers.h"
 
 using Gaudi::Units::GeV;
