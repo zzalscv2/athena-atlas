@@ -25,6 +25,7 @@
 #include "xAODCaloEvent/CaloCluster.h"
 #include <CLHEP/Matrix/Vector.h>
 #include <CLHEP/Geometry/Vector3D.h>
+#include <optional>
 
 class CaloCluster;
 class CaloTopoSplitterClusterCell;
@@ -35,35 +36,24 @@ class CaloTopoSplitterHashCluster
   typedef CaloTopoTmpHashCell<CaloTopoSplitterClusterCell> HashCell;
 
 private:
-
-  // Friends
   
   // Data members
-
-  const xAOD::CaloCluster *m_parentCluster;
-  size_t m_parentClusterIndex;
-  float m_energy;
-  bool m_hasValidEnergy;
-  bool m_containsLocalMax;
-  HepGeom::Vector3D<double> * m_centroid;
-  // Helper functions
+  const xAOD::CaloCluster *m_parentCluster = nullptr;
+  size_t m_parentClusterIndex = 0;
+  float m_energy = 0;
+  bool m_hasValidEnergy = false;
+  bool m_containsLocalMax = false;
+  std::optional<HepGeom::Vector3D<double> > m_centroid;
 
 public:
   
   // Constructors
   CaloTopoSplitterHashCluster (pool_type& pool)
     : Base (pool)
-  {
-    m_parentCluster = 0;
-    m_parentClusterIndex =0;
-    m_energy = 0;
-    m_hasValidEnergy = false;
-    m_containsLocalMax = false;
-    m_centroid = 0;
-  }
+  {}
 
   // Destructors
-  ~CaloTopoSplitterHashCluster();
+  ~CaloTopoSplitterHashCluster() = default;
 
   // Operators
   
@@ -96,7 +86,7 @@ public:
   
   float getEnergy();
 
-  const HepGeom::Vector3D<double> * getCentroid();
+  const HepGeom::Vector3D<double>& getCentroid();
 
   inline bool getContainsLocalMax() const
   {

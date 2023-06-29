@@ -21,27 +21,6 @@
 #include "CaloTopoSplitterHashCluster.h"
 #include "CaloTopoSplitterClusterCell.h"
 
-
-//----------------------------
-// This Class's Base Header --
-//----------------------------
-
-//---------------
-// C++ Headers --
-//---------------
-
-//---------------
-// C Headers --
-//---------------
-
-//----------------
-// Constructors --
-//----------------
-
-CaloTopoSplitterHashCluster::~CaloTopoSplitterHashCluster()
-{
-  delete m_centroid;
-}
     
 //-----------
 // Methods --
@@ -57,10 +36,7 @@ void CaloTopoSplitterHashCluster::add (HashCell& hashCell)
   
   Base::add(hashCell);
   m_hasValidEnergy = false;
-  if (m_centroid) {
-    delete m_centroid;
-    m_centroid = nullptr;
-  }
+  m_centroid.reset();
 }
 
 void CaloTopoSplitterHashCluster::remove (const HashCell& hashCell)
@@ -83,10 +59,7 @@ void CaloTopoSplitterHashCluster::remove (const HashCell& hashCell)
     }
   }
   m_hasValidEnergy = false;
-  if (m_centroid) {
-    delete m_centroid;
-    m_centroid = nullptr;
-  }
+  m_centroid.reset();
 }
 
 void CaloTopoSplitterHashCluster::add
@@ -99,10 +72,7 @@ void CaloTopoSplitterHashCluster::add
 
   Base::add(rClus);
   m_hasValidEnergy = false;
-  if (m_centroid) {
-    delete m_centroid;
-    m_centroid = nullptr;
-  }
+  m_centroid.reset();
 }
 
 float CaloTopoSplitterHashCluster::getEnergy()
@@ -112,11 +82,11 @@ float CaloTopoSplitterHashCluster::getEnergy()
   return m_energy;
 }
 
-const HepGeom::Vector3D<double> * CaloTopoSplitterHashCluster::getCentroid()
+const HepGeom::Vector3D<double> & CaloTopoSplitterHashCluster::getCentroid()
 {
   if ( !m_centroid) 
     this->calcCentroid();
-  return m_centroid;
+  return m_centroid.value();
 }
 
 void CaloTopoSplitterHashCluster::calcEnergy()
@@ -142,10 +112,7 @@ void CaloTopoSplitterHashCluster::calcEnergy()
 
 void CaloTopoSplitterHashCluster::calcCentroid()
 {
-  if ( m_centroid ) 
-    delete m_centroid;
-
-  HepGeom::Vector3D<double> theCentroid(0,0,0);
+  m_centroid.emplace(0,0,0);  
 
   if ( !m_members.empty() ) {
     double thisAbsEng,absEng = 0;
@@ -165,11 +132,10 @@ void CaloTopoSplitterHashCluster::calcCentroid()
       thisAbsEng = fabs(myWeight*itrCell->e());
       absEng += thisAbsEng;
       HepGeom::Vector3D<double> thisPos(itrCell->x(), itrCell->y(), itrCell->z());
-      theCentroid += thisAbsEng*thisPos;
+      m_centroid.value() += thisAbsEng*thisPos;
     }
     if ( absEng > 0 ) 
-      theCentroid *= (1./absEng);
+      m_centroid.value() *= (1./absEng);
   }
-  m_centroid = new HepGeom::Vector3D<double>(theCentroid);
 }
 

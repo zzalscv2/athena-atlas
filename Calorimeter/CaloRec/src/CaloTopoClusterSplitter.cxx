@@ -1019,10 +1019,10 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
       if ( e2 <= 0 ) e2 = 1*MeV;    
       const xAOD::CaloCluster::cell_iterator itrCell = pClusCell->getCellIterator();
       Vector3D<double> thisPos(itrCell->x(),itrCell->y(),itrCell->z());
-      const Vector3D<double> * c1 = (pClusCell->getCaloTopoTmpHashCluster())->getCentroid();
-      const Vector3D<double> * c2 = (pClusCell->getSecondCaloTopoTmpHashCluster())->getCentroid();
-      double d1 = (thisPos-(*c1)).mag();
-      double d2 = (thisPos-(*c2)).mag();
+      const Vector3D<double> & c1 = (pClusCell->getCaloTopoTmpHashCluster())->getCentroid();
+      const Vector3D<double> & c2 = (pClusCell->getSecondCaloTopoTmpHashCluster())->getCentroid();
+      double d1 = (thisPos-c1).mag();
+      double d2 = (thisPos-c2).mag();
       double r = (d1-d2)/m_emShowerScale;
       if ( r > 10 ) 
 	r = exp(10);
