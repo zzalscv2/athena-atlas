@@ -11,7 +11,7 @@ atlas_add_library( FPGATrackSimConfToolsLib
    src/*.cxx FPGATrackSimConfTools/*.h
    PUBLIC_HEADERS FPGATrackSimConfTools
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib
+   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib TruthUtils
    LINK_LIBRARIES AthenaBaseComps AtlasHepMCLib GaudiKernel FPGATrackSimObjectsLib )
 
 atlas_add_component( FPGATrackSimConfTools
