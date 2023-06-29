@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
@@ -239,7 +239,9 @@ float PixelChargeCalibCondData::getToT(InDetDD::PixelDiodeType type, unsigned in
   if (Q>exth && getCalibrationStrategy(moduleHash)==CalibrationStrategy::RUN3PIX) {
     float paramF = getQ2TotF(type, moduleHash, FE);
     float paramG = getQ2TotG(type, moduleHash, FE);
-    tot = (Q-paramG)/paramF;
+    if (paramF != 0.0f){
+      tot = (Q-paramG)/paramF;
+    }
   }
   return tot;
 }
