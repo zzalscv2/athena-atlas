@@ -79,7 +79,13 @@ static const int POMERON = 990;
 static const int ODDERON = 9990;
 static const int REGGEON = 110;
 
-
+/// PDG rule 10:
+/// Codes 81–100 are reserved for generator-specific pseudoparticles and concepts. 
+/// Codes 901–930, 1901–1930, 2901–2930, and 3901–3930 are for additional components 
+/// of Standard Modelparton distribution functions, where the latter three ranges are intended 
+/// to distinguish left/right/ longitudinal components. Codes 998 and 999 are reserved for GEANT tracking pur-poses.
+static const int GEANTINOPLUS = 998;
+static const int GEANTINO0 = 999;
 
 
 /// PDG rule 2:
@@ -178,6 +184,7 @@ template<class T> inline bool isBSM(const T& p);
 template<class T> inline bool isValid(const T& p);
 template<class T> inline bool isTransportable(const T& p);
 template<class T> inline bool isGenSpecific(const T& p);
+template<class T> inline bool isGeantino(const T& p);
 
 /// Main Table
 /// for MC internal use 81–100,901–930,998-999,1901–1930,2901–2930, and 3901–3930
@@ -189,6 +196,10 @@ template<> inline bool isGenSpecific(const int& p){
   if (p >= 2901 && p <= 2930) return true;
   if (p >= 3901 && p <= 3930) return true;
   return false; 
+}
+
+template<> inline bool isGeantino(const int& p){ 
+  return (std::abs(p) ==  GEANTINO0 || std::abs(p) ==  GEANTINOPLUS);
 }
 
 template<> inline bool isSUSY(const DecodedPID& p){return (p.ndigits() == 7 &&  p(0) != 9 );}
@@ -332,9 +343,9 @@ template<> inline bool isBSM(const int& p){
 
 template<> inline bool isHadron(const DecodedPID& p){ return isMeson(p)||isBaryon(p)||isTetraquark(p)||isPentaquark(p);}
 template<> inline bool isHadron(const int& p){ auto value_digits = DecodedPID(p); return isHadron(value_digits);}
-template<> inline bool isTransportable(const DecodedPID& p){ return isPhoton(p.pid()) || isHadron(p) || isLepton(p.pid());}
+template<> inline bool isTransportable(const DecodedPID& p){ return isPhoton(p.pid()) || isGeantino(p.pid()) || isHadron(p) || isLepton(p.pid());}
 template<> inline bool isTransportable(const int& p){ auto value_digits = DecodedPID(p); return isTransportable(value_digits);}
-template<> inline bool isValid(const DecodedPID& p){ return isHadron(p) || isTrajectory(p.pid()) || isDiquark(p) || isBSM(p) || isNucleus(p) || (std::abs(p.pid()) < 42) || isGenSpecific(p.pid());}
+template<> inline bool isValid(const DecodedPID& p){ return isHadron(p) || isTrajectory(p.pid()) || isDiquark(p) || isBSM(p) || isNucleus(p) || (std::abs(p.pid()) < 42) || isGenSpecific(p.pid()) || isGeantino(p.pid());}
 template<> inline bool isValid(const int& p){ if (!p) return false; if (std::abs(p) < 42) return true; 
   if (isGenSpecific(p)) return true;
   auto value_digits = DecodedPID(p); return isValid(value_digits);
@@ -403,6 +414,8 @@ template<> inline int charge3(const DecodedPID& p) {
   auto ap = std::abs(p.pid());
   if (ap < TABLESIZE ) return p.pid() > 0 ? triple_charge.at(ap) : -triple_charge.at(ap);
   if (ap == K0) return 0;
+  if (ap == GEANTINO0) return 0;
+  if (ap == GEANTINOPLUS) return p.pid() > 0  ? 3 : -3;
   size_t nq = 0;
   int sign = 1;
   int signmult = 1;

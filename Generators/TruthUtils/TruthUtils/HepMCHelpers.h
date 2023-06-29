@@ -20,7 +20,7 @@ namespace MC
 #include "AtlasPID.h"
 
   /// @brief Identify if the particle with given PDG ID would not interact with the detector, i.e. not a neutrino or WIMP
-  inline bool isNonInteracting(int pid) { return !(isStrongInteracting(pid) || isEMInteracting(pid)); }
+  inline bool isNonInteracting(int pid) { return !(isStrongInteracting(pid) || isEMInteracting(pid) || isGeantino(pid)); }
 
   /// @brief Identify if the particle with given PDG ID would produce ID tracks but not shower in the detector if stable
   inline bool isChargedNonShowering(int pid) { return (isMuon(pid) || isSUSY(pid)); }
