@@ -3,7 +3,7 @@
 */
 
 #include "TruthConverters/xAODtoHepMCTool.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 xAODtoHepMCTool::xAODtoHepMCTool(const std::string &name)
     : asg::AsgTool(name),

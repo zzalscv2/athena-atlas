@@ -6,7 +6,7 @@
 //
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "GeneratorObjects/McEventCollection.h"
 
 #include "StoreGate/ReadHandle.h"

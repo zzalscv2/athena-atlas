@@ -11,7 +11,7 @@ find_package( ROOT COMPONENTS Core Tree )
 atlas_add_component( TrkValAlgs
    TrkValAlgs/*.h src/*.cxx src/components/*.cxx
    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AtlasHepMCLib AthenaBaseComps
+   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AtlasHepMCLib  TruthUtils AthenaBaseComps
    GaudiKernel TrkParameters TrkTrack TrkTruthData AtlasDetDescr
    GeneratorObjects TrkSurfaces TrkEventUtils TrkMaterialOnTrack
    TrkParticleBase TrkPrepRawData TrkRIO_OnTrack TrkSegment

@@ -20,6 +20,7 @@ atlas_add_library( FlowAfterburnerLib
 
 atlas_add_component( FlowAfterburner
                      src/components/*.cxx
+                     PRIVATE_LINK_LIBRARIES TruthUtils
                      LINK_LIBRARIES FlowAfterburnerLib )
 
 # Install files from the package:

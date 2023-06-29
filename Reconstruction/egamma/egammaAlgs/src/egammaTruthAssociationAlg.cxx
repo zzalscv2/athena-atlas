@@ -12,7 +12,7 @@
 #include "xAODEgamma/EgammaxAODHelpers.h"
 #include "xAODTruth/xAODTruthHelpers.h"
 
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 #include <memory>
 

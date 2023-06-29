@@ -21,7 +21,7 @@ namespace HepPDT {
 }
 #include "AtlasHepMC/GenEvent_fwd.h"
 #include "AtlasHepMC/GenParticle_fwd.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 class IPartPropSvc;
 class McEventCollection;

@@ -14,7 +14,7 @@ atlas_add_library( GeneratorModulesLib
                    PUBLIC_HEADERS GeneratorModules
                    INCLUDE_DIRS ${HEPPDT_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} 
                    DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} AtlasHepMCLib AthenaBaseComps AthenaKernel CxxUtils GaudiKernel GeneratorObjects StoreGateLib )
+                   LINK_LIBRARIES ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} AtlasHepMCLib TruthUtils AthenaBaseComps AthenaKernel CxxUtils GaudiKernel GeneratorObjects StoreGateLib )
 
 atlas_add_component( GeneratorModules
                      src/components/*.cxx

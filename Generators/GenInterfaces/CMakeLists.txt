@@ -8,7 +8,7 @@ atlas_add_library( GenInterfacesLib
    GenInterfaces/*.h
    INTERFACE
    PUBLIC_HEADERS GenInterfaces
-   LINK_LIBRARIES AtlasHepMCLib GaudiKernel )
+   LINK_LIBRARIES AtlasHepMCLib GaudiKernel TruthUtils )
 
 atlas_add_dictionary( GenInterfacesDict
    GenInterfaces/GenInterfacesDict.h

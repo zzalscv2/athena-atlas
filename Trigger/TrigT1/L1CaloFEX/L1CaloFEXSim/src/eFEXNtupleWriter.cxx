@@ -20,7 +20,7 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODJet/JetContainer.h"
 
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 LVL1::eFEXNtupleWriter::eFEXNtupleWriter(const std::string& name, ISvcLocator* pSvcLocator): AthAlgorithm(name, pSvcLocator) { }
 

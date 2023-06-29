@@ -13,7 +13,7 @@ atlas_add_library( LArDigitizationLib
                    PUBLIC_HEADERS LArDigitization
                    LINK_LIBRARIES AthenaKernel CaloDetDescrLib
                    LArCablingLib LArRawEvent 
-                   PRIVATE_LINK_LIBRARIES AtlasHepMCLib
+                   PRIVATE_LINK_LIBRARIES AtlasHepMCLib TruthUtils
                    GaudiKernel GeneratorObjects Identifier LArIdentifier )
 
 
@@ -22,7 +22,7 @@ atlas_add_component( LArDigitization
                      PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
                      PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
                      LINK_LIBRARIES ${CLHEP_LIBRARIES} ${Boost_LIBRARIES} 
-                     AthenaBaseComps AtlasHepMCLib CaloIdentifier EventInfoUtils
+                     AthenaBaseComps AtlasHepMCLib TruthUtils CaloIdentifier EventInfoUtils
                      GeneratorObjects Identifier LArDigitizationLib
                      LArElecCalib LArIdentifier LArRawConditions
                      LArRecConditions LArSimEvent PileUpToolsLib

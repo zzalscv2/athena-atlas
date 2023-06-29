@@ -6,7 +6,7 @@
 #define TrackInformation_H
 
 #include "VTrackInformation.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "CxxUtils/checker_macros.h"
 
 namespace ISF {

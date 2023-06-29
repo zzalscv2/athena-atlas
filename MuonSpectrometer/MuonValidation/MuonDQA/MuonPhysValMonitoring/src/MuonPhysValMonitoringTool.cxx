@@ -29,7 +29,7 @@
 #include "xAODTruth/TruthVertexAuxContainer.h"
 #include "xAODTruth/TruthVertexContainer.h"
 #include "FourMomUtils/xAODP4Helpers.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 #include "TString.h"
 #include <cmath>

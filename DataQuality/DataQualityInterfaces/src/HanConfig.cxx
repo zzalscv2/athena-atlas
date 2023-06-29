@@ -49,7 +49,6 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/pointer_cast.hpp>
 #include <utility>
 
 #include "CxxUtils/checker_macros.h"

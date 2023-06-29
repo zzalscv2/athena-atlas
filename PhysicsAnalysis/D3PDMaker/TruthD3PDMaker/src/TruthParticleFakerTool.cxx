@@ -14,7 +14,7 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/SimpleVector.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "AthenaKernel/errorcheck.h"
 
 #include "GaudiKernel/SystemOfUnits.h"

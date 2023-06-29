@@ -24,7 +24,7 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/Relatives.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "GeneratorObjects/McEventCollection.h"
 // Needed for FourVector
 #include "AtlasHepMC/SimpleVector.h"

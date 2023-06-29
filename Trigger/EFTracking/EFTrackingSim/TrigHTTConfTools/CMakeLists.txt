@@ -12,7 +12,7 @@ atlas_add_library( TrigHTTConfToolsLib
    PUBLIC_HEADERS TrigHTTConfTools
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib
-   LINK_LIBRARIES AthenaBaseComps AtlasHepMCLib GaudiKernel TrigHTTObjectsLib )
+   LINK_LIBRARIES AthenaBaseComps AtlasHepMCLib TruthUtils GaudiKernel TrigHTTObjectsLib )
 
 atlas_add_component( TrigHTTConfTools
    src/components/*.cxx
