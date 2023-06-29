@@ -89,25 +89,21 @@ class TrigInDetReco(ExecStep):
                 chains += "'HLT_mu14_mu14_idperf_50invmAB130_L12MU8F',"
                 flags += 'doMuonSlice=True;'
             if (i=='L2electronLRT') :
-                chains += "'HLT_e20_idperf_loose_lrtloose_L1EM15VH',"
-                chains += "'HLT_e30_idperf_loose_lrtloose_L1EM22VHI',"
-                chains += "'HLT_e26_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1EM22VHI',"
-                chains += "'HLT_e5_idperf_loose_lrtloose_probe_g25_medium_L1EM20VH',"
-
-                # new chains
-                chains += "'HLT_e26_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1EM22VHI',"
-                chains += "'HLT_e5_idperf_loose_lrtloose_probe_g25_medium_L1EM20VH',"
+                chains += "'HLT_e20_idperf_loose_lrtloose_L1eEM18L',"
+                chains += "'HLT_e30_idperf_loose_lrtloose_L1eEM26M',"
+                chains += "'HLT_e26_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1eEM26M',"
+                chains += "'HLT_e5_idperf_loose_lrtloose_probe_g25_medium_L1eEM24L',"
                 flags += 'doEgammaSlice=True;'
             if (i=='electron') :
                 # chains +=  "'HLT_e5_etcut_L1EM3',"  ## need an idperf chain once one is in the menu
                 # chains +=  "'HLT_e17_lhvloose_nod0_L1EM15VH',"
                 # chains += "'HLT_e26_idperf_gsf_tight_L1EM22VHI',"
-                chains += "'HLT_e26_idperf_loose_L1EM22VHI',"
+                chains += "'HLT_e26_idperf_loose_L1eEM26M',"
                 chains += "'HLT_e5_idperf_tight_L1EM3',"
                 flags += 'doEgammaSlice=True;'
             if (i=='electron-tnp') :
-                chains += "'HLT_e26_lhtight_e14_idperf_tight_probe_50invmAB130_L1EM22VHI',"
-                chains += "'HLT_e26_lhtight_e14_idperf_tight_nogsf_probe_50invmAB130_L1EM22VHI',"
+                chains += "'HLT_e26_lhtight_e14_idperf_tight_probe_50invmAB130_L1eEM26M',"
+                chains += "'HLT_e26_lhtight_e14_idperf_tight_nogsf_probe_50invmAB130_L1eEM26M',"
                 flags += 'doEgammaSlice=True;'
             if (i=='tau') :
                 chains +=  "'HLT_tau25_idperf_tracktwoMVA_L1TAU12IM',"
