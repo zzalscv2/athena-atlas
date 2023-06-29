@@ -76,7 +76,7 @@ Navigable<CONT, RPAR, COLL>::fillToken(INavigationToken& navToken) const
 template <typename CONT, typename RPAR, typename COLL>
 void 
 Navigable<CONT, RPAR, COLL>::fillToken(INavigationToken& navToken,
-				       const boost::any& aParameter) const 
+				       const std::any& aParameter) const 
 {
   //////////////////////////////////
   // Check Object Type Query Only //
@@ -108,7 +108,7 @@ Navigable<CONT, RPAR, COLL>::fillToken(INavigationToken& navToken,
   // token type accepted
   if ( parToken != 0 )
     {
-      this->apply(*parToken, boost::any_cast<RPAR>(aParameter));
+      this->apply(*parToken, std::any_cast<RPAR>(aParameter));
       this->toKidsAfterAccept(*parToken,aParameter);
 //debug       std::cout << "[Navigable::fillToken(token,weight)] - honored "
 //debug 		<< "NavigableToken<CONSTITUENT_TYPE,REL_PARM>"
@@ -571,21 +571,21 @@ Navigable<CONT, RPAR,COLL>::toKidsAfterReject(INavigationToken& navToken) const
 template <typename CONT, typename RPAR, typename COLL>
 void 
 Navigable<CONT, RPAR, COLL>::toKidsAfterAccept(INavigationToken& navToken,
-					       const boost::any& aParameter) const
+					       const std::any& aParameter) const
 {
   // loop on children
   const constituent_coll& coll = this->getConstituents();
   constituent_const_iter iCtr(coll.begin());
   constituent_const_iter iEnd(coll.end());
-  // catch exception thrown by boost::any_cast 
+  // catch exception thrown by std::any_cast 
   try {
     // only identical parameter types can be forwarded!
-    RPAR parentPar(boost::any_cast<RPAR>(aParameter));
+    RPAR parentPar(std::any_cast<RPAR>(aParameter));
 
     // Do it like this to avoid creating and destroying a temp any object
     // each time through the loop.
-    boost::any arg (parentPar);
-    RPAR* argp = boost::any_cast<RPAR> (&arg);
+    std::any arg (parentPar);
+    RPAR* argp = std::any_cast<RPAR> (&arg);
 
     for (; iCtr != iEnd; ++iCtr) 
       {
@@ -597,7 +597,7 @@ Navigable<CONT, RPAR, COLL>::toKidsAfterAccept(INavigationToken& navToken,
 //      else
 //	  setBackNavigationWarning();
       } 
-  } catch(boost::bad_any_cast&) {
+  } catch(std::bad_any_cast&) {
     // parameter type mismatch: terminate parameter forwarding only
     for (; iCtr != iEnd; ++iCtr) 
       { //FIXME no weight?
@@ -614,21 +614,21 @@ Navigable<CONT, RPAR, COLL>::toKidsAfterAccept(INavigationToken& navToken,
 template <typename CONT, typename RPAR, typename COLL>
 void 
 Navigable<CONT, RPAR, COLL>::toKidsAfterReject(INavigationToken& navToken,
-					       const boost::any& aParameter) const
+					       const std::any& aParameter) const
 {
   // loop on children
   const constituent_coll& coll = this->getConstituents();
   constituent_const_iter iCtr(coll.begin());
   constituent_const_iter iEnd(coll.end());
-  // catch exception thrown by boost::any_cast 
+  // catch exception thrown by std::any_cast 
   try {
     // only identical parameter types can be forwarded!
-    RPAR parentPar(boost::any_cast<RPAR>(aParameter));
+    RPAR parentPar(std::any_cast<RPAR>(aParameter));
 
     // Do it like this to avoid creating and destroying a temp any object
     // each time through the loop.
-    boost::any arg (parentPar);
-    RPAR* argp = boost::any_cast<RPAR> (&arg);
+    std::any arg (parentPar);
+    RPAR* argp = std::any_cast<RPAR> (&arg);
 
     for (; iCtr != iEnd; ++iCtr) 
       {
@@ -642,7 +642,7 @@ Navigable<CONT, RPAR, COLL>::toKidsAfterReject(INavigationToken& navToken,
 //	  setBackNavigationWarning();
 					   
       } 
-  } catch(boost::bad_any_cast&) {
+  } catch(std::bad_any_cast&) {
     // parameter type mismatch: terminate parameter forwarding only
     for (; iCtr != iEnd; ++iCtr) 
       { //FIXME no weight?

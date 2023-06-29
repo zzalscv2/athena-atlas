@@ -200,7 +200,7 @@ StatusCode BSignalFilter::filterEvent()
 	      bool motherIsB = false;
 	      bool newBChain = false;
 
-	      if( ( MC::PID::isBottomMeson(particleID) || MC::PID::isBottomBaryon(particleID) )
+	      if( ( MC::isBottomMeson(particleID) || MC::isBottomBaryon(particleID) )
 		  && part->status()!=3 ) // p->status()!=3 excludes the partons
 		                            // including immediate decays of resonances.
                 {
@@ -217,7 +217,7 @@ StatusCode BSignalFilter::filterEvent()
 		  for (auto  thisParent = firstParent; thisParent != lastParent; ++thisParent )
                     {
 		      int parentID = (*thisParent)->pdg_id();
-		      if (MC::PID::isBottomMeson(parentID) || MC::PID::isBottomBaryon(parentID) ) motherIsB = true;
+		      if (MC::isBottomMeson(parentID) || MC::isBottomBaryon(parentID) ) motherIsB = true;
                     }
 		  if( motherIsB ){
 		    newBChain = false; // Since the chain is not new
@@ -436,7 +436,7 @@ void BSignalFilter::FindAllChildren(const HepMC::ConstGenParticlePtr& mother,std
 	  bool passedCut = FinalStatePassedCuts(mother);                // X = X && ... in case of multiple particles (e.g. KK)
 	  if ( m_cuts_f_e_on   && std::abs(pID)==11 )                                      passedAllCuts = passedAllCuts && passedCut;
 	  if ( m_cuts_f_mu_on  && std::abs(pID)==13 )                                      passedAllCuts = passedAllCuts && passedCut;
-	  if ( m_cuts_f_had_on && MC::PID::isHadron(pID) && MC::PID::isCharged(pID) ) passedAllCuts = passedAllCuts && passedCut;
+	  if ( m_cuts_f_had_on && MC::isHadron(pID) && MC::isCharged(pID) ) passedAllCuts = passedAllCuts && passedCut;
 	  if ( m_cuts_f_gam_on && std::abs(pID)==22 )                                      passedAllCuts = passedAllCuts && passedCut;
 	  if ( m_cuts_f_K0_on  && std::abs(pID)==311 )                                     passedAllCuts = passedAllCuts && passedCut;
 	  //
@@ -478,14 +478,14 @@ void BSignalFilter::FindAllChildren(const HepMC::ConstGenParticlePtr& mother,std
   if( !( treeIDStr=="" ) ) treeIDStr = treeIDStr + ".";
 
   // ** Find out whether particle is child of final (non-excited) B, used for cuts **
-  if( (!fromFinalB) && (MC::PID::isBottomMeson(pID) || MC::PID::isBottomBaryon(pID)) )
+  if( (!fromFinalB) && (MC::isBottomMeson(pID) || MC::isBottomBaryon(pID)) )
     {
       fromFinalB = true;
       int pID{};
       for (auto thisChild = firstChild; thisChild != lastChild; ++thisChild)
 	{
 	  pID = (*thisChild)->pdg_id();
-	  if( MC::PID::isBottomMeson(pID) || MC::PID::isBottomBaryon(pID) ) fromFinalB = false;
+	  if( MC::isBottomMeson(pID) || MC::isBottomBaryon(pID) ) fromFinalB = false;
 	}
     }
 
@@ -570,7 +570,7 @@ bool BSignalFilter::FinalStatePassedCuts(const HepMC::ConstGenParticlePtr& child
     }
   if ( m_cuts_f_had_on )
     {
-      if ( MC::PID::isHadron(pID) && MC::PID::isCharged(pID))
+      if ( MC::isHadron(pID) && MC::isCharged(pID))
 	{
 	  ATH_MSG_DEBUG("       ** ( pT , eta ) cuts applied on the charged hadron --> ( " << m_cuts_f_had_pT
 	      << " , " <<  m_cuts_f_had_eta << " )");

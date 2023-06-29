@@ -534,7 +534,7 @@ StatusCode TestHepMC::execute() {
       } // End of check that stable particles are known to G4 or are non-interacting
 
       // Check for bad PDG IDs
-      if (!MC::PID::isValid(ppdgid)){
+      if (!MC::isValid(ppdgid)){
         ATH_MSG_DEBUG("Invalid PDG ID found: " << ppdgid);
         if (m_unknownPDGIDTest && std::find(m_uknownPDGID_tab.begin(),m_uknownPDGID_tab.end(),ppdgid)==m_uknownPDGID_tab.end()){
           ATH_MSG_WARNING("Invalid and unmasked PDG ID found: " << ppdgid);

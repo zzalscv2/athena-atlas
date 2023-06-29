@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MergeTruthParticlesTool.h"
@@ -41,7 +41,7 @@ StatusCode MergeTruthParticlesTool::processBunchXing(int bunchXing,
   SubEventIterator iEvt(bSubEvents);
   while (iEvt != eSubEvents) {
     const xAOD::TruthParticleContainer* inputTruthParticleContainer{};
-    if (m_pMergeSvc->retrieveSingleSubEvtData(m_inputTruthParticleCollKey, inputTruthParticleContainer,
+    if (m_pMergeSvc->retrieveSingleSubEvtData(m_inputTruthParticleCollKey.value(), inputTruthParticleContainer,
                                               bunchXing, iEvt).isSuccess()) {
       ATH_MSG_VERBOSE("Found an xAOD::TruthParticleContainer in storeGate.");
       if ( !inputTruthParticleContainer ) {
@@ -116,7 +116,7 @@ StatusCode MergeTruthParticlesTool::processAllSubEvents(const EventContext& /*ct
 
   typedef PileUpMergeSvc::TimedList<xAOD::TruthParticleContainer>::type TruthParticleList;
   TruthParticleList truthList;
-  if ( (m_pMergeSvc->retrieveSubEvtsData(m_inputTruthParticleCollKey, truthList)).isSuccess() ) {
+  if ( (m_pMergeSvc->retrieveSubEvtsData(m_inputTruthParticleCollKey.value(), truthList)).isSuccess() ) {
     if (!truthList.empty()) {
       //now merge all collections into one
       TruthParticleList::const_iterator truthParticleColl_iter(truthList.begin());

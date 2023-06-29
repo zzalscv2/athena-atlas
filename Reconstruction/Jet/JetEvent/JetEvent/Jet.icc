@@ -206,7 +206,7 @@ inline bool Jet::remove()
 inline void Jet::fillToken(INavigationToken& navToken) const 
 { (this->navigableBase()).fillToken(navToken); }
 inline void Jet::fillToken(INavigationToken& navToken,
-			   const boost::any& par) const 
+			   const std::any& par) const 
 { (this->navigableBase()).fillToken(navToken,par); }
 
 ///////////                                                        /////////// 

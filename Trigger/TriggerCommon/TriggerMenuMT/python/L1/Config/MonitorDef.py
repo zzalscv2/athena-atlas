@@ -355,18 +355,14 @@ class MonitorDef:
                 "L1_BCM_AC_CA_BGRP12", "L1_BCM_AC_UNPAIRED_ISO", "L1_BCM_CA_UNPAIRED_ISO",
                 "L1_BCM_Wide_BGRP12",
                 # Muons
-                "L1_MU3V", "L1_MU3VF", "L1_MU5VF",
-                "L1_MU8F", "L1_MU8VF", "L1_MU10BOM",
-                "L1_MU14FCH", "L1_MU14FCHR", "L1_MU15VFCH",
+                "L1_MU3V", "L1_MU5VF",
+                "L1_MU8F", "L1_MU8VF",
+                "L1_MU14FCH",
                 "L1_MU3V_EMPTY",
                 "L1_MU3V_FIRSTEMPTY",
                 "L1_2MU5VF_EMPTY",
                 "L1_2MU3V", "L1_2MU5VF",
-                "L1_2MU8F",
-                "L1_MU5VF_2MU3V",
-                "L1_MU8VF_2MU5VF",
-                "L1_MU5VF_3MU3V", "L1_2MU5VF_3MU3V",
-                "L1_3MU3V", "L1_3MU5VF", "L1_4MU3V",
+                "L1_3MU3V",
                 "L1_2MU14FCH_OVERLAY",
                 # Mu+X
                 "L1_MU3V_J12",
@@ -385,7 +381,6 @@ class MonitorDef:
                 # Jet
                 "L1_J30", "L1_J50",
                 "L1_J20p31ETA49", "L1_J30p31ETA49",
-                "L1_2J15",
                 "L1_J12_EMPTY",
                 "L1_J40_XE50",
                 # TE
@@ -427,8 +422,6 @@ class MonitorDef:
                 "L1_eEM18", "L1_eEM18L",
                 "L1_eEM26", "L1_eEM26M",
                 "L1_2eEM18L",
-                #
-                "L1_eTAU12",
                 #
                 "L1_jJ20", "L1_jJ30", "L1_jJ40", "L1_jJ50",
                 "L1_jJ55", "L1_jJ60", "L1_jJ90",

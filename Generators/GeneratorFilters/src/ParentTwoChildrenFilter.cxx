@@ -61,7 +61,7 @@ StatusCode ParentTwoChildrenFilter::filterEvent() {
 	ATH_MSG_DEBUG(" ParentTwoChildrenFilter: parent ==> " <<pitr->pdg_id() << " child ===> "  <<thisChild->pdg_id());
 	for (int i = 0; i < 2; i++) {
 	  if ( std::abs(thisChild->pdg_id()) == m_PDGChild[i]) {
-	    int antiparticle = ( MC::PID::charge(m_PDGChild[i]) == 0 ? 1 : -1 ); // assume that zero charge particles are their own anti-particle
+	    int antiparticle = ( MC::charge(m_PDGChild[i]) == 0 ? 1 : -1 ); // assume that zero charge particles are their own anti-particle
 	    if ( thisChild->pdg_id() == m_PDGChild[i] ) {
 	      if( (thisChild->momentum().perp() >= m_PtMinChild) ) {
 		if(antiparticle == 1) {

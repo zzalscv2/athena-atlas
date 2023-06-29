@@ -10,5 +10,5 @@ using namespace std;
 
 
 bool CopyTruthPartons::classify(const xAOD::TruthParticle* tp) const {
-    return MC::PID::isParton(tp->pdgId());
+    return MC::isParton(tp->pdgId());
 }

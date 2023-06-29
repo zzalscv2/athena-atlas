@@ -28,7 +28,7 @@ StatusCode xAODMETFilter::filterEvent() {
   unsigned int nParticles = xTruthParticleContainer->size();
   for (unsigned int iPart=0; iPart<nParticles; ++iPart) {
     const xAOD::TruthParticle* missingETparticle = (*xTruthParticleContainer)[iPart];
-    if (!m_useHadronicNu && MC::PID::isNeutrino(missingETparticle->pdgId()) &&
+    if (!m_useHadronicNu && MC::isNeutrino(missingETparticle->pdgId()) &&
       !(missingETparticle->auxdata<bool>("isPrompt"))) continue; // ignore neutrinos from hadron decays
       
       sumx += missingETparticle->px();

@@ -14,8 +14,10 @@ def defineMenu():
         ##
         # single EM
         ##
-        #'L1_EM8VH', 'L1_EM10', 
-        'L1_EM10VH', 
+        #'L1_EM8VH',
+        'L1_EM10',
+        'L1_EM10VH',
+        'L1_EM12',
         #'L1_EM14', 
         'L1_EM15', 
         #'L1_EM16','L1_EM18VH', 
@@ -30,11 +32,9 @@ def defineMenu():
         ## 
         # MU
         ##
-        'L1_MU3V', 'L1_MU5VF', 'L1_MU8F', 'L1_MU8VF', 'L1_MU14FCH', 'L1_MU14FCHR',
-        'L1_MU3VF', 'L1_MU8FC', 'L1_MU15VFCH', 'L1_MU10BOM',
-        'L1_2MU3V', 'L1_2MU5VF', 'L1_2MU8F', 'L1_MU8VF_2MU5VF', 'L1_MU5VF_2MU3V',
-        'L1_3MU3V', 'L1_3MU5VF', 'L1_MU5VF_3MU3V', 'L1_4MU3V',
-        'L1_2MU5VF_3MU3V', 'L1_2MU8VF',
+        'L1_MU3V', 'L1_MU5VF', 'L1_MU8F', 'L1_MU8VF', 'L1_MU14FCH',
+        'L1_2MU3V', 'L1_2MU5VF',
+        'L1_3MU3V',
 
         'L1_2MU14FCH_OVERLAY',
         'L1_MU3V_EMPTY', 'L1_2MU5VF_EMPTY', 'L1_MU3V_FIRSTEMPTY', 'L1_MU8VF_EMPTY',
@@ -43,7 +43,8 @@ def defineMenu():
         ##
         # combined lepton (e and mu)
         ##
-        #'L1_2EM10', 'L1_2EM15', 'L1_2EM16',
+        'L1_2EM15',
+        #'L1_2EM10', 'L1_2EM16',
         #'L1_2EM20VH',
         # new calo
         #'L1_2eEM7', 'L1_2eEM9', 'L1_2eEM15',
@@ -56,8 +57,6 @@ def defineMenu():
 
         'L1_TAU8', 'L1_TAU60', 'L1_TAU12IM', 'L1_TAU20IM',
         'L1_TAU8_EMPTY',
-        # new calo
-        'L1_eTAU12',
 
 
         # single jet
@@ -70,8 +69,6 @@ def defineMenu():
         'L1_J100_FIRSTEMPTY',
         'L1_J12_BGRP12',
         'L1_J400', 'L1_J400_LAR',
-        # di-jet
-        'L1_2J15',
         # new calo
         'L1_jJ500', 'L1_jJ500_LAR',
         'L1_jJ20', 'L1_jJ30',
@@ -102,6 +99,7 @@ def defineMenu():
         # new calo
         'L1_jTE200',
         # additional jTE items for 2023 heavy ion runs
+        'L1_jTE3', 'L1_jTE5',
         'L1_jTE10',
         'L1_jTE20','L1_jTE50',
         'L1_jTE100',

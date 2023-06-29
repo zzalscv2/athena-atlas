@@ -483,12 +483,12 @@ bool FixHepMC::fromDecay(const HepMC::ConstGenParticlePtr& p) const {
       if (!v) return false;
 #ifdef HEPMC3
       for ( const auto& anc: v->particles_in())
-      if (MC::isDecayed(anc) && (MC::PID::isTau(anc->pdg_id()) || MC::PID::isHadron(anc->pdg_id()))) return true;
+      if (MC::isDecayed(anc) && (MC::isTau(anc->pdg_id()) || MC::isHadron(anc->pdg_id()))) return true;
       for ( const auto& anc: v->particles_in())
       if (fromDecay(anc)) return true;
 #else
       for (auto  anc=v->particles_in_const_begin(); anc != v->particles_in_const_end(); ++anc)
-      if (MC::isDecayed((*anc)) && (MC::PID::isTau((*anc)->pdg_id()) || MC::PID::isHadron((*anc)->pdg_id()))) return true;
+      if (MC::isDecayed((*anc)) && (MC::isTau((*anc)->pdg_id()) || MC::isHadron((*anc)->pdg_id()))) return true;
       for (auto  anc=v->particles_in_const_begin(); anc != v->particles_in_const_end(); ++anc)
       if (fromDecay(*anc)) return true;
 #endif
@@ -497,7 +497,7 @@ bool FixHepMC::fromDecay(const HepMC::ConstGenParticlePtr& p) const {
 
 // Identify non-transportable stuff _after_ hadronisation
 bool FixHepMC::isNonTransportableInDecayChain(const HepMC::ConstGenParticlePtr& p) const {
-  return !MC::PID::isTransportable(p->pdg_id()) && fromDecay(p);
+  return !MC::isTransportable(p->pdg_id()) && fromDecay(p);
 }
 
 // Identify internal "loop" particles

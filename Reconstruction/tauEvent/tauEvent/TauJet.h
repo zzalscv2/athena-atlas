@@ -147,7 +147,7 @@ namespace Analysis
             /// @param thisToke Navigation Token
             virtual void fillToken(
                     INavigationToken &thisToken,
-                    const boost::any& ) const;
+                    const std::any& ) const;
 
             /// dummy Parameter accessors,
             /// for analysis code backward compatibility

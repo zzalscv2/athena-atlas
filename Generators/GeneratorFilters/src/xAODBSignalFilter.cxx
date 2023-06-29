@@ -207,7 +207,7 @@ StatusCode xAODBSignalFilter::filterEvent()
                 bool motherIsB = false;
                 bool newBChain = false;
 
-                if ((MC::PID::isBottomMeson(particleID) || MC::PID::isBottomBaryon(particleID)) && part->status() != 3) // p->status()!=3 excludes the partons
+                if ((MC::isBottomMeson(particleID) || MC::isBottomBaryon(particleID)) && part->status() != 3) // p->status()!=3 excludes the partons
                                                                                                                         // including immediate decays of resonances.
                 {
                     // ** Reject whole event if any of B-hadrons in the event is not decayed **
@@ -220,7 +220,7 @@ StatusCode xAODBSignalFilter::filterEvent()
                     {
                         auto parent = part->prodVtx()->incomingParticle(thisParent_id);
                         int parentID = parent->pdgId();
-                        if (MC::PID::isBottomMeson(parentID) || MC::PID::isBottomBaryon(parentID))
+                        if (MC::isBottomMeson(parentID) || MC::isBottomBaryon(parentID))
                             motherIsB = true;
                     }
                     if (motherIsB)
@@ -460,7 +460,7 @@ void xAODBSignalFilter::FindAllChildren(const xAOD::TruthParticle* mother, std::
                 passedAllCuts = passedAllCuts && passedCut;
             if (m_cuts_f_mu_on && std::abs(pID) == 13)
                 passedAllCuts = passedAllCuts && passedCut;
-            if (m_cuts_f_had_on && MC::PID::isHadron(pID) && MC::PID::isCharged(pID))
+            if (m_cuts_f_had_on && MC::isHadron(pID) && MC::isCharged(pID))
                 passedAllCuts = passedAllCuts && passedCut;
             if (m_cuts_f_gam_on && std::abs(pID) == 22)
                 passedAllCuts = passedAllCuts && passedCut;
@@ -508,7 +508,7 @@ void xAODBSignalFilter::FindAllChildren(const xAOD::TruthParticle* mother, std::
         treeIDStr = treeIDStr + ".";
 
     // ** Find out whether particle is child of final (non-excited) B, used for cuts **
-    if ((!fromFinalB) && (MC::PID::isBottomMeson(pID) || MC::PID::isBottomBaryon(pID)))
+    if ((!fromFinalB) && (MC::isBottomMeson(pID) || MC::isBottomBaryon(pID)))
     {
         fromFinalB = true;
         int pID;
@@ -516,7 +516,7 @@ void xAODBSignalFilter::FindAllChildren(const xAOD::TruthParticle* mother, std::
         {
             auto child = mother->decayVtx()->outgoingParticle(thisChild_id);
             pID = child->pdgId();
-            if (MC::PID::isBottomMeson(pID) || MC::PID::isBottomBaryon(pID))
+            if (MC::isBottomMeson(pID) || MC::isBottomBaryon(pID))
                 fromFinalB = false;
         }
     }
@@ -601,7 +601,7 @@ bool xAODBSignalFilter::FinalStatePassedCuts(const xAOD::TruthParticle* child) c
     }
     if (m_cuts_f_had_on)
     {
-        if (MC::PID::isHadron(pID) && MC::PID::isCharged(pID))
+        if (MC::isHadron(pID) && MC::isCharged(pID))
         {
             ATH_MSG_DEBUG("       ** ( pT , eta ) cuts applied on the charged hadron --> ( " << m_cuts_f_had_pT
                                                                                              << " , " << m_cuts_f_had_eta << " )");

@@ -153,7 +153,7 @@ StatusCode xAODHTFilter::filterEvent()
           continue;
         int pdgid = theParticle->pdgId();
 
-        if (m_UseNu && MC::PID::isNeutrino(pdgid) && (theParticle->isGenStable()))
+        if (m_UseNu && MC::isNeutrino(pdgid) && (theParticle->isGenStable()))
         {
           if (isPrompt(theParticle))
           {

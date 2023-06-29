@@ -45,7 +45,7 @@ UPDATED:
 
 #include "egammaEvent/CaloRingsContainer.h"
 
-#include <boost/any.hpp>
+#include <any>
 
 class EMErrorDetail;
 class CaloCluster;
@@ -253,7 +253,7 @@ class egamma
   /** @brief fill token */
   virtual void fillToken( INavigationToken & thisToken ) const;
   /** @brief fill token */
-  virtual void fillToken( INavigationToken & thisToken, const boost::any& ) const;
+  virtual void fillToken( INavigationToken & thisToken, const std::any& ) const;
 
   /** @brief ID flag with cuts, true:e/phot, false:bkg  */
   bool isElectron(unsigned int mask= egammaPIDObs::ALL, 

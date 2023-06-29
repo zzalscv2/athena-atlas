@@ -98,7 +98,7 @@ StatusCode xAODChargedTracksWeightFilter::filterEvent() {
 
             // Particle's charge
             int pID = part->pdgId();
-            double pCharge = MC::PID::charge(pID);
+            double pCharge = MC::charge(pID);
 
             // Count tracks in specified acceptance
             const double pT = part->pt();

@@ -171,7 +171,7 @@ StatusCode PixelFastDigitizationTool::processBunchXing(int bunchXing,
   using TimedHitCollList = PileUpMergeSvc::TimedList<SiHitCollection>::type;
   TimedHitCollList hitCollList;
 
-  if (!(m_mergeSvc->retrieveSubSetEvtData(m_inputObjectName, hitCollList, bunchXing,
+  if (!(m_mergeSvc->retrieveSubSetEvtData(m_inputObjectName.value(), hitCollList, bunchXing,
                                           bSubEvents, eSubEvents).isSuccess()) &&
       hitCollList.empty()) {
     ATH_MSG_ERROR("Could not fill TimedHitCollList");
@@ -253,7 +253,7 @@ StatusCode PixelFastDigitizationTool::processAllSubEvents(const EventContext& ct
   //this is a list<pair<time_t, DataLink<SCTUncompressedHitCollection> > >
   TimedHitCollList hitCollList;
   unsigned int numberOfSimHits(0);
-  if ( !(m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList, numberOfSimHits).isSuccess()) && hitCollList.empty() ) {
+  if ( !(m_mergeSvc->retrieveSubEvtsData(m_inputObjectName.value(), hitCollList, numberOfSimHits).isSuccess()) && hitCollList.empty() ) {
     ATH_MSG_ERROR ( "Could not fill TimedHitCollList" );
     return StatusCode::FAILURE;
   } else {

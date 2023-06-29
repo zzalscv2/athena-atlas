@@ -74,7 +74,7 @@ bool CopyTruthJetParticles::classifyJetInput(const xAOD::TruthParticle* tp,
 
   // Extra catch.  If we aren't supposed to include prompt leptons, we aren't supposed to include prompt neutrinos
   unsigned int tc_res = getTCresult(tp, tc_results);
-  if (!m_includePromptLeptons && MC::PID::isNeutrino(pdgid) && MCTruthClassifier::isPrompt(tc_res)) {
+  if (!m_includePromptLeptons && MC::isNeutrino(pdgid) && MCTruthClassifier::isPrompt(tc_res)) {
     return false;
   }
 
@@ -90,7 +90,7 @@ bool CopyTruthJetParticles::classifyJetInput(const xAOD::TruthParticle* tp,
   if (!m_includeDark && (std::abs(tp->pdgId()) >= 4.9e6) && (std::abs(tp->pdgId()) < 5e6)) return false;
   // ----------------------------------- //
 
-  if (!m_includePromptPhotons && MC::PID::isPhoton(pdgid) && tp->hasProdVtx()){
+  if (!m_includePromptPhotons && MC::isPhoton(pdgid) && tp->hasProdVtx()){
     //ParticleOrigin orig = getPartOrigin(tp, originMap);
     //if (orig==Higgs || orig==HiggsMSSM) return false;
     if (MCTruthClassifier::isPrompt(tc_res))  return false;
@@ -100,7 +100,7 @@ bool CopyTruthJetParticles::classifyJetInput(const xAOD::TruthParticle* tp,
   if (!m_dressingName.empty()){
     // Accessor for the dressing decoration above
     const static SG::AuxElement::Accessor<char> dressAcc(m_dressingName);
-    if (MC::PID::isPhoton(pdgid) && dressAcc(*tp)) return false;
+    if (MC::isPhoton(pdgid) && dressAcc(*tp)) return false;
   } // End of removal via dressing decoration
 
   // Pseudo-rapidity cut

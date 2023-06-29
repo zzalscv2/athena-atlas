@@ -56,6 +56,7 @@ class jFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
         ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool","","Monitoring tool"};
         bool m_UseMonitoring = false;
         
+        Gaudi::Property<bool> m_doThinning    {this, "DoThinning"  , true, "Remove overlapped towers. Only FPGA Core region is saved"};
         
         // ROBIDs property required by the interface
         Gaudi::Property<std::vector<uint32_t>> m_robIds {this, "ROBIDs", {}, "List of ROB IDs required for conversion to/from xAOD RoI"};

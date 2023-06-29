@@ -67,7 +67,7 @@ StatusCode xAODParentTwoChildrenFilter::filterEvent() {
        ATH_MSG_DEBUG(" ParentTwoChildrenFilter: parent ==> " <<pitr->pdgId() << " child ===> "  <<thisChild->pdgId());
        for (int i = 0; i < 2; i++) {
 	  if ( std::abs(thisChild->pdgId()) == m_PDGChild[i]) {
-	    int antiparticle = ( MC::PID::charge(m_PDGChild[i]) == 0 ? 1 : -1 ); // assume that zero charge particles are their own anti-particle
+	    int antiparticle = ( MC::charge(m_PDGChild[i]) == 0 ? 1 : -1 ); // assume that zero charge particles are their own anti-particle
 	    if ( thisChild->pdgId() == m_PDGChild[i] ) {
                  if( (thisChild->pt() >= m_PtMinChild) ) {
 		if(antiparticle == 1) {
