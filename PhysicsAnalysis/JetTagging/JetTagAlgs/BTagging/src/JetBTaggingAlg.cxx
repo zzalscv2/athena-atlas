@@ -138,7 +138,7 @@ namespace Analysis {
     //retrieve the Secondary Vertex container
     SG::ReadHandle<xAOD::VertexContainer> h_BTagSVCollectionName (m_BTagSVCollectionName , ctx);
     if (!h_BTagSVCollectionName.isValid()) {
-      ATH_MSG_ERROR( " cannot retrieve Sec Vertex container with key " << m_BTagJFVtxCollectionName.key()  );
+      ATH_MSG_ERROR( " cannot retrieve Sec Vertex container with key " << m_BTagSVCollectionName.key()  );
       return StatusCode::FAILURE;
     }
 
