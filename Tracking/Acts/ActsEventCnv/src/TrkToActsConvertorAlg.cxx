@@ -10,7 +10,7 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #include "xAODTracking/TrackMeasurementAuxContainer.h"
 #include "xAODTracking/TrackParametersAuxContainer.h"
 #include "xAODTracking/TrackStateAuxContainer.h"
-#include "ActsTrkEvent/MultiTrajectory.h"
+#include "ActsEvent/MultiTrajectory.h"
 
 StatusCode ActsTrk::TrkToActsConvertorAlg::initialize() {
   ATH_CHECK(m_trackCollectionKeys.initialize());

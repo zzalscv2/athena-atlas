@@ -8,7 +8,7 @@
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "StoreGate/ReadHandleKey.h"
-#include "ActsTrkEvent/TrackParameters.h"
+#include "ActsEvent/TrackParameters.h"
 
 namespace ActsTrk {
 

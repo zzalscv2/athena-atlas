@@ -16,7 +16,7 @@
 #include "xAODTracking/TrackStateContainer.h"
 #include "xAODTracking/TrackMeasurementContainer.h"
 #include "StoreGate/WriteHandleKey.h"
-#include "ActsTrkEvent/MultiTrajectory.h"
+#include "ActsEvent/MultiTrajectory.h"
 
 namespace ActsTrk {
 /** Algorithm convert Trk::Track to ACTS multistate objects

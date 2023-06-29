@@ -18,7 +18,7 @@
 // ACTS
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
-#include "ActsTrkEvent/TrackContainer.h"
+#include "ActsEvent/TrackContainer.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
 
 // PACKAGE

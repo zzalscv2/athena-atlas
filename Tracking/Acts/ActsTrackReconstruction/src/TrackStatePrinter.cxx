@@ -17,7 +17,7 @@
 #include "Acts/Surfaces/DiscSurface.hpp"
 #include "Acts/EventData/detail/TransformationBoundToFree.hpp"
 
-#include "ActsTrkEvent/TrackContainer.h"
+#include "ActsEvent/TrackContainer.h"
 
 // PACKAGE
 #include "ActsGeometry/ActsDetectorElement.h"

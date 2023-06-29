@@ -33,7 +33,7 @@
 #include "Acts/TrackFitting/GainMatrixSmoother.hpp"
 #include "Acts/TrackFitting/GainMatrixUpdater.hpp"
 // ACTS glue
-#include "ActsTrkEvent/TrackContainer.h"
+#include "ActsEvent/TrackContainer.h"
 
 // PACKAGE
 #include "ActsGeometry/ATLASSourceLink.h"

@@ -15,9 +15,9 @@
 #include "ActsToolInterfaces/ITrackFindingTool.h"
 
 // ACTS
-#include "ActsTrkEvent/Seed.h"
-#include "ActsTrkEvent/TrackParameters.h"
-#include "ActsTrkEvent/TrackContainer.h"
+#include "ActsEvent/Seed.h"
+#include "ActsEvent/TrackParameters.h"
+#include "ActsEvent/TrackContainer.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
 
 // Athena

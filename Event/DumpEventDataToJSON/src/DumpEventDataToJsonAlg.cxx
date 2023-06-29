@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DumpEventDataToJsonAlg.h"
@@ -9,7 +9,7 @@
 #include <string>
 
 #include "Acts/EventData/TrackContainer.hpp"
-#include "ActsTrkEvent/MultiTrajectory.h"
+#include "ActsEvent/MultiTrajectory.h"
 #include "Gaudi/Property.h"
 #include "GaudiKernel/Algorithm.h"
 #include "GaudiKernel/MsgStream.h"

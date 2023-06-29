@@ -1,8 +1,8 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef ActsTrkEvent_MultiTrajectory_h
-#define ActsTrkEvent_MultiTrajectory_h
+#ifndef ActsEvent_MultiTrajectory_h
+#define ActsEvent_MultiTrajectory_h
 #include <type_traits>
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/EventData/SourceLink.hpp"

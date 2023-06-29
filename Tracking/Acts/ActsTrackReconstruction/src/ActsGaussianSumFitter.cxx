@@ -25,7 +25,7 @@
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
-#include "ActsTrkEvent/TrackContainer.h"
+#include "ActsEvent/TrackContainer.h"
 
 // PACKAGE
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"

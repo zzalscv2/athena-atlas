@@ -21,7 +21,7 @@ atlas_add_library(ActsEventCnvLib
     TrkParameters
     xAODMeasurementBase
     xAODTracking
-    ActsTrkEventLib
+    ActsEventLib
 )
 
 atlas_add_component(ActsEventCnv
