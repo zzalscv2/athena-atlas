@@ -37,7 +37,7 @@ Muon::MuonIdHelperSvc* muIdHelperSvc (IdDictParser& parser)
   assert ( muIdSvc->setProperty("HasMM", false).isSuccess() );
   if ( muIdSvc->initialize().isFailure() ) std::abort();
   ISvcManager* svcmgr = dynamic_cast<ISvcManager*>( svcLoc );
-  if ( svcmgr->addService( muIdSvc ).isFailure() ) std::abort();
+  if ( !svcmgr || svcmgr->addService( muIdSvc ).isFailure() ) std::abort();
   return muIdSvc;
 }
 
