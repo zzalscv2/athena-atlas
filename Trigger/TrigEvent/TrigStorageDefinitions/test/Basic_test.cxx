@@ -4,7 +4,7 @@
 
 #include "TrigStorageDefinitions/TypeInformation.h"
 #include <iostream>
-#include <boost/type_traits.hpp>
+#include <typeinfo>
 
 using namespace HLT::TypeInformation;
 

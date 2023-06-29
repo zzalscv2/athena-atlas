@@ -10,7 +10,7 @@
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "CxxUtils/sincos.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 //-------------------------------------------------
 // Other stuff
 #include <cmath>

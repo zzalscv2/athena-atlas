@@ -3,7 +3,7 @@
 */
 
 #include "TrigStorageDefinitions/TypeInformation.h"
-#include <boost/type_traits.hpp>
+#include <typeinfo>
 #include <iostream>
 #include "TrigStorageDefinitions/EDM_TypeInformation.h"
 

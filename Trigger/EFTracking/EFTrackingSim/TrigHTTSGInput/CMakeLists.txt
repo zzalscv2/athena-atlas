@@ -14,7 +14,7 @@ atlas_add_library(
   INCLUDE_DIRS              ${ROOT_INCLUDE_DIRS}
   PRIVATE_INCLUDE_DIRS      ${HEPPDT_INCLUDE_DIRS}
   LINK_LIBRARIES            ${ROOT_LIBRARIES}
-                            AthenaBaseComps GeneratorObjects InDetIdentifier InDetPrepRawData StoreGateLib TrigHTTObjectsLib TrkExInterfaces TrkToolInterfaces BeamSpotConditionsData InDetSimData AtlasHepMCLib
+                            AthenaBaseComps GeneratorObjects InDetIdentifier InDetPrepRawData StoreGateLib TrigHTTObjectsLib TrkExInterfaces TrkToolInterfaces BeamSpotConditionsData InDetSimData AtlasHepMCLib TruthUtils
   PRIVATE_LINK_LIBRARIES    ${HEPPDT_LIBRARIES}
                             AtlasDetDescr EventInfo EventPrimitives GaudiKernel IdDict IdDictDetDescr Identifier InDetRawData InDetReadoutGeometry InDetRIO_OnTrack ReadoutGeometryBase TileIdentifier TrkFitterInterfaces TrkRIO_OnTrack TrkSpacePoint VxVertex 
 )

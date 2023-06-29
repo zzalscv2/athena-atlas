@@ -8,7 +8,7 @@
 #include "G4VUserPrimaryParticleInformation.hh"
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "CxxUtils/checker_macros.h"
 
 namespace ISF {

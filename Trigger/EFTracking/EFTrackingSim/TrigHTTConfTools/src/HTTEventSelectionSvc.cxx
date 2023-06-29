@@ -14,7 +14,7 @@
 #include "TrigHTTObjects/HTTLogicalEventInputHeader.h"
 #include "TrigHTTObjects/HTTTypes.h"
 #include <AsgMessaging/MessageCheck.h>
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 using namespace asg::msgUserCode;
 

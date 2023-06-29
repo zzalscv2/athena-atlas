@@ -19,7 +19,7 @@
 #include "xAODTruth/TruthVertexContainer.h"
 #include "MCTruthClassifier/MCTruthClassifier.h"
 #include "TruthUtils/HepMCHelpers.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include <unordered_set>
 
 namespace DerivationFramework {

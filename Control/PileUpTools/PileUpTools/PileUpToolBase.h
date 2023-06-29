@@ -13,7 +13,7 @@
  */
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "PileUpTools/IPileUpTool.h"
-#include "AtlasHepMC/MagicNumbers.h" // for crazyParticleBarcode
+#include "TruthUtils/MagicNumbers.h" // for crazyParticleBarcode
 
 class PileUpToolBase :  public extends<AthAlgTool, IPileUpTool> {
 public:

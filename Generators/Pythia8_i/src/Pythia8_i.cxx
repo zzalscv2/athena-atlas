@@ -12,7 +12,7 @@
 
 // calls to fortran routines
 #include "AthenaKernel/RNGWrapper.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 #include <sstream>
 // For limits

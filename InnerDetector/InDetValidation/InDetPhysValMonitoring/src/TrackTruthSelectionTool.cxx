@@ -4,9 +4,9 @@
 
 // InDetPhysValMonitoring includes
 #include "TrackTruthSelectionTool.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "xAODTruth/TruthVertex.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include <cmath> // std::fabs
 
 

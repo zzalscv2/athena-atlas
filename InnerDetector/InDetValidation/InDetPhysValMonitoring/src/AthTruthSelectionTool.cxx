@@ -10,14 +10,14 @@
  **/
 
 #include "AthTruthSelectionTool.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "xAODTruth/TruthVertex.h"
 
 #include <vector>
 #include <cmath>
 
 #include "TrkParameters/TrackParameters.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 namespace {
   constexpr int electronId(11);

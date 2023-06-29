@@ -14,7 +14,7 @@
 #include "AtlasDetDescr/AtlasDetectorID.h"
 // HepMC
 #include "AtlasHepMC/GenParticle.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 InDet::PRD_TruthTrajectoryManipulatorID::PRD_TruthTrajectoryManipulatorID(const std::string& t, const std::string& n, const IInterface* p) :
 AthAlgTool(t,n,p)

@@ -13,7 +13,7 @@
 
 #include "GenEventGenParticleAssociationTool.h"
 #include "AtlasHepMC/GenParticle.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "AthenaKernel/errorcheck.h"
 
 
