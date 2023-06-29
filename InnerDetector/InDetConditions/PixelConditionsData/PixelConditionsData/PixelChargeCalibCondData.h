@@ -9,8 +9,8 @@
 #include <PixelReadoutDefinitions/PixelReadoutDefinitions.h>
 
 #include <map>
-#include <iostream>
-#include <limits>
+#include <vector>
+#include <array>
 
 class PixelChargeCalibCondData
 {
@@ -75,7 +75,7 @@ class PixelChargeCalibCondData
     std::size_t m_maxModuleHash = 0;
 
     constexpr static std::size_t s_NPixelDiods = 4;
-    static unsigned short diodIndex(InDetDD::PixelDiodeType type) { return static_cast<unsigned int>(type); }
+    static unsigned short diodeIndex(InDetDD::PixelDiodeType type) { return static_cast<unsigned int>(type); }
 
    template <typename T>
     static void resize(std::size_t idx, std::size_t max_size, T &container)  { if (idx >= container.size()) { container.resize(max_size); } }
@@ -87,8 +87,8 @@ class PixelChargeCalibCondData
 
     template <typename T, typename T_Value>
     static void setValue(std::size_t max_size, T &container, InDetDD::PixelDiodeType type, unsigned int moduleHash, T_Value &&value)  {
-       resize( moduleHash,max_size, container.at(diodIndex(type)));
-       container.at(diodIndex(type)).at(moduleHash) = std::move(value);
+       resize( moduleHash,max_size, container.at(diodeIndex(type)));
+       container.at(diodeIndex(type)).at(moduleHash) = std::move(value);
     }
 
     using chipThreshold = std::vector<std::vector<int>>;

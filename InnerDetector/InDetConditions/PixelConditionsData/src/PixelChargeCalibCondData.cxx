@@ -77,7 +77,7 @@ void PixelChargeCalibCondData::setTotRes2(unsigned int moduleHash, std::vector<f
 
 int PixelChargeCalibCondData::getAnalogThreshold(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
 {
-  const chipThreshold &typeMap = m_analogThreshold.at(diodIndex(type));
+  const chipThreshold &typeMap = m_analogThreshold.at(diodeIndex(type));
   const auto &fe_vec = typeMap.at(moduleHash);
   if (FE < fe_vec.size()) {
     return fe_vec[FE];
@@ -90,7 +90,7 @@ int PixelChargeCalibCondData::getAnalogThreshold(InDetDD::PixelDiodeType type, u
 
 int PixelChargeCalibCondData::getAnalogThresholdSigma(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
 {
-  const chipThreshold &typeMap = m_analogThresholdSigma.at(diodIndex(type));
+  const chipThreshold &typeMap = m_analogThresholdSigma.at(diodeIndex(type));
   const auto &fe_vec = typeMap.at(moduleHash);
   if (FE < fe_vec.size()) {
      return fe_vec.at(FE);
@@ -103,7 +103,7 @@ int PixelChargeCalibCondData::getAnalogThresholdSigma(InDetDD::PixelDiodeType ty
 
 int PixelChargeCalibCondData::getAnalogThresholdNoise(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
 {
-  const chipThreshold &typeMap = m_analogThresholdNoise.at(diodIndex(type));
+  const chipThreshold &typeMap = m_analogThresholdNoise.at(diodeIndex(type));
   const auto &fe_vec = typeMap.at(moduleHash);
   if (FE < fe_vec.size()) {
     return fe_vec[FE];
@@ -116,7 +116,7 @@ int PixelChargeCalibCondData::getAnalogThresholdNoise(InDetDD::PixelDiodeType ty
 
 int PixelChargeCalibCondData::getInTimeThreshold(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
 {
-  const chipThreshold &typeMap = m_inTimeThreshold.at(diodIndex(type));
+  const chipThreshold &typeMap = m_inTimeThreshold.at(diodeIndex(type));
   const auto &fe_vec = typeMap.at(moduleHash);
   if (FE < fe_vec.size()) {
     return fe_vec[FE];
@@ -129,7 +129,7 @@ int PixelChargeCalibCondData::getInTimeThreshold(InDetDD::PixelDiodeType type, u
 
 float PixelChargeCalibCondData::getQ2TotA(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
 {
-  const chipCharge &typeMap = m_totA.at(diodIndex(type));
+  const chipCharge &typeMap = m_totA.at(diodeIndex(type));
   const auto &fe_vec = typeMap.at(moduleHash);
   if (FE < fe_vec.size()) {
     return fe_vec[FE];
@@ -142,7 +142,7 @@ float PixelChargeCalibCondData::getQ2TotA(InDetDD::PixelDiodeType type, unsigned
 
 float PixelChargeCalibCondData::getQ2TotE(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
 {
-  const chipCharge &typeMap = m_totE.at(diodIndex(type));
+  const chipCharge &typeMap = m_totE.at(diodeIndex(type));
   const auto &fe_vec = typeMap.at(moduleHash);
   if (FE < fe_vec.size()) {
     return fe_vec[FE];
@@ -155,7 +155,7 @@ float PixelChargeCalibCondData::getQ2TotE(InDetDD::PixelDiodeType type, unsigned
 
 float PixelChargeCalibCondData::getQ2TotC(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
 {
-  const chipCharge &typeMap = m_totC.at(diodIndex(type));
+  const chipCharge &typeMap = m_totC.at(diodeIndex(type));
   const auto &fe_vec = typeMap.at(moduleHash);
   if (FE < fe_vec.size()) {
     return fe_vec[FE];
@@ -168,7 +168,7 @@ float PixelChargeCalibCondData::getQ2TotC(InDetDD::PixelDiodeType type, unsigned
 
 float PixelChargeCalibCondData::getQ2TotF(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
 {
-  const chipCharge &typeMap = m_totF.at(diodIndex(type));
+  const chipCharge &typeMap = m_totF.at(diodeIndex(type));
   const auto &fe_vec = typeMap.at(moduleHash);
   if (FE < fe_vec.size()) {
     return fe_vec[FE];
@@ -181,7 +181,7 @@ float PixelChargeCalibCondData::getQ2TotF(InDetDD::PixelDiodeType type, unsigned
 
 float PixelChargeCalibCondData::getQ2TotG(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
 {
-  const chipCharge &typeMap = m_totG.at(diodIndex(type));
+  const chipCharge &typeMap = m_totG.at(diodeIndex(type));
   const auto &fe_vec = typeMap.at(moduleHash);
   if (FE < fe_vec.size()) {
     return fe_vec[FE];
