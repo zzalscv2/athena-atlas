@@ -35,7 +35,7 @@
 #include "Acts/Propagator/CovarianceTransport.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Surfaces/Surface.hpp"
-#include "ActsTrkEvent/MultiTrajectory.h"
+#include "ActsEvent/MultiTrajectory.h"
 #include "Acts/EventData/TrackStatePropMask.hpp"
 
 // STL

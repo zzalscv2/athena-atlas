@@ -11,15 +11,15 @@
 // Athena
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GaudiKernel/EventContext.h"
-#include "ActsTrkEvent/TrackContainer.h"
+#include "ActsEvent/TrackContainer.h"
 #include "TrkTrack/TrackCollection.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 
 // ACTS EDM
-#include "ActsTrkEvent/Seed.h"
-#include "ActsTrkEvent/TrackParameters.h"
+#include "ActsEvent/TrackParameters.h"
+#include "ActsEvent/Seed.h"
 
 // OTHER
 #include <vector>

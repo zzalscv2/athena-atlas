@@ -26,7 +26,7 @@
 #include "Acts/Utilities/CalibrationContext.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
 
-#include "ActsTrkEvent/TrackContainer.h"
+#include "ActsEvent/TrackContainer.h"
 // PACKAGE
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometry/ActsGeometryContext.h"

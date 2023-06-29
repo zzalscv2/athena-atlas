@@ -16,7 +16,7 @@ atlas_add_library( ActsToolInterfacesLib
                    GaudiKernel
                    BeamSpotConditionsData
                    ActsCore
-                   ActsTrkEventLib
+                   ActsEventLib
                    SiSpacePointFormationLib
                    InDetReadoutGeometry
 		   InDetIdentifier

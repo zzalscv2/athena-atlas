@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DUMPEVENTDATATOJSONALG_H
@@ -25,7 +25,7 @@
 #include "InDetPrepRawData/PixelClusterContainer.h"
 #include "InDetPrepRawData/SCT_ClusterContainer.h"
 #include "InDetPrepRawData/TRT_DriftCircleContainer.h"
-#include "ActsTrkEvent/MultiTrajectory.h"
+#include "ActsEvent/MultiTrajectory.h"
 #include "Acts/EventData/VectorTrackContainer.hpp"
 #include <nlohmann/json.hpp>
 #include <string>

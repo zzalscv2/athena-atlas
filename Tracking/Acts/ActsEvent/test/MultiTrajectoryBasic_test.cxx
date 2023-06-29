@@ -13,7 +13,7 @@
 #include "Acts/EventData/SourceLink.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 
-#include "ActsTrkEvent/MultiTrajectory.h"
+#include "ActsEvent/MultiTrajectory.h"
 #include "xAODTracking/TrackJacobianAuxContainer.h"
 #include "xAODTracking/TrackMeasurementAuxContainer.h"
 #include "xAODTracking/TrackParametersAuxContainer.h"

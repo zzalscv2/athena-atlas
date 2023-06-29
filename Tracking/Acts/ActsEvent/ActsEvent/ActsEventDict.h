@@ -2,8 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSTRKEVENT_DICT_H
-#define ACTSTRKEVENT_DICT_H 1
+#ifndef ACTSEVENT_DICT_H
+#define ACTSEVENT_DICT_H
 
 #include "AthLinks/DataLink.h"
 #include "AthLinks/ElementLink.h"
@@ -22,8 +22,8 @@
   std::vector< std::vector< ElementLink< NS::TYPE > > >			\
   dummy_##NS##_##TYPE##_6;  
 
-#include "ActsTrkEvent/Seed.h"
-#include "ActsTrkEvent/TrackParameters.h"
+#include "ActsEvent/Seed.h"
+#include "ActsEvent/TrackParameters.h"
 
 // Instantiate all necessary types for the dictionary.
 namespace {

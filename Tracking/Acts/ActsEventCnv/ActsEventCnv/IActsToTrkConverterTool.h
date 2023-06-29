@@ -21,7 +21,7 @@
 #include "xAODTracking/TrackStateContainer.h"
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
-#include "ActsTrkEvent/MultiTrajectory.h"
+#include "ActsEvent/MultiTrajectory.h"
 
 namespace Trk {
 class Surface;

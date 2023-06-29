@@ -18,8 +18,8 @@
 
 // PACKAGE
 #include "ActsGeometry/ATLASSourceLink.h"
-#include "ActsTrkEvent/Seed.h"
-#include "ActsTrkEvent/TrackContainer.h"
+#include "ActsEvent/Seed.h"
+#include "ActsEvent/TrackContainer.h"
 
 // Other
 #include <vector>

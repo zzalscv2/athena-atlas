@@ -13,7 +13,7 @@
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "SiSPSeededTrackFinderData/SiSpacePointsSeedMakerEventData.h"
 
-#include "ActsTrkEvent/Seed.h"
+#include "ActsEvent/Seed.h"
 #include "SiSpacePoint/SCT_SpacePoint.h"
 #include "SiSpacePoint/PixelSpacePoint.h"
 #include "InDetPrepRawData/PixelClusterCollection.h"

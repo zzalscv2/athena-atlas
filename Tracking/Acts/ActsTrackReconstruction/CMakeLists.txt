@@ -17,7 +17,7 @@ atlas_add_component( ActsTrackReconstruction
                        GaudiKernel
                        BeamSpotConditionsData
                        ActsCore
-                       ActsTrkEventLib
+                       ActsEventLib
                        ActsToolInterfacesLib
                        MagFieldConditions
                        ActsGeometryInterfacesLib

@@ -15,7 +15,7 @@ atlas_add_component( ActsMonitoring
 			InDetIdentifier 
 			InDetReadoutGeometry 
 			StoreGateLib 
-			ActsTrkEventLib 
+			ActsEventLib 
 			xAODInDetMeasurement
 		     	AthenaMonitoringKernelLib 
 			AthenaMonitoringLib 

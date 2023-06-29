@@ -31,7 +31,7 @@
 #include "StoreGate/ReadHandleKeyArray.h"
 #include "StoreGate/WriteHandleKey.h"
 
-#include "ActsTrkEvent/TrackParameters.h"
+#include "ActsEvent/TrackParameters.h"
 
 namespace ActsTrk {
 

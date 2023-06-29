@@ -9,7 +9,7 @@
 #include "GaudiKernel/IAlgTool.h"
 #include "GaudiKernel/EventContext.h"
 #include "Acts/MagneticField/MagneticFieldContext.hpp"
-#include "ActsTrkEvent/Seed.h"
+#include "ActsEvent/Seed.h"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Definitions/TrackParametrization.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
