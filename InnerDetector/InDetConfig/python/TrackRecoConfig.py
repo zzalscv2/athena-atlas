@@ -3,6 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType, Format
+from TrkConfig.TrackingPassFlags import printActiveConfig
 
 _flags_set = []  # For caching
 _extensions_list = [] # For caching
@@ -294,6 +295,7 @@ def InDetTrackRecoCfg(flags):
     isPrimaryPass = True
 
     for current_flags in flags_set:
+        printActiveConfig(current_flags)
 
         extension = (
             "" if isPrimaryPass else

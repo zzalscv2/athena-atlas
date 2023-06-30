@@ -41,6 +41,8 @@
 
 // services
 #include "AthenaKernel/IAthRNGSvc.h"
+
+#include "AthAllocators/DataPool.h"
 namespace CLHEP {
   class HepRandomEngine;
 }
@@ -73,14 +75,17 @@ protected:
   // access to many conditions
   template<class T> const T* pointerFromKey(const EventContext& context, const SG::ReadCondHandleKey<T>& key) const;
 
-  StatusCode MakeDigit(const EventContext& ctx, const Identifier & cellId,
-               const HWIdentifier & ch_id,
-               LArDigit*& DigitContainer, LArDigit*& DigitContainer_DigiHSTruth,
-               const std::vector<std::pair<float,float> >* TimeE,
-               const LArDigit * rndm_digit, CLHEP::HepRandomEngine * engine,
-               const std::vector<std::pair<float,float> >* TimeE_DigiHSTruth = nullptr) const;
-  
-  
+  StatusCode MakeDigit(const EventContext& ctx,
+                       const Identifier& cellId,
+                       const HWIdentifier& ch_id,
+                       LArDigit*& Digit,
+                       DataPool<LArDigit>& dataItemsPool,
+                       LArDigit*& Digit_DigiHSTruth,
+                       const std::vector<std::pair<float, float> >* TimeE,
+                       const LArDigit* rndm_digit,
+                       CLHEP::HepRandomEngine* engine,
+                       const std::vector<std::pair<float, float> >* TimeE_DigiHSTruth = nullptr) const;
+
   StatusCode ConvertHits2Samples(const EventContext& ctx, const Identifier & cellId, HWIdentifier ch_id,
                    CaloGain::CaloGain igain,
                    const std::vector<std::pair<float,float> >  *TimeE,  staticVecDouble_t& sampleList) const;
@@ -99,23 +104,23 @@ protected:
 
   SG::ReadCondHandleKey<LArBadChannelCont> m_bcContKey {this, "BadChanKey", "LArBadChannel", "SG key for LArBadChan object"};
   SG::ReadCondHandleKey<LArBadFebCont> m_badFebKey{this, "BadFebKey", "LArBadFeb", "Key of BadFeb object in ConditionsStore"};
-  Gaudi::Property<std::vector<std::string> > m_problemsToMask{this,"ProblemsToMask",{},"Bad-Channel categories to mask entirly"}; 
+  Gaudi::Property<std::vector<std::string> > m_problemsToMask{this,"ProblemsToMask",{},"Bad-Channel categories to mask entirly"};
   LArBadChannelMask m_bcMask;
- 
+
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,"CaloDetDescrManager", "CaloDetDescrManager"};
-  
+
   // keys to inputs
   SG::ReadHandleKey<LArHitEMap> m_hitMapKey{this,"LArHitEMapKey","LArHitEMap"};
   SG::ReadHandleKey<LArHitEMap> m_hitMapKey_DigiHSTruth{this,"LArHitEMap_DigiHSTruthKey","LArHitEMap_DigiHSTruth"};
   SG::ReadHandleKey<LArDigitContainer> m_inputDigitContainerKey{this, "InputDigitContainer", "",
-       "Name of input digit container"}; // input digit container name 
+       "Name of input digit container"}; // input digit container name
   // keys to output
   SG::WriteHandleKey<LArDigitContainer> m_DigitContainerName{this, "DigitContainer", "LArDigitContainer_MC",
-       "Name of output digit container"};    // output digit container name list 
-  SG::WriteHandleKey<LArDigitContainer>  m_DigitContainerName_DigiHSTruth{this, "DigitContainer_DigiHSTruth", 
+       "Name of output digit container"};    // output digit container name list
+  SG::WriteHandleKey<LArDigitContainer>  m_DigitContainerName_DigiHSTruth{this, "DigitContainer_DigiHSTruth",
        "LArDigitContainer_DigiHSTruth", "Name of output signal digit container"};    // output digit container name list
   Gaudi::Property<std::string> m_randomStreamName{this, "RandomStreamName", "LArDigitization", ""};
- 
+
   // services needed
   ServiceHandle<IAthRNGSvc> m_rndmGenSvc{this, "RndmSvc", "AthRNGSvc", ""};
   Gaudi::Property<uint32_t> m_randomSeedOffset{this, "RandomSeedOffset", 2, ""}; //

@@ -283,43 +283,28 @@ def muonIDCosmicTrackingSequence( flags, RoIs, name, extraLoads=None, extraLoads
 
   return trackingSequence
 
+def muCombVDVCfg( flags, postFix):
+  result=ComponentAccumulator()
+  dataObjects=[('xAOD::L2StandAloneMuonContainer','StoreGateSvc+%s' % muNames.L2SAName+postFix)]
+  ViewVerify = CompFactory.AthViews.ViewDataVerifier("muCombAlgVDV"+postFix, DataObjects = dataObjects)
+  result.addEventAlgo(ViewVerify)
+  return result
 
+def muCombRecoSequenceCfg( flags, RoIs, name, l2mtmode=False, l2CBname="" ):
 
-
-def muCombRecoSequence( flags, RoIs, name, l2mtmode=False ):
-
-  from AthenaCommon.CFElements import parOR
+  acc = ComponentAccumulator()
   postFix = ""
   if l2mtmode:
     postFix = "l2mtmode"
 
-  muCombRecoSequence = parOR("l2muCombViewNode_"+name+postFix)
-  ### A simple algorithm to confirm that data has been inherited from parent view ###
-  ### Required to satisfy data dependencies                                       ###
-  import AthenaCommon.CfgMgr as CfgMgr
-  ViewVerify = CfgMgr.AthViews__ViewDataVerifier("muFast"+postFix+"ViewDataVerifier_"+name)
-  ViewVerify.DataObjects = [('xAOD::L2StandAloneMuonContainer','StoreGateSvc+%s' % muNames.L2SAName+postFix)]
-
-  muCombRecoSequence+=ViewVerify
-
+  acc.merge(muCombVDVCfg(flags, postFix))
   from TrigmuComb.TrigmuCombConfig import muCombCfg
-  _, muCombAlg = muCombCfg(flags, f'{postFix}_{name}', useBackExtrp=True)
+  l2trackname = getIDTracks(flags) if l2mtmode else getIDTracks(flags, name)
+  acc.merge(muCombCfg(flags, f'{postFix}_{name}', useBackExtrp=True,
+                      L2StandAloneMuonContainerName = muNames.L2SAName+postFix,
+                      L2CombinedMuonContainerName = l2CBname, TrackParticleContainerName = l2trackname ))
 
-  muCombAlg.L2StandAloneMuonContainerName = muNames.L2SAName+postFix
-  if ('LRT' in name):
-    muCombAlg.L2CombinedMuonContainerName   = muNamesLRT.L2CBName
-  else:
-    muCombAlg.L2CombinedMuonContainerName   = muNames.L2CBName+postFix
-    
-  if l2mtmode:
-    muCombAlg.TrackParticlesContainerName   = getIDTracks(flags)
-  else:
-    muCombAlg.TrackParticlesContainerName   = getIDTracks(flags, name)
-
-  muCombRecoSequence += muCombAlg
-  sequenceOut = muCombAlg.L2CombinedMuonContainerName
-
-  return muCombRecoSequence, sequenceOut
+  return acc
 
 def EFMuSADataPrepViewDataVerifierCfg(flags, RoIs, roiName):
   result=ComponentAccumulator()

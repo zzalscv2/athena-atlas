@@ -60,7 +60,6 @@ class _ConfigSettingsBase() :
       self._dodEdxTrk           = False 
       self._doHitDV             = False 
       self._doDisappearingTrk   = False
-      self._usePixelNN          = False
       self._useDynamicRoiZWidth = False
 
       #precision tracking configuration values
@@ -327,7 +326,7 @@ class _ConfigSettingsBase() :
 
    @property
    def usePixelNN(self):
-       return self._usePixelNN
+     raise Exception( "ID Trigger configuration:  usePixelNN not implemented temporarily")
 
    @property
    def maxRPhiImpact(self):

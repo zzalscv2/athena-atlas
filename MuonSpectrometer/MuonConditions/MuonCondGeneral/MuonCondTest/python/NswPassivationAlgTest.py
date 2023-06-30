@@ -15,7 +15,10 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from .MdtCablingTester import SetupArgParser, setupServicesCfg
     
-    args = SetupArgParser().parse_args()
+    parser = SetupArgParser()
+    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/UnitTestInput/Run3MC.ESD.pool.root"])
+    args = parser.parse_args()
+    
 
     flags = initConfigFlags()
     flags.Concurrency.NumThreads = args.threads

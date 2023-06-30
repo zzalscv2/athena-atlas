@@ -13,7 +13,7 @@ JfexMonitorAlgorithm::JfexMonitorAlgorithm( const std::string& name, ISvcLocator
 StatusCode JfexMonitorAlgorithm::initialize() {
 
     ATH_MSG_DEBUG("JfexMonitorAlgorith::initialize");
-    ATH_MSG_DEBUG("Package Name "<< m_packageName);
+    ATH_MSG_DEBUG("Package Name "<< m_Grouphist);
 
     ATH_MSG_DEBUG("m_jFexLRJetContainerKey"<< m_jFexLRJetContainerKey);
     ATH_MSG_DEBUG("m_jFexSRJetContainerKey"<< m_jFexSRJetContainerKey);
@@ -145,7 +145,7 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
             jFexSRJetphi=jFexSRJetRoI->phi();
             jFexSRJeteta_glo=jFexSRJetRoI->globalEta();
             jFexSRJetphi_glo=jFexSRJetRoI->globalPhi();
-            fill(m_packageName,jFexSRJetModule,jFexSRJetFPGA,jFexSRJetEt,jFexSRJeteta,jFexSRJetphi,jFexSRJeteta_glo,jFexSRJetphi_glo);
+            fill(m_Grouphist,jFexSRJetModule,jFexSRJetFPGA,jFexSRJetEt,jFexSRJeteta,jFexSRJetphi,jFexSRJeteta_glo,jFexSRJetphi_glo);
 
         }
     }
@@ -160,7 +160,7 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
             jFexLRJetphi=jFexLRJetRoI->phi();
             jFexLRJeteta_glo=jFexLRJetRoI->globalEta();
             jFexLRJetphi_glo=jFexLRJetRoI->globalPhi();
-            fill(m_packageName,jFexLRJetModule,jFexLRJetFPGA,jFexLRJetEt,jFexLRJeteta,jFexLRJetphi,jFexLRJeteta_glo,jFexLRJetphi_glo);
+            fill(m_Grouphist,jFexLRJetModule,jFexLRJetFPGA,jFexLRJetEt,jFexLRJeteta,jFexLRJetphi,jFexLRJeteta_glo,jFexLRJetphi_glo);
         }
     }
 
@@ -175,7 +175,7 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
             jFexTauphi=jFexTauRoI->phi();
             jFexTaueta_glo=jFexTauRoI->globalEta();
             jFexTauphi_glo=jFexTauRoI->globalPhi();
-            fill(m_packageName,jFexTauModule,jFexTauFPGA,jFexTauEt,jFexTauIso,jFexTaueta,jFexTauphi,jFexTaueta_glo,jFexTauphi_glo);
+            fill(m_Grouphist,jFexTauModule,jFexTauFPGA,jFexTauEt,jFexTauIso,jFexTaueta,jFexTauphi,jFexTaueta_glo,jFexTauphi_glo);
         }
     }
 
@@ -192,7 +192,7 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
             jFexEMIso=jFexFwdElRoI->tobEMIso();
             jFexEMf1 =jFexFwdElRoI->tobEMf1();
             jFexEMf2 =jFexFwdElRoI->tobEMf2();
-            fill(m_packageName,jFexEMModule,jFexEMFPGA,jFexEMEt,jFexEMeta,jFexEMphi,jFexEMeta_glo,jFexEMphi_glo,jFexEMIso,jFexEMf1,jFexEMf2);
+            fill(m_Grouphist,jFexEMModule,jFexEMFPGA,jFexEMEt,jFexEMeta,jFexEMphi,jFexEMeta_glo,jFexEMphi_glo,jFexEMIso,jFexEMf1,jFexEMf2);
         }    
     }
 
@@ -207,12 +207,12 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
                 mety += jFexMETRoI->Ey()/jFexMETRoI->tobEtScale();
             }
 
-            fill(m_packageName,jFexMETX,jFexMETY);
+            fill(m_Grouphist,jFexMETX,jFexMETY);
         }
         if(jFexMETContainer->size()>0) {
             jFexMET    = TMath::Sqrt(std::pow(metx,2)+std::pow(mety,2));
             jFexMETphi = TMath::ATan2(mety,metx);
-            fill(m_packageName,jFexMET,jFexMETphi);
+            fill(m_Grouphist,jFexMET,jFexMETphi);
         }    
     }
 
@@ -222,11 +222,11 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
             jFexSumEt_low =jFexSumETRoI->tobEt_lower();
             jFexSumEt_high =jFexSumETRoI->tobEt_upper();
             sumEt_total += jFexSumETRoI->tobEt_lower()+jFexSumETRoI->tobEt_upper();
-            fill(m_packageName,jFexSumEt_low,jFexSumEt_high);
+            fill(m_Grouphist,jFexSumEt_low,jFexSumEt_high);
         }
         if(jFexSumETContainer->size()>0) {
             jFexSumEt_total = sumEt_total;
-            fill(m_packageName,jFexSumEt_total);
+            fill(m_Grouphist,jFexSumEt_total);
         }    
     }
 

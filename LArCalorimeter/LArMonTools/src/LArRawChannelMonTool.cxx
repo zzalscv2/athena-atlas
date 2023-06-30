@@ -33,7 +33,6 @@
 
 
 // --- boost ---
-#include <boost/assign/list_of.hpp>
 #include <boost/lexical_cast.hpp>
 
 
@@ -61,17 +60,16 @@ using namespace LArMonTools;
 
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
-using boost::shared_ptr;
-using namespace boost::assign;
+using std::shared_ptr;
 
-typedef std::map<RawChHisto,boost::shared_ptr<IHistoProxyBase> > map_str_th2;
+typedef std::map<RawChHisto,std::shared_ptr<IHistoProxyBase> > map_str_th2;
 using map_idhash_str_th2 = std::map<IdentifierHash, map_str_th2>;
 using map_det_idhash_str_th2 = std::map<Detector, map_idhash_str_th2>;
 
 using citer_vect_hwid = std::vector<HWIdentifier>::const_iterator;
 
 //typedef std::pair<Detector,TH2*> pair_det_th2ptr;
-using map_det_th2ptr = std::map<Detector, boost::shared_ptr<IHistoProxyBase> >;
+using map_det_th2ptr = std::map<Detector, std::shared_ptr<IHistoProxyBase> >;
 using citer_det_th2ptr = map_det_th2ptr::const_iterator;
 
 //typedef std::map<Detector, std::map<Sampling, std::deque<Region> > > det_region_map_t;
@@ -245,7 +243,6 @@ StatusCode LArRawChannelMonTool::initialize()
   // --- loop over channels to determine number of channels in each detector ---
   // (looping over all channels so this can easlily be done for FEBs and
   //  feedthroughs later ... )
-  //m_det_to_nchannels = boost::assign::map_list_of(EMBA,0)(EMECA,0)(HECA,0)(FCALA,0)(EMBC,0)(EMECC,0)(HECC,0)(FCALC,0);
   m_det_to_nchannels[EMBA] = 0;
   m_det_to_nchannels[EMECA] = 0;
   m_det_to_nchannels[HECA] = 0;
@@ -295,7 +292,7 @@ StatusCode LArRawChannelMonTool::initialize()
   }
 
 
-  std::deque<Detector> detectors = list_of( EMBA )( EMBC )( EMECA )( EMECC )( HECA )( HECC )( FCALA )( FCALC );
+  std::deque<Detector> detectors{ EMBA , EMBC , EMECA , EMECC , HECA , HECC , FCALA , FCALC };
   for( const Detector & det : detectors ){
     m_selectionContext[det].quality( m_quality_threshold );
   }
@@ -315,7 +312,7 @@ StatusCode LArRawChannelMonTool::bookHistograms()
 
   ATH_MSG_DEBUG( "===> start " << name() << "::bookHistograms <=== " );
 
-  std::deque<Detector> detectors = list_of( EMBA )( EMBC )( EMECA )( EMECC )( HECA )( HECC )( FCALA )( FCALC );
+  std::deque<Detector> detectors{ EMBA , EMBC , EMECA , EMECC , HECA , HECC , FCALA , FCALC };
 
   // --- determine whether new histograms need booking ---
   bool is_new_interval = true;
@@ -1344,20 +1341,16 @@ StatusCode LArRawChannelMonTool::fillHistograms()
 
   //  int channels_above_bcid_threshold = 0;
 
-  std::map<Detector,unsigned int> det_n_noisy_channels =
-    boost::assign::map_list_of(EMBA,0)(EMECA,0)(HECA,0)(FCALA,0)(EMBC,0)(EMECC,0)(HECC,0)(FCALC,0);
+  std::map<Detector,unsigned int> det_n_noisy_channels{{EMBA,0},{EMECA,0},{HECA,0},{FCALA,0},{EMBC,0},{EMECC,0},{HECC,0},{FCALC,0}};
 
-  std::map<Detector,unsigned int> det_n_noisy_channels_Neg =
-    boost::assign::map_list_of(EMBA,0)(EMECA,0)(HECA,0)(FCALA,0)(EMBC,0)(EMECC,0)(HECC,0)(FCALC,0);
+  std::map<Detector,unsigned int> det_n_noisy_channels_Neg{{EMBA,0},{EMECA,0},{HECA,0},{FCALA,0},{EMBC,0},{EMECC,0},{HECC,0},{FCALC,0}};
 
-  std::map<Detector,unsigned int> det_n_possibly_problematic_channels =
-    boost::assign::map_list_of(EMBA,0)(EMECA,0)(HECA,0)(FCALA,0)(EMBC,0)(EMECC,0)(HECC,0)(FCALC,0);
+  std::map<Detector,unsigned int> det_n_possibly_problematic_channels{{EMBA,0},{EMECA,0},{HECA,0},{FCALA,0},{EMBC,0},{EMECC,0},{HECC,0},{FCALC,0}};
 
   MeanCalculator event_mean_time;
   std::map<Detector,MeanCalculator> mean_detector_times;
   std::map<Detector,std::map<HWIdentifier, MeanCalculator> > mean_feb_times;
-  std::map<Detector,double> per_detector_total_energy =
-    map_list_of(EMBA,0.)(EMECA,0.)(HECA,0.)(FCALA,0.)(EMBC,0.)(EMECC,0.)(HECC,0.)(FCALC,0.);
+  std::map<Detector,double> per_detector_total_energy{{EMBA,0.},{EMECA,0.},{HECA,0.},{FCALA,0.},{EMBC,0.},{EMECC,0.},{HECC,0.},{FCALC,0.}};
 
 
   Detector lastdet(UNDEF);
@@ -1697,7 +1690,7 @@ StatusCode LArRawChannelMonTool::fillHistograms()
   //  if ( bunch_crossing_id ) _global_bcid_occupancy->Fill( bunch_crossing_id, double(channels_above_bcid_threshold) );
 
 
-  std::vector<Detector> detectors = list_of( EMBA )( EMBC )( EMECA )( EMECC )( HECA )( HECC )( FCALA )( FCALC );
+  std::vector<Detector> detectors{ EMBA , EMBC , EMECA , EMECC , HECA , HECC , FCALA , FCALC };
   if ( m_monitor_burst ) {
     for( Detector det : detectors ) {
 

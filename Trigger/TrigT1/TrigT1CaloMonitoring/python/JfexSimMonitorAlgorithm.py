@@ -18,7 +18,7 @@ def JfexSimMonitoringConfig(flags, UseOfflineCopy = True):
 
     # add any steering
     groupName = "JfexSimMonitor" # the monitoring group name is also used for the package name
-    JfexSimMonAlg.PackageName = groupName
+    JfexSimMonAlg.Grouphist = groupName
     
     doXtobs = False
     if doXtobs:
@@ -42,6 +42,17 @@ def JfexSimMonitoringConfig(flags, UseOfflineCopy = True):
 
     # add monitoring algorithm to group, with group name and main directory 
     myGroup = helper.addGroup(JfexSimMonAlg, groupName, mainDir)
+    myGenericGroup = helper.addGroup(None, groupName+"Gen", mainDir)
+    
+    myGenericGroup.defineHistogram('genLocation,genType;jFEX_Errors', path=None, type='TH2I',
+                            title='jFEX generic monitoring for shifters;Location;Type',
+                            xbins=4, xmin=0, xmax=4, xlabels=["Sim_DataTowers","Sim_EmulatedTowers","Input_Mismatch","Input_Invalids"],
+                            ybins=4, ymin=0, ymax=4, ylabels=["TOB", "global TOB", "EM layer", "HAD layer" ],
+                            opt=['kCanRebin'])
+                            
+    JfexSimMonAlg.jFEXMonTool = myGenericGroup
+    
+    
     
     Input_items = ["EmulatedTowers","DataTowers"]
     TOB_items = ["jJ","jLJ","jTau","jEM","jXE", "jTE"]

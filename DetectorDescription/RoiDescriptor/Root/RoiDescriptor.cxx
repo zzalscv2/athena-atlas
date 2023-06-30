@@ -17,7 +17,6 @@
 
 #include <cmath>
 #include <sstream>
-// #include <exception>
 #include <stdexcept>
 
 
@@ -247,11 +246,11 @@ void RoiDescriptor::construct( const IRoiDescriptor& roi ) {
 
 /// methods to calculate z position at the RoI boundary 
 /// at a given radius
-double  RoiDescriptor::zedMin(const double r) const { return  r*m_dzdrMinus+m_zedMinus; } 
-double  RoiDescriptor::zedMax(const double r) const { return  r*m_dzdrPlus+m_zedPlus;  } 
+double  RoiDescriptor::zedMin(double r) const { return  r*m_dzdrMinus+m_zedMinus; }
+double  RoiDescriptor::zedMax(double r) const { return  r*m_dzdrPlus+m_zedPlus;  }
 
-double  RoiDescriptor::rhoMin(const double z) const { return  (z-m_zedMinus)*m_drdzMinus; }
-double  RoiDescriptor::rhoMax(const double z) const { return  (z-m_zedPlus)*m_drdzPlus ; }
+double  RoiDescriptor::rhoMin(double z) const { return  (z-m_zedMinus)*m_drdzMinus; }
+double  RoiDescriptor::rhoMax(double z) const { return  (z-m_zedPlus)*m_drdzPlus ; }
 
 
 

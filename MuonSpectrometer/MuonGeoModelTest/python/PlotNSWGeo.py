@@ -13,7 +13,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from MuonCondTest.MdtCablingTester import SetupArgParser
     parser = SetupArgParser()
-    parser.set_defaults(inputFile=["../group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.HITS.Run3_2NSW_100822_EXT0/group.det-muon.30014436.EXT0._000047.HITS.pool.root"])
+    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"])
     args = parser.parse_args()
 
     flags = initConfigFlags()
@@ -22,6 +22,8 @@ if __name__ == "__main__":
     flags.Output.ESDFileName = args.output
     flags.Input.Files = args.inputFile
     flags.Muon.applyMMPassivation = True
+    flags.GeoModel.AtlasVersion = "ATLAS-R3S-2021-03-02-00"
+    flags.IOVDb.GlobalTag = "OFLCOND-MC23-SDR-RUN3-02"
     flags.lock()
 
     cfg = NSWGeoPlottingAlgCfg(flags)

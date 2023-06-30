@@ -16,6 +16,8 @@ if __name__ == "__main__":
     from .MdtCablingTester import SetupArgParser, setupServicesCfg
     
     parser = SetupArgParser()
+    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/ESD/data23_cos.00448208.express_express.recon.ESD.x721/73events.data23_cos.00448208.express_express.recon.ESD.x721._lb0003._SFO-ALL._0001.1"])
+    
     parser.add_argument("--LogName", default="LogFile", 
                         help="If the test is run multiple times to ensure reproducibility, then the dump of the test can be resteered")
     args = parser.parse_args()
