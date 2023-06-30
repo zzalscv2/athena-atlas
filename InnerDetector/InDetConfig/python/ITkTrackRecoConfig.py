@@ -3,6 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
+from TrkConfig.TrackingPassFlags import printActiveConfig
 
 from InDetConfig.TrackRecoConfig import FTAG_AUXDATA
 
@@ -86,6 +87,7 @@ def ITkTrackRecoCfg(flags):
     from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
 
     for current_flags in flags_set:
+        printActiveConfig(current_flags)
 
         extension = current_flags.Tracking.ActiveConfig.extension
         TrackContainer = "Resolved" + extension + "Tracks"
