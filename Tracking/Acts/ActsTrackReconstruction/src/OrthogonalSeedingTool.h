@@ -110,9 +110,6 @@ namespace ActsTrk {
     Gaudi::Property<bool> m_seedConfirmation {this, "seedConfirmation", true,
 	"Seed Confirmation"};
 
-    Gaudi::Property<bool> m_skipPreviousTopSP {this, "skipPreviousTopSP", true,
-	"Skip top SPs based on cotTheta sorting when producing triplets"};
-
     Gaudi::Property<float> m_radLengthPerSeed {this, "radLengthPerSeed", 0.1,
 	"average radiation lengths of material on the length of a seed. used for scattering"};
 

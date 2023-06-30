@@ -65,7 +65,6 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_maxSeedsPerSpM);
     ATH_MSG_DEBUG("   " << m_interactionPointCut);
     ATH_MSG_DEBUG("   " << m_arithmeticAverageCotTheta);
-    ATH_MSG_DEBUG("   " << m_skipPreviousTopSP);
     ATH_MSG_DEBUG("   " << m_zBinsCustomLooping);
     ATH_MSG_DEBUG("   " << m_useVariableMiddleSPRange);
     if ( m_useVariableMiddleSPRange ) {
@@ -323,7 +322,6 @@ namespace ActsTrk {
     m_finderCfg.maxSeedsPerSpM = m_maxSeedsPerSpM;
     m_finderCfg.interactionPointCut = m_interactionPointCut;
     m_finderCfg.arithmeticAverageCotTheta = m_arithmeticAverageCotTheta;
-    m_finderCfg.skipPreviousTopSP = m_skipPreviousTopSP;
     m_finderCfg.zBinsCustomLooping = m_zBinsCustomLooping;
     m_finderCfg.useVariableMiddleSPRange = m_useVariableMiddleSPRange;
     m_finderCfg.deltaRMiddleMinSPRange = m_deltaRMiddleMinSPRange;

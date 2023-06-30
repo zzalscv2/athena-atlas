@@ -141,8 +141,6 @@ namespace ActsTrk {
       "Enable cut on the compatibility between interaction point and SPs"};
     Gaudi::Property< bool > m_arithmeticAverageCotTheta {this, "arithmeticAverageCotTheta", false,
       "Use arithmetic or geometric average in the calculation of the squared error"};
-    Gaudi::Property< bool > m_skipPreviousTopSP {this, "skipPreviousTopSP", true,
-      "Additional cut to skip top SPs when producing triplets"};
     Gaudi::Property< std::vector< size_t > > m_zBinsCustomLooping {this, "zBinsCustomLooping",
       {1, 2, 3, 4, 11, 10, 9, 8, 6, 5, 7} , "defines order of z bins for looping"};
     Gaudi::Property< bool > m_useVariableMiddleSPRange {this, "useVariableMiddleSPRange", true,

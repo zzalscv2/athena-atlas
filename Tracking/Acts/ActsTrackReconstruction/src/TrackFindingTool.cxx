@@ -64,7 +64,7 @@ namespace
 
   static Acts::Result<void>
   gainMatrixUpdate(const Acts::GeometryContext &gctx,
-                   typename Acts::MultiTrajectory<ActsTrk::TrackStateBackend>::TrackStateProxy trackState,
+		   typename ActsTrk::TrackStateBackend::TrackStateProxy trackState,
                    Acts::Direction direction,
                    const Acts::Logger &logger)
   {
@@ -74,7 +74,7 @@ namespace
 
   static Acts::Result<void>
   gainMatrixSmoother(const Acts::GeometryContext &gctx,
-                     Acts::MultiTrajectory<ActsTrk::TrackStateBackend> &trajectory,
+                     ActsTrk::TrackStateBackend &trajectory,
                      size_t entryIndex,
                      const Acts::Logger &logger)
   {

@@ -45,7 +45,6 @@ namespace ActsTrk {
 
     ATH_MSG_DEBUG("   " << m_interactionPointCut);
     ATH_MSG_DEBUG("   " << m_seedConfirmation);
-    ATH_MSG_DEBUG("   " << m_skipPreviousTopSP);
     ATH_MSG_DEBUG("   " << m_radLengthPerSeed);
 
     ATH_MSG_DEBUG(" *  Used by SeedFilterConfig" );
@@ -186,7 +185,6 @@ namespace ActsTrk {
     m_finderCfg.seedConfirmation = m_seedConfirmation;
     m_finderCfg.centralSeedConfirmationRange = filterCfg.centralSeedConfirmationRange;
     m_finderCfg.forwardSeedConfirmationRange = filterCfg.forwardSeedConfirmationRange;
-    m_finderCfg.skipPreviousTopSP = m_skipPreviousTopSP;
     m_finderCfg.radLengthPerSeed = m_radLengthPerSeed;
     m_finderCfg = m_finderCfg.toInternalUnits();
 
