@@ -79,26 +79,6 @@ TrackStateOnSurface::TrackStateOnSurface(
   assert(isSane());
 }
 
-TrackStateOnSurface::TrackStateOnSurface(
-  const FitQualityOnSurface& fitQoS,
-  std::unique_ptr<const MeasurementBase> meas,
-  std::unique_ptr<const TrackParameters> trackParameters,
-  std::unique_ptr<const MaterialEffectsBase> materialEffects,
-  const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>&
-    typePattern,
-  const std::bitset<TrackStateOnSurface::NumberOfPersistencyHints>& hintPattern,
-  std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack)
-  : m_fitQualityOnSurface(fitQoS)
-  , m_trackParameters(std::move(trackParameters))
-  , m_measurementOnTrack(std::move(meas))
-  , m_materialEffectsOnTrack(std::move(materialEffects))
-  , m_alignmentEffectsOnTrack(std::move(alignmentEffectsOnTrack))
-  , m_typeFlags(typePattern.to_ulong())
-  , m_hints(hintPattern.to_ulong())
-{
-  assert(isSane());
-}
-
 // copy
 TrackStateOnSurface::TrackStateOnSurface(const TrackStateOnSurface& rhs)
   : m_fitQualityOnSurface(rhs.m_fitQualityOnSurface)

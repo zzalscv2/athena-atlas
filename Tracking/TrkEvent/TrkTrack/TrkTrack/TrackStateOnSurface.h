@@ -176,7 +176,7 @@ public:
   };
 
   /*
-   * Helpers to join and split the bitsets 
+   * Helpers to join and split the bitsets
    * for the types and hints
    * Needed in order to keep the same T/P separation.
    * Note that in the Persistent side we keep a single ulong
@@ -244,7 +244,7 @@ public:
   /**
    * Full constructors
    *
-   * @param[in] FitQualityOnSurface (we provide one without it) 
+   * @param[in] FitQualityOnSurface (we provide one without it)
    * @param[in] unique pointer to a MeasurementBase, or 0 if no object is being
    *            passed.
    * @param[in] unigue trackParameter pointer to a TrackParameters, or 0 if no object
@@ -268,18 +268,6 @@ public:
     std::unique_ptr<const TrackParameters> trackParameters,
     std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack,
     const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>& typePattern,
-    std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack = nullptr);
-
-  /**
-   * ctor with hints for slimming
-   */
-  explicit TrackStateOnSurface(
-    const FitQualityOnSurface& fitQoS,
-    std::unique_ptr<const MeasurementBase> meas,
-    std::unique_ptr<const TrackParameters> trackParameters,
-    std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack,
-    const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>& typePattern,
-    const std::bitset<TrackStateOnSurface::NumberOfPersistencyHints>& hintPattern,
     std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack = nullptr);
 
  /**
@@ -378,7 +366,7 @@ private:
   std::unique_ptr<const MeasurementBase> m_measurementOnTrack{};
   std::unique_ptr<const MaterialEffectsBase> m_materialEffectsOnTrack{};
   std::unique_ptr<const AlignmentEffectsOnTrack> m_alignmentEffectsOnTrack{};
-protected: 
+protected:
   uint16_t m_typeFlags{};
   mutable std::atomic<uint8_t> m_hints{};
 };
