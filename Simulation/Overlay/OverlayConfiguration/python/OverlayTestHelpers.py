@@ -105,6 +105,12 @@ def overlayTestFlags(flags, args):
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
     setupDetectorFlags(flags, detectors, toggle_geometry=True, use_metadata=True)
 
+    # Moving here so that it is ahead of flags being locked. Need to
+    # iterate on exact best position w.r.t. above calls
+    from OverlayConfiguration.OverlayMetadata import overlayMetadataCheck
+    # Handle metadata correctly
+    overlayMetadataCheck(flags)
+
 
 def postprocessAndLockFlags(flags, args):
     """Postprocess and lock config flags for overlay"""

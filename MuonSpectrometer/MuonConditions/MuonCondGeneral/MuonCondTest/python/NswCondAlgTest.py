@@ -18,6 +18,7 @@ if __name__ == "__main__":
     parser = SetupArgParser()
     parser.add_argument("--LogName", default="LogFile", 
                         help="If the test is run multiple times to ensure reproducibility, then the dump of the test can be resteered")
+    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/UnitTestInput/Run3MC.ESD.pool.root"])
     args = parser.parse_args()
 
     flags = initConfigFlags()

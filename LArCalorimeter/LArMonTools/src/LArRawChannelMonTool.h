@@ -24,8 +24,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 
-// --- boost ---
-#include <boost/shared_ptr.hpp>
+#include <memory>
 // --- stl ---
 #include <string>
 #include <vector>
@@ -175,13 +174,13 @@ class LArRawChannelMonTool: public ManagedMonitorToolBase
 
   // --- Histograms ---
   //! pointers to per FEB histograms
-  std::map< LArMonTools::RawChHisto, std::vector<boost::shared_ptr<LArMonTools::IHistoProxyBase> > > m_per_feb_hists;
+  std::map< LArMonTools::RawChHisto, std::vector<std::shared_ptr<LArMonTools::IHistoProxyBase> > > m_per_feb_hists;
 
   //! pointers to per feedthrough 2D histograms
-  std::map< LArMonTools::RawChHisto, std::vector<boost::shared_ptr<LArMonTools::IHistoProxyBase> > > m_per_feedthrough_hists;
+  std::map< LArMonTools::RawChHisto, std::vector<std::shared_ptr<LArMonTools::IHistoProxyBase> > > m_per_feedthrough_hists;
 
   // per detector view
-  std::map< LArMonTools::RawChHisto, std::map<LArMonTools::Detector,boost::shared_ptr<LArMonTools::IHistoProxyBase> > >
+  std::map< LArMonTools::RawChHisto, std::map<LArMonTools::Detector,std::shared_ptr<LArMonTools::IHistoProxyBase> > >
     m_per_detector_hists;
 
 

@@ -379,7 +379,7 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
         ok = true;
     
     // BSM particles
-    if(m_writeBSM && isBSM(p))
+    if(m_writeBSM && MC::MenuTruthThinning_isBSM(p))
         ok = true;
     
     // tt+HF hadrons
@@ -409,7 +409,7 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
         for(unsigned int itr=0; itr<nIncoming; ++itr) {
             const xAOD::TruthParticle* incomingParticle = prodVtx->incomingParticle(itr);
             if (!incomingParticle) continue;
-            if ((m_writeBSMProducts && isBSM( (incomingParticle) )) ||
+            if ((m_writeBSMProducts && MC::MenuTruthThinning_isBSM( (incomingParticle) )) ||
                 (m_writeBosonProducts && isBoson( (incomingParticle) )) ||
                 (m_writeTopAndDecays && abs(incomingParticle->pdgId())==6) ){
                 ok = true;
@@ -647,29 +647,6 @@ bool DerivationFramework::MenuTruthThinning::isFromTau(const xAOD::TruthParticle
     return false;
 }
 
-bool DerivationFramework::MenuTruthThinning::isBSM(const xAOD::TruthParticle* part) {
-    
-    int pdg = part->pdgId();
-    
-    if ( (31<abs(pdg) && abs(pdg)<38) || // BSM Higgs / W' / Z' / etc
-        abs(pdg)==39 ||
-        abs(pdg)==41 ||
-        abs(pdg)==42 ||
-        abs(pdg)== 7 || // 4th gen beauty
-        abs(pdg)== 8 || // 4th gen top
-        (600 < abs(pdg) && abs(pdg) < 607) || // scalar leptoquarks
-        (1000000<abs(pdg) && abs(pdg)<1000040) || // left-handed SUSY
-        (2000000<abs(pdg) && abs(pdg)<2000040) || // right-handed SUSY
-        abs(pdg)==6000005 || // X5/3
-        abs(pdg)==6000006 || // T2/3
-        abs(pdg)==6000007 || // B-1/3
-        abs(pdg)==6000008 || // Y-4/3
-        ( (abs(pdg)>=10000100) && (abs(pdg)<=10001000) ) // multi-charged
-        )
-        return true;
-    
-    return false;
-}
 
 
 bool DerivationFramework::MenuTruthThinning::isttHFHadron(const xAOD::TruthParticle* part) {

@@ -15,7 +15,6 @@
 #include <atomic>
 #include <boost/iterator_adaptors.hpp>
 #include <boost/iterator/indirect_iterator.hpp>
-#include <boost/assign/list_of.hpp>
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/ClassName.h"
 
@@ -23,9 +22,6 @@
 #include "DataVector_test.icc"
 
 //*************************************************************************
-
-
-using boost::assign::list_of;
 
 #include "AthContainers/DataVector.h"
 #include "AthContainers/ConstDataVector.h"
@@ -448,23 +444,23 @@ void test_baseinfo()
 {
   std::vector<CLID> clids;
   clids = SG::BaseInfo<DataVector<CC> >::get_bases();
-  std::vector<CLID> exp1 = list_of
-    (ClassID_traits<SG::AuxVectorBase>::ID())
-    (ClassID_traits<DataVector<AA> >::ID())
-    (ClassID_traits<DataVector<BB> >::ID())
-    (ClassID_traits<DataVector<CC> >::ID());
+  std::vector<CLID> exp1{
+    ClassID_traits<SG::AuxVectorBase>::ID(),
+    ClassID_traits<DataVector<AA> >::ID(),
+    ClassID_traits<DataVector<BB> >::ID(),
+    ClassID_traits<DataVector<CC> >::ID()};
   std::sort (clids.begin(), clids.end());
   std::sort (exp1.begin(), exp1.end());
   myassert (clids == exp1);
 
   clids = SG::BaseInfo<DataVector<R> >::get_bases();
-  std::vector<CLID> exp2 = list_of
-    (ClassID_traits<SG::AuxVectorBase>::ID())
-    (ClassID_traits<DataVector<R> >::ID())
-    (ClassID_traits<DataVector<N> >::ID())
-    (ClassID_traits<DataVector<O> >::ID())
-    (ClassID_traits<DataVector<Q> >::ID())
-    (ClassID_traits<DataVector<M> >::ID());
+  std::vector<CLID> exp2{
+    ClassID_traits<SG::AuxVectorBase>::ID(),
+    ClassID_traits<DataVector<R> >::ID(),
+    ClassID_traits<DataVector<N> >::ID(),
+    ClassID_traits<DataVector<O> >::ID(),
+    ClassID_traits<DataVector<Q> >::ID(),
+    ClassID_traits<DataVector<M> >::ID()};
   std::sort (clids.begin(), clids.end());
   std::sort (exp2.begin(), exp2.end());
   myassert (clids == exp2);
@@ -484,22 +480,22 @@ void test_eltbaseinfo()
 {
   std::vector<const std::type_info*> tinfos;
   tinfos = SG::BaseInfo<CC>::get_ti_bases();
-  std::vector<const std::type_info*> exp1 = list_of
-    (&typeid(AA))
-    (&typeid(BB))
-    (&typeid(CC));
+  std::vector<const std::type_info*> exp1{
+     &typeid(AA),
+     &typeid(BB),
+     &typeid(CC)};
   std::sort (tinfos.begin(), tinfos.end());
   std::sort (exp1.begin(), exp1.end());
   myassert (tinfos == exp1);
 
   tinfos = SG::BaseInfo<R>::get_ti_bases();
-  std::vector<const std::type_info*> exp2 = list_of
-    (&typeid(R))
-    (&typeid(N))
-    (&typeid(O))
-    (&typeid(Q))
-    (&typeid(M))
-    (&typeid(MM));
+  std::vector<const std::type_info*> exp2{
+     &typeid(R),
+     &typeid(N),
+     &typeid(O),
+     &typeid(Q),
+     &typeid(M),
+     &typeid(MM)};
   std::sort (tinfos.begin(), tinfos.end());
   std::sort (exp2.begin(), exp2.end());
   myassert (tinfos == exp2);

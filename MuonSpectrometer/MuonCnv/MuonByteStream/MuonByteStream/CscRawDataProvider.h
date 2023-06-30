@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONBYTESTREAM_CSCRAWDATAPROVIDER_H
@@ -10,9 +10,9 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "IRegionSelector/IRegSelTool.h"
-#include "MuonAlignmentData/CorrContainer.h"  // for ALineMapContainer
 #include "MuonCnvToolInterfaces/IMuonRawDataProviderTool.h"
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
+#include "MuonReadoutGeometry/MuonDetectorManager.h"
 
 namespace Muon {
 
@@ -42,10 +42,10 @@ namespace Muon {
 
         /// ReadHandle for the input RoIs
         SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey{this, "RoIs", "OutputRoIs", "Name of RoI collection to read in"};
-
-        SG::ReadCondHandleKey<ALineMapContainer> m_ALineKey{
-            this, "ALineMapContainer", "ALineMapContainer",
-            "Name of muon alignment ALine condition data"};  // !!! REMOVEME: when MuonDetectorManager in cond store
+        // MuonDetectorManager from the conditions store
+        SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detMgrKey{this, "DetectorManagerKey", "MuonDetectorManager",
+                                                                       "Key of input MuonDetectorManager condition data"};
+       
     };
 }  // namespace Muon
 

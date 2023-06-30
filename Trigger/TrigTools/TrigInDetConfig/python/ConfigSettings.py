@@ -24,8 +24,6 @@ def getInDetTrigConfig( name ):
       #       will just hide the error until people try to use
       #       the bad slice configuration
       raise Exception( "getInDetTrigConfig() called with non existent slice: "+name )
-      return None
-
 
 class ConfigSettings_electron( _ConfigSettingsBase ):
    def __init__( self ):
@@ -238,25 +236,6 @@ class ConfigSettings_beamSpotFS( _ConfigSettingsBase ):
       self._nClustersMin    = 8
       self._UseTrigSeedML   = 4
       self._doRecord        = False
-
-
-class ConfigSettings_fullScanUTT( _ConfigSettingsBase ):
-   def __init__( self ):
-      _ConfigSettingsBase.__init__(self)
-      self._name     = "fullScanUTT"
-      self._suffix   = "FS"
-      self._roi      = "HLT_Roi_FS"
-      self._doFullScan      = True
-      self._etaHalfWidth    = 3.
-      self._phiHalfWidth    = math.pi
-      self._doTRT           = False
-      self._DoubletDR_Max   = 200
-      self._SeedRadBinWidth = 10
-      self._TripletDoPPS    = False
-      self._nClustersMin    = 8
-      self._UseTrigSeedML   = 4
-      self._vertex          = "HLT_IDVertex_FS"
-      self._actsVertex      = True
 
 
 class ConfigSettings_cosmics( _ConfigSettingsBase ):

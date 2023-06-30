@@ -13,7 +13,7 @@ atlas_add_library( LArDigitizationLib
                    PUBLIC_HEADERS LArDigitization
                    LINK_LIBRARIES AthenaKernel CaloDetDescrLib
                    LArCablingLib LArRawEvent 
-                   PRIVATE_LINK_LIBRARIES AtlasHepMCLib TruthUtils
+                   PRIVATE_LINK_LIBRARIES AtlasHepMCLib TruthUtils AthAllocators
                    GaudiKernel GeneratorObjects Identifier LArIdentifier )
 
 

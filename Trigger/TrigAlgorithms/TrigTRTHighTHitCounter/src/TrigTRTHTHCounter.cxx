@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigTRTHTHCounter.h"
@@ -8,7 +8,7 @@
 //Function to calculate distance for road algorithm
 float dist2COR(float R, float phi1, float phi2){
   float PHI= std::abs(phi1-phi2);
-  return std::abs(R*sin(PHI));
+  return std::abs(R*std::sin(PHI));
 }
 
 //TRT hit struct used for convenience
@@ -57,7 +57,6 @@ StatusCode TrigTRTHTHCounter::initialize()
 
 
 StatusCode TrigTRTHTHCounter::execute(const EventContext& ctx) const {
- using namespace xAOD;
 
  ATH_MSG_DEBUG( "Executing " <<name());
 
@@ -97,7 +96,7 @@ StatusCode TrigTRTHTHCounter::execute(const EventContext& ctx) const {
 
  //Sanity check of the ROI size
  double deltaEta= std::abs(roiDescriptor->etaPlus()-roiDescriptor->etaMinus());
- double deltaPhi=CxxUtils::deltaPhi(roiDescriptor->phiPlus(),roiDescriptor->phiMinus());
+ double deltaPhi= std::abs(CxxUtils::deltaPhi(roiDescriptor->phiPlus(),roiDescriptor->phiMinus()));
 
  ATH_MSG_DEBUG( "roiDescriptor->etaPlus() in TrigTRTHTHCounter:"<<roiDescriptor->etaPlus());
  ATH_MSG_DEBUG( "roiDescriptor->etaMinus() in TrigTRTHTHCounter:"<<roiDescriptor->etaMinus());
@@ -154,12 +153,12 @@ StatusCode TrigTRTHTHCounter::execute(const EventContext& ctx) const {
 
       //First, define coarse wedges in phi, and count the TRT hits in these wedges
       int countbin=0;	
-      if(CxxUtils::deltaPhi(hphi, static_cast<float>(roiDescriptor->phi())) < 0.1){
+      if(std::abs(CxxUtils::deltaPhi(hphi, static_cast<float>(roiDescriptor->phi()))) < 0.1){
         float startValue = roiDescriptor->phi() - m_phiHalfWidth + coarseWedgeHalfWidth;
 	float endValue = roiDescriptor->phi() + m_phiHalfWidth;
 	float increment = 2*coarseWedgeHalfWidth;
         for(float roibincenter = startValue; roibincenter < endValue; roibincenter += increment){
-          if (CxxUtils::deltaPhi(hphi,roibincenter)<=coarseWedgeHalfWidth && hth_eta_match((roiDescriptor)->eta(), heta, m_etaHalfWidth)) {
+          if (std::abs(CxxUtils::deltaPhi(hphi,roibincenter))<=coarseWedgeHalfWidth && hth_eta_match((roiDescriptor)->eta(), heta, m_etaHalfWidth)) {
 	    if(hth) count_httrt_c.at(countbin) += 1.;
 	    count_tottrt_c.at(countbin) += 1.;
 	  break; //the hit has been assigned to one of the coarse wedges, so no need to continue the for loop							
@@ -199,12 +198,12 @@ StatusCode TrigTRTHTHCounter::execute(const EventContext& ctx) const {
   //Now, define fine wedges in phi, centered around the best coarse wedge, and count the TRT hits in these fine wedges
   for(size_t v=0;v<hit.size();v++){
     int countbin=0;	
-    if(CxxUtils::deltaPhi(hit[v].phi, center_pos_phi) < 0.01){
+    if(std::abs(CxxUtils::deltaPhi(hit[v].phi, center_pos_phi)) < 0.01){
       float startValue = center_pos_phi - 3*coarseWedgeHalfWidth + fineWedgeHalfWidth;
       float endValue = center_pos_phi + 3*coarseWedgeHalfWidth;
       float increment = 2*fineWedgeHalfWidth;
       for(float roibincenter = startValue; roibincenter < endValue; roibincenter += increment){	
-        if (CxxUtils::deltaPhi(hit[v].phi,roibincenter)<=fineWedgeHalfWidth) {
+        if (std::abs(CxxUtils::deltaPhi(hit[v].phi,roibincenter))<=fineWedgeHalfWidth) {
           if(hit[v].isHT) count_httrt.at(countbin) += 1.;
           count_tottrt.at(countbin) += 1.;
           break; //the hit has been assigned to one of the fine wedges, so no need to continue the for loop							

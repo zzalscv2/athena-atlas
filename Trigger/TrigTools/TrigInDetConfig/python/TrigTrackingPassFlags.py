@@ -27,6 +27,9 @@ def signatureSpecificSettingOfFlags(flags,mode):
     flags.useNewParameterizationTRT = True
     flags.minTRTonTrk          =9
 
+    #TODO - simple ambiguitues
+    flags.useTIDE_Ambi = False  
+
     #2023fix - it should read 2
     flags.maxSiHoles           = 5
     flags.maxSCTHoles          = 5
@@ -91,7 +94,6 @@ def signatureSpecificSettingOfFlags(flags,mode):
   flags.addFlag("refitROT", True) 
   flags.addFlag("trtExtensionType", "xf") 
   flags.addFlag("doBremRecovery", False)  #setTrue for electron once validated
-
 
     
 def createTrigTrackingPassFlags(mode="InDet"):

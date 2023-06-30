@@ -5,6 +5,15 @@ from AthenaCommon import CfgMgr
 
 ############################################################################
 
+def HepMCVersion():
+    try:
+        from AthenaPython.PyAthena import HepMC3 # noqa: F401
+        HepMCVersion=3
+    except ImportError:
+        HepMCVersion=2
+    return HepMCVersion
+
+
 def genericMergeMcEventCollTool(name="MergeMcEventCollTool", **kwargs):
     if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
         from OverlayCommonAlgs.OverlayFlags import overlayFlags
@@ -12,11 +21,7 @@ def genericMergeMcEventCollTool(name="MergeMcEventCollTool", **kwargs):
     else:
         kwargs.setdefault("TruthCollOutputKey", "TruthEvent")
     kwargs.setdefault("TruthCollInputKey", "TruthEvent")
-    if 'SimpleMerge' in digitizationFlags.experimentalDigi():
-        if not digitizationFlags.doXingByXingPileUp(): # Algorithm approach
-            kwargs.setdefault("PileUpMergeSvc", "PileUpMergeSvc")
-        return CfgMgr.SimpleMergeMcEventCollTool(name, **kwargs)
-    elif 'NewMerge' in digitizationFlags.experimentalDigi():
+    if 'NewMerge' in digitizationFlags.experimentalDigi():
         if not digitizationFlags.doXingByXingPileUp(): # Algorithm approach
             kwargs.setdefault("PileUpMergeSvc", "PileUpMergeSvc")
         if digitizationFlags.doLowPtMinBias:
@@ -26,6 +31,11 @@ def genericMergeMcEventCollTool(name="MergeMcEventCollTool", **kwargs):
         # Default `PileUpType` to "Unknown"
         kwargs.setdefault("PileUpType", -1)
         return CfgMgr.NewMergeMcEventCollTool(name, **kwargs)
+    elif HepMCVersion() == 3 or 'SimpleMerge' in digitizationFlags.experimentalDigi():
+        kwargs.setdefault("OverrideEventNumbers", True)
+        if not digitizationFlags.doXingByXingPileUp(): # Algorithm approach
+            kwargs.setdefault("PileUpMergeSvc", "PileUpMergeSvc")
+        return CfgMgr.SimpleMergeMcEventCollTool(name, **kwargs)
     else:
         kwargs.setdefault("LowTimeToKeep", -50.5)
         kwargs.setdefault("HighTimeToKeep", 50.5)

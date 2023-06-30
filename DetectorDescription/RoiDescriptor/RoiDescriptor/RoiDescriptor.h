@@ -1,6 +1,6 @@
 // emacs: this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //
 //   @file    RoiDescriptor.h        
@@ -10,7 +10,6 @@
 //  
 //   @author sutt@cern.ch
 //
-//   $Id: RoiDescriptor.h, v0.0   Fri 08 Jun 2013 23:52:09 CEST sutt $
 
 
 #ifndef ROIDESCRIPTOR_ROIDESCRIPTOR_H
@@ -94,91 +93,90 @@ public:
 
   // Methods to retrieve data members
 
-  double phi() const { return m_phi; }
-  double eta() const { return m_eta; }
-  double zed() const { return m_zed; }
+  virtual double phi() const override { return m_phi; }
+  virtual double eta() const override { return m_eta; }
+  virtual double zed() const override { return m_zed; }
 
-  /// these quantities probably don't need to be used any more 
+  /// these quantities probably don't need to be used any more
   /// - they are implemented here only because we had them in 
   ///   the original legacy interface
  
-  virtual unsigned int roiId()   const { return 0; }
-  virtual unsigned int l1Id()    const { return 0; }
-  virtual unsigned int roiWord() const { return 0; }
+  virtual unsigned int roiId()   const override { return 0; }
+  virtual unsigned int l1Id()    const override { return 0; }
+  virtual unsigned int roiWord() const override { return 0; }
 
-  double zedPlus()  const { return m_zedPlus; } //!< z at the most forward end of the RoI
-  double zedMinus() const { return m_zedMinus; } //!< z at the most backward end of the RoI
+  virtual double zedPlus()  const override { return m_zedPlus; } //!< z at the most forward end of the RoI
+  virtual double zedMinus() const override { return m_zedMinus; } //!< z at the most backward end of the RoI
 
-  double etaPlus()  const { return m_etaPlus; }   //!< gets eta at zedPlus
-  double etaMinus() const { return m_etaMinus; }   //!< gets eta at zMinus
+  virtual double etaPlus()  const override { return m_etaPlus; }   //!< gets eta at zedPlus
+  virtual double etaMinus() const override { return m_etaMinus; }   //!< gets eta at zMinus
 
-  double phiPlus()  const  { return m_phiPlus; }    //!< gets phiPlus
-  double phiMinus() const  { return m_phiMinus; }   //!< gets phiMinus
+  virtual double phiPlus()  const override { return m_phiPlus; }    //!< gets phiPlus
+  virtual double phiMinus() const override { return m_phiMinus; }   //!< gets phiMinus
 
 
   /// versioning 
-  int   version() const   { return m_version; } 
-  void  version(int v)    { m_version = v; } 
+  virtual int version() const override { return m_version; }
+  void version(int v)                  { m_version = v; }
 
 
   /// output
-  virtual operator std::string() const;
+  virtual operator std::string() const override;
 
 
   /// is this a full scan RoI?
-  bool  isFullscan() const { return m_fullscan; }
+  virtual bool  isFullscan() const override { return m_fullscan; }
  
   /// SuperRoI compatability methods
 
   /// am I a SuperRoi?
-  virtual bool composite() const          { return m_composite; }
-  virtual void setComposite(bool b=true)  { m_composite=b; } 
+  virtual bool composite() const override { return m_composite; }
+  void setComposite(bool b=true)          { m_composite=b; }
 
   /// always manage constituents ???
-  virtual bool manageConstituents() const  { return m_manageConstituents; }
-  virtual void manageConstituents(bool b)  { m_manageConstituents=b; }
+  bool manageConstituents() const { return m_manageConstituents; }
+  void manageConstituents(bool b) { m_manageConstituents=b; }
 
   /// number of constituents
-  virtual unsigned size() const { return m_roiDescriptors.size(); }
+  virtual unsigned size() const override { return m_roiDescriptors.size(); }
 
   /// find an RoiDescriptor constituent
-  virtual const IRoiDescriptor* at(int i) const { return m_roiDescriptors.at(i); }
+  virtual const IRoiDescriptor* at(int i) const override { return m_roiDescriptors.at(i); }
 
-  /// clear the vector                                                                                                                               
+  /// clear the vector
   void clear()  { m_roiDescriptors.clear(); }  // setComposite(false); }
 
+  /// reserve elements in vector
   void reserve(size_t s) { m_roiDescriptors.reserve(s); }
 
-  /// add and RoiDescriptor                                                                                                                           
+  /// add a RoiDescriptor
   void push_back(const IRoiDescriptor* roi) { m_roiDescriptors.push_back(roi); setComposite(true); }
 
-  /// iterators                                                                                                                                       
-  //  std::vector<const IRoiDescriptor*>::const_iterator begin() const { return m_roiDescriptors.begin(); }
-  //  std::vector<const IRoiDescriptor*>::const_iterator end()   const { return m_roiDescriptors.end(); }
-  roi_iterator  begin() const { return m_roiDescriptors.begin(); }
-  roi_iterator  end()   const { return m_roiDescriptors.end(); }
+  /// iterators
+  virtual roi_iterator  begin() const override { return m_roiDescriptors.begin(); }
+  virtual roi_iterator  end()   const override { return m_roiDescriptors.end(); }
 
 
 
   /// methods to determine whether coordinates or stubs are within the RoI 
 
   /// return the gradients 
-  double dzdrMinus() const { return m_dzdrMinus; }       //!<  dz/dr at the rear of the RoI
-  double dzdrPlus()  const { return m_dzdrPlus; }        //!<  dz/dr at the front of the RoI
+  virtual double dzdrMinus() const override { return m_dzdrMinus; }       //!<  dz/dr at the rear of the RoI
+  virtual double dzdrPlus()  const override { return m_dzdrPlus; }        //!<  dz/dr at the front of the RoI
 
-  double drdzMinus() const { return m_drdzMinus; }       //!<  dr/dz at the rear of the RoI
-  double drdzPlus()  const { return m_drdzPlus; }        //!<  dr/dz at the front of the RoI
+  virtual double drdzMinus() const override { return m_drdzMinus; }       //!<  dr/dz at the rear of the RoI
+  virtual double drdzPlus()  const override { return m_drdzPlus; }        //!<  dr/dz at the front of the RoI
 
   /// methods to calculate z position at the RoI boundary 
   /// at a given radius
-  double zedMin(const double r) const;
-  double zedMax(const double r) const; 
+  virtual double zedMin(double r) const override;
+  virtual double zedMax(double r) const override;
 
-  double zedOuterPlus()  const { return m_zedOuterPlus; } //!< z at the most forward end of the RoI
-  double zedOuterMinus() const { return m_zedOuterMinus; } //!< z at the most backward end of the RoI
+  virtual double zedOuterPlus()  const override { return m_zedOuterPlus; } //!< z at the most forward end of the RoI
+  virtual double zedOuterMinus() const override { return m_zedOuterMinus; } //!< z at the most backward end of the RoI
 
-  double rhoMin(const double z) const; 
-  double rhoMax(const double z) const; 
+  virtual double rhoMin(double z) const override;
+  virtual double rhoMax(double z) const override;
 
 public:
 

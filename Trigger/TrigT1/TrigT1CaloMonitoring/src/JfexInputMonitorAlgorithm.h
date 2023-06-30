@@ -6,29 +6,41 @@
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "AthenaMonitoringKernel/Monitored.h"
+#include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadDecorHandle.h"
+#include "StoreGate/ReadDecorHandleKey.h"
 
-//#include "TrigT1Interfaces/TrigT1CaloDefs.h"
 #include "xAODTrigL1Calo/jFexTowerContainer.h"
 #include "xAODTrigL1Calo/jFexTower.h"
 
 class JfexInputMonitorAlgorithm : public AthMonitorAlgorithm {
-public:JfexInputMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );
-  virtual ~JfexInputMonitorAlgorithm()=default;
-  virtual StatusCode initialize() override;
-  virtual StatusCode fillHistograms( const EventContext& ctx ) const override;
+    public:
+        JfexInputMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );
+        virtual ~JfexInputMonitorAlgorithm()=default;
+        virtual StatusCode initialize() override;
+        virtual StatusCode fillHistograms( const EventContext& ctx ) const override;
 
-private:
+    private:
 
-  StringProperty m_packageName{this,"PackageName","JfexInputMonitor","group name for histograming"};
+        StringProperty m_Grouphist{this,"Grouphist","JfexInputMonitor","group name for histograming"};
 
-  // container keys including steering parameter and description
-  SG::ReadHandleKey<xAOD::jFexTowerContainer> m_jFexDataTowerKey    {this, "jFexDataTower"    ,"L1_jFexDataTowers"     ,"SG key of the input jFex Tower container"};  
-  SG::ReadHandleKey<xAOD::jFexTowerContainer> m_jFexEmulatedTowerKey{this, "jFexEmulatedTower","L1_jFexEmulatedTowers" ,"SG key of the emulated jFex Tower container"};  
-  
-  unsigned int m_InvalidCode = 4095;
-  
-  int codedVal(int, int) const;
-  
+        ToolHandle<GenericMonitoringTool> m_monTool{this,"jFEXMonTool","","Monitoring tool"};
+        void  genError(const std::string& location, const std::string& title) const;
+
+        // container keys including steering parameter and description
+        SG::ReadHandleKey<xAOD::jFexTowerContainer> m_jFexDataTowerKey    {this, "jFexDataTower","L1_jFexDataTowers","SG key of the input jFex Tower container"};
+        SG::ReadHandleKey<xAOD::jFexTowerContainer> m_jFexEmulatedTowerKey{this, "jFexEmulatedTower","L1_jFexEmulatedTowers","SG key of the emulated jFex Tower container"};
+        
+        SG::ReadDecorHandleKey<xAOD::jFexTowerContainer> m_jtowerEtMeVdecorKey{ this, "jtowerEtMeVdecorKey", m_jFexDataTowerKey, "jtowerEtMeV"       , "jFex Tower Et information in MeV"};
+        SG::ReadDecorHandleKey<xAOD::jFexTowerContainer> m_SCellEtMeVdecorKey { this, "SCellEtMeVdecorKey" , m_jFexDataTowerKey, "SCellEtMeV"        , "SCell Et sum information in MeV"};
+        SG::ReadDecorHandleKey<xAOD::jFexTowerContainer> m_TileEtMeVdecorKey  { this, "TileEtMeVdecorKey"  , m_jFexDataTowerKey, "TileEtMeV"         , "Tile Et information in MeV"};
+        SG::ReadDecorHandleKey<xAOD::jFexTowerContainer> m_jTowerEtdecorKey   { this, "jTowerEtdecorKey"   , m_jFexDataTowerKey, "emulated_jtowerEt" , "jFex Tower Et information. ENCODED!"};
+
+
+        unsigned int m_InvalidCode = 4095;
+
+        int codedVal(int, int) const;
+
 };
 #endif

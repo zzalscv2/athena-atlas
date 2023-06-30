@@ -25,12 +25,8 @@ StatusCode Muon::CscRawDataProvider::initialize() {
     ATH_CHECK(m_rawDataTool.retrieve());
 
     // We only need the region selector in RoI seeded mode
-    if (m_seededDecoding)
-        ATH_CHECK(m_regsel_csc.retrieve());
-    else
-        m_regsel_csc.disable();
-
-    ATH_CHECK(m_ALineKey.initialize(m_seededDecoding));  // !!! REMOVEME: when MuonDetectorManager in cond store
+    ATH_CHECK(m_regsel_csc.retrieve(EnableTool{m_seededDecoding}));
+    ATH_CHECK(m_detMgrKey.initialize(m_seededDecoding));  // !!! REMOVEME: when MuonDetectorManager in cond store
 
     return StatusCode::SUCCESS;
 }
@@ -42,11 +38,11 @@ StatusCode Muon::CscRawDataProvider::execute(const EventContext& ctx) const {
     ATH_MSG_VERBOSE("CscRawDataProvider::execute");
 
     if (m_seededDecoding) {
-        SG::ReadCondHandle<ALineMapContainer> readALineHandle(m_ALineKey, ctx);    // !!! REMOVEME: when MuonDetectorManager in cond store
-        if (!readALineHandle.isValid()) {                                          // !!! REMOVEME: when MuonDetectorManager in cond store
-            ATH_MSG_WARNING("Cannot retrieve ALine Handle " << m_ALineKey.key());  // !!! REMOVEME: when MuonDetectorManager in cond store
-            return StatusCode::SUCCESS;                                            // !!! REMOVEME: when MuonDetectorManager in cond store
-        }                                                                          // !!! REMOVEME: when MuonDetectorManager in cond store
+        SG::ReadCondHandle<MuonGM::MuonDetectorManager> readDetMgrHandle(m_detMgrKey, ctx);
+        if (!readDetMgrHandle.isValid()) {                                                 
+            ATH_MSG_WARNING("Cannot retrieve DetMgr Handle " << m_detMgrKey.key());      
+            return StatusCode::FAILURE;                                                 
+        }                                                                               
 
         // read in the RoIs to process
         SG::ReadHandle<TrigRoiDescriptorCollection> muonRoI(m_roiCollectionKey, ctx);

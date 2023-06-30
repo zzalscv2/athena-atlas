@@ -16,6 +16,7 @@
 #include "CLHEP/Random/RandomEngine.h"
 #include <CLHEP/Random/Randomize.h>
 
+
 using CLHEP::RandFlat;
 using CLHEP::RandGaussZiggurat;
 
@@ -62,7 +63,7 @@ StatusCode LArHitEMapToDigitAlg::initialize()
   ATH_CHECK(m_badFebKey.initialize());
   ATH_CHECK(m_adc2mevKey.initialize());
   ATH_CHECK(m_caloMgrKey.initialize());
- 
+
   ATH_CHECK(m_cablingKey.initialize());
 
   // helpers
@@ -91,11 +92,11 @@ StatusCode LArHitEMapToDigitAlg::initialize()
   ATH_CHECK(m_rndmGenSvc.retrieve());
   ATH_CHECK(m_hitMapKey.initialize());
   ATH_CHECK(m_hitMapKey_DigiHSTruth.initialize(m_doDigiTruth));
- 
+
   ATH_CHECK(m_DigitContainerName.initialize());
   ATH_CHECK(m_DigitContainerName_DigiHSTruth.initialize(m_doDigiTruth));
   return StatusCode::SUCCESS;
- 
+
 }
 
 StatusCode LArHitEMapToDigitAlg::execute(const EventContext& context) const {
@@ -118,15 +119,26 @@ StatusCode LArHitEMapToDigitAlg::execute(const EventContext& context) const {
      hitmapPtr_DigiHSTruth = hitmap_DigitHSTruth.cptr();
    }
 
-   // Prepare Output
-   auto DigitContainer = std::make_unique<LArDigitContainer>();
-   auto DigitContainer_DigiHSTruth = std::make_unique<LArDigitContainer>();
    int it,it_end;
    it =  0;
    it_end = hitmapPtr->GetNbCells();
-   DigitContainer->reserve(it_end);
-   DigitContainer_DigiHSTruth->reserve(it_end);
 
+   // Prepare Output
+   //
+   // For the standard one lets use a DataPool
+   auto DigitContainer = std::make_unique<LArDigitContainer>(SG::VIEW_ELEMENTS);
+   DigitContainer->reserve(it_end);
+   DataPool<LArDigit> dataItemsPool(context);
+   dataItemsPool.reserve(it_end);
+   //
+   // HSTruth outputt might not be needed so avoid doing anything
+   // in that case
+   std::unique_ptr<LArDigitContainer> DigitContainer_DigiHSTruth = nullptr;
+   if (m_doDigiTruth){
+     DigitContainer_DigiHSTruth = std::make_unique<LArDigitContainer>();
+     DigitContainer_DigiHSTruth->reserve(it_end);
+   }
+   //
    const std::vector<std::pair<float,float> >* TimeE;
    const std::vector<std::pair<float,float> >* TimeE_DigiHSTruth = nullptr;
 
@@ -138,7 +150,7 @@ StatusCode LArHitEMapToDigitAlg::execute(const EventContext& context) const {
    for( ; it!=it_end;++it) // now loop on cells
    {
       const LArHitList& hitlist = hitmapPtr->GetCell(it);
-      
+
       if (!m_Windows || hitlist.inWindows()) {
         TimeE = &(hitlist.getData());
         if(m_doDigiTruth) {
@@ -156,12 +168,17 @@ StatusCode LArHitEMapToDigitAlg::execute(const EventContext& context) const {
              if(m_RndmEvtOverlay) digit = hitmapPtr->GetDigit(it);
              // MakeDigit called if in no overlay mode or
              // if in overlay mode and random digit exists
-             if( (!m_RndmEvtOverlay) || (m_RndmEvtOverlay && digit) ) {
-	       LArDigit* Digit = nullptr;
-	       LArDigit* Digit_DigiHSTruth = nullptr;
-               ATH_CHECK( MakeDigit(context,cellID, ch_id, Digit, Digit_DigiHSTruth, TimeE, digit, engine, TimeE_DigiHSTruth));
-	       DigitContainer->push_back(Digit);
-	       if ( m_doDigiTruth && Digit_DigiHSTruth ) DigitContainer_DigiHSTruth->push_back(Digit_DigiHSTruth);
+             if ((!m_RndmEvtOverlay) || (m_RndmEvtOverlay && digit)) {
+               LArDigit* Digit = nullptr;
+               LArDigit* Digit_DigiHSTruth = nullptr;
+               ATH_CHECK(MakeDigit(context, cellID, ch_id, Digit,
+                                   dataItemsPool,
+                                   Digit_DigiHSTruth, TimeE, digit, engine,
+                                   TimeE_DigiHSTruth));
+               DigitContainer->push_back(Digit);
+               if (DigitContainer_DigiHSTruth){
+                 DigitContainer_DigiHSTruth->push_back(Digit_DigiHSTruth);
+               }
              }
            }
         }
@@ -173,7 +190,7 @@ StatusCode LArHitEMapToDigitAlg::execute(const EventContext& context) const {
 
   SG::WriteHandle<LArDigitContainer> DigitContainerHandle( m_DigitContainerName, context);
   ATH_CHECK(DigitContainerHandle.record( std::move(DigitContainer) ) );
-  if ( m_doDigiTruth ){
+  if ( DigitContainer_DigiHSTruth ){
     SG::WriteHandle<LArDigitContainer> DigitContainer_DigiHSTruthHandle( m_DigitContainerName_DigiHSTruth, context);
     ATH_CHECK(DigitContainer_DigiHSTruthHandle.record( std::move(DigitContainer_DigiHSTruth) ) );
   }
@@ -182,13 +199,17 @@ StatusCode LArHitEMapToDigitAlg::execute(const EventContext& context) const {
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArHitEMapToDigitAlg::MakeDigit(const EventContext& ctx, const Identifier & cellId,
-                                    const HWIdentifier & ch_id,
-                                    LArDigit*& Digit, LArDigit*& Digit_DigiHSTruth,
-                                    const std::vector<std::pair<float,float> >* TimeE,
-                                    const LArDigit * rndmEvtDigit, CLHEP::HepRandomEngine * engine,
-                                    const std::vector<std::pair<float,float> >* TimeE_DigiHSTruth) const
-{
+StatusCode LArHitEMapToDigitAlg::MakeDigit(
+    const EventContext& ctx,
+    const Identifier& cellId,
+    const HWIdentifier& ch_id,
+    LArDigit*& Digit,
+    DataPool<LArDigit>& dataItemsPool,
+    LArDigit*& Digit_DigiHSTruth,
+    const std::vector<std::pair<float, float>>* TimeE,
+    const LArDigit* rndmEvtDigit,
+    CLHEP::HepRandomEngine* engine,
+    const std::vector<std::pair<float, float>>* TimeE_DigiHSTruth) const {
   bool createDigit_DigiHSTruth = true;
 
   int sampleGainChoice{2};
@@ -218,7 +239,7 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(const EventContext& ctx, const Identi
   SG::ReadCondHandle<ILArPedestal> pedHdl(m_pedestalKey, ctx);
   const ILArPedestal* pedestal=*pedHdl;
 
-  const ILArNoise* noise=nullptr;  
+  const ILArNoise* noise=nullptr;
   if ( (!m_RndmEvtOverlay || m_isMcOverlay)  && !m_pedestalNoise && m_NoiseOnOff ){
     SG::ReadCondHandle<ILArNoise> noiseHdl(m_noiseKey, ctx);
     noise=*noiseHdl;
@@ -232,7 +253,7 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(const EventContext& ctx, const Identi
 
   /** Retrieve BadChannels */
   SG::ReadCondHandle<LArBadChannelCont> bch{m_bcContKey,ctx};
-  const LArBadChannelCont* bcCont{*bch}; 
+  const LArBadChannelCont* bcCont{*bch};
 
   int iCalo=0;
   if(m_larem_id->is_lar_em(cellId)) {
@@ -254,8 +275,6 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(const EventContext& ctx, const Identi
 //
 // ....... dump info ................................
 //
-
-
 #ifndef NDEBUG
   ATH_MSG_DEBUG("    Cellid " << m_larem_id->show_to_string(cellId));
   ATH_MSG_DEBUG("    SF: " << SF);
@@ -283,9 +302,13 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(const EventContext& ctx, const Identi
 
 
   if (!isDead) {
-    if( this->ConvertHits2Samples(ctx, cellId,ch_id,initialGain,TimeE, Samples).isFailure() ) return StatusCode::SUCCESS;
+    if( this->ConvertHits2Samples(ctx, cellId,ch_id,initialGain,TimeE, Samples).isFailure() ) {
+      return StatusCode::SUCCESS;
+    }
     if(m_doDigiTruth){
-      if( this->ConvertHits2Samples(ctx, cellId,ch_id,initialGain,TimeE_DigiHSTruth, Samples_DigiHSTruth).isFailure() ) return StatusCode::SUCCESS;
+      if( this->ConvertHits2Samples(ctx, cellId,ch_id,initialGain,TimeE_DigiHSTruth, Samples_DigiHSTruth).isFailure() ) {
+        return StatusCode::SUCCESS;
+      }
     }
   }
 
@@ -325,8 +348,11 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(const EventContext& ctx, const Identi
 
      int nmax=m_NSamples;
      if ((int)(rndm_digit_samples.size()) < m_NSamples) {
-         ATH_MSG_WARNING("Less digit Samples than requested in digitization for cell " << ch_id.get_compact() << " Digit has " << rndm_digit_samples.size() << " samples.  Digitization request " << m_NSamples); 
-         nmax=rndm_digit_samples.size();
+        ATH_MSG_WARNING(
+            "Less digit Samples than requested in digitization for cell "
+            << ch_id.get_compact() << " Digit has " << rndm_digit_samples.size()
+            << " samples.  Digitization request " << m_NSamples);
+        nmax = rndm_digit_samples.size();
      }
      for(i=0 ; i<nmax ; i++)
      {
@@ -378,12 +404,13 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(const EventContext& ctx, const Identi
   //
   // ......... try a gain
   //
-  if ( pseudoADC3 <= m_HighGainThresh[iCalo])
+  if (pseudoADC3 <= m_HighGainThresh[iCalo]) {
     igain = CaloGain::LARHIGHGAIN;
-   else if ( pseudoADC3 <= m_LowGainThresh[iCalo])
+  } else if (pseudoADC3 <= m_LowGainThresh[iCalo]) {
     igain = CaloGain::LARMEDIUMGAIN;
-  else
+  } else {
     igain = CaloGain::LARLOWGAIN;
+  }
 
  // check that select gain is never lower than random gain in case of overlay
   if (rndmGain==CaloGain::LARMEDIUMGAIN && igain==CaloGain::LARHIGHGAIN) igain=CaloGain::LARMEDIUMGAIN;
@@ -400,101 +427,115 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(const EventContext& ctx, const Identi
      }
 
      if (!isDead) {
-       if( this->ConvertHits2Samples(ctx, cellId,ch_id,igain,TimeE, Samples) == StatusCode::FAILURE ) return StatusCode::SUCCESS;
+       if( this->ConvertHits2Samples(ctx, cellId,ch_id,igain,TimeE, Samples) == StatusCode::FAILURE ) {
+         return StatusCode::SUCCESS;
+       }
        if(m_doDigiTruth){
-         if( this->ConvertHits2Samples(ctx, cellId,ch_id,igain,TimeE_DigiHSTruth, Samples_DigiHSTruth) == StatusCode::FAILURE ) return StatusCode::SUCCESS;
+         if( this->ConvertHits2Samples(ctx, cellId,ch_id,igain,TimeE_DigiHSTruth, Samples_DigiHSTruth) == StatusCode::FAILURE ) {
+           return StatusCode::SUCCESS;
+         }
        }
      }
-
    }
 
 //
 // ........ add the noise ................................
 //
-  
+
   double Rndm[32]{};
   int BvsEC=0;
   if(iCalo==EM || iCalo==EMIW) BvsEC=std::abs(m_larem_id->barrel_ec(cellId));
 
   bool addedNoise=false;
-  if(    m_NoiseOnOff
-      && (    (BvsEC==1 && m_NoiseInEMB)
-           || (BvsEC>1  && m_NoiseInEMEC)
-           || (iCalo==HEC && m_NoiseInHEC)
-           || (iCalo==FCAL && m_NoiseInFCAL)
-         )
-    )
-    //add the noise only in the wanted sub-detectors
+  if (m_NoiseOnOff &&
+      ((BvsEC == 1 && m_NoiseInEMB) || (BvsEC > 1 && m_NoiseInEMEC) ||
+       (iCalo == HEC && m_NoiseInHEC) || (iCalo == FCAL && m_NoiseInFCAL)))
+  // add the noise only in the wanted sub-detectors
   {
-     if ( !m_RndmEvtOverlay ) {
-        if (!m_pedestalNoise) {
-          SigmaNoise =noise->noise(ch_id,igain );
-        } else {
-          float noise = pedestal->pedestalRMS(ch_id,igain);
-          if (noise >= (1.0+LArElecCalib::ERRORCODE) ) SigmaNoise = noise;
-          else SigmaNoise=0.;
-        }
-        // Sqrt of noise covariance matrix
-	const std::vector<float>& CorGen=autoCorrNoise->autoCorrSqrt(cellId,igain);
-	if (CorGen.size() < (unsigned)m_NSamples*m_NSamples) {
-	  ATH_MSG_ERROR("Noise AutoCorr too small, need " << m_NSamples*m_NSamples << " points for " 
-			<<  m_NSamples << " samples.");
-	  return StatusCode::FAILURE;
-	}
+     if (!m_RndmEvtOverlay) {
+       if (!m_pedestalNoise) {
+         SigmaNoise = noise->noise(ch_id, igain);
+       } else {
+         float noise = pedestal->pedestalRMS(ch_id, igain);
+         if (noise >= (1.0 + LArElecCalib::ERRORCODE))
+          SigmaNoise = noise;
+         else
+          SigmaNoise = 0.;
+       }
+       // Sqrt of noise covariance matrix
+       const std::vector<float>& CorGen =
+           autoCorrNoise->autoCorrSqrt(cellId, igain);
+       if (CorGen.size() < (unsigned)m_NSamples * m_NSamples) {
+         ATH_MSG_ERROR("Noise AutoCorr too small, need "
+                       << m_NSamples * m_NSamples << " points for "
+                       << m_NSamples << " samples.");
+         return StatusCode::FAILURE;
+       }
 
+       RandGaussZiggurat::shootArray(engine, m_NSamples, Rndm, 0., 1.);
 
-        RandGaussZiggurat::shootArray(engine,m_NSamples,Rndm,0.,1.);
-
-        int index;
-        for (int i=0;i<m_NSamples;i++) {
-           Noise[i]=0.;
-           for(int j=0;j<=i;j++) {
-             index = i*m_NSamples + j;
-             Noise[i] += Rndm[j] * CorGen[index];
-           }
-           Noise[i]=Noise[i]*SigmaNoise;
-        }
-        addedNoise=true;
-     } else  {
-        // overlay case a priori don't add any noise
-        for (int i=0;i<m_NSamples;i++) Noise[i]=0.;
-        // if gain from zerobias events is < gain from mixed events => add extra noise to account for gain vs noise dependance
-        //   done in a simple way without taking into account the time correlation of this extra noise properly
-        if (rndmEvtDigit) {
-            // if gain of cell is different from ZB event gain
-            if (igain > rndmEvtDigit->gain() ) {
-               double SigmaNoiseZB=0.;    // noise in ZB event for gain of ZB event
-               double SigmaNoise=0.;      // noise expected for new gain value
-               double SigmaExtraNoise=0.;  // quadratic difference of noise values
-               if (!m_pedestalNoise) {
-                  SigmaNoiseZB =  noise->noise(ch_id,rndmEvtDigit->gain());
-                  SigmaNoise   =  noise->noise(ch_id,igain );
-               }    
-               else {
-                  float noise = pedestal->pedestalRMS(ch_id,rndmEvtDigit->gain() );
-                  if (noise >= (1.0+LArElecCalib::ERRORCODE) ) SigmaNoiseZB = noise;
-                  else SigmaNoiseZB=0.;
-                  noise = pedestal->pedestalRMS(ch_id,igain);
-                  if (noise >= (1.0+LArElecCalib::ERRORCODE) ) SigmaNoise=noise;
-                  else SigmaNoise=0.;
-               }
-               // Convert SigmaNoiseZB in noise in ADC counts for igain conversion
-               auto polynom_adc2mevZB = adc2MeVs->ADC2MEV(cellId,rndmEvtDigit->gain() );
-               auto polynom_adc2mev = adc2MeVs->ADC2MEV(cellId,igain);
-               if ( polynom_adc2mevZB.size()>1 &&  polynom_adc2mev.size()>1) {
-                  if (polynom_adc2mev[1] >0.) {
-                   SigmaNoiseZB = SigmaNoiseZB * (polynom_adc2mevZB[1])/(polynom_adc2mev[1]);
-                   if (SigmaNoise > SigmaNoiseZB) SigmaExtraNoise = sqrt(SigmaNoise*SigmaNoise - SigmaNoiseZB*SigmaNoiseZB);
-                  }
-               }    // check that AC2MeV factors are there
-               RandGaussZiggurat::shootArray(engine,m_NSamples,Rndm,0.,1.);   // generate noise
-               for (int i=0;i<m_NSamples;i++) Noise[i] = SigmaExtraNoise * Rndm[i];
-               addedNoise=true;
-            }  // different gains
-        }      // rndm Digit is there
-     }         // rndm Overlay test
-  }            // add noise ?
-//
+       int index;
+       for (int i = 0; i < m_NSamples; i++) {
+         Noise[i] = 0.;
+         for (int j = 0; j <= i; j++) {
+          index = i * m_NSamples + j;
+          Noise[i] += Rndm[j] * CorGen[index];
+         }
+         Noise[i] = Noise[i] * SigmaNoise;
+       }
+       addedNoise = true;
+     } else {
+       // overlay case a priori don't add any noise
+       for (int i = 0; i < m_NSamples; i++)
+         Noise[i] = 0.;
+       // if gain from zerobias events is < gain from mixed events => add extra
+       // noise to account for gain vs noise dependance
+       //   done in a simple way without taking into account the time
+       //   correlation of this extra noise properly
+       if (rndmEvtDigit) {
+         // if gain of cell is different from ZB event gain
+         if (igain > rndmEvtDigit->gain()) {
+          double SigmaNoiseZB = 0.;  // noise in ZB event for gain of ZB event
+          double SigmaNoise = 0.;    // noise expected for new gain value
+          double SigmaExtraNoise = 0.;  // quadratic difference of noise values
+          if (!m_pedestalNoise) {
+            SigmaNoiseZB = noise->noise(ch_id, rndmEvtDigit->gain());
+            SigmaNoise = noise->noise(ch_id, igain);
+          } else {
+            float noise = pedestal->pedestalRMS(ch_id, rndmEvtDigit->gain());
+            if (noise >= (1.0 + LArElecCalib::ERRORCODE))
+                 SigmaNoiseZB = noise;
+            else
+                 SigmaNoiseZB = 0.;
+            noise = pedestal->pedestalRMS(ch_id, igain);
+            if (noise >= (1.0 + LArElecCalib::ERRORCODE))
+                 SigmaNoise = noise;
+            else
+                 SigmaNoise = 0.;
+          }
+          // Convert SigmaNoiseZB in noise in ADC counts for igain conversion
+          auto polynom_adc2mevZB =
+              adc2MeVs->ADC2MEV(cellId, rndmEvtDigit->gain());
+          auto polynom_adc2mev = adc2MeVs->ADC2MEV(cellId, igain);
+          if (polynom_adc2mevZB.size() > 1 && polynom_adc2mev.size() > 1) {
+            if (polynom_adc2mev[1] > 0.) {
+                 SigmaNoiseZB = SigmaNoiseZB * (polynom_adc2mevZB[1]) /
+                                (polynom_adc2mev[1]);
+                 if (SigmaNoise > SigmaNoiseZB)
+                   SigmaExtraNoise = sqrt(SigmaNoise * SigmaNoise -
+                                          SigmaNoiseZB * SigmaNoiseZB);
+            }
+          }  // check that AC2MeV factors are there
+          RandGaussZiggurat::shootArray(engine, m_NSamples, Rndm, 0.,
+                                        1.);  // generate noise
+          for (int i = 0; i < m_NSamples; i++)
+            Noise[i] = SigmaExtraNoise * Rndm[i];
+          addedNoise = true;
+         }  // different gains
+       }    // rndm Digit is there
+     }      // rndm Overlay test
+  }         // add noise ?
+            //
 // ......... convert into adc counts  ................................
 //
   Pedestal = pedestal->pedestal(ch_id,igain);
@@ -579,27 +620,28 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(const EventContext& ctx, const Identi
   }
 
 //
-// ...... create the LArDigit and push it into the Digit container ..................
+// ...... create the LArDigit .............
 //
-  Digit = new LArDigit(ch_id,igain,std::move(AdcSample));
+  Digit = dataItemsPool.nextElementPtr();
+  (*Digit)=LArDigit(ch_id,igain,std::move(AdcSample));
 
-
-  if(m_doDigiTruth && createDigit_DigiHSTruth){
+  if (m_doDigiTruth && createDigit_DigiHSTruth) {
     createDigit_DigiHSTruth = false;
     Digit_DigiHSTruth = nullptr;
 
-    for(int i=0; i<m_NSamples; i++) {
-      if(Samples_DigiHSTruth[i] != 0) createDigit_DigiHSTruth = true;
+    for (int i = 0; i < m_NSamples; i++) {
+      if (Samples_DigiHSTruth[i] != 0)
+         createDigit_DigiHSTruth = true;
     }
 
-    Digit_DigiHSTruth = new LArDigit(ch_id,igain,std::move(AdcSample_DigiHSTruth));
+    Digit_DigiHSTruth =
+        new LArDigit(ch_id, igain, std::move(AdcSample_DigiHSTruth));
   }
-
 
   return StatusCode::SUCCESS;
 }
 
-// ----------------------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------
 
 StatusCode LArHitEMapToDigitAlg::ConvertHits2Samples(const EventContext& ctx,
                                                      const Identifier & cellId, const HWIdentifier ch_id, CaloGain::CaloGain igain,

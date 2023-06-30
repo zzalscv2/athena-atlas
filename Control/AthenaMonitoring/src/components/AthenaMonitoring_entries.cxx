@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "../AthenaMon.h"
@@ -14,8 +14,6 @@
 #include "../TriggerTranslatorSimple.h"
 #include "../ExampleMonitorAlgorithm.h"
 #include "../ForceIDConditionsAlg.h"
-#include "../ForceMSConditionsAlg.h"
-
 
 DECLARE_COMPONENT( AthenaMon )
 DECLARE_COMPONENT( AthenaMonManager )
@@ -29,4 +27,3 @@ DECLARE_COMPONENT( DQBadLBFilterAlg )
 DECLARE_COMPONENT( TriggerTranslatorToolSimple )
 DECLARE_COMPONENT( ExampleMonitorAlgorithm )
 DECLARE_COMPONENT( ForceIDConditionsAlg )
-DECLARE_COMPONENT( ForceMSConditionsAlg )

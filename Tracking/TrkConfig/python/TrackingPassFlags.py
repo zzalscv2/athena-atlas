@@ -1119,6 +1119,18 @@ def createTRTStandaloneTrackingPassFlags():
     return icf
 
 #####################################################################
+
+def printActiveConfig(flags):
+    print()
+    print("************************************************************************")
+
+    print("******************** Tracking reconstruction Config ********************")
+    print("                     Active Config is ",flags.Tracking.ActiveConfig.extension)
+    flags.dump(pattern="Tracking.ActiveConfig.*", evaluate=True)
+    print("************************************************************************")
+    return
+
+
 #####################################################################
 #####################################################################
 

@@ -15,7 +15,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from MuonCondTest.MdtCablingTester import SetupArgParser
     parser = SetupArgParser()
-    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences/22.0/q445/v20/myESD.pool.root"])
+    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/UnitTestInput/Run3MC.ESD.pool.root"])
     args = parser.parse_args()
 
     flags = initConfigFlags()

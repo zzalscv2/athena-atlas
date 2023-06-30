@@ -121,8 +121,7 @@ if __name__=='__main__':
     # Force loading of conditions in MT mode
     if flags.Concurrency.NumThreads > 0:
         from AthenaConfiguration.ComponentAccumulator import ConfigurationError
-        for condalg, alg in (("PixelDetectorElementCondAlg", "ForceIDConditionsAlg"),
-                             ("MuonAlignmentCondAlg", "ForceMSConditionsAlg")):
+        for condalg, alg in [("PixelDetectorElementCondAlg", "ForceIDConditionsAlg")]:
             try:
                 cfg.getCondAlgo(condalg)
             except ConfigurationError:
