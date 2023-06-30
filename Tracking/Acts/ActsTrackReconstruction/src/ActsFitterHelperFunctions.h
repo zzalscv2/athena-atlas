@@ -19,7 +19,7 @@
 namespace ActsTrk::FitterHelperFunctions {
   template<typename trajectory_t>
   Acts::Result<void> gainMatrixUpdate(const Acts::GeometryContext& gctx,
-                    typename Acts::MultiTrajectory<trajectory_t>::TrackStateProxy trackState, 
+                    typename trajectory_t::TrackStateProxy trackState, 
                     Acts::Direction direction, 
                     const Acts::Logger& logger) {
     Acts::GainMatrixUpdater updater;
@@ -28,7 +28,7 @@ namespace ActsTrk::FitterHelperFunctions {
 
   template<typename trajectory_t>
   Acts::Result<void> gainMatrixSmoother(const Acts::GeometryContext& gctx,
-                Acts::MultiTrajectory<trajectory_t>& trajectory, 
+                trajectory_t& trajectory, 
                 size_t entryIndex, 
                 const Acts::Logger& logger) {
     Acts::GainMatrixSmoother smoother;
