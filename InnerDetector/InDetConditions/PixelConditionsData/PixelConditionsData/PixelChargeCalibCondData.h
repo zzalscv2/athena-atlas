@@ -69,8 +69,6 @@ class PixelChargeCalibCondData
     float getChargeLUTFEI4(unsigned int moduleHash, unsigned int FE, unsigned int ToT) const;
     float getToTLUTFEI4(unsigned int moduleHash, unsigned int FE, float Q) const;
 
-    void clear();
-
   private:
     std::size_t m_maxModuleHash = 0;
 

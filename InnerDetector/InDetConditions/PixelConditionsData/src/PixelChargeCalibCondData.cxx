@@ -85,7 +85,7 @@ int PixelChargeCalibCondData::getAnalogThreshold(InDetDD::PixelDiodeType type, u
 
   std::stringstream error;
   error << "PixelChargeCalibCondData::getAnalogThreshold(" << static_cast<int>(type) << ", " << moduleHash << ", " << FE << "): array out of bounds";
-  throw std::range_error(error.str());
+  throw std::out_of_range(error.str());
 }
 
 int PixelChargeCalibCondData::getAnalogThresholdSigma(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
@@ -98,7 +98,7 @@ int PixelChargeCalibCondData::getAnalogThresholdSigma(InDetDD::PixelDiodeType ty
 
   std::stringstream error;
   error << "PixelChargeCalibCondData::getAnalogThresholdSigma(" << static_cast<int>(type) << ", " << moduleHash << ", " << FE << "): array out of bounds";
-  throw std::range_error(error.str());
+  throw std::out_of_range(error.str());
 }
 
 int PixelChargeCalibCondData::getAnalogThresholdNoise(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
@@ -111,7 +111,7 @@ int PixelChargeCalibCondData::getAnalogThresholdNoise(InDetDD::PixelDiodeType ty
 
   std::stringstream error;
   error << "PixelChargeCalibCondData::getAnalogThresholdNoise(" << static_cast<int>(type) << ", " << moduleHash << ", " << FE << "): array out of bounds";
-  throw std::range_error(error.str());
+  throw std::out_of_range(error.str());
 }
 
 int PixelChargeCalibCondData::getInTimeThreshold(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
@@ -124,7 +124,7 @@ int PixelChargeCalibCondData::getInTimeThreshold(InDetDD::PixelDiodeType type, u
 
   std::stringstream error;
   error << "PixelChargeCalibCondData::getInTimeThreshold(" << static_cast<int>(type) << ", " << moduleHash << ", " << FE << "): array out of bounds";
-  throw std::range_error(error.str());
+  throw std::out_of_range(error.str());
 }
 
 float PixelChargeCalibCondData::getQ2TotA(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
@@ -137,7 +137,7 @@ float PixelChargeCalibCondData::getQ2TotA(InDetDD::PixelDiodeType type, unsigned
 
   std::stringstream error;
   error << "PixelChargeCalibCondData::getQ2TotA(" << static_cast<int>(type) << ", " << moduleHash << ", " << FE << "): array out of bounds";
-  throw std::range_error(error.str());
+  throw std::out_of_range(error.str());
 }
 
 float PixelChargeCalibCondData::getQ2TotE(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
@@ -150,7 +150,7 @@ float PixelChargeCalibCondData::getQ2TotE(InDetDD::PixelDiodeType type, unsigned
 
   std::stringstream error;
   error << "PixelChargeCalibCondData::getQ2TotE(" << static_cast<int>(type) << ", " << moduleHash << ", " << FE << "): array out of bounds";
-  throw std::range_error(error.str());
+  throw std::out_of_range(error.str());
 }
 
 float PixelChargeCalibCondData::getQ2TotC(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
@@ -163,7 +163,7 @@ float PixelChargeCalibCondData::getQ2TotC(InDetDD::PixelDiodeType type, unsigned
 
   std::stringstream error;
   error << "PixelChargeCalibCondData::getQ2TotC(" << static_cast<int>(type) << ", " << moduleHash << ", " << FE << "): array out of bounds";
-  throw std::range_error(error.str());
+  throw std::out_of_range(error.str());
 }
 
 float PixelChargeCalibCondData::getQ2TotF(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
@@ -176,7 +176,7 @@ float PixelChargeCalibCondData::getQ2TotF(InDetDD::PixelDiodeType type, unsigned
 
   std::stringstream error;
   error << "PixelChargeCalibCondData::getQ2TotF(" << static_cast<int>(type) << ", " << moduleHash << ", " << FE << "): array out of bounds";
-  throw std::range_error(error.str());
+  throw std::out_of_range(error.str());
 }
 
 float PixelChargeCalibCondData::getQ2TotG(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
@@ -189,7 +189,7 @@ float PixelChargeCalibCondData::getQ2TotG(InDetDD::PixelDiodeType type, unsigned
 
   std::stringstream error;
   error << "PixelChargeCalibCondData::getQ2TotG(" << static_cast<int>(type) << ", " << moduleHash << ", " << FE << "): array out of bounds";
-  throw std::range_error(error.str());
+  throw std::out_of_range(error.str());
 }
 
 float PixelChargeCalibCondData::getTotRes(unsigned int moduleHash, unsigned int FE, float Q) const
@@ -202,7 +202,7 @@ float PixelChargeCalibCondData::getTotRes(unsigned int moduleHash, unsigned int 
   } else {
     std::stringstream error;
     error << "PixelChargeCalibCondData::getTotRes(" << moduleHash << ", " << FE << "): res1 array out of bounds";
-    throw std::range_error(error.str());
+    throw std::out_of_range(error.str());
   }
   }
 
@@ -214,7 +214,7 @@ float PixelChargeCalibCondData::getTotRes(unsigned int moduleHash, unsigned int 
   } else {
     std::stringstream error;
     error << "PixelChargeCalibCondData::getTotRes(" << moduleHash << ", " << FE << "): res2 array out of bounds";
-    throw std::range_error(error.str());
+    throw std::out_of_range(error.str());
   }
   }
   return res1 + res2 * Q;
@@ -275,12 +275,22 @@ float PixelChargeCalibCondData::getCharge(InDetDD::PixelDiodeType type, unsigned
 }
 
 void PixelChargeCalibCondData::setCalibrationStrategy(unsigned int moduleHash, CalibrationStrategy strategy)
-{
+{ 
+  if (moduleHash > m_maxModuleHash) {
+    std::stringstream error;
+    error << "PixelChargeCalibCondData::setCalibrationStrategy(" << moduleHash << "): array out of bounds";
+    throw std::out_of_range(error.str());
+  }
   m_calibrationStrategy[moduleHash] = strategy;
 }
 
 PixelChargeCalibCondData::CalibrationStrategy PixelChargeCalibCondData::getCalibrationStrategy(unsigned int moduleHash) const
 {
+  if (moduleHash > m_maxModuleHash){
+    std::stringstream error;
+    error << "PixelChargeCalibCondData::getCalibrationStrategy(" << moduleHash << "): array out of bounds";
+    throw std::out_of_range(error.str());
+  }
   auto itr = m_calibrationStrategy.find(moduleHash);
   if (itr != m_calibrationStrategy.end()) {
     return itr->second;
@@ -289,7 +299,12 @@ PixelChargeCalibCondData::CalibrationStrategy PixelChargeCalibCondData::getCalib
 }
 
 void PixelChargeCalibCondData::setTot2Charges(unsigned int moduleHash, IBLModule charges)
-{
+{ 
+  if (moduleHash > m_maxModuleHash){
+    std::stringstream error;
+    error << "PixelChargeCalibCondData::setTot2Charges(" << moduleHash << ", vector<array<float, 16>>): array out of bounds";
+    throw std::out_of_range(error.str());
+  }
   m_tot2Charges[moduleHash] = std::move(charges);
 }
 
@@ -302,7 +317,7 @@ const PixelChargeCalibCondData::IBLCalibration &PixelChargeCalibCondData::getTot
 
   std::stringstream error;
   error << "PixelChargeCalibCondData::getTot2Charges(" << moduleHash << ", " << FE << "): array out of bounds";
-  throw std::range_error(error.str());
+  throw std::out_of_range(error.str());
 }
 
 float PixelChargeCalibCondData::getChargeLUTFEI4(unsigned int moduleHash, unsigned int FE, unsigned int ToT) const
@@ -310,7 +325,7 @@ float PixelChargeCalibCondData::getChargeLUTFEI4(unsigned int moduleHash, unsign
   if (ToT < 1 || ToT > IBLCalibrationSize) {
     std::stringstream error;
     error << "PixelChargeCalibCondData::getChargeLUTFEI4(" << moduleHash << ", " << FE << ", " << ToT << "): array out of bounds";
-    throw std::runtime_error(error.str());
+    throw std::out_of_range(error.str());
   }
 
   const IBLCalibration &charges = getTot2Charges(moduleHash,FE);
