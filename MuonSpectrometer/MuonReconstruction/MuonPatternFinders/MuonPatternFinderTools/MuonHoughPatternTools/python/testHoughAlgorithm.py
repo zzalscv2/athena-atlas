@@ -5,7 +5,7 @@ def SetupArgParser():
 
     parser = ArgumentParser()
     parser.add_argument("-o", "--output", dest="output", default='', help="Text file containing each cabling channel", metavar="FILE")
-    parser.add_argument("--inputFile", "-i", default=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences/master/q443/v9/myESD.pool.root"], 
+    parser.add_argument("--inputFile", "-i", default=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/UnitTestInput/Run3MC.ESD.pool.root"], 
                         help="Input file to run on ", nargs="+")
     return parser
     

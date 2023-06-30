@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #### Simple script to test the reproducibility of the database read-in of the NSWCondAlg
-primary_script="python -m MuonCondTest.NswCondAlgTest -i /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences/22.0/q445/v20/myESD.pool.root"
+primary_script="python -m MuonCondTest.NswCondAlgTest"
 
 sides="MMA MMC STGCA STGCC"
 conv="TDO PDO"
