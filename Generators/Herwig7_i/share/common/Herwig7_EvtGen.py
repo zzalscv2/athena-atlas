@@ -1,8 +1,10 @@
 ## Run EvtGen afterburner on top of Pythia 8
 assert hasattr(genSeq, "Herwig7")
 include("EvtGen_i/EvtGen_Fragment.py")
-evgenConfig.auxfiles += ['HerwigppInclusiveP8.pdt']
-genSeq.EvtInclusiveDecay.pdtFile = "HerwigppInclusiveP8.pdt"
+
+# Set the aux-files depending on the current Herwig version
+evgenConfig.auxfiles += ['Herwig71Inclusive.pdt']
+genSeq.EvtInclusiveDecay.pdtFile = "Herwig71Inclusive.pdt"
 
 Herwig7Config.add_commands("""
 # Quick "fix" to the mismatch between Herwig 7 and EvtGen of the masses below
@@ -28,6 +30,7 @@ set /Herwig/Particles/B_c-:NominalMass 6.277
 #
 #  Since EvtGen will redecay everything anyway, we'll make these particles stable in Herwig
 #
+
 set /Herwig/Particles/D'_s1+:NominalMass 2.4595000e+00
 set /Herwig/Particles/D'_s1+:Width 0.001
 set /Herwig/Particles/D'_s1+:WidthCut 0.01
@@ -52,6 +55,4 @@ set /Herwig/Particles/D'_s1-:Stable Stable
 set /Herwig/Particles/D'_s1+:Stable Stable
 set /Herwig/Particles/D_s1-:Stable Stable
 set /Herwig/Particles/D_s1+:Stable Stable
-
 """)
-
