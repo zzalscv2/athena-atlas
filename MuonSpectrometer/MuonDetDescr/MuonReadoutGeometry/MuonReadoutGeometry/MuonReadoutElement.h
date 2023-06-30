@@ -68,11 +68,11 @@ namespace MuonGM {
         const Amg::Transform3D& defTransform() const;
 
         // Amdb local (szt) to global coord
-        Amg::Vector3D AmdbLRSToGlobalCoords(const Amg::Vector3D& x) const;
-        Amg::Transform3D AmdbLRSToGlobalTransform() const;
+        virtual Amg::Vector3D AmdbLRSToGlobalCoords(const Amg::Vector3D& x) const;
+        virtual Amg::Transform3D AmdbLRSToGlobalTransform() const;
         // Global to Amdb local (szt) coord
-        Amg::Vector3D GlobalToAmdbLRSCoords(const Amg::Vector3D& x) const;
-        Amg::Transform3D GlobalToAmdbLRSTransform() const;
+        virtual Amg::Vector3D GlobalToAmdbLRSCoords(const Amg::Vector3D& x) const;
+        virtual Amg::Transform3D GlobalToAmdbLRSTransform() const;
 
         // like MDT, RPC, TGC, CSC
         inline std::string getTechnologyType() const;
