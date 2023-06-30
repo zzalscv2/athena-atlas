@@ -3,13 +3,6 @@
 */
 
 #include "LArRawEvent/LArDigit.h"
-#include <cstdio>
-#include <typeinfo>
-
-LArDigit::operator std::string() const{
-  std::string digitString = typeid( *this ).name();
- return digitString ;
-}
 
 // set method
 void LArDigit::setSamples(const std::vector<short>& samples)

@@ -31,12 +31,6 @@ class LArDigitContainer : public DataVector<LArDigit> {
   /** @brief Alternative Construction with ownership policy*/
   LArDigitContainer(SG::OwnershipPolicy ownPolicy) : DataVector<LArDigit>(ownPolicy) { }
    
-/**
-  * Conversion operator to a std::string <br><br>
-  * Can be used in a cast operation : (std::string) digit_container
-  */
-  
-  virtual operator std::string() const;
 
 /**
   * destructor 
