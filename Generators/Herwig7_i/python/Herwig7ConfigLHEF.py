@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ## \file Herwig7ConfigLHEF.py
 ## \brief Configuration class for showering LHE files from MG5_aMC@NLO or PowhegBox
@@ -130,7 +130,8 @@ saverun {} /Herwig/Generators/EventGenerator
   ## Sets up reading of events from an LHE file
   ##
   ## \param usespin Use the spin of tau leptons from the LHE file (spins of other particles are ignored anyways)
-  def __lhef_commands(self, lhe_filename="events.lhe", me_pdf_order="NLO", usespin=True):
+  ## \param usepwghlhereader Uses a different LHE reader, which is able to propagte multiple event weights
+  def __lhef_commands(self, lhe_filename="events.lhe", me_pdf_order="NLO", usespin=True, usepwghlhereader=False):
 
     if me_pdf_order not in ["LO", "NLO"]:
       raise RuntimeError(hw7Utils.ansi_format_error("Herwig7ConfigLHEF.py:__lhef_commands: Parameter 'me_pdf_order' must either be 'LO' or 'NLO'!"))
@@ -158,6 +159,9 @@ saverun {} /Herwig/Generators/EventGenerator
 # set /Herwig/EventHandlers/LHEReader:PDFB /Herwig/Partons/Hard{MEPDFOrder}PDF
 """.format(MEPDFOrder = me_pdf_order)
 
+    pwg_reader_lib = "library libpowhegHerwig.so" 
+
+
     self.commands += """
 ## ----------------------------
 ## Read in Events from LHE File
@@ -165,8 +169,9 @@ saverun {} /Herwig/Generators/EventGenerator
 
 ## Create the Handler and Reader
 library LesHouches.so
-create ThePEG::LesHouchesFileReader /Herwig/EventHandlers/LHEReader
 create ThePEG::LesHouchesEventHandler /Herwig/EventHandlers/LHEHandler
+{PwgReaderLib}
+create ThePEG::{PwgReader}LesHouchesFileReader /Herwig/EventHandlers/LHEReader
 
 ## Set LHE filename
 set /Herwig/EventHandlers/LHEReader:FileName {FileName}
@@ -197,8 +202,10 @@ set /Herwig/EventHandlers/LHEReader:Cuts /Herwig/Cuts/NoCuts
 
 {BeamCommands}
 """.format(FileName = lhe_filename,
+           PwgReaderLib = pwg_reader_lib if usepwghlhereader else "",
+           PwgReader = "powheg" if usepwghlhereader else "",
            Beams = self.beams,
-           IncludeSpin = "Yes" if usespin is True else "No",
+           IncludeSpin = "Yes" if usespin else "No",
            MomentumTreatment = momentum_treatment,
            BeamCommands = beam_commands)
 
@@ -236,10 +243,12 @@ set /Herwig/EventHandlers/LHEReader:Cuts /Herwig/Cuts/NoCuts
 set /Herwig/Shower/KinematicsReconstructor:ReconstructionOption General
 set /Herwig/Shower/KinematicsReconstructor:InitialInitialBoostOption LongTransBoost
 set /Herwig/Shower/KinematicsReconstructor:InitialStateReconOption Rapidity
-set /Herwig/Shower/KinematicsReconstructor:FinalStateReconOption Default
 set /Herwig/Shower/ShowerHandler:SpinCorrelations No
 """
-
+     
+    # this option is not available anymore in Herwig 7.2:
+    if os.environ['HERWIG7VER'].startswith('7.1'):
+      self.command += """set /Herwig/Shower/KinematicsReconstructor:FinalStateReconOption Default"""
 
   ## Commands specific to showering of events produced with PowhegBox
   ##
@@ -249,6 +258,7 @@ set /Herwig/Shower/ShowerHandler:SpinCorrelations No
   ##                         hard process generation and the PDF set with
   ##                         generator.me_pdf_commands.
   ## \param[in] usespin 
+  ## \param[in] usepwghlhereader 
   ##
   ## Specifying the LHE file name with
   ##
@@ -271,11 +281,14 @@ set /Herwig/Shower/ShowerHandler:SpinCorrelations No
   ##
   ## should still work.
   ##
-  def lhef_powhegbox_commands(self, lhe_filename="events.lhe", me_pdf_order="NLO", usespin=True):
+  ## If you want to use the pwglhereader, needed to propagte multiple event weights
+  ## you need to use a gridpack that contains the powhegHerwig.so 
+  ## 
+  def lhef_powhegbox_commands(self, lhe_filename="events.lhe", me_pdf_order="NLO", usespin=True, usepwhglhereader=False):
 
     if me_pdf_order not in ["LO", "NLO"]:
       raise RuntimeError(hw7Utils.ansi_format_error("Herwig7ConfigLHEF.py:lhef_powhegbox_commands: Parameter 'me_pdf_order' must either be 'LO' or 'NLO'!"))
 
     self.set_lhef_powhegbox_commands = True
 
-    self.__lhef_commands(lhe_filename, me_pdf_order, usespin)
+    self.__lhef_commands(lhe_filename, me_pdf_order, usespin, usepwhglhereader)

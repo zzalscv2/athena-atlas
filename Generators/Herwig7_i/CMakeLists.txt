@@ -4,7 +4,7 @@
 atlas_subdir( Herwig7_i )
 
 # External dependencies:
-find_package( Boost COMPONENTS filesystem)
+find_package( Boost )
 find_package( Herwig3 COMPONENTS HerwigAPI )
 find_package( ThePEG COMPONENTS "ThePEG" "LesHouches${CMAKE_SHARED_LIBRARY_SUFFIX}" )
 find_package( GSL )
