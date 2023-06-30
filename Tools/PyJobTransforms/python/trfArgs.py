@@ -56,7 +56,7 @@ def addStandardTrfArgs(parser):
 #  @param parser trfArgParser object
 #  @param maxEventsDefaultSubstep Special option which can change the default substep for maxEvents (needed by
 #  some special transforms).
-def addAthenaArguments(parser, maxEventsDefaultSubstep='first', addValgrind=True, addPerfMon=True):
+def addAthenaArguments(parser, maxEventsDefaultSubstep='first', addValgrind=True, addPerfMon=True, addVTune=True):
     parser.defineArgGroup('Athena', 'General Athena Options')
     parser.add_argument('--athenaopts', group = 'Athena', type=argFactory(trfArgClasses.argSubstepList, splitter=' ', runarg=False), nargs="+", metavar='substep:ATHENAOPTS', 
                         help='Extra options to pass to athena. Opts will split on spaces. '
@@ -134,6 +134,9 @@ def addAthenaArguments(parser, maxEventsDefaultSubstep='first', addValgrind=True
     if addValgrind:
         addValgrindArguments(parser)
 
+    if addVTune:
+        addVTuneArguments(parser)
+
 ## @brief Options for PerfMon
 #  @param parser trfArgParser object
 def addPerfMonArguments(parser):
@@ -175,10 +178,47 @@ def addValgrindArguments(parser):
             splitter = ',',
             runarg = False
         ),
-        metavar = 'OPT1,OPT2,OPT3', 
+        metavar = 'OPT1,OPT2,OPT3',
         help = 'Extra options passed to Valgrind when running Athena. ' +
         'Options starting with "-" must be given as ' +
         '--valgrindExtraOpts=\'--opt1=foo,--opt2=bar,...\''
+    )
+
+## @brief Add VTune options
+def addVTuneArguments(parser):
+    parser.defineArgGroup('VTune', 'General VTune Options')
+    parser.add_argument(
+        '--vtune',
+        group = 'VTune',
+        type = argFactory(
+            trfArgClasses.argBool,
+            runarg = False
+        ),
+        metavar = "substep:BOOL",
+        help = 'Enable VTune'
+    )
+    parser.add_argument(
+        '--vtuneDefaultOpts',
+        group = 'VTune',
+        type = argFactory(
+            trfArgClasses.argBool,
+            runarg = False
+        ),
+        metavar = "substep:BOOL",
+        help = 'Enable default VTune options'
+    )
+    parser.add_argument(
+        '--vtuneExtraOpts',
+        group = 'VTune',
+        type = argFactory(
+            trfArgClasses.argList,
+            splitter = ',',
+            runarg = False
+        ),
+        metavar = 'OPT1,OPT2,OPT3',
+        help = 'Extra options passed to VTune when running Athena. ' +
+        'Options starting with "-" must be given as ' +
+        '--vtuneExtraOpts=\'-opt1=foo,-opt2=bar,...\''
     )
 
 ## @brief Options related to the setup of the ATLAS detector (used in simulation and digitisation

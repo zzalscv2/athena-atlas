@@ -1630,6 +1630,62 @@ def ValgrindCommand(
         ))
         raise(Exception)
 
+### @brief return VTune command
+#   @detail This function returns a VTune command for use with Athena. The
+#   command is returned as a string (by default) or a list, as requested using
+#   the argument returnFormat.
+#   The function will return a default VTune command specification, unless
+#   the user suppress them through an option. To append additional options to
+#   the command specification the argument extraOptionsList is used. This
+#   causes the list of extra specified command options to be appended to
+#   the command specification, which will contain the default options unless
+#   these are suppressed.
+#   The Athena serialised configuration file is specified using the argument
+#   AthenaSerialisedConfigurationFile.
+#   @return command as string
+def VTuneCommand(
+    defaultOptions                    = True,
+    extraOptionsList                  = None,
+    AthenaSerialisedConfigurationFile = "athenaConf.pkl",
+    isCAEnabled                       = False,
+    returnFormat                      = "string"
+    ):
+
+    # Access VTune suppressions files by finding the paths from
+    # environment variables. Append the files to the VTune suppressions
+    # options.
+    optionsList = ["vtune"]
+    # If default options are not suppressed, use them.
+    if defaultOptions:
+        optionsList.append("-run-pass-thru=--no-altstack")
+        optionsList.append("-mrte-mode=native")
+    # If extra options are specified, append them to the existing options.
+    isCollectSpecified=False
+    if extraOptionsList:
+        for option in extraOptionsList:
+            optionsList.append(option)
+            if option.startswith("-collect="):
+                isCollectSpecified=True
+    if not isCollectSpecified:
+        optionsList.append("-collect=hotspots")
+    optionsList.append("-- $(which python)")
+    if not isCAEnabled:
+        optionsList.append("$(which athena.py)")
+    else:
+        optionsList.append("$(which CARunner.py)")
+    optionsList.append(AthenaSerialisedConfigurationFile)
+    # Return the command in the requested format, string (by default) or list.
+    if returnFormat is None or returnFormat == "string":
+        return(" ".join(optionsList))
+    elif returnFormat == "list":
+        return(optionsList)
+    else:
+        print(
+            "error: invalid VTune command format request (requested " +
+            "format: {format}; valid formats: string, list)".format(
+            format = returnFormat
+        ))
+        raise(Exception)
 
 # calculate cpuTime from os.times() times tuple
 def calcCpuTime(start, stop):

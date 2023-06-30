@@ -25,7 +25,7 @@ msg = logging.getLogger(__name__)
 from PyJobTransforms.trfJobOptions import JobOptionsTemplate
 from PyJobTransforms.trfUtils import asetupReport, asetupReleaseIsOlderThan, unpackDBRelease, setupDBRelease, \
     cvmfsDBReleaseCheck, forceToAlphaNum, \
-    ValgrindCommand, isInteractiveEnv, calcCpuTime, calcWallTime, analytic, reportEventsPassedSimFilter
+    ValgrindCommand, VTuneCommand, isInteractiveEnv, calcCpuTime, calcWallTime, analytic, reportEventsPassedSimFilter
 from PyJobTransforms.trfExeStepTools import commonExecutorStepName, executorStepSuffix
 from PyJobTransforms.trfExitCodes import trfExit
 from PyJobTransforms.trfLogger import stdLogLevels
@@ -1574,8 +1574,42 @@ class athenaExecutor(scriptExecutor):
                     )
                     msg.debug("Valgrind command: {command}".format(command = command))
                     print(command, file=wrapper)
+                # If VTune is engaged, a serialised Athena configuration file
+                # is generated for use with a subsequent run of Athena with
+                # VTune.
+                elif 'vtune' in self.conf._argdict and self.conf._argdict['vtune'].value is True:
+                    msg.info('VTune engaged')
+                    # Define the file name of the serialised Athena
+                    # configuration.
+                    AthenaSerialisedConfigurationFile = "{name}Conf.pkl".format(
+                        name = self._name
+                    )
+                    # Run Athena for generation of its serialised configuration.
+                    print(' '.join(self._cmd), "--config-only={0}".format(AthenaSerialisedConfigurationFile), file=wrapper)
+                    print('if [ $? != "0" ]; then exit 255; fi', file=wrapper)
+                    # Generate a VTune command, suppressing or ussing default
+                    # options as requested and extra options as requested.
+                    if 'vtuneDefaultOpts' in self.conf._argdict:
+                        defaultOptions = self.conf._argdict['vtuneDefaultOpts'].value
+                    else:
+                        defaultOptions = True
+                    if 'vtuneExtraOpts' in self.conf._argdict:
+                        extraOptionsList = self.conf._argdict['vtuneExtraOpts'].value
+                    else:
+                        extraOptionsList = None
+                    msg.debug("requested VTune command basic options: {options}".format(options = defaultOptions))
+                    msg.debug("requested VTune command extra options: {options}".format(options = extraOptionsList))
+                    command = VTuneCommand(
+                        defaultOptions = defaultOptions,
+                        extraOptionsList = extraOptionsList,
+                        AthenaSerialisedConfigurationFile = \
+                            AthenaSerialisedConfigurationFile,
+                        isCAEnabled = self._isCAEnabled()
+                    )
+                    msg.debug("VTune command: {command}".format(command = command))
+                    print(command, file=wrapper)
                 else:
-                    msg.info('Valgrind not engaged')
+                    msg.info('Valgrind/VTune not engaged')
                     # run Athena command
                     print(' '.join(self._cmd), file=wrapper)
             os.chmod(self._wrapperFile, 0o755)

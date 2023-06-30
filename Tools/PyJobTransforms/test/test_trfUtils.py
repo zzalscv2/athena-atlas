@@ -73,6 +73,11 @@ class TestValgrindCommand(unittest.TestCase):
         vgc=ValgrindCommand()
         self.assertTrue(vgc.startswith('valgrind'))
 
+class TestVTuneCommand(unittest.TestCase):
+    def test_vtunearguments(self):
+        vgc=VTuneCommand()
+        self.assertTrue(vgc.startswith('vtune'))
+
 class TestVersionDetection(unittest.TestCase):
     def test_asetup_version_detection(self):
         self.assertFalse(asetupReleaseIsOlderThan('Athena,master,latest', 22))
