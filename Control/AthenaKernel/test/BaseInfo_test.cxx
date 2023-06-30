@@ -13,14 +13,11 @@
 
 #include "AthenaKernel/BaseInfo.h"
 #include "AthenaKernel/CLASS_DEF.h"
-#include "boost/assign/list_of.hpp"
 #include <iostream>
 #include <algorithm>
 #include <cassert>
 
 using std::cout;
-using boost::assign::list_of;
-
 struct AA
 {
   AA (int the_x=0): x(the_x) {}
@@ -117,42 +114,42 @@ int test1()
 
   std::vector<CLID> clids;
   clids = CC_C::get_bases();
-  std::vector<CLID> exp1 = list_of
-    (ClassID_traits<CC>::ID())
-    (ClassID_traits<BB>::ID())
-    (ClassID_traits<AA>::ID());
+  std::vector<CLID> exp1{
+    ClassID_traits<CC>::ID(),
+    ClassID_traits<BB>::ID(),
+    ClassID_traits<AA>::ID()};
   std::sort (clids.begin(), clids.end());
   std::sort (exp1.begin(), exp1.end());
   assert (clids == exp1);
 
   std::vector<const std::type_info*> tinfos;
   tinfos = CC_C::get_ti_bases();
-  std::vector<const std::type_info*> exp1ti = list_of
-    (&typeid(CC))
-    (&typeid(BB))
-    (&typeid(AA));
+  std::vector<const std::type_info*> exp1ti{
+    &typeid(CC),
+    &typeid(BB),
+    &typeid(AA)};
   std::sort (tinfos.begin(), tinfos.end());
   std::sort (exp1ti.begin(), exp1ti.end());
   assert (tinfos == exp1ti);
 
   clids = R_C::get_bases();
-  std::vector<CLID> exp2 = list_of
-    (ClassID_traits<M>::ID())
-    (ClassID_traits<N>::ID())
-    (ClassID_traits<O>::ID())
-    (ClassID_traits<Q>::ID())
-    (ClassID_traits<R>::ID());
+  std::vector<CLID> exp2{
+    ClassID_traits<M>::ID(),
+    ClassID_traits<N>::ID(),
+    ClassID_traits<O>::ID(),
+    ClassID_traits<Q>::ID(),
+    ClassID_traits<R>::ID()};
   std::sort (clids.begin(), clids.end());
   std::sort (exp2.begin(), exp2.end());
   assert (clids == exp2);
 
   tinfos = R_C::get_ti_bases();
-  std::vector<const std::type_info*> exp2ti = list_of
-    (&typeid(M))
-    (&typeid(N))
-    (&typeid(O))
-    (&typeid(Q))
-    (&typeid(R));
+  std::vector<const std::type_info*> exp2ti{
+    &typeid(M),
+    &typeid(N),
+    &typeid(O),
+    &typeid(Q),
+    &typeid(R)};
   std::sort (tinfos.begin(), tinfos.end());
   std::sort (exp2ti.begin(), exp2ti.end());
   assert (tinfos == exp2ti);
@@ -252,29 +249,29 @@ int test1()
   assert (typeid(SG::BaseType<SG::Bases<N>::bases::Base1>::is_virtual) ==
           typeid(std::true_type));
 
-  std::vector<CLID> exp3 = list_of
-    (ClassID_traits<AA>::ID());
+  std::vector<CLID> exp3{
+    ClassID_traits<AA>::ID()};
   clids = SG::BaseInfoBase::find (typeid (I1))->get_bases();
   assert (clids == exp3);
 
-  std::vector<const std::type_info*> exp3ti = list_of
-    (&typeid (AA))
-    (&typeid (I1));
+  std::vector<const std::type_info*> exp3ti{
+    &typeid (AA),
+    &typeid (I1)};
   std::sort (exp3ti.begin(), exp3ti.end());
   tinfos = SG::BaseInfoBase::find (typeid (I1))->get_ti_bases();
   std::sort (tinfos.begin(), tinfos.end());
   assert (tinfos == exp3ti);
 
-  std::vector<CLID> exp4 = list_of
-    (ClassID_traits<AA>::ID())
-    (ClassID_traits<I2>::ID());
+  std::vector<CLID> exp4{
+    ClassID_traits<AA>::ID(),
+    ClassID_traits<I2>::ID()};
   clids = SG::BaseInfoBase::find (ClassID_traits<I2>::ID())->get_bases();
   std::sort (clids.begin(), clids.end());
   assert (clids == exp4);
 
-  std::vector<const std::type_info*> exp4ti = list_of
-    (&typeid (AA))
-    (&typeid (I2));
+  std::vector<const std::type_info*> exp4ti{
+    &typeid (AA),
+    &typeid (I2)};
   std::sort (exp4ti.begin(), exp4ti.end());
   tinfos = SG::BaseInfoBase::find (typeid (I2))->get_ti_bases();
   std::sort (tinfos.begin(), tinfos.end());
@@ -282,11 +279,11 @@ int test1()
 
   const SG::BaseInfoBase* jbib = SG::BaseInfoBase::find (typeid (J));
   tinfos = jbib->get_ti_bases();
-  std::vector<const std::type_info*> exp5ti = list_of
-    (&typeid (AA))
-    (&typeid (X1))
-    (&typeid (M))
-    (&typeid (J));
+  std::vector<const std::type_info*> exp5ti{
+    &typeid (AA),
+    &typeid (X1),
+    &typeid (M),
+    &typeid (J)};
   std::sort (exp5ti.begin(), exp5ti.end());
   std::sort (tinfos.begin(), tinfos.end());
   assert (tinfos == exp5ti);
@@ -296,9 +293,9 @@ int test1()
 
   const SG::BaseInfoBase* kbib = SG::BaseInfoBase::find (typeid (K));
   tinfos = kbib->get_ti_bases();
-  std::vector<const std::type_info*> exp6ti = list_of
-    (&typeid (AA))
-    (&typeid (K));
+  std::vector<const std::type_info*> exp6ti{
+    &typeid (AA),
+    &typeid (K)};
   std::sort (exp6ti.begin(), exp6ti.end());
   std::sort (tinfos.begin(), tinfos.end());
   assert (tinfos == exp6ti);
@@ -324,8 +321,8 @@ void test2()
   std::cout << "test2\n";
   const SG::BaseInfoBase& bib = SG::BaseInfo<K>::baseinfo();
   std::vector<CLID> clids = bib.get_copy_conversions();
-  std::vector<CLID> exp1 = list_of
-    (ClassID_traits<M>::ID());
+  std::vector<CLID> exp1{
+    ClassID_traits<M>::ID()};
   assert (clids == exp1);
 
   const SG::CopyConversionBase* b = bib.copy_conversion (clids[0]);
