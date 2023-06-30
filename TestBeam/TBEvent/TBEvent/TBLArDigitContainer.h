@@ -42,13 +42,6 @@ class TBLArDigitContainer : public DataVector<LArDigit> {
  public :
  
    TBLArDigitContainer() : DataVector<LArDigit>() { }
-   
-/**
-  * Convertion operator to a std::string <br><br>
-  * Can be used in a cast operation : (std::string) digit_container
-  */
-  
-  virtual operator std::string() const;
 
 /**
   * destructor 

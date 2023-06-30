@@ -67,10 +67,6 @@ class LArDigit  {
   /** @return a reference to a stl vector containing the sample values */
   const std::vector<short>& samples() const { return m_samples; }
 
-  /** @brief Conversion operator to a std::string <br> Can be used in a cast
-   * operation : (std::string) digit <br> */
-  virtual operator std::string() const;
-
   /** @brief Set new digits in object.
       @param[in] samples  vector of ADC time samples
   */
