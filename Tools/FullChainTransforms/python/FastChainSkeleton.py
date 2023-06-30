@@ -130,6 +130,13 @@ def fromRunArgs(runArgs):
     # To respect --athenaopts 
     flags.fillFromArgs()
 
+    # Moving here so that it is ahead of flags being locked. Need to
+    # iterate on exact best position w.r.t. above calls
+    # Handle metadata correctly
+    if flags.Overlay.FastChain:
+        from OverlayConfiguration.OverlayMetadata import fastChainOverlayMetadataCheck
+        fastChainOverlayMetadataCheck(flags)
+
     # Lock flags
     flags.lock()
 

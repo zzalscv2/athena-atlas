@@ -127,8 +127,14 @@ def fromRunArgs(runArgs):
     # Pre-exec
     processPreExec(runArgs, flags)
 
-    # To respect --athenaopts 
+    # To respect --athenaopts
     flags.fillFromArgs()
+
+    # Moving here so that it is ahead of flags being locked. Need to
+    # iterate on exact best position w.r.t. above calls
+    from OverlayConfiguration.OverlayMetadata import overlayMetadataCheck
+    # Handle metadata correctly
+    overlayMetadataCheck(flags)
 
     # Lock flags
     flags.lock()

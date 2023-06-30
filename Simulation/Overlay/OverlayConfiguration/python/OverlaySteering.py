@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Main steering for MC+MC and MC+data overlay
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -9,8 +9,6 @@ from AthenaConfiguration.DetectorConfigFlags import getEnabledDetectors
 from AthenaConfiguration.Enums import LHCPeriod
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from Digitization.DigitizationParametersConfig import writeDigitizationParameters
-from OverlayConfiguration.OverlayMetadata import overlayMetadataCheck, \
-    fastChainOverlayMetadataCheck
 
 from InDetOverlay.BCMOverlayConfig import BCMOverlayCfg
 from InDetOverlay.ITkPixelOverlayConfig import ITkPixelOverlayCfg
@@ -48,11 +46,6 @@ def OverlayMainCfg(configFlags):
 def OverlayMainContentCfg(configFlags):
     """Main overlay content"""
 
-    # Handle metadata correctly
-    if configFlags.Overlay.FastChain:
-        fastChainOverlayMetadataCheck(configFlags)
-    else:
-        overlayMetadataCheck(configFlags)
     acc = writeDigitizationParameters(configFlags)
 
     # Add event info overlay
