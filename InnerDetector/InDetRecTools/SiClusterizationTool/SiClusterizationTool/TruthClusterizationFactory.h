@@ -73,7 +73,7 @@ namespace InDet {
     ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", "Random Number Service used in TruthClusterizationFactory"};
     Gaudi::Property<std::string> m_rndmEngineName {this, "RndmEngine", "TruthClustering", "Random Engine Name"};
     ATHRNG::RNGWrapper*      m_rndmEngine{nullptr};
-    Gaudi::Property<bool> m_usePUHits{this, "usePUHits", false, "Take into account PU hits as contributing particles for NN emulation"};
+    Gaudi::Property<bool> m_discardPUHits{this, "discardPUHits", true, "Discard PU hits for NN emulation"};
 
    };
    
