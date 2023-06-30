@@ -138,6 +138,12 @@ namespace MuonGM {
         void  clearALinePar();
         void  clearBLinePar() { m_BLinePar = nullptr; }
         
+        // Amdb local (szt) to global coord
+        virtual Amg::Vector3D AmdbLRSToGlobalCoords(const Amg::Vector3D& x) const override final { return AmdbLRSToGlobalTransform()*x; }
+        virtual Amg::Transform3D AmdbLRSToGlobalTransform() const override final { return absTransform()*Amg::Translation3D(0, 0, m_offset)*getDelta(); }
+        // Global to Amdb local (szt) coord
+        virtual Amg::Vector3D GlobalToAmdbLRSCoords(const Amg::Vector3D& x) const override final { return GlobalToAmdbLRSTransform()*x; }
+        virtual Amg::Transform3D GlobalToAmdbLRSTransform() const override final { return AmdbLRSToGlobalTransform().inverse(); }
 
     private:
         using PCBPassivation = NswPassivationDbData::PCBPassivation;
