@@ -8,21 +8,12 @@
 #include "FPGATrackSimObjects/FPGATrackSimConstants.h"
 #include <iostream>
 #include <iomanip>
-#include <TMath.h>
+#include <cmath>
 using namespace std;
 
 ClassImp(FPGATrackSimTrack)
 // first stage only
 
-FPGATrackSimTrack::FPGATrackSimTrack()
-{
-  // nothing to do here
-}
-
-FPGATrackSimTrack::~FPGATrackSimTrack()
-{
-  if (not m_hits.empty() ) m_hits.clear();
-}
 
 std::vector<float> FPGATrackSimTrack::getCoords(unsigned ilayer) const
 {
@@ -65,15 +56,15 @@ std::vector<float> FPGATrackSimTrack::computeIdealCoords(unsigned ilayer) const
     expectedGPhi -= target_r * houghRho; //first order
 
     if (m_trackCorrType == TrackCorrType::Second) {
-      hitGPhi += (pow(m_hits[ilayer].getR() * houghRho, 3.0) / 6.0); //higher order
-      expectedGPhi -= (pow(target_r * houghRho, 3.0) / 6.0); //higher order
+      hitGPhi += (std::pow(m_hits[ilayer].getR() * houghRho, 3.0) / 6.0); //higher order
+      expectedGPhi -= (std::pow(target_r * houghRho, 3.0) / 6.0); //higher order
     }
 
     double hitZ = m_hits[ilayer].getZ();
     if (m_hits[ilayer].getR() > 1e-8) {
       hitZ -= m_hits[ilayer].getGCotTheta() * (m_hits[ilayer].getR() - htt::TARGET_R_1STAGE[ilayer]); //first order
       if (m_trackCorrType == TrackCorrType::Second)
-        hitZ -= (m_hits[ilayer].getGCotTheta() * pow(m_hits[ilayer].getR(), 3.0) * houghRho * houghRho) / 6.0; //higher order
+        hitZ -= (m_hits[ilayer].getGCotTheta() * std::pow(m_hits[ilayer].getR(), 3.0) * houghRho * houghRho) / 6.0; //higher order
     }
 
     coords.push_back(hitZ);
@@ -88,7 +79,7 @@ std::vector<float> FPGATrackSimTrack::computeIdealCoords(unsigned ilayer) const
     if (m_hits[ilayer].getR() > 1e-8) {
       z -= m_hits[ilayer].getGCotTheta() * (m_hits[ilayer].getR() - target_r); //first order
       if (m_trackCorrType == TrackCorrType::Second)
-        z -= m_hits[ilayer].getGCotTheta() * (pow(m_hits[ilayer].getR(), 3.0) * trackTwoRhoInv * trackTwoRhoInv) / 6.0; //higher order
+        z -= m_hits[ilayer].getGCotTheta() * (std::pow(m_hits[ilayer].getR(), 3.0) * trackTwoRhoInv * trackTwoRhoInv) / 6.0; //higher order
     }
 
     coords.push_back(z);
@@ -153,8 +144,8 @@ void FPGATrackSimTrack::setPhi(float phi, bool ForceRange) {
       }
     }
     else {
-      while (phi >= TMath::Pi()) phi -= TMath::TwoPi();
-      while (phi < -TMath::Pi()) phi += TMath::TwoPi();
+      while (phi >= M_PI) phi -= (2. * M_PI);
+      while (phi < -M_PI) phi += (2. * M_PI);
     }
   }
   m_phi = phi;

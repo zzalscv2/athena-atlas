@@ -97,7 +97,9 @@ FPGATrackSimMultiTruth FPGATrackSimRoad::getTruth() const
             if (x.second & (1 << i))
                 w += (i < nPixel) ? 2 : 1; // double weight pixels
         }
-
+        if (n == 0){
+          throw "divide by zero in FPGATrackSimRoad::getTruth";
+        }
         mt.add(x.first, static_cast<float>(w) / n);
     }
 

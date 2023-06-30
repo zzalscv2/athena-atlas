@@ -15,8 +15,6 @@
 class FPGATrackSimTrack : public TObject {
 
 public:
-  FPGATrackSimTrack();
-  virtual ~FPGATrackSimTrack();
 
   TrackCorrType getTrackCorrType() const { return m_trackCorrType; }
   TrackStage getTrackStage() const { return m_trackStage; }

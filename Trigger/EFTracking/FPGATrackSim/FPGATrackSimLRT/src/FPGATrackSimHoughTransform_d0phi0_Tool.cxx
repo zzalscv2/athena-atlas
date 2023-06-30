@@ -481,7 +481,7 @@ void FPGATrackSimHoughTransform_d0phi0_Tool::addRoad(std::vector<const FPGATrack
 	}
       }
     }
-
+    if (bin_scale == 0) bin_scale = 1; //avoid divide by zero,use 1:1 scale
     unsigned y_bin_min = floor(1.0 * y / bin_scale) * bin_scale;
     unsigned y_bin_max = ceil(1.0 * y / bin_scale) * bin_scale;
     if (y_bin_min == y_bin_max) y_bin_max++;

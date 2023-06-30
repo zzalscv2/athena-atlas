@@ -233,7 +233,12 @@ void FPGATrackSimEtaPatternFilterTool::addRedundantPatterns(std::set<EtaPattern>
 
 FPGATrackSimRoad_Hough FPGATrackSimEtaPatternFilterTool::buildRoad(std::pair<EtaPattern, layer_bitmask_t> const & patt, FPGATrackSimRoad* origr) const
 {
-  FPGATrackSimRoad_Hough r(*dynamic_cast<FPGATrackSimRoad_Hough*>(origr)); // only works with Hough roads TODO!
+  auto p = dynamic_cast<FPGATrackSimRoad_Hough*>(origr);
+  if (not p){
+    ATH_MSG_FATAL("Dynamic cast failure in FPGATrackSimEtaPatternFilterTool::buildRoad");
+    throw "FPGATrackSimEtaPatternFilterTool::buildRoad error";
+  }
+  FPGATrackSimRoad_Hough r(*p); // only works with Hough roads TODO!
 
   r.setHitLayers(patt.second);
   for (unsigned lyr = 0; lyr < m_nLayers; lyr++)
