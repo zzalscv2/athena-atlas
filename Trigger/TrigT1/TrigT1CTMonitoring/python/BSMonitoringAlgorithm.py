@@ -586,7 +586,7 @@ def BSMonitoringConfig(inputFlags):
         myGroup.defineHistogram('candPtECX;candPtEC', title='EC cand pT;pT index;candidates', path=monPath,xbins=15,xmin=0.5,xmax=15.5,opt='kAlwaysCreate')
         myGroup.defineHistogram('candPtFWX;candPtFW', title='FW cand pT;pT index;candidates', path=monPath,xbins=15,xmin=0.5,xmax=15.5,opt='kAlwaysCreate')
         myGroup.defineHistogram('candCount',title='Candidates distrib. per event (central slice);candidates',type='TH1I',path=monPath,xbins=candidateWordsPerTimeslice,duration='' if inputFlags.Common.isOnline else 'lb',opt='kAlwaysCreate')
-        myGroup.defineHistogram('candCountVsLBX,candCountVsLBY;candCountVsLB',title='Candidates distrib. per event (central slice) vs LB;candidates',type='TH2I',path=monPath,ybins=candidateWordsPerTimeslice,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candCountVsLBX,candCountVsLBY;candCountVsLB',title='Candidates distrib. per event (central slice) vs LB;LB;candidates',type='TH2I',path=monPath,xmin=0.5,xmax=2000.5,xbins=2000,ybins=candidateWordsPerTimeslice,opt='kAlwaysCreate')
 
         monPath="/MUCTPI/Cand/Expert"
         myGroup.defineHistogram('candSLVsLBBAX,candSLVsLBBAY;candSLVsLBBA', title='BA cand SL vs LB;LB;BA sect. number', type='TH2F', path=monPath,xbins=2000,xmin=0.5,xmax=2000.5, ybins=64,ymin=-0.5,ymax=63.5 ,opt='kAlwaysCreate')
