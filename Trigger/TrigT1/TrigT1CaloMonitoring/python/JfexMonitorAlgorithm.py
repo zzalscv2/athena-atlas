@@ -19,7 +19,7 @@ def JfexMonitoringConfig(inputFlags):
 
     # add any steering
     groupName = 'JfexMonitor' # the monitoring group name is also used for the package name
-    JfexMonAlg.PackageName = groupName
+    JfexMonAlg.Grouphist = groupName
     
     mainDir = 'L1Calo'
     trigPath = 'Jfex/'

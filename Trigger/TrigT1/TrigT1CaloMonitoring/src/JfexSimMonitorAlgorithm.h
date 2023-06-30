@@ -26,7 +26,11 @@ class JfexSimMonitorAlgorithm : public AthMonitorAlgorithm {
 
     private:
 
-        StringProperty m_packageName{this,"PackageName","JfexSimMonitor","group name for histograming"};
+        StringProperty m_Grouphist   {this,"Grouphist"       ,"JfexSimMonitor","group name for histograming"};
+        
+        ToolHandle<GenericMonitoringTool> m_monTool{this,"jFEXMonTool","","Monitoring tool"};
+        void  genError(const std::string& location, const std::string& title) const;
+        
         
         // container keys for jfex input data
         SG::ReadHandleKey<xAOD::jFexTowerContainer> m_jFexTowerKey{this, "jFexTowerContainer","L1_jFexDataTowers","SG key of the input jFex Tower container"};

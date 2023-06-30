@@ -7,8 +7,11 @@ JfexSimMonitorAlgorithm::JfexSimMonitorAlgorithm( const std::string& name, ISvcL
 
 StatusCode JfexSimMonitorAlgorithm::initialize() {
 
-    ATH_MSG_DEBUG("JfexSimMonitorAlgorith::initialize");
-    ATH_MSG_DEBUG("Package Name "<< m_packageName);
+    ATH_MSG_DEBUG("Initializing JfexSimMonitorAlgorithm algorithm with name: "<< name());
+    ATH_MSG_DEBUG("Package Name "<< m_Grouphist);
+    ATH_CHECK(m_monTool.retrieve());
+    ATH_MSG_DEBUG("Logging errors to " << m_monTool.name() << " monitoring tool");
+
 
     ATH_MSG_DEBUG("m_data_key_jJ "   << m_data_key_jJ   );
     ATH_MSG_DEBUG("m_data_key_jLJ "  << m_data_key_jLJ  );
@@ -228,7 +231,7 @@ void JfexSimMonitorAlgorithm::fillHist(const std::string & pkg, const std::strin
     auto jFexInput   = Monitored::Scalar< std::string >  ("input",input);
     auto jFexItem    = Monitored::Scalar< std::string >  ("item" , item);
     
-    std::string package = m_packageName+"_"+pkg+"_"+item+"_"+input;
+    std::string package = m_Grouphist+"_"+pkg+"_"+item+"_"+input;
     
     for(const auto tob: elem) {
 
@@ -240,7 +243,8 @@ void JfexSimMonitorAlgorithm::fillHist(const std::string & pkg, const std::strin
         fill(package,jFexModule,jFexFPGA,jFexeta,jFexphi);
         
         if(fillError){
-            fill(m_packageName,jFexInput,jFexItem);
+            fill(m_Grouphist,jFexInput,jFexItem);
+            genError("Sim_"+input, "TOB");
         }
     }
 }
@@ -294,7 +298,7 @@ void JfexSimMonitorAlgorithm::fillHistGlobals(const std::string & pkg, const std
     
     std::string fpga_name[4] = {"U1", "U2", "U3", "U4"};
     
-    std::string package = m_packageName+"_"+pkg+"_"+item+"_"+input;
+    std::string package = m_Grouphist+"_"+pkg+"_"+item+"_"+input;
     
     for(const auto tob: elem) {
 
@@ -304,7 +308,16 @@ void JfexSimMonitorAlgorithm::fillHistGlobals(const std::string & pkg, const std
         fill(package,jFexModule,jFexFPGA);
         
         if(fillError){
-            fill(m_packageName,jFexInput,jFexItem);
+            fill(m_Grouphist,jFexInput,jFexItem);
+            genError("Sim_"+input, "global TOB");
         }
     }
+}
+
+
+void  JfexSimMonitorAlgorithm::genError(const std::string& location, const std::string& title) const {
+    Monitored::Group(m_monTool,
+                     Monitored::Scalar("genLocation",location.empty() ? std::string("UNKNOWN") : location),
+                     Monitored::Scalar("genType",title.empty()    ? std::string("UNKNOWN") : title)
+                    );
 }
