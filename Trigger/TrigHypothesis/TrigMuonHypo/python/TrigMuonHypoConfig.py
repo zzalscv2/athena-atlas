@@ -481,6 +481,9 @@ class TrigMufastHypoToolConfig:
                 self.tool().MonTool = TrigMufastHypoMonitoring(flags, 'TrigMufastHypoTool/' + self.toolName())
 
 
+def TrigmuCombHypoAlgCfg(flags, name="UNSPECIFIED", **kwargs):
+    return CompFactory.TrigmuCombHypoAlg(name, **kwargs)
+
 def TrigmuCombHypoToolFromDict( flags, chainDict ):
 
     if 'idperf' in chainDict['chainParts'][0]['addInfo'] or 'idtp' in chainDict['chainParts'][0]['addInfo'] :

@@ -18,6 +18,7 @@ from DecisionHandling.DecisionHandlingConf import ViewCreatorNamedROITool, \
 #muon container names (for RoI based sequences)
 from .MuonRecoSequences import muonNames
 muNames = muonNames().getNames('RoI')
+muNamesLRT = muonNames().getNames('LRT')
 muNamesFS = muonNames().getNames('FS')
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 
@@ -171,7 +172,7 @@ def muCombAlgSequence(flags):
     muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
 
     ### get ID tracking and muComb reco sequences ###
-    from .MuonRecoSequences  import muFastRecoSequenceCfg, muCombRecoSequence, muonIDFastTrackingSequenceCfg, muonIDCosmicTrackingSequence, isCosmic
+    from .MuonRecoSequences  import muFastRecoSequenceCfg, muCombRecoSequenceCfg, muonIDFastTrackingSequenceCfg, muonIDCosmicTrackingSequence, isCosmic
     #
     l2muCombViewsMaker.RoIsLink = "initialRoI" # ROI for merging is still from L1, we get exactly one L2 SA muon per L1 ROI
     l2muCombViewsMaker.RoITool = newRoITool # Create a new ROI centred on the L2 SA muon from Step 1
@@ -182,7 +183,8 @@ def muCombAlgSequence(flags):
     l2muCombViewsMaker.RequireParentView = True
     l2muCombViewsMaker.ViewFallThrough = True #if this needs to access anything from the previous step, from within the view
 
-    muCombRecoSeq, sequenceOut = muCombRecoSequence( flags, l2muCombViewsMaker.InViewRoIs, "FTF", l2mtmode=False )
+    sequenceOut = muNames.L2CBName
+    muCombRecoSeq = algorithmCAToGlobalWrapper(muCombRecoSequenceCfg,flags, l2muCombViewsMaker.InViewRoIs, "FTF", l2mtmode=False, l2CBname = sequenceOut )
 
     # for L2 multi-track SA
     from TrigMuonEF.TrigMuonEFConf import MuonChainFilterAlg
@@ -201,7 +203,8 @@ def muCombAlgSequence(flags):
     for decision in MultiTrackChainFilter.InputDecisions:
       extraLoadsForl2mtmode += [( 'xAOD::TrigCompositeContainer', 'StoreGateSvc+%s' % decision )]
 
-    muCombl2mtRecoSeq, sequenceOutL2mtCB = muCombRecoSequence( flags, l2muCombViewsMaker.InViewRoIs, "FTF", l2mtmode=True )
+    sequenceOutL2mtCB = muNames.L2CBName+"l2mtmode"
+    muCombl2mtRecoSeq = algorithmCAToGlobalWrapper(muCombRecoSequenceCfg,flags, l2muCombViewsMaker.InViewRoIs, "FTF", l2mtmode=True, l2CBname = sequenceOutL2mtCB )
     muCombl2mtFilterSequence = seqAND("l2mtmuCombFilterSequence", [MultiTrackChainFilter, muCombl2mtRecoSeq])
 
     #Filter algorithm to run muComb only if non-Bphysics muon chains are active
@@ -274,73 +277,56 @@ def muCombSequence(flags, is_probe_leg=False):
                          HypoToolGen = TrigmuCombHypoToolFromDict,
                          IsProbe     = is_probe_leg )
 
+def muCombLRTAlgSequenceCfg(flags, is_probe_leg=False):
 
-def muCombLRTAlgSequence(flags):
-    ### set the EVCreator ###
-    l2muCombLRTViewsMaker = EventViewCreatorAlgorithm("IMl2muCombLRT")
-    newRoITool = ViewCreatorCentredOnIParticleROITool("l2muCombLRTROITool")
-
+    selAcc = SelectionCA('l2muCombLRT', isProbe=is_probe_leg)
+    
+    viewName="l2muCombLRT"
+    ViewCreatorCenteredOnIParticleTool=CompFactory.ViewCreatorCentredOnIParticleROITool
     from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
     IDConfig = getInDetTrigConfig("muonLRT")
-    newRoITool.RoIEtaWidth=IDConfig.etaHalfWidth
-    newRoITool.RoIPhiWidth=IDConfig.phiHalfWidth
-    if IDConfig.zedHalfWidth > 0 :
-        newRoITool.RoIZedWidth=IDConfig.zedHalfWidth
-        # for the LRT instance we want a *wider* roi z width, and *don't* want to 
-        # update the z position for the central z
-        newRoITool.UseZedPosition=False
-    newRoITool.RoisWriteHandleKey = recordable("HLT_Roi_L2SAMuon_LRT") #RoI collection recorded to EDM
+  
+    roiTool         = ViewCreatorCenteredOnIParticleTool(RoisWriteHandleKey = recordable("HLT_Roi_L2SAMuon_LRT"), RoIZedWidth=IDConfig.zedHalfWidth, RoIEtaWidth=IDConfig.etaHalfWidth, RoIPhiWidth=IDConfig.phiHalfWidth, UseZedPosition=False)
+    requireParentView = True
 
-    #
-    l2muCombLRTViewsMaker.RoIsLink = "initialRoI" # ROI for merging is still from L1, we get exactly one L2 SA muon per L1 ROI
-    l2muCombLRTViewsMaker.RoITool = newRoITool # Create a new ROI centred on the L2 SA muon from Step 1
-    #
-    l2muCombLRTViewsMaker.Views = "MUCombLRTViewRoIs" #output of the views maker (key in "storegate")
-    l2muCombLRTViewsMaker.InViewRoIs = "MUIDRoIs" # Name of the RoI collection inside of the view, holds the single ROI used to seed the View.
-    #
-    l2muCombLRTViewsMaker.RequireParentView = True
-    l2muCombLRTViewsMaker.ViewFallThrough = True #if this needs to access anything from the previous step, from within the view
+    recol2cb = InViewRecoCA(name=viewName, RoITool = roiTool, RequireParentView = requireParentView, isProbe=is_probe_leg)
 
     ### get ID tracking and muComb reco sequences ###
-    from .MuonRecoSequences  import muCombRecoSequence, muonIDFastTrackingSequenceCfg
-
-    muCombLRTRecoSequence, sequenceOut = muCombRecoSequence( flags, l2muCombLRTViewsMaker.InViewRoIs, "FTF_LRT" )
+    from .MuonRecoSequences  import muCombRecoSequenceCfg, muonIDFastTrackingSequenceCfg
+    sequenceOut = muNamesLRT.L2CBName
+    recol2cb.mergeReco(muCombRecoSequenceCfg(flags, viewName+"RoIs", "FTF_LRT", l2CBname = sequenceOut ))
 
     extraLoads = []
 
-    muFastIDRecoSequence = algorithmCAToGlobalWrapper(muonIDFastTrackingSequenceCfg, flags, l2muCombLRTViewsMaker.InViewRoIs , "muonLRT", extraLoads, doLRT=True )
+    recol2cb.mergeReco(muonIDFastTrackingSequenceCfg(flags, viewName+"RoIs" , "muonLRT", extraLoads, doLRT=True ))
 
-    muCombLRTIDSequence = parOR("l2muCombLRTIDSequence", [muFastIDRecoSequence, muCombLRTRecoSequence])
-
-    l2muCombLRTViewsMaker.ViewNodeName = muCombLRTIDSequence.name()
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, flags, nameSuffix=l2muCombLRTViewsMaker.name())[0]
+    robPrefetchAlg = ROBPrefetchingAlgCfg_Si(flags, nameSuffix=viewName+'_probe' if is_probe_leg else viewName)
+    selAcc.mergeReco(recol2cb, robPrefetchAlg)
 
-    l2muCombLRTSequence = seqAND("l2muCombLRTSequence", [l2muCombLRTViewsMaker, robPrefetchAlg, muCombLRTIDSequence] )
 
-    return (l2muCombLRTSequence, l2muCombLRTViewsMaker, sequenceOut)
+    return (selAcc, sequenceOut)
 
 
 
 def muCombLRTSequence(flags, is_probe_leg=False):
 
-    (l2muCombLRTSequence, l2muCombLRTViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(muCombLRTAlgSequence, flags)
+    (selAcc, sequenceOut) = muCombLRTAlgSequenceCfg(flags, is_probe_leg)
 
-    ### set up muCombHypo algorithm ###
-    from TrigMuonHypo.TrigMuonHypoConfig import TrigmuCombHypoAlg
-    trigmuCombHypo = TrigmuCombHypoAlg("TrigL2MuCBHypoAlg_LRT")
-    trigmuCombHypo.MuonL2CBInfoFromMuCombAlg = sequenceOut
-    trigmuCombHypo.RoILinkName = "l2lrtroi"
+    from TrigMuonHypo.TrigMuonHypoConfig import TrigmuCombHypoAlgCfg, TrigmuCombHypoToolFromDict
+    l2cbHypo = TrigmuCombHypoAlgCfg( flags,
+                                     name = 'TrigL2MuCBLRTHypoAlg',
+                                     MuonL2CBInfoFromMuCombAlg = sequenceOut,
+                                     RoILinkName = "l2lrtroi")
 
-    from TrigMuonHypo.TrigMuonHypoConfig import TrigmuCombHypoToolFromDict
+    selAcc.addHypoAlgo(l2cbHypo)
+    
+    l2cbSequence = MenuSequenceCA(flags, selAcc,
+                                  HypoToolGen = TrigmuCombHypoToolFromDict, isProbe=is_probe_leg)
 
-    return MenuSequence( flags,
-                         Sequence    = l2muCombLRTSequence,
-                         Maker       = l2muCombLRTViewsMaker,
-                         Hypo        = trigmuCombHypo,
-                         HypoToolGen = TrigmuCombHypoToolFromDict,
-                         IsProbe     = is_probe_leg )
+
+    return l2cbSequence
 
 
 def muCombOvlpRmSequence(flags, is_probe_leg=False):
