@@ -49,8 +49,12 @@ persToTrans( const Trk::TrackStateOnSurface_p3 *persObj, Trk::TrackStateOnSurfac
     types);
   transObj->m_measurementOnTrack.reset(meas);
   transObj->m_materialEffectsOnTrack.reset(materialEffects);
-  //Hints are atomic. Set once here
-  transObj->setHints(hints.to_ulong());
+  //Hints are atomic. Set once here if TSOS was slimmed
+  //aka not 0. If 0 we want to allow setting them later on
+  uint8_t hintsUInt = hints.to_ulong();
+  if(hintsUInt!=0){
+    transObj->setHints(hintsUInt);
+  }
 }
 
 
