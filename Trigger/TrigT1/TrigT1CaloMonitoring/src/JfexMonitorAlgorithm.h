@@ -32,7 +32,7 @@ class JfexMonitorAlgorithm : public AthMonitorAlgorithm {
 
     private:
 
-        StringProperty m_packageName{this,"PackageName","JfexMonitor","group name for histograming"};
+        StringProperty m_Grouphist{this,"Grouphist","JfexMonitor","group name for histograming"};
 
         // container keys including this, steering parameter, default value and help description
         SG::ReadHandleKey< xAOD::jFexSRJetRoIContainer > m_jFexSRJetContainerKey {this,"jFexSRJetRoIContainer","L1_jFexSRJetRoI","SG key of the input jFex SR Jet Roi container"};

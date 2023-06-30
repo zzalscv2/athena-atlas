@@ -98,19 +98,12 @@ def LVL1CaloMonitoringConfig(flags):
             #############################
             
             #jfex monitoring for input data
-            from L1CaloFEXAlgos.FexEmulatedTowersConfig import jFexEmulatedTowersCfg
-            result.merge(jFexEmulatedTowersCfg(flags,"jFexEmulatedTowerMaker"))
-            
-            from TrigT1CaloMonitoring.JfexInputMonitorAlgorithm import JfexInputMonitoringConfig
-            result.merge(JfexInputMonitoringConfig(flags))
-            
-            #jfex monitoring for Data Vs Simulation
-            from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexInputByteStreamToolCfg
-            inputjFexTool = result.popToolsAndMerge(jFexInputByteStreamToolCfg(flags, 'jFexInputBSDecoderTool'))
-            
             maybeMissingRobs = []
             decoderTools = []
             
+            from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexInputByteStreamToolCfg
+            inputjFexTool = result.popToolsAndMerge(jFexInputByteStreamToolCfg(flags, 'jFexInputBSDecoderTool'))  
+                      
             for module_id in inputjFexTool.ROBIDs:
                 maybeMissingRobs.append(module_id)
 
@@ -121,10 +114,17 @@ def LVL1CaloMonitoringConfig(flags):
             
             from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CaloFEXDecoratorCfg
             result.merge(L1CaloFEXDecoratorCfg(flags,"jFexTower2SCellDecorator"))
-            
+                     
+            from L1CaloFEXAlgos.FexEmulatedTowersConfig import jFexEmulatedTowersCfg
+            result.merge(jFexEmulatedTowersCfg(flags,"jFexEmulatedTowerMaker"))        
+                
             from L1CaloFEXSim.L1CaloFEXSimCfg import L1CaloFEXSimCfg
-            result.merge(L1CaloFEXSimCfg(flags))
+            result.merge(L1CaloFEXSimCfg(flags))              
             
+            from TrigT1CaloMonitoring.JfexInputMonitorAlgorithm import JfexInputMonitoringConfig
+            result.merge(JfexInputMonitoringConfig(flags))
+            
+            #jfex monitoring for Data Vs Simulation
             from TrigT1CaloMonitoring.JfexSimMonitorAlgorithm import JfexSimMonitoringConfig
             JfexSimMonitoring = JfexSimMonitoringConfig(flags)
             result.merge(JfexSimMonitoring)
