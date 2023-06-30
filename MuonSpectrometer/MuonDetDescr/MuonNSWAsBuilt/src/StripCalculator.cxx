@@ -56,7 +56,7 @@ StripCalculator::position_t StripCalculator::getPositionAlongStrip(ParameterClas
 
 
 //===============================================================================
-void StripCalculator::parseJSON(std::string& in) {
+void StripCalculator::parseJSON(const std::string& in) {
   try {
     using json = nlohmann::json;
     json jroot = json::parse(in);
