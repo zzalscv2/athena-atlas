@@ -24,9 +24,6 @@ def makeInDetTrigPrecisionTracking( inflags, config=None, verifier=False, rois='
     from InDetTrigRecExample import InDetTrigCA
     InDetTrigCA.InDetTrigConfigFlags = flags
     
-    from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
-    summaryTool = CAtoLegacyPublicToolWrapper(InDetTrigTrackSummaryToolCfg)
-
     doTRT = flags.Tracking.ActiveConfig.doTRT
 
     # Add suffix to the algorithms
@@ -48,17 +45,31 @@ def makeInDetTrigPrecisionTracking( inflags, config=None, verifier=False, rois='
                                  ( 'TrackCollection' , 'StoreGateSvc+' +inputTracks ),
                                  ( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
 
-    
-    ambiSolvingAlgs = ambiguitySolver_builder(flags, signature, config, summaryTool, inputTracks, outputTrackName=ambiTrackCollection, prefix=prefix+"Trk" )
+    from TrkConfig.TrkAmbiguitySolverConfig import TrkAmbiguityScore_Trig_Cfg
+    ambiguityScore = algorithmCAToGlobalWrapper(
+        TrkAmbiguityScore_Trig_Cfg,
+        flags,
+        name = f"{prefix}AmbiScore_{flags.Tracking.ActiveConfig.input_name}",
+        TrackInput = [inputTracks],
+        AmbiguityScoreProcessor = None,
+    )
 
+    from TrkConfig.TrkAmbiguitySolverConfig import TrkAmbiguitySolver_Trig_Cfg
+    ambiguitySolver = algorithmCAToGlobalWrapper(
+        TrkAmbiguitySolver_Trig_Cfg,
+        flags,
+        name = "TrigAmbiguitySolver"+flags.Tracking.ActiveConfig.input_name,
+    )
+    
+    
     #Loading the alg to the sequence
-    ptAlgs.extend( ambiSolvingAlgs )
+    ptAlgs.extend( [ambiguityScore[0], ambiguitySolver[0]] )
 
     finalTrackCollection = ambiTrackCollection
     if doTRT:
         # do the TRT extension if requested
         finalTrackCollection = outTrkTracks
-        trtAlgs = trtExtension_builder(flags, signature, config, rois, summaryTool, inputTracks=ambiTrackCollection, outputTracks=outTrkTracks, prefix=prefix ) 
+        trtAlgs = trtExtension_builder(flags, signature, config, rois, inputTracks=ambiTrackCollection, outputTracks=outTrkTracks, prefix=prefix ) 
         ptAlgs.extend( trtAlgs )
 
         
@@ -295,12 +306,12 @@ def scoringTool_builder(flags, signature, config, prefix=None, SiOnly=True ):
   return scoringTool
 
 
-def trtExtension_builder(flags, signature, config, rois, summaryTool, inputTracks, outputTracks, prefix="InDetTrigMT" ): 
+def trtExtension_builder(flags, signature, config, rois, inputTracks, outputTracks, prefix="InDetTrigMT" ): 
 
         
     trtRIOMaker           = trtRIOMaker_builder(flags, signature, config, rois, prefix  )
     trtExtensionAlg       = trtExtensionAlg_builder(flags, signature, config, inputTracks, prefix =prefix)
-    trtExtensionProcessor = trtExtensionProcessor_builder(flags, signature, config, summaryTool, inputTracks, outputTracks, prefix )
+    trtExtensionProcessor = trtExtensionProcessor_builder(flags, signature, config, inputTracks, outputTracks, prefix )
 
     return [ trtRIOMaker, trtExtensionAlg, trtExtensionProcessor]
     
@@ -356,7 +367,7 @@ def trtExtensionAlg_builder(flags, signature, config, inputTracks, prefix="InDet
     return extensionAlg[0]
 
 
-def trtExtensionProcessor_builder(flags, signature, config, summaryTool, inputTracks, outputTracks, prefix="InDetTrigMT" ):   
+def trtExtensionProcessor_builder(flags, signature, config, inputTracks, outputTracks, prefix="InDetTrigMT" ):   
 
 
     from InDetConfig.InDetExtensionProcessorConfig import TrigInDetExtensionProcessorCfg

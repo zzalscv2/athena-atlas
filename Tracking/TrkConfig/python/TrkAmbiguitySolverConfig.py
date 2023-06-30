@@ -62,16 +62,14 @@ def TrkAmbiguityScore_Trig_Cfg(
         flags,
         name='InDetTrig_SeededAmbiguityScore',
         **kwargs):
-    acc = ComponentAccumulator()
 
     kwargs.setdefault("TrackInput", [flags.Tracking.ActiveConfig.trkTracks_FTF])
     kwargs.setdefault("TrackOutput",
                       f"ScoreMap{flags.Tracking.ActiveConfig.input_name}")
     kwargs.setdefault("AmbiguityScoreProcessor", None)
 
-    acc.addEventAlgo(CompFactory.Trk.TrkAmbiguityScore(name, **kwargs))
-    return acc
-
+    #allow internal useTIDE_Ambi control
+    return TrkAmbiguityScoreCfg(flags, name, **kwargs)
 
 def ITkTrkAmbiguityScoreCfg(
         flags,
@@ -141,8 +139,8 @@ def TrkAmbiguitySolver_TRT_Cfg(
         name='InDetTRT_SeededAmbiguitySolver',
         ClusterSplitProbContainer='',
         **kwargs):
-    acc = ComponentAccumulator()
 
+    acc = ComponentAccumulator()
     from TrkConfig.TrkAmbiguityProcessorConfig import (
         SimpleAmbiguityProcessorTool_TRT_Cfg)
     InDetTRT_SeededAmbiguityProcessor = acc.popToolsAndMerge(
