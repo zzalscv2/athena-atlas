@@ -11,10 +11,6 @@
 #include "xAODBTagging/BTagging.h"
 #include "xAODBTagging/BTaggingContainer.h"
 #include "xAODBTagging/BTaggingAuxContainer.h"
-#include "xAODTracking/VertexContainer.h"
-#include "xAODTracking/VertexAuxContainer.h"
-#include "xAODBTagging/BTagVertexContainer.h"
-#include "xAODBTagging/BTagVertexAuxContainer.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "AthContainers/AuxElement.h"
@@ -54,15 +50,9 @@ namespace Analysis {
     ATH_CHECK( m_JetCollectionName.initialize() );
     ATH_CHECK( m_IncomingTracks.initialize() );
     ATH_CHECK( m_OutgoingTracks.initialize() );
-    ATH_CHECK( m_BTagSVCollectionName.initialize() );
-    ATH_CHECK( m_BTagJFVtxCollectionName.initialize() );
     ATH_CHECK( m_BTaggingCollectionName.initialize() );
     ATH_CHECK( m_jetBTaggingLinkName.initialize() );
     ATH_CHECK( m_bTagJetDecorLinkName.initialize() );
-    
-    ATH_CHECK( m_BTagSVFlipCollectionName.initialize(!m_BTagSVFlipCollectionName.empty()));
-    ATH_CHECK( m_BTagJFVtxFlipCollectionName.initialize(!m_BTagJFVtxFlipCollectionName.empty()));
-
 
     // this is a terrible, awful hack
     // but right now there aren't any muons for b-tagging in the trigger
@@ -86,8 +76,6 @@ namespace Analysis {
     ATH_MSG_DEBUG("#BTAG# BTagging container name: " << m_BTaggingCollectionName.key());
     ATH_MSG_DEBUG("#BTAG# EL from Jet to BTagging: " << m_jetBTaggingLinkName.key());
     ATH_MSG_DEBUG("#BTAG# EL from BTagging to Jet: " << m_bTagJetDecorLinkName.key());
-    ATH_MSG_DEBUG("#BTAG# BTagging Secondary Vertex container name: " << m_BTagSVCollectionName.key());
-    ATH_MSG_DEBUG("#BTAG# BTagging JF Vertex container name: " << m_BTagJFVtxCollectionName.key());
    
     /// retrieve the main BTagTool
     if ( m_bTagTool.retrieve().isFailure() ) {
@@ -125,21 +113,6 @@ namespace Analysis {
     }
     else {
       ATH_MSG_DEBUG("#BTAG#  Nb jets in JetContainer: "<< h_JetCollectionName->size());
-    }
-
-    //retrieve the JF Vertex container
-    SG::ReadHandle<xAOD::BTagVertexContainer> h_BTagJFVtxCollectionName (m_BTagJFVtxCollectionName, ctx);
-    if (!h_BTagJFVtxCollectionName.isValid()) {
-      ATH_MSG_ERROR( " cannot retrieve JF Vertex container with key " << m_BTagJFVtxCollectionName.key()  );
-      return StatusCode::FAILURE;
-    }
-    ATH_MSG_DEBUG("#BTAG# Size of the JF Vertex container: " <<  h_BTagJFVtxCollectionName->size());
-
-    //retrieve the Secondary Vertex container
-    SG::ReadHandle<xAOD::VertexContainer> h_BTagSVCollectionName (m_BTagSVCollectionName , ctx);
-    if (!h_BTagSVCollectionName.isValid()) {
-      ATH_MSG_ERROR( " cannot retrieve Sec Vertex container with key " << m_BTagSVCollectionName.key()  );
-      return StatusCode::FAILURE;
     }
 
     SG::ReadDecorHandle<xAOD::JetContainer, std::vector<ElementLink< xAOD::IParticleContainer> > >
