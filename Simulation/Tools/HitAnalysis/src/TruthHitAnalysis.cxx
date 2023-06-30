@@ -6,7 +6,7 @@
 
 // Section of includes for Truth tests
 #include "AtlasHepMC/GenEvent.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "GeneratorObjects/McEventCollection.h"
 
 #include "TH1.h"

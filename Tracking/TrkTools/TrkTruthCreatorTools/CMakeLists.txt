@@ -8,4 +8,4 @@ atlas_add_component( TrkTruthCreatorTools
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS 
-                     LINK_LIBRARIES AtlasHepMCLib AthenaBaseComps AthLinks AthContainers AtlasDetDescr GaudiKernel TrkEventUtils TrkTruthData TrkToolInterfaces GeneratorObjects TrkCompetingRIOsOnTrack TrkMeasurementBase TrkPrepRawData TrkRIO_OnTrack TrkTrack )
+                     LINK_LIBRARIES AtlasHepMCLib TruthUtils AthenaBaseComps AthLinks AthContainers AtlasDetDescr GaudiKernel TrkEventUtils TrkTruthData TrkToolInterfaces GeneratorObjects TrkCompetingRIOsOnTrack TrkMeasurementBase TrkPrepRawData TrkRIO_OnTrack TrkTrack )

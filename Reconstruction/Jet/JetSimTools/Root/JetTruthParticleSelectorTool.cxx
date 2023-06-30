@@ -16,7 +16,7 @@
 
 #include "JetUtils/JetDistances.h"
 
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "TruthUtils/HepMCHelpers.h"
 
 namespace {

@@ -14,7 +14,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimLogicalEventInputHeader.h"
 #include "FPGATrackSimObjects/FPGATrackSimTypes.h"
 #include <AsgMessaging/MessageCheck.h>
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 using namespace asg::msgUserCode;
 

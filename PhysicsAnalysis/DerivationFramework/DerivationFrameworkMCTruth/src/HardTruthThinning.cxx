@@ -25,7 +25,7 @@
 #include "StoreGate/ThinningHandle.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include <vector>
 #include <string>
 

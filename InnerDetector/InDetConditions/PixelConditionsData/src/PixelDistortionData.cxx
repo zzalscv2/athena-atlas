@@ -30,7 +30,10 @@ constexpr double Binomial(int n, int k) {
   return fact;
 }
 
-constexpr std::array<double, 21> BinomialCache() {
+constexpr int PolyDegree = 20;
+constexpr int PolyNCoeff = PolyDegree + 1;
+
+constexpr std::array<double, PolyNCoeff> BinomialCache() {
   constexpr double b0 = Binomial(20, 0);
   constexpr double b1 = Binomial(20, 1);
   constexpr double b2 = Binomial(20, 2);
@@ -43,15 +46,16 @@ constexpr std::array<double, 21> BinomialCache() {
   constexpr double b9 = Binomial(20, 9);
   constexpr double b10 = Binomial(20, 10);
 
-  std::array<double, 21> res = {b0, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10,
-                                b9, b8, b7, b6, b5, b4, b3, b2, b1, b0};
+  std::array<double, PolyNCoeff> res = {b0, b1, b2, b3,  b4, b5, b6,
+                                        b7, b8, b9, b10, b9, b8, b7,
+                                        b6, b5, b4, b3,  b2, b1, b0};
 
   return res;
 }
 
 // We just have a static const array in the anonymous
 // as cache
-constexpr std::array<double, 21> s_binomialCache = BinomialCache();
+constexpr std::array<double, PolyNCoeff> s_binomialCache = BinomialCache();
 
 template <int N>
 double bernstein_grundpolynom(const double t, const int i) {
@@ -62,30 +66,24 @@ double bernstein_grundpolynom(const double t, const int i) {
 }
 
 double bernstein_bezier(const double u, const double v, const float *P) {
-  constexpr int n = 20;
-  constexpr int m = 20;
-  static_assert(n == m, "n has to be equal to m");
-
   double r = 0.;
-
   //So here we calculate the 21+21 polynomial values we need
   //for the inputs u , v for 0....n each (m==n)
-  std::array<double,n+1> bernstein_grundpolynomU{};
-  std::array<double,m+1> bernstein_grundpolynomV{};
-  for (int i = 0; i <= n; ++i) {
-    bernstein_grundpolynomU[i] = bernstein_grundpolynom<n>(u, i);
-    bernstein_grundpolynomV[i] = bernstein_grundpolynom<m>(v, i);
+  std::array<double,PolyNCoeff> bernstein_grundpolynomU{};
+  std::array<double,PolyNCoeff> bernstein_grundpolynomV{};
+  for (int i = 0; i < PolyNCoeff; ++i) {
+    bernstein_grundpolynomU[i] = bernstein_grundpolynom<PolyDegree>(u, i);
+    bernstein_grundpolynomV[i] = bernstein_grundpolynom<PolyDegree>(v, i);
   }
 
-
-  for (int i = 0; i <= n; ++i) {
+  for (int i = 0; i < PolyNCoeff; ++i) {
 
     //the one we passed u and  0 ....n
     const double bernstein_grundpolynom_i = bernstein_grundpolynomU[i];
 
-    for (int j = 0; j <= m; ++j) {
+    for (int j = 0; j < PolyNCoeff; ++j) {
 
-      const int k = (i * (m + 1)) + j;
+      const int k = (i * (PolyDegree + 1)) + j;
       if (P[k] < -998.9){
         continue;
       }

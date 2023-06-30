@@ -19,7 +19,7 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "GaudiKernel/IPartPropSvc.h"

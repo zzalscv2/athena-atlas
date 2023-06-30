@@ -19,7 +19,7 @@
 #include "xAODMuon/MuonSegmentAuxContainer.h"
 #include "xAODTruth/TruthParticleAuxContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 namespace {
     const SG::AuxElement::Decorator<int> dec_truthOrigin{"truthOrigin"};
     const SG::AuxElement::Decorator<int> dec_truthType{"truthType"};

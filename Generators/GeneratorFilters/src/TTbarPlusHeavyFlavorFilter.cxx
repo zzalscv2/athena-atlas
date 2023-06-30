@@ -4,7 +4,7 @@
 
 #include "GeneratorFilters/TTbarPlusHeavyFlavorFilter.h"
 #include "AtlasHepMC/Relatives.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "GaudiKernel/MsgStream.h"
 
 //--------------------------------------------------------------------------

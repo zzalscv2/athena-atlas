@@ -21,7 +21,7 @@
 // Fatras
 #include "ISF_FatrasInterfaces/IPhysicsValidationTool.h"
 // AtlasHepMC
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 // CLHEP
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "CLHEP/Matrix/Vector.h"

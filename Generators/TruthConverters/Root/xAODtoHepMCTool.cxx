@@ -6,7 +6,7 @@
 #ifndef XAOD_STANDALONE
 #include "AthAnalysisBaseComps/AthAnalysisHelper.h"
 #endif
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 xAODtoHepMCTool::xAODtoHepMCTool(const std::string &name)
     : asg::AsgTool(name),

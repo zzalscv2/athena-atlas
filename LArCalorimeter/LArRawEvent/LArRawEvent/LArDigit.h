@@ -35,6 +35,16 @@ class LArDigit  {
   std::vector<short> m_samples;
 
  public:
+  /** @brief Destructor */
+  virtual ~LArDigit() = default;
+  /** @brief default constructor for persistency */
+  LArDigit() = default;
+  /** @brief default copy/move assignment */
+  LArDigit(const LArDigit&) = default;
+  LArDigit(LArDigit&&) = default;
+  LArDigit& operator=(const LArDigit&) = default;
+  LArDigit& operator=(LArDigit&&) = default;
+
   /** @brief constructor
       @param[in] channel_value  Online identifier
       @param[in] gain_value  Gain
@@ -76,11 +86,6 @@ class LArDigit  {
   */
   void setSamples(const std::vector<short>& samples);
 
-  /** @brief Destructor */
-  virtual ~LArDigit() = default;
-
-  /** @brief default constructor for persistency */
-  LArDigit() = default;
 };
 
 #endif //LARDIGIT_H

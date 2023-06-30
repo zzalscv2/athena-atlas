@@ -44,13 +44,13 @@ atlas_add_test( HepMcParticleLinkCnv_p1_test
                 SOURCES
                 test/HepMcParticleLinkCnv_p1_test.cxx
                 INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-                LINK_LIBRARIES ${CLHEP_LIBRARIES} GeneratorObjectsTPCnv StoreGateLib TestTools )
+                LINK_LIBRARIES ${CLHEP_LIBRARIES} GeneratorObjectsTPCnv StoreGateLib TestTools TruthUtils)
 
 atlas_add_test( HepMcParticleLinkCnv_p2_test
                 SOURCES
                 test/HepMcParticleLinkCnv_p2_test.cxx
                 INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-                LINK_LIBRARIES ${CLHEP_LIBRARIES} GeneratorObjectsTPCnv StoreGateLib TestTools )
+                LINK_LIBRARIES ${CLHEP_LIBRARIES} GeneratorObjectsTPCnv StoreGateLib TestTools  TruthUtils)
 
 atlas_add_test( McEventCollectionCnv_p6_test
                 SOURCES

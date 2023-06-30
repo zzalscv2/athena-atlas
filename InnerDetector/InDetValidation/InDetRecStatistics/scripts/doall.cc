@@ -23,7 +23,7 @@ using std::cout;
 using std::endl;
 using std::string;
 using std::to_string;
-// barcode threshold (SIM_BARCODE_THRESHOLD) for simulated particles (was previously set to 100000 in this code), taken from AtlasHepMC/MagicNumbers.h
+// barcode threshold (SIM_BARCODE_THRESHOLD) for simulated particles (was previously set to 100000 in this code), taken from TruthUtils/MagicNumbers.h
 const int SIM_BARCODE_THRESHOLD = 200000 
 const TString SIM_BC_THRESHOLD=std::to_string(SIM_BARCODE_THRESHOLD);
 

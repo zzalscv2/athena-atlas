@@ -13,7 +13,7 @@ atlas_add_library( PileUpToolsLib
                    src/*.cxx
                    PUBLIC_HEADERS PileUpTools
                    LINK_LIBRARIES AthenaBaseComps AthenaKernel
-                   AthLinks AtlasHepMCLib SGTools
+                   AthLinks AtlasHepMCLib TruthUtils SGTools
                    EventInfo xAODEventInfo xAODCnvInterfaces
                    GaudiKernel StoreGateLib CxxUtils )
 

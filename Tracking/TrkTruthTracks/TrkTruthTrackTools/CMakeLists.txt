@@ -11,4 +11,4 @@ atlas_add_component( TrkTruthTrackTools
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${HEPPDT_INCLUDE_DIRS} 
-                     LINK_LIBRARIES ${HEPPDT_LIBRARIES} AtlasHepMCLib AthenaBaseComps AtlasDetDescr GaudiKernel TrkSurfaces TrkEventUtils TrkEventPrimitives TrkPrepRawData TrkRIO_OnTrack TrkTrack TrkTruthData TrkTruthTrackInterfaces TrkExInterfaces TrkFitterInterfaces TrkToolInterfaces )
+                     LINK_LIBRARIES ${HEPPDT_LIBRARIES} AtlasHepMCLib TruthUtils AthenaBaseComps AtlasDetDescr GaudiKernel TrkSurfaces TrkEventUtils TrkEventPrimitives TrkPrepRawData TrkRIO_OnTrack TrkTrack TrkTruthData TrkTruthTrackInterfaces TrkExInterfaces TrkFitterInterfaces TrkToolInterfaces )

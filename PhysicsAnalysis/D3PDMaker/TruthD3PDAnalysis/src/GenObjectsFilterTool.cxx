@@ -15,7 +15,7 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/Relatives.h"
-#include "AtlasHepMC/MagicNumbers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "GeneratorObjects/McEventCollection.h"
 
