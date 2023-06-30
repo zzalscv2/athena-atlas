@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPGATrackSimObjects/FPGATrackSimFunctions.h"
@@ -66,6 +66,9 @@ double rms95(TH1 const * h)
     if ((1.0 - frac) * entries < 1 || entries == 0) return h->GetRMS();
 
     TH1* h_tmp = dynamic_cast<TH1*>(h->Clone());
+    if (not h_tmp){
+      throw "dynamic_cast failure in FPGATrackSimFunctions rms95(TH1*)";
+    }
     h_tmp->GetXaxis()->SetRange(1, h_tmp->GetNbinsX());
 
     int meanbin  = h->GetXaxis()->FindBin(h_tmp->GetMean());
