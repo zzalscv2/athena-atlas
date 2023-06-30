@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_SUITE(PixelChargeCalibCondDataTest)
     BOOST_CHECK_NO_THROW(PixelChargeCalibCondData(100));
   }
   
-  BOOST_AUTO_TEST_CASE( SetAndGet, * utf::expected_failures(3)){
+  BOOST_AUTO_TEST_CASE( SetAndGet ){
     std::vector<int> dummy(6,10);
     std::vector<int> thresholds{0,20,40, 100, 4, 30};//normally 16 values, 1 for each chip
     size_t maxModuleHash(100); //normally given by the maximum hash
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_SUITE(PixelChargeCalibCondDataTest)
     unsigned int frontEndIdxTooBig=15;
     BOOST_CHECK(calib.getAnalogThreshold(type, moduleHash, frontEndIdx) == 20);
     BOOST_CHECK_THROW(calib.getAnalogThreshold(type, hashTooBig, frontEndIdx), std::out_of_range);
-    BOOST_CHECK_THROW(calib.getAnalogThreshold(type, moduleHash, frontEndIdxTooBig), std::range_error);
+    BOOST_CHECK_THROW(calib.getAnalogThreshold(type, moduleHash, frontEndIdxTooBig), std::out_of_range);
     //set and get for sigma, noise are the same pattern, and all use the same underlying template
     std::vector<int> sigma(6);
     std::iota(sigma.begin(), sigma.end(), 1);
@@ -158,13 +158,13 @@ BOOST_AUTO_TEST_SUITE(PixelChargeCalibCondDataTest)
     //
     //ToT indices start from 1, not zero, and have 1 subtracted when indexing into the array
     BOOST_TEST(calib.getChargeLUTFEI4(moduleHash, frontEndIdx, ToT) == 5.f);
-    BOOST_CHECK_THROW(calib.getChargeLUTFEI4(hashTooBig, frontEndIdx, ToT), std::range_error);
-    BOOST_CHECK_THROW(calib.getChargeLUTFEI4(moduleHash, frontEndIdx, 0), std::runtime_error);//too small
+    BOOST_CHECK_THROW(calib.getChargeLUTFEI4(hashTooBig, frontEndIdx, ToT), std::out_of_range);
+    BOOST_CHECK_THROW(calib.getChargeLUTFEI4(moduleHash, frontEndIdx, 0), std::out_of_range);//too small
     BOOST_TEST(calib.getChargeLUTFEI4(moduleHash, frontEndIdx, 16) == 20.f);//16 is OK
-    BOOST_CHECK_THROW(calib.getChargeLUTFEI4(moduleHash, frontEndIdx, 17), std::runtime_error);//too big
+    BOOST_CHECK_THROW(calib.getChargeLUTFEI4(moduleHash, frontEndIdx, 17), std::out_of_range);//too big
     //
     BOOST_TEST(calib.getToTLUTFEI4(moduleHash, frontEndIdx, 20.f) == 16.f);
-    BOOST_CHECK_THROW(calib.getToTLUTFEI4(hashTooBig, frontEndIdx, 20.f), std::range_error);
+    BOOST_CHECK_THROW(calib.getToTLUTFEI4(hashTooBig, frontEndIdx, 20.f), std::out_of_range);
     //method 'clear()' is declared, never defined
   }
 BOOST_AUTO_TEST_SUITE_END();
