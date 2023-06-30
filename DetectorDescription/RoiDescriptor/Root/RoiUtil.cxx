@@ -17,14 +17,12 @@
 
 #include <cmath>
 
-#ifndef M_2PI
-static const double M_2PI = 2*M_PI;
-#endif
+namespace {
+  constexpr double M_2PI = 2*M_PI;
+  constexpr float  M_PIF = M_PI;
 
-#ifndef M_PIF
-static const float  M_PIF = float(M_PI);
-#endif
-
+  constexpr double MAX_R = 1100; // maximum radius of RoI - outer TRT radius ~1070 mm - should be configurable?
+}
 
 
 namespace RoiUtil { 
@@ -40,55 +38,50 @@ private:
 }
 
 
-
-
 /// test whether a stub is contained within the roi
 bool RoiUtil::contains( const IRoiDescriptor& roi, double z0, double dzdr ) {
-  static const double maxR = 1100; // maximum radius of RoI - outer TRT radius ~1070 mm - should be configurable? 
-  double zouter = dzdr*maxR + z0; 
-  if ( roi.composite() ) { 
-    for ( IRoiDescriptor::roi_iterator itr=roi.begin() ; itr!=roi.end() ; itr++ ) if ( RoiUtil::contains_internal( *(*itr), z0, zouter ) ) return true;
+  const double zouter = dzdr*MAX_R + z0;
+
+  auto contains_internal = [zouter, z0]( const IRoiDescriptor& rd )  {
+    return ( z0<=rd.zedPlus() && z0>=rd.zedMinus() &&
+             zouter<=rd.zedOuterPlus() && zouter>=rd.zedOuterMinus() );
+  };
+
+  if ( roi.composite() ) {
+    for ( const IRoiDescriptor* rd : roi ) {
+      if ( contains_internal( *rd ) ) return true;
+    }
     return false;
   }
-  else return contains_internal( roi, z0, zouter ); 
+  else return contains_internal( roi );
 } 
-
-
-
-
-bool RoiUtil::contains_internal( const IRoiDescriptor& roi, double z0, double zouter )  {
-  if ( z0<=roi.zedPlus() && z0>=roi.zedMinus() && zouter<=roi.zedOuterPlus() && zouter>=roi.zedOuterMinus() ) return true;
-  return false;
-} 
-  
 
 
 bool RoiUtil::contains_zrange( const IRoiDescriptor& roi, double z0, double dzdr, double zmin, double zmax ) { 
- static const double maxR = 1100; // maximum radius of RoI - outer TRT radius ~1070 mm - should be configurable? 
-  double zouter = dzdr*maxR + z0; 
-  if ( roi.composite() ) { 
-    for ( IRoiDescriptor::roi_iterator itr=roi.begin() ; itr!=roi.end() ; itr++ ) if ( RoiUtil::contains_zrange_internal( *(*itr), z0, zouter, zmin, zmax ) ) return true;
+  const double zouter = dzdr*MAX_R + z0;
+
+  auto contains_internal = [zouter, z0, zmin, zmax]( const IRoiDescriptor& rd )  {
+    return ( z0<=zmax && z0>=zmin &&
+             zouter<=rd.zedOuterPlus() && zouter>=rd.zedOuterMinus() );
+  };
+
+  if ( roi.composite() ) {
+    for ( const IRoiDescriptor* rd : roi ) {
+      if ( contains_internal( *rd ) ) return true;
+    }
     return false;
   }
-  else return contains_zrange_internal( roi, z0, zouter, zmin, zmax ); 
+  else return contains_internal( roi );
 }
-
-
-
-
-bool RoiUtil::contains_zrange_internal( const IRoiDescriptor& roi, double z0, double zouter, double zmin, double zmax )  {
-  if ( z0<=zmax && z0>=zmin && zouter<=roi.zedOuterPlus() && zouter>=roi.zedOuterMinus() ) return true;
-  return false;
-} 
-  
-
 
 
 /// test whether a stub is contained within the roi
 bool RoiUtil::containsPhi( const IRoiDescriptor& roi, double phi ) {
-  if ( roi.composite() ) { 
-    for ( IRoiDescriptor::roi_iterator itr=roi.begin() ; itr!=roi.end() ; itr++ ) if ( RoiUtil::containsPhi( *(*itr), phi ) ) return true;
-      return false;
+  if ( roi.composite() ) {
+    for ( const IRoiDescriptor* rd : roi ) {
+      if ( RoiUtil::containsPhi( *rd, phi ) ) return true;
+    }
+    return false;
   }
   else {
     if ( roi.isFullscan() ) return true; 
@@ -98,26 +91,11 @@ bool RoiUtil::containsPhi( const IRoiDescriptor& roi, double phi ) {
 }
 
 
-
-
-/// non member, non friend interface function 
-/// test whether a stub is contained within the roi                                                                                                                                                                  
-bool RoiUtil::roiContainsZed( const IRoiDescriptor& roi, double z, double r ) {
-  if ( roi.composite() ) { 
-    for ( unsigned int i=0 ; i<roi.size() ; i++ ) if ( roiContainsZed( *roi.at(i), z, r ) ) return true;
-    return false;
-  }
-  if ( roi.isFullscan() ) return true;
-  double zminus = r*roi.dzdrMinus()+roi.zedMinus();
-  double zplus  = r*roi.dzdrPlus() +roi.zedPlus();
-  return ( z>=zminus && z<=zplus );
-}
-
-
-
 bool RoiUtil::containsZed( const IRoiDescriptor& roi, double z, double r ) {
-  if ( roi.composite() ) { 
-    for ( IRoiDescriptor::roi_iterator itr=roi.begin() ; itr!=roi.end() ; itr++ ) if ( RoiUtil::containsZed( *(*itr), z, r ) ) return true;
+  if ( roi.composite() ) {
+    for ( const IRoiDescriptor* rd : roi ) {
+      if ( RoiUtil::containsZed( *rd, z, r ) ) return true;
+    }
     return false;
   }
   else { 
@@ -129,11 +107,11 @@ bool RoiUtil::containsZed( const IRoiDescriptor& roi, double z, double r ) {
 }
 
 
-
-
 bool RoiUtil::contains( const IRoiDescriptor& roi, double z, double r, double phi ) {
-  if ( roi.composite() ) { 
-    for ( IRoiDescriptor::roi_iterator itr=roi.begin() ; itr!=roi.end() ; itr++ ) if ( RoiUtil::contains( *(*itr), z, r, phi ) ) return true;
+  if ( roi.composite() ) {
+    for ( const IRoiDescriptor* rd : roi ) {
+      if ( RoiUtil::contains( *rd, z, r, phi ) ) return true;
+    }
     return false;
   }
   else { 
@@ -142,22 +120,7 @@ bool RoiUtil::contains( const IRoiDescriptor& roi, double z, double r, double ph
 }
   
 
-
-bool RoiUtil::roiContains( const IRoiDescriptor& roi, double z, double r, double phi ) { 
-  if ( roi.composite() ) { 
-    for ( unsigned int i=0 ; i<roi.size() ; i++ ) if ( RoiUtil::roiContains( *roi.at(i), z, r, phi ) ) return true;
-    return false;
-  } 
-  if ( roi.isFullscan() ) return true;
-  return ( RoiUtil::roiContainsZed( roi, z, r ) && RoiUtil::containsPhi( roi, phi ) ); 
-}
-
-
-
-
-
-
-double RoiUtil::phicheck(double phi) { 
+double RoiUtil::phicheck(double phi) {
   while ( phi> M_PIF ) phi-=M_2PI;
   while ( phi<-M_PIF ) phi+=M_2PI;
   if ( !(phi >= -M_PIF && phi <= M_PIF) ) { // use ! of range rather than range to also catch nan etc
