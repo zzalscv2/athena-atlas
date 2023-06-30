@@ -24,6 +24,7 @@
 #include <cmath>
 #include <vector>
 #include <string>
+#include <cstdint>
 
 #include <boost/tuple/tuple.hpp>
 
