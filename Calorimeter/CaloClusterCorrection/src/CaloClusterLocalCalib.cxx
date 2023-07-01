@@ -78,8 +78,7 @@ StatusCode  CaloClusterLocalCalib::execute(const EventContext& ctx,
         double engdens(0.);
         double emprobability(0.);
         double isolation(0.);
-        
-// Store moments and energy of the old cluster
+        // Store moments and energy of the old cluster
         //theCluster->retrieveMoment(xAOD::CaloCluster::DM_WEIGHT,  dm_weight); 
         //theCluster->retrieveMoment(xAOD::CaloCluster::HAD_WEIGHT,had_weight); 
         if (!theCluster->retrieveMoment(xAOD::CaloCluster::CENTER_LAMBDA,centLambd))
@@ -97,10 +96,10 @@ StatusCode  CaloClusterLocalCalib::execute(const EventContext& ctx,
         ATH_CHECK(detStore()->retrieve(calo_id,"CaloCell_ID"));   
               
 //         Make new Cluster and CellColl
-        CaloCellContainer* myCellColl = new CaloCellContainer(SG::OWN_ELEMENTS);  
-	std::unique_ptr<xAOD::CaloCluster> myCluster  = CaloClusterStoreHelper::makeCluster(myCellColl);
+        //std::unique_ptr<CaloCellContainer> myCellColl=std::make_unique<CaloCellContainer>(SG::OWN_ELEMENTS);
+        CaloCellContainer myCellColl(SG::OWN_ELEMENTS);
+        std::unique_ptr<xAOD::CaloCluster> myCluster  = CaloClusterStoreHelper::makeCluster(&myCellColl);
         int cellIndex = 0; 
-        CaloCell* CellReplica = nullptr;     
 //         Iterate over cells of old cluster and replicate them with energy weighted by -1 if negative and add it to the new cluster
         xAOD::CaloCluster::cell_iterator cellIter = theCluster->cell_begin();  
         for(;cellIter!=theCluster->cell_end();cellIter++) {
@@ -108,9 +107,8 @@ StatusCode  CaloClusterLocalCalib::execute(const EventContext& ctx,
           double CellEnergy = pCell->e();    
           //Identifier myId = pCell->ID();    
           //IdentifierHash myHashId = calo_id->calo_cell_hash(myId); 
-          if( CellEnergy < 0. )   CellEnergy = -1 * pCell->e();    
-          CellReplica = new CaloCell( pCell->caloDDE(), pCell->ID(), CellEnergy, pCell->time(), pCell->quality(),  pCell->provenance(), pCell->gain() );
-          myCellColl->push_back(CellReplica);          
+          if( CellEnergy < 0. )   CellEnergy = -1 * pCell->e();
+          myCellColl.push_back(new CaloCell(pCell->caloDDE(), pCell->ID(), CellEnergy, pCell->time(), pCell->quality(),  pCell->provenance(), pCell->gain() ));    
           double cellWeight = cellIter.weight();         
           myCluster->addCell(cellIndex,cellWeight);
           cellIndex++;
@@ -176,10 +174,7 @@ StatusCode  CaloClusterLocalCalib::execute(const EventContext& ctx,
            theCluster->retrieveMoment(xAOD::CaloCluster::OOC_WEIGHT,ooc_weight);
            newWeightMoment *= ooc_weight;
            theCluster->insertMoment(xAOD::CaloCluster::OOC_WEIGHT,newWeightMoment);
-         }         
-                  
-         delete myCellColl;          
-
+         }
       }
 //    else, what as was always done     
       else{ 

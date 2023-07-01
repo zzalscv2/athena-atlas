@@ -148,15 +148,16 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
     // the event loop
     while(pDR->good() && eventCounter<=maxEvents) {
       unsigned int eventSize;    
-      char *buf;
+      char *buf=nullptr;
 	
       DRError ecode = pDR->getData(eventSize,&buf);
+      std::unique_ptr<uint32_t[]> fragment(reinterpret_cast<uint32_t*>(buf));
       if(DROK != ecode) {
-	std::cout << "Can't read from file!" << std::endl;
-	break;
+	      std::cout << "Can't read from file!" << std::endl;
+	      break;
       }
 
-      std::unique_ptr<uint32_t[]> fragment(reinterpret_cast<uint32_t*>(buf));
+      
     
       // make a fragment with eformat 3.0 and check it's validity
       try {

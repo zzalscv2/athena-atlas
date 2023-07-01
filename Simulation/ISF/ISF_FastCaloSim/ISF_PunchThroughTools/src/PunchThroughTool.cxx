@@ -431,6 +431,8 @@ const ISF::ISFParticleVector* ISF::PunchThroughTool::computePunchThroughParticle
           else getAllParticles(isfp, *isfpCont, rndmEngine, doPdg, interpEnergy, interpEta);
 
         } // for-loop over all particle pdgs
+
+      nTries++;
   }
 
   if (!isfpCont->empty())  ATH_MSG_DEBUG( "[ punchthrough ] returning ISFparticle vector , size: "<<isfpCont->size() );
