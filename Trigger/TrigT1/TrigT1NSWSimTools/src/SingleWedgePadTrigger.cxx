@@ -85,8 +85,8 @@ namespace NSWL1{
         float ROIx=centroid(ROI).x();
         float ROIy=centroid(ROI).y(); //YR 8-18 using the center local Y of the ROI for the decision if in the TR
 
-	auto vector = std::unique_ptr<ROOT::Math::DisplacementVector2D<ROOT::Math::Cartesian2D<float>>>(new ROOT::Math::DisplacementVector2D<ROOT::Math::Cartesian2D<float>>(ROIx,ROIy));
-	float ROILocalY=(vector->R())*std::cos(std::abs(vector->Phi()-phi0));
+        auto vector = ROOT::Math::DisplacementVector2D<ROOT::Math::Cartesian2D<float>>(ROIx,ROIy);
+        float ROILocalY=(vector.R())*std::cos(std::abs(vector.Phi()-phi0));
 
         bool isTr=false;
          float TransitonSmall[7] ={2104,2243,3248,3445,4216,4411,ROILocalY}; // YR should be taken from the XML (H1 active_max, H2 active min... projected from 7 to 1)
@@ -136,7 +136,7 @@ namespace NSWL1{
         //S.I VERY IMPORTANT : A polygon is an ordered set of vertices. So order matters !
         //According to the previous experience (our drawing tool) vertices are connected in the order :
         //Do not play with the order array 0132.
-        const static std::vector<int> vertexordering={0,1,3,2};
+        constexpr std::array<int,4> vertexordering={0,1,3,2};
         //project each pad polygon onto the first plane of the wedge
         float Zproj=pads[0]->m_cornerXyz[1][2];//second index x:0 y:1 z:2
         for(const auto& pad : pads){
