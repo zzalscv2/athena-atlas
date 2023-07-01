@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonDetDescrUtils/BuildNSWReadoutGeometry.h"
@@ -57,16 +57,12 @@ bool BuildNSWReadoutGeometry::BuildReadoutGeometry(MuonGM::MuonDetectorManager* 
                 re->initDesign();
                 re->fillCache();
                 mgr->addMMReadoutElement(re);
-                re->setDelta(mgr);
-                re->setBLinePar(mgr);
             } else if (chTag.substr(0, 3) == "sTG") {
                 sTgcReadoutElement* re = new sTgcReadoutElement(vol, sName, etaIndex, phiIndex, mLayer, mgr);
                 std::string myVolName = (chTag.substr(0, 8)).c_str();
                 re->initDesign(-999., -999., -999., 3.2, -999., 2.7, -999., 2.6);
                 re->fillCache();
                 mgr->addsTgcReadoutElement(re);
-                re->setDelta(mgr);
-                re->setBLinePar(mgr);
             }
         }
     }

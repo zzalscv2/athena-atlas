@@ -45,14 +45,20 @@ persToTrans( const Trk::TrackStateOnSurface_p1 *persObj, Trk::TrackStateOnSurfac
                                         std::unique_ptr<const Trk::MeasurementBase>(meas),
                                         std::unique_ptr<const Trk::TrackParameters>(trackParameters),
                                         std::unique_ptr<const Trk::MaterialEffectsBase>(materialEffects),
-                                        types,
-                                        hints);
+                                        types);
+  //Hints are atomic. Set once here if TSOS was slimmed
+  //aka not 0. If 0 we want to allow setting them later on
+  uint8_t hintsUInt = hints.to_ulong();
+  if(hintsUInt!=0){
+    transObj->setHints(hintsUInt);
+  }
+
 }
 
 
 void TrackStateOnSurfaceCnv_p1::
-transToPers( const Trk::TrackStateOnSurface *, Trk::TrackStateOnSurface_p1 *, MsgStream & ) 
+transToPers( const Trk::TrackStateOnSurface *, Trk::TrackStateOnSurface_p1 *, MsgStream & )
 {
-  throw std::runtime_error("TrackStateOnSurfaceCnv_p1::transToPers is deprecated!");   
+  throw std::runtime_error("TrackStateOnSurfaceCnv_p1::transToPers is deprecated!");
 }
 

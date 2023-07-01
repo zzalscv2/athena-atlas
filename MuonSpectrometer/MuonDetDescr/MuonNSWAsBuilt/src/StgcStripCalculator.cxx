@@ -43,7 +43,7 @@ StgcStripCalculator::position_t StgcStripCalculator::getPositionAlongStgcStrip(P
   return { IsValid::VALID, it->second.getPositionAlongStgcStrip(iclass, strip_id.istrip, sx, sy) };
 }
 
-void StgcStripCalculator::parseJSON(std::string& in) {
+void StgcStripCalculator::parseJSON(const std::string& in) {
   try {
     using json = nlohmann::json;
     json jroot = json::parse(in);

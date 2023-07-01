@@ -6,7 +6,6 @@
 #define LARRAWSC_H
 #include <vector>
 #include <utility> //for std::move
-#include <string> //for the string conversion operator
 
 #include "Identifier/HWIdentifier.h"
 
@@ -122,10 +121,6 @@ class LArRawSC  final{
 
     /** @return pedestal Overflow */
     bool pedOverflow() const { return m_pedOverflow; }
-
-
-    /** @brief Conversion operator to a std::string <br> Can be used in a cast operation : (std::string) digit <br> */
-    virtual operator std::string() const;
 
     /** @brief Set energies .
         @param[in] samples  vector of energies
