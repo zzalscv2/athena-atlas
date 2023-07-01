@@ -58,7 +58,6 @@ InDet::PixelClusterOnTrackTool::PixelClusterOnTrackTool
   (const std::string &t, const std::string &n, const IInterface *p) :
   ::AthAlgTool(t, n, p),
   m_disableDistortions(false),
-  m_rel13like(false),
   m_pixelid(nullptr),
   m_NNIBLcorrection(false),
   m_IBLAbsent(true),
@@ -72,7 +71,6 @@ InDet::PixelClusterOnTrackTool::PixelClusterOnTrackTool
 
   declareProperty("PositionStrategy", m_positionStrategy = 1, "Which calibration of cluster positions");
   declareProperty("DisableDistortions", m_disableDistortions, "Disable simulation of module distortions");
-  declareProperty("Release13like", m_rel13like, "Activate release-13 like settigs");
   declareProperty("NNIBLcorrection", m_NNIBLcorrection);
   declareProperty("NnClusterizationFactory", m_NnClusterizationFactory);
   declareProperty("SplitClusterAmbiguityMap", m_splitClusterMapKey);//Remove Later
@@ -98,8 +96,6 @@ InDet::PixelClusterOnTrackTool::initialize() {
 
   m_errorStrategy = m_errorStrategyProperty;
   ATH_MSG_DEBUG("Error strategy is" << m_errorStrategy);
-
-  ATH_MSG_DEBUG("Release 13 flag is" << m_rel13like);
 
   if (m_IBLParameterSvc.retrieve().isFailure()) {
     ATH_MSG_WARNING("Could not retrieve IBLParameterSvc");
@@ -201,7 +197,6 @@ InDet::PixelClusterOnTrackTool::correctDefault
 
   const double TOPHAT_SIGMA = 1. / std::sqrt(12.);
 
-  //  const InDet::SiCluster* SC = dynamic_cast<const InDet::SiCluster*> (&rio);
   const InDet::PixelCluster *pix = nullptr;
 
   if (!(pix = dynamic_cast<const InDet::PixelCluster *>(&rio))) {
@@ -279,14 +274,12 @@ InDet::PixelClusterOnTrackTool::correctDefault
     double localeta = -9999.;
 
     const std::vector<Identifier> & rdos = pix->rdoList();
-    //std::vector<Identifier>::const_iterator oneRDO = rdos.begin();
     InDetDD::SiLocalPosition meanpos(0, 0, 0);
     int rowmin = 9999;
     int rowmax = -9999;
     int colmin = 9999;
     int colmax = -9999;
     for (const auto & rId:rdos) {
-      //Identifier rId = *oneRDO;
       const int row = m_pixelid->phi_index(rId);
       const int col = m_pixelid->eta_index(rId);
       rowmin = std::min(rowmin, row);
@@ -310,10 +303,6 @@ InDet::PixelClusterOnTrackTool::correctDefault
     int nrows = rowmax - rowmin + 1;
     int ncol = colmax - colmin + 1;
     double ang = 999.;
-    double eta = 999.;
-
-    //    ATH_MSG_VERBOSE ( << "Position strategy = "
-    //    << m_positionStrategy << "omegaphi = " << omegaphi )
 
     // TOT interpolation for collision data
     // Force IBL to use digital clustering and broad errors.
@@ -461,10 +450,7 @@ InDet::PixelClusterOnTrackTool::correctDefault
           }
         }
 
-        if (m_rel13like) {
-          int ibin = offlineCalibData->getPixelClusterErrorData()->getBarrelBin(eta, ncol, nrows);
-          erreta = offlineCalibData->getPixelClusterErrorData()->getPixelBarrelEtaError(ibin);
-        }else if (m_IBLAbsent || !blayer) {
+        if (m_IBLAbsent || !blayer) {
           int ibin = offlineCalibData->getPixelClusterOnTrackErrorData()->getBarrelBinEta(std::abs(etatrack), ncol, nrows);
           erreta = offlineCalibData->getPixelClusterOnTrackErrorData()->getPixelBarrelEtaError(ibin);
         } else {    // special calibration for IBL
@@ -528,7 +514,6 @@ InDet::PixelClusterOnTrackTool::correctDefault
 
   // create new copy of error matrix
   if (!m_pixelErrorScalingKey.key().empty()) {
-    //SG::ReadCondHandle<PixelRIO_OnTrackErrorScaling> error_scaling( m_pixelErrorScalingKey );
     SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_pixelErrorScalingKey );
     cov = Trk::ErrorScalingCast<PixelRIO_OnTrackErrorScaling>(*error_scaling)
               ->getScaledCovariance(std::move(cov), *m_pixelid,
@@ -561,9 +546,7 @@ InDet::PixelClusterOnTrackTool::correct
   case InDet::PIXELCLUSTER_OUTLIER: // if cluster is outlier, increase errors
   case InDet::PIXELCLUSTER_SHARED:
     initial_errorStrategy = m_errorStrategy;
-    if (!m_rel13like) {
-      m_errorStrategy = 0; // error as size of cluster /sqrt(12)
-    }
+    m_errorStrategy = 0; // error as size of cluster /sqrt(12)
     newROT = correct(rio, trackPar);
     m_errorStrategy = initial_errorStrategy;
     return newROT;
@@ -659,7 +642,6 @@ InDet::PixelClusterOnTrackTool::correctNN
   Amg::MatrixX cov = finalerrormatrix;
   // create new copy of error matrix
   if (!m_pixelErrorScalingKey.key().empty()) {
-    //    SG::ReadCondHandle<PixelRIO_OnTrackErrorScaling> error_scaling( m_pixelErrorScalingKey );
     SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling(
         m_pixelErrorScalingKey);
     cov = Trk::ErrorScalingCast<PixelRIO_OnTrackErrorScaling>(*error_scaling)
