@@ -1459,6 +1459,8 @@ if __name__=='__main__':
     cfg.getEventAlgo('TgcRawDataMonAlg').nHitsInOtherTGCStrip = 2
     cfg.getEventAlgo('TgcRawDataMonAlg').MaskChannelFileName = 'tgc_mask_channels.txt'
     cfg.getEventAlgo('TgcRawDataMonAlg').TagMuonInDifferentSystem = False
+    cfg.getEventAlgo('TgcRawDataMonAlg').StreamerFilter = '' # such as 'HLT_noalg_L1MU14FCH'
+    cfg.getEventAlgo('TgcRawDataMonAlg').doExpressProcessing = False
 
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
     cfg.merge(AtlasFieldCacheCondAlgCfg(flags))

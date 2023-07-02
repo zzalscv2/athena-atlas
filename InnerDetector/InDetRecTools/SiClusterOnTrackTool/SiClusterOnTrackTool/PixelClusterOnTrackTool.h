@@ -127,8 +127,6 @@ private:
 
   ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool{this, "LorentzAngleTool", "SiLorentzAngleTool", "Tool to retreive Lorentz angle"};
 
-  //  SG::ReadCondHandleKey<PixelRIO_OnTrackErrorScaling> m_pixelErrorScalingKey
-  //    {this,"PixelErrorScalingKey", "/Indet/TrkErrorScalingPixel", "Key for pixel error scaling conditions data."};
   SG::ReadCondHandleKey<PixelCalib::PixelOfflineCalibData> m_clusterErrorKey{this, "PixelOfflineCalibData", "PixelOfflineCalibData", "Output key of pixel cluster"};
   SG::ReadCondHandleKey<RIO_OnTrackErrorScaling> m_pixelErrorScalingKey
     {this,"PixelErrorScalingKey", "/Indet/TrkErrorScalingPixel", "Key for pixel error scaling conditions data."};
@@ -136,7 +134,6 @@ private:
   //! toolhandle for central error scaling
   //! flag storing if errors need scaling or should be kept nominal
   bool                               m_disableDistortions;
-  bool                               m_rel13like         ;
   int                                m_positionStrategy  ;
   mutable std::atomic_int            m_errorStrategy{2};
   IntegerProperty                    m_errorStrategyProperty{this, "ErrorStrategy", 2, "Which calibration of cluster position errors"};

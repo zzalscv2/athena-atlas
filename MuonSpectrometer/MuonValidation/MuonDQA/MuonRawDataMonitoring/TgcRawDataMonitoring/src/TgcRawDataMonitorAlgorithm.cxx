@@ -158,6 +158,24 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
     }
   }
 
+  if( !m_streamerFilter.empty() ) {
+    if(m_doExpressProcessing){
+      const unsigned int passBits = getTrigDecisionTool()->isPassedBits(m_streamerFilter.value());
+      const bool expressPass = passBits & TrigDefs::Express_passed;
+      if(!expressPass){
+	ATH_MSG_DEBUG("failed expressPass");
+	return StatusCode::SUCCESS;
+      }
+    }
+    bool pass = getTrigDecisionTool()->isPassed(m_streamerFilter.value(),TrigDefs::Physics);
+    if(pass){
+      ATH_MSG_DEBUG("passing StreamerFilter: " << m_streamerFilter.value() );
+    }else{
+      ATH_MSG_DEBUG("failed StreamerFilter: " << m_streamerFilter.value() );
+      return StatusCode::SUCCESS;
+    }
+  }
+
   // Print out all available muon triggers
   // This is to be used when making a list of triggers
   // to be monitored, and writted in .py config file

@@ -237,6 +237,7 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
   SG::ReadDecorHandleKey<xAOD::MuonRoIContainer> m_thresholdPatternsKey{this,"MuRoIThresholdPatternsKey","LVL1MuonRoIs.thresholdPatterns","Name of the muon RoI container decoration for the threshold patterns"};
   BooleanProperty m_monitorThresholdPatterns{this,"MonitorThresholdPatterns",true,"start monitoring tirgger threshold patterns"};
   StringProperty m_thrPatternList{this,"ThrPatternList","MU4,MU6,MU10,MU11,MU20,MU21","list of single L1MU items to be monitored by the threshold pattern"};
+  StringProperty m_streamerFilter{this,"StreamerFilter","","Streamer filter such as HLT_noalg_MU14FCH"};
 
   SG::ReadHandleKey<xAOD::MuonContainer> m_MuonContainerKey{this,"MuonContainerName","Muons","Offline muon track container"};
   SG::ReadHandleKey<xAOD::MuonRoIContainer> m_MuonRoIContainerKey{this,"MuonRoIContainerName","LVL1MuonRoIs","L1 muon RoI container"};

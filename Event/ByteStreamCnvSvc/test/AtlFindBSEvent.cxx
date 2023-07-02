@@ -111,7 +111,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
     eventCounter=0;
 
     std::cout << "Checking file " << fName << std::endl;
-    DataReader *pDR = pickDataReader(fName);
+    std::unique_ptr<DataReader> pDR(pickDataReader(fName));
 
     if(!pDR) {
       std::cout << "Problem opening or reading this file!\n";
@@ -147,23 +147,21 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
     // the event loop
     while(!found && pDR->good()) {
       unsigned int eventSize;    
-      char *buf;
+      char *buf=nullptr;
 	
       DRError ecode = pDR->getData(eventSize,&buf);
+      std::unique_ptr<uint32_t[]> fragment(reinterpret_cast<uint32_t*>(buf));
       if(DROK != ecode) {
-	std::cout << "Can't read from file!" << std::endl;
-	break;
+	      std::cout << "Can't read from file!" << std::endl;
+	      break;
       }
 
       ++eventCounter;
-      uint32_t* fragment = reinterpret_cast<uint32_t*>(buf); 
-    
       // make a fragment with eformat 3.0 and check it's validity
       try {
 	if ((eformat::HeaderMarker)(fragment[0])!=FULL_EVENT) {
 	  std::cout << "Event doesn't start with full event fragment (found " 
 		    << std::ios::hex << fragment[0] << ") ignored." <<std::endl;
-	  delete[] buf;
 	  continue;
 	}
 	const uint32_t formatVersion = eformat::helper::Version(fragment[3]).major_version();
@@ -171,14 +169,13 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
 	if (formatVersion != eformat::MAJOR_DEFAULT_VERSION) {
 	  // 100 for increase of data-size due to header conversion
 	  uint32_t newEventSize = eventSize + 1000;
-	  uint32_t* newFragment = new uint32_t[newEventSize];
-	  eformat::old::convert(fragment,newFragment,newEventSize);
-	  // delete old fragment
-	  delete [] fragment;
+    auto newFragment=std::make_unique<uint32_t[]>(newEventSize);
+	  eformat::old::convert(fragment.get(),newFragment.get(),newEventSize);
 	  // set new pointer
-	  fragment = newFragment;
+	  fragment = std::move(newFragment);
 	}
-	FullEventFragment<const uint32_t*> fe(fragment);
+
+	FullEventFragment<const uint32_t*> fe(fragment.get());
       
 	if (checkevents) fe.check_tree();
 	
@@ -217,14 +214,12 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
       }
       
       // end event processing 
-      delete [] fragment;
     }
 
     //std::cout << std::endl;
     //std::cout << "File end time " << pDR->fileEndTime() << std::endl;
     //std::cout << "File end date " << pDR->fileEndDate() << std::endl;
 
-    delete pDR;
   }
   if (!found) {
     if (searchRun!=std::numeric_limits<uint32_t>::max()) 

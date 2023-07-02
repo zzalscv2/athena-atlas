@@ -81,7 +81,7 @@ namespace NswAsBuilt {
        * Parses a std::istream with JSON-formatted configuration of the
        * as-built parameters
        */
-      void parseJSON(std::string& in);
+      void parseJSON(const std::string& in);
 
     private:
       std::vector<std::unique_ptr<Element>> m_rootElements;

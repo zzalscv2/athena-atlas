@@ -274,12 +274,12 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[]) {
   }
   std::cout << std::endl;
 
-  EventStorage::DataWriter* pDW=NULL;
+  std::unique_ptr<EventStorage::DataWriter> pDW;
   //start loop over files
   for (std::vector<std::string>::const_iterator it = fileNames.begin(), it_e = fileNames.end(); it != it_e; ++it) {
     const std::string& fName=*it;
     std::cout << "Checking file " << fName << std::endl;
-    DataReader *pDR = pickDataReader(fName);
+    std::unique_ptr<DataReader> pDR(pickDataReader(fName));
     if (!pDR) {
       std::cout << "Problem opening or reading this file!\n";
       return -1;
@@ -320,17 +320,15 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[]) {
 
       EventStorage::freeMetaDataStrings metaStrings;
       if (compressEvents) {
-        pDW= new EventStorage::DataWriter(dirNameOut, shortFileNameOut, runPara, project, streamType,
+        pDW=std::make_unique<EventStorage::DataWriter>(dirNameOut, shortFileNameOut, runPara, project, streamType,
 	        streamName, stream, lbnbr, "AtlCopyBSEvent", metaStrings, EventStorage::ZLIB);
       } else {
-        pDW= new EventStorage::DataWriter(dirNameOut, shortFileNameOut, runPara, project, streamType,
+        pDW= std::make_unique<EventStorage::DataWriter>(dirNameOut, shortFileNameOut, runPara, project, streamType,
 	        streamName, stream, lbnbr, "AtlCopyBSEvent", metaStrings);
       }
       pDW->setMaxFileMB(10000); //Max 10 metric GByte files
       if (!pDW->good() ) { 
 	std::cout << "ERROR  Unable to initialize file "<< std::endl;
-	delete pDW;
-	delete pDR;
 	return -1;
       }    
       std::cout << "Created DataWriter for file " << shortFileNameOut << " in directory " << dirNameOut << std::endl;
@@ -344,14 +342,12 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[]) {
       // sort events and offsets maps by key/pfn
       std::sort(searchEventByPFN[fName].begin(),searchEventByPFN[fName].end());
       std::sort(offsetEventByPFN[fName].begin(),offsetEventByPFN[fName].end());
-      eventLoop(pDR, pDW, nFound, &searchEventByPFN[fName], searchRun, searchRunSet, listEvents, checkEvents, &offsetEventByPFN[fName]);
+      eventLoop(pDR.get(), pDW.get(), nFound, &searchEventByPFN[fName], searchRun, searchRunSet, listEvents, checkEvents, &offsetEventByPFN[fName]);
     } else {
-      eventLoop(pDR, pDW, nFound, &searchEvents, searchRun, searchRunSet, listEvents, checkEvents);
+      eventLoop(pDR.get(), pDW.get(), nFound, &searchEvents, searchRun, searchRunSet, listEvents, checkEvents);
     }
-    delete pDR;
     if (nFound >= searchEvents.size() && nFound) break;
   }
-  delete pDW;
   if (!nFound && searchEvents.size() > 0) {
     std::cout << "No events found!"  << std::endl;
     //return -1;  // Some use cases don't expect to find the events, just issue message
@@ -375,7 +371,7 @@ void eventLoop(DataReader* pDR, EventStorage::DataWriter* pDW, unsigned& nFound,
   }
   while (pDR->good()) {
     unsigned int eventSize;    
-    char *buf;
+    char *buf=nullptr;
     DRError ecode;
     if (pOffsetEvents != 0) {
       if (offIt == offEnd) break;
@@ -384,19 +380,18 @@ void eventLoop(DataReader* pDR, EventStorage::DataWriter* pDW, unsigned& nFound,
     } else {
       ecode = pDR->getData(eventSize,&buf);
     }
+    std::unique_ptr<uint32_t[]> fragment(reinterpret_cast<uint32_t*>(buf));
     if (DROK != ecode) {
       std::cout << "Can't read from file!" << std::endl;
       break;
     }
     ++eventCounter;
-    uint32_t* fragment = reinterpret_cast<uint32_t*>(buf); 
     
     // make a fragment with eformat 3.0 and check it's validity
     try {
       if ((eformat::HeaderMarker)(fragment[0])!=FULL_EVENT) {
         std::cout << "Event doesn't start with full event fragment (found " 
                 << std::ios::hex << fragment[0] << ") ignored." <<std::endl;
-        delete [] buf;
         continue;
       }
       const uint32_t formatVersion = eformat::helper::Version(fragment[3]).major_version();
@@ -404,14 +399,12 @@ void eventLoop(DataReader* pDR, EventStorage::DataWriter* pDW, unsigned& nFound,
       if (formatVersion != eformat::MAJOR_DEFAULT_VERSION) {
         // 100 for increase of data-size due to header conversion
         uint32_t newEventSize = eventSize + 1000;
-        uint32_t* newFragment = new uint32_t[newEventSize];
-        eformat::old::convert(fragment,newFragment,newEventSize);
-        // delete old fragment
-        delete [] fragment;
-        // set new pointer
-        fragment = newFragment;
+        auto newFragment=std::make_unique<uint32_t[]>(newEventSize);
+	      eformat::old::convert(fragment.get(),newFragment.get(),newEventSize);
+	      // set new pointer
+	      fragment = std::move(newFragment);
       }
-      FullEventFragment<const uint32_t*> fe(fragment);
+      FullEventFragment<const uint32_t*> fe(fragment.get());
       if (checkEvents) fe.check_tree();
       
       uint64_t eventNo=fe.global_id();
@@ -431,11 +424,11 @@ void eventLoop(DataReader* pDR, EventStorage::DataWriter* pDW, unsigned& nFound,
       
         //Write event to file
         uint32_t size = fe.fragment_size_word(); 
-        pDW->putData(sizeof(uint32_t)*size, reinterpret_cast<void *>(fragment));
+        pDW->putData(sizeof(uint32_t)*size, reinterpret_cast<void *>(fragment.get()));
       } else if (pSearchEvents->size() == 0) {
         //Write event to file
         uint32_t size = fe.fragment_size_word(); 
-        pDW->putData(sizeof(uint32_t)*size, reinterpret_cast<void *>(fragment));
+        pDW->putData(sizeof(uint32_t)*size, reinterpret_cast<void *>(fragment.get()));
       }
     } catch (eformat::Issue& ex) {
       std::cerr << "Uncaught eformat issue: " << ex.what() << std::endl;
@@ -447,6 +440,5 @@ void eventLoop(DataReader* pDR, EventStorage::DataWriter* pDW, unsigned& nFound,
       std::cerr << std::endl << "Uncaught unknown exception" << std::endl;
     }
     // end event processing 
-    delete [] fragment;
   }
 }

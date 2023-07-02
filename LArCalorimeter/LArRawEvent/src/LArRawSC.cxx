@@ -2,15 +2,7 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <typeinfo>
-
 #include "LArRawEvent/LArRawSC.h"
-
-
-LArRawSC::operator std::string() const{
- std::string digitString = typeid( *this ).name();
- return digitString ;
-}
 
 // set method
 void LArRawSC::setEnergies(const std::vector<int>& energies)

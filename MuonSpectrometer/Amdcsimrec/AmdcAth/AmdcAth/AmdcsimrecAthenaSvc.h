@@ -18,8 +18,6 @@ namespace MuonGM {
 
 class AtlasDetectorID ;
 
-#include "MuonAlignmentData/CorrContainer.h"
-
 #include "AthenaKernel/IOVSvcDefs.h"
 
 #include <vector>
@@ -176,13 +174,6 @@ private:
     StatusCode SetAmdcBlineStoreExternal();
     StatusCode SetAmdcIlineStoreExternal();
 
-    StatusCode GetALineMapContainer (const ALineMapContainer*& pALineMapContainer);
-    StatusCode GetBLineMapContainer (const BLineMapContainer*& pBLineMapContainer);
-    StatusCode GetCscInternalAlignmentMapContainer  (const CscInternalAlignmentMapContainer*& pCscInternalAlignmentMapContainer);
-
-    void       CheckALineMapContainer(const ALineMapContainer*& pALineMapContainer);
-    void       CheckBLineMapContainer(const BLineMapContainer*& pBLineMapContainer);
- 
     StatusCode SetAmdcAlineStoreFromExternal(AmdcAlineStore* pAmdcAlineStore,int& LoadIer);
     StatusCode SetAmdcBlineStoreFromExternal(AmdcBlineStore* pAmdcBlineStore,int& LoadIer);
     StatusCode SetAmdcIlineStoreFromExternal(AmdcIlineStore* pAmdcIlineStore,int& LoadIer);

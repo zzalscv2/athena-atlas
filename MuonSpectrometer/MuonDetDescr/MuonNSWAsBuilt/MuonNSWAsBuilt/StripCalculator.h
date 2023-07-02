@@ -67,7 +67,7 @@ namespace NswAsBuilt {
       position_t getPositionAlongStrip(ParameterClass iclass, stripIdentifier_t strip_id, double sx, double sy) const;
 
      /* Parses a std::istream with JSON-formatted configuration of the as-built parameters */
-      void parseJSON(std::string& in);
+      void parseJSON(const std::string& in);
 
     private:
 
