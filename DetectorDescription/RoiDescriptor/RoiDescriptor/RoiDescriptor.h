@@ -16,12 +16,10 @@
 #define ROIDESCRIPTOR_ROIDESCRIPTOR_H
 
 #include <iostream>
-#include <mutex>
+#include <atomic>
 
 #include "IRegionSelector/IRoiDescriptor.h"
 #include "IRegionSelector/RoiUtil.h"
-
-#include "CxxUtils/checker_macros.h"
 
 
 /**
@@ -182,42 +180,8 @@ public:
 
   static double zedWidthDefault() { return s_zedWidthDefault; }
 
-  static void  (*zedWidthDefault_set ATLAS_THREAD_SAFE)( double d );
-
-  /// wrapper to circumvent the erroneous cpp warningvs for the static function pointer  
-  static void circumvent_cppchecker( double d ) { zedWidthDefault_set( d ); } 
-
-private:
- 
-  static void zedWidthDefault_0( double d ) {
-    //RAII lock guard
-    std::lock_guard<std::mutex> lock(s_mutex); 
-    if ( increment==increment_0 )  s_zedWidthDefault = d;
-    increment();
-  }
-
-  static void  zedWidthDefault_1( double ) { }
-
-
-  /// increment checker to ensure that the static method to set the 
-  /// Roi width can only ever be called before the first RoiDescriptor 
-  /// is created - for thread safety the increment is protected by a
-  /// mutex, but to avoid pointless resource hungry mutex locking to 
-  /// check all subsequent RoiDescriptor calls, the increment mnethod
-  /// is replaced by an emtpy method for all subsequent calls so there 
-  /// will be no performance overhead    
-   
-  static void increment_0(){ 
-    std::lock_guard<std::mutex> lock(s_mutex_inc);
-    zedWidthDefault_set = zedWidthDefault_1;
-    increment = increment_1;
-  }
-
-  static void increment_1() { }
-
-public:
-  /// can't have this private, or the cpp checker complains
-  static void (*increment ATLAS_THREAD_SAFE)();
+  /// set default z-width (but only before any RoiDescriptor has been created)
+  static void zedWidthDefault( double d );
 
 protected:
 
@@ -237,11 +201,9 @@ protected:
 protected:
 
   /// default parameters - there may be better ways, but this will do
-  static double s_zedWidthDefault ATLAS_THREAD_SAFE;
-
-  /// Mutex to protect setting of the default z width.
-  static std::mutex s_mutex; 
-  static std::mutex s_mutex_inc; 
+  static std::atomic<double> s_zedWidthDefault;
+  /// to ensure default width is only set once at job startup
+  static std::atomic<bool> s_firstInstanceCreated;
 
 protected:
 

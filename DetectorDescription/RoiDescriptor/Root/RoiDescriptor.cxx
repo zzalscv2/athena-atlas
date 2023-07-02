@@ -30,21 +30,16 @@ static const float  M_PIF = float(M_PI);
 
 static const int RoiVersion = 4;
 
-/// This should be set by some static class function during the 
-/// overall configuration - perhaps by an RoiBuilder class  
-double RoiDescriptor::s_zedWidthDefault = 225;
+std::atomic<double> RoiDescriptor::s_zedWidthDefault = 225;
+std::atomic<bool> RoiDescriptor::s_firstInstanceCreated = false;
 
-
-//  ATLAS_THREAD_SAFE;
-
-std::mutex RoiDescriptor::s_mutex;
-std::mutex RoiDescriptor::s_mutex_inc;
-
-void (*RoiDescriptor::zedWidthDefault_set)(double) ATLAS_THREAD_SAFE = RoiDescriptor::zedWidthDefault_0;
-
-void (*RoiDescriptor::increment)() ATLAS_THREAD_SAFE = RoiDescriptor::increment_0;
-
-
+void RoiDescriptor::zedWidthDefault( double d )
+{
+  if (s_firstInstanceCreated) {
+    throw std::runtime_error("Cannot set default z-width because a RoiDescriptor has already been created");
+  }
+  s_zedWidthDefault = d;
+}
 
 RoiDescriptor::RoiDescriptor( bool fullscan )
   : m_phi(0), m_eta(0), m_zed(0), 
@@ -165,8 +160,7 @@ void RoiDescriptor::construct(double eta_, double etaMinus_, double etaPlus_,
 			      double phi_, double phiMinus_, double phiPlus_, 
 			      double zed_, double zedMinus_, double zedPlus_)
 { 
- 
-  increment();
+  s_firstInstanceCreated = true;
 
   m_eta = eta_;
   m_phi = phi_;
