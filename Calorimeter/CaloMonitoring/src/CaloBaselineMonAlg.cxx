@@ -18,8 +18,7 @@ using Athena::Units::GeV;
 CaloBaselineMonAlg::CaloBaselineMonAlg(const std::string& name, ISvcLocator* pSvcLocator) :
   CaloMonAlgBase(name, pSvcLocator),
   m_bool_pedestalMon(false),
-  m_bool_bcidtoolMon(false),
-  m_calo_id(nullptr)
+  m_bool_bcidtoolMon(false)
 {
 
 }
