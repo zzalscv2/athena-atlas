@@ -36,7 +36,7 @@ namespace LVL1MUCTPIPHASE1 {
     void setTrigTool(LVL1::TrigThresholdDecisionTool& tool) {m_trigThresholdDecisionTool=&tool;}
 
     //processing
-    LVL1MUONIF::Lvl1MuCTPIInputPhase1 mergeInputs(std::vector<const LVL1MUONIF::Lvl1MuCTPIInputPhase1*> inputs) const;
+    LVL1MUONIF::Lvl1MuCTPIInputPhase1 mergeInputs(const std::vector<const LVL1MUONIF::Lvl1MuCTPIInputPhase1*>& inputs) const;
     std::string computeMultiplicities(LVL1MUONIF::Lvl1MuCTPIInputPhase1& mergedInputs, int bcid, MUCTPIResults& results) const;
 
   private:
