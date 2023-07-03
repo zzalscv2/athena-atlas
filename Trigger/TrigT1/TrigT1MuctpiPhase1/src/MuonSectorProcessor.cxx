@@ -1,4 +1,4 @@
-/*                                                                                                                      
+/*
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
@@ -30,26 +30,26 @@
 
 using boost::property_tree::ptree;
 
-namespace LVL1MUCTPIPHASE1 { 
+namespace LVL1MUCTPIPHASE1 {
   struct SectorNumberConverter {
-    
+
     std::pair<int,int> barrel_global2local(int sector){
       auto inoct_sector = ((sector + 2) % 4);
       auto mioct_number = ((sector + 2) / 4) % 8;
       return std::make_pair(inoct_sector,mioct_number);
     }
-    
+
     int barrel_local2global(int number,int mioct){
       return ((30 + 4 * mioct)  + number) % 32;
     }
-    
+
     std::pair<int,int>  endcap_global2local(int sector){
       auto inoct_sector = ((sector + 1) % 6);
       auto mioct_number = ((sector + 1) / 6) % 8;
       return std::make_pair(inoct_sector,mioct_number);
-      
+
     }
-    
+
     int endcap_local2global(int number,int mioct){
       return ((47 + 6 * mioct)  + number) % 48;
     }
@@ -57,9 +57,9 @@ namespace LVL1MUCTPIPHASE1 {
       auto inoct_sector = (sector % 3);
       auto mioct_number = (sector / 3) % 8;
       return std::make_pair(inoct_sector,mioct_number);
-      
+
     }
-    
+
     int forward_local2global(int number,int mioct){
       return ((0 + 3 * mioct)  + number) % 24;
     }
@@ -70,23 +70,23 @@ namespace LVL1MUCTPIPHASE1 {
   public:
     MuctpiXMLHelper xmlHelper;
     std::map<int,std::set<std::string> > global_pairs;
-    
+
     std::array<std::map<std::string,std::vector<std::string>>,2> lhs_index;
     std::array<std::map<std::string,std::vector<std::string>>,2> rhs_index;
-    
+
     std::string make_key(std::string prefix, int global_sec, int roi){
       prefix += std::to_string(global_sec) + "_" + std::to_string(roi);
       return prefix;
     }
-    
+
     std::string make_pair(const std::string& lhs, const std::string& rhs) const {
       return lhs + ":" + rhs;
     }
 
 
     void create_indices(){
-      for(auto side_regions : global_pairs ){
-	for(auto region : side_regions.second){
+      for(const auto& side_regions : global_pairs ){
+	for(const auto& region : side_regions.second){
 	  auto split = region.find(':');
 	  auto left = region.substr(0,split);
 	  auto right = region.substr(split+1,std::string::npos);
@@ -95,33 +95,33 @@ namespace LVL1MUCTPIPHASE1 {
 	}
       }
     }
-    
+
     std::vector<std::string> get_lhs_keys(const std::string& dettype, int roi, int sector) const {
       std::vector<std::string>  r;
       r.push_back(dettype + std::to_string(sector) + "_" + std::to_string(roi));
-      return r;   
+      return r;
     }
-    
+
     std::vector<std::string> get_rhs_keys(const std::string& dettype, int roi, int sector) const {
       std::vector<std::string>  r;
       r.push_back(dettype + std::to_string(sector) + "_" + std::to_string(roi));
-      return r;   
+      return r;
     }
-    
+
     std::vector<std::string> relevant_regions(int side, const std::string& dettype, int roi, int sector) const {
       std::vector<std::string>  r;
-      for(auto key : get_lhs_keys(dettype,roi,sector)){
+      for(const auto& key : get_lhs_keys(dettype,roi,sector)){
 	auto x = lhs_index[side].find(key);
 	if(x != lhs_index[side].end()){
-	  for(auto rr : x->second){
+	  for(const auto& rr : x->second){
 	    r.push_back(make_pair(key,rr));
 	  }
 	}
       }
-      for(auto key : get_rhs_keys(dettype,roi,sector)){
+      for(const auto& key : get_rhs_keys(dettype,roi,sector)){
 	auto x = rhs_index[side].find(key);
 	if(x != rhs_index[side].end()){
-	  for(auto rr : x->second){
+	  for(const auto& rr : x->second){
 	    r.push_back(make_pair(rr,key));
 	  }
 	}
@@ -133,15 +133,15 @@ namespace LVL1MUCTPIPHASE1 {
     {
       ptree inputTree;
       read_xml(lutFile, inputTree);
-      
+
       boost::property_tree::ptree topEle = inputTree.get_child("MUCTPI_LUT");
-      
+
       // iterate through elements of the XML
       for(const boost::property_tree::ptree::value_type &x: topEle) {
-	
+
 	std::string topElementName = x.first;
 	ptree lut = x.second;
-	
+
 	if (topElementName != "LUT") continue;
 
 	std::string SectorId1 = xmlHelper.getAttribute(lut,"SectorId1");
@@ -153,13 +153,13 @@ namespace LVL1MUCTPIPHASE1 {
 	if (SectorId1[0] == 'F') left_mod = 24;
 	if (SectorId2[0] == 'E') right_mod = 48;
 	if (SectorId2[0] == 'F') right_mod = 24;
-	
+
 	std::string snum_left = std::string(1,SectorId1[1])+std::string(1,SectorId1[2]);
 	int sec_left = std::stoi(snum_left) % left_mod;
-	
+
 	std::string snum_right = std::string(1,SectorId2[1])+std::string(1,SectorId2[2]);
 	int sec_right = std::stoi(snum_right) % right_mod;
-	
+
 	std::string side = xmlHelper.getAttribute(lut,"Side");
 	int active_side = (side == "C") ? 0 : 1;
 
@@ -181,7 +181,7 @@ namespace LVL1MUCTPIPHASE1 {
       create_indices();
     }
   };
-  
+
 
   MuonSectorProcessor::MuonSectorProcessor(bool side)
     :
@@ -196,10 +196,8 @@ namespace LVL1MUCTPIPHASE1 {
   {
   }
 
-  MuonSectorProcessor::MuonSectorProcessor(MuonSectorProcessor &&o)
-    : m_overlapHelper(std::move(o.m_overlapHelper))
-  {
-  }
+  MuonSectorProcessor::MuonSectorProcessor(MuonSectorProcessor&& o) noexcept
+      : m_overlapHelper(std::move(o.m_overlapHelper)) {}
 
   void MuonSectorProcessor::setMenu(const TrigConf::L1Menu* l1menu)
   {
@@ -235,11 +233,11 @@ namespace LVL1MUCTPIPHASE1 {
        m_ptEncoding[1][i] = exMU->ptForTgcIdx(i);
        m_ptEncoding[2][i] = exMU->ptForTgcIdx(i);
     }
-  
+
     return true;
   }
 
-  
+
   void MuonSectorProcessor::runOverlapRemoval(LVL1MUONIF::Lvl1MuCTPIInputPhase1* inputs, int bcid) const
   {
     std::map<std::string,std::vector<std::pair<std::shared_ptr<LVL1MUONIF::Lvl1MuSectorLogicDataPhase1>, unsigned> > > buckets;
@@ -258,7 +256,7 @@ namespace LVL1MUCTPIPHASE1 {
 	  //get a pointer to this since we'll need to modify the 'veto' flag of the SL data
 	  std::shared_ptr<LVL1MUONIF::Lvl1MuSectorLogicDataPhase1> sectorData = inputs->getSectorLogicDataPtr(isys, isub, isec, bcid);
 	  if (!sectorData) continue;
-	  
+
 	  for (unsigned int icand=0;icand<LVL1MUONIF::NCAND[isys];icand++)
 	  {
 	    //build the sector name
@@ -308,8 +306,8 @@ namespace LVL1MUCTPIPHASE1 {
       }
     }
   }
-  
-  std::string MuonSectorProcessor::makeL1TopoData(LVL1MUONIF::Lvl1MuCTPIInputPhase1* inputs, int bcid, 
+
+  std::string MuonSectorProcessor::makeL1TopoData(LVL1MUONIF::Lvl1MuCTPIInputPhase1* inputs, int bcid,
 						  LVL1::MuCTPIL1Topo& l1topoData) const
   {
     // Barrel + EC + Fwd
@@ -331,7 +329,7 @@ namespace LVL1MUCTPIPHASE1 {
 	  if (isys == 0) sectorName<<"B";
 	  else if (isys == 1) sectorName<<"E";
 	  else if (isys == 2) sectorName<<"F";
-	    
+
 	  LVL1MUONIF::Lvl1MuCTPIInputPhase1::MuonSubSystem side = static_cast<LVL1MUONIF::Lvl1MuCTPIInputPhase1::MuonSubSystem>(isub);
 	  if (isys == 0)
 	  {
@@ -348,10 +346,10 @@ namespace LVL1MUCTPIPHASE1 {
 	    sectorName << isec;
 	  }
 
-	  
+
 	  for (unsigned int icand=0;icand<LVL1MUONIF::NCAND[isys];icand++)
-	  {	    
-	    //find the eta/phi 
+	  {
+	    //find the eta/phi
 	    int roiID = sectorData->roi(icand);
 	    if (roiID < 0) continue;
 	    int ptword = sectorData->pt(icand);
@@ -371,7 +369,7 @@ namespace LVL1MUCTPIPHASE1 {
 
 	    int ptValue = 0;
 	    auto enc = m_ptEncoding[isys].find(ptword);
-	    if (enc == m_ptEncoding[isys].end()) 
+	    if (enc == m_ptEncoding[isys].end())
 	    {
 	      auto last_enc = m_ptEncoding[isys].rbegin();
 	      if (last_enc != m_ptEncoding[isys].rend() && ptword > last_enc->first)
@@ -387,13 +385,13 @@ namespace LVL1MUCTPIPHASE1 {
 	    }
 	    else ptValue=enc->second;
 
-	    if (ptValue < 0) 
+	    if (ptValue < 0)
 	    {
 	      std::stringstream err;
 	      err << "Default value returned for pt encoding. Thr: " << ptword << ", isys: " << isys;
 	      return err.str();
 	    }
-	    
+
 
 	    // no longer needed, but keep for backwards compatibility
 	    int etacode=0;
@@ -420,14 +418,14 @@ namespace LVL1MUCTPIPHASE1 {
 				  coord.ieta,
 				  coord.iphi);
 
-	    if (isys == 0) cand.setRPCFlags(sectorData->is2candidates(icand), 
+	    if (isys == 0) cand.setRPCFlags(sectorData->is2candidates(icand),
 					    sectorData->ovl(icand));
 	    else cand.setTGCFlags(sectorData->bw2or3(icand),
 				  sectorData->innercoin(icand),
 				  sectorData->goodmf(icand),
 				  sectorData->charge(icand));
 
-	    
+
 	    l1topoData.addCandidate(cand);
 	  }
 	}

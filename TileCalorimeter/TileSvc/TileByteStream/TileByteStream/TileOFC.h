@@ -25,8 +25,9 @@ void Double2Int_ofc( int w_off_size,
 		     int &scale, 
 		     bool verbose =false );
 
-bool ConvertOFC( std::vector<std::vector<std::vector<std::vector<double> > > > w_off,
-		 std::vector<std::vector<double> > calibration, 
+bool ConvertOFC( 
+     const std::vector<std::vector<std::vector<std::vector<double> > > >& w_off,
+		 const std::vector<std::vector<double> >& calibration, 
 		 int calibtype, 
 		 int runtype, 
 		 std::vector<unsigned int> &OFC, 

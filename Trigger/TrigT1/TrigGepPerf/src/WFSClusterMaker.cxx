@@ -30,7 +30,7 @@ Gep::WFSClusterMaker::makeClusters(const pGepCellMap& caloCellsMap) const {
 }
 
 
-bool Gep::WFSClusterMaker::isSeedCell (Gep::CustomCaloCell cell) const {
+bool Gep::WFSClusterMaker::isSeedCell (const Gep::CustomCaloCell& cell) const {
 
   if (cell.isBadCell()) return false;
   if (fabs(cell.sigma) < m_seed_threshold) return false;

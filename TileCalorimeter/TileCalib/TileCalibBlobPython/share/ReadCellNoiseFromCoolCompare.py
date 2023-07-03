@@ -7,8 +7,6 @@
 # Yuri Smirnov 2015-03-19
 #
 
-from __future__ import print_function
-
 import getopt,sys,os
 os.environ['TERM'] = 'linux'
 
@@ -18,11 +16,13 @@ def usage():
     print ("")
     print ("-h, --help      shows this help")
     print ("-s, --schema=   specify schema to use, ONL or OFL for RUN1 or ONL2 or OFL2 for RUN2 or MC")
+    print ("-S, --server=   specify server - ORACLE or FRONTIER, default is FRONTIER")
     print ("-f, --folder=   specify status folder to use f.i. /TILE/OFL02/NOISE/CELL or /CALO/Noise/CellNoise ")
     print ("-t, --tag=      specify tag to use, f.i. UPD1 or UPD4 or tag suffix like 14TeV-N200_dT50-01")
     print ("-r, --run=      specify run  number, by default uses latest iov")
     print ("-l, --lumi=     specify lumi block number, default is 0")
     print ("-s2, --schema2=   specify schema2 to use, ONL or OFL for RUN1 or ONL2 or OFL2 for RUN2 or MC")
+    print ("-S2, --server2=   specify server2 - ORACLE or FRONTIER, default is FRONTIER")
     print ("-f2, --folder2=   specify status folder2 to use f.i. /TILE/OFL02/NOISE/CELL or /CALO/Noise/CellNoise ")
     print ("-t2, --tag2=      specify tag2 to use, f.i. UPD1 or UPD4 or tag suffix like 14TeV-N200_dT50-01")
     print ("-r2, --run2=      specify 2-nd run number, by default uses latest iov")
@@ -38,8 +38,8 @@ def usage():
     print ("-b, --brief     print only numbers without character names")
     print ("-d, --double    print values with double precision")
 
-letters = "hs:t:f:r:l:s2:t2:f2:r2:l2:m:m2:n:c:g:i:z:wbd"
-keywords = ["help","schema=","tag=","folder=","run=","lumi=","schema2=","tag2=","folder2=","run2=","lumi2=","maxdiff=","maxdiffpercent=","channel=","cell=","gain=","index=","zero=","wide","brief","double"]
+letters = "hS:s:t:f:r:l:S2:s2:t2:f2:r2:l2:m:m2:n:c:g:i:z:wbd"
+keywords = ["help","server=","schema=","tag=","folder=","run=","lumi=","server2=","schema2=","tag2=","folder2=","run2=","lumi2=","maxdiff=","maxdiffpercent=","channel=","cell=","gain=","index=","zero=","wide","brief","double"]
 
 try:
     opts, extraparams = getopt.getopt(sys.argv[1:],letters,keywords)
@@ -53,6 +53,8 @@ run    = 2147483647
 run2   = 0      # will be set to "run" if not on command line
 lumi   = 0
 lumi2  = -1     # will be set to "lumi" if not on command line
+server = ''
+server2 = "none"
 schema = 'OFL2'
 schema2 = "none"
 folderPath = '/TILE/OFL02/NOISE/CELL'
@@ -71,10 +73,15 @@ multi  = True
 zthr   = 5e-7
 
 for o, a in opts:
+    a = a.strip()
     if o in ("-s","--schema"):
         schema = a
     elif o in ("-s2","--schema2"):
         schema2 = a
+    elif o in ("-S","--server"):
+        server = a
+    elif o in ("-S2","--server2"):
+        server2 = a
     elif o in ("-f","--folder"):
         folderPath = a
     elif o in ("-f2","--folder2"):
@@ -130,6 +137,8 @@ if tag2=="none":
     tag2=tag
 if schema2=="none":
     schema2=schema
+if server2=="none":
+    server2=server
 
 tile=(chan==48)
 
@@ -205,7 +214,7 @@ else:
         cabling = 'RUN2'
 hashMgr=TileCellTools.TileCellHashMgr(cabling=cabling)
 
-db = CaloCondTools.openDbConn(schema, "READONLY")
+db = CaloCondTools.openDbConn(schema, server)
 
 if folderPath.startswith('/TILE') or tag=='UPD1' or tag=='UPD4' or 'COND'in tag:
     folderTag = TileCalibTools.getFolderTag(db, folderPath, tag )
@@ -268,7 +277,7 @@ elif schema2=='MC': # shortcut for COOLOFL_TILE/OFLP200 or COOLOFL_LAR/OFLP200
         if tag2=='UPD4':
             tag2='IOVDEP-02' # change default to tag used in DC14
 
-db2 = CaloCondTools.openDbConn(schema2, "READONLY")
+db2 = CaloCondTools.openDbConn(schema2, server2)
 
 if folderPath2.startswith('/TILE') or tag2=='UPD1' or tag2=='UPD4' or 'COND'in tag2:
     folderTag2 = TileCalibTools.getFolderTag(db2, folderPath2, tag2 )

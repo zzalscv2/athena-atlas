@@ -9,8 +9,6 @@
 # 2016-12-14 - Yuri Smirnov, change for PyCintex->cppyy for ROOT6
 # 2020-06-06 - Sasha - introducing --end and --endlumi parameters
 
-from __future__ import print_function
-
 import getopt,sys,os,re,bisect
 os.environ['TERM'] = 'linux'
 
@@ -25,6 +23,7 @@ def usage():
     print ("-T, --outtag=   specify the output tag")
     print ("-f, --folder=   specify status folder to use e.g. /TILE/OFL02/NOISE/CELL ")
     print ("-d, --dbname=   specify the database name e.g. OFLP200")
+    print ("-S, --server=   specify server - ORACLE or FRONTIER, default is FRONTIER")
     print ("-x, --txtfile=  specify the text file with the new noise constants")
     print ("-r, --run=      specify run number for start of IOV")
     print ("-l, --lumi=     specify lumiblock number for start of IOV, default is 0")
@@ -38,8 +37,8 @@ def usage():
     print ("--scaleElec=    specify separate scale factor for all electronic noise fields except ratio field")
     print ("if run number and lumiblock number are omitted - all IOVs from input file are updated")
 
-letters = "hi:o:t:T:f:d:x:r:l:b:e:L:A:n:s:u"
-keywords = ["help","infile=","outfile=","intag=","outtag=","folder=","dbname=","txtfile=","run=","lumi=","begin=","end=","endlumi=","adjust",
+letters = "hi:o:t:T:f:d:S:x:r:l:b:e:L:A:n:s:u"
+keywords = ["help","infile=","outfile=","intag=","outtag=","folder=","dbname=","server=","txtfile=","run=","lumi=","begin=","end=","endlumi=","adjust",
             "channel=","scale=","scaleA=","scaleB=","scaleD=","scaleE=","scaleD4=","scaleC10=","scaleD4sp=","scaleC10sp=","scaleElec=","update"]
 
 try:
@@ -56,6 +55,7 @@ inTag       = ''
 outTag      = ''
 folderPath  = ''
 dbName      = ''
+server      = ''
 txtFile     = ''
 run         = -1
 lumi        = 0
@@ -78,6 +78,7 @@ scaleC10sp  = 0.0 # scale for pileup term in C10 special
 scaleElec   = 0.0 # scale for electronic noise
 
 for o, a in opts:
+    a = a.strip()
     if o in ("-i","--infile"):
         inFile = a
     elif o in ("-o","--outfile"):
@@ -90,6 +91,8 @@ for o, a in opts:
         folderPath = a
     elif o in ("-d","--dbname"):
         dbName = a
+    elif o in ("-S","--server"):
+        server = a
     elif o in ("-r","--run"):
         run = int(a)
         if run>=0:
@@ -219,9 +222,8 @@ if os.path.isfile(inFile):
 else:
     log.info("File %s was not found, assuming it's full schema string" , inFile)
     ischema = inFile
-    # possible strings for inFile:
-    # "oracle://ATLAS_COOLPROD;schema=ATLAS_COOLOFL_CALO;dbname=OFLP200"
-    # "oracle://ATLAS_COOLPROD;schema=ATLAS_COOLOFL_TILE;dbname=OFLP200"
+    # possible strings for inFile - full schema connection string or short names like
+    # COOLOFL_CALO/OFLP200 COOLOFL_CALO/COMP200 COOLOFL_CALO/CONDBR2
     # COOLOFL_TILE/OFLP200 COOLOFL_TILE/COMP200 COOLOFL_TILE/CONDBR2
 
 rb = max(run,beg)
@@ -260,7 +262,7 @@ if end >= TileCalibTools.MAXRUN:
 
 if iov:
     #=== Get list of IOVs by tricking TileCalibTools to read a Calo blob
-    idb = TileCalibTools.openDbConn(ischema,'READONLY')
+    idb = TileCalibTools.openDbConn(ischema,server)
     try:
         blobReader = TileCalibTools.TileBlobReader(idb,folderPath, inTag)
         iovList = blobReader.getIOVsWithinRange(-1,chan)
@@ -323,7 +325,7 @@ if len(iovList)==0:
 
 #=== Open DB connections
 oschema = 'sqlite://;schema='+outFile+';dbname='+dbName
-dbr = CaloCondTools.openDbConn(ischema,'READONLY')
+dbr = CaloCondTools.openDbConn(ischema,server)
 update = update or (inFile==outFile)
 dbw = CaloCondTools.openDbConn(oschema,('UPDATE' if update else 'RECREATE'))
 reader = CaloCondTools.CaloBlobReader(dbr,folderPath,inTag)

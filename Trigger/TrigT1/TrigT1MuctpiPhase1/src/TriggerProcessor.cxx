@@ -29,7 +29,7 @@ namespace LVL1MUCTPIPHASE1 {
     m_l1menu = l1menu;
   }
   
-  LVL1MUONIF::Lvl1MuCTPIInputPhase1 TriggerProcessor::mergeInputs(std::vector<const LVL1MUONIF::Lvl1MuCTPIInputPhase1*> inputs) const
+  LVL1MUONIF::Lvl1MuCTPIInputPhase1 TriggerProcessor::mergeInputs(const std::vector<const LVL1MUONIF::Lvl1MuCTPIInputPhase1*>&  inputs) const
   {
     LVL1MUONIF::Lvl1MuCTPIInputPhase1 mergedInputs;
     int nrInputs = inputs.size();

@@ -5,8 +5,6 @@
 # ReadFloatFromCool.py
 # Lukas Pribyl <lukas.pribyl@cern.ch>, 2008-11-18
 
-from __future__ import print_function
-
 import getopt,sys,os
 os.environ['TERM'] = 'linux'
 
@@ -25,9 +23,10 @@ def usage():
     print ("-g, -a, --adc=  specify gain (adc number), default is 0")
     print ("-n, --nval=     specify number of values to output, default is all")
     print ("-s, --schema=   specify schema to use, like 'COOLOFL_TILE/CONDBR2' or 'sqlite://;schema=tileSqlite.db;dbname=CONDBR2'")
+    print ("-S, --server=   specify server - ORACLE or FRONTIER, default is FRONTIER")
 
-letters = "hr:l:s:t:f:p:d:c:a:g:n:"
-keywords = ["help","run=","lumi=","schema=","tag=","folder=","ros=","drawer=","channel=","adc=","gain=","nval="]
+letters = "hr:l:S:s:t:f:p:d:c:a:g:n:"
+keywords = ["help","run=","lumi=","server=","schema=","tag=","folder=","ros=","drawer=","channel=","adc=","gain=","nval="]
 
 try:
     opts, extraparams = getopt.getopt(sys.argv[1:],letters,keywords)
@@ -39,6 +38,7 @@ except getopt.GetoptError as err:
 # defaults
 run = 2147483647
 lumi = 0
+server = ''
 schema = 'COOLOFL_TILE/CONDBR2'
 folderPath =  "/TILE/OFL02/CALIB/CIS/LIN"
 tag = "UPD4"
@@ -50,10 +50,13 @@ nval    = 0
 # note: for MUID there are 40 values stored at every channel 0
 
 for o, a in opts:
+    a = a.strip()
     if o in ("-f","--folder"):
         folderPath = a
     elif o in ("-t","--tag"):
         tag = a
+    elif o in ("-S","--server"):
+        server = a
     elif o in ("-s","--schema"):
         schema = a
     elif o in ("-p","--ros"):
@@ -103,7 +106,7 @@ log.setLevel(logging.DEBUG)
 
 
 #=== set database
-db = TileCalibTools.openDbConn(schema,'READONLY')
+db = TileCalibTools.openDbConn(schema,server)
 folderTag = TileCalibTools.getFolderTag(db, folderPath, tag)
 log.info("Initializing folder %s with tag %s", folderPath, folderTag)
 

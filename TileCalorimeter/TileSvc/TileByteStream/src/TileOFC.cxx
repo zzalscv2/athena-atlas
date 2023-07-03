@@ -85,8 +85,9 @@ void Double2Int_ofc( int w_off_size, vector<double> w_off, vector<int> &w_dsp, i
   return ;
 }
 
-bool ConvertOFC( vector<vector<vector<vector<double> > > > w_off, vector<vector<double> > calibration, int calibtype, int runtype, vector<unsigned int> &OFC, bool verbose)
-{
+bool ConvertOFC(const vector<vector<vector<vector<double> > > >& w_off,
+                const vector<vector<double> >& calibration, int calibtype, int runtype,
+                vector<unsigned int> &OFC, bool verbose) {
   bool flag;
   
   // Select number of phases and step inside DSP

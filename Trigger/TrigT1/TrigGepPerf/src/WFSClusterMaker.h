@@ -31,7 +31,7 @@ private:
     std::vector<int> m_allowed_seed_samplings = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
     std::vector<int> m_allowed_clustering_samplings = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
 
-    bool isSeedCell (Gep::CustomCaloCell cell) const;
+    bool isSeedCell (const Gep::CustomCaloCell& cell) const;
     bool isInAllowedSampling(int sampling, std::vector<int> list_of_samplings) const ;
     bool isNewCell(unsigned int id, std::vector<unsigned int> seenCells) const;
 

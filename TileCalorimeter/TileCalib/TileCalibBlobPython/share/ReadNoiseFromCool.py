@@ -5,8 +5,6 @@
 # ReadNoiseFromCool.py
 # Lukas Pribyl <lukas.pribyl@cern.ch>, 2008-08-05
 
-from __future__ import print_function
-
 import getopt,sys,os
 os.environ['TERM'] = 'linux'
 
@@ -23,9 +21,10 @@ def usage():
     print ("-c, --channel=  specify channel number, default is 0")
     print ("-g, -a, --adc=  specify gain (adc number), default is 0")
     print ("-s, --schema=   specify schema to use, like 'COOLONL_TILE/CONDBR2' or 'sqlite://;schema=tileSqlite.db;dbname=CONDBR2'")
+    print ("-S, --server=   specify server - ORACLE or FRONTIER, default is FRONTIER")
 
-letters = "hr:l:s:t:p:d:c:a:g:"
-keywords = ["help","run=","lumi=","schema=","tag=","ros=","drawer=","channel=","adc=","gain="]
+letters = "hr:l:S:s:t:p:d:c:a:g:"
+keywords = ["help","run=","lumi=","server=","schema=","tag=","ros=","drawer=","channel=","adc=","gain="]
 
 try:
     opts, extraparams = getopt.getopt(sys.argv[1:],letters,keywords)
@@ -37,6 +36,7 @@ except getopt.GetoptError as err:
 # defaults
 run = 2147483647
 lumi = 0
+server = ''
 schema = 'COOLONL_TILE/CONDBR2'
 tag = "HLT-UPD1-01" # tag is needed only for COMP200, ignored in CONDBR2
 ros     = 1
@@ -45,8 +45,11 @@ channel = 0
 adc     = 0
 
 for o, a in opts:
+    a = a.strip()
     if o in ("-t","--tag"):
         tag = a
+    elif o in ("-S","--server"):
+        server = a
     elif o in ("-s","--schema"):
         schema = a
     elif o in ("-r","--run"):
@@ -83,7 +86,7 @@ log.setLevel(logging.DEBUG)
 
 
 #=== set database
-db = TileCalibTools.openDbConn(schema,'READONLY')
+db = TileCalibTools.openDbConn(schema,server)
 
 folder1="/TILE/ONL01/NOISE/SAMPLE"
 folder2="/TILE/ONL01/NOISE/OFNI"

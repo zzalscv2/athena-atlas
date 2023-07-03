@@ -5,8 +5,6 @@
 # Example_ReadSampleNoise.py
 # Nils Gollub <nils.gollub@cern.ch>, 2008-06-16
 
-from __future__ import print_function
-
 from TileCalibBlobPython import TileCalibTools
 from TileCalibBlobObjs.Classes import TileCalibUtils
 
@@ -17,7 +15,7 @@ pointInTime = (999999999,0) # (run number, luminosity block number)
 globalTag   = "UPD4"
 
 #=== open the database
-db = TileCalibTools.openDb('ORACLE', 'CONDBR2', 'READONLY', 'COOLOFL_TILE')
+db = TileCalibTools.openDbConn('COOLOFL_TILE/CONDBR2')
 
 #=== resolve folder tag from global tag
 folderTag = TileCalibTools.getFolderTag(db, folder, globalTag)

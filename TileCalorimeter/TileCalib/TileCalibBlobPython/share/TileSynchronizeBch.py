@@ -74,7 +74,7 @@ log.info("")
 #===================================================================
 
 #=== get DB1
-db1 = TileCalibTools.openDb('ORACLE', 'CONDBR2', 'READONLY', 'COOLOFL_TILE')
+db1 = TileCalibTools.openDbConn('COOLOFL_TILE/CONDBR2')
 folder1 = "/TILE/OFL02/STATUS/ADC"
 folderTag1 = TileCalibTools.getFolderTag(db1, folder1, tag1)
 
@@ -87,11 +87,11 @@ mgr1.initialize(db1, folder1, folderTag1, (run1,0))
 #=== get DB2
 online = tag2[0:3].upper()=="ONL"
 if online:
-    db2 = TileCalibTools.openDb('ORACLE', 'CONDBR2', 'READONLY', 'COOLONL_TILE')
+    db2 = TileCalibTools.openDbConn('COOLONL_TILE/CONDBR2')
     folder2 = "/TILE/ONL01/STATUS/ADC"
     folderTag2 = ""
 else:
-    db2 = TileCalibTools.openDb('ORACLE', 'CONDBR2', 'READONLY', 'COOLOFL_TILE')
+    db2 = TileCalibTools.openDbConn('COOLOFL_TILE/CONDBR2')
     folder2 = "/TILE/OFL02/STATUS/ADC"
     folderTag2 = TileCalibTools.getFolderTag(db2, folder2, tag2)
 

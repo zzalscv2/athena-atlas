@@ -6,7 +6,6 @@
 #include <AthenaKernel/getMessageSvc.h>
 #include <GaudiKernel/MsgStream.h>
 #include <MuonTesterTree/MuonTesterTree.h>
-#include <MuonTesterTree/ScalarBranch.h>
 namespace MuonVal {
 template <class T> ScalarBranch<T>::ScalarBranch(TTree* tree, const std::string& name) : MuonTesterBranch(tree, name) {}
 template <class T> ScalarBranch<T>::ScalarBranch(MuonTesterTree& tree, const std::string& name) : MuonTesterBranch(tree, name) {}

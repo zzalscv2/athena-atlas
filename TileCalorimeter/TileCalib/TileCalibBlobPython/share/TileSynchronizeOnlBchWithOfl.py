@@ -48,7 +48,7 @@ runOfl = MAXRUN
 folder = "/TILE/OFL02/STATUS/ADC"
 
 #=== get offline DB
-db1 = TileCalibTools.openDb('ORACLE', 'CONDBR2', 'READONLY', 'COOLOFL_TILE')
+db1 = TileCalibTools.openDbConn('COOLOFL_TILE/CONDBR2')
 folderTag = TileCalibTools.getFolderTag(db1, folder, tag)
 
 #--- create ofline bad channel manager
@@ -63,7 +63,7 @@ folderOnl = "/TILE/ONL01/STATUS/ADC"
 folderTagOnl = ""
 
 #=== get online DB
-db  = TileCalibTools.openDb('ORACLE', 'CONDBR2', 'READONLY', 'COOLONL_TILE')
+db  = TileCalibTools.openDbConn('COOLONL_TILE/CONDBR2')
 
 mgrOnl = TileBchTools.TileBchMgr()
 mgrOnl.setLogLvl(logging.DEBUG)

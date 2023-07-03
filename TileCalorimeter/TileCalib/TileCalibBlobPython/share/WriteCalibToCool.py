@@ -6,8 +6,6 @@
 # Sanya Solodkov 2014-08-29
 # change Yuri Smirnov 2014-12-24
 
-from __future__ import print_function
-
 import getopt,sys,os,bisect
 os.environ['TERM'] = 'linux'
 
@@ -43,13 +41,14 @@ def usage():
     print ("-U, --user=     specify username for comment")
     print ("-p, --prefix=   specify prefix which is expected on every line in input file, default - no prefix")
     print ("-k, --keep=     field numbers or channel numbers to ignore, e.g. '0,2,3,EBch0,EBch1,EBch12,EBch13,EBspD4ch18,EBspD4ch19,EBspC10ch4,EBspC10ch5' ")
-    print ("-i, --inschema=   specify the input schema to use, default is 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLOFL_TILE;dbname=CONDBR2'")
+    print ("-i, --inschema=   specify the input schema to use, default is 'COOLOFL_TILE/CONDBR2'")
     print ("-o, --outschema=  specify the output schema to use, default is 'sqlite://;schema=tileSqlite.db;dbname=CONDBR2'")
     print ("-s, --schema=     specify input/output schema to use when both input and output schemas are the same")
+    print ("-S, --server=     specify server - ORACLE or FRONTIER, default is FRONTIER")
     print ("-u  --update      set this flag if output sqlite file should be updated, otherwise it'll be recreated")
 
-letters = "hr:l:R:L:b:e:AD:s:i:o:t:T:f:F:C:G:n:v:x:m:M:U:p:dcazZuk:"
-keywords = ["help","run=","lumi=","run2=","lumi2=","begin=","end=","adjust","module=","schema=","inschema=","outschema=","tag=","outtag=","folder=","outfolder=","nchannel=","ngain=","nval=","version=","txtfile=","comment=","Comment=","user=","prefix=","default","channel","all","zero","allzero","update","keep="]
+letters = "hr:l:R:L:b:e:AD:S:s:i:o:t:T:f:F:C:G:n:v:x:m:M:U:p:dcazZuk:"
+keywords = ["help","run=","lumi=","run2=","lumi2=","begin=","end=","adjust","module=","server=","schema=","inschema=","outschema=","tag=","outtag=","folder=","outfolder=","nchannel=","ngain=","nval=","version=","txtfile=","comment=","Comment=","user=","prefix=","default","channel","all","zero","allzero","update","keep="]
 
 try:
     opts, extraparams = getopt.getopt(sys.argv[1:],letters,keywords)
@@ -63,8 +62,9 @@ run = -1
 lumi = 0
 run2 = -1
 lumi2 = 0
+server = ''
 schema = 'sqlite://;schema=tileSqlite.db;dbname=CONDBR2'
-inSchema = "oracle://ATLAS_COOLPROD;schema=ATLAS_COOLOFL_TILE;dbname=CONDBR2"
+inSchema = 'COOLOFL_TILE/CONDBR2'
 outSchema = 'sqlite://;schema=tileSqlite.db;dbname=CONDBR2'
 folderPath =  "/TILE/OFL02/TIME/CHANNELOFFSET/GAP/LAS"
 tag = "UPD1"
@@ -97,6 +97,7 @@ except Exception:
     user="UnknownUser"
 
 for o, a in opts:
+    a = a.strip()
     if o in ("-f","--folder"):
         folderPath = a
     elif o in ("-F","--outfolder"):
@@ -105,6 +106,8 @@ for o, a in opts:
         tag = a
     elif o in ("-T","--outtag"):
         outtag = a
+    elif o in ("-S","--server"):
+        server = a
     elif o in ("-s","--schema"):
         schema = a
         inSchema = a
@@ -205,7 +208,7 @@ else:
     log.setLevel(logging.DEBUG)
 
 #=== set database
-dbr = TileCalibTools.openDbConn(inSchema,'READONLY')
+dbr = TileCalibTools.openDbConn(inSchema,server)
 dbw = TileCalibTools.openDbConn(outSchema,('UPDATE' if update else 'RECREATE'))
 if tag=='UPD5':
     tag='UPD4'

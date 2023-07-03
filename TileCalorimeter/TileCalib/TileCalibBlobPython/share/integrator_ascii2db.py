@@ -6,8 +6,6 @@
 # Nils Gollub <nils.gollub@cern.ch>, 2008-02-07
 # change Yuri Smirnov <iouri.smirnov@cern.ch>, 2014-12-24
 
-from __future__ import print_function
-
 import sys, re, os.path
 
 #=== get a logger

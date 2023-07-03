@@ -3,8 +3,6 @@
 # Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 #
 
-from __future__ import print_function
-
 import getopt,sys
 
 def usage():
@@ -37,6 +35,7 @@ tag = "TEST-00"
 fileName = "Tile.trips"
 
 for o, a in opts:
+    a = a.strip()
     if o in ("-i","--input"):
         fileName = a
     elif o in ("-t","--tag"):
