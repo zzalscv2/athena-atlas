@@ -803,8 +803,7 @@ Amg::Vector3D TRTProcessingOfStraw::getGlobalPosition (  int hitID, const TimedH
   }
 
   ATH_MSG_WARNING ( "Could not find global coordinate of a straw - drifttime calculation will be inaccurate" );
-  const Amg::Vector3D def(0.0,0.0,0.0);
-  return def;
+  return {0.0,0.0,0.0};
 
 }
 
