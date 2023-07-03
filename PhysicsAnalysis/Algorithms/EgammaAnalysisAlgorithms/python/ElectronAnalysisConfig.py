@@ -80,10 +80,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
                                'CP::EgammaCalibrationAndSmearingTool' )
         alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
         alg.calibrationAndSmearingTool.decorrelationModel = '1NP_v1'
-        if config.dataType() == 'afii':
-            alg.calibrationAndSmearingTool.useAFII = 1
-        else:
-            alg.calibrationAndSmearingTool.useAFII = 0
+        alg.calibrationAndSmearingTool.useAFII = int( config.dataType() == 'afii' )
         alg.egammas = config.readName (self.containerName)
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -104,10 +101,8 @@ class ElectronCalibrationConfig (ConfigBlock) :
                                           'ElectronIsolationCorrectionAlg' + self.postfix )
             config.addPrivateTool( 'isolationCorrectionTool',
                                    'CP::IsolationCorrectionTool' )
-            if config.dataType() == 'data':
-                alg.isolationCorrectionTool.IsMC = 0
-            else:
-                alg.isolationCorrectionTool.IsMC = 1
+            alg.isolationCorrectionTool.IsMC = config.dataType() != 'data'
+            alg.isolationCorrectionTool.AFII_corr = config.dataType() == 'afii'
             alg.egammas = config.readName (self.containerName)
             alg.egammasOut = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
