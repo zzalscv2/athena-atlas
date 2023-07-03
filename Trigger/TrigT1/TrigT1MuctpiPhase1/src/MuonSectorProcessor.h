@@ -39,7 +39,7 @@ namespace LVL1MUCTPIPHASE1 {
   public:
     MuonSectorProcessor(bool side /*1=A,0=C*/);
     ~MuonSectorProcessor();
-    MuonSectorProcessor(MuonSectorProcessor &&o);
+    MuonSectorProcessor(MuonSectorProcessor &&o) noexcept;
     MuonSectorProcessor(const MuonSectorProcessor &) = delete;
 
     //initialization
