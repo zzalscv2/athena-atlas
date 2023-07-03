@@ -65,9 +65,6 @@ class CaloBaselineMonAlg : public CaloMonAlgBase {
    bool m_bool_pedestalMon;
    bool m_bool_bcidtoolMon;
 
-   
-   const CaloCell_ID*   m_calo_id;
-
    /* Histogram grouping (part)(ieta) */
    std::vector<std::vector<int> >m_histoGroups;
 
