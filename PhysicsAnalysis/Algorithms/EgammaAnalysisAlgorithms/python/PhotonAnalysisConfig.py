@@ -96,10 +96,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
                                'CP::EgammaCalibrationAndSmearingTool' )
         alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
         alg.calibrationAndSmearingTool.decorrelationModel = '1NP_v1'
-        if config.dataType() == 'afii':
-            alg.calibrationAndSmearingTool.useAFII = 1
-        else :
-            alg.calibrationAndSmearingTool.useAFII = 0
+        alg.calibrationAndSmearingTool.useAFII = int( config.dataType() == 'afii' )
         alg.egammas = config.readName (self.containerName)
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -119,10 +116,8 @@ class PhotonCalibrationConfig (ConfigBlock) :
                                       'PhotonIsolationCorrectionAlg' + postfix )
         config.addPrivateTool( 'isolationCorrectionTool',
                                'CP::IsolationCorrectionTool' )
-        if config.dataType() == 'data':
-            alg.isolationCorrectionTool.IsMC = 0
-        else:
-            alg.isolationCorrectionTool.IsMC = 1
+        alg.isolationCorrectionTool.IsMC = config.dataType() != 'data'
+        alg.isolationCorrectionTool.AFII_corr = config.dataType() == 'afii'
         alg.egammas = config.readName (self.containerName)
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -146,6 +141,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
         self.addOption ('qualityWP', None, type=str)
         self.addOption ('isolationWP', None, type=str)
         self.addOption ('recomputeIsEM', False, type=bool)
+        self.addOption ('isRun3Geo', False, type=bool)
 
     def makeAlgs (self, config) :
 
@@ -167,8 +163,10 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             # Rerun the cut-based ID
             config.addPrivateTool( 'selectionTool', 'AsgPhotonIsEMSelector' )
             alg.selectionTool.isEMMask = quality
-            alg.selectionTool.ConfigFile = \
-                'ElectronPhotonSelectorTools/offline/20180116/PhotonIsEMTightSelectorCutDefs.conf'
+            if self.qualityWP == 'Tight':
+                alg.selectionTool.ConfigFile = 'ElectronPhotonSelectorTools/offline/20180825/PhotonIsEMTightSelectorCutDefs.conf'
+            elif self.qualityWP == 'Loose':
+                alg.selectionTool.ConfigFile = 'ElectronPhotonSelectorTools/offline/mc15_20150712/PhotonIsEMLooseSelectorCutDefs.conf'
         else:
             # Select from Derivation Framework flags
             config.addPrivateTool( 'selectionTool', 'CP::AsgFlagSelectionTool' )
@@ -199,24 +197,48 @@ class PhotonWorkingPointConfig (ConfigBlock) :
         alg.preselection = config.getFullSelection (self.containerName, self.selectionName)
         config.addOutputVar (self.containerName, 'baselineSelection' + postfix, 'select' + postfix)
 
+        # Set up the ID/reco photon efficiency correction algorithm:
         if config.dataType() != 'data':
-            # Set up the photon efficiency correction algorithm.
             alg = config.createAlgorithm( 'CP::PhotonEfficiencyCorrectionAlg',
-                                          'PhotonEfficiencyCorrectionAlg' + postfix )
+                                          'PhotonEfficiencyCorrectionAlgID' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionTool',
                                    'AsgPhotonEfficiencyCorrectionTool' )
-            alg.scaleFactorDecoration = 'ph_effSF' + postfix + '_%SYS%'
+            alg.scaleFactorDecoration = 'ph_id_effSF' + postfix + '_%SYS%'
             if config.dataType() == 'afii':
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full  # no AFII ID SFs for now
             elif config.dataType() == 'mc':
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
+            if not self.isRun3Geo:
+                alg.efficiencyCorrectionTool.MapFilePath = 'PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map3.txt'
             alg.outOfValidity = 2 #silent
-            alg.outOfValidityDeco = 'bad_eff' + postfix
+            alg.outOfValidityDeco = 'ph_id_bad_eff' + postfix
             alg.photons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'effSF' + postfix)
+            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'id_effSF' + postfix)
+
+        # Set up the ISO photon efficiency correction algorithm:
+        if config.dataType() != 'data':
+            alg = config.createAlgorithm( 'CP::PhotonEfficiencyCorrectionAlg',
+                                          'PhotonEfficiencyCorrectionAlgIsol' + postfix )
+            config.addPrivateTool( 'efficiencyCorrectionTool',
+                                   'AsgPhotonEfficiencyCorrectionTool' )
+            alg.scaleFactorDecoration = 'ph_isol_effSF' + postfix + '_%SYS%'
+            if config.dataType() == 'afii':
+                alg.efficiencyCorrectionTool.ForceDataType = \
+                    PATCore.ParticleDataType.Full  # no AFII ID SFs for now
+            elif config.dataType() == 'mc':
+                alg.efficiencyCorrectionTool.ForceDataType = \
+                    PATCore.ParticleDataType.Full
+            alg.efficiencyCorrectionTool.IsoKey = self.isolationWP.replace("FixedCut","")
+            if not self.isRun3Geo:
+                alg.efficiencyCorrectionTool.MapFilePath = 'PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map3.txt'
+            alg.outOfValidity = 2 #silent
+            alg.outOfValidityDeco = 'ph_isol_bad_eff' + postfix
+            alg.photons = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'isol_effSF' + postfix)
 
 
 
@@ -260,7 +282,8 @@ def makePhotonCalibrationConfig( seq, containerName,
 
 
 def makePhotonWorkingPointConfig( seq, containerName, workingPoint, postfix,
-                                  recomputeIsEM = None ):
+                                  recomputeIsEM = None,
+                                  isRun3Geo = None ):
     """Create photon analysis algorithms for a single working point
 
     Keywrod arguments:
@@ -280,4 +303,5 @@ def makePhotonWorkingPointConfig( seq, containerName, workingPoint, postfix,
         config.setOptionValue ('qualityWP',     splitWP[0])
         config.setOptionValue ('isolationWP',   splitWP[1])
     config.setOptionValue ('recomputeIsEM', recomputeIsEM, noneAction='ignore')
+    config.setOptionValue ('isRun3Geo', isRun3Geo, noneAction='ignore')
     seq.append (config)
