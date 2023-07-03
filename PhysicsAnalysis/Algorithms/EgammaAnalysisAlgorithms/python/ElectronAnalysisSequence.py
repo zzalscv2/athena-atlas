@@ -248,6 +248,7 @@ def makeElectronWorkingPointSequence( seq, dataType, workingPoint,
             # Select from Derivation Framework flags
             addPrivateTool( alg, 'selectionTool', 'CP::AsgFlagSelectionTool' )
             dfFlag = "DFCommonElectronsLH" + likelihoodWP.split('LH')[0]
+            dfFlag = dfFlag.replace("BLayer","BL")
             alg.selectionTool.selectionFlags = [dfFlag]
             algDecorCount = 1
     else:

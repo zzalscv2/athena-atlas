@@ -128,6 +128,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         self.addOption ('isolationWP', None, type=str)
         self.addOption ('recomputeLikelihood', False, type=bool)
         self.addOption ('chargeIDSelection', False, type=bool)
+        self.addOption ('isRun3Geo', False, type=bool)
 
     def makeAlgs (self, config) :
 
@@ -150,12 +151,17 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 # Rerun the likelihood ID
                 config.addPrivateTool( 'selectionTool', 'AsgElectronLikelihoodTool' )
                 alg.selectionTool.primaryVertexContainer = 'PrimaryVertices'
-                alg.selectionTool.WorkingPoint = self.likelihoodWP
+                # Here we have to match the naming convention of EGSelectorConfigurationMapping.h
+                if self.isRun3Geo:
+                    alg.selectionTool.WorkingPoint = self.likelihoodWP + 'Electron'
+                else:
+                    alg.selectionTool.WorkingPoint = self.likelihoodWP + 'Electron_Run2'
                 algDecorCount = 7
             else:
                 # Select from Derivation Framework flags
                 config.addPrivateTool( 'selectionTool', 'CP::AsgFlagSelectionTool' )
                 dfFlag = "DFCommonElectronsLH" + self.likelihoodWP.split('LH')[0]
+                dfFlag = dfFlag.replace("BLayer","BL")
                 alg.selectionTool.selectionFlags = [dfFlag]
                 algDecorCount = 1
         else:
@@ -165,7 +171,11 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             if self.recomputeLikelihood:
                 # Rerun the DNN ID
                 config.addPrivateTool( 'selectionTool', 'AsgElectronSelectorTool' )
-                alg.selectionTool.WorkingPoint = self.likelihoodWP
+                # Here we have to match the naming convention of EGSelectorConfigurationMapping.h
+                if self.isRun3Geo:
+                    raise ValueError ( "DNN working points are not available for Run 3 yet.")
+                else:
+                    alg.selectionTool.WorkingPoint = self.likelihoodWP + 'Electron'
                 algDecorCount = 6
             else:
                 # Select from Derivation Framework flags
@@ -211,13 +221,13 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         alg.preselection = config.getFullSelection (self.containerName, self.selectionName)
         config.addOutputVar (self.containerName, 'baselineSelection' + postfix, 'select' + postfix)
 
-        # Set up the electron efficiency correction algorithm:
+        # Set up the RECO electron efficiency correction algorithm:
         if config.dataType() != 'data':
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
-                                          'ElectronEfficiencyCorrectionAlg' + postfix )
+                                          'ElectronEfficiencyCorrectionAlgReco' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionTool',
                                    'AsgElectronEfficiencyCorrectionTool' )
-            alg.scaleFactorDecoration = 'effSF' + selectionPostfix + '_%SYS%'
+            alg.scaleFactorDecoration = 'el_reco_effSF' + selectionPostfix + '_%SYS%'
             alg.efficiencyCorrectionTool.RecoKey = "Reconstruction"
             alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
             if config.dataType() == 'afii':
@@ -226,13 +236,67 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             elif config.dataType() == 'mc':
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
+            if not self.isRun3Geo:
+                alg.efficiencyCorrectionTool.MapFilePath = "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"
             alg.outOfValidity = 2 #silent
-            alg.outOfValidityDeco = 'bad_eff' + selectionPostfix
+            alg.outOfValidityDeco = 'el_reco_bad_eff' + selectionPostfix
             alg.electrons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'effSF' + postfix)
+            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'reco_effSF' + postfix)
 
+        # Set up the ID electron efficiency correction algorithm:
+        if config.dataType() != 'data':
+            alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
+                                          'ElectronEfficiencyCorrectionAlgID' + postfix )
+            config.addPrivateTool( 'efficiencyCorrectionTool',
+                                   'AsgElectronEfficiencyCorrectionTool' )
+            alg.scaleFactorDecoration = 'el_id_effSF' + selectionPostfix + '_%SYS%'
+            alg.efficiencyCorrectionTool.IdKey = self.likelihoodWP.replace("LH","")
+            alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
+            if config.dataType() == 'afii':
+                alg.efficiencyCorrectionTool.ForceDataType = \
+                    PATCore.ParticleDataType.Fast
+            elif config.dataType() == 'mc':
+                alg.efficiencyCorrectionTool.ForceDataType = \
+                    PATCore.ParticleDataType.Full
+            if not self.isRun3Geo:
+                alg.efficiencyCorrectionTool.MapFilePath = "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"
+            alg.outOfValidity = 2 #silent
+            alg.outOfValidityDeco = 'el_id_bad_eff' + selectionPostfix
+            alg.electrons = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'id_effSF' + postfix)
 
+        # Set up the ISO electron efficiency correction algorithm:
+        if config.dataType() != 'data' and self.isolationWP != 'NonIso':
+            alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
+                                          'ElectronEfficiencyCorrectionAlgIsol' + postfix )
+            config.addPrivateTool( 'efficiencyCorrectionTool',
+                                   'AsgElectronEfficiencyCorrectionTool' )
+            alg.scaleFactorDecoration = 'el_isol_effSF' + selectionPostfix + '_%SYS%'
+            alg.efficiencyCorrectionTool.IdKey = self.likelihoodWP.replace("LH","")
+            alg.efficiencyCorrectionTool.IsoKey = self.isolationWP
+            alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
+            if config.dataType() == 'afii':
+                alg.efficiencyCorrectionTool.ForceDataType = \
+                    PATCore.ParticleDataType.Fast
+            elif config.dataType() == 'mc':
+                alg.efficiencyCorrectionTool.ForceDataType = \
+                    PATCore.ParticleDataType.Full
+            if not self.isRun3Geo:
+                alg.efficiencyCorrectionTool.MapFilePath = "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"
+            alg.outOfValidity = 2 #silent
+            alg.outOfValidityDeco = 'el_isol_bad_eff' + selectionPostfix
+            alg.electrons = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'isol_effSF' + postfix)
+
+        # TO-DO: add trigger SFs, for which we need ID key + ISO key + Trigger key !
+
+        if self.chargeIDSelection:
+            # ECIDS is currently not supported in R22.
+            # SFs might become available or it will be part of the DNN ID.
+            pass
 
 
 def makeElectronCalibrationConfig( seq, containerName, postfix = None,
@@ -268,7 +332,8 @@ def makeElectronCalibrationConfig( seq, containerName, postfix = None,
 def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
                                     postfix,
                                     recomputeLikelihood = None,
-                                    chargeIDSelection = None ):
+                                    chargeIDSelection = None,
+                                    isRun3Geo = None ):
     """Create electron analysis configuration blocks
 
     Keyword arguments:
@@ -279,6 +344,7 @@ def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
                  names are unique.
       recomputeLikelihood -- Whether to rerun the LH. If not, use derivation flags
       chargeIDSelection -- Whether or not to perform charge ID/flip selection
+      isRun3Geo -- Whether to retrieve Run 3 efficiency SFs
     """
 
 
@@ -291,4 +357,5 @@ def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
         config.setOptionValue ('isolationWP', splitWP[1])
     config.setOptionValue ('recomputeLikelihood', recomputeLikelihood, noneAction='ignore')
     config.setOptionValue ('chargeIDSelection', chargeIDSelection, noneAction='ignore')
+    config.setOptionValue ('isRun3Geo', isRun3Geo, noneAction='ignore')
     seq.append (config)
