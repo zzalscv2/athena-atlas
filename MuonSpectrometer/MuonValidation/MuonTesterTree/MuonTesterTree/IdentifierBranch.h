@@ -7,6 +7,10 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <MuonTesterTree/MuonTesterBranch.h>
 #include <MuonTesterTree/VectorBranch.h>
+#include <MuonTesterTree/MuonTesterTree.h>
+//
+#include <string>
+
 
 namespace MuonVal {
 /// Class to dump the basic properties of an Identifier into an n-tuple

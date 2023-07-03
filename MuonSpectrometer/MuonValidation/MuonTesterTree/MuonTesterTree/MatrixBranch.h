@@ -4,7 +4,9 @@
 #ifndef MUONTESTER_MATRIXBRANCH_H
 #define MUONTESTER_MATRIXBRANCH_H
 #include <MuonTesterTree/VectorBranch.h>
-/// Helper class to store branches of type std::vector<std::vector<T>>
+
+class TTree;
+
 namespace MuonVal {
 class MuonTesterTree;
 template <class T> class MatrixBranch : public IMuonTesterBranch {
