@@ -208,7 +208,7 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     likelihood = True
     recomputeLikelihood=False
     if likelihood:
-        workingpoint = 'LooseLHElectron.Loose_VarRad'
+        workingpoint = 'LooseBLayerLHElectron.Loose_VarRad'
     else:
         workingpoint = 'LooseDNNElectron.Loose_VarRad'
     # FIXME: fails for PHYSLITE with missing data item
@@ -579,9 +579,9 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq += makeConfig ('Electrons', 'AnaElectrons')
     configSeq += makeConfig ('Electrons.Selection', 'AnaElectrons.loose')
     if likelihood:
-        configSeq.setOptionValue ('.likelihoodWP', 'LooseLHElectron')
+        configSeq.setOptionValue ('.likelihoodWP', 'LooseBLayerLH')
     else:
-        configSeq.setOptionValue ('.likelihoodWP', 'LooseDNNElectron')
+        configSeq.setOptionValue ('.likelihoodWP', 'LooseDNN')
     # FIXME: fails for PHYSLITE with missing data item
     # ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000
     if not noPhysliteBroken :
