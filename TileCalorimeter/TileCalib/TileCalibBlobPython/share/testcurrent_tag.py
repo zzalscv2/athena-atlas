@@ -5,17 +5,17 @@
 # testcurrent_tag.py
 #==================================================
 
-from __future__ import print_function
-
 import sys, getopt
 
-options, remainder = getopt.getopt(sys.argv[1:], 'h', ['help','folder=','globaltag=','instance='])
+options, remainder = getopt.getopt(sys.argv[1:], 'h', ['help','folder=','globaltag=','instance=','server='])
 # defaults
 folder=''
 globaltag='CURRENT'
 instance = 'CONDBR2'
+server = ''
 help = 0
 for opt, arg in options:
+    arg = arg.strip()
     if opt in ('-h'):
         help = 1
     elif opt in ('--help'):
@@ -26,6 +26,8 @@ for opt, arg in options:
         globaltag = arg
     elif opt in ('--instance'):
         instance = arg
+    elif opt in ('--server'):
+        server = arg
 
 if help:
     print (' this script prints aliases for CURRENT and NEXT global tags')
@@ -33,8 +35,9 @@ if help:
     print (' folder is provided. By default, if global tag is not specified,')
     print ('  globaltag=CURRENT')
     print ('  default instance=CONDBR2')
+    print ('  default server=FRONTIER')
     print (' usage:')
-    print (' testcurrent_tag.py --folder=foldername --globaltag=tagname --instance=instancename')
+    print (' testcurrent_tag.py --folder=foldername --globaltag=tagname --instance=instancename --server=servername')
     sys.exit()
 
 
@@ -57,7 +60,7 @@ if folder == '':
 connStr='COOLOFL_TILE/'+instance
 
 #=== open the database
-db = TileCalibTools.openDbConn(connStr, 'READONLY')
+db = TileCalibTools.openDbConn(connStr, server)
 
 #=== resolve folder tag from global tag
 foldertag = TileCalibTools.getFolderTag(db, folder, globaltag)

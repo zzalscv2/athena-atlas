@@ -5,8 +5,6 @@
 # ReadBadBitsFromCool.py   --schema='COOLOFL_TILE/CONDBR2'  --folder='OFL02' --tag='UPD4'
 # Sanya Solodkov 2011-07-15
 
-from __future__ import print_function
-
 import getopt,sys,os
 os.environ['TERM'] = 'linux'
 
@@ -20,11 +18,12 @@ def usage():
     print ("-r, --run=      specify run  number, by default uses latest iov")
     print ("-l, --lumi=     specify lumi block number, default is 0")
     print ("-s, --schema=   specify schema to use, like 'COOLOFL_TILE/CONDBR2' or 'sqlite://;schema=tileSqlite.db;dbname=CONDBR2' or tileSqlite.db")
-    print ("-D, --dbname=   specify dbname part of schema if schema only contains file name, default is CONDBR2'")
+    print ("-D, --dbname=   specify dbname part of schema if schema only contains file name, default is CONDBR2")
+    print ("-S, --server=   specify server - ORACLE or FRONTIER, default is FRONTIER")
     print ("-w, --warning   suppress warning messages about missing drawers in DB")
 
-letters = "hr:l:s:t:f:D:w"
-keywords = ["help","run=","lumi=","schema=","tag=","folder=","dbname=","warning"]
+letters = "hr:l:s:t:f:D:S:w"
+keywords = ["help","run=","lumi=","schema=","tag=","folder=","dbname=","server=","warning"]
 
 try:
     opts, extraparams = getopt.getopt(sys.argv[1:],letters,keywords)
@@ -38,11 +37,13 @@ run = 2147483647
 lumi = 0
 schema = 'COOLOFL_TILE/CONDBR2'
 dbname = 'CONDBR2'
+server = ''
 folderPath =  "/TILE/OFL02/STATUS/ADC"
 tag = "UPD4"
 warn = 1
 
 for o, a in opts:
+    a = a.strip()
     if o in ("-f","--folder"):
         folderPath = "/TILE/%s/STATUS/ADC" % a
     elif o in ("-t","--tag"):
@@ -51,6 +52,8 @@ for o, a in opts:
         schema = a
     elif o in ("-D","--dbname"):
         dbname = a
+    elif o in ("-S","--server"):
+        server = a
     elif o in ("-r","--run"):
         run = int(a)
     elif o in ("-l","--lumi"):
@@ -116,7 +119,7 @@ if schema=='COOLOFL_TILE/COMP200' or schema=='COOLOFL_TILE/CONDBR2':
 
 
 #=== set database
-db = TileCalibTools.openDbConn(schema,'READONLY')
+db = TileCalibTools.openDbConn(schema,server)
 folderTag = TileCalibTools.getFolderTag(db, folderPath, tag)
 log.info("Initializing folder %s with tag %s", folderPath, folderTag)
 

@@ -6,9 +6,6 @@
 # Using Part of ReadCalibfromCool.py to plot constants
 # Tigran Mkrtchyan 2017-06-15
 
-from __future__ import print_function
-
-
 import getopt,sys,os,math
 os.environ['TERM'] = 'linux'
 
@@ -47,10 +44,11 @@ def usage():
     print ("-C, --cut=      specify additional cut on displayed values")
     print ("-s, --schema=   specify schema to use, like 'COOLONL_TILE/CONDBR2' or 'sqlite://;schema=tileSqlite.db;dbname=CONDBR2' or tileSqlite.db")
     print ("-D, --dbname=   specify dbname part of schema if schema only contains file name, default is CONDBR2")
+    print ("-S, --server=   specify server - ORACLE or FRONTIER, default is FRONTIER")
 
 
-letters = "hr:l:s:t:f:D:a:g:b:e:o:z:xL:M:Pp:Tv:i:m:c:I:A:N:X:Y:Z:d:u:C:n"
-words = ["help","run=","lumi=","schema=","tag=","folder=","dbname=","adc=","gain=","print","module=","opt=","zAxis=","noTitle","label=","label2=","chan=","begin=","end=","tree","val=","ind=","part=","modmin=","modmax=","chmin=","chmax=","gmin=","gmax=","vmin=","vmax=","cut=","norm"]
+letters = "hr:l:s:t:f:D:S:a:g:b:e:o:z:xL:M:Pp:Tv:i:m:c:I:A:N:X:Y:Z:d:u:C:n"
+words = ["help","run=","lumi=","schema=","tag=","folder=","dbname=","server=","adc=","gain=","print","module=","opt=","zAxis=","noTitle","label=","label2=","chan=","begin=","end=","tree","val=","ind=","part=","modmin=","modmax=","chmin=","chmax=","gmin=","gmax=","vmin=","vmax=","cut=","norm"]
 try:
     options,args = getopt.getopt(sys.argv[1:],letters,words)
 except getopt.GetoptError as err:
@@ -65,6 +63,7 @@ except getopt.GetoptError as err:
 # defaults
 schema = 'COOLOFL_TILE/CONDBR2'
 dbname = ''
+server = ''
 folderPath =  "/TILE/OFL02/CALIB/CIS/LIN"
 tag = "UPD4"
 line = False
@@ -102,6 +101,7 @@ norm = False
 cut = None
 
 for o, a in options:
+    a = a.strip()
     if o in ("-f","--folder"):
         folderPath = a
     elif o in ("-t","--tag"):
@@ -110,6 +110,8 @@ for o, a in options:
         schema = a
     elif o in ("-D","--dbname"):
         dbname = a
+    elif o in ("-S","--server"):
+        server = a
     elif o in ("-b","--begin"):
         begin = int(a)
     elif o in ("-e","--end"):
@@ -345,7 +347,7 @@ elif ros==0 and modmin==1:
 else:
     COOL_part = -1
     COOL_chan = 1000
-idb = TileCalibTools.openDbConn(schema,'READONLY')
+idb = TileCalibTools.openDbConn(schema,server)
 iovList = []
 blobReader = []
 for (fp,ft) in zip(folderPath,folderTag):

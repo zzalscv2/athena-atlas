@@ -11,8 +11,6 @@
 # These are: ratio between first and second gaussian, RMS of the first gaussian, and RMS of the second gaussian
 # change Yuri Smirnov <iouri.smirnov@cern.ch> 2014-12-24
 
-from __future__ import print_function
-
 import getopt,sys,os
 os.environ['TERM'] = 'linux'
 
@@ -22,6 +20,7 @@ def usage():
     print ("")
     print ("-h, --help      shows this help")
     print ("-s, --schema=   specify schema to use, ONL or OFL for RUN1 or ONL2 or OFL2 for RUN2 or MC")
+    print ("-S, --server=   specify server - ORACLE or FRONTIER, default is FRONTIER")
     print ("-f, --folder=   specify status folder to use f.i. /TILE/OFL02/NOISE/CELL or /CALO/Noise/CellNoise ")
     print ("-t, --tag=      specify tag to use, f.i. UPD1 or UPD4 or tag suffix like 14TeV-N200_dT50-01")
     print ("-r, --run=      specify run  number, by default uses latest iov")
@@ -33,8 +32,8 @@ def usage():
     print ("-b, --brief     print only numbers without character names")
     print ("-d, --double    print values with double precision")
 
-letters = "hs:t:f:r:l:n:c:g:i:bd"
-keywords = ["help","schema=","tag=","folder=","run=","lumi=","channel=","cell=","gain=","index=","brief","double"]
+letters = "hS:s:t:f:r:l:n:c:g:i:bd"
+keywords = ["help","server=","schema=","tag=","folder=","run=","lumi=","channel=","cell=","gain=","index=","brief","double"]
 
 try:
     opts, extraparams = getopt.getopt(sys.argv[1:],letters,keywords)
@@ -46,6 +45,7 @@ except getopt.GetoptError as err:
 # defaults
 run    = 2147483647
 lumi   = 0
+server = ''
 schema = 'OFL2'
 folderPath = '/TILE/OFL02/NOISE/CELL'
 tag    = 'UPD4'
@@ -57,8 +57,11 @@ brief  = False
 doubl  = False
 
 for o, a in opts:
+    a = a.strip()
     if o in ("-s","--schema"):
         schema = a
+    elif o in ("-S","--server"):
+        server = a
     elif o in ("-f","--folder"):
         folderPath = a
     elif o in ("-t","--tag"):
@@ -145,7 +148,7 @@ elif schema=='MC': # shortcut for COOLOFL_TILE/OFLP200 or COOLOFL_LAR/OFLP200
         schema='COOLOFL_TILE/OFLP200'
         folderPath='/TILE/OFL02/NOISE/CELL'
     if tag=='UPD4':
-        tag='OFLCOND-MC16-SDR-RUN2-09' # change default to tag used in MC16
+        tag='OFLCOND-MC23-SDR-RUN3-02' # change default to tag used in MC23
 
 if run<222222 or 'COMP200' in schema:
     cabling = 'RUN1'
@@ -162,7 +165,7 @@ hashMgrA=TileCellTools.TileCellHashMgr("UpgradeA")
 hashMgrBC=TileCellTools.TileCellHashMgr("UpgradeBC")
 hashMgrABC=TileCellTools.TileCellHashMgr("UpgradeABC")
 
-db = CaloCondTools.openDbConn(schema, "READONLY")
+db = CaloCondTools.openDbConn(schema, server)
 
 if folderPath.startswith('/TILE') or tag=='UPD1' or tag=='UPD4' or 'COND'in tag:
     folderTag = TileCalibTools.getFolderTag(db, folderPath, tag )

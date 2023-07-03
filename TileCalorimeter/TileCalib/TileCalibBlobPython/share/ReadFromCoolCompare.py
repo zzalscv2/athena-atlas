@@ -23,8 +23,6 @@
 #folderTag = ""
 #==================================================
 
-from __future__ import print_function
-
 from TileCalibBlobPython import TileCalibTools
 from TileCalibBlobObjs.Classes import TileCalibUtils
 import os, sys, getopt
@@ -51,15 +49,18 @@ schema = "COOLOFL_TILE"
 schema2 = "none"
 instance = "CONDBR2"
 instance2 = "none"
+server = "FRONTIER"
+server2 = "none"
 sqlfn = "none"
 sqlfn2 = "none"
 help = 0
 
 #------------------------------- parse arguments and change defaults
 # print ('ARGV      :', sys.argv[1:])
-options, remainder = getopt.getopt(sys.argv[1:], 'h', ['run=','run2=','lumi=','lumi2=','maxdiff=','maxdiffpercent=','folder=','folder2=','tag=','tag2=','schema=','schema2=','instance=','instance2=','sqlfn=','sqlfn2='])
+options, remainder = getopt.getopt(sys.argv[1:], 'h', ['run=','run2=','lumi=','lumi2=','maxdiff=','maxdiffpercent=','folder=','folder2=','tag=','tag2=','schema=','schema2=','instance=','instance2=','server=','server2=','sqlfn=','sqlfn2='])
 # print ('OPTIONS   :', options)
 for opt, arg in options:
+    arg = arg.strip()
     if opt in ('--h'):
         help = 1
     elif opt in ('--run'):
@@ -90,6 +91,10 @@ for opt, arg in options:
         instance=arg
     elif opt in ('--instance2'):
         instance2=arg
+    elif opt in ('--server'):
+        server=arg
+    elif opt in ('--server2'):
+        server2=arg
     elif opt in ('--sqlfn'):
         sqlfn=arg
     elif opt in ('--sqlfn2'):
@@ -107,6 +112,8 @@ if schema2=="none":
     schema2=schema
 if instance2=="none":
     instance2=instance
+if server2=="none":
+    server2=server
 if sqlfn2=="same":
     sqlfn2=sqlfn
 
@@ -120,6 +127,7 @@ print ('folder ',folderPath, 'folder2 ',folderPath2)
 print ('tag ',tag, 'tag2 ',tag2)
 print ('schema ', schema, 'schema2 ', schema2)
 print ('instance ', instance, 'instance2 ', instance2)
+print ('server ', server, 'server2 ', server2)
 print ('sqlfn ',sqlfn, 'sqlfn2 ',sqlfn2)
 
 if help:
@@ -146,11 +154,11 @@ connStr2=schema2+'/'+instance2   if ':' not in schema2 and ';' not in schema2 an
 #--- Read from COOL server or from local sqlite file:
 
 if sqlfn == 'none':
-    db = TileCalibTools.openDbConn(connStr, 'READONLY')
+    db = TileCalibTools.openDbConn(connStr, server)
 else:
     db = TileCalibTools.openDb('SQLITE', instance, 'READONLY',schema,sqlfn)
 if sqlfn2 == 'none':
-    db2 = TileCalibTools.openDbConn(connStr2, 'READONLY')
+    db2 = TileCalibTools.openDbConn(connStr2, server2)
 else:
     db2 = TileCalibTools.openDb('SQLITE', instance2, 'READONLY',schema2,sqlfn2)
 
@@ -297,7 +305,10 @@ for ros in range(0,5):
                             v2[ind] = flt2.getData(chn, adc, ind)
                         dv12 = v[ind] - v2[ind]
                         if v2[ind] == 0:
-                            dv12percent=0
+                            if v[ind] == 0:
+                                dv12percent=0
+                            else:
+                                dv12percent=dv12*100./v[ind]
                         else:
                             dv12percent=dv12*100./v2[ind]
                         #print ( modName, ' chann ',  repr(chn),  ' adc ',  repr(adc),  ' ind ',  repr(ind),  ' val1 ',  repr(v[ind]),' val2 ',  repr(v2[ind]), ' diff ',  repr(dv12), 'percent ', repr(dv12percent))
