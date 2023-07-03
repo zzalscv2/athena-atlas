@@ -354,8 +354,8 @@ bool scanPhaseSpace(Config& cfg, map_t& affected_bins)
         if (nonzero_uncorr[i] && !expected_uncorr[i]) snz += x;
         if (!nonzero_uncorr[i] && expected_uncorr[i]) se += x;
       }
-      snz.pop_back();
-      se.pop_back();
+      if (snz.length()) snz.pop_back();
+      if (se.length()) se.pop_back();
       std::string w{"systUncorrVariationIndex() at " + dom.str() + 
         " indicates different NP(s) than those found in the scan, "
         "(%s) vs (%s)."};
