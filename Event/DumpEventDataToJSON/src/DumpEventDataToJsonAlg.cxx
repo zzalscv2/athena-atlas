@@ -73,7 +73,7 @@ StatusCode DumpEventDataToJsonAlg::initialize() {
 
 // Specialisation for TrackProxy
 template <>
-nlohmann::json DumpEventDataToJsonAlg::getData(const Acts::TrackProxy<Acts::ConstVectorTrackContainer, ActsTrk::MultiTrajectory<true>, Acts::detail::ConstRefHolder, true> &track) {
+nlohmann::json DumpEventDataToJsonAlg::getData(const Acts::TrackProxy<Acts::ConstVectorTrackContainer, ActsTrk::ConstMultiTrajectory, Acts::detail::ConstRefHolder, true> &track) {
   nlohmann::json data;
   
   // ACTS units are GeV, whilst ATLAS is MeV. So we need to convert.

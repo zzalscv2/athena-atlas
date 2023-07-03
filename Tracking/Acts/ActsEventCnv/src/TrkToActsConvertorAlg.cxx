@@ -56,7 +56,7 @@ StatusCode ActsTrk::TrkToActsConvertorAlg::execute(
   auto multiTraj = std::make_unique<MutableMultiTrajectory>(&(*states), &(*parameters), &(*jacobians), &(*measurements));
   Acts::VectorTrackContainer vecTrk;
   Acts::TrackContainer<Acts::VectorTrackContainer,
-                       ActsTrk::MultiTrajectory<ActsTrk::IsReadWrite>>
+                       ActsTrk::MutableMultiTrajectory>
       tc{vecTrk, *multiTraj};
   // auto constMultiTraj = multiTraj->convertToReadOnly(); 
   Acts::GeometryContext tgContext = m_convertorTool->trackingGeometryTool()
@@ -78,6 +78,7 @@ StatusCode ActsTrk::TrkToActsConvertorAlg::execute(
   ATH_MSG_VERBOSE("TrackStateContainer has  " << states->size() << " states");
   ATH_MSG_VERBOSE("TrackParametersContainer has  " << parameters->size() << " parameters");
 
+  // TODO the TrackContainer should be constructed with ConstMTJ
   // Store the VectorTrackContainer
   auto constVecTrackCont = std::make_unique<Acts::ConstVectorTrackContainer>(std::move(vecTrk)); 
   SG::WriteHandle<Acts::ConstVectorTrackContainer> wh_vtc(m_vectorTrackContainer, ctx);

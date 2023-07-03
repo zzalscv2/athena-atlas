@@ -4,13 +4,13 @@
 #ifndef ActsEvent_MultiTrajectory_h
 #define ActsEvent_MultiTrajectory_h
 #include <type_traits>
+
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/EventData/SourceLink.hpp"
 #include "Acts/EventData/TrackStatePropMask.hpp"
 #include "Acts/EventData/VectorMultiTrajectory.hpp"
 #include "Acts/Utilities/HashedString.hpp"
 #include "CxxUtils/concepts.h"
-
 #include "xAODTracking/TrackJacobianAuxContainer.h"
 #include "xAODTracking/TrackJacobianContainer.h"
 #include "xAODTracking/TrackMeasurement.h"
@@ -22,15 +22,8 @@
 #include "xAODTracking/TrackStateContainer.h"
 
 namespace ActsTrk {
-template <bool RWState>
-class MultiTrajectory;
-
-namespace detail {
-struct Decoration;
-}
-
-constexpr static bool IsReadOnly = true;
-constexpr static bool IsReadWrite = false;
+class MutableMultiTrajectory;
+class ConstMultiTrajectory;
 }  // namespace ActsTrk
 
 namespace Acts {
@@ -44,48 +37,42 @@ template <typename T>
 struct IsReadOnlyMultiTrajectory<T&&> : IsReadOnlyMultiTrajectory<T> {};
 
 template <>
-struct IsReadOnlyMultiTrajectory<ActsTrk::MultiTrajectory<ActsTrk::IsReadOnly>>
+struct IsReadOnlyMultiTrajectory<ActsTrk::ConstMultiTrajectory>
     : std::true_type {};
+
 template <>
-struct IsReadOnlyMultiTrajectory<ActsTrk::MultiTrajectory<ActsTrk::IsReadWrite>>
+struct IsReadOnlyMultiTrajectory<ActsTrk::MutableMultiTrajectory>
     : std::false_type {};
 }  // namespace Acts
 
 namespace ActsTrk {
+
+using IndexType = std::uint32_t;
+
+namespace detail {
+struct Decoration;
+}
+
 /**
- * @brief Athena implementation of ACTS::MultiTrajectory
- *
- * @tparam RWState - generates variant of the class that allows r/o (if ==
- * IsReadOnly) or r/w (when not IsReadWrite)
+ * @brief Athena implementation of ACTS::MultiTrajectory (ReadWrite version)
+ * The data is stored in 4 external backends. 
+ * Backends lifetime are not maintained by this class.
+ * except when objects are default constructed (this functionality will be removed). 
+ * This class is meant to be used in track finding algorithms (e.g. CKF) and then converted
+ * ConstMultiTrajectory varaiant. Thes conversion is meant to be costless. 
  */
-template <bool RWState>
-class MultiTrajectory final
-    : public Acts::MultiTrajectory<ActsTrk::MultiTrajectory<RWState>> {
+class MutableMultiTrajectory final
+    : public Acts::MultiTrajectory<ActsTrk::MutableMultiTrajectory> {
  public:
-  using TrackStateContainerBackendPtr =
-      typename std::conditional<RWState, const xAOD::TrackStateContainer*,
-                                xAOD::TrackStateContainer*>::type;
-  using TrackParametersContainerBackendPtr =
-      typename std::conditional<RWState, const xAOD::TrackParametersContainer*,
-                                xAOD::TrackParametersContainer*>::type;
-  using TrackJacobianContainerBackendPtr =
-      typename std::conditional<RWState, const xAOD::TrackJacobianContainer*,
-                                xAOD::TrackJacobianContainer*>::type;
-  using TrackMeasurementContainerBackendPtr =
-      typename std::conditional<RWState, const xAOD::TrackMeasurementContainer*,
-                                xAOD::TrackMeasurementContainer*>::type;
-
-  using IndexType = std::uint32_t;
-
   using TrackStateProxy = typename Acts::MultiTrajectory<
-      ActsTrk::MultiTrajectory<RWState>>::TrackStateProxy;
+      ActsTrk::MutableMultiTrajectory>::TrackStateProxy;
   using ConstTrackStateProxy = typename Acts::MultiTrajectory<
-      ActsTrk::MultiTrajectory<RWState>>::ConstTrackStateProxy;
+      ActsTrk::MutableMultiTrajectory>::ConstTrackStateProxy;
 
   /**
    * @brief Construct a new Multi Trajectory object owning backends
    */
-  MultiTrajectory();
+  MutableMultiTrajectory();
 
   /**
    * @brief Construct a new Multi Trajectory object given backends
@@ -93,23 +80,20 @@ class MultiTrajectory final
    * @param state, parametrs, jacobians, measuremnts - pointers to xAOD
    * interface backend containers
    */
-  MultiTrajectory(TrackStateContainerBackendPtr states,
-                  TrackParametersContainerBackendPtr parameters,
-                  TrackJacobianContainerBackendPtr jacobians,
-                  TrackMeasurementContainerBackendPtr measurements);
-
+  MutableMultiTrajectory(xAOD::TrackStateContainer* states,
+                         xAOD::TrackParametersContainer* parameters,
+                         xAOD::TrackJacobianContainer* jacobians,
+                         xAOD::TrackMeasurementContainer* measurements);
   /**
-   * @brief Construct a new Multi Trajectory object given r/w input MTJ
-   * @note constructed MTJ does not copy backends, they remain shared
-   * @param other - source MTJ
+   * @brief Copy-Construct a new Multi Trajectory object other one
+   * Warning, default constructed MTJ can not be copied (runtime error)
    */
-  template <bool OtherRWState>
-  MultiTrajectory(const MultiTrajectory<OtherRWState>& other);
+  MutableMultiTrajectory(const ActsTrk::MutableMultiTrajectory& other);
 
   /**
    * @brief Destructor needed for MTJ owing backends
    */
-  ~MultiTrajectory();
+  ~MutableMultiTrajectory();
 
   /**
    * @brief Add state with stograge for data that depends on the mask
@@ -118,8 +102,8 @@ class MultiTrajectory final
    * @param istate - previous state
    * @return index of just added state
    */
-  ATH_MEMBER_REQUIRES(RWState == IsReadWrite, IndexType)
-  addTrackState_impl(Acts::TrackStatePropMask mask, IndexType iprevious);
+  ActsTrk::IndexType addTrackState_impl(Acts::TrackStatePropMask mask,
+                                        ActsTrk::IndexType iprevious);
 
   /**
    * @brief Access component by key
@@ -130,8 +114,8 @@ class MultiTrajectory final
    * nonconst variant)
    */
 
-  const std::any component_impl(Acts::HashedString key, IndexType istate) const;
-  std::any component_impl(Acts::HashedString key, IndexType istate);
+  const std::any component_impl(Acts::HashedString key, ActsTrk::IndexType istate) const;
+  std::any component_impl(Acts::HashedString key, ActsTrk::IndexType istate);
 
   /**
    * @brief checks if given state has requested component
@@ -142,7 +126,7 @@ class MultiTrajectory final
    * @return false
    */
 
-  constexpr bool has_impl(Acts::HashedString key, IndexType istate) const;
+  constexpr bool has_impl(Acts::HashedString key, ActsTrk::IndexType istate) const;
 
   /**
    * @brief checks if MTJ has requested column (irrespectively of the state)
@@ -169,8 +153,7 @@ class MultiTrajectory final
    * @param istate - index in the
    */
 
-  void unset_impl(Acts::TrackStatePropMask target,
-                  ActsTrk::MultiTrajectory<RWState>::IndexType istate);
+  void unset_impl(Acts::TrackStatePropMask target, ActsTrk::IndexType istate);
 
   /**
    * @brief shares from a given state
@@ -179,8 +162,7 @@ class MultiTrajectory final
    * @param iself, iother  - indexes
    */
 
-  void shareFrom_impl(ActsTrk::MultiTrajectory<RWState>::IndexType iself,
-                      ActsTrk::MultiTrajectory<RWState>::IndexType iother,
+  void shareFrom_impl(ActsTrk::IndexType iself, ActsTrk::IndexType iother,
                       Acts::TrackStatePropMask shareSource,
                       Acts::TrackStatePropMask shareTarget);
 
@@ -192,12 +174,11 @@ class MultiTrajectory final
    */
 
   typename ConstTrackStateProxy::Parameters parameters_impl(
-      IndexType index) const {
+      ActsTrk::IndexType index) const {
     return trackParameters().at(index)->paramsEigen();
   }
-  ATH_MEMBER_REQUIRES(RWState == IsReadWrite,
-                      typename TrackStateProxy::Parameters)
-  parameters_impl(IndexType index) {
+
+  typename TrackStateProxy::Parameters parameters_impl(ActsTrk::IndexType index) {
     return trackParameters().at(index)->paramsEigen();
   }
 
@@ -208,12 +189,10 @@ class MultiTrajectory final
    * @return TrackStateProxy::Covariance
    */
   typename ConstTrackStateProxy::Covariance covariance_impl(
-      IndexType index) const {
+      ActsTrk::IndexType index) const {
     return trackParameters().at(index)->covMatrixEigen();
   }
-  ATH_MEMBER_REQUIRES(RWState == IsReadWrite,
-                      typename TrackStateProxy::Covariance)
-  covariance_impl(IndexType index) {
+  typename TrackStateProxy::Covariance covariance_impl(ActsTrk::IndexType index) {
     return trackParameters().at(index)->covMatrixEigen();
   }
 
@@ -224,12 +203,11 @@ class MultiTrajectory final
    * @return TrackStateProxy::Covariance
    */
   typename ConstTrackStateProxy::Covariance trackMeasurementsCov(
-      IndexType index) const {
+      ActsTrk::IndexType index) const {
     return trackMeasurements().at(index)->covMatrixEigen();
   }
-  ATH_MEMBER_REQUIRES(RWState == IsReadWrite,
-                      typename TrackStateProxy::Covariance)
-  trackMeasurementsCov(IndexType index) {
+
+  typename TrackStateProxy::Covariance trackMeasurementsCov(ActsTrk::IndexType index) {
     return trackMeasurements().at(index)->covMatrixEigen();
   }
 
@@ -241,13 +219,11 @@ class MultiTrajectory final
    */
 
   inline typename ConstTrackStateProxy::Covariance jacobian_impl(
-      IndexType istate) const {
+      ActsTrk::IndexType istate) const {
     xAOD::TrackStateIndexType jacIdx = (*m_trackStates)[istate]->jacobian();
     return trackJacobians().at(jacIdx)->jacEigen();
   }
-  ATH_MEMBER_REQUIRES(RWState == IsReadWrite,
-                      typename TrackStateProxy::Covariance)
-  jacobian_impl(IndexType istate) {
+  typename TrackStateProxy::Covariance jacobian_impl(ActsTrk::IndexType istate) {
     xAOD::TrackStateIndexType jacIdx = (*m_trackStates)[istate]->jacobian();
     return trackJacobians().at(jacIdx)->jacEigen();
   }
@@ -261,14 +237,14 @@ class MultiTrajectory final
 
   template <std::size_t measdim>
   inline typename ConstTrackStateProxy::template Measurement<measdim>
-  measurement_impl(IndexType index) const {
+  measurement_impl(ActsTrk::IndexType index) const {
     xAOD::TrackStateIndexType measIdx = (*m_trackStates)[index]->calibrated();
     return trackMeasurements().at(measIdx)->template measEigen<measdim>();
   }
   template <std::size_t measdim, bool Enable = true>
-  std::enable_if_t<Enable && (RWState == IsReadWrite),
+  std::enable_if_t<Enable,
                    typename TrackStateProxy::template Measurement<measdim>>
-  measurement_impl(IndexType index) {
+  measurement_impl(ActsTrk::IndexType index) {
     xAOD::TrackStateIndexType measIdx = (*m_trackStates)[index]->calibrated();
     return trackMeasurements().at(measIdx)->template measEigen<measdim>();
   }
@@ -282,15 +258,14 @@ class MultiTrajectory final
 
   template <std::size_t measdim>
   inline typename ConstTrackStateProxy::template MeasurementCovariance<measdim>
-  measurementCovariance_impl(IndexType index) const {
+  measurementCovariance_impl(ActsTrk::IndexType index) const {
     xAOD::TrackStateIndexType measIdx = (*m_trackStates)[index]->calibrated();
     return trackMeasurements().at(measIdx)->template covMatrixEigen<measdim>();
   }
   template <std::size_t measdim, bool Enable = true>
   std::enable_if_t<
-      Enable && (RWState == IsReadWrite),
-      typename TrackStateProxy::template MeasurementCovariance<measdim>>
-  measurementCovariance_impl(IndexType index) {
+      Enable, typename TrackStateProxy::template MeasurementCovariance<measdim>>
+  measurementCovariance_impl(ActsTrk::IndexType index) {
     xAOD::TrackStateIndexType measIdx = (*m_trackStates)[index]->calibrated();
     return trackMeasurements().at(measIdx)->template covMatrixEigen<measdim>();
   }
@@ -323,7 +298,7 @@ class MultiTrajectory final
   /**
    * Implementation of allocation of calibrated measurements
    */
-  void allocateCalibrated_impl(IndexType istate, std::size_t measdim) {
+  void allocateCalibrated_impl(ActsTrk::IndexType istate, std::size_t measdim) {
     // resize the calibrated measurement to the size measdim
     const auto& trackStates = *m_trackStates;
     trackMeasurements().at(trackStates[istate]->calibrated())->resize(measdim);
@@ -332,7 +307,7 @@ class MultiTrajectory final
   /**
    * Implementation of calibrated size
    */
-  IndexType calibratedSize_impl(IndexType istate) const {
+  ActsTrk::IndexType calibratedSize_impl(ActsTrk::IndexType istate) const {
     // Retrieve the calibrated measurement size
     const auto& trackStates = *m_trackStates;
     return trackMeasurements().at(trackStates[istate]->calibrated())->size();
@@ -341,9 +316,8 @@ class MultiTrajectory final
   /**
    * Implementation of uncalibrated link insertion
    */
-  ATH_MEMBER_REQUIRES(RWState == IsReadWrite, void)
-  setUncalibratedSourceLink_impl(IndexType istate,
-                                 const Acts::SourceLink& sourceLink) {
+  void setUncalibratedSourceLink_impl(ActsTrk::IndexType istate,
+                                      const Acts::SourceLink& sourceLink) {
     auto el =
         sourceLink.get<ElementLink<xAOD::UncalibratedMeasurementContainer>>();
     trackStates()[istate]->setUncalibratedMeasurementLink(el);
@@ -353,16 +327,13 @@ class MultiTrajectory final
    * Implementation of uncalibrated link fetch
    */
   typename Acts::SourceLink getUncalibratedSourceLink_impl(
-      ActsTrk::MultiTrajectory<RWState>::IndexType istate) const;
-
-  ATH_MEMBER_REQUIRES(RWState == IsReadWrite, Acts::SourceLink)
-  getUncalibratedSourceLink_impl(
-      ActsTrk::MultiTrajectory<RWState>::IndexType istate);
+      ActsTrk::IndexType istate) const;
+  typename Acts::SourceLink getUncalibratedSourceLink_impl(IndexType istate);
 
  private:
   // bare pointers to the backend (need to be fast and we do not claim ownership
   // anyways)
-  TrackStateContainerBackendPtr m_trackStates = nullptr;
+  xAOD::TrackStateContainer* m_trackStates = nullptr;
   xAOD::TrackStateAuxContainer* m_trackStatesAux = nullptr;
 
   inline const xAOD::TrackStateContainer& trackStates() const {
@@ -370,7 +341,7 @@ class MultiTrajectory final
   }
   inline xAOD::TrackStateContainer& trackStates() { return *m_trackStates; }
 
-  TrackParametersContainerBackendPtr m_trackParameters = nullptr;
+  xAOD::TrackParametersContainer* m_trackParameters = nullptr;
   xAOD::TrackParametersAuxContainer* m_trackParametersAux = nullptr;
 
   inline const xAOD::TrackParametersContainer& trackParameters() const {
@@ -380,7 +351,7 @@ class MultiTrajectory final
     return *m_trackParameters;
   }
 
-  TrackJacobianContainerBackendPtr m_trackJacobians = nullptr;
+  xAOD::TrackJacobianContainer* m_trackJacobians = nullptr;
   xAOD::TrackJacobianAuxContainer* m_trackJacobiansAux = nullptr;
 
   inline const xAOD::TrackJacobianContainer& trackJacobians() const {
@@ -390,7 +361,7 @@ class MultiTrajectory final
     return *m_trackJacobians;
   }
 
-  TrackMeasurementContainerBackendPtr m_trackMeasurements = nullptr;
+  xAOD::TrackMeasurementContainer* m_trackMeasurements = nullptr;
   xAOD::TrackMeasurementAuxContainer* m_trackMeasurementsAux = nullptr;
 
   inline const xAOD::TrackMeasurementContainer& trackMeasurements() const {
@@ -400,26 +371,20 @@ class MultiTrajectory final
     return *m_trackMeasurements;
   }
 
-  friend class ActsTrk::MultiTrajectory<IsReadWrite>;
-  friend class ActsTrk::MultiTrajectory<IsReadOnly>;
-
   std::vector<detail::Decoration> m_decorations;
   //!< decoration accessors, one per type
   template <typename T>
-  std::any decorationSetter(IndexType, const std::string&);
+  std::any decorationSetter(ActsTrk::IndexType, const std::string&);
   template <typename T>
-  const std::any decorationGetter(IndexType, const std::string&) const;
+  const std::any decorationGetter(ActsTrk::IndexType, const std::string&) const;
 };
-
-typedef ActsTrk::MultiTrajectory<ActsTrk::IsReadOnly> ConstMultiTrajectory;
-typedef ActsTrk::MultiTrajectory<ActsTrk::IsReadWrite> MutableMultiTrajectory;
 
 namespace detail {
 struct Decoration {
-  using SetterType = std::function<std::any(
-      ActsTrk::MultiTrajectory<true>::IndexType, const std::string&)>;
-  using GetterType = std::function<const std::any(
-      ActsTrk::MultiTrajectory<true>::IndexType, const std::string&)>;
+  using SetterType =
+      std::function<std::any(ActsTrk::IndexType, const std::string&)>;
+  using GetterType =
+      std::function<const std::any(ActsTrk::IndexType, const std::string&)>;
 
   Decoration(const std::string& n, SetterType s, GetterType g)
       : name(n), hash(Acts::hashString(name)), setter(s), getter(g) {}
@@ -429,9 +394,68 @@ struct Decoration {
   GetterType getter;
 };
 }  // namespace detail
+
+/**
+ * Read only version of MTJ
+ * The implementation is separate as the details are significantly different 
+ * and in addition only const methods are ever needed
+ */
+class ConstMultiTrajectory
+    : public Acts::MultiTrajectory<ConstMultiTrajectory> {
+ public:
+
+  ConstMultiTrajectory(
+      DataLink<xAOD::TrackStateContainer> trackStates,
+      DataLink<xAOD::TrackParametersContainer> trackParameters,
+      DataLink<xAOD::TrackJacobianContainer> trackJacobians,
+      DataLink<xAOD::TrackMeasurementContainer> trackMeasurements);
+
+  bool has_impl(Acts::HashedString key, ActsTrk::IndexType istate) const;
+
+  const std::any component_impl(Acts::HashedString key, ActsTrk::IndexType istate) const;
+
+  constexpr bool hasColumn_impl(Acts::HashedString key) const;
+
+  typename ConstTrackStateProxy::Parameters parameters_impl(
+      ActsTrk::IndexType index) const {
+    return m_trackParameters->at(index)->paramsEigen();
+  }
+
+  typename ConstTrackStateProxy::Covariance covariance_impl(
+      ActsTrk::IndexType index) const {
+    return m_trackParameters->at(index)->covMatrixEigen();
+  }
+
+  inline typename ConstTrackStateProxy::Covariance jacobian_impl(
+      ActsTrk::IndexType istate) const {
+    xAOD::TrackStateIndexType jacIdx = (*m_trackStates)[istate]->jacobian();
+    return m_trackJacobians->at(jacIdx)->jacEigen();
+  }
+
+  template <std::size_t measdim>
+  inline typename ConstTrackStateProxy::template Measurement<measdim>
+  measurement_impl(IndexType index) const {
+    xAOD::TrackStateIndexType measIdx = (*m_trackStates)[index]->calibrated();
+    return m_trackMeasurements->at(measIdx)->template measEigen<measdim>();
+  }
+
+  template <std::size_t measdim>
+  inline typename ConstTrackStateProxy::template MeasurementCovariance<measdim>
+  measurementCovariance_impl(IndexType index) const;
+  inline size_t size_impl() const { return m_trackStates->size(); }
+
+ private:
+  // TODO these 4 DATA links will be replaced by a reference to storable object that would contain those
+  DataLink<xAOD::TrackStateContainer> m_trackStates;
+  DataLink<xAOD::TrackParametersContainer> m_trackParameters;
+  DataLink<xAOD::TrackJacobianContainer> m_trackJacobians;
+  DataLink<xAOD::TrackMeasurementContainer> m_trackMeasurements;
+};
+
 }  // namespace ActsTrk
 
 #include "MultiTrajectory.icc"
+
 
 #include "AthenaKernel/CLASS_DEF.h"
 CLASS_DEF(ActsTrk::ConstMultiTrajectory, 237752966, 1)

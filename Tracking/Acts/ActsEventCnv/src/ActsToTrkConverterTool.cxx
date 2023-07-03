@@ -409,7 +409,7 @@ ActsTrk::ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
 
 void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
     Acts::TrackContainer<Acts::VectorTrackContainer,
-                         ActsTrk::MultiTrajectory<ActsTrk::IsReadWrite>> &tc,
+                         ActsTrk::MutableMultiTrajectory> &tc,
     const TrackCollection &trackColl,
     const Acts::GeometryContext & /**gctx*/) const {
   ATH_MSG_VERBOSE("Calling trkTrackCollectionToActsTrackContainer with "
