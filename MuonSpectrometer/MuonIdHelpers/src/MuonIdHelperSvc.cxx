@@ -741,4 +741,15 @@ namespace Muon {
     bool MuonIdHelperSvc::hasCSC() const { return m_hasCSC; }
     bool MuonIdHelperSvc::hasSTGC() const { return m_hasSTGC; }
     bool MuonIdHelperSvc::hasMM() const { return m_hasMM; }
+    
+    std::string MuonIdHelperSvc::stationNameString(const Identifier& id) const {
+        const int station = stationName(id);
+        if (isMdt(id)) return m_mdtIdHelper->stationNameString(station);
+        else if (isRpc(id)) return m_rpcIdHelper->stationNameString(station);
+        else if (isTgc(id)) return m_tgcIdHelper->stationNameString(station);
+        else if (isMM(id)) return m_mmIdHelper->stationNameString(station);
+        else if (issTgc(id)) return m_stgcIdHelper->stationNameString(station);   
+        else if (isCsc(id)) return m_cscIdHelper->stationNameString(station);
+        return "UNKNOWN";
+     }
 }  // namespace Muon

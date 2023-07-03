@@ -143,6 +143,9 @@ namespace Muon {
         /** @brief Return stationEta for all technologies */
         virtual int stationEta(const Identifier& id) const override;
 
+        /** @brief Return the station name string for all technologies */
+        virtual std::string stationNameString(const Identifier& id) const override;
+
         /** @brief Return stationName for all technologies */
         virtual int stationName(const Identifier& id) const override;
 
