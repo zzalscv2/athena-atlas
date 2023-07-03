@@ -51,26 +51,32 @@ static const int BQUARK = 5;
 static const int TQUARK = 6;
 
 static const int ELECTRON = 11;
+static const int NU_E = 12;
 static const int MUON = 13;
+static const int NU_MU = 14;
 static const int TAU = 15;
+static const int NU_TAU = 16;
 
 static const int GLUON = 21;
 static const int PHOTON = 22;
 static const int Z0BOSON = 23;
-static const int HIGGSBOSON = 25;
 static const int WPLUSBOSON = 24;
+static const int HIGGSBOSON = 25;
 static const int GRAVITON = 39;
 static const int LEPTOQUARK = 42;
 
-static const int PIPLUS = 211;
-static const int KPLUS = 321;
 static const int PI0 = 111;
 static const int K0L = 130;
-static const int K0S = 310;
-/// This is not a standard, but it seems some generators use 210 for K0
-static const int K0 = 210;
+static const int PIPLUS = 211;
 
+static const int K0S = 310;
+static const int K0 = 311;
+static const int KPLUS = 321;
+
+static const int DSTAR = 413;
+static const int D0 = 421;
 static const int JPSI = 443;
+
 static const int PROTON = 2212;
 /// PDG rule 8:
 /// The pomeron and odderon trajectories and a generic reggeon trajectory

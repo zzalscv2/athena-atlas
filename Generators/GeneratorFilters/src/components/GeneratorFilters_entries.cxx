@@ -100,6 +100,7 @@
 #include "GeneratorFilters/VBFHbbEtaSortingFilter.h"  
 #include "GeneratorFilters/ZtoLeptonFilter.h"
 #include "GeneratorFilters/ParticleDecayFilter.h"
+#include "GeneratorFilters/MuDstarFilter.h"
 
 //filters accepted for 22.6 (xAOD format)
 DECLARE_COMPONENT( QCDTruthJetFilter )
@@ -202,3 +203,5 @@ DECLARE_COMPONENT( TruthJetFilter )
 DECLARE_COMPONENT( VBFHbbEtaSortingFilter )
 DECLARE_COMPONENT( ZtoLeptonFilter )
 DECLARE_COMPONENT( ParticleDecayFilter )
+DECLARE_COMPONENT( MuDstarFilter )
+
