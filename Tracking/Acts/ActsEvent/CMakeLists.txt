@@ -13,7 +13,7 @@ atlas_add_library( ActsEventLib
                    PUBLIC_HEADERS ActsEvent
                    INCLUDE_DIRS ${Acts_INCLUDE_DIR}
                    LINK_LIBRARIES ${Boost_LIBRARIES} ${EIGEN_LIBRARIES} 
-		   AthenaBaseComps GaudiKernel AtlasDetDescr CxxUtils 
+		   AthenaBaseComps GaudiKernel AtlasDetDescr CxxUtils
 		   xAODCore ActsCore ActsFatras ActsGeometryLib BeamSpotConditionsData
 		   MagFieldConditions MagFieldElements GeoPrimitives xAODTracking xAODInDetMeasurement
 		   )
@@ -31,3 +31,8 @@ atlas_add_test( MultiTrajectoryBasic_test
 				SOURCES test/MultiTrajectoryBasic_test.cxx
 				LINK_LIBRARIES TestTools ActsEventLib
 				POST_EXEC_SCRIPT nopost.sh)
+
+# atlas_add_test( MultiTrajectorySG_test
+# 				SOURCES test/MultiTrajectorySG_test.cxx
+# 				LINK_LIBRARIES TestTools ActsEventLib
+# 				POST_EXEC_SCRIPT nopost.sh)

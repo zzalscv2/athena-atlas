@@ -1,145 +1,15 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-template <bool RWState>
-ActsTrk::MultiTrajectory<RWState>::MultiTrajectory(
-    MultiTrajectory<RWState>::TrackStateContainerBackendPtr states,
-    MultiTrajectory<RWState>::TrackParametersContainerBackendPtr parameters,
-    MultiTrajectory<RWState>::TrackJacobianContainerBackendPtr jacobians,
-    MultiTrajectory<RWState>::TrackMeasurementContainerBackendPtr measurements)
-    : m_trackStates(states),
-      m_trackParameters(parameters),
-      m_trackJacobians(jacobians),
-      m_trackMeasurements(measurements) {
-  addColumn_impl<IndexType>("calibratedSourceLink");
-}
-
-template <bool RWState>
-template <bool OtherRWState>
-ActsTrk::MultiTrajectory<RWState>::MultiTrajectory(
-    const MultiTrajectory<OtherRWState>& other)
-    : m_trackStates(other.m_trackStates),
-      m_trackParameters(other.m_trackParameters),
-      m_trackJacobians(other.m_trackJacobians),
-      m_trackMeasurements(other.m_trackMeasurements) {
-  if (other.m_trackStatesAux or other.m_trackParametersAux or
-      other.m_trackJacobiansAux or other.m_trackMeasurementsAux) {
-    throw std::runtime_error(
-        "ActsTrk::MultiTrajectory that was default constructed can not be "
-        "copied");
-  }
-  for (auto& decoration : other.m_decorations) {
-    m_decorations.push_back(decoration);
-  }
-}
-namespace ActsTrk {
-template <bool RWState>
-MultiTrajectory<RWState>::~MultiTrajectory() {
-  // this is MTJ owning backends
-  if (m_trackStatesAux or m_trackParametersAux or m_trackJacobiansAux or
-      m_trackMeasurementsAux) {
-    delete m_trackStatesAux;
-    delete m_trackParametersAux;
-    delete m_trackJacobiansAux;
-    delete m_trackMeasurementsAux;
-    delete m_trackStates;
-    delete m_trackParameters;
-    delete m_trackJacobians;
-    delete m_trackMeasurements;
-  }
-}
-} // namespace ActsTrk
-
-template <bool RWState>
-bool ActsTrk::MultiTrajectory<RWState>::has_backends() const {
-  return m_trackStates != nullptr and m_trackParameters != nullptr and
-         m_trackJacobians != nullptr and m_trackMeasurements != nullptr;
-}
-
-template <bool RWState>
-ATH_MEMBER_REQUIRES_DEF(RWState == ActsTrk::IsReadWrite,
-                        typename ActsTrk::MultiTrajectory<RWState>::IndexType)
-ActsTrk::MultiTrajectory<RWState>::addTrackState_impl(
-    Acts::TrackStatePropMask mask,
-    ActsTrk::MultiTrajectory<RWState>::IndexType previous) {
-  using namespace Acts::HashedStringLiteral;
-
-  assert(m_trackStates && "Missing Track States backend");
-
-  auto state = new xAOD::TrackState_v1();
-  m_trackStates->push_back(state);
-
-  // set kInvalid
-  using Acts::MultiTrajectoryTraits::kInvalid;
-
-  if (previous >= kInvalid - 1)
-    previous = kInvalid;  // fix needed in Acts::MTJ
-  m_trackStates->back()->setPrevious(previous);
-  using namespace Acts;
-
-  auto addParam = [this]() -> IndexType {
-    trackParameters().push_back(new xAOD::TrackParameters_v1());
-    trackParameters().back()->resize();
-    return trackParameters().size() - 1;
-  };
-
-  auto addJacobian = [this]() -> IndexType {
-    trackJacobians().push_back(new xAOD::TrackJacobian_v1());
-    trackJacobians().back()->resize();
-    return trackJacobians().size() - 1;
-  };
-
-  auto addMeasurement = [this]() -> IndexType {
-    trackMeasurements().push_back(new xAOD::TrackMeasurement_v1());
-    // trackMeasurements are resized by allocateCalibrated()
-    return trackMeasurements().size() - 1;
-  };
-
-  state->setPredicted(kInvalid);
-  if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Predicted)) {
-    state->setPredicted(addParam());
-  }
-
-  state->setFiltered(kInvalid);
-  if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Filtered)) {
-    state->setFiltered(addParam());
-  }
-
-  state->setSmoothed(kInvalid);
-  if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Smoothed)) {
-    state->setSmoothed(addParam());
-  }
-
-  state->setCalibrated(kInvalid);
-  if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Calibrated)) {
-    xAOD::TrackMeasurement* meas = new xAOD::TrackMeasurement();
-    m_trackMeasurements->push_back(meas);
-    state->setCalibrated(m_trackMeasurements->size() - 1);
-  }
-  if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Calibrated)) {
-    state->setCalibrated(addMeasurement());
-    // TODO: in Acts there is m_projections collection
-    // https://github.com/acts-project/acts/blob/main/Core/src/EventData/VectorMultiTrajectory.cpp#L83
-  }
-
-  state->setJacobian(kInvalid);
-  if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Jacobian)) {
-    state->setJacobian(addJacobian());
-  }
-
-  return m_trackStates->size() - 1;
-}
 
 //  has_impl implementation
-
-template <bool RWState>
-constexpr bool ActsTrk::MultiTrajectory<RWState>::has_impl(
-    Acts::HashedString key,
-    ActsTrk::MultiTrajectory<RWState>::IndexType istate) const {
+namespace ActsTrk {
+namespace details {
+constexpr std::optional<bool> has_impl(
+    const xAOD::TrackStateContainer& trackStates, Acts::HashedString key,
+    ActsTrk::IndexType istate) {
   using namespace Acts::HashedStringLiteral;
-
   using Acts::MultiTrajectoryTraits::kInvalid;
-  const auto& trackStates = *m_trackStates;
   switch (key) {
     case "previous"_hash:
       return trackStates[istate]->previous() < kInvalid;
@@ -165,18 +35,29 @@ constexpr bool ActsTrk::MultiTrajectory<RWState>::has_impl(
       return trackStates[istate]->measDim() < kInvalid;
     case "uncalibratedSourceLink"_hash:
       return !trackStates[istate]->uncalibratedMeasurementLink().isDefault();
-    default:
-      for (auto& d : m_decorations) {
-        if (d.hash == key) {
-          return true;
-        }
-      }
+  }
+  return std::optional<bool>();
+}
+}  // namespace details
+}  // namespace ActsTrk
+
+constexpr bool ActsTrk::MutableMultiTrajectory::has_impl(
+    Acts::HashedString key, ActsTrk::IndexType istate) const {
+  const auto& trackStates = *m_trackStates;
+  std::optional<bool> inTrackState =
+      ActsTrk::details::has_impl(trackStates, key, istate);
+  if (inTrackState.has_value())
+    return inTrackState.value();
+  for (auto& d : m_decorations) {
+    if (d.hash == key) {
+      return true;
+    }
   }
 
   return false;
 }
-template <bool RWState>
-constexpr bool ActsTrk::MultiTrajectory<RWState>::hasColumn_impl(
+
+constexpr bool ActsTrk::MutableMultiTrajectory::hasColumn_impl(
     Acts::HashedString key) const {
   using namespace Acts::HashedStringLiteral;
   switch (key) {
@@ -203,148 +84,8 @@ constexpr bool ActsTrk::MultiTrajectory<RWState>::hasColumn_impl(
   }
 }
 
-template <bool RWState>
-const std::any ActsTrk::MultiTrajectory<RWState>::component_impl(
-    Acts::HashedString key,
-    ActsTrk::MultiTrajectory<RWState>::IndexType istate) const {
-  using namespace Acts::HashedStringLiteral;
-  assert(istate < m_trackStates->size() &&
-         "Attempt to reach beyond the Track States container size");
-  const auto& trackStates = *m_trackStates;
-  switch (key) {
-    case "previous"_hash:
-      return trackStates[istate]->previousPtr();
-    case "chi2"_hash:
-      return trackStates[istate]->chi2Ptr();
-    case "pathLength"_hash:
-      return trackStates[istate]->pathLengthPtr();
-    case "predicted"_hash:
-      return trackStates[istate]->predictedPtr();
-    case "filtered"_hash:
-      return trackStates[istate]->filteredPtr();
-    case "smoothed"_hash:
-      return trackStates[istate]->smoothedPtr();
-    case "jacobian"_hash:
-      return trackStates[istate]->jacobianPtr();
-    case "projector"_hash:
-      return trackMeasurements()
-          .at(trackStates[istate]->calibrated())
-          ->projectorPtr();
-    case "calibrated"_hash: {
-      return trackStates[istate]->calibratedPtr();
-    }
-    case "calibratedCov"_hash: {
-      return trackStates[istate]->calibratedPtr();
-    }
-    case "measdim"_hash:
-      return trackStates[istate]->measDimPtr();
-    default: {
-      for (auto& d : m_decorations) {
-        if (d.hash == key) {
-          return d.getter(istate, d.name);
-        }
-      }
-      throw std::runtime_error("no such component " + std::to_string(key));
-    }
-  }
-}
-
-template <bool RWState>
-std::any ActsTrk::MultiTrajectory<RWState>::component_impl(
-    Acts::HashedString key,
-    ActsTrk::MultiTrajectory<RWState>::IndexType istate) {
-  using namespace Acts::HashedStringLiteral;
-  assert(istate < m_trackStates->size() &&
-         "Attempt to reach beyond the Track States container size");
-
-  switch (key) {
-    case "previous"_hash:
-      return (*m_trackStates)[istate]->previousPtr();
-    case "chi2"_hash:
-      return (*m_trackStates)[istate]->chi2Ptr();
-    case "pathLength"_hash:
-      return (*m_trackStates)[istate]->pathLengthPtr();
-    case "predicted"_hash:
-      return (*m_trackStates)[istate]->predictedPtr();
-    case "filtered"_hash:
-      return (*m_trackStates)[istate]->filteredPtr();
-    case "smoothed"_hash:
-      return (*m_trackStates)[istate]->smoothedPtr();
-    case "projector"_hash:
-      return trackMeasurements()
-          .at((*m_trackStates)[istate]->calibrated())
-          ->projectorPtr();
-    case "measdim"_hash:
-      return (*m_trackStates)[istate]->measDimPtr();
-    default: {
-      for (auto& d : m_decorations) {
-        if (d.hash == key) {
-          return d.getter(istate, d.name);
-        }
-      }
-      throw std::runtime_error("no such component " + std::to_string(key));
-    }
-  }
-}
-
-/**
- * Implementation of uncalibrated link fetch
- */
-template <bool RWState>
-typename Acts::SourceLink
-ActsTrk::MultiTrajectory<RWState>::getUncalibratedSourceLink_impl(
-    ActsTrk::MultiTrajectory<RWState>::IndexType istate) const {
-  auto el = trackStates()[istate]->uncalibratedMeasurementLink();
-  auto geoID = trackStates()[istate]->geometryId();
-  return Acts::SourceLink(geoID, el);
-}
-template <bool RWState>
-ATH_MEMBER_REQUIRES_DEF(RWState == ActsTrk::IsReadWrite, Acts::SourceLink)
-ActsTrk::MultiTrajectory<RWState>::getUncalibratedSourceLink_impl(
-    ActsTrk::MultiTrajectory<RWState>::IndexType istate) {
-  auto el = trackStates()[istate]->uncalibratedMeasurementLink();
-  auto geoID = trackStates()[istate]->geometryId();
-  return Acts::SourceLink(geoID, el);
-}
-
-// Implementation of unset
-template <bool RWState>
-void ActsTrk::MultiTrajectory<RWState>::unset_impl(
-    Acts::TrackStatePropMask target,
-    ActsTrk::MultiTrajectory<RWState>::IndexType istate) {
-
-  using PM = Acts::TrackStatePropMask;
-  // set kInvalid
-  using Acts::MultiTrajectoryTraits::kInvalid;
-
-  switch (target) {
-    case PM::Predicted:
-      (*m_trackStates)[istate]->setPredicted(kInvalid);
-      break;
-    case PM::Filtered:
-      (*m_trackStates)[istate]->setFiltered(kInvalid);
-      break;
-    case PM::Smoothed:
-      (*m_trackStates)[istate]->setSmoothed(kInvalid);
-      break;
-    case PM::Jacobian:
-      (*m_trackStates)[istate]->setJacobian(kInvalid);
-      break;
-    case PM::Calibrated:
-      (*m_trackStates)[istate]->setCalibrated(kInvalid);
-      // TODO here m_measOffset[istate] and m_measCovOffset[istate] should be
-      // set to kInvalid
-
-      break;
-    default:
-      throw std::domain_error{"Unable to unset this component"};
-  }
-}
-
-template <bool RWState>
 template <typename T>
-void ActsTrk::MultiTrajectory<RWState>::addColumn_impl(
-    const std::string& name) {
+void ActsTrk::MutableMultiTrajectory::addColumn_impl(const std::string& name) {
   // It is actually not clear if we would allow decorating RO MTJ, maybe we do
   using std::placeholders::_1;
   using std::placeholders::_2;
@@ -354,18 +95,17 @@ void ActsTrk::MultiTrajectory<RWState>::addColumn_impl(
                 std::is_same<T, std::uint32_t>::value) {
     m_decorations.emplace_back(
         name,
-        std::bind(&ActsTrk::MultiTrajectory<RWState>::decorationSetter<T>, this,
+        std::bind(&ActsTrk::MutableMultiTrajectory::decorationSetter<T>, this,
                   _1, _2),
-        std::bind(&ActsTrk::MultiTrajectory<RWState>::decorationGetter<T>, this,
+        std::bind(&ActsTrk::MutableMultiTrajectory::decorationGetter<T>, this,
                   _1, _2));
   } else {
     throw std::runtime_error("Can't add decoration of this type");
   }
 }
 
-template <bool RWState>
 template <typename T>
-std::any ActsTrk::MultiTrajectory<RWState>::decorationSetter(
+std::any ActsTrk::MutableMultiTrajectory::decorationSetter(
     IndexType idx, const std::string& name) {
   // TODO this approach is known not to be fastest possible, it would be better
   // to construct SG::Accessor and reuse it
@@ -375,10 +115,9 @@ std::any ActsTrk::MultiTrajectory<RWState>::decorationSetter(
   return &(el->auxdecor<T>(name));
 }
 
-template <bool RWState>
 template <typename T>
-const std::any ActsTrk::MultiTrajectory<RWState>::decorationGetter(
-    IndexType idx, const std::string& name) const {
+const std::any ActsTrk::MutableMultiTrajectory::decorationGetter(
+    ActsTrk::IndexType idx, const std::string& name) const {
   const auto& trackStates = *m_trackStates;
   const SG::AuxElement* el = trackStates[idx];
   return &(
@@ -387,60 +126,3 @@ const std::any ActsTrk::MultiTrajectory<RWState>::decorationGetter(
 }
 
 // Implementation of shareFrom
-template <bool RWState>
-void ActsTrk::MultiTrajectory<RWState>::shareFrom_impl(
-    ActsTrk::MultiTrajectory<RWState>::IndexType iself,
-    ActsTrk::MultiTrajectory<RWState>::IndexType iother,
-    Acts::TrackStatePropMask shareSource,
-    Acts::TrackStatePropMask shareTarget) {
-  auto self = (*m_trackStates)[iself];
-  auto other = (*m_trackStates)[iother];
-
-  assert(ACTS_CHECK_BIT(this->getTrackState(iother).getMask(), shareSource) &&
-         "Source has incompatible allocation");
-
-  using PM = Acts::TrackStatePropMask;
-  // set kInvalid
-  using Acts::MultiTrajectoryTraits::kInvalid;
-
-  IndexType sourceIndex{kInvalid};
-  switch (shareSource) {
-    case PM::Predicted:
-      sourceIndex = other->predicted();
-      break;
-    case PM::Filtered:
-      sourceIndex = other->filtered();
-      break;
-    case PM::Smoothed:
-      sourceIndex = other->smoothed();
-      break;
-    case PM::Jacobian:
-      sourceIndex = other->jacobian();
-      break;
-    default:
-      throw std::domain_error{"Unable to share this component"};
-  }
-
-  assert(sourceIndex != kInvalid);
-
-  switch (shareTarget) {
-    case PM::Predicted:
-      assert(shareSource != PM::Jacobian);
-      self->setPredicted(sourceIndex);
-      break;
-    case PM::Filtered:
-      assert(shareSource != PM::Jacobian);
-      self->setFiltered(sourceIndex);
-      break;
-    case PM::Smoothed:
-      assert(shareSource != PM::Jacobian);
-      self->setSmoothed(sourceIndex);
-      break;
-    case PM::Jacobian:
-      assert(shareSource == PM::Jacobian);
-      self->setJacobian(sourceIndex);
-      break;
-    default:
-      throw std::domain_error{"Unable to share this component"};
-  }
-}

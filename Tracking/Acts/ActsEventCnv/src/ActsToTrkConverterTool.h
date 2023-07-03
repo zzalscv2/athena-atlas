@@ -94,7 +94,7 @@ public:
   */
   virtual 
   void trkTrackCollectionToActsTrackContainer(Acts::TrackContainer<Acts::VectorTrackContainer,
-                       ActsTrk::MultiTrajectory<ActsTrk::IsReadWrite>> &tc, const TrackCollection& trackColl, const Acts::GeometryContext& gctx) const override;
+                       ActsTrk::MutableMultiTrajectory> &tc, const TrackCollection& trackColl, const Acts::GeometryContext& gctx) const override;
 
   virtual
   const IActsTrackingGeometryTool*
