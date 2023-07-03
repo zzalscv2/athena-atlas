@@ -233,11 +233,17 @@ def getDeadMaterialPhysicsRegionTool(name='DeadMaterialPhysicsRegionTool', **kwa
     if currentRun in ["RUN1"]:
         # Avoid overlap with BeampipeFwdCut Region (ATLASSIM-6426)
         endRange = 47 if simFlags.BeamPipeSimMode.statusOn and simFlags.BeamPipeSimMode() != "Normal" else 49
+        # Avoid overlap with FWDBeamLine region
+        if simFlags.ForwardDetectors.statusOn and simFlags.ForwardDetectors() == 2:
+            endRange = 46
         sectionList = list(range(16,endRange)) # does not include endRange
         sectionList += [ 51, 52, 53, 54 ]
     else:
         # Avoid overlap with BeampipeFwdCut Region (ATLASSIM-6426)
         endRange = 198 if simFlags.BeamPipeSimMode.statusOn and simFlags.BeamPipeSimMode() != "Normal" else 200
+        # Avoid overlap with FWDBeamLine region
+        if simFlags.ForwardDetectors.statusOn and simFlags.ForwardDetectors() == 2:
+            endRange = 197
         sectionList = list(range(191,endRange)) # does not include endRange
         if currentRun not in ["RUN2", "RUN3", "RUN4"]:
             print('getDeadMaterialPhysicsRegionTool: WARNING check that RUN2 beampipe volume names are correct for this geometry tag')

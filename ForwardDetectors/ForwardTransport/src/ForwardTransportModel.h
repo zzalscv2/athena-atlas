@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FORWARDTRANSPORT_FORWARD_TRANSPORT_MODEL_H
@@ -8,6 +8,8 @@
 #include "G4VFastSimulationModel.hh"
 #include "ForwardTransportSvc/IForwardTransportSvc.h"
 #include "ForwardTracker/ForwardTrack.h"
+
+class PrimaryParticleInformation;
 
 class ForwardTransportModel: public G4VFastSimulationModel {
 
@@ -20,15 +22,15 @@ class ForwardTransportModel: public G4VFastSimulationModel {
   G4bool ModelTrigger(const G4FastTrack&)          override final { return true; } // IDLE: we do selection in DoIt method
   void   DoIt        (const G4FastTrack&, G4FastStep&) override final;             // Actual selection and parametrization
 
-  void KillPrimaryTrack(G4FastStep&, double energy);
-
 private:
+  void KillPrimaryTrack(const G4FastTrack&, G4FastStep&);
 
-  IForwardTransportSvc    *m_fwdSvc;
+  PrimaryParticleInformation* getPrimaryParticleInformation(const G4FastTrack& fastTrack) const;
+  IForwardTransportSvc    *m_fwdSvc{};
   ForwardTrack             m_fwdTrack;
   ForwardTracker::Particle m_fwdParticle;
-  const int                m_verboseLevel;
-  std::string m_FwdTrSvcName;
+  const int                m_verboseLevel{0};
+  std::string m_FwdTrSvcName{};
 };
 
 #endif //FORWARDTRANSPORT_FORWARD_TRANSPORT_MODEL_H
