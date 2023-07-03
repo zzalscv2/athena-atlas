@@ -12,8 +12,6 @@
 #
 # WARNING: options explained in usage() have not been tested!!!   Probably they WON'T work as expected!!
 
-from __future__ import print_function
-
 import getopt,sys
 
 def usage():
@@ -112,6 +110,7 @@ if __name__ == "__main__":
 
     print ('opts:',opts)
     for o, a in opts:
+        a = a.strip()
         if o in ("-f","--folder"):
             folderPath = "/TILE/%s/STATUS/ADC" % a
         elif o in ("-t","--tag"):

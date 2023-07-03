@@ -6,23 +6,23 @@
 # Andrei Artamonov 2012
 #==================================================
 
-from __future__ import print_function
-
 import sys, getopt
 tagusefile='/afs/cern.ch/user/a/atlcond/notify/AtlCoolMerge.taguse'
 
 
-options, remainder = getopt.getopt(sys.argv[1:], 'h', ['help','folder=','globaltag=','instance=','localtag=','schema='])
+options, remainder = getopt.getopt(sys.argv[1:], 'h', ['help','folder=','globaltag=','instance=','localtag=','schema=','server='])
 
 # defaults
 folder=''
 #globaltag='CURRENT'
 globaltag=''
 localtag=''
+server = ''
 instance = 'CONDBR2'
 schema = "COOLOFL_TILE"
 help = 0
 for opt, arg in options:
+    arg = arg.strip()
     if opt in ('-h'):
         help = 1
     elif opt in ('--help'):
@@ -37,6 +37,8 @@ for opt, arg in options:
         instance = arg
     elif opt in ('--schema'):
         schema = arg
+    elif opt in ('--server'):
+        server = a
 
 if 'ONL01' in folder:
     print (' it does not work with singleversion folders')
@@ -83,7 +85,7 @@ if folder == '':
 connStr=schema+'/'+instance
 
 #=== open the database
-db = TileCalibTools.openDbConn(connStr, 'READONLY')
+db = TileCalibTools.openDbConn(connStr, server)
 
 if localtag == "" :
     #=== resolve folder tag from global tag

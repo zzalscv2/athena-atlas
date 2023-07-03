@@ -5,8 +5,6 @@
 # ReadOfcFromCool.py
 # Lukas Pribyl <lukas.pribyl@cern.ch>, 2008-07-25
 
-from __future__ import print_function
-
 import getopt,sys,os
 os.environ['TERM'] = 'linux'
 
@@ -24,9 +22,10 @@ def usage():
     print ("-g, -a, --adc=  specify gain (adc number), default is 0")
     print ("-i, --field=    specify field number, default is 0")
     print ("-s, --schema=   specify schema to use, like 'COOLONL_TILE/CONDBR2' or 'sqlite://;schema=tileSqlite.db;dbname=CONDBR2'")
+    print ("-S, --server=   specify server - ORACLE or FRONTIER, default is FRONTIER")
 
-letters = "hr:l:s:t:f:p:d:c:a:g:i:"
-keywords = ["help","run=","lumi=","schema=","tag=","folder=","ros=","drawer=","channel=","adc=","gain=","field="]
+letters = "hr:l:S:s:t:f:p:d:c:a:g:i:"
+keywords = ["help","run=","lumi=","server=","schema=","tag=","folder=","ros=","drawer=","channel=","adc=","gain=","field="]
 
 try:
     opts, extraparams = getopt.getopt(sys.argv[1:],letters,keywords)
@@ -38,6 +37,7 @@ except getopt.GetoptError as err:
 # defaults
 run = 2147483647
 lumi = 0
+server = ''
 schema = 'COOLONL_TILE/CONDBR2'
 folderPath =  "/TILE/ONL01/FILTER/OF2/PHY"
 tag = ""
@@ -48,6 +48,7 @@ adc     = 0
 field   = 0
 
 for o, a in opts:
+    a = a.strip()
     if o in ("-f","--folder"):
         if a.startswith("/TILE"):
             folderPath = a
@@ -57,6 +58,8 @@ for o, a in opts:
             folderPath = "/TILE/ONL01/FILTER/OF2/%s" % a
     elif o in ("-t","--tag"):
         tag = a
+    elif o in ("-S","--server"):
+        server = a
     elif o in ("-s","--schema"):
         schema = a
     elif o in ("-p","--ros"):
@@ -90,7 +93,7 @@ log.setLevel(logging.DEBUG)
 
 
 #=== set database
-db = TileCalibTools.openDbConn(schema,'READONLY')
+db = TileCalibTools.openDbConn(schema,server)
 folderTag = TileCalibTools.getFolderTag(schema if 'COMP200' in schema or 'OFLP200' in schema else db, folderPath, tag)
 
 #=== required OF2 folder

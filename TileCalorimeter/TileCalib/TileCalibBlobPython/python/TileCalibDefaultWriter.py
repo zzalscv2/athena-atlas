@@ -26,8 +26,6 @@ self.__tilePrefixOfl1
 
 """
 
-from __future__ import print_function
-
 import cppyy
 
 from TileCalibBlobPython import TileCalibTools

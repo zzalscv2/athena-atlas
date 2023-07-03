@@ -5,8 +5,6 @@
 # PlotPulseshapeFromCool.py
 # Nils Gollub <nils.gollub@cern.ch>, 2008-06-05
 
-from __future__ import print_function
-
 from TileCalibBlobPython import TileCalibTools
 from TileCalibBlobObjs.Classes import TileCalibUtils
 import ROOT
@@ -18,7 +16,7 @@ from TileCalibBlobPython.TileCalibLogger import getLogger
 log = getLogger("ps_readDb")
 
 #=== open the database
-db = TileCalibTools.openDb('ORACLE', 'CONDBR2', 'READONLY', 'COOLOFL_TILE')
+db = TileCalibTools.openDbConn('COOLOFL_TILE/CONDBR2')
 
 #=== specify folder and tag
 folder = "/TILE/OFL02/PULSESHAPE/PHY"

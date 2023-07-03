@@ -5,8 +5,6 @@
 # ReadCalibFromCool.py
 # Andrei Artamonov 2009-11-03
 
-from __future__ import print_function
-
 import getopt,sys,os
 os.environ['TERM'] = 'linux'
 
@@ -35,10 +33,11 @@ def usage():
     print ("-p, --prefix=   print some prefix on every line ")
     print ("-k, --keep=     field numbers or channel numbers to ignore, e.g. '0,2,3,EBch0,EBch1,EBch12,EBch13,EBspD4ch18,EBspD4ch19,EBspC10ch4,EBspC10ch5' ")
     print ("-s, --schema=   specify schema to use, like 'COOLONL_TILE/CONDBR2' or 'sqlite://;schema=tileSqlite.db;dbname=CONDBR2' or tileSqlite.db")
-    print ("-D, --dbname=   specify dbname part of schema if schema only contains file name, default is CONDBR2'")
+    print ("-D, --dbname=   specify dbname part of schema if schema only contains file name, default is CONDBR2")
+    print ("-S, --server=   specify server - ORACLE or FRONTIER, default is FRONTIER")
 
-letters = "hr:l:s:t:f:D:n:b:e:m:N:X:c:a:g:p:dBCHPk:"
-keywords = ["help","run=","lumi=","schema=","tag=","folder=","dbname=","module=","begin=","end=","chmin=","chmax=","gain=","adc=","chan=","nval=","prefix=","default","blob","hex","pmt","keep=","comment"]
+letters = "hr:l:s:t:f:D:S:n:b:e:m:N:X:c:a:g:p:dBCHPk:"
+keywords = ["help","run=","lumi=","schema=","tag=","folder=","dbname=","server=","module=","begin=","end=","chmin=","chmax=","gain=","adc=","chan=","nval=","prefix=","default","blob","hex","pmt","keep=","comment"]
 
 try:
     opts, extraparams = getopt.getopt(sys.argv[1:],letters,keywords)
@@ -52,6 +51,7 @@ run = 2147483647
 lumi = 0
 schema = 'COOLOFL_TILE/CONDBR2'
 dbname = ''
+server = ''
 folderPath =  "/TILE/OFL02/CALIB/CIS/LIN"
 tag = "UPD4"
 nval = 0
@@ -81,6 +81,7 @@ comment = False
 keep=[]
 
 for o, a in opts:
+    a = a.strip()
     if o in ("-f","--folder"):
         folderPath = a
     elif o in ("-t","--tag"):
@@ -89,6 +90,8 @@ for o, a in opts:
         schema = a
     elif o in ("-D","--dbname"):
         dbname = a
+    elif o in ("-S","--server"):
+        server = a
     elif o in ("-n","--nval"):
         nval = int(a)
     elif o in ("-b","--begin"):
@@ -175,7 +178,7 @@ if iov:
     lumi=0
 
 #=== set database
-db = TileCalibTools.openDbConn(schema,'READONLY')
+db = TileCalibTools.openDbConn(schema,server)
 folderTag = TileCalibTools.getFolderTag(schema if 'COMP200' in schema or 'OFLP200' in schema else db, folderPath, tag)
 log.info("Initializing folder %s with tag %s", folderPath, folderTag)
 
