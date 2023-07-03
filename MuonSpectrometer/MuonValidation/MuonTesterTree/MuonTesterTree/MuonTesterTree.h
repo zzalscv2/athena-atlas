@@ -4,16 +4,24 @@
 #ifndef MUONTESTERTREE_MUONTESTERTREE_H
 #define MUONTESTERTREE_MUONTESTERTREE_H
 
-#include <GaudiKernel/ITHistSvc.h>
+#include <GaudiKernel/ITHistSvc.h> //service handle template argument
 #include <GaudiKernel/ServiceHandle.h>
-#include <MuonTesterTree/IMuonTesterBranch.h>
+#include <MuonTesterTree/IMuonTesterBranch.h> //for IMuonTesterBranch::DataDependency
+#include <AthenaBaseComps/AthMessaging.h> //parent class
+//
+#include <set>
+#include <string>
+#include <vector>
+#include <memory>
+#include <type_traits> //for std::enable_if
+//
+//need the full class declarations, function templates cannot return incomplete types
 #include <MuonTesterTree/MatrixBranch.h>
 #include <MuonTesterTree/ScalarBranch.h>
 #include <MuonTesterTree/VectorBranch.h>
 #include <MuonTesterTree/SetBranch.h>
-#include <AthenaBaseComps/AthMessaging.h>
-
-#include <set>
+//
+class TTree;
 
 namespace MuonVal {
 

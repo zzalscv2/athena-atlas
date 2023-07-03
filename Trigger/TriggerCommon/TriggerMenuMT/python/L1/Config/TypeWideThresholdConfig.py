@@ -339,8 +339,8 @@ def getConfig_eTAU():
     rCore_fw_medium = 12 # PLACEHOLDER
     rCore_fw_tight = 32
     rHad_fw_loose = 10 # PLACEHOLDER
-    rHad_fw_medium = 10 # PLACEHOLDER
-    rHad_fw_tight = 10 # PLACEHOLDER
+    rHad_fw_medium = 72 # Only for HM, does not affect L/M/T which cut only on rCore
+    rHad_fw_tight = 72
     confObj = odict()
     confObj["workingPoints"] = odict()
     # Working points here translate to cuts on both rCore and rHad

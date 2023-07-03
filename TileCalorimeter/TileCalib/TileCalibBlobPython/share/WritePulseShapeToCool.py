@@ -83,6 +83,7 @@ except Exception:
 #=== read command line parameters
 
 for o, a in options:
+    a = a.strip()
     if o in ("-h","--help"):
         usage()
         sys.exit(2)

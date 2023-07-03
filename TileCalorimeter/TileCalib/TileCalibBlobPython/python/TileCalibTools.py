@@ -12,8 +12,6 @@
 Python helper module for managing COOL DB connections and TileCalibBlobs.
 """
 
-from __future__ import print_function
-
 import cx_Oracle # noqa: F401
 from PyCool import cool
 import datetime, time, re, os
@@ -197,32 +195,36 @@ def getAthenaFolderType(folderDescr):
         raise Exception("No folder type info found in \'%s\'" % folderDescr)
     return type.groups()[0]
 
-
 #
 #______________________________________________________________________
-def openDb(db, instance, mode="READONLY",schema="COOLONL_TILE",sqlfn="tileSqlite.db"):
+def openDb(db, instance, mode="READONLY", schema="COOLOFL_TILE", sqlfn="tileSqlite.db"):
     """
     Opens a COOL db connection.
-    - connStr: The DB connection string. The following
-               abbreviations are recognized:
-               * SQLITE: Opens tileSqlite.db file in current directory (OFLP200)
-    - mode: Can be READONLY (default), RECREATE or UPDATE
+    - db:       The DB type. The following names are recognized:
+                    * SQLITE: Opens file mentioned in sqlfn parameter
+                    * ORACLE or FRONTIER: Opens ORACLE DB, forces READONLY
+    - instance: One of valid instances - CONDBR2 OFLP200 COMP200 CMCP200
+    - mode:     Can be READONLY (default), RECREATE or UPDATE
+    - schema:   One of valid schemas - COOLONL_CALO COOLOFL_CALO COOLONL_LAR COOLOFL_LAR COOLONL_TILE COOLOFL_TILE
+    - sqlfn:    Name of sqlite file if db is SQLITE
     """
     #=== check for valid db names
-    validDb = ["SQLITE", "ORACLE"]
-    if db not in validDb:
-        raise Exception( "DB not valid: %s, valid DBs are: %s" % (db,validDb) )
+    if db is not None:
+        validDb = ["SQLITE", "ORACLE", "FRONTIER"]
+        if db not in validDb:
+            raise Exception( "DB not valid: %s, valid DBs are: %s" % (db,validDb) )
+        elif db == "ORACLE" or db == "FRONTIER":
+            mode = "READONLY"
 
     #=== check for valid instance names
-    #=== see https://twiki.cern.ch/twiki/bin/view/Atlas/CoolProdAcc
     validInstance = ["COMP200", "CONDBR2", "CMCP200", "OFLP200"]
     if instance not in validInstance:
         raise Exception( "Instance not valid: %s, valid instance are: %s" % (instance,validInstance) )
 
     #=== check for valid schema names
-    VALIDSCHEMAS = ["COOLONL_TILE","COOLOFL_TILE"]
-    if schema not in VALIDSCHEMAS:
-        raise Exception( "Schema not valid: %s, valid schemas are: %s" % (schema,VALIDSCHEMAS) )
+    validSchema = ["COOLONL_TILE","COOLOFL_TILE"]
+    if schema not in validSchema:
+        raise Exception( "Schema not valid: %s, valid schemas are: %s" % (schema,validSchema) )
 
     #=== construct connection string
     connStr = ""
@@ -234,9 +236,12 @@ def openDb(db, instance, mode="READONLY",schema="COOLONL_TILE",sqlfn="tileSqlite
             if dirn:
                 os.makedirs(dirn)
         connStr="sqlite://X;schema=%s;dbname=%s" % (sqlfn,instance)
+    elif db=='FRONTIER':
+        connStr='frontier://ATLF/()/;schema=ATLAS_%s;dbname=%s' % (schema,instance)
     elif db=='ORACLE':
         connStr='oracle://%s;schema=ATLAS_%s;dbname=%s' % ('ATLAS_COOLPROD',schema,instance)
-        #connStr=schema+'/'+instance
+    else:
+        connStr=schema+'/'+instance
 
     return openDbConn(connStr, mode)
 
@@ -244,9 +249,10 @@ def openDb(db, instance, mode="READONLY",schema="COOLONL_TILE",sqlfn="tileSqlite
 #______________________________________________________________________
 def openDbConn(connStr, mode="READONLY"):
     """
-    Opens a COOL db connection or sqlite file.
-    - connStr: The DB connection string.
-    - mode: Can be READONLY (default), RECREATE or UPDATE
+    Opens a COOL db connection.
+    - connStr: The DB connection string
+    - mode:    Can be READONLY (default), RECREATE or UPDATE
+               or ORACLE or FRONTIER if connStr is only short name of the database
     """
 
     #=== split the name into schema and dbinstance
@@ -256,26 +262,28 @@ def openDbConn(connStr, mode="READONLY"):
     else:                    # construct connection string
         schema=splitname[0]
         instance=splitname[1]
-        connStr_new='oracle://%s;schema=ATLAS_%s;dbname=%s' % ('ATLAS_COOLPROD',schema,instance)
+        if mode=="ORACLE":
+            connStr_new='oracle://%s;schema=ATLAS_%s;dbname=%s' % ('ATLAS_COOLPROD',schema,instance)
+        else:
+            connStr_new='frontier://ATLF/()/;schema=ATLAS_%s;dbname=%s' % (schema,instance)
 
     #=== get dbSvc and print header info
-    #.. get a CoraCoolDatabaseSvc object
     dbSvc = cool.DatabaseSvcFactory.databaseService()
     log.info( "---------------------------------------------------------------------------------" )
     log.info( "-------------------------- TileCalibTools.openDbConn ----------------------------" )
-    log.info( "- using COOL version %s", dbSvc.serviceVersion()                                  )
-    log.info( "- opening TileDb: %s",connStr_new                                                    )
+    log.info( "- using COOL version %s", dbSvc.serviceVersion()                                   )
+    log.info( "- opening TileDb: %s",connStr_new                                                  )
     log.info( "- mode: %s", mode                                                                  )
     log.info( "---------------------------------------------------------------------------------" )
 
     #=== action depends on mode
-    if mode=="READONLY":
+    if mode in ["READONLY","ORACLE","FRONTIER","",None]:
         #=== open read only
         try:
             db=dbSvc.openDatabase(connStr_new,True)
         except Exception as e:
             log.debug( e )
-            log.critical("Could not connect to %s" % connStr )
+            log.critical("Could not connect to %s" % connStr_new )
             return None
         return db
     elif mode=="RECREATE":
@@ -294,7 +302,7 @@ def openDbConn(connStr, mode="READONLY"):
             db=dbSvc.openDatabase(connStr_new,False)
         except Exception as e:
             log.debug( e )
-            log.warning( "Could not connect to \'%s\', trying to create it...." , connStr )
+            log.warning( "Could not connect to \'%s\', trying to create it....", connStr_new )
             try:
                 db=dbSvc.createDatabase(connStr_new)
             except Exception as e:
@@ -305,8 +313,6 @@ def openDbConn(connStr, mode="READONLY"):
     else:
         log.error("Mode \"%s\" not recognized", mode )
         return None
-
-
 
 #
 #______________________________________________________________________

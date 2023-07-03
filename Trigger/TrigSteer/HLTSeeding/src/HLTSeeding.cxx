@@ -50,7 +50,7 @@ StatusCode HLTSeeding::initialize() {
 
   if ( m_roiZedWidthDefault!=0 ) { 
     ATH_MSG_INFO( "CHANGING THE DEFAULT ROI Z WIDTH: " << m_roiZedWidthDefault );
-    RoiDescriptor::circumvent_cppchecker( m_roiZedWidthDefault );
+    RoiDescriptor::zedWidthDefault( m_roiZedWidthDefault );
   }
 
   return StatusCode::SUCCESS;

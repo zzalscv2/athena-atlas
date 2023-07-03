@@ -55,44 +55,37 @@ def getAthenaFolderType(folderDescr):
         raise Exception("No folder type info found in \'%s\'" % folderDescr)
     return type.groups()[0]
 
-
 #
 #______________________________________________________________________
-def openDb(db, schema, mode="READONLY", schema2="COOLONL_CALO", sqlfn="caloSqlite.db"):
+def openDb(db, instance, mode="READONLY", schema="COOLOFL_CALO", sqlfn="caloSqlite.db"):
     """
     Opens a COOL db connection.
-    - connStr: The DB connection string. The following
-               abbreviations are recognized:
-               * SQLITE: Opens CaloSqlite.db file in current directory
-               * ORACLE: Opens ORACLE DB, forces READONLY
-    - mode: Can be READONLY (default), RECREATE or UPDATE
+    - db:       The DB type. The following names are recognized:
+                    * SQLITE: Opens file mentioned in sqlfn parameter
+                    * ORACLE or FRONTIER: Opens ORACLE DB, forces READONLY
+    - instance: One of valid instances - CONDBR2 OFLP200 COMP200 CMCP200
+    - mode:     Can be READONLY (default), RECREATE or UPDATE
+    - schema:   One of valid schemas - COOLONL_CALO COOLOFL_CALO COOLONL_LAR COOLOFL_LAR COOLONL_TILE COOLOFL_TILE
+    - sqlfn:    Name of sqlite file if db is SQLITE
     """
     #=== check for valid db names
-    validDb = ["SQLITE","ORACLE"]
-    if db not in validDb:
-        log.error( "DB not valid: %s", db )
-        log.error( "Valid DB are: %s", validDb )
-        raise("Invalid DB")
-    elif db == "ORACLE":
-        mode = "READONLY" # If using ORACLE, only read
-        
+    if db is not None:
+        validDb = ["SQLITE", "ORACLE", "FRONTIER"]
+        if db not in validDb:
+            raise Exception( "DB not valid: %s, valid DBs are: %s" % (db,validDb) )
+        elif db == "ORACLE" or db == "FRONTIER":
+            mode = "READONLY"
+
     #=== check for valid instance names
-    # USE OF KEYWORD "schema" is retained for backward compatability
-    #=== see https://twiki.cern.ch/twiki/bin/view/Atlas/CoolProdAcc
-    validInstance = ["COMP200", "CMCP200", "OFLP200","CONDBR2"]
-    if schema not in validInstance:
-        log.error( "DB schema not valid: %s", schema )
-        log.error( "Valid schema are: %s", validInstance )
-        raise("Invalid schema")
-        
+    validInstance = ["COMP200", "CONDBR2", "CMCP200", "OFLP200"]
+    if instance not in validInstance:
+        raise Exception( "Instance not valid: %s, valid instance are: %s" % (instance,validInstance) )
+
     #=== check for valid schema names
-    #=== see https://twiki.cern.ch/twiki/bin/view/Atlas/CoolProdAcc
-    validSchema = ["COOLONL_CALO","COOLOFL_CALO"]
-    if schema2 not in validSchema:
-        log.error( "DB schema2 not valid: %s", schema2 )
-        log.error( "Valid schema2 are: %s", validSchema )
-        raise("Invalid schema2")
-        
+    validSchema = ["COOLONL_CALO","COOLOFL_CALO","COOLONL_LAR","COOLOFL_LAR","COOLONL_TILE","COOLOFL_TILE"]
+    if schema not in validSchema:
+        raise Exception( "Schema not valid: %s, valid schemas are: %s" % (schema,validSchema) )
+
     #=== construct connection string
     connStr = ""
     if db=='SQLITE':
@@ -102,11 +95,13 @@ def openDb(db, schema, mode="READONLY", schema2="COOLONL_CALO", sqlfn="caloSqlit
             dirn=os.path.dirname(sqlfn)
             if dirn:
                 os.makedirs(dirn)
-        connStr="sqlite://X;schema=%s;dbname=%s" % (sqlfn,schema)
-#        connStr="sqlite://;schema=caloSqlite.db;dbname=%s" % schema
+        connStr="sqlite://X;schema=%s;dbname=%s" % (sqlfn,instance)
+    elif db=='FRONTIER':
+        connStr='frontier://ATLF/()/;schema=ATLAS_%s;dbname=%s' % (schema,instance)
     elif db=='ORACLE':
-        connStr='oracle://%s;schema=ATLAS_%s;dbname=%s' % ('ATLAS_COOLPROD',schema2,schema)
-#        connStr=schema2+'/'+schema
+        connStr='oracle://%s;schema=ATLAS_%s;dbname=%s' % ('ATLAS_COOLPROD',schema,instance)
+    else:
+        connStr=schema+'/'+instance
 
     return openDbConn(connStr, mode)
 
@@ -115,33 +110,34 @@ def openDb(db, schema, mode="READONLY", schema2="COOLONL_CALO", sqlfn="caloSqlit
 def openDbConn(connStr, mode="READONLY"):
     """
     Opens a COOL db connection.
-    - connStr: The DB connection string. The following
-               abbreviations are recognized:
-               * SQLITE: Opens caloSqlite.db file in current directory (OFLP200)
-    - mode: Can be READONLY (default), RECREATE or UPDATE
+    - connStr: The DB connection string
+    - mode:    Can be READONLY (default), RECREATE or UPDATE
+               or ORACLE or FRONTIER if connStr is only short name of the database
     """
 
-# split the name into schema and dbinstance
-
+    #=== split the name into schema and dbinstance
     splitname=connStr.split('/')
     if (len(splitname)!=2):  # string connection ready to be used as it is
         connStr_new=connStr
     else:                    # construct connection string
         schema=splitname[0]
         instance=splitname[1]
-        connStr_new='oracle://%s;schema=ATLAS_%s;dbname=%s' % ('ATLAS_COOLPROD',schema,instance)
+        if mode=="ORACLE":
+            connStr_new='oracle://%s;schema=ATLAS_%s;dbname=%s' % ('ATLAS_COOLPROD',schema,instance)
+        else:
+            connStr_new='frontier://ATLF/()/;schema=ATLAS_%s;dbname=%s' % (schema,instance)
 
     #=== get dbSvc and print header info
     dbSvc = cool.DatabaseSvcFactory.databaseService()
     log.info( "---------------------------------------------------------------------------------" )
     log.info( "-------------------------- CaloCondTools.openDbConn -----------------------------" )
-    log.info( "- using COOL version %s", dbSvc.serviceVersion()                                  )
-    log.info( "- opening CaloDb: %s",connStr_new                                                 )
+    log.info( "- using COOL version %s", dbSvc.serviceVersion()                                   )
+    log.info( "- opening CaloDb: %s",connStr_new                                                  )
     log.info( "- mode: %s", mode                                                                  )
     log.info( "---------------------------------------------------------------------------------" )
 
     #=== action depends on mode
-    if mode=="READONLY":
+    if mode in ["READONLY","ORACLE","FRONTIER","",None]:
         #=== open read only
         try:
             db=dbSvc.openDatabase(connStr_new,True)
@@ -178,8 +174,6 @@ def openDbConn(connStr, mode="READONLY"):
         log.error("Mode \"%s\" not recognized", mode )
         return None
 
-
-    
 #
 #______________________________________________________________________
 def iovFromRunLumi(runNum, lbkNum):

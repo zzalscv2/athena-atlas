@@ -497,7 +497,7 @@ std::vector<const xAOD::EmTauRoI*> TrigTauMonitorAlgorithm::getL1items_legacy(co
        // check which threshold has passed based on the current L1 item under monitoring
        // reference : https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/L1/Config/ItemDef.py
        bool found_thrName= false;
-       for(auto item : EmTauRoI->thrNames()){
+       for(const auto& item : EmTauRoI->thrNames()){
           if( trigL1Item.find("L1TAU8") != std::string::npos && item.find("HA8") != std::string::npos)
           {
              found_thrName = true;

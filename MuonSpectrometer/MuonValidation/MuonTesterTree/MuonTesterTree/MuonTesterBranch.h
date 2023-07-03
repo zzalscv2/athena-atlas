@@ -5,7 +5,11 @@
 #define MUONTESTER_MUONTESTERBRANCH_H
 
 #include <MuonTesterTree/IMuonTesterBranch.h>
-#include <TTree.h>
+//
+#include <string>
+#include <vector>
+//
+class TTree;
 
 /// First stage of the IMuonTesterBranch implementation
 ///  --> saves the name of the MuonTree as member and

@@ -6,8 +6,6 @@
 # Alexander Solodkov <Sanya.Solodkov@cern.ch>, 2014-09-09
 # change Yuri Smirnov <iouri.smirnov@cern.ch>, 2014-12-24
 
-from __future__ import print_function
-
 import getopt,sys,os,bisect
 os.environ['TERM'] = 'linux'
 
@@ -30,16 +28,17 @@ def usage():
     print ("-C, --Comment=    specify comment which should be written to DB, in mutli-iov mode it overwrites old comment")
     print ("-U, --user=       specify username for comment")
     print ("-x, --execfile=   specify python file which should be executed, default is bch.py")
-    print ("-i, --inschema=   specify the input schema to use, default is 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLOFL_TILE;dbname=CONDBR2'")
+    print ("-i, --inschema=   specify the input schema to use, default is 'COOLOFL_TILE/CONDBR2'")
     print ("-o, --outschema=  specify the output schema to use, default is 'sqlite://;schema=tileSqlite.db;dbname=CONDBR2'")
     print ("-n, --online      write additional sqlite file with online bad channel status")
     print ("-p, --upd4        write additional sqlite file with CURRENT UPD4 tag")
     print ("-v, --verbose     verbose mode")
     print ("-s, --schema=     specify input/output schema to use when both input and output schemas are the same")
+    print ("-S, --server=     specify server - ORACLE or FRONTIER, default is FRONTIER")
     print ("-u  --update      set this flag if output sqlite file should be updated, otherwise it'll be recreated")
 
-letters = "hr:l:b:e:L:AM:m:s:i:o:t:f:x:c:C:U:npvu"
-keywords = ["help","run=","lumi=","begin=","end=","endlumi=","adjust","module=","mode=","schema=","inschema=","outschema=","tag=","folder=","execfile=","comment=","Comment=","user=","online","upd4","verbose","update"]
+letters = "hr:l:b:e:L:AM:m:S:s:i:o:t:f:x:c:C:U:npvu"
+keywords = ["help","run=","lumi=","begin=","end=","endlumi=","adjust","module=","mode=","server=","schema=","inschema=","outschema=","tag=","folder=","execfile=","comment=","Comment=","user=","online","upd4","verbose","update"]
 
 try:
     opts, extraparams = getopt.getopt(sys.argv[1:], letters, keywords)
@@ -52,8 +51,9 @@ except getopt.GetoptError as err:
 run = -1
 lumi = 0
 mode = 0
+server = ''
 schema = 'sqlite://;schema=tileSqlite.db;dbname=CONDBR2'
-oraSchema = "oracle://ATLAS_COOLPROD;schema=ATLAS_COOLOFL_TILE;dbname=CONDBR2"
+oraSchema = 'COOLOFL_TILE/CONDBR2'
 inSchema = oraSchema
 outSchema = schema
 folderPath =  "/TILE/OFL02/STATUS/ADC"
@@ -78,10 +78,13 @@ except Exception:
     user="UnknownUser"
 
 for o, a in opts:
+    a = a.strip()
     if o in ("-f","--folder"):
         folderPath = a
     elif o in ("-t","--tag"):
         tag = a
+    elif o in ("-S","--server"):
+        server = a
     elif o in ("-s","--schema"):
         schema = a
         inSchema = a
@@ -158,7 +161,7 @@ log = getLogger("WriteBchToCool")
 import logging
 log.setLevel(logging.DEBUG)
 
-dbr = TileCalibTools.openDbConn(inSchema,'READONLY')
+dbr = TileCalibTools.openDbConn(inSchema,server)
 folderTag = TileCalibTools.getFolderTag(dbr, folderPath, tag)
 log.info("Initializing bad channels from %s folder %s with tag %s", inSchema, folderPath, tag)
 
@@ -420,7 +423,7 @@ if len(curSuffix) and not onl and "sqlite" in outSchema:
     folder = dbr.getFolder(folderPath)
     if folderTagUPD4 not in folder.listTags():
         log.warning( "Tag %s not found in input schema, reading previous status from Oracle", folderTagUPD4)
-        dbR = TileCalibTools.openDbConn(oraSchema,'READONLY')
+        dbR = TileCalibTools.openDbConn(oraSchema,server)
         mgr.updateFromDb(dbR, folderPath, folderTagUPD4, since, 0, 2)
         dbR.closeDatabase()
     else:
@@ -455,7 +458,7 @@ if len(onlSuffix) and not onl and "sqlite" in outSchema:
     inSchemaOnl = inSchema.replace("COOLOFL", "COOLONL")
     if inSchemaOnl != inSchema:
         dbr.closeDatabase()
-        dbr = TileCalibTools.openDbConn(inSchemaOnl, 'READONLY')
+        dbr = TileCalibTools.openDbConn(inSchemaOnl, server)
     else:
         try:
             reader = TileCalibTools.TileBlobReader(dbr, folderOnl, folderTagOnl)
@@ -463,7 +466,7 @@ if len(onlSuffix) and not onl and "sqlite" in outSchema:
             log.warning( "No %s folder in %s, reading from Oracle", folderOnl, inSchema)
             inSchemaOnl = oraSchema.replace("COOLOFL", "COOLONL")
             dbr.closeDatabase()
-            dbr = TileCalibTools.openDbConn(inSchemaOnl, 'READONLY')
+            dbr = TileCalibTools.openDbConn(inSchemaOnl, server)
 
     mgrOnl = TileBchTools.TileBchMgr()
     mgrOnl.setLogLvl(logging.DEBUG)

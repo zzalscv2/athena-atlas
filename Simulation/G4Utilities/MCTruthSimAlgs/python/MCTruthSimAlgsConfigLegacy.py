@@ -60,7 +60,7 @@ def MergeMcEventCollTool(name="MergeMcEventCollTool", **kwargs):
         kwargs.setdefault("FirstXing", -30000)
         kwargs.setdefault("LastXing",   30000)
     keys = ['SimpleMerge', 'NewMerge']
-    if set(keys).isdisjoint(set(digitizationFlags.experimentalDigi())):
+    if HepMCVersion() == 2 and set(keys).isdisjoint(set(digitizationFlags.experimentalDigi())):
         kwargs.setdefault("DoSlimming", False)
     keys = ['NewMerge']
     if set(keys).isdisjoint(set(digitizationFlags.experimentalDigi())):
@@ -81,7 +81,7 @@ def InTimeOnlyMcEventCollTool(name="InTimeOnlyMcEventCollTool", **kwargs):
         kwargs.setdefault("FirstXing", 0)
         kwargs.setdefault("LastXing",  0)
     keys = ['SimpleMerge', 'NewMerge']
-    if set(keys).isdisjoint(set(digitizationFlags.experimentalDigi())):
+    if HepMCVersion() == 2 and set(keys).isdisjoint(set(digitizationFlags.experimentalDigi())):
         kwargs.setdefault("DoSlimming", False)
     keys = ['NewMerge']
     if set(keys).isdisjoint(set(digitizationFlags.experimentalDigi())):

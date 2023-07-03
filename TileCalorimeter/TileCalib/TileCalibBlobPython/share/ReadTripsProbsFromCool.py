@@ -4,8 +4,6 @@
 #
 # ./ReadTripsProbsFromCool.py  --schema='COOLOFL_TILE/OFLP200'  --folder='OFL02' --tag='UPD4'
 
-from __future__ import print_function
-
 import getopt,sys,os
 os.environ['TERM'] = 'linux'
 
@@ -19,9 +17,10 @@ def usage():
     print ("-r, --run=     specify run  number, by default uses latest iov")
     print ("-l, --lumi=    specify lumi block number, default is 0")
     print ("-s, --schema=  specify schema to use, like 'COOLOFL_TILE/OFLP200' or 'sqlite://;schema=tileSqlite.db;dbname=OFLP200'")
+    print ("-S, --server=  specify server - ORACLE or FRONTIER, default is FRONTIER")
 
-letters = "hr:l:s:t:f:"
-keywords = ["help","run=","lumi=","schema=","tag=","folder="]
+letters = "hr:l:S:s:t:f:"
+keywords = ["help","run=","lumi=","server=","schema=","tag=","folder="]
 
 try:
     opts, extraparams = getopt.getopt(sys.argv[1:],letters,keywords)
@@ -33,15 +32,19 @@ except getopt.GetoptError as err:
 # defaults
 run = 2147483647
 lumi = 0
+server = ''
 schema = 'COOLOFL_TILE/OFLP200'
 folderPath =  "/TILE/OFL02/STATUS/ADC"
 tag = "SDR-BS8T-10"
 
 for o, a in opts:
+    a = a.strip()
     if o in ("-f","--folder"):
         folderPath = "/TILE/%s/STATUS/ADC" % a
     elif  o in ("-t","--tag"):
         tag = a
+    elif o in ("-S","--server"):
+        server = a
     elif o in ("-s","--schema"):
         schema = a
     elif o in ("-r","--run"):
@@ -69,7 +72,7 @@ log1.setLevel(logLevel)
 
 
 #=== set database
-db = TileCalibTools.openDbConn(schema, 'READONLY')
+db = TileCalibTools.openDbConn(schema, server)
 folderTag = TileCalibTools.getFolderTag(db, folderPath, tag)
 log.info("Initializing folder %s with tag %s", folderPath, folderTag)
 

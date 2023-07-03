@@ -5,8 +5,6 @@
 # integrator_readDb.py
 # Nils Gollub <nils.gollub@cern.ch>, 2008-02-07
 
-from __future__ import print_function
-
 import sys
 
 #=== process command line arguments
