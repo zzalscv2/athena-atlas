@@ -5,7 +5,9 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #define MUONTESTER_MUONVECTORBRANCH_H
 
 #include <MuonTesterTree/MuonTesterBranch.h>
-
+#include <vector>
+#include <string>
+class TTree;
 // Implementation to store vector like variables
 namespace MuonVal {
 class MuonTesterTree;

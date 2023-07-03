@@ -3,7 +3,6 @@
 */
 #ifndef MUONTESTER_MUONSMATRIXBRANCH_IXX
 #define MUONTESTER_MUONSMATRIXBRANCH_IXX
-#include <MuonTesterTree/MuonTesterTree.h>
 namespace MuonVal {
 template <class T> MatrixBranch<T>::MatrixBranch(TTree* tree, const std::string& name) : m_Vec(tree, name) {}
 template <class T> MatrixBranch<T>::MatrixBranch(TTree* tree, const std::string& b_name, const T& def) : MatrixBranch<T>(tree, b_name) {

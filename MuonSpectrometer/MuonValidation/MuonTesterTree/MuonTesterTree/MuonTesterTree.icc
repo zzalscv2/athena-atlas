@@ -3,7 +3,10 @@
 */
 #ifndef MUONTESTER_MUONTESTERTREE_IXX
 #define MUONTESTER_MUONTESTERTREE_IXX
-#include <MuonTesterTree/MuonTesterTree.h>
+#include <TTree.h>
+
+
+//these are the template implementations included to MuonTesterTree.h
 namespace MuonVal {
 template <typename T> VectorBranch<T>& MuonTesterTree::newVector(const std::string& b_name) {
     if (!addBranch(std::make_shared<VectorBranch<T>>(*this, b_name))) {
