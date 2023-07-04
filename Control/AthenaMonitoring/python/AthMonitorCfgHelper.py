@@ -156,7 +156,6 @@ class AthMonitorCfgHelper(object):
         convention = 'ONLINE' if self.flags.Common.isOnline else 'OFFLINE'
         array.broadcast('convention', convention)
         array.broadcast('defaultDuration',defaultDuration)
-        array.broadcast('RegisterHandler', not self.flags.Common.isOnline)
         if alg is not None:
             alg.GMTools += array.toolList()
         return array
@@ -301,7 +300,6 @@ class AthMonitorCfgHelperOld(object):
         array.broadcast('UseCache',True)
         array.broadcast('convention',conventionName)
         array.broadcast('defaultDuration',defaultDuration)
-        array.broadcast('RegisterHandler', not athenaCommonFlags.isOnline())        
         alg.GMTools += array.toolList()
         return array
 
