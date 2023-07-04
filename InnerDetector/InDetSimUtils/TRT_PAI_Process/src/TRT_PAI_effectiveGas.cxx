@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_PAI_Process.h"
@@ -259,7 +259,7 @@ double TRT_PAI_effectiveGas::dndedx(double lnE, double gamma) {
 
 //____________________________________________________________________________
 
-void TRT_PAI_effectiveGas::GasTab(std::vector<float> gamvec,
+void TRT_PAI_effectiveGas::GasTab(const std::vector<float> & gamvec,
 				  std::vector<float>& lnEarray,
 				  std::vector< std::vector<float> >& fnArray,
 				  std::vector<float>& dndx)
