@@ -917,7 +917,8 @@ def TauAODSelectorCfg(flags):
     TauAODSelector = CompFactory.getComp("TauAODSelector")
     myTauAODSelector = TauAODSelector(name=_name,
                                       Min0pTauPt = flags.Tau.MinPt0p,
-                                      MinTauPt = flags.Tau.MinPt)
+                                      MinTauPt = flags.Tau.MinPt,
+                                      doEarlyStopping = flags.Tau.doEarlyStopping and not flags.Output.doWriteESD)
 
     result.setPrivateTools(myTauAODSelector)
     return result

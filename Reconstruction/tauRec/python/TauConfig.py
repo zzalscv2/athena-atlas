@@ -154,6 +154,8 @@ def TauRunnerAlgCfg(flags):
         tools.append( result.popToolsAndMerge(tauTools.MvaTESVariableDecoratorCfg(flags)) )
         tools.append( result.popToolsAndMerge(tauTools.MvaTESEvaluatorCfg(flags)) )
 
+    tools.append( result.popToolsAndMerge(tauTools.TauAODSelectorCfg(flags)) )
+
     if flags.Tau.doTauDiscriminant:
         tools.append( result.popToolsAndMerge(tauTools.TauIDVarCalculatorCfg(flags)) )
         tools.append( result.popToolsAndMerge(tauTools.TauJetRNNEvaluatorCfg(flags)) )
@@ -161,8 +163,6 @@ def TauRunnerAlgCfg(flags):
         tools.append( result.popToolsAndMerge(tauTools.TauEleRNNEvaluatorCfg(flags)) )
         tools.append( result.popToolsAndMerge(tauTools.TauWPDecoratorEleRNNCfg(flags)) )
         tools.append( result.popToolsAndMerge(tauTools.TauDecayModeNNClassifierCfg(flags)) )
-
-    tools.append( result.popToolsAndMerge(tauTools.TauAODSelectorCfg(flags)) )
 
     TauRunnerAlg = CompFactory.getComp("TauRunnerAlg")
     RunnerAlg = TauRunnerAlg(name                           = flags.Tau.ActiveConfig.prefix+"TauRecRunnerAlg",
