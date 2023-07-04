@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUAODSELECTOR_H
@@ -24,6 +24,7 @@ private:
   // minimum tau pt below which taus are not written to AOD
   double m_min0pTauPt;
   double m_minTauPt;
+  bool m_doEarlyStopping;
 
 };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // local include(s)
@@ -10,6 +10,7 @@ TauAODSelector::TauAODSelector(const std::string& name)
   : TauRecToolBase(name) {
   declareProperty("Min0pTauPt", m_min0pTauPt = 0.);
   declareProperty("MinTauPt", m_minTauPt = 0.);
+  declareProperty("doEarlyStopping", m_doEarlyStopping = true);
 }
 
 
@@ -27,6 +28,8 @@ StatusCode TauAODSelector::execute(xAOD::TauJet& tau) const {
 
   static const SG::AuxElement::Accessor<char> acc_passThinning("passThinning");
   acc_passThinning(tau) = passThinning;
+
+  if (m_doEarlyStopping && !passThinning) return StatusCode::FAILURE;
   
   return StatusCode::SUCCESS;
 }
