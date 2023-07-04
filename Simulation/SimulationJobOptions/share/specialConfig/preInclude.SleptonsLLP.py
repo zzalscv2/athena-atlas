@@ -2,11 +2,12 @@
 #       preInclude.SLeptonsLLP.py - Emma Kuwertz, Dec 2017                #
 #################################################################
 
-def get_and_fix_PDGTABLE(replace):
+def get_and_fix_PDGTABLE(replace, keepLocalPDGTable):
     import os, shutil, re, sys
 
-    # Download generic PDGTABLE (do not overwrite existing one if it exists, use existing one instead) 
-    os.system('get_files -remove -data PDGTABLE.MeV')
+    # Download generic PDGTABLE (do not overwrite existing one if it exists, use existing one instead)
+    if not keepLocalPDGTable:
+        os.system('get_files -remove -data PDGTABLE.MeV')
     shutil.move('PDGTABLE.MeV', 'PDGTABLE.MeV.org')
 
     # an example line to illustrate the fixed format, see PDGTABLE.MeV for more details
@@ -38,30 +39,35 @@ def get_and_fix_PDGTABLE(replace):
 
 def load_files_for_sleptonLLP_scenario(simdict):
     pdgcodes = []
+    keepLocalPDGTable=False
     if "GMSBSlepton" in simdict:
         get_and_fix_PDGTABLE([
                 (2000011, eval(simdict.get("GMSBSlepton",'0')), '~e(R)', '-'),
                 (2000013, eval(simdict.get("GMSBSlepton",'0')), '~mu(R)', '-'),
                 (1000011, eval(simdict.get("GMSBSlepton",'0')), '~e(L)', '-'),
                 (1000013, eval(simdict.get("GMSBSlepton",'0')), '~mu(L)', '-'),
-                ])
+                ], keepLocalPDGTable)
+        keepLocalPDGTable=True
         pdgcodes += [-2000011,2000011,-2000013,2000013,-1000011,1000011,-1000013,1000013]
     if "GMSBStau" in simdict:
         get_and_fix_PDGTABLE([
                 (2000015, eval(simdict.get("GMSBStau",'0')), '~tau(R)', '-'),
                 (1000015, eval(simdict.get("GMSBStau",'0')), '~tau(L)', '-'),
-                ])
+                ], keepLocalPDGTable)
+        keepLocalPDGTable=True
         pdgcodes += [-2000015,2000015,-1000015,1000015]
     if "GMSBGravitino" in simdict:
         get_and_fix_PDGTABLE([
                 (1000039, eval(simdict.get("GMSBGravitino",'0')), '~G', '0'),
-                ])
+                ], keepLocalPDGTable)
+        keepLocalPDGTable=True
         pdgcodes += [1000039]
     if "coannihilationStau" in simdict:
         get_and_fix_PDGTABLE([
                 (2000015, eval(simdict.get("coannihilationStau",'0')), '~tau(R)', '-'),
                 (1000015, eval(simdict.get("coannihilationStau",'0')), '~tau(L)', '-'),
-                ])
+                ], keepLocalPDGTable)
+        keepLocalPDGTable=True
         pdgcodes += [-2000015,2000015,-1000015,1000015]
     if "coannihilationSlepton" in simdict:
         get_and_fix_PDGTABLE([
@@ -69,12 +75,14 @@ def load_files_for_sleptonLLP_scenario(simdict):
             (2000013, eval(simdict.get("coannihilationSlepton", '0')), '~mu(R)', '-'),
             (1000011, eval(simdict.get("coannihilationSlepton", '0')), '~e(L)', '-'),
             (1000013, eval(simdict.get("coannihilationSlepton", '0')), '~mu(L)', '-'),
-        ])
+        ], keepLocalPDGTable)
+        keepLocalPDGTable=True
         pdgcodes += [-2000011, 2000011, -2000013, 2000013, -1000011, 1000011, -1000013, 1000013]
     if "coannihilationNeutralino" in simdict:
         get_and_fix_PDGTABLE([
                 (1000022, eval(simdict.get("coannihilationNeutralino", '0')), '~chi(0,1)', '0'),
-                ])
+                ], keepLocalPDGTable)
+        keepLocalPDGTable=True
         pdgcodes += [1000022]
 
 
