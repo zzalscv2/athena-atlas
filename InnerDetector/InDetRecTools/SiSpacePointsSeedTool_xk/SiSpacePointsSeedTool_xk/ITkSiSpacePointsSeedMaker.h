@@ -196,7 +196,6 @@ namespace ITk
     FloatProperty m_dzdrver{this, "maxdZdRver", 0.02};
     FloatProperty m_maxdImpact{this, "maxdImpact", 10.};
     FloatProperty m_maxdImpactSSS{this, "maxdImpactSSS", 20.};
-    FloatProperty m_divermax{this, "maxdImpactForDecays", 20.};
     FloatProperty m_dzmaxPPP{this, "dZmaxForPPPSeeds", 600.};
 
     FloatProperty m_maxScore{this, "maximumAcceptedSeedScore", 100.};
@@ -237,18 +236,6 @@ namespace ITk
     BooleanProperty m_checketa{this, "checkEta", false};
     //@}
 
-    /// @name Properties, which are not used in this implementation of ITk::SiSpacePointsSeedMaker class
-    //@{
-    UnsignedIntegerProperty m_maxNumberVertices{this, "maxNumberVertices", 99};
-    FloatProperty m_r1min{this, "minRadius1", 0.};
-    FloatProperty m_r1max{this, "maxRadius1", 600.};
-    FloatProperty m_r2min{this, "minRadius2", 0.};
-    FloatProperty m_r2max{this, "maxRadius2", 600.};
-    FloatProperty m_r3min{this, "minRadius3", 0.};
-    FloatProperty m_r3max{this, "maxRadius3", 600.};
-    FloatProperty m_diverpps{this, "maxdImpactPPS", 1.7};
-    //@}
-
     /// @name Data member, which is not updated at all
     //@{
     float m_drminv{20.};
@@ -258,9 +245,6 @@ namespace ITk
     //@{
     int m_outputlevel{0};
     
-    int m_fvNmax{0};
-    int m_rfzv_n[arraySizePhiZV]{};
-    int m_rfzv_i[arraySizePhiZV][arraySizeNeighbourBinsVertex]{};
     float m_dzdrmin0{0.};
     float m_dzdrmax0{0.};
     float m_ipt{0.};
@@ -315,6 +299,8 @@ namespace ITk
     float m_inverseBinSizePhiPPP{0};   ///<  cache the inverse bin size in phi which we use - needed to evaluate phi bin locations
     int m_maxPhiBinSSS{0};
     float m_inverseBinSizePhiSSS{0};
+    int m_maxBinPhiVertex{0};
+    float m_inverseBinSizePhiVertex{0};
 
     
     /** Seed score thresholds defined based on the modifiers defined 
@@ -340,6 +326,9 @@ namespace ITk
     std::array<std::array<int, arraySizeNeighbourBins>, arraySizePhiZ> m_neighbourCellsBottomSSS{};
     std::array<std::array<int, arraySizeNeighbourBins>, arraySizePhiZ> m_neighbourCellsTopSSS{};
 
+    std::array<int,arraySizePhiZV> m_nNeighboursVertexPhiZ{};
+    std::array<std::array<int, arraySizeNeighbourBinsVertex>, arraySizePhiZV> m_neighboursVertexPhiZ{};
+
 
     ///////////////////////////////////////////////////////////////////
     // Private methods
@@ -361,6 +350,9 @@ namespace ITk
 			       std::array<std::array<int, arraySizeNeighbourBins>, arraySizePhiZ>& neighbourCellsBottom,
 			       std::array<std::array<int, arraySizeNeighbourBins>, arraySizePhiZ>& neighbourCellsTop,
 			       int maxPhiBin, bool isSSS);
+    static void buildConnectionMapsVertex(std::array<int, arraySizePhiZV>& nNeighbourCells,
+					  std::array<std::array<int, arraySizeNeighbourBinsVertex>, arraySizePhiZV>& neighbourCells,
+					  int maxPhiBin);
 
     void buildBeamFrameWork(EventData& data) const;
 
