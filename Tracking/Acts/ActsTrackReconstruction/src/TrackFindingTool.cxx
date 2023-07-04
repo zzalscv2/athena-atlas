@@ -234,13 +234,17 @@ namespace
   struct Measurements_impl : public ActsTrk::ITrackFindingTool::Measurements
   {
 
-    Measurements_impl(size_t numMeasurements, const ActsTrk::IActsToTrkConverterTool *converterTool, const ActsTrk::ITrackStatePrinter *trackStatePrinter)
-        : m_numMeasurements(numMeasurements), m_ATLASConverterTool(converterTool), m_trackStatePrinter(trackStatePrinter)
+    Measurements_impl(size_t numMeasurements,
+                      const ActsTrk::IActsToTrkConverterTool *converterTool,
+                      const ActsTrk::ITrackStatePrinter *trackStatePrinter,
+                      std::vector<ATLASUncalibSourceLink::ElementsType> *elements_collection_external=nullptr)
+       : m_numMeasurements(numMeasurements), m_ATLASConverterTool(converterTool), m_trackStatePrinter(trackStatePrinter),
+         m_elementsCollectionPtr(elements_collection_external ? elements_collection_external : &m_elementsCollectionInternal)
     {
       m_sourceLinks.reserve(m_numMeasurements);
-      m_elementsCollection.reserve(m_numMeasurements);
       m_sourceLinksVec.reserve(2);
       m_measurementOffset.reserve(2);
+      m_elementsCollectionPtr->reserve(m_numMeasurements);
     }
 
     void addMeasurements(size_t type, const EventContext &ctx, const ActsTrk::UncalibratedMeasurementContainerPtr &clusterContainer, const InDetDD::SiDetectorElementCollection *detElems) override
@@ -257,7 +261,7 @@ namespace
                     m_sourceLinksVec[type].reserve(clusterContainerVar->size());
                     for (auto *measurement : *clusterContainerVar)
                     {
-                      auto sl = m_ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(*detElems, *measurement, m_elementsCollection);
+                      auto sl = m_ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(*detElems, *measurement, *m_elementsCollectionPtr);
                       m_sourceLinks.insert(m_sourceLinks.end(), sl);
                       m_sourceLinksVec[type].push_back(sl);
                     } },
@@ -279,8 +283,9 @@ namespace
     const ActsTrk::ITrackStatePrinter *m_trackStatePrinter = nullptr;
     UncalibSourceLinkMultiset m_sourceLinks;
     std::vector<std::vector<ATLASUncalibSourceLink>> m_sourceLinksVec;
-    std::vector<ATLASUncalibSourceLink::ElementsType> m_elementsCollection;
     std::vector<size_t> m_measurementOffset;
+    std::vector<ATLASUncalibSourceLink::ElementsType> m_elementsCollectionInternal;
+    std::vector<ATLASUncalibSourceLink::ElementsType> *m_elementsCollectionPtr;
   };
 
 } // anonymous namespace
@@ -405,6 +410,7 @@ namespace ActsTrk
     {
       ATH_CHECK(m_trackStatePrinter.retrieve());
     }
+    ATH_CHECK(m_sourceLinksOut.initialize(SG::AllowEmpty));
 
     m_logger = makeActsAthenaLogger(this, "Acts");
 
@@ -450,9 +456,22 @@ namespace ActsTrk
   std::unique_ptr<ActsTrk::ITrackFindingTool::Measurements>
   ActsTrk::TrackFindingTool::initMeasurements(size_t numMeasurements) const
   {
+     std::vector<ATLASUncalibSourceLink::ElementsType> *elements_collection=nullptr;
+     if (!m_sourceLinksOut.empty()) {
+        SG::WriteHandle< std::vector<ATLASUncalibSourceLink::ElementsType> > source_links_out_handle(m_sourceLinksOut);
+        if (source_links_out_handle.record( std::make_unique< std::vector<ATLASUncalibSourceLink::ElementsType> >() ).isFailure() ) {
+           std::stringstream a_msg;
+           a_msg << "Failed to write ATLASUncalibSourceLink elements collection with key " << m_sourceLinksOut.key();
+           ATH_MSG_FATAL( a_msg.str() );
+           throw std::runtime_error(a_msg.str());
+        }
+        elements_collection = source_links_out_handle.ptr();
+     }
+
     return std::unique_ptr<ActsTrk::ITrackFindingTool::Measurements>(new Measurements_impl(numMeasurements,
                                                                                            &*m_ATLASConverterTool,
-                                                                                           m_trackStatePrinter.empty() ? nullptr : &*m_trackStatePrinter));
+                                                                                           m_trackStatePrinter.empty() ? nullptr : &*m_trackStatePrinter,
+                                                                                           elements_collection));
   }
 
   StatusCode

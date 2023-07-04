@@ -21,6 +21,9 @@
 #include "ActsEvent/TrackContainer.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
 
+#include "ActsGeometry/ATLASSourceLink.h"
+#include "StoreGate/WriteHandleKey.h"
+
 // PACKAGE
 #include "src/ITrackStatePrinter.h"
 
@@ -72,6 +75,8 @@ namespace ActsTrk
     Gaudi::Property<std::vector<double>> m_etaBins{this, "etaBins", {}, "MeasurementSelector: bins in |eta| to specify variable selections"};
     Gaudi::Property<std::vector<double>> m_chi2CutOff{this, "chi2CutOff", {std::numeric_limits<double>::max()}, "MeasurementSelector: maximum local chi2 contribution"};
     Gaudi::Property<std::vector<size_t>> m_numMeasurementsCutOff{this, "numMeasurementsCutOff", {1}, "MeasurementSelector: maximum number of associated measurements on a single surface"};
+     SG::WriteHandleKey< std::vector<ATLASUncalibSourceLink::ElementsType> > m_sourceLinksOut
+        {this, "ATLASUncalibSourceLinkElementsName","" /*"UncalibratedMeasurementSourceLinkElements"*/, ""};
 
     // Create tracks from one seed's CKF result, appending to tracksContainer
     class DuplicateSeedDetector;

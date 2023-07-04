@@ -144,4 +144,6 @@ void ATLASSourceLinkCalibrator::calibrate(const Acts::GeometryContext& /*gctx*/,
   }
 }
 
+#include "AthenaKernel/CLASS_DEF.h"
+CLASS_DEF( std::vector<ATLASUncalibSourceLink::ElementsType>, 127101450, 1 )
 #endif

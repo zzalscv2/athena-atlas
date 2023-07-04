@@ -72,6 +72,10 @@ def ActsTrkFindingToolCfg(
             acc.popToolsAndMerge(ActsTrackStatePrinterCfg(flags)),
         )
 
+    # need to persistify source link helper container to ensure that source links do not contaion
+    # stale pointers pointing to freed memory
+    kwargs.setdefault("ATLASUncalibSourceLinkElementsName","ACTSUncalibratedMeasurementSourceLinkElements")
+
     acc.setPrivateTools(CompFactory.ActsTrk.TrackFindingTool(name, **kwargs))
     return acc
 
