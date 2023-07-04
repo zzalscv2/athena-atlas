@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RootCollection.h"
@@ -92,7 +92,7 @@ namespace pool {
            }
            m_poolOut << coral::Info << "File " << m_fileName << " opened in " << method <<  coral::MessageStream::endmsg;
  
-           m_tree->SetDirectory(gDirectory);
+           m_tree->SetDirectory(m_file);
            m_schemaEditor->writeSchema();
         }
      }
@@ -279,8 +279,7 @@ namespace pool {
         }
       }
 
-      TDirectory *dirsav = gDirectory;
-
+      TDirectory::TContext dirctxt;
       if( m_session == 0 || m_mode == ICollection::READ || m_mode == ICollection::UPDATE ) {
          // first step: Try to open the file
          m_poolOut << coral::Info << "Opening Collection File " << m_fileName << " in mode: "
@@ -301,20 +300,16 @@ namespace pool {
                root_mode = "UPDATE";
 	       io_mode = (Io::WRITE | Io::APPEND);
             }
-	    
-	    if (m_fileMgr == 0) {
-	      IService *is(0);
-
-	      if (Gaudi::svcLocator()->getService("FileMgr",is,true).isFailure()) {
-		m_poolOut << coral::Error 
-			  << "unable to get the FileMgr, will not manage TFiles"
-			  << coral::MessageStream::endmsg;
-	      } else {
-		m_fileMgr = dynamic_cast<IFileMgr*>(is);
-	      }
-
+	    if( m_fileMgr == 0 ) {
+               IService *is(0);
+               if (Gaudi::svcLocator()->getService("FileMgr",is,true).isFailure()) {
+                  m_poolOut << coral::Error 
+                            << "unable to get the FileMgr, will not manage TFiles"
+                            << coral::MessageStream::endmsg;
+               } else {
+                  m_fileMgr = dynamic_cast<IFileMgr*>(is);
+               }
 	    }
-
 	    // FIXME: hack to avoid issue with setting up RecExCommon links
 	    if (m_fileMgr != 0 && 
 		m_fileMgr->hasHandler(Io::ROOT).isFailure()) {
@@ -395,7 +390,7 @@ namespace pool {
       m_tree->SetAutoFlush(TTREE_AUTO_FLUSH);
 
       if( m_session && m_mode == ICollection::UPDATE ) {
-        m_tree->SetDirectory(dirsav);
+        m_tree->SetDirectory(0);
 
 	int n(0);
 	if (m_fileMgr == 0) {

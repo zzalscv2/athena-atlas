@@ -152,7 +152,8 @@ StatusCode FixHepMC::execute() {
 
     /// AV: In case we have 3 particles, we try to add a vertex 
     /// that corresponds to 1->2 and 1->1 splitting.
-    if (semi_disconnected.size() == 3 || semi_disconnected.size() == 2) {
+    /// AV: In case we have 4 particles, we can try to do that as well.
+    if ( semi_disconnected.size() == 4 || semi_disconnected.size() == 3 || semi_disconnected.size() == 2) {
       size_t no_endv = 0;
       size_t no_prov = 0;
       HepMC::FourVector sum(0,0,0,0);
@@ -303,7 +304,8 @@ StatusCode FixHepMC::execute() {
     }
 
     /// AV: In case we have 3 particles, we try to add a vertex that correspond to 1->2 and 1->1 splitting.
-    if (semi_disconnected.size() == 3 || semi_disconnected.size() == 2) {
+    /// AV: we can try to do that for 4 particles as well.
+    if (semi_disconnected.size() == 4 ||semi_disconnected.size() == 3 || semi_disconnected.size() == 2) {
       size_t no_endv = 0;
       size_t no_prov = 0;
       double vsum[4] = {0,0,0,0};

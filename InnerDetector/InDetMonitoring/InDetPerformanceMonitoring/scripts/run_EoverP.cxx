@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef __CINT__
@@ -952,7 +952,7 @@ void makeScalingHist(TString inputDir)
 
 
   //Need to obtain the mean pt either from a histogram or from hardcoded values 
-  double pt[1000];
+  double pt[1000]={};
 
   TH2F* meanPtVsEta =  (TH2F*) file0->Get("meanPtVsEta");
   if(!meanPtVsEta){

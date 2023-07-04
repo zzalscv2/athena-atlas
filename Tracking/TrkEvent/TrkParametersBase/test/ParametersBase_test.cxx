@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_SUITE(ParametersBaseTest)
     BOOST_TEST(y.charge() == 1.0);
     BOOST_TEST(y.parameters() == parameters);
     //operator '*' here is dereferencing pointer and getting optional value resp.
-    BOOST_TEST(*(y.covariance()) == *covariance);
+    BOOST_TEST((*(y.covariance()) == *covariance));
     BOOST_TEST(y.pT() == 5.);
     constexpr double etaAt45Deg{0.88137358701954305};
     BOOST_TEST(y.eta() == etaAt45Deg);
@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_SUITE(ParametersBaseTest)
     m.setIdentity();
     std::optional<AmgSymMatrix(DIM)> covariance{m};
     x.setCovariance(*covariance);
-    BOOST_TEST(*(x.covariance()) == *covariance,"Covariance has been set");
+    BOOST_TEST((*(x.covariance()) == *covariance),"Covariance has been set");
     //update both
     AmgVector(DIM) otherParameters;
     otherParameters.setZero();

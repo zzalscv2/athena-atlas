@@ -7,10 +7,9 @@
 
 #include <fstream>
 #include <string>
-
+#include <optional>
 #include "CaloConditions/CaloLocalHadCoeff.h"
 #include "CaloConditions/CaloLocalHadDefs.h"
-//#include "CaloLocalHadCoeff.h"
 
 
 class CaloLCCoeffHelper {
@@ -19,7 +18,7 @@ class CaloLCCoeffHelper {
     CaloLCCoeffHelper();
     virtual ~CaloLCCoeffHelper();
 
-    static CaloLocalHadCoeff *InitDataFromFile(const char *fname);
+    static std::optional<CaloLocalHadCoeff> InitDataFromFile(const char *fname);
     static void PrintData(CaloLocalHadCoeff *m_data, std::ostream &fout);
     static void PrintData(CaloLocalHadCoeff *m_data, const char *fname);
 
@@ -87,7 +86,7 @@ class CaloLCCoeffHelper {
     }
 
   private:
-    static CaloLocalHadCoeff::LocalHadDimension *parse_dim(std::string &sLine);
+    static std::optional<CaloLocalHadCoeff::LocalHadDimension> parse_dim(const std::string &sLine);
 
 };
 

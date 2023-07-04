@@ -151,6 +151,8 @@ namespace Muon {
 
         /** @brief Return stationName for all technologies */
         virtual int stationName(const Identifier& id) const = 0;
+        /** @brief Return the stationName string for all technologies*/
+        virtual std::string stationNameString(const Identifier& id) const = 0;
 
         /** @brief Return stationRegion for all technologies */
         virtual int stationRegion(const Identifier& id) const = 0;
