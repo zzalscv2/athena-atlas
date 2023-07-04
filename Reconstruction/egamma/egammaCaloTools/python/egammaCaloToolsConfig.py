@@ -16,34 +16,56 @@ def CaloFillRectangularClusterCfg(flags, **kwargs):
     kwargs.setdefault("phi_size", 7)
     kwargs.setdefault("cells_name", flags.Egamma.Keys.Input.CaloCells)
 
-    result.setPrivateTools(
-        CompFactory.CaloFillRectangularCluster(**kwargs))
+    result.setPrivateTools(CompFactory.CaloFillRectangularCluster(**kwargs))
     return result
 
 
-def egammaCaloClusterSelectorCfg(ConfigFlags,
-                                 name="caloClusterROISelector",
-                                 **kwargs):
+def egammaCaloClusterSelectorGSFCfg(
+    flags, name="caloClusterGSFSelector", **kwargs
+):
     result = ComponentAccumulator()
 
     if "egammaCheckEnergyDepositTool" not in kwargs:
-        kwargs["egammaCheckEnergyDepositTool"] = CompFactory.egammaCheckEnergyDepositTool()
-    kwargs.setdefault("EMEtCut", 2250.)
+        kwargs[
+            "egammaCheckEnergyDepositTool"
+        ] = CompFactory.egammaCheckEnergyDepositTool()
+
+    kwargs.setdefault("EMEtCut", 2250.0 if not flags.Egamma.doLowMu else 500.0)
+    kwargs.setdefault("EMEtSplittingFraction", 0.7)
+    kwargs.setdefault("EMFCut", 0.5)
+    result.setPrivateTools(
+        CompFactory.egammaCaloClusterSelector(name, **kwargs)
+    )
+    return result
+
+
+def egammaCaloClusterSelectorCfg(
+    flags, name="caloClusterROISelector", **kwargs
+):
+    result = ComponentAccumulator()
+
+    if "egammaCheckEnergyDepositTool" not in kwargs:
+        kwargs[
+            "egammaCheckEnergyDepositTool"
+        ] = CompFactory.egammaCheckEnergyDepositTool()
+    kwargs.setdefault("EMEtCut", 2250.0 if not flags.Egamma.doLowMu else 500.0)
     kwargs.setdefault("EMEtSplittingFraction", 0.7)
     kwargs.setdefault("EMFCut", 0.7)
     kwargs.setdefault("RetaCut", 0.65)
     kwargs.setdefault("HadLeakCut", 0.15)
     result.setPrivateTools(
-        CompFactory.egammaCaloClusterSelector(name, **kwargs))
+        CompFactory.egammaCaloClusterSelector(name, **kwargs)
+    )
     return result
 
 
-def egammaHadCaloClusterSelectorCfg(ConfigFlags,
-                                    name="caloClusterHadROISelector",
-                                    **kwargs):
+def egammaHadCaloClusterSelectorCfg(
+    ConfigFlags, name="caloClusterHadROISelector", **kwargs
+):
     result = ComponentAccumulator()
     kwargs.setdefault("egammaCheckEnergyDepositTool", "")
     kwargs.setdefault("ClusterEtCut", 150e3)
     result.setPrivateTools(
-        CompFactory.egammaCaloClusterSelector(name, **kwargs))
+        CompFactory.egammaCaloClusterSelector(name, **kwargs)
+    )
     return result

@@ -10,6 +10,7 @@ def createTauConfigFlags():
 
     tau_cfg.addFlag("Tau.doTauRec", True)
     tau_cfg.addFlag("Tau.ThinTaus", True)
+    tau_cfg.addFlag("Tau.doEarlyStopping", True)
 
     # Switches for enabling/disabling some tools
     tau_cfg.addFlag("Tau.doTJVA", True)
