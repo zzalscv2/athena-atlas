@@ -15,115 +15,93 @@
 using namespace TrigConf;
 
 
-// \brief Function to check for hash collisions. To minimize the chance of collision,
-// the hash can additionally be assigned to a category.
-// Thread-safe implementation.
-// \param hash The hash of the string
-// \param s The string
-// \param category The category this string is placed under
-// \throws std::domain_error Upon a hash-collision within a category
-void HLTUtils::checkGeneratedHash(HLTHash hash, const std::string& s, const std::string& category)
-{
-
-  // Attempt a read-only check.
-  // This is the most common use-case and it avoids locking.
-  // Hence it is suitable for many threads to use at once.
-  {
-    HLTUtils::CategoryMap_t::const_accessor cacc_category;
-    const bool categoryExists = HLTUtils::s_allHashesByCategory.find(cacc_category, category);
-    if (categoryExists) {
-      HLTUtils::HashMap_t::const_accessor cacc_hash;
-      const bool hashExists = cacc_category->second.find(cacc_hash, hash);
-      if (hashExists) {
-        if (s != cacc_hash->second) {
-          // Stored string disagrees with test string for given hash. Flag a hash collision!
-          std::stringstream ss;
-          ss << "Hashes the same for category: " << category
-             << " and elements "<< cacc_hash->second << " " << s;
-          throw std::domain_error( ss.str() );
-        } else {
-          // Stored hash's string in agreement with test string. No collisions. Finished.
-          return;
-        }
-      }
-    }
-  }
-
-  // If we failed to find either the category-map itself, or the hash within its category-map,
-  // then we need to obtain exclusive mutable access to add the category and/or hash.
-  // This is rarer, and will temporarily block other threads trying to read from within the respective hash-buckets.
-  // The difference is the use of accessor rather than const_accessor and insert() instead of find()
-  //
-  // We don't mind if this is a new category or an existing one (we ignore return boolean from s_allHashesByCategory.insert)
-  // We use the default constructor in the case that the category-map is newly created.
-  HLTUtils::CategoryMap_t::accessor acc_category;
-  HLTUtils::s_allHashesByCategory.insert(acc_category, category);
-  HLTUtils::HashMap_t::accessor acc_hash;
-  const bool newEntryInMap = acc_category->second.insert(acc_hash, hash);
-  if (newEntryInMap) {
-    // We are the first thread to write this hash into this category (as expected). Set the payload value
-    acc_hash->second = s;
-  } else {
-    // Rarer, but possible that two-or-more threads are all trying to concurrently insert the same hash into the same category.
-    // Getting here means that we weren't the first thread.
-    // While this does mean that the other thread did the job for us, we must check once again that what this other thread inserted
-    // doesn't collide with what this thread wanted to insert.
-    if (s != acc_hash->second) {
-      // Stored string disagrees with test string for given hash. Flag a hash collision!
-      std::stringstream ss;
-      ss << "Hashes the same for category: " << category
-         << " and elements "<< acc_hash->second << " " << s;
-      throw std::domain_error( ss.str() );
-    }
-  }
+HashStore::~HashStore() {
+  // delete categories owned by us
+  for (auto& [cat, catptr] : hashCat) delete catptr;
 }
 
+HashMap::~HashMap() {
+  // delete strings owned by us
+  for (auto& [hash, nameptr] : hash2name) delete nameptr;
+}
 
 
 HLTHash HLTUtils::string2hash( const std::string& s, const std::string& category )
 {
-  // hash function (based on available elsewhere ELF hash function)
-  // uniqueness tested in MC way; contact me for details
-  // email: Tomasz.Bold@cern.ch
-  HLTHash hash;
-  hash = 0xd2d84a61;
-  int i;
+  // Try to find existing hash in category
+  const auto icat = s_hashStore.hashCat.find(category);
+  if (icat != s_hashStore.hashCat.end()) { // category found
+    const HashMap* cat = icat->second;
+    const auto ihash = cat->name2hash.find(s);
+    if (ihash != cat->name2hash.end()) {   // hash found
+      return ihash->second;
+    }
+  }
+  else {
+    s_hashStore.hashCat.emplace(category, new HashMap);
+  }
 
-  for ( i = (int)s.size()-1; i >= 0; --i )
+  /*********************************************************************
+   This hash function is derived from the ELF hashing function and
+   unchanged since Run-1. For Phase-II we should really switch to a
+   64 bit hash like CxxUtils::crc64 which is safer (and faster).
+   But we need to take care of backwards compatibility with old data.
+   Original author: Tomasz Bold
+  *********************************************************************/
+  HLTHash hash = 0xd2d84a61;
+  for ( int i = (int)s.size()-1; i >= 0; --i )
     hash ^= ( hash >> 5) + s[i] + ( hash << 7 );
 
-  for ( i = 0; i < (int)s.size(); ++i )
+  for ( int i = 0; i < (int)s.size(); ++i )
     hash ^= ( hash >> 5) + s[i] + ( hash << 7 );
+  /********************************************************************/
 
-    
-  checkGeneratedHash(hash, s, category);
+  // Try to insert new hash
+  HashMap* cat = s_hashStore.hashCat.at(category);
+  const std::string* nameptr = new std::string(s);
+  const auto& [itr, inserted] = cat->hash2name.emplace(hash, nameptr);
+
+  if ( inserted ) {
+    // also update reverse map
+    cat->name2hash.emplace(s, hash);
+  }
+  else {
+    // There are two cases where insertion into the hash->name map would fail:
+    // 1) another thread entered the same hash/name pair already
+    // 2) there is a hash collision
+    delete nameptr;  // avoid memory leak if not inserted
+    if ( s != *itr->second ) {
+      throw std::domain_error("Hash collision in category " + category +
+                              " for elements " +  *itr->second + " and " + s);
+    }
+  }
 
   return hash;
 }
 
 const std::string HLTUtils::hash2string( HLTHash hash, const std::string& category ) {
 
-  HLTUtils::CategoryMap_t::const_accessor cacc_category;
-  const bool categoryExists = HLTUtils::s_allHashesByCategory.find(cacc_category, category);
-  if (!categoryExists) {
+  const auto& icat = s_hashStore.hashCat.find(category);
+  if (icat == s_hashStore.hashCat.end()) {
     return "UNKNOWN CATEGORY";
   }
 
-  HLTUtils::HashMap_t::const_accessor cacc_hash;
-  const bool hashExists = cacc_category->second.find(cacc_hash, hash);
-  if (!hashExists) {
+  const HashMap* cat = icat->second;
+  const auto& h = cat->hash2name.find(hash);
+  if (h == cat->hash2name.end()) {
     return "UNKNOWN HASH ID";
   }
 
-  return cacc_hash->second;
+  return *h->second;
 }
 
-void HLTUtils::hashes2file( const std::string& fileName ) {
+void HLTUtils::hashes2file( const std::string& fileName) {
   std::ofstream fout(fileName);
 
-  for (const auto& [category, hashes] : s_allHashesByCategory) {
+  for (const auto& [category, hashes] : s_hashStore.hashCat) {
     fout << s_newCategory << std::endl << category << std::endl;
-    for (auto [hash, name] : hashes) {  // by value on purpose
+    for (const auto& [hash, nameptr] : hashes->hash2name) {
+      std::string name(*nameptr);
       name.erase(std::remove(name.begin(), name.end(), '\n'), name.end()); // Remove any line breaks
       fout << hash << std::endl << name << std::endl;
     }

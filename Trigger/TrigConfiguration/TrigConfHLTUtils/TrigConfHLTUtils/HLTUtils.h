@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConfHLTUtils_HLTUtils
@@ -8,41 +8,44 @@
 #include <string>
 #include <inttypes.h>
 
-#include <tbb/concurrent_hash_map.h>
-
 #include "CxxUtils/checker_macros.h"
+#include "CxxUtils/ConcurrentMap.h"
+#include "CxxUtils/ConcurrentStrMap.h"
+#include "CxxUtils/SimpleUpdater.h"
 
 namespace TrigConf {
 
-  struct stringHashCompare {
-    static size_t hash(const std::string& s);
-    static bool equal(const std::string& x, const std::string& y);
+  typedef uint32_t HLTHash;
+
+  /**
+   * Two concurrent maps to store name->hash and hash->name mappings.
+   *
+   * We are using CxxUtils::Concurrent*Map which is optimized for frequent (lock-less)
+   * reads and rare writes. Previous implementations used TBB's concurrent containers
+   * but they are much slower for this use-case.
+   *
+   * Due to limitations of CxxUtils::ConcurrentMap, we need to store a pointer
+   * to a string instead of the string itself for the hash->string lookup.
+   */
+  struct HashMap {
+    ~HashMap();
+
+    using Name2HashMap_t = CxxUtils::ConcurrentStrMap<HLTHash, CxxUtils::SimpleUpdater>;
+    using Hash2NameMap_t = CxxUtils::ConcurrentMap<HLTHash, const std::string*, CxxUtils::SimpleUpdater>;
+
+    Name2HashMap_t name2hash{Name2HashMap_t::Updater_t()};  //!< name to hash map
+    Hash2NameMap_t hash2name{Hash2NameMap_t::Updater_t()};  //!< hash to name map
   };
 
-  inline size_t stringHashCompare::hash(const std::string& s) {
-    return std::hash<std::string>{}(s);
-  }
+  /** Store for hash maps per category*/
+  struct HashStore {
+    ~HashStore();
 
-  inline bool stringHashCompare::equal(const std::string& x, const std::string& y) {
-    return (x == y);
-  }
-
-  typedef uint32_t HLTHash; 
-
-  struct HLTHashCompare {
-    static size_t hash(const HLTHash& s);
-    static bool equal(const HLTHash& x, const HLTHash& y);
+    using HashMap_t = CxxUtils::ConcurrentStrMap<HashMap*, CxxUtils::SimpleUpdater>;
+    HashMap_t hashCat{HashMap_t::Updater_t()};  //!< one HashMap per category
   };
 
-  inline size_t HLTHashCompare::hash(const HLTHash& h) {
-    return h;
-  }
 
-  inline bool HLTHashCompare::equal(const HLTHash& x, const HLTHash& y) {
-    return (x == y);
-  }
-
-  
   class HLTUtils {
   public:
     /**@brief hash function translating TE names into identifiers*/
@@ -55,17 +58,11 @@ namespace TrigConf {
     static void file2hashes( const std::string& fileName="hashes2string.txt" );
 
   private:
-    typedef tbb::concurrent_hash_map<HLTHash, std::string, HLTHashCompare> HashMap_t;
-    typedef tbb::concurrent_hash_map<std::string, HashMap_t, stringHashCompare> CategoryMap_t;
-
-    /**@brief Function to check for hash collisions. To minimize the chance of collision*/
-    static void checkGeneratedHash(HLTHash hash, const std::string& s, const std::string& category);
-
     /**@brief In-file identifier*/
     inline static const std::string s_newCategory{"##NewCategory"};
 
     /**@brief Nested concurrent hash-maps to store (key=hash, value=string) pairs for different hash categories*/
-    inline static CategoryMap_t s_allHashesByCategory ATLAS_THREAD_SAFE{};
+    inline static HashStore s_hashStore ATLAS_THREAD_SAFE{};
   };
  
 }
