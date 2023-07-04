@@ -21,6 +21,8 @@
 #include "xAODJet/JetContainer.h"
 
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
+
 
 LVL1::eFEXNtupleWriter::eFEXNtupleWriter(const std::string& name, ISvcLocator* pSvcLocator): AthAlgorithm(name, pSvcLocator) { }
 
@@ -274,7 +276,7 @@ StatusCode LVL1::eFEXNtupleWriter::loadTruthElectron() {
       // select particles that is not decayed further by the generator
       if(each_particle->status() != 1) continue;
       // select electrons
-      if(fabs(each_particle->pdgId()) != 11) continue;
+      if(std::abs(each_particle->pdgId()) != 11) continue;
       // select particles from Z
       if(!getMother(each_particle, 23)) continue;
 
@@ -324,9 +326,9 @@ StatusCode LVL1::eFEXNtupleWriter::loadTruthTau() {
       // ignore geant4
       if(HepMC::is_simulation_particle(each_particle)) continue;
       // select final state particles and decaying hadrons, muons or taus
-      if (each_particle->status() != 1 && each_particle->status() != 2) continue;
+      if (!MC::isPhysical(each_particle)) continue;
       // select tau
-      if (fabs(each_particle->pdgId()) != 15) continue;
+      if (std::abs(each_particle->pdgId()) != 15) continue;
       std::unique_ptr<TLorentzVector> p4_visible = visibleTauP4(each_particle);
 
       if (!p4_visible) break;
@@ -350,9 +352,9 @@ std::unique_ptr<TLorentzVector> LVL1::eFEXNtupleWriter::visibleTauP4(const xAOD:
   decay_vertex->nOutgoingParticles();
   for(uint i=0; i < decay_vertex->nOutgoingParticles(); i++) {
     const xAOD::TruthParticle* each_particle = decay_vertex->outgoingParticle(i);
-    int pid = fabs(each_particle->pdgId());
+    int pid = std::abs(each_particle->pdgId());
     // particle that is not decayed further by the generator
-    if (each_particle->status() == 1) {
+    if (MC::isStable(each_particle)) {
       // ignore neutrinos
       if (pid ==  12 || pid ==  14 || pid ==  16) continue;
       // ignore leptonic decay events
@@ -379,9 +381,9 @@ std::unique_ptr<TLorentzVector> LVL1::eFEXNtupleWriter::invisibleTauP4(const xAO
   const xAOD::TruthVertex* decay_vertex = particle->decayVtx();
   for (uint i=0; i < decay_vertex->nOutgoingParticles(); i++) {
     const xAOD::TruthParticle* each_particle = decay_vertex->outgoingParticle(i);
-    int pid = fabs(each_particle->pdgId());
+    int pid = std::abs(each_particle->pdgId());
     // particle that is not decayed further by the generator
-    if (each_particle->status() == 1) {
+    if (MC::isStable(each_particle)) {
       // ignore leptonic decay events
       if (pid ==  11 || pid ==  13) return std::unique_ptr<TLorentzVector>(nullptr);
       // select neutrinos

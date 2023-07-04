@@ -10,6 +10,7 @@
 
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "AthContainers/DataVector.h"
@@ -83,7 +84,7 @@ ElasticTruthTrajectoryBuilder::MotherDaughter
 		mother = *vtx->particles_in_const_begin();
 #endif
 		// Allow status code 1 and 2.  E.g. a pion that produced a long track can decay  outside of InDet and have status==2.
-		if( mother && (mother->status() < 3) ) {
+		if( mother && MC::isPhysical(mother) ) {
 
 			// Restrict to quasi-elastic processes (e.g. brems, delta-rays, pi->pi+Delta).
 			// 
@@ -118,8 +119,8 @@ ElasticTruthTrajectoryBuilder::MotherDaughter
 					daughter = passed_cuts;
 				}
 
-			} // if (vtx->particles_out_size() <= 2)
-		} // if( mother && (mother->status() == 1) )
+			} 
+		}
 	}
 
 	return std::make_pair(mother, daughter);

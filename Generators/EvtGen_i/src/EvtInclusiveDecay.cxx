@@ -35,6 +35,7 @@
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ISvcLocator.h"
@@ -851,8 +852,8 @@ std::string EvtInclusiveDecay::pdgName(HepMC::ConstGenParticlePtr p, bool status
     if ( ((barcodeList!=0) && (inlist)) ||
          ((barcodeList==0) && isToBeDecayed(p,false)) )
       buf << "\033[7m";   // reverse
-    if (p->status() != 1) {
-      if (p->status() == 2)
+    if (!MC::isStable(p)) {
+      if (MC::isDecayed(p))
         buf << "\033[33m";   // yellow
       else
         buf << "\033[31m";   // red
@@ -872,8 +873,8 @@ std::string EvtInclusiveDecay::pdgName(HepMC::ConstGenParticlePtr p, bool status
     if ( ((barcodeList!=0) && (barcodeList->find(HepMC::barcode(p)) != barcodeList->end())) ||
          ((barcodeList==0) && isToBeDecayed(p,false)) )
       buf << "\033[7m";   // reverse
-    if (p->status() != 1) {
-      if (p->status() == 2)
+    if (!MC::isStable(p)) {
+      if (MC::isDecayed(p))
         buf << "\033[33m";   // yellow
       else
         buf << "\033[31m";   // red
