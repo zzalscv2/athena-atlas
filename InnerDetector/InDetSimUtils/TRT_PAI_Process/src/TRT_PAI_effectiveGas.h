@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_PAI_effectiveGas_h
@@ -38,7 +38,7 @@ public:
    * \param dndx:    This array effectively contains the inverse of the mean
    *                 free path as function of binned energy variable
    */
-  void GasTab(std::vector<float> gamvec,
+  void GasTab(const std::vector<float> & gamvec,
 	      std::vector<float>& EArray,
 	      std::vector< std::vector<float> >& fnArray,
 	      std::vector<float>& dndx);

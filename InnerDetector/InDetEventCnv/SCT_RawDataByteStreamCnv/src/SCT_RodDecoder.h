@@ -26,6 +26,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <array>
 
 class IdentifierHash;
 
@@ -145,7 +146,7 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
     int oldStrip {INVALID_STRIP};
     int linkNumber{0}; // Determined from header and may be changed for links using Rx redundancy
 
-    std::array<bool, N_STRIPS_PER_SIDE*N_SIDES> saved;
+    std::array<bool, N_STRIPS_PER_SIDE*N_SIDES> saved{};//defaults to false
 
     // For MissingLinkHeaderError
     bool foundMissingLinkHeaderError{false};
