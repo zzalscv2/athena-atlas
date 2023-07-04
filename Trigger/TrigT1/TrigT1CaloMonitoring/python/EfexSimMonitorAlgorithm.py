@@ -21,6 +21,10 @@ def EfexSimMonitoringConfig(flags):
     # get any algorithms
     EfexSimMonAlg = helper.addAlgorithm(CompFactory.EfexSimMonitorAlgorithm,'EfexSimMonAlg')
 
+    # treat every event as not being fexInput if not decoding fex inputs
+    if not flags.Trigger.L1.doCaloInputs: EfexSimMonAlg.eFexTowerContainer=""
+
+
     # add any steering
     groupName = 'EfexSimMonitor' # the monitoring group name is also used for the package name
     EfexSimMonAlg.PackageName = groupName

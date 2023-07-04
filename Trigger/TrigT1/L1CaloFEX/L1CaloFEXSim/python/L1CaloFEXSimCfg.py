@@ -3,6 +3,7 @@
 #
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaCommon.Logging import logging
 
 def ReadSCellFromPoolFileCfg(flags, key='SCell'):
     '''Configure reading SCell container from a Pool file like RDO or ESD'''
@@ -50,8 +51,10 @@ def eFEXTOBEtToolCfg(flags):
     """
     acc = ComponentAccumulator()
 
-    eTowerMakerAlg = CompFactory.LVL1.eTowerMakerFromSuperCells('eTowerMakerFromSuperCells')
-    acc.addEventAlgo(eTowerMakerAlg)
+    # had to comment this out for now, because it causes a clash with the eTowerMakerFromEfexTowers algorithm
+    # if that gets scheduled
+    #eTowerMakerAlg = CompFactory.LVL1.eTowerMakerFromSuperCells('eTowerMakerFromSuperCells')
+    #acc.addEventAlgo(eTowerMakerAlg)
 
     eFEXTOBEtTool = CompFactory.LVL1.eFEXTOBEtTool
     acc.setPrivateTools(eFEXTOBEtTool())
@@ -70,14 +73,20 @@ def TriggerTowersInputCfg(flags):
         return LVL1CaloRun2ReadBSCfg(flags)
 
 
-def L1CaloFEXSimCfg(flags, eFexTowerInputs = [],deadMaterialCorrections=False, eFEXDebug=False):
+def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulatedTowers"],deadMaterialCorrections=True, eFEXDebug=False):
     acc = ComponentAccumulator()
+
+    log = logging.getLogger('L1CaloFEXSimCfg')
 
     # Configure SCell inputs
     sCellType = "SCell"
     if flags.Input.isMC:
         # Read SCell directly from input RDO file
         acc.merge(ReadSCellFromPoolFileCfg(flags,sCellType))
+        # wont have eFexDataTowers available so remove that if it appears in input list
+        eFexTowerInputs = [l for l in eFexTowerInputs if l != "L1_eFexDataTowers"]
+        # also no DM corrections for MC yet ...
+        deadMaterialCorrections = False
     else:
         from AthenaConfiguration.Enums import LHCPeriod
         if flags.GeoModel.Run is LHCPeriod.Run2:
@@ -92,15 +101,25 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = [],deadMaterialCorrections=False, e
     # Need also TriggerTowers as input
     acc.merge(TriggerTowersInputCfg(flags))
 
+    if 'L1_eFexEmulatedTowers' in eFexTowerInputs:
+        acc.addEventAlgo( CompFactory.LVL1.eFexTowerBuilder("L1_eFexEmulatedTowers") ) # builds the emulated towers to use as secondary input to eTowerMaker - name has to match what it gets called in other places to avoid conflict
+
     if flags.Trigger.L1.doeFex:
         if eFexTowerInputs==[]:
             # no input specified, so use the old eTowerMaker
             eFEXInputs = CompFactory.LVL1.eTowerMakerFromSuperCells('eTowerMakerFromSuperCells',
                eSuperCellTowerMapperTool = CompFactory.LVL1.eSuperCellTowerMapper('eSuperCellTowerMapper', SCell=sCellType))
         else:
+            # if primary is DataTowers, check that caloInputs are enabled. If it isn't then skip this
+            if (not flags.Trigger.L1.doCaloInputs) and eFexTowerInputs[0] == "L1_eFexDataTowers":
+                if len(eFexTowerInputs)==1:
+                    log.fatal("Requested L1_eFexDataTowers but Trigger.L1.doCaloInputs is False, but not secondary collection given")
+                    import sys
+                    sys.exit(1)
+                log.warning("Requested L1_eFexDataTowers but Trigger.L1.doCaloInputs is False, falling back to secondary")
+                eFexTowerInputs[0] = eFexTowerInputs[1]
+                eFexTowerInputs[1] = ""
             eFEXInputs = CompFactory.LVL1.eTowerMakerFromEfexTowers('eTowerMakerFromEfexTowers')
-            if 'L1_eFexEmulatedTowers' in eFexTowerInputs:
-                acc.addEventAlgo( CompFactory.LVL1.eFexTowerBuilder("eFexTowerBuilder") ) # builds the emulated towers to use as secondary input to eTowerMaker
             eFEXInputs.InputTowers = eFexTowerInputs[0]
             eFEXInputs.SecondaryInputTowers = eFexTowerInputs[1] if len(eFexTowerInputs) > 1 else ""
 
@@ -118,7 +137,9 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = [],deadMaterialCorrections=False, e
         if not flags.Input.isMC:
             from IOVDbSvc.IOVDbSvcConfig import addFolders#, addFoldersSplitOnline
             acc.merge(addFolders(flags,"/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts","TRIGGER_ONL",className="CondAttrListCollection"))
-            if len(eFexTowerInputs)>0: eFEXInputs.NoiseCutsKey = "/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts"
+            # don't use db for data for data22 ... but due to bugs in athenaHLT tests they're tests have it has data17
+            # so will assume not to use noisecuts in that case as well!
+            if len(eFexTowerInputs)>0 and "data17" not in flags.Input.ProjectName and "data22" not in flags.Input.ProjectName: eFEXInputs.NoiseCutsKey = "/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts"
             acc.merge(addFolders(flags,"/TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib","TRIGGER_ONL",className="CondAttrListCollection")) # dmCorr from DB!
             eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXegAlgoTool.DMCorrectionsKey = "/TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib"
 
@@ -191,9 +212,9 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = [],deadMaterialCorrections=False, e
             """
             Add 'Sim' to the standard handle path
             """
-            key += "Sim"
+            if not key.endswith("Sim"): key += "Sim"
             return key
-            
+
         if flags.Trigger.L1.doeFex:
             eFEX.eFEXSysSimTool.Key_eFexEMOutputContainer=getSimHandle("L1_eEMRoI")
             eFEX.eFEXSysSimTool.Key_eFexTauOutputContainer=getSimHandle("L1_eTauRoI")
