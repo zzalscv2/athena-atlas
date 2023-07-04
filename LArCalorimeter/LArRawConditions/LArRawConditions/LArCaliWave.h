@@ -40,13 +40,6 @@
 #include <iostream>
 #include <stdint.h>
 
-// Need real class for CaliWave vector:
-class LArCaliWave;
-class LArCaliWaveVec : public std::vector<LArCaliWave> {
- public:
-  LArCaliWaveVec() {};
-  bool isEmpty() const;
-};
 
 class LArCaliWave : public LArWaveCumul {
 
@@ -93,6 +86,12 @@ public:
   int m_DAC;
   int m_isPulsed;
 
+};
+// Need real class for CaliWave vector:
+class LArCaliWaveVec : public std::vector<LArCaliWave> {
+ public:
+  LArCaliWaveVec() {};
+  bool isEmpty() const;
 };
 
 
