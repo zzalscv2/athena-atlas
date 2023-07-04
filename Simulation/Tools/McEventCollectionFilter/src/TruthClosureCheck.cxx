@@ -7,6 +7,8 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "GeneratorObjects/McEventCollection.h"
+#include "TruthUtils/HepMCHelpers.h"
+
 
 #include "StoreGate/ReadHandle.h"
 
@@ -42,23 +44,23 @@ StatusCode TruthClosureCheck::sanityCheck(const HepMC::GenEvent& event) const {
   //Sanity check
   bool resetProblem(false);
   for (const auto& particle: event) {
-    if (particle->status() == 1) {
+    if (MC::isStable(particle)) {
       if (!particle->production_vertex()) {
-        ATH_MSG_ERROR("Status 1 particle without a production vertex!! " << particle);
+        ATH_MSG_ERROR("Stable particle without a production vertex!! " << particle);
         resetProblem = true;
       }
       if (!m_postSimulation && particle->end_vertex()) {
-        ATH_MSG_ERROR("Status 1 particle with an end vertex!! " << particle);
+        ATH_MSG_ERROR("Stable particle with an end vertex!! " << particle);
         resetProblem = true;
       }
     }
-    else if (particle->status() == 2) {
+    else if (MC::isDecayed(particle)) {
       if (!particle->production_vertex()) {
-        ATH_MSG_ERROR("Status 2 particle without a production vertex!! " << particle);
+        ATH_MSG_ERROR("Decayed particle without a production vertex!! " << particle);
         resetProblem = true;
       }
       if (!particle->end_vertex()) {
-        ATH_MSG_ERROR("Status 2 particle without an end vertex!! " << particle);
+        ATH_MSG_ERROR("Decayed particle without an end vertex!! " << particle);
         resetProblem = true;
       }
     }

@@ -41,7 +41,6 @@ public:
   void descendants(const xAOD::TruthParticle*,
                    std::vector<bool>&,
                    std::unordered_set<int>&) const;
-  static bool isStatus1BSMParticle(const xAOD::TruthParticle*) ;
 
 private:
   StringProperty m_streamName{ this,

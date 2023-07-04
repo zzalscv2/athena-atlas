@@ -17,7 +17,6 @@
 //#include "DerivationFrameworkMCTruth/xPlotterUtils.h"
 #include "xAODTruth/TruthEventContainer.h"
 #include "xAODTruth/TruthVertexContainer.h"
-//#include "EventKernel/PdtPdg.h"
 #include "AthenaKernel/errorcheck.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "GaudiKernel/SystemOfUnits.h"

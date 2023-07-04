@@ -10,6 +10,7 @@
 
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "AthContainers/DataVector.h"
@@ -92,7 +93,7 @@ DecayInFlyTruthTrajectoryBuilder::truthTrajectoryCuts(const HepMC::ConstGenVerte
     mother = *vtx->particles_in_const_begin();
 #endif    
     // Allow status code 1 and 2.  E.g. a pion that produced a long track can decay  outside of InDet and have status==2.
-    if( mother && (mother->status() < 3) ) {
+    if( mother && MC::isPhysical(mother) ) {
 
 	int num_passed_cuts = 0;
 	HepMC::ConstGenParticlePtr passed_cuts{nullptr};
@@ -119,7 +120,7 @@ DecayInFlyTruthTrajectoryBuilder::truthTrajectoryCuts(const HepMC::ConstGenVerte
 	if(num_passed_cuts==1) { // disallow hadronic pi->N*pi etc.
 	  daughter = passed_cuts;
 	}
-    } // if( mother && (mother->status() == 1) )
+    }
   }
   
   return std::make_pair(mother, daughter);

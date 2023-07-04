@@ -11,6 +11,7 @@
 #include "AsgDataHandles/ReadDecorHandle.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 
 using std::string;
@@ -222,7 +223,7 @@ StatusCode JetQGTaggerVariableTool::decorate(const xAOD::JetContainer& jetCont) 
 	  if (!part) continue;
 	  // require the particle in the final state                                                                                                                                                    
 	  ATH_MSG_DEBUG("status: " << (part->status()) );
-	  if( ! (part->status() == 1) ) continue;
+	  if( ! MC::isStable(part) ) continue;
 	  // require that the particle type (e.g. production type) be valid (e.g. not primaries)                                                                                                        
 	  ATH_MSG_DEBUG("barcode: " << (part->barcode()) );
 	  if (HepMC::is_simulation_particle(part)) continue;
