@@ -15,7 +15,7 @@
 #include "CaloDetDescr/CaloDetDescriptor.h"
 #include "AthenaKernel/errorcheck.h"
 #include "CLHEP/Geometry/Vector3D.h"
-#include <boost/algorithm/cxx11/partition_point.hpp>
+#include <algorithm>
 #include <atomic>
 
 
@@ -258,7 +258,7 @@ CaloCellContainer::updateCaloIteratorsOrdered (CaloCellContainer::iterator beg,
   }
   else {
     CaloCellContainer::iterator beg2 =
-      boost::algorithm::partition_point (beg, end, is_calo (beg_calo));
+      std::partition_point (beg, end, is_calo (beg_calo));
     updateCaloIteratorsOrdered (beg, beg2);
     updateCaloIteratorsOrdered (beg2, end);
   }
