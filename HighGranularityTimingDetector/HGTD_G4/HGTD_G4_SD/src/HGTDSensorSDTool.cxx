@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // HGTD Sensitive Detector.
@@ -12,6 +12,9 @@
 // For the SD itself
 #include "HGTDSensorSD.h"
 #include "HGTDSensorGmxSD.h"
+
+#include <GeoModelRead/ReadGeoModel.h>
+
 // STL includes
 #include <exception>
 
@@ -24,11 +27,19 @@ G4VSensitiveDetector* HGTDSensorSDTool::makeSD() const
 {
   // Make sure the job has been set up properly
   ATH_MSG_DEBUG( "Initializing SD" );
+  GeoModelIO::ReadGeoModel* sqlreader = nullptr;
+  StatusCode sc = m_geoDbTagSvc.retrieve();
+  if (sc.isFailure()) {
+    msg(MSG::ERROR) << "Could not locate GeoDbTagSvc" << endmsg;
+    }
+  else {
+    sqlreader = m_geoDbTagSvc->getSqliteReader();
+  }
   // Create a fresh SD
   if (!m_gmxSensor){
     return new HGTDSensorSD(name(), m_outputCollectionNames[0]);
   } else {
-    return new HGTDSensorGmxSD(name(), m_outputCollectionNames[0]);
+    return new HGTDSensorGmxSD(name(), m_outputCollectionNames[0], sqlreader);
   }
   
 }

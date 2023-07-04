@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////
@@ -26,13 +26,17 @@
 class G4Step;
 class G4HCofThisEvent;
 
+namespace GeoModelIO{
+  class ReadGeoModel;
+}
+
 class HGTDSensorGmxSD : public G4VSensitiveDetector
 {
 
 public:
 
     // Constructor
-    HGTDSensorGmxSD(const std::string& name, const std::string& hitCollectionName);
+    HGTDSensorGmxSD(const std::string& name, const std::string& hitCollectionName, GeoModelIO::ReadGeoModel * sqlreader=nullptr);
 
     // Destructor
     virtual ~HGTDSensorGmxSD() {}
@@ -46,6 +50,7 @@ public:
 private:
 
     SG::WriteHandle<SiHitCollection> m_HitColl;
+    GeoModelIO::ReadGeoModel * m_sqlreader;
 
 };
 

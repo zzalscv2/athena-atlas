@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HGTD_GeoModelXml_HGTD_GMXINTERFACE_H
@@ -13,6 +13,12 @@
 #include <map>
 #include <string>
 #include <sstream>
+
+class IRDBAccessSvc;
+
+namespace GeoModelIO{
+  class ReadGeoModel;
+}
 
 namespace InDetDD {
     class HGTD_ModuleDesign;
@@ -33,6 +39,8 @@ public:
                    std::map<std::string, int> &index,
                    int sequentialId,
                    GeoVFullPhysVol *fpv) override final;
+
+    void buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccessSvc, GeoModelIO::ReadGeoModel* sqlreader);
 
 private:
     void makeLgadModule(const std::string &typeName,
