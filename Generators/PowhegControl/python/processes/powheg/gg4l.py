@@ -119,6 +119,7 @@ class gg4l(PowhegRES):
         self.add_keyword("m4lwindow", 4)
         self.add_keyword("manyseeds")
         self.add_keyword("massiveloops", 0)
+        self.add_keyword("mass_rwg_frac", 0.) # gg4l treatment of heavy-flavour
         self.add_keyword("max_io_bufsize")
         self.add_keyword("maxseeds")
         self.add_keyword("minlo")
