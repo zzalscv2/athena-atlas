@@ -288,6 +288,7 @@ class Registry(metaclass=Singleton):
         self.add_default("m4l_sampling", 2, description="gg4l: 0: flat   1: exponential   2:Breit-Wigner")     
         self.add_default("m4lwindow", 4)
         self.add_default("manyseeds", 0, description="read multiple seeds for the random number generator from pwgseeds.dat. [1:enabled]")
+        self.add_default("mass_rwg_frac", 0., description="gg4l treatment of heavy-flavour (see Eur. Phys. J. C 81 (2021) 687). 0 (or <0): 1/mt expansion, 1: 1-loop reweighting, other value: interpolating 1/mt expansion and 1-loop reweighting")
         self.add_default("mass_b", powheg_atlas_common.mass.b, description="b-quark mass in GeV")
         self.add_default("mass_c", powheg_atlas_common.mass.c, name="mass_c", description="c-quark mass in GeV")
         self.add_default("mass_d", powheg_atlas_common.mass.d, description="d-quark mass in GeV")
