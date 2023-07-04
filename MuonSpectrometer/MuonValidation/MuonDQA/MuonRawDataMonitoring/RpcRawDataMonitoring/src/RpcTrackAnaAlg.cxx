@@ -20,7 +20,6 @@
 #include "xAODTracking/TrackParticlexAODHelpers.h"
 
 // Boost package to read XML
-#include <boost/foreach.hpp>  //BOOST_FOREACH
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
@@ -238,7 +237,7 @@ StatusCode RpcTrackAnaAlg::readElIndexFromXML() {
     boost::property_tree::ptree pt;
     read_xml(xml_file, pt);
 
-    BOOST_FOREACH (boost::property_tree::ptree::value_type& child,
+    for (boost::property_tree::ptree::value_type& child:
                    pt.get_child("Elements")) {
         if (child.first == "Element") {
             int index = child.second.get<int>("<xmlattr>.index");
