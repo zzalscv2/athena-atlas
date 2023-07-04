@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HGTD_GMX_DetectorTool.h"
@@ -40,7 +40,7 @@ StatusCode HGTD_GMX_DetectorTool::create()
     std::string node{"InnerDetector"};
     std::string table{"HGTDXDD"};
 
-    const GeoModelIO::ReadGeoModel* sqlreader = getSqliteReader();
+    GeoModelIO::ReadGeoModel* sqlreader = getSqliteReader();
     
     if(!sqlreader){
         if (!isAvailable(node, table)) {
@@ -63,6 +63,18 @@ StatusCode HGTD_GMX_DetectorTool::create()
     // empty strings are the (optional) containing detector and envelope names
     // allowed to pass a null sqlreader ptr - it will be used to steer the source of the geometry
     const GeoVPhysVol* topVolume = createTopVolume(world, gmxInterface, node, table,"","",sqlreader);
+    // if we are using SQLite inputs,
+    if(sqlreader){
+        bool useNewIdentifierScheme = idHelper->get_useNewIdentifierScheme();
+        if (useNewIdentifierScheme){
+            ATH_MSG_INFO("Building HGTD Readout Geometry from SQLite using "<<m_geoDbTagSvc->getParamSvcName());
+            gmxInterface.buildReadoutGeometryFromSqlite(m_sqliteReadSvc.operator->(),sqlreader);
+        } else {
+            ATH_MSG_FATAL("SQLite workflow is unsupported for old HGTD identifier scheme!");
+            return StatusCode::FAILURE;
+        }
+    }
+
     if (topVolume) { //see that a valid pointer is returned
         manager->addTreeTop(topVolume);
     } else {

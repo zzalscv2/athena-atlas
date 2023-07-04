@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // HGTD Sensitive Detector.
@@ -20,15 +20,22 @@
 #include "G4VisExtent.hh" // Added to get extent of sensors
 #include "G4VSolid.hh" // Added to get extent of sensors
 
+// GeoModel headers
+#include <GeoModelKernel/GeoFullPhysVol.h>
+#include <GeoModelRead/ReadGeoModel.h>
+
+#include <InDetSimEvent/SiHitIdHelper.h>
+
 // CLHEP headers
 #include "CLHEP/Geometry/Transform3D.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 #include <stdint.h>
 #include <string.h>
 
-HGTDSensorGmxSD::HGTDSensorGmxSD(const std::string& name, const std::string& hitCollectionName)
+HGTDSensorGmxSD::HGTDSensorGmxSD(const std::string& name, const std::string& hitCollectionName, GeoModelIO::ReadGeoModel * sqlreader)
     : G4VSensitiveDetector( name ), 
-      m_HitColl( hitCollectionName )
+      m_HitColl( hitCollectionName ),
+      m_sqlreader( sqlreader )
 {
 
 }
@@ -88,15 +95,32 @@ G4bool HGTDSensorGmxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*
     lP2[SiHit::xPhi] = localPosition2[0]*CLHEP::mm;
     lP2[SiHit::xDep] = localPosition2[2]*CLHEP::mm;
 
-  
-  // For the XML-based Pixel geometry, the identifier is equivalent
-  // to the copy number of our volume.
-
-
-    int id = myTouch->GetVolume()->GetCopyNo();
-
-
+    // get the HepMcParticleLink from the TrackHelper
     TrackHelper trHelp(aStep->GetTrack());
+
+    if(m_sqlreader){
+        // if sqlite inputs, Identifier indices come from PhysVol Name
+        std::string physVolName = myTouch->GetVolume()->GetName();
+
+        int hitIdOfWafer = SiHitIdHelper::GetHelper()->buildHitIdFromStringHGTD(2,physVolName);
+
+        m_HitColl->Emplace(lP1,
+                           lP2,
+                           edep,
+                           aStep->GetPreStepPoint()->GetGlobalTime(),
+                           trHelp.GetParticleLink(),
+                           hitIdOfWafer);
+        
+        return true;
+    }
+  
+    // if not from SQLite, we assume that the Identifier has already been written in as the copy number 
+    // (it should hsave done if GeoModel building ran within Athena)
+    //
+    //    Get the indexes of which detector the hit is in
+    //
+    const int id = myTouch->GetVolume()->GetCopyNo();
+
     m_HitColl->Emplace(lP1,
                        lP2,
                        edep,

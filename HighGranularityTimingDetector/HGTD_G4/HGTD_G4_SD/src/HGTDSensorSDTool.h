@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////
@@ -11,6 +11,8 @@
 
 // Base class
 #include "G4AtlasTools/SensitiveDetectorBase.h"
+
+#include "GeoModelInterfaces/IGeoDbTagSvc.h"
 
 // STL headers
 #include <string>
@@ -31,6 +33,7 @@ protected:
   virtual G4VSensitiveDetector* makeSD() const override final;
   // property to toggle GeoModelXML 
   Gaudi::Property<bool> m_gmxSensor{this, "GmxSensor", false};
+  ServiceHandle<IGeoDbTagSvc> m_geoDbTagSvc{this, "GeoDbTagSvc", "GeoDbTagSvc", ""};
 };
 
 #endif // HGTD_G4_SD_HGTDSENSORSDTOOL_H

@@ -145,3 +145,19 @@ int SiHitIdHelper::buildHitIdFromStringITk(int part, std::string physVolName) co
     }
     return buildHitId(part,brlEcap,layerDisk,etaMod,phiMod,side);
 }
+
+int SiHitIdHelper::buildHitIdFromStringHGTD(int part, std::string physVolName) const
+{
+    int endcap = 0;
+    int layer = 0;
+    int moduleInLayer = 0;
+    //Extract the indices from the name, and write them in to the matching int
+    std::map<std::string, int&> fields{{"endcap",endcap},{"layer",layer},{"moduleInLayer",moduleInLayer}};
+    for(auto field:fields){
+        size_t pos1 = (physVolName).find(field.first+"_");
+        size_t pos2 = (physVolName).find("_",pos1+field.first.size()+1);//start looking only after end of first delimiter (plus 1 for the "_" appended) ends
+        std::string strNew = (physVolName).substr(pos1+field.first.size()+1,pos2-(pos1+field.first.size()+1));
+        field.second = std::stoi(strNew);
+    }
+    return buildHitId(part,endcap,layer,0,moduleInLayer,0);
+}

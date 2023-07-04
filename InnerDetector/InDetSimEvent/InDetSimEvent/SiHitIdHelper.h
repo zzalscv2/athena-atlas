@@ -55,6 +55,8 @@ class SiHitIdHelper : HitIdHelper {
 
   int buildHitIdFromStringITk(int part, std::string) const;
 
+  int buildHitIdFromStringHGTD(int part, std::string) const;
+
  private:
   //
   // private constructor to have a singleton
