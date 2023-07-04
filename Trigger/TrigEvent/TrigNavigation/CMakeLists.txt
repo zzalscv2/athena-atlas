@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigNavigation )
@@ -16,9 +16,9 @@ atlas_add_library( TrigNavigationLib
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} AthContainers AthLinks AsgMessagingLib
    AthenaBaseComps AthenaKernel CxxUtils SGTools GaudiKernel TrigNavStructure
-   TrigStorageDefinitions StoreGateLib xAODCore
+   TrigSerializeResultLib TrigStorageDefinitions StoreGateLib xAODCore
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${TBB_LIBRARIES} AthContainersInterfaces AthContainersRoot RootUtils
-   TrigConfHLTUtilsLib TrigSerializeCnvSvcLib TrigSerializeResultLib )
+   TrigConfHLTUtilsLib TrigSerializeCnvSvcLib )
 
 atlas_add_component( TrigNavigation
    src/components/*.cxx
