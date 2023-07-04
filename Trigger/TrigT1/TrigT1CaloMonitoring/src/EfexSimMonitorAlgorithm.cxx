@@ -25,8 +25,9 @@ StatusCode EfexSimMonitorAlgorithm::initialize() {
   ATH_CHECK( m_eFexEmSimContainerKey.initialize() );
   ATH_CHECK( m_eFexTauContainerKey.initialize() );
   ATH_CHECK( m_eFexTauSimContainerKey.initialize() );
-  m_decorKey = "EventInfo.eTowerMakerFromEfexTowers_usedSecondary";
-  ATH_CHECK( m_decorKey.initialize() );
+  //m_decorKey = "EventInfo.eTowerMakerFromEfexTowers_usedSecondary";
+  //ATH_CHECK( m_decorKey.initialize() );
+  ATH_CHECK( m_eFexTowerContainerKey.initialize(SG::AllowEmpty) );
   
   return AthMonitorAlgorithm::initialize();
 }
@@ -34,8 +35,18 @@ StatusCode EfexSimMonitorAlgorithm::initialize() {
 StatusCode EfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const {
 
     // check flag that indicates if simulation was done with fexReadout (primary) or not (secondary)
-    SG::ReadDecorHandle<xAOD::EventInfo,bool> usedSecondaryDecor(m_decorKey,ctx);
-    auto fexReadout = Monitored::Scalar<unsigned int>("fexReadout", !(usedSecondaryDecor.isAvailable() && usedSecondaryDecor(*GetEventInfo(ctx))));
+    // SG::ReadDecorHandle<xAOD::EventInfo,bool> usedSecondaryDecor(m_decorKey,ctx);
+    // auto fexReadout = Monitored::Scalar<unsigned int>("fexReadout", !(usedSecondaryDecor.isAvailable() && usedSecondaryDecor(*GetEventInfo(ctx))));
+
+    auto fexReadout = Monitored::Scalar<unsigned int>("fexReadout", 0);
+    if(!m_eFexTowerContainerKey.empty()) {
+        SG::ReadHandle<xAOD::eFexTowerContainer> towers{m_eFexTowerContainerKey, ctx};
+        if(towers.isValid() && !towers->empty()) {
+            fexReadout = 1;
+        }
+    }
+
+
     std::string groupSuffix = (fexReadout==0) ? "" : "2";
 
     unsigned int nUnmatched_em = 0;
