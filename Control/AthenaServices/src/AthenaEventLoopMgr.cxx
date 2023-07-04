@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #define  GAUDISVC_EVENTLOOPMGR_CPP
@@ -717,11 +717,7 @@ StatusCode AthenaEventLoopMgr::executeEvent(EventContext&& ctx)
   // Call any attached tools to reject events early
   unsigned int toolCtr=0;
   if(m_useTools) {
-    if (pEvent == nullptr) {
-      ATH_MSG_ERROR ( "Tools for event selection work only with old-style EventInfo!"  );
-      return StatusCode::FAILURE;
-    }
-
+    //note: pEvent cannot be nullptr here, it has already been dereferenced
     tool_store::iterator theTool = m_tools.begin();
     tool_store::iterator lastTool  = m_tools.end();
     while(toolsPassed && theTool!=lastTool ) 

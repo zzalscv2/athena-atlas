@@ -572,8 +572,8 @@ StatusCode AthenaOutputStream::write() {
          IAlgTool* st = AlgTool::Factory::create( m_streamer->type(), m_streamer->type(), m_streamer->name(), this ).release();
          st->addRef();
          streamer = dynamic_cast<IAthenaOutputStreamTool*>( st );
-         if( streamer->initialize().isFailure()
-             || streamer->connectServices(m_dataStore.typeAndName(), m_persName, m_extendProvenanceRecord).isFailure() ) {
+         if( !streamer or streamer->initialize().isFailure()
+             or streamer->connectServices(m_dataStore.typeAndName(), m_persName, m_extendProvenanceRecord).isFailure() ) {
             ATH_MSG_FATAL("Unable to initialize OutputStreamTool for " << outputFN );
             return StatusCode::FAILURE;
          }

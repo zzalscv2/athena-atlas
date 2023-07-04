@@ -12,7 +12,7 @@
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MAIN
-#define BOOST_TEST_MODULE TEST_IOVDBSVC
+#define BOOST_TEST_MODULE TEST_METADATASVC
 
 #include "TestTools/initGaudi.h"
 #include "TInterpreter.h"
@@ -43,7 +43,9 @@ struct GaudiKernelFixture{
     std::scoped_lock lock (m);
     if (svcLoc==nullptr){
       std::string fullJobOptsName="AthenaServices/" + jobOpts;
-      Athena_test::initGaudi(fullJobOptsName, svcLoc);
+      if (not Athena_test::initGaudi(fullJobOptsName, svcLoc)){
+        throw ("The MetaDataSvc tests cannot be run");
+      };
     }
   }
 };
