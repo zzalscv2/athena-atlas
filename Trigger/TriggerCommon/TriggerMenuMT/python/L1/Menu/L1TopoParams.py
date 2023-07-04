@@ -278,11 +278,7 @@ L1TopoParams = {
  'eTauSelect': {'comment': '', 'parameters': ['MinET', 'RCoreMin', 'RHadMin']},
  'eTauSort': {'comment': '', 'parameters': ['RCoreMin', 'RHadMin']},
  'gJetSort': {'comment': '', 'parameters': ['MinEta', 'MaxEta']},
- 'jEmNoSort': {'comment': '',
-               'parameters': ['IsolationMin',
-                              'EmFraction1Min',
-                              'EmFraction2Min']},
- 'jEmSort': {'comment': 'misses Iso cuts', 'parameters': ['MinEta', 'MinEta']},
+ 'jEmSort': {'comment': '', 'parameters': ['MinEta', 'MaxEta','IsoMin','Frac1Min','Frac2Min']},
  'jJetSelect': {'comment': '', 'parameters': ['MinET', 'MinEta', 'MaxEta']},
  'jJetSort': {'comment': '', 'parameters': ['MinEta', 'MaxEta']},
 
