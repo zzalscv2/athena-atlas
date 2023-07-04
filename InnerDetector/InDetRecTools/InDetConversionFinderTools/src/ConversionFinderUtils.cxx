@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -212,20 +212,6 @@ namespace InDet {
       }//end of meas on track check
     }//end of loop over all track states on surface
 
-    return nullptr;
-  }
-
-  /**
-   * return first track particle parameters
-   */
-  const Trk::TrackParameters*
-  ConversionFinderUtils::getTrkParticleParameters(
-    const Trk::TrackParticleBase* track) 
-  {
-
-    std::vector<const Trk::TrackParameters*>::const_iterator vpb = track->trackParameters().begin();
-    std::vector<const Trk::TrackParameters*>::const_iterator vpe = track->trackParameters().end();
-    for(;vpb != vpe; ++vpb) if((*vpb)->position().perp()>=10.) return (*vpb);
     return nullptr;
   }
 
