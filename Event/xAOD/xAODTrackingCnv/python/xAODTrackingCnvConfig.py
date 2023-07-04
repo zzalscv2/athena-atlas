@@ -145,6 +145,65 @@ def TrackParticleCnvAlgCfg(flags, name="TrackParticleCnvAlg",
     result.addEventAlgo(CompFactory.xAODMaker.TrackParticleCnvAlg(name, **kwargs))
     return result
 
+
+def TrigTrackParticleCnvAlgCfg(flags, name="TrigTrackParticleCnvAlg",
+                               ClusterSplitProbabilityName = "",
+                               AssociationMapName = "",
+                               **kwargs):
+    
+    if flags.Detector.GeometryITk:
+        name = name.replace("InDet", "ITk")
+        return ITkTrackParticleCnvAlgCfg(flags, name,
+                                         ClusterSplitProbabilityName,
+                                         AssociationMapName,
+                                         **kwargs)
+
+    kwargs.setdefault("ConvertTracks", True)
+    kwargs.setdefault("ConvertTrackParticles", False)
+    kwargs.setdefault("TrackContainerName", "CombinedInDetTracks")
+    kwargs.setdefault("xAODTrackParticlesFromTracksContainerName", "InDetTrackParticles")
+    kwargs.setdefault("AddTruthLink", False)
+    
+    result = ComponentAccumulator()
+    
+    if "TrackParticleCreator" not in kwargs:
+        from TrkConfig.TrkParticleCreatorConfig import InDetTrigParticleCreatorToolCfg, \
+            InDetTrigParticleCreatorToolTRTPidCfg
+        
+        if flags.Tracking.ActiveConfig.electronPID:
+            partCreatorToolCfg = InDetTrigParticleCreatorToolTRTPidCfg
+        else:
+            partCreatorToolCfg = InDetTrigParticleCreatorToolCfg
+
+        
+        kwargs.setdefault("TrackParticleCreator", result.popToolsAndMerge(
+            partCreatorToolCfg(
+                flags,
+                name = kwargs["xAODTrackParticlesFromTracksContainerName"] + "CreatorTool",
+                ClusterSplitProbabilityName = ClusterSplitProbabilityName,
+                AssociationMapName = AssociationMapName)
+        ))
+
+    if "TrackCollectionCnvTool" not in kwargs:
+        result.addPublicTool(kwargs["TrackParticleCreator"])
+        kwargs.setdefault("TrackCollectionCnvTool", result.popToolsAndMerge(
+            TrackCollectionCnvToolCfg(
+                flags,
+                TrackParticleCreator = kwargs["TrackParticleCreator"])))
+
+
+    if flags.Tracking.perigeeExpression == "Vertex":
+        kwargs.setdefault("PrimaryVerticesName", "PrimaryVertices")
+
+    result.merge(TrackParticleCnvAlgCfg(flags, name,
+                                        ClusterSplitProbabilityName,
+                                        AssociationMapName,
+                                        **kwargs)
+                 )
+    
+    return result
+
+
 def BeamLineTrackParticleCnvAlgCfg(flags, name="BeamLineTrackParticleCnvAlg",
                                    ClusterSplitProbabilityName = "",
                                    AssociationMapName = "",
