@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1CaloCalibConditions/L1CaloPprChanCalibV1Container.h"
@@ -44,6 +44,9 @@ L1CaloPprChanCalibV1Container::L1CaloPprChanCalibV1Container(const std::string& 
   m_coolFolderKey = folderKey;
 }
 
+L1CaloPprChanCalibV1Container::~L1CaloPprChanCalibV1Container()
+{
+}
 
 DataObject* L1CaloPprChanCalibV1Container::makePersistent() const
 {
@@ -140,4 +143,9 @@ void L1CaloPprChanCalibV1Container::addPprChanCalibV1(const L1CaloPprChanCalibV1
                                              return el.channelId() < va;
                                            }),
                           pprChanCalib);
+}
+
+void L1CaloPprChanCalibV1Container::clear()
+{
+  m_pprChanCalibs.clear();
 }
