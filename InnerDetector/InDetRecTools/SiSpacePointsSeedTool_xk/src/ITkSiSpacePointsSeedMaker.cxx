@@ -1110,14 +1110,21 @@ void SiSpacePointsSeedMaker::buildFrameWork()
   /// now we can determine the number of bins by dividing the interval by the bin size
   m_maxPhiBinPPP = static_cast<int>(twoPi * m_inverseBinSizePhiPPP);
   /// additional protection against too many bins. Should not happen given constraints above
-  if (m_maxPhiBinPPP >= nPhiBinsMax)
-    m_maxPhiBinPPP = nPhiBinsMax - 1;
+  if (m_maxPhiBinPPP >= nPhiBinsMax) m_maxPhiBinPPP = nPhiBinsMax - 1;
   m_maxPhiBinSSS = static_cast<int>(twoPi * m_inverseBinSizePhiSSS);
-  if (m_maxPhiBinSSS >= nPhiBinsMax)
-    m_maxPhiBinSSS = nPhiBinsMax - 1;
+  if (m_maxPhiBinSSS >= nPhiBinsMax) m_maxPhiBinSSS = nPhiBinsMax - 1;
   /// recompute inverse bin size, taking into account rounding + truncation
   m_inverseBinSizePhiPPP = ( m_maxPhiBinPPP + 1 ) / twoPi;
   m_inverseBinSizePhiSSS = ( m_maxPhiBinSSS + 1 ) / twoPi;
+
+  // Build radius-azimuthal-Z sorted containers for Z-vertices
+  /// same logic as for the space points above
+  const int   nPhiBinsVertexMax  = arraySizePhiV;
+  const float inverseBinSizePhiVertexMax = static_cast<float>(nPhiBinsVertexMax)/twoPi;
+  m_inverseBinSizePhiVertex = m_ptmin/120.f;
+  if (m_inverseBinSizePhiVertex > inverseBinSizePhiVertexMax) m_inverseBinSizePhiVertex = inverseBinSizePhiVertexMax;
+  m_maxBinPhiVertex = static_cast<int>(twoPi*m_inverseBinSizePhiVertex);
+  if (m_maxBinPhiVertex>=nPhiBinsVertexMax) m_maxBinPhiVertex = nPhiBinsVertexMax-1;
 
   buildConnectionMaps(m_nNeighbourCellsBottomPPP, m_nNeighbourCellsTopPPP,
                       m_neighbourCellsBottomPPP, m_neighbourCellsTopPPP,
@@ -1126,6 +1133,11 @@ void SiSpacePointsSeedMaker::buildFrameWork()
   buildConnectionMaps(m_nNeighbourCellsBottomSSS, m_nNeighbourCellsTopSSS,
                       m_neighbourCellsBottomSSS, m_neighbourCellsTopSSS,
                       m_maxPhiBinSSS, true);
+
+  buildConnectionMapsVertex(m_nNeighboursVertexPhiZ,
+			    m_neighboursVertexPhiZ,
+			    m_maxBinPhiVertex);
+
 }
 
 void SiSpacePointsSeedMaker::buildConnectionMaps(std::array<int, arraySizePhiZ> &nNeighbourCellsBottom,
@@ -1143,16 +1155,13 @@ void SiSpacePointsSeedMaker::buildConnectionMaps(std::array<int, arraySizePhiZ> 
   {
 
     int phiBelow = phiBin - 1;
-    if (phiBelow < 0)
-      phiBelow = maxPhiBin; ///< loop around at edges of range
+    if (phiBelow < 0) phiBelow = maxPhiBin; ///< loop around at edges of range
 
     int phiAbove = phiBin + 1;
-    if (phiAbove > maxPhiBin)
-      phiAbove = 0; ///< loop around at edges of range
+    if (phiAbove > maxPhiBin) phiAbove = 0; ///< loop around at edges of range
 
     /// For each azimuthal region loop through all Z regions
-    for (int z = 0; z < arraySizeZ; ++z)
-    {
+    for (int z = 0; z < arraySizeZ; ++z) {
 
       /// we always include the two neighbouring phi bins for the top / bottom
       /// space point search
@@ -1263,6 +1272,53 @@ void SiSpacePointsSeedMaker::buildConnectionMaps(std::array<int, arraySizePhiZ> 
           neighbourCellsBottom[twoDbinSamePhi][7] = twoDbinLowerPhi - 2;
           neighbourCellsBottom[twoDbinSamePhi][8] = twoDbinHigherPhi - 2;
         }
+      }
+    }
+  }
+}
+
+/// Build maps for radius-azimuthal-Z sorted collections for Z
+/// Similar logic to the above, just simplified as only 3
+/// regions in z exist!
+
+void SiSpacePointsSeedMaker::buildConnectionMapsVertex(std::array<int, arraySizePhiZV> &nNeighbourCells,
+						       std::array<std::array<int, arraySizeNeighbourBinsVertex>, arraySizePhiZV> &neighbourCells,
+						       int maxPhiBin)
+{
+  for (int phiBin=0; phiBin<=maxPhiBin; ++phiBin) {
+
+    int phiBinBelow = phiBin-1;
+    if (phiBinBelow<0) phiBinBelow=maxPhiBin;
+
+    int phiBinTop = phiBin+1;
+    if (phiBinTop>maxPhiBin) phiBinTop=0;
+
+    /// For each azimuthal region loop through central Z regions
+    for (int zbin=0; zbin<arraySizeZV; ++zbin) {
+
+      int twoDbinSamePhi  = phiBin*arraySizeZV+zbin;
+      int twoDbinLowerPhi  = phiBinBelow*arraySizeZV+zbin;
+      int twoDbinHigherPhi  = phiBinTop*arraySizeZV+zbin;
+
+      /// always include the two neighbour bins in phi
+      nNeighbourCells[twoDbinSamePhi]   = 3;
+      neighbourCells[twoDbinSamePhi][0] = twoDbinSamePhi;
+      neighbourCells[twoDbinSamePhi][1] = twoDbinLowerPhi;
+      neighbourCells[twoDbinSamePhi][2] = twoDbinHigherPhi;
+
+      /// for the positive z bin, include the central z slice as well
+      if (zbin>1) {
+        nNeighbourCells[twoDbinSamePhi]   = 6;
+        neighbourCells[twoDbinSamePhi][3] = twoDbinSamePhi-1;
+        neighbourCells[twoDbinSamePhi][4] = twoDbinLowerPhi-1;
+        neighbourCells[twoDbinSamePhi][5] = twoDbinHigherPhi-1;
+      }
+      /// for the negative z bin, include the central z slice as well
+      else if (zbin<1) {
+        nNeighbourCells[twoDbinSamePhi]   = 6;
+        neighbourCells[twoDbinSamePhi][3] = twoDbinSamePhi+1;
+        neighbourCells[twoDbinSamePhi][4] = twoDbinLowerPhi+1;
+        neighbourCells[twoDbinSamePhi][5] = twoDbinHigherPhi+1;
       }
     }
   }
@@ -1768,25 +1824,20 @@ void SiSpacePointsSeedMaker::production2Sp(EventData &data) const
 
   // Loop thorugh all azimuthal regions
   //
-  for (int f = data.fvNmin; f <= m_fvNmax; ++f)
-  {
+  for (int f = data.fvNmin; f <= m_maxBinPhiVertex; ++f) {
 
     // For each azimuthal region loop through Z regions
     //
     int z = 0;
-    if (!data.endlist)
-      z = data.zMin;
-    for (; z < arraySizeZV; ++z)
-    {
+    if (!data.endlist) z = data.zMin;
+    for (; z < arraySizeZV; ++z) {
 
       int a = f * arraySizeZV + z;
-      if (!data.rfzv_map[a])
-        continue;
+      if (!data.rfzv_map[a]) continue;
       r0 = data.rfzv_ITkSorted[a].begin();
       r0e = data.rfzv_ITkSorted[a].end();
 
-      if (!data.endlist)
-      {
+      if (!data.endlist) {
         r0 = data.ITk_rMin;
         data.endlist = true;
       }
@@ -1798,22 +1849,19 @@ void SiSpacePointsSeedMaker::production2Sp(EventData &data) const
         float X = (*r0)->x();
         float Y = (*r0)->y();
         float R = (*r0)->radius();
-        if (R < m_r2minv)
-          continue;
-        if (R > m_r2maxv)
-          break;
+        if (R < m_r2minv) continue;
+        if (R > m_r2maxv) break;
         float Z = (*r0)->z();
         float ax = X / R;
         float ay = Y / R;
 
         // Bottom links production
         //
-        int NB = m_rfzv_n[a];
-        for (int i = 0; i < NB; ++i)
-        {
-          int an = m_rfzv_i[a][i];
-          if (!data.rfzv_map[an])
-            continue;
+        int numberBottomCells = m_nNeighboursVertexPhiZ[a];
+        for (int i=0; i<numberBottomCells; ++i) {
+
+          int an = m_neighboursVertexPhiZ[a][i];
+	  if (!data.rfzv_map[an]) continue;
 
           r = data.rfzv_ITkSorted[an].begin();
           re = data.rfzv_ITkSorted[an].end();
@@ -1821,25 +1869,19 @@ void SiSpacePointsSeedMaker::production2Sp(EventData &data) const
           for (; r != re; ++r)
           {
             float Rb = (*r)->radius();
-            if (Rb < m_r1minv)
-              continue;
-            if (Rb > m_r1maxv)
-              break;
+            if (Rb < m_r1minv) continue;
+            if (Rb > m_r1maxv) break;
             float dR = R - Rb;
-            if (dR < m_drminv)
-              break;
-            if (dR > m_drmax)
-              continue;
+            if (dR < m_drminv) break;
+            if (dR > m_drmax) continue;
             float dZ = Z - (*r)->z();
             float Tz = dZ / dR;
-            if (Tz < data.dzdrmin || Tz > data.dzdrmax)
-              continue;
+            if (Tz < data.dzdrmin || Tz > data.dzdrmax) continue;
             float Zo = Z - R * Tz;
 
             // Comparison with vertices Z coordinates
             //
-            if (!isZCompatible(data, Zo, Rb, Tz))
-              continue;
+            if (!isZCompatible(data, Zo, Rb, Tz)) continue;
 
             // Momentum cut
             //
@@ -1848,24 +1890,20 @@ void SiSpacePointsSeedMaker::production2Sp(EventData &data) const
             float x = dx * ax + dy * ay;
             float y = -dx * ay + dy * ax;
             float xy = x * x + y * y;
-            if (xy == 0.)
-              continue;
+            if (xy == 0.) continue;
             float r2 = 1.f / xy;
             float Ut = x * r2;
             float Vt = y * r2;
             float UR = Ut * R + 1.f;
-            if (UR == 0.)
-              continue;
+            if (UR == 0.) continue;
             float A = Vt * R / UR;
             float B = Vt - A * Ut;
-            if (std::abs(B * data.K) > m_ipt * std::sqrt(1.f + A * A))
-              continue;
+            if (std::abs(B * data.K) > m_ipt * std::sqrt(1.f + A * A)) continue;
             ++nseed;
             newSeed(data, (*r), (*r0), Zo);
           }
         }
-        if (nseed < m_maxsize)
-          continue;
+        if (nseed < m_maxsize) continue;
         data.endlist = false;
         data.ITk_rMin = (++r0);
         data.fvNmin = f;

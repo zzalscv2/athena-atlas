@@ -140,14 +140,6 @@ def ITkSiSpacePointsSeedMakerCfg(flags, name="ITkSpSeedsMaker", **kwargs):
         kwargs.setdefault("PRDtoTrackMap", (
             'ITkPRDtoTrackMap' + flags.Tracking.ActiveConfig.extension))
 
-    if flags.Beam.Type is not BeamType.Cosmics:
-        kwargs.setdefault("maxRadius1",
-                          0.75*flags.Tracking.ActiveConfig.radMax)
-        kwargs.setdefault("maxRadius2",
-                          flags.Tracking.ActiveConfig.radMax)
-        kwargs.setdefault("maxRadius3",
-                          flags.Tracking.ActiveConfig.radMax)
-
     if flags.Tracking.doITkFastTracking:
         kwargs.setdefault("useFastTracking", True)
         kwargs.setdefault("maxSeedsForSpacePoint", 3)
