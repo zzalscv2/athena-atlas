@@ -11,6 +11,7 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger("EFIDTracking")
 
 from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
+from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
 
 #Create a view verifier for necessary data collections
 def get_idtrig_view_verifier(name):
@@ -161,18 +162,6 @@ def makeInDetPatternRecognition( inflags, config, verifier = 'IDTrigViewDataVeri
 
          viewAlgs.append( siSPSeededTrackFinder )
 
-      #This code is expected to be used for monitoring purposes and comparison between first and second stage but atm disabled
-      #-----------------------------------------------------------------------------
-      #                      Track particle conversion algorithm (for pattern rec.)
-      #                        atm disabled but might be useful later for debugging
-      #
-      #from .InDetTrigCommon import trackParticleCnv_builder
-      #trackParticleCnvAlg = trackParticleCnv_builder(name                 = add_prefix( 'xAODParticleCreatorAlg',config.name + '_EFID' ), 
-      #                                               config               = config,
-      #                                               inTrackCollectionKey = config.trkTracks_IDTrig(),
-      #                                               outTrackParticlesKey = config.tracks_EFID(),
-      #                                               )
-
       #-----------------------------------------------------------------------------
       #                      Precision algorithms
 
@@ -191,7 +180,6 @@ def makeInDetPatternRecognition( inflags, config, verifier = 'IDTrigViewDataVeri
       return  viewAlgs, dataVerifier
 
 
-# This could potentially be unified with makeInDetTrigPrecisionTracking in the InDetTrigPrecisionTracking.py?
 def ambiguitySolverForIDPatternRecognition( flags, config, summaryTool, inputTracks,verifier=None ):
    ptAlgs = [] #List containing all the precision tracking algorithms hence every new added alg has to be appended to the list
    
@@ -204,52 +192,38 @@ def ambiguitySolverForIDPatternRecognition( flags, config, summaryTool, inputTra
    
    #-----------------------------------------------------------------------------
    #                        Ambiguity solving stage
-   from .InDetTrigCommon import ambiguityScoreAlg_builder, ambiguitySolverAlg_builder, add_prefix
 
-   scoreMapName = "ScoreMap"+config.input_name
-   
-   ambiguityScoreAlg = ambiguityScoreAlg_builder( name                  = add_prefix( core='TrkAmbiguityScore', suffix=config.input_name ),
-                                                  config                = config,
-                                                  inputTrackCollection  = inputTracks,
-                                                  outputTrackScoreMap   = scoreMapName )
-                                                 
-   ptAlgs.append( ambiguityScoreAlg )
+   from TrkConfig.TrkAmbiguitySolverConfig import TrkAmbiguityScore_Trig_Cfg
+   ambiguityScore = algorithmCAToGlobalWrapper(
+      TrkAmbiguityScore_Trig_Cfg,
+      flags,
+      name = f"EFAmbiScore_{flags.Tracking.ActiveConfig.input_name}",
+      TrackInput = [inputTracks],
+      AmbiguityScoreProcessor = None,
+   )
 
-   #FIXME: these alg internally don't expect EFID setting (but FTF), have to take into consideration
+   from TrkConfig.TrkAmbiguitySolverConfig import TrkAmbiguitySolver_Trig_Cfg
+   ambiguitySolver = algorithmCAToGlobalWrapper(
+      TrkAmbiguitySolver_Trig_Cfg,
+      flags,
+      name = "EFTrigAmbiguitySolver"+flags.Tracking.ActiveConfig.input_name,
+   )
+    
+   ptAlgs.extend( [ambiguityScore[0], ambiguitySolver[0]] )
 
-   ambiguitySolverAlg = ambiguitySolverAlg_builder( name                  = add_prefix( core='TrkAmbiguitySolver', suffix=config.input_name ),
-                                                    config                = config,
-                                                    summaryTool           = summaryTool,
-                                                    inputTrackScoreMap    = scoreMapName, #Map of tracks and their scores, 
-                                                    outputTrackCollection = config.trkTracks_IDTrig()+"_Amb" )  #FIXME: for now keep PT but if TRT added this will ahve to become intermediate collection
-
-   ptAlgs.append( ambiguitySolverAlg )
-   
-   #-----------------------------------------------------------------------------
-   #                      TrackPRD particle conversion algorithm, can be enabled to restore shared hit computation in TrackParticleCreatorTool
-
-   #-----------------------------------------------------------------------------
-
-   # from TrigInDetConfig.InDetTrigCommon import trackPRD_Association_builder
-   # trackPRD_AssociationAlg = trackPRD_Association_builder(name = add_prefix( 'trackPRD_AssociationAlg', config.name + '_IDTrig' ),
-   #                                                        inTrackCollections = [config.trkTracks_IDTrig()+"_Amb"],
-   #                                                        associationMapName = "TrigInDetPRDtoTrackMap")
-
-   # ptAlgs.append( trackPRD_AssociationAlg )
 
    #-----------------------------------------------------------------------------
    #                      Track particle conversion algorithm
-   from .InDetTrigCommon import trackParticleCnv_builder
-   from InDetTrigRecExample.InDetTrigConfigRecLoadToolsPost import InDetTrigParticleCreatorTool
-   creatorTool = InDetTrigParticleCreatorTool
-   
-   trackParticleCnvAlg = trackParticleCnv_builder(flags,
-                                                  name                 = add_prefix( 'xAODParticleCreatorAlg', config.name + '_IDTrig' ),
-                                                  config               = config,
-                                                  inTrackCollectionKey = config.trkTracks_IDTrig()+"_Amb",
-                                                  outTrackParticlesKey = config.tracks_IDTrig(),
-                                                  trackParticleCreatorTool     =  creatorTool )
-   
-   ptAlgs.append( trackParticleCnvAlg )
+
+   from xAODTrackingCnv.xAODTrackingCnvConfig import TrigTrackParticleCnvAlgCfg
+   trackParticleCnvAlg = algorithmCAToGlobalWrapper(
+      TrigTrackParticleCnvAlgCfg,
+      flags,
+      name = 'EFxAODParticleCreatorAlg_'+flags.Tracking.ActiveConfig.input_name+'_IDTrig', 
+      TrackContainerName = flags.Tracking.ActiveConfig.trkTracks_IDTrig+'_Amb',
+      xAODTrackParticlesFromTracksContainerName = flags.Tracking.ActiveConfig.tracks_IDTrig,
+   )
+
+   ptAlgs.extend( trackParticleCnvAlg )
 
    return ptAlgs
