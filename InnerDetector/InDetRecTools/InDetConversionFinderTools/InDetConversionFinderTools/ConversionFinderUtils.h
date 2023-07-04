@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETCONVERSIONFINDERTOOLS_CONVERSIONFINDERUTILS_H
@@ -57,9 +57,6 @@ namespace InDet {
                                            const Trk::Perigee* mp) ;
     /** Correct VxCandidate with respect to a user defined vertex.  */
     static xAOD::Vertex* correctVxCandidate(xAOD::Vertex*, Amg::Vector3D) ;
-    /** Get measured track parameters at first hit. Trk::TrackParticleBase interface. */
-    static const Trk::TrackParameters* getTrkParticleParameters(
-      const Trk::TrackParticleBase*) ;
 
   };
   

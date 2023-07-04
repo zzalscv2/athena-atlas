@@ -12,8 +12,9 @@ atlas_add_library( InDetConversionFinderToolsLib
                    PUBLIC_HEADERS InDetConversionFinderTools
                    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES AthenaBaseComps GaudiKernel GeoPrimitives InDetRecToolInterfaces Particle TrkEventPrimitives TrkParameters TrkParticleBase TrkToolInterfaces TrkTrack TrkVertexFitterInterfaces TrkVertexSeedFinderUtilsLib xAODTracking
-                    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES}  AthLinks InDetPrepRawData TrkMeasurementBase TrkRIO_OnTrack TrkSurfaces VxVertex )
+                   LINK_LIBRARIES AthenaBaseComps GaudiKernel GeoPrimitives InDetRecToolInterfaces Particle TrkEventPrimitives 
+                   TrkParameters TrkToolInterfaces TrkTrack TrkVertexFitterInterfaces TrkVertexSeedFinderUtilsLib xAODTracking
+                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES}  AthLinks InDetPrepRawData TrkMeasurementBase TrkRIO_OnTrack TrkSurfaces VxVertex )
 
 atlas_add_component( InDetConversionFinderTools
                      src/components/*.cxx
