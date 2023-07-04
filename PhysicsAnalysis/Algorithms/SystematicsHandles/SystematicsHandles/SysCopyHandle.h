@@ -23,7 +23,39 @@ class StatusCode;
 
 namespace CP
 {
-  /// \brief a data handle for copying systematics varied input data
+  /// @brief a systematics data handle that will either copy the input object or
+  /// act like an update handle
+  ///
+  /// There are several use cases for this data handle:
+
+  /// * It needs a mutable container, e.g. to apply momentum corrections to it.
+  ///   This is the main use case and other use cases either derive from it or are
+  ///   discouraged.
+  /// * In needs to add systematic variations to the object.  This will
+  ///   generally coincide with changing the object, as otherwise the systematics
+  ///   are usually applied to the decorations instead of the container.
+  /// * It needs to copy the input object, generally because it comes directly
+  ///   from the input file and we want to make a copy so we don't add decorations
+  ///   to the input object.  This is generally discouraged and instead it is
+  ///   preferred to schedule a separate algorithm to do the copy.
+  ///
+  /// Normally this handle will be configured both with the name of the input
+  /// object and the name of the output object to create.  In that case it will
+  /// create a shallow copy of the input object and add it to the event store.
+  ///
+  /// Alternatively if the second name is not given, it will do a non-const
+  /// retrieve of the input object and effectively act like an update handle.
+  /// This is essentially an optimization to avoid shallow copies when no
+  /// systematics are added.  This is not common and may break some assumptions
+  /// in Athena.
+  ///
+  /// The template parameter `T` can optionally be `const` qualified to indicate
+  /// that only a `const` object will be needed.  This can be used if only the
+  /// copy behavior of this handle is needed, but the copy won't be modified.
+  /// That is a rather specialized behavior, since normally we only need copies
+  /// to modify them.  As such it is recommended to switch those algorithms to a
+  /// `SysReadHandle` and schedule an `CP::AsgShallowCopyAlg` beforehand to do
+  /// the copy.
 
   template<typename T> class SysCopyHandle final
     : public ISysHandleBase, public asg::AsgMessagingForward
