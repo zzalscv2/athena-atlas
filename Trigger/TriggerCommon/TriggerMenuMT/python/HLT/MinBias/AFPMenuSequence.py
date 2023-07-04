@@ -61,6 +61,10 @@ def TrigAFPDijetComboHypoToolCfg(flags, chainDict):
     name = chainDict['chainName']
     tool = TrigAFPDijetComboHypoTool(name)
 
+    tool.maxProtonDiff_x = 2.5 
+    tool.maxProtonDiff_y = 100.0
+    tool.maxProtonDist = 100.0
+
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
     monTool = GenericMonitoringTool(flags, 'MonTool_' + name, HistPath='AFPComboHypo/' + tool.getName())
     monTool.defineHistogram('DijetMass', type='TH1F', path='EXPERT', title="Dijet mass", xbins=100, xmin=0, xmax=2000)
