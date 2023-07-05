@@ -154,8 +154,8 @@ def PhaseIISimulation(flags):
     PhaseIISimulationSingleIoV(flags)
 
 
-def mc23PhaseIIPileUp1(flags):
-    """Phase-II Upgrade / Run 4 flags for mc23 and above with pile-up, mu=1, conditions like mu=60"""
+def MC23PhaseIIPileUp1(flags):
+    """Phase-II Upgrade / Run 4 flags for MC23 and above with pile-up, mu=1, conditions like mu=60"""
     PhaseIIPileUpBase(flags, collisions=60)
 
     flags.Digitization.PU.NumberOfLowPtMinBias = 1.996
@@ -171,8 +171,8 @@ def mc23PhaseIIPileUp1(flags):
     }
 
 
-def mc23PhaseIIPileUp60(flags):
-    """Phase-II Upgrade / Run 4 flags for mc23 and above and above with pile-up, mu=60"""
+def MC23PhaseIIPileUp60(flags):
+    """Phase-II Upgrade / Run 4 flags for MC23 and above and above with pile-up, mu=60"""
     PhaseIIPileUpBase(flags, collisions=60)
 
     ## pile-up
@@ -194,8 +194,8 @@ def mc23PhaseIIPileUp60(flags):
     }
 
 
-def mc23PhaseIIPileUp140(flags):
-    """Phase-II Upgrade / Run 4 flags for mc23 and above with pile-up, mu=140"""
+def MC23PhaseIIPileUp140(flags):
+    """Phase-II Upgrade / Run 4 flags for MC23 and above with pile-up, mu=140"""
     PhaseIIPileUpBase(flags, collisions=140)
 
     ## pile-up
@@ -217,8 +217,8 @@ def mc23PhaseIIPileUp140(flags):
     }
 
 
-def mc23PhaseIIPileUp200(flags):
-    """Phase-II Upgrade / Run 4 flags for mc23 and above with pile-up, mu=200"""
+def MC23PhaseIIPileUp200(flags):
+    """Phase-II Upgrade / Run 4 flags for MC23 and above with pile-up, mu=200"""
     PhaseIIPileUpBase(flags, collisions=200)
 
     ## pile-up
@@ -239,8 +239,8 @@ def mc23PhaseIIPileUp200(flags):
         'timestamp': 1625130000
     }
 
-def mc23PhaseIIPileUpMC21a(flags):
-    """Phase-II Upgrade / Run 4 flags for mc23 and above with pile-up, MC21a pile-up profile"""
+def MC23PhaseIIPileUpMC21a(flags):
+    """Phase-II Upgrade / Run 4 flags for MC23 and above with pile-up, MC21a pile-up profile"""
     PhaseIIPileUpBase(flags, collisions=60)
 
     flags.Digitization.PU.NumberOfLowPtMinBias = 84.335
@@ -249,8 +249,8 @@ def mc23PhaseIIPileUpMC21a(flags):
     flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run242006_MC21a_SingleBeamspot'
 
 
-def mc23PhaseIINoPileUp(flags):
-    """Phase-II Upgrade / Run 4 flags for mc23 and above without pile-up"""
+def MC23PhaseIINoPileUp(flags):
+    """Phase-II Upgrade / Run 4 flags for MC23 and above without pile-up"""
     flags.Beam.NumberOfCollisions = 0.
 
     flags.GeoModel.Align.Dynamic = False  # no dynamic alignment for now
@@ -261,7 +261,7 @@ def mc23PhaseIINoPileUp(flags):
     flags.Digitization.DoInnerDetectorNoise = False  # disable noise for now
 
 
-def mc23PhaseIISimulationNoIoV(flags):
+def MC23PhaseIISimulationNoIoV(flags):
     """Phase-II Upgrade / Run 4 flags for simulation"""
     from SimulationConfig.SimEnums import TruthStrategy
     flags.Sim.PhysicsList = 'FTFP_BERT_ATL'
@@ -276,15 +276,15 @@ def mc23PhaseIISimulationNoIoV(flags):
     enableG4Optimizations(flags)
 
 
-def mc23PhaseIISimulationSingleIoV(flags):
+def MC23PhaseIISimulationSingleIoV(flags):
     """Phase-II Upgrade / Run 4 flags for simulation"""
-    mc23PhaseIISimulationNoIoV(flags)
+    MC23PhaseIISimulationNoIoV(flags)
 
     flags.Input.RunNumber = [350000]
     flags.Input.OverrideRunNumber = True
     flags.Input.LumiBlockNumber = [1] # dummy value
 
 
-def mc23PhaseIISimulation(flags):
+def MC23PhaseIISimulation(flags):
     """Phase-II Upgrade / Run 4 flags for simulation (alias)"""
-    mc23PhaseIISimulationSingleIoV(flags)
+    MC23PhaseIISimulationSingleIoV(flags)
