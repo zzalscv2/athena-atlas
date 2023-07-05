@@ -37,7 +37,7 @@
 #include "ActsFatras/Physics/Decay/NoDecay.hpp"
 #include "ActsFatras/Physics/StandardInteractions.hpp"
 #include "ActsFatras/Selectors/SurfaceSelectors.hpp"
-#include "ActsFatras/Utilities/ParticleData.hpp"
+#include "Acts/Definitions/ParticleData.hpp"
 // Tracking
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
