@@ -44,6 +44,7 @@ _simple_test( ArenaPoolSTLAllocator_test )
 _simple_test( ArenaHeapSTLAllocator_test )
 _simple_test( ArenaSharedHeapSTLAllocator_test )
 _simple_test( LockedAllocator_test )
+_simple_test( DataPool_align_test )
 
 atlas_add_test( DataPool_test
    SOURCES test/DataPool_test.cxx
