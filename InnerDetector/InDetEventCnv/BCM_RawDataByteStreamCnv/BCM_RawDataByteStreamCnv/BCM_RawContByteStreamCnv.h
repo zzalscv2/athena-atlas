@@ -17,11 +17,9 @@
 
 #include "AthenaBaseComps/AthConstConverter.h"
 
-#include "ByteStreamData/RawEvent.h" 
-
 class BCM_RawContByteStreamTool;
-class IByteStreamEventAccess;
-class StoreGateSvc;
+class IOpaqueAddress;
+class DataObject;
 
 class BCM_RawContByteStreamCnv: public AthConstConverter {
 

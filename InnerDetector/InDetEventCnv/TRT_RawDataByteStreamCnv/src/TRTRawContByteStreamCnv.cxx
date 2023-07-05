@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTRawContByteStreamCnv.h"
@@ -8,7 +8,7 @@
 #include "AthenaKernel/StorableConversions.h"
 #include "GaudiKernel/DataObject.h"
 #include "GaudiKernel/MsgStream.h"
-
+#include <string>
 // ------------------------------------------------------
 // constructor
 
@@ -44,8 +44,7 @@ TRTRawContByteStreamCnv::createRepConst(DataObject* pObj, IOpaqueAddress*& pAddr
 {
   // get IDC for TRT Raw Data
   TRT_RDO_Container* cont=nullptr; 
-  SG::fromStorable(pObj, cont); 
-  if(!cont){
+  if(!SG::fromStorable(pObj, cont)){
     ATH_MSG_ERROR( " Can not cast to TRTRawContainer " );
     return StatusCode::FAILURE;    
   } 
