@@ -17,7 +17,7 @@ ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
 ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
 ex.input = 'data_run2_EB'
-ex.args = '-c "setMenu=\'PhysicsP1_pp_run3_v1_HLTReprocessing_prescale\';doL1Sim=True;rewriteLVL1=True;flags.GeoModel.AtlasVersion=\'ATLAS-R2-2016-01-00-01\';flags.IOVDb.GlobalTag=\'CONDBR2-HLTP-2018-03\';"'
+ex.args = '-c "setMenu=\'PhysicsP1_pp_run3_v1_HLTReprocessing_prescale\';doL1Sim=True;rewriteLVL1=True;flags.GeoModel.AtlasVersion=\'ATLAS-R2-2016-01-00-01\';flags.IOVDb.GlobalTag=\'CONDBR2-HLTP-2018-04\';"'
 ex.args += ' --dump-config-exit'
 
 test = Test.Test()
