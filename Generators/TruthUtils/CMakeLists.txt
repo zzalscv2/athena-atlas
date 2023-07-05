@@ -20,3 +20,9 @@ atlas_add_library( TruthUtils
 # Install files from the package:
 atlas_install_runtime( share/*.txt )
 
+atlas_add_test( AtlasPIDTest
+                SOURCES
+                test/testPIDs.cxx 
+                PROPERTIES WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                LINK_LIBRARIES TruthUtils 
+                POST_EXEC_SCRIPT nopost.sh )
