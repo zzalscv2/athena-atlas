@@ -181,6 +181,7 @@ namespace xAODMaker {
 	  bool isSignalProcess(false);
 	  if (cntr==0) {
             isSignalProcess=true;
+#ifdef HEPMC3
             auto bunchCrossingTime = genEvt->attribute<HepMC3::IntAttribute>("BunchCrossingTime");
             if (bunchCrossingTime) {
               newAttributesPresent = true;
@@ -189,11 +190,15 @@ namespace xAODMaker {
             else {
               ATH_MSG_VERBOSE("New attributes missing.");
             }
+#else
+              ATH_MSG_VERBOSE("New attributes missing.");
+#endif
           }
 	  if (cntr>0) {
             // Handle pile-up events
             if (!m_doInTimePileUp && !m_doAllPileUp) break;
             isSignalProcess=false;
+#ifdef HEPMC3
             auto bunchCrossingTime = genEvt->attribute<HepMC3::IntAttribute>("BunchCrossingTime");
             if (bunchCrossingTime) {
               // New approach based on checking the bunch crossing
@@ -220,6 +225,17 @@ namespace xAODMaker {
                 break;
               }
             }
+#else
+              // Old approach based on McEventCollection structure. If
+              // in-time pileup only is requested, loop stops when the
+              // separator GenEvent between out-of-time and in-time is
+              // reached
+              if (m_doInTimePileUp && isSeparatorGenEvent(genEvt)) {
+                // Old structure - stop at the first separator
+                // GenEvent.
+                break;
+              }
+#endif
 	  }
                 
 	  xAOD::TruthEvent* xTruthEvent = new xAOD::TruthEvent();
