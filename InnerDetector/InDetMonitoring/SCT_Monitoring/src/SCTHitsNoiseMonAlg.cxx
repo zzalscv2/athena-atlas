@@ -412,6 +412,12 @@ StatusCode SCTHitsNoiseMonAlg::generalHistsandNoise(const std::array<std::unorde
       auto noAcc{Monitored::Collection("NO_" + occMap, vNO2D[jReg][element])};
       auto isSelectedTriggerAcc{Monitored::Collection("IsSelectedTrigger_"+occMap, vIsSelectedTriggerNOHO[jReg][element])};
       fill("SCTHitsNoiseMonitor_" + std::to_string(jReg), etaEacc, phiAcc, hoAcc, noAcc, isSelectedTriggerAcc);
+
+      if (m_doOnline){
+            auto isSelectedTriggerRecentAcc{Monitored::Collection("IsSelectedTriggerRecent_"+occMap, vIsSelectedTriggerNOHO[jReg][element])};
+            fill("SCTHitsNoiseMonitor_" + std::to_string(jReg), etaEacc, phiAcc, hoAcc, noAcc, isSelectedTriggerRecentAcc);
+      }
+
     }
   }
   

@@ -64,6 +64,7 @@ class SCTHitsNoiseMonAlg : public AthMonitorAlgorithm {
   /// Name of the L1 Type to use for filling the extra NO histograms
   StringProperty m_NOTriggerItem{this, "NOTrigger", "L1_RD0_EMPTY"};
   BooleanProperty m_doTrigger{this, "doTrigger", false};
+  BooleanProperty m_doOnline{this, "doOnlineMon", false};
   /// Switch on or off the hitmaps histograms
   //BooleanProperty m_boolhitmaps{this, "doHitmapHistos", false};
   /// Switch on or off the endcaps
