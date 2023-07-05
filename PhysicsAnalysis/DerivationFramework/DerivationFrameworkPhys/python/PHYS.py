@@ -60,10 +60,15 @@ def PHYSCfg(ConfigFlags):
     # Common augmentations
     acc.merge(PHYSKernelCfg(ConfigFlags, name="PHYSKernel", StreamName = stream_name, TriggerListsHelper = PHYSTriggerListsHelper))
     
-    ## Higgs augmentations    
-    from DerivationFrameworkHiggs.HiggsPhysContent import  setupHiggsAugmentationAlgs, setupHiggsSlimmingVariables
-    acc.merge(setupHiggsAugmentationAlgs(ConfigFlags, stream_name = stream_name))
-    
+    ## Higgs augmentations - create 4l vertex
+    from DerivationFrameworkHiggs.HiggsPhysContent import  HiggsAugmentationAlgsCfg
+    acc.merge(HiggsAugmentationAlgsCfg(ConfigFlags))
+
+    ## CloseByIsolation correction augmentation
+    ## For the moment, run BOTH CloseByIsoCorrection on AOD AND add in augmentation variables to be able to also run on derivation (the latter part will eventually be suppressed)
+    from IsolationSelection.IsolationSelectionConfig import  IsoCloseByAlgsCfg
+    acc.merge(IsoCloseByAlgsCfg(ConfigFlags, isPhysLite = False, stream_name = stream_name))
+
     # ============================
     # Define contents of the format
     # =============================
@@ -132,8 +137,14 @@ def PHYSCfg(ConfigFlags):
                                               "Muons.TruthLink",
                                               "Photons.TruthLink"]
 
+    ## Higgs content - 4l vertex and Higgs STXS truth variables
+    from DerivationFrameworkHiggs.HiggsPhysContent import  setupHiggsSlimmingVariables
     setupHiggsSlimmingVariables(ConfigFlags, PHYSSlimmingHelper)
    
+    ## CloseByIsolation content - CloseBy isolation correction (for all analyses)
+    from IsolationSelection.IsolationSelectionConfig import  setupIsoCloseBySlimmingVariables
+    setupIsoCloseBySlimmingVariables(PHYSSlimmingHelper)
+
    
     # Trigger content
     PHYSSlimmingHelper.IncludeTriggerNavigation = False

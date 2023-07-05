@@ -72,7 +72,7 @@ namespace CP
 
     /// tool properties
     /// \{
-
+  private:
     std::vector<std::string> m_selFlags;
     std::vector<bool> m_invertFlags;
     std::vector<std::unique_ptr<ISelectionReadAccessor> > m_acc_selFlags;

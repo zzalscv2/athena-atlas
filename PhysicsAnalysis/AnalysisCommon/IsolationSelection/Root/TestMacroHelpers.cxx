@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef XAOD_STANDALONE
@@ -168,7 +168,7 @@ namespace CP {
                                                               MuonVal::VectorBranch<float>& Original, MuonVal::VectorBranch<float>& Corrected) {
         if (!Acc) return StatusCode::SUCCESS;
         float IsoValue{-1.};
-        if (Acc->getOrignalIsolation(P, IsoValue).code() != CorrectionCode::Ok) return StatusCode::FAILURE;
+        if (Acc->getOriginalIsolation(P, IsoValue).code() != CorrectionCode::Ok) return StatusCode::FAILURE;
         Original.push_back(IsoValue);
         if (Acc->getIsolation(P, IsoValue).code() != CorrectionCode::Ok) return StatusCode::FAILURE;
         Corrected.push_back(IsoValue);

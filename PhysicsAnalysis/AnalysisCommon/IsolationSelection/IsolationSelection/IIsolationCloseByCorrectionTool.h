@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef ISOLATIONSELECTION_IISOLATIONCLOSEBYCORRECTIONTOOL_H
@@ -36,10 +36,17 @@ namespace CP {
                                                     const std::vector<xAOD::Iso::IsolationType>& types,
                                                     const xAOD::IParticleContainer& closePar) const = 0;
 
-        virtual CorrectionCode getCloseByIsoCorrection ATLAS_NOT_THREAD_SAFE (xAOD::ElectronContainer* Electrons = nullptr, xAOD::MuonContainer* Muons = nullptr,
-                                                       xAOD::PhotonContainer* Photons = nullptr) const = 0;
-        virtual CorrectionCode subtractCloseByContribution(xAOD::IParticle& x, const xAOD::IParticleContainer& closebyPar) const = 0;
-
+        // This function calculates the values of the corrections for close-by objects and applies them to the isolation variables and
+        // writes them out as a new decoration of the particles. This requires a suffix to be specified for the new decoration, otherwise 
+        // an ERROR will be returned.
+        virtual CorrectionCode getCloseByIsoCorrection (
+#ifndef XAOD_ANALYSIS
+                                                        const EventContext& ctx,
+#endif
+                                                        const xAOD::ElectronContainer* Electrons = nullptr, 
+                                                        const xAOD::MuonContainer* Muons = nullptr,
+                                                        const xAOD::PhotonContainer* Photons = nullptr
+                                                        ) const = 0;
         virtual float getOriginalIsolation(const xAOD::IParticle& P, IsoType type) const = 0;
         virtual float getOriginalIsolation(const xAOD::IParticle* P, IsoType type) const = 0;
 

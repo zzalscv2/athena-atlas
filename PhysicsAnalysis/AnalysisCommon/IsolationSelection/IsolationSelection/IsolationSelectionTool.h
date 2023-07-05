@@ -85,6 +85,9 @@ namespace CP {
                                                "path of the cut map for electron"};
         Gaudi::Property<std::string> m_phWPKey{this, "PhotonKey", "/ElectronPhoton/LHTight/el_cutValues_",
                                                "path of the cut map for photon"};
+        Gaudi::Property<std::string> m_isoDecSuffix{
+            this, "IsoDecSuffix", "", "Suffix added to output isolation variables to allow to NOT overwrite existing values"};
+
 
         /// input file
         Gaudi::Property<std::string> m_calibFileName{this, "CalibFileName", "", " The config to use"};

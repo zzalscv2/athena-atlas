@@ -54,6 +54,20 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
         thinningTools.append(acc.getPublicTool(thinningToolsArgs[key]))
 
 
+    # Higgs augmentations - 4l vertex, Higgs STXS truth variables, CloseBy isolation correction (for all analyses)
+    # For PhysLite, must run CloseBy BEFORE running analysis sequences to be able to 'pass through' to the shallow copy the added isolation values
+    # Here we only run the augmentation algs
+    # These do not need to be run if PhysLite is run from Phys (i.e. not from 'StreamAOD')
+    if 'StreamAOD' in ConfigFlags.Input.ProcessingTags:
+        # running from AOD
+        ## Higgs - create 4l vertex
+        from DerivationFrameworkHiggs.HiggsPhysContent import  HiggsAugmentationAlgsCfg
+        acc.merge(HiggsAugmentationAlgsCfg(ConfigFlags))
+         
+        ## CloseByIsolation correction augmentation
+        from IsolationSelection.IsolationSelectionConfig import  IsoCloseByAlgsCfg
+        acc.merge(IsoCloseByAlgsCfg(ConfigFlags, isPhysLite = True))
+
     #==============================================================================
     # Analysis-level variables 
     #==============================================================================
@@ -74,13 +88,14 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
 
     # Create a pile-up analysis sequence
     if ConfigFlags.Input.isMC:
+        # setup config and lumicalc files for pile-up tool
         from AsgAnalysisAlgorithms.PileupAnalysisSequence import makePileupAnalysisSequence
         pileupSequence = makePileupAnalysisSequence( dataType, campaign=ConfigFlags.Input.MCCampaign, files=ConfigFlags.Input.Files, useDefaultConfig=True )
         pileupSequence.configure( inputName = {}, outputName = {} )
         for element in pileupSequence.getGaudiConfig2Components():
             acc.addEventAlgo(element)
 
-    # Include, and then set up the electron analysis sequence:
+    # Include, and then set up the electron analysis sequence (For SiHits electrons, use: LooseLHElectronSiHits.NonIso):
     from EgammaAnalysisAlgorithms.ElectronAnalysisSequence import  makeElectronAnalysisSequence
     electronSequence = makeElectronAnalysisSequence( dataType, 'LooseLHElectron.NonIso', shallowViewOutput = False, deepCopyOutput = True, trackSelection = False )
     electronSequence.configure( inputName = 'Electrons',
@@ -130,7 +145,7 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
     largeRjetSequence.configure( inputName = largeRjetContainer, outputName = 'AnalysisLargeRJets')
     for element in largeRjetSequence.getGaudiConfig2Components():
         acc.addEventAlgo(element)
-    
+
     # Build MET from our analysis objects
     # Currently only works for the AOD->PHYSLITE workflow
     if 'StreamAOD' in ConfigFlags.Input.ProcessingTags:
@@ -271,12 +286,12 @@ def PHYSLITECfg(ConfigFlags):
     ]
 
     PHYSLITESlimmingHelper.ExtraVariables = [ 
-        'AnalysisElectrons.trackParticleLinks.pt.eta.phi.m.charge.author.DFCommonElectronsLHVeryLoose.DFCommonElectronsLHLoose.DFCommonElectronsLHLooseBL.DFCommonElectronsLHMedium.DFCommonElectronsLHTight.DFCommonElectronsLHVeryLooseIsEMValue.DFCommonElectronsLHLooseIsEMValue.DFCommonElectronsLHLooseBLIsEMValue.DFCommonElectronsLHMediumIsEMValue.DFCommonElectronsLHTightIsEMValue.DFCommonElectronsECIDS.DFCommonElectronsECIDSResult.topoetcone20.neflowisol20.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt500.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt500.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.caloClusterLinks.ambiguityLink.TruthLink.truthParticleLink.truthOrigin.truthType.truthPdgId.firstEgMotherTruthType.firstEgMotherTruthOrigin.firstEgMotherTruthParticleLink.firstEgMotherPdgId.ambiguityType.OQ',
-        'AnalysisPhotons.pt.eta.phi.m.author.OQ.DFCommonPhotonsIsEMLoose.DFCommonPhotonsIsEMTight.DFCommonPhotonsIsEMTightIsEMValue.DFCommonPhotonsCleaning.DFCommonPhotonsCleaningNoTime.ptcone20.topoetcone20.topoetcone40.topoetcone20ptCorrection.topoetcone40ptCorrection.caloClusterLinks.vertexLinks.ambiguityLink.TruthLink.truthParticleLink.truthOrigin.truthType',
-        'GSFTrackParticles.chiSquared.phi.d0.theta.qOverP.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.z0.vz.charge.vertexLink.numberOfPixelHits.numberOfSCTHits.originalTrackParticle',
+        'AnalysisElectrons.trackParticleLinks.pt.eta.phi.m.charge.author.DFCommonElectronsLHVeryLoose.DFCommonElectronsLHLoose.DFCommonElectronsLHLooseBL.DFCommonElectronsLHMedium.DFCommonElectronsLHTight.DFCommonElectronsLHVeryLooseIsEMValue.DFCommonElectronsLHLooseIsEMValue.DFCommonElectronsLHLooseBLIsEMValue.DFCommonElectronsLHMediumIsEMValue.DFCommonElectronsLHTightIsEMValue.DFCommonElectronsECIDS.DFCommonElectronsECIDSResult.topoetcone20.neflowisol20.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt500.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt500.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.topoetcone20_CloseByCorr.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr.caloClusterLinks.ambiguityLink.TruthLink.truthParticleLink.truthOrigin.truthType.truthPdgId.firstEgMotherTruthType.firstEgMotherTruthOrigin.firstEgMotherTruthParticleLink.firstEgMotherPdgId.ambiguityType.OQ',
+        'AnalysisPhotons.pt.eta.phi.m.author.OQ.DFCommonPhotonsIsEMLoose.DFCommonPhotonsIsEMTight.DFCommonPhotonsIsEMTightIsEMValue.DFCommonPhotonsCleaning.DFCommonPhotonsCleaningNoTime.ptcone20.topoetcone20.topoetcone40.topoetcone20ptCorrection.topoetcone40ptCorrection.topoetcone20_CloseByCorr.topoetcone40_CloseByCorr.ptcone20_CloseByCorr.caloClusterLinks.vertexLinks.ambiguityLink.TruthLink.truthParticleLink.truthOrigin.truthType',
+        'GSFTrackParticles.chiSquared.phi.d0.theta.qOverP.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.z0.vz.charge.vertexLink.numberOfPixelHits.numberOfSCTHits.expectInnermostPixelLayerHit.expectNextToInnermostPixelLayerHit.numberOfInnermostPixelLayerHits.numberOfNextToInnermostPixelLayerHits.originalTrackParticle',
         'GSFConversionVertices.trackParticleLinks.x.y.z.px.py.pz.pt1.pt2.neutralParticleLinks.minRfirstHit',
         'egammaClusters.calE.calEta.calPhi.calM.e_sampl.eta_sampl.ETACALOFRAME.PHICALOFRAME.ETA2CALOFRAME.PHI2CALOFRAME.constituentClusterLinks',
-        'AnalysisMuons.pt.eta.phi.truthType.truthOrigin.author.muonType.quality.inDetTrackParticleLink.muonSpectrometerTrackParticleLink.combinedTrackParticleLink.InnerDetectorPt.MuonSpectrometerPt.DFCommonGoodMuon.neflowisol20.topoetcone20.TruthLink.truthParticleLink.charge.extrapolatedMuonSpectrometerTrackParticleLink.allAuthors.ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000.ptcone20_Nonprompt_All_MaxWeightTTVA_pt500.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500.numberOfPrecisionLayers.combinedTrackOutBoundsPrecisionHits.numberOfPrecisionLayers.numberOfPrecisionHoleLayers.numberOfGoodPrecisionLayers.innerSmallHits.innerLargeHits.middleSmallHits.middleLargeHits.outerSmallHits.outerLargeHits.extendedSmallHits.extendedLargeHits.extendedSmallHoles.isSmallGoodSectors.cscUnspoiledEtaHits.EnergyLoss.energyLossType.momentumBalanceSignificance.scatteringCurvatureSignificance.scatteringNeighbourSignificance.CaloMuonIDTag.CaloMuonScore',
+        'AnalysisMuons.pt.eta.phi.truthType.truthOrigin.author.muonType.quality.inDetTrackParticleLink.muonSpectrometerTrackParticleLink.combinedTrackParticleLink.InnerDetectorPt.MuonSpectrometerPt.DFCommonGoodMuon.neflowisol20.topoetcone20.TruthLink.truthParticleLink.charge.extrapolatedMuonSpectrometerTrackParticleLink.allAuthors.ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000.ptcone20_Nonprompt_All_MaxWeightTTVA_pt500.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500.topoetcone20_CloseByCorr.neflowisol20_CloseByCorr.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500_CloseByCorr.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000_CloseByCorr.numberOfPrecisionLayers.combinedTrackOutBoundsPrecisionHits.numberOfPrecisionLayers.numberOfPrecisionHoleLayers.numberOfGoodPrecisionLayers.innerSmallHits.innerLargeHits.middleSmallHits.middleLargeHits.outerSmallHits.outerLargeHits.extendedSmallHits.extendedLargeHits.extendedSmallHoles.isSmallGoodSectors.cscUnspoiledEtaHits.EnergyLoss.energyLossType.momentumBalanceSignificance.scatteringCurvatureSignificance.scatteringNeighbourSignificance.CaloMuonIDTag.CaloMuonScore',
         'CombinedMuonTrackParticles.qOverP.d0.z0.vz.phi.theta.truthOrigin.truthType.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.numberOfPixelDeadSensors.numberOfPixelHits.numberOfPixelHoles.numberOfSCTDeadSensors.numberOfSCTHits.numberOfSCTHoles.numberOfTRTHits.numberOfTRTOutliers.chiSquared.numberDoF',
         'ExtrapolatedMuonTrackParticles.d0.z0.vz.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.truthOrigin.truthType.qOverP.theta.phi',
         'MuonSpectrometerTrackParticles.phi.d0.z0.vz.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.vertexLink.theta.qOverP.truthParticleLink',
@@ -296,9 +311,15 @@ def PHYSLITECfg(ConfigFlags):
         'EventInfo.RandomRunNumber.PileupWeight_NOSYS.GenFiltHT.GenFiltMET'
     ]
 
+    # Truth extra content
+
     if ConfigFlags.Input.isMC:
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(PHYSLITESlimmingHelper)
+
+    # add in extra values for Higgs 
+    from DerivationFrameworkHiggs.HiggsPhysContent import  setupHiggsSlimmingVariables
+    setupHiggsSlimmingVariables(ConfigFlags, PHYSLITESlimmingHelper)
 
     # Output stream    
     PHYSLITEItemList = PHYSLITESlimmingHelper.GetItemList()

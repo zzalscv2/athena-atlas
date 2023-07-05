@@ -22,6 +22,7 @@ MuonsCPContent = [
 "MuonSegmentsAux.chamberIndex",
 "MuonsAux.ptcone20_Nonprompt_All_MaxWeightTTVA_pt500.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500",
 "MuonsAux.ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000",
+"MuonsAux.topoetcone20_CloseByCorr.neflowisol20_CloseByCorr.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500_CloseByCorr.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000_CloseByCorr",
 "PhotonsAux.pt.eta.phi.m.caloClusterLinks.author.f1.topoetcone40.Tight.truthParticleLink.vertexLinks",
 "egammaClustersAux.calEta.calPhi.calE.calM",
 "egammaTopoSeededClusters",

@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef ISOLATIONSELECTION_ISOVARIABLEHELPER_H
@@ -18,15 +18,15 @@ namespace CP {
 
     class IsoVariableHelper {
     public:
-        CorrectionCode getOrignalIsolation(const xAOD::IParticle* particle, float& value) const;
+        CorrectionCode getOriginalIsolation(const xAOD::IParticle* particle, float& value) const;
         CorrectionCode getIsolation(const xAOD::IParticle* particle, float& value) const;
         CorrectionCode backupIsolation(const xAOD::IParticle* particle) const;
-        CorrectionCode setIsolation(xAOD::IParticle* P, float value) const;
+        CorrectionCode setIsolation(const xAOD::IParticle* P, float value) const;
 
         IsoType isotype() const;
         std::string name() const;
 
-        IsoVariableHelper(IsoType type, const std::string& BackupPreFix);
+        IsoVariableHelper(IsoType type, const std::string& backupPreFix, const std::string& isoDecSuffix = "");
 
     private:
         CorrectionCode getIsolationFromOriginal(const xAOD::IParticle* particle, float& value) const;

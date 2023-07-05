@@ -9,11 +9,7 @@
 #include "TruthUtils/MagicNumbers.h"
 
 xAODtoHepMCTool::xAODtoHepMCTool(const std::string &name)
-    : asg::AsgTool(name),
-      m_momFac(1.), //<-- MeV/GeV conversion factor
-      m_lenFac(1.), //<-- length conversion factor
-      m_signalOnly(true),
-      m_maxCount(0)
+    : asg::AsgTool(name)
 {
 }
 

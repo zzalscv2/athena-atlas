@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
- Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef ISOLATIONSELECTION_ISOLATIONCONDITIONFORMULA_H
@@ -19,8 +19,8 @@ namespace CP {
     class IsolationConditionFormula : public IsolationCondition {
     public:
         IsolationConditionFormula(std::string name, xAOD::Iso::IsolationType isoType, const std::string& cutFunction,
-                                  bool invertCut = false);
-        IsolationConditionFormula(std::string name, std::string isoType, const std::string& cutFunction, bool invertCut = false);
+                                  bool invertCut = false, std::string isoDecSuffix = "");
+        IsolationConditionFormula(std::string name, std::string isoType, const std::string& cutFunction, bool invertCut = false, std::string isoDecSuffix = "");
         virtual ~IsolationConditionFormula() = default;
 
         virtual bool accept(const xAOD::IParticle& x) const override;

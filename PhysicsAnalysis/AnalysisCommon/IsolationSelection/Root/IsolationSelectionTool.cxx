@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <IsolationSelection/Interp3D.h>
@@ -27,6 +27,8 @@ namespace CP {
     StatusCode IsolationSelectionTool::initialize() {
         /// Greet the user:
         ATH_MSG_INFO("Initialising...");
+
+        ATH_MSG_INFO("IsoDecSuffix: " << m_isoDecSuffix);
 
         if (!m_calibFileName.empty()) {
             std::string filename = PathResolverFindCalibFile(m_calibFileName);
@@ -73,10 +75,13 @@ namespace CP {
         for (const std::string& c : m_phWPvec) ATH_CHECK(addPhotonWP(c));
 
         m_calibFile.reset();
+        #ifndef XAOD_STANDALONE
         ATH_CHECK(m_isoDecors.initialize());
+        #endif
         /// Return gracefully:
         return StatusCode::SUCCESS;
     }
+
     void IsolationSelectionTool::addDependencies(const std::string& container, const IsolationWP& wp) {
         if (container.empty()) return;
         for (const std::unique_ptr<IsolationCondition>& cond : wp.conditions()) {
@@ -139,35 +144,35 @@ namespace CP {
         std::unique_ptr<IsolationWP> wp = std::make_unique<IsolationWP>(muWPname);
         if (muWPname == "HighPtTrackOnly") {
             wp->addCut(std::make_unique<IsolationConditionFormula>(
-                "ptcone20_Tight_1p25", xAOD::Iso::ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000, "1.25E03"));  // units are MeV!
+                "ptcone20_Tight_1p25", xAOD::Iso::ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000, "1.25E03", false, m_isoDecSuffix));  // units are MeV!
         } else if (muWPname == "TightTrackOnly_FixedRad") {
             wp->addCut(std::make_unique<IsolationConditionFormula>(
-                "MuonFixedCutHighMuTrackOnly_lowPt", xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000, "0.06*(x>50e3?1e9:x)"));
+                "MuonFixedCutHighMuTrackOnly_lowPt", xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000, "0.06*(x>50e3?1e9:x)", false, m_isoDecSuffix));
             wp->addCut(std::make_unique<IsolationConditionFormula>(
-                "MuonFixedCutHighMuTrackOnly_highPt", xAOD::Iso::ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000, "0.06*(x>50e3?x:1e9)"));
+                "MuonFixedCutHighMuTrackOnly_highPt", xAOD::Iso::ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000, "0.06*(x>50e3?x:1e9)", false, m_isoDecSuffix));
         } else if (muWPname == "Tight_FixedRad") {
             wp->addCut(std::make_unique<IsolationConditionFormula>(
-                "MuonFixedCutHighMuTight_track_lowPt", xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000, "0.04*(x>50e3?1e9:x)"));
+                "MuonFixedCutHighMuTight_track_lowPt", xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000, "0.04*(x>50e3?1e9:x)", false, m_isoDecSuffix));
             wp->addCut(std::make_unique<IsolationConditionFormula>(
-                "MuonFixedCutHighMuTight_track_highPt", xAOD::Iso::ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000, "0.04*(x>50e3?x:1e9)"));
-            wp->addCut(std::make_unique<IsolationConditionFormula>("MuonFixedCutHighMuTight_calo", xAOD::Iso::topoetcone20, "0.15*x"));
+                "MuonFixedCutHighMuTight_track_highPt", xAOD::Iso::ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000, "0.04*(x>50e3?x:1e9)", false, m_isoDecSuffix));
+            wp->addCut(std::make_unique<IsolationConditionFormula>("MuonFixedCutHighMuTight_calo", xAOD::Iso::topoetcone20, "0.15*x", false, m_isoDecSuffix));
         } else if (muWPname == "Loose_FixedRad") {
             wp->addCut(std::make_unique<IsolationConditionFormula>(
-                "MuonFixedCutHighMuLoose_track_lowPt", xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000, "0.15*(x>50e3?1e9:x)"));
+                "MuonFixedCutHighMuLoose_track_lowPt", xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000, "0.15*(x>50e3?1e9:x)", false, m_isoDecSuffix));
             wp->addCut(std::make_unique<IsolationConditionFormula>(
-                "MuonFixedCutHighMuLoose_track_highPt", xAOD::Iso::ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000, "0.15*(x>50e3?x:1e9)"));
-            wp->addCut(std::make_unique<IsolationConditionFormula>("MuonFixedCutHighMuLoose_calo", xAOD::Iso::topoetcone20, "0.30*x"));
+                "MuonFixedCutHighMuLoose_track_highPt", xAOD::Iso::ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000, "0.15*(x>50e3?x:1e9)", false, m_isoDecSuffix));
+            wp->addCut(std::make_unique<IsolationConditionFormula>("MuonFixedCutHighMuLoose_calo", xAOD::Iso::topoetcone20, "0.30*x", false, m_isoDecSuffix));
         } else if (muWPname == "TightTrackOnly_VarRad") {
             wp->addCut(std::make_unique<IsolationConditionFormula>("MuonFixedCutHighMuTrackOnly",
-                                                                   xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000, "0.06*x"));
+                                                                   xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000, "0.06*x", false, m_isoDecSuffix));
         } else if (muWPname == "Tight_VarRad") {
             wp->addCut(std::make_unique<IsolationConditionFormula>("MuonFixedCutHighMuTight_track",
-                                                                   xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000, "0.04*x"));
-            wp->addCut(std::make_unique<IsolationConditionFormula>("MuonFixedCutHighMuTight_calo", xAOD::Iso::topoetcone20, "0.15*x"));
+                                                                   xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000, "0.04*x", false, m_isoDecSuffix));
+            wp->addCut(std::make_unique<IsolationConditionFormula>("MuonFixedCutHighMuTight_calo", xAOD::Iso::topoetcone20, "0.15*x", false, m_isoDecSuffix));
         } else if (muWPname == "Loose_VarRad") {
             wp->addCut(std::make_unique<IsolationConditionFormula>("MuonFixedCutHighMuLoose_track",
-                                                                   xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000, "0.15*x"));
-            wp->addCut(std::make_unique<IsolationConditionFormula>("MuonFixedCutHighMuLoose_calo", xAOD::Iso::topoetcone20, "0.30*x"));
+                                                                   xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000, "0.15*x", false, m_isoDecSuffix));
+            wp->addCut(std::make_unique<IsolationConditionFormula>("MuonFixedCutHighMuLoose_calo", xAOD::Iso::topoetcone20, "0.30*x", false, m_isoDecSuffix));
         } else if (muWPname == "PflowTight_FixedRad") {
             std::vector<xAOD::Iso::IsolationType> isoTypesHighPt{xAOD::Iso::ptcone20_Nonprompt_All_MaxWeightTTVA_pt500,
                                                                  xAOD::Iso::neflowisol20};
@@ -175,15 +180,15 @@ namespace CP {
                                                                 xAOD::Iso::neflowisol20};
             wp->addCut(std::make_unique<IsolationConditionCombined>("MuonPFlowTightLowPt", isoTypesLowPt,
                                                                     std::make_unique<TF2>("pflowTFunctionLowPt", "fabs(x)+0.4*(y>0?y:0)"),
-                                                                    "0.045*(x>50e3?1e9:x)"));
+                                                                    "0.045*(x>50e3?1e9:x)", m_isoDecSuffix));
             wp->addCut(std::make_unique<IsolationConditionCombined>("MuonPFlowTightHighPt", isoTypesHighPt,
                                                                     std::make_unique<TF2>("pflowTFunctionHighPt", "fabs(x)+0.4*(y>0?y:0)"),
-                                                                    "0.045*(x>50e3?x:1e9)"));
+                                                                    "0.045*(x>50e3?x:1e9)", m_isoDecSuffix));
         } else if (muWPname == "PflowTight_VarRad") {
             std::vector<xAOD::Iso::IsolationType> isoTypes{xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500,
                                                            xAOD::Iso::neflowisol20};
             wp->addCut(std::make_unique<IsolationConditionCombined>(
-                "MuonPFlowTight", isoTypes, std::make_unique<TF2>("pflowTFunction", "fabs(x)+0.4*(y>0?y:0)"), "0.045*x"));
+                "MuonPFlowTight", isoTypes, std::make_unique<TF2>("pflowTFunction", "fabs(x)+0.4*(y>0?y:0)"), "0.045*x", m_isoDecSuffix));
         } else if (muWPname == "PflowLoose_FixedRad") {
             std::vector<xAOD::Iso::IsolationType> isoTypesHighPt{xAOD::Iso::ptcone20_Nonprompt_All_MaxWeightTTVA_pt500,
                                                                  xAOD::Iso::neflowisol20};
@@ -191,21 +196,23 @@ namespace CP {
                                                                 xAOD::Iso::neflowisol20};
             wp->addCut(std::make_unique<IsolationConditionCombined>("MuonPFlowLooseLowPt", isoTypesLowPt,
                                                                     std::make_unique<TF2>("pflowLFunctionLowPt", "fabs(x)+0.4*(y>0?y:0)"),
-                                                                    "0.16*(x>50e3?1e9:x)"));
+                                                                    "0.16*(x>50e3?1e9:x)", m_isoDecSuffix));
             wp->addCut(std::make_unique<IsolationConditionCombined>("MuonPFlowLooseHighPt", isoTypesHighPt,
                                                                     std::make_unique<TF2>("pflowLFunctionHighPt", "fabs(x)+0.4*(y>0?y:0)"),
-                                                                    "0.16*(x>50e3?x:1e9)"));
+                                                                    "0.16*(x>50e3?x:1e9)", m_isoDecSuffix));
         } else if (muWPname == "PflowLoose_VarRad") {
             std::vector<xAOD::Iso::IsolationType> isoTypes{xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500,
                                                            xAOD::Iso::neflowisol20};
             wp->addCut(std::make_unique<IsolationConditionCombined>(
-                "MuonPFlowLoose", isoTypes, std::make_unique<TF2>("pflowTFunction", "fabs(x)+0.4*(y>0?y:0)"), "0.16*x"));
+                "MuonPFlowLoose", isoTypes, std::make_unique<TF2>("pflowTFunction", "fabs(x)+0.4*(y>0?y:0)"), "0.16*x", m_isoDecSuffix));
         } else {
             ATH_MSG_ERROR("Unknown muon isolation WP: " << muWPname);
             return StatusCode::FAILURE;
         }
         m_muonAccept.addCut(wp->name(), wp->name());
+#ifndef XAOD_STANDALONE
         addDependencies(m_inMuonContainer, *wp);
+#endif
         m_muWPs.push_back(std::move(wp));        
         return StatusCode::SUCCESS;
     }
@@ -213,28 +220,30 @@ namespace CP {
     StatusCode IsolationSelectionTool::addPhotonWP(std::string phWPname) {
         std::unique_ptr<IsolationWP> wp = std::make_unique<IsolationWP>(phWPname);
         if (phWPname == "TightCaloOnly") {
-            wp->addCut(std::make_unique<IsolationConditionFormula>("PhFixedCut_calo40", xAOD::Iso::topoetcone40, "0.022*x+2450"));
+            wp->addCut(std::make_unique<IsolationConditionFormula>("PhFixedCut_calo40", xAOD::Iso::topoetcone40, "0.022*x+2450", false, m_isoDecSuffix));
         } else if (phWPname == "FixedCutTight") {
-            wp->addCut(std::make_unique<IsolationConditionFormula>("PhFixedCut_calo40", xAOD::Iso::topoetcone40, "0.022*x+2450"));
-            wp->addCut(std::make_unique<IsolationConditionFormula>("PhFixedCut_track20", xAOD::Iso::ptcone20, "0.05*x"));
+            wp->addCut(std::make_unique<IsolationConditionFormula>("PhFixedCut_calo40", xAOD::Iso::topoetcone40, "0.022*x+2450", false, m_isoDecSuffix));
+            wp->addCut(std::make_unique<IsolationConditionFormula>("PhFixedCut_track20", xAOD::Iso::ptcone20, "0.05*x", false, m_isoDecSuffix));
         } else if (phWPname == "FixedCutLoose") {
-            wp->addCut(std::make_unique<IsolationConditionFormula>("PhFixedCut_calo20", xAOD::Iso::topoetcone20, "0.065*x"));
-            wp->addCut(std::make_unique<IsolationConditionFormula>("PhFixedCut_track20", xAOD::Iso::ptcone20, "0.05*x"));
+            wp->addCut(std::make_unique<IsolationConditionFormula>("PhFixedCut_calo20", xAOD::Iso::topoetcone20, "0.065*x", false, m_isoDecSuffix));
+            wp->addCut(std::make_unique<IsolationConditionFormula>("PhFixedCut_track20", xAOD::Iso::ptcone20, "0.05*x", false, m_isoDecSuffix));
         } else if (phWPname == "Tight") {
-            wp->addCut(std::make_unique<IsolationConditionFormula>("PhFixedCut_calo40", xAOD::Iso::topoetcone40, "0.022*x+2450"));
+            wp->addCut(std::make_unique<IsolationConditionFormula>("PhFixedCut_calo40", xAOD::Iso::topoetcone40, "0.022*x+2450", false, m_isoDecSuffix));
             wp->addCut(std::make_unique<IsolationConditionFormula>("PhFixedCut_Tighttrack20",
-                                                                   xAOD::Iso::ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000, "0.05*x"));
+                                                                   xAOD::Iso::ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000, "0.05*x", false, m_isoDecSuffix));
         } else if (phWPname == "Loose") {
-            wp->addCut(std::make_unique<IsolationConditionFormula>("PhFixedCut_calo20", xAOD::Iso::topoetcone20, "0.065*x"));
+            wp->addCut(std::make_unique<IsolationConditionFormula>("PhFixedCut_calo20", xAOD::Iso::topoetcone20, "0.065*x", false, m_isoDecSuffix));
             wp->addCut(std::make_unique<IsolationConditionFormula>("PhFixedCut_Tighttrack20",
-                                                                   xAOD::Iso::ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000, "0.05*x"));
+                                                                   xAOD::Iso::ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000, "0.05*x", false, m_isoDecSuffix));
         } else {
             ATH_MSG_ERROR("Unknown photon isolation WP: " << phWPname);
             return StatusCode::FAILURE;
         }
 
         m_photonAccept.addCut(wp->name(), wp->name());
+#ifndef XAOD_STANDALONE        
         addDependencies(m_inPhotContainer, *wp);
+#endif
         m_phWPs.push_back(std::move(wp));
        
         // Return gracefully:
@@ -246,23 +255,23 @@ namespace CP {
 
         if (elWPname == "HighPtCaloOnly") {
             wp->addCut(std::make_unique<IsolationConditionFormula>("FCHighPtCaloOnly_calo", xAOD::Iso::topoetcone20,
-                                                                   "std::max(0.015*x,3.5E3)"));  // units are MeV!
+                                                                   "std::max(0.015*x,3.5E3)", false, m_isoDecSuffix));  // units are MeV!
         } else if (elWPname == "Tight_VarRad") {
             wp->addCut(std::make_unique<IsolationConditionFormula>(
-                "ElecTight_track", xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000, "0.06*x"));
-            wp->addCut(std::make_unique<IsolationConditionFormula>("ElecTight_calo", xAOD::Iso::topoetcone20, "0.06*x"));
+                "ElecTight_track", xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000, "0.06*x", false, m_isoDecSuffix));
+            wp->addCut(std::make_unique<IsolationConditionFormula>("ElecTight_calo", xAOD::Iso::topoetcone20, "0.06*x", false, m_isoDecSuffix));
         } else if (elWPname == "Loose_VarRad") {
             wp->addCut(std::make_unique<IsolationConditionFormula>(
-                "ElecLoose_track", xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000, "0.15*x"));
-            wp->addCut(std::make_unique<IsolationConditionFormula>("ElecLoose_calo", xAOD::Iso::topoetcone20, "0.20*x"));
+                "ElecLoose_track", xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000, "0.15*x", false, m_isoDecSuffix));
+            wp->addCut(std::make_unique<IsolationConditionFormula>("ElecLoose_calo", xAOD::Iso::topoetcone20, "0.20*x", false, m_isoDecSuffix));
         } else if (elWPname == "TightTrackOnly_VarRad") {
             wp->addCut(std::make_unique<IsolationConditionFormula>(
-                "ElecTightTrackOnly", xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000, "0.06*x"));
+                "ElecTightTrackOnly", xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000, "0.06*x", false, m_isoDecSuffix));
         } else if (elWPname == "TightTrackOnly_FixedRad") {
             wp->addCut(std::make_unique<IsolationConditionFormula>(
-                "ElecTightTrackOnly_lowPt", xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000, "0.06*(x>50e3?1e9:x)"));
+                "ElecTightTrackOnly_lowPt", xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000, "0.06*(x>50e3?1e9:x)", false, m_isoDecSuffix));
             wp->addCut(std::make_unique<IsolationConditionFormula>(
-                "ElecTightTrackOnly_highPt", xAOD::Iso::ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000, "0.06*(x>50e3?x:1e9)"));
+                "ElecTightTrackOnly_highPt", xAOD::Iso::ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000, "0.06*(x>50e3?x:1e9)", false, m_isoDecSuffix));
         } else if (elWPname == "PflowTight_FixedRad") {
             std::vector<xAOD::Iso::IsolationType> isoTypesHighPt{xAOD::Iso::ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt500,
                                                                  xAOD::Iso::neflowisol20};
@@ -270,15 +279,15 @@ namespace CP {
                                                                 xAOD::Iso::neflowisol20};
             wp->addCut(std::make_unique<IsolationConditionCombined>("ElecPFlowTightLowPt", isoTypesLowPt,
                                                                     std::make_unique<TF2>("pflowTFunctionLowPt", "fabs(x)+0.4*(y>0?y:0)"),
-                                                                    "0.045*(x>50e3?1e9:x)"));
+                                                                    "0.045*(x>50e3?1e9:x)", m_isoDecSuffix));
             wp->addCut(std::make_unique<IsolationConditionCombined>("ElecPFlowTightHighPt", isoTypesHighPt,
                                                                     std::make_unique<TF2>("pflowTFunctionHighPt", "fabs(x)+0.4*(y>0?y:0)"),
-                                                                    "0.045*(x>50e3?x:1e9)"));
+                                                                    "0.045*(x>50e3?x:1e9)", m_isoDecSuffix));
         } else if (elWPname == "PflowTight") {
             std::vector<xAOD::Iso::IsolationType> isoTypes{xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt500,
                                                            xAOD::Iso::neflowisol20};
             wp->addCut(std::make_unique<IsolationConditionCombined>(
-                "ElecPFlowTight", isoTypes, std::make_unique<TF2>("pflowLFunction", "fabs(x)+0.4*(y>0?y:0)"), "0.045*x"));
+                "ElecPFlowTight", isoTypes, std::make_unique<TF2>("pflowLFunction", "fabs(x)+0.4*(y>0?y:0)"), "0.045*x", m_isoDecSuffix));
         } else if (elWPname == "PflowLoose_FixedRad") {
             std::vector<xAOD::Iso::IsolationType> isoTypesHighPt{xAOD::Iso::ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt500,
                                                                  xAOD::Iso::neflowisol20};
@@ -286,22 +295,24 @@ namespace CP {
                                                                 xAOD::Iso::neflowisol20};
             wp->addCut(std::make_unique<IsolationConditionCombined>("ElecPFlowLooseLowPt", isoTypesLowPt,
                                                                     std::make_unique<TF2>("pflowLFunctionLowPt", "fabs(x)+0.4*(y>0?y:0)"),
-                                                                    "0.16*(x>50e3?1e9:x)"));
+                                                                    "0.16*(x>50e3?1e9:x)", m_isoDecSuffix));
             wp->addCut(std::make_unique<IsolationConditionCombined>("ElecPFlowLooseHighPt", isoTypesHighPt,
                                                                     std::make_unique<TF2>("pflowLFunctionHighPt", "fabs(x)+0.4*(y>0?y:0)"),
-                                                                    "0.16*(x>50e3?x:1e9)"));
+                                                                    "0.16*(x>50e3?x:1e9)", m_isoDecSuffix));
         } else if (elWPname == "PflowLoose") {
             std::vector<xAOD::Iso::IsolationType> isoTypes{xAOD::Iso::ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt500,
                                                            xAOD::Iso::neflowisol20};
             wp->addCut(std::make_unique<IsolationConditionCombined>(
-                "ElecPFlowLoose", isoTypes, std::make_unique<TF2>("pflowLFunction", "fabs(x)+0.4*(y>0?y:0)"), "0.16*x"));
+                "ElecPFlowLoose", isoTypes, std::make_unique<TF2>("pflowLFunction", "fabs(x)+0.4*(y>0?y:0)"), "0.16*x", m_isoDecSuffix));
         } else {
             ATH_MSG_ERROR("Unknown electron isolation WP: " << elWPname);
             return StatusCode::FAILURE;
         }
 
         m_electronAccept.addCut(wp->name(), wp->name());
+#ifndef XAOD_STANDALONE
         addDependencies(m_inElecContainer, *wp);
+#endif
         m_elWPs.push_back(std::move(wp));
         
         // Return gracefully:

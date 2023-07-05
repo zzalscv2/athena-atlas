@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "CxxUtils/checker_macros.h"
@@ -13,8 +13,8 @@
 
 namespace CP {
     IsolationConditionCombined::IsolationConditionCombined(const std::string& name, const std::vector<xAOD::Iso::IsolationType>& isoType,
-                                                           std::unique_ptr<TF1> isoFunction, const std::string& cutFunction) :
-        IsolationCondition(name, isoType) {
+                                                           std::unique_ptr<TF1> isoFunction, const std::string& cutFunction, std::string isoDecSuffix) :
+        IsolationCondition(name, isoType, isoDecSuffix) {
         m_cutFunction = std::make_unique<TF1>(cutFunction.c_str(), cutFunction.c_str());
         m_isoFunction = std::move(isoFunction);
     }
@@ -25,10 +25,9 @@ namespace CP {
             const FloatAccessor& acc_ele = accessor(acc);
 
             if (!acc_ele.isAvailable(x)) {
-                Warning("IsolationConditionFormula", "Accessor %s is not available. Expected when using primary AODs, post-p3793 "
-                                                     "derivations (only for *FixedRad or FixedCutPflow* for electrons), pre-p3517 "
-                                                     "derivations (only for FC*), or pre-p3830 derivations (for other electron WPs)",
-                                                     SG::AuxTypeRegistry::instance().getName(acc_ele.auxid()).c_str());
+                Warning("IsolationConditionCombined", "Accessor %s is not available. Expected when using primary AODs, post-p3793 derivations (only for *FixedRad or FixedCutPflow* for electrons), pre-p3517 derivations (only for FC*), or pre-p3830 derivations (for other electron WPs)",
+                        SG::AuxTypeRegistry::instance().getName(acc_ele.auxid()).c_str());
+                if (!m_isoDecSuffix.empty()) throw std::runtime_error ("IsolationConditionCombined: IsolationSelectionTool property 'IsoDecSuffix' is set to " + m_isoDecSuffix + ". Must run on derivation made with IsolationCloseByCorrection to create the isolation variables with this suffix, or remove 'IsoDecSuffix'. ");
                 isoVars[acc] = FLT_MAX;
             } else
                 isoVars[acc] = acc_ele(x);           

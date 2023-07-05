@@ -66,6 +66,7 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
     StatusCode IsoCloseByCorrectionTrkSelAlg::execute(const EventContext& ctx) const {
+
         TrackSet assoc_trks{};
         LepContainer prim_objs{};
         ATH_CHECK(loadTracks(ctx, m_muonKey, assoc_trks, prim_objs));
@@ -74,7 +75,6 @@ namespace CP {
         const size_t n_elecs = prim_objs.size() - n_muons;
         ATH_CHECK(loadTracks(ctx, m_photKey, assoc_trks, prim_objs));
         const size_t n_phots = prim_objs.size() - n_muons - n_elecs;
-
         m_selected_obj[0] += n_muons;
         m_selected_obj[1] += n_elecs;
         m_selected_obj[2] += n_phots;
@@ -111,6 +111,7 @@ namespace CP {
                          });
             assoc_trks = std::move(pruned_trks);
         }
+
         /// Dump the containers
         if (!m_trkKey.empty()) {
             auto tracks = std::make_unique<ConstDataVector<xAOD::TrackParticleContainer>>(SG::VIEW_ELEMENTS);
