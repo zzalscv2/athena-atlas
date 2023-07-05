@@ -739,9 +739,9 @@ void Database::resetAttributes(AttributesMap& attributes)
 
 void Database::importDefaultROOT(std::string filename) 
 {
-    const std::string prefix = "^(FakeFactor|FakeEfficiency|RealEfficiency)", suffix = "_([[:w:]][^_]+)(__[[:w:]]+)?$";
-    const std::regex rxTH1(prefix + "_(el|mu|tau)" + suffix);
-    const std::regex rxTH2(prefix + "2D_(el|mu|tau)_([[:alnum:]]+)" + suffix);
+    const std::string prefix = "^(FakeFactor|FakeEfficiency|RealEfficiency|FakeEfficiencySF)", suffix = "_([[:w:]][^_]+)(__[[:w:]]+)?$";
+    const std::regex rxTH1(prefix + "_(el|mu|tau|e2y)" + suffix);
+    const std::regex rxTH2(prefix + "2D_(el|mu|tau|e2y)_([[:alnum:]]+)" + suffix);
     const std::regex rxTH3(prefix + "3D_(el|mu|tau)_([[:alnum:]]+)_([[:alnum:]]+)" + suffix);
     
     filename = PathResolverFindCalibFile(filename);
@@ -777,7 +777,8 @@ void Database::importDefaultROOT(std::string filename)
             auto type = getAttribute(StringRef(sss.data(), sss.length()),
                 "FakeFactor-el", ELECTRON_FAKE_FACTOR, "FakeFactor-mu", MUON_FAKE_FACTOR, "FakeFactor-tau", TAU_FAKE_FACTOR,
                 "FakeEfficiency-el", ELECTRON_FAKE_EFFICIENCY, "FakeEfficiency-mu", MUON_FAKE_EFFICIENCY, "FakeEfficiency-tau", TAU_FAKE_EFFICIENCY,
-                "RealEfficiency-el", ELECTRON_REAL_EFFICIENCY, "RealEfficiency-mu", MUON_REAL_EFFICIENCY, "RealEfficiency-tau", TAU_REAL_EFFICIENCY
+                "RealEfficiency-el", ELECTRON_REAL_EFFICIENCY, "RealEfficiency-mu", MUON_REAL_EFFICIENCY, "RealEfficiency-tau", TAU_REAL_EFFICIENCY,
+                "FakeEfficiency-e2y", PHOTON_ELEFAKE_EFFICIENCY, "FakeEfficiencySF-e2y", PHOTON_ELEFAKE_EFFICIENCY_SF
                 );
             bool systTH1 = (mr[mr.size()-1].str() != "");
             if(step==0 && !systTH1)
@@ -1045,6 +1046,7 @@ Efficiency* Database::selectEfficiency(ParticleData& pd, const xAOD::IParticle& 
         if(type==ELECTRON_FAKE_FACTOR) return &pd.fake_factor;
         else if(type==ELECTRON_FAKE_EFFICIENCY) return &pd.fake_efficiency;
         else if(type==ELECTRON_REAL_EFFICIENCY) return &pd.real_efficiency;
+        else if(type==PHOTON_ELEFAKE_EFFICIENCY) return &pd.fake_efficiency;
         break;
       case xAOD::Type::Muon:
         if(type==MUON_FAKE_FACTOR) return &pd.fake_factor;
@@ -1055,6 +1057,9 @@ Efficiency* Database::selectEfficiency(ParticleData& pd, const xAOD::IParticle& 
         if(type==TAU_FAKE_FACTOR) return &pd.fake_factor;
         else if(type==TAU_FAKE_EFFICIENCY) return &pd.fake_efficiency;
         else if(type==TAU_REAL_EFFICIENCY) return &pd.real_efficiency;
+        break;
+      case xAOD::Type::Photon:
+        if(type==PHOTON_ELEFAKE_EFFICIENCY_SF) return &pd.fake_efficiency;
         break;
       default:;
     }
@@ -1080,6 +1085,11 @@ auto Database::selectTypesToFill(Client client) -> std::bitset<N_EFFICIENCY_TYPE
         result[MUON_FAKE_FACTOR] = true;
         result[TAU_FAKE_FACTOR] = true;
     }
+    if(client==Client::E2Y_FAKE || client==Client::ALL_METHODS)
+    {
+        result[PHOTON_ELEFAKE_EFFICIENCY] = true;
+        result[PHOTON_ELEFAKE_EFFICIENCY_SF] = true;
+    }
     if(result.none()) throw(GenericError() << "unrecognized client type, implementation incomplete");
     return result;
 }
@@ -1097,6 +1107,8 @@ Database::EfficiencyType Database::getSourceType(EfficiencyType wantedType) cons
           case ELECTRON_FAKE_FACTOR: return ELECTRON_FAKE_EFFICIENCY;
           case MUON_FAKE_FACTOR: return MUON_FAKE_EFFICIENCY;
           case TAU_FAKE_FACTOR: return TAU_FAKE_EFFICIENCY;
+          case PHOTON_ELEFAKE_EFFICIENCY: return PHOTON_ELEFAKE_EFFICIENCY;
+          case PHOTON_ELEFAKE_EFFICIENCY_SF: return PHOTON_ELEFAKE_EFFICIENCY_SF;
           default:;
         }
     }
@@ -1126,6 +1138,8 @@ std::string Database::getTypeAsString(EfficiencyType type)
         case TAU_REAL_EFFICIENCY: return "real efficiency (taus)";
         case TAU_FAKE_EFFICIENCY: return "fake efficiency (taus)";
         case TAU_FAKE_FACTOR: return "fake factor (taus)";
+        case PHOTON_ELEFAKE_EFFICIENCY: return "fake efficiency (electrons->photons)";
+        case PHOTON_ELEFAKE_EFFICIENCY_SF: return "fake efficiency SF(electrons->photons)";
         default:;
     }
     return "???";

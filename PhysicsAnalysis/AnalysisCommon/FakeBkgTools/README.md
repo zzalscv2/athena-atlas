@@ -2,6 +2,7 @@ This package provides support for a few data-driven methods to estimate the fake
 - `ApplyFakeFactor`, implementing the fake-factor method;
 - `AsymptMatrixTool`, implementing the standard matrix method;
 - `LhoodMM_tools`, implementing an improved, likelihood-based, version of the matrix method.
+- `ApplyE2YFakeRate`, implementing for electron to photon fake background estimation.
 
 These different tools derive from the same interface `CP::IFakeBkgTool` ([header](../../Interfaces/AsgAnalysisInterfaces/IFakeBkgTool.h)) so they can be used interchangeably, and the results obtained with different methods compared. Note that the interface headers are stored in a separate package, [PhysicsAnalysis/Interfaces/AsgAnalysisInterfaces](../../Interfaces/AsgAnalysisInterfaces), which is generally the one you should link against. 
 
@@ -26,7 +27,7 @@ float yield, statUp, statDown;
 ATH_CHECK(tool->getTotalYield(yield, statUp, statDown));
 ```
 
-The types of particles currently supported are xAOD::Electron, xAOD::Muon and xAOD::TauJet. 
+The types of particles currently supported are xAOD::Electron, xAOD::Muon ,xAOD::TauJet and xAOD::Photon. 
 
 All these methods rely on auxiliary measurements (efficiencies for prompt/fake leptons to satisfy a tighter selection, or the closely-related fake factors). These must be performed independently and provided as input to the tool (ROOT or XML files) via the property `"InputFiles"`. There is a large flexibility in the parametrization of these efficiencies (and their uncertainties) as function of kinematic variables. 
 

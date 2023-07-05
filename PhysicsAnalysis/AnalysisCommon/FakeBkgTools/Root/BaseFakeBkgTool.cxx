@@ -6,6 +6,7 @@
 #include "FakeBkgTools/FakeBkgInternals.h"
 #include "FakeBkgTools/Database.h"
 #include "xAODEgamma/Electron.h"
+#include "xAODEgamma/Photon.h"
 #include "xAODMuon/Muon.h"
 #include "xAODTau/TauJet.h"
 #include "SelectionHelpers/ISelectionReadAccessor.h"
@@ -177,11 +178,13 @@ StatusCode BaseFakeBkgTool::addEvent(const xAOD::IParticleContainer& iparticles,
         m_particles.emplace_back();
         auto& d = m_particles.back();
         d.tight = m_tightAccessor->getBool(p);
+        d.type = p.type();
         switch(p.type())
         {
             case xAOD::Type::Electron: d.charge = static_cast<const xAOD::Electron&>(p).charge(); break;
             case xAOD::Type::Muon: d.charge = static_cast<const xAOD::Muon&>(p).charge(); break;
             case xAOD::Type::Tau: d.charge = static_cast<const xAOD::TauJet&>(p).charge(); break;
+            case xAOD::Type::Photon: d.charge = 0; break;
             default:
                 ATH_MSG_WARNING("unknown particle type, setting charge to 0");
                 d.charge = 0;
@@ -377,6 +380,8 @@ std::string BaseFakeBkgTool::getListOfEfficienciesAffectedBy(unsigned short uid)
     if(affects[Database::MUON_REAL_EFFICIENCY]) info += "muon real efficiencies, ";
     if(affects[Database::MUON_FAKE_EFFICIENCY]) info += "muon fake efficiencies, ";
     if(affects[Database::MUON_FAKE_FACTOR]) info += "muon fake factors, ";
+    if(affects[Database::PHOTON_ELEFAKE_EFFICIENCY]) info += "electron->photon fake efficiencies, ";
+    if(affects[Database::PHOTON_ELEFAKE_EFFICIENCY_SF]) info += "electron->photon fake efficiencies scale factor, ";
     return info.substr(0, info.size()-2);
 }
 
