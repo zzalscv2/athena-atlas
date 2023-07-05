@@ -8,7 +8,7 @@ atlas_add_library( InDetMultipleVertexSeedFinderUtilsLib
                    src/*.cxx
                    PUBLIC_HEADERS InDetMultipleVertexSeedFinderUtils
                    LINK_LIBRARIES AthenaBaseComps xAODTracking GaudiKernel
-                   PRIVATE_LINK_LIBRARIES EventPrimitives TrkParameters TrkParticleBase TrkTrack VxVertex TrkExInterfaces )
+                   PRIVATE_LINK_LIBRARIES EventPrimitives TrkParameters TrkTrack VxVertex TrkExInterfaces )
 
 atlas_add_component( InDetMultipleVertexSeedFinderUtils
                      src/components/*.cxx

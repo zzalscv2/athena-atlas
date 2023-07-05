@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef InDetMultipleVertexSeedFinderUtils_InDetTrackZ0SortingTool_H
@@ -54,9 +54,6 @@ namespace InDet
  * indexes of  tracks in initial container. Index range is [0.. tracks.size())
  */ 
    std::vector<int> sortedIndex(const std::vector<const Trk::Track*>& tracks, const Trk::Vertex * reference = 0 )const;
-   
-   
-   std::vector<int> sortedIndex(const std::vector<const Trk::TrackParticleBase*>& tracks ,const Trk::Vertex * reference = 0 )const;
    
    std::vector<int> sortedIndex(const std::vector<const xAOD::TrackParticle*>& perigeeList, const xAOD::Vertex * beamVtx = 0) const; 
    
