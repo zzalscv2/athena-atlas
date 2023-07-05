@@ -100,9 +100,9 @@ def V0MainDecoratorCfg(flags, name="V0Decorator", **kwargs):
     acc = ComponentAccumulator()
 
     if "V0Tools" not in kwargs:
-        from TrkConfig.TrkVertexAnalysisUtilsConfig import V0ToolsNoExtrapCfg
-        kwargs.setdefault("V0Tools", acc.popToolsAndMerge(
-            V0ToolsNoExtrapCfg(flags)))
+        from TrkConfig.TrkVertexAnalysisUtilsConfig import V0ToolsCfg
+        kwargs.setdefault("V0Tools",  acc.popToolsAndMerge(
+            V0ToolsCfg(flags, name+"_V0Tools")))
 
     acc.setPrivateTools(CompFactory.InDet.V0MainDecorator(name, **kwargs))
     return acc
