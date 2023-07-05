@@ -20,9 +20,9 @@ def SetupArgParser():
                                                                                   "OFLCOND-MC23-SDR-RUN3-02",
                                                                                   "CONDBR2-BLKPA-2023-02",
                                                                                   "CONDBR2-BLKPA-RUN2-11"])
-    parser.add_argument("--chambers", default=["BIL1A3", #"BIS1A3", "EML1A8", "BOS1A8", "BML1A5" 
+    parser.add_argument("--chambers", default=["all"
     ], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
-    parser.add_argument("--outRootFile", default="MdtGeoDump.root", help="Output ROOT file to dump the geomerty")
+    parser.add_argument("--outRootFile", default="GeoModelDump.root", help="Output ROOT file to dump the geomerty")
     parser.add_argument("--outTxtFile", default ="MdtGeoDump.txt", help="Output txt file to dump the geometry")
     return parser
 
@@ -44,7 +44,22 @@ def setupHistSvc(flags, out_file="MdtGeoDump.root"):
 
 def GeoModelMdtTestCfg(flags, name = "GeoModelMdtTest", **kwargs):
     result = ComponentAccumulator()
+    if not flags.Detector.GeometryMDT: return result
     the_alg = CompFactory.MuonGM.GeoModelMdtTest(name, **kwargs)
+    result.addEventAlgo(the_alg)
+    return result
+
+def GeoModelRpcTestCfg(flags,name = "GeoModelRpcTest", **kwargs):
+    result = ComponentAccumulator()
+    if not flags.Detector.GeometryRPC: return result
+    the_alg = CompFactory.MuonGM.GeoModelRpcTest(name, **kwargs)
+    result.addEventAlgo(the_alg)
+    return result
+
+def GeoModelTgcTestCfg(flags, name = "GeoModelTgcTest", **kwargs):
+    result = ComponentAccumulator()
+    if not flags.Detector.GeometryTGC: return result
+    the_alg = CompFactory.MuonGM.GeoModelTgcTest(name, **kwargs)
     result.addEventAlgo(the_alg)
     return result
 
@@ -68,6 +83,8 @@ if __name__=="__main__":
     cfg.merge(GeoModelMdtTestCfg(flags, TestStations = args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else [], 
                                         DumpTxtFile = args.outTxtFile,
                                         dumpSurfaces = True ))
+    cfg.merge(GeoModelRpcTestCfg(flags))
+    cfg.merge(GeoModelTgcTestCfg(flags))
     
     cfg.printConfig(withDetails=True, summariseProps=True)
     flags.dump()

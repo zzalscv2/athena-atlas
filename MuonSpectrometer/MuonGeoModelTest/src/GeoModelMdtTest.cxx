@@ -8,6 +8,7 @@
 
 #include "EventPrimitives/EventPrimitivesToStringConverter.h"
 #include "MuonReadoutGeometry/MdtReadoutElement.h"
+#include "MuonReadoutGeometry/MuonStation.h"
 namespace MuonGM {
 GeoModelMdtTest::GeoModelMdtTest(const std::string& name,
                                  ISvcLocator* pSvcLocator)
@@ -20,7 +21,6 @@ StatusCode GeoModelMdtTest::initialize() {
     if (m_dumpTree) ATH_CHECK(m_tree.init(this));
 
     const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
-
     for (const std::string& testCham : m_selectStat) {
         if (testCham.size() != 6) {
             ATH_MSG_FATAL("Wrong format given " << testCham);
@@ -123,6 +123,51 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadout
 
     m_tubeRad = readoutEle->innerTubeRadius();
     m_tubePitch = readoutEle->tubePitch();
+    
+    const MuonGM::MuonStation* station = readoutEle->parentMuonStation();
+    if (station->hasALines()){ 
+        m_ALineTransS = station->getALine_tras();
+        m_ALineTransT = station->getALine_traz();
+        m_ALineTransZ = station->getALine_trat();
+        m_ALineRotS   = station->getALine_rots();
+        m_ALineRotT   = station->getALine_rotz();
+        m_ALineRotZ   = station->getALine_rott();
+    }
+    const BLinePar* bline = readoutEle->getBLinePar();
+    if (bline) {
+        m_BLineBz = bline->bz();
+        m_BLineBp = bline->bp();
+        m_BLineBn = bline->bn();
+        m_BLineSp = bline->sp();
+        m_BLineSn = bline->sn();
+        m_BLineTw = bline->tw();
+        m_BLinePg = bline->pg();
+        m_BLineTr = bline->tr();
+        m_BLineEg = bline->eg();
+        m_BLineEp = bline->ep();
+        m_BLineEn = bline->en();
+    }
+    
+    if (station->hasMdtAsBuiltParams()) {
+        const MdtAsBuiltPar* asBuilt = station->getMdtAsBuiltParams();
+        using multilayer_t = MdtAsBuiltPar::multilayer_t;
+        using tubeSide_t   = MdtAsBuiltPar::tubeSide_t;
+        const multilayer_t asBuiltMl = readoutEle->getMultilayer() ? multilayer_t::ML1  : multilayer_t::ML2;
+        m_asBuiltPosY0 = asBuilt->y0(asBuiltMl, tubeSide_t::POS);
+        m_asBuiltPosZ0 = asBuilt->z0(asBuiltMl, tubeSide_t::POS);
+        m_asBuiltPosAlpha = asBuilt->alpha (asBuiltMl, tubeSide_t::POS);
+        m_asBuiltPosPitchY = asBuilt->ypitch(asBuiltMl, tubeSide_t::POS);
+        m_asBuiltPosPitchZ = asBuilt->zpitch(asBuiltMl, tubeSide_t::POS);
+        m_asBuiltPosStagg = asBuilt->stagg (asBuiltMl, tubeSide_t::POS);
+
+        m_asBuiltNegY0 = asBuilt->y0(asBuiltMl, tubeSide_t::NEG);
+        m_asBuiltNegZ0 = asBuilt->z0(asBuiltMl, tubeSide_t::NEG);
+        m_asBuiltNegAlpha = asBuilt->alpha (asBuiltMl, tubeSide_t::NEG);
+        m_asBuiltNegPitchY = asBuilt->ypitch(asBuiltMl, tubeSide_t::NEG);
+        m_asBuiltNegPitchZ = asBuilt->zpitch(asBuiltMl, tubeSide_t::NEG);
+        m_asBuiltNegStagg = asBuilt->stagg (asBuiltMl, tubeSide_t::NEG);
+    }
+
 
     const Amg::Transform3D& trans{readoutEle->transform()};
     m_readoutTransform.push_back(Amg::Vector3D(trans.translation()));
