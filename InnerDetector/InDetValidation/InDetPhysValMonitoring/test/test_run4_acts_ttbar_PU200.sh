@@ -6,6 +6,7 @@
 # art-output: *.xml
 # art-output: dcube*
 # art-html: dcube_last
+# art-athena-mt: 8
 
 lastref_dir=last_results
 ref_trk=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/ActsTest_AthenaRef.IDPVM.root
@@ -36,6 +37,8 @@ run () {
     return $rc
 }
 
+export ATHENA_CORE_NUMBER=8
+
 run "Reconstruction" \
     Reco_tf.py --CA \
     --inputRDOFile ${rdo_23p0} \
@@ -44,7 +47,8 @@ run "Reconstruction" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsArtFlags" \
     --postInclude "ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
     --preExec "flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;" \
-    --maxEvents 20
+    --maxEvents 20 \
+    --multithreaded
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
