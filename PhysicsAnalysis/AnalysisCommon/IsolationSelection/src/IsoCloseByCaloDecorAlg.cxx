@@ -48,6 +48,7 @@ namespace CP {
             ATH_MSG_FATAL("Failed to retrieve particle collection " << m_primPartKey.fullKey());
             return StatusCode::FAILURE;
         }
+
         for (const xAOD::IParticle* part : *readHandle) {
             float eta{0.f}, phi{0.f}, ene{0.f};
             if (m_decorClust) {

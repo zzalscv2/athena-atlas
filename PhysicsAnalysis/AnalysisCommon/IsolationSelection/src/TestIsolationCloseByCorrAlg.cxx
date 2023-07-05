@@ -118,7 +118,11 @@ namespace CP {
         Muons = MuonsShallow.first.get();
 
         // Okay everything is defined for the preselection of the algorithm. lets  pass the things  towards the IsoCorrectionTool
+#ifndef XAOD_ANALYSIS
+        if (m_isoCloseByCorrTool->getCloseByIsoCorrection(ctx, Electrons, Muons, Photons).code() == CorrectionCode::Error) {
+#else
         if (m_isoCloseByCorrTool->getCloseByIsoCorrection(Electrons, Muons, Photons).code() == CorrectionCode::Error) {
+#endif
             ATH_MSG_ERROR("Something weird happened with the tool");
             return StatusCode::FAILURE;
         }

@@ -238,19 +238,28 @@ def makeElectronWorkingPointSequence( seq, dataType, workingPoint,
         # It is safe to do this before calibration, as the cluster E is used
         alg = createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlg' + postfix )
         alg.selectionDecoration = 'selectLikelihood' + postfix + ',as_bits'
-        if recomputeLikelihood:
-            # Rerun the likelihood ID
-            addPrivateTool( alg, 'selectionTool', 'AsgElectronLikelihoodTool' )
-            alg.selectionTool.primaryVertexContainer = 'PrimaryVertices'
-            alg.selectionTool.WorkingPoint = likelihoodWP
-            algDecorCount = 7
-        else:
-            # Select from Derivation Framework flags
-            addPrivateTool( alg, 'selectionTool', 'CP::AsgFlagSelectionTool' )
-            dfFlag = "DFCommonElectronsLH" + likelihoodWP.split('LH')[0]
-            dfFlag = dfFlag.replace("BLayer","BL")
-            alg.selectionTool.selectionFlags = [dfFlag]
+        if 'SiHits' in likelihoodWP:
+            # Select from Derivation Framework IsEM bits
+            addPrivateTool( alg, 'selectionTool', 'CP::AsgMaskSelectionTool' )
+            dfVar = "DFCommonElectronsLHLooseBLIsEMValue"
+            alg.selectionTool.selectionVars = [dfVar]
+            mask = int( 0 | 0x1 << 1 | 0x1 << 2)
+            alg.selectionTool.selectionMasks = [mask]
             algDecorCount = 1
+        else:
+            if recomputeLikelihood:
+                # Rerun the likelihood ID
+                addPrivateTool( alg, 'selectionTool', 'AsgElectronLikelihoodTool' )
+                alg.selectionTool.primaryVertexContainer = 'PrimaryVertices'
+                alg.selectionTool.WorkingPoint = likelihoodWP
+                algDecorCount = 7
+            else:
+                # Select from Derivation Framework flags
+                addPrivateTool( alg, 'selectionTool', 'CP::AsgFlagSelectionTool' )
+                dfFlag = "DFCommonElectronsLH" + likelihoodWP.split('LH')[0]
+                dfFlag = dfFlag.replace("BLayer","BL")
+                alg.selectionTool.selectionFlags = [dfFlag]
+                algDecorCount = 1
     else:
         # Set up the DNN ID selection algorithm
         alg = createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronDNNAlg' + postfix )

@@ -4,6 +4,7 @@
 
 #include "../IsoCloseByCaloDecorAlg.h"
 #include "../IsoCloseByCorrectionTrkSelAlg.h"
+#include "../IsoCloseByCorrectionAlg.h"
 #include "../TestIsolationAthenaAlg.h"
 #include "../TestIsolationCloseByCorrAlg.h"
 #include "IsolationSelection/IsolationCloseByCorrectionTool.h"
@@ -15,5 +16,6 @@ DECLARE_COMPONENT(CP::TestIsolationAthenaAlg)
 DECLARE_COMPONENT(CP::IsolationCloseByCorrectionTool)
 DECLARE_COMPONENT(CP::TestIsolationCloseByCorrAlg)
 DECLARE_COMPONENT(CP::IsoCloseByCorrectionTrkSelAlg)
+DECLARE_COMPONENT(CP::IsoCloseByCorrectionAlg)
 DECLARE_COMPONENT(CP::IsoCloseByCaloDecorAlg)
 DECLARE_COMPONENT(CP::IsolationLowPtPLVTool)

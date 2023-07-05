@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef ISOLATIONSELECTION_ISOLATIONCONDITIONCOMBINED_H
@@ -13,7 +13,7 @@ namespace CP {
     class IsolationConditionCombined : public IsolationCondition {
     public:
         IsolationConditionCombined(const std::string& name, const std::vector<xAOD::Iso::IsolationType>& isoType,
-                                   std::unique_ptr<TF1> isoFunction, const std::string& cutFunction);
+                                   std::unique_ptr<TF1> isoFunction, const std::string& cutFunction, std::string isoDecSuffix = "");
         virtual ~IsolationConditionCombined() = default;
 
         bool accept(const xAOD::IParticle& x) const override;

@@ -9,6 +9,7 @@
 #define ASG_ANALYSIS_ALGORITHMS__ASG_ANALYSIS_ALGORITHMS_DICT_H
 
 #include <AsgAnalysisAlgorithms/AsgFlagSelectionTool.h>
+#include <AsgAnalysisAlgorithms/AsgMaskSelectionTool.h>
 #include <AsgAnalysisAlgorithms/AsgPtEtaSelectionTool.h>
 #include <AsgAnalysisAlgorithms/AsgClassificationDecorationAlg.h>
 #include <AsgAnalysisAlgorithms/AsgPriorityDecorationAlg.h>
@@ -25,7 +26,6 @@
 #include <AsgAnalysisAlgorithms/EventFlagSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/EventStatusSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/EventSelectionByObjectFlagAlg.h>
-#include <AsgAnalysisAlgorithms/IsolationCloseByCorrectionAlg.h>
 #include <AsgAnalysisAlgorithms/KinematicHistAlg.h>
 #include <AsgAnalysisAlgorithms/ObjectCutFlowHistAlg.h>
 #include <AsgAnalysisAlgorithms/OverlapRemovalAlg.h>

@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef ISOLATIONSELECTION_ISOLATIONCONDITION_H
@@ -26,10 +26,10 @@ struct strObj {
 namespace CP {
     class IsolationCondition {
     public:
-        IsolationCondition(const std::string& name, xAOD::Iso::IsolationType isoType);
-        IsolationCondition(const std::string& name, const std::vector<xAOD::Iso::IsolationType>& isoTypes);
-        IsolationCondition(const std::string& name, std::string& isoType);
-        IsolationCondition(const std::string& name, const std::vector<std::string>& isoTypes);
+        IsolationCondition(const std::string& name, xAOD::Iso::IsolationType isoType, std::string isoDecSuffix = "");
+        IsolationCondition(const std::string& name, const std::vector<xAOD::Iso::IsolationType>& isoTypes, std::string isoDecSuffix = "");
+        IsolationCondition(const std::string& name, std::string& isoType, std::string isoDecSuffix = "");
+        IsolationCondition(const std::string& name, const std::vector<std::string>& isoTypes, std::string isoDecSuffix = "");
 
         IsolationCondition(const IsolationCondition& rhs) = delete;
         IsolationCondition& operator=(const IsolationCondition& rhs) = delete;
@@ -48,6 +48,9 @@ namespace CP {
         std::string m_name;
         std::vector<xAOD::Iso::IsolationType> m_isolationType;
         std::vector<FloatAccessor> m_acc;
+        
+    protected:
+        std::string m_isoDecSuffix{};
     };
 }  // namespace CP
 #endif

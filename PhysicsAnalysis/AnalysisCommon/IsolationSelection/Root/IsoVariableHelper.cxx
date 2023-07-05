@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <IsolationSelection/IsoVariableHelper.h>
@@ -10,26 +10,26 @@ namespace CP {
     //######################################################################################################
     //                                      IsoVariableHelper
     //######################################################################################################
-    IsoVariableHelper::IsoVariableHelper(xAOD::Iso::IsolationType type, const std::string& BackupPreFix) :
+    IsoVariableHelper::IsoVariableHelper(xAOD::Iso::IsolationType type, const std::string& backupPreFix, const std::string& isoDecSuffix) :
         m_isoType(type),
-        m_BackupIso(!BackupPreFix.empty()),
-        m_dec_IsoIsBackup("IsBackup_" + std::string(xAOD::Iso::toString(type)) + (BackupPreFix.empty() ? "" : "_") + BackupPreFix),
-        m_acc_IsoIsBackup("IsBackup_" + std::string(xAOD::Iso::toString(type)) + (BackupPreFix.empty() ? "" : "_") + BackupPreFix),
+        m_BackupIso(!backupPreFix.empty()),
+        m_dec_IsoIsBackup("IsBackup_" + std::string(xAOD::Iso::toString(type)) + (backupPreFix.empty() ? "" : "_") + backupPreFix),
+        m_acc_IsoIsBackup("IsBackup_" + std::string(xAOD::Iso::toString(type)) + (backupPreFix.empty() ? "" : "_") + backupPreFix),
         m_acc_iso_variable(xAOD::Iso::toString(type)),
-        m_dec_iso_variable(xAOD::Iso::toString(type)),
-        m_acc_iso_backup(std::string(xAOD::Iso::toString(type)) + (BackupPreFix.empty() ? "" : "_") + BackupPreFix),
-        m_dec_iso_backup(std::string(xAOD::Iso::toString(type)) + (BackupPreFix.empty() ? "" : "_") + BackupPreFix) {}
+        m_dec_iso_variable(xAOD::Iso::toString(type) + (isoDecSuffix.empty() ? "" : "_") + isoDecSuffix),
+        m_acc_iso_backup(std::string(xAOD::Iso::toString(type)) + (backupPreFix.empty() ? "" : "_") + backupPreFix),
+        m_dec_iso_backup(std::string(xAOD::Iso::toString(type)) + (backupPreFix.empty() ? "" : "_") + backupPreFix) {}
 
-    CorrectionCode IsoVariableHelper::getOrignalIsolation(const xAOD::IParticle* particle, float& value) const {
+    CorrectionCode IsoVariableHelper::getOriginalIsolation(const xAOD::IParticle* particle, float& value) const {
         if (!particle) {
-            Error("IsoVariableHelper::GetOrignalIsolation()", "No particle given");
+            Error("IsoVariableHelper::getOriginalIsolation()", "No particle given");
             return CorrectionCode::Error;
         }
         if (!m_BackupIso) {
             return getIsolationFromOriginal(particle, value);
         } else {
             if (!m_acc_IsoIsBackup.isAvailable(*particle) || !m_acc_IsoIsBackup(*particle)) {
-                Warning("IsoVariableHelper::GetOrignalIsolation()",
+                Warning("IsoVariableHelper::getOriginalIsolation()",
                         "No isolation value was backuped thus far. Did you call the BackupIsolation before for %s?",
                         SG::AuxTypeRegistry::instance().getName(m_acc_IsoIsBackup.auxid()).c_str());
                 return CorrectionCode::Error;
@@ -44,7 +44,8 @@ namespace CP {
         if (originalParticle && getIsolation(originalParticle, value) == CorrectionCode::Error)
             return CorrectionCode::Error;
         else if (!originalParticle) {
-            Warning("IsoVariableHelper::GetOrignalIsolation()", "No original object was found");
+            // Suppress warning as the CloseBy tool is no longer working on a shallow copy
+            // Warning("IsoVariableHelper::getOriginalIsolation()", "No original object was found");
             return getIsolation(particle, value);
         }
         return CorrectionCode::Ok;
@@ -70,7 +71,7 @@ namespace CP {
         }
         return CorrectionCode::Ok;
     }
-    CorrectionCode IsoVariableHelper::setIsolation(xAOD::IParticle* particle, float value) const {
+    CorrectionCode IsoVariableHelper::setIsolation(const xAOD::IParticle* particle, float value) const {
         if (!particle) {
             Error("IsoVariableHelper::SetIsolation()", "No particle given");
             return CorrectionCode::Error;

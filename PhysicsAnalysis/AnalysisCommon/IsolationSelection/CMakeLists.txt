@@ -11,7 +11,7 @@ if ( NOT XAOD_STANDALONE)
    set(extra_libs  MuonTesterTreeLib)
 endif()
 if ( NOT XAOD_STANDALONE AND NOT XAOD_ANALYSIS )
-  set(extra_libs ${extra_libs} TrkExUtils)
+  set(extra_libs ${extra_libs} TrkExUtils TrackToCaloLib)
 endif()
 
 # Libraries in the package:

@@ -56,7 +56,7 @@ namespace DerivationFramework {
     for ( const xAOD::IParticle* part : *particles) {
       auto theAccept = m_tool->accept(part);  // asg::AcceptData or TAccept
       if(m_cut.empty()){
-          decorator(*part) = true && theAccept;    
+        decorator(*part) = true && theAccept;    
       } else{
         decorator(*part) = true && theAccept.getCutResult(m_cut);
       }

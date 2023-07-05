@@ -147,23 +147,32 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             # It is safe to do this before calibration, as the cluster E is used
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlg' + postfix )
             alg.selectionDecoration = 'selectLikelihood' + selectionPostfix + ',as_bits'
-            if self.recomputeLikelihood:
-                # Rerun the likelihood ID
-                config.addPrivateTool( 'selectionTool', 'AsgElectronLikelihoodTool' )
-                alg.selectionTool.primaryVertexContainer = 'PrimaryVertices'
-                # Here we have to match the naming convention of EGSelectorConfigurationMapping.h
-                if self.isRun3Geo:
-                    alg.selectionTool.WorkingPoint = self.likelihoodWP + 'Electron'
-                else:
-                    alg.selectionTool.WorkingPoint = self.likelihoodWP + 'Electron_Run2'
-                algDecorCount = 7
-            else:
-                # Select from Derivation Framework flags
-                config.addPrivateTool( 'selectionTool', 'CP::AsgFlagSelectionTool' )
-                dfFlag = "DFCommonElectronsLH" + self.likelihoodWP.split('LH')[0]
-                dfFlag = dfFlag.replace("BLayer","BL")
-                alg.selectionTool.selectionFlags = [dfFlag]
+            if 'SiHits' in self.likelihoodWP:
+                # Select from Derivation Framework IsEM bits
+                config.addPrivateTool( 'selectionTool', 'CP::AsgMaskSelectionTool' )
+                dfVar = "DFCommonElectronsLHLooseBLIsEMValue"
+                alg.selectionTool.selectionVars = [dfVar]
+                mask = int( 0 | 0x1 << 1 | 0x1 << 2)
+                alg.selectionTool.selectionMasks = [mask]
                 algDecorCount = 1
+            else:
+                if self.recomputeLikelihood:
+                    # Rerun the likelihood ID
+                    config.addPrivateTool( 'selectionTool', 'AsgElectronLikelihoodTool' )
+                    alg.selectionTool.primaryVertexContainer = 'PrimaryVertices'
+                    # Here we have to match the naming convention of EGSelectorConfigurationMapping.h
+                    if self.isRun3Geo:
+                        alg.selectionTool.WorkingPoint = self.likelihoodWP + 'Electron'
+                    else:
+                        alg.selectionTool.WorkingPoint = self.likelihoodWP + 'Electron_Run2'
+                    algDecorCount = 7
+                else:
+                    # Select from Derivation Framework flags
+                    config.addPrivateTool( 'selectionTool', 'CP::AsgFlagSelectionTool' )
+                    dfFlag = "DFCommonElectronsLH" + self.likelihoodWP.split('LH')[0]
+                    dfFlag = dfFlag.replace("BLayer","BL")
+                    alg.selectionTool.selectionFlags = [dfFlag]
+                    algDecorCount = 1
         else:
             # Set up the DNN ID selection algorithm
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronDNNAlg' + postfix )

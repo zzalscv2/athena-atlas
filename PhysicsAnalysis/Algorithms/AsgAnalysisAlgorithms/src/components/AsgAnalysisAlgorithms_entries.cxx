@@ -5,6 +5,7 @@
 /// @author Nils Krumnack
 
 #include <AsgAnalysisAlgorithms/AsgFlagSelectionTool.h>
+#include <AsgAnalysisAlgorithms/AsgMaskSelectionTool.h>
 #include <AsgAnalysisAlgorithms/AsgPtEtaSelectionTool.h>
 #include <AsgAnalysisAlgorithms/AsgCutBookkeeperAlg.h>
 #include <AsgAnalysisAlgorithms/AsgClassificationDecorationAlg.h>
@@ -21,7 +22,6 @@
 #include <AsgAnalysisAlgorithms/EventFlagSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/EventStatusSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/EventSelectionByObjectFlagAlg.h>
-#include <AsgAnalysisAlgorithms/IsolationCloseByCorrectionAlg.h>
 #include <AsgAnalysisAlgorithms/KinematicHistAlg.h>
 #include <AsgAnalysisAlgorithms/ObjectCutFlowHistAlg.h>
 #include <AsgAnalysisAlgorithms/OverlapRemovalAlg.h>
@@ -32,6 +32,7 @@
 #include <AsgAnalysisAlgorithms/TreeMakerAlg.h>
 
 DECLARE_COMPONENT (CP::AsgFlagSelectionTool)
+DECLARE_COMPONENT (CP::AsgMaskSelectionTool)
 DECLARE_COMPONENT (CP::AsgPtEtaSelectionTool)
 DECLARE_COMPONENT (CP::AsgClassificationDecorationAlg)
 DECLARE_COMPONENT (CP::AsgPriorityDecorationAlg)
@@ -48,7 +49,6 @@ DECLARE_COMPONENT (CP::AsgxAODMetNTupleMakerAlg)
 DECLARE_COMPONENT (CP::EventFlagSelectionAlg)
 DECLARE_COMPONENT (CP::EventStatusSelectionAlg)
 DECLARE_COMPONENT (CP::EventSelectionByObjectFlagAlg)
-DECLARE_COMPONENT (CP::IsolationCloseByCorrectionAlg)
 DECLARE_COMPONENT (CP::KinematicHistAlg)
 DECLARE_COMPONENT (CP::ObjectCutFlowHistAlg)
 DECLARE_COMPONENT (CP::OverlapRemovalAlg)
