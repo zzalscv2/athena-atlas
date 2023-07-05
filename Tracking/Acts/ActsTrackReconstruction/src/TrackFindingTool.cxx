@@ -64,7 +64,7 @@ namespace
 
   static Acts::Result<void>
   gainMatrixUpdate(const Acts::GeometryContext &gctx,
-		   typename ActsTrk::TrackStateBackend::TrackStateProxy trackState,
+                   typename ActsTrk::TrackStateBackend::TrackStateProxy trackState,
                    Acts::Direction direction,
                    const Acts::Logger &logger)
   {
@@ -544,8 +544,12 @@ namespace ActsTrk
         ++m_nFailedSeeds;
         continue;
       }
+
+      // Fill the track infos into the duplicate seed detector
+      ATH_CHECK(storeSeedInfo(tracksContainer, result.value(), duplicateSeedDetector));
+
       // Get the track finding output and add to tracksCollection
-      size_t ntracks = makeTracks(ctx, tgContext, tracksContainer, result.value(), tracksCollection, duplicateSeedDetector);
+      size_t ntracks = makeTracks(ctx, tgContext, tracksContainer, result.value(), tracksCollection);
       addTracks += ntracks;
 
       if (!m_trackStatePrinter.empty())
@@ -567,14 +571,40 @@ namespace ActsTrk
     return StatusCode::SUCCESS;
   }
 
+  StatusCode
+  TrackFindingTool::storeSeedInfo(const ActsTrk::TrackContainer &tracksContainer,
+                                  const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
+                                  TrackFindingTool::DuplicateSeedDetector &duplicateSeedDetector) const
+  {
+    for (auto &track : fitResult)
+    {
+      const auto lastMeasurementIndex = track.tipIndex();
+      duplicateSeedDetector.newTrajectory();
+
+      tracksContainer.trackStateContainer().visitBackwards(
+          lastMeasurementIndex,
+          [&duplicateSeedDetector](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
+          {
+            // Check there is a source link
+            if (not state.hasUncalibratedSourceLink())
+              return;
+
+            // Fill the duplicate selector
+            auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
+            duplicateSeedDetector.addMeasurement(sl);
+          }); // end visit backwards
+    }         // loop on tracks from fitResult
+
+    return StatusCode::SUCCESS;
+  }
+
   /// based on Tracking/Acts/ActsTrkTools/ActsTrkFittingTools/src/ActsKalmanFitter.ipp
   size_t
   TrackFindingTool::makeTracks(const EventContext &ctx,
                                const Acts::GeometryContext &tgContext,
                                const ActsTrk::TrackContainer &tracksContainer,
                                const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
-                               ::TrackCollection &tracksCollection,
-                               TrackFindingTool::DuplicateSeedDetector &duplicateSeedDetector) const
+                               ::TrackCollection &tracksCollection) const
   {
     size_t ntracks = 0;
     for (auto &track : fitResult)
@@ -585,7 +615,6 @@ namespace ActsTrk
       // initialise the number of dead Pixel and Acts strip
       int numberOfDeadPixel = 0;
       int numberOfDeadSCT = 0;
-      duplicateSeedDetector.newTrajectory();
 
       std::vector<std::unique_ptr<const Acts::BoundTrackParameters>> actsSmoothedParam;
       // Loop over all the output state to create track state
@@ -670,7 +699,6 @@ namespace ActsTrk
             if (state.hasUncalibratedSourceLink())
             {
               auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
-              duplicateSeedDetector.addMeasurement(sl);
               const xAOD::UncalibratedMeasurement &uncalibMeas = sl.atlasHit();
               measState = makeRIO_OnTrack(uncalibMeas, parm.get());
             }
