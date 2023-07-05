@@ -14,7 +14,7 @@
 // Rafal Staszewski   Jul 2011
 
 #include "GeneratorFilters/ForwardProtonFilter.h"
-
+#include "TruthUtils/HepMCHelpers.h"
 
 ForwardProtonFilter::ForwardProtonFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter(name,pSvcLocator)
@@ -38,8 +38,7 @@ StatusCode ForwardProtonFilter::filterEvent() {
   for (itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = *itr;
     for (const auto& part: *genEvt) {
-      // We're only interested in stable (status == 1) particles
-      if ( part->status() != 1) continue;
+      if ( !MC::isStable(part)) continue;
 
       // We are specifically looking for protons
       const long pid = part->pdg_id();

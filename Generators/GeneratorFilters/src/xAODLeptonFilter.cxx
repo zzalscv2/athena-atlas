@@ -4,7 +4,7 @@
 
 #include "GeneratorFilters/xAODLeptonFilter.h"
 #include <cmath>
-
+#include "TruthUtils/HepMCHelpers.h"
 
 xAODLeptonFilter::xAODLeptonFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter(name,pSvcLocator) 
@@ -41,7 +41,7 @@ StatusCode xAODLeptonFilter::filterEvent() {
 
 
 
-    if (part->status()==1 && part->absPdgId()==11){ //electron 
+    if (MC::isStable(part) && part->absPdgId()==11){ //electron 
           const double pT = part->pt();
           const double eta = part->abseta();
           if (pT > leading_lepton_pt_e && std::abs(eta) <= m_EtaRange) {
@@ -55,7 +55,7 @@ StatusCode xAODLeptonFilter::filterEvent() {
   for (unsigned int iPart=0; iPart<nParticlesMuons; ++iPart) {
     const xAOD::TruthParticle* part = (*xTruthParticleContainerMuon)[iPart];
 
-    if (part->status()==1 && part->absPdgId()==13){ //Muon 
+    if (MC::isStable(part) && part->absPdgId()==13){ //Muon 
         const double pT = part->pt();
           const double eta = part->abseta();
           if (pT > leading_lepton_pt_mu && std::abs(eta) <= m_EtaRange) {

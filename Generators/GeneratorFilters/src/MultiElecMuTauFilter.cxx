@@ -4,7 +4,7 @@
 
 #include "GeneratorFilters/MultiElecMuTauFilter.h"
 #include "CLHEP/Vector/LorentzVector.h"
-
+#include "TruthUtils/HepMCHelpers.h"
 
 MultiElecMuTauFilter::MultiElecMuTauFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter(name,pSvcLocator)
@@ -33,7 +33,7 @@ StatusCode MultiElecMuTauFilter::filterEvent() {
     const HepMC::GenEvent* genEvt = *itr;
     for (const auto& pitr: *genEvt) {
       // Electrons and muons
-      if (pitr->status() == 1 && (std::abs(pitr->pdg_id()) == 11 || std::abs(pitr->pdg_id()) == 13)) {
+      if (MC::isStable(pitr) && (std::abs(pitr->pdg_id()) == 11 || std::abs(pitr->pdg_id()) == 13)) {
         if (pitr->momentum().perp() >= m_minPt && std::abs(pitr->momentum().pseudoRapidity()) <= m_maxEta) {
           ATH_MSG_DEBUG("Found lepton with PDG ID = " << pitr->pdg_id()
                         << ", status = " <<  pitr->status()

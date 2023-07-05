@@ -78,7 +78,6 @@ StatusCode JetFilter::filterEvent() {
   const HepMC::GenEvent* genEvt = event();
   for (const auto& part: *genEvt) {
     /// @todo Use MCPID to identify leptons
-    // if ( part->status() == 1 ) {// stables only
       if(MC::isGenStable(part)) { //stables only
       if ( (part->pdg_id() != 13 ) &&  (part->pdg_id() != -13 ) &&
            (part->pdg_id() != 12 ) && (part->pdg_id() != -12 ) &&

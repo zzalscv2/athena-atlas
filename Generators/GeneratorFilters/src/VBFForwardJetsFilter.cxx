@@ -6,7 +6,7 @@
 #include "GaudiKernel/PhysicalConstants.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "xAODJet/JetContainer.h"
-
+#include "TruthUtils/HepMCHelpers.h"
 
 // Pt  High --> Low
 class High2LowByJetClassPt {
@@ -99,13 +99,13 @@ StatusCode VBFForwardJetsFilter::filterEvent() {
 #ifdef HEPMC3
     for (const auto& pitr: *genEvt) {
       // photon
-      if ( pitr->pdg_id() == 22 && pitr->status() == 1 &&
+      if ( pitr->pdg_id() == 22 && MC::isStable(pitr) &&
            pitr->momentum().perp() >= m_LGMinPt && std::abs(pitr->momentum().pseudoRapidity()) <= m_LGMaxEta) {
         MCTruthPhotonList.push_back(pitr);
         ATH_MSG_INFO("photon pt(Gaudi::Units::GeV) = " << pitr->momentum().perp()/Gaudi::Units::GeV << " eta = " << pitr->momentum().pseudoRapidity());
       }
       // electon
-      if ( std::abs(pitr->pdg_id()) == 11 && pitr->status() == 1 &&
+      if ( std::abs(pitr->pdg_id()) == 11 && MC::isStable(pitr) &&
            pitr->momentum().perp() >= m_LGMinPt && std::abs(pitr->momentum().pseudoRapidity()) <= m_LGMaxEta) {
         MCTruthElectronList.push_back(pitr);
         ATH_MSG_INFO("electron pt(Gaudi::Units::GeV) = " << pitr->momentum().perp()/Gaudi::Units::GeV << " eta = " << pitr->momentum().pseudoRapidity());
@@ -137,13 +137,13 @@ StatusCode VBFForwardJetsFilter::filterEvent() {
 #else
     for (HepMC::GenEvent::particle_const_iterator pitr = genEvt->particles_begin(); pitr != genEvt->particles_end(); ++pitr) {
       // photon
-      if ( (*pitr)->pdg_id() == 22 && (*pitr)->status() == 1 &&
+      if ( (*pitr)->pdg_id() == 22 && MC::isStable(*pitr) &&
            (*pitr)->momentum().perp() >= m_LGMinPt && std::abs((*pitr)->momentum().pseudoRapidity()) <= m_LGMaxEta) {
         MCTruthPhotonList.push_back((*pitr));
         ATH_MSG_INFO("photon pt(Gaudi::Units::GeV) = " << (*pitr)->momentum().perp()/Gaudi::Units::GeV << " eta = " << (*pitr)->momentum().pseudoRapidity());
       }
       // electon
-      if ( std::abs((*pitr)->pdg_id()) == 11 && (*pitr)->status() == 1 &&
+      if ( std::abs((*pitr)->pdg_id()) == 11 && MC::isStable(*pitr) &&
            (*pitr)->momentum().perp() >= m_LGMinPt && std::abs((*pitr)->momentum().pseudoRapidity()) <= m_LGMaxEta) {
         MCTruthElectronList.push_back((*pitr));
         ATH_MSG_INFO("electron pt(Gaudi::Units::GeV) = " << (*pitr)->momentum().perp()/Gaudi::Units::GeV << " eta = " << (*pitr)->momentum().pseudoRapidity());

@@ -4,6 +4,7 @@
 
 // Will pass if there are the specified number of photons with pT and eta in the specified range
 #include "GeneratorFilters/PhotonFilter.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 PhotonFilter::PhotonFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter(name, pSvcLocator)
@@ -23,7 +24,7 @@ StatusCode PhotonFilter::filterEvent() {
   for (McEventCollection::const_iterator itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
     for (const auto& pitr: *genEvt) {
-      if (pitr->pdg_id() == 22 && pitr->status()==1 &&
+      if (pitr->pdg_id() == 22 && MC::isStable(pitr) &&
           pitr->momentum().perp() >= m_Ptmin &&
           pitr->momentum().perp() <  m_Ptmax &&
           std::abs(pitr->momentum().pseudoRapidity()) <= m_EtaRange) NPhotons++;

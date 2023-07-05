@@ -4,6 +4,7 @@
 
 // Header for this module
 #include "GeneratorFilters/M4MuIntervalFilter.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
@@ -71,7 +72,7 @@ StatusCode M4MuIntervalFilter::filterEvent() {
     for (const auto& pitr: *genEvt){
 
 	   // muon
-	   if (std::abs((pitr)->pdg_id()) == 13 && (pitr)->status() == 1 &&
+	   if (std::abs((pitr)->pdg_id()) == 13 && MC::isStable(pitr) &&
 	      (pitr)->momentum().perp() >= m_minPt &&
 	       std::abs((pitr)->momentum().pseudoRapidity()) <= m_maxEta) {
            HepMC::FourVector tmp((pitr)->momentum().px(), (pitr)->momentum().py(), (pitr)->momentum().pz(), (pitr)->momentum().e());

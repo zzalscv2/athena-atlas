@@ -28,6 +28,8 @@
 #include <vector>
 #include <TLorentzVector.h>
 
+#include "TruthUtils/HepMCHelpers.h"
+
 //--------------------------------------------------------------------------
 xAODLeptonPairFilter::xAODLeptonPairFilter(const std::string& name, 
       ISvcLocator* pSvcLocator): GenFilter(name,pSvcLocator) {
@@ -76,7 +78,7 @@ StatusCode xAODLeptonPairFilter::filterEvent() {
     unsigned int nPart = genEvt->nTruthParticles();
     for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
         const xAOD::TruthParticle* pitr =  genEvt->truthParticle(iPart);
-        if( pitr->status()!=1 ) continue;
+        if( !MC::isStable(pitr) ) continue;
         // check stable particles only
         // We do not place requirements on their origins (updated: optionally rejecting hadron decays)
         // save pdg ids of found leptons
