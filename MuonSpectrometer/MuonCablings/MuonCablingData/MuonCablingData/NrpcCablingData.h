@@ -163,7 +163,9 @@ inline bool operator<(const NrpcCablingData& a, const NrpcCablOnDataByStrip& b) 
     return a.strip < b.firstStrip;
 }
 inline bool operator<(const NrpcCablOnDataByStrip& a, const  NrpcCablingCoolData& b) {
-     if (static_cast<const NrpcCablingOnlineID&>(a) != b) return static_cast<const NrpcCablingOnlineID&>(a) < b;
+     if (static_cast<const NrpcCablingOnlineID&>(a) != static_cast<const NrpcCablingOnlineID&>(b)) {
+         return static_cast<const NrpcCablingOnlineID&>(a) < b;
+     }
      return static_cast<const NrpcTdcStripRange&>(a) < b;
 }
 inline bool operator<(const  NrpcCablingCoolData& a, const NrpcCablOnDataByStrip& b) {
