@@ -48,7 +48,7 @@ namespace ActsTrk
                const Measurements &measurements,
                const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
                const ActsTrk::SeedContainer *seeds,
-               ActsTrk::TrackContainer &tracksContainer, 
+               ActsTrk::TrackContainer &tracksContainer,
                ::TrackCollection &tracksCollection,
                size_t seedCollectionIndex,
                const char *seedType) const override;
@@ -75,13 +75,16 @@ namespace ActsTrk
 
     // Create tracks from one seed's CKF result, appending to tracksContainer
     class DuplicateSeedDetector;
+    StatusCode storeSeedInfo(const ActsTrk::TrackContainer &tracksContainer,
+                             const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
+                             DuplicateSeedDetector &duplicateSeedDetector) const;
+
     size_t
     makeTracks(const EventContext &ctx,
                const Acts::GeometryContext &tgContext,
                const ActsTrk::TrackContainer &tracks,
                const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitOutput,
-               ::TrackCollection &tracksContainer,
-               DuplicateSeedDetector &duplicateSeedDetector) const;
+               ::TrackCollection &tracksContainer) const;
 
     std::unique_ptr<const Trk::MeasurementBase>
     makeRIO_OnTrack(const xAOD::UncalibratedMeasurement &uncalibMeas,
