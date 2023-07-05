@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -43,6 +43,8 @@ void compare(const TRT_RDO_Collection& p1,
   for (unsigned int i = 0; i < p1.size(); ++i) {
     const TRT_LoLumRawData* chan1 = dynamic_cast<const TRT_LoLumRawData*>(p1[i]);
     const TRT_LoLumRawData* chan2 = dynamic_cast<const TRT_LoLumRawData*>(p2[i]);
+    assert(chan1 != nullptr);
+    assert(chan2 != nullptr);
     compare(*chan1, *chan2);
   }
 }
