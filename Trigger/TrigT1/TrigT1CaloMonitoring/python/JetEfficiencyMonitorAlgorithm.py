@@ -97,8 +97,8 @@ def JetEfficiencyMonitoringConfig(inputFlags):
     multijet_triggers = ['L1_J85_3J30', 'L1_3J50', 'L1_4J15', 'L1_4J20']
     LR_triggers = ['L1_SC111-CJ15']
     
-    gfex_SR_triggers = ['L1_gJ20','L1_gJ30','L1_gJ40','L1_gJ50', 'L1_gJ100']
-    gfex_LR_triggers = ['L1_gLJ80', 'L1_gLJ100', 'L1_gLJ140']
+    gfex_SR_triggers = ['L1_gJ20','L1_gJ20p0ETA25','L1_gJ20p25ETA49','L1_gJ20p0ETA25_EMPTY', 'L1_gJ30','L1_gJ40','L1_gJ50', 'L1_gJ50p0ETA25','L1_gJ100', 'L1_gJ100p0ETA25', 'L1_gJ400p0ETA25' ]
+    gfex_LR_triggers = ['L1_gLJ80', 'L1_gLJ100', 'L1_gLJ140', 'L1_gLJ140p0ETA25']
 
     jfex_SR_triggers = ['L1_jJ30','L1_jJ40','L1_jJ50', 'L1_jJ60',
                     'L1_jJ80','L1_jJ90', 'L1_jJ125','L1_jJ140','L1_jJ160', 'L1_jJ180']
