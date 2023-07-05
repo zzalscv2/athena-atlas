@@ -203,7 +203,6 @@ def getKernel_GenericSimulator(name="ISF_Kernel_GenericSimulator", **kwargs):
 def getKernel_GenericSimulatorMT(name="ISF_Kernel_GenericSimulatorMT", **kwargs):
     kwargs.setdefault("InputEvgenCollection", "BeamTruthEvent" )
     kwargs.setdefault("OutputTruthCollection", "TruthEvent" )
-    kwargs.setdefault("ParticleKillerTool", "ISF_ParticleKillerTool" )
     kwargs.setdefault("GeoIDSvc", "ISF_GeoIDSvc" )
     if ISF_Flags.Simulator.isQuasiStable():
         kwargs.setdefault('InputConverter', 'ISF_LongLivedInputConverter')
