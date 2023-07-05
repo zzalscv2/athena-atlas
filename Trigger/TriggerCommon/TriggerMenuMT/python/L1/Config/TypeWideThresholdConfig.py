@@ -96,7 +96,7 @@ def getTypeWideThresholdConfig(ttype,do_HI_tob_thresholds=False):
     if ttype == ThrType.MU:
         return getConfig_MU()
     if ttype == ThrType.eEM:
-        return getConfig_eEM()
+        return getConfig_eEM(do_HI_tob_thresholds)
     if ttype == ThrType.jEM:
         return getConfig_jEM()
     if ttype == ThrType.eTAU:
@@ -171,7 +171,7 @@ def getConfig_MU():
     return confObj
 
 
-def getConfig_eEM():
+def getConfig_eEM(do_HI_tob_thresholds):
     confObj = odict()
     confObj["workingPoints"] = odict()
     bitshift_reta = 3
@@ -233,7 +233,7 @@ def getConfig_eEM():
                ("etamin",  24), ("etamax", 49), ("priority", 0)]),
         # More granular cuts from -24 to 25 are specified in FexThresholdParameters
     ]
-    confObj["ptMinToTopo"] = 3
+    confObj["ptMinToTopo"] = 1 if do_HI_tob_thresholds else 3
     confObj["maxEt"] = 60
     confObj["resolutionMeV"] = 100
 
