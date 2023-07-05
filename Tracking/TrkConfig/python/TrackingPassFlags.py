@@ -462,6 +462,8 @@ def createITkFTFPassFlags():
 
     icf = createITkFastTrackingPassFlags()
     
+    icf.addFlag("doHitDV"            , False)
+    icf.addFlag("doDisappearingTrk"  , False)
     icf.minPT                 = [0.9 * Units.GeV, 0.4 * Units.GeV, 0.4 * Units.GeV]
     icf.minPTSeed             = 0.9 * Units.GeV
 
