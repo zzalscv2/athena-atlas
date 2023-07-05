@@ -23,7 +23,7 @@ AlgorithmIdenti...   INFO Store:'StoreGateSvc_Impl'
 AlgorithmIdenti...   INFO Store Hash:2258941643
 AlgorithmIdenti...   INFO View ID:-1
 AlgorithmIdenti...   INFO AI Hash:2948771837912172353
-AlgorithmIdenti...  DEBUG Caught St12domain_error: Hashes the same for category: ALG and elements APP_HLT:HLTMPPU-36:HLT-36:tpu-rack-73:pc-tdq-tpu-73012-30 APP_HLT:HLTMPPU-36:HLT-36:tpu-rack-75:pc-tdq-tpu-75033-11
+AlgorithmIdenti...  DEBUG Caught St12domain_error: Hash collision in category ALG for elements APP_HLT:HLTMPPU-36:HLT-36:tpu-rack-73:pc-tdq-tpu-73012-30 and APP_HLT:HLTMPPU-36:HLT-36:tpu-rack-75:pc-tdq-tpu-75033-11
 AlgorithmIdenti...   INFO ----------
 AlgorithmIdenti...   INFO Valid? YES
 AlgorithmIdenti...   INFO Real Slot:0
