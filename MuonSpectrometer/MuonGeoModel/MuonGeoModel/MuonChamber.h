@@ -35,7 +35,6 @@ namespace MuonGM {
 
         double rotangle[10]{};
 
-        int stationPhiTGC(std::string_view stName, int fi, int zi, std::string_view geometry_version) const;
         inline void setFineClashFixingFlag(int value);
 
         MuonChamber(const MYSQL& mysql, Station *s);
