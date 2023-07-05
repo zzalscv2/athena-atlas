@@ -1,4 +1,3 @@
-
 #ifndef TRUTHUTILS_ATLASPID_H
 #define TRUTHUTILS_ATLASPID_H
 #include <vector>
@@ -185,7 +184,8 @@ template<class T> inline bool isValid(const T& p);
 template<class T> inline bool isTransportable(const T& p);
 template<class T> inline bool isGenSpecific(const T& p);
 template<class T> inline bool isGeantino(const T& p);
-
+template<class T> inline bool isPythia8Specific(const T& p);
+template<> inline bool isPythia8Specific(const DecodedPID& p){ return (p(0) == 9 && p(1) == 9 && p.ndigits() == 7 );}
 /// Main Table
 /// for MC internal use 81–100,901–930,998-999,1901–1930,2901–2930, and 3901–3930
 template<> inline bool isGenSpecific(const int& p){ 
@@ -345,7 +345,8 @@ template<> inline bool isHadron(const DecodedPID& p){ return isMeson(p)||isBaryo
 template<> inline bool isHadron(const int& p){ auto value_digits = DecodedPID(p); return isHadron(value_digits);}
 template<> inline bool isTransportable(const DecodedPID& p){ return isPhoton(p.pid()) || isGeantino(p.pid()) || isHadron(p) || isLepton(p.pid());}
 template<> inline bool isTransportable(const int& p){ auto value_digits = DecodedPID(p); return isTransportable(value_digits);}
-template<> inline bool isValid(const DecodedPID& p){ return isHadron(p) || isTrajectory(p.pid()) || isDiquark(p) || isBSM(p) || isNucleus(p) || (std::abs(p.pid()) < 42) || isGenSpecific(p.pid()) || isGeantino(p.pid());}
+/// Av: we implement here an ATLAS-sepcific convention: all particles which are 99xxxxx are fine.
+template<> inline bool isValid(const DecodedPID& p){ return isHadron(p) || isTrajectory(p.pid()) || isDiquark(p) || isBSM(p) || isNucleus(p) || (std::abs(p.pid()) < 42) || isGenSpecific(p.pid()) || isGeantino(p.pid()) || isPythia8Specific(p);}
 template<> inline bool isValid(const int& p){ if (!p) return false; if (std::abs(p) < 42) return true; 
   if (isGenSpecific(p)) return true;
   auto value_digits = DecodedPID(p); return isValid(value_digits);
