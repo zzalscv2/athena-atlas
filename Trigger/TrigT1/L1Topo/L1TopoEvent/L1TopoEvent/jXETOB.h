@@ -40,7 +40,7 @@ namespace TCS {
       void setEx(int ex) { m_Ex = ex; }
       void setEy(int ey) { m_Ey = ey; }
       void setEt(unsigned int et) { m_Et = et; }
-      void setEt2(unsigned int et2) { m_Et2 = et2; }
+      void setEt2(unsigned long long et2) { m_Et2 = et2; }
       
       void setExDouble(double ex) { m_ExDouble = ex; }
       void setEyDouble(double ey) { m_EyDouble = ey; }
@@ -63,7 +63,7 @@ namespace TCS {
       int m_Ex {0};
       int m_Ey {0};
       unsigned int m_Et {0};
-      unsigned int m_Et2 {0};
+      unsigned long long m_Et2 {0};
 
       double m_ExDouble {0};
       double m_EyDouble {0};

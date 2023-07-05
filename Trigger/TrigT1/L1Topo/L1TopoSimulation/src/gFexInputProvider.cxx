@@ -186,7 +186,11 @@ gFexInputProvider::fillXEJWOJ(TCS::TopoInputEvent& inputEvent) const {
     
    int ExTopo = gFexRoI->METquantityOne()*m_EtGlobal_conversion;
    int EyTopo = gFexRoI->METquantityTwo()*m_EtGlobal_conversion;
-   unsigned int Et2Topo = ExTopo*ExTopo + EyTopo*EyTopo;
+
+   unsigned long long ExTopoLong = static_cast<unsigned long long>(ExTopo);
+   unsigned long long EyTopoLong = static_cast<unsigned long long>(EyTopo);
+
+   unsigned long long Et2Topo = ExTopoLong*ExTopoLong + EyTopoLong*EyTopoLong;
    unsigned int EtTopo  = std::sqrt(Et2Topo);
  
    TCS::gXETOB gxe( -ExTopo, -EyTopo, EtTopo, TCS::GXEJWOJ );
@@ -234,7 +238,11 @@ gFexInputProvider::fillMHT(TCS::TopoInputEvent& inputEvent) const {
     
    int ExTopo = gFexRoI->METquantityOne()*m_EtGlobal_conversion;
    int EyTopo = gFexRoI->METquantityTwo()*m_EtGlobal_conversion;
-   unsigned int Et2Topo = ExTopo*ExTopo + EyTopo*EyTopo;
+
+   unsigned long long ExTopoLong = static_cast<unsigned long long>(ExTopo);
+   unsigned long long EyTopoLong = static_cast<unsigned long long>(EyTopo);
+
+   unsigned long long Et2Topo = ExTopoLong*ExTopoLong + EyTopoLong*EyTopoLong;
    unsigned int EtTopo  = std::sqrt(Et2Topo);
  
    TCS::gXETOB gxe( -ExTopo, -EyTopo, EtTopo, TCS::GMHT );
@@ -279,7 +287,12 @@ gFexInputProvider::fillXENC(TCS::TopoInputEvent& inputEvent) const {
     
    int ExTopo = gFexRoI->METquantityOne()*m_EtGlobal_conversion;
    int EyTopo = gFexRoI->METquantityTwo()*m_EtGlobal_conversion;
-   unsigned int Et2Topo = ExTopo*ExTopo + EyTopo*EyTopo;
+   
+   //Cast the Ex and Ey to longs to perform multiplication that is safe wrt. overflows   
+   unsigned long long ExTopoLong = static_cast<unsigned long long>(ExTopo);
+   unsigned long long EyTopoLong = static_cast<unsigned long long>(EyTopo);
+
+   unsigned long long Et2Topo = ExTopoLong*ExTopoLong + EyTopoLong*EyTopoLong;
    unsigned int EtTopo  = std::sqrt(Et2Topo);
  
    TCS::gXETOB gxe( -ExTopo, -EyTopo, EtTopo, TCS::GXENC );
@@ -323,7 +336,11 @@ gFexInputProvider::fillXERHO(TCS::TopoInputEvent& inputEvent) const {
     
    int ExTopo = gFexRoI->METquantityOne()*m_EtGlobal_conversion;
    int EyTopo = gFexRoI->METquantityTwo()*m_EtGlobal_conversion;
-   unsigned int Et2Topo = ExTopo*ExTopo + EyTopo*EyTopo;
+
+   unsigned long long ExTopoLong = static_cast<unsigned long long>(ExTopo);
+   unsigned long long EyTopoLong = static_cast<unsigned long long>(EyTopo);
+
+   unsigned long long Et2Topo = ExTopoLong*ExTopoLong + EyTopoLong*EyTopoLong;
    unsigned int EtTopo  = std::sqrt(Et2Topo);
  
    TCS::gXETOB gxe( -ExTopo, -EyTopo, EtTopo, TCS::GXERHO );
