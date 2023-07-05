@@ -19,7 +19,7 @@ hlt.forks = 1
 hlt.threads = 4
 hlt.concurrent_events = 4
 hlt.max_events = 50
-hlt.args = f'--precommand=\\\"setMenu=\\\'{triggermenu}\\\'\\;doL1Sim=True\\;rewriteLVL1=True\\;flags.GeoModel.AtlasVersion=\\\'ATLAS-R2-2016-01-00-01\\\'\\;flags.IOVDb.GlobalTag=\\\'CONDBR2-HLTP-2018-03\\\'\\;\\\"'
+hlt.args = f'--precommand=\\\"setMenu=\\\'{triggermenu}\\\'\\;doL1Sim=True\\;rewriteLVL1=True\\;flags.GeoModel.AtlasVersion=\\\'ATLAS-R2-2016-01-00-01\\\'\\;flags.IOVDb.GlobalTag=\\\'CONDBR2-HLTP-2018-04\\\'\\;\\\"'
 hlt.args += ' --prodSysBSRDO True'
 hlt.args += ' --outputBSFile=RAW.pool.root'
 hlt.args += ' --outputHIST_HLTMONFile=hltmon.root'
@@ -54,7 +54,7 @@ tzreco.args = '--inputBSFile=RAW.pool.root'  # output of the previous step
 tzreco.args += ' --outputAODFile=AOD.pool.root'
 tzreco.args += ' --outputNTUP_TRIGRATEFile=rate.ntup.root'
 tzreco.args += ' --outputHISTFile=hist.root'
-tzreco.args += ' --conditionsTag=\'CONDBR2-BLKPA-RUN2-09\' --geometryVersion=\'ATLAS-R2-2016-01-00-01\''
+tzreco.args += ' --conditionsTag=\'CONDBR2-BLKPA-RUN2-11\' --geometryVersion=\'ATLAS-R2-2016-01-00-01\''
 tzreco.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
 tzreco.args += ' --CA'
 

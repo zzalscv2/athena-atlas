@@ -6,6 +6,7 @@
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthParticleAuxContainer.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 xAODMuonFilter::xAODMuonFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter(name,pSvcLocator)
@@ -27,7 +28,7 @@ StatusCode xAODMuonFilter::filterEvent() {
   for (unsigned int iPart=0; iPart<nParticles; ++iPart) {
     const xAOD::TruthParticle* part = (*xTruthParticleContainer)[iPart];
 
-    if (part->status()==1 && part->absPdgId()==13) //muon
+    if (MC::isStable(part) && part->absPdgId()==13) //muon
         if(  part->pt()>= m_Ptmin && part->abseta() <= m_EtaRange )
             return StatusCode::SUCCESS;
   }

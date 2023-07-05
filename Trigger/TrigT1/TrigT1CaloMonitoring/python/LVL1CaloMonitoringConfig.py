@@ -79,12 +79,13 @@ def LVL1CaloMonitoringConfig(flags):
             from TrigT1CaloMonitoring.GfexMonitorAlgorithm import GfexMonitoringConfig
             result.merge(GfexMonitoringConfig(flags))
 
-            # efex input monitoring (requires SCell and Emulated towers)
-            from L1CaloFEXSim.L1CaloFEXSimCfg import ReadSCellFromByteStreamCfg
-            result.merge(ReadSCellFromByteStreamCfg(flags))
+            # run the L1Calo simulation (causes conflicts with DAOD)
+            from L1CaloFEXSim.L1CaloFEXSimCfg import L1CaloFEXSimCfg
+            result.merge(L1CaloFEXSimCfg(flags))
 
-            from L1CaloFEXAlgos.FexEmulatedTowersConfig import eFexEmulatedTowersCfg
-            result.merge(eFexEmulatedTowersCfg(flags,'L1_eFexEmulatedTowers'))
+            # monitoring of simulation vs hardware
+            from TrigT1CaloMonitoring.EfexSimMonitorAlgorithm import EfexSimMonitoringConfig
+            result.merge(EfexSimMonitoringConfig(flags))
 
             from TrigT1CaloMonitoring.EfexInputMonitorAlgorithm import EfexInputMonitoringConfig
             result.merge(EfexInputMonitoringConfig(flags))

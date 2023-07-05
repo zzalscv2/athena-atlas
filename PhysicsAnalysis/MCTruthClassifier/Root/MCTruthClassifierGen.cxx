@@ -137,12 +137,12 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
     return std::make_pair(GenParticle, partOrig);
   }
   bool isPartHadr = isHadron(thePart);
-  if (thePart->status() == 2 && (!MC::isTau(iParticlePDG) && !isPartHadr)) {
+  if (MC::isDecayed(thePart) && (!MC::isTau(iParticlePDG) && !isPartHadr)) {
     return std::make_pair(GenParticle, partOrig);
   }
 
   // SUSY datasets: tau(satus==2)->tau(satus==2)
-  if (thePart->status() == 2 && MC::isTau(iParticlePDG)) {
+  if (MC::isDecayed(thePart) && MC::isTau(iParticlePDG)) {
     const xAOD::TruthVertex* endVert = thePart->decayVtx();
     if (endVert != nullptr) {
       int numOfDaught = endVert->nOutgoingParticles();
@@ -152,11 +152,11 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
     }
   }
 
-  if (thePart->status() == 1 && MC::isSUSY(iParticlePDG)) {
+  if (MC::isStable(thePart) && MC::isSUSY(iParticlePDG)) {
     return std::make_pair(SUSYParticle, partOrig);
   }
 
-  if (thePart->status() == 1 && MC::isBSM(iParticlePDG)) {
+  if (MC::isStable(thePart) && MC::isBSM(iParticlePDG)) {
     return std::make_pair(OtherBSMParticle, partOrig);
   }
 
@@ -3175,7 +3175,7 @@ MCTruthClassifier::findParticleDaughters(const xAOD::TruthParticle* thePart,
       const xAOD::TruthParticle* theDaughter = endVtx->outgoingParticle(i);
       if (theDaughter == nullptr)
         continue;
-      if (theDaughter->status() == 1 && !HepMC::is_simulation_particle(theDaughter)) {
+      if (MC::isStable(theDaughter) && !HepMC::is_simulation_particle(theDaughter)) {
         // Add descendants with status code 1
         daughters.insert(theDaughter);
       }

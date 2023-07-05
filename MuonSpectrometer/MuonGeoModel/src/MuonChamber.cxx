@@ -1181,7 +1181,7 @@ namespace MuonGM {
                 if (zi < 0)
                     stationEta = -stationEta;
                 int stationPhi = 0;
-                stationPhi = MuonGM::stationPhiTGC(stName, fi + 1, zi, geometry_version);
+                stationPhi = MuonGM::stationPhiTGC(stName, fi + 1, zi);
                 int ttag = 1000 * stationPhi + tg->index;
                 std::string stag = "stPhiJob[" + MuonGM::buildString(ttag, 0) + "]" + techname + "tgccomponent";
                 GeoNameTag *nm = new GeoNameTag(stag);
@@ -1694,62 +1694,6 @@ namespace MuonGM {
     void MuonChamber::print() {
         MsgStream log(m_msgSvc, "MuGM:MuonChamber");
         log << MSG::INFO << "MuonChamber " << name << " :" << endmsg;
-    }
-
-    int MuonChamber::stationPhiTGC(std::string_view stName, int fi, int zi_input, std::string_view geometry_version) const {
-        std::string_view stName3 = stName.substr(0, 3);
-        int stphi = 0;
-
-        int zi = abs(zi_input);
-
-        if (stName3 == "T4E") {
-            switch (fi) {
-            case 0: stphi = zi; break;
-            case 1: stphi = zi + 3; break;
-            case 2: stphi = zi + 6; break;
-            case 3:
-                if (geometry_version.substr(0, 7) != "R.03.03") {
-                    stphi = zi + 9 - 1; // zi are 2 and 3 (counting do not tart by 1)
-                } else {
-                    stphi = zi + 9; // zi are numbered in order, i.e. 1 and 2
-                }
-                break;
-            case 4: stphi = zi + 11; break;
-            case 5: stphi = zi + 14; break;
-            case 6: stphi = zi + 16; break;
-            case 7: stphi = zi + 19; break;
-            default: stphi = 0;
-            }
-
-            // minumum stPhi at phi 0
-            stphi = stphi - 1;
-            if (stphi < 1)
-                stphi = stphi + 21;
-
-        } else {
-            int nch = 3;
-            if ((stName).substr(2, 1) == "E")
-                nch = 6;
-            int fioff = abs(zi);
-            if (fioff > 3 && (stName).substr(2, 1) == "F")
-                fioff = fioff - 3;
-            // minumum stPhi at phi 0
-            if ((stName).substr(2, 1) == "F") {
-                fioff = fioff - 1;
-            } else {
-                fioff = fioff - 2;
-            }
-            stphi = fi * nch + fioff;
-            if (stphi < 1) {
-                if ((stName).substr(2, 1) == "F") {
-                    stphi = stphi + 24;
-                } else {
-                    stphi = stphi + 48;
-                }
-            }
-        }
-
-        return stphi;
     }
 
 } // namespace MuonGM

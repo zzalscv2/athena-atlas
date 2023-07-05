@@ -22,6 +22,7 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/SimpleVector.h"
 #include "AtlasHepMC/GenParticle.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 //ROOT headers
 #include "TFile.h"
@@ -281,10 +282,10 @@ int ALFA_BeamTransport::TransportSelectedParticle(HepMC::GenEvent& evt, int evt_
        theta = std::acos(std::abs(p->momentum().pz()) / mom);
        eta = -std::log(std::tan(theta / 2));
 
-       if ((p->status() == 1) &&
+       if (MC::isStable(p) &&
            (!p->end_vertex())) { // TODO What is end_vertex()???
          // Change the status code from Pythia (1) to 201 //added 120124
-         p->set_status(201);
+         p->set_status(HepMC::PYTHIA8NOENDVERTEXSTATUS);
 
          int pid = p->pdg_id();
          if (eta > m_EtaCut &&

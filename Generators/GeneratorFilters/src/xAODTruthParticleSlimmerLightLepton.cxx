@@ -19,6 +19,7 @@
 #include "xAODTruth/TruthEventContainer.h"
 
 #include "GeneratorFilters/xAODTruthParticleSlimmerLightLepton.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 xAODTruthParticleSlimmerLightLepton::xAODTruthParticleSlimmerLightLepton(const std::string &name, ISvcLocator *svcLoc)
     : AthReentrantAlgorithm(name, svcLoc)
@@ -60,10 +61,9 @@ StatusCode xAODTruthParticleSlimmerLightLepton::execute(const EventContext& cont
             const xAOD::TruthParticle* particle =  (*itr)->truthParticle(iPart);
             
             int this_absPdgID = particle->absPdgId();
-            int this_status = particle->status();
 
             //Save stable Electrons & Muons
-            if (this_status == 1 && (this_absPdgID == 11 || this_absPdgID == 13) )
+            if (MC::isStable(particle) && (this_absPdgID == 11 || this_absPdgID == 13) )
             {
                 xAOD::TruthParticle *xTruthParticle = new xAOD::TruthParticle();
                 xTruthParticleContainerLightLepton->push_back( xTruthParticle );

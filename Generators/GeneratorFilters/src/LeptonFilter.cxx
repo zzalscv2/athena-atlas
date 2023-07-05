@@ -14,7 +14,7 @@
 
 #include "GeneratorFilters/LeptonFilter.h"
 #include <cmath>
-
+#include "TruthUtils/HepMCHelpers.h"
 
 LeptonFilter::LeptonFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter(name,pSvcLocator) 
@@ -37,7 +37,7 @@ StatusCode LeptonFilter::filterEvent() {
     for (const auto& part: *genEvt) {
 
       // We're only interested in stable (status == 1) particles
-      if ( part->status() != 1) continue;
+      if ( !MC::isStable(part)) continue;
 
       // We are specifically looking for electrons (+-11) and muons (+-13)
       const long pid = part->pdg_id();

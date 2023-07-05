@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -74,9 +74,8 @@ long PixelRawContByteStreamCnv::storageType()
 StatusCode PixelRawContByteStreamCnv::createRepConst(DataObject* pObj, IOpaqueAddress*& pAddr) const {
 
   PixelRDO_Container* cont=nullptr; 
-  SG::fromStorable(pObj,cont); 
 
-  if(!cont) {
+  if(!SG::fromStorable(pObj,cont)) {
     ATH_MSG_ERROR( "Can not cast to PixelRDO_Container" );
     return StatusCode::FAILURE;
   } 

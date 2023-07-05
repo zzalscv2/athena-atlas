@@ -39,7 +39,7 @@ Let's say the below file is `TriggerTest/test/test_trig_example.py`
 
 # art-description: example trigger test
 # art-type: build
-# art-include: master/Athena
+# art-include: main/Athena
 
 # Import modules needed to build a test configuration
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps

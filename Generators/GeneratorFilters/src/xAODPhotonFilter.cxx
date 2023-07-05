@@ -7,6 +7,7 @@
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthParticleAuxContainer.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 xAODPhotonFilter::xAODPhotonFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter(name, pSvcLocator)
@@ -35,7 +36,7 @@ StatusCode xAODPhotonFilter::filterEvent() {
   for (unsigned int iPart=0; iPart<nParticles; ++iPart) {
     const xAOD::TruthParticle* part = (*xTruthParticleContainer)[iPart];
 
-    if (part->status()==1 && part->absPdgId()==22) //photon
+    if (MC::isStable(part) && part->absPdgId()==22) //photon
         if(  part->pt()>= m_Ptmin && part->pt()< m_Ptmax && part->abseta() <= m_EtaRange )
         {
           NPhotons++;

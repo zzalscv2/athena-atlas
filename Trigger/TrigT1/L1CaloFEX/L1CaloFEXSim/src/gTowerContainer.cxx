@@ -12,7 +12,6 @@
 #include "L1CaloFEXSim/gTower.h"
 #include "AthenaKernel/errorcheck.h"
 #include "CLHEP/Geometry/Vector3D.h"
-#include <boost/algorithm/cxx11/partition_point.hpp>
 #include <atomic>
 
 namespace LVL1{

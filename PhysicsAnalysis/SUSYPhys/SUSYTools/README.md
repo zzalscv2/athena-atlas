@@ -42,7 +42,7 @@ And then the version of SUSYTools in the release can be checked out via:
 ```bash
 cd athena
 git atlas addpkg SUSYTools
-git checkout -b mybranchname upstream/master
+git checkout -b mybranchname upstream/main
 ```
 
 Then, to compile:  

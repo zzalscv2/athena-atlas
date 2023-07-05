@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -70,8 +70,7 @@ StatusCode
 BCM_RawContByteStreamCnv::createRepConst(DataObject* pObj, IOpaqueAddress*& pAddr) const
 {
   BCM_RDO_Container* cont = nullptr;
-  SG::fromStorable(pObj,cont);
-  if(!cont) {
+  if(! SG::fromStorable(pObj,cont)) {
     ATH_MSG_ERROR( "Can not cast to BCM_RDO_Container" );
     return StatusCode::FAILURE;
   }

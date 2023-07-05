@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -52,13 +52,11 @@ namespace InDet
  *  priamry interaction vertices.  A beam spot information
  *  can be used optionally to reject secondary tracks.
  */
-    virtual std::vector< std::vector<const Trk::Track *> > seeds(const std::vector<const Trk::Track*>& tracks )const = 0;
+    virtual std::vector<std::vector<const Trk::Track*> > seeds(
+        const std::vector<const Trk::Track*>& tracks) const = 0;
 
-    virtual std::vector< std::vector<const Trk::TrackParticleBase *> > seeds(const std::vector<const Trk::TrackParticleBase*>& tracks )const = 0;
-
-    //virtual std::vector< std::vector<const Trk::TrackParameters *> > seeds(const std::vector<const Trk::TrackParameters*>& tracks )const = 0;
-    
-    virtual std::vector< std::vector<const Trk::TrackParameters *> > seeds(const std::vector<const xAOD::TrackParticle*>& tracks )const = 0;
+    virtual std::vector<std::vector<const Trk::TrackParameters*> > seeds(
+        const std::vector<const xAOD::TrackParticle*>& tracks) const = 0;
 
  };//end of class definitions
 } //end of namespace definitions

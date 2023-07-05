@@ -277,7 +277,7 @@ std::vector<TLorentzVector> VGammaORTool::getLeptonP4s(const xAOD::TruthParticle
       }
     }
     // electron and muons: use all status 1 not from tau
-    else if (p->status() == 1 && !isFromTau(*p)) {
+    else if (MC::isStable(p) && !isFromTau(*p)) {
       elmu_candidates.push_back(p);
     }
   }

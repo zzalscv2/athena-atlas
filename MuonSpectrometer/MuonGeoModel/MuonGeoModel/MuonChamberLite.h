@@ -36,8 +36,6 @@ namespace MuonGM {
 
         std::array<double,10> rotangle{};
 
-        int stationPhiTGC(std::string_view stName, int fi, int zi) const;
-
         MuonChamberLite(const MYSQL& mysql, Station *s, 
 		        std::map<std::string, GeoFullPhysVol*> * mapFPV,
                         std::map<std::string, GeoAlignableTransform *> * mapAXF);

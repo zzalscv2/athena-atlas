@@ -20,6 +20,8 @@
 
 #include "TileTBMonTool.h"
 #include "TileIdentifier/TileHWID.h"
+#include "Identifier/IdentifierHash.h"
+
 #include "TileEvent/TileDigitsContainer.h"
 #include "TileEvent/TileRawChannelContainer.h"
 #include "TileCalibBlobObjs/TileCalibUtils.h"
@@ -31,10 +33,11 @@
 
 #include <iostream>
 #include <sstream>
-#include <string>
 #include <iomanip>
 #include <cmath>
 #include <algorithm>
+#include <map>
+
 
 /*---------------------------------------------------------*/
 TileTBMonTool::TileTBMonTool(const std::string & type, const std::string & name, const IInterface* parent)
@@ -250,6 +253,11 @@ StatusCode TileTBMonTool::fillHistograms() {
     IdentifierHash hash2 = caloDDE->onl2();
     
     int gain1 = tile_cell->gain1();
+    if (gain1 < 0) {
+      //tile_cell->gain1() can return negative number
+      ATH_MSG_ERROR("gain1 is <0 in TileTBMonTool::fillHistograms");
+      return StatusCode::FAILURE;
+    }
     
     HWIdentifier ch_id1 = m_tileHWID->channel_id(hash1);
 
@@ -270,12 +278,18 @@ StatusCode TileTBMonTool::fillHistograms() {
     if (onlyLBC04 && chan1 > 0 && drawerIdx1 != 87) onlyLBC04 = false;
     
     if (hash2 == TileHWID::NOT_VALID_HASH) {
+      //shift by negative number is UB
       if (!((m_maskedChannels[drawerIdx1][chan1] >> gain1) & 1U)) {
         energy = cell->energy();
       }
     } else { 
 
       int gain2 = tile_cell->gain2();
+      if (gain2 < 0) {
+        //tile_cell->gain2() can return negative number
+        ATH_MSG_ERROR("gain2 is <0 in TileTBMonTool::fillHistograms");
+        return StatusCode::FAILURE;
+      }
 
       HWIdentifier ch_id2 = m_tileHWID->channel_id(hash2);
       int ros2 = m_tileHWID->ros(ch_id2);
@@ -291,7 +305,7 @@ StatusCode TileTBMonTool::fillHistograms() {
       if (tile_cell->ene2() > m_energyThresholdForTime) {
         m_tileTBChannelTime[partition2][drawer2]->Fill(chan2, tile_cell->time2());
       }
-
+      //shift by negative number is UB
       if ((m_maskedChannels[drawerIdx1][chan1] >> gain1) & 1U) {
         if (!((m_maskedChannels[drawerIdx2][chan2] >> gain2) & 1U)) {
           energy = tile_cell->ene2() * 2;
@@ -458,9 +472,15 @@ void TileTBMonTool::fillHitMap(int side, int section, int module, int tower, int
 
       if (sample != TileID::SAMP_A && tower > 8 && tower < 16) { // A & D4
         
-        if (tower != 9) y = yEB[index * 2 - 1]; // C10
-        else y = yEB[index * 2 + 1]; // D & B
-
+        if (tower != 9) {
+          y = yEB[index * 2 - 1]; // C10
+        } else {
+         if(const auto i = index * 2 + 1; i < 5){//check against array size
+           y = yEB[i]; // D & B
+         } else {
+           ATH_MSG_ERROR("Attempt to read beyond yEB array bounds in TileTBMonTool::fillHitMap");
+         }
+        }
         for (int x = cellHitMapEB[index][tower]; x < cellHitMapEB[index][tower + 1]; ++x) {
           m_tileTBHitMapEBC02->Fill(x, y, energy);
           

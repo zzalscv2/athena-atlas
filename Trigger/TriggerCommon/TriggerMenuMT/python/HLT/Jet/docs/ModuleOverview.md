@@ -4,7 +4,7 @@ Overview of HLT jet reco configuration modules
 <details>
 <summary>Note on RecoFragmentsPool</summary>
 
-As an intermediate step before the new job configuration (see https://atlassoftwaredocs.web.cern.ch/guides/ca_configuration/) is fully adopted, the [`RecoFragmentsPool`](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Menu/MenuComponents.py) construct is used to avoid duplication of algorithms within AlgSequences. This is used as follows. Wherever a function returning a sequence is called, the call should be made through the following expression:
+As an intermediate step before the new job configuration (see https://atlassoftwaredocs.web.cern.ch/guides/ca_configuration/) is fully adopted, the [`RecoFragmentsPool`](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Menu/MenuComponents.py) construct is used to avoid duplication of algorithms within AlgSequences. This is used as follows. Wherever a function returning a sequence is called, the call should be made through the following expression:
 ```
 mySequence = RecoFragmentsPool.retrieve( seqGenerator, configFlags, **kwargs )
 ```

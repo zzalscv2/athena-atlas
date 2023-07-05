@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -18,22 +18,17 @@
 #ifndef PIXELBYTESTREAM_PIXELRAWCONTRAWEVENTCNV_H
 #define PIXELBYTESTREAM_PIXELRAWCONTRAWEVENTCNV_H
 
-#include <stdint.h>
-#include <string>
 
-#include "ByteStreamData/RawEvent.h" 
 
-#include "InDetRawData/InDetRawDataCLASS_DEF.h"
+#include "GaudiKernel/ServiceHandle.h" //member
+#include "AthenaBaseComps/AthConstConverter.h" //inheritance
+#include "ByteStreamCnvSvcBase/IByteStreamEventAccess.h" //SvcHandle template arg
+#include "InDetRawData/Pixel1RawData.h"
+#include "InDetRawData/InDetRawDataCollection.h"
 
-#include "GaudiKernel/ServiceHandle.h"
-#include "AthenaBaseComps/AthConstConverter.h"
-#include "ByteStreamCnvSvcBase/IByteStreamEventAccess.h" 
-#include "StoreGate/StoreGateSvc.h"
-
-class ByteStreamAddress;
 class PixelRawContByteStreamTool;
-class IByteStreamEventAccess;
-class PixelRDORawData;
+class IOpaqueAddress;
+class DataObject;
 
 
 class PixelRawContByteStreamCnv: public AthConstConverter {

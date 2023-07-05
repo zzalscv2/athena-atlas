@@ -4,6 +4,7 @@
 
 #include "GeneratorFilters/xAODDirectPhotonFilter.h"
 #include <algorithm>
+#include "TruthUtils/HepMCHelpers.h"
 
 xAODDirectPhotonFilter::xAODDirectPhotonFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter(name, pSvcLocator)
@@ -75,7 +76,7 @@ StatusCode xAODDirectPhotonFilter::filterEvent() {
     for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
         const xAOD::TruthParticle* pitr =  genEvt->truthParticle(iPart);
       if (pitr->pdgId() == 22 &&
-          pitr->status() == 1 &&
+          MC::isStable(pitr) &&
           std::abs(pitr->eta()) <= m_EtaRange) {
         
         // iterate over parent particles to exclude photons from hadron decays

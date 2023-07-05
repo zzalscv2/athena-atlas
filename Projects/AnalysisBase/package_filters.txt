@@ -2,7 +2,7 @@
 # Packages to build as part of AnalysisBase:
 #
 
-# these packages existed in 21.2, but no longer exist in master.
+# these packages existed in 21.2, but no longer exist in main.
 # remove these lines if you are confident that these packages have
 # been retired.
 
@@ -15,7 +15,7 @@
 
 
 # Actual packages that are part of the release.  Commented out lines
-# were present in 21.2, but the packages do not compile in master yet.
+# were present in 21.2, but the packages do not compile in main yet.
 # These comments should either be removed as the packages get fixed
 # up, or the lines should be removed if these packages are not
 # intended for analysis.

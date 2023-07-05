@@ -9,6 +9,7 @@
 
 
 #include "TrigInDetAnalysisUtils/TrigTrackSelector.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "xAODTruth/TruthVertexContainer.h"
 
@@ -543,8 +544,7 @@ bool TrigTrackSelector::selectTrack( const TruthParticle* track ) {
 bool TrigTrackSelector::selectTrack( const xAOD::TruthParticle* track, double x0, double y0) { 
   if ( track ) { 
         
-    // check it is a final state particle - documentation particles have status() == 3     
-    if ( track->status() != 1 ) return false;
+    if (!MC::isStable(track) ) return false;
 
     /// lazy just to avoid a find-replace of measPer to track
     const xAOD::TruthParticle* measPer = track;
@@ -751,8 +751,7 @@ TIDA::Track* TrigTrackSelector::makeTrack( const TruthParticle* track, unsigned 
     const double outer_radius = m_radius;
     if ( ( track->genParticle()->production_vertex() && rp<=inner_radius ) && 
 	 ( track->genParticle()->end_vertex()==0 || rd>outer_radius ) ) final_state = true; 
-      
-    //    if ( track->status() == 3 ) final_state = false;         /// check its not a documentation particle
+     
     
     if ( !final_state ) return 0; /// keep anything over 10 GeV with the old requirement
     

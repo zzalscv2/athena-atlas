@@ -11,12 +11,13 @@
 
 #include "TileFatherMonTool.h"
 
-#include "Identifier/IdentifierHash.h"
-
-class TileDQstatus;
-
 #include <vector>
 #include <string>
+class TH1;
+class TProfile2D;
+class TH2F;
+class TH1F;
+class IdentifierHash; //C++17: OK to fwd declare the vector template parameter
 
 /** @class TileTBMonTool
  *  @brief Class for TileCal TB monitoring

@@ -378,8 +378,8 @@ def defineInputsMenu():
                                                                                                        'KF-jXE60-AjJall',
                                                                                                        'KF-jXE65-AjJall',
                                                                                                        'KF-jXE75-AjJall'] ),
-                    TopoMenuDef( 'ZAFB_DPHI',                      outputbits = (6,7), outputlines = [ '60INVM-04DPHI32-eEM18abm-FjJj40s623ETA49',
-                                                                                                       '60INVM-25DPHI32-eEM18abm-FjJj40s623ETA49'] ),
+                    TopoMenuDef( 'ZAFB_DPHI',                      outputbits = (6,7), outputlines = [ '60INVM-04DPHI32-eEM18abm-jEM20s625ETA49',
+                                                                                                       '60INVM-25DPHI32-eEM18abm-jEM20s625ETA49'] ),
                     TopoMenuDef( 'CEP_CjJ',                        outputbits = (8,9), outputlines = [ 'CEP-CjJ90s6',
                                                                                                        'CEP-CjJ100s6'] ),
                 ]

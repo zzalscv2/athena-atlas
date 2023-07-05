@@ -29,6 +29,7 @@ import re
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )
+
 # Pool of mutable ComboHypo instances (as opposed to immutable cache of RecoFragmentsPool)
 _ComboHypoPool = dict()
 
@@ -1087,12 +1088,12 @@ class SelectionCA(ComponentAccumulator):
         ''' upSequenceCA is the user CA to run before the recoCA'''
         ca=ComponentAccumulator()
         ca.addSequence(self.stepViewSequence)
+        if upSequenceCA:
+            ca.merge(upSequenceCA, sequenceName=self.stepViewSequence.name)
         ca.addEventAlgo(recoCA.inputMaker(), sequenceName=self.stepViewSequence.name)
         if robPrefetchCA:
             ca.merge(robPrefetchCA, self.stepViewSequence.name)
         ca.merge(recoCA, sequenceName=self.stepViewSequence.name)
-        if upSequenceCA:
-            self.merge(upSequenceCA)
         self.merge(ca)        
         
 

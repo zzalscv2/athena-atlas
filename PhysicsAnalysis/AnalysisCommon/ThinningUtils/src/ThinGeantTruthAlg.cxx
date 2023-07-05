@@ -35,6 +35,7 @@
 #include <cstdlib>
 
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 StatusCode
 ThinGeantTruthAlg::initialize()
@@ -212,7 +213,7 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
     encounteredBarcodes.clear();
     const xAOD::TruthParticle* particle = (*truthParticles)[i];
     // Retain status 1 BSM particles and descendants
-    if (isStatus1BSMParticle(particle)) {
+    if (MC::ThinGeantTruthAlg_isStatus1BSMParticle(particle)) {
       descendants(particle, particleMask, encounteredBarcodes);
       encounteredBarcodes.clear();
     }
@@ -371,34 +372,4 @@ ThinGeantTruthAlg::descendants(
 
   }
 
-// ==============================
-// isStatus1BSMParticle
-// ==============================
-// Returns true if a particle is BSM and stable
-bool
-ThinGeantTruthAlg::isStatus1BSMParticle(const xAOD::TruthParticle* part) 
-{
 
-  int pdg = part->pdgId();
-  bool status1 = (part->status() == 1);
-  bool isBSM(false);
-
-  if ((31 < abs(pdg) && std::abs(pdg) < 38) || // BSM Higgs / W' / Z' / etc
-      std::abs(pdg) == 39 || std::abs(pdg) == 41 || std::abs(pdg) == 42 ||
-      std::abs(pdg) == 7 ||                      // 4th gen beauty
-      std::abs(pdg) == 8 ||                      // 4th gen top
-      (600 < abs(pdg) && std::abs(pdg) < 607) || // scalar leptoquarks
-      (1000000 < std::abs(pdg) &&
-       std::abs(pdg) < 2000000) || // left-handed SUSY (including R-Hadrons)
-      (2000000 < std::abs(pdg) &&
-       std::abs(pdg) < 3000000) || // right-handed SUSY (including R-Hadrons)
-      std::abs(pdg) == 6000005 ||  // X5/3
-      std::abs(pdg) == 6000006 ||  // T2/3
-      std::abs(pdg) == 6000007 ||  // B-1/3
-      std::abs(pdg) == 6000008 ||  // Y-4/3
-      ((std::abs(pdg) >= 10000100) && (std::abs(pdg) <= 10001000)) // multi-charged
-  )
-    isBSM = true;
-
-  return status1 && isBSM;
-}

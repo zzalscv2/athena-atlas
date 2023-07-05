@@ -419,11 +419,10 @@ std::string JetCleaningTool::getCutName( const CleaningLevel c) const
 /** Hot cells reading helper */
 StatusCode JetCleaningTool::readHotCells()
 {
-    const std::string& file_path{m_hotCellsFile};
-    if (file_path.empty()) return StatusCode::SUCCESS;
+    if (m_hotCellsFile.empty()) return StatusCode::SUCCESS;
     
     // Ensure that the file exists
-    if ( !JCT::utils::fileExists(file_path) )
+    if ( !JCT::utils::fileExists(m_hotCellsFile) )
     {
         ATH_MSG_ERROR("Failed to find hot cells file: " << m_hotCellsFile);
         return StatusCode::FAILURE;
@@ -431,7 +430,7 @@ StatusCode JetCleaningTool::readHotCells()
 
     // Now parse the file
     TEnv readCells;
-    if (readCells.ReadFile(file_path.c_str(),kEnvGlobal))
+    if (readCells.ReadFile(m_hotCellsFile.value().c_str(),kEnvGlobal))
     {
         ATH_MSG_ERROR("Cannot read hot cells file: " << m_hotCellsFile);
         return StatusCode::FAILURE;

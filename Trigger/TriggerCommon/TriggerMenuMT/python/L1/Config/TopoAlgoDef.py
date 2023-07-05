@@ -283,12 +283,17 @@ class TopoAlgoDef:
             tm.registerTopoAlgo(alg)
 
 
-        #input list needed for ATR-18824 (TODO: to be replaced by fwd jEM)
-        alg = AlgConf.jJetSort( name = 'FjJjs23ETA49', inputs = 'jJetTobs', outputs = 'FjJjs23ETA49')
-        alg.addgeneric('InputWidth',  HW.jJetInputWidth)
-        alg.addgeneric('OutputWidth', HW.jJetOutputWidthSort )
-        alg.addvariable('MinEta', 23*_eta_conversion)
+        #input list needed for ATR-18824
+        # Forward electrons
+        alg = AlgConf.jEmSort( name = 'jEMs25ETA49', inputs = 'jEmTobs', outputs = 'jEMs25ETA49' )
+        alg.addgeneric('InputWidth', HW.jEmInputWidth)
+        alg.addgeneric('OutputWidth', HW.jEmOutputWidthSort)
+        alg.addvariable('MinEta', 25*_eta_conversion)
         alg.addvariable('MaxEta', 49*_eta_conversion)
+        # Setting no WP for now, use 0-3 for None/L/M/T when optimised
+        alg.addvariable('IsoMin',    0) # Placeholder, see TypeWideThresholdConfig
+        alg.addvariable('Frac1Min',  0)
+        alg.addvariable('Frac2Min',  0)
         tm.registerTopoAlgo(alg)
 
         # MET
@@ -303,8 +308,7 @@ class TopoAlgoDef:
         alg.addgeneric('OutputWidth', HW.metOutputWidth)
         tm.registerTopoAlgo(alg)
 
-        
-                
+
         # Decision algorithms
 
         # LAR  ZEE
@@ -1607,19 +1611,19 @@ class TopoAlgoDef:
         # 9. MinDeltaPhi
         # 10. MaxDeltaPhi
         ZAFBDphimap = [
-            { "minInvm": 60 , "minDphiList": [4, 25], "maxDphi": 32, "minEta2": 23, "maxEta2": 49,
+            { "minInvm": 60 , "minDphiList": [4, 25], "maxDphi": 32, "minEta2": 25, "maxEta2": 49,
               "inputwidth1": HW.eEmOutputWidthSelect, "otype1" : "eEM", "ocut1" : 18, "olist1" : "abm",
-              "nleading1" : HW.eEmOutputWidthSelect, "inputwidth2": HW.jJetOutputWidthSort,  "ocut2" : 40, "nleading2" : 6 }
+              "nleading1" : HW.eEmOutputWidthSelect, "inputwidth2": HW.jEmOutputWidthSort,  "ocut2" : 20, "nleading2" : 6 }
         ]
         for x in ZAFBDphimap:
             class d:
                 pass
             for k in x:
                 setattr (d, k, x[k])
-            inputList = [d.otype1 + d.olist1, 'FjJjs23ETA49']
+            inputList = [d.otype1 + d.olist1, 'jEMs25ETA49']
             toponames=[]
             for minDphi in d.minDphiList:
-                toponames.append ("%iINVM-%02dDPHI%i-%s%s%s%s-FjJj%ss%s%iETA%i"  % (d.minInvm, minDphi, d.maxDphi,
+                toponames.append ("%iINVM-%02dDPHI%i-%s%s%s%s-jEM%ss%s%iETA%i"  % (d.minInvm, minDphi, d.maxDphi,
                                                                                      d.otype1, str(d.ocut1) , d.olist1, str(d.nleading1) if d.olist1=="s" else "",
                                                                                      str(d.ocut2) , str(d.nleading2) , d.minEta2, d.maxEta2))
             alg = AlgConf.InvariantMassDeltaPhiInclusive2( name = 'ZAFB_DPHI', inputs = inputList, outputs = toponames)
@@ -1631,13 +1635,13 @@ class TopoAlgoDef:
             alg.addgeneric('ApplyEtaCut', 1)
             for bitid,minDphi in enumerate(d.minDphiList):
                 alg.addvariable('MinET1',  get_threshold_cut(d.otype1, d.ocut1)*_et_conversion, bitid)
-                alg.addvariable('MinET2',  get_threshold_cut('jJ', d.ocut2)*_et_conversion, bitid)
+                alg.addvariable('MinET2',  get_threshold_cut('jEM', d.ocut2)*_et_conversion, bitid)
                 alg.addvariable('MinMSqr', d.minInvm*d.minInvm*_et_conversion*_et_conversion, bitid)
                 alg.addvariable('MaxMSqr', _no_m_upper_threshold, bitid)
                 alg.addvariable('MinEta1',  0*_eta_conversion, bitid)
                 alg.addvariable('MaxEta1', 49*_eta_conversion, bitid)
-                alg.addvariable('MinEta2', 23*_eta_conversion, bitid)
-                alg.addvariable('MaxEta2', 49*_eta_conversion, bitid)
+                alg.addvariable('MinEta2', d.minEta2*_eta_conversion, bitid)
+                alg.addvariable('MaxEta2', d.maxEta2*_eta_conversion, bitid)
                 alg.addvariable('MinDeltaPhi', minDphi*_phi_conversion, bitid)
                 alg.addvariable('MaxDeltaPhi', d.maxDphi*_phi_conversion, bitid)
             tm.registerTopoAlgo(alg)

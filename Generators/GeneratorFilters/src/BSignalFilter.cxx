@@ -178,7 +178,7 @@ StatusCode BSignalFilter::filterEvent()
       //
       for(const auto& part: *genEvt)
         {
-	  if ( std::abs(part->pdg_id()) <= 6 && part->status() == 1 )
+	  if ( std::abs(part->pdg_id()) <= 6 && MC::isStable(part) )
             {
 	      acceptEvent = false;
 	      const int pID = part->pdg_id();
@@ -205,7 +205,7 @@ StatusCode BSignalFilter::filterEvent()
 		                            // including immediate decays of resonances.
                 {
 		  // ** Reject whole event if any of B-hadrons in the event is not decayed **
-		  if( part->status() == 1 || part->status() == HepMC::EVTGENUNDECAYEDSTATUS ) { acceptEvent = false; }
+		  if( MC::isStable(part) || part->status() == HepMC::EVTGENUNDECAYEDSTATUS ) { acceptEvent = false; }
 
 #ifdef HEPMC3
 		  auto  firstParent = part->production_vertex()->particles_in().begin();

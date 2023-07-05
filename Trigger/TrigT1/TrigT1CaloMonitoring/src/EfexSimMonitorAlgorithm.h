@@ -35,7 +35,8 @@ private:
   SG::ReadHandleKey<xAOD::eFexEMRoIContainer> m_eFexEmSimContainerKey{this,"eFexEMRoISimContainer","L1_eEMRoISim","SG key of the simulated eFex Em RoI container"};
   SG::ReadHandleKey<xAOD::eFexTauRoIContainer> m_eFexTauSimContainerKey{this,"eFexTauSimRoIContainer","L1_eTauRoISim","SG key of the simulated eFex Tau RoI container"};
 
-  SG::ReadDecorHandleKey<xAOD::EventInfo> m_decorKey;
+  // SG::ReadDecorHandleKey<xAOD::EventInfo> m_decorKey;
+  SG::ReadHandleKey<xAOD::eFexTowerContainer> m_eFexTowerContainerKey{this,"eFexTowerContainer","L1_eFexDataTowers","SG key of the primary eFex tower container, which should be populated if fex readout occurring"};
 
   StatusCode fillEmErrorHistos(const std::string &errName, const xAOD::eFexEMRoIContainer *emcont, const std::set<uint32_t> &simEqDataCoords) const;
   StatusCode fillTauErrorHistos(const std::string &errName, const xAOD::eFexTauRoIContainer *taucont, const std::set<uint32_t> &simEqDataCoords) const;

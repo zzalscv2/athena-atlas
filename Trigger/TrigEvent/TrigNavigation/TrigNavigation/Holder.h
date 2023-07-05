@@ -1,7 +1,7 @@
 // Emacs -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGNAVIGATION_HOLDER_H
@@ -24,6 +24,7 @@
 #include "TrigNavigation/TypeProxy.h"
 #include "TrigNavigation/TriggerElement.h"
 
+#include "TrigSerializeResult/ITrigSerializerToolBase.h"
 #include "TrigStorageDefinitions/TypeInformation.h"
 #include "TrigStorageDefinitions/EDM_TypeInfoMethods.h"
 
@@ -31,7 +32,6 @@
 #include "GaudiKernel/ToolHandle.h"
 
 class MsgStream;
-class ITrigSerializerToolBase;
 
 namespace SG {
   class IAuxStoreIO;

@@ -20,6 +20,8 @@
 #include <iostream>
 
 
+#include "AthAllocators/DataPool.h"
+#include "AthAllocators/ArenaHeader.h"
 void compare (const LArDigit& p1,
               const LArDigit& p2)
 {
@@ -66,7 +68,16 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   // create LArOnlineID helper to be passed to converter
   std::unique_ptr<LArOnlineID> idHelper = std::make_unique<LArOnlineID>();
   assert (idHelper->initialize_from_dictionary (idd) == 0);
+  
+  {
+    // Need to instantiate an instance of this before Leakcheck,
+    // to get the allocator created.  But the instance will also
+    // hold a lock on the allocator, so can't leave this live
+    // or we'll deadlock.
+    DataPool<LArDigit> pooldum;
+  }
 
+ 
   Athena_test::Leakcheck check;
 
   CaloGain::CaloGain gains[CaloGain::LARNGAIN] =
@@ -84,6 +95,9 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 
   testit (trans, idHelper.get());
 
+  //We use a DataPool/custom allocator. We need to call erase so as
+  //to make sure we clean up before we exit.
+  SG::ArenaHeader::defaultHeader()->allocator(0)->erase();
 }
 
 

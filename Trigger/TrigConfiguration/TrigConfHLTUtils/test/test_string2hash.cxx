@@ -13,13 +13,15 @@ using namespace TrigConf;
 
 
 int main() {
-  // Basic checks
+  // New item
   assert( HLTUtils::string2hash("L1_EM22VH")==3462952785 );
   assert( HLTUtils::hash2string(3462952785)=="L1_EM22VH" );
-
+  // Known item
+  assert( HLTUtils::string2hash("L1_EM22VH")==3462952785 );
+  // Different category
   assert( HLTUtils::string2hash("L1_EM22VH","MyCat")==3462952785 );
   assert( HLTUtils::hash2string(3462952785,"MyCat")=="L1_EM22VH" );
-
+  // Unknown hash
   assert( HLTUtils::hash2string(42)=="UNKNOWN HASH ID" );
   assert( HLTUtils::hash2string(42,"NOCAT")=="UNKNOWN CATEGORY" );
 

@@ -418,7 +418,7 @@ MCTruthClassifier::findJetConstituents(const xAOD::Jet* jet,
     // find the matching truth particles
     for (const auto *const thePart : *truthParticleContainerReadHandle) {
       // match truth particles to the jet
-      if (thePart->status() == 1 && deltaR((*thePart), (*jet)) < m_jetPartDRMatch) {
+      if (MC::isStable(thePart) && deltaR((*thePart), (*jet)) < m_jetPartDRMatch) {
         constituents.insert(thePart);
       }
     }
@@ -427,7 +427,7 @@ MCTruthClassifier::findJetConstituents(const xAOD::Jet* jet,
     xAOD::JetConstituentVector vec = jet->getConstituents();
     for (const auto *particle0 : vec) {
       const xAOD::TruthParticle* thePart = dynamic_cast<const xAOD::TruthParticle*>(particle0->rawConstituent());
-      if (thePart->status() == 1) {
+      if (MC::isStable(thePart)) {
         constituents.insert(thePart);
       }
     }

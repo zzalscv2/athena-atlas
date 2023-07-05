@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <sstream>
@@ -10,7 +10,6 @@
 #include "TrigNavigation/Holder.h"
 #include "TrigAuxStore.h"
 #include "TrigSerializeResult/StringSerializer.h"
-#include "TrigSerializeResult/ITrigSerializerToolBase.h"
 #include "xAODCore/AuxContainerBase.h"
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/AuxStoreInternal.h"

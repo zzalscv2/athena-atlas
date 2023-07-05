@@ -30,10 +30,10 @@ git-atlas init-workdir https://:@gitlab.cern.ch:8443/atlas/athena.git
 cd ~/athena
 git-atlas addpkg InDetPhysValMonitoring
 git fetch upstream
-git checkout -b 22.0-idpvm upstream/master --no-track
+git checkout -b 22.0-idpvm upstream/main --no-track
 
 3. Setup the dev release
-asetup master, latest, Athena
+asetup main,latest,Athena
 
 
 4. Develop, then build with cmake
@@ -61,7 +61,7 @@ At this point, you have committed to your previously forked repository which is 
 8. Make a 'Merge Request'
 This is done on the webpage of your personal forked repository, or using the link 
 provided in the ouput of step 7 above. Your code will be reviewed and (hopefully) 
-accepted to master; this may take ~ 1 day.
+accepted to main; this may take ~ 1 day.
 
 
 

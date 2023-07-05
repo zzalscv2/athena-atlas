@@ -37,7 +37,7 @@ In addition to the modules supporting the current jobOptions configuration, addi
 Generally components of the ID configuration for use by the signatures should 
 come from 
 
-[Trigger/TrigTools/TrigInDetConfig](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigTools/TrigInDetConfig)
+[Trigger/TrigTools/TrigInDetConfig](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigTools/TrigInDetConfig)
 
 Generally, there are four things that are needed:
 * Tracking configuration settings - track collection names, Roi sizes etc 
@@ -85,7 +85,7 @@ should instead be obtained from the config
 
 The Fast Track Finder configuration code can be found in 
 
-[Trigger/TrigTools/TrigInDetConfig/python/InDetTrigFastTracking.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigTools/TrigInDetConfig/python/InDetTrigFastTracking.py)
+[Trigger/TrigTools/TrigInDetConfig/python/InDetTrigFastTracking.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigTools/TrigInDetConfig/python/InDetTrigFastTracking.py)
 
 An example on how to call this 
 
@@ -116,7 +116,7 @@ where the arguments are
   
 The code for this is in 
 
-[Trigger/TrigTools/TrigInDetConfig/python/InDetTrigPrecisionTracking.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigTools/TrigInDetConfig/python/InDetTrigFastTracking.py)
+[Trigger/TrigTools/TrigInDetConfig/python/InDetTrigPrecisionTracking.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigTools/TrigInDetConfig/python/InDetTrigFastTracking.py)
 
 and should be configured using 
    
@@ -148,7 +148,7 @@ where the arguments are
  
 This uses the code in 
 
-[Trigger/TrigTools/TrigInDetConfig/EFIDTracking.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigTools/TrigInDetConfig/python/InDetTrigFastTracking.py)
+[Trigger/TrigTools/TrigInDetConfig/EFIDTracking.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigTools/TrigInDetConfig/python/InDetTrigFastTracking.py)
 
 but the actual called function should be the same as for the precision tracking. *** need to check this ***
   

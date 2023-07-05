@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -622,7 +622,9 @@ StatusCode TileCellNoiseMonTool::fillHistoPerCell() {
         msg(MSG::DEBUG) << "CellName2           = " << CellName2 << endmsg;
         msg(MSG::DEBUG) << "Cell energy         = " << energy << endmsg;
         msg(MSG::DEBUG) << "ch1Ok               = " << (ch1Ok ? 1 : 0) << "  ch2Ok           = " << (ch2Ok ? 1 : 0) << endmsg;
-        msg(MSG::DEBUG) << "HistoName           = " << m_tileCellEne[partition1][m_tileID->module(id)][CellID1]->GetName() << endmsg;
+        if (partition1 >= 0){
+          msg(MSG::DEBUG) << "HistoName           = " << m_tileCellEne[partition1][m_tileID->module(id)][CellID1]->GetName() << endmsg;
+        }
       }
 
       ATH_MSG_DEBUG( "ch1Ok = " << ch1Ok
@@ -634,7 +636,14 @@ StatusCode TileCellNoiseMonTool::fillHistoPerCell() {
 
       //// Fill histo with cell energy ////  
       if (ch1Ok && ch2Ok && cell_isbad == 0) {
-        if (gn1 == gn2) m_tileCellEne[partition1][m_tileID->module(id)][CellID1]->Fill(energy);
+        
+        if (gn1 == gn2) {
+          if (partition1 >= 0){
+            m_tileCellEne[partition1][m_tileID->module(id)][CellID1]->Fill(energy);
+          } else {
+            ATH_MSG_ERROR("Attempting to access m_tileCellEne at index "<<partition1);
+          }
+        }
         //if(gn1==1 && gn2==1) 	  m_TileCellEne[partition1][m_tileID->module(id)][CellID1]->Fill(energy);
 
         if (CellName1 != CellName2) {

@@ -16,6 +16,7 @@
 #include "xAODTruth/TruthParticleAuxContainer.h"
 
 #include "GeneratorFilters/xAODTruthParticleSlimmerPhoton.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 xAODTruthParticleSlimmerPhoton::xAODTruthParticleSlimmerPhoton(const std::string &name, ISvcLocator *svcLoc)
     : AthAlgorithm(name, svcLoc)
@@ -66,10 +67,9 @@ StatusCode xAODTruthParticleSlimmerPhoton::execute()
             const xAOD::TruthParticle* theParticle =  (*itr)->truthParticle(iPart);
 
             int this_absPdgID = theParticle->absPdgId();
-            int this_status = theParticle->status();
 
             //Save stable Photons 
-            if (this_status == 1 && this_absPdgID == 22)
+            if (MC::isStable(theParticle) && this_absPdgID == 22)
             {
                 xAOD::TruthParticle *xTruthParticle = new xAOD::TruthParticle();
                 xTruthParticleContainerPhoton->push_back( xTruthParticle );

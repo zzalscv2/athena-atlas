@@ -22,7 +22,7 @@
 #include <string>
 #include <iosfwd>
 #include <type_traits>
-
+#include "AthAllocators/ArenaBlockAlignDetail.h"
 
 namespace SG {
 
@@ -314,6 +314,10 @@ public:
             bool no_dtor = false>
   struct initParams
   {
+
+    static_assert(
+        std::alignment_of<T>::value <= SG::ArenaBlockAlignDetail::alignment,
+        "Requested Alignment larger than the one that can be provided");
     /**
      * @brief Constructor.
      * @param nblock Value to set in the parameters structure for the

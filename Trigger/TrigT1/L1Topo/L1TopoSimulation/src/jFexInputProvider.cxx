@@ -305,7 +305,10 @@ jFexInputProvider::fillXE(TCS::TopoInputEvent& inputEvent) const {
                    );
   }
 
-  unsigned int Et2Topo = global_ExTopo*global_ExTopo + global_EyTopo*global_EyTopo;
+  unsigned long long global_ExTopoLong = static_cast<unsigned long long>(global_ExTopo);
+  unsigned long long global_EyTopoLong = static_cast<unsigned long long>(global_EyTopo);
+
+  unsigned long long Et2Topo = global_ExTopoLong*global_ExTopoLong + global_EyTopoLong*global_EyTopoLong;
   unsigned int EtTopo =  std::sqrt( Et2Topo );
 
   TCS::jXETOB jxe( -(global_ExTopo), -(global_EyTopo), EtTopo, TCS::JXE );

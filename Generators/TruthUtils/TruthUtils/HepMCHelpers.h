@@ -105,7 +105,7 @@ namespace MC
 
   template <class T> inline bool egammaTruthAlg_isGenInteracting (const T& p){
     const int status = p->status();
-    const int apid = abs(p->pdg_id());
+    const int apid = std::abs(p->pdg_id());
     const auto vertex = p->end_vertex();
   // we want to keep primary particle with status==2 but without vertex in HepMC
     return
@@ -121,26 +121,51 @@ namespace MC
        (apid==5000039 &&  status==1 ))
      );
   }
+  template <class T> inline bool ThinGeantTruthAlg_isStatus1BSMParticle(const T& p)  {
+
+  int pdg = p->pdg_id();
+  bool status1 = (p->status() == 1);
+  bool isBSM(false);
+
+  if ((31 < std::abs(pdg) && std::abs(pdg) < 38) || // BSM Higgs / W' / Z' / etc
+      std::abs(pdg) == 39 || std::abs(pdg) == 41 || std::abs(pdg) == 42 ||
+      std::abs(pdg) == 7 ||                      // 4th gen beauty
+      std::abs(pdg) == 8 ||                      // 4th gen top
+      (600 < abs(pdg) && std::abs(pdg) < 607) || // scalar leptoquarks
+      (1000000 < std::abs(pdg) &&
+       std::abs(pdg) < 2000000) || // left-handed SUSY (including R-Hadrons)
+      (2000000 < std::abs(pdg) &&
+       std::abs(pdg) < 3000000) || // right-handed SUSY (including R-Hadrons)
+      std::abs(pdg) == 6000005 ||  // X5/3
+      std::abs(pdg) == 6000006 ||  // T2/3
+      std::abs(pdg) == 6000007 ||  // B-1/3
+      std::abs(pdg) == 6000008 ||  // Y-4/3
+      ((std::abs(pdg) >= 10000100) && (std::abs(pdg) <= 10001000)) // multi-charged
+  )
+    isBSM = true;
+
+  return status1 && isBSM;
+}
 
 
   template <class T> inline bool MenuTruthThinning_isBSM(const T& p) {
     
     int pdg = p->pdg_id();
     
-    if ( (31<abs(pdg) && abs(pdg)<38) || // BSM Higgs / W' / Z' / etc
-        abs(pdg)==39 ||
-        abs(pdg)==41 ||
-        abs(pdg)==42 ||
-        abs(pdg)== 7 || // 4th gen beauty
-        abs(pdg)== 8 || // 4th gen top
-        (600 < abs(pdg) && abs(pdg) < 607) || // scalar leptoquarks
-        (1000000<abs(pdg) && abs(pdg)<1000040) || // left-handed SUSY
-        (2000000<abs(pdg) && abs(pdg)<2000040) || // right-handed SUSY
-        abs(pdg)==6000005 || // X5/3
-        abs(pdg)==6000006 || // T2/3
-        abs(pdg)==6000007 || // B-1/3
-        abs(pdg)==6000008 || // Y-4/3
-        ( (abs(pdg)>=10000100) && (abs(pdg)<=10001000) ) // multi-charged
+    if ( (31<std::abs(pdg) && std::abs(pdg)<38) || // BSM Higgs / W' / Z' / etc
+        std::abs(pdg)==39 ||
+        std::abs(pdg)==41 ||
+        std::abs(pdg)==42 ||
+        std::abs(pdg)== 7 || // 4th gen beauty
+        std::abs(pdg)== 8 || // 4th gen top
+        (600 < std::abs(pdg) && std::abs(pdg) < 607) || // scalar leptoquarks
+        (1000000<std::abs(pdg) && std::abs(pdg)<1000040) || // left-handed SUSY
+        (2000000<std::abs(pdg) && std::abs(pdg)<2000040) || // right-handed SUSY
+        std::abs(pdg)==6000005 || // X5/3
+        std::abs(pdg)==6000006 || // T2/3
+        std::abs(pdg)==6000007 || // B-1/3
+        std::abs(pdg)==6000008 || // Y-4/3
+        ( (std::abs(pdg)>=10000100) && (std::abs(pdg)<=10001000) ) // multi-charged
         )
         return true;
     

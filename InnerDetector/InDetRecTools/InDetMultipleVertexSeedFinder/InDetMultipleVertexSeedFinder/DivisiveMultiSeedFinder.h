@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef InDetMultipleVertexSeedFinder_DivisiveMultiSeedFinder_H
@@ -23,7 +23,7 @@ namespace InDet
  class InDetTrackZ0SortingTool;
  class InDetTrackClusterCleaningTool;
 
- class DivisiveMultiSeedFinder : public AthAlgTool, virtual public IMultiPVSeedFinder
+ class DivisiveMultiSeedFinder final : public AthAlgTool, virtual public IMultiPVSeedFinder
  {
  
   public:
@@ -39,13 +39,13 @@ namespace InDet
 
 /**
  * Clustering method itself
- */   
-   virtual std::vector< std::vector<const Trk::Track *> > seeds(const std::vector<const Trk::Track*>& tracks )const override;
+ */
+   virtual std::vector<std::vector<const Trk::Track*> > seeds(
+       const std::vector<const Trk::Track*>& tracks) const override;
 
-   virtual std::vector< std::vector<const Trk::TrackParticleBase *> > seeds(const std::vector<const Trk::TrackParticleBase*>& tracks )const override;
+   virtual std::vector<std::vector<const Trk::TrackParameters*> > seeds(
+       const std::vector<const xAOD::TrackParticle*>& tracks) const override;
 
-   virtual std::vector< std::vector<const Trk::TrackParameters *> > seeds(const std::vector<const xAOD::TrackParticle*>& tracks )const override;
-    
   private:
 
 // tuning parameters

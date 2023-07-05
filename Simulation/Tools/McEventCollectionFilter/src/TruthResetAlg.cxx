@@ -7,6 +7,7 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "GeneratorObjects/McEventCollection.h"
 
 #include "StoreGate/ReadHandle.h"
@@ -52,19 +53,19 @@ StatusCode TruthResetAlg::execute() {
   //Sanity check
   bool inputProblem(false);
   for (const auto& particle: inputEvent) {
-    if (particle->status() == 1) {
+    if (MC::isStable(particle)) {
       if (!particle->production_vertex()) {
-        ATH_MSG_ERROR("Status 1 particle without a production vertex!! " << particle);
+        ATH_MSG_ERROR("Stable particle without a production vertex!! " << particle);
         inputProblem = true;
       }
     }
-    else if (particle->status() == 2) {
+    else if (MC::isDecayed(particle)) {
       if (!particle->production_vertex()) {
-        ATH_MSG_ERROR("Status 2 particle without a production vertex!! " << particle);
+        ATH_MSG_ERROR("Decyed particle without a production vertex!! " << particle);
         inputProblem = true;
       }
       if (!particle->end_vertex()) {
-        ATH_MSG_ERROR("Status 2 particle without an end vertex!! " << particle);
+        ATH_MSG_ERROR("Decyed particle without an end vertex!! " << particle);
         inputProblem = true;
       }
     }
@@ -194,23 +195,23 @@ StatusCode TruthResetAlg::execute() {
   //Sanity check
   bool outputProblem(false);
   for (const auto& particle: *(outputEvent.get())) {
-    if (particle->status() == 1) {
+    if (MC::isStable(particle)) {
       if (!particle->production_vertex()) {
-        ATH_MSG_ERROR("Status 1 particle without a production vertex!! " << particle);
+        ATH_MSG_ERROR("Stable particle without a production vertex!! " << particle);
         outputProblem = true;
       }
       if (particle->end_vertex()) {
-        ATH_MSG_ERROR("Status 1 particle with an end vertex!! " << particle);
+        ATH_MSG_ERROR("Stable particle with an end vertex!! " << particle);
         outputProblem = true;
       }
     }
-    else if (particle->status() == 2) {
+    else if (MC::isDecayed(particle)) {
       if (!particle->production_vertex()) {
-        ATH_MSG_ERROR("Status 2 particle without a production vertex!! " << particle);
+        ATH_MSG_ERROR("Decayed particle without a production vertex!! " << particle);
         outputProblem = true;
       }
       if (!particle->end_vertex()) {
-        ATH_MSG_ERROR("Status 2 particle without an end vertex!! " << particle);
+        ATH_MSG_ERROR("Decayed  particle without an end vertex!! " << particle);
         outputProblem = true;
       }
     }

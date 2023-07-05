@@ -88,6 +88,7 @@ void TRT_LoLumRawDataContainerCnv_p3::transToPers(const TRT_RDO_Container* trans
       // We will use the id to determine when to insert missing straws to create a container that represents the complete detector.
       // We will only store the digit word.
       const TRT_LoLumRawData* tchan0 = dynamic_cast<const TRT_LoLumRawData*>(collection[i]);
+      if (not tchan0) throw std::runtime_error("TRT_LoLumRawDataContainerCnv_p3::transToPers: could not cast ptr to TRT_LoLumRawData");
       tchan_id   = tchan0->identify().get_identifier32().get_compact(); // the i'th channel id in the transient collection
       tchan_word = tchan0->getWord();                                   // the i'th channel word in the transient collection
 

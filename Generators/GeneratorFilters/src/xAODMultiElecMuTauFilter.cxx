@@ -4,7 +4,7 @@
 
 #include "GeneratorFilters/xAODMultiElecMuTauFilter.h"
 #include "CLHEP/Vector/LorentzVector.h"
-
+#include "TruthUtils/HepMCHelpers.h"
 
 xAODMultiElecMuTauFilter::xAODMultiElecMuTauFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter(name,pSvcLocator)
@@ -42,7 +42,7 @@ StatusCode xAODMultiElecMuTauFilter::filterEvent() {
     unsigned int nPart = genEvt->nTruthParticles();
     for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
        const xAOD::TruthParticle* pitr =  genEvt->truthParticle(iPart);
-       if (pitr->status() == 1 && (std::abs(pitr->pdgId()) == 11 || std::abs(pitr->pdgId()) == 13)) {
+       if (MC::isStable(pitr) && (std::abs(pitr->pdgId()) == 11 || std::abs(pitr->pdgId()) == 13)) {
          if (pitr->pt() >= m_minPt && std::abs(pitr->eta()) <= m_maxEta) {
            ATH_MSG_DEBUG("Found lepton with PDG ID = " << pitr->pdgId()
                          << ", status = " <<  pitr->status()

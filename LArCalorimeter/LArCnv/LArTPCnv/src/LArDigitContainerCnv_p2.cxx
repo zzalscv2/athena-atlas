@@ -9,6 +9,8 @@
 #include "GaudiKernel/GaudiException.h"
 #include "CxxUtils/AthUnlikelyMacros.h"
 
+#include "AthAllocators/DataPool.h"
+
 #include <algorithm>
 #include <cstdlib>
 
@@ -35,14 +37,19 @@ void
 LArDigitContainerCnv_p2::persToTrans(const LArDigitContainer_p2* pers, 
 				     LArDigitContainer* trans, MsgStream &/*log*/) const
 {
+
+  DataPool<LArDigit> dataItems;
   if (pers->m_nSamples==0 || pers->m_samples.size()==0) {
     //No data
     return;
   }
 
   const unsigned nMaxChannels=4*(pers->m_gain.size());
-  trans->clear();
-  trans->reserve(pers->m_samples.size()/pers->m_nSamples);
+  trans->clear(SG::VIEW_ELEMENTS);
+  size_t numElements = pers->m_samples.size()/pers->m_nSamples;
+  //
+  dataItems.reserve(numElements);
+  trans->reserve(numElements);
 
   std::vector<short>::const_iterator samplesIt=pers->m_samples.begin();
   for(unsigned idx=0;idx<nMaxChannels;idx++) {
@@ -51,8 +58,10 @@ LArDigitContainerCnv_p2::persToTrans(const LArDigitContainer_p2* pers,
       const HWIdentifier hwid=m_idHelper->channel_Id(IdentifierHash(idx));
       std::vector<short>::const_iterator samplesIt_e=samplesIt+pers->m_nSamples;
       std::vector<short> samples(samplesIt,samplesIt_e);
-      trans->push_back(new LArDigit(hwid,(CaloGain::CaloGain)(gain-1),
-				    std::move(samples)));
+      LArDigit* lardigi = dataItems.nextElementPtr();
+      (*lardigi) =
+          LArDigit(hwid, (CaloGain::CaloGain)(gain - 1), std::move(samples));
+      trans->push_back(lardigi);
       samplesIt=samplesIt_e;
     }//end if gain!=0, eg channel present 
   }//end loop over all hashes
