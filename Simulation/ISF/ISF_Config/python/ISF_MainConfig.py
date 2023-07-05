@@ -59,12 +59,6 @@ def Kernel_GenericSimulatorMTCfg(flags, name="ISF_Kernel_GenericSimulatorMT", **
         from ISF_HepMC_Tools.ISF_HepMC_ToolsConfig import TruthPreselectionToolCfg
         kwargs.setdefault( "TruthPreselectionTool", acc.popToolsAndMerge(TruthPreselectionToolCfg(flags)) )
 
-    if "ParticleKillerTool" not in kwargs:
-        tool = acc.popToolsAndMerge(ParticleKillerToolCfg(flags))
-        acc.addPublicTool(tool)
-        pubTool = acc.getPublicTool(tool.name)
-        kwargs.setdefault("ParticleKillerTool", pubTool) # public toolHandle
-
     if "GeoIDSvc" not in kwargs:
         kwargs.setdefault("GeoIDSvc", acc.getPrimaryAndMerge(GeoIDSvcCfg(flags)).name)
 

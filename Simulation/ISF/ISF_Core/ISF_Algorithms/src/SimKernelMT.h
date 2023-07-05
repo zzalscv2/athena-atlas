@@ -116,7 +116,7 @@ private:
   ToolHandleArray<ISimulatorTool> m_simulationTools{this, "SimulationTools", {}, ""};
 
   /// When no appropriate simulator can be found for a given particle, the particle is sent to this "particle killer":
-  PublicToolHandle<ISimulatorTool> m_particleKillerTool{this, "ParticleKillerTool", "", ""};
+  ISimulatorTool *m_particleKillerTool{};
 
   /// AthenaTool responsible for writing Calo/Muon Entry/Exit Layer collection
   PublicToolHandle<IEntryLayerTool> m_entryLayerTool{this, "EntryLayerTool", "ISF_EntryLayerToolMT", ""};

@@ -57,20 +57,18 @@ StatusCode ISF::SimKernelMT::initialize() {
       }
       // New flavour add it to the map.
       m_simToolMap[flavor] = &*curSimTool;
+      if (flavor == ISF::ParticleKiller) {
+        m_particleKillerTool = &*curSimTool;
+      }
     }
   }
-  ATH_CHECK( m_particleKillerTool.retrieve() );
-  const ISF::SimulationFlavor pkFlavor = m_particleKillerTool->simFlavor();
-  if ( m_simToolMap.find(pkFlavor) == m_simToolMap.end() )
-  {
-    m_simToolMap[pkFlavor] = &*m_particleKillerTool;
-  }
-  else
-  {
-    ATH_MSG_WARNING("Two ISimulatorTool instances (" << m_simToolMap.find(ISF::ParticleKiller)->second->name() << "," << m_particleKillerTool->name() << ") with the same flavor in this job!\n Check your configuration!");
+  // Check that a particle killer simulator tool was provided
+  if (!m_particleKillerTool) {
+    ATH_MSG_FATAL("No fallback ParticleKiller Simulator Tool provided in SimulationTools, the job will bail out now.");
+    return StatusCode::FAILURE;
   }
 
-  ATH_MSG_INFO("The following Simulators will be used in this job: \t" << m_simulationTools << "\n" << m_particleKillerTool);
+  ATH_MSG_INFO("The following Simulators will be used in this job: \t" << m_simulationTools);
   // retrieve simulation selectors (i.e. the "routing chain")
   for ( auto& selectorsToolHandleArray: m_simSelectors )
   {
