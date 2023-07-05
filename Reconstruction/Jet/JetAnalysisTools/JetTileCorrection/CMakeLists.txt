@@ -44,7 +44,7 @@ endif()
 # Test(s) in the package:
 if( XAOD_STANDALONE )
    # FIX ME: temporarily disabled as part of the migration of AnalysisBase
-   #         to master
+   #         to main
 
    # atlas_add_test( ut_JetTileCorrectionTool_data
    #    SOURCES test/ut_JetTileCorrectionTool_data.cxx )

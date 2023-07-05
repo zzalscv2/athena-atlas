@@ -26,9 +26,9 @@ There are generally two common ways to run the code.
 ## Setting up the release 
 
 InDetPhysValMonitoring requires the full athena release. 
-In `master`, you can set this up using for example 
+In `main`, you can set this up using for example 
 ``` 
-asetup Athena,master,latest 
+asetup Athena,main,latest 
 ```  
 to get the most up-to date nightly or 
 ```
@@ -163,7 +163,7 @@ git-atlas addpkg InDetPhysValMonitoring
 3. Create a development branch to work with: 
 ``` 
 git fetch upstream
-git checkout -b MyDevelopmentBranch upstream/master --no-track
+git checkout -b MyDevelopmentBranch upstream/main --no-track
 ``` 
 Now you can start making changes! 
 
@@ -194,4 +194,4 @@ cd -
 In addition to just test-running the code, we recommend to also run the unit tests provided with the package when you have made changes. You can do this by typing `ctest` in the build folder after having compiled. 
 
 ## Making a merge request
-If you have made a modification that may be useful to more users, please consider [making a merge request](https://atlassoftwaredocs.web.cern.ch/gittutorial/merge-request/) into master to share your work with others!
+If you have made a modification that may be useful to more users, please consider [making a merge request](https://atlassoftwaredocs.web.cern.ch/gittutorial/merge-request/) into `main` to share your work with others!

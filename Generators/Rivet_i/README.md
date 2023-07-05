@@ -33,7 +33,7 @@ Occasionally it might be useful to set up the latest nightly in order to benefit
 from recent merge requests that haven't made it into a proper release yet:
 
 ```bash
-asetup master,latest,AthGeneration
+asetup main,latest,AthGeneration
 source setupRivet
 ```
 

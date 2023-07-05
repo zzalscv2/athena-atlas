@@ -283,11 +283,11 @@ You can use `addpkg` to add as many packages as you like, `rmpkg` to remove them
 
 **WARNING:** The following instructions assume a sparse checkout of Athena. If you made a full checkout, please refer [here](https://atlassoftwaredocs.web.cern.ch/gittutorial/branch-and-change/#setting-up-to-compile-and-test-code-for-the-tutorial) on how to properly compile without fully building Athena.
 
-The tool is developed on the athena master. To set up the according environment, do
+The tool is developed on the athena `main`. To set up the according environment, do
 
 ```bash
 cd build
-asetup AnalysisBase master latest
+asetup AnalysisBase,main,latest
 ```
 
 If you want to target a specific nightly (often worth it for development) then replace `latest` with `rXX` where `XX` is the day of the month.

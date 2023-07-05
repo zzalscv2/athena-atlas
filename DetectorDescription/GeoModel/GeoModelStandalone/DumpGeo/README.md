@@ -23,7 +23,7 @@ You should setup Athena, as usual; for example you can setup the latest nightly 
 
 ```bash
 setupATLAS
-asetup Athena,master,latest,slc6
+asetup Athena,main,latest
 ```
 
 ## Run

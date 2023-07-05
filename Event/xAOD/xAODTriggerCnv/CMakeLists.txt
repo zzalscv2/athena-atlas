@@ -37,7 +37,7 @@ if( XAOD_STANDALONE )
    find_package( ROOT COMPONENTS Core Tree RIO )
 
    # FIX ME: temporarily disabled as part of the migration of AnalysisBase
-   #         to master
+   #         to main
 
    # # Test(s) in standalone mode:
    # atlas_add_test( ut_xaodtriggercnv_triggermenumetadatatool_test

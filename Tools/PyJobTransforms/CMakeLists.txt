@@ -47,7 +47,7 @@ if( NOT SIMULATIONBASE AND NOT GENERATIONBASE )
    _add_test( trfArgClassesATLAS py 300 )
 endif()
 
-#The following tests currently fail in master and should be revised
+#The following tests currently fail in main and should be revised
 #AODMerge_tf
 #AtlasG4_SimTTBar_tf
 #ESDMerge_tf
