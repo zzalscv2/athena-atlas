@@ -23,6 +23,8 @@
 #include <cassert>
 #include <iostream>
 
+#include "AthAllocators/DataPool.h"
+#include "AthAllocators/ArenaHeader.h"
 
 void compare (const LArDigit& p1,
               const LArDigit& p2)
@@ -61,16 +63,16 @@ void testit (const LArDigitContainer& trans1,
 
 void test1 ATLAS_NOT_THREAD_SAFE ()
 {
-  std::cout << "test1\n";  
+  std::cout << "test1\n";
 
   IdDictParser parser;
   parser.register_external_entity ("LArCalorimeter", "IdDictParser/IdDictLArCalorimeter_DC3-05-Comm-01.xml");
   IdDictMgr& idd = parser.parse ("IdDictParser/ATLAS_IDS.xml");
-  
+
   // create LArOnlineID and LArOnline_SuperCellID helpers to be passed to converter
   std::unique_ptr<LArOnlineID> idHelper = std::make_unique<LArOnlineID>();
   assert (idHelper->initialize_from_dictionary (idd) == 0);
- 
+
   std::unique_ptr<LArOnline_SuperCellID> idSCHelper = std::make_unique<LArOnline_SuperCellID>();
   assert (idSCHelper->initialize_from_dictionary (idd) == 0);
 
@@ -106,17 +108,28 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   ISvcLocator* svcLoc = Gaudi::svcLocator();
   StoreGateSvc* storeGateSvc = nullptr;
   assert (svcLoc->service("StoreGateSvc", storeGateSvc).isSuccess());
-
   // name must not contain 'SC' to be handled as standard cells in transient->persistent conversion
   assert (storeGateSvc->record(&trans, "myLArDigitContainer").isSuccess());
   // name must contain 'SC' to be handled as supercells in transient->persistent conversion
   assert (storeGateSvc->record(&transSC, "myLArDigitContainerSC").isSuccess());
+
+  //The DataPool/LeakCheck need to happen after we setup StoreGate
+  {
+    // Need to instantiate an instance of this before Leakcheck,
+    // to get the allocator created.  But the instance will also
+    // hold a lock on the allocator, so can't leave this live
+    // or we'll deadlock.
+    DataPool<LArDigit> pooldum;
+  }
 
   Athena_test::Leakcheck check;
 
   testit (trans, idHelper.get(), idSCHelper.get(), storeGateSvc);
 
   testit (transSC, idHelper.get(), idSCHelper.get(), storeGateSvc);
+  //We use a DataPool/custom allocator. We need to call erase so as
+  //to make sure we clean up before we exit.
+  SG::ArenaHeader::defaultHeader()->allocator(0)->erase();
 }
 
 
