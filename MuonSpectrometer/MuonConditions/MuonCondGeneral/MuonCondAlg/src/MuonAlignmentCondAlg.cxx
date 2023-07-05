@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondAlg/MuonAlignmentCondAlg.h"
@@ -15,7 +15,6 @@
 #include "GaudiKernel/ConcurrencyFlags.h"
 #include "MuonCondSvc/MdtStringUtils.h"
 #include "MuonReadoutGeometry/GlobalUtilities.h"
-#include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "PathResolver/PathResolver.h"
 #include "SGTools/TransientAddress.h"
 #include "boost/algorithm/string/predicate.hpp"
@@ -61,10 +60,6 @@ StatusCode MuonAlignmentCondAlg::initialize() {
     ATH_CHECK(m_writeILineKey.initialize(m_idHelperSvc->hasCSC() && m_ILinesFromDb and m_ILineRequested));
     ATH_CHECK(m_writeMdtAsBuiltKey.initialize(m_MdtAsBuiltRequested));
     ATH_CHECK(m_writeNswAsBuiltKey.initialize(m_NswAsBuiltRequested));
-
-    ATH_CHECK(detStore()->retrieve(m_muonDetMgrDS));
-    m_geometryVersion = m_muonDetMgrDS->geometryVersion();
-    ATH_MSG_INFO("geometry version from the MuonDetectorManager = " << m_geometryVersion);
     ATH_CHECK(m_idHelperSvc.retrieve());
     return StatusCode::SUCCESS;
 }
@@ -557,8 +552,7 @@ StatusCode MuonAlignmentCondAlg::loadAlignABLines(const std::string& folderName,
                 ATH_MSG_VERBOSE("identifier being assigned is " << m_idHelperSvc->stgcIdHelper().show_to_string(id)); 
             } else if (stationType.at(0) == 'T') {
                 // tgc case
-                int stPhi = MuonGM::stationPhiTGC(
-                    stationType, jff, jzz, m_geometryVersion);  // !!!!! The stationPhiTGC implementation in this package is NOT used !!!!!
+                int stPhi = MuonGM::stationPhiTGC(stationType, jff, jzz);  // !!!!! The stationPhiTGC implementation in this package is NOT used !!!!!
                 int stEta = 1;
                 if (jzz < 0) stEta = -1;
                 if (job != 0) {
@@ -1201,8 +1195,7 @@ StatusCode MuonAlignmentCondAlg::setALinesFromAscii(ALineMapContainer* writeALin
 	  id = m_idHelperSvc->stgcIdHelper().multilayerID(id, obj);
 	} else if (name[0] == 'T') {
 	  // tgc case
-	  int stPhi = MuonGM::stationPhiTGC(
-					    name, jff, jzz, m_geometryVersion);  // !!!!! The stationPhiTGC implementation in this package is NOT used !!!!!
+	  int stPhi = MuonGM::stationPhiTGC(name, jff, jzz);  // !!!!! The stationPhiTGC implementation in this package is NOT used !!!!!
 	  int stEta = 1;
 	  if (jzz < 0) stEta = -1;
 	  if (obj != 0) {

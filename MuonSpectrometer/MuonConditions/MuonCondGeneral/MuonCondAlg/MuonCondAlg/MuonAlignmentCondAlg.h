@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDALG_MUONALIGNMENTCONDALG_H
@@ -18,12 +18,6 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "nlohmann/json.hpp"
 
-class StoreGateSvc;
-class StatusCode;
-
-namespace MuonGM {
-    class MuonDetectorManager;
-}
 
 class MuonAlignmentCondAlg : public AthAlgorithm {
 public:
@@ -67,8 +61,6 @@ private:
                                                                      "Key of output muon alignment MM+STGC/AsBuilt condition data"};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-    const MuonGM::MuonDetectorManager* m_muonDetMgrDS{nullptr};
-    std::string m_geometryVersion{""};
    
     Gaudi::Property<std::vector<std::string>> m_parlineFolder{this, "ParlineFolders", {}, "Database folders"};
                                                               

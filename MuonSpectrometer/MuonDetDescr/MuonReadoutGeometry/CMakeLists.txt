@@ -39,3 +39,18 @@ if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
      COMPILE_FLAGS "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}"
      COMPILE_DEFINITIONS "FLATTEN" )
 endif()
+
+# we also add unit tests. 
+# Build them from the files in test/ 
+file(GLOB_RECURSE tests "test/*.cxx")
+foreach(_theTestSource ${tests})
+    get_filename_component(_theTest ${_theTestSource} NAME_WE)
+
+    atlas_add_test( ${_theTest} SOURCES ${_theTestSource}
+    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} 
+    LINK_LIBRARIES ${ROOT_LIBRARIES} MuonReadoutGeometry 
+    POST_EXEC_SCRIPT nopost.sh 
+    )
+    
+
+endforeach()

@@ -439,7 +439,7 @@ namespace MuonGM {
             Identifier id{0};
             if (m_idHelperSvc->hasTGC() && stType.at(0) == 'T') {
                 // TGC case
-                int stPhi = MuonGM::stationPhiTGC(stType, jff, jzz, geometryVersion());
+                int stPhi = MuonGM::stationPhiTGC(stType, jff, jzz);
                 int stEta = 1;            // stEta for the station is stEta for the first component chamber
                 if (jzz < 0) stEta = -1;  // stEta for the station is stEta for the first component chamber
                 id = m_idHelperSvc->tgcIdHelper().elementID(stType, stEta, stPhi);
