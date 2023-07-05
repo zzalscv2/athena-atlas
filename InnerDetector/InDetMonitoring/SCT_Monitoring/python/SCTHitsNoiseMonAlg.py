@@ -33,6 +33,8 @@ def SCTHitsNoiseMonAlgConfig(inputFlags):
     # Trigger histogram will be made only for data.
     myMonAlg.doTrigger = (not inputFlags.Input.isMC and inputFlags.DQ.useTrigger)
 
+    myMonAlg.doOnlineMon = inputFlags.Common.isOnline
+
     from ROOT import SCT_Monitoring as sctMon #import SCT_MonitoringNumbers.h
 
     # Add a generic monitoring tool (a "group" in old language). The returned 
@@ -101,6 +103,18 @@ def SCTHitsNoiseMonAlgConfig(inputFlags):
                                                             path= path[isub] + "/Noise",
                                                             xbins=sctMon.n_etabins[isub], xmin=sctMon.f_etabin[isub]-0.5, xmax=sctMon.l_etabin[isub]+0.5,
                                                             ybins=sctMon.n_phibins[isub], ymin=sctMon.f_phibin[isub]-0.5, ymax=sctMon.l_phibin[isub]+0.5)
+        
+            if myMonAlg.doOnlineMon:
+                noiseoccupancyrecent = "noiseoccupancymaprecent" + abbreviations[isub] + "_" + str(i//2) + "_" + str(i%2)
+                histotitlerecent = "SCT Noise Occupancy map for " + m_NOTriggerItem + " recent events and " + names[isub] + ": " + Title(i,isub)
+                MonGroupArray.__getitem__(isub).defineHistogram(varname= "eta_"+occMap + ",phi_"+occMap + ",NO_"+occMap+";" + noiseoccupancyrecent,
+                                                                type= "TProfile2D", 
+                                                                title= histotitlerecent + ";Index in the direction of #eta;Index in the direction of #phi",
+                                                                cutmask= "IsSelectedTriggerRecent_"+occMap,
+                                                                path= path[isub] + "/Noise",
+                                                                xbins=sctMon.n_etabins[isub], xmin=sctMon.f_etabin[isub]-0.5, xmax=sctMon.l_etabin[isub]+0.5,
+                                                                ybins=sctMon.n_phibins[isub], ymin=sctMon.f_phibin[isub]-0.5, ymax=sctMon.l_phibin[isub]+0.5,
+                                                                opt = 'kLBNHistoryDepth=30,kAlwaysCreate')
         
         #End i Loop
     
