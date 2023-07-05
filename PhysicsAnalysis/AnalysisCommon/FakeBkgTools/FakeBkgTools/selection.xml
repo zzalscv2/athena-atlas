@@ -1,6 +1,7 @@
 
 <lcgdict>
    <class name="CP::ApplyFakeFactor" />
+   <class name="CP::ApplyE2YFakeRate" />
    <class name="CP::AsymptMatrixTool" />
    <class name="CP::LhoodMM_tools" />
    <class name="CP::LhoodMMFitInfo" />

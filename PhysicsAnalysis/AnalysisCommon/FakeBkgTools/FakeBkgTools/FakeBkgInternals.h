@@ -14,7 +14,7 @@
 #include <map>
 #include <iostream>
 #include "TBuffer.h"
-
+#include "xAODBase/IParticle.h"
 namespace CP
 {
     class BaseFakeBkgTool;
@@ -87,6 +87,7 @@ struct ParticleData
     FakeFactor fake_factor;
     bool tight;
     int8_t charge;
+    xAOD::Type::ObjectType type;
 };
 
 inline constexpr uint8_t maxParticles() { return 6; }
@@ -138,7 +139,7 @@ private:
 
 enum class Client
 {
-    NONE, MATRIX_METHOD, FAKE_FACTOR, ALL_METHODS
+    NONE, MATRIX_METHOD, FAKE_FACTOR, E2Y_FAKE, ALL_METHODS
 };
 
 inline Uncertainty& Uncertainty::operator+=(const Uncertainty& rhs)

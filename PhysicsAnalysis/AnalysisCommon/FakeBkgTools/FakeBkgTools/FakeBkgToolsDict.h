@@ -6,6 +6,7 @@
 #define FAKEBKGTOOLS_FAKEBKGTOOLSDICT_H
 
 #include "FakeBkgTools/ApplyFakeFactor.h"
+#include "FakeBkgTools/ApplyE2YFakeRate.h"
 #include "FakeBkgTools/AsymptMatrixTool.h"
 #include "FakeBkgTools/LhoodMM_tools.h"
 #include "FakeBkgTools/TMinuit_LHMM.h"
