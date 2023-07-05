@@ -40,6 +40,7 @@ namespace DerivationFramework {
       bool m_and;
       bool m_trackAnd;
       bool m_thinTracks;
+      bool m_allowFailures;
   }; 
 }
 
