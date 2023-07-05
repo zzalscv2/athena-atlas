@@ -7,7 +7,7 @@ This document is intended to describe the bjet-signature specific code. Besides 
 [[_TOC_]]
 
 ## TriggerMenuMT
-The starting point for each trigger is the chain-name, a simple string. In our example it is  '*HLT_2j55_0eta290_020jvt_pf_ftf_bdl1r60_2j55_pf_ftf_0eta320_L14J15p0ETA25*'. In [Trigger Menu](https://gitlab.cern.ch/atlas/athena/-/tree/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Menu) this string is getting converted into a python-dictionary. This dictionary contains sub-dictionaries for each chain part. These sub-dictionaries are signature specific and contain all information needed for the execution of the signature code.
+The starting point for each trigger is the chain-name, a simple string. In our example it is  '*HLT_2j55_0eta290_020jvt_pf_ftf_bdl1r60_2j55_pf_ftf_0eta320_L14J15p0ETA25*'. In [Trigger Menu](https://gitlab.cern.ch/atlas/athena/-/tree/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Menu) this string is getting converted into a python-dictionary. This dictionary contains sub-dictionaries for each chain part. These sub-dictionaries are signature specific and contain all information needed for the execution of the signature code.
 The chain parts in the chain-name are identified by the trigger types.
 </details>
 <details>
@@ -45,7 +45,7 @@ This is only a brief introduction to the trigger menu in order to better underst
 
 
 ## JetChainParts-Dictionary
-The ChainParts-Dictionaries are defined in [SignatureDicts.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Menu/SignatureDicts.py). There you can also find the full set of keys and defaults of the JetChainParts-Dictionary. The b-tagging specific options are listed in the table below:
+The ChainParts-Dictionaries are defined in [SignatureDicts.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Menu/SignatureDicts.py). There you can also find the full set of keys and defaults of the JetChainParts-Dictionary. The b-tagging specific options are listed in the table below:
 
 | Key           | Description                   | Allowed values | Default       |
 | --------------| ------------------------------| ---------------| --------------|
@@ -159,7 +159,7 @@ Under '*chainParts*' it contains two JetChainParts-Dictionaries, one for each of
 This dictionary serves as input to the bjet-signature code.
 
 ## Bjet-signature code
-The bjet-signature code is hosted [here](https://gitlab.cern.ch/atlas/athena/-/tree/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet). The following graph should give an overview of the general workflow.
+The bjet-signature code is hosted [here](https://gitlab.cern.ch/atlas/athena/-/tree/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet). The following graph should give an overview of the general workflow.
 
 ```mermaid
 graph LR;
@@ -208,7 +208,7 @@ graph LR;
 ```
 
 The following list will describe the available files and their functionality:
-1. [GenerateBjetChainDefs.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/GenerateBjetChainDefs.py)\
+1. [GenerateBjetChainDefs.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/GenerateBjetChainDefs.py)\
      The first function being called in every signature code is '*generateChainConfigs*'. For the bjet-signature this function is located in '*GenerateBjetChainDefs.py*'. Input to it is the complete chain dictionary (see above for our example).\
      In a first stept this dictionary is being split into a list of chain dictionaries, one for each chain part, i.e. in the end each dictionary contains only one chain part.
      ```python
@@ -247,7 +247,7 @@ The following list will describe the available files and their functionality:
     | 2j55_0eta290_020jvt_pf_ftf_bdl1r60 | Bjet      | Jet + Bjet           |
     | 2j55_pf_ftf_0eta320_L14J15p0ETA25  | Jet       | Jet                  |
 
-2. [JetChainConfiguration.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Jet/JetChainConfiguration.py) \& [BjetChainConfiguration.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetChainConfiguration.py)\
+2. [JetChainConfiguration.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Jet/JetChainConfiguration.py) \& [BjetChainConfiguration.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetChainConfiguration.py)\
      Those two files are being called by '*GenerateBjetChainDefs.py*'. Input are the chain dictionaries with only one chain part, created in `GenerateBjetChainDefs.py`. They interpret the chain dict and build the chain for jet reconstruction and b-tagging, respectively. For details on the jet reconstruction please consult the respective documentation. Here we will focus on the b-tagging code.\
 In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the chain part steps. The sequence is extracted from `getBJetSequence`, which is defined in '*BjetMenuSequence*'.
      ```python
@@ -261,7 +261,7 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
      and finally returned.\
      In the log-files this step can be recognised by its name "Step2_bjet". It is called "Step2" as the first step is the jet-reconstruction.
 
-3. [BjetMenuSequence](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetMenuSequences.py)\
+3. [BjetMenuSequence](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetMenuSequences.py)\
      This file assembles all reconstruction algorithms into the bjet sequence mentioned above. As input it requires only the name of the jet-collection. In this way the code can be run for "EMTopo" and "EMPFlow" jet-collections. In the end a '*MenuSequence*' is being returned. A '*MenuSequence*' consits of three parts: '*InputMaker*', '*Sequence*' and '*Hypo*'.
     - **InputMaker**\
       The **InputMaker** defines the environement in which the **sequence** will be executed.\
@@ -273,8 +273,8 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
       ```python
         RoITool = ViewCreatorCentredOnJetWithPVConstraintROITool()
       ```
-      Currently the default values of $`\eta (\text{half-width}) = \phi (\text{half-width}) = 0.4`$ are being used (cf. [ViewCreatorCentredOnJetWithPVConstraintROITool.h](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigSteer/DecisionHandling/src/ViewCreatorCentredOnJetWithPVConstraintROITool.h)). Hence, the total size will be $`0.8 \times 0.8`$. The event views allow us to process only the most relevant parts of the detector information and thereby speed up the computation time. In addition a constraint on the distance between jet and primary vertex of $`z < 10 mm`$ is applied when creating the view.\
-      The primary vertex (PV) has already been determined by the jet code upstream. The collection name is configured from [TrigInDetConfig/ConfigSettings.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigTools/TrigInDetConfig/python/ConfigSettings.py), currently being `HLT_IDVertex_FS`  
+      Currently the default values of $`\eta (\text{half-width}) = \phi (\text{half-width}) = 0.4`$ are being used (cf. [ViewCreatorCentredOnJetWithPVConstraintROITool.h](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigSteer/DecisionHandling/src/ViewCreatorCentredOnJetWithPVConstraintROITool.h)). Hence, the total size will be $`0.8 \times 0.8`$. The event views allow us to process only the most relevant parts of the detector information and thereby speed up the computation time. In addition a constraint on the distance between jet and primary vertex of $`z < 10 mm`$ is applied when creating the view.\
+      The primary vertex (PV) has already been determined by the jet code upstream. The collection name is configured from [TrigInDetConfig/ConfigSettings.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigTools/TrigInDetConfig/python/ConfigSettings.py), currently being `HLT_IDVertex_FS`  
       ```python
        config=getInDetTrigConfig('jet')
        prmVtxKey = config.vertex
@@ -289,7 +289,7 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
         ViewFallThrough = True
       ```
       is set.\
-      In contrast, for the jet-collection a deep-copy of it is placed inside the view (cf. [EventViewCreatorAlgorithm.cxx](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigSteer/ViewAlgs/src/EventViewCreatorAlgorithm.cxx)), since it will be modified inside the view.
+      In contrast, for the jet-collection a deep-copy of it is placed inside the view (cf. [EventViewCreatorAlgorithm.cxx](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigSteer/ViewAlgs/src/EventViewCreatorAlgorithm.cxx)), since it will be modified inside the view.
       ```python
         PlaceJetInView = True
       ```
@@ -304,7 +304,7 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
       in order to be saved.
     - **Sequence**\
       The **sequence** is a sequence of all algorithms that will be executed with extra informations on it's ordering, i.e. which algorithms can be run in parallel and which have to be run sequential. All algorithms in our sequence are being run inside the single event views.\
-      The first algorithms are second stage of fast tracking and precision tracking (see [BjetTrackingConfiguration.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetTrackingConfiguration.py)).
+      The first algorithms are second stage of fast tracking and precision tracking (see [BjetTrackingConfiguration.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetTrackingConfiguration.py)).
       ```python
         secondStageAlgs, PTTrackParticles = getSecondStageBjetTracking(
           flags,
@@ -319,7 +319,7 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
         from AthenaCommon.Configurable import ConfigurableCABehavior
         with ConfigurableCABehavior():
       ```
-      Then we can extract the sequence of flavour-tagging algorithms from '*getFlavourTagging*' (see [BjetFlavourTaggingConfiguration.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetFlavourTaggingConfiguration.py))
+      Then we can extract the sequence of flavour-tagging algorithms from '*getFlavourTagging*' (see [BjetFlavourTaggingConfiguration.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetFlavourTaggingConfiguration.py))
       ```python
         acc_flavourTaggingAlgs = getFlavourTagging(
             inputJets=str(InputMakerAlg.InViewJets),
@@ -344,7 +344,7 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
       This is the final sequence being given to '*MenuSequence*'.
     - **Hypo**\
       The **hypo** algorithm tests whether a given hypothesis is `True` or `False`. For the bjet signature it tests whether the chain fulfills the given b-tagging requirements.\
-      The algorithm for this (see [TrigBjetBtagHypoAlg.cxx](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigHypothesis/TrigBjetHypo/src/TrigBjetBtagHypoAlg.cxx)) is loaded via
+      The algorithm for this (see [TrigBjetBtagHypoAlg.cxx](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigHypothesis/TrigBjetHypo/src/TrigBjetBtagHypoAlg.cxx)) is loaded via
       ```python
         hypo = TrigBjetBtagHypoAlg(
          f"TrigBjetBtagHypoAlg_{jc_name}",
@@ -360,8 +360,8 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
        )
       ```
       The inputs to it are the names of the jet, b-Tagging, tracks and PV collections.\
-      The hypo-algorithms retrive the collections from the view. For this reason online monitoring is being performed at this instance (see [TrigBjetMonitoringConfig.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigHypothesis/TrigBjetHypo/python/TrigBjetMonitoringConfig.py)).\
-      In the end the hypothesis is being tested with the help of the hypotool (see [TrigBjetBtagHypoTool.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigHypothesis/TrigBjetHypo/python/TrigBjetBtagHypoTool.py))
+      The hypo-algorithms retrive the collections from the view. For this reason online monitoring is being performed at this instance (see [TrigBjetMonitoringConfig.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigHypothesis/TrigBjetHypo/python/TrigBjetMonitoringConfig.py)).\
+      In the end the hypothesis is being tested with the help of the hypotool (see [TrigBjetBtagHypoTool.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigHypothesis/TrigBjetHypo/python/TrigBjetBtagHypoTool.py))
       ```python
         from TrigBjetHypo.TrigBjetBtagHypoTool import TrigBjetBtagHypoToolFromDict
       ```
@@ -384,7 +384,7 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
         BTagName = recordable(f'{jc_key}BTagging')
       ```
 
-4. [BjetTrackingConfiguration.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetTrackingConfiguration.py)\
+4. [BjetTrackingConfiguration.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetTrackingConfiguration.py)\
      This file configures the tracking algorithms run in the bjet signature code.\
      The function '*getSecondStageBjetTracking*' is called in '*BjetMenuSequence*'.\
      Inputs to it are the name of the RoI, PV and Jets it should run on.\
@@ -413,7 +413,7 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
      The name of the '*TrackParticle*'-Collection is `HLT_IDTrack_Bjet_IDTrig`.\
      For more informations on the tracking algorithms you can check out the '*IDTrig*' documentations.
 
-5. [BjetFlavourTaggingConfiguration.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetFlavourTaggingConfiguration.py)\
+5. [BjetFlavourTaggingConfiguration.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetFlavourTaggingConfiguration.py)\
      This file configures the algorithms to compute b-tagging probabilities. The same algorithms as at offline-level are being executed, just using the respective trigger-collections. For bjet, again all algorithms are running inside the views.\
      The function '*getFlavourTagging*' is only being called in '*BjetMenuSequence*'. Inputs are track, jet, PV and output b-Tagging collection names.\
      The workflow is as follows:
@@ -474,20 +474,20 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
      ```
 
 ## TrigBjetHypo
-The bjet hypothesis package is located at [TrigBjetHypo](https://gitlab.cern.ch/atlas/athena/-/tree/master/Trigger/TrigHypothesis/TrigBjetHypo).\
+The bjet hypothesis package is located at [TrigBjetHypo](https://gitlab.cern.ch/atlas/athena/-/tree/main/Trigger/TrigHypothesis/TrigBjetHypo).\
 The purpose of the hypo-tool is to decide on whether an event passes the chain-hypothesis or not. In our case the hypothsis is that a certain number of b-jets are present in the event. I.e. we test whether a the jets pass a certain b-tagging probability threshold. If this is the case, the event will be recorded.\
 In addition the hypo-tool takes care of navigation, which means linking the hypothesis decisions to the objects (jets). Also online monitoring, i.e. histogramming of b-tagging quantities at online-level, is being performed at the hypothesis testing step.\
 The package consists of two main parts. The python-code which takes care of configuring the hypo-tools. And the c++-code which contain the hypo-tools. (Currently there is only one tool in use.)
 
 ### Python code -- HypoTool configuration
-The file [`TrigBjetBtagHypoTool.py`](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigHypothesis/TrigBjetHypo/python/TrigBjetBtagHypoTool.py) takes care of configuring the hypothesis tool correctly.\
+The file [`TrigBjetBtagHypoTool.py`](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigHypothesis/TrigBjetHypo/python/TrigBjetBtagHypoTool.py) takes care of configuring the hypothesis tool correctly.\
   1. The function `TrigBjetBtagHypoToolFromDict` is being called by the `MenuSequence`. Input to it is the _JetChainDictionary_. The relevant informations for configuring the hypo-tool, like `bTag`, `maxEta`, etc. are copied into a slimmed dictionary.
-  2. This slimmed dictionary together with the chain-name is being passed to the function `getBjetBtagHypoConfiguration`. There the main hypo-tool [`TrigBjetBtagHypoTool`](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigHypothesis/TrigBjetHypo/src/TrigBjetBtagHypoTool.cxx) (written in c++) is loaded.
+  2. This slimmed dictionary together with the chain-name is being passed to the function `getBjetBtagHypoConfiguration`. There the main hypo-tool [`TrigBjetBtagHypoTool`](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigHypothesis/TrigBjetHypo/src/TrigBjetBtagHypoTool.cxx) (written in c++) is loaded.
   3. Then the value of the key `bTag` is being passed to the function `decodeThreshold`. This function interprets the b-tagger and the working-point. With the help of the dictionary `bTaggingWP` the cut-value is determined. Finally tagger and cut-value are returned to `getBjetBtagHypoConfiguration`.
   4. A `bTag`-value of "offperf" means that no b-tagging cut is applied. Hence, a flag of the hypo-tool called `AcceptAll` is being set to "True". Consequently all objects in this event will be recorded. Chains like this are interesting for performance checks.\
   Next `Tagger` (b-tagger), `BTaggingCut` (cut-value) and `cFraction` arguments of the hypo-tool are being set. The `cFraction` value is hardcoded (currently 0.018) and is important for DL1r taggers to compute the log-likelihood ratio.\
   This tool is then returned to `TrigBjetBtagHypoToolFromDict`.
-  5. Monitoring code is also being configured at this step. Therefore the function `addMonitoring` is being called. It adds the monitoring class [`TrigBjetBtagHypoToolMonitoring`](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigHypothesis/TrigBjetHypo/python/TrigBjetMonitoringConfig.py) as the argument `MonTool` to the hypo-tool.
+  5. Monitoring code is also being configured at this step. Therefore the function `addMonitoring` is being called. It adds the monitoring class [`TrigBjetBtagHypoToolMonitoring`](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigHypothesis/TrigBjetHypo/python/TrigBjetMonitoringConfig.py) as the argument `MonTool` to the hypo-tool.
   6. Finally the hypo-tool is being returned.
 ```mermaid
 graph TB;
@@ -497,14 +497,14 @@ graph TB;
 
   end
 ```
-The file [`TrigBjetMonitoringConfig.py`](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigHypothesis/TrigBjetHypo/python/TrigBjetMonitoringConfig.py) contains two classes for monitoring.\
+The file [`TrigBjetMonitoringConfig.py`](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigHypothesis/TrigBjetHypo/python/TrigBjetMonitoringConfig.py) contains two classes for monitoring.\
 The first one is `TrigBjetBtagHypoToolMonitoring`. It monitors only the flavour-probabilities and the log-likelihood-ratio, and is added to the hypo-tool in `TrigBjetBtagHypoTool.py`, as described above.\
-The second one is `TrigBjetOnlineMonitoring`. It monitors all kinds of flavour-tagging related quantities, and is added to the hypo-tool in [`BjetMenuSequence.py`](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetMenuSequences.py).\
+The second one is `TrigBjetOnlineMonitoring`. It monitors all kinds of flavour-tagging related quantities, and is added to the hypo-tool in [`BjetMenuSequence.py`](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetMenuSequences.py).\
 Both classes contain only the definition of the histograms. The histograms will be filled in the hypothesis-Algorithms (see next section).
 
 ### C++ code -- HypoTools
-- [TrigBjetBtagHypoAlg.cxx](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigHypothesis/TrigBjetHypo/src/TrigBjetBtagHypoAlg.cxx)/[TrigBjetBtagHypoAlg.h](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigHypothesis/TrigBjetHypo/src/TrigBjetBtagHypoAlg.h)\
-  This is the main hypothesis algorithm at the moment. It is called / added to the `MenuSequence` in [`BjetMenuSequence.py`](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetMenuSequences.py).\
+- [TrigBjetBtagHypoAlg.cxx](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigHypothesis/TrigBjetHypo/src/TrigBjetBtagHypoAlg.cxx)/[TrigBjetBtagHypoAlg.h](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigHypothesis/TrigBjetHypo/src/TrigBjetBtagHypoAlg.h)\
+  This is the main hypothesis algorithm at the moment. It is called / added to the `MenuSequence` in [`BjetMenuSequence.py`](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetMenuSequences.py).\
   Arguments to be set are:
   - ReadHandleKeys of the Jet, BTagging, Track, and PV-Container (On which to test the hypothesis, i.e. the containers inside the views)
   - GaudiProperties which are the names of the links to the BTagging, and PV-Container used for navigation
@@ -526,7 +526,7 @@ Both classes contain only the definition of the histograms. The histograms will 
      In this step the necessary information for running the hypo-tool is stored in a `TrigBjetBtagHypoToolInfo`-object. In order to do so another loop over the decision-objects is being executed. A `TrigBjetBtagHypoToolInfo`-object is created for every decision and the following information is passed to it: previousDecisionIDs, _ElementLinks_ to the BTagging, and PV-Container, and the new decision objects (which have been created in the previous step).
   4. Calculating decision on trigger chains
      In a last loop over the hypo-tools the output decision, depending on the `TrigBjetBtagHypoToolInfo`, is calculated. There is one hypo-tool for each splitted JetChainParts-Dictionary. For our example chain this would be two hypo.tools.
-- [TrigBjetBtagHypoTool.cxx](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigHypothesis/TrigBjetHypo/src/TrigBjetBtagHypoTool.cxx)/[TrigBjetBtagHypoTool.h](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigHypothesis/TrigBjetHypo/src/TrigBjetBtagHypoTool.h)\
+- [TrigBjetBtagHypoTool.cxx](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigHypothesis/TrigBjetHypo/src/TrigBjetBtagHypoTool.cxx)/[TrigBjetBtagHypoTool.h](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigHypothesis/TrigBjetHypo/src/TrigBjetBtagHypoTool.h)\
   This is the main bjet hypothesis-tool.\
   Arguments to be set are:
   1. Gaudi property _bool_ whether to accept all events
@@ -545,8 +545,8 @@ Both classes contain only the definition of the histograms. The histograms will 
   
   If all of the checks are successfull, a new decisionID will be added to the output-decision container, if not, nothing will be added. When the argument `m_acceptAll` is set to "true", the jet will pass the decision, even if the thrid check is not successfull (b-tagging weight smaller than cut value).
 
-- [TrigBjetHypoAlgBase.cxx](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigHypothesis/TrigBjetHypo/src/TrigBjetHypoAlgBase.cxx)/[TrigBjetHypoAlgBase.h](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigHypothesis/TrigBjetHypo/src/TrigBjetHypoAlgBase.h)/[TrigBjetHypoAlgBase.icc](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigHypothesis/TrigBjetHypo/src/TrigBjetHypoAlgBase.icc)\
-  These files contain helper functions for retrieving objects or collections from StoreGate, EventViews and Navigation as well as functions to attach links from objects or collections to the output decision. These functions are used in [TrigBjetBtagHypoAlg.cxx](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigHypothesis/TrigBjetHypo/src/TrigBjetBtagHypoAlg.cxx).
+- [TrigBjetHypoAlgBase.cxx](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigHypothesis/TrigBjetHypo/src/TrigBjetHypoAlgBase.cxx)/[TrigBjetHypoAlgBase.h](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigHypothesis/TrigBjetHypo/src/TrigBjetHypoAlgBase.h)/[TrigBjetHypoAlgBase.icc](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigHypothesis/TrigBjetHypo/src/TrigBjetHypoAlgBase.icc)\
+  These files contain helper functions for retrieving objects or collections from StoreGate, EventViews and Navigation as well as functions to attach links from objects or collections to the output decision. These functions are used in [TrigBjetBtagHypoAlg.cxx](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigHypothesis/TrigBjetHypo/src/TrigBjetBtagHypoAlg.cxx).
 
 ### Combo-Hypo
 All of the hypothesis code explained above only works on single chain parts. Now the combo-hypo tests whether an event passes the full chain, which can consist of multiple chain parts. To do so it simply tests all kind of possible combinations of jets to find a combination where all jets pass their respective assigned single chain part hypothesis. This is done with the help of the previously created output decision containers. If one combination is successfull, the chain is passed and the event will be stored.
@@ -594,28 +594,28 @@ The full bjet sigature sequence looks as follows (excluding jet steps)
     +-- ComboHypo/ComboHypo_Step2_NStep2_bjet
 ```
 # Modify the bjet code
-New chains can be added in [Menu/Dev_pp_run3_v1.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Menu/Dev_pp_run3_v1.py) under `chains['Bjet']` .\
-If the dictionary has to be interpreted differently or the chain has to be build differently, [GenerateBjetChainDefs.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/GenerateBjetChainDefs.py) or [BjetChainConfiguration.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetChainConfiguration.py) has to be modified, respectively.\
-Changes to the sequence or event-view setup has to end up in [BjetMenuSequences.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetMenuSequences.py).\
-Changes to tracking and flavour-tagging configuration end up in [BjetTrackingConfiguration.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetTrackingConfiguration.py) and [BjetFlavourTaggingConfiguration.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetFlavourTaggingConfiguration.py), respectively.\
+New chains can be added in [Menu/Dev_pp_run3_v1.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Menu/Dev_pp_run3_v1.py) under `chains['Bjet']` .\
+If the dictionary has to be interpreted differently or the chain has to be build differently, [GenerateBjetChainDefs.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/GenerateBjetChainDefs.py) or [BjetChainConfiguration.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetChainConfiguration.py) has to be modified, respectively.\
+Changes to the sequence or event-view setup has to end up in [BjetMenuSequences.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetMenuSequences.py).\
+Changes to tracking and flavour-tagging configuration end up in [BjetTrackingConfiguration.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetTrackingConfiguration.py) and [BjetFlavourTaggingConfiguration.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetFlavourTaggingConfiguration.py), respectively.\
 
-In case adaptations to the offline flavour-tagging code has to be made, the files can be found in [PhysicsAnalysis/JetTagging/JetTagAlgs/BTagging](https://gitlab.cern.ch/atlas/athena/-/tree/master/PhysicsAnalysis/JetTagging/JetTagAlgs/BTagging).\
-New collections or decorations have to be added in [TriggerEDMRun3.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TrigEDMConfig/python/TriggerEDMRun3.py) in order to be saved in the ouput.\
-The working points for hypothesis testing are defined in [TrigBjetBtagHypoTool.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigHypothesis/TrigBjetHypo/python/TrigBjetBtagHypoTool.py).
+In case adaptations to the offline flavour-tagging code has to be made, the files can be found in [PhysicsAnalysis/JetTagging/JetTagAlgs/BTagging](https://gitlab.cern.ch/atlas/athena/-/tree/main/PhysicsAnalysis/JetTagging/JetTagAlgs/BTagging).\
+New collections or decorations have to be added in [TriggerEDMRun3.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TrigEDMConfig/python/TriggerEDMRun3.py) in order to be saved in the ouput.\
+The working points for hypothesis testing are defined in [TrigBjetBtagHypoTool.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigHypothesis/TrigBjetHypo/python/TrigBjetBtagHypoTool.py).
 
 ## Testing code changes (ART Tutorial)
 The easiest way of testing any of the code changes is by making use of the ATLAS-Release-Tester (ART) code.\
-The ART code for flavour-tagging can be found at [PhysicsAnalysis/JetTagging/FlavourTaggingTests](https://gitlab.cern.ch/atlas/athena/-/tree/master/PhysicsAnalysis/JetTagging/FlavourTaggingTests). Initially it was developed to histogram offline quantities. A new class called '*PhysicsTriggerVariablePlots*', which inherits from '*PhysicsVariablePlots*', was added to also histogram variables at trigger level. The two classes just differ in the way the collections are retrieved from the input files. Where as for offline quantities, the collections can be accessed directly, for trigger navigation has to be used in order to retain information on which event/jet passed which chain.\
-The core algorithm lies in [PhysicsVariablePlots](https://gitlab.cern.ch/atlas/athena/-/blob/master/PhysicsAnalysis/JetTagging/FlavourTaggingTests/src/PhysicsVariablePlots.cxx) and [PhysicsTriggerVariablePlots](https://gitlab.cern.ch/atlas/athena/-/blob/master/PhysicsAnalysis/JetTagging/FlavourTaggingTests/src/PhysicsTriggerVariablePlots.cxx) for offline and trigger, respectively.\
-Offline-jets have to a pass a quality selection, kinematic selection and a JVT cut. Trigger-jets have to pass only a kinematic selection. Those selections are defined in [FTAGValidationAlgorithm](https://gitlab.cern.ch/atlas/athena/-/blob/master/PhysicsAnalysis/JetTagging/FlavourTaggingTests/src/FTAGValidationAlgorithm.cxx).
+The ART code for flavour-tagging can be found at [PhysicsAnalysis/JetTagging/FlavourTaggingTests](https://gitlab.cern.ch/atlas/athena/-/tree/main/PhysicsAnalysis/JetTagging/FlavourTaggingTests). Initially it was developed to histogram offline quantities. A new class called '*PhysicsTriggerVariablePlots*', which inherits from '*PhysicsVariablePlots*', was added to also histogram variables at trigger level. The two classes just differ in the way the collections are retrieved from the input files. Where as for offline quantities, the collections can be accessed directly, for trigger navigation has to be used in order to retain information on which event/jet passed which chain.\
+The core algorithm lies in [PhysicsVariablePlots](https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/JetTagging/FlavourTaggingTests/src/PhysicsVariablePlots.cxx) and [PhysicsTriggerVariablePlots](https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/JetTagging/FlavourTaggingTests/src/PhysicsTriggerVariablePlots.cxx) for offline and trigger, respectively.\
+Offline-jets have to a pass a quality selection, kinematic selection and a JVT cut. Trigger-jets have to pass only a kinematic selection. Those selections are defined in [FTAGValidationAlgorithm](https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/JetTagging/FlavourTaggingTests/src/FTAGValidationAlgorithm.cxx).
 In addition trigger jets are matched to offline jets (including a DR=0.2 cut to avoid mismatches) to gain flavour information.\
-The same functions are used for plotting and the histogram definitions are stored in a single json-file [PhysicsAnalysis/JetTagging/JetTagValidation/JetTagDQA/data/PhysValBtag_VariablesMenu.json](https://gitlab.cern.ch/atlas/athena/-/blob/master/PhysicsAnalysis/JetTagging/JetTagValidation/JetTagDQA/data/PhysValBtag_VariablesMenu.json).
+The same functions are used for plotting and the histogram definitions are stored in a single json-file [PhysicsAnalysis/JetTagging/JetTagValidation/JetTagDQA/data/PhysValBtag_VariablesMenu.json](https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/JetTagging/JetTagValidation/JetTagDQA/data/PhysValBtag_VariablesMenu.json).
 
 1. Setup athena
    ```
     cd <path-to-source-folder>
     setupATLAS
-    asetup Athena,master,latest,here
+    asetup Athena,main,latest,here
    ```
    Alternatively you can also choose one of the latest stable releases.
    
@@ -637,7 +637,7 @@ The same functions are used for plotting and the histogram definitions are store
     source */setup.sh
    ```
 4. Running ART code
-   Execute the script in [test-folder](https://gitlab.cern.ch/atlas/athena/-/tree/master/PhysicsAnalysis/JetTagging/FlavourTaggingTests/test) for running ART code.
+   Execute the script in [test-folder](https://gitlab.cern.ch/atlas/athena/-/tree/main/PhysicsAnalysis/JetTagging/FlavourTaggingTests/test) for running ART code.
    ```
     python <path-to-athena-folder>/PhysicsAnalysis/JetTagging/FlavourTaggingTests/test/test_trigAna_FTAG_PhysicsVariablePlots_AOD_grid.py
    ```
@@ -645,10 +645,10 @@ The same functions are used for plotting and the histogram definitions are store
 
 5. Customising program options
   - Reduce the number of events to be produced\
-     AOD production takes quite some time. So for testing changes where high statistics is not neccessary, it may make sense to reduce the number of '*max_events*' in [test_trigAna_FTAG_PhysicsVariablePlots_AOD_grid.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/PhysicsAnalysis/JetTagging/FlavourTaggingTests/test/test_trigAna_FTAG_PhysicsVariablePlots_AOD_grid.py) from 800 to around 20.
+     AOD production takes quite some time. So for testing changes where high statistics is not neccessary, it may make sense to reduce the number of '*max_events*' in [test_trigAna_FTAG_PhysicsVariablePlots_AOD_grid.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/JetTagging/FlavourTaggingTests/test/test_trigAna_FTAG_PhysicsVariablePlots_AOD_grid.py) from 800 to around 20.
 
    - Histograming JobOptions\
-     General JobOptions for histograming offline quantities are defined in [FlavourTaggingConfiguration_PhysicsVariablePlots.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/PhysicsAnalysis/JetTagging/FlavourTaggingTests/python/FlavourTaggingConfiguration_PhysicsVariablePlots.py). Below you can find the list of configurable options:
+     General JobOptions for histograming offline quantities are defined in [FlavourTaggingConfiguration_PhysicsVariablePlots.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/JetTagging/FlavourTaggingTests/python/FlavourTaggingConfiguration_PhysicsVariablePlots.py). Below you can find the list of configurable options:
 
      | Option | Description |
      | ------ | ----------- |
@@ -656,7 +656,7 @@ The same functions are used for plotting and the histogram definitions are store
      |VertexCollectionKey        | Name of the corresponding vertex container |
      |TrackParticleCollectionKey | Name of the corresponding track container  |
 
-     General JobOptions for histograming trigger quantities are defined in [FlavourTaggingConfiguration_PhysicsTriggerVariablePlots.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/PhysicsAnalysis/JetTagging/FlavourTaggingTests/python/FlavourTaggingConfiguration_PhysicsTriggerVariablePlots.py). Below you can find the list of configurable options:
+     General JobOptions for histograming trigger quantities are defined in [FlavourTaggingConfiguration_PhysicsTriggerVariablePlots.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/JetTagging/FlavourTaggingTests/python/FlavourTaggingConfiguration_PhysicsTriggerVariablePlots.py). Below you can find the list of configurable options:
 
      | Option | Description |
      | ------ | ----------- |
@@ -667,7 +667,7 @@ The same functions are used for plotting and the histogram definitions are store
      |bJetChains                     | Array of the chains you want to analyse (In case you are unsure about the available chains in your input-file, you can first run the program using a dummy chain name. At the end of execution the list of available chains will be printed: "INFO m_trigDec->getListOfTriggers() [ ...]" |
 
   - Adding new histograms
-     Variables can be added in [PhysicsVariablePlots](https://gitlab.cern.ch/atlas/athena/-/blob/master/PhysicsAnalysis/JetTagging/FlavourTaggingTests/src/PhysicsVariablePlots.cxx) and [PhysicsTriggerVariablePlots](https://gitlab.cern.ch/atlas/athena/-/blob/master/PhysicsAnalysis/JetTagging/FlavourTaggingTests/src/PhysicsTriggerVariablePlots.cxx).
+     Variables can be added in [PhysicsVariablePlots](https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/JetTagging/FlavourTaggingTests/src/PhysicsVariablePlots.cxx) and [PhysicsTriggerVariablePlots](https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/JetTagging/FlavourTaggingTests/src/PhysicsTriggerVariablePlots.cxx).
      The syntax for filling a new histogram is:
      ```
        1D: ATH_CHECK( fillHistogram( "<histname>",<variable> ) );   
@@ -677,7 +677,7 @@ The same functions are used for plotting and the histogram definitions are store
      ```
        ATH_CHECK( fillHistogram( chain+flavour+"DL1r_pu",DL1r_pu ) );
      ```
-     The last step is defining the properties of the new histogram in [PhysValBtag_VariablesMenu.json](https://gitlab.cern.ch/atlas/athena/-/blob/master/PhysicsAnalysis/JetTagging/JetTagValidation/JetTagDQA/data/PhysValBtag_VariablesMenu.json). The syntax is as follows:
+     The last step is defining the properties of the new histogram in [PhysValBtag_VariablesMenu.json](https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/JetTagging/JetTagValidation/JetTagDQA/data/PhysValBtag_VariablesMenu.json). The syntax is as follows:
      ```json
      "<histname>": {
          "title": "<Histogram-title>", #String

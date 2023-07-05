@@ -2,7 +2,7 @@ Overview of Run3 JetMonitoring Tools
 =====
 
 This overview presents the basic functionality of the tools available in the Run3 JetMonitoring framework, as well as the helper functions / dictionaries used to simplify the monitoring config.
-It only contains brief examples, taken from the [`TrigJetMonitorAlgorithm.py`](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigMonitoring/TrigJetMonitoring/python/TrigJetMonitorAlgorithm.py) and other standard configurations.
+It only contains brief examples, taken from the [`TrigJetMonitorAlgorithm.py`](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigMonitoring/TrigJetMonitoring/python/TrigJetMonitorAlgorithm.py) and other standard configurations.
 
 For more information on the functionality, structure, and usage of the Offline JetMonitoring tool, refer to the [`JetTriggerRun3OfflineMonitoring twiki`](https://twiki.cern.ch/twiki/bin/view/Atlas/JetTriggerRun3OfflineMonitoring).
 
@@ -26,7 +26,7 @@ Contains commonly used instances of `VarSpec`, `HistoSpec`, and `ToolSpec` (esp.
 [JetMonitoringAlg](../src/JetMonitoringAlg.cxx)
 -----
 
-Processes the input jet collection and calls the specified tools to create and fill histograms from those jets. Tools are called via an interface to [`IJetHistoFiller`](https://gitlab.cern.ch/atlas/athena/-/blob/master/Reconstruction/Jet/JetMonitoring/JetMonitoring/IJetHistoFiller.h).
+Processes the input jet collection and calls the specified tools to create and fill histograms from those jets. Tools are called via an interface to [`IJetHistoFiller`](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/Jet/JetMonitoring/JetMonitoring/IJetHistoFiller.h).
 
 [JetVariable](../JetMonitoring/JetVariable.h)
 -----

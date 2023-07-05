@@ -7,7 +7,7 @@ For the package to "do anything", CUDA needs to be available in the build
 environment. This is not the case by default but can be requested by adding
 the `cuda` tag to your asetup command, e.g.:
 ```
-asetup Athena,master,latest,cuda
+asetup Athena,main,latest,cuda
 ```
 Note that CUDA does not necessarily need to be available in
 the runtime environment, as by default CMake links the package's library

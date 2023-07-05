@@ -13,7 +13,7 @@ RunTrigEgammaMonitoring.py -i path/to/AOD.root --nov 1000
 
 ### Run with emulator (default):
 
-Default configuration can be found [here](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Egamma/EgammaDefs.py#L22).
+Default configuration can be found [here](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Egamma/EgammaDefs.py#L22).
 
 ```
 RunTrigEgammaMonitoring.py -i path/to/AOD.root --nov 1000 --emulate
@@ -31,7 +31,7 @@ RunTrigEgammaMonitoring.py -i path/to/AOD.root --nov 1000 --emulate --dnnConfigP
 ```
 setupATLAS
 lsetup git
-asetup Athena,master,latest,here
+asetup Athena,main,latest
 ```
 ### Local Installation (optional):
 

@@ -5,7 +5,7 @@ Create references:
 
 * Produce `DAOD_PHYSLITE.art.pool.root`:
 ```
-asetup Athena,master,latest
+asetup Athena,main,latest
 test_trf_q445_phys_physlite_mt_mp.sh > out.txt 2>&1 &
 ```
 * Produce reference histograms `hist_physlite_2305.root`:

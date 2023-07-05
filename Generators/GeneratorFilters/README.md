@@ -25,7 +25,7 @@ xAODElectronFilter = xAODElectronFilter("xAODElectronFilter")
 filtSeq += xAODElectronFilter
 filtSeq.xAODElectronFilter.Ptcut = 25000
 
-One can find all free parameters of a filter (settable cuts) and their predefined default values in the filters headers: https://gitlab.cern.ch/atlas/athena/-/tree/master/Generators/GeneratorFilters/GeneratorFilters
+One can find all free parameters of a filter (settable cuts) and their predefined default values in the filters headers: https://gitlab.cern.ch/atlas/athena/-/tree/main/Generators/GeneratorFilters/GeneratorFilters
 
 
 4. Release for running the harmonised filters

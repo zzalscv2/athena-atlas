@@ -14,11 +14,11 @@ The job requires no input and produces no output except log messages.
 To run the example you should first set up the ATLAS software and then run the configuration file:
 
 ```
-asetup Athena,master,latest
+asetup Athena,main,latest
 python -m AthExHelloWorld.HelloWorldConfig
 ```
 
-This will run the job according to [this configuration file](https://gitlab.cern.ch/atlas/athena/-/blob/master/Control/AthenaExamples/AthExHelloWorld/python/HelloWorldConfig.py) and will print a number of messages, clearly demonstrating how the algorithm, tool and configuration relate to each other.
+This will run the job according to [this configuration file](https://gitlab.cern.ch/atlas/athena/-/blob/main/Control/AthenaExamples/AthExHelloWorld/python/HelloWorldConfig.py) and will print a number of messages, clearly demonstrating how the algorithm, tool and configuration relate to each other.
 
 ## Package description
 
