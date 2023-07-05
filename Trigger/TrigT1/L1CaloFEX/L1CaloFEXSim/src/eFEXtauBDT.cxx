@@ -324,10 +324,10 @@ LVL1::eFEXtauBDT::computeEstimate(std::vector<unsigned int *> &ptr_list,
 unsigned int LVL1::eFEXtauBDT::multWithOverflow(unsigned int a, unsigned int b,
                                                 bool &overflow,
                                                 int resultNBits) {
+  overflow = false;
   if (b == 0) {
     return 0;
   }
-  overflow = false;
   unsigned int result = a * b;
   if (a != result / b) {
     // This shouldn't happen (a and b are in reality 16 bit numbers), but just
