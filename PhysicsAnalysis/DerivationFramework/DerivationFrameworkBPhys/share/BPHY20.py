@@ -303,12 +303,13 @@ BPHY20_GammaFinder  		= DerivationFramework__BPhysBGammaFinder(
     VertexFitterTool 		= GammaVertexFit,
     VertexEstimator 		= BPHY20_VertexTools.VtxPointEstimator,
     InputTrackParticleContainerName = "InDetTrackParticles",
+    InputLowPtTrackContainerName = "LowPtRoITrackParticles",
     ConversionContainerName = "BPHY20ConversionCandidates",
     BVertexContainers 	  	= ["BPHY20BcJpsiMuCandidates", "BPHY20BcJpsiECandidates"],
     PassFlagsToCheck  		= ["passed_Bc"],
     RequireDeltaQ 			= True, 
-    Use_low_pT              = False,
-    MaxDeltaQ 				= 500.0,
+    MaxDeltaQ 				= 450.0,
+    MinRxy                  = 10.0,
     MaxGammaMass            = 110.0,
     Chi2Cut                 = 20.0 )
 
@@ -512,15 +513,24 @@ BPHY20Thin_ConvTrk = DerivationFramework__Thin_vtxTrk(
   VertexContainerNames       = ["BPHY20ConversionCandidates"],
   PassFlags                  = ["passed_Gamma"] 
   )
-
 ToolSvc += BPHY20Thin_ConvTrk
 
+# if addLowPtTracking:
+BPHY20Thin_ConvLowPtTrk = DerivationFramework__Thin_vtxTrk(
+  name                       = "BPHY20Thin_ConvLowPtTrk",
+  ThinningService            = "BPHY20ThinningSvc",
+  TrackParticleContainerName = "LowPtRoITrackParticles",
+  VertexContainerNames       = ["BPHY20ConversionCandidates"],
+  PassFlags                  = ["passed_Gamma"],
+  AllowFailures              = True
+)
+ToolSvc += BPHY20Thin_ConvLowPtTrk
 
 #====================================================================
 # CREATE THE DERIVATION KERNEL ALGORITHM AND PASS THE ABOVE TOOLS  
 #====================================================================
 
-BPHY20ThinningTools = [ BPHY20MuonTPThinningTool, BPHY20EgammaTPThinningTool, BPHY20Thin_ConvTrk,
+BPHY20ThinningTools = [ BPHY20MuonTPThinningTool, BPHY20EgammaTPThinningTool, BPHY20Thin_ConvTrk, BPHY20Thin_ConvLowPtTrk,
                         BPHY20Thin_vtxTrk, BPHY20_thinningTool_PV,  
                         BPHY20TauTPThinningTool]
 
@@ -585,7 +595,8 @@ SmartCollections = [
                     "AntiKt4EMTopoJets_BTagging201810", 
                     "BTagging_AntiKt4EMTopo_201810", 
                     "Muons", 
-                    "InDetTrackParticles", 
+                    "InDetTrackParticles",
+                    "LowPtRoITrackParticles",
                     "MET_Reference_AntiKt4EMTopo"
                     ]
 
@@ -616,7 +627,8 @@ ExtraVariables = ["Photons.pt.eta.phi.m",
 ExtraVariables += ["Muons.etaLayer1Hits.etaLayer2Hits.etaLayer3Hits.etaLayer4Hits.phiLayer1Hits.phiLayer2Hits.phiLayer3Hits.phiLayer4Hits",
                    "Muons.numberOfTriggerEtaLayers.numberOfPhiLayers",
                    "CombinedMuonTrackParticles.numberOfTRTHits.numberOfTRTHighThresholdHits", 
-                   "InDetTrackParticles.numberOfTRTHits.numberOfTRTHighThresholdHits.vx.vy.vz.radiusOfFirstHit",
+                   "InDetTrackParticles.numberOfTRTHits.numberOfTRTHighThresholdHits.vx.vy.vz.radiusOfFirstHit.TRTdEdx.TRTdEdxUsedHits.pixeldEdx",
+                   "LowPtRoITrackParticles.numberOfTRTHits.numberOfTRTHighThresholdHits.vx.vy.vz.radiusOfFirstHit.TRTdEdx.TRTdEdxUsedHits.pixeldEdx",
                    "PrimaryVertices.chiSquared.covariance"]
 
 

@@ -28,10 +28,10 @@ BPhysBGammaFinder::BPhysBGammaFinder(const std::string& t, const std::string& n,
       m_maxDistBetweenTracks(10.0),
       m_maxDeltaCotTheta(0.3),
       m_requireDeltaQ(true),
-      m_use_low_pT(false),
-      m_maxDeltaQ(1000.0),
+      m_maxDeltaQ(450.0),
+      m_minRxy(10.0),
       m_Chi2Cut(20.0),
-      m_maxGammaMass(100.0) {
+      m_maxGammaMass(110.0) {
 
   declareInterface<DerivationFramework::IAugmentationTool>(this);
 
@@ -44,13 +44,13 @@ BPhysBGammaFinder::BPhysBGammaFinder(const std::string& t, const std::string& n,
   declareProperty("InputTrackParticleContainerName", m_inputTrackParticleContainerName);
   declareProperty("InputLowPtTrackContainerName", m_inputLowPtTrackContainerName);
   declareProperty("ConversionContainerName", m_conversionContainerName);
-  declareProperty("MaxDistBetweenTracks", m_maxDistBetweenTracks = 10.0); // Maximum allowed distance of minimum approach
-  declareProperty("MaxDeltaCotTheta", m_maxDeltaCotTheta = 0.3); // Maximum allowed dCotTheta between tracks
-  declareProperty("RequireDeltaQ", m_requireDeltaQ = true); // Only save a conversions if it's a chi_c,b candidate (must then pass "MaxDeltaM" requirement), if "False" all conversions in the event will be saved
-  declareProperty("Use_low_pT", m_use_low_pT = false); // Only save a conversions if it's a chi_c,b candidate (must then pass "MaxDeltaM" requirement), if "False" all conversions in the event will be saved
-  declareProperty("MaxDeltaQ", m_maxDeltaQ = 700.0); // Maximum mass difference between di-muon+conversion and di-muon
-  declareProperty("Chi2Cut", m_Chi2Cut = 20.0);
-  declareProperty("MaxGammaMass", m_maxGammaMass = 100.0);
+  declareProperty("MaxDistBetweenTracks", m_maxDistBetweenTracks); // Maximum allowed distance of minimum approach
+  declareProperty("MaxDeltaCotTheta", m_maxDeltaCotTheta); // Maximum allowed dCotTheta between tracks
+  declareProperty("RequireDeltaQ", m_requireDeltaQ); // Only save a conversions if it's a chi_c,b candidate (must then pass "MaxDeltaM" requirement), if "False" all conversions in the event will be saved
+  declareProperty("MaxDeltaQ", m_maxDeltaQ); // Maximum mass difference between di-muon+conversion and di-muon
+  declareProperty("Chi2Cut", m_Chi2Cut);
+  declareProperty("MinRxy", m_minRxy);
+  declareProperty("MaxGammaMass", m_maxGammaMass);
 }
 
 
@@ -79,6 +79,8 @@ StatusCode BPhysBGammaFinder::addBranches() const {
   std::vector<const xAOD::Vertex*> BVertices;
   BVertices.clear();
   std::vector<const xAOD::TrackParticle*> BVertexTracks;
+  std::vector<const xAOD::TrackParticle*> theIDTracksAfterSelection;
+  std::vector<char> IDTracksContainerNames;
 
 
   // Output conversion container
@@ -90,13 +92,13 @@ StatusCode BPhysBGammaFinder::addBranches() const {
   const xAOD::TrackParticleContainer* inputTrackParticles = nullptr;
   ATH_CHECK( evtStore()->retrieve(inputTrackParticles, m_inputTrackParticleContainerName));
   ATH_MSG_DEBUG( "Track particle container size " << inputTrackParticles->size() );
+
   // Low pT collection
   const xAOD::TrackParticleContainer* lowPtTrackParticles = nullptr;
-  if (m_use_low_pT) {
+  if(evtStore()->contains<xAOD::TrackParticleContainer>(m_inputLowPtTrackContainerName)){
     StatusCode sc = evtStore()->retrieve(lowPtTrackParticles, m_inputLowPtTrackContainerName);
     if (sc.isFailure()) {
       ATH_MSG_WARNING("No low pT collection with key " << m_inputLowPtTrackContainerName << " found in StoreGate.");
-      return StatusCode::SUCCESS;;
     }
     else {
       ATH_MSG_DEBUG("Low pT track particle container size " <<  lowPtTrackParticles->size());
@@ -108,18 +110,27 @@ StatusCode BPhysBGammaFinder::addBranches() const {
     ATH_MSG_FATAL( "No B vertex collections provided" );
     return StatusCode::FAILURE;
   }
-  else {
-    for ( auto itr = m_BVertexCollectionsToCheck.begin(); itr != m_BVertexCollectionsToCheck.end(); ++itr) {
-      ATH_MSG_DEBUG( "Using " << *itr << " as the source B vertex collection" );
+
+  // Track Selection
+  for (const xAOD::TrackParticle* trackParticle : *inputTrackParticles) {
+    IDTracksContainerNames.push_back(0);
+    theIDTracksAfterSelection.push_back(trackParticle);
+  }
+  if (lowPtTrackParticles != nullptr) {
+    for (const xAOD::TrackParticle* lowPt_trackParticle: *lowPtTrackParticles) {
+      IDTracksContainerNames.push_back(1);
+      theIDTracksAfterSelection.push_back(lowPt_trackParticle);
     }
   }
 
   // Retrieve vertex containers
-  for (auto itr = m_BVertexCollectionsToCheck.begin(); itr!=m_BVertexCollectionsToCheck.end(); ++itr) {
+  for (const std::string& BVertexCollectionName : m_BVertexCollectionsToCheck) {
+    ATH_MSG_DEBUG( "Using " << BVertexCollectionName << " as the source B vertex collection" );
+
     // retieve vertex
     const xAOD::VertexContainer* BVtxContainer = nullptr;
-    CHECK( evtStore()->retrieve(BVtxContainer, *itr));
-    ATH_MSG_DEBUG( "Vertex Container (" << *itr << ") contains " << BVtxContainer->size() << " vertices" );
+    CHECK( evtStore()->retrieve(BVtxContainer, BVertexCollectionName));
+    ATH_MSG_DEBUG( "Vertex Container (" << BVertexCollectionName << ") contains " << BVtxContainer->size() << " vertices" );
 
     static SG::AuxElement::Decorator< std::vector< VertexLink > > BGammaLinks( "BGammaLinks" );
     static std::vector< VertexLink > vertexLinks;
@@ -130,7 +141,7 @@ StatusCode BPhysBGammaFinder::addBranches() const {
       bool passedHypothesis = false;
       BVertexTracks.clear();
 
-      for (const auto &flag : m_passFlagsToCheck) {
+      for (const auto& flag : m_passFlagsToCheck) {
         bool pass = vertex->auxdata<Char_t>(flag);
         if (pass) passedHypothesis = true;
       }
@@ -142,12 +153,11 @@ StatusCode BPhysBGammaFinder::addBranches() const {
       std::vector<const xAOD::Vertex*> precedingVertices(1, vertex);
 
       // Collect up B-vertex tracks
-      for (size_t i = 0; i < vertex->nTrackParticles(); ++i) BVertexTracks.push_back(vertex->trackParticle(i));
+      for (auto trk : vertex->trackParticleLinks()) BVertexTracks.push_back(*trk);
 
-      // Track Selection
       // Track1 Loop
-      for (xAOD::TrackParticleContainer::const_iterator tpIt1 = inputTrackParticles->begin(); tpIt1 != inputTrackParticles->end(); ++tpIt1) {
-        const xAOD::TrackParticle* trackParticle1 = *tpIt1;
+      for (size_t tp1 = 0; tp1 < theIDTracksAfterSelection.size(); ++tp1) {
+        const xAOD::TrackParticle* trackParticle1 = theIDTracksAfterSelection.at(tp1);
 
         auto itr1 = std::find(BVertexTracks.begin(), BVertexTracks.end(), trackParticle1);
         if (itr1 != BVertexTracks.end()) continue;
@@ -155,8 +165,8 @@ StatusCode BPhysBGammaFinder::addBranches() const {
         const Trk::Perigee& trackPerigee1 = trackParticle1->perigeeParameters();
 
         // Track2 Loop
-        for (xAOD::TrackParticleContainer::const_iterator tpIt2 = tpIt1 + 1; tpIt2 != inputTrackParticles->end(); ++tpIt2) {
-  	    const xAOD::TrackParticle* trackParticle2 = *tpIt2;
+        for (size_t tp2 = tp1 + 1; tp2 < theIDTracksAfterSelection.size(); ++tp2) {
+          const xAOD::TrackParticle* trackParticle2 = theIDTracksAfterSelection.at(tp2);
           if (trackParticle1 == trackParticle2) continue;
 
           auto itr2 = std::find(BVertexTracks.begin(), BVertexTracks.end(), trackParticle2);
@@ -190,6 +200,7 @@ StatusCode BPhysBGammaFinder::addBranches() const {
 
           std::vector<float> RefTrackPx, RefTrackPy, RefTrackPz, RefTrackE;
           std::vector<float> OrigTrackPx, OrigTrackPy, OrigTrackPz, OrigTrackE;
+          std::vector<char> IDTracksContainerName;
 
           std::vector<const xAOD::TrackParticle*> trackPair;
           trackPair.clear();
@@ -210,11 +221,13 @@ StatusCode BPhysBGammaFinder::addBranches() const {
             // Parameters at vertex
             convVertexCandidate->clearTracks();
             ElementLink<xAOD::TrackParticleContainer> newLink1;
-            newLink1.setElement(*tpIt1);
-            newLink1.setStorableObject(*inputTrackParticles);
+            newLink1.setElement(trackParticle1);
+            if (IDTracksContainerNames.at(tp1)==0) newLink1.setStorableObject(*inputTrackParticles);
+            else newLink1.setStorableObject(*lowPtTrackParticles);
             ElementLink<xAOD::TrackParticleContainer> newLink2;
-            newLink2.setElement(*tpIt2);
-            newLink2.setStorableObject(*inputTrackParticles);
+            newLink2.setElement(trackParticle2);
+            if (IDTracksContainerNames.at(tp2)==0) newLink2.setStorableObject(*inputTrackParticles);
+            else newLink2.setStorableObject(*lowPtTrackParticles);
             convVertexCandidate->addTrackAtVertex(newLink1);
             convVertexCandidate->addTrackAtVertex(newLink2);
 
@@ -246,6 +259,10 @@ StatusCode BPhysBGammaFinder::addBranches() const {
 
             const double deltaQ = (m_B + photon).M() - Bc.mass() - 2 * Trk::electron;
             const double mass = photon.M();
+            const double Rxy = m_v0Tools->rxy(convVertexCandidate.get());
+            if (deltaQ > m_maxDeltaQ) continue;
+            if (mass > m_maxGammaMass) continue;
+            if (Rxy < m_minRxy) continue;
 
             RefTrackPx.push_back(trackMomentum(convVertexCandidate.get(), 0).Px());
             RefTrackPx.push_back(trackMomentum(convVertexCandidate.get(), 1).Px());
@@ -279,7 +296,8 @@ StatusCode BPhysBGammaFinder::addBranches() const {
 
             OrigTrackE.push_back(e1.E());
             OrigTrackE.push_back(e2.E());
-
+            IDTracksContainerName.push_back(IDTracksContainerNames.at(tp1));
+            IDTracksContainerName.push_back(IDTracksContainerNames.at(tp2));
 
             ATH_MSG_DEBUG( "pt = " << photon.Pt() << " ph " << ph.Pt() << " mass " << photon.M() << " px size " << RefTrackPx.size() );
             ATH_MSG_DEBUG( "Candidate DeltaM = " << (m_B + photon).M() << " MeV DiMuon " << " ( Mass = " << m_B.M() << " MeV )");
@@ -293,16 +311,17 @@ StatusCode BPhysBGammaFinder::addBranches() const {
 
             convVertexCandidate->auxdata<float>("deltaQ") = deltaQ;
             convVertexCandidate->auxdata<float>("gamma_mass") = mass;
-            convVertexCandidate->auxdata< std::vector<float> >("RefTrackPx") = RefTrackPx;
-            convVertexCandidate->auxdata< std::vector<float> >("RefTrackPy") = RefTrackPy;
-            convVertexCandidate->auxdata< std::vector<float> >("RefTrackPz") = RefTrackPz;
-            convVertexCandidate->auxdata< std::vector<float> >("RefTrackE") = RefTrackE;
+            convVertexCandidate->auxdata<float>("Rxy") = Rxy;
+            convVertexCandidate->auxdata<std::vector<float>>("RefTrackPx") = RefTrackPx;
+            convVertexCandidate->auxdata<std::vector<float>>("RefTrackPy") = RefTrackPy;
+            convVertexCandidate->auxdata<std::vector<float>>("RefTrackPz") = RefTrackPz;
+            convVertexCandidate->auxdata<std::vector<float>>("RefTrackE") = RefTrackE;
 
-            convVertexCandidate->auxdata< std::vector<float> >("OrigTrackPx") = OrigTrackPx;
-            convVertexCandidate->auxdata< std::vector<float> >("OrigTrackPy") = OrigTrackPy;
-            convVertexCandidate->auxdata< std::vector<float> >("OrigTrackPz") = OrigTrackPz;
-            convVertexCandidate->auxdata< std::vector<float> >("OrigTrackE") = OrigTrackE;
-
+            convVertexCandidate->auxdata<std::vector<float>>("OrigTrackPx") = OrigTrackPx;
+            convVertexCandidate->auxdata<std::vector<float>>("OrigTrackPy") = OrigTrackPy;
+            convVertexCandidate->auxdata<std::vector<float>>("OrigTrackPz") = OrigTrackPz;
+            convVertexCandidate->auxdata<std::vector<float>>("OrigTrackE") = OrigTrackE;
+            convVertexCandidate->auxdata<std::vector<char>>("IDTracksContainerName") = IDTracksContainerName;
             convVertexCandidate->auxdata<Char_t>("passed_Gamma") = true; // Used in event skimming
 
             conversionContainer->push_back( convVertexCandidate.release() );
@@ -319,9 +338,7 @@ StatusCode BPhysBGammaFinder::addBranches() const {
 
         }  // end of Track2 Loop
       }  // end of Track1 Loop
-
     } // end of Bc loop
-
   } // end of vertex container loop
 
   // Write the results to StoreGate

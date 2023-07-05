@@ -40,6 +40,7 @@ DerivationFramework::Thin_vtxTrk::Thin_vtxTrk(const std::string& t, const std::s
   declareProperty("ApplyAnd"                  , m_and = false);
   declareProperty("ApplyAndForTracks"         , m_trackAnd = false);
   declareProperty("ThinTracks"                , m_thinTracks = true);
+  declareProperty("AllowFailures"             , m_allowFailures = false);
 }
 
 // Destructor
@@ -104,7 +105,11 @@ StatusCode DerivationFramework::Thin_vtxTrk::doThinning() const
 {
   // Retrieve main TrackParticle collection
   const xAOD::TrackParticleContainer* importedTrackParticles;
-  CHECK( evtStore()->retrieve(importedTrackParticles,m_trackParticleContainerName) );
+  StatusCode sc = evtStore()->retrieve(importedTrackParticles, m_trackParticleContainerName);
+  if(sc.isFailure()){
+      if(m_allowFailures) return StatusCode::SUCCESS;
+      else return sc;
+  }
   
   // Check the event contains tracks
   unsigned int nTracks = importedTrackParticles->size();

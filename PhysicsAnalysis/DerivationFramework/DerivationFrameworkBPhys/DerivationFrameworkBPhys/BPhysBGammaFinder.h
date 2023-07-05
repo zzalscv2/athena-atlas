@@ -71,8 +71,8 @@ class BPhysBGammaFinder : public AthAlgTool, public IAugmentationTool {
         float m_maxDeltaCotTheta;
 
         bool m_requireDeltaQ;
-        bool m_use_low_pT;
         float m_maxDeltaQ;
+        float m_minRxy;
         float m_Chi2Cut;
         float m_maxGammaMass;
         
