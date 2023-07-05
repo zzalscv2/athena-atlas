@@ -3,6 +3,7 @@
 */
 
 #include "GeneratorFilters/MultiElectronFilter.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 
 MultiElectronFilter::MultiElectronFilter(const std::string& name, ISvcLocator* pSvcLocator)
@@ -20,7 +21,7 @@ StatusCode MultiElectronFilter::filterEvent() {
   for (itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
     for (const auto& part: *genEvt) {
-      if ( part->status() != 1) continue;
+      if ( MC::isStable(part)) continue;
       if ( std::abs(part->pdg_id()) != 11) continue;
 	  if ( (part->momentum().perp() >= m_Ptmin) && std::abs(part->momentum().pseudoRapidity()) <= m_EtaRange) {
 	    numElectrons++;

@@ -6,6 +6,7 @@
 #include "AthLinks/ElementLink.h"
 
 #include "GeneratorObjects/xAODTruthParticleLink.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/DataSvc.h"
@@ -66,10 +67,9 @@ StatusCode xAODTruthParticleSlimmerMuon::execute()
             const xAOD::TruthParticle* theParticle =  (*itr)->truthParticle(iPart);
 
             int this_absPdgID = theParticle->absPdgId();
-            int this_status = theParticle->status();
 
             //Save stable Muons 
-            if (this_status == 1 && this_absPdgID == 13)
+            if (MC::isStable(theParticle) && this_absPdgID == 13)
             {
                 xAOD::TruthParticle *xTruthParticle = new xAOD::TruthParticle();
                 xTruthParticleContainerMuon->push_back( xTruthParticle );

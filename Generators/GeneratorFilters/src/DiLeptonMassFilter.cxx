@@ -78,7 +78,6 @@ StatusCode DiLeptonMassFilter::filterEvent() {
 
           for(; pitr2 != HepMC::end(*genEvt); ++pitr2){
             int pdgId2((*pitr2)->pdg_id());
-            //if((*pitr2)->status()!=1 && pitr1 != pitr2) continue;
             if((*pitr2)->status()!=1 || pitr1 == pitr2) continue;
 
             // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta

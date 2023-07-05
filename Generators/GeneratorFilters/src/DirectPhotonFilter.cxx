@@ -5,6 +5,7 @@
 #include "GeneratorFilters/DirectPhotonFilter.h"
 #include <limits>
 #include <algorithm>
+#include "TruthUtils/HepMCHelpers.h"
 
 DirectPhotonFilter::DirectPhotonFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter(name, pSvcLocator)
@@ -62,7 +63,7 @@ StatusCode DirectPhotonFilter::filterEvent() {
     // Find all prompt photons with within given eta range
     for (const auto& pitr: *genEvt) {
       if (pitr->pdg_id() == 22 &&
-          pitr->status() == 1 &&
+          MC::isStable(pitr) &&
           std::abs(pitr->momentum().pseudoRapidity()) <= m_EtaRange) {
         
         // iterate over parent particles to exclude photons from hadron decays

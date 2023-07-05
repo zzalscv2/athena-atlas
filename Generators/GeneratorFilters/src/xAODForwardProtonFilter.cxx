@@ -14,6 +14,7 @@
 // Rafal Staszewski   Jul 2011
 
 #include "GeneratorFilters/xAODForwardProtonFilter.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 xAODForwardProtonFilter::xAODForwardProtonFilter(const std::string &name, ISvcLocator *pSvcLocator)
     : GenFilter(name, pSvcLocator)
@@ -45,7 +46,7 @@ StatusCode xAODForwardProtonFilter::filterEvent()
       const xAOD::TruthParticle *pitr = genEvt->truthParticle(iPart);
       // We're only interested in stable (status == 1) particles
 
-      if (pitr->status() != 1)
+      if (!MC::isStable(pitr))
         continue;
       // We are specifically looking for protons
       const long pid = pitr->pdgId();

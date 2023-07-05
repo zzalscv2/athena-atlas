@@ -184,7 +184,7 @@ StatusCode xAODBSignalFilter::filterEvent()
         for (unsigned int iPart = 0; iPart < nPart; ++iPart) 
         {
             const xAOD::TruthParticle* part =  (*itr)->truthParticle(iPart);
-            if (std::abs(part->pdgId()) <= 6 && part->status() == 1)
+            if (std::abs(part->pdgId()) <= 6 && MC::isStable(part))
             {
                 acceptEvent = false;
                 const int pID = part->pdgId();
@@ -211,7 +211,7 @@ StatusCode xAODBSignalFilter::filterEvent()
                                                                                                                         // including immediate decays of resonances.
                 {
                     // ** Reject whole event if any of B-hadrons in the event is not decayed **
-                    if (part->status() == 1 || part->status() == HepMC::EVTGENUNDECAYEDSTATUS)
+                    if (MC::isStable(part) || part->status() == HepMC::EVTGENUNDECAYEDSTATUS)
                     {
                         acceptEvent = false;
                     }

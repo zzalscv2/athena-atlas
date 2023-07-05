@@ -5,6 +5,7 @@
 #include "GeneratorFilters/xAODVBFForwardJetsFilter.h"
 #include "GaudiKernel/PhysicalConstants.h"
 #include "xAODJet/JetContainer.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 // Pt  High --> Low
 class High2LowByJetClassPt
@@ -121,7 +122,7 @@ StatusCode xAODVBFForwardJetsFilter::filterEvent()
                 ATH_MSG_INFO("photon pt(Gaudi::Units::GeV) = " << pitr->pt() / Gaudi::Units::GeV << " eta = " << pitr->eta());
             }
             // electon
-            if (std::abs(pitr->pdgId()) == 11 && pitr->status() == 1 &&
+            if (std::abs(pitr->pdgId()) == 11 && MC::isStable(pitr) &&
                 pitr->pt() >= m_LGMinPt && std::abs(pitr->eta()) <= m_LGMaxEta)
             {
                 MCTruthElectronList.push_back(pitr);

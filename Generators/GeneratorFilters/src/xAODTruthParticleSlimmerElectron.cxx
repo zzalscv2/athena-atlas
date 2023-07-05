@@ -16,6 +16,7 @@
 #include "xAODTruth/TruthParticleAuxContainer.h"
 
 #include "GeneratorFilters/xAODTruthParticleSlimmerElectron.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 xAODTruthParticleSlimmerElectron::xAODTruthParticleSlimmerElectron(const std::string &name, ISvcLocator *svcLoc)
     : AthAlgorithm(name, svcLoc)
@@ -68,10 +69,9 @@ StatusCode xAODTruthParticleSlimmerElectron::execute()
             const xAOD::TruthParticle* theParticle =  (*itr)->truthParticle(iPart);
 
             int this_absPdgID = theParticle->absPdgId();
-            int this_status = theParticle->status();
 
             //Save stable Electrons 
-            if (this_status == 1 && this_absPdgID == 11)
+            if (MC::isStable(theParticle) && this_absPdgID == 11)
             {
                 xAOD::TruthParticle *xTruthParticle = new xAOD::TruthParticle();
                 xTruthParticleContainerElectron->push_back( xTruthParticle );
