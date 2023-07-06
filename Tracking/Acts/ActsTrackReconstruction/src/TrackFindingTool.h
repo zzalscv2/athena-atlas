@@ -74,7 +74,7 @@ namespace ActsTrk
     Gaudi::Property<std::vector<size_t>> m_numMeasurementsCutOff{this, "numMeasurementsCutOff", {1}, "MeasurementSelector: maximum number of associated measurements on a single surface"};
 
     // Create tracks from one seed's CKF result, appending to tracksContainer
-    class DuplicateSeedDetector;
+    struct DuplicateSeedDetector;
     StatusCode storeSeedInfo(const ActsTrk::TrackContainer &tracksContainer,
                              const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
                              DuplicateSeedDetector &duplicateSeedDetector) const;
