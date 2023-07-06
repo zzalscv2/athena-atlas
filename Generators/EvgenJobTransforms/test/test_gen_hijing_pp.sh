@@ -1,7 +1,7 @@
 #!/bin/bash
 # art-description: Generation test Hijing pp at 5020 GeV, nch>40
-# art-include: master/AthGeneration
-# art-include: master--HepMC2/Athena
+# art-include: main/AthGeneration
+# art-include: main--HepMC2/Athena
 # art-include: 22.0/Athena
 # art-type: build
 # art-output: *.root

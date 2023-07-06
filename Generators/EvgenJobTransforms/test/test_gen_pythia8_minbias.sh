@@ -1,7 +1,7 @@
 #!/bin/bash
 # art-description: Generation test Pythia8 min_bias 
-# art-include: master/AthGeneration
-# art-include: master--HepMC2/Athena
+# art-include: main/AthGeneration
+# art-include: main--HepMC2/Athena
 # art-include: 22.0/Athena
 # art-type: build
 # art-output: *.root
@@ -9,7 +9,7 @@
  
 ## Any arguments are considered overrides, and will be added at the end
 export TRF_ECHO=True;
-Gen_tf.py --ecmEnergy=13000 --jobConfig=421113 --maxEvents=100 \
+Gen_tf.py --ecmEnergy=13600 --jobConfig=421113 --maxEvents=100 \
     --outputEVNTFile=test_minbias_inelastic.EVNT.pool.root \
 
 echo "art-result: $? generate"
