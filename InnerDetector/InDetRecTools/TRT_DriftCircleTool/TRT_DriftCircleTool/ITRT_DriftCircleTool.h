@@ -21,6 +21,7 @@
 #include "InDetRawData/TRT_RDORawData.h"
 #include "TrkPrepRawData/PrepRawDataCLASS_DEF.h"
 
+#include "AthAllocators/DataPool.h"
 
 namespace InDet {
    
@@ -43,7 +44,12 @@ namespace InDet {
        static const InterfaceID& interfaceID( ) { return IID_ITRT_DriftCircleTool; };
        
        /** Interface method */
-       virtual InDet::TRT_DriftCircleCollection* convert(int,const InDetRawDataCollection<TRT_RDORawData>*, const EventContext& ctx, const bool CTBBadChannels) const = 0;               
+       virtual InDet::TRT_DriftCircleCollection* convert(
+           int,
+           const InDetRawDataCollection<TRT_RDORawData>*,
+           const EventContext& ctx,
+           DataPool<TRT_DriftCircle>* dataItemsPool,
+           const bool CTBBadChannels) const = 0;
        /** test validity gate for corrected drift times */
        virtual bool passValidityGate(unsigned int word, float lowGate, float highGate, float t0) const =0;
 

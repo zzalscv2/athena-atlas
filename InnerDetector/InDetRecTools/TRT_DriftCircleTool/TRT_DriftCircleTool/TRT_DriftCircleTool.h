@@ -42,7 +42,7 @@ namespace InDet {
 Class for converting a RDO collection to a DriftCircle collection
 Performs trigger phase corrections in case of CTB data
 */
-class TRT_DriftCircleTool: public AthAlgTool, virtual public ITRT_DriftCircleTool
+class TRT_DriftCircleTool final: public AthAlgTool, virtual public ITRT_DriftCircleTool
  
 {
   ///////////////////////////////////////////////////////////////////
@@ -55,14 +55,18 @@ public:
   /** destructor */
   virtual ~TRT_DriftCircleTool ();
   /** initialize needed services */
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override;
   /** finalize */
-  virtual StatusCode finalize  ();
+  virtual StatusCode finalize  () override;
   /** make the conversion from RDOs to DriftCircles */
   virtual InDet::TRT_DriftCircleCollection*  
-  convert(int,const InDetRawDataCollection<TRT_RDORawData>*, const EventContext& ctx, const bool CTBBadChannels) const;
+  convert(int,
+          const InDetRawDataCollection<TRT_RDORawData>*,
+          const EventContext& ctx,
+          DataPool<TRT_DriftCircle>* dataItemsPool,
+          const bool CTBBadChannels) const override;
   /** test validity gate for corrected drift times */
-  virtual bool passValidityGate(unsigned int word, float lowGate, float highGate, float t0) const;
+  virtual bool passValidityGate(unsigned int word, float lowGate, float highGate, float t0) const override;
 
   ///////////////////////////////////////////////////////////////////
   // Private methods:

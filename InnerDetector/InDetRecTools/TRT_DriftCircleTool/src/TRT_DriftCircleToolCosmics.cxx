@@ -170,7 +170,11 @@ StatusCode InDet::TRT_DriftCircleToolCosmics::finalize()
 // Trk::TRT_DriftCircles collection production
 ///////////////////////////////////////////////////////////////////
 
-InDet::TRT_DriftCircleCollection* InDet::TRT_DriftCircleToolCosmics::convert(int Mode,const InDetRawDataCollection<TRT_RDORawData>* rdo, const EventContext& ctx, const bool /* _getTRTBadChannel */) const
+InDet::TRT_DriftCircleCollection* InDet::TRT_DriftCircleToolCosmics::convert(int Mode,
+                                                                             const InDetRawDataCollection<TRT_RDORawData>* rdo,
+                                                                             const EventContext& ctx,
+                                                                             DataPool<TRT_DriftCircle>* /*dataItemsPool*/,
+                                                                             const bool /* _getTRTBadChannel */) const
 {
 
   //Initialise a new TRT_DriftCircleCollection
