@@ -2,6 +2,8 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AthenaConfiguration.Enums import LHCPeriod
+
 import ROOT
 
 # E/gamma import(s).
@@ -141,9 +143,12 @@ class PhotonWorkingPointConfig (ConfigBlock) :
         self.addOption ('qualityWP', None, type=str)
         self.addOption ('isolationWP', None, type=str)
         self.addOption ('recomputeIsEM', False, type=bool)
-        self.addOption ('isRun3Geo', False, type=bool)
 
     def makeAlgs (self, config) :
+
+        # The setup below is inappropriate for Run 1 and we don't have a use case for Run 4 (yet)
+        if config.geometry() not in [LHCPeriod.Run2, LHCPeriod.Run3]:
+            raise ValueError ("Can't set up the PhotonWorkingPointConfig with %s, there must be something wrong!" % config.geometry().value)
 
         postfix = self.postfix
         if postfix != '' and postfix[0] != '_' :
@@ -210,7 +215,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             elif config.dataType() == 'mc':
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
-            if not self.isRun3Geo:
+            if config.geometry() == LHCPeriod.Run2:
                 alg.efficiencyCorrectionTool.MapFilePath = 'PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map3.txt'
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'ph_id_bad_eff' + postfix
@@ -232,7 +237,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
             alg.efficiencyCorrectionTool.IsoKey = self.isolationWP.replace("FixedCut","")
-            if not self.isRun3Geo:
+            if config.geometry() == LHCPeriod.Run2:
                 alg.efficiencyCorrectionTool.MapFilePath = 'PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map3.txt'
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'ph_isol_bad_eff' + postfix
@@ -282,8 +287,7 @@ def makePhotonCalibrationConfig( seq, containerName,
 
 
 def makePhotonWorkingPointConfig( seq, containerName, workingPoint, postfix,
-                                  recomputeIsEM = None,
-                                  isRun3Geo = None ):
+                                  recomputeIsEM = None ):
     """Create photon analysis algorithms for a single working point
 
     Keywrod arguments:
@@ -303,5 +307,4 @@ def makePhotonWorkingPointConfig( seq, containerName, workingPoint, postfix,
         config.setOptionValue ('qualityWP',     splitWP[0])
         config.setOptionValue ('isolationWP',   splitWP[1])
     config.setOptionValue ('recomputeIsEM', recomputeIsEM, noneAction='ignore')
-    config.setOptionValue ('isRun3Geo', isRun3Geo, noneAction='ignore')
     seq.append (config)

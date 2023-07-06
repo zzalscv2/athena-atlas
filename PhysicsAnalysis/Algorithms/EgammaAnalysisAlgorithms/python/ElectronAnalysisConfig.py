@@ -2,6 +2,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AthenaConfiguration.Enums import LHCPeriod
 
 # E/gamma import(s).
 from xAODEgamma.xAODEgammaParameters import xAOD
@@ -128,13 +129,17 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         self.addOption ('isolationWP', None, type=str)
         self.addOption ('recomputeLikelihood', False, type=bool)
         self.addOption ('chargeIDSelection', False, type=bool)
-        self.addOption ('isRun3Geo', False, type=bool)
+
 
     def makeAlgs (self, config) :
 
         selectionPostfix = self.selectionName
         if selectionPostfix != '' and selectionPostfix[0] != '_' :
             selectionPostfix = '_' + selectionPostfix
+
+        # The setup below is inappropriate for Run 1 and we don't have a use case for Run 4 (yet)
+        if config.geometry() not in [LHCPeriod.Run2, LHCPeriod.Run3]:
+            raise ValueError ("Can't set up the ElectronWorkingPointConfig with %s, there must be something wrong!" % config.geometry().value)
 
         postfix = self.postfix
         if postfix is None :
@@ -161,9 +166,9 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                     config.addPrivateTool( 'selectionTool', 'AsgElectronLikelihoodTool' )
                     alg.selectionTool.primaryVertexContainer = 'PrimaryVertices'
                     # Here we have to match the naming convention of EGSelectorConfigurationMapping.h
-                    if self.isRun3Geo:
+                    if config.geometry() >= LHCPeriod.Run3:
                         alg.selectionTool.WorkingPoint = self.likelihoodWP + 'Electron'
-                    else:
+                    elif config.geometry() == LHCPeriod.Run2:
                         alg.selectionTool.WorkingPoint = self.likelihoodWP + 'Electron_Run2'
                     algDecorCount = 7
                 else:
@@ -181,7 +186,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 # Rerun the DNN ID
                 config.addPrivateTool( 'selectionTool', 'AsgElectronSelectorTool' )
                 # Here we have to match the naming convention of EGSelectorConfigurationMapping.h
-                if self.isRun3Geo:
+                if config.geometry() == LHCPeriod.Run3:
                     raise ValueError ( "DNN working points are not available for Run 3 yet.")
                 else:
                     alg.selectionTool.WorkingPoint = self.likelihoodWP + 'Electron'
@@ -245,7 +250,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             elif config.dataType() == 'mc':
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
-            if not self.isRun3Geo:
+            if config.geometry() == LHCPeriod.Run2:
                 alg.efficiencyCorrectionTool.MapFilePath = "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'el_reco_bad_eff' + selectionPostfix
@@ -268,7 +273,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             elif config.dataType() == 'mc':
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
-            if not self.isRun3Geo:
+            if config.geometry() == LHCPeriod.Run2:
                 alg.efficiencyCorrectionTool.MapFilePath = "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'el_id_bad_eff' + selectionPostfix
@@ -292,7 +297,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             elif config.dataType() == 'mc':
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
-            if not self.isRun3Geo:
+            if config.geometry() == LHCPeriod.Run2:
                 alg.efficiencyCorrectionTool.MapFilePath = "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'el_isol_bad_eff' + selectionPostfix
@@ -341,8 +346,7 @@ def makeElectronCalibrationConfig( seq, containerName, postfix = None,
 def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
                                     postfix,
                                     recomputeLikelihood = None,
-                                    chargeIDSelection = None,
-                                    isRun3Geo = None ):
+                                    chargeIDSelection = None ):
     """Create electron analysis configuration blocks
 
     Keyword arguments:
@@ -353,7 +357,6 @@ def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
                  names are unique.
       recomputeLikelihood -- Whether to rerun the LH. If not, use derivation flags
       chargeIDSelection -- Whether or not to perform charge ID/flip selection
-      isRun3Geo -- Whether to retrieve Run 3 efficiency SFs
     """
 
 
@@ -366,5 +369,4 @@ def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
         config.setOptionValue ('isolationWP', splitWP[1])
     config.setOptionValue ('recomputeLikelihood', recomputeLikelihood, noneAction='ignore')
     config.setOptionValue ('chargeIDSelection', chargeIDSelection, noneAction='ignore')
-    config.setOptionValue ('isRun3Geo', isRun3Geo, noneAction='ignore')
     seq.append (config)

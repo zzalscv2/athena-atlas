@@ -48,6 +48,9 @@ parser.add_option( '--physlite', dest='physlite',
 parser.add_option( '--no-physlite-broken', dest='no_physlite_broken',
                    action = 'store_true', default = False,
                    help = 'Configure the job to skip algorithms that fail on physlite test file' )
+parser.add_option( '--geometry', dest='geometry',
+                   action = 'store', type = 'string', default = 'RUN2',
+                   help = 'LHC Run period to run over. Valid options are RUN2, RUN3' )
 ( options, args ) = parser.parse_args()
 
 # Set up (Py)ROOT.
@@ -65,6 +68,7 @@ blockConfig = options.block_config
 forCompare = options.for_compare
 isPhyslite = options.physlite
 noPhysliteBroken = options.no_physlite_broken
+geometry = options.geometry
 
 if dataType not in ["data", "mc", "afii"] :
     raise Exception ("invalid data type: " + dataType)
@@ -103,7 +107,7 @@ from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence, printSeq
 algSeq = makeSequence (dataType, blockConfig, forCompare=forCompare,
                        noSystematics = options.no_systematics,
                        hardCuts = options.hard_cuts, isPhyslite=isPhyslite,
-                       noPhysliteBroken=noPhysliteBroken)
+                       noPhysliteBroken=noPhysliteBroken, geometry=geometry)
 printSequenceAlgs( algSeq ) # For debugging
 algSeq.addSelfToJob( job )
 

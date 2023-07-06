@@ -2,6 +2,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AthenaConfiguration.Enums import LHCPeriod
 import ROOT
 
 
@@ -89,8 +90,6 @@ class MuonWorkingPointConfig (ConfigBlock) :
         self.addOption ('postfix', postfix, type=str)
         self.addOption ('quality', None, type=str)
         self.addOption ('isolation', None, type=str)
-        self.addOption ('isRun3Geo', False, type=bool,
-                        info='use run 3 geometry for the muon selection tool')
         self.addOption ('qualitySelectionOutput', True, type=bool)
         self.addOption ('systematicBreakdown', False, type=bool)
 
@@ -113,6 +112,10 @@ class MuonWorkingPointConfig (ConfigBlock) :
                               "\", allowed values are Tight, Medium, Loose, " +
                               "VeryLoose, HighPt, LowPtEfficiency")
 
+        # The setup below is inappropriate for Run 1 and we don't have a use case for Run 4 (yet)
+        if config.geometry() not in [LHCPeriod.Run2, LHCPeriod.Run3]:
+            raise ValueError ("Can't set up the MuonWorkingPointConfig with %s, there must be something wrong!" % config.geometry().value)
+
         postfix = self.postfix
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
@@ -122,7 +125,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
                                'MuonSelectionAlg' + postfix )
         config.addPrivateTool( 'selectionTool', 'CP::MuonSelectionTool' )
         alg.selectionTool.MuQuality = quality
-        alg.selectionTool.IsRun3Geo = self.isRun3Geo
+        alg.selectionTool.IsRun3Geo = config.geometry() == LHCPeriod.Run3
         alg.selectionDecoration = 'good_muon' + postfix + ',as_bits'
         alg.badMuonVetoDecoration = 'is_bad' + postfix + ',as_char'
         alg.muons = config.readName (self.containerName)
@@ -154,7 +157,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'muon_reco_bad_eff' + postfix
             alg.efficiencyScaleFactorTool.WorkingPoint = self.quality
-            if self.isRun3Geo:
+            if config.geometry() == LHCPeriod.Run3:
                 alg.efficiencyScaleFactorTool.CalibrationRelease = '230309_Preliminary_r22run3'
             alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
             alg.muons = config.readName (self.containerName)
@@ -171,7 +174,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'muon_BadMuonVeto_bad_eff' + postfix
             alg.efficiencyScaleFactorTool.WorkingPoint = 'BadMuonVeto_HighPt'
-            if self.isRun3Geo:
+            if config.geometry() == LHCPeriod.Run3:
                 alg.efficiencyScaleFactorTool.CalibrationRelease = '220817_Preliminary_r22run3' # not available as part of '230123_Preliminary_r22run3'!
             alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
             alg.muons = config.readName (self.containerName)
@@ -188,7 +191,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'muon_isol_bad_eff' + postfix
             alg.efficiencyScaleFactorTool.WorkingPoint = self.isolation + 'Iso'
-            if self.isRun3Geo:
+            if config.geometry() == LHCPeriod.Run3:
                 alg.efficiencyScaleFactorTool.CalibrationRelease = '230123_Preliminary_r22run3'
             alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
             alg.muons = config.readName (self.containerName)
@@ -205,7 +208,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'muon_TTVA_bad_eff' + postfix
             alg.efficiencyScaleFactorTool.WorkingPoint = 'TTVA'
-            if self.isRun3Geo:
+            if config.geometry() == LHCPeriod.Run3:
                 alg.efficiencyScaleFactorTool.CalibrationRelease = '230123_Preliminary_r22run3'
             alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
             alg.muons = config.readName (self.containerName)
@@ -251,7 +254,6 @@ def makeMuonCalibrationConfig( seq, containerName,
 
 def makeMuonWorkingPointConfig( seq, containerName, workingPoint, postfix,
                                 qualitySelectionOutput = None,
-                                isRun3Geo = None,
                                 systematicBreakdown = None):
     """Create muon analysis algorithms for a single working point
 
@@ -263,7 +265,6 @@ def makeMuonWorkingPointConfig( seq, containerName, workingPoint, postfix,
                  names are unique.
       qualitySelectionOutput -- Whether or not to apply muon quality selection
                                 when creating output containers.
-      isRun3Geo -- switches the muon selection tool to run 3 geometry
       systematicBreakdown -- enables the full breakdown of eff SF systematics
     """
 
@@ -275,7 +276,6 @@ def makeMuonWorkingPointConfig( seq, containerName, workingPoint, postfix,
             raise ValueError ('working point should be of format "quality.isolation", not ' + workingPoint)
         config.setOptionValue ('quality', splitWP[0])
         config.setOptionValue ('isolation', splitWP[1])
-    config.setOptionValue ('isRun3Geo', isRun3Geo, noneAction='ignore')
     config.setOptionValue ('qualitySelectionOutput', qualitySelectionOutput, noneAction='ignore')
     config.setOptionValue ('systematicBreakdown', systematicBreakdown, noneAction='ignore')
     seq.append (config)
