@@ -319,7 +319,16 @@ namespace ExpressionParsing {
            const SG::BaseInfoBase* base_info = (container_data_id ? SG::BaseInfoBase::find (container_data_id->clid()) : nullptr);
            if (!base_info) {
               std::stringstream msg;
-              msg << "Missing type information about container  " << container_name << ".";
+              msg << "Missing type information about container " << container_name << ".";
+              if (container_data_id) {
+                 msg << " It seems that inheritance information is missing for " << container_data_id->className() << "."
+                     << " Only container which inherit from SG::AuxVectorBase or data inheriting from  SG::AuxElement "
+                     << " are supported by the SGxAODProxyLoader loader.";
+              }
+              else {
+                  msg << " This problem may occur if the container is read from the input"
+                      << " file and not accessed anywhere in the job via read handles. ";
+              }
               throw std::runtime_error(msg.str());
            }
            // ---DEBUG

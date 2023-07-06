@@ -14,6 +14,7 @@
 
 #include <stdexcept>
 #include <iostream>
+#include <sstream>
 
 namespace ExpressionParsing {
   MultipleProxyLoader::MultipleProxyLoader() :
@@ -56,8 +57,16 @@ namespace ExpressionParsing {
       m_varnameToProxyLoader.emplace(varname, proxyLoader);
       return result;
     }
-
-    throw std::runtime_error("MultipleProxyLoader: unable to find valid proxy loader for "+varname);
+    std::stringstream msg;
+    msg << "MultipleProxyLoader: unable to find valid proxy loader for " << varname << "."
+        << " If it is an xAOD element or container which is read from the input file"
+        << " this problem may occur if it is not accessed anywhere in the job via read handles."
+        << " The problem can be mitigated by providing the missing information in the property "
+        << " ExtraDataForDynamicConsumers of the sequence which has the property "
+        << " ProcessDynamicDataDependencies set to True."
+        << " The property takes a list of strings of the form \'type/container-name\' e.g."
+        << " \'xAOD::TrackParticleContainer/InDetTrackParticles\'.";
+    throw std::runtime_error(msg.str());
   }
 
   int MultipleProxyLoader::loadIntVariableFromString(const std::string &varname) const
