@@ -484,6 +484,11 @@ def defineHistogram(flags, varname, type='TH1F', path=None,
         assert type not in ['TEfficiency', 'TTree', 'TGraph'],'only default merge defined for non-histogram objects'
         settings['merge'] = merge
 
+    # LB histograms always need to be published online (ADHI-4947)
+    if settings['kLBNHistoryDepth']>0 and _isOnline(flags):
+        settings['kAlwaysCreate'] = True
+        log.debug('Setting kAlwaysCreate for lumiblock histogram "%s"', varname)
+
     # Check that kLBNHistoryDepth and kLive are both non-negative
     assert settings['kLBNHistoryDepth']>=0, f'Histogram "{alias}" has invalid kLBNHistoryDepth.'
     assert settings['kLive']>=0, f'Histogram "{alias}" has invalid kLive.'
