@@ -489,7 +489,7 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
 
 
 
-def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken, autoconfigFromFlags=None) :
+def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken, geometry=None, autoconfigFromFlags=None) :
 
     vars = []
     metVars = []
@@ -500,6 +500,10 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     largeRJets = False
     # there are no track jets in PHYSLITE, or in the sequence configuration
     trackJets = not isPhyslite and not forCompare
+
+    if autoconfigFromFlags is not None:
+        if geometry is None:
+            geometry = autoconfigFromFlags.GeoModel.Run
 
     configSeq = ConfigSequence ()
 
@@ -601,19 +605,14 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
 
 
     # set up the muon analysis algorithm sequence:
-    from AthenaConfiguration.Enums import LHCPeriod
-    run3Muons = autoconfigFromFlags is not None and autoconfigFromFlags.GeoModel.Run >= LHCPeriod.Run3
-
     configSeq += makeConfig ('Muons', 'AnaMuons')
     configSeq += makeConfig ('Muons.Selection', 'AnaMuons.medium')
     configSeq.setOptionValue ('.quality', 'Medium')
     configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
-    configSeq.setOptionValue ('.isRun3Geo', run3Muons)
     # TODO: MCP should restore this when the recommendations for Tight WP exist in R23
     # configSeq += makeConfig ('Muons.Selection', 'AnaMuons.tight')
     # configSeq.setOptionValue ('.quality', 'Tight')
     # configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
-    # configSeq.setOptionValue ('.isRun3Geo', run3Muons)
 
 
     # Include, and then set up the tau analysis algorithm sequence:
@@ -726,7 +725,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq.setOptionValue ('.metVars', metVars)
     configSeq.setOptionValue ('.containers', outputContainers)
 
-    configAccumulator = ConfigAccumulator (dataType, algSeq, isPhyslite=isPhyslite)
+    configAccumulator = ConfigAccumulator (dataType, algSeq, isPhyslite, geometry)
     configSeq.fullConfigure (configAccumulator)
 
 
@@ -746,7 +745,7 @@ def printSequenceAlgs (sequence) :
         print (sequence)
 
 
-def makeSequence (dataType, useBlocks, forCompare, noSystematics, hardCuts = False, isPhyslite = False, noPhysliteBroken = False, autoconfigFromFlags = None) :
+def makeSequence (dataType, useBlocks, forCompare, noSystematics, hardCuts = False, isPhyslite = False, noPhysliteBroken = False, geometry = None, autoconfigFromFlags = None) :
 
     # do some harder cuts on all object types, this is mostly used for
     # benchmarking
@@ -787,6 +786,7 @@ def makeSequence (dataType, useBlocks, forCompare, noSystematics, hardCuts = Fal
     else :
         makeSequenceBlocks (dataType, algSeq, forCompare=forCompare,
                             isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
+                            geometry=geometry,
                             autoconfigFromFlags=autoconfigFromFlags)
 
     return algSeq

@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 import AnaAlgorithm.DualUseConfig as DualUseConfig
+from AthenaConfiguration.Enums import LHCPeriod
 import re
 
 
@@ -94,11 +95,16 @@ class ConfigAccumulator :
     """
 
 
-    def __init__ (self, dataType, algSeq, isPhyslite=False):
+    def __init__ (self, dataType, algSeq, isPhyslite=False, geometry=LHCPeriod.Run2):
         if dataType not in ["data", "mc", "afii"] :
             raise ValueError ("invalid data type: " + dataType)
+        # allow possible string argument for `geometry` and convert it to enum
+        geometry = LHCPeriod(geometry)
+        if geometry not in [LHCPeriod.Run2, LHCPeriod.Run3] :
+            raise ValueError ("invalid Run geometry: %s" % geometry.value)
         self._dataType = dataType
         self._isPhyslite = isPhyslite
+        self._geometry = geometry
         self._algSeq = algSeq
         self._containerConfig = {}
         self._outputContainers = {}
@@ -118,6 +124,9 @@ class ConfigAccumulator :
         """whether we run on PHYSLITE"""
         return self._isPhyslite
 
+    def geometry (self) :
+        """the LHC Run period we run on"""
+        return self._geometry
 
     def createAlgorithm (self, type, name) :
         """create a new algorithm and register it as the current algorithm"""
