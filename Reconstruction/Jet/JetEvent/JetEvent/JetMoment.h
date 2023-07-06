@@ -5,14 +5,14 @@
 #ifndef JETEVENT_JETMOMENT_H
 #define JETEVENT_JETMOMENT_H
 
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 #include <string>
 
 struct JetMoment
 {
   typedef float                              float_t;
   typedef bool                                tag_t;
-  typedef boost::tuples::tuple<float_t,tag_t> database_t;
+  typedef std::tuple<float_t,tag_t> database_t;
 
   static float_t invalidMoment() { return float_t(0.); }
   
@@ -34,13 +34,13 @@ struct JetMoment
 
     ~MomentData() = default;
 
-    void setMoment(float_t moment) { this->get<0>() = moment; }
-    void setTag(tag_t tag)         { this->get<1>() = tag; }
+    void setMoment(float_t moment) { std::get<0>(*this) = moment; }
+    void setTag(tag_t tag)         { std::get<1>(*this) = tag; }
     void setData(float_t moment,tag_t tag) 
-    { this->get<0>() = moment; this->get<1>() = tag; }
+    { std::get<0>(*this) = moment; std::get<1>(*this) = tag; }
 
-    float_t moment() const { return this->get<0>(); }
-    tag_t   tag()    const { return this->get<1>(); }
+    float_t moment() const { return std::get<0>(*this); }
+    tag_t   tag()    const { return std::get<1>(*this); }
 
     //  private:
 

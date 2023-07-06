@@ -12,11 +12,7 @@
 #ifndef JETEVENTTPCNV_JETSAMPLING_P1_H 
 #define JETEVENTTPCNV_JETSAMPLING_P1_H 
 
-// STL includes
-//#include <vector>
-
-// Boost includes
-#include <boost/array.hpp>
+#include <array>
 
 // EventCommonTPCnv includes
 #include "EventCommonTPCnv/HepLorentzVector_p1.h"
@@ -31,9 +27,9 @@ public:
   // public typedefs
   /////////////////////////////////////////////////////////////////// 
 
-  typedef boost::array<double, 2>  JS_t;
-  typedef boost::array<double, 16> ECS_t;
-  typedef boost::array<double, 10> ERad_t;
+  typedef std::array<double, 2>  JS_t;
+  typedef std::array<double, 16> ECS_t;
+  typedef std::array<double, 10> ERad_t;
 
   /////////////////////////////////////////////////////////////////// 
   // Friend classes
