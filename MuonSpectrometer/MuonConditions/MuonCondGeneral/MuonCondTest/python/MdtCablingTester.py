@@ -17,16 +17,17 @@ def setupServicesCfg(flags):
     result = MainServicesCfg(flags)
     ### Setup the file reading
     from AthenaConfiguration.Enums import Format
-    if flags.Input.Format is Format.POOL:
+    if flags.Input.Format == Format.POOL:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
         result.merge(PoolReadCfg(flags))
-       
+    elif flags.Input.Format == Format.BS:
+        from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+        result.merge(ByteStreamReadCfg(flags)) 
 
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     result.merge(MuonGeoModelCfg(flags))
     from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
-    result.merge(MuonIdHelperSvcCfg(flags))
-    
+    result.merge(MuonIdHelperSvcCfg(flags))    
     return result
 
 def MdtCablingTestAlgCfg(flags, 

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # Script to merge a set of MRs with given labels into the local branch.
 #
 
 # Defaults
-branch='master'
+branch='main'
 remote='origin'
 
 usage() {

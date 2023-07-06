@@ -1,19 +1,19 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # test the whole AFP calibration loop
 
 # prerequisite - have AODs from AFP_Calibration stream
 # cd /afs/cern.ch/work/p/pbalek/workspace/public/data17_13TeV.00338480.calibration_AFP.AOD
-# asetup Athena,master,latest,here
+# asetup Athena,main,latest,here
 # for inputfile in `ls -d -1 /afs/cern.ch/work/p/pbalek/public/data17_13TeV.00338480.calibration_AFP.daq.RAW/*`
-# 	do python ~/AFP/reco_master_Athena/athena/ForwardDetectors/ForwardRec/python/AFPRecConfig.py --filesInput=${inputfile}
+# 	do python ~/AFP/reco_main_Athena/athena/ForwardDetectors/ForwardRec/python/AFPRecConfig.py --filesInput=${inputfile}
 # 	mv AOD.pool.root `echo $inputfile | sed -e 's/daq.RAW/AOD/g' -e 's/data$/root/'`
 # done
 
 # move to temp folder
 cd /tmp/${USER}
 setupATLAS
-asetup Athena,master,latest,here
+asetup Athena,main,latest,here
 
 # setup this branch, e.g.
 cd /afs/cern.ch/work/p/pbalek/public/afp_calibration_athena/build

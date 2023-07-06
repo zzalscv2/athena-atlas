@@ -171,6 +171,7 @@ InDet::TRT_DriftCircleTool::convert(
   int Mode,
   const InDetRawDataCollection<TRT_RDORawData>* rdo,
   const EventContext& ctx,
+  DataPool<TRT_DriftCircle>* dataItemsPool,
   const bool getTRTBadChannel) const
 {
 
@@ -203,6 +204,10 @@ InDet::TRT_DriftCircleTool::convert(
     rio                                = new InDet::TRT_DriftCircleCollection(IHc);
     rio->setIdentifier(rdo->identify());
     rio->reserve( std::distance(rb, re) );
+    //DataPool will own them if there.
+    if (dataItemsPool) {
+     rio->clear(SG::VIEW_ELEMENTS);
+    }
 
     bool isArgonStraw = false;
     bool isGasSet = false;
@@ -303,8 +308,16 @@ InDet::TRT_DriftCircleTool::convert(
       auto errmat = Amg::MatrixX(1,1);
       errmat(0,0) = error*error;
       Amg::Vector2D loc(radius, 0.);
-      InDet::TRT_DriftCircle* tdc =
-        new InDet::TRT_DriftCircle(id, loc, std::move(errmat), pE, word);
+
+      InDet::TRT_DriftCircle* tdc = nullptr;
+      //
+      if (dataItemsPool) {
+        tdc = dataItemsPool->nextElementPtr();
+        (*tdc) = InDet::TRT_DriftCircle(id, loc, std::move(errmat), pE, word);
+      } else {
+        tdc = new InDet::TRT_DriftCircle(id, loc, std::move(errmat), pE, word);
+      }
+      //
       if (tdc) {
         tdc->setHashAndIndex(rio->identifyHash(), rio->size());
         rio->push_back(tdc);

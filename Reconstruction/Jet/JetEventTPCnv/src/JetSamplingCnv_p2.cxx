@@ -88,7 +88,7 @@ void JetSamplingCnv_p2::persToTrans( const JetSampling_p2* pers,
   TPCNV_PERSTOTRANS( pers, trans, m_eNull  );
 
   // JetECS
-  for ( std::size_t i = 0; i != JetSampling_p2::ECS_t::size(); ++i ) {
+  for ( std::size_t i = 0; i != std::tuple_size_v<JetSampling_p2::ECS_t>; ++i ) {
     TPCNV_PERSTOTRANS( pers, trans, m_ePreSamBCell[i] );
     TPCNV_PERSTOTRANS( pers, trans, m_ePreSamECell[i] );
     TPCNV_PERSTOTRANS( pers, trans, m_eEMB1Cell[i] );
@@ -121,7 +121,7 @@ void JetSamplingCnv_p2::persToTrans( const JetSampling_p2* pers,
   }
 
   // Energy in cone radii, from cells and from tracks
-  for ( std::size_t i = 0; i != JetSampling_p2::ERad_t::size(); ++i ) {
+  for ( std::size_t i = 0; i != std::tuple_size_v<JetSampling_p2::ERad_t>; ++i ) {
     TPCNV_PERSTOTRANS( pers, trans, m_erad_cells[i] );  
     TPCNV_PERSTOTRANS( pers, trans, m_erad_tracks[i] );
   }
@@ -189,7 +189,7 @@ void JetSamplingCnv_p2::transToPers( const JetSampling* trans,
   TPDFCNV_TRANSTOPERS( trans, pers, m_eNull  );
 
   // JetECS
-  for ( std::size_t i = 0; i != JetSampling_p2::ECS_t::size(); ++i ) {
+  for ( std::size_t i = 0; i != std::tuple_size_v<JetSampling_p2::ECS_t>; ++i ) {
     TPDFCNV_TRANSTOPERS( trans, pers, m_ePreSamBCell[i] );
     TPDFCNV_TRANSTOPERS( trans, pers, m_ePreSamECell[i] );
     TPDFCNV_TRANSTOPERS( trans, pers, m_eEMB1Cell[i] );
@@ -222,7 +222,7 @@ void JetSamplingCnv_p2::transToPers( const JetSampling* trans,
   }
 
   // Energy in cone radii, from cells and from tracks 
-  for ( std::size_t i = 0; i != JetSampling_p2::ERad_t::size(); ++i ) {
+  for ( std::size_t i = 0; i != std::tuple_size_v<JetSampling_p2::ERad_t>; ++i ) {
     TPDFCNV_TRANSTOPERS( trans, pers, m_erad_cells[i] );
     TPDFCNV_TRANSTOPERS( trans, pers, m_erad_tracks[i] );
   }

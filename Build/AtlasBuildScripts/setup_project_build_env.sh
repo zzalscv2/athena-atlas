@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # Script that is used by the build_env.sh scripts of the individual projects.
 # It takes care of setting up a functional build environment for an ATLAS
@@ -74,7 +74,7 @@ atlas_env_setup() {
       ATLAS_EXT_DIR="${ATLAS_BUILD_DIR}/install/${ATLAS_EXT_PROJECT_NAME}/${ATLAS_PROJECT_VERSION}/InstallArea"
       if [ ! -d ${ATLAS_EXT_DIR} ]; then
 	      echo "Warning: Didn't find ${ATLAS_EXT_PROJECT_NAME} under ${ATLAS_EXT_DIR}"
-         echo "         (Hopefully this is intentional and you have done e.g. asetup AthenaExternals,master,latest)"
+         echo "         (Hopefully this is intentional and you have done e.g. asetup AthenaExternals,main,latest)"
       else
          echo "Setting up ${ATLAS_EXT_PROJECT_NAME} from: ${ATLAS_EXT_DIR}"
          source ${ATLAS_EXT_DIR}/*/setup.sh

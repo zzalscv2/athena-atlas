@@ -26,8 +26,8 @@
 #include "JetEvent/JetMoment.h"
 //#include "JetEvent/JetMomentMap.h"
 
-#include <boost/function.hpp>
 #include <vector>
+#include <any>
 
 /////////////////////////
 // Signal State Friend //

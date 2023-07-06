@@ -139,10 +139,46 @@ HLT_2g10_loose_L1eEM9_mu20_L1MU14FCH:
   eventCount: 0
 HLT_2g10_loose_L1eEM9_mu23_L1MU18VFCH:
   eventCount: 0
+HLT_2g10_loose_PhysicsTLA_L12DR15-M70-2eEM9L:
+  eventCount: 0
+HLT_2g10_loose_PhysicsTLA_L1DPHI12-M70-2eEM9L:
+  eventCount: 0
+  stepCounts:
+    0: 3
+  stepFeatures:
+    0: 14
+    1: 2
 HLT_2g10_loose_mu20_L1MU14FCH:
   eventCount: 0
 HLT_2g10_loose_mu23_L1MU18VFCH:
   eventCount: 0
+HLT_2g10_medium_PhysicsTLA_L12DR15-M70-2eEM9L:
+  eventCount: 0
+HLT_2g10_medium_PhysicsTLA_L1DPHI12-M70-2eEM9L:
+  eventCount: 0
+  stepCounts:
+    0: 3
+  stepFeatures:
+    0: 14
+    1: 2
+HLT_2g13_loose_PhysicsTLA_L12DR15-M70-2eEM12L:
+  eventCount: 0
+HLT_2g13_loose_PhysicsTLA_L1DPHI12-M70-2eEM12L:
+  eventCount: 0
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 8
+    1: 1
+HLT_2g13_medium_PhysicsTLA_L12DR15-M70-2eEM12L:
+  eventCount: 0
+HLT_2g13_medium_PhysicsTLA_L1DPHI12-M70-2eEM12L:
+  eventCount: 0
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 8
+    1: 1
 HLT_2g15_loose_25dphiAA_invmAA80_L12eEM9:
   eventCount: 0
   stepCounts:
@@ -5073,6 +5109,20 @@ HLT_j150_2j55_0eta290_020jvt_bgn170_pf_ftf_preselj80XX2j45b90_L1J85_3J30:
   eventCount: 0
 HLT_j150_2j55_0eta290_020jvt_bgn170_pf_ftf_preselj80XX2j45b90_L1jJ140_3jJ60:
   eventCount: 0
+HLT_j15_L1RD0_FILLED:
+  eventCount: 43
+  stepCounts:
+    0: 43
+  stepFeatures:
+    0: 228
+HLT_j15_pf_ftf_L1RD0_FILLED:
+  eventCount: 40
+  stepCounts:
+    0: 50
+    1: 40
+  stepFeatures:
+    0: 50
+    1: 166
 HLT_j15f_L1RD0_FILLED:
   eventCount: 10
   stepCounts:

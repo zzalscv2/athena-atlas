@@ -38,7 +38,7 @@
 
 #include "CLHEP/Vector/LorentzVector.h"
 
-#include <boost/array.hpp>
+#include <array>
 
 class JetSampling 
 {
@@ -309,8 +309,8 @@ class JetSampling
   double m_ehad; //!> Jet energy deposited in hadronic calorimeters
   double m_eem; //!> Jet energy deposited in electromagnetic calorimeters
 
-  typedef         boost::array<double,16>    double_array16;
-  typedef         boost::array<double,10>    double_array10;
+  typedef         std::array<double,16>    double_array16;
+  typedef         std::array<double,10>    double_array10;
 
   double m_eCryo;
   double m_eGap;
