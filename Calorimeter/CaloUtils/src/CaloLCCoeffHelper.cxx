@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // //-----------------------------------------------------------------------
@@ -340,7 +340,7 @@ parsing dimension string  of type 'ener   8   3.1    6.3'
 *************************************************************************** */
 std::optional<CaloLocalHadCoeff::LocalHadDimension> CaloLCCoeffHelper::parse_dim(const std::string &sLine)
 {
-  std::optional<CaloLocalHadCoeff::LocalHadDimension> dim;
+  std::optional<CaloLocalHadCoeff::LocalHadDimension> dim{std::nullopt};
   std::istringstream ist(sLine.c_str());
 
   std::string dim_title;
