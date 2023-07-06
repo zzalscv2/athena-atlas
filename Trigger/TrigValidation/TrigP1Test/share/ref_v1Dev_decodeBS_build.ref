@@ -5109,6 +5109,20 @@ HLT_j150_2j55_0eta290_020jvt_bgn170_pf_ftf_preselj80XX2j45b90_L1J85_3J30:
   eventCount: 0
 HLT_j150_2j55_0eta290_020jvt_bgn170_pf_ftf_preselj80XX2j45b90_L1jJ140_3jJ60:
   eventCount: 0
+HLT_j15_L1RD0_FILLED:
+  eventCount: 43
+  stepCounts:
+    0: 43
+  stepFeatures:
+    0: 228
+HLT_j15_pf_ftf_L1RD0_FILLED:
+  eventCount: 40
+  stepCounts:
+    0: 50
+    1: 40
+  stepFeatures:
+    0: 50
+    1: 166
 HLT_j15f_L1RD0_FILLED:
   eventCount: 10
   stepCounts:
