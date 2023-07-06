@@ -3,7 +3,7 @@
 #IMPORTANT: THIS IS ONLY AN EXAMPLE AND NOT A RECOMMENDATION OF THE BEST CONFIGURATION TO BE USED (because there is no single configuration optimal for all cases)
 #the values used for all the possible config options are printed at the beginning of the execution of top-xaod
 #all options not explicitely configured in the file use the default values
-#all available options and their default values can be seen here https://gitlab.cern.ch/atlas/athena/-/blob/master/PhysicsAnalysis/TopPhys/xAOD/TopConfiguration/Root/ConfigurationSettings.cxx
+#all available options and their default values can be seen here https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TopPhys/xAOD/TopConfiguration/Root/ConfigurationSettings.cxx
 #(this is the default link for the HEAD version, if you're using a specific release, search e.g. "22.2.XXX" from the drop-down release menu to see the one relative to your version)
 
 ############General setup###########

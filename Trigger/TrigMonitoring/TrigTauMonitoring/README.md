@@ -17,7 +17,7 @@ Run3DQTestingDriver.py --dqOffByDefault Input.Files="['path_to_myxAOD.root file'
 ```
 setupATLAS
 lsetup git
-asetup Athena,master,latest,here
+asetup Athena,main,latest
 ```
 ### Local Installation (optional):
 

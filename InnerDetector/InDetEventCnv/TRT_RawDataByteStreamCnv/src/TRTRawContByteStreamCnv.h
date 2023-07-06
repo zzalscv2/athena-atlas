@@ -1,22 +1,22 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_RAWDATABYTESTREAMCNV_TRTRAWCONTRAWEVENTCNV_H
 #define TRT_RAWDATABYTESTREAMCNV_TRTRAWCONTRAWEVENTCNV_H
 
-#include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "InDetRawData/InDetRawDataCLASS_DEF.h"
-#include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
-#include "AthenaBaseComps/AthConstConverter.h"
+#include "GaudiKernel/ToolHandle.h"  //member
+#include "InDetRawData/TRT_RDO_Container.h" //typedef here
+#include "ByteStreamCnvSvcBase/ByteStreamAddress.h" //implementation used
+#include "AthenaBaseComps/AthConstConverter.h" //inheritance
+#include "AthenaKernel/ClassID_traits.h" //implementation used
 
-#include "TRT_RawDataByteStreamCnv/ITRTRawContByteStreamTool.h"
+#include "TRT_RawDataByteStreamCnv/ITRTRawContByteStreamTool.h" //ToolHandle template arg
 
 class DataObject;
 class TRTRawContByteStreamTool ; 
-
-#include <string>
+class IOpaqueAddress;
+class DataObject;
 
 // Abstract factory to create the converter
 template <class TYPE> class CnvFactory;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -18,6 +18,10 @@
 #include "TileIdentifier/TileRawChannelUnit.h"
 #include "TileEvent/TileDQstatus.h"
 #include "StoreGate/ReadHandleKey.h"
+#include <map>
+#include <vector>
+#include <memory>
+#include <string>
 
 class TileRawChannel;
 class TileCondToolEmscale;

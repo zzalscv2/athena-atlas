@@ -8,7 +8,7 @@ atlas_add_tpcnv_library( LArTPCnv
                          src/*.cxx
                          PUBLIC_HEADERS LArTPCnv
                          LINK_LIBRARIES AthenaPoolCnvSvcLib CxxUtils Identifier LArRawEvent LArRecEvent
-                         PRIVATE_LINK_LIBRARIES AthenaKernel CaloIdentifier GaudiKernel LArIdentifier )
+                         PRIVATE_LINK_LIBRARIES AthenaKernel CaloIdentifier GaudiKernel LArIdentifier AthAllocators)
 
 atlas_add_dictionary( LArTPCnvDict
                       LArTPCnv/LArTPCnvDict.h

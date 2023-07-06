@@ -10,7 +10,6 @@
 
 #include <fmt/format.h>
 
-/* #include "boost/concept_check.hpp" */
 #include "GaudiKernel/System.h"
 #include "GaudiKernel/StatusCode.h"
 

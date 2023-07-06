@@ -143,7 +143,7 @@ Skip steps 1 and 2 of the procedure described above. Follow step 3. Instead of s
 
     mkdir athena-py8custom-build && cd athena-py8custom-build
     asetup 21.6.99,AthGeneration
-    # or in R22/23: asetup AthGeneration,master,latest
+    # or in R22/23: asetup AthGeneration,main,latest
     cmake -DATLAS_PACKAGE_FILTER_FILE=../package_filters.txt -DPYTHIA8_LCGROOT=/cvmfs/sft-nightlies.cern.ch/lcg/nightlies/dev4/Thu/MCGenerators/pythia8/309/x86_64-centos7-gcc11-opt ../athena/Projects/WorkDir/
     make
     source */setup.sh

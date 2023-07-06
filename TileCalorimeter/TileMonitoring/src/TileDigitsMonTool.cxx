@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -1540,7 +1540,7 @@ int TileDigitsMonTool::stuckBits_Amp2(TH1S * hist, TH1C *modhist, int gain, TH2C
   if ((first_non0 >= (m_i_ADCmax + 1) / 2 && first_non0 < m_i_ADCmax)
       || (last_non0 == (m_i_ADCmax + 1) / 2 - 1 && hist->GetBinContent(last_non0) > 3)) {
     is_stack = 1;
-    sb_prob[3] = 100.;
+
     sb_prob[3] = 1.;
     if (stuck_probs != NULL)
       stuck_probs[9] = first_non0 >= 512 ? 200u : 100u;

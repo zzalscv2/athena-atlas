@@ -40,47 +40,50 @@ StatusCode JfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
     // Access jFex tower container
     SG::ReadHandle<xAOD::jFexTowerContainer> jFexTowerContainer{m_jFexDataTowerKey, ctx};
     if(!jFexTowerContainer.isValid()) {
-        ATH_MSG_ERROR("No jFex Tower container valid in storegate with key: "<< m_jFexDataTowerKey);
+        ATH_MSG_WARNING("No jFex Tower container valid in storegate with key: "<< m_jFexDataTowerKey);
         return StatusCode::FAILURE;
     }
-    
+
+    //Run the monitoring only when the input data is filled (it is pre-scaled), otherwise skip
+    if(jFexTowerContainer->empty()){
+        ATH_MSG_DEBUG("number of jfex towers = "<< jFexTowerContainer->size());
+        return StatusCode::SUCCESS;
+    }
+
+ 
     SG::ReadHandle<xAOD::jFexTowerContainer> jFexEmulatedTowerContainer{m_jFexEmulatedTowerKey, ctx};
     if(!jFexEmulatedTowerContainer.isValid()) {
         ATH_MSG_ERROR("No jFex Tower container valid in storegate with key: "<< m_jFexEmulatedTowerKey);
         return StatusCode::FAILURE;
     }
     
-    
+   
     SG::ReadDecorHandle<xAOD::jFexTowerContainer, int >   jTowerEtMeV     (m_jtowerEtMeVdecorKey, ctx);
-    if(!jTowerEtMeV.isPresent()) {
-        ATH_MSG_ERROR("Decorated variable jTowerEtMeV is not available. Is "<< m_jFexDataTowerKey << " decorated?");
-        return StatusCode::FAILURE;
+    if(!jTowerEtMeV.isAvailable()) {
+        ATH_MSG_WARNING("Decorated variable jTowerEtMeV is not available. Is "<< m_jFexDataTowerKey << " decorated?");
+        return StatusCode::SUCCESS;
     }
     
     SG::ReadDecorHandle<xAOD::jFexTowerContainer, float > SCellEtMeV      (m_SCellEtMeVdecorKey , ctx);
-    if(!SCellEtMeV.isPresent()) {
-        ATH_MSG_ERROR("Decorated variable SCellEtMeV is not available. Is "<< m_jFexDataTowerKey << " decorated?");
-        return StatusCode::FAILURE;
+    if(!SCellEtMeV.isAvailable()) {
+        ATH_MSG_WARNING("Decorated variable SCellEtMeV is not available. Is "<< m_jFexDataTowerKey << " decorated?");
+        return StatusCode::SUCCESS;
     }
         
     SG::ReadDecorHandle<xAOD::jFexTowerContainer, float > TileEtMeV       (m_TileEtMeVdecorKey  , ctx);
-    if(!TileEtMeV.isPresent()) {
-        ATH_MSG_ERROR("Decorated variable TileEtMeV is not available. Is "<< m_jFexDataTowerKey << " decorated?");
-        return StatusCode::FAILURE;
+    if(!TileEtMeV.isAvailable()) {
+        ATH_MSG_WARNING("Decorated variable TileEtMeV is not available. Is "<< m_jFexDataTowerKey << " decorated?");
+        return StatusCode::SUCCESS;
     }
     
     SG::ReadDecorHandle<xAOD::jFexTowerContainer, int >   emulated_jtowerEt (m_jTowerEtdecorKey   , ctx);
-    if(!emulated_jtowerEt.isPresent()) {
-        ATH_MSG_ERROR("Decorated variable emulated_jtowerEt is not available. Is "<< m_jFexDataTowerKey << " decorated?");
-        return StatusCode::FAILURE;
-    }
-    
-    
-    //Run the monitoring only when the input data is filled (it is pre-scaled), otherwise skip
-    if(jFexTowerContainer->empty()){
-        ATH_MSG_DEBUG("number of jfex towers = "<< jFexTowerContainer->size());
+    if(!emulated_jtowerEt.isAvailable()) {
+        ATH_MSG_WARNING("Decorated variable emulated_jtowerEt is not available. Is "<< m_jFexDataTowerKey << " decorated?");
         return StatusCode::SUCCESS;
     }
+    
+    
+   
     
     
     // monitored variables for histogramscd 

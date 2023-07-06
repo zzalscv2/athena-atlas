@@ -11,6 +11,7 @@
 #define MUONREADOUTGEOMETRY_GLOBALUTILITIES_H
 
 #include <string>
+#include <string_view>
 #include <optional>
 #include <GeoPrimitives/GeoPrimitives.h>
 #include <EventPrimitives/EventPrimitives.h>
@@ -18,7 +19,11 @@
 namespace MuonGM {
     std::string buildString(int i, int ncha);
     int strtoint(std::string_view str, unsigned int istart, unsigned int length);
-    int stationPhiTGC(std::string_view stName, int fi, int zi_input, std::string_view geometry_version);
+
+    /// Converts the AMDB phi index to the Identifier phi Index
+    int stationPhiTGC(std::string_view stName, int fi, int zi_input);
+    /// Converts the Identifier phi index to the AMDB phi index
+    int amdbPhiTGC(std::string_view stName, int phiIndex, int eta_index);
 
     /// Calculates the closest approach of two lines. 
     ///    posA: offset point of line A

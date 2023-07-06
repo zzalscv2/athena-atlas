@@ -19,6 +19,7 @@
 // Header for this module:-
 
 #include "GeneratorFilters/LeptonPairFilter.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 // Framework Related Headers:-
 #include "GaudiKernel/MsgStream.h"
@@ -114,7 +115,7 @@ StatusCode LeptonPairFilter::filterEvent() {
     const HepMC::GenEvent* genEvt = (*itr);
 #ifdef HEPMC3
     for(const auto& pitr: genEvt->particles()) {
-      if( pitr->status()!=1 ) continue;
+      if( !MC::isStable(pitr) ) continue;
 	// check stable particles only
 	// We do not place requirements on their origins (updated: optionally rejecting hadron decays)
 	// save pdg ids of found leptons
@@ -152,7 +153,7 @@ StatusCode LeptonPairFilter::filterEvent() {
 #else
     for(HepMC::GenEvent::particle_const_iterator pitr=genEvt->particles_begin();
 	pitr!=genEvt->particles_end(); ++pitr )
-      if( (*pitr)->status()==1 )
+      if( MC::isStable(*pitr) )
 	// check stable particles only
 	// We do not place requirements on their origins (updated: optionally rejecting hadron decays)
 	// save pdg ids of found leptons
@@ -197,7 +198,7 @@ StatusCode LeptonPairFilter::filterEvent() {
 			vLeptonParentPDGIDs.push_back(parentPDG_tmp);
 		}
 	  }//end if pdg_id
-       }//end if status==1
+       }
 #endif
   }//end loop over collections
 

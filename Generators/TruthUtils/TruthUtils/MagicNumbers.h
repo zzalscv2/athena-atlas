@@ -33,6 +33,7 @@ constexpr int SPECIALSTATUS = 10902;
 constexpr int EVTGENUNDECAYEDSTATUS = 899;
 constexpr int PYTHIA8LHESTATUS = 1003;
 constexpr int HERWIG7INTERMEDIATESTATUS = 11;
+constexpr int PYTHIA8NOENDVERTEXSTATUS = 201;
 
 /// @brief This barcode is used by objects matched to particles from pile-up interactions in standard MC Production
 constexpr int crazyParticleBarcode(std::numeric_limits<int32_t>::max());

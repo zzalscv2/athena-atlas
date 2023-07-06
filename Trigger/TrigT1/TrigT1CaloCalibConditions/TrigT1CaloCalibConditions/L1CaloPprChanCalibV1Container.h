@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOCALIBCONDITIONS_L1CALOPPRCHANCALIBV1CONTAINER_H
@@ -30,7 +30,7 @@ private:
 public:
   L1CaloPprChanCalibV1Container();
   L1CaloPprChanCalibV1Container(const std::string& folderKey);
-  virtual ~L1CaloPprChanCalibV1Container() {}
+  virtual ~L1CaloPprChanCalibV1Container();
 
   // interface of AbstractL1CaloPersistentCondition
   using AbstractL1CaloPersistentCondition::makeTransient;
@@ -38,7 +38,7 @@ public:
   virtual DataObject* makePersistent() const;
   virtual std::vector<std::string> coolInputKeys() const { return {m_coolFolderKey}; }
   virtual std::string coolOutputKey() const { return m_coolFolderKey; }
-  virtual void clear() { m_pprChanCalibs.clear(); }
+  virtual void clear();
 
   // getters
   const L1CaloPprChanCalibV1* pprChanCalibV1(unsigned int channelId) const;

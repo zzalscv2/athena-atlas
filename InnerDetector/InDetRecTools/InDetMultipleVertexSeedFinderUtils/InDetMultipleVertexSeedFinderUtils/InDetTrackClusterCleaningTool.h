@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef InDetMultipleVertexSeedFinderUtils_InDetTrackClusterCleaningTool_H
@@ -28,7 +28,6 @@ namespace Trk
 {
  class Track;
  class Vertex;
- class TrackParticleBase;
  class IExtrapolator;
 }
 
@@ -51,15 +50,16 @@ namespace InDet
 /**
  * Cleaning method. Returns a cluster core (first element of the pair)
  * and  outliers (second element)
- */   
-   std::pair<std::vector<const Trk::Track*>,std::vector<const Trk::Track*> > clusterAndOutliers(const std::vector<const Trk::Track*>& cluster, 
-                                                                                                const Trk::Vertex * reference = 0)const;
-   
-   std::pair<std::vector<const Trk::TrackParticleBase*>,std::vector<const Trk::TrackParticleBase*> > clusterAndOutliers(const std::vector<const Trk::TrackParticleBase*>& cluster,const Trk::Vertex * reference = 0)const;
-   
-   std::pair<std::vector<const Trk::TrackParameters *>, 
-     std::vector<const xAOD::TrackParticle *> > clusterAndOutliers(std::vector<const xAOD::TrackParticle *> tracks_to_clean, const xAOD::Vertex * beamposition = 0 ) const;
- 
+ */
+   std::pair<std::vector<const Trk::Track*>, std::vector<const Trk::Track*> >
+   clusterAndOutliers(const std::vector<const Trk::Track*>& cluster,
+                      const Trk::Vertex* reference = 0) const;
+
+   std::pair<std::vector<const Trk::TrackParameters*>,
+             std::vector<const xAOD::TrackParticle*> >
+   clusterAndOutliers(std::vector<const xAOD::TrackParticle*> tracks_to_clean,
+                      const xAOD::Vertex* beamposition = 0) const;
+
   private:
   
    ToolHandle<Trk::IExtrapolator> m_extrapolator; //<! Extrapolator tool 

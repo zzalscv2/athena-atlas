@@ -197,6 +197,37 @@ public:
 
 DECLARE_COMPONENT( MockSimulatorTool )
 
+const std::string mockParticleKillerToolName = "ISFTesting::MockParticleKillerTool/MyTestParticleKillerTool";
+
+class MockParticleKillerTool : public extends<AthAlgTool, ISF::ISimulatorTool> {
+
+public:
+  MockParticleKillerTool(const std::string& type, const std::string& name, const IInterface* svclocator)
+    : base_class(type, name, svclocator)
+  {
+  };
+  virtual ~MockParticleKillerTool() { };
+
+  MOCK_METHOD0(finalize, StatusCode());
+  MOCK_METHOD1(setupEvent, StatusCode(const EventContext&));
+  MOCK_METHOD3(simulate, StatusCode(ISF::ISFParticle&, ISF::ISFParticleContainer&, McEventCollection*));
+  MOCK_METHOD4(simulateVector, StatusCode(const ISF::ISFParticleVector&, ISF::ISFParticleContainer&, McEventCollection*, McEventCollection*));
+  MOCK_METHOD1(releaseEvent, StatusCode(const EventContext&));
+  MOCK_CONST_METHOD1(bid, int(const ISF::ISFParticle&));
+
+  // dummy methods implementing in pure virtual interface methods (to make class non-abstract)
+  virtual StatusCode initialize() {
+    ATH_MSG_INFO ("initializing MockParticleKillerTool: " << name());
+    return StatusCode::SUCCESS;
+  };
+  virtual StatusCode setupEventST() { return StatusCode::FAILURE; };
+  virtual StatusCode releaseEventST() { return StatusCode::FAILURE; };
+  virtual ISF::SimulationFlavor simFlavor() const { return ISF::ParticleKiller; };
+
+}; // MockParticleKillerTool
+
+DECLARE_COMPONENT( MockParticleKillerTool )
+
 
 // Athena Tool to mock a SimulatorTool
 // //
@@ -291,7 +322,7 @@ protected:
       // the tested AthAlgorithm
       m_alg = new ISF::SimKernelMT{"SimKernelMT", m_svcLoc};
       m_alg->addRef();
-      EXPECT_TRUE( m_alg->setProperty("ParticleKillerTool", particleKillerSimulatorToolName).isSuccess() );
+      EXPECT_TRUE( m_alg->setProperty("SimulationTools", "['"+particleKillerSimulatorToolName+"']").isSuccess() );
       EXPECT_TRUE( m_alg->setProperty("GeoIDSvc", mockGeoIDSvcName).isSuccess() );
       EXPECT_TRUE( m_alg->setProperty("TruthRecordService", mockTruthSvcName).isSuccess() );
       EXPECT_TRUE( m_alg->setProperty("EntryLayerTool", mockEntryLayerToolName).isSuccess() );
@@ -301,6 +332,7 @@ protected:
       m_mockTruthSvc = retrieveService<MockTruthSvc>(mockTruthSvcName);
       m_mockInputConverter = retrieveService<MockInputConverter>(mockInputConverterName);
       m_mockSimulatorTool = retrieveTool<MockSimulatorTool>(mockSimulatorToolName);
+      m_mockParticleKillerTool = retrieveTool<MockParticleKillerTool>(mockParticleKillerToolName);
       m_mockSimulationSelector = retrieveTool<MockSimulationSelector>(mockSimulationSelectorName);
       m_mockEntryLayerTool = retrieveTool<MockEntryLayerTool>(mockEntryLayerToolName);
       ASSERT_TRUE( m_svcLoc->service("StoreGateSvc", m_sg) );
@@ -388,6 +420,11 @@ protected:
       return m_alg->m_simulationTools;
     }
 
+    ISF::ISimulatorTool* getParticleKillerTool() const
+    {
+      return m_alg->m_particleKillerTool;
+    }
+
     // the tested AthAlgorithm
     ISF::SimKernelMT* m_alg;
 
@@ -398,6 +435,7 @@ protected:
     ISFTesting::MockTruthSvc* m_mockTruthSvc = nullptr;
     ISFTesting::MockInputConverter* m_mockInputConverter = nullptr;
     ISFTesting::MockSimulatorTool* m_mockSimulatorTool = nullptr;
+    ISFTesting::MockParticleKillerTool* m_mockParticleKillerTool = nullptr;
     ISFTesting::MockSimulationSelector* m_mockSimulationSelector = nullptr;
     ISFTesting::MockEntryLayerTool* m_mockEntryLayerTool = nullptr;
 
@@ -599,8 +637,15 @@ protected:
   }
 
 
+  TEST_F(SimKernelMT_test, specifyTwoClashingSimulationTools_expectInitializeFailure) {
+    EXPECT_TRUE( m_alg->setProperty("SimulationTools", "['"+mockParticleKillerToolName+"','"+particleKillerSimulatorToolName+"']").isSuccess() );
+    this->setEmptyInputOutputCollections();
+    EXPECT_TRUE( m_alg->initialize().isFailure() );
+  }
+
+
   TEST_F(SimKernelMT_test, specifyASimulationTool_expectInitializeSuccess) {
-    EXPECT_TRUE( m_alg->setProperty("SimulationTools", "['"+mockSimulatorToolName+"']").isSuccess() );
+    EXPECT_TRUE( m_alg->setProperty("SimulationTools", "['"+mockSimulatorToolName+"','"+particleKillerSimulatorToolName+"']").isSuccess() );
     this->setEmptyInputOutputCollections();
     EXPECT_TRUE( m_alg->initialize().isSuccess() );
 
@@ -633,7 +678,7 @@ protected:
 
 
   TEST_F(SimKernelMT_test, filledSimulationSelectors_expectInitializeSuccess) {
-    EXPECT_TRUE( m_alg->setProperty("ParticleKillerTool", mockSimulatorToolName).isSuccess() );
+    EXPECT_TRUE( m_alg->setProperty("SimulationTools", "['"+mockSimulatorToolName+"','"+particleKillerSimulatorToolName+"']").isSuccess() );
     EXPECT_TRUE( m_alg->setProperty("BeamPipeSimulationSelectors", "['"+mockSimulationSelectorName+"']").isSuccess() ); //mockSimulationSelectorName);
     EXPECT_TRUE( m_alg->setProperty("IDSimulationSelectors", "['"+mockSimulationSelectorName+"']").isSuccess() );
     EXPECT_TRUE( m_alg->setProperty("CaloSimulationSelectors", "['"+mockSimulationSelectorName+"']").isSuccess() );
@@ -646,7 +691,7 @@ protected:
 
 
   TEST_F(SimKernelMT_test, identifySimulator_particleInsideInnerDetectorAndInnerDetectorSimulationSelectorAcceptingParticle_expectInnerDetectorSimulatorReturned) {
-    EXPECT_TRUE( m_alg->setProperty("SimulationTools", "['"+mockSimulatorToolName+"']").isSuccess() );
+    EXPECT_TRUE( m_alg->setProperty("SimulationTools", "['"+mockSimulatorToolName+"','"+particleKillerSimulatorToolName+"']").isSuccess() );
     EXPECT_TRUE( m_alg->setProperty("IDSimulationSelectors", "['"+mockSimulationSelectorName+"']").isSuccess() );
     this->setEmptyInputOutputCollections();
     EXPECT_TRUE( m_alg->initialize().isSuccess() );
@@ -671,7 +716,7 @@ protected:
     const auto* actualSimulatorToolPtr = &this->identifySimulator(particle);
 
     ToolHandleArray<ISF::ISimulatorTool>& simulatorTools = this->getSimulatorTools();
-    const unsigned int expectedSize(1);
+    const unsigned int expectedSize(2);
     ASSERT_EQ (simulatorTools.size(), expectedSize);
     ISFTesting::MockSimulatorTool* expectedSimulatorToolPtr = dynamic_cast<ISFTesting::MockSimulatorTool*>(&*(simulatorTools[0]));
     ASSERT_EQ(expectedSimulatorToolPtr, actualSimulatorToolPtr);
@@ -679,7 +724,7 @@ protected:
 
 
   TEST_F(SimKernelMT_test, identifySimulator_particleInsideInnerDetectorAndInnerDetectorSimulationSelectorNotAcceptingParticle_expectParticleKillerSimulatorReturned) {
-    EXPECT_TRUE( m_alg->setProperty("SimulationTools", "['"+mockSimulatorToolName+"']").isSuccess() );
+    EXPECT_TRUE( m_alg->setProperty("SimulationTools", "['"+mockSimulatorToolName+"','"+particleKillerSimulatorToolName+"']").isSuccess() );
     EXPECT_TRUE( m_alg->setProperty("IDSimulationSelectors", "['"+mockSimulationSelectorName+"']").isSuccess() );
     this->setEmptyInputOutputCollections();
     EXPECT_TRUE( m_alg->initialize().isSuccess() );
@@ -702,15 +747,14 @@ protected:
       .WillOnce(::testing::Return(false));
 
     const auto* actualSimulatorToolPtr = &this->identifySimulator(particle);
-    ToolHandle<ISF::ISimulatorTool> particleKillerSimulatorTool(particleKillerSimulatorToolName);
-    const ISF::ISimulatorTool* expectedSimulatorToolPtr = &*particleKillerSimulatorTool;
+    const ISF::ISimulatorTool* expectedSimulatorToolPtr = getParticleKillerTool();
 
     ASSERT_EQ(expectedSimulatorToolPtr, actualSimulatorToolPtr);
   }
 
 
   TEST_F(SimKernelMT_test, identifySimulator_particleInsideCaloAndOnlyInnerDetectorSimulationSelectorPresent_expectSimulationSelectorNotCalledAndParticleKillerSimulatorReturned) {
-    EXPECT_TRUE( m_alg->setProperty("SimulationTools", "['"+mockSimulatorToolName+"']").isSuccess() );
+    EXPECT_TRUE( m_alg->setProperty("SimulationTools", "['"+mockSimulatorToolName+"','"+particleKillerSimulatorToolName+"']").isSuccess() );
     EXPECT_TRUE( m_alg->setProperty("IDSimulationSelectors", "['"+mockSimulationSelectorName+"']").isSuccess() );
     this->setEmptyInputOutputCollections();
     EXPECT_TRUE( m_alg->initialize().isSuccess() );
@@ -733,15 +777,14 @@ protected:
       .Times(0);
 
     const auto* actualSimulatorToolPtr = &this->identifySimulator(particle);
-    ToolHandle<ISF::ISimulatorTool> particleKillerSimulatorTool(particleKillerSimulatorToolName);
-    const ISF::ISimulatorTool* expectedSimulatorToolPtr = &*particleKillerSimulatorTool;
+    const ISF::ISimulatorTool* expectedSimulatorToolPtr = getParticleKillerTool();
 
     ASSERT_EQ(expectedSimulatorToolPtr, actualSimulatorToolPtr);
   }
 
 
   TEST_F(SimKernelMT_test, identifySimulator_particleInsideCaloAndCaloSimulationSelectorSelectingParticle_expectSimulatorReturned) {
-    EXPECT_TRUE( m_alg->setProperty("SimulationTools", "['"+mockSimulatorToolName+"']").isSuccess() );
+    EXPECT_TRUE( m_alg->setProperty("SimulationTools", "['"+mockSimulatorToolName+"','"+particleKillerSimulatorToolName+"']").isSuccess() );
     EXPECT_TRUE( m_alg->setProperty("CaloSimulationSelectors", "['"+mockSimulationSelectorName+"']").isSuccess() );
     this->setEmptyInputOutputCollections();
     EXPECT_TRUE( m_alg->initialize().isSuccess() );
@@ -765,7 +808,7 @@ protected:
 
     const auto* actualSimulatorToolPtr = &this->identifySimulator(particle);
     ToolHandleArray<ISF::ISimulatorTool>& simulatorTools = this->getSimulatorTools();
-    const unsigned int expectedSize(1);
+    const unsigned int expectedSize(2);
     ASSERT_EQ (simulatorTools.size(), expectedSize);
     ISFTesting::MockSimulatorTool* expectedSimulatorToolPtr = dynamic_cast<ISFTesting::MockSimulatorTool*>(&*(simulatorTools[0]));
     ASSERT_EQ(expectedSimulatorToolPtr, actualSimulatorToolPtr);
@@ -800,7 +843,7 @@ protected:
 
     EXPECT_TRUE( m_alg->setProperty("InputEvgenCollection", "testInputEvgenCollection").isSuccess() );
     EXPECT_TRUE( m_alg->setProperty("OutputTruthCollection", "testOutputTruthCollection").isSuccess() );
-    EXPECT_TRUE( m_alg->setProperty("ParticleKillerTool", mockSimulatorToolName).isSuccess() );
+    EXPECT_TRUE( m_alg->setProperty("SimulationTools", "['"+mockParticleKillerToolName+"']").isSuccess() );
     EXPECT_TRUE( m_alg->setProperty("InputConverter", fullInputConverter).isSuccess() );
     EXPECT_TRUE( m_alg->initialize().isSuccess() );
 
@@ -821,8 +864,9 @@ protected:
                                      truthBinding
                                        );
 
-    ASSERT_NE( m_mockSimulatorTool, nullptr );
-    EXPECT_CALL( *m_mockSimulatorTool, simulateVector(::testing::_,::testing::_,::testing::_,::testing::_) )
+    ASSERT_NE( m_mockParticleKillerTool, nullptr );
+    ISFTesting::MockParticleKillerTool *particleKillerTool = dynamic_cast<ISFTesting::MockParticleKillerTool*>(getParticleKillerTool());
+    EXPECT_CALL( *particleKillerTool, simulateVector(::testing::_,::testing::_,::testing::_,::testing::_) )
       .Times(1)
       .WillOnce(::testing::Return(StatusCode::SUCCESS));
 

@@ -7,7 +7,7 @@
 
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
-
+#include "TruthUtils/HepMCHelpers.h"
 
 
 xAODM4MuIntervalFilter::xAODM4MuIntervalFilter(const std::string& name, ISvcLocator* pSvcLocator)
@@ -62,7 +62,7 @@ for (itr = xTruthEventContainer->begin(); itr!=xTruthEventContainer->end(); ++it
     for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
      const xAOD::TruthParticle* pitr =  genEvt->truthParticle(iPart);
 	   // muon
-	   if (std::abs((pitr)->pdgId()) == 13 && (pitr)->status() == 1 &&
+	   if (std::abs((pitr)->pdgId()) == 13 && MC::isStable(pitr) &&
 	      (pitr)->pt() >= m_minPt &&
 	       std::abs((pitr)->eta()) <= m_maxEta) {
            HepMC::FourVector tmp((pitr)->px(), (pitr)->py(), (pitr)->pz(), (pitr)->e());

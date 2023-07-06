@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef InDetMultipleVertexSeedFinder_HistogrammingMultiSeedFinder_H
@@ -38,7 +38,7 @@ namespace InDet
  
  class InDetTrackClusterCleaningTool;
 
- class HistogrammingMultiSeedFinder : public AthAlgTool, virtual public IMultiPVSeedFinder
+ class HistogrammingMultiSeedFinder final : public AthAlgTool, virtual public IMultiPVSeedFinder
  {
   public:
    
@@ -53,16 +53,12 @@ namespace InDet
 
 /**
  * Clustering method itself
- */   
-   virtual std::vector< std::vector<const Trk::Track *> > seeds(const std::vector<const Trk::Track*>& tracks )const override;
+ */
+   virtual std::vector<std::vector<const Trk::Track*> > seeds(
+       const std::vector<const Trk::Track*>& tracks) const override;
 
-   virtual std::vector< std::vector<const Trk::TrackParticleBase *> > seeds(const std::vector<const Trk::TrackParticleBase*>& tracks )const override;
-    
-   virtual std::vector< std::vector<const Trk::TrackParameters *> > seeds(const std::vector<const xAOD::TrackParticle*>& tracks )const override;
-
-   //  std::pair<std::vector<const Trk::TrackParameters *>, 
-   //  std::vector<const xAOD::TrackParticle *> > m_clusterAndOutliers(std::vector<const xAOD::TrackParticle *> tracks_to_clean, xAOD::Vertex * beamposition) const;
-  
+   virtual std::vector<std::vector<const Trk::TrackParameters*> > seeds(
+       const std::vector<const xAOD::TrackParticle*>& tracks) const override;
 
   private:
 

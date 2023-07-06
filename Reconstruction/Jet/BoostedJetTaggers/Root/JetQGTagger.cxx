@@ -14,6 +14,7 @@
 
 #include "xAODTracking/VertexContainer.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace CP {
 
@@ -587,7 +588,7 @@ namespace CP {
       // dont count invalid truth particles
       if (!part) continue;
       // require the particle in the final state
-      if( ! (part->status() == 1) ) continue;
+      if( ! MC::isStable(part) ) continue;
       // require that the particle type (e.g. production type) be valid (e.g. not primaries)
       if (HepMC::is_simulation_particle(part)) continue;
       // pt>500 MeV

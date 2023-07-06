@@ -8,6 +8,7 @@
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "GaudiKernel/PhysicalConstants.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 // Pt  High --> Low
 class High2LowByJetClassPt
@@ -106,7 +107,7 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
             if (m_photonjetoverlap == true)
             {
                 // photon - copied from VBFForwardJetsFilter.cxx
-                if (pitr->pdgId() == 22 && pitr->status() == 1 &&
+                if (pitr->pdgId() == 22 && MC::isStable(pitr) &&
                     pitr->pt() >= m_olapPt &&
                     std::abs(pitr->eta()) <= m_yMax)
                 {
@@ -116,7 +117,7 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
             if (m_electronjetoverlap == true)
             {
                 // electron
-                if (std::abs(pitr->pdgId()) == 11 && pitr->status() == 1 &&
+                if (std::abs(pitr->pdgId()) == 11 && MC::isStable(pitr) &&
                     pitr->pt() >= m_olapPt &&
                     std::abs(pitr->eta()) <= m_yMax)
                 {

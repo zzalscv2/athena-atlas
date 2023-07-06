@@ -190,7 +190,7 @@ def SCTErrMonAlgConfig(flags):
                         ymax=(
                             sctMon.LAST_PHI_BIN if region == sctMon.BARREL_INDEX else sctMon.LAST_PHI_BIN_EC)+0.5,
                         duration="lowStat",
-                        opt='kAlwaysCreate')
+                        opt='kLBNHistoryDepth=30,kAlwaysCreate')
 
     # Filled in fillByteStreamErrorsHelper
     myMonGroup.defineHistogram(varname="maskedLinksBin;Masked Links",

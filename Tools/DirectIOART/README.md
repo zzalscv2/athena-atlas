@@ -1,6 +1,6 @@
 # DirectIOART - Testing direct I/O in recent ATLAS offline software releases using ART (rel21)
 ## The DirectIOART package
-DirectIOART is a package meant for testing and monitoring file access via direct I/O in (almost) all recent *ATLAS* offline software releases (**only** release 21 and master) making use of the ART ([*ATLAS* Release Tester](https://twiki.cern.ch/twiki/bin/view/AtlasComputing/ART)) framework. Its tests range from simple `TFile::Open` command to more involved `Reco_tf.py` reconstruction or derivation tests as well as small analysis algorithms. Each test is performed three times, in order to test three different protocols:
+DirectIOART is a package meant for testing and monitoring file access via direct I/O in (almost) all recent *ATLAS* offline software releases (**only** release 21 and `main`) making use of the ART ([*ATLAS* Release Tester](https://twiki.cern.ch/twiki/bin/view/AtlasComputing/ART)) framework. Its tests range from simple `TFile::Open` command to more involved `Reco_tf.py` reconstruction or derivation tests as well as small analysis algorithms. Each test is performed three times, in order to test three different protocols:
 * **DAVS**  (davs://...)
 * **HTTPS**  (https://...)
 * **ROOT**  (root://...)
@@ -10,8 +10,8 @@ The actual tests are implemented in small bash and python scripts stored in the 
 Detailed lists of the tests that are performed within the particular software releases and the input files are given below.
 ##### Tests:
 * **TFile::Open** (using an AOD input file)
-  * master/Athena
-  * master/AthSimulation
+  * main/Athena
+  * main/AthSimulation
   * 21.0/Athena
   * 21.0/AthSimulation
   * 21.2/AthAnalysis

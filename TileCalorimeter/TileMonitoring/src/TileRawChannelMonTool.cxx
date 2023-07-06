@@ -465,21 +465,10 @@ void TileRawChannelMonTool::bookDsp(int ros, int drawer)
       sStr.str("");
       sStr << moduleName << " CH " << ch << gain[3 + gn] << " Dsp-OF Amp difference";
       histTitle = sStr.str();
-
-      switch (gn) {
-        case 0: // low gain
-          m_data->m_histDsp1[ros][drawer][ch][gn].push_back(book1F(subDir, histName, histTitle, 404, -1.01, 1.01));
-          break;
-        case 1: // high gain
-          m_data->m_histDsp1[ros][drawer][ch][gn].push_back(book1F(subDir, histName, histTitle, 404, -1.01, 1.01));
-          break;
-        default: // single gain mode
-          if (m_runType == PhysRun) {
-            m_data->m_histDsp1[ros][drawer][ch][gn & 1].push_back(book1F(subDir, histName, histTitle, 404, -1.01, 1.01));
-          } else {
-            m_data->m_histDsp1[ros][drawer][ch][gn & 1].push_back(book1F(subDir, histName, histTitle, 404, -1.01, 1.01));
-          }
-      }
+      
+      auto ix = (gn < 2) ? gn : (gn & 1);
+      m_data->m_histDsp1[ros][drawer][ch][ix].push_back(book1F(subDir, histName, histTitle, 404, -1.01, 1.01));
+      
       sStr.str("");
       sStr << moduleName << "_ch_" << sCh << gain[gn] << "_dsp-fit_time_diff";
       histName = sStr.str();

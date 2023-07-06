@@ -3480,12 +3480,6 @@ HLT_e20_lhtight_ivarloose_L12eEM9:
     6: 4
 HLT_e20_lhtight_ivarloose_L1ZAFB-25DPHI-eEM18M:
   eventCount: 0
-  stepCounts:
-    0: 1
-    1: 1
-  stepFeatures:
-    0: 1
-    1: 1
 HLT_e20_lhvloose_L1eEM18L:
   eventCount: 4
   stepCounts:

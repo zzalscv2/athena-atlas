@@ -11,7 +11,7 @@ atlas_add_component( ALFA_BeamTransport
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS  ${ROOT_INCLUDE_DIRS} 
-                     LINK_LIBRARIES  ${ROOT_LIBRARIES} AtlasHepMCLib AthenaBaseComps FPTracker GaudiKernel StoreGateLib xAODEventInfo GeneratorObjects FPTracker )
+                     LINK_LIBRARIES  ${ROOT_LIBRARIES} AtlasHepMCLib TruthUtils AthenaBaseComps FPTracker GaudiKernel StoreGateLib xAODEventInfo GeneratorObjects FPTracker )
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )

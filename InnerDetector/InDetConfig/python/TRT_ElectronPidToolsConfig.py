@@ -51,45 +51,55 @@ def TRTOccupancyIncludeCfg(flags, name="TRTOccupancyInclude", **kwargs):
     return acc
 
 
-def TRT_dEdxToolCfg(flags, name="TRT_dEdxTool", **kwargs):
+def __TRT_dEdxToolBaseCfg(flags, name, **kwargs):
+    """internal function to avoid code duplication,
+    it does not  deal with LumiBlockMuWriterCfg dependancy correctly
+    """
+
     from TRT_ConditionsAlgs.TRT_ConditionsAlgsConfig import TRTToTCondAlgCfg
     acc = TRTToTCondAlgCfg(flags)
 
+    kwargs.setdefault("TRT_dEdx_isData", not flags.Input.isMC)
+    
+    if "TRT_LocalOccupancyTool" not in kwargs:
+        kwargs.setdefault("TRT_LocalOccupancyTool", acc.popToolsAndMerge(TrigTRT_LocalOccupancyCfg(flags)))
+
+    if "AssociationTool" not in kwargs:
+        from InDetConfig.InDetAssociationToolsConfig import TrigPrdAssociationToolCfg
+        kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(TrigPrdAssociationToolCfg(flags)))
+
+    acc.setPrivateTools(CompFactory.TRT_ToT_dEdx(name,**kwargs))
+    return acc
+
+def TRT_dEdxToolCfg(flags, name="TRT_dEdxTool", **kwargs):
+    acc = __TRT_dEdxToolBaseCfg(flags, name, **kwargs)
+    
     if not flags.Input.isMC:
         from LumiBlockComps.LumiBlockMuWriterConfig import LumiBlockMuWriterCfg
         acc.merge(LumiBlockMuWriterCfg(flags))
 
-    kwargs.setdefault("TRT_dEdx_isData", not flags.Input.isMC)
-    kwargs.setdefault("TRT_LocalOccupancyTool", acc.popToolsAndMerge(TRT_LocalOccupancyCfg(flags)))
-    
-    acc.setPrivateTools(CompFactory.TRT_ToT_dEdx(name, **kwargs))
     return acc
 
 def TrigTRT_dEdxToolCfg(flags, name="TrigTRT_dEdxTool", **kwargs):
-    acc = ComponentAccumulator()
-
-    kwargs.setdefault("TRT_dEdx_isData", not flags.Input.isMC)
-    kwargs.setdefault("TRT_LocalOccupancyTool", acc.popToolsAndMerge(TrigTRT_LocalOccupancyCfg(flags)))
-
-    from InDetConfig.InDetAssociationToolsConfig import TrigPrdAssociationToolCfg
-    kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(TrigPrdAssociationToolCfg(flags)))
-
-    acc.setPrivateTools(acc.popToolsAndMerge(TRT_dEdxToolCfg(flags,name,**kwargs)))
-    return acc
-
+    """trigger version should not add LumiBlockMuWriterCfg to views as it is scheduled globally""" 
+    return __TRT_dEdxToolBaseCfg(flags, name, **kwargs)
 
 def TRT_ElectronPidToolCfg(flags, name="TRT_ElectronPidTool", **kwargs):
     from TRT_ConditionsAlgs.TRT_ConditionsAlgsConfig import TRTHTCondAlgCfg, TRTPIDNNCondAlgCfg
     acc = TRTHTCondAlgCfg(flags)
     acc.merge(TRTPIDNNCondAlgCfg(flags))
 
-    from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
-    StrawStatusTool = acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags))
-    acc.addPublicTool(StrawStatusTool)  # public as it is has many clients to save some memory
-    kwargs.setdefault("TRTStrawSummaryTool", StrawStatusTool)
+    if "TRTStrawSummaryTool" not in kwargs:
+        from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
+        StrawStatusTool = acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags))
+        acc.addPublicTool(StrawStatusTool)  # public as it is has many clients to save some memory
+        kwargs.setdefault("TRTStrawSummaryTool", StrawStatusTool)
 
-    kwargs.setdefault("TRT_LocalOccupancyTool", acc.popToolsAndMerge(TRT_LocalOccupancyCfg(flags)))
-    kwargs.setdefault("TRT_ToT_dEdx_Tool", acc.popToolsAndMerge(TRT_dEdxToolCfg(flags)))
+    if "TRT_LocalOccupancyTool" not in kwargs:
+        kwargs.setdefault("TRT_LocalOccupancyTool", acc.popToolsAndMerge(TRT_LocalOccupancyCfg(flags)))
+    
+    if "TRT_ToT_dEdx_Tool" not in kwargs:
+        kwargs.setdefault("TRT_ToT_dEdx_Tool", acc.popToolsAndMerge(TRT_dEdxToolCfg(flags)))
 
     kwargs.setdefault("CalculateNNPid", True)
 

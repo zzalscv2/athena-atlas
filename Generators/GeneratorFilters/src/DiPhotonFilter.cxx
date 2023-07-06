@@ -3,6 +3,7 @@
 */
 
 #include "GeneratorFilters/DiPhotonFilter.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include <vector>
 
 
@@ -63,7 +64,7 @@ StatusCode DiPhotonFilter::filterEvent() {
     const HepMC::GenEvent* genEvt = (*itr);
     for (const auto& part: *genEvt) {
       if ( (part->pdg_id() == 22) ) {
-        if ( part->status() == 1 && (part->momentum().perp() >= ptcut) ) {
+        if ( MC::isStable(part) && (part->momentum().perp() >= ptcut) ) {
           MCTruthPhotonList.push_back(part);
         }
       }

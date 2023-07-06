@@ -8,7 +8,6 @@
 
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
 #include "InDetMultipleVertexSeedFinderUtils/InDetTrackZ0SortingTool.h"
-#include "TrkParticleBase/TrackParticleBase.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkVertexFitterInterfaces/IVertexSeedFinder.h"
 #include "xAODTracking/Vertex.h"
@@ -186,122 +185,6 @@ namespace InDet
  }//end of seeding method
 
  
- std::vector< std::vector<const Trk::TrackParticleBase *> > SlidingWindowMultiSeedFinder::seeds(const std::vector<const Trk::TrackParticleBase*>& tracks )const
- {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-  std::vector<const Trk::TrackParticleBase*> preselectedTracks(0);
-  std::vector<const Trk::TrackParticleBase*>::const_iterator tr = tracks.begin();
-  std::vector<const Trk::TrackParticleBase*>::const_iterator tre = tracks.end(); 
-  
-  //using the beam position for pre-selection
-  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
-  Trk::RecVertex  beamRecVertex(beamSpotHandle->beamVtx()); 
-  for(;tr!=tre;++tr) if(m_trkFilter->decision(**tr,&beamRecVertex)) preselectedTracks.push_back(*tr);
-  ATH_MSG_DEBUG("Beam spot position is: "<< beamRecVertex.position());
-  Trk::Vertex* beamVertex=&beamRecVertex;
-
-  if (m_ignoreBeamSpot){
-    std::vector<const Trk::TrackParameters*> perigeeList;
-    std::vector<const Trk::TrackParticleBase*>::const_iterator trackBegin=tracks.begin();
-    std::vector<const Trk::TrackParticleBase*>::const_iterator trackEnd=tracks.end();
-    for (std::vector<const Trk::TrackParticleBase*>::const_iterator trackIter=trackBegin;trackIter!=trackEnd;++trackIter){
-      perigeeList.push_back(&((*trackIter)->definingParameters()));
-    }
-
-    Trk::Vertex* myVertex=new Trk::Vertex(m_vtxSeedFinder->findSeed(perigeeList));
-    ATH_MSG_DEBUG(" vtx seed x: " << myVertex->position().x() <<
-		  " vtx seed y: " << myVertex->position().y() <<
-		  " vtx seed z: " << myVertex->position().z());
-    beamVertex=myVertex;
-  }
-
-  //output container
-  std::vector< std::vector<const Trk::TrackParticleBase*> > result(0);
-
-  //sorting the tracks on their z_0 basis.
-  if(!preselectedTracks.empty())
-  {
-   std::vector<int> indexOfSorted = m_sortingTool->sortedIndex(preselectedTracks, beamVertex);
-   
-   std::vector<const Trk::TrackParticleBase *> tmp_cluster(0); 
-   
-   //extrapolating the tracks to the actual beam spot
-   const Trk::TrackParameters * exPerigee(nullptr);
-   Trk::PerigeeSurface perigeeSurface(beamVertex->position());
-
-   exPerigee = m_extrapolator
-                 ->extrapolate(ctx,
-                               preselectedTracks[indexOfSorted[0]]->definingParameters(),
-                               perigeeSurface,
-                               Trk::anyDirection,
-                               true,
-                               Trk::pion).release();
-
-   float lastTrackZ0  = -999.;
-   if(exPerigee) { lastTrackZ0 = exPerigee->parameters()[Trk::z0]; delete exPerigee; }
-   else
-   {
-     ATH_MSG_WARNING("Impossible to extrapolate the first track; returning 0 container for this event");
-     if (m_ignoreBeamSpot) delete beamVertex;
-     return result;
-   }          	   
-
-   ATH_MSG_DEBUG("Z0 of last track"<<lastTrackZ0);
-
-   //looping over sorted container:  storing the Z0 of last iteration...
-   float prevTrackZ0 =0.;
-
-   float addingDistance = m_addingDistance;
-   if(m_useMaxInCluster) addingDistance = 0.;
-   
-   for(unsigned int i=0;i<indexOfSorted.size();++i){
-     const Trk::TrackParameters* lexPerigee = m_extrapolator
-       ->extrapolate(ctx,
-		     preselectedTracks[indexOfSorted[i]]->definingParameters(),
-		     perigeeSurface,
-		     Trk::anyDirection,
-		     true,
-		     Trk::pion).release();
-     float currentTrackZ0 = lexPerigee->parameters()[Trk::z0];
-     delete lexPerigee;
-
-     if(!i) prevTrackZ0 = currentTrackZ0;
-
-     ATH_MSG_DEBUG("Z0 of current  track" << currentTrackZ0);
-     if ((std::abs(currentTrackZ0 - lastTrackZ0) > m_clusterLength &&
-	  std::abs(currentTrackZ0 - prevTrackZ0) > addingDistance) ||
-	 std::abs(currentTrackZ0 - prevTrackZ0) > m_breakingDistance) {
-
-       // this track is outside the current cluster or the distance is too big. breaking the cluster here
-       if (int(tmp_cluster.size()) > m_ignoreLevel) result.push_back(tmp_cluster);
-       tmp_cluster.clear();
-       tmp_cluster.push_back(preselectedTracks[indexOfSorted[i]]);
-       lastTrackZ0 = currentTrackZ0;
-       ATH_MSG_DEBUG("Finishing a cluster, starting the new one");
-     }else{
-       //this track is within the current cluster  or the distance to next is too short. Keeping populating it.
-       tmp_cluster.push_back(preselectedTracks[indexOfSorted[i]]);
-       ATH_MSG_DEBUG("Pushing a track to a cluster");
-       if(i==indexOfSorted.size()-1 && int(tmp_cluster.size())>m_ignoreLevel) result.push_back(tmp_cluster);
-     }//end of check for the cluster size
-    
-     //making adding distance max in cluster
-     if(m_useMaxInCluster){
-       float diff = std::abs(currentTrackZ0-prevTrackZ0);
-       if(addingDistance < diff) addingDistance = diff;
-     }//end of  using max in cluster
-     prevTrackZ0 = currentTrackZ0;
-
-   }//end of loop
-  }//end of preselection size check
-  
-  ATH_MSG_DEBUG("Returning number of clusters: "<< result.size());
-  if (m_ignoreBeamSpot) delete beamVertex;
-  return result; 
-   
- }//end of seeding method for TrackParticles
-
-
 std::vector< std::vector<const Trk::TrackParameters *> > SlidingWindowMultiSeedFinder::seeds(const std::vector<const xAOD::TrackParticle*>& tracks )const
   {
     const EventContext& ctx = Gaudi::Hive::currentContext();

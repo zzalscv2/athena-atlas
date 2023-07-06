@@ -203,6 +203,32 @@ namespace {
   }
 
 
+  StringRegexes getFlipConverters(const FlipTagConfig& flip_config) {
+
+    // determine name based on flip config
+    std::string flip_name = "";
+    if (flip_config == FlipTagConfig::FLIP_SIGN) {
+      flip_name = "Flip";
+    }
+    if (flip_config == FlipTagConfig::NEGATIVE_IP_ONLY) {
+      flip_name = "Neg";
+    }
+
+    // we rewrite the inputs if we're using flip taggers
+    StringRegexes flip_converters {
+      {"(GN1[^_]*|GN2[^_]*)"_r, "$1" + flip_name},
+      {"(GN1[^_]*|GN2[^_]*)_(.*)"_r, "$1" + flip_name + "_$2"},
+      {"(IP[23]D)_(.*)"_r, "$1Neg_$2"},
+      {"(rnnip|dips[^_]*)_(.*)"_r, "$1flip_$2"},
+      {"(JetFitter|SV1|JetFitterSecondaryVertex)_(.*)"_r, "$1Flip_$2"},
+      {"(rnnip|dips[^_]*)"_r, "$1flip"},
+      {"^(DL1|DL1r[^_]*|DL1rmu|DL1d[^_]*)$"_r, "$1" + flip_name},
+      {"pt|abs_eta|eta"_r, "$&"},
+      {"softMuon.*|smt.*"_r, "$&"}
+    };
+
+    return flip_converters;
+  }
 
 }
 
@@ -638,26 +664,8 @@ namespace FlavorTagDiscriminants {
       TrackLinkType track_link_type
     ){
 
-      // determine name based on flip config
-      std::string flip_name = "";
-      if (flip_config == FlipTagConfig::FLIP_SIGN) {
-        flip_name = "Flip";
-      }
-      if (flip_config == FlipTagConfig::NEGATIVE_IP_ONLY) {
-        flip_name = "Neg";
-      }
-
       // we rewrite the inputs if we're using flip taggers
-      StringRegexes flip_converters {
-        {"(GN1[^_]*|GN2[^_]*)"_r, "$1" + flip_name},
-        {"(IP[23]D)_(.*)"_r, "$1Neg_$2"},
-        {"(rnnip|dips[^_]*)_(.*)"_r, "$1flip_$2"},
-        {"(JetFitter|SV1|JetFitterSecondaryVertex)_(.*)"_r, "$1Flip_$2"},
-        {"(rnnip|dips[^_]*)"_r, "$1flip"},
-        {"^(DL1|DL1r[^_]*|DL1rmu|DL1d[^_]*)$"_r, "$1" + flip_name},
-        {"pt|abs_eta|eta"_r, "$&"},
-        {"softMuon.*|smt.*"_r, "$&"}
-      };
+      StringRegexes flip_converters = getFlipConverters(flip_config);
 
       // some sequences also need to be sign-flipped. We apply this by
       // changing the input scaling and normalizations
@@ -928,6 +936,80 @@ namespace FlavorTagDiscriminants {
       return std::make_tuple(decorators, deps, used_remap);
     }
 
+    std::tuple<
+      internal::OutNode, internal::OutNodeVecChar,
+      internal::OutNodeVecFloat, internal::OutNodeTrackLinks,
+      FTagDataDependencyNames, std::set<std::string>>
+    createGNDecorators(
+      const GNNConfig::Config& config,
+      const FTagOptions& options)
+    {
+      FTagDataDependencyNames deps;
+      internal::OutNode decorators_f;
+      internal::OutNodeVecChar decorators_vc;
+      internal::OutNodeVecFloat decorators_vf;
+      internal::OutNodeTrackLinks decorators_tl;
+
+      std::map<std::string, std::string> remap = options.remap_scalar;
+      std::set<std::string> used_remap;
+
+      // we rewrite the inputs if we're using flip taggers
+      StringRegexes flip_converters = getFlipConverters(options.flip);
+      std::string context = "building negative tag b-btagger";
+
+      for (const auto& out_node: config.outputs) {
+
+        std::string name = out_node.label;
+
+        // name needs to get regexed
+        if (options.flip != FlipTagConfig::STANDARD) {
+          name = sub_first(flip_converters, name, context);  
+        }
+
+        // let user rename the output
+        if (auto h = remap.extract(name)){
+          name = h.mapped();
+          used_remap.insert(h.key());
+        }
+        deps.bTagOutputs.insert(name);
+
+        switch (out_node.type) {
+          case GNNConfig::OutputNodeType::FLOAT: {
+            SG::AuxElement::Decorator<float> f(name);
+            decorators_f.emplace_back(out_node.label, f);
+            break;
+          }
+          case GNNConfig::OutputNodeType::VECCHAR: {
+            SG::AuxElement::Decorator<std::vector<char>> vc(name);
+            decorators_vc.emplace_back(out_node.label, vc);
+            break;
+          }
+          case GNNConfig::OutputNodeType::VECFLOAT: {
+            SG::AuxElement::Decorator<std::vector<float>> vf(name);
+            decorators_vf.emplace_back(out_node.label, vf);
+            break;
+          }
+          default:
+            throw std::logic_error("uknown outputnode type");
+        }
+      }
+
+      // TrackLinks decorator
+      if (decorators_vc.size() > 0 || decorators_vf.size() > 0){
+        std::string name = "TrackLinks";
+        if (auto h = remap.extract(name)){
+          name = h.mapped();
+          used_remap.insert(h.key());
+        }
+        deps.bTagOutputs.insert(name);
+
+        SG::AuxElement::Decorator<internal::TrackLinks> tl(name);
+        decorators_tl.emplace_back("TrackLinks", tl);
+      }
+
+      return std::make_tuple(decorators_f, decorators_vc, decorators_vf, decorators_tl, deps, used_remap);
+    }
+
     // return a function to check IP validity
     std::tuple<
       std::function<char(const internal::Tracks&)>,
@@ -986,8 +1068,6 @@ namespace FlavorTagDiscriminants {
         throw std::logic_error("found unused output remapping(s): " + outputs);
       }
     }
-
-
   } // end of datapre namespace
 
 } // end of FlavorTagDiscriminants namespace

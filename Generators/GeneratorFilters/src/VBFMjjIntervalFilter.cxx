@@ -9,7 +9,7 @@
 #include "AthContainers/ConstDataVector.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "GaudiKernel/PhysicalConstants.h"
-
+#include "TruthUtils/HepMCHelpers.h"
 
 // Pt  High --> Low
 class High2LowByJetClassPt {
@@ -91,7 +91,7 @@ StatusCode VBFMjjIntervalFilter::filterEvent() {
     for (const auto& pitr: *genEvt) {
       if (m_photonjetoverlap==true) {
 	// photon - copied from VBFForwardJetsFilter.cxx
-	if ( pitr->pdg_id() == 22 && pitr->status() == 1 &&
+	if ( pitr->pdg_id() == 22 && MC::isStable(pitr) &&
 	     pitr->momentum().perp() >= m_olapPt && 
 	     std::abs(pitr->momentum().pseudoRapidity()) <= m_yMax) {
 	  MCTruthPhotonList.push_back(pitr);
@@ -99,7 +99,7 @@ StatusCode VBFMjjIntervalFilter::filterEvent() {
       }
       if (m_electronjetoverlap==true) {
 	// electron
-	if (std::abs(pitr->pdg_id()) == 11 && pitr->status() == 1 &&
+	if (std::abs(pitr->pdg_id()) == 11 && MC::isStable(pitr) &&
 	    pitr->momentum().perp() >= m_olapPt &&
 	    std::abs(pitr->momentum().pseudoRapidity()) <= m_yMax) {
 	  MCTruthElectronList.push_back(pitr);

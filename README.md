@@ -13,7 +13,7 @@ The following major branches are currently active:
 
 Branch                                                            | Purpose                      | Main Project, Release Series
 ------------------------------------------------------------------| ---------------------------- | ---------------------------------------
-[master](https://gitlab.cern.ch/atlas/athena/tree/master)         | Upgrade, Analysis, Derivations | Athena 24.0.X, (Ath)AnalysisBase 24.2.X
+[main](https://gitlab.cern.ch/atlas/athena/tree/main)             | Upgrade, Analysis, Derivations | Athena 24.0.X, (Ath)AnalysisBase 24.2.X
 [23.0](https://gitlab.cern.ch/atlas/athena/tree/23.0)             | Run-3 Tier0, Point1, MCProd  | Athena 23.0.X, AthSimulation 23.0.X, AthGeneration 23.6.X
 [21.2](https://gitlab.cern.ch/atlas/athena/tree/21.2)             | Legacy run 2 derivations     | AthDerivation 21.2.X
 
@@ -25,5 +25,5 @@ Links
 - The [software documentation](https://atlassoftwaredocs.web.cern.ch) page is the main entry point for tutorials, etc.
 - The git repository is [here](https://gitlab.cern.ch/atlas/athena)
 - The [ATLAS Nightlies and CI page](https://bigpanda.cern.ch/globalview/) shows the build status of all nightlies
-- The [Doxygen code documentation](https://atlas-sw-doxygen.web.cern.ch/atlas-sw-doxygen/atlas_22.0.X-DOX/docs/html/index.html) is available for the master branch
+- The [Doxygen code documentation](https://atlas-sw-doxygen.web.cern.ch/atlas-sw-doxygen/atlas_main--Doxygen/docs/html/index.html) is available for the `main` branch
 - To cite Athena, you can use the following zenodo [DOI](https://zenodo.org/record/2641997)

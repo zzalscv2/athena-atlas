@@ -16,13 +16,13 @@
 
 #include <cstdlib>
 #include <atomic>
-
+#include "AthAllocators/ArenaBlockAlignDetail.h"
 
 namespace SG {
 
 
-class ArenaAllocatorBase;
 
+class ArenaAllocatorBase;
 
 /**
  * @brief A large memory block that gets carved into smaller uniform elements.
@@ -221,7 +221,6 @@ public:
    */
   static void unprotectList (ArenaBlock* p);
 
-
 private:
   /// Prohibit calling these.
   ArenaBlock (size_t n, size_t elt_size);
@@ -242,16 +241,9 @@ private:
   /// Size, in bytes, of each element in this block.
   size_t m_elt_size;
 
-  /// The start of the block body.
-  // Try to make sure it's maximally aligned.
-  // __attribute__ ((aligned)) will do that with gcc; on other compilers,
-  // try to get at least what a double requires.  That's probably enough.
-  double m_dummy
-#ifdef __GCC__
-    __attribute__ ((aligned))
-#endif
-    ;
-
+  // The start of the block body.
+  // Try to make sure it's aligned.
+  ArenaBlockAlignDetail::padForAlign m_dummy;
 
   /// Global count of the number of blocks in use.
   static std::atomic<size_t> s_nactive;
@@ -260,7 +252,7 @@ private:
 
 /// The offset from the start of the block to the first element.
 static const int ArenaBlockBodyOffset =
-  sizeof (ArenaBlock) - sizeof (double);
+  sizeof (ArenaBlock) - sizeof (ArenaBlockAlignDetail::padForAlign);
 
 
 } // namespace SG

@@ -75,24 +75,16 @@ def makeInDetTrigPrecisionTracking( inflags, config=None, verifier=False, rois='
         
     #  Track particle conversion algorithm
 
-    from .InDetTrigCommon import trackParticleCnv_builder
-    from InDetTrigRecExample.InDetTrigConfigRecLoadToolsPost import InDetTrigParticleCreatorTool, \
-        InDetTrigParticleCreatorToolTRTPid
-
-    creatorTool = InDetTrigParticleCreatorTool
-    if config.electronPID:
-      creatorTool = InDetTrigParticleCreatorToolTRTPid
-    
-    trackParticleCnvAlg = trackParticleCnv_builder( 
+    from xAODTrackingCnv.xAODTrackingCnvConfig import TrigTrackParticleCnvAlgCfg
+    trackParticleCnvAlg = algorithmCAToGlobalWrapper(
+        TrigTrackParticleCnvAlgCfg,
         flags,
-        name                 = prefix+'xAODParticleCreatorAlg'+flags.Tracking.ActiveConfig.input_name+'_IDTrig',
-        config               = config,
-        inTrackCollectionKey = finalTrackCollection,
-        outTrackParticlesKey = outTrackParticles,
-        trackParticleCreatorTool     =  creatorTool)
+        name = prefix+'xAODParticleCreatorAlg'+flags.Tracking.ActiveConfig.input_name+'_IDTrig', 
+        TrackContainerName = finalTrackCollection,
+        xAODTrackParticlesFromTracksContainerName = outTrackParticles,
+    )
     
-    log.debug(trackParticleCnvAlg)
-    ptAlgs.append(trackParticleCnvAlg)
+    ptAlgs.extend(trackParticleCnvAlg)
     
     # Potentialy other algs with more collections? 
     # Might Drop the list in the end and keep just one output key

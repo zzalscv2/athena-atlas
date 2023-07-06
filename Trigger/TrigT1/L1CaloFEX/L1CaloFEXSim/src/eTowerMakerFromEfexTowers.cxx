@@ -97,9 +97,11 @@ StatusCode eTowerMakerFromEfexTowers::initialize()
   SG::ReadHandle<xAOD::eFexTowerContainer> eFexTowers(m_eFexTowerContainerSGKey/*, ctx*/);
   if((!eFexTowers.isValid() || eFexTowers->size() < m_minTowersRequired) && !m_eFexTowerContainer2SGKey.empty()) {
       eFexTowers = SG::ReadHandle<xAOD::eFexTowerContainer>(m_eFexTowerContainer2SGKey);
-      const xAOD::EventInfo* ei = nullptr;
-      CHECK( evtStore()->retrieve(ei) );
-      ei->auxdecor<bool>("eTowerMakerFromEfexTowers_usedSecondary") = true;
+      // removing this to avoid breaking frozen tier0 policy
+      // bug keeping commented out until sure we've replaced with a good alternative
+      //const xAOD::EventInfo* ei = nullptr;
+      //CHECK( evtStore()->retrieve(ei) );
+      //ei->auxdecor<bool>("eTowerMakerFromEfexTowers_usedSecondary") = true;
   }
 
   // STEP 2 - Do the efexTower-tower mapping - put this information into the eTowerContainer

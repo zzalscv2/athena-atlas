@@ -166,7 +166,7 @@ These are only used if the aux store doesn’t contain an element of the correct
 
 ## Description of main files
 
-The main user-facing class is `ExpressionParserUser.h` which should be used to set up the expression parser in the initialise method of any C++ tool that needs to use it. An example of this in action can be found [here](https://gitlab.cern.ch/atlas/athena/-/blob/master/PhysicsAnalysis/DerivationFramework/DerivationFrameworkTools/src/GenericObjectThinning.cxx):
+The main user-facing class is `ExpressionParserUser.h` which should be used to set up the expression parser in the initialise method of any C++ tool that needs to use it. An example of this in action can be found [here](https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/DerivationFramework/DerivationFrameworkTools/src/GenericObjectThinning.cxx):
 
 `ATH_CHECK(initializeParser( m_selectionString) );`
 

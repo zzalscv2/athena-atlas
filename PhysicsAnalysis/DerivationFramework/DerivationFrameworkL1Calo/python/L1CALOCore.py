@@ -109,16 +109,16 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
         eFexEmulatedTool = eFexEmulatedTowersCfg(flags,'L1_eFexEmulatedTowers')
         acc.merge(eFexEmulatedTool)
 
-    # decorate the eFEX TOBs (offline copy)
-    if flags.Trigger.L1.doeFex and isNotPool:
-        from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import eFexTOBDecoratorCfg
-        DecoratorAlgo = eFexTOBDecoratorCfg(flags,'eFexTOBDecorator','L1_eEMRoI_OfflineCopy','L1_eTauRoI_OfflineCopy')
-        acc.merge(DecoratorAlgo)
-
     # Re-simulate from LATOME
     if isNotPool:
         from L1CaloFEXSim.L1CaloFEXSimCfg import L1CaloFEXSimCfg
         acc.merge(L1CaloFEXSimCfg(flags))
+
+    # decorate the eFEX TOBs (offline copy) - must be configured to run *after* resimulation
+    if flags.Trigger.L1.doeFex and isNotPool:
+        from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import eFexTOBDecoratorCfg
+        DecoratorAlgo = eFexTOBDecoratorCfg(flags,'eFexTOBDecorator','L1_eEMRoI_OfflineCopy','L1_eTauRoI_OfflineCopy')
+        acc.merge(DecoratorAlgo)
 
     # set up the slimming helper
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
