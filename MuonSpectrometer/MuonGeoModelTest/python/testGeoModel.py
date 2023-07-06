@@ -26,15 +26,6 @@ def SetupArgParser():
     parser.add_argument("--outTxtFile", default ="MdtGeoDump.txt", help="Output txt file to dump the geometry")
     return parser
 
-def setupServicesCfg(flags):
-    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    result = MainServicesCfg(flags)
-    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-    result.merge(MuonGeoModelCfg(flags))
-    from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
-    result.merge(MuonIdHelperSvcCfg(flags))
-    return result
-
 def setupHistSvc(flags, out_file="MdtGeoDump.root"):
     result = ComponentAccumulator()
     if len(out_file) == 0: return result
@@ -63,6 +54,12 @@ def GeoModelTgcTestCfg(flags, name = "GeoModelTgcTest", **kwargs):
     result.addEventAlgo(the_alg)
     return result
 
+def GeoModelCscTestCfg(flags, name = "GeoModelCscTest", **kwargs):
+    result = ComponentAccumulator()
+    if not flags.Detector.GeometryCSC: return result
+    the_alg = CompFactory.MuonGM.GeoModelCscTest(name, **kwargs)
+    result.addEventAlgo(the_alg)
+    return result
 
 if __name__=="__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -74,8 +71,10 @@ if __name__=="__main__":
     flags.Input.Files = args.inputFile 
     flags.GeoModel.AtlasVersion = args.geoTag
     flags.IOVDb.GlobalTag = args.condTag
+    flags.Scheduler.ShowDataDeps = True 
+    flags.Scheduler.ShowDataFlow = True
     flags.lock()
-    
+    from MuonCondTest.MdtCablingTester import setupServicesCfg
     cfg = setupServicesCfg(flags)
     cfg.merge(setupHistSvc(flags, out_file = args.outRootFile))
     from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg
@@ -85,6 +84,7 @@ if __name__=="__main__":
                                         dumpSurfaces = True ))
     cfg.merge(GeoModelRpcTestCfg(flags))
     cfg.merge(GeoModelTgcTestCfg(flags))
+    cfg.merge(GeoModelCscTestCfg(flags))
     
     cfg.printConfig(withDetails=True, summariseProps=True)
     flags.dump()
