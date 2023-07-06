@@ -506,6 +506,38 @@ HLT_2g10_loose_L1eEM9_mu23_L1MU18VFCH:
     1: 13
     2: 6
     3: 2
+HLT_2g10_loose_PhysicsTLA_L12DR15-M70-2eEM9L:
+  eventCount: 1
+  stepCounts:
+    0: 2
+    1: 2
+    2: 2
+    3: 1
+    4: 1
+    5: 1
+  stepFeatures:
+    0: 11
+    1: 4
+    2: 4
+    3: 2
+    4: 2
+    5: 2
+HLT_2g10_loose_PhysicsTLA_L1DPHI12-M70-2eEM9L:
+  eventCount: 2
+  stepCounts:
+    0: 11
+    1: 8
+    2: 7
+    3: 2
+    4: 2
+    5: 2
+  stepFeatures:
+    0: 56
+    1: 21
+    2: 19
+    3: 8
+    4: 5
+    5: 4
 HLT_2g10_loose_mu20_L1MU14FCH:
   eventCount: 0
   stepCounts:
@@ -528,6 +560,102 @@ HLT_2g10_loose_mu23_L1MU18VFCH:
     1: 13
     2: 6
     3: 2
+HLT_2g10_medium_PhysicsTLA_L12DR15-M70-2eEM9L:
+  eventCount: 1
+  stepCounts:
+    0: 2
+    1: 2
+    2: 2
+    3: 1
+    4: 1
+    5: 1
+  stepFeatures:
+    0: 11
+    1: 4
+    2: 4
+    3: 2
+    4: 2
+    5: 2
+HLT_2g10_medium_PhysicsTLA_L1DPHI12-M70-2eEM9L:
+  eventCount: 2
+  stepCounts:
+    0: 11
+    1: 8
+    2: 7
+    3: 2
+    4: 2
+    5: 2
+  stepFeatures:
+    0: 56
+    1: 21
+    2: 19
+    3: 8
+    4: 5
+    5: 4
+HLT_2g13_loose_PhysicsTLA_L12DR15-M70-2eEM12L:
+  eventCount: 1
+  stepCounts:
+    0: 2
+    1: 2
+    2: 2
+    3: 1
+    4: 1
+    5: 1
+  stepFeatures:
+    0: 4
+    1: 4
+    2: 4
+    3: 2
+    4: 2
+    5: 2
+HLT_2g13_loose_PhysicsTLA_L1DPHI12-M70-2eEM12L:
+  eventCount: 2
+  stepCounts:
+    0: 6
+    1: 4
+    2: 4
+    3: 2
+    4: 2
+    5: 2
+  stepFeatures:
+    0: 17
+    1: 11
+    2: 11
+    3: 6
+    4: 5
+    5: 4
+HLT_2g13_medium_PhysicsTLA_L12DR15-M70-2eEM12L:
+  eventCount: 1
+  stepCounts:
+    0: 2
+    1: 2
+    2: 2
+    3: 1
+    4: 1
+    5: 1
+  stepFeatures:
+    0: 4
+    1: 4
+    2: 4
+    3: 2
+    4: 2
+    5: 2
+HLT_2g13_medium_PhysicsTLA_L1DPHI12-M70-2eEM12L:
+  eventCount: 2
+  stepCounts:
+    0: 6
+    1: 4
+    2: 4
+    3: 2
+    4: 2
+    5: 2
+  stepFeatures:
+    0: 17
+    1: 11
+    2: 11
+    3: 6
+    4: 5
+    5: 4
 HLT_2g15_loose_25dphiAA_invmAA80_L12eEM9:
   eventCount: 1
   stepCounts:

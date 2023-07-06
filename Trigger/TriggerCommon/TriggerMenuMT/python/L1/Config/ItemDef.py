@@ -1887,6 +1887,11 @@ class ItemDef:
             #ATR-21637
             MenuItem('L1_DPHI-M70-2eEM9' ).setLogic( d.TOPO_0INVM70_27DPHI32_eEM9s1_eEM9s6 & physcond)
             MenuItem('L1_DPHI-M70-2eEM9L' ).setLogic( d.TOPO_0INVM70_27DPHI32_eEM9sl1_eEM9sl6 & physcond)
+            #ATR-27782 Boosted diPhoton
+            MenuItem('L1_DPHI12-M70-2eEM9L').setLogic(d.TOPO_0INVM70_0DPHI12_eEM9sl1_eEM9sl6 & physcond)
+            MenuItem('L1_DPHI12-M70-2eEM12L').setLogic(d.TOPO_0INVM70_0DPHI12_eEM12sl1_eEM12sl6 & physcond)
+            MenuItem('L1_2DR15-M70-2eEM9L').setLogic(d.TOPO_0INVM70_2DR15_eEM9sl1_eEM9sl6 & physcond)
+            MenuItem('L1_2DR15-M70-2eEM12L').setLogic(d.TOPO_0INVM70_2DR15_eEM12sl1_eEM12sl6 & physcond)
             #ATR-19376
             MenuItem('L1_10DR-MU14FCH-MU5VF'             ).setLogic( d.TOPO_10DR99_2MU5VFab & d.MU14FCH & physcond) 
             MenuItem('L1_10DR-MU14FCH-MU5VF_EMPTY'       ).setLogic( d.TOPO_10DR99_2MU5VFab & d.MU14FCH & cosmiccond) 
