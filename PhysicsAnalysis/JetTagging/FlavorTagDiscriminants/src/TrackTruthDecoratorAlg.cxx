@@ -15,6 +15,8 @@
 #include "xAODTruth/TruthVertex.h"
 #include "xAODTruth/TruthVertexContainer.h"
 
+#include "InDetTrackSystematicsTools/InDetTrackTruthOriginDefs.h"
+
 
 namespace FlavorTagDiscriminants {
 
@@ -69,12 +71,18 @@ namespace FlavorTagDiscriminants {
     // decorate loop
     std::vector<const xAOD::TrackParticle*> tracks_vector(tracks->begin(), tracks->end());
     for ( const auto& track : tracks_vector ) {
+      
+      // for the origin label we need to start from the track object (to label fake tracks)
+      int trackTruthOrigin = m_trackTruthOriginTool->getTrackOrigin(track);
+      dec_origin_label(*track) = InDet::ExclusiveOrigin::getExclusiveOrigin(trackTruthOrigin);
+
+      // everything else is already decorated to the associated truth particle
       const auto truth = m_trackTruthOriginTool->getTruth(track);
       dec_barcode(*track) = truth ? truth->barcode() : -2;
       dec_parent_barcode(*track) = truth ? m_acc_truthParentBarcode(*truth) : -2;
-      dec_origin_label(*track) = truth ? m_acc_truthOriginLabel(*truth) : -2;
       dec_type_label(*track) = truth ? m_acc_truthTypeLabel(*truth) : -2;
       dec_vertex_index(*track) = truth ? m_acc_truthVertexIndex(*truth) : -2;
+
     }
     return StatusCode::SUCCESS;
   }
