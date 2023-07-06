@@ -299,6 +299,7 @@ StatusCode EvtInclusiveDecay::execute() {
           return StatusCode::FAILURE;
         }
         decayParticle(hepMC,p);
+        HepMC::fillBarcodesAttribute(hepMC);
       }
 #else
       for (std::set<int>::iterator itb = toBeDecayed.begin(); itb!=toBeDecayed.end(); ++itb) {
@@ -308,6 +309,7 @@ StatusCode EvtInclusiveDecay::execute() {
           return StatusCode::FAILURE;
         }
         decayParticle(hepMC,p);
+        HepMC::fillBarcodesAttribute(hepMC);
       }
 #endif
 
