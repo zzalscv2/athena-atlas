@@ -283,7 +283,8 @@ def createTrackingConfigFlags():
     # Turn running of ITk FastTracking on and off
     icf.addFlag("Tracking.doITkFastTracking", False)
     # Turn running of ConversionFinding second pass on and off
-    icf.addFlag("Tracking.doITkConversionFinding",True)
+    icf.addFlag("Tracking.doITkConversionFinding",
+                lambda prevFlags: not prevFlags.Tracking.doITkFastTracking)
     # Allows TrigFastTrackFinder to be run as an offline algorithm by replacing
     # SiSPSeededTrackFinder
     icf.addFlag("Tracking.useITkFTF", False)
