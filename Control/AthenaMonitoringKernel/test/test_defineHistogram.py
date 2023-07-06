@@ -154,6 +154,12 @@ class Test( unittest.TestCase ):
       true = '{"alias": "var", "allvars": ["var"], "convention": "", "merge": "", "path": "EXPERT", "title": "var", "treeDef": "", "type": "TH1F", "weight": "", "cutMask": "", "xarray": [], "xbins": 100, "xlabels": [], "xmax": 1.0, "xmin": 0.0, "xvar": "var", "yarray": [], "ybins": 0.0, "ylabels": [], "ymax": 0.0, "ymin": 0.0, "yvar": "", "zbins": 0.0, "zlabels": [], "zmax": 0.0, "zmin": 0.0, "zvar": "", "Sumw2": false, "kLBNHistoryDepth": 0, "kAddBinsDynamically": false, "kRebinAxes": false, "kCanRebin": false, "kVec": false, "kVecUO": false, "kCumulative": false, "kLive": 1, "kAlwaysCreate": false}'
       self.assertEqual(json.loads(check), json.loads(true))
 
+   def test_LBN( self ):
+      flags = initConfigFlags()
+      flags.Common.isOnline = True
+      check = defineHistogram(flags, 'var', path='EXPERT', opt='kLBNHistoryDepth=1')
+      self.assertEqual(json.loads(check)['kAlwaysCreate'], True)
+
    def test_badAlias( self ):
       flags = initConfigFlags()
       check = defineHistogram(flags, 'var;alias;more')

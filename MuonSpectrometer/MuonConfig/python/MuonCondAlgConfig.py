@@ -306,8 +306,8 @@ def NswDcsDbAlgCfg(flags, **kwargs):
     acc = ComponentAccumulator()
     if flags.GeoModel.Run!=LHCPeriod.Run3: return acc
     if flags.Input.isMC: return acc
-    acc.merge(addFolders(flags, "/MMG/DCS/TSTHV", "DCS_OFL", className="CondAttrListCollection"))
-    acc.merge(addFolders(flags, "/STG/DCS/TSTHV", "DCS_OFL", className="CondAttrListCollection"))
+    acc.merge(addFolders(flags, "/MMG/DCS/HV", "DCS_OFL", className="CondAttrListCollection"))
+    acc.merge(addFolders(flags, "/STG/DCS/HV", "DCS_OFL", className="CondAttrListCollection"))
     alg = CompFactory.NswDcsDbAlg("NswDcsDbAlg", **kwargs)
     acc.addCondAlgo(alg)
     return acc

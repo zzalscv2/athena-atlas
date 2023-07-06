@@ -104,7 +104,7 @@ void JetSamplingCnv_p1::persToTrans( const JetSampling_p1* pers,
   // JetECS: Transient has more/finer granularity that can not be rebuilt from old variables
   // in persistent JetSampling_p1
   // Those variables will be set to -1.*INT_MAX, largest negative integer value
-  for ( std::size_t i = 0; i != JetSampling_p1::ECS_t::size(); ++i ) {
+  for ( std::size_t i = 0; i != std::tuple_size_v<JetSampling_p1::ECS_t>; ++i ) {
     TPCNV_PERSTOTRANS( pers, trans, m_ePreSamBCell[i] );
     TPCNV_PERSTOTRANS( pers, trans, m_ePreSamECell[i] );
     TPCNV_PERSTOTRANS( pers, trans, m_eEMB1Cell[i] );
@@ -155,7 +155,7 @@ void JetSamplingCnv_p1::persToTrans( const JetSampling_p1* pers,
 
 
   // Energy in cone radii
-  for ( std::size_t i = 0; i != JetSampling_p1::ERad_t::size(); ++i ) {
+  for ( std::size_t i = 0; i != std::tuple_size_v<JetSampling_p1::ERad_t>; ++i ) {
 
     // Name of energy in cone radii in transient is different from persistent
     trans->m_erad_cells[i] = pers->m_erad[i];
@@ -221,7 +221,7 @@ void JetSamplingCnv_p1::transToPers( const JetSampling* trans,
   pers->m_edEMB0Cell[1] = trans->eEMBCell(1);
   pers->m_edEME0Cell[0] = trans->eEMECell(0); //EME
   pers->m_edEME0Cell[1] = trans->eEMECell(1);
-  for ( std::size_t i = 0; i != JetSampling_p1::ECS_t::size(); ++i ) {
+  for ( std::size_t i = 0; i != std::tuple_size_v<JetSampling_p1::ECS_t>; ++i ) {
     pers->m_edEMB1Cell[i]  =  trans->eEMBCell(0, i); // EMB
     pers->m_edEMB2Cell[i]  =  trans->eEMBCell(1, i);
     pers->m_edEME1Cell[i]  =  trans->eEMECell(0, i); // EME
@@ -240,7 +240,7 @@ void JetSamplingCnv_p1::transToPers( const JetSampling* trans,
   TPCNV_TRANSTOPERS( trans, pers, m_eNull  );
 
   // JetECS: some in persistent are different than in transient 
-  for ( std::size_t i = 0; i != JetSampling_p1::ECS_t::size(); ++i ) {
+  for ( std::size_t i = 0; i != std::tuple_size_v<JetSampling_p1::ECS_t>; ++i ) {
     TPCNV_TRANSTOPERS( trans, pers, m_ePreSamBCell[i] );
     TPCNV_TRANSTOPERS( trans, pers, m_ePreSamECell[i] );
     TPCNV_TRANSTOPERS( trans, pers, m_eEMB1Cell[i] );
@@ -276,7 +276,7 @@ void JetSamplingCnv_p1::transToPers( const JetSampling* trans,
   }
 
   // Energy in cone radii
-  for ( std::size_t i = 0; i != JetSampling_p1::ERad_t::size(); ++i ) {
+  for ( std::size_t i = 0; i != std::tuple_size_v<JetSampling_p1::ERad_t>; ++i ) {
     // Name of energy in cone radii in transient is different from persistent    
     pers->m_erad[i] = trans->m_erad_cells[i];
 

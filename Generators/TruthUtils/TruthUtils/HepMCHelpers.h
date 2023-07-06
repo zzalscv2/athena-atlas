@@ -52,31 +52,28 @@ namespace MC
 
 /* The functions below should be unified */
   template <class T> inline bool FastCaloSimIsGenSimulStable(const T&  p) {
-    const int status=p->status();
+    const int status = p->status();
     const auto vertex = p->end_vertex();
-    return (status == 1) ||
-          (status==2 && !vertex) ||
-          (status==2 && HepMC::is_simulation_vertex(vertex))
-          ;
+    return ((status == 1) ||
+            (status == 2 && (!vertex || HepMC::is_simulation_vertex(vertex))));
   }
 
   template <class T> inline bool jettruthparticleselectortool_isStable( const T& p) {
     if (HepMC::is_simulation_particle(p)) return false; // This particle is from G4
     if (p->pdg_id() == 21 && p->p4().E() == 0) return false; //< Workaround for a gen bug?
-    const int status=p->status();
+    const int status = p->status();
     const auto vertex = p->end_vertex();
     return ((status == 1) || //< Fully stable, even if marked that way by G4
             (status == 2 && vertex && HepMC::is_simulation_vertex(vertex))); //< Gen-stable with G4 decay
   }
-  
 
-  template <class T> inline bool jettruthparticleselectortool_isInteracting( const T& p) {
+  template <class T> inline bool jettruthparticleselectortool_isInteracting(const T& p) {
       if (! jettruthparticleselectortool_isStable(p)) return false;
       const int apid = std::abs(p->pdg_id() );
-      if (apid == 12 || apid == 14 || apid == 16) return false;
-      if (p->status() == 1 &&
-          (apid == 1000022 || apid == 1000024 || apid == 5100022 ||
-           apid == 39 || apid == 1000039 || apid == 5000039)) return false;
+      const int status = p->status();
+      if (apid == 12 || apid == 14 || apid == 16) return false; //< neutrinos
+      if (status == 1 && (apid == 1000022 || apid == 1000024 || apid == 5100022)) return false;
+      if (status == 1 && (apid == 39 || apid == 1000039 || apid == 5000039)) return false;
       return true;      
     }
 
@@ -90,89 +87,60 @@ namespace MC
   }
 
   template <class T> inline bool egammaTruthAlg_isGenStable (const T& p) {
-    const int apid = std::abs(p->pdg_id());
-    const auto vertex = p->end_vertex();
+    if (HepMC::is_simulation_particle(p)) return false;
+    if (p->pdg_id() == 21 && p->e() == 0) return false;
     const int status = p->status();
-  // we want to keep primary particle with status==2 but without vertex in HepMC
-    return (
-          ( ( status == 1) ||  
-            (status==2 && (!vertex || HepMC::is_simulation_vertex(vertex))) 
-            ) && (!HepMC::is_simulation_particle(p)) 
-          && !(apid == 21 && p->e()==0)
-          );    
+    const auto vertex = p->end_vertex();
+    return ((status == 1) ||
+            (status == 2 && (!vertex || HepMC::is_simulation_vertex(vertex))));    
   }
-
 
   template <class T> inline bool egammaTruthAlg_isGenInteracting (const T& p){
+    if (HepMC::is_simulation_particle(p)) return false;
     const int status = p->status();
     const int apid = std::abs(p->pdg_id());
     const auto vertex = p->end_vertex();
-  // we want to keep primary particle with status==2 but without vertex in HepMC
-    return
-    (
-     (((status == 1) ||
-       (status==2 && (!vertex || HepMC::is_simulation_vertex(vertex)))) && (!HepMC::is_simulation_particle(p)) ) &&
-     !(apid==12 || apid==14 || apid==16 ||
-       (apid==1000022 &&  status==1 ) ||
-       (apid==5100022 &&  status==1 ) ||
-       (apid==1000024 &&  status==1 ) ||
-       (apid==39 &&  status==1 ) ||
-       (apid==1000039 &&  status==1 ) ||
-       (apid==5000039 &&  status==1 ))
-     );
+    if (apid == 12 || apid == 14 || apid == 16) return false; //< neutrinos
+    if (status == 1 && (apid == 1000022 || apid == 1000024 || apid == 5100022)) return false;
+    if (status == 1 && (apid == 39 || apid == 1000039 || apid == 5000039)) return false;
+    return ((status == 1) ||
+            (status == 2 && (!vertex || HepMC::is_simulation_vertex(vertex))));
   }
+
   template <class T> inline bool ThinGeantTruthAlg_isStatus1BSMParticle(const T& p)  {
-
-  int pdg = p->pdg_id();
-  bool status1 = (p->status() == 1);
-  bool isBSM(false);
-
-  if ((31 < std::abs(pdg) && std::abs(pdg) < 38) || // BSM Higgs / W' / Z' / etc
-      std::abs(pdg) == 39 || std::abs(pdg) == 41 || std::abs(pdg) == 42 ||
-      std::abs(pdg) == 7 ||                      // 4th gen beauty
-      std::abs(pdg) == 8 ||                      // 4th gen top
-      (600 < abs(pdg) && std::abs(pdg) < 607) || // scalar leptoquarks
-      (1000000 < std::abs(pdg) &&
-       std::abs(pdg) < 2000000) || // left-handed SUSY (including R-Hadrons)
-      (2000000 < std::abs(pdg) &&
-       std::abs(pdg) < 3000000) || // right-handed SUSY (including R-Hadrons)
-      std::abs(pdg) == 6000005 ||  // X5/3
-      std::abs(pdg) == 6000006 ||  // T2/3
-      std::abs(pdg) == 6000007 ||  // B-1/3
-      std::abs(pdg) == 6000008 ||  // Y-4/3
-      ((std::abs(pdg) >= 10000100) && (std::abs(pdg) <= 10001000)) // multi-charged
-  )
-    isBSM = true;
-
-  return status1 && isBSM;
-}
-
+    const int apid = std::abs(p->pdg_id());
+    bool status1 = (p->status() == 1);
+    return ((31 < apid && apid < 38) || // BSM Higgs / W' / Z' / etc
+      apid == 39 || apid == 41 || apid == 42 ||
+      apid == 7 || // 4th gen beauty
+      apid == 8 || // 4th gen top
+      (600 < apid && apid < 607) || // scalar leptoquarks
+      (1000000 < apid && apid < 2000000) || // left-handed SUSY (including R-Hadrons)
+      (2000000 < apid && apid < 3000000) || // right-handed SUSY (including R-Hadrons)
+      apid == 6000005 ||  // X5/3
+      apid == 6000006 ||  // T2/3
+      apid == 6000007 ||  // B-1/3
+      apid == 6000008 ||  // Y-4/3
+      ((apid >= 10000100) && (apid <= 10001000)) // multi-charged
+      ) && status1;
+  }
 
   template <class T> inline bool MenuTruthThinning_isBSM(const T& p) {
-    
-    int pdg = p->pdg_id();
-    
-    if ( (31<std::abs(pdg) && std::abs(pdg)<38) || // BSM Higgs / W' / Z' / etc
-        std::abs(pdg)==39 ||
-        std::abs(pdg)==41 ||
-        std::abs(pdg)==42 ||
-        std::abs(pdg)== 7 || // 4th gen beauty
-        std::abs(pdg)== 8 || // 4th gen top
-        (600 < std::abs(pdg) && std::abs(pdg) < 607) || // scalar leptoquarks
-        (1000000<std::abs(pdg) && std::abs(pdg)<1000040) || // left-handed SUSY
-        (2000000<std::abs(pdg) && std::abs(pdg)<2000040) || // right-handed SUSY
-        std::abs(pdg)==6000005 || // X5/3
-        std::abs(pdg)==6000006 || // T2/3
-        std::abs(pdg)==6000007 || // B-1/3
-        std::abs(pdg)==6000008 || // Y-4/3
-        ( (std::abs(pdg)>=10000100) && (std::abs(pdg)<=10001000) ) // multi-charged
-        )
-        return true;
-    
-    return false;
-}
-
-
+    const int apid = std::abs(p->pdg_id());
+    return ((31 < apid && apid < 38) || // BSM Higgs / W' / Z' / etc
+      apid == 39 || apid == 41 || apid == 42 ||
+      apid == 7 || // 4th gen beauty
+      apid == 8 || // 4th gen top
+      (600 < apid && apid < 607) || // scalar leptoquarks
+      (1000000 < apid && apid < 1000040) || // left-handed SUSY
+      (2000000 < apid && apid < 2000040) || // right-handed SUSY
+      apid == 6000005 || // X5/3
+      apid == 6000006 || // T2/3
+      apid == 6000007 || // B-1/3
+      apid == 6000008 || // Y-4/3
+      ((apid >= 10000100) && (apid <= 10001000) ) // multi-charged
+      );
+  }
 
 }
 #endif

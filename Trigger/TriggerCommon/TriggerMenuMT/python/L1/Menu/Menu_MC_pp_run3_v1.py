@@ -21,6 +21,14 @@ def defineMenu():
         # ATR-24037 
         'L1_jXEPerf100',
 
+        # ATR-27782 - test eEM L1 M/PHI Topo
+        'L1_DPHI12-M70-2eEM9L',
+        'L1_DPHI12-M70-2eEM12L',
+
+        # ATR-27782 - test eEM M/DR Topo
+        'L1_2DR15-M70-2eEM9L',
+        'L1_2DR15-M70-2eEM12L',
+        
         # jLJ, Production thresholds, not used in commissioning
         'L1_jLJ60', 'L1_jLJ100', 'L1_jLJ160', 'L1_jLJ200',
 

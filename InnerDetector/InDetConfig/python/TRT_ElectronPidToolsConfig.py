@@ -62,11 +62,11 @@ def __TRT_dEdxToolBaseCfg(flags, name, **kwargs):
     kwargs.setdefault("TRT_dEdx_isData", not flags.Input.isMC)
     
     if "TRT_LocalOccupancyTool" not in kwargs:
-        kwargs.setdefault("TRT_LocalOccupancyTool", acc.popToolsAndMerge(TrigTRT_LocalOccupancyCfg(flags)))
+        kwargs.setdefault("TRT_LocalOccupancyTool", acc.popToolsAndMerge(TRT_LocalOccupancyCfg(flags)))
 
     if "AssociationTool" not in kwargs:
-        from InDetConfig.InDetAssociationToolsConfig import TrigPrdAssociationToolCfg
-        kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(TrigPrdAssociationToolCfg(flags)))
+        from InDetConfig.InDetAssociationToolsConfig import InDetPrdAssociationToolCfg
+        kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(InDetPrdAssociationToolCfg(flags)))
 
     acc.setPrivateTools(CompFactory.TRT_ToT_dEdx(name,**kwargs))
     return acc
@@ -81,8 +81,19 @@ def TRT_dEdxToolCfg(flags, name="TRT_dEdxTool", **kwargs):
     return acc
 
 def TrigTRT_dEdxToolCfg(flags, name="TrigTRT_dEdxTool", **kwargs):
-    """trigger version should not add LumiBlockMuWriterCfg to views as it is scheduled globally""" 
-    return __TRT_dEdxToolBaseCfg(flags, name, **kwargs)
+    """trigger version should not add LumiBlockMuWriterCfg to views as it is scheduled globally"""
+    
+    acc = ComponentAccumulator()
+    
+    if "TRT_LocalOccupancyTool" not in kwargs:
+        kwargs.setdefault("TRT_LocalOccupancyTool", acc.popToolsAndMerge(TrigTRT_LocalOccupancyCfg(flags)))
+
+    if "AssociationTool" not in kwargs:
+        from InDetConfig.InDetAssociationToolsConfig import TrigPrdAssociationToolCfg
+        kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(TrigPrdAssociationToolCfg(flags)))
+
+    acc.setPrivateTools(acc.popToolsAndMerge(__TRT_dEdxToolBaseCfg(flags, name, **kwargs)))
+    return acc
 
 def TRT_ElectronPidToolCfg(flags, name="TRT_ElectronPidTool", **kwargs):
     from TRT_ConditionsAlgs.TRT_ConditionsAlgsConfig import TRTHTCondAlgCfg, TRTPIDNNCondAlgCfg

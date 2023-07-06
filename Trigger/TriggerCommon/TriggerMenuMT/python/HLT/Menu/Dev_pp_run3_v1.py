@@ -168,6 +168,17 @@ def getDevSignatures():
         ChainProp(name='HLT_e9_lhtight_e4_etcut_probe_1invmAB5_L1JPSI-1M5-EM7', l1SeedThresholds=['EM7','PROBEEM3'], groups=DevGroup+MultiElectronGroup+LegacyTopoGroup),
         ChainProp(name='HLT_e14_lhtight_e4_etcut_probe_1invmAB5_L1JPSI-1M5-EM12', l1SeedThresholds=['EM12','PROBEEM3'], groups=DevGroup+MultiElectronGroup+LegacyTopoGroup),
 
+        # low-mass boosted diphoton TLA
+        # M, DPHI
+        ChainProp(name='HLT_2g10_loose_PhysicsTLA_L1DPHI12-M70-2eEM9L',l1SeedThresholds=['eEM9'],stream=['TLA'], groups=SupportPhIGroup+Topo2Group+DevGroup),
+        ChainProp(name='HLT_2g10_medium_PhysicsTLA_L1DPHI12-M70-2eEM9L',l1SeedThresholds=['eEM9'],stream=['TLA'], groups=SupportPhIGroup+Topo2Group+DevGroup),
+        ChainProp(name='HLT_2g13_loose_PhysicsTLA_L1DPHI12-M70-2eEM12L',l1SeedThresholds=['eEM12L'],stream=['TLA'], groups=SupportPhIGroup+Topo2Group+DevGroup),
+        ChainProp(name='HLT_2g13_medium_PhysicsTLA_L1DPHI12-M70-2eEM12L',l1SeedThresholds=['eEM12L'],stream=['TLA'], groups=SupportPhIGroup+Topo2Group+DevGroup),
+        # M, DR
+        ChainProp(name='HLT_2g10_loose_PhysicsTLA_L12DR15-M70-2eEM9L',l1SeedThresholds=['eEM9'],stream=['TLA'], groups=SupportPhIGroup+Topo2Group+DevGroup),
+        ChainProp(name='HLT_2g10_medium_PhysicsTLA_L12DR15-M70-2eEM9L',l1SeedThresholds=['eEM9'],stream=['TLA'], groups=SupportPhIGroup+Topo2Group+DevGroup),
+        ChainProp(name='HLT_2g13_loose_PhysicsTLA_L12DR15-M70-2eEM12L',l1SeedThresholds=['eEM12L'],stream=['TLA'], groups=SupportPhIGroup+Topo2Group+DevGroup),
+        ChainProp(name='HLT_2g13_medium_PhysicsTLA_L12DR15-M70-2eEM12L',l1SeedThresholds=['eEM12L'],stream=['TLA'], groups=SupportPhIGroup+Topo2Group+DevGroup),
     ]
 
     chains['MET'] = [

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 #/** @file post.sh
 # @brief sh script that checks the return code of an executable and compares
@@ -339,7 +339,7 @@ else
        else
            echo "$RED post.sh> ERROR: reference output ${reflog} not available $RESET"
            echo " post.sh> Either create a reference file or use a different POST_EXEC_SCRIPT."
-           echo " post.sh> see: https://gitlab.cern.ch/atlas/athena/-/tree/master/AtlasTest/TestTools"
+           echo " post.sh> see: https://gitlab.cern.ch/atlas/athena/-/tree/main/AtlasTest/TestTools"
            exit 1
        fi
    else
