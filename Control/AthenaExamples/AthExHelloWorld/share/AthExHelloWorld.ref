@@ -2,7 +2,6 @@ Py:Athena            INFO executing ROOT6Setup
 ApplicationMgr       INFO Application Manager Configured successfully
 AthDictLoaderSvc     INFO in initialize...
 AthDictLoaderSvc     INFO acquired Dso-registry
-CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 8(Floating point exception) 
 AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
 HelloWorld           INFO initialize()
 HelloWorld           INFO   MyInt =    42
@@ -30,13 +29,10 @@ HelloWorld           INFO   MyMatrix[2] = [ 7 8 9 ]
 HelloWorld           INFO   MyPrivateHelloTool = HelloTool
 HelloWorld           INFO   MyPublicHelloTool = HelloTool
 HelloWorld           INFO MyPrivateHelloTool: Retrieved tool HelloTool
-HelloWorld           INFO MyPublicHelloTool: Retrieved tool HelloTool
 ApplicationMgr       INFO Application Manager Initialized successfully
-HelloWorld           INFO start()
 ApplicationMgr       INFO Application Manager Started successfully
 AthenaEventLoopMgr   INFO   ===>>>  start of run 1    <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
-HelloWorld           INFO execute()
 HelloWorld           INFO An INFO message
 HelloWorld        WARNING A WARNING message
 HelloWorld          ERROR An ERROR message
@@ -47,7 +43,6 @@ HelloWorld           INFO Let the tool MyPrivateHelloTool say something:
 HelloWorld.Hell...   INFO my message to the world: A Private Message!
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #1 1 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #1 1 events processed so far  <<<===
-HelloWorld           INFO execute()
 HelloWorld           INFO An INFO message
 HelloWorld        WARNING A WARNING message
 HelloWorld          ERROR An ERROR message
@@ -58,7 +53,6 @@ HelloWorld           INFO Let the tool MyPrivateHelloTool say something:
 HelloWorld.Hell...   INFO my message to the world: A Private Message!
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #1 2 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #3, run #1 2 events processed so far  <<<===
-HelloWorld           INFO execute()
 HelloWorld           INFO An INFO message
 HelloWorld        WARNING A WARNING message
 HelloWorld          ERROR An ERROR message
@@ -69,7 +63,6 @@ HelloWorld           INFO Let the tool MyPrivateHelloTool say something:
 HelloWorld.Hell...   INFO my message to the world: A Private Message!
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #3, run #1 3 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #4, run #1 3 events processed so far  <<<===
-HelloWorld           INFO execute()
 HelloWorld           INFO An INFO message
 HelloWorld        WARNING A WARNING message
 HelloWorld          ERROR An ERROR message
@@ -80,7 +73,6 @@ HelloWorld           INFO Let the tool MyPrivateHelloTool say something:
 HelloWorld.Hell...   INFO my message to the world: A Private Message!
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #4, run #1 4 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #5, run #1 4 events processed so far  <<<===
-HelloWorld           INFO execute()
 HelloWorld           INFO An INFO message
 HelloWorld        WARNING A WARNING message
 HelloWorld          ERROR An ERROR message
@@ -91,7 +83,6 @@ HelloWorld           INFO Let the tool MyPrivateHelloTool say something:
 HelloWorld.Hell...   INFO my message to the world: A Private Message!
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #5, run #1 5 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #6, run #1 5 events processed so far  <<<===
-HelloWorld           INFO execute()
 HelloWorld           INFO An INFO message
 HelloWorld        WARNING A WARNING message
 HelloWorld          ERROR An ERROR message
@@ -102,7 +93,6 @@ HelloWorld           INFO Let the tool MyPrivateHelloTool say something:
 HelloWorld.Hell...   INFO my message to the world: A Private Message!
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #6, run #1 6 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #7, run #1 6 events processed so far  <<<===
-HelloWorld           INFO execute()
 HelloWorld           INFO An INFO message
 HelloWorld        WARNING A WARNING message
 HelloWorld          ERROR An ERROR message
@@ -113,7 +103,6 @@ HelloWorld           INFO Let the tool MyPrivateHelloTool say something:
 HelloWorld.Hell...   INFO my message to the world: A Private Message!
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #7, run #1 7 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #8, run #1 7 events processed so far  <<<===
-HelloWorld           INFO execute()
 HelloWorld           INFO An INFO message
 HelloWorld        WARNING A WARNING message
 HelloWorld          ERROR An ERROR message
@@ -124,7 +113,6 @@ HelloWorld           INFO Let the tool MyPrivateHelloTool say something:
 HelloWorld.Hell...   INFO my message to the world: A Private Message!
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #8, run #1 8 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #9, run #1 8 events processed so far  <<<===
-HelloWorld           INFO execute()
 HelloWorld           INFO An INFO message
 HelloWorld        WARNING A WARNING message
 HelloWorld          ERROR An ERROR message
@@ -135,7 +123,6 @@ HelloWorld           INFO Let the tool MyPrivateHelloTool say something:
 HelloWorld.Hell...   INFO my message to the world: A Private Message!
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #9, run #1 9 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #10, run #1 9 events processed so far  <<<===
-HelloWorld           INFO execute()
 HelloWorld           INFO An INFO message
 HelloWorld        WARNING A WARNING message
 HelloWorld          ERROR An ERROR message
@@ -145,7 +132,6 @@ ToolSvc.PublicH...   INFO my message to the world: A Public Message!
 HelloWorld           INFO Let the tool MyPrivateHelloTool say something:
 HelloWorld.Hell...   INFO my message to the world: A Private Message!
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #10, run #1 10 events processed so far  <<<===
-HelloWorld           INFO stop()
 ApplicationMgr       INFO Application Manager Stopped successfully
 AthDictLoaderSvc     INFO in finalize...
 ToolSvc              INFO Removing all tools created by ToolSvc
