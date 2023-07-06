@@ -12491,6 +12491,20 @@ HLT_j150_2j55_0eta290_020jvt_bgn170_pf_ftf_preselj80XX2j45b90_L1jJ140_3jJ60:
     1: 4
     2: 11
     3: 3
+HLT_j15_L1RD0_FILLED:
+  eventCount: 20
+  stepCounts:
+    0: 20
+  stepFeatures:
+    0: 158
+HLT_j15_pf_ftf_L1RD0_FILLED:
+  eventCount: 20
+  stepCounts:
+    0: 20
+    1: 20
+  stepFeatures:
+    0: 20
+    1: 145
 HLT_j15f_L1RD0_FILLED:
   eventCount: 2
   stepCounts:
