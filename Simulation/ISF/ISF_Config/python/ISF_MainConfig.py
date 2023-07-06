@@ -410,15 +410,25 @@ def Kernel_ATLFAST3F_G4MSCfg(flags, name="ISF_Kernel_ATLFAST3F_G4MS", **kwargs):
     acc.merge(Kernel_GenericSimulatorCfg(flags, name, **kwargs)) # Force the SimKernel to be before the CollectionMerger by adding it here
     acc.addPublicTool(acc.popToolsAndMerge(DefaultParticleKillerSelectorCfg(flags)))
     acc.addPublicTool(acc.popToolsAndMerge(DefaultFatrasSelectorCfg(flags)))
-    acc.addPublicTool(acc.popToolsAndMerge(MuonFatrasSelectorCfg(flags)))
     acc.addPublicTool(acc.popToolsAndMerge(EtaGreater5ParticleKillerSimSelectorCfg(flags)))
     acc.addPublicTool(acc.popToolsAndMerge(DefaultFastCaloSimV2SelectorCfg(flags)))
     acc.addPublicTool(acc.popToolsAndMerge(DefaultAFIIGeant4SelectorCfg(flags)))
+    acc.addPublicTool(acc.popToolsAndMerge(MuonAFIIGeant4SelectorCfg(flags)))
+    acc.addPublicTool(acc.popToolsAndMerge(PionATLFAST3Geant4SelectorCfg(flags)))
+    acc.addPublicTool(acc.popToolsAndMerge(ProtonATLFAST3Geant4SelectorCfg(flags)))
+    acc.addPublicTool(acc.popToolsAndMerge(NeutronATLFAST3Geant4SelectorCfg(flags)))
+    acc.addPublicTool(acc.popToolsAndMerge(ChargedKaonATLFAST3Geant4SelectorCfg(flags)))
+    acc.addPublicTool(acc.popToolsAndMerge(KLongATLFAST3Geant4SelectorCfg(flags)))
 
     kwargs.setdefault("BeamPipeSimulationSelectors", [ acc.getPublicTool("ISF_DefaultParticleKillerSelector") ])
     kwargs.setdefault("IDSimulationSelectors"      , [ acc.getPublicTool("ISF_DefaultFatrasSelector") ])
-    kwargs.setdefault("CaloSimulationSelectors"    , [ acc.getPublicTool("ISF_MuonFatrasSelector"),
+    kwargs.setdefault("CaloSimulationSelectors"    , [ acc.getPublicTool("ISF_MuonAFIIGeant4Selector"),
                                                        acc.getPublicTool("ISF_EtaGreater5ParticleKillerSimSelector"),
+                                                       acc.getPublicTool("ISF_PionATLFAST3Geant4Selector"),
+                                                       acc.getPublicTool("ISF_ProtonATLFAST3Geant4Selector"),
+                                                       acc.getPublicTool("ISF_NeutronATLFAST3Geant4Selector"),
+                                                       acc.getPublicTool("ISF_ChargedKaonATLFAST3Geant4Selector"),
+                                                       acc.getPublicTool("ISF_KLongATLFAST3Geant4Selector"),
                                                        acc.getPublicTool("ISF_DefaultFastCaloSimV2Selector") ])
     kwargs.setdefault("MSSimulationSelectors"      , [ acc.getPublicTool("ISF_DefaultAFIIGeant4Selector") ])
     kwargs.setdefault("CavernSimulationSelectors"  , [ acc.getPublicTool("ISF_DefaultParticleKillerSelector") ])
