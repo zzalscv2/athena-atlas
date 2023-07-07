@@ -177,8 +177,11 @@ template <class T>
 StatusCode ReadDecorHandleKey<T>::initialize (bool used /*= true*/)
 {
   // If a parent container is used, its key may have changed
-  if (m_contKey)
+  if (m_contKey){
     m_contHandleKey = m_contKey->key();
+    std::string decorKey=decorKeyFromKey(this->key());
+    VarHandleKey::operator=(makeContDecorKey (m_contKey->key(), decorKey));
+  }
 
   if (m_contHandleKey.initialize (used).isFailure())
     return StatusCode::FAILURE;

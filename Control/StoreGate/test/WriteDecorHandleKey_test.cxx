@@ -107,6 +107,7 @@ void test1()
   auto check = [](TestOwner& owner, SG::WriteDecorHandleKey<MyObj>& k) {
     assert (k.clid() == 293847295);
     assert (k.key() == "ccc.dec");
+    //assert (k.objKey() == "ccc.dec");
     assert (k.mode() == Gaudi::DataHandle::Writer);
     assert (k.contHandleKey().clid() == 293847295);
     assert (k.contHandleKey().key() == "ccc");
@@ -126,6 +127,15 @@ void test1()
     TestOwner owner;
     SG::WriteHandleKey<MyObj> w ("ccc");
     SG::WriteDecorHandleKey<MyObj> k (&owner, "CCCKey", w, "dec", "doc string");
+    check(owner, k);
+  }
+
+  {
+    TestOwner owner;
+    SG::WriteHandleKey<MyObj> w ("xxx");
+    SG::WriteDecorHandleKey<MyObj> k (&owner, "CCCKey", w, "dec", "doc string");
+    w="ccc";
+    k.initialize().ignore();
     check(owner, k);
   }
 
