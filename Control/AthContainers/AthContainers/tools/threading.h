@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -130,7 +130,18 @@ private:
 
 #include "boost/thread/shared_mutex.hpp"
 #include "boost/thread/tss.hpp"
+
+// See ATLINFR-4996 for an explanation of this clunky
+// warning suppression.
+#if __cplusplus > 201703L
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-volatile"
+#endif  // >C++17
 #include "tbb/concurrent_vector.h"
+#if __cplusplus > 201703L
+#pragma clang diagnostic pop
+#endif  // >C++17
+
 #include <atomic>
 #include <mutex>
 #include <thread>
