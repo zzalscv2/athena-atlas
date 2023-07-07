@@ -5,6 +5,7 @@
 #include <GaudiKernel/MsgStream.h>
 #include <MuonTesterTree/EventInfoBranch.h>
 #include <StoreGate/ReadHandle.h>
+#include <stdexcept>
 namespace {
      static const SG::AuxElement::ConstAccessor<unsigned int> acc_Random("RandomRunNumber");
      static const SG::AuxElement::ConstAccessor<unsigned int> acc_LumiBlock("RandomLumiBlockNumber");
@@ -22,7 +23,9 @@ EventInfoBranch::EventInfoBranch(MuonTesterTree& tree, unsigned int write_mask):
             for (unsigned int lhe = 1; lhe < s_num_lhe ; ++lhe ) {
                 std::shared_ptr<ScalarBranch<double>>& new_br = m_lhe_weights[lhe];                
                 new_br = std::make_shared<ScalarBranch<double>>(tree.tree(),  "mcEventWeight_LHE_" + std::to_string(lhe),0.);
-                tree.addBranch(new_br);
+                if (not tree.addBranch(new_br)) {
+                  throw std::runtime_error("EventInfoBranch: Failed to create Scalar branch in c'tor");
+                };
             }            
         }
     } else {
