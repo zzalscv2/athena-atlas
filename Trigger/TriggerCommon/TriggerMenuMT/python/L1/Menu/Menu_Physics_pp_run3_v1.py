@@ -22,7 +22,7 @@ def defineMenu():
         'L1_eEM5', 'L1_eEM7', 'L1_eEM9', 'L1_eEM10L',
         'L1_eEM12L', 'L1_eEM15', 'L1_eEM18',  'L1_eEM18L',  'L1_eEM18M', 
         'L1_eEM22M', 'L1_eEM24L', 'L1_eEM24VM',
-        'L1_eEM9_EMPTY', 'L1_eEM9_UNPAIRED_ISO',
+        'L1_eEM9_EMPTY', 'L1_2eEM9_EMPTY', 'L1_eEM9_UNPAIRED_ISO',
         'L1_eEM26', 'L1_eEM26L', 'L1_eEM26M', 'L1_eEM26T', 'L1_eEM28M',
 
         ## 
