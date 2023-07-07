@@ -15,6 +15,7 @@
 #include <AsgTools/ToolHandle.h>
 
 #include "InDetTrackSystematicsTools/InclusiveTrackFilterTool.h"
+#include "InDetTrackSystematicsTools/InDetTrackTruthFilterTool.h"
 #include "xAODTracking/TrackParticleContainer.h"
 
 namespace InDet {
@@ -30,7 +31,9 @@ namespace InDet {
   
     private:
 
-      ToolHandle<InDet::InclusiveTrackFilterTool> m_trackFilterTool{this, "TrackFilterTool", "", "Track filter tool"};
+      ToolHandle<InDet::InclusiveTrackFilterTool> m_trackFilterToolLRT{this, "TrackFilterToolLRT", "", "LRT Track filter tool"};
+
+      ToolHandle<InDet::InDetTrackTruthFilterTool> m_trackFilterToolSTD{this, "TrackFilterToolSTD", "", "STD Track filter tool"};
   
       SG::ReadHandleKey<xAOD::TrackParticleContainer> m_inTrackKey{this, "InputTrackContainer", "InDetLargeD0TrackParticles", "Input track particle container"};
       SG::WriteHandleKey<xAOD::TrackParticleContainer> m_outTrackKey{this, "OutputTrackContainer", "InDetLargeD0TrackParticles_TRK_EFF_LARGED0_GLOBAL__1down", "Output track particle container"};

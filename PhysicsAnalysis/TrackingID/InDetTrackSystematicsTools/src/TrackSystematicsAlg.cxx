@@ -16,14 +16,22 @@ namespace InDet {
     ATH_CHECK(m_outTrackKey.initialize());
     ATH_CHECK(m_decorDeps.initialize(m_inTrackKey, m_outTrackKey));
 
-    // Retrieve the tool:
-    ATH_CHECK(m_trackFilterTool.retrieve());
+    // Retrieve the tools:
+    ATH_CHECK(m_trackFilterToolLRT.retrieve());
+    ATH_CHECK(m_trackFilterToolSTD.retrieve());
 
-    CP::SystematicSet systSet = {  
+    CP::SystematicSet systSetLRT = {  
       CP::SystematicVariation("TRK_EFF_LARGED0_GLOBAL")
     };
+    CP::SystematicSet systSetSTD = {  
+      CP::SystematicVariation("TRK_EFF_LOOSE_GLOBAL"),
+      CP::SystematicVariation("TRK_EFF_LOOSE_IBL"),
+      CP::SystematicVariation("TRK_EFF_LOOSE_PP0"),
+      CP::SystematicVariation("TRK_EFF_LOOSE_PHYSMODEL"),
+    };
 
-    ATH_CHECK(m_trackFilterTool->applySystematicVariation(systSet));
+    ATH_CHECK(m_trackFilterToolLRT->applySystematicVariation(systSetLRT));
+    ATH_CHECK(m_trackFilterToolSTD->applySystematicVariation(systSetSTD));
 
     return StatusCode::SUCCESS;
   }
@@ -36,7 +44,19 @@ namespace InDet {
     auto selectedTracks = std::make_unique<ConstDataVector<xAOD::TrackParticleContainer> >( SG::VIEW_ELEMENTS );
 
     for(const xAOD::TrackParticle* track : *inTracks) {
-      if (m_trackFilterTool->accept(track)) {
+
+      const std::bitset<xAOD::NumberOfTrackRecoInfo> patternReco = track->patternRecoInfo();
+      bool passFilter = false;
+
+      // LRT track
+      if(patternReco.test(49)) {
+        passFilter = m_trackFilterToolLRT->accept(track);
+      }
+      // standard track
+      else {
+        passFilter = m_trackFilterToolSTD->accept(track);
+      }
+      if (passFilter) {
         ATH_MSG_DEBUG("Track accepted!");
         selectedTracks->push_back( track  );
       }
