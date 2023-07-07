@@ -175,7 +175,9 @@ namespace xAODMaker {
             
 	// (1) Build TruthEvents
 	ATH_MSG_DEBUG("Number of GenEvents in this Athena event = " << mcColl->size());
+#ifdef HEPMC3
         bool newAttributesPresent(false);
+#endif
 	for (unsigned int cntr = 0; cntr < mcColl->size(); ++cntr) {
 	  const HepMC::GenEvent* genEvt = (*mcColl)[cntr];
 	  bool isSignalProcess(false);
