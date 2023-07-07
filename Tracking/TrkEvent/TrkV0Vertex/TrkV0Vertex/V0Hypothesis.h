@@ -8,7 +8,7 @@
 #define TRKV0VERTEX_V0HYPOTHESIS_H
 
 #include "VxVertex/ExtendedVxCandidate.h"
-#include "EventKernel/PdtPdg.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 
 /**
@@ -46,7 +46,7 @@ class V0Hypothesis : public ExtendedVxCandidate
    V0Hypothesis();
 
    V0Hypothesis(const Trk::ExtendedVxCandidate& vxCandidate,
-                int positiveTrackID = PDG::pi_plus, int negativeTrackID = PDG::pi_minus, int constraintID = PDG::K0);
+                int positiveTrackID = MC::PIPLUS, int negativeTrackID = MC::PIMINUS, int constraintID = MC::K0);
 /**
  * A constructor taking a Trk::RecVertex, a vector of tracks fitted to the vertex, a full covariance matrix of the fit
  * and PDG ID's of particles and constraint mass as arguments.
@@ -54,7 +54,7 @@ class V0Hypothesis : public ExtendedVxCandidate
    V0Hypothesis(const Trk::RecVertex& recVertex,
                 const std::vector<Trk::VxTrackAtVertex *>& vxTrackAtVertex,
                 const Amg::MatrixX * fullCov = nullptr,
-                int positiveTrackID = PDG::pi_plus, int negativeTrackID = PDG::pi_minus, int constraintID = PDG::K0);
+                int positiveTrackID = MC::PIPLUS, int negativeTrackID = MC::PIMINUS, int constraintID = MC::K0);
 
 /**
  * Clone method
@@ -77,20 +77,17 @@ class V0Hypothesis : public ExtendedVxCandidate
    V0Hypothesis(const V0Hypothesis& rhs);
 
 /**
- * Retrieves a positive decay product ID according to
- * EventKernel/PdtPdg.h. 
+ * Retrieves a positive decay product ID
  */
   int positiveTrackID(void) const;
 
 /**
- * Retrieves a negative decay product according to
- * EventKernel/PdtPdg.h. 
+ * Retrieves a negative decay product
  */  
   int negativeTrackID(void) const;
 
 /**
- * Retrieves a V0 hypothesis ID according to
- * EventKernel/PdtPdg.h. The pid = 0 for no-hypothesis
+ * Retrieves a V0 hypothesis ID. The pid = 0 for no-hypothesis
  * case (unconstrained fit for instance). This coresponds
  * to PDG::null in ATHENA definitions.
  */    

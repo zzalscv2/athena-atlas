@@ -63,7 +63,7 @@ The IParticleFilter can select particles from their momentum, PDGId and charge.
 It uses internally the DecayPattern class to build the filtering decision.
 The basic <i>modus operandi</i> is to loop on HepMC::GenVertex (of a given HepMC::GenEvent) to select the ones which are of interest (and fulfill the decay pattern).
 
-  - ParticleCandidateList: this is a simple wrapper for std::list<PDG::pidType> to model a list of particle identity candidates. 
+  - ParticleCandidateList: this is a simple wrapper for std::list<int> to model a list of particle identity candidates. 
 This candidate list is used by the PdgIdFilter and McVtxFilter to select for particles which might fulfill some criterion (well in our case this is its Particle Data Group identity.
 
   - DecayParser: this is the class which parses and models decay patterns.

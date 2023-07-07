@@ -15,7 +15,6 @@
 #include "RecoToolInterfaces/IParticleCaloExtensionTool.h"
 #include "TrkCaloExtension/CaloExtension.h"
 #include "TrkCaloExtension/CaloExtensionHelpers.h"
-#include "EventKernel/PdtPdg.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 #include "GaudiKernel/SystemOfUnits.h"
@@ -128,10 +127,10 @@ bool egammaTruthAlg::isAccepted (const xAOD::TruthParticle& tp,
   int aid = abs(id);
   int barcode = tp.barcode();
 
-  if (aid == abs(PDG::e_minus)) {
+  if (aid == abs(MC::ELECTRON)) {
     if (tp.pt() < m_electronPtMin) return false;
   }
-  else if (aid == abs(PDG::gamma)) {
+  else if (aid == abs(MC::PHOTON)) {
     if (tp.pt() < m_photonPtMin) return false;
   }
   else
@@ -158,7 +157,7 @@ bool egammaTruthAlg::isAccepted (const xAOD::TruthParticle& tp,
 
   // Isolation selection for photons.
   iso = computeIso (tp, cont);
-  if (aid == abs(PDG::gamma)) {
+  if (aid == abs(MC::PHOTON)) {
     if (iso > m_photonEtIsoMax)
       return false;
   }

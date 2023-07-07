@@ -126,7 +126,7 @@ HepMC::ConstGenParticlePtr TruthParticle::genChild(const std::size_t i) const
   }
 }
 
-bool TruthParticle::hasMother( const PDG::pidType pdgId ) const
+bool TruthParticle::hasMother( const int pdgId ) const
 {
   const std::size_t nMothers = m_mothers.size();
   for ( std::size_t iMother = 0; iMother != nMothers; ++iMother ) {
@@ -138,7 +138,7 @@ bool TruthParticle::hasMother( const PDG::pidType pdgId ) const
   return false;
 }
 
-bool TruthParticle::hasChild( const PDG::pidType pdgId ) const
+bool TruthParticle::hasChild( const int pdgId ) const
 {
   const std::size_t nChildren = m_children.size();
   for ( std::size_t iChild = 0; iChild != nChildren; ++iChild ) {
@@ -150,7 +150,7 @@ bool TruthParticle::hasChild( const PDG::pidType pdgId ) const
   return false;
 }
 
-bool TruthParticle::hasMother( const PDG::pidType pdgId, 
+bool TruthParticle::hasMother( const int pdgId, 
 			       std::vector<unsigned int>& indices ) const
 {
   bool found = false;
@@ -165,7 +165,7 @@ bool TruthParticle::hasMother( const PDG::pidType pdgId,
   return found;
 }
 
-bool TruthParticle::hasChild( const PDG::pidType pdgId, 
+bool TruthParticle::hasChild( const int pdgId, 
 			      std::vector<unsigned int>& indices ) const
 {
   bool found = false;
@@ -218,7 +218,7 @@ CLHEP::HepLorentzVector TruthParticle::pDecay( const std::size_t i ) const
   }
 }
 
-PDG::pidType TruthParticle::pdgDecay( const std::size_t i ) const 
+int TruthParticle::pdgDecay( const std::size_t i ) const 
 { 
   if ( i < m_children.size() ) {
     auto child = this->child(i);

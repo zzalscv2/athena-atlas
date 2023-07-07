@@ -254,7 +254,7 @@ class ParticleImpl : public IParticle
   /** Return enum indicating particle id
       the enum file is available in Event/EventKernel/PdtPdg.h  */
   virtual
-  PDG::pidType pdgId() const;
+  int pdgId() const;
 
   /** @}
    */
@@ -290,7 +290,7 @@ class ParticleImpl : public IParticle
   virtual
   void set_charge( ChargeType x );
   virtual
-  void set_pdgId( PDG::pidType x );
+  void set_pdgId( int x );
   virtual
   void set_origin( const VxContainer* theContainer, int index );
   virtual
@@ -732,7 +732,7 @@ ParticleImpl<INavigable_t,
 
 template< class INavigable_t, class I4Momentum_t, class IParticle_t>
 inline
-PDG::pidType
+int
 ParticleImpl<INavigable_t,
 	     I4Momentum_t,
 	     IParticle_t>::pdgId() const
@@ -923,7 +923,7 @@ inline
 void
 ParticleImpl<INavigable_t,
 	     I4Momentum_t,
-	     IParticle_t>::set_pdgId( PDG::pidType x )
+	     IParticle_t>::set_pdgId( int x )
 {
   m_part.set_pdgId(x);
 }

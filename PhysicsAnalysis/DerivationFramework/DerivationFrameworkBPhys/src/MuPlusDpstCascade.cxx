@@ -19,7 +19,7 @@
 #include "DerivationFrameworkBPhys/LocalVector.h"
 #include "HepPDT/ParticleDataTable.hh"
 #include "TrkVKalVrtFitter/VxCascadeInfo.h"
-
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace DerivationFramework {
     typedef ElementLink<xAOD::VertexContainer> VertexLink;
@@ -50,13 +50,13 @@ namespace DerivationFramework {
         auto pdt = partPropSvc->PDT();
 
         // retrieve particle masses
-        if(m_vtx0MassHypo < 0.) m_vtx0MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::B_c_plus);
-        if(m_vtx1MassHypo < 0.) m_vtx1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::D0);
+        if(m_vtx0MassHypo < 0.) m_vtx0MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::BCPLUS);
+        if(m_vtx1MassHypo < 0.) m_vtx1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::D0);
 
-        if(m_vtx0Daug1MassHypo < 0.) m_vtx0Daug1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::mu_minus);
-        if(m_vtx0Daug2MassHypo < 0.) m_vtx0Daug2MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::pi_plus);
-        if(m_vtx1Daug1MassHypo < 0.) m_vtx1Daug1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::pi_plus);
-        if(m_vtx1Daug2MassHypo < 0.) m_vtx1Daug2MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::K_plus);
+        if(m_vtx0Daug1MassHypo < 0.) m_vtx0Daug1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::MUON);
+        if(m_vtx0Daug2MassHypo < 0.) m_vtx0Daug2MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::PIPLUS);
+        if(m_vtx1Daug1MassHypo < 0.) m_vtx1Daug1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::PIPLUS);
+        if(m_vtx1Daug2MassHypo < 0.) m_vtx1Daug2MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::KPLUS);
 
         return StatusCode::SUCCESS;
     }

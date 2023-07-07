@@ -13,6 +13,7 @@
 
 // AnalysisUtils includes
 #include "AnalysisUtils/ParticleCandidateList.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 
 ParticleCandidateList::ParticleCandidateList()
@@ -25,7 +26,7 @@ ParticleCandidateList::ParticleCandidateList( const ParticleCandidateList& rhs)
 {}
 
 
-bool ParticleCandidateList::hasInList( const PDG::pidType& pdgID,
+bool ParticleCandidateList::hasInList( const int& pdgID,
                                        const bool tightMatch ) const
 {
   ATH_MSG_VERBOSE( "In ParticleCandidateList::hasInList( pdgID ) : " << this
@@ -38,7 +39,7 @@ bool ParticleCandidateList::hasInList( const PDG::pidType& pdgID,
 			  StatusCode::FAILURE );
   }
 
-  for ( ParticleCandidateList::const_iterator itrPart = m_list.begin();
+  for ( auto itrPart = m_list.begin();
 	itrPart != m_list.end();
 	++itrPart ) {//> Loop over the list of intern particles
     ATH_MSG_VERBOSE( "in loop over list of intern particle candidates"
@@ -59,7 +60,7 @@ void ParticleCandidateList::dropList() const
 {
   ATH_MSG_VERBOSE("---------------------------------------------------\n"
                   << "Added those particles : " );
-  for ( ParticleCandidateList::const_iterator itrPart = m_list.begin();
+  for ( auto itrPart = m_list.begin();
 	itrPart != m_list.end();
 	++itrPart ) {
     ATH_MSG_VERBOSE( "\tpdgID= " << (*itrPart) );
@@ -73,20 +74,20 @@ void ParticleCandidateList::dropList() const
 /////////////////////////////////////////////////////////////////// 
 void ParticleCandidateList::addLeptons()
 {
-  m_list.push_back( PDG::e_minus   ); //>e-
-  m_list.push_back( PDG::e_plus    ); //>e+
-  m_list.push_back( PDG::nu_e      ); //>nu_e
-  m_list.push_back( PDG::anti_nu_e ); //>nu_e_bar
+  m_list.push_back( MC::ELECTRON   ); //>e-
+  m_list.push_back( MC::POSITRON    ); //>e+
+  m_list.push_back( MC::NU_E      ); //>nu_e
+  m_list.push_back( -MC::NU_E ); //>nu_e_bar
 
-  m_list.push_back( PDG::mu_minus  ); //>mu-
-  m_list.push_back( PDG::mu_plus   ); //>mu+
-  m_list.push_back( PDG::nu_mu     ); //>nuMu
-  m_list.push_back( PDG::anti_nu_mu ); //>nuMu_bar
+  m_list.push_back( MC::MUON  ); //>mu-
+  m_list.push_back( -MC::MUON   ); //>mu+
+  m_list.push_back( MC::NU_MU     ); //>nuMu
+  m_list.push_back( -MC::NU_MU ); //>nuMu_bar
 
-  m_list.push_back( PDG::tau_minus  ); //>tau-
-  m_list.push_back( PDG::tau_plus   ); //>tau+
-  m_list.push_back( PDG::nu_tau     ); //>nuTau
-  m_list.push_back( PDG::anti_nu_tau ); //>nuTau_bar
+  m_list.push_back( MC::TAU  ); //>tau-
+  m_list.push_back( -MC::TAU   ); //>tau+
+  m_list.push_back( MC::NU_TAU     ); //>nuTau
+  m_list.push_back( -MC::NU_TAU ); //>nuTau_bar
 }
 
 void ParticleCandidateList::addLightJets()
@@ -94,28 +95,28 @@ void ParticleCandidateList::addLightJets()
   /// To cope with Full Reconstruction scheme :
   /// a light-jet, is a jet which could not have been tagged
   /// One has also to add PDG::null to the matching list
-  m_list.push_back( PDG::null ); //> untagged jet : so taken light
+  m_list.push_back( 0 ); //> untagged jet : so taken light
 
-  m_list.push_back( PDG::d      ); //> d
-  m_list.push_back( PDG::anti_d ); //> d_bar
-  m_list.push_back( PDG::u      ); //> u
-  m_list.push_back( PDG::anti_u ); //> u_bar
-  m_list.push_back( PDG::c      ); //> c
-  m_list.push_back( PDG::anti_c ); //> c_bar
-  m_list.push_back( PDG::s      ); //> s
-  m_list.push_back( PDG::anti_s ); //> s_bar
+  m_list.push_back( MC::DQUARK      ); //> d
+  m_list.push_back( -MC::DQUARK ); //> d_bar
+  m_list.push_back( MC::UQUARK      ); //> u
+  m_list.push_back( -MC::UQUARK ); //> u_bar
+  m_list.push_back( MC::CQUARK      ); //> c
+  m_list.push_back( -MC::CQUARK ); //> c_bar
+  m_list.push_back( MC::SQUARK      ); //> s
+  m_list.push_back( -MC::SQUARK ); //> s_bar
 }
 
 void ParticleCandidateList::addLightQuarks()
 {
-  m_list.push_back( PDG::d      ); //> d
-  m_list.push_back( PDG::anti_d ); //> d_bar
-  m_list.push_back( PDG::u      ); //> u
-  m_list.push_back( PDG::anti_u ); //> u_bar
-  m_list.push_back( PDG::c      ); //> c
-  m_list.push_back( PDG::anti_c ); //> c_bar
-  m_list.push_back( PDG::s      ); //> s
-  m_list.push_back( PDG::anti_s ); //> s_bar
+  m_list.push_back( MC::DQUARK      ); //> d
+  m_list.push_back( -MC::DQUARK ); //> d_bar
+  m_list.push_back( MC::UQUARK      ); //> u
+  m_list.push_back( -MC::UQUARK ); //> u_bar
+  m_list.push_back( MC::CQUARK      ); //> c
+  m_list.push_back( -MC::CQUARK ); //> c_bar
+  m_list.push_back( MC::SQUARK      ); //> s
+  m_list.push_back( -MC::SQUARK ); //> s_bar
 }
 
 void ParticleCandidateList::add( const std::string& list )

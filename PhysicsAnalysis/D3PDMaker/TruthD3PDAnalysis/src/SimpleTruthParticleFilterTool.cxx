@@ -3,7 +3,6 @@
 */
 
 #include "SimpleTruthParticleFilterTool.h"
-#include "EventKernel/PdtPdg.h"
 #include "AthenaKernel/errorcheck.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"

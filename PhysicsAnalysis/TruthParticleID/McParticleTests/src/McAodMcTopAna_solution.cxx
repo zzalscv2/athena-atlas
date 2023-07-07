@@ -28,9 +28,8 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "McParticleUtils/McVtxFilter.h"
-
-#include "EventKernel/PdtPdg.h"
 
 // units
 #include "CLHEP/Units/SystemOfUnits.h"
@@ -218,7 +217,7 @@ StatusCode McTopAnaSolution::doMcTopWb()
     // retrieve the decay vertex of the current particle
    auto decayVtx = particle->end_vertex();
 
-    if (PDG::t == particle->pdg_id() && //> select top
+    if (MC::TQUARK == particle->pdg_id() && //> select top
         0      !=  decayVtx        && //> check that we have a valid vtx pointer
 #ifdef HEPMC3
         2      <=  decayVtx->particles_out().size() ) { //> isn't necessary, just to exercize the GenVertex interface
@@ -263,8 +262,7 @@ StatusCode McTopAnaSolution::doMcTopWb()
         itr != mcparts->end();
         ++itr ) {
     const TruthParticle* mc = *itr;
-    if ( PDG::W_plus  != mc->pdgId() &&
-         PDG::W_minus != mc->pdgId() ) {
+    if ( MC::WPLUSBOSON  != std::abs(mc->pdgId())) {
       // not interested in... Skip it
       continue;
     }
