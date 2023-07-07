@@ -24,7 +24,7 @@
 #include "CxxUtils/checker_macros.h"
 #include <cassert>
 #include <iostream>
-
+#include "TruthUtils/HepMCHelpers.h"
 
 void compare (const ParticleEvent::Base& p1,
               const ParticleEvent::Base& p2)
@@ -211,7 +211,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 
   trans1.set_dataType (ParticleDataType::Full);
   trans1.set_charge (0.5);
-  trans1.set_pdgId (PDG::mu_plus);
+  trans1.set_pdgId (-MC::MUON);
   trans1.setAthenaBarCode (444);
   trans1.set_origin (el10);
   

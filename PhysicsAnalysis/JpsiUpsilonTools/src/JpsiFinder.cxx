@@ -25,7 +25,7 @@
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
-#include "EventKernel/PdtPdg.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 namespace Analysis {
     
@@ -56,7 +56,7 @@ namespace Analysis {
             return StatusCode::SUCCESS;
         } else {
             auto particleDataTable = partPropSvc->PDT();
-            const HepPDT::ParticleData* pd_mu = particleDataTable->particle(PDG::mu_minus);
+            const HepPDT::ParticleData* pd_mu = particleDataTable->particle(MC::MUON);
             if (m_diMuons) {m_trk1M = pd_mu->mass(); m_trk2M = pd_mu->mass();}
         }
         
@@ -512,8 +512,6 @@ namespace Analysis {
         
         return(myPairs);
     }
-    
-    // *********************************************************************************
     
     // ---------------------------------------------------------------------------------
     // getPairs: forms up 2-plets of muons

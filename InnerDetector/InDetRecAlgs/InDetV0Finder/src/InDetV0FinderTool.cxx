@@ -32,7 +32,7 @@
 #include "xAODTracking/TrackingPrimitives.h"
 #include "HepPDT/ParticleDataTable.hh"
 #include "xAODTracking/VertexContainer.h"
-#include "EventKernel/PdtPdg.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include <vector>
@@ -244,11 +244,11 @@ StatusCode InDetV0FinderTool::initialize()
   ATH_CHECK( m_vertexEstimator.retrieve() );
   ATH_MSG_DEBUG("Retrieved tool " << m_vertexEstimator);
 
-  const HepPDT::ParticleData* pd_pi = m_particleDataTable->particle(PDG::pi_plus);
-  const HepPDT::ParticleData* pd_p  = m_particleDataTable->particle(PDG::p_plus);
-  const HepPDT::ParticleData* pd_e  = m_particleDataTable->particle(PDG::e_minus);
-  const HepPDT::ParticleData* pd_K  = m_particleDataTable->particle(PDG::K_S0);
-  const HepPDT::ParticleData* pd_L  = m_particleDataTable->particle(PDG::Lambda0);
+  const HepPDT::ParticleData* pd_pi = m_particleDataTable->particle(MC::PIPLUS);
+  const HepPDT::ParticleData* pd_p  = m_particleDataTable->particle(MC::PROTON);
+  const HepPDT::ParticleData* pd_e  = m_particleDataTable->particle(MC::ELECTRON);
+  const HepPDT::ParticleData* pd_K  = m_particleDataTable->particle(MC::K0S);
+  const HepPDT::ParticleData* pd_L  = m_particleDataTable->particle(MC::LAMBDA0);
   if (m_masses == 1) {
    m_masspi     = pd_pi->mass();
    m_massp      = pd_p->mass();

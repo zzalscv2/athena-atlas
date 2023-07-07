@@ -19,7 +19,7 @@
 #include "DerivationFrameworkBPhys/LocalVector.h"
 
 #include "TrkVKalVrtFitter/VxCascadeInfo.h"
-
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace DerivationFramework {
     typedef ElementLink<xAOD::VertexContainer> VertexLink;
@@ -50,18 +50,18 @@ namespace DerivationFramework {
         m_particleDataTable = partPropSvc->PDT();
 
         // retrieve particle masses
-        if(m_mass_jpsi < 0. ) m_mass_jpsi = getParticleMass(PDG::J_psi);
-        if(m_vtx0MassHypo < 0.) m_vtx0MassHypo = getParticleMass(PDG::B_c_plus);
-        if(m_vtx1MassHypo < 0.) m_vtx1MassHypo = getParticleMass(PDG::D0);
-        if(m_vtx2MassHypo < 0.) m_vtx2MassHypo = getParticleMass(PDG::K_S0);
+        if(m_mass_jpsi < 0. ) m_mass_jpsi = getParticleMass(MC::JPSI);
+        if(m_vtx0MassHypo < 0.) m_vtx0MassHypo = getParticleMass(MC::BCPLUS);
+        if(m_vtx1MassHypo < 0.) m_vtx1MassHypo = getParticleMass(MC::D0);
+        if(m_vtx2MassHypo < 0.) m_vtx2MassHypo = getParticleMass(MC::K0S);
 
-        if(m_vtx0Daug1MassHypo < 0.) m_vtx0Daug1MassHypo = getParticleMass(PDG::mu_minus);
-        if(m_vtx0Daug2MassHypo < 0.) m_vtx0Daug2MassHypo = getParticleMass(PDG::mu_minus);
-        if(m_vtx0Daug3MassHypo < 0.) m_vtx0Daug3MassHypo = getParticleMass(PDG::pi_plus);
-        if(m_vtx1Daug1MassHypo < 0.) m_vtx1Daug1MassHypo = getParticleMass(PDG::pi_plus);
-        if(m_vtx1Daug2MassHypo < 0.) m_vtx1Daug2MassHypo = getParticleMass(PDG::K_plus);
-        if(m_vtx2Daug1MassHypo < 0.) m_vtx2Daug1MassHypo = getParticleMass(PDG::pi_plus);
-        if(m_vtx2Daug2MassHypo < 0.) m_vtx2Daug2MassHypo = getParticleMass(PDG::pi_plus);
+        if(m_vtx0Daug1MassHypo < 0.) m_vtx0Daug1MassHypo = getParticleMass(MC::MUON);
+        if(m_vtx0Daug2MassHypo < 0.) m_vtx0Daug2MassHypo = getParticleMass(MC::MUON);
+        if(m_vtx0Daug3MassHypo < 0.) m_vtx0Daug3MassHypo = getParticleMass(MC::PIPLUS);
+        if(m_vtx1Daug1MassHypo < 0.) m_vtx1Daug1MassHypo = getParticleMass(MC::PIPLUS);
+        if(m_vtx1Daug2MassHypo < 0.) m_vtx1Daug2MassHypo = getParticleMass(MC::KPLUS);
+        if(m_vtx2Daug1MassHypo < 0.) m_vtx2Daug1MassHypo = getParticleMass(MC::PIPLUS);
+        if(m_vtx2Daug2MassHypo < 0.) m_vtx2Daug2MassHypo = getParticleMass(MC::PIPLUS);
 
         return StatusCode::SUCCESS;
     }

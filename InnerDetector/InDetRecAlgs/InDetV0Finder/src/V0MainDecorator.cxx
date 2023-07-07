@@ -4,10 +4,10 @@
 #include "InDetV0Finder/V0MainDecorator.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "HepPDT/ParticleDataTable.hh"
-#include "EventKernel/PdtPdg.h"
 #include "GaudiKernel/IPartPropSvc.h"
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/VertexContainer.h"
+#include "TruthUtils/HepMCHelpers.h"
 namespace InDet
 {
 V0MainDecorator::V0MainDecorator(const std::string& t, const std::string& n, const IInterface* p)
@@ -91,11 +91,11 @@ StatusCode V0MainDecorator::initialize(){
     ATH_CHECK( service("PartPropSvc", partPropSvc, true) );
     auto *particleDataTable = partPropSvc->PDT();
   
-    const HepPDT::ParticleData* pd_pi = particleDataTable->particle(PDG::pi_plus);
-    const HepPDT::ParticleData* pd_p  = particleDataTable->particle(PDG::p_plus);
-    const HepPDT::ParticleData* pd_e  = particleDataTable->particle(PDG::e_minus);
-    const HepPDT::ParticleData* pd_K  = particleDataTable->particle(PDG::K_S0);
-    const HepPDT::ParticleData* pd_L  = particleDataTable->particle(PDG::Lambda0);
+    const HepPDT::ParticleData* pd_pi = particleDataTable->particle(MC::PIPLUS);
+    const HepPDT::ParticleData* pd_p  = particleDataTable->particle(MC::PROTON);
+    const HepPDT::ParticleData* pd_e  = particleDataTable->particle(MC::ELECTRON);
+    const HepPDT::ParticleData* pd_K  = particleDataTable->particle(MC::K0S);
+    const HepPDT::ParticleData* pd_L  = particleDataTable->particle(MC::LAMBDA0);
     
     m_masspi     = pd_pi->mass();
     m_massp      = pd_p->mass();

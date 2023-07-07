@@ -32,9 +32,6 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 
-// EventKernel includes
-#include "EventKernel/PdtPdg.h"
-
 // AnalysisUtils includes
 #include "AnalysisUtils/IFilterCuts.h"
 #include "AnalysisUtils/ParticleCandidateList.h"
@@ -160,36 +157,6 @@ class McVtxFilter : virtual public IFilterCuts, public AthMessaging
   /// Check the branches for the special case of a 1->2 body decay
   /// (there is some room for optimisation in that particular case)
   bool checkTwoBodyDecay( HepMC::ConstGenVertexPtr vtx ) const;
-
-  /// Populate vtx by HepPDT::ParticleData
-  //void addParent( const HepPDT::ParticleData& pdt );
-  //void addChild ( const HepPDT::ParticleData& pdt );
-  
-  /**Populate in-going particles' vtx by particle identification
-   */
-  //void addParent( const PDG::pidType& parentPID );
-  /**Populate out-going particles' vtx by particle identification
-   */
-  //void addChild ( const PDG::pidType& childPID  );
-  
-  /// Populate vtx by particle name
-  //void addParent( const std::string& parentName );
-  //void addChild ( const std::string& childName  );
-  
-  /** Populate in-going particles' vtx list by group name
-   */
-  //void addParentList( const std::string& parentClass );
-
-  /** Populate out-going particles' vtx list by group name
-   */
-  //void addChildList ( const std::string& childClass  );
-  
-  /// Populate parents' vtx list by copy
-  /// McVtxFilter takes ownership of the given list
-  //void addParentList( const ParticleCandidateList* parentList );
-  /// Populate children's vtx list by copy : 
-  /// McVtxFilter takes ownership of the given list
-  //void addChildList ( const ParticleCandidateList* childList  );
   
   /////////////////////////////////////////////////////////////////// 
   // Protected data: 

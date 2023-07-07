@@ -15,7 +15,6 @@
 #include <iosfwd>
 
 // EventKernel includes
-#include "EventKernel/PdtPdg.h"
 #include "EventKernel/IParticle.h" // for {Charge,ParticleDataType::Data}Type
 
 // VxVertex includes
@@ -89,7 +88,7 @@ class Base
 
   /** Return enum indicating particle id
       the enum file is available in Event/EventKernel/PdtPdg.h  */
-  PDG::pidType pdgId() const;
+  int pdgId() const;
 
   /// Print @c IParticle content
   std::ostream& dump( std::ostream& out ) const;
@@ -105,7 +104,7 @@ class Base
   // Set functions (for IParticle)
   void set_dataType( ParticleDataType::DataType x );
   void set_charge( ChargeType x );
-  void set_pdgId( PDG::pidType x );
+  void set_pdgId( int x );
   void reset_charge();
   void reset_pdgId();
   void set_origin( const VxContainer* theContainer, int index );
@@ -143,7 +142,7 @@ class Base
   /** Value for the PDG identity (this has real meaning, only
    *  if hasPdgId() returns true)
    */
-  PDG::pidType m_pdgId;
+  int m_pdgId;
 
   /// The AthenaBarCode Part
   AthenaBarCodeImpl m_abc;
@@ -167,7 +166,7 @@ Base::Base() :
   m_hasCharge( false ),
   m_charge   ( 0. ),
   m_hasPdgId ( false ),
-  m_pdgId    ( PDG::null ),
+  m_pdgId    ( 0 ),
   m_abc      ()
 {}
 
@@ -233,7 +232,7 @@ Base::hasPdgId() const
   return m_hasPdgId;
 }
 
-inline PDG::pidType 
+inline int 
 Base::pdgId() const 
 {
   return m_pdgId;
@@ -260,7 +259,7 @@ Base::set_charge( ChargeType x )
 
 inline
 void 
-Base::set_pdgId( PDG::pidType x ) 
+Base::set_pdgId( int x ) 
 { 
   m_pdgId = x; 
   m_hasPdgId = true;

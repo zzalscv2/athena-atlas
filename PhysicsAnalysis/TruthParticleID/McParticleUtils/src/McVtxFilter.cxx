@@ -149,7 +149,7 @@ bool McVtxFilter::isAccepted( HepMC::ConstGenVertexPtr vtx ) const
     HepMC::ConstGenParticlePtr part = *(vtx->particles_out_const_begin());
 #endif
     const ParticleCandidateList * item = *( m_childList.begin() );
-    if ( item->hasInList( static_cast<PDG::pidType>(part->pdg_id()),  m_matchSign ) ) {
+    if ( item->hasInList( part->pdg_id(),  m_matchSign ) ) {
       return true;
     } else { 
       return false;
@@ -268,7 +268,7 @@ void McVtxFilter::setDecayPattern( const std::string& decayPattern )
     for( std::vector<std::string>::const_iterator candidate = itr->begin();
 	 candidate != candEnd;
 	 ++candidate ) {
-      PDG::pidType pdgID = parser.pdgId( *candidate );
+      int pdgID = parser.pdgId( *candidate );
       list->push_back( pdgID );
     }
     if ( ! list->empty() ) {
@@ -286,7 +286,7 @@ void McVtxFilter::setDecayPattern( const std::string& decayPattern )
     for( std::vector<std::string>::const_iterator candidate = itr->begin();
 	 candidate != candEnd;
 	 ++candidate ) {
-      PDG::pidType pdgID = parser.pdgId( *candidate );
+      int pdgID = parser.pdgId( *candidate );
       list->push_back( pdgID );
     }
     if ( ! list->empty() ) {
@@ -357,9 +357,7 @@ bool McVtxFilter::checkParentBranch( HepMC::ConstGenVertexPtr vtx ) const
     accepted = true;
     const unsigned int iMax = std::min( m_parentList.size(), parentIds.size() );
     for ( unsigned int i = 0; i != iMax; ++i ) {
-      const bool hasInList = 
-	m_parentList[i]->hasInList( static_cast<PDG::pidType>(parents[i]), 
-				    m_matchSign );
+      const bool hasInList = m_parentList[i]->hasInList( parents[i],m_matchSign );
       if ( !hasInList ) {
 	// this permutation is not suiting, going to the next one (if any)
 	accepted = false;
@@ -413,9 +411,7 @@ bool McVtxFilter::checkChildBranch( HepMC::ConstGenVertexPtr vtx ) const
     accepted = true;
     const unsigned int iMax = std::min( m_childList.size(), childIds.size() );
     for ( unsigned int i = 0; i != iMax; ++i ) {
-      const bool hasInList = 
-	m_childList[i]->hasInList( static_cast<PDG::pidType>(children[i]), 
-				   m_matchSign );
+      const bool hasInList = m_childList[i]->hasInList( children[i], m_matchSign );
       if ( !hasInList ) {
 	// this permutation is not suiting, going to the next one (if any)
 	accepted = false;
@@ -452,13 +448,13 @@ bool McVtxFilter::checkTwoBodyDecay( HepMC::ConstGenVertexPtr vtx ) const
   /// Cache the id of the outgoing particles of the vertex being analysed
 //AV It would be a very good idea to have a chack of the number of output particles here.
 #ifdef HEPMC3
-  const PDG::pidType pdgId1=static_cast<PDG::pidType>(vtx->particles_out().at(0)->pdg_id());
-  const PDG::pidType pdgId2=static_cast<PDG::pidType>(vtx->particles_out().at(1)->pdg_id());
+  const int pdgId1= vtx->particles_out().at(0)->pdg_id();
+  const int pdgId2= vtx->particles_out().at(1)->pdg_id();
 #else
   HepMC::GenVertex::particles_out_const_iterator itrPart = vtx->particles_out_const_begin();
-  const PDG::pidType pdgId1 = static_cast<PDG::pidType>((*itrPart)->pdg_id());
+  const int pdgId1 = (*itrPart)->pdg_id());
   ++itrPart;
-  const PDG::pidType pdgId2 = static_cast<PDG::pidType>((*itrPart)->pdg_id());
+  const int pdgId2 = (*itrPart)->pdg_id();
 #endif
 
   /// Loop over candidates for the 1st child

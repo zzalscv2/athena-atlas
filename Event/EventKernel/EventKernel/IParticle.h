@@ -17,7 +17,6 @@
 
 #include "AthenaKernel/CLASS_DEF.h"
 #include "EventKernel/INavigable4Momentum.h"
-#include "EventKernel/PdtPdg.h"
 #include "AthLinks/ElementLink.h"
 
 #ifndef SIMULATIONBASE
@@ -74,7 +73,7 @@ class IParticle : public virtual INavigable4Momentum
 
   /** Return enum indicating particle id
       the enum file is available in Event/EventKernel/PdtPdg.h  */
-  virtual PDG::pidType pdgId()     const = 0;
+  virtual int pdgId()     const = 0;
   
 };
 
