@@ -2,7 +2,7 @@
 #
 # art-description: RAWtoALL (q443 test), PHYSVAL production and NTUP_PHYSVAL for jets
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-athena-mt: 8
 # art-output: *.root
 # art-output: dcube

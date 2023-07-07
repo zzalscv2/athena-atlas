@@ -2,7 +2,7 @@
 #
 # art-description: Run test-beam simulation outside ISF, generating events on-the-fly, writing HITS
 # art-include: 23.0/Athena
-# art-include: master/Athena
+# art-include: main/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-output: test*HITS.pool.root

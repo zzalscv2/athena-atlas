@@ -3,7 +3,7 @@
 # art-description: DirectIOART AthenaMP Reco_tf.py inputFile:AOD protocol=ROOT
 # art-type: grid
 # art-output: *.pool.root
-# art-include: master/Athena
+# art-include: main/Athena
 # art-athena-mt: 2
 
 set -e

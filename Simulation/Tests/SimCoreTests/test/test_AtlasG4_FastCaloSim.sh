@@ -2,7 +2,7 @@
 #
 # art-description: Tests implementation of FastCaloSimV2 as a Geant4 fast simulation engine with Run 3 geometry and conditions
 # art-include: 23.0/Athena
-# art-include: master/Athena
+# art-include: main/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-output: test.HITS.pool.root

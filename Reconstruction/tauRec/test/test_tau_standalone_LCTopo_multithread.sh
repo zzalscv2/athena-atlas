@@ -3,7 +3,7 @@
 # art-description: standalone tau reconstruction ART on MC in multithread mode
 # art-type: grid
 # art-athena-mt: 8
-# art-include: master/Athena
+# art-include: main/Athena
 # art-output: *.root
 # art-output: *.log
 # art-output: *.ps

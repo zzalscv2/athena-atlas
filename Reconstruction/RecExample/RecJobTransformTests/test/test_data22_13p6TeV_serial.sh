@@ -2,7 +2,7 @@
 #
 # art-description: Reco_tf runs on 13.6TeV collision data 2022 in serial mode
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 # art-memory: 6500
 

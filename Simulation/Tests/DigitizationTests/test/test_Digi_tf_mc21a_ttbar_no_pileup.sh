@@ -5,7 +5,7 @@
 # art-architecture:  '#x86_64-intel'
 # art-include: 22.0/Athena
 # art-include: 23.0/Athena
-# art-include: master/Athena
+# art-include: main/Athena
 # art-output: mc21a.ttbar.nopileup.CG.RDO.pool.root
 # art-output: mc21a.ttbar.nopileup.CA.RDO.pool.root
 # art-output: log.*

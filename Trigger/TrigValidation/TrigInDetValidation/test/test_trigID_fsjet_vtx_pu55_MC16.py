@@ -3,7 +3,7 @@
 
 # art-description: art job for fsjet_vtx_pu55_MC16
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 # art-input-nfiles: 3
 # art-athena-mt: 8

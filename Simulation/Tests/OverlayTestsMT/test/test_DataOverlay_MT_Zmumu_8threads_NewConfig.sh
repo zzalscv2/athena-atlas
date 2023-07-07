@@ -4,7 +4,7 @@
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-athena-mt: 8
-# art-include: master/Athena
+# art-include: main/Athena
 
 # art-output: dataOverlayRDO.pool.root
 # art-output: log.*

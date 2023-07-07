@@ -1,7 +1,7 @@
 #!/bin/bash
 # art-description: Run 4 configuration, ITK only recontruction, all-hadronic ttbar, full pileup, acts activated
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-output: *.root
 # art-output: *.xml
 # art-output: dcube*

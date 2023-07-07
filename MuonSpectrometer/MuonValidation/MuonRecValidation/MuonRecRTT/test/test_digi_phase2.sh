@@ -3,7 +3,7 @@
 # art-description: Test muon digitisation on best knowledge Run4 muon layout
 # 
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 22.0/Athena
 # art-include: 21.9/Athena
 # art-output: log.HITtoRDO

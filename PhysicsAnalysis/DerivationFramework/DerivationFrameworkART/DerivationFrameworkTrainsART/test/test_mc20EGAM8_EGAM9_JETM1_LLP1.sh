@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# art-include: master/Athena
+# art-include: main/Athena
 # art-description: DAOD building EGAM8 EGAM9 JETM1 LLP1 mc20
 # art-type: grid
 # art-output: *.pool.root

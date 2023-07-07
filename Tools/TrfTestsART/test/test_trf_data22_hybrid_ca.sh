@@ -2,7 +2,7 @@
 #
 # art-description: Reco_tf.py data22 RAWtoALL in hybrid MT/MP mode: nprocs=2, threads=4 and ComponentAccumulator
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 # art-athena-mt: 8
 

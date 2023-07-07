@@ -3,7 +3,7 @@
 
 # art-description: athenaHLT test of the Dev_pp_run3_v1 menu with with reversed order of views to check their independence
 # art-type: build                                                                  
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena                                                       
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps

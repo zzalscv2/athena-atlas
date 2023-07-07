@@ -3,7 +3,7 @@
 # art-description: DirectIOART Athena Reco_tf.py inputFile:RDO protocol=ROOT
 # art-type: grid
 # art-output: *.pool.root
-# art-include: master/Athena
+# art-include: main/Athena
 # art-athena-mt: 8
 
 set -e

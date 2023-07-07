@@ -3,7 +3,7 @@
 # art-description: Run simulation from existing layout of geometry database and from local NSW AGDD file (for muon geometry MuonSpectrometer-R.09.02.Asym)
 #
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 #
 # art-output: log.EVNTtoHITS_fromLocal
 # art-output: log.EVNTtoHITS

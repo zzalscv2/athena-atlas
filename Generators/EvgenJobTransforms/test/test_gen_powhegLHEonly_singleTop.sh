@@ -1,8 +1,8 @@
 #!/bin/bash
 # art-description: Generation test Powheg LHE-only single top s-channel
 # art-type: build
-# art-include: master/AthGeneration
-# art-include: master--HepMC2/Athena
+# art-include: main/AthGeneration
+# art-include: main--HepMC2/Athena
 # art-include: 22.0/Athena
 # art-output: *.root
 # art-output: log.generate

@@ -3,7 +3,7 @@
 # art-description: Check SQL files of muon spectrometer (NSW) description, just AGDD part from NSW .xml
 #
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 #
 # art-output: *.txt
 # art-output: *.data

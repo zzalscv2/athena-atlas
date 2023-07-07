@@ -3,7 +3,7 @@
 
 # art-description: athenaHLT test of the Dev_pp_run3_v1 menu without monitoring (ATR-24655)
 # art-type: build
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps, PyStep

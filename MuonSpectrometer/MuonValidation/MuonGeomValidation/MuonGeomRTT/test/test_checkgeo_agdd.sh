@@ -3,7 +3,7 @@
 # art-description: Check SQL files of muon spectrometer description, just AGDD part from amdc_simrec (only passive materials)
 #
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 #
 # art-output: *.txt
 # art-output: *.data

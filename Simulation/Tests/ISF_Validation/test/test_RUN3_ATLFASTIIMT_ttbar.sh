@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # art-description: MC23-style RUN3 simulation using ATLFASTIIMT in serial Athena
-# art-include: master/Athena
+# art-include: main/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-output: test.*.HITS.pool.root

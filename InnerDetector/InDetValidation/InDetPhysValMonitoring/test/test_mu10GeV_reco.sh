@@ -5,7 +5,7 @@
 # art-input-nfiles: 10
 # art-cores: 4
 # art-memory: 4096
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 22.0/Athena
 # art-include: 23.0/Athena
 # art-output: physval*.root

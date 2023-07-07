@@ -2,7 +2,7 @@
 #
 # art-description: standalone tau reconstruction on MC in serial mode
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-output: *.root
 # art-output: *.log
 # art-output: *.ps

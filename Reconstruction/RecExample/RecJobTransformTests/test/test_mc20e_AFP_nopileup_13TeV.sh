@@ -4,7 +4,7 @@
 # art-output: log.*
 # art-type: grid
 # art-athena-mt: 8
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 
 export ATHENA_CORE_NUMBER=8

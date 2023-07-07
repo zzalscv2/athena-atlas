@@ -4,7 +4,7 @@
 # # Purpose: Compare MuonGeoModel and AMDB detector element positions
 #
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 21.0/Athena
 # art-include: 21.3/Athena
 #

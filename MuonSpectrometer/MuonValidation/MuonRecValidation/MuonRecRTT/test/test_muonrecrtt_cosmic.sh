@@ -3,7 +3,7 @@
 # art-description: Test the reconstruction of muon cosmic samples.
 #
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 22.0/Athena
 # art-include: 21.0/Athena
 # art-input: user.zhidong.data17_cos.00342172.physics_CosmicMuons.merge.RAW_subset01

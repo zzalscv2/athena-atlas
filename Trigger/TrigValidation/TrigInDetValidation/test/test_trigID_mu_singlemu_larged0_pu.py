@@ -3,7 +3,7 @@
 
 # art-description: art job for mu_singlemu_larged0_pu
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 # art-input: mc15_13TeV.107237.ParticleGenerator_mu_Pt4to100_vertxy20.recon.RDO.e3603_s2726_r7772
 # art-input-nfiles: 10

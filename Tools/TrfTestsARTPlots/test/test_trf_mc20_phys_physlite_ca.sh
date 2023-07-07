@@ -2,7 +2,7 @@
 #
 # art-description: Derivation_tf.py mc20 in MP and CA
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-athena-mt: 8
 # art-output: dcube*
 # art-html: dcube_physlite

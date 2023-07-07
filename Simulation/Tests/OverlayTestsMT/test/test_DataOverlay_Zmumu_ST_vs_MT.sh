@@ -4,7 +4,7 @@
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-athena-mt: 8
-# art-include: master/Athena
+# art-include: main/Athena
 
 # art-output: MC_plus_data.MT.RDO.pool.root
 # art-output: MC_plus_data.ST.RDO.pool.root

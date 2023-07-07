@@ -3,7 +3,7 @@
 # art-description: Art test job for MooPerformance package, migrated from RTT job: SingleMuons-mc12-Pt50GeV
 # 
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 21.0/Athena
 # art-include: 21.3/Athena
 # art-memory: 4096

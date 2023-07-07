@@ -4,7 +4,7 @@
 # # Purpose: Check internal consistency of readout geometry (used by reconstruction)
 # 
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 21.0/Athena
 # art-include: 21.3/Athena
 #
