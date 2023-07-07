@@ -117,7 +117,7 @@ def PHYSCfg(ConfigFlags):
 
     # FTAG Xbb extra content
     extraList = []
-    for tagger in ["GN2Xv00", "GN2XWithMassv00"]:
+    for tagger in ["GN2Xv00", "GN2XWithMassv00", "GN2Xv01"]:
         for score in ["phbb", "phcc", "ptop", "pqcd"]:
             extraList.append(f"{tagger}_{score}")
     PHYSSlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets." + ".".join(extraList)]

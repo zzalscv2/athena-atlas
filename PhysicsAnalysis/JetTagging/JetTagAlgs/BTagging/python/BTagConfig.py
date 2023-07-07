@@ -83,6 +83,7 @@ def GetTaggerTrainingMap(inputFlags, jet_collection_list):
         "AntiKt10UFOCSSKSoftDropBeta100Zcut10": [
             "BTagging/20230413/gn2xv00/antikt10ufo/network.onnx",
             "BTagging/20230413/gn2xwithmassv00/antikt10ufo/network.onnx",
+            "BTagging/20230705/gn2xv01/antikt10ufo/network.onnx",
         ],
         "AntiKt4HI": [
             "BTagging/201903/rnnip/antikt4empflow/network.json",
