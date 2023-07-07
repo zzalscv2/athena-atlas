@@ -112,12 +112,6 @@ def LVL1CaloMonitoringConfig(flags):
             from AthenaConfiguration.ComponentFactory import CompFactory
             decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder", DecoderTools=[inputjFexTool], MaybeMissingROBs=maybeMissingRobs)
             result.addEventAlgo(decoderAlg)     
-            
-            from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CaloFEXDecoratorCfg
-            result.merge(L1CaloFEXDecoratorCfg(flags,"jFexTower2SCellDecorator"))
-                     
-            from L1CaloFEXAlgos.FexEmulatedTowersConfig import jFexEmulatedTowersCfg
-            result.merge(jFexEmulatedTowersCfg(flags,"jFexEmulatedTowerMaker"))        
                 
             from L1CaloFEXSim.L1CaloFEXSimCfg import L1CaloFEXSimCfg
             result.merge(L1CaloFEXSimCfg(flags))              
