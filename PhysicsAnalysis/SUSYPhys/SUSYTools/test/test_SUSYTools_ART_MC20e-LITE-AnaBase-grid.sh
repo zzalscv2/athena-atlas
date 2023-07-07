@@ -2,7 +2,7 @@
 
 # art-description: SUSYTools ART test - TestSUSYToolsAlg.py
 # art-type: grid
-# art-include: master/AnalysisBase
+# art-include: main/AnalysisBase
 # art-output: hist-MC20e_DAOD_PHYSLITE.root
 # art-output: dcube
 

@@ -2,7 +2,7 @@
 #
 # art-description: Test for bulk processing at Tier0
 # art-type: local
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 
 # There was a database connection problem reported in ATR-24782. Rodney Walker's solution is to use the following export to fix the problem:

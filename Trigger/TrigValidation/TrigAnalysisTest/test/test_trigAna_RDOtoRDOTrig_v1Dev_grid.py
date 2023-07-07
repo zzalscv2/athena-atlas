@@ -3,7 +3,7 @@
 #
 # art-description: Test of the RDOtoRDOTrigger transform with Dev menu
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 # art-athena-mt: 4
 # art-output: *.txt

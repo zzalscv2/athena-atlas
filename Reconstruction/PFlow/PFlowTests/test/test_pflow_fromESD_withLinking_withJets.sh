@@ -2,7 +2,7 @@
 #
 # art-description: Athena runs Standard ESD pflow reconstruction, PFO linking off, thinning off.
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 # art-athena-mt: 8
 # art-output: AOD.pool.root

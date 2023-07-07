@@ -3,7 +3,7 @@
 
 # art-description: art job for minbias
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 # art-input: valid1.900341.Epos_LHC_minbias_inelastic.recon.RDO.e8514_e8528_s4111_s4114_r14655_tid33662517_00
 # art-input-nfiles: 4

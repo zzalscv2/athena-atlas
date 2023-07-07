@@ -2,7 +2,7 @@
 #
 # art-description: Tests detector response to single muons, generated on-the-fly, using 2015 geometry and conditions
 # art-include: 23.0/Athena
-# art-include: master/Athena
+# art-include: main/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-output: *.HITS.pool.root

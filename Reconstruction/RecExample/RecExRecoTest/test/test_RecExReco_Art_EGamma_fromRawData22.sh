@@ -3,7 +3,7 @@
 # art-description: Athena runs egamma (+ calo + ID)  reconstruction from a RAW data22 file
 # art-type: grid
 # art-athena-mt: 8
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 # art-output: *.log   
 

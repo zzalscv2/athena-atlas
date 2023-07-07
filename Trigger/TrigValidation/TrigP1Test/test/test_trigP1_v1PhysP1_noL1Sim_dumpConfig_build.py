@@ -3,7 +3,7 @@
 
 # art-description: PhysicsP1_pp_run3_v1 menu test only dumping options for SMK generation
 # art-type: build
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps

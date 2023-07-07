@@ -3,8 +3,8 @@
 # art-description: Run simulation using ISF with the FullG4MT_QS simulator, reading 13.6 TeV ttbar events, writing HITS, using the best knowledge RUN3 geometry and MC23 conditions
 # art-include: 23.0/Athena
 # art-include: 23.0/AthSimulation
-# art-include: master/Athena
-# art-include: master/AthSimulation
+# art-include: main/Athena
+# art-include: main/AthSimulation
 # art-type: grid
 # art-athena-mt: 8
 # art-architecture:  '#x86_64-intel'

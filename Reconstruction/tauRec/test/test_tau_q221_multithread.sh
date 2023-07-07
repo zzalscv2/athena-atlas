@@ -3,7 +3,7 @@
 # art-description: q221 reconstruction ART on MC in multithread mode
 # art-type: grid
 # art-athena-mt: 4
-# art-include: master/Athena
+# art-include: main/Athena
 # art-output: myAOD.pool.root
 # art-output: NTUP_PHYSVAL.root
 # art-output: rootcomp.root

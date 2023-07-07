@@ -2,7 +2,7 @@
 #
 # art-description: Athena runs met reconstruction from an ESD file
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 # art-athena-mt: 8
 # art-output: *.log   

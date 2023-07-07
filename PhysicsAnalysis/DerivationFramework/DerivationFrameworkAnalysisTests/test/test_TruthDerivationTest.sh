@@ -3,7 +3,7 @@
 # art-description: Truth derivation validation
 #
 # art-type: grid
-# art-include: master
+# art-include: main
 # art-output: test_histograms.root
 # art-output: dcube
 # art-html: dcube

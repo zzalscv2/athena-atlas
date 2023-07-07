@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # art-include: 21.6/AthGeneration
-# art-include: master/AthGeneration
+# art-include: main/AthGeneration
 # art-description: Powheg Control ART test single top s-channel
 # art-type: grid
 # art-output: test_powheg_ZZ.TXT.tar.gz

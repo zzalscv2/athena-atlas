@@ -5,7 +5,7 @@
 # art-architecture:  '#x86_64-intel'
 # art-athena-mt: 8
 # art-include: 23.0/Athena
-# art-include: master/Athena
+# art-include: main/Athena
 # art-output: RUN4_ttbar_SP.RDO.pool.root
 # art-output: RUN4_ttbar_MP_fork_evt0.RDO.pool.root
 # art-output: RUN4_ttbar_MP_fork_evt1.RDO.pool.root

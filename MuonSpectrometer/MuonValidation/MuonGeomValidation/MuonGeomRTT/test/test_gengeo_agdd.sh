@@ -3,7 +3,7 @@
 # art-description: Generate SQL files for muon spectrometer description, just AGDD part from .xml
 #
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 #
 # art-output: *.data
 

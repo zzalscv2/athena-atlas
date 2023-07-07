@@ -5,8 +5,8 @@
 # art-architecture:  '#x86_64-intel'
 # art-include: 23.0/Athena
 # art-include: 23.0/AthSimulation
-# art-include: master/Athena
-# art-include: master/AthSimulation
+# art-include: main/Athena
+# art-include: main/AthSimulation
 # art-output: *.root
 # art-output: PDGTABLE.MeV.*
 # art-output: *.HITS.pool.root

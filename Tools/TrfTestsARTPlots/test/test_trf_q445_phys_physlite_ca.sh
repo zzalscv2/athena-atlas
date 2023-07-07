@@ -2,7 +2,7 @@
 #
 # art-description: Reco_tf.py q445, HITtoRDO/RDOtoRDOTrigger/RAWtoALL in MT and AODtoDAOD in MP with CA
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-athena-mt: 8
 # art-output: dcube*
 # art-html: dcube_physlite

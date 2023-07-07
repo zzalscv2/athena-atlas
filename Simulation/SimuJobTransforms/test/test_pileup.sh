@@ -3,7 +3,7 @@
 # art-description: Modified/Simplified MC20e digitization job
 # art-type: build
 # art-include: 23.0/Athena
-# art-include: master/Athena
+# art-include: main/Athena
 
 Events=10
 HSHitsFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/mc16_13TeV.900149.PG_single_nu_Pt50.simul.HITS.e8307_s3482/HITS.24078104._234467.pool.root.1"

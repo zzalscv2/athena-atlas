@@ -2,7 +2,7 @@
 #
 # art-description: MC23-style RUN3 simulation using ATLFAST3MT in serial Athena
 # art-include: 23.0/Athena
-# art-include: master/Athena
+# art-include: main/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-output: test.*.HITS.pool.root

@@ -2,7 +2,7 @@
 #
 # art-description: q431 reconstruction ART on data in serail mode
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-output: myAOD.pool.root
 # art-output: NTUP_PHYSVAL.root
 # art-output: rootcomp.root

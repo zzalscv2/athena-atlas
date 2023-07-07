@@ -2,7 +2,7 @@
 #
 # art-description: Reco_tf.py data15 RAWtoALL in MT mode
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 
 # art-include: 23.0/Athena
 # art-athena-mt: 8

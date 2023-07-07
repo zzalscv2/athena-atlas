@@ -4,7 +4,7 @@
 # art-type: build
 # art-include: 22.0/Athena
 # art-include: 23.0/Athena
-# art-include: master/Athena
+# art-include: main/Athena
 
 # Full chain with special flags
 # ATLAS-R3S-2021-03-01-00 and OFLCOND-MC21-SDR-RUN3-07

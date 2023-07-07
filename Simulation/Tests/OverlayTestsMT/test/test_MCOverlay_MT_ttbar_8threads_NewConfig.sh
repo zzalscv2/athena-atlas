@@ -6,7 +6,7 @@
 # art-athena-mt: 8
 # art-include: 22.0/Athena
 # art-include: 23.0/Athena
-# art-include: master/Athena
+# art-include: main/Athena
 
 # art-output: mcOverlayRDO.pool.root
 # art-output: log.*

@@ -3,7 +3,7 @@
 # art-description: Reco_tf runs on 13p6TeV collision data 2022, run 435229 has AFP detector included. Details at https://twiki.cern.ch/twiki/bin/view/AtlasProtected/SpecialRunsIn2022#done_47_SM_HI_combined_LHCf_ZDC
 # art-athena-mt: 8
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 
 export ATHENA_CORE_NUMBER=8

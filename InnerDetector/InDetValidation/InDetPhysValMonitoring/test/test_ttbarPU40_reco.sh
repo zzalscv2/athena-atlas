@@ -3,7 +3,7 @@
 # art-input: user.keli:user.keli.mc16_13TeV.410471.PhPy8EG_A14_ttbar_hdamp258p75_allhad.e6337_e5984_Rel22073
 # art-input-nfiles: 10
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 22.0/Athena
 # art-include: 23.0/Athena
 # art-output: physval*.root

@@ -80,7 +80,7 @@ def write_RecoTF(opts):
 # art-type: grid
 # art-output: *.pool.root
 # art-include: 21.0/Athena
-# art-include: master/Athena\n
+# art-include: main/Athena\n
 set -e\n
 Reco_tf.py --AMI q221 --inputRDOFile {turl} --outputRDO_TRIGFile art.pool.root\n
 echo \"art-result: $? DirectIOART_Athena_RecoTF_inputRDO_protocol_{protocol}\"""".format(turl=item.values()[0], protocol=item.keys()[0])
@@ -98,7 +98,7 @@ echo \"art-result: $? DirectIOART_Athena_RecoTF_inputRDO_protocol_{protocol}\"""
 # art-type: grid
 # art-output: *.pool.root
 # art-include: 21.0/Athena
-# art-include: master/Athena\n
+# art-include: main/Athena\n
 set -e\n
 export ATHENA_CORE_NUMBER=2
 Reco_tf.py --AMI q221 --multiprocess --inputRDOFile {turl} --outputRDO_TRIGFile art.pool.root\n
@@ -118,7 +118,7 @@ echo \"art-result: $? DirectIOART_AthenaMP_RecoTF_inputRDO_protocol_{protocol}\"
 # art-type: grid
 # art-output: *.pool.root
 # art-include: 21.0/Athena
-# art-include: master/Athena\n
+# art-include: main/Athena\n
 set -e\n
 Reco_tf.py --AMI q431 --inputBSFile {turl} --outputESDFile art.pool.root\n
 echo \"art-result: $? DirectIOART_Athena_RecoTF_inputBS_protocol_{protocol}\"""".format(turl=item.values()[0], protocol=item.keys()[0])
@@ -136,7 +136,7 @@ echo \"art-result: $? DirectIOART_Athena_RecoTF_inputBS_protocol_{protocol}\""""
 # art-type: grid
 # art-output: *.pool.root
 # art-include: 21.0/Athena
-# art-include: master/Athena\n
+# art-include: main/Athena\n
 set -e\n
 export ATHENA_CORE_NUMBER=2
 Reco_tf.py --AMI q431 --multiprocess --inputBSFile {turl} --outputESDFile art.pool.root\n
@@ -223,7 +223,7 @@ def writeTFileOpen():
   outstring = """#!/usr/bin/env python\n
 # art-description: DirectIOART TFile::Open
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: master/AthSimulation
 # art-include: 21.0/Athena
 # art-include: 21.0/AthSimulation
