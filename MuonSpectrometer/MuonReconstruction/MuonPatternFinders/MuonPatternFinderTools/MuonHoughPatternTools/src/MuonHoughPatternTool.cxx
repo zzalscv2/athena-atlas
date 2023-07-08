@@ -1447,6 +1447,10 @@ bool MuonHoughPatternTool::hitThroughCut(const std::shared_ptr<MuonHoughHit>& hi
 }
 
 void MuonHoughPatternTool::printPattern(Muon::MuonPrdPattern* muonpattern) const {
+    if (!muonpattern) {
+        ATH_MSG_VERBOSE("Printout of Pattern: nullptr");
+        return;
+    }
     ATH_MSG_VERBOSE("Printout of Pattern: ");
     for (unsigned int k = 0; k < muonpattern->numberOfContainedPrds(); k++) {
         const Trk::PrepRawData* prd = muonpattern->prd(k);
