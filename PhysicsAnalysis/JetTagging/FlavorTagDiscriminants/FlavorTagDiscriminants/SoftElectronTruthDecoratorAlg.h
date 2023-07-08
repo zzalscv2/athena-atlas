@@ -45,10 +45,10 @@ namespace FlavorTagDiscriminants {
     SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_vertex_index {
       this, "ftagTruthVertexIndex", "ftagTruthVertexIndex", 
         "Truth vertex index of the electron"};
-    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_barcode {
+    SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_barcode {
       this, "ftagTruthBarcode", "ftagTruthBarcode", 
         "Barcode of linked truth particle"};
-    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_parent_barcode {
+    SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_parent_barcode {
       this, "ftagTruthParentBarcode", "ftagTruthParentBarcode", 
         "Barcode of parent of linked truth particle"};
 
