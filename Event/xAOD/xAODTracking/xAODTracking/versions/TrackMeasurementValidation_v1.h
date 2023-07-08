@@ -9,6 +9,7 @@
 #include <vector>
 
 // Core include(s):
+#include "AthContainers/DataVector.h"
 #include "AthContainers/AuxElement.h"
 
 namespace xAOD {
@@ -76,5 +77,6 @@ namespace xAOD {
   }; // end of the TrackMeasurementValidation_v1 class definitions
 
 } // end of the xAOD namespace
+DATAVECTOR_BASE( xAOD::TrackMeasurementValidation_v1, SG::AuxElement );
 
 #endif // XAODTRACKING_VERSIONS_TRACKMEASUREMENTVALIDATION_V1_H

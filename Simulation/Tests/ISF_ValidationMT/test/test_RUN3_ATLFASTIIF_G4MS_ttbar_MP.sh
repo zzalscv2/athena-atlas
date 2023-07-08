@@ -3,7 +3,7 @@
 # art-description: MC23-style Run3 simulation using ATLFASTIIF_G4MS in AthenaMP
 # art-type: grid
 # art-include: 23.0/Athena
-# art-include: master/Athena
+# art-include: main/Athena
 # art-athena-mt: 8
 # art-architecture:  '#x86_64-intel'
 # art-output: test.*.HITS.pool.root

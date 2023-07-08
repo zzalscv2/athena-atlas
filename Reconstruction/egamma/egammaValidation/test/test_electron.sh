@@ -6,7 +6,7 @@
 # art-input: mc16_13TeV.423000.ParticleGun_single_electron_egammaET.recon.RDO.e3566_e5984_s3112_r12663
 # art-input-nfiles: 30
 # art-cores: 4
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 # art-output: *.hist.root
 # art-output: *.txt

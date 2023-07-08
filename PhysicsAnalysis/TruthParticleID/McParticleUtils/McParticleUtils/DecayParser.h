@@ -22,9 +22,6 @@
 #include <string>
 #include <vector>
 
-// EventKernel includes
-#include "EventKernel/PdtPdg.h"
-
 // fwd declare
 struct _object;
 typedef _object PyObject;
@@ -54,7 +51,7 @@ class DecayParser
 
   void dump() const;
 
-  PDG::pidType pdgId( const std::string& pdgIdString ) const;
+  int pdgId( const std::string& pdgIdString ) const;
 
   /////////////////////////////////////////////////////////////////// 
   // Non-const methods: 

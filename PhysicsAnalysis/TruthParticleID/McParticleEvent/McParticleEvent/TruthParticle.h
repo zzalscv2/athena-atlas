@@ -148,24 +148,24 @@ class TruthParticle : public ParticleImpl<
   /** Return true if the given PDG::id to match can be found within the 
    *  parents of this TruthParticle.
    */
-  bool hasMother( const PDG::pidType pdgId ) const;
+  bool hasMother( const int pdgId ) const;
 
   /** Return true if the given PDG::id to match can be found within the 
    *  children of this TruthParticle.
    */
-  bool hasChild( const PDG::pidType pdgId ) const;
+  bool hasChild( const int pdgId ) const;
 
   /** Return true if the given PDG::id to match can be found within the 
    *  parents of this TruthParticle. It also fills the given vector with 
    *  the indices toward the matching particles.
    */
-  bool hasMother( const PDG::pidType pdgId, std::vector<unsigned int>& indices ) const;
+  bool hasMother( const int pdgId, std::vector<unsigned int>& indices ) const;
 
   /** Return true if the given PDG::id to match can be found within the 
    *  children of this TruthParticle. It also fills the given vector with 
    *  the indices toward the matching particles.
    */
-  bool hasChild( const PDG::pidType pdgId, std::vector<unsigned int>& indices ) const;
+  bool hasChild( const int pdgId, std::vector<unsigned int>& indices ) const;
 
   // Accessor functions
   
@@ -198,7 +198,7 @@ class TruthParticle : public ParticleImpl<
   CLHEP::HepLorentzVector pDecay( const std::size_t i ) const;
 
   /// Return the PDG-Id of the i-th child of this particle
-  PDG::pidType pdgDecay( const std::size_t i ) const;
+  int pdgDecay( const std::size_t i ) const;
 
 #ifdef HEPMC3
 //FIXME

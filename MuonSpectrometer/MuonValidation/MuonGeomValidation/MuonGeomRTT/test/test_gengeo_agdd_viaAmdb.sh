@@ -3,7 +3,7 @@
 # art-description: Generate SQL files for muon spectrometer description, just AGDD part from amdb_simrec file
 #
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 #
 # art-output: *.data
 

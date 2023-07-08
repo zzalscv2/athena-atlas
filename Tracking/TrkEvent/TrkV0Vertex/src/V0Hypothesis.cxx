@@ -18,7 +18,7 @@
 
 namespace Trk {
 
- V0Hypothesis::V0Hypothesis() : ExtendedVxCandidate(), m_positiveTrackID(PDG::null), m_negativeTrackID(PDG::null), m_constraintID(PDG::null) {}
+ V0Hypothesis::V0Hypothesis() : ExtendedVxCandidate(), m_positiveTrackID(0), m_negativeTrackID(0), m_constraintID(0) {}
 
  V0Hypothesis::V0Hypothesis(const Trk::ExtendedVxCandidate& vxCandidate, 
                             int positiveTrackID, int negativeTrackID, int constraintID):

@@ -46,7 +46,7 @@ def generateText(formatName,label,inputFile,isTruth,isMC,nEvents,useLegacy):
    outputFile = open(outputFileName,"w")
    outputFile.write("#!/bin/sh"+"\n")
    outputFile.write("\n")
-   outputFile.write("# art-include: master/Athena"+"\n")
+   outputFile.write("# art-include: main/Athena"+"\n")
    if (formatName.find("EGAM")!=-1 or formatName.find("JETM")!=-1 or formatName.find("FTAG")!=-1 or formatName.find("IDTR")!=-1 or formatName.find("TRIG")!=-1 or (formatName.find("PHYS")!=-1 and formatName.find("PHYSLITE")==-1)):
       outputFile.write("# art-include: 23.0/Athena"+"\n")
    outputFile.write("# art-description: DAOD building "+formatName+" "+label+"\n")
@@ -109,7 +109,7 @@ def generateTrains(formatList,label,inputFile,isMC,nEvents,useLegacy):
    outputFile = open(outputFileName,"w")
    outputFile.write("#!/bin/sh"+"\n")
    outputFile.write("\n")
-   outputFile.write("# art-include: master/Athena"+"\n")
+   outputFile.write("# art-include: main/Athena"+"\n")
    outputFile.write("# art-description: DAOD building "+" ".join(formatList)+" "+label+"\n")
    outputFile.write("# art-type: grid"+"\n")
    outputFile.write("# art-output: *.pool.root"+"\n")

@@ -3,7 +3,7 @@
 
 # art-description: Test of cosmic P1+Tier0 workflow, runs athenaHLT with Cosmic_run3_v1 menu followed by offline reco and monitoring
 # art-type: build
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps

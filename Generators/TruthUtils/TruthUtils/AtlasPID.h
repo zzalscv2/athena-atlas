@@ -50,6 +50,7 @@ static const int BQUARK = 5;
 static const int TQUARK = 6;
 
 static const int ELECTRON = 11;
+static const int POSITRON = -11;
 static const int NU_E = 12;
 static const int MUON = 13;
 static const int NU_MU = 14;
@@ -64,9 +65,13 @@ static const int HIGGSBOSON = 25;
 static const int GRAVITON = 39;
 static const int LEPTOQUARK = 42;
 
+static const int PIPLUS = 211;
+static const int PIMINUS = -211;
 static const int PI0 = 111;
 static const int K0L = 130;
-static const int PIPLUS = 211;
+static const int LAMBDA0 = 3122;
+static const int DSPLUS = 431;
+static const int DPLUS = 411;
 
 static const int K0S = 310;
 static const int K0 = 311;
@@ -75,8 +80,15 @@ static const int KPLUS = 321;
 static const int DSTAR = 413;
 static const int D0 = 421;
 static const int JPSI = 443;
-
+static const int PSI2S =  20443;
 static const int PROTON = 2212;
+
+static const int BCPLUS = 541;
+
+static const int LAMBDACPLUS = 4122;
+static const int B0 = 511;
+static const int LAMBDAB0 = 5122;
+
 /// PDG rule 8:
 /// The pomeron and odderon trajectories and a generic reggeon trajectory
 /// of states in QCD areassigned codes 990, 9990, and 110 respectively

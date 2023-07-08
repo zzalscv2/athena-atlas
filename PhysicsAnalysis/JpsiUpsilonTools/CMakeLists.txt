@@ -16,7 +16,7 @@ atlas_add_library( JpsiUpsilonToolsLib
                    PUBLIC_HEADERS JpsiUpsilonTools
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${HEPPDT_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES  AthenaBaseComps xAODMuon xAODTracking GaudiKernel xAODEgamma TrkVertexFitterInterfaces
+                   LINK_LIBRARIES  AthenaBaseComps xAODMuon xAODTracking GaudiKernel xAODEgamma TrkVertexFitterInterfaces TruthUtils
                    PRIVATE_LINK_LIBRARIES ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} FourMomUtils TrkV0FitterLib VxVertex TrkToolInterfaces xAODBPhysLib AthLinks TrkVKalVrtFitterLib InDetConversionFinderToolsLib)
 
 atlas_add_component( JpsiUpsilonTools

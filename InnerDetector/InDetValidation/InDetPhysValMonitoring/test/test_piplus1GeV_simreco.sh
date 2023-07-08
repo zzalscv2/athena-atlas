@@ -3,7 +3,7 @@
 # art-type: grid
 # art-input: user.keli:user.keli.mc16_13TeV.422047.ParticleGun_single_piplus_Pt1.merge.EVNT.e7967_e5984_tid20255138_00
 # art-input-nfiles: 1
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 22.0/Athena
 # art-include: 23.0/Athena
 # art-output: physval*.root

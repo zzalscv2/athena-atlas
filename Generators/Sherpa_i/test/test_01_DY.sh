@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # art-include: 21.6/AthGeneration
-# art-include: master/AthGeneration
+# art-include: main/AthGeneration
 # art-description: Sherpa DY test
 # art-type: grid
 # art-output: EVNT.root

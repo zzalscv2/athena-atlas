@@ -2,7 +2,7 @@
 # art-description: AOD->HIST, R22 MC, Trigger Only
 # art-type: grid
 # art-memory: 4096
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 # art-output: ExampleMonitorOutput.root
 # art-output: log*

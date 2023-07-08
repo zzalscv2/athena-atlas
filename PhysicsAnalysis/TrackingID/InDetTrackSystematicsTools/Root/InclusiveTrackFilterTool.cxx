@@ -60,7 +60,7 @@ namespace InDet {
 
     if ( isActive( TRK_EFF_LARGED0_GLOBAL ) ) {
       float probDrop = std::abs(m_trkEffSystScale); // default is one; adjust this parameter to increase / decrease the effect
-      probDrop *= std::abs(getLRTTrkEff( track ));
+      probDrop *= std::abs(getTrackUncertainty( track ));
 
       if ( m_rnd->Uniform(0, 1) < probDrop ) return false;
     }
@@ -68,7 +68,7 @@ namespace InDet {
     return true;
   }
 
-  float InclusiveTrackFilterTool::getLRTTrkEff(const xAOD::TrackParticle* track) const
+  float InclusiveTrackFilterTool::getTrackUncertainty(const xAOD::TrackParticle* track) const
   {
     if (m_trkLRTEff == nullptr) {
       ATH_MSG_ERROR( "LRT track efficiency histogram is not property initialized!" );

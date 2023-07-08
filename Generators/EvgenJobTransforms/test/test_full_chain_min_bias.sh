@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# art-include: master--HepMC2/Athena
-# art-include: master/Athena
+# art-include: main--HepMC2/Athena
+# art-include: main/Athena
 # art-description: Pythia event generation -- min_bias
 # art-type: grid
 

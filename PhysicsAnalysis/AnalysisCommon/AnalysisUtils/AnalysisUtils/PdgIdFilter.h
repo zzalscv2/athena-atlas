@@ -24,9 +24,6 @@
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
 
-// EventKernel includes
-#include "EventKernel/PdtPdg.h"
-
 // AnalysisUtils includes
 #include "AnalysisUtils/IFilter.h"
 #include "AnalysisUtils/ParticleCandidateList.h"
@@ -83,8 +80,8 @@ class PdgIdFilter : virtual public IFilter<T>
   /////////////////////////////////////////////////////////////////// 
   void setFilter( const IFilterCuts * filter );
 
-  void setPdgId ( const PDG::pidType& pdgId );
-  void setPdgIds( const std::list<PDG::pidType>& pdgIds );
+  void setPdgId ( const int& pdgId );
+  void setPdgIds( const std::list<int>& pdgIds );
   void setPdgIds( const ParticleCandidateList& pdgIds );
 
   void setMatchSign( const bool matchSign );
@@ -154,7 +151,7 @@ bool PdgIdFilter<T>::isAccepted( const T * element ) const
 {
   /// Check if a pdg-id set has been set-up
   if ( false == m_pdgIds.empty() ) {
-    const PDG::pidType pdgId = element->pdgId();
+    const int pdgId = element->pdgId();
     //std::cout << "Received PDG: " << pdgId << std::endl;
     //m_pdgIds.dropList();
     if ( m_pdgIds.hasInList( pdgId, m_matchSign ) ) return true;
@@ -197,15 +194,15 @@ void PdgIdFilter<T>::setFilter( const IFilterCuts * filter )
 }
 
 template<typename T>
-inline void PdgIdFilter<T>::setPdgId( const PDG::pidType& pdgId )
+inline void PdgIdFilter<T>::setPdgId( const int& pdgId )
 {
   m_pdgIds.add( pdgId );
 }
 
 template<typename T>
-void PdgIdFilter<T>::setPdgIds( const std::list<PDG::pidType>& pdgIds )
+void PdgIdFilter<T>::setPdgIds( const std::list<int>& pdgIds )
 {
-  for ( std::list<PDG::pidType>::const_iterator itr = pdgIds.begin();
+  for ( auto itr = pdgIds.begin();
 	itr != pdgIds.end();
 	++itr ) {
     m_pdgIds.add( *itr );

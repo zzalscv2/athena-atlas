@@ -10,7 +10,7 @@
 #ifndef ANALYSISUTILS_PARTICLECANDIDATELIST_H 
 #define ANALYSISUTILS_PARTICLECANDIDATELIST_H 
 
-/** A simple wrapper for std::list<PDG::pidType> to model a list of particle
+/** A simple wrapper for std::list<int> to model a list of particle
  *  identity candidates.
  *  This candidate list is used by the PdgIdFilter and McVtxFilter to select 
  *  for particles which might fulfill some criterion (well in our case this is
@@ -21,7 +21,7 @@
 #include <list>
 
 // EventKernel includes
-#include "EventKernel/PdtPdg.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "AthenaBaseComps/AthMessaging.h"
 
 // Gaudi includes
@@ -35,21 +35,11 @@ class ParticleCandidateList
   /////////////////////////////////////////////////////////////////// 
  public:
 
-  ///\name list typedefs: it behaves like a std::list<PDG::pidType>
+  ///\name list typedefs: it behaves like a std::list<int>
   //@{
-  typedef PDG::pidType& reference;
-  typedef const PDG::pidType& const_reference;
-  typedef std::list<PDG::pidType>::iterator iterator;
-  typedef std::list<PDG::pidType>::const_iterator const_iterator;
-  typedef std::list<PDG::pidType>::size_type size_type;
-  typedef std::list<PDG::pidType>::difference_type difference_type;
-  typedef PDG::pidType value_type;
-  typedef std::list<PDG::pidType>::allocator_type allocator_type;
-  typedef PDG::pidType* pointer;
-  typedef const pointer const_pointer;
-  typedef std::list<PDG::pidType>::reverse_iterator reverse_iterator;
-  typedef std::list<PDG::pidType>::const_reverse_iterator const_reverse_iterator;
-  typedef PDG::pidType base_value_type;
+  typedef std::list<int>::iterator iterator;
+  typedef std::list<int>::const_iterator const_iterator;
+  typedef std::list<int>::size_type size_type;
   //@}
 
   /////////////////////////////////////////////////////////////////// 
@@ -83,15 +73,15 @@ class ParticleCandidateList
    *  if tightMatch = false : look only if std::abs() of
    *  particle data group id-s matches
    */
-  bool hasInList( const PDG::pidType& pdgID, 
+  bool hasInList( const int& pdgID, 
                   const bool tightMatch = false ) const;
   void dropList() const;
 
   /** Return the wrapped STL list
    */
-  const std::list<PDG::pidType>& list() const;
+  const std::list<int>& list() const;
 
-  /// \name forward some of the std::list<PDG::pidType> const methods
+  /// \name forward some of the std::list<int> const methods
   //@{
   const_iterator begin()  const;
   const_iterator end()    const;
@@ -106,11 +96,11 @@ class ParticleCandidateList
   // Non-const methods: 
   /////////////////////////////////////////////////////////////////// 
 
-  /** forward the std::list<PDG::pidType>::push_back() method
+  /** forward the std::list<int>::push_back() method
    */
-  void push_back(const PDG::pidType& id);
+  void push_back(const int& id);
 
-  /** forward the std::list<PDG::pidType>::clear() method
+  /** forward the std::list<int>::clear() method
    */
   void clear();
 
@@ -123,11 +113,11 @@ class ParticleCandidateList
   void addBjet();
   void addWBosons();
   void addZBoson();
-  void add( const PDG::pidType& partID );
+  void add( const int& partID );
   void add( const std::string& listOfParticlesName = "LightQuarks" );
 
  protected: 
-  std::list<PDG::pidType> m_list;
+  std::list<int> m_list;
 }; 
 
 
@@ -147,7 +137,7 @@ ParticleCandidateList::operator=( const ParticleCandidateList& rhs )
 /////////////////////////////////////////////////////////////////// 
 // Const methods: 
 /////////////////////////////////////////////////////////////////// 
-inline const std::list<PDG::pidType>& ParticleCandidateList::list() const
+inline const std::list<int>& ParticleCandidateList::list() const
 {
   return m_list;
 }
@@ -182,7 +172,7 @@ inline ParticleCandidateList::size_type ParticleCandidateList::max_size() const
 // Non-const methods: 
 /////////////////////////////////////////////////////////////////// 
 
-inline void ParticleCandidateList::push_back( const PDG::pidType& partID )
+inline void ParticleCandidateList::push_back( const int& partID )
 {
   m_list.push_back( partID );
 }
@@ -192,42 +182,42 @@ inline void ParticleCandidateList::clear()
   m_list.clear();
 }
 
-inline void ParticleCandidateList::add( const PDG::pidType& partID )
+inline void ParticleCandidateList::add( const int& partID )
 {
   push_back( partID );
 }
 
 inline void ParticleCandidateList::addBQuark()
 {
-  add( PDG::b ); //> b
+  add( MC::BQUARK ); //> b
 }
 
 inline void ParticleCandidateList::addBbarQuark()
 {
-  add( PDG::anti_b ); //> b_bar
+  add( -MC::BQUARK ); //> b_bar
 }
 
 inline void ParticleCandidateList::addBQuarks()
 {
-  add( PDG::b      ); //> b
-  add( PDG::anti_b ); //> b_bar
+  add( MC::BQUARK      ); //> b
+  add( -MC::BQUARK ); //> b_bar
 }
 
 inline void ParticleCandidateList::addBjet()
 {
-  add( PDG::b      ); //> b
-  add( PDG::anti_b ); //> b_bar
+  add( MC::BQUARK      ); //> b
+  add( -MC::BQUARK ); //> b_bar
 }
 
 inline void ParticleCandidateList::addWBosons()
 {
-  add( PDG::W_plus  ); //> W+
-  add( PDG::W_minus ); //> W-
+  add( MC::WPLUSBOSON  ); //> W+
+  add( -MC::WPLUSBOSON ); //> W-
  }
 
 inline void ParticleCandidateList::addZBoson()
 {
-  add( PDG::Z0 );
+  add( MC::Z0BOSON );
 }
 
 #endif //> ANALYSISUTILS_PARTICLECANDIDATELIST_H

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # art-include: 21.6/AthGeneration
-# art-include: master/Athena
+# art-include: main/Athena
 # art-description: Pythia event generation -- Zprime to tautau
 # art-architecture: '#x86_64-intel'
 # art-type: grid

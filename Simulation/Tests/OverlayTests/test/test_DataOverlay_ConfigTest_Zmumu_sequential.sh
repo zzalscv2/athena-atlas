@@ -3,7 +3,7 @@
 # art-description: MC+data Overlay with MT support, running sequentially, new config
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
-# art-include: master/Athena
+# art-include: main/Athena
 
 # art-output: dataOverlayRDO.pool.root
 # art-output: log.*

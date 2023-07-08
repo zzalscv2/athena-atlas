@@ -127,7 +127,7 @@ void ForwardTransportModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastS
   G4ThreeVector postTransportMomentum(fMom.x()*CLHEP::GeV, fMom.y()*CLHEP::GeV, fMom.z()*CLHEP::GeV);
 
   PrimaryParticleInformation *ppi = this->getPrimaryParticleInformation(fastTrack);
-  HepMC::GenParticlePtr part = (ppi)? ppi->GetHepMCParticle() : HepMC3::GenParticlePtr();
+  HepMC::GenParticlePtr part = (ppi)? ppi->GetHepMCParticle() : HepMC::GenParticlePtr();
   HepMC::GenEvent* gEvent = (part) ? const_cast<HepMC::GenEvent*>(part->parent_event()) : nullptr;
   if (!gEvent)
     {
@@ -233,7 +233,7 @@ void ForwardTransportModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastS
 
 void ForwardTransportModel::KillPrimaryTrack(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
   PrimaryParticleInformation *ppi = this->getPrimaryParticleInformation(fastTrack);
-  HepMC::GenParticlePtr part = (ppi)? ppi->GetHepMCParticle() : HepMC3::GenParticlePtr();
+  HepMC::GenParticlePtr part = (ppi)? ppi->GetHepMCParticle() : HepMC::GenParticlePtr();
   HepMC::GenEvent* gEvent = (part) ? const_cast<HepMC::GenEvent*>(part->parent_event()) : nullptr;
   if (!gEvent)
     {

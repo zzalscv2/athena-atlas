@@ -2,7 +2,7 @@
 
 # art-description: SUSYTools ART test - TestSUSYToolsAlg.py
 # art-type: grid
-# art-include: master/AnalysisBase
+# art-include: main/AnalysisBase
 # art-output: hist-data18_DAOD_PHYS.root
 # art-output: dcube
 

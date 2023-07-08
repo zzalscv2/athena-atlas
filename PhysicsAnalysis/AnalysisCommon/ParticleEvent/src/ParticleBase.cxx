@@ -30,7 +30,7 @@ ParticleBase::ParticleBase() :
   m_origin(),
   m_charge( 0. ),
   m_hasCharge  ( false ),
-  m_pdgId      ( PDG::null ),
+  m_pdgId      ( 0 ),
   m_hasPdgId   ( false ),
   m_dataType   ( ParticleDataType::Data )
 {}

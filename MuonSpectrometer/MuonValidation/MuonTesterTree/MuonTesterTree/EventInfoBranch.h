@@ -8,6 +8,7 @@
 #include <StoreGate/ReadDecorHandleKey.h>
 #include <xAODEventInfo/EventInfo.h>
 #include <MuonTesterTree/MuonTesterBranch.h>
+#include <MuonTesterTree/MuonTesterTree.h>
 #include <atomic>
 
 namespace MuonVal {

@@ -26,6 +26,7 @@
 #include "AthContainers/ConstDataVector.h"
 #include "TrkVKalVrtFitter/VxCascadeInfo.h"
 #include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace DerivationFramework {
     typedef ElementLink<xAOD::VertexContainer> VertexLink;
@@ -72,22 +73,22 @@ namespace DerivationFramework {
 
         // retrieve particle masses
         if(m_vtx0MassHypo < 0.)
-          m_vtx0MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::B_c_plus);
+          m_vtx0MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::BCPLUS);
         if(m_vtx1MassHypo < 0.) {
-          if(std::abs(m_Dx_pid) == 411) m_vtx1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::D_plus);
-          if(std::abs(m_Dx_pid) == 431) m_vtx1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::D_s_plus);
-          if(std::abs(m_Dx_pid) == 4122) m_vtx1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::Lambda_c_plus);
+          if(std::abs(m_Dx_pid) == 411) m_vtx1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::DPLUS);
+          if(std::abs(m_Dx_pid) == 431) m_vtx1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::DSPLUS);
+          if(std::abs(m_Dx_pid) == 4122) m_vtx1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::LAMBDACPLUS);
         }
 
-        if(m_vtx0Daug1MassHypo < 0.) m_vtx0Daug1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::mu_minus);
+        if(m_vtx0Daug1MassHypo < 0.) m_vtx0Daug1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::MUON);
         if(m_vtx1Daug1MassHypo < 0.) {
-           if(std::abs(m_Dx_pid) == 431) m_vtx1Daug1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::K_plus); //Ds+
-           else m_vtx1Daug1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::pi_plus); //D+, Lambda_c+
+           if(std::abs(m_Dx_pid) == 431) m_vtx1Daug1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::KPLUS); //Ds+
+           else m_vtx1Daug1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::PIPLUS); //D+, Lambda_c+
         }
-        if(m_vtx1Daug2MassHypo < 0.) m_vtx1Daug2MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::K_plus);
+        if(m_vtx1Daug2MassHypo < 0.) m_vtx1Daug2MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::KPLUS);
         if(m_vtx1Daug3MassHypo < 0.) {
-            if(std::abs(m_Dx_pid) == 4122) m_vtx1Daug3MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::p_plus); //Lambda_c+
-            else m_vtx1Daug3MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::pi_plus); //Ds+, D+
+            if(std::abs(m_Dx_pid) == 4122) m_vtx1Daug3MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::PROTON); //Lambda_c+
+            else m_vtx1Daug3MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::PIPLUS); //Ds+, D+
         }
         return StatusCode::SUCCESS;
     }

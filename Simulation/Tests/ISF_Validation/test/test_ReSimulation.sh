@@ -2,7 +2,7 @@
 #
 # art-description: ReSimulation Workflow running with MC16 conditions/geometry
 # art-include: 23.0/Athena
-# art-include: master/Athena
+# art-include: main/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-output: log.*

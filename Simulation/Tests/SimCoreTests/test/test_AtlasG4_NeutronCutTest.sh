@@ -2,7 +2,7 @@
 #
 # art-description: Run simulation outside ISF, reading Z->tau tau events, modifying the Neutron timing cut, writing HITS, using 2015 geometry and conditions
 # art-include: 23.0/Athena
-# art-include: master/Athena
+# art-include: main/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-output: *.HITS.pool.root

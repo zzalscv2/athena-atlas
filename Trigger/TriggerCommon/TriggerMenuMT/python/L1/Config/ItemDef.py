@@ -182,6 +182,7 @@ class ItemDef:
         MenuItem('L1_eEM26T'    ).setLogic( d.eEM26T     & physcond).setTriggerType( TT.calo ) 
         MenuItem('L1_eEM28M'    ).setLogic( d.eEM28M     & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eEM9_EMPTY'        ).setLogic(d.eEM9 & cosmiccond      ).setTriggerType( TT.calo )
+        MenuItem('L1_2eEM9_EMPTY'        ).setLogic(d.eEM9.x(2) & cosmiccond      ).setTriggerType( TT.calo )
         MenuItem('L1_eEM9_UNPAIRED_ISO' ).setLogic(d.eEM9 & unpaired_isocond).setTriggerType( TT.calo )
 
         # PhaseI 2xEM and 3xEM

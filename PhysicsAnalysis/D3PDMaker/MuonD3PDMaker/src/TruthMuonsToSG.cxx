@@ -13,7 +13,7 @@
 #include "TruthMuonsToSG.h"
 
 #include "xAODTruth/TruthParticleContainer.h"
-#include "EventKernel/PdtPdg.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "AthContainers/ConstDataVector.h"
 #include "AthenaKernel/errorcheck.h"
 
@@ -56,7 +56,7 @@ StatusCode TruthMuonsToSG::execute() {
     = new ConstDataVector<xAOD::TruthParticleContainer>(SG::VIEW_ELEMENTS);
 
   for (const xAOD::TruthParticle* p : *truthCollection) {
-    if( abs(p->pdgId()) == PDG::mu_minus && p->status() == 1 ) {
+    if( abs(p->pdgId()) == MC::MUON && p->status() == 1 ) {
       muonColl->push_back(p);
     }
     else if( p->pdgId() == 22 ) {

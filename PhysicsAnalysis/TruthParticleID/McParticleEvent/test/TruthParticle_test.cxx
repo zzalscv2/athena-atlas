@@ -38,6 +38,7 @@
 #include "McParticleEvent/TruthParticleContainer.h"
 #include "McParticleEvent/TruthParticle.h"
 #include "McParticleEvent/TruthEtIsolations.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 class tp_test_err
   : public std::exception
@@ -365,10 +366,10 @@ void testSettersAndGetters( TruthParticleTest* tp )
     TP_ASSERT( caught );
     TP_ASSERT( mc.child(0) == 0 );
 
-    TP_ASSERT( mc.hasMother( PDG::t ) );
+    TP_ASSERT( mc.hasMother( MC::TQUARK ) );
     {
       std::vector<unsigned int> indices;
-      TP_ASSERT( mc.hasMother( PDG::t, indices ) );
+      TP_ASSERT( mc.hasMother( MC::TQUARK, indices ) );
       TP_ASSERT( indices.size() == 1 );
       TP_ASSERT( indices[0]     == 0 );
     }
@@ -440,13 +441,13 @@ void testSettersAndGetters( TruthParticleTest* tp )
     }
 
     TP_ASSERT( mc.status() == tp->m_top->status() );
-    TP_ASSERT( mc.hasChild( PDG::b ) );
-    TP_ASSERT( mc.hasChild( PDG::W_plus ) );
-    TP_ASSERT( mc.hasChild( PDG::g ) );
+    TP_ASSERT( mc.hasChild( MC::BQUARK ) );
+    TP_ASSERT( mc.hasChild( MC::WPLUSBOSON ) );
+    TP_ASSERT( mc.hasChild( MC::GLUON ) );
 
     {
       std::vector<unsigned int> indices;
-      TP_ASSERT( mc.hasChild( PDG::W_plus, indices ) );
+      TP_ASSERT( mc.hasChild( MC::WPLUSBOSON, indices ) );
       TP_ASSERT( indices.size() == 1 );
       TP_ASSERT( indices[0]     == refWIdx );
       for ( unsigned int i = 0; i != indices.size(); ++i ) {
@@ -465,13 +466,13 @@ void testSettersAndGetters( TruthParticleTest* tp )
     }
     {
       std::vector<unsigned int> indices;
-      TP_ASSERT( mc.hasChild( PDG::b, indices ) );
+      TP_ASSERT( mc.hasChild( MC::BQUARK, indices ) );
       TP_ASSERT( indices.size() == 1 );
       TP_ASSERT( indices[0]     == refBIdx );
     }
     {
       std::vector<unsigned int> indices;
-      TP_ASSERT( mc.hasChild( PDG::g, indices ) );
+      TP_ASSERT( mc.hasChild( MC::GLUON, indices ) );
       TP_ASSERT( indices.size() == 2 );
       TP_ASSERT( indices[0]     == refGluon1Idx );
       TP_ASSERT( indices[1]     == refGluon2Idx );

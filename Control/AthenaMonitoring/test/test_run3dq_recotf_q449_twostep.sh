@@ -2,7 +2,7 @@
 # art-description: new DQ in Reco_tf, two-step, Run 2 data q431
 # art-type: grid
 # art-memory: 6144
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 # art-output: myHIST.root
 # art-output: log*

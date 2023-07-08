@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # art-description: ReSimulation Workflow running with MC16 conditions/geometry
-# art-include: master/Athena
+# art-include: main/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-output: log.*

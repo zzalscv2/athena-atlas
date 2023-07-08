@@ -19,7 +19,6 @@
 // Gaudi includes
 
 // EventKernel includes
-#include "EventKernel/PdtPdg.h"
 #include "EventKernel/IParticle.h" // for {Charge,ParticleDataType::Data}Type
 
 // Navigation includes
@@ -88,9 +87,8 @@ class TruthParticleBase
   /** method to check if particle id information is available*/
   bool hasPdgId() const;
 
-  /** Return enum indicating particle id
-      the enum file is available in Event/EventKernel/PdtPdg.h  */
-  PDG::pidType pdgId() const;
+  /** Return eparticle id*/
+  int pdgId() const;
 
   /// Print @c IParticle content
   std::ostream& dump( std::ostream& out ) const;
@@ -120,7 +118,7 @@ class TruthParticleBase
   // Set functions (for IParticle) (all dummy)
   void set_dataType( ParticleDataType::DataType /*x*/ ) {std::abort();}
   void set_charge( ChargeType x ) {setCharge(x);}
-  void set_pdgId( PDG::pidType /*x*/ ) {std::abort();}
+  void set_pdgId( int /*x*/ ) {std::abort();}
   void set_origin( const VxContainer* /*theContainer*/, int /*index*/ )
   {std::abort();}
   void set_origin( const VxContainer* /*theContainer*/,
@@ -173,9 +171,9 @@ bool TruthParticleBase::hasPdgId() const
 }
 
 inline 
-PDG::pidType TruthParticleBase::pdgId() const
+int TruthParticleBase::pdgId() const
 {
-  return static_cast<PDG::pidType>(m_genParticle->pdg_id());
+  return m_genParticle->pdg_id();
 }
 
 inline 

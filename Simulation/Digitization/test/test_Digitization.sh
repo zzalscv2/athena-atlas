@@ -3,7 +3,7 @@
 # art-description: Run digitization of an MC16a ttbar sample with 2016a geometry and conditions, without pile-up
 # art-type: build
 # art-include: 23.0/Athena
-# art-include: master/Athena
+# art-include: main/Athena
 
 Digi_tf.py \
     --CA \

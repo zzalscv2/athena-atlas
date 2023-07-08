@@ -65,19 +65,12 @@ void DecayParser::dump() const
   printMcUtilsStrings( m_children );
 }
 
-PDG::pidType DecayParser::pdgId( const std::string& pdgIdString ) const
+int DecayParser::pdgId( const std::string& pdgIdString ) const
 {
-  PDG::pidType pdgID = PDG::null;
-
-  /// We have been setup to directly use PdgIds
-  /// so here we just convert a PDG-ID string into a bare number
-  /// Note: if we were in 1990's we could have used atoi(char*)
-  /// but, hey, let us use ANSI-C++ : (need to go through a temporary integer
-  /// because explicit cast of PDG::pidType into integer does not work
-  /// with int std::stringstream::operator>>() ==> Why ? //FIXME
+  int pdgID = 0;
   int iPDG = 0;
   std::stringstream( pdgIdString ) >> iPDG;
-  pdgID = static_cast<PDG::pidType>(iPDG);
+  pdgID = iPDG;
 
   return pdgID;
 }

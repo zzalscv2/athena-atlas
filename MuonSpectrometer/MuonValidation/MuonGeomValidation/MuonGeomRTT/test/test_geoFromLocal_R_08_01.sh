@@ -3,7 +3,7 @@
 # art-description: Run simulation from existing layout of geometry database and from local amdb file (for muon geometry MuonSpectrometer-R.08.01)
 #
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 #
 # art-output: log.EVNTtoHITS_fromLocal
 # art-output: log.EVNTtoHITS

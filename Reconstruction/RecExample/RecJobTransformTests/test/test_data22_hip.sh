@@ -3,7 +3,7 @@
 # art-description: heavy ion reconstruction on data22
 # art-athena-mt: 8
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 
 export ATHENA_CORE_NUMBER=8

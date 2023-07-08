@@ -2,7 +2,7 @@
 #
 # art-description: Athena runs data22 with 1 and 8 threads twice, and then does diff-root.
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 # art-athena-mt: 8
 # art-output: runOne

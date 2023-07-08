@@ -3,7 +3,7 @@
 # art-description: MC+MC Overlay with MT support, running sequentially, new config
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
-# art-include: master/Athena
+# art-include: main/Athena
 
 # art-output: mcOverlayRDO.pool.root
 # art-output: log.*

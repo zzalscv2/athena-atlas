@@ -16,6 +16,7 @@
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ThreadLocalContext.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include <cassert>
 #include <iostream>
 
@@ -68,7 +69,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   testit (trans2);
 
   ParticleEvent::Base trans3 (trans1);
-  trans3.set_pdgId (PDG::t);
+  trans3.set_pdgId (MC::TQUARK);
   testit (trans3);
 }
 
