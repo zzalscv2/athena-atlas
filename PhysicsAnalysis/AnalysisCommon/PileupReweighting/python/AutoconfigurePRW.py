@@ -3,40 +3,43 @@ from Campaigns.Utils import Campaign, getMCCampaign
 
 
 def getLumicalcFiles(campaign):
-    list = []
-
-    if campaign in [Campaign.MC16a, Campaign.MC20a]:
-        list.append(
-            'GoodRunsLists/data15_13TeV/20170619/PHYS_StandardGRL_All_Good_25ns_276262-284484_OflLumi-13TeV-008.root'
-        )
-        list.append(
+    """ Returns the list of lumicalc files for a given campaign """
+    ilumical_files = {
+        Campaign.MC16a: [
+            'GoodRunsLists/data15_13TeV/20170619/PHYS_StandardGRL_All_Good_25ns_276262-284484_OflLumi-13TeV-008.root',
             'GoodRunsLists/data16_13TeV/20180129/PHYS_StandardGRL_All_Good_25ns_297730-311481_OflLumi-13TeV-009.root'
-        )
-
-    elif campaign in [Campaign.MC16d, Campaign.MC20d]:
-        list.append(
+        ],
+        Campaign.MC16d: [
             'GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.lumicalc.OflLumi-13TeV-010.root'
-        )
-
-    elif campaign in [Campaign.MC16e, Campaign.MC20e]:
-        list.append(
+        ],
+        Campaign.MC16e: [
             'GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root'
-        )
-
-    elif campaign in [Campaign.MC21a, Campaign.MC23a]:
-        list.append(
+        ],
+        Campaign.MC20a: [
+            'GoodRunsLists/data15_13TeV/20170619/PHYS_StandardGRL_All_Good_25ns_276262-284484_OflLumi-13TeV-008.root',
+            'GoodRunsLists/data16_13TeV/20180129/PHYS_StandardGRL_All_Good_25ns_297730-311481_OflLumi-13TeV-009.root'
+        ],
+        Campaign.MC20d: [
+            'GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.lumicalc.OflLumi-13TeV-010.root'
+        ],
+        Campaign.MC20e: [
+            'GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root'
+        ],
+        Campaign.MC21a: [
             'GoodRunsLists/data22_13p6TeV/20220902/ilumicalc_histograms_None_430536-430648_OflLumi-Run3-001.root'
-        )
+        ],
+        Campaign.MC23a: [
+            'GoodRunsLists/data22_13p6TeV/20220902/ilumicalc_histograms_None_430536-430648_OflLumi-Run3-001.root'
+        ],
+        Campaign.MC23c: [
+            'GoodRunsLists/data23_13p6TeV/20230626/ilumicalc_histograms_None_451587-452872_OflLumi-Run3-003.root'
+        ]
+    }
 
-    else:
-        raise ValueError(f'Unsupported campaign {campaign}')
-
-    if campaign in [Campaign.MC16a, Campaign.MC20a]:
-        assert(len(list) == 2)
-    else:
-        assert(len(list) == 1)
-
-    return list
+    try:
+        return ilumical_files[campaign]
+    except KeyError:
+        raise ValueError(f'Unsupported campaign {campaign} for lumicalc files')
 
 
 def actualMuFiles(campaign):
