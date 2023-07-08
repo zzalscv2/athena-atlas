@@ -8,6 +8,7 @@
 #include "TruthUtils/HepMCHelpers.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenEvent.h"
+#include <vector>
 
 
 FixHepMC::FixHepMC(const std::string& name, ISvcLocator* pSvcLocator)
@@ -479,27 +480,36 @@ bool FixHepMC::isPID0(const HepMC::ConstGenParticlePtr& p) const {
 }
 
 // Identify the particles from
-bool FixHepMC::fromDecay(const HepMC::ConstGenParticlePtr& p) const {
+bool FixHepMC::fromDecay(const HepMC::ConstGenParticlePtr& p, std::shared_ptr<std::set<int> >& storage) const {
       if (!p) return false;
       auto v=p->production_vertex();
       if (!v) return false;
 #ifdef HEPMC3
-      for ( const auto& anc: v->particles_in())
-      if (MC::isDecayed(anc) && (MC::isTau(anc->pdg_id()) || MC::isHadron(anc->pdg_id()))) return true;
-      for ( const auto& anc: v->particles_in())
-      if (fromDecay(anc)) return true;
+      for ( const auto& anc: v->particles_in()) {
+        if (MC::isDecayed(anc) && (MC::isTau(anc->pdg_id()) || MC::isHadron(anc->pdg_id()))) return true;
+      }
+      if (storage->find(p->id()) != storage->end()) return false;
+      storage->insert(p->id());
+      for ( const auto& anc: v->particles_in()) {
+            if (fromDecay(anc, storage)) return true;
+      }
 #else
-      for (auto  anc=v->particles_in_const_begin(); anc != v->particles_in_const_end(); ++anc)
-      if (MC::isDecayed((*anc)) && (MC::isTau((*anc)->pdg_id()) || MC::isHadron((*anc)->pdg_id()))) return true;
-      for (auto  anc=v->particles_in_const_begin(); anc != v->particles_in_const_end(); ++anc)
-      if (fromDecay(*anc)) return true;
+      for (auto  anc=v->particles_in_const_begin(); anc != v->particles_in_const_end(); ++anc) {
+        if (MC::isDecayed((*anc)) && (MC::isTau((*anc)->pdg_id()) || MC::isHadron((*anc)->pdg_id()))) return true;
+      }
+      if (storage->find(p->barcode()) != storage->end()) return false;
+      storage->insert(p->barcode());
+      for (auto  anc=v->particles_in_const_begin(); anc != v->particles_in_const_end(); ++anc){
+        if (fromDecay(*anc, storage)) return true;
+      }
 #endif
       return false;
 }
 
 // Identify non-transportable stuff _after_ hadronisation
 bool FixHepMC::isNonTransportableInDecayChain(const HepMC::ConstGenParticlePtr& p) const {
-  return !MC::isTransportable(p->pdg_id()) && fromDecay(p);
+  auto storage = std::make_shared<std::set<int>>();
+  return !MC::isTransportable(p->pdg_id()) && fromDecay(p, storage);
 }
 
 // Identify internal "loop" particles
