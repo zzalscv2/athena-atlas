@@ -6,7 +6,7 @@
 # art-include: 21.0/Athena
 # art-include: 21.3/Athena
 # art-include: 21.9/Athena
-# art-include: master/Athena
+# art-include: main/Athena
 # art-output: mc16e_ttbar_beamspotsizereweight.*.RDO.pool.root
 
 DigiOutFileNameCG="mc16e_ttbar_beamspotsizereweight.CG.RDO.pool.root"

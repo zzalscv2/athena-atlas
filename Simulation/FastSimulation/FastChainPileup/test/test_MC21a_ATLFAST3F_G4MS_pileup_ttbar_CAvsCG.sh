@@ -2,7 +2,7 @@
 #
 # art-description: CA vs Legacy code diff (ATLFAST3F_G4MS with pileup profile) for MC21a ttbar
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 # art-output: run_*
 # art-output: log.*

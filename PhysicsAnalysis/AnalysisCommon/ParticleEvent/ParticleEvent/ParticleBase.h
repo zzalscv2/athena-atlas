@@ -54,14 +54,13 @@ class ParticleBase : public virtual IParticle
   /** method to check if particle id information is available*/
   virtual bool hasPdgId()          const;
 
-  /** Return enum indicating particle id
-      the enum file is available in Event/EventKernel/PdtPdg.h  */
-  virtual PDG::pidType pdgId()     const;
+  /** Return particle id*/
+  virtual int pdgId()     const;
   
   // Set functions (for IParticle)
   void set_dataType(ParticleDataType::DataType x ) { m_dataType = x;}
   void set_charge(ChargeType x ) { m_charge = x; m_hasCharge = true;}
-  void set_pdgId(PDG::pidType x ) { m_pdgId = x; m_hasPdgId = true;}
+  void set_pdgId(int x ) { m_pdgId = x; m_hasPdgId = true;}
   void reset_charge() { m_hasCharge = false; }
   void reset_pdgId() { m_hasPdgId = false; }
   void set_origin(const VxContainer* theContainer, int index);
@@ -73,7 +72,7 @@ class ParticleBase : public virtual IParticle
   ElementLink< VxContainer > m_origin;
   ChargeType m_charge;
   bool m_hasCharge;
-  PDG::pidType m_pdgId;
+  int m_pdgId;
   bool m_hasPdgId;
   ParticleDataType::DataType m_dataType;  
 
@@ -98,7 +97,7 @@ inline   ParticleDataType::DataType ParticleBase::dataType() const
 inline bool ParticleBase::hasCharge()  const { return m_hasCharge;}
 inline ChargeType ParticleBase::charge() const { return m_charge ;}
 inline bool ParticleBase::hasPdgId() const {return m_hasPdgId ;}
-inline PDG::pidType ParticleBase::pdgId() const {return m_pdgId;}
+inline int ParticleBase::pdgId() const {return m_pdgId;}
 
 DATAVECTOR_VIRTBASES1 (ParticleBase, IParticle);
 

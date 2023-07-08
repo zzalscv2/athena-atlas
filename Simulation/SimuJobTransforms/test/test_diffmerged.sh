@@ -3,7 +3,7 @@
 # art-description: MC23-style simulation, then merge two copies of the HITS file
 # art-type: build
 # art-include: 23.0/Athena
-# art-include: master/Athena
+# art-include: main/Athena
 
 # MC23 setup
 # ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-01

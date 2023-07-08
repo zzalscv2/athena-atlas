@@ -3,7 +3,7 @@
 
 # art-description: Trigger RDO->RDO_TRIG athena test of the b-jet slice in Dev_pp_run3_v1 menu
 # art-type: build
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.

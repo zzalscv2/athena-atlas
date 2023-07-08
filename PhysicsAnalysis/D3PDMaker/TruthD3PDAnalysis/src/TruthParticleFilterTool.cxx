@@ -12,7 +12,6 @@
 
 
 #include "TruthParticleFilterTool.h"
-#include "EventKernel/PdtPdg.h"
 #include "AthenaKernel/errorcheck.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
@@ -142,7 +141,7 @@ TruthParticleFilterTool::isAccepted (const HepMC::ConstGenParticlePtr& p)
   }
 
   if (HepMC::is_simulation_particle(barcode) && !m_writeGeant && !m_writeEverything && !ok) {
-    if (! (pdg_id == PDG::gamma &&
+    if (! (pdg_id == MC::PHOTON &&
            m_geantPhotonPtThresh >= 0 &&
            p->momentum().perp() > m_geantPhotonPtThresh) )
       return false;

@@ -2,7 +2,7 @@
 #
 # art-description: Testing AODMerge_tf.py in the old/new-style job configurations 
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 
 # Run the old-style merge

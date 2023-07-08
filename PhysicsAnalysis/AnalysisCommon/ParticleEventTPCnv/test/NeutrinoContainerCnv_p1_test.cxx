@@ -16,6 +16,7 @@
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ThreadLocalContext.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include <cassert>
 #include <iostream>
 
@@ -81,7 +82,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   p2->set_charge (1.5);
 
   auto p3 = std::make_unique<Neutrino>(*p1);
-  p3->set_pdgId (PDG::t);
+  p3->set_pdgId (MC::TQUARK);
 
   trans1.push_back (std::move(p1));
   trans1.push_back (std::move(p2));

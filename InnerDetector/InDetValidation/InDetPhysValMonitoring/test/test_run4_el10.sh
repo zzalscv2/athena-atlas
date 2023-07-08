@@ -3,7 +3,7 @@
 # art-input: mc15_14TeV:mc15_14TeV.900035.PG_singleel_Pt10_etaFlatnp0_43.evgen.EVNT.e8185
 # art-input-nfiles: 1
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-output: *.root
 # art-output: *.xml
 # art-output: dcube*

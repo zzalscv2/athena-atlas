@@ -57,7 +57,7 @@ void ParticleBaseCnv_p2::persToTrans( const ParticleBase_p2* pers,
     trans->reset_charge();
   }
   if (pers->m_hasPdgId) {
-    trans->set_pdgId     (static_cast<PDG::pidType>( pers->m_pdgId ));
+    trans->set_pdgId     (pers->m_pdgId );
   }
   else {
     trans->reset_pdgId();
@@ -109,7 +109,7 @@ void ParticleBaseCnv_p2::persToTrans( const ParticleBase_p2* pers,
     trans->reset_charge();
   }
   if (pers->m_hasPdgId) {
-    trans->set_pdgId     (static_cast<PDG::pidType>( pers->m_pdgId ));
+    trans->set_pdgId     (pers->m_pdgId );
   }
   else {
     trans->reset_pdgId();

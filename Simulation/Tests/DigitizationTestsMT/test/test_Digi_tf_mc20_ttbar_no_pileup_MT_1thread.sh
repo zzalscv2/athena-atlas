@@ -6,7 +6,7 @@
 # art-athena-mt: 8
 # art-include: 22.0-mc20/Athena
 # art-include: 23.0/Athena
-# art-include: master/Athena
+# art-include: main/Athena
 # the name below is needed because of the environment variable (marks storing in tar file).
 # art-output: mc20_nopileup_ttbar.MT.RDO.pool.root
 # art-output: mc20_nopileup_ttbar.ST.RDO.pool.root

@@ -73,6 +73,14 @@ void test1()
     SG::ReadDecorHandleKey<MyObj> k (&owner, "CCCKey", r, "dec", "doc string");
     check(owner, k);
   }
+  {
+    TestOwner owner;
+    SG::ReadHandleKey<MyObj> w ("xxx");
+    SG::ReadDecorHandleKey<MyObj> k (&owner, "CCCKey", w, "dec", "doc string");
+    w="ccc";
+    k.initialize().ignore();
+    check(owner, k);
+  }
 }
 
 

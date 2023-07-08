@@ -3,7 +3,7 @@
 
 # art-description: art job for all_ttbar_pu55
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 # art-input: valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8453_e8455_s3873_s3874_r13829_tid30652302_00
 # art-input-nfiles: 2

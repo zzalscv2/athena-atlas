@@ -1,7 +1,7 @@
 #!/bin/bash
 # art-description: Standard test for 2015 data
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 22.0/Athena
 # art-include: 23.0/Athena
 # art-output: physval*.root

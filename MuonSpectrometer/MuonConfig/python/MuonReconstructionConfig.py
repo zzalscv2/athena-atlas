@@ -124,15 +124,13 @@ def StandaloneMuonOutputCfg(flags):
         esd_items += ["DetailedTrackTruthCollection#MuonSpectrometerTracksTruth"]
         esd_items += ["TrackTruthCollection#MuonSpectrometerTracksTruth"]
 
-        # Since this is only used for debugging, probably okay not to have a writeSDO flag..
-        # Leaving this here for the moment in case this turns out to be a mistake.
-        # if muonRecFlags.writeSDOs():
-        #     if flags.Detector.EnableCSC: esd_items+=["CscSimDataCollection#CSC_SDO"]
-        #     esd_items+=["MuonSimDataCollection#MDT_SDO"]
-        #     esd_items+=["MuonSimDataCollection#RPC_SDO"]
-        #     esd_items+=["MuonSimDataCollection#TGC_SDO"]
-        #     if flags.Detector.EnablesTGC: esd_items+=["MuonSimDataCollection#sTGC_SDO"]
-        #     if flags.Detector.EnableMM: esd_items+=["MuonSimDataCollection#MM_SDO"]
+        if flags.Muon.writeSDOs:
+            if flags.Detector.EnableCSC: esd_items+=["CscSimDataCollection#CSC_SDO"]
+            esd_items+=["MuonSimDataCollection#MDT_SDO"]
+            esd_items+=["MuonSimDataCollection#RPC_SDO"]
+            esd_items+=["MuonSimDataCollection#TGC_SDO"]
+            if flags.Detector.EnablesTGC: esd_items+=["MuonSimDataCollection#sTGC_SDO"]
+            if flags.Detector.EnableMM: esd_items+=["MuonSimDataCollection#MM_SDO"]
 
     if flags.Output.doWriteESD:
         result.merge(OutputStreamCfg(flags, "ESD", esd_items))

@@ -2,7 +2,7 @@
 #
 # art-description: MC21-style simulation using FullG4 and RUN4 geometry, single neutrino
 # art-include: 23.0/Athena
-# art-include: master/Athena
+# art-include: main/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-output: test_neutrino.HITS.pool.root

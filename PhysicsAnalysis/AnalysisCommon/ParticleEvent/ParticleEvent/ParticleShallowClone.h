@@ -218,10 +218,9 @@ namespace Analysis
         (forwareded to the orignal "master" particle) */
     virtual bool hasPdgId() const;
 
-    /** Return enum indicating particle id
-        the enum file is available in Event/EventKernel/PdtPdg.h
+    /** Return particle id
         (forwareded to the orignal "master" particle)  */
-    virtual PDG::pidType pdgId() const;
+    virtual int pdgId() const;
 
 
     // Set functions (for IParticle)
@@ -239,7 +238,7 @@ namespace Analysis
     /* These setters are not implemented! 
        Users should get the master particle and modify its PDG_ID or ParticleDataType directly... */
     //virtual void set_dataType( ParticleDataType::DataType x );
-    //virtual void set_pdgId( PDG::pidType x );
+    //virtual void set_pdgId( int x );
     
 
 
@@ -387,7 +386,7 @@ bool Analysis::ParticleShallowClone::hasPdgId() const
 }
 
 inline
-PDG::pidType Analysis::ParticleShallowClone::pdgId() const
+int Analysis::ParticleShallowClone::pdgId() const
 {
   return (*m_masterLink)->pdgId();
 }

@@ -132,6 +132,8 @@ def createMuonConfigFlags():
     # configuration to write out RPC RDO for trigger timing calibration
     mcf.addFlag("Muon.doWriteRpcRDO", True)
 
+    mcf.addFlag("Muon.writeSDOs", lambda prevFlags : prevFlags.Output.doWriteESD and prevFlags.Input.isMC)
+
     # TODO - add configuration for above    
         
     return mcf

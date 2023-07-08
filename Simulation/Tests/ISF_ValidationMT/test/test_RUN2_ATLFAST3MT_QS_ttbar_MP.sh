@@ -2,7 +2,7 @@
 #
 # art-description: MC23-style RUN2 simulation using ATLFAST3MT_QS in AthenaMP
 # art-include: 23.0/Athena
-# art-include: master/Athena
+# art-include: main/Athena
 # art-type: grid
 # art-athena-mt: 8
 # art-architecture:  '#x86_64-intel'

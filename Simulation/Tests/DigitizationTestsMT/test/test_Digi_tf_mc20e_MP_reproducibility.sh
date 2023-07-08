@@ -6,7 +6,7 @@
 # art-athena-mt: 8
 # art-include: 22.0-mc20/Athena
 # art-include: 23.0/Athena
-# art-include: master/Athena
+# art-include: main/Athena
 # art-output: mc20e_SP.RDO.pool.root
 # art-output: mc20e_MP_fork_evt0.RDO.pool.root
 # art-output: mc20e_MP_fork_evt1.RDO.pool.root

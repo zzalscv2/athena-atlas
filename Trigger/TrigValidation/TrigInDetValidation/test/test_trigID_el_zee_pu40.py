@@ -3,7 +3,7 @@
 
 # art-description: art job for el_zee_pu40
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 # art-input: valid1.601189.PhPy8EG_AZNLO_Zee.recon.RDO.e8453_e8455_s3873_s3874_r13929_tid30659542_00
 # art-input-nfiles: 8

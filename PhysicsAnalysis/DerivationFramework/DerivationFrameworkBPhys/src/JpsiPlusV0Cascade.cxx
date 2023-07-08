@@ -18,6 +18,7 @@
 #include "xAODTracking/VertexContainer.h"
 #include "HepPDT/ParticleDataTable.hh"
 #include "TrkVKalVrtFitter/VxCascadeInfo.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace DerivationFramework {
     typedef ElementLink<xAOD::VertexContainer> VertexLink;
@@ -61,15 +62,15 @@ namespace DerivationFramework {
         const HepPDT::ParticleDataTable* pdt = partPropSvc->PDT();
 
         // retrieve particle masses
-        m_mass_electron = BPhysPVCascadeTools::getParticleMass(pdt, PDG::e_minus);
-        m_mass_muon     = BPhysPVCascadeTools::getParticleMass(pdt, PDG::mu_minus);
-        m_mass_pion     = BPhysPVCascadeTools::getParticleMass(pdt, PDG::pi_plus);
-        m_mass_proton   = BPhysPVCascadeTools::getParticleMass(pdt, PDG::p_plus);
-        m_mass_lambda   = BPhysPVCascadeTools::getParticleMass(pdt, PDG::Lambda0);
-        m_mass_ks       = BPhysPVCascadeTools::getParticleMass(pdt, PDG::K_S0);
-        m_mass_jpsi     = BPhysPVCascadeTools::getParticleMass(pdt, PDG::J_psi);
-        m_mass_b0       = BPhysPVCascadeTools::getParticleMass(pdt, PDG::B0);
-        m_mass_lambdaB  = BPhysPVCascadeTools::getParticleMass(pdt, PDG::Lambda_b0);
+        m_mass_electron = BPhysPVCascadeTools::getParticleMass(pdt, MC::ELECTRON);
+        m_mass_muon     = BPhysPVCascadeTools::getParticleMass(pdt, MC::MUON);
+        m_mass_pion     = BPhysPVCascadeTools::getParticleMass(pdt, MC::PIPLUS);
+        m_mass_proton   = BPhysPVCascadeTools::getParticleMass(pdt, MC::PROTON);
+        m_mass_lambda   = BPhysPVCascadeTools::getParticleMass(pdt, MC::LAMBDA0);
+        m_mass_ks       = BPhysPVCascadeTools::getParticleMass(pdt, MC::K0S);
+        m_mass_jpsi     = BPhysPVCascadeTools::getParticleMass(pdt, MC::JPSI);
+        m_mass_b0       = BPhysPVCascadeTools::getParticleMass(pdt, MC::B0);
+        m_mass_lambdaB  = BPhysPVCascadeTools::getParticleMass(pdt, MC::LAMBDAB0);
         ATH_CHECK(m_RelinkContainers.initialize());
 
         return StatusCode::SUCCESS;

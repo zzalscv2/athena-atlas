@@ -3,8 +3,8 @@
 # art-description: Run G4AtlasAlg simulation, reading ttbar events, writing HITS, using RUN3 geometry and conditions and quasi-stable particle simulation
 # art-include: 23.0/Athena
 # art-include: 23.0/AthSimulation
-# art-include: master/Athena
-# art-include: master/AthSimulation
+# art-include: main/Athena
+# art-include: main/AthSimulation
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-athena-mt: 8

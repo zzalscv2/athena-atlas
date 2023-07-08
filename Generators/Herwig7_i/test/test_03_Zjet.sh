@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # art-include: 21.6/AthGeneration
-# art-include: master/AthGeneration
+# art-include: main/AthGeneration
 # art-description: Herwig7 ART test Zjet
 # art-type: grid
 # art-output: EVNT.root

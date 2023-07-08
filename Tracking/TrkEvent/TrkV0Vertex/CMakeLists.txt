@@ -7,7 +7,7 @@ atlas_subdir( TrkV0Vertex )
 atlas_add_library( TrkV0Vertex
                    src/*.cxx
                    PUBLIC_HEADERS TrkV0Vertex
-                   LINK_LIBRARIES AthLinks AthContainers AthenaKernel EventKernel VxVertex )
+                   LINK_LIBRARIES AthLinks TruthUtils AthContainers AthenaKernel EventKernel VxVertex )
 
 atlas_add_dictionary( TrkV0VertexDict
                       TrkV0Vertex/V0VertexDict.h

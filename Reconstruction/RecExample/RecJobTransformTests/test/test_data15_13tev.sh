@@ -3,7 +3,7 @@
 # art-description: Reco_tf runs on 13TeV collision data with all streams 2015
 # art-athena-mt: 8
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 
 export ATHENA_CORE_NUMBER=8

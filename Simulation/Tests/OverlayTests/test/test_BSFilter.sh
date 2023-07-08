@@ -3,7 +3,7 @@
 # art-description: BSOverlayFilter_tf legacy test
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
-# art-include: master/Athena
+# art-include: main/Athena
 
 # art-output: trigs_tar.txt
 # art-output: log.*

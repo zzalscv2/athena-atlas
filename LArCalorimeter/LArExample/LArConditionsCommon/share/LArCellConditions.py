@@ -110,40 +110,42 @@ except:
 #Don't let PyRoot open X-connections
 sys.argv = sys.argv[:1] + ['-b'] 
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags 
-ConfigFlags.Input.Files = []
-ConfigFlags.Input.TimeStamp = 1000
-ConfigFlags.Input.isMC=False
-ConfigFlags.Input.RunNumber=run
-ConfigFlags.IOVDb.DatabaseInstance="CONDBR2" if run>222222 else "COMP200"
-ConfigFlags.IOVDb.GlobalTag=tag
-ConfigFlags.LAr.doAlign=False
-ConfigFlags.Exec.OutputLevel=8
-ConfigFlags.lock()
+from AthenaConfiguration.AllConfigFlags import initConfigFlags 
+flags=initConfigFlags()
+flags.Input.Files = []
+flags.Input.TimeStamp = 1000
+flags.Input.isMC=False
+flags.Input.RunNumber=run
+flags.IOVDb.DatabaseInstance="CONDBR2" if run>222222 else "COMP200"
+flags.IOVDb.GlobalTag=tag
+flags.LAr.doAlign=False
+from AthenaCommon.Constants import FATAL
+flags.Exec.OutputLevel=FATAL
+flags.lock()
 
 from RootUtils import PyROOTFixes  # noqa F401
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-cfg=MainServicesCfg(ConfigFlags)
+cfg=MainServicesCfg(flags)
 
 from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
-cfg.merge (McEventSelectorCfg (ConfigFlags))
+cfg.merge (McEventSelectorCfg (flags))
 
 if geo:
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-    cfg.merge(LArGMCfg(ConfigFlags))
+    cfg.merge(LArGMCfg(flags))
 else:
     from DetDescrCnvSvc.DetDescrCnvSvcConfig import DetDescrCnvSvcCfg
-    cfg.merge(DetDescrCnvSvcCfg(ConfigFlags))    
+    cfg.merge(DetDescrCnvSvcCfg(flags))    
 
 from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg 
-cfg.merge(LArOnOffIdMappingCfg(ConfigFlags))
+cfg.merge(LArOnOffIdMappingCfg(flags))
 
 from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
 requiredConditions=["Pedestal","Ramp","DAC2uA","uA2MeV","MphysOverMcal","HVScaleCorr"]
-cfg.merge(LArElecCalibDBCfg(ConfigFlags,requiredConditions))
+cfg.merge(LArElecCalibDBCfg(flags,requiredConditions))
 
 from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
-cfg.merge(LArBadChannelCfg(ConfigFlags))
+cfg.merge(LArBadChannelCfg(flags))
 
 from LArConditionsCommon.LArCellConditionsAlg import LArCellConditionsAlg
 theLArCellConditionsAlg=LArCellConditionsAlg("LArCellConditions",

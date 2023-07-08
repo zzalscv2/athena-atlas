@@ -7,11 +7,25 @@ def JfexInputMonitoringConfig(inputFlags):
     # get the component factory - used for getting the algorithms
     from AthenaConfiguration.ComponentFactory import CompFactory
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    from AthenaConfiguration.Enums import Format
     result = ComponentAccumulator()
 
     # make the athena monitoring helper
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(inputFlags,'JfexInputMonitoringCfg')
+    
+    
+    #Algorithms needed for the monitoring
+    if inputFlags.Input.Format==Format.BS:
+        
+        #Decorator for the DataTowers
+        from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CaloFEXDecoratorCfg
+        result.merge(L1CaloFEXDecoratorCfg(inputFlags,"jFexTower2SCellDecorator"))
+        
+        #jfex emulated input: EmulatedTowers
+        from L1CaloFEXAlgos.FexEmulatedTowersConfig import jFexEmulatedTowersCfg
+        result.merge(jFexEmulatedTowersCfg(inputFlags,"jFexEmulatedTowerMaker"))    
+    
 
     # get any algorithms
     JfexInputMonAlg = helper.addAlgorithm(CompFactory.JfexInputMonitorAlgorithm,'JfexInputMonAlg')

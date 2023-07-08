@@ -3,7 +3,7 @@
 #
 # art-description: Test Run 2 to Run 3 EDM Conversion (Navigation & config metadata)
 # art-type: build
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.

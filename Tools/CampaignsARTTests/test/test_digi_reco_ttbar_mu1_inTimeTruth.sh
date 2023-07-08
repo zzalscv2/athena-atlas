@@ -2,7 +2,7 @@
 # art-description: Run-4 Sim to DAOD_PHYSVAL and output plots via dcube, on non-all-had ttbar with no pile-up
 # art-input-nfiles: 1
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-output: *.root
 # art-output: *.xml
 # art-output: dcube*

@@ -4,7 +4,7 @@
 # # Purpose: Check internal consistency of raw geometry (fed to G4 simulation)
 # 
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 21.0/Athena
 # art-include: 21.3/Athena
 #

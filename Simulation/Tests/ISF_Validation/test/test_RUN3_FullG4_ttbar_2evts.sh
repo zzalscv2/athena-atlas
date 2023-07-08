@@ -6,8 +6,8 @@
 # art-include: 22.0/AthSimulation
 # art-include: 23.0/Athena
 # art-include: 23.0/AthSimulation
-# art-include: master/Athena
-# art-include: master/AthSimulation
+# art-include: main/Athena
+# art-include: main/AthSimulation
 
 # RUN3 setup - Frozen Showers currently off by default
 # ATLAS-R3S-2021-03-01-00 and OFLCOND-MC21-SDR-RUN3-03

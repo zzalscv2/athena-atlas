@@ -1851,36 +1851,50 @@ StatusCode TrigFastTrackFinder::findHitDV(const EventContext& ctx, const std::ve
 
    // space points
    const float SPCUT_DELTA_R_TO_SEED = 1.0;
-   int n_sp_stored = 0;
-   const int N_MAX_SP_STORED = 100000;
-   int n_sp_reserve = std::min(N_MAX_SP_STORED,(int)v_sp_eta.size());
-   hitDVSPContainer->reserve(n_sp_reserve);
-   for(unsigned int iSp=0; iSp<v_sp_eta.size(); ++iSp) {
-      float sp_eta = v_sp_eta[iSp];
-      float sp_phi = v_sp_phi[iSp];
-      if( m_doHitDV_Seeding ) {
-	 bool isNearSeed = false;
-	 for (unsigned int iSeed=0; iSeed<v_seeds_eta.size(); ++iSeed) {
-	    float seed_eta = v_seeds_eta[iSeed];
-	    float seed_phi = v_seeds_phi[iSeed];
-	    float dR = deltaR(sp_eta,sp_phi,seed_eta,seed_phi);
-	    if( dR <= SPCUT_DELTA_R_TO_SEED ) { isNearSeed = true; break; }
-	 }
-	 if( ! isNearSeed ) continue;
-      }
-      ++n_sp_stored;
-      if( n_sp_stored > N_MAX_SP_STORED ) break;
-      xAOD::TrigComposite *hitDVSP = new xAOD::TrigComposite();
-      hitDVSPContainer->push_back(hitDVSP);
-      hitDVSP->setDetail<float>  ("hitDVSP_eta",       v_sp_eta[iSp]);
-      hitDVSP->setDetail<float>  ("hitDVSP_r",         v_sp_r[iSp]);
-      hitDVSP->setDetail<float>  ("hitDVSP_phi",       v_sp_phi[iSp]);
-      hitDVSP->setDetail<int16_t>("hitDVSP_layer",     (int16_t)v_sp_layer[iSp]);
-      hitDVSP->setDetail<bool>   ("hitDVSP_isPix",     v_sp_isPix[iSp]);
-      hitDVSP->setDetail<bool>   ("hitDVSP_isSct",     v_sp_isSct[iSp]);
-      hitDVSP->setDetail<int16_t>("hitDVSP_usedTrkId", (int16_t)v_sp_usedTrkId[iSp]);
+   const size_t n_sp_max = std::min<size_t>(100000, v_sp_eta.size());
+   size_t n_sp_stored = 0;
+
+   // Instead of push_back we pre-allocate the container and use Accessors.
+   // In principle the same could be done everywhere else but this loop is
+   // by far the most time consuming. See ATR-27846 for details.
+   std::vector<xAOD::TrigComposite*> tmp(n_sp_max);
+   std::generate(tmp.begin(), tmp.end(), []{return new xAOD::TrigComposite();});
+   hitDVSPContainer->reserve(n_sp_max);
+   hitDVSPContainer->assign(tmp.begin(), tmp.end());
+
+   static const SG::AuxElement::Accessor<float> hitDVSP_eta("hitDVSP_eta");
+   static const SG::AuxElement::Accessor<float> hitDVSP_r("hitDVSP_r");
+   static const SG::AuxElement::Accessor<float> hitDVSP_phi("hitDVSP_phi");
+   static const SG::AuxElement::Accessor<int16_t> hitDVSP_layer("hitDVSP_layer");
+   static const SG::AuxElement::Accessor<bool> hitDVSP_isPix("hitDVSP_isPix");
+   static const SG::AuxElement::Accessor<bool> hitDVSP_isSct("hitDVSP_isSct");
+   static const SG::AuxElement::Accessor<int16_t> hitDVSP_usedTrkId("hitDVSP_usedTrkId");
+   for(size_t iSp=0; iSp<v_sp_eta.size(); ++iSp) {
+     if( m_doHitDV_Seeding ) {
+       const float sp_eta = v_sp_eta[iSp];
+       const float sp_phi = v_sp_phi[iSp];
+       bool isNearSeed = false;
+       for (size_t iSeed=0; iSeed<v_seeds_eta.size(); ++iSeed) {
+         const float seed_eta = v_seeds_eta[iSeed];
+         const float seed_phi = v_seeds_phi[iSeed];
+         const float dR = deltaR(sp_eta, sp_phi, seed_eta, seed_phi);
+         if( dR <= SPCUT_DELTA_R_TO_SEED ) { isNearSeed = true; break; }
+       }
+       if( ! isNearSeed ) continue;
+     }
+     if( n_sp_stored >= n_sp_max ) break;
+     xAOD::TrigComposite& hit = *hitDVSPContainer->at(n_sp_stored);
+     hitDVSP_eta(hit) = v_sp_eta[iSp];
+     hitDVSP_r(hit)   = v_sp_r[iSp];
+     hitDVSP_phi(hit) = v_sp_phi[iSp];
+     hitDVSP_layer(hit) = v_sp_layer[iSp];
+     hitDVSP_isPix(hit) = v_sp_isPix[iSp];
+     hitDVSP_isSct(hit) = v_sp_isSct[iSp];
+     hitDVSP_usedTrkId(hit) = v_sp_usedTrkId[iSp];
+     ++n_sp_stored;
    }
    ATH_MSG_DEBUG("Nr of SPs stored = " << n_sp_stored);
+   hitDVSPContainer->resize(n_sp_stored);  // shrink container to actual size
 
    return StatusCode::SUCCESS;
 }

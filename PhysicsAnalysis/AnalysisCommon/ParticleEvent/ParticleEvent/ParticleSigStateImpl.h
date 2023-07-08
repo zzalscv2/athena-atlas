@@ -262,10 +262,9 @@ public:
   virtual
   bool hasPdgId() const;
 
-  /** Return enum indicating particle id
-      the enum file is available in Event/EventKernel/PdtPdg.h  */
+  /** Return particle id*/
   virtual
-  PDG::pidType pdgId() const;
+  int pdgId() const;
 
   /** @}
    */
@@ -299,7 +298,7 @@ public:
   // Set functions (for IParticle)
   virtual  void set_dataType( ParticleDataType::DataType x );
   virtual  void set_charge( ChargeType x );
-  virtual  void set_pdgId ( PDG::pidType x );
+  virtual  void set_pdgId ( int x );
   virtual  void set_origin( const VxContainer* theContainer, int index );
   virtual  void set_origin( const VxContainer* theContainer,
 			    const Trk::VxCandidate * vertex );
@@ -911,7 +910,7 @@ inline bool ParticleSigStateImpl<INavigable_t,
 }
 
 template< class INavigable_t, class I4Momentum_t, class IParticle_t>
-inline PDG::pidType ParticleSigStateImpl<INavigable_t,
+inline int ParticleSigStateImpl<INavigable_t,
                                          I4Momentum_t,
                                          IParticle_t>::pdgId() const
 {
@@ -1098,7 +1097,7 @@ inline void ParticleSigStateImpl<INavigable_t,
 template< class INavigable_t, class I4Momentum_t, class IParticle_t>
 inline void ParticleSigStateImpl<INavigable_t,
                                  I4Momentum_t,
-                                 IParticle_t>::set_pdgId( PDG::pidType x )
+                                 IParticle_t>::set_pdgId( int x )
 {
   m_part.set_pdgId(x);
 }

@@ -5,7 +5,7 @@
 # art-input: data18_13TeV:data18_13TeV.00357750.physics_Main.daq.RAW
 # art-input-nfiles: 50
 # art-input-nfilesperjob: 3
-# art-include: master/Athena
+# art-include: main/Athena
 
 # art-include: 23.0/Athena
 # art-athena-mt: 8

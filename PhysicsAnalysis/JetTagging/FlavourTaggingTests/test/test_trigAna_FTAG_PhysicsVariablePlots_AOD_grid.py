@@ -3,7 +3,7 @@
 #
 # art-description: FTAG Validation plots run on mc16 AOD file
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-athena-mt: 4
 # art-memory: 7000
 # art-output: *.root

@@ -6,8 +6,8 @@
 # art-include: 21.0/AthSimulation
 # art-include: 21.3/Athena
 # art-include: 21.9/Athena
-# art-include: master/Athena
-# art-include: master/AthSimulation
+# art-include: main/Athena
+# art-include: main/AthSimulation
 
 # MC16 setup
 # ATLAS-R2-2016-01-00-01 and OFLCOND-MC16-SDR-14

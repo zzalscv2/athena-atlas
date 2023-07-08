@@ -9,7 +9,6 @@
 #include "AthenaBaseComps/AthMessaging.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include "DerivationFrameworkBPhys/CascadeTools.h"
-#include "EventKernel/PdtPdg.h"
 #include "xAODEventInfo/EventInfo.h"
 #include <vector>
 // Authors: Adam Barton <abarton@SPAMMENOTTtttcern.ch>

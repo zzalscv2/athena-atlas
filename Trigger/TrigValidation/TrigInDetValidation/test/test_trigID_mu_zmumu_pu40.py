@@ -3,7 +3,7 @@
 
 # art-description: art job for mu_Zmumu_pu40
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-include: 23.0/Athena
 # art-input: valid1.601190.PhPy8EG_AZNLO_Zmumu.recon.RDO.e8453_e8455_s3873_s3874_r13929_tid30652304_00
 # art-input-nfiles: 5

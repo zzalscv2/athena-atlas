@@ -2,7 +2,7 @@
 #
 # art-description: Reco_tf.py Run 4, mu=200, Overlay,RAWtoALL in MT mode
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-athena-mt: 8
 
 if [ -z ${ATLAS_REFERENCE_DATA+x} ]; then

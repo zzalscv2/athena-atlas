@@ -17,6 +17,7 @@
 #include "HepPDT/ParticleDataTable.hh"
 #include <algorithm>
 #include <functional>
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace DerivationFramework {
   typedef ElementLink<xAOD::VertexContainer> VertexLink;
@@ -39,19 +40,19 @@ namespace DerivationFramework {
     auto pdt = partPropSvc->PDT();
 
     // retrieve particle masses
-    if(m_massJpsi1 < 0.) m_massJpsi1 = BPhysPVCascadeTools::getParticleMass(pdt, PDG::J_psi);
-    if(m_massJpsi2 < 0.) m_massJpsi2 = BPhysPVCascadeTools::getParticleMass(pdt, PDG::J_psi);
-    if(m_massPsi1 < 0.) m_massPsi1 = BPhysPVCascadeTools::getParticleMass(pdt, PDG::psi_2S);
-    if(m_massPsi2 < 0.) m_massPsi2 = BPhysPVCascadeTools::getParticleMass(pdt, PDG::psi_2S);
+    if(m_massJpsi1 < 0.) m_massJpsi1 = BPhysPVCascadeTools::getParticleMass(pdt, MC::JPSI);
+    if(m_massJpsi2 < 0.) m_massJpsi2 = BPhysPVCascadeTools::getParticleMass(pdt, MC::JPSI);
+    if(m_massPsi1 < 0.) m_massPsi1 = BPhysPVCascadeTools::getParticleMass(pdt, MC::PSI2S);
+    if(m_massPsi2 < 0.) m_massPsi2 = BPhysPVCascadeTools::getParticleMass(pdt, MC::PSI2S);
 
-    if(m_vtx1Daug1MassHypo < 0.) m_vtx1Daug1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::mu_minus);
-    if(m_vtx1Daug2MassHypo < 0.) m_vtx1Daug2MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::mu_minus);
-    if(m_vtx1Daug3MassHypo < 0.) m_vtx1Daug3MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::pi_plus);
-    if(m_vtx1Daug4MassHypo < 0.) m_vtx1Daug4MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::pi_plus);
-    if(m_vtx2Daug1MassHypo < 0.) m_vtx2Daug1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::mu_minus);
-    if(m_vtx2Daug2MassHypo < 0.) m_vtx2Daug2MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::mu_minus);
-    if(m_vtx2Daug3MassHypo < 0.) m_vtx2Daug3MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::pi_plus);
-    if(m_vtx2Daug4MassHypo < 0.) m_vtx2Daug4MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::pi_plus);
+    if(m_vtx1Daug1MassHypo < 0.) m_vtx1Daug1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::MUON);
+    if(m_vtx1Daug2MassHypo < 0.) m_vtx1Daug2MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::MUON);
+    if(m_vtx1Daug3MassHypo < 0.) m_vtx1Daug3MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::PIPLUS);
+    if(m_vtx1Daug4MassHypo < 0.) m_vtx1Daug4MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::PIPLUS);
+    if(m_vtx2Daug1MassHypo < 0.) m_vtx2Daug1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::MUON);
+    if(m_vtx2Daug2MassHypo < 0.) m_vtx2Daug2MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::MUON);
+    if(m_vtx2Daug3MassHypo < 0.) m_vtx2Daug3MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::PIPLUS);
+    if(m_vtx2Daug4MassHypo < 0.) m_vtx2Daug4MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::PIPLUS);
 
     return StatusCode::SUCCESS;
   }

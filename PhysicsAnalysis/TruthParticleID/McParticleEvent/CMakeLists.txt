@@ -11,7 +11,7 @@ atlas_add_library( McParticleEvent
    McParticleEvent/*.h src/*.cxx
    PUBLIC_HEADERS McParticleEvent
    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-   LINK_LIBRARIES ${CLHEP_LIBRARIES} AtlasHepMCLib AthenaKernel AthContainers AthLinks Navigation
+   LINK_LIBRARIES ${CLHEP_LIBRARIES} AtlasHepMCLib TruthUtils  AthenaKernel AthContainers AthLinks Navigation
    EventKernel NavFourMom GeneratorObjects ParticleEvent VxVertex )
 
 atlas_add_dictionary( McParticleEventDict

@@ -25,8 +25,8 @@
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/TrackParticle.h"
-#include "EventKernel/PdtPdg.h"
 #include "FourMomUtils/xAODP4Helpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 namespace Analysis {
 
     StatusCode JpsiFinder_ee::initialize() {
@@ -56,7 +56,7 @@ namespace Analysis {
             return StatusCode::FAILURE;
         } else {
             auto particleDataTable = partPropSvc->PDT();
-            const HepPDT::ParticleData* pd_el = particleDataTable->particle(PDG::e_minus);
+            const HepPDT::ParticleData* pd_el = particleDataTable->particle(MC::ELECTRON);
             if (m_diElectrons) {m_trk1M = pd_el->mass(); m_trk2M = pd_el->mass();}
         }
 
