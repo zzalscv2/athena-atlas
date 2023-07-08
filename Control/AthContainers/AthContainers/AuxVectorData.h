@@ -691,6 +691,16 @@ public:
 
 
   /**
+   * @brief Clear the cached decoration pointer for a single variable.
+   * @param auxid ID of the variable to clear.
+   *
+   * Not really safe to use if another thread may be accessing
+   * the same decoration.
+   */
+  void clearDecorCache (SG::auxid_t auxid);
+
+
+  /**
    * @brief Lock the container.
    *
    * After this, only decorations can be changed/modified.
@@ -831,6 +841,16 @@ private:
      * @brief Clear the cache (and free any old cache vectors).
      */
     void clear();
+
+
+    /**
+     * @brief Clear the cached pointer for a single variable.
+     * @param auxid ID of the variable to clear.
+     *
+     * Not really safe to use if another thread may be accessing
+     * the same variable.
+     */
+    void clear (SG::auxid_t auxid);
 
 
     /**
