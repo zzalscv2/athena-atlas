@@ -381,6 +381,37 @@ void test6()
 }
 
 
+// locking
+void test7()
+{
+  std::cout << "test7\n";
+
+  SGTest::TestStore testStore;
+
+  SG::AuxStoreInternal auxstore;
+  auto cont = std::make_unique<MyObjCont>();
+  cont->setStore (&auxstore);
+  cont->push_back (new MyObj(1));
+  const MyObjCont* pcont = cont.get();
+  cont->lock();
+  testStore.record (std::move (cont), "foo");
+  
+
+  MyObj::Decorator<int> bdec ("aaa");
+
+  SG::WriteDecorHandleKey<MyObjCont> k1 ("foo.aaa");
+  assert (k1.initialize().isSuccess());
+  {
+    SG::WriteDecorHandle<MyObjCont, int> h1 (k1);
+    assert (h1.setProxyDict (&testStore).isSuccess());
+    h1 (*(*pcont)[0]) = 11;
+    assert (bdec (*(*pcont)[0]) == 11);
+  }
+
+  EXPECT_EXCEPTION (SG::ExcStoreLocked, bdec (*(*pcont)[0]) = 12);
+}
+
+
 int main()
 {
   errorcheck::ReportMessage::hideErrorLocus();
@@ -396,5 +427,6 @@ int main()
   test4();
   test5();
   test6();
+  test7();
   return 0;
 }

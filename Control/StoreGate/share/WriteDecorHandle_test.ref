@@ -33,3 +33,4 @@ ServiceManager      FATAL No Service factory for BazSvc available.
 VarHandleKey.Se...  ERROR ServiceLocatorHelper::service: can not locate service BazSvc
                     ERROR FILE:LINE (StatusCode SG::VarHandleKey::initialize(bool)): code FAILURE: Cannot locate store: BazSvc
 test6
+test7
