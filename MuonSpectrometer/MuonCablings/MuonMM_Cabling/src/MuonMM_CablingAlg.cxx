@@ -81,6 +81,10 @@ StatusCode MuonMM_CablingAlg::execute() {
         }
 
         const CondAttrListCollection* readCdo{*readHandle}; 
+        if (not readCdo){
+          ATH_MSG_ERROR("ReadCdo is null in MuonMM_CablingAlg::execute()");
+          return StatusCode::FAILURE;
+        }
         writeHandle.addDependency(readHandle);
         ATH_MSG_DEBUG("Size of CondAttrListCollection " << readHandle.fullKey() << " readCdo->size()= " << readCdo->size());
         ATH_MSG_DEBUG("Range of input is " << readHandle.getRange() << ", range of output is " << writeHandle.getRange());

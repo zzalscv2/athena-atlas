@@ -11,9 +11,7 @@
 #define MUONMM_CABLING_MUONMM_CABLINGALG_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "AthenaKernel/IIOVDbSvc.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
-#include "GaudiKernel/IChronoStatSvc.h"
 #include "MuonCablingData/MicroMega_CablingMap.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
