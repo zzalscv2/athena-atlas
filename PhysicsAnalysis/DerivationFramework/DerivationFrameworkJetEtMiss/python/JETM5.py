@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_JETM5.py
@@ -13,7 +13,7 @@ def JETM5SkimmingToolCfg(ConfigFlags):
     """Configure the skimming tool"""
     acc = ComponentAccumulator()
 
-    expression = '( HLT_noalg_zb_L1ZB )'
+    expression = '( HLT_noalg_zb_L1ZB || HLT_noalg_L1ZB )'
     JETM5SkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "JETM5SkimmingTool1",
                                                                                expression = expression)
 
