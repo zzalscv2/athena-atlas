@@ -117,7 +117,9 @@ def ITkTrackRecoCfg(flags):
                 TrackContainerName=TrackContainer,
                 xAODTrackParticlesFromTracksContainerName=(
                     "InDet" + extension + "TrackParticles"),
-                ClusterSplitProbabilityName=ClusterSplitProbContainer,
+                ClusterSplitProbabilityName=(
+                    "" if flags.Tracking.doITkFastTracking else
+                    ClusterSplitProbContainer),
                 AssociationMapName=""))
 
         else:
@@ -134,8 +136,8 @@ def ITkTrackRecoCfg(flags):
         InputCombinedTracks=InputCombinedITkTracks,
         OutputCombinedTracks="CombinedITkTracks",
         AssociationMapName=(
-            "PRDtoTrackMapCombinedITkTracks"
-            if not flags.Tracking.doITkFastTracking else "")))
+            "" if flags.Tracking.doITkFastTracking else
+            "PRDtoTrackMapCombinedITkTracks")))
 
     if flags.Tracking.doTruth:
         from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
@@ -160,11 +162,11 @@ def ITkTrackRecoCfg(flags):
     result.merge(ITkTrackParticleCnvAlgCfg(
         flags,
         ClusterSplitProbabilityName=(
-            ITkClusterSplitProbabilityContainerName(flags)
-            if not flags.Tracking.doITkFastTracking else ""),
+            "" if flags.Tracking.doITkFastTracking else
+            ITkClusterSplitProbabilityContainerName(flags)),
         AssociationMapName=(
-            "PRDtoTrackMapCombinedITkTracks"
-            if not flags.Tracking.doITkFastTracking else "")))
+            "" if flags.Tracking.doITkFastTracking else
+            "PRDtoTrackMapCombinedITkTracks")))
 
     if flags.Tracking.doVertexFinding:
         from InDetConfig.InDetPriVxFinderConfig import primaryVertexFindingCfg

@@ -157,9 +157,14 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
     # ----------- form SpacePoints from clusters in SCT and Pixels
     #
     if configuration_settings.doAthenaSpacePoint:
-        from InDetConfig.SiSpacePointFormationConfig import (
-            ITkSiTrackerSpacePointFinderCfg)
-        acc.merge(ITkSiTrackerSpacePointFinderCfg(flags))
+        if flags.Tracking.doITkFastTracking:
+            from InDetConfig.SiSpacePointFormationConfig import (
+                ITkFastSiTrackerSpacePointFinderCfg)
+            acc.merge(ITkFastSiTrackerSpacePointFinderCfg(flags))
+        else:
+            from InDetConfig.SiSpacePointFormationConfig import (
+                ITkSiTrackerSpacePointFinderCfg)
+            acc.merge(ITkSiTrackerSpacePointFinderCfg(flags))
 
     if configuration_settings.doActsSpacePoint:
         from ActsConfig.ActsTrkSpacePointFormationConfig import (

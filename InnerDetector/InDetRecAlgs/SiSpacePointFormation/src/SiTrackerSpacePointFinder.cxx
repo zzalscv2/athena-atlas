@@ -1,5 +1,6 @@
+
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -85,11 +86,11 @@ StatusCode SiTrackerSpacePointFinder::initialize()
   }
   ATH_CHECK( m_SpacePointContainerPixelKey.initialize(m_selectPixels) );
 
-  if (m_spacepointoverlapCollectionKey.key().empty()){
+  if (m_overlap && m_spacepointoverlapCollectionKey.key().empty()){
     ATH_MSG_FATAL( "No name set for overlap space points");
     return StatusCode::FAILURE;
   }
-  ATH_CHECK( m_spacepointoverlapCollectionKey.initialize() );
+  ATH_CHECK( m_spacepointoverlapCollectionKey.initialize(m_overlap) );
 
   // create containers (requires the Identifier Helpers)
   if (m_selectPixels){
@@ -181,10 +182,12 @@ StatusCode SiTrackerSpacePointFinder::execute (const EventContext& ctx) const
     }
   }
 
-  SG::WriteHandle<SpacePointOverlapCollection> spacepointoverlapCollection( m_spacepointoverlapCollectionKey, ctx );
-  ATH_CHECK( spacepointoverlapCollection.record( std::make_unique<SpacePointOverlapCollection>() ) );
-
-  ATH_MSG_DEBUG( "Container '" << spacepointoverlapCollection.name() << "' initialised" );
+  SG::WriteHandle<SpacePointOverlapCollection> spacepointoverlapCollection;
+  if(m_overlap){
+    spacepointoverlapCollection = SG::WriteHandle<SpacePointOverlapCollection>( m_spacepointoverlapCollectionKey, ctx );
+    ATH_CHECK( spacepointoverlapCollection.record( std::make_unique<SpacePointOverlapCollection>() ) );
+    ATH_MSG_DEBUG( "Container '" << spacepointoverlapCollection.name() << "' initialised" );
+  }
 
   int sctCacheCount = 0;
   int pixCacheCount = 0;
@@ -312,13 +315,15 @@ StatusCode SiTrackerSpacePointFinder::execute (const EventContext& ctx) const
 
   // store the overlap space points.
   // check that the set isn't empty.
-  if (spacepointoverlapCollection->empty())
-  {
-    ATH_MSG_DEBUG( "No overlap space points found" );
-  }
-  else
-  {
-    ATH_MSG_DEBUG( spacepointoverlapCollection->size() <<" overlap space points registered." );
+  if(m_overlap){
+    if (spacepointoverlapCollection->empty())
+      {
+	ATH_MSG_DEBUG( "No overlap space points found" );
+      }
+    else
+      {
+	ATH_MSG_DEBUG( spacepointoverlapCollection->size() <<" overlap space points registered." );
+      }
   }
 
   if(m_cachemode)//Prevent unnecessary atomic counting
