@@ -192,7 +192,7 @@ std::vector<double> iFatras::MultipleScatteringSamplerGeneralMixture::getSemigau
   return scattering_params;
 }
 
-double iFatras::MultipleScatteringSamplerGeneralMixture::simGaussmix(std::vector<double> scattering_params) const{
+double iFatras::MultipleScatteringSamplerGeneralMixture::simGaussmix(const std::vector<double>& scattering_params) const{
   double sigma_tot = scattering_params[0];
   double var1 = scattering_params[1];
   double var2 = scattering_params[2];
@@ -205,7 +205,7 @@ double iFatras::MultipleScatteringSamplerGeneralMixture::simGaussmix(std::vector
   return sqrt(var2)*sqrt(-2*log(u))*sigma_tot;
 }
 
-double iFatras::MultipleScatteringSamplerGeneralMixture::simSemigauss(std::vector<double> scattering_params) const{
+double iFatras::MultipleScatteringSamplerGeneralMixture::simSemigauss(const std::vector<double>& scattering_params) const{
   double a = scattering_params[0];
   double b = scattering_params[1];
   double var1 = scattering_params[2];
