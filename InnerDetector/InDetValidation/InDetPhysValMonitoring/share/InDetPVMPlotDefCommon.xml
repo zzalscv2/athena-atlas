@@ -979,6 +979,10 @@
   <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
   <y title="HS vertex selection efficiency" lo="0.6" hi="1.2"/>
 </h>
+<h id="vx_hs_sel_eff_dist" type="TEfficiency" title="HS vertex selection efficiency (distance based)">
+  <x title="Placeholder" n="80" lo="0.0" hi="80.0"/>
+  <y title="HS vertex selection efficiency" lo="0.6" hi="1.2"/>
+</h>
 <h id="vx_hs_reco_long_reso" type="TProfile" title="Reco Longitudinal Resolution">
   <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
   <y title="Reco longitudinal resolution [mm]" lo="0.0" hi="1.0"/>

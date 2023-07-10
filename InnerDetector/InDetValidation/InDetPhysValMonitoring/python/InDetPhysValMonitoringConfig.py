@@ -123,6 +123,11 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
         acc.merge(AddRecoJetsIfNotExistingCfg(
             flags, flags.PhysVal.IDPVM.jetsNameForHardScatter))
 
+    # if we are running with the HGam hard scatter selection, we need to schedule the NN
+    if flags.PhysVal.IDPVM.hardScatterStrategy == 3:
+        from DerivationFrameworkHiggs.HIGG1D1CustomVertexConfig import DiPhotonVertexCfg
+        acc.merge(DiPhotonVertexCfg(flags))
+
     if flags.PhysVal.IDPVM.GRL:
         kwargs.setdefault("useGRL", True)
         kwargs.setdefault('GoodRunsListSelectionTool', acc.popToolsAndMerge(
@@ -134,17 +139,22 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
             kwargs.setdefault("TruthSelectionTool", acc.popToolsAndMerge(
                 InDetRttTruthSelectionToolCfg(flags)))
 
+        doHyyHSSelection = flags.PhysVal.IDPVM.hardScatterStrategy == 3
         if 'hardScatterSelectionTool' not in kwargs:
             from InDetConfig.InDetHardScatterSelectionToolConfig import (
                 InDetHardScatterSelectionToolCfg)
             kwargs.setdefault("hardScatterSelectionTool", acc.popToolsAndMerge(
                 InDetHardScatterSelectionToolCfg(
                     flags,
-                    RedoHardScatter=True,
+                    RedoHardScatter=not doHyyHSSelection,
                     SelectionMode=flags.PhysVal.IDPVM.hardScatterStrategy,
                     # make sure the HS selection tool picks up the correct jets
-                    JetContainer=flags.PhysVal.IDPVM.jetsNameForHardScatter
+                    JetContainer=flags.PhysVal.IDPVM.jetsNameForHardScatter,
+                    VertexContainer="PrimaryVertices" if not doHyyHSSelection else "HggPrimaryVertices"
                 )))
+
+        if doHyyHSSelection:
+            kwargs.setdefault("VertexContainerName", "HggPrimaryVertices")
 
         if flags.PhysVal.IDPVM.doValidateTracksInJets:
             kwargs.setdefault("JetContainerName", 'AntiKt4EMPFlowJets')
