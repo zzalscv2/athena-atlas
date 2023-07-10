@@ -420,8 +420,8 @@ MsgStream& InDet::SiSpacePointsSeedMaker_LowMomentum::dumpConditions(EventData& 
   out<<"| pTmax  (mev)            | "
      <<std::setw(12)<<std::setprecision(5)<<m_ptmax
      <<"                              |"<<endmsg;
-  out<<"| |rapidity|          <=  | " 
-     <<std::setw(12)<<std::setprecision(5)<<m_rapcut
+  out<<"| |eta|               <=  | " 
+     <<std::setw(12)<<std::setprecision(5)<<m_etamax
      <<"                              |"<<endmsg;
   out<<"| max radius SP           | "
      <<std::setw(12)<<std::setprecision(5)<<m_r_rmax 
@@ -467,9 +467,6 @@ MsgStream& InDet::SiSpacePointsSeedMaker_LowMomentum::dumpConditions(EventData& 
      <<"                              |"<<endmsg;
   out<<"| max       impact        | "
      <<std::setw(12)<<std::setprecision(5)<<m_diver
-     <<"                              |"<<endmsg;
-  out<<"| max       impact pps    | "
-     <<std::setw(12)<<std::setprecision(5)<<m_diverpps
      <<"                              |"<<endmsg;
   out<<"|---------------------------------------------------------------------|"
      <<endmsg;
@@ -574,8 +571,8 @@ void InDet::SiSpacePointsSeedMaker_LowMomentum::buildFrameWork()
   if (m_ptmin < 50.) m_ptmin = 50.;
   m_iptmax  = 1.f/std::abs(m_ptmax);
   m_iptmin  = 1.f/std::abs(m_ptmin);
-  m_rapcut    = std::abs(m_rapcut);
-  m_dzdrmax   = 1.f/std::tan(2.f*std::atan(std::exp(-m_rapcut)));
+  m_etamax    = std::abs(m_etamax);
+  m_dzdrmax   = 1.f/std::tan(2.f*std::atan(std::exp(-m_etamax)));
   m_dzdrmin   =-m_dzdrmax;
   m_r3max     = m_r_rmax;
 

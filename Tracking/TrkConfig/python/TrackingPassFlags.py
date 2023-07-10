@@ -326,7 +326,8 @@ def createTrackingPassFlags():
     icf.addFlag("usePixel"       		  , lambda pcf : pcf.Detector.EnablePixel )
     icf.addFlag("useTRT"        		  , lambda pcf : pcf.Detector.EnableTRT )
     icf.addFlag("useSCT"        		  , lambda pcf : pcf.Detector.EnableSCT )
-    icf.addFlag("useSCTSeeding"        	  	  , True )
+    icf.addFlag("usePixelSeeding"        	  , lambda pcf : pcf.Detector.EnablePixel )
+    icf.addFlag("useSCTSeeding"        	  	  , lambda pcf : pcf.Detector.EnableSCT )
 
     # --------------------------------------
     # --- TRT Only TRACKING cuts
@@ -645,6 +646,7 @@ def createR3LargeD0TrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension          = "R3LargeD0"
     icf.usePrdAssociationTool = True
+    icf.usePixelSeeding    = False
     icf.storeSeparateContainer = lambda pcf : pcf.Tracking.storeSeparateLargeD0Container
     icf.maxPT              = 1.0 * Units.TeV
     icf.minPT              = 1.0 * Units.GeV                                                                                    

@@ -5,60 +5,85 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType
 
 
-def SiSpacePointsSeedMakerCfg(flags, name="InDetSpSeedsMaker", **kwargs):
+def SiSpacePointsSeedMaker_CosmicCfg(
+        flags, name="InDetSpSeedsMaker_Cosmic", **kwargs):
     acc = ComponentAccumulator()
-    #
-    # --- Space points seeds maker, use different ones for cosmics and collisions
-    #
-    if flags.Beam.Type is BeamType.Cosmics:
-        SiSpacePointsSeedMaker = (
-            CompFactory.InDet.SiSpacePointsSeedMaker_Cosmic)
-    elif flags.Reco.EnableHI:
-        SiSpacePointsSeedMaker = (
-            CompFactory.InDet.SiSpacePointsSeedMaker_HeavyIon)
-    elif flags.Tracking.ActiveConfig.isLowPt:
-        SiSpacePointsSeedMaker = (
-            CompFactory.InDet.SiSpacePointsSeedMaker_LowMomentum)
-    elif flags.Tracking.ActiveConfig.extension == "BeamGas":
-        SiSpacePointsSeedMaker = (
-            CompFactory.InDet.SiSpacePointsSeedMaker_BeamGas)
-    else:
-        SiSpacePointsSeedMaker = CompFactory.InDet.SiSpacePointsSeedMaker_ATLxk
-        if flags.Tracking.writeSeedValNtuple:
-            kwargs.setdefault("WriteNtuple", True)
-            acc.addService(CompFactory.THistSvc(
-                Output=["valNtuples DATAFILE='SeedMakerValidation.root' OPT='RECREATE'"]))
 
-    kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPT)
+    acc.setPrivateTools(CompFactory.InDet.SiSpacePointsSeedMaker_Cosmic(
+        name, **kwargs))
+    return acc
+
+
+def SiSpacePointsSeedMaker_HeavyIonCfg(
+        flags, name="InDetSpSeedsMaker_HeavyIon", **kwargs):
+    acc = ComponentAccumulator()
+
     kwargs.setdefault("maxdImpact",
                       flags.Tracking.ActiveConfig.maxPrimaryImpact)
     kwargs.setdefault("maxZ", flags.Tracking.ActiveConfig.maxZImpact)
     kwargs.setdefault("minZ", -flags.Tracking.ActiveConfig.maxZImpact)
-    kwargs.setdefault("radMax", flags.Tracking.ActiveConfig.radMax)
-    kwargs.setdefault("RapidityCut", flags.Tracking.ActiveConfig.maxEta)
+    kwargs.setdefault("maxdImpactPPS",
+                      flags.Tracking.ActiveConfig.maxdImpactPPSSeeds)
+    kwargs.setdefault("maxdImpactSSS",
+                      flags.Tracking.ActiveConfig.maxdImpactSSSSeeds)
 
-    kwargs.setdefault("usePixel", flags.Tracking.ActiveConfig.usePixel and
-                      flags.Tracking.ActiveConfig.extension != "R3LargeD0")
-    kwargs.setdefault("SpacePointsPixelName", 'PixelSpacePoints')
-    kwargs.setdefault("useSCT", flags.Tracking.ActiveConfig.useSCT and
-                      flags.Tracking.ActiveConfig.useSCTSeeding)
-    kwargs.setdefault("SpacePointsSCTName", 'SCT_SpacePoints')
-    kwargs.setdefault("useOverlapSpCollection",
-                      flags.Tracking.ActiveConfig.useSCT and
-                      flags.Tracking.ActiveConfig.useSCTSeeding)
-    kwargs.setdefault("SpacePointsOverlapName", 'OverlapSpacePoints')
+    acc.setPrivateTools(CompFactory.InDet.SiSpacePointsSeedMaker_HeavyIon(
+        name+flags.Tracking.ActiveConfig.extension, **kwargs))
+    return acc
 
-    if flags.Tracking.ActiveConfig.usePrdAssociationTool:
-        # not all classes have that property !!!
-        kwargs.setdefault("PRDtoTrackMap", (
-            'InDetPRDtoTrackMap' + flags.Tracking.ActiveConfig.extension))
 
-    if not flags.Reco.EnableHI and (
-            flags.Tracking.ActiveConfig.extension == "" or
-            flags.Tracking.ActiveConfig.extension == "Forward" or
-            flags.Tracking.ActiveConfig.extension == "BLS"):
-        kwargs.setdefault("maxdImpactPPS",
-                          flags.Tracking.ActiveConfig.maxdImpactPPSSeeds)
+def SiSpacePointsSeedMaker_LowMomentumCfg(
+        flags, name="InDetSpSeedsMaker_LowMomentum", **kwargs):
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("maxdImpact",
+                      flags.Tracking.ActiveConfig.maxPrimaryImpact)
+    kwargs.setdefault("maxZ", flags.Tracking.ActiveConfig.maxZImpact)
+    kwargs.setdefault("minZ", -flags.Tracking.ActiveConfig.maxZImpact)
+
+    kwargs.setdefault("maxRadius1",
+                      0.75*flags.Tracking.ActiveConfig.radMax)
+    kwargs.setdefault("maxRadius2",
+                      flags.Tracking.ActiveConfig.radMax)
+    kwargs.setdefault("pTmax", flags.Tracking.ActiveConfig.maxPT)
+    kwargs.setdefault("mindRadius", 4.0)
+
+    acc.setPrivateTools(CompFactory.InDet.SiSpacePointsSeedMaker_LowMomentum(
+        name+flags.Tracking.ActiveConfig.extension, **kwargs))
+    return acc
+
+
+def SiSpacePointsSeedMaker_BeamGasCfg(
+        flags, name="InDetSpSeedsMaker_BeamGas", **kwargs):
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("maxdImpact",
+                      flags.Tracking.ActiveConfig.maxPrimaryImpact)
+    kwargs.setdefault("maxZ", flags.Tracking.ActiveConfig.maxZImpact)
+    kwargs.setdefault("minZ", -flags.Tracking.ActiveConfig.maxZImpact)
+
+    kwargs.setdefault("maxRadius1",
+                      0.75*flags.Tracking.ActiveConfig.radMax)
+    kwargs.setdefault("maxRadius2",
+                      flags.Tracking.ActiveConfig.radMax)
+    kwargs.setdefault("maxRadius3",
+                      flags.Tracking.ActiveConfig.radMax)
+
+    acc.setPrivateTools(CompFactory.InDet.SiSpacePointsSeedMaker_BeamGas(
+        name, **kwargs))
+    return acc
+
+
+def SiSpacePointsSeedMaker_ATLxkCfg(
+        flags, name="InDetSpSeedsMaker", **kwargs):
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("maxdImpact",
+                      flags.Tracking.ActiveConfig.maxPrimaryImpact)
+    kwargs.setdefault("maxZ", flags.Tracking.ActiveConfig.maxZImpact)
+    kwargs.setdefault("minZ", -flags.Tracking.ActiveConfig.maxZImpact)
+
+    if flags.Tracking.ActiveConfig.extension in ["", "Forward", "BLS"]:
         kwargs.setdefault("maxdImpactSSS",
                           flags.Tracking.ActiveConfig.maxdImpactSSSSeeds)
         kwargs.setdefault("maxSeedsForSpacePointStrips",
@@ -74,41 +99,60 @@ def SiSpacePointsSeedMakerCfg(flags, name="InDetSpSeedsMaker", **kwargs):
         kwargs.setdefault("dImpactCutSlopeUnconfirmedSSS", 1.25)
         kwargs.setdefault("dImpactCutSlopeUnconfirmedPPP", 2.0)
 
-    if flags.Reco.EnableHI:
-        kwargs.setdefault("maxdImpactPPS",
-                          flags.Tracking.ActiveConfig.maxdImpactPPSSeeds)
-        kwargs.setdefault("maxdImpactSSS",
-                          flags.Tracking.ActiveConfig.maxdImpactSSSSeeds)
+        if flags.Tracking.ActiveConfig.extension == "Forward":
+            kwargs.setdefault("checkEta", True)
+            kwargs.setdefault("etaMin", flags.Tracking.ActiveConfig.minEta)
 
-    if flags.Beam.Type is not BeamType.Cosmics:
-        kwargs.setdefault("maxRadius1",
-                          0.75*flags.Tracking.ActiveConfig.radMax)
-        kwargs.setdefault("maxRadius2",
-                          flags.Tracking.ActiveConfig.radMax)
-        kwargs.setdefault("maxRadius3",
-                          flags.Tracking.ActiveConfig.radMax)
-
-    if flags.Tracking.ActiveConfig.isLowPt:
-        kwargs.setdefault("pTmax", flags.Tracking.ActiveConfig.maxPT)
-        kwargs.setdefault("mindRadius", 4.0)
-
-    if flags.Tracking.ActiveConfig.extension == "R3LargeD0":
+    elif flags.Tracking.ActiveConfig.extension == "R3LargeD0":
         kwargs.setdefault("optimisePhiBinning", False)
-        kwargs.setdefault("etaMax", flags.Tracking.ActiveConfig.maxEta)
         kwargs.setdefault("maxSeedsForSpacePointStrips",
                           flags.Tracking.ActiveConfig.maxSeedsPerSP_Strips)
         kwargs.setdefault("alwaysKeepConfirmedStripSeeds",
                           flags.Tracking.ActiveConfig.keepAllConfirmedStripSeeds)
         kwargs.setdefault("maxdRadius", 150)
         kwargs.setdefault("seedScoreBonusConfirmationSeed", -2000)
-    elif flags.Tracking.ActiveConfig.extension == "Forward":
-        kwargs.setdefault("checkEta", True)
-        kwargs.setdefault("etaMin", flags.Tracking.ActiveConfig.minEta)
-        kwargs.setdefault("etaMax", flags.Tracking.ActiveConfig.maxEta)
 
-    acc.setPrivateTools(SiSpacePointsSeedMaker(
+    if flags.Tracking.writeSeedValNtuple:
+        kwargs.setdefault("WriteNtuple", True)
+        acc.addService(CompFactory.THistSvc(
+            Output=["valNtuples DATAFILE='SeedMakerValidation.root' OPT='RECREATE'"]))
+
+    acc.setPrivateTools(CompFactory.InDet.SiSpacePointsSeedMaker_ATLxk(
         name+flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
+
+
+def SiSpacePointsSeedMakerCfg(flags, **kwargs):
+    # Properties valid for all of the classes
+    kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPT)
+    kwargs.setdefault("radMax", flags.Tracking.ActiveConfig.radMax)
+    kwargs.setdefault("etaMax", flags.Tracking.ActiveConfig.maxEta)
+    kwargs.setdefault("usePixel", flags.Tracking.ActiveConfig.usePixelSeeding)
+    kwargs.setdefault("SpacePointsPixelName", 'PixelSpacePoints')
+    kwargs.setdefault("useSCT", flags.Tracking.ActiveConfig.useSCTSeeding)
+    kwargs.setdefault("SpacePointsSCTName", 'SCT_SpacePoints')
+    kwargs.setdefault("useOverlapSpCollection",
+                      flags.Tracking.ActiveConfig.useSCTSeeding)
+    kwargs.setdefault("SpacePointsOverlapName", 'OverlapSpacePoints')
+
+    if flags.Tracking.ActiveConfig.usePrdAssociationTool:
+        # not all classes have that property !!!
+        kwargs.setdefault("PRDtoTrackMap", (
+            'InDetPRDtoTrackMap' + flags.Tracking.ActiveConfig.extension))
+
+    #
+    # --- Space points seeds maker, use different ones for cosmics and collisions
+    #
+    if flags.Beam.Type is BeamType.Cosmics:
+        return SiSpacePointsSeedMaker_CosmicCfg(flags, **kwargs)
+    elif flags.Reco.EnableHI:
+        return SiSpacePointsSeedMaker_HeavyIonCfg(flags, **kwargs)
+    elif flags.Tracking.ActiveConfig.isLowPt:
+        return SiSpacePointsSeedMaker_LowMomentumCfg(flags, **kwargs)
+    elif flags.Tracking.ActiveConfig.extension == "BeamGas":
+        return SiSpacePointsSeedMaker_BeamGasCfg(flags, **kwargs)
+    else:
+        return SiSpacePointsSeedMaker_ATLxkCfg(flags, **kwargs)
 
 
 def ITkSiSpacePointsSeedMakerCfg(flags, name="ITkSpSeedsMaker", **kwargs):

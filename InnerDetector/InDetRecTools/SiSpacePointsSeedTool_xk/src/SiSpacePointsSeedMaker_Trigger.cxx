@@ -483,8 +483,8 @@ MsgStream& InDet::SiSpacePointsSeedMaker_Trigger::dumpConditions(EventData& data
   out<<"| pTmin  (mev)            | "
      <<std::setw(12)<<std::setprecision(5)<<m_ptmin
      <<"                              |"<<endmsg;
-  out<<"| |rapidity|          <=  | " 
-     <<std::setw(12)<<std::setprecision(5)<<m_rapcut
+  out<<"| |eta|               <=  | "
+     <<std::setw(12)<<std::setprecision(5)<<m_etamax
      <<"                              |"<<endmsg;
   out<<"| max radius SP           | "
      <<std::setw(12)<<std::setprecision(5)<<m_r_rmax 
@@ -653,8 +653,8 @@ void InDet::SiSpacePointsSeedMaker_Trigger::buildFrameWork()
 {
   m_ptmin     = std::abs(m_ptmin);
   if (m_ptmin < 100.) m_ptmin = 100.;
-  m_rapcut    = std::abs(m_rapcut);
-  m_dzdrmax   = 1.f/std::tan(2.f*std::atan(exp(-m_rapcut)));
+  m_etamax    = std::abs(m_etamax);
+  m_dzdrmax   = 1.f/std::tan(2.f*std::atan(exp(-m_etamax)));
   m_dzdrmin   =-m_dzdrmax;
   m_r3max     = m_r_rmax;
   m_COF       =  134*.05*9.;

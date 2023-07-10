@@ -177,8 +177,7 @@ namespace InDet {
 
     /// @name Properties, which can be updated in initialize
     //@{
-    FloatProperty m_r3max{this, "maxRadius3", 600.}; //!< Always overwriten by m_r_rmax
-    FloatProperty m_rapcut{this, "RapidityCut", 2.7};
+    FloatProperty m_etamax{this, "etaMax", 2.7};
     FloatProperty m_ptmin{this, "pTmin", 500.};
     //@}
 
@@ -202,6 +201,7 @@ namespace InDet {
     int m_rfzv_i[SizeRFZV][SizeIV]{};
     float m_dzdrmin{0.};
     float m_dzdrmax{0.};
+    float m_r3max{0.};
     float m_ipt{0.};
     float m_ipt2{0.};
     float m_COF{0.};
