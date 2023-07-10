@@ -208,7 +208,6 @@ namespace InDet {
     FloatProperty m_etamin{this, "etaMin", 0.};
     FloatProperty m_r_rmax{this, "radMax", 600.};
     FloatProperty m_binSizeR{this, "radStep", 2.};
-    FloatProperty m_r3max{this, "maxRadius3", 600.}; ///< This is always overwritten by m_r_rmax.
     FloatProperty m_drmin{this, "mindRadius", 5.};
     FloatProperty m_maxdImpact{this, "maxdImpact", 10.};
     FloatProperty m_maxdImpactSSS{this, "maxdImpactSSS", 50.};
@@ -238,19 +237,6 @@ namespace InDet {
 
     /// Maximum score to accept 
     FloatProperty m_maxScore{this, "maximumAcceptedSeedScore", 100.}; 
-
-
-    /// @name Properties, which are not used in this implementation of SiSpacePointsSeedMaker_ATLxk class
-    //@{
-    UnsignedIntegerProperty m_maxNumberVertices{this, "maxNumberVertices", 99};
-    FloatProperty m_r1min{this, "minRadius1", 0.};
-    FloatProperty m_r1max{this, "maxRadius1", 600.};
-    FloatProperty m_r2min{this, "minRadius2", 0.};
-    FloatProperty m_r2max{this, "maxRadius2", 600.};
-    FloatProperty m_r3min{this, "minRadius3", 0.};
-    FloatProperty m_rapcut{this, "RapidityCut", 2.7};
-    FloatProperty m_maxdImpactPPS{this, "maxdImpactPPS", 1.7};
-    //@}
 
     /// @name Data member, which is not updated at all.
     //@{
@@ -301,7 +287,7 @@ namespace InDet {
     std::array<std::array<int, arraySizeNeighbourBins>, arraySizePhiZ> m_neighbourCellsTop{}; ///< mapping of neighbour cells in the 2D phi-z binning to consider  for the "top SP" search for central SPs in each phi-z bin. Number of valid entries stored in m_nNeighboursPhiZtop
 
     std::array<int,arraySizePhiZV> m_nNeighboursVertexPhiZ{};
-    std::array<std::array<int, arraySizeNeighbourBinsVertex>, arraySizePhiZ> m_neighboursVertexPhiZ{};
+    std::array<std::array<int, arraySizeNeighbourBinsVertex>, arraySizePhiZV> m_neighboursVertexPhiZ{};
     //@}
 
     ///////////////////////////////////////////////////////////////////

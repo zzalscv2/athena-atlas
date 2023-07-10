@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -431,8 +431,8 @@ MsgStream& InDet::SiSpacePointsSeedMaker_Cosmic::dumpConditions(MsgStream& out) 
   out<<"| pTmin  (mev)            | "
      <<std::setw(12)<<std::setprecision(5)<<m_ptmin
      <<"                              |"<<endmsg;
-  out<<"| |rapidity|          <=  | " 
-     <<std::setw(12)<<std::setprecision(5)<<m_rapcut
+  out<<"| |eta|               <=  | "
+     <<std::setw(12)<<std::setprecision(5)<<m_etamax
      <<"                              |"<<endmsg;
   out<<"| max radius SP           | "
      <<std::setw(12)<<std::setprecision(5)<<m_r_rmax 
@@ -440,20 +440,11 @@ MsgStream& InDet::SiSpacePointsSeedMaker_Cosmic::dumpConditions(MsgStream& out) 
   out<<"| radius step             | "
      <<std::setw(12)<<std::setprecision(5)<<m_r_rstep
      <<"                              |"<<endmsg;
-  out<<"| min Z-vertex position   | "
-     <<std::setw(12)<<std::setprecision(5)<<m_zmin
-     <<"                              |"<<endmsg;
-  out<<"| max Z-vertex position   | "
-     <<std::setw(12)<<std::setprecision(5)<<m_zmax
-     <<"                              |"<<endmsg;
   out<<"| min space points dR     | "
      <<std::setw(12)<<std::setprecision(5)<<m_drmin
      <<"                              |"<<endmsg;
   out<<"| max space points dR     | "
      <<std::setw(12)<<std::setprecision(5)<<m_drmax
-     <<"                              |"<<endmsg;
-  out<<"| max       impact        | "
-     <<std::setw(12)<<std::setprecision(5)<<m_diver
      <<"                              |"<<endmsg;
   out<<"|---------------------------------------------------------------------|"
      <<endmsg;
@@ -488,8 +479,8 @@ MsgStream& InDet::SiSpacePointsSeedMaker_Cosmic::dumpEvent(EventData& data, MsgS
 
 void InDet::SiSpacePointsSeedMaker_Cosmic::buildFrameWork() 
 {
-  m_rapcut  = std::abs(m_rapcut);
-  m_dzdrmax = 1.f/std::tan(2.f*std::atan(std::exp(-m_rapcut)));
+  m_etamax  = std::abs(m_etamax);
+  m_dzdrmax = 1.f/std::tan(2.f*std::atan(std::exp(-m_etamax)));
   m_dzdrmin = -m_dzdrmax;
 
   // Build radius sorted containers

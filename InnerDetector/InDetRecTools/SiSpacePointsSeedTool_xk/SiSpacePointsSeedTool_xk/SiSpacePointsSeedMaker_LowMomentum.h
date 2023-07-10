@@ -165,19 +165,13 @@ namespace InDet {
     FloatProperty m_dzver{this, "maxdZver", 5.};
     FloatProperty m_dzdrver{this, "maxdZdRver", 0.02};
     FloatProperty m_diver{this, "maxdImpact", 7.};
+    FloatProperty m_ptmax{this, "pTmax", 500.};
     //@}
 
     /// @name Properties, which can be updated in initialize
     //@{
-    FloatProperty m_r3max{this, "maxRadius3", 600.}; //!< Always overwritten by m_r_rmax
-    FloatProperty m_rapcut{this, "RapidityCut", 2.7};
+    FloatProperty m_etamax{this, "etaMax", 2.7};
     FloatProperty m_ptmin{this, "pTmin", 100.};
-    FloatProperty m_ptmax{this, "pTmax", 500.};
-    //@}
-
-    /// @name Properties, which are not used in this implementation of SiSpacePointsSeedMaker_LowMomentum class
-    //@{
-    FloatProperty m_diverpps{this, "maxdImpactPPS", 1.2};
     //@}
 
     /// @name Data members, which are updated only in initialize
@@ -192,6 +186,7 @@ namespace InDet {
     int m_rfz_it[SizeRFZ][SizeI]{};
     float m_dzdrmin{0.};
     float m_dzdrmax{0.};
+    float m_r3max{0.};
     float m_iptmin{0.};
     float m_iptmax{1./400.};
     float m_sF{0.};
