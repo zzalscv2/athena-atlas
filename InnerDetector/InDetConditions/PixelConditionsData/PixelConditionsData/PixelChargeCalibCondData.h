@@ -11,11 +11,17 @@
 #include <map>
 #include <vector>
 #include <array>
+namespace PixelChargeCalib{
+  class LegacyFitParameters;
+  class LinearFitParameters;
+  class Thresholds;
+  class Resolutions;
+}
 
 class PixelChargeCalibCondData
 {
   public:
-    PixelChargeCalibCondData();
+    PixelChargeCalibCondData() = default;
     PixelChargeCalibCondData(std::size_t max_module_hash);
 
     static constexpr size_t IBLCalibrationSize{16};
@@ -31,28 +37,51 @@ class PixelChargeCalibCondData
     };
 
     // Normal pixel
+    void 
+    setThresholds(InDetDD::PixelDiodeType type, unsigned int moduleHash, const std::vector<PixelChargeCalib::Thresholds> & thresholds);
+    //
     void setAnalogThreshold(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> &&value);
     void setAnalogThresholdSigma(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> &&value);
     void setAnalogThresholdNoise(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> &&value);
     void setInTimeThreshold(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> &&value);
-
+    //
+    //
+    void setLegacyFitParameters(InDetDD::PixelDiodeType type, unsigned int moduleHash, const std::vector<PixelChargeCalib::LegacyFitParameters> &parameters);
+    //
     void setQ2TotA(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> &&value);
     void setQ2TotE(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> &&value);
     void setQ2TotC(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> &&value);
+    //
+    //
+    void setLinearFitParameters(InDetDD::PixelDiodeType type, unsigned int moduleHash, const std::vector<PixelChargeCalib::LinearFitParameters> &parameters);
+    //
     void setQ2TotF(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> &&value);
     void setQ2TotG(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> &&value);
-
+    //
+    //
+    void setTotResolutions(unsigned int moduleHash, const std::vector<PixelChargeCalib::Resolutions> &value);
+    //
     void setTotRes1(unsigned int moduleHash, std::vector<float> &&value);
     void setTotRes2(unsigned int moduleHash, std::vector<float> &&value);
-
+    //
+    //
+    PixelChargeCalib::Thresholds getThresholds(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
+    //
     int getAnalogThreshold(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
     int getAnalogThresholdSigma(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
     int getAnalogThresholdNoise(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
     int getInTimeThreshold(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
-
+    //
+    //
+    PixelChargeCalib::LegacyFitParameters getLegacyFitParameters(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
+    //
     float getQ2TotA(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
     float getQ2TotE(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
     float getQ2TotC(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
+    //
+    //
+    PixelChargeCalib::LinearFitParameters getLinearFitParameters(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
+    //
     float getQ2TotF(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
     float getQ2TotG(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
 
@@ -72,8 +101,7 @@ class PixelChargeCalibCondData
   private:
     std::size_t m_maxModuleHash = 0;
 
-    constexpr static std::size_t s_NPixelDiods = 4;
-    static unsigned short diodeIndex(InDetDD::PixelDiodeType type) { return static_cast<unsigned int>(type); }
+    constexpr static std::size_t s_NPixelDiodes = enum2uint(InDetDD::PixelDiodeType::N_DIODETYPES);
 
    template <typename T>
     static void resize(std::size_t idx, std::size_t max_size, T &container)  { if (idx >= container.size()) { container.resize(max_size); } }
@@ -85,14 +113,14 @@ class PixelChargeCalibCondData
 
     template <typename T, typename T_Value>
     static void setValue(std::size_t max_size, T &container, InDetDD::PixelDiodeType type, unsigned int moduleHash, T_Value &&value)  {
-       resize( moduleHash,max_size, container.at(diodeIndex(type)));
-       container.at(diodeIndex(type)).at(moduleHash) = std::move(value);
+       resize( moduleHash,max_size, container.at(enum2uint(type)));
+       container.at(enum2uint(type)).at(moduleHash) = std::move(value);
     }
 
     using chipThreshold = std::vector<std::vector<int>>;
     using chipCharge = std::vector<std::vector<float>>;
-    using chipThresholdMap = std::array<chipThreshold, s_NPixelDiods>;
-    using chipChargeMap = std::array<chipCharge, s_NPixelDiods>;
+    using chipThresholdMap = std::array<chipThreshold, s_NPixelDiodes>;
+    using chipChargeMap = std::array<chipCharge, s_NPixelDiodes>;
 
     chipThresholdMap m_analogThreshold;
     chipThresholdMap m_analogThresholdSigma;
