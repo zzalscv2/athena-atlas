@@ -174,13 +174,7 @@ namespace InDet {
     /// @name Properties, which can be updated in buildFrameWork method which is called in initialize method
     //@{
     FloatProperty m_ptmin{this, "pTmin", 1000.};
-    FloatProperty m_rapcut{this, "RapidityCut", 5.3};
-    //@}
-
-    /// @name Properties, which are not used in this implementation of SiSpacePointsSeedMaker_BeamGas class
-    //@{
-    FloatProperty m_dzver{this, "maxdZver", 5.};
-    FloatProperty m_dzdrver{this, "maxdZdRver", 0.02};
+    FloatProperty m_etamax{this, "etaMax", 5.3};
     //@}
 
     /// @name Data members, which are updated in only initialize

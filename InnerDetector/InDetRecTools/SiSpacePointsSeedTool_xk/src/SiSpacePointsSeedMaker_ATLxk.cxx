@@ -746,9 +746,6 @@ MsgStream& InDet::SiSpacePointsSeedMaker_ATLxk::dumpConditions(EventData &data, 
   out<<"| pTmin  (mev)            | "
      <<std::setw(12)<<std::setprecision(5)<<m_ptmin
      <<"                              |"<<endmsg;
-  out<<"| |rapidity|          <=  | " 
-     <<std::setw(12)<<std::setprecision(5)<<m_rapcut
-     <<"                              |"<<endmsg;
   out<<"| max radius SP           | "
      <<std::setw(12)<<std::setprecision(5)<<m_r_rmax 
      <<"                              |"<<endmsg;
@@ -760,24 +757,6 @@ MsgStream& InDet::SiSpacePointsSeedMaker_ATLxk::dumpConditions(EventData &data, 
      <<"                              |"<<endmsg;
   out<<"| max Z-vertex position   | "
      <<std::setw(12)<<std::setprecision(5)<<m_zmax
-     <<"                              |"<<endmsg;
-  out<<"| min radius first  SP(3) | "
-     <<std::setw(12)<<std::setprecision(5)<<m_r1min
-     <<"                              |"<<endmsg;
-  out<<"| min radius second SP(3) | "
-     <<std::setw(12)<<std::setprecision(5)<<m_r2min
-     <<"                              |"<<endmsg;
-  out<<"| min radius last   SP(3) | "
-     <<std::setw(12)<<std::setprecision(5)<<m_r3min
-     <<"                              |"<<endmsg;
-  out<<"| max radius first  SP(3) | "
-     <<std::setw(12)<<std::setprecision(4)<<m_r1max
-     <<"                              |"<<endmsg;
-  out<<"| max radius second SP(3) | "
-     <<std::setw(12)<<std::setprecision(5)<<m_r2max
-     <<"                              |"<<endmsg;
-  out<<"| max radius last   SP(3) | "
-     <<std::setw(12)<<std::setprecision(5)<<m_r3max
      <<"                              |"<<endmsg;
   out<<"| min radius first  SP(2) | "
      <<std::setw(12)<<std::setprecision(5)<<m_r1minv
@@ -805,9 +784,6 @@ MsgStream& InDet::SiSpacePointsSeedMaker_ATLxk::dumpConditions(EventData &data, 
      <<"                              |"<<endmsg;
   out<<"| max       impact        | "
      <<std::setw(12)<<std::setprecision(5)<<m_maxdImpact
-     <<"                              |"<<endmsg;
-  out<<"| max       impact pps    | "
-     <<std::setw(12)<<std::setprecision(5)<<m_maxdImpactPPS
      <<"                              |"<<endmsg;
   out<<"| max       impact sss    | "
      <<std::setw(12)<<std::setprecision(5)<<m_maxdImpactSSS
@@ -945,7 +921,6 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::buildFrameWork()
   m_dzdrmax0  = 1.f/std::tan(2.f*std::atan(std::exp(-m_etamax)));
   m_dzdrmin0  = 1.f/std::tan(2.f*std::atan(std::exp(-m_etamin)));
   
-  m_r3max     = m_r_rmax;
   /// cache inverse pt cuts 
   m_ipt       = 1.f/std::abs(.9f*m_ptmin);
   m_ipt2      = m_ipt*m_ipt;
@@ -1163,27 +1138,27 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::buildFrameWork()
     for (int zbin=0; zbin<arraySizeZV; ++zbin) {
       
       int twoDbinSamePhi  = phiBin *arraySizeZV+zbin;
-      int twoDbinLowePhi  = phiBinBelow*arraySizeZV+zbin;
+      int twoDbinLowerPhi  = phiBinBelow*arraySizeZV+zbin;
       int twoDbinHigherPhi  = phiBinTop*arraySizeZV+zbin;
 
       /// always include the two neighbour bins in phi
       m_nNeighboursVertexPhiZ[twoDbinSamePhi]    = 3;
       m_neighboursVertexPhiZ[twoDbinSamePhi][0] = twoDbinSamePhi;
-      m_neighboursVertexPhiZ[twoDbinSamePhi][1] = twoDbinLowePhi;
+      m_neighboursVertexPhiZ[twoDbinSamePhi][1] = twoDbinLowerPhi;
       m_neighboursVertexPhiZ[twoDbinSamePhi][2] = twoDbinHigherPhi;
 
       /// for the positive z bin, include the central z slice as well 
       if (zbin>1) {
         m_nNeighboursVertexPhiZ[twoDbinSamePhi]    = 6;
         m_neighboursVertexPhiZ[twoDbinSamePhi][3] = twoDbinSamePhi-1;
-        m_neighboursVertexPhiZ[twoDbinSamePhi][4] = twoDbinLowePhi-1;
+        m_neighboursVertexPhiZ[twoDbinSamePhi][4] = twoDbinLowerPhi-1;
         m_neighboursVertexPhiZ[twoDbinSamePhi][5] = twoDbinHigherPhi-1;
       } 
       /// for the negative z bin, include the central z slice as well 
       else if (zbin<1) {
         m_nNeighboursVertexPhiZ[twoDbinSamePhi]    = 6;
         m_neighboursVertexPhiZ[twoDbinSamePhi][3] = twoDbinSamePhi+1;
-        m_neighboursVertexPhiZ[twoDbinSamePhi][4] = twoDbinLowePhi+1;
+        m_neighboursVertexPhiZ[twoDbinSamePhi][4] = twoDbinLowerPhi+1;
         m_neighboursVertexPhiZ[twoDbinSamePhi][5] = twoDbinHigherPhi+1;
       }
     }

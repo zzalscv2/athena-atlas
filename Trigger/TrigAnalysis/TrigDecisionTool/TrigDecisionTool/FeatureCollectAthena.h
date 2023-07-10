@@ -22,7 +22,7 @@
 
 #include <string>
 #include <set>
-#include "boost/type_traits/is_same.hpp"
+#include <type_traits>
 #include "boost/shared_ptr.hpp"
 #include "boost/lexical_cast.hpp"
 
@@ -93,7 +93,7 @@ namespace Trig {
 
     // is not substituded for DataVectors
     template<class T>
-    const typename boost::disable_if_c<isDataVector<T>::value, T>::type* 
+    const typename std::enable_if<!isDataVector<T>::value, T>::type* 
     use_or_construct(const T* source, const HLT::TriggerElement*, const std::string&, unsigned int, const HLT::NavigationCore*  ) {
       return source;
     }
@@ -101,7 +101,7 @@ namespace Trig {
     // is substituded for DataVectors
     template<class T>
     const typename
-    boost::enable_if_c<isDataVector<T>::value, T>::type*
+    std::enable_if<isDataVector<T>::value, T>::type*
     use_or_construct(const T* source, const HLT::TriggerElement* te, const std::string& label, unsigned int condition, const HLT::NavigationCore* navigation ) {
 
       const TrigPassBits* bits(0);
@@ -344,7 +344,7 @@ namespace Trig {
 
     // access by container, stored as container
     template<class CONT> TrigPassFlags
-    build_flags (const typename boost::enable_if_c<isDataVector<CONT>::value, CONT>::type *orig_cont, const CONT* cont, const TrigPassFlags * orig_tpf) {
+    build_flags (const typename std::enable_if<isDataVector<CONT>::value, CONT>::type *orig_cont, const CONT* cont, const TrigPassFlags * orig_tpf) {
       TrigPassFlags tpf(cont->size(), orig_tpf->flagSize());
 
       if(orig_cont->size() != orig_tpf->size()) {
@@ -370,7 +370,7 @@ namespace Trig {
 
 
     template<class T> TrigPassFlags
-    build_flags (const typename boost::disable_if_c<isDataVector<T>::value, T>::type *orig, const T* feature, const TrigPassFlags * orig_tpf) {
+    build_flags (const typename std::enable_if<!isDataVector<T>::value, T>::type *orig, const T* feature, const TrigPassFlags * orig_tpf) {
       if(orig != feature) return TrigPassFlags(); // a problem TODO: print a ERROR
 
       TrigPassFlags tpf(1, orig_tpf->flagSize());

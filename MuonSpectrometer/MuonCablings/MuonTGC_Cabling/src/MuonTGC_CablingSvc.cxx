@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -1011,12 +1011,9 @@ bool MuonTGC_CablingSvc::getReadoutIDfromElementID(const Identifier & elementID,
     readoutSector = 3*readoutSector + 1;
   }
   
-  // rodID = 1..12
-  if(subdetectorID == m_AsideId.value()) {
-    rodID = readoutSector +1;
-  } else {
-    rodID = readoutSector +1;
-  }    
+ 
+  rodID = readoutSector +1;
+    
 
   return true;
 }

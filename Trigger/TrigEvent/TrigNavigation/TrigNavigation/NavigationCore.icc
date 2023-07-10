@@ -11,7 +11,6 @@
 #include <iostream>
 #include <algorithm>
 #include <boost/mpl/if.hpp>
-#include <boost/utility/enable_if.hpp>
 
 #include "TrigNavigation/Holder.h"
 #include "TrigNavigation/Holder.icc"

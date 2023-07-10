@@ -1,5 +1,5 @@
  /*
- Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TrigEgammaTLAPhotonReAlgo.h"
@@ -33,7 +33,7 @@ struct HasPtAboveThreshold {
  
 
 TrigEgammaTLAPhotonReAlgo::TrigEgammaTLAPhotonReAlgo(const std::string & name, ISvcLocator* pSvcLocator)
- : AthAlgorithm (name, pSvcLocator)
+ : AthReentrantAlgorithm (name, pSvcLocator)
  {
 
  }
@@ -60,14 +60,11 @@ StatusCode TrigEgammaTLAPhotonReAlgo::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TrigEgammaTLAPhotonReAlgo::execute()
+StatusCode TrigEgammaTLAPhotonReAlgo::execute(const EventContext& ctx) const
 {
   using namespace xAOD;
 
   ATH_MSG_DEBUG("Executing " << name() << " ...");
-
-
-  auto ctx = getContext();
 
   SG::ReadHandle<PhotonContainer> h_inputPhotons = SG::makeHandle(m_inputPhotonsKeys, ctx);
   SG::WriteHandle<PhotonContainer> h_TLAPhotons = SG::makeHandle(m_TLAOutPhotonsKey, ctx);

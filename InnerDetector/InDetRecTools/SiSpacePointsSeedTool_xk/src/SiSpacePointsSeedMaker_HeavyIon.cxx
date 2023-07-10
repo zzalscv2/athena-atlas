@@ -436,8 +436,8 @@ MsgStream& InDet::SiSpacePointsSeedMaker_HeavyIon::dumpConditions(EventData& dat
   out<<"| pTmin  (mev)            | "
      <<std::setw(12)<<std::setprecision(5)<<m_ptmin
      <<"                              |"<<endmsg;
-  out<<"| |rapidity|          <=  | " 
-     <<std::setw(12)<<std::setprecision(5)<<m_rapcut
+  out<<"| |eta|          <=  | " 
+     <<std::setw(12)<<std::setprecision(5)<<m_etamax
      <<"                              |"<<endmsg;
   out<<"| max radius SP           | "
      <<std::setw(12)<<std::setprecision(5)<<m_r_rmax 
@@ -450,24 +450,6 @@ MsgStream& InDet::SiSpacePointsSeedMaker_HeavyIon::dumpConditions(EventData& dat
      <<"                              |"<<endmsg;
   out<<"| max Z-vertex position   | "
      <<std::setw(12)<<std::setprecision(5)<<m_zmax
-     <<"                              |"<<endmsg;
-  out<<"| min radius first  SP(3) | "
-     <<std::setw(12)<<std::setprecision(5)<<m_r1min
-     <<"                              |"<<endmsg;
-  out<<"| min radius second SP(3) | "
-     <<std::setw(12)<<std::setprecision(5)<<m_r2min
-     <<"                              |"<<endmsg;
-  out<<"| min radius last   SP(3) | "
-     <<std::setw(12)<<std::setprecision(5)<<m_r3min
-     <<"                              |"<<endmsg;
-  out<<"| max radius first  SP(3) | "
-     <<std::setw(12)<<std::setprecision(4)<<m_r1max
-     <<"                              |"<<endmsg;
-  out<<"| max radius second SP(3) | "
-     <<std::setw(12)<<std::setprecision(5)<<m_r2max
-     <<"                              |"<<endmsg;
-  out<<"| max radius last   SP(3) | "
-     <<std::setw(12)<<std::setprecision(5)<<m_r3max
      <<"                              |"<<endmsg;
   out<<"| min radius first  SP(2) | "
      <<std::setw(12)<<std::setprecision(5)<<m_r1minv
@@ -603,10 +585,9 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::buildFrameWork()
 {
   m_ptmin     = std::abs(m_ptmin)                  ;
   if (m_ptmin < 100.) m_ptmin = 100.;
-  m_rapcut    = std::abs(m_rapcut)                 ;
-  m_dzdrmax   = 1.f/std::tan(2.f*std::atan(exp(-m_rapcut)));
+  m_etamax    = std::abs(m_etamax)                 ;
+  m_dzdrmax   = 1.f/std::tan(2.f*std::atan(exp(-m_etamax)));
   m_dzdrmin   =-m_dzdrmax                      ;
-  m_r3max     = m_r_rmax                       ;
   m_COF       =  134*.05*9.                    ;
   m_ipt       = 1.f/std::abs(.9f*m_ptmin)            ;
   m_ipt2      = m_ipt*m_ipt                    ;
@@ -1005,8 +986,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp(EventData& data) cons
         rte[NT++] = data.rfz_Sorted[an].end();
       } 
       if (data.izvertex) {
-	if (!data.trigger) production3Sp       (data, rb, rbe, rt, rte, NB, NT, nseed);
-	else            production3SpTrigger(data, rb, rbe, rt, rte, NB, NT, nseed);
+	production3Sp(data, rb, rbe, rt, rte, NB, NT, nseed);
       } else {
 	production3SpNoVertex(data, rb, rbe, rt, rte, NB, NT, nseed);
       }
@@ -1188,205 +1168,6 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp
       data.rMin = r0;
       return;
     } 
-  }
-}
-
-///////////////////////////////////////////////////////////////////
-// Production 3 space points seeds in ROI
-///////////////////////////////////////////////////////////////////
-
-void InDet::SiSpacePointsSeedMaker_HeavyIon::production3SpTrigger
-(EventData& data,
- std::vector<InDet::SiSpacePointForSeed*>::iterator* rb ,
- std::vector<InDet::SiSpacePointForSeed*>::iterator* rbe,
- std::vector<InDet::SiSpacePointForSeed*>::iterator* rt ,
- std::vector<InDet::SiSpacePointForSeed*>::iterator* rte,
- int NB, int NT, int& nseed) const
-{
-  constexpr float pi2 = 2.*M_PI;
-
-  std::vector<InDet::SiSpacePointForSeed*>::iterator r0=rb[0],r;
-  if (!data.endlist) {
-    r0 = data.rMin;
-    data.endlist = true;
-  }
-
-  // Loop through all trigger space points
-  //
-  for (; r0!=rbe[0]; ++r0) {
-    data.nOneSeeds = 0;
-    data.mapOneSeeds.erase(data.mapOneSeeds.begin(), data.mapOneSeeds.end());
-	
-    float R  = (*r0)->radius();
-
-    const Trk::SpacePoint* SP0 = (*r0)->spacepoint;
-    bool pix = true;
-    if (SP0->clusterList().second) pix = false;
-
-    const Trk::Surface* sur0 = (*r0)->sur();
-    float               X    = (*r0)->x()  ;
-    float               Y    = (*r0)->y()  ;
-    float               Z    = (*r0)->z()  ;
-    int                 Nb   = 0           ;
-
-    // Bottom links production
-    //
-    for (int i=0; i<NB; ++i) {
-      for (r=rb[i]; r!=rbe[i]; ++r) {
-	float Rb =(*r)->radius();
-
-	float dR = R-Rb;
-	if (dR<m_drmin) break;
-	if (dR > m_drmax) {
-          rb[i]=r;
-          continue;
-        }
-
-	if ((*r)->sur()==sur0) continue;
-	if (!pix && !(*r)->spacepoint->clusterList().second) continue;
-
-	float Tz = (Z-(*r)->z())/dR;
-
-	if (Tz < m_dzdrmin || Tz > m_dzdrmax) continue;
-	
-	// Comparison with vertices Z coordinates
-	//
-	float Zo = Z-R*Tz;
-        if (!isZCompatible(data, Zo, Rb, Tz)) continue;
-	data.SP[Nb] = (*r);
-        if (++Nb==m_maxsizeSP) goto breakb;
-      }
-    }
-  breakb:
-    if (!Nb || Nb==m_maxsizeSP) continue;
-    int Nt = Nb;
-    
-    // Top   links production
-    //
-    for (int i=0; i<NT; ++i) {
-      for (r=rt[i]; r!=rte[i]; ++r) {
-	float Rt =(*r)->radius();
-	float dR = Rt-R;
-        if (dR<m_drmin) {
-          rt[i]=r;
-          continue;
-        }
-	if (dR>m_drmax) break;
-
-	if ( (*r)->sur()==sur0) continue;
-
-	float Tz = ((*r)->z()-Z)/dR;
-
-	if (Tz < m_dzdrmin || Tz > m_dzdrmax) continue;
-
-	// Comparison with vertices Z coordinates
-	//
-	float Zo = Z-R*Tz;
-        if (!isZCompatible(data, Zo, R, Tz)) continue;
-	
-	// Polar angle test
-	//
-	Zo = (*r)->z()+(550.-Rt)*Tz;
-        if ( Zo < m_zminU || Zo > m_zmaxU) continue;
-	
-  	data.SP[Nt] = (*r);
-        if (++Nt==m_maxsizeSP) goto breakt;
-      }
-    }
-    
-  breakt:
-    if (!(Nt-Nb)) continue;
-
-    float covr0 = (*r0)->covr();
-    float covz0 = (*r0)->covz();
-
-    float ax   = X/R;
-    float ay   = Y/R;
-    
-    for (int i=0; i!=Nt; ++i) {
-      InDet::SiSpacePointForSeed* sp = data.SP[i];
-
-      float dx  = sp->x()-X   ;
-      float dy  = sp->y()-Y   ;
-      float dz  = sp->z()-Z   ;
-      float x   = dx*ax+dy*ay ;
-      float y   =-dx*ay+dy*ax ;
-      float r2  = 1.f/(x*x+y*y);
-      float dr  = std::sqrt(r2)    ;
-      float tz  = dz*dr       ;
-      if (i < Nb) tz = -tz;
-
-      data.Tz[i]   = tz                                            ;
-      data.Zo[i]   = Z-R*tz                                        ;
-      data.R [i]   = dr                                            ;
-      data.U [i]   = x*r2                                          ;
-      data.V [i]   = y*r2                                          ;
-      data.Er[i]   = (covz0+sp->covz()+tz*tz*(covr0+sp->covr()))*r2;
-    }
- 
-    float imc   = m_diver   ;
-    float ipt2  = m_ipt2    ;
-    float K     = data.K       ;
-    float K2    = K*K       ;
-    float COF   = m_COF     ;
-    float ipt2K = ipt2/K2   ;
-    float ipt2C = ipt2*COF  ;
-    float COFK  = COF*K2    ;
-    covr0      *= 2.        ;
-    covz0      *= 2.        ;
-  
-    // Three space points comparison
-    //
-    for (int b=0; b!=Nb; ++b) {
-      const Trk::SpacePoint* SPb = data.SP[b]->spacepoint;
- 
-      float  Zob  = data.Zo[b]      ;
-      float  Tzb  = data.Tz[b]      ;
-      float  Rb2r = data.R [b]*covr0;
-      float  Rb2z = data.R [b]*covz0;
-      float  Erb  = data.Er[b]      ;
-      float  Vb   = data.V [b]      ;
-      float  Ub   = data.U [b]      ;
-      float  Tzb2 = (1.f+Tzb*Tzb) ;
-      float  CSA  = Tzb2*COFK    ;
-      float ICSA  = Tzb2*ipt2C   ;
-      float dZ    = dZVertexMin(data, Zob);
-      float Iz    = (dZ*dZ)/Tzb2 ;
-
-      for (int t=Nb; t!=Nt; ++t) {
-	float Ts  = .5f*(Tzb+data.Tz[t])                          ;
-	float dt  =     Tzb-data.Tz[t]                           ;
-	float dT  = dt*dt-Erb-data.Er[t]-data.R[t]*(Ts*Ts*Rb2r+Rb2z);
-	if ( dT > ICSA) continue;
-	float dU  = data.U[t]-Ub; if (dU == 0.) continue ;
-	float A   = (data.V[t]-Vb)/dU                   ;
-	float S2  = 1.f+A*A                           ;
-	float B   = Vb-A*Ub                          ;
-	float B2  = B*B                              ;
-	if (B2  > ipt2K*S2 || dT*S2 > B2*CSA) continue;
-	float Im  = std::abs((A-B*R)*R)                  ;
-	
-	if (Im > imc ) continue;
-
-	// Azimuthal angle test
-	//
-	float y  = 1.;
-	float x  = 2.f*B*R-A;
-	float df = std::abs(std::atan2(ay*y-ax*x,ax*y+ay*x)-m_ftrig);
-	if (df > M_PI) df=pi2-df;
-	if (df > m_ftrigW) continue;
-	Im = Im*Im+Iz;
-	newOneSeed(data, SPb, SP0, data.SP[t]->spacepoint, Zob, Im);
-      }
-    }
-    nseed += data.mapOneSeeds.size();
-    fillSeeds(data);
-    if (nseed>=m_maxsize) {
-      data.endlist=false;
-      ++r0;
-      data.rMin = r0;
-      return;
-    }
   }
 }
       

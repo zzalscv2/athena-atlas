@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -406,6 +406,7 @@ void Trk::TrackingVolumeHelper::glueTrackingVolumes(const std::vector<Trk::Track
             ATH_MSG_VERBOSE( "Set MaterialLayer to the BoundarySurface of volume from first array." );
             Trk::Surface& firstFaceSurface = tVolIter->boundarySurfaces()[firstFace]->surfaceRepresentation();
             // assume that now the mlayer onwership goes over to the TrackingVolume
+            //cppcheck-suppress ignoredReturnValue
             mLayer.release();
             firstFaceSurface.setMaterialLayer(*mLayer_ptr);
         }
@@ -425,6 +426,7 @@ void Trk::TrackingVolumeHelper::glueTrackingVolumes(const std::vector<Trk::Track
             ATH_MSG_VERBOSE( "Set MaterialLayer to the BoundarySurface of volume from second array." );
             Trk::Surface& secondFaceSurface = tVolIter->boundarySurfaces()[secondFace]->surfaceRepresentation();
             // assume that now the mlayer onwership goes over to the TrackingVolume
+            //cppcheck-suppress ignoredReturnValue
             mLayer.release();
             secondFaceSurface.setMaterialLayer(*mLayer_ptr);
         }
