@@ -6,6 +6,8 @@ from AthenaConfiguration.Enums import Format
 
 def ITkInDetToXAODClusterConversionCfg(flags, name="ITkInDetToXAODClusterConversion", **kwargs):
     acc = ComponentAccumulator()
+    kwargs.setdefault('ProcessPixel', flags.Detector.EnableITkPixel)
+    kwargs.setdefault('ProcessStrip', flags.Detector.EnableITkStrip)
     acc.addEventAlgo(CompFactory.InDet.InDetToXAODClusterConversion(name, **kwargs))
     return acc
 
@@ -14,6 +16,9 @@ def ITkXAODToInDetClusterConversionCfg(flags, name="ITkXAODToInDetClusterConvers
 
     from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
     kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)) )
+
+    kwargs.setdefault('ProcessPixel', flags.Detector.EnableITkPixel)
+    kwargs.setdefault('ProcessStrip', flags.Detector.EnableITkStrip)
 
     acc.addEventAlgo(CompFactory.InDet.XAODToInDetClusterConversion(name, **kwargs))
     return acc

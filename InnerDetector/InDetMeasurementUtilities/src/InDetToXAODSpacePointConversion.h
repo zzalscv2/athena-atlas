@@ -53,6 +53,9 @@ namespace InDet {
 	"Output Strip space points container"};
     SG::WriteHandleKey< xAOD::SpacePointContainer > m_outSpacepointsOverlap {this, "OutputStripOverlapSpacePointsName", "ITkStripOverlapSpacePoints",
 	"Output Strip Overlap space points container"};
+
+    Gaudi::Property<bool> m_processPixel {this, "ProcessPixel", true};
+    Gaudi::Property<bool> m_processStrip {this, "ProcessStrip", true};
   };
 
 }

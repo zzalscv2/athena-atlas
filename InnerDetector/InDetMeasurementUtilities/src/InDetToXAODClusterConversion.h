@@ -71,6 +71,9 @@ private:
 
   SG::WriteHandleKey<xAOD::PixelClusterContainer> m_outputPixelClusterContainerKey {this, "OutputPixelClustersName", "ITkPixelClusters", "name of the output xAOD pixel cluster container"};
   SG::WriteHandleKey<xAOD::StripClusterContainer> m_outputStripClusterContainerKey {this, "OutputStripClustersName", "ITkStripClusters", "name of the output xAOD strip cluster container"};
+
+  Gaudi::Property<bool> m_processPixel {this, "ProcessPixel", true};
+  Gaudi::Property<bool> m_processStrip {this, "ProcessStrip", true};
 };
 
 }

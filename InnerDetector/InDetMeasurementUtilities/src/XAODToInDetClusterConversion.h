@@ -74,6 +74,9 @@ class XAODToInDetClusterConversion
 
   SG::WriteHandleKey<InDet::SCT_ClusterContainer> m_outputStripClusterContainerKey {this, "OutputStripClustersName", "ITkStripClusters", "name of the output InDet pixel cluster container"};
   SG::WriteHandleKey< InDet::SiClusterContainer > m_stripClusterContainerLinkKey {this, "StripClustersLinkName", "ITkStripClusters"};
+
+  Gaudi::Property<bool> m_processPixel {this, "ProcessPixel", true};
+  Gaudi::Property<bool> m_processStrip {this, "ProcessStrip", true};
 };
 
 }
