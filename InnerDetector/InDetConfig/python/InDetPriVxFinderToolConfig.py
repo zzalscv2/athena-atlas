@@ -197,10 +197,10 @@ def VertexFinderToolCfg(flags, **kwargs):
 def TrigVertexFinderToolCfg(flags, **kwargs):
     from ActsConfig.ActsTrkPriVxFinderConfig import TrigActsGaussAdaptiveMultiFindingCfg
 
-    if flags.Tracking.ActiveConfig.adaptiveVertex and \
-       flags.Tracking.ActiveConfig.adaptiveVertex:
-        return TrigActsGaussAdaptiveMultiFindingCfg(flags, **kwargs)
-    elif flags.Tracking.ActiveConfig.adaptiveVertex:
-        return TrigGaussAdaptiveMultiFindingCfg(flags, **kwargs)
+    if flags.Tracking.ActiveConfig.adaptiveVertex:
+        if flags.Tracking.ActiveConfig.actsVertex:
+            return TrigActsGaussAdaptiveMultiFindingCfg(flags, **kwargs)
+        else:
+            return TrigGaussAdaptiveMultiFindingCfg(flags, **kwargs)
     else:
         return TrigGaussIterativeFindingCfg(flags, **kwargs)
