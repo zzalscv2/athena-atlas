@@ -35,6 +35,7 @@ InDetPerfPlot_VertexTruthMatching::InDetPerfPlot_VertexTruthMatching(InDetPlotBa
     m_vx_nReco_vs_nTruth_none(nullptr),
     m_vx_hs_reco_eff(nullptr),
     m_vx_hs_sel_eff(nullptr),
+    m_vx_hs_sel_eff_dist(nullptr),
     m_vx_hs_reco_long_reso(nullptr),
     m_vx_hs_reco_trans_reso(nullptr),
     m_vx_hs_truth_long_reso_vs_PU(nullptr),
@@ -213,6 +214,7 @@ void InDetPerfPlot_VertexTruthMatching::initializePlots() {
         book(m_vx_nReco_vs_nTruth_none,"vx_nReco_vs_nTruth_none");
         book(m_vx_hs_reco_eff,"vx_hs_reco_eff");
         book(m_vx_hs_sel_eff,"vx_hs_sel_eff");
+        book(m_vx_hs_sel_eff_dist,"vx_hs_sel_eff_dist");
         book(m_vx_hs_reco_long_reso,"vx_hs_reco_long_reso");
         book(m_vx_hs_reco_trans_reso,"vx_hs_reco_trans_reso");
         book(m_vx_hs_truth_long_reso,"vx_hs_truth_long_reso");
@@ -586,6 +588,26 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex* recoHardScatter
         breakdown[InDetVertexTruthMatchUtils::VertexMatchType::FAKE]    = 0;
         breakdown[InDetVertexTruthMatchUtils::VertexMatchType::DUMMY]   = 0;
 
+       if (!recoHardScatter){
+            ATH_MSG_INFO("No recoHardScatter vertex - not filling vertex truth matching.");
+            return;
+        }
+
+        // Get the truth HS vertex
+        const xAOD::TruthVertex* truthHSVtx = nullptr;
+
+        // Check that we have *exactly* 1 truth HS vertex
+        if (!truthHSVertices.empty()) {
+            if (truthHSVertices.size() != 1) {
+                ATH_MSG_WARNING("Size of truth HS vertex vector is >1 -- only using the first one in the vector.");
+            }
+            truthHSVtx = truthHSVertices.at(0);
+            fillHisto(m_vx_hs_sel_eff_dist, nTruthVertices, getRadialDiff2(recoHardScatter, truthHSVtx) < std::pow(m_cutMinTruthRecoRadialDiff, 2), weight);
+        }
+        else {
+            ATH_MSG_WARNING("Size of truth HS vertex vector is 0 -- assuming truth HS vertex to NOT be reconstructed.");
+        }
+
         const xAOD::TruthVertex* truthVtx = nullptr;
         float localPUDensity;
 
@@ -602,8 +624,6 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex* recoHardScatter
             return;
         }
 
-
-
         // Did we correctly select the best reco HS vertex using sumpt2?
         truthVtx = getTruthVertex(recoHardScatter);
         if (!truthVtx){
@@ -617,13 +637,7 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex* recoHardScatter
         bool truthHSVtxRecoed = false;
         float minTruthRecoRadialDiff2 = std::pow(m_cutMinTruthRecoRadialDiff, 2);
         float truthRecoRadialDiff2 = -1.;
-        const xAOD::TruthVertex* truthHSVtx = nullptr;
-        // Check that we have *exactly* 1 truth HS vertex
-        if (!truthHSVertices.empty()) {
-            if (truthHSVertices.size() != 1) {
-                ATH_MSG_WARNING("Size of truth HS vertex vector is >1 -- only using the first one in the vector.");
-            }
-            truthHSVtx = truthHSVertices.at(0);
+        if (truthHSVtx) {
             // If the radial difference between the truth-pkg-selected best reco HS vertex and the truth HS vertex is
             // less than some cut (e.g., 0.1 mm), then we say the truth HS vertex is reconstructed
             truthRecoRadialDiff2 = getRadialDiff2(bestRecoHSVtx_truth, truthHSVtx);
@@ -632,10 +646,6 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex* recoHardScatter
                 minTruthRecoRadialDiff2 = truthRecoRadialDiff2;
             }
         }
-        else {
-            ATH_MSG_WARNING("Size of truth HS vertex vector is 0 -- assuming truth HS vertex to NOT be reconstructed.");
-        }
-         
 
         // add variables here so that they are in correct scope (outside loop over vertices)
         float number_matched = 0;
