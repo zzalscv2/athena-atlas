@@ -84,14 +84,6 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
     augmentationTools = [ LLP1MaxCellDecoratorTool,
                           LLP1LRTMaxCellDecoratorTool ]
 
-    # Common augmentations
-    from IsolationSelection.IsolationSelectionConfig import IsoCloseByCorrSkimmingAlgCfg, IsoCloseByCaloDecorCfg
-    acc.merge(IsoCloseByCorrSkimmingAlgCfg(ConfigFlags, ttva_wp = "Nonprompt_All_MaxWeight"))
-
-    ### Associate the close-by pflow objects and the calorimeter clusters
-    acc.merge(IsoCloseByCaloDecorCfg(ConfigFlags,
-                                    containers = ["Electrons", "Muons", "Photons", "LRTElectrons", "MuonsLRT"] ))
-
     # Reclustered jets definitions
     from JetRecConfig.JetRecConfig import registerAsInputConstit, JetRecCfg
     from JetRecConfig.StandardSmallRJets import AntiKt4Truth, AntiKt4EMTopo
@@ -367,10 +359,9 @@ def LLP1Cfg(ConfigFlags):
     ## CloseByIsolation correction augmentation
     ## For the moment, run BOTH CloseByIsoCorrection on AOD AND add in augmentation variables to be able to also run on derivation (the latter part will eventually be suppressed)
     ## Must set useSelTools to set elLHVLoose and phIsEMLoose with tools - not already set in LLP1 derivation
-    from IsolationSelection.IsolationSelectionConfig import  setupIsoCloseByAlgs
+    from IsolationSelection.IsolationSelectionConfig import IsoCloseByAlgsCfg
     contNames = [ "Muons", "Electrons", "Photons", "LRTElectrons", "MuonsLRT" ]
-    acc.merge(setupIsoCloseByAlgs(ConfigFlags, isPhysLite = False, containerNames = contNames, useSelTools = True, stream_name = 'StreamDAOD_LLP1'))
-
+    acc.merge(IsoCloseByAlgsCfg(ConfigFlags, isPhysLite = False, containerNames = contNames, useSelTools = True, stream_name = 'StreamDAOD_LLP1'))
 
     # ============================
     # Define contents of the format
@@ -434,11 +425,10 @@ def LLP1Cfg(ConfigFlags):
 
     LLP1SlimmingHelper.ExtraVariables += ["AntiKt10TruthTrimmedPtFrac5SmallR20Jets.Tau1_wta.Tau2_wta.Tau3_wta.D2.GhostBHadronsFinalCount",
                                           "Electrons.LHValue.DFCommonElectronsLHVeryLooseNoPixResult.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z.f3",
-                                          "LRTElectrons.LHValue.DFCommonElectronsLHVeryLooseNoPixResult.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z.f3.topoetcone20_CloseByCorr.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr",
+                                          "LRTElectrons.LHValue.DFCommonElectronsLHVeryLooseNoPixResult.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z.f3",
                                           "Photons.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z.f3",
                                           "egammaClusters.phi_sampl.eta0.phi0",
                                           "LRTegammaClusters.phi_sampl.eta0.phi0",
-                                          "MuonsLRT.topoetcone20_CloseByCorr.neflowisol20_CloseByCorr.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500_CloseByCorr.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000_CloseByCorr",
                                           "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PartonTruthLabelID.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostBHadronsFinal.GhostCHadronsFinal.GhostTrack.GhostTrackCount.GhostTrackLRT.GhostTrackLRTCount",
                                           "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PartonTruthLabelID.DFCommonJets_fJvt.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostBHadronsFinal.GhostCHadronsFinal",
                                           "AntiKtVR30Rmax4Rmin02TrackJets_BTagging201903.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostTausFinal.GhostTausFinalCount",
@@ -469,7 +459,7 @@ def LLP1Cfg(ConfigFlags):
 
     ## CloseByIsolation content - CloseBy isolation correction (for all analyses)
     from IsolationSelection.IsolationSelectionConfig import  setupIsoCloseBySlimmingVariables
-    setupIsoCloseBySlimmingVariables(ConfigFlags, LLP1SlimmingHelper, isLLP1 = True)
+    setupIsoCloseBySlimmingVariables(LLP1SlimmingHelper, isLLP1 = True)
 
     # Truth containers
     if ConfigFlags.Input.isMC:
