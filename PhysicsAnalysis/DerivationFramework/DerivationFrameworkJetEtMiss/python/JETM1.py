@@ -318,7 +318,7 @@ def JETM1Cfg(ConfigFlags):
 
     JETM1SlimmingHelper.SmartCollections = ["Electrons", "Photons", "Muons", "PrimaryVertices",
                                             "InDetTrackParticles",
-                                            "AntiKt4EMTopoJets","AntiKt4EMPFlowJets",
+                                            "AntiKt4EMTopoJets",
                                             "AntiKt10UFOCSSKJets",
                                             "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
                                             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
@@ -333,7 +333,8 @@ def JETM1Cfg(ConfigFlags):
                                            "AntiKt10UFOCSSKJets.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.EnergyPerSampling.GhostTrack"]
 
     JETM1SlimmingHelper.AllVariables = [ "MuonSegments", "EventInfo",
-                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape"]
+                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape",
+                                         "AntiKt4EMPFlowJets"]
     
     # Truth containers
     if ConfigFlags.Input.isMC:
@@ -366,7 +367,7 @@ def JETM1Cfg(ConfigFlags):
     JETM1SlimmingHelper.IncludeBPhysTriggerContent = False
     JETM1SlimmingHelper.IncludeMinBiasTriggerContent = False
 
-    jetOutputList = ["AntiKt4PV0TrackJets","AntiKt4EMPFlowCSSKNoPtCutJets","AntiKt4UFOCSSKNoPtCutJets","AntiKt4EMPFlowNoPtCutJets","AntiKt4EMTopoNoPtCutJets"]
+    jetOutputList = ["AntiKt4PV0TrackJets","AntiKt4EMPFlowCSSKNoPtCutJets","AntiKt4UFOCSSKNoPtCutJets","AntiKt4EMPFlowNoPtCutJets","AntiKt4EMTopoNoPtCutJets"] 
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
     addJetsToSlimmingTool(JETM1SlimmingHelper, jetOutputList, JETM1SlimmingHelper.SmartCollections)
 
