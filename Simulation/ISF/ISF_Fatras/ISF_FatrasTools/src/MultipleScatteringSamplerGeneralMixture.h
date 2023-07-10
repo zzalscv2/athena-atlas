@@ -75,9 +75,9 @@ namespace iFatras {
       //!< General mixture model: get parameters for semi-gaussian mixture
       static std::vector<double> 	getSemigauss(double beta,double p,double dOverX0,double Z, double scale) ;
       //!< General mixture model: simulate semi-gaussian mixture
-      double 	simGaussmix(std::vector<double> scattering_params) const;
+      double 	simGaussmix(const std::vector<double>& scattering_params) const;
       //!< General mixture model: simulate gaussian mixture
-      double 	simSemigauss(std::vector<double> scattering_params) const;
+      double 	simSemigauss(const std::vector<double>& scattering_params) const;
     };
   
   
