@@ -39,7 +39,7 @@ namespace muCombUtil {
   }
 
 
-  double getMuFastRes(std::vector<double> vec, const MuonFeature* feature) {
+  double getMuFastRes(const std::vector<double>& vec, const MuonFeature* feature) {
 
    double  ptGev = feature->pt();
    double  pt = ptGev*1000.;     //muFast Pt(MeV)
