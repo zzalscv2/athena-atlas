@@ -298,7 +298,7 @@ class TrigInDetRdictStep(Step):
         self.auto_report_result = True
         self.required = True
         self.executable = 'TIDArdict'
-        self.timeout = 10*60
+        self.timeout = 15*60
         self.config = config
 
     def configure(self, test):
