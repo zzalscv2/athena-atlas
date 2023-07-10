@@ -111,8 +111,10 @@ def ITkSiSPSeededTrackFinderCfg(flags, name="ITkSiSpTrackFinder", **kwargs):
     kwargs.setdefault("useZBoundFinding",
                       flags.Tracking.ActiveConfig.doZBoundary)
     kwargs.setdefault("ITKGeometry", True)
-    kwargs.setdefault("SpacePointsSCTName", "ITkStripSpacePoints")
-    kwargs.setdefault("SpacePointsPixelName", "ITkPixelSpacePoints")
+    kwargs.setdefault("SpacePointsSCTName", "ITkStripSpacePoints"
+                      if flags.Tracking.ActiveConfig.useITkStripSeeding else "")
+    kwargs.setdefault("SpacePointsPixelName", "ITkPixelSpacePoints"
+                      if flags.Tracking.ActiveConfig.useITkPixelSeeding else "")
 
     if flags.Tracking.doITkFastTracking:
         kwargs.setdefault("doFastTracking", True)

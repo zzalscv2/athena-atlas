@@ -140,13 +140,8 @@ def ITkSiTrackerSpacePointFinderCfg(
     kwargs.setdefault("SpacePointsSCTName", 'ITkStripSpacePoints')
     kwargs.setdefault("SpacePointsOverlapName", 'ITkOverlapSpacePoints')
     kwargs.setdefault("ProcessPixels", flags.Detector.EnableITkPixel)
-    # Strip hits are not used for default fast tracking but are used
-    # for LRT fast tracking
-    useStrip = (flags.Detector.EnableITkStrip and
-                (not flags.Tracking.doITkFastTracking or
-                 flags.Tracking.doLargeD0))
-    kwargs.setdefault("ProcessSCTs", useStrip)
-    kwargs.setdefault("ProcessOverlaps", useStrip)
+    kwargs.setdefault("ProcessSCTs", flags.Detector.EnableITkStrip)
+    kwargs.setdefault("ProcessOverlaps", flags.Detector.EnableITkStrip)
 
     if flags.Beam.Type is BeamType.Cosmics:
         kwargs.setdefault("ProcessOverlaps", False)
@@ -158,6 +153,26 @@ def ITkSiTrackerSpacePointFinderCfg(
 
     acc.addEventAlgo(
         CompFactory.InDet.SiTrackerSpacePointFinder(name, **kwargs))
+    return acc
+
+
+def ITkPixelSiTrackerSpacePointFinderCfg(
+        flags, name="ITkPixelSiTrackerSpacePointFinder", **kwargs):
+    kwargs.setdefault("ProcessSCTs", False)
+    kwargs.setdefault("ProcessOverlaps", False)
+    return ITkSiTrackerSpacePointFinderCfg(flags, name, **kwargs)
+
+
+def ITkStripSiTrackerSpacePointFinderCfg(
+        flags, name="ITkStripSiTrackerSpacePointFinder", **kwargs):
+    kwargs.setdefault("ProcessPixels", False)
+    return ITkSiTrackerSpacePointFinderCfg(flags, name, **kwargs)
+
+
+def ITkFastSiTrackerSpacePointFinderCfg(flags):
+    acc = ITkPixelSiTrackerSpacePointFinderCfg(flags)
+    if flags.Tracking.doLargeD0:
+        acc.merge(ITkStripSiTrackerSpacePointFinderCfg(flags))
     return acc
 
 
