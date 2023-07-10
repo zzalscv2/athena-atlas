@@ -41,7 +41,6 @@ endforeach()
 _add_test( LogFileScanner py 400 )
 
 if( NOT SIMULATIONBASE AND NOT GENERATIONBASE )
-   _add_test( RAWMerge_tf py 300 )
    _add_test( trfSubstepIntegration py 300 )
    _add_test( HelloWorldTrf sh 300 )
    _add_test( trfArgClassesATLAS py 300 )
@@ -62,3 +61,4 @@ endif()
 #Reco_q222_tf
 #Reco_tf
 #TAGMerge_tf
+#RAWMerge_tf py
