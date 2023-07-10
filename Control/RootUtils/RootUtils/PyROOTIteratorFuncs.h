@@ -31,9 +31,7 @@
 #ifndef ROOTUTILS_PYROOTITERATORFUNCS_H
 #define ROOTUTILS_PYROOTITERATORFUNCS_H
 
-
-#include "boost/utility/enable_if.hpp"
-#include "boost/type_traits/is_base_of.hpp"
+#include <type_traits>
 #include <iterator>
 
 
@@ -53,9 +51,10 @@ public:
 
 
   /// Ordering comparison.  Only supported by random access iterators.
-  static typename boost::enable_if<
-    boost::is_base_of<std::random_access_iterator_tag,
+  static typename std::enable_if<
+    std::is_base_of_v<std::random_access_iterator_tag,
                       typename std::iterator_traits<T>::iterator_category>,
+
      bool>::type
   lt (T a, T b) { return a < b; }
 };
