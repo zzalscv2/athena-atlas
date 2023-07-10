@@ -13,7 +13,7 @@ export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
 alias setupATLAS='source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh'
 setupATLAS
 
-asetup master,latest,Athena
+asetup main,latest,Athena
 pushd ../../../../../../build
 cmake ../athena/Projects/WorkDir
 make

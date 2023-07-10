@@ -452,7 +452,7 @@ bool McVtxFilter::checkTwoBodyDecay( HepMC::ConstGenVertexPtr vtx ) const
   const int pdgId2= vtx->particles_out().at(1)->pdg_id();
 #else
   HepMC::GenVertex::particles_out_const_iterator itrPart = vtx->particles_out_const_begin();
-  const int pdgId1 = (*itrPart)->pdg_id());
+  const int pdgId1 = (*itrPart)->pdg_id();
   ++itrPart;
   const int pdgId2 = (*itrPart)->pdg_id();
 #endif

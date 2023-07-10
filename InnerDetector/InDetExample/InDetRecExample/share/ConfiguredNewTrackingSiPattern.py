@@ -82,19 +82,14 @@ class  ConfiguredNewTrackingSiPattern:
 
          InDetSiSpacePointsSeedMaker = SiSpacePointsSeedMaker (name                   = "InDetSpSeedsMaker"+NewTrackingCuts.extension(),
                                                                pTmin                  = NewTrackingCuts.minPT(),
-                                                               maxdImpact             = NewTrackingCuts.maxPrimaryImpact(),
-                                                               maxZ                   = NewTrackingCuts.maxZImpact(),
-                                                               minZ                   = -NewTrackingCuts.maxZImpact(),
                                                                usePixel               = NewTrackingCuts.usePixel(),
                                                                SpacePointsPixelName   = InDetKeys.PixelSpacePoints(),
-                                                               # useSCT                 = NewTrackingCuts.useSCT(),
                                                                useSCT                 = (NewTrackingCuts.useSCT() and NewTrackingCuts.useSCTSeeding()),
                                                                SpacePointsSCTName     = InDetKeys.SCT_SpacePoints(),
-                                                               # useOverlapSpCollection = NewTrackingCuts.useSCT(),
                                                                useOverlapSpCollection = (NewTrackingCuts.useSCT() and NewTrackingCuts.useSCTSeeding()),
                                                                SpacePointsOverlapName = InDetKeys.OverlapSpacePoints(),
                                                                radMax                 = NewTrackingCuts.radMax(),
-                                                               RapidityCut            = NewTrackingCuts.maxEta())
+                                                               etaMax                 = NewTrackingCuts.maxEta())
 
          if doSeedMakerValidation:
 
@@ -106,28 +101,32 @@ class  ConfiguredNewTrackingSiPattern:
              ServiceMgr += THistSvc()
 
            ServiceMgr.THistSvc.Output  = ["valNtuples DATAFILE='SeedMakerValidation.root' OPT='RECREATE'"]
-            
-         if NewTrackingCuts.mode() == "Offline" or NewTrackingCuts.mode() == "BLS" or InDetFlags.doHeavyIon() or  NewTrackingCuts.mode() == "ForwardTracks":
+
+         if not InDetFlags.doCosmics():
+            InDetSiSpacePointsSeedMaker.maxdImpact = NewTrackingCuts.maxPrimaryImpact()
+            InDetSiSpacePointsSeedMaker.maxZ = NewTrackingCuts.maxZImpact()
+            InDetSiSpacePointsSeedMaker.minZ = -NewTrackingCuts.maxZImpact()
+
+         if InDetFlags.doHeavyIon():
             InDetSiSpacePointsSeedMaker.maxdImpactPPS = NewTrackingCuts.maxdImpactPPSSeeds()
             InDetSiSpacePointsSeedMaker.maxdImpactSSS = NewTrackingCuts.maxdImpactSSSSeeds()
-            
-            if not InDetFlags.doHeavyIon():
-               InDetSiSpacePointsSeedMaker.maxSeedsForSpacePointStrips = NewTrackingCuts.MaxSeedsPerSP_Strips()
-               InDetSiSpacePointsSeedMaker.maxSeedsForSpacePointPixels = NewTrackingCuts.MaxSeedsPerSP_Pixels()
-               InDetSiSpacePointsSeedMaker.alwaysKeepConfirmedStripSeeds = NewTrackingCuts.KeepAllConfirmedStripSeeds()
-               InDetSiSpacePointsSeedMaker.alwaysKeepConfirmedPixelSeeds = NewTrackingCuts.KeepAllConfirmedPixelSeeds()
-               InDetSiSpacePointsSeedMaker.mindRadius  = 10. 
-               # limit size of space-point vector, uses auto-grow mechanism 
-               # to avoid exceeding bounds (should rarely happen) 
-               InDetSiSpacePointsSeedMaker.maxSizeSP  = 200 
-               InDetSiSpacePointsSeedMaker.dImpactCutSlopeUnconfirmedSSS  = 1.25 
-               InDetSiSpacePointsSeedMaker.dImpactCutSlopeUnconfirmedPPP  = 2.0 
 
+         if NewTrackingCuts.mode() in ["Offline", "BLS", "ForwardTracks"]:
+            InDetSiSpacePointsSeedMaker.maxdImpactSSS = NewTrackingCuts.maxdImpactSSSSeeds()
+            InDetSiSpacePointsSeedMaker.maxSeedsForSpacePointStrips = NewTrackingCuts.MaxSeedsPerSP_Strips()
+            InDetSiSpacePointsSeedMaker.maxSeedsForSpacePointPixels = NewTrackingCuts.MaxSeedsPerSP_Pixels()
+            InDetSiSpacePointsSeedMaker.alwaysKeepConfirmedStripSeeds = NewTrackingCuts.KeepAllConfirmedStripSeeds()
+            InDetSiSpacePointsSeedMaker.alwaysKeepConfirmedPixelSeeds = NewTrackingCuts.KeepAllConfirmedPixelSeeds()
+            InDetSiSpacePointsSeedMaker.mindRadius  = 10.
+            # limit size of space-point vector, uses auto-grow mechanism
+            # to avoid exceeding bounds (should rarely happen)
+            InDetSiSpacePointsSeedMaker.maxSizeSP  = 200
+            InDetSiSpacePointsSeedMaker.dImpactCutSlopeUnconfirmedSSS  = 1.25
+            InDetSiSpacePointsSeedMaker.dImpactCutSlopeUnconfirmedPPP  = 2.0
 
-         if NewTrackingCuts.mode() == "R3LargeD0":
+         elif NewTrackingCuts.mode() == "R3LargeD0":
             InDetSiSpacePointsSeedMaker.optimisePhiBinning = False
             InDetSiSpacePointsSeedMaker.usePixel = False
-            InDetSiSpacePointsSeedMaker.etaMax = NewTrackingCuts.maxEta() 
             InDetSiSpacePointsSeedMaker.maxSeedsForSpacePointStrips = NewTrackingCuts.MaxSeedsPerSP_Strips()
             InDetSiSpacePointsSeedMaker.alwaysKeepConfirmedStripSeeds = NewTrackingCuts.KeepAllConfirmedStripSeeds()
             InDetSiSpacePointsSeedMaker.maxdRadius = 150
@@ -137,21 +136,26 @@ class  ConfiguredNewTrackingSiPattern:
             # not all classes have that property !!!
             InDetSiSpacePointsSeedMaker.PRDtoTrackMap      = prefix+'PRDtoTrackMap'+suffix \
                                                                 if usePrdAssociationTool else ''
-         if not InDetFlags.doCosmics():
+
+         if (NewTrackingCuts.mode() in ["BeamGas", "LowPt", "VeryLowPt"] or
+             (NewTrackingCuts.mode() == "Pixel" and InDetFlags.doMinBias())):
             InDetSiSpacePointsSeedMaker.maxRadius1         = 0.75*NewTrackingCuts.radMax()
             InDetSiSpacePointsSeedMaker.maxRadius2         = NewTrackingCuts.radMax()
-            InDetSiSpacePointsSeedMaker.maxRadius3         = NewTrackingCuts.radMax()
-         if NewTrackingCuts.mode() == "LowPt" or NewTrackingCuts.mode() == "VeryLowPt" or (NewTrackingCuts.mode() == "Pixel" and InDetFlags.doMinBias()):
+            if NewTrackingCuts.mode() == "BeamGas":
+               InDetSiSpacePointsSeedMaker.maxRadius3      = NewTrackingCuts.radMax()
+
+         if (NewTrackingCuts.mode() in ["LowPt", "VeryLowPt"] or
+             (NewTrackingCuts.mode() == "Pixel" and InDetFlags.doMinBias())):
             try :
                InDetSiSpacePointsSeedMaker.pTmax              = NewTrackingCuts.maxPT()
             except:
                pass 
             InDetSiSpacePointsSeedMaker.mindRadius         = 4.0
+
          if NewTrackingCuts.mode() == "ForwardTracks":
             InDetSiSpacePointsSeedMaker.checkEta           = True
             InDetSiSpacePointsSeedMaker.etaMin             = NewTrackingCuts.minEta()
             InDetSiSpacePointsSeedMaker.etaMax             = NewTrackingCuts.maxEta()
-            InDetSiSpacePointsSeedMaker.RapidityCut        = NewTrackingCuts.maxEta()
                     
          #InDetSiSpacePointsSeedMaker.OutputLevel = VERBOSE
          ToolSvc += InDetSiSpacePointsSeedMaker

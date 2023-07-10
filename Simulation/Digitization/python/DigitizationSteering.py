@@ -103,11 +103,9 @@ def DigitizationMainContentCfg(flags):
             from MCTruthSimAlgs.MCTruthSimAlgsConfig import InTimeOnlySimpleMergeMcEventCollCfg as InTimeOnlyMergeMcEventCollCfg
             from MCTruthSimAlgs.MCTruthSimAlgsConfig import SignalOnlySimpleMergeMcEventCollCfg as SignalOnlyMergeMcEventCollCfg
         else:
-            from MCTruthSimAlgs.MCTruthSimAlgsConfig import (
-                MergeMcEventCollCfg,
-                InTimeOnlyMergeMcEventCollCfg,
-                SignalOnlyMergeMcEventCollCfg,
-            )
+            from MCTruthSimAlgs.MCTruthSimAlgsConfig import MergeMcEventCollCfg
+            from MCTruthSimAlgs.MCTruthSimAlgsConfig import InTimeOnlyMcEventCollCfg as InTimeOnlyMergeMcEventCollCfg
+            from MCTruthSimAlgs.MCTruthSimAlgsConfig import SignalOnlyMcEventCollCfg as SignalOnlyMergeMcEventCollCfg
         from MCTruthSimAlgs.MCTruthSimAlgsConfig import (
             MergeAntiKt4TruthJetsCfg,
             MergeAntiKt6TruthJetsCfg,

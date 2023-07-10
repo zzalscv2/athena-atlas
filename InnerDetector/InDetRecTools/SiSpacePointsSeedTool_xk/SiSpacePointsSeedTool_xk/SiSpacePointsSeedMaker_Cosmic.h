@@ -157,19 +157,7 @@ namespace InDet {
     /// @name Properties, which can be updated in initialize
     //@{
     FloatProperty m_ptmin{this, "pTmin", 500.};
-    FloatProperty m_rapcut{this, "RapidityCut", 2.3};
-    //@}
-
-    /// @name Properties, which are not used in this implementation of SiSpacePointsSeedMaker_Cosmic class
-    //@{
-    BooleanProperty m_checketa{this, "checkEta", false};
-    FloatProperty m_zmin{this, "minZ", -10000.};
-    FloatProperty m_zmax{this, "maxZ", +10000.};
-    FloatProperty m_diver{this, "maxdImpact", 10.};
-    FloatProperty m_diverpps{this, "maxdImpactPPS", 0.};
-    FloatProperty m_diversss{this, "maxdImpactSSS", 0.};
-    FloatProperty m_etamin{this, "etaMin", 0.};
-    FloatProperty m_etamax{this, "etaMax", 0.};
+    FloatProperty m_etamax{this, "etaMax", 2.3};
     //@}
 
     /// @name Data members, which are updated in only initialize

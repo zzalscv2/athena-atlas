@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2020-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2020-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <TROOT.h>
@@ -95,7 +95,8 @@ void Geant_Following(const std::string& File = "", const std::string& Detector =
 
   for(auto const& id: detectors) {
     TCut c1 = detSelection;
-    TCut c2 = ("ActsVolumeId == " + to_string(id)).c_str();
+    std::string cutString = "ActsVolumeId == " + to_string(id);
+    TCut c2(cutString.c_str());
     detSelection = c1 || c2;
   }
 

@@ -123,9 +123,6 @@ def siSpacePointsSeedMakerTool_builder(name, config, trackingCuts, usePrdAssocia
    kwargs = {}
    kwargs = setDefaults( kwargs,
                          pTmin                  = trackingCuts.minPT(),
-                         maxdImpact             = trackingCuts.maxPrimaryImpact(),
-                         maxZ                   = trackingCuts.maxZImpact(),
-                         minZ                   = -trackingCuts.maxZImpact(),
                          usePixel               = trackingCuts.usePixel(),
                          SpacePointsPixelName   = TrigPixelKeys.SpacePoints,
                          useSCT                 = trackingCuts.useSCT(), #Note: this is false for dissappearing tracks in offline
@@ -133,8 +130,7 @@ def siSpacePointsSeedMakerTool_builder(name, config, trackingCuts, usePrdAssocia
                          useOverlapSpCollection = trackingCuts.useSCT(), #Note: this is false for dissappearing tracks in offline
                          SpacePointsOverlapName = InDetKeys.OverlapSpacePoints(), #FIXME: Switch to trigger flags? ATR-22756
                          radMax                 = trackingCuts.radMax(),
-                         RapidityCut            = trackingCuts.maxEta())
-
+                         etaMax                 = trackingCuts.maxEta())
 
    #FIXME: revisit HI ATR-22756
    #Change/add tracking  parameters based on the different tracking mode
@@ -147,21 +143,17 @@ def siSpacePointsSeedMakerTool_builder(name, config, trackingCuts, usePrdAssocia
       kwargs = setDefaults( kwargs,
                             PRDtoTrackMap      = TrigPixelKeys.PRDtoTrackMap)
 
-   #FIXME: switch to TrigFlags? ATR-22756
-   if config.name != 'cosmics':
-      kwargs = setDefaults( kwargs,
-                            maxRadius1     = 0.75*trackingCuts.radMax(),
-                            maxRadius2     = trackingCuts.radMax(),
-                            maxRadius3     = trackingCuts.radMax())
-
-
    if config.name == 'cosmics':
       from SiSpacePointsSeedTool_xk.SiSpacePointsSeedTool_xkConf import InDet__SiSpacePointsSeedMaker_Cosmic as SiSpacePointsSeedMaker
    #FIXME: revisit HI ATR-22756
    #elif config.name == 'HI':
    #   from SiSpacePointsSeedTool_xk.SiSpacePointsSeedTool_xkConf import InDet__SiSpacePointsSeedMaker_HeavyIon as SiSpacePointsSeedMaker
    else:
-    from SiSpacePointsSeedTool_xk.SiSpacePointsSeedTool_xkConf import InDet__SiSpacePointsSeedMaker_ATLxk as SiSpacePointsSeedMaker
+      kwargs = setDefaults( kwargs,
+                            maxdImpact = trackingCuts.maxPrimaryImpact(),
+                            maxZ = trackingCuts.maxZImpact(),
+                            minZ = -trackingCuts.maxZImpact() )
+      from SiSpacePointsSeedTool_xk.SiSpacePointsSeedTool_xkConf import InDet__SiSpacePointsSeedMaker_ATLxk as SiSpacePointsSeedMaker
 
    return SiSpacePointsSeedMaker ( name    =  name,
                                    **kwargs)

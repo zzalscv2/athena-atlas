@@ -1376,6 +1376,8 @@ HLT_e10_etcut_L1eEM9:
     1: 25
     2: 52
     3: 18
+HLT_e10_lhmedium_ivarloose_j70_j50a_j0_DJMASS900j50_L1MJJ-500-NFF:
+  eventCount: 0
 HLT_e10_lhmedium_ivarloose_j70_j50a_j0_DJMASS900j50_L1jMJJ-500-NFF:
   eventCount: 0
 HLT_e10_lhvloose_L1eEM9:

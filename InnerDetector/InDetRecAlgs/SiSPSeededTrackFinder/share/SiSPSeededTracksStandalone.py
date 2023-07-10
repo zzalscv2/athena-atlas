@@ -577,9 +577,8 @@ InDetSiSpacePointsSeedMaker = SiSpacePointsSeedMaker(name                   = "I
                                                      useOverlapSpCollection = NewTrackingCuts.usePixel() and (NewTrackingCuts.useSCT() and NewTrackingCuts.useSCTSeeding()), ###
                                                      SpacePointsOverlapName = InDetKeys.OverlapSpacePoints(),
                                                      radMax                 = NewTrackingCuts.radMax(),
-                                                     RapidityCut            = NewTrackingCuts.maxEta(),
+                                                     etaMax                 = NewTrackingCuts.maxEta(),
                                                      PRDtoTrackMap          = "", # @TODO
-                                                     maxdImpactPPS = NewTrackingCuts.maxdImpactPPSSeeds(),
                                                      maxdImpactSSS = NewTrackingCuts.maxdImpactSSSSeeds())
 if not doBeamSpot:
     InDetSiSpacePointsSeedMaker.BeamSpotKey = ""

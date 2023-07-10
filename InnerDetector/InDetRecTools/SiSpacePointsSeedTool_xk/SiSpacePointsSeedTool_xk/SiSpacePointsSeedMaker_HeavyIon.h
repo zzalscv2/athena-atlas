@@ -174,27 +174,13 @@ namespace InDet {
 
     /// @name Properties, which can be updated in initialize
     //@{
-    FloatProperty m_r3max{this, "maxRadius3", 600.}; //!< Always overwritten by m_r_rmax
-    FloatProperty m_rapcut{this, "RapidityCut", 2.7};
+    FloatProperty m_etamax{this, "etaMax", 2.7};
     FloatProperty m_ptmin{this, "pTmin", 500.};
-    //@}
-
-    /// @name Properties, which are not used in this implementation of SiSpacePointsSeedMaker_HeavyIon class
-    //@{
-    FloatProperty m_r1min{this, "minRadius1", 0.};
-    FloatProperty m_r1max{this, "maxRadius1", 600.};
-    FloatProperty m_r2min{this, "minRadius2", 0.};
-    FloatProperty m_r2max{this, "maxRadius2", 600.};
-    FloatProperty m_r3min{this, "minRadius3", 0.};
     //@}
 
     /// @name Data members, which are not updated at all
     //@{
     float m_drminv{20.};
-    float m_zminU{0.};
-    float m_zmaxU{0.};
-    float m_ftrig{0.};
-    float m_ftrigW{0.};
     //@}
 
     // @name Data members, which are updated only in initialize
@@ -257,13 +243,6 @@ namespace InDet {
     void production2Sp(EventData& data) const;
     void production3Sp(EventData& data) const;
     void production3Sp
-    (EventData& data,
-     std::vector<InDet::SiSpacePointForSeed*>::iterator*,
-     std::vector<InDet::SiSpacePointForSeed*>::iterator*,
-     std::vector<InDet::SiSpacePointForSeed*>::iterator*,
-     std::vector<InDet::SiSpacePointForSeed*>::iterator*,
-     int,int,int&) const;
-    void production3SpTrigger
     (EventData& data,
      std::vector<InDet::SiSpacePointForSeed*>::iterator*,
      std::vector<InDet::SiSpacePointForSeed*>::iterator*,

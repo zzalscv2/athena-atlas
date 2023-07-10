@@ -8,6 +8,9 @@
 #define FIX_HEPMC
 
 #include "GeneratorModules/GenBase.h"
+#include "AtlasHepMC/GenParticle.h"
+#include <set>
+#include <memory>
 
 
 /// @brief A "fix-up" algorithm to correct weird event records
@@ -39,7 +42,7 @@ private:
   bool isPID0(const HepMC::ConstGenParticlePtr& p) const;
   bool isNonTransportableInDecayChain(const HepMC::ConstGenParticlePtr& p) const;
   bool isLoop(const HepMC::ConstGenParticlePtr& p) const;
-  bool fromDecay(const HepMC::ConstGenParticlePtr& p) const;
+  bool fromDecay(const HepMC::ConstGenParticlePtr& p, std::shared_ptr<std::set<int> >& storage) const;
   //@}
 
   /// @name Config properties

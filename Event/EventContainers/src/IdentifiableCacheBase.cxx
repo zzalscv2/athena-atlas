@@ -35,7 +35,6 @@ IdentifiableCacheBase::IdentifiableCacheBase (IdentifierHash maxHash,
     m_maker (maker), m_NMutexes(lockBucketSize), m_currentHashes(0)
 {
    if(m_NMutexes>0) m_HoldingMutexes = std::make_unique<mutexPair[]>(m_NMutexes);
-   for(auto &h : m_vec) h.store(nullptr, std::memory_order_relaxed); //Ensure initialized to null - I'm not sure if this is implicit
 }
 
 
