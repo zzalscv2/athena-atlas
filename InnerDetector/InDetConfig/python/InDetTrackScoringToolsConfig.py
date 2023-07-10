@@ -109,35 +109,47 @@ def InDetTrigAmbiScoringToolCfg(
 
     acc = ComponentAccumulator()
 
-    if "Extrapolator" not in kwargs:
-        # TODO using offline, consider porting
-        from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
-        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
-            InDetExtrapolatorCfg(flags)))
+    if flags.Tracking.ActiveConfig.input_name == "cosmics":
+        ambiScoringFactory = CompFactory.InDet.InDetCosmicScoringTool
+        kwargs.setdefault("nWeightedClustersMin",
+                          flags.Tracking.ActiveConfig.nWeightedClustersMin)
+        kwargs.setdefault("minTRTHits", 0)
+        
+    else:
+        ambiScoringFactory = CompFactory.InDet.InDetAmbiScoringTool
 
-    if "DriftCircleCutTool" not in kwargs:
-        from InDetConfig.InDetTrackSelectorToolConfig import (
-            InDetTrigTRTDriftCircleCutToolCfg)
-        kwargs.setdefault("DriftCircleCutTool", acc.popToolsAndMerge(
-            InDetTrigTRTDriftCircleCutToolCfg(flags)))
+        if "Extrapolator" not in kwargs:
+            # TODO using offline, consider porting
+            from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
+            kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
+                InDetExtrapolatorCfg(flags)))
+      
+        if "DriftCircleCutTool" not in kwargs:
+            from InDetConfig.InDetTrackSelectorToolConfig import (
+                InDetTrigTRTDriftCircleCutToolCfg)
+            kwargs.setdefault("DriftCircleCutTool", acc.popToolsAndMerge(
+                InDetTrigTRTDriftCircleCutToolCfg(flags)))
+      
+        kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPT)
+        kwargs.setdefault("useAmbigFcn", True)
+        kwargs.setdefault("useTRT_AmbigFcn", False)
+        kwargs.setdefault("maxZImp", flags.Tracking.ActiveConfig.maxZImpact)
+        kwargs.setdefault("maxRPhiImp", flags.Tracking.ActiveConfig.maxRPhiImpact)
+        kwargs.setdefault("maxEta", flags.Tracking.ActiveConfig.maxEta)
+        kwargs.setdefault("maxSCTHoles", flags.Tracking.ActiveConfig.maxSCTHoles)
+        kwargs.setdefault("maxSiHoles", flags.Tracking.ActiveConfig.maxSiHoles)
+        kwargs.setdefault("usePixel", flags.Tracking.ActiveConfig.usePixel)
+        kwargs.setdefault("useSCT", flags.Tracking.ActiveConfig.useSCT)
+        kwargs.setdefault("doEmCaloSeed", False)
+        kwargs.setdefault("EMROIPhiRZContainer", "")
+        kwargs.setdefault("minTRTonTrk", 0)
+        kwargs.setdefault("minTRTPrecisionFraction", 0)
 
-    kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPT)
-    kwargs.setdefault("useAmbigFcn", True)
-    kwargs.setdefault("useTRT_AmbigFcn", False)
-    kwargs.setdefault("maxZImp", flags.Tracking.ActiveConfig.maxZImpact)
-    kwargs.setdefault("maxRPhiImp", flags.Tracking.ActiveConfig.maxRPhiImpact)
-    kwargs.setdefault("maxEta", flags.Tracking.ActiveConfig.maxEta)
-    kwargs.setdefault("maxSCTHoles", flags.Tracking.ActiveConfig.maxSCTHoles)
-    kwargs.setdefault("maxSiHoles", flags.Tracking.ActiveConfig.maxSiHoles)
-    kwargs.setdefault("usePixel", flags.Tracking.ActiveConfig.usePixel)
-    kwargs.setdefault("useSCT", flags.Tracking.ActiveConfig.useSCT)
-    kwargs.setdefault("doEmCaloSeed", False)
-    kwargs.setdefault("EMROIPhiRZContainer", "")
-    kwargs.setdefault("minTRTonTrk", 0)
-    kwargs.setdefault("minTRTPrecisionFraction", 0)
-
-    acc.setPrivateTools(CompFactory.InDet.InDetAmbiScoringTool(
-        name=name+flags.Tracking.ActiveConfig.input_name, **kwargs))
+        
+    acc.setPrivateTools(ambiScoringFactory(
+        name=name+flags.Tracking.ActiveConfig.input_name, 
+        **kwargs))
+    
     return acc
 
 

@@ -168,6 +168,38 @@ def InDetTrigAmbiTrackSelectionToolCfg(
     return acc
 
 
+def InDetTrigAmbiTrackSelectionToolCosmicsCfg(
+        flags, name='InDetTrigAmbiTrackSelectionToolCosmics', **kwargs):
+    acc = ComponentAccumulator()
+    # TODO add AmbiTrackSelectionTool for cosmics
+
+    if "DriftCircleCutTool" not in kwargs:
+        from InDetConfig.InDetTrackSelectorToolConfig import (
+            InDetTrigTRTDriftCircleCutToolCfg)
+        DriftCircleCutTool = acc.popToolsAndMerge(
+            InDetTrigTRTDriftCircleCutToolCfg(flags))
+        acc.addPublicTool(DriftCircleCutTool)
+        kwargs.setdefault("DriftCircleCutTool", DriftCircleCutTool)
+
+    if "AssociationTool" not in kwargs:
+        from InDetConfig.InDetAssociationToolsConfig import (
+            TrigPRDtoTrackMapToolGangedPixelsCfg)
+        kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(
+            TrigPRDtoTrackMapToolGangedPixelsCfg(flags)))
+
+    kwargs.setdefault("minHits", 0)
+    kwargs.setdefault("minNotShared",3)
+    kwargs.setdefault("maxShared", 0)
+    kwargs.setdefault("minTRTHits", 0)  # used for Si only tracking !!!
+    kwargs.setdefault("maxTracksPerSharedPRD", 10)
+    kwargs.setdefault("Cosmics", True)  # there is a different instance
+    kwargs.setdefault("UseParameterization", False)
+
+    acc.setPrivateTools(
+        CompFactory.InDet.InDetAmbiTrackSelectionTool(name, **kwargs))
+    return acc
+
+
 def ITkAmbiTrackSelectionToolCfg(
         flags, name="ITkAmbiTrackSelectionTool", **kwargs):
     acc = ComponentAccumulator()

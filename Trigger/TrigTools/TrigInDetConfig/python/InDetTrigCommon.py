@@ -71,33 +71,12 @@ def getTrackingSuffix( name ):
       return ''
 
 
-
-def trackPRD_Association_builder(name, inTrackCollections, associationMapName):
-      from InDetRecExample.TrackingCommon import getInDetTrackPRD_Association
-      associationTool = associationTool_getter()
-      return getInDetTrackPRD_Association(name,
-                                          TracksName = inTrackCollections,
-                                          AssociationTool = associationTool,
-                                          AssociationMapName = associationMapName)
-
-
-
 #--------------------------------------------------------------------------
 #                    Track Ambiguity algs/tools
 def associationTool_getter():
       #TODO double check this!
       from InDetRecExample.TrackingCommon import getInDetTrigPRDtoTrackMapToolGangedPixels
       return getInDetTrigPRDtoTrackMapToolGangedPixels()
-
-def trackFitterTool_getter(config):
-      #For now load from RecLoadTools where the config is based on: InDetTrigFlags.trackFitterType()  (gaussian, kalman, globalChi2, ...)
-      #There are also variations of cosmic/TRT fitters -> Decision which fitter to return  has to be adapted based on the signature as well
-      if config.name == 'cosmics':
-         from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTrackFitterCosmics
-         return InDetTrigTrackFitterCosmics
-      else:
-         from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTrackFitter
-         return  InDetTrigTrackFitter
 
 def trackSelectionTool_getter(config):
       #TODO this might need to be revisited!
@@ -183,29 +162,6 @@ def zVertexMakerTool_builder(name, trackingCuts, seedMakerTool ):
    return InDet__SiZvertexMaker_xk(name  = name,
                                    **kwargs)
 
-
-
-
-def prdAssociation_builder( InputCollections ):
-   import InDetRecExample.TrackingCommon as TrackingCommon
-   #FIXME: If so: ATR-22756
-   # 1] Get a new association tool
-   #associationTool = TrackingCommon.getInDetTrigPRDtoTrackMapToolGangedPixels(),
-
-   # 2] Use the ganged pixel from here?
-   #from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigPrdAssociationTool
-
-   # 3] Create the new one as in offline tracking?:
-   prefix     = 'TrigInDet'
-   suffix     = ''#NewTrackingCuts.extension()
-   return TrackingCommon.getInDetTrackPRD_Association(namePrefix   = prefix,
-                                                      nameSuffix   = suffix,
-                                                      TracksName   = list(InputCollections))#This is readHandle #What input collection Thought there are no tracks at this point??!
-   # 4] if so do I use normal or ganged?
-   #from InDetAssociationTools.InDetAssociationToolsConf import InDet__InDetPRD_AssociationToolGangedPixels
-   #InDetTrigPrdAssociationl = InDet__InDetPRD_AssociationToolGangedPixels(name = "%sPrdAssociationTool%s"%(prefix,suffix),
-   #                                                                          PixelClusterAmbiguitiesMapName = TrigPixelKeys.PRDtoTrackMap )
-
 @makePublicTool
 def siDetectorElementRoadMakerTool_builder( name, trackingCuts ):
    from InDetRecExample.InDetKeys  import  InDetKeys
@@ -266,10 +222,6 @@ def siTrackMakerTool_builder( name, config, siDetElementsRoadMakerTool, trackFin
 
    if config.name == 'cosmics':
       trackPatternRecoInfo = 'SiSpacePointsSeedMaker_Cosmic'
-   #FIXME: Add HI option once implemented ATR-2275
-   #elif config.name == 'HI':
-   #  trackPatternRecoInfo = 'SiSpacePointsSeedMaker_HeavyIon'
-
    else:
       trackPatternRecoInfo = 'SiSPSeededFinder'
 
