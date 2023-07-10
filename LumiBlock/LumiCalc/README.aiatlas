@@ -29,22 +29,22 @@ cd ..
 git checkout -b lumicalcDev
 git push --set-upstream origin lumicalcDev
 
-# So for me, origin is my fork, while upstream is the atlas master
+# So for me, origin is my fork, while upstream is the atlas main
 
 # Setup build environment
 mkdir build; cd build
-asetup master,latest,Athena  # Or a fixed release
+asetup main,latest,Athena  # Or a fixed release
 cmake ../athena/Projects/WorkDir
 make -j
 
 # And everything should now be ready to go
-# Be sure to test atlas-lumicalc-dev before updating the prod area from master
+# Be sure to test atlas-lumicalc-dev before updating the prod area from main
 
 # For updates, log into aiatlas031 and go to the correct area:
 cd /var/www/lumicalc_dev
 
 # Ensure we are on the correct branch (if needed)
-# <branch> = master (prod)
+# <branch> = main (prod)
 # <branch> = lumicalcDev (dev)
 git checkout <branch>
 
@@ -54,7 +54,7 @@ git pull origin <branch>
 
 # Rebuild if any code changes
 
-# Once tested, push changes back to master (or make merge request)
+# Once tested, push changes back to main (or make merge request)
 
 Go to the correct area:
 cd /
