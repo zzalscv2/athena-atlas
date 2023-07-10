@@ -11,6 +11,9 @@ def SetupArgParser():
     parser.add_argument("--inputFile", "-i", default=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"], 
                         help="Input file to run on ", nargs="+")
     parser.add_argument("--geoModelFile", default ="root://eoshome.cern.ch:1094//eos/user/c/cimuonsw/GeometryFiles/muonsOnlyR4WMDT.db", help="GeoModel SqLite file containing the muon geometry.")
+    parser.add_argument("--chambers", default=["BIL1A3"], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
+    parser.add_argument("--outRootFile", default="MdtGeoDump.root", help="Output ROOT file to dump the geomerty")
+    parser.add_argument("--outTxtFile", default ="MdtGeoDump.txt", help="Output txt file to dump the geometry")
     return parser
 
 def setupServicesCfg(flags):
@@ -24,6 +27,13 @@ def setupServicesCfg(flags):
 
     from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
     result.merge(MuonIdHelperSvcCfg(flags))
+    return result
+
+def setupHistSvcCfg(flags, out_file="MdtGeoDump.root"):
+    result = ComponentAccumulator()
+    if len(out_file) == 0: return result
+    histSvc = CompFactory.THistSvc(Output=["GEOMODELTESTER DATAFILE='{out_file}', OPT='RECREATE'".format(out_file = out_file)])
+    result.addService(histSvc, primary=True)
     return result
 
 
@@ -72,8 +82,9 @@ if __name__=="__main__":
     DetDescCnvSvc.IdDictFromRDB = False
     DetDescCnvSvc.MuonIDFileName="IdDictParser/IdDictMuonSpectrometer_R.10.00.xml"
     DetDescCnvSvc.MuonIDFileName="IdDictParser/IdDictMuonSpectrometer_R.09.03.xml"
-    
-    cfg.merge(GeoModelMdtTestCfg(flags))
+    cfg.merge(setupHistSvcCfg(flags, out_file = args.outRootFile))
+    cfg.merge(GeoModelMdtTestCfg(flags, DumpTxtFile =  args.outTxtFile,
+                                        TestStations = args.chambers))
     
     cfg.printConfig(withDetails=True, summariseProps=True)
     flags.dump()
