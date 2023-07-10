@@ -7,16 +7,17 @@
 #include <EventPrimitives/EventPrimitivesToStringConverter.h>
 
 namespace MuonGMR4{
-
+    /// Helper struct to parse the information from the AMDB cutout tables
     struct CutOutArea{
         /// Center of the cutout to be applied
         Amg::Vector3D origin{Amg::Vector3D::Zero()};
         /// Half length a long the X axis
         double halfLengthX{0.};
-        /// Half length along the Z axis
+        /// Half length along the Y axis
         double lengthY{0.};
-        ///
-        Amg::Vector3D inclanation{Amg::Vector3D::Zero()};
+        /// The cutout may have an inclanation angle w.r.t to the plane.
+        /// The inclination vector describes the vertical evolution
+        Amg::Vector3D inclanation{Amg::Vector3D::UnitZ()};
         
     };
     inline std::ostream& operator<<(std::ostream& ostr, const CutOutArea& cut){

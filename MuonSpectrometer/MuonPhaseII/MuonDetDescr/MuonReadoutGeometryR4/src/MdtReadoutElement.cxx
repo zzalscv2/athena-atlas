@@ -15,12 +15,13 @@ std::ostream& operator<<(
     ostr << std::endl;
     ostr << " //  tube half-length (min/max): "<<pars.shortHalfX<<"/"<<pars.longHalfX<<", chamber width "<<
         pars.halfY<<", multilayer height: "<<pars.halfHeight;
-    ostr << " // Number of tube layers " << pars.firstTubePos.size()<< std::endl;
+    ostr << " // Number of tube layers " << pars.tubeLayers.size()<< std::endl;
     ostr << " // Tube pitch: " << pars.tubePitch
          << " wall thickness: " << pars.tubeWall
          << " inner radius: " << pars.tubeInnerRad << std::endl;
-    for (const Amg::Vector3D& tube : pars.firstTubePos)
-        ostr << " //    **** " << Amg::toString(tube) << std::endl;
+    for (const MdtTubeLayer& layer : pars.tubeLayers) {
+         ostr << "//   **** "<< Amg::toString(layer.tubeTransform(0).linear(),3)<<std::endl;
+    }
     return ostr;
 }
 MdtReadoutElement::MdtReadoutElement(defineArgs&& args)
@@ -47,11 +48,6 @@ StatusCode MdtReadoutElement::initElement() {
   }
   /// Coordinate system of the trapezoid is in the center while the tubes are defined 
   /// w.r.t. to the chamber edge. Move first tube into the proper position
-  const Amg::Transform3D tubeShift = toCenterTrans();
-  for (Amg::Vector3D& firstTube : m_pars.firstTubePos) {
-     firstTube -= tubeShift.translation().dot(Amg::Vector3D::UnitX()) *Amg::Vector3D::UnitZ() 
-                + m_pars.halfY * Amg::Vector3D::UnitY();
-  }
   for (unsigned int lay =1 ; lay <= numLayers() ; ++lay){
      /// Cache the transformations to the chamber layers
      ATH_CHECK(insertTransform(measurementHash(lay,0), 
@@ -85,35 +81,43 @@ Acts::Surface& MdtReadoutElement::surface() {
 
 Amg::Vector3D MdtReadoutElement::globalTubePos(const ActsGeometryContext& ctx,
                                 const IdentifierHash& hash) const {
-    return localToGlobalTrans(ctx) * localTubePos(hash);
+   return localToGlobalTrans(ctx) * localTubePos(hash);
 }
 
 Amg::Vector3D MdtReadoutElement::localTubePos(const IdentifierHash& hash) const {
-  const unsigned int layer = layerNumber(hash);
-  const unsigned int tube = tubeNumber(hash);
-  ATH_MSG_VERBOSE("Resolved hash "<<static_cast<unsigned int>(hash)<<" to layer "<<layer<< " and tube "<<tube<<". First tube position "<<
-                  Amg::toString(m_pars.firstTubePos[layer],3));
-  return m_pars.firstTubePos[layer] + tube*m_pars.tubePitch * Amg::Vector3D::UnitY();
+  return toTubeFrame(hash).translation();
 }
 Amg::Vector3D MdtReadoutElement::readOutPos(const ActsGeometryContext& ctx,
-                                const IdentifierHash& hash) const{
-    return localToGlobalTrans(ctx) * ( localTubePos(hash) + (m_pars.longHalfX  - m_pars.endPlugLength)*Amg::Vector3D::UnitX());
+                                const IdentifierHash& hash) const {
+   const unsigned int layer = layerNumber(hash);
+   const unsigned int tube  = tubeNumber(hash);
+   const MdtTubeLayer& zeroT{m_pars.tubeLayers[layer]};
+   const double length = -zeroT.tubeHalfLength(tube);
+   return localToGlobalTrans(ctx) * zeroT.tubeTransform(tube)*(length * Amg::Vector3D::UnitZ());
 }
 
-Amg::Transform3D MdtReadoutElement::toChamberLayer(const IdentifierHash& hash) const {
-   static const Amg::Transform3D rotation{Amg::getRotateZ3D(M_PI_2)};
+Amg::Transform3D MdtReadoutElement::toChamberLayer(const IdentifierHash& hash) const {   
    const unsigned int layer = layerNumber(hash);
-   const Amg::Vector3D& zeroT{m_pars.firstTubePos[layer]};
-   return Amg::Translation3D{zeroT.z()*Amg::Vector3D::UnitZ()}*rotation; 
+   const MdtTubeLayer& zeroT{m_pars.tubeLayers[layer]};
+   return zeroT.layerTransform();
 }
 Amg::Transform3D MdtReadoutElement::toTubeFrame(const IdentifierHash& hash) const {
-   static const Amg::Transform3D rotation{Amg::getRotateY3D(-M_PI_2) * Amg::getRotateZ3D(-M_PI_2)};
-   return Amg::Translation3D{localTubePos(hash)}*rotation;
+   const unsigned int layer = layerNumber(hash);
+   const unsigned int tube = tubeNumber(hash);
+   const MdtTubeLayer& zeroT{m_pars.tubeLayers[layer]};
+   return zeroT.tubeTransform(tube);  
+}
+double MdtReadoutElement::activeTubeLength(const IdentifierHash& hash) const {
+   const unsigned int layer = layerNumber(hash);
+   const unsigned int tube = tubeNumber(hash);
+   const MdtTubeLayer& zeroT{m_pars.tubeLayers[layer]}; 
+   return 2. * zeroT.tubeHalfLength(tube);
 }
 double MdtReadoutElement::tubeLength(const IdentifierHash& hash) const {
-  MdtCutOuts::const_iterator cut_itr = m_pars.cutouts.find(hash);
-  return 2.*m_pars.shortHalfX - (cut_itr != m_pars.cutouts.end() ? cut_itr->leftX + cut_itr->rightX : 0. );
+  return activeTubeLength(hash) + 2.*m_pars.deadLength;
 }
-
+double MdtReadoutElement::wireLength(const IdentifierHash& hash) const {
+   return tubeLength(hash) - 2.*m_pars.endPlugLength;
+}
         
 }  // namespace MuonGMR4

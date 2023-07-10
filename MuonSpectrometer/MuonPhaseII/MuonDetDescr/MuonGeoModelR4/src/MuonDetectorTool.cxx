@@ -1,22 +1,14 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "MuonGeoModelR4/MuonDetectorTool.h"
 
-#include "GeoModelInterfaces/IGeoModelSvc.h"
-#include "GeoModelKernel/GeoFullPhysVol.h"
-#include "GeoModelKernel/GeoPhysVol.h"
-#include "GeoModelKernel/GeoVolumeCursor.h"
-#include "GeoModelRead/ReadGeoModel.h"
-#include "GeoModelUtilities/GeoModelExperiment.h"
-#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
-#include "RDBAccessSvc/IRDBAccessSvc.h"
-#include "RDBAccessSvc/IRDBRecord.h"
-#include "RDBAccessSvc/IRDBRecordset.h"
-/**
- ** Constructor(s)
- **/
+#include <GeoModelInterfaces/IGeoModelSvc.h>
+#include <GeoModelKernel/GeoPhysVol.h>
+#include <GeoModelKernel/GeoVolumeCursor.h>
+#include <GeoModelRead/ReadGeoModel.h>
+#include <GeoModelUtilities/GeoModelExperiment.h>
+#include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 
 namespace MuonGMR4 {
 MuonDetectorTool::MuonDetectorTool(const std::string &type,

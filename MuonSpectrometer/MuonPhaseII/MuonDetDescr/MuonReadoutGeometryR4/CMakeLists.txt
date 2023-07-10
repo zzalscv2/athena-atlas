@@ -30,8 +30,7 @@ foreach(_theTestSource ${tests})
     atlas_add_test( ${_theTest} SOURCES ${_theTestSource}
                     INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} 
                     LINK_LIBRARIES ${ROOT_LIBRARIES} MuonReadoutGeometryR4 
-                    POST_EXEC_SCRIPT nopost.sh 
-    )
+                    POST_EXEC_SCRIPT nopost.sh)
     
 
 endforeach()

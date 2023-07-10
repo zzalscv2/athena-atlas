@@ -11,6 +11,7 @@
 
 #include <GeoModelInterfaces/IGeoDbTagSvc.h>
 #include <MuonGeoModelR4/IMuonReaoutGeomTool.h>
+#include <MuonGeoModelR4/IMuonGeoUtilityTool.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 
 namespace MuonGMR4 {
@@ -33,6 +34,7 @@ class MdtReadoutGeomTool : public AthAlgTool,
     ServiceHandle<IGeoDbTagSvc> m_geoDbTagSvc{this, "GeoDbTagSvc",
                                               "GeoDbTagSvc"};
 
+    PublicToolHandle<IMuonGeoUtilityTool> m_geoUtilTool{this,"GeoUtilTool", "" };
     using parameterBook = MdtReadoutElement::parameterBook;
     
 
@@ -40,10 +42,7 @@ class MdtReadoutGeomTool : public AthAlgTool,
     StatusCode readParameterBook();
     /// Loads the chamber dimensions from GeoModel
     StatusCode loadDimensions(MdtReadoutElement::defineArgs& args );
-    /// Load the cutouts
-    StatusCode loadCutouts(MdtReadoutElement::defineArgs& args );
-    
-
+  
     using ParamBookTable = std::map<std::string, parameterBook>; 
     ParamBookTable m_parBook{};
 

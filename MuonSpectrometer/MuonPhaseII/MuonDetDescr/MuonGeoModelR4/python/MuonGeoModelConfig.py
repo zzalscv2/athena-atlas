@@ -2,9 +2,14 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-
+def MuonGeoUtilityToolCfg(flags, name = "MuonGeoUtilityTool", **kwargs):
+    result = ComponentAccumulator()
+    the_tool = CompFactory.MuonGMR4.MuonGeoUtilityTool(name, **kwargs)
+    result.addPublicTool(the_tool, primary = True)
+    return result
 def MdtReadoutGeomToolCfg(flags, name="MdtReadoutGeomTool", **kwargs):
     result = ComponentAccumulator()
+    kwargs.setdefault("GeoUtilTool", result.getPrimaryAndMerge(MuonGeoUtilityToolCfg(flags)))
     the_tool = CompFactory.MuonGMR4.MdtReadoutGeomTool(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result

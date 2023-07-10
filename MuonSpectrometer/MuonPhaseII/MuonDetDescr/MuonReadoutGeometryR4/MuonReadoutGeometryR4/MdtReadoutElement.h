@@ -5,8 +5,7 @@
 #define MUONREADOUTGEOMETRYR4_MDTREADOUTELEMENT_H
 
 #include <MuonReadoutGeometryR4/MuonReadoutElement.h>
-#include <MuonReadoutGeometryR4/MdtCutOut.h>
-
+#include <MuonReadoutGeometryR4/MdtTubeLayer.h>
 
 namespace MuonGMR4 {
 
@@ -18,10 +17,10 @@ class MdtReadoutElement : public MuonReadoutElement {
     struct parameterBook {
         /// Number of tubes per layer
         unsigned int numTubesPerLay{0};
-        /// Vector defining the position of the first tube in each tube layer.
+        /// Vector defining the position of all tubes in each tube layer.
         /// The Size of the vector reflects the number of tube layers in the
         /// multi layer
-        std::vector<Amg::Vector3D> firstTubePos{};
+        std::vector<MdtTubeLayer> tubeLayers{};
         /// Thickness of the tube walls
         double tubeWall{0.};
         /// Inner radius of the tubes
@@ -47,12 +46,7 @@ class MdtReadoutElement : public MuonReadoutElement {
         double longHalfX{0.};
         double halfY{0.};
         /// Height of the chamber ~ number of layers
-        double halfHeight{0.};
-        /// The trapezoidal shape of the endcap chambers is approximate. In fact, the trapezoid is segmented into
-        /// steps, where nTubes have the same length.
-        unsigned int tubesPerStep{0};
-        /// set of cut outs
-        MdtCutOuts cutouts{}; 
+        double halfHeight{0.};        
     };
 
     struct defineArgs : public MuonReadoutElement::defineArgs,
@@ -73,7 +67,7 @@ class MdtReadoutElement : public MuonReadoutElement {
 
     StatusCode initElement() override final;
     /// Returns the multi layer of the MdtReadoutElement
-    int multilayer() const;
+    unsigned int multilayer() const;
 
     /// Returns the number of tube layer
     unsigned int numLayers() const;
@@ -102,6 +96,9 @@ class MdtReadoutElement : public MuonReadoutElement {
 
     /// States whether the chamber is built into the barrel or not
     bool isBarrel() const;
+    
+    /// Returns the pitch between 2 tubes in a layer
+    double tubePitch() const;
     /// Returns the inner tube radius
     double innerTubeRadius() const;
     /// Adds the thickness of the tube wall onto the radius
@@ -113,6 +110,7 @@ class MdtReadoutElement : public MuonReadoutElement {
     
     Amg::Vector3D globalTubePos(const ActsGeometryContext& ctx,
                                 const IdentifierHash& hash) const;
+    
     /// Returns the global position of the readout card
     Amg::Vector3D readOutPos(const ActsGeometryContext& ctx,
                              const Identifier& measId) const;
@@ -120,8 +118,15 @@ class MdtReadoutElement : public MuonReadoutElement {
     Amg::Vector3D readOutPos(const ActsGeometryContext& ctx,
                              const IdentifierHash& measId) const;
     
-    /// Returns the Mdt tube length including the dead areas of the endplugs & dead length
+    
+    
+    double activeTubeLength(const IdentifierHash& hash) const;
+        
     double tubeLength(const IdentifierHash& hash) const;
+    
+    double wireLength(const IdentifierHash& hash) const;
+
+
 
    private:
         /// Returns the tube position in the chamber coordinate frame
