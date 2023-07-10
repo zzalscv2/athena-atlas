@@ -130,10 +130,6 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
     # ---  Cluster EDM converters
     #
     if configuration_settings.doAthenaToActsCluster:
-        if (not flags.Detector.EnableITkPixel or
-                not flags.Detector.EnableITkStrip):
-            raise RuntimeError(
-                "Cluster EDM converter (InDet -> xAOD) must be activated for both Pixel and Strips")
         #
         # --- InDet -> xAOD Cluster EDM converter
         #
@@ -142,10 +138,6 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
         acc.merge(ITkInDetToXAODClusterConversionCfg(flags))
 
     if configuration_settings.doActsToAthenaCluster:
-        if (not flags.Detector.EnableITkPixel or
-                not flags.Detector.EnableITkStrip):
-            raise RuntimeError(
-                "Cluster EDM converter (xAOD -> InDet) must be activated for both Pixel and Strips")
         #
         # --- xAOD -> InDet Cluster EDM converter
         #
@@ -175,11 +167,6 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
     # --- Space Point EDM converters
     #
     if configuration_settings.AthenaToActsSpacePointConverter:
-        if (not flags.Detector.EnableITkPixel or
-                not flags.Detector.EnableITkStrip):
-            raise RuntimeError(
-                "Space Point EDM converter (InDet -> xAOD) must be activated for both Pixel and Strips")
-
         #
         # --- InDet -> xAOD Space Point EDM converter
         #

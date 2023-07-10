@@ -40,15 +40,15 @@ StatusCode InDetToXAODClusterConversion::initialize() {
   
   ATH_CHECK(detStore()->retrieve(m_pixelID,"PixelID"));
   ATH_CHECK(detStore()->retrieve(m_stripID,"SCT_ID"));
-  
-  ATH_CHECK( m_pixelDetEleCollKey.initialize() );
-  ATH_CHECK( m_stripDetEleCollKey.initialize() );
-  
-  ATH_CHECK( m_inputPixelClusterContainerKey.initialize() );
-  ATH_CHECK( m_inputStripClusterContainerKey.initialize() );
-  ATH_CHECK( m_outputPixelClusterContainerKey.initialize() );
-  ATH_CHECK( m_outputStripClusterContainerKey.initialize() );
-  
+
+  ATH_CHECK( m_pixelDetEleCollKey.initialize(m_processPixel) );
+  ATH_CHECK( m_stripDetEleCollKey.initialize(m_processStrip) );
+
+  ATH_CHECK( m_inputPixelClusterContainerKey.initialize(m_processPixel) );
+  ATH_CHECK( m_inputStripClusterContainerKey.initialize(m_processStrip) );
+  ATH_CHECK( m_outputPixelClusterContainerKey.initialize(m_processPixel) );
+  ATH_CHECK( m_outputStripClusterContainerKey.initialize(m_processStrip) );
+
   ATH_MSG_DEBUG( "Initialize done !" );
   return StatusCode::SUCCESS;
 }
@@ -58,11 +58,15 @@ StatusCode InDetToXAODClusterConversion::initialize() {
 StatusCode InDetToXAODClusterConversion::execute(const EventContext& ctx) const {
   ATH_MSG_DEBUG("Executing " << name() << " ...");
 
-  ATH_MSG_DEBUG("Converting Pixel Clusters: InDet -> xAOD");
-  ATH_CHECK( convertPixelClusters(ctx) );
+  if (m_processPixel.value()) {
+    ATH_MSG_DEBUG("Converting Pixel Clusters: InDet -> xAOD");
+    ATH_CHECK( convertPixelClusters(ctx) );
+  }
   
-  ATH_MSG_DEBUG("Converting Strip Clusters: InDet -> xAOD");
-  ATH_CHECK( convertStripClusters(ctx) );
+  if (m_processStrip.value()) {
+    ATH_MSG_DEBUG("Converting Strip Clusters: InDet -> xAOD");
+    ATH_CHECK( convertStripClusters(ctx) );
+  }
 
   return StatusCode::SUCCESS;
 }

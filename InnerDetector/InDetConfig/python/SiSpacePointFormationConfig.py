@@ -9,6 +9,8 @@ def InDetToXAODSpacePointConversionCfg(flags,
                                        name: str = "InDetToXAODSpacePointConversion",
                                        **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
+    kwargs.setdefault('ProcessPixel', flags.Detector.EnableITkPixel)
+    kwargs.setdefault('ProcessStrip', flags.Detector.EnableITkStrip)
     acc.addEventAlgo( CompFactory.InDet.InDetToXAODSpacePointConversion(name, **kwargs) )
     return acc
 

@@ -20,13 +20,13 @@ namespace InDet {
 
     ATH_CHECK( m_beamSpotKey.initialize() );
 
-    ATH_CHECK( m_inSpacepointsPixel.initialize() );
-    ATH_CHECK( m_inSpacepointsStrip.initialize() );
-    ATH_CHECK( m_inSpacepointsOverlap.initialize() );
+    ATH_CHECK( m_inSpacepointsPixel.initialize(m_processPixel) );
+    ATH_CHECK( m_inSpacepointsStrip.initialize(m_processStrip) );
+    ATH_CHECK( m_inSpacepointsOverlap.initialize(m_processStrip) );
 
-    ATH_CHECK( m_outSpacepointsPixel.initialize() );
-    ATH_CHECK( m_outSpacepointsStrip.initialize() );
-    ATH_CHECK( m_outSpacepointsOverlap.initialize() );
+    ATH_CHECK( m_outSpacepointsPixel.initialize(m_processPixel) );
+    ATH_CHECK( m_outSpacepointsStrip.initialize(m_processStrip) );
+    ATH_CHECK( m_outSpacepointsOverlap.initialize(m_processStrip) );
     
     return StatusCode::SUCCESS; 
   }
@@ -41,9 +41,14 @@ namespace InDet {
     auto vertex = beamSpot->beamVtx().position();
 
     // Convert
-    ATH_CHECK( convertPixel(ctx) );
-    ATH_CHECK( convertStrip(ctx, vertex) );
-    ATH_CHECK( convertStripOverlap(ctx, vertex) );
+    if (m_processPixel.value()) {
+      ATH_CHECK( convertPixel(ctx) );
+    }
+
+    if (m_processStrip.value()) {
+      ATH_CHECK( convertStrip(ctx, vertex) );
+      ATH_CHECK( convertStripOverlap(ctx, vertex) );
+    }
 
     return StatusCode::SUCCESS; 
   }
