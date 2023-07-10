@@ -5,14 +5,15 @@ isHI_mode = False
 
 ## ------------------------------------------- name of the partition from which to read data and configuration parameters
 partitionName   = 'ATLAS'
-#partitionName   = 'GMTestPartition' #Test partition serving events from a raw data file if you want to test when no run is ongoing.
+#partitionName   = 'GMTestPartition' #Test partition serving events from a raw data file if you want to test when no run is ongoing. To see which files will be ran over on this test partition, at point 1, see the uncommented lines in: /det/dqm/GlobalMonitoring/GMTestPartition_oks/tdaq-10-00-00/without_gatherer/GMTestPartition.data.xml  
+#partitionName   = 'GMTestPartitionT9' To see which files will be ran over on this test partition, at point 1, see the uncommented lines in: /det/dqm/GlobalMonitoring/GMTestPartition_oks/tdaq-10-00-00/without_gatherer/GMTestPartitionT9.data.xml
 
 ## ------------------------------------------- set both the old flags in RecExOnline and the new flags consistently
 beamType          = 'collisions'
 #beamType          = 'cosmics'
 
 #COND tag
-ConditionsTag     = 'CONDBR2-HLTP-2022-02'
+ConditionsTag     = 'CONDBR2-HLTP-2023-01'
 #Current DetDesc
 DetDescrVersion   = 'ATLAS-R3S-2021-03-00-00'
 
@@ -177,7 +178,7 @@ elif beamType == 'collisions':
 
 if (partitionName != 'ATLAS'): # Can't get some information from the test partition
      ConfigFlags.Input.RunNumber = [412343]
-     ConfigFlags.Input.ProjectName = 'data22_13p6TeV'
+     ConfigFlags.Input.ProjectName = 'data23_13p6TeV'
      ## ERROR Missing ROBFragment with ID 0x760001 requested ATR-24151 13 Oct 2021 lshi
      ConfigFlags.Trigger.L1.doMuon=False;
      ConfigFlags.Trigger.L1.doCalo=False;
