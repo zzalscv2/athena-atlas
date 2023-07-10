@@ -116,7 +116,6 @@ def mergeFolder(path):
     for jetcont in jetcontainers:
         if jetcont in path:
             currentdir = gDirectory.GetPath()
-            gDirectory.cd(path)
             # create /restCategory
             print("Create directory " + path + "/other_histograms/histos")
             tagfolders[path+"/"+restCategory] = f.mkdir(path+"/other_histograms/histos")
