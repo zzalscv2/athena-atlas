@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef TrigEgammaTLAPhotonReAlgo_h
@@ -13,7 +13,6 @@
 
 // Base class
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 
@@ -24,13 +23,13 @@
 #include "xAODTrigEgamma/TrigPhotonContainer.h"
 
 
-class TrigEgammaTLAPhotonReAlgo : public AthAlgorithm {
+class TrigEgammaTLAPhotonReAlgo : public AthReentrantAlgorithm {
 
   public:
     TrigEgammaTLAPhotonReAlgo(const std::string & name, ISvcLocator* pSvcLocator);
 
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
 
 
   private:
