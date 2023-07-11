@@ -44,6 +44,7 @@ def main():
             tests_to_run.append(QTest("q444", run, WorkflowType.MCPileUpReco, ["Overlay", "RAWtoALL"], setup, options.extra_args))
     elif options.derivation:
         test_id = "MC_PHYS" if not options.ami_tag else options.ami_tag
+        test_id = f"{test_id}_{run.value}"
         tests_to_run.append(DerivationTest(test_id, run, WorkflowType.Derivation, ["Derivation"], setup, options.extra_args))
     else:
         if not options.workflow or options.workflow is WorkflowType.MCReco:
