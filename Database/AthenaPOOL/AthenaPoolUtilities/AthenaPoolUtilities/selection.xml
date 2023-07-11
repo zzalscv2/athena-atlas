@@ -46,6 +46,8 @@
     <class pattern="*iterator<const*AttributeList*::value_type"/>
     <class pattern="*iterator<const*AttributeList*::iterator_category"/>
     <class pattern="*iterator_category*"/>
+    <!-- new exclude for C++20 for 'private struct __ptr' error -->
+    <class pattern="*iterator_traits<__gnu_cxx::__normal_iterator<const coral::AttributeList*"/>
   </exclusion>
 
   <class name="TPIntegerVectorStorage_p2" />
