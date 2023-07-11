@@ -25,8 +25,7 @@ def _TrigEff(flags, triggerAndRef, algname='HLTMinBiasEffMonitoringAlg'):
 
     length = len(alg.triggerList)
 
-    mainGroup = monConfig.addGroup(
-        alg, 'TrigAll', topPath='HLT/MinBiasMon/Counts/')
+    mainGroup = monConfig.addGroup(alg, 'TrigAll', topPath='HLT/MinBiasMon/Counts/')
 
     alreadyConfigured = set()
     for cdef in triggerAndRef:
@@ -35,8 +34,7 @@ def _TrigEff(flags, triggerAndRef, algname='HLTMinBiasEffMonitoringAlg'):
         xmin  = cdef['xmin']
         xmax  = cdef['xmax']
         xbins = xmax-xmin
-        effGroup = monConfig.addGroup(
-            alg, chain+refchain, topPath='HLT/MinBiasMon/EffAll/')
+        effGroup = monConfig.addGroup(alg, chain+refchain, topPath='HLT/MinBiasMon/EffAll/')
 
         whichcounter='nTrkOffline'
         # if the chain cuts on higher pt (there is a few predefined chains) use different counter
@@ -74,10 +72,8 @@ def _TrigEff(flags, triggerAndRef, algname='HLTMinBiasEffMonitoringAlg'):
 
 
 def TrigMinBiasEff(flags):
-
-    # configure the monitoring dynamically according to the chains present in the menu
-    #mbChains = [ c for c in GetFileMD(flags.Input.Files)['TriggerMenu']['HLTChains'] if '_mb_' in c]
-    mbChains = [c for c in getHLTMenuAccess(flags) if '_mb_' in c]
+    allChains = getHLTMenuAccess(flags)
+    mbChains = [c for c in allChains if '_mb_' in c]
     if len(mbChains) == 0:
         return _TrigEff(flags, [])
 
@@ -144,6 +140,7 @@ def TrigMinBiasEff(flags):
     # monitor exclusivity cut
     excl = [c for c in mbChains if ('_excl_' in c)]
     triggerAndRef += [_c(chain, 'HLT_mb_sptrk_L1RD0_FILLED') for chain in excl]
+    triggerAndRef += [_c(chain, 'HLT_mb_sp_L1RD0_FILLED') for chain in excl]
 
     # monitor noalg MBTS chains
     mbtsNoAlg = [c for c in mbChains if 'noalg' in c and 'L1MBTS' in c]
@@ -156,14 +153,63 @@ def TrigMinBiasEff(flags):
     # L1 transverse energy
     triggerAndRef += [_c("L1_TE{}".format(i), 'HLT_mb_sptrk_L1RD0_FILLED', xmin=0, xmax=100) for i in [3, 5, 10, 40]]
 
-    # HI UPC chains (2022)
-    triggerAndRef += [_c('HLT_mb_excl_1trk2_pt1_L1TRT_VTE20', 'HLT_noalg_L1TRT_VTE20')]
-    triggerAndRef += [_c('HLT_mb_sptrk_L1MBTS_1_VTE5', 'HLT_noalg_L1MBTS_1_VTE5')]
-    triggerAndRef += [_c('HLT_mb_sptrk_L1VTE5', 'HLT_noalg_L1VTE5')]
+    # Pair HLT chain with its noalg version
+    def _find_noalg(chain):
+        pos = chain.find('L1')
+        return 'HLT_noalg_' + chain[pos:]
 
-    # add here all the special cases
+    def _chains_with_noalg_ref():
+        chains = []
+
+        for c in filledChains:
+            # Already added
+            if 'L1RD0_FILLED' in c:
+                continue
+
+            noalg = _find_noalg(c)
+            if noalg not in allChains:
+                continue
+
+            chains.append(_c(c, noalg))
+
+        return chains
+
+    triggerAndRef += _chains_with_noalg_ref()
+
+    # HI chains
+    hiChains = [c for c in mbChains if '_hi_' in c]
+
+    # Pair MB+HI chains with MB only reference if it exists
+    def _hi_chain_with_mb_ref():
+        chains = []
+
+        for c in hiChains:
+            split = c.split('_hi_')
+            if len(split) != 2:
+                continue
+            mb, hi_l1 = split
+
+            split = hi_l1.split('L1')
+            if len(split) != 2:
+                continue
+            hi, l1 = split
+
+            ref = f'{mb}_L1{l1}'
+
+            if ref not in mbChains:
+                continue
+
+            chains.append(_c(c, ref))
+
+        return chains
+
+    triggerAndRef += _hi_chain_with_mb_ref()
+
+    # Add here all the special cases:
+    # HI Fgap chains
+    triggerAndRef.append(_c('HLT_mb_excl_1trk4_pt1_hi_FgapAC5_L12eEM1_VjTE200', 'HLT_mb_excl_1trk4_pt1_L12eEM1_VjTE200_GAP_AANDC'))
+
     return _TrigEff(flags, triggerAndRef)
-
 
 
 if __name__ == '__main__':
