@@ -1,6 +1,6 @@
 // emacs: this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //
 //   @file    TrigRoiDescriptor.h        
@@ -10,7 +10,6 @@
 //  
 //   @author sutt@cern.ch
 //
-//   $Id: TrigRoiDescriptor.h, v0.1   Fri 08 Jun 2013 23:52:09 CEST sutt $
 
 
 /// nope - should be used for standalone also, perhaps need to 
@@ -125,13 +124,13 @@ public:
   TrigRoiDescriptor& operator=( const IRoiDescriptor& roi );
 
   // Destructor
-  ~TrigRoiDescriptor();
+  virtual ~TrigRoiDescriptor();
 
-  unsigned int roiId() const { return m_roiId; }
-  unsigned int l1Id() const { return m_l1Id; }
-  unsigned int roiWord() const { return m_roiWord; }
+  virtual unsigned int roiId() const override final { return m_roiId; }
+  virtual unsigned int l1Id() const override final { return m_l1Id; }
+  virtual unsigned int roiWord() const override final { return m_roiWord; }
 
-  operator std::string() const;
+  virtual operator std::string() const override;
 
 protected:
 
