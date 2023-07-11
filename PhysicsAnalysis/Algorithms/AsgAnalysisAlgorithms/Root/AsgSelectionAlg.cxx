@@ -25,8 +25,10 @@ namespace CP
                      ISvcLocator* pSvcLocator)
     : AnaAlgorithm (name, pSvcLocator)
     , m_selectionTool ("", this)
+    , m_selectionToolByName ("")
   {
     declareProperty ("selectionTool", m_selectionTool, "the selection tool we apply");
+    declareProperty ("selectionToolByName", m_selectionToolByName, "the name of the selection tool to retrieve, if not passed directly");
   }
 
 
@@ -41,7 +43,16 @@ namespace CP
       if (m_systematicsTool)
         ANA_CHECK (m_systematicsList.addSystematics (*m_systematicsTool));
     }
-      
+    else if (!m_selectionToolByName.empty())
+      {
+	if (asg::ToolStore::contains<IAsgSelectionTool>(m_selectionToolByName)) {
+	    m_selectionTool = asg::ToolStore::get<IAsgSelectionTool>(m_selectionToolByName);
+	    m_systematicsTool = dynamic_cast<ISystematicsTool*>(&*m_selectionTool);
+	    if (m_systematicsTool)
+	      ANA_CHECK (m_systematicsList.addSystematics (*m_systematicsTool));
+	}
+      }
+
     ANA_CHECK (m_particlesHandle.initialize (m_systematicsList));
     ANA_CHECK (m_preselection.initialize (m_systematicsList, m_particlesHandle, SG::AllowEmpty));
     ANA_CHECK (m_selectionHandle.initialize (m_systematicsList, m_particlesHandle));

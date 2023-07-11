@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -9,6 +9,7 @@
 #ifndef ASG_ANALYSIS_ALGORITHMS__ASG_SELECTION_ALG_H
 #define ASG_ANALYSIS_ALGORITHMS__ASG_SELECTION_ALG_H
 
+#include <AsgTools/ToolStore.h>
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <PATCore/IAsgSelectionTool.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
@@ -59,6 +60,10 @@ namespace CP
     /// \brief the smearing tool
   private:
     ToolHandle<IAsgSelectionTool> m_selectionTool;
+
+    /// \brief alternative way of retrieving the selection tool
+  private:
+    std::string m_selectionToolByName;
 
     /// \brief the smearing tool cast to an ISystematicsTool
     ///
