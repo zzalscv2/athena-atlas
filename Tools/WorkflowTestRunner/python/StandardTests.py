@@ -183,7 +183,7 @@ class DerivationTest(WorkflowTest):
     def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: List[str], setup: TestSetup, extra_args: str = "") -> None:
         test_def = ID.split("_")
         data_type = test_def[0].lower()
-        format = test_def[-1].upper()
+        format = test_def[1].upper()
 
         threads = 0
         if setup.custom_threads is not None:
@@ -212,7 +212,7 @@ class DerivationTest(WorkflowTest):
         # skip performance checks for now due to CA
         self.skip_performance_checks = True
 
-        enable_checks = False
+        enable_checks = True if format == "PHYS" else False
         if enable_checks:
             self.output_checks = [
                 FrozenTier0PolicyCheck(setup, f"DAOD_{format}", 10),
