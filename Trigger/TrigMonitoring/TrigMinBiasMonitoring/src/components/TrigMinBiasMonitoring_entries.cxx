@@ -1,4 +1,3 @@
-#include "../ExclMinBiasTrkMonAlg.h"
 #include "../FwdAFPCountMonitoringAlg.h"
 #include "../FwdAFPJetEffMonitoringAlg.h"
 #include "../FwdAFPJetMonitoringAlg.h"
@@ -7,7 +6,6 @@
 #include "../HLTMinBiasTrkMonAlg.h"
 #include "../TrigAFPSidHypoMonitoringAlg.h"
 
-DECLARE_COMPONENT(ExclMinBiasTrkMonAlg)
 DECLARE_COMPONENT(FwdAFPCountMonitoringAlg)
 DECLARE_COMPONENT(FwdAFPJetEffMonitoringAlg)
 DECLARE_COMPONENT(FwdAFPJetMonitoringAlg)
