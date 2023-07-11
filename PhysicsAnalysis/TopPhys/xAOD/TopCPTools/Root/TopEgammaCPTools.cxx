@@ -364,26 +364,66 @@ namespace top {
     if (m_config->electronIDSFFileLoosePath() =="Default") m_electronEffSFIDLoose = setupElectronSFToolWithMap(elSFPrefix + "IDLoose", m_electronEffSFIDLooseFile, "",
                                                         electronIDLoose, "", "", dataType, "TOTAL", "", "");
     else m_electronEffSFIDLoose = setupElectronSFTool(elSFPrefix + "IDLoose", inExpIDLoose, dataType);
-    // Trigger SFs
-    m_electronEffSFTrigger = setupElectronSFToolWithMap(elSFPrefix + "TriggerSF", m_electronEffSFTriggerFile, "",
+    
+    //Tight trigger SF & Eff mapping
+    if (electronID=="LooseAndBLayerLLH"&&electronIsolation=="Loose_VarRad"){
+         ATH_MSG_INFO("Mapping trigger SF & EFf from Loose_VarRad ISO to FCLoose");
+         m_electronEffSFTrigger = setupElectronSFToolWithMap(elSFPrefix + "TriggerSF", m_electronEffSFTriggerFile, "",
                                                         electronID,
-							(!(electronIsolation == "PLImprovedTight" || electronIsolation == "PLImprovedVeryTight")) ? electronIsolation : "",
-							trigger_string, dataType,
+                                                        "FCLoose",                            
+                                                        trigger_string, dataType,
                                                         "TOTAL", "", "");
-    m_electronEffSFTriggerLoose = setupElectronSFToolWithMap(elSFPrefix + "TriggerSFLoose",
-                                                             m_electronEffSFTriggerLooseFile, "", electronIDLoose,
-                                                             (!(electronIsolationLoose == "PLImprovedTight" || electronIsolationLoose == "PLImprovedVeryTight")) ? electronIsolationLoose : "",
-							     trigger_string, dataType, "TOTAL",
-                                                             "", "");
-    // Trigger Efficiencies
-    m_electronEffTrigger = setupElectronSFToolWithMap(elSFPrefix + "Trigger", m_electronEffTriggerFile, "", electronID,
+
+          m_electronEffTrigger = setupElectronSFToolWithMap(elSFPrefix + "Trigger", m_electronEffTriggerFile, "",
+                                                      electronID,
+                                                      "FCLoose",
+                                                      "Eff_" + trigger_string, dataType,
+                                                      "TOTAL", "","");
+
+
+      } else {
+          m_electronEffSFTrigger = setupElectronSFToolWithMap(elSFPrefix + "TriggerSF", m_electronEffSFTriggerFile, "",
+                                                        electronID,                           
+                                                        (!(electronIsolation == "PLImprovedTight" || electronIsolation == "PLImprovedVeryTight")) ? electronIsolation : "",
+                                                        trigger_string, dataType,
+                                                        "TOTAL", "", "");
+                                                      
+          m_electronEffTrigger = setupElectronSFToolWithMap(elSFPrefix + "Trigger", m_electronEffTriggerFile, "",
+                                                      electronID,
                                                       (!(electronIsolation == "PLImprovedTight" || electronIsolation == "PLImprovedVeryTight")) ? electronIsolation : "",
-						      "Eff_" + trigger_string, dataType, "TOTAL", "",
-                                                      "");
-    m_electronEffTriggerLoose = setupElectronSFToolWithMap(elSFPrefix + "TriggerLoose", m_electronEffTriggerLooseFile,
-                                                           "", electronIDLoose,
-							   (!(electronIsolationLoose == "PLImprovedTight" || electronIsolationLoose == "PLImprovedVeryTight")) ? electronIsolationLoose : "",
-                                                           "Eff_" + trigger_string, dataType, "TOTAL", "", "");
+                                                      "Eff_" + trigger_string, dataType,
+                                                      "TOTAL", "","");
+      }
+
+    //Loose trigger SF & Eff mapping
+    if (electronIDLoose=="LooseAndBLayerLLH"&&electronIsolationLoose=="Loose_VarRad"){
+        ATH_MSG_INFO("Mapping Loose_VarRad ISO to FCLoose");
+        m_electronEffSFTriggerLoose = setupElectronSFToolWithMap(elSFPrefix + "TriggerSFLoose",m_electronEffSFTriggerLooseFile, "", electronIDLoose,
+                                                             "FCLoose",
+                                                             trigger_string, dataType,
+                                                             "TOTAL","", "");
+
+        m_electronEffTriggerLoose = setupElectronSFToolWithMap(elSFPrefix + "TriggerLoose", m_electronEffTriggerLooseFile,"",
+                                                            electronIDLoose,
+                                                            "FCLoose",
+                                                            "Eff_" + trigger_string, dataType,
+                                                            "TOTAL", "", "");
+
+
+    } else {
+        m_electronEffSFTriggerLoose = setupElectronSFToolWithMap(elSFPrefix + "TriggerSFLoose",m_electronEffSFTriggerLooseFile, "", electronIDLoose,
+                                                             (!(electronIsolationLoose == "PLImprovedTight" || electronIsolationLoose == "PLImprovedVeryTight")) ? electronIsolationLoose : "",
+                                                             trigger_string, dataType,
+                                                             "TOTAL","", "");
+
+         m_electronEffTriggerLoose = setupElectronSFToolWithMap(elSFPrefix + "TriggerLoose", m_electronEffTriggerLooseFile,"",
+                                                            electronIDLoose,
+                                                            (!(electronIsolationLoose == "PLImprovedTight" || electronIsolationLoose == "PLImprovedVeryTight")) ? electronIsolationLoose : "",
+                                                            "Eff_" + trigger_string, dataType,
+                                                            "TOTAL", "", "");
+
+     }
+
     // Isolation SFs
     if (electronIsolation == "PLVTight" ||
 	electronIsolation == "PLVLoose") {
