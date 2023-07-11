@@ -1522,32 +1522,6 @@ StatusCode TRT_RodDecoder::update() const {
       Ctable->m_lengths_integral[i++] = atoi(tok.c_str());
     }
 
-#ifdef NOTDEF
-    if (0) {
-      ATH_MSG_INFO("Compress Table Version : " << Ctable->m_TableVersion);
-      ATH_MSG_INFO("Compress Table Nsymbols: " << Ctable->m_Nsymbols);
-
-      int i;
-      for (i = 0; i < 32; i++)
-        ATH_MSG_INFO("Compress Table firstcode  : " << i << " "
-                                                    << Ctable->m_firstcode[i]);
-
-      for (i = 0; i < 32; i++)
-        ATH_MSG_INFO("Compress Table lengths_int: "
-                     << i << " " << Ctable->m_lengths_integral[i]);
-
-      for (i = 0; i < 10; i++)
-        ATH_MSG_INFO("Compress Table syms: " << i << " " << Ctable->m_syms[i]);
-
-      ATH_MSG_INFO("Compress Table syms: [...]");
-
-      for (i = 0; i < 10; i++)
-        ATH_MSG_INFO("Compress Table syms: "
-                     << (Ctable->m_Nsymbols - 10 + i) << " "
-                     << Ctable->m_syms[(Ctable->m_Nsymbols - 10 + i)]);
-    }
-#endif /* NOTDEF */
-
     int ctable_version = Ctable->m_TableVersion;
     ATH_MSG_INFO("Loaded Compress Table Version: " << ctable_version);
     m_CompressionTables[ctable_version].set(std::move(Ctable));
