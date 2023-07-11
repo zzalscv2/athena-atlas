@@ -43,9 +43,7 @@ namespace Trk {
     class ITrackLink;
     class IVertexSeedFinder;
     class IImpactPoint3dEstimator;
-
     class IVertexLinearizedTrackFactory;
-    class IVxCandidateXAODVertex;
 }  // namespace Trk
 //
 //
