@@ -21,6 +21,7 @@ AthONNX.DoBatches = False
 AthONNX.NumberOfBatches = 1
 AthONNX.SizeOfBatch = 1
 AthONNX.OutputLevel = DEBUG
+AthONNX.UseCUDA = False
 
 # Run for 10 "events".
 theApp.EvtMax = 2

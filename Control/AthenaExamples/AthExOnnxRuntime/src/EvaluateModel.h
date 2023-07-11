@@ -68,6 +68,9 @@ namespace AthONNX {
       Gaudi::Property<bool> m_doBatches {this, "DoBatches", false, "Processing events by batches"};
       Gaudi::Property<int> m_numberOfBatches {this, "NumberOfBatches", 1, "No. of batches to be passed"};
       Gaudi::Property<int> m_sizeOfBatch {this, "SizeOfBatch", 1, "No. of elements/example in a batch"};
+
+      // If runs on CUDA
+      Gaudi::Property<bool> m_useCUDA {this, "UseCUDA", false, "Use CUDA"};
       
       std::unique_ptr< Ort::Session > m_session;
       std::vector<std::vector<std::vector<float>>> m_input_tensor_values_notFlat;

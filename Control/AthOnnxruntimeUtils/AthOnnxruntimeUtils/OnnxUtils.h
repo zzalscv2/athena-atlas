@@ -45,10 +45,10 @@ namespace AthONNX {
 /****************************************************************************************/
 
  template<typename T>
- inline Ort::Value TensorCreator(std::vector<T> flattenData, std::vector<int64_t> input_node_dims ){ 
+ inline Ort::Value TensorCreator(std::vector<T>& flattenData, std::vector<int64_t>& input_node_dims ){ 
     /************** Create input tensor object from input data values to feed into your model *********************/
-    auto memory_info = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault); 
-    Ort::Value input_tensor = Ort::Value::CreateTensor<float>(memory_info, 
+    auto memory_info = Ort::MemoryInfo::CreateCpu(OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault); 
+    Ort::Value input_tensor = Ort::Value::CreateTensor<T>(memory_info, 
                                                                   flattenData.data(), 
                                                                   flattenData.size(),  /*** 1x28x28 = 784 ***/ 
                                                                   input_node_dims.data(), 
@@ -61,12 +61,15 @@ namespace AthONNX {
 /*****************************************************************************************/
 
  //template<typename T>
- inline std::unique_ptr< Ort::Session > CreateORTSession(const std::string& modelFile){
+ inline std::unique_ptr< Ort::Session > CreateORTSession(const std::string& modelFile, bool withCUDA=false){
    
     // Set up the ONNX Runtime session.
     Ort::SessionOptions sessionOptions;
     sessionOptions.SetIntraOpNumThreads( 1 );
-    sessionOptions.SetGraphOptimizationLevel( ORT_ENABLE_BASIC );
+    if (withCUDA) {
+      Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProvider_CUDA(sessionOptions, 0));
+    }
+    sessionOptions.SetGraphOptimizationLevel( GraphOptimizationLevel::ORT_ENABLE_EXTENDED );
 
     ServiceHandle< IONNXRuntimeSvc > svc("AthONNX::ONNXRuntimeSvc",
                                               "AthONNX::ONNXRuntimeSvc");
@@ -158,6 +161,30 @@ namespace AthONNX {
      // Get pointer to output tensor float values
      float* floatarr = output_tensor.front().GetTensorMutableData<float>();
      return floatarr;
+  }
+
+  void InferenceWithIOBinding(const std::unique_ptr<Ort::Session>& session, 
+    const std::vector<const char*>& inputNames,
+    const std::vector<Ort::Value>& inputData,
+    const std::vector<const char*>& outputNames,
+    const std::vector<Ort::Value>& outputData){
+    
+    if (inputNames.empty()) {
+        throw std::runtime_error("Onnxruntime input data maping cannot be empty");
+    }
+    assert(inputNames.size() == inputData.size());
+
+    Ort::IoBinding iobinding(*session);
+    for(size_t idx = 0; idx < inputNames.size(); ++idx){
+        iobinding.BindInput(inputNames[idx], inputData[idx]);
+    }
+
+
+    for(size_t idx = 0; idx < outputNames.size(); ++idx){
+        iobinding.BindOutput(outputNames[idx], outputData[idx]);
+    }
+
+    session->Run(Ort::RunOptions{nullptr}, iobinding);
   }
 
 }
