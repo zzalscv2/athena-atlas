@@ -138,12 +138,13 @@ StatusCode GlobalLargeRDNNCalibration::initialize(){
     
   // Get DNN config file
   m_modelFileName = m_config->GetValue("DNNC.ONNXInput","");
-  // will need to give path to file when in JetCalibArea
-  const std::string modelFileName = PathResolverFindCalibFile( m_modelFileName );
-  ATH_MSG_DEBUG( "Using model file: " << modelFileName );
+  std::string modelPath="JetCalibTools/"+m_calibArea+"CalibrationConfigs/"+m_modelFileName;
+  const std::string fullModelPath = PathResolverFindCalibFile( modelPath ); // Full path
+  ATH_MSG_INFO("Using ONNX model : " << m_modelFileName);
+  ATH_MSG_INFO("resolved in: " << fullModelPath);
 
   // Set up the ONNX Runtime session.
-  m_session = GlobalLargeRDNNCalibration::CreateORTSession(modelFileName);
+  m_session = GlobalLargeRDNNCalibration::CreateORTSession(fullModelPath);
   ATH_MSG_DEBUG( "Created the ONNX Runtime session" );
 
 

@@ -56,7 +56,7 @@ fatjetcontexts = {
     "TrigUngroomed": ("JES_Full2012dataset_Rscan_June2014.config","00-04-77","JetArea_EtaJES"),
     "TrigTrimmed":   ("JES_MC15recommendation_FatJet_June2015_PtFrac4.config","00-04-82","EtaJES_JMS"),
     "TrigSoftDrop":  ("JES_MC16recommendation_R10_UFO_CSSK_SoftDrop_JMS_01April2020.config","00-04-82","EtaJES_JMS"),
-    "LargeRDNN":     ("JES_JMS_MC20dnnc_R10_UFO_CSSK_SoftDrop_Feb2023.config","00-04-82","LargeRDNN"),
+    "LargeRDNN":     ("JES_JMS_MC20dnnc_R10_UFO_CSSK_SoftDrop_Jun2023.config","00-04-83","LargeRDNN"),
 }
 
 # List AFII config files separately, to avoid needing to specify a different context
