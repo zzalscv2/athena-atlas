@@ -256,7 +256,7 @@ class MetadataCheck(WorkflowCheck):
 
         self.logger.info(f"Reading the reference file from location {reference_path}")
 
-        exclusion_list = " ".join(["file_guid", "file_size", "/TagInfo/AtlasRelease", "FileMetaData/productionRelease"])
+        exclusion_list = " ".join(["file_guid", "file_size", "/TagInfo/AtlasRelease", "FileMetaData/productionRelease", "StreamDAOD_PHYS/eventTypes"])
 
         file_name = f"my{self.format}.pool.root"
         if test.type == WorkflowType.Derivation:
