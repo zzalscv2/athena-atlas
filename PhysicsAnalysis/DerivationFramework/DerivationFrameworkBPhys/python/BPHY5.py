@@ -22,6 +22,29 @@ def BPHY5Cfg(ConfigFlags):
        VertexContainer = "PrimaryVertices",
        TrackContainer = "InDetTrackParticles" )
 
+
+   from DerivationFrameworkLLP.LLPToolsConfig import LRTMuonMergerAlg
+   acc.merge(LRTMuonMergerAlg( ConfigFlags,
+                                PromptMuonLocation    = "Muons",
+                                LRTMuonLocation       = "MuonsLRT",
+                                OutputMuonLocation    = "StdWithLRTMuons",
+                                CreateViewCollection  = True))
+   from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleMergerCfg
+   BPHY5TrackParticleMergerTool = acc.getPrimaryAndMerge(TrackParticleMergerCfg(
+        ConfigFlags,
+        name                        = "BPHY5TrackParticleMergerTool",
+        TrackParticleLocation       = ["InDetTrackParticles", "InDetLargeD0TrackParticles"],
+        OutputTrackParticleLocation = "InDetWithLRTTrackParticles",
+        CreateViewColllection       = True))
+   LRTMergeAug = CompFactory.DerivationFramework.CommonAugmentation("BPHY5InDetLRTMerge", AugmentationTools = [BPHY5TrackParticleMergerTool])
+   acc.addEventAlgo(LRTMergeAug)
+
+   mainMuonInput = "StdWithLRTMuons"
+   mainIDInput   = "InDetWithLRTTrackParticles"
+
+   toRelink = ["InDetTrackParticles", "InDetLargeD0TrackParticles"]
+   MuonReLink = [ "Muons", "MuonsLRT" ]
+
    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(ConfigFlags, BPHYDerivationName))
    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName))        # VKalVrt vertex fitter
    acc.addPublicTool(vkalvrt)
@@ -42,9 +65,9 @@ def BPHY5Cfg(ConfigFlags):
        oppChargesOnly              = True,
        combOnly                    = True,
        atLeastOneComb              = False,
-       useCombinedMeasurement      = False, # Only takes effect if combOnly=True   
-       muonCollectionKey           = "Muons",
-       TrackParticleCollection     = "InDetTrackParticles",
+       useCombinedMeasurement      = False, # Only takes effect if combOnly=True
+       muonCollectionKey           = mainMuonInput,
+       TrackParticleCollection     = mainIDInput,
        useV0Fitter                 = False,                   # if False a TrkVertexFitterTool will be used
        TrkVertexFitterTool         = vkalvrt,
        V0VertexFitterTool          = None,
@@ -60,6 +83,8 @@ def BPHY5Cfg(ConfigFlags):
                                                        V0Tools                = V0Tools,
                                                        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
                                                        RefPVContainerName     = "SHOULDNOTBEUSED",
+                                                       RelinkTracks  =  toRelink,
+                                                       RelinkMuons   =  MuonReLink,
                                                        DoVertexType           =1)
    
    ## a/ augment and select Jpsi->mumu candidates
@@ -88,8 +113,8 @@ def BPHY5Cfg(ConfigFlags):
          TrkQuadrupletMassUpper      = 6000.0,
          TrkQuadrupletMassLower      = 4800.0,
          JpsiContainerKey            = "BPHY5JpsiCandidates",
-         TrackParticleCollection     = "InDetTrackParticles",
-         MuonsUsedInJpsi             = "Muons",
+         TrackParticleCollection     = mainIDInput,
+         MuonsUsedInJpsi             = mainMuonInput,
          TrkVertexFitterTool         = vkalvrt,
          TrackSelectorTool           = trackselect,
          VertexPointEstimator        = vpest,
@@ -106,7 +131,7 @@ def BPHY5Cfg(ConfigFlags):
          BMassLower              = 4300.0,
          BMassUpper              = 6300.0,
          JpsiContainerKey        = "BPHY5JpsiCandidates",
-         TrackParticleCollection = "InDetTrackParticles",
+         TrackParticleCollection = mainIDInput,
          #MuonsUsedInJpsi      = "Muons", #Don't remove all muons, just those in J/psi candidate (see the following cut)
          ExcludeCrossJpsiTracks  = False,   #setting this to False rejects the muons from J/psi candidate
          TrkVertexFitterTool     = vkalvrt,
@@ -130,8 +155,8 @@ def BPHY5Cfg(ConfigFlags):
          TrkTrippletMassUpper            = 8000,
          TrkTrippletMassLower            = 4000,
          JpsiContainerKey        = "BPHY5JpsiCandidates",
-         TrackParticleCollection         = "InDetTrackParticles",
-         MuonsUsedInJpsi         = "Muons",
+         TrackParticleCollection         = mainIDInput,
+         MuonsUsedInJpsi         = mainMuonInput,
          VertexPointEstimator        = vpest,
          TrkVertexFitterTool     = vkalvrt,
          TrackSelectorTool       = trackselect,
@@ -153,8 +178,8 @@ def BPHY5Cfg(ConfigFlags):
          TrkQuadrupletMassUpper      = 5800.0,
          TrkQuadrupletMassLower      = 3400.0,
          JpsiContainerKey            = "BPHY5JpsiCandidates",
-         TrackParticleCollection     = "InDetTrackParticles",
-         MuonsUsedInJpsi             = "Muons",
+         TrackParticleCollection     = mainIDInput,
+         MuonsUsedInJpsi             = mainMuonInput,
          VertexPointEstimator        = vpest,
          TrkVertexFitterTool     = vkalvrt,
          TrackSelectorTool       = trackselect,
@@ -170,6 +195,7 @@ def BPHY5Cfg(ConfigFlags):
                         PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
                         RefPVContainerName       = "BPHY5RefittedPrimaryVertices",
                         RefitPV                  = True, Do3d = False,
+                        RelinkTracks  =  toRelink,
                         MaxPVrefit               = 10000, DoVertexType = 7)
 
    BPHY5BplKplSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name    = "BPHY5BplKplSelectAndWrite",
@@ -180,6 +206,7 @@ def BPHY5Cfg(ConfigFlags):
                                                               PVRefitter                = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
                                                               RefPVContainerName        = "BPHY5RefBplJpsiKplPrimaryVertices",                                                              
                                                               RefitPV                   = True,
+                                                              RelinkTracks  =  toRelink,
                                                               MaxPVrefit                = 10000 )
 
    BPHY5BpipiXSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name  = "BPHY5BpipiXSelectAndWrite",
@@ -190,6 +217,7 @@ def BPHY5Cfg(ConfigFlags):
                                                            PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
                                                            RefPVContainerName       = "BPHY5RefittedBPipiPrimaryVertices",
                                                            RefitPV                  = True, Do3d = False,
+                                                           RelinkTracks  =  toRelink,
                                                            MaxPVrefit               = 10000, DoVertexType = 7)
 
    BPHY5BdKstSelectAndWrite  = CompFactory.DerivationFramework.Reco_Vertex(
@@ -201,6 +229,7 @@ def BPHY5Cfg(ConfigFlags):
                                  PVContainerName        = "PrimaryVertices",
                                  RefPVContainerName     = "BPHY5RefittedKstPrimaryVertices",
                                  RefitPV                = True,
+                                 RelinkTracks  =  toRelink,
                                  MaxPVrefit             = 10000,
                                  DoVertexType = 7)
 
@@ -332,7 +361,7 @@ def BPHY5Cfg(ConfigFlags):
    StaticContent += ["xAOD::VertexAuxContainer#BPHY5RefittedKstPrimaryVerticesAux."]
     
    ## ID track particles
-   AllVariables += ["InDetTrackParticles"]
+   AllVariables += ["InDetTrackParticles", "InDetLargeD0TrackParticles"]
     
    ## combined / extrapolated muon track particles 
    ## (note: for tagged muons there is no extra TrackParticle collection since the ID tracks

@@ -19,11 +19,13 @@ namespace DerivationFramework {
                                        const IInterface* p) :
     AthAlgTool(t,n,p),
     m_TrackContainername("InDetTrackParticles"),
+    m_TrackContainerLRTname("InDetLargeD0TrackParticles"),
     m_PVContainername("PrimaryVertices")
   {
     declareInterface<DerivationFramework::IAugmentationTool>(this);
 
     declareProperty("TrackContainer", m_TrackContainername);
+    declareProperty("TrackLRTContainer", m_TrackContainerLRTname);
     declareProperty("VertexContainer", m_PVContainername);
     declareProperty("AddPVCountsByType", m_addPVCountsByType = false);
     // decorate PVs with track counts and/or sqrt(sum(pt^2))
@@ -35,6 +37,7 @@ namespace DerivationFramework {
   StatusCode AugOriginalCounts::initialize()
   {
   	 ATH_CHECK(m_TrackContainername.initialize(SG::AllowEmpty));
+     ATH_CHECK(m_TrackContainerLRTname.initialize(SG::AllowEmpty));
   	 ATH_CHECK(m_PVContainername.initialize(SG::AllowEmpty));
   	 
      if(!m_PVContainername.empty()){
@@ -76,6 +79,10 @@ namespace DerivationFramework {
      if(!m_TrackContainername.empty()){
         m_OrigNTracksKeys = "EventInfo.OriginalCount_" + m_TrackContainername.key();
         ATH_CHECK(m_OrigNTracksKeys.initialize());
+     }
+     if(!m_TrackContainerLRTname.empty()){
+        m_OrigNTracksLRTKeys = "EventInfo.OriginalCount_" + m_TrackContainerLRTname.key();
+        ATH_CHECK(m_OrigNTracksLRTKeys.initialize());
      }
      return StatusCode::SUCCESS;
   }
@@ -142,6 +149,11 @@ namespace DerivationFramework {
     if(!m_TrackContainername.empty()){
       SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_TrackContainername, ctx);
       SG::WriteDecorHandle<xAOD::EventInfo, int> track_count(m_OrigNTracksKeys, ctx);
+      track_count(0) = tracks->size();
+    }
+    if(!m_TrackContainerLRTname.empty()){
+      SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_TrackContainerLRTname, ctx);
+      SG::WriteDecorHandle<xAOD::EventInfo, int> track_count(m_OrigNTracksLRTKeys, ctx);
       track_count(0) = tracks->size();
     }
 

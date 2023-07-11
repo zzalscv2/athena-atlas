@@ -51,6 +51,9 @@ namespace Analysis {
         static Analysis::CleanUpVertex ClosestRefPV(xAOD::BPhysHelper&, const xAOD::VertexContainer*,const Analysis::PrimaryVertexRefitter*);
         template< size_t N>
         static bool isContainedIn(const xAOD::TrackParticle*, const std::array<const xAOD::TrackParticle*, N>& );
+        static void RelinkVertexTracks(const std::vector<const xAOD::TrackParticleContainer*> &trkcols, xAOD::Vertex* vtx);
+        static void RelinkVertexMuons(const std::vector<const xAOD::MuonContainer*>& muoncols, xAOD::Vertex* vtx);
+
    };
 
 template< size_t N>

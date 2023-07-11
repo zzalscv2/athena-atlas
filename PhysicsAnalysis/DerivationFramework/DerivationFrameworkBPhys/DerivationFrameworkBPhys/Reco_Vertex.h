@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -17,6 +17,8 @@
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "StoreGate/ReadHandleKeyArray.h"
+#include "xAODTracking/TrackParticleContainerFwd.h"
+#include "xAODMuon/MuonContainer.h"
 
 namespace DerivationFramework {
 
@@ -47,6 +49,8 @@ namespace DerivationFramework {
       bool        m_do3d;
       bool        m_checkCollections;
       SG::ReadHandleKeyArray<xAOD::VertexContainer> m_CollectionsToCheck;
+      SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_RelinkContainers{this, "RelinkTracks", {}, "Track Containers if they need to be relinked through indirect use" };
+      SG::ReadHandleKeyArray<xAOD::MuonContainer> m_RelinkMuons{this, "RelinkMuons", {}, "Muon Containers if they need to be relinked through indirect use" };
   }; 
 }
 
