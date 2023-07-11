@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JpsiUpsilonTools/JpsiUpsilonCommon.h"
@@ -121,6 +121,53 @@ namespace Analysis {
            if(ptr != vtx_closest) delete ptr;
        }
        return Analysis::CleanUpVertex(vtx_closest, vertexrefitted);
+    }
+
+    void JpsiUpsilonCommon::RelinkVertexTracks(const std::vector<const xAOD::TrackParticleContainer*> &trkcols, xAOD::Vertex* vtx) {
+      std::vector<ElementLink<DataVector<xAOD::TrackParticle> > > newLinkVector;
+      auto size = vtx->trackParticleLinks().size();
+      for(size_t i = 0; i<size; i++){
+          const xAOD::TrackParticle* mylink= *(vtx->trackParticleLinks()[i]);
+          for(const xAOD::TrackParticleContainer* trkcol : trkcols){
+              auto itr = std::find(trkcol->begin(), trkcol->end(), mylink);
+              if(itr != trkcol->end()){
+                auto mylink=vtx->trackParticleLinks()[i];
+                mylink.setStorableObject(*trkcol, true);
+                newLinkVector.push_back( mylink );
+                break;
+              }
+          }
+      }
+      if(size != newLinkVector.size()){
+        throw std::runtime_error("JpsiUpsilonCommon::RelinkVertexTracks: Could not relink all tracks");
+      }
+      vtx->clearTracks();
+      vtx->setTrackParticleLinks( newLinkVector );
+    }
+    
+    void JpsiUpsilonCommon::RelinkVertexMuons(const std::vector<const xAOD::MuonContainer*>& muoncols, xAOD::Vertex* vtx){
+       using MuonLink = ElementLink<xAOD::MuonContainer>;
+       using MuonLinkVector = std::vector<MuonLink>;
+       static const SG::AuxElement::Decorator<MuonLinkVector> muonLinksDecor("MuonLinks");
+       const MuonLinkVector &mlinksold = muonLinksDecor(*vtx);
+       auto size = mlinksold.size();
+       MuonLinkVector newmulinks;
+       for(size_t i = 0; i<size; i++){
+          const xAOD::Muon* mylink= *(mlinksold[i]);
+          for(const xAOD::MuonContainer* mucol : muoncols){
+            auto itr = std::find(mucol->begin(), mucol->end(), mylink);
+            if(itr != mucol->end()){
+                auto mylink=mlinksold[i];
+                mylink.setStorableObject(*mucol, true);
+                newmulinks.push_back( mylink );
+                break;
+            }
+          }
+       }
+       if(size != newmulinks.size()){
+        throw std::runtime_error("JpsiUpsilonCommon::RelinkVertexMuons: Could not relink all tracks");
+       }
+       muonLinksDecor(*vtx) = std::move(newmulinks);
     }
 }
 

@@ -71,6 +71,7 @@ namespace DerivationFramework {
     /// @{
     SG::WriteDecorHandleKey<xAOD::EventInfo> m_OrigPVNTracks{this, "DO_NOT_SET1", "", "internal property"};
     SG::WriteDecorHandleKey<xAOD::EventInfo> m_OrigNTracksKeys{this, "DO_NOT_SET2", "", "internal property"};
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_OrigNTracksLRTKeys{this, "DO_NOT_SET22", "", "internal property"};
     SG::WriteDecorHandleKey<xAOD::EventInfo> m_OrigNtype0{this, "DO_NOT_SET3", "", "internal property"};
     SG::WriteDecorHandleKey<xAOD::EventInfo> m_OrigNtype1{this, "DO_NOT_SET4", "", "internal property"};
     SG::WriteDecorHandleKey<xAOD::EventInfo> m_OrigNtype2{this, "DO_NOT_SET5", "", "internal property"};
@@ -80,6 +81,7 @@ namespace DerivationFramework {
     SG::WriteDecorHandleKey<xAOD::VertexContainer> m_OrigSqrtPt2Sum{this, "DO_NOT_SET8", "", "internal property"};
     SG::WriteDecorHandleKey<xAOD::VertexContainer> m_d_nPVTracks{this, "DO_NOT_SET9", "", "internal property"};
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrackContainername;
+    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrackContainerLRTname;
     SG::ReadHandleKey<xAOD::VertexContainer> m_PVContainername;
     bool        m_addPVCountsByType;
     bool        m_addNTracksToPVs;

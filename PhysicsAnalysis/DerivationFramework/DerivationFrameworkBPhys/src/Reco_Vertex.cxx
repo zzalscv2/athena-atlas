@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -14,6 +14,7 @@
 #include "DerivationFrameworkBPhys/BPhysPVTools.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
+#include "JpsiUpsilonTools/JpsiUpsilonCommon.h"
 
 namespace DerivationFramework {
 
@@ -69,6 +70,8 @@ namespace DerivationFramework {
     ATH_CHECK(m_outputVtxContainerName.initialize());
     ATH_CHECK(m_pvContainerName.initialize());
     ATH_CHECK(m_refPVContainerName.initialize());
+    ATH_CHECK(m_RelinkContainers.initialize());
+    ATH_CHECK(m_RelinkMuons.initialize());
     if(m_checkCollections) ATH_CHECK(m_CollectionsToCheck.initialize());
     return StatusCode::SUCCESS;
     
@@ -141,7 +144,39 @@ namespace DerivationFramework {
     }else{
         if(vtxContainer->size() >0)CHECK(helper.FillCandExistingVertices(vtxContainer.get(), pvContainer.cptr(), m_DoVertexType));
     }
-    
+  
+    using Analysis::JpsiUpsilonCommon;
+
+    std::vector<const xAOD::TrackParticleContainer*> trackCols;
+    for(const auto &str : m_RelinkContainers){
+      SG::ReadHandle<xAOD::TrackParticleContainer> handle(str,ctx);
+      trackCols.push_back(handle.cptr());
+    }
+    if(not trackCols.empty()){
+       for(xAOD::Vertex* vtx : *vtxContainer.get()){
+          try{
+            JpsiUpsilonCommon::RelinkVertexTracks(trackCols, vtx);
+          }catch(std::runtime_error const& e){
+            ATH_MSG_ERROR(e.what());
+            return StatusCode::FAILURE;
+          }
+       }
+    }
+    std::vector<const xAOD::MuonContainer*> muCols;
+    for(const auto &str : m_RelinkMuons){
+      SG::ReadHandle<xAOD::MuonContainer> handle(str,ctx);
+      muCols.push_back(handle.cptr());
+    }
+    if(not muCols.empty()){
+       for(xAOD::Vertex* vtx : *vtxContainer.get()){
+          try{
+             JpsiUpsilonCommon::RelinkVertexMuons(muCols, vtx);
+          }catch(std::runtime_error const& e){
+             ATH_MSG_ERROR(e.what());
+             return StatusCode::FAILURE;
+          }
+       }
+    }
     //----------------------------------------------------
     // save in the StoreGate
     //----------------------------------------------------
@@ -161,5 +196,8 @@ namespace DerivationFramework {
     }
     
     return StatusCode::SUCCESS;
-  }  
+  }
+
+
+
 }
