@@ -38,6 +38,7 @@ class TauCalibrationConfig (ConfigBlock):
         # Set up the tau 4-momentum smearing algorithm:
         alg = config.createAlgorithm( 'CP::TauSmearingAlg', 'TauSmearingAlg' + postfix )
         config.addPrivateTool( 'smearingTool', 'TauAnalysisTools::TauSmearingTool' )
+        alg.smearingTool.isAFII = config.dataType() == 'afii'
         alg.taus = config.readName (self.containerName)
         alg.tausOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -87,15 +88,15 @@ class TauWorkingPointConfig (ConfigBlock) :
                               "VeryLoose, NoID, Baseline")
         inputfile = nameFormat.format(self.quality.lower())
 
-        # Setup the tau selection tool
+        # Setup the tau selection tool: common for both the selection algorithm
+        # and the efficiency corrections tool (scale factors)
         selectionTool = config.createPublicTool( 'TauAnalysisTools::TauSelectionTool',
                                                  'TauSelectionTool' + postfix)
         selectionTool.ConfigPath = inputfile
 
         # Set up the algorithm selecting taus:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'TauSelectionAlg' + postfix )
-        config.addPrivateTool( 'selectionTool', 'TauAnalysisTools::TauSelectionTool' )
-        alg.selectionTool.ConfigPath = inputfile
+        alg.selectionToolByName = selectionTool.getName()
         alg.selectionDecoration = 'selected_tau' + selectionPostfix + ',as_bits'
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
@@ -119,6 +120,7 @@ class TauWorkingPointConfig (ConfigBlock) :
                             'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
             alg.efficiencyCorrectionsTool.TauSelectionTool = '%s/%s' % \
                 ( selectionTool.getType(), selectionTool.getName() )
+            alg.efficiencyCorrectionsTool.isAFII = config.dataType() == 'afii'
             alg.scaleFactorDecoration = 'tau_effSF' + selectionPostfix + '_%SYS%'
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'bad_eff' + selectionPostfix
@@ -139,7 +141,6 @@ def makeTauCalibrationConfig( seq, containerName, postfix = None,
     between the working points.
 
     Keyword arguments:
-      dataType -- The data type to run on ("data", "mc" or "afii")
       postfix -- a postfix to apply to decorations and algorithm
                  names.  this is mostly used/needed when using this
                  sequence with multiple working points to ensure all
@@ -163,7 +164,6 @@ def makeTauWorkingPointConfig( seq, containerName, workingPoint, postfix,
     """Create tau analysis algorithms for a single working point
 
     Keyword arguments:
-      dataType -- The data type to run on ("data", "mc" or "afii")
       legacyRecommendations -- use legacy tau BDT and electron veto recommendations
       postfix -- a postfix to apply to decorations and algorithm
                  names.  this is mostly used/needed when using this
