@@ -50,7 +50,7 @@ namespace EL
     /// guarantee: basic
     /// failures: out of memory II
     void fillJob (BatchJob& myjob, const Job& job,
-		  const std::string& submitDir)
+                  const std::string& submitDir)
     {
       myjob.job = job;
       myjob.location = submitDir;
@@ -64,7 +64,7 @@ namespace EL
     /// guarantee: basic
     /// failures: out of memory II
     void fillSample (BatchSample& mysample,
-		     const SH::Sample& sample, const SH::MetaObject& meta)
+                     const SH::Sample& sample, const SH::MetaObject& meta)
     {
       mysample.name = sample.name();
       mysample.meta = *sample.meta();
@@ -82,7 +82,7 @@ namespace EL
     /// failures: segment misconfiguration
     /// requires: !segments.empty()
     void addSample (BatchJob& job, BatchSample sample,
-		    const std::vector<BatchSegment>& segments)
+                    const std::vector<BatchSegment>& segments)
     {
       RCU_REQUIRE (!segments.empty());
 
@@ -92,7 +92,7 @@ namespace EL
       RCU_ASSERT (segments[0].begin_event == 0);
       for (std::size_t iter = 0, end = segments.size(); iter != end; ++ iter)
       {
-	BatchSegment segment = segments[iter];
+        BatchSegment segment = segments[iter];
 
         segment.sampleName = sample.name;
         {
@@ -106,19 +106,19 @@ namespace EL
           segment.segmentName = myname.str();
         }
 
-	segment.sample = job.samples.size();
-	segment.job_id = job.segments.size();
-	if (iter+1 < end)
-	{
-	  segment.end_file  = segments[iter+1].begin_file;
-	  segment.end_event = segments[iter+1].begin_event;
-	} else
-	{
-	  segment.end_file = sample.files.size();
-	  segment.end_event = 0;
-	}
-	RCU_ASSERT (segment.begin_file < segment.end_file || (segment.begin_file == segment.end_file && segment.begin_event <= segment.end_event));
-	job.segments.push_back (segment);
+        segment.sample = job.samples.size();
+        segment.job_id = job.segments.size();
+        if (iter+1 < end)
+        {
+          segment.end_file  = segments[iter+1].begin_file;
+          segment.end_event = segments[iter+1].begin_event;
+        } else
+        {
+          segment.end_file = sample.files.size();
+          segment.end_event = 0;
+        }
+        RCU_ASSERT (segment.begin_file < segment.end_file || (segment.begin_file == segment.end_file && segment.begin_event <= segment.end_event));
+        job.segments.push_back (segment);
       }
 
       sample.end_segments = job.segments.size();
@@ -137,19 +137,19 @@ namespace EL
     /// requires: numJobs == rint (numJobs)
     /// postcondition: !segments.empty()
     void splitSampleByFile (const BatchSample& sample,
-			    std::vector<BatchSegment>& segments,
-			    double numJobs)
+                            std::vector<BatchSegment>& segments,
+                            double numJobs)
     {
       // RCU_REQUIRE (!sample.files.empty());
       RCU_REQUIRE (numJobs == rint (numJobs));
       RCU_REQUIRE (numJobs <= sample.files.size());
 
       for (std::size_t index = 0, end = numJobs;
-	   index < end; ++ index)
+           index < end; ++ index)
       {
-	BatchSegment segment;
-	segment.begin_file = rint (index * (sample.files.size() / numJobs));
-	segments.push_back (segment);
+        BatchSegment segment;
+        segment.begin_file = rint (index * (sample.files.size() / numJobs));
+        segments.push_back (segment);
       }
     }
 
@@ -165,9 +165,9 @@ namespace EL
     /// requires: numJobs == rint (numJobs)
     /// postcondition: !segments.empty()
     void splitSampleByEvent (const BatchSample& sample,
-			     std::vector<BatchSegment>& segments,
-			     const std::vector<Long64_t>& eventsFile,
-			     double numJobs)
+                             std::vector<BatchSegment>& segments,
+                             const std::vector<Long64_t>& eventsFile,
+                             double numJobs)
     {
       RCU_REQUIRE (!sample.files.empty());
       RCU_REQUIRE (sample.files.size() == eventsFile.size());
@@ -175,29 +175,29 @@ namespace EL
 
       Long64_t eventsSum = 0;
       for (std::vector<Long64_t>::const_iterator nevents = eventsFile.begin(),
-	     end = eventsFile.end(); nevents != end; ++ nevents)
+             end = eventsFile.end(); nevents != end; ++ nevents)
       {
-	RCU_ASSERT_SOFT (*nevents >= 0);
-	eventsSum += *nevents;
+        RCU_ASSERT_SOFT (*nevents >= 0);
+        eventsSum += *nevents;
       }
       if (numJobs > eventsSum)
-	numJobs = eventsSum;
+        numJobs = eventsSum;
       Long64_t eventsMax
-	= sample.meta.castDouble (Job::optEventsPerWorker);
+        = sample.meta.castDouble (Job::optEventsPerWorker);
       if (eventsMax > 0)
-	numJobs = ceil (double (eventsSum) / eventsMax);
+        numJobs = ceil (double (eventsSum) / eventsMax);
       eventsMax = Long64_t (ceil (double (eventsSum) / numJobs));
 
       BatchSegment segment;
       while (std::size_t (segment.begin_file) < eventsFile.size())
       {
-	while (segment.begin_event < eventsFile[segment.begin_file])
-	{
-	  segments.push_back (segment);
-	  segment.begin_event += eventsMax;
-	}
-	segment.begin_event -= eventsFile[segment.begin_file];
-	++ segment.begin_file;
+        while (segment.begin_event < eventsFile[segment.begin_file])
+        {
+          segments.push_back (segment);
+          segment.begin_event += eventsMax;
+        }
+        segment.begin_event -= eventsFile[segment.begin_file];
+        ++ segment.begin_file;
       }
       RCU_ASSERT (segments.size() == numJobs);
     }
@@ -213,7 +213,7 @@ namespace EL
     /// requires: !sample.files.empty()
     /// postcondition: !segments.empty()
     void splitSample (const BatchSample& sample,
-		      std::vector<BatchSegment>& segments)
+                      std::vector<BatchSegment>& segments)
     {
       // RCU_REQUIRE (!sample.files.empty());
 
@@ -223,36 +223,36 @@ namespace EL
       //   it will balance out things slightly if we only have a few
       //   files and multiple files per job.
       const double filesPerWorker
-	= sample.meta.castDouble (Job::optFilesPerWorker, 1);
+        = sample.meta.castDouble (Job::optFilesPerWorker, 1);
       if (filesPerWorker < 1)
       {
-	std::ostringstream msg;
-	msg << "invalid number of files per worker: " << filesPerWorker;
-	RCU_THROW_MSG (msg.str());
+        std::ostringstream msg;
+        msg << "invalid number of files per worker: " << filesPerWorker;
+        RCU_THROW_MSG (msg.str());
       }
       double numJobs = ceil (sample.files.size() / filesPerWorker);
 
       const TObject *meta
-	= sample.meta.get (SH::MetaFields::numEventsPerFile);
+        = sample.meta.get (SH::MetaFields::numEventsPerFile);
       if (meta)
       {
-	const SH::MetaVector<Long64_t> *const meta_nentries
-	  = dynamic_cast<const SH::MetaVector<Long64_t> *>(meta);
-	RCU_ASSERT_SOFT (meta == meta_nentries);
-	RCU_ASSERT_SOFT (meta_nentries->value.size() == sample.files.size());
-	splitSampleByEvent (sample, segments, meta_nentries->value, numJobs);
+        const SH::MetaVector<Long64_t> *const meta_nentries
+          = dynamic_cast<const SH::MetaVector<Long64_t> *>(meta);
+        RCU_ASSERT_SOFT (meta == meta_nentries);
+        RCU_ASSERT_SOFT (meta_nentries->value.size() == sample.files.size());
+        splitSampleByEvent (sample, segments, meta_nentries->value, numJobs);
       } else
       {
-	splitSampleByFile (sample, segments, numJobs);
+        splitSampleByFile (sample, segments, numJobs);
       }
 
 
       if (segments.empty())
       {
-	// rationale: this isn't really the proper thing to do.  if a
-	//   sample is empty I should just run the job locally.
-	BatchSegment empty;
-	segments.push_back (empty);
+        // rationale: this isn't really the proper thing to do.  if a
+        //   sample is empty I should just run the job locally.
+        BatchSegment empty;
+        segments.push_back (empty);
       }
 
       RCU_PROVIDE (!segments.empty());
@@ -264,23 +264,23 @@ namespace EL
     /// guarantee: basic
     /// failures: out of memory II
     void fillFullJob (BatchJob& myjob, const Job& job,
-		      const std::string& location,
-		      const SH::MetaObject& meta)
+                      const std::string& location,
+                      const SH::MetaObject& meta)
     {
       fillJob (myjob, job, location);
       *myjob.job.options() = meta;
 
       for (std::size_t sampleIndex = 0, end = job.sampleHandler().size();
-	   sampleIndex != end; ++ sampleIndex)
+           sampleIndex != end; ++ sampleIndex)
       {
-	BatchSample mysample;
-	fillSample (mysample, *job.sampleHandler()[sampleIndex], meta);
+        BatchSample mysample;
+        fillSample (mysample, *job.sampleHandler()[sampleIndex], meta);
 
-	std::vector<BatchSegment> subsegments;
-	splitSample (mysample, subsegments);
-	myjob.njobs_old.push_back (subsegments.size());
+        std::vector<BatchSegment> subsegments;
+        splitSample (mysample, subsegments);
+        myjob.njobs_old.push_back (subsegments.size());
 
-	addSample (myjob, mysample, subsegments);
+        addSample (myjob, mysample, subsegments);
       }
     }
   }
@@ -443,15 +443,15 @@ namespace EL
     case Detail::ManagerStep::batchJobStatusResubmit:
     case Detail::ManagerStep::batchJobStatusRetrieve:
       {
-	for (std::size_t job = 0; job != data.batchJob->segments.size(); ++ job)
-	{
-	  std::ostringstream completedFile;
-	  completedFile << data.submitDir << "/status/completed-" << job;
+        for (std::size_t job = 0; job != data.batchJob->segments.size(); ++ job)
+        {
+          std::ostringstream completedFile;
+          completedFile << data.submitDir << "/status/completed-" << job;
           const bool hasCompleted =
             (gSystem->AccessPathName (completedFile.str().c_str()) == 0);
 
-	  std::ostringstream failFile;
-	  failFile << data.submitDir << "/status/fail-" << job;
+          std::ostringstream failFile;
+          failFile << data.submitDir << "/status/fail-" << job;
           const bool hasFail =
             (gSystem->AccessPathName (failFile.str().c_str()) == 0);
 
@@ -552,8 +552,18 @@ namespace EL
 
     // <path of build dir>/x86_64-slc6-gcc62-opt (comes from CMake, we need this)
     const char *WORKDIR_DIR         = getenv ("WorkDir_DIR");
-    if (WORKDIR_DIR == nullptr)
-      RCU_THROW_MSG ("could not find environment variable $WorkDir_DIR");
+    // As a backup, keep the CMAKE_PREFIX_PATH
+    std::string CMAKE_DIR_str ( getenv ("CMAKE_PREFIX_PATH") );
+    if (WORKDIR_DIR == nullptr){
+      msgEventLoop::ANA_MSG_INFO ("Could not find environment variable $WorkDir_DIR");
+      // Instead, build from the first path in CMAKE_PREFIX_PATH
+      if (CMAKE_DIR_str.find(":") != std::string::npos){
+        // Erase everything from the colon onwards
+        CMAKE_DIR_str.erase( CMAKE_DIR_str.find(":") , std::string::npos );
+      }
+      // Provide the remainder of the string to the workdir
+      WORKDIR_DIR = CMAKE_DIR_str.data();
+    }
 
     if(!data.sharedFileSystem)
     {
@@ -724,7 +734,7 @@ namespace EL
 
     RCU_ASSERT (data.batchJob->njobs_old.size() == data.batchJob->samples.size());
     for (std::size_t sample = 0, end = data.batchJob->samples.size();
-	 sample != end; ++ sample)
+         sample != end; ++ sample)
     {
       const BatchSample& mysample (data.batchJob->samples[sample]);
 
@@ -734,62 +744,62 @@ namespace EL
       {
         ANA_MSG_VERBOSE ("merge files for sample " << data.batchJob->samples[sample].name);
 
-	bool complete = true;
-	std::vector<std::string> input;
-	for (std::size_t segment = mysample.begin_segments,
-	       end = mysample.end_segments; segment != end; ++ segment)
-	{
-	  const BatchSegment& mysegment = data.batchJob->segments[segment];
+        bool complete = true;
+        std::vector<std::string> input;
+        for (std::size_t segment = mysample.begin_segments,
+               end = mysample.end_segments; segment != end; ++ segment)
+        {
+          const BatchSegment& mysegment = data.batchJob->segments[segment];
 
-	  const std::string hist_file = origHistOutput->targetURL
+          const std::string hist_file = origHistOutput->targetURL
             (mysegment.sampleName, mysegment.segmentName, ".root");
 
           ANA_MSG_VERBOSE ("merge segment " << segment << " completed=" << (data.batchJobSuccess.find(segment)!=data.batchJobSuccess.end()) << " fail=" << (data.batchJobFailure.find(segment)!=data.batchJobFailure.end()) << " unknown=" << (data.batchJobUnknown.find(segment)!=data.batchJobUnknown.end()));
 
-	  input.push_back (hist_file);
+          input.push_back (hist_file);
 
-	  if (data.batchJobFailure.find(segment)!=data.batchJobFailure.end())
-	  {
-	    std::ostringstream message;
-	    message << "subjob " << segment << "/" << mysegment.fullName
-		    << " failed";
-	    RCU_THROW_MSG (message.str());
-	  }
-	  else if (data.batchJobSuccess.find(segment)==data.batchJobSuccess.end())
-	    complete = false, result = false;
-	}
-	if (complete)
-	{
-	  RCU::hadd (output.str(), input);
+          if (data.batchJobFailure.find(segment)!=data.batchJobFailure.end())
+          {
+            std::ostringstream message;
+            message << "subjob " << segment << "/" << mysegment.fullName
+                    << " failed";
+            RCU_THROW_MSG (message.str());
+          }
+          else if (data.batchJobSuccess.find(segment)==data.batchJobSuccess.end())
+            complete = false, result = false;
+        }
+        if (complete)
+        {
+          RCU::hadd (output.str(), input);
 
-	  // Merge output data directories
-	  for (Job::outputIter out = data.batchJob->job.outputBegin(),
-		 end = data.batchJob->job.outputEnd(); out != end; ++ out)
-	    {
-	      output.str("");
-	      output << data.submitDir << "/data-" << out->label();
+          // Merge output data directories
+          for (Job::outputIter out = data.batchJob->job.outputBegin(),
+                 end = data.batchJob->job.outputEnd(); out != end; ++ out)
+            {
+              output.str("");
+              output << data.submitDir << "/data-" << out->label();
 
-	      if(gSystem->AccessPathName(output.str().c_str()))
-		gSystem->mkdir(output.str().c_str(),true);
+              if(gSystem->AccessPathName(output.str().c_str()))
+                gSystem->mkdir(output.str().c_str(),true);
 
 
-	      output << "/" << data.batchJob->samples[sample].name << ".root";
+              output << "/" << data.batchJob->samples[sample].name << ".root";
 
-	      std::vector<std::string> input;
-	      for (std::size_t segment = mysample.begin_segments,
-		     end = mysample.end_segments; segment != end; ++ segment)
-		{
-		  const BatchSegment& mysegment = data.batchJob->segments[segment];
+              std::vector<std::string> input;
+              for (std::size_t segment = mysample.begin_segments,
+                     end = mysample.end_segments; segment != end; ++ segment)
+                {
+                  const BatchSegment& mysegment = data.batchJob->segments[segment];
 
-		  const std::string infile =
-		    data.submitDir + "/fetch/data-" + out->label() + "/" + mysegment.fullName + ".root";
+                  const std::string infile =
+                    data.submitDir + "/fetch/data-" + out->label() + "/" + mysegment.fullName + ".root";
 
-		  input.push_back (infile);
-		}
+                  input.push_back (infile);
+                }
 
-	      RCU::hadd(output.str(), input);
-	    }
-	}
+              RCU::hadd(output.str(), input);
+            }
+        }
       }
     }
     return result;
