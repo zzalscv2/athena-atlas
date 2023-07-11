@@ -97,7 +97,8 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() co
         ATH_MSG_WARNING("Found xAODTruthMetaDataContainer empty! Configuring to be NOT Sherpa.");
       }
       ATH_MSG_INFO("From metadata configured: Sherpa? " << is_sherpa);
-    } {
+    } 
+    else {
       ATH_MSG_WARNING("Could not find metadata container in storegate; assuming NOT Sherpa");
     }
     return is_sherpa;
@@ -123,16 +124,34 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() co
   SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > classificationDecorator(m_classificationDecoratorKey, ctx);
 
   // add relevant particles to new collection
+  int sherpLepParentBarcode = 0;
   for (unsigned int i=0; i<truthParticles->size(); ++i) {
     // Grab the particle
     const xAOD::TruthParticle* theParticle = (*truthParticles)[i];
     if (!theParticle) continue; // Protection against null pointers
     if (!theParticle->isLepton()) continue; // Only include leptons!
 
-    if (is_sherpa>0 && theParticle->status()!=11){
-      // If Sherpa, take leptons with status 11
-      continue;
-    } else if (is_sherpa==0) {
+    if (is_sherpa > 0) {
+      // For Sherpa, skip is not status 11
+      if (theParticle->status() != 11) continue;
+      // Sherpa may have two sets of status == 11 leptons. Here we take the first set.
+      // To do so, we check the first status == 11 leptons, 
+      //   check that it has a child a parent barecode corresponding the the lepton's barcode
+      // If so, then save this parent barcode and skip all status 11 leptons with this parent barcode.
+
+      if (sherpLepParentBarcode == 0) {
+        // Do test on first status 11 lepton
+        const xAOD::TruthParticle* thePartchild = theParticle->child();
+        if (thePartchild) {
+          int cparentBarcode = (thePartchild->parent()) ? thePartchild->parent()->barcode() : 0;
+          if (cparentBarcode == theParticle->barcode()) {
+            sherpLepParentBarcode = cparentBarcode;
+          } 
+        }
+      }
+      int pbarcode = (theParticle->parent()) ? theParticle->parent()->barcode() : 0;
+      if (sherpLepParentBarcode > 0 && sherpLepParentBarcode == pbarcode) continue;
+    } else if (is_sherpa == 0) {
       // Some generators, look for leptons with status 3 coming from vertices with other leptons
       bool has_status_n3=false, has_status_3=false, has_V=false;
       if (theParticle->status()==3){
