@@ -120,7 +120,7 @@ public:
     std::vector<const char*> m_output_node_names;
     
     TEnv * m_config;
-    TString m_calibArea;
+    std::string m_calibArea;
 
 
 }; // Class GlobalLargeRDNNCalibration
