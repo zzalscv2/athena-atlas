@@ -9,7 +9,7 @@ log = logging.getLogger('decodeBS_TLA_AOD.py')
 
 
 
-def decodingCfg(flags):
+def decodingCfg(flags, ds_id='PhysicsTLA'):
     """ Configure deserialization of RAW byte stream """
     acc = ComponentAccumulator()
 
@@ -26,7 +26,7 @@ def decodingCfg(flags):
 
 
     deserialiser = CompFactory.TriggerEDMDeserialiserAlg("TLATrigDeserialiser")
-    deserialiser.ModuleID = DataScoutingInfo.DataScoutingIdentifiers["PhysicsTLA"]
+    deserialiser.ModuleID = DataScoutingInfo.DataScoutingIdentifiers[ds_id]
     acc.addEventAlgo(deserialiser, "Decoding")
 
     return acc
