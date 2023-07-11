@@ -111,7 +111,6 @@ namespace Trk {
 class Track;
 class ITrackLink;
 class TrkQuality;
-class IVxCandidateXAODVertex;
 }
 
 namespace InDet {

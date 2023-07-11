@@ -61,8 +61,6 @@
 namespace Trk {
 class Track;
 class ITrackLink;
-
-class IVxCandidateXAODVertex;
 }
 
 namespace InDet {
