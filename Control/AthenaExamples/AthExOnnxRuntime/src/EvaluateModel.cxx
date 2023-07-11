@@ -90,8 +90,14 @@ namespace AthONNX {
       ATH_MSG_INFO( "Using pixel file: " << labelFileName );
       // Set up the ONNX Runtime session.
   
-      m_session = AthONNX::CreateORTSession(modelFileName);
-      ATH_MSG_INFO( "Created the ONNX Runtime session" );
+      m_session = AthONNX::CreateORTSession(modelFileName, m_useCUDA);
+
+      if (m_useCUDA) {
+         ATH_MSG_INFO( "Created the ONNX Runtime session on CUDA" );
+      } else {
+         ATH_MSG_INFO( "Created the ONNX Runtime session on CPUs" );
+      }
+      
       m_input_tensor_values_notFlat = read_mnist_pixel_notFlat(pixelFileName);
       std::vector<std::vector<float>> c = m_input_tensor_values_notFlat[0];
       m_output_tensor_values = read_mnist_label(labelFileName);    
