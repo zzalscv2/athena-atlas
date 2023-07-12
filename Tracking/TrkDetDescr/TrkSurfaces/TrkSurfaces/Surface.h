@@ -398,8 +398,6 @@ public:
   SurfaceOwner owner() const;
 
   /** set material layer */
-  void setMaterialLayer(Layer& mlay);
-
   void setMaterialLayer(Layer* mlay);
 
   /** Output Method for MsgStream, to be overloaded by child classes */
