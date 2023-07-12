@@ -74,16 +74,14 @@ BOOST_FIXTURE_TEST_CASE(BuildFromDL, PopulateSG) {
   BOOST_CHECK(trackJacobianDL.isValid());
   DataLink<xAOD::TrackMeasurementContainer> trackMeasurementDL("measurements", sg);
   BOOST_CHECK(trackMeasurementDL.isValid());
-  // TODO, enable once CLID clash is eliminated
-  // {
-  //   auto cmtj = std::make_unique<ActsTrk::ConstMultiTrajectory>(trackStateDL, trackParametersDL, trackJacobianDL, trackMeasurementDL);
-  //   BOOST_CHECK(sg->record(cmtj.release(), "MTJ").isSuccess());
-  // }
-  // {
-  //   const ActsTrk::ConstMultiTrajectory* back;
-  //   BOOST_CHECK( sg->retrieve(back, "MTJ").isSuccess());
-  // // TODO add content to test what was filled
-  // }
+  {
+    auto cmtj = std::make_unique<ActsTrk::ConstMultiTrajectory>(trackStateDL, trackParametersDL, trackJacobianDL, trackMeasurementDL);
+    BOOST_CHECK(sg->record(cmtj.release(), "MTJ").isSuccess());
+  }
+  {
+    const ActsTrk::ConstMultiTrajectory* back;
+    BOOST_CHECK( sg->retrieve(back, "MTJ").isSuccess());
+  }
 }
   
 

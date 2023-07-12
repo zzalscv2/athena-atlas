@@ -249,15 +249,19 @@ BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
   BOOST_CHECK_EQUAL(mtj->hasColumn("author"_hash),
                     false);              // dynamic column absent initially
   mtj->addColumn<short>("author");  // add dynamic column
+
   BOOST_CHECK_EQUAL(mtj->hasColumn("author"_hash),
                     true);  // dynamic column present now
+  mtj->addColumn<float>("mcprob");
+  BOOST_CHECK_EQUAL(mtj->hasColumn("mcprob"_hash),
+                    true);  // dynamic column present now
+
 
   constexpr auto kMask = Acts::TrackStatePropMask::Predicted;
   auto i0 = mtj->addTrackState(kMask);
   auto i1 = mtj->addTrackState(kMask, i0);
   auto i2 = mtj->addTrackState(kMask, i1);
   // dynamic column enabled late
-  mtj->addColumn<float>("mcprob");
   auto ts0 = mtj->getTrackState(i0);
   auto ts1 = mtj->getTrackState(i1);
   auto ts2 = mtj->getTrackState(i2);
@@ -267,6 +271,8 @@ BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
 
   ts0.component<float, "mcprob"_hash>() = 0.5;
   ts1.component<float, "mcprob"_hash>() = 0.9;
+
+
   // unset for ts2
 
   // read them back
@@ -282,6 +288,36 @@ BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
              boost::test_tools::tolerance(0.01));
 
   BOOST_CHECK_THROW((ts2.component<float, "sth"_hash>()), std::runtime_error);
+
+  // RO MTJ needs to be remade now because only at construction it can recognise the dynamic columns
+  ro_mtj = std::make_unique<ActsTrk::ConstMultiTrajectory>(trackStateBackend.get(), parametersBackend.get(), jacobianBackend.get(), measurementsBackend.get());
+
+  BOOST_CHECK_EQUAL(ro_mtj->hasColumn("author"_hash),
+                    true);  // dynamic column present now in const version too
+  BOOST_CHECK_EQUAL(ro_mtj->hasColumn("mcprob"_hash),
+                    true);  // dynamic column present now in const version too
+
+
+
+  auto ro_ts0 = ro_mtj->getTrackState(i0);
+  auto ro_ts1 = ro_mtj->getTrackState(i1);
+  auto ro_ts2 = ro_mtj->getTrackState(i2);
+
+  BOOST_CHECK_EQUAL((ro_ts0.component<double, "chi2"_hash>()), 0.0);
+
+
+  BOOST_CHECK_EQUAL((ro_ts0.component<short, "author"_hash>()), 5);
+  BOOST_CHECK_EQUAL((ro_ts1.component<short, "author"_hash>()), 6);
+  BOOST_CHECK_EQUAL((ro_ts2.component<short, "author"_hash>()), 4);
+
+  BOOST_TEST((ro_ts0.component<float, "mcprob"_hash>()) == 0.5,
+             boost::test_tools::tolerance(0.01));
+  BOOST_TEST((ro_ts1.component<float, "mcprob"_hash>()) == 0.9,
+             boost::test_tools::tolerance(0.01));
+  BOOST_TEST((ro_ts2.component<float, "mcprob"_hash>()) == 0.0,
+             boost::test_tools::tolerance(0.01));
+
+
 }
 
 // FIXME - test below should use ACTS::MTJ api once available in needed shape
