@@ -899,15 +899,15 @@ bool TrigNavStructure::matchFeature(const TriggerElement::FeatureAccessHelper& f
   //we always require the CLID to match
   if(fea.getCLID() != clid) return false;
 
-  if(index_or_label.which() == 0){
+  if(index_or_label.index() == 0){
     //subtype index case: if argument is invalid_sub_index we always match, else require exact match
-    auto index = boost::get<sub_index_type>(index_or_label) ;
+    auto index = std::get<sub_index_type>(index_or_label) ;
     return (index == invalid_sub_index || index == fea.getIndex().subTypeIndex());
   }
 
-  if(index_or_label.which() == 1){
+  if(index_or_label.index() == 1){
     //label case: if argument is "" we always match, else require exact match (via)
-    auto label = boost::get<std::string>(index_or_label);
+    auto label = std::get<std::string>(index_or_label);
     if(label.empty()){
       return true;
     }
