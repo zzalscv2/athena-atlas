@@ -78,19 +78,6 @@ def associationTool_getter():
       from InDetRecExample.TrackingCommon import getInDetTrigPRDtoTrackMapToolGangedPixels
       return getInDetTrigPRDtoTrackMapToolGangedPixels()
 
-def trackSelectionTool_getter(config):
-      #TODO this might need to be revisited!
-
-      if config.name == 'cosmics':
-        from InDetTrigRecExample.InDetTrigConfigRecLoadToolsCosmics import  InDetTrigAmbiTrackSelectionToolCosmicsN
-        return InDetTrigAmbiTrackSelectionToolCosmicsN
-
-      else:
-        from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigAmbiTrackSelectionTool
-        return InDetTrigAmbiTrackSelectionTool
-
-
-
 #-------------------------------------------------------------------------------------------------
 #                       Alg/Tools for offline pattern recognition tracking
 

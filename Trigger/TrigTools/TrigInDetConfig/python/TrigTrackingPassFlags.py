@@ -57,7 +57,8 @@ def signatureSpecificSettingOfFlags(flags,mode):
   if flags.input_name=="cosmics":
     flags.minPT               = 0.5*Units.GeV
     flags.nClustersMin        = 4
-    flags.minSiNotShared      = 4
+    flags.minSiNotShared      = 3
+    flags.maxShared           = 0
     flags.nHolesMax           = 3
     flags.maxSiHoles          = 3
     flags.maxSCTHoles         = 3
@@ -71,6 +72,7 @@ def signatureSpecificSettingOfFlags(flags,mode):
     flags.nWeightedClustersMin= 8
     flags.minTRTonTrk         = 20
     flags.seedFilterLevel     = 3
+    flags.maxTracksPerSharedPRD = 10
 
   def collToRecordable(flags,name):
     ret = name
