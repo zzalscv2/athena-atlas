@@ -10,12 +10,12 @@ from ..Config.ChainConfigurationBase import ChainConfigurationBase
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from ..CommonSequences.CaloSequences import fastCaloMenuSequence
 from ..Photon.FastPhotonMenuSequences import fastPhotonMenuSequence
+from ..Photon.PrecisionPhotonCaloIsoMenuSequences import precisionPhotonCaloIsoMenuSequence
 from ..Photon.PrecisionPhotonMenuSequences import precisionPhotonMenuSequence
 
 if isComponentAccumulatorCfg():
     pass
 else:
-    from ..Photon.PrecisionPhotonCaloIsoMenuSequences import precisionPhotonCaloIsoMenuSequence
     from ..Photon.HipTRTMenuSequences import hipTRTMenuSequence
     from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaTopoHypoTool
     from ..Photon.PrecisionCaloMenuSequences import precisionCaloMenuSequence
