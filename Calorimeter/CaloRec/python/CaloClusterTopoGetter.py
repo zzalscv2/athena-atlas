@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #
 #
@@ -368,6 +368,8 @@ class CaloClusterTopoGetter ( Configured )  :
         TopoMaker.CutOOTseed = jobproperties.CaloTopoClusterFlags.extendTimeCut() and jobproperties.CaloTopoClusterFlags.doTimeCut()
         TopoMaker.UseTimeCutUpperLimit = jobproperties.CaloTopoClusterFlags.useUpperLimitForTimeCut()
         TopoMaker.TimeCutUpperLimit = jobproperties.CaloTopoClusterFlags.timeCutUpperLimit()
+        TopoMaker.XTalkEM2 = jobproperties.CaloTopoClusterFlags.xtalkEM2()
+        TopoMaker.XTalkDeltaT = jobproperties.CaloTopoClusterFlags.xtalkDeltaT()
 
         # note E or AbsE 
         #
