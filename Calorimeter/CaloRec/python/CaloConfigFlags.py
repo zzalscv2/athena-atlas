@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
@@ -30,6 +30,8 @@ def createCaloConfigFlags():
     ccf.addFlag("Calo.TopoCluster.useUpperLimitForTimeCut",
                 lambda prevFlags: prevFlags.Calo.TopoCluster.doTimeCut)
     ccf.addFlag("Calo.TopoCluster.timeCutUpperLimit", 20.0)
+    ccf.addFlag("Calo.TopoCluster.xtalkEM2", False)
+    ccf.addFlag("Calo.TopoCluster.xtalkDeltaT", 15.0)
     ccf.addFlag("Calo.TopoCluster.writeExtendedClusterMoments", True)
     ccf.addFlag("Calo.TopoCluster.CalibrationHitDecorationName","calclus_NLeadingTruthParticleBarcodeEnergyPairs")
     ccf.addFlag("Calo.TopoCluster.addCalibrationHitDecoration",False)

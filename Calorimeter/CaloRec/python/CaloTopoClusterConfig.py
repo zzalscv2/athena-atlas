@@ -255,7 +255,9 @@ def CaloTopoClusterToolCfg(flags, cellsname):
     TopoMaker.CutOOTseed = flags.Calo.TopoCluster.extendTimeCut and flags.Calo.TopoCluster.doTimeCut
     TopoMaker.UseTimeCutUpperLimit = flags.Calo.TopoCluster.useUpperLimitForTimeCut
     TopoMaker.TimeCutUpperLimit = flags.Calo.TopoCluster.timeCutUpperLimit
-
+    TopoMaker.XTalkEM2 = flags.Calo.TopoCluster.xtalkEM2
+    TopoMaker.XTalkDeltaT = flags.Calo.TopoCluster.xtalkDeltaT
+    
     # note E or AbsE
     #
     # the following property must be set to TRUE in order to make double

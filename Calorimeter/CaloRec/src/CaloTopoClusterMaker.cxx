@@ -61,6 +61,7 @@ CaloTopoClusterMaker::CaloTopoClusterMaker(const std::string& type,
     m_seedThresholdOnEorAbsEinSigma    (    6.),
     m_seedThresholdOnTAbs              (  12.5*ns),
     m_timeCutUpperLimit                (    20.),
+    m_xtalkDeltaT                      (  15.*ns),
     m_neighborOption                   ("super3D"),
     m_nOption                          (LArNeighbours::super3D),
     m_restrictHECIWandFCalNeighbors    (false),
@@ -74,6 +75,7 @@ CaloTopoClusterMaker::CaloTopoClusterMaker(const std::string& type,
     m_seedCutsInT                      (false),
     m_cutOOTseed                       (false),
     m_useTimeCutUpperLimit             (false),
+    m_xtalkEM2                         (false),
     m_minSampling                      (0),
     m_maxSampling                      (0),
     m_hashMin                          (999999),
@@ -113,6 +115,10 @@ CaloTopoClusterMaker::CaloTopoClusterMaker(const std::string& type,
   declareProperty("CutOOTseed",m_cutOOTseed);
   //do not apply time cut on cells of large significance
   declareProperty("UseTimeCutUpperLimit",m_useTimeCutUpperLimit);
+  //relax time window (if timing is used) in EM2 when xTalk is present
+  declareProperty("XTalkEM2",m_xtalkEM2);
+  //delta T to add to upper time threshold for EM2 cells affected by xtalk
+  declareProperty("XTalkDeltaT",m_xtalkDeltaT);
 
   // Neighbor cuts are in E or Abs E
   declareProperty("NeighborCutsInAbsE",m_neighborCutsInAbsE);
@@ -389,7 +395,7 @@ CaloTopoClusterMaker::execute(const EventContext& ctx,
 	  bool passedSeedCut = (m_seedCutsInAbsE?std::abs(signedRatio):signedRatio) > m_seedThresholdOnEorAbsEinSigma;
 
 	  bool applyTimeCut = m_seedCutsInT && (!m_useTimeCutUpperLimit || signedRatio <= m_timeCutUpperLimit);
-	  bool passTimeCut_seedCell = (!applyTimeCut || passCellTimeCut(pCell,m_seedThresholdOnTAbs));
+	  bool passTimeCut_seedCell = (!applyTimeCut || passCellTimeCut(pCell,cellColl.cptr()));
 	  bool passedSeedAndTimeCut = (passedSeedCut && passTimeCut_seedCell);
 
 	  bool passedNeighborAndTimeCut = passedNeighborCut;
@@ -679,9 +685,9 @@ void CaloTopoClusterMaker::getClusterSize(){
 }
 
 
-inline bool CaloTopoClusterMaker::passCellTimeCut(const CaloCell* pCell,float threshold) {
+inline bool CaloTopoClusterMaker::passCellTimeCut(const CaloCell* pCell, const CaloCellContainer* cellColl) const {
   // get the cell time to cut on (the same as in CaloEvent/CaloCluster.h)                             
-  
+  bool isInTime = true; 
   // need sampling number already for time
   CaloSampling::CaloSample sam = pCell->caloDDE()->getSampling();
   // check for unknown sampling                                                 
@@ -691,8 +697,33 @@ inline bool CaloTopoClusterMaker::passCellTimeCut(const CaloCell* pCell,float th
     //(from TWiki: https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/CaloEventDataModel#The_Raw_Data_Model)	    
     // Is time defined?                                                                         
     if(pCell->provenance() & pmask) {
-      return std::abs(pCell->time())<threshold;
+      isInTime = (std::abs(pCell->time())<m_seedThresholdOnTAbs);
+      if ( m_xtalkEM2 && (!isInTime) && (pCell->energy() > 0 && (sam == CaloSampling::EMB2 || (sam == CaloSampling::EME2 && std::abs(pCell->eta()) < 2.5)))) {
+	// relax time constraints in EMB2 and EME2_OW due to xTalk from direct phi neighbours
+	// check if |E| is less than 0.25 times one of the |E| values of direct
+	// phi-neighbours. In case that phi-neigbour is in-time, expand upper limit by m_xtalkDeltaT
+	IdentifierHash hashid = pCell->caloDDE()->calo_hash();
+	std::vector<IdentifierHash> theNeighbors;
+	LArNeighbours::neighbourOption opt = (LArNeighbours::neighbourOption)(((int)LArNeighbours::prevInPhi)|((int)LArNeighbours::nextInPhi)); // shoud make a proper enum in LarNeighbours.h for this one ...
+	m_calo_id->get_neighbours(hashid,opt,theNeighbors);
+	// loop over all neighbors of that cell (Seed Growing Algo)
+	for (IdentifierHash nId : theNeighbors) {
+	  const CaloCell * pNCell = cellColl->findCell(nId);
+	  if ( pNCell ) {
+	    if ( pNCell->energy() > 4*pCell->energy() ) {
+	      if ( (!(pNCell->provenance() & pmask)) || std::abs(pNCell->time()) < m_seedThresholdOnTAbs) {
+		isInTime = ((pCell->time() > -m_seedThresholdOnTAbs) && (pCell->time() < m_seedThresholdOnTAbs + m_xtalkDeltaT));
+		if ( isInTime ) {
+		  // exit after first phi neighbour in case that already made
+		  // the time-cut pass
+		  break;
+		}
+	      }
+	    }
+	  }
+	}
+      }
     }
   }
-  return true;
+  return isInTime;
 }

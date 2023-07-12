@@ -1,6 +1,6 @@
 //Dear emacs, this is -*-c++-*-
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOTOPOCLUSTERMAKER_H
@@ -38,6 +38,7 @@
 #include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "CaloConditions/CaloNoise.h"
+#include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
 class Identifier; 
@@ -58,8 +59,8 @@ public:
   void getClusterSize();
 
 private: 
-
-  static inline bool passCellTimeCut(const CaloCell*, float) ;
+  
+  inline bool passCellTimeCut(const CaloCell*, const CaloCellContainer*) const;
   
   const CaloCell_ID* m_calo_id;
   
@@ -133,6 +134,11 @@ private:
   /**                                                                                                             
    * upper limit on the energy significance, for applying the cell time cut */
   float m_timeCutUpperLimit;
+
+
+  /**                                                                                                             
+   * additional max. delta t added to the upper limit time window in case of xtalk in EM2 should be accounted for */
+  float m_xtalkDeltaT;
 
 
   /** @brief Key of the CaloNoise Conditions data object. Typical values 
@@ -248,6 +254,11 @@ private:
    * if set to true, the time cut is not applied on cell of large significance
    */
   bool m_useTimeCutUpperLimit;
+
+  /**                                                                                              
+   * if set to true, the time window is softened in the EMB2 and EME2_OW due to xtalk from direct neighbour cells in phi
+   */
+  bool m_xtalkEM2;
 
   /** 
    * @brief vector of names of the calorimeter samplings to consider
