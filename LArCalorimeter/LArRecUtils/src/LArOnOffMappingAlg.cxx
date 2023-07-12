@@ -89,11 +89,9 @@ StatusCode LArOnOffMappingAlg::execute() {
 
   for (unsigned i=0;i<nChan;++i) {
     const Identifier id=Identifier(Identifier32(pBlobOnOff[i]));
-    std::cout << "blob["<<i<<"]=0x"<< std::hex << pBlobOnOff[i] << std::dec << std::endl;
     if (id.is_valid()) {
       const IdentifierHash oflHash=calocellID->calo_cell_hash(id);
       const HWIdentifier hwid=larOnlineID->channel_Id(IdentifierHash(i));
-
       ++nConnected;
       onOffMap->m_onlHashToOffline[i]=id;
       onOffMap->m_oflHashToOnline[oflHash]=hwid;
