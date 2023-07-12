@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetRawData/TRT_LoLumRawData.h"
@@ -11,7 +11,7 @@
 #include "TRT_LoLumRawDataContainerCnv_p2.h"
 #include "MsgUtil.h"
 
-
+#include "AthAllocators/DataPool.h"
 
 void TRT_LoLumRawDataContainerCnv_p2::transToPers(const TRT_RDO_Container* transCont, InDetRawDataContainer_p2* persCont, MsgStream &log) 
 {
@@ -89,26 +89,34 @@ void  TRT_LoLumRawDataContainerCnv_p2::persToTrans(const InDetRawDataContainer_p
     // So here we loop over all collection and extract their channels
     // from the vector.
 
-
+    // create Data Pool
+    DataPool<TRT_LoLumRawData> dataItems;
+    // It resizes as needed .
+    // The max number of straws is 350847 but assume
+    // that we do not have 100% occupancy
+    dataItems.reserve(180000);
     TRT_RDO_Collection* coll = nullptr;
-
     TRT_LoLumRawDataCnv_p2  chanCnv;
     MSG_DEBUG(log," Reading " << persCont->m_collections.size() << "Collections");
     for (unsigned int icoll = 0; icoll < persCont->m_collections.size(); ++icoll) {
 
         // Create trans collection - in NOT owner of TRT_RDO_RawData (SG::VIEW_ELEMENTS)
-	// IDet collection don't have the Ownership policy c'tor
+        // IDet collection don't have the Ownership policy c'tor
         const InDetRawDataCollection_p1& pcoll = persCont->m_collections[icoll];        
         Identifier collID(pcoll.m_id);
         IdentifierHash collIDHash(pcoll.m_hashId);
         coll = new TRT_RDO_Collection(IdentifierHash(collIDHash));
         coll->setIdentifier(collID);
+        coll->clear (SG::VIEW_ELEMENTS);
         unsigned int nchans           = pcoll.m_end - pcoll.m_begin;
         coll->resize(nchans);
         // Fill with channels
         for (unsigned int ichan = 0; ichan < nchans; ++ ichan) {
             const InDetRawData_p2* pchan = &(persCont->m_rawdata[ichan + pcoll.m_begin]);
-            TRT_LoLumRawData* chan = new TRT_LoLumRawData();
+            //ask the pool for the next pointer
+            TRT_LoLumRawData* chan = dataItems.nextElementPtr();
+            //set the payload
+            *chan = TRT_LoLumRawData();
             chanCnv.persToTrans(pchan, chan, log);
             (*coll)[ichan] = chan;
         }

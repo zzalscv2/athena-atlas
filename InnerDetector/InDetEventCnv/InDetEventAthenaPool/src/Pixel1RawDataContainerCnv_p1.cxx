@@ -12,6 +12,7 @@
 #include "Pixel1RawDataContainerCnv_p1.h"
 #include "MsgUtil.h"
 
+#include "AthAllocators/DataPool.h"
 
 void Pixel1RawDataContainerCnv_p1::transToPers(const PixelRDO_Container* transCont, InDetRawDataContainer_p1* persCont, MsgStream &log) 
 {
@@ -36,9 +37,8 @@ void Pixel1RawDataContainerCnv_p1::transToPers(const PixelRDO_Container* transCo
     Pixel1RawDataCnv_p1  chanCnv;
     TRANS::const_iterator it_Coll     = transCont->begin();
     TRANS::const_iterator it_CollEnd  = transCont->end();
-    unsigned int collIndex;
-    unsigned int chanBegin = 0;
-    unsigned int chanEnd = 0;
+    size_t chanBegin = 0;
+    size_t chanEnd = 0;
     int numColl = transCont->numberOfCollections();
     //if(numColl == transCont->fullSize() ) { // let's count how many collections we have:
     // numColl = 0;
@@ -49,19 +49,19 @@ void Pixel1RawDataContainerCnv_p1::transToPers(const PixelRDO_Container* transCo
     persCont->m_collections.resize(numColl);
     MSG_DEBUG(log," Preparing " << persCont->m_collections.size() << "Collections");
   
-    for (collIndex = 0; it_Coll != it_CollEnd; ++collIndex, ++it_Coll)  {
+    for (size_t collIndex = 0; it_Coll != it_CollEnd; ++collIndex, ++it_Coll)  {
         // Add in new collection
         const PixelRDO_Collection& collection = (**it_Coll);
         chanBegin  = chanEnd;
         chanEnd   += collection.size();
         InDetRawDataCollection_p1& pcollection = persCont->m_collections[collIndex];
         pcollection.m_id    = collection.identify().get_identifier32().get_compact();
-        pcollection.m_hashId = (unsigned int) collection.identifyHash();
+        pcollection.m_hashId = static_cast<size_t> (collection.identifyHash());
         pcollection.m_begin = chanBegin;
         pcollection.m_end   = chanEnd;
         // Add in channels
         persCont->m_rawdata.resize(chanEnd);
-        for (unsigned int i = 0; i < collection.size(); ++i) {
+        for (size_t i = 0; i < collection.size(); ++i) {
             InDetRawData_p1* pchan = &(persCont->m_rawdata[i + chanBegin]);
             const Pixel1RawData* chan = dynamic_cast<const Pixel1RawData*>(collection[i]);
             if (not chan) continue;
@@ -89,25 +89,35 @@ void  Pixel1RawDataContainerCnv_p1::persToTrans(const InDetRawDataContainer_p1* 
     // from the vector.
 
 
-    PixelRDO_Collection* coll = nullptr;
-
     Pixel1RawDataCnv_p1  chanCnv;
-    MSG_DEBUG(log," Reading " << persCont->m_collections.size() << "Collections");
-    for (unsigned int icoll = 0; icoll < persCont->m_collections.size(); ++icoll) {
+    const size_t numCollections = persCont->m_collections.size();
+    std::vector<size_t> chans_per_collection{};
+    chans_per_collection.reserve(numCollections);
+    size_t totalChannels = 0;
+    //
+    MSG_DEBUG(log, " Reading " << numCollections << "Collections");
+    for (const InDetRawDataCollection_p1& pcoll : persCont->m_collections) {
+        size_t nchans = pcoll.m_end - pcoll.m_begin;
+        chans_per_collection.push_back(nchans);
+        totalChannels += nchans;
+    }
+    DataPool<Pixel1RawData> dataItems;
+    dataItems.reserve(totalChannels);
 
-        // Create trans collection - in NOT owner of PixelRDO_RawData (SG::VIEW_ELEMENTS)
-	// IDet collection don't have the Ownership policy c'tor
-        const InDetRawDataCollection_p1& pcoll = persCont->m_collections[icoll];        
+    for (size_t icoll = 0; icoll < numCollections; ++icoll) {
+        const InDetRawDataCollection_p1& pcoll = persCont->m_collections[icoll];
         Identifier collID(pcoll.m_id);
         IdentifierHash collIDHash(IdentifierHash(pcoll.m_hashId));
-        coll = new PixelRDO_Collection(collIDHash );
+        //
+        PixelRDO_Collection* coll = new PixelRDO_Collection(collIDHash);
         coll->setIdentifier(collID);
-        unsigned int nchans           = pcoll.m_end - pcoll.m_begin;
+        coll->clear(SG::VIEW_ELEMENTS);
+        size_t nchans = chans_per_collection[icoll];
         coll->resize(nchans);
         // Fill with channels
-        for (unsigned int ichan = 0; ichan < nchans; ++ ichan) {
+        for (size_t ichan = 0; ichan < nchans; ++ ichan) {
             const InDetRawData_p1* pchan = &(persCont->m_rawdata[ichan + pcoll.m_begin]);
-            Pixel1RawData* chan = new Pixel1RawData();
+            Pixel1RawData* chan = dataItems.nextElementPtr();
             chanCnv.persToTrans(pchan, chan, log);
             (*coll)[ichan] = chan;
         }
@@ -117,7 +127,7 @@ void  Pixel1RawDataContainerCnv_p1::persToTrans(const InDetRawDataContainer_p1* 
         if (sc.isFailure()) {
             throw std::runtime_error("Failed to add collection to ID Container");
         }
-	MSG_VERBOSE(log,"AthenaPoolTPCnvIDCont::persToTrans, collection, hash_id/coll id = "
+        MSG_VERBOSE(log,"AthenaPoolTPCnvIDCont::persToTrans, collection, hash_id/coll id = "
 		    << (int) collIDHash << " / " << collID.get_compact() << ", added to Identifiable container.");
     }
 
