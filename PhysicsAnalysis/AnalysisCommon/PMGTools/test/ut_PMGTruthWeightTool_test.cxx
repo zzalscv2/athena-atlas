@@ -103,6 +103,12 @@ int main(int argc, char *argv[])
     if (event.getEntry(entry) < 0) { ANA_MSG_ERROR("Failed to read event " << entry); continue; }
     ANA_CHECK( event.retrieve(evtInfo, "EventInfo") );
 
+    // Print nominal weight
+    if (entry == 0) {
+      CP::SystematicSet sys;
+      ANA_MSG_INFO("Event #" << entry << ": nominal weight = " << weightTool->getSysWeight(evtInfo,sys));
+    }
+
     auto weightNames = weightTool->getWeightNames();
     ANA_MSG_INFO("Event #" << entry << ": found " << weightNames.size() << " weights for this event");
 
@@ -127,7 +133,7 @@ int main(int argc, char *argv[])
 
     // Check retrieval speed
     ANA_MSG_INFO("Check average time taken to retrieve a weight");
-    if (entry == nEntries - 1) {
+    if (entry == nEntries - 1 && !weightNames.empty()) {
       int nWeightCalls = 1000000;
       static std::string weight_name_to_test = weightNames.back();
       auto start = std::chrono::steady_clock::now();
