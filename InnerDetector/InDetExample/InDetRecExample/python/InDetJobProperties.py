@@ -1200,10 +1200,6 @@ class InDetJobProperties(JobPropertyContainer):
   """Container for the InDet flags
   """
 
-  def __init__(self, context=''):
-    #allow specifying context (used by the trigger) 
-    JobPropertyContainer.__init__(self,context)
-  
   def checkThenSet (self, jp, value):
     # checks if a variable has been changed by the user before
     if not jp.setByUser:
