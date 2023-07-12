@@ -14,8 +14,7 @@
 #include <utility> // for std::pair
 
 #include <boost/mpl/if.hpp>
-#include <boost/type_traits/is_base_of.hpp>
-#include <boost/type_traits/remove_pointer.hpp>
+#include <type_traits>
 #include "GaudiKernel/DataObject.h"
 
 #include "CxxUtils/checker_macros.h"
@@ -229,19 +228,14 @@ struct get_thinning_handler
 {
 private:
   typedef typename Container::value_type value_type;
-  typedef typename boost::remove_pointer<value_type>::type base_value_type;
+  typedef typename std::remove_pointer<value_type>::type base_value_type;
 
-  typedef typename boost::is_base_of<std::vector<value_type>, 
-				     Container>
+  typedef typename std::is_base_of<std::vector<value_type>, Container>
   derives_from_std_vector;
-
-//   typedef typename boost::is_base_of<DataVector<base_value_type>,
-// 				     Container>
-//   derives_from_datavector;
   
   // ASSUME a Container inheriting from DataObject means IdentifiableContainer
   // XXX that's kind of a bold assumption...
-  typedef typename boost::is_base_of<DataObject, Container>
+  typedef typename std::is_base_of<DataObject, Container>
   derives_from_dataobject;
   
 public:

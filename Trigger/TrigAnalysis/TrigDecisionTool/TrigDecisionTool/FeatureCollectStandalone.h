@@ -21,6 +21,7 @@
 
 #include <string>
 #include <set>
+#include <type_traits>
 #include "boost/type_traits/is_same.hpp"
 #include "boost/shared_ptr.hpp"
 
@@ -165,7 +166,7 @@ namespace Trig {
 	  insert_flatten_if(typedvec,feature,owned);
 	}
 	else{
-	  if(boost::is_same<STORED,TrigRoiDescriptor>::value){
+	  if(std::is_same<STORED,TrigRoiDescriptor>::value){
 	     std::shared_ptr<const STORED> owned(dest);
 	     //TrigRoiDescriptor needs deletiong by us.. a bit hacky but oh well...
 	     insert_flatten_if(typedvec,feature,owned);

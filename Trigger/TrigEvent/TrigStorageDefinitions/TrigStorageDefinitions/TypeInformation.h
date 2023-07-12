@@ -7,14 +7,14 @@
 #include <string>
 #include <iostream>
 #include <vector>
-#include <boost/type_traits.hpp>
+#include <type_traits>
 #include <typeinfo>
 
 #include <boost/function_types/function_type.hpp>
 #include <boost/function_types/parameter_types.hpp>
 #include <boost/function_types/function_arity.hpp>
 #include <boost/typeof/std/utility.hpp>
-#include <boost/type_traits/remove_pointer.hpp>
+#include <type_traits>
 
 
 namespace HLT{
@@ -62,7 +62,7 @@ struct list {
 // the output of the do_add helper method as its result. do_add adds the element
 // *except* when the new element is nil, in which case it doesn't do anything
 // this is important for cancatenating two lists (as each one will have its terminating nil)
-template<class new_element,class list,bool is_nil = boost::is_same<new_element,nil>::value > struct do_add;
+template<class new_element,class list,bool is_nil = std::is_same<new_element,nil>::value > struct do_add;
 
 //nil case
 template<class new_element,class thelist>
@@ -118,7 +118,7 @@ struct at{
 #ifdef __COVERITY__
 template<typename element, typename list>
 struct do_search{
-    static const bool found = boost::is_same<element,typename list::first>::value or
+    static const bool found = std::is_same<element,typename list::first>::value or
     do_search<element,typename list::rest>::found;
 };
 
@@ -130,13 +130,13 @@ struct do_search<element,nil>{
 #else
 template<typename element, typename list, int i = list::last_index>
 struct do_search{
-  static const bool found = boost::is_same<element,typename at<list,i>::type>::value ||
+  static const bool found = std::is_same<element,typename at<list,i>::type>::value ||
                             do_search<element,list,i-1>::found;
 };
 
 template<typename element, typename list>
 struct do_search<element,list,0>{
-  static const bool found = boost::is_same<element,typename at<list,0>::type>::value;
+  static const bool found = std::is_same<element,typename at<list,0>::type>::value;
 };
 #endif
 
@@ -180,7 +180,7 @@ template<class new_element, class old_element, bool do_replace> struct replace_i
 template<class new_element, class old_element> struct replace_if<new_element,old_element,true>{typedef new_element result;};
 template<class new_element, class old_element> struct replace_if<new_element,old_element,false>{typedef old_element result;};
 
-template<class a_list,class new_element,int i, bool last_is_nil = boost::is_same<typename a_list::rest,nil>::value> struct do_update;
+template<class a_list,class new_element,int i, bool last_is_nil = std::is_same<typename a_list::rest,nil>::value> struct do_update;
 
 template<class a_list,class  new_element,int i>
 struct do_update<a_list,new_element,i,false>{
@@ -274,23 +274,23 @@ static const int result = test<by<element,list,0>::result,
 // to the find function so it know's by what to search
 
 template<typename element,typename list,int index> struct get_element{
-  static const bool result = boost::is_same<element,typename at<list,index>::type>::value;
+  static const bool result = std::is_same<element,typename at<list,index>::type>::value;
 };
 template<typename element,typename list,int index> struct get_cont{
-  static const bool result = boost::is_same<element,typename at<list,index>::type::container>::value;
+  static const bool result = std::is_same<element,typename at<list,index>::type::container>::value;
 };
 
 template<typename element,typename list,int index> struct get_objt{
-  static const bool result = boost::is_same<element,typename at<list,index>::type::object>::value;
+  static const bool result = std::is_same<element,typename at<list,index>::type::object>::value;
 };
 
 template<typename element,typename list,int index> struct get_aux{
-  static const bool result = boost::is_same<element,typename at<list,index>::type::auxt>::value;
+  static const bool result = std::is_same<element,typename at<list,index>::type::auxt>::value;
 };
 
 template<typename element,typename list,int index> struct get_feat{
   static const bool result = at<list,index>::type::list_of_features::template has<element>::result || 
-                             boost::is_same<element,typename at<list,index>::type::object>::value;
+                             std::is_same<element,typename at<list,index>::type::object>::value;
 };
 
 

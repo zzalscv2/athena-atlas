@@ -24,7 +24,7 @@
 #  include "GaudiKernel/MsgStream.h"
 #endif
 
-#include "boost/type_traits/is_same.hpp"
+#include <type_traits>
 #include "boost/mpl/identity.hpp"
 #include "boost/mpl/eval_if.hpp"
 #include <memory>
@@ -135,7 +135,7 @@ namespace SG {
     typedef typename SG::BaseType<typename SG::Bases<T>::bases::Base1>::type base1;
 
     // Test to see if it's valid.
-    typedef typename boost::is_same<base1, SG::NoBase>::type has_base;
+    typedef typename std::is_same<base1, SG::NoBase>::type has_base;
 
     // This is what we'll return in the default (no base) case.
     typedef boost::mpl::identity<SG::DataBucket<U> > deflt;

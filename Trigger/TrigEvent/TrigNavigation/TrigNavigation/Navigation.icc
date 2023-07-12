@@ -15,7 +15,7 @@
  *
  *****************************************************************************/
 
-#include <boost/type_traits.hpp>
+#include <type_traits>
 #include "TrigNavigation/Holder.h"
 #include "CxxUtils/checker_macros.h"
 #include "CxxUtils/no_sanitize_undefined.h"
