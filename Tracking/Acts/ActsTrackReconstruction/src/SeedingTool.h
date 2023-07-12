@@ -83,6 +83,10 @@ namespace ActsTrk {
     Acts::SeedFinderConfig< value_type > m_finderCfg;
     Acts::SpacePointGridConfig m_gridCfg;
 
+    // See quality selection
+    Gaudi::Property< bool > m_seedQualitySelection {this, "doSeedQualitySelection", true,
+	"Select seed according to quality criteria"};
+
     // Properties to set SpacePointGridConfig
     Gaudi::Property< float > m_minPt {this, "minPt", 900. * Acts::UnitConstants::MeV,
       "lower pT cutoff for seeds"}; // Used in SeedfinderConfig as well

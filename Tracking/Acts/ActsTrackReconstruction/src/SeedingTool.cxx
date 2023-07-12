@@ -289,6 +289,49 @@ namespace ActsTrk {
           std::back_inserter(seeds), bottom, middle, top, rMiddleSPRange);
     }
 
+    if (m_seedQualitySelection) {
+      // Selection function - temporary implementation
+      // need change from ACTS for final implementation
+      // To be used only on PPP
+      auto selectionFunction = [&state] (const Acts::Seed<xAOD::SpacePoint>& seed) -> bool 
+	{
+	  const xAOD::SpacePoint* bottom_sp =  seed.sp()[0];
+	  const xAOD::SpacePoint* middle_sp =  seed.sp()[1];
+	  const xAOD::SpacePoint* top_sp =  seed.sp()[2];
+	  
+	  float seed_quality = seed.seedQuality();
+	  float bottom_quality = state.spacePointData.quality(bottom_sp->index());
+	  float middle_quality = state.spacePointData.quality(middle_sp->index());
+	  float top_quality = state.spacePointData.quality(top_sp->index());
+	  
+	  if (bottom_quality > seed_quality and
+	      middle_quality > seed_quality and
+	      top_quality > seed_quality) {
+            return false;
+          }
+
+	  return true;
+	};
+
+      // Select the seeds
+      std::size_t acceptedSeeds = 0;
+      for (std::size_t i(0); i<seeds.size(); ++i) {
+	const auto& seed = seeds[i];
+	if (not selectionFunction(seed)) {
+	  continue;
+	}
+	// move passing seeds at the beginning of the vector/collection
+	// no need to swap them both. The seed currently at acceptedSeeds 
+	// didn't make it (if i != acceptedSeeds)
+	if (acceptedSeeds != i)
+	  seeds[acceptedSeeds] = std::move(seeds[i]);
+	++acceptedSeeds;
+      }
+      // remove seeds that didn't make it
+      // they are all at the end of the collection
+      seeds.erase(seeds.begin() + acceptedSeeds, seeds.end());     
+    }
+
     return StatusCode::SUCCESS;
   }
 
