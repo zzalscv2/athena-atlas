@@ -48,17 +48,17 @@ const std::map<std::string, std::string> LHPointToConfFile = {
     "ElectronPhotonSelectorTools/offline/mc20_20210514/"
     "ElectronLikelihoodTightOfflineConfig2017_Smooth.conf" },
   { "VeryLooseLHElectron_LLP",
-    "ElectronPhotonSelectorTools/trigger/rel22_20210611/"
-    "ElectronLikelihoodVeryLooseTriggerConfig_NoPix.conf" },
+    "ElectronPhotonSelectorTools/offline/mc20_20230321/"
+    "ElectronLikelihoodVeryLooseOfflineConfig2017_Smooth_NoD0_NoPix.conf" },
   { "LooseLHElectron_LLP",
-    "ElectronPhotonSelectorTools/trigger/rel22_20210611/"
-    "ElectronLikelihoodLooseTriggerConfig_NoPix.conf" },
+    "ElectronPhotonSelectorTools/offline/mc20_20230321/"
+    "ElectronLikelihoodLooseOfflineConfig2017_Smooth_NoD0_NoPix.conf" },
   { "MediumLHElectron_LLP",
-    "ElectronPhotonSelectorTools/trigger/rel22_20210611/"
-    "ElectronLikelihoodMediumTriggerConfig_NoPix.conf" },
+    "ElectronPhotonSelectorTools/offline/mc20_20230321/"
+    "ElectronLikelihoodMediumOfflineConfig2017_Smooth_NoD0_NoPix.conf" },
   { "TightLHElectron_LLP",
-    "ElectronPhotonSelectorTools/trigger/rel22_20210611/"
-    "ElectronLikelihoodTightTriggerConfig_NoPix.conf" },
+    "ElectronPhotonSelectorTools/offline/mc20_20230321/"
+    "ElectronLikelihoodTightOfflineConfig2017_Smooth_NoD0_NoPix.conf" },
 };
 const std::map<std::string, std::string> PhotonCutPointToConfFile = {
   { "LoosePhoton",
