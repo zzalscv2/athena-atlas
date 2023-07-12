@@ -23,6 +23,7 @@ def ActsTrkITkStripSeedingToolCfg(flags,
                                   **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     ## For ITkStrip, change properties that have to be modified w.r.t. the default values
+    kwargs.setdefault("doSeedQualitySelection", False)
     # For SpacePointGridConfig
     kwargs.setdefault("gridRMax" , 1000. * UnitConstants.mm)
     kwargs.setdefault("deltaRMax" , 600. * UnitConstants.mm)
