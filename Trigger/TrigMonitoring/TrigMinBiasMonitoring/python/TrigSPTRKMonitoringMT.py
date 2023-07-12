@@ -8,31 +8,19 @@
 import math
 
 
-def HI_chains(configFlags):
-    """ Add chains used in HI runs streamed to MinBias and UPC streams. """
+def SPTRK_chains(configFlags):
+    """ Add MinBias chains """
     from TrigConfigSvc.TriggerConfigAccess import getHLTMenuAccess
     allChains = getHLTMenuAccess(configFlags)
 
-    def is_noalg(chain, *args):
-        return '_noalg_' in chain and all(map(lambda x: x in chain, args))
+    tokens = ['_mb_sp_', '_mb_sptrk_', '_mb_excl_', '_hmt_']
 
-    def not_EB_OVERLAY(chain):
-        return '_eb_' not in chain and 'OVERLAY' not in chain
+    def isMinBias(chain):
+        return any([t in chain for t in tokens])
 
-    chains = []
+    chains = [c for c in allChains if isMinBias(c)]
 
-    # 2022 HI run
-    chains += [c for c in allChains if '_excl_' in c]  # UPC
-    chains += [c for c in allChains if is_noalg(c, 'L1TRT', 'VTE')]  # UPC
-    chains += [c for c in allChains if is_noalg(c, 'L1TAU1', 'VTE')]  # UPC
-    chains += [c for c in allChains if is_noalg(c, 'L12TAU1', 'VTE')]  # UPC
-    chains += [c for c in allChains if is_noalg(c, 'L1TE')]  # UPC + MB
-    chains += ['HLT_noalg_L1VTE5', 'HLT_noalg_L1MBTS_1_VTE5']  # UPC
-
-    # Remove Enhanced Bias and Overlay chains
-    chains = [c for c in chains if not_EB_OVERLAY(c)]
-
-    return chains
+    return list(set(chains))  # Remove duplicates
 
 
 def TrigSPTRK(configFlags, highGranularity=False):
@@ -56,19 +44,17 @@ def TrigSPTRK(configFlags, highGranularity=False):
 
     from TrigConfigSvc.TriggerConfigAccess import getHLTMenuAccess
 
-    detailed = ["HLT_mb_sptrk_L1RD0_FILLED", "HLT_mb_sp_L1RD0_FILLED"]
-    alg.triggerListTrackingMon = [c for c in getHLTMenuAccess(configFlags) if 'HLT_mb_sptrk_L1' in c]
-    alg.triggerListTrackingMon += [c for c in getHLTMenuAccess(configFlags) if 'HLT_mb_sptrk_pt2_L1' in c]
-    # HI chains
-    alg.triggerListTrackingMon += HI_chains(configFlags)
+    alg.triggerListTrackingMon = SPTRK_chains(configFlags)
 
-    detailed += [c for c in getHLTMenuAccess(configFlags) if 'HLT_mb_sp_pix' in c]
+    allChains = getHLTMenuAccess(configFlags)
+    detailed = ["HLT_mb_sptrk_L1RD0_FILLED", "HLT_mb_sp_L1RD0_FILLED"]
+    detailed += [c for c in allChains if 'HLT_mb_sp_pix' in c]
+    detailed += [c for c in allChains if 'HLT_mb_sp_vpix' in c]
+    detailed += [c for c in allChains if 'HLT_mb_sp' in c and '_hmt_' in c]
     alg.triggerListSpacePointsMon = detailed
 
     for chain in alg.triggerListTrackingMon:
-        mbEffGroup = monConfig.addGroup(
-            alg, chain + "_Tracking", topPath="HLT/MinBiasMon/Tracking/" + chain + "/"
-        )
+        mbEffGroup = monConfig.addGroup(alg, chain + "_Tracking", topPath="HLT/MinBiasMon/Tracking/" + chain + "/")
         if chain in detailed:
             mbEffGroup.defineHistogram( "nTrkOffline;nTrkOfflineLowMult", title="Number of tracks reconstructed offline;track counts", xbins=50, xmin=-1, xmax=50 )
 

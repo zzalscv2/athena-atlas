@@ -773,7 +773,7 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
           // check whether this is a trapezoid
           const bool isTrapezoid(design->shape()==InDetDD::Trapezoid);
           // prepare & create the siWidth
-          InDet::SCT_Cluster *potentialCluster(nullptr);
+          std::unique_ptr<InDet::SCT_Cluster> potentialClusterUniq = nullptr;
           // Find length of strip at centre
           const double clusterWidth(potentialClusterRDOList.size()*hitSiDetElement->phiPitch(potentialClusterPosition)); //!< @TODO CHECK
           const std::pair<InDetDD::SiLocalPosition, InDetDD::SiLocalPosition> ends(design->endsOfStrip(potentialClusterPosition));
@@ -810,7 +810,11 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
                 {
                   continue;
                 }
-              potentialCluster = m_clusterMaker->sctCluster(potentialClusterId,potentialClusterPosition,potentialClusterRDOList,siWidth,hitSiDetElement,m_sctErrorStrategy);
+                potentialClusterUniq = std::make_unique<InDet::SCT_Cluster>(
+                    m_clusterMaker->sctCluster(
+                        potentialClusterId, potentialClusterPosition,
+                        potentialClusterRDOList, siWidth, hitSiDetElement,
+                        m_sctErrorStrategy));
             }
           else
             {
@@ -838,22 +842,24 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
                 }
 
               // create a custom cluster
-              potentialCluster = new InDet::SCT_Cluster(potentialClusterId,
-                                                        lcorrectedPosition,
-                                                        potentialClusterRDOList,
-                                                        siWidth,
-                                                        hitSiDetElement,
-                                                        Amg::MatrixX(mat));
+                potentialClusterUniq = std::make_unique<InDet::SCT_Cluster>(
+                    potentialClusterId, lcorrectedPosition,
+                    potentialClusterRDOList, siWidth, hitSiDetElement,
+                    Amg::MatrixX(mat));
             }
 
-          (void) SCT_DetElClusterMap.insert(SCT_detElement_RIO_map::value_type(waferID, potentialCluster));
+            //SCT_DetElClusterMap takes ownership of the ptr
+            const auto it =
+                SCT_DetElClusterMap.insert(SCT_detElement_RIO_map::value_type(
+                    waferID, potentialClusterUniq.release()));
 
-          // Build Truth info for current cluster
-          if (currentSiHit->particleLink().isValid())
-            {
-              const int barcode( currentSiHit->particleLink().barcode());
-              if ( barcode !=0 && barcode != m_vetoThisBarcode )
-                {
+            //since we use this later 
+            const InDet::SCT_Cluster*  potentialCluster = it->second;
+
+            // Build Truth info for current cluster
+            if (currentSiHit->particleLink().isValid()) {
+                const int barcode(currentSiHit->particleLink().barcode());
+                if (barcode != 0 && barcode != m_vetoThisBarcode) {
                   sctPrdTruth->insert(std::make_pair(potentialCluster->identify(), currentSiHit->particleLink()));
                   ATH_MSG_DEBUG("Truth map filled with cluster" << potentialCluster << " and link = " << currentSiHit->particleLink());
                 }

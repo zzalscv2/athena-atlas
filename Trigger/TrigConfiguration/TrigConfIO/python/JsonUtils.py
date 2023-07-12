@@ -63,8 +63,8 @@ def modifyConfigForP1(json_file, db_file):
 
 
       # L1 and HLT Config Svc must read from db
-      mod( properties, "LVL1ConfigSvc", "InputType", lambda x : "db" )
-      mod( properties, "HLTConfigSvc", "InputType", lambda x : "db" )
+      mod( properties, "LVL1ConfigSvc", "InputType", lambda x : "DB" )
+      mod( properties, "HLTConfigSvc", "InputType", lambda x : "DB" )
       mod( properties, "HLTPrescaleCondAlg", "Source", lambda x : "COOL" ) # prescales will be read from COOL online
       mod( properties, "HLTPrescaleCondAlg", "TriggerDB", lambda x : "JOSVC" ) # configuration will be taken from the JOSvc at P1
       # remove filenames to avoid duplicates

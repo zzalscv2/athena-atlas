@@ -21,7 +21,7 @@
 
 #include <string>
 #include <set>
-#include "boost/type_traits/is_same.hpp"
+#include <type_traits>
 #include "boost/shared_ptr.hpp"
 #include "boost/lexical_cast.hpp"
 
@@ -46,8 +46,8 @@
 
 //forward declare ROI types used in is_storable_type use below
 //it's important for this to happen outside of Trig 
-//e.g. not in the boost::is_same call directly a la 
-// boost::is_same<T,struct Muon_ROI>::value
+//e.g. not in the std::is_same call directly a la 
+// std::is_same<T,struct Muon_ROI>::value
 //so that it does not end up to be a check on is_same<T,Trig::Muon_ROI> 
 #if !defined(XAOD_STANDALONE) && !defined(XAOD_ANALYSIS) // Full Athena
 class Muon_ROI;
@@ -80,13 +80,13 @@ namespace Trig {
 #if !defined(XAOD_STANDALONE) && !defined(XAOD_ANALYSIS) // Full Athena
     static const bool value = 
       !(
-	boost::is_same<T,Muon_ROI>::value  ||
-	boost::is_same<T,EmTau_ROI>::value ||
-	boost::is_same<T,Jet_ROI>::value ||
-	boost::is_same<T,xAOD::EmTauRoI>::value ||
-	boost::is_same<T,xAOD::MuonRoI>::value ||
-	boost::is_same<T,xAOD::JetRoI>::value  ||
-	boost::is_same<T,xAOD::IParticle>::value
+	std::is_same<T,Muon_ROI>::value  ||
+	std::is_same<T,EmTau_ROI>::value ||
+	std::is_same<T,Jet_ROI>::value ||
+	std::is_same<T,xAOD::EmTauRoI>::value ||
+	std::is_same<T,xAOD::MuonRoI>::value ||
+	std::is_same<T,xAOD::JetRoI>::value  ||
+	std::is_same<T,xAOD::IParticle>::value
 	);
 #else // AnalysisBase or AthAnalysis
     static const bool value = false;

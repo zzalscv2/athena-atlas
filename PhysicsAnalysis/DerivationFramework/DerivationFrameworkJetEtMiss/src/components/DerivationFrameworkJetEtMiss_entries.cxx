@@ -1,4 +1,5 @@
 #include "../PFlowAugmentationTool.h"
+#include "../METRemappingAlg.h"
 #include "../METTriggerAugmentationTool.h"
 #include "../ViewContainerThinning.h"
 #include "../JetExternalAssocTool.h"
@@ -9,6 +10,7 @@
 using namespace DerivationFramework;
 
 DECLARE_COMPONENT( PFlowAugmentationTool )
+DECLARE_COMPONENT( METRemappingAlg )
 DECLARE_COMPONENT( METTriggerAugmentationTool )
 DECLARE_COMPONENT( ViewContainerThinning )
 DECLARE_COMPONENT( JetExternalAssocTool )

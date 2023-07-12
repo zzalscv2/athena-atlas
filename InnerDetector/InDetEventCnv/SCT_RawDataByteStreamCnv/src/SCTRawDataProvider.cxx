@@ -156,7 +156,11 @@ StatusCode SCTRawDataProvider::execute(const EventContext& ctx) const
   if(!externalCacheRDO){
     dataItemsPool = std::make_unique<DataPool<SCT3_RawData>>(ctx);
     dataItemsPool->reserve(10000);  // Some large default size
+  } else if (m_useDataPoolWithCache) {
+    dataItemsPool = std::make_unique<DataPool<SCT3_RawData>>(ctx);
+    // for now a default size 1024.
   }
+
   // Ask SCTRawDataProviderTool to decode it and to fill the IDC
   StatusCode statConv = m_rawDataTool->convert(vecROBFrags,
 					       *(rdoContainer.ptr()),

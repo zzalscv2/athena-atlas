@@ -225,8 +225,8 @@ namespace Trig {
 	typedef typename Features2Container<FEATURE,EDMLIST>::type container_type;
 	typedef typename Features2Object<FEATURE,EDMLIST>::type object_type;
 
-	const bool do_flatten  = (! boost::is_same<REQUESTED,container_type>::value) && boost::is_same<FEATURE,container_type>::value;
-	const bool do_retrieve = ! (boost::is_same<REQUESTED,container_type>::value && boost::is_same<FEATURE,object_type>::value);
+	const bool do_flatten  = (! std::is_same<REQUESTED,container_type>::value) && std::is_same<FEATURE,container_type>::value;
+	const bool do_retrieve = ! (std::is_same<REQUESTED,container_type>::value && std::is_same<FEATURE,object_type>::value);
 	// std::cout << "flatten? (case when requested type is element of feature type) : "  << (do_flatten ? "yes" : "no") << std::endl;
 	// std::cout << "retrieve? (don't retrueve when requested type in container but stored type is element): " << (do_retrieve ? "yes" : "no") << std::endl;
 	_do_it<FEATURE,do_flatten>(typename get_type<do_retrieve>::type());
@@ -256,9 +256,8 @@ namespace Trig {
 	  if (m_teName == "" || m_teName == Trig::getTEName(**m_sourceTE)) {
 	    if (link.cptr()) {   
 	      //std::cout << "TrigDecisionTool::Feature::get_links: actually we got a feature here" << std::endl;
-	      //print_features<link_type,boost::is_same<FEATURE,container_type>::value>::do_it(link,do_flatten);
 	      insert_and_flatten<REQUESTED,FEATURE, do_flatten,link_type>::do_it(*m_data,
-										 print_features<link_type,boost::is_same<FEATURE,container_type>::value>::get_ptr(link),
+										 print_features<link_type,std::is_same<FEATURE,container_type>::value>::get_ptr(link),
 										 *m_sourceTE, sourceLabel, m_condition, m_navigation,link);
 	    }
 	  }
@@ -436,7 +435,7 @@ namespace Trig {
       const HLT::TriggerElement* sourceTE(0);
       std::string sourceLabel("");
       if (navigation->getRecentFeature(f.te(), orig, f.label(), sourceTE, sourceLabel)) {
-	TrigPassFlags tpf = getFlagsHelper<T,STORED, boost::is_same<T,STORED>::value>::do_build(orig, f.cptr(), orig_tpf);
+	TrigPassFlags tpf = getFlagsHelper<T,STORED, std::is_same<T,STORED>::value>::do_build(orig, f.cptr(), orig_tpf);
 	return tpf;
       }
       return TrigPassFlags();

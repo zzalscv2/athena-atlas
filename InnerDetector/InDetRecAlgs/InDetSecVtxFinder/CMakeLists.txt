@@ -8,6 +8,7 @@ atlas_subdir( InDetSecVtxFinder )
 atlas_add_component( InDetSecVtxFinder
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaBaseComps xAODTracking GaudiKernel InDetRecToolInterfaces TrkTrack TrkParticleBase TrkVertexFitterInterfaces VxSecVertex TrkVxEdmCnvLib )
+                     LINK_LIBRARIES AthenaBaseComps xAODTracking GaudiKernel InDetRecToolInterfaces TrkTrack 
+                     TrkParticleBase TrkVertexFitterInterfaces VxSecVertex)
 
 atlas_install_joboptions( share/*.py POST_BUILD_CMD ${ATLAS_FLAKE8})

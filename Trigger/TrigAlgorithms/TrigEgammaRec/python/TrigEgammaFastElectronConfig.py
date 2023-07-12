@@ -28,7 +28,6 @@ def fastElectronFexAlgCfg(flags, name="EgammaFastElectronFex_1", rois="EMRoIs"):
                                          CaloTrackdEoverPHigh=999.0,
                                          RCalBarrelFace=1470.0*mm,
                                          ZCalEndcapFace=3800.0*mm,
-                                         useCaloInfoInExtrap=flags.Trigger.egamma.useCaloInfoInExtrap,
                                          ParticleCaloExtensionTool=extTool,
                                          ElectronsName=recordable("HLT_FastElectrons"),
                                          RoIs=rois,

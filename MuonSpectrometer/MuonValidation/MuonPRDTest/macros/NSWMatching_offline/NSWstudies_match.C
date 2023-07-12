@@ -398,7 +398,7 @@ bool doEvt (int evtnr) {
    return keep_event;
 }
 
-void write_and_delete (std::vector< TH1I* > vec) {
+void write_and_delete (std::vector< TH1I* >& vec) {
    for (TH1I* _h: vec) {
       _h->Write();
       delete _h;

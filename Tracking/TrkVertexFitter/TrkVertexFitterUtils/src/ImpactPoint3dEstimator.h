@@ -9,6 +9,9 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkVertexFitterInterfaces/IImpactPoint3dEstimator.h"
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
+#include "TrkSurfaces/PlaneSurface.h"
+#include <memory>
+
 
 /**
  * @class Trk::ImpactPoint3dEstimator
@@ -27,10 +30,11 @@
  * EDM Migration to xAOD - move Trk::Vertex to Amg::Vector3D
  *
  */
-
+ 
 namespace Trk
 {
   class IExtrapolator;
+
 
   class ImpactPoint3dEstimator : public extends<AthAlgTool, IImpactPoint3dEstimator>
   {

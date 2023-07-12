@@ -4,6 +4,7 @@
 
 #include <stdexcept>
 #include <stdint.h>
+#include <utility>
 
 #include "StoreGate/StoreGateSvc.h"
 #include "GaudiKernel/EventContext.h"
@@ -158,7 +159,7 @@ bool isGoodFeature(const HLT::TriggerElement::FeatureAccessHelper& fea,
 bool getFromExplicitTE(TestTNS& tns) {
   BEGIN_TEST;
   // get from valid TE
-  auto fea = tns.getFeature(getById(tns, 11), cluster_clid, 3);
+  auto fea = tns.getFeature(getById(tns, 11), cluster_clid, index_or_label_type{static_cast<unsigned short>(3)});
   if ( not isGoodFeature(fea, cluster_clid, 3, 0, 1) )
     REPORT_AND_STOP("Valid request to get clusters fails");
   PROGRESS;
@@ -180,19 +181,19 @@ bool getFromExplicitTE(TestTNS& tns) {
 
   // requests below shuld be failing
   // wrong subType
-  fea = tns.getFeature(getById(tns, 10), cluster_clid, 1);
+  fea = tns.getFeature(getById(tns, 10), cluster_clid, index_or_label_type{static_cast<unsigned short>(1)});
   if ( fea.valid() )
     REPORT_AND_STOP("Got feature while should obtain nothing using this sub type ID");
   PROGRESS;
 
   // earlier TE
-  fea = tns.getFeature(getById(tns, 10), cluster_clid, 3);
+  fea = tns.getFeature(getById(tns, 10), cluster_clid, index_or_label_type{static_cast<unsigned short>(3)});
   if ( fea.valid() )
     REPORT_AND_STOP("Got feature while should obtain nothing from this TE");
   PROGRESS;
 
   // latter TE
-  fea = tns.getFeature(getById(tns, 12), cluster_clid, 3);
+  fea = tns.getFeature(getById(tns, 12), cluster_clid, index_or_label_type{static_cast<unsigned short>(3)});
   if ( fea.valid() )
     REPORT_AND_STOP("Got feature while should obtain nothing from this TE");
   PROGRESS;

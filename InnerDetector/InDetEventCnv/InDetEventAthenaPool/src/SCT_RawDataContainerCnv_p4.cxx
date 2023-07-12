@@ -128,7 +128,7 @@ void  SCT_RawDataContainerCnv_p4::persToTrans(const SCT_RawDataContainer_p4* per
 
   if (m_type == 1) {
     DataPool<SCT1_RawData> dataItems;
-    dataItems.prepareToAdd(totalChannels);
+    dataItems.reserve(totalChannels);
     for (unsigned int icoll = 0; icoll < numCollections; ++icoll) {
       const InDetRawDataCollection_p1& pcoll = persCont->m_collections[icoll];
       Identifier collID(pcoll.m_id);

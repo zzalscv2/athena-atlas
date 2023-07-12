@@ -133,14 +133,14 @@ private:
 
 // See ATLINFR-4996 for an explanation of this clunky
 // warning suppression.
-#if __cplusplus > 201703L
+#if (__cplusplus > 201703L) && defined(__ROOTCLING__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-volatile"
-#endif  // >C++17
+#endif  // >C++17 with ROOT
 #include "tbb/concurrent_vector.h"
-#if __cplusplus > 201703L
+#if (__cplusplus > 201703L) && defined(__ROOTCLING__)
 #pragma clang diagnostic pop
-#endif  // >C++17
+#endif  // >C++17 with ROOT
 
 #include <atomic>
 #include <mutex>
@@ -191,7 +191,7 @@ namespace AthContainers_detail {
  * lock on the underlying object rather than an exclusive one.
  */
 template <typename LOCKABLE>
-class strict_shared_lock 
+class strict_shared_lock
 {
 public:
   /// The underlying object type.
@@ -210,7 +210,7 @@ public:
    * @param obj The lockable object.
    */
   explicit strict_shared_lock(const lockable_type& obj);
-  
+
 
   /**
    * @brief Release the held lock.

@@ -10,7 +10,7 @@
 #include <memory>
 #include <string>
 
-#include <boost/variant.hpp>
+#include <variant>
 
 #include "AsgMessaging/AsgMessaging.h"
 #include "TrigNavStructure/Types.h"
@@ -27,7 +27,7 @@ namespace HLT{
     bool registerHolder(const std::shared_ptr<BaseHolder>& holder);
 
     template<typename HolderType = BaseHolder>
-    HolderType* getHolder(class_id_type clid, const boost::variant<sub_index_type,std::string>& stiOrLabel) const {
+    HolderType* getHolder(class_id_type clid, const std::variant<sub_index_type,std::string>& stiOrLabel) const {
       return getCastHolder<HolderType>(getBaseHolder(clid,getSubTypeIndex(clid,stiOrLabel)));
     }
 
@@ -62,14 +62,14 @@ namespace HLT{
 
     sub_index_type getSubTypeIndex(class_id_type clid, const index_or_label_type& stiOrLabel) const {
       //short circuit for sub_index_type because that case is valid whether we have a map or not. (visitor only works with map)
-      if (stiOrLabel.which() == 0){
-	return boost::get<sub_index_type>(stiOrLabel);
+      if (stiOrLabel.index() == 0){
+	return std::get<sub_index_type>(stiOrLabel);
       }
 
       auto lookup_it = m_lookupSubIndex.find(clid);
       if(lookup_it == m_lookupSubIndex.end()) return invalid_sub_index;
 
-      auto it = lookup_it->second.find(boost::get<std::string>(stiOrLabel));
+      auto it = lookup_it->second.find(std::get<std::string>(stiOrLabel));
       if(it==lookup_it->second.end()) return invalid_sub_index;
 
       return  it->second;
@@ -77,8 +77,8 @@ namespace HLT{
 
     std::string getLabel(class_id_type clid, const index_or_label_type& stiOrLabel) const {
       //short circuit for sub_index_type because that case is valid whether we have a map or not. (visitor only works with map)
-      if (stiOrLabel.which() == 1){
-	return boost::get<std::string>(stiOrLabel);
+      if (stiOrLabel.index() == 1){
+	return std::get<std::string>(stiOrLabel);
       }
 
       std::string invalid_label = "inavalid_label";
@@ -86,7 +86,7 @@ namespace HLT{
       auto lookup_it = m_lookupLabels.find(clid);
       if(lookup_it == m_lookupLabels.end()) return invalid_label;
 
-      auto it = lookup_it->second.find(boost::get<sub_index_type>(stiOrLabel));
+      auto it = lookup_it->second.find(std::get<sub_index_type>(stiOrLabel));
       if(it==lookup_it->second.end()) return invalid_label;
 
       return  it->second;

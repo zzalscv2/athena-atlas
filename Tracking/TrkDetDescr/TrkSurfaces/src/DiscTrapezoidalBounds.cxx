@@ -285,9 +285,9 @@ Trk::DiscTrapezoidalBounds::inside(const Amg::Vector2D& locpo,
         return false;
       }
     }
-    explicit EllipseCollisionTest(int maxIterations)
+    explicit EllipseCollisionTest(int maxIterations) : m_maxIterations(maxIterations)
     {
-      this->m_maxIterations = maxIterations;
+      
     }
   };
 

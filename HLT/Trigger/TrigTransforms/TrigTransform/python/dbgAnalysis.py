@@ -14,7 +14,7 @@ from TrigConfStorage.TriggerCoolUtil import TriggerCoolUtil
 from TrigConfIO.L1TriggerConfigAccess import L1MenuAccess
 from TrigConfIO.HLTTriggerConfigAccess import HLTMenuAccess
 
-from ROOT import TFile
+from ROOT import TFile, TH1F
 
 import logging
 msg = logging.getLogger("PyJobTransforms." + __name__)
@@ -67,7 +67,7 @@ def dbgPreRun(inputFileList, outputFileList, argdict = None):
                 data = [event.run_no(), event.lumi_block(), event.global_id(),
                         event.lvl1_id(), event.bc_time_seconds(), event.bc_time_nanoseconds()]
                 msg.info('Event details :%s', data)
-
+            
             # Run debug event analysis and fill output TTree
             eventInfo.eventCount(event)
             eventInfo.eventInfo(event, l1Info, hltInfo)
@@ -254,9 +254,29 @@ def getHLTConfigFromArgs(args):
         configKeys['HLTPSK'] = int(args['DBhltpskey'].value)
 
         msg.info("Found config keys in args %s", configKeys)
-
+    
     except KeyError:
         msg.warn("Config keys not found in argdict")
         return {}
 
     return configKeys
+
+def getHltDecision(rejected, outputFile):
+    '''
+       Add HLT_rejected_events to outputFile 
+    ''' 
+
+    # Open root output file
+    hfile = TFile(outputFile, 'UPDATE')
+    # Define a new histogram called HLT_rejected_events 
+    HLT_rejected_events = TH1F("HLT_rejected_events", "HLT_rejected_events", 3, 0.0, 3.0)
+    
+    # Fill the histogram if events are rejected by the HLT 
+    # HLT_rejected_events are assigned the value 1
+    # If all events are accepted the Histogram is empty 
+    HLT_rejected_events.Fill(1, rejected)
+    
+    # Close output TFile
+    hfile.Write("HLT_rejected_events",TFile.kOverwrite)
+    hfile.Close()
+    return msg.info("Added HLT_rejeceted_events to %s", outputFile)

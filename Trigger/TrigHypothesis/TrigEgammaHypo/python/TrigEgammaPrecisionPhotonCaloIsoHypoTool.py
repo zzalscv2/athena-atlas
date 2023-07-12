@@ -2,14 +2,13 @@
 
 from AthenaCommon.SystemOfUnits import GeV
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-
+from AthenaConfiguration.ComponentFactory import CompFactory
 #
 # photon hypo alg
 #
 def createTrigEgammaPrecisionPhotonCaloIsoHypoAlg(name, sequenceOut, sequenceIn):
 
-  from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaPrecisionPhotonCaloIsoHypoAlg
-  thePrecisionPhotonCaloIsoHypo = TrigEgammaPrecisionPhotonCaloIsoHypoAlg(name)
+  thePrecisionPhotonCaloIsoHypo = CompFactory.TrigEgammaPrecisionPhotonCaloIsoHypoAlg(name)
   thePrecisionPhotonCaloIsoHypo.Photons = sequenceIn       # Key of the input photon container
   thePrecisionPhotonCaloIsoHypo.IsoPhotons = sequenceOut   # key of the output isolated photon container
   return thePrecisionPhotonCaloIsoHypo
@@ -61,8 +60,7 @@ class TrigEgammaPrecisionPhotonCaloIsoHypoToolConfig:
     self.__monGroups = monGroups
     
     if not tool:
-      from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaPrecisionPhotonCaloIsoHypoTool    
-      tool = TrigEgammaPrecisionPhotonCaloIsoHypoTool( name )
+      tool = CompFactory.TrigEgammaPrecisionPhotonCaloIsoHypoTool( name )
      
     tool.EtaBins        = [0.0, 0.6, 0.8, 1.15, 1.37, 1.52, 1.81, 2.01, 2.37, 2.47]
 

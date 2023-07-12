@@ -143,6 +143,13 @@ namespace InDet {
     }
 
     if (not dontDoClusterization) {
+       std::unique_ptr<DataPool<SCT_Cluster>> dataItemsPool = nullptr;
+       const bool hasExternalCache = rdoContainer->hasExternalCache();
+       if (!hasExternalCache) {
+        dataItemsPool = std::make_unique<DataPool<SCT_Cluster>>(ctx);
+        dataItemsPool->reserve(20000);  // Some large default size
+       }
+
       if (not m_roiSeeded.value()) { //Full-scan mode
         for (; rdoCollections != rdoCollectionsEnd; ++rdoCollections) {
           const InDetRawDataCollection<SCT_RDORawData>* rd{*rdoCollections};
@@ -155,32 +162,46 @@ namespace InDet {
           bool goodModule{m_checkBadModules.value() ? ( !m_sctDetElStatus.empty() ?  sctDetElStatus->isGood( rd->identifyHash() ) : m_pSummaryTool->isGood(rd->identifyHash(),ctx)) : true};
           VALIDATE_STATUS_ARRAY(m_checkBadModules.value()  && !m_sctDetElStatus.empty(), sctDetElStatus->isGood( rd->identifyHash() ), m_pSummaryTool->isGood(rd->identifyHash(),ctx));
 
-	  if (!goodModule) ATH_MSG_DEBUG(" module status is bad");
-          // Check the RDO is not empty and that the wafer is good according to the conditions
+          if (!goodModule) {
+            ATH_MSG_DEBUG(" module status is bad");
+          }
+          // Check the RDO is not empty and that the wafer is good according to
+          // the conditions
           if ((not rd->empty()) and goodModule) {
             // If more than a certain number of RDOs set module to bad
             if (m_maxFiredStrips.value()) {
               unsigned int nFiredStrips{0};
-              for (const SCT_RDORawData* rdo: *rd) nFiredStrips += rdo->getGroupSize();
+              for (const SCT_RDORawData* rdo : *rd) {
+                nFiredStrips += rdo->getGroupSize();
+              }
               if (nFiredStrips > m_maxFiredStrips.value()) {
-                //This should work in the case of a new code or existing, since the default init is 0
-                constexpr int value = (1 << SCT_FlaggedCondEnum::ExceedMaxFiredStrips);
-                auto [pPair, inserted] = flaggedCondMap.insert({rd->identifyHash(),value}); if (not inserted){ pPair->second |= value; }
+                // This should work in the case of a new code or existing, since
+                // the default init is 0
+                constexpr int value =
+                    (1 << SCT_FlaggedCondEnum::ExceedMaxFiredStrips);
+                auto [pPair, inserted] =
+                    flaggedCondMap.insert({rd->identifyHash(), value});
+                if (not inserted) {
+                  pPair->second |= value;
+                }
                 continue;
               }
             }
-            // Use one of the specific clustering AlgTools to make clusters    
-            std::unique_ptr<SCT_ClusterCollection> clusterCollection{m_clusteringTool->clusterize(*rd, *m_idHelper,
-                                                                                                  !m_sctDetElStatus.empty()
-                                                                                                  ? sctDetElStatus.cptr()
-                                                                                                  : nullptr, ctx) };
+            // Use one of the specific clustering AlgTools to make clusters
+            std::unique_ptr<SCT_ClusterCollection> clusterCollection{
+                m_clusteringTool->clusterize(
+                    *rd, *m_idHelper,
+                    !m_sctDetElStatus.empty() ? sctDetElStatus.cptr() : nullptr,
+                    dataItemsPool.get(),
+                    ctx)};
             if (clusterCollection) {
               if (not clusterCollection->empty()) {
                 const IdentifierHash hash{clusterCollection->identifyHash()};
-                //Using get because I'm unsure of move semantec status
+                // Using get because I'm unsure of move semantec status
                 ATH_CHECK(lock.addOrDelete(std::move(clusterCollection)));
-                ATH_MSG_DEBUG("Clusters with key '" << hash << "' added to Container\n");
-	      } else {
+                ATH_MSG_DEBUG("Clusters with key '"
+                              << hash << "' added to Container\n");
+              } else {
                 ATH_MSG_DEBUG("Don't write empty collections\n");
               }
             } else {
@@ -188,58 +209,80 @@ namespace InDet {
             }
           }
         }
-      } else { //enter RoI-seeded mode
-	SG::ReadHandle<TrigRoiDescriptorCollection> roiCollection{m_roiCollectionKey, ctx};
+      } else {  // enter RoI-seeded mode
+        SG::ReadHandle<TrigRoiDescriptorCollection> roiCollection{
+            m_roiCollectionKey, ctx};
         ATH_CHECK(roiCollection.isValid());
         TrigRoiDescriptorCollection::const_iterator roi{roiCollection->begin()};
         TrigRoiDescriptorCollection::const_iterator roiE{roiCollection->end()};
         std::vector<IdentifierHash> listOfSCTIds;
-        for (; roi!=roiE; ++roi) {
-	  listOfSCTIds.clear(); //Prevents needless memory reallocations
+        for (; roi != roiE; ++roi) {
+          listOfSCTIds.clear();  // Prevents needless memory reallocations
           m_regionSelector->HashIDList(**roi, listOfSCTIds);
-          ATH_MSG_VERBOSE(**roi);     
-          ATH_MSG_VERBOSE( "REGTEST: SCT : Roi contains " << listOfSCTIds.size() << " det. Elements" );
+          ATH_MSG_VERBOSE(**roi);
+          ATH_MSG_VERBOSE("REGTEST: SCT : Roi contains " << listOfSCTIds.size()
+                                                         << " det. Elements");
           for (size_t i{0}; i < listOfSCTIds.size(); i++) {
-	    IdentifierHash id = listOfSCTIds[i];
-            const InDetRawDataCollection<SCT_RDORawData>* RDO_Collection{rdoContainer->indexFindPtr(id)};
-            if (RDO_Collection==nullptr) continue;
+            IdentifierHash id = listOfSCTIds[i];
+            const InDetRawDataCollection<SCT_RDORawData>* RDO_Collection{
+                rdoContainer->indexFindPtr(id)};
+            if (RDO_Collection == nullptr){
+              continue;
+            }
             bool goodModule;
             {
               Monitored::ScopedTimer time_SummaryTool(mnt_timer_SummaryTool);
-	      goodModule = {m_checkBadModules.value() ? ( !m_sctDetElStatus.empty() ?  sctDetElStatus->isGood( id ) :  m_pSummaryTool->isGood(id, ctx)) : true};
-              VALIDATE_STATUS_ARRAY(m_checkBadModules.value() && !m_sctDetElStatus.empty(), sctDetElStatus->isGood( id ), m_pSummaryTool->isGood(id));
-	      if (!goodModule) ATH_MSG_VERBOSE("module status flagged as BAD");
+              goodModule = {m_checkBadModules.value()
+                                ? (!m_sctDetElStatus.empty()
+                                       ? sctDetElStatus->isGood(id)
+                                       : m_pSummaryTool->isGood(id, ctx))
+                                : true};
+              VALIDATE_STATUS_ARRAY(
+                  m_checkBadModules.value() && !m_sctDetElStatus.empty(),
+                  sctDetElStatus->isGood(id), m_pSummaryTool->isGood(id));
+              if (!goodModule){
+                ATH_MSG_VERBOSE("module status flagged as BAD");
+              }
             }
-            // Check the RDO is not empty and that the wafer is good according to the conditions
-	    if ((not RDO_Collection->empty()) and goodModule) {
-	      // If more than a certain number of RDOs set module to bad
-	      if (m_maxFiredStrips.value()) {
-		unsigned int nFiredStrips{0};
-		for (const SCT_RDORawData* rdo: *RDO_Collection) nFiredStrips += rdo->getGroupSize();
-		if (nFiredStrips > m_maxFiredStrips.value()) {
-                  //This should work in the case of a new code or existing, since the default init is 0
-                  constexpr int value = (1 << SCT_FlaggedCondEnum::ExceedMaxFiredStrips);
-                  auto [pPair, inserted] = flaggedCondMap.insert({id,value}); if (not inserted){ pPair->second |= value; }
+            // Check the RDO is not empty and that the wafer is good according
+            // to the conditions
+            if ((not RDO_Collection->empty()) and goodModule) {
+              // If more than a certain number of RDOs set module to bad
+              if (m_maxFiredStrips.value()) {
+                unsigned int nFiredStrips{0};
+                for (const SCT_RDORawData* rdo : *RDO_Collection){
+                  nFiredStrips += rdo->getGroupSize();
+                }
+                if (nFiredStrips > m_maxFiredStrips.value()) {
+                  // This should work in the case of a new code or existing,
+                  // since the default init is 0
+                  constexpr int value =
+                      (1 << SCT_FlaggedCondEnum::ExceedMaxFiredStrips);
+                  auto [pPair, inserted] = flaggedCondMap.insert({id, value});
+                  if (not inserted) {
+                    pPair->second |= value;
+                  }
                   continue;
-		}
-	      }
-	    }
+                }
+              }
+            }
 
-
-            SCT_ClusterContainer::IDC_WriteHandle lock{clusterContainer->getWriteHandle(listOfSCTIds[i])};
+            SCT_ClusterContainer::IDC_WriteHandle lock{
+                clusterContainer->getWriteHandle(listOfSCTIds[i])};
             if (lock.OnlineAndPresentInAnotherView()) {
-	      ATH_MSG_DEBUG("Item already in cache , Hash=" << listOfSCTIds[i]);
+              ATH_MSG_DEBUG("Item already in cache , Hash=" << listOfSCTIds[i]);
               continue;
             }
-
 
             // Use one of the specific clustering AlgTools to make clusters
             {
               Monitored::ScopedTimer time_Clusterize(mnt_timer_Clusterize);
-              std::unique_ptr<SCT_ClusterCollection> clusterCollection{m_clusteringTool->clusterize(*RDO_Collection, *m_idHelper,
-                                                                                                    !m_sctDetElStatus.empty()
-                                                                                                    ? sctDetElStatus.cptr()
-                                                                                                    : nullptr, ctx)};
+              std::unique_ptr<SCT_ClusterCollection> clusterCollection{
+                  m_clusteringTool->clusterize(*RDO_Collection, *m_idHelper,
+                                               !m_sctDetElStatus.empty()
+                                                   ? sctDetElStatus.cptr()
+                                                   : nullptr,
+                                               dataItemsPool.get(), ctx)};
               if (clusterCollection and (not clusterCollection->empty())) {
                 ATH_MSG_VERBOSE("REGTEST: SCT : clusterCollection contains " << clusterCollection->size() << " clusters");
                 ATH_CHECK(lock.addOrDelete(std::move(clusterCollection)));
