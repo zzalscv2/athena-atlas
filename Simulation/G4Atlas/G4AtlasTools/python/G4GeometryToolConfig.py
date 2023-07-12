@@ -203,9 +203,13 @@ def FwdRegionGeoDetectorToolCfg(flags, name='FwdRegion', **kwargs):
 
 def MuonGeoDetectorToolCfg(flags, name='Muon', **kwargs):
     #set up geometry
-    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-    result = MuonGeoModelCfg(flags)
-    kwargs.setdefault("DetectorName", "Muon")
+    result = ComponentAccumulator()
+    if not flags.Muon.setupGeoModelXML:
+        from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+        result.merge(MuonGeoModelCfg(flags))
+        kwargs.setdefault("DetectorName", "Muon")
+    else:
+        kwargs.setdefault("DetectorName", "MuonR4")
     result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
 

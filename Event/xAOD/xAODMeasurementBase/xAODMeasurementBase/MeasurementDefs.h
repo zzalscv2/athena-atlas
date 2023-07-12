@@ -56,5 +56,27 @@ using MatrixMap = Eigen::Map<MeasMatrix<N>>;
 template <size_t N>
 using ConstMatrixMap = Eigen::Map<const MeasMatrix<N>>;
 
+///@brief Converts the double precision of the AmgVector 
+///       into the floating point storage precision of the MeasVector
+template <int N> MeasVector<N> toStorage(const AmgVector(N)& amgVec){
+        MeasVector<N> vec{};
+        for (int i =0 ; i < N ; ++i) vec[i] = amgVec[i];
+        return vec;
+}
+
+///@brief Converts the double precision of the AmgSymMatrix 
+///       into the floating point storage precision of the MeasMatrix
+template <int N> MeasMatrix<N> toStorage(const AmgSymMatrix(N)& amgMat) {
+     MeasMatrix<N> mat{};
+     for (int i =0 ; i < N; ++i){
+        for (int j =0 ; j < N; ++j) {
+            mat(i,j) = amgMat(i, j);
+        }
+     }
+     return mat;
+}
+
+
+
 }  // namespace xAOD
 #endif

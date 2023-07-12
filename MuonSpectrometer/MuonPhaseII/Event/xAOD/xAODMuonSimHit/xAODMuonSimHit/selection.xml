@@ -1,0 +1,14 @@
+<!-- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration -->
+<lcgdict>
+
+    <class name="xAOD::MuonSimHit_v1" />
+    <typedef name="xAOD::MuonSimHit" />
+    <class name="xAOD::MuonSimHitContainer_v1"
+           id="664D13C6-32E9-42B5-9B6F-CAF60B049C05" />
+    <typedef name="xAOD::MuonSimHitContainer" />
+    
+    <class name="xAOD::MuonSimHitAuxContainer_v1"
+           id="5A96D05C-3085-4BEA-B59A-2ACCCACC2A24" />
+    <typedef name="xAOD::MuonSimHitAuxContainer" /> 
+  
+</lcgdict>

@@ -33,6 +33,9 @@ class MuonDetectorTool final : public GeoModelTool {
     virtual StatusCode clear() override final;
 
    private:
+    /// List of GeoGraphnodes in the tree, that belong to the Muon system.
+    Gaudi::Property<std::vector<std::string>> m_treeTopNodes{this, "TreeTopNodes",
+        {"MuonBarrel", "NSW", "MuonEndcap_sideA", "MuonEndcap_sideC", "Muon"}};
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
         this, "IdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 

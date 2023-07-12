@@ -1,4 +1,3 @@
-
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -8,6 +7,10 @@ def SetupArgParser():
 
     parser = ArgumentParser()
     parser.add_argument("--threads", type=int, help="number of threads", default=1)
+    parser.add_argument("--geoTag", default="ATLAS-R3S-2021-03-02-00", help="Geometry tag to use", choices=["ATLAS-R3S-2021-03-02-00",
+                                                                                                            "ATLAS-P2-RUN4-01-00-00"])
+    parser.add_argument("--condTag", default="OFLCOND-MC23-SDR-RUN3-02", help="Conditions tag to use",
+                                                                         choices= ["OFLCOND-MC23-SDR-RUN3-02"])
     parser.add_argument("--inputFile", "-i", default=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"], 
                         help="Input file to run on ", nargs="+")
     parser.add_argument("--geoModelFile", default ="root://eoshome.cern.ch:1094//eos/user/c/cimuonsw/GeometryFiles/muonsOnlyR4WMDT.db", help="GeoModel SqLite file containing the muon geometry.")
@@ -43,33 +46,54 @@ def GeoModelMdtTestCfg(flags, name = "GeoModelMdtTest", **kwargs):
     result.addEventAlgo(the_alg)
     return result
 
-
-if __name__=="__main__":
+def setupGeoR4TestCfg(args):
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    args = SetupArgParser().parse_args()
-
     flags = initConfigFlags()
     flags.Concurrency.NumThreads = args.threads
-    flags.Concurrency.NumConcurrentEvents = args.threads  # Might change this later, but good enough for the moment.
+    flags.Concurrency.NumConcurrentEvents = args.threads
     flags.Input.Files = args.inputFile 
     from os import path, system
     if args.geoModelFile.startswith("root://"):
         if not path.exists("MuonGeometryDB.db"):
             system("xrdcp {source} MuonGeometryDB.db".format(source = args.geoModelFile))
         args.geoModelFile = "MuonGeometryDB.db"
-
-    flags.GeoModel.SQLiteDB = args.geoModelFile
-    #flags.GeoModel.AtlasVersion ="ATLAS-P2-RUN4-01-00-00"
     
+    flags.GeoModel.AtlasVersion = args.geoTag
+    flags.IOVDb.GlobalTag = args.condTag
+    flags.GeoModel.SQLiteDB = args.geoModelFile
+    
+    flags.Detector.GeometryBpipe = False
+    ### Inner detector
+    flags.Detector.GeometryBCM = False
+    flags.Detector.GeometryPixel = False
+    flags.Detector.GeometrySCT = False
+    flags.Detector.GeometryTRT = False
+    ### ITK
+    flags.Detector.GeometryPLR = False
+    flags.Detector.GeometryBCMPrime = False
+    flags.Detector.GeometryITkPixel = False
+    flags.Detector.GeometryITkStrip = False
+    ### HGTD
+    flags.Detector.GeometryHGTD = False
+    ### Calorimeter
+    flags.Detector.GeometryLAr = False
+    flags.Detector.GeometryTile = False
+    flags.Detector.GeometryMBTS = False
+    flags.Detector.GeometryCalo = False
+    ### Muon spectrometer
     flags.Detector.GeometryCSC = False
     flags.Detector.GeometrysTGC = False
     flags.Detector.GeometryMM = False
     flags.Detector.GeometryTGC = False
     flags.Detector.GeometryRPC = False
-   
+    flags.Detector.GeometryMDT = True
+
+    flags.Muon.setupGeoModelXML = True
 
     flags.lock()
-    
+    flags.dump()
+
+
     cfg = setupServicesCfg(flags)
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
     geoModelSvc = cfg.getPrimaryAndMerge(GeoModelCfg(flags))
@@ -77,18 +101,25 @@ if __name__=="__main__":
     #from AthenaCommon.Constants import VERBOSE
     geoModelSvc.DetectorTools =[cfg.popToolsAndMerge(MuonDetectorToolCfg(flags,#OutputLevel= VERBOSE
     ))]
+    
+
+    return flags, cfg
+
+if __name__=="__main__":
+    args = SetupArgParser().parse_args()
+    flags, cfg = setupGeoR4TestCfg(args)
+    cfg.merge(GeoModelMdtTestCfg(flags))    
     ####    
     DetDescCnvSvc = cfg.getService("DetDescrCnvSvc")
     DetDescCnvSvc.IdDictFromRDB = False
     DetDescCnvSvc.MuonIDFileName="IdDictParser/IdDictMuonSpectrometer_R.10.00.xml"
     DetDescCnvSvc.MuonIDFileName="IdDictParser/IdDictMuonSpectrometer_R.09.03.xml"
+
     cfg.merge(setupHistSvcCfg(flags, out_file = args.outRootFile))
     cfg.merge(GeoModelMdtTestCfg(flags, DumpTxtFile =  args.outTxtFile,
                                         TestStations = args.chambers))
     
     cfg.printConfig(withDetails=True, summariseProps=True)
-    flags.dump()
-   
     if not cfg.run(1).isSuccess():
         import sys
         sys.exit("Execution failed")
