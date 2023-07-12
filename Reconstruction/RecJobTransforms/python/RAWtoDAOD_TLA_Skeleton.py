@@ -19,6 +19,10 @@ def fromRunArgs(runArgs):
     # some basic settings here...
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
+    from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
+    commonRunArgsToFlags(runArgs, flags)
+    from RecJobTransforms.RecoConfigFlags import recoRunArgsToFlags
+    recoRunArgsToFlags(runArgs, flags)
 
     # Input
     if hasattr(runArgs, 'inputBSFile'):
