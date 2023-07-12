@@ -44,12 +44,14 @@ StatusCode MuonDetectorTool::create() {
     GeoVolumeCursor cursor(world);
     while (!cursor.atEnd()) {
         std::string volName = cursor.getName();
-        if (volName == "MuonBarrel") {
+        ATH_MSG_ALWAYS("Check whether "<<volName<<" belongs to the muon world. ");
+        if (std::find(m_treeTopNodes.value().begin(), 
+                      m_treeTopNodes.value().end(),volName) != m_treeTopNodes.value().end()) {
             m_manager->addTreeTop(GeoPVLink(cursor.getVolume().operator->()));
         }
         cursor.next();
     }
-
+    
     ATH_CHECK(detStore()->record(m_manager, m_manager->getName()));
     ATH_CHECK(detStore()->retrieve(theExpt, "ATLAS"));
     theExpt->addManager(m_manager);

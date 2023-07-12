@@ -51,7 +51,7 @@ const GeoShape* MuonGeoUtilityTool::extractShape(const GeoShape* inShape) const 
     }
     if (inShape->typeID() == GeoShapeShift::getClassTypeID()) {
         const GeoShapeShift* shift = static_cast<const GeoShapeShift*>(inShape);
-        ATH_MSG_ALWAYS(__FILE__<<":"<<__LINE__<<" "<<__func__<<
+        ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<" "<<__func__<<
                         "Shape is a shift by "<<Amg::toString(shift->getX().translation(), 2)
                         << ". Continue navigation "<<shift);
             return extractShape(shift->getOp());
