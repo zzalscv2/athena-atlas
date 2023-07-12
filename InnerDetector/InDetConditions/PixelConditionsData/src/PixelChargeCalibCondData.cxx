@@ -339,7 +339,7 @@ PixelChargeCalibCondData::getToT(InDetDD::PixelDiodeType type, unsigned int modu
   float exth = 1e5;    // the calibration function is analytically connected at threshold exth.
   if (Q>exth && getCalibrationStrategy(moduleHash)==CalibrationStrategy::RUN3PIX) {
     LinearFitParameters lin{getQ2TotF(type, moduleHash, FE), getQ2TotG(type, moduleHash, FE)};
-    tot = lin.ToT(Q);
+    if ( float tot1 = lin.ToT(Q); tot1 != 0.f) return tot1;
   }
   return tot;
 }
@@ -360,7 +360,7 @@ PixelChargeCalibCondData::getCharge(InDetDD::PixelDiodeType type, unsigned int m
   float exth = 1e5;    // the calibration function is analytically connected at threshold exth.
   if (charge>exth && getCalibrationStrategy(moduleHash)==CalibrationStrategy::RUN3PIX) {
     LinearFitParameters lin  = {getQ2TotF(type, moduleHash, FE), getQ2TotG(type, moduleHash, FE)};
-    charge = lin.Q(ToT);
+    if (float charge1 = lin.Q(ToT); charge1 != 0.f) return charge1;
   }
   return charge;
 }
