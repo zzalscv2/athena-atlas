@@ -428,7 +428,7 @@ bool NavigationCore::getFeatureAccessorsSingleTE( const TriggerElement* te, CLID
   bool status = TrigNavStructure::getFeatureAccessorsSingleTE(te,clid,index_or_label,only_single_feature,features,source,sourcelabel);
   
   //if query was via subindex we don't cache the query (no support yet)
-  if(index_or_label.which() == 0) return status;
+  if(index_or_label.index() == 0) return status;
   
   return status;
 }
