@@ -157,7 +157,7 @@ public:
   //    0: Cluster Width/sqrt(12.)
   //    1: Set to a different values for one and two-strip clusters (def.)
 
-  SCT_Cluster* sctCluster(const Identifier& clusterID,
+  SCT_Cluster sctCluster(const Identifier& clusterID,
                          const Amg::Vector2D& localPos,
                          const std::vector<Identifier>& rdoList,
                          const SiWidth& width,
