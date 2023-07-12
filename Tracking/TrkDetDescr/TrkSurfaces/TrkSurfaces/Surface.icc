@@ -252,12 +252,6 @@ Surface::owner() const
 }
 
 inline void
-Surface::setMaterialLayer(Layer& mlay)
-{
-  m_materialLayer = (&mlay);
-}
-
-inline void
 Surface::setMaterialLayer(Layer* mlay)
 {
   m_materialLayer = mlay;

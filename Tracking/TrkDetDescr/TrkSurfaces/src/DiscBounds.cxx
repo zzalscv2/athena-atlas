@@ -216,9 +216,9 @@ Trk::DiscBounds::inside(const Amg::Vector2D& locpo, const BoundaryCheck& bchk) c
         return false;
       }
     }
-    explicit EllipseCollisionTest(int maxIterations)
+    explicit EllipseCollisionTest(int maxIterations) : m_maxIterations(maxIterations)
     {
-      this->m_maxIterations = maxIterations;
+      
     }
   };
 

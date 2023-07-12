@@ -57,7 +57,7 @@ void CompoundLayerMaterialCnv_p1::persToTrans( const Trk::CompoundLayerMaterial_
             transObj->m_composition[ioc].reserve(icBins);
             for (size_t iic = 0; iic < icBins; ++iic){
                 const std::vector< std::pair<unsigned char, unsigned char> >& cEntry = persObj->composition[ioc][iic];
-                transObj->m_composition[ioc].push_back( cEntry );
+                transObj->m_composition[ioc].emplace_back(cEntry );
             }
         }                 
     }
