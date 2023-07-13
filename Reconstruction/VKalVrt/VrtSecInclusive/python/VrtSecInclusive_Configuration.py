@@ -58,6 +58,7 @@ def setupVSI( suffix ,AugSuffix=""):
     vsiInstance.VertexMergeFinalDistCut                = 1.
     vsiInstance.VertexMergeFinalDistScaling            = 0.
     vsiInstance.improveChi2ProbThreshold               = 0.0001
+    vsiInstance.doRemoveNonLeptonVertices              = False
     vsiInstance.doAugmentDVimpactParametersToMuons     = True
     vsiInstance.doAugmentDVimpactParametersToElectrons = True
 

@@ -795,6 +795,9 @@ namespace VKalVrtAthena {
     declareProperty("doSelectTracksFromMuons",         m_jp.doSelectTracksFromMuons         = false                         );
     declareProperty("doRemoveCaloTaggedMuons",         m_jp.doRemoveCaloTaggedMuons         = false                         );
     declareProperty("doSelectTracksFromElectrons",     m_jp.doSelectTracksFromElectrons     = false                         );
+    declareProperty("doSelectIDAndGSFTracks",          m_jp.doSelectIDAndGSFTracks          = false                         );
+    declareProperty("doRemoveNonLeptonVertices",       m_jp.doRemoveNonLeptonVertices       = false                         );
+
     // Select tracks with additonal LRT Cuts (inspiried by Run 3 LRT optimization studies)
     declareProperty("doSelectTracksWithLRTCuts",     m_jp.doSelectTracksWithLRTCuts     = false                               );
     

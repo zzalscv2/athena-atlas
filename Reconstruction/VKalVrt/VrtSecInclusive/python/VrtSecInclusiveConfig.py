@@ -93,6 +93,7 @@ def VrtSecInclusiveCfg(flags, name="VrtSecInclusive", **kwargs):
     kwargs.setdefault("VertexMergeFinalDistCut"                , 1.)
     kwargs.setdefault("VertexMergeFinalDistScaling"            , 0.)
     kwargs.setdefault("improveChi2ProbThreshold"               , 0.0001)
+    kwargs.setdefault("doRemoveNonLeptonVertices"              , False)
     kwargs.setdefault("doAugmentDVimpactParametersToMuons"     , False)
     kwargs.setdefault("doAugmentDVimpactParametersToElectrons" , False)
 

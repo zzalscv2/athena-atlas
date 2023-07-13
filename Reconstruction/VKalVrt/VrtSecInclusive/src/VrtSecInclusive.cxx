@@ -152,9 +152,10 @@ namespace VKalVrtAthena {
     // Track selection algorithm configuration
     if( m_jp.doSelectTracksFromMuons )     { m_trackSelectionAlgs.emplace_back( &VrtSecInclusive::selectTracksFromMuons );     }
     if( m_jp.doSelectTracksFromElectrons ) { m_trackSelectionAlgs.emplace_back( &VrtSecInclusive::selectTracksFromElectrons ); }
+    if( m_jp.doSelectIDAndGSFTracks )      { m_trackSelectionAlgs.emplace_back( &VrtSecInclusive::selectInDetAndGSFTracks );   }
     
     // if none of the above two flags are activated, use ID tracks (default)
-    if( !m_jp.doSelectTracksFromMuons && !m_jp.doSelectTracksFromElectrons ) {
+    if( !m_jp.doSelectTracksFromMuons && !m_jp.doSelectTracksFromElectrons && !m_jp.doSelectIDAndGSFTracks) {
       
       m_trackSelectionAlgs.emplace_back( &VrtSecInclusive::selectTracksInDet );
       
@@ -377,7 +378,8 @@ namespace VKalVrtAthena {
     // Later use elsewhere in the algorithm
     m_selectedTracks.reset  ( new std::vector<const xAOD::TrackParticle*> );
     m_associatedTracks.reset( new std::vector<const xAOD::TrackParticle*> );
-    
+    m_leptonicTracks.reset  ( new std::vector<const xAOD::TrackParticle*> );
+
     m_extrapolatedPatternBank.clear();
     
     ///////////////////////////////////////////////////////////////////////////
