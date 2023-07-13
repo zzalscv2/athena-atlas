@@ -20,6 +20,7 @@
 // forward declare not possible (typedef)
 #include "InDetPrepRawData/PixelClusterCollection.h"
 
+#include "AthAllocators/DataPool.h"
 class PixelID;
 
 namespace InDet
@@ -34,11 +35,11 @@ namespace InDet
     DeclareInterfaceID(IPixelClusteringTool, 2, 0);
 
     // Clusterize a collection of pixel raw data objects
-    virtual PixelClusterCollection* clusterize
-    (const InDetRawDataCollection<PixelRDORawData> &RDOs,
-     const PixelID& idHelper,
-     const EventContext& ctx) const = 0;
-
+    virtual PixelClusterCollection* clusterize(
+        const InDetRawDataCollection<PixelRDORawData>& RDOs,
+        const PixelID& idHelper, 
+        DataPool<PixelCluster>* dataItemsPool,
+        const EventContext& ctx) const = 0;
   };
 
 }
