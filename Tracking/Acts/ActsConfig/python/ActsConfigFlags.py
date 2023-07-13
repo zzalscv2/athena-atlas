@@ -47,6 +47,8 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.doPrintTrackStates', False)
     actscf.addFlag('Acts.skipDuplicateSeeds', True)
 
+    actscf.addFlag('Acts.doAmbiguityResolution', True)
+
     # Track fitting
     actscf.addFlag('Acts.writeTrackCollection', False) # save to file (ESD, AOD) the Resolved and Refitted track collections
     actscf.addFlag('Acts.trackFitterType', TrackFitterType.KalmanFitter, enum=TrackFitterType) # Define Tracking algorithm for refitting

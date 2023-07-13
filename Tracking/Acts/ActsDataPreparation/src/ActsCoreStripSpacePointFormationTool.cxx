@@ -13,6 +13,8 @@
 #include "xAODInDetMeasurement/ContainerAccessor.h"
 #include "Acts/SpacePointFormation/SpacePointBuilderConfig.hpp"
 #include "ActsGeometry/ATLASSourceLink.h"
+
+#include "StoreGate/WriteHandle.h"
 namespace ActsTrk
 {
 
@@ -28,7 +30,7 @@ namespace ActsTrk
     ATH_CHECK(m_lorentzAngleTool.retrieve());
     ATH_CHECK(m_trackingGeometryTool.retrieve());
     ATH_CHECK(m_ATLASConverterTool.retrieve());
-
+    ATH_CHECK(m_sourceLinksOut.initialize(SG::AllowEmpty));
     return StatusCode::SUCCESS;
   }
 
@@ -286,7 +288,19 @@ namespace ActsTrk
 
 	ATH_CHECK( fillSpacePoints(ctx, spBuilder, neighbourElements, neighbourSourceLinks, overlapExtents, beamSpotVertex,
 					spacePoints, overlapSpacePoints) );
+
       }
+
+    if (!m_sourceLinksOut.empty()) {
+       SG::WriteHandle< std::vector<ATLASUncalibSourceLink::ElementsType> > source_links_out_handle(m_sourceLinksOut, ctx);
+       if (source_links_out_handle.record(
+              std::make_unique< std::vector<ATLASUncalibSourceLink::ElementsType> >(
+                 std::move(elementsCollection)) ).isFailure() ) {
+          ATH_MSG_FATAL("Failed to write ATLASUncalibSourceLink elements collection with key "
+                        << m_sourceLinksOut.key() );
+          return StatusCode::FAILURE;
+       }
+    }
     return StatusCode::SUCCESS;
   }
 

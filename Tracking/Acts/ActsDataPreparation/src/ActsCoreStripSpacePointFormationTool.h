@@ -8,6 +8,9 @@
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 
+#include "ActsGeometry/ATLASSourceLink.h"
+#include "StoreGate/WriteHandleKey.h"
+
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ActsToolInterfaces/IStripSpacePointFormationTool.h"
 #include "StripInformationHelper.h"
@@ -106,7 +109,8 @@ namespace ActsTrk {
     Gaudi::Property<float> m_stripLengthTolerance{this, "StripLengthTolerance", 0.01};
     Gaudi::Property<float> m_stripGapParameter{this, "StripGapParameter", 0.0015, "Recommend 0.001 - 0.0015 for ITK geometry"};
 
-
+    SG::WriteHandleKey< std::vector<ATLASUncalibSourceLink::ElementsType> > m_sourceLinksOut
+       {this, "ATLASUncalibSourceLinkElementsName","" /*"StripSourceLinkElements"*/, ""};
   };
 
 }

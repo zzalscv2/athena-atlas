@@ -4,6 +4,7 @@
 
 #include "src/SeedingAlg.h"
 #include "src/TrackFindingAlg.h"
+#include "src/AmbiguityResolutionAlg.h"
 #include "src/ActsReFitterAlg.h"
 #include "src/ActsCompareTrackAlg.h"
 
@@ -22,6 +23,8 @@ DECLARE_COMPONENT( ActsTrk::SeedingAlg )
 DECLARE_COMPONENT( ActsTrk::TrackFindingAlg )
 DECLARE_COMPONENT( ActsTrk::ActsReFitterAlg )
 DECLARE_COMPONENT( ActsTrk::ActsCompareTrackAlg )
+
+DECLARE_COMPONENT( ActsTrk::AmbiguityResolutionAlg )
 
 // Tools
 DECLARE_COMPONENT( ActsTrk::SeedingTool )

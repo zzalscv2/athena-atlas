@@ -72,6 +72,10 @@ def ActsTrkFindingToolCfg(
             acc.popToolsAndMerge(ActsTrackStatePrinterCfg(flags)),
         )
 
+    # need to persistify source link helper container to ensure that source links do not contaion
+    # stale pointers pointing to freed memory
+    kwargs.setdefault("ATLASUncalibSourceLinkElementsName","ACTSUncalibratedMeasurementSourceLinkElements")
+
     acc.setPrivateTools(CompFactory.ActsTrk.TrackFindingTool(name, **kwargs))
     return acc
 
@@ -119,10 +123,29 @@ def ActsTrkFindingCfg(flags, name: str = "ActsTrkFindingAlg", **kwargs):
     kwargs.setdefault('StripSeeds', 'ITkStripSeeds')
     kwargs.setdefault("TracksLocation", "SiSPSeededActsTracks")
 
+
+    if flags.Acts.doAmbiguityResolution:
+        kwargs.setdefault(
+            "ACTSTracksLocation",
+            "ActsTracks"
+        )
+
     if flags.Acts.doMonitoring:
         from ActsConfig.ActsTrkMonitoringConfig import ActsTrkFindingMonitoringCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(
             ActsTrkFindingMonitoringCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.TrackFindingAlg(name, **kwargs))
+    return acc
+
+def ActsAmbiguityResolutionCfg(flags, name: str = "ActsAmbiguityResolution", **kwargs):
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault('TracksLocation', 'ActsTracks')
+    kwargs.setdefault('ResolvedTracksLocation', 'ActsTracksResolved')
+    kwargs.setdefault('MaximumSharedHits', 3)
+    kwargs.setdefault('MaximumIterations', 10000)
+    kwargs.setdefault('NMeasurementsMin', 7)
+
+    acc.addEventAlgo(CompFactory.ActsTrk.AmbiguityResolutionAlg(name, **kwargs))
     return acc
