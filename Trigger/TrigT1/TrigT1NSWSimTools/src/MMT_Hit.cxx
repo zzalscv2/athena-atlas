@@ -37,6 +37,10 @@ MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* 
   m_Rp = -1.;
   m_isNoise = false;
   m_time = entry.gtime;
+  m_RZslope = -1.;
+  m_YZslope = -1.;
+  m_PitchOverZ = -1.;
+  m_shift = -1.;
 
   if(m_strip > 8191 || m_strip<0){
     m_strip = 0;
