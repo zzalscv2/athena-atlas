@@ -23,4 +23,6 @@
 #include "xAODTracking/TrackJacobianAuxContainer.h"
 #include "xAODTracking/TrackMeasurementContainer.h"
 #include "xAODTracking/TrackMeasurementAuxContainer.h"
+#include "xAODTracking/TrackBackendContainer.h"
+#include "xAODTracking/TrackBackendAuxContainer.h"
 

@@ -143,6 +143,17 @@
           id="DDCD13AD-AB54-4D53-9D3F-6726AFF12CC7" />
    <typedef name="xAOD::TrackMeasurementAuxContainer" />
 
+   <!-- xAOD::TrackBackend interface type(s). -->
+   <class name="xAOD::TrackBackend_v1" />
+   <class name="xAOD::TrackBackendContainer_v1"
+          id="9422D96E-9DD1-44EE-9068-96BD64FB3118" />
+   <typedef name="xAOD::TrackBackend" />
+   <typedef name="xAOD::TrackBackendContainer" />
+
+   <!-- xAOD::TrackBackend auxiliary type(s). -->
+   <class name="xAOD::TrackBackendAuxContainer_v1"
+          id="DFFB8821-70CB-4A13-A8Ef-94C87B96BACC" />
+   <typedef name="xAOD::TrackBackendAuxContainer" />
 
    <!-- xAOD::TrackMeasurementValidation interface type(s). -->
    <class name="xAOD::TrackMeasurementValidation_v1" />
