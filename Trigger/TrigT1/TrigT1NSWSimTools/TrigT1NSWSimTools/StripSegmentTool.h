@@ -118,8 +118,8 @@ namespace NSWL1 {
     std::vector<float> *m_seg_global_y ATLAS_THREAD_SAFE{nullptr};
     std::vector<float> *m_seg_global_z ATLAS_THREAD_SAFE{nullptr};
 
-    uint8_t findRIdx(const float& val, const Envelope_t &env) const;
-    uint8_t findDtheta(const float&) const;
+    uint8_t findRIdx(const float val, const Envelope_t &env) const;
+    uint8_t findDtheta(const float) const;
   };  // end of StripSegmentTool class
 } // namespace NSWL1
 #endif

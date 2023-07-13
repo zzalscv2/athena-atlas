@@ -57,7 +57,7 @@ class MMT_Diamond : public AthMessaging {
     void clearEvent();
     void createRoads_fillHits(const unsigned int iterator, std::map<hitData_key,hitData_entry> &hitDatas, const MuonGM::MuonDetectorManager* detManager, std::shared_ptr<MMT_Parameters> par, const int phi);
     void findDiamonds(const unsigned int iterator, const int event);
-    double phiShift(const int n, const double &phi, const char &side) const;
+    double phiShift(const int n, const double phi, const char side) const;
     std::vector<diamond_t> getDiamondVector() const { return m_diamonds; }
     diamond_t getDiamond(const unsigned int iterator) const { return m_diamonds.at(iterator); }
     std::vector<double> getHitSlopes() const { return m_hitslopes; }

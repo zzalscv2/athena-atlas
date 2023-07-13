@@ -341,7 +341,7 @@ namespace NSWL1 {
         return (stationEta>0)? trigger_sector + 16 : trigger_sector;
     }
     //------------------------------------------------------------------------------
-    bool PadTdsOfflineTool::determine_delay_and_bc(const sTgcDigit* digit, const int &pad_hit_number,
+    bool PadTdsOfflineTool::determine_delay_and_bc(const sTgcDigit* digit, const int pad_hit_number,
                                                    double &delayed_time, uint16_t &BCtag) const
     {
         bool success = false;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1NSWSimTools/PadTriggerLookupTool.h"
@@ -77,8 +77,8 @@ StatusCode PadTriggerLookupTool::lookup_pad_triggers(const std::vector<std::shar
     );
 
     //use only active sectors selected by the pads / event
-    for(const int &side : activeSides){//0:C 1:A
-        for(const int &sector : activeSectors){//{1...16} odd:L even:S
+    for(const int side : activeSides){//0:C 1:A
+        for(const int sector : activeSectors){//{1...16} odd:L even:S
             ATH_CHECK( LookupSectorTriggers(pads,side,sector,triggers));
         }
     }

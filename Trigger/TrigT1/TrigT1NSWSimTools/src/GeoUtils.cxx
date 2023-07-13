@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1NSWSimTools/GeoUtils.h"
@@ -73,13 +73,13 @@ Vertex centroid(const Polygon& p){
 Polygon firstIntersection(const Polygon& p1,const Polygon& p2){
     std::vector<Polygon> pols=allIntersections(p1,p2);
      //we have to return something
-    if(pols.size()==0) return NilPolygon();
+    if(pols.empty()) return NilPolygon();
     return allIntersections(p1,p2).at(0);
 }
 
 Polygon largestIntersection(const Polygon& p1,const Polygon& p2){
     std::vector<Polygon> pols=allIntersections(p1,p2);
-     if(pols.size()==0) return NilPolygon();
+     if(pols.empty()) return NilPolygon();
      
      std::sort(pols.begin(),pols.end(),[](const Polygon& a,const Polygon& b){return area(a)>area(b);});
      return pols[0];

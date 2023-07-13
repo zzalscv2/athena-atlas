@@ -92,7 +92,7 @@ namespace NSWL1 {
     return StatusCode::SUCCESS;
   }
 
-  uint8_t StripSegmentTool::findRIdx(const float& val, const Envelope_t &env) const {
+  uint8_t StripSegmentTool::findRIdx(const float val, const Envelope_t &env) const {
     unsigned int nSlices=(1<<m_rIndexBits); //256
     std::pair<float,float> range;
     switch(m_ridxScheme){
@@ -115,7 +115,7 @@ namespace NSWL1 {
     return 0;
   }
 
-  uint8_t StripSegmentTool::findDtheta(const float& val) const {
+  uint8_t StripSegmentTool::findDtheta(const float val) const {
     uint8_t nbins_dtheta=1<<m_dThetaBits;
     float step_dtheta=(m_dtheta_max-m_dtheta_min)/nbins_dtheta;
     for(uint8_t i=0;i<nbins_dtheta;++i) {
