@@ -36,9 +36,6 @@ class hasMM(JobProperty):
 class MuonGeometryFlags_JobProperties(JobPropertyContainer):
     """ The geometry flag/job property container """
 
-    def __init__(self, context=""):
-        JobPropertyContainer.__init__(self,context)
-        return
     def setupValuesFromDB(self,geoTagName=None):
 
         dbGeomCursor = AtlasGeoDBInterface(geoTagName or globalflags.DetDescrVersion())
