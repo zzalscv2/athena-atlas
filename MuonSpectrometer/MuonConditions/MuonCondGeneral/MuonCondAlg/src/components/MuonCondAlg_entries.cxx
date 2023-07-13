@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
 #include "MuonCondAlg/CscCondDbAlg.h"
 #include "MuonCondAlg/MdtCalibDbAlg.h"
 #include "MuonCondAlg/MdtCalibFormatAlgTest.h"
@@ -12,6 +15,7 @@
 #include "MuonCondAlg/NswCalibDbAlg.h"
 #include "MuonCondAlg/NswDcsDbAlg.h"
 #include "MuonCondAlg/NswPassivationDbAlg.h"
+#include "MuonCondAlg/NswAsBuiltCondAlg.h"
 
 DECLARE_COMPONENT(CscCondDbAlg)
 DECLARE_COMPONENT(MdtCondDbAlg)
@@ -27,3 +31,4 @@ DECLARE_COMPONENT(TgcDigitCrosstalkCondAlg)
 DECLARE_COMPONENT(NswCalibDbAlg)
 DECLARE_COMPONENT(NswDcsDbAlg)
 DECLARE_COMPONENT(NswPassivationDbAlg)
+DECLARE_COMPONENT(NswAsBuiltCondAlg)

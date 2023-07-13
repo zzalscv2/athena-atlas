@@ -1,52 +1,30 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDDATA_NSWASBUILTDBDATA_H
 #define MUONCONDDATA_NSWASBUILTDBDATA_H
 
-// STL includes
-#include <string>
-
 // Athena includes
 #include "AthenaKernel/CondCont.h" 
 #include "AthenaKernel/BaseInfo.h" 
-
+#include <memory>
+#ifndef SIMULATIONBASE
+#include "MuonNSWAsBuilt/StripCalculator.h"
+#include "MuonNSWAsBuilt/StgcStripCalculator.h"
+#endif
 
 class NswAsBuiltDbData {
 
-  friend class MuonAlignmentCondAlg;
-
 public:
-
-    NswAsBuiltDbData(){};
+#ifndef SIMULATIONBASE
+    /// Storage to the micromega as built calculator
+    std::unique_ptr<const NswAsBuilt::StripCalculator> microMegaData{};
+    /// Storage to the stgc as built calculator
+    std::unique_ptr<const NswAsBuilt::StgcStripCalculator> sTgcData{};
+#endif
+    NswAsBuiltDbData() = default;
     virtual ~NswAsBuiltDbData() = default;
-
-    inline void setMmData(const std::string& data){ 
-        m_MmData.assign(data); 
-        m_MmIsSet = true; 
-    };
-    inline void setSTgcData(const std::string& data){ 
-        m_sTgcData.assign(data); 
-        m_sTgcIsSet = true; 
-    };
-    inline bool getMmData(std::string& data) const {
-        data = m_MmData;
-        return m_MmIsSet; 
-    };
-    inline bool getSTgcData(std::string& data) const {
-        data = m_sTgcData;
-        return m_sTgcIsSet; 
-    };
-
- 
-private:
-
-	// containers
-    std::string m_MmData;
-    std::string m_sTgcData;
-    bool m_MmIsSet  {false};
-    bool m_sTgcIsSet{false};
 
 };
 

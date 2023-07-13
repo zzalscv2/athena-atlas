@@ -30,10 +30,19 @@ class MuonDetectorCondAlg : public AthAlgorithm {
 
     Gaudi::Property<bool> m_isData{this, "IsData", true};
     Gaudi::Property<bool> m_applyMmPassivation{this, "applyMmPassivation", false};
-    Gaudi::Property<bool> m_applyAsBuiltMM{this, "applyAsBuiltMM", true};     // allow turning off MM as-built for tests
-    Gaudi::Property<bool> m_applyAsBuiltSTGC{this, "applyAsBuiltSTGC", false}; // allow turning off sTGC as-built for tests. Set true when we are confident about the conditions.
+    
+    Gaudi::Property<bool> m_applyNswAsBuilt{this, "applyNswAsBuilt", true, 
+                                            "Toggles the application of the Nsw as-built parameters"};
+
+    Gaudi::Property<bool> m_applyMdtAsBuilt{this, "applyMdtAsBuilt", true, 
+                                            "Toggles the application of the Mdt as-built parameters"};
+    /// Apply translations and rotations to align the Muon stations
     Gaudi::Property<bool> m_applyALines{this, "applyALines", true};
+    /// Apply the chamber deformation model (Mdts + Nsw)
     Gaudi::Property<bool> m_applyBLines{this, "applyBLines", true};
+    /// Apply internal transformations on the CSCs
+    Gaudi::Property<bool> m_applyILines{this, "applyILines", true};
+    
 
   private:
     ToolHandle<MuonDetectorTool> m_iGeoModelTool{this, "MuonDetectorTool", "MuonDetectorTool", "The MuonDetector tool"};

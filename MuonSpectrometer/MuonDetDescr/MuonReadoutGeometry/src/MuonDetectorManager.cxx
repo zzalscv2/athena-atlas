@@ -20,10 +20,6 @@
 #include "MuonReadoutGeometry/TgcReadoutElement.h"
 #include "MuonReadoutGeometry/sTgcReadoutElement.h"
 
-#ifndef SIMULATIONBASE
-#include "MuonCondSvc/NSWCondUtils.h"
-#endif
-
 namespace MuonGM {
 
     MuonDetectorManager::MuonDetectorManager(): AthMessaging{"MGM::MuonDetectorManager"} { 
@@ -459,47 +455,11 @@ namespace MuonGM {
             m_aLineContainer.emplace(id, std::move(newALine));
             ATH_MSG_DEBUG("<Filling A-line container with entry for key >" << m_idHelperSvc->toString(id));
         }
-
-#ifndef SIMULATIONBASE
-        if (!m_NSWABLineAsciiPath.empty()) {
-	        ATH_MSG_DEBUG("Using NSW AB lines from file: " << m_NSWABLineAsciiPath);
-            ALineMapContainer writeALines;
-            BLineMapContainer writeBLines;
-            MuonCalib::NSWCondUtils::setNSWABLinesFromAscii(m_NSWABLineAsciiPath, writeALines, writeBLines, stgcIdHelper(), mmIdHelper());
-            for (auto it = writeALines.cbegin(); it != writeALines.cend(); ++it) {
-                Identifier id = it->first;
-                ALinePar aline = it->second;
-                m_aLineContainer.emplace(id, std::move(aline));
-            }
-
-            for (auto it = writeBLines.cbegin(); it != writeBLines.cend(); ++it) {
-                Identifier id = it->first;
-                BLinePar bline = it->second;
-                m_bLineContainer.emplace(id, std::move(bline));
-            }
-        }
-#endif
-
         ATH_MSG_INFO("Init A/B Line Containers - done - size is respectively " << m_aLineContainer.size() << "/"
             << m_bLineContainer.size());
     }
 
     StatusCode MuonDetectorManager::updateAlignment(const ALineMapContainer& alineData, bool isData) {
-#ifdef TESTBLINES
-        {
-            for (auto& it : m_MuonStationMap) {
-                MuonStation* station = it.second.get();
-                station->setDelta_fromAline(0., 0., 0., 0., 0.,
-                                            0.);  // double tras, double traz, double trat, double rots, double rotz, double rott
-                if (cacheFillingFlag()) {
-                    station->clearCache();
-                    station->fillCache();
-                } else {
-                    station->refreshCache();
-                }
-            }
-        }
-#endif
         if (alineData.empty()) {
             if (isData) {
                 ATH_MSG_INFO("Empty temporary A-line container - nothing to do here");
@@ -535,11 +495,6 @@ namespace MuonGM {
             
                 if (!nMMRE() || !nsTgcRE()) {
                     ATH_MSG_WARNING("Unable to set A-line; the manager does not contain NSW readout elements" );
-                    continue;
-                }
-                            
-                if (!m_NSWABLineAsciiPath.empty()) {
-                    ATH_MSG_INFO( "NSW A-lines are already set via external ascii file " << m_NSWABLineAsciiPath );
                     continue;
                 }
 
@@ -717,11 +672,6 @@ namespace MuonGM {
             
                 if (!nMMRE() || !nsTgcRE()) {
                     ATH_MSG_WARNING("Unable to set B-line; the manager does not contain NSW readout elements" );
-                    continue;
-                }
-                            
-                if (!m_NSWABLineAsciiPath.empty()) {
-                    ATH_MSG_INFO( "NSW B-lines are already set via external ascii file " << m_NSWABLineAsciiPath );
                     continue;
                 }
                  // record this B-line in the historical B-line container
@@ -1098,37 +1048,8 @@ namespace MuonGM {
         }
         return &iter->second;
     }
-
-    void MuonDetectorManager::setMMAsBuiltCalculator(const NswAsBuiltDbData* nswAsBuiltData) {
-        if (m_NSWAsBuiltAsciiOverrideMM) return; // test-mode using AsBuilt conditions from an ascii file
-#ifndef SIMULATIONBASE
-        m_MMAsBuiltCalculator.reset();  // unset any previous instance
-        m_MMAsBuiltCalculator = std::make_unique<NswAsBuilt::StripCalculator>();
-        std::string mmJson="";
-        if(!nswAsBuiltData->getMmData(mmJson)){          
-           ATH_MSG_WARNING(" Cannot retrieve MM as-built conditions data from detector store!" );
-        }
-        m_MMAsBuiltCalculator->parseJSON(mmJson);
-#else
-        // just to silence the warning about an unused parameter
-        (void)nswAsBuiltData;
-#endif
-    }
-
-    void MuonDetectorManager::setStgcAsBuiltCalculator(const NswAsBuiltDbData* nswAsBuiltData) {
-        if (m_NSWAsBuiltAsciiOverrideSTgc) return; // test-mode using AsBuilt conditions from an ascii file
-#ifndef SIMULATIONBASE
-        m_StgcAsBuiltCalculator.reset();  // unset any previous instance
-        m_StgcAsBuiltCalculator = std::make_unique<NswAsBuilt::StgcStripCalculator>();
-        std::string stgcJson="";
-        if(!nswAsBuiltData->getSTgcData(stgcJson)){          
-           ATH_MSG_WARNING(" Cannot retrieve sTGC as-built conditions data from detector store!" );
-        }
-        m_StgcAsBuiltCalculator->parseJSON(stgcJson);
-#else
-        // just to silence the warning about an unused parameter
-        (void)nswAsBuiltData;
-#endif
+    void MuonDetectorManager::setNswAsBuilt(const NswAsBuiltDbData* nswAsBuiltData) {
+        m_nswAsBuilt = nswAsBuiltData;
     }
 
     const MdtReadoutElement* MuonDetectorManager::getMdtReadoutElement(const IdentifierHash& id) const {
@@ -1221,36 +1142,6 @@ namespace MuonGM {
         m_rpcIdxToStat.insert(std::make_pair(RpcStatType::BIL, rpcHelper.stationNameIndex("BIL")));
         m_rpcIdxToStat.insert(std::make_pair(RpcStatType::BIS, rpcHelper.stationNameIndex("BIS")));
     }    
-    // functions that override standard condition input for tests
-    void MuonDetectorManager::setNSWABLineAsciiPath(const std::string& str) { m_NSWABLineAsciiPath = str; }
-    void MuonDetectorManager::setNSWAsBuiltAsciiPath(const std::string &strMM, const std::string &strSTgc) {
-        if (!strMM.empty()) {           
-            ATH_MSG_INFO( "Overriding standard MM As-Built conditions with an external ascii file" );
-            std::ifstream thefile(strMM);
-            std::stringstream buffer;
-            buffer << thefile.rdbuf();
-            std::string str = buffer.str();
-            thefile.close();
-            std::unique_ptr<NswAsBuiltDbData> readNswAsBuilt = std::make_unique<NswAsBuiltDbData>();
-            readNswAsBuilt->setMmData(str);
-            setMMAsBuiltCalculator(readNswAsBuilt.get());
-            m_NSWAsBuiltAsciiOverrideMM = true;
-        }
-
-        if (!strSTgc.empty()) {           
-            ATH_MSG_INFO( "Overriding standard sTGC As-Built conditions with an external ascii file" );
-            std::ifstream thefile(strSTgc);
-            std::stringstream buffer;
-            buffer << thefile.rdbuf();
-            std::string str = buffer.str();
-            thefile.close();
-            std::unique_ptr<NswAsBuiltDbData> readNswAsBuilt = std::make_unique<NswAsBuiltDbData>();
-            readNswAsBuilt->setSTgcData(str);
-            setStgcAsBuiltCalculator(readNswAsBuilt.get());
-            m_NSWAsBuiltAsciiOverrideSTgc = true;
-        }
-    }
-    
     void MuonDetectorManager::setCacheFillingFlag(int value) { m_cacheFillingFlag = value; }
     void MuonDetectorManager::setCachingFlag(int value) { m_cachingFlag = value; }
     void MuonDetectorManager::set_DBMuonVersion(const std::string& version) { m_DBMuonVersion = version; }
