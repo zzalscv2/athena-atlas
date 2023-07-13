@@ -25,7 +25,9 @@ namespace TCS {
       
    private:
       parType_t      p_NumberLeading1 = { 0 };
-      parType_t      p_MinET1[6] = { 0 ,0,0,0,0,0};
+      parType_t      p_PtScale = { 0 };
+      parType_t      p_PtShift = { 0 };
+      parType_t      p_MinET1[6] = { 0,0,0,0,0,0 };
       parType_t      p_XiMin[6] = { 0,0,0,0,0,0 };
       parType_t      p_XiMax[6] = { 0,0,0,0,0,0 };
       parType_t      p_ApplyEtaCut[6] = { 0,0,0,0,0,0 };

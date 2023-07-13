@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -64,7 +64,7 @@ namespace NSWL1 {
       first pad DG In the future, we might want to use some geometric
       pad info (center?)...good enough for now
      */
-    bool isInTransitionRegion(std::pair<double,double> Zratio) const;
+    bool isInTransitionRegion(const std::pair<double,double>& Zratio) const;
     bool is4outOf4Layers() const { return (m_pads.size()==4); }
     bool is3outOf4Layers() const { return (m_pads.size()==3); }
     SingleWedgePadTrigger& setCombined() { m_alreadyCombined=true; return *this;}

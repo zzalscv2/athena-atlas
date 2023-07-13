@@ -32,7 +32,10 @@ class PyxAODEvtFilter(Alg):
         # Read the run/event number from xAOD::EventInfo
         if self.sg.contains('xAOD::EventInfo', 'EventInfo'):
             ei = self.sg.retrieve('xAOD::EventInfo', 'EventInfo')
-            runNumber = ei.runNumber()
+            if not self.isMC:
+                runNumber = ei.runNumber()
+            else:
+                runNumber = ei.mcChannelNumber()
             eventNumber = ei.eventNumber()
             mcChannelNumber = ei.mcChannelNumber()
 
@@ -61,7 +64,7 @@ if '__main__' in __name__:
     parser.add_argument('--outputAODFile', default=None, required=True,
                         help='Output AOD file')
     parser.add_argument('--eventList', default=None, required=True,
-                        help='Text file containing "run event guid" information (one per line)')
+                        help='Text file containing "run event [guid]" information (one per line)')
     args, _ = parser.parse_known_args()
 
     # Setup configuration logging
@@ -69,11 +72,11 @@ if '__main__' in __name__:
     log = logging.getLogger('AODEventPicking')
     log.info('== Picking events from AOD files w/ the CA Configuration')
 
-    # Parse input file that contains run_number, event_number, guid combinations
+    # Parse input file that contains run_number, event_number[, guid] combinations
     evtList = []
     with open(args.eventList) as f:
         for line in f:
-            run, evt, guid = line.rstrip().split()
+            run, evt, *guid = line.rstrip().split()
             evtList.append((int(run), int(evt)))
 
     # Set the configuration flags
@@ -105,7 +108,7 @@ if '__main__' in __name__:
     # Configure the output stream
     log.info('== Configuring Output Stream')
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    cfg.merge(OutputStreamCfg(flags, 'AOD', takeItemsFromInput=True, AcceptAlgs = ['EventFilterAlg']))
+    cfg.merge(OutputStreamCfg(flags, 'AOD', takeItemsFromInput=True))
 
     # Configure metadata
     log.info('== Configuring metadata for the output stream')
@@ -115,6 +118,7 @@ if '__main__' in __name__:
     # Setup the output stream algorithm
     StreamAOD = cfg.getEventAlgo('OutputStreamAOD')
     StreamAOD.ForceRead = True
+    StreamAOD.AcceptAlgs += ['EventFilterAlg']
 
     # For (un)packing Cell Containers
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg

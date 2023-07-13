@@ -340,11 +340,11 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
 
       unsigned int maxEtCountsTau = thr_eTAU.maxEtCounts(m_eFexStep);
       if (eTauTobEt >= maxEtCountsTau) {
-	rCoreWP = 3;
-	rHadWP = 3;
+        rCoreWP = 3;
+        rHadWP = 3;
       } else {
-	SetIsoWP(rCoreVec,threshRCore,rCoreWP,RcoreBitS);
-	SetIsoWP(rHadVec,threshRHad,rHadWP,RhadBitS);
+        SetIsoWP(rCoreVec,threshRCore,rCoreWP,RcoreBitS);
+        SetIsoWP(rHadVec,threshRHad,rHadWP,RhadBitS);
       }
       std::vector<unsigned int> threshBDT;
       threshBDT.push_back(bdt_loose);
@@ -570,25 +570,39 @@ void eFEXFPGA::SetIsoWP(std::vector<unsigned int> & CoreEnv, std::vector<unsigne
   // Working point evaluted by Core * 2^bitshift > Threshold * Environment conditions
   std::unordered_map<unsigned int, unsigned int> bsmap { {3, 8}, {5, 32}};
 
-  int large = CoreEnv[0]*bsmap[bitshift]; // core
-  int small = CoreEnv[1]; // env
+  unsigned int large = CoreEnv[0]*bsmap[bitshift]; // core
+  unsigned int small = CoreEnv[1]; // env
+  
+  // Word length conditions
+  if (large > 0xffff ) large = 0xffff;
+  if (small > 0xffff ) small = 0xffff;
 
-  unsigned int shifted = large;// <<bitShift;
-  if ( shifted > 0xffff )
-    shifted = 0xffff;
-  if ( shifted >= small*thresholds[2] ) {
-    workingPoint=3;
+  // Pass all if shifted core sum overflows
+  if (large == 0xffff) {
+    workingPoint = 3;
     return;
   }
-  if ( shifted >= small*thresholds[1] ) {
-    workingPoint=2;
+  // Fail all if env sum overflows
+  else if (small == 0xffff) {
+    workingPoint = 0;
     return;
   }
-  if ( shifted >= small*thresholds[0] ) {
-    workingPoint=1;
+
+  // Otherwise test thresholds in firmware order 
+  // i.e. check lowest threshold failed rather than highest passed
+  if ( large < small*thresholds[0] ) {
+    workingPoint = 0;
     return;
   }
-  workingPoint=0;
+  if ( large < small*thresholds[1] ) {
+    workingPoint = 1;
+    return;
+  }
+  if ( large < small*thresholds[2] ) {
+    workingPoint = 2;
+    return;
+  }
+  workingPoint = 3;
   return;
 }
 

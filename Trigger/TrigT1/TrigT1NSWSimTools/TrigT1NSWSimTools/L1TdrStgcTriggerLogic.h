@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef NSW_L1TDRSTGCTRIGGERLOGIC_H
@@ -60,7 +60,7 @@ class L1TdrStgcTriggerLogic : public AthMessaging {
 
         */
         
-        std::vector<SectorTriggerCandidate> buildSectorTriggers(const std::vector<std::shared_ptr<PadOfflineData>> &pads, std::pair<double,double> Zratio) const;
+        std::vector<SectorTriggerCandidate> buildSectorTriggers(const std::vector<std::shared_ptr<PadOfflineData>> &pads, const std::pair<double,double>& Zratio) const;
         /// simulate efficiency by dropping random pads (their indices)
         std::vector< size_t > removeRandomPadIndices(const std::vector< size_t > &padIndices) const;
         /**

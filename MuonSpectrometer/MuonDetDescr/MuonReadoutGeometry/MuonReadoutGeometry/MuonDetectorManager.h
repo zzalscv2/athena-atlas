@@ -150,9 +150,6 @@ namespace MuonGM {
         void setCacheFillingFlag(int value);
         inline int cacheFillingFlag() const;
 
-        void setNSWABLineAsciiPath(const std::string &);
-        void setNSWAsBuiltAsciiPath(const std::string &, const std::string &);
-
         void setMinimalGeoFlag(int flag);
         inline int  MinimalGeoFlag() const;
         void setCutoutsFlag(int flag);
@@ -163,14 +160,11 @@ namespace MuonGM {
         inline int  mdtDeformationFlag() const { return m_applyMdtDeformations; }
         void setMdtAsBuiltParamsFlag(int flag) { m_applyMdtAsBuiltParams = flag; }
         inline int  mdtAsBuiltParamsFlag() const { return m_applyMdtAsBuiltParams; }
-        void setNswAsBuiltParamsFlag(int flag) { m_applyNswAsBuiltParams = flag; }
-        inline int  nswAsBuiltParamsFlag() const { return m_applyNswAsBuiltParams; }
         void setControlAlinesFlag(int flag) { m_controlAlines = flag; }
         inline int  controlAlinesFlag() const { return m_controlAlines; }
         void setApplyCscIntAlignment(bool x) { m_useCscIntAlign = x; }
         inline bool applyMdtDeformations() const { return (bool)m_applyMdtDeformations; }
         inline bool applyMdtAsBuiltParams() const { return (bool)m_applyMdtAsBuiltParams; }
-        inline bool applyNswAsBuiltParams() const { return (bool)m_applyNswAsBuiltParams; }
         inline bool applyCscIntAlignment() const { return m_useCscIntAlign; }
         void setCscIlinesFlag(int flag) { m_controlCscIlines = flag; }
         inline int  CscIlinesFlag() const { return m_controlCscIlines; }
@@ -283,11 +277,14 @@ namespace MuonGM {
         StatusCode updateCSCInternalAlignmentMap(const CscInternalAlignmentMapContainer& cscIntAline);
 
         void initABlineContainers();
-        void setMMAsBuiltCalculator(const NswAsBuiltDbData* nswAsBuiltData);
-        void setStgcAsBuiltCalculator(const NswAsBuiltDbData* nswAsBuiltData);
+        void setNswAsBuilt(const NswAsBuiltDbData* nswAsBuiltData);
 #ifndef SIMULATIONBASE
-        const NswAsBuilt::StripCalculator* getMMAsBuiltCalculator() const { return m_MMAsBuiltCalculator.get(); }
-        const NswAsBuilt::StgcStripCalculator* getStgcAsBuiltCalculator() const { return m_StgcAsBuiltCalculator.get(); }
+        const NswAsBuilt::StripCalculator* getMMAsBuiltCalculator() const { 
+            return  m_nswAsBuilt ? m_nswAsBuilt->microMegaData.get() : nullptr; 
+        }
+        const NswAsBuilt::StgcStripCalculator* getStgcAsBuiltCalculator() const { 
+            return m_nswAsBuilt ? m_nswAsBuilt->sTgcData.get() : nullptr; ; 
+        }
 #endif
 
         // get Mdt AsBuilt parameters for chamber specified by Identifier
@@ -321,7 +318,6 @@ namespace MuonGM {
         int m_controlAlines{111111};
         int m_applyMdtDeformations{0};
         int m_applyMdtAsBuiltParams{0};
-        int m_applyNswAsBuiltParams{0};
         bool m_useCscIntAlign{false};
         int m_controlCscIlines{111111};
         bool m_useCscIlinesFromGM{true};
@@ -336,10 +332,6 @@ namespace MuonGM {
         // Geometry versioning
         std::string m_geometryVersion{};  // generic name of the Layout
         std::string m_DBMuonVersion{};    // name of the MuonVersion table-collection in Oracle
-
-        std::string m_NSWABLineAsciiPath{};
-        bool m_NSWAsBuiltAsciiOverrideMM{false};
-        bool m_NSWAsBuiltAsciiOverrideSTgc{false};
        
         // 115.6 kBytes.
         static constexpr int s_NumMaxRpcElements = NRpcStatType * NRpcStatEta * NRpcStatPhi * NDoubletR * NDoubletZ;
@@ -376,6 +368,8 @@ namespace MuonGM {
         BLineMapContainer m_bLineContainer;
         CscInternalAlignmentMapContainer m_cscALineContainer;
         MdtAsBuiltMapContainer m_AsBuiltParamsMap;
+
+        const NswAsBuiltDbData* m_nswAsBuilt{nullptr};
         /// RPC name caches
         std::map<int, int> m_rpcStatToIdx;
         std::map<int, int> m_rpcIdxToStat;
@@ -385,11 +379,6 @@ namespace MuonGM {
         int m_mdt_BIM_stName{-1}; //52
         int m_mdt_BME_stName{-1}; //53
         int m_mdt_BMG_stName{-1}; //54
-
-#ifndef SIMULATIONBASE
-        std::unique_ptr<NswAsBuilt::StripCalculator> m_MMAsBuiltCalculator;
-        std::unique_ptr<NswAsBuilt::StgcStripCalculator> m_StgcAsBuiltCalculator;
-#endif
 
         template <typename read_out, size_t N> void clearCache(std::array<std::unique_ptr<read_out>, N>& array);
         template <typename read_out, size_t N> void fillCache(std::array<std::unique_ptr<read_out>, N>& array);

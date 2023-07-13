@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackStatisticsAlg.h"
@@ -10,12 +10,12 @@
 
 //  CONSTRUCTOR:
 MuonTrackStatisticsAlg::MuonTrackStatisticsAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthAlgorithm(name, pSvcLocator), m_statisticsTool("MuonTrackStatisticsTool"), m_writeToFile(false), m_doTruth(false) {
+    AthAlgorithm(name, pSvcLocator), m_writeToFile(false), m_doTruth(false) {
     declareProperty("doTruth", m_doTruth);
     declareProperty("writeToFile", m_writeToFile);
     declareProperty("FileName", m_fileName);
 }
-
+MuonTrackStatisticsAlg::~MuonTrackStatisticsAlg() = default;
 // INITIALIZE METHOD:
 
 StatusCode MuonTrackStatisticsAlg::initialize() {

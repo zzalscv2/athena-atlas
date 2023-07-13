@@ -99,7 +99,7 @@ double MMT_Road::avgZofUV(const int uv1, const int uv2) const {
   return avg_z;
 }
 
-bool MMT_Road::checkCoincidences(const int &bcwind) const {
+bool MMT_Road::checkCoincidences(const int bcwind) const {
   bool passHorizontalCheck = this->horizontalCheck();
   bool passStereoCheck = this->stereoCheck();
   bool passMatureCheck = this->matureCheck(bcwind);
@@ -155,7 +155,7 @@ bool MMT_Road::horizontalCheck() const {
   return (nx1 > 0 && nx2 > 0 && (nx1+nx2) >= m_xthr);
 }
 
-void MMT_Road::incrementAge(const int &bcwind) {
+void MMT_Road::incrementAge(const int bcwind) {
   std::vector<unsigned int> old_ihits;
   for (unsigned int j = 0; j < m_road_hits.size(); j++) {
     m_road_hits[j]->setAge(m_road_hits[j]->getAge() +1);
@@ -164,7 +164,7 @@ void MMT_Road::incrementAge(const int &bcwind) {
   for (int j = old_ihits.size()-1; j > -1; j--) m_road_hits.erase(m_road_hits.begin()+j);
 }
 
-bool MMT_Road::matureCheck(const int &bcwind) const {
+bool MMT_Road::matureCheck(const int bcwind) const {
   for (const auto &hit : m_road_hits) {
     if (hit->getAge() == (bcwind - 1)) return true;
   }

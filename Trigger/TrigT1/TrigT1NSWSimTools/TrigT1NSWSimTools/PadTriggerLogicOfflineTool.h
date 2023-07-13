@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef NSWL1_PADTRIGGERLOGICOFFLINETOOL_H
@@ -80,7 +80,7 @@ namespace NSWL1 {
 
         virtual StatusCode compute_pad_triggers(const std::vector<std::shared_ptr<PadData>>& pads, std::vector<std::unique_ptr<PadTrigger>> &triggers) const override;
 
-        int ROI2BandId(const float &EtaTrigAtCenter, const int &SectorType) const;//Recipe From Y.R (based on eta slicing of triggering bands see the implementation) 
+        int ROI2BandId(const float EtaTrigAtCenter, const int SectorType) const;//Recipe From Y.R (based on eta slicing of triggering bands see the implementation) 
 
         static std::vector<std::unique_ptr<PadTrigger>> build4of4SingleWedgeTriggers(const std::vector<std::shared_ptr<PadData>> &pads);
 

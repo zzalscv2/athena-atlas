@@ -59,6 +59,12 @@ class LArOnOffIdMapping {
    */
   bool isOnlineConnected(const HWIdentifier & sid ) const;
   
+
+  /** 
+   * Access to underlying storage (not-const only!)
+   */
+  std::vector<Identifier>& getOnlHash2OflId(); 
+  std::vector<HWIdentifier>& getOflHash2OnId();
   
 
  private:
@@ -114,7 +120,14 @@ inline HWIdentifier LArOnOffIdMapping::createSignalChannelID(const Identifier & 
   return this->createSignalChannelIDFromHash(id_hash);
 }
 
+inline std::vector<Identifier>& LArOnOffIdMapping::getOnlHash2OflId() { 
+  return m_onlHashToOffline;
+}
 
+inline std::vector<HWIdentifier>& LArOnOffIdMapping::getOflHash2OnId() {
+  return m_oflHashToOnline;
+}
+ 
 
 #include "AthenaKernel/CLASS_DEF.h"
 CLASS_DEF( LArOnOffIdMapping,148608605 , 1)

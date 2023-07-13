@@ -128,6 +128,15 @@ namespace InDet{
     ATH_CHECK(rdoContainer.isValid());
 
     ATH_MSG_DEBUG( "Data object " << rdoContainer.name() << " found" );
+
+    std::unique_ptr<DataPool<PixelCluster>> dataItemsPool = nullptr;
+    const bool hasExternalCache = rdoContainer->hasExternalCache();
+    if (!hasExternalCache) {
+      dataItemsPool = std::make_unique<DataPool<PixelCluster>>(ctx);
+      dataItemsPool->reserve(20000);  // Some large default size
+    }
+
+
     if (!m_roiSeeded) {//Full-scan mode
       PixelRDO_Container::const_iterator rdoCollections      = rdoContainer->begin();
       PixelRDO_Container::const_iterator rdoCollectionsEnd   = rdoContainer->end();
@@ -139,7 +148,9 @@ namespace InDet{
         if( lock.OnlineAndPresentInAnotherView() ) continue;
 
         // Use one of the specific clustering AlgTools to make clusters
-        std::unique_ptr<PixelClusterCollection> clusterCollection (m_clusteringTool->clusterize(*RDO_Collection, *m_idHelper, ctx));
+        std::unique_ptr<PixelClusterCollection> clusterCollection(
+            m_clusteringTool->clusterize(*RDO_Collection, *m_idHelper,
+                                         dataItemsPool.get(), ctx));
 
         if (clusterCollection && !clusterCollection->empty()){
 
@@ -173,14 +184,16 @@ namespace InDet{
           if( lock.OnlineAndPresentInAnotherView() ) continue;
 
           // Use one of the specific clustering AlgTools to make clusters
-          std::unique_ptr<PixelClusterCollection> clusterCollection (m_clusteringTool->clusterize(*RDO_Collection, *m_idHelper, ctx));
-          if (clusterCollection && !clusterCollection->empty()){
+          std::unique_ptr<PixelClusterCollection> clusterCollection(
+              m_clusteringTool->clusterize(*RDO_Collection, *m_idHelper,
+                                           dataItemsPool.get(), ctx));
+          if (clusterCollection && !clusterCollection->empty()) {
             ATH_MSG_VERBOSE( "REGTEST: Pixel : clusterCollection contains " 
                 << clusterCollection->size() << " clusters" );
             m_gangedAmbiguitiesFinder->execute(clusterCollection.get(),*ambiguitiesMap);
             ATH_CHECK(lock.addOrDelete( std::move(clusterCollection) ));
 
-          }else{
+          } else {
             ATH_MSG_DEBUG("No PixelClusterCollection to write");
           }
         }

@@ -14,7 +14,6 @@
 #include "CoralUtilities/blobaccess.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "MuonAlignmentData/CorrContainer.h"
-#include "MuonAlignmentData/NswAsBuiltDbData.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "nlohmann/json.hpp"
 
@@ -43,11 +42,6 @@ private:
                                                                      "Key of input CSC/ILINES condition data"};
     SG::ReadCondHandleKey<CondAttrListCollection> m_readMdtAsBuiltParamsKey{this, "ReadMdtAsBuiltParamsKey", "/MUONALIGN/MDT/ASBUILTPARAMS",
                                                                             "Key of MDT/ASBUILTPARAMS input condition data"};
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readMmAsBuiltParamsKey{this, "ReadMmAsBuiltParamsKey", "/MUONALIGN/ASBUILTPARAMS/MM",
-                                                                            "Key of MM/ASBUILTPARAMS input condition data"};
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readSTgcAsBuiltParamsKey{this, "ReadSTgcAsBuiltParamsKey", "/MUONALIGN/ASBUILTPARAMS/STGC",
-                                                                            "Key of sTGC/ASBUILTPARAMS input condition data"};
-
     // Write Handles
     SG::WriteCondHandleKey<ALineMapContainer> m_writeALineKey{this, "WriteALineKey", "ALineMapContainer",
                                                               "Key of output muon alignment ALine condition data"};
@@ -57,9 +51,6 @@ private:
                                                                              "Key of output muon alignment CSC/ILine condition data"};
     SG::WriteCondHandleKey<MdtAsBuiltMapContainer> m_writeMdtAsBuiltKey{this, "WriteMdtAsBuiltKey", "MdtAsBuiltMapContainer",
                                                                      "Key of output muon alignment MDT/AsBuilt condition data"};
-    SG::WriteCondHandleKey<NswAsBuiltDbData> m_writeNswAsBuiltKey{this, "WriteNswAsBuiltKey", "NswAsBuiltDbData",
-                                                                     "Key of output muon alignment MM+STGC/AsBuilt condition data"};
-
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
    
     Gaudi::Property<std::vector<std::string>> m_parlineFolder{this, "ParlineFolders", {}, "Database folders"};
@@ -73,7 +64,6 @@ private:
     Gaudi::Property<bool> m_ILinesFromDb{this, "ILinesFromCondDB", false};
 
     bool m_MdtAsBuiltRequested {false};
-    bool m_NswAsBuiltRequested {false};
     bool m_ILineRequested {false};
     Gaudi::Property<std::string> m_aLinesFile{this, "ALinesFile", "" };
     Gaudi::Property<std::string> m_asBuiltFile{this, "AsBuiltFile", ""};
@@ -89,7 +79,6 @@ private:
     StatusCode loadAlignILines(const std::string& folderName);
     StatusCode loadAlignILinesData(const std::string& folderName, const std::string& data, nlohmann::json& json);
     StatusCode loadMdtAlignAsBuilt(const std::string& folderName);
-    StatusCode loadNswAlignAsBuilt(const std::string& mmFolderName, const std::string& sTgcFolderName);
 
     StatusCode setALinesFromAscii(ALineMapContainer* writeALineCdo) const;
     void setAsBuiltFromAscii(MdtAsBuiltMapContainer* writeCdo) const;

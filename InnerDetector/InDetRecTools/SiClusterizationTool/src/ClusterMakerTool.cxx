@@ -39,7 +39,7 @@ constexpr double ONE_TWELFTH = 1./12.;
 // Some methods below can be parameterized on the pixel cluster type,
 // The following functions allow using a function parameter for common
 // operations.
-InDet::PixelCluster* newInDetpixelCluster(const Identifier& RDOId,
+InDet::PixelCluster newInDetpixelCluster(const Identifier& RDOId,
 					  const Amg::Vector2D& locpos,
 					  const Amg::Vector3D& globpos,
 					  const std::vector<Identifier>& rdoList,
@@ -55,7 +55,7 @@ InDet::PixelCluster* newInDetpixelCluster(const Identifier& RDOId,
 					  float splitProb1,
 					  float splitProb2)
 {
-    return new InDet::PixelCluster(RDOId,
+    return InDet::PixelCluster(RDOId,
 				   locpos,
 				   globpos,
 				   rdoList,
@@ -214,8 +214,7 @@ PixelCluster* ClusterMakerTool::pixelCluster(const Identifier& clusterID,
   
   const AtlasDetectorID* aid = element->getIdHelper();
   if (aid->helper() != AtlasDetectorID::HelperType::Pixel){
-  	ATH_MSG_ERROR("Wrong helper type at "<<__LINE__<<" of ClusterMakerTool.cxx.");
-  	return nullptr;
+    throw std::runtime_error( "Wrong helper type in ClusterMakerTool.cxx.");
   }
   const PixelID* pid = static_cast<const PixelID*>(aid);
   if ( errorStrategy==2 && m_forceErrorStrategy1A ) errorStrategy=1;
@@ -374,8 +373,7 @@ ClusterType ClusterMakerTool::makePixelCluster(
   // Fill vector of charges and compute charge balance
   const InDetDD::PixelModuleDesign* design = (dynamic_cast<const InDetDD::PixelModuleDesign*>(&element->design()));
   if (not design){
-  	ATH_MSG_ERROR("Dynamic cast failed at "<<__LINE__<<" of ClusterMakerTool.cxx.");
-  	return nullptr;
+    throw std::runtime_error( "Dynamic cast failed for design in ClusterMakerTool.cxx");
   }
   int rowMin = design->rows();
   int rowMax = 0;
@@ -475,8 +473,7 @@ ClusterType ClusterMakerTool::makePixelCluster(
   const AtlasDetectorID* aid = element->getIdHelper();
   
   if (aid->helper() != AtlasDetectorID::HelperType::Pixel){
-  	ATH_MSG_ERROR("Wrong helper type at "<<__LINE__<<" of ClusterMakerTool.cxx.");
-  	return nullptr;
+    throw std::runtime_error( "Wrong helper type in ClusterMakerTool.cxx.");
   }
   const PixelID* pid = static_cast<const PixelID*>(aid);
   int layer = pid->layer_disk(clusterID);
@@ -545,7 +542,7 @@ ClusterType ClusterMakerTool::makePixelCluster(
 			splitProb2);
 }
 
-PixelCluster* ClusterMakerTool::pixelCluster(
+PixelCluster ClusterMakerTool::pixelCluster(
     const Identifier& clusterID,
     const Amg::Vector2D& localPos,
     const std::vector<Identifier>& rdoList,
@@ -562,7 +559,7 @@ PixelCluster* ClusterMakerTool::pixelCluster(
     const PixelChargeCalibCondData *calibData,
     const PixelOfflineCalibData *offlineCalibData) const
 {
-    return makePixelCluster<PixelCluster*>(
+    return makePixelCluster<PixelCluster>(
 	clusterID,
 	localPos,
 	rdoList,

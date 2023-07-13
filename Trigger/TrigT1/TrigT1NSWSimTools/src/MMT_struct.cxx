@@ -363,7 +363,7 @@ MMT_Parameters::MMT_Parameters(par_par inputParams, char wedgeSize, const MuonGM
   // retrieve the z-position of the planes
   z_nominal.clear();
   int eta = 1;
-  for (auto pos: MM_firststrip_positions(detManager, wedgeString, eta)){
+  for (const auto& pos: MM_firststrip_positions(detManager, wedgeString, eta)){
     z_nominal.push_back(double(pos.z()));
   }
 
@@ -413,10 +413,11 @@ MMT_Parameters::MMT_Parameters(par_par inputParams, char wedgeSize, const MuonGM
   float radial_pos      = 0;
   float radial_pos_xx_1 = 0, radial_pos_xx_2 = 0;
   float radial_pos_uv_1 = 0, radial_pos_uv_2 = 0;
-
+  
+  // FIXME: variable called 'eta' already defined above 
   for (unsigned int eta = 1; eta <= 2; eta++){
     unsigned int layer = 1;
-    for (auto pos: MM_firststrip_positions(detManager, wedgeString, eta)){
+    for (const auto& pos: MM_firststrip_positions(detManager, wedgeString, eta)){
 
       if (wedgeString=="MMS"){
         x_rotated = pos.x()*cos_rotation - pos.y()*sin_rotation;
@@ -436,9 +437,9 @@ MMT_Parameters::MMT_Parameters(par_par inputParams, char wedgeSize, const MuonGM
       radial_pos = std::abs(x_rotated - y_rotated*std::tan(st_angle * M_PI/180.0));
 
       if (is_x(layer) && eta==1) radial_pos_xx_1 = radial_pos;
-      if (is_x(layer) && eta==2) radial_pos_xx_2 = radial_pos;
+      else if (is_x(layer) && eta==2) radial_pos_xx_2 = radial_pos;
       if (is_u(layer) && eta==1) radial_pos_uv_1 = radial_pos;
-      if (is_u(layer) && eta==2) radial_pos_uv_2 = radial_pos;
+      else if (is_u(layer) && eta==2) radial_pos_uv_2 = radial_pos;
 
       layer++;
     }
@@ -457,15 +458,9 @@ MMT_Parameters::MMT_Parameters(par_par inputParams, char wedgeSize, const MuonGM
   ybases[7] = radial_pos_xx;
 
   //now put in the positions at `ly spaced points for a y dependent z
-  bool hack=false;
   z_large=vector<vector<double > >(ybins,z_nominal);
   double pitch_f=1.*std::sin(correct.rotate.X())*h1/ybins, bumper_up=0.0;
   //double pitch_b = 0;
-  if(hack) {
-    double factor=-1;
-    pitch_f*=factor;
-    //pitch_b*=factor;
-  }
   ATH_MSG_DEBUG("Specs: correct.rotate.X()=" << correct.rotate.X() << ",correct.translate.Z()=" << correct.translate.Z() << ",pitch_f=" << pitch_f);
   for(int iy=0;iy<ybins;iy++){
     //z axis in misalignment line points in the opposite direction....TOO LATE! (right handed coordinate system the way we expect for x and y makes this happen)
@@ -507,6 +502,7 @@ MMT_Parameters::MMT_Parameters(par_par inputParams, char wedgeSize, const MuonGM
   for(int i=0;i<=n_phibins;i++)  m_phibins.push_back(  (minimum_large_phi+phiseg*i)   );
   double etalo=-std::log(std::tan(0.5*maximum_large_theta));
   double etahi=-std::log(std::tan(0.5*minimum_large_theta));
+  /*
   bool custom=false;
   if(custom){
     //these custom eta bins have the top station as one bin (since that has normal shape for the phi resolutions)
@@ -520,7 +516,8 @@ MMT_Parameters::MMT_Parameters(par_par inputParams, char wedgeSize, const MuonGM
     m_etabins.push_back(etahi);
     n_etabins=m_etabins.size()-1;
   }
-  else if(n_etabins==(int)xeta.size()){
+  else */
+  if(n_etabins==static_cast<int>(xeta.size())){
     m_etabins.push_back(etalo);
     for(int i=n_etabins-1;i>=0;i--){
       m_etabins.push_back(std::asinh( (z_nominal.front()/xeta[i]) ));
@@ -764,7 +761,7 @@ void MMT_Parameters::fill_slims(){
       for(int which=0; which<ntru; which++){
  	ATH_MSG_DEBUG("\t\twhich=" << which);
 	vector<int>indices(indices_to_key(xdex,ybin,which));
-  for(int i=0;i<(int)indices.size();i++)  ATH_MSG_DEBUG(indices[i]);
+	for(int i=0;i<(int)indices.size();i++)  ATH_MSG_DEBUG(indices[i]);
 	pair<double,double>howdy(ak_bk_hit_bins(indices));
  	ATH_MSG_DEBUG(setprecision(8) << "---akbk.first=" << howdy.first << ", second=" << howdy.second);
 	Ak_local_slim[xdex][ybin].push_back(howdy.first);

@@ -31,18 +31,11 @@ StatusCode MuonAlignmentCondAlg::initialize() {
     // =======================
     // Loop on folders requested in configuration and check if /MUONALIGN/CSC/ILINES and /MUONALIGN/MDT/ASBUILTPARAMS are requested
     // =======================
-    bool mmAsBuiltRequested{false};
-    bool sTgcAsBuiltRequested{false};
     for (const std::string& currentFolderName : m_parlineFolder) {
         if (currentFolderName.find("ILINES") != std::string::npos) m_ILineRequested = true;
-        if (currentFolderName.find("ASBUILTPARAMS") != std::string::npos) {
-            if      (currentFolderName.find("MDT" ) != std::string::npos) m_MdtAsBuiltRequested = true;
-            else if (currentFolderName.find("MM"  ) != std::string::npos) mmAsBuiltRequested    = true;
-            else if (currentFolderName.find("STGC") != std::string::npos) sTgcAsBuiltRequested  = true;
-        }
+        if (currentFolderName.find("ASBUILTPARAMS") != std::string::npos && 
+            currentFolderName.find("MDT" ) != std::string::npos) m_MdtAsBuiltRequested = true;
     }
-    m_NswAsBuiltRequested = mmAsBuiltRequested && sTgcAsBuiltRequested;
-
     // Read Handles Keys
     ATH_CHECK(m_readMdtBarrelKey.initialize());
     ATH_CHECK(m_readMdtEndcapSideAKey.initialize());
@@ -51,15 +44,12 @@ StatusCode MuonAlignmentCondAlg::initialize() {
     ATH_CHECK(m_readTgcSideCKey.initialize());
     ATH_CHECK(m_readCscILinesKey.initialize(m_idHelperSvc->hasCSC() && m_ILinesFromDb and m_ILineRequested));
     ATH_CHECK(m_readMdtAsBuiltParamsKey .initialize(m_MdtAsBuiltRequested));
-    ATH_CHECK(m_readMmAsBuiltParamsKey  .initialize(m_NswAsBuiltRequested));
-    ATH_CHECK(m_readSTgcAsBuiltParamsKey.initialize(m_NswAsBuiltRequested));
 
     // Write Handles
     ATH_CHECK(m_writeALineKey.initialize());
     ATH_CHECK(m_writeBLineKey.initialize());
     ATH_CHECK(m_writeILineKey.initialize(m_idHelperSvc->hasCSC() && m_ILinesFromDb and m_ILineRequested));
     ATH_CHECK(m_writeMdtAsBuiltKey.initialize(m_MdtAsBuiltRequested));
-    ATH_CHECK(m_writeNswAsBuiltKey.initialize(m_NswAsBuiltRequested));
     ATH_CHECK(m_idHelperSvc.retrieve());
     return StatusCode::SUCCESS;
 }
@@ -90,12 +80,6 @@ StatusCode MuonAlignmentCondAlg::loadParameters() {
     // Load AsBuilt parameters if /MUONALIGN/MDT/ASBUILTPARAMS folder given in the joboptions
     // =======================
     if (m_MdtAsBuiltRequested) sc = loadMdtAlignAsBuilt("/MUONALIGN/MDT/ASBUILTPARAMS");
-    if (sc.isFailure()) return StatusCode::FAILURE;
-
-    // =======================
-    // Load NSW AsBuilt parameters if both MM and STGC as-built folders are given in the joboptions
-    // =======================
-    if (m_NswAsBuiltRequested) sc = loadNswAlignAsBuilt("/MUONALIGN/ASBUILTPARAMS/MM", "/MUONALIGN/ASBUILTPARAMS/STGC");
     if (sc.isFailure()) return StatusCode::FAILURE;
 
     // =======================
@@ -957,97 +941,6 @@ StatusCode MuonAlignmentCondAlg::loadMdtAlignAsBuilt(const std::string& folderNa
     ATH_MSG_INFO("recorded new " << writeHandle.key() << " with range " << rangeMdtAsBuiltW << " into Conditions Store");
 
     ATH_MSG_VERBOSE("Collection CondAttrListCollection CLID " << readMdtAsBuiltCdo->clID());
-
-    return StatusCode::SUCCESS;
-}
-
-StatusCode MuonAlignmentCondAlg::loadNswAlignAsBuilt(const std::string& mmFolderName, const std::string& sTgcFolderName) {
-    // =======================
-    // Write AsBuilt Cond Handle
-    // =======================
-    SG::WriteCondHandle<NswAsBuiltDbData> writeHandle{m_writeNswAsBuiltKey};
-    if (writeHandle.isValid()) {
-        ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid."
-                                    << ". In theory this should not be called, but may happen"
-                                    << " if multiple concurrent events are being processed out of order.");
-        return StatusCode::SUCCESS;
-    }
-    std::unique_ptr<NswAsBuiltDbData> writeCdo{std::make_unique<NswAsBuiltDbData>()};
-
-    ATH_MSG_INFO("Load alignment parameters from DB folders <" << mmFolderName << "> and <" << sTgcFolderName << ">");
-
-    // =======================
-    // Read MM/ASBUILTPARAMS Cond Handle
-    // =======================
-    SG::ReadCondHandle<CondAttrListCollection> readMmAsBuiltHandle{m_readMmAsBuiltParamsKey};
-    const CondAttrListCollection* readMmAsBuiltCdo{*readMmAsBuiltHandle};
-    if (readMmAsBuiltCdo == nullptr) {
-        ATH_MSG_ERROR("Null pointer to the read MM/ASBUILTPARAMS conditions object");
-        return StatusCode::FAILURE;
-    }
-
-    EventIDRange rangeMmAsBuiltW;
-    if (!readMmAsBuiltHandle.range(rangeMmAsBuiltW)) {
-        ATH_MSG_ERROR("Failed to retrieve validity range for " << readMmAsBuiltHandle.key());
-        return StatusCode::FAILURE;
-    }
-
-    ATH_MSG_INFO("Size of MM/ASBUILTPARAMS CondAttrListCollection " << readMmAsBuiltHandle.fullKey()
-                                                                     << " ->size()= " << readMmAsBuiltCdo->size());
-    ATH_MSG_INFO("Range of MM/ASBUILTPARAMS input is " << rangeMmAsBuiltW);
-
-    // =======================
-    // Read STGC/ASBUILTPARAMS Cond Handle
-    // =======================
-    SG::ReadCondHandle<CondAttrListCollection> readSTgcAsBuiltHandle{m_readSTgcAsBuiltParamsKey};
-    const CondAttrListCollection* readSTgcAsBuiltCdo{*readSTgcAsBuiltHandle};
-    if (readSTgcAsBuiltCdo == nullptr) {
-        ATH_MSG_ERROR("Null pointer to the read STGC/ASBUILTPARAMS conditions object");
-        return StatusCode::FAILURE;
-    }
-
-    EventIDRange rangeSTgcAsBuiltW;
-    if (!readSTgcAsBuiltHandle.range(rangeSTgcAsBuiltW)) {
-        ATH_MSG_ERROR("Failed to retrieve validity range for " << readSTgcAsBuiltHandle.key());
-        return StatusCode::FAILURE;
-    }
-
-    ATH_MSG_INFO("Size of STGC/ASBUILTPARAMS CondAttrListCollection " << readSTgcAsBuiltHandle.fullKey()
-                                                                     << " ->size()= " << readSTgcAsBuiltCdo->size());
-    ATH_MSG_INFO("Range of STGC/ASBUILTPARAMS input is " << rangeSTgcAsBuiltW);
-
-    // =======================
-    // Retrieve the collection of strings read out from the DB
-    // =======================
-    unsigned int nLines = 0;
-    CondAttrListCollection::const_iterator itr;
-    for(itr = readMmAsBuiltCdo->begin(); itr != readMmAsBuiltCdo->end(); ++itr) {
-        const coral::AttributeList& atr = itr->second;
-        std::string data;
-        data = *(static_cast<const std::string*>((atr["data"]).addressOfData()));
-        ATH_MSG_DEBUG("Data load is " << data << " FINISHED HERE ");
-        writeCdo->setMmData(data);
-        nLines++;
-    }
-    
-    if(nLines>1) ATH_MSG_WARNING(nLines << " data objects were loaded for MM/ASBUILTPARAMS! Expected only one for this validity range!");
-    
-    nLines = 0;
-    for(itr = readSTgcAsBuiltCdo->begin(); itr != readSTgcAsBuiltCdo->end(); ++itr) {
-        const coral::AttributeList& atr = itr->second;
-        std::string data;
-        data = *(static_cast<const std::string*>((atr["data"]).addressOfData()));
-        ATH_MSG_DEBUG("Data load is " << data << " FINISHED HERE ");
-        writeCdo->setSTgcData(data);
-        nLines++;
-    }
-    if(nLines>1) ATH_MSG_WARNING(nLines << " data objects were loaded for STGC/ASBUILTPARAMS! Expected only one for this validity range!");
-
-    EventIDRange rangeIntersection{EventIDRange::intersect(rangeMmAsBuiltW, rangeSTgcAsBuiltW)};
-    if (writeHandle.record(rangeIntersection, std::move(writeCdo)).isFailure()) {
-        ATH_MSG_FATAL("Could not record NswAsBuiltMapContainer " << writeHandle.key() << " with EventRange " << rangeMmAsBuiltW << " into Conditions Store");
-        return StatusCode::FAILURE;
-    }
 
     return StatusCode::SUCCESS;
 }

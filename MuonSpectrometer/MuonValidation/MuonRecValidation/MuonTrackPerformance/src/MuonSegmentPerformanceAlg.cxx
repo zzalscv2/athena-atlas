@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSegmentPerformanceAlg.h"
@@ -10,12 +10,9 @@
 
 MuonSegmentPerformanceAlg::MuonSegmentPerformanceAlg(const std::string& name, ISvcLocator* pSvcLocator) :
     AthAlgorithm(name, pSvcLocator),
-    m_writeToFile(false),
-    m_segmentKey("MuonSegments"),
-    m_truthSegmentKey("MuonTruthSegments"),
+    m_writeToFile(false),   
     m_nevents(0) {
-    declareProperty("SegmentLocation", m_segmentKey);
-    declareProperty("TruthSegmentLocation", m_truthSegmentKey);
+
     declareProperty("writeToFile", m_writeToFile = false);
     declareProperty("FileName", m_fileName = "MuonSegmentPerformanceAlg.txt");
 }
