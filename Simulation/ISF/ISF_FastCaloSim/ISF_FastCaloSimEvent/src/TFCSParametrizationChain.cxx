@@ -264,6 +264,10 @@ void TFCSParametrizationChain::Streamer(TBuffer &R__b) {
       }
     }
 
+    // Expect that any TFCSParametrizationBase from the last time the
+    // streamer was called can be safely forgotten.
+    m_writtenBases.clear();
+
     TFCSParametrizationChain::Chain_t &R__stl = m_chain;
     int R__n = int(R__stl.size());
     R__b << R__n;
@@ -278,8 +282,9 @@ void TFCSParametrizationChain::Streamer(TBuffer &R__b) {
               R__t->GetName(), TString("Placeholder for: ") + R__t->GetTitle());
           R__t = std::move(new_R__t);
         }
-        R__b << R__t.get(); // get raw pointer from R__t because TBuffer operator<< does not support unique_ptr
-
+        m_writtenBases.emplace_back(R__t.release());
+        // Get raw pointer from R__t because TBuffer operator<< does not support unique_ptr
+        R__b << m_writtenBases.back().get();
       }
     }
     R__b.SetByteCount(R__c, kTRUE);
