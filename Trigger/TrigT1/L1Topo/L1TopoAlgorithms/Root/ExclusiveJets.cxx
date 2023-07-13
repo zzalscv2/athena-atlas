@@ -31,6 +31,8 @@ TCS::ExclusiveJets::ExclusiveJets(const std::string & name) : DecisionAlg(name)
    defineParameter("NumResultBits", 6);
    setNumberOutputBits(6);
 
+   defineParameter("PtScale",0);
+   defineParameter("PtShift",0);
    for (unsigned int i=0;i<numberOutputBits();i++){
      defineParameter("MinXi",  0, i);
      defineParameter("MaxXi", 999, i);
@@ -51,12 +53,15 @@ TCS::ExclusiveJets::initialize() {
    } else {
       p_NumberLeading1 = parameter("InputWidth").value();
    }
+   p_PtScale = parameter("PtScale").value();
+   p_PtShift = parameter("PtShift").value();
    for(unsigned int i=0; i<numberOutputBits(); ++i) {
+
      p_XiMin[i] = parameter("MinXi", i).value();
      p_XiMax[i] = parameter("MaxXi", i).value();
      
      p_MinET1[i] = parameter("MinET1",i).value();
-     
+      
      p_ApplyEtaCut[i] = parameter("ApplyEtaCut",i).value();
      p_MinEta1[i]     = parameter("MinEta1"    ,i).value();
      p_MaxEta1[i]     = parameter("MaxEta1"    ,i).value();
@@ -64,11 +69,14 @@ TCS::ExclusiveJets::initialize() {
      p_MaxEta2[i]     = parameter("MaxEta2"    ,i).value();
    }
    TRG_MSG_INFO("NumberLeading1 : " << p_NumberLeading1);
+   TRG_MSG_INFO("PtScale     : " << p_PtScale);
+   TRG_MSG_INFO("PtShift     : " << p_PtShift);
    for(unsigned int i=0; i<numberOutputBits(); ++i) {
-     TRG_MSG_INFO("XiMin   : " << p_XiMin[i]);
-     TRG_MSG_INFO("XiMax   : " << p_XiMax[i]);
+     TRG_MSG_INFO("XiMin       : " << p_XiMin[i]);
+     TRG_MSG_INFO("XiMax       : " << p_XiMax[i]);
    
-     TRG_MSG_INFO("MinET1          : " << p_MinET1[i]);
+     TRG_MSG_INFO("MinET1      : " << p_MinET1[i]);
+
      
      TRG_MSG_INFO("ApplyEtaCut : "<<p_ApplyEtaCut[i] );
      

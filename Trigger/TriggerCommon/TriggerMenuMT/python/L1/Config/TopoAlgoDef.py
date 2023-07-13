@@ -1984,6 +1984,8 @@ class TopoAlgoDef:
             alg.addgeneric('InputWidth', HW.jJetOutputWidthSort) # noqa: F821
             alg.addgeneric('MaxTob', HW.jJetOutputWidthSort)       # noqa: F821
             alg.addgeneric('NumResultBits',  len(toponames)) # noqa: F821
+            alg.addvariable('PtScale', 1.4*10) # noqa: F821
+            alg.addvariable('PtShift', 20*_et_conversion) # noqa: F821
             for bitid,minET in enumerate(d.minETlist):  # noqa: F821
                 alg.addvariable('MinET1', get_threshold_cut('jJ', minET)*_et_conversion, bitid)# noqa: F821
                 alg.addvariable('MinXi', 13600.0*_et_conversion*0.02, bitid) # noqa: F821
