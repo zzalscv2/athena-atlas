@@ -575,7 +575,7 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx,
 
 
       // the pixel positions and other needed stuff for the geometrical clustering
-      InDet::PixelCluster* pixelCluster = nullptr;
+      std::unique_ptr<InDet::PixelCluster> pixelCluster = nullptr;
       Amg::Vector2D       clusterPosition(0.,0.);
 
       std::vector<Identifier>           rdoList;
@@ -731,74 +731,77 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx,
       //       double newshift = 0.5*thickness*tanLorAng;
       //       double corr = ( shift - newshift );
       // 2a) Cluster creation ------------------------------------
-      if (m_pixUseClusterMaker){
-
-
-        //ATTENTION this can be enabled, take a look to localDirection
-        //         if (m_pixModuleDistortion &&  hitSiDetElement->isBarrel() )
-        //           clusterPosition = SG::ReadCondHandle<PixelDistortionData>(m_distortionKey)->correctSimulation(m_pixel_ID->wafer_hash(hitSiDetElement->identify()), clusterPosition, localDirection);
+      if (m_pixUseClusterMaker) {
 
         // from InDetReadoutGeometry: width from eta
-        const auto *pixModDesign = dynamic_cast<const InDetDD::PixelModuleDesign*>(&hitSiDetElement->design());
+        const auto* pixModDesign =
+            dynamic_cast<const InDetDD::PixelModuleDesign*>(
+                &hitSiDetElement->design());
         if (!pixModDesign) {
           return StatusCode::FAILURE;
         }
-        double etaWidth = pixModDesign->widthFromColumnRange(etaIndexMin, etaIndexMax);
+        double etaWidth =
+            pixModDesign->widthFromColumnRange(etaIndexMin, etaIndexMax);
         // from InDetReadoutGeometry : width from phi
-        double phiWidth = pixModDesign->widthFromRowRange(phiIndexMin, phiIndexMax);
+        double phiWidth =
+            pixModDesign->widthFromRowRange(phiIndexMin, phiIndexMax);
 
-        InDet::SiWidth siWidth(Amg::Vector2D(siDeltaPhiCut,siDeltaEtaCut),
-                               Amg::Vector2D(phiWidth,etaWidth));
+        InDet::SiWidth siWidth(Amg::Vector2D(siDeltaPhiCut, siDeltaEtaCut),
+                               Amg::Vector2D(phiWidth, etaWidth));
 
         // use the cluster maker from the offline software
-        pixelCluster = m_clusterMaker->pixelCluster(clusterId,
-                                                    clusterPosition,
-                                                    rdoList,
-                                                    lvl1a,
-                                                    totList,
-                                                    siWidth,
-                                                    hitSiDetElement,
-                                                    isGanged,
-                                                    m_pixErrorStrategy,
-                                                    *m_pixel_ID,
-                                                    false,
-                                                    0.0,
-                                                    0.0,
-                                                    calibData,
-                                                    *offlineCalibData);
-        if (isGanged)  pixelCluster->setGangedPixel(isGanged);
+        pixelCluster =
+            std::make_unique<PixelCluster>(m_clusterMaker->pixelCluster(
+                clusterId, clusterPosition, rdoList, lvl1a, totList, siWidth,
+                hitSiDetElement, isGanged, m_pixErrorStrategy, *m_pixel_ID,
+                false, 0.0, 0.0, calibData, *offlineCalibData));
+        if (isGanged) {
+          pixelCluster->setGangedPixel(isGanged);
+        }
       } else {
-        ATH_MSG_WARNING("[ cluster - pix ] No pixels errors provided, but configured to use them.");
-        ATH_MSG_WARNING("                  -> No pixels cluster will be created.");
+        ATH_MSG_WARNING(
+            "[ cluster - pix ] No pixels errors provided, but configured to "
+            "use them.");
+        ATH_MSG_WARNING(
+            "                  -> No pixels cluster will be created.");
         continue;
       }
 
-      if(!(pixelCluster->identify().is_valid()))
-        {
-          delete pixelCluster;
-          continue;
-        }
-
-      if (! (m_pixel_ID->is_pixel(pixelCluster->identify()))) {delete pixelCluster; continue;}
-
-      (void) PixelDetElClusterMap.insert(Pixel_detElement_RIO_map::value_type(waferHash, pixelCluster));
-
-      if (hit->particleLink().isValid()){
-        const int barcode( hit->particleLink().barcode());
-        if ( barcode !=0 && barcode != m_vetoThisBarcode ) {
-          m_pixPrdTruth->insert(std::make_pair(pixelCluster->identify(), hit->particleLink()));
-          ATH_MSG_DEBUG("Truth map filled with cluster" << pixelCluster << " and link = " << hit->particleLink());
-        }
-      }else{
-        ATH_MSG_DEBUG("Particle link NOT valid!! Truth map NOT filled with cluster" << pixelCluster << " and link = " << hit->particleLink());
+      if (!(pixelCluster->identify().is_valid())) {
+        pixelCluster.reset();
+        continue;
       }
 
-      //Add all hit that was connected to the cluster
-      for(const HepMcParticleLink& p: hit_vector){
-
-        m_pixPrdTruth->insert(std::make_pair(pixelCluster->identify(), p ));
+      if (!(m_pixel_ID->is_pixel(pixelCluster->identify()))) {
+        pixelCluster.reset();
+        continue;
       }
 
+      const auto it =
+          PixelDetElClusterMap.insert(Pixel_detElement_RIO_map::value_type(
+              waferHash, pixelCluster.release()));
+      const PixelCluster* insertedCluster = it->second;
+
+      if (hit->particleLink().isValid()) {
+        const int barcode(hit->particleLink().barcode());
+        if (barcode != 0 && barcode != m_vetoThisBarcode) {
+          m_pixPrdTruth->insert(
+              std::make_pair(insertedCluster->identify(), hit->particleLink()));
+          ATH_MSG_DEBUG("Truth map filled with cluster"
+                        << insertedCluster
+                        << " and link = " << hit->particleLink());
+        }
+      } else {
+        ATH_MSG_DEBUG(
+            "Particle link NOT valid!! Truth map NOT filled with cluster"
+            << insertedCluster << " and link = " << hit->particleLink());
+      }
+
+      // Add all hit that was connected to the cluster
+      for (const HepMcParticleLink& p : hit_vector) {
+
+        m_pixPrdTruth->insert(std::make_pair(insertedCluster->identify(), p ));
+      }
 
       hit_vector.clear();
     } // end hit while
