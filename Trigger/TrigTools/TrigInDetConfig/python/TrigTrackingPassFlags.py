@@ -55,12 +55,24 @@ def signatureSpecificSettingOfFlags(flags,mode):
     flags.maxDoubleHoles      = 0
     
   if flags.input_name=="cosmics":
+    flags.minPT               = 0.5*Units.GeV
     flags.nClustersMin        = 4
+    flags.minSiNotShared      = 3
+    flags.maxShared           = 0
     flags.nHolesMax           = 3
+    flags.maxSiHoles          = 3
+    flags.maxSCTHoles         = 3
+    flags.maxPixelHoles       = 3
+    flags.maxDoubleHoles      = 1
+    flags.maxPrimaryImpact    = 1000.
+    flags.maxRPhiImpact       = 1000.
+    flags.maxZImpact          = 10000.
     flags.Xi2max              = 60.  if mode=="InDet" else [60.]
     flags.Xi2maxNoAdd         = 100. if mode=="InDet" else [100.]
     flags.nWeightedClustersMin= 8
     flags.minTRTonTrk         = 20
+    flags.seedFilterLevel     = 3
+    flags.maxTracksPerSharedPRD = 10
 
   def collToRecordable(flags,name):
     ret = name

@@ -184,9 +184,13 @@ def SimpleAmbiguityProcessorTool_Trig_Cfg(
 
     if "Fitter" not in kwargs:
         from TrkConfig.TrkGlobalChi2FitterConfig import (
-            InDetTrigGlobalChi2FitterCfg)
-        kwargs.setdefault("Fitter", acc.popToolsAndMerge(
-            InDetTrigGlobalChi2FitterCfg(flags)))
+            InDetTrigGlobalChi2FitterCfg,InDetTrigGlobalChi2FitterCosmicsCfg)
+        if flags.Tracking.ActiveConfig.input_name == "cosmics":
+            kwargs.setdefault("Fitter", acc.popToolsAndMerge(
+                InDetTrigGlobalChi2FitterCosmicsCfg(flags)))
+        else:
+            kwargs.setdefault("Fitter", acc.popToolsAndMerge(
+                InDetTrigGlobalChi2FitterCfg(flags)))
 
     if "ScoringTool" not in kwargs:
         from InDetConfig.InDetTrackScoringToolsConfig import (
@@ -208,9 +212,14 @@ def SimpleAmbiguityProcessorTool_Trig_Cfg(
 
     if "SelectionTool" not in kwargs:
         from InDetConfig.InDetAmbiTrackSelectionToolConfig import (
-            InDetTrigAmbiTrackSelectionToolCfg)
-        kwargs.setdefault("SelectionTool", acc.popToolsAndMerge(
-            InDetTrigAmbiTrackSelectionToolCfg(flags,DriftCircleCutTool=None)))
+            InDetTrigAmbiTrackSelectionToolCfg,InDetTrigAmbiTrackSelectionToolCosmicsCfg)
+        
+        if flags.Tracking.ActiveConfig.input_name == "cosmics":
+            kwargs.setdefault("SelectionTool", acc.popToolsAndMerge(
+                InDetTrigAmbiTrackSelectionToolCosmicsCfg(flags)))
+        else:
+            kwargs.setdefault("SelectionTool", acc.popToolsAndMerge(
+                InDetTrigAmbiTrackSelectionToolCfg(flags,DriftCircleCutTool=None)))
 
     acc.setPrivateTools(
         CompFactory.Trk.SimpleAmbiguityProcessorTool(name, **kwargs))
