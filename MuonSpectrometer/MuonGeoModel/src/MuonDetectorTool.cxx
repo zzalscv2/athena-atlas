@@ -171,7 +171,6 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
       mgr->setCachingFlag(m_fillCache_initTime);
       mgr->setMdtDeformationFlag(m_enableMdtDeformations);
       mgr->setMdtAsBuiltParamsFlag(m_enableMdtAsBuiltParameters);
-      mgr->setNswAsBuiltParamsFlag(m_enableNswAsBuiltParameters);
       
       if (m_fillCache_initTime) {
 	mgr->fillCache();
@@ -245,9 +244,7 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
     else
         ATH_MSG_INFO("    ControlCscIntAlines   reset to " << tempControlCscIntAlines);
     ATH_MSG_INFO("    EnableMdtDeformations          " << m_enableMdtDeformations);
-    ATH_MSG_INFO("    EnableMdtAsBuiltParameters     " << m_enableMdtAsBuiltParameters);
-    ATH_MSG_INFO("    EnableNswAsBuiltParameters     " << m_enableNswAsBuiltParameters);
-
+    ATH_MSG_INFO("    EnableMdtAsBuiltParameters     " << m_enableMdtAsBuiltParameters);    
     if (m_stationSelection > 0) {
         StationSelector::SetSelectionType(m_stationSelection);
         if ((m_selectedStations.size() + m_selectedStEta.size() + m_selectedStPhi.size()) < 1) {
@@ -296,9 +293,7 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
         theFactory.setDBAtlasVersion(AtlasVersion);
         theFactory.setDBMuonVersion(MuonVersion);
         theFactory.setDBkey(detectorKey);
-        theFactory.setDBnode(detectorNode);
-        theFactory.setNSWABLineAsciiPath(m_NSWABLineAsciiPath);
-        theFactory.setNSWAsBuiltAsciiPath(m_NSWAsBuiltAsciiPathMM, m_NSWAsBuiltAsciiPathSTgc);
+        theFactory.setDBnode(detectorNode);       
         theFactory.setAmdcDb(isAmdcDb);
         theFactory.setLayout(tempLayout);
         theFactory.setCutoutsFlag(m_includeCutouts);
@@ -314,7 +309,6 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
         theFactory.setCacheFillingFlag(m_fillCache_initTime);
         theFactory.setMdtDeformationFlag(m_enableMdtDeformations);
         theFactory.setMdtAsBuiltParaFlag(m_enableMdtAsBuiltParameters);
-        theFactory.setNswAsBuiltParaFlag(m_enableNswAsBuiltParameters);
         theFactory.setFineClashFixingFlag(m_enableFineClashFixing);
         theFactory.hasCSC(m_hasCSC);
         theFactory.hasSTgc(m_hasSTgc);

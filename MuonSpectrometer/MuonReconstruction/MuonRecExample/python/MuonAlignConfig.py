@@ -62,7 +62,7 @@ if conddb.dbdata != 'COMP200' and conddb.dbmc != 'COMP200' and \
    'HLT' not in globalflags.ConditionsTag() and not conddb.isOnline :
     MuonAlignAlg.IsData = False
 condSequence+=MuonAlignAlg
-    
+
 MuonDetectorTool.FillCacheInitTime = 0 # We do not need to fill cache for the MuonGeoModel MuonDetectorTool, just for the condAlg
 
 # Condition DB is needed only if A-lines or B-lines are requested
@@ -93,24 +93,26 @@ if muonAlignFlags.UseIlines and MuonGeometryFlags.hasCSC():
         MuonAlignAlg.ILinesFromCondDB = True
 
 # here define if As-Built (MDT chamber alignment) are enabled
+applyNswAsBuilt = False
 if muonAlignFlags.UseAsBuilt:
     if conddb.dbdata == 'COMP200' or conddb.dbmc == 'COMP200' or \
        'HLT' in globalflags.ConditionsTag() or conddb.isOnline or conddb.isMC:
         logMuon.info("No MDT As-Built parameters applied.")
-        MuonDetectorTool.EnableMdtAsBuiltParameters = 0
-        MuonDetectorTool.EnableNswAsBuiltParameters = 0
+        MuonDetectorTool.EnableMdtAsBuiltParameters = 0        
     else :
         logMuon.info("Reading As-Built parameters from conditions database")
-        MuonDetectorTool.EnableMdtAsBuiltParameters = 1
-        MuonDetectorTool.EnableNswAsBuiltParameters = 0
+        MuonDetectorTool.EnableMdtAsBuiltParameters = 1        
         conddb.addFolder('MUONALIGN_OFL','/MUONALIGN/MDT/ASBUILTPARAMS' ,className='CondAttrListCollection')
         MuonAlignAlg.ParlineFolders += ["/MUONALIGN/MDT/ASBUILTPARAMS"]
         if CommonGeometryFlags.Run not in ["RUN1","RUN2"]: 
-            MuonDetectorTool.EnableNswAsBuiltParameters = 1
+            applyNswAsBuilt = True
             # TODO: remove hard-coded tag once the global tag is ready
             conddb.addFolderWithTag('MUONALIGN_OFL','/MUONALIGN/ASBUILTPARAMS/MM' , tag='MuonAlignAsBuiltParamsMm-RUN3-01-00', className='CondAttrListCollection')
             conddb.addFolderWithTag('MUONALIGN_OFL','/MUONALIGN/ASBUILTPARAMS/STGC',tag='MUONALIGN_STG_ASBUILT-001-03',        className='CondAttrListCollection')
-            MuonAlignAlg.ParlineFolders += ['/MUONALIGN/ASBUILTPARAMS/MM','/MUONALIGN/ASBUILTPARAMS/STGC']
+            from MuonCondAlg.MuonCondAlgConf import NswAsBuiltCondAlg
+            if not hasattr(condSequence, "NswAsBuiltCondAlg"):
+                condSequence+=NswAsBuiltCondAlg("NswAsBuiltCondAlg",
+                                            ReadSTgcAsBuiltParamsKey="")
 
 # nuisance parameter used during track fit to account for alignment uncertainty
 if conddb.dbdata != 'COMP200' and conddb.dbmc != 'COMP200' and \
@@ -129,6 +131,7 @@ if not hasattr(condSequence, "MuonDetectorCondAlg"):
     MuonDetectorManagerCond = MuonDetectorCondAlg("MuonDetectorCondAlg")
     MuonDetectorManagerCond.applyMmPassivation = muonAlignFlags.applyMMPassivation()
     MuonDetectorManagerCond.MuonDetectorTool = MuonDetectorTool
+    MuonDetectorManagerCond.applyNswAsBuilt = applyNswAsBuilt
     MuonDetectorManagerCond.MuonDetectorTool.FillCacheInitTime = 1 # CondAlg cannot update itself later - not threadsafe
 
     if conddb.dbdata != 'COMP200' and conddb.dbmc != 'COMP200' and \
