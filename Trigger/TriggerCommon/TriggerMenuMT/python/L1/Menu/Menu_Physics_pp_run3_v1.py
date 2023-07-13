@@ -103,10 +103,10 @@ def defineMenu():
         # combined mu - jet 
         'L1_MU3V_J12', 'L1_MU3V_J15', 'L1_MU5VF_J40', 'L1_BTAG-MU3VjJ40', 'L1_BTAG-MU5VFjJ50', 
 
-        #ATR-13743 
+        #ATR-13743 J,XE thershold change for ATR-19376 
         'L1_MU8F_2J20','L1_MU8F_3J20', 'L1_MU8F_2J15_J20',
-        'L1_MU14FCH_J40',
-        'L1_MU14FCH_XE30',
+        'L1_MU14FCH_J50',
+        'L1_MU14FCH_XE40',
         'L1_MU14FCH_EMPTY',
         'L1_MU14FCH_UNPAIRED_ISO',
 
