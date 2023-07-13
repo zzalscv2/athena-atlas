@@ -15,9 +15,7 @@ from TrigAnalysisTest.TrigAnalysisSteps import add_analysis_steps
 
 preExec = ';'.join([
   'setMenu=\'Dev_pp_run3_v1_TriggerValidation_prescale\'',
-  'from AthenaConfiguration.AllConfigFlags import ConfigFlags',
-  'ConfigFlags.Trigger.AODEDMSet=\'AODFULL\'',
-  'from JetRec.JetRecFlags import jetFlags; jetFlags.writeJetsToAOD = True',
+  'flags.Trigger.AODEDMSet=\'AODFULL\'; flags.Jet.WriteToAOD = True',
 ])
 
 rdo2aod = ExecStep.ExecStep("rdo2aod")
@@ -27,6 +25,7 @@ rdo2aod.max_events = 800
 rdo2aod.threads = 4
 rdo2aod.concurrent_events = 4
 rdo2aod.args = '--outputAODFile=AOD.pool.root --steering="doRDO_TRIG"'
+rdo2aod.args += ' --CA "default:True" "RDOtoRDOTrigger:False"'
 rdo2aod.args += ' --preExec="all:{:s};"'.format(preExec)
 
 
@@ -38,10 +37,8 @@ aod2hist_offline.max_events = -1
 aod2hist_offline.threads = 4
 aod2hist_offline.concurrent_events = 4
 aod2hist_offline.args  = "-c \""
-aod2hist_offline.args += "from AthenaConfiguration.AllConfigFlags import ConfigFlags; "
-aod2hist_offline.args += "ConfigFlags.Input.Files='AOD.pool.root'.split(','); "
-aod2hist_offline.args += "ConfigFlags.Input.isMC=True; "
-aod2hist_offline.args += "ConfigFlags.Output.HISTFileName='Output.FTAGValidation.PhysicsVariablePlots.pool.root'; "
+aod2hist_offline.args += "flags.Input.Files='AOD.pool.root'.split(','); "
+aod2hist_offline.args += "flags.Output.HISTFileName='Output.FTAGValidation.PhysicsVariablePlots.pool.root'; "
 aod2hist_offline.args += "\""
 
 aod2hist_online = ExecStep.ExecStep("aod2hist_online")
@@ -52,10 +49,8 @@ aod2hist_online.max_events = -1
 aod2hist_online.threads = 4
 aod2hist_online.concurrent_events = 4
 aod2hist_online.args  = "-c \""
-aod2hist_online.args += "from AthenaConfiguration.AllConfigFlags import ConfigFlags; "
-aod2hist_online.args += "ConfigFlags.Input.Files='AOD.pool.root'.split(','); "
-aod2hist_online.args += "ConfigFlags.Input.isMC=True; "
-aod2hist_online.args += "ConfigFlags.Output.HISTFileName='Output.FTAGValidation.PhysicsTriggerVariablePlots.pool.root'; "
+aod2hist_online.args += "flags.Input.Files='AOD.pool.root'.split(','); "
+aod2hist_online.args += "flags.Output.HISTFileName='Output.FTAGValidation.PhysicsTriggerVariablePlots.pool.root'; "
 aod2hist_online.args += "\""
 
 test = Test.Test()
