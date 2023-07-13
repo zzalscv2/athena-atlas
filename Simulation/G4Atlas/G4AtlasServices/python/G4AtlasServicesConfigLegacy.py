@@ -60,6 +60,9 @@ def getPhysicsListSvc(name="PhysicsListSvc", **kwargs):
     """
     ## kwargs.setdefault("EMDEDXBinning"   , 77)
     ## kwargs.setdefault("EMLambdaBinning" , 77)
+    from ISF_Config.ISF_jobProperties import ISF_Flags
+    if ISF_Flags.Simulator.usesFatras():
+        kwargs.setdefault("UnstableAntiNeutrons", True) # Fix for ATLASSIM-6634 - consider fixing for FullG4 also
     return CfgMgr.PhysicsListSvc(name, **kwargs)
 
 
