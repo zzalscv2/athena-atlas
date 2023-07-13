@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTRACKSUMMARYHELPERTOOL_H
@@ -69,7 +69,7 @@ namespace Muon {
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
         /* used to do hits-in-road search for straight tracks */
-        ToolHandle<Trk::IExtrapolator> m_slExtrapolator{"Trk::Extrapolator/MuonStraightLineExtrapolator"};
+        ToolHandle<Trk::IExtrapolator> m_slExtrapolator{this, "StaightLineExtrapolator", "Trk::Extrapolator/MuonStraightLineExtrapolator"};
 
         /* used to do hits-in-road search */
         ToolHandle<Trk::IExtrapolator> m_extrapolator{this, "Extrapolator", "Trk::Extrapolator/AtlasExtrapolator"};

@@ -44,8 +44,8 @@ def MuonTrackToSegmentToolCfg(flags,name="MuonTrackToSegmentTool", **kwargs):
     return result
 
 def MuonHitSummaryToolCfg(flags, name="MuonHitSummaryTool", **kwargs):
-    result = MuonTrackSummaryHelperToolCfg(flags)   
-    kwargs.setdefault('MuonTrackSummaryHelperTool', result.getPrimary())
+    result = ComponentAccumulator()       
+    kwargs.setdefault('MuonTrackSummaryHelperTool', result.popToolsAndMerge(MuonTrackSummaryHelperToolCfg(flags)))
     printer = result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags))
     kwargs.setdefault('Printer', printer )
     result.addPublicTool(printer)
@@ -106,17 +106,12 @@ def MuonSegmentMomentumFromFieldCfg(flags, name="MuonSegmentMomentumFromField", 
     return result
     
 def MuonTrackSummaryHelperToolCfg(flags, name="MuonTrackSummaryHelperTool", **kwargs):
-    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-    
-    result = AtlasExtrapolatorCfg(flags)
-    extrap = result.getPrimary()
-    result.addPublicTool(extrap)
-    kwargs.setdefault("Extrapolator", extrap)
-
+    result = ComponentAccumulator()
+    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg, MuonStraightLineExtrapolatorCfg
+    kwargs.setdefault("Extrapolator", result.popToolsAndMerge(AtlasExtrapolatorCfg(flags)) )
+    kwargs.setdefault("StaightLineExtrapolator", result.popToolsAndMerge(MuonStraightLineExtrapolatorCfg(flags)) )
     kwargs.setdefault("CalculateCloseHits", True)
-
-    Muon__MuonTrackSummaryHelperTool=CompFactory.Muon.MuonTrackSummaryHelperTool
-    result.setPrivateTools(Muon__MuonTrackSummaryHelperTool(name=name,**kwargs))
+    result.setPrivateTools(CompFactory.Muon.MuonTrackSummaryHelperTool(name=name,**kwargs))
     return result
 
 def MuonTrackScoringToolCfg(flags, name="MuonTrackScoringTool", **kwargs):

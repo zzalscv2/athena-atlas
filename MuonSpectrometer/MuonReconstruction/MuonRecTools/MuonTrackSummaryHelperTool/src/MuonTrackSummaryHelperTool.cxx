@@ -33,11 +33,8 @@ Muon::MuonTrackSummaryHelperTool::MuonTrackSummaryHelperTool(const std::string& 
 
 StatusCode Muon::MuonTrackSummaryHelperTool::initialize() {
     ATH_CHECK(m_DetectorManagerKey.initialize());
-    if (m_calculateCloseHits && !m_extrapolator.empty()) {
-        ATH_CHECK(m_extrapolator.retrieve());
-    } else {
-        m_extrapolator.disable();
-    }
+    ATH_CHECK(m_extrapolator.retrieve(EnableTool{m_calculateCloseHits && !m_extrapolator.empty()}));
+    ATH_CHECK(m_slExtrapolator.retrieve(EnableTool{m_calculateCloseHits && !m_slExtrapolator.empty()}));
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_mdtKey.initialize());
     return StatusCode::SUCCESS;
@@ -445,11 +442,10 @@ void Muon::MuonTrackSummaryHelperTool::calculateRoadHits(Trk::MuonTrackSummary::
             }
         }
     }
-    const Trk::IExtrapolator* extrapolator = nullptr;
-    if (!isStraightLine && !m_extrapolator.empty()) {
-        extrapolator = &*(m_extrapolator);
-    } else if (isStraightLine && !m_slExtrapolator.empty()) {
-        extrapolator = &*(m_slExtrapolator);
+    const Trk::IExtrapolator* extrapolator{nullptr};
+    if (m_extrapolator.isEnabled()) extrapolator = m_extrapolator.get();
+    if (isStraightLine && m_slExtrapolator.isEnabled()) {
+        extrapolator = m_slExtrapolator.get();
     }
     if (!extrapolator) return;
 
