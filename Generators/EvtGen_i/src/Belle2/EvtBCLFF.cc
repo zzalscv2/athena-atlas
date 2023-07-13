@@ -102,7 +102,7 @@ void EvtBCLFF::getvectorff(EvtId parent, EvtId daughter, double t, double, doubl
     return (term1 - term2) / (term1 + term2);
   };
 
-  auto sum = [&z](decltype(t) q2, std::vector<double> par) {
+  auto sum = [&z](decltype(t) q2, const std::vector<double>& par) {
     double tot = 0;
     for (unsigned int n = 0; n < par.size(); ++n) {
       tot += par[n] * std::pow(z(q2) - z(0), n);

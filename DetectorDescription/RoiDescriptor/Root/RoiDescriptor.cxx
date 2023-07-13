@@ -20,15 +20,12 @@
 #include <stdexcept>
 
 
-#ifndef M_2PI
-static const double M_2PI = 2*M_PI;
-#endif
-
-#ifndef M_PIF
-static const float  M_PIF = float(M_PI);
-#endif
-
-static const int RoiVersion = 4;
+namespace {
+  constexpr double M_2PI = 2*M_PI;
+  /// Single-precision PI for boundary checks to match EDM precision
+  constexpr float  M_PIF = M_PI;
+  constexpr int RoiVersion = 4;
+}
 
 std::atomic<double> RoiDescriptor::s_zedWidthDefault = 225;
 std::atomic<bool> RoiDescriptor::s_firstInstanceCreated = false;

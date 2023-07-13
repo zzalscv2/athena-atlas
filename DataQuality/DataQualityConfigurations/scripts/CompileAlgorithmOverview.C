@@ -126,7 +126,7 @@ void printHanLimits(TDirectory *limitDir)
 }
 
 
-string printResults(TDirectory *resultsDir, string histoName)
+string printResults(TDirectory *resultsDir, const string& histoName)
 {
   if (detailedOutput)
     cout << "Results:" << endl;

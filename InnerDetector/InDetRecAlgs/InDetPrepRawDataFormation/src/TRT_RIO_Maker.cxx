@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -95,6 +95,9 @@ namespace InDet {
     if (!hasExternalCache) {
       dataItemsPool = std::make_unique<DataPool<TRT_DriftCircle>>(ctx);
       dataItemsPool->reserve(100000);  // Some large default size
+    }else if(m_useDataPoolWithCache){
+      dataItemsPool = std::make_unique<DataPool<TRT_DriftCircle>>(ctx);
+      //Default size for now 1024 let it expand on its own
     }
 
     // Get TRT_RDO and produce TRT_RIO collections
@@ -122,11 +125,6 @@ namespace InDet {
          
          listOfTRTIds.clear(); //Prevents needless memory reallocations
          m_regionSelector->HashIDList( *roi, listOfTRTIds);
-#ifndef NDEBUG
-          ATH_MSG_VERBOSE(*roi);
-          ATH_MSG_VERBOSE( "REGTEST: SCT : Roi contains " 
-		     << listOfTRTIds.size() << " det. Elements" );
-#endif   
          for(auto &id : listOfTRTIds){
             const InDetRawDataCollection<TRT_RDORawData>* RDO_Collection (rdoContainer->indexFindPtr(id));
             if (!RDO_Collection) continue;
@@ -141,11 +139,7 @@ namespace InDet {
                                             RDO_Collection, ctx, dataItemsPool.get(),
                                             m_trtBadChannels));
             if (p_rio && !p_rio->empty()) {
-#ifndef NDEBUG               
-                 ATH_MSG_VERBOSE( "REGTEST: TRT : DriftCircleCollection contains "
-                 << p_rio->size() << " clusters" );
-#endif
-                 ATH_CHECK(lock.addOrDelete(std::move(p_rio)));
+              ATH_CHECK(lock.addOrDelete(std::move(p_rio)));
             }
          }
       }

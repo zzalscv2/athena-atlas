@@ -18,8 +18,7 @@
 #include "CxxUtils/fpcompare.h"
 #include "AthContainers/DataVector.h"
 #include "TruthUtils/MagicNumbers.h"
-#include "boost/type_traits/remove_pointer.hpp"
-#include "boost/type_traits/is_convertible.hpp"
+#include <type_traits>
 
 
 #ifndef XAOD_STANDALONE
@@ -454,10 +453,9 @@ namespace AnalysisUtils {
       template <class COLL, class COMP>
       inline void dosort (COLL& coll, COMP comp)
       {
-        typedef typename boost::remove_pointer<typename COLL::value_type>::type
-                valtype;
+        typedef typename std::remove_pointer<typename COLL::value_type>::type valtype;
         typedef DataVector<valtype> dvtype;
-        const bool is_dv = boost::is_convertible<COLL&, dvtype&>::value;
+        const bool is_dv = std::is_convertible<COLL&, dvtype&>::value;
         dosort_imp<is_dv>::dosort (coll, comp);
       }
 

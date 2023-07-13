@@ -504,7 +504,7 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
           ++iter;
         }
         if (!known)
-          hSteps[phibin].push_back(std::pair<int, float>(tmin, rmin));
+          hSteps[phibin].emplace_back(tmin, rmin);
         iter = hSteps[phibin].begin();
         known = false;
         while (iter != hSteps[phibin].end()) {
@@ -520,10 +520,10 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
           ++iter;
         }
         if (!known)
-          hSteps[phibin].push_back(std::pair<int, float>(tmax, rmax));
+          hSteps[phibin].emplace_back(tmax, rmax);
       } else {
-        hSteps[phibin].push_back(std::pair<int, float>(tmin, rmin));
-        hSteps[phibin].push_back(std::pair<int, float>(tmax, rmax));
+        hSteps[phibin].emplace_back(tmin, rmin);
+        hSteps[phibin].emplace_back(tmax, rmax);
       }
     }
     // verify size of the array

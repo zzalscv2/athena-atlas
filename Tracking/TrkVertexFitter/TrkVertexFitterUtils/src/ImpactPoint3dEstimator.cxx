@@ -8,7 +8,6 @@
 
 #include "ImpactPoint3dEstimator.h"
 #include "TrkParameters/TrackParameters.h"
-#include "TrkSurfaces/PlaneSurface.h"
 #include "VxVertex/VxTrackAtVertex.h"
 #include "TrkEventPrimitives/ParamDefs.h"
 #include "MagFieldElements/AtlasFieldCache.h"
@@ -150,19 +149,19 @@ namespace Trk
 
     ATH_MSG_VERBOSE( " Now running ImpactPoint3dEstimator::Estimate3dIP" );
     double phi0=thePerigee->parameters()[Trk::phi0];
-    double cosphi0=-std::sin(phi0);
-    double sinphi0=std::cos(phi0);
+    double dCosPhi0=-std::sin(phi0);
+    double dSinPhi0=std::cos(phi0);
     double theta=thePerigee->parameters()[Trk::theta];
-    double cottheta=1./std::tan(thePerigee->parameters()[Trk::theta]);
+    double cotTheta=1./std::tan(thePerigee->parameters()[Trk::theta]);
     double d0=thePerigee->parameters()[Trk::d0];
 
     //I need the radius (magnetic field...)
     double Bz=magnFieldVect[2]*299.792;
     double Rt=std::sin(theta)/(Bz*thePerigee->parameters()[Trk::qOverP]);
 
-    double x0=thePerigee->associatedSurface().center().x()+(d0-Rt)*cosphi0;
-    double y0=thePerigee->associatedSurface().center().y()+(d0-Rt)*sinphi0;
-    double z0=thePerigee->associatedSurface().center().z()+thePerigee->parameters()[Trk::z0]+Rt*phi0*cottheta;
+    double x0=thePerigee->associatedSurface().center().x()+(d0-Rt)*dCosPhi0;
+    double y0=thePerigee->associatedSurface().center().y()+(d0-Rt)*dSinPhi0;
+    double z0=thePerigee->associatedSurface().center().z()+thePerigee->parameters()[Trk::z0]+Rt*phi0*cotTheta;
 
     if (thePerigee!=trackPerigee) {
       delete thePerigee;
@@ -173,9 +172,9 @@ namespace Trk
     double yc=theVertex->y();
     double zc=theVertex->z();
 
-    double phiactual=phi0;
-    double cosphiactual=-std::sin(phiactual);
-    double sinphiactual=std::cos(phiactual);
+    double phiActual=phi0;
+    double dCosPhiActual=-std::sin(phiActual);
+    double dSinPhiActual=std::cos(phiActual);
 
     double secderivative=0.;
     double derivative=0.;
@@ -186,22 +185,20 @@ namespace Trk
     double deltaphi=0.;
 
 #ifdef IMPACTPOINT3DESTIMATOR_DEBUG
-    std::cout << std::setprecision(25) << "actual distance  before cycle is: " << std::sqrt(std::pow(x0-xc+Rt*cosphiactual,2)+
-                                                                                            std::pow(y0-yc+Rt*sinphiactual,2)+
-                                                                                            std::pow(z0-zc-Rt*cottheta*phiactual,2)) << std::endl;
+    std::cout << std::setprecision(25) << "actual distance  before cycle is: " << std::hypot(x0-xc+Rt*dCosPhiActual, 
+                                                                                  y0-yc+Rt*dSinPhiActual, 
+                                                                                  z0-zc-Rt*cotTheta*phiActual) << std::endl;
 #endif
 
     do {
 
 #ifdef IMPACTPOINT3DESTIMATOR_DEBUG
-      ATH_MSG_VERBOSE( "Cycle number: " << ncycle << " old phi: " << phiactual  );
+      ATH_MSG_VERBOSE( "Cycle number: " << ncycle << " old phi: " << phiActual  );
 #endif
-      //      distance=std::sqrt(std::pow(x0-xc+Rt*cosphiactual,2)+
-      //                 std::pow(y0-yc+Rt*sinphiactual,2)+
-      //                 std::pow(z0-zc-Rt*cottheta*phiactual));
+     
 
-      derivative=(x0-xc)*(-Rt*sinphiactual)+(y0-yc)*Rt*cosphiactual+(z0-zc-Rt*phiactual*cottheta)*(-Rt*cottheta);
-      secderivative=Rt*(-(x0-xc)*cosphiactual-(y0-yc)*sinphiactual+Rt*cottheta*cottheta);
+      derivative=(x0-xc)*(-Rt*dSinPhiActual)+(y0-yc)*Rt*dCosPhiActual+(z0-zc-Rt*phiActual*cotTheta)*(-Rt*cotTheta);
+      secderivative=Rt*(-(x0-xc)*dCosPhiActual-(y0-yc)*dSinPhiActual+Rt*cotTheta*cotTheta);
 #ifdef IMPACTPOINT3DESTIMATOR_DEBUG
       ATH_MSG_VERBOSE( "derivative is: " << derivative << " sec derivative is: " << secderivative  );
 #endif
@@ -212,18 +209,17 @@ namespace Trk
       std::cout << std::setprecision(25) << "deltaphi: " << deltaphi << std::endl;
 #endif
 
-      phiactual+=deltaphi;
-      cosphiactual=-std::sin(phiactual);
-      sinphiactual=std::cos(phiactual);
+      phiActual+=deltaphi;
+      dCosPhiActual=-std::sin(phiActual);
+      dSinPhiActual=std::cos(phiActual);
 
 #ifdef IMPACTPOINT3DESTIMATOR_DEBUG
       ATH_MSG_VERBOSE( "derivative is: " << derivative << " sec derivative is: " << secderivative  );
-      std::cout << std::setprecision(25) << std::sqrt(std::pow(x0-xc+Rt*cosphiactual,2)+
-                                                      std::pow(y0-yc+Rt*sinphiactual,2)+
-                                                      std::pow(z0-zc-Rt*cottheta*phiactual,2)) << std::endl;
-      ATH_MSG_VERBOSE( "actual distance is: " << std::sqrt(std::pow(x0-xc+Rt*cosphiactual,2)+
-                                                                 std::pow(y0-yc+Rt*sinphiactual,2)+
-                                                           std::pow(z0-zc-Rt*cottheta*phiactual,2))  );
+      std::cout << std::setprecision(25) << std::hypot(x0-xc+Rt*dCosPhiActual, y0-yc+Rt*dSinPhiActual,
+                                                      z0-zc-Rt*cotTheta*phiActual) << std::endl;
+      ATH_MSG_VERBOSE( "actual distance is: " << std::hypot(x0-xc+Rt*dCosPhiActual,
+                                                            y0-yc+Rt*dSinPhiActual,
+                                                            z0-zc-Rt*cotTheta*phiActual));
 #endif
 
       if (secderivative<0) throw error::ImpactPoint3dEstimatorProblem("Second derivative is negative");
@@ -233,7 +229,7 @@ namespace Trk
       ncycle+=1;
       if (ncycle>m_maxiterations||std::abs(deltaphi)<m_precision) {
 #ifdef IMPACTPOINT3DESTIMATOR_DEBUG
-        ATH_MSG_VERBOSE( "found minimum at: " << phiactual  );
+        ATH_MSG_VERBOSE( "found minimum at: " << phiActual  );
 #endif
         isok=true;
       }
@@ -242,8 +238,8 @@ namespace Trk
 
     //now you have to construct the plane with PlaneSurface
     //first vector at 3d impact point
-    Amg::Vector3D MomentumDir(std::cos(phiactual)*std::sin(theta),std::sin(phiactual)*std::sin(theta),std::cos(theta));
-    Amg::Vector3D DeltaR(x0-xc+Rt*cosphiactual,y0-yc+Rt*sinphiactual,z0-zc-Rt*cottheta*phiactual);
+    Amg::Vector3D MomentumDir(std::cos(phiActual)*std::sin(theta),std::sin(phiActual)*std::sin(theta),std::cos(theta));
+    Amg::Vector3D DeltaR(x0-xc+Rt*dCosPhiActual,y0-yc+Rt*dSinPhiActual,z0-zc-Rt*cotTheta*phiActual);
     distance=DeltaR.mag();
     if (distance==0.){
       ATH_MSG_WARNING("DeltaR is zero in ImpactPoint3dEstimator::Estimate3dIP, returning nullptr");
@@ -265,11 +261,11 @@ namespace Trk
     Amg::Vector3D YDir=MomentumDir.cross(DeltaRcorrected);
 
     //store the impact 3d point
-    Amg::Vector3D vertex(x0+Rt*cosphiactual,y0+Rt*sinphiactual,z0-Rt*cottheta*phiactual);
+    Amg::Vector3D vertex(x0+Rt*dCosPhiActual,y0+Rt*dSinPhiActual,z0-Rt*cotTheta*phiActual);
 
-    ATH_MSG_VERBOSE( "final minimal distance is: " << std::sqrt(std::pow(x0-xc+Rt*cosphiactual,2)+
-                                                                std::pow(y0-yc+Rt*sinphiactual,2)+
-                                                                std::pow(z0-zc-Rt*cottheta*phiactual,2))  );
+    ATH_MSG_VERBOSE( "final minimal distance is: " << std::hypot(x0-xc+Rt*dCosPhiActual,
+                                                                 y0-yc+Rt*dSinPhiActual,
+                                                                 z0-zc-Rt*cotTheta*phiActual));
 
     ATH_MSG_DEBUG( "POCA in 3D is: " << vertex  );
 

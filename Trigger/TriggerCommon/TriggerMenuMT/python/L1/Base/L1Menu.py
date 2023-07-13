@@ -456,33 +456,65 @@ class L1Menu(object):
                 pars_for_algo = params[algo.classtype]
                 generics_map = {g.name:g.value for g in algo.generics}
                 # No conditional parameters
-                ordered_params = None
+                common_params = None # Common parameters at the beginning, not repeated on multiple algo instances
+                ordered_params = None # Parameters that can be repeated if configuring multiple algo instances
+                if 'common_parameters' in pars_for_algo:
+                    common_params = pars_for_algo['common_parameters']
                 if 'parameters' in pars_for_algo:
                     ordered_params = pars_for_algo['parameters']
-                else: # Check value of conditional
+                # If all of the param lists are None, we have conditionals
+                if common_params is None and ordered_params is None:
                     for cond in pars_for_algo.keys():
-                        condname, condval = cond.split(' = ')
-                        if condname in generics_map and int(condval) == generics_map[condname]:
-                            ordered_params = pars_for_algo[cond]['parameters']
-                        elif int(condval)==0:
-                            # If the generic is not defined, assume false
-                            ordered_params = pars_for_algo[cond]['parameters']
-                if ordered_params is None:
+                        if cond == 'comment': continue
+
+                        # Check that the condition is valid
+                        pass_condition = True
+                        for c in cond.split(' and '):
+                            condname, condval = c.split(' = ')
+                            if condname in generics_map:
+                                if int(condval) == generics_map[condname]:
+                                    continue
+                                else:
+                                    pass_condition = False
+                                    break
+                            elif int(condval) == 0: # If the generic is not defined, assume that false is ok
+                                continue
+                            else:
+                                pass_condition = False
+                                break
+
+                        if pass_condition:
+                            if 'common_parameters' in pars_for_algo[cond]:
+                                common_params = pars_for_algo[cond]['common_parameters']
+                            if 'parameters' in pars_for_algo[cond]:
+                                ordered_params = pars_for_algo[cond]['parameters']
+                            break
+
+                if common_params is None and ordered_params is None and common_params is None:
                     raise RuntimeError(f'checkL1TopoParams: Did not find ordered parameter list for L1Topo algorithm type {algo.classtype}')
+
                 menu_params = [p.name for p in algo.variables]
-                log.info(f'Menu contains parameter list {menu_params}')
-                log.info(f'Expected parameter list {ordered_params}')
+                log.info(f'Menu contains parameter list: {menu_params}')
+
+                if common_params is None: common_params = []
+                if ordered_params is None: ordered_params = []
+                log.info(f'Expected parameter list: {common_params + ordered_params}')
+
                 # Handle case where parameters are supplied repeatedly to
                 # configure multiple instances
-                if len(menu_params) > len(ordered_params):
-                    if len(menu_params) % len(ordered_params) == 0:
-                        ordered_params = int(len(menu_params)/len(ordered_params)) * ordered_params
+                non_common_param_count = len(menu_params) - len(common_params)
+                if non_common_param_count > len(ordered_params):
+                    log.info(f'Can repeat the parameters: {ordered_params}')
+                    if non_common_param_count % len(ordered_params) == 0:
+                        ordered_params = int(non_common_param_count/len(ordered_params)) * ordered_params
                     else:
                         log.error("Mismatch in number of parameters")
-                if menu_params!=ordered_params:
+
+                total_params = common_params + ordered_params
+                if menu_params != total_params:
                     log.error(f'checkL1TopoParams: Parameter list for {algo.name}/{algo.classtype} does not match specification')
                     log.error(f'    Menu contains parameter list {menu_params}')
-                    log.error(f'    Expected parameter list {ordered_params}')
+                    log.error(f'    Expected parameter list {total_params}')
                     algo_param_mismatch.append(algo)
                 
         if algo_param_mismatch:

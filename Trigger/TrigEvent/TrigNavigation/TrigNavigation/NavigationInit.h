@@ -15,7 +15,7 @@
 #include <boost/function_types/parameter_types.hpp>
 #include <boost/function_types/function_arity.hpp>
 #include <boost/typeof/std/utility.hpp>
-#include <boost/type_traits/remove_pointer.hpp>
+#include <type_traits>
 #include "AthLinks/ElementLink.h"
 #include "AthLinks/DataLink.h"
 #include "CxxUtils/checker_macros.h"

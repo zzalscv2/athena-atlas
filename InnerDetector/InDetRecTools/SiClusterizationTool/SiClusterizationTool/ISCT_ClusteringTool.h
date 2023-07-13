@@ -21,6 +21,7 @@
 //// no forward declare ... typedef
 #include "InDetPrepRawData/SCT_ClusterCollection.h"
 
+#include "AthAllocators/DataPool.h"
 class SCT_ID;
 
 class SCT_ChannelStatusAlg;
@@ -49,7 +50,9 @@ namespace InDet {
      */
     virtual SCT_ClusterCollection *clusterize(const InDetRawDataCollection<SCT_RDORawData>& rdoCollection,
                                               const SCT_ID& idHelper,
-                                              const InDet::SiDetectorElementStatus *sctDetElementStatus, const EventContext& ctx) const = 0;
+                                              const InDet::SiDetectorElementStatus *sctDetElementStatus, 
+                                              DataPool<SCT_Cluster>* dataItemsPool,
+                                              const EventContext& ctx) const = 0;
   };
 }
 

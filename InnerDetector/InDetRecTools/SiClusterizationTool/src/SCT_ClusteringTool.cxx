@@ -307,11 +307,13 @@ namespace InDet {
   SCT_ClusterCollection * 
   SCT_ClusteringTool::clusterize(const InDetRawDataCollection<SCT_RDORawData>& collection,
                                  const SCT_ID& idHelper,
-                                 const InDet::SiDetectorElementStatus *sctDetElStatus, const EventContext& ctx) const
+                                 const InDet::SiDetectorElementStatus *sctDetElStatus, 
+                                 DataPool<SCT_Cluster>* dataItemsPool,
+                                 const EventContext& ctx) const
   {
     ATH_MSG_VERBOSE ("SCT_ClusteringTool::clusterize()");
 
-    if (m_doFastClustering) return fastClusterize(collection, idHelper, sctDetElStatus, ctx);
+    if (m_doFastClustering) return fastClusterize(collection, idHelper, sctDetElStatus, dataItemsPool, ctx);
 
     SCT_ClusterCollection* nullResult(nullptr);
     if (collection.empty()) {
@@ -444,6 +446,10 @@ namespace InDet {
     SCT_ClusterCollection* clusterCollection = new SCT_ClusterCollection(idHash);
     clusterCollection->setIdentifier(elementID);
     clusterCollection->reserve(idGroups.size());
+    //DataPool will own the elements
+    if(dataItemsPool){
+      clusterCollection->clear(SG::VIEW_ELEMENTS);
+    }
 
     // All strips are assumed to be the same width.
     std::vector<uint16_t>::iterator tbinIter(tbinGroups.begin());
@@ -473,16 +479,29 @@ namespace InDet {
       //
       // Now make a SiCluster
       const SiWidth siWidth(Amg::Vector2D(nStrips, 1), Amg::Vector2D(clusterDim.width, stripLength));
-      
-      SCT_Cluster* cluster = (m_clusterMaker) ? (m_clusterMaker->sctCluster(clusterId, localPos, stripGroup, siWidth, element, m_errorStrategy))
-        : (new SCT_Cluster(clusterId, localPos, stripGroup, siWidth, element,{}));
-      cluster->setHashAndIndex(clusterCollection->identifyHash(), clusterCollection->size());
+
+      SCT_Cluster* cluster = nullptr;
+      if (dataItemsPool){
+         cluster =  dataItemsPool->nextElementPtr();
+      }else{
+        cluster = new SCT_Cluster();
+      }
+
+      (*cluster) =
+          (m_clusterMaker)
+              ? (m_clusterMaker->sctCluster(clusterId, localPos, stripGroup,
+                                            siWidth, element, m_errorStrategy))
+              : (SCT_Cluster(clusterId, localPos, stripGroup, siWidth, element,
+                             {}));
+
+      cluster->setHashAndIndex(clusterCollection->identifyHash(),
+                               clusterCollection->size());
       if (tbinIter != tbinGroups.end()) {
         cluster->setHitsInThirdTimeBin(*tbinIter);
         ++tbinIter;
       }
-      if (badStripInClusterOnThisModuleSide) cluster->setHitsInThirdTimeBin(0); /// clusters had been split - recalculating HitsInThirdTimeBin too difficult to be worthwhile for this rare corner case..
-
+      /// clusters had been split - recalculating HitsInThirdTimeBin too difficult to be worthwhile for this rare corner case..
+      if (badStripInClusterOnThisModuleSide) cluster->setHitsInThirdTimeBin(0);       
       clusterCollection->push_back(cluster);
     }
 
@@ -491,7 +510,9 @@ namespace InDet {
 
   SCT_ClusterCollection* SCT_ClusteringTool::fastClusterize(const InDetRawDataCollection<SCT_RDORawData>& collection,
                                                             const SCT_ID& idHelper,
-                                                            const InDet::SiDetectorElementStatus *sctDetElStatus, const EventContext& ctx) const
+                                                            const InDet::SiDetectorElementStatus *sctDetElStatus, 
+                                                            DataPool<SCT_Cluster>* dataItemsPool,
+                                                            const EventContext& ctx) const
   {
     if (collection.empty()) return nullptr;
 
@@ -627,6 +648,9 @@ namespace InDet {
     Identifier elementID = collection.identify();
     clusterCollection->setIdentifier(elementID);
     clusterCollection->reserve(idGroups.size());
+    if(dataItemsPool){
+      clusterCollection->clear(SG::VIEW_ELEMENTS);
+    }
 
     int clusterNumber = 0;
 
@@ -718,9 +742,16 @@ namespace InDet {
 
       SiWidth siWidth{Amg::Vector2D(dnStrips,1.), Amg::Vector2D(width,stripL)};
 
-      SCT_Cluster* cluster =
-          new SCT_Cluster{clusterId, locpos,  std::move(*pGroup),
-                          siWidth,   element, std::move(errorMatrix)};
+      SCT_Cluster* cluster = nullptr;
+      if (dataItemsPool) {
+        cluster = dataItemsPool->nextElementPtr();
+        (*cluster) = SCT_Cluster{clusterId, locpos,  std::move(*pGroup),
+                                 siWidth,   element, std::move(errorMatrix)};
+
+      } else {
+        cluster = new SCT_Cluster{clusterId, locpos,  std::move(*pGroup),
+                                  siWidth,   element, std::move(errorMatrix)};
+      }
 
       cluster->setHashAndIndex(idHash, clusterNumber);
 

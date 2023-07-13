@@ -72,8 +72,12 @@ namespace InDet{
 
     SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey{this, "RoIs", "", "RoIs to read in"};
     BooleanProperty m_roiSeeded{this, "isRoI_Seeded", false, "Use RoI"};
+    Gaudi::Property<bool> m_useDataPoolWithCache{
+        this, "useDataPoolWithCache", false, "use DataPool With Cache"};
+
     ToolHandle<IRegSelTool>     m_regionSelector { this, "RegSelTool", "RegSelTool/RegSelTool_TRT" };     //!< region selector tool
     SG::UpdateHandleKey<InDet::TRT_DriftCircleContainerCache> m_rioContainerCacheKey;
+    
 
   };
 }//end of namespace

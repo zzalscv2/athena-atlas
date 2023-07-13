@@ -290,7 +290,10 @@ class trigRecoExecutor(athenaExecutor):
         log = self._logFileName
         msg.debug('Now scanning logfile {0} for HLTMPPU Child Issues'.format(log))
         # Using the generator so that lines can be grabbed by subroutines if needed for more reporting
-
+       
+        #Count the number of rejected events 
+        rejected = 0 
+       
         try:
             myGen = lineByLine(log, substepName=self._substep)
         except IOError as e:
@@ -322,6 +325,14 @@ class trigRecoExecutor(athenaExecutor):
                             # write out file line by line
                             for line in log_file:
                                 merged_file.write(line)
+                                # Check for rejected events in log file
+                                if 'rejected:' in line and int(line[14]) != 0:
+                                    #Add the number of rejected events      
+                                    rejected += int(line[14])
+            
+            # Add the HLT_rejected_events histogram to the output file 
+            dbgStream.getHltDecision(rejected, self.conf.argdict["outputHIST_DEBUGSTREAMMONFile"].value[0])
+
         except OSError as e:
             raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'),
                         'Exception raised when merging log files into {0}: {1}'.format(self._logFileName, e))
@@ -371,7 +382,7 @@ class trigRecoExecutor(athenaExecutor):
         msg.info("Search for created BS files, and rename if single file found")
         # The following is needed to handle the BS file being written with a different name (or names)
         # base is from either the tmp value created by the transform or the value entered by the user
-
+   
         argInDict = {}
         if self._rc != 0:
             msg.error('HLT step failed (with status %s) so skip BS filename check', self._rc)
@@ -413,7 +424,7 @@ class trigRecoExecutor(athenaExecutor):
                     if(splitFailed):
                         raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'),
                             'Did not produce any BS file when selecting CostMonitoring stream with trigbs_extractStream.py in file')
-
+                
                 # Run debug step for all streams
                 if "HIST_DEBUGSTREAMMON" in self.conf.dataDictionary:
                     self._postExecuteDebug(BSFile)
@@ -452,6 +463,6 @@ class trigRecoExecutor(athenaExecutor):
             msg.info('Will use file created in PreRun step {0}'.format(fileNameDbg))
         else:
             msg.info('No file created  in PreRun step {0}'.format(fileNameDbg))
-
+        
         # Do debug stream postRun step
         dbgStream.dbgPostRun(outputBSFile, fileNameDbg[0], self.conf.argdict)

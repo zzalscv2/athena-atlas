@@ -91,6 +91,10 @@ class SCTRawDataProvider : public AthReentrantAlgorithm
   /** Boolean to determine if SCT Raw Data Provider should be run in RoI seeded mode. */
   BooleanProperty m_roiSeeded{this, "isRoI_Seeded", false, "Use RoI"};
 
+  /** Boolean to Use DataPool with IDC online Cache */
+  Gaudi::Property<bool> m_useDataPoolWithCache{
+      this, "useDataPoolWithCache", false, "use DataPool With Cache"};
+
   /** Read handle for Trigger ROI descriptor collection. */
   SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey{this,
                                                                     "RoIs",

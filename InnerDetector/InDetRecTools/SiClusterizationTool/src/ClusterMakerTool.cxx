@@ -634,7 +634,7 @@ xAOD::PixelCluster* ClusterMakerTool::xAODpixelCluster(
   // The scale factors were derived by the study reported on 25th September 2006.
   // https://indico.cern.ch/event/430391/contributions/1066157/attachments/929942/1317007/SCTSoft_25Sept06_clusters.pdf
 
-SCT_Cluster*
+SCT_Cluster
 ClusterMakerTool::sctCluster(const Identifier& clusterID,
                              const Amg::Vector2D& localPos,
                              const std::vector<Identifier>& rdoList,
@@ -711,9 +711,8 @@ ClusterMakerTool::sctCluster(const Identifier& clusterID,
           errorMatrix.fillSymmetric(1,1,sn2*v0+cs2*v1);
 	} //else if (designShape == InDetDD::PolarAnnulus) {// Polar rotation for endcap}
 
-        SCT_Cluster* newCluster = new SCT_Cluster(
-          clusterID, locpos, rdoList, width, element, errorMatrix);
-        return newCluster;
+  return SCT_Cluster(clusterID, locpos, rdoList, width, element, errorMatrix);
+        
 }
 
 //---------------------------------------------------------------------------

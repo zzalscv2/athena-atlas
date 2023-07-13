@@ -58,13 +58,17 @@ namespace InDet {
     SCT_ClusterCollection*
     clusterize(const InDetRawDataCollection<SCT_RDORawData>& RDOs,
                const SCT_ID& idHelper,
-               const InDet::SiDetectorElementStatus *sctDetElementStatus, const EventContext& ctx) const override;
+               const InDet::SiDetectorElementStatus *sctDetElementStatus, 
+               DataPool<SCT_Cluster>* dataItemsPool,
+               const EventContext& ctx) const override;
 
     /// A new fast method originally implemented for ITk. Can be internally used in clusterize with m_doFastClustering=true.
     SCT_ClusterCollection*
       fastClusterize(const InDetRawDataCollection<SCT_RDORawData>& RDOs,
                      const SCT_ID& idHelper,
-                     const InDet::SiDetectorElementStatus *sctDetElementStatus, const EventContext& ctx) const;
+                     const InDet::SiDetectorElementStatus *sctDetElementStatus, 
+                     DataPool<SCT_Cluster>* dataItemsPool,
+                     const EventContext& ctx) const;
     
   private:
     typedef std::vector<Identifier> IdVec_t;

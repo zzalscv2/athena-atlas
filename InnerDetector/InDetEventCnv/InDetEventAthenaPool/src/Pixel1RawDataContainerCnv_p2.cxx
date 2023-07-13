@@ -38,14 +38,14 @@ void Pixel1RawDataContainerCnv_p2::transToPers(const PixelRDO_Container* transCo
     Pixel1RawDataCnv_p2  chanCnv;
     TRANS::const_iterator it_Coll     = transCont->begin();
     TRANS::const_iterator it_CollEnd  = transCont->end();
-    unsigned int chanBegin = 0;
-    unsigned int chanEnd = 0;
-    unsigned int numColl = transCont->numberOfCollections();
+    size_t chanBegin = 0;
+    size_t chanEnd = 0;
+    size_t numColl = transCont->numberOfCollections();
 
     persCont->m_collections.resize(numColl);
     MSG_DEBUG(log, " Preparing " << persCont->m_collections.size() << " Collections" );
 
-    for (unsigned int collIndex = 0; it_Coll != it_CollEnd; ++collIndex, ++it_Coll)  {
+    for (size_t collIndex = 0; it_Coll != it_CollEnd; ++collIndex, ++it_Coll)  {
         // Add in new collection
         const PixelRDO_Collection& collection = (**it_Coll);
         chanBegin  = chanEnd;
@@ -54,12 +54,12 @@ void Pixel1RawDataContainerCnv_p2::transToPers(const PixelRDO_Container* transCo
         InDetRawDataCollection_p1& pcollection = persCont->m_collections[collIndex];
 
         pcollection.m_id    = collection.identify().get_identifier32().get_compact();
-        pcollection.m_hashId = (unsigned int) collection.identifyHash();
+        pcollection.m_hashId = static_cast<size_t> (collection.identifyHash());
         pcollection.m_begin = chanBegin;
         pcollection.m_end   = chanEnd;
         // Add in channels
         persCont->m_rawdata.resize(chanEnd);
-        for (unsigned int i = 0; i < collection.size(); ++i) {
+        for (size_t i = 0; i < collection.size(); ++i) {
             InDetRawData_p2* pchan = &(persCont->m_rawdata[i + chanBegin]);
             const Pixel1RawData* chan = dynamic_cast<const Pixel1RawData*>(collection[i]);
             if (nullptr == chan) {
@@ -97,16 +97,15 @@ void  Pixel1RawDataContainerCnv_p2::persToTrans(const InDetRawDataContainer_p2* 
     size_t totalChannels = 0;
     //
     MSG_DEBUG(log, " Reading " << numCollections << "Collections");
-    for (unsigned int icoll = 0; icoll < numCollections; ++icoll) {
-        const InDetRawDataCollection_p1& pcoll = persCont->m_collections[icoll];
-        unsigned int nchans = pcoll.m_end - pcoll.m_begin;
+    for (const InDetRawDataCollection_p1& pcoll : persCont->m_collections) {
+        size_t nchans = pcoll.m_end - pcoll.m_begin;
         chans_per_collection.push_back(nchans);
         totalChannels += nchans;
     }
     DataPool<Pixel1RawData> dataItems;
-    dataItems.prepareToAdd(totalChannels);
+    dataItems.reserve(totalChannels);
 
-    for (unsigned int icoll = 0; icoll < numCollections; ++icoll) {
+    for (size_t icoll = 0; icoll < numCollections; ++icoll) {
         const InDetRawDataCollection_p1& pcoll = persCont->m_collections[icoll];
         Identifier collID(pcoll.m_id);
         IdentifierHash collIDHash(IdentifierHash(pcoll.m_hashId));
@@ -114,10 +113,10 @@ void  Pixel1RawDataContainerCnv_p2::persToTrans(const InDetRawDataContainer_p2* 
         PixelRDO_Collection* coll = new PixelRDO_Collection(collIDHash);
         coll->setIdentifier(collID);
         coll->clear(SG::VIEW_ELEMENTS);
-        unsigned int nchans = chans_per_collection[icoll];
+        size_t nchans = chans_per_collection[icoll];
         coll->resize(nchans);
         // Fill with channels
-        for (unsigned int ichan = 0; ichan < nchans; ++ichan) {
+        for (size_t ichan = 0; ichan < nchans; ++ichan) {
             const InDetRawData_p2* pchan =
                 &(persCont->m_rawdata[ichan + pcoll.m_begin]);
             Pixel1RawData* chan = dataItems.nextElementPtr();

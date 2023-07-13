@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #********************************************************************
 # METCommonConfig.py
@@ -46,4 +46,12 @@ def METCustomVtxCfg(ConfigFlags, vxColl, jetColl, constituentColl):
     for assoc in cfg.assoclist:
         assoc.PrimVxColl = vxColl
 
-    return getAssocCA(cfg,METName='CustomJet')
+    return getAssocCA(cfg, METName='CustomJet')
+
+def METRemappingCfg(ConfigFlags):
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, CompFactory
+
+    acc = ComponentAccumulator()
+    acc.addEventAlgo(CompFactory.DerivationFramework.METRemappingAlg('AnalysisMETRemappingAlg'))
+
+    return acc

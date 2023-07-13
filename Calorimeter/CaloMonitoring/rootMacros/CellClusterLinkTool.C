@@ -409,7 +409,7 @@ void Maketag(string& info,cellbin bin,int index,string& webadd,list<string>& myw
  myweblist.unique();
 
 }
-void Output(const clusterbin& clb,vector<cellbin> problemCellbinSummary,int initial_pos,string& webadd,list<string>& myweblist){
+void Output(const clusterbin& clb, const vector<cellbin>& problemCellbinSummary,int initial_pos,string& webadd,list<string>& myweblist){
   if(problemCellbinSummary.size()==initial_pos) return;
   for(int i=initial_pos;i<problemCellbinSummary.size();i++){
     string info;

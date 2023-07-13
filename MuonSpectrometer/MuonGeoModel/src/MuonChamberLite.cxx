@@ -720,7 +720,7 @@ namespace MuonGM {
                 if (zi < 0)
                     stationEta = -stationEta;
                 int stationPhi = 0;
-                stationPhi = stationPhiTGC(stName, fi,zi);
+                stationPhi = stationPhiTGC(stName, fi + 1,zi);
                                 
                 TgcReadoutElement *det = new TgcReadoutElement(lvt, stName, manager);
                 Position ip = mysql.GetStationPosition(stName.substr(0, 3), fi, zi);

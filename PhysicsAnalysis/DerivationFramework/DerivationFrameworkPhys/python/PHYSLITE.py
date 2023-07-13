@@ -147,7 +147,6 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
         acc.addEventAlgo(element)
 
     # Build MET from our analysis objects
-    # Currently only works for the AOD->PHYSLITE workflow
     if 'StreamAOD' in ConfigFlags.Input.ProcessingTags:
         from METReconstruction.METAssocCfg import AssocConfig, METAssocConfig
         from METReconstruction.METAssociatorCfg import getAssocCA
@@ -164,6 +163,11 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
                                       usePFOLinks=True)
         components_PHYSLITE_cfg = getAssocCA(PHYSLITE_cfg,METName='AnalysisMET')
         acc.merge(components_PHYSLITE_cfg)
+    elif 'StreamDAOD_PHYS' in ConfigFlags.Input.ProcessingTags:
+        from DerivationFrameworkJetEtMiss.METCommonConfig import METRemappingCfg
+
+        METRemap_cfg = METRemappingCfg(ConfigFlags)
+        acc.merge(METRemap_cfg)
 
     # The derivation kernel itself
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
