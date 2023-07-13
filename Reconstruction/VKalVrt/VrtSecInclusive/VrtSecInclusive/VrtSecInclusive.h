@@ -153,7 +153,7 @@ namespace VKalVrtAthena {
       double d0TrkErrorCut;
       double z0TrkErrorCut;
       double twoTrkVtxFormingD0Cut;
-      
+
       /* pT anc chi2 */
       double TrkChi2Cut;
       double TrkPtCut;
@@ -220,6 +220,8 @@ namespace VKalVrtAthena {
       bool doSelectTracksFromMuons;
       bool doRemoveCaloTaggedMuons;
       bool doSelectTracksFromElectrons;
+      bool doSelectIDAndGSFTracks;
+      bool doRemoveNonLeptonVertices;
 
       // When doSelectTracksWithLRTCuts is set to true, the addtional track cuts 
       // be applied to the selected tracks to reduce the number of fake tracks in 
@@ -252,7 +254,7 @@ namespace VKalVrtAthena {
     const xAOD::Vertex*           m_thePV;
     std::unique_ptr<std::vector<const xAOD::TrackParticle*> > m_selectedTracks;
     std::unique_ptr<std::vector<const xAOD::TrackParticle*> > m_associatedTracks;
-    
+    std::unique_ptr<std::vector<const xAOD::TrackParticle*> > m_leptonicTracks;
     std::vector<double>  m_BeamPosition;
     
     /////////////////////////////////////////////////////////
@@ -381,6 +383,7 @@ namespace VKalVrtAthena {
     StatusCode selectTracksInDet();
     StatusCode selectTracksFromMuons();
     StatusCode selectTracksFromElectrons();
+    StatusCode selectInDetAndGSFTracks();
     
     using TrackSelectionAlg = StatusCode (VrtSecInclusive::*)();
     std::vector<TrackSelectionAlg> m_trackSelectionAlgs;

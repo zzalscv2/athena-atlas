@@ -196,7 +196,7 @@ namespace VKalVrtAthena {
       }
       
       (*m_decor_isSelected)( *trk ) = true;
-      if (m_jp.doSelectTracksFromElectrons) {
+      if (m_jp.doSelectTracksFromElectrons  || m_jp.doSelectIDAndGSFTracks) {
         const xAOD::TrackParticle *id_tr;
         id_tr = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(trk);
         if (id_tr != nullptr){
@@ -294,5 +294,59 @@ namespace VKalVrtAthena {
     
     return StatusCode::SUCCESS;
   }
-  
+
+
+  //____________________________________________________________________________________________________
+  StatusCode  VrtSecInclusive::selectInDetAndGSFTracks() { 
+
+    ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": begin"  );
+    
+    //--------------------------------------------------------
+    //  Extract tracks from xAOD::TrackParticle container
+    //
+    
+    const xAOD::TrackParticleContainer* IDtracks ( nullptr );
+    ATH_CHECK( evtStore()->retrieve( IDtracks, m_jp.TrackLocation) );
+
+    const xAOD::ElectronContainer *electrons( nullptr );
+    ATH_CHECK( evtStore()->retrieve( electrons, m_jp.ElectronLocation ) );
+
+    const xAOD::MuonContainer* muons ( nullptr );
+    ATH_CHECK( evtStore()->retrieve( muons, m_jp.MuonLocation) );
+
+    std::vector<const xAOD::TrackParticle*> IDTrksFromEls;
+
+    // Loop over electrons to select all GSF tracks
+    for( const auto *electron : *electrons ) {
+      if( 0 == electron->nTrackParticles() ) { continue; }
+      // The first track is the best-matched GSF track
+      const auto* el_trk = electron->trackParticle(0);
+      selectTrack( el_trk );
+      m_leptonicTracks->emplace_back(el_trk);
+      IDTrksFromEls.emplace_back(xAOD::EgammaHelpers::getOriginalTrackParticle(electron));
+    }
+
+    // Loop over ID tracks to select all non-el tracks
+    for( const auto *trk : *IDtracks ) {
+      // do not select ID track if matched to an electron
+      if ( std::find(IDTrksFromEls.begin(), IDTrksFromEls.end(), trk) != IDTrksFromEls.end() ) { continue; }
+      selectTrack( trk ); 
+    }
+
+    // Loop over muons to book-keep all ID tracks matched to muons
+    for (const auto *muon : *muons) {
+      if (m_jp.doRemoveCaloTaggedMuons && muon->muonType() == xAOD::Muon::CaloTagged) { continue; }
+      const auto* mu_trk = muon->trackParticle( xAOD::Muon::InnerDetectorTrackParticle );
+      if(!mu_trk) { continue; }
+      m_leptonicTracks->emplace_back(mu_trk);
+    }
+
+    ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": Number of total ID tracks   = " << IDtracks->size() );
+    ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": Number of total electrons   = " << electrons->size() );
+    ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": Number of selected tracks   = " << m_selectedTracks->size() );    
+    
+    return StatusCode::SUCCESS;
+  }
+
+
 } // end of namespace VKalVrtAthena

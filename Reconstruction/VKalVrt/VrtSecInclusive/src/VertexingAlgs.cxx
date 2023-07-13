@@ -694,7 +694,7 @@ namespace VKalVrtAthena {
     //-Identify remaining 2-track vertices with very bad Chi2 and mass (b-tagging)
     ATH_MSG_VERBOSE(" > " << __FUNCTION__ << ": Identify remaining 2-track vertices with very bad Chi2 and mass (b-tagging).");
     for( auto& wrkvrt : *workVerticesContainer ) {
-      
+
       if( TMath::Prob( wrkvrt.Chi2, wrkvrt.ndof() ) < m_jp.improveChi2ProbThreshold ) wrkvrt.isGood = false;
       if( wrkvrt.selectedTrackIndices.size() != 2 ) continue;
       if( m_jp.FillHist ) m_hists["NtrkChi2Dist"]->Fill( log10( wrkvrt.fitQuality() ) );
@@ -1104,7 +1104,7 @@ namespace VKalVrtAthena {
                                         auto found = std::find_if( wrkvrt.selectedTrackIndices.begin(), wrkvrt.selectedTrackIndices.end(),
                                                                    [&]( long int index ) {
                                                                      // when using selected tracks from electrons, also check the orginal track particle from GSF to see if InDetTrackParticle (trk) is an electron that is already in the vertex
-                                                                    if (m_jp.doSelectTracksFromElectrons) {
+                                                                    if (m_jp.doSelectTracksFromElectrons || m_jp.doSelectIDAndGSFTracks) {
                                                                       const xAOD::TrackParticle *id_tr;
                                                                       id_tr = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(m_selectedTracks->at(index));
                                                                       return trk == m_selectedTracks->at(index) or trk == id_tr;
@@ -1788,6 +1788,20 @@ namespace VKalVrtAthena {
       
       if( badIPflag ) {
         ATH_MSG_DEBUG(" > " << __FUNCTION__ << ": Bad impact parameter signif wrt SV was flagged." );
+      }
+
+      if (m_jp.doRemoveNonLeptonVertices) {
+
+        bool oneLepMatchTrack = false;
+        for (const auto *trk: tracks) {
+          if ( std::find(m_leptonicTracks->begin(), m_leptonicTracks->end(), trk) != m_leptonicTracks->end() ) {
+            oneLepMatchTrack = true;
+            break;
+          }
+        }
+
+        // If there are no tracks matched to leptons, do not save the container to the output.
+        if (!oneLepMatchTrack) continue;        
       }
 
       ///////////////////////////////////////////////////
