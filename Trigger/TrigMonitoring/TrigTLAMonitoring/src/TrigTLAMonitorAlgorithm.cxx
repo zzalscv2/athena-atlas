@@ -103,6 +103,9 @@ StatusCode TrigTLAMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
       ANA_CHECK(fillJetVariableHistograms<float>(pfjets,"fastDIPS20211215_pu", "pfjet", trigName));
       ANA_CHECK(fillJetVariableHistograms<float>(pfjets,"fastDIPS20211215_pb", "pfjet", trigName));
       ANA_CHECK(fillJetVariableHistograms<float>(pfjets,"fastDIPS20211215_pc", "pfjet", trigName));
+      ANA_CHECK(fillJetVariableHistograms<float>(pfjets,"GN120230331_pu", "pfjet", trigName));
+      ANA_CHECK(fillJetVariableHistograms<float>(pfjets,"GN120230331_pb", "pfjet", trigName));
+      ANA_CHECK(fillJetVariableHistograms<float>(pfjets,"GN120230331_pc", "pfjet", trigName));
     }
 
     //
