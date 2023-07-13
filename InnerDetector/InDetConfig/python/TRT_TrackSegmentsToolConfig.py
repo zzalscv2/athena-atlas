@@ -70,11 +70,11 @@ def TRT_TrackSegmentsMaker_ATLxkCfg(flags, name = 'InDetTRT_SeedsMaker',
 
 def TRT_TrackSegmentsMaker_ATLxk_Phase_Cfg(flags, name = 'InDetTRT_SeedsMaker_Phase', **kwargs):
     kwargs.setdefault("PRDtoTrackMap", "")
-    return TRT_TrackSegmentsMaker_ATLxkCfg(flags, name, *kwargs)
+    return TRT_TrackSegmentsMaker_ATLxkCfg(flags, name, **kwargs)
 
 def TRT_TrackSegmentsMaker_ATLxk_TrackSegmentsCfg(flags, name = 'InDetTRT_SeedsMaker_TrackSegments', **kwargs):
    kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPT)
    kwargs.setdefault("MinNumberDriftCircles", flags.Tracking.ActiveConfig.minPT)
    kwargs.setdefault("sharedFrac", flags.Tracking.ActiveConfig.maxTRTonlyShared)
    kwargs.setdefault("PRDtoTrackMap", "")
-   return TRT_TrackSegmentsMaker_ATLxkCfg(flags, name, *kwargs)
+   return TRT_TrackSegmentsMaker_ATLxkCfg(flags, name, **kwargs)
