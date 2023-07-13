@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -31,11 +31,14 @@
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
 
+#include "xAODTracking/TrackBackend.h"
+#include "xAODTracking/TrackBackendContainer.h"
+#include "xAODTracking/TrackBackendAuxContainer.h"
+
 #include <any>
 
 
 namespace {
-
 
 BOOST_AUTO_TEST_CASE(TrackMeasurement_build) {
     constexpr static size_t sz = 6;
@@ -204,4 +207,43 @@ BOOST_AUTO_TEST_CASE(TrackJacobian_build) {
                 BOOST_CHECK_EQUAL(jacs[j]->jacEigen()(i, k), semirandoms[j]*i*k);
     }
 }
+}
+
+
+BOOST_AUTO_TEST_CASE(TrackBackend_build) {
+    constexpr static size_t sz = 6;
+
+    xAOD::TrackBackendContainer backend;
+    xAOD::TrackBackendAuxContainer aux;
+    backend.setStore(&aux);
+
+    std::vector<double> semirandoms = {0.12, 0.92};
+    for (const double sr : semirandoms) {    
+        auto par = new xAOD::TrackBackend();    
+        backend.push_back(par);
+        par->resize();
+        for ( size_t i = 0; i < sz; ++i) {
+            par->paramsEigen()(i) = i * sr;
+            for ( size_t j = 0; j < sz; ++j) {
+                par->covParamsEigen()(i, j) = (i+j) * sr;
+            }
+        }
+    }
+
+    for ( size_t p=0; p < semirandoms.size(); ++p) {
+        const xAOD::TrackBackend* par = backend.at(p);
+        for ( size_t i = 0; i < sz; ++i) {
+            const double stored = par->paramsEigen()(i);
+            const double expected = i * semirandoms[p];
+            BOOST_CHECK_EQUAL(stored, expected);
+            for ( size_t j = 0; j < sz; ++j) {
+                const double stored = par->covParamsEigen()(i, j);
+                const double expected = (i+j) * semirandoms[p];
+                BOOST_CHECK_EQUAL(stored, expected);
+            }
+        }
+    }
+
+
+    
 }

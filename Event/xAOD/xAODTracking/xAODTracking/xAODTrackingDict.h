@@ -84,6 +84,13 @@
 #include "xAODTracking/versions/TrackMeasurementContainer_v1.h"
 #include "xAODTracking/versions/TrackMeasurementAuxContainer_v1.h"
 
+#include "xAODTracking/TrackBackend.h"
+#include "xAODTracking/TrackBackendContainer.h"
+#include "xAODTracking/TrackBackendAuxContainer.h"
+#include "xAODTracking/versions/TrackBackend_v1.h"
+#include "xAODTracking/versions/TrackBackendContainer_v1.h"
+#include "xAODTracking/versions/TrackBackendAuxContainer_v1.h"
+
 
 // EDM include(s).
 #include "xAODCore/tools/DictHelpers.h"

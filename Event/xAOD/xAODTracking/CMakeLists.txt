@@ -27,7 +27,8 @@ atlas_add_xaod_smart_pointer_dicts(
               "xAOD::NeutralParticleContainer_v1" "xAOD::VertexContainer_v1"
               "xAOD::TrackMeasurementValidationContainer_v1"
               "xAOD::TrackStateValidationContainer_v1"
-              "xAOD::SCTRawHitValidationContainer_v1" )
+              "xAOD::SCTRawHitValidationContainer_v1" 
+              "xAOD::TrackBackendContainer_v1")
 
 atlas_add_dictionary( xAODTrackingDict
    xAODTracking/xAODTrackingDict.h
@@ -48,6 +49,8 @@ atlas_add_test( xAODTracking_TrackParticlexAODHelpers_test
 atlas_add_test( ut_xaodtracking_vertex
    SOURCES test/ut_xaodtracking_vertex.cxx
    LINK_LIBRARIES xAODTracking )
+
+
 
 if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
    atlas_add_test(MultiTrajectoryBackends_test
