@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTRACKSTATISTICSTOOL_MUONTRACKSTATISTICSTOOL_H
@@ -107,8 +107,7 @@ private:
     // access to Id Helpers
     ServiceHandle<Muon::IMuonEDMHelperSvc> m_edmHelperSvc{this, "edmHelper", "Muon::MuonEDMHelperSvc/MuonEDMHelperSvc",
                                                           "Handle to the service providing the IMuonEDMHelperSvc interface"};
-    ToolHandle<Trk::ITruthToTrack> m_truthToTrack;
-
+   
     bool m_doTruth;
 
     std::vector<MuonTrackStatisticsTool::TrackCounters*> m_allCounters;

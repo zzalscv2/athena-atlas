@@ -17,10 +17,7 @@
 
 MuonTrackPerformanceAlg::MuonTrackPerformanceAlg(const std::string& name, ISvcLocator* pSvcLocator) :
     AthAlgorithm(name, pSvcLocator),
-    m_eventInfo(nullptr),
-    m_printer("Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"),
-    m_truthTool("Muon::MuonTrackTruthTool/MuonTrackTruthTool"),
-    m_summaryHelperTool("Muon::MuonTrackSummaryHelperTool/MuonTrackSummaryHelperTool"),
+    m_eventInfo(nullptr),    
     m_nevents(0),
     m_ntracks(0),
     m_nmatchedTracks(0),
@@ -82,11 +79,7 @@ StatusCode MuonTrackPerformanceAlg::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_printer.retrieve());
     ATH_CHECK(m_edmHelperSvc.retrieve());
-
-    if (m_doTruth)
-        ATH_CHECK(m_truthTool.retrieve());
-    else
-        m_truthTool.disable();
+    ATH_CHECK(m_truthTool.retrieve(EnableTool{m_doTruth}));   
 
     ATH_CHECK(m_summaryHelperTool.retrieve());
 
@@ -109,7 +102,7 @@ StatusCode MuonTrackPerformanceAlg::initialize() {
 
     ATH_CHECK(m_mcEventColl.initialize(m_doTruth));
     if (!(m_idHelperSvc->hasSTGC() && m_idHelperSvc->hasMM())) m_muonSimData = {"MDT_SDO", "RPC_SDO", "TGC_SDO"};
-    if (m_doTruth) ATH_CHECK(m_muonSimData.initialize());
+    ATH_CHECK(m_muonSimData.initialize(m_doTruth));
     ATH_CHECK(m_cscSimData.initialize(m_doTruth && m_idHelperSvc->hasCSC()));
     ATH_CHECK(m_trackRecord.initialize(m_doTruth));
 

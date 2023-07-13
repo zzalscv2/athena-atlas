@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONSEGMENTPERFORMANCEALG_H
@@ -17,13 +17,14 @@ class MuonSegmentPerformanceAlg : public AthAlgorithm {
 public:
     // Algorithm Constructor
     MuonSegmentPerformanceAlg(const std::string &name, ISvcLocator *pSvcLocator);
-    ~MuonSegmentPerformanceAlg() = default;
+    virtual ~MuonSegmentPerformanceAlg() = default;
 
     // Gaudi algorithm hooks
-    StatusCode initialize();
-    StatusCode execute();
-    StatusCode finalize();
+    virtual StatusCode initialize() override;
+    virtual StatusCode execute() override;
+    virtual StatusCode finalize() override;
 
+    unsigned int cardinality() const override final { return 1;}
 private:
     bool retrieve(const SG::ReadHandleKey<xAOD::MuonSegmentContainer> &, const xAOD::MuonSegmentContainer *&ptr) const;
     std::string printRatio(const std::string& prefix, unsigned int begin, unsigned int end, const std::vector<int>& reco,
@@ -37,9 +38,8 @@ private:
     /** output file*/
     std::ofstream m_fileOutput;
 
-    // statistics to be counted
-    SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey;
-    SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegmentKey;
+    SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentLocation", "MuonSegments"};
+    SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegmentKey{this, "TruthSegmentLocation", "MuonTruthSegments"};
 
     unsigned int m_nevents;
     std::vector<int> m_nhitCuts;
