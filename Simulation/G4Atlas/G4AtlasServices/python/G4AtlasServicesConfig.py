@@ -57,5 +57,7 @@ def PhysicsListSvcCfg(flags, name="PhysicsListSvc", **kwargs):
     """
     ## kwargs.setdefault("EMDEDXBinning"   , 77)
     ## kwargs.setdefault("EMLambdaBinning" , 77)
+    if flags.Sim.ISF.Simulator.usesFatras():
+        kwargs.setdefault("UnstableAntiNeutrons", True) # Fix for ATLASSIM-6634 - consider fixing for FullG4 also
     result.addService(CompFactory.PhysicsListSvc(name, **kwargs), primary = True)
     return result
