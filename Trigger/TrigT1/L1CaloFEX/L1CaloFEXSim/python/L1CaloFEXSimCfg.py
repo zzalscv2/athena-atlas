@@ -102,7 +102,7 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
     acc.merge(TriggerTowersInputCfg(flags))
 
     if 'L1_eFexEmulatedTowers' in eFexTowerInputs:
-        acc.addEventAlgo( CompFactory.LVL1.eFexTowerBuilder("L1_eFexEmulatedTowers") ) # builds the emulated towers to use as secondary input to eTowerMaker - name has to match what it gets called in other places to avoid conflict
+        acc.addEventAlgo( CompFactory.LVL1.eFexTowerBuilder("L1_eFexEmulatedTowers",CaloCellContainerReadKey=sCellType) ) # builds the emulated towers to use as secondary input to eTowerMaker - name has to match what it gets called in other places to avoid conflict
 
     if flags.Trigger.L1.doeFex:
         if eFexTowerInputs==[]:
