@@ -414,7 +414,7 @@ class ConstMultiTrajectory
 
   const std::any component_impl(Acts::HashedString key, ActsTrk::IndexType istate) const;
 
-  constexpr bool hasColumn_impl(Acts::HashedString key) const;
+  bool hasColumn_impl(Acts::HashedString key) const;
 
   typename ConstTrackStateProxy::Parameters parameters_impl(
       ActsTrk::IndexType index) const {
@@ -450,6 +450,9 @@ class ConstMultiTrajectory
   DataLink<xAOD::TrackParametersContainer> m_trackParameters;
   DataLink<xAOD::TrackJacobianContainer> m_trackJacobians;
   DataLink<xAOD::TrackMeasurementContainer> m_trackMeasurements;
+  std::vector<detail::Decoration> m_decorations;
+  template <typename T>
+  const std::any decorationGetter(ActsTrk::IndexType, const std::string&) const;
 };
 
 }  // namespace ActsTrk

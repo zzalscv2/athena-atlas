@@ -99,8 +99,9 @@ void ActsTrk::MutableMultiTrajectory::addColumn_impl(const std::string& name) {
                   _1, _2),
         std::bind(&ActsTrk::MutableMultiTrajectory::decorationGetter<T>, this,
                   _1, _2));
+    // it would be useful to force presence of decoration already here
   } else {
-    throw std::runtime_error("Can't add decoration of this type");
+    throw std::runtime_error("Can't add decoration of this type to MutableMultiTrajectory");
   }
 }
 
@@ -120,9 +121,15 @@ const std::any ActsTrk::MutableMultiTrajectory::decorationGetter(
     ActsTrk::IndexType idx, const std::string& name) const {
   const auto& trackStates = *m_trackStates;
   const SG::AuxElement* el = trackStates[idx];
-  return &(
-      el->auxdecor<T>(name));  // yeah, xAOD auxdecor returns nonconst ref even
-                               // for const AuxElements, here we shield
+  return &(el->auxdecor<T>(name));
 }
 
-// Implementation of shareFrom
+
+
+template <typename T>
+const std::any ActsTrk::ConstMultiTrajectory::decorationGetter(
+    ActsTrk::IndexType idx, const std::string& name) const {
+  const auto& trackStates = *m_trackStates;
+  const SG::AuxElement* el = trackStates[idx];
+  return static_cast<const T*>(&(el->auxdecor<T>(name)));
+}

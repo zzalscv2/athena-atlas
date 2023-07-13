@@ -332,7 +332,7 @@ ActsTrk::MutableMultiTrajectory::getUncalibratedSourceLink_impl(
 }
 
 
-
+/////////////////////////////////////////////////////////
 // ReadOnly MTJ
 ActsTrk::ConstMultiTrajectory::ConstMultiTrajectory(
     DataLink<xAOD::TrackStateContainer> trackStates,
@@ -342,7 +342,45 @@ ActsTrk::ConstMultiTrajectory::ConstMultiTrajectory(
     : m_trackStates(trackStates),
       m_trackParameters(trackParameters),
       m_trackJacobians(trackJacobians),
-      m_trackMeasurements(trackMeasurements) {}
+      m_trackMeasurements(trackMeasurements) {
+      for ( auto id : m_trackStates->getConstStore()->getAuxIDs() ) {        
+
+        const std::string name = SG::AuxTypeRegistry::instance().getName(id);
+        if ( hasColumn_impl(Acts::hashString(name)) ) { // already known coulmns
+          continue;
+        }
+        const std::type_info* typeInfo = SG::AuxTypeRegistry::instance().getType(id);
+
+        using std::placeholders::_1;
+        using std::placeholders::_2;
+        // try making decoration accessor of matching type
+        // there is a fixed set of supported types (as there is a fixed set available in MutableMTJ)
+        // setters are not needed so replaced by a "nullptr"
+        if ( *typeInfo == typeid(float) ) {
+          m_decorations.emplace_back( name,
+            static_cast<ActsTrk::detail::Decoration::SetterType>(nullptr),
+            std::bind(&ActsTrk::ConstMultiTrajectory::decorationGetter<float>, this,
+                      _1, _2));          
+        } else if ( *typeInfo == typeid(double) ) {
+          m_decorations.emplace_back( name,
+            static_cast<ActsTrk::detail::Decoration::SetterType>(nullptr),
+            std::bind(&ActsTrk::ConstMultiTrajectory::decorationGetter<double>, this,
+                      _1, _2));          
+
+        } else if ( *typeInfo == typeid(short) ) {
+          m_decorations.emplace_back( name,
+            static_cast<ActsTrk::detail::Decoration::SetterType>(nullptr),
+            std::bind(&ActsTrk::ConstMultiTrajectory::decorationGetter<short>, this,
+                      _1, _2));  
+        } else if ( *typeInfo == typeid(uint32_t) ) {
+          m_decorations.emplace_back( name,
+            static_cast<ActsTrk::detail::Decoration::SetterType>(nullptr),
+            std::bind(&ActsTrk::ConstMultiTrajectory::decorationGetter<uint32_t>, this,
+                      _1, _2));          
+        }
+
+    }
+}
 
 bool ActsTrk::ConstMultiTrajectory::has_impl(Acts::HashedString key,
                                              ActsTrk::IndexType istate) const {
@@ -388,12 +426,18 @@ const std::any ActsTrk::ConstMultiTrajectory::component_impl(
     }
     case "measdim"_hash:
       return trackStates[istate]->measDimPtr();
-    default:
-      return std::any();  // TODO handle dynamic
+    default: {
+      for (auto& d : m_decorations) {
+        if (d.hash == key) {
+          return  d.getter(istate, d.name);
+        }
+      }
+      throw std::runtime_error("no such component " + std::to_string(key));
+    }
   }
 }
 
-constexpr bool ActsTrk::ConstMultiTrajectory::hasColumn_impl(
+bool ActsTrk::ConstMultiTrajectory::hasColumn_impl(
     Acts::HashedString key) const {
   using namespace Acts::HashedStringLiteral;
   switch (key) {
@@ -410,6 +454,11 @@ constexpr bool ActsTrk::ConstMultiTrajectory::hasColumn_impl(
     case "calibratedCov"_hash:
     case "measdim"_hash:
       return true;
-  }
-  return false;  // TODO dynamic
+  }  
+  for (auto& d : m_decorations) {
+      if (d.hash == key) {
+        return true;
+      }
+    }
+  return false;
 }
