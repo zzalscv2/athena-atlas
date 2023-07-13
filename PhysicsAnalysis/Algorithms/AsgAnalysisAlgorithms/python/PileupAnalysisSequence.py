@@ -52,11 +52,12 @@ def makePileupAnalysisSequence( dataType, campaign=None, files=None, useDefaultC
         toolConfigFiles = userPileupConfigs[:]
 
     if userLumicalcFiles is not None:
-        log.info('Using user-provided lumicalc files')
         toolLumicalcFiles = userLumicalcFiles[:]
+        log.info(f'Using user-provided lumicalc files: {", ".join(toolLumicalcFiles)}')
     else:
         from PileupReweighting.AutoconfigurePRW import getLumicalcFiles
         toolLumicalcFiles = getLumicalcFiles(campaign)
+        log.info(f'Using autoconfigured lumicalc files: {", ".join(toolLumicalcFiles)}')
 
     # Set up the only algorithm of the sequence:
     alg = createAlgorithm( 'CP::PileupReweightingAlg', 'PileupReweightingAlg' )
