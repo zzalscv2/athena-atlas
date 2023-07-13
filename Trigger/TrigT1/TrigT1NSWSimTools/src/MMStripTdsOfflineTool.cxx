@@ -43,7 +43,7 @@ namespace NSWL1 {
       m_mmstrip_cache_eventNumber(-1),
       m_mmstrip_cache_status(CLEARED),
       m_doNtuple(false),
-      m_tree(0)
+      m_tree(nullptr)
 
 
     {
@@ -98,7 +98,7 @@ namespace NSWL1 {
         memset(ntuple_name,'\0',40*sizeof(char));
         sprintf(ntuple_name,"%sTree",algo_name.c_str());
 
-        m_tree = 0;
+        m_tree = nullptr;
         sc = tHistSvc->getTree(ntuple_name,m_tree);
         if (sc.isFailure()) {
           this->clear_ntuple_variables();
@@ -543,6 +543,7 @@ namespace NSWL1 {
 
   double MMStripTdsOfflineTool::phi_shift(double athena_phi) const{
     return athena_phi+(athena_phi>=0?-1:1)*M_PI;
+    // FIXME: why a second return?
     return (-1.*athena_phi+(athena_phi>=0?1.5*M_PI:-0.5*M_PI));
   }
   void MMStripTdsOfflineTool::xxuv_to_uvxx(ROOT::Math::XYZVector& hit,int plane)const{
@@ -555,18 +556,18 @@ namespace NSWL1 {
 
   void MMStripTdsOfflineTool::hit_rot_stereo_fwd(ROOT::Math::XYZVector& hit)const{
     double degree=M_PI/180.0*(m_par->stereo_degree);
-    if(striphack) hit.SetY(hit.Y()*cos(degree));
+    if(striphack) hit.SetY(hit.Y()*std::cos(degree));
     else{
-      double xnew=hit.X()*cos(degree)+hit.Y()*sin(degree),ynew=-hit.X()*sin(degree)+hit.Y()*cos(degree);
+      double xnew=hit.X()*std::cos(degree)+hit.Y()*std::sin(degree),ynew=-hit.X()*std::sin(degree)+hit.Y()*std::cos(degree);
       hit.SetX(xnew);hit.SetY(ynew);
     }
   }
 
   void MMStripTdsOfflineTool::hit_rot_stereo_bck(ROOT::Math::XYZVector& hit)const{
     double degree=-M_PI/180.0*(m_par->stereo_degree);
-    if(striphack) hit.SetY(hit.Y()*cos(degree));
+    if(striphack) hit.SetY(hit.Y()*std::cos(degree));
     else{
-      double xnew=hit.X()*cos(degree)+hit.Y()*sin(degree),ynew=-hit.X()*sin(degree)+hit.Y()*cos(degree);
+      double xnew=hit.X()*std::cos(degree)+hit.Y()*std::sin(degree),ynew=-hit.X()*std::sin(degree)+hit.Y()*std::cos(degree);
       hit.SetX(xnew);hit.SetY(ynew);
     }
   }
@@ -597,24 +598,24 @@ namespace NSWL1 {
     }
     std::string xuv=setup.substr(plane,1);
     if(xuv=="u"){//||xuv=="v"){
-      if(striphack)return ceil(Y*cos(degree)/strip_width);
-      y_hit = X*sin(degree)+Y*cos(degree);
+      if(striphack)return std::ceil(Y*std::cos(degree)/strip_width);
+      y_hit = X*std::sin(degree)+Y*std::cos(degree);
     }
     else if(xuv=="v"){
-      if(striphack)return ceil(Y*cos(degree)/strip_width);
-      y_hit = -X*sin(degree)+Y*cos(degree);
+      if(striphack)return std::ceil(Y*std::cos(degree)/strip_width);
+      y_hit = -X*std::sin(degree)+Y*std::cos(degree);
     }
     else if(xuv!="x"){
       ATH_MSG_ERROR("Invalid plane option " << xuv);
       throw std::runtime_error("MMStripTdsOfflineTool::Get_Strip_ID: invalid plane option");
     }
-    double strip_hit = ceil(y_hit*1./strip_width);
+    double strip_hit = std::ceil(y_hit*1./strip_width);
     return strip_hit;
   }
 
   int MMStripTdsOfflineTool::Get_VMM_chip(int strip) const{  //Not Finished... Rough
     int strips_per_VMM = 64;
-    return ceil(1.*strip/strips_per_VMM);
+    return std::ceil(1.*strip/strips_per_VMM);
   }
 
   int MMStripTdsOfflineTool::strip_number(int station,int plane,int spos)const{
@@ -644,7 +645,7 @@ namespace NSWL1 {
     }
     double width=m_par->strip_width; 
     std::string plane_char=m_par->setup.substr(plane,1);
-    int base_strip=ceil(ybase/width)+spos;
+    int base_strip=std::ceil(ybase/width)+spos;
     return base_strip;
   }
   bool MMStripTdsOfflineTool::Mimic_VMM_Chip_Deadtime(hitData_entry& candy){//** ASK BLC IF THERE'S A WAY TO DO THIS SINGLE ENTRY
@@ -690,7 +691,7 @@ namespace NSWL1 {
   }
 
   int MMStripTdsOfflineTool::eta_bin(double theta) const{
-    int ebin=-999; double eta=-log(tan(0.5*theta));
+    int ebin=-999; double eta=-std::log(std::tan(0.5*theta));
     for(int i=0;i<=m_n_etabins;i++){
       if(eta<m_etabins[i]){
         ebin=i-1;

@@ -19,14 +19,14 @@ class MMT_Road {
     double avgSofX() const;
     double avgSofUV(const int uv1, const int uv2) const;
     double avgZofUV(const int uv1, const int uv2) const;
-    bool checkCoincidences(const int &bcwind) const;
+    bool checkCoincidences(const int bcwind) const;
     unsigned int countHits() const { return m_road_hits.size(); }
     unsigned int countRealHits() const;
     unsigned int countUVHits(bool flag) const;
     unsigned int countXHits(bool flag) const;
     bool evaluateLowRes() const;
     bool horizontalCheck() const;
-    void incrementAge(const int &bcwind);
+    void incrementAge(const int bcwind);
     const std::vector<std::unique_ptr<MMT_Hit> >& getHitVector() const { return m_road_hits; }
     int getRoadSize() const { return m_roadSize; }
     int getRoadSizeUpX() const { return m_roadSizeUpX; }
@@ -39,7 +39,7 @@ class MMT_Road {
     int iRoadx() const { return m_iroadx; }
     int iRoadu() const { return m_iroadu; }
     int iRoadv() const { return m_iroadv; }
-    bool matureCheck(const int &bcwind) const;
+    bool matureCheck(const int bcwind) const;
     double mxl() const;
     void reset();
     bool stereoCheck() const;

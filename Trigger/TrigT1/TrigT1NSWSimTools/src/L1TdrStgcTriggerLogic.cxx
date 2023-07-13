@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/getMessageSvc.h"
@@ -339,7 +339,7 @@ namespace NSWL1{
       }
     }
     //-------------------------------------
-    std::vector<SectorTriggerCandidate> L1TdrStgcTriggerLogic::buildSectorTriggers(const std::vector< std::shared_ptr<PadOfflineData> > &pads, std::pair<double,double> Zratio) const {
+    std::vector<SectorTriggerCandidate> L1TdrStgcTriggerLogic::buildSectorTriggers(const std::vector< std::shared_ptr<PadOfflineData> > &pads, const std::pair<double,double>& Zratio) const {
 
         std::vector<SectorTriggerCandidate> secTrigCand;
 
@@ -376,61 +376,48 @@ namespace NSWL1{
         outerTrigs.insert(outerTrigs.end(), o3of4trig.begin(), o3of4trig.end());
         outerTrigs.insert(outerTrigs.end(), o4of4trig.begin(), o4of4trig.end());
         bool acceptSingleWedgeInTransition = true;
-        //=============S.I this should absoultely be removed why do we keep this ? ======
-        bool skipInnerOuterMatchHack = false;
-        if (skipInnerOuterMatchHack) {
-            for (auto &swpt : innerTrigs){
-                secTrigCand.emplace_back(swpt.setCombined());
-            }
-            for (auto &swpt : outerTrigs){
-                secTrigCand.emplace_back(swpt.setCombined());
-            }
-        } 
-        //SI ================================================================================
-        else {
-            for (auto& it : innerTrigs) {
-                for (auto& ot: outerTrigs) {
-                    // Inner-Outer matching based on area
-                    Polygon innerArea=SingleWedgePadTrigger::padOverlap3(it.pads());
-                    Polygon outerArea=SingleWedgePadTrigger::padOverlap3(ot.pads());
 
-                    float Z1=ot.pads().at(0)->m_cornerXyz[1][2];
-                    float Z0=it.pads().at(0)->m_cornerXyz[1][2];
+	for (auto& it : innerTrigs) {
+	  for (auto& ot: outerTrigs) {
+	    // Inner-Outer matching based on area
+	    Polygon innerArea=SingleWedgePadTrigger::padOverlap3(it.pads());
+	    Polygon outerArea=SingleWedgePadTrigger::padOverlap3(ot.pads());
 
-                    Polygon inoutovl=largestIntersection(innerArea,Project(outerArea,Z1,Z0));
+	    float Z1=ot.pads().at(0)->m_cornerXyz[1][2];
+	    float Z0=it.pads().at(0)->m_cornerXyz[1][2];
 
-                    float overlap=area(inoutovl);
+	    Polygon inoutovl=largestIntersection(innerArea,Project(outerArea,Z1,Z0));
 
-                    if (overlap >0) {
-                       ATH_MSG_DEBUG("OVERLAP  "<<overlap<<" Inner "<<area(innerArea)<<" Outer "<<area(outerArea));
-                        secTrigCand.emplace_back(it.setCombined(), ot.setCombined());
-                    }
-                } // end for(ot)
-            }   // end for(it)
-            //***** Transition Region *****
+	    float overlap=area(inoutovl);
 
+	    if (overlap >0) {
+	      ATH_MSG_DEBUG("OVERLAP  "<<overlap<<" Inner "<<area(innerArea)<<" Outer "<<area(outerArea));
+	      secTrigCand.emplace_back(it.setCombined(), ot.setCombined());
+	    }
+	  } // end for(ot)
+	}   // end for(it)
+	//***** Transition Region *****
 
-            if (acceptSingleWedgeInTransition) {
-                for ( auto& it : innerTrigs){
-                    if (it.alreadyCombined()){
-                         ATH_MSG_DEBUG("Inner SingleWedge trigger already combined, skipping");
-                        continue;
-                    }
-                    else if ((it.is4outOf4Layers()||it.is3outOf4Layers()) && it.isInTransitionRegion(Zratio)){
-                        secTrigCand.emplace_back(it.setCombined());
-                    }
-                }
-                for ( auto& ot : outerTrigs) {
-                    if (ot.alreadyCombined()){
-                         ATH_MSG_DEBUG("Outer SingleWedge trigger already combined, skipping");
-                        continue;
-                    }
-                    else if ((ot.is4outOf4Layers()||ot.is3outOf4Layers()) && ot.isInTransitionRegion(Zratio)){
-                        secTrigCand.emplace_back(ot.setCombined());
-                    }
-                }
-            } // end if(acceptSingleWedgeInTransition)
-        }   // if(not skipInnerOuterMatchHack)
+	if (acceptSingleWedgeInTransition) {
+	  for ( auto& it : innerTrigs){
+	    if (it.alreadyCombined()){
+	      ATH_MSG_DEBUG("Inner SingleWedge trigger already combined, skipping");
+	      continue;
+	    }
+	    else if ((it.is4outOf4Layers()||it.is3outOf4Layers()) && it.isInTransitionRegion(Zratio)){
+	      secTrigCand.emplace_back(it.setCombined());
+	    }
+	  }
+	  for ( auto& ot : outerTrigs) {
+	    if (ot.alreadyCombined()){
+	      ATH_MSG_DEBUG("Outer SingleWedge trigger already combined, skipping");
+	      continue;
+	    }
+	    else if ((ot.is4outOf4Layers()||ot.is3outOf4Layers()) && ot.isInTransitionRegion(Zratio)){
+	      secTrigCand.emplace_back(ot.setCombined());
+	    }
+	  }
+	} // end if(acceptSingleWedgeInTransition)
 
         if (msgLvl(MSG::DEBUG)) {
           ATH_MSG_DEBUG("found " << secTrigCand.size() << " triggerCandidates from "<< pads.size() << " pads");
@@ -486,7 +473,7 @@ namespace NSWL1{
   {
     std::vector<size_t> indices;
     for(size_t i=0; i<padSelectedIndices.size(); i++){
-      const size_t &idx=padSelectedIndices[i];
+      const size_t idx=padSelectedIndices[i];
       if(layer==pads[idx]->gasGapId()) indices.push_back(idx);
     }
     return indices;
@@ -498,7 +485,7 @@ namespace NSWL1{
   {
     std::vector<size_t> indices;
     for(size_t i=0; i<padSelectedIndices.size(); i++){
-      const size_t &idx=padSelectedIndices[i];
+      const size_t idx=padSelectedIndices[i];
       if(multiplet==pads[idx]->multipletId()) indices.push_back(idx);
     }
     return indices;

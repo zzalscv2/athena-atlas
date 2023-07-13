@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/getMessageSvc.h"
@@ -156,7 +156,7 @@ double MMT_Fitter::Get_Global_Slope (const vector<Hit>& track, const string& typ
 {
   vector<Hit> qhits = q_hits(type,track,par);
   double sum = 0.;
-  if(qhits.size()==0) return -999;
+  if(qhits.empty()) return -999;
   double nhitdiv= 1./qhits.size();
   for(int ihit=0;ihit<(int)qhits.size();ihit++){
     sum+=(qhits[ihit].info.slope*nhitdiv);
@@ -345,7 +345,8 @@ ROI MMT_Fitter::Get_ROI(double M_x, double M_u, double M_v, const vector<Hit>&tr
   //--- calc constants ------
   double b=M_PI/180.0*(par->stereo_degree);
   double A=1./std::tan(b);
-  double B=1./std::tan(b);
+  // FIXME: why do we need B if equal to A?
+  double B=A;
 
   //---  slope conversion equations ----
   double my = M_x;
@@ -461,7 +462,7 @@ double MMT_Fitter::Slope_Components_ROI_theta(int jy, int ix, std::shared_ptr<MM
   if(xdex==0) xdex++;
   double mx = par->m_x_min+par->h_mx*xdex;
   double my = par->m_y_min+par->h_my*ydex;
-  double theta = std::atan(sqrt( (mx*mx+my*my) ));
+  double theta = std::atan(std::sqrt( (mx*mx+my*my) ));
   if(theta<par->minimum_large_theta || theta>par->maximum_large_theta){
     theta=0;
   }

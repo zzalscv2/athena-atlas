@@ -135,17 +135,17 @@ MMT_Hit::MMT_Hit(const MMT_Hit* hit)
 
 bool MMT_Hit::isX() const {
   int id = this->getPlane();
-  return (id == 0 || id == 1 || id == 6 || id == 7) ? true : false;
+  return (id == 0 || id == 1 || id == 6 || id == 7);
 }
 
 bool MMT_Hit::isU() const {
   int id = this->getPlane();
-  return (id == 2 || id == 4) ? true : false;
+  return (id == 2 || id == 4);
 }
 
 bool MMT_Hit::isV() const {
   int id = this->getPlane();
-  return (id == 3 || id == 5) ? true : false;
+  return (id == 3 || id == 5);
 }
 
 bool MMT_Hit::verifyHit() const {
