@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Adding SiHitValidation for whichever parts of ITk are running
 def ITkHitAnalysis(flags):
@@ -27,4 +27,17 @@ def HGTDHitAnalysis(flags):
     if flags.Detector.EnableHGTD:
         result.merge(HGTD_HitAnalysisCfg(flags))
 
+    return result
+
+
+def IDHitAnalysis(flags): 
+
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    from HitAnalysis.SiHitAnalysis import PixelHitAnalysisCfg, SCTHitAnalysisCfg
+    result = ComponentAccumulator()
+    result.merge(PixelHitAnalysisCfg(flags))
+    result.merge(SCTHitAnalysisCfg(flags))
+ 
+    result.getService("THistSvc").Output = ["SiHitAnalysis DATAFILE='SiHitValid.root' OPT='RECREATE'"]
+ 
     return result
