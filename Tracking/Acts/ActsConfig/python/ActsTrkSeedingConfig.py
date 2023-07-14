@@ -19,6 +19,19 @@ def ActsTrkITkPixelSeedingToolCfg(flags,
     acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name = "ActsSeedingTool_ITkPixel", **kwargs))
     return acc
 
+def ActsTrkITkFastPixelSeedingToolCfg(flags,
+                                  **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    ## For ITkPixel
+    kwargs.setdefault("numSeedIncrement" , float("inf"))
+    kwargs.setdefault("deltaZMax" , float("inf"))
+    kwargs.setdefault("maxPtScattering", float("inf"))
+
+    ## Additional cuts for fast seed configuration
+
+    acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name = "ActsFastSeedingTool_ITkPixel", **kwargs))
+    return acc
+
 def ActsTrkITkStripSeedingToolCfg(flags,
                                   **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
@@ -134,7 +147,11 @@ def  ActsTrkSiSpacePointsSeedMakerCfg(flags,
         if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
             seedTool_pixel = acc.popToolsAndMerge(ActsTrkITkPixelOrthogonalSeedingToolCfg(flags))
         else:
-            seedTool_pixel = acc.popToolsAndMerge(ActsTrkITkPixelSeedingToolCfg(flags))
+            if flags.Tracking.doITkFastTracking:
+                kwargs.setdefault("useFastTracking", True)
+                seedTool_pixel = acc.popToolsAndMerge(ActsTrkITkFastPixelSeedingToolCfg(flags))
+            else:
+                seedTool_pixel = acc.popToolsAndMerge(ActsTrkITkPixelSeedingToolCfg(flags))
 
     seedTool_strip = None
     if 'SeedToolStrip' not in kwargs:
@@ -178,7 +195,11 @@ def ActsTrkITkPixelSeedingCfg(flags,
         if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
             seedTool = acc.popToolsAndMerge(ActsTrkITkPixelOrthogonalSeedingToolCfg(flags))
         else:
-            seedTool = acc.popToolsAndMerge(ActsTrkITkPixelSeedingToolCfg(flags))
+            if flags.Tracking.doITkFastTracking:
+                kwargs.setdefault("useFastTracking", True)
+                seedTool = acc.popToolsAndMerge(ActsTrkITkFastPixelSeedingToolCfg(flags))
+            else:
+                seedTool = acc.popToolsAndMerge(ActsTrkITkPixelSeedingToolCfg(flags))
 
     kwargs.setdefault('InputSpacePoints', ['ITkPixelSpacePoints'])
     kwargs.setdefault('OutputSeeds', 'ITkPixelSeeds')
@@ -187,7 +208,6 @@ def ActsTrkITkPixelSeedingCfg(flags,
     kwargs.setdefault('ATLASConverterTool', converterTool)
     kwargs.setdefault('TrackParamsEstimationTool', trackEstimationTool)
     kwargs.setdefault('OutputEstimatedTrackParameters', 'ITkPixelEstimatedTrackParams')
-    kwargs.setdefault('UsePixel', True)
     kwargs.setdefault('DetectorElements', 'ITkPixelDetectorElementCollection')
 
     if flags.Acts.doMonitoring:
@@ -228,7 +248,6 @@ def ActsTrkITkStripSeedingCfg(flags,
     kwargs.setdefault('ATLASConverterTool', converterTool)
     kwargs.setdefault('TrackParamsEstimationTool', trackEstimationTool)
     kwargs.setdefault('OutputEstimatedTrackParameters', 'ITkStripEstimatedTrackParams')
-    kwargs.setdefault('UsePixel', False)
     kwargs.setdefault('DetectorElements', 'ITkStripDetectorElementCollection')
 
     if flags.Acts.doMonitoring:

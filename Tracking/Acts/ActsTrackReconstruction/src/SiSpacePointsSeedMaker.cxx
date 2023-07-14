@@ -28,6 +28,7 @@
 
 #include "TTree.h"
 
+#include <cmath>
 
 
 namespace ActsTrk {
@@ -45,6 +46,7 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "   " << m_strip );
     ATH_MSG_DEBUG( "   " << m_useOverlap );
     ATH_MSG_DEBUG( "   " << m_writeNtuple );
+    ATH_MSG_DEBUG( "   " << m_fastTracking );
 
     if (not m_pixel and not m_strip) {
       ATH_MSG_ERROR("Activate seeding on at least one between Pixel and Strip space point collections!");
@@ -133,6 +135,9 @@ namespace ActsTrk {
     r[1] = static_cast<float>(globPos.y());
     r[2] = static_cast<float>(globPos.z());
 
+    if (m_fastTracking and skipSpacePoint(r[0]-data.xbeam[0], r[1]-data.ybeam[0], r[2]-data.zbeam[0]))
+      return;
+
     // adding additional information from strip or pixel
     if (not sp->clusterList().second)
       pixInform(sp, r);
@@ -148,9 +153,25 @@ namespace ActsTrk {
   SiSpacePointsSeedMaker::newSpacePoint(InDet::SiSpacePointsSeedMakerEventData& data,
                                         const xAOD::SpacePoint* const& sp) const
   {
+    if (m_fastTracking and skipSpacePoint(sp->x()-data.xbeam[0], sp->y()-data.ybeam[0], sp->z()-data.zbeam[0]))
+      return;
+
     data.v_ActsSpacePointForSeed.emplace_back(sp);
     data.ns++;
     data.nsaz++;
+  }
+
+  bool SiSpacePointsSeedMaker::skipSpacePoint(float x, float y, float z) const {
+    float R = std::hypotf(x,y);
+    // At small R, we remove space points beyond |z|=200
+    if (std::abs(z) > 200. && R < 50.)
+      return true;
+    // We also remove space points beyond eta=4. if their z is larger
+    // than the max seed z0 (150.)
+    float cotTheta = 27.2899;  // (4.0 eta) --> 27.2899 = 1/tan(2*arctan(exp(-4)))
+    if (std::abs(z) - 150. > cotTheta * R)
+      return true;
+    return false;
   }
 
   void SiSpacePointsSeedMaker::pixInform(const Trk::SpacePoint* const& sp,
