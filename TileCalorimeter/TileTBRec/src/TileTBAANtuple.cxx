@@ -175,6 +175,7 @@ TileTBAANtuple::TileTBAANtuple(const std::string& name, ISvcLocator* pSvcLocator
   , m_tof(0)
   , m_btdc1(0)
   , m_btdc2(0)
+  , m_scaler(0)
   , m_btdc(0)
   , m_tjitter(0)
   , m_tscTOF(0)
@@ -1062,7 +1063,14 @@ StatusCode TileTBAANtuple::storeBeamElements() {
                     // BEAM
                     case 0: m_s1cou = amplitude; break;
                     case 1: m_s2cou = amplitude; break;
-                    case 2: m_muBack[10] = amplitude; break;
+                    case 2: { 
+		      if (m_run < 2310000) {
+			m_muBack[10] = amplitude;
+		      } else {
+			m_s3cou = amplitude;
+		      }
+		    }
+		      break;
                     case 3: m_cher1 = amplitude; break;
                     case 4: m_cher2 = amplitude; break;
                     case 5: m_cher3 = amplitude; break;
@@ -1125,9 +1133,13 @@ StatusCode TileTBAANtuple::storeBeamElements() {
             break;
 
           case COMMON_PTN_FRAG:
-
-            if (cha == 0) m_commonPU = amplitude;
-            else WRONG_CHANNEL(frag, cha);
+	    if (m_run > 2310000 && cha < 16) {
+	      m_scaler[cha] = amplitude;
+	    } else if (cha == 0) {
+	      m_commonPU = amplitude;
+	    } else {
+	      WRONG_CHANNEL(frag, cha);
+	    }
             break;
 
           case COMMON_TOF_FRAG:
@@ -3312,6 +3324,10 @@ void TileTBAANtuple::BEAM_addBranch(void) {
       m_tof = new int[16];
       m_ntuplePtr->Branch("tof", m_tof, "m_tof[16]/I");
     }
+    if (m_beamIdList[COMMON_PTN_FRAG]) {
+      m_scaler = new int[16];
+      m_ntuplePtr->Branch("scaler", m_scaler, "m_scaler[16]/I");
+    }
   } else if (!m_unpackAdder) {
     if (m_beamIdList[COMMON_ADC2_FRAG]) {
       m_ntuplePtr->Branch("S2extra", &m_s2extra, "S2extra/S");
@@ -3467,6 +3483,10 @@ void TileTBAANtuple::BEAM_clearBranch(void) {
     for (std::vector<int>& btdc_amplitudes : *m_btdc) {
       btdc_amplitudes.clear();
     }
+  }
+
+  if (m_scaler) {
+    memset(m_scaler, 0, sizeof(*m_scaler));
   }
 
   memset(m_btdcNhit,0,sizeof(m_btdcNhit));
