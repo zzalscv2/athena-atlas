@@ -7,6 +7,7 @@
 #include "AsgTools/TProperty.h"
 
 #include <stdexcept>
+#include <optional>
 
 namespace top {
   std::string json_dump(std::string const& value) {
@@ -84,12 +85,12 @@ namespace top {
   PropertyValueJsonDumper::~PropertyValueJsonDumper() {
   }
 
-  boost::optional<std::string> PropertyValueJsonDumper::operator () (Property* prop) const {
+  std::optional<std::string> PropertyValueJsonDumper::operator () (Property* prop) const {
     Property::Type propType = prop->type();
     for (auto&& kv : m_dispatch) {
       if (kv.first == propType) return (*kv.second)(prop);
     }
-    return boost::none;
+    return std::nullopt;
   }
 
   PropertyValueJsonDumper::ISpecializedDumper::~ISpecializedDumper() {

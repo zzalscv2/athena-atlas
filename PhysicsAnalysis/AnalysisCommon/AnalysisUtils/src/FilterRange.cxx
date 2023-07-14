@@ -45,7 +45,6 @@ FilterRange & FilterRange::operator = ( const FilterRange& range )
 bool FilterRange::isInRange( const double point ) const
 { 
   // check if point is in range
-  //if ( boost::numeric::in( point, *m_range ) ) return true;
   if ( ( ( lower() - point ) <= +m_precision ) &&
        ( ( upper() - point ) >= -m_precision ) ) return true;
   return false; 
@@ -58,7 +57,7 @@ void FilterRange::setRange( const double lower, const double upper )
 {
   /// Special case where one adds a no-op interval
   if ( lower == MINUS_INF() && upper == PLUS_INF() ) {
-    m_range = boost::none;
+    m_range = std::nullopt;
     return;
   }
 
@@ -75,7 +74,7 @@ void FilterRange::include(double xMin, double xMax)
 
 void FilterRange::includeAll() 
 { 
-  m_range = boost::none;
+  m_range = std::nullopt;
   return;
 }
 
@@ -86,7 +85,7 @@ void FilterRange::addRange( const double xMin, const double xMax)
 { 
   /// Special case where one adds a no-op interval
   if ( xMin == MINUS_INF() && xMax == PLUS_INF() ) {
-    m_range = boost::none;
+    m_range = std::nullopt;
     return;
   }
 
@@ -108,7 +107,6 @@ bool operator==( const FilterRange& r1, const FilterRange& r2 )
   }
   const double precision = std::min( r1.precision(), r2.precision() );
 
-  //return boost::numeric::interval_lib::poseq( *m_range, *(rhs.m_range) );
   return ( ( std::fabs(r1.lower() - r2.lower()) <= precision ) && 
 	   ( std::fabs(r1.upper() - r2.upper()) <= precision ) );
 }

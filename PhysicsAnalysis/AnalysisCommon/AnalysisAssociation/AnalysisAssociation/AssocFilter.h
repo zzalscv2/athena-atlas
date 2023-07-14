@@ -25,8 +25,7 @@
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
 
-// Boost includes
-#include <boost/optional.hpp>
+#include <optional>
 
 // FourMom includes
 #include "FourMomUtils/P4Helpers.h"

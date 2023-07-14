@@ -19,7 +19,7 @@
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 #include <boost/regex.hpp>
 #include <boost/scope_exit.hpp>
 
@@ -239,7 +239,7 @@ namespace top {
         for (auto&& prop : props.getProperties()) {
           if (!prop.second->isValid()) continue;
           auto&& jvalue = json_dump_prop(prop.second);
-          if (jvalue == boost::none) continue;
+          if (jvalue == std::nullopt) continue;
           out << propsep << json_dump(prop.first) << ": " << *jvalue;
           propsep = ",\n  ";
         }
