@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -39,6 +39,9 @@ constexpr double ONE_TWELFTH = 1./12.;
 // Some methods below can be parameterized on the pixel cluster type,
 // The following functions allow using a function parameter for common
 // operations.
+//   [ Omegax = TOT1/(TOT1+TOT2), where TOT1 and TOT2 are the sum of the
+//     charges of the first and last row of the cluster respectively
+//     Omegay: similar definition with columns rather than rows ]
 InDet::PixelCluster newInDetpixelCluster(const Identifier& RDOId,
 					  const Amg::Vector2D& locpos,
 					  const Amg::Vector3D& globpos,
@@ -167,7 +170,6 @@ StatusCode  ClusterMakerTool::initialize(){
 }
 
 
-
 // Compute the pixel cluster global position, and the error associated 
 // to the position.
 // Called by the pixel clustering tools
@@ -186,165 +188,8 @@ StatusCode  ClusterMakerTool::initialize(){
 //       (default)
 //   10: CTB parametrization (as a function of module and cluster size)
 //       no magnetic field
-// - TOT interpolation variable in local x and y directions 
-//   [ Omegax = TOT1/(TOT1+TOT2), where TOT1 and TOT2 are the sum of the 
-//     charges of the first and last row of the cluster respectively  
-//     Omegay: similar definition with columns rather than rows ]
-// OBSOLETE, kept just for backward compatibility
+// - const reference to a PixelID helper class
 
-
-PixelCluster* ClusterMakerTool::pixelCluster(const Identifier& clusterID,
-                         const Amg::Vector2D& localPos,
-                         const std::vector<Identifier>& rdoList,
-                         const int lvl1a,
-                         const std::vector<int>& totList,
-                         const SiWidth& width,
-                         const InDetDD::SiDetectorElement* element,
-                         bool  ganged,
-                         int errorStrategy,
-                         const float omegax,
-                         const float omegay,
-         			           bool split,
-                         double splitProb1,
-                         double splitProb2,
-                         const PixelChargeCalibCondData *calibData,
-                         const PixelOfflineCalibData *offlineCalibData) const{
-  if ( errorStrategy==2 && m_issueErrorA ) {
-    m_issueErrorA=false;
-  }
-  
-  const AtlasDetectorID* aid = element->getIdHelper();
-  if (aid->helper() != AtlasDetectorID::HelperType::Pixel){
-    throw std::runtime_error( "Wrong helper type in ClusterMakerTool.cxx.");
-  }
-  const PixelID* pid = static_cast<const PixelID*>(aid);
-  if ( errorStrategy==2 && m_forceErrorStrategy1A ) errorStrategy=1;
-  // Fill vector of charges
-  std::vector<float> chargeList;
-  if (calibData) {
-    int nRDO=rdoList.size();
-    chargeList.reserve(nRDO);
-    for (int i=0; i<nRDO; i++) {
-      Identifier pixid=rdoList[i];
-      int ToT=totList[i];
-
-      Identifier moduleID = pid->wafer_id(pixid);
-      IdentifierHash moduleHash = pid->wafer_hash(moduleID);
-      unsigned int FE = m_pixelReadout->getFE(pixid, moduleID);
-      InDetDD::PixelDiodeType type = m_pixelReadout->getDiodeType(pixid);
-      float charge = calibData->getCharge(type, moduleHash, FE, ToT);
-
-      chargeList.push_back(charge);
-    }
-  }
-// ask for Lorentz correction, get global position
-
-  double shift = m_pixelLorentzAngleTool->getLorentzShift(element->identifyHash());
-  Amg::Vector2D locpos(localPos[Trk::locX]+shift, localPos[Trk::locY]);
-  // find global position of element
-  const Amg::Transform3D& T = element->surface().transform();
-  double Ax[3] = {T(0,0),T(1,0),T(2,0)};
-  double Ay[3] = {T(0,1),T(1,1),T(2,1)};
-  double R [3] = {T(0,3),T(1,3),T(2,3)};
-
-  const Amg::Vector2D&    M = locpos;
-  Amg::Vector3D globalPos(M[0]*Ax[0]+M[1]*Ay[0]+R[0],M[0]*Ax[1]+M[1]*Ay[1]+R[1],M[0]*Ax[2]+M[1]*Ay[2]+R[2]);
-
-  // error matrix
-  const Amg::Vector2D& colRow = width.colRow();// made ref to avoid 
-                                             // unnecessary copy EJWM
-  auto errorMatrix = Amg::MatrixX(2,2);
-  errorMatrix.setIdentity();
-
-  // switches are more readable **OPT**
-  // actually they're slower as well (so I'm told) so perhaps
-  // this should be re-written at some point EJWM
-  double eta = std::abs(globalPos.eta());
-  double zPitch = width.z()/colRow.y();
-  
-  //const AtlasDetectorID* aid = element->getIdHelper();
-  //const PixelID* pid = dynamic_cast<const PixelID*>(aid);
-  
-  
-  int layer = pid->layer_disk(clusterID);
-  int phimod = pid->phi_module(clusterID);
-  switch (errorStrategy){
-  case 0:
-    errorMatrix.fillSymmetric(0,0,square(width.phiR())*ONE_TWELFTH);
-    errorMatrix.fillSymmetric(1,1,square(width.z())*ONE_TWELFTH);
-    break;
-  case 1:
-    errorMatrix.fillSymmetric(0,0,square(width.phiR()/colRow.x())*ONE_TWELFTH);
-    errorMatrix.fillSymmetric(1,1,square(width.z()/colRow.y())*ONE_TWELFTH);
-    break;
-  case 2:                  
-    // use parameterization only if the cluster does not 
-    // contain long pixels or ganged pixels
-    // Also require calibration service is available....
-    if (!ganged && zPitch>399*micrometer && zPitch<401*micrometer) {
-      if (offlineCalibData) {
-        if(element->isBarrel()){
-          int ibin = offlineCalibData->getPixelClusterErrorData()->getBarrelBin(eta,int(colRow.y()),int(colRow.x()));
-          double phiError = offlineCalibData->getPixelClusterErrorData()->getPixelBarrelPhiError(ibin);
-          double etaError = offlineCalibData->getPixelClusterErrorData()->getPixelBarrelEtaError(ibin);
-          errorMatrix.fillSymmetric(0,0,square(phiError));
-          errorMatrix.fillSymmetric(1,1,square(etaError));
-        }
-        else {
-          int ibin = offlineCalibData->getPixelClusterErrorData()->getEndcapBin(int(colRow.y()),int(colRow.x()));
-          double phiError = offlineCalibData->getPixelClusterErrorData()->getPixelEndcapPhiError(ibin);
-          double etaError = offlineCalibData->getPixelClusterErrorData()->getPixelEndcapRError(ibin);
-          errorMatrix.fillSymmetric(0,0,square(phiError));
-          errorMatrix.fillSymmetric(1,1,square(etaError));
-        }
-      }
-    }else{// cluster with ganged and/or long pixels
-      errorMatrix.fillSymmetric(0,0,square(width.phiR()/colRow.x())*ONE_TWELFTH);
-      errorMatrix.fillSymmetric(1,1,square(zPitch)*ONE_TWELFTH);
-    }
-    break;
-    
-  case 10:
-    errorMatrix.fillSymmetric(0,0,square( getPixelCTBPhiError(layer,phimod,int(colRow.x()))));
-    errorMatrix.fillSymmetric(1,1,square(width.z()/colRow.y())*ONE_TWELFTH);
-    break;
-    
-  default:
-    errorMatrix.fillSymmetric(0,0,square(width.phiR()/colRow.x())*ONE_TWELFTH);
-    errorMatrix.fillSymmetric(1,1,square(width.z()/colRow.y())*ONE_TWELFTH);
-    break;
-  }
- PixelCluster* newCluster = 
-   new PixelCluster(clusterID, locpos, globalPos,
-                    rdoList, lvl1a, totList,chargeList, 
-                    width, element, errorMatrix, omegax, omegay,
-                    split,
-                    splitProb1,
-                    splitProb2);
- return newCluster;
-
-}
-
-
-// Compute the pixel cluster global position, and the error associated 
-  // to the position.
-  // Called by the pixel clustering tools
-  // 
-  // Input parameters
-  // - the cluster Identifier 
-  // - the position in local reference frame 
-  // - the list of identifiers of the Raw Data Objects belonging to the cluster
-  // - the width of the cluster
-  // - the module the cluster belongs to  
-  // - wheter the cluster contains ganged pixels
-  // - the error strategy, currently
-  //    0: cluster width/sqrt(12.)
-  //    1: pixel pitch/sqrt(12.)
-  //    2: parametrized as a function ofpseudorapidity and cluster size 
-  //       (default)
-  //   10: CTB parametrization (as a function of module and cluster size)
-  //       no magnetic field
-  // - const reference to a PixelID helper class
 template <typename ClusterType, typename CreatorType>
 ClusterType ClusterMakerTool::makePixelCluster(
                          const Identifier& clusterID,
@@ -616,21 +461,20 @@ xAOD::PixelCluster* ClusterMakerTool::xAODpixelCluster(
   offlineCalibData);
 }
 
-
 // Computes global position and errors for SCT cluster.
-  // Called by SCT Clustering tools
-  // 
-  // Input parameters
-  // - the cluster Identifier 
-  // - the position in local reference frame 
-  // - the list of identifiers of the Raw Data Objects belonging to the cluster
-  // - the width of the cluster
-  // - the module the cluster belongs to  
-  // - the error strategy, currently
-  //    0: Cluster Width/sqrt(12.)
-  //    1: Set to a different values for one and two-strip clusters (def.)
-  // The scale factors were derived by the study reported on 25th September 2006.
-  // https://indico.cern.ch/event/430391/contributions/1066157/attachments/929942/1317007/SCTSoft_25Sept06_clusters.pdf
+// Called by SCT Clustering tools
+//
+// Input parameters
+// - the cluster Identifier
+// - the position in local reference frame
+// - the list of identifiers of the Raw Data Objects belonging to the cluster
+// - the width of the cluster
+// - the module the cluster belongs to
+// - the error strategy, currently
+//    0: Cluster Width/sqrt(12.)
+//    1: Set to a different values for one and two-strip clusters (def.)
+// The scale factors were derived by the study reported on 25th September 2006.
+// https://indico.cern.ch/event/430391/contributions/1066157/attachments/929942/1317007/SCTSoft_25Sept06_clusters.pdf
 
 SCT_Cluster
 ClusterMakerTool::sctCluster(const Identifier& clusterID,
@@ -742,5 +586,3 @@ double ClusterMakerTool::getPixelCTBPhiError(int layer, int phi,
 }
 
 }
-
-
