@@ -380,8 +380,8 @@ std::string BaseFakeBkgTool::getListOfEfficienciesAffectedBy(unsigned short uid)
     if(affects[Database::MUON_REAL_EFFICIENCY]) info += "muon real efficiencies, ";
     if(affects[Database::MUON_FAKE_EFFICIENCY]) info += "muon fake efficiencies, ";
     if(affects[Database::MUON_FAKE_FACTOR]) info += "muon fake factors, ";
-    if(affects[Database::PHOTON_ELEFAKE_EFFICIENCY]) info += "electron->photon fake efficiencies, ";
-    if(affects[Database::PHOTON_ELEFAKE_EFFICIENCY_SF]) info += "electron->photon fake efficiencies scale factor, ";
+    if(affects[Database::PHOTON_ELE_FAKE_FACTOR]) info += "electron->photon fake rate, ";
+    if(affects[Database::PHOTON_ELE_FAKE_FACTOR_SF]) info += "electron->photon fake rate scale factor, ";
     return info.substr(0, info.size()-2);
 }
 
