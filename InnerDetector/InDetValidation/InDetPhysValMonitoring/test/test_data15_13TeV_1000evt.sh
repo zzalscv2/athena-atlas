@@ -27,36 +27,26 @@ fi
 # Reco step based on test InDetPhysValMonitoring ART setup from Josh Moss.
 
 run  Reco_tf.py \
+  --CA \
   --inputBSFile "$inputBS" \
   --maxEvents 1000 \
   --autoConfiguration everything \
-  --conditionsTag="CONDBR2-BLKPA-RUN2-09" \
+  --conditionsTag   'CONDBR2-BLKPA-RUN2-11' \
+  --geometryVersion="ATLAS-R2-2016-01-00-01" \
   --outputAODFile   physval.AOD.root \
-  --outputNTUP_PHYSVALFile physval.ntuple.root \
   --steering        doRAWtoALL \
   --checkEventCount False \
-  --ignoreErrors    True \
-  --valid           True \
-  --validationFlags doInDet \
-  --preExec 'from InDetRecExample.InDetJobProperties import InDetFlags; \
-  InDetFlags.doSlimming.set_Value_and_Lock(False); rec.doTrigger.set_Value_and_Lock(False); \
-  from InDetPhysValMonitoring.InDetPhysValJobProperties import InDetPhysValFlags; \
-  InDetPhysValFlags.doValidateTightPrimaryTracks.set_Value_and_Lock(True); \
-  InDetPhysValFlags.doValidateTracksInJets.set_Value_and_Lock(False); \
-  InDetPhysValFlags.doValidateGSFTracks.set_Value_and_Lock(False); \
-  InDetPhysValFlags.doExpertOutput.set_Value_and_Lock(True); \
-  InDetPhysValFlags.doHitLevelPlots.set_Value_and_Lock(True); \
-  rec.doDumpProperties=True; rec.doCalo=True; rec.doEgamma=True; \
-  rec.doForwardDet=False; rec.doInDet=True; rec.doJetMissingETTag=True; \
-  rec.doLArg=True; rec.doLucid=True; rec.doMuon=True; rec.doMuonCombined=True; \
-  rec.doSemiDetailedPerfMon=True; rec.doTau=True; rec.doTile=True; \
-  from ParticleBuilderOptions.AODFlags import AODFlags; \
-  AODFlags.ThinGeantTruth.set_Value_and_Lock(False);  \
-  AODFlags.ThinNegativeEnergyCaloClusters.set_Value_and_Lock(False); \
-  AODFlags.ThinNegativeEnergyNeutralPFOs.set_Value_and_Lock(False);\
-  AODFlags.ThinInDetForwardTrackParticles.set_Value_and_Lock(False) '
+  --ignoreErrors    True 
 rec_tf_exit_code=$?
 echo "art-result: $rec_tf_exit_code reco"
+
+run runIDPVM.py \
+  --filesInput physval.AOD.root \
+  --outputFile physval.ntuple.root \
+  --doHitLevelPlots \
+  --doExpertPlots
+idpvm_tf_exit_code=$?
+echo "art-result: $idpvm_tf_exit_code idpvm"
 
 if [ $rec_tf_exit_code -eq 0 ]  ;then
   echo "download latest result"

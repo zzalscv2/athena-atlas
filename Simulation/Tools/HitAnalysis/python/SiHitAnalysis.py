@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -13,6 +13,32 @@ def SiHitAnalysisOutputCfg(flags, output_name='SiHitAnalysis'):
 
     return acc
 
+
+def PixelHitAnalysisCfg(flags):
+    from PixelGeoModel.PixelGeoModelConfig import PixelSimulationGeometryCfg
+    acc = PixelSimulationGeometryCfg(flags)
+    
+    alg = CompFactory.SiHitAnalysis('PixelHitAnalysis')
+    alg.CollectionName='PixelHits'
+    alg.HistPath='/SiHitAnalysis/'
+    acc.addEventAlgo(alg)
+    
+    acc.merge(SiHitAnalysisOutputCfg(flags))
+    
+    return acc
+
+def SCTHitAnalysisCfg(flags):
+  from SCT_GeoModel.SCT_GeoModelConfig import SCT_SimulationGeometryCfg
+  acc = SCT_SimulationGeometryCfg(flags)
+  
+  alg = CompFactory.SiHitAnalysis('SCTHitAnalysis')
+  alg.CollectionName='SCT_Hits'
+  alg.HistPath='/SiHitAnalysis/'
+  acc.addEventAlgo(alg)
+  
+  acc.merge(SiHitAnalysisOutputCfg(flags))
+  
+  return acc
 
 def ITkPixelHitAnalysisCfg(flags):
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelSimulationGeometryCfg
