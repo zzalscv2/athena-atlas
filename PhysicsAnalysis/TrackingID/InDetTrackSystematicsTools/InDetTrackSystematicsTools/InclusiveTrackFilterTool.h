@@ -62,7 +62,7 @@ namespace InDet {
   private:
 
     // Property: random seed
-    Gaudi::Property<int> m_seed{this, "Seed", 0, "Seed used to initialize the RNG"};
+    Gaudi::Property<int> m_seed{this, "Seed", 42, "Seed used to initialize the RNG"};
 
     // Property: parameter to artificially scale up/down the effect of the tool
     Gaudi::Property<float> m_trkEffSystScale{this, "trkEffSystScale", 1.0, "Option to scale the effect of the systematic (default 1)"};
