@@ -109,19 +109,19 @@ public:
     const ParticleHypothesis matEffects = nonInteracting) const override final;
 
 private:
-  using MultiTrajectory = DataVector<const Trk::MultiComponentStateOnSurface>;
+  using GSFTrajectory = DataVector<const Trk::MultiComponentStateOnSurface>;
   /** Produces a perigee from a smoothed trajectory */
   std::unique_ptr<MultiComponentStateOnSurface> makePerigee(
     const EventContext& ctx,
     Trk::IMultiStateExtrapolator::Cache&,
-    const MultiTrajectory&,
+    const GSFTrajectory&,
     const ParticleHypothesis particleHypothesis = nonInteracting) const;
 
   /** Gsf smoothe trajectory*/
-  MultiTrajectory smootherFit(
+  GSFTrajectory smootherFit(
     const EventContext& ctx,
     Trk::IMultiStateExtrapolator::Cache&,
-    const MultiTrajectory&,
+    const GSFTrajectory&,
     const ParticleHypothesis particleHypothesis = nonInteracting,
     const CaloCluster_OnTrack* ccot = nullptr) const;
 
@@ -130,10 +130,10 @@ private:
     const EventContext& ctx,
     const Trk::MultiComponentStateOnSurface* currentState,
     const Trk::CaloCluster_OnTrack* ccot,
-    MultiTrajectory& smoothedTrajectory) const;
+    GSFTrajectory& smoothedTrajectory) const;
 
   /** Forward GSF fit using PrepRawData */
-  MultiTrajectory fitPRD(
+  GSFTrajectory fitPRD(
     const EventContext& ctx,
     IMultiStateExtrapolator::Cache&,
     const PrepRawDataSet&,
@@ -141,7 +141,7 @@ private:
     const ParticleHypothesis particleHypothesis = nonInteracting) const;
 
   /** Forward GSF fit using MeasurementSet */
-  MultiTrajectory fitMeasurements(
+  GSFTrajectory fitMeasurements(
     const EventContext& ctx,
     IMultiStateExtrapolator::Cache&,
     const MeasurementSet&,
@@ -152,7 +152,7 @@ private:
   bool stepForwardFit(
     const EventContext& ctx,
     IMultiStateExtrapolator::Cache&,
-    MultiTrajectory&,
+    GSFTrajectory&,
     const PrepRawData*,
     const MeasurementBase*,
     const Surface&,
