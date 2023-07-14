@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -134,6 +134,9 @@ namespace InDet{
     if (!hasExternalCache) {
       dataItemsPool = std::make_unique<DataPool<PixelCluster>>(ctx);
       dataItemsPool->reserve(20000);  // Some large default size
+    }else if (m_useDataPoolWithCache){
+      dataItemsPool = std::make_unique<DataPool<PixelCluster>>(ctx);
+      //Default size for now 1024 let it expand on its own
     }
 
 
