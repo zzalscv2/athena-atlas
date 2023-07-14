@@ -363,7 +363,7 @@ MuonInputProvider::fillTopoInputEvent(TCS::TopoInputEvent& inputEvent) const {
 
                ATH_MSG_DEBUG( "Contains L1Topo LateMuons L1Muctpi object from StoreGate!" );
 
-               for(const auto muonRoi : *muonROIs) {
+               for(const auto muonRoi : *latemuonROIs) {
                   inputEvent.addLateMuon( MuonInputProvider::createLateMuonTOB( *muonRoi, rpcPtValues, tgcPtValues) );
                }
             }
