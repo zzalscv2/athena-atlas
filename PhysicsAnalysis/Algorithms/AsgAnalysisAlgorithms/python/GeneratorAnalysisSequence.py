@@ -31,9 +31,8 @@ def makeGeneratorAnalysisSequence( dataType,
         raise ValueError ("invalid generator type: " + generator)
 
     # MC/MC scale factors configuration
-    if generator == "default":
-        DSID = "410470"
-    elif generator == "Sherpa221":
+    DSID = "410470"
+    if generator == "Sherpa221":
         DSID = "410250"
     elif generator == "Sherpa228":
         DSID = "421152"
