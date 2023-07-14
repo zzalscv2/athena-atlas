@@ -405,7 +405,7 @@ class MenuSequence(object):
         if ROBPrefetching.StepRoI in flags.Trigger.ROBPrefetchingOptions:
             seqChildren = Sequence.getChildren() if hasattr(Sequence,'getChildren') else Sequence.Members
             for child in seqChildren:
-                if hasProp(child,'ROBPrefetchingInputDecisions') and input_maker_output not in child.ROBPrefetchingInputDecisions and not input_maker_output.endswith('_probe'):
+                if hasProp(child,'ROBPrefetchingInputDecisions') and input_maker_output not in child.ROBPrefetchingInputDecisions and not IsProbe:
                     locked = bool(child.isLocked()) if hasattr(child,'isLocked') else False
                     if locked:
                         child.unlock()
