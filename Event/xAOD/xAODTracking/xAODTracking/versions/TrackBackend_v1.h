@@ -19,7 +19,7 @@ namespace xAOD
   class TrackBackend_v1 : public SG::AuxElement
   {
   private:
-    static const SG::AuxElement::Accessor<std::vector<double> > paramsAcc, covParamsAcc;  
+    static const SG::AuxElement::Accessor<std::vector<double> > s_paramsAcc, s_covParamsAcc;
   public:
     TrackBackend_v1() = default;
     /**
@@ -29,7 +29,7 @@ namespace xAOD
     template <std::size_t measdim = 6>
     Eigen::Map<const Eigen::Matrix<double, measdim, 1>> paramsEigen() const
     {
-      return Eigen::Map<const Eigen::Matrix<double, measdim, 1>>{paramsAcc(*this).data()};
+      return Eigen::Map<const Eigen::Matrix<double, measdim, 1>>{s_paramsAcc(*this).data()};
     }
     /**
      * access parameters of non const element
@@ -37,7 +37,7 @@ namespace xAOD
     template <std::size_t measdim = 6>
     Eigen::Map<Eigen::Matrix<double, measdim, 1>> paramsEigen()
     {
-      return Eigen::Map<Eigen::Matrix<double, measdim, 1>>{paramsAcc(*this).data()};
+      return Eigen::Map<Eigen::Matrix<double, measdim, 1>>{s_paramsAcc(*this).data()};
     }
 
     /**
@@ -55,7 +55,7 @@ namespace xAOD
     template <std::size_t measdim = 6>
     Eigen::Map<const Eigen::Matrix<double, measdim, measdim>> covParamsEigen() const
     {
-      return Eigen::Map<const Eigen::Matrix<double, measdim, measdim>>{covParamsAcc(*this).data()};
+      return Eigen::Map<const Eigen::Matrix<double, measdim, measdim>>{s_covParamsAcc(*this).data()};
     }
 
     /**
@@ -64,7 +64,7 @@ namespace xAOD
     template <std::size_t measdim = 6>
     Eigen::Map<Eigen::Matrix<double, measdim, measdim>> covParamsEigen()
     {
-      return Eigen::Map<Eigen::Matrix<double, measdim, measdim>>{covParamsAcc(*this).data()};
+      return Eigen::Map<Eigen::Matrix<double, measdim, measdim>>{s_covParamsAcc(*this).data()};
     }
 
     /**
