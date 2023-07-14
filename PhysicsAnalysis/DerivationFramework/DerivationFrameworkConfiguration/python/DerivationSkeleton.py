@@ -119,7 +119,12 @@ def fromRunArgs(runArgs):
 
     # Write AMI tag into in-file metadata
     from PyUtils.AMITagHelperConfig import AMITagCfg
-    cfg.merge(AMITagCfg(flags, runArgs))
+    cfg.merge(AMITagCfg(flags, runArgs, fixBroken=True))
+
+    # Fix generator metadata
+    if flags.Input.isMC:
+        from GeneratorConfig.Versioning import GeneratorVersioningFixCfg
+        cfg.merge(GeneratorVersioningFixCfg(flags))
 
     # Set EventPrintoutInterval to 100 events
     cfg.getService(cfg.getAppProps()['EventLoop']).EventPrintoutInterval = 100
