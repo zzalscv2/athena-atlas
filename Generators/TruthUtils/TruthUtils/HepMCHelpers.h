@@ -82,17 +82,9 @@ namespace MC
     return false;
   }
 
-  template <class T> inline bool egammaTruthAlg_isGenStable (const T& p) {
+  template <class T> inline bool egammaTruthAlg_isGenStable_and_isGenInteracting (const T& p) {
     if (HepMC::is_simulation_particle(p)) return false;
     if (p->pdg_id() == 21 && p->e() == 0) return false;
-    const int status = p->status();
-    const auto vertex = p->end_vertex();
-    return ((status == 1) ||
-            (status == 2 && (!vertex || HepMC::is_simulation_vertex(vertex))));    
-  }
-
-  template <class T> inline bool egammaTruthAlg_isGenInteracting (const T& p){
-    if (HepMC::is_simulation_particle(p)) return false;
     const int status = p->status();
     const int apid = std::abs(p->pdg_id());
     const auto vertex = p->end_vertex();
