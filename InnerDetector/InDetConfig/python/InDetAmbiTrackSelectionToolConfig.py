@@ -171,7 +171,7 @@ def InDetTrigAmbiTrackSelectionToolCosmicsCfg(
         flags, name='InDetTrigAmbiTrackSelectionToolCosmics', **kwargs):
     kwargs.setdefault("Cosmics", True)
     kwargs.setdefault("minHits", 0)       #not the same minClusters setting everywhere
-    kwargs.setdefault("maxTracksPerSharedPRD", flags.Tracking.ActiveConfig.maxTracksPerSharedPRD)
+    kwargs.setdefault("maxTracksPerSharedPRD", 10)
     return InDetTrigAmbiTrackSelectionToolCfg(flags, name, **kwargs)
 
 def ITkAmbiTrackSelectionToolCfg(
