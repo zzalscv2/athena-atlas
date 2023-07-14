@@ -20,10 +20,9 @@
 // STL includes
 #include <cfloat>
 #include <iostream>
+#include <optional>
 
 // Boost includes
-#include <boost/none.hpp>
-#include <boost/optional.hpp>
 #include <boost/numeric/interval/interval.hpp>
 #include <boost/numeric/interval/checking.hpp>
 #include <boost/numeric/interval/policies.hpp>
@@ -145,7 +144,7 @@ class FilterRange
   /** The boost interval wrapped by a boost optional. 
    *  This is to allow the instantiation of uninitialised ranges
    */
-  boost::optional<interval_t> m_range;
+  std::optional<interval_t> m_range;
 
   /** Setup the wanted double precision. Default = 1e-6
    */
@@ -169,7 +168,7 @@ bool operator>=( const FilterRange& r1, const FilterRange& r2 );
 /// Constructors
 ////////////////
 inline FilterRange::FilterRange() :
-  m_range(boost::none),
+  m_range(std::nullopt),
   m_precision(1e-6)   
 {}
 
@@ -184,7 +183,7 @@ inline FilterRange::FilterRange( const double min, const double max ) :
     //      << std::endl
     //      << ">>> De-activating this range for optimization purpose."
     //      << std::endl;
-    m_range = boost::none;
+    m_range = std::nullopt;
     if ( isActive() ) {
       std::string error = "ERROR : FilterRange is ACTIVE (Should NOT BE !!)";
       std::cerr << error << std::endl;

@@ -24,6 +24,7 @@
 
 // AnalysisUtils includes
 #include "AnalysisUtils/FilterRange.h"
+#include <optional>
 
 class PhiFilterRange : public FilterRange
 { 
@@ -151,7 +152,7 @@ inline PhiFilterRange::PhiFilterRange( const double min, const double max ) :
     //      << std::endl
     //      << ">>> De-activating this range for optimization purpose."
     //      << std::endl;
-    m_range = boost::none;
+    m_range = std::nullopt;
     if ( isActive() ) {
       std::string err = "ERROR : PhiFilterRange is ACTIVE (Should NOT BE !!)";
       throw err;

@@ -116,12 +116,12 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
 
   Acts::LayerArrayCreator::Config lacCfg;
   auto layerArrayCreator = std::make_shared<const Acts::LayerArrayCreator>(
-      lacCfg, makeActsAthenaLogger(this, "LayArrCrtr", "ActsTGSvc"));
+      lacCfg, makeActsAthenaLogger(this, std::string("LayArrCrtr"), std::string("ActsTGSvc")));
 
   Acts::TrackingVolumeArrayCreator::Config tvcCfg;
   auto trackingVolumeArrayCreator =
       std::make_shared<const Acts::TrackingVolumeArrayCreator>(
-          tvcCfg, makeActsAthenaLogger(this, "TrkVolArrCrtr", "ActsTGSvc"));
+          tvcCfg, makeActsAthenaLogger(this, std::string("TrkVolArrCrtr"), std::string("ActsTGSvc")));
 
   Acts::CylinderVolumeHelper::Config cvhConfig;
   cvhConfig.layerArrayCreator = layerArrayCreator;
@@ -129,7 +129,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
 
   auto cylinderVolumeHelper =
       std::make_shared<const Acts::CylinderVolumeHelper>(
-          cvhConfig, makeActsAthenaLogger(this, "CylVolHlpr", "ActsTGSvc"));
+          cvhConfig, makeActsAthenaLogger(this, std::string("CylVolHlpr"), std::string("ActsTGSvc")));
 
   Acts::TrackingGeometryBuilder::Config tgbConfig;
   tgbConfig.trackingVolumeHelper = cylinderVolumeHelper;
@@ -171,7 +171,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
           makeBeamPipeConfig(cylinderVolumeHelper);
 
         Acts::CylinderVolumeBuilder beamPipeVolumeBuilder {
-          bpvConfig, makeActsAthenaLogger(this, "BPVolBldr", "ActsTGSvc")};
+          bpvConfig, makeActsAthenaLogger(this, std::string("BPVolBldr"), std::string("ActsTGSvc"))};
 
         return beamPipeVolumeBuilder.trackingVolume(gctx, inner);
       });
@@ -187,7 +187,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
         auto cfg = makeLayerBuilderConfig(p_pixelManager);
         cfg.mode = ActsLayerBuilder::Mode::Pixel;
         auto lb = std::make_shared<ActsLayerBuilder>(
-            cfg, makeActsAthenaLogger(this, "PixelGMSLayBldr", "ActsTGSvc"));
+            cfg, makeActsAthenaLogger(this, std::string("PixelGMSLayBldr"), std::string("ActsTGSvc")));
         Acts::CylinderVolumeBuilder::Config cvbConfig;
         cvbConfig.layerEnvelopeR = {3_mm, 3_mm};
         cvbConfig.layerEnvelopeZ = 1_mm;
@@ -198,7 +198,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
         cvbConfig.buildToRadiusZero = !m_buildBeamPipe;
 
         Acts::CylinderVolumeBuilder cvb(
-            cvbConfig, makeActsAthenaLogger(this, "CylVolBldr", "ActsTGSvc"));
+            cvbConfig, makeActsAthenaLogger(this, std::string("CylVolBldr"), std::string("ActsTGSvc")));
 
         return cvb.trackingVolume(gctx, inner);
       });
@@ -213,7 +213,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
             cfg.objDebugOutput = m_objDebugOutput;
             cfg.doEndcapLayerMerging = true;
             auto lb = std::make_shared<ActsLayerBuilder>(
-                cfg, makeActsAthenaLogger(this, "ITkPxInLb", "ActsTGSvc"));
+                cfg, makeActsAthenaLogger(this, std::string("ITkPxInLb"), std::string("ActsTGSvc")));
 
             Acts::CylinderVolumeBuilder::Config cvbConfig;
             cvbConfig.layerEnvelopeR = {5_mm, 5_mm};
@@ -226,7 +226,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
 
             Acts::CylinderVolumeBuilder cvb(
                 cvbConfig,
-                makeActsAthenaLogger(this, "CylVolBldr", "ActsTGSvc"));
+                makeActsAthenaLogger(this, std::string("CylVolBldr"), std::string("ActsTGSvc")));
 
             return cvb.trackingVolume(gctx, inner);
           });
@@ -238,7 +238,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
             cfg.objDebugOutput = m_objDebugOutput;
             cfg.doEndcapLayerMerging = false;
             auto lb = std::make_shared<ActsLayerBuilder>(
-                cfg, makeActsAthenaLogger(this, "ITkPxOtLb", "ActsTGSvc"));
+                cfg, makeActsAthenaLogger(this, std::string("ITkPxOtLb"), std::string("ActsTGSvc")));
 
             Acts::CylinderVolumeBuilder::Config cvbConfig;
             cvbConfig.layerEnvelopeR = {5_mm, 5_mm};
@@ -253,7 +253,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
 
             Acts::CylinderVolumeBuilder cvb(
                 cvbConfig,
-                makeActsAthenaLogger(this, "CylVolBldr", "ActsTGSvc"));
+                makeActsAthenaLogger(this, std::string("CylVolBldr"), std::string("ActsTGSvc")));
 
             return cvb.trackingVolume(gctx, inner);
           });
@@ -267,7 +267,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
             cfg.mode = ActsLayerBuilder::Mode::ITkStrip;
             cfg.objDebugOutput = m_objDebugOutput;
             auto lb = std::make_shared<ActsLayerBuilder>(
-                cfg, makeActsAthenaLogger(this, "ITkStripLB", "ActsTGSvc"));
+                cfg, makeActsAthenaLogger(this, std::string("ITkStripLB"), std::string("ActsTGSvc")));
 
             Acts::CylinderVolumeBuilder::Config cvbConfig;
             cvbConfig.layerEnvelopeR = {5_mm, 5_mm};
@@ -281,7 +281,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
 
             Acts::CylinderVolumeBuilder cvb(
                 cvbConfig,
-                makeActsAthenaLogger(this, "CylVolBldr", "ActsTGSvc"));
+                makeActsAthenaLogger(this, std::string("CylVolBldr"), std::string("ActsTGSvc")));
 
             return cvb.trackingVolume(gctx, inner);
           });
@@ -298,7 +298,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
             cfg.mode = ActsLayerBuilder::Mode::SCT;
             cfg.endcapEnvelopeZ = sctECEnvelopeZ;
             auto sct_lb = std::make_shared<ActsLayerBuilder>(
-                cfg, makeActsAthenaLogger(this, "SCTGMSLayBldr", "ActsTGSvc"));
+                cfg, makeActsAthenaLogger(this, std::string("SCTGMSLayBldr"), std::string("ActsTGSvc")));
 
             auto trt_lb = makeStrawLayerBuilder(p_TRTManager);
 
@@ -314,7 +314,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
             lbCfg.endcapEnvelopeZ = sctECEnvelopeZ;
             auto lb = std::make_shared<ActsLayerBuilder>(
                 lbCfg,
-                makeActsAthenaLogger(this, "SCTGMSLayBldr", "ActsTGSvc"));
+                makeActsAthenaLogger(this, std::string("SCTGMSLayBldr"), std::string("ActsTGSvc")));
 
             Acts::CylinderVolumeBuilder::Config cvbConfig;
             cvbConfig.layerEnvelopeR = {5_mm, 5_mm};
@@ -327,7 +327,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
 
             Acts::CylinderVolumeBuilder cvb(
                 cvbConfig,
-                makeActsAthenaLogger(this, "SCTCylVolBldr", "ActsTGSvc"));
+                makeActsAthenaLogger(this, std::string("SCTCylVolBldr"), std::string("ActsTGSvc")));
 
             return cvb.trackingVolume(gctx, inner);
           });
@@ -346,7 +346,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
 
             Acts::CylinderVolumeBuilder cvb(
                 cvbConfig,
-                makeActsAthenaLogger(this, "TRTCylVolBldr", "ActsTGSvc"));
+                makeActsAthenaLogger(this, std::string("TRTCylVolBldr"), std::string("ActsTGSvc")));
 
             return cvb.trackingVolume(gctx, inner);
           });
@@ -368,7 +368,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
 
             Acts::CylinderVolumeBuilder cvb(
                 cvbConfig,
-                makeActsAthenaLogger(this, "HGTDCylVolBldr", "ActsTGSvc"));
+                makeActsAthenaLogger(this, std::string("HGTDCylVolBldr"), std::string("ActsTGSvc")));
 
             return cvb.trackingVolume(gctx, inner);
           });
@@ -389,7 +389,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
 
   auto trackingGeometryBuilder =
       std::make_shared<const Acts::TrackingGeometryBuilder>(
-          tgbConfig, makeActsAthenaLogger(this, "TrkGeomBldr", "ActsTGSvc"));
+          tgbConfig, makeActsAthenaLogger(this, std::string("TrkGeomBldr"), std::string("ActsTGSvc")));
 
   ATH_MSG_VERBOSE("Begin building process");
   m_trackingGeometry =
@@ -662,11 +662,11 @@ ActsTrackingGeometrySvc::makeStrawLayerBuilder(
 
   auto surfaceArrayCreator = std::make_shared<Acts::SurfaceArrayCreator>(
       sacCfg,
-      makeActsAthenaLogger(this, managerName + "SrfArrCrtr", "ActsTGSvc"));
+      makeActsAthenaLogger(this, managerName + "SrfArrCrtr", std::string("ActsTGSvc")));
   Acts::LayerCreator::Config lcCfg;
   lcCfg.surfaceArrayCreator = surfaceArrayCreator;
   auto layerCreator = std::make_shared<Acts::LayerCreator>(
-      lcCfg, makeActsAthenaLogger(this, managerName + "LayCrtr", "ActsTGSvc"));
+      lcCfg, makeActsAthenaLogger(this, managerName + "LayCrtr", std::string("ActsTGSvc")));
 
   ActsStrawLayerBuilder::Config cfg;
   cfg.mng = static_cast<const InDetDD::TRT_DetectorManager *>(manager);
@@ -674,7 +674,7 @@ ActsTrackingGeometrySvc::makeStrawLayerBuilder(
   cfg.layerCreator = layerCreator;
   cfg.idHelper = m_TRT_idHelper;
   return std::make_shared<const ActsStrawLayerBuilder>(
-      cfg, makeActsAthenaLogger(this, managerName + "GMSLayBldr", "ActsTGSvc"));
+      cfg, makeActsAthenaLogger(this, managerName + "GMSLayBldr", std::string("ActsTGSvc")));
 }
 
 std::shared_ptr<const Acts::ILayerBuilder>
@@ -693,11 +693,11 @@ ActsTrackingGeometrySvc::makeHGTDLayerBuilder(
 
   auto surfaceArrayCreator = std::make_shared<Acts::SurfaceArrayCreator>(
       sacCfg,
-      makeActsAthenaLogger(this, managerName + "SrfArrCrtr", "ActsTGSvc"));
+      makeActsAthenaLogger(this, managerName + "SrfArrCrtr", std::string("ActsTGSvc")));
   Acts::LayerCreator::Config lcCfg;
   lcCfg.surfaceArrayCreator = surfaceArrayCreator;
   auto layerCreator = std::make_shared<Acts::LayerCreator>(
-      lcCfg, makeActsAthenaLogger(this, managerName + "LayCrtr", "ActsTGSvc"));
+      lcCfg, makeActsAthenaLogger(this, managerName + "LayCrtr", std::string("ActsTGSvc")));
 
   ActsHGTDLayerBuilder::Config cfg;
   cfg.mng = static_cast<const HGTD_DetectorManager *>(manager);
@@ -705,7 +705,7 @@ ActsTrackingGeometrySvc::makeHGTDLayerBuilder(
   cfg.layerCreator = layerCreator;
   cfg.idHelper = m_HGTD_idHelper;
   return std::make_shared<const ActsHGTDLayerBuilder>(
-      cfg, makeActsAthenaLogger(this, managerName + "GMSLayBldr", "ActsTGSvc"));
+      cfg, makeActsAthenaLogger(this, managerName + "GMSLayBldr", std::string("ActsTGSvc")));
 }
 
 ActsLayerBuilder::Config ActsTrackingGeometrySvc::makeLayerBuilderConfig(
@@ -758,11 +758,11 @@ ActsLayerBuilder::Config ActsTrackingGeometrySvc::makeLayerBuilderConfig(
 
   auto surfaceArrayCreator = std::make_shared<Acts::SurfaceArrayCreator>(
       sacCfg,
-      makeActsAthenaLogger(this, managerName + "SrfArrCrtr", "ActsTGSvc"));
+      makeActsAthenaLogger(this, managerName + "SrfArrCrtr", std::string("ActsTGSvc")));
   Acts::LayerCreator::Config lcCfg;
   lcCfg.surfaceArrayCreator = surfaceArrayCreator;
   auto layerCreator = std::make_shared<Acts::LayerCreator>(
-      lcCfg, makeActsAthenaLogger(this, managerName + "LayCrtr", "ActsTGSvc"));
+      lcCfg, makeActsAthenaLogger(this, managerName + "LayCrtr", std::string("ActsTGSvc")));
 
   ActsLayerBuilder::Config cfg;
   cfg.surfaceMatcher = matcher;
@@ -802,7 +802,7 @@ ActsTrackingGeometrySvc::makeSCTTRTAssembly(
 
   Acts::CylinderVolumeBuilder::Config cvbCfg;
   Acts::CylinderVolumeBuilder cvb(
-      cvbCfg, makeActsAthenaLogger(this, "SCTTRTCVB", "ActsTGSvc"));
+      cvbCfg, makeActsAthenaLogger(this, std::string("SCTTRTCVB"), std::string("ActsTGSvc")));
 
   ATH_MSG_VERBOSE("Making SCT negative layers: ");
   Acts::VolumeConfig sctNegEC =
@@ -1102,7 +1102,7 @@ ActsTrackingGeometrySvc::makeBeamPipeConfig(
   bplConfig.centralLayerHalflengthZ = {3000_mm};
   bplConfig.centralLayerThickness = {1_mm};
   auto beamPipeBuilder = std::make_shared<const Acts::PassiveLayerBuilder>(
-      bplConfig, makeActsAthenaLogger(this, "BPLayBldr", "ActsTGSvc"));
+      bplConfig, makeActsAthenaLogger(this, std::string("BPLayBldr"), std::string("ActsTGSvc")));
 
   // create the volume for the beam pipe
   cfg.trackingVolumeHelper = cvh;

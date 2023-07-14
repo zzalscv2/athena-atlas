@@ -125,10 +125,10 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
   auto trackingVolumeArrayCreator
       = std::make_shared<const Acts::TrackingVolumeArrayCreator>(
           Acts::TrackingVolumeArrayCreator::Config{},
-          makeActsAthenaLogger(this, "TrkVolArrCrtr", "ActsTGSvc"));
+          makeActsAthenaLogger(this, std::string("TrkVolArrCrtr"), std::string("ActsTGSvc")));
   Acts::CylinderVolumeHelper::Config cvhCfg;
   cvhCfg.trackingVolumeArrayCreator = trackingVolumeArrayCreator;
-  Acts::CylinderVolumeHelper cvh(cvhCfg, makeActsAthenaLogger(this, "ACaloTrkVB", "CylVolHlp"));
+  Acts::CylinderVolumeHelper cvh(cvhCfg, makeActsAthenaLogger(this, std::string("ACaloTrkVB"), std::string("CylVolHlp")));
 
   std::vector<double> lPos = {};
   std::vector<std::shared_ptr<Acts::TrackingVolume>> noVolumes;
