@@ -31,6 +31,8 @@ namespace ActsTrk {
   
   StatusCode SeedingAlg::initialize() {
     ATH_MSG_INFO( "Initializing " << name() << " ... " );
+    if (m_fastTracking)
+      ATH_MSG_INFO( "   using fast tracking configuration.");
     
     // Retrieve seed tool
     ATH_CHECK( m_seedsTool.retrieve() );
@@ -115,14 +117,15 @@ namespace ActsTrk {
       number_input_space_points += handle->size();
     }
 
-    // TODO: Write some lines to check which SPs you want to use from the input container
-    // At the time being we fill a vector with all SPs available.
+    // Apply selection on which SPs you want to use from the input container
     std::vector<const xAOD::SpacePoint*> selectedSpacePoints;
     selectedSpacePoints.reserve(number_input_space_points);
 
     for (const auto* collection : all_input_collections) {
       for (const auto* sp : *collection) {
-	selectedSpacePoints.push_back( sp );
+        if (m_fastTracking and skipSpacePoint(sp->x()-beamPos.x(), sp->y()-beamPos.y(), sp->z()-beamPos.z()))
+          continue;
+        selectedSpacePoints.push_back( sp );
       }
     }
 	
