@@ -7,7 +7,9 @@ atlas_subdir( SiSpacePointFormation )
 atlas_add_library( SiSpacePointFormationLib
                    src/*.cxx
                    PUBLIC_HEADERS SiSpacePointFormation
-                   LINK_LIBRARIES AthContainers AthenaBaseComps AthenaKernel AthenaMonitoringKernelLib BeamSpotConditionsData GaudiKernel GeoPrimitives Identifier InDetPrepRawData ReadoutGeometryBase InDetReadoutGeometry SiSpacePointToolLib StoreGateLib TrkSpacePoint xAODInDetMeasurement
+                   LINK_LIBRARIES AthContainers AthenaBaseComps AthenaKernel AthenaMonitoringKernelLib AthAllocators
+                   BeamSpotConditionsData GaudiKernel GeoPrimitives Identifier InDetPrepRawData ReadoutGeometryBase 
+                   InDetReadoutGeometry SiSpacePointToolLib StoreGateLib TrkSpacePoint xAODInDetMeasurement
                    PRIVATE_LINK_LIBRARIES AtlasDetDescr xAODEventInfo InDetIdentifier)
 
 atlas_add_component( SiSpacePointFormation

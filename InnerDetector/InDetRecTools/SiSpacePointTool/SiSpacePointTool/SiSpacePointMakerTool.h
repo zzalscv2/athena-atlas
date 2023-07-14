@@ -11,7 +11,11 @@
 #include "InDetPrepRawData/PixelClusterCollection.h"
 #include "InDetPrepRawData/SCT_ClusterCollection.h"
 #include "SiSpacePointTool/SCTinformation.h"
-#include "TrkSpacePoint/SpacePoint.h"
+
+#include "SiSpacePoint/SCT_SpacePoint.h"
+#include "SiSpacePoint/PixelSpacePoint.h"
+
+#include "AthAllocators/DataPool.h"
 
 #include <string>
 
@@ -57,16 +61,20 @@ namespace InDet {
     virtual StatusCode finalize() override;
 
     /// Convert clusters to space points: SCT_Clusters -> SCT_SpacePoints
-    static Trk::SpacePoint* makeSCT_SpacePoint(InDet::SCTinformation&,InDet::SCTinformation&,IdentifierHash,IdentifierHash,double,double) ;
+    static Trk::SpacePoint* makeSCT_SpacePoint(
+        InDet::SCTinformation&, InDet::SCTinformation&, IdentifierHash,
+        IdentifierHash, double, double, DataPool<SCT_SpacePoint>* dataItemsSCT);
 
     void fillSCT_SpacePointCollection(std::array<const InDetDD::SiDetectorElement*, nNeighbours>&,
                                       std::array<const SCT_ClusterCollection*, nNeighbours>&,
                                       std::array<double, 14>&,bool,const Amg::Vector3D&,
-                                      SpacePointCollection*,SpacePointOverlapCollection*) const;
+                                      SpacePointCollection*,SpacePointOverlapCollection*,
+                                      DataPool<SCT_SpacePoint>* dataItemsSCT) const;
 
     /// Convert clusters to space points: PixelClusters -> PixelSpacePoints
     static void fillPixelSpacePointCollection(const InDet::PixelClusterCollection* clusters,
-                                       SpacePointCollection* spacepointCollection) ;
+                                       SpacePointCollection* spacepointCollection,
+                                       DataPool<PixelSpacePoint>* dataItemsPixel);
 
     
 

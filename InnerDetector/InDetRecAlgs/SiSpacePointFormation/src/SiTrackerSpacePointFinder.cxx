@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -154,6 +154,7 @@ StatusCode SiTrackerSpacePointFinder::execute (const EventContext& ctx) const
 
   // register the IdentifiableContainer into StoreGate
   SG::WriteHandle<SpacePointContainer> spacePointContainerPixel;
+  std::unique_ptr<DataPool<PixelSpacePoint>> dataItemsPixel = nullptr;
   if (m_selectPixels){
     spacePointContainerPixel = SG::WriteHandle<SpacePointContainer>( m_SpacePointContainerPixelKey, ctx );
     if(m_SpacePointCache_PixKey.key().empty()){
@@ -165,9 +166,15 @@ StatusCode SiTrackerSpacePointFinder::execute (const EventContext& ctx) const
        ATH_CHECK( spacePointContainerPixel.record( std::make_unique<SpacePointContainer>(updateH.ptr()) ) );
        ATH_MSG_DEBUG("Created SpacePointContainer " << m_SpacePointContainerPixelKey.key() << " from cache " << m_SpacePointCache_PixKey.key());
     }
+    const bool hasExternalCache = spacePointContainerPixel->hasExternalCache();
+    if (!hasExternalCache) {
+      dataItemsPixel = std::make_unique<DataPool<PixelSpacePoint>>(ctx);
+      dataItemsPixel->reserve(5000);  // Some large default size
+    }
   }
 
   SG::WriteHandle<SpacePointContainer> spacePointContainer_SCT;
+  std::unique_ptr<DataPool<SCT_SpacePoint>> dataItemsSCT = nullptr;
   if (m_selectSCTs){
     spacePointContainer_SCT = SG::WriteHandle<SpacePointContainer>( m_SpacePointContainer_SCTKey, ctx );
     if(m_SpacePointCache_SCTKey.key().empty()){
@@ -179,18 +186,29 @@ StatusCode SiTrackerSpacePointFinder::execute (const EventContext& ctx) const
        ATH_CHECK( spacePointContainer_SCT.record( std::make_unique<SpacePointContainer>(updateH.ptr()) ) );
        ATH_MSG_DEBUG("Created SpacePointContainer " << m_SpacePointContainer_SCTKey.key() << " from cache " << m_SpacePointCache_SCTKey.key());
     }
+    const bool hasExternalCache = spacePointContainer_SCT->hasExternalCache();
+    if (!hasExternalCache) {
+      dataItemsSCT = std::make_unique<DataPool<SCT_SpacePoint>>(ctx);
+      dataItemsSCT->reserve(10000);  // Some large default size
+    }
   }
 
-  SG::WriteHandle<SpacePointOverlapCollection> spacepointoverlapCollection( m_spacepointoverlapCollectionKey, ctx );
-  ATH_CHECK( spacepointoverlapCollection.record( std::make_unique<SpacePointOverlapCollection>() ) );
+  SG::WriteHandle<SpacePointOverlapCollection> spacepointoverlapCollection(
+      m_spacepointoverlapCollectionKey, ctx);
+  ATH_CHECK(spacepointoverlapCollection.record(
+      std::make_unique<SpacePointOverlapCollection>()));
 
-  ATH_MSG_DEBUG( "Container '" << spacepointoverlapCollection.name() << "' initialised" );
+  if (dataItemsSCT) {
+    // if we have a DataPool it will own the elements
+    spacepointoverlapCollection.ptr()->clear(SG::VIEW_ELEMENTS);
+  }
+  ATH_MSG_DEBUG("Container '" << spacepointoverlapCollection.name()
+                              << "' initialised");
 
   int sctCacheCount = 0;
   int pixCacheCount = 0;
 
   if (m_selectSCTs){
-
     // retrieve SCT cluster container
     SG::ReadHandle<SCT_ClusterContainer> sct_clcontainer( m_Sct_clcontainerKey, ctx );
     if (!sct_clcontainer.isValid()){
@@ -224,10 +242,15 @@ StatusCode SiTrackerSpacePointFinder::execute (const EventContext& ctx) const
       Identifier elementID = colNext->identify();
       auto spacepointCollection = std::make_unique<SpacePointCollection>(idHash);
       spacepointCollection->setIdentifier(elementID);
+      if(dataItemsSCT){
+        //if we have a DataPool it will own the elements
+        spacepointCollection->clear(SG::VIEW_ELEMENTS);
+      }
 
       if(!colNext->empty() && !elements->getDetectorElement(colNext->identifyHash())->isStereo()) {
-        addSCT_SpacePoints(colNext, properties, elements,
-                           spacepointCollection.get(), spacepointoverlapCollection.ptr(), r_cache);
+        addSCT_SpacePoints(
+            colNext, properties, elements, spacepointCollection.get(),
+            spacepointoverlapCollection.ptr(), r_cache, dataItemsSCT.get());
       } else {
         ATH_MSG_DEBUG( "Empty SCT cluster collection" );
       }
@@ -243,7 +266,7 @@ StatusCode SiTrackerSpacePointFinder::execute (const EventContext& ctx) const
           return StatusCode::RECOVERABLE;
         }
         ATH_MSG_VERBOSE( size << " SpacePoints successfully added to Container !" );
-	nReceivedSPsSCT += size;
+        nReceivedSPsSCT += size;
       }
     }
     m_numberOfSCT+= sct_clcontainer->size();
@@ -280,13 +303,16 @@ StatusCode SiTrackerSpacePointFinder::execute (const EventContext& ctx) const
       Identifier elementID = (*colNext)->identify();
       auto spacepointCollection = std::make_unique< SpacePointCollection >(idHash);
       spacepointCollection->setIdentifier(elementID);
+      if(dataItemsPixel){
+        //if we have a DataPool it will own the elements
+        spacepointCollection->clear(SG::VIEW_ELEMENTS);
+      }
 
       if (!(*colNext)->empty())
       {
-        m_SiSpacePointMakerTool->fillPixelSpacePointCollection(*colNext,spacepointCollection.get());
-      }
-      else
-      {
+        m_SiSpacePointMakerTool->fillPixelSpacePointCollection(
+            *colNext, spacepointCollection.get(), dataItemsPixel.get());
+      } else {
         ATH_MSG_DEBUG( "Empty pixel cluster collection" );
       }
       size_t size = spacepointCollection->size();
@@ -304,7 +330,7 @@ StatusCode SiTrackerSpacePointFinder::execute (const EventContext& ctx) const
         }
         ATH_MSG_VERBOSE( size
             << " SpacePoints successfully added to Container !" );
-	nReceivedSPsPIX += size;
+        nReceivedSPsPIX += size;
       }
     }
     m_numberOfPixel+= pixel_clcontainer->size();
@@ -353,7 +379,8 @@ void SiTrackerSpacePointFinder::addSCT_SpacePoints(const SCT_ClusterCollection* 
                                                    const InDetDD::SiDetectorElementCollection* elements,
                                                    SpacePointCollection* spacepointCollection, 
                                                    SpacePointOverlapCollection* spacepointOverlapCollection, 
-                                                   SPFCache &r_cache) const
+                                                   SPFCache &r_cache,
+                                                   DataPool<SCT_SpacePoint>* dataItemsSCT) const
 {
   // For each trigger element, first evaluate and collect the quantities you need to build the space points.
   // The detector element array has capacity 6:
@@ -485,9 +512,12 @@ void SiTrackerSpacePointFinder::addSCT_SpacePoints(const SCT_ClusterCollection* 
       }
     }
   }
-  
-  if(search) {
-    m_SiSpacePointMakerTool->fillSCT_SpacePointCollection(neighbourElements,neighbourClusters,overlapExtents,m_allClusters,r_cache.vertex,spacepointCollection,spacepointOverlapCollection);
+
+  if (search) {
+    m_SiSpacePointMakerTool->fillSCT_SpacePointCollection(
+        neighbourElements, neighbourClusters, overlapExtents, m_allClusters,
+        r_cache.vertex, spacepointCollection, spacepointOverlapCollection,
+        dataItemsSCT);
   }
 }
 

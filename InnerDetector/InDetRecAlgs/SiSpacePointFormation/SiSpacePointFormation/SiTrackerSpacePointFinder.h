@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SiSpacePointFormation_SI_POINT_FINDER_H
@@ -27,6 +27,8 @@
 #include "BeamSpotConditionsData/BeamSpotData.h"
 
 #include "GaudiKernel/ToolHandle.h"
+//
+#include "AthAllocators/DataPool.h"
 
 #include <string>
 
@@ -129,7 +131,10 @@ namespace InDet {
       (const SCT_ClusterCollection* next,
        const SiElementPropertiesTable* properties,
        const InDetDD::SiDetectorElementCollection* elements,
-       SpacePointCollection* spacepointCollection, SpacePointOverlapCollection* spacepointOverlapCollection, SPFCache&) const;
+       SpacePointCollection* spacepointCollection,
+       SpacePointOverlapCollection* spacepointOverlapCollection,
+       SPFCache&,
+       DataPool<SCT_SpacePoint>* dataItemsSCT) const;
     //@}
 
     // data members
