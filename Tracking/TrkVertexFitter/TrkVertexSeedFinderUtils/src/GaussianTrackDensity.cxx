@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkVertexSeedFinderUtils/GaussianTrackDensity.h"
@@ -50,7 +50,6 @@ namespace Trk
     return globalMaximum (perigeeList, density);
   }
 
-
   /**
    * @brief Find position of global maximum for density function.
    * @param vectorTrk List of input tracks.
@@ -61,7 +60,6 @@ namespace Trk
     TrackDensity d (m_gaussStep);
     return globalMaximumImpl (perigeeList, d);
   }
-
 
   /**
    * @brief Find position of global maximum for density function.
@@ -78,9 +76,8 @@ namespace Trk
     return globalMaximumImpl (perigeeList, *dp);
   }
 
-  std::pair<double,double> GaussianTrackDensity::globalMaximumWithWidth (const std::vector<const TrackParameters*>& perigeeList/*,
-                                                  std::unique_ptr<ITrackDensity>& density*/) const
-  {
+  std::pair<double, double> GaussianTrackDensity::globalMaximumWithWidth(
+      const std::vector<const TrackParameters*>& perigeeList) const {
     TrackDensity d (m_gaussStep);
     return globalMaximumWithWidthImpl (perigeeList, d);
   }
@@ -94,16 +91,15 @@ namespace Trk
                                                   TrackDensity& density) const
   {
     addTracks (perigeeList, density);
-    return density.globalMaximum (msg());
+    return density.globalMaximum ();
   }
 
   std::pair<double,double> GaussianTrackDensity::globalMaximumWithWidthImpl (const std::vector<const TrackParameters*>& perigeeList,
                                                   TrackDensity& density) const
   {
     addTracks (perigeeList, density);
-    return density.globalMaximumWithWidth (msg());
+    return density.globalMaximumWithWidth ();
   }
-
 
   /**
    * @brief Add a set of tracks to a density object.
@@ -127,22 +123,6 @@ namespace Trk
 
 
   //***********************************************************************
-
-
-  GaussianTrackDensity::TrackEntry::TrackEntry(double c0, double c1, double c2,
-                                               double zMin, double zMax)
-    : c_0(c0), c_1(c1), c_2(c2), lowerBound(zMin), upperBound(zMax)
-  { }
-
-  // Dummy constructor for binary search
-  GaussianTrackDensity::TrackEntry::TrackEntry(double z)
-    : c_0(0), c_1(0), c_2(0), lowerBound(z), upperBound(z)
-  { }
-
-
-  //***********************************************************************
-
-
   /**
    *  Evaluate the density function at the specified coordinate
    *  along the beamline.
@@ -177,7 +157,7 @@ namespace Trk
   }
 
   std::pair<double,double>
-  GaussianTrackDensity::TrackDensity::globalMaximumWithWidth (MsgStream& msg) const
+  GaussianTrackDensity::TrackDensity::globalMaximumWithWidth () const
   {
     // strategy:
     // the global maximum must be somewhere near a track...
@@ -201,20 +181,22 @@ namespace Trk
       double slope     = 0.0;
       double curvature = 0.0;
       trackDensity( trialZ, density, slope, curvature );
-      if ( curvature >= 0.0 || density <= 0.0 ) continue;
+      if ( curvature >= 0.0 || density <= 0.0 ) {
+        continue;
+      }
       updateMaximum( trialZ, density, curvature, maximumPosition, maximumDensity, maxCurvature);
       trialZ += stepSize( density, slope, curvature );
       trackDensity( trialZ, density, slope, curvature );
-      if ( curvature >= 0.0 || density <= 0.0 ) continue;
+      if ( curvature >= 0.0 || density <= 0.0 ) {
+        continue;
+      }
       updateMaximum( trialZ, density, curvature, maximumPosition, maximumDensity, maxCurvature);
       trialZ += stepSize( density, slope, curvature );
       trackDensity( trialZ, density, slope, curvature );
-      if ( curvature >= 0.0 || density <= 0.0) continue;
+      if ( curvature >= 0.0 || density <= 0.0) {
+        continue;
+      }
       updateMaximum( trialZ, density, curvature, maximumPosition, maximumDensity, maxCurvature);
-    }
-    if ( maximumDensity <= 0 &&  msg.level() <= MSG::DEBUG) {
-      msg << MSG::DEBUG << "Global maximum at density of 0; track map contains "
-          <<  m_trackMap.size() << " tracks" << endmsg;
     }
     if (maxCurvature == 0.) return invalidResult;
     return {maximumPosition,std::sqrt(-maximumDensity/maxCurvature)};
@@ -225,9 +207,9 @@ namespace Trk
    * @param msg Message stream.
    */
   double
-  GaussianTrackDensity::TrackDensity::globalMaximum (MsgStream& msg) const
+  GaussianTrackDensity::TrackDensity::globalMaximum () const
   {
-    return GaussianTrackDensity::TrackDensity::globalMaximumWithWidth(msg).first;
+    return GaussianTrackDensity::TrackDensity::globalMaximumWithWidth().first;
   }
 
 
