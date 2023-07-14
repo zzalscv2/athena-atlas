@@ -1160,11 +1160,11 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
         unsigned int paramsSize = (*data >> 8 ) & 0xFF;
         moduleID[miniDrawer]    = (*data >> 16) & 0xFF;
         runType[miniDrawer]     = (*data >> 24) & 0xFF;
-        if (fragSize != sampleNumber*6) {
+        if (fragSize != sampleNumber * 12) {
           ATH_MSG_WARNING("FRAG6: Minidrawer [" << miniDrawer
                           << "] has unexpected fragment size: " << fragSize
                           << " correct value for " << sampleNumber
-                          << " samples is " << sampleNumber*6);
+                          << " samples is " << sampleNumber * 12);
         }
 
         // check trailer
