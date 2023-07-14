@@ -20,31 +20,25 @@ namespace MC
 #include "AtlasPID.h"
 
   /// @brief Identify if the particle with given PDG ID would not interact with the detector, i.e. not a neutrino or WIMP
-  inline bool isNonInteracting(int pid) { return !(isStrongInteracting(pid) || isEMInteracting(pid) || isGeantino(pid)); }
+  template <class T> inline bool isNonInteracting(const T& p) { return !(isStrongInteracting<T>(p) || isEMInteracting<T>(p) || isGeantino<T>(p)); }
 
   /// @brief Identify if the particle with given PDG ID would produce ID tracks but not shower in the detector if stable
-  inline bool isChargedNonShowering(int pid) { return (isMuon(pid) || isSUSY(pid)); }
+  template <class T> inline  bool isChargedNonShowering(const T& p) { return (isMuon<T>(p) || isSUSY<T>(p)); }
 
   template <class T> inline bool isDecayed(const T& p)  { return p->status() == 2;}
   template <class T> inline bool isStable(const T& p)   { return p->status() == 1;}
   template <class T> inline bool isFinalState(const T& p)   { return p->status() == 1 && !p->end_vertex();}
   template <class T> inline bool isPhysical(const T& p) { return isStable<T>(p) || isDecayed<T>(p); }
-  template <class T> inline bool isPhysicalHadron(const T& p) { return isHadron(p->pdg_id()) && isPhysical<T>(p);}
+  template <class T> inline bool isPhysicalHadron(const T& p) { return isHadron<T>(p) && isPhysical<T>(p);}
 
   /// @brief Determine if the particle is stable at the generator (not det-sim) level,
-  template <class T> inline bool isGenStable(const T& p) {
-    return isStable<T>(p) && !HepMC::is_simulation_particle<T>(p);
-  }
+  template <class T> inline bool isGenStable(const T& p) { return isStable<T>(p) && !HepMC::is_simulation_particle<T>(p);}
 
   /// @brief Identify if the particle is considered stable at the post-detector-sim stage
-  template <class T> inline bool isSimStable(const T& p) {
-    return  isStable<T>(p) &&  !p->end_vertex() && HepMC::is_simulation_particle<T>(p);
-  }
+  template <class T> inline bool isSimStable(const T& p) { return  isStable<T>(p) &&  !p->end_vertex() && HepMC::is_simulation_particle<T>(p);}
 
   /// @brief Identify if the particle could interact with the detector during the simulation, e.g. not a neutrino or WIMP
-  template <class T> inline bool isSimInteracting(const T& p) {
-    return isGenStable<T>(p) && !isNonInteracting(p->pdg_id());
-  }
+  template <class T> inline bool isSimInteracting(const T& p) { return isGenStable<T>(p) && !isNonInteracting<T>(p);}
 
 /* The functions below should be unified */
   template <class T> inline bool FastCaloSimIsGenSimulStable(const T&  p) {
