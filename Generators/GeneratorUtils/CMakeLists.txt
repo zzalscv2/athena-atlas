@@ -3,15 +3,11 @@
 # Declare the package name:
 atlas_subdir( GeneratorUtils )
 
-find_package( Boost )
-
 # Component(s) in the package:
 atlas_add_library( GeneratorUtilsLib
                    GeneratorUtils/*.h
                    INTERFACE
-                   PUBLIC_HEADERS GeneratorUtils
-                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} )
+                   PUBLIC_HEADERS GeneratorUtils)
 
 # Test(s) in the package:
 atlas_add_test( StringParse_test
