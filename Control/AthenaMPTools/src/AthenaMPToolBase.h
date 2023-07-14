@@ -15,7 +15,7 @@
 #include "AthenaInterprocess/ProcessGroup.h"
 #include "AthenaInterprocess/IMessageDecoder.h"
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 class IEvtSelector;
 
@@ -74,7 +74,7 @@ class AthenaMPToolBase : public AthAlgTool
   std::string fmterror(int errnum);
 
   int reopenFds();
-  int handleSavedPfc(const boost::filesystem::path& dest_path);
+  int handleSavedPfc(const std::filesystem::path& dest_path);
 
   void waitForSignal();
 

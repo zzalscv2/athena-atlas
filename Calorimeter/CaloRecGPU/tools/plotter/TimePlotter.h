@@ -23,7 +23,7 @@
 #include <map>
 #include <type_traits>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 using namespace std::literals::string_literals;
 //Not too good.
@@ -67,7 +67,7 @@ struct TimeTable
     return columns.front().size();
   }
 
-  void load_from_file(const boost::filesystem::path & filename)
+  void load_from_file(const std::filesystem::path & filename)
   {
     std::ifstream is(filename.native());
     if (!is.is_open())
@@ -160,7 +160,7 @@ struct TimeTable
     is.close();
   }
 
-  TimeTable(const boost::filesystem::path & filename)
+  TimeTable(const std::filesystem::path & filename)
   {
     load_from_file(filename);
   }
@@ -337,15 +337,15 @@ struct TimeHolder
       }
   }
 
-  TimeHolder(const boost::filesystem::path & foldername, const size_t n_thrs): num_threads(n_thrs)
+  TimeHolder(const std::filesystem::path & foldername, const size_t n_thrs): num_threads(n_thrs)
   {
-    for (auto const & dir_entry : boost::filesystem::directory_iterator(foldername))
+    for (auto const & dir_entry : std::filesystem::directory_iterator(foldername))
       {
-        if (!boost::filesystem::is_regular_file(dir_entry))
+        if (!std::filesystem::is_regular_file(dir_entry))
           {
             continue;
           }
-        const boost::filesystem::path file_path = dir_entry;
+        const std::filesystem::path file_path = dir_entry;
         if (file_path.extension() != ".txt")
           {
             continue;
@@ -420,15 +420,15 @@ struct TimePlotter : public BasePlotter
     return runs.back().has_splitting_data();
   }
 
-  TimePlotter(const boost::filesystem::path & pth)
+  TimePlotter(const std::filesystem::path & pth)
   {
-    for (auto const & dir_entry : boost::filesystem::directory_iterator(pth))
+    for (auto const & dir_entry : std::filesystem::directory_iterator(pth))
       {
-        if (!boost::filesystem::is_directory(dir_entry))
+        if (!std::filesystem::is_directory(dir_entry))
           {
             continue;
           }
-        const boost::filesystem::path inner_dir = dir_entry;
+        const std::filesystem::path inner_dir = dir_entry;
         const std::string dir_string = inner_dir.native();
         const auto pos = dir_string.rfind("times_");
         if (pos == std::string::npos)

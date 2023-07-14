@@ -20,6 +20,7 @@
 #include <signal.h>
 
 #include <iterator>
+#include <filesystem>
 
 namespace AthenaMPToolBase_d {
   std::atomic<bool> sig_done = false;
@@ -138,11 +139,11 @@ AthenaMP::AllWorkerOutputs_ptr AthenaMPToolBase::generateOutputReport()
       // Get the name of FileMgr log
       std::ostringstream workindex;
       workindex<<i;
-      boost::filesystem::path logFilePath(m_subprocTopDir);
-      logFilePath /= boost::filesystem::path(m_subprocDirPrefix+workindex.str());
-      boost::filesystem::path logFile(logFilePath);
-      logFile /= boost::filesystem::path(m_fileMgrLog);
-      if(!(boost::filesystem::exists(logFile)&&boost::filesystem::is_regular_file(logFile))) {
+      std::filesystem::path logFilePath(m_subprocTopDir);
+      logFilePath /= std::filesystem::path(m_subprocDirPrefix+workindex.str());
+      std::filesystem::path logFile(logFilePath);
+      logFile /= std::filesystem::path(m_fileMgrLog);
+      if(!(std::filesystem::exists(logFile)&&std::filesystem::is_regular_file(logFile))) {
         ATH_MSG_WARNING(logFile.string() << " either does not exist or is not a regular file. Skipping");
         continue;
       }
@@ -168,13 +169,13 @@ AthenaMP::AllWorkerOutputs_ptr AthenaMPToolBase::generateOutputReport()
           }
 
           // enties[0] is filename
-	  boost::filesystem::path filenamePath(entries[0]);
-	  boost::filesystem::path basename = filenamePath.filename();
+	  std::filesystem::path filenamePath(entries[0]);
+	  std::filesystem::path basename = filenamePath.filename();
           if(reportedFiles.find(basename.string())==reportedFiles.end())
             reportedFiles.insert(basename.string());
           else
             continue;
-	  boost::filesystem::path absolutename = basename.is_absolute() ? basename : boost::filesystem::absolute(boost::filesystem::path(logFilePath)/=basename);
+	  std::filesystem::path absolutename = basename.is_absolute() ? basename : std::filesystem::absolute(std::filesystem::path(logFilePath)/=basename);
 	  AthenaMP::AllWorkerOutputsIterator it1 = jobOutputs->find(basename.string());
           if(it1==jobOutputs->end()) {
             (*jobOutputs)[basename.string()] = AthenaMP::SingleWorkerOutputs();
@@ -347,7 +348,7 @@ int AthenaMPToolBase::updateIoReg(const std::string& rundir)
   }
 
   // update the IoRegistry for the new workdir - make sure we use absolute path
-  boost::filesystem::path abs_rundir = boost::filesystem::absolute(rundir);
+  std::filesystem::path abs_rundir = std::filesystem::absolute(rundir);
   if(!m_ioMgr->io_update_all(abs_rundir.string()).isSuccess()) {
     ATH_MSG_ERROR("Error updating IoRegistry");
     return -1;
@@ -421,9 +422,9 @@ int AthenaMPToolBase::reopenFds()
   return 0;
 }
 
-int AthenaMPToolBase::handleSavedPfc(const boost::filesystem::path& dest_path)
+int AthenaMPToolBase::handleSavedPfc(const std::filesystem::path& dest_path)
 {
-  if(boost::filesystem::is_regular_file("PoolFileCatalog.xml.AthenaMP-saved"))
+  if(std::filesystem::is_regular_file("PoolFileCatalog.xml.AthenaMP-saved"))
     COPY_FILE_HACK("PoolFileCatalog.xml.AthenaMP-saved",dest_path.string()+"/PoolFileCatalog.xml");
   return 0;
 }

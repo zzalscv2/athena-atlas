@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdexcept>
+#include <filesystem>
 
 SharedEvtQueueProvider::SharedEvtQueueProvider(const std::string& type
 					       , const std::string& name
@@ -109,8 +110,8 @@ StatusCode SharedEvtQueueProvider::exec()
 void SharedEvtQueueProvider::subProcessLogs(std::vector<std::string>& filenames)
 {
   filenames.clear();
-  boost::filesystem::path counter_rundir(m_subprocTopDir);
-  counter_rundir /= boost::filesystem::path(m_subprocDirPrefix);
+  std::filesystem::path counter_rundir(m_subprocTopDir);
+  counter_rundir /= std::filesystem::path(m_subprocDirPrefix);
   filenames.push_back(counter_rundir.string()+std::string("/AthenaMP.log"));
 }
 
@@ -133,8 +134,8 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueProvider::boots
   // ...
 
   // ________________________ mkdir ________________________
-  boost::filesystem::path counter_rundir(m_subprocTopDir);
-  counter_rundir /= boost::filesystem::path(m_subprocDirPrefix);
+  std::filesystem::path counter_rundir(m_subprocTopDir);
+  counter_rundir /= std::filesystem::path(m_subprocDirPrefix);
 
   if(mkdir(counter_rundir.string().c_str(),S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH)==-1) {
     ATH_MSG_ERROR( "Unable to make event counter run directory: " << counter_rundir.string() << ". " << fmterror(errno) );
@@ -154,7 +155,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueProvider::boots
   ATH_MSG_INFO( "Io registry updated in the AthenaMP event event counter PID=" << getpid() );
 
   // _______________________ Handle saved PFC (if any) ______________________
-  boost::filesystem::path abs_counter_rundir = boost::filesystem::absolute(counter_rundir);
+  std::filesystem::path abs_counter_rundir = std::filesystem::absolute(counter_rundir);
   if(handleSavedPfc(abs_counter_rundir))
     return outwork;
 

@@ -31,7 +31,7 @@
 #include <algorithm>
 #include <functional>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <boost/algorithm/string.hpp>
 
 namespace athenaMP_MemHelper
@@ -517,9 +517,9 @@ StatusCode AthMpEvtLoopMgr::generateOutputReport()
 	  for(size_t ii=0; ii<it_wos->second.size(); ++ii) {
 	    AthenaMP::WorkerOutput& outp = it_wos->second[ii];
 	    if(ii==0 && m_nEventsBeforeFork>0) {
-	      boost::filesystem::path masterFile(boost::filesystem::current_path());
-	      masterFile /= boost::filesystem::path(*keys_it);
-	      if(boost::filesystem::exists(masterFile) && boost::filesystem::is_regular_file(masterFile))
+	      std::filesystem::path masterFile(std::filesystem::current_path());
+	      masterFile /= std::filesystem::path(*keys_it);
+	      if(std::filesystem::exists(masterFile) && std::filesystem::is_regular_file(masterFile))
 		ofs << "    <File "
 		    << "description=\"" << outp.description
 		    << "\" mode=\"" << outp.access_mode
@@ -550,7 +550,7 @@ StatusCode AthMpEvtLoopMgr::generateOutputReport()
 std::shared_ptr<AthenaInterprocess::FdsRegistry> AthMpEvtLoopMgr::extractFds()
 {
   ATH_MSG_DEBUG("Extracting file descriptors");
-  using namespace boost::filesystem;
+  using namespace std::filesystem;
   std::shared_ptr<AthenaInterprocess::FdsRegistry> registry(new AthenaInterprocess::FdsRegistry());
 
   // Extract file descriptors associated with the current process
