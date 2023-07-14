@@ -32,22 +32,17 @@ namespace MC
 
   /// @brief Determine if the particle is stable at the generator (not det-sim) level,
   template <class T> inline bool isGenStable(const T& p) {
-    /// Retrieving the barcode is relatively expensive with HepMC3, so test status first.
-    if (p->status() != 1) return false;
-    return !HepMC::is_simulation_particle<T>(p);
+    return isStable<T>(p) && !HepMC::is_simulation_particle<T>(p);
   }
 
   /// @brief Identify if the particle is considered stable at the post-detector-sim stage
   template <class T> inline bool isSimStable(const T& p) {
-    if (p->status() != 1) return false;
-    if (isGenStable<T>(p)) return p->end_vertex() == nullptr;
-    return true;
+    return  isStable<T>(p) &&  !p->end_vertex() && HepMC::is_simulation_particle<T>(p);
   }
 
   /// @brief Identify if the particle could interact with the detector during the simulation, e.g. not a neutrino or WIMP
   template <class T> inline bool isSimInteracting(const T& p) {
-    if (!MC::isGenStable<T>(p)) return false;
-    return !MC::isNonInteracting(p->pdg_id());
+    return isGenStable<T>(p) && !isNonInteracting(p->pdg_id());
   }
 
 /* The functions below should be unified */
