@@ -16,7 +16,7 @@ def SetupArgParser():
     parser = ArgumentParser()
     parser.add_argument("-t", "--threads", dest="threads", type=int, help="number of threads", default=1)
     parser.add_argument("-o", "--output", dest="output", default='PrepDataTest.pool.root', help="Text file containing each cabling channel", metavar="FILE")
-    parser.add_argument("--inputFile", "-i", default=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences/master/q449/v32/myESD.pool.root"], 
+    parser.add_argument("--inputFile", "-i", default=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/UnitTestInput/Run3MC.ESD.pool.root"], 
                         help="Input file to run on ", nargs="+")
     return parser
 
@@ -33,10 +33,8 @@ def setupTestOutputCfg(flags,**kwargs):
     container_items = ["xAOD::MdtDriftCircleContainer#",
                        "xAOD::MdtDriftCircleAuxContainer#"]
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     kwargs.setdefault("ItemList", container_items)
     result.merge(OutputStreamCfg(flags, **kwargs))
-    result.merge(InfileMetaDataCfg(flags, kwargs["streamName"], kwargs["AcceptAlgs"]))
     return result
 
     

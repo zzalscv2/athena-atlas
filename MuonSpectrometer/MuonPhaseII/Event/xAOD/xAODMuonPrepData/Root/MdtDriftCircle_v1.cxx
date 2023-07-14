@@ -10,18 +10,27 @@
 #include "xAODMuonPrepData/versions/MdtDriftCircle_v1.h"
 
 namespace {
-static const SG::AuxElement::Accessor<uint8_t> accDriftStatus{
-    "driftCircleStatus"};
+    static const std::string preFixStr{"MDT_"};
+    static const SG::AuxElement::Accessor<uint8_t> accDriftStatus{preFixStr + "status"};
 }
+#define IMPLEMENT_SETTER_GETTER( DTYPE, GETTER, SETTER)                          \
+      DTYPE MdtDriftCircle_v1::GETTER() const {                                  \
+         static const SG::AuxElement::Accessor<DTYPE> acc{preFixStr + #GETTER};  \
+         return acc(*this);                                                      \
+      }                                                                          \
+                                                                                 \
+      void MdtDriftCircle_v1::SETTER(DTYPE value) {                        \
+         static const SG::AuxElement::Accessor<DTYPE> acc{preFixStr + #GETTER};  \
+         acc(*this) = value;                                                     \
+      }
+                                                                          
 namespace xAOD {
 using MdtDriftCircleStatus = MdtDriftCircle_v1::MdtDriftCircleStatus;
 
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(MdtDriftCircle_v1, int16_t, tdc, setTdc)
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(MdtDriftCircle_v1, int16_t, adc, setAdc)
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(MdtDriftCircle_v1, uint16_t, driftTube,
-                                     setTube)
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(MdtDriftCircle_v1, uint8_t, tubeLayer,
-                                     setLayer)
+IMPLEMENT_SETTER_GETTER(int16_t, tdc, setTdc)
+IMPLEMENT_SETTER_GETTER(int16_t, adc, setAdc)
+IMPLEMENT_SETTER_GETTER(uint16_t, driftTube, setTube)
+IMPLEMENT_SETTER_GETTER(uint8_t, tubeLayer, setLayer)
 
 void MdtDriftCircle_v1::setStatus(MdtDriftCircleStatus st) {
     accDriftStatus(*this) = st;
@@ -53,3 +62,4 @@ void MdtDriftCircle_v1::setDriftRadCov(float cov) {
 }
 
 }  // namespace xAOD
+#undef IMPLEMENT_SETTER_GETTER
