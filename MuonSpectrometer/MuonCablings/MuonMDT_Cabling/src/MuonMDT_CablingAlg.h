@@ -9,12 +9,9 @@
 #ifndef MUONMDT_CABLING_MUONMDT_CABLINGALG_H
 #define MUONMDT_CABLING_MUONMDT_CABLINGALG_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaKernel/IIOVDbSvc.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
-#include "GaudiKernel/AlgTool.h"
-#include "GaudiKernel/IChronoStatSvc.h"
 #include "MuonCablingData/MuonMDT_CablingMap.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -22,12 +19,14 @@
 #include "nlohmann/json.hpp"
 
 
-class MuonMDT_CablingAlg : public AthAlgorithm {
+class MuonMDT_CablingAlg : public AthReentrantAlgorithm {
 public:
     MuonMDT_CablingAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~MuonMDT_CablingAlg() = default;
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
+
+    virtual bool isReEntrant() const override final { return false; }
 
     using CablingData = MuonMDT_CablingMap::CablingData;
 

@@ -19,7 +19,7 @@
 
 using DataSource = MuonMDT_CablingMap::DataSource;
 
-MuonMDT_CablingAlg::MuonMDT_CablingAlg(const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator) {}
+MuonMDT_CablingAlg::MuonMDT_CablingAlg(const std::string& name, ISvcLocator* pSvcLocator) : AthReentrantAlgorithm(name, pSvcLocator) {}
 
 StatusCode MuonMDT_CablingAlg::initialize() {
     ATH_MSG_DEBUG("initialize " << name());
@@ -30,9 +30,8 @@ StatusCode MuonMDT_CablingAlg::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonMDT_CablingAlg::execute() {
+StatusCode MuonMDT_CablingAlg::execute(const EventContext& ctx) const {
     ATH_MSG_VERBOSE("MuonMDT_CablingAlg::execute()");
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     // Write Cond Handle
     SG::WriteCondHandle<MuonMDT_CablingMap> writeHandle{m_writeKey, ctx};
     if (writeHandle.isValid()) {

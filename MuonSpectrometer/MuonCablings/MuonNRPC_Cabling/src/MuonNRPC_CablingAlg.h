@@ -10,26 +10,23 @@
 #ifndef MUONNRPC_CABLING_MUONNRPC_CABLINGALG_H
 #define MUONNRPC_CABLING_MUONNRPC_CABLINGALG_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "AthenaKernel/IIOVDbSvc.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
-#include "GaudiKernel/AlgTool.h"
-#include "GaudiKernel/IChronoStatSvc.h"
 #include "MuonCablingData/MuonNRPC_CablingMap.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
-class IIOVSvc;
-class IIOVDbSvc;
 
-class MuonNRPC_CablingAlg : public AthAlgorithm {
+
+class MuonNRPC_CablingAlg : public AthReentrantAlgorithm {
    public:
     MuonNRPC_CablingAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~MuonNRPC_CablingAlg() = default;
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
+
+    virtual bool isReEntrant() const override final { return false; }
 
     using CablingData = NrpcCablingCoolData;
 
