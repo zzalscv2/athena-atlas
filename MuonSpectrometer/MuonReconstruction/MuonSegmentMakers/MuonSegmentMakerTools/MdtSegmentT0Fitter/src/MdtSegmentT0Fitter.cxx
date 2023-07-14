@@ -443,7 +443,7 @@ namespace TrkDriftCircleMath {
     if(t0Seed > -999.) variable[2] = t0Seed;
 
     ROOT::Minuit2::Minuit2Minimizer minimum("algoName");
-    minimum.SetMaxFunctionCalls(1000000);
+    minimum.SetMaxFunctionCalls(10000);
     minimum.SetTolerance(0.001);
     minimum.SetPrintLevel(-1);
     if(msgLvl(MSG::VERBOSE)) minimum.SetPrintLevel(1);
