@@ -32,7 +32,10 @@ def PhysValExampleCfg(flags, **kwargs):
     return acc
 
 
-def PhysValMonitoringCfg(flags, name="PhysValMonManager", tools=[], **kwargs):
+def PhysValMonitoringCfg(flags, name="PhysValMonManager", tools=None, **kwargs):
+    if tools is None:
+        tools = []
+    
     acc = ComponentAccumulator()
 
     kwargs.setdefault("FileKey", "PhysVal")
