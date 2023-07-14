@@ -32,6 +32,7 @@ public:
     virtual ~MdtCondDbAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext&) const override;
+    virtual bool isReEntrant() const override { return false; }
 
 private:
     typedef SG::WriteCondHandle<MdtCondDbData> writeHandle_t;
