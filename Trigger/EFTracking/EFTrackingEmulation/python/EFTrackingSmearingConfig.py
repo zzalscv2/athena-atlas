@@ -51,7 +51,7 @@ if __name__ == "__main__":
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     acc.merge(PoolReadCfg(flags))
     
-    smearer = EFTrackingSmearingCfg("test", trkpTCut=1, smearFactor=1, InputTrackParticle="InDetTrackParticles",
+    smearer = EFTrackingSmearingCfg("test", trkpTCut=1, smearFactor=2, InputTrackParticle="InDetTrackParticles",
                                     trackEfficiency=1., parameterizeEfficiency=True,
                                     EnableMonitoring=True)
     acc.merge(smearer)    
