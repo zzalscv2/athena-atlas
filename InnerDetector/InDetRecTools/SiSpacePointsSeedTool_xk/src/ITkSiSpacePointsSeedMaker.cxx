@@ -77,13 +77,6 @@ StatusCode SiSpacePointsSeedMaker::initialize()
   //
   m_outputlevel = msg().level() - MSG::DEBUG;
 
-   if (msgLvl(MSG::DEBUG)) { 
-    EventData data;
-    initializeEventData(data);
-    data.nprint=0;
-    dump(data, msg(MSG::DEBUG)); 
-  }
-
   m_umax = 100. - std::abs(m_umax) * 300.;
 
   if (m_writeNtuple) {
@@ -145,218 +138,59 @@ StatusCode SiSpacePointsSeedMaker::finalize()
 
 void SiSpacePointsSeedMaker::newEvent(const EventContext &ctx, EventData &data, int iteration) const
 {
-
-  /// if not done so, book the arrays etc inside the event data object
-  if (not data.initialized)
-    initializeEventData(data);
-
-  data.trigger = false;
   if (!m_pixel && !m_strip)
     return;
 
+  /// if not done so, book the arrays etc inside the event data object
+  if (not data.initialized)
+    initializeEventData(data, ctx);
+
+  /// Erase any existing entries in the data object
+  erase(data);
+  data.trigger = false;
   /// pass the iteration info into our data object
   data.iteration = iteration;
   if (iteration <= 0)
     data.iteration = 0;
-  /// Erase any existing entries in the data object
-  erase(data);
-
   data.dzdrmin = m_dzdrmin0;
+  data.checketa = data.dzdrmin > 1.;
   data.dzdrmax = m_dzdrmax0;
   data.maxScore = m_maxScore; ///< max score, where low scores are "better".
-
-  /// in the first iteration, initialise the beam framework - beam spot position and direction
-  if (data.iteration == 0)
-  {
-
-    buildBeamFrameWork(data);
-
-    /// Read the field information
-    double magField[3]{0, 0, 0};
-    double globalPos[3] = {10., 10., 0.};
-
-    MagField::AtlasFieldCache fieldCache;
-
-    SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCondObjInputKey, ctx};
-    const AtlasFieldCacheCondObj *fieldCondObj{*readHandle};
-    if (fieldCondObj == nullptr)
-    {
-      ATH_MSG_ERROR("ITk::SiSpacePointsSeedMaker: Failed to retrieve AtlasFieldCacheCondObj with key " << m_fieldCondObjInputKey.key());
-      return;
-    }
-    fieldCondObj->getInitializedCache(fieldCache);
-
-    if (fieldCache.solenoidOn())
-    {
-      /// retrieve field
-      fieldCache.getFieldZR(globalPos, magField);
-      /** 
-        * Knowing the field (note that the field cache returns the field in units of kiloTesla!) 
-        * allows to set the circle-radius to pT conversion factor.
-        * 
-        * See for example ATLAS-CONF-2010-072 
-        * R[mm] =pT[GeV] / (3·10−4×B[T]) =  pT[MeV] / (300 *Bz[kT])
-        * 
-        * We actually estimate the circle diameter, 2R, in the seeding. 
-        * So what we want is: 2R = pT[MeV] x 2  / (300 x Bz) = K x pT[MeV]. 
-        **/
-      data.K = 2. / (300. * magField[2]);
-    }
-    else
-    {
-      data.K = 2. / (300. * 5.);
-    }
-    /** helper variables allowing us to directly apply our pt cut on the variables
-      * available at seed level. 
-      * ipt2K is 1 / (K * 0.9 * pt cut)² 
-      **/
-    data.ipt2K = m_ipt2 / (data.K * data.K);
-    /// related to the mysterious magic number, m_COF{134*.05*9}
-    data.ipt2C = m_ipt2 * m_COF;
-    data.COFK = m_COF * (data.K * data.K);
-    /// save magnetic field used for later
-    data.bField[0] = magField[0];
-    data.bField[1] = magField[1];
-    data.bField[2] = magField[2];
-
-    /// set the spacepoint iterator to the beginning of the space-point list
-    data.i_ITkSpacePointForSeed = data.l_ITkSpacePointForSeed.begin();
-    // Set the seed multiplicity strategy of the event data to the one configured
-    // by the user for strip seeds
-    data.maxSeedsPerSP = m_maxOneSizeSSS;
-    data.keepAllConfirmedSeeds = m_alwaysKeepConfirmedStripSeeds;
-  } ///< end if-statement for iteration 0
-  else
-  {                   /// for the second iteration (PPP pass), don't redo the full init required the first time
-    data.r_first = 0; ///< reset the first radial bin
-    // Set the seed multiplicity strategy of the event data to the one configured
-    // by the user for pixel seeds
-    data.maxSeedsPerSP = m_maxOneSizePPP;
-    data.keepAllConfirmedSeeds = m_alwaysKeepConfirmedPixelSeeds;
-
-    /// call fillLists to repopulate the candidate space points and exit
-    fillLists(data);
-    return;
-  }
-
-  if (m_fastTracking)
-  {
-    fillListsFast(ctx, data);
-    return;
-  }
-
-  /// the following will only happen in the first iteration
-  data.checketa = data.dzdrmin > 1.;
+  data.r_first = 0;
 
   /// build the r-binning.
   float oneOverBinSizeR = 1. / m_binSizeR;
   int maxBinR = m_nBinsR - 1;
 
-  /** This cleans up remaining entries in the data object. 
-    * In standard execution, we only run this in the first 
-    * iterations on a newly created data object, 
-    * in which case this loop will not ever be entered. 
-    * Leaving it in place for nonstandard use cases. 
-    **/
-  for (int i = 0; i < data.nr; ++i)
-  {
-    int n = data.r_index[i];
-    data.r_map[n] = 0;
-    data.r_ITkSorted[n].clear();
-  }
-  data.ns = data.nr = 0;
+  /// set the spacepoint iterator to the beginning of the space-point list
+  data.i_ITkSpacePointForSeed = data.l_ITkSpacePointForSeed.begin();
 
-  SG::ReadHandle<Trk::PRDtoTrackMap> prd_to_track_map;
-  const Trk::PRDtoTrackMap *prd_to_track_map_cptr = nullptr;
-  if (!m_prdToTrackMap.key().empty())
+  bool isPixel = (m_fastTracking && m_pixel) || data.iteration == 1;
+
+  if (not isPixel)
   {
-    prd_to_track_map = SG::ReadHandle<Trk::PRDtoTrackMap>(m_prdToTrackMap, ctx);
-    if (!prd_to_track_map.isValid())
-    {
-      ATH_MSG_ERROR("Failed to read PRD to track association map: " << m_prdToTrackMap.key());
+    // Now, we will populate the space point list in the event data object.
+
+    // Set the seed multiplicity strategy of the event data to the one configured
+    // by the user for strip seeds
+    data.maxSeedsPerSP = m_maxOneSizeSSS;
+    data.keepAllConfirmedSeeds = m_alwaysKeepConfirmedStripSeeds;
+
+    SG::ReadHandle<Trk::PRDtoTrackMap> prd_to_track_map;
+    const Trk::PRDtoTrackMap *prd_to_track_map_cptr = nullptr;
+    if (!m_prdToTrackMap.key().empty()) {
+      prd_to_track_map = SG::ReadHandle<Trk::PRDtoTrackMap>(m_prdToTrackMap, ctx);
+      if (!prd_to_track_map.isValid()) {
+        ATH_MSG_ERROR("Failed to read PRD to track association map: " << m_prdToTrackMap.key());
+      }
+      prd_to_track_map_cptr = prd_to_track_map.cptr();
     }
-    prd_to_track_map_cptr = prd_to_track_map.cptr();
-  }
-
-  /////////////////////////////
-  /// Now, we will populate the space point list in the event data object once.
-  /////////////////////////////
-
-  /// reset the first r index
-  data.r_first = 0;
-
-  /// Get pixels space points containers from store gate
-  if (m_pixel)
-  {
-    SG::ReadHandle<SpacePointContainer> spacepointsPixel{m_spacepointsPixel, ctx};
-    if (spacepointsPixel.isValid())
-    {
-      /// loop over the pixel space points
-      for (const SpacePointCollection *spc : *spacepointsPixel)
-      {
-        for (const Trk::SpacePoint *sp : *spc)
-        {
-
-          /// if we use the PRD to track map and this SP has already been used in a track, bail out
-          /// also skip any SP outside the r binning
-          if ((prd_to_track_map_cptr && isUsed(sp, *prd_to_track_map_cptr)) || sp->r() > m_r_rmax || sp->r() < m_r_rmin)
-            continue;
-
-          /// Remove DBM space points
-          ///
-          const InDetDD::SiDetectorElement *de =
-              static_cast<const InDetDD::SiDetectorElement *>(sp->clusterList().first->detectorElement());
-          if (!de || de->isDBM())
-            continue;
-
-          /** create a SiSpacePointForSeed from the space point. 
-            * This will also add the point to the l_spforseed list and update 
-            * the i_spforseed iterator
-            **/
-          SiSpacePointForSeed *sps = newSpacePoint(data, sp);
-          /// this can occur if we fail the eta cut
-          if (!sps)
-            continue;
-
-          /// determine the r-bin of this SP.
-          /// done by dividing the radius by the bin size.
-          int radiusBin = static_cast<int>(sps->radius() * oneOverBinSizeR);
-          /// catch outliers
-          if (radiusBin > maxBinR)
-            radiusBin = maxBinR;
-
-          /// now add the SP to the r-binned vector
-          data.r_ITkSorted[radiusBin].push_back(sps);
-          /// increment the counter for this bin
-          ++data.r_map[radiusBin];
-          /// if this is the first time we see this bin in use, we update the index map for this bin
-          /// to the radius bin index
-          if (data.r_map[radiusBin] == 1)
-            data.r_index[data.nr++] = radiusBin;
-          /// if this is the highest bin we saw so far, update the r_first member of the data object to this bin
-          if (radiusBin > data.r_first)
-            data.r_first = radiusBin;
-          /// update the space point counter
-          ++data.ns;
-        }           ///< end loop over space points in collection
-      }             ///< end loop over pixel SP collections
-    }               ///< end if-statement on valid pixel SP container
-    ++data.r_first; ///< increment r_first past the last occupied bin we saw
-  }                 ///< end pixel case
-
-  /// Get strip space points containers from store gate
-  if (m_strip)
-  {
 
     SG::ReadHandle<SpacePointContainer> spacepointsStrip{m_spacepointsStrip, ctx};
-    if (spacepointsStrip.isValid())
-    {
-
-      for (const SpacePointCollection *spc : *spacepointsStrip)
-      {
-        for (const Trk::SpacePoint *sp : *spc)
-        {
-          /// as for the pixel, veto already used SP if we are using the PRD to track map in later passes of track finding.
+    if (spacepointsStrip.isValid()) {
+      for (const SpacePointCollection *spc : *spacepointsStrip) {
+        for (const Trk::SpacePoint *sp : *spc) {
+          /// as for the pixel, veto already used SP if we are using the PRD to track map in laterpasses of track finding.
           /// Also, veto SP outside the maximum and minimum radii
           if ((prd_to_track_map_cptr && isUsed(sp, *prd_to_track_map_cptr)) || sp->r() > m_r_rmax || sp->r() < m_r_rmin)
             continue;
@@ -365,8 +199,7 @@ void SiSpacePointsSeedMaker::newEvent(const EventContext &ctx, EventData &data, 
           if (!sps)
             continue;
 
-          /// as for PIX, determine the radial bin.
-          /// Note that for the Strip we do not update data.r_first.
+          /// Determine the radial bin
           int radiusBin = static_cast<int>(sps->radius() * oneOverBinSizeR);
           if (radiusBin > maxBinR)
             radiusBin = maxBinR;
@@ -382,16 +215,11 @@ void SiSpacePointsSeedMaker::newEvent(const EventContext &ctx, EventData &data, 
         }
       }
     }
-
     /// Get strip overlap space points containers from store gate
-    if (m_useOverlap && !data.checketa)
-    {
-
+    if (m_useOverlap && !data.checketa) {
       SG::ReadHandle<SpacePointOverlapCollection> spacepointsOverlap{m_spacepointsOverlap, ctx};
-      if (spacepointsOverlap.isValid())
-      {
-        for (const Trk::SpacePoint *sp : *spacepointsOverlap)
-        {
+      if (spacepointsOverlap.isValid()) {
+        for (const Trk::SpacePoint *sp : *spacepointsOverlap) {
           /// usual rejection of SP used in previous track finding passes if we run with the PRT to track map + check of the max and min radii
           if ((prd_to_track_map_cptr && isUsed(sp, *prd_to_track_map_cptr)) || sp->r() > m_r_rmax || sp->r() < m_r_rmin)
             continue;
@@ -417,15 +245,66 @@ void SiSpacePointsSeedMaker::newEvent(const EventContext &ctx, EventData &data, 
         }
       }
     }
+  } else {
+
+    // Now, we will populate the space point list in the event data object.
+
+    // Set the seed multiplicity strategy of the event data to the one configured
+    // by the user for pixel seeds
+    data.maxSeedsPerSP = m_maxOneSizePPP;
+    data.keepAllConfirmedSeeds = m_alwaysKeepConfirmedPixelSeeds;
+
+    SG::ReadHandle<Trk::PRDtoTrackMap> prd_to_track_map;
+    const Trk::PRDtoTrackMap *prd_to_track_map_cptr = nullptr;
+    if (!m_prdToTrackMap.key().empty()) {
+      prd_to_track_map = SG::ReadHandle<Trk::PRDtoTrackMap>(m_prdToTrackMap, ctx);
+      if (!prd_to_track_map.isValid()) {
+        ATH_MSG_ERROR("Failed to read PRD to track association map: " << m_prdToTrackMap.key());
+      }
+      prd_to_track_map_cptr = prd_to_track_map.cptr();
+    }
+
+    SG::ReadHandle<SpacePointContainer> spacepointsPixel{m_spacepointsPixel, ctx};
+    if (spacepointsPixel.isValid()) {
+      /// loop over the pixel space points
+      for (const SpacePointCollection *spc : *spacepointsPixel) {
+        for (const Trk::SpacePoint *sp : *spc) {
+          /// if we use the PRD to track map and this SP has already been used in a track, bail out
+          /// also skip any SP outside the r binning
+          if ((prd_to_track_map_cptr && isUsed(sp, *prd_to_track_map_cptr)) || sp->r() > m_r_rmax || sp->r() < m_r_rmin)
+            continue;
+
+          /** create a SiSpacePointForSeed from the space point.
+           * This will also add the point to the l_spforseed list and update
+           * the i_spforseed iterator
+           **/
+
+          SiSpacePointForSeed *sps = newSpacePoint(data, sp);
+          /// this can occur if we fail the eta cut
+          if (!sps)
+            continue;
+
+          /// determine the r-bin of this SP.
+          /// done by dividing the radius by the bin size.
+          int radiusBin = static_cast<int>(sps->radius() * oneOverBinSizeR);
+          /// catch outliers
+          if (radiusBin > maxBinR)
+            radiusBin = maxBinR;
+
+          /// now add the SP to the r-binned vector
+          data.r_ITkSorted[radiusBin].push_back(sps);
+          /// increment the counter for this bin
+          ++data.r_map[radiusBin];
+          /// if this is the first time we see this bin in use, we update the index map for this bin
+          /// to the radius bin index
+          if (data.r_map[radiusBin] == 1)
+            data.r_index[data.nr++] = radiusBin;
+          /// update the space point counter
+          ++data.ns;
+        }          ///< end loop over space points in collection
+      }             ///< end loop over pixel SP collections
+    }              ///< end if-statement on valid pixel SP container
   }
-
-  /// negative iterations are not used in the current ITk reco
-  if (iteration < 0)
-    data.r_first = 0;
-
-  /// populates the phi-z sorted histograms using the spacepoint lists and r-binning.
-  /// after this call, we have a 3D binning
-  fillLists(data);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -435,66 +314,26 @@ void SiSpacePointsSeedMaker::newEvent(const EventContext &ctx, EventData &data, 
 void SiSpacePointsSeedMaker::newRegion(const EventContext &ctx, EventData &data,
                                        const std::vector<IdentifierHash> &vPixel, const std::vector<IdentifierHash> &vStrip) const
 {
-  if (not data.initialized)
-    initializeEventData(data);
-
-  data.iteration = 0;
-  data.trigger = false;
-  erase(data);
   if (!m_pixel && !m_strip)
     return;
 
+  if (not data.initialized)
+    initializeEventData(data, ctx);
+  erase(data);
+  data.iteration = 0;
+  data.trigger = false;
   data.dzdrmin = m_dzdrmin0;
   data.dzdrmax = m_dzdrmax0;
   data.maxScore = m_maxScore;
-
-  buildBeamFrameWork(data);
-
-  double magField[3]{0, 0, 0};
-  double globalPos[3] = {10., 10., 0.};
-
-  MagField::AtlasFieldCache fieldCache;
-
-  // Get field cache object
-  SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCondObjInputKey, ctx};
-  const AtlasFieldCacheCondObj *fieldCondObj{*readHandle};
-  if (fieldCondObj == nullptr)
-  {
-    ATH_MSG_ERROR("ITk::SiSpacePointsSeedMaker: Failed to retrieve AtlasFieldCacheCondObj with key " << m_fieldCondObjInputKey.key());
-    return;
-  }
-  fieldCondObj->getInitializedCache(fieldCache);
-
-  if (fieldCache.solenoidOn())
-  {
-    fieldCache.getFieldZR(globalPos, magField);
-
-    data.K = 2. / (300. * magField[2]);
-  }
-  else
-  {
-    data.K = 2. / (300. * 5.);
-  }
-
-  data.ipt2K = m_ipt2 / (data.K * data.K);
-  data.ipt2C = m_ipt2 * m_COF;
-  data.COFK = m_COF * (data.K * data.K);
-
-  data.i_ITkSpacePointForSeed = data.l_ITkSpacePointForSeed.begin();
-
-  float oneOverBinSizeR = 1. / m_binSizeR; //was float irstep = 1.f/m_binSizeR;
-  int maxBinR = m_nBinsR - 1;              //was int   irmax  = m_nBinsR-1;
-
   data.r_first = 0;
   data.checketa = false;
 
-  for (int i = 0; i < data.nr; ++i)
-  {
-    int n = data.r_index[i];
-    data.r_map[n] = 0;
-    data.r_ITkSorted[n].clear();
-  }
-  data.ns = data.nr = 0;
+  /// build the r-binning.
+  float oneOverBinSizeR = 1. / m_binSizeR; //was float irstep = 1.f/m_binSizeR;
+  int maxBinR = m_nBinsR - 1;              //was int   irmax  = m_nBinsR-1;
+
+  /// set the spacepoint iterator to the beginning of the space-point list
+  data.i_ITkSpacePointForSeed = data.l_ITkSpacePointForSeed.begin();
 
   SG::ReadHandle<Trk::PRDtoTrackMap> prd_to_track_map;
   const Trk::PRDtoTrackMap *prd_to_track_map_cptr = nullptr;
@@ -582,9 +421,7 @@ void SiSpacePointsSeedMaker::newRegion(const EventContext &ctx, EventData &data,
       }
     }
   }
-  fillLists(data);
 }
-
 ///////////////////////////////////////////////////////////////////
 // Initialize tool for new region
 ///////////////////////////////////////////////////////////////////
@@ -594,25 +431,22 @@ void SiSpacePointsSeedMaker::newRegion(const EventContext &ctx, EventData &data,
 {
   constexpr float twoPi = 2. * M_PI;
 
-  if (not data.initialized)
-    initializeEventData(data);
+   newRegion(ctx, data, vPixel, vStrip);
+   data.trigger = true;
 
-  newRegion(ctx, data, vPixel, vStrip);
-  data.trigger = true;
+   double dzdrmin = 1. / std::tan(2. * std::atan(std::exp(-IRD.etaMinus())));
+   double dzdrmax = 1. / std::tan(2. * std::atan(std::exp(-IRD.etaPlus())));
 
-  double dzdrmin = 1.f / std::tan(2.f * std::atan(std::exp(-IRD.etaMinus())));
-  double dzdrmax = 1.f / std::tan(2.f * std::atan(std::exp(-IRD.etaPlus())));
-
-  data.zminB = IRD.zedMinus() - data.zbeam[0]; // min bottom Z
-  data.zmaxB = IRD.zedPlus() - data.zbeam[0];  // max bottom Z
-  data.zminU = data.zminB + 550. * dzdrmin;
-  data.zmaxU = data.zmaxB + 550. * dzdrmax;
-  double fmax = IRD.phiPlus();
-  double fmin = IRD.phiMinus();
-  if (fmin > fmax)
-    fmin -= twoPi;
-  data.ftrig = (fmin + fmax) * .5;
-  data.ftrigW = (fmax - fmin) * .5;
+   data.zminB = IRD.zedMinus() - data.zbeam[0]; // min bottom Z
+   data.zmaxB = IRD.zedPlus() - data.zbeam[0];  // max bottom Z
+   data.zminU = data.zminB + 550. * dzdrmin;
+   data.zmaxU = data.zmaxB + 550. * dzdrmax;
+   double fmax = IRD.phiPlus();
+   double fmin = IRD.phiMinus();
+   if (fmin > fmax)
+     fmin -= twoPi;
+   data.ftrig = (fmin + fmax) * .5;
+   data.ftrigW = (fmax - fmin) * .5;
 }
 
 
@@ -621,40 +455,9 @@ void SiSpacePointsSeedMaker::newRegion(const EventContext &ctx, EventData &data,
 // with two space points with or without vertex constraint
 ///////////////////////////////////////////////////////////////////
 
-void SiSpacePointsSeedMaker::find2Sp(EventData &data, const std::list<Trk::Vertex> &lv) const
+void SiSpacePointsSeedMaker::find2Sp(EventData &/*data*/, const std::list<Trk::Vertex> &/*lv*/) const
 {
-  if (not data.initialized)
-    initializeEventData(data);
-
-  data.zminU = m_zmin;
-  data.zmaxU = m_zmax;
-
-  int mode = 0;
-  if (lv.begin() != lv.end())
-    mode = 1;
-  bool newv = newVertices(data, lv);
-
-  if (newv || !data.state || data.nspoint != 2 || data.mode != mode || data.nlist)
-  {
-
-    data.i_ITkSeedEnd = data.i_ITkSeeds.begin();
-    data.state = 1;
-    data.nspoint = 2;
-    data.nlist = 0;
-    data.mode = mode;
-    data.endlist = true;
-    data.fvNmin = 0;
-    data.fNmin = 0;
-    data.zMin = 0;
-    production2Sp(data);
-  }
-  data.i_ITkSeed = data.i_ITkSeeds.begin();
-
-  if (m_outputlevel <= 0)
-  {
-    data.nprint = 1;
-    dump(data, msg(MSG::DEBUG));
-  }
+  ATH_MSG_WARNING("ITk::SiSpacePointsSeedMaker::find2Sp not implemented!");
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -662,10 +465,13 @@ void SiSpacePointsSeedMaker::find2Sp(EventData &data, const std::list<Trk::Verte
 // with three space points with or without vertex constraint
 ///////////////////////////////////////////////////////////////////
 
-void SiSpacePointsSeedMaker::find3Sp(const EventContext &, EventData &data, const std::list<Trk::Vertex> &lv) const
+void SiSpacePointsSeedMaker::find3Sp(const EventContext & ctx, EventData &data, const std::list<Trk::Vertex> &lv) const
 {
   if (not data.initialized)
-    initializeEventData(data);
+    initializeEventData(data, ctx);
+
+  /// call fillLists to repopulate the candidate space points
+  fillLists(data);
 
   /// reset the Z interval stored in the data object
   data.zminU = m_zmin;
@@ -710,11 +516,13 @@ void SiSpacePointsSeedMaker::find3Sp(const EventContext &, EventData &data, cons
 // with three space points with or without vertex constraint
 ///////////////////////////////////////////////////////////////////
 
-void SiSpacePointsSeedMaker::find3Sp(const EventContext &, EventData &data, const std::list<Trk::Vertex> &lv, const double *ZVertex) const
+void SiSpacePointsSeedMaker::find3Sp(const EventContext &ctx, EventData &data, const std::list<Trk::Vertex> &lv, const double *ZVertex) const
 {
-
   if (not data.initialized)
-    initializeEventData(data);
+    initializeEventData(data, ctx);
+
+  /// call fillLists to repopulate the candidate space points
+  fillLists(data);
 
   /// Update the data object's Z interval based on the interval passed as arg to this
   /// function.
@@ -765,11 +573,14 @@ void SiSpacePointsSeedMaker::find3Sp(const EventContext &, EventData &data, cons
 // Variable means (2,3,4,....) any number space points
 ///////////////////////////////////////////////////////////////////
 
-void SiSpacePointsSeedMaker::findVSp(const EventContext &, EventData &data, const std::list<Trk::Vertex> &lv) const
+void SiSpacePointsSeedMaker::findVSp(const EventContext &ctx, EventData &data, const std::list<Trk::Vertex> &lv) const
 {
 
   if (not data.initialized)
-    initializeEventData(data);
+    initializeEventData(data, ctx);
+
+  /// call fillLists to repopulate the candidate space points
+  fillLists(data);
 
   data.zminU = m_zmin;
   data.zmaxU = m_zmax;
@@ -807,9 +618,6 @@ void SiSpacePointsSeedMaker::findVSp(const EventContext &, EventData &data, cons
 
 MsgStream &SiSpacePointsSeedMaker::dump(EventData &data, MsgStream &out) const
 {
-  if (not data.initialized)
-    initializeEventData(data);
-
   if (data.nprint)
     return dumpEvent(data, out);
   return dumpConditions(data, out);
@@ -1390,48 +1198,6 @@ void SiSpacePointsSeedMaker::convertToBeamFrameWork(EventData &data, const Trk::
   r[0] = static_cast<float>(sp->globalPosition().x()) - data.xbeam[0];
   r[1] = static_cast<float>(sp->globalPosition().y()) - data.ybeam[0];
   r[2] = static_cast<float>(sp->globalPosition().z()) - data.zbeam[0];
-
-  //not in 21.9 ITk New implementation
-  /*
-    if (!sp->clusterList().second) return;
-
-    // Only for SCT space points
-    //
-    const SiCluster* c0 = static_cast<const SiCluster*>(sp->clusterList().first );
-    const SiCluster* c1 = static_cast<const SiCluster*>(sp->clusterList().second);
-    
-    Amg::Vector2D lc0 = c0->localPosition();
-    Amg::Vector2D lc1 = c1->localPosition();
-    
-    std::pair<Amg::Vector3D, Amg::Vector3D > e0 =
-      (c0->detectorElement()->endsOfStrip(InDetDD::SiLocalPosition(lc0.y(),lc0.x(),0.)));
-    std::pair<Amg::Vector3D, Amg::Vector3D > e1 =
-      (c1->detectorElement()->endsOfStrip(InDetDD::SiLocalPosition(lc1.y(),lc1.x(),0.)));
-
-    Amg::Vector3D b0 (e0.second-e0.first);
-    Amg::Vector3D b1 (e1.second-e1.first);
-    Amg::Vector3D d02(e0.first -e1.first);
-
-    // b0
-    r[ 3] = static_cast<float>(b0[0]);
-    r[ 4] = static_cast<float>(b0[1]);
-    r[ 5] = static_cast<float>(b0[2]);
-    
-    // b1
-    r[ 6] = static_cast<float>(b1[0]);
-    r[ 7] = static_cast<float>(b1[1]);
-    r[ 8] = static_cast<float>(b1[2]);
-
-    // r0-r2
-    r[ 9] = static_cast<float>(d02[0]);
-    r[10] = static_cast<float>(d02[1]);
-    r[11] = static_cast<float>(d02[2]);
-
-    // r0
-    r[12] = static_cast<float>(e0.first[0])-data.xbeam[0];
-    r[13] = static_cast<float>(e0.first[1])-data.ybeam[0];
-    r[14] = static_cast<float>(e0.first[2])-data.zbeam[0];
-    */
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -1473,19 +1239,20 @@ void SiSpacePointsSeedMaker::fillLists(EventData &data) const
       {100000, 10}, ///< if we encounter Si hits at z > +100m, we are probably not in ATLAS anymore...
   };
 
-  int nPhiBins = data.iteration ? m_maxPhiBinPPP : m_maxPhiBinSSS;
-  float inverseBinSizePhi = data.iteration ? m_inverseBinSizePhiPPP : m_inverseBinSizePhiSSS;
+  bool isPixel = (m_fastTracking && m_pixel) || data.iteration == 1;
+
+  int nPhiBins = isPixel ? m_maxPhiBinPPP : m_maxPhiBinSSS;
+  float inverseBinSizePhi = isPixel ? m_inverseBinSizePhiPPP : m_inverseBinSizePhiSSS;
 
   for (int radialBin = data.r_first; radialBin < m_nBinsR; ++radialBin)
   {
-
     /// skip empty radial bins
     if (!data.r_map[radialBin])
       continue;
 
     // Stop when we reach strip SP in PPP iteration #1
     std::vector<SiSpacePointForSeed *>::iterator SP_first = data.r_ITkSorted[radialBin].begin();
-    if (data.iteration && (*SP_first)->spacepoint->clusterList().second)
+    if (isPixel && (*SP_first)->spacepoint->clusterList().second)
       break;
 
     /// remember the first non-empty bin we encounter
@@ -1547,180 +1314,36 @@ void SiSpacePointsSeedMaker::fillLists(EventData &data) const
   }
 
   data.state = 0;
-    if(data.iteration){ // PPP
+
+  if (m_fastTracking) {
+    // Loop through all RZ collections and sort them in radius order
+    //
+    for (int twoDbin(0); twoDbin != arraySizePhiZ; ++twoDbin) {
+      if (data.rfz_ITkSorted[twoDbin].size() > 1) {
+        std::sort(data.rfz_ITkSorted[twoDbin].begin(), data.rfz_ITkSorted[twoDbin].end(), SiSpacePointsComparison_R());
+      }
+    }
+
+    if (m_strip) {
+      data.RTmin = m_rminSSS ;
+      data.RTmax = m_rmaxSSS ;
+    }
+
+  } else {
+    if (isPixel) { // PPP
       data.RTmin = m_binSizeR*firstRadialBin+10. ;
       data.RTmax = m_binSizeR*lastRadialBin-10.;
-    }else{ //SSS
-      if ( endcap and m_isLRT) {
+    } else { //SSS
+      if (endcap and m_isLRT) {
         data.RTmin = m_binSizeR*firstRadialBin+10. ;
         data.RTmax = m_binSizeR*lastRadialBin-10.;
-      }
-      else{
+      } else {
         data.RTmin = m_binSizeR*firstRadialBin+30. ;
         data.RTmax = m_binSizeR*lastRadialBin-150.;
       }
     }
-    
-}
-
-///////////////////////////////////////////////////////////////////
-/// Initiate space points seed maker for fast tracking
-///////////////////////////////////////////////////////////////////
-
-void SiSpacePointsSeedMaker::fillListsFast(const EventContext &ctx, EventData &data) const
-{
-  constexpr float twoPi = 2. * M_PI;
-
-  /// Erase any existing entries in the data object
-  erase(data);
-
-  SG::ReadHandle<Trk::PRDtoTrackMap> prd_to_track_map;
-  const Trk::PRDtoTrackMap *prd_to_track_map_cptr = nullptr;
-  if (!m_prdToTrackMap.key().empty())
-  {
-    prd_to_track_map = SG::ReadHandle<Trk::PRDtoTrackMap>(m_prdToTrackMap, ctx);
-    if (!prd_to_track_map.isValid())
-    {
-      ATH_MSG_ERROR("Failed to read PRD to track association map: " << m_prdToTrackMap.key());
-    }
-    prd_to_track_map_cptr = prd_to_track_map.cptr();
   }
 
-  /** 
-    * The following is done separately for each iteration. 
-    * We sort the hits in our radially sorted lists into the 
-    * z-phi binning, keeping only those we want to consider to reduce 
-    * combinatorics
-    *
-    * Note that the use of r_first to start the loop is what ensures that 
-    * the first iteration is a pure SSS pass. 
-    * In newEvent, r_first is set to the bin after the last 
-    * radial bin containing Pixel space points. 
-    * For the second iteration, we reset it to zero and thus start in the pixels. 
-    **/
-
-  const std::map<float, int> ztoBin{
-      {-2500., 0},
-      {-1400., 1},
-      {-925., 2},
-      {-450., 3},
-      {-250, 4},
-      {250, 5},
-      {450, 6},
-      {925, 7},
-      {1400, 8},
-      {2500, 9},
-      {100000, 10}, ///< if we encounter Si hits at z > +100m, we are probably not in ATLAS anymore...
-  };
-
-  SG::ReadHandle<SpacePointContainer> spacepoints;
-  if (m_strip)
-  {
-    SG::ReadHandle<SpacePointContainer> spacepointsStrip{m_spacepointsStrip, ctx};
-    spacepoints = spacepointsStrip;
-  }
-  else if (m_pixel)
-  {
-    SG::ReadHandle<SpacePointContainer> spacepointsPixel{m_spacepointsPixel, ctx};
-    spacepoints = spacepointsPixel;
-  }
-
-  int nPhiBins = m_pixel ? m_maxPhiBinPPP : m_maxPhiBinSSS;
-  float inverseBinSizePhi = m_pixel ? m_inverseBinSizePhiPPP : m_inverseBinSizePhiSSS;
-
-  if (spacepoints.isValid())
-  {
-    /// loop over the space points
-    for (const SpacePointCollection *spc : *spacepoints)
-    {
-
-      SpacePointCollection::const_iterator spFirst = spc->begin();
-      float r[15];
-      if (m_pixel)
-        pixInform(*spFirst, r);
-      else if (m_strip)
-        stripInform(data, *spFirst, r);
-
-      for (const Trk::SpacePoint *sp : *spc)
-      {
-
-        if (prd_to_track_map_cptr && isUsed(sp, *prd_to_track_map_cptr))
-          continue;
-
-        /** create a SiSpacePointForSeed from the space point.
-     * This will also add the point to the l_spforseed list and update
-     * the i_spforseed iterator
-     **/
-        SiSpacePointForSeed *sps = newSpacePoint(data, sp, r);
-        if (!sps)
-          continue;
-
-        /// Azimuthal angle sort
-        /// find the bin by dividing phi in 0...2pi by the bin size
-        float Phi = sps->phi();
-        if (Phi < 0.)
-          Phi += twoPi; // phi is defined in [0..2pi] for the binning
-        int phiBin = static_cast<int>(Phi * inverseBinSizePhi);
-        /// handle overflows
-        if (phiBin < 0)
-        {
-          phiBin = nPhiBins;
-        }
-        else if (phiBin > nPhiBins)
-        {
-          phiBin = 0;
-        }
-
-        float Z = sps->z();
-        /** z-coordinate sort.
-     * Here, we have a variable bin size.
-     * Use a map to replace 5 levels of nested ternaries
-     * for a somewhat more readable notation while retaining
-     * a logN lookup speed
-     **/
-        int zBin{0};
-        auto bound = ztoBin.lower_bound(Z);
-        /// some protection in case things go REALLY wrong
-        if (bound == ztoBin.end())
-        {
-          --bound; ///< z beyond the max: return last bin
-        }
-        zBin = bound->second;
-
-        /// 2D bin index - computed from the 1D using standard 2D array bin arithmetics
-        int twoDbin = phiBin * arraySizeZ + zBin;
-        /// increment total counter of space points.
-        /// This is not reset between iterations.
-        ++data.nsaz;
-        // push our space point into the 2D binned array
-        data.rfz_ITkSorted[twoDbin].push_back(sps);
-        /// the conditional seems to always be true. The rfz_index vector stores
-        /// the 2D bin for each SP in the radius-sorted map. This way,
-        /// we obtain effectively a *3D binning* in r(via the r-sorted vector), phi and z (via the 2D index)
-        if (!data.rfz_map[twoDbin]++)
-          data.rfz_index[data.nrfz++] = twoDbin;
-      }
-    }
-  }
-
-  // Loop through all RZ collections and sort them in radius order
-  //
-  for (int twoDbin(0); twoDbin != arraySizePhiZ; ++twoDbin)
-  {
-    if (data.rfz_ITkSorted[twoDbin].size() > 1)
-    {
-      std::sort(data.rfz_ITkSorted[twoDbin].begin(), data.rfz_ITkSorted[twoDbin].end(), SiSpacePointsComparison_R());
-    }
-  }
-
-    if(m_pixel){
-      data.RTmin = m_rminPPPFast ;
-      //m_RTmax set per zBin in production3Sp
-    }
-    else if(m_strip){
-      data.RTmin = m_rminSSS ;
-      data.RTmax = m_rmaxSSS ;
-    }
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -1803,116 +1426,29 @@ void SiSpacePointsSeedMaker::erase(EventData &data)
     data.rfzv_map[n] = 0;
     data.rfzv_ITkSorted[n].clear();
   }
+
+  for (int i = 0; i < data.nr; ++i) {
+    int n = data.r_index[i];
+    data.r_map[n] = 0;
+    data.r_ITkSorted[n].clear();
+  }
+
   data.state = 0;
   data.nsaz = 0;
   data.nsazv = 0;
   data.nrfz = 0;
   data.nrfzv = 0;
+  data.ns = 0;
+  data.nr = 0;
 }
 
 ///////////////////////////////////////////////////////////////////
 // 2 space points seeds production
 ///////////////////////////////////////////////////////////////////
 
-void SiSpacePointsSeedMaker::production2Sp(EventData &data) const
+void SiSpacePointsSeedMaker::production2Sp(EventData &/*data*/) const
 {
-  if (data.nsazv < 2)
-    return;
-
-  std::vector<SiSpacePointForSeed *>::iterator r0, r0e, r, re;
-  int nseed = 0;
-
-  // Loop thorugh all azimuthal regions
-  //
-  for (int f = data.fvNmin; f <= m_maxBinPhiVertex; ++f) {
-
-    // For each azimuthal region loop through Z regions
-    //
-    int z = 0;
-    if (!data.endlist) z = data.zMin;
-    for (; z < arraySizeZV; ++z) {
-
-      int a = f * arraySizeZV + z;
-      if (!data.rfzv_map[a]) continue;
-      r0 = data.rfzv_ITkSorted[a].begin();
-      r0e = data.rfzv_ITkSorted[a].end();
-
-      if (!data.endlist) {
-        r0 = data.ITk_rMin;
-        data.endlist = true;
-      }
-
-      // Loop through trigger space points
-      //
-      for (; r0 != r0e; ++r0)
-      {
-        float X = (*r0)->x();
-        float Y = (*r0)->y();
-        float R = (*r0)->radius();
-        if (R < m_r2minv) continue;
-        if (R > m_r2maxv) break;
-        float Z = (*r0)->z();
-        float ax = X / R;
-        float ay = Y / R;
-
-        // Bottom links production
-        //
-        int numberBottomCells = m_nNeighboursVertexPhiZ[a];
-        for (int i=0; i<numberBottomCells; ++i) {
-
-          int an = m_neighboursVertexPhiZ[a][i];
-	  if (!data.rfzv_map[an]) continue;
-
-          r = data.rfzv_ITkSorted[an].begin();
-          re = data.rfzv_ITkSorted[an].end();
-
-          for (; r != re; ++r)
-          {
-            float Rb = (*r)->radius();
-            if (Rb < m_r1minv) continue;
-            if (Rb > m_r1maxv) break;
-            float dR = R - Rb;
-            if (dR < m_drminv) break;
-            if (dR > m_drmax) continue;
-            float dZ = Z - (*r)->z();
-            float Tz = dZ / dR;
-            if (Tz < data.dzdrmin || Tz > data.dzdrmax) continue;
-            float Zo = Z - R * Tz;
-
-            // Comparison with vertices Z coordinates
-            //
-            if (!isZCompatible(data, Zo, Rb, Tz)) continue;
-
-            // Momentum cut
-            //
-            float dx = (*r)->x() - X;
-            float dy = (*r)->y() - Y;
-            float x = dx * ax + dy * ay;
-            float y = -dx * ay + dy * ax;
-            float xy = x * x + y * y;
-            if (xy == 0.) continue;
-            float r2 = 1.f / xy;
-            float Ut = x * r2;
-            float Vt = y * r2;
-            float UR = Ut * R + 1.f;
-            if (UR == 0.) continue;
-            float A = Vt * R / UR;
-            float B = Vt - A * Ut;
-            if (std::abs(B * data.K) > m_ipt * std::sqrt(1.f + A * A)) continue;
-            ++nseed;
-            newSeed(data, (*r), (*r0), Zo);
-          }
-        }
-        if (nseed < m_maxsize) continue;
-        data.endlist = false;
-        data.ITk_rMin = (++r0);
-        data.fvNmin = f;
-        data.zMin = z;
-        return;
-      }
-    }
-  }
-  data.endlist = true;
+  ATH_MSG_WARNING("ITk::SiSpacePointsSeedMaker::production2Sp not implemented!");
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -2958,213 +2494,14 @@ void SiSpacePointsSeedMaker::production3SpSSS(EventData &data,
 // Production 3 space points seeds in ROI
 ///////////////////////////////////////////////////////////////////
 
-void SiSpacePointsSeedMaker::production3SpTrigger(EventData &data,
-                                                  std::array<std::vector<SiSpacePointForSeed *>::iterator, arraySizeNeighbourBins> &rb,
-                                                  std::array<std::vector<SiSpacePointForSeed *>::iterator, arraySizeNeighbourBins> &rbe,
-                                                  std::array<std::vector<SiSpacePointForSeed *>::iterator, arraySizeNeighbourBins> &rt,
-                                                  std::array<std::vector<SiSpacePointForSeed *>::iterator, arraySizeNeighbourBins> &rte,
-                                                  const int numberBottomCells, const int numberTopCells, int &nseed) const
+void SiSpacePointsSeedMaker::production3SpTrigger(EventData &/*data*/,
+                                                  std::array<std::vector<SiSpacePointForSeed *>::iterator, arraySizeNeighbourBins> &/*rb*/,
+                                                  std::array<std::vector<SiSpacePointForSeed *>::iterator, arraySizeNeighbourBins> &/*rbe*/,
+                                                  std::array<std::vector<SiSpacePointForSeed *>::iterator, arraySizeNeighbourBins> &/*rt*/,
+                                                  std::array<std::vector<SiSpacePointForSeed *>::iterator, arraySizeNeighbourBins> &/*rte*/,
+                                                  const int /*numberBottomCells*/, const int /*numberTopCells*/, int &/*nseed*/) const
 {
-  std::vector<SiSpacePointForSeed *>::iterator r0 = rb[0], r;
-  if (!data.endlist)
-  {
-    r0 = data.ITk_rMin;
-    data.endlist = true;
-  }
-
-  constexpr float pi2 = 2. * M_PI;
-
-  float ipt2K = data.ipt2K;
-  float ipt2C = data.ipt2C;
-  float COFK = data.COFK;
-  float imaxp = m_maxdImpact;
-  float imaxs = m_maxdImpactSSS;
-
-  data.ITkCmSp.clear();
-
-  // Loop through all trigger space points
-  //
-  for (; r0 != rbe[0]; ++r0)
-  {
-    data.nOneSeeds = 0;
-    data.ITkMapOneSeeds.clear();
-
-    float R = (*r0)->radius();
-
-    const Trk::Surface *sur0 = (*r0)->sur();
-    float X = (*r0)->x();
-    float Y = (*r0)->y();
-    float Z = (*r0)->z();
-    int Nb = 0;
-
-    // Bottom links production
-    //
-    for (int i = 0; i < numberBottomCells; ++i)
-    {
-      for (r = rb[i]; r != rbe[i]; ++r)
-      {
-        float Rb = (*r)->radius();
-
-        float dR = R - Rb;
-        if (dR < m_drmin || (data.iteration && (*r)->spacepoint->clusterList().second))
-          break;
-        if (dR > m_drmax || (*r)->sur() == sur0)
-          continue;
-
-        // Comparison with  bottom and top Z
-        //
-        float Tz = (Z - (*r)->z()) / dR;
-        float Zo = Z - R * Tz;
-        if (Zo < data.zminB || Zo > data.zmaxB)
-          continue;
-        float Zu = Z + (550.f - R) * Tz;
-        if (Zu < data.zminU || Zu > data.zmaxU)
-          continue;
-        data.ITkSP[Nb] = (*r);
-        if (++Nb == m_maxsizeSP)
-          goto breakb;
-      }
-    }
-  breakb:
-    if (!Nb || Nb == m_maxsizeSP)
-      continue;
-    int Nt = Nb;
-
-    // Top   links production
-    //
-    for (int i = 0; i < numberTopCells; ++i)
-    {
-      for (r = rt[i]; r != rte[i]; ++r)
-      {
-        float Rt = (*r)->radius();
-        float dR = Rt - R;
-
-        if (dR < m_drmin)
-        {
-          rt[i] = r;
-          continue;
-        }
-        if (dR > m_drmax)
-          break;
-
-        if ((*r)->sur() == sur0)
-          continue;
-
-        // Comparison with  bottom and top Z
-        //
-        float Tz = ((*r)->z() - Z) / dR;
-        float Zo = Z - R * Tz;
-        if (Zo < data.zminB || Zo > data.zmaxB)
-          continue;
-        float Zu = Z + (550.f - R) * Tz;
-        if (Zu < data.zminU || Zu > data.zmaxU)
-          continue;
-        data.ITkSP[Nt] = (*r);
-        if (++Nt == m_maxsizeSP)
-          goto breakt;
-      }
-    }
-
-  breakt:
-    if (!(Nt - Nb))
-      continue;
-    float covr0 = (*r0)->covr();
-    float covz0 = (*r0)->covz();
-
-    float ax = X / R;
-    float ay = Y / R;
-
-    for (int i = 0; i < Nt; ++i)
-    {
-      SiSpacePointForSeed *sp = data.ITkSP[i];
-
-      float dx = sp->x() - X;
-      float dy = sp->y() - Y;
-      float dz = sp->z() - Z;
-      float x = dx * ax + dy * ay;
-      float y = dy * ax - dx * ay;
-      float r2 = 1.f / (x * x + y * y);
-      float dr = std::sqrt(r2);
-      float tz = dz * dr;
-      if (i < Nb)
-        tz = -tz;
-
-      data.X[i] = x;
-      data.Y[i] = y;
-      data.Tz[i] = tz;
-      data.Zo[i] = Z - R * tz;
-      data.R[i] = dr;
-      data.U[i] = x * r2;
-      data.V[i] = y * r2;
-      data.Er[i] = ((covz0 + sp->covz()) + (tz * tz) * (covr0 + sp->covr())) * r2;
-    }
-    covr0 *= .5;
-    covz0 *= 2.;
-
-    // Three space points comparison
-    //
-    for (int b = 0; b < Nb; ++b)
-    {
-      float Zob = data.Zo[b];
-      float Tzb = data.Tz[b];
-      float Rb2r = data.R[b] * covr0;
-      float Rb2z = data.R[b] * covz0;
-      float Erb = data.Er[b];
-      float Vb = data.V[b];
-      float Ub = data.U[b];
-      float Tzb2 = (1.f + Tzb * Tzb);
-      float CSA = Tzb2 * COFK;
-      float ICSA = Tzb2 * ipt2C;
-      float imax = imaxp;
-      if (data.ITkSP[b]->spacepoint->clusterList().second)
-        imax = imaxs;
-
-      for (int t = Nb; t != Nt; ++t)
-      {
-        float dT = ((Tzb - data.Tz[t]) * (Tzb - data.Tz[t]) - data.R[t] * Rb2z - (Erb + data.Er[t])) - (data.R[t] * Rb2r) * ((Tzb + data.Tz[t]) * (Tzb + data.Tz[t]));
-        if (dT > ICSA)
-          continue;
-        float dU = data.U[t] - Ub;
-        if (dU == 0.)
-          continue;
-        float A = (data.V[t] - Vb) / dU;
-        float S2 = 1.f + A * A;
-        float B = Vb - A * Ub;
-        float B2 = B * B;
-        if (B2 > ipt2K * S2 || dT * S2 > B2 * CSA)
-          continue;
-
-        float Im = std::abs((A - B * R) * R);
-        if (Im > imax)
-          continue;
-
-        // Azimuthal angle test
-        //
-        float y = 1.;
-        float x = 2.f * B * R - A;
-        float df = std::abs(std::atan2(ay * y - ax * x, ax * y + ay * x) - data.ftrig);
-        if (df > M_PI)
-          df = pi2 - df;
-        if (df > data.ftrigW)
-          continue;
-        data.ITkCmSp.emplace_back(std::make_pair(B / std::sqrt(S2), data.ITkSP[t]));
-        data.ITkSP[t]->setParam(Im);
-      }
-      if (!data.ITkCmSp.empty())
-      {
-        newOneSeedWithCurvaturesComparison(data, data.ITkSP[b], (*r0), Zob);
-      }
-    }
-    fillSeeds(data);
-    nseed += data.fillOneSeeds;
-    if (nseed >= m_maxsize)
-    {
-      data.endlist = false;
-      ++r0;
-      data.ITk_rMin = r0;
-      return;
-    }
-  }
+   ATH_MSG_WARNING("ITk::SiSpacePointsSeedMaker::production3SpTrigger not implemented!");
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -3408,11 +2745,11 @@ void SiSpacePointsSeedMaker::fillSeeds(EventData &data)
   } ///< end loop over seed candidates
 }
 
-const InDet::SiSpacePointsSeed *SiSpacePointsSeedMaker::next(const EventContext &, EventData &data) const
+const InDet::SiSpacePointsSeed *SiSpacePointsSeedMaker::next(const EventContext& ctx, EventData &data) const
 {
   /// This only holds if we call next() without manually calling newEvent/find3Sp
   if (not data.initialized)
-    initializeEventData(data);
+    initializeEventData(data, ctx);
 
   if (data.nspoint == 3)
   {
@@ -3562,7 +2899,7 @@ void SiSpacePointsSeedMaker::newSeed(EventData &data,
   }
 }
 
-void SiSpacePointsSeedMaker::initializeEventData(EventData &data) const
+void SiSpacePointsSeedMaker::initializeEventData(EventData &data, const EventContext& ctx) const
 {
   int seedArrayPerSPSize = (m_maxOneSizePPP > m_maxOneSizeSSS ? m_maxOneSizePPP : m_maxOneSizeSSS);
   if (m_alwaysKeepConfirmedStripSeeds || m_alwaysKeepConfirmedPixelSeeds)
@@ -3576,6 +2913,54 @@ void SiSpacePointsSeedMaker::initializeEventData(EventData &data) const
                   arraySizePhiZ,
                   arraySizePhiZV,
                   m_checketa);
+
+  buildBeamFrameWork(data);
+
+  /// Read the field information
+  double magField[3]{0, 0, 0};
+  double globalPos[3] = {10., 10., 0.};
+
+  MagField::AtlasFieldCache fieldCache;
+  SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCondObjInputKey, ctx};
+  const AtlasFieldCacheCondObj *fieldCondObj{*readHandle};
+  if (fieldCondObj == nullptr) {
+    ATH_MSG_ERROR("ITk::SiSpacePointsSeedMaker: Failed to retrieve AtlasFieldCacheCondObj with key " << m_fieldCondObjInputKey.key());
+    return;
+  }
+
+  fieldCondObj->getInitializedCache(fieldCache);
+
+  if (fieldCache.solenoidOn()) {
+    /// retrieve field
+    fieldCache.getFieldZR(globalPos, magField);
+    /**
+     * Knowing the field (note that the field cache returns the field in units of kiloTesla!)
+     * allows to set the circle-radius to pT conversion factor.
+     *
+     * See for example ATLAS-CONF-2010-072
+     * R[mm] =pT[GeV] / (3·10−4×B[T]) =  pT[MeV] / (300 *Bz[kT])
+     *
+     * We actually estimate the circle diameter, 2R, in the seeding.
+     * So what we want is: 2R = pT[MeV] x 2  / (300 x Bz) = K x pT[MeV].
+     **/
+    data.K = 2. / (300. * magField[2]);
+  } else {
+    data.K = 2. / (300. * 5.);
+  }
+
+  /** helper variables allowing us to directly apply our pt cut on the variables
+   * available at seed level.
+   * ipt2K is 1 / (K * 0.9 * pt cut)²
+   **/
+  data.ipt2K = m_ipt2 / (data.K * data.K);
+  /// related to the mysterious magic number, m_COF{134*.05*9}
+  data.ipt2C = m_ipt2 * m_COF;
+  data.COFK = m_COF * (data.K * data.K);
+  /// save magnetic field used for later
+  data.bField[0] = magField[0];
+  data.bField[1] = magField[1];
+  data.bField[2] = magField[2];
+
 }
 
 ///////////////////////////////////////////////////////////////////

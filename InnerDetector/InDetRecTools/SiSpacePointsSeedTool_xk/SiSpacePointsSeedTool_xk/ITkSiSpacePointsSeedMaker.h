@@ -220,7 +220,6 @@ namespace ITk
     FloatProperty m_dImpactCutSlopeUnconfirmedPPP{this, "dImpactCutSlopeUnconfirmedPPP", 0.};
     FloatProperty m_seedScoreBonusConfirmationSeed{this, "seedScoreBonusConfirmationSeed", -200.};
     BooleanProperty m_useSeedConfirmation{this, "useSeedConfirmation", false};
-    FloatProperty m_rminPPPFast{this, "m_rminPPPFast", 70.};
     //@}
 
     /// @name Properties, which will be updated in initialize
@@ -405,7 +404,6 @@ namespace ITk
 
     static void fillSeeds(EventData& data) ;
     void fillLists(EventData& data) const;
-    void fillListsFast(const EventContext& ctx, EventData& data) const;
     static void pixInform(const Trk::SpacePoint* sp, float* r) ;
     static void stripInform(EventData& data,const Trk::SpacePoint* sp, float* r) ;
     static void erase(EventData& data) ;
@@ -500,7 +498,7 @@ namespace ITk
     static void convertToBeamFrameWork(EventData& data, const Trk::SpacePoint*const&,float*) ;
     bool isUsed(const Trk::SpacePoint*, const Trk::PRDtoTrackMap &prd_to_track_map) const;
 
-    void initializeEventData(EventData& data) const;
+    void initializeEventData(EventData& data, const EventContext& ctx) const;
   };
 
   ///////////////////////////////////////////////////////////////////
