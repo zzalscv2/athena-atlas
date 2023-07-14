@@ -137,13 +137,12 @@ namespace NSWL1 {
       diamond->setRoadSizeDownUV(m_diamOverlapStereoDown);
     }
 
-    unsigned int particles = entries.rbegin()->first.second +1, nskip=0;
-    for (unsigned int i=0; i<particles; i++) {
       double trueta = -999., truphi = -999., trutheta = -999., trupt = -999., dt = -999., tpos = -999., ppos = -999., epos = -999., tent = -999., pent = -999., eent = -999.;
       // We need to extract truth info, if available
-      std::pair<int, unsigned int> pair_event (event,i);
+	for (unsigned int j=0; j<Event_Info.size(); j++) {
+      std::pair<int, unsigned int> truth_event (event,j);
       if (!Event_Info.empty()) {
-        auto tru_it = Event_Info.find(pair_event);
+        auto tru_it = Event_Info.find(truth_event);
         if (tru_it != Event_Info.end()) {
           evInf_entry truth_info(tru_it->second);
           trutheta = truth_info.theta_ip; // truth muon at the IP
@@ -170,8 +169,13 @@ namespace NSWL1 {
             m_trigger_trueTheEnt->push_back(tent);
             m_trigger_truePhiEnt->push_back(pent);
           }
-        } else ATH_MSG_DEBUG( "Extra reco particle with no truth candidate available" );
+        }
       }
+	}
+	unsigned int particles = entries.rbegin()->first.second +1,  nskip=0;
+	for (unsigned int i=0; i<particles; i++) {
+	std::pair<int, unsigned int> pair_event (event,i);
+
       // Now let's switch to reco hits: firstly, extracting the station name we're working on...
       std::string station = "-";
       auto event_it = entries.find(pair_event);
