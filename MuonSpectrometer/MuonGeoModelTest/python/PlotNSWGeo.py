@@ -1,13 +1,19 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-    
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator   
 
-def NSWGeoPlottingAlgCfg(flags, name = "NSWGeoPlottingAlg"):
-    from AthenaConfiguration.ComponentFactory import CompFactory
-    from MuonGeoModelTest.testGeoModel import setupServicesCfg
-    result = setupServicesCfg(flags)   
-    event_algo = CompFactory.NSWGeoPlottingAlg(name)
+def NSWGeoPlottingAlgCfg(flags, name = "NSWGeoPlottingAlg", **kwargs):
+    result = ComponentAccumulator()
+    event_algo = CompFactory.NSWGeoPlottingAlg(name, **kwargs)
     result.addEventAlgo(event_algo, primary = True)
     return result
+
+def sTgcPadPlottingAlg(flags, name = "sTgcPadPlottingAlg", **kwargs):
+    result = ComponentAccumulator()
+    event_algo = CompFactory.sTgcPadPlottingAlg(name, **kwargs)
+    result.addEventAlgo(event_algo, primary = True)
+    return result
+
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -25,18 +31,20 @@ if __name__ == "__main__":
     flags.GeoModel.AtlasVersion = "ATLAS-R3S-2021-03-02-00"
     flags.IOVDb.GlobalTag = "OFLCOND-MC23-SDR-RUN3-02"
     flags.lock()
+    #### 
+    from MuonCondTest.MdtCablingTester import setupServicesCfg
+    cfg = setupServicesCfg(flags)
+    
+    #cfg.merge(NSWGeoPlottingAlgCfg(flags))
+    cfg.merge(sTgcPadPlottingAlg(flags))
 
-    cfg = NSWGeoPlottingAlgCfg(flags)
     msgService = cfg.getService('MessageSvc')
     msgService.Format = "S:%s E:%e % F%128W%S%7W%R%T  %0W%M"
 
     cfg.printConfig(withDetails=True, summariseProps=True)
 
     flags.dump()
-
-    with open("MdtCablingTester.pkl", "wb") as f:
-        cfg.store(f)
-
+    
     sc = cfg.run(1)
     if not sc.isSuccess():
         import sys

@@ -10,7 +10,7 @@
 atlas_subdir( FlavorTagDiscriminants )
 
 # External dependencies:
-find_package( Boost COMPONENTS filesystem )
+find_package( Boost )
 find_package( lwtnn )
 find_package( ROOT COMPONENTS Core MathCore )
 find_package( onnxruntime )

@@ -14,7 +14,7 @@ if( NOT CMAKE_CUDA_COMPILER )
   return()
 endif()
 
-find_package( Boost COMPONENTS chrono filesystem )
+find_package( Boost COMPONENTS chrono )
 
 # Add a component library that has some CUDA code in it.
 atlas_add_library( CaloRecGPULib

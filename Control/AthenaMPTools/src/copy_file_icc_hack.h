@@ -11,9 +11,9 @@
   #define COPY_FILE_HACK(_src, _dest) \
     {std::string _tpcpcommand("cp _src _dest"); system(_tpcpcommand.c_str()); }
 #else
-  #include <boost/filesystem.hpp>
+  #include <filesystem>
   #define COPY_FILE_HACK(_src, _dest) \
-    boost::filesystem::copy_file(_src, _dest);      
+    std::filesystem::copy_file(_src, _dest);      
 #endif
 
 #endif

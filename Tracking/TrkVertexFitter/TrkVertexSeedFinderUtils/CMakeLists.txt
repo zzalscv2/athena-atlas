@@ -22,7 +22,7 @@ atlas_add_component( TrkVertexSeedFinderUtils
    AthenaBaseComps TrkParticleBase TrkParameters TrkLinks TrkTrack
    TrkVertexFitterInterfaces TrkEventPrimitives xAODTracking xAODTruth
    InDetTrackSelectionToolLib BeamSpotConditionsData EventPrimitives
-   GeoPrimitives MagFieldElements TrkVertexSeedFinderUtilsLib )
+   GeoPrimitives MagFieldElements TrkVertexSeedFinderUtilsLib AthAllocators)
 
 # Test(s) in the package.
 atlas_add_test( NewtonTrkDistanceFinder_test

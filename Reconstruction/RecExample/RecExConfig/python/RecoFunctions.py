@@ -8,8 +8,6 @@
 ## Description: This is a collection of utility functions for RecExCommon
 ##=============================================================================
 
-from AthenaCommon.GlobalFlags  import globalflags
-
 def RunInnerDetectorOnly():
     from RecExConfig.RecFlags import rec
     rec.doCalo=False
@@ -78,6 +76,7 @@ def OutputFileName(suffix=""):
     OutFileName=""
     if rec.OutputFileNameForRecoStep()=="":
         if rec.readRDO():
+            from AthenaCommon.GlobalFlags  import globalflags
             if globalflags.InputFormat()=="bytestream":
                 OutFileName="bs"
             else:

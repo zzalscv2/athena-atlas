@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiSpacePointTool/SiSpacePointMakerTool.h"
@@ -50,7 +50,8 @@ namespace InDet {
 
   //--------------------------------------------------------------------------
   void SiSpacePointMakerTool::fillPixelSpacePointCollection(const InDet::PixelClusterCollection* clusters, 
-                                                            SpacePointCollection* spacepointCollection) {
+                                                            SpacePointCollection* spacepointCollection,
+                                                            DataPool<PixelSpacePoint>* dataItemsPixel) {
                                                               
     InDet::PixelClusterCollection::const_iterator clusStart = clusters->begin(); 
     InDet::PixelClusterCollection::const_iterator clusFinish = clusters->end(); 
@@ -68,7 +69,7 @@ namespace InDet {
         const InDet::SiCluster* c = (*clusStart);
         const Amg::MatrixX&     V = c->localCovariance();
         
-	// Global position is already computed during pixel cluster creation and cached in the SiCluster object
+        // Global position is already computed during pixel cluster creation and cached in the SiCluster object
         const Amg::Vector3D&  pos = c->globalPosition();
         
         double B0[2] = {Ax[0]*V(0,0)+Ax[1]*V(1,0),Ax[0]*V(1,0)+Ax[1]*V(1,1)};
@@ -84,8 +85,16 @@ namespace InDet {
              C01                    , B1[0]*Ay[0]+B1[1]*Ay[1], C12                    ,
         // cppcheck-suppress constStatement
              C02                    , C12                    , B2[0]*Az[0]+B2[1]*Az[1];
-             
-        spacepointCollection->push_back( new InDet::PixelSpacePoint(idHash,c,pos,cov) );
+
+        if (dataItemsPixel) {
+          PixelSpacePoint* pix = dataItemsPixel->nextElementPtr();
+          (*pix) = InDet::PixelSpacePoint(idHash, c, pos, cov);
+          spacepointCollection->push_back(pix);
+
+        } else {
+          spacepointCollection->push_back(
+              new InDet::PixelSpacePoint(idHash, c, pos, cov));
+        }
       }
     }
   }
@@ -141,7 +150,8 @@ namespace InDet {
                                                             bool allClusters,
                                                             const Amg::Vector3D& vertexVec,
                                                             SpacePointCollection* spacepointCollection,
-                                                            SpacePointOverlapCollection* spacepointoverlapCollection) const 
+                                                            SpacePointOverlapCollection* spacepointoverlapCollection,
+                                                            DataPool<SCT_SpacePoint>* dataItemsSCT) const 
   {
                                                               
     // This function is called once all the needed quantities are collected.
@@ -240,9 +250,12 @@ namespace InDet {
               std::pair<Amg::Vector3D, Amg::Vector3D > ends(currentElement->endsOfStrip(InDetDD::SiLocalPosition(locpos.y(),locpos.x(),0.)));
               sctInfo.set(cluster,ends.first, ends.second, vertexVec,lx1);
             }
-        
-            Trk::SpacePoint* sp = makeSCT_SpacePoint(sct,sctInfo,Id,currentId,limit,slimit);
-            if(sp) tmpSpacePoints.push_back(sp);
+
+            Trk::SpacePoint* sp = makeSCT_SpacePoint(
+                sct, sctInfo, Id, currentId, limit, slimit, dataItemsSCT);
+            if (sp) {
+              tmpSpacePoints.push_back(sp);
+            }
           }
         }
         // If you are processing the opposite element, save the space points into 
@@ -300,9 +313,12 @@ namespace InDet {
           std::pair<Amg::Vector3D, Amg::Vector3D > ends(currentElement->endsOfStrip(InDetDD::SiLocalPosition(locpos.y(),locpos.x(),0.)));
           InDet::SCTinformation sctInfo(cluster,ends.first, ends.second, vertexVec,lx1);
          
-          for(auto& sct : sctPhiInfos) {           
-            Trk::SpacePoint* sp = makeSCT_SpacePoint(*sct,sctInfo,Id,currentId,limit,slimit);
-            if(sp) tmpSpacePoints.push_back(sp);
+          for(auto& sct : sctPhiInfos) {
+            Trk::SpacePoint* sp = makeSCT_SpacePoint(
+                *sct, sctInfo, Id, currentId, limit, slimit, dataItemsSCT);
+            if (sp) {
+              tmpSpacePoints.push_back(sp);
+            }
           }
         }
       }
@@ -336,8 +352,10 @@ namespace InDet {
         InDet::SCTinformation sctInfo(cluster,ends.first, ends.second,vertexVec,locpos.x()); 
         
         for(auto& sct : sctInfos) {          
-          Trk::SpacePoint* sp = makeSCT_SpacePoint(sct,sctInfo,Id,currentId,limit,slimit);
-          if(sp) tmpSpacePoints.push_back(sp);
+          Trk::SpacePoint* sp = makeSCT_SpacePoint(sct,sctInfo,Id,currentId,limit,slimit,dataItemsSCT);
+          if(sp) {
+            tmpSpacePoints.push_back(sp);
+          }
         }
       }
       // If you are processing the opposite element, save the space points into 
@@ -361,9 +379,10 @@ namespace InDet {
 
   //--------------------------------------------------------------------------
   //
-  Trk::SpacePoint* SiSpacePointMakerTool::makeSCT_SpacePoint
-  (InDet::SCTinformation& In0,InDet::SCTinformation& In1,IdentifierHash ID0,IdentifierHash ID1,double limit,double slimit) {
-
+  Trk::SpacePoint* SiSpacePointMakerTool::makeSCT_SpacePoint(
+      InDet::SCTinformation& In0, InDet::SCTinformation& In1,
+      IdentifierHash ID0, IdentifierHash ID1, double limit, double slimit,
+      DataPool<SCT_SpacePoint>* dataItemsSCT) {
 
     double a  =-In0.traj_direction().dot(In1.normal());
     double b  = In0.strip_direction().dot(In1.normal());
@@ -403,8 +422,15 @@ namespace InDet {
     }
     Amg::Vector3D point(In0.position(m));
     
-    const std::pair<IdentifierHash,IdentifierHash> elementIdList(ID0,ID1); 
-    return new InDet::SCT_SpacePoint(elementIdList, point, {In0.cluster(),In1.cluster()});
+    const std::pair<IdentifierHash,IdentifierHash> elementIdList(ID0,ID1);
+    //if we have a DataPool use it
+    if (dataItemsSCT) {
+      SCT_SpacePoint* sp = dataItemsSCT->nextElementPtr();
+      (*sp) = InDet::SCT_SpacePoint(elementIdList, point,
+                                    {In0.cluster(), In1.cluster()});
+      return sp;
+    }
+    return new InDet::SCT_SpacePoint(elementIdList, point,
+                                     {In0.cluster(), In1.cluster()});
   }
- 
 }

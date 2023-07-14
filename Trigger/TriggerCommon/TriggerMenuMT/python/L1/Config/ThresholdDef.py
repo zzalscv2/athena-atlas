@@ -241,6 +241,11 @@ class ThresholdDef:
         for thrV in [20]:
             ThresholdDef.addJetVaryingThrValues( gJetThreshold('gJ%ip25ETA49' % thrV, 'gJ'), pt=get_threshold_cut('gJ', thrV), shift_set=0, rangemin=25, rangemax=49)
 
+        # gJET SPARES
+        for thrV in range(1,2):
+            gJetThreshold('gJSPARE%i' % thrV, 'gJ').addThrValue(thrVal_SPARE)
+
+
         # gLJET (default range)
         for thrV in [80, 100, 140, 160]:
             ThresholdDef.addJetVaryingThrValues( gLJetThreshold('gLJ%ip0ETA25' % thrV, 'gLJ'), pt=get_threshold_cut('gLJ', thrV), shift_set=0, rangemin=0, rangemax=25)  

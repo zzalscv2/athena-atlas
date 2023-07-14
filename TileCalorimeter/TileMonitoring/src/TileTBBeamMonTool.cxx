@@ -107,6 +107,7 @@ TileTBBeamMonTool::TileTBBeamMonTool(const std::string & type, const std::string
   , m_total_energy(0)
   , m_cell_energy(0)
   , m_total_muon_energy(0)
+  , m_maskedMuPMTs(16, false)
 {
 
 
@@ -192,6 +193,7 @@ TileTBBeamMonTool::TileTBBeamMonTool(const std::string & type, const std::string
 
   declareProperty("TileBeamElemContainer", m_beamElemContainer = "TileBeamElemCnt");
   declareProperty("CellContainer", m_cellContainer = "AllCalo"); //SG Cell Container
+  declareProperty("MaskMuonPMTs", m_maskMuonPMTs);
 }
 
 TileTBBeamMonTool::~TileTBBeamMonTool() {
@@ -200,6 +202,14 @@ TileTBBeamMonTool::~TileTBBeamMonTool() {
 StatusCode TileTBBeamMonTool:: initialize() {
 
     ATH_MSG_INFO( "in initialize()" );
+
+    for (unsigned int pmt : m_maskMuonPMTs) {
+      if (pmt < m_maskedMuPMTs.size()) {
+        m_maskedMuPMTs[pmt] = true;
+        ATH_MSG_INFO("Masking Muon Wall PMT: " << pmt);
+      }
+    }
+
     return TileFatherMonTool::initialize();
 }
 
@@ -254,9 +264,9 @@ StatusCode TileTBBeamMonTool::storeBeamElements() {
       int dsize = digits.size();
       
       if ( dsize <= 0 ) {
-        
         WRONG_SAMPLE(frag, cha, dsize);
-        
+      } else if (cha < 0) {
+        WRONG_CHANNEL(frag, cha);
       } else {
         
         int amplitude = digits[0];
@@ -289,7 +299,9 @@ StatusCode TileTBBeamMonTool::storeBeamElements() {
 
           if(cha < 8) {
             m_muBack[cha] = amplitude;
-            m_total_muon_energy += amplitude;
+            if (!m_maskedMuPMTs[cha]) {
+              m_total_muon_energy += amplitude;
+            }
           }
 
           break;
@@ -309,10 +321,13 @@ StatusCode TileTBBeamMonTool::storeBeamElements() {
 	  default: WRONG_CHANNEL(frag, cha);
 	  }
 
-          if(cha < 6) {
-            m_muBack[8+cha] = amplitude;
-            m_total_muon_energy += amplitude;
-          }
+    	if(cha < 6) {
+	  m_muBack[8+cha] = amplitude;
+  	  if (!m_maskedMuPMTs[8 + cha]) {
+	    m_total_muon_energy += amplitude;
+	  }
+	}
+
 
 	  break;
 	    
@@ -320,10 +335,10 @@ StatusCode TileTBBeamMonTool::storeBeamElements() {
 	  if (m_TBperiod >= 2022) {
 	    if (cha > 11) { // The first channels are connected to BC1 and BC2, the last 4 channels are supposed to be TOF
 	      if(cha < 16) {
-          m_tof[cha] = amplitude;
-          ATH_MSG_VERBOSE( "TOF: " << cha << " amp: " << amplitude);
+		m_tof[cha] = amplitude;
+		ATH_MSG_VERBOSE( "TOF: " << cha << " amp: " << amplitude);
 	      } else {
-          WRONG_CHANNEL(frag, cha);
+		WRONG_CHANNEL(frag, cha);
 	      }
 	      break;
 	    }
@@ -334,11 +349,11 @@ StatusCode TileTBBeamMonTool::storeBeamElements() {
 	  }
 	case COMMON_TDC1_FRAG:
           
-    FRAG_FOUND(frag, cha, dsize);
-	  if ((cha > 11) && (cha < 16) && (m_lastRun > 2211136)) {
+	  FRAG_FOUND(frag, cha, dsize);
+	  if ((cha > 11) && (cha < 16) && (m_runNum > 2211136)) {
 	    m_tof[cha] = amplitude;
 	    ATH_MSG_VERBOSE( "TOF: " << cha << " amp: " << amplitude);
-    } if (cha < 16) {
+	  } if (cha < 16) {
 	    if (m_TBperiod >= 2021) {
 	      if (m_btdcFirstHit[cha]) {
           m_btdc[cha] = amplitude;
@@ -370,12 +385,19 @@ StatusCode TileTBBeamMonTool::storeBeamElements() {
 
         case COMMON_ADC1_FRAG:
 
-	  if (m_lastRun > 2211444) {
+	  if (m_runNum > 2211444) {
 	    switch(cha) {
 	      // set counter values for 1D beam elements
 	    case 0:  m_s1cou = amplitude; break;
 	    case 1:  m_s2cou = amplitude; break;
-	    case 2:  m_pmt11cou = amplitude; break;
+	    case 2:  {
+	      if (m_runNum < 2310000) {
+		m_pmt11cou = amplitude;
+	      } else {
+		m_s3cou = amplitude;
+	      }
+	    }
+	      break;
 	    case 3:  m_cher1 = amplitude; break;
 	    case 4:  m_cher2 = amplitude; break;
 	    case 5:  m_cher3 = amplitude; break;
@@ -396,10 +418,14 @@ StatusCode TileTBBeamMonTool::storeBeamElements() {
 
 	    if((cha > 5) && (cha < 16)) {
 	      m_muBack[cha - 5] = amplitude;
-	      m_total_muon_energy += amplitude;
-	    } else if (cha == 2) {
+	      if (!m_maskedMuPMTs[cha - 5]) {
+		m_total_muon_energy += amplitude;
+	      }
+	    } else if (cha == 2 && m_runNum < 2310000) {
 	      m_muBack[11] = amplitude;
-	      m_total_muon_energy += amplitude;
+	      if (!m_maskedMuPMTs[11]) {
+		m_total_muon_energy += amplitude;
+	      }
 	    }
 
 	    break;
@@ -424,7 +450,7 @@ StatusCode TileTBBeamMonTool::storeBeamElements() {
 
         case COMMON_ADC2_FRAG:
 
-	  if (m_lastRun < 2211445) {
+	  if (m_runNum < 2211445) {
 
 	    switch(cha) {
 
@@ -446,11 +472,21 @@ StatusCode TileTBBeamMonTool::storeBeamElements() {
 
 	    if(cha < 16) {
 	      m_muBack[cha] = amplitude;
-	      m_total_muon_energy += amplitude;
+	      if (!m_maskedMuPMTs[cha]) {
+		m_total_muon_energy += amplitude;
+	      }
 	    }
 	  }
 	  break;
-	}
+
+        case COMMON_PTN_FRAG:
+          if (m_runNum > 2310000 && cha < 16) {
+            m_scaler[cha] = amplitude;
+          } else {
+            WRONG_CHANNEL(frag, cha);
+          }
+          break;
+        }
       }
     }
   }
@@ -487,7 +523,7 @@ StatusCode TileTBBeamMonTool::storeBeamElements() {
   // Beam Chamber Coordinates
 
   // For BC1
-  if (m_lastRun > 2211444) {
+  if (m_runNum > 2211444) {
     m_xCha1 = (m_btdc[8] - m_btdc[0]) * m_horizontal_slope1 + m_horizontal_offset1;
     m_yCha1 = (m_btdc[9] - m_btdc[3]) * m_vertical_slope1 + m_vertical_offset1; //(up - down)
   } else {
@@ -503,7 +539,7 @@ StatusCode TileTBBeamMonTool::storeBeamElements() {
   //Sum Plots
 
   // For BC1
-  if (m_lastRun > 2211444) {
+  if (m_runNum > 2211444) {
     m_xCha1_sum = (m_btdc[8] + m_btdc[0]) * m_horizontal_slope1 + m_horizontal_offset1;
     m_yCha1_sum = (m_btdc[9] + m_btdc[3]) * m_vertical_slope1 + m_vertical_offset1;
   } else {
@@ -558,6 +594,8 @@ StatusCode TileTBBeamMonTool::fillHistograms() {
   for (int i=0; i<16; ++i) {
     m_tof[i] = 0;
   }
+
+  memset(&m_scaler, 0, sizeof(m_scaler));
 
   CHECK( storeBeamElements() );
 
@@ -643,6 +681,14 @@ StatusCode TileTBBeamMonTool::fillHistograms() {
   m_Cher3TOF1->Fill(tof1, m_cher3);
   m_Cher3TOF2->Fill(tof2, m_cher3);
   m_Cher3TOF3->Fill(tof3, m_cher3);
+
+
+  if (m_runNum >= 2310000) {
+    m_scalerS1->Fill(m_scaler[0]);
+    m_scalerS2->Fill(m_scaler[1]);
+    m_scalerS3->Fill(m_scaler[2]);
+    m_scalerS12->Fill(m_scaler[3]);
+  }
 
   //...
 
@@ -783,7 +829,7 @@ void TileTBBeamMonTool::initFirstEvent() {
   m_Cher3hist->GetYaxis()->SetTitle("Counts");
 
 
-  m_MuonEnergy = book1F("", "TotalMuonEnergy", "Run " + runNumber + ": Muon Wall Total Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned");
+  m_MuonEnergy = book1F("", "TotalMuonEnergy", "Run " + runNumber + ": Muon Wall Total Hist", 1500, 0., 15000., run, ATTRIB_MANAGED, "", "mergeRebinned");
   m_MuonEnergy->GetYaxis()->SetTitle("Counts");
 
   m_PMT1 = book1F("", "MuonWallPMT1", "Run " + runNumber + ": Muon Wall PMT1 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned");
@@ -879,6 +925,23 @@ void TileTBBeamMonTool::initFirstEvent() {
   m_Cher3TOF3->GetXaxis()->SetTitle("TOF3");
   m_Cher3TOF3->GetYaxis()->SetTitle("Cher3");
   m_Cher3TOF3->SetOption("COLZ");
+
+
+  m_scalerS1 = book1F("", "ScalerS1", "Run " + runNumber + ": Scaler S1", 20000, -0.5, 19999.5);
+  m_scalerS1->GetXaxis()->SetTitle("[Counts]");
+  m_scalerS1->GetYaxis()->SetTitle("# Events");
+
+  m_scalerS2 = book1F("", "ScalerS2", "Run " + runNumber + ": Scaler S2", 20000, -0.5, 19999.5);
+  m_scalerS2->GetXaxis()->SetTitle("[Counts]");
+  m_scalerS2->GetYaxis()->SetTitle("# Events");
+
+  m_scalerS3 = book1F("", "ScalerS3", "Run " + runNumber + ": Scaler S3", 20000, -0.5, 19999.5);
+  m_scalerS3->GetXaxis()->SetTitle("[Counts]");
+  m_scalerS3->GetYaxis()->SetTitle("# Events");
+
+  m_scalerS12 = book1F("", "ScalerS12", "Run " + runNumber + ": Scaler S1 and S2 coincedence", 20000, -0.5, 19999.5);
+  m_scalerS12->GetXaxis()->SetTitle("[Counts]");
+  m_scalerS12->GetYaxis()->SetTitle("# Events");
 
 }
  

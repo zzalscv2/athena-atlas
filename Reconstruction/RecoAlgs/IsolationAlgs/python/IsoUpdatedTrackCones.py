@@ -1,8 +1,6 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
-from AthenaCommon import CfgMgr
-from AthenaCommon.BeamFlags import jobproperties
 
 log = logging.getLogger(__name__)
 
@@ -57,8 +55,10 @@ def GetUpdatedIsoTrackCones(postfix="", object_types=("Electrons", "Photons", "M
             if "Muons" in object_types and not loose_cone and "LRT" in postfix:
                 kwargs["MuonCollectionContainerName"] = "MuonsLRT"
             toolkwargs = {}
+            from AthenaCommon.BeamFlags import jobproperties
             if jobproperties.Beam.beamType == 'cosmics':
                 toolkwargs['VertexLocation'] = ''
+            from AthenaCommon import CfgMgr
             if TTVATool is None:
                 if WP != "MVATight":
                     TTVATool = CfgMgr.CP__TrackVertexAssociationTool(WP,

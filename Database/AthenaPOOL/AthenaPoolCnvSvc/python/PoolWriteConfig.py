@@ -76,6 +76,9 @@ def PoolWriteCfg(flags):
         "D2AOD_PHYSLITE" : [5, 5,  500, 1, 1],
     }
 
+    # Metadata containers needed for augmentations
+    OutputMetadataContainers = []
+
     # Loop over all streams and set the appropriate attributes
     maxAutoFlush = -1
     for stream in _getStreamsFromFlags(flags):
@@ -124,6 +127,7 @@ def PoolWriteCfg(flags):
             # Set the Collection/Container prefixes
             outputCollection += f"_{stream}"
             poolContainerPrefix += f"_{stream}"
+            OutputMetadataContainers += [f"MetaData_{stream}"]
 
         # Set the AutoFlush attributes
         PoolAttributes += [ pah.setTreeAutoFlush( fileName, poolContainerPrefix, autoFlush ) ]
@@ -156,4 +160,5 @@ def PoolWriteCfg(flags):
     return AthenaPoolCnvSvcCfg(flags,
                                PoolAttributes=PoolAttributes,
                                ParallelCompression=useParallelCompression,
-                               StorageTechnology=flags.Output.StorageTechnology)
+                               StorageTechnology=flags.Output.StorageTechnology,
+                               OutputMetadataContainers=OutputMetadataContainers)

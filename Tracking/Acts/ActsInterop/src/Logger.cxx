@@ -13,8 +13,7 @@
 
 #include "Acts/Utilities/Logger.hpp"
 
-#include <boost/optional.hpp>
-
+#include <optional>
 #include <iostream>
 #include <string>
 
@@ -61,7 +60,7 @@ ActsAthenaFilterPolicy::clone(Acts::Logging::Level level) const
 }
 
 std::unique_ptr<const Acts::Logger>
-makeActsAthenaLogger(IMessageSvc *svc, const std::string& name, int level, boost::optional<std::string> parent_name)
+makeActsAthenaLogger(IMessageSvc *svc, const std::string& name, int level, std::optional<std::string> parent_name)
 {
   using namespace Acts::Logging;
 
@@ -82,7 +81,7 @@ makeActsAthenaLogger(const CommonMessagingBase* parent, const std::string& name)
 {
   // no explicit name, get from component
   const INamedInterface *inamed = dynamic_cast<const INamedInterface*>(parent);
-  boost::optional<std::string> parent_name = boost::none;
+  std::optional<std::string> parent_name = std::nullopt;
   // this will not prefix if parent is not named (which it should be)
   if (inamed == nullptr) {
     throw std::invalid_argument("parent needs to be INamedInterface");
@@ -92,7 +91,7 @@ makeActsAthenaLogger(const CommonMessagingBase* parent, const std::string& name)
 }
 
 std::unique_ptr<const Acts::Logger>
-makeActsAthenaLogger(const CommonMessagingBase* parent, const std::string& name, boost::optional<std::string> parent_name)
+makeActsAthenaLogger(const CommonMessagingBase* parent, const std::string& name, std::optional<std::string> parent_name)
 {
   int level = 0;
   const INamedInterface *inamed = dynamic_cast<const INamedInterface*>(parent);
@@ -106,5 +105,5 @@ std::unique_ptr<const Acts::Logger>
 makeActsAthenaLogger(const CommonMessagingBase* parent, const std::string& name, const std::string& parent_name)
 {
   
-  return makeActsAthenaLogger(parent, name, boost::optional<std::string>(parent_name));
+  return makeActsAthenaLogger(parent, name, std::optional<std::string>(parent_name));
 }

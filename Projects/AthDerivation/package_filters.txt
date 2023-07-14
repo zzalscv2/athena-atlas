@@ -124,6 +124,7 @@
 # Generator package(s).
 + Generators/AtlasHepMC
 + Generators/GenInterfaces
++ Generators/GeneratorConfig
 + Generators/GeneratorObjects.*
 + Generators/HepMCWeightSvc
 + Generators/TruthConverters

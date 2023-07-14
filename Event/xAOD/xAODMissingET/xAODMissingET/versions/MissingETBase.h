@@ -26,7 +26,7 @@
 #include <string>
 #include <cstdint>
 
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 
 /*! @brief General namespace for MET EDM software */
 namespace MissingETBase
@@ -36,7 +36,7 @@ namespace MissingETBase
     {
       typedef uint64_t                             bitmask_t;         /*!< @brief Type for status word bit mask */
       typedef std::vector<bitmask_t>               bitmask_vector_t;  /*!< @brief Type for vector of status word bit masks */
-      typedef boost::tuples::tuple<size_t,size_t>  indexedlink_t;     /*!< @brief Type for links defined as index pairs */ 
+      typedef std::tuple<size_t,size_t>  indexedlink_t;     /*!< @brief Type for links defined as index pairs */ 
     } // namespace MissingETBase::Types
     
     namespace Constants
@@ -408,21 +408,21 @@ bool operator<(MissingETBase::Types::indexedlink_t l0,MissingETBase::Types::inde
 /*!@}*/
 
 inline bool operator==(MissingETBase::Types::indexedlink_t l0,MissingETBase::Types::indexedlink_t l1)
-{ return l0.get<0>() == l1.get<0>() && l0.get<1>() == l1.get<1>(); }
+{ return std::get<0>(l0) == std::get<0>(l1) && std::get<1>(l0) == std::get<1>(l1); }
 
 inline bool operator!=(MissingETBase::Types::indexedlink_t l0,MissingETBase::Types::indexedlink_t l1)
 { return !operator==(l0,l1); }
 
 inline bool operator>=(MissingETBase::Types::indexedlink_t l0,MissingETBase::Types::indexedlink_t l1)
-{ return l0.get<0>() == l1.get<0>() ? l0.get<1>() >= l1.get<1>() : l0.get<0>() > l1.get<0>(); }
+{ return std::get<0>(l0) == std::get<0>(l1) ? std::get<1>(l0) >= std::get<1>(l1) : std::get<0>(l0) > std::get<0>(l1); }
 
 inline bool operator<=(MissingETBase::Types::indexedlink_t l0,MissingETBase::Types::indexedlink_t l1)
-{ return l0.get<0>() == l1.get<0>() ? l0.get<1>() <= l1.get<1>() : l0.get<0>() < l1.get<0>(); }
+{ return std::get<0>(l0) == std::get<0>(l1) ? std::get<1>(l0) <= std::get<1>(l1) : std::get<0>(l0) < std::get<0>(l1); }
 
 inline bool operator>(MissingETBase::Types::indexedlink_t l0,MissingETBase::Types::indexedlink_t l1)
-{ return l0.get<0>() == l1.get<0>() ? l0.get<1>() > l1.get<1>() : l0.get<0>() > l1.get<0>(); }
+{ return std::get<0>(l0) == std::get<0>(l1) ? std::get<1>(l0) > std::get<1>(l1) : std::get<0>(l0) > std::get<0>(l1); }
 
 inline bool operator<(MissingETBase::Types::indexedlink_t l0,MissingETBase::Types::indexedlink_t l1)
-{ return l0.get<0>() == l1.get<0>() ? l0.get<1>() < l1.get<1>() : l0.get<0>() < l1.get<0>(); }
+{ return std::get<0>(l0) == std::get<0>(l1) ? std::get<1>(l0) < std::get<1>(l1) : std::get<0>(l0) < std::get<0>(l1); }
  
 #endif

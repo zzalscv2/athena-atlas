@@ -23,7 +23,7 @@
 
 MuonMM_CablingAlg::MuonMM_CablingAlg(const std::string& name,
                                      ISvcLocator* pSvcLocator)
-    : AthAlgorithm(name, pSvcLocator) {}
+    : AthReentrantAlgorithm(name, pSvcLocator) {}
 
 StatusCode MuonMM_CablingAlg::initialize() {
     ATH_MSG_DEBUG("initialize " << name());
@@ -38,9 +38,8 @@ StatusCode MuonMM_CablingAlg::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonMM_CablingAlg::execute() {
+StatusCode MuonMM_CablingAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("Load the Micro mega cabling map");
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     // Write Cond Handle
     SG::WriteCondHandle<MicroMega_CablingMap> writeHandle{m_writeKey, ctx};
     if (writeHandle.isValid()) {

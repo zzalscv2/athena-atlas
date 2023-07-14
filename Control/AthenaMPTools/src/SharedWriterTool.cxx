@@ -13,6 +13,7 @@
 #include "GaudiKernel/IIoComponentMgr.h"
 
 #include "AthenaBaseComps/AthCnvSvc.h"
+#include <filesystem>
 
 SharedWriterTool::SharedWriterTool(const std::string& type
 				   , const std::string& name
@@ -127,8 +128,8 @@ void SharedWriterTool::subProcessLogs(std::vector<std::string>& filenames)
   for(int i=0; i<m_writer; ++i) {
     std::ostringstream workerIndex;
     workerIndex << i;
-    boost::filesystem::path writer_rundir(m_subprocTopDir);
-    writer_rundir/= boost::filesystem::path(m_subprocDirPrefix+workerIndex.str());
+    std::filesystem::path writer_rundir(m_subprocTopDir);
+    writer_rundir/= std::filesystem::path(m_subprocDirPrefix+workerIndex.str());
     filenames.push_back(writer_rundir.string()+std::string("/AthenaMP.log"));
   }
 }
@@ -182,8 +183,8 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedWriterTool::bootstrap_f
   workerIndex<<m_rankId;
 
   // Writer dir: mkdir
-  boost::filesystem::path writer_rundir(m_subprocTopDir);
-  writer_rundir /= boost::filesystem::path(m_subprocDirPrefix+workerIndex.str());
+  std::filesystem::path writer_rundir(m_subprocTopDir);
+  writer_rundir /= std::filesystem::path(m_subprocDirPrefix+workerIndex.str());
 
   if(mkdir(writer_rundir.string().c_str(),S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH)==-1) {
     ATH_MSG_ERROR("Unable to make writer run directory: " << writer_rundir.string() << ". " << fmterror(errno));
@@ -205,7 +206,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedWriterTool::bootstrap_f
   ATH_MSG_INFO("Io registry updated in the AthenaMP Shared Writer PID=" << getpid());
 
   // _______________________ Handle saved PFC (if any) ______________________
-  boost::filesystem::path abs_writer_rundir = boost::filesystem::absolute(writer_rundir);
+  std::filesystem::path abs_writer_rundir = std::filesystem::absolute(writer_rundir);
   if(handleSavedPfc(abs_writer_rundir))
     return outwork;
 

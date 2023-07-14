@@ -25,7 +25,7 @@
 #include <iomanip>
 
 // Boost includes
-#include "boost/filesystem.hpp"
+#include <filesystem>
 #include "boost/format.hpp"
 
 // TBB
@@ -628,7 +628,7 @@ void PerfMonMTSvc::report2Log_CpuInfo() const {
  */
 void PerfMonMTSvc::report2Log_EnvInfo() const {
   using boost::format;
-  using boost::filesystem::path;
+  using std::filesystem::path;
 
   ATH_MSG_INFO("                               Environment Information                                 ");
   ATH_MSG_INFO("=======================================================================================");
@@ -739,8 +739,8 @@ void PerfMonMTSvc::report2JsonFile_Summary(nlohmann::json& j) const {
                              {"totMem", totMem}};
 
   // Report Enviroment info
-  const std::string mallocLib = boost::filesystem::path(PMonSD::symb2lib("malloc")).filename().string();
-  const std::string mathLib = boost::filesystem::path(PMonSD::symb2lib("atan2")).filename().string();
+  const std::string mallocLib = std::filesystem::path(PMonSD::symb2lib("malloc")).filename().string();
+  const std::string mathLib = std::filesystem::path(PMonSD::symb2lib("atan2")).filename().string();
 
   j["summary"]["envInfo"] = {{"mallocLib", mallocLib},
                              {"mathLib", mathLib}};

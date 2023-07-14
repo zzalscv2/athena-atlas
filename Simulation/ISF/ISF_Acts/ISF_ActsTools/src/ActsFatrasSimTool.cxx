@@ -25,7 +25,7 @@ StatusCode ISF::ActsFatrasSimTool::initialize() {
   if (!m_particleFilter.empty()) ATH_CHECK(m_particleFilter.retrieve());
 
   // setup logger
-  m_logger = makeActsAthenaLogger(this, "ActsFatras","ActsFatrasSimTool");
+  m_logger = makeActsAthenaLogger(this, std::string("ActsFatras"),std::string("ActsFatrasSimTool"));
 
   // retrive tracking geo tool
   ATH_CHECK(m_trackingGeometryTool.retrieve());

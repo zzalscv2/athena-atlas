@@ -18,7 +18,7 @@
 #include <set>
 #include <iomanip>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 
 //Note to self and/or anyone who may worry about that:
@@ -44,10 +44,10 @@ struct StandaloneDataIO
   constexpr static int current_version = 6;
 
   template <class T>
-  inline static ErrorState read_from_file(const boost::filesystem::path & file, T * obj_ptr, const size_t offset = 0, const bool can_have_bool_at_start = true)
+  inline static ErrorState read_from_file(const std::filesystem::path & file, T * obj_ptr, const size_t offset = 0, const bool can_have_bool_at_start = true)
   {
     std::ifstream in(file.native(), std::ios_base::binary);
-    if (boost::filesystem::file_size(file) > sizeof(T) + offset && can_have_bool_at_start)
+    if (std::filesystem::file_size(file) > sizeof(T) + offset && can_have_bool_at_start)
       //Some of our output versions had an extra bool at the start.
       {
         in.ignore(sizeof(bool) + offset);
@@ -70,7 +70,7 @@ struct StandaloneDataIO
     return ErrorState::OK;
   }
 
-  inline static int guess_version(const boost::filesystem::path & filepath)
+  inline static int guess_version(const std::filesystem::path & filepath)
   {
     if (filepath.extension() == ".dat")
       {
@@ -94,7 +94,7 @@ struct StandaloneDataIO
       }
     else if (filepath.extension() == ".geo")
       {
-        if (abs(ptrdiff_t( boost::filesystem::file_size(filepath)) - ptrdiff_t(sizeof(ConstantInformation::GeometryArr_v2))) > ptrdiff_t(sizeof(bool)))
+        if (abs(ptrdiff_t( std::filesystem::file_size(filepath)) - ptrdiff_t(sizeof(ConstantInformation::GeometryArr_v2))) > ptrdiff_t(sizeof(bool)))
           //There might be a bool in the beginning due to the old way of binary output...
           {
             return 5;
@@ -120,7 +120,7 @@ struct StandaloneDataIO
       }
   }
 
-  inline static void report_error(const boost::filesystem::path & file, const std::string & kind, const bool report = false)
+  inline static void report_error(const std::filesystem::path & file, const std::string & kind, const bool report = false)
   {
     if (report)
       {
@@ -200,7 +200,7 @@ struct StandaloneDataIO
 
    public:
 
-    inline static ErrorState read_geometry(const boost::filesystem::path & file, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::GeometryArr> & geo, const int version)
+    inline static ErrorState read_geometry(const std::filesystem::path & file, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::GeometryArr> & geo, const int version)
     {
       if (version <= 0 || version > current_version)
         {
@@ -332,7 +332,7 @@ struct StandaloneDataIO
       return ErrorState::OK;
     }
 
-    inline static ErrorState read_noise(const boost::filesystem::path & file, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellNoiseArr> & noise, const int version)
+    inline static ErrorState read_noise(const std::filesystem::path & file, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellNoiseArr> & noise, const int version)
     {
       if (version <= 0 || version > current_version)
         {
@@ -375,7 +375,7 @@ struct StandaloneDataIO
       return ErrorState::OK;
     }
 
-    inline static ErrorState read_geometry_and_noise(const boost::filesystem::path & file,
+    inline static ErrorState read_geometry_and_noise(const std::filesystem::path & file,
                                                      CaloRecGPU::Helpers::CPU_object<CaloRecGPU::GeometryArr> & geo,
                                                      CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellNoiseArr> & noise, const int version)
     {
@@ -428,24 +428,24 @@ struct StandaloneDataIO
       return ErrorState::OK;
     }
 
-    inline static ErrorState read_geometry(const boost::filesystem::path & file, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::GeometryArr> & geo)
+    inline static ErrorState read_geometry(const std::filesystem::path & file, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::GeometryArr> & geo)
     {
       return read_geometry(file, geo, guess_version(file));
     }
 
-    inline static ErrorState read_noise(const boost::filesystem::path & file, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellNoiseArr> & noise)
+    inline static ErrorState read_noise(const std::filesystem::path & file, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellNoiseArr> & noise)
     {
       return read_noise(file, noise, guess_version(file));
     }
 
-    inline static ErrorState read_geometry_and_noise(const boost::filesystem::path & file,
+    inline static ErrorState read_geometry_and_noise(const std::filesystem::path & file,
                                                      CaloRecGPU::Helpers::CPU_object<CaloRecGPU::GeometryArr> & geo,
                                                      CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellNoiseArr> & noise)
     {
       return read_geometry_and_noise(file, geo, noise, guess_version(file));
     }
 
-    inline static ErrorState write_geometry(boost::filesystem::path file, const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::GeometryArr> & geo)
+    inline static ErrorState write_geometry(std::filesystem::path file, const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::GeometryArr> & geo)
     {
       file.replace_extension(".geometry");
       std::ofstream out(file, std::ios_base::binary);
@@ -459,7 +459,7 @@ struct StandaloneDataIO
       return ErrorState::OK;
     }
 
-    inline static ErrorState write_noise(boost::filesystem::path file, const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellNoiseArr> & noise)
+    inline static ErrorState write_noise(std::filesystem::path file, const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellNoiseArr> & noise)
     {
       file.replace_extension(".noise");
       std::ofstream out(file, std::ios_base::binary);
@@ -542,7 +542,7 @@ struct StandaloneDataIO
     }
 
    public:
-    inline static ErrorState read_cluster_info(const boost::filesystem::path & file, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr> & clusters, const int version)
+    inline static ErrorState read_cluster_info(const std::filesystem::path & file, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr> & clusters, const int version)
     {
       if (version <= 0 || version > current_version)
         {
@@ -675,7 +675,7 @@ struct StandaloneDataIO
 
     }
 
-    inline static ErrorState read_cell_info(const boost::filesystem::path & file,
+    inline static ErrorState read_cell_info(const std::filesystem::path & file,
                                             CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info,
                                             const int version)
     {
@@ -701,7 +701,7 @@ struct StandaloneDataIO
       return ErrorState::OK;
     }
 
-    inline static ErrorState read_cell_state(const boost::filesystem::path & file,
+    inline static ErrorState read_cell_state(const std::filesystem::path & file,
                                              CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state,
                                              const int version)
     {
@@ -727,7 +727,7 @@ struct StandaloneDataIO
       return ErrorState::OK;
     }
 
-    inline static ErrorState read_cell_info_and_state(const boost::filesystem::path & file,
+    inline static ErrorState read_cell_info_and_state(const std::filesystem::path & file,
                                                       CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info,
                                                       CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state,
                                                       const int version)
@@ -880,7 +880,7 @@ struct StandaloneDataIO
     }
 
 
-    inline static ErrorState read_cell_and_cluster_info(const boost::filesystem::path & file,
+    inline static ErrorState read_cell_and_cluster_info(const std::filesystem::path & file,
                                                         CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info,
                                                         CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state,
                                                         CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr> & clusters,
@@ -1011,29 +1011,29 @@ struct StandaloneDataIO
       return ErrorState::OK;
     }
 
-    inline static ErrorState read_cluster_info(const boost::filesystem::path & file, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr> & clusters)
+    inline static ErrorState read_cluster_info(const std::filesystem::path & file, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr> & clusters)
     {
       return read_cluster_info(file, clusters, guess_version(file));
     }
 
-    inline static ErrorState read_cell_info(const boost::filesystem::path & file, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info)
+    inline static ErrorState read_cell_info(const std::filesystem::path & file, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info)
     {
       return read_cell_info(file, cell_info, guess_version(file));
     }
 
-    inline static ErrorState read_cell_state(const boost::filesystem::path & file, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state)
+    inline static ErrorState read_cell_state(const std::filesystem::path & file, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state)
     {
       return read_cell_state(file, cell_state, guess_version(file));
     }
 
-    inline static ErrorState read_cell_info_and_state(const boost::filesystem::path & file,
+    inline static ErrorState read_cell_info_and_state(const std::filesystem::path & file,
                                                       CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info,
                                                       CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state)
     {
       return read_cell_info_and_state(file, cell_info, cell_state, guess_version(file));
     }
 
-    inline static ErrorState read_cell_and_cluster_info(const boost::filesystem::path & file,
+    inline static ErrorState read_cell_and_cluster_info(const std::filesystem::path & file,
                                                         CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info,
                                                         CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state,
                                                         CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr> & clusters)
@@ -1041,7 +1041,7 @@ struct StandaloneDataIO
       return read_cell_and_cluster_info(file, cell_info, cell_state, clusters, guess_version(file));
     }
 
-    inline static ErrorState write_cluster_info(boost::filesystem::path file, const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr> & clusters)
+    inline static ErrorState write_cluster_info(std::filesystem::path file, const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr> & clusters)
     {
       file.replace_extension(".clusterinfo");
       std::ofstream out(file, std::ios_base::binary);
@@ -1062,7 +1062,7 @@ struct StandaloneDataIO
       return ErrorState::OK;
     }
 
-    inline static ErrorState write_cell_info(boost::filesystem::path file,
+    inline static ErrorState write_cell_info(std::filesystem::path file,
                                              const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info)
     {
       file.replace_extension(".cellinfo");
@@ -1077,7 +1077,7 @@ struct StandaloneDataIO
       return ErrorState::OK;
     }
 
-    inline static ErrorState write_cell_state(boost::filesystem::path file,
+    inline static ErrorState write_cell_state(std::filesystem::path file,
                                               const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state)
     {
       file.replace_extension(".cellstate");
@@ -1096,11 +1096,11 @@ struct StandaloneDataIO
 
  protected:
 
-  inline static bool create_or_check_folder(const boost::filesystem::path & folder, const bool output_errors = true)
+  inline static bool create_or_check_folder(const std::filesystem::path & folder, const bool output_errors = true)
   {
-    if (!boost::filesystem::exists(folder))
+    if (!std::filesystem::exists(folder))
       {
-        if (!boost::filesystem::create_directory(folder))
+        if (!std::filesystem::create_directory(folder))
           {
             if (output_errors)
               {
@@ -1109,7 +1109,7 @@ struct StandaloneDataIO
             return false;
           }
       }
-    else if (!boost::filesystem::is_directory(folder))
+    else if (!std::filesystem::is_directory(folder))
       {
         if (output_errors)
           {
@@ -1122,7 +1122,7 @@ struct StandaloneDataIO
 
  public:
 
-  inline static ErrorState prepare_folder_for_output(const boost::filesystem::path & folder, const bool output_errors = true)
+  inline static ErrorState prepare_folder_for_output(const std::filesystem::path & folder, const bool output_errors = true)
   {
     if (!create_or_check_folder(folder, output_errors))
       {
@@ -1153,7 +1153,7 @@ struct StandaloneDataIO
   }
 
 
-  inline static ErrorState save_constants_to_folder(const boost::filesystem::path & folder,
+  inline static ErrorState save_constants_to_folder(const std::filesystem::path & folder,
                                                     const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::GeometryArr> & geo,
                                                     const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellNoiseArr> & noise,
                                                     const std::string & prefix = "",
@@ -1182,7 +1182,7 @@ struct StandaloneDataIO
   }
 
   inline static ErrorState save_event_to_folder(const size_t event_number,
-                                                const boost::filesystem::path & folder,
+                                                const std::filesystem::path & folder,
                                                 const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info,
                                                 const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state,
                                                 const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr> & clusters,
@@ -1221,7 +1221,7 @@ struct StandaloneDataIO
   }
 
   inline static ErrorState save_cell_state_to_folder(const size_t event_number,
-                                                     const boost::filesystem::path & folder,
+                                                     const std::filesystem::path & folder,
                                                      const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state,
                                                      const std::string & prefix = "",
                                                      const std::string & suffix = "",
@@ -1250,7 +1250,7 @@ struct StandaloneDataIO
   }
 
   inline static ErrorState save_cell_info_to_folder(const size_t event_number,
-                                                    const boost::filesystem::path & folder,
+                                                    const std::filesystem::path & folder,
                                                     const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info,
                                                     const std::string & prefix = "",
                                                     const std::string & suffix = "",
@@ -1279,7 +1279,7 @@ struct StandaloneDataIO
   }
 
   inline static ErrorState save_clusters_to_folder(const size_t event_number,
-                                                   const boost::filesystem::path & folder,
+                                                   const std::filesystem::path & folder,
                                                    const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr> & clusters,
                                                    const std::string & prefix = "",
                                                    const std::string & suffix = "",
@@ -1350,13 +1350,13 @@ struct StandaloneDataIO
   inline static FolderLoad load_folder_filter(F && filter_function,
                                               //Receives a std::string (the filename),
                                               //returns `true` if the file should be filtered out.
-                                              const boost::filesystem::path & folder,
+                                              const std::filesystem::path & folder,
                                               int max_events = -1,
                                               const FolderLoadOptions & flo = FolderLoadOptions::None(),
                                               const bool output_messages = true)
   {
     FolderLoad ret;
-    if (!boost::filesystem::is_directory(folder))
+    if (!std::filesystem::is_directory(folder))
       {
         if (output_messages)
           {
@@ -1366,7 +1366,7 @@ struct StandaloneDataIO
       }
     std::set<std::string> read_one_part_of_v1_cells;
     int event_count = 0;
-    for (const boost::filesystem::path & file : boost::filesystem::directory_iterator(folder))
+    for (const std::filesystem::path & file : std::filesystem::directory_iterator(folder))
       {
         if ( max_events > 0 && event_count >= max_events &&
              ret.geometry.size() > 0 && ret.noise.size() > 0 )
@@ -1749,7 +1749,7 @@ struct StandaloneDataIO
     return ret;
   }
 
-  inline static FolderLoad load_folder(const boost::filesystem::path & folder,
+  inline static FolderLoad load_folder(const std::filesystem::path & folder,
                                        int max_events = -1,
                                        const FolderLoadOptions & flo = FolderLoadOptions::None(),
                                        const bool output_messages = true)

@@ -43,6 +43,7 @@
 #include <bitset>
 #include <string>
 #include <ctime>
+#include <arpa/inet.h>
 
 std::string cern_local_time(time_t unix_time)
 {
@@ -412,7 +413,9 @@ StatusCode TileTBDump::execute() {
             subdet_id == 0x70) { // COMMON BEAM ROD in CTB2004
           dump_digi(subdet_id,data, size, version, verbosity, source_id, ctx);
         } else if ( m_dumpUnknown ) {
-          if (subdet_id != 0 || size<13 || data[5] != 0x12345678 || data[size-1] != 0x87654321) {
+          if (!(subdet_id == 0 || size < 13
+                || data[5] == 0x12345678 || data[size-1] == 0x87654321
+                || data[5] == 0x34127856 || data[size-1] == 0x65872143)) {
             dump_data(data, size, version, verbosity);
           }
           if (subdet_id == 0) { // try also to find normal fragments  
@@ -1886,26 +1889,25 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
           case 6:
           {
             std::cout << "\nFELIX fragment 0x" << std::hex  << id << std::dec << ", " << size << " words found" << std::endl;
-
+            std::vector<uint32_t> correct_data = get_correct_data(data, size);
             // dump first few words of the first MD fragment
             int head = 9;
             std::cout << std::hex << std::endl;
-            bool phase2format = (size>head && data[2] == 0x12345678 && data[size-1] == 0x87654321);
+            bool phase2format = (size>head && correct_data[2] == 0x12345678 && correct_data[size-1] == 0x87654321);
             if (phase2format) {
               const char * names[] = { "size_packet", "elink", "SOP", "runParam1", "runParam2", "runParam3", "runParam4", "BC_MD_ID", "L1ID" };
               for (int i=0; i<head; ++i) {
-                std::cout << std::setw(13) << names[i] << std::setw(10) << data[i] << std::endl;
+                std::cout << std::setw(13) << names[i] << std::setw(10) << correct_data[i] << std::endl;
               }
             } else {
               if (head>size) head=size;
               for (int i=0; i<head; ++i) {
-                std::cout << "     Word" << std::setw(3) << i << std::setw(10) << data[i] << std::endl;
+                std::cout << "     Word" << std::setw(3) << i << std::setw(10) << correct_data[i] << std::endl;
               }
             }
             std::cout << std::dec << std::endl;
-
             FelixData_t digitsHighGain, digitsLowGain, digitsMetaData;
-            unpack_frag6(data, size, digitsHighGain, digitsLowGain, digitsMetaData);
+            unpack_frag6(correct_data.data(), size, digitsHighGain, digitsLowGain, digitsMetaData);
 
             std::cout << "                    MD1       MD2       MD3       MD4" << std::endl;
             std::cout << "-----------------------------------------------------";
@@ -2099,16 +2101,16 @@ void TileTBDump::unpack_frag6(const uint32_t* data, unsigned int size,
                               FelixData_t & digitsMetaData) const
 {
 
-  std::vector<unsigned short> bcid(4);
-  std::vector<unsigned short> l1id(4);
-  std::vector<unsigned short> moduleID(4);
-  std::vector<unsigned short> runType (4);
-  std::vector<unsigned short> runNumber(4);
-  std::vector<unsigned short> pedestalHi(4);
-  std::vector<unsigned short> pedestalLo(4);
-  std::vector<unsigned short> chargeInjected(4);
-  std::vector<unsigned short> timeInjected(4);
-  std::vector<unsigned short> capacitor(4);
+  std::vector<unsigned int> bcid(4);
+  std::vector<unsigned int> l1id(4);
+  std::vector<unsigned int> moduleID(4);
+  std::vector<unsigned int> runType (4);
+  std::vector<unsigned int> runNumber(4);
+  std::vector<unsigned int> pedestalHi(4);
+  std::vector<unsigned int> pedestalLo(4);
+  std::vector<unsigned int> chargeInjected(4);
+  std::vector<unsigned int> timeInjected(4);
+  std::vector<unsigned int> capacitor(4);
 
   digitsHighGain.clear();
   digitsLowGain.clear();
@@ -2132,11 +2134,11 @@ void TileTBDump::unpack_frag6(const uint32_t* data, unsigned int size,
         moduleID[miniDrawer ]   = (*data >> 16) & 0xFF;
         runType[miniDrawer]     = (*data >> 24) & 0xFF;
 
-        if (fragSize != sampleNumber*6) {
+        if (fragSize != sampleNumber * 12) {
             std::cout << "Minidrawer [" << miniDrawer
                       << "] has unexpected fragment size: " << fragSize
                       << " correct value for " << sampleNumber
-                      << " samples is " << sampleNumber*6 << std::endl;
+                      << " samples is " << sampleNumber * 12 << std::endl;
         }
 
         // find MD trailer
@@ -2997,3 +2999,17 @@ void TileTBDump::tile_min_max ( const unsigned short *frame, int frame_length, u
   *smax = Max;
 }
 
+std::vector<uint32_t> TileTBDump::get_correct_data(const uint32_t* p, unsigned int size) const {
+
+  std::vector<uint32_t> data;
+  data.reserve(size);
+
+  // The first 2 words are correct (just copy)
+  std::copy_n(p, 2, std::back_inserter(data));
+
+  std::for_each(p + 2, p + size, [&data] (uint32_t p) {
+      data.push_back((ntohs(p >> 16) << 16) | (ntohs(p & 0xFFFF)));
+    });
+
+  return data;
+}

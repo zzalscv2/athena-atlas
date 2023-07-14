@@ -21,7 +21,21 @@ import re
 amitagRegex = re.compile('^[a-z][0-9]+')
 
 
-def inputAMITags(flags):
+def inputAMITagsFromEnvironment(silent=False):
+    tagsFromINDS = []
+    # from INDS environmental variable
+    from os import environ
+    varINDS = environ.get('INDS', '')
+    if varINDS:
+        # try extracting the AMITag of the input dataset from its name
+        tagsFromINDS = varINDS.split('.')[-1].split('_')
+        tagsFromINDS = [tag for tag in tagsFromINDS if amitagRegex.match(tag)]
+        if not silent:
+            log.debug('AMITag from input dataset name: {}'.format(tagsFromINDS))
+    return tagsFromINDS
+
+
+def inputAMITags(flags, fixBroken=False, silent=False):
     """Returns AMITag of input, split in a list, e.g. ['e6337','s3681','r13145']
 
     Looks up AMITag of input from ConfigFlag input file's in-file
@@ -35,38 +49,38 @@ def inputAMITags(flags):
 
     from AthenaConfiguration.AutoConfigFlags import GetFileMD
     tags = GetFileMD(files).get('AMITag', '')
-
-    tagsFromINDS = []
-    # from INDS environmental variable
-    from os import environ
-    varINDS = environ.get('INDS', '')
-    if varINDS:
-        # try extracting the AMITag of the input dataset from its name
-        tagsFromINDS = varINDS.split('.')[-1].split('_')
-        tagsFromINDS = [tag for tag in tagsFromINDS if amitagRegex.match(tag)]
-        log.debug('AMITag from input dataset name: {}'.format(tagsFromINDS))
+    tagsFromINDS = inputAMITagsFromEnvironment(silent)
 
     if tags:
         tags = tags.split('_')
-        log.info(f'Read AMITag from metadata: {tags}')
+        # remove duplicates
+        from itertools import groupby
+        tags = [key for key, _group in groupby(tags)]
+        if not silent:
+            log.info(f'Read AMITag from metadata: {tags}')
     else:
         log.info("Cannot access /TagInfo/AMITag from in-file metadata")
-        # Set it to an empty list
+        # Set it to an empty list or the value from INDS
         return tagsFromINDS
 
     if tagsFromINDS and tags != tagsFromINDS:
-        log.warning("AMITag mismatch, check metadata of input dataset")
+        if not silent:
+            log.warning("AMITag mismatch, check metadata of input dataset")
+        if fixBroken:
+            if not silent:
+                log.warning(f"Will change {tags} to {tagsFromINDS} based on INDS environment variable")
+            tags = tagsFromINDS
 
     return tags
 
 
-def AMITagCfg(flags, runArgs=None):
+def AMITagCfg(flags, runArgs=None, fixBroken=False):
     """Add input and output AMITag values and set result in in-file metadata
 
     The AMITags will be combined with '_' as delimiters. The result is set in
     the in-file metadata.
     """
-    tags = inputAMITags(flags)
+    tags = inputAMITags(flags, fixBroken)
     if runArgs is not None:
         if hasattr(runArgs, 'AMITag') and runArgs.AMITag not in tags:
             tags += [runArgs.AMITag]

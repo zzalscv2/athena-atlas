@@ -136,9 +136,9 @@ def defineInputsMenu():
             None, 
 
             # gJ thresholds for commissioning
-            ('gJ20p0ETA25',3), ('gJ20p25ETA49',3), 
+            ('gJ20p0ETA25',3), ('gJ20p25ETA49',3), ('gJSPARE1',3),
 
-            (None,3), (None,3),
+            (None,3),
 
             'gJ50p0ETA25', 'gJ100p0ETA25', 
             'gJ400p0ETA25',

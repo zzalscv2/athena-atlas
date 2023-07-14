@@ -5,15 +5,15 @@
 #ifndef HBB_TAG_CONFIG_H
 #define HBB_TAG_CONFIG_H
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 namespace FlavorTagDiscriminants {
 
   struct HbbTagConfig
   {
-    HbbTagConfig(const boost::filesystem::path& path);
+    HbbTagConfig(const std::filesystem::path& path);
     HbbTagConfig() = default;
-    boost::filesystem::path input_file_path;
+    std::filesystem::path input_file_path;
     std::string subjet_link_name;
     double min_subjet_pt = 7e3;
   };

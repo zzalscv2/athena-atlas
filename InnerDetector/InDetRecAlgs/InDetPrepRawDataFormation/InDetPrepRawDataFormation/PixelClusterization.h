@@ -89,6 +89,8 @@ private:
   SG::WriteHandleKey<SiClusterContainer> m_clusterContainerLinkKey;
   SG::WriteHandleKey<PixelGangedClusterAmbiguities> m_ambiguitiesMapKey;
   SG::UpdateHandleKey<InDet::PixelClusterContainerCache> m_clusterContainercacheKey;
+  Gaudi::Property<bool> m_useDataPoolWithCache{
+      this, "useDataPoolWithCache", false, "use DataPool With Cache"};
 };
 
 }//end of ns

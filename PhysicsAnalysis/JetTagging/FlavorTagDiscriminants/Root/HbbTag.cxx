@@ -19,6 +19,8 @@
 // c++ core
 #include <set>
 #include <fstream>
+#include <filesystem>
+
 
 namespace {
 
@@ -50,7 +52,7 @@ namespace FlavorTagDiscriminants {
     m_n_subjets(0),
     m_min_subjet_pt(config.min_subjet_pt)
   {
-    namespace fs = boost::filesystem;
+    namespace fs = std::filesystem;
     // setup NN
     fs::path nn_path = config.input_file_path;
     if (!fs::exists(nn_path)) {

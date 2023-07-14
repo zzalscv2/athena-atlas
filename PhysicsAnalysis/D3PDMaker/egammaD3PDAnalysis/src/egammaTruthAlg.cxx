@@ -138,8 +138,7 @@ bool egammaTruthAlg::isAccepted (const xAOD::TruthParticle& tp,
 
   if (fabs(tp.eta()) > m_etaMax) return false;
 
-  if (!MC::egammaTruthAlg_isGenStable (&tp)) return false;
-  if (!MC::egammaTruthAlg_isGenInteracting (&tp)) return false;
+  if (!MC::egammaTruthAlg_isGenStable_and_isGenInteracting (&tp)) return false;
 
   // Remove electrons/gammas decaying into themselves
   if( tp.hasDecayVtx() ) {
@@ -177,8 +176,7 @@ float egammaTruthAlg::computeIso (const xAOD::TruthParticle& tp,
   TLorentzVector sum;
   for (const xAOD::TruthParticle* p : cont) {
     if (p == &tp || p->barcode() == tp.barcode()) continue;
-    if (!MC::egammaTruthAlg_isGenStable (p)) continue;
-    if (!MC::egammaTruthAlg_isGenInteracting (p)) continue;
+    if (!MC::egammaTruthAlg_isGenStable_and_isGenInteracting (p)) continue;
     if (tp.p4().DeltaR (p->p4()) < m_isoCone)
       sum += p->p4();
   }

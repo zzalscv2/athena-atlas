@@ -166,6 +166,7 @@
 + External/AtlasDataArea
 + Generators/AtlasHepMC
 + Generators/GenInterfaces
++ Generators/GeneratorConfig
 + Generators/GeneratorObjects
 + Generators/GeneratorObjectsAthenaPool
 + Generators/GeneratorObjectsTPCnv

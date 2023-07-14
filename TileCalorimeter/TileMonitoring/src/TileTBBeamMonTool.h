@@ -91,6 +91,10 @@ class ATLAS_NOT_THREAD_SAFE TileTBBeamMonTool: public TileFatherMonTool {  // de
     TH1F* m_TOF21 = nullptr;
     TH1F* m_TOF23 = nullptr;
     TH1F* m_TOF31 = nullptr;
+    TH1F* m_scalerS1 = nullptr;
+    TH1F* m_scalerS2 = nullptr;
+    TH1F* m_scalerS3 = nullptr;
+    TH1F* m_scalerS12 = nullptr;
     TH2F* m_Cher1TOF1 = nullptr;
     TH2F* m_Cher1TOF2 = nullptr;
     TH2F* m_Cher1TOF3 = nullptr;
@@ -118,6 +122,7 @@ class ATLAS_NOT_THREAD_SAFE TileTBBeamMonTool: public TileFatherMonTool {  // de
 
     int m_tof[16]={0};
     int m_btdc[16]={0};
+    int m_scaler[16]={0};
     bool m_btdcFirstHit[16]={};
 
     //PMT counters
@@ -176,7 +181,8 @@ class ATLAS_NOT_THREAD_SAFE TileTBBeamMonTool: public TileFatherMonTool {  // de
 
     //Beam element container
     std::string m_beamElemContainer;
-
+    std::vector<unsigned int> m_maskMuonPMTs;
+    std::vector<bool> m_maskedMuPMTs;
     int m_TBperiod{};
 };
 

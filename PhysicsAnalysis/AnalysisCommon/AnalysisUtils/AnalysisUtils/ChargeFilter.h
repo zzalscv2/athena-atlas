@@ -19,9 +19,7 @@
 // FrameWork includes
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
-
-// Boost includes
-#include <boost/optional.hpp>
+#include <optional>
 
 // EventKernel includes
 #include "EventKernel/IParticle.h"
@@ -92,9 +90,9 @@ class ChargeFilter : virtual public IFilter<T>
  protected: 
 
   /** The charge the filter is looking for. It is unitialized by default (in
-   *  the boost::optional sense)
+   *  the std::optional sense)
    */
-  boost::optional<ChargeType> m_charge;
+  std::optional<ChargeType> m_charge;
 
 }; 
 

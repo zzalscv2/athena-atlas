@@ -19,6 +19,7 @@
 #include "StoreGate/WriteHandle.h"
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
+#include "AthAllocators/DataPool.h"
 #include <limits>
 #include <unordered_map>
 
@@ -148,6 +149,9 @@ namespace InDet {
        if (!hasExternalCache) {
         dataItemsPool = std::make_unique<DataPool<SCT_Cluster>>(ctx);
         dataItemsPool->reserve(20000);  // Some large default size
+       } else if (m_useDataPoolWithCache) {
+        dataItemsPool = std::make_unique<DataPool<SCT_Cluster>>(ctx);
+        //this is  per view so let it expand on its own in blocks
        }
 
       if (not m_roiSeeded.value()) { //Full-scan mode

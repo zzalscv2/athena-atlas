@@ -77,11 +77,11 @@ StatusCode
 ActsExtrapolationTool::initialize()
 {
   using namespace std::literals::string_literals;
-  m_logger = makeActsAthenaLogger(this, "ActsExtrapTool", "Prop");
+  m_logger = makeActsAthenaLogger(this, std::string("ActsExtrapTool"), std::string("Prop"));
 
   ATH_MSG_INFO("Initializing ACTS extrapolation");
 
-  m_logger = makeActsAthenaLogger(this, "Prop", "ActsExtrapTool");
+  m_logger = makeActsAthenaLogger(this, std::string("Prop"), std::string("ActsExtrapTool"));
 
   ATH_CHECK( m_trackingGeometryTool.retrieve() );
   std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry

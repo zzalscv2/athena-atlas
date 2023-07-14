@@ -222,7 +222,7 @@ void BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagger, st
 
   //retrive the "fraction" used in the DL1 log likelihood from the CDI, if its not there, use the hard coded values
   // (backwards compatibility)
-  if( (m_taggerEnum == Tagger::DL1) || (m_taggerEnum == Tagger::GN1) ){
+  if( (m_taggerEnum == Tagger::DL1) || (m_taggerEnum == Tagger::GN1) || (m_taggerEnum == Tagger::GN2)){
 
     TString fraction_data_name = taggerName+"/"+m_jetAuthor+"/"+OP+"/fraction";
     TVector *fraction_data = (TVector*) m_inf->Get(fraction_data_name);
@@ -322,7 +322,7 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( double pb, double pc, dou
   }
 
   tagweight = -100.;
-  if( (m_taggerEnum == Tagger::DL1) || (m_taggerEnum == Tagger::GN1)){
+  if( (m_taggerEnum == Tagger::DL1) || (m_taggerEnum == Tagger::GN1) || (m_taggerEnum == Tagger::GN2)){
 
     bool valid_input = (!std::isnan(pu) && pb>=0 && pc>=0 && pu>=0);
 

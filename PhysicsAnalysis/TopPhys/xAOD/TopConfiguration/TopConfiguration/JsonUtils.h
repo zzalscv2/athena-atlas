@@ -7,8 +7,7 @@
 
 #include "AsgTools/Property.h"
 
-#include <boost/optional.hpp>
-
+#include <optional>
 #include <cmath>
 #include <ios>
 #include <memory>
@@ -67,9 +66,9 @@ namespace top {
     /**
      * @brief Convert the value of a property to JSON.
      *
-     * @return The JSON representation of the value, or boost::none if no conversion is available.
+     * @return The JSON representation of the value, or std::none if no conversion is available.
      */
-    boost::optional<std::string> operator () (Property* prop) const;
+    std::optional<std::string> operator () (Property* prop) const;
 
     class ISpecializedDumper {
     public:

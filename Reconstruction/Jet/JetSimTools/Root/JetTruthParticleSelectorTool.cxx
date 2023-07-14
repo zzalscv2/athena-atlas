@@ -231,7 +231,7 @@ bool JetTruthParticleSelectorTool::passKinematics(const xAOD::TruthParticle* tru
 bool JetTruthParticleSelectorTool::selector(const xAOD::TruthParticle* truthPart) {
 
   bool result = false;
-  if ( abs(truthPart->pdgId()) == 999) return false; // protect against unexpected geantinos
+  if (MC::isGeantino(truthPart->pdgId()))  return false; // protect against unexpected geantinos
 
   switch( m_selectionMode) { // For now only 4 modes used in practice for jets...
                              // a switch statement is probably not optimal here...

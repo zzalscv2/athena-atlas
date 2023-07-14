@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondAlg/MuonAlignmentErrorDbAlg.h"
 
 MuonAlignmentErrorDbAlg::MuonAlignmentErrorDbAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthAlgorithm(name, pSvcLocator) {}
+    AthReentrantAlgorithm(name, pSvcLocator) {}
 
 StatusCode MuonAlignmentErrorDbAlg::initialize() {
     ATH_MSG_DEBUG("initialize " << name());
@@ -15,12 +15,12 @@ StatusCode MuonAlignmentErrorDbAlg::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonAlignmentErrorDbAlg::execute() {
+StatusCode MuonAlignmentErrorDbAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("execute " << name());
 
     // Write Cond Handle
 
-    SG::WriteCondHandle<MuonAlignmentErrorData> writeHandle{m_writeKey};
+    SG::WriteCondHandle<MuonAlignmentErrorData> writeHandle{m_writeKey, ctx};
     if (writeHandle.isValid()) {
         ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid."
                                     << ". In theory this should not be called, but may happen"
@@ -31,7 +31,7 @@ StatusCode MuonAlignmentErrorDbAlg::execute() {
 
     // Read Cond Handle
 
-    SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey};
+    SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey, ctx};
     const CondAttrListCollection* readCdo{*readHandle};
     // const CondAttrListCollection* atrc(0);
     // readCdo = *readHandle;
@@ -134,10 +134,5 @@ StatusCode MuonAlignmentErrorDbAlg::execute() {
     }
     ATH_MSG_INFO("recorded new " << writeHandle.key() << " with range " << rangeW << " into Conditions Store");
 
-    return StatusCode::SUCCESS;
-}
-
-StatusCode MuonAlignmentErrorDbAlg::finalize() {
-    ATH_MSG_DEBUG("finalize " << name());
     return StatusCode::SUCCESS;
 }
