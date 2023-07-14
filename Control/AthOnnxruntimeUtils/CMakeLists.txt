@@ -9,4 +9,3 @@ atlas_add_library( AthOnnxruntimeUtilsLib
    PUBLIC_HEADERS AthOnnxruntimeUtils
    INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
    LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} AthOnnxruntimeServiceLib AthenaKernel GaudiKernel AsgServicesLib )
-
