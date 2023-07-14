@@ -67,7 +67,7 @@ namespace AthONNX {
     Ort::SessionOptions sessionOptions;
     sessionOptions.SetIntraOpNumThreads( 1 );
     if (withCUDA) {
-      Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProvider_CUDA(sessionOptions, 0));
+      ;  // does nothing for now until we have a GPU enabled build
     }
     sessionOptions.SetGraphOptimizationLevel( GraphOptimizationLevel::ORT_ENABLE_EXTENDED );
 
@@ -78,28 +78,6 @@ namespace AthONNX {
                                      modelFile.c_str(),
                                      sessionOptions );
    }
-
-
-/****************************Creation of ORT Session for GPU******************************/
-/*****************************************************************************************/
-
- //template<typename T>
- inline std::unique_ptr< Ort::Session > CreateORTSessionGPU(const std::string& modelFile){
-
-    // Set up the ONNX Runtime session.
-    Ort::SessionOptions sessionOptions;
-    Ort::ThrowOnError (OrtSessionOptionsAppendExecutionProvider_CUDA(sessionOptions,0));
-    sessionOptions.SetIntraOpNumThreads( 1 );
-    sessionOptions.SetGraphOptimizationLevel( ORT_ENABLE_BASIC );
-
-    ServiceHandle< IONNXRuntimeSvc > svc("AthONNX::ONNXRuntimeSvc",
-                                              "AthONNX::ONNXRuntimeSvc");
-
-    return std::make_unique<Ort::Session>( svc->env(),
-                                     modelFile.c_str(),
-                                     sessionOptions );
-   }
-
 
 
 /*********************************Input Node Structure of Model*********************************/
