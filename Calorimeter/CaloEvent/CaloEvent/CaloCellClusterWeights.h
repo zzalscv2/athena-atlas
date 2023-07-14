@@ -8,7 +8,7 @@
 
 #include <string>
 #include <vector>
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 
 class CaloCell;
 
@@ -26,7 +26,7 @@ public:
   /// @name Storage and payload types
   /// @{
   typedef std::vector<double>                 weight_t;        ///< @brief Type of weight
-  typedef boost::tuples::tuple<bool,weight_t> value_t;         ///< @brief Type of payload
+  typedef std::tuple<bool,weight_t> value_t;         ///< @brief Type of payload
   typedef std::vector<value_t>                store_t;         ///< @brief Store type
   typedef store_t::const_iterator             const_iterator;  ///< @brief Iterator type for const access
   typedef store_t::iterator                   iterator;        ///< @brief Iterator type 
