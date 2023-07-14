@@ -30,7 +30,7 @@ class MdtDriftCircleAuxContainer_v1 : public AuxContainerBase {
     std::vector<int16_t> adc{};
     std::vector<uint16_t> driftTube{};
     std::vector<uint8_t> tubeLayer{};
-    std::vector<uint8_t> driftCircleStatus{};
+    std::vector<uint8_t> status{};
     /// @}
 };
 }  // namespace xAOD
