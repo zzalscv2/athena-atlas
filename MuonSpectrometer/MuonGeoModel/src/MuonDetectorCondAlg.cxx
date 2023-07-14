@@ -35,20 +35,17 @@ StatusCode MuonDetectorCondAlg::initialize() {
     ATH_CHECK(m_iGeoModelTool.retrieve());
 
     ATH_CHECK(m_readALineKey.initialize(m_applyALines));
-    ATH_CHECK(m_readBLineKey.initialize());
+    ATH_CHECK(m_readBLineKey.initialize(m_applyBLines));
     ATH_CHECK(m_readILineKey.initialize(MuonDetMgrDS->applyCscIntAlignment()));
     ATH_CHECK(m_readMdtAsBuiltKey.initialize(MuonDetMgrDS->applyMdtAsBuiltParams()));
-    ATH_CHECK(m_readNswAsBuiltKey.initialize(MuonDetMgrDS->applyNswAsBuiltParams()));
+    ATH_CHECK(m_readNswAsBuiltKey.initialize(m_applyNswAsBuilt));
 
     ATH_CHECK(m_condMmPassivKey.initialize(m_applyMmPassivation));
     ATH_CHECK(m_idHelperSvc.retrieve());
-
-    // Write Handles
-    // std::string ThisKey = "MuonDetectorManager";
-    // std::size_t pos = name().find("MuonDetectorCondAlg");
-    // m_writeDetectorManagerKey = ThisKey + name().substr (pos);
     ATH_CHECK(m_writeDetectorManagerKey.initialize());
-
+    ATH_MSG_INFO("Initialize successful -- "<<m_applyALines<<", "<<m_applyBLines<<","
+                                            <<m_applyILines<<","<<m_applyMdtAsBuilt<<","
+                                            <<m_applyNswAsBuilt<<","<<m_applyMmPassivation);
     return StatusCode::SUCCESS;
 }
 
@@ -66,8 +63,6 @@ StatusCode MuonDetectorCondAlg::execute() {
                                     << " if multiple concurrent events are being processed out of order.");
         return StatusCode::SUCCESS;
     }
-
-
     writeHandle.addDependency(IOVInfiniteRange::infiniteRunLB());
 
     // =======================
@@ -136,15 +131,14 @@ StatusCode MuonDetectorCondAlg::execute() {
     // =======================
     // Set NSW as-built geometry if requested
     // =======================
-    if (MuonMgrData->applyNswAsBuiltParams()) {
+    if (!m_readNswAsBuiltKey.empty()) {
         SG::ReadCondHandle<NswAsBuiltDbData> readNswAsBuilt{m_readNswAsBuiltKey, ctx};
         if(!readNswAsBuilt.isValid()) {
             ATH_MSG_ERROR("Cannot find conditions data container for NSW as-built!");
             return StatusCode::FAILURE;
         }
         writeHandle.addDependency(readNswAsBuilt);
-        if (m_applyAsBuiltMM)   MuonMgrData->setMMAsBuiltCalculator(*readNswAsBuilt);
-        if (m_applyAsBuiltSTGC) MuonMgrData->setStgcAsBuiltCalculator(*readNswAsBuilt);
+        MuonMgrData->setNswAsBuilt(*readNswAsBuilt); 
     }
 
     // =======================

@@ -62,13 +62,10 @@ def MuonDetectorToolCfg(flags):
             if flags.IOVDb.DatabaseInstance == 'COMP200' or \
                     'HLT' in flags.IOVDb.GlobalTag or flags.Common.isOnline or flags.Input.isMC:
                 #logMuon.info("No MDT As-Built parameters applied.")
-                detTool.EnableMdtAsBuiltParameters = 0
-                detTool.EnableNswAsBuiltParameters = 0
+                detTool.EnableMdtAsBuiltParameters = 0               
             else :
                 #logMuon.info("Reading As-Built parameters from conditions database")
                 detTool.EnableMdtAsBuiltParameters = 1
-                detTool.EnableNswAsBuiltParameters = 1 if flags.GeoModel.Run>=LHCPeriod.Run3 else 0
-                pass
 
     else:
         detTool.UseConditionDb = 0
@@ -101,8 +98,9 @@ def MuonDetectorToolCfg(flags):
     return acc
 
 @AccumulatorCache
-def MuonAlignmentCondAlgCfg(flags):
-    acc = MuonGeoModelToolCfg(flags)
+def MuonAlignmentCondAlgCfg(flags, name="MuonAlignmentCondAlg", **kwargs):
+    acc = ComponentAccumulator()
+    acc.merge(MuonGeoModelToolCfg(flags))
 
     # This is all migrated from MuonSpectrometer/MuonReconstruction/MuonRecExample/python/MuonAlignConfig.py
 
@@ -156,11 +154,7 @@ def MuonAlignmentCondAlgCfg(flags):
             #logMuon.info("Reading As-Built parameters from conditions database")
             acc.merge(addFolders( flags, '/MUONALIGN/MDT/ASBUILTPARAMS' , 'MUONALIGN_OFL', className='CondAttrListCollection'))
             MuonAlign.ParlineFolders += ["/MUONALIGN/MDT/ASBUILTPARAMS"]
-            if flags.GeoModel.Run>=LHCPeriod.Run3:
-                # TODO: remove hard-coded tag once the global tag is ready
-                acc.merge(addFolders( flags, '/MUONALIGN/ASBUILTPARAMS/MM'  , 'MUONALIGN_OFL', className='CondAttrListCollection', tag='MuonAlignAsBuiltParamsMm-RUN3-01-00'))
-                acc.merge(addFolders( flags, '/MUONALIGN/ASBUILTPARAMS/STGC', 'MUONALIGN_OFL', className='CondAttrListCollection', tag='MUONALIGN_STG_ASBUILT-001-03'))
-                MuonAlign.ParlineFolders += ['/MUONALIGN/ASBUILTPARAMS/MM', '/MUONALIGN/ASBUILTPARAMS/STGC']
+            acc.merge(NswAsBuiltCondAlgCfg(flags))
             pass
 
     acc.addCondAlgo(MuonAlign)
@@ -174,22 +168,44 @@ def MuonAlignmentErrorDbAlgCfg(flags):
     acc.addCondAlgo(CompFactory.MuonAlignmentErrorDbAlg("MuonAlignmentErrorDbAlg"))
     return acc
 
+def NswAsBuiltCondAlgCfg(flags, name = "NswAsBuiltCondAlg", **kwargs):
+    result = ComponentAccumulator()
+    #### Do not apply the as-built correction if not activated
+    if flags.GeoModel.Run < LHCPeriod.Run3:
+        return result
+    ##TODO: remove hard-coded tag once the global tag is ready
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    result.merge(addFolders( flags, '/MUONALIGN/ASBUILTPARAMS/MM'  , 'MUONALIGN_OFL', className='CondAttrListCollection', tag='MuonAlignAsBuiltParamsMm-RUN3-01-00'))
+    ### Disable the STGC as-built parameters (Keep the path if we want to add later fully validated As-built)
+    result.merge(addFolders( flags, '/MUONALIGN/ASBUILTPARAMS/STGC', 'MUONALIGN_OFL', className='CondAttrListCollection', tag='MUONALIGN_STG_ASBUILT-001-03'))
+    kwargs.setdefault("ReadSTgcAsBuiltParamsKey", "")
+    the_alg = CompFactory.NswAsBuiltCondAlg(name, **kwargs)
+    result.addCondAlgo(the_alg, primary = True)     
+    return result
 
-def MuonDetectorCondAlgCfg(flags):
-    acc = MuonAlignmentCondAlgCfg(flags)
-    if flags.Muon.applyMMPassivation:
+
+def MuonDetectorCondAlgCfg(flags, name = "MuonDetectorCondAlg", **kwargs):
+    result = ComponentAccumulator()
+
+    result.merge(MuonAlignmentCondAlgCfg(flags))
+    kwargs.setdefault("applyMmPassivation", flags.Muon.applyMMPassivation)
+
+    if kwargs["applyMmPassivation"]:
         from MuonConfig.MuonCondAlgConfig import NswPassivationDbAlgCfg
-        acc.merge(NswPassivationDbAlgCfg(flags))
-    MuonDetectorManagerCond = CompFactory.MuonDetectorCondAlg()
-    MuonDetectorManagerCond.applyMmPassivation = flags.Muon.applyMMPassivation
+        result.merge(NswPassivationDbAlgCfg(flags))
     
-    detTool = acc.popToolsAndMerge(MuonDetectorToolCfg(flags))
-    MuonDetectorManagerCond.MuonDetectorTool = detTool
+    kwargs.setdefault("applyALines", len([alg for alg in result.getCondAlgos() if alg.name == "MuonAlignmentCondAlg"])>0)
+    kwargs.setdefault("applyBLines", len([alg for alg in result.getCondAlgos() if alg.name == "MuonAlignmentCondAlg"])>0)
+    kwargs.setdefault("applyNswAsBuilt", len([alg for alg in result.getCondAlgos() if alg.name == "NswAsBuiltCondAlg"])>0)
+    kwargs.setdefault("MuonDetectorTool", result.popToolsAndMerge(MuonDetectorToolCfg(flags)))
+    
     if flags.IOVDb.DatabaseInstance != 'COMP200' and \
        'HLT' not in flags.IOVDb.GlobalTag and not flags.Common.isOnline:
-        MuonDetectorManagerCond.IsData = False
-    acc.addCondAlgo(MuonDetectorManagerCond)
-    return acc
+        kwargs.setdefault("IsData", False)
+    MuonDetectorManagerCond = CompFactory.MuonDetectorCondAlg(name, **kwargs)
+
+    result.addCondAlgo(MuonDetectorManagerCond, primary = True)
+    return result
 
 
 def MuonGeoModelToolCfg(flags):
@@ -206,10 +222,11 @@ def MuonGeoModelCfg(flags, forceDisableAlignment=False):
         from MuonGeoModelR4.MuonGeoModelConfig import MuonGeoModelCfg as MuonGeoModelCfgR4
         return MuonGeoModelCfgR4(flags)
     
-    acc = MuonGeoModelToolCfg(flags)
+    result = ComponentAccumulator()
+    result.merge(MuonGeoModelToolCfg(flags))
 
     if flags.Muon.enableAlignment and not forceDisableAlignment:
-        acc.merge(MuonDetectorCondAlgCfg(flags))
+        result.merge(MuonDetectorCondAlgCfg(flags))
 
-    acc.merge(MuonIdHelperSvcCfg(flags)) # This line can be removed once the configuration methods for all 258 components which directly use this service are updated!!
-    return acc
+    result.merge(MuonIdHelperSvcCfg(flags)) # This line can be removed once the configuration methods for all 258 components which directly use this service are updated!!
+    return result

@@ -79,7 +79,7 @@ void PadTriggerLogicOfflineTool::fillGeometricInformation(const std::shared_ptr<
 }
 
 ///! helper function: copy pads with a given multiplet
-std::vector<std::shared_ptr<PadData>> filterByMultiplet(const std::vector<std::shared_ptr<PadData>> &pads_in, const int &multiplet){
+std::vector<std::shared_ptr<PadData>> filterByMultiplet(const std::vector<std::shared_ptr<PadData>> &pads_in, const int multiplet){
     std::vector<std::shared_ptr<PadData>> pads_out;
     pads_out.reserve(0.5*pads_in.size()); // educated guess (half inner multiplet, half outer multiplet)
     for(const auto& p : pads_in)
@@ -88,7 +88,7 @@ std::vector<std::shared_ptr<PadData>> filterByMultiplet(const std::vector<std::s
     return pads_out;
 }
 ///! helper function: copy pads with a given gas gap
-std::vector<std::shared_ptr<PadData>> filterByGasGap(const std::vector<std::shared_ptr<PadData>> &pads_in, const int &gasgap){
+std::vector<std::shared_ptr<PadData>> filterByGasGap(const std::vector<std::shared_ptr<PadData>> &pads_in, const int gasgap){
     std::vector<std::shared_ptr<PadData>> pads_out;
     pads_out.reserve(0.25*pads_in.size()); // educated guess (4 gas gaps)
     for(const auto& p : pads_in)
@@ -151,8 +151,8 @@ StatusCode PadTriggerLogicOfflineTool::compute_pad_triggers(const std::vector<st
                       <<", pad eta "<<pad->padEtaId()
                       <<", pad phi "<<pad->padPhiId());
     }
-    for(const size_t &side : SIDES){
-        for(const size_t &sector : SECTORS){
+    for(const size_t side : SIDES){
+        for(const size_t sector : SECTORS){
             std::vector<std::shared_ptr<PadData>> sector_pads;
             std::copy_if(pads.begin(), pads.end(),
                     back_inserter(sector_pads),
@@ -211,7 +211,7 @@ StatusCode PadTriggerLogicOfflineTool::compute_pad_triggers(const std::vector<st
 }
 //------------------------------------------------------------------------------
 
-int PadTriggerLogicOfflineTool::ROI2BandId(const float &EtaTrigAtCenter, const int &SectorType) const {
+int PadTriggerLogicOfflineTool::ROI2BandId(const float EtaTrigAtCenter, const int SectorType) const {
 
     switch(SectorType){
       case(1): //L
@@ -283,7 +283,7 @@ NSWL1::PadTrigger PadTriggerLogicOfflineTool::convert(const SectorTriggerCandida
 
     //************** assign extrema of the trigger region coordinates in eta-phi  and some other variables for offline analysis **************
     std::vector<std::pair<float,float>> trg_etaphis;
-    for(auto v : boost::geometry::exterior_ring(roi)){
+    for(const auto& v : boost::geometry::exterior_ring(roi)){
         const float xcurr=coordinate<0>(v);
         const float ycurr=coordinate<1>(v);
         const float zcurr=zcntr;
@@ -504,7 +504,6 @@ NSWL1::PadTrigger PadTriggerLogicOfflineTool::convert(const SectorTriggerCandida
     }
 
   }
-
 
 
 } // NSWL1

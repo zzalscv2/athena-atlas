@@ -10,6 +10,7 @@
 #include "G4EmParameters.hh"
 #include "G4UImanager.hh"
 #include "G4PhysListFactory.hh"
+#include "G4AntiNeutron.hh"
 
 #include "CLHEP/Units/PhysicalConstants.h"
 
@@ -149,6 +150,11 @@ void PhysicsListSvc::SetPhysicsOptions()
     {
       emp->SetApplyCuts(true);
     }
+
+  if (m_unstableAntiNeutrons) {
+    G4AntiNeutron::Definition()->SetPDGStable(false);
+  }
+
   return;
 }
 

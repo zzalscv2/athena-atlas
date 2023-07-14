@@ -110,7 +110,7 @@ public:
                              const PixelChargeCalibCondData *calibData,
                              const PixelOfflineCalibData *offlineCalibData) const;
 
-  PixelCluster* pixelCluster(const Identifier& clusterID,
+  PixelCluster  pixelCluster(const Identifier& clusterID,
                              const Amg::Vector2D& localPos,
                              const std::vector<Identifier>& rdoList,
                              const int lvl1a,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONPERFORMANCEALG_H
@@ -23,12 +23,13 @@ class MuonPerformanceAlg : public AthAlgorithm {
 public:
     // Algorithm Constructor
     MuonPerformanceAlg(const std::string& name, ISvcLocator* pSvcLocator);
-    ~MuonPerformanceAlg(){};
-
+    virtual ~MuonPerformanceAlg() = default;
     // Gaudi algorithm hooks
-    StatusCode initialize();
-    StatusCode execute();
-    StatusCode finalize();
+    virtual StatusCode initialize() override;
+    virtual StatusCode execute() override;
+    virtual StatusCode finalize() override;
+
+    virtual unsigned int cardinality() const override final { return 1;}
 
     // statistics to be counted
     std::vector<std::string> m_muonLocationList;

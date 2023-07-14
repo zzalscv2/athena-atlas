@@ -68,10 +68,12 @@ namespace InDet {
     // module (with non-empty RDO collection...). 
     // It clusters together the RDOs with a pixell cell side in common.
     // [Implementation of the IPixelClusteringTool interface]
-    virtual PixelClusterCollection* clusterize(const InDetRawDataCollection<PixelRDORawData>& RDOs,
-					       const PixelID& pixelID,
-					       const EventContext& ctx) const override;
-      
+    virtual PixelClusterCollection* clusterize(
+        const InDetRawDataCollection<PixelRDORawData>& RDOs,
+        const PixelID& pixelID, 
+        DataPool<PixelCluster>* dataItemsPool,
+        const EventContext& ctx) const override;
+
     // Once the lists of RDOs which makes up the clusters have been found by the
     // clusterize() method, this method is called for each of these lists.
     // The method computes the local position of the cluster, and create 
@@ -83,17 +85,18 @@ namespace InDet {
     // Input parameters are the list of RDOs identifier of the would-be 
     // cluster, the list of TOT values, the module the cluster belongs to,
     // the pixel helper tool and the number of RDOS of the cluster.
-    PixelCluster* makeCluster(const std::vector<Identifier>& group,
-                              const std::vector<int>& totgroup,
-                              const std::vector<int>& lvl1group,
-                              const InDetDD::SiDetectorElement* element,
-                              const PixelID& pixelID,
-                              int& clusterNumber,
-                              bool split,
-                              double splitProb1,
-                              double splitProb2,
-                              const PixelChargeCalibCondData* calibData,
-                              const PixelOfflineCalibData* offlineCalibData) const;
+    PixelCluster makeCluster(
+        const std::vector<Identifier>& group, 
+        const std::vector<int>& totgroup,
+        const std::vector<int>& lvl1group,
+        const InDetDD::SiDetectorElement* element, 
+        const PixelID& pixelID,
+        int& clusterNumber, 
+        bool split, 
+        double splitProb1, 
+        double splitProb2,
+        const PixelChargeCalibCondData* calibData,
+        const PixelOfflineCalibData* offlineCalibData) const;
 
     ///Retrieve the necessary services in initialize                
     virtual StatusCode initialize() override;

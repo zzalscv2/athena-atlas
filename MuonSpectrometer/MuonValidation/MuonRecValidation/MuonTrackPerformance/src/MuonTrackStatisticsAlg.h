@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTRACKSTATISTICSALG_MUONTRACKSTATISTICSALG_H
@@ -20,16 +20,19 @@ class MuonTrackStatisticsAlg : public AthAlgorithm {
 public:
     // Algorithm Constructor
     MuonTrackStatisticsAlg(const std::string &name, ISvcLocator *pSvcLocator);
-    ~MuonTrackStatisticsAlg(){};
+    virtual ~MuonTrackStatisticsAlg();
 
     // Gaudi algorithm hooks
-    StatusCode initialize();
-    StatusCode execute();
-    StatusCode finalize();
+    virtual StatusCode initialize() override;
+    virtual StatusCode execute() override;
+    virtual StatusCode finalize() override;
+
+    virtual unsigned int cardinality() const override final { return 1;}
 
 private:
-    // ServiceHandle<Muon::IMuonEDMHelperSvc>   m_edmHelperSvc;
-    ToolHandle<MuonTrackStatisticsTool> m_statisticsTool;
+    ToolHandle<MuonTrackStatisticsTool> m_statisticsTool{this, "StatTool", "" };
+
+
 
     /** name of external file to write statistics */
     std::string m_fileName;

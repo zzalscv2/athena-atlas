@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1NSWSimTools/SingleWedgePadTrigger.h"
@@ -77,7 +77,7 @@ namespace NSWL1{
 
 
 
-    bool SingleWedgePadTrigger::isInTransitionRegion(std::pair<double,double> Zratio) const{
+    bool SingleWedgePadTrigger::isInTransitionRegion(const std::pair<double,double>& Zratio) const{
         Polygon ROI=padOverlap3(this->pads());
         if(area(ROI)==0) return false;
         float phi0=m_pads[0]->sectorType()==1 ? (M_PI/4)*(m_pads[0]->sectorId()-1) : (M_PI/8)+(M_PI/4)*(m_pads[0]->sectorId()-1);

@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include "TrigT1NSWSimTools/MMT_Diamond.h"
 
 MMT_Diamond::MMT_Diamond(const MuonGM::MuonDetectorManager* detManager): AthMessaging(Athena::getMessageSvc(), "MMT_Diamond") {
@@ -237,7 +241,7 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const int event) {
   ATH_MSG_DEBUG("Processing roads took " << std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count() << " ms");
 }
 
-double MMT_Diamond::phiShift(const int n, const double &phi, const char &side) const {
+double MMT_Diamond::phiShift(const int n, const double phi, const char side) const {
   double Phi = (side == 'A') ? phi : -phi;
   double shift = (n > 8) ? (16-n)*M_PI/8. : n*M_PI/8.;
   if (n < 8)       return (Phi + shift);

@@ -28,8 +28,7 @@ namespace MuonGM {
 
         void ProcessTGCreadout(MYSQL& mysql);
         void ProcessCscInternalAlignments();
-        std::string TGCreadoutName(int ichtyp);
-        void ProcessMdtAsBuiltParams();
+        std::string TGCreadoutName(int ichtyp);    
 
       private:
         void ProcessTechnologies(MYSQL& mysql);

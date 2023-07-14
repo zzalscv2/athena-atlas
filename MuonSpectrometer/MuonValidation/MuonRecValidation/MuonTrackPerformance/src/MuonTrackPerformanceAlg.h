@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTRACKPERFORMANCEALG_H
@@ -180,9 +180,11 @@ public:
 public:
     virtual ~MuonTrackPerformanceAlg();
 
-    virtual StatusCode initialize();
-    virtual StatusCode execute();
-    virtual StatusCode finalize();
+    virtual StatusCode initialize() override;
+    virtual StatusCode execute() override;
+    virtual StatusCode finalize() override;
+
+    virtual unsigned int cardinality() const override final { return 1;}
 
 private:
     void extractEtaPhiCounts(const std::set<Identifier>& ids, int& neta, int& nphi, int& netaCh, int& nphiCh) const;
@@ -282,11 +284,15 @@ private:
     bool m_doStau{};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-    ToolHandle<Muon::MuonEDMPrinterTool> m_printer;
+    
+    ToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "Printer", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
+
     ServiceHandle<Muon::IMuonEDMHelperSvc> m_edmHelperSvc{this, "edmHelper", "Muon::MuonEDMHelperSvc/MuonEDMHelperSvc",
                                                           "Handle to the service providing the IMuonEDMHelperSvc interface"};
-    ToolHandle<Muon::IMuonTrackTruthTool> m_truthTool;
-    ToolHandle<Trk::ITrackSummaryHelperTool> m_summaryHelperTool;
+    
+    
+    ToolHandle<Muon::IMuonTrackTruthTool> m_truthTool{this, "TrackTruthTool",""};
+    ToolHandle<Trk::ITrackSummaryHelperTool> m_summaryHelperTool{this, "SummaryHelperTool", ""};
     int m_doEventListMissed{};
     int m_doEventListIncomplete{};
     int m_doEventListFake{};

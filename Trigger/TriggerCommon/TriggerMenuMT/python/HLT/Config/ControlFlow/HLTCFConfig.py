@@ -213,7 +213,7 @@ def makeHLTTree(flags, newJO=False, hltMenuConfig = None):
                 # Add stream filter to EndOfEventFilterAlg
                 # Only accept events going to streams that already do full calo reco
                 # CosmicCalo explicitly requested [ATR-26096]
-                endOfEventFilterAlg.StreamFilter = ['Main','VBFDelayed','PhysicsTLA','CosmicCalo']
+                endOfEventFilterAlg.StreamFilter = ['Main','VBFDelayed','TLA','TLAJetPEB','CosmicCalo']
 
                 from TriggerMenuMT.HLT.CalibCosmicMon.CalibChainConfiguration import getLArNoiseBurstRecoSequence
                 recoSeq = getLArNoiseBurstRecoSequence(flags)

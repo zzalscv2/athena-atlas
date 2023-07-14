@@ -1,5 +1,5 @@
 /*
-  copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -70,17 +70,17 @@ namespace InDet {
   // cluster, the list of TOT values, the module the cluster belongs to,
   // the pixel helper tool and the number of RDOS of the cluster.
   
-  PixelCluster* MergedPixelsTool::makeCluster (const std::vector<Identifier>& group,
-                                               const std::vector<int>& totgroup,
-                                               const std::vector<int>& lvl1group,
-                                               const InDetDD::SiDetectorElement* element,
-                                               const PixelID& pixelID,
-                                               int& clusterNumber,
-                                               bool split,
-                                               double splitProb1,
-                                               double splitProb2,
-                                               const PixelChargeCalibCondData* calibData,
-                                               const PixelOfflineCalibData* offlineCalibData) const
+  PixelCluster MergedPixelsTool::makeCluster (const std::vector<Identifier>& group,
+                                              const std::vector<int>& totgroup,
+                                              const std::vector<int>& lvl1group,
+                                              const InDetDD::SiDetectorElement* element,
+                                              const PixelID& pixelID,
+                                              int& clusterNumber,
+                                              bool split,
+                                              double splitProb1,
+                                              double splitProb2,
+                                              const PixelChargeCalibCondData* calibData,
+                                              const PixelOfflineCalibData* offlineCalibData) const
   {
       ATH_MSG_VERBOSE("makeCluster called, number " << clusterNumber);
   
@@ -88,8 +88,7 @@ namespace InDet {
       const InDetDD::PixelModuleDesign* design
           (dynamic_cast<const InDetDD::PixelModuleDesign*>(&element->design()));
       if (not design){
-        ATH_MSG_ERROR("Dynamic cast failed at "<<__LINE__<<" of MergedPixelsTool.");
-        return nullptr;
+        throw std::runtime_error( "Wrong design at MergedPixelsTool");
       }
       int rowMin = int(2*(design->width()/design->phiPitch()))+1;
       int rowMax = 0;
@@ -248,48 +247,36 @@ namespace InDet {
       ATH_MSG_VERBOSE("Cluster local position (eta,phi) = " 
           << (position)[0] << " " 
           << (position)[1]);
-  
-      if(!m_clusterMaker){
-        PixelCluster* cluster = new PixelCluster(
-          id, position, DVid, lvl1min, totgroup, siWidth, element, {});
-        return cluster;
+
+      if (!m_clusterMaker) {
+        return PixelCluster(id, position, DVid, lvl1min, totgroup, siWidth,
+                            element, Amg::MatrixX{});
       } else {
-        ATH_MSG_VERBOSE("Cluster omega old = " << etaRow <<  " " << etaCol);       
-        PixelCluster* cluster = m_clusterMaker->pixelCluster(id,
-                                                             position,
-                                                             DVid,
-                                                             lvl1min,
-                                                             totgroup,
-                                                             siWidth,
-                                                             element,
-                                                             hasGanged,
-                                                             m_errorStrategy,
-                                                             pixelID,
-                                                             split,
-                                                             splitProb1,
-                                                             splitProb2,
-                                                             calibData,
-                                                             offlineCalibData);
-          return cluster;
+        return m_clusterMaker->pixelCluster(
+            id, position, DVid, lvl1min, totgroup, siWidth, element, hasGanged,
+            m_errorStrategy, pixelID, split, splitProb1, splitProb2, calibData,
+            offlineCalibData);
       }
   }
-  
 
   //-----------------------------------------------------------------------
   // Runs for every pixel module (with non-empty RDO collection...). 
   // It clusters together the RDOs with a pixell cell side in common
   // using connected component analysis based on four-cell 
   // or eight-cell (if m_addCorners == true) connectivity
-  PixelClusterCollection*  MergedPixelsTool::clusterize(const InDetRawDataCollection<PixelRDORawData> &collection,
-							const PixelID& pixelID,
-							const EventContext& ctx) const {
+  PixelClusterCollection* MergedPixelsTool::clusterize(
+      const InDetRawDataCollection<PixelRDORawData>& collection,
+      const PixelID& pixelID, 
+      DataPool<PixelCluster>* dataItemsPool,
+      const EventContext& ctx) const {
 
-      const InDetDD::SiDetectorElement* element = m_pixelRDOTool->checkCollection(collection, ctx);
-    if (element == nullptr)
+    const InDetDD::SiDetectorElement* element = m_pixelRDOTool->checkCollection(collection, ctx);
+    if (element == nullptr){
       return nullptr;
+    }
     
     std::vector<UnpackedPixelRDO> collectionID =
-	m_pixelRDOTool->getUnpackedPixelRDOs(collection, pixelID, element, ctx);
+      m_pixelRDOTool->getUnpackedPixelRDOs(collection, pixelID, element, ctx);
     
     // Sort pixels in ascending columns order
     // 
@@ -390,6 +377,9 @@ namespace InDet {
     const Identifier elementID = collection.identify();
     const IdentifierHash idHash = collection.identifyHash();
     PixelClusterCollection  *clusterCollection = new PixelClusterCollection(idHash);
+    if(dataItemsPool){
+      clusterCollection->clear(SG::VIEW_ELEMENTS);
+    }
     clusterCollection->setIdentifier(elementID);
     clusterCollection->reserve(Ncluster);
 
@@ -420,39 +410,38 @@ namespace InDet {
     }
 
     for(int i=1; i<=collectionSize; ++i) {
-
       if(i!=collectionSize and collectionID.at(i).NCL==NCL0) {
         DVid.push_back(collectionID.at(i).ID );
         Totg.push_back(collectionID.at(i).TOT);
         Lvl1.push_back(collectionID.at(i).LVL1);
       
       } else {
-        
         // Cluster production
-        ++m_processedClusters;
-        PixelCluster* cluster = makeCluster(DVid,
-                                            Totg,
-                                            Lvl1,
-                                            element,
-                                            pixelID,
-                                            ++clusterNumber,
-                                            false,
-                                            0.0,
-                                            0.0,
-                                            calibData,
-                                            offlineCalibData);
-        
         // no merging has been done;
-        if (cluster) { 
-          // statistics output
-          cluster->setHashAndIndex(clusterCollection->identifyHash(), clusterCollection->size());
-          clusterCollection->push_back(cluster);
-        }      
-        
+        ++m_processedClusters;
+        PixelCluster* cluster = nullptr;
+        if (dataItemsPool) {
+          // data Item pool owns the element. The collection
+          // is view. Just move assign to it.
+          cluster = dataItemsPool->nextElementPtr();
+          (*cluster) =
+              makeCluster(DVid, Totg, Lvl1, element, pixelID, ++clusterNumber,
+                          false, 0.0, 0.0, calibData, offlineCalibData);
+        } else {
+          // collection will own the element release
+          cluster = new PixelCluster();
+          (*cluster) =
+              makeCluster(DVid, Totg, Lvl1, element, pixelID, ++clusterNumber,
+                          false, 0.0, 0.0, calibData, offlineCalibData);
+        }
+        // statistics output
+        cluster->setHashAndIndex(clusterCollection->identifyHash(),
+                                 clusterCollection->size());
+        clusterCollection->push_back(cluster);
         
         // Preparation for next cluster
         if (i!=collectionSize) {
-          NCL0   = collectionID.at(i).NCL                     ;
+          NCL0   = collectionID.at(i).NCL ;
           DVid.clear(); DVid = {collectionID.at(i).ID };
           Totg.clear(); Totg = {collectionID.at(i).TOT};
           Lvl1.clear(); Lvl1 = {collectionID.at(i).LVL1};
@@ -463,7 +452,6 @@ namespace InDet {
     return clusterCollection;
   }
 
-  
   void MergedPixelsTool::addClusterNumber(const int& r, 
                                           const int& Ncluster,
                                           const std::vector<network>& connections,                                         
@@ -476,6 +464,4 @@ namespace InDet {
       }
     }
   }
-  
 }
-//----------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Athena/Gaudi includes
@@ -29,7 +29,7 @@ namespace NSWL1 {
       m_mmcandidate_cache_runNumber(-1),
       m_mmcandidate_cache_eventNumber(-1),
       m_doNtuple(false),
-      m_tree(0)
+      m_tree(nullptr)
 
     {
       memset (m_mmcandidate_cache_status,CLEARED,sizeof(cStatus));
@@ -73,7 +73,7 @@ namespace NSWL1 {
         memset(ntuple_name,'\0',40*sizeof(char));
         sprintf(ntuple_name,"%sTree",algo_name.c_str());
 
-        m_tree = 0;
+        m_tree = nullptr;
         sc = tHistSvc->getTree(ntuple_name,m_tree);
         if (sc.isFailure()) {
           this->clear_ntuple_variables();
@@ -137,7 +137,7 @@ namespace NSWL1 {
 
     void MMFPGAOfflineTool::reset_ntuple_variables() {
       // if ntuple is not booked nothing to do
-      if ( m_tree==0 ) return;
+      if ( m_tree==nullptr ) return;
 
       //reset the ntuple variables
       m_nMMCandidates = 0;

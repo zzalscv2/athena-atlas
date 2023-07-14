@@ -10,7 +10,7 @@ atlas_subdir( MuonReadoutGeometry )
 # Extra dependencies, based on the environment (no MuonCondSvc needed in AthSimulation):
 set( extra_libs )
 if( NOT SIMULATIONBASE )
-  set( extra_libs MuonCondSvcLib MuonNSWAsBuilt  )
+  set( extra_libs MuonCondSvcLib )
 endif()
 
 # External dependencies:

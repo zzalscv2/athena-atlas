@@ -1,9 +1,8 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
-def getPhysicsTriggerVariablePlotsCfg():
+def getPhysicsTriggerVariablePlotsCfg(flags):
 
     from AthenaCommon.Constants import INFO
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
     from FlavourTaggingTests.histoConfigurationWrapper import getHistoDefs
 
     # Chains we want to run over. To find out all available chains, run code ones and see printout in finalize step.
@@ -23,7 +22,7 @@ def getPhysicsTriggerVariablePlotsCfg():
     output = ComponentAccumulator()
 
     from AthenaMonitoring.TriggerInterface import TrigDecisionToolCfg
-    output.merge(TrigDecisionToolCfg(ConfigFlags))
+    output.merge(TrigDecisionToolCfg(flags))
 
     options = {}
     options['name'] = 'PhysicsTriggerVariablePlotsAlg'
