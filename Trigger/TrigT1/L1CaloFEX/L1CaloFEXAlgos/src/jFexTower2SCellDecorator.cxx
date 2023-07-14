@@ -194,8 +194,15 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
             for(const auto& tmpet : scEt){
                 tmpSCellEt += tmpet;
             }
+            
+            //How many SCell are masked? if all then send invalid code
+            unsigned int count_scMask =0;
+            for(const auto& masked : scMask){
+                if(masked) count_scMask++;
+            }
+            
             SCellEt = tmpSCellEt;
-            jFexEtencoded = jFEXCompression::Compress( tmpSCellEt );
+            jFexEtencoded = jFEXCompression::Compress( tmpSCellEt, count_scMask == scMask.size() ? true : false );
             jFexEt        = jFEXCompression::Expand( jTower->jTowerEt() );
         }
         else if(source == 1){

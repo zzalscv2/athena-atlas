@@ -135,6 +135,7 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
             }
         
             float Total_Et = 0;
+            unsigned int countMasked = 0;
             for (auto const& SCellID : it_TTower2SCells->second ) {
                 
                 //check that the SCell Identifier exists in the map
@@ -150,6 +151,7 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
                 if( (myCell->provenance() >> 7 & 0x1) and m_apply_masking ) {
                     //if masked then Et = 0
                     et = 0.0;
+                    countMasked++;
                 }
                 
                 if(myCell->quality() == 1){
@@ -160,7 +162,7 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
                 
             }      
             
-            Total_Et_encoded = jFEXCompression::Compress( Total_Et ); 
+            Total_Et_encoded = jFEXCompression::Compress( Total_Et, countMasked == (it_TTower2SCells->second).size() ? true : false ); 
             
         }
         else{

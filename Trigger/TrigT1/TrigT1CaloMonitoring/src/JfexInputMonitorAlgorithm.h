@@ -39,6 +39,7 @@ class JfexInputMonitorAlgorithm : public AthMonitorAlgorithm {
 
 
         unsigned int m_InvalidCode = 4095;
+        unsigned int m_EmptyCode = 0;
 
         int codedVal(int, int) const;
 
