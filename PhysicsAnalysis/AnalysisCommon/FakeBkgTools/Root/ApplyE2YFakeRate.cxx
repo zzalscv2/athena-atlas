@@ -58,6 +58,8 @@ StatusCode ApplyE2YFakeRate::getEventWeightCustom(
   // m_e2y_option == 1: Apply the electron to photon fake rate
   // m_e2y_option == 0: Apply the electron to photon fake rate scale factor
   // In general, we could only condider one electron fake a photon.
+  // the rate of electron wrongly reconstructed rate and idenified as photon:f = N_y^{reco}/N_e^{true}.
+  // the fake rate is defined:F = N_y^{reco}/N^_e{reco} = f/(1-f)
 
   for(size_t i=0;i<nc;i++){ 
 
@@ -65,30 +67,30 @@ StatusCode ApplyE2YFakeRate::getEventWeightCustom(
       // FF, FR, RF, RR
       // if we want to calculate the weight with process = "1F"
       // the accepted process : FR, RF
-      // weight = eff1*(1-eff2) + (1-eff1)*eff2
-      // dev[0] = 1-2*eff2, dev[1] = 1-2*eff1
-      // unc = dev[0]*unc1 + dev[1]*unc2
+      // weight = F1 + F2
+      // dev[0] = 1, dev[1] = 1
+      // unc = unc1 + unc2
 
       FSBitset reals(i);
       if(!fs.accept_process(n, reals, tights)) continue;
       double wei = 1.;
       for(size_t j=0;j<n;j++){
           if(m_e2y_option == 1 && m_particles[j].type == xAOD::Type::Electron){
-              double x = reals[j]? 1-m_particles[j].fake_efficiency.nominal : m_particles[j].fake_efficiency.nominal;
+              double x = reals[j]? 1 : m_particles[j].fake_factor.nominal;
               wei *= x;
-              double theta = reals[j]? -1 : 1;
+              double theta = reals[j]? 0 : 1;
               for(size_t k=0;k<n;k++){
-                  if(k != j) theta *= reals[k]? 1-m_particles[k].fake_efficiency.nominal : m_particles[k].fake_efficiency.nominal;
+                  if(k != j) theta *= reals[k]? 1 : m_particles[k].fake_factor.nominal;
               }
               dev[j] += theta;
           }
           else if(m_e2y_option == 0 && m_particles[j].type == xAOD::Type::Photon){
               if(reals.count() == 0){  //only consider case all photons are from the electron fake
-                  double x = m_particles[j].fake_efficiency.nominal;
+                  double x = m_particles[j].fake_factor.nominal;
                   wei *= x;
                   double theta = 1.;
                   for(size_t k=0;k<n;k++){
-                      if(k != j) theta *= m_particles[k].fake_efficiency.nominal;
+                      if(k != j) theta *= m_particles[k].fake_factor.nominal;
                   }
                   dev[j] += theta;
               }
@@ -107,7 +109,7 @@ StatusCode ApplyE2YFakeRate::getEventWeightCustom(
         
   }
   for(size_t i=0;i<n;i++){
-      for(auto const &kv :m_particles[i].fake_efficiency.uncertainties){
+      for(auto const &kv :m_particles[i].fake_factor.uncertainties){
           auto & uncertainties = weight.uncertainties[kv.first];
           uncertainties.up += dev[i] * kv.second.up;
           uncertainties.down += dev[i] * kv.second.down;
