@@ -54,6 +54,8 @@ namespace MC
             (status == 2 && (!vertex || HepMC::is_simulation_vertex(vertex))));
   }
 
+  template <class T> inline bool isZeroEnergyPhoton(const T&  p) { return isPhoton(p->pdg_id()) && p->e() == 0;}
+
   template <class T> inline bool jettruthparticleselectortool_isStable( const T& p) {
     if (HepMC::is_simulation_particle(p)) return false; // This particle is from G4
     if (p->pdg_id() == 21 && p->p4().E() == 0) return false; //< Workaround for a gen bug?

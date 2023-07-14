@@ -128,7 +128,7 @@ namespace DerivationFramework {
     for (const auto tp : *tpc){
       int pdgid = tp->pdgId();
       if (HepMC::is_simulation_particle(tp)) continue; // Particle is from G4
-      if (pdgid==21 && tp->e()==0) continue; // Work around for an old generator bug
+      if (MC::isZeroEnergyPhoton(tp)) continue; // Work around for an old generator bug
       if ( !MC::isStable(tp) ) continue; // Stable!
 
       if ((std::abs(pdgid)==11 || std::abs(pdgid)==13) && tp->pt()>m_MinLepPt && std::fabs(tp->eta())<m_MaxLepEta) {

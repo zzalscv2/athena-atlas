@@ -52,7 +52,7 @@ bool CopyTruthJetParticles::classifyJetInput(const xAOD::TruthParticle* tp,
   //  First block is largely copied from isGenStable, which works on HepMC only
   if (HepMC::is_simulation_particle(tp)) return false; // Particle is from G4
   int pdgid = tp->pdgId();
-  if (pdgid==21 && tp->e()==0) return false; // Work around for an old generator bug
+  if (MC::isZeroEnergyPhoton(tp)) return false; // Work around for an old generator bug
 
   // -- changed for dark jet clustering -- //
   if ( tp->status() != 1 && !m_includeDark ) return false; // dark hadrons will not be status 1
