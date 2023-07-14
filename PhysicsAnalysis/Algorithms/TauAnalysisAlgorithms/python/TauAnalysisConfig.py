@@ -51,7 +51,6 @@ class TauCalibrationConfig (ConfigBlock):
 
 
 
-
 class TauWorkingPointConfig (ConfigBlock) :
     """the ConfigBlock for the tau working point
 
@@ -65,6 +64,23 @@ class TauWorkingPointConfig (ConfigBlock) :
         self.addOption ('quality', None, type=str)
         self.addOption ('legacyRecommendations', False, type=bool)
 
+    def createCommonSelectionTool (self, config, tauSelectionAlg, configPath, postfix) :
+
+        # This should eventually be fixed in the TauEfficiencyCorrectionsTool directly...
+        # ---
+        # Create two instances of TauSelectionTool, one public and one private.
+        # Both should share the same configuration options.
+        # We attach the private tool to the CP::AsgSelectionAlg for tau selection,
+        # and the public one is returned, to be retrieved later by TauEfficiencyCorrectionsTool.
+
+        config.addPrivateTool( 'selectionTool', 'TauAnalysisTools::TauSelectionTool' )
+        tauSelectionAlg.selectionTool.ConfigPath = configPath
+
+        publicTool = config.createPublicTool( 'TauAnalysisTools::TauSelectionTool',
+                                              'TauSelectionTool' + postfix)
+        publicTool.ConfigPath = configPath
+
+        return publicTool
 
     def makeAlgs (self, config) :
 
@@ -88,15 +104,9 @@ class TauWorkingPointConfig (ConfigBlock) :
                               "VeryLoose, NoID, Baseline")
         inputfile = nameFormat.format(self.quality.lower())
 
-        # Setup the tau selection tool: common for both the selection algorithm
-        # and the efficiency corrections tool (scale factors)
-        selectionTool = config.createPublicTool( 'TauAnalysisTools::TauSelectionTool',
-                                                 'TauSelectionTool' + postfix)
-        selectionTool.ConfigPath = inputfile
-
         # Set up the algorithm selecting taus:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'TauSelectionAlg' + postfix )
-        alg.selectionToolByName = selectionTool.getName()
+        selectionTool = self.createCommonSelectionTool(config, alg, inputfile, postfix)
         alg.selectionDecoration = 'selected_tau' + selectionPostfix + ',as_bits'
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
@@ -127,9 +137,6 @@ class TauWorkingPointConfig (ConfigBlock) :
             alg.taus = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'effSF' + postfix)
-
-
-
 
 
 def makeTauCalibrationConfig( seq, containerName, postfix = None,
