@@ -27,6 +27,7 @@ namespace MC
 
   template <class T> inline bool isDecayed(const T& p)  { return p->status() == 2;}
   template <class T> inline bool isStable(const T& p)   { return p->status() == 1;}
+  template <class T> inline bool isFinalState(const T& p)   { return p->status() == 1 && !p->end_vertex();}
   template <class T> inline bool isPhysical(const T& p) { return isStable<T>(p) || isDecayed<T>(p); }
   template <class T> inline bool isPhysicalHadron(const T& p) { return isHadron(p->pdg_id()) && isPhysical<T>(p);}
 
