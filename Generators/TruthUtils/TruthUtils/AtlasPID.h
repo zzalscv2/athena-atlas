@@ -19,6 +19,7 @@ inline DecodedPID(const int& p){
     for(; ap; ap/=10) this->second.push_back( ap%10 );
     std::reverse(this->second.begin(), this->second.end());
   }
+  inline DecodedPID shift(const size_t n) const { return DecodedPID(this->first%int(std::pow(10,ndigits()-n)));}
   inline const int& operator()(const size_t n) const { return this->second.at(n);}
   inline const int& last() const { return this->second.back();}
   inline const int& pid() const { return this->first;}
@@ -50,7 +51,7 @@ static const int BQUARK = 5;
 static const int TQUARK = 6;
 
 static const int ELECTRON = 11;
-static const int POSITRON = -11;
+static const int POSITRON = -ELECTRON;
 static const int NU_E = 12;
 static const int MUON = 13;
 static const int NU_MU = 14;
@@ -66,7 +67,7 @@ static const int GRAVITON = 39;
 static const int LEPTOQUARK = 42;
 
 static const int PIPLUS = 211;
-static const int PIMINUS = -211;
+static const int PIMINUS = -PIPLUS;
 static const int KPLUS = 321;
 static const int PI0 = 111;
 static const int K0L = 130;
@@ -109,52 +110,54 @@ static const int GEANTINO0 = 999;
 /// respectively; to dothis they are first ordered by family and within 
 /// families by weak isospin.
 /// APID: the fourth generation quarks are quarks.
-template<class T> inline bool isQuark(const T& p);
+template<class T> inline bool isQuark(const T& p) {return isQuark(p->pdg_id());}
 template<> inline bool isQuark(const int& p) { return p != 0 && std::abs(p) <= 8;}
+template<> inline bool isQuark(const DecodedPID& p){ return isQuark(p.pid()); }
 
-template<class T> inline bool isStrange(const T& p);
+template<class T> inline bool isStrange(const T& p) {return isStrange(p->pdg_id());}
 template<> inline bool isStrange(const int& p){ return std::abs(p) == 3;}
 
-template<class T> inline bool isCharm(const T& p);
+template<class T> inline bool isCharm(const T& p){return isCharm(p->pdg_id());}
 template<> inline bool isCharm(const int& p){ return std::abs(p) == 4;}
 
-template<class T> inline bool isBottom(const T& p);
+template<class T> inline bool isBottom(const T& p){return isBottom(p->pdg_id());}
 template<> inline bool isBottom(const int& p){ return std::abs(p) == 5;}
 
-template<class T> inline bool isTop(const T& p);
+template<class T> inline bool isTop(const T& p){return isTop(p->pdg_id());}
 template<> inline bool isTop(const int& p){ return std::abs(p) == 6;}
 
 /// APID: the fourth generation leptons are leptons.
-template<class T> inline bool isLepton(const T& p);
+template<class T> inline bool isLepton(const T& p){return isLepton(p->pdg_id());}
 template<> inline bool isLepton(const int& p){ auto sp = std::abs(p); return sp >= 11 && sp <= 18; }
+template<> inline bool isLepton(const DecodedPID& p){ return isLepton(p.pid()); }
 
 /// APID: the fourth generation leptons are leptons.
-template<class T> inline bool isChLepton(const T& p);
+template<class T> inline bool isChLepton(const T& p){return isChLepton(p->pdg_id());}
 template<> inline bool isChLepton(const int& p){ auto sp = std::abs(p); return sp >= 11 && sp <= 18 && sp%2 == 1; }
 
-template<class T> inline bool isElectron(const T& p);
+template<class T> inline bool isElectron(const T& p){return isElectron(p->pdg_id());}
 template<> inline bool isElectron(const int& p){ return std::abs(p) == ELECTRON;}
 
-template<class T> inline bool isMuon(const T& p);
+template<class T> inline bool isMuon(const T& p){return isMuon(p->pdg_id());}
 template<> inline bool isMuon(const int& p){ return std::abs(p) == MUON;}
 
-template<class T> inline bool isTau(const T& p);
+template<class T> inline bool isTau(const T& p){return isTau(p->pdg_id());}
 template<> inline bool isTau(const int& p){ return std::abs(p) == TAU;}
 
 /// APID: the fourth generation neutrinos are neutrinos.
-template<class T> inline bool isNeutrino(const T& p);
+template<class T> inline bool isNeutrino(const T& p){return isNeutrino(p->pdg_id());}
 template<> inline bool isNeutrino(const int& p){ auto sp = std::abs(p); return sp == 12 || sp == 14 || sp == 16|| sp == 18;  }
 
-template<class T> inline bool isGluon(const T& p);
+template<class T> inline bool isGluon(const T& p){return isGluon(p->pdg_id());}
 template<> inline bool isGluon(const int& p){ return p == GLUON; }
 
-template<class T> inline bool isPhoton(const T& p);
+template<class T> inline bool isPhoton(const T& p){return isPhoton(p->pdg_id());}
 template<> inline bool isPhoton(const int& p){ return p == PHOTON; }
 
-template<class T> inline bool isZ(const T& p);
+template<class T> inline bool isZ(const T& p){return isZ(p->pdg_id());}
 template<> inline bool isZ(const int& p){ return p == Z0BOSON; }
 
-template<class T> inline bool isW(const T& p);
+template<class T> inline bool isW(const T& p){return isW(p->pdg_id());}
 template<> inline bool isW(const int& p){ return std::abs(p) == WPLUSBOSON; }
 
 /// PDG rule 11j:
@@ -167,41 +170,42 @@ template<> inline bool isW(const int& p){ return std::abs(p) == WPLUSBOSON; }
 /// codes 54 and 55 for spin 0 or 1 ones. Separate antiparticles, with negativecodes, 
 /// may or may not exist. More elaborate new scenarios should be constructed with n= 5 and nr = 9.
 /// APID: Only the 51-60 range is considered DM. The antiparticles are assumed to be existing.
-template<class T> inline bool isDM(const T& p);
+template<class T> inline bool isDM(const T& p){return isDM(p->pdg_id());}
 template<> inline bool isDM(const int& p){ auto sp = std::abs(p); return sp >= 51 && sp <= 60; }
 
 /// PDG rule 8:
 /// The pomeron and odderon trajectories and a generic reggeon trajectory
 /// of states in QCD areassigned codes 990, 9990, and 110 respectively
-template<class T> inline bool isTrajectory(const T& p);
+template<class T> inline bool isTrajectory(const T& p){return isTrajectory(p->pdg_id());}
 template<> inline bool isTrajectory(const int& p){ return std::abs(p) == POMERON || std::abs(p) == ODDERON || std::abs(p) == REGGEON; }
 
 /// APID: HIGGS boson is only one particle.
-template<class T> inline bool isHiggs(const T& p);
+template<class T> inline bool isHiggs(const T& p){return isHiggs(p->pdg_id());}
 template<> inline bool isHiggs(const int& p){ return p == HIGGSBOSON; }
 
 template<class T> inline bool isResonance(const T& p) { return isZ(p)||isW(p)||isHiggs(p)||isTop(p); }
 
-template<class T> inline bool isGraviton(const T& p);
+template<class T> inline bool isGraviton(const T& p) {return isGraviton(p->pdg_id());}
 template<> inline bool isGraviton(const int& p){ return p == 39; }
 
-template<class T> inline bool isLeptoQuark(const T& p);
+template<class T> inline bool isLeptoQuark(const T& p){return isLeptoQuark(p->pdg_id());}
 template<> inline bool isLeptoQuark(const int& p){ return std::abs(p) == LEPTOQUARK; }
 
-template<class T> inline bool isSUSY(const T& p);
-template<class T> inline bool isDiquark(const T& p);
-template<class T> inline bool isHadron(const T& p);
-template<class T> inline bool isMeson(const T& p);
-template<class T> inline bool isBaryon(const T& p);
-template<class T> inline bool isTetraquark(const T& p);
-template<class T> inline bool isPentaquark(const T& p);
-template<class T> inline bool isNucleus(const T& p);
-template<class T> inline bool isBSM(const T& p);
-template<class T> inline bool isValid(const T& p);
-template<class T> inline bool isTransportable(const T& p);
-template<class T> inline bool isGenSpecific(const T& p);
-template<class T> inline bool isGeantino(const T& p);
-template<class T> inline bool isPythia8Specific(const T& p);
+template<class T> inline bool isSUSY(const T& p){return isSUSY(p->pdg_id());}
+template<class T> inline bool isDiquark(const T& p){return isDiquark(p->pdg_id());}
+template<class T> inline bool isHadron(const T& p){return isHadron(p->pdg_id());}
+template<class T> inline bool isMeson(const T& p){return isMeson(p->pdg_id());}
+template<class T> inline bool isBaryon(const T& p){return isBaryon(p->pdg_id());}
+template<class T> inline bool isTetraquark(const T& p){return isTetraquark(p->pdg_id());}
+template<class T> inline bool isPentaquark(const T& p){return isPentaquark(p->pdg_id());}
+template<class T> inline bool isNucleus(const T& p){return isNucleus(p->pdg_id());}
+template<class T> inline bool isBSM(const T& p){return isBSM(p->pdg_id());}
+template<class T> inline bool isValid(const T& p){return isValid(p->pdg_id());}
+template<> inline bool isValid(const DecodedPID& p);
+template<class T> inline bool isTransportable(const T& p){return isTransportable(p->pdg_id());}
+template<class T> inline bool isGenSpecific(const T& p){return isGenSpecific(p->pdg_id());}
+template<class T> inline bool isGeantino(const T& p){return isGeantino(p->pdg_id());}
+template<class T> inline bool isPythia8Specific(const T& p){return isPythia8Specific(p->pdg_id());}
 template<> inline bool isPythia8Specific(const DecodedPID& p){ return (p(0) == 9 && p(1) == 9 && p.ndigits() == 7 );}
 /// Main Table
 /// for MC internal use 81–100,901–930,998-999,1901–1930,2901–2930, and 3901–3930
@@ -215,11 +219,15 @@ template<> inline bool isGenSpecific(const int& p){
   return false; 
 }
 
-template<> inline bool isGeantino(const int& p){ 
-  return (std::abs(p) ==  GEANTINO0 || std::abs(p) ==  GEANTINOPLUS);
-}
+template<> inline bool isGeantino(const int& p){ return (std::abs(p) ==  GEANTINO0 || std::abs(p) ==  GEANTINOPLUS);}
 
-template<> inline bool isSUSY(const DecodedPID& p){return (p.ndigits() == 7 &&  p(0) != 9 );}
+/// PDG rule 11d
+/// Fundamental supersymmetric particles are identified by adding a nonzeronto the par-ticle number. T
+/// he superpartner of a boson or a left-handed fermion hasn= 1whilethe superpartner of a right-handed fermion hasn= 2. 
+/// When mixing occurs, such asbetween the winos and charged Higgsinos to give charginos, or between left and rightsfermions, 
+/// the lighter physical state is given the smaller basis state number.
+template<> inline bool isSUSY(const DecodedPID& p){return (p.ndigits() == 7 && (p(0) == 1 || p(0) == 2 ) && isValid(p.shift(2)));}
+
 /// PDG rule 4
 /// Diquarks have 4-digit numbers with nq1 >= nq2 and nq3 = 0
 /// APID: the diquarks with top or fourth generation are not diquarks
@@ -301,6 +309,7 @@ template<> inline bool isBaryon(const DecodedPID& p){
 ///In the particle the first four are quarks and the fifth an antiquark while t
 /// heopposite holds in the antiparticle, which is given with a negative sign. 
 ///Thenr,nL, andnJnumbers have the same meaning as for ordinary hadrons.
+
 template<> inline bool isPentaquark(const DecodedPID& p){
   return (p.ndigits() == 9 && p(0) == 1 && 
   p.max_digit(1,6) < 6  && p.min_digit(1,6) > 0 && 
@@ -383,7 +392,7 @@ template<> inline bool hasQuark(const DecodedPID& p, const int& q){
 
 template<> inline bool hasQuark(const int& p, const int& q){ auto value_digits = DecodedPID(p); return hasQuark(value_digits, q);}
 
-template<class T> inline int leadingQuark(const T& p);
+template<class T> inline int leadingQuark(const T& p) {return leadingQuark(p->pdg_id());}
 template<> inline int leadingQuark(const DecodedPID& p){
   if (isQuark(p.pid())) { return std::abs(p.pid());}
   if (isMeson(p)) {return p.max_digit(1,3);}
@@ -420,7 +429,7 @@ template<class T> inline bool isCharmBaryon(const T& p) { return  leadingQuark(p
 template<class T> inline bool isBottomBaryon(const T& p) { return  leadingQuark(p) == BQUARK && isBaryon(p); }
 
 
-template<class T> inline int charge3( const T& p);
+template<class T> inline int charge3( const T& p){return charge3(p->pdg_id());}
 template<class T> inline double charge( const T& p){ return 1.0*charge3(p)/3.0;}
 template<class T> inline double threeCharge( const T& p){ return charge3(p);}
 template<class T> inline bool isCharged( const T& p){ return charge3(p) != 0;}
@@ -459,10 +468,10 @@ template<> inline int charge3(const int& p){
   return charge3(value_digits);
 }
 
-template<class T> inline bool isEMInteracting(const T& p);
+template<class T> inline bool isEMInteracting(const T& p){return isEMInteracting(p->pdg_id());}
 template<> inline bool isEMInteracting(const int& p) {return (isPhoton(p) || isZ(p) || charge3(p) != 0 );}
 
-template<class T> inline bool isStrongInteracting(const T& p);
+template<class T> inline bool isStrongInteracting(const T& p){return isStrongInteracting(p->pdg_id());}
 template<> inline bool isStrongInteracting(const int& p) { return (isGluon(p) || isQuark(p) || isDiquark(p) || isLeptoQuark(p) || isHadron(p));}
 
 template<class T> inline bool isParton(const T& p) { return isQuark(p)||isGluon(p);}
