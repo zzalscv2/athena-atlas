@@ -28,7 +28,7 @@ class EFTrackingSmearingAlg: public ::AthHistogramAlgorithm {
                                                                           "key for retrieval of output TrackParticles" };
 
 
-  IntegerProperty  m_SigmaScaleFactor      {this, "SmearingScaleFactor", 1, "Set the smearing SF value for the sigmas"};
+  DoubleProperty   m_SigmaScaleFactor      {this, "SmearingScaleFactor", 1, "Set the smearing SF value for the sigmas"};
   BooleanProperty  m_UseResolutionPtCutOff {this, "UseResolutionPtCutOff", false, "Apply ptCutoff on smearing"};
   DoubleProperty   m_SetResolutionPtCutOff {this, "SetResolutionPtCutOff", 0., "Set ptCutoff off for semaring"};
   DoubleProperty   m_inputTracksPtCut      {this, "InputTracksPtCutGeV", 4.0, "Set input track pT cut"};

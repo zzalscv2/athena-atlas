@@ -12,3 +12,26 @@ EFTrackingSmearingAlg:
 
 EFTrackingSmearingConfig:
   - contains the configuraiton of EFTrackingSmearingAlg and an example of how to implement in a job (as unit test)
+
+
+python/EFTrackingSmearingConfig.py
+  - contains the configuration of the Smearing Algorithm, and a test that runs in CI, to be used as an example to include it in your analisys
+
+FitFunctions:
+ - contain the fit functions obtained by fitting the track resoltuion functions
+ 
+ - FitFunctions/HTT: functions used for the L1Track note TL-COM-DAQ-2020-116
+   
+   2D-function to describe the efficiency versus pT and eta
+   obtained from XXX
+   (original code from A.Cerri and P. Calfayan, used for the L1Track task-force, 2020)
+   https://twiki.cern.ch/twiki/bin/viewauth/Atlas/HTTPerfWithEmulation
+
+ 
+ - FitFunctions/URD: functions to be used for the EFTracking URD. 
+
+   They are extracted from the IDPVM files: https://codimd.web.cern.ch/Rcmq5nrER1moq_IMHcf63Q 
+   with ATLAS-P2-RUN4-01-00-00 and a postProcessing code in a user repository
+   https://gitlab.cern.ch/fpastore/in-det-phys-val-monitoring-pp
+
+

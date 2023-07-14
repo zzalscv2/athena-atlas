@@ -17,10 +17,10 @@
 #include "FTS_Track.h"
 #include <cmath>
 namespace FitFunctions {
-  #include "FitFunctions/L1TT/d0Fitparam_N.C"
-  #include "FitFunctions/L1TT/z0Fitparam_N.C"
-  #include "FitFunctions/L1TT/MoreFitParam_N.C"
-  #include "FitFunctions/L1TT/effFitparam_N.C"
+  #include "FitFunctions/URD/d0Fitparam_N.C"
+  #include "FitFunctions/URD/z0Fitparam_N.C"  
+  #include "FitFunctions/URD/effFitparam_N.C"
+  #include "FitFunctions/URD/ptqoptFitparam_N.C"
 }
  
 
@@ -75,13 +75,13 @@ class FakeTrackSmearer
   double d0ResFunc(double eta,double pt,int verbose)
   {
     // add here other d0 res functions
-    return FitFunctions::getD0ResParam_N(eta,pt,verbose)/1000.0;
+    return FitFunctions::getd0ResParam_N(eta,pt,verbose)/1000.0;// convert to mm
   }
 
-  double z0ResFunc(double eta,double pt,int verbose)
+   double z0ResFunc(double eta,double pt,int verbose)
   {
     // add here other z0 res functions
-    return FitFunctions::getZ0ResParam_N(eta,pt,verbose)/1000.0;
+    return FitFunctions::getz0ResParam_N(eta,pt,verbose)/1000.0; // convert to mm
   }
    
   double etaResFunc(double eta __attribute__((unused)),double pt __attribute__((unused)),int verbose __attribute__((unused))) 
@@ -99,7 +99,7 @@ class FakeTrackSmearer
   double curvResFunc(double eta __attribute__((unused)),double pt __attribute__((unused)),int verbose __attribute__((unused)))
   {
     // add here other curv res functions
-    return 0.;
+    return FitFunctions::getptqoptResParam_N(eta,pt,verbose)/pt;
   }
 
 // Reference functions, in case needed ////
@@ -347,7 +347,7 @@ double effFunc(double eta,double pt,int verbose)
 
   double m_FMatches = 1.; // NMatch/NOffline  i.e. k
   double m_FakeFraction = 0.;
-  double m_SigmaScaleFactor = 1.0;//Note: This is an *integer property* in EFTrackingSmearingAlg.h
+  double m_SigmaScaleFactor = 1.0;
   double m_nominalEfficiency = 0.95;
 
   bool m_parameterizedEfficiency = false;
