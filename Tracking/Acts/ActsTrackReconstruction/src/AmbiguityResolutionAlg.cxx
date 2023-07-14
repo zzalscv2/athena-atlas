@@ -4,6 +4,9 @@
 
 #include "AmbiguityResolutionAlg.h"
 
+// Athena
+#include "AthenaMonitoringKernel/Monitored.h"
+
 // ACTS
 #include "Acts/Definitions/Units.hpp"
 
@@ -47,6 +50,8 @@ namespace ActsTrk
         assert( m_ambi );
      }
 
+     ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
+     
      ATH_CHECK(m_tracksKey.initialize());
      ATH_CHECK(m_resolvedTracksKey.initialize());
      return StatusCode::SUCCESS;
@@ -54,6 +59,8 @@ namespace ActsTrk
 
   StatusCode AmbiguityResolutionAlg::execute(const EventContext &ctx) const
   {
+    auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
+    auto mon = Monitored::Group( m_monTool, timer );
 
     SG::ReadHandle<ActsTrk::ConstTrackContainer> trackHandle = SG::makeHandle(m_tracksKey, ctx);
     ATH_CHECK(trackHandle.isValid());

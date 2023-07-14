@@ -127,3 +127,18 @@ def ActsTrkFindingMonitoringCfg(flags,
     acc.setPrivateTools(monTool)
     acc.merge(ActsTrkMonitoringHistSvcCfg(flags))
     return acc
+
+def ActsAmbiguityResolutionMonitoringCfg(flags,
+                                         name: str = "ActsAmbiguityResolutionMonitoring",
+                                         **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+    monTool = GenericMonitoringTool(flags, name)
+
+    monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title='Time for execute',
+                            xbins=100, xmin=0, xmax=10000)
+
+    acc.setPrivateTools(monTool)
+    acc.merge(ActsTrkMonitoringHistSvcCfg(flags))
+    return acc

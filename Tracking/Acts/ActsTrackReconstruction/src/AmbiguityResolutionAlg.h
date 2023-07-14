@@ -43,6 +43,8 @@ namespace ActsTrk
     virtual StatusCode execute(const EventContext &ctx) const override;
 
   private:
+    ToolHandle< GenericMonitoringTool > m_monTool {this, "MonTool", "", "Monitoring tool"};
+
     SG::ReadHandleKey<ActsTrk::ConstTrackContainer> m_tracksKey
        {this, "TracksLocation", "ActsTracks", "Input track collection"};
     SG::WriteHandleKey<ActsTrk::ConstTrackContainer> m_resolvedTracksKey

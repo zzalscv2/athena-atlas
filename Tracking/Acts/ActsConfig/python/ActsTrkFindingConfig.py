@@ -147,5 +147,10 @@ def ActsAmbiguityResolutionCfg(flags, name: str = "ActsAmbiguityResolution", **k
     kwargs.setdefault('MaximumIterations', 10000)
     kwargs.setdefault('NMeasurementsMin', 7)
 
+    if flags.Acts.doMonitoring:
+        from ActsConfig.ActsTrkMonitoringConfig import ActsAmbiguityResolutionMonitoringCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(
+            ActsAmbiguityResolutionMonitoringCfg(flags)))
+    
     acc.addEventAlgo(CompFactory.ActsTrk.AmbiguityResolutionAlg(name, **kwargs))
     return acc
