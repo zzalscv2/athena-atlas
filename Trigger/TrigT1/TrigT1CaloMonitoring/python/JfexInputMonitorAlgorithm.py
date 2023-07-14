@@ -20,7 +20,7 @@ def JfexInputMonitoringConfig(inputFlags):
         
         #Decorator for the DataTowers
         from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CaloFEXDecoratorCfg
-        result.merge(L1CaloFEXDecoratorCfg(inputFlags,"jFexTower2SCellDecorator"))
+        result.merge(L1CaloFEXDecoratorCfg(inputFlags,"jFexTower2SCellDecorator",ExtraInfo = False))
         
         #jfex emulated input: EmulatedTowers
         from L1CaloFEXAlgos.FexEmulatedTowersConfig import jFexEmulatedTowersCfg
@@ -76,11 +76,11 @@ def JfexInputMonitoringConfig(inputFlags):
         DetailsGroup.append( helper.addGroup(JfexInputMonAlg, groupName+"_details_"+str(i)   , mainDir))
         
         if(i == 1):
-            DetailsGroup[i].defineHistogram('DataEt,EmuSum;SumSCell_vs_Data_'+Calosource_names[i], title='Data Et vs Tile Et ('+ Calosource_names[i]+'); Data Et [GeV]; Tile Et [GeV]',
+            DetailsGroup[i].defineHistogram('DataEt_Tile,EmulatedEt_Tile;SumSCell_vs_Data_'+Calosource_names[i], title='Data Et vs Tile Et ('+ Calosource_names[i]+'); Data Et [GeV]; Tile Et [GeV]',
                             type='TH2F',path=trigPath+"expert/", xbins=200,xmin=0,xmax=100,ybins=200,ymin=0,ymax=100)
                             
         else:    
-            DetailsGroup[i].defineHistogram('DataEt,EmuSum;SumSCell_vs_Data_'+Calosource_names[i], title='Data vs SCell Sum Et ('+ Calosource_names[i]+'); Data Et [MeV]; SCell Sum Et [MeV]',
+            DetailsGroup[i].defineHistogram('DataEt,EmulatedEt;SumSCell_vs_Data_'+Calosource_names[i], title='Data vs SCell Sum Et ('+ Calosource_names[i]+'); Data Et [MeV]; SCell Sum Et [MeV]',
                             type='TH2F',path=trigPath+"expert/", xbins=160,xmin=-2000,xmax=2000,ybins=160,ymin=-2000,ymax=2000)
                             
         
@@ -88,7 +88,10 @@ def JfexInputMonitoringConfig(inputFlags):
     myGroup.defineHistogram('region,type;DataErrors', title='jFEX Data mismatches per region; Region; Type',
                             type='TH2F',path=trigPath, xbins=7,xmin=0,xmax=7,ybins=2,ymin=0,ymax=2,xlabels=Calosource_names,ylabels=["Invalid codes","Data mismatch"])
 
-    myGroup.defineHistogram('TowerEtaInvalid,TowerPhiInvalid;2Dmap_InvalidCodes', title='jFex DataTower Invalid Et codes; #eta; #phi',
+    myGroup.defineHistogram('TowerEtaInvalid,TowerPhiInvalid;2Dmap_InvalidCodes', title='jFex DataTower Invalid Et codes (4095); #eta; #phi',
+                            type='TH2F',path=trigPath, **eta_phi_bins)
+
+    myGroup.defineHistogram('TowerEtaEmpty,TowerPhiEmpty;2Dmap_EmptyCodes', title='jFex DataTower Empty Et codes (0); #eta; #phi',
                             type='TH2F',path=trigPath, **eta_phi_bins)
                             
     DecorGroup.defineHistogram('TowerEta,TowerPhi;2Dmap_MismatchedEts', title='jFex DataTower mismatches (no invalid codes); #eta; #phi',

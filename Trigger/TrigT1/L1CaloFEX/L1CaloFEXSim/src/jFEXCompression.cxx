@@ -17,7 +17,10 @@ const int jFEXCompression::s_steps[] = {25, 50, 100, 200, 400};
 const int jFEXCompression::s_minET[] = {-3150, 6400, 25600, 102400, 409600};
 const int jFEXCompression::s_minCode[] = {2, 384, 768, 1536, 3072};
 
-unsigned int jFEXCompression::Compress(float floatEt) {
+unsigned int jFEXCompression::Compress(float floatEt, bool empty) {
+    
+    //If all Scells are masked, then send empty/data not available
+    if(empty) return s_NoData;
     
     int Et = std::round(floatEt);
 
