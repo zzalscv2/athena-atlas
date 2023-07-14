@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondAlg/TgcCondDbAlg.h"
@@ -12,10 +12,8 @@
 
 // constructor
 TgcCondDbAlg::TgcCondDbAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthAlgorithm(name, pSvcLocator) {
-    declareProperty("isOnline", m_isOnline);
-    declareProperty("isData", m_isData);
-    declareProperty("isRun1", m_isRun1);
+    AthReentrantAlgorithm(name, pSvcLocator) {
+    
 }
 
 // Initialize
@@ -29,7 +27,7 @@ StatusCode TgcCondDbAlg::initialize() {
 }
 
 // execute
-StatusCode TgcCondDbAlg::execute() {
+StatusCode TgcCondDbAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("execute " << name());
 
     if (m_isOnline) {
@@ -38,7 +36,7 @@ StatusCode TgcCondDbAlg::execute() {
     }
 
     // launching Write Cond Handle
-    SG::WriteCondHandle<TgcCondDbData> writeHandle{m_writeKey};
+    SG::WriteCondHandle<TgcCondDbData> writeHandle{m_writeKey, ctx};
     if (writeHandle.isValid()) {
         ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid."
                                     << " In theory this should not be called, but may happen"
@@ -67,7 +65,7 @@ StatusCode TgcCondDbAlg::execute() {
 }
 
 // loadDetectorStatus
-StatusCode TgcCondDbAlg::loadDetectorStatus(EventIDRange& rangeW, std::unique_ptr<TgcCondDbData>& writeCdo) {
+StatusCode TgcCondDbAlg::loadDetectorStatus(EventIDRange& rangeW, std::unique_ptr<TgcCondDbData>& writeCdo) const {
     SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey_folder_detectorStatus};
     const CondAttrListCollection* readCdo{*readHandle};
     if (readCdo == nullptr) {

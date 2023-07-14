@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDALG_NSWPASSIVATIONDBALG_H
@@ -35,6 +35,7 @@ public:
     virtual ~NswPassivationDbAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute (const EventContext&) const override;
+    virtual bool isReEntrant() const override { return false; }
 
  
 private:
