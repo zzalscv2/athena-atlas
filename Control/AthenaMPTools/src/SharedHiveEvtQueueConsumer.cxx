@@ -226,8 +226,8 @@ SharedHiveEvtQueueConsumer::subProcessLogs(std::vector<std::string>& filenames)
   for(int i=0; i<m_nprocs; ++i) {
     std::ostringstream workerIndex;
     workerIndex << i;
-    boost::filesystem::path worker_rundir(m_subprocTopDir);
-    worker_rundir /= boost::filesystem::path(m_subprocDirPrefix+workerIndex.str());
+    std::filesystem::path worker_rundir(m_subprocTopDir);
+    worker_rundir /= std::filesystem::path(m_subprocDirPrefix+workerIndex.str());
     filenames.push_back(worker_rundir.string()+std::string("/AthenaMP.log"));
   }
 }
@@ -281,8 +281,8 @@ SharedHiveEvtQueueConsumer::bootstrap_func()
   workindex<<m_rankId;
 
   // ________________________ Worker dir: mkdir ________________________
-  boost::filesystem::path worker_rundir(m_subprocTopDir);
-  worker_rundir /= boost::filesystem::path(m_subprocDirPrefix+workindex.str());
+  std::filesystem::path worker_rundir(m_subprocTopDir);
+  worker_rundir /= std::filesystem::path(m_subprocDirPrefix+workindex.str());
   // TODO: this "worker_" can be made configurable too
 
   if(mkdir(worker_rundir.string().c_str(),S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH)==-1) {
@@ -303,12 +303,12 @@ SharedHiveEvtQueueConsumer::bootstrap_func()
   ATH_MSG_INFO("Io registry updated in the AthenaMP event worker PID=" << getpid());
 
   // ________________________ SimParams & DigiParams & PDGTABLE.MeV ____________________________
-  boost::filesystem::path abs_worker_rundir = boost::filesystem::absolute(worker_rundir);
-  if(boost::filesystem::is_regular_file("SimParams.db"))
+  std::filesystem::path abs_worker_rundir = std::filesystem::absolute(worker_rundir);
+  if(std::filesystem::is_regular_file("SimParams.db"))
     COPY_FILE_HACK("SimParams.db", abs_worker_rundir.string()+"/SimParams.db");
-  if(boost::filesystem::is_regular_file("DigitParams.db"))
+  if(std::filesystem::is_regular_file("DigitParams.db"))
     COPY_FILE_HACK("DigitParams.db", abs_worker_rundir.string()+"/DigitParams.db");
-  if(boost::filesystem::is_regular_file("PDGTABLE.MeV"))
+  if(std::filesystem::is_regular_file("PDGTABLE.MeV"))
     COPY_FILE_HACK("PDGTABLE.MeV", abs_worker_rundir.string()+"/PDGTABLE.MeV");
 
   // _______________________ Handle saved PFC (if any) ______________________

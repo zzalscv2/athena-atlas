@@ -4,7 +4,7 @@
 atlas_subdir( AthenaMP )
 
 # External dependencies:
-find_package( Boost COMPONENTS filesystem )
+find_package( Boost )
 
 # Component(s) in the package:
 atlas_add_component( AthenaMP

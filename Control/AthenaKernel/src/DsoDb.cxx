@@ -22,9 +22,7 @@
 #include <set>
 
 // boost includes
-#include "boost/filesystem.hpp"
-#include "boost/filesystem/path.hpp"
-#include "boost/filesystem/exception.hpp" /*filesystem_error*/
+#include <filesystem>
 #include "boost/tokenizer.hpp"
 
 #include "boost/algorithm/string.hpp"
@@ -36,7 +34,7 @@
 // fwk includes
 #include "GaudiKernel/System.h"
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace {
   typedef std::vector<std::string> Strings_t;
@@ -76,11 +74,7 @@ namespace {
   inline
   std::string to_string(const fs::path& p) 
   {
-#if BOOST_FILESYSTEM_VERSION == 3 
-    return p.c_str();
-#else
-    return p.native_file_string();
-#endif
+    return p.u8string();
   }
 
   std::string getlibname(const std::string& libname)
@@ -317,7 +311,7 @@ DsoDb::build_repository()
       continue;
     }
     fs::path p(*itr);
-    if (!boost::filesystem::exists(*itr)) {
+    if (!std::filesystem::exists(*itr)) {
       continue;
     }
     Paths_t dir_content {fs::directory_iterator(p),
@@ -339,13 +333,8 @@ DsoDb::build_repository()
       if (!fs::exists(dsomap)) continue;
 
       //std::cerr << "=== [" << dso << "] ===\n";
-#if BOOST_FILESYSTEM_VERSION == 3 
       dsofiles.insert(dsomap.c_str());
       std::ifstream f(dsomap.c_str());
-#else
-      dsofiles.insert(dsomap.native_file_string().c_str());
-      std::ifstream f(dsomap.native_file_string().c_str());
-#endif
       int line_nbr = -1;
       std::string lastlib;
       while (f) {

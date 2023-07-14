@@ -4,7 +4,7 @@
 atlas_subdir( TrigServices )
 
 # External dependencies:
-find_package( Boost COMPONENTS filesystem regex )
+find_package( Boost COMPONENTS regex )
 find_package( CORAL COMPONENTS CoralBase CoralKernel )
 find_package( ROOT COMPONENTS Core Tree Hist RIO )
 find_package( tdaq COMPONENTS owl )

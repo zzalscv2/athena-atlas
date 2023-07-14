@@ -13,6 +13,8 @@
 #include <utility>
 
 #include <functional>
+#include <filesystem>
+
 
 #include <sstream>
 #include <numeric>
@@ -873,9 +875,9 @@ struct ClusterPlotter : public BasePlotter
     return events.size();
   }
 
-  ClusterPlotter(const boost::filesystem::path & constants_folder_path,
-                 const boost::filesystem::path & reference_folder_path,
-                 const boost::filesystem::path & test_folder_path,
+  ClusterPlotter(const std::filesystem::path & constants_folder_path,
+                 const std::filesystem::path & reference_folder_path,
+                 const std::filesystem::path & test_folder_path,
                  const int max_events = -1,
                  const std::string & filter = "",
                  const double min_similarity = CaloRecGPU::default_min_similarity,

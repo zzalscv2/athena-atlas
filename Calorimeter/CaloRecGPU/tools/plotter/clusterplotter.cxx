@@ -11,7 +11,7 @@
 #include <list>
 #include "PlotterAuxDefines.h"
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "CxxUtils/checker_macros.h"
 
@@ -158,7 +158,7 @@ struct ProgArgs
   }
 };
 
-void read_plots_file(const boost::filesystem::path & file, std::vector<PlotDefs> & vec)
+void read_plots_file(const std::filesystem::path & file, std::vector<PlotDefs> & vec)
 {
   vec.clear();
   if (file == "none" || file == "NONE")
@@ -785,7 +785,7 @@ bool setup_arguments(ProgArgs & args, size_t argc, char ** argv)
         {
           break;
         }
-      if (!boost::filesystem::exists(text))
+      if (!std::filesystem::exists(text))
         {
           std::cout << "ERROR: Input directory '" << text << "' does not exist!" << std::endl;
           return true;
@@ -973,9 +973,9 @@ bool setup_arguments(ProgArgs & args, size_t argc, char ** argv)
         }
     }
 
-  if (!boost::filesystem::exists(args.out_path))
+  if (!std::filesystem::exists(args.out_path))
     {
-      if (boost::filesystem::create_directories(args.out_path))
+      if (std::filesystem::create_directories(args.out_path))
         {
           std::cout << "WARNING: Output path '" << args.out_path << "' did not exist and was created!" << std::endl;
         }
@@ -1108,9 +1108,9 @@ void do_plots (const ProgArgs & args)
       const std::string out_dir = args.out_path + "/plots_" + std::to_string(std::max(plotters.size(), time_plotters.size()));
 
 
-      if (!boost::filesystem::exists(out_dir))
+      if (!std::filesystem::exists(out_dir))
         {
-          if (boost::filesystem::create_directories(out_dir))
+          if (std::filesystem::create_directories(out_dir))
             {
               std::cout << "WARNING: Output path '" << out_dir << "' did not exist and was created!" << std::endl;
             }

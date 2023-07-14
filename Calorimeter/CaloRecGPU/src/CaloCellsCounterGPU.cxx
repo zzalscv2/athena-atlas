@@ -7,6 +7,8 @@
 
 #include <map>
 #include <vector>
+#include <filesystem>
+
 
 using namespace CaloRecGPU;
 
@@ -147,7 +149,7 @@ StatusCode CaloCellsCounterGPU::execute(const EventContext & ctx, const Constant
       return StatusCode::FAILURE;
     }
 
-  const boost::filesystem::path save_file = m_savePath + "/" +  StandaloneDataIO::build_filename((m_filePrefix.size() > 0 ? m_filePrefix + "_counts" : "counts"),
+  const std::filesystem::path save_file = m_savePath + "/" +  StandaloneDataIO::build_filename((m_filePrefix.size() > 0 ? m_filePrefix + "_counts" : "counts"),
                                                                                                ctx.evt(), m_fileSuffix, "txt", m_numWidth);
 
   std::ofstream out_file(save_file);
