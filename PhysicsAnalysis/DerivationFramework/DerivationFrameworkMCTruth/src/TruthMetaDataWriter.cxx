@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -20,9 +20,6 @@
 // Service for the weights
 #include "GenInterfaces/IHepMCWeightSvc.h"
 
-// Service for the metadata (tag info)
-#include "EventInfoMgt/ITagInfoMgr.h"
-
 // Constructor
 DerivationFramework::TruthMetaDataWriter::TruthMetaDataWriter(const std::string& t,
                                                               const std::string& n,
@@ -30,7 +27,6 @@ DerivationFramework::TruthMetaDataWriter::TruthMetaDataWriter(const std::string&
   : AthAlgTool(t,n,p)
   , m_metaStore( "MetaDataStore", n )
   , m_weightSvc( "HepMCWeightSvc/HepMCWeightSvc" , n )
-  , m_tagInfoMgr("TagInfoMgr", n)
 {
     declareInterface<DerivationFramework::IAugmentationTool>(this);
     declareProperty( "MetaObjectName", m_metaName = "TruthMetaData" );

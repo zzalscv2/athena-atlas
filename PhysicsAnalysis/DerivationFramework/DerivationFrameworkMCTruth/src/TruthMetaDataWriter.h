@@ -17,7 +17,6 @@
 
 // EDM classes - typedefs, so have to #include them
 #include "xAODTruth/TruthMetaDataContainer.h"
-#include "EventInfoMgt/ITagInfoMgr.h"
 
 // Standard library includes
 #include <string>
@@ -41,8 +40,6 @@ namespace DerivationFramework {
       ServiceHandle< StoreGateSvc > m_metaStore;
       /// Service for retrieving the weight names
       ServiceHandle< IHepMCWeightSvc > m_weightSvc;
-      /// Access to /TagInfo
-      ServiceHandle< ITagInfoMgr > m_tagInfoMgr;
       /// The meta data container to be written out
       xAOD::TruthMetaDataContainer* m_tmd = nullptr;
       /// SG key and name for meta data
