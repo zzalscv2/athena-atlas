@@ -1,26 +1,22 @@
 /*
-Copyright! (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGMINBIAS_SPCOUNTHYPOTOOL_H
 #define TRIGMINBIAS_SPCOUNTHYPOTOOL_H
 
-#include "Gaudi/Property.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaBaseComps/AthCheckedComponent.h"
+#include "Gaudi/Property.h"
 #include "TrigCompositeUtils/HLTIdentifier.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 
-class SPCountHypoTool : virtual public AthCheckedComponent<::AthAlgTool>
-{
-public:
-  SPCountHypoTool(const std::string &type,
-                  const std::string &name,
-                  const IInterface *parent);
+class SPCountHypoTool : virtual public AthCheckedComponent<::AthAlgTool> {
+ public:
+  SPCountHypoTool(const std::string &type, const std::string &name, const IInterface *parent);
 
   virtual StatusCode initialize() override;
 
-  struct SPCountsInfo
-  {
+  struct SPCountsInfo {
     TrigCompositeUtils::Decision *decision;
     const xAOD::TrigComposite *counts;
     const TrigCompositeUtils::DecisionIDContainer previousDecisionIDs;
@@ -28,14 +24,15 @@ public:
 
   StatusCode decide(SPCountsInfo &decisions) const;
 
-private:
-  bool applyCut(const Gaudi::Property<int> &threshold, const xAOD::TrigComposite *composit, const std::string_view name="" ) const;
-  bool applyInverseCut(const Gaudi::Property<int> &threshold, const xAOD::TrigComposite *composit, const std::string_view name="" ) const;
+ private:
+  bool applyCut(const Gaudi::Property<int> &threshold, const xAOD::TrigComposite *composit, const std::string_view name = "") const;
+  bool applyInverseCut(const Gaudi::Property<int> &threshold, const xAOD::TrigComposite *composit, const std::string_view name = "") const;
 
   HLT::Identifier m_decisionId;
 
-  Gaudi::Property<int> m_pixCL{this, "pixCL", -1, "Require Clusters  (of any size) Count > threshold (-1 disabled) in whole pixel"};
-  Gaudi::Property<int> m_pixCLMax{this, "pixCLMax", -1, "Require Clusters  (of any size) Count < threshold (-1 disabled) in whole pixel"};
+  Gaudi::Property<int> m_pixCL{this, "pixCL", -1, "Require Clusters (of any size) Count > threshold (-1 disabled) in whole pixel"};
+  Gaudi::Property<int> m_pixCLMax{this, "pixCLMax", -1, "Require Clusters (of any size) Count < threshold (-1 disabled) in whole pixel"};
+  Gaudi::Property<int> m_pixCLnoToT{this, "pixCLnoToT", -1, "Require Clusters (of any size, without ToT cut) Count > threshold (-1 disabled) in whole pixel"};
   Gaudi::Property<int> m_pixCL_1{this, "pixCL_1", -1, "Require Clusters Count made of clusters of size 1 > threshold (-1 disabled) in whole pixel"};
   Gaudi::Property<int> m_pixCL_2{this, "pixCL_2", -1, "Require Clusters Count made of clusters of size 2 > threshold (-1 disabled) in whole pixel"};
   Gaudi::Property<int> m_pixCLmin3{this, "pixCLmin3", -1, "Accept eventss with minimum 3 SP Count > threshold (-1 disabled) in pixel"};
@@ -50,4 +47,4 @@ private:
   Gaudi::Property<bool> m_logicAnd{this, "TriggerTypeAnd", true, "And/Or Logic"};
 };
 
-#endif //> !TRIGMINBIAS_SPCOUNTHYPOTOOL_H
+#endif  //> !TRIGMINBIAS_SPCOUNTHYPOTOOL_H
