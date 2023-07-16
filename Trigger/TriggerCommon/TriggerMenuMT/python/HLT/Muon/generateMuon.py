@@ -47,10 +47,10 @@ def EFMuonCBViewDataVerifierCfg(flags, name):
     else:
         if flags.Detector.GeometryITk:
             EFMuonCBViewDataVerifier.DataObjects += [( 'MuonCandidateCollection' , 'StoreGateSvc+MuonCandidates' ),
-                                                    ( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+flags.Trigger.ITkTracking.Muon.tracks_FTF )]
+                                                    ( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+flags.Tracking.ActiveConfig.tracks_FTF )]
         else:
             EFMuonCBViewDataVerifier.DataObjects += [( 'MuonCandidateCollection' , 'StoreGateSvc+MuonCandidates' ),
-                                                    ( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+flags.Trigger.InDetTracking.Muon.tracks_FTF ),
+                                                    ( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+flags.Tracking.ActiveConfig.tracks_FTF ),
                                                     ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_FlaggedCondData' )
                                                      ]
 
@@ -130,7 +130,7 @@ def _muCombStepSeq(flags, is_probe_leg=False):
     recoL2CB.mergeReco( MuCombViewDataVerifier() )
 
     #ID tracking
-    recoL2CB.mergeReco(trigInDetFastTrackingCfg( flags, roisKey=recoL2CB.inputMaker().InViewRoIs, signatureName="Muon" ))
+    recoL2CB.mergeReco(trigInDetFastTrackingCfg( flags, roisKey=recoL2CB.inputMaker().InViewRoIs, signatureName="muon" ))
 
     selAccL2CB.mergeReco(recoL2CB)
 
@@ -185,8 +185,8 @@ def _muEFCBStepSeq(flags, name='RoI', is_probe_leg=False):
                                                              ViewNodeName    = viewName+"InView")
         recoCB = InViewRecoCA("EFMuCBReco_"+name, viewMaker=viewMakerAlg, isProbe=is_probe_leg)
         #ID tracking
-        recoCB.mergeReco(trigInDetFastTrackingCfg( flags, roisKey=recoCB.inputMaker().InViewRoIs, signatureName="MuonFS" ))
-        trackName = flags.Trigger.InDetTracking.MuonFS.tracks_FTF
+        recoCB.mergeReco(trigInDetFastTrackingCfg( flags, roisKey=recoCB.inputMaker().InViewRoIs, signatureName="muonFS" ))
+        trackName = flags.Trigger.InDetTracking.muonFS.tracks_FTF
     else:
         recoCB = InViewRecoCA(viewName, isProbe=is_probe_leg)
         recoCB.inputMaker().RequireParentView = True
@@ -276,9 +276,9 @@ def _muEFIsoStepSeq(flags):
                                                          ViewNodeName    = viewName+"InView")
     recoIso = InViewRecoCA("EFMuIsoReco", viewMaker=viewMakerAlg)
     #ID tracking
-    recoIso.mergeReco(trigInDetFastTrackingCfg( flags, roisKey=recoIso.inputMaker().InViewRoIs, signatureName="MuonIso" ))
+    recoIso.mergeReco(trigInDetFastTrackingCfg( flags, roisKey=recoIso.inputMaker().InViewRoIs, signatureName="muonIso" ))
     recoIso.mergeReco(MuIsoViewDataVerifierCfg())
-    recoIso.mergeReco(TrigMuonEFTrackIsolationAlgCfg(flags, IdTrackParticles=flags.Trigger.InDetTracking.MuonIso.tracks_FTF,
+    recoIso.mergeReco(TrigMuonEFTrackIsolationAlgCfg(flags, IdTrackParticles=flags.Trigger.InDetTracking.muonIso.tracks_FTF,
                                                     MuonEFContainer="InViewIsoMuons", 
                                                     ptcone02Name="InViewIsoMuons.ptcone02", 
                                                     ptcone03Name="InViewIsoMuons.ptcone03"))

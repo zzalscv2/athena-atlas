@@ -10,18 +10,9 @@ from InDetRecExample.TrackingCommon import makePublicTool, setDefaults
 from AthenaCommon.Logging import logging 
 log = logging.getLogger("InDetTrigCommon")
 
-
+from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
 
 #--------------------------------------------------------------------------
-#                    Track Ambiguity Solver algs/tools
-
-
-#-------------------------------
-#TODO:
-
-#Make loader for extrapolator
-
-#-------------------------------
 
 def _prefix():
    #Too long? Do we need this to separate from InDet?
@@ -38,92 +29,8 @@ def _suffix(signature=None):
 def add_prefix( core, suffix=None ):
    return  '{}{}{}'.format( _prefix(), core, _suffix(suffix) )
 
-
-def trigPropagator_getter():
-   from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigPropagator
-   return InDetTrigPropagator
-
-#--------------------------------------------------------------------------------------
-
-def trackMonitoringTool_builder(flags, suffix):
-  #First load the generic monitoring tool with set of histograms for Particle Cnv
-  from TrigInDetMonitoringTools.TrigInDetTrackingMonitoring import TrigInDetTrackCnvMonitoring
-  genericMonTool = TrigInDetTrackCnvMonitoring(flags, name = 'GenericMonitoring_{}'.format(suffix))
-
-
-
-  #Now pass this tool to the Track Monitoring tool
-  from TrigInDetMonitoringTools.TrigInDetMonitoringToolsConf import TrigInDetTrackMonitoringTool
-  return TrigInDetTrackMonitoringTool( name           = 'xAODParticleCreatorAlg_{}'.format(suffix),
-                                       MonitoringTool = genericMonTool)
-
-
-
-#Returns suffix of tracking type from a given alg name
-def getTrackingSuffix( name ):
-   if 'IDTrig' in name:
-         return '_IDTrig'
-   elif 'FTF' in name:
-         return '_FTF'
-   elif 'EFID' in name:
-         return '_EFID'
-   else:
-      return ''
-
-
-#--------------------------------------------------------------------------
-#                    Track Ambiguity algs/tools
-def associationTool_getter():
-      #TODO double check this!
-      from InDetRecExample.TrackingCommon import getInDetTrigPRDtoTrackMapToolGangedPixels
-      return getInDetTrigPRDtoTrackMapToolGangedPixels()
-
 #-------------------------------------------------------------------------------------------------
 #                       Alg/Tools for offline pattern recognition tracking
-
-@makePublicTool
-def siSpacePointsSeedMakerTool_builder(name, config, trackingCuts, usePrdAssociationTool, trackSummaryTool ):
-   from InDetRecExample.InDetKeys  import  InDetKeys
-   from .InDetTrigCollectionKeys   import  TrigPixelKeys, TrigSCTKeys
-
-   kwargs = {}
-   kwargs = setDefaults( kwargs,
-                         pTmin                  = trackingCuts.minPT(),
-                         usePixel               = trackingCuts.usePixel(),
-                         SpacePointsPixelName   = TrigPixelKeys.SpacePoints,
-                         useSCT                 = trackingCuts.useSCT(), #Note: this is false for dissappearing tracks in offline
-                         SpacePointsSCTName     = TrigSCTKeys.SpacePoints,
-                         useOverlapSpCollection = trackingCuts.useSCT(), #Note: this is false for dissappearing tracks in offline
-                         SpacePointsOverlapName = InDetKeys.OverlapSpacePoints(), #FIXME: Switch to trigger flags? ATR-22756
-                         radMax                 = trackingCuts.radMax(),
-                         etaMax                 = trackingCuts.maxEta())
-
-   #FIXME: revisit HI ATR-22756
-   #Change/add tracking  parameters based on the different tracking mode
-   #if config.name == 'HI':
-   #   kwargs = setDefaults( kwargs,
-   #                         maxdImpactPPS = trackingCuts.maxdImpactPPSSeeds(),
-   #                         maxdImpactSSS = trackingCuts.maxdImpactSSSSeeds())
-
-   if usePrdAssociationTool:
-      kwargs = setDefaults( kwargs,
-                            PRDtoTrackMap      = TrigPixelKeys.PRDtoTrackMap)
-
-   if config.name == 'cosmics':
-      from SiSpacePointsSeedTool_xk.SiSpacePointsSeedTool_xkConf import InDet__SiSpacePointsSeedMaker_Cosmic as SiSpacePointsSeedMaker
-   #FIXME: revisit HI ATR-22756
-   #elif config.name == 'HI':
-   #   from SiSpacePointsSeedTool_xk.SiSpacePointsSeedTool_xkConf import InDet__SiSpacePointsSeedMaker_HeavyIon as SiSpacePointsSeedMaker
-   else:
-      kwargs = setDefaults( kwargs,
-                            maxdImpact = trackingCuts.maxPrimaryImpact(),
-                            maxZ = trackingCuts.maxZImpact(),
-                            minZ = -trackingCuts.maxZImpact() )
-      from SiSpacePointsSeedTool_xk.SiSpacePointsSeedTool_xkConf import InDet__SiSpacePointsSeedMaker_ATLxk as SiSpacePointsSeedMaker
-
-   return SiSpacePointsSeedMaker ( name    =  name,
-                                   **kwargs)
-
 
 
 @makePublicTool
@@ -149,63 +56,10 @@ def zVertexMakerTool_builder(name, trackingCuts, seedMakerTool ):
    return InDet__SiZvertexMaker_xk(name  = name,
                                    **kwargs)
 
-@makePublicTool
-def siDetectorElementRoadMakerTool_builder( name, trackingCuts ):
-   from InDetRecExample.InDetKeys  import  InDetKeys
-
-   from SiDetElementsRoadTool_xk.SiDetElementsRoadTool_xkConf import InDet__SiDetElementsRoadMaker_xk
-   return  InDet__SiDetElementsRoadMaker_xk(name               = name,
-                                            PropagatorTool     = trigPropagator_getter(),
-                                            usePixel           = trackingCuts.usePixel(),
-                                            PixManagerLocation = InDetKeys.PixelManager(), #FIXME: revisit  ATR-22756
-                                            useSCT             = trackingCuts.useSCT(),
-                                            SCTManagerLocation = InDetKeys.SCT_Manager(),  #FIXME: revisit   ATR-22756
-                                            RoadWidth          = trackingCuts.RoadWidth())
-
-
 
 @makePublicTool
-def siCombinatorialTrackFinderTool_builder( name, trackingCuts ):
-   from .InDetTrigCollectionKeys   import TrigPixelKeys, TrigSCTKeys
-   from AthenaCommon.DetFlags      import DetFlags
-   import InDetRecExample.TrackingCommon as TrackingCommon
-
-   #FIXME: quick hack to try running ID, remove later, ATR-22756
-   DetFlags.ID_setOn()
-
-   #Are we happy with these settings?
-   from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigSCTConditionsSummaryTool, InDetTrigPatternUpdator, InDetTrigBoundaryCheckTool
-   # @TODO ensure that PRD association map is used if usePrdAssociationTool is set ATR-22756
-
-   kwargs = {}
-   #Prepare default parameter settings for the tool
-   kwargs = setDefaults( kwargs,
-                         PropagatorTool        = trigPropagator_getter(),
-                         UpdatorTool           = InDetTrigPatternUpdator,
-                         SctSummaryTool        = InDetTrigSCTConditionsSummaryTool, #Any reason for this to be turned off? None,
-                         RIOonTrackTool        = TrackingCommon.getInDetRotCreatorDigital(),
-                         usePixel              = DetFlags.haveRIO.pixel_on(),
-                         useSCT                = DetFlags.haveRIO.SCT_on(),
-                         PixelClusterContainer = TrigPixelKeys.Clusters,
-                         SCT_ClusterContainer  = TrigSCTKeys.Clusters)
-
-
-   #Add SCT condition summary if specified
-   #FIXME: Use TriggerFlags instead? ATR-22756
-   #if (DetFlags.haveRIO.SCT_on()):
-   #   kwargs = setDefaults( kwargs,
-   #                         SctSummaryTool = InDetTrigSCTConditionsSummaryTool )
-
-   from SiCombinatorialTrackFinderTool_xk.SiCombinatorialTrackFinderTool_xkConf import InDet__SiCombinatorialTrackFinder_xk
-   return InDet__SiCombinatorialTrackFinder_xk(name  = name,
-                                               BoundaryCheckTool = InDetTrigBoundaryCheckTool,
-                                               **kwargs)
-
-
-@makePublicTool
-def siTrackMakerTool_builder( name, config, siDetElementsRoadMakerTool, trackFinderTool, trackingCuts, usePrdAssociationTool ):
+def siTrackMakerTool_builder( name, config, trackFinderTool, trackingCuts, usePrdAssociationTool ):
    from InDetRecExample.InDetJobProperties import InDetFlags
-   from InDetRecExample.InDetKeys          import InDetKeys
 
    if config.name == 'cosmics':
       trackPatternRecoInfo = 'SiSpacePointsSeedMaker_Cosmic'
@@ -216,7 +70,9 @@ def siTrackMakerTool_builder( name, config, siDetElementsRoadMakerTool, trackFin
 
    kwargs = {}
 
-
+   from InDetConfig.SiDetElementsRoadToolConfig import TrigSiDetElementsRoadMaker_xkCfg
+   siDetElementsRoadMakerTool = CAtoLegacyPublicToolWrapper(TrigSiDetElementsRoadMaker_xkCfg)
+   
    #FIXME:
    #Check compatibility of cosmic cuts from offline version with online run2
    #https://gitlab.cern.ch/atlas/athena/-/blob/21.2/InnerDetector/InDetExample/InDetTrigRecExample/python/InDetTrigConfigRecNewTracking.py#L167-172
@@ -251,16 +107,6 @@ def siTrackMakerTool_builder( name, config, siDetElementsRoadMakerTool, trackFin
                          UseAssociationTool            = usePrdAssociationTool)
 
 
-   if InDetFlags.doStoreTrackSeeds():
-      from SeedToTrackConversionTool.SeedToTrackConversionToolConf import InDet__SeedToTrackConversionTool
-      InDet_SeedToTrackConversion = InDet__SeedToTrackConversionTool(name       = "InDet_SeedToTrackConversion"+trackingCuts.extension(),
-                                                                     OutputName = InDetKeys.SiSPSeedSegments()+trackingCuts.extension())
-      kwargs = setDefaults( kwargs,
-                            SeedToTrackConversion = InDet_SeedToTrackConversion,
-                            SeedSegmentsWrite = True )
-
-
-
    from SiTrackMakerTool_xk.SiTrackMakerTool_xkConf import InDet__SiTrackMaker_xk
    return  InDet__SiTrackMaker_xk(name = name,
                                   **kwargs)
@@ -281,11 +127,9 @@ def siSPSeededTrackFinder_builder( name, config, outputTracks, trackingCuts, use
 
 
    #Load subtools of the TrackFinder
-   siSpacePointsSeedMakerTool = siSpacePointsSeedMakerTool_builder(name                  = add_prefix( 'siSPSeedMaker', nameSuffix),
-                                                                   config                = config,
-                                                                   trackingCuts          = trackingCuts,
-                                                                   usePrdAssociationTool = usePrdAssociationTool, 
-                                                                   trackSummaryTool      = trackSummaryTool )
+   from InDetConfig.SiSpacePointsSeedToolConfig import TrigSiSpacePointsSeedMakerCfg
+   siSpacePointsSeedMakerTool = CAtoLegacyPublicToolWrapper(TrigSiSpacePointsSeedMakerCfg)
+
    
    # --- Z-coordinates primary vertices finder (only for collisions)
    zVertexMakerTool = None
@@ -293,19 +137,12 @@ def siSPSeededTrackFinder_builder( name, config, outputTracks, trackingCuts, use
    if InDetFlags.useZvertexTool():
       zVertexMakerTool =  zVertexMakerTool_builder(name, trackingCuts, siSpacePointsSeedMakerTool )
 
-   # --- SCT and Pixel detector elements road builder
-   #FIXME: use cosmic version of RMaker as for Run2?
-   #https://gitlab.cern.ch/atlas/athena/-/blob/21.2/InnerDetector/InDetExample/InDetTrigRecExample/python/InDetTrigConfigRecNewTracking.py#L167
-   siDetectorElementRoadMaker = siDetectorElementRoadMakerTool_builder( name         = add_prefix( 'SiDetectorElementRoadMaker', nameSuffix),
-                                                                        trackingCuts = trackingCuts )
 
-   # --- Local track finding using sdCaloSeededSSSpace point seed
-   siCombinatorialTrackFinderTool = siCombinatorialTrackFinderTool_builder( name         = add_prefix( 'SiCombinatorialTrackFinder', nameSuffix),
-                                                                            trackingCuts = trackingCuts)
+   from InDetConfig.SiCombinatorialTrackFinderToolConfig import SiCombinatorialTrackFinder_xk_Trig_Cfg
+   siCombinatorialTrackFinderTool = CAtoLegacyPublicToolWrapper(SiCombinatorialTrackFinder_xk_Trig_Cfg, name=name+'_Tool')
 
    siTrackMakerTool =  siTrackMakerTool_builder( name                       = add_prefix( 'siTrackMaker', nameSuffix),
                                                  config                     = config,
-                                                 siDetElementsRoadMakerTool = siDetectorElementRoadMaker,
                                                  trackFinderTool            = siCombinatorialTrackFinderTool,
                                                  trackingCuts               = trackingCuts,
                                                  usePrdAssociationTool      = usePrdAssociationTool)

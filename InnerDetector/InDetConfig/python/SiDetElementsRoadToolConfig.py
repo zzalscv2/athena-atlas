@@ -35,6 +35,20 @@ def SiDetElementsRoadMaker_xkCfg(flags, name="InDetSiRoadMaker", **kwargs) :
         name+flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
 
+def TrigSiDetElementsRoadMaker_xkCfg(flags, name="InDetTrigSiRoadMaker", **kwargs) :
+    acc = ComponentAccumulator()
+    
+    if 'PropagatorTool' not in kwargs:
+        from TrkConfig.TrkExRungeKuttaPropagatorConfig import RungeKuttaPropagatorCfg
+        InDetPatternPropagator = acc.popToolsAndMerge(RungeKuttaPropagatorCfg(flags, 
+                                                                              name="InDetTrigPatternPropagator"))
+        acc.addPublicTool(InDetPatternPropagator)
+        kwargs.setdefault("PropagatorTool", InDetPatternPropagator)
+
+    acc.setPrivateTools(acc.popToolsAndMerge(SiDetElementsRoadMaker_xkCfg(flags, name, **kwargs)))
+    return acc
+
+
 def SiDetElementsRoadMaker_xk_TRT_Cfg(flags, name = 'InDetTRT_SeededSiRoad', **kwargs):
     #
     # Silicon det elements road maker tool

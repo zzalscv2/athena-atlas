@@ -112,18 +112,15 @@ class InDetTrigTrackingCuts :
 
     # --- settings for segment finder
     self.__TRTSegFinderPtBins        = 70
-    self.__maxSegTRTShared           = 0.3
     self.__excludeUsedTRToutliers    = False
 
 
     # --- TRT only
-    self.__minTRTonlyMinPt         = 0.5 * Units.GeV
     self.__minTRTonly              = 15
     self.__maxTRTonlyShared        = 0.3
 
     # --- TRT standalone has harder cuts
     if mode == "TRT":
-      self.__minTRTonlyMinPt         = 0.5 * Units.GeV
       self.__minTRTonly              = 15
       self.__maxTRTonlyShared        = 0.3
       self.__useTRTonlyParamCuts       = False
@@ -552,9 +549,6 @@ class InDetTrigTrackingCuts :
   def maxTRTonlyShared( self ) :
     return self.__maxTRTonlyShared
 
-  def minTRTonlyMinPt( self ) :
-    return self.__minTRTonlyMinPt
-
   def RoadWidth( self ) :
     return self.__roadWidth
 
@@ -611,10 +605,6 @@ class InDetTrigTrackingCuts :
 
   def doZBoundary( self ) :
     return self.__doZBoundary
-
-
-  def setRegSelZmax( self, val):
-    self.__RegSelZmax = val
 
   def printInfo( self ) :
     print ('****** Inner Detector Trigger Track Reconstruction Cuts *********************************')
@@ -681,6 +671,5 @@ class InDetTrigTrackingCuts :
       print ('* --------------')
       print ('* min TRT only hits           :  ', self.__minTRTonly)
       print ('* max TRT shared fraction     :  ', self.__maxTRTonlyShared)
-      print ('* min TRT only min pt         :  ', self.__minTRTonlyMinPt, ' MeV')
       print ('*')
     print ('************************************************************************************')

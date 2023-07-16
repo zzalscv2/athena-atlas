@@ -171,7 +171,7 @@ def makeInDetPatternRecognition( inflags, config, verifier = 'IDTrigViewDataVeri
                                                              config      = config,
                                                              inputTracks = config.trkTracks_IDTrig(), 
                                                              verifier    = None, 
-                                                             summaryTool = summaryTool )
+                                                             )
 
 
       viewAlgs += precisionAlgs
@@ -180,7 +180,7 @@ def makeInDetPatternRecognition( inflags, config, verifier = 'IDTrigViewDataVeri
       return  viewAlgs, dataVerifier
 
 
-def ambiguitySolverForIDPatternRecognition( flags, config, summaryTool, inputTracks,verifier=None ):
+def ambiguitySolverForIDPatternRecognition( flags, config, inputTracks,verifier=None ):
    ptAlgs = [] #List containing all the precision tracking algorithms hence every new added alg has to be appended to the list
    
    #-----------------------------------------------------------------------------

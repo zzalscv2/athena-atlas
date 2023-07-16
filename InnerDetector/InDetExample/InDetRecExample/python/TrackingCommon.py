@@ -678,12 +678,6 @@ def getInDetPRDtoTrackMapToolGangedPixels(name='PRDtoTrackMapToolGangedPixels',*
     return InDet__InDetPRDtoTrackMapToolGangedPixels( name=the_name, **kwargs)
 
 
-def getInDetTrigPRDtoTrackMapToolGangedPixels(name='InDetTrigPRDtoTrackMapToolGangedPixels',**kwargs) :
-    return getInDetPRDtoTrackMapToolGangedPixels(name,
-                                                 **setDefaults(kwargs,
-                                                               PixelClusterAmbiguitiesMapName = "TrigPixelClusterAmbiguitiesMap",
-                                                               addTRToutliers                 = False))
-
 def getInDetTrackPRD_Association(name='InDetTrackPRD_Association', **kwargs) :
     the_name,prefix,suffix=makeNameGetPreAndSuffix(name,kwargs)
 
@@ -723,13 +717,6 @@ def getInDetPrdAssociationTool(name='InDetPrdAssociationTool',**kwargs) :
 
     from InDetAssociationTools.InDetAssociationToolsConf import InDet__InDetPRD_AssociationToolGangedPixels
     return InDet__InDetPRD_AssociationToolGangedPixels(name=the_name, **kwargs)
-
-def getInDetTrigPrdAssociationTool(name='InDetTrigPrdAssociationTool_setup',**kwargs) :
-    return getInDetPrdAssociationTool(name,
-                                      **setDefaults(kwargs,
-                                                    PixelClusterAmbiguitiesMapName = "TrigPixelClusterAmbiguitiesMap",
-                                                    addTRToutliers                 = False))
-
 
 def getInDetPrdAssociationTool_setup(name='InDetPrdAssociationTool_setup',**kwargs) :
     '''
@@ -1277,12 +1264,6 @@ def getInDetTrackSummaryTool(name='InDetTrackSummaryTool',**kwargs) :
 
 def getInDetTrackSummaryToolNoHoleSearch(name='InDetTrackSummaryToolNoHoleSearch',**kwargs) :
     return getInDetTrackSummaryTool(name, **setDefaults(kwargs, doHolesInDet           = False))
-
-def getInDetTrigTrackSummaryTool(name='InDetTrackSummaryTool',**kwargs) :
-    return getInDetTrackSummaryTool(name,**setDefaults(kwargs,
-                                                       namePrefix = "InDetTrig",
-                                                       isHLT      = True))
-
 
 @makePublicTool
 def getInDetTRT_ExtensionToolCosmics(name='InDetTRT_ExtensionToolCosmics',**kwargs) :

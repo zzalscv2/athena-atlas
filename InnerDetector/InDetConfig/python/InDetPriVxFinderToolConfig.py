@@ -169,14 +169,11 @@ def TrigGaussIterativeFindingCfg(flags,
         kwargs.setdefault("TrackSelector", acc.popToolsAndMerge(
             TrigVtxInDetTrackSelectionCfg(flags)))
 
-    from InDetTrigRecExample.TrigInDetConfiguredVtxCuts import (
-        ConfiguredTrigVtxCuts)
-    vtx_cuts = ConfiguredTrigVtxCuts()
     kwargs.setdefault("useBeamConstraint", True)
     kwargs.setdefault("maximumChi2cutForSeeding", 29)
     kwargs.setdefault("createSplitVertices", False)
-    kwargs.setdefault("doMaxTracksCut", vtx_cuts.doMaxTracksCut())
-    kwargs.setdefault("MaxTracks", vtx_cuts.MaxTracks())
+    kwargs.setdefault("doMaxTracksCut", True)
+    kwargs.setdefault("MaxTracks", 3000)
 
     acc.setPrivateTools(acc.popToolsAndMerge(
         GaussIterativeFindingCfg(flags, name+flags.Tracking.ActiveConfig.input_name, **kwargs)))

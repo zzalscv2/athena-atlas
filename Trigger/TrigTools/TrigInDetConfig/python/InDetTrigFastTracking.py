@@ -89,10 +89,8 @@ def makeInDetTrigFastTracking( inflags, config = None, rois = 'EMViewRoIs', doFT
       viewAlgs.extend(theFTF)
 
 
-    from InDetTrigRecExample.InDetTrigFlags import InDetTrigFlags
-
-    if (InDetTrigFlags.doTruth()):   
-
+    if (flags.Tracking.ActiveConfig.doTruth):   
+      
       from InDetTruthAlgs.InDetTruthAlgsConf import InDet__PRD_MultiTruthMaker
       InDetTrigPRD_MultiTruthMakerSi = InDet__PRD_MultiTruthMaker (name                    = 'InDetTrigPRD_MultiTruthMakerSi',
                                                                PixelClusterContainerName   = 'PixelTrigClusters',
@@ -114,8 +112,8 @@ def makeInDetTrigFastTracking( inflags, config = None, rois = 'EMViewRoIs', doFT
                                                                         SpacePointsPixelName   = "PixelTrigSpacePoints"    ,
                                                                         SpacePointsSCTName     = "SCT_TrigSpacePoints"    ,
                                                                         SpacePointsOverlapName = "OverlapSpacePoints",
-                                                                        PixelClustesContainer  = 'PixelTrigClusters',
-                                                                        SCT_ClustesContainer   = 'SCT_TrigClusters',
+                                                                        PixelClusterContainer  = 'PixelTrigClusters',
+                                                                        SCT_ClusterContainer   = 'SCT_TrigClusters',
                                                                         MomentumCut            = 1.5 * Units.GeV,
                                                                         RapidityCut            = 2.7     ,
                                                                         RadiusMin              = 0.0     ,

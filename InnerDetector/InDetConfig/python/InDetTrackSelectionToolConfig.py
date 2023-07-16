@@ -114,29 +114,25 @@ def VtxInDetTrackSelectionCfg(flags, name="VertexInDetTrackSelectionTool", **kwa
 
 
 def TrigVtxInDetTrackSelectionCfg(flags, name="InDetTrigDetailedTrackSelectionTool", **kwargs):
-    from InDetTrigRecExample.TrigInDetConfiguredVtxCuts import ConfiguredTrigVtxCuts
-    cuts = ConfiguredTrigVtxCuts()
-    cuts.printInfo()
 
     acc = ComponentAccumulator()
-
-    kwargs.setdefault("CutLevel", cuts.TrackCutLevel())
-    kwargs.setdefault("minPt", cuts.minPT())
-    kwargs.setdefault("maxD0", cuts.IPd0Max())
-    kwargs.setdefault("maxZ0", cuts.z0Max())
-    kwargs.setdefault("maxZ0SinTheta", cuts.IPz0Max())
-    kwargs.setdefault("maxSigmaD0", cuts.sigIPd0Max())
-    kwargs.setdefault("maxSigmaZ0SinTheta", cuts.sigIPz0Max())
-    kwargs.setdefault("maxChiSqperNdf", cuts.fitChi2OnNdfMax())
-    kwargs.setdefault("maxAbsEta", cuts.etaMax())
-    kwargs.setdefault("minNInnermostLayerHits", cuts.nHitInnermostLayer())
-    kwargs.setdefault("minNPixelHits", cuts.nHitPix())
-    kwargs.setdefault("maxNPixelHoles", cuts.nHolesPix())
-    kwargs.setdefault("minNSctHits", cuts.nHitSct())
-    kwargs.setdefault("minNTrtHits", cuts.nHitTrt())
-    kwargs.setdefault("minNSiHits", flags.Tracking.ActiveConfig.minNSiHits_vtx  \
-                      if flags.Tracking.ActiveConfig.minNSiHits_vtx is not None \
-                      else cuts.nHitSi())
+    import AthenaCommon.SystemOfUnits as Units
+    
+    kwargs.setdefault("CutLevel", "NoCut")    #fill flags rather than hardcode here
+    kwargs.setdefault("minPt",           1.*Units.GeV)
+    kwargs.setdefault("maxD0",           4.*Units.mm)
+    kwargs.setdefault("maxZ0",        1000.*Units.mm)
+    kwargs.setdefault("maxZ0SinTheta",1000.*Units.mm)
+    kwargs.setdefault("maxSigmaD0", 5.)
+    kwargs.setdefault("maxSigmaZ0SinTheta", 10.)
+    kwargs.setdefault("maxChiSqperNdf", 3.5)
+    kwargs.setdefault("maxAbsEta", 2.4)
+    kwargs.setdefault("minNInnermostLayerHits", 0)
+    kwargs.setdefault("minNPixelHits",          1)
+    kwargs.setdefault("maxNPixelHoles",         1)
+    kwargs.setdefault("minNSctHits",            4)
+    kwargs.setdefault("minNTrtHits",            0)
+    kwargs.setdefault("minNSiHits", flags.Tracking.ActiveConfig.minNSiHits_vtx)
     # N.B. Legacy config used to set extrapolator + trackSummary tools but since UseTrkTrackTools is not set to True, they're not used in the InDetTrackSelectionTool
 
     acc.setPrivateTools(CompFactory.InDet.InDetTrackSelectionTool(
