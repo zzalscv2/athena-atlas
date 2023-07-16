@@ -40,7 +40,7 @@ def _ftfSeq(flags):
     # # # fast ID (need to be customised because require secialised configuration of the views maker - i.e. parent has to be linked)
     fastInDetReco = InViewRecoCA('FastElectron', RequireParentView = True)
     from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
-    idTracking = trigInDetFastTrackingCfg(flags, roisKey=fastInDetReco.inputMaker().InViewRoIs, signatureName='Electron')
+    idTracking = trigInDetFastTrackingCfg(flags, roisKey=fastInDetReco.inputMaker().InViewRoIs, signatureName='electron')
     fastInDetReco.mergeReco(idTracking)
     fastInDetReco.addRecoAlgo(CompFactory.AthViews.ViewDataVerifier(name='VDVElectronFastCalo',
                                 DataObjects=[('xAOD::TrigEMClusterContainer', 'StoreGateSvc+HLT_FastCaloEMClusters')]) )
@@ -98,14 +98,14 @@ def _precisionTrackingSeq(flags,chainDict):
     name='ElectronPrecisionTracking'
     selAcc=SelectionCA('ElectronPrecisionTracking')
 
-    roisKey = flags.Trigger.InDetTracking.Electron.roi
+    roisKey = flags.Trigger.InDetTracking.electron.roi
     precisionInDetReco = InViewRecoCA(name, 
                                         RoITool=CompFactory.ViewCreatorPreviousROITool(), # view maker args
                                         RequireParentView=True, 
                                         InViewRoIs=roisKey)
 
     from TrigInDetConfig.TrigInDetConfig import trigInDetPrecisionTrackingCfg
-    idTracking = trigInDetPrecisionTrackingCfg(flags, rois= roisKey, signatureName='Electron')
+    idTracking = trigInDetPrecisionTrackingCfg(flags, rois= roisKey, signatureName='electron')
     precisionInDetReco.mergeReco(idTracking)
     selAcc.mergeReco(precisionInDetReco)
     hypoAlg = CompFactory.TrigStreamerHypoAlg('ElectronprecisionTrackingHypo')

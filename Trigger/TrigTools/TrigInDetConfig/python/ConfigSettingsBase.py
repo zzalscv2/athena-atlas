@@ -53,7 +53,7 @@ class _ConfigSettingsBase() :
       self._actsVertex          = False
       self._addSingleTrackVertices = False
       self._TracksMaxZinterval  = 1 #mm
-      self._minNSiHits_vtx      = None
+      self._minNSiHits_vtx      = 10        #from vtxCuts
       self._vertex_jet          = None
       self._adaptiveVertex_jet  = False
       self._actsVertex_jet      = False
@@ -111,16 +111,6 @@ class _ConfigSettingsBase() :
 
    def trkTracks_IDTrig(self):
          return 'HLT_IDTrkTrack_{}_IDTrig'.format( self._suffix )
-
-   def tracks_EFID(self):
-      if self._doRecord:
-         return recordable('HLT_IDTrack_{}_EFID'.format( self._suffix ))
-      else:
-         return 'HLT_IDTrack_{}_EFID'.format( self._suffix )
-
-   def trkTracks_EFID(self):
-      return 'HLT_IDTrkTrack_{}_EFID'.format( self._suffix )
-
 
    @property
    def name(self):
