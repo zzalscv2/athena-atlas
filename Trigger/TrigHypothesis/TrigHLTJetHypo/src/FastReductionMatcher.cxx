@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./FastReductionMatcher.h"
@@ -12,9 +12,11 @@
 
 FastReductionMatcher::FastReductionMatcher(ConditionPtrs& conditions,
 					   ConditionFilters& filters,
+					   const ConditionFilterInds& filterInds,
 					   const Tree& tree):
   m_conditions(std::move(conditions)),
   m_conditionFilters(std::move(filters)),
+  m_conditionFilterInds(filterInds),
   m_tree(tree){
 
   if (m_conditions[0]->capacity() != 0 or
@@ -37,9 +39,12 @@ FastReductionMatcher::FastReductionMatcher(ConditionPtrs& conditions,
 
   m_minNjets = std::max(1, minNjets);
   
-  if (filters.size() != conditions.size()) {
+  if (filterInds.size() != m_conditions.size()) {
     m_validState = false;
-    m_msg = "Conditions and ConditionFilters sequence sizes differ";
+    std::stringstream ss;
+    ss <<  "ConditionFilterInds and Conditions sequence sizes differ: ";
+    ss << filterInds.size() <<  " "  << m_conditions.size();
+    m_msg = ss.str();
   }
 
 }
@@ -78,6 +83,7 @@ FastReductionMatcher::match(const HypoJetVector& jv,
   FastReducer reducer(jv,
                       m_conditions,
 		      m_conditionFilters,
+		      m_conditionFilterInds,
                       m_tree,
                       jetCollector,
                       collector);
@@ -100,6 +106,19 @@ std::string FastReductionMatcher::toString() const {
     sc.insert(sc.begin(), 3-sc.length(), ' ');
     ss << sc <<": "<< c->toString() + '\n';
   }
+
+
+  ss << "FastReductionMatcher ConditionFilter indices ["
+     << m_conditionFilterInds.size() << "]: \n";
+  
+
+  count = 0;
+  for(const auto& c : m_conditionFilterInds){
+    auto sc = std::to_string(count++);
+    sc.insert(sc.begin(), 3-sc.length(), ' ');
+    ss << sc <<": "<< c <<  '\n';
+  }
+
 
   ss << "FastReductionMatcher ConditionFilters ["
      << m_conditionFilters.size() << "]: \n";

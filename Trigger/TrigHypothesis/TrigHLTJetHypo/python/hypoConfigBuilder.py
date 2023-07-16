@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TrigHLTJetHypo.FastReductionAlgToolFactory import toolfactory
 
@@ -16,10 +16,6 @@ from TrigHLTJetHypo.prefilter_clean import prefilter_clean
 
 from TrigHLTJetHypo.makeConditionFilterConfigurer import (
     makeConditionFilterConfigurer,
-)
-
-from TrigHLTJetHypo.makePassThroughFilterConfigurer import (
-    makePassThroughFilterConfigurer,
 )
 
 from TrigHLTJetHypo.make_repeatedCondConfigurer import (
@@ -73,8 +69,10 @@ def buildHypoHelperConfigTool(params):
     scenarios. It contains the information needed to build the
     configuration AlgTool that intialiases a hypo helper AlgTool"""
 
-    # check that each Condition has a Filter
-    assert len(params.repcondargs) == len(params.filterparams)
+    # check that each Condition has a Filter index.
+    # the index is -1 for no Condition filtering.
+    assert len(params.repcondargs) == len(params.filterparam_inds)
+    assert len(params.filterparam_inds) >= len(params.filterparams)
     
     # FastReducer root node
     repcondobjs = [make_root_repcondconfig()]
@@ -82,24 +80,24 @@ def buildHypoHelperConfigTool(params):
         repcondobjs.append(make_repeatedCondCfgFromParams(ra))
 
 
-    # filter for FastReducer root node
-    filtConditionMakers = [makePassThroughFilterConfigurer()]
+    # filter for FastReducer root node (use position 0)
+    filtConditionMakers = []
+    filtConditionMakerInds = [-1] # no condition filtering for root
 
-    for ra in params.filterparams:
-        if ra.typename == 'ConditionFilter':
+    for ra_ind in params.filterparam_inds:
+        if ra_ind != -1:
+            ra = params.filterparams[ra_ind]
             filtConditionMakers.append(makeConditionFilterConfigurer(ra))
-        elif ra.typename == 'PassThroughFilter':
-            filtConditionMakers.append(makePassThroughFilterConfigurer())
+            filtConditionMakerInds.append(len(filtConditionMakers)-1)
         else:
-            raise NotImplementedError(
-                'Filter type %s not implemented' % ra.typename
-            )
+            filtConditionMakerInds.append(-1)
 
     toolclass, name = toolfactory('HelperToolConfigTool')
                            
     vals = {'name': name,
             'conditionMakers': repcondobjs,
             'filterMakers': filtConditionMakers,
+            'filterMakerInds': filtConditionMakerInds,
             'treeVector': params.treevec,
             'leafVector': params.leafvec,
             }
@@ -294,7 +292,7 @@ def make_prefilter_configurers(chain_dict):
     # a PassThroughFilter configurer is made.
 
     if not pf_strings:
-        return [makePassThroughFilterConfigurer()]
+        return []
 
     # route the prefilter strings to the appropriate handler
     prefilter_router = {

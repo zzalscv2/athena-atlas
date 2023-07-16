@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGJETHYPOTOOLCONFIG_FASTREDUCTION_H
@@ -49,6 +49,13 @@ public extends<AthAlgTool, ITrigJetHypoToolNoGrouperConfig> {
   
   ToolHandleArray<ITrigHypoJetVectorFilterConfig> m_filterMakers{
     this, "filterMakers", {}, "AlgTools that construct Condition filters"
+  };
+
+
+  // indirection to allow non-specification of PassThrough  filters.
+  // as requested in  ATR-27619
+  Gaudi::Property<std::vector<int>> m_filterMakerInds{
+    this, "filterMakerInds", {}, "Indicies into m_filterMakers"
   };
 
   Gaudi::Property<std::vector<std::size_t>> m_treeVec{

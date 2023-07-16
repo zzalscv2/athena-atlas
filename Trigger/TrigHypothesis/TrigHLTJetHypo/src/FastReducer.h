@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGHLTJETHYPO_FASTREDUCER_H
@@ -30,12 +30,15 @@ using JetGroupInd2ElemInds = std::map<int, std::vector<std::size_t>>;
 using  ConditionFilters =
   std::vector<std::unique_ptr<IHypoJetVectorFilter>>;
 
+using  ConditionFilterInds = std::vector<int>;
+
 class FastReducer {
  public:
 
   FastReducer(const HypoJetVector& jv,
               const ConditionPtrs& conditionObjects,
 	      const ConditionFilters& conditionFilters,
+	      const ConditionFilterInds& conditionFilterInds,
               const Tree& conditionsTree,
               xAODJetCollector& jetCollector,
               const Collector& collector);
@@ -59,6 +62,7 @@ class FastReducer {
 
   // conditionFilters owned by the matcher
   const ConditionFilters& m_conditionFilters;
+  ConditionFilterInds m_conditionFilterInds;
 
   /** tree structure for Conditions objects.
    The conditions tree gives relations among conditions (eg parent-child

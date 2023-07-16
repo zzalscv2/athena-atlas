@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TrigHLTJetHypo.RepeatedConditionParams import RepeatedConditionParams
-from TrigHLTJetHypo.FilterParams import FilterParams
 from TrigHLTJetHypo.HelperConfigToolParams import HelperConfigToolParams
 from TrigHLTJetHypo.ConditionDefaults import defaults
 from TrigHLTJetHypo.make_treevec import make_treevec
@@ -62,8 +61,8 @@ def scenario_fbdjshared(scenario, chainPartInd):
 
     # make pass through filter params for each condition in the tree.
     nconds = len(repcondargs)
-    filterparams = [FilterParams(typename='PassThroughFilter')
-                    for i in range(nconds)]
+    filterparams = []
+    filterparam_inds = [-1 for i in range(nconds)]
 
     # treevec[i] gives the tree_id of the parent of the
     # node with tree_id = i
@@ -72,7 +71,8 @@ def scenario_fbdjshared(scenario, chainPartInd):
     
     helperparams = HelperConfigToolParams(treevec=treevec,
                                           repcondargs=repcondargs,
-                                          filterparams=filterparams)
+                                          filterparams=filterparams,
+                                          filterparam_inds=filterparam_inds)
     helperparamslist = [helperparams]
 
     #############################################33
@@ -125,8 +125,8 @@ def scenario_fbdjshared(scenario, chainPartInd):
 
     # make pass through filter params for each condition in the tree.
     nconds = len(repcondargs)
-    filterparams = [FilterParams(typename='PassThroughFilter')
-                    for i in range(nconds)]
+    filterparams = []
+    filterparam_inds = [-1 for i in range(nconds)]
 
     # parameters to initalise the AlgTool that initialises the helper AlgTool
 
@@ -137,8 +137,12 @@ def scenario_fbdjshared(scenario, chainPartInd):
  
     helperparams = HelperConfigToolParams(treevec=treevec,
                                            repcondargs=repcondargs,
-                                           filterparams=filterparams)
+                                           filterparams=filterparams,
+                                           filterparam_inds=filterparam_inds)
     
     # a list is one entry per FastReduction tree
+
+    assert len(repcondargs) == len(filterparam_inds)
+
     helperparamslist.append(helperparams)
     return helperparamslist

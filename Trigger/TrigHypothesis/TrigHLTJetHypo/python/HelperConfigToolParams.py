@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 from AthenaCommon.Constants import DEBUG
@@ -14,12 +14,17 @@ class HelperConfigToolParams:
     and Conditions that will filter for the node.
     """
     
-    def __init__(self, treevec=[], repcondargs=[], filterparams=[]):
+    def __init__(self,
+                 treevec=[],
+                 repcondargs=[],
+                 filterparams=[],
+                 filterparam_inds=[]):
   
 
         self.treevec = treevec
         self.repcondargs = repcondargs
         self.filterparams = filterparams
+        self.filterparam_inds = filterparam_inds
 
     @property
     def treevec(self):
@@ -69,11 +74,22 @@ class HelperConfigToolParams:
     @filterparams.setter
     def filterparams(self, filterparams):
         self.__filterparams = filterparams
+
+        
+    @property
+    def filterparam_inds(self):
+        return self.__filterparam_inds
+
+    @filterparam_inds.setter
+    def filterparam_inds(self, filterparam_inds):
+        self.__filterparam_inds = filterparam_inds
+
         
     def __str__(self):
 
         s = [self.__class__.__name__ + ':']
-        to_show = ['treevec', 'leafvec', 'repcondargs', 'filterparams']
+        to_show = ['treevec', 'leafvec', 'repcondargs', 'filterparams',
+                   'filterparam_inds']
         width = max([len(a) for a in to_show])
         [s.append('%s %s' % (a.ljust(width), getattr(self, a))) for a in to_show]
         return '\n'.join(s)
