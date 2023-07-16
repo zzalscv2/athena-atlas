@@ -100,8 +100,11 @@ def scenario_ht(scenario, chainPartInd):
                                                condargs=condargs)]
         filterparams = [FilterParams(typename='ConditionFilter',
                                      args=repfiltargs)]
+        filterparam_inds = [0]
+        
     else:
-        filterparams = [FilterParams(typename='PassThroughFilter')]
+        filterparams = []
+        filterparam_inds = [-1] # no condition filter
 
     # parameters to initalise the AlgTool that initialises the helper AlgTool
 
@@ -110,9 +113,13 @@ def scenario_ht(scenario, chainPartInd):
     treevec = make_treevec(repcondargs)
     assert treevec == [0, 0]
 
+    assert len(repcondargs) == len(filterparam_inds)
+
+
     helper_params = HelperConfigToolParams(treevec=treevec,
                                            repcondargs=repcondargs,
-                                           filterparams=filterparams)
+                                           filterparams=filterparams,
+                                           filterparam_inds=filterparam_inds)
 
     return [helper_params]  # a list with one entry per FastReduction tree
 
