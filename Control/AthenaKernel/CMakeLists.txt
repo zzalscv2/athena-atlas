@@ -4,7 +4,7 @@
 atlas_subdir( AthenaKernel )
 
 # External dependencies:
-find_package( Boost COMPONENTS regex filesystem thread )
+find_package( Boost COMPONENTS regex thread )
 find_package( UUID )
 find_package( CLHEP )
 find_package( TBB )

@@ -118,6 +118,9 @@ private:
   UnsignedIntegerProperty m_maxTotalOccupancyPercent{this, "maxTotalOccupancyInPercent", 100, "Threshold of percentage of fired strips for the whole SCT. 100 disables the whole SCT cut."};
   BooleanProperty m_roiSeeded{this, "isRoI_Seeded", false, "Use RoI"};
   BooleanProperty m_checkBadModules{this, "checkBadModules", true, "Flag to check bad modules using InDetSCT_ConditionsSummaryTool"};
+  Gaudi::Property<bool> m_useDataPoolWithCache{
+      this, "useDataPoolWithCache", false, "use DataPool With Cache"};
+
   //@}
 };
 

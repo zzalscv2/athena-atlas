@@ -36,6 +36,7 @@ public:
 	virtual ~NswDcsDbAlg() = default;
 	virtual StatusCode initialize() override;
 	virtual StatusCode execute (const EventContext&) const override;
+	virtual bool isReEntrant() const override { return false; }
 
  
 private:

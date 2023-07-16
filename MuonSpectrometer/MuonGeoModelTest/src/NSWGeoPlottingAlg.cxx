@@ -309,8 +309,6 @@ StatusCode NSWGeoPlottingAlg::initMicroMega() {
   ATH_CHECK(detStore()->retrieve(detMgr));
   const MmIdHelper& id_helper = m_idHelperSvc->mmIdHelper();
   for (const std::string station : {"MML", "MMS"}) {
-    for (int ml = id_helper.multilayerMin(); ml <= id_helper.multilayerMax();
-         ++ml) {
       for (int phi = id_helper.stationPhiMin();
            phi <= id_helper.stationPhiMax(); ++phi) {
         for (int eta = -2; eta <= 2; ++eta) {
@@ -344,8 +342,7 @@ StatusCode NSWGeoPlottingAlg::initMicroMega() {
             }
           }
         }
-      }
-    }
+      }    
   }
   return StatusCode::SUCCESS;
 }

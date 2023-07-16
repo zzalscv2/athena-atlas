@@ -70,7 +70,6 @@ public:
 
   StatusCode initialize();
   
-  //  void SetErrorStrategy(int strategy);
 
   // Compute the pixel cluster global position, and the error associated 
   // to the position.
@@ -88,28 +87,9 @@ public:
   //    1: pixel pitch/sqrt(12.)
   //    2: parametrized as a function ofpseudorapidity and cluster size 
   //       (default)
-  // - TOT interpolation variable in local x and y directions 
-  //   [ Omegax = TOT1/(TOT1+TOT2), where TOT1 and TOT2 are the sum of the 
-  //     charges of the first and last row of the cluster respectively  
-  //     Omegay: similar definition with columns rather than rows ]
-
-  PixelCluster* pixelCluster(const Identifier& clusterID,
-                             const Amg::Vector2D& localPos,
-                             const std::vector<Identifier>& rdoList,
-                             const int lvl1a,
-                             const std::vector<int>& totList,
-                             const SiWidth& width,
-                             const InDetDD::SiDetectorElement* element,
-                             bool ganged,
-                             int errorStrategy,
-                             const float omegax,
-                             const float omegay,
-                             bool split,
-                             double splitProb1,
-                             double splitProb2,
-                             const PixelChargeCalibCondData *calibData,
-                             const PixelOfflineCalibData *offlineCalibData) const;
-
+  //   10: CTB parametrization (as a function of module and cluster size)
+  //       no magnetic field
+  // - const reference to a PixelID helper class
   PixelCluster  pixelCluster(const Identifier& clusterID,
                              const Amg::Vector2D& localPos,
                              const std::vector<Identifier>& rdoList,

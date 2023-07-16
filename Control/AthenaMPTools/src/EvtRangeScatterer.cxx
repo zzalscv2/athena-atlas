@@ -22,6 +22,7 @@
 #include <queue>
 #include <fstream>
 #include <cstdlib>
+#include <filesystem>
 
 EvtRangeScatterer::EvtRangeScatterer(const std::string& type
 				     , const std::string& name
@@ -100,8 +101,8 @@ StatusCode EvtRangeScatterer::exec()
 void EvtRangeScatterer::subProcessLogs(std::vector<std::string>& filenames)
 {
   filenames.clear();
-  boost::filesystem::path reader_rundir(m_subprocTopDir);
-  reader_rundir/= boost::filesystem::path(m_subprocDirPrefix);
+  std::filesystem::path reader_rundir(m_subprocTopDir);
+  reader_rundir/= std::filesystem::path(m_subprocDirPrefix);
   filenames.push_back(reader_rundir.string()+std::string("/AthenaMP.log"));
 }
 
@@ -124,8 +125,8 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeScatterer::bootstrap_
   // ...
 
   // Reader dir: mkdir 
-  boost::filesystem::path reader_rundir(m_subprocTopDir);
-  reader_rundir /= boost::filesystem::path(m_subprocDirPrefix);
+  std::filesystem::path reader_rundir(m_subprocTopDir);
+  reader_rundir /= std::filesystem::path(m_subprocDirPrefix);
 
   if(mkdir(reader_rundir.string().c_str(),S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH)==-1) {
     ATH_MSG_ERROR("Unable to make reader run directory: " << reader_rundir.string() << ". " << fmterror(errno));
@@ -145,7 +146,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeScatterer::bootstrap_
   ATH_MSG_INFO("Io registry updated in the AthenaMP Event Range Scatterer PID=" << getpid());
 
   // _______________________ Handle saved PFC (if any) ______________________
-  boost::filesystem::path abs_reader_rundir = boost::filesystem::absolute(reader_rundir);
+  std::filesystem::path abs_reader_rundir = std::filesystem::absolute(reader_rundir);
   if(handleSavedPfc(abs_reader_rundir))
     return outwork;
 

@@ -11,6 +11,7 @@
 #include "StoreGate/DataHandle.h"
 
 #include <map>
+#include <filesystem>
 
 using namespace CaloRecGPU;
 
@@ -270,8 +271,8 @@ StatusCode CaloCellsCounterCPU::execute (const EventContext & ctx, xAOD::CaloClu
       return StatusCode::FAILURE;
     }
 
-  const boost::filesystem::path save_file = m_savePath + "/" + StandaloneDataIO::build_filename((m_filePrefix.size() > 0 ? m_filePrefix + "_counts" : "counts"),
-                                                                                                ctx.evt(), m_fileSuffix, "txt", m_numWidth);
+  const std::filesystem::path save_file = m_savePath + "/" + StandaloneDataIO::build_filename((m_filePrefix.size() > 0 ? m_filePrefix + "_counts" : "counts"),
+											      ctx.evt(), m_fileSuffix, "txt", m_numWidth);
 
   std::ofstream out_file(save_file);
 

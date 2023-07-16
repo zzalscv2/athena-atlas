@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCDIGITASDPOSCONDALG_H
@@ -18,7 +18,7 @@ class TgcDigitASDposCondAlg : public AthReentrantAlgorithm
   virtual ~TgcDigitASDposCondAlg() = default;
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& ctx) const override;
-
+    virtual bool isReEntrant() const override { return false; }
  private:
   SG::ReadCondHandleKey<CondAttrListCollection> m_readKey_ASDpos{this, "ReadKeyAsdPos", "/TGC/DIGIT/ASDPOS", "SG key for TGCDIGITASDPOS"};
   SG::WriteCondHandleKey<TgcDigitASDposData> m_writeKey{this, "WriteKey", "TGCDigitASDposData", "SG Key of TGCDigit AsdPos"};

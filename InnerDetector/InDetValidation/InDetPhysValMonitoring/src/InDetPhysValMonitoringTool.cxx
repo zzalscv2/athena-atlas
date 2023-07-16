@@ -264,6 +264,8 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
     rttConfig.doVertexPlots = false;
     rttConfig.doVerticesVsMuPlots = false;
     rttConfig.doHardScatterVertexPlots = false;
+    rttConfig.doVertexTruthMatchingPlots = false;
+    rttConfig.doHardScatterVertexTruthMatchingPlots = false;
     rttConfig.doTrkInJetPlots = true;
     rttConfig.doTrkInJetPlots_bjets = true;
     rttConfig.doTrkInJetPlots_matched = true;

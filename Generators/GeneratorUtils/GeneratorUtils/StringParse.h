@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORUTILS_STRINGPARSE_H
@@ -7,7 +7,6 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include "boost/lexical_cast.hpp"
 
 /// @brief Utility object for parsing a string into tokens and returning them as a variety of types
 ///
@@ -25,6 +24,7 @@
 /// @author Ian Hinchliffe, April 2000
 /// @author Yun-Ha.Shin, June 2006
 /// @author Andy Buckley, September 2012
+/// @author Andrii Verbytskyi, Jul 2023
 ///
 class StringParse {
 public:
@@ -41,45 +41,21 @@ public:
   }
 
   /// Templated function to get the num'th token as any type (via stringstream)
-  template <typename T>
-  T piece(size_t num) {
-    try {
-      std::string token = (num > num_pieces()) ? "?!?" : m_lsubstring[num-1];
-      return boost::lexical_cast<T>(token);
-    } catch (const boost::bad_lexical_cast& ex) {
-      return boost::lexical_cast<T>("-1");
-    }
-  }
-
-  /// Function to get the num'th token as a string
-  std::string piece(size_t num) {
-    return piece<std::string>(num);
-  }
+  template <typename T> T piece(size_t num) const; 
 
   /// Function to get the num'th token as an int
-  int intpiece(size_t num) {
-    if (num > num_pieces()) return -1;
-    return piece<int>(num);
-  }
+  int intpiece(size_t num) const;
 
   /// Function to get the num'th token as a long int
-  long longpiece(size_t num) {
-    if (num > num_pieces()) return -1;
-    return piece<long>(num);
-  }
+  long longpiece(size_t num) const;
 
   /// Function to get the num'th token as a double
-  double numpiece(size_t num) {
-    if (num > num_pieces()) return -1;
-    return piece<double>(num);
-  }
+  double numpiece(size_t num) const;
+  
+  std::string piece(size_t num) const;
 
   /// Number of tokens in the input string
   size_t num_pieces() const { return m_lsubstring.size(); }
-
-  /// @brief Number of tokens in the input string
-  /// @deprecated Prefer num_pieces, which is a more accurate name
-  unsigned string_size() const { return num_pieces(); }
 
 private:
 
@@ -88,5 +64,65 @@ private:
 
 };
 
+  template <> double StringParse::piece(size_t num) const {
+    try {
+      std::string token = (num > num_pieces()) ? "?!?" : m_lsubstring[num-1];
+      size_t idx = 0;
+      auto ret = std::stod(token,&idx);
+      return (idx == token.size()) ? ret : std::stod("-1");
+    } catch (const std::invalid_argument& ex) {
+      return std::stod("-1");
+    }
+  }
 
+
+  template <> int StringParse::piece(size_t num) const {
+    try {
+      std::string token = (num > num_pieces()) ? "?!?" : m_lsubstring[num-1];
+      size_t idx = 0;
+      auto ret = std::stoi(token,&idx);
+      return (idx == token.size()) ? ret : std::stoi("-1");
+    } catch (const std::invalid_argument& ex) {
+      return std::stoi("-1");
+    }
+  }
+
+  template <> long StringParse::piece(size_t num) const {
+    try {
+      std::string token = (num > num_pieces()) ? "?!?" : m_lsubstring[num-1];
+      size_t idx = 0;
+      auto ret = std::stol(token,&idx);
+      return (idx == token.size()) ? ret : std::stol("-1");
+    } catch (const std::invalid_argument& ex) {
+      return std::stol("-1");
+    }
+  }
+
+  /// Function to get the num'th token as a string
+  template <> std::string StringParse::piece(size_t num)  const{
+    return m_lsubstring.at(num-1);
+  }
+  
+  
+  /// Function to get the num'th token as an int
+  int StringParse::intpiece(size_t num) const {
+    if (num > num_pieces()) return -1;
+    return piece<int>(num);
+  }
+
+  /// Function to get the num'th token as a long int
+  long StringParse::longpiece(size_t num) const {
+    if (num > num_pieces()) return -1;
+    return piece<long>(num);
+  }
+
+  /// Function to get the num'th token as a double
+  double StringParse::numpiece(size_t num) const {
+    if (num > num_pieces()) return -1;
+    return piece<double>(num);
+  }
+
+  std::string StringParse::piece(size_t num) const {
+    return piece<std::string>(num);
+  }
 #endif

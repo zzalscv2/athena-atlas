@@ -348,6 +348,7 @@ class TileTBAANtuple: public AthAlgorithm {
     int* m_tof;
     int* m_btdc1;
     int* m_btdc2;
+    int* m_scaler;
     std::vector<std::vector<int> > *m_btdc;
     int m_tjitter;
     int m_tscTOF;

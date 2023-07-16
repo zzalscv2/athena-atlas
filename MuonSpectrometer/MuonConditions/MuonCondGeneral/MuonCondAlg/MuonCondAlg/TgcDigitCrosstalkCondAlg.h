@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDALG_TGCDIGITCROSSTALKCONDALG_H_
@@ -18,6 +18,7 @@ class TgcDigitCrosstalkCondAlg : public AthReentrantAlgorithm
   virtual ~TgcDigitCrosstalkCondAlg() = default;
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& ctx) const override;
+  virtual bool isReEntrant() const override { return false; }
 
  private:
   SG::ReadCondHandleKey<CondAttrListCollection> m_readKey{this, "ReadKey", "/TGC/DIGIT/XTALK", "SG key for TGCDIGITXTALK"};

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CpmMonitorAlgorithm.h"
@@ -800,11 +800,14 @@ StatusCode CpmMonitorAlgorithm::fillCpmTowerVectors(SG::ReadHandle<xAOD::CPMTowe
       : converter.cpCrateOverlap(coord);
     const int cpm    = (core) ? converter.cpModule(coord)
       : converter.cpModuleOverlap(coord);
-    const int loc    = crate * m_modules + cpm - 1;
+    const unsigned int loc    = crate * m_modules + cpm - 1;
     const int slices = (ct->emEnergyVec()).size();
     const int slice = crate * m_maxSlices + slices - 1;
-    if (crate==999) {
-      ATH_MSG_DEBUG("Crate number is 999, "<< crate << " eta " << eta << " phi " << phi <<       
+    if (loc >= errorsCPM.size()) {
+      ATH_MSG_ERROR("Crate/module index out of range: " << loc << " >= "
+                    << errorsCPM.size() << " crate " << crate
+                    << " core " << core
+                    << " eta " << eta << " phi " << phi <<       
  		    " cpm " << cpm << " slices " << slices <<
 		    " max slices " << m_maxSlices << " m_modules " << m_modules <<
 		    " slice " << slice);
@@ -814,7 +817,7 @@ StatusCode CpmMonitorAlgorithm::fillCpmTowerVectors(SG::ReadHandle<xAOD::CPMTowe
     bool emParityError=false; 
     bool emLinkDownError=false; 
     uint32_t error = ct->emError(); 
-    if (error) {
+    if (error && loc < errorsCPM.size()) {
       const LVL1::DataError emError(error);
       if (emError.get(LVL1::DataError::Parity)) {
 	emParityError=true;
@@ -840,7 +843,7 @@ StatusCode CpmMonitorAlgorithm::fillCpmTowerVectors(SG::ReadHandle<xAOD::CPMTowe
     bool hadParityError=false;
     bool hadLinkDownError=false;
     error = ct->hadError();
-    if (error) {
+    if (error && loc < errorsCPM.size()) {
       const LVL1::DataError hadError(error);
       if (hadError.get(LVL1::DataError::Parity)) {
 	hadParityError=true;

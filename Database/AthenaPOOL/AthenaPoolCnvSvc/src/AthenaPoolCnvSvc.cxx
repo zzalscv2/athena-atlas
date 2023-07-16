@@ -466,8 +466,21 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
                std::ostringstream oss2;
                oss2 << std::dec << num;
                std::string::size_type len = m_metadataContainerProp.value().size();
-               if (len > 0 && contName.compare(0, len, m_metadataContainerProp.value()) == 0
-		               && contName[len] == '(') {
+               bool foundContainer = false;
+               std::size_t pPos = contName.find('(');
+               if (contName.compare(0, pPos, m_metadataContainerProp.value()) == 0) {
+                  foundContainer = true;
+               }
+               else {
+                  for (const auto& item: m_metadataContainersAug.value()) {
+                     if (contName.compare(0, pPos, item) == 0){
+                        foundContainer = true;
+                        len = item.size();
+                        break;
+                     }
+                  }
+               }
+               if (len > 0 && foundContainer && contName[len] == '(' ) {
                   ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
                   // For Metadata, before moving to next client, fire file incidents
                   if (m_metadataClient != num) {

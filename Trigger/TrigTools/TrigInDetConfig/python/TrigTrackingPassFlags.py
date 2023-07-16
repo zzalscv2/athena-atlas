@@ -72,7 +72,6 @@ def signatureSpecificSettingOfFlags(flags,mode):
     flags.nWeightedClustersMin= 8
     flags.minTRTonTrk         = 20
     flags.seedFilterLevel     = 3
-    flags.maxTracksPerSharedPRD = 10
 
   def collToRecordable(flags,name):
     ret = name

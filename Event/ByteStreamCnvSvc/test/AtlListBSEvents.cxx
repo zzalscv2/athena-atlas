@@ -50,26 +50,8 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
     std::exit(1);
   }
 
-  std::vector<std::pair<eformat::SubDetectorGroup,std::string> > namesPerSubdet;
-  namesPerSubdet.push_back(std::make_pair<eformat::SubDetectorGroup,std::string>(PIXEL,"  Pixel"));
-  namesPerSubdet.push_back(std::make_pair<eformat::SubDetectorGroup,std::string>(SCT,"    SCT"));
-  namesPerSubdet.push_back(std::make_pair<eformat::SubDetectorGroup,std::string>(TRT,"    TRT"));
-  namesPerSubdet.push_back(std::make_pair<eformat::SubDetectorGroup,std::string>(LAR,"    LAr"));
-  namesPerSubdet.push_back(std::make_pair<eformat::SubDetectorGroup,std::string>(TILECAL,"   Tile"));
-  namesPerSubdet.push_back(std::make_pair<eformat::SubDetectorGroup,std::string>(MUON,"   Muon"));
-  namesPerSubdet.push_back(std::make_pair<eformat::SubDetectorGroup,std::string>(TDAQ,"   TDAQ"));
-  namesPerSubdet.push_back(std::make_pair<eformat::SubDetectorGroup,std::string>(FORWARD,"Forward"));
-  namesPerSubdet.push_back(std::make_pair<eformat::SubDetectorGroup,std::string>(OTHER_DETECTORS,"  others"));
-
-
-  std::map<SubDetectorGroup,unsigned> totalSizePerSubdet;
-  std::map<SubDetectorGroup,unsigned>::iterator sizeit;
-  
-  for(sizeit=totalSizePerSubdet.begin();sizeit!=totalSizePerSubdet.end();++sizeit)
-    sizeit->second=0;
-
-  unsigned totalSize=0;
-
+  uint64_t totalSize=0;
+  std::vector<uint64_t> totalSizePerSubDet(10,0);
   std::vector<std::string> fileNames;
   unsigned eventCounter=0;
   unsigned maxEvents=std::numeric_limits<unsigned>::max();
@@ -156,9 +138,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
 	      std::cout << "Can't read from file!" << std::endl;
 	      break;
       }
-
       
-    
       // make a fragment with eformat 3.0 and check it's validity
       try {
 	if ((eformat::HeaderMarker)(fragment[0])!=FULL_EVENT) {
@@ -180,14 +160,14 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
 	FullEventFragment<const uint32_t*> fe(fragment.get());
       
 	if (checkevents) fe.check_tree();
-	totalSize+=fe.readable_payload_size_word()*4;
-	
+	totalSize+=fe.readable_payload_size_word()*sizeof(uint32_t);
 	const uint64_t eventNo=fe.global_id();
 	const uint32_t runNo=fe.run_no();
 	const time_t sec=fe.bc_time_seconds();
 	if (listevents) {
+    std::cout << std::setprecision(2) << std::fixed;
 	  std::cout << "Index=" << eventCounter <<" Run=" << runNo << " Event=" << eventNo 
-		    << " LB=" <<  fe.lumi_block() << " Size=" << fe. fragment_size_word()*4./1024 <<"kB" 
+		    << " LB=" <<  fe.lumi_block() << " Size=" << fe.fragment_size_word()*sizeof(uint32_t)/1024. <<"kB (uncompr:" <<fe.readable_payload_size_word()*sizeof(uint32_t)/1024. << "kB)" 
 		    << " Offset=" << pDR->getPosition() << " " << std::put_time(std::gmtime(&sec),"%Y-%m-%d:%H:%m:%S") << " UTC" << std::endl;
 
 	  //2017-07-24:03:55:00
@@ -199,13 +179,16 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
 	  sd_it_e=robIndex.end();
 	  for (sd_it=robIndex.begin();sd_it!=sd_it_e;++sd_it) {
 	    const eformat::SubDetectorGroup sd=sd_it->first;
+      if (sd>=totalSizePerSubDet.size())
+        totalSizePerSubDet.resize(1+sd,0);
+      uint64_t& thisSDSize=totalSizePerSubDet[sd];
 	    const std::vector<const uint32_t*>& robs = sd_it->second;
 	    std::vector<const uint32_t*>::const_iterator rob_it=robs.begin();
 	    std::vector<const uint32_t*>::const_iterator rob_it_e=robs.end();
 	    for (;rob_it!=rob_it_e;++rob_it) {
 	      ROBFragment<const uint32_t*> robFrag(*rob_it);
 	      const unsigned robsize=robFrag.fragment_size_word()*sizeof(uint32_t);
-	      totalSizePerSubdet[sd]+=robsize;
+	      thisSDSize+=robsize;
 	    }//end loop over Rob-fragmets
 	  }//end loop over subdets
 	}//end if showSizes
@@ -233,22 +216,36 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
   }
 
   //Print summary:
-
-
-  std::ios_base::fmtflags original_flags = std::cout.flags();
   std::cout.setf(std::ios::right | std::ios::fixed);//,std::ios::floatfield); 
   std::cout.width(10);
   std::cout.precision(2);
   if (showSizes) {
+    std::array<std::string,10> detnames{"    ANY (0x0)",
+                                        "  PIXEL (0x1)",
+                                        "    SCT (0x2)",
+                                        "    TRT (0x3)",
+                                        "    LAR (0x4)",
+                                        "TILECAL (0x5)",
+                                        "   MUON (0x6)",
+                                        "   TDAQ (0x7)",
+                                        "FORWARD (0x8)",
+                                        " L1Calo (0x9)"};
+
     std::cout << std::endl << "Average fragment size per subdetector:" << std::endl;
-    std::vector<std::pair<SubDetectorGroup,std::string> >::const_iterator nit=namesPerSubdet.begin();
-    std::vector<std::pair<SubDetectorGroup,std::string> >::const_iterator nit_e=namesPerSubdet.end();
-    unsigned sum=0;
-    for(;nit!=nit_e;++nit) {
-      const SubDetectorGroup sd=nit->first;
-      const std::string& name=nit->second;
-      
-      const unsigned s=totalSizePerSubdet[sd];
+    uint64_t sum=0;
+    for (unsigned sd=0;sd<totalSizePerSubDet.size();++sd) {
+      std::string name;
+      if (sd <detnames.size()) {
+        name=detnames[sd];  
+      }
+      else {
+        std::stringstream sname;
+        sname << "UNKONW (0x" << std::hex << sd << ")";
+        name=sname.str();
+      }
+
+      const uint64_t s=totalSizePerSubDet[sd];
+      if (s==0) continue; //Ignore if size is exactly 0
       sum+=s;
       double sPerEv=0;
       if (eventCounter>0) sPerEv=s/(1024.0*eventCounter); //In kB
@@ -257,14 +254,14 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
       if (totalSize>0) fraction=s/double(totalSize);
       std::cout << name << " :" << sPerEv << " kB/event (" << 100*fraction << "%)" << std::endl;
     }
-    const unsigned overhead=totalSize-sum;
+    const int64_t overhead=totalSize-sum;
     double ohPerEv=0;
+    double fraction=0;
+    if (totalSize>0) fraction=overhead/double(totalSize);  
     if (eventCounter>0) ohPerEv=overhead/(double)eventCounter;
-    std::cout << "Overhead: " << overhead/1024.0 <<" kB or " << ohPerEv << " Bytes/event" << std::endl;
+    std::cout << "     Overhead: " << overhead/1024.0 <<" kB or " << ohPerEv << " Bytes/event (" << 100*fraction << "%)"<< std::endl;
   }
 
-  std::cout << "Total: " << totalSize/(1024.0*eventCounter) << " kB/event" << std::endl; 
-  std::cout.flags(original_flags);
-  
+  std::cout << "Total: " << std::setprecision(2) << std::fixed << totalSize/(1024.0*eventCounter) << " kB/event" << std::endl; 
   return 0;
 }

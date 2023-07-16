@@ -250,10 +250,12 @@ private: // properties
    /// default = "", no tree name results in a single persistency service.
    StringProperty m_persSvcPerInputType{this,"PersSvcPerInputType",""};
    std::mutex  m_mutex;
-  
+
    /// For SharedWriter:
    /// To use MetadataSvc to merge data placed in a certain container
    StringProperty  m_metadataContainerProp{this,"OutputMetadataContainer","MetaData"};
+   StringArrayProperty m_metadataContainersAug{this, "OutputMetadataContainers", {}, "Metadata containers used for augmentations"};
+
    /// Make this instance a Streaming Client during first connect/write automatically
    IntegerProperty m_makeStreamingToolClient{this,"MakeStreamingToolClient",0};
    /// Use Streaming for selected technologies only

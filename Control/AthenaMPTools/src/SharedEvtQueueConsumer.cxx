@@ -19,7 +19,7 @@
 #include "GaudiKernel/IIncidentSvc.h"
 #include "GaudiKernel/IConversionSvc.h"
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <sys/stat.h>
 #include <sstream>
@@ -126,8 +126,8 @@ StatusCode SharedEvtQueueConsumer::finalize()
 
     // 1. Check if master run directory already contains a file with saved orders
     // If so, then rename it with random suffix
-    boost::filesystem::path ordersFile(m_eventOrdersFile);
-    if(boost::filesystem::exists(ordersFile)) {
+    std::filesystem::path ordersFile(m_eventOrdersFile);
+    if(std::filesystem::exists(ordersFile)) {
       srand((unsigned)time(0));
       std::ostringstream randname;
       randname << rand();
@@ -135,8 +135,8 @@ StatusCode SharedEvtQueueConsumer::finalize()
       ATH_MSG_WARNING("File " << m_eventOrdersFile << " already exists in the master run directory!");
       ATH_MSG_WARNING("Saving a backup with new name " << ordersFileBak);
 
-      boost::filesystem::path ordersFileBakpath(ordersFileBak);
-      boost::filesystem::rename(ordersFile,ordersFileBakpath);
+      std::filesystem::path ordersFileBakpath(ordersFileBak);
+      std::filesystem::rename(ordersFile,ordersFileBakpath);
     }
 
     // 2. Merge workers event orders into the master file
@@ -144,8 +144,8 @@ StatusCode SharedEvtQueueConsumer::finalize()
     for(int i=0; i<m_nprocs; ++i) {
       std::ostringstream workerIndex;
       workerIndex << i;
-      boost::filesystem::path worker_rundir(m_subprocTopDir);
-      worker_rundir /= boost::filesystem::path(m_subprocDirPrefix+workerIndex.str());
+      std::filesystem::path worker_rundir(m_subprocTopDir);
+      worker_rundir /= std::filesystem::path(m_subprocDirPrefix+workerIndex.str());
       std::string ordersFileWorker(worker_rundir.string()+std::string("/")+m_eventOrdersFile);
       ATH_MSG_INFO("Processing " << ordersFileWorker << " ...");
       std::fstream fs_worker(ordersFileWorker.c_str(),std::fstream::in);
@@ -276,8 +276,8 @@ void SharedEvtQueueConsumer::subProcessLogs(std::vector<std::string>& filenames)
   for(int i=0; i<m_nprocs; ++i) {
     std::ostringstream workerIndex;
     workerIndex << i;
-    boost::filesystem::path worker_rundir(m_subprocTopDir);
-    worker_rundir /= boost::filesystem::path(m_subprocDirPrefix+workerIndex.str());
+    std::filesystem::path worker_rundir(m_subprocTopDir);
+    worker_rundir /= std::filesystem::path(m_subprocDirPrefix+workerIndex.str());
     filenames.push_back(worker_rundir.string()+std::string("/AthenaMP.log"));
   }
 }
@@ -341,8 +341,8 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::boots
   workindex<<m_rankId;
 
   // ________________________ Worker dir: mkdir ________________________
-  boost::filesystem::path worker_rundir(m_subprocTopDir);
-  worker_rundir /= boost::filesystem::path(m_subprocDirPrefix+workindex.str());
+  std::filesystem::path worker_rundir(m_subprocTopDir);
+  worker_rundir /= std::filesystem::path(m_subprocDirPrefix+workindex.str());
   // TODO: this "worker_" can be made configurable too
 
   if(mkdir(worker_rundir.string().c_str(),S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH)==-1) {
@@ -365,12 +365,12 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::boots
   ATH_MSG_INFO("Io registry updated in the AthenaMP event worker PID=" << getpid());
 
   // ________________________ SimParams & DigiParams & PDGTABLE.MeV ____________________________
-  boost::filesystem::path abs_worker_rundir = boost::filesystem::absolute(worker_rundir);
-  if(boost::filesystem::is_regular_file("SimParams.db"))
+  std::filesystem::path abs_worker_rundir = std::filesystem::absolute(worker_rundir);
+  if(std::filesystem::is_regular_file("SimParams.db"))
     COPY_FILE_HACK("SimParams.db", abs_worker_rundir.string()+"/SimParams.db");
-  if(boost::filesystem::is_regular_file("DigitParams.db"))
+  if(std::filesystem::is_regular_file("DigitParams.db"))
     COPY_FILE_HACK("DigitParams.db", abs_worker_rundir.string()+"/DigitParams.db");
-  if(boost::filesystem::is_regular_file("PDGTABLE.MeV"))
+  if(std::filesystem::is_regular_file("PDGTABLE.MeV"))
     COPY_FILE_HACK("PDGTABLE.MeV", abs_worker_rundir.string()+"/PDGTABLE.MeV");
 
   // _______________________ Handle saved PFC (if any) ______________________
@@ -549,8 +549,8 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::exec_
   auto predefinedEvt = m_eventOrders.cbegin();
 
   // If the event orders file already exists in worker's run directory, then it's an unexpected error!
-  boost::filesystem::path ordersFile(m_eventOrdersFile);
-  if(boost::filesystem::exists(ordersFile)) {
+  std::filesystem::path ordersFile(m_eventOrdersFile);
+  if(std::filesystem::exists(ordersFile)) {
     ATH_MSG_ERROR(m_eventOrdersFile << " already exists in the worker's run directory!");
     all_ok = false;
   }

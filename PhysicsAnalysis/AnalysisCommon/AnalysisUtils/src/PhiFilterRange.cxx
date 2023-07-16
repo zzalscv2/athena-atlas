@@ -74,7 +74,7 @@ void PhiFilterRange::include(double xMin, double xMax)
 
 void PhiFilterRange::includeAll() 
 { 
-  m_range = boost::none;
+  m_range = std::nullopt;
   return;
 }
 
@@ -86,7 +86,7 @@ void PhiFilterRange::addRange( const double xMin, const double xMax)
   /// Special case where one adds a no-op interval
   if ( (xMin == -M_PI    && xMax == +M_PI    ) ||
        (xMin == -FLT_MAX && xMax == +FLT_MAX ) ) {
-    m_range = boost::none;
+    m_range = std::nullopt;
     return;
   }
 
@@ -117,7 +117,6 @@ bool operator==( const PhiFilterRange& r1, const PhiFilterRange& r2 )
 
   const double precision = std::min( r1.precision(), r2.precision() );
 
-  //return boost::numeric::interval_lib::poseq( *m_range, *(rhs.m_range) );
   return ( (std::fabs(r1.lower() - r2.lower()) <= precision ) && 
 	   (std::fabs(r1.upper() - r2.upper()) <= precision ) );
 }

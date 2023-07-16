@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDALG_TGCCONDDBALG_H
@@ -15,7 +15,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 
 // Athena includes
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "MuonCondData/TgcCondDbData.h"
 #include "MuonCondSvc/MdtStringUtils.h"
@@ -23,19 +23,21 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
-class TgcCondDbAlg : public AthAlgorithm {
+class TgcCondDbAlg : public AthReentrantAlgorithm {
 public:
     TgcCondDbAlg(const std::string& name, ISvcLocator* svc);
     virtual ~TgcCondDbAlg() = default;
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
+    virtual bool isReEntrant() const override { return false; }
 
 private:
-    virtual StatusCode loadDetectorStatus(EventIDRange&, std::unique_ptr<TgcCondDbData>&);
+    StatusCode loadDetectorStatus(EventIDRange&, std::unique_ptr<TgcCondDbData>&) const;
 
-    bool m_isOnline{false};
-    bool m_isData{false};
-    bool m_isRun1{false};
+
+    Gaudi::Property<bool> m_isOnline{this, "isOnline", false};
+    Gaudi::Property<bool> m_isData{this, "isData", false};
+    Gaudi::Property<bool> m_isRun1{this, "isRun1", false};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 

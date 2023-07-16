@@ -17,7 +17,7 @@
 #include <TKey.h>
 #include <TSystem.h>
 #include <TTree.h>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 //
 // unit test
@@ -95,7 +95,7 @@ namespace EL
       data.submitDir = baseDir + "/simple";
       data.submitDirMode = SubmitDirMode::NO_CLOBBER;
       ASSERT_SUCCESS (manager.doManagerStep (data));
-      ASSERT_TRUE (boost::filesystem::is_directory (data.submitDir));
+      ASSERT_TRUE (std::filesystem::is_directory (data.submitDir));
 
       // check that we don't overwrite directories in regular mode
       ASSERT_FAILURE (manager.doManagerStep (data));
@@ -105,11 +105,11 @@ namespace EL
       // directory and check that it disappears.
       std::string dummyFile = data.submitDir + "/dummy";
       ASSERT_SUCCESS (gSystem->Exec (("touch " + dummyFile).c_str()));
-      ASSERT_TRUE (boost::filesystem::is_regular_file (dummyFile));
+      ASSERT_TRUE (std::filesystem::is_regular_file (dummyFile));
       data.submitDirMode = SubmitDirMode::OVERWRITE;
       ASSERT_SUCCESS (manager.doManagerStep (data));
-      ASSERT_TRUE (boost::filesystem::is_directory (data.submitDir));
-      ASSERT_FALSE (boost::filesystem::is_regular_file (dummyFile));
+      ASSERT_TRUE (std::filesystem::is_directory (data.submitDir));
+      ASSERT_FALSE (std::filesystem::is_regular_file (dummyFile));
 
 
 
@@ -120,8 +120,8 @@ namespace EL
       ASSERT_SUCCESS (manager.doManagerStep (data));
       ASSERT_NE (data.submitDir, uniqueBase);
       ASSERT_TRUE (data.submitDir.find (uniqueBase) == 0);
-      ASSERT_TRUE (boost::filesystem::is_directory (data.submitDir));
-      ASSERT_FALSE (boost::filesystem::exists (uniqueBase));
+      ASSERT_TRUE (std::filesystem::is_directory (data.submitDir));
+      ASSERT_FALSE (std::filesystem::exists (uniqueBase));
 
 
       // check that we create a symlink when working with unique link
@@ -130,9 +130,9 @@ namespace EL
       data.submitDir = uniqueBase;
       data.submitDirMode = SubmitDirMode::UNIQUE_LINK;
       ASSERT_SUCCESS (manager.doManagerStep (data));
-      ASSERT_TRUE (boost::filesystem::is_symlink (uniqueBase));
+      ASSERT_TRUE (std::filesystem::is_symlink (uniqueBase));
       ASSERT_SUCCESS (gSystem->Exec (("touch " + data.submitDir + "/dummy1").c_str()));
-      ASSERT_TRUE (boost::filesystem::is_regular_file (uniqueBase + "/dummy1"));
+      ASSERT_TRUE (std::filesystem::is_regular_file (uniqueBase + "/dummy1"));
 
 
       // check that we also re-create a symlink when there is already
@@ -142,9 +142,9 @@ namespace EL
       data.submitDir = uniqueBase;
       data.submitDirMode = SubmitDirMode::UNIQUE_LINK;
       ASSERT_SUCCESS (manager.doManagerStep (data));
-      ASSERT_TRUE (boost::filesystem::is_symlink (uniqueBase));
+      ASSERT_TRUE (std::filesystem::is_symlink (uniqueBase));
       ASSERT_SUCCESS (gSystem->Exec (("touch " + data.submitDir + "/dummy2").c_str()));
-      ASSERT_TRUE (boost::filesystem::is_regular_file (uniqueBase + "/dummy2"));
+      ASSERT_TRUE (std::filesystem::is_regular_file (uniqueBase + "/dummy2"));
     }
   }
 }

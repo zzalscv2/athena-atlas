@@ -14,7 +14,7 @@
 #include "MissingETEvent/MissingET.h"
 
 #include <vector>
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 
 struct MissingETtags {
 
@@ -178,7 +178,7 @@ struct MissingETtags {
 
 namespace MissingETHandlers {
 
-  typedef boost::tuples::tuple<float,float,float,unsigned short int> struct_t;
+  typedef std::tuple<float,float,float,unsigned short int> struct_t;
 
   static float precision() { return 0.0001; }
 
@@ -205,15 +205,15 @@ namespace MissingETHandlers {
     Weight(const Weight& w) : struct_t(w.wpx(),w.wpy(),w.wet(),w.statusWord()) { }
     Weight(Weight& w) : struct_t(w.wpx(),w.wpy(),w.wet(),w.statusWord()) { }
 
-    float wpx() const { return (float)this->get<0>(); }
-    float wpy() const { return (float)this->get<1>(); }
-    float wet() const { return (float)this->get<2>(); }
-    unsigned short int statusWord() const { return (unsigned short int)this->get<3>(); }
+    float wpx() const { return (float)std::get<0>(*this); }
+    float wpy() const { return (float)std::get<1>(*this); }
+    float wet() const { return (float)std::get<2>(*this); }
+    unsigned short int statusWord() const { return (unsigned short int)std::get<3>(*this); }
 
-    void setWpx(float wpx) { this->get<0>() = wpx; }
-    void setWpy(float wpy) { this->get<1>() = wpy; }
-    void setWet(float wet) { this->get<2>() = wet; }
-    void setStatusWord(unsigned short int status) { this->get<3>() = status; }
+    void setWpx(float wpx) { std::get<0>(*this) = wpx; }
+    void setWpy(float wpy) { std::get<1>(*this) = wpy; }
+    void setWet(float wet) { std::get<2>(*this) = wet; }
+    void setStatusWord(unsigned short int status) { std::get<3>(*this) = status; }
 
     Weight& operator+=(const Weight& w)
     {

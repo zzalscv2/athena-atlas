@@ -226,13 +226,13 @@ namespace xAOD
     {
       // check on cluster signal
       if ( pPart->type() == Type::CaloCluster ) 
-	{ size_t idx(pPart->index()); return idx < m_clusterLinks.size() ? m_clusterLinks.at(idx).get<N>() : MissingETBase::Numerical::invalidIndex(); }
+	{ size_t idx(pPart->index()); return idx < m_clusterLinks.size() ? std::get<N>( m_clusterLinks.at(idx)) : MissingETBase::Numerical::invalidIndex(); }
       // check on track signal
       if ( pPart->type() == Type::TrackParticle )
-	{ size_t idx(pPart->index()); return idx < m_trackLinks.size() ? m_trackLinks.at(idx).get<N>() : MissingETBase::Numerical::invalidIndex(); }
+	{ size_t idx(pPart->index()); return idx < m_trackLinks.size() ? std::get<N>(m_trackLinks.at(idx)) : MissingETBase::Numerical::invalidIndex(); }
       // 
       particle_map_t::const_iterator fPart(m_particleLinks.find(pPart));
-      return fPart != m_particleLinks.end() ? (fPart->second).get<N>() : MissingETBase::Numerical::invalidIndex();
+      return fPart != m_particleLinks.end() ? std::get<N>(fPart->second) : MissingETBase::Numerical::invalidIndex();
     }
     /*!@}*/
 

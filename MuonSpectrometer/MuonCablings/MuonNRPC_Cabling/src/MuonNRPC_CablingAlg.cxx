@@ -22,7 +22,7 @@
 
 MuonNRPC_CablingAlg::MuonNRPC_CablingAlg(const std::string& name,
                                          ISvcLocator* pSvcLocator)
-    : AthAlgorithm(name, pSvcLocator) {}
+    : AthReentrantAlgorithm(name, pSvcLocator) {}
 
 StatusCode MuonNRPC_CablingAlg::initialize() {
     ATH_MSG_DEBUG("initialize " << name());
@@ -34,10 +34,9 @@ StatusCode MuonNRPC_CablingAlg::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonNRPC_CablingAlg::execute() {
+StatusCode MuonNRPC_CablingAlg::execute(const EventContext& ctx) const {
     ATH_MSG_VERBOSE("MuonNRPC_CablingAlg::execute()");
-    const EventContext& ctx = Gaudi::Hive::currentContext();
-
+   
     // Write Cond Handle
     SG::WriteCondHandle<MuonNRPC_CablingMap> writeCablingHandle{m_writeKey,
                                                                 ctx};

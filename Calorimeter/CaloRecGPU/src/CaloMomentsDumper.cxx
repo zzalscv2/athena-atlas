@@ -8,6 +8,7 @@
 #include "CaloRecGPU/StandaloneDataIO.h"
 
 #include <fstream>
+#include <filesystem>
 
 using namespace CaloRecGPU;
 
@@ -32,7 +33,7 @@ StatusCode CaloMomentsDumper::execute (const EventContext & ctx, xAOD::CaloClust
       return StatusCode::FAILURE;
     }
 
-  const boost::filesystem::path save_file = m_savePath + "/" + StandaloneDataIO::build_filename((m_filePrefix.size() > 0 ? m_filePrefix + "_moments" : "moments"),
+  const std::filesystem::path save_file = m_savePath + "/" + StandaloneDataIO::build_filename((m_filePrefix.size() > 0 ? m_filePrefix + "_moments" : "moments"),
                                                                                                 ctx.evt(), m_fileSuffix, "txt", m_numWidth);
 
   std::ofstream out_file(save_file);

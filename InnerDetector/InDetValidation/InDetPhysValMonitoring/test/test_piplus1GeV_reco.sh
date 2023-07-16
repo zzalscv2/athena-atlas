@@ -89,38 +89,25 @@ case $ArtProcess in
     unset  ATHENA_PROC_NUMBER
 
     Reco_tf.py \
+      --CA \
       --inputRDOFile $x \
-      --outputNTUP_PHYSVALFile physval.ntuple.root \
       --outputAODFile   physval.AOD.root \
-      --conditionsTag   'OFLCOND-MC16-SDR-RUN2-08' \
+      --conditionsTag   'default:OFLCOND-MC23-SDR-RUN3-01' \
       --steering        doRAWtoALL \
       --checkEventCount False \
       --ignoreErrors    True \
-      --maxEvents       -1 \
-      --skipEvents      0 \
-      --valid           True \
-      --validationFlags doInDet \
-      --autoConfiguration everything \
-      --postExec 'condSeq.TileSamplingFractionCondAlg.G4Version = -1' \
-      --preExec 'from InDetRecExample.InDetJobProperties import InDetFlags; \
-      InDetFlags.doSlimming.set_Value_and_Lock(False); rec.doTrigger.set_Value_and_Lock(False); \
-      from InDetPhysValMonitoring.InDetPhysValJobProperties import InDetPhysValFlags; \
-      InDetPhysValFlags.doValidateTightPrimaryTracks.set_Value_and_Lock(True); \
-      InDetPhysValFlags.doValidateTracksInJets.set_Value_and_Lock(False); \
-      InDetPhysValFlags.doValidateGSFTracks.set_Value_and_Lock(False); \
-      InDetPhysValFlags.doExpertOutput.set_Value_and_Lock(True); \
-      InDetPhysValFlags.doHitLevelPlots.set_Value_and_Lock(True); \
-      rec.doDumpProperties=True; rec.doCalo=True; rec.doEgamma=True; \
-      rec.doForwardDet=False; rec.doInDet=True; rec.doJetMissingETTag=True; \
-      rec.doLArg=True; rec.doLucid=True; rec.doMuon=True; rec.doMuonCombined=True; \
-      rec.doSemiDetailedPerfMon=True; rec.doTau=True; rec.doTile=True; \
-      from ParticleBuilderOptions.AODFlags import AODFlags; \
-      AODFlags.ThinGeantTruth.set_Value_and_Lock(False);  \
-      AODFlags.ThinNegativeEnergyCaloClusters.set_Value_and_Lock(False); \
-      AODFlags.ThinNegativeEnergyNeutralPFOs.set_Value_and_Lock(False);\
-      AODFlags.ThinInDetForwardTrackParticles.set_Value_and_Lock(False) '
+      --maxEvents       -1 
     rec_tf_exit_code=$?
     echo "art-result: $rec_tf_exit_code reco_${file}"
+
+    runIDPVM.py \
+      --filesInput physval.AOD.root \
+      --outputFile physval.ntuple.root \
+      --doHitLevelPlots \
+      --doExpertPlots
+    idpvm_tf_exit_code=$?
+    echo "art-result: $idpvm_tf_exit_code idpvm"
+
     if [ $rec_tf_exit_code -ne 0 ]  ;then
        success_run=$rec_tf_exit_code 
     fi

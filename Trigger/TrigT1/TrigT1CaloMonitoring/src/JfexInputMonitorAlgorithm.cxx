@@ -86,20 +86,23 @@ StatusCode JfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
    
     
     
-    // monitored variables for histogramscd 
+    // monitored variables for histograms 
     auto nJfexTowers = Monitored::Scalar<int>("NJfexTowers",0.0);
     auto Towereta = Monitored::Scalar<float>("TowerEta",0.0);
     auto Towerphi = Monitored::Scalar<float>("TowerPhi",0.0);
     auto ToweretaDeco = Monitored::Scalar<float>("TowerEtaDeco",0.0);
     auto TowerphiDeco = Monitored::Scalar<float>("TowerPhiDeco",0.0);
     auto DataEt = Monitored::Scalar<float>("DataEt",0.0);
-    auto SCellSum = Monitored::Scalar<float>("SCellSum",0.0);
-    auto EmuSum = Monitored::Scalar<float>("EmuSum",0.0);
+    auto EmulatedEt = Monitored::Scalar<float>("EmulatedEt",0.0);
+    auto DataEt_Tile = Monitored::Scalar<float>("DataEt_Tile",0.0);
+    auto EmulatedEt_Tile = Monitored::Scalar<float>("EmulatedEt_Tile",0.0);
     auto region = Monitored::Scalar<int>("region",0.0);
     auto type = Monitored::Scalar<int>("type",0.0);
     auto frac_SCellSum = Monitored::Scalar<float>("frac_SCellSum",0.0);
     auto ToweretaInvalid = Monitored::Scalar<float>("TowerEtaInvalid",-99.0);
     auto TowerPhiInvalid = Monitored::Scalar<float>("TowerPhiInvalid",-99.0);
+    auto ToweretaEmpty = Monitored::Scalar<float>("TowerEtaEmpty",-99.0);
+    auto TowerPhiEmpty = Monitored::Scalar<float>("TowerPhiEmpty",-99.0);
     auto Towerglobaleta = Monitored::Scalar<int>("TowerGlobalEta",0);
     auto Towerglobalphi = Monitored::Scalar<uint32_t>("TowerGlobalPhi",0);
     auto Towermodule = Monitored::Scalar<uint8_t>("TowerModule",0);
@@ -145,25 +148,63 @@ StatusCode JfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                 ATH_MSG_WARNING("DataTower: "<<TTID<< " with Calosource: "<<source<< "is repeated. It shouldn't! ");
             }
             
+            DataEt         = jTowerEtMeV(*dataTower);
+            EmulatedEt     = SCellEtMeV(*dataTower);
+
             
+            // If Tile (Calosource == 1) then use Tile information
+            if(source == 1){
+                EmulatedEt      = TileEtMeV(*dataTower);
+               
+                DataEt_Tile     = DataEt/Gaudi::Units::GeV;
+                EmulatedEt_Tile = EmulatedEt/Gaudi::Units::GeV;
+                fill(m_Grouphist+"_details_"+std::to_string(source),DataEt_Tile,EmulatedEt_Tile); 
+            }
+            else{
+                fill(m_Grouphist+"_details_"+std::to_string(source),DataEt,EmulatedEt); 
+            }          
+                                    
+            fill(m_Grouphist+"_decorated_all" ,DataEt,EmulatedEt);
             
-            DataEt = jTowerEtMeV(*dataTower);
-            SCellSum = SCellEtMeV(*dataTower);
-                       
-            fill(m_Grouphist+"_decorated_all",DataEt,SCellSum);
+             
             
-            //Looking at decorated variables
+            //Looking at decorated variables. Is real time path data Et the same as the simulated one (encoded Et)?
             if( (dataTower->et_count()).at(0) != emulated_jtowerEt(*dataTower)) {
                 
                 std::string location = "EM layer";
-                // if source is Tile, HEC, FCAL2 and FCAL3 then location is HAD
-                if(dataTower->Calosource()== 1 || dataTower->Calosource()== 3 || dataTower->Calosource() == 5 ||  dataTower->Calosource() == 6 ){
+                if(dataTower->Calosource()== 1 || dataTower->Calosource()== 3 || dataTower->Calosource() == 5 ||  dataTower->Calosource() == 6 ){ // if source is Tile, HEC, FCAL2 and FCAL3 then location is HAD
                     location="HAD layer";
                 } 
                 
                 if( (dataTower->et_count()).at(0) != m_InvalidCode ){
-                    frac_SCellSum = DataEt != 0 ? (SCellSum - DataEt)/DataEt : 0;
-                    fill(m_Grouphist+"_decorated",Towereta,Towerphi,DataEt,SCellSum,frac_SCellSum);
+                    ATH_MSG_WARNING("Tower:"<< TTID << " source:"<< +dataTower->Calosource() << " for eventNumber:"<< GetEventInfo(ctx)->eventNumber()<< " and LB:"<<GetEventInfo(ctx)->lumiBlock() << ". DataTower Et:"<< (dataTower->et_count()).at(0) <<"/"<< DataEt<<" vs EmulatedTower Et:" << emulated_jtowerEt(*dataTower)<<"/"<< EmulatedEt);
+                    
+                    
+                    /*Commented block, needed for further debugging
+                    for(uint i=0;i<(dataTower->SCellEt()).size();i++){
+                        printf("%11.1f ",(dataTower->SCellEt()).at(i) );
+                    }
+                    printf("\n");
+                    
+                    for(uint i=0;i<(dataTower->SCellEta()).size();i++){
+                        printf("%5.2f/%5.2f ",(dataTower->SCellEta()).at(i),(dataTower->SCellPhi()).at(i) );
+                    }
+                    printf("\n");
+                    
+                    for(uint i=0;i<(dataTower->SCellEta()).size();i++){
+                        printf(" 0x%08x ",(dataTower->SCellID()).at(i) );
+                    }
+                    printf("\n");
+                    
+                    
+                    for(uint i=0;i<(dataTower->SCellEta()).size();i++){
+                        printf("%11d ",(dataTower->SCellMask()).at(i) );
+                    }
+                    printf("\n");
+                    */
+                    
+                    frac_SCellSum = DataEt != 0 ? (EmulatedEt - DataEt)/DataEt : 0;
+                    fill(m_Grouphist+"_decorated",Towereta,Towerphi,DataEt,EmulatedEt,frac_SCellSum);
                     genError("Input_Mismatch", location);
                 }
                 else{
@@ -176,14 +217,6 @@ StatusCode JfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                 fill(m_Grouphist,region,type);
                     
             }
-            
-            EmuSum = SCellEtMeV(*dataTower);
-            if(source == 1){
-               DataEt /= 1e3; 
-               EmuSum = TileEtMeV(*dataTower)/1e3;
-            }
-            fill(m_Grouphist+"_details_"+std::to_string(source),DataEt,EmuSum);
-            
         }
         
         fill(m_Grouphist,Towereta,Towerphi);
@@ -219,11 +252,20 @@ StatusCode JfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
         Toweretcount_fcal2=Toweret_count.at(0);
         Toweretcount_fcal3=Toweret_count.at(0);
         
-        if(Toweret_count.at(0) == m_InvalidCode){
-            ToweretaInvalid=dataTower->eta();
-            TowerPhiInvalid=dataTower->phi();
-            fill(m_Grouphist,ToweretaInvalid,TowerPhiInvalid);
+        if(dataTower->Calosource() != 1){ // Only for LATOME, not Tile
+            if(Toweret_count.at(0) == m_InvalidCode){
+                ToweretaInvalid=dataTower->eta();
+                TowerPhiInvalid=dataTower->phi();
+                fill(m_Grouphist,ToweretaInvalid,TowerPhiInvalid);
+            }
+            
+            if(Toweret_count.at(0) == m_EmptyCode){
+                ToweretaEmpty=dataTower->eta();
+                TowerPhiEmpty=dataTower->phi();
+                fill(m_Grouphist,ToweretaEmpty,TowerPhiEmpty);
+            }            
         }
+
 
         if(Towercalosource==0) {
             fill(m_Grouphist,Toweretcount_barrel);
