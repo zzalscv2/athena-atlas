@@ -47,16 +47,16 @@ namespace xAOD {
                                         nSharedHits,
                                         setnSharedHits)
 
-    const SG::AuxElement::Accessor<std::vector<double> > xAOD::TrackBackend_v1::paramsAcc{"params"};
-    const SG::AuxElement::Accessor<std::vector<double> > xAOD::TrackBackend_v1::covParamsAcc{"covParams"};
+    const SG::AuxElement::Accessor<std::vector<double> > xAOD::TrackBackend_v1::s_paramsAcc{"params"};
+    const SG::AuxElement::Accessor<std::vector<double> > xAOD::TrackBackend_v1::s_covParamsAcc{"covParams"};
 
 
     void TrackBackend_v1::resize(size_t sz) {
-        paramsAcc(*this).resize(sz);
-        covParamsAcc(*this).resize(sz * sz);
+        s_paramsAcc(*this).resize(sz);
+        s_covParamsAcc(*this).resize(sz * sz);
     }
 
     size_t TrackBackend_v1::size() const {
-        return paramsAcc(*this).size();
+        return s_paramsAcc(*this).size();
     }
-}    
+}

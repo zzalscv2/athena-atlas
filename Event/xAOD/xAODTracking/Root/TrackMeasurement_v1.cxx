@@ -6,8 +6,8 @@
 
 
 namespace xAOD {
-    const SG::AuxElement::Accessor<std::vector<double>> TrackMeasurement_v1::measAcc("meas");
-    const SG::AuxElement::Accessor<std::vector<double>> TrackMeasurement_v1::covMatrixAcc("covMatrix");
+    const SG::AuxElement::Accessor<std::vector<double>> TrackMeasurement_v1::s_measAcc("meas");
+    const SG::AuxElement::Accessor<std::vector<double>> TrackMeasurement_v1::s_covMatrixAcc("covMatrix");
 
     AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackMeasurement_v1,
                                         std::vector<double>,
@@ -55,11 +55,11 @@ namespace xAOD {
 
 
     void TrackMeasurement_v1::resize(size_t sz) {
-        measAcc(*this).resize(sz);
-        covMatrixAcc(*this).resize(sz * sz);
+        s_measAcc(*this).resize(sz);
+        s_covMatrixAcc(*this).resize(sz * sz);
     }
 
     size_t TrackMeasurement_v1::size() const {
-      return measAcc(*this).size();
+      return s_measAcc(*this).size();
     }
 }

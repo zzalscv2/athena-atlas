@@ -25,7 +25,7 @@ namespace xAOD {
          **/
         template<std::size_t measdim = 6>
           Eigen::Map<const Eigen::Matrix<double, measdim, 1>> measEigen() const {
-          return Eigen::Map<const Eigen::Matrix<double, measdim, 1>>{measAcc(*this).data()};
+          return Eigen::Map<const Eigen::Matrix<double, measdim, 1>>{s_measAcc(*this).data()};
         }
 
         /**
@@ -33,7 +33,7 @@ namespace xAOD {
         **/
         template<std::size_t measdim = 6>
           Eigen::Map<Eigen::Matrix<double, measdim, 1>> measEigen() {
-          return Eigen::Map<Eigen::Matrix<double, measdim, 1>>{measAcc(*this).data()};
+          return Eigen::Map<Eigen::Matrix<double, measdim, 1>>{s_measAcc(*this).data()};
         }
 
         /**
@@ -51,7 +51,7 @@ namespace xAOD {
         **/
         template<std::size_t measdim = 6>
           Eigen::Map<const Eigen::Matrix<double, measdim, measdim>> covMatrixEigen() const {
-          return Eigen::Map<const Eigen::Matrix<double, measdim, measdim>>{covMatrixAcc(*this).data()};
+          return Eigen::Map<const Eigen::Matrix<double, measdim, measdim>>{s_covMatrixAcc(*this).data()};
         }
 
         /**
@@ -59,7 +59,7 @@ namespace xAOD {
         **/
         template<std::size_t measdim = 6>
           Eigen::Map<Eigen::Matrix<double, measdim, measdim>> covMatrixEigen() {
-          return Eigen::Map<Eigen::Matrix<double, measdim, measdim>> {covMatrixAcc(*this).data()};
+          return Eigen::Map<Eigen::Matrix<double, measdim, measdim>> {s_covMatrixAcc(*this).data()};
         }
 
         /**
@@ -118,8 +118,8 @@ namespace xAOD {
         */
         size_t size() const;
       private:
-        static const SG::AuxElement::Accessor<std::vector<double>> measAcc;
-        static const SG::AuxElement::Accessor<std::vector<double>> covMatrixAcc;
+        static const SG::AuxElement::Accessor<std::vector<double>> s_measAcc;
+        static const SG::AuxElement::Accessor<std::vector<double>> s_covMatrixAcc;
     };
 }
 #endif
