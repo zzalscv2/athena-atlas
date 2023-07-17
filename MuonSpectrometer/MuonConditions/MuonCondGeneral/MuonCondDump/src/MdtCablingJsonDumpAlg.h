@@ -2,8 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-/**
-   Algorithm to test the validity of the MDT cabling
+/*
+ * Algorithm to dump the Mdt cabling maps into a JSON file
 */
 
 #ifndef MUONMDT_CABLING_MDTCABLINGMEZZALG_H
@@ -18,10 +18,10 @@
 
 
 
-class MdtCablMezzAlg : public AthAlgorithm {
+class MdtCablingJsonDumpAlg : public AthAlgorithm {
 public:
-    MdtCablMezzAlg(const std::string& name, ISvcLocator* pSvcLocator);
-    virtual ~MdtCablMezzAlg() = default;
+    MdtCablingJsonDumpAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    virtual ~MdtCablingJsonDumpAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute() override;
     virtual unsigned int cardinality() const override final{return 1;}

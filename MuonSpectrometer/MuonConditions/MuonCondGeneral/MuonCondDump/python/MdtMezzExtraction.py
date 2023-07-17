@@ -6,7 +6,7 @@ def MdtCablMezzAlgCfg(flags, name = "MdtCablMezzAlg", **kwargs):
     result = setupServicesCfg(flags)
     from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg
     result.merge(MDTCablingConfigCfg(flags))
-    event_algo = CompFactory.MdtCablMezzAlg(name,**kwargs)
+    event_algo = CompFactory.MdtCablingJsonDumpAlg(name,**kwargs)
     result.addEventAlgo(event_algo, primary = True)
     return result
 

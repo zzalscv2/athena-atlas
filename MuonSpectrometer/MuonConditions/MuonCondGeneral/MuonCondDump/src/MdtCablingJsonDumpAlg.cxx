@@ -1,7 +1,7 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-#include "MdtCablMezzAlg.h"
+#include "MdtCablingJsonDumpAlg.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "MuonReadoutGeometry/MdtReadoutElement.h"
 #include "MuonReadoutGeometry/ArrayHelper.h"
@@ -31,18 +31,18 @@ namespace {
 
 }
 
-MdtCablMezzAlg::MdtCablMezzAlg(const std::string& name, ISvcLocator* pSvcLocator):
+MdtCablingJsonDumpAlg::MdtCablingJsonDumpAlg(const std::string& name, ISvcLocator* pSvcLocator):
     AthAlgorithm(name,pSvcLocator) {}
 
 
-StatusCode MdtCablMezzAlg::initialize(){
+StatusCode MdtCablingJsonDumpAlg::initialize(){
   ATH_CHECK(m_idHelperSvc.retrieve());
   ATH_CHECK(m_DetectorManagerKey.initialize());
   ATH_CHECK(m_cablingKey.initialize());
   return StatusCode::SUCCESS;
 } 
 
-StatusCode MdtCablMezzAlg::execute(){
+StatusCode MdtCablingJsonDumpAlg::execute() {
   const EventContext& ctx = Gaudi::Hive::currentContext();
   ATH_MSG_INFO("Dump cabling & mezzanines into JSON file");
 
@@ -187,18 +187,21 @@ StatusCode MdtCablMezzAlg::execute(){
           ATH_MSG_ERROR("Failed to write "<<m_summaryTxt);
           return StatusCode::FAILURE;
       }
-      mezz_json<<"[";
+      mezz_json<<"["<<std::endl;
       for (size_t i = 0; i < cached_cards.size() ; ++i) {
          const MdtMezzanineCard& card  = cached_cards[i];
-         mezz_json<<"{ \"mezzId\": "<<static_cast<int>(card.id())<<", ";
-         mezz_json<<"\"nTubeLayer\": "<<static_cast<int>(card.numTubeLayers())<<", ";
-         mezz_json<<"\"tdcToTubeMap\": [";
+         mezz_json<<"     {"<<std::endl;
+         mezz_json<<"       \"mezzId\": "<<static_cast<int>(card.id())<<","<<std::endl;
+         mezz_json<<"       \"nTubeLayer\": "<<static_cast<int>(card.numTubeLayers())<<","<<std::endl;
+         mezz_json<<"       \"tdcToTubeMap\": [";
          for (size_t ch = 0 ; ch < card.tdcToTubeMap().size(); ++ch) {
            mezz_json<<static_cast<int>(card.tdcToTubeMap()[ch]);
-           if (ch + 1 != card.tdcToTubeMap().size())mezz_json<<", ";
+           if (ch + 1 != card.tdcToTubeMap().size())mezz_json<<",";
          }
-         mezz_json<<"] }";
-         if (i +1 != cached_cards.size()) mezz_json<<",  ";
+         mezz_json<<"]"<<std::endl;
+         mezz_json<<"     }";       
+         if (i +1 != cached_cards.size()) mezz_json<<",";
+         mezz_json<<std::endl;
       }
       mezz_json<<"]";
     }
@@ -208,28 +211,28 @@ StatusCode MdtCablMezzAlg::execute(){
          ATH_MSG_FATAL("Failed to write "<<m_cablingJSON);
          return StatusCode::FAILURE;
       }
-      chamb_json<<"[";
+      chamb_json<<"["<<std::endl;
       size_t i =0;
       for (const MdtCablingData& chamb : cached_chnls){ 
-        chamb_json<<"{";
-        chamb_json<<"\"station\": \""<<idHelper.stationNameString(chamb.stationIndex)<<"\", ";
-        chamb_json<<"\"eta\": "<<static_cast<int>(chamb.eta)<<", ";
-        chamb_json<<"\"phi\": "<<static_cast<int>(chamb.phi)<<", ";
-        chamb_json<<"\"ml\": "<<static_cast<int>(chamb.multilayer)<<", ";
-        chamb_json<<"\"subDet\": "<<static_cast<int>(chamb.subdetectorId)<<", ";
-        chamb_json<<"\"csm\": "<<static_cast<int>(chamb.csm)<<", ";
-        chamb_json<<"\"mrod\": "<<static_cast<int>(chamb.mrod)<<", ";
-        chamb_json<<"\"tdcId\": "<<static_cast<int>(chamb.tdcId)<<", ";
-        chamb_json<<"\"mezzId\": "<<static_cast<int>(chamb.mezzanine_type)<<", ";
-        chamb_json<<"\"tubeZero\": "<<static_cast<int>(chamb.tube);
-        chamb_json<<"}";        
-        if (i +1 != cached_chnls.size()) chamb_json<<",  ";
+        chamb_json<<"    {"<<std::endl;
+        chamb_json<<"     \"station\": \""<<idHelper.stationNameString(chamb.stationIndex)<<"\","<<std::endl;
+        chamb_json<<"     \"eta\": "<<static_cast<int>(chamb.eta)<<","<<std::endl;
+        chamb_json<<"     \"phi\": "<<static_cast<int>(chamb.phi)<<","<<std::endl;
+        chamb_json<<"     \"ml\": "<<static_cast<int>(chamb.multilayer)<<","<<std::endl;
+        chamb_json<<"     \"subDet\": "<<static_cast<int>(chamb.subdetectorId)<<","<<std::endl;
+        chamb_json<<"     \"csm\": "<<static_cast<int>(chamb.csm)<<","<<std::endl;
+        chamb_json<<"     \"mrod\": "<<static_cast<int>(chamb.mrod)<<","<<std::endl;
+        chamb_json<<"     \"tdcId\": "<<static_cast<int>(chamb.tdcId)<<","<<std::endl;
+        chamb_json<<"     \"mezzId\": "<<static_cast<int>(chamb.mezzanine_type)<<","<<std::endl;
+        chamb_json<<"     \"tubeZero\": "<<static_cast<int>(chamb.tube)<<std::endl;
+        chamb_json<<"    }";
+        if (i +1 != cached_chnls.size()) chamb_json<<",";
+        chamb_json<<std::endl;
         ++i;
       }
-      chamb_json<<"]";
+      chamb_json<<"]"<<std::endl;
     }
 
     
   return StatusCode::SUCCESS;
 } 
-   
