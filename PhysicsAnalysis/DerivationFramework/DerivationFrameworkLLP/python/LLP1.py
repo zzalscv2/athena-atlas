@@ -157,27 +157,42 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
                             TrackFilterToolSTD      = LLP1TrackFilterToolSTD
                           ))
         acc.merge(VrtSecInclusiveCfg(ConfigFlags,
-                                     name = f"VrtSecInclusive_{TrackSystSuffix}",
+                                     name = f"VrtSecInclusive{TrackSystSuffix}",
                                      AugmentingVersionString  = TrackSystSuffix,
                                      FillIntermediateVertices = False,
                                      TrackLocation            = f"{MergedTrackCollection}{TrackSystSuffix}"))
         LLP1VrtSecInclusiveSuffixes.append(TrackSystSuffix)
 
     # leptons-only VSI
-    LeptonsModSuffix = "_LeptonsMod_LRTR3_1p0"
+    LeptonsSuffix = "_Leptons"
     acc.merge(VrtSecInclusiveCfg(ConfigFlags,
-                                 name = "VrtSecInclusive_InDet_"+LeptonsModSuffix,
-                                 AugmentingVersionString     = LeptonsModSuffix,
+                                 name = "VrtSecInclusive_InDet"+LeptonsSuffix,
+                                 AugmentingVersionString     = LeptonsSuffix,
                                  FillIntermediateVertices    = False,
                                  TrackLocation               = MergedTrackCollection,
                                  twoTrkVtxFormingD0Cut       = 1.0,
-                                 doSelectTracksWithLRTCuts   = True,
                                  doSelectTracksFromMuons     = True,
                                  doRemoveCaloTaggedMuons     = True,
                                  doSelectTracksFromElectrons = True,
                                  MuonLocation                = MergedMuonContainer,
                                  ElectronLocation            = MergedElectronContainer))
-    LLP1VrtSecInclusiveSuffixes.append(LeptonsModSuffix)
+    LLP1VrtSecInclusiveSuffixes.append(LeptonsSuffix)
+
+    # track VSI
+    LepTrackSuffix = "_LepTrack"
+    acc.merge(VrtSecInclusiveCfg(ConfigFlags,
+                                 name = "VrtSecInclusive_InDet"+LepTrackSuffix,
+                                 AugmentingVersionString     = LepTrackSuffix,
+                                 FillIntermediateVertices    = False,
+                                 TrackLocation               = MergedTrackCollection,
+                                 MuonLocation                = MergedMuonContainer,
+                                 ElectronLocation            = MergedElectronContainer,
+                                 twoTrkVtxFormingD0Cut       = 1.0,
+                                 doSelectIDAndGSFTracks      = True,
+                                 doRemoveCaloTaggedMuons     = True,
+                                 doRemoveNonLeptonVertices   = True,
+                                 doAssociateNonSelectedTracks= False))
+    LLP1VrtSecInclusiveSuffixes.append(LepTrackSuffix)
 
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, TauTrackParticleThinningCfg, DiTauTrackParticleThinningCfg, TauJetLepRMParticleThinningCfg
