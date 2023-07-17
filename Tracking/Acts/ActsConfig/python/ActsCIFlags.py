@@ -47,6 +47,11 @@ def actsValidateTracksFlags(flags):
     flags.Tracking.ITkMainPass.doAmbiguityProcessorTrackFit = False
     flags.Tracking.recoChain = [TrackingComponent.ValidateActsTracks]
 
+def actsValidateAmbiguityResolutionFlags(flags):
+    """flags for Reco_tf with CA used in CI tests: use ActsTrkFinding during reconstruction with ambi. resolution"""
+    actsValidateTracksFlags(flags)
+    flags.Tracking.ITkMainPass.doAmbiguityProcessorTrackFit = True
+
 def actsValidateGSFFlags(flags):
     """flags for Reco_tf with CA used in CI tests: use GaussianSumFitter"""
     flags.Reco.EnableHGTDExtension = False
