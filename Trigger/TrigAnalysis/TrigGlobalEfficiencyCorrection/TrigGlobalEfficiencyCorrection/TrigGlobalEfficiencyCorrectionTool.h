@@ -60,8 +60,18 @@ public:
 	virtual CP::CorrectionCode countTriggerLegs(const std::string& trigger, std::size_t& numberOfLegs) override;
 	
 	static CP::CorrectionCode suggestElectronMapKeys(const std::map<std::string,std::string>& triggerCombination,
-		const std::string& version, std::map<std::string,std::string>& legsPerKey);
-	
+		const std::string& version, std::map<std::string,std::string>& legsPerKey)
+	{
+		return suggestEgammaMapKeys(triggerCombination, version, legsPerKey, xAOD::Type::Electron);
+	}
+	static CP::CorrectionCode suggestPhotonMapKeys(const std::map<std::string,std::string>& triggerCombination,
+		const std::string& version, std::map<std::string,std::string>& legsPerKey)
+	{
+		return suggestEgammaMapKeys(triggerCombination, version, legsPerKey, xAOD::Type::Photon);
+	}
+	static CP::CorrectionCode suggestEgammaMapKeys(const std::map<std::string,std::string>& triggerCombination,
+		const std::string& version, std::map<std::string,std::string>& legsPerKey, xAOD::Type::ObjectType type);
+		
 private: 
 
 	struct Hierarchy

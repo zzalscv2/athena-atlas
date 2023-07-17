@@ -41,17 +41,19 @@
 ANA_MSG_HEADER(Test)
 ANA_MSG_SOURCE(Test, MSGSOURCE)
 using namespace Test;
+
+StatusCode testElectrons(const char* APP_NAME, bool quiet);
+StatusCode testPhotons(const char* APP_NAME, bool quiet);
+
 int main(int argc, char* argv[])
 {
-    bool quiet = false;
-
-    ANA_CHECK_SET_TYPE(bool)
+	bool quiet = false;
+	ANA_CHECK_SET_TYPE(bool)
 	const std::string flagQuiet("--quiet");
 	for(int i=1;i<argc;++i)
 	{
 		if(argv[i] == flagQuiet) quiet = true;
 	}
-	
 	const char* APP_NAME = argv[0];
 	#ifdef XAOD_STANDALONE
 		xAOD::Init(APP_NAME).ignore();
@@ -60,6 +62,18 @@ int main(int argc, char* argv[])
 	   IAppMgrUI* app = POOL::Init();
 	#endif
 	
+	ANA_CHECK(testElectrons(APP_NAME, quiet));
+	ANA_CHECK(testPhotons(APP_NAME, quiet));
+	
+	#ifndef XAOD_STANDALONE
+		ANA_CHECK(app->finalize())
+	#endif
+	return 0;
+}
+
+
+StatusCode testElectrons(const char* APP_NAME, bool quiet)
+{
 	/// Retrieve the list of electron map keys for the chosen trigger combination
 	std::map<std::string,std::string> triggerCombination;
 	triggerCombination["2015"] = "2e12_lhloose_L12EM10VH || e17_lhloose_mu14  || mu18_mu8noL1"
@@ -86,7 +100,7 @@ int main(int argc, char* argv[])
 	else
 	{
 		Error(APP_NAME, "Unable to find list of trigger legs!");
-		return 1;
+		return StatusCode::FAILURE;
 	}
 	
 	cc = TrigGlobalEfficiencyCorrectionTool::suggestElectronMapKeys(triggerCombination, "2015_2018/rel21.2/Precision_Summer2020_v1", legsPerKey);
@@ -105,7 +119,7 @@ int main(int argc, char* argv[])
 	else
 	{
 		Error(APP_NAME, "Unable to find list of map keys!");
-		return 1;
+		return StatusCode::FAILURE;
 	}
 	
 	/// Then create all the needed electron tools and initialize the TrigGlob tool
@@ -124,16 +138,12 @@ int main(int argc, char* argv[])
 			auto t = electronToolsFactory.emplace(electronToolsFactory.end(), "AsgElectronEfficiencyCorrectionTool/ElTrigEff_"+std::to_string(nTools++));
 			t->setProperty("MapFilePath", "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt").ignore();
 			t->setProperty("TriggerKey", (j? trigKey : "Eff_"+trigKey)).ignore();
-			t->setProperty("IdKey","Tight").ignore();
-			t->setProperty("IsoKey","FCTight").ignore();
-			t->setProperty("CorrelationModel","TOTAL").ignore();
+			t->setProperty("IdKey", "Tight").ignore();
+			t->setProperty("IsoKey", "FCTight").ignore();
+			t->setProperty("CorrelationModel", "TOTAL").ignore();
 			t->setProperty("ForceDataType", (int)PATCore::ParticleDataType::Full).ignore();
 			t->setProperty("OutputLevel", MSG::ERROR).ignore();
-			if(t->initialize() != StatusCode::SUCCESS)
-			{
-				Error(APP_NAME, "Unable to initialize CP tool <%s>!", t->name().c_str());
-				return 2;
-			}
+			ANA_CHECK(t->initialize());
 			auto& handles = j? electronSFTools : electronEffTools;
 			handles.push_back(t->getHandle());
 			/// Safer to retrieve the name from the final ToolHandle, it might be prefixed (by the parent tool name) when the handle is copied
@@ -142,32 +152,89 @@ int main(int argc, char* argv[])
 		}
 	}
 	
-    ToolHandleArray<CP::IMuonTriggerScaleFactors> muonTools;
-    asg::AnaToolHandle<CP::IMuonTriggerScaleFactors> muonTool("CP::MuonTriggerScaleFactors/MuonTrigEff");
-    muonTool.setProperty("MuonQuality", "Medium").ignore();
+	ToolHandleArray<CP::IMuonTriggerScaleFactors> muonTools;
+	asg::AnaToolHandle<CP::IMuonTriggerScaleFactors> muonTool("CP::MuonTriggerScaleFactors/MuonTrigEff");
+	muonTool.setProperty("MuonQuality", "Medium").ignore();
 	muonTool.setProperty("OutputLevel", MSG::ERROR).ignore();
-    if(muonTool.initialize() != StatusCode::SUCCESS)
-    {
-        Error(APP_NAME, "Unable to initialize the muon CP tool!");
-        return 3;
-    }
-    muonTools.push_back(muonTool.getHandle());
+	if(muonTool.initialize() != StatusCode::SUCCESS)
+	{
+		Error(APP_NAME, "Unable to initialize the muon CP tool!");
+		return StatusCode::FAILURE;
+	}
+	muonTools.push_back(muonTool.getHandle());
 	
-	asg::AnaToolHandle<ITrigGlobalEfficiencyCorrectionTool> myTool("TrigGlobalEfficiencyCorrectionTool/MyTool");
-	myTool.setProperty("ElectronEfficiencyTools",electronEffTools).ignore();
-	myTool.setProperty("ElectronScaleFactorTools",electronSFTools).ignore();
-	myTool.setProperty("MuonTools",muonTools).ignore();
+	asg::AnaToolHandle<ITrigGlobalEfficiencyCorrectionTool> myTool("TrigGlobalEfficiencyCorrectionTool/MyTool1");
+	myTool.setProperty("ElectronEfficiencyTools", electronEffTools).ignore();
+	myTool.setProperty("ElectronScaleFactorTools", electronSFTools).ignore();
+	myTool.setProperty("MuonTools", muonTools).ignore();
 	myTool.setProperty("TriggerCombination", triggerCombination).ignore();
 	myTool.setProperty("ListOfLegsPerTool", legsPerTool).ignore();
 	myTool.setProperty("OutputLevel", quiet? MSG::WARNING : MSG::INFO).ignore();
-	if(myTool.initialize() != StatusCode::SUCCESS)
+	ANA_CHECK(myTool.initialize());
+	return StatusCode::SUCCESS;
+}
+
+
+StatusCode testPhotons(const char* APP_NAME, bool quiet)
+{
+	/// Retrieve the list of electron map keys for the chosen trigger combination
+	std::map<std::string,std::string> triggerCombination;
+	triggerCombination["2015"] = "g35_loose_g25_loose || 2g20_tight";
+	triggerCombination["2016"] = " g35_loose_g25_loose || 2g22_tight";
+	triggerCombination["2017"] = "g35_medium_g25_medium_L12EM20VH || 2g22_tight_L12EM15VHI";
+	triggerCombination["2018"] = triggerCombination["2017"];
+	std::map<std::string,std::string> legsPerKey;
+	auto cc = TrigGlobalEfficiencyCorrectionTool::suggestPhotonMapKeys(triggerCombination, "2015_2018/rel21.2/Summer2020_Rec_v1", legsPerKey);
+	if(cc == CP::CorrectionCode::Ok)
 	{
-		Error( APP_NAME, "Unable to initialize tool!" );
-		return 4;
+		if(!quiet)
+		{
+			std::string msg = "List of map keys necessary for this combination of triggers:\n";
+			for(auto& kv : legsPerKey)
+			{
+				msg += "   - tool with key \"" + kv.first + "\" chosen for legs " + kv.second + '\n';
+			}
+			Info(APP_NAME, "%s", msg.c_str());
+		}
+	}
+	else
+	{
+		Error(APP_NAME, "Unable to find list of map keys!");
+		return StatusCode::FAILURE;
 	}
 	
-	#ifndef XAOD_STANDALONE
-		ANA_CHECK(app->finalize())
-	#endif
-	return 0;
+	/// Then create all the needed photon tools and initialize the TrigGlob tool
+	/// using the information returned by suggestPhotonMapKeys()
+
+	/// Trigger efficiency/scale factor CP tools for photons
+	ToolHandleArray<IAsgPhotonEfficiencyCorrectionTool> photonEffTools, photonSFTools;
+	std::vector<asg::AnaToolHandle<IAsgPhotonEfficiencyCorrectionTool> > photonToolsFactory; // for RAII
+	std::map<std::string,std::string> legsPerTool;
+	int nTools = 0;
+	for(auto& kv : legsPerKey)
+	{
+		const std::string& trigKey = kv.first;
+		for(int j=0;j<2;++j) /// one tool instance for efficiencies, another for scale factors
+		{
+			auto t = photonToolsFactory.emplace(photonToolsFactory.end(), "AsgPhotonEfficiencyCorrectionTool/PhTrigEff_"+std::to_string(nTools++));
+			t->setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map3.txt").ignore();
+			t->setProperty("TriggerKey", (j? trigKey : "Eff_"+trigKey)).ignore();
+			t->setProperty("IsoKey", "TightCaloOnly").ignore();
+			t->setProperty("ForceDataType", (int)PATCore::ParticleDataType::Full).ignore();
+			t->setProperty("OutputLevel", MSG::ERROR).ignore();
+			ANA_CHECK(t->initialize());
+			auto& handles = j? photonSFTools : photonEffTools;
+			handles.push_back(t->getHandle());
+			std::string name = handles[handles.size()-1].name();
+			legsPerTool[name] = legsPerKey[trigKey];
+		}
+	}
+	asg::AnaToolHandle<ITrigGlobalEfficiencyCorrectionTool> myTool("TrigGlobalEfficiencyCorrectionTool/MyTool2");
+	myTool.setProperty("PhotonEfficiencyTools", photonEffTools).ignore();
+	myTool.setProperty("PhotonScaleFactorTools", photonSFTools).ignore();
+	myTool.setProperty("TriggerCombination", triggerCombination).ignore();
+	myTool.setProperty("ListOfLegsPerTool", legsPerTool).ignore();
+	myTool.setProperty("OutputLevel", quiet? MSG::WARNING : MSG::INFO).ignore();
+	ANA_CHECK(myTool.initialize());
+	return StatusCode::SUCCESS;
 }
