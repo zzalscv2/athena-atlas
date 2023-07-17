@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONALIGNMENTDATA_MDTASBUILTPAR_H
@@ -68,10 +68,10 @@ private:
         float zpitch;          // z pitch
         int stagg;             // is tube staggering ATLAS-standard or reversed?
     };
-    static const int NMEAS = NMLTYPES * NTUBESIDETYPES;
+    static constexpr size_t NMEAS = static_cast<size_t>(NMLTYPES) * static_cast<size_t>(NTUBESIDETYPES);
     AlignmentParameters m_meas[NMEAS];  // in this order: ML1_HV, ML1_RO, ML2_HV, ML2_RO
 
-    AlignmentParameters& meas(multilayer_t iML, tubeSide_t iTubeSide) { return m_meas[NTUBESIDETYPES * iML + iTubeSide]; }
-    const AlignmentParameters& meas(multilayer_t iML, tubeSide_t iTubeSide) const { return m_meas[NTUBESIDETYPES * iML + iTubeSide]; }
+    AlignmentParameters& meas(multilayer_t iML, tubeSide_t iTubeSide) { return m_meas[static_cast<size_t>(NTUBESIDETYPES) * iML + iTubeSide]; }
+    const AlignmentParameters& meas(multilayer_t iML, tubeSide_t iTubeSide) const { return m_meas[static_cast<size_t>(NTUBESIDETYPES) * iML + iTubeSide]; }
 };
 #endif  // MUONALIGNMENTDATA_MDTASBUILTPAR_H
