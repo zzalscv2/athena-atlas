@@ -10,6 +10,7 @@
 
 
 #undef NDEBUG
+
 #include "CxxUtils/ConcurrentStrMap.h"
 #include "CxxUtils/StrFormat.h"
 #include "CxxUtils/MurmurHash2.h"
@@ -276,14 +277,16 @@ void test1a()
   assert (map.at (keys[10]) == vals[10]);
   EXPECT_EXCEPTION (std::out_of_range, map.at ("fooabr"));
 
-  for (size_t i = 0; i < MAXKEYS; i++) {
-    auto [it, flag] = map.insert_or_assign (keys[i], vals2[i]);
-    assert (!flag);
-    assert (it.valid());
-    assert (it->first == keys[i]);
-    assert (it->second == vals2[i]);
+  {
+    auto lock = map.lock();
+    for (size_t i = 0; i < MAXKEYS; i++) {
+      auto [it, flag] = map.insert_or_assign (lock, keys[i], vals2[i]);
+      assert (!flag);
+      assert (it.valid());
+      assert (it->first == keys[i]);
+      assert (it->second == vals2[i]);
+    }
   }
-
   assert (map.size() == MAXKEYS);
   assert (map.capacity() == 1024);
 
@@ -454,9 +457,12 @@ void test_swap1()
   Values<mapped_type> vals1 (MAXKEYS, 0.5);
   Values<mapped_type> vals2 (MAXKEYS/2, MAXKEYS + 0.5);
 
-  for (size_t i = 0; i < MAXKEYS; i++) {
-    auto [it, flag] = map1.emplace (keys1[i], vals1[i]);
-    assert (flag);
+  {
+    auto lock = map1.lock();
+    for (size_t i = 0; i < MAXKEYS; i++) {
+      auto [it, flag] = map1.emplace (lock, keys1[i], vals1[i]);
+      assert (flag);
+    }
   }
   for (size_t i = 0; i < MAXKEYS/2; i++) {
     auto [it, flag] = map2.emplace (keys2[i], vals2[i]);

@@ -10,6 +10,7 @@
 
 
 #undef NDEBUG
+
 #include "CxxUtils/ConcurrentMap.h"
 #include "CxxUtils/checker_macros.h"
 #include "TestTools/expect_exception.h"
@@ -280,13 +281,16 @@ void test1a()
   assert (map.at (keys[10]) == vals[10]);
   EXPECT_EXCEPTION (std::out_of_range, map.at (keys.nonex()));
 
-  for (size_t i = 0; i < MAXKEYS; i++) {
-    vals.change(i);
-    auto [it, flag] = map.insert_or_assign (keys[i], vals[i]);
-    assert (!flag);
-    assert (it.valid());
-    assert (it->first == keys[i]);
-    assert (it->second == vals[i]);
+  {
+    auto lock = map.lock();
+    for (size_t i = 0; i < MAXKEYS; i++) {
+      vals.change(i);
+      auto [it, flag] = map.insert_or_assign (lock, keys[i], vals[i]);
+      assert (!flag);
+      assert (it.valid());
+      assert (it->first == keys[i]);
+      assert (it->second == vals[i]);
+    }
   }
 
   assert (map.size() == MAXKEYS);
@@ -451,12 +455,15 @@ void test3a()
   Values<mapped_type> vals (MAXKEYS);
   Values<mapped_type> vals2 (MAXKEYS, MAXKEYS);
 
-  for (size_t i = 0; i < MAXKEYS; i++) {
-    auto [it, flag] = map.emplace (keys[i], vals[i]);
-    assert (flag);
-    assert (it.valid());
-    assert (it->first == keys[i]);
-    assert (it->second == vals[i]);
+  {
+    auto lock = map.lock();
+    for (size_t i = 0; i < MAXKEYS; i++) {
+      auto [it, flag] = map.emplace (lock, keys[i], vals[i]);
+      assert (flag);
+      assert (it.valid());
+      assert (it->first == keys[i]);
+      assert (it->second == vals[i]);
+    }
   }
   assert (map.size() == 1000);
   assert (map.capacity() == 1024);
@@ -544,8 +551,11 @@ void test_swap1()
     auto [it, flag] = map2.emplace (keys2[i], vals2[i]);
     assert (flag);
   }
-  for (size_t i = 0; i < MAXKEYS; i+=2) {
-    assert (map2.erase (keys2[i]));
+  {
+    auto lock = map2.lock();
+    for (size_t i = 0; i < MAXKEYS; i+=2) {
+      assert (map2.erase (lock, keys2[i]));
+    }
   }
 
   assert (map1.size() == MAXKEYS);

@@ -10,6 +10,7 @@
 
 
 #undef NDEBUG
+
 #include "CxxUtils/ConcurrentPtrSet.h"
 #include "CxxUtils/MurmurHash2.h"
 #include "CxxUtils/checker_macros.h"
@@ -296,8 +297,11 @@ void test3()
     keys.push_back (i);
   }
 
-  for (size_t i = 0; i < MAXKEYS; i++) {
-    assert (set.emplace (&keys[i]).second);
+  {
+    auto lock = set.lock();
+    for (size_t i = 0; i < MAXKEYS; i++) {
+      assert (set.emplace (lock, &keys[i]).second);
+    }
   }
 
   assert (set.size() == MAXKEYS);
