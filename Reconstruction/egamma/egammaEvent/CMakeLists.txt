@@ -4,7 +4,6 @@
 atlas_subdir( egammaEvent )
 
 # External dependencies:
-find_package( Boost )
 find_package( CLHEP )
 find_package( ROOT COMPONENTS Core )
 
@@ -12,10 +11,10 @@ find_package( ROOT COMPONENTS Core )
 atlas_add_library( egammaEvent
                    src/*.cxx
                    PUBLIC_HEADERS egammaEvent
-                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+                   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} CaloEvent CaloGeoHelpers CaloIdentifier AthContainers AthLinks Navigation AthenaKernel EventKernel FourMom NavFourMom ParticleEvent JetEvent Particle TrkParametersBase TrkParameters VxVertex
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} CaloEvent CaloGeoHelpers CaloIdentifier AthContainers AthLinks Navigation AthenaKernel EventKernel FourMom NavFourMom ParticleEvent JetEvent Particle TrkParametersBase TrkParameters VxVertex
                    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} GaudiKernel egammaConditions TrkSurfaces TrkMaterialOnTrack TrkNeutralParameters TrkParticleBase TrkTrack )
 
 atlas_add_dictionary( egammaEventDict

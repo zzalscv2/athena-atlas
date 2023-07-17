@@ -17,7 +17,6 @@ endif()
 # External dependencies:
 find_package( FastJet )
 find_package( ROOT COMPONENTS Matrix TMVA )
-find_package( Boost )
 find_package( lwtnn )
 
 # Build a shared library:
@@ -31,8 +30,8 @@ atlas_add_library( BoostedJetTaggersLib
   Root/SmoothedWZTagger.cxx
   Root/SmoothedTopTagger.cxx
    PUBLIC_HEADERS BoostedJetTaggers
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${FASTJET_LIBRARIES}
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} ${FASTJET_LIBRARIES}
    ${LWTNN_LIBRARIES}
    AsgTools CxxUtils
    xAODBase xAODJet xAODTruth xAODTracking JetInterface JetRecLib JetEDM JetSelectorToolsLib JetCalibToolsLib  JetUncertaintiesLib ParticleJetToolsLib PathResolver
