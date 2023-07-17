@@ -37,12 +37,9 @@ class PyxAODEvtFilter(Alg):
             else:
                 runNumber = ei.mcChannelNumber()
             eventNumber = ei.eventNumber()
-            mcChannelNumber = ei.mcChannelNumber()
 
             # Check to see if we should accept or reject the event
             if (runNumber, eventNumber) in self.evtList:
-                self.setFilterPassed(True)
-            elif self.isMC and (mcChannelNumber, eventNumber) in self.evtList:
                 self.setFilterPassed(True)
             else:
                 self.setFilterPassed(False)
