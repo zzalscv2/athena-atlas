@@ -17,15 +17,17 @@
  * - caloExtension : extrapolate typically from parameters
  *   until the exit of the calorimeter (can be changed to be
  *   entry in the configuration). This typically uses the STEP
- *   propagator via the Extrapolator. This is the most
- *   generic case if one wants all intersections and
- *   the full path inside the calo.
+ *   propagator via the Extrapolator and  the
+ *   Tracking Geometry so to collect possible
+ *   intersections following the full path
+ *   inside the calo.
  *
  * - layersCaloExtension : Extrapolate to particular
  *   layers directly using the configured Propagator in the
- *   Extrapolator. This is faster but assumes
+ *   Extrapolator. This can be much faster and
+ *   needs just the Calo Detector Description but assumes
  *   explicit knowledge of which layer intersection to
- *   target
+ *   target.
  *
  *
  * Methods accepting  IParticle :

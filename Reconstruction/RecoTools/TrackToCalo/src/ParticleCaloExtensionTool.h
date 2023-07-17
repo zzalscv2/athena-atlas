@@ -57,7 +57,8 @@ public:
   /*
    * Implement the IParticleCaloExtension methods
    * see IParticleCaloExtension.h for
-   * documentation
+   * detailed documentation of the various options
+   * and methods
    */
   virtual std::unique_ptr<Trk::CaloExtension> caloExtension(
     const EventContext& ctx,
@@ -131,13 +132,13 @@ private:
     "",
     "Tool to build calorimeter layer surfaces"
   };
+ 
   Gaudi::Property<std::string> m_particleTypeName{
-    this,
-    "ParticleType",
-    "muon",
-    "The particle type used to decide for the extrapolation strategy"
-    ": muon, pion, electron,nonInteracting"
-  };
+      this, "ParticleType", "muon",
+      "The particle type used during extrapolation when not passed via the "
+      "method interfaces"
+      ": muon, pion, nonInteracting"};
+
   Gaudi::Property<bool> m_startFromPerigee{ this,
                                             "StartFromPerigee",
                                             false,
