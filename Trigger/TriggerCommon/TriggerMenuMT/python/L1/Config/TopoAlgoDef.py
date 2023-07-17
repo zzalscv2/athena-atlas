@@ -109,10 +109,10 @@ class TopoAlgoDef:
 
         # SORT
         # Inherited from NoSort
-        alg = AlgConf.eTauSort( name = 'eTAUsm', inputs = 'eTauTobs', outputs = 'eTAUsm' )
+        alg = AlgConf.eTauSort( name = 'eTAUs', inputs = 'eTauTobs', outputs = 'eTAUs' )
         alg.addgeneric('InputWidth', HW.eTauInputWidth)
         alg.addgeneric('OutputWidth', HW.eTauOutputWidthSort)
-        alg.addvariable('RCoreMin',  2)
+        alg.addvariable('RCoreMin',  0)
         alg.addvariable('RHadMin',   0)
         tm.registerTopoAlgo(alg)
 
@@ -1014,7 +1014,7 @@ class TopoAlgoDef:
 
         # RATIO MATCH dedicated to Exotic #TODO: are eTAU correct to use here (and below)?
         toponame = '100RATIO-0MATCH-eTAU40si2-eEMall'
-        alg = AlgConf.RatioMatch( name = toponame, inputs = [ 'eTAUsm', 'eEMall'], outputs = [ toponame ] )
+        alg = AlgConf.RatioMatch( name = toponame, inputs = [ 'eTAUs', 'eEMall'], outputs = [ toponame ] )
         alg.addgeneric('InputWidth1', HW.eTauOutputWidthSort)
         alg.addgeneric('InputWidth2', HW.eEmInputWidth)      
         alg.addgeneric('MaxTob1', 2)
@@ -1027,7 +1027,7 @@ class TopoAlgoDef:
 
         # NOT MATCH dedicated to Exotic
         toponame = 'NOT-0MATCH-eTAU40si1-eEMall'
-        alg = AlgConf.NotMatch( name = toponame, inputs = [ 'eTAUsm', 'eEMall'], outputs = [ toponame ] )
+        alg = AlgConf.NotMatch( name = toponame, inputs = [ 'eTAUs', 'eEMall'], outputs = [ toponame ] )
         alg.addgeneric('InputWidth1', HW.eTauOutputWidthSort)
         alg.addgeneric('InputWidth2', HW.eEmInputWidth)
         alg.addgeneric('MaxTob1', 1)
@@ -1383,9 +1383,9 @@ class TopoAlgoDef:
         algoList = [
             { "minDeta": 0,  "maxDeta": 20, "otype" : "jJ",  "ocut1" : 90,  "olist" : "s",
               "nleading1" : 1, "inputwidth1": HW.jJetOutputWidthSort, "ocut2" : 0, "nleading2": 2}, #0DETA20-jJ90s1-jJs2                        
-            { "minDeta":  0, "maxDeta"  : 24, "otype" : "eTAU" , "olist"  : "abm", "inputwidth1": HW.eTauOutputWidthSelect, 
+            { "minDeta":  0, "maxDeta"  : 24, "otype" : "eTAU" , "olist"  : "s", "inputwidth1": HW.eTauOutputWidthSort, 
               "ocut1"  : 30, "nleading1":  2,
-              "ocut2"  : 12, "nleading2":  2}, #0DETA24_eTAU30abm_eTAU12abm
+              "ocut2"  : 12, "nleading2":  2}, #0DETA24_eTAU30s2_eTAU12s2
         ]        
         for x in algoList:
             class d:
@@ -1393,8 +1393,8 @@ class TopoAlgoDef:
             for k in x:
                 setattr (d, k, x[k])
             toponame = "%iDETA%i-%s%s%s%s-%s%s%s%s"  % (d.minDeta, d.maxDeta,
-                                                        d.otype, d.ocut1 if d.ocut1 > 0 else "", d.olist, d.nleading1 if d.olist=="s" else "",
-                                                        d.otype, d.ocut2 if d.ocut2 > 0 else "", d.olist, d.nleading2 if d.olist=="s" else "")
+                                                        d.otype, d.ocut1 if d.ocut1 > 0 else "", d.olist, d.nleading1,
+                                                        d.otype, d.ocut2 if d.ocut2 > 0 else "", d.olist, d.nleading2)
             log.debug("Define %s", toponame)
             inputList = d.otype + d.olist
             alg = AlgConf.DeltaEtaIncl1( name = toponame, inputs = inputList, outputs = toponame )
