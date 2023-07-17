@@ -56,7 +56,7 @@ namespace ActsTrk
                size_t seedCollectionIndex,
                const char *seedType) const override;
 
-    virtual std::unique_ptr<ActsTrk::ITrackFindingTool::Measurements> initMeasurements(size_t numMeasurements) const override;
+    virtual std::unique_ptr<Measurements> initMeasurements(size_t numMeasurements, size_t numSeeds) const final;
 
   private:
     // Tools
@@ -79,10 +79,9 @@ namespace ActsTrk
         {this, "ATLASUncalibSourceLinkElementsName","" /*"UncalibratedMeasurementSourceLinkElements"*/, ""};
 
     // Create tracks from one seed's CKF result, appending to tracksContainer
-    struct DuplicateSeedDetector;
     StatusCode storeSeedInfo(const ActsTrk::TrackContainer &tracksContainer,
                              const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
-                             DuplicateSeedDetector &duplicateSeedDetector) const;
+                             const Measurements &measurements) const;
 
     size_t
     makeTracks(const EventContext &ctx,

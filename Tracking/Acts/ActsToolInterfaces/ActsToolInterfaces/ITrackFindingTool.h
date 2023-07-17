@@ -37,7 +37,11 @@ namespace ActsTrk
     struct Measurements
     {
       virtual ~Measurements() = default;
-      virtual void addMeasurements(size_t type, const EventContext &ctx, const UncalibratedMeasurementContainerPtr &clusterContainer, const InDetDD::SiDetectorElementCollection *detElems) = 0;
+      virtual void addMeasurements(size_t type,
+                                   const EventContext &ctx,
+                                   const UncalibratedMeasurementContainerPtr &clusterContainer,
+                                   const InDetDD::SiDetectorElementCollection &detElems,
+                                   const ActsTrk::SeedContainer *seeds) = 0;
     };
 
     DeclareInterfaceID(ITrackFindingTool, 1, 0);
@@ -64,7 +68,7 @@ namespace ActsTrk
                size_t seedCollectionIndex,
                const char *seedType) const = 0;
 
-    virtual std::unique_ptr<Measurements> initMeasurements(size_t numMeasurements) const = 0;
+    virtual std::unique_ptr<Measurements> initMeasurements(size_t numMeasurements, size_t numSeeds) const = 0;
   };
 
 } // namespace

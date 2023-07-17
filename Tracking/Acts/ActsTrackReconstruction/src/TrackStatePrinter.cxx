@@ -402,8 +402,7 @@ namespace ActsTrk
   static void
   printTrackState(const Acts::GeometryContext &tgContext,
                   const Acts::MultiTrajectory<ActsTrk::TrackStateBackend>::ConstTrackStateProxy &state,
-                  const std::vector<ATLASUncalibSourceLink> &measurements,
-                  size_t measurementOffset)
+                  const std::vector<ATLASUncalibSourceLink> &measurements)
   {
     ptrdiff_t index = -1;
     if (state.hasUncalibratedSourceLink())
@@ -411,7 +410,7 @@ namespace ActsTrk
       auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
       auto it = std::find(measurements.begin(), measurements.end(), sl);
       if (it != measurements.end())
-        index = std::distance(measurements.begin(), it) + measurementOffset;
+        index = std::distance(measurements.begin(), it);
     }
 
     std::cout << std::setw(5) << state.index() << ' ';
@@ -477,14 +476,8 @@ namespace ActsTrk
                                const ActsTrk::Seed &seed,
                                const Acts::BoundTrackParameters &initialParameters,
                                size_t measurementOffset,
-                               size_t iseed,
-                               size_t head,
-                               const char *seedType) const
+                               size_t iseed) const
   {
-    if (head)
-    {
-      ATH_MSG_INFO("CKF results for " << head << ' ' << seedType << " seeds:");
-    }
     printHeader(1);
 
     std::ostringstream os;
@@ -519,8 +512,7 @@ namespace ActsTrk
   TrackStatePrinter::printTracks(const Acts::GeometryContext &tgContext,
                                  const ActsTrk::TrackContainer &tracks,
                                  const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
-                                 const std::vector<ATLASUncalibSourceLink> &measurements,
-                                 size_t measurementOffset) const
+                                 const std::vector<ATLASUncalibSourceLink> &measurements) const
   {
     for (auto &track : fitResult)
     {
@@ -557,7 +549,7 @@ namespace ActsTrk
 
       for (auto i = states.size(); i > 0;)
       {
-        printTrackState(tgContext, states[--i], measurements, measurementOffset);
+        printTrackState(tgContext, states[--i], measurements);
       }
     }
     std::cout << std::flush;
@@ -566,21 +558,20 @@ namespace ActsTrk
   void
   TrackStatePrinter::printSourceLinks(const EventContext &ctx,
                                       const std::vector<ATLASUncalibSourceLink> &sourceLinks,
-                                      size_t type,
+                                      size_t typeIndex,
                                       size_t offset) const
   {
     auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
     Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
 
     std::vector<MeasurementInfo> measurementIndex;
-    measurementIndex.reserve(sourceLinks.size());
-    size_t index = offset;
-    for (auto &sl : sourceLinks)
+    measurementIndex.reserve(sourceLinks.size() - offset);
+    for (size_t index = offset; index < sourceLinks.size(); ++index)
     {
-      measurementIndex.push_back({index++, &sl, {}});
+      measurementIndex.push_back({index, &sourceLinks[index], {}});
     }
 
-    addSpacePoints(ctx, measurementIndex, type);
+    addSpacePoints(ctx, measurementIndex, typeIndex);
 
     if (offset == 0)
     {
@@ -594,7 +585,7 @@ namespace ActsTrk
     std::cout << std::flush;
   }
 
-  void TrackStatePrinter::addSpacePoints(const EventContext &ctx, std::vector<MeasurementInfo> &measurementIndex, size_t type) const
+  void TrackStatePrinter::addSpacePoints(const EventContext &ctx, std::vector<MeasurementInfo> &measurementIndex, size_t typeIndex) const
   {
     size_t icoll = 0;
     for (auto &spacePointKey : m_spacePointKey)
@@ -605,7 +596,7 @@ namespace ActsTrk
         continue;
       }
       auto spType = m_spacePointType[icoll++];
-      if (spType != type)
+      if (spType != typeIndex)
         continue;
       ATH_MSG_DEBUG("Retrieving from input SpacePoint collection '" << spacePointKey.key() << "' ...");
       SG::ReadHandle<xAOD::SpacePointContainer> handle = SG::makeHandle(spacePointKey, ctx);

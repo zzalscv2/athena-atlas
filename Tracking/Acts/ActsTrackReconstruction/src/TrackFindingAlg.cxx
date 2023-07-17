@@ -27,22 +27,14 @@ namespace ActsTrk
     ATH_CHECK(m_trackFindingTool.retrieve());
 
     // Read and Write handles
-    if (!m_pixelSeedsKey.empty())
-      ATH_CHECK(m_pixelSeedsKey.initialize());
-    if (!m_stripSeedsKey.empty())
-      ATH_CHECK(m_stripSeedsKey.initialize());
-    if (!m_pixelClusterContainerKey.empty())
-      ATH_CHECK(m_pixelClusterContainerKey.initialize());
-    if (!m_stripClusterContainerKey.empty())
-      ATH_CHECK(m_stripClusterContainerKey.initialize());
-    if (!m_pixelDetEleCollKey.empty())
-      ATH_CHECK(m_pixelDetEleCollKey.initialize());
-    if (!m_stripDetEleCollKey.empty())
-      ATH_CHECK(m_stripDetEleCollKey.initialize());
-    if (!m_pixelEstimatedTrackParametersKey.empty())
-      ATH_CHECK(m_pixelEstimatedTrackParametersKey.initialize());
-    if (!m_stripEstimatedTrackParametersKey.empty())
-      ATH_CHECK(m_stripEstimatedTrackParametersKey.initialize());
+    ATH_CHECK(m_pixelSeedsKey.initialize(SG::AllowEmpty));
+    ATH_CHECK(m_stripSeedsKey.initialize(SG::AllowEmpty));
+    ATH_CHECK(m_pixelClusterContainerKey.initialize(SG::AllowEmpty));
+    ATH_CHECK(m_stripClusterContainerKey.initialize(SG::AllowEmpty));
+    ATH_CHECK(m_pixelDetEleCollKey.initialize(SG::AllowEmpty));
+    ATH_CHECK(m_stripDetEleCollKey.initialize(SG::AllowEmpty));
+    ATH_CHECK(m_pixelEstimatedTrackParametersKey.initialize(SG::AllowEmpty));
+    ATH_CHECK(m_stripEstimatedTrackParametersKey.initialize(SG::AllowEmpty));
     ATH_CHECK(m_tracksKey.initialize());
     ATH_CHECK(m_tracksContainerKey.initialize());
 
@@ -158,17 +150,19 @@ namespace ActsTrk
 
     // convert all measurements to source links, so the CKF can find them from either strip or pixel seeds.
 
-    auto measurements = m_trackFindingTool->initMeasurements((pixelClusterContainer ? pixelClusterContainer->size() : 0) +
-                                                             (stripClusterContainer ? stripClusterContainer->size() : 0));
+    auto measurements = m_trackFindingTool->initMeasurements(((pixelClusterContainer ? pixelClusterContainer->size() : 0u) +
+                                                              (stripClusterContainer ? stripClusterContainer->size() : 0u)),
+                                                             ((pixelSeeds ? pixelSeeds->size() : 0u) +
+                                                              (stripSeeds ? stripSeeds->size() : 0u)));
     if (pixelClusterContainer && pixelDetEleColl)
     {
       ATH_MSG_DEBUG("Create " << pixelClusterContainer->size() << " source links from pixel measurements");
-      measurements->addMeasurements(0, ctx, pixelClusterContainer, pixelDetEleColl);
+      measurements->addMeasurements(0, ctx, pixelClusterContainer, *pixelDetEleColl, pixelSeeds);
     }
     if (stripClusterContainer && stripDetEleColl)
     {
       ATH_MSG_DEBUG("Create " << stripClusterContainer->size() << " source links from strip measurements");
-      measurements->addMeasurements(1, ctx, stripClusterContainer, stripDetEleColl);
+      measurements->addMeasurements(1, ctx, stripClusterContainer, *stripDetEleColl, stripSeeds);
     }
 
     // ================================================== //
