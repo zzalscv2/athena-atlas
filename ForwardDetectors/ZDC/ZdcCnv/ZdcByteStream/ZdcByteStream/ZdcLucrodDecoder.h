@@ -15,27 +15,22 @@
 
 #include "ZdcByteStream/ZdcLucrodData.h"
 
-#define ROD_MARKER        0xee1234ee
-#define ROD_HEADER_SIZE   9
-#define ROD_TRAILER_SIZE  3
-#define ROD_VERSION       0x03010000
-#define ROD_SOURCE_ID     0x00830000
-#define ROD_NSTATUS       1
-//#define ROD_NDATA         165
-//#define ROD_FRAGMENT_SIZE 178
-#define ROD_NDATA         101
-#define ROD_FRAGMENT_SIZE 114
-#define ROD_STATUS_POS    1
-#define ROD_NCHANNELS     8
 
+class ZdcLucrodDecoder : public AthMessaging 
+{
+  enum {ROD_MARKER = 0xee1234ee,
+	ROD_NCHANNELS = 8};
 
-class ZdcLucrodDecoder : public AthMessaging {
-  
  public: 
   
- ZdcLucrodDecoder() :  AthMessaging(Athena::getMessageSvc(), "ZdcLucrodDecoder")  {};
-  ~ZdcLucrodDecoder() {};
+ ZdcLucrodDecoder(unsigned int expectedSrcIDHigh, unsigned int expectedRODVersion = 0x301) :  
+  AthMessaging(Athena::getMessageSvc(), "ZdcLucrodDecoder"),
+    m_sourceIdHigh(expectedSrcIDHigh), m_rodVersion(expectedRODVersion)
+  {};
+
   
+  ~ZdcLucrodDecoder() {};
+
   StatusCode decode(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* robFragment, ZdcLucrodData* zld);
   
   MsgStream& msg(MSG::Level lvl) const { return AthMessaging::msg() << lvl; }
@@ -43,7 +38,9 @@ class ZdcLucrodDecoder : public AthMessaging {
   bool msgLevel(MSG::Level lvl) const { return AthMessaging::msgLvl(lvl); }
   
  private:
-  
+
+  unsigned short m_sourceIdHigh;
+  unsigned short m_rodVersion;
 }; 
 
 #endif

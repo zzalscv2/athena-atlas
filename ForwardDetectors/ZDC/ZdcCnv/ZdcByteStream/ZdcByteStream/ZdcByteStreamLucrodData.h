@@ -22,7 +22,6 @@
 class StoreGateSvc;
 class ZdcLucrodDecoder;
 
-
 class ZdcByteStreamLucrodData: public AthAlgorithm {
 
  public:
