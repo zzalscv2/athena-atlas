@@ -569,8 +569,10 @@ std::vector<ImportData::TrigDef> ImportData::parseTriggerString(const std::strin
 	return triggers;
 }
 
-bool ImportData::suggestElectronMapKeys(const std::map<std::string,std::string>& triggerCombination,
-		const std::string& version, std::map<std::string,std::string>& legsPerKey)
+bool ImportData::suggestEgammaMapKeys(const std::map<std::string,std::string>& triggerCombination,
+									  const std::string& version,
+									  std::map<std::string,std::string>& legsPerKey,
+									  xAOD::Type::ObjectType type)
 {
 	legsPerKey.clear();
 	if(!importAll()) return false;
@@ -603,7 +605,7 @@ bool ImportData::suggestElectronMapKeys(const std::map<std::string,std::string>&
 		{
 			for(std::size_t leg : trig.leg)
 			{
-				if(leg && associatedLeptonFlavour(leg, success)==xAOD::Type::Electron)
+				if(leg && associatedLeptonFlavour(leg, success)==type)
 				{
 					auto insertion = legs.emplace(leg,years);
 					if(!insertion.second) insertion.first->second |= years;

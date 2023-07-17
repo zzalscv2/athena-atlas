@@ -118,9 +118,10 @@ public:
 	bool importAll(const std::map<std::string, std::string>& overridenThresholds = {});
 	
 	bool getPeriodBoundaries(const std::string& period, std::pair<unsigned,unsigned>& boundaries);
-	bool suggestElectronMapKeys(const std::map<std::string,std::string>& triggerCombination,
-		const std::string& version, std::map<std::string,std::string>& legsPerKey);
-		
+	bool suggestEgammaMapKeys(const std::map<std::string,std::string>& triggerCombination,
+							  const std::string& version,
+							  std::map<std::string,std::string>& legsPerKey,
+							  xAOD::Type::ObjectType type);
 	const std::map<std::size_t,TrigDef>& getTriggerDefs() const { return m_triggerDefs; }
 	const std::map<std::size_t,float>& getTriggerThresholds() const { return m_triggerThresholds; }
 	const std::map<std::string, std::pair<unsigned,unsigned>>& getDataPeriods() const { return m_dataPeriods; }

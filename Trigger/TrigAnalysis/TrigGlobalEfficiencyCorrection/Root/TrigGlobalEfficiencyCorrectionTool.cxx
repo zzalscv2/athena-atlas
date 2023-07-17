@@ -1028,11 +1028,13 @@ std::vector<std::size_t> TrigGlobalEfficiencyCorrectionTool::getSortedLegs(const
 	return sorted_legs;
 }
 
-CP::CorrectionCode TrigGlobalEfficiencyCorrectionTool::suggestElectronMapKeys(const std::map<std::string,std::string>& triggerCombination, 
-	const std::string& version, std::map<std::string,std::string>& legsPerKey)
+CP::CorrectionCode TrigGlobalEfficiencyCorrectionTool::suggestEgammaMapKeys(
+	const std::map<std::string,std::string>& triggerCombination, 
+	const std::string& version, std::map<std::string,std::string>& legsPerKey,
+	xAOD::Type::ObjectType type)
 {
 	ImportData data;
-	bool success = data.suggestElectronMapKeys(triggerCombination, version, legsPerKey);
+	bool success = data.suggestEgammaMapKeys(triggerCombination, version, legsPerKey, type);
 	return success? CP::CorrectionCode::Ok : CP::CorrectionCode::Error;
 }
 
