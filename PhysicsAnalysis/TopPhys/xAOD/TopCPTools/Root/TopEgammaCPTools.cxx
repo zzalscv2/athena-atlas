@@ -20,9 +20,11 @@
 #include "ElectronEfficiencyCorrection/AsgElectronEfficiencyCorrectionTool.h"
 #include "ElectronEfficiencyCorrection/ElectronChargeEfficiencyCorrectionTool.h"
 #include "ElectronPhotonSelectorTools/AsgPhotonIsEMSelector.h"
-#include "ElectronPhotonShowerShapeFudgeTool/ElectronPhotonShowerShapeFudgeTool.h"
+#include "EgammaAnalysisInterfaces/IElectronPhotonShowerShapeFudgeTool.h"
 #include "PhotonEfficiencyCorrection/AsgPhotonEfficiencyCorrectionTool.h"
 #include "Root/EGSelectorConfigurationMapping.h"
+
+#include "AsgTools/AnaToolHandle.h"
 
 namespace top {
   EgammaCPTools::EgammaCPTools(const std::string& name) :
@@ -168,17 +170,11 @@ namespace top {
     // This should only be applied on MC
     using IFudgeTool = IElectronPhotonShowerShapeFudgeTool;
     const std::string fudgeName = "PhotonFudgeTool";
-    if (asg::ToolStore::contains<IFudgeTool>(fudgeName)) {
-      m_photonFudgeTool = asg::ToolStore::get<IFudgeTool>(fudgeName);
-    } else {
-      IFudgeTool* fudge_tool = new ElectronPhotonShowerShapeFudgeTool(fudgeName);
-      // Set Preselection to 22
-      // for MC15 samples, which are based on a geometry derived from GEO-21 from 2015+2016 data
-      top::check(asg::setProperty(fudge_tool, "Preselection", 22),
-                 "Failed to set " + fudgeName + " property: Preselection");
-      top::check(fudge_tool->initialize(),
-                 "Failed to initialize PhotonFudgeTool");
-      m_photonFudgeTool = fudge_tool;
+    m_photonFudgeTool = asg::AnaToolHandle<IElectronPhotonShowerShapeFudgeTool> ("ElectronPhotonVariableCorrectionTool/" + fudgeName);
+    if (!asg::ToolStore::contains<IFudgeTool>(fudgeName)) {
+      std::string configFilePath = "EGammaVariableCorrection/TUNE23/ElPhVariableNominalCorrection.conf";
+      ANA_CHECK(m_photonFudgeTool.setProperty("ConfigFile",configFilePath));
+      top::check(m_photonFudgeTool.initialize(), "Failed to initialize PhotonFudgeTool");
     }
 
     // The photon efficiency SF tool
@@ -915,3 +911,4 @@ IAsgElectronEfficiencyCorrectionTool*
     return working_point;
   }
 }  // namespace top
+

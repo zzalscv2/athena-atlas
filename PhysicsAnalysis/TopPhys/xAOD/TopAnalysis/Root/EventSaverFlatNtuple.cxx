@@ -178,7 +178,6 @@ namespace top {
     m_useRCAdditionalJSS(false),
     m_useVarRCJSS(false),
     m_useVarRCAdditionalJSS(false),
-    m_useElectronChargeIDSelection(false),
     m_met_met(0.),
     m_met_sumet(0.),
     m_met_phi(0.),
@@ -266,10 +265,6 @@ namespace top {
       m_useVarRCJSS = config->useVarRCJetSubstructure();
       m_useVarRCAdditionalJSS = config->useVarRCJetAdditionalSubstructure();
     } // end make VarRC jets
-
-    if (config->useElectronChargeIDSelection()) {
-      m_useElectronChargeIDSelection = true;
-    }
 
     //make a tree for each systematic
     std::string nominalTTreeName("SetMe"), nominalLooseTTreeName("SetMe");
@@ -903,10 +898,6 @@ namespace top {
         systematicTree->makeOutputVariable(m_el_CF, "el_CF");
         systematicTree->makeOutputVariable(m_el_d0sig, "el_d0sig");
         systematicTree->makeOutputVariable(m_el_delta_z0_sintheta, "el_delta_z0_sintheta");
-        if (m_useElectronChargeIDSelection) {
-          systematicTree->makeOutputVariable(m_el_ECIDS, "el_ECIDS");
-          systematicTree->makeOutputVariable(m_el_ECIDSResult, "el_ECIDSResult");
-        }
         if (m_config->isMC()) {
           systematicTree->makeOutputVariable(m_el_true_type, "el_true_type");
           systematicTree->makeOutputVariable(m_el_true_origin, "el_true_origin");
@@ -2279,10 +2270,6 @@ namespace top {
         m_el_trigMatched[trigger.first].resize(n_electrons);
       m_el_d0sig.resize(n_electrons);
       m_el_delta_z0_sintheta.resize(n_electrons);
-      if (m_useElectronChargeIDSelection) {
-        m_el_ECIDS.resize(n_electrons);
-        m_el_ECIDSResult.resize(n_electrons);
-      }
       if (m_config->isMC()) {
         m_el_true_type.resize(n_electrons);
         m_el_true_origin.resize(n_electrons);
@@ -2309,9 +2296,6 @@ namespace top {
 	m_PLIV_el_PromptLeptonImprovedVetoBARR.resize(n_electrons);
 	m_PLIV_el_PromptLeptonImprovedVetoECAP.resize(n_electrons);
       }
-
-      static const SG::AuxElement::Accessor<char> accECIDS("DFCommonElectronsECIDS");
-      static const SG::AuxElement::Accessor<double> accECIDSResult("DFCommonElectronsECIDSResult");
 
       static const SG::AuxElement::Accessor<float> PLIV_el_PromptLeptonRNN_conversion("PromptLeptonRNN_conversion");
       static const SG::AuxElement::Accessor<float> PLIV_el_PromptLeptonRNN_non_prompt_b("PromptLeptonRNN_non_prompt_b");
@@ -2350,11 +2334,6 @@ namespace top {
         }
         if (elPtr->isAvailable<float>("d0sig")) m_el_d0sig[i] = elPtr->auxdataConst<float>("d0sig");
         if (elPtr->isAvailable<float>("delta_z0_sintheta")) m_el_delta_z0_sintheta[i] = elPtr->auxdataConst<float>("delta_z0_sintheta");
-
-        if (m_useElectronChargeIDSelection) {
-          m_el_ECIDS[i] = accECIDS.isAvailable(*elPtr) ? accECIDS(*elPtr) : 'n';
-          m_el_ECIDSResult[i] = accECIDSResult.isAvailable(*elPtr) ? accECIDSResult(*elPtr) : -999.;
-        }
 
 	if (m_config->enablePromptLeptonImprovedVetoStudies()) {
 	  m_PLIV_el_PromptLeptonRNN_conversion[i] = PLIV_el_PromptLeptonRNN_conversion.isAvailable(*elPtr) ? PLIV_el_PromptLeptonRNN_conversion(*elPtr) : -999.;
