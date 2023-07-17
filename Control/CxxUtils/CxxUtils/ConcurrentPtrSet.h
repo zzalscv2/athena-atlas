@@ -93,6 +93,8 @@ public:
   using Updater_t = typename Impl_t::Updater_t;
   /// Context type.
   using Context_t = typename Updater_t::Context_t;
+  /// Type for external locking.
+  using Lock_t = typename Impl_t::Lock_t;
 
 
   /**
@@ -315,6 +317,17 @@ public:
 
 
   /**
+   * @brief Take a lock on the container.
+   *
+   * Take a lock on the container.
+   * The lock can then be passed to insertion methods, allowing to factor out
+   * the locking inside loops.  The lock will be released when the
+   * lock object is destroyed.
+   */
+  Lock_t lock();
+
+
+  /**
    * @brief Add an element to the set.
    * @param key The key of the new item to add.
    * @param ctx Execution context.
@@ -330,6 +343,23 @@ public:
 
 
   /**
+   * @brief Add an element to the set, with external locking.
+   * @param lock The lock object returned from lock().
+   * @param key The key of the new item to add.
+   * @param ctx Execution context.
+   *
+   * This will not overwrite an existing entry.
+   * The first element in the returned pair is an iterator referencing
+   * the added item.  The second is a flag that is true if a new element
+   * was added.
+   */
+  std::pair<const_iterator, bool>
+  emplace (const Lock_t& lock,
+           const key_type key,
+           const Context_t& ctx = Updater_t::defaultContext());
+
+
+  /**
    * @brief Add an element to the set.
    * @param p The item to add.
    *
@@ -337,6 +367,8 @@ public:
    * The first element in the returned pair is an iterator referencing
    * the added item.  The second is a flag that is true if a new element
    * was added.
+   *
+   * This is the same as emplace().  Use that for the case of external locking.
    */
   std::pair<const_iterator, bool> insert (const key_type p);
 
@@ -451,6 +483,22 @@ private:
    */
   std::pair<const_iterator, bool>
   put (const key_type key,
+       const Context_t& ctx = Updater_t::defaultContext());
+
+
+  /**
+   * @brief Insert an entry in the table, with external locking.
+   * @param lock The lock object returned from lock().
+   * @param key The new item to add.
+   * @param ctx Execution context.
+   *
+   * The first element in the returned pair is an iterator referencing
+   * the added item.  The second is a flag that is true if a new element
+   * was added.
+   */
+  std::pair<const_iterator, bool>
+  put (const Lock_t& lock,
+       const key_type key,
        const Context_t& ctx = Updater_t::defaultContext());
 
 

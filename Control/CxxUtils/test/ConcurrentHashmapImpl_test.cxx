@@ -250,15 +250,18 @@ void test3()
     assert (it.value() == key+1);
   }
 
-  for (size_t i = 0; i < 1000; i++) {
-    size_t key = 23*i + 100;
-    size_t hash = TestHash() (key);
-
-    auto [it, flag] = chm.put (key, hash, key+2, true, Context_t());
-    assert (!flag);
-    assert (it.valid());
-    assert (it.key() == key);
-    assert (it.value() == key+2);
+  {
+    CHMImpl::Lock_t lock = chm.lock();
+    for (size_t i = 0; i < 1000; i++) {
+      size_t key = 23*i + 100;
+      size_t hash = TestHash() (key);
+      
+      auto [it, flag] = chm.put (lock, key, hash, key+2, true, Context_t());
+      assert (!flag);
+      assert (it.valid());
+      assert (it.key() == key);
+      assert (it.value() == key+2);
+    }
   }
   assert (chm.size() == 1000);
   assert (chm.capacity() == 1024);
@@ -478,10 +481,13 @@ void test_swap()
     auto [it, flag] = chm2.put (key, hash, key+1, true, Context_t());
     assert (flag);
   }
-  for (size_t i = 0; i < 1000; i+=2) {
-    size_t key = 47*i + 100;
-    size_t hash = TestHash() (key);
-    assert (chm2.erase (key, hash));
+  {
+    auto lock = chm2.lock();
+    for (size_t i = 0; i < 1000; i+=2) {
+      size_t key = 47*i + 100;
+      size_t hash = TestHash() (key);
+      assert (chm2.erase (lock, key, hash));
+    }
   }
 
   assert (chm1.size() == 1000);

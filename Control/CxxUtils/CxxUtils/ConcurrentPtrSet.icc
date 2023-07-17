@@ -93,8 +93,9 @@ CONCURRENTPTRSET::ConcurrentPtrSet (InputIterator f,
             Matcher(),
             ctx)
 {
+  Lock_t lck = lock();
   for (; f != l; ++f) {
-    this->put (*f, ctx);
+    this->put (lck, *f, ctx);
   }
 }
 
@@ -328,6 +329,22 @@ auto CONCURRENTPTRSET::equal_range (const const_key_type key) const
 
 
 /**
+ * @brief Take a lock on the container.
+ *
+ * Take a lock on the container.
+ * The lock can then be passed to insertion methods, allowing to factor out
+ * the locking inside loops.  The lock will be released when the
+ * lock object is destroyed.
+ */
+T_CONCURRENTPTRSET
+inline
+auto CONCURRENTPTRSET::lock() -> Lock_t
+{
+  return m_impl.lock();
+}
+
+
+/**
  * @brief Add an element to the set.
  * @param key The key of the new item to add.
  * @param ctx Execution context.
@@ -349,6 +366,29 @@ auto CONCURRENTPTRSET::emplace (const key_type key,
 
 
 /**
+ * @brief Add an element to the set, with external locking.
+ * @param lock The lock object returned from lock().
+ * @param key The key of the new item to add.
+ * @param ctx Execution context.
+ *
+ * This will not overwrite an existing entry.
+ * The first element in the returned pair is an iterator referencing
+ * the added item.  The second is a flag that is true if a new element
+ * was added.
+ */
+T_CONCURRENTPTRSET
+inline
+auto CONCURRENTPTRSET::emplace (const Lock_t& lock,
+                                const key_type key,
+                                const Context_t& ctx
+                                  /*= Updater_t::defaultContext()*/)
+  -> std::pair<const_iterator, bool>
+{
+  return put (lock, key, ctx);
+}
+
+
+/**
  * @brief Add an element to the set.
  * @param p The item to add.
  *
@@ -356,6 +396,8 @@ auto CONCURRENTPTRSET::emplace (const key_type key,
  * The first element in the returned pair is an iterator referencing
  * the added item.  The second is a flag that is true if a new element
  * was added.
+ *
+ * This is the same as emplace().  Use that for the case of external locking.
  */
 T_CONCURRENTPTRSET
 inline
@@ -375,8 +417,10 @@ T_CONCURRENTPTRSET
 template <class InputIterator>
 void CONCURRENTPTRSET::insert (InputIterator first, InputIterator last)
 {
+  Lock_t lck = lock();
+  const Context_t& ctx = Updater_t::defaultContext();
   for (; first != last; ++first) {
-    emplace (*first);
+    emplace (lck, *first, ctx);
   }
 }
 
@@ -536,6 +580,31 @@ auto CONCURRENTPTRSET::put (const key_type key,
 {
   size_t hash = m_impl.hasher() (key);
   auto [it, flag] = m_impl.put (keyAsVal(key), hash,
+                                0,
+                                false, ctx);
+  return std::make_pair (const_iterator (it), flag);
+}
+
+
+/**
+ * @brief Insert an entry in the table, with external locking.
+ * @param lock The lock object returned from lock().
+ * @param key The new item to add.
+ * @param ctx Execution context.
+ *
+ * The first element in the returned pair is an iterator referencing
+ * the added item.  The second is a flag that is true if a new element
+ * was added.
+ */
+T_CONCURRENTPTRSET
+auto CONCURRENTPTRSET::put (const Lock_t& lock,
+                            const key_type key,
+                            const Context_t& ctx /*= Updater_t::defaultContext()*/)
+  -> std::pair<const_iterator, bool>
+{
+  size_t hash = m_impl.hasher() (key);
+  auto [it, flag] = m_impl.put (lock,
+                                keyAsVal(key), hash,
                                 0,
                                 false, ctx);
   return std::make_pair (const_iterator (it), flag);

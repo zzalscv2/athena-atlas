@@ -96,6 +96,8 @@ public:
   using Updater_t = typename Impl_t::Updater_t;
   /// Context type.
   using Context_t = typename Updater_t::Context_t;
+  /// Type for external locking.
+  using Lock_t = typename Impl_t::Lock_t;
 
   /// Ensure that the underlying map can store our mapped_type.
   static_assert( sizeof(typename Impl_t::val_t) >= sizeof(mapped_type) );
@@ -341,6 +343,17 @@ public:
 
 
   /**
+   * @brief Take a lock on the container.
+   *
+   * Take a lock on the container.
+   * The lock can then be passed to insertion methods, allowing to factor out
+   * the locking inside loops.  The lock will be released when the
+   * lock object is destroyed.
+   */
+  Lock_t lock();
+
+
+  /**
    * @brief Add an element to the map.
    * @param key The key of the new item to add.
    * @param val The value of the new item to add.
@@ -353,6 +366,24 @@ public:
    */
   std::pair<const_iterator, bool>
   emplace (const key_type& key, mapped_type val,
+           const Context_t& ctx = Updater_t::defaultContext());
+
+
+  /**
+   * @brief Add an element to the map, with external locking.
+   * @param lock The lock object returned from lock().
+   * @param key The key of the new item to add.
+   * @param val The value of the new item to add.
+   * @param ctx Execution context.
+   *
+   * This will not overwrite an existing entry.
+   * The first element in the returned pair is an iterator referencing
+   * the added item.  The second is a flag that is true if a new element
+   * was added.
+   */
+  std::pair<const_iterator, bool>
+  emplace (const Lock_t& lock,
+           const key_type& key, mapped_type val,
            const Context_t& ctx = Updater_t::defaultContext());
 
 
@@ -373,6 +404,25 @@ public:
 
 
   /**
+   * @brief Add an element to the map, or overwrite an existing one,
+   *        with external locking.
+   * @param lock The lock object returned from lock().
+   * @param key The key of the new item to add.
+   * @param val The value of the new item to add.
+   * @param ctx Execution context.
+   *
+   * This will overwrite an existing entry.
+   * The first element in the returned pair is an iterator referencing
+   * the added item.  The second is a flag that is true if a new element
+   * was added.
+   */
+  std::pair<const_iterator, bool>
+  insert_or_assign (const Lock_t& lock,
+                    const key_type& key, mapped_type val,
+                    const Context_t& ctx = Updater_t::defaultContext());
+
+
+  /**
    * @brief Add an element to the map.
    * @param p The item to add.
    *          Should be a pair where first is the string key
@@ -382,6 +432,8 @@ public:
    * The first element in the returned pair is an iterator referencing
    * the added item.  The second is a flag that is true if a new element
    * was added.
+   *
+   * For external locking, use emplace().
    */
   template <class PAIR>
   std::pair<const_iterator, bool> insert (const PAIR& p);
@@ -393,7 +445,7 @@ public:
    * @param last End of the range.
    *
    * The range should be a sequence of pairs where first is the string key
-   *  and second is the integer value.
+   * and second is the integer value.
    */
   template <class InputIterator>
   void insert (InputIterator first, InputIterator last);
@@ -500,6 +552,25 @@ private:
    */
   std::pair<const_iterator, bool>
   put (const key_type& key,
+       mapped_type val,
+       bool overwrite = true,
+       const Context_t& ctx = Updater_t::defaultContext());
+
+
+  /**
+   * @brief Insert / overwrite an entry in the table, with external locking.
+   * @param lock The lock object returned from lock().
+   * @param val The value of the new item to add.
+   * @param overwrite If true, allow overwriting an existing entry.
+   * @param ctx Execution context.
+   *
+   * The first element in the returned pair is an iterator referencing
+   * the added item.  The second is a flag that is true if a new element
+   * was added.
+   */
+  std::pair<const_iterator, bool>
+  put (const Lock_t& lock,
+       const key_type& key,
        mapped_type val,
        bool overwrite = true,
        const Context_t& ctx = Updater_t::defaultContext());

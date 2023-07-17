@@ -298,7 +298,24 @@ CHMIMPL::ConcurrentHashmapImpl (Updater_t&& updater,
 
 
 /**
- * @brief Add an entry to the table.
+ * @brief Take a lock on the container.
+ *
+ * Take a lock on the container.
+ * The lock can then be passed to put(), allowing to factor out the locking
+ * when put() gets used in a loop.  The lock will be released when the
+ * lock object is destroyed.
+ */
+T_CHMIMPL
+inline
+typename CHMIMPL::Lock_t CHMIMPL::lock()
+{
+  return Lock_t (m_mutex);
+}
+
+
+/**
+ * @brief Add an entry to the table, with external locking.
+ * @param lock The lock object returned from lock().
  * @param key The key to insert.
  * @param hash The hash of the key.
  * @param val The value to insert.
@@ -312,11 +329,11 @@ CHMIMPL::ConcurrentHashmapImpl (Updater_t&& updater,
  */
 T_CHMIMPL
 std::pair<typename CHMIMPL::const_iterator, bool>
-CHMIMPL::put (val_t key, size_t hash, val_t val, bool overwrite,
+CHMIMPL::put (const Lock_t& lock,
+              val_t key, size_t hash, val_t val, bool overwrite,
               const typename Updater_t::Context_t& ctx)
 {
   assert (key != nullval && key != tombstone);
-  lock_t lock (m_mutex);
 
   do {
     bool insert;
@@ -350,6 +367,29 @@ CHMIMPL::put (val_t key, size_t hash, val_t val, bool overwrite,
 
 
 /**
+ * @brief Add an entry to the table.
+ * @param key The key to insert.
+ * @param hash The hash of the key.
+ * @param val The value to insert.
+ * @param overwrite If true, then overwrite an existing entry.
+ *                  If false, an existing entry will not be changed.
+ * @param ctx Execution context.
+ *
+ * If the key already exists, then its value will be updated.
+ * Returns an iterator pointing at the entry and a flag which is
+ * true if a new element was added.
+ */
+T_CHMIMPL
+inline
+std::pair<typename CHMIMPL::const_iterator, bool>
+CHMIMPL::put (val_t key, size_t hash, val_t val, bool overwrite,
+              const typename Updater_t::Context_t& ctx)
+{
+  return put (lock(), key, hash, val, overwrite, ctx);
+}
+
+
+/**
  * @brief Look up an entry in the table.
  * @param key The key to find.
  * @param hash The hash of the key.
@@ -363,6 +403,40 @@ typename CHMIMPL::const_iterator CHMIMPL::get (val_t key, size_t hash) const
   size_t offset = table.probeRead (key, hash);
   // Offset will be -1 if not found --- invalid iterator.
   return const_iterator (table, offset);
+}
+
+
+/**
+ * @brief Erase an entry from the table, with external locking.
+ * @param lock The lock object returned from lock().
+ * @param key The key to find.
+ * @param hash The hash of the key.
+ *
+ * Mark the corresponding entry as deleted.
+ * Return true on success, false on failure (key not found).
+ *
+ * The tombstone value must be different from the null value.
+ *
+ * Take care if the key or value types require memory allocation.
+ *
+ * This may cause the key type returned by an iterator to change
+ * asynchronously to the tombstone value.
+ **/
+T_CHMIMPL
+bool
+CHMIMPL::erase (const Lock_t& /*lock*/, val_t key, size_t hash)
+{
+  static_assert (nullval != tombstone);
+  const Table& table = m_updater.get();
+  size_t offset = table.probeRead (key, hash);
+  if (offset != INVALID) {
+    entry_t& ent = m_table->entry (offset);
+    ++m_erased;
+    --m_size;
+    ent.m_key = tombstone;
+    return true;
+  }
+  return false;
 }
 
 
@@ -382,21 +456,11 @@ typename CHMIMPL::const_iterator CHMIMPL::get (val_t key, size_t hash) const
  * asynchronously to the tombstone value.
  **/
 T_CHMIMPL
+inline
 bool
 CHMIMPL::erase (val_t key, size_t hash)
 {
-  static_assert (nullval != tombstone);
-  lock_t lock (m_mutex);
-  const Table& table = m_updater.get();
-  size_t offset = table.probeRead (key, hash);
-  if (offset != INVALID) {
-    entry_t& ent = m_table->entry (offset);
-    ++m_erased;
-    --m_size;
-    ent.m_key = tombstone;
-    return true;
-  }
-  return false;
+  return erase (lock(), key, hash);
 }
 
 
@@ -627,7 +691,7 @@ CHMIMPL::clear (size_t capacity,
                 const typename Updater_t::Context_t& ctx)
 {
   capacity = round_up (capacity);
-  lock_t lock (m_mutex);
+  Lock_t lock (m_mutex);
   std::unique_ptr<Table> new_table (new (capacity) Table (capacity,
                                                           m_hasher,
                                                           m_matcher));
@@ -672,7 +736,7 @@ CHMIMPL::clear (const typename Updater_t::Context_t& ctx)
 T_CHMIMPL
 void CHMIMPL::forceClear()
 {
-  lock_t lock (m_mutex);
+  Lock_t lock (m_mutex);
   size_t cap = m_table->capacity();
   for (size_t i = 0; i < cap; i++) {
     m_table->entry(i).m_key.store (nullval, std::memory_order_relaxed);
@@ -695,7 +759,7 @@ T_CHMIMPL
 void CHMIMPL::reserve (size_t capacity,
                        const typename Updater_t::Context_t& ctx)
 {
-  lock_t lock (m_mutex);
+  Lock_t lock (m_mutex);
   if (capacity < m_table->capacity()) return;
   grow (lock, round_up (capacity), ctx);
 }
@@ -729,8 +793,8 @@ void CHMIMPL::swap (ConcurrentHashmapImpl& other)
 {
   // Shouldn't be needed since we specified that no other threads can be
   // accessing this...
-  lock_t lock (m_mutex);
-  lock_t lock_other (other.m_mutex);
+  Lock_t lock (m_mutex);
+  Lock_t lock_other (other.m_mutex);
 
   m_updater.swap (other.m_updater);
   std::swap (m_table, other.m_table);
@@ -766,7 +830,7 @@ typename CHMIMPL::Updater_t& CHMIMPL::updater()
  * Must be holding a lock on the mutex to call this.
  */
 T_CHMIMPL
-bool CHMIMPL::grow (lock_t& lock, const typename Updater_t::Context_t& ctx)
+bool CHMIMPL::grow (const Lock_t& lock, const typename Updater_t::Context_t& ctx)
 {
   // Allocate a new table with twice the capacity, unless there
   // have been many erasures.
@@ -784,7 +848,7 @@ bool CHMIMPL::grow (lock_t& lock, const typename Updater_t::Context_t& ctx)
  * Must be holding a lock on the mutex to call this.
  */
 T_CHMIMPL
-bool CHMIMPL::grow (lock_t& /*lock*/,
+bool CHMIMPL::grow (const Lock_t& /*lock*/,
                     size_t new_capacity,
                     const typename Updater_t::Context_t& ctx)
 {

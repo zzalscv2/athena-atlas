@@ -58,6 +58,18 @@ concept IsConcurrentHashmapPayload = std::is_standard_layout_v<T> &&
 #endif
 
 
+
+/**
+ * @brief Helper to allow for external locking with put().
+ */
+class HashmapLock
+  : public std::unique_lock<std::mutex>
+{
+public:
+  using std::unique_lock<std::mutex>::unique_lock;
+};
+
+
 /**
  * @brief Helper to generate hash probes.
  *
@@ -207,6 +219,9 @@ public:
   static constexpr uintptr_t tombstone = TOMBSTONE_;
   /// Used to represent an invalid table index.
   static constexpr size_t INVALID = static_cast<size_t>(-1);
+
+  /// Lock class used for external locking.
+  using Lock_t = HashmapLock;
 
 
 private:
@@ -476,6 +491,17 @@ public:
 
 
   /**
+   * @brief Take a lock on the container.
+   *
+   * Take a lock on the container.
+   * The lock can then be passed to put(), allowing to factor out the locking
+   * when put() gets used in a loop.  The lock will be released when the
+   * lock object is destroyed.
+   */
+  Lock_t lock();
+
+
+  /**
    * @brief Add an entry to the table.
    * @param key The key to insert.
    * @param hash The hash of the key.
@@ -490,6 +516,27 @@ public:
    */
   std::pair<const_iterator, bool>
   put (val_t key, size_t hash, val_t val,
+       bool overwrite,
+       const typename Updater_t::Context_t& ctx);
+
+
+  /**
+   * @brief Add an entry to the table, with external locking.
+   * @param lock The lock object returned from lock().
+   * @param key The key to insert.
+   * @param hash The hash of the key.
+   * @param val The value to insert.
+   * @param overwrite If true, then overwrite an existing entry.
+   *                  If false, an existing entry will not be changed.
+   * @param ctx Execution context.
+   *
+   * If the key already exists, then its value will be updated.
+   * Returns an iterator pointing at the entry and a flag which is
+   * true if a new element was added.
+   */
+  std::pair<const_iterator, bool>
+  put (const Lock_t& lock,
+       val_t key, size_t hash, val_t val,
        bool overwrite,
        const typename Updater_t::Context_t& ctx);
 
@@ -520,6 +567,25 @@ public:
    * asynchronously to the tombstone value.
    **/
   bool erase (val_t key, size_t hash);
+
+
+  /**
+   * @brief Erase an entry from the table, with external locking.
+   * @param lock The lock object returned from lock().
+   * @param key The key to erase.
+   * @param hash The hash of the key.
+   *
+   * Mark the corresponding entry as deleted.
+   * Return true on success, false on failure (key not found).
+   *
+   * The tombstone value must be different from the null value.
+   *
+   * Take care if the key or value types require memory allocation.
+   *
+   * This may cause the key type returned by an iterator to change
+   * asynchronously to the tombstone value.
+   **/
+  bool erase (const Lock_t& lock, val_t key, size_t hash);
 
 
   /// Two iterators defining a range.
@@ -615,17 +681,13 @@ public:
 
 
 private:
-  using mutex_t = std::mutex;
-  using lock_t  = std::lock_guard<mutex_t>;
-
-
   /**
    * @brief Make the table larger.
    * @param ctx Execution context.
    *
    * Must be holding a lock on the mutex to call this.
    */
-  bool grow (lock_t& /*lock*/, const typename Updater_t::Context_t& ctx);
+  bool grow (const Lock_t& lock, const typename Updater_t::Context_t& ctx);
 
 
   /**
@@ -635,7 +697,7 @@ private:
    *
    * Must be holding a lock on the mutex to call this.
    */
-  bool grow (lock_t& /*lock*/, size_t new_capacity, const typename Updater_t::Context_t& ctx);
+  bool grow (const Lock_t& lock, size_t new_capacity, const typename Updater_t::Context_t& ctx);
 
 
   static uint64_t round_up (uint64_t);

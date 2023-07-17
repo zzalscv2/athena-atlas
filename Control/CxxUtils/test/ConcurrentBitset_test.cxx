@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
-
-// $Id$
 /**
  * @file CxxUtils/test/ConcurrentBitset_test.cxx
  * @author scott snyder
@@ -14,6 +10,7 @@
 
 
 #undef NDEBUG
+
 #include "CxxUtils/ConcurrentBitset.h"
 #include "CxxUtils/checker_macros.h"
 #include "TestTools/random.h"

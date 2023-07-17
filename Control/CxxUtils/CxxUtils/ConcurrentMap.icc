@@ -107,8 +107,9 @@ CONCURRENTMAP::ConcurrentMap (InputIterator f,
             Matcher(),
             ctx)
 {
+  Lock_t lck = lock();
   for (; f != l; ++f) {
-    this->put (f->first, f->second, true, ctx);
+    this->put (lck, f->first, f->second, true, ctx);
   }
 }
 
@@ -363,6 +364,22 @@ auto CONCURRENTMAP::equal_range (key_type key) const
 
 
 /**
+ * @brief Take a lock on the container.
+ *
+ * Take a lock on the container.
+ * The lock can then be passed to insertion methods, allowing to factor out
+ * the locking inside loops.  The lock will be released when the
+ * lock object is destroyed.
+ */
+T_CONCURRENTMAP
+inline
+auto CONCURRENTMAP::lock() -> Lock_t
+{
+  return m_impl.lock();
+}
+
+
+/**
  * @brief Add an element to the map.
  * @param key The key of the new item to add.
  * @param val The value of the new item to add.
@@ -382,6 +399,30 @@ auto CONCURRENTMAP::emplace (key_type key,
   -> std::pair<const_iterator, bool>
 {
   return put (key, val, false, ctx);
+}
+
+
+/**
+ * @brief Add an element to the map, with external locking.
+ * @param lock The lock object returned from lock().
+ * @param val The value of the new item to add.
+ * @param ctx Execution context.
+ *
+ * This will not overwrite an existing entry.
+ * The first element in the returned pair is an iterator referencing
+ * the added item.  The second is a flag that is true if a new element
+ * was added.
+ */
+T_CONCURRENTMAP
+inline
+auto CONCURRENTMAP::emplace (const Lock_t& lock,
+                             key_type key,
+                             mapped_type val,
+                             const Context_t& ctx
+                               /*= Updater_t::defaultContext()*/)
+  -> std::pair<const_iterator, bool>
+{
+  return put (lock, key, val, false, ctx);
 }
 
 
@@ -409,6 +450,32 @@ auto CONCURRENTMAP::insert_or_assign (key_type key,
 
 
 /**
+ * @brief Add an element to the map, or overwrite an existing one,
+ *        with external locking.
+ * @param lock The lock object returned from lock().
+ * @param key The key of the new item to add.
+ * @param val The value of the new item to add.
+ * @param ctx Execution context.
+ *
+ * This will overwrite an existing entry.
+ * The first element in the returned pair is an iterator referencing
+ * the added item.  The second is a flag that is true if a new element
+ * was added.
+ */
+T_CONCURRENTMAP
+inline
+auto CONCURRENTMAP::insert_or_assign (const Lock_t& lock,
+                                      key_type key,
+                                      mapped_type val,
+                                      const Context_t& ctx
+                                        /*= Updater_t::defaultContext()*/)
+  -> std::pair<const_iterator, bool>
+{
+  return put (lock, key, val, true, ctx);
+}
+
+
+/**
  * @brief Add an element to the map.
  * @param p The item to add.
  *          Should be a pair where first is the key
@@ -418,6 +485,8 @@ auto CONCURRENTMAP::insert_or_assign (key_type key,
  * The first element in the returned pair is an iterator referencing
  * the added item.  The second is a flag that is true if a new element
  * was added.
+ *
+ * For external locking, use emplace().
  */
 T_CONCURRENTMAP
 template <class PAIR>
@@ -441,8 +510,10 @@ T_CONCURRENTMAP
 template <class InputIterator>
 void CONCURRENTMAP::insert (InputIterator first, InputIterator last)
 {
+  Lock_t lck = lock();
+  const Context_t& ctx = Updater_t::defaultContext();
   for (; first != last; ++first) {
-    emplace (first->first, first->second);
+    emplace (lck, first->first, first->second, ctx);
   }
 }
 
@@ -466,6 +537,29 @@ bool CONCURRENTMAP::erase (key_type key)
   val_t kval = keyAsVal (key);
   size_t hash = m_impl.hasher() (kval);
   return m_impl.erase (kval, hash);
+}
+
+
+/**
+ * @brief Erase an entry from the table, with external locking.
+ * @param lock The lock object returned from lock().
+ * @param key The key to erase.
+ *
+ * Mark the corresponding entry as deleted.
+ * Return true on success, false on failure (key not found).
+ *
+ * The tombstone value must be different from the null value.
+ *
+ * This may cause the key type returned by an iterator to change
+ * asynchronously to the tombstone value.
+ **/
+T_CONCURRENTMAP
+inline
+bool CONCURRENTMAP::erase (const Lock_t& lock, key_type key)
+{
+  val_t kval = keyAsVal (key);
+  size_t hash = m_impl.hasher() (kval);
+  return m_impl.erase (lock, kval, hash);
 }
 
 
@@ -672,6 +766,35 @@ auto CONCURRENTMAP::put (key_type key,
   val_t kval = keyAsVal (key);
   size_t hash = m_impl.hasher() (kval);
   auto [it, flag] = m_impl.put (kval, hash,
+                                mappedAsVal (val),
+                                overwrite, ctx);
+  return std::make_pair (const_iterator (it), flag);
+}
+
+
+/**
+ * @brief Insert / overwrite an entry in the table, with external locking.
+ * @param lock The lock object returned from lock().
+ * @param key The key of the new item to add.
+ * @param val The value of the new item to add.
+ * @param overwrite If true, allow overwriting an existing entry.
+ * @param ctx Execution context.
+ *
+ * The first element in the returned pair is an iterator referencing
+ * the added item.  The second is a flag that is true if a new element
+ * was added.
+ */
+T_CONCURRENTMAP
+auto CONCURRENTMAP::put (const Lock_t& lock,
+                         key_type key,
+                         mapped_type val,
+                         bool overwrite /*= true*/,
+                         const Context_t& ctx /*= Updater_t::defaultContext()*/)
+  -> std::pair<const_iterator, bool>
+{
+  val_t kval = keyAsVal (key);
+  size_t hash = m_impl.hasher() (kval);
+  auto [it, flag] = m_impl.put (lock, kval, hash,
                                 mappedAsVal (val),
                                 overwrite, ctx);
   return std::make_pair (const_iterator (it), flag);
