@@ -24375,10 +24375,10 @@ HLT_tau0_mediumRNN_tracktwoMVA_tau0_mediumRNN_tracktwoMVA_03dRAB_L14jJ30p0ETA24_
     2: 8
     3: 8
   stepFeatures:
-    0: 46
-    1: 44
-    2: 44
-    3: 44
+    0: 52
+    1: 48
+    2: 48
+    3: 48
     4: 6
 HLT_tau0_mediumRNN_tracktwoMVA_tau0_mediumRNN_tracktwoMVA_03dRAB_L14jJ30p0ETA24_0DETA24_10DPHI99-eTAU30MeTAU12M:
   eventCount: 0
@@ -26718,10 +26718,10 @@ HLT_tau30_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB_L14jJ30p0ETA2
     2: 8
     3: 8
   stepFeatures:
-    0: 43
-    1: 41
-    2: 41
-    3: 41
+    0: 49
+    1: 45
+    2: 45
+    3: 45
     4: 6
 HLT_tau30_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB_L14jJ30p0ETA24_0DETA24_10DPHI99-eTAU30MeTAU12M:
   eventCount: 0

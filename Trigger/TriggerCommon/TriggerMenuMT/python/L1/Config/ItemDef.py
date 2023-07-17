@@ -1930,7 +1930,7 @@ class ItemDef:
             MenuItem('L1_2cTAU20M_4DR28-eTAU30MeTAU20M-jJ55').setLogic ( d.cTAU20M.x(2) & d.TOPO_2DISAMB_jJ55ab_4DR28_eTAU30abm_eTAU20abm   & physcond)
             MenuItem('L1_2cTAU20M_4DR32-eTAU30MeTAU20M-jJ55').setLogic ( d.cTAU20M.x(2) & d.TOPO_2DISAMB_jJ55ab_4DR32_eTAU30abm_eTAU20abm   & physcond)
             MenuItem('L1_2cTAU20M_10DR32-eTAU30MeTAU20M-jJ55').setLogic( d.cTAU20M.x(2) & d.TOPO_2DISAMB_jJ55ab_10DR32_eTAU30abm_eTAU20abm  & physcond)
-            MenuItem('L1_4jJ30p0ETA24_0DETA24-eTAU30MeTAU12M').setLogic         ( d.jJ300ETA25.x(4) & d.TOPO_0DETA24_eTAU30abm_eTAU12abm          & physcond)
+            MenuItem('L1_4jJ30p0ETA24_0DETA24-eTAU30MeTAU12M').setLogic         ( d.jJ300ETA25.x(4) & d.TOPO_0DETA24_eTAU30s2_eTAU12s2      & physcond)
             MenuItem('L1_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30MeTAU20M').setLogic ( d.jJ300ETA25.x(4) & d.TOPO_0DETA24_4DPHI99_eTAU30abm_eTAU20abm  & physcond)
             MenuItem('L1_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30MeTAU12M').setLogic ( d.jJ300ETA25.x(4) & d.TOPO_0DETA24_4DPHI99_eTAU30abm_eTAU12abm  & physcond)
             MenuItem('L1_4jJ30p0ETA24_0DETA24_10DPHI99-eTAU30MeTAU12M').setLogic( d.jJ300ETA25.x(4) & d.TOPO_0DETA24_10DPHI99_eTAU30abm_eTAU12abm & physcond)
