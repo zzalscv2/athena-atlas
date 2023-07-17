@@ -79,7 +79,7 @@ namespace top {
     ToolHandle<IAsgElectronEfficiencyCorrectionTool> m_electronEffSFIsoCorrModel;
     ToolHandle<IAsgElectronEfficiencyCorrectionTool> m_electronEffSFIsoLooseCorrModel;
 
-    ToolHandle<IElectronPhotonShowerShapeFudgeTool> m_photonFudgeTool;
+    asg::AnaToolHandle<IElectronPhotonShowerShapeFudgeTool> m_photonFudgeTool;
     ToolHandle<IAsgPhotonEfficiencyCorrectionTool> m_photonEffSF;
     ToolHandleArray<IAsgPhotonEfficiencyCorrectionTool> m_photonIsoSFTools;
 
@@ -156,3 +156,4 @@ namespace top {
 }  // namespace top
 
 #endif  // TOPCPTOOLS_TOPEGAMMACPTOOLS_H_
+
