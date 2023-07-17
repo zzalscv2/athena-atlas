@@ -36,6 +36,7 @@ def main():
         tests_to_run.append(QTest("q447", run, WorkflowType.MCReco, ["HITtoRDO", "RAWtoALL"], setup, f"{options.extra_args} --geometryVersion ATLAS-P2-RUN4-01-01-00"))
     elif options.derivation:
         test_id = "MC_PHYS" if not options.ami_tag else options.ami_tag
+        test_id = f"{test_id}_{run.value}"
         tests_to_run.append(DerivationTest(test_id, run, WorkflowType.Derivation, ["Derivation"], setup, options.extra_args))
     else:
         if setup.parallel_execution:
