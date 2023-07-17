@@ -28,8 +28,6 @@
 #include "MuonNSWAsBuilt/StgcStripCalculator.h"
 #endif
 
-typedef ALineMapContainer::const_iterator ciALineMap;
-typedef BLineMapContainer::const_iterator ciBLineMap;
 typedef CscInternalAlignmentMapContainer::const_iterator ciCscInternalAlignmentMap;
 typedef MdtAsBuiltMapContainer::const_iterator ciMdtAsBuiltMap;
 
@@ -85,8 +83,6 @@ namespace MuonGM {
 
         // storeCscInternalAlignmentParams
         void storeCscInternalAlignmentParams(const CscInternalAlignmentPar& x);
-
-        void storeMdtAsBuiltParams(const MdtAsBuiltPar& x);
 
         // access to Readout Elements
         const MdtReadoutElement* getMdtReadoutElement(const Identifier&) const;    //!< access via extended identifier (requires unpacking)
@@ -156,15 +152,7 @@ namespace MuonGM {
         inline int  IncludeCutoutsFlag() const;
         void setCutoutsBogFlag(int flag);
         inline int  IncludeCutoutsBogFlag() const;
-        void setMdtDeformationFlag(int flag) { m_applyMdtDeformations = flag; }
-        inline int  mdtDeformationFlag() const { return m_applyMdtDeformations; }
-        void setMdtAsBuiltParamsFlag(int flag) { m_applyMdtAsBuiltParams = flag; }
-        inline int  mdtAsBuiltParamsFlag() const { return m_applyMdtAsBuiltParams; }
-        void setControlAlinesFlag(int flag) { m_controlAlines = flag; }
-        inline int  controlAlinesFlag() const { return m_controlAlines; }
         void setApplyCscIntAlignment(bool x) { m_useCscIntAlign = x; }
-        inline bool applyMdtDeformations() const { return (bool)m_applyMdtDeformations; }
-        inline bool applyMdtAsBuiltParams() const { return (bool)m_applyMdtAsBuiltParams; }
         inline bool applyCscIntAlignment() const { return m_useCscIntAlign; }
         void setCscIlinesFlag(int flag) { m_controlCscIlines = flag; }
         inline int  CscIlinesFlag() const { return m_controlCscIlines; }
@@ -258,25 +246,19 @@ namespace MuonGM {
         void fillsTgcCache();
         void fillMMCache();
 
-        inline const ALineMapContainer* ALineContainer() const;
-        inline const BLineMapContainer* BLineContainer() const;
         inline const CscInternalAlignmentMapContainer* CscInternalAlignmentContainer() const;
         inline const MdtAsBuiltMapContainer* MdtAsBuiltContainer() const;
-        inline ciALineMap ALineMapBegin() const;
-        inline ciBLineMap BLineMapBegin() const;
-        inline ciALineMap ALineMapEnd() const;
-        inline ciBLineMap BLineMapEnd() const;
+
         inline ciCscInternalAlignmentMap CscALineMapBegin() const;
         inline ciCscInternalAlignmentMap CscALineMapEnd() const;
         inline ciMdtAsBuiltMap MdtAsBuiltMapBegin() const;
         inline ciMdtAsBuiltMap MdtAsBuiltMapEnd() const;
-        StatusCode updateAlignment(const ALineMapContainer& a, bool isData = true);
-        StatusCode updateDeformations(const BLineMapContainer& a, bool isData = true);
+        StatusCode updateAlignment(const ALineContainer& a);
+        StatusCode updateDeformations(const BLineContainer& a);
         StatusCode updateMdtAsBuiltParams(const MdtAsBuiltMapContainer& a);
         StatusCode initCSCInternalAlignmentMap();
         StatusCode updateCSCInternalAlignmentMap(const CscInternalAlignmentMapContainer& cscIntAline);
 
-        void initABlineContainers();
         void setNswAsBuilt(const NswAsBuiltDbData* nswAsBuiltData);
 #ifndef SIMULATIONBASE
         const NswAsBuilt::StripCalculator* getMMAsBuiltCalculator() const { 
@@ -315,9 +297,6 @@ namespace MuonGM {
         int m_minimalgeo{0};
         int m_includeCutouts{0};
         int m_includeCutoutsBog{0};
-        int m_controlAlines{111111};
-        int m_applyMdtDeformations{0};
-        int m_applyMdtAsBuiltParams{0};
         bool m_useCscIntAlign{false};
         int m_controlCscIlines{111111};
         bool m_useCscIlinesFromGM{true};
@@ -364,8 +343,6 @@ namespace MuonGM {
         // pointers to the XxxDetectorElements (with granularity a la EDM)
         std::vector<std::unique_ptr<const TgcReadoutParams> > m_TgcReadoutParamsVec;
 
-        ALineMapContainer m_aLineContainer;
-        BLineMapContainer m_bLineContainer;
         CscInternalAlignmentMapContainer m_cscALineContainer;
         MdtAsBuiltMapContainer m_AsBuiltParamsMap;
 
@@ -431,18 +408,10 @@ namespace MuonGM {
     unsigned int MuonDetectorManager::nRpcDE() const { return m_n_rpcDE; }
     unsigned int MuonDetectorManager::nTgcDE() const { return m_n_tgcDE; }
 
-    const ALineMapContainer* MuonDetectorManager::ALineContainer() const { return &m_aLineContainer; }
-
-    const BLineMapContainer* MuonDetectorManager::BLineContainer() const { return &m_bLineContainer; }
-
     const CscInternalAlignmentMapContainer* MuonDetectorManager::CscInternalAlignmentContainer() const { return &m_cscALineContainer; }
 
     const MdtAsBuiltMapContainer* MuonDetectorManager::MdtAsBuiltContainer() const { return &m_AsBuiltParamsMap; }
 
-    ciALineMap MuonDetectorManager::ALineMapBegin() const { return m_aLineContainer.begin(); }
-    ciBLineMap MuonDetectorManager::BLineMapBegin() const { return m_bLineContainer.begin(); }
-    ciALineMap MuonDetectorManager::ALineMapEnd() const { return m_aLineContainer.end(); }
-    ciBLineMap MuonDetectorManager::BLineMapEnd() const { return m_bLineContainer.end(); }
     ciCscInternalAlignmentMap MuonDetectorManager::CscALineMapBegin() const { return m_cscALineContainer.begin(); }
     ciCscInternalAlignmentMap MuonDetectorManager::CscALineMapEnd() const { return m_cscALineContainer.end(); }
     ciMdtAsBuiltMap MuonDetectorManager::MdtAsBuiltMapBegin() const { return m_AsBuiltParamsMap.begin(); }

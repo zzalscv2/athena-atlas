@@ -5,7 +5,7 @@
 #ifndef MUONGEOMODEL_MUONDETECTORCONDALG_H
 #define MUONGEOMODEL_MUONDETECTORCONDALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "MuonAlignmentData/CorrContainer.h"
 #include "MuonAlignmentData/NswAsBuiltDbData.h"
@@ -16,7 +16,7 @@
 #include "StoreGate/WriteCondHandleKey.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
-class MuonDetectorCondAlg : public AthAlgorithm {
+class MuonDetectorCondAlg : public AthReentrantAlgorithm {
 
   public:
     // Standard Constructor
@@ -26,9 +26,10 @@ class MuonDetectorCondAlg : public AthAlgorithm {
     virtual ~MuonDetectorCondAlg() = default;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode execute() override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
+    virtual bool isReEntrant() const override final { return false; }
 
-    Gaudi::Property<bool> m_isData{this, "IsData", true};
+  private:
     Gaudi::Property<bool> m_applyMmPassivation{this, "applyMmPassivation", false};
     
     Gaudi::Property<bool> m_applyNswAsBuilt{this, "applyNswAsBuilt", true, 
@@ -43,14 +44,12 @@ class MuonDetectorCondAlg : public AthAlgorithm {
     /// Apply internal transformations on the CSCs
     Gaudi::Property<bool> m_applyILines{this, "applyILines", true};
     
-
-  private:
     ToolHandle<MuonDetectorTool> m_iGeoModelTool{this, "MuonDetectorTool", "MuonDetectorTool", "The MuonDetector tool"};
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
     // Read Handles
-    SG::ReadCondHandleKey<ALineMapContainer> m_readALineKey{this, "ReadALineKey", "ALineMapContainer", "Key of input muon alignment ALine condition data"};
-    SG::ReadCondHandleKey<BLineMapContainer> m_readBLineKey{this, "ReadBLineKey", "BLineMapContainer", "Key of input muon alignment BLine condition data"};
+    SG::ReadCondHandleKey<ALineContainer> m_readALineKey{this, "ReadALineKey", "ALineContainer", "Key of input muon alignment ALine condition data"};
+    SG::ReadCondHandleKey<BLineContainer> m_readBLineKey{this, "ReadBLineKey", "BLineContainer", "Key of input muon alignment BLine condition data"};
     SG::ReadCondHandleKey<CscInternalAlignmentMapContainer> m_readILineKey{this, "ReadILineKey", "CscInternalAlignmentMapContainer",
                                                                            "Key of input muon alignment CSC/ILine condition data"};
     SG::ReadCondHandleKey<MdtAsBuiltMapContainer> m_readMdtAsBuiltKey{this, "ReadMdtAsBuiltKey", "MdtAsBuiltMapContainer", "Key of output muon alignment MDT/AsBuilt condition data"};

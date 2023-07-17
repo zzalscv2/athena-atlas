@@ -1,42 +1,49 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONALIGNMENTDATA_MUONALIGNMENTPAR_H
 #define MUONALIGNMENTDATA_MUONALIGNMENTPAR_H
 
 #include <string>
+#include <Identifier/Identifier.h>
 
-#include "Identifier/Identifier.h"
-
+/**
+ * Basic class to map the MuonAlignment parameters to the different subdetectors 
+ * inside the muon system.
+*/
 class MuonAlignmentPar {
 public:
-    MuonAlignmentPar();
+    MuonAlignmentPar() = default;
     virtual ~MuonAlignmentPar() = default;
+    
+    /// Setters and getters for the Athena Identifier
+    void setIdentifier(const Identifier& id);
+    const Identifier& identify() const;
+    /// Odering operater using the Identifier
+    bool operator<(const MuonAlignmentPar& other) const;
+    
+    /// @brief AMDB identifiers. They're often not the same as the ATLAS ones (TGCs)
+    void setAmdbId(const std::string& stName, int stEta, int stPhi, int stJob);
+    /// Seems to correspond to the multilayer but sometimes also stEta.
+    int AmdbJob() const; 
+    /// @brief station Eta
+    int AmdbEta() const;
+    /// @brief station phi
+    int AmdbPhi() const;
+    /// @brief station Name
+    std::string AmdbStation() const;
 
-    Identifier identify() const { return m_stationId; }
-    std::string key() const { return m_stationKey; }
-
-    void setAmdbId(std::string_view type, int jff, int jzz, int job);
-    void getAmdbId(std::string& type, int& jff, int& jzz, int& job) const;
-
-    bool isNew() const { return m_isNew; }
-    void isNew(bool newPar) { m_isNew = newPar; }
-
-protected:
-    // Identifier
-    Identifier m_stationId;
-
-    // geomodel key
-    std::string m_stationKey;
-
-    // Amdb identifier
-    std::string m_Type;
-    int m_Jff;
-    int m_Jzz;
-    int m_Job;
-
-    bool m_isNew;
+    void isNew(bool){};
+private:
+    Identifier m_id{0};
+    std::string m_station{};
+    int m_eta{0};
+    int m_phi{0};
+    int m_job{0};
 };
+/// Operator for 
+bool operator<(const Identifier& a, const MuonAlignmentPar& b);
+bool operator<(const MuonAlignmentPar& a, const Identifier& b);
 
 #endif  // MUONALIGNMENTDATA_MUONALIGNMENTPAR_H

@@ -13,13 +13,14 @@
 #include "MuonAlignmentData/MdtAsBuiltPar.h"
 #include "MuonIdHelpers/MdtIdHelper.h"
 
-typedef std::map<Identifier, ALinePar> ALineMapContainer;
-CLASS_DEF(ALineMapContainer, 1324994866, 1)
-CLASS_DEF(CondCont<ALineMapContainer>, 1201194425, 0)
+using ALineContainer = std::set<ALinePar, std::less<>>;
+CLASS_DEF( ALineContainer , 1206027754 , 1 );
+CONDCONT_DEF( ALineContainer , 1165315046 );
 
-typedef std::map<Identifier, BLinePar> BLineMapContainer;
-CLASS_DEF(BLineMapContainer, 1124991377, 1)
-CLASS_DEF(CondCont<BLineMapContainer>, 1332301344, 0)
+using BLineContainer =  std::set<BLinePar, std::less<>>;
+CLASS_DEF( BLineContainer , 1162339375 , 1 );
+CONDCONT_DEF( BLineContainer , 1122676225 );
+
 
 typedef std::map<Identifier, CscInternalAlignmentPar> CscInternalAlignmentMapContainer;
 CLASS_DEF(CscInternalAlignmentMapContainer, 1285567354, 1)
@@ -29,8 +30,6 @@ typedef std::map<Identifier, MdtAsBuiltPar> MdtAsBuiltMapContainer;
 CLASS_DEF(MdtAsBuiltMapContainer, 1198729422, 1)
 CLASS_DEF(CondCont<MdtAsBuiltMapContainer>, 1076645826, 0)
 
-typedef ALineMapContainer::iterator iALineMap;
-typedef BLineMapContainer::iterator iBLineMap;
 typedef CscInternalAlignmentMapContainer::iterator iCscInternalAlignmentMap;
 typedef MdtAsBuiltMapContainer::iterator iMdtAsBuiltMap;
 

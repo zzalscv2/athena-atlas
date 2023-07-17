@@ -68,10 +68,6 @@ class MuonDetectorTool final : public GeoModelTool {
     
     Gaudi::Property<bool> m_cachingFlag{this, "CachingFlag", true, "Turn on/off caching of ReadoutElement surfaces etc. (i.e. for MDTs)"};
     
-    Gaudi::Property<bool> m_enableMdtDeformations{this,      "EnableMdtDeformations", true};
-    Gaudi::Property<bool> m_enableMdtAsBuiltParameters{this, "EnableMdtAsBuiltParameters", false};
-    Gaudi::Property<std::string> m_altMdtAsBuiltFile{this,   "AlternateAsBuiltParamAlignFile", "" };
-
     MuonGM::MuonDetectorManager* m_manager{nullptr};
 };
 

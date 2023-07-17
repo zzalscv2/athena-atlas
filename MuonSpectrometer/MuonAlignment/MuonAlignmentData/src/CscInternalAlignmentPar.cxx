@@ -4,8 +4,6 @@
 
 #include "MuonAlignmentData/CscInternalAlignmentPar.h"
 
-CscInternalAlignmentPar::CscInternalAlignmentPar() :
-    MuonAlignmentPar(), m_wireLayer(0), m_S(0.0), m_Z(0.0), m_T(0.0), m_rotS(0.0), m_rotZ(0.0), m_rotT(0.0) {}
 
 void CscInternalAlignmentPar::setParameters(float s, float z, float t, float rotS, float rotZ, float rotT) {
     m_S = s;
