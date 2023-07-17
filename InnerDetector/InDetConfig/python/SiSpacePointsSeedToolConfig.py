@@ -126,9 +126,7 @@ def SiSpacePointsSeedMakerCfg(flags, **kwargs):
     # Properties valid for all of the classes
     kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPT)
     kwargs.setdefault("radMax", flags.Tracking.ActiveConfig.radMax)
-    kwargs.setdefault("etaMax",
-                      2.7 if flags.Tracking.ActiveConfig.extension == "Disappearing"
-                      else flags.Tracking.ActiveConfig.maxEta)
+    kwargs.setdefault("etaMax", flags.Tracking.ActiveConfig.maxEta)
     kwargs.setdefault("usePixel", flags.Tracking.ActiveConfig.usePixelSeeding)
     kwargs.setdefault("SpacePointsPixelName", 'PixelSpacePoints')
     kwargs.setdefault("useSCT", flags.Tracking.ActiveConfig.useSCTSeeding)
