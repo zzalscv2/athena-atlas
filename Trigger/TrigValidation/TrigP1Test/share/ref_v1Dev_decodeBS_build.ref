@@ -214,6 +214,8 @@ HLT_2g20_tight_icaloloose_L12eEM18M:
   eventCount: 0
 HLT_2g22_tight_L12eEM18M:
   eventCount: 0
+HLT_2g22_tight_L1eEM15_EMPTY:
+  eventCount: 0
 HLT_2g22_tight_L12eEM9_EMPTY:
   eventCount: 0
 HLT_2g22_tight_L1EM7_EMPTY:
@@ -225,6 +227,8 @@ HLT_2g22_tight_L1eEM9_UNPAIRED_ISO:
 HLT_2g25_loose_g15_loose_L12eEM24L:
   eventCount: 0
 HLT_2g50_loose_L12eEM24L:
+  eventCount: 0
+HLT_2g50_tight_L1eEM15_EMPTY:
   eventCount: 0
 HLT_2g50_tight_L12eEM9_EMPTY:
   eventCount: 0
@@ -3938,6 +3942,8 @@ HLT_g35_medium_L1eEM24L:
     0: 2
     1: 1
 HLT_g35_medium_g25_medium_L12eEM24L:
+  eventCount: 0
+HLT_g35_medium_g25_medium_L1eEM15_EMPTY:
   eventCount: 0
 HLT_g35_medium_g25_medium_L12eEM9_EMPTY:
   eventCount: 0
