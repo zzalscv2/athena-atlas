@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "ParticleCaloExtensionTool.h"
@@ -44,8 +44,6 @@ ParticleCaloExtensionTool::initialize()
     m_particleStrategy = muon;
   } else if (m_particleTypeName == "pion") {
     m_particleStrategy = pion;
-  } else if (m_particleTypeName == "electron") {
-    m_particleStrategy = electron;
   } else {
     ATH_MSG_WARNING("Unsupported particle type, using strategy based on type "
                     << m_particleTypeName);
@@ -57,7 +55,9 @@ ParticleCaloExtensionTool::initialize()
   }
   ATH_MSG_INFO(" Using strategy based on particle type "
                << m_particleTypeName << " enum value " << m_particleStrategy);
-  if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
+  if (!m_monTool.empty()) {
+    ATH_CHECK(m_monTool.retrieve());
+  }
   return StatusCode::SUCCESS;
 }
 
@@ -213,23 +213,12 @@ ParticleCaloExtensionTool::caloExtension(
    * the strategy we want to follow for muons.
    * But should also work well as a generic
    * strategy.
-   *
-   * For electrons the extrapolation will be done as
-   * a muon (we want close to non-interacting)
    */
 
   // Start with what the user opted as strategy
   ParticleHypothesis particleType = m_particleStrategy;
 
-  // special treatment when we want an electron strategy
-  if (m_particleStrategy == electron) {
-    particleType = muon;
-  }
-  if (particle.particleHypothesis() == xAOD::electron) {
-    particleType = muon;
-  }
-
-  // In principle we will extrapolate either from the perigee or
+  // wee extrapolate either from the perigee or
   // from the last measurement.
   if (m_startFromPerigee || !particle.track()) {
     bool idExit = true;
