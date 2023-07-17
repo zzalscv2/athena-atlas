@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTrack/GXFMaterialEffects.h"
@@ -9,37 +9,17 @@
 #include "TrkMaterialOnTrack/EnergyLoss.h"
 
 namespace Trk {
-  GXFMaterialEffects::GXFMaterialEffects()
-    : m_scatphi (0),
-      m_scattheta (0),
-      m_sigmascatphi (0),
-      m_sigmascattheta (0),
-      m_x0 (0),
-      m_deltap (0),
-      m_deltae (0),
-      m_sigmadeltae (0),
-      m_sigmadeltaepos (0),
-      m_sigmadeltaeneg (0),
-      m_surf (nullptr),
-      m_matprop (nullptr),
-      m_iskink (false),
-      m_ismeasuredeloss (true),
-      m_measscatphi (0),
-      m_sintheta (1)
-  {
-  }
+  GXFMaterialEffects::GXFMaterialEffects(const MaterialEffectsOnTrack &meot)
+    : m_sigmadeltae(0), m_surf(&meot.associatedSurface()) {
 
-  GXFMaterialEffects::GXFMaterialEffects(const MaterialEffectsOnTrack *meot)
-      : m_sigmadeltae(0) {
+    if (meot.energyLoss() != nullptr) {
+      m_deltae = meot.energyLoss()->deltaE();
+      m_sigmadeltaepos = meot.energyLoss()->sigmaPlusDeltaE();
+      m_sigmadeltaeneg = meot.energyLoss()->sigmaMinusDeltaE();
 
-    if (meot->energyLoss() != nullptr) {
-      m_deltae = meot->energyLoss()->deltaE();
-      m_sigmadeltaepos = meot->energyLoss()->sigmaPlusDeltaE();
-      m_sigmadeltaeneg = meot->energyLoss()->sigmaMinusDeltaE();
-      
-      if (meot->scatteringAngles() == nullptr) {
-        m_eloss = std::unique_ptr<EnergyLoss>(meot->energyLoss()->clone());
-        m_sigmadeltae = meot->energyLoss()->sigmaDeltaE();
+      if (meot.scatteringAngles() == nullptr) {
+        m_eloss = std::unique_ptr<EnergyLoss>(meot.energyLoss()->clone());
+        m_sigmadeltae = meot.energyLoss()->sigmaDeltaE();
       } else {
         m_eloss = nullptr;
       }
@@ -50,13 +30,9 @@ namespace Trk {
       m_sigmadeltaeneg = 0;
     }
 
-    m_x0 = 0;
-    m_sintheta = 1;
+    double x0 = meot.thicknessInX0();
+    const ScatteringAngles *scatangles = meot.scatteringAngles();
 
-    double x0 = meot->thicknessInX0();
-
-    const ScatteringAngles *scatangles = meot->scatteringAngles();
-    
     if ((scatangles != nullptr) && x0 > 0) {
       m_x0 = x0;
       m_sintheta = scatangles->sigmaDeltaTheta() / scatangles->sigmaDeltaPhi();
@@ -67,16 +43,9 @@ namespace Trk {
     } else {
       m_scatphi = m_scattheta = m_sigmascatphi = m_sigmascattheta = 0;
     }
-    
-    m_surf = &meot->associatedSurface();
-    m_matprop = nullptr;
-    m_iskink = false;
-    m_ismeasuredeloss = true;
-    m_deltap = 0;
-    m_measscatphi = 0;
   }
 
-  GXFMaterialEffects::GXFMaterialEffects(GXFMaterialEffects & rhs)
+  GXFMaterialEffects::GXFMaterialEffects(const GXFMaterialEffects & rhs)
     : m_scatphi (rhs.m_scatphi),
       m_scattheta (rhs.m_scattheta),
       m_sigmascatphi (rhs.m_sigmascatphi),
@@ -97,7 +66,7 @@ namespace Trk {
   {
   }
 
-  GXFMaterialEffects & GXFMaterialEffects::operator =(GXFMaterialEffects & rhs) {
+  GXFMaterialEffects & GXFMaterialEffects::operator = (const GXFMaterialEffects & rhs) {
     if (this != &rhs) {
       m_eloss = std::unique_ptr<EnergyLoss>(rhs.m_eloss != nullptr ? rhs.m_eloss->clone() : nullptr);
       m_scatphi = rhs.m_scatphi;
