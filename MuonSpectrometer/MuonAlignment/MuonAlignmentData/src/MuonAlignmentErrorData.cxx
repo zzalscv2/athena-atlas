@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonCondAlg/MuonAlignmentErrorData.h"
+#include "MuonAlignmentData/MuonAlignmentErrorData.h"
 
 MuonAlignmentErrorData::MuonAlignmentErrorData() : m_test(0), m_vec(0) {}
 
