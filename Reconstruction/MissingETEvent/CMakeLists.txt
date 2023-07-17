@@ -4,17 +4,15 @@
 atlas_subdir( MissingETEvent )
 
 # External dependencies:
-find_package( Boost )
 find_package( CLHEP )
 
 # Component(s) in the package:
 atlas_add_library( MissingETEvent
                    src/*.cxx
                    PUBLIC_HEADERS MissingETEvent
-                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} AthenaKernel AtlasHepMCLib CaloEvent CaloGeoHelpers AthContainers Navigation NavFourMom
+                   LINK_LIBRARIES AthenaKernel AtlasHepMCLib CaloEvent CaloGeoHelpers AthContainers Navigation NavFourMom
                    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} CxxUtils TruthUtils )
 
 atlas_add_dictionary( MissingETEventDict

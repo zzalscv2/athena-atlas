@@ -4,7 +4,7 @@
 atlas_subdir( CaloIdentifier )
 
 # External dependencies:
-find_package( Boost COMPONENTS filesystem thread system )
+find_package( Boost COMPONENTS thread system )
 
 # Component(s) in the package:
 atlas_add_library( CaloIdentifier
