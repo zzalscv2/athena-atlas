@@ -46,6 +46,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.doRotCorrection', True)
     actscf.addFlag('Acts.doPrintTrackStates', False)
     actscf.addFlag('Acts.skipDuplicateSeeds', True)
+    actscf.addFlag('Acts.trackFindingChi2CutOff', 15.0)
 
     actscf.addFlag('Acts.doAmbiguityResolution', True)
 

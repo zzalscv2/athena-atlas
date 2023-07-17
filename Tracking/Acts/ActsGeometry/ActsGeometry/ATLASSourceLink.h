@@ -70,6 +70,10 @@ public:
 
   Acts::GeometryIdentifier geometryId() const { return m_geometryId; }
 
+  std::ptrdiff_t elementIndex(const ElementsType *firstElement) const {
+    return m_elements - firstElement;
+  }
+
  private:
   const ElementsType& collection() const { return *m_elements; }
 

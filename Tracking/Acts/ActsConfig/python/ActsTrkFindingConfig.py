@@ -14,7 +14,7 @@ def ActsTrkFindingToolCfg(
     kwargs.setdefault("maxPropagationStep", 10000)
     kwargs.setdefault("skipDuplicateSeeds", flags.Acts.skipDuplicateSeeds)
     kwargs.setdefault("etaBins", [])
-    kwargs.setdefault("chi2CutOff", [15.0])
+    kwargs.setdefault("chi2CutOff", [flags.Acts.trackFindingChi2CutOff])
     kwargs.setdefault("numMeasurementsCutOff", [10])
 
     from ActsConfig.ActsTrkGeometryConfig import ActsExtrapolationToolCfg, ActsTrackingGeometryToolCfg
@@ -109,18 +109,22 @@ def ActsTrkFindingCfg(flags, name: str = "ActsTrkFindingAlg", **kwargs):
         kwargs["TrackFindingTool"] = acc.popToolsAndMerge(
             ActsTrkFindingToolCfg(flags))
 
-    kwargs.setdefault("PixelClusterContainerKey", "ITkPixelClusters")
-    kwargs.setdefault("StripClusterContainerKey", "ITkStripClusters")
-    kwargs.setdefault("PixelDetectorElements",
-                      "ITkPixelDetectorElementCollection")
-    kwargs.setdefault("StripDetectorElements",
-                      "ITkStripDetectorElementCollection")
-    kwargs.setdefault("PixelEstimatedTrackParameters",
-                      "ITkPixelEstimatedTrackParams")
-    kwargs.setdefault("StripEstimatedTrackParameters",
-                      "ITkStripEstimatedTrackParams")
-    kwargs.setdefault('PixelSeeds', 'ITkPixelSeeds')
-    kwargs.setdefault('StripSeeds', 'ITkStripSeeds')
+    if flags.Detector.EnableITkPixel:
+        kwargs.setdefault("PixelClusterContainerKey", "ITkPixelClusters")
+        kwargs.setdefault("PixelDetectorElements",
+                          "ITkPixelDetectorElementCollection")
+        kwargs.setdefault("PixelEstimatedTrackParameters",
+                          "ITkPixelEstimatedTrackParams")
+        kwargs.setdefault('PixelSeeds', 'ITkPixelSeeds')
+
+    if flags.Detector.EnableITkStrip:
+        kwargs.setdefault("StripClusterContainerKey", "ITkStripClusters")
+        kwargs.setdefault("StripDetectorElements",
+                          "ITkStripDetectorElementCollection")
+        kwargs.setdefault("StripEstimatedTrackParameters",
+                          "ITkStripEstimatedTrackParams")
+        kwargs.setdefault('StripSeeds', 'ITkStripSeeds')
+
     kwargs.setdefault("TracksLocation", "SiSPSeededActsTracks")
 
 

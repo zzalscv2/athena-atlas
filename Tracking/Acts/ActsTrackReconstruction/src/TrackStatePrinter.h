@@ -40,7 +40,7 @@ namespace ActsTrk
     void
     printSourceLinks(const EventContext &ctx,
                      const std::vector<ATLASUncalibSourceLink> &sourceLinks,
-                     size_t type,
+                     size_t typeIndex,
                      size_t offset) const override;
 
     void
@@ -48,16 +48,13 @@ namespace ActsTrk
               const ActsTrk::Seed &seed,
               const Acts::BoundTrackParameters &initialParameters,
               size_t measurementOffset,
-              size_t iseed,
-              size_t head,
-              const char *seedType) const override;
+              size_t iseed) const override;
 
     void
     printTracks(const Acts::GeometryContext &tgContext,
                 const ActsTrk::TrackContainer &tracks,
                 const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
-                const std::vector<ATLASUncalibSourceLink> &measurements,
-                size_t measurementOffset) const override;
+                const std::vector<ATLASUncalibSourceLink> &measurements) const override;
 
     using MeasurementInfo = std::tuple<size_t,
                                        const ATLASUncalibSourceLink *,
@@ -73,7 +70,7 @@ namespace ActsTrk
     // Configuration
     Gaudi::Property<std::vector<size_t>> m_spacePointType{this, "spacePointType", {}, "Type of each InputSpacePoints collection used for debugging"};
 
-    void addSpacePoints(const EventContext &ctx, std::vector<MeasurementInfo> &measurementIndex, size_t type) const;
+    void addSpacePoints(const EventContext &ctx, std::vector<MeasurementInfo> &measurementIndex, size_t typeIndex) const;
   };
 
 } // namespace
