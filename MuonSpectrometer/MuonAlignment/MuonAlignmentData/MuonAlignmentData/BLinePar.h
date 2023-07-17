@@ -1,47 +1,56 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONALIGNMENTDATA_BLINEPAR_H
 #define MUONALIGNMENTDATA_BLINEPAR_H
 
 #include "MuonAlignmentData/MuonAlignmentPar.h"
+#include <array>
+#include <climits>
+#include <iostream>
 
 class BLinePar : public MuonAlignmentPar {
 public:
     // Default constructor
-    BLinePar();
+    BLinePar() = default;
     // destructor
     virtual ~BLinePar() override = default;
 
+    enum class Parameter{
+       bz=0,  // tube bow in plane,
+       bp,    // tube bow out of plane,
+       bn,    // tube bow out of plane
+       sp,    // cross plate sag out of plane
+       sn,    // cross plate sag out of plane
+       tw,    // twist
+       pg,    // parallelogram
+       tr,    // trapezoid
+       eg,    // global expansion
+       ep,    // local expansion
+       en,    // local expansion
+       numPars
+    };
+    /// Cast the parameter to an unsigned int    
     void setParameters(float bz, float bp, float bn, float sp, float sn, float tw, float pg, float tr, float eg, float ep, float en);
 
-    void getParameters(float& bz, float& bp, float& bn, float& sp, float& sn, float& tw, float& pg, float& tr, float& eg, float& ep,
-                       float& en) const;
-    float bz() const { return m_bz; }
-    float bp() const { return m_bp; }
-    float bn() const { return m_bn; }
-    float sp() const { return m_sp; }
-    float sn() const { return m_sn; }
-    float tw() const { return m_tw; }
-    float pg() const { return m_pg; }
-    float tr() const { return m_tr; }
-    float eg() const { return m_eg; }
-    float ep() const { return m_ep; }
-    float en() const { return m_en; }
+    /// @brief Returns a given parameter
+    float getParameter(const Parameter p) const {
+       return m_payload[static_cast<unsigned int>(p)];
+    }    
+    /// @brief  Returns true if at least one of the payload parameters is set
+    operator bool () const {
+      return std::find_if(m_payload.begin(),
+                          m_payload.end(),[](const float par){
+                            return std::abs(par) > std::numeric_limits<float>::epsilon();
+                          }) != m_payload.end();
+    }
 
 private:
-    float m_bz;  // tube bow in plane
-    float m_bp;  // tube bow out of plane
-    float m_bn;  // tube bow out of plane
-    float m_sp;  // cross plate sag out of plane
-    float m_sn;  // cross plate sag out of plane
-    float m_tw;  // twist
-    float m_pg;  // parallelogram
-    float m_tr;  // trapezoid
-    float m_eg;  // global expansion
-    float m_ep;  // local expansion
-    float m_en;  // local expansion
+    std::array<float, static_cast<unsigned int>(Parameter::numPars)> m_payload{};
 };
+
+std::ostream& operator<<(std::ostream& ostr, const BLinePar& par);
+
 
 #endif  // MUONALIGNMENTDATA_BLINEPAR_H

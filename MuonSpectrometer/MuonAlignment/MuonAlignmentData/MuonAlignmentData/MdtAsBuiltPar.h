@@ -1,24 +1,24 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONALIGNMENTDATA_MDTASBUILTPAR_H
 #define MUONALIGNMENTDATA_MDTASBUILTPAR_H
 
 #include <string>
+#include <array>
 
 #include "MuonAlignmentData/MuonAlignmentPar.h"
 
 /**
- * Container classfor the MDT as-built parameters
+ * Container classifier the MDT as-built parameters
  * See parameter description in
  * http://atlas-muon-align.web.cern.ch/atlas-muon-align/endplug/asbuilt.pdf
  */
 class MdtAsBuiltPar : public MuonAlignmentPar {
 public:
     // Default constructor
-    MdtAsBuiltPar();
-
+    MdtAsBuiltPar() = default;
     // destructor
     virtual ~MdtAsBuiltPar() override = default;
 
@@ -42,9 +42,6 @@ public:
     void setAlignmentParameters(multilayer_t iML, tubeSide_t iTubeSide, float y0, float z0, float alpha, float ypitch, float zpitch,
                                 int stagg);
 
-    /**
-     * Initialize from a line of an ASCII CLOB, return true on success
-     */
     bool setFromAscii(const std::string& line);
 
     // Getters
@@ -58,20 +55,31 @@ public:
 private:
     // Alignment parameters
     struct AlignmentParameters {
-        AlignmentParameters();
-        multilayer_t iML;      // ML index
-        tubeSide_t iTubeSide;  // tube side
-        float y0;              // y position of first wire w.r.t. reference point
-        float z0;              // z position of first wire w.r.t. reference point
-        float alpha;           // rotation around tube axis
-        float ypitch;          // y pitch
-        float zpitch;          // z pitch
-        int stagg;             // is tube staggering ATLAS-standard or reversed?
+        AlignmentParameters() = default;
+        multilayer_t iML{multilayer_t::ML1};      // ML index
+        tubeSide_t iTubeSide{tubeSide_t::POS};  // tube side
+        float y0{0.f};              // y position of first wire w.r.t. reference point
+        float z0{0.f};              // z position of first wire w.r.t. reference point
+        float alpha{0.f};           // rotation around tube axis
+        float ypitch{0.f};          // y pitch
+        float zpitch{0.f};          // z pitch
+        int stagg{1};             // is tube staggering ATLAS-standard or reversed?
     };
-    static const int NMEAS = NMLTYPES * NTUBESIDETYPES;
-    AlignmentParameters m_meas[NMEAS];  // in this order: ML1_HV, ML1_RO, ML2_HV, ML2_RO
+    static constexpr unsigned int NMEAS = static_cast<unsigned int>(multilayer_t::NMLTYPES) * 
+                                          static_cast<unsigned int>(tubeSide_t::NTUBESIDETYPES);
+    std::array<AlignmentParameters, NMEAS>  m_meas{};  // in this order: ML1_HV, ML1_RO, ML2_HV, ML2_RO
 
-    AlignmentParameters& meas(multilayer_t iML, tubeSide_t iTubeSide) { return m_meas[NTUBESIDETYPES * iML + iTubeSide]; }
-    const AlignmentParameters& meas(multilayer_t iML, tubeSide_t iTubeSide) const { return m_meas[NTUBESIDETYPES * iML + iTubeSide]; }
+    AlignmentParameters& meas(multilayer_t iML, tubeSide_t iTubeSide) { 
+        const unsigned int idx = static_cast<unsigned int>(tubeSide_t::NTUBESIDETYPES) *
+                                 static_cast<unsigned int>(iML) + static_cast<unsigned>(iTubeSide);
+        return m_meas.at(idx); 
+    }
+    const AlignmentParameters& meas(multilayer_t iML, tubeSide_t iTubeSide) const { 
+        const unsigned int idx = static_cast<unsigned int>(tubeSide_t::NTUBESIDETYPES) *
+                                 static_cast<unsigned int>(iML) + static_cast<unsigned>(iTubeSide);
+        return m_meas.at(idx);  
+    }
 };
+
+std::ostream& operator<<(std::ostream& ostr, const MdtAsBuiltPar& par);
 #endif  // MUONALIGNMENTDATA_MDTASBUILTPAR_H

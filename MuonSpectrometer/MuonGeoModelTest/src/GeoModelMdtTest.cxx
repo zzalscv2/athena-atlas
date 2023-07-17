@@ -135,17 +135,18 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadout
     }
     const BLinePar* bline = readoutEle->getBLinePar();
     if (bline) {
-        m_BLineBz = bline->bz();
-        m_BLineBp = bline->bp();
-        m_BLineBn = bline->bn();
-        m_BLineSp = bline->sp();
-        m_BLineSn = bline->sn();
-        m_BLineTw = bline->tw();
-        m_BLinePg = bline->pg();
-        m_BLineTr = bline->tr();
-        m_BLineEg = bline->eg();
-        m_BLineEp = bline->ep();
-        m_BLineEn = bline->en();
+        using Parameter = BLinePar::Parameter;
+        m_BLineBz = bline->getParameter(Parameter::bz);
+        m_BLineBp = bline->getParameter(Parameter::bp);
+        m_BLineBn = bline->getParameter(Parameter::bn);
+        m_BLineSp = bline->getParameter(Parameter::sp);
+        m_BLineSn = bline->getParameter(Parameter::sn);
+        m_BLineTw = bline->getParameter(Parameter::tw);
+        m_BLinePg = bline->getParameter(Parameter::pg);
+        m_BLineTr = bline->getParameter(Parameter::tr);
+        m_BLineEg = bline->getParameter(Parameter::eg);
+        m_BLineEp = bline->getParameter(Parameter::ep);
+        m_BLineEn = bline->getParameter(Parameter::en);
     }
     
     if (station->hasMdtAsBuiltParams()) {

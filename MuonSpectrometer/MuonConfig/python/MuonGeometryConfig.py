@@ -33,16 +33,7 @@ def MuonDetectorToolCfg(flags):
         # Condition DB is needed only if A-lines or B-lines are requested
         if not (not flags.Muon.Align.UseALines and flags.Muon.Align.UseBLines=='none'):
             detTool.UseConditionDb = 1
-        # here define to what extent B-lines are enabled
-        if flags.Muon.Align.UseBLines=='none':
-            detTool.EnableMdtDeformations = 0
-        elif flags.Muon.Align.UseBLines=='all':
-            detTool.EnableMdtDeformations = 1
-        elif flags.Muon.Align.UseBLines=='barrel':
-            detTool.EnableMdtDeformations = 2
-        elif flags.Muon.Align.UseBLines=='endcaps':
-            detTool.EnableMdtDeformations = 3
-
+        
         # here define if I-lines (CSC internal alignment) are enabled
         if flags.Muon.Align.UseILines and flags.Detector.GeometryCSC:
             if 'HLT' in flags.IOVDb.GlobalTag:
@@ -56,17 +47,6 @@ def MuonDetectorToolCfg(flags):
                 else:
                     detTool.UseIlinesFromGM = False
                     detTool.EnableCscInternalAlignment = True
-
-        # here define if As-Built (MDT chamber alignment) are enabled
-        if flags.Muon.Align.UseAsBuilt:
-            if flags.IOVDb.DatabaseInstance == 'COMP200' or \
-                    'HLT' in flags.IOVDb.GlobalTag or flags.Common.isOnline or flags.Input.isMC:
-                #logMuon.info("No MDT As-Built parameters applied.")
-                detTool.EnableMdtAsBuiltParameters = 0               
-            else :
-                #logMuon.info("Reading As-Built parameters from conditions database")
-                detTool.EnableMdtAsBuiltParameters = 1
-
     else:
         detTool.UseConditionDb = 0
         detTool.UseAsciiConditionData = 0
@@ -120,9 +100,7 @@ def MuonAlignmentCondAlgCfg(flags, name="MuonAlignmentCondAlg", **kwargs):
         acc.merge(addFolders( flags, ['/MUONALIGN/TGC/SIDEC'], 'MUONALIGN_OFL', className='CondAttrListCollection'))
 
     MuonAlign = MuonAlignmentCondAlg()
-    if flags.IOVDb.DatabaseInstance != 'COMP200' and \
-       'HLT' not in flags.IOVDb.GlobalTag and not flags.Common.isOnline:
-        MuonAlign.IsData = False
+
 
     MuonAlign.ParlineFolders = ["/MUONALIGN/MDT/BARREL",
                                 "/MUONALIGN/MDT/ENDCAP/SIDEA",
@@ -197,11 +175,11 @@ def MuonDetectorCondAlgCfg(flags, name = "MuonDetectorCondAlg", **kwargs):
     kwargs.setdefault("applyALines", len([alg for alg in result.getCondAlgos() if alg.name == "MuonAlignmentCondAlg"])>0)
     kwargs.setdefault("applyBLines", len([alg for alg in result.getCondAlgos() if alg.name == "MuonAlignmentCondAlg"])>0)
     kwargs.setdefault("applyNswAsBuilt", len([alg for alg in result.getCondAlgos() if alg.name == "NswAsBuiltCondAlg"])>0)
+    kwargs.setdefault("applyMdtAsBuilt", flags.Muon.Align.UseAsBuilt and not (flags.IOVDb.DatabaseInstance == 'COMP200' or \
+                                         'HLT' in flags.IOVDb.GlobalTag or flags.Common.isOnline or flags.Input.isMC))
+
     kwargs.setdefault("MuonDetectorTool", result.popToolsAndMerge(MuonDetectorToolCfg(flags)))
     
-    if flags.IOVDb.DatabaseInstance != 'COMP200' and \
-       'HLT' not in flags.IOVDb.GlobalTag and not flags.Common.isOnline:
-        kwargs.setdefault("IsData", False)
     MuonDetectorManagerCond = CompFactory.MuonDetectorCondAlg(name, **kwargs)
 
     result.addCondAlgo(MuonDetectorManagerCond, primary = True)

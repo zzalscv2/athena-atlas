@@ -1160,10 +1160,8 @@ void MuonGMCheck::checkreadoutmdtgeo() {
                         else {
                             fendpoints << m_idHelperSvc->toString(chid)
                                         << " B-line in use is: bz,bp,bn,sp,sn,tw,pg,tr,eg,ep,en  " << std::setw(10)
-                                        << setiosflags(std::ios::fixed) << std::setprecision(7) << bLine->bz() << " "
-                                        << bLine->bp() << " " << bLine->bn() << " " << bLine->sp() << " " << bLine->sn() << " "
-                                        << bLine->tw() << " " << bLine->pg() << " " << bLine->tr() << " " << bLine->eg() << " "
-                                        << bLine->ep() << " " << bLine->en() << std::setw(10) << setiosflags(std::ios::fixed)
+                                        << setiosflags(std::ios::fixed) << std::setprecision(7) << bLine
+                                        << std::setw(10) << setiosflags(std::ios::fixed)
                                         << std::setprecision(4) << std::endl;
                         }
                         if (mdt->barrel())
@@ -1221,10 +1219,8 @@ void MuonGMCheck::checkreadoutmdtgeo() {
                         fout << " B-line is NOT defined " << std::endl;
                     else {
                         fout << " B-line in use is: bz,bp,bn,sp,sn,tw,pg,tr,eg,ep,en  " << std::setw(10)
-                                << setiosflags(std::ios::fixed) << std::setprecision(7) << bLine->bz() << " " << bLine->bp() << " "
-                                << bLine->bn() << " " << bLine->sp() << " " << bLine->sn() << " " << bLine->tw() << " "
-                                << bLine->pg() << " " << bLine->tr() << " " << bLine->eg() << " " << bLine->ep() << " "
-                                << bLine->en() << std::setw(10) << setiosflags(std::ios::fixed) << std::setprecision(4)
+                                << setiosflags(std::ios::fixed) << std::setprecision(7) << bLine
+                                << std::setw(10) << setiosflags(std::ios::fixed) << std::setprecision(4)
                                 << std::endl;
                     }
                 }

@@ -408,103 +408,38 @@ namespace MuonGM {
         }
         return static_cast<int>(hash);
     }
-    void MuonDetectorManager::initABlineContainers() {
-        m_aLineContainer.clear();
-        m_bLineContainer.clear();
-        ATH_MSG_DEBUG("Init A/B Line Containers - pointers are <" << (uintptr_t)&m_aLineContainer << "> and <"
-                << (uintptr_t)&m_bLineContainer << ">");
-
-        // loop over stations to fill the A-line map at start-up
-        for (auto& ist : m_MuonStationMap) {
-            MuonStation* ms = ist.second.get();
-            int jff = ms->getPhiIndex();
-            int jzz = ms->getEtaIndex();
-            std::string stType = ms->getStationType();
-
-            ALinePar newALine;
-            newALine.setAmdbId(stType, jff, jzz, 0);
-            if (ms->hasALines()) {
-                newALine.setParameters(ms->getALine_tras(), ms->getALine_traz(), ms->getALine_trat(), ms->getALine_rots(),
-                                       ms->getALine_rotz(), ms->getALine_rott());
-            } else {
-                ATH_MSG_DEBUG("No starting A-lines for Station " << stType << " Jzz/Jff " << jzz << "/" << jff);
-                newALine.setParameters(0., 0., 0., 0., 0., 0.);
-            }
-            newALine.isNew(true);
-
-            Identifier id{0};
-            if (m_idHelperSvc->hasTGC() && stType.at(0) == 'T') {
-                // TGC case
-                int stPhi = MuonGM::stationPhiTGC(stType, jff, jzz);
-                int stEta = 1;            // stEta for the station is stEta for the first component chamber
-                if (jzz < 0) stEta = -1;  // stEta for the station is stEta for the first component chamber
-                id = m_idHelperSvc->tgcIdHelper().elementID(stType, stEta, stPhi);
-                ATH_MSG_DEBUG("Filling A-line container with entry for key = " << m_idHelperSvc->toString(id));
-            } else if (m_idHelperSvc->hasCSC() && stType.at(0) == 'C') {
-                // CSC case
-                id = m_idHelperSvc->cscIdHelper().elementID(stType, jzz, jff);
-                ATH_MSG_DEBUG( "Filling A-line container with entry for key = " << m_idHelperSvc->toString(id));
-            } else if (m_idHelperSvc->hasRPC() && stType.substr(0, 3) == "BML" && std::abs(jzz) == 7) {
-                // RPC case
-                id = m_idHelperSvc->rpcIdHelper().elementID(stType, jzz, jff, 1);
-                ATH_MSG_DEBUG("Filling A-line container with entry for key = " << m_idHelperSvc->toString(id));
-            } else if (m_idHelperSvc->hasMDT()) {
-                id = m_idHelperSvc->mdtIdHelper().elementID(stType, jzz, jff);
-                ATH_MSG_DEBUG("Filling A-line container with entry for key = " << m_idHelperSvc->toString(id));
-            }
-            m_aLineContainer.emplace(id, std::move(newALine));
-            ATH_MSG_DEBUG("<Filling A-line container with entry for key >" << m_idHelperSvc->toString(id));
-        }
-        ATH_MSG_INFO("Init A/B Line Containers - done - size is respectively " << m_aLineContainer.size() << "/"
-            << m_bLineContainer.size());
-    }
-
-    StatusCode MuonDetectorManager::updateAlignment(const ALineMapContainer& alineData, bool isData) {
+    
+    StatusCode MuonDetectorManager::updateAlignment(const ALineContainer& alineData) {
         if (alineData.empty()) {
-            if (isData) {
-                ATH_MSG_INFO("Empty temporary A-line container - nothing to do here");
-            } else {
-               ATH_MSG_DEBUG("Got empty A-line container (expected for MC), not applying A-lines...");
-            }
+            ATH_MSG_DEBUG("Got empty A-line container (expected for MC), not applying A-lines...");
             return StatusCode::SUCCESS;
-        } else
-            ATH_MSG_INFO("temporary A-line container with size = " << alineData.size());
+        }
 
+        using Parameter = ALinePar::Parameter;
         // loop over the container of the updates passed by the MuonAlignmentDbTool
-        unsigned int nLines = 0;
-        unsigned int nUpdates = 0;
-        for (const auto& [ALineId, ALine] : alineData) {
+        unsigned int nLines{0}, nUpdates{0};
+        for (const ALinePar&  ALine : alineData) {
             nLines++;
-            std::string stType{""};
-            int jff{0}, jzz{0}, job{0};
-            ALine.getAmdbId(stType, jff, jzz, job);
-
-            if (!ALine.isNew()) {
-                ATH_MSG_WARNING("ALinePar with AmdbId " << stType << " " << jzz << " " << jff << " " << job << " is not new *** skipping" );
-                continue;
-            }            
-            
-           
-            ATH_MSG_DEBUG("ALinePar with AmdbId " << stType << " " << jzz << " " << jff << " " << job << " is new. ID = " << m_idHelperSvc->toString(ALineId) );
-
+            ATH_MSG_DEBUG(ALine << " is new. ID = " << m_idHelperSvc->toString(ALine.identify()));
+            const std::string stType = ALine.AmdbStation();
+            const int jff = ALine.AmdbPhi();
+            const int jzz = ALine.AmdbEta();
+            const int job = ALine.AmdbJob();
             //********************
             // NSW Cases
-            //********************
-            
-            if (stType[0] == 'M' || stType[0] == 'S') {
-            
+            //********************            
+            if (stType[0] == 'M' || stType[0] == 'S') {            
                 if (!nMMRE() || !nsTgcRE()) {
                     ATH_MSG_WARNING("Unable to set A-line; the manager does not contain NSW readout elements" );
                     continue;
                 }
-
                 if (stType[0] == 'M') {
                     // Micromegas                        
-                    const int array_idx  = mmIdenToArrayIdx(ALineId);
+                    const int array_idx  = mmIdenToArrayIdx(ALine.identify());
                     MMReadoutElement* RE = m_mmcArray[array_idx].get();
 
                     if (!RE) {
-                        ATH_MSG_WARNING("AlinePar with AmdbId " << stType << " " << jzz << " " << jff << " " << job << " *** No MM readout element found\n"
+                        ATH_MSG_WARNING(ALine << " *** No MM readout element found\n"
                             << "PLEASE CHECK FOR possible MISMATCHES between alignment constants from COOL and Geometry Layout in use");
                         return StatusCode::FAILURE;
                     }
@@ -513,26 +448,17 @@ namespace MuonGM {
 
                 } else if (stType[0] == 'S') {
                     // sTGC
-                    const int array_idx    = stgcIdentToArrayIdx(ALineId);
+                    const int array_idx    = stgcIdentToArrayIdx(ALine.identify());
                     sTgcReadoutElement* RE = m_stgArray[array_idx].get();
 
                     if (!RE) {
-                        ATH_MSG_WARNING("AlinePar with AmdbId " << stType << " " << jzz << " " << jff << " " << job << " *** No sTGC readout element found\n"
+                        ATH_MSG_WARNING(ALine << " *** No sTGC readout element found\n"
                             << "PLEASE CHECK FOR possible MISMATCHES between alignment constants from COOL and Geometry Layout in use");
                         return StatusCode::FAILURE;
                     }
                 
                     RE->setDelta(ALine);
                 }
-
-                // record this A-line in the historical A-line container
-                auto [it, flag] = m_aLineContainer.insert_or_assign(ALineId, ALine);
-                if (flag)
-                    ATH_MSG_DEBUG( "New A-line entry for Station " << stType << " at Jzz/Jff/Job " << jzz << "/" << jff << "/" << job );
-                else 
-                    ATH_MSG_DEBUG( "Updating existing A-line for Station " << stType << " at Jzz/Jff/Job " << jzz << "/" << jff << "/" << job );
-                
-                
                 continue;
             }
              
@@ -540,18 +466,16 @@ namespace MuonGM {
             //********************
             // Non-NSW Cases
             //********************
-
             MuonStation* thisStation = getMuonStation(stType, jzz, jff);
             if (!thisStation) {
                 ATH_MSG_WARNING("ALinePar with AmdbId " << stType << " " << jzz << " " << jff << " " << job << "*** No MuonStation found\n"
-                    << "PLEASE CHECK FOR possible MISMATCHES between alignment constants from COOL and Geometry Layout in use"
-                    );
+                    << "PLEASE CHECK FOR possible MISMATCHES between alignment constants from COOL and Geometry Layout in use" );
                 continue;
             }
 
             if (job != 0) {
                 // job different than 0 (standard for TGC conditions for Sept 2010 repro.)
-                if (stType.at(0) == 'T') {                    
+                if (stType[0] == 'T') {                    
                     ATH_MSG_DEBUG( "ALinePar with AmdbId " << stType << " " << jzz << " " << jff << " " << job
                         << " has JOB not 0 - this is expected for TGC" );
                 } else {
@@ -560,36 +484,15 @@ namespace MuonGM {
                     continue;
                 }
             }
-
-            // record this A-line in the historical A-line container
-            auto [it, flag] = m_aLineContainer.insert_or_assign(ALineId, ALine);
-            ALinePar& newALine = it->second;
-            if (flag) {                
-                ATH_MSG_DEBUG( "               New entry in A-line container for Station " << stType << " at Jzz/Jff " << jzz
-                    << "/" << jff << " --- in the container with key " << m_idHelperSvc->toString(ALineId) );
-            } else {                
-                ATH_MSG_DEBUG( "Updating extisting entry in A-line container for Station " << stType << " at Jzz/Jff " << jzz
-                    << "/" << jff );
-            }
-
             if (job == 0) {
-                float s, z, t, ths, thz, tht;
-                newALine.getParameters(s, z, t, ths, thz, tht);
-                if (m_controlAlines % 10 == 0) tht = 0.;
-                if (int(m_controlAlines / 10) % 10 == 0) thz = 0.;
-                if (int(m_controlAlines / 100) % 10 == 0) ths = 0.;
-                if (int(m_controlAlines / 1000) % 10 == 0) t = 0.;
-                if (int(m_controlAlines / 10000) % 10 == 0) z = 0.;
-                if (int(m_controlAlines / 100000) % 10 == 0) s = 0.;
-                if (m_controlAlines != 111111) newALine.setParameters(s, z, t, ths, thz, tht);
-                
-                ATH_MSG_DEBUG( "Setting delta transform for Station " << stType << " " << jzz << " " << jff << " "
-                    << " params are = " << s << " " << z << " " << t << " " << ths << " " << thz << " " << tht );
-                thisStation->setDelta_fromAline(s, z, t, ths, thz, tht);
-#ifdef TESTBLINES
-                newALine.setParameters(0., 0., 0., 0., 0., 0.);
-                thisStation->setDelta_fromAline(0., 0., 0., 0., 0., 0.);
-#endif
+                ATH_MSG_DEBUG( "Setting delta transform for Station " << ALine);
+                using Parameter = ALinePar::Parameter;
+                thisStation->setDelta_fromAline(ALine.getParameter(Parameter::transS), 
+                                                ALine.getParameter(Parameter::transZ), 
+                                                ALine.getParameter(Parameter::transT), 
+                                                ALine.getParameter(Parameter::rotS),
+                                                ALine.getParameter(Parameter::rotZ),
+                                                ALine.getParameter(Parameter::rotT));
                 if (cacheFillingFlag()) {
                     thisStation->clearCache();
                     thisStation->fillCache();
@@ -598,20 +501,14 @@ namespace MuonGM {
                 }
             } else {
                 // job different than 0 (standard for TGC conditions for Sept 2010 repro.)
-                float s, z, t, ths, thz, tht;
-                newALine.getParameters(s, z, t, ths, thz, tht);
-                if (m_controlAlines % 10 == 0) tht = 0.;
-                if (int(m_controlAlines / 10) % 10 == 0) thz = 0.;
-                if (int(m_controlAlines / 100) % 10 == 0) ths = 0.;
-                if (int(m_controlAlines / 1000) % 10 == 0) t = 0.;
-                if (int(m_controlAlines / 10000) % 10 == 0) z = 0.;
-                if (int(m_controlAlines / 100000) % 10 == 0) s = 0.;
-                if (m_controlAlines != 111111) newALine.setParameters(s, z, t, ths, thz, tht);
-                
-                ATH_MSG_DEBUG( "Setting delta transform for component " << job << " of Station " << stType << " " << jzz << " "
-                    << jff << " "
-                    << " params are = " << s << " " << z << " " << t << " " << ths << " " << thz << " " << tht );
-                thisStation->setDelta_fromAline_forComp(job, s, z, t, ths, thz, tht);
+                ATH_MSG_DEBUG( "Setting delta transform for component " << ALine);
+                thisStation->setDelta_fromAline_forComp(job, 
+                                                ALine.getParameter(Parameter::transS), 
+                                                ALine.getParameter(Parameter::transZ), 
+                                                ALine.getParameter(Parameter::transT), 
+                                                ALine.getParameter(Parameter::rotS),
+                                                ALine.getParameter(Parameter::rotZ),
+                                                ALine.getParameter(Parameter::rotT));
                 if (cacheFillingFlag()) {
                     thisStation->getMuonReadoutElement(job)->clearCache();
                     thisStation->getMuonReadoutElement(job)->fillCache();
@@ -623,180 +520,77 @@ namespace MuonGM {
         }
         ATH_MSG_INFO( "# of A-lines read from the ALineMapContainer in StoreGate is " << nLines );
         ATH_MSG_INFO( "# of deltaTransforms updated according to A-lines         is " << nUpdates );
-        ATH_MSG_INFO( "# of entries in the A-lines historical container          is " << ALineContainer()->size() );
-
         return StatusCode::SUCCESS;
     }
 
-    StatusCode MuonDetectorManager::updateDeformations(const BLineMapContainer& blineData, bool isData) {
-#ifdef TESTBLINES
-        {
-            for (auto& it : m_MuonStationMap) {
-                MuonStation* station = it.second.get();
-                station->clearBLineCache();
-                BLinePar* BLine = new BLinePar();
-                BLine->setParameters(0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.);
-                station->setBline(BLine);
-                if (cacheFillingFlag()) station->fillBLineCache();
-            }
-        }
-#endif
-       
-        ATH_MSG_INFO( "In updateDeformations()" );
-        if (!applyMdtDeformations()) ATH_MSG_INFO( "Mdt deformations are disabled; will only apply NSW deformations" );
-        
+    StatusCode MuonDetectorManager::updateDeformations(const BLineContainer& blineData) {
+        ATH_MSG_DEBUG( "In updateDeformations()" );        
         if (blineData.empty()) {
-            if (isData) {
-                ATH_MSG_INFO( "Empty temporary B-line container - nothing to do here" );
-            } else {
-                ATH_MSG_DEBUG( "Got empty B-line container (expected for MC), not applying B-lines..." );
-            }
+            ATH_MSG_DEBUG( "Got empty B-line container (expected for MC), not applying B-lines..." );
             return StatusCode::SUCCESS;
         } else
             ATH_MSG_INFO( "temporary B-line container with size = " << blineData.size() );
 
         // loop over the container of the updates passed by the MuonAlignmentDbTool
-        unsigned int nLines = 0;
-        unsigned int nUpdates = 0;
-        for (auto [BLineId, BLine] : blineData) {
-            nLines++;
-            std::string stType{""};
-            int jff{0}, jzz{0}, job{0};
-            BLine.getAmdbId(stType, jff, jzz, job);
-
+        unsigned int nLines{0}, nUpdates{0};
+        for (const BLinePar& BLine : blineData) {
+            ++nLines;
+            const std::string stType = BLine.AmdbStation();
+            const int jff = BLine.AmdbPhi();
+            const int jzz = BLine.AmdbEta();
+            const int job = BLine.AmdbJob();
             //********************
             // NSW Cases
-            //********************
-            
-            if (stType[0] == 'M' || stType[0] == 'S') {
-            
+            //********************            
+            if (stType[0] == 'M' || stType[0] == 'S') {            
                 if (!nMMRE() || !nsTgcRE()) {
                     ATH_MSG_WARNING("Unable to set B-line; the manager does not contain NSW readout elements" );
                     continue;
                 }
-                 // record this B-line in the historical B-line container
-                auto [it, flag] = m_bLineContainer.insert_or_assign(BLineId, BLine);
-                 {
-                    if (flag)
-                        ATH_MSG_DEBUG( "New B-line entry for Station " << stType << " at Jzz/Jff/Job " << jzz << "/" << jff << "/" << job );
-                    else 
-                        ATH_MSG_DEBUG( "Updating existing B-line for Station " << stType << " at Jzz/Jff/Job " << jzz << "/" << jff << "/" << job );
-                }
-
                 if (stType[0] == 'M') {
                     // Micromegas                        
-                    const int array_idx  = mmIdenToArrayIdx(BLineId);
+                    const int array_idx  = mmIdenToArrayIdx(BLine.identify());
                     MMReadoutElement* RE = m_mmcArray[array_idx].get();
 
                     if (!RE) {
-                        ATH_MSG_WARNING("BlinePar with AmdbId " << stType << " " << jzz << " " << jff << " " << job << " *** No MM readout element found\n"
+                        ATH_MSG_WARNING("BlinePar with AmdbId " <<BLine<< " *** No MM readout element found\n"
                             << "PLEASE CHECK FOR possible MISMATCHES between alignment constants from COOL and Geometry Layout in use");
                         return StatusCode::FAILURE;
                     }
-                    RE->setBLinePar(it->second);
+                    RE->setBLinePar(BLine);
                 } else if (stType[0] == 'S') {
                     // sTGC
-                    const int array_idx    = stgcIdentToArrayIdx(BLineId);
+                    const int array_idx    = stgcIdentToArrayIdx(BLine.identify());
                     sTgcReadoutElement* RE = m_stgArray[array_idx].get();
-
                     if (!RE) {
-                        ATH_MSG_WARNING("BlinePar with AmdbId " << stType << " " << jzz << " " << jff << " " << job << " *** No sTGC readout element found\n"
+                        ATH_MSG_WARNING("BlinePar with AmdbId " << BLine << " *** No sTGC readout element found\n"
                             << "PLEASE CHECK FOR possible MISMATCHES between alignment constants from COOL and Geometry Layout in use");
                         return StatusCode::FAILURE;
                     }
-                    RE->setBLinePar(it->second);
+                    RE->setBLinePar(BLine);
                 }
                 continue;
             }
             
             //********************
             // MDT Cases
-            //********************    
-
-            if (!applyMdtDeformations()) continue; // nothing to more to do
-        
-#ifdef TESTBLINES
-            BLine.setParameters(0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.);
-#endif
-            if (mdtDeformationFlag() > 999999) {
-                // first reset everything
-                BLine.setParameters(0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.);
-                // now apply user choice
-                int choice = mdtDeformationFlag();
-                if (int(choice % 10) > 0)
-                    BLine.setParameters(0., 0., 0., BLine.sp(), BLine.sn(), BLine.tw(), 0., 0., BLine.eg(), BLine.ep(), 100.);
-                if (int(choice % 100) > 9)
-                    BLine.setParameters(0., 0., 0., BLine.sp(), BLine.sn(), BLine.tw(), 0., 0., BLine.eg(), 100., BLine.en());
-                if (int(choice % 1000) > 99)
-                    BLine.setParameters(0., 0., 0., BLine.sp(), BLine.sn(), BLine.tw(), 0., 0., 100., BLine.ep(), BLine.en());
-                if (int(choice % 10000) > 999)
-                    BLine.setParameters(0., 0., 0., BLine.sp(), BLine.sn(), 100., 0., 0., BLine.eg(), BLine.ep(), BLine.en());
-                if (int(choice % 100000) > 9999)
-                    BLine.setParameters(0., 0., 0., BLine.sp(), 100., BLine.tw(), 0., 0., BLine.eg(), BLine.ep(), BLine.en());
-                if (int(choice % 1000000) > 99999)
-                    BLine.setParameters(0., 0., 0., 100., BLine.sn(), BLine.tw(), 0., 0., BLine.eg(), BLine.ep(), BLine.en());
-                
-                ATH_MSG_DEBUG( "Testing B-lines: control flag " << choice << " hard coding Bline = ( bz=" << BLine.bz()
-                    << " bp=" << BLine.bp() << " bn=" << BLine.bn() << " sp=" << BLine.sp() << " sn=" << BLine.sn()
-                    << " tw=" << BLine.tw() << " pg=" << BLine.pg() << " tr=" << BLine.tr() << " eg=" << BLine.eg()
-                    << " ep=" << BLine.ep() << " en=" << BLine.en() << ")" );
-            }
-
-            if (stType.at(0) == 'T' || stType.at(0) == 'C' || (stType.substr(0, 3) == "BML" && std::abs(jzz) == 7)) {
-                
-                ATH_MSG_DEBUG( "BLinePar with AmdbId " << stType << " " << jzz << " " << jff << " " << job
-                    << " is not a MDT station - skipping" );
+            //********************
+            if (stType.at(0) == 'T' || stType.at(0) == 'C' || (stType.substr(0, 3) == "BML" && std::abs(jzz) == 7)) {                
+                ATH_MSG_DEBUG( "BLinePar with AmdbId " << BLine << " is not a MDT station - skipping" );
                 continue;
             }
-            if (mdtDeformationFlag() == 2 &&
-                (stType.substr(0, 3) == "BEE" || stType.at(0) == 'E'))  // MDT deformations are requested for Barrel(ASAP) only !!!!
-            {
-                
-                ATH_MSG_DEBUG( " mdtDeformationFlag()==" << mdtDeformationFlag() << " stName = " << stType.substr(0, 3)
-                    << " barrel / ec initial = " << stType.substr(0, 1) << " 	 skipping this b-line" );
-                continue;  // MDT deformations are requested for Barrel(ASAP) only !!!!
-            }
-            if (mdtDeformationFlag() == 3 && (stType.substr(0, 3) != "BEE" && stType.at(0) == 'B')) {
-                
-                ATH_MSG_DEBUG( " mdtDeformationFlag()==" << mdtDeformationFlag() << " stName = " << stType.substr(0, 3)
-                    << " barrel / ec initial = " << stType.substr(0, 1) << " 	 skipping this b-line" );
-                continue;  // MDT deformations are requested for Endcap(ARAMYS) only !!!!
-            }
-            if (mdtDeformationFlag() == 0) {
-                 ATH_MSG_DEBUG( " mdtDeformationFlag()==0 skipping this b-line" );
-                continue;  // should never happen...
-            }
-            if (!BLine.isNew()) {
-                ATH_MSG_WARNING("BLinePar with AmdbId " << stType << " " << jzz << " " << jff << " " << job
-                    << " is not new *** skipping" );
-                continue;
-            }
-            
-            ATH_MSG_DEBUG( "BLinePar with AmdbId " << stType << " " << jzz << " " << jff << " " << job
-                << " is new ID = " << m_idHelperSvc->toString(BLineId) );
+            ATH_MSG_DEBUG( "BLinePar with AmdbId " <<BLine << " is new ID = " << m_idHelperSvc->toString(BLine.identify()) );
             if (job == 0) {
                 MuonStation* thisStation = getMuonStation(stType, jzz, jff);
                 if (!thisStation) {
-                    ATH_MSG_WARNING("BLinePar with AmdbId " << stType << " " << jzz << " " << jff << " " << job
-                        << " *** No MuonStation found \n PLEASE CHECK FOR possible MISMATCHES between alignment constants from COOL and "
+                    ATH_MSG_WARNING("BLinePar with AmdbId " << BLine <<
+                            " *** No MuonStation found \n PLEASE CHECK FOR possible MISMATCHES between alignment constants from COOL and "
                            "Geometry Layout in use");
                     continue;
                 }
-
-                // record this B-line in the historical B-line container
-                auto [it, flag] = m_bLineContainer.insert_or_assign(BLineId, BLine);
-                if (flag) {                    
-                    ATH_MSG_DEBUG( "               New entry in B-line container for Station " << stType << " at Jzz/Jff " << jzz
-                        << "/" << jff << " --- in the container with key " << m_idHelperSvc->toString(BLineId) );
-                } else {                    
-                    ATH_MSG_DEBUG( "Updating existing entry in B-line container for Station " << stType << " at Jzz/Jff " << jzz
-                        << "/" << jff );
-                }
-
-                
                 ATH_MSG_DEBUG( "Setting deformation parameters for Station " << stType << " " << jzz << " " << jff << " ");
                 thisStation->clearBLineCache();
-                thisStation->setBline(&it->second);
+                thisStation->setBline(&BLine);
                 if (cacheFillingFlag()) thisStation->fillBLineCache();
                 nUpdates++;
             } else {
@@ -806,8 +600,6 @@ namespace MuonGM {
         }
         ATH_MSG_INFO( "# of B-lines read from the ALineMapContainer in StoreGate   is " << nLines );
         ATH_MSG_INFO( "# of deform-Transforms updated according to B-lines         is " << nUpdates );
-        ATH_MSG_INFO( "# of entries in the B-lines historical container            is " << BLineContainer()->size() );
-
         return StatusCode::SUCCESS;
     }
 
@@ -952,15 +744,11 @@ namespace MuonGM {
         unsigned int nLines{0}, nUpdates{0};
         for (const auto& [AsBuiltId, AsBuiltPar] : asbuiltData) {
             nLines++;
-            std::string stType = "";
-            int jff{0}, jzz{0}, job{0};
-            AsBuiltPar.getAmdbId(stType, jff, jzz, job);
-            if (!AsBuiltPar.isNew()) {                
-                ATH_MSG_DEBUG( "MdtAsBuiltPar with AmdbId " << stType << " " << jzz << " " << jff << " " << job
-                    << " is not new *** skipping" );
-                continue;
-            }
-
+            const std::string stType = AsBuiltPar.AmdbStation();
+            const int jff = AsBuiltPar.AmdbPhi();
+            const int jzz = AsBuiltPar.AmdbEta();
+            const int job = AsBuiltPar.AmdbJob();
+            
             auto [it, flag] = m_AsBuiltParamsMap.insert_or_assign(AsBuiltId, AsBuiltPar);
             if (flag) {                
                 ATH_MSG_DEBUG( "New entry in AsBuilt container for Station " << stType << " at Jzz/Jff " << jzz << "/" << jff
@@ -1011,29 +799,6 @@ namespace MuonGM {
         ATH_MSG_DEBUG( "Adding Aline for CSC wire layer: " << m_idHelperSvc->toString(id) );
         ATH_MSG_DEBUG( "CscInternalAlignmentMapContainer has currently size " << m_cscALineContainer.size() );
         
-    }
-
-    void MuonDetectorManager::storeMdtAsBuiltParams(const MdtAsBuiltPar& params) {
-       
-
-        std::string stName = "XXX";
-        int jff{0}, jzz{0}, job{0};
-        params.getAmdbId(stName, jff, jzz, job);
-        Identifier id = m_idHelperSvc->mdtIdHelper().elementID(stName, jzz, jff);
-        if (!id.is_valid()) {
-            ATH_MSG_ERROR( "Invalid MDT identifiers: sta=" << stName << " eta=" << jzz << " phi=" << jff );
-            return;
-        }
-
-        if (m_AsBuiltParamsMap.insert_or_assign(id, params).second) {            
-            ATH_MSG_DEBUG( "New entry in AsBuilt container for Station " << stName << " at Jzz/Jff " << jzz << "/" << jff
-                << " --- in the container with key " << m_idHelperSvc->toString(id) );
-        } else {            
-            ATH_MSG_DEBUG( "Updating extisting entry in AsBuilt container for Station " << stName << " at Jzz/Jff " << jzz << "/"
-                << jff );
-        }
-
-        return;
     }
 
     const MdtAsBuiltPar* MuonDetectorManager::getMdtAsBuiltParams(const Identifier& id) const {

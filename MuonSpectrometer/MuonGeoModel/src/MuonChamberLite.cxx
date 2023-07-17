@@ -661,15 +661,7 @@ namespace MuonGM {
                 int jobIndex = c->index;
 
                 mstat->addMuonReadoutElementWithAlTransf(det, xfaligncomponent, jobIndex);
-
                 manager->addMdtReadoutElement(det);
-
-                // Select right MdtAsBuilt parameters from map in MuonDetectorManager and assign them to MuonStation
-                if (manager->applyMdtAsBuiltParams()) {
-                    Identifier AsBuiltId = manager->mdtIdHelper()->elementID(mstat->getStationType(), mstat->getEtaIndex(), mstat->getPhiIndex());
-                    const MdtAsBuiltPar *xtomo = manager->getMdtAsBuiltParams(AsBuiltId);
-                    mstat->setMdtAsBuiltParams(xtomo);
-                }
             }
 
             if (lvc && manager->cscIdHelper()) {
