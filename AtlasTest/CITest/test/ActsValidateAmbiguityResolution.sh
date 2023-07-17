@@ -5,7 +5,7 @@ input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitori
 n_events=2
 
 Reco_tf.py --CA \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
+  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateAmbiguityResolutionFlags" \
   --inputRDOFile ${input_rdo} \
   --outputAODFile test.AOD.pool.root  \
   --maxEvents ${n_events}
