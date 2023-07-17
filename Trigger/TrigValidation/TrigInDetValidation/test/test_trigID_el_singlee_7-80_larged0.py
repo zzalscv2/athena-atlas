@@ -5,8 +5,8 @@
 # art-type: grid
 # art-include: main/Athena
 # art-include: 23.0/Athena
-# art-input: mc15_13TeV.159053.ParticleGenerator_e_Et7to80_vertxy20.recon.RDO.e3603_s2726_r7728
-# art-input-nfiles: 10
+# art-input: valid1.901969.PG_e_Et7to80_vertxy20.recon.RDO.e8544_e8528_s4159_s4114_r14813_tid34085595_00
+# art-input-nfiles: 2
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt
@@ -36,9 +36,6 @@ Threads = 8
 Slots   = 8
 Input   = 'Single_el_larged0'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles=True
-
-preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDV_cond_fix.py' #conditions fix for ATR-23982. In future find a more recent RDO
-postinclude_file = 'RAWtoALL:TrigInDetValidation.TIDV_cond_fix'
 
 Jobs = [ ( "Truth",       " TIDAdata-run3-larged0-el.dat                    -o data-hists.root -p 11",   "Test_bin_larged0.dat" ),
          ( "Offline",     " TIDAdata-run3-offline-larged0-el.dat -r Offline -o data-hists-offline.root", "Test_bin_larged0.dat" ) ]
