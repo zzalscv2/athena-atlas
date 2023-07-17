@@ -58,7 +58,7 @@ if not 'TilePhysRun' in dir():
     TilePhysRun = not (TileCisRun or TileMonoRun or TilePedRun)
 
 if not 'TileFrameLength' in dir():
-    TileFrameLength = 7
+    TileFrameLength = 15
 
 if not 'doTileOpt2' in dir():
     doTileOpt2 = not (TileCisRun or TileMonoRun)
@@ -143,7 +143,7 @@ if TileTBperiod >= 2021:
         TileTBAANtuple.BC2X2 = -0.176083
         TileTBAANtuple.BC2Y1 = 0.49177
         TileTBAANtuple.BC2Y2 = -0.18221
-    else:
+    elif RunNumber <= 2310000:
         # June TB2022
         TileTBAANtuple.BC1X1 = -0.566211
         TileTBAANtuple.BC1X2 = -0.0513049
@@ -154,6 +154,17 @@ if TileTBperiod >= 2021:
         TileTBAANtuple.BC2X2 = -0.0523055
         TileTBAANtuple.BC2Y1 = -0.0602012
         TileTBAANtuple.BC2Y2 =  -0.0532108
+    else:
+        # July TB2023
+        TileTBAANtuple.BC1X1 = 2.465295
+        TileTBAANtuple.BC1X2 = -0.072135
+        TileTBAANtuple.BC1Y1 = 2.127854
+        TileTBAANtuple.BC1Y2 = -0.073442
+
+        TileTBAANtuple.BC2X1 = -0.317171
+        TileTBAANtuple.BC2X2 = -0.075384
+        TileTBAANtuple.BC2Y1 = 1.875657
+        TileTBAANtuple.BC2Y2 = -0.076717
 
 
 topSequence += TileTBAANtuple
@@ -162,7 +173,7 @@ print(topSequence.TileTBAANtuple)
 from GaudiSvc.GaudiSvcConf import THistSvc
 svcMgr += THistSvc()
 svcMgr.THistSvc.Output += [ f"AANT DATAFILE='{OutputDirectory}/{ntuple_name}' OPT='RECREATE' " ]
-OutputDirectorysvcMgr.THistSvc.MaxFileSize = 32768
+svcMgr.THistSvc.MaxFileSize = 32768
 
 if TileCisRun or TileMonoRun:
     # CIS calibration using top calib alg
@@ -178,6 +189,12 @@ if TileCisRun or TileMonoRun:
     TileCisTool = TileCisDefaultCalibTool()
 
     TileCisTool.removePed = True
+
+    if RunNumber >= 2200000:
+        TileCisTool.FragIDsDemonstrators = [ 0x201, 0x402 ]
+    elif RunNumber >= 2100000:
+        TileCisTool.FragIDsDemonstrators = [ 0x201 ]
+
     from AthenaCommon.AppMgr import ToolSvc
     TileCalibAlg.TileCalibTools += [ TileCisTool ]
     TileCalibAlg.OutputLevel = WARNING
