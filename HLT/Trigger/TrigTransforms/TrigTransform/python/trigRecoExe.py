@@ -330,8 +330,9 @@ class trigRecoExecutor(athenaExecutor):
                                     #Add the number of rejected events      
                                     rejected += int(line[14])
             
-            # Add the HLT_rejected_events histogram to the output file 
-            dbgStream.getHltDecision(rejected, self.conf.argdict["outputHIST_DEBUGSTREAMMONFile"].value[0])
+            if "HIST_DEBUGSTREAMMON" in self.conf.dataDictionary: 
+                # Add the HLT_rejected_events histogram to the output file 
+                dbgStream.getHltDecision(rejected, self.conf.argdict["outputHIST_DEBUGSTREAMMONFile"].value[0])
 
         except OSError as e:
             raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'),
