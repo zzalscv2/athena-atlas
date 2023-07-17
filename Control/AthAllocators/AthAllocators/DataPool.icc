@@ -63,7 +63,7 @@ DataPool<VALUE, clear>::DataPool(const EventContext& ctx,
 DATAPOOL_T
 DataPool<VALUE, clear>::DataPool(SG::Arena* arena,
                                  size_type n /*= 0*/)
-  : m_handle (arena, nullptr, &s_params)
+  : m_handle (arena, &s_params)
 {
   if (n > 0)
     m_handle.reserve (std::max (n, s_minRefCount));
