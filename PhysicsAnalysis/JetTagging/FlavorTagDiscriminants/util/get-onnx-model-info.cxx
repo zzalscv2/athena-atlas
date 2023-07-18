@@ -6,6 +6,7 @@
 #include <iostream>
 #include <iomanip>
 #include <unordered_map>
+#include <cstdint>
 
 void pretty_print_table(
   const std::vector<std::string>& names,
@@ -98,7 +99,7 @@ int main(int narg, char* argv[]) {
   std::vector<std::vector<int64_t>> shapes;
 
   for (std::size_t i = 0; i < num_input_nodes; i++) {
-    char* input_name = session->GetInputName(i, Ort::AllocatorWithDefaultOptions());
+    char* input_name = session->GetInputNameAllocated(i, Ort::AllocatorWithDefaultOptions()).release();
     names.push_back(input_name);
 
     // get input type and shape
@@ -118,7 +119,7 @@ int main(int narg, char* argv[]) {
   names.clear(); types.clear(); shapes.clear();
 
   for (std::size_t i = 0; i < num_output_nodes; i++) {
-    char* output_name = session->GetOutputName(i, Ort::AllocatorWithDefaultOptions());
+    char* output_name = session->GetOutputNameAllocated(i, Ort::AllocatorWithDefaultOptions()).release();
     names.push_back(output_name);
 
     // get input type and shape
@@ -139,17 +140,16 @@ int main(int narg, char* argv[]) {
   Ort::ModelMetadata metadata = session->GetModelMetadata();
   if (narg == 2) {
     std::cout << "available metadata keys: ";
-    int64_t nkeys = 0;
-    char** keys = metadata.GetCustomMetadataMapKeys(allocator, nkeys);
-    for (int64_t i = 0; i < nkeys; i++) {
-      std::cout << keys[i];
-      if (i+1 < nkeys) std::cout << ", ";
+    auto keys = metadata.GetCustomMetadataMapKeysAllocated(allocator);
+    for (uint64_t i = 0; i < keys.size(); i++) {
+      std::cout << keys[i].get();
+      if (i+1 < keys.size()) std::cout << ", ";
     }
     std::cout << std::endl;
     return 2;
   }
-  std::string val = metadata.LookupCustomMetadataMap(argv[2], allocator);
-  std::cout << val << std::endl;
+  auto val = metadata.LookupCustomMetadataMapAllocated(argv[2], allocator);
+  std::cout << val.get() << std::endl;
 
   return 0;
 }

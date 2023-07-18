@@ -1,5 +1,10 @@
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include <core/session/onnxruntime_cxx_api.h>
 #include <iostream>
+#include <cstdint>
 
 int main(int narg, char* argv[]) {
   if (narg != 3 && narg != 2) {
@@ -25,17 +30,16 @@ int main(int narg, char* argv[]) {
   Ort::ModelMetadata metadata = session->GetModelMetadata();
   if (narg == 2) {
     std::cout << "keys: ";
-    int64_t nkeys = 0;
-    char** keys = metadata.GetCustomMetadataMapKeys(allocator, nkeys);
-    for (int64_t i = 0; i < nkeys; i++) {
-      std::cout << keys[i];
-      if (i+1 < nkeys) std::cout << ", ";
+    auto keys = metadata.GetCustomMetadataMapKeysAllocated(allocator);
+    for (uint64_t i = 0; i < keys.size(); i++) {
+      std::cout << keys[i].get();
+      if (i+1 < keys.size()) std::cout << ", ";
     }
     std::cout << std::endl;
     return 2;
   }
-  std::string val = metadata.LookupCustomMetadataMap(argv[2], allocator);
-  std::cout << val << std::endl;
+  auto val = metadata.LookupCustomMetadataMapAllocated(argv[2], allocator);
+  std::cout << val.get() << std::endl;
 
   return 0;
 }
