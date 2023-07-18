@@ -20,10 +20,4 @@ class ConfiguredNewTrackingTrigCuts(InDetTrigTrackingCuts):
 
 if 'EFIDTrackingCuts' not in globals():
   EFIDTrackingCuts = ConfiguredNewTrackingTrigCuts("Offline")
-  EFIDTrackingCutsCosmics = ConfiguredNewTrackingTrigCuts("Cosmics")
-  EFIDTrackingCutsBeamGas = ConfiguredNewTrackingTrigCuts("BeamGas")
-  EFIDTrackingCutsLowPt = ConfiguredNewTrackingTrigCuts("LowPt")
-  EFIDTrackingCutsTRT = ConfiguredNewTrackingTrigCuts("TRT")
-  EFIDTrackingCutsHeavyIon = ConfiguredNewTrackingTrigCuts("HeavyIon")
-  EFIDTrackingCutLRT = ConfiguredNewTrackingTrigCuts("LRT")
   L2IDTrackingCuts = EFIDTrackingCuts

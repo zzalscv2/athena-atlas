@@ -6,13 +6,16 @@
 #include "ZdcByteStream/ZdcLucrodDataContainer.h"
 #include "ZdcByteStream/ZdcLucrodData.h"
 
+#include "eformat/SourceIdentifier.h"
+
 using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 
 ZdcByteStreamLucrodData::ZdcByteStreamLucrodData(const std::string& name, ISvcLocator* pSvcLocator):
   AthAlgorithm     (name                , pSvcLocator),
-  m_robDataProvider("ROBDataProviderSvc", name) {
-  
-}
+  m_robDataProvider("ROBDataProviderSvc", name),
+  m_ZdcLucrodDecoder(eformat::FORWARD_ZDC)
+ {
+ }
 
 StatusCode ZdcByteStreamLucrodData::initialize() {
   
@@ -37,12 +40,16 @@ StatusCode ZdcByteStreamLucrodData::execute() {
   std::vector<const ROBFragment*> listOfRobf;
   std::vector<unsigned int> ROBIDs;
   
-  ROBIDs.push_back(ROD_SOURCE_ID);
-  ROBIDs.push_back(ROD_SOURCE_ID+1);
-  ROBIDs.push_back(ROD_SOURCE_ID+2);
-  ROBIDs.push_back(ROD_SOURCE_ID+3);
-  ROBIDs.push_back(ROD_SOURCE_ID+4);
-  ROBIDs.push_back(ROD_SOURCE_ID+5);
+  // Set up the list of LUCROD ROBIDs 
+  //
+  //  High word of source ID indicates the ZDC (0x83)
+  //  Low word numbers the modules: 0-5 for the 6 LUCRODs in Run 3
+  //
+  const unsigned int RODSourceIdShifted = eformat::FORWARD_ZDC << 16;
+
+  for (unsigned int lucrodModuleNum = 0; lucrodModuleNum < 6; lucrodModuleNum++) {
+    ROBIDs.push_back(RODSourceIdShifted + lucrodModuleNum);
+  }
 
   ATH_MSG_DEBUG("ZdcByteStreamLucrodData::execute::getROBDATA");
   m_robDataProvider->getROBData(ROBIDs, listOfRobf);

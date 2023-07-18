@@ -155,6 +155,46 @@ def SiSpacePointsSeedMakerCfg(flags, **kwargs):
         return SiSpacePointsSeedMaker_ATLxkCfg(flags, **kwargs)
 
 
+def TrigSiSpacePointsSeedMakerCfg(flags, **kwargs):
+    
+    # Properties valid for all of the classes
+    kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPT)
+    kwargs.setdefault("radMax", flags.Tracking.ActiveConfig.radMax)
+    kwargs.setdefault("etaMax", flags.Tracking.ActiveConfig.maxEta)
+    kwargs.setdefault("usePixel", flags.Tracking.ActiveConfig.usePixelSeeding)
+    kwargs.setdefault("SpacePointsPixelName", 'PixelTrigSpacePoints')
+    kwargs.setdefault("useSCT", flags.Tracking.ActiveConfig.useSCTSeeding)
+    kwargs.setdefault("SpacePointsSCTName", 'SCT_TrigSpacePoints')
+    kwargs.setdefault("useOverlapSpCollection",
+                      flags.Tracking.ActiveConfig.useSCTSeeding)
+    kwargs.setdefault("SpacePointsOverlapName", 'OverlapSpacePoints')
+
+    if flags.Tracking.ActiveConfig.usePrdAssociationTool:
+        # not all classes have that property !!!
+        kwargs.setdefault("PRDtoTrackMap", 'TrigPRDtoTrackMap') #2023fix + flags.Tracking.ActiveConfig.extension))
+
+    #
+    # --- Space points seeds maker, use different ones for cosmics and collisions
+    #
+    if flags.Tracking.ActiveConfig.input_name=="cosmics":
+        return SiSpacePointsSeedMaker_CosmicCfg(flags, **kwargs)
+    # elif flags.Reco.EnableHI:   #2023fix - in principle minBias and HI should use specific versions too
+    #     return SiSpacePointsSeedMaker_HeavyIonCfg(flags, **kwargs)
+    # elif flags.Tracking.ActiveConfig.isLowPt:
+    #     return SiSpacePointsSeedMaker_LowMomentumCfg(flags, **kwargs)
+    else:
+        from InDetRecExample.TrackingCommon  import setDefaults
+        kwargs = setDefaults( kwargs,      
+                              maxdImpact = flags.Tracking.ActiveConfig.maxRPhiImpact,
+                              maxZ = flags.Tracking.ActiveConfig.maxZImpact,
+                              minZ =-flags.Tracking.ActiveConfig.maxZImpact,
+                              )
+                              
+        return SiSpacePointsSeedMaker_ATLxkCfg(flags, 
+                                               name = 'TrigSiSpacePointsSeedMaker_'+flags.Tracking.ActiveConfig.input_name,
+                                               **kwargs)
+
+    
 def ITkSiSpacePointsSeedMakerCfg(flags, name="ITkSpSeedsMaker", **kwargs):
     acc = ComponentAccumulator()
 

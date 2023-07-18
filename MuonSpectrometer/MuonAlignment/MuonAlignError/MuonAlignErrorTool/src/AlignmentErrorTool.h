@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONALIGNERRORTOOL_ALIGNMENTERRORTOOL_H
@@ -15,7 +15,7 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "MuonAlignErrorBase/AlignmentDeviation.h"
 #include "MuonCalibITools/IIdToFixedIdTool.h"
-#include "MuonCondAlg/MuonAlignmentErrorData.h"  // for accessing info from the DB
+#include "MuonAlignmentData/MuonAlignmentErrorData.h"  // for accessing info from the DB
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "TrkToolInterfaces/ITrkAlignmentDeviationTool.h"

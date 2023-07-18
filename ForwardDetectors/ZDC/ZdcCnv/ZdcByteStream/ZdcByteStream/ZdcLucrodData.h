@@ -27,7 +27,7 @@ class ZdcLucrodData {
     m_bcid      = 0;
     m_runNumber = 0;
     m_level1ID  = 0;
-    m_dataSize  = 0;    
+    m_numBCs  = 0;    
     m_status    = 0;    
 
     m_trigAvgA = 0;
@@ -42,7 +42,7 @@ class ZdcLucrodData {
   void SetBCID     (unsigned int val) { m_bcid      = val; }
   void SetRunNumber(unsigned int val) { m_runNumber = val; }
   void SetLevel1ID (unsigned int val) { m_level1ID  = val; }
-  void SetDataSize (unsigned int val) { m_dataSize  = val; }
+  void SetNumBCs (unsigned int val)   { m_numBCs  = val; }
   void SetStatus   (unsigned int val) { m_status    = val; }
 
   void SetTrigAvgA(uint16_t val) { m_trigAvgA = val; }
@@ -50,21 +50,26 @@ class ZdcLucrodData {
 
   void AddTrigData(uint16_t val) { m_trigData.push_back(val); }
 
-  void AddChanData(unsigned int id, const std::vector<uint16_t>& waveform) { 
+  bool AddChanData(unsigned int id, const std::vector<uint16_t>& waveform) { 
     
     ZdcLucrodChannel channel;
     
     channel.id       = id;
     channel.waveform = waveform;
-    
+
+    // Check for valid length
+    //
+    if (waveform.size() != m_numBCs*8) return false;
+
     m_chanData.push_back(channel);
+    return true;
   }
 
   unsigned int GetLucrodID()  const { return m_lucrodID; }
   unsigned int GetBCID()      const { return m_bcid; }
   unsigned int GetRunNumber() const { return m_runNumber; }
   unsigned int GetLevel1ID()  const { return m_level1ID; }
-  unsigned int GetDataSize()  const { return m_dataSize; }
+  unsigned int GetNumBCs()  const { return m_numBCs; }
   unsigned int GetStatus()    const { return m_status; }
 
   uint16_t GetTrigAvgA() const { return m_trigAvgA; }
@@ -84,7 +89,7 @@ class ZdcLucrodData {
 	<< " BCID:      "   << std::dec << m_bcid      << std::endl
 	<< " RunNumber: "   << std::dec << m_runNumber << std::endl
 	<< " Level1ID:  0x" << std::hex << m_level1ID  << std::endl
-	<< " DataSize:  "   << std::dec << m_dataSize  << std::endl
+	<< " NumBCs:  "     << std::dec << m_numBCs  << std::endl
 	<< " Status:    "   << std::dec << m_status    << std::endl;
 
     for (unsigned int nch=0; nch<m_chanData.size(); nch++) 
@@ -120,7 +125,7 @@ class ZdcLucrodData {
   unsigned int m_bcid;
   unsigned int m_runNumber;
   unsigned int m_level1ID;
-  unsigned int m_dataSize;
+  unsigned int m_numBCs;
   unsigned int m_status;
 
   uint16_t m_trigAvgA;

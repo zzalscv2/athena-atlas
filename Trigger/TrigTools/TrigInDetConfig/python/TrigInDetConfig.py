@@ -41,18 +41,6 @@ def InDetIDCCacheCreatorCfg(flags):
   acc.addEventAlgo( InDetCacheCreatorTrig )
   return acc
 
-def trtCondCfg(flags):
-  acc = ComponentAccumulator()
-  from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline, addFolders
-  #TODO switch to use config from TRT_ConditionsConfig
-  if flags.Common.isOnline:
-    acc.merge(addFolders(flags, "/TRT/Onl/ROD/Compress","TRT_ONL", className='CondAttrListCollection'))
-  acc.merge(addFoldersSplitOnline(flags, "TRT","/TRT/Onl/Calib/RT","/TRT/Calib/RT",className="TRTCond::RtRelationMultChanContainer"))
-  acc.merge(addFoldersSplitOnline(flags, "TRT","/TRT/Onl/Calib/T0","/TRT/Calib/T0",className="TRTCond::StrawT0MultChanContainer"))
-  acc.merge(addFoldersSplitOnline (flags, "TRT","/TRT/Onl/Calib/errors","/TRT/Calib/errors",className="TRTCond::RtRelationMultChanContainer"))
-
-  return acc
-
 def _trackConverterCfg(flags, signature, inputTracksKey, outputTrackParticleKey):
   acc = ComponentAccumulator()
 

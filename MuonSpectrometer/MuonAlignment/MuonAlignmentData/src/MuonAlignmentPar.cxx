@@ -1,25 +1,22 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
+#include <MuonAlignmentData/MuonAlignmentPar.h>
 
-#include "MuonAlignmentData/MuonAlignmentPar.h"
 
-MuonAlignmentPar::MuonAlignmentPar() : m_Jff(0), m_Jzz(0), m_Job(0), m_isNew(false) {}
+bool operator<(const Identifier& a, const MuonAlignmentPar& b) { return a < b.identify(); }
+bool operator<(const MuonAlignmentPar& a, const Identifier& b) { return a.identify() < b; }
 
-void MuonAlignmentPar::setAmdbId(std::string_view type, int jff, int jzz, int job) {
-    m_Type = std::string(type);
-    m_Jff = jff;
-    m_Jzz = jzz;
-    m_Job = job;
-
-    return;
+void MuonAlignmentPar::setIdentifier(const Identifier& id) { m_id = id; }
+const Identifier& MuonAlignmentPar::identify() const {return m_id; }
+bool MuonAlignmentPar::operator<(const MuonAlignmentPar& other) const { return m_id < other.m_id; }
+void MuonAlignmentPar::setAmdbId(const std::string& stName, int stEta, int stPhi, int stJob) {
+    m_station = stName;
+    m_eta = stEta;
+    m_phi = stPhi;
+    m_job = stJob;
 }
-
-void MuonAlignmentPar::getAmdbId(std::string& type, int& jff, int& jzz, int& job) const {
-    type = m_Type;
-    jff = m_Jff;
-    jzz = m_Jzz;
-    job = m_Job;
-
-    return;
-}
+int MuonAlignmentPar::AmdbJob() const { return m_job; }
+int MuonAlignmentPar::AmdbEta() const{ return m_eta; }
+int MuonAlignmentPar::AmdbPhi() const{ return m_phi;}
+std::string MuonAlignmentPar::AmdbStation() const {return m_station;}

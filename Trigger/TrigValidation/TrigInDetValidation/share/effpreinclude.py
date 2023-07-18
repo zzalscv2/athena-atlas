@@ -7,9 +7,6 @@ log.info( "preinclude: effpreinclude.py" )
 
 from TrigInDetConfig.ConfigSettingsBase import _ConfigSettingsBase 
 
-# potential future check - leave here
-# from InDetTrigRecExample.InDetTrigFlags import InDetTrigFlags ; InDetTrigFlags.cutLevel.set_Value_and_Lock(15) 
-
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 from AthenaCommon.SystemOfUnits import GeV
 

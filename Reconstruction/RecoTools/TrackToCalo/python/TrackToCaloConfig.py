@@ -31,10 +31,11 @@ def EMParticleCaloExtensionToolCfg(flags,
                                    name='EMParticleCaloExtensionTool',
                                    **kwargs):
     ''' e/gamma configuration of the tool.
-    Useful when targeting a specific layer given
-    a cluster i.e "direct" extrapolation'''
+    Useful when targeting a specific layers in
+    "direct" extrapolation mode. It needs the
+    CaloSurfaceBuilder.
+    '''
     acc = ComponentAccumulator()
-    kwargs.setdefault("ParticleType", "electron")
     kwargs.setdefault("StartFromPerigee", True)
 
     if "CaloSurfaceBuilder" not in kwargs:

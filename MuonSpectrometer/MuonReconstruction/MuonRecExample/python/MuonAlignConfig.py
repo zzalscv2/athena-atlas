@@ -58,9 +58,6 @@ MuonAlignAlg.ParlineFolders = ["/MUONALIGN/MDT/BARREL",
                                "/MUONALIGN/MDT/ENDCAP/SIDEC",
                                "/MUONALIGN/TGC/SIDEA",
                                "/MUONALIGN/TGC/SIDEC"]
-if conddb.dbdata != 'COMP200' and conddb.dbmc != 'COMP200' and \
-   'HLT' not in globalflags.ConditionsTag() and not conddb.isOnline :
-    MuonAlignAlg.IsData = False
 condSequence+=MuonAlignAlg
 
 MuonDetectorTool.FillCacheInitTime = 0 # We do not need to fill cache for the MuonGeoModel MuonDetectorTool, just for the condAlg
@@ -68,15 +65,6 @@ MuonDetectorTool.FillCacheInitTime = 0 # We do not need to fill cache for the Mu
 # Condition DB is needed only if A-lines or B-lines are requested
 if not (muonAlignFlags.UseAlines=='none' and muonAlignFlags.UseBlines=='none'):
     MuonDetectorTool.UseConditionDb = 1
-    # here define to what extent B-lines are enabled
-    if muonAlignFlags.UseBlines=='none':
-        MuonDetectorTool.EnableMdtDeformations = 0
-    elif muonAlignFlags.UseBlines=='all':
-        MuonDetectorTool.EnableMdtDeformations = 1
-    elif muonAlignFlags.UseBlines=='barrel':
-        MuonDetectorTool.EnableMdtDeformations = 2
-    elif muonAlignFlags.UseBlines=='endcaps':
-        MuonDetectorTool.EnableMdtDeformations = 3
 
 # here define if I-lines (CSC internal alignment) are enabled
 if muonAlignFlags.UseIlines and MuonGeometryFlags.hasCSC(): 
@@ -94,14 +82,15 @@ if muonAlignFlags.UseIlines and MuonGeometryFlags.hasCSC():
 
 # here define if As-Built (MDT chamber alignment) are enabled
 applyNswAsBuilt = False
+applyMdtAsBuilt = False
 if muonAlignFlags.UseAsBuilt:
     if conddb.dbdata == 'COMP200' or conddb.dbmc == 'COMP200' or \
        'HLT' in globalflags.ConditionsTag() or conddb.isOnline or conddb.isMC:
         logMuon.info("No MDT As-Built parameters applied.")
-        MuonDetectorTool.EnableMdtAsBuiltParameters = 0        
+        applyMdtAsBuilt = False        
     else :
         logMuon.info("Reading As-Built parameters from conditions database")
-        MuonDetectorTool.EnableMdtAsBuiltParameters = 1        
+        applyMdtAsBuilt = True        
         conddb.addFolder('MUONALIGN_OFL','/MUONALIGN/MDT/ASBUILTPARAMS' ,className='CondAttrListCollection')
         MuonAlignAlg.ParlineFolders += ["/MUONALIGN/MDT/ASBUILTPARAMS"]
         if CommonGeometryFlags.Run not in ["RUN1","RUN2"]: 
@@ -132,9 +121,6 @@ if not hasattr(condSequence, "MuonDetectorCondAlg"):
     MuonDetectorManagerCond.applyMmPassivation = muonAlignFlags.applyMMPassivation()
     MuonDetectorManagerCond.MuonDetectorTool = MuonDetectorTool
     MuonDetectorManagerCond.applyNswAsBuilt = applyNswAsBuilt
+    MuonDetectorManagerCond.applyMdtAsBuilt = applyMdtAsBuilt
     MuonDetectorManagerCond.MuonDetectorTool.FillCacheInitTime = 1 # CondAlg cannot update itself later - not threadsafe
-
-    if conddb.dbdata != 'COMP200' and conddb.dbmc != 'COMP200' and \
-    'HLT' not in globalflags.ConditionsTag() and not conddb.isOnline :
-        MuonDetectorManagerCond.IsData = False
     condSequence+=MuonDetectorManagerCond

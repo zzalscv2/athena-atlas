@@ -27,7 +27,6 @@ EMParticleCaloExtensionTool = ToolFactory(
     CfgMgr.Trk__ParticleCaloExtensionTool,
     name="EMParticleCaloExtensionTool",
     Extrapolator=egammaCaloExtrapolator,
-    ParticleType="electron",
     CaloSurfaceBuilder=egCaloSurfaceBuilder,
     StartFromPerigee=True)
 

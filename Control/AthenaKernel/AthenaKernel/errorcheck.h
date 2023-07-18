@@ -392,6 +392,7 @@ private:
  * If the status is not successful, then an error message will be produced,
  * and the failing @c StatusCode (or @c RET) will be returned to the caller.
  */
+#ifndef __CPPCHECK__ // The varadic macros here confuse cppcheck.
 #define CHECK_WITH_CONTEXT(...)  \
     BOOST_PP_OVERLOAD(CHECK_WITH_CONTEXT_, __VA_ARGS__)(__VA_ARGS__)
 
@@ -423,6 +424,7 @@ private:
 
 #define CHECK_1(EXP) CHECK_WITH_CONTEXT(EXP, errorcheck::context_name(this))
 #define CHECK_2(EXP, RET) CHECK_WITH_CONTEXT(EXP, errorcheck::context_name(this), RET)
+#endif
 
 
 /**

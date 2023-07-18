@@ -36,8 +36,12 @@ def SPCountHypoToolGen(chainDict):
         hypo.pixCL = -1  # Remove any cut on mininum number of Pixel and SCT SpacePoints
         hypo.sctSP = -1
         hypo.pixCLMax = int(chainDict["chainParts"][0]["hypoSPInfo"].strip("vpix"))
-    return hypo
+    if "nototpix" in chainDict["chainName"]:
+        hypo.pixCL = -1  # Remove any cut on mininum number of Pixel and SCT SpacePoints
+        hypo.sctSP = -1
+        hypo.pixCLnoToT = int(chainDict["chainParts"][0]["hypoSPInfo"].strip("nototpix"))
 
+    return hypo
 
 
 def TrackCountHypoToolGen(chainDict):
@@ -80,7 +84,7 @@ def MbtsHypoToolGen(flags, chainDict):
         hypo.MbtsCounters=1
     return hypo
 
-    
+
 
 def TrigZVertexHypoToolGen(chainDict):
     hypo = CompFactory.TrigZVertexHypoTool(chainDict["chainName"])
@@ -91,14 +95,14 @@ def TrigZVertexHypoToolGen(chainDict):
 
     return hypo
 
-@AccumulatorCache    
+@AccumulatorCache
 def MinBiasSPSel(flags):
 
     reco = InViewRecoCA("SPCountingReco")
     minBiasFlags = flags.cloneAndReplace("Tracking.ActiveConfig","Trigger.InDetTracking.minBias")
 
     from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
-    seq = InDetTrigSequence(minBiasFlags, 
+    seq = InDetTrigSequence(minBiasFlags,
                             minBiasFlags.Tracking.ActiveConfig.input_name, # this is already in the flags, maybe we would nto need to pass it in the future?
                             rois   = str(reco.inputMaker().InViewRoIs),
                             inView = str(reco.inputMaker().Views))
@@ -128,13 +132,13 @@ def MinBiasSPSequenceCfg(flags):
 def MinBiasZVertexFinderSequenceCfg(flags):
     recoAcc = InViewRecoCA(name="ZVertFinderReco", InViewRoIs="InputRoI", RequireParentView=True)
     vdv = CompFactory.AthViews.ViewDataVerifier( "VDVZFinderInputs",
-                                                  DataObjects = [( 'SpacePointContainer' , 'StoreGateSvc+PixelTrigSpacePoints'), 
+                                                  DataObjects = [( 'SpacePointContainer' , 'StoreGateSvc+PixelTrigSpacePoints'),
                                                                  ( 'PixelID' , 'DetectorStore+PixelID' ) ])
 
     recoAcc.addRecoAlgo(vdv)
     from IDScanZFinder.ZFinderAlgConfig import  MinBiasZFinderCfg
     recoAcc.mergeReco( MinBiasZFinderCfg(flags) )
-    selAcc = SelectionCA("ZVertexFinderSel")    
+    selAcc = SelectionCA("ZVertexFinderSel")
     selAcc.mergeReco(recoAcc)
     selAcc.addHypoAlgo( CompFactory.TrigZVertexHypoAlg("TrigZVertexHypoAlg", ZVertexKey=recordable("HLT_vtx_z")))
     return MenuSequenceCA(flags, selAcc, HypoToolGen = TrigZVertexHypoToolGen)
@@ -179,16 +183,16 @@ def MinBiasMbtsSequenceCfg(flags):
     from TrigMinBias.MbtsConfig import MbtsFexCfg, MbtsSGInputCfg
     fex = MbtsFexCfg(flags, MbtsBitsKey = recordable("HLT_MbtsBitsContainer"))
     recoAcc.mergeReco(fex)
-    selAcc = SelectionCA("MbtsSel")    
+    selAcc = SelectionCA("MbtsSel")
     hypo = CompFactory.MbtsHypoAlg("MbtsHypoAlg", MbtsBitsKey = fex.getPrimary().MbtsBitsKey)
     selAcc.mergeReco(recoAcc)
     selAcc.addHypoAlgo(hypo)
 
     return MenuSequenceCA(flags,
                           selAcc,
-                          HypoToolGen = MbtsHypoToolGen, 
+                          HypoToolGen = MbtsHypoToolGen,
                           globalRecoCA = MbtsSGInputCfg(flags))
-    
+
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -198,7 +202,7 @@ if __name__ == "__main__":
     zf.ca.printConfig(withDetails=True)
     from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
     zfms = menuSequenceCAToGlobalWrapper(MinBiasZVertexFinderSequenceCfg, flags)
-    
+
 
     mb = MinBiasMbtsSequenceCfg(flags)
     mb.ca.printConfig()

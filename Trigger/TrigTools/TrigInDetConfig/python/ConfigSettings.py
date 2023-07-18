@@ -497,7 +497,6 @@ class ConfigSettings_DVtxLRT( _ConfigSettingsBase ):
 
 ConfigSettingsInstances = {
    "electron"     : ConfigSettings_electron(),
-   "Electron"     : ConfigSettings_electron(),
    "photon"       : ConfigSettings_electron(),
 
     "muon"        : ConfigSettings_muon(),
@@ -507,12 +506,6 @@ ConfigSettingsInstances = {
     "muonFS"      : ConfigSettings_muon(),
     "muonLate"    : ConfigSettings_muon(),
 
-    "Muon"        : ConfigSettings_muon(),
-    "MuonIso"     : ConfigSettings_muonIso(),
-    "MuonCore"    : ConfigSettings_muon(),
-    "MuonFS"      : ConfigSettings_muon(),
-    "MuonLate"    : ConfigSettings_muon(),
-
     "tau"         : ConfigSettings_tau(),
     "tauTau"      : ConfigSettings_tau(),
     "tauCore"     : ConfigSettings_tauCore(),
@@ -520,7 +513,6 @@ ConfigSettingsInstances = {
     "tauIsoBDT"   : ConfigSettings_tauIsoBDT(),
 
     "bjet"        : ConfigSettings_bjet(),
-    "Bjet"        : ConfigSettings_bjet(),
 
     "jet"         : ConfigSettings_fullScan(),
     #    "jet"         : ConfigSettings_bjet(),

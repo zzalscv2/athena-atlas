@@ -27,25 +27,49 @@ public:
 
 
 private:
+    /** Attaches the dependencies of the Alignment keys onto the A & Bline container*/
+    StatusCode attachDependencies(const EventContext& ctx,
+                              SG::WriteCondHandle<ALineContainer>& alines,
+                              SG::WriteCondHandle<BLineContainer>& blines ) const;
+    /**
+     *  Load the Alignment data from the legacy format where the channels are parsed line wise 
+     *  The data is then transferred into a modern JSON blob
+     * */
+    StatusCode loadDataFromLegacy(const std::string& data, nlohmann::json& json, bool loadBLines) const;
+    /**
+     *  Parse the JSON blob to fill the A & B Line containers
+     * */
+    StatusCode parseDataFromJSON(const nlohmann::json& lines,
+                                ALineContainer& writeALineCdo, 
+                                BLineContainer& writeBLineCdo) const;
+    /**
+     *  Retrieves the alignment parameters from a COOL folder
+     * */
+    StatusCode loadCoolFolder(const EventContext& ctx,
+                              const SG::ReadCondHandleKey<CondAttrListCollection>& key,
+                              ALineContainer& writeALineCdo, 
+                              BLineContainer& writeBLineCdo) const;
+    
     // Read Handles
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readMdtBarrelKey{this, "ReadMdtBarrelKey", "/MUONALIGN/MDT/BARREL",
-                                                                     "Key of input MDT/BARREL condition data"};
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readMdtEndcapSideAKey{this, "ReadMdtEndcapSideAKey", "/MUONALIGN/MDT/ENDCAP/SIDEA",
-                                                                          "Key of input MDT/ENDCAP/SIDEA condition data"};
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readMdtEndcapSideCKey{this, "ReadMdtEndcapSideCKey", "/MUONALIGN/MDT/ENDCAP/SIDEC",
-                                                                          "Key of input MDT/ENDCAP/SIDEC condition data"};
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readTgcSideAKey{this, "ReadTgcSideAKey", "/MUONALIGN/TGC/SIDEA",
-                                                                    "Key of input TGC/SIDEA condition data"};
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readTgcSideCKey{this, "ReadTgcSideCKey", "/MUONALIGN/TGC/SIDEC",
-                                                                    "Key of input TGC/SIDEC condition data"};
+    SG::ReadCondHandleKeyArray<CondAttrListCollection> m_alignKeys{this, "MuonAlignmentKeys", {
+                                                                  "/MUONALIGN/MDT/BARREL",
+                                                                  "/MUONALIGN/MDT/ENDCAP/SIDEA",
+                                                                  "/MUONALIGN/MDT/ENDCAP/SIDEC",
+                                                                  "/MUONALIGN/TGC/SIDEA",
+                                                                  "/MUONALIGN/TGC/SIDEC",
+                                                                  },
+                                                                  "Folder names where the alignment paramters are stored"};
+
+
+
     SG::ReadCondHandleKey<CondAttrListCollection> m_readCscILinesKey{this, "ReadCscILinesKey", "/MUONALIGN/CSC/ILINES",
                                                                      "Key of input CSC/ILINES condition data"};
     SG::ReadCondHandleKey<CondAttrListCollection> m_readMdtAsBuiltParamsKey{this, "ReadMdtAsBuiltParamsKey", "/MUONALIGN/MDT/ASBUILTPARAMS",
                                                                             "Key of MDT/ASBUILTPARAMS input condition data"};
     // Write Handles
-    SG::WriteCondHandleKey<ALineMapContainer> m_writeALineKey{this, "WriteALineKey", "ALineMapContainer",
+    SG::WriteCondHandleKey<ALineContainer> m_writeALineKey{this, "WriteALineKey", "ALineContainer",
                                                               "Key of output muon alignment ALine condition data"};
-    SG::WriteCondHandleKey<BLineMapContainer> m_writeBLineKey{this, "WriteBLineKey", "BLineMapContainer",
+    SG::WriteCondHandleKey<BLineContainer> m_writeBLineKey{this, "WriteBLineKey", "BLineContainer",
                                                               "Key of output muon alignment BLine condition data"};
     SG::WriteCondHandleKey<CscInternalAlignmentMapContainer> m_writeILineKey{this, "WriteILineKey", "CscInternalAlignmentMapContainer",
                                                                              "Key of output muon alignment CSC/ILine condition data"};
@@ -55,11 +79,7 @@ private:
    
     Gaudi::Property<std::vector<std::string>> m_parlineFolder{this, "ParlineFolders", {}, "Database folders"};
                                                               
-    Gaudi::Property<bool> m_isData{this, "IsData", true};
 
-  
-    Gaudi::Property<bool> m_dumpALines{this, "DumpALines", false};
-    Gaudi::Property<bool> m_dumpBLines{this, "DumpBLines", false};
     Gaudi::Property<bool> m_dumpILines{this, "DumpILines", false};
     Gaudi::Property<bool> m_ILinesFromDb{this, "ILinesFromCondDB", false};
 
@@ -69,21 +89,18 @@ private:
     Gaudi::Property<std::string> m_asBuiltFile{this, "AsBuiltFile", ""};
 
     // new folder format 2020
-    Gaudi::Property<bool> m_newFormat2020 {this, "NewFormat2020", false};
+    Gaudi::Property<bool> m_newFormat2020 {this, "NewFormat2020", false, 
+                          "The database folders are given in the new JSON format"};
+     /// @brief Load the alignment parameters from a JSON file
+    Gaudi::Property<std::string> m_readFromJSON{this,"readFromJSON", "",
+                                 "Reads the A & B lines parameters from a JSON file instead from COOL"};
 
-    StatusCode loadParameters();
-    StatusCode loadAlignABLines();
-    StatusCode loadAlignABLines(const std::string& folderName, ALineMapContainer* writeALineCdo, BLineMapContainer* writeBLineCdo,
-                                EventIDRange& rangeALineW, EventIDRange& rangeBLineW);
-    StatusCode loadAlignABLinesData(const std::string& folderName, const std::string& data, nlohmann::json& json, bool);
+    
     StatusCode loadAlignILines(const std::string& folderName);
     StatusCode loadAlignILinesData(const std::string& folderName, const std::string& data, nlohmann::json& json);
     StatusCode loadMdtAlignAsBuilt(const std::string& folderName);
 
-    StatusCode setALinesFromAscii(ALineMapContainer* writeALineCdo) const;
     void setAsBuiltFromAscii(MdtAsBuiltMapContainer* writeCdo) const;
-    void dumpALines(const std::string& folderName, ALineMapContainer* writeALineCdo);
-    void dumpBLines(const std::string& folderName, BLineMapContainer* writeBLineCdo);
     void dumpILines(const std::string& folderName, CscInternalAlignmentMapContainer* writeCdo);
 };
 

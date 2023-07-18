@@ -821,8 +821,7 @@ namespace MuonGM {
         MsgStream log(Athena::getMessageSvc(), "MdtReadoutElement");
         const MdtIdHelper* idh = manager()->mdtIdHelper();
 #endif
-        if (((!(manager()->applyMdtDeformations())) || (!(ms->hasBLines()))) &&
-            ((!(manager()->applyMdtAsBuiltParams())) || (!(ms->hasMdtAsBuiltParams())))) {
+        if (!ms->hasBLines() && !ms->hasMdtAsBuiltParams()) {
             return Amg::Transform3D::Identity();
         }
 
@@ -873,23 +872,24 @@ namespace MuonGM {
         Amg::Vector3D pt_end2_new = pt_end2;
 
         // if there are as built parameters ... apply them here
-        if ((manager()->applyMdtAsBuiltParams()) && (ms->hasMdtAsBuiltParams())) {
+        if (ms->hasMdtAsBuiltParams()) {
             wireEndpointsAsBuilt(pt_end1_new, pt_end2_new, multilayer, tubelayer, tube);
         }
 
         // if there are deformation parameters ... apply them here
-        if ((manager()->applyMdtDeformations()) && (ms->hasBLines())) {
-            double bz = m_BLinePar->bz();
-            double bp = m_BLinePar->bp();
-            double bn = m_BLinePar->bn();
-            double sp = m_BLinePar->sp();
-            double sn = m_BLinePar->sn();
-            double tw = m_BLinePar->tw();
-            double pg = m_BLinePar->pg();
-            double tr = m_BLinePar->tr();
-            double eg = m_BLinePar->eg();
-            double ep = m_BLinePar->ep();
-            double en = m_BLinePar->en();
+        if (ms->hasBLines()) {
+            using Parameter = BLinePar::Parameter;
+            const double bz = m_BLinePar->getParameter(Parameter::bz);
+            const double bp = m_BLinePar->getParameter(Parameter::bp);
+            const double bn = m_BLinePar->getParameter(Parameter::bn);
+            const double sp = m_BLinePar->getParameter(Parameter::sp);
+            const double sn = m_BLinePar->getParameter(Parameter::sn);
+            const double tw = m_BLinePar->getParameter(Parameter::tw);
+            const double pg = m_BLinePar->getParameter(Parameter::pg);
+            const double tr = m_BLinePar->getParameter(Parameter::tr);
+            const double eg = m_BLinePar->getParameter(Parameter::eg);
+            const double ep = m_BLinePar->getParameter(Parameter::ep);
+            const double en = m_BLinePar->getParameter(Parameter::en);
 
             // Get positions after the deformations applied
             // first wire end point
@@ -932,9 +932,14 @@ namespace MuonGM {
                                                       const Amg::Vector3D& fixedPoint) const {
         double height = m_inBarrel ? m_Zsize : m_Rsize;
         double thickness = m_inBarrel ? m_Rsize : m_Zsize;
-
-        return posOnDefChamWire(locAMDBPos, m_Ssize, m_LongSsize, height, thickness, bLine->bz(), bLine->bp(), bLine->bn(), bLine->sp(),
-                                bLine->sn(), bLine->tw(), bLine->pg(), bLine->tr(), bLine->eg(), bLine->ep(), bLine->en(), fixedPoint);
+        using Parameter = BLinePar::Parameter;
+        return posOnDefChamWire(locAMDBPos, m_Ssize, m_LongSsize, height, thickness, 
+                                bLine->getParameter(Parameter::bz), bLine->getParameter(Parameter::bp), 
+                                bLine->getParameter(Parameter::bn), bLine->getParameter(Parameter::sp),
+                                bLine->getParameter(Parameter::sn), bLine->getParameter(Parameter::tw), 
+                                bLine->getParameter(Parameter::pg), bLine->getParameter(Parameter::tr), 
+                                bLine->getParameter(Parameter::eg), bLine->getParameter(Parameter::ep), 
+                                bLine->getParameter(Parameter::en), fixedPoint);
     }
 
     //   //Correspondence to AMDB parameters -TBM

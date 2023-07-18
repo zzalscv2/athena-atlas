@@ -23,7 +23,7 @@ def trkFS_trkfast_Cfg( flags ):
         return allTE_trkfast( flags, signature="FS" )
 
 def allTE_trkfast_Cfg( flags ):
-        return allTE_trkfast( flags, signature="BeamSpot" )
+        return allTE_trkfast( flags, signature="beamSpot" )
 
 def allTE_trkfast( flags, signature="FS" ):
         inputMakerAlg = EventViewCreatorAlgorithm("IM_beamspot_"+signature)

@@ -72,7 +72,14 @@ def signatureSpecificSettingOfFlags(flags,mode):
     flags.nWeightedClustersMin= 8
     flags.minTRTonTrk         = 20
     flags.seedFilterLevel     = 3
-
+    
+  elif flags.input_name=="minBias":
+    flags.minPT               = 0.1*Units.GeV
+    flags.maxPrimaryImpact    = 10.*Units.mm
+    flags.maxRPhiImpact       = 10.*Units.mm
+    flags.maxZImpact          = 150.*Units.mm
+    flags.roadWidth           = 20
+    
   def collToRecordable(flags,name):
     ret = name
     signature = flags.input_name
@@ -105,7 +112,7 @@ def signatureSpecificSettingOfFlags(flags,mode):
   flags.addFlag("refitROT", True) 
   flags.addFlag("trtExtensionType", "xf") 
   flags.addFlag("doBremRecovery", False)  #setTrue for electron once validated
-
+  flags.addFlag("doTruth",  False)  
     
 def createTrigTrackingPassFlags(mode="InDet"):
   def __flagsFromConfigSettings(settings, mode):
@@ -160,9 +167,9 @@ class FlagsCopiedTest(unittest.TestCase):
         from AthenaConfiguration.AllConfigFlags import initConfigFlags
         flags = initConfigFlags()
         flags.Trigger.doID
-        flags.Trigger.InDetTracking.Muon
-        flags.Trigger.InDetTracking.Electron.minPT = 2.0 * Units.GeV
-        self.newflags = flags.cloneAndReplace('Tracking.ActiveConfig', 'Trigger.InDetTracking.Electron')
+        flags.Trigger.InDetTracking.muon
+        flags.Trigger.InDetTracking.electron.minPT = 2.0 * Units.GeV
+        self.newflags = flags.cloneAndReplace('Tracking.ActiveConfig', 'Trigger.InDetTracking.electron')
 
         self.newflags.dump(".*InDet")
 

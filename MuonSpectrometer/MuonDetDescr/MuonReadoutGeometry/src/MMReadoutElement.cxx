@@ -283,16 +283,8 @@ namespace MuonGM {
     void MMReadoutElement::setDelta(const ALinePar& aline) {
 
         // amdb frame (s, z, t) = chamber frame (y, z, x)
-        float tras{0.}, traz{0.}, trat{0.}, rots{0.}, rotz{0.}, rott{0.};
-        aline.getParameters(tras, traz, trat, rots, rotz, rott);
-        if (std::abs(tras) + std::abs(traz) + std::abs(trat) + std::abs(rots) + std::abs(rotz) + std::abs(rott) > 1e-5) {
-            m_delta = Amg::Translation3D(0., tras, 0.) // translations (applied after rotations)
-                    * Amg::Translation3D(0., 0., traz)  
-                    * Amg::Translation3D(trat, 0., 0.) 
-                    * Amg::AngleAxis3D(rots, Amg::Vector3D::UnitY())  // rotation about Y (applied 3rd)
-                    * Amg::AngleAxis3D(rotz, Amg::Vector3D::UnitZ())  // rotation about Z (applied 2nd)
-                    * Amg::AngleAxis3D(rott, Amg::Vector3D::UnitX()); // rotation about X (applied 1st)
-
+        if (aline) {
+            m_delta = aline.delta();
             // The origin of the rotation axes is at the center of the active area 
             // in the z (radial) direction. Account for this shift in the definition 
             // of m_delta so that it can be applied on chamber frame coordinates.
@@ -304,25 +296,6 @@ namespace MuonGM {
             clearALinePar();
         }
     }
-
-
-    //============================================================================
-    void MMReadoutElement::setDelta(MuonDetectorManager* mgr) {
-
-        const ALineMapContainer* alineMap = mgr->ALineContainer();
-        Identifier id = mgr->mmIdHelper()->elementID(getStationName(), getStationEta(), getStationPhi());
-        Identifier idMult = mgr->mmIdHelper()->multilayerID(id, m_ml);
-        ALineMapContainer::const_iterator it = alineMap->find(idMult);
-
-        if (it == alineMap->end()) {
-            clearALinePar();
-            MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
-            if (log.level() <= MSG::DEBUG) { log << MSG::DEBUG << "m_aLineMapContainer does not contain ALine for MM" << endmsg; }
-        } else {
-            setDelta(it->second);
-        }
-    }
-
     //============================================================================
     void MMReadoutElement::clearALinePar() {
         if (has_ALines()) {
@@ -334,30 +307,9 @@ namespace MuonGM {
 
     //============================================================================
     void MMReadoutElement::setBLinePar(const BLinePar& bLine) {
-        MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
-        if (log.level() <= MSG::DEBUG)
-            log << MSG::DEBUG << "Setting B-line for " << getStationName().substr(0, 3) << " at eta/phi " << getStationEta() << "/" << getStationPhi() << endmsg;
+        ATH_MSG_VERBOSE("Setting B-line for " << idHelperSvc()->toStringDetEl(identify())<<" "<<bLine);
         m_BLinePar = &bLine;
     }
-
-
-    //============================================================================
-    void MMReadoutElement::setBLinePar(MuonDetectorManager* mgr) {
-        const BLineMapContainer* blineMap = mgr->BLineContainer();
-        Identifier id     = mgr->mmIdHelper()->elementID(getStationName(), getStationEta(), getStationPhi());
-        Identifier idMult = mgr->mmIdHelper()->multilayerID(id, m_ml);
-        BLineMapContainer::const_iterator it = blineMap->find(idMult);
-
-        if (it == blineMap->end()) {
-            clearBLinePar();
-            MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
-            if (log.level() <= MSG::DEBUG) { log << MSG::DEBUG << "m_bLineMapContainer does not contain BLine for MM" << endmsg; }
-        } else {
-            setBLinePar(it->second);
-        }
-    }
-
-
     //============================================================================
     void MMReadoutElement::posOnDefChamber(Amg::Vector3D& locPosML) const {
 
@@ -374,14 +326,15 @@ namespace MuonGM {
         double t_rel = t0/(m_tckChamber/2.);    // in [-1, 1]
 
         // b-line parameters
-        double bp    = m_BLinePar->bp();
-        double bn    = m_BLinePar->bn();
-        double sp    = m_BLinePar->sp();
-        double sn    = m_BLinePar->sn();
-        double tw    = m_BLinePar->tw();
-        double eg    = m_BLinePar->eg()*1.e-3;
-        double ep    = m_BLinePar->ep()*1.e-3;
-        double en    = m_BLinePar->en()*1.e-3;
+        using Parameter = BLinePar::Parameter;
+        double bp    = m_BLinePar->getParameter(Parameter::bp);
+        double bn    = m_BLinePar->getParameter(Parameter::bn);
+        double sp    = m_BLinePar->getParameter(Parameter::sp);
+        double sn    = m_BLinePar->getParameter(Parameter::sn);
+        double tw    = m_BLinePar->getParameter(Parameter::tw);
+        double eg    = m_BLinePar->getParameter(Parameter::eg)*1.e-3;
+        double ep    = m_BLinePar->getParameter(Parameter::ep)*1.e-3;
+        double en    = m_BLinePar->getParameter(Parameter::en)*1.e-3;
 
         double ds{0.}, dz{0.}, dt{0.};
 
