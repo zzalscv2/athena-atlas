@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Json2Cool.h"
@@ -139,7 +139,7 @@ namespace IOVDbNamespace{
   Json2Cool::createAttributeList(cool::RecordSpecification * pSpec, const nlohmann::json & j){
     cool::Record a(*pSpec);
     unsigned int s=a.size();
-   
+    
     json::const_iterator it = j.begin();
     for (unsigned int i(0);i!=s;++i){
       auto & f=a[i];
@@ -157,100 +157,113 @@ namespace IOVDbNamespace{
           att.setNull();
           continue;
         }
-        switch (f.storageType().id()){
-          case (StorageType::Bool):
-          {
-            const bool newVal=(thisVal.get<std::string>() == "true");
-            att.setValue<bool>(newVal);
-          }
-          break;
-          case (StorageType::UChar):
-          {
-            const unsigned char newVal=std::stoul(thisVal.get<std::string>());
-            att.setValue<unsigned char>(newVal);
-          }
-          break;
-          case (StorageType::Int16):
-          {
-            const short newVal=std::stol(thisVal.get<std::string>());
-            att.setValue<short>(newVal);
-          }
-          break;
-          case (StorageType::UInt16):
-          {
-            const unsigned short newVal=std::stoul(thisVal.get<std::string>());
-            att.setValue<unsigned short>(newVal);
-          }
-          break;
-        
-          case (StorageType::Int32):
-          {
-            const int newVal=std::stoi(thisVal.get<std::string>());
-            att.setValue<int>(newVal);
-          }
-          break;
-          case (StorageType::UInt32):
-          {
-            const std::string valString=thisVal.get<std::string>();
-            const unsigned int newVal=std::stoull(valString);
-            att.setValue<unsigned int>(newVal);
-          }
-          break;
-          case (StorageType::UInt63):
-          {
-            const unsigned long long newVal=thisVal;
-            att.setValue<unsigned long long>(newVal);
-          }
-          break;
-          case (StorageType::Int64):
-          {
-            const  long long newVal=std::stoll(thisVal.get<std::string>());
-            att.setValue< long long>(newVal);
-          }
-          break;
-          case (StorageType::Float):
-          {
-            const  float newVal=std::stof(thisVal.get<std::string>());;
-            att.setValue<float>(newVal);
-          }
-          break;
-          case (StorageType::Double):
-          {
-            const  double newVal=std::stod(thisVal.get<std::string>());
-            att.setValue<double>(newVal);
-          }
-          break;
-          
-          case (StorageType::String255):
-          case (StorageType::String4k):
-          case (StorageType::String64k):
-          case (StorageType::String16M):
-          {
-            const  std::string newVal=thisVal;
-            att.setValue<std::string>(newVal);
-          }
-          break;
-          case (StorageType::Blob16M):
-          {
-            const std::string & s = thisVal.get<std::string>();
-            auto blob = base64Decode(s);
-            att.setValue<coral::Blob>(blob);
-          }
-          break;
-          default:
-          //nop
-          std::cout<<"UNTREATED TYPE!"<<std::endl;
-          break;
-        }
-      } catch (json::exception& e){
-        std::cout<<e.what()<<std::endl;
+	
+	cool::StorageType::TypeId typespec = f.storageType().id();
+
+        switch (typespec) {
+	case StorageType::Bool:
+	  {
+	    const bool newVal=(thisVal.get<std::string>() == "true");
+	    att.setValue<bool>(newVal);
+	    break;
+	  }
+	case StorageType::UChar:
+	  {
+	    const unsigned char newVal=std::stoul(thisVal.get<std::string>());
+	    att.setValue<unsigned char>(newVal);
+	    break;
+	  }
+	case StorageType::Int16:
+	  {
+	    const short newVal=std::stol(thisVal.get<std::string>());
+	    att.setValue<short>(newVal);
+	    break;
+	  }
+	case StorageType::UInt16:
+	  {
+	    const unsigned short newVal=std::stoul(thisVal.get<std::string>());
+	    att.setValue<unsigned short>(newVal);
+	    break;
+	  }
+	case StorageType::Int32:
+	  {
+	    const int newVal=std::stoi(thisVal.get<std::string>());
+	    att.setValue<int>(newVal);
+	    break;
+	  }
+	case StorageType::UInt32:
+	  {
+	    const std::string valString=thisVal.get<std::string>();
+	    const unsigned int newVal=std::stoull(valString);
+	    att.setValue<unsigned int>(newVal);
+	    break;
+	  }
+	case StorageType::UInt63:
+	  {
+	    const unsigned long long newVal=thisVal;
+	    att.setValue<unsigned long long>(newVal);
+	    break;
+	  }
+	case StorageType::Int64:
+	  {
+	    const  long long newVal=std::stoll(thisVal.get<std::string>());
+	    att.setValue< long long>(newVal);
+	    break;
+	  }
+	case StorageType::Float:
+	  {
+	    const  float newVal=std::stof(thisVal.get<std::string>());;
+	    att.setValue<float>(newVal);
+	    break;
+	  }
+	case StorageType::Double:
+	  {
+	    const  double newVal=std::stod(thisVal.get<std::string>());
+	    att.setValue<double>(newVal);
+	    break;
+	  }
+	case StorageType::String255:
+	case StorageType::String4k:
+	case StorageType::String64k:
+	case StorageType::String16M:
+	  {
+	    const  std::string newVal=thisVal;
+	    att.setValue<std::string>(newVal);
+	    break;
+	  }
+	case StorageType::Blob16M:
+	case StorageType::Blob64k:
+	  {
+	    const std::string & s = thisVal.get<std::string>();
+	    auto blob = base64Decode(s);
+	    att.setValue<coral::Blob>(blob);
+	    break;
+	  }
+	default:
+	  {
+	    std::string typeName{};
+	    for (auto& [key,val] : typeCorrespondance) {
+	      if(val==typespec) {
+		typeName = key;
+		break;
+	      }
+	    }
+	    if(typeName.empty()) {
+	      typeName = "Unexpected Type";
+	    }
+	    std::string errorMessage("UNTREATED TYPE! " + typeName);
+	    std::cerr << errorMessage << std::endl;
+	    throw std::runtime_error(errorMessage);
+	    break;
+	  }
+	}
+      } 
+      catch (json::exception& e){
+        std::cerr << e.what() << std::endl;
+	throw std::runtime_error(e.what());
       }
     }
     return a;
   }
-
-  
-  
-
 }//end of namespace
 
