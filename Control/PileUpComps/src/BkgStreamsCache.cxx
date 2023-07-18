@@ -7,7 +7,7 @@
 #include <stdexcept>  /*runtime_error*/
 #include <string>
 
-#include "boost/bind/bind.hpp"
+#include <functional>
 #include "AthenaKernel/IAtRndmGenSvc.h"
 
 #include "StoreGate/StoreGateSvc.h" /*to print name() */
@@ -278,15 +278,15 @@ StatusCode BkgStreamsCache::initialize()
   // select collision distribution functions
   if (m_collDistrName.value() == "Fixed")
     {
-      m_f_collDistr = boost::bind(&BkgStreamsCache::collXing, this);
-      using namespace boost::placeholders;
+      m_f_collDistr = std::bind(&BkgStreamsCache::collXing, this);
+      using namespace std::placeholders;
       if(m_ignoreBM.value())
         {
-          m_f_numberOfBackgroundForBunchCrossing = boost::bind(&BkgStreamsCache::numberOfBkgForBunchCrossingIgnoringBeamIntensity, this, _1);
+          m_f_numberOfBackgroundForBunchCrossing = std::bind(&BkgStreamsCache::numberOfBkgForBunchCrossingIgnoringBeamIntensity, this, _1);
         }
       else
         {
-          m_f_numberOfBackgroundForBunchCrossing = boost::bind(&BkgStreamsCache::numberOfCavernBkgForBunchCrossing, this, _1);
+          m_f_numberOfBackgroundForBunchCrossing = std::bind(&BkgStreamsCache::numberOfCavernBkgForBunchCrossing, this, _1);
         }
       return StatusCode::SUCCESS;
     }
@@ -295,15 +295,15 @@ StatusCode BkgStreamsCache::initialize()
       //pass collEng by reference. If Not CLHEP will take ownership...
       m_collXingPoisson = new CLHEP::RandPoisson(*(collEng), m_collXing);
       // m_f_collDistr will call m_collXingPoisson->fire(m_collXing)  USED TO BE boost::bind(&CLHEP::RandPoisson::fire, m_collXingPoisson);
-      m_f_collDistr = boost::bind(&BkgStreamsCache::collXingPoisson, this);
-      using namespace boost::placeholders;
+      m_f_collDistr = std::bind(&BkgStreamsCache::collXingPoisson, this);
+      using namespace std::placeholders;
       if(m_ignoreBM.value())
         {
-          m_f_numberOfBackgroundForBunchCrossing = boost::bind(&BkgStreamsCache::numberOfBkgForBunchCrossingIgnoringBeamIntensity, this, _1);
+          m_f_numberOfBackgroundForBunchCrossing = std::bind(&BkgStreamsCache::numberOfBkgForBunchCrossingIgnoringBeamIntensity, this, _1);
         }
       else
         {
-          m_f_numberOfBackgroundForBunchCrossing = boost::bind(&BkgStreamsCache::numberOfBkgForBunchCrossingDefaultImpl, this, _1);
+          m_f_numberOfBackgroundForBunchCrossing = std::bind(&BkgStreamsCache::numberOfBkgForBunchCrossingDefaultImpl, this, _1);
         }
       return StatusCode::SUCCESS;
     }
