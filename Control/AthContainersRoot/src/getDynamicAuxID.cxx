@@ -95,8 +95,8 @@ SG::auxid_t getDynamicAuxID (const std::type_info& ti,
         void* fac_vp = fac_class->New();
         if (fac_vp) {
           SG::IAuxTypeVectorFactory* fac = reinterpret_cast<SG::IAuxTypeVectorFactory*> (reinterpret_cast<unsigned long>(fac_vp) + offs);
-          r.addFactory (ti, fac);
-          auxid = r.getAuxID(ti, name);
+          r.addFactory (ti, *fac->tiAlloc(), fac);
+          auxid = r.getAuxID(*fac->tiAlloc(), ti, name);
         }
       }
     }
@@ -114,8 +114,8 @@ SG::auxid_t getDynamicAuxID (const std::type_info& ti,
 
     if (vec_class) {
       SG::IAuxTypeVectorFactory* fac = new SG::RootAuxVectorFactory (vec_class);
-      r.addFactory (ti, fac);
-      auxid = r.getAuxID(ti, name);
+      r.addFactory (ti, fac->tiAllocName(), fac);
+      auxid = r.getAuxID(fac->tiAllocName(), ti, name);
     }
   }
 

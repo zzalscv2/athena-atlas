@@ -23,13 +23,19 @@
 namespace SG {
 
 
+/// The default allocator type to use for auxiliary variables.
+template <class T>
+using AuxAllocator_t = std::allocator<T>;
+constexpr const char* auxAllocatorNamePrefix = "std::allocator<";
+
+
 /**
  * @brief Allow customizing how aux data types are treated.
  *
  * @c T here is the type that the user requests, eg in the template
  * argument of a decorator.
  */
-template <class T, class ALLOC = std::allocator<T> >
+template <class T, class ALLOC = AuxAllocator_t<T> >
 class AuxDataTraits
 {
 public:

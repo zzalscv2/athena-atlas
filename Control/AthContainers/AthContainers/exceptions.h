@@ -1,5 +1,4 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
@@ -137,10 +136,14 @@ public:
    * @param auxid ID of the requested aux data item.
    * @param new_type New type requested for the item.
    * @param old_type Previous type associated with the item.
+   * @param new_alloc_type New allocator type requested for this item.
+   * @param old_alloc_type Previous allocator type associated with this item.
    */
   ExcAuxTypeMismatch (SG::auxid_t auxid,
                       const std::type_info& new_type,
-                      const std::type_info& old_type);
+                      const std::type_info& old_type,
+                      const std::string& new_alloc_type,
+                      const std::string& old_alloc_type);
 };
 
 

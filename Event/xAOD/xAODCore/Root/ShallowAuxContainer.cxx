@@ -287,9 +287,17 @@ namespace xAOD {
          throw std::runtime_error( message.str() );
       }
 
+      // And the allocator type for this variable.
+      const std::type_info* allocType = reg.getAllocType( auxid );
+      if( allocType == nullptr ) {
+         std::ostringstream message;
+         message << "Couldn't find the allocator type of auxiliary ID " << auxid;
+         throw std::runtime_error( message.str() );
+      }
+
       // Get the vector factory of this variable.
       const SG::IAuxTypeVectorFactory* factory =
-         SG::AuxTypeRegistry::instance().getFactory( *type );
+         SG::AuxTypeRegistry::instance().getFactory( *type, *allocType );
       if( factory == nullptr ) {
          std::ostringstream message;
          message << "Couldn't find a factory for type " << type->name();
@@ -397,9 +405,17 @@ namespace xAOD {
          throw std::runtime_error( message.str() );
       }
 
+      // And the allocator type for this variable.
+      const std::type_info* allocType = reg.getAllocType( auxid );
+      if( allocType == nullptr ) {
+         std::ostringstream message;
+         message << "Couldn't find the allocator type of auxiliary ID " << auxid;
+         throw std::runtime_error( message.str() );
+      }
+
       // First let's get the vector factory of this variable:
       const SG::IAuxTypeVectorFactory* factory =
-         SG::AuxTypeRegistry::instance().getFactory( *type );
+        SG::AuxTypeRegistry::instance().getFactory( *type, *allocType );
       if( factory == nullptr ) {
          std::ostringstream message;
          message << "Couldn't find a factory for type " << type->name();

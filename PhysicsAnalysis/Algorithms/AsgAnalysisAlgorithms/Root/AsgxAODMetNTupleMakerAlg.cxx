@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s):
 #include "AsgAnalysisAlgorithms/AsgxAODMetNTupleMakerAlg.h"
@@ -423,7 +423,7 @@ namespace CP {
              << auxName << endmsg;
          return StatusCode::FAILURE;
       }
-      m_factory = reg.getFactory( *ti );
+      m_factory = reg.getFactory( m_acc->auxid() );
       if( ! m_factory ) {
          msg << MSG::ERROR << "No factory found for auxiliary variable: "
              << auxName << endmsg;

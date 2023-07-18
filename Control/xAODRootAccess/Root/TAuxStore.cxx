@@ -1169,7 +1169,7 @@ namespace xAOD {
          }
          // Now get the factory for this variable:
          const SG::IAuxTypeVectorFactory* factory =
-            reg.getFactory( *type );
+            reg.getFactory( auxid );
          if( ! factory ) {
             ::Error( "xAOD::TAuxStore::setupOutputData",
                      XAOD_MESSAGE( "No factory found for transient variable "
@@ -1600,7 +1600,7 @@ namespace xAOD {
                         reinterpret_cast< unsigned long >( fac_vp ) + offs;
                      SG::IAuxTypeVectorFactory* fac =
                         reinterpret_cast< SG::IAuxTypeVectorFactory* >( tmp );
-                     registry.addFactory( *ti, fac );
+                     registry.addFactory( *ti, *fac->tiAlloc(), fac );
                      auxid = registry.getAuxID( *ti, auxName, "",
                                                 SG::AuxTypeRegistry::SkipNameCheck );
                   }
@@ -1624,7 +1624,12 @@ namespace xAOD {
          ::TClass* vec_class = ::TClass::GetClass( vec_class_name.c_str() );
          if( vec_class && vec_class->IsLoaded() ) {
             SG::IAuxTypeVectorFactory* fac = new TAuxVectorFactory( vec_class );
-            registry.addFactory( *ti, fac );
+            if (fac->tiAlloc()) {
+              registry.addFactory( *ti, *fac->tiAlloc(), fac );
+            }
+            else {
+              registry.addFactory( *ti, fac->tiAllocName(), fac );
+            }
             auxid = registry.getAuxID( *ti, auxName, "",
                                        SG::AuxTypeRegistry::SkipNameCheck );
          } else {

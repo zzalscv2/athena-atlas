@@ -12,13 +12,36 @@
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/exceptions.h"
 #include "AthContainers/normalizedTypeinfoName.h"
+#include "AthContainers/tools/error.h"
 #include "CxxUtils/checker_macros.h"
+#include "boost/algorithm/string/predicate.hpp"
 #include <cassert>
 #include <sstream>
 #include <cstring>
 
 
 namespace SG {
+
+
+/**
+ * @brief Check that the allocator type for this entry matches
+ *        the requested type.
+ */
+bool AuxTypeRegistry::typeinfo_t::checkAlloc (const std::type_info* ti_alloc,
+                                              const std::string* alloc_name) const
+{
+  if (ti_alloc && m_ti_alloc) {
+    if (ti_alloc == m_ti_alloc) return true;
+    return strcmp (ti_alloc->name(), m_ti_alloc->name()) == 0;
+  }
+  if (alloc_name) {
+    return *alloc_name == m_alloc_name;
+  }
+  if (ti_alloc) {
+    return SG::normalizedTypeinfoName (*ti_alloc) == m_alloc_name;
+  }
+  return true;
+}
 
 
 /**
@@ -60,7 +83,58 @@ SG::auxid_t AuxTypeRegistry::getAuxID (const std::type_info& ti,
                                        const std::string& clsname /*= ""*/,
                                        const Flags flags /*= Flags::None*/)
 {
-  return findAuxID (name, clsname, flags, ti, &AuxTypeRegistry::makeFactoryNull);
+  return findAuxID (name, clsname, flags, ti, nullptr, nullptr,
+                    &AuxTypeRegistry::makeFactoryNull);
+}
+
+
+/**
+ * @brief Look up a name -> @c auxid_t mapping, specifying allocator.
+ * @param ti_alloc Type of the vector allocator.
+ * @param ti Type of the aux data item.
+ * @param name The name of the aux data item.
+ * @param clsname The name of its associated class.  May be blank.
+ * @param flags Optional flags qualifying the type.  See above.
+ *
+ * The type of the item is given by @a ti.
+ * Return @c null_auxid if we don't know how to make vectors of @a ti.
+ * (Use @c addFactory to register additional types.)
+ * If an item with the same name was previously requested
+ * with a different type, then raise @c SG::ExcAuxTypeMismatch.
+ */
+SG::auxid_t AuxTypeRegistry::getAuxID (const std::type_info& ti_alloc,
+                                       const std::type_info& ti,
+                                       const std::string& name,
+                                       const std::string& clsname /*= ""*/,
+                                       const Flags flags /*= Flags::None*/)
+{
+  return findAuxID (name, clsname, flags, ti, &ti_alloc, nullptr,
+                    &AuxTypeRegistry::makeFactoryNull);
+}
+
+
+/**
+ * @brief Look up a name -> @c auxid_t mapping, specifying allocator.
+ * @param alloc_name Name of the vector allocator type.
+ * @param ti Type of the aux data item.
+ * @param name The name of the aux data item.
+ * @param clsname The name of its associated class.  May be blank.
+ * @param flags Optional flags qualifying the type.  See above.
+ *
+ * The type of the item is given by @a ti.
+ * Return @c null_auxid if we don't know how to make vectors of @a ti.
+ * (Use @c addFactory to register additional types.)
+ * If an item with the same name was previously requested
+ * with a different type, then raise @c SG::ExcAuxTypeMismatch.
+ */
+SG::auxid_t AuxTypeRegistry::getAuxID (const std::string& alloc_type,
+                                       const std::type_info& ti,
+                                       const std::string& name,
+                                       const std::string& clsname /*= ""*/,
+                                       const Flags flags /*= Flags::None*/)
+{
+  return findAuxID (name, clsname, flags, ti, nullptr, &alloc_type,
+                    &AuxTypeRegistry::makeFactoryNull);
 }
 
 
@@ -229,6 +303,18 @@ std::string AuxTypeRegistry::getVecTypeName (SG::auxid_t auxid) const
 
 
 /**
+ * @brief Return the type of the vector allocator.
+ * @param auxid The desired aux data item.
+ */
+const std::type_info* AuxTypeRegistry::getAllocType (SG::auxid_t auxid) const
+{
+  if (auxid >= m_types.size())
+    return 0;
+  return m_types[auxid].m_ti_alloc;
+}
+
+
+/**
  * @brief Return size of an element in the STL vector.
  * @param auxid The desired aux data item.
  */
@@ -320,16 +406,69 @@ void AuxTypeRegistry::clear (SG::auxid_t auxid, void* dst, size_t dst_index)
 /**
  * @brief Return the vector factory for a given vector element type.
  * @param ti The type of the vector element.
+ * @param ti_alloc The type of the vector allocator
  *
  * Returns nullptr if the type is not known.
  * (Use @c addFactory to add new mappings.)
  */
 const IAuxTypeVectorFactory*
-AuxTypeRegistry::getFactory (const std::type_info& ti) const
+AuxTypeRegistry::getFactory (const std::type_info& ti,
+                             const std::type_info& ti_alloc)
 {
-  ti_map_t::const_iterator it = m_factories.find (ti.name());
+  lock_t lock (m_mutex);
+  return getFactory (lock, ti, ti_alloc);
+}
+
+
+/**
+ * @brief Return the vector factory for a given vector element type.
+ *        (External locking.)
+ * @param lock The registry lock.
+ * @param ti The type of the vector element.
+ * @param ti_alloc The type of the vector allocator
+ *
+ * Returns nullptr if the type is not known.
+ * (Use @c addFactory to add new mappings.)
+ */
+const IAuxTypeVectorFactory*
+AuxTypeRegistry::getFactory (lock_t& lock,
+                             const std::type_info& ti,
+                             const std::type_info& ti_alloc)
+{
+  std::string key = std::string (ti.name()) + ";TI;" + ti_alloc.name();
+  ti_map_t::const_iterator it = m_factories.find (key);
   if (it != m_factories.end())
     return it->second;
+
+  std::string name = SG::normalizedTypeinfoName (ti_alloc);
+  const IAuxTypeVectorFactory* fac = getFactory (ti, name);
+  if (fac) {
+    // We only really need to be holding the lock here, but doing things
+    // otherwise would require some code duplication.
+    addFactory (lock, ti, ti_alloc, fac);
+  }
+  return fac;
+}
+
+
+/**
+ * @brief Return the vector factory for a given vector element type.
+ * @param ti The type of the vector element.
+ * @param alloc_name The name of the vector allocator type.
+ *
+ * Returns nullptr if the type is not known.
+ * (Use @c addFactory to add new mappings.)
+ */
+const IAuxTypeVectorFactory*
+AuxTypeRegistry::getFactory (const std::type_info& ti,
+                             const std::string& alloc_name)
+{
+  std::string key = std::string (ti.name()) + ";" + alloc_name;
+  ti_map_t::const_iterator it = m_factories.find (key);
+  if (it != m_factories.end()) {
+    return it->second;
+  }
+
   return nullptr;
 }
 
@@ -337,6 +476,7 @@ AuxTypeRegistry::getFactory (const std::type_info& ti) const
 /**
  * @brief Add a new type -> factory mapping.
  * @param ti Type of the vector element.
+ * @param ti_alloc The type of the vector allocator
  * @param factory The factory instance.  The registry will take ownership.
  *
  * This records that @c factory can be used to construct vectors with
@@ -344,11 +484,36 @@ AuxTypeRegistry::getFactory (const std::type_info& ti) const
  * factory is discarded, unless the old one is a dynamic factory and
  * the new one isn't, in which case the new replaces the old one.
  */
-void AuxTypeRegistry::addFactory (const std::type_info& ti,
-                                  IAuxTypeVectorFactory* factory)
+const IAuxTypeVectorFactory*
+AuxTypeRegistry::addFactory (const std::type_info& ti,
+                             const std::type_info& ti_alloc,
+                             const IAuxTypeVectorFactory* factory)
 {
   lock_t lock (m_mutex);
-  return addFactory (lock, ti, factory);
+  std::string name = SG::normalizedTypeinfoName (ti_alloc);
+  factory = addFactory (lock, ti, name, factory);
+  return addFactory (lock, ti, ti_alloc, factory);
+}
+
+
+/**
+ * @brief Add a new type -> factory mapping.
+ * @param ti Type of the vector element.
+ * @param ti_alloc_name The name of the vector allocator type.
+ * @param factory The factory instance.  The registry will take ownership.
+ *
+ * This records that @c factory can be used to construct vectors with
+ * an element type of @c ti.  If a mapping already exists, the new
+ * factory is discarded, unless the old one is a dynamic factory and
+ * the new one isn't, in which case the new replaces the old one.
+ */
+const IAuxTypeVectorFactory*
+AuxTypeRegistry::addFactory (const std::type_info& ti,
+                             const std::string& ti_alloc_name,
+                             const IAuxTypeVectorFactory* factory)
+{
+  lock_t lock (m_mutex);
+  return addFactory (lock, ti, ti_alloc_name, factory);
 }
 
 
@@ -356,6 +521,50 @@ void AuxTypeRegistry::addFactory (const std::type_info& ti,
  * @brief Add a new type -> factory mapping.  (external locking)
  * @param lock The registry lock.
  * @param ti Type of the vector element.
+ * @param ti_alloc The type of the vector allocator
+ * @param factory The factory instance.
+ *
+ * This records that @c factory can be used to construct vectors with
+ * an element type of @c ti.  If a mapping already exists, the new
+ * factory is discarded, unless the old one is a dynamic factory and
+ * the new one isn't, in which case the new replaces the old one.
+ */
+const IAuxTypeVectorFactory*
+AuxTypeRegistry::addFactory (lock_t& /*lock*/,
+                             const std::type_info& ti,
+                             const std::type_info& ti_alloc,
+                             const IAuxTypeVectorFactory* factory)
+{
+  std::string key = std::string (ti.name()) + ";TI;" + ti_alloc.name();
+  ti_map_t::const_iterator it = m_factories.find (key);
+  if (it != m_factories.end()) {
+    if (it->second->isDynamic() && !factory->isDynamic()) {
+      // Replacing a dynamic factory with a non-dynamic one.
+      // The string version should put it to m_oldFactories.
+      m_factories.insert_or_assign (key, factory);
+    }
+    else {
+      factory = it->second;
+    }
+  }
+  else
+    m_factories.insert_or_assign (key, factory);
+
+  if (boost::starts_with (SG::normalizedTypeinfoName (ti_alloc),
+                          SG::auxAllocatorNamePrefix))
+  {
+    m_allocMap.insert_or_assign (ti.name(), &ti_alloc);
+  }
+
+  return factory;
+}
+
+
+/**
+ * @brief Add a new type -> factory mapping.  (external locking)
+ * @param lock The registry lock.
+ * @param ti Type of the vector element.
+ * @param ti_alloc_name The name of the vector allocator type.
  * @param factory The factory instance.  The registry will take ownership.
  *
  * This records that @c factory can be used to construct vectors with
@@ -363,11 +572,14 @@ void AuxTypeRegistry::addFactory (const std::type_info& ti,
  * factory is discarded, unless the old one is a dynamic factory and
  * the new one isn't, in which case the new replaces the old one.
  */
-void AuxTypeRegistry::addFactory (lock_t& /*lock*/,
-                                  const std::type_info& ti,
-                                  IAuxTypeVectorFactory* factory)
+const IAuxTypeVectorFactory*
+AuxTypeRegistry::addFactory (lock_t& /*lock*/,
+                             const std::type_info& ti,
+                             const std::string& ti_alloc_name,
+                             const IAuxTypeVectorFactory* factory)
 {
-  ti_map_t::const_iterator it = m_factories.find (ti.name());
+  std::string key = std::string (ti.name()) + ";" + ti_alloc_name;
+  ti_map_t::const_iterator it = m_factories.find (key);
   if (it != m_factories.end()) {
     if (it->second->isDynamic() && !factory->isDynamic()) {
       // Replacing a dynamic factory with a non-dynamic one.
@@ -375,13 +587,17 @@ void AuxTypeRegistry::addFactory (lock_t& /*lock*/,
       // Instead, push it on a vector to remember it so we can delete
       // it later.
       m_oldFactories.push_back (it->second);
-      m_factories.insert_or_assign (ti.name(), factory);
+      m_factories.insert_or_assign (key, factory);
     }
-    else
+    else {
       delete factory;
+      factory = it->second;
+    }
   }
   else
-    m_factories.insert_or_assign (ti.name(), factory);
+    m_factories.insert_or_assign (key, factory);
+
+  return factory;
 }
 
 
@@ -392,12 +608,13 @@ void AuxTypeRegistry::addFactory (lock_t& /*lock*/,
  */
 AuxTypeRegistry::AuxTypeRegistry()
   : m_auxids (id_map_t::Updater_t()),
-    m_factories (ti_map_t::Updater_t())
+    m_factories (ti_map_t::Updater_t()),
+    m_allocMap (allocMap_t::Updater_t())
 {
   m_types.reserve (auxid_set_size_hint);
 
   // Make sure we have factories registered for common C++ types.
-#define ADD_FACTORY(T) addFactory(typeid(T), new AuxTypeVectorFactory<T>)
+#define ADD_FACTORY(T) addFactory(typeid(T), typeid(AuxAllocator_t<T>), new AuxTypeVectorFactory<T>)
   ADD_FACTORY (bool);
   ADD_FACTORY (char);
   ADD_FACTORY (unsigned char);
@@ -431,8 +648,11 @@ AuxTypeRegistry::AuxTypeRegistry()
 AuxTypeRegistry::~AuxTypeRegistry()
 {
   // not using reference, because our iterator doesn't return a reference
-  for (auto p : m_factories)
-    delete p.second;
+  for (auto p : m_factories) {
+    if (p.first.find (";TI;") == std::string::npos) {
+      delete p.second;
+    }
+  }
   for (const IAuxTypeVectorFactory* p : m_oldFactories)
     delete p;
 }
@@ -444,6 +664,9 @@ AuxTypeRegistry::~AuxTypeRegistry()
  * @param clsname The name of its associated class.  May be blank.
  * @param flags Optional flags qualifying the type.  See above.
  * @param ti The type of this aux data item.
+ * @param ti_alloc The type of the vector allocator.
+ * @param alloc_name The name of the vector allocator.
+ *                   Used only if ti_alloc is null.
  * @param makeFactory Function to create a factory for this type, if needed.
  *                    May return 0 if the type is unknown.
  *
@@ -463,6 +686,8 @@ AuxTypeRegistry::findAuxID (const std::string& name,
                             const std::string& clsname,
                             const Flags flags,
                             const std::type_info& ti,
+                            const std::type_info* ti_alloc,
+                            const std::string* alloc_name,
                             IAuxTypeVectorFactory* (AuxTypeRegistry::*makeFactory) () const)
 {
 
@@ -479,6 +704,7 @@ AuxTypeRegistry::findAuxID (const std::string& name,
       if (!(CxxUtils::test (m.m_flags, Flags::Atomic) &&
             !CxxUtils::test (flags, Flags::Atomic)) &&
           (&ti == m.m_ti || strcmp(ti.name(), m.m_ti->name()) == 0) &&
+          m.checkAlloc (ti_alloc, alloc_name) &&
           !(*m.m_factory).isDynamic())
       {
         return i->second;
@@ -506,19 +732,30 @@ AuxTypeRegistry::findAuxID (const std::string& name,
     // not clear that it's feasible to actually eliminate the possibility
     // of this happening.  So if the @c type_info instances differ,
     // we still accept the match as long as the names are the same.
-    if (&ti == m.m_ti || strcmp(ti.name(), m.m_ti->name()) == 0) {
+    if ((&ti == m.m_ti || strcmp(ti.name(), m.m_ti->name()) == 0) &&
+        m.checkAlloc (ti_alloc, alloc_name))
+    {
       // Try to upgrade a dynamic factory.
       if ((*m.m_factory).isDynamic()) {
         IAuxTypeVectorFactory* fac2 = (*this.*makeFactory)();
         if (fac2) {
-          addFactory (lock, ti, fac2);
-          m.m_factory = getFactory (ti);
+          if (!ti_alloc) {
+            ti_alloc = fac2->tiAlloc();
+          }
+          if (ti_alloc) {
+            m.m_factory = addFactory (lock, ti, *ti_alloc, fac2);
+          }
+          else {
+            m.m_factory = addFactory (lock, ti, fac2->tiAllocName(), fac2);
+          }
         }
       }
       return i->second;
     }
     if( *m.m_ti != typeid(SG::AuxTypePlaceholder) ) {
-       throw SG::ExcAuxTypeMismatch (i->second, ti, *m.m_ti);
+      throw SG::ExcAuxTypeMismatch (i->second, ti, *m.m_ti,
+                                    ti_alloc ? SG::normalizedTypeinfoName (*ti_alloc) : (alloc_name ? *alloc_name : ""),
+                                    m.m_alloc_name);
     }
     // fall through, get a new auxid and real type info
     // new auxid needed so a new data vector is created in the AuxStore
@@ -532,21 +769,44 @@ AuxTypeRegistry::findAuxID (const std::string& name,
     throw ExcBadVarName (key);
   }
 
-  const IAuxTypeVectorFactory* fac = getFactory (ti);
+  const IAuxTypeVectorFactory* fac = nullptr;
+  if (ti_alloc) {
+    fac = getFactory (lock, ti, *ti_alloc);
+  }
+  else if (alloc_name) {
+    fac = getFactory (ti, *alloc_name);
+  }
+  else {
+    std::string def_alloc_name = SG::auxAllocatorNamePrefix + SG::normalizedTypeinfoName (ti);
+    if (def_alloc_name[def_alloc_name.size()-1] == '>') def_alloc_name += " ";
+    def_alloc_name += ">";
+    fac = getFactory (ti,def_alloc_name);
+  }
+
   if (!fac || fac->isDynamic()) {
     IAuxTypeVectorFactory* fac2 = (*this.*makeFactory)();
     if (fac2) {
-      addFactory (lock, ti, fac2);
-      fac = getFactory (ti);
+      if (!ti_alloc) {
+        ti_alloc = fac2->tiAlloc();
+      }
+      if (ti_alloc) {
+        fac = addFactory (lock, ti, *ti_alloc, fac2);
+      }
+      else {
+        fac = addFactory (lock, ti, fac2->tiAllocName(), fac2);
+      }
     }
   }
   if (!fac) return null_auxid;
+  if (!ti_alloc) ti_alloc = fac->tiAlloc();
   SG::auxid_t auxid = m_types.size();
   m_types.resize (auxid+1);
   typeinfo_t& t = m_types[auxid];
   t.m_name = name;
   t.m_clsname = clsname;
   t.m_ti = &ti;
+  t.m_ti_alloc = ti_alloc;
+  t.m_alloc_name = fac->tiAllocName();
   t.m_factory = fac;
   t.m_flags = (flags & ~Flags::SkipNameCheck);
   AthContainers_detail::fence_seq_cst();

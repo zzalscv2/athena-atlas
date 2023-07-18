@@ -258,21 +258,22 @@ void test_factories()
   std::cout << "test_factories\n";
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
-  const SG::IAuxTypeVectorFactory* fac = r.getFactory (typeid(char));
+  const SG::IAuxTypeVectorFactory* fac = r.getFactory (typeid(char),
+                                                       typeid(std::allocator<char>));
   assert (fac->getEltSize() == sizeof(char));
   assert (fac->tiVec() == &typeid(std::vector<char>));
 
-  assert (r.getFactory (typeid (FacTest1)) == 0);
+  assert (r.getFactory (typeid (FacTest1), typeid (std::allocator<FacTest1>)) == 0);
 
   SG::IAuxTypeVectorFactory* fac1 = new FacTest1DynFac;
-  r.addFactory (typeid (FacTest1), fac1);
-  assert (r.getFactory (typeid (FacTest1)) == fac1);
+  r.addFactory (typeid (FacTest1), typeid (std::allocator<FacTest1>), fac1);
+  assert (r.getFactory (typeid (FacTest1), typeid (std::allocator<FacTest1>)) == fac1);
   SG::IAuxTypeVectorFactory* fac2 = new SG::AuxTypeVectorFactory<FacTest1>;
-  r.addFactory (typeid (FacTest1), fac2);
-  assert (r.getFactory (typeid (FacTest1)) == fac2);
+  r.addFactory (typeid (FacTest1), typeid (std::allocator<FacTest1>), fac2);
+  assert (r.getFactory (typeid (FacTest1), typeid(std::allocator<FacTest1>)) == fac2);
   SG::IAuxTypeVectorFactory* fac3 = new SG::AuxTypeVectorFactory<FacTest1>;
-  r.addFactory (typeid (FacTest1), fac3);
-  assert (r.getFactory (typeid (FacTest1)) == fac2);
+  r.addFactory (typeid (FacTest1), typeid (std::allocator<FacTest1>), fac3);
+  assert (r.getFactory (typeid (FacTest1), typeid (std::allocator<FacTest1>)) == fac2);
 }
 
 
@@ -299,7 +300,7 @@ void test_get_by_ti()
   assert (r.getTypeName (auxid) == "short");
 
   assert (r.getAuxID (typeid(FacTest3), "aTest3") == SG::null_auxid);
-  r.addFactory (typeid(FacTest3), new SG::AuxTypeVectorFactory<FacTest3>);
+  r.addFactory (typeid(FacTest3), typeid(std::allocator<FacTest3>), new SG::AuxTypeVectorFactory<FacTest3>);
   auxid = r.getAuxID (typeid(FacTest3), "aTest3");
   assert (auxid != SG::null_auxid);
   assert (r.getType (auxid) == &typeid(FacTest3));
