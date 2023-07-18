@@ -120,7 +120,7 @@ void DerivationFramework::TruthIsolationTool::calcIsos(const xAOD::TruthParticle
         //skip if we find a particle in the exclude list
         continue;
       }
-      if (!m_includeNonInteracting && MC::isNonInteracting(cand_part->pdgId())){
+      if (!m_includeNonInteracting && !MC::isInteracting(cand_part->pdgId())){
         // Do not include non-interacting particles, and this particle is non-interacting
         continue;
       }

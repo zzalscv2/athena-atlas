@@ -2120,7 +2120,7 @@ FastShowerCellBuilderTool::process (CaloCellContainer* theCellContainer,
         }
 #endif
     }
-  auto last_good = std::remove_if(particles.begin(), particles.end(),[](auto & part) { return MC::FastCaloSimIsGenSimulStable(part) == false; });
+  auto last_good = std::remove_if(particles.begin(), particles.end(),[](auto & part) { return MC::isStableOrSimDecayed(part) == false; });
   particles.erase(last_good, particles.end());
 
 
@@ -2157,7 +2157,7 @@ FastShowerCellBuilderTool::process (CaloCellContainer* theCellContainer,
         break;
       }
       if(m_invisibles[i]==0) {
-        if(MC::isNonInteracting(par->pdg_id())) {
+        if(!MC::isInteracting(par->pdg_id())) {
           do_simul_state[barcodepar]=invisibleTruthHelper;
           break;
         }
