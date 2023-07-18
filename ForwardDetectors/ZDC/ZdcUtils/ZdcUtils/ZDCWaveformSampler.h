@@ -23,29 +23,25 @@
 
 class ZDCWaveformSampler
 {
-  float m_freqMHz;
   float m_timeMin;
   unsigned int m_numSamples;
-  unsigned int m_numBits;
   unsigned int m_pedestal;
   unsigned int m_numChannels;
-  
+
   float m_deltaT;
   float m_maxADC;
 
   bool m_haveDefaultT0;
   float m_defaultT0;
-  
+
   std::vector<std::shared_ptr<ZDCWaveformBase> > m_waveformChanPtrs;
-  
+
 public:
-  
+
   ZDCWaveformSampler(float freqMHz, float timeMin, unsigned int numSamples, unsigned int nBits, unsigned int pedestal,
 		     std::shared_ptr<ZDCWaveformBase> waveformPtr) :
-    m_freqMHz(freqMHz),
     m_timeMin(timeMin),
     m_numSamples(numSamples),
-    m_numBits(nBits),
     m_pedestal(pedestal),
     m_numChannels(1),
     m_deltaT(1000./freqMHz),
@@ -57,10 +53,8 @@ public:
 
   ZDCWaveformSampler(float freqMHz, float timeMin, unsigned int numSamples, unsigned int nBits, unsigned int pedestal,
 		     std::vector<std::shared_ptr<ZDCWaveformBase> > waveformPtrVec) :
-    m_freqMHz(freqMHz),
     m_timeMin(timeMin),
     m_numSamples(numSamples),
-    m_numBits(nBits),
     m_pedestal(pedestal),
     m_numChannels(waveformPtrVec.size()),
     m_deltaT(1000./freqMHz),
@@ -74,14 +68,14 @@ public:
     m_haveDefaultT0 = true;
     m_defaultT0 = T0;
   }
-  
+
   std::vector<unsigned int> Generate(float amplitude)
   {
     if (m_numChannels != 1) throw std::runtime_error("ZDCWaveformSampler::Generate called with one parameter on an object with multiple channels.");
     if (!m_haveDefaultT0) throw std::runtime_error("ZDCWaveformSampler::Generate called with no default t0.");
     return Generate(amplitude, m_defaultT0);
   }
-  
+
   std::vector<unsigned int> Generate(float amplitude, float T0)
   {
     if (m_numChannels != 1) throw std::runtime_error("ZDCWaveformSampler::Generate called with one parameter on an object with multiple channels.");
