@@ -137,10 +137,11 @@ bool LVL1::jFEXSmallRJetAlgo::CalculateLM(int mymatrix[5][5]) {
 //check if central TT is a local maxima
 bool LVL1::jFEXSmallRJetAlgo::isSeedLocalMaxima() {
     
+    bool isCentralLM   = CalculateLM(m_jFEXalgoSearchWindowSeedET) && 
+    ( getTTowerET(m_jFEXalgoTowerID[3][3]) >= getTTowerET(m_jFEXalgoTowerID[4][2]) || m_jFEXalgoSearchWindowSeedET[2][2] > m_jFEXalgoSearchWindowSeedET[3][1]);
     
-    bool isCentralLM   = CalculateLM(m_jFEXalgoSearchWindowSeedET) && (getTTowerET(m_jFEXalgoTowerID[3][3]) >= getTTowerET(m_jFEXalgoTowerID[4][2])) && m_jFEXalgoSearchWindowSeedET[2][2] > m_jFEXalgoSearchWindowSeedET_displaced[3][3];
-    
-    bool isDisplacedLM = CalculateLM(m_jFEXalgoSearchWindowSeedET_displaced) && (getTTowerET(m_jFEXalgoTowerID[3][3]) >  getTTowerET(m_jFEXalgoTowerID[2][4])) && m_jFEXalgoSearchWindowSeedET[2][2] == m_jFEXalgoSearchWindowSeedET_displaced[2][2];
+    bool isDisplacedLM = CalculateLM(m_jFEXalgoSearchWindowSeedET_displaced) && 
+    ( getTTowerET(m_jFEXalgoTowerID[3][3]) > getTTowerET(m_jFEXalgoTowerID[2][4]) && m_jFEXalgoSearchWindowSeedET[2][2] == m_jFEXalgoSearchWindowSeedET[1][3]);
     
     if(isCentralLM || isDisplacedLM){
         return true;
