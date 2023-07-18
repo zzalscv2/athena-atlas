@@ -35,7 +35,7 @@ namespace Ringer{
       size_t num_input_nodes = m_session->GetInputCount();
       
       for( std::size_t i = 0; i < num_input_nodes; i++ ) {
-        char* input_name = m_session->GetInputName(i, allocator);
+        char* input_name = m_session->GetInputNameAllocated(i, allocator).release();
         m_input_node_names.push_back(input_name);
         Ort::TypeInfo type_info = m_session->GetInputTypeInfo(i);
         auto tensor_info = type_info.GetTensorTypeAndShapeInfo();
@@ -51,7 +51,7 @@ namespace Ringer{
       // Always have only one output
       size_t num_output_nodes = m_session->GetOutputCount();      
       for( std::size_t i = 0; i < num_output_nodes; i++ ) {
-        char* output_name = m_session->GetOutputName(i, allocator);
+        char* output_name = m_session->GetOutputNameAllocated(i, allocator).release();
         m_output_node_names.push_back(output_name);
       }
 

@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #ifndef ONNX_UTILS_H
 #define ONNX_UTILS_H
 
@@ -90,13 +90,12 @@ namespace AthONNX {
     std::vector<const char*> input_node_names(num_input_nodes);
     Ort::AllocatorWithDefaultOptions allocator;
     for( std::size_t i = 0; i < num_input_nodes; i++ ) {
-     
-        char* input_name = session->GetInputName(i, allocator);
+        char* input_name = session->GetInputNameAllocated(i, allocator).release();
         input_node_names[i] = input_name;
         Ort::TypeInfo type_info = session->GetInputTypeInfo(i);
         auto tensor_info = type_info.GetTensorTypeAndShapeInfo();
    
-        input_node_dims = tensor_info.GetShape();  
+        input_node_dims = tensor_info.GetShape();
      }
      return std::make_tuple(input_node_dims, input_node_names); 
   }
@@ -113,7 +112,7 @@ namespace AthONNX {
      Ort::AllocatorWithDefaultOptions allocator;
 
       for( std::size_t i = 0; i < num_output_nodes; i++ ) {
-        char* output_name = session->GetOutputName(i, allocator);
+        char* output_name = session->GetOutputNameAllocated(i, allocator).release();
         output_node_names[i] = output_name;
 
         Ort::TypeInfo type_info = session->GetOutputTypeInfo(i);

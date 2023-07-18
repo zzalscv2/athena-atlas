@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloMuonScoreTool.h"
@@ -61,7 +61,7 @@ StatusCode CaloMuonScoreTool::initialize() {
 
     for (std::size_t i = 0; i < num_input_nodes; i++) {
         // print input node names
-        char *input_name = m_session->GetInputName(i, allocator);
+        char* input_name = m_session->GetInputNameAllocated(i, allocator).release();
         ATH_MSG_INFO("Input " << i << " : "
                               << " name= " << input_name);
         m_input_node_names[i] = input_name;
@@ -89,7 +89,7 @@ StatusCode CaloMuonScoreTool::initialize() {
 
     for (std::size_t i = 0; i < num_output_nodes; i++) {
         // print output node names
-        char *output_name = m_session->GetOutputName(i, allocator);
+        char* output_name = m_session->GetOutputNameAllocated(i, allocator).release();
         ATH_MSG_INFO("Output " << i << " : "
                                << " name= " << output_name);
         m_output_node_names[i] = output_name;

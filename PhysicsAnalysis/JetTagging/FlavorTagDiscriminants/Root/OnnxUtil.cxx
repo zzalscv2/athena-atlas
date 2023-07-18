@@ -53,9 +53,9 @@ namespace FlavorTagDiscriminants {
 
     // iterate over all input nodes
     for (std::size_t i = 0; i < num_input_nodes; i++) {
-      char* input_name = m_session->GetInputName(i, allocator);
+      char* input_name = m_session->GetInputNameAllocated(i, allocator).release();
       m_input_node_names.push_back(std::string(input_name));
-    }
+     }
 
     // get the output nodes
     size_t num_output_nodes = m_session->GetOutputCount();
@@ -63,7 +63,7 @@ namespace FlavorTagDiscriminants {
 
     // iterate over all output nodes
     for(std::size_t i = 0; i < num_output_nodes; i++ ) {
-      char* output_name = m_session->GetOutputName(i, allocator);
+      char* output_name = m_session->GetOutputNameAllocated(i, allocator).release();
       ONNXOutputNode output_node;
       output_node.name = std::string(output_name);
       output_node.name_in_model = output_node.name;
@@ -89,7 +89,7 @@ namespace FlavorTagDiscriminants {
 
     Ort::AllocatorWithDefaultOptions allocator;
     Ort::ModelMetadata metadata = m_session->GetModelMetadata();
-    std::string val = metadata.LookupCustomMetadataMap(key.c_str(), allocator);
+    std::string val = metadata.LookupCustomMetadataMapAllocated(key.c_str(), allocator).release();
     return val;
   }
 

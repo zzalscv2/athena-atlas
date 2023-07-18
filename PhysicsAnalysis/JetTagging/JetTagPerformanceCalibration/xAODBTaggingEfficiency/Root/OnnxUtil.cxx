@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <fstream>
@@ -35,7 +35,7 @@ void OnnxUtil::initialize(){
     
 	// iterate over all input nodes
 	for (std::size_t i = 0; i < num_input_nodes; i++) {
-		char* input_name = m_session->GetInputName(i, allocator);
+    char* input_name = m_session->GetInputNameAllocated(i, allocator).release();
 		m_input_node_names.push_back(std::string(input_name));
 	}
 
@@ -45,8 +45,8 @@ void OnnxUtil::initialize(){
 
 	// iterate over all output nodes
 	for(std::size_t i = 0; i < num_output_nodes; i++ ) {
-		char* output_name = m_session->GetOutputName(i, allocator);
-		m_output_node_names.push_back(std::string(output_name));
+        char* output_name = m_session->GetOutputNameAllocated(i, allocator).release();
+		    m_output_node_names.push_back(std::string(output_name));
     
         // get output node types
         Ort::TypeInfo type_info = m_session->GetOutputTypeInfo(i);
