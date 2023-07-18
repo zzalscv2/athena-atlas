@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TrigHLTJetHypo.RepeatedConditionParams import RepeatedConditionParams
-from TrigHLTJetHypo.FilterParams import FilterParams
 from TrigHLTJetHypo.HelperConfigToolParams import HelperConfigToolParams
 from TrigHLTJetHypo.ConditionDefaults import defaults
 from TrigHLTJetHypo.make_treevec import make_treevec
@@ -170,6 +169,7 @@ def scenario_simple(chain_parts):
 
     repcondargs = []
     filterparams = []
+    filterparam_inds = []
     
     ncp = 0
     
@@ -191,8 +191,8 @@ def scenario_simple(chain_parts):
         multiplicity = int(cp['multiplicity'])
         chainPartInd = cp['chainPartIndex']
  
-        # make an empty filter condition for the FR condition
-        filterparams.append(FilterParams(typename='PassThroughFilter'))
+        # no condition filtering
+        filterparam_inds.append(-1) # no Condition filter
 
         clique = None
         try:
@@ -215,8 +215,10 @@ def scenario_simple(chain_parts):
     treevec = make_treevec(repcondargs)
     assert treevec == [0 for i in range(len(chain_parts) + 1)]
 
+    assert len(repcondargs) == len(filterparam_inds)
     helper_params = HelperConfigToolParams(treevec=treevec,
                                            repcondargs=repcondargs,
-                                           filterparams=filterparams)
+                                           filterparams=filterparams,
+                                           filterparam_inds=filterparam_inds)
     
     return [helper_params]  # a list is one entry per FastReduction tree

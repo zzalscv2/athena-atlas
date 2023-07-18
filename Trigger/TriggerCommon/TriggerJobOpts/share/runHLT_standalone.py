@@ -353,10 +353,6 @@ include ("RecExCond/AllDet_detDescr.py")
 
 if flags.Trigger.doID:
     include("InDetTrigRecExample/InDetTrigRec_jobOptions.py")
-    from InDetTrigRecExample.InDetTrigFlags import InDetTrigFlags
-    InDetTrigFlags.doPrintConfigurables = log.getEffectiveLevel() <= logging.DEBUG
-    from InDetRecExample.InDetJobProperties import InDetFlags
-    InDetFlags.doPrintConfigurables = log.getEffectiveLevel() <= logging.DEBUG
     include("InDetRecExample/InDetRecConditionsAccess.py")
 
 

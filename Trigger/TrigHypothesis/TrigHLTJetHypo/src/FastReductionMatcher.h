@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGHLTJETHYPO_FASTREDUCTIONMATCHER_H
@@ -18,11 +18,14 @@ class ITrigJetHypoInfoCollector;
 using  ConditionFilters =
   std::vector<std::unique_ptr<IHypoJetVectorFilter>>;
 
+using  ConditionFilterInds = std::vector<int>;
+
 class FastReductionMatcher: public IJetsMatcher {
  public:
 
   FastReductionMatcher(ConditionPtrs&,
 		       ConditionFilters&,
+		       const ConditionFilterInds&,
 		       const Tree&);
 
 
@@ -53,6 +56,7 @@ class FastReductionMatcher: public IJetsMatcher {
 
   ConditionPtrs m_conditions;
   ConditionFilters m_conditionFilters;
+  ConditionFilterInds  m_conditionFilterInds;
   
   /** tree structure for Conditions objects.
    The conditions tree gives relations among conditions (eg parent-child

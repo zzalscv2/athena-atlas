@@ -8,8 +8,6 @@
   * Configured sets of tracking cuts for the modes: Offline, Cosmics, BeamGas, LowPt, TRT, HeavyIon, LRT   
 * [InDetTrigTrackingCuts](InDetTrigTrackingCuts.py)
   * Cuts applied in tracking algorithms and tools for each mode. Also depends on the cutLevel set in InDetTrigFlags.  
-* [ConfiguredVertexingTrigCuts](ConfiguredVertexingTrigCuts.py)    
-  * Trigger version of InDetRecExample.ConfiguredVertexingCuts
 ## Creation & configuration of tools used by ID tracking: 
 * [InDetTrigConfigRecLoadTools](InDetTrigConfigRecLoadTools.py)
   * Creates and configures tracking tools
@@ -21,8 +19,6 @@
   * configures lowPt versions of tracking tools
 * [InDetTrigConfigRecLoadToolsBeamGas](InDetTrigConfigRecLoadToolsBeamGas.py)  
   * **removed** configures BeamGas versions of tracking tools
-* [InDetTrigConfigRecLoadToolsCosmics](InDetTrigConfigRecLoadToolsCosmics.py)  
-  * configures Cosmics versions of tracking tools
 ## Create & configure ID Conditions
 * [InDetTrigConditionsAccess](InDetTrigConditionsAccess.py)      
   * uses InDetTrigConfigConditions to configure & create conditions tools, services & algorithms

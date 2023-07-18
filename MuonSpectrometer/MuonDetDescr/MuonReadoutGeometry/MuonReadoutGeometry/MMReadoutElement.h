@@ -122,12 +122,10 @@ namespace MuonGM {
             in the local-to-global (ATLAS) reference frame transformaton */
         const Amg::Transform3D& getDelta() const { return m_delta; }
         void setDelta(const ALinePar& aline);
-        void setDelta(MuonDetectorManager* mgr);
-
+       
         /** read B-line (chamber-deformation) parameters */
         void setBLinePar(const BLinePar& bLine);
-        void setBLinePar(MuonDetectorManager* mgr);
-
+       
         /** transform a position (in chamber-frame coordinates) to the deformed-chamber geometry */
         void posOnDefChamber(Amg::Vector3D& locPosML) const;
 

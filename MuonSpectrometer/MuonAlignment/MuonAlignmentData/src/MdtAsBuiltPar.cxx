@@ -1,15 +1,33 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonAlignmentData/MdtAsBuiltPar.h"
 
-#include <sstream>
-
-MdtAsBuiltPar::MdtAsBuiltPar() : MuonAlignmentPar() {}
-
-MdtAsBuiltPar::AlignmentParameters::AlignmentParameters() :
-    iML(multilayer_t::ML1), iTubeSide(tubeSide_t::POS), y0(0.), z0(0.), alpha(0.), ypitch(0.), zpitch(0.), stagg(1) {}
+std::ostream& operator<<(std::ostream& ostr, const MdtAsBuiltPar& par) {
+   ostr<<"MdtAsBuilt AMDB id (name,eta,phi,job)=(";
+   ostr<<par.AmdbStation()<<",";
+   ostr<<par.AmdbEta()<<",";
+   ostr<<par.AmdbPhi()<<",";
+   ostr<<par.AmdbJob()<<"), "<<std::endl;
+   using multilayer_t = MdtAsBuiltPar::multilayer_t;
+   using tubeSide_t = MdtAsBuiltPar::tubeSide_t;  
+   for (const multilayer_t ml : {multilayer_t::ML1, multilayer_t::ML2}){
+      ostr<<" chamber multi-layer " << static_cast<unsigned int>(ml)<<",";
+      for (const tubeSide_t side : {tubeSide_t::POS, tubeSide_t::NEG}){
+          ostr << "(y0,z0,alpha,ypitch,zpitch,stagg) at ";
+          ostr << (side == tubeSide_t::POS ? "positive" : "negative")<<" side = {";
+          ostr << par.y0(ml, side) <<", ";
+          ostr << par.z0(ml, side) <<", ";
+          ostr << par.alpha(ml, side) <<", ";
+          ostr << par.ypitch(ml, side) <<", ";
+          ostr << par.zpitch(ml, side) <<", ";
+          ostr << par.stagg(ml, side) <<"},  ";
+      }
+      ostr<<std::endl;
+   }
+   return ostr;
+}
 
 void MdtAsBuiltPar::setAlignmentParameters(multilayer_t iML, tubeSide_t iTubeSide, float y0, float z0, float alpha, float ypitch,
                                            float zpitch, int stagg) {
@@ -23,7 +41,6 @@ void MdtAsBuiltPar::setAlignmentParameters(multilayer_t iML, tubeSide_t iTubeSid
     params.zpitch = zpitch;
     params.stagg = stagg;
 }
-
 bool MdtAsBuiltPar::setFromAscii(const std::string& line) {
     std::istringstream in(line);
 
@@ -33,8 +50,7 @@ bool MdtAsBuiltPar::setFromAscii(const std::string& line) {
     std::string typ;
     int jff, jzz;
     if (!(in >> typ >> jff >> jzz)) return false;
-    setAmdbId(typ, jff, jzz, 0);
-
+    setAmdbId(typ, jzz, jff, 0);
     multilayer_t ml[NMLTYPES] = {ML1, ML2};
     tubeSide_t sid[NTUBESIDETYPES] = {POS, NEG};
     int stagg[NMLTYPES];

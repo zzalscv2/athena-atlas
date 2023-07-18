@@ -15,7 +15,7 @@
 
 #include <fstream>
 
-MuonDetectorCondAlg::MuonDetectorCondAlg(const std::string &name, ISvcLocator *pSvcLocator) : AthAlgorithm(name, pSvcLocator)
+MuonDetectorCondAlg::MuonDetectorCondAlg(const std::string &name, ISvcLocator *pSvcLocator) : AthReentrantAlgorithm(name, pSvcLocator)
 { }
 
 StatusCode MuonDetectorCondAlg::initialize() {
@@ -37,9 +37,8 @@ StatusCode MuonDetectorCondAlg::initialize() {
     ATH_CHECK(m_readALineKey.initialize(m_applyALines));
     ATH_CHECK(m_readBLineKey.initialize(m_applyBLines));
     ATH_CHECK(m_readILineKey.initialize(MuonDetMgrDS->applyCscIntAlignment()));
-    ATH_CHECK(m_readMdtAsBuiltKey.initialize(MuonDetMgrDS->applyMdtAsBuiltParams()));
+    ATH_CHECK(m_readMdtAsBuiltKey.initialize(m_applyMdtAsBuilt));
     ATH_CHECK(m_readNswAsBuiltKey.initialize(m_applyNswAsBuilt));
-
     ATH_CHECK(m_condMmPassivKey.initialize(m_applyMmPassivation));
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_writeDetectorManagerKey.initialize());
@@ -49,12 +48,11 @@ StatusCode MuonDetectorCondAlg::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonDetectorCondAlg::execute() {
+StatusCode MuonDetectorCondAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("execute " << name());
-    const EventContext& ctx = Gaudi::Hive::currentContext();
-
+    
     // =======================
-    // Write ILine Cond Handle
+    // Conditions handle
     // =======================
     SG::WriteCondHandle<MuonGM::MuonDetectorManager> writeHandle{m_writeDetectorManagerKey, ctx};
     if (writeHandle.isValid()) {
@@ -69,7 +67,7 @@ StatusCode MuonDetectorCondAlg::execute() {
     // Create the MuonDetectorManager by calling the MuonDetectorFactory001
     // =======================
     MuonGM::MuonDetectorFactory001 theFactory(detStore().operator->());
-    MuonGM::MuonDetectorManager *mgr;
+    MuonGM::MuonDetectorManager *mgr{nullptr};
     if (m_iGeoModelTool->createFactory(mgr).isFailure()) {
         ATH_MSG_FATAL("unable to create MuonDetectorFactory001 ");
         return StatusCode::FAILURE;
@@ -118,7 +116,7 @@ StatusCode MuonDetectorCondAlg::execute() {
     // =======================
     // Update MdtAsBuiltMapContainer if requested BEFORE updating ALINES and BLINES
     // =======================
-    if (MuonMgrData->applyMdtAsBuiltParams()) {
+    if (!m_readMdtAsBuiltKey.empty()) {
         SG::ReadCondHandle<MdtAsBuiltMapContainer> readMdtAsBuiltHandle{m_readMdtAsBuiltKey, ctx};
         if (!readMdtAsBuiltHandle.isValid()) {
             ATH_MSG_FATAL("Failed to load Mdt as-built container "<<m_readMdtAsBuiltKey.fullKey());
@@ -145,26 +143,26 @@ StatusCode MuonDetectorCondAlg::execute() {
     // Update Alignment, ALINES
     // =======================
     if (m_applyALines) {
-        SG::ReadCondHandle<ALineMapContainer> readALinesHandle{m_readALineKey, ctx};
+        SG::ReadCondHandle<ALineContainer> readALinesHandle{m_readALineKey, ctx};
         if (!readALinesHandle.isValid()) {
             ATH_MSG_FATAL("Failed to load ALine container "<<m_readALineKey.fullKey());
             return StatusCode::FAILURE;
         }
         writeHandle.addDependency(readALinesHandle);
-        ATH_CHECK(MuonMgrData->updateAlignment(**readALinesHandle, m_isData));     
+        ATH_CHECK(MuonMgrData->updateAlignment(**readALinesHandle));     
     } else ATH_MSG_INFO("Do not apply the A Lines of the alignment");
  
     // =======================
     // Update Deformations, BLINES
     // =======================
     if (m_applyBLines) {
-        SG::ReadCondHandle<BLineMapContainer> readBLinesHandle{m_readBLineKey, ctx};
+        SG::ReadCondHandle<BLineContainer> readBLinesHandle{m_readBLineKey, ctx};
         if (!readBLinesHandle.isValid()) {
             ATH_MSG_FATAL("Failed to load B line container "<<m_readBLineKey.fullKey());
             return StatusCode::FAILURE;
         }
         writeHandle.addDependency(readBLinesHandle);
-        ATH_CHECK (MuonMgrData->updateDeformations(**readBLinesHandle, m_isData));  
+        ATH_CHECK (MuonMgrData->updateDeformations(**readBLinesHandle));  
     } else ATH_MSG_INFO("Do not apply the B Lines of the alignment");
     
     // !!!!!!!! UPDATE ANYTHING ELSE ???????

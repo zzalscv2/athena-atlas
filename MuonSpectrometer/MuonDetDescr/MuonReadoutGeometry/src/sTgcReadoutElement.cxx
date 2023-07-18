@@ -567,18 +567,9 @@ namespace MuonGM {
 
     //============================================================================
     void sTgcReadoutElement::setDelta(const ALinePar& aline) {
-
-        // amdb frame (s, z, t) = chamber frame (y, z, x)
-        float tras{0.}, traz{0.}, trat{0.}, rots{0.}, rotz{0.}, rott{0.};
-        aline.getParameters(tras, traz, trat, rots, rotz, rott);
-        if (std::abs(tras) + std::abs(traz) + std::abs(trat) + std::abs(rots) + std::abs(rotz) + std::abs(rott) > 1e-5) {
-            m_delta = Amg::Translation3D(0., tras, 0.) // translations (applied after rotations)
-                    * Amg::Translation3D(0., 0., traz)  
-                    * Amg::Translation3D(trat, 0., 0.) 
-                    * Amg::AngleAxis3D(rots, Amg::Vector3D(0., 1., 0.))  // rotation about Y (applied 3rd)
-                    * Amg::AngleAxis3D(rotz, Amg::Vector3D(0., 0., 1.))  // rotation about Z (applied 2nd)
-                    * Amg::AngleAxis3D(rott, Amg::Vector3D(1., 0., 0.)); // rotation about X (applied 1st)
-                    
+        // amdb frame (s, z, t) = chamber frame (y, z, x)        
+        if (aline) {
+            m_delta = aline.delta();                    
             // The origin of the rotation axes is at the center of the active area 
             // in the z (radial) direction. Account for this shift in the definition 
             // of m_delta so that it can be applied on chamber frame coordinates.
@@ -588,24 +579,6 @@ namespace MuonGM {
             refreshCache();
         } else {
             clearALinePar();
-        }
-    }
-
-
-    //============================================================================
-    void sTgcReadoutElement::setDelta(MuonDetectorManager* mgr) {
-
-        const ALineMapContainer* alineMap = mgr->ALineContainer();
-        Identifier id = mgr->stgcIdHelper()->elementID(getStationName(), getStationEta(), getStationPhi());
-        Identifier idMult = mgr->stgcIdHelper()->multilayerID(id, m_ml);
-        auto it = alineMap->find(idMult);
-                
-        if (it == alineMap->cend()) {
-            clearALinePar();
-            MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
-            if (log.level() <= MSG::DEBUG) { log << MSG::DEBUG << "m_aLineMapContainer does not contain ALine for sTGC" << endmsg; }     
-        } else {
-            setDelta(it->second);
         }
     }
 
@@ -620,31 +593,9 @@ namespace MuonGM {
 
     //============================================================================
     void sTgcReadoutElement::setBLinePar(const BLinePar& bLine) {
-#ifndef NDEBUG
-        MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
-        if (log.level() <= MSG::DEBUG)
-            log << MSG::DEBUG << "Setting B-line for " << getStationName().substr(0, 3) << " at eta/phi " << getStationEta() << "/" << getStationPhi() << endmsg;
-#endif
+        ATH_MSG_DEBUG("Setting B-line for " <<idHelperSvc()->toStringDetEl(identify())<<" "<<bLine);
         m_BLinePar = &bLine;
     }
-
-
-    //============================================================================
-    void sTgcReadoutElement::setBLinePar(MuonDetectorManager* mgr) {
-        const BLineMapContainer* blineMap = mgr->BLineContainer();
-        Identifier id     = mgr->stgcIdHelper()->elementID(getStationName(), getStationEta(), getStationPhi());
-        Identifier idMult = mgr->stgcIdHelper()->multilayerID(id, m_ml);
-        auto it = blineMap->find(idMult);
-
-        if (it == blineMap->cend()) {
-            clearBLinePar();
-            MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
-            if (log.level() <= MSG::DEBUG) { log << MSG::DEBUG << "m_bLineMapContainer does not contain BLine for sTGC" << endmsg; }
-        } else {
-            setBLinePar(it->second);
-        }
-    }
-
 
     //============================================================================
     void sTgcReadoutElement::posOnDefChamber(Amg::Vector3D& locPosML) const {
@@ -662,14 +613,15 @@ namespace MuonGM {
         double t_rel = t0/(m_tckChamber/2.);    // in [-1, 1]
 
         // b-line parameters
-        double bp    = m_BLinePar->bp();
-        double bn    = m_BLinePar->bn();
-        double sp    = m_BLinePar->sp();
-        double sn    = m_BLinePar->sn();
-        double tw    = m_BLinePar->tw();
-        double eg    = m_BLinePar->eg()*1.e-3;
-        double ep    = m_BLinePar->ep()*1.e-3;
-        double en    = m_BLinePar->en()*1.e-3;
+        using Parameter = BLinePar::Parameter;
+        const double bp = m_BLinePar->getParameter(Parameter::bp);
+        const double bn = m_BLinePar->getParameter(Parameter::bn);
+        const double sp = m_BLinePar->getParameter(Parameter::sp);
+        const double sn = m_BLinePar->getParameter(Parameter::sn);
+        const double tw = m_BLinePar->getParameter(Parameter::tw);
+        const double eg = m_BLinePar->getParameter(Parameter::eg)*1.e-3;
+        const double ep = m_BLinePar->getParameter(Parameter::ep)*1.e-3;
+        const double en = m_BLinePar->getParameter(Parameter::en)*1.e-3;
 
         double ds{0.}, dz{0.}, dt{0.};
 

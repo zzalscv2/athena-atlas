@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -41,6 +41,16 @@ StatusCode TrigJetHypoToolConfig_fastreduction::initialize() {
     ATH_MSG_ERROR("No. of conditions " +
 		  std::to_string( m_conditionMakers.size()) + 
 		  " require at least 2" );
+    return StatusCode::FAILURE;
+  }
+
+  if(m_filterMakerInds.size() != m_conditionMakers.size()){
+    // need an index for each condition
+    ATH_MSG_ERROR("No. of conditions " +
+		  std::to_string( m_conditionMakers.size()) +
+		  " no. of filter inds " +
+		  std::to_string( m_filterMakerInds.size()) +
+		  " must be equal" );
     return StatusCode::FAILURE;
   }
   
@@ -111,18 +121,18 @@ TrigJetHypoToolConfig_fastreduction::requiresNJets() const {
 std::unique_ptr<IJetsMatcher>
 TrigJetHypoToolConfig_fastreduction::getMatcher () const {
 
+  auto matcher =  std::unique_ptr<IJetsMatcher>(nullptr);
+
   auto repeatedConds = getRepeatedConditions();
-
-  if(repeatedConds.empty()){
-    return std::unique_ptr<IJetsMatcher>(nullptr);
-  }
-
-  auto matcher =  std::unique_ptr<IJetsMatcher>();
+ 
+  if(repeatedConds.empty()){return matcher;}
 
   auto conditions = std::move(repeatedConds);
   auto filters = getFilters();
+
   auto fpm = new FastReductionMatcher(conditions,
 				      filters,
+				      m_filterMakerInds,
 				      Tree(m_treeVec));
   matcher.reset(fpm);
   return matcher;

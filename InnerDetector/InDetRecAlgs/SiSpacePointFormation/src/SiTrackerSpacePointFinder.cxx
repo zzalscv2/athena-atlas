@@ -169,8 +169,11 @@ StatusCode SiTrackerSpacePointFinder::execute (const EventContext& ctx) const
     }
     const bool hasExternalCache = spacePointContainerPixel->hasExternalCache();
     if (!hasExternalCache) {
-      dataItemsPixel = std::make_unique<DataPool<PixelSpacePoint>>(ctx);
-      dataItemsPixel->reserve(5000);  // Some large default size
+       dataItemsPixel = std::make_unique<DataPool<PixelSpacePoint>>(ctx);
+       dataItemsPixel->reserve(5000);  // Some large default size
+    } else if (m_useDataPoolWithCache) {
+       dataItemsPixel = std::make_unique<DataPool<PixelSpacePoint>>(ctx);
+       // Default size for now 1024 let it expand on its own
     }
   }
 
@@ -191,6 +194,9 @@ StatusCode SiTrackerSpacePointFinder::execute (const EventContext& ctx) const
     if (!hasExternalCache) {
       dataItemsSCT = std::make_unique<DataPool<SCT_SpacePoint>>(ctx);
       dataItemsSCT->reserve(10000);  // Some large default size
+    } else if (m_useDataPoolWithCache) {
+      dataItemsSCT = std::make_unique<DataPool<SCT_SpacePoint>>(ctx);
+      // Default size for now 1024 let it expand on its own
     }
   }
 

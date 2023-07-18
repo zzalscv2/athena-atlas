@@ -60,7 +60,6 @@ namespace MuonGM {
       m_manager = new  MuonDetectorManager();
 
 
-    m_manager->setControlAlinesFlag(false);
     m_manager->setApplyCscIntAlignment(false);
     m_manager->setCscIlinesFlag(false);
     m_manager->setCscFromGM(true);

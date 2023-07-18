@@ -56,6 +56,16 @@ void test_basic()
 {
   std::cout << "test_basic\n";
 
+  //test ctors
+  {
+    DataPool<double> dummy(EventContext (0, 1));
+  }
+
+  {
+    SG::Arena a ("a");
+    DataPool<double> dummy(&a);
+  }
+
   // ask for 10 Fluff's in memory, but default is 1024!
   DataPool<Fluff>* df = new DataPool<Fluff>(10);
   DataPool<Fluff>::const_iterator iter = df->begin();

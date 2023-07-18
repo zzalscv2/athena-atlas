@@ -129,14 +129,11 @@ namespace MuonGM {
 
         m_manager->setCachingFlag(m_caching);
         m_manager->setCacheFillingFlag(m_cacheFillingFlag);
-        m_manager->setControlAlinesFlag(m_controlAlines);
         // set here the flag defining the geometry granularity
         // minimalgeo = 1 => The geo tree is built up to the Detector Level (Full PhysVol)
         //                     no internal structure of the Detector is built
         // minimalgeo = 0 => The geo tree is built in full details
         m_manager->setMinimalGeoFlag(m_minimalGeoFlag);
-        m_manager->setMdtDeformationFlag(m_mdtDeformationFlag);
-        m_manager->setMdtAsBuiltParamsFlag(m_mdtAsBuiltParaFlag);
 
         if (m_controlCscIntAlines == 0)
             m_manager->setApplyCscIntAlignment(false);
@@ -249,33 +246,6 @@ namespace MuonGM {
         cscCache.dummy1 = 0;
         cscCache.dummy2 = 0;
         m_manager->setGenericCscDescriptor(cscCache);
-
-        /*
-        // TMP DEBUG temporary code to read the as-built parameters from an ASCII file
-        {
-          AltAsciiDBMap::const_iterator fileit = m_altAsciiDBMap.find("XAMDT");
-          if (fileit != m_altAsciiDBMap.end()) {
-            const std::string& file = fileit->second;
-            std::ifstream fin(file.c_str());
-            std::string line;
-            MdtAsBuiltPar xPar;
-            int count = 0;
-            while(getline(fin, line)) {
-              if (line.find("Corr:")==0) {
-                if (!xPar.setFromAscii(line)) {
-                  log << MSG::ERROR
-                      << "Unable to parse AsBuilt params from Ascii line: " << line
-                      << endmsg;
-                } else {
-                  m_manager->storeMdtAsBuiltParams(new MdtAsBuiltPar(xPar));
-                  ++count;
-                }
-              }
-            }
-            log << MSG::INFO << "Parsed AsBuilt parameters: " << count << endmsg;
-          }
-        }
-        */
 
         StoredMaterialManager *theMaterialManager;
         if (StatusCode::SUCCESS != m_pDetStore->retrieve(theMaterialManager, "MATERIALS")) {

@@ -30,8 +30,8 @@ class HypoToolStructure(unittest.TestCase):
              ChainProp(name='HLT_j420_subresjesgscIS_ftf_L1J100',
                        groups=SingleJetGroup),
              'connections': dict(((0, [1]),
-                                  (1, [2, 10]),
-                                  (2, [3, 5, 8, 9]),
+                                  (1, [2]),
+                                  (2, [3, 5]),
                                   (3, [4]),
                                   (5, [6, 7]))),
              'values': []
@@ -41,8 +41,8 @@ class HypoToolStructure(unittest.TestCase):
              ChainProp(name='HLT_j260f_L1J75_31ETA49',
                        groups=SingleJetGroup),
              'connections': dict(((0, [1]),
-                                  (1, [2, 10]),
-                                  (2, [3, 5, 8, 9]),
+                                  (1, [2]),
+                                  (2, [3, 5]),
                                   (3, [4]),
                                   (5, [6, 7]))),
              'values': []
@@ -53,8 +53,8 @@ class HypoToolStructure(unittest.TestCase):
              ChainProp(name='HLT_j80_j60_L1J15',
                        l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup),
              'connections': dict(((0, [1]),
-                                  (1, [2, 14]),
-                                  (2, [3, 5, 8, 11,12, 13]),
+                                  (1, [2]),
+                                  (2, [3, 5, 8]),
                                   (3, [4]),
                                   (5, [6, 7]),
                                   (8, [9, 10]))),
@@ -64,8 +64,8 @@ class HypoToolStructure(unittest.TestCase):
         {
             'prop': ChainProp(name='HLT_2j80_3j60_L1J15',
                               l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup),
-            'connections': dict(((0, [1]), (1, [2, 14]),
-                                 (2, [3, 5, 8, 11, 12, 13]),
+            'connections': dict(((0, [1]), (1, [2]),
+                                 (2, [3, 5, 8]),
                                  (3, [4]),
                                  (5, [6, 7]),
                                  (8, [9,10]))),
@@ -77,12 +77,12 @@ class HypoToolStructure(unittest.TestCase):
                               groups=SingleJetGroup),
             
             'connections': dict(((0, [1]),
-                                 (1, [2, 12]),
-                                 (2, [3, 5, 7, 8]),
+                                 (1, [2]),
+                                 (2, [3, 5, 7]),
                                  (3, [4]),
                                  (5, [6]),
-                                 (8, [9]),
-                                 (9, [10, 11]))),
+                                 (7, [8]),
+                                 (8, [9, 10]))),
              'values': []
         },
 
@@ -93,15 +93,15 @@ class HypoToolStructure(unittest.TestCase):
                 groups=MultiJetGroup),
             
             'connections': dict(((0, [1]),
-                                 (1, [2, 14, 27]),
-                                 (2, [3, 5, 8, 11, 12, 13]),
+                                 (1, [2, 11]),
+                                 (2, [3, 5, 8]),
                                  (3, [4]),
                                  (5, [6, 7]),
                                  (8, [9, 10]),
-                                 (14, [15, 17, 21, 24, 25, 26]),
-                                 (15, [16]),
-                                 (17, [18, 19, 20]),
-                                 (21, [22, 23]),)),
+                                 (11, [12, 14, 18]),
+                                 (12, [13]),
+                                 (14, [15, 16, 17]),
+                                 (18, [19, 20]),)),
              'values': []
         },
 
@@ -111,8 +111,8 @@ class HypoToolStructure(unittest.TestCase):
                                   groups=MultiJetGroup),
          
                 'connections': dict(((0, [1]),
-                                     (1, [2, 10]),
-                                     (2, [3, 5, 8, 9]),
+                                     (1, [2]),
+                                     (2, [3, 5]),
                                      (3, [4]),
                                      (5, [6, 7]))),
              'values': [{'nodeid': 5,
@@ -124,16 +124,16 @@ class HypoToolStructure(unittest.TestCase):
                                   groups=SingleJetGroup),
         
                 'connections': dict(((0, [1]),
-                                     (1, [2, 14, 30]),
-                                     (2, [3, 5, 8, 11, 12, 13]),
+                                     (1, [2, 11]),
+                                     (2, [3, 5, 8]),
                                      (3, [4]),
                                      (5, [6, 7]),
                                      (8, [9, 10]),
-                                     (14, [15, 17, 20, 23, 26, 27, 28, 29]),
-                                     (15, [16]),
+                                     (11, [12, 14, 17, 20]),
+                                     (12, [13]),
+                                     (14, [15, 16]),
                                      (17, [18, 19]),
-                                     (20, [21, 22]),
-                                     (23, [24, 25]))),
+                                     (20, [21, 22]))),
              'values': []
             },
             
@@ -143,15 +143,15 @@ class HypoToolStructure(unittest.TestCase):
                                   groups=MultiJetGroup),
         
                 'connections': dict(((0, [1]),
-                                     (1, [2, 10, 20]),
-                                     (2, [3, 5, 8, 9]),
+                                     (1, [2, 8]),
+                                     (2, [3, 5]),
                                      (3, [4]),
                                      (5, [6, 7]),
-                                     (10, [11, 13, 15, 16]),
+                                     (8, [9, 11, 13]),
+                                     (9, [10]),
                                      (11, [12]),
                                      (13, [14]),
-                                     (16, [17,]),
-                                     (17, [18, 19]))),
+                                     (14, [15, 16]))),
              'values': []
             },
             
@@ -160,8 +160,8 @@ class HypoToolStructure(unittest.TestCase):
                                   groups=SingleJetGroup),
                 
                 'connections': dict(((0, [1]),
-                                     (1, [2, 26]),
-                                     (2, [3, 5, 8, 11, 14, 17, 20, 21, 22, 23, 24, 25]),
+                                     (1, [2]),
+                                     (2, [3, 5, 8, 11, 14, 17]),
                                      (3, [4]),
                                      (5, [6, 7]),
                                      (8, [9, 10]),
@@ -177,8 +177,8 @@ class HypoToolStructure(unittest.TestCase):
                                   groups=SingleJetGroup),
         
                 'connections': dict(((0, [1]),
-                                     (1, [2, 10]),
-                                     (2, [3, 5, 8, 9]),
+                                     (1, [2]),
+                                     (2, [3, 5]),
                                      (3, [4]),
                                      (5, [6, 7]))),
              'values': []
@@ -190,12 +190,12 @@ class HypoToolStructure(unittest.TestCase):
                 
                 
                 'connections': dict(((0, [1]),
-                                     (1, [2, 10]),
-                                     (2, [3, 5, 8, 9]),
+                                     (1, [2, 8]),
+                                     (2, [3, 5]),
                                      (3, [4]),
                                      (5, [6, 7]),
-                                     (10, [11]),
-                                     (11, [12, 13]))),
+                                     (8, [9]),
+                                     (9, [10, 11]))),
              'values': []
             },
 
@@ -207,8 +207,8 @@ class HypoToolStructure(unittest.TestCase):
         
         
                 'connections': dict(((0, [1]),
-                                     (1, [2, 13]),
-                                     (2, [3, 5, 7, 10, 11, 12]),
+                                     (1, [2]),
+                                     (2, [3, 5, 7]),
                                      (3, [4]),
                                      (5, [6]),
                                      (7, [8, 9]))),
@@ -237,11 +237,18 @@ class HypoToolStructure(unittest.TestCase):
            
             analyser = HypoToolAnalyser(tool)
 
+            node_table = []
+            for k in sorted(analyser.node_table.keys()):
+                node_table.append ('%d: %s' % (k, analyser.node_table[k]))
+
+            node_table = '\n'.join(node_table)
+                                   
             self.assertTrue(analyser.connections == td['connections'],
-                            'fail for case %s expected %s; saw %s' %(
+                            'fail for case %s expected %s; saw %s \n %s' %(
                                 chain_name,
                                 str(td['connections']),
-                                str(analyser.connections))) 
+                                str(analyser.connections),
+                                node_table)) 
 
             # check selected attributes of inner (nested) tools.
 
@@ -259,7 +266,7 @@ class HypoToolStructure(unittest.TestCase):
                 for attrname, testval in ref_values.items():
                     toolval = getattr(subtool, attrname)
                     self.assertEqual(toolval, testval,
-                                    msg='%s:  node: %d expected %s saw %s' % (
+                                    msg='%s:  node: %d expected %s saw  %s' % (
                                         chain_name,
                                         nodeid,
                                         str(testval),

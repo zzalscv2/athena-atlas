@@ -13,7 +13,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
-#include "MuonCondAlg/MuonAlignmentErrorData.h"
+#include "MuonAlignmentData/MuonAlignmentErrorData.h"
 
 class MuonAlignmentErrorDbAlg : public AthReentrantAlgorithm {
 public:

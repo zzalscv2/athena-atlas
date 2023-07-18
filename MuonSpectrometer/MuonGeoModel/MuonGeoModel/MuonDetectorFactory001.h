@@ -61,13 +61,11 @@ namespace MuonGM {
         inline void setDumpMemoryBreakDown(bool value);
         inline void setCacheFillingFlag(int value);
         inline void setMdtDeformationFlag(int mdtDeformationFlag);
-        inline void setMdtAsBuiltParaFlag(int mdtAsBuiltParaFlag);
         inline void setNswAsBuiltParaFlag(int nswAsBuiltParaFlag);
         inline void setFineClashFixingFlag(int value);
         inline void hasCSC(bool value);
         inline void hasSTgc(bool value);
         inline void hasMM(bool value);
-        inline void setNSWABLineAsciiPath(const std::string &);
         inline void setNSWAsBuiltAsciiPath(const std::string &, const std::string &);
 
       private:
@@ -96,8 +94,6 @@ namespace MuonGM {
 
         int m_caching{0};
         int m_cacheFillingFlag{0};
-        int m_mdtDeformationFlag{0};
-        int m_mdtAsBuiltParaFlag = 0;
         bool m_dumpMemoryBreakDown{false};
         int m_enableFineClashFixing{0};
         bool m_hasCSC{true};
@@ -145,8 +141,6 @@ namespace MuonGM {
 
     void MuonDetectorFactory001::setCachingFlag(int value) { m_caching = value; }
     void MuonDetectorFactory001::setCacheFillingFlag(int value) { m_cacheFillingFlag = value; }
-    void MuonDetectorFactory001::setMdtDeformationFlag(int value) { m_mdtDeformationFlag = value; }
-    void MuonDetectorFactory001::setMdtAsBuiltParaFlag(int value) { m_mdtAsBuiltParaFlag = value; }
     void MuonDetectorFactory001::setDumpMemoryBreakDown(bool value) { m_dumpMemoryBreakDown = value; }
     void MuonDetectorFactory001::setFineClashFixingFlag(int value) { m_enableFineClashFixing = value; }
     void MuonDetectorFactory001::hasCSC(bool value) { m_hasCSC = value; }

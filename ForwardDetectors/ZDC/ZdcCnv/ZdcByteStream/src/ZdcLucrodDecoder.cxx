@@ -20,11 +20,13 @@ StatusCode ZdcLucrodDecoder::decode(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragme
   uint32_t ROD_fragment_size     = robFragment->rod_fragment_size_word();
   uint32_t ROD_header_size       = robFragment->rod_header_size_word();
   uint32_t ROD_trailer_size      = robFragment->rod_trailer_size_word();
-  uint32_t ROD_version           = robFragment->rod_version();
-  uint32_t ROD_source_ID         = robFragment->rod_source_id();
+  uint32_t ROD_version           = robFragment->rod_version() >> 16;     // extract the upper 16 bits
+  uint32_t ROD_sourceID          = robFragment->rod_source_id();
   uint32_t ROD_nstatus           = robFragment->rod_nstatus();
   uint32_t ROD_ndata             = robFragment->rod_ndata(); 
   uint32_t ROD_status_pos        = robFragment->rod_status_position();
+
+  uint32_t ROD_sourceID_high = ROD_sourceID >> 16; // extract the upper 16 bits
 
   if (msgLevel(MSG::DEBUG)) 
     msg(MSG::DEBUG) 
@@ -38,28 +40,52 @@ StatusCode ZdcLucrodDecoder::decode(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragme
       << " ROD_header_size:       "   << std::dec << ROD_header_size       << endreq
       << " ROD_trailer_size:      "   << std::dec << ROD_trailer_size      << endreq
       << " ROD_version:           0x" << std::hex << ROD_version           << endreq
-      << " ROD_source_ID:         0x" << std::hex << ROD_source_ID         << endreq
+      << " ROD_source_ID:         0x" << std::hex << ROD_sourceID         << endreq
       << " ROD_nstatus:           "   << std::dec << ROD_nstatus           << endreq
       << " ROD_ndata:             "   << std::dec << ROD_ndata             << endreq
       << " ROD_status_pos:        "   << std::dec << ROD_status_pos        << endreq
       << std::dec;
+
+  // Check for  valid marker
+  //
+  if (ROD_marker        != ROD_MARKER)        {
+    msg(MSG::ERROR) << " ERROR: Invalid ROD_marker " <<  std::hex << ROD_marker << endreq;
+    return StatusCode::FAILURE;
+  }
   
-  if (ROD_marker        != ROD_MARKER)        { if (msgLevel(MSG::DEBUG)) msg(MSG::DEBUG) << " ERROR: ROD_marker "        << endreq; return StatusCode::FAILURE; }
-  if (ROD_header_size   != ROD_HEADER_SIZE)   { if (msgLevel(MSG::DEBUG)) msg(MSG::DEBUG) << " ERROR: ROD_header_size "   << endreq; return StatusCode::FAILURE; }
-  if (ROD_trailer_size  != ROD_TRAILER_SIZE)  { if (msgLevel(MSG::DEBUG)) msg(MSG::DEBUG) << " ERROR: ROD_trailer_size "  << endreq; return StatusCode::FAILURE; }
-  if (ROD_version       != ROD_VERSION)       { if (msgLevel(MSG::DEBUG)) msg(MSG::DEBUG) << " ERROR: ROD_version "       << endreq; return StatusCode::FAILURE; }
-  if (ROD_source_ID>>4  != ROD_SOURCE_ID>>4)  { if (msgLevel(MSG::DEBUG)) msg(MSG::DEBUG) << " ERROR: ROD_source_ID "     << endreq; return StatusCode::FAILURE; }
-  if (ROD_nstatus       != ROD_NSTATUS)       { if (msgLevel(MSG::DEBUG)) msg(MSG::DEBUG) << " ERROR: ROD_nstatus "       << endreq; return StatusCode::FAILURE; }
-  if (ROD_ndata         != ROD_NDATA)         { if (msgLevel(MSG::DEBUG)) msg(MSG::DEBUG) << " ERROR: ROD_ndata "         << endreq; return StatusCode::FAILURE; } // is this needed?? we expect different data volumes 
-  if (ROD_fragment_size != ROD_FRAGMENT_SIZE) { if (msgLevel(MSG::DEBUG)) msg(MSG::DEBUG) << " ERROR: ROD_fragment_size " << endreq; return StatusCode::FAILURE; }
-  if (ROD_status_pos    != ROD_STATUS_POS)    { if (msgLevel(MSG::DEBUG)) msg(MSG::DEBUG) << " ERROR: ROD_status_pos "    << endreq; return StatusCode::FAILURE; }
+  // Check for expected ROD format version
+  //
+  if (ROD_version      != m_rodVersion)   {
+    msg(MSG::ERROR) << " ERROR: Incorrect ROD_version, expected  " << m_rodVersion
+		    << ", found " << (ROD_version>>16) << endreq;
+    return StatusCode::FAILURE; 
+  }
+
+  // Check for ZDC detector ID in upper bits
+  //
+  if (ROD_sourceID_high  != m_sourceIdHigh)
+  {
+    msg(MSG::ERROR) << " ERROR: invalid source ID detector word, " << ROD_sourceID << endreq;
+    return StatusCode::FAILURE;
+  }
   
-  if (msgLevel(MSG::DEBUG)) msg(MSG::DEBUG) << " Fill ZdcLucrodData " << endreq; 
+  unsigned int nwordsNoTrig = ROD_ndata - 5; // Five words for per-module amplitudes and per-side sums/4
+
+  // There should be 32 words per bunch crossing: 1/2 word for each of eight samples * 8 channels
+  //
+  if (nwordsNoTrig % 32 != 0) {
+    msg(MSG::ERROR) << " ERROR: incorrect number of words in ROD data: " << ROD_ndata << endreq;
+    return StatusCode::FAILURE;
+  }
+
+  unsigned int numBCRead = ROD_ndata/32;
+  
+  if (msgLevel(MSG::DEBUG)) msg(MSG::DEBUG) << " Fill ZdcLucrodData, with " << numBCRead << " bunch crossings" << endreq; 
   
   zld->SetBCID     (ROD_bc_id);
   zld->SetRunNumber(ROD_run_no);
   zld->SetLevel1ID (ROD_lvl1_id);
-  zld->SetDataSize (ROD_ndata);
+  zld->SetNumBCs(numBCRead);
 
   OFFLINE_FRAGMENTS_NAMESPACE::PointerType vintData;
   OFFLINE_FRAGMENTS_NAMESPACE::PointerType vintStat;
@@ -79,7 +105,12 @@ StatusCode ZdcLucrodDecoder::decode(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragme
 
     if ((word & 0xf0000000) >> 28 == 0xc) { // start of trigger data
 
-      if (waveform.size()) zld->AddChanData(channel, waveform); 
+      if (waveform.size()) {
+	if (!zld->AddChanData(channel, waveform)) {
+	  msg(MSG::ERROR) << " ERROR: inconsistency in LUCROD data" << endreq;
+	  return StatusCode::FAILURE;
+	}
+      }
       break;      
     }
     
@@ -105,9 +136,13 @@ StatusCode ZdcLucrodDecoder::decode(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragme
       waveform.push_back(adc2);
     }
     else { // new channel
+      if (waveform.size()) {
+	if (!zld->AddChanData(channel, waveform)) {
+	  msg(MSG::ERROR) << " ERROR: inconsistency in LUCROD data" << endreq;
+	  return StatusCode::FAILURE;
+	} 
+      }
       
-      if (waveform.size()) zld->AddChanData(channel, waveform);
-
       channel = cid1; // shouldn't this go before the line above?
       
       waveform.clear();
@@ -115,6 +150,7 @@ StatusCode ZdcLucrodDecoder::decode(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragme
       waveform.push_back(adc2);
     }
   }
+  
   
   // this can adapt
   if ((word & 0xf000) >> 12 != 0xa) return StatusCode::FAILURE;
@@ -131,13 +167,15 @@ StatusCode ZdcLucrodDecoder::decode(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragme
   zld->SetTrigAvgA(trigAvgA);
   zld->SetTrigAvgC(trigAvgC);
 
-  while (wordIt<ROD_ndata) { // shouldn't this be 8?
+  // Loop over all data words in the fragment
+  //
+  while (wordIt<ROD_ndata) { 
     
     word = vintData[wordIt]; wordIt++;
 
     if ((word & 0xf0000000) >> 28 != 0xb) return StatusCode::FAILURE;
     
-    uint16_t amp1 = (word & 0xfff);
+    uint16_t amp1 = (word & 0xfff);         // 12 bit ADC
     uint16_t amp2 = (word & 0xfff0000)>>16;
     
     if (msgLevel(MSG::DEBUG)) 

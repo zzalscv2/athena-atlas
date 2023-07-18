@@ -168,17 +168,13 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
       mgr->setMinimalGeoFlag(m_minimalGeoFlag);
       mgr->setGeometryVersion(tempLayout);
       mgr->setCachingFlag(m_cachingFlag);
-      mgr->setCachingFlag(m_fillCache_initTime);
-      mgr->setMdtDeformationFlag(m_enableMdtDeformations);
-      mgr->setMdtAsBuiltParamsFlag(m_enableMdtAsBuiltParameters);
-      
       if (m_fillCache_initTime) {
-	mgr->fillCache();
+        mgr->fillCache();
       } else {
-	// cache for RPC / TGC / CSC must be filled once forever
-	mgr->fillRpcCache();
-	mgr->fillTgcCache();
-	mgr->fillCscCache();
+        // cache for RPC / TGC / CSC must be filled once forever
+        mgr->fillRpcCache();
+        mgr->fillTgcCache();
+        mgr->fillCscCache();
       }
     
       return StatusCode::SUCCESS;
@@ -220,8 +216,6 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
             altAsciiDBMap.insert(std::make_pair("ASZT", m_altAsztFile));
         if (m_altCscIntAlinesFile != "")
             altAsciiDBMap.insert(std::make_pair("IACSC", m_altCscIntAlinesFile));
-        if (m_altMdtAsBuiltFile != "")
-            altAsciiDBMap.insert(std::make_pair("XAMDT", m_altMdtAsBuiltFile));
     }
 
     //
@@ -243,8 +237,7 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
         ATH_MSG_INFO("    ControlCscIntAlines            " << tempControlCscIntAlines);
     else
         ATH_MSG_INFO("    ControlCscIntAlines   reset to " << tempControlCscIntAlines);
-    ATH_MSG_INFO("    EnableMdtDeformations          " << m_enableMdtDeformations);
-    ATH_MSG_INFO("    EnableMdtAsBuiltParameters     " << m_enableMdtAsBuiltParameters);    
+
     if (m_stationSelection > 0) {
         StationSelector::SetSelectionType(m_stationSelection);
         if ((m_selectedStations.size() + m_selectedStEta.size() + m_selectedStPhi.size()) < 1) {
@@ -307,8 +300,6 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
         theFactory.setDumpMemoryBreakDown(m_dumpMemoryBreakDown);
         theFactory.setCachingFlag(m_cachingFlag);
         theFactory.setCacheFillingFlag(m_fillCache_initTime);
-        theFactory.setMdtDeformationFlag(m_enableMdtDeformations);
-        theFactory.setMdtAsBuiltParaFlag(m_enableMdtAsBuiltParameters);
         theFactory.setFineClashFixingFlag(m_enableFineClashFixing);
         theFactory.hasCSC(m_hasCSC);
         theFactory.hasSTgc(m_hasSTgc);
@@ -343,8 +334,7 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
         }
         // Register the MuonDetectorNode instance with the Transient Detector Store
         MuonGM::MuonDetectorManager *theManager = theFactory.getDetectorManager();
-        // Init ABline historical container --- will write there A/B lines from ORACLE / ascii file if any
-        theManager->initABlineContainers();
+       
         if ((theManager->initCSCInternalAlignmentMap()).isFailure())
             return StatusCode::FAILURE; // does nothing other then checking the size (map is built while reading data from the primary source)
 

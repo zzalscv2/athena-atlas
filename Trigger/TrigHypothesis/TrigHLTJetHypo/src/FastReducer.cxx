@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./FastReducer.h"
@@ -41,10 +41,12 @@ struct IndexVecComp{
 FastReducer::FastReducer(const HypoJetVector& jv,
                          const ConditionPtrs& conditions,
 			 const ConditionFilters& filters,
+			 const ConditionFilterInds& filterInds,
                          const Tree& tree,
                          xAODJetCollector& jetCollector,
                          const Collector& collector):
-  m_conditions(conditions),  m_conditionFilters(filters), m_tree(tree) {
+  m_conditions(conditions),  m_conditionFilters(filters),
+  m_conditionFilterInds(filterInds), m_tree(tree) {
 
   // create an empty vector of indices of satisfying jet groups
   // for each Condition.
@@ -181,9 +183,13 @@ bool FastReducer::findInitialJetGroups(const HypoJetVector& jv,
 
   for(const auto& leaf: leaves){
 
-    auto& filter = m_conditionFilters[leaf];
-    auto filtered_jets = filter->filter(jv, collector);
-
+    auto filtered_jets = jv;
+    auto& filter_ind = m_conditionFilterInds[leaf];
+    if (filter_ind != -1) {
+      const auto& filter = m_conditionFilters[filter_ind];
+      filtered_jets = filter->filter(filtered_jets, collector);
+    }
+    
     auto iters = std::make_pair(filtered_jets.begin(),
 				filtered_jets.end());
 

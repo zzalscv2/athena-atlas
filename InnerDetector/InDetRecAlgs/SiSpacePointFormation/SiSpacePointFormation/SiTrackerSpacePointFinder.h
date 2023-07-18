@@ -200,8 +200,9 @@ namespace InDet {
     bool m_selectSCTs;
     bool m_overlap; //!< process all overlapping SCT pairs if true.
     bool m_allClusters; //!< process all clusters without limits if true.
-
     bool m_cachemode{false}; //!< used for online MT counters
+    Gaudi::Property<bool> m_useDataPoolWithCache{
+        this, "useDataPoolWithCache", false, "use DataPool With Cache"};
     //@}
 
     /**
