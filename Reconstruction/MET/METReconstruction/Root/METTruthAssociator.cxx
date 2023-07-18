@@ -237,7 +237,7 @@ namespace met {
       // stable
       if(!truth->isGenStable()) continue;
       // interacting
-      if(MC::isNonInteracting(truth->pdgId())) continue;
+      if(!MC::isInteracting(truth->pdgId())) continue;
       if(truth->pt()<1 || fabs(truth->eta())>5) continue;
       ATH_MSG_VERBOSE("Accepted soft truth particle with pt " << truth->pt()
 		      << " status " << truth->status()
@@ -314,7 +314,7 @@ namespace met {
       // stable
       if(!truth->isGenStable()) continue;
       // interacting
-      if(MC::isNonInteracting(truth->pdgId())) continue;
+      if(!MC::isInteracting(truth->pdgId())) continue;
       float etasize = 0.025/2;
       float phisize = 0.025/2;
       bool isSuperCluster = false;
@@ -407,7 +407,7 @@ namespace met {
       // stable
       if(!truth->isGenStable()) continue;
       // interacting
-      if(MC::isNonInteracting(truth->pdgId())) continue;
+      if(!MC::isInteracting(truth->pdgId())) continue;
       float etasize(0.025/2);
       float phisize(0.025/2);
       bool isSuperCluster = false;

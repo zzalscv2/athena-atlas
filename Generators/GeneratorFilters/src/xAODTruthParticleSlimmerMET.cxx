@@ -85,7 +85,7 @@ StatusCode xAODTruthParticleSlimmerMET::execute()
           // which in turn use the implementation from Reconstruction
           //https://gitlab.cern.ch/atlas/athena/blob/21.0/Reconstruction/MET/METReconstruction/Root/METTruthTool.cxx#L143
           if (!theParticle->isGenStable()) continue;
-          if (!MC::isNonInteracting(theParticle->pdgId())) continue;
+          if (MC::isInteracting(theParticle->pdgId())) continue;
 
 
           xAOD::TruthParticle *xTruthParticle = new xAOD::TruthParticle();

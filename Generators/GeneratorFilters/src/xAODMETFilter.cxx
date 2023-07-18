@@ -17,7 +17,7 @@ xAODMETFilter::xAODMETFilter(const std::string& name, ISvcLocator* pSvcLocator)
 
 StatusCode xAODMETFilter::filterEvent() {
     
-  // Retrieve TruthMET container from xAOD MET slimmer, contains (MC::isGenStable() && MC::isNonInteracting()) particles
+  // Retrieve TruthMET container from xAOD MET slimmer, contains (MC::isGenStable() && !MC::isInteracting()) particles
   const xAOD::TruthParticleContainer* xTruthParticleContainer;
   if (evtStore()->retrieve(xTruthParticleContainer, "TruthMET").isFailure()) {
       ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthMET" << " found in StoreGate!");

@@ -14,7 +14,7 @@
 #include "PhotonTruthTool.h"
 #include "xAODEgamma/Photon.h"
 #include "AthenaKernel/errorcheck.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include <vector>
 #include <cmath>
 
