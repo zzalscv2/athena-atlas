@@ -313,7 +313,7 @@ template<> inline bool isBaryon(const DecodedPID& p){
 template<> inline bool isPentaquark(const DecodedPID& p){
   return (p.ndigits() == 9 && p(0) == 1 && 
   p.max_digit(1,6) < 6  && p.min_digit(1,6) > 0 && 
-  ( p(1) >= p(2) && p(2) >= p(3) && p(3) >= p(4)) );
+  ( p(3) >= p(4) && p(4) >= p(5) && p(5) >= p(6)) );
 }
 /// PDG rule 14
 ///The 9-digit tetra-quark codes are±1nrnLnq1nq20nq3nq4nJ. For the particleq1q2is a diquarkand 
@@ -322,9 +322,10 @@ template<> inline bool isPentaquark(const DecodedPID& p){
 /// with the same sorting except that eithernq1> nq3ornq2> nq4(so thatflavour-diagonal states are particles). 
 /// Thenr,nL, andnJnumbers have the same meaningas for ordinary hadrons.
 template<> inline bool isTetraquark(const DecodedPID& p){
-  return (p.ndigits() == 9 && p(0) == 1 && 
-      p.max_digit(1,5) < 6  && p.min_digit(1,5) > 0 && 
-     ( p(1) >= p(2)  && p(3) >= p(4)) && (p(1) > p(3)  || (p(1) == p(3) &&(p(2) >= p(4)))) 
+  return (p.ndigits() == 9 && p(0) == 1 && p(5) == 0 && 
+      p.max_digit(1,3) < 6  && p.min_digit(1,3) > 0 && 
+      p.max_digit(1+3,3+3) < 6  && p.min_digit(1+3,3+3) > 0 && 
+     ( p(3) >= p(4)  && p(6) >= p(7) ) &&  ( ( p(3) > p(6) ) || ( p(3) == p(6) && (p(4) >= p(7)))) 
   );
 }
 
@@ -451,8 +452,8 @@ template<> inline int charge3(const DecodedPID& p) {
   if (!classified && isMeson(p)) { classified = true; nq = 2; if ((*(p.second.rbegin()+2)) == 2||(*(p.second.rbegin()+2)) == 4 ) { sign=-1;} signmult =-1; }
   if (!classified && isDiquark(p)) {return triple_charge.at(p(0))+triple_charge.at(p(1)); }
   if (!classified && isBaryon(p)) { classified = true; nq = 3; } 
-  if (!classified && isTetraquark(p)){ classified = true; nq = 4; } 
-  if (!classified && isPentaquark(p)){classified = true;  nq = 5; } 
+  if (!classified && isTetraquark(p)){ return triple_charge.at(p(3)) + triple_charge.at(p(4)) - triple_charge.at(p(6)) - triple_charge.at(p(7)); } 
+  if (!classified && isPentaquark(p)){ return triple_charge.at(p(3)) + triple_charge.at(p(4)) + triple_charge.at(p(5)) + triple_charge.at(p(6)) - triple_charge.at(p(7)); } 
   if (!classified && isNucleus(p)) { classified = true; nq=0; result = 3*(p(3)*100 + p(4)*10 + p(5)) + (-1)*p(2);}
   if (!classified && isSUSY(p)) {  nq=0; auto apsusy = ap%1000000;  if (apsusy < TABLESIZE ) return p.pid() > 0 ? triple_charge.at(apsusy) : -triple_charge.at(apsusy); }
   for (auto r=p.second.rbegin()+1; r!=p.second.rbegin()+1+nq; ++r) {
