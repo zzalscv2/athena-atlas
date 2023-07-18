@@ -234,9 +234,10 @@ StatusCode MuonAlignmentCondAlg::parseDataFromJSON(const nlohmann::json& lines,
         newALine.setAmdbId(stationType, stationEta, stationPhi, multiLayer);
         newALine.setParameters(line["svalue"], line["zvalue"], line["tvalue"], 
                                line["tsv"], line["tzv"], line["ttv"]);
-        if (newALine && !writeALineCdo.insert(std::move(newALine)).second) {
-            ATH_MSG_FATAL("Failed to insert  A line for "<<m_idHelperSvc->toString(id));
-            return StatusCode::FAILURE;
+        auto aLineInsert = writeALineCdo.insert(newALine);
+        if (newALine && !aLineInsert.second) {
+            ATH_MSG_WARNING("Failed to insert  A line "<<newALine<<" for "<<m_idHelperSvc->toString(id)
+                            <<" because "<<(*aLineInsert.first)<<" has been added before");
         }
         ATH_MSG_VERBOSE("Inserted new a Line "<<newALine<<" "<<m_idHelperSvc->toString(id));
     
@@ -251,9 +252,10 @@ StatusCode MuonAlignmentCondAlg::parseDataFromJSON(const nlohmann::json& lines,
         newBLine.setIdentifier(id);
         newBLine.setAmdbId(stationType, stationEta, stationPhi, multiLayer);
         ATH_MSG_VERBOSE(" HardwareChamberName " <<  static_cast<std::string>(line["hwElement"]));
-        if (newBLine && !writeBLineCdo.insert(std::move(newBLine)).second){
-            ATH_MSG_FATAL("Failed to insert B line for "<<m_idHelperSvc->toString(id));
-            return StatusCode::FAILURE;
+        auto bLineInsert = writeBLineCdo.insert(newBLine);
+        if (newBLine && !bLineInsert.second){
+            ATH_MSG_WARNING("Failed to insert B line "<<newBLine<<" for "<<m_idHelperSvc->toString(id)
+                            <<" because "<<(*bLineInsert.first)<<" has been added before.");
         }
     }    
     return StatusCode::SUCCESS;
