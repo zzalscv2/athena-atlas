@@ -177,31 +177,7 @@ StatusCode JfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                 } 
                 
                 if( (dataTower->et_count()).at(0) != m_InvalidCode ){
-                    ATH_MSG_WARNING("Tower:"<< TTID << " source:"<< +dataTower->Calosource() << " for eventNumber:"<< GetEventInfo(ctx)->eventNumber()<< " and LB:"<<GetEventInfo(ctx)->lumiBlock() << ". DataTower Et:"<< (dataTower->et_count()).at(0) <<"/"<< DataEt<<" vs EmulatedTower Et:" << emulated_jtowerEt(*dataTower)<<"/"<< EmulatedEt);
-                    
-                    
-                    /*Commented block, needed for further debugging
-                    for(uint i=0;i<(dataTower->SCellEt()).size();i++){
-                        printf("%11.1f ",(dataTower->SCellEt()).at(i) );
-                    }
-                    printf("\n");
-                    
-                    for(uint i=0;i<(dataTower->SCellEta()).size();i++){
-                        printf("%5.2f/%5.2f ",(dataTower->SCellEta()).at(i),(dataTower->SCellPhi()).at(i) );
-                    }
-                    printf("\n");
-                    
-                    for(uint i=0;i<(dataTower->SCellEta()).size();i++){
-                        printf(" 0x%08x ",(dataTower->SCellID()).at(i) );
-                    }
-                    printf("\n");
-                    
-                    
-                    for(uint i=0;i<(dataTower->SCellEta()).size();i++){
-                        printf("%11d ",(dataTower->SCellMask()).at(i) );
-                    }
-                    printf("\n");
-                    */
+                    ATH_MSG_WARNING("Tower:"<< TTID << " source:"<< +dataTower->Calosource() << " for eventNumber:"<< GetEventInfo(ctx)->eventNumber()<< " and LB:"<<GetEventInfo(ctx)->lumiBlock() << ". DataTower Et:"<< (dataTower->et_count()).at(0) <<"/"<< DataEt<<" MeV vs EmulatedTower Et:" << emulated_jtowerEt(*dataTower)<<"/"<< EmulatedEt<< " MeV");
                     
                     frac_SCellSum = DataEt != 0 ? (EmulatedEt - DataEt)/DataEt : 0;
                     fill(m_Grouphist+"_decorated",Towereta,Towerphi,DataEt,EmulatedEt,frac_SCellSum);

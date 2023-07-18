@@ -87,7 +87,6 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     fillHist("DataNoSim" ,"jJ" ,inputTower ,1 ,jJ_data_UNmatched);
     fillHist("SimNoData" ,"jJ" ,inputTower ,1 ,jJ_simu_UNmatched);
     
-    
     /*************************/
     //        LR jets!
     /*************************/
@@ -194,7 +193,7 @@ template <typename T> std::vector<std::array<float,5> >  JfexSimMonitorAlgorithm
     std::vector< std::array<float,5> > matched;
     
     if(isInValid) return matched;
-
+    
     for(const auto tob1 : *tobs1Cont) {
 
         bool isMatched = false;
