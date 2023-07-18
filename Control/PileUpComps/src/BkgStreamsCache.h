@@ -13,7 +13,7 @@
 
 #include <string>
 #include <vector>
-#include <boost/function.hpp>
+#include <functional>
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -137,10 +137,10 @@ private:
   CLHEP::RandPoisson* m_collXingPoisson;
   /// function returning the number of collisions per bunch crossing
   /// before bunch structure modulation
-  boost::function0< long > m_f_collDistr;
+  std::function< long() > m_f_collDistr;
   /// function returning the number of bkg events per bunch crossing
   /// after bunch structure modulation
-  boost::function1< unsigned int, unsigned int > m_f_numberOfBackgroundForBunchCrossing;
+  std::function< unsigned int(unsigned int) > m_f_numberOfBackgroundForBunchCrossing;
   /// float scaling number of collisions per bunch crossing
   float m_collXingSF;
   /// bool apply scaling number of collisions per bunch crossing ?
