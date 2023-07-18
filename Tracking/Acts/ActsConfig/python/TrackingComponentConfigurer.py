@@ -38,6 +38,7 @@ class TrackingComponentConfigurer:
         self.ActsToAthenaClusterConverter = False
         self.ActsToAthenaSpacePointConverter = False
         self.ActsToAthenaSeedConverter = False
+        self.ActsToAthenaTrackConverter = False
 
         # Enable the requested configurations
         for req in configuration_requests:
@@ -122,6 +123,10 @@ class TrackingComponentConfigurer:
     def doActsToAthenaSeed(self) -> bool:
         return self.ActsToAthenaSeedConverter
 
+    @property
+    def doActsToAthenaTrack(self) -> bool:
+        return self.ActsToAthenaTrackConverter
+
     def producesActsClusters(self) -> bool:
         return self.ActsCluster or self.AthenaToActsClusterConverter
     
@@ -138,8 +143,13 @@ class TrackingComponentConfigurer:
         self.ActsCluster = True
         self.ActsSpacePoint = True
         self.ActsSeed = True
-        # Track finding is not yet in its final form
-        # thus, it is not enabled yet
+        # ActsTrack can be turned on and will work.
+        # However memory consumption is still a
+        # concern, so this is disabled in this workflow
+        self.ActsTrack = False
+        # Ambiguity resolution can follow if ActsTrack is 
+        # enabled. Ambi. can be activated/deactivated with 
+        # the flag: Acts.doAmbiguityResolution
 
     def ValidateActsClusters(self):
         self.ActsCluster = True
@@ -174,6 +184,7 @@ class TrackingComponentConfigurer:
         self.ActsSpacePoint = True
         self.ActsSeed = True
         self.ActsTrack = True
+        self.ActsToAthenaTrackConverter = True
 
     def BenchmarkSpot(self):
         # Very not-standard configuration

@@ -12,7 +12,6 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GaudiKernel/EventContext.h"
 #include "ActsEvent/TrackContainer.h"
-#include "TrkTrack/TrackCollection.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
@@ -64,7 +63,6 @@ namespace ActsTrk
                const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
                const ActsTrk::SeedContainer *seeds,
                ActsTrk::TrackContainer &tracksContainer,
-               ::TrackCollection &tracksCollection,
                size_t seedCollectionIndex,
                const char *seedType) const = 0;
 

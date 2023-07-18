@@ -26,45 +26,11 @@ def ActsTrkFindingToolCfg(
         "ExtrapolationTool",
         acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
     )  # PrivateToolHandle
-    from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
-    kwargs.setdefault(
-        "SummaryTool", acc.popToolsAndMerge(InDetTrackSummaryToolCfg(flags))
-    )  # PrivateToolHandle
     from ActsConfig.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
     kwargs.setdefault(
         "ATLASConverterTool",
         acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)),
     )
-
-    if flags.Detector.GeometryITk:
-        from InDetConfig.InDetBoundaryCheckToolConfig import ITkBoundaryCheckToolCfg
-
-        BoundaryCheckToolCfg = ITkBoundaryCheckToolCfg
-    else:
-        from InDetConfig.InDetBoundaryCheckToolConfig import InDetBoundaryCheckToolCfg
-
-        BoundaryCheckToolCfg = InDetBoundaryCheckToolCfg
-
-    kwargs.setdefault(
-        "BoundaryCheckTool",
-        acc.popToolsAndMerge(BoundaryCheckToolCfg(flags)),
-    )
-
-    if flags.Acts.doRotCorrection:
-        if flags.Detector.GeometryITk:
-            from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorCfg
-
-            RotCreatorCfg = ITkRotCreatorCfg
-        else:
-            from TrkConfig.TrkRIO_OnTrackCreatorConfig import InDetRotCreatorCfg
-
-            RotCreatorCfg = InDetRotCreatorCfg
-
-        kwargs.setdefault(
-            "RotCreatorTool",
-            acc.popToolsAndMerge(RotCreatorCfg(
-                flags, name="ActsRotCreatorTool")),
-        )
 
     if flags.Acts.doPrintTrackStates:
         kwargs.setdefault(
@@ -99,8 +65,6 @@ def ActsTrackStatePrinterCfg(
     return acc
 
 # ACTS only algorithm
-
-
 def ActsTrkFindingCfg(flags, name: str = "ActsTrkFindingAlg", **kwargs):
     acc = ComponentAccumulator()
 
@@ -125,8 +89,7 @@ def ActsTrkFindingCfg(flags, name: str = "ActsTrkFindingAlg", **kwargs):
                           "ITkStripEstimatedTrackParams")
         kwargs.setdefault('StripSeeds', 'ITkStripSeeds')
 
-    kwargs.setdefault("TracksLocation", "SiSPSeededActsTracks")
-
+    kwargs.setdefault('ACTSTracksLocation', 'ActsTracks')
 
     if flags.Acts.doAmbiguityResolution:
         kwargs.setdefault(

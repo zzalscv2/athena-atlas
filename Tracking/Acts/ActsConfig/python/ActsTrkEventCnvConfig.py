@@ -21,6 +21,48 @@ def TrkToActsConvertorAlgCfg(flags, name="", **kwargs):
         CompFactory.ActsTrk.TrkToActsConvertorAlg(name, **kwargs))
     return result
 
+def ActsToTrkConvertorAlgCfg(flags,
+                             name: str = "ActsToTrkConvertorAlg",
+                             **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    # convert proper ACTS track collection
+    # this depends on the ambi resol. activation
+    kwargs.setdefault('ACTSTracksLocation', 'ActsTracks' if not flags.Acts.doAmbiguityResolution else 'ActsTracksResolved')
+
+    from ActsConfig.ActsTrkGeometryConfig import ActsTrackingGeometryToolCfg
+    kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+
+    from ActsConfig.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
+    kwargs.setdefault("ATLASConverterTool", acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
+
+    BoundaryCheckToolCfg = None
+    if flags.Detector.GeometryITk:
+        from InDetConfig.InDetBoundaryCheckToolConfig import ITkBoundaryCheckToolCfg
+        BoundaryCheckToolCfg = ITkBoundaryCheckToolCfg
+    else:
+        from InDetConfig.InDetBoundaryCheckToolConfig import InDetBoundaryCheckToolCfg
+        BoundaryCheckToolCfg = InDetBoundaryCheckToolCfg
+
+    kwargs.setdefault("BoundaryCheckTool", acc.popToolsAndMerge(BoundaryCheckToolCfg(flags)))
+
+    from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
+    kwargs.setdefault("SummaryTool", acc.popToolsAndMerge(InDetTrackSummaryToolCfg(flags)))
+
+    if flags.Acts.doRotCorrection:
+        RotCreatorCfg = None
+        if flags.Detector.GeometryITk:
+            from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorCfg
+            RotCreatorCfg = ITkRotCreatorCfg
+        else:
+            from TrkConfig.TrkRIO_OnTrackCreatorConfig import InDetRotCreatorCfg
+            RotCreatorCfg = InDetRotCreatorCfg
+
+        kwargs.setdefault("RotCreatorTool", acc.popToolsAndMerge(RotCreatorCfg(flags, name="ActsRotCreatorTool")))
+
+    acc.addEventAlgo(CompFactory.ActsTrk.ActsToTrkConvertorAlg(name, **kwargs))
+    return acc
+
 def RunConversion():
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from TrkConfig.TrackCollectionReadConfig import TrackCollectionReadCfg

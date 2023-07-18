@@ -35,7 +35,6 @@ namespace ActsTrk
     ATH_CHECK(m_stripDetEleCollKey.initialize(SG::AllowEmpty));
     ATH_CHECK(m_pixelEstimatedTrackParametersKey.initialize(SG::AllowEmpty));
     ATH_CHECK(m_stripEstimatedTrackParametersKey.initialize(SG::AllowEmpty));
-    ATH_CHECK(m_tracksKey.initialize());
     ATH_CHECK(m_tracksContainerKey.initialize());
 
     if (not m_monTool.empty())
@@ -169,10 +168,6 @@ namespace ActsTrk
     // ===================== OUTPUTS ==================== //
     // ================================================== //
 
-    SG::WriteHandle<::TrackCollection> trackHandle = SG::makeHandle(m_tracksKey, ctx);
-    auto trackCollection = std::make_unique<::TrackCollection>();
-    ATH_MSG_DEBUG("    \\__ Tracks Collection `" << m_tracksKey.key() << "` created ...");
-
     auto trackContainerHandle = SG::makeHandle(m_tracksContainerKey, ctx);
     Acts::TrackContainer trackContainer{Acts::VectorTrackContainer{},
                                         ActsTrk::TrackStateBackend{}};
@@ -193,7 +188,6 @@ namespace ActsTrk
                                                *pixelEstimatedTrackParameters,
                                                pixelSeeds,
                                                trackContainer,
-                                               *trackCollection.get(),
                                                0,
                                                "pixel"));
     }
@@ -205,12 +199,11 @@ namespace ActsTrk
                                                *stripEstimatedTrackParameters,
                                                stripSeeds,
                                                trackContainer,
-                                               *trackCollection.get(),
                                                1,
                                                "strip"));
     }
 
-    ATH_MSG_DEBUG("    \\__ Created " << trackCollection->size() << " tracks");
+    ATH_MSG_DEBUG("    \\__ Created " << trackContainer.size() << " tracks");
 
     // ================================================== //
     // ===================== STORE OUTPUT =============== //
@@ -220,9 +213,6 @@ namespace ActsTrk
     ActsTrk::ConstTrackBackend trackBackend(trackContainer.container());
     auto constTrackContainer = std::make_unique<ActsTrk::ConstTrackContainer>(std::move(trackBackend), std::move(trackStateBackend));
     ATH_CHECK(trackContainerHandle.record(std::move(constTrackContainer)));
-
-    ATH_MSG_DEBUG("Storing Track Collection " << m_tracksKey.key());
-    ATH_CHECK(trackHandle.record(std::move(trackCollection)));
 
     return StatusCode::SUCCESS;
   }

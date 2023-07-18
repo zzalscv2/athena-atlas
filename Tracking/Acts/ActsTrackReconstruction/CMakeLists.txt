@@ -29,7 +29,6 @@ atlas_add_component( ActsTrackReconstruction
 		       xAODInDetMeasurement
 		       SiSpacePoint		     
 		       CxxUtils
-		       InDetRIO_OnTrack
 		       ActsGeometryLib
 		       EventPrimitives
 		       GeoPrimitives
@@ -46,7 +45,6 @@ atlas_add_component( ActsTrackReconstruction
                        TrkFitterUtils
                        TrkTrackSummary
 		       xAODTracking
-		       TrkToolInterfaces
 		       TrkFitterInterfaces
                      )
 

@@ -85,16 +85,17 @@ def ITkTrackingSiPatternCfg(flags,
 
         # ACTS track
         if configuration_settings.doActsTrack:
+            from ActsConfig.ActsTrkFindingConfig import ActsTrkFindingCfg
+            acc.merge(ActsTrkFindingCfg(flags))
 
-            from ActsConfig.ActsTrkFindingConfig import ActsTrkFindingCfg, ActsAmbiguityResolutionCfg
-            if configuration_settings.doAthenaTrack:
-                acc.merge(ActsTrkFindingCfg(flags))
-            else:  # send output TrackCollection to Athena ambiguity scorer etc
-                acc.merge(ActsTrkFindingCfg(
-                    flags,
-                    TracksLocation=SiSPSeededTrackCollectionKey))
             if flags.Acts.doAmbiguityResolution :
+                from ActsConfig.ActsTrkFindingConfig import ActsAmbiguityResolutionCfg
                 acc.merge(ActsAmbiguityResolutionCfg(flags))
+                
+        if configuration_settings.doActsToAthenaTrack:
+            from ActsConfig.ActsTrkEventCnvConfig import ActsToTrkConvertorAlgCfg
+            acc.merge(ActsToTrkConvertorAlgCfg(flags,
+                                               TracksLocation=SiSPSeededTrackCollectionKey))
 
     from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
     if flags.Tracking.doTruth:
