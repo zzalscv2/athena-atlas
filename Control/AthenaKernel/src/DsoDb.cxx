@@ -74,7 +74,7 @@ namespace {
   inline
   std::string to_string(const fs::path& p) 
   {
-    return p.u8string();
+    return p.string();
   }
 
   std::string getlibname(const std::string& libname)
