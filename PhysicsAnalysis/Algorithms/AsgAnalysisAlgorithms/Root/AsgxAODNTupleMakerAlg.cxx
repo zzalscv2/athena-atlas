@@ -717,7 +717,7 @@ namespace CP {
              << auxName << endmsg;
          return StatusCode::FAILURE;
       }
-      m_factory = reg.getFactory( *ti );
+      m_factory = reg.getFactory( m_acc->auxid() );
       if( ! m_factory ) {
          msg << MSG::ERROR << "No factory found for auxiliary variable: "
              << auxName << endmsg;
@@ -957,7 +957,7 @@ namespace CP {
              << auxName << endmsg;
          return StatusCode::FAILURE;
       }
-      m_factory = reg.getFactory( *ti );
+      m_factory = reg.getFactory( m_acc->auxid() );
       if( ! m_factory ) {
          msg << MSG::ERROR << "No factory found for auxiliary variable: "
              << auxName << endmsg;

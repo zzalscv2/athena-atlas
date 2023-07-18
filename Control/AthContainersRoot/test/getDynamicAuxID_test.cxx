@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -36,7 +36,8 @@ void test1 (SG::auxid_t a1_id)
                                false) == a1_id);
 
   const SG::IAuxTypeVectorFactory* fac;
-  fac = r.getFactory (typeid(AthContainersRootTest::Foo));
+  fac = r.getFactory (typeid(AthContainersRootTest::Foo),
+                      typeid(std::allocator<AthContainersRootTest::Foo>));
   assert  (fac == nullptr);
   SG::auxid_t foo_id = SG::getDynamicAuxID (typeid(AthContainersRootTest::Foo),
                                             "foo",
@@ -44,14 +45,16 @@ void test1 (SG::auxid_t a1_id)
                                             "std::vector<AthContainersRootTest::Foo>",
                                             false);
   assert (foo_id != SG::null_auxid);
-  fac = r.getFactory (typeid(AthContainersRootTest::Foo));
+  fac = r.getFactory (typeid(AthContainersRootTest::Foo),
+                      typeid(std::allocator<AthContainersRootTest::Foo>));
   assert  (fac != nullptr);
   assert (dynamic_cast<const SG::AuxTypeVectorFactory<AthContainersRootTest::Foo>*>(fac) != nullptr);
   assert (r.getName(foo_id) == "foo");
   assert (r.getTypeName(foo_id) == "AthContainersRootTest::Foo");
   assert (r.getVecTypeName(foo_id) == "std::vector<AthContainersRootTest::Foo>");
 
-  fac = r.getFactory (typeid(AthContainersRootTest::Bar));
+  fac = r.getFactory (typeid(AthContainersRootTest::Bar),
+                      typeid(std::allocator<AthContainersRootTest::Bar>));
   assert  (fac == nullptr);
   SG::auxid_t bar_id = SG::getDynamicAuxID (typeid(AthContainersRootTest::Bar),
                                             "bar",
@@ -59,14 +62,16 @@ void test1 (SG::auxid_t a1_id)
                                             "std::vector<AthContainersRootTest::Bar>",
                                             false);
   assert (bar_id != SG::null_auxid);
-  fac = r.getFactory (typeid(AthContainersRootTest::Bar));
+  fac = r.getFactory (typeid(AthContainersRootTest::Bar),
+                      typeid(std::allocator<AthContainersRootTest::Bar>));
   assert  (fac != nullptr);
   assert (dynamic_cast<const SG::RootAuxVectorFactory*>(fac) != nullptr);
   assert (r.getName(bar_id) == "bar");
   assert (r.getTypeName(bar_id) == "AthContainersRootTest::Bar");
   assert (r.getVecTypeName(bar_id) == "std::vector<AthContainersRootTest::Bar>");
 
-  fac = r.getFactory (typeid(AthContainersRootTest::Baz));
+  fac = r.getFactory (typeid(AthContainersRootTest::Baz),
+                      typeid(std::allocator<AthContainersRootTest::Baz>));
   assert  (fac == nullptr);
   SG::auxid_t baz_id = SG::getDynamicAuxID (typeid(AthContainersRootTest::Baz),
                                             "baz",
@@ -74,7 +79,8 @@ void test1 (SG::auxid_t a1_id)
                                             "AthContainersRootTest::Baz",
                                             true);
   assert (baz_id != SG::null_auxid);
-  fac = r.getFactory (typeid(AthContainersRootTest::Baz));
+  fac = r.getFactory (typeid(AthContainersRootTest::Baz),
+                      typeid(std::allocator<AthContainersRootTest::Baz>));
   assert  (fac != nullptr);
   assert (dynamic_cast<const SG::RootAuxVectorFactory*>(fac) != nullptr);
   assert (r.getName(baz_id) == "baz");

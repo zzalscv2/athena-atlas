@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/PackedContainer.h
@@ -17,6 +17,7 @@
 
 #include "AthContainersInterfaces/IAuxSetOption.h"
 #include "AthContainers/PackedParameters.h"
+#include "AthContainers/tools/AuxDataTraits.h"
 #include <vector>
 
 
@@ -43,7 +44,7 @@ namespace SG {
  * converted to a @c PackedContainer when @c setOption is called for the
  * variable.
  */
-template <class T, class ALLOC = std::allocator<T> >
+template <class T, class ALLOC = AuxAllocator_t<T> >
 class PackedContainer
   : public std::vector<T, ALLOC>, public IAuxSetOption
 {

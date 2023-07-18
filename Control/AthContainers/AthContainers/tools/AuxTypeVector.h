@@ -326,7 +326,7 @@ private:
  * instance as a member variable (and thus manages memory internally).
  */
 template <class T,
-          class ALLOC = std::allocator<T>,
+          class ALLOC = AuxAllocator_t<T>,
           class CONT = typename AuxDataTraits<T, ALLOC>::vector_type>
 class AuxTypeVector
   : public AuxTypeVectorHolder<T, CONT>

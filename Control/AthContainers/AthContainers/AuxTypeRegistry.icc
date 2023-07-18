@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/AuxTypeRegistry.icc
@@ -18,17 +18,19 @@ namespace SG {
  * @param clsname The name of its associated class.  May be blank.
  * @param flags Optional flags qualifying the type.  See above.
  *
- * The type of the item is given by the template parameter @c T.
+ * The type of the item is given by the template parameter @c T,
+ * and the @c ALLOC gives the type of the vector allocator.
  * If an item with the same name was previously requested
  * with a different type, then raise an @c AuxTypeMismatch exception.
  */
-template <class T>
+template <class T, class ALLOC>
 SG::auxid_t
 AuxTypeRegistry::getAuxID (const std::string& name,
                            const std::string& clsname /*= ""*/,
                            const Flags flags /*= Flags::None*/)
 {
-  return findAuxID (name, clsname, flags, typeid(T), &AuxTypeRegistry::makeFactory<T>);
+  return findAuxID (name, clsname, flags, typeid(T), &typeid(ALLOC), nullptr,
+                    &AuxTypeRegistry::makeFactory<T, ALLOC>);
 }
 
 
@@ -67,12 +69,15 @@ AuxTypeRegistry::Flags AuxTypeRegistry::getFlags (SG::auxid_t auxid) const
  *
  * This is passed to @c findAuxID when we're looking up an item
  * for which we know the type at compile-time.
+ *
+ * The ALLOC template parameter is the allocator to use
+ * for the resulting vector.
  */
-template <class T>
+template <class T, class ALLOC>
 inline
 IAuxTypeVectorFactory* AuxTypeRegistry::makeFactory() const
 {
-  return new SG::AuxTypeVectorFactory<T>;
+  return new SG::AuxTypeVectorFactory<T, ALLOC>;
 }
 
 

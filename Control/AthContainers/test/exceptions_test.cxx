@@ -37,8 +37,10 @@ void test1()
 
   std::cout << SG::ExcBadPrivateStore("op").what() << "\n";
 
-  std::cout << SG::ExcAuxTypeMismatch(id1, typeid(int), typeid(float)).what() << "\n";
-  std::cout << SG::ExcAuxTypeMismatch(id2, typeid(int), typeid(float)).what() << "\n";
+  std::cout << SG::ExcAuxTypeMismatch(id1, typeid(int), typeid(float),
+                                      "aaa", "aaa").what() << "\n";
+  std::cout << SG::ExcAuxTypeMismatch(id2, typeid(int), typeid(float),
+                                      "aaa", "bbb").what() << "\n";
 
   std::cout << SG::ExcInsertionInBaseClass("op", typeid(int), typeid(float)).what() << "\n";
 

@@ -166,7 +166,9 @@ ExcBadPrivateStore::ExcBadPrivateStore (const std::string& op)
 /// Helper: format exception error string.
 std::string excAuxTypeMismatch_format (SG::auxid_t auxid,
                                        const std::type_info& new_type,
-                                       const std::type_info& old_type)
+                                       const std::type_info& old_type,
+                                       const std::string& new_alloc_type,
+                                       const std::string& old_alloc_type)
 {
   std::ostringstream os;
   os << "SG::ExcAuxTypeMismatch: "
@@ -174,6 +176,11 @@ std::string excAuxTypeMismatch_format (SG::auxid_t auxid,
      << excFormatName (auxid)
      << "; old type is " << AthContainers_detail::typeinfoName (old_type)
      << " new type is "  << AthContainers_detail::typeinfoName (new_type);
+  if (old_alloc_type != new_alloc_type)
+  {
+    os << ".  Old allocator type is " << old_alloc_type
+       << " new allocator type is " << new_alloc_type;
+  }
   return os.str();
 }
 
@@ -183,12 +190,18 @@ std::string excAuxTypeMismatch_format (SG::auxid_t auxid,
  * @param auxid ID of the requested aux data item.
  * @param new_type New type requested for the item.
  * @param old_type Previous type associated with the item.
+ * @param new_alloc_type New allocator type requested for this item.
+ * @param old_alloc_type Previous allocator type associated with this item.
  */
 ExcAuxTypeMismatch::ExcAuxTypeMismatch (SG::auxid_t auxid,
                                         const std::type_info& new_type,
-                                        const std::type_info& old_type)
+                                        const std::type_info& old_type,
+                                        const std::string& new_alloc_type,
+                                        const std::string& old_alloc_type)
   : std::runtime_error (excAuxTypeMismatch_format (auxid,
-                                                   new_type, old_type))
+                                                   new_type, old_type,
+                                                   new_alloc_type,
+                                                   old_alloc_type))
 {
 }
 
