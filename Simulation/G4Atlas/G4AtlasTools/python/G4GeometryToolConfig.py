@@ -2,6 +2,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType, LHCPeriod
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 from AthenaCommon import Logging
 
@@ -685,6 +686,7 @@ def GeometryConfigurationToolsCfg(flags):
     return result
 
 
+@AccumulatorCache
 def G4AtlasDetectorConstructionToolCfg(flags, name="G4AtlasDetectorConstructionTool", **kwargs):
     result = ComponentAccumulator()
 
