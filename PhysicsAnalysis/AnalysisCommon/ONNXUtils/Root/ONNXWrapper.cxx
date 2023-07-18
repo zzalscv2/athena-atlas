@@ -8,7 +8,6 @@ ONNXWrapper::ONNXWrapper(std::string model_path) {
     //  init onnx envi
     m_onnxEnv = std::make_unique< Ort::Env >(ORT_LOGGING_LEVEL_WARNING, "");
 
-
     // initialize session options if needed
     m_session_options.SetIntraOpNumThreads(1);
     m_session_options.SetGraphOptimizationLevel(
@@ -89,7 +88,8 @@ std::map<std::string, std::vector<float>> ONNXWrapper::Run(
           n*=i;
         }
     if ( (p.second.size() % n) != 0){
-      throw std::invalid_argument("length of vector of inputs not compatible with model. Expect a multiple of n, got m");
+      
+      throw std::invalid_argument("For input '"+p.first+"' length not compatible with model. Expect a multiple of "+std::to_string(n)+", got "+std::to_string(p.second.size()));
     }
     else if (  p.second.size()!=(n_batches*n)){
       throw std::invalid_argument("number of batches not compatible with length of vector");
