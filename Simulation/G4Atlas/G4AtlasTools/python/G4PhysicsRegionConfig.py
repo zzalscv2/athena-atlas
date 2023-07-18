@@ -3,6 +3,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
 from SimulationConfig.SimEnums import BeamPipeSimMode
+from AthenaCommon.Logging import logging
 
 RegionCreator=CompFactory.RegionCreator
 
@@ -10,6 +11,7 @@ RegionCreator=CompFactory.RegionCreator
 # Beampipe Regions
 def BeampipeFwdCutPhysicsRegionToolCfg(flags, name='BeampipeFwdCutPhysicsRegionTool', **kwargs):
     result = ComponentAccumulator()
+    theLog = logging.getLogger("BeampipeFwdCutPhysicsRegionToolCfg")
     kwargs.setdefault("RegionName", 'BeampipeFwdCut')
     volumeList = []
     if flags.GeoModel.Run is LHCPeriod.Run1:
@@ -17,20 +19,20 @@ def BeampipeFwdCutPhysicsRegionToolCfg(flags, name='BeampipeFwdCutPhysicsRegionT
     else:
         volumeList = ['BeamPipe::SectionF198', 'BeamPipe::SectionF199', 'BeamPipe::SectionF200']
         if flags.GeoModel.Run > LHCPeriod.Run4:
-            print('BeampipeFwdCutPhysicsRegionToolCfg: WARNING check that RUN2 beampipe volume names are correct for this geometry tag')
+            theLog.warning('check that RUN2 beampipe volume names are correct for this geometry tag')
     kwargs.setdefault("VolumeList",  volumeList)
 
     if flags.Sim.BeamPipeSimMode is BeamPipeSimMode.FastSim:
         kwargs.setdefault("ElectronCut", 10.)
         kwargs.setdefault("PositronCut", 10.)
         kwargs.setdefault("GammaCut", 10.)
-        print('Adding fast sim model to the beampipe!')
+        theLog.info('Adding fast sim model to the beampipe!')
     else:
         assert flags.Sim.BeamPipeCut
         if flags.Sim.BeamPipeCut < 1:
             msg = "Setting the forward beam pipe range cuts to %e mm " % flags.Sim.BeamPipeCut
             msg += "-- cut is < 1 mm, I hope you know what you're doing!"
-            print(msg)
+            theLog.info(msg)
         if flags.Sim.BeamPipeSimMode is BeamPipeSimMode.EGammaRangeCuts:
             kwargs.setdefault("ElectronCut", flags.Sim.BeamPipeCut)
             kwargs.setdefault("PositronCut", flags.Sim.BeamPipeCut)
@@ -52,7 +54,8 @@ def FWDBeamLinePhysicsRegionToolCfg(flags, name='FWDBeamLinePhysicsRegionTool', 
     else:
         volumeList = ['BeamPipe::SectionF197']
         if flags.GeoModel.Run > LHCPeriod.Run4:
-            print('FWDBeamLinePhysicsRegionToolCfg: WARNING check that RUN2 beampipe volume names are correct for this geometry tag')
+            theLog = logging.getLogger("FWDBeamLinePhysicsRegionToolCfg")
+            theLog.warning('Check that RUN2 beampipe volume names are correct for this geometry tag')
     kwargs.setdefault("VolumeList",  volumeList)
     result.setPrivateTools(RegionCreator(name, **kwargs))
     return result
