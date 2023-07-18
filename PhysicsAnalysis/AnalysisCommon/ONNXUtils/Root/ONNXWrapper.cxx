@@ -1,13 +1,13 @@
-#include <ONNXUtils/ONNXWrapper.h>
+#include <MyAnalysis/ONNXUtils.h>
 
 ONNXWrapper::ONNXWrapper(std::string model_path) {
     
     // Use the path resolver to find the location of the network .onnx file
     m_modelPath = PathResolverFindCalibFile(model_path);
-    // if (m_modelPath == "") return StatusCode::FAILURE;
 
     //  init onnx envi
-    m_onnxEnv = std::make_unique< Ort::Env >(ORT_LOGGING_LEVEL_FATAL, "");
+    m_onnxEnv = std::make_unique< Ort::Env >(ORT_LOGGING_LEVEL_WARNING, "");
+
 
     // initialize session options if needed
     m_session_options.SetIntraOpNumThreads(1);
@@ -25,8 +25,7 @@ ONNXWrapper::ONNXWrapper(std::string model_path) {
 
     // get the output nodes
     m_nr_output = m_onnxSession->GetOutputCount();
-    
-    // std::cout << "------- input size: " << m_nr_inputs << "\n";
+     
 
     // iterate over all input nodes
     for (std::size_t i = 0; i < m_nr_inputs; i++) {
@@ -36,8 +35,6 @@ ONNXWrapper::ONNXWrapper(std::string model_path) {
 
       m_input_dims[input_name] = getShape(m_onnxSession->GetInputTypeInfo(i));
     }
-    // init input tensor
-    // std::vector<Ort::Value> input_tensor(m_nr_inputs);
 
     // iterate over all output nodes
     for(std::size_t i = 0; i < m_nr_output; i++ ) {
@@ -47,8 +44,6 @@ ONNXWrapper::ONNXWrapper(std::string model_path) {
 
       m_output_dims[output_name] = getShape(m_onnxSession->GetOutputTypeInfo(i));
 
-      // std::vector<float> output(m_output_dims[i][1], 0.0);
-      // m_outputs.push_back(output);
     }
 }
 
@@ -83,13 +78,9 @@ std::map<std::string, std::string> ONNXWrapper::GetMETAData() {
 
   return METAData_map;
 }
-// std::vector<std::vector<float>> ONNXWrapper::Run(
-//   std::map<std::string, std::vector<float>> inputs,
-//   int n_batches) { 
-//   }
 
 std::map<std::string, std::vector<float>> ONNXWrapper::Run(
-  std::map<std::string, std::vector<float>> inputs, int n_batches) { // ADDD custom input size
+  std::map<std::string, std::vector<float>> inputs, int n_batches) {
     for ( const auto &p : inputs ) // check for valid dimensions between batches and inputs
     {
       uint64_t n=1;
@@ -106,7 +97,6 @@ std::map<std::string, std::vector<float>> ONNXWrapper::Run(
 
     } 
     // Create a CPU tensor to be used as input
-    // std::cout << "------- Creating ONNX tensors: \n";
     Ort::MemoryInfo memory_info("Cpu", OrtDeviceAllocator, 0, OrtMemTypeDefault);
 
     // define input tensor
@@ -114,7 +104,6 @@ std::map<std::string, std::vector<float>> ONNXWrapper::Run(
     std::vector<Ort::Value> input_tensor;
 
     // add the inputs to vector
-    // for(std::size_t i = 0; i < m_nr_inputs; i++ ){
     for ( const auto &p : m_input_dims )   
     {        
       std::vector<int64_t> in_dims = p.second;
@@ -127,7 +116,6 @@ std::map<std::string, std::vector<float>> ONNXWrapper::Run(
     }
 
     // init output tensor and fill with zeros
-    // std::cout << "init output"<< "\n";
     std::map<std::string, std::vector<float>> outputs;
     for ( const auto &p : m_output_dims ) {     
       std::vector<int64_t> out_dims = p.second;
@@ -144,20 +132,6 @@ std::map<std::string, std::vector<float>> ONNXWrapper::Run(
                                                             out_dims.data(),
                                                             out_dims.size()));
     }
-    // std::vector<std::vector<float>> outputs;
-    // for(std::size_t i = 0; i < m_nr_output; i++ ){
-    //   // init output  
-    //   std::vector<float> output(m_output_dims[i][1], 0.0); 
-    // output_pt = (0.0), out_transport = (0,0,0) 
-    //   outputs.push_back(output);
-
-    //   // create output ort tensor 
-    //   output_tensor.push_back(Ort::Value::CreateTensor<float>(memory_info,
-    //                                                   outputs[i].data(),
-    //                                                   outputs[i].size(),
-    //                                                   m_output_dims[i].data(),
-    //                                                   m_output_dims[i].size()));
-    // }
 
     Ort::Session& session = *m_onnxSession;
 
