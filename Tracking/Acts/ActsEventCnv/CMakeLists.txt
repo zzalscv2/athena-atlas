@@ -22,6 +22,9 @@ atlas_add_library(ActsEventCnvLib
     xAODMeasurementBase
     xAODTracking
     ActsEventLib
+    TrkToolInterfaces
+    InDetPrepRawData
+    InDetRIO_OnTrack
 )
 
 atlas_add_component(ActsEventCnv

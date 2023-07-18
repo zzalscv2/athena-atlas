@@ -10,9 +10,6 @@
 #include "ActsToolInterfaces/ITrackFindingTool.h"
 
 // ATHENA
-#include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
-#include "TrkToolInterfaces/IBoundaryCheckTool.h"
-#include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 
 // ACTS
@@ -52,7 +49,6 @@ namespace ActsTrk
                const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
                const ActsTrk::SeedContainer *seeds,
                ActsTrk::TrackContainer &tracksContainer,
-               ::TrackCollection &tracksCollection,
                size_t seedCollectionIndex,
                const char *seedType) const override;
 
@@ -62,10 +58,7 @@ namespace ActsTrk
     // Tools
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "ActsExtrapolationTool"};
     ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
-    ToolHandle<Trk::IExtendedTrackSummaryTool> m_trkSummaryTool{this, "SummaryTool", "ToolHandle for track summary tool"};
     ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", "ActsToTrkConverterTool"};
-    ToolHandle<Trk::IBoundaryCheckTool> m_boundaryCheckTool{this, "BoundaryCheckTool", "InDet::InDetBoundaryCheckTool", "Boundary checking tool for detector sensitivities"};
-    ToolHandle<Trk::IRIO_OnTrackCreator> m_RotCreatorTool{this, "RotCreatorTool", "", "optional RIO_OnTrack creator tool"};
     ToolHandle<ActsTrk::ITrackStatePrinter> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
 
     // Configuration
@@ -83,16 +76,6 @@ namespace ActsTrk
                              const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
                              const Measurements &measurements) const;
 
-    size_t
-    makeTracks(const EventContext &ctx,
-               const Acts::GeometryContext &tgContext,
-               const ActsTrk::TrackContainer &tracks,
-               const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitOutput,
-               ::TrackCollection &tracksContainer) const;
-
-    std::unique_ptr<const Trk::MeasurementBase>
-    makeRIO_OnTrack(const xAOD::UncalibratedMeasurement &uncalibMeas,
-                    const Trk::TrackParameters *parm) const;
 
     // Access Acts::CombinatorialKalmanFilter etc using "pointer to implementation"
     // so we don't have to instantiate the heavily templated classes in the header.
@@ -113,6 +96,7 @@ namespace ActsTrk
 
     /// logging instance
     std::unique_ptr<const Acts::Logger> m_logger;
+
   };
 
 } // namespace

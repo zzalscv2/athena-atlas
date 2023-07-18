@@ -23,7 +23,6 @@ DECLARE_COMPONENT( ActsTrk::SeedingAlg )
 DECLARE_COMPONENT( ActsTrk::TrackFindingAlg )
 DECLARE_COMPONENT( ActsTrk::ActsReFitterAlg )
 DECLARE_COMPONENT( ActsTrk::ActsCompareTrackAlg )
-
 DECLARE_COMPONENT( ActsTrk::AmbiguityResolutionAlg )
 
 // Tools

@@ -288,7 +288,6 @@ namespace ActsTrk
 
 	ATH_CHECK( fillSpacePoints(ctx, spBuilder, neighbourElements, neighbourSourceLinks, overlapExtents, beamSpotVertex,
 					spacePoints, overlapSpacePoints) );
-
       }
 
     if (!m_sourceLinksOut.empty()) {
