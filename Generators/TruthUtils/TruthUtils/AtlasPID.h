@@ -193,6 +193,11 @@ template<class T> inline bool isLeptoQuark(const T& p){return isLeptoQuark(p->pd
 template<> inline bool isLeptoQuark(const int& p){ return std::abs(p) == LEPTOQUARK; }
 
 template<class T> inline bool isSUSY(const T& p){return isSUSY(p->pdg_id());}
+template<class T> inline bool isTechnicolor(const T& p){return isTechnicolor(p->pdg_id());}
+template<class T> inline bool isExcited(const T& p){return isExcited(p->pdg_id());}
+template<class T> inline bool isKK(const T& p){return isKK(p->pdg_id());}
+template<class T> inline bool isHiddenValley(const T& p){return isHiddenValley(p->pdg_id());}
+
 template<class T> inline bool isDiquark(const T& p){return isDiquark(p->pdg_id());}
 template<class T> inline bool isHadron(const T& p){return isHadron(p->pdg_id());}
 template<class T> inline bool isMeson(const T& p){return isMeson(p->pdg_id());}
@@ -228,6 +233,37 @@ template<> inline bool isGeantino(const int& p){ return (std::abs(p) ==  GEANTIN
 /// When mixing occurs, such asbetween the winos and charged Higgsinos to give charginos, or between left and rightsfermions, 
 /// the lighter physical state is given the smaller basis state number.
 template<> inline bool isSUSY(const DecodedPID& p){return (p.ndigits() == 7 && (p(0) == 1 || p(0) == 2 ) && isValid(p.shift(2)));}
+
+/// PDG rule 11e
+/// Technicolor states have n= 3, with technifermions treated like ordinary fermions. States which are ordinary color singlets
+/// have nr= 0. Color octets have nr= 1. If a state has non-trivial quantum numbers under the topcolor groups SU(3)1×SU(3)2, 
+/// the quantum numbers are specified by tech, ij, where i and j are 1 or 2. nLis then 2i+j. The coloron
+/// V8, is a heavy gluon color octet and thus is 3100021
+template<> inline bool isTechnicolor(const DecodedPID& p){return (p.ndigits() == 7 &&  p(0) == 3 && (p(1) == 0 || p(0) == 1) && isValid(p.shift(2)));}
+template<> inline bool isTechnicolor(const int& p){ auto value_digits = DecodedPID(p); return isTechnicolor(value_digits);}
+
+/// PDG rule 11f
+/// Excited (composite) quarks and leptons are identified by setting n= 4 and nr= 0
+template<> inline bool isExcited(const DecodedPID& p){return (p.ndigits() == 7 && (p(0) == 4 && p(1) == 0 ) && (isLepton(p.shift(2))||isQuark(p.shift(2))) );}
+template<> inline bool isExcited(const int& p){ auto value_digits = DecodedPID(p); return isExcited(value_digits);}
+
+/// PDG rule 11h
+/// A black hole in models with extra dimensions has code 5000040. Kaluza-Klein excitations in models with extra dimensions 
+/// have n= 5 or n= 6, to distinguish excitations of left-or right-handed fermions or, in case of mixing, the lighter or heavier 
+/// state (cf. 11d). The non zero nr digit gives the radial excitation number, in scenarios where the level spacing allows these to be
+///  distinguished. Should the model also contain supersymmetry, excited SUSY states would be denoted by a nnr>0, with n= 1 or 2 as usual. 
+/// Should some colored states be long-lived enough that hadrons would form around them, the coding strategy of 11g applies, with the initial 
+/// two nnr digits preserved in the combined code.
+template<> inline bool isKK(const DecodedPID& p){return (p.ndigits() == 7 && (p(0) == 5 || p(0) == 6 ) );}
+template<> inline bool isKK(const int& p){ auto value_digits = DecodedPID(p); return isExcited(value_digits);}
+
+
+/// PDG rule 11k
+/// Hidden Valley particles have n= 4 and nr= 9, and trailing numbers in agreement with their nearest-analog standard particles, 
+/// as far as possible. Thus 4900021 is the gauge boson gv of a confining gauge field, 490000 nqv and 490001 nlv fundamental 
+/// constituents charged or not under this, 4900022 is the γv of a non-confining field, and 4900 nqv1 nqv2 nJ a Hidden Valley meson.
+template<> inline bool isHiddenValley(const DecodedPID& p){return (p.ndigits() == 7 &&  p(0) == 4 && p(1) == 9 && isValid(p.shift(2)));}
+template<> inline bool isHiddenValley(const int& p){ auto value_digits = DecodedPID(p); return isHiddenValley(value_digits);}
 
 /// PDG rule 4
 /// Diquarks have 4-digit numbers with nq1 >= nq2 and nq3 = 0
@@ -314,7 +350,7 @@ template<> inline bool isBaryon(const DecodedPID& p){
 template<> inline bool isPentaquark(const DecodedPID& p){
   return (p.ndigits() == 9 && p(0) == 1 && 
   p.max_digit(1,6) < 6  && p.min_digit(1,6) > 0 && 
-  ( p(1) >= p(2) && p(2) >= p(3) && p(3) >= p(4)) );
+  ( p(3) >= p(4) && p(4) >= p(5) && p(5) >= p(6)) );
 }
 /// PDG rule 14
 ///The 9-digit tetra-quark codes are±1nrnLnq1nq20nq3nq4nJ. For the particleq1q2is a diquarkand 
@@ -323,9 +359,10 @@ template<> inline bool isPentaquark(const DecodedPID& p){
 /// with the same sorting except that eithernq1> nq3ornq2> nq4(so thatflavour-diagonal states are particles). 
 /// Thenr,nL, andnJnumbers have the same meaningas for ordinary hadrons.
 template<> inline bool isTetraquark(const DecodedPID& p){
-  return (p.ndigits() == 9 && p(0) == 1 && 
-      p.max_digit(1,5) < 6  && p.min_digit(1,5) > 0 && 
-     ( p(1) >= p(2)  && p(3) >= p(4)) && (p(1) > p(3)  || (p(1) == p(3) &&(p(2) >= p(4)))) 
+  return (p.ndigits() == 9 && p(0) == 1 && p(5) == 0 && 
+      p.max_digit(1,3) < 6  && p.min_digit(1,3) > 0 && 
+      p.max_digit(1+3,3+3) < 6  && p.min_digit(1+3,3+3) > 0 && 
+     ( p(3) >= p(4)  && p(6) >= p(7) ) &&  ( ( p(3) > p(6) ) || ( p(3) == p(6) && (p(4) >= p(7)))) 
   );
 }
 
@@ -349,6 +386,10 @@ template<> inline bool isBSM(const DecodedPID& p){
   if (std::abs(p.pid()) > 39 && std::abs(p.pid()) < 81) return true;
   if (std::abs(p.pid()) > 6 && std::abs(p.pid()) < 9) return true;
   if (isSUSY(p)) return true;
+  if (isTechnicolor(p)) return true;
+  if (isExcited(p)) return true;
+  if (isKK(p)) return true;
+  if (isHiddenValley(p)) return true;
   return false;
 }
 
@@ -452,8 +493,8 @@ template<> inline int charge3(const DecodedPID& p) {
   if (!classified && isMeson(p)) { classified = true; nq = 2; if ((*(p.second.rbegin()+2)) == 2||(*(p.second.rbegin()+2)) == 4 ) { sign=-1;} signmult =-1; }
   if (!classified && isDiquark(p)) {return triple_charge.at(p(0))+triple_charge.at(p(1)); }
   if (!classified && isBaryon(p)) { classified = true; nq = 3; } 
-  if (!classified && isTetraquark(p)){ classified = true; nq = 4; } 
-  if (!classified && isPentaquark(p)){classified = true;  nq = 5; } 
+  if (!classified && isTetraquark(p)){ return triple_charge.at(p(3)) + triple_charge.at(p(4)) - triple_charge.at(p(6)) - triple_charge.at(p(7)); } 
+  if (!classified && isPentaquark(p)){ return triple_charge.at(p(3)) + triple_charge.at(p(4)) + triple_charge.at(p(5)) + triple_charge.at(p(6)) - triple_charge.at(p(7)); } 
   if (!classified && isNucleus(p)) { classified = true; nq=0; result = 3*(p(3)*100 + p(4)*10 + p(5)) + (-1)*p(2);}
   if (!classified && isSUSY(p)) {  nq=0; auto apsusy = ap%1000000;  if (apsusy < TABLESIZE ) return p.pid() > 0 ? triple_charge.at(apsusy) : -triple_charge.at(apsusy); }
   for (auto r=p.second.rbegin()+1; r!=p.second.rbegin()+1+nq; ++r) {

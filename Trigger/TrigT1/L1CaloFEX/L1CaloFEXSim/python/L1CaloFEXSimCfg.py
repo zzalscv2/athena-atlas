@@ -161,6 +161,9 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
             decoderTools += [inputjFexTool]
             decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder", DecoderTools=[inputjFexTool], MaybeMissingROBs=maybeMissingRobs)
             acc.addEventAlgo(decoderAlg)
+            
+        from L1CaloFEXAlgos.FexEmulatedTowersConfig import jFexEmulatedTowersCfg
+        acc.merge(jFexEmulatedTowersCfg(flags,"jFexEmulatedTowerMaker"))      
         
         jFEXInputs = CompFactory.LVL1.jTowerMakerFromJfexTowers('jTowerMakerFromJfexTowers')
         jFEXInputs.IsMC = flags.Input.isMC

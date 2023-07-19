@@ -1,10 +1,12 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 
+@AccumulatorCache
 def ISFCollectionMergerCfg(flags,name="ISF_CollectionMerger", **kwargs):
     kwargs.setdefault( "InputBCMHits",              [ ] )
     kwargs.setdefault( "InputBLMHits",              [ ] )
@@ -33,14 +35,14 @@ def ISFCollectionMergerCfg(flags,name="ISF_CollectionMerger", **kwargs):
     kwargs.setdefault( "InputMMHits",               [ ] )
 
     hardscatterSG=""
-    if flags.hasFlag("Digitization.PileUp"):
-        if flags.Sim.DoFullChain and (flags.Digitization.PileUp is True):
-            hardscatterSG = "OriginalEvent_SG+"
-    else:
-        msg = logging.getLogger(name)
-        msg.info("Digitization flags are unavailable in AthSimulation.")
-        # FIXME: Digitization is not the AthSimulation project;
-        # support for FastChain may need to be added in the future.
+    from AthenaConfiguration.Enums import Project
+    if flags.Sim.DoFullChain:
+        if flags.Common.Project is Project.Athena:
+            if flags.Digitization.PileUp:
+                hardscatterSG = "OriginalEvent_SG+"
+        else:
+            msg = logging.getLogger(name)
+            msg.warning("Fast Chain running only supported in the Athena project.")
     if flags.Detector.EnableBCM and not flags.Sim.ISF.Simulator.usesFatras():
         kwargs.setdefault( "OutputBCMHits",             hardscatterSG+"BCMHits"             )
         kwargs.setdefault( "OutputBLMHits",             hardscatterSG+"BLMHits"             )

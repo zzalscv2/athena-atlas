@@ -1142,9 +1142,9 @@ namespace Trk {
       }
     }
 
-    std::unique_ptr<GXFMaterialEffects> firstscatmeff = std::make_unique<GXFMaterialEffects>(&calomeots[0]);
-    std::unique_ptr<GXFMaterialEffects> elossmeff = std::make_unique<GXFMaterialEffects>(&calomeots[1]);
-    std::unique_ptr<GXFMaterialEffects> secondscatmeff = std::make_unique<GXFMaterialEffects>(&calomeots[2]);
+    std::unique_ptr<GXFMaterialEffects> firstscatmeff = std::make_unique<GXFMaterialEffects>(calomeots[0]);
+    std::unique_ptr<GXFMaterialEffects> elossmeff = std::make_unique<GXFMaterialEffects>(calomeots[1]);
+    std::unique_ptr<GXFMaterialEffects> secondscatmeff = std::make_unique<GXFMaterialEffects>(calomeots[2]);
 
     double pull1 = std::abs(firstscatphi / firstscatmeff->sigmaDeltaPhi());
     double pull2 = std::abs(secondscatphi / secondscatmeff->sigmaDeltaPhi());
@@ -1474,9 +1474,9 @@ namespace Trk {
       }
     }
 
-    std::unique_ptr<GXFMaterialEffects> firstscatmeff = std::make_unique<GXFMaterialEffects>(&calomeots[0]);
-    std::unique_ptr<GXFMaterialEffects> elossmeff = std::make_unique<GXFMaterialEffects>(&calomeots[1]);
-    std::unique_ptr<GXFMaterialEffects> secondscatmeff = std::make_unique<GXFMaterialEffects>(&calomeots[2]);
+    std::unique_ptr<GXFMaterialEffects> firstscatmeff = std::make_unique<GXFMaterialEffects>(calomeots[0]);
+    std::unique_ptr<GXFMaterialEffects> elossmeff = std::make_unique<GXFMaterialEffects>(calomeots[1]);
+    std::unique_ptr<GXFMaterialEffects> secondscatmeff = std::make_unique<GXFMaterialEffects>(calomeots[2]);
 
     double dp = 0;
     double sigmadp = 0;
@@ -2632,7 +2632,7 @@ namespace Trk {
         !tsos->type(TrackStateOnSurface::Scatterer) or 
         (tsos->trackParameters() == nullptr)
       ) {
-        newmeff = std::make_unique<GXFMaterialEffects>(meff);
+        newmeff = std::make_unique<GXFMaterialEffects>(*meff);
       } else {
         Trk::MaterialProperties matprop(meff->thicknessInX0(), 1., 0., 0., 0., 0.);
         
@@ -2657,7 +2657,7 @@ namespace Trk {
           tsos->surface()
         );
         
-        newmeff = std::make_unique<GXFMaterialEffects>(&newmeot);
+        newmeff = std::make_unique<GXFMaterialEffects>(newmeot);
       }
       
       if (
@@ -3950,7 +3950,7 @@ namespace Trk {
             if (meb) {
               if (meb->derivedType() == MaterialEffectsBase::MATERIAL_EFFECTS_ON_TRACK) {
                 const MaterialEffectsOnTrack *meot = static_cast < const MaterialEffectsOnTrack * >(meb);
-                std::unique_ptr<GXFMaterialEffects> meff = std::make_unique<GXFMaterialEffects>(meot);
+                std::unique_ptr<GXFMaterialEffects> meff = std::make_unique<GXFMaterialEffects>(*meot);
                 const TrackParameters * newpars = (*matvec)[i]->trackParameters() != nullptr ? (*matvec)[i]->trackParameters()->clone() : nullptr;
                 meff->setSigmaDeltaE(0);
                 matstates.push_back(std::make_unique<GXFTrackState>(
@@ -4053,7 +4053,7 @@ namespace Trk {
             if (meb) {
               if (meb->derivedType() == MaterialEffectsBase::MATERIAL_EFFECTS_ON_TRACK) {
                 const MaterialEffectsOnTrack *meot = static_cast<const MaterialEffectsOnTrack *>(meb);
-                std::unique_ptr<GXFMaterialEffects> meff = std::make_unique<GXFMaterialEffects>(meot);
+                std::unique_ptr<GXFMaterialEffects> meff = std::make_unique<GXFMaterialEffects>(*meot);
                 if (cache.m_fiteloss && (meot->energyLoss() != nullptr)) {
                   meff->setSigmaDeltaE(meot->energyLoss()->sigmaDeltaE());
                 }
@@ -4121,7 +4121,7 @@ namespace Trk {
             return;
           }
 
-          std::unique_ptr<GXFMaterialEffects> meff = std::make_unique<GXFMaterialEffects>(&calomeots[i]);
+          std::unique_ptr<GXFMaterialEffects> meff = std::make_unique<GXFMaterialEffects>(calomeots[i]);
           
           if (i == 2) {
             lastcalopar = layerpar.get();
@@ -4180,7 +4180,7 @@ namespace Trk {
             return;
           }
           
-          std::unique_ptr<GXFMaterialEffects> meff = std::make_unique<GXFMaterialEffects>(&calomeots[i]);
+          std::unique_ptr<GXFMaterialEffects> meff = std::make_unique<GXFMaterialEffects>(calomeots[i]);
           
           if (i == 2) {
             firstcalopar = unique_clone(layerpar.get()).release();
@@ -4353,7 +4353,7 @@ namespace Trk {
             if (meb) {
               if ((meb->derivedType() ==  MaterialEffectsBase::MATERIAL_EFFECTS_ON_TRACK) and (j < (int) matvec->size() - 1)) {
                 const MaterialEffectsOnTrack *meot = static_cast<const MaterialEffectsOnTrack *>(meb);
-                std::unique_ptr<GXFMaterialEffects> meff = std::make_unique<GXFMaterialEffects>(meot);
+                std::unique_ptr<GXFMaterialEffects> meff = std::make_unique<GXFMaterialEffects>(*meot);
               
                 if (
                   !trajectory.m_straightline && 
@@ -4465,7 +4465,7 @@ namespace Trk {
 
               if ((meb->derivedType() == MaterialEffectsBase::MATERIAL_EFFECTS_ON_TRACK) && j < (int) matvec->size() - 1) {
                 const MaterialEffectsOnTrack *meot = static_cast<const MaterialEffectsOnTrack *>(meb);
-                std::unique_ptr<GXFMaterialEffects> meff = std::make_unique<GXFMaterialEffects>(meot);
+                std::unique_ptr<GXFMaterialEffects> meff = std::make_unique<GXFMaterialEffects>(*meot);
                 
                 if (
                   !trajectory.m_straightline && 

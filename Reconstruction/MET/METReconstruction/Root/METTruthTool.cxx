@@ -121,7 +121,7 @@ namespace met {
   {
     ATH_MSG_VERBOSE("Check nonint");
     // stable and non-interacting
-    return truth->isGenStable() && MC::isNonInteracting(truth->pdgId());
+    return truth->isGenStable() && !MC::isInteracting(truth->pdgId());
   }
 
   bool METTruthTool::accept_int(const xAOD::TruthParticle* truth) const
@@ -132,7 +132,7 @@ namespace met {
     // stable
     if(!truth->isGenStable()) return false;
     // interacting
-    if(MC::isNonInteracting(truth->pdgId())) return false;
+    if(!MC::isInteracting(truth->pdgId())) return false;
     // in acceptance
     if(fabs(truth->eta())>m_det_maxEta) return false;
 
@@ -152,7 +152,7 @@ namespace met {
     // stable
     if(!truth->isGenStable()) return false;
     // interacting
-    if(MC::isNonInteracting(truth->pdgId())) return false;
+    if(!MC::isInteracting(truth->pdgId())) return false;
 
     return true;
   }

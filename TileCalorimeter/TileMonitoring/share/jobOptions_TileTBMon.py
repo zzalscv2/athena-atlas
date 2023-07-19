@@ -12,6 +12,8 @@ from __future__ import print_function
 
 from os import system, popen
 from AthenaCommon.Logging import logging
+from AthenaConfiguration.AutoConfigFlags import GetFileMD
+from AthenaCommon.SystemOfUnits import GeV
 log = logging.getLogger( 'jobOptions_TileTBMon.py' )
 
 MaxEnergySetupFile = "/afs/cern.ch/user/t/tiledemo/public/efmon22/MaxEnergyInMonitoring.txt"
@@ -234,6 +236,11 @@ if not athenaCommonFlags.isOnline() or TestOnline:
     svcMgr.EventSelector.SkipEvents = EvtMin
     theApp.EvtMax = EvtMax
 
+    if  'beam_energy' not in dir():
+        energy = GetFileMD(FileNameVec).get('beam_energy', 0)
+        if energy > 0:
+            beam_energy = energy
+            log.info( "Beam energy auto configured is " + str(beam_energy) + " GeV")
 
     log.info( "InputDirectory is " + str(InputDirectory) )
     log.info( "RunNumber is " + str(FormattedRunNumber) )
@@ -321,8 +328,17 @@ if RunNumber >= 2200000:
     if RunNumber >= 2210456:
         UseDemoCabling = 2018
 
+if RunNumber >= 2310000:
+    ByteStreamCnvSvc.ROD2ROBmap += ["0x15",  "0x500000"]
+
 if TileFELIX:
-    ByteStreamCnvSvc.ROD2ROBmap += ["0x203", "0x500006"]
+    if RunNumber < 2310000:
+        ByteStreamCnvSvc.ROD2ROBmap += ["0x203", "0x500006"]
+    elif RunNumber < 2310439:
+        ByteStreamCnvSvc.ROD2ROBmap += ["0x201", "0x2"]
+    else:
+        ByteStreamCnvSvc.ROD2ROBmap += ["0x201", "0x520002"]
+        ByteStreamCnvSvc.ROD2ROBmap += ["0x402", "0x540003"]
 
 if 'PublishName' in dir():
     doTileOptATLAS = False
@@ -358,6 +374,8 @@ include( "TileRec/TileRec_jobOptions.py" )
 if doTileCells:
     # enable interpolation for dead cells
     doCaloNeighborsCorr = False
+    if not 'MaskBadChannels' in dir():
+        MaskBadChannels = False
     if TileBiGainRun:
         include( "TileRec/TileCellMaker_jobOptions_doublegain.py" )
         topSequence.CaloCellMakerHG.CaloCellMakerToolNames["TileCellBuilderHG"].UseDemoCabling = UseDemoCabling
@@ -367,7 +385,7 @@ if doTileCells:
     else:
         include('TileRec/TileCellMaker_jobOptions.py')
         topSequence.CaloCellMaker.CaloCellMakerToolNames["TileCellBuilder"].UseDemoCabling = UseDemoCabling
-        topSequence.CaloCellMaker.CaloCellMakerToolNames["TileCellBuilder"].maskBadChannels = False
+        topSequence.CaloCellMaker.CaloCellMakerToolNames["TileCellBuilder"].maskBadChannels = MaskBadChannels
         topSequence.CaloCellMaker.CaloCellMakerToolNames["TileCellBuilder"].mergeChannels = False
 
 from TileRecUtils.TileDQstatusAlgDefault import TileDQstatusAlgDefault
@@ -402,7 +420,11 @@ if doMonitoring:
                                            , MBTSCellContainerID = '' # used to check if the current event is collision
                                            # Masked format: 'module gain channel,channel' (channels are separated by comma)
                                            , Masked = ['LBC04 0 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47',
-                                                       'LBC04 1 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47']
+                                                       'LBC04 1 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47',
+                                                       'LBA01 0 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47',
+                                                       'LBA01 1 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47',
+                                                       'LBC01 0 36,37,38,39,40,41',
+                                                       'LBC01 1 36,37,38,39,40,41']
                                            , CellContainer       = CellContainerMonitored
                                            , MaxTotalEnergy      = MaxTotalEnergy
                                            , CellEnergyThreshold = CellEnergyThreshold)
@@ -445,7 +467,7 @@ if doMonitoring:
             TileTBBeamMonTool.BC2HorizontalSlope = -0.176083
             TileTBBeamMonTool.BC2VerticalOffset = +0.49177
             TileTBBeamMonTool.BC2VerticalSlope = -0.18221
-        else:
+        elif RunNumber < 2310000:
             # June TB2022
             TileTBBeamMonTool.BC1HorizontalOffset = -0.566211
             TileTBBeamMonTool.BC1HorizontalSlope = -0.0513049
@@ -455,6 +477,18 @@ if doMonitoring:
             TileTBBeamMonTool.BC2HorizontalSlope = -0.0523055
             TileTBBeamMonTool.BC2VerticalOffset = -0.0602012
             TileTBBeamMonTool.BC2VerticalSlope =  -0.0532108
+        else:
+            # July TB2023
+            TileTBBeamMonTool.BC1HorizontalOffset = 2.465295
+            TileTBBeamMonTool.BC1HorizontalSlope = -0.072135
+            TileTBBeamMonTool.BC1VerticalOffset = 2.127854
+            TileTBBeamMonTool.BC1VerticalSlope = -0.073442
+            TileTBBeamMonTool.BC2HorizontalOffset = -0.317171
+            TileTBBeamMonTool.BC2HorizontalSlope = -0.075384
+            TileTBBeamMonTool.BC2VerticalOffset = 1.875657
+            TileTBBeamMonTool.BC2VerticalSlope = -0.076717
+
+            TileTBBeamMonTool.MaskMuonPMTs = [7] # Mask PMTs in total energy for Muon Wall
 
 
     topSequence.TileTBMonManager.AthenaMonTools += [ TileTBBeamMonTool ]

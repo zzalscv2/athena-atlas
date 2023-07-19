@@ -1099,7 +1099,14 @@ def TgcRawDataMonitoringConfig(inputFlags):
                     rmask_coverage = 'coin_inner_tgc_forward'
 
             ### Evt 1D and 2D histograms ###
+            if Region == '':
+                myGroupCoin.defineHistogram('coin_inner_'+det+'_roiEta,coin_inner_'+det+'_roiPhi;InnerCoin_Evt2D_'+Det+'_EtaVsPhi',
+                                            title='InnerCoin_Evt2D_'+Det+'_EtaVsPhi;RoI Eta;RoI Phi',
+                                            path=coinPath,type='TH2F',xbins=100,xmin=-2.5,xmax=2.5,ybins=48,ymin=-math.pi,ymax=math.pi)
             if (Det != 'Nsw' and Region == '') or (Det == 'Nsw' and Region != ''):
+                myGroupCoin.defineHistogram('coin_inner_'+det+'_roiNum,coin_inner_'+det+'_slSector'+region+';InnerCoin_Evt2D_'+Det+Region+'_SectorVsRoI',
+                                            title='InnerCoin_Evt2D_'+Det+Region+'_SectorVsRoI;RoI;SL Trigger Sector +1  (>0 for A, <0 for C)',
+                                            path=coinPath,type='TH2F',ybins=nsectors*2+1,ymin=-1*nsectors-0.5,ymax=nsectors+0.5,xbins=nrois,xmin=-0.5,xmax=nrois-0.5)
                 myGroupCoin.defineHistogram('coin_inner_'+det+'_slSector'+region+',coin_inner_'+det+'_deltaBcid;InnerCoin_Evt2D_'+Det+Region+'_SectorVsDeltaBcid',
                                             title='InnerCoin_Evt2D_'+Det+Region+'_SectorVsDeltaBcid;SL Trigger Sector +1  (>0 for A, <0 for C);Delta Bcid ('+Det+' - ATLAS)',
                                             path=coinPath,type='TH2F',xbins=nsectors*2+1,xmin=-1*nsectors-0.5,xmax=nsectors+0.5,ybins=31,ymin=-15.5,ymax=15.5)
@@ -1115,6 +1122,7 @@ def TgcRawDataMonitoringConfig(inputFlags):
                 myGroupCoin.defineHistogram('coin_inner_'+det+'_slSector'+region+',coin_inner_'+det+'_deltaTiming;InnerCoin_Evt2D_'+Det+Region+'_SectorVsDeltaTiming_goodBcid0',
                                             title='InnerCoin_Evt2D_'+Det+Region+'_SectorVsDeltaTiming_goodBcid0;SL Trigger Sector +1  (>0 for A, <0 for C);Delta Signal Timing',
                                             path=coinPath,type='TH2F',cutmask='coin_inner_'+det+'_goodBcid0',xbins=nsectors*2+1,xmin=-1*nsectors-0.5,xmax=nsectors+0.5,ybins=11,ymin=-5.5,ymax=5.5)
+
                 ### Bcid matching window scan ### 
                 for bcid in ['','0','1','2']:
                     goodBcid = '_goodBcid'+bcid if bcid != '' else ''
@@ -1123,6 +1131,7 @@ def TgcRawDataMonitoringConfig(inputFlags):
                                                 title='InnerCoin_Evt2D_'+Det+Region+'_SectorVsLB_BcCurr'+goodBcid+';Lumi Block;SL Trigger Sector +1  (>0 for A, <0 for C)',
                                                 path=coinPath,type='TH2F',cutmask=cmask,ybins=nsectors*2+1,ymin=-1*nsectors-0.5,ymax=nsectors+0.5,xbins=100,xmin=0.5,xmax=100.5,
                                                 opt='kAddBinsDynamically', merge='merge')
+
             ### Efficiency and Reduction ###
             for htype in ['Eff','Reduction']:
                 fake = '_fake' if htype == 'Reduction' else ''
@@ -1181,7 +1190,6 @@ def TgcRawDataMonitoringConfig(inputFlags):
                             myGroupCoin.defineHistogram('coin_inner_tgc_currBc'+Det+goodBcid+',coin_inner_tgc'+fake+'_eta;InnerCoin_'+htype+'1D_'+Det+'_Eta_Bc'+Bunch+goodBcid,
                                                         title='InnerCoin_'+htype+'1D_'+Det+'_Eta_Bc'+Bunch+goodBcid+';RoI Eta;Efficiency',
                                                         path=coinPath,type='TEfficiency',xbins=100,xmin=-2.5,xmax=2.5)
-
 
     #Tile inner coincidence
     myGroupCoin.defineHistogram('coin_inner_tile2_slSector,coin_inner_tile2_tmdbDecisions;InnerCoin_Evt2D_Tile_SectorVsTmdbDecisions',

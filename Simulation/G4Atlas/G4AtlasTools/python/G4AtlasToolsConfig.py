@@ -3,8 +3,10 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
 from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, LArParameterization
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 
+@AccumulatorCache
 def FastSimulationToolListCfg(flags):
     result = ComponentAccumulator()
     tools = []
@@ -18,7 +20,9 @@ def FastSimulationToolListCfg(flags):
             tools += [ result.popToolsAndMerge(SimpleFastKillerCfg(flags)) ]
     if flags.Detector.GeometryLAr:
         if flags.Sim.LArParameterization is LArParameterization.NoFrozenShowers:
-            print( "getFastSimulationMasterTool INFO No Frozen Showers" )
+            from AthenaCommon.Logging import logging
+            msg = logging.getLogger("FastSimulationToolListCfg")
+            msg.info( "Not using Frozen Showers" )
         else:
             from LArG4FastSimulation.LArG4FastSimulationConfig import EMBFastShowerCfg, EMECFastShowerCfg, FCALFastShowerCfg, FCAL2FastShowerCfg
             # We run production with LArParameterization.FrozenShowersFCalOnly, so the EMB and EMEC tools are not required
