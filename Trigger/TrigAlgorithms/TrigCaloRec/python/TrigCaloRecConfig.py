@@ -60,7 +60,7 @@ def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None,
     from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg, CaloDataAccessSvcDependencies
     acc.merge(trigCaloDataAccessSvcCfg(flags))
     #choose RoI for fullscan
-    if not roisKey:
+    if (roisKey == 'UNSPECIFIED'):
         from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
         roisKey = mapThresholdToL1RoICollection("FSNOSEED")
     # choose cells name given parameters

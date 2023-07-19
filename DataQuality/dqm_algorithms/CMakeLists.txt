@@ -4,7 +4,7 @@
 atlas_subdir( dqm_algorithms )
 
 # External dependencies:
-find_package( Boost COMPONENTS program_options filesystem thread system )
+find_package( Boost COMPONENTS program_options thread system )
 find_package( ROOT COMPONENTS MathCore Hist Core Tree RIO pthread )
 find_package( tdaq-common COMPONENTS dqm_core_io dqm_core dqm_dummy_io dqm_dummy )
 find_package( COOL COMPONENTS CoolKernel CoolApplication )

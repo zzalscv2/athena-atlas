@@ -40,7 +40,7 @@ class jTowerMakerFromJfexTowers : public AthAlgorithm
         SG::ReadHandleKey<xAOD::jFexTowerContainer> m_EmulTowerKey {this, "InputEmulatedTowers", "L1_jFexEmulatedTowers", "If specified, will fallback to this collection of towers if the first collection is incomplete/empty"};
         
         //Gaudi properties
-        Gaudi::Property<bool> m_UseEmulated {this, "UseEmulated", false, "It switches off the CaloCell -> Jtower path. It uses instead L1_jFexDataTowers and L1_jFexEmulatedTowers "};
+        Gaudi::Property<bool> m_UseEmulated {this, "UseEmulated", true, "It switches off the CaloCell -> Jtower path. It uses instead L1_jFexDataTowers and L1_jFexEmulatedTowers "};
         Gaudi::Property<bool> m_isMC {this, "IsMC", false, "Is used to know when we run on data. So L1_jFexDataTowers can be present"};
 
         
