@@ -5,6 +5,7 @@ input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitori
 n_events=5
 
 Reco_tf.py --CA \
+  --preExec "flags.Exec.FPE=500;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateClustersFlags" \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.pool.root \
