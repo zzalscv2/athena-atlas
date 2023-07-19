@@ -51,6 +51,7 @@ filter_bs.args += ' -s Main ' + find_file('*_HLTMPPy_output.*.data')
 tzrecoPreExec = ' '.join([
   "flags.Trigger.triggerMenuSetup=\'Cosmic_run3_v1\';",
   "flags.Trigger.AODEDMSet=\'AODFULL\';",
+  "flags.Exec.FPE=500;",
 ])
 
 tzreco = ExecStep.ExecStep('Tier0Reco')
