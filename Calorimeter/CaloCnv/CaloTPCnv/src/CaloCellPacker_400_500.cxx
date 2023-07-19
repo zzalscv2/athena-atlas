@@ -20,6 +20,7 @@
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "AthenaKernel/errorcheck.h"
 #include "AthenaKernel/ThinningDecisionBase.h"
+#include "CxxUtils/AthUnlikelyMacros.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
@@ -677,7 +678,7 @@ double CaloCellPacker_400_500::unpack_time
   // Unpack to a float.
   int underflow;
   double time = pars.m_logat_field.out (data, underflow);
-  if (UNLIKELY(underflow))
+  if (ATH_UNLIKELY(underflow))
     return 0;
 
   // Exponentiate, and restore the sign.
