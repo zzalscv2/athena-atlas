@@ -3,9 +3,8 @@
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaMonitoring.DQConfigFlags import DQDataType
 
-if 'DQMonFlags' not in dir():
-    from AthenaMonitoring.DQMonFlags import DQMonFlags as dqflags
 
 class TrigBphysMonAlgBuilder:
 
@@ -91,17 +90,18 @@ class TrigBphysMonAlgBuilder:
   def get_monitoring_mode(self):
 
     self.__logger.info("TrigBphysMonToolBuilder.get_monitoring_mode()")
-    self.data_type = dqflags.monManDataType()
-    if self.data_type == 'monteCarlo': 
+    self.data_type = self.helper.flags.DQ.DataType
+
+    if self.data_type is DQDataType.MC:
       self.mc_mode = True
       return True
-    elif self.data_type == 'collisions': 
+    elif self.data_type is DQDataType.Collisions:
       self.pp_mode = True
       return True
-    elif self.data_type == 'heavyioncollisions': 
+    elif self.data_type is DQDataType.HeavyIon:
       self.hi_mode = True
       return True
-    elif self.data_type == 'cosmics':
+    elif self.data_type is DQDataType.Cosmics:
       self.cosmic_mode = True
       return True
     else:
