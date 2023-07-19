@@ -23,7 +23,7 @@ atlas_add_component( InDetPhysValMonitoring
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
 atlas_install_joboptions( share/*.py share/*.txt )
-atlas_install_runtime( share/*.xml share/*.xsd)
+atlas_install_runtime( share/*.xml share/*.dtd share/*.xsd)
 atlas_install_runtime( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # build postprocessing program 
@@ -64,7 +64,7 @@ atlas_add_test( InDetPlotBase_test
 )
 
 atlas_add_test( ValidateXml_test
-                SCRIPT "xmllint ${CMAKE_CURRENT_SOURCE_DIR}/share/InDetPVMPlotDefRun2.xml --schema ${CMAKE_CURRENT_SOURCE_DIR}/share/hdefSchema.xsd --noent --noout"
+                SCRIPT "xmllint ${CMAKE_CURRENT_SOURCE_DIR}/share/InDetPVMPlotDefRun2.xml --schema ${CMAKE_CURRENT_SOURCE_DIR}/share/hdefSchema.xsd --loaddtd --noent --noout"
                 POST_EXEC_SCRIPT "nopost.sh" 
 )
 
