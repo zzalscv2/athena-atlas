@@ -69,17 +69,6 @@ class TrigTauMonAlgBuilder:
             isComboChain = True
         return isComboChain        
 
-      # CAUTION: Works only for no combined chains
-      def L1thresh(self):
-        thresh = []
-        splits = self.chain().split("_")
-        for split in splits:
-            if split.startswith('L1'):
-                for word in split:
-                   if word.isdigit():
-                      thresh.append(int(word))
-        return thresh
-
       def L1seed(self):
         l1seed = ''
         splits = self.chain().split("_")
@@ -538,24 +527,18 @@ class TrigTauMonAlgBuilder:
 
     monGroup = self.helper.addGroup( monAlg, monGroupName,
                               self.basePath+'/'+monGroupPath )
+ 
+    binning = [0,500]
+    if 'tau0' in trigger: binning  = list(range(0,80,5)) + list(range(80,120,10))+list(range(120,160,20))+list(range(160,240,40))+list(range(240,420,60)) + [500]
+    elif 'tau20' in trigger: binning  = list(range(15,80,5)) + list(range(80,120,10))+list(range(120,160,20))+list(range(160,240,40))+list(range(240,420,60)) + [500]
+    elif 'tau25' in trigger: binning  = list(range(20,80,5)) + list(range(80,120,10))+list(range(120,160,20))+list(range(160,240,40))+list(range(240,420,60)) + [500]
+    elif 'tau35' in trigger: binning  = list(range(30,80,5)) + list(range(80,120,10))+list(range(120,160,20))+list(range(160,240,40))+list(range(240,420,60)) + [500]
+    elif 'tau60' in trigger: binning  = list(range(55,80,5)) + list(range(80,120,10))+list(range(120,160,20))+list(range(160,240,40))+list(range(240,420,60)) + [500]
+    elif 'tau80' in trigger: binning  = [75,80] + list(range(80,120,10))+list(range(120,160,20))+list(range(160,240,40))+list(range(240,420,60)) + [500]
+    elif 'tau160' in trigger: binning = [155,160] + list(range(160,240,40))+list(range(240,420,60)) + [500]
+    elif 'tau200' in trigger: binning = [195,200,240] + list(range(240,420,60)) + [500]
 
-    info = self.getTrigInfo(trigger) 
-    l1th = []    
-    if(not info.isComboChain()):
-      l1th = info.L1thresh()
-
-    thresh=''
-    for i in range(1,len(l1th)):
-       thresh=thresh+str(l1th[i])
-
-    etmin=0.
-    etmax=250.
-    
-    if len(l1th) !=  0:
-       etmin=int(thresh)
-       etmax=5*int(thresh)
-
-    monGroup.defineHistogram('hEFEt', title='EF Et;E_{T}[GeV];Nevents',xbins=50,xmin=etmin,xmax=etmax,opt='kAlwaysCreate')
+    monGroup.defineHistogram('hEFEt', title='EF Et;E_{T}[GeV];Nevents',xbins=binning, opt='kAlwaysCreate')
     monGroup.defineHistogram('hEFEta', title='EF TrigCaloCluster Eta; #eta ; Nevents',xbins=26,xmin=-2.6,xmax=2.6,opt='kAlwaysCreate')
     monGroup.defineHistogram('hEFPhi', title='EF TrigCaloCluster Phi; #phi ; Nevents',xbins=16,xmin=-3.2,xmax=3.2,opt='kAlwaysCreate')
     monGroup.defineHistogram('hEFnTrack', title='EF number of tracks;number of tracks;Nevents',xbins=10,xmin=0,xmax=10,opt='kAlwaysCreate')
@@ -563,9 +546,9 @@ class TrigTauMonAlgBuilder:
     monGroup.defineHistogram('hEFEta,hEFPhi', type='TH2F', title='Eta vs Phi; #eta ; #phi',
                                xbins=26,xmin=-2.6,xmax=2.6,ybins=16,ymin=-3.2,ymax=3.2,opt='kAlwaysCreate')
     monGroup.defineHistogram('hEFEt,hEFPhi', type='TH2F',  title='Et vs Phi; E_{T} [GeV]; #phi',
-                               xbins=50,xmin=etmin,xmax=etmax,ybins=16,ymin=-3.2,ymax=3.2,opt='kAlwaysCreate') 
+                               xbins=binning, ybins=16,ymin=-3.2,ymax=3.2,opt='kAlwaysCreate') 
     monGroup.defineHistogram('hEFEt,hEFEta', type='TH2F',  title='Et vs Eta; E_{T} [GeV]; #eta',
-                               xbins=50,xmin=etmin,xmax=etmax,ybins=26,ymin=-2.6,ymax=2.6,opt='kAlwaysCreate')
+                               xbins=binning, ybins=26,ymin=-2.6,ymax=2.6,opt='kAlwaysCreate')
    
     monGroup.defineHistogram('hEFnWideTrack', title='EF number of wide tracks;number of tracks;Nevents',xbins=10,xmin=0,xmax=10,opt='kAlwaysCreate')
 
