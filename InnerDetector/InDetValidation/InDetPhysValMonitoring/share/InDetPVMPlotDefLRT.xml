@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" media="screen" href="hdefhtml.xsl"?>
 <?xml-stylesheet type="text/xsl" media="tty" href="hdeftty.xsl" alternate="yes"?>
-<!DOCTYPE hdef SYSTEM "InDetPVMPlotDefCommon.dtd" [
-<!ENTITY % ITKOverrides SYSTEM "InDetPVMPlotDefITK.dtd">
-%ITKOverrides;
+<!DOCTYPE hdef SYSTEM "InDetPVMPlotDefCommon.dtd"[
+<!-- eta coverage of the tracker -->
+<!ENTITY ETA "3.0">
+
+<!-- Tracking Recommendation Plots -->
+<!ENTITY EtaBinsTrkRec "120">
 ]>
 
 <hdef xmlns:xi="http://www.w3.org/2001/XInclude">
   <!-- Plots common to Run2 and ITK -->
   &Common;
-  <!-- ITK-specific plots -->
-  &CommonITK;
+  <!-- Run2 specific plots -->
+  &CommonRun2;
 </hdef>
