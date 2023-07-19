@@ -168,8 +168,9 @@ namespace top {
                "Failed to set b-tagging systematics to exclude from EV treatment");
     top::check(btageff->initialize(), "Failed to initialize " + bTagWPName);
     // Check the excludedSysts - Cannot check before the tool is initialised
-    top::check(this->checkExcludedSysts(btageff, m_excluded_systs),
-               "Incorrect excluded systematics have been provided.");
+    if (this->checkExcludedSysts(btageff, m_excluded_systs) != StatusCode::SUCCESS) {
+        ATH_MSG_WARNING("Incorrect excluded systematics have been provided.");
+    }
     m_btagging_efficiency_tools.push_back(btageff);
     return StatusCode::SUCCESS;
   }
