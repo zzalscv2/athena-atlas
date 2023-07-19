@@ -124,7 +124,7 @@ def defineMenu():
         'L1_J12_BGRP12',
 
         # jJ 
-        'L1_jJ30', 'L1_jJ30p0ETA25', 'L1_jJ40', 'L1_jJ40p0ETA25', 'L1_jJ50', 'L1_jJ55',  'L1_jJ55p0ETA23',
+        'L1_jJ30', 'L1_jJ30_EMPTY', 'L1_jJ30p0ETA25', 'L1_jJ40', 'L1_jJ40p0ETA25', 'L1_jJ50', 'L1_jJ55',  'L1_jJ55p0ETA23',
         'L1_jJ60', 'L1_jJ60_EMPTY', 'L1_jJ60_FIRSTEMPTY', 'L1_jJ70p0ETA23', 'L1_jJ80', 'L1_jJ80p0ETA25', 'L1_jJ85p0ETA21', 'L1_jJ90',
         'L1_jJ125', 'L1_jJ140', 'L1_jJ160', 'L1_jJ180', 'L1_jJ500',
         'L1_jJ500_LAR',
