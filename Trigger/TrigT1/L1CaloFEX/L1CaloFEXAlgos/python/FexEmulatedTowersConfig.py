@@ -6,7 +6,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
 
-def jFexEmulatedTowersCfg(flags, name, writeKey="L1_jFexEmulatedTowers"):
+def jFexEmulatedTowersCfg(flags, name="jFexEmulatedTowerMaker", writeKey="L1_jFexEmulatedTowers"):
     """
     Config for emulating jFex input data from LATOME readout
     """
@@ -14,6 +14,7 @@ def jFexEmulatedTowersCfg(flags, name, writeKey="L1_jFexEmulatedTowers"):
     
     emulator = CompFactory.LVL1.jFexEmulatedTowers(name)
     emulator.jTowersWriteKey = writeKey 
+    emulator.isDATA = not flags.Input.isMC 
     acc.addEventAlgo(emulator)
 
     return acc

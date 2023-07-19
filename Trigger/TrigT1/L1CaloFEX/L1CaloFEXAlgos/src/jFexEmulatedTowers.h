@@ -55,6 +55,7 @@ class jFexEmulatedTowers : public AthReentrantAlgorithm{
         
         //property for jFEX mapping
         Gaudi::Property<bool> m_apply_masking {this, "SCellMasking", true, "Applies masking. Only use for data"};
+        Gaudi::Property<bool> m_isDATA        {this, "isDATA"      , true, "Tells the algorithm if it is data. Used for xAOD::TriggerTower WARNING due to the 0 supresion"};
         Gaudi::Property<bool> m_doThinning    {this, "DoThinning"  , true, "Remove overlapped towers. Only FPGA Core region is saved"};
         
         //property for jFEX mapping
