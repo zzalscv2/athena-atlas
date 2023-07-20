@@ -46,13 +46,13 @@ def signatureSpecificSettingOfFlags(flags,mode):
   flags.seedFilterLevel     = 0
   
   if flags.isLRT:
-    flags.minClusters         = 8
-    flags.nHolesGapMax        = 1
-    flags.nWeightedClustersMin= 8
-    flags.maxSiHoles          = 2
-    flags.maxSCTHoles         = 1
-    flags.maxPixelHoles       = 1
-    flags.maxDoubleHoles      = 0
+    flags.minClusters         = 8 if mode=="InDet" else [8]
+    flags.nHolesGapMax        = 1 if mode=="InDet" else [1]
+    flags.nWeightedClustersMin= 8 if mode=="InDet" else [8]
+    flags.maxSiHoles          = 2 if mode=="InDet" else [2]
+    flags.maxSCTHoles         = 1 if mode=="InDet" else [1]
+    flags.maxPixelHoles       = 1 if mode=="InDet" else [1]
+    flags.maxDoubleHoles      = 0 if mode=="InDet" else [0]
     
   if flags.input_name=="cosmics":
     flags.minPT               = 0.5*Units.GeV
