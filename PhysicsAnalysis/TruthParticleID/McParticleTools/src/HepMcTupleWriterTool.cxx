@@ -123,11 +123,7 @@ StatusCode HepMcTupleWriterTool::execute()
 
 StatusCode HepMcTupleWriterTool::write( const HepMC::GenEvent* evt )
 {
-#ifdef HEPMC3
-  m_particles.m_nParticles = std::min<std::size_t>( s_nMax, evt->particles().size() );
-#else  
   m_particles.m_nParticles = std::min<std::size_t>( s_nMax, evt->particles_size() );
-#endif
   std::size_t i = 0;
   for (const auto& p: *evt)
   {

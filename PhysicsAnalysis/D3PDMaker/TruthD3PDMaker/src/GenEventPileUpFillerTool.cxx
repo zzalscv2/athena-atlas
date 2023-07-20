@@ -66,11 +66,7 @@ namespace D3PD {
    /// pileUpType=5: dummy event used to separate types
    /// pileUpType=-1: not filled
    StatusCode GenEventPileUpFillerTool::fill( const HepMC::GenEvent& p ) {
-#ifdef HEPMC3
-      *m_nparticle = p.particles().size();
-#else
       *m_nparticle = p.particles_size();
-#endif
 
       *m_pileUpType = -1;
 

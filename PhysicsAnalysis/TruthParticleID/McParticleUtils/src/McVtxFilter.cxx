@@ -129,13 +129,8 @@ bool McVtxFilter::isAccepted( HepMC::ConstGenVertexPtr vtx ) const
 {
   ATH_MSG_VERBOSE("In McVtxFilter::isAccepted(...)");
 //AV TODO: add here a check to prevent null pointer dereference
-#ifdef HEPMC3
-  unsigned int number_particles_out = vtx->particles_out().size();
-  unsigned int number_particles_in  = vtx->particles_in().size();
-#else
   unsigned int number_particles_out = vtx->particles_out_size();
   unsigned int number_particles_in  = vtx->particles_in_size();
-#endif
   ////////////////////////////////////////////////////////////////
   /// First handle special case where the filter has only 1 child
   /// and no parent : one is looking for a stable particle with
@@ -318,15 +313,9 @@ bool McVtxFilter::checkParentBranch( HepMC::ConstGenVertexPtr vtx ) const
   }
 
   /// Check if number of parents is OK
-#ifdef HEPMC3
-  if ( static_cast<unsigned int>(vtx->particles_in().size()) < m_parentList.size() ){
-    return false;
-  }
-#else
   if ( static_cast<unsigned int>(vtx->particles_in_size()) < m_parentList.size() ){
     return false;
   }
-#endif
 
   if ( msgLvl(MSG::VERBOSE) ) {
     msg() << MSG::VERBOSE
@@ -391,11 +380,7 @@ bool McVtxFilter::checkChildBranch( HepMC::ConstGenVertexPtr vtx ) const
   }
 
   /// Check there is enough outgoing particles in the current vertex
-#ifdef HEPMC3
-  if ( static_cast<unsigned int>(vtx->particles_out().size()) < m_childList.size() ) return false;
-#else
   if ( static_cast<unsigned int>(vtx->particles_out_size()) < m_childList.size() ) return false;
-#endif
   ATH_MSG_VERBOSE("Number of list of children : " << m_childList.size());
 
   std::vector<int> childIds;

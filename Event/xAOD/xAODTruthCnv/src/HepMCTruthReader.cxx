@@ -65,12 +65,7 @@ StatusCode HepMCTruthReader::execute() {
 void HepMCTruthReader::printEvent(const HepMC::GenEvent* event) {
   cout << "--------------------------------------------------------------------------------\n";
   cout << "GenEvent: #" << "NNN" << "\n";
-#ifdef HEPMC3 
-  cout << " Entries this event: " << event->vertices().size() << " vertices, " << event->particles().size() << " particles.\n";
-#else 
   cout << " Entries this event: " << event->vertices_size() << " vertices, " << event->particles_size() << " particles.\n";
-  // Particles and vertices
-#endif
   cout << "                                    GenParticle Legend\n";
   cout << "        Barcode   PDG ID      ( Px,       Py,       Pz,     E ) Stat  DecayVtx\n";
   cout << "--------------------------------------------------------------------------------\n";

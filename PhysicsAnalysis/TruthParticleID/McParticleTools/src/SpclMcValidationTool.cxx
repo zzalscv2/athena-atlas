@@ -134,11 +134,7 @@ SpclMcValidationTool::executeTool( const McEventCollection* mcEvents,
     return StatusCode::FAILURE;
   }
 
-#ifdef HEPMC3
-  int particles_size=genEvt->particles().size();
-#else
   int particles_size=genEvt->particles_size();
-#endif
   if ( static_cast<int>( mcParts->size() ) != particles_size ) {
     ATH_MSG_ERROR("TruthParticleContainer and McEventCollection don't have "\
 		  "the same number of particles !!" << endmsg

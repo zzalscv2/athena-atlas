@@ -787,11 +787,7 @@ StatusCode ISF_HitAnalysis::execute()
      if(!mcEvent->empty()) {
        int particleIndex=0;
        int loopEnd = m_NtruthParticles;
-#ifdef HEPMC3
-       int particles_size=(*mcEvent->begin())->particles().size();
-#else
        int particles_size=(*mcEvent->begin())->particles_size();
-#endif
        if(loopEnd==-1) {
          loopEnd = particles_size; //is this the correct thing?
        }

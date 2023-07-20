@@ -242,13 +242,8 @@ TruthParticleTest* makeTestData()
   test->m_g1         = g1;
   test->m_g2         = g2;
   // we subtract one because we don't account for the top
-#ifdef HEPMC3
-  test->m_nPartsIn   = vtx->particles_in().size() - 1; 
-  test->m_nPartsOut  = vtx->particles_out().size();
-#else
   test->m_nPartsIn   = vtx->particles_in_size() - 1; 
   test->m_nPartsOut  = vtx->particles_out_size();
-#endif
 
   test->m_nCones = TruthParticleParameters::NbrOfCones;
   for ( std::size_t i = 0; 

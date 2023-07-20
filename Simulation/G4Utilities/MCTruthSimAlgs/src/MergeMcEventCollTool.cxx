@@ -297,11 +297,7 @@ void MergeMcEventCollTool::printDetailsOfMergedMcEventCollection() const {
       const int signal_process_id(HepMC::signal_process_id((*outputEventItr))), event_number((*outputEventItr)->event_number()), separator_hack(HepMC::mpi((*outputEventItr)));
       const IndexKey key(makekey(signal_process_id,event_number,separator_hack));
       const PileUpBackgroundMap::const_iterator event(m_backgroundClassificationMap.find(key));
-#ifdef HEPMC3
-      ATH_MSG_INFO ( "GenEvent #"<<event_number<<", signal_process_id="<<signal_process_id<<", category="<<event->second<<", number of Vertices="<<(*outputEventItr)->vertices().size() );
-#else
       ATH_MSG_INFO ( "GenEvent #"<<event_number<<", signal_process_id="<<signal_process_id<<", category="<<event->second<<", number of Vertices="<<(*outputEventItr)->vertices_size() );
-#endif
       ++outputEventItr;
     }
     ATH_MSG_INFO ( "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" );
@@ -540,11 +536,7 @@ StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection 
     //keep vertices with outgoing particles
     for (int type(INTIME); type<NOPUTYPE; ++type) {
       if (!pCopyOfVertexForClassification[type]) continue;
-#ifdef HEPMC3
-      int n_particles_out=pCopyOfVertexForClassification[type]->particles_out().size();
-#else
       int n_particles_out=pCopyOfVertexForClassification[type]->particles_out_size();
-#endif
       if (m_saveType[type] && (n_particles_out > 0) ) {
         updateClassificationMap(spi, currentBkgEventIndex, 0, type, false);
       }
@@ -642,11 +634,7 @@ StatusCode MergeMcEventCollTool::compressOutputMcEventCollection() {
         ++currentClassification;
         continue;
       }
-#ifdef HEPMC3
-      if((*outputEventItr)->vertices().empty()) {
-#else
       if((*outputEventItr)->vertices_empty()) {
-#endif
         //Delete empty GenEvent
         outputEventItr=m_pOvrlMcEvColl->erase(outputEventItr);
         ATH_MSG_VERBOSE( "compressOutputMcEventCollection() Removed Empty GenEvent #" << event_number << ", signal_process_id(" << signal_process_id << "), category = " << currentClassification);

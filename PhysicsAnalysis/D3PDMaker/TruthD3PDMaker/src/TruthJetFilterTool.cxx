@@ -170,17 +170,10 @@ TruthJetFilterTool::buildMcAod (const McEventCollection* mc_in, McEventCollectio
     CHECK( filterEvent (ev_in, ev_out) );
 
     // Maybe throw out empty GenEvent's.
-#ifdef HEPMC3
-    if (m_removeEmpty && ev_out->particles().empty())
-      delete ev_out;
-    else
-      mc_out->push_back (ev_out);
-#else
     if (m_removeEmpty && ev_out->particles_empty())
       delete ev_out;
     else
       mc_out->push_back (ev_out);
-#endif
 
     // If we don't want pileup, only do the first GenEvent.
     if (!m_doPileup)
