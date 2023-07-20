@@ -93,8 +93,7 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
    --maxEvents -1 \
    --outputRDOFile output.RDO.root \
    --preInclude 'HITtoRDO:Campaigns.MC23NoPileUp' \
-   --postInclude 'PyJobTransforms.UseFrontier' \
-   --detectors Pixel SCT
+   --postInclude 'PyJobTransforms.UseFrontier' 
  echo "art-result: $? digi"
 
  run RunRDOAnalysis.py \
