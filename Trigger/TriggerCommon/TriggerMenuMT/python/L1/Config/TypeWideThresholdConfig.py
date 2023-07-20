@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from collections import OrderedDict as odict
+from dataclasses import dataclass
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -332,7 +333,9 @@ def getConfig_jEM():
 
     return confObj
 
-def getConfig_eTAU():
+
+@dataclass
+class L1Config_eTAU():
     bitshift_rCore = 3
     bitshift_rHad = 3
     rCore_fw_loose = 2  # rCore = 1 - (3x2)/(9x2), rCore > threshold -> pass
@@ -341,122 +344,143 @@ def getConfig_eTAU():
     rHad_fw_loose = 10 # PLACEHOLDER
     rHad_fw_medium = 72 # Only for HM, does not affect L/M/T which cut only on rCore
     rHad_fw_tight = 72
-    confObj = odict()
-    confObj["workingPoints"] = odict()
-    # Working points here translate to cuts on both rCore and rHad
-    # For individual thresholds, rCore and rHad working points are
-    # set independently, so the two variables are not coupled
-    # L1Topo firmware only has 2 bits, allowing None/Loose/Medium/Tight values
-    confObj["workingPoints"]["Loose"] = [
-        odict([("rCore", eFEXfwToFloatConversion(rCore_fw_loose,bitshift_rCore)), ("rCore_fw", rCore_fw_loose), 
-               ("rHad", eFEXfwToFloatConversion(rHad_fw_loose,bitshift_rHad)), ("rHad_fw", rHad_fw_loose),
-              ]), 
-    ]
-    confObj["workingPoints"]["Medium"] = [
-        odict([("rCore", eFEXfwToFloatConversion(rCore_fw_medium,bitshift_rCore)), ("rCore_fw", rCore_fw_medium), 
-               ("rHad", eFEXfwToFloatConversion(rHad_fw_medium,bitshift_rHad)), ("rHad_fw", rHad_fw_medium), 
-             ]),
-    ]
-    confObj["workingPoints"]["Tight"] = [
-        odict([("rCore", eFEXfwToFloatConversion(rCore_fw_tight,bitshift_rCore)), ("rCore_fw", rCore_fw_tight), 
-               ("rHad", eFEXfwToFloatConversion(rHad_fw_tight,bitshift_rHad)), ("rHad_fw", rHad_fw_tight), 
-             ]),
-    ]
 
-    confObj["ptMinToTopo"] = 5 # PLACEHOLDER
-    confObj["resolutionMeV"] = 100
-    confObj["maxEt"] = 50 # PLACEHOLDER
 
-    # Check that FW values are integers
-    for wp in confObj["workingPoints"]:
-        for ssthr in confObj["workingPoints"][wp]:
-            for ssthr_i in ssthr:
-                if "_fw" in ssthr_i:
-                     if not isinstance(ssthr[ssthr_i], int):
-                          raise RuntimeError("Threshold %s in eTAU configuration is not an integer!", ssthr_i )
+    def __call__(self) -> odict:
+        confObj = odict()
+        confObj["workingPoints"] = odict()
+        # Working points here translate to cuts on both rCore and rHad
+        # For individual thresholds, rCore and rHad working points are
+        # set independently, so the two variables are not coupled
+        # L1Topo firmware only has 2 bits, allowing None/Loose/Medium/Tight values
+        confObj["workingPoints"]["Loose"] = [
+            odict([("rCore", eFEXfwToFloatConversion(self.rCore_fw_loose,self.bitshift_rCore)), ("rCore_fw", self.rCore_fw_loose), 
+                   ("rHad", eFEXfwToFloatConversion(self.rHad_fw_loose,self.bitshift_rHad)), ("rHad_fw", self.rHad_fw_loose),
+                  ]), 
+        ]
+        confObj["workingPoints"]["Medium"] = [
+            odict([("rCore", eFEXfwToFloatConversion(self.rCore_fw_medium,self.bitshift_rCore)), ("rCore_fw", self.rCore_fw_medium), 
+                   ("rHad", eFEXfwToFloatConversion(self.rHad_fw_medium,self.bitshift_rHad)), ("rHad_fw", self.rHad_fw_medium), 
+                 ]),
+        ]
+        confObj["workingPoints"]["Tight"] = [
+            odict([("rCore", eFEXfwToFloatConversion(self.rCore_fw_tight,self.bitshift_rCore)), ("rCore_fw", self.rCore_fw_tight), 
+                   ("rHad", eFEXfwToFloatConversion(self.rHad_fw_tight,self.bitshift_rHad)), ("rHad_fw", self.rHad_fw_tight), 
+                 ]),
+        ]
+        confObj["ptMinToTopo"] = 5 # PLACEHOLDER
+        confObj["resolutionMeV"] = 100
+        confObj["maxEt"] = 50 # PLACEHOLDER
 
-    # Check that T >= M >= L [ATR-27796]
-    for var in ["rCore_fw","rHad_fw"]:
-        validate_ordering(var,"Loose","Medium",confObj["workingPoints"])
-        validate_ordering(var,"Medium","Tight",confObj["workingPoints"])
+        # Check that FW values are integers
+        for wp in confObj["workingPoints"]:
+            for ssthr in confObj["workingPoints"][wp]:
+                for ssthr_i in ssthr:
+                    if "_fw" in ssthr_i:
+                         if not isinstance(ssthr[ssthr_i], int):
+                              raise RuntimeError("Threshold %s in eTAU configuration is not an integer!", ssthr_i )
+                         elif ssthr[ssthr_i] < 0:
+                            raise RuntimeError("Threshold %s in eTAU configuration is negative!", ssthr_i )
+                         
+        # Check that T >= M >= L [ATR-27796]
+        for var in ["rCore_fw","rHad_fw"]:
+            validate_ordering(var,"Loose","Medium",confObj["workingPoints"])
+            validate_ordering(var,"Medium","Tight",confObj["workingPoints"])
 
-    return confObj
+        return confObj
 
-def getConfig_cTAU():
-    isolation_fw_loose = 410
-    isolation_fw_medium = 358
-    isolation_fw_tight = 307 # PLACEHOLDER
+getConfig_eTAU = L1Config_eTAU()
 
-    confObj = odict()
-    confObj["workingPoints"] = odict()
-    confObj["workingPoints"]["Loose"] = [
-        odict([("isolation", cTAUfwToFlowConversion(isolation_fw_loose)), ("isolation_fw", isolation_fw_loose)]),
-    ]
-    confObj["workingPoints"]["Medium"] = [
-        odict([("isolation", cTAUfwToFlowConversion(isolation_fw_medium)), ("isolation_fw", isolation_fw_medium)]),
-    ]
-    confObj["workingPoints"]["Tight"] = [
-        odict([("isolation", cTAUfwToFlowConversion(isolation_fw_tight)), ("isolation_fw", isolation_fw_tight)]),
-    ]
-    confObj["resolutionMeV"] = 100
 
-    # Check that FW values are integers
-    for wp in confObj["workingPoints"]:
-        for ssthr in confObj["workingPoints"][wp]:
-            for ssthr_i in ssthr:
-                if "_fw" in ssthr_i:
-                     if not isinstance(ssthr[ssthr_i], int):
-                          raise RuntimeError("Threshold %s in cTAU configuration is not an integer!", ssthr_i )
+@dataclass
+class L1Config_cTAU():
+    isolation_fw_loose: int = 410
+    isolation_fw_medium: int = 358
+    isolation_fw_tight: int = 307 # PLACEHOLDER
 
-    # Check that T >= M >= L [ATR-27796]
-    # Ordering is inverted here: larger value is looser
-    for var in ["isolation_fw"]:
-        validate_ordering(var,"Medium","Loose",confObj["workingPoints"])
-        validate_ordering(var,"Tight","Medium",confObj["workingPoints"])
-    return confObj
+    def __call__(self) -> odict:
+        confObj = odict()
+        confObj["workingPoints"] = odict()
+        confObj["workingPoints"]["Loose"] = [
+            odict([("isolation", cTAUfwToFlowConversion(self.isolation_fw_loose)), ("isolation_fw", self.isolation_fw_loose)]),
+        ]
+        confObj["workingPoints"]["Medium"] = [
+            odict([("isolation", cTAUfwToFlowConversion(self.isolation_fw_medium)), ("isolation_fw", self.isolation_fw_medium)]),
+        ]
+        confObj["workingPoints"]["Tight"] = [
+            odict([("isolation", cTAUfwToFlowConversion(self.isolation_fw_tight)), ("isolation_fw", self.isolation_fw_tight)]),
+        ]
+        confObj["resolutionMeV"] = 100
 
-def getConfig_jTAU():
-    isolation_fw_loose = 410
-    isolation_fw_medium = 358 # PLACEHOLDER
-    isolation_fw_tight = 307 # PLACEHOLDER
+        # Check that FW values are integers
+        for wp in confObj["workingPoints"]:
+            for ssthr in confObj["workingPoints"][wp]:
+                for ssthr_i in ssthr:
+                    if "_fw" in ssthr_i:
+                         if not isinstance(ssthr[ssthr_i], int):
+                              raise RuntimeError("Threshold %s in cTAU configuration is not an integer!", ssthr_i )
+                         elif ssthr[ssthr_i] < 0:
+                            raise RuntimeError("Threshold %s in cTAU configuration is negative!", ssthr_i )
 
-    confObj = odict()
-    confObj["workingPoints"] = odict()
-    confObj["workingPoints"]["Loose"] = [
-        odict([("isolation", cTAUfwToFlowConversion(isolation_fw_loose)), ("isolation_fw", isolation_fw_loose), 
-              ]),
-    ]
-    confObj["workingPoints"]["Medium"] = [
-        odict([("isolation", cTAUfwToFlowConversion(isolation_fw_medium)), ("isolation_fw", isolation_fw_medium), 
-              ]),
-    ]
-    confObj["workingPoints"]["Tight"] = [
-        odict([("isolation", cTAUfwToFlowConversion(isolation_fw_tight)), ("isolation_fw", isolation_fw_tight), 
-              ]),
-    ]
-    confObj["ptMinToTopo1"] = 5 # PLACEHOLDER
-    confObj["ptMinToTopo2"] = 5 # PLACEHOLDER
-    confObj["ptMinToTopo3"] = 5 # PLACEHOLDER
-    confObj["ptMinxTOB1"] = 5 # PLACEHOLDER
-    confObj["ptMinxTOB2"] = 5 # PLACEHOLDER
-    confObj["ptMinxTOB3"] = 5 # PLACEHOLDER
-    confObj["resolutionMeV"] = 200
-    confObj["maxEt"] = 50 # PLACEHOLDER
+        # Check that T >= M >= L [ATR-27796]
+        # Ordering is inverted here: larger value is looser
+        for var in ["isolation_fw"]:
+            validate_ordering(var,"Medium","Loose",confObj["workingPoints"])
+            validate_ordering(var,"Tight","Medium",confObj["workingPoints"])
+        return confObj
 
-    # Check that FW values are integers
-    for wp in confObj["workingPoints"]:
-        for ssthr in confObj["workingPoints"][wp]:
-            for ssthr_i in ssthr:
-                if "_fw" in ssthr_i:
-                     if not isinstance(ssthr[ssthr_i], int):
-                          raise RuntimeError("Threshold %s in jTAU configuration is not an integer!", ssthr_i )
+getConfig_cTAU = L1Config_cTAU()
 
-    # Check that T >= M >= L [ATR-27796]
-    # Ordering is inverted here: larger value is looser
-    for var in ["isolation_fw"]:
-        validate_ordering(var,"Medium","Loose",confObj["workingPoints"])
-        validate_ordering(var,"Tight","Medium",confObj["workingPoints"])
-    return confObj
+
+@dataclass
+class L1Config_jTAU():
+    isolation_fw_loose: int = 410
+    isolation_fw_medium: int = 358 # PLACEHOLDER
+    isolation_fw_tight: int = 307 # PLACEHOLDER
+
+    def __call__(self) -> odict:
+        confObj = odict()
+        confObj["workingPoints"] = odict()
+        confObj["workingPoints"]["Loose"] = [
+            odict([("isolation", cTAUfwToFlowConversion(self.isolation_fw_loose)), ("isolation_fw", self.isolation_fw_loose), 
+                  ]),
+        ]
+        confObj["workingPoints"]["Medium"] = [
+            odict([("isolation", cTAUfwToFlowConversion(self.isolation_fw_medium)), ("isolation_fw", self.isolation_fw_medium), 
+                  ]),
+        ]
+        confObj["workingPoints"]["Tight"] = [
+            odict([("isolation", cTAUfwToFlowConversion(self.isolation_fw_tight)), ("isolation_fw", self.isolation_fw_tight), 
+                  ]),
+        ]
+        confObj["ptMinToTopo1"] = 5 # PLACEHOLDER
+        confObj["ptMinToTopo2"] = 5 # PLACEHOLDER
+        confObj["ptMinToTopo3"] = 5 # PLACEHOLDER
+        confObj["ptMinxTOB1"] = 5 # PLACEHOLDER
+        confObj["ptMinxTOB2"] = 5 # PLACEHOLDER
+        confObj["ptMinxTOB3"] = 5 # PLACEHOLDER
+        confObj["resolutionMeV"] = 200
+        confObj["maxEt"] = 50 # PLACEHOLDER
+
+        # Check that FW values are integers
+        for wp in confObj["workingPoints"]:
+            for ssthr in confObj["workingPoints"][wp]:
+                for ssthr_i in ssthr:
+                    if "_fw" in ssthr_i:
+                         if not isinstance(ssthr[ssthr_i], int):
+                              raise RuntimeError("Threshold %s in jTAU configuration is not an integer!", ssthr_i )
+                         elif ssthr[ssthr_i] < 0:
+                            raise RuntimeError("Threshold %s in jTAU configuration is negative!", ssthr_i )
+
+        # Check that T >= M >= L [ATR-27796]
+        # Ordering is inverted here: larger value is looser
+        for var in ["isolation_fw"]:
+            validate_ordering(var,"Medium","Loose",confObj["workingPoints"])
+            validate_ordering(var,"Tight","Medium",confObj["workingPoints"])
+        return confObj
+
+getConfig_jTAU = L1Config_jTAU()
+
 
 def getConfig_jJ():
     confObj = odict()
