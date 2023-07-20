@@ -105,8 +105,6 @@ from InDetRecExample.InDetJobProperties import InDetJobProperties
 class InDetTrigJobProperties(InDetJobProperties):
   """Container for the InDetTrig flags
   """
-  def __init__(self, context='EFID'):
-    InDetJobProperties.__init__(self,context)
 
 ##-----------------------------------------------------------------------------
 ## 3rd step
