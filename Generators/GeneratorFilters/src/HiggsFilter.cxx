@@ -63,11 +63,7 @@ StatusCode HiggsFilter::filterEvent() {
 	auto decayVtx = pitr->end_vertex();
 	// verify if we got a valid pointer and retrieve the number of daughters
 	if (!decayVtx ) continue;
-#ifdef HEPMC3
-	int n_daughters =  decayVtx->particles_out().size();
-#else
-        int n_daughters =  decayVtx->particles_out_size();
-#endif
+    int n_daughters =  decayVtx->particles_out_size();
 	if( n_daughters < 2 ) continue;
 	for (const auto& child_mcpart: *decayVtx) {
 	      if ( std::abs(child_mcpart->pdg_id()) != 5 ) continue;
