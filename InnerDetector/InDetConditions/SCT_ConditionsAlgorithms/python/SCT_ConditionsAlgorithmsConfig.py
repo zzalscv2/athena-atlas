@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
@@ -76,8 +76,8 @@ def SCT_DetectorElementCondAlgCfg(flags, name="SCT_DetectorElementCondAlg", **kw
     # conditions algs to ensure that the IOV
     # is identical to the IOV of the tracking geometry
     if flags.Detector.GeometryMuon and flags.Muon.enableAlignment:
-        from MuonConfig.MuonGeometryConfig import MuonDetectorCondAlgCfg
-        acc.merge(MuonDetectorCondAlgCfg(flags))
+        from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+        acc.merge(MuonGeoModelCfg(flags))
         kwargs.setdefault("MuonManagerKey", "MuonDetectorManager")
     if flags.Detector.GeometryTRT:
         from TRT_GeoModel.TRT_GeoModelConfig import TRT_ReadoutGeometryCfg

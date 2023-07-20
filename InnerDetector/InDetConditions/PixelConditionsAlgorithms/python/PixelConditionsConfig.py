@@ -244,8 +244,8 @@ def PixelDetectorElementCondAlgCfg(flags, name="PixelDetectorElementCondAlg", **
     # conditions algs to ensure that the IOV
     # is identical to the IOV of the tracking geometry
     if flags.Detector.GeometryMuon and flags.Muon.enableAlignment:
-        from MuonConfig.MuonGeometryConfig import MuonDetectorCondAlgCfg
-        acc.merge(MuonDetectorCondAlgCfg(flags))
+        from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+        acc.merge(MuonGeoModelCfg(flags))
         kwargs.setdefault("MuonManagerKey", "MuonDetectorManager")
     if flags.Detector.GeometryTRT:
         from TRT_GeoModel.TRT_GeoModelConfig import TRT_ReadoutGeometryCfg

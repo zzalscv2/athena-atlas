@@ -123,7 +123,7 @@ def TGC_DigitizationBasicCfg(flags, **kwargs):
 
 def TGC_OverlayDigitizationBasicCfg(flags, **kwargs):
     """Return ComponentAccumulator with TGC Overlay digitization"""
-    acc = MuonGeoModelCfg(flags, forceDisableAlignment=not flags.Overlay.DataOverlay)
+    acc = MuonGeoModelCfg(flags)
     if flags.Common.ProductionStep != ProductionStep.FastChain:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, ["TGCSimHitCollection#TGC_Hits"]))

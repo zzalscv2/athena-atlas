@@ -134,7 +134,7 @@ def MDT_DigitizationBasicCfg(flags, **kwargs):
 
 def MDT_OverlayDigitizationBasicCfg(flags, **kwargs):
     """Return ComponentAccumulator with MDT Overlay digitization"""
-    acc = MuonGeoModelCfg(flags, forceDisableAlignment=not flags.Overlay.DataOverlay)
+    acc = MuonGeoModelCfg(flags)
 
     if flags.Common.ProductionStep != ProductionStep.FastChain:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg

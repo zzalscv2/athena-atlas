@@ -111,7 +111,7 @@ def MM_DigitizationBasicCfg(flags, **kwargs):
 
 def MM_OverlayDigitizationBasicCfg(flags, **kwargs):
     """Return ComponentAccumulator with MM Overlay digitization"""
-    acc = MuonGeoModelCfg(flags, forceDisableAlignment=not flags.Overlay.DataOverlay)
+    acc = MuonGeoModelCfg(flags)
     if flags.Common.ProductionStep != ProductionStep.FastChain:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         if 'MMSimHitCollection#MicromegasSensitiveDetector' in flags.Input.SecondaryTypedCollections:

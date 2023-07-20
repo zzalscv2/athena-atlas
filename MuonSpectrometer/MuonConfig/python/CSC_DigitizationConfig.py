@@ -114,7 +114,7 @@ def CSC_DigitizationBasicCfg(flags, **kwargs):
 
 def CSC_OverlayDigitizationBasicCfg(flags, **kwargs):
     """Return ComponentAccumulator with CSC Overlay digitization"""
-    acc = MuonGeoModelCfg(flags, forceDisableAlignment=not flags.Overlay.DataOverlay)
+    acc = MuonGeoModelCfg(flags)
     acc.merge(CscCondDbAlgCfg(flags))
 
     if flags.Common.ProductionStep != ProductionStep.FastChain:
