@@ -55,6 +55,8 @@ namespace InDet {
 
   StatusCode InDetToXAODSpacePointConversion::convertPixel(const EventContext& ctx) const
   {
+    static const SG::AuxElement::Accessor< ElementLink< ::SpacePointCollection > > linkAcc("pixelSpacePointLink");
+	
     // Input
     SG::ReadHandle< ::SpacePointContainer > pixel_handle = SG::makeHandle( m_inSpacepointsPixel, ctx );
     ATH_CHECK( pixel_handle.isValid() );
@@ -77,6 +79,10 @@ namespace InDet {
 	pixel_xaod_container->push_back( new xAOD::SpacePoint() );
 	ATH_CHECK( TrackingUtilities::convertTrkToXaodPixelSpacePoint(*indetSP, *pixel_xaod_container->back()) );
 	pixel_xaod_container->back()->setMeasurementIndexes({counter++});
+
+	// Add link to this space point
+	ElementLink< ::SpacePointCollection > link(indetSP, *spc);
+	linkAcc(*pixel_xaod_container->back()) = link;
       }
     }
 
@@ -90,6 +96,8 @@ namespace InDet {
   StatusCode InDetToXAODSpacePointConversion::convertStrip(const EventContext& ctx,
 							   const Amg::Vector3D& vertex) const
   {
+    static const SG::AuxElement::Accessor< ElementLink< ::SpacePointCollection > > linkAcc("sctSpacePointLink");
+
     // Input
     SG::ReadHandle< ::SpacePointContainer > strip_handle = SG::makeHandle( m_inSpacepointsStrip, ctx );
     ATH_CHECK( strip_handle.isValid() );
@@ -111,7 +119,11 @@ namespace InDet {
 
 	strip_xaod_container->push_back( new xAOD::SpacePoint() );	
 	ATH_CHECK( TrackingUtilities::convertTrkToXaodStripSpacePoint(*indetSP, vertex, *strip_xaod_container->back()) );
-	strip_xaod_container->back()->setMeasurementIndexes({counter, counter++}); 
+	strip_xaod_container->back()->setMeasurementIndexes({counter, counter++});
+
+	 // Add link to this space point
+	ElementLink< ::SpacePointCollection > link(indetSP, *spc);
+	linkAcc(*strip_xaod_container->back()) = link;
       }
     }
 

@@ -320,7 +320,6 @@ def ActsTrkSeedingAlgorithmAnalysisAlgCfg(flags, name="ActsTrkSeedingAlgorithmAn
 
         from ActsConfig.ActsTrkSeedingConfig import ActsTrkSiSpacePointsSeedMakerCfg
         ActsITkSiSpacePointsSeedMaker = result.popToolsAndMerge(ActsTrkSiSpacePointsSeedMakerCfg(flags))
-        ActsITkSiSpacePointsSeedMaker.doSpacePointConversion = False
         ActsITkSiSpacePointsSeedMaker.doSeedConversion = False
         MonitoringGroupNames.append("ActsITkSiSpacePointSeedMaker")
 
@@ -330,7 +329,6 @@ def ActsTrkSeedingAlgorithmAnalysisAlgCfg(flags, name="ActsTrkSeedingAlgorithmAn
           result.popToolsAndMerge(ActsTrkSiSpacePointsSeedMakerCfg(flags,
                                                                    name="ActsTrkSiSpacePointsSeedMakerOrthogonal",
                                                                    SeedToolPixel=orthogonal_seeding_tool))
-        ActsITkSiSpacePointsSeedMakerOrthogonal.doSpacePointConversion = False
         ActsITkSiSpacePointsSeedMakerOrthogonal.doSeedConversion = False
         MonitoringGroupNames.append("ActsOrthogonalITkSiSpacePointSeedMaker")
 
