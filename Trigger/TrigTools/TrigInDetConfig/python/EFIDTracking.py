@@ -10,7 +10,6 @@ include("InDetTrigRecExample/InDetTrigRec_jobOptions.py") # this is needed to ge
 from AthenaCommon.Logging import logging 
 log = logging.getLogger("EFIDTracking")
 
-from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
 from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
 
 #Create a view verifier for necessary data collections
@@ -87,17 +86,6 @@ def makeInDetPatternRecognition( inflags, config, verifier = 'IDTrigViewDataVeri
          dataVerifier = get_idtrig_view_verifier(verifier+config.input_name)
          viewAlgs.append( dataVerifier )
 
-      #FIXME:  eventually adapt the cuts in the configsetting ATR-22755
-      mode_name = remapToOffline( config.name )
-      if config.name == "cosmics" or config.name == "minBias":
-         from InDetTrigRecExample.InDetTrigTrackingCuts import InDetTrigTrackingCuts
-         trackingCuts = InDetTrigTrackingCuts( mode_name ) 
-      #MinBias cuts need to be revisited: ATR-23077
-      else:
-         from InDetRecExample.ConfiguredNewTrackingCuts import ConfiguredNewTrackingCuts
-         trackingCuts = ConfiguredNewTrackingCuts( mode_name ) 
-      #trackingCuts.printInfo() 
-      
 
       from TrigInDetConfig.utils import getFlagsForActiveConfig
       flags = getFlagsForActiveConfig(inflags, config.input_name, log)
@@ -106,61 +94,15 @@ def makeInDetPatternRecognition( inflags, config, verifier = 'IDTrigViewDataVeri
       InDetTrigCA.InDetTrigConfigFlags = flags
       
 
-      from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
-      summaryTool = CAtoLegacyPublicToolWrapper(InDetTrigTrackSummaryToolCfg)
+      from InDetConfig.SiSPSeededTrackFinderConfig import TrigSiSPSeededTrackFinderCfg
+      siSPSeededTrackFinder = algorithmCAToGlobalWrapper(
+         TrigSiSPSeededTrackFinderCfg,
+         flags,
+         name = 'EFsiSPSeededTrackFinder'+flags.Tracking.ActiveConfig.input_name,
+      )
       
-      # --- decide if use the association tool
-      usePrdAssociationTool = False 
-      #FIXME: Do we need this switch? If so, make the same decision as offline (based on the tracking cuts)? ATR-22755
-      #Are all of these needed?
-      #if (len(InputCollections) > 0) and (trackingCuts.mode() == "LowPt" or trackingCuts.mode() == "VeryLowPt" or trackingCuts.mode() == "LargeD0" or trackingCuts.mode() == "LowPtLargeD0" or trackingCuts.mode() == "BeamGas" or trackingCuts.mode() == "ForwardTracks" or trackingCuts.mode() == "ForwardSLHCTracks"  or trackingCuts.mode() == "Disappearing" or trackingCuts.mode() == "VeryForwardSLHCTracks" or trackingCuts.mode() == "SLHCConversionFinding"):
-      #usePrdAssociationTool = True
-      if usePrdAssociationTool:
-         from .InDetTrigCommon import prdAssociation_builder
-         InputCollections = None #Dummy atm
-         prdAssociation = prdAssociation_builder( InputCollections )
-         viewAlgs.append( prdAssociation )
 
-
-
-      # FIXME Use trigger flags instead of indetflags ATR-22756
-      # What are the instances when we don't need this?
-      # if InDetFlags.doSiSPSeededTrackFinder():
-
-      doSiSPSeededTrackFinder = True 
-
-      if doSiSPSeededTrackFinder:
-
-         #FIXME: do we need this covered by detflag condition? ATR-22756
-         #from AthenaCommon.DetFlags import DetFlags 
-         # --- Loading Pixel, SCT conditions
-         if True: #DetFlags.haveRIO.pixel_on():
-            from AthenaCommon.AlgSequence import AthSequencer
-            condSeq = AthSequencer("AthCondSeq")
-            if not hasattr(condSeq, "InDetSiDetElementBoundaryLinksPixelCondAlg"):
-               from SiCombinatorialTrackFinderTool_xk.SiCombinatorialTrackFinderTool_xkConf import InDet__SiDetElementBoundaryLinksCondAlg_xk
-               condSeq += InDet__SiDetElementBoundaryLinksCondAlg_xk(name     = "InDetSiDetElementBoundaryLinksPixelCondAlg",
-                                                                     ReadKey  = "PixelDetectorElementCollection",
-                                                                     WriteKey = "PixelDetElementBoundaryLinks_xk",)
-
-
-            if not hasattr(condSeq, "InDetSiDetElementBoundaryLinksSCTCondAlg"):
-               from SiCombinatorialTrackFinderTool_xk.SiCombinatorialTrackFinderTool_xkConf import InDet__SiDetElementBoundaryLinksCondAlg_xk
-               condSeq += InDet__SiDetElementBoundaryLinksCondAlg_xk(name     = "InDetSiDetElementBoundaryLinksSCTCondAlg",
-                                                                  ReadKey  = "SCT_DetectorElementCollection",
-                                                                  WriteKey = "SCT_DetElementBoundaryLinks_xk")
-            #-------------------------------------------------------
-
-         from .InDetTrigCommon import siSPSeededTrackFinder_builder, add_prefix
-         siSPSeededTrackFinder = siSPSeededTrackFinder_builder( name                  = add_prefix( 'siSPSeededTrackFinder', config.input_name ),
-                                                                config                = config,
-                                                                outputTracks          = config.trkTracks_IDTrig(), 
-                                                                trackingCuts          = trackingCuts,
-                                                                usePrdAssociationTool = usePrdAssociationTool,
-                                                                nameSuffix            = config.input_name,
-                                                                trackSummaryTool      = summaryTool )
-
-         viewAlgs.append( siSPSeededTrackFinder )
+      viewAlgs.extend( siSPSeededTrackFinder )
 
       #-----------------------------------------------------------------------------
       #                      Precision algorithms

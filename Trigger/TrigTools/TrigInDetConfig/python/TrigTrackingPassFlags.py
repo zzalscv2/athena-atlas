@@ -72,13 +72,18 @@ def signatureSpecificSettingOfFlags(flags,mode):
     flags.nWeightedClustersMin= 8
     flags.minTRTonTrk         = 20
     flags.seedFilterLevel     = 3
+    flags.usePrdAssociationTool = False     #for backward compatibility #2023fix?
     
   elif flags.input_name=="minBias":
     flags.minPT               = 0.1*Units.GeV
+    flags.nClustersMin        = 5
+    flags.seedFilterLevel     = 2
     flags.maxPrimaryImpact    = 10.*Units.mm
     flags.maxRPhiImpact       = 10.*Units.mm
     flags.maxZImpact          = 150.*Units.mm
     flags.roadWidth           = 20
+    flags.usePrdAssociationTool = False     #for backward compatibility #2023fix?
+
     
   def collToRecordable(flags,name):
     ret = name
