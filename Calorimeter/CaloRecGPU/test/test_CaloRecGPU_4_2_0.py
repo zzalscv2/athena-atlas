@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # art-description: GPU Topological (Topo-Automaton) Clustering test: 4 2 0 thresholds.
-# art-type: local
+# art-type: grid
 # art-include: master/Athena
 # art-architecture: '#&nvidia'
 # art-output: expert-monitoring.root
