@@ -53,27 +53,20 @@ namespace ActsTrk {
       return StatusCode::FAILURE;
     }
 
-    ATH_CHECK( m_spacepointsPixel.initialize(m_pixel and m_doSpacePointConversion) );
-    ATH_CHECK( m_spacepointsStrip.initialize(m_strip and m_doSpacePointConversion) );
-    ATH_CHECK( m_spacepointsOverlap.initialize(m_strip and m_useOverlap and m_doSpacePointConversion) );
+    ATH_CHECK( m_actsSpacepointsPixel.initialize(m_pixel) );
+    ATH_CHECK( m_actsSpacepointsStrip.initialize(m_strip) );
+    ATH_CHECK( m_actsSpacepointsOverlap.initialize(m_strip and m_useOverlap) );
 
-    ATH_CHECK( m_actsSpacepointsPixel.initialize(m_pixel and not m_doSpacePointConversion) );
-    ATH_CHECK( m_actsSpacepointsStrip.initialize(m_strip and not m_doSpacePointConversion) );
-    ATH_CHECK( m_actsSpacepointsOverlap.initialize(m_strip and m_useOverlap and not m_doSpacePointConversion) );
-
-    ATH_CHECK( m_pixelClusterContainerKey.initialize(m_pixel and not m_doSpacePointConversion) );
-    ATH_CHECK( m_stripClusterContainerKey.initialize(m_strip and not m_doSpacePointConversion) );
-
-    if (m_pixel)
-      ATH_CHECK( m_seedsToolPixel.retrieve() );
-
-    if (m_strip)
-      ATH_CHECK( m_seedsToolStrip.retrieve() );
+    ATH_CHECK( m_seedsToolPixel.retrieve(EnableTool{m_pixel}) );
+    ATH_CHECK( m_seedsToolStrip.retrieve(EnableTool{m_strip}) );
 
     ATH_CHECK( m_prdToTrackMap.initialize(SG::AllowEmpty) );
 
     ATH_CHECK( m_beamSpotKey.initialize() );
     ATH_CHECK( m_fieldCondObjInputKey.initialize() );
+
+    ATH_CHECK( m_pixelClusterContainerKey.initialize(SG::AllowEmpty) );
+    ATH_CHECK( m_stripClusterContainerKey.initialize(SG::AllowEmpty) );
 
     // Validation
     if (m_writeNtuple) 
@@ -122,31 +115,6 @@ namespace ActsTrk {
     ATH_CHECK( m_thistSvc->regTree( full_tree_name.c_str(), m_outputTree ) );
 
     return StatusCode::SUCCESS;
-  }
-
-  void
-  SiSpacePointsSeedMaker::newSpacePoint(InDet::SiSpacePointsSeedMakerEventData& data,
-					    const Trk::SpacePoint* const& sp) const
-  {
-    float r[15];
-
-    auto globPos = sp->globalPosition();
-    r[0] = static_cast<float>(globPos.x());
-    r[1] = static_cast<float>(globPos.y());
-    r[2] = static_cast<float>(globPos.z());
-
-    if (m_fastTracking and skipSpacePoint(r[0]-data.xbeam[0], r[1]-data.ybeam[0], r[2]-data.zbeam[0]))
-      return;
-
-    // adding additional information from strip or pixel
-    if (not sp->clusterList().second)
-      pixInform(sp, r);
-    else
-      stripInform(data, sp, r);
-
-    data.l_ITkSpacePointForSeed.emplace_back(sp, r);
-    data.ns++;
-    data.nsaz++;
   }
 
   void
@@ -233,122 +201,70 @@ namespace ActsTrk {
 
   StatusCode 
   SiSpacePointsSeedMaker::retrievePixel(const EventContext& ctx,
-					    InDet::SiSpacePointsSeedMakerEventData& data,
-					    const Trk::PRDtoTrackMap* prd_to_track_map_cptr) const
+					InDet::SiSpacePointsSeedMakerEventData& data,
+					const Trk::PRDtoTrackMap* /*prd_to_track_map_cptr*/) const
   {
-
-    if (m_doSpacePointConversion) {
-      SG::ReadHandle< ::SpacePointContainer > pixel_handle = SG::makeHandle( m_spacepointsPixel, ctx );
-      ATH_CHECK( pixel_handle.isValid() );
-      const ::SpacePointContainer* pixel_container = pixel_handle.get();
-
-      /// loop over the pixel space points
-      for (const ::SpacePointCollection *spc : *pixel_container) {
-        for (const Trk::SpacePoint *sp : *spc) {
-          /// if we use the PRD to track map and this SP has already been used in a track, bail out
-          if ( prd_to_track_map_cptr and
-              isUsed(sp, *prd_to_track_map_cptr) )
-            continue;
-          newSpacePoint(data, sp);
-        }
-      }
-    } else {
-      // get the xAOD::SpacePointContainer and loop on entries to check which space point
-      // you want to use for seeding
-
-      SG::ReadHandle< xAOD::SpacePointContainer > inputSpacePointContainer( m_actsSpacepointsPixel, ctx );
-      if (!inputSpacePointContainer.isValid()){
-        ATH_MSG_FATAL("xAOD::SpacePointContainer with key " << m_actsSpacepointsPixel.key() << " is not available...");
-        return StatusCode::FAILURE;
-      }
-      const xAOD::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
-      // TODO: here you need to write some lines to implement the
-      // check on the used PDRs in previous tracking passes
-      for (const xAOD::SpacePoint * sp : *inputSpacePointCollection) {
-        newSpacePoint(data, sp);
-      }
-
+    // get the xAOD::SpacePointContainer and loop on entries to check which space point
+    // you want to use for seeding
+    
+    SG::ReadHandle< xAOD::SpacePointContainer > inputSpacePointContainer( m_actsSpacepointsPixel, ctx );
+    if (not inputSpacePointContainer.isValid()){
+      ATH_MSG_FATAL("xAOD::SpacePointContainer with key " << m_actsSpacepointsPixel.key() << " is not available...");
+      return StatusCode::FAILURE;
     }
-
+    const xAOD::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
+    // TODO: here you need to write some lines to implement the
+    // check on the used PDRs in previous tracking passes
+    for (const xAOD::SpacePoint * sp : *inputSpacePointCollection) {
+      newSpacePoint(data, sp);
+    }
+    
     return StatusCode::SUCCESS;
   }
 
   StatusCode
   SiSpacePointsSeedMaker::retrieveStrip(const EventContext& ctx,
-					    InDet::SiSpacePointsSeedMakerEventData& data,
-					    const Trk::PRDtoTrackMap* prd_to_track_map_cptr) const
+					InDet::SiSpacePointsSeedMakerEventData& data,
+					const Trk::PRDtoTrackMap* /*prd_to_track_map_cptr*/) const
   {
-    if (m_doSpacePointConversion) {
-      SG::ReadHandle< ::SpacePointContainer > strip_handle = SG::makeHandle( m_spacepointsStrip, ctx );
-      ATH_CHECK( strip_handle.isValid() );
-      const ::SpacePointContainer *strip_container = strip_handle.get();
-      for (const ::SpacePointCollection *spc : *strip_container) {
-        for (const Trk::SpacePoint *sp : *spc) {
-          /// as for the pixel, veto already used SP if we are using the PRD to track map in later passes of track finding.
-          if ( prd_to_track_map_cptr and
-              isUsed(sp, *prd_to_track_map_cptr) )
-            continue;
-          newSpacePoint(data, sp);
-        }
-      }
-    } else {
-      // get the xAOD::SpacePointContainer and loop on entries to check which space point
-      // you want to use for seeding
-
-      SG::ReadHandle< xAOD::SpacePointContainer > inputSpacePointContainer( m_actsSpacepointsStrip, ctx );
-      if (!inputSpacePointContainer.isValid()){
-        ATH_MSG_FATAL("xAOD::SpacePointContainer with key " << m_actsSpacepointsStrip.key() << " is not available...");
-        return StatusCode::FAILURE;
-      }
-      const xAOD::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
-      // TODO: here you need to write some lines to implement the
-      // check on the used PDRs in previous tracking passes
-      for (const xAOD::SpacePoint * sp : *inputSpacePointCollection) {
-        newSpacePoint(data, sp);
-      }
-
+    // get the xAOD::SpacePointContainer and loop on entries to check which space point
+    // you want to use for seeding
+    
+    SG::ReadHandle< xAOD::SpacePointContainer > inputSpacePointContainer( m_actsSpacepointsStrip, ctx );
+    if (!inputSpacePointContainer.isValid()){
+      ATH_MSG_FATAL("xAOD::SpacePointContainer with key " << m_actsSpacepointsStrip.key() << " is not available...");
+      return StatusCode::FAILURE;
     }
-
+    const xAOD::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
+    // TODO: here you need to write some lines to implement the
+    // check on the used PDRs in previous tracking passes
+    for (const xAOD::SpacePoint * sp : *inputSpacePointCollection) {
+      newSpacePoint(data, sp);
+    }
 
     return StatusCode::SUCCESS;
   }
 
   StatusCode 
   SiSpacePointsSeedMaker::retrieveOverlap(const EventContext& ctx,
-					      InDet::SiSpacePointsSeedMakerEventData& data,
-					      const Trk::PRDtoTrackMap* prd_to_track_map_cptr) const
+					  InDet::SiSpacePointsSeedMakerEventData& data,
+					  const Trk::PRDtoTrackMap* /*prd_to_track_map_cptr*/) const
   {
-    if (m_doSpacePointConversion) {
-      SG::ReadHandle< ::SpacePointOverlapCollection > overlap_handle = SG::makeHandle( m_spacepointsOverlap, ctx );
-      ATH_CHECK( overlap_handle.isValid() );
-      const ::SpacePointOverlapCollection *overlap_container = overlap_handle.get();
-
-      for (const Trk::SpacePoint *sp : *overlap_container) {
-        /// usual rejection of SP used in previous track finding passes if we run with the PRT to track map
-        if (prd_to_track_map_cptr and
-            isUsed(sp, *prd_to_track_map_cptr))
-          continue;
-        newSpacePoint(data, sp);
-      }
-    } else {
-      // get the xAOD::SpacePointContainer and loop on entries to check which space point
-      // you want to use for seeding
-
-      SG::ReadHandle< xAOD::SpacePointContainer > inputSpacePointContainer( m_actsSpacepointsOverlap, ctx );
-      if (!inputSpacePointContainer.isValid()){
-        ATH_MSG_FATAL("xAOD::SpacePointContainer with key " << m_actsSpacepointsOverlap.key() << " is not available...");
-        return StatusCode::FAILURE;
-      }
-      const xAOD::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
-      // TODO: here you need to write some lines to implement the
-      // check on the used PDRs in previous tracking passes
-      for (const xAOD::SpacePoint * sp : *inputSpacePointCollection) {
-        newSpacePoint(data, sp);
-      }
-
+    // get the xAOD::SpacePointContainer and loop on entries to check which space point
+    // you want to use for seeding
+    
+    SG::ReadHandle< xAOD::SpacePointContainer > inputSpacePointContainer( m_actsSpacepointsOverlap, ctx );
+    if (!inputSpacePointContainer.isValid()){
+      ATH_MSG_FATAL("xAOD::SpacePointContainer with key " << m_actsSpacepointsOverlap.key() << " is not available...");
+      return StatusCode::FAILURE;
     }
-
-
+    const xAOD::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
+    // TODO: here you need to write some lines to implement the
+    // check on the used PDRs in previous tracking passes
+    for (const xAOD::SpacePoint * sp : *inputSpacePointCollection) {
+      newSpacePoint(data, sp);
+    }
+    
     return StatusCode::SUCCESS;
   }
 
@@ -480,26 +396,17 @@ namespace ActsTrk {
 
     // Retrieve Pixels
     if (isPixel and not retrievePixel(ctx, data, prd_to_track_map_cptr).isSuccess() ) {
-      if (m_doSpacePointConversion)
-        ATH_MSG_ERROR("Error while retrieving Pixel space points with key " << m_spacepointsPixel.key());
-      else
-        ATH_MSG_ERROR("Error while retrieving Pixel space points with key " << m_actsSpacepointsPixel.key());
+      ATH_MSG_ERROR("Error while retrieving Pixel space points with key " << m_actsSpacepointsPixel.key());
     }
 
     // Retrieve Strips
     if (isStrip and not retrieveStrip(ctx, data, prd_to_track_map_cptr).isSuccess() ) {
-      if (m_doSpacePointConversion)
-        ATH_MSG_ERROR("Error while retrieving Strip space points with key " << m_spacepointsStrip.key());
-      else
-        ATH_MSG_ERROR("Error while retrieving Strip space points with key " << m_actsSpacepointsStrip.key());
+      ATH_MSG_ERROR("Error while retrieving Strip space points with key " << m_actsSpacepointsStrip.key());
     }
 
     // Retrieve Overlaps, will go into Strip collection
     if ((isStrip and m_useOverlap) and not retrieveOverlap(ctx, data, prd_to_track_map_cptr).isSuccess() ) {
-      if (m_doSpacePointConversion)
-        ATH_MSG_ERROR("Error while retrieving Strip Overlap space points with key " <<  m_spacepointsOverlap.key());
-      else
-        ATH_MSG_ERROR("Error while retrieving Strip Overlap space points with key " <<  m_actsSpacepointsOverlap.key());
+      ATH_MSG_ERROR("Error while retrieving Strip Overlap space points with key " <<  m_actsSpacepointsOverlap.key());
     }    
 
     data.initialized = true;
@@ -507,88 +414,18 @@ namespace ActsTrk {
 
   void
   SiSpacePointsSeedMaker::find3Sp(const EventContext& ctx,
-				      InDet::SiSpacePointsSeedMakerEventData& data,
-				      const std::list<Trk::Vertex>& /*lv*/) const
+				  InDet::SiSpacePointsSeedMakerEventData& data,
+				  const std::list<Trk::Vertex>& /*lv*/) const
   {
     // Fast return if no sps are collected
-    if (m_doSpacePointConversion and data.l_ITkSpacePointForSeed.empty() )
+    if ( data.v_ActsSpacePointForSeed.empty() )
       return;
-    if (not m_doSpacePointConversion and data.v_ActsSpacePointForSeed.empty() )
-      return;
-
-    // Now we get care of the input space points!
-    // Need to convert these space points to Acts EDM
-    std::unique_ptr<xAOD::SpacePointContainer> actsSpContainer =
-      std::make_unique<xAOD::SpacePointContainer>();
-    std::unique_ptr<xAOD::SpacePointAuxContainer> actsSpContainerAux =
-      std::make_unique<xAOD::SpacePointAuxContainer>();
-    actsSpContainer->setStore( actsSpContainerAux.get() );
 
     // select the ACTS seeding tool to call, if for PPP or SSS
     bool isPixel = (m_fastTracking or data.iteration == 1) and m_pixel;
 
     // this is use for a fast retrieval of the space points later
     std::vector<ITk::SiSpacePointForSeed*> sp_storage;
-
-    if (m_doSpacePointConversion) {
-
-      actsSpContainer->reserve(data.l_ITkSpacePointForSeed.size());
-      actsSpContainerAux->reserve(data.l_ITkSpacePointForSeed.size());
-
-      sp_storage.reserve(data.l_ITkSpacePointForSeed.size());
-
-      std::size_t el_index = 0;
-      for (auto& sp : data.l_ITkSpacePointForSeed) {
-        // add to storage
-        sp_storage.push_back(&sp);
-
-        // Get position and covariance
-	Eigen::Matrix<float, 3, 1> position { sp.x(), sp.y(), sp.z() };
-        Acts::Vector2 covariance { sp.covr(), sp.covz() };
-
-        // This index correspond to the space point in
-        // the input_space_points collection (data.l_ITkSpacePointForSeed)
-        // (used later for storing the seed into data)
-	std::vector<std::size_t> indexes( {el_index++} );
-        if (isPixel) {
-	  xAOD::SpacePoint *toAdd = new xAOD::SpacePoint();
-	  actsSpContainer->push_back(toAdd);
-	  toAdd->setSpacePoint(0, 
-			       position,
-			       sp.covr(), sp.covz(),
-			       indexes);
-          data.v_ActsSpacePointForSeed.emplace_back( actsSpContainer->back() );
-        } else {
-          // defining additional quantities needed for measurement details:
-          Amg::Vector3D topStrip = {sp.b0()[0],sp.b0()[1],sp.b0()[2]};
-          float topHalfStripLength = topStrip.norm();
-          Eigen::Matrix<float, 3, 1> topStripDirection = (topStrip/topHalfStripLength).cast <float>();
-          Eigen::Matrix<float, 3, 1> topStripCenter = {sp.r0()[0],sp.r0()[1],sp.r0()[2]};
-
-          Amg::Vector3D bottomStrip = {sp.b1()[0],sp.b1()[1],sp.b1()[2]};
-          float bottomHalfStripLength = bottomStrip.norm();
-          Eigen::Matrix<float, 3, 1> bottomStripDirection = (bottomStrip/bottomHalfStripLength).cast <float>();
-          Eigen::Matrix<float, 3, 1> stripCenterDistance = {sp.dr()[0],sp.dr()[1],sp.dr()[2]};
-
-	  xAOD::SpacePoint *toAdd = new xAOD::SpacePoint();
-          actsSpContainer->push_back(toAdd);
-
-	  toAdd->setSpacePoint({0, 0},
-			       position,
-			       sp.covr(), sp.covz(),
-			       indexes,
-			       topHalfStripLength,
-			       bottomHalfStripLength,
-			       topStripDirection,
-			       bottomStripDirection,
-			       stripCenterDistance,
-			       topStripCenter);
-
-          data.v_ActsSpacePointForSeed.emplace_back( actsSpContainer->back() );
-
-        }
-      }
-    }
 
     // We can now run the Acts Seeding
     std::unique_ptr< ActsTrk::SeedContainer > seedPtrs = std::make_unique< ActsTrk::SeedContainer >();
@@ -630,179 +467,18 @@ namespace ActsTrk {
     // Store seeds to data
     // We need now to convert the output to Athena object once again (i.e. ITk::SiSpacePointForSeed)
     // The seeds will be stored in data.i_ITkSeeds (both PPP and SSS seeds)
-
-    if (m_doSpacePointConversion) {
-      for (const ActsTrk::Seed* seed : *seedPtrs.get()) {
-        std::size_t bottom_idx = seed->sp()[0]->measurementIndexes()[0];
-        std::size_t medium_idx = seed->sp()[1]->measurementIndexes()[0];
-        std::size_t top_idx = seed->sp()[2]->measurementIndexes()[0];
-
-        // Get the space point from storaga and not from std::list
-        ITk::SiSpacePointForSeed *bottom_sp = sp_storage.at(bottom_idx);
-        bottom_sp->setQuality(-seed->seedQuality());
-        ITk::SiSpacePointForSeed *medium_sp = sp_storage.at(medium_idx);
-        medium_sp->setQuality(-seed->seedQuality());
-        ITk::SiSpacePointForSeed *top_sp    = sp_storage.at(top_idx);
-        top_sp->setQuality(-seed->seedQuality());
-
-        data.i_ITkSeeds.emplace_back(bottom_sp, medium_sp,
-                                     top_sp, seed->z());
-        data.i_ITkSeeds.back().setQuality(-seed->seedQuality());
-      }
-    } else if (m_doSeedConversion) {
-
+    if (m_doSeedConversion) {
+      
       if (isPixel) {
-        SG::ReadHandle<xAOD::PixelClusterContainer> inputClusterContainer( m_pixelClusterContainerKey, ctx );
-        if (!inputClusterContainer.isValid()){
-          ATH_MSG_FATAL("xAOD::PixelClusterContainer with key " << m_pixelClusterContainerKey.key() << " is not available...");
-          return;
-        }
-        const xAOD::PixelClusterContainer inputContainer = *inputClusterContainer.cptr();
-
-        std::vector< InDet::PixelSpacePoint* > pixelSpacePoints(inputContainer.size(), nullptr);
-        std::vector< ITk::SiSpacePointForSeed* > pixelSpacePointsForSeed(inputContainer.size(), nullptr);
-
-
-        for (const ActsTrk::Seed* seed : *seedPtrs.get()) {
-
-          // creating ITk::SiSpacePointForSeed for bottom, middle and top sps
-          // first we need the space points
-          std::size_t bottom_idx = seed->sp()[0]->measurementIndexes()[0];
-          std::size_t medium_idx = seed->sp()[1]->measurementIndexes()[0];
-          std::size_t top_idx    = seed->sp()[2]->measurementIndexes()[0];
-
-          std::array<const xAOD::PixelCluster*, 3> pixel_cluster{ inputContainer.at(bottom_idx),
-                                                                  inputContainer.at(medium_idx),
-                                                                  inputContainer.at(top_idx) };
-
-          const SG::AuxElement::Accessor< ElementLink< InDet::PixelClusterCollection > > pixelLinkAcc("pixelClusterLink");
-          if (!pixelLinkAcc.isAvailable(*pixel_cluster[0])){
-            ATH_MSG_FATAL("no pixelClusterLink for cluster associated to bottom sp!");
-            return;
-          }
-          if (!pixelLinkAcc.isAvailable(*pixel_cluster[1])){
-            ATH_MSG_FATAL("no pixelClusterLink for cluster associated to middle sp!");
-            return;
-          }
-          if (!pixelLinkAcc.isAvailable(*pixel_cluster[2])){
-            ATH_MSG_FATAL("no pixelClusterLink for cluster associated to top sp!");
-            return;
-          }
-
-          if (pixelSpacePoints.at(bottom_idx) == nullptr)
-            pixelSpacePoints.at(bottom_idx) = new InDet::PixelSpacePoint(pixel_cluster[0]->identifierHash(),
-                                                                         *(pixelLinkAcc(*pixel_cluster[0])));
-          if (pixelSpacePoints.at(medium_idx) == nullptr)
-            pixelSpacePoints.at(medium_idx) = new InDet::PixelSpacePoint(pixel_cluster[1]->identifierHash(),
-                                                                         *(pixelLinkAcc(*pixel_cluster[1])));
-          if (pixelSpacePoints.at(top_idx) == nullptr)
-            pixelSpacePoints.at(top_idx) = new InDet::PixelSpacePoint(pixel_cluster[2]->identifierHash(),
-                                                                      *(pixelLinkAcc(*pixel_cluster[2])));
-
-          std::array<InDet::PixelSpacePoint*, 3> spacePoints { pixelSpacePoints.at(bottom_idx),
-                                                               pixelSpacePoints.at(medium_idx),
-                                                               pixelSpacePoints.at(top_idx)};
-          for (unsigned int index = 0; index<3; index++) {
-            size_t sp_idx = seed->sp()[index]->measurementIndexes()[0];
-            if (pixelSpacePointsForSeed.at(sp_idx) == nullptr) {
-              float r[15];
-              r[0] = seed->sp()[index]->x();
-              r[1] = seed->sp()[index]->y();
-              r[2] = seed->sp()[index]->z();
-              pixInform(spacePoints[index], r);
-              pixelSpacePointsForSeed[sp_idx] = new ITk::SiSpacePointForSeed(spacePoints[index], r);
-            }
-            pixelSpacePointsForSeed[sp_idx]->setQuality(-seed->seedQuality());
-          }
-
-          data.i_ITkSeeds.emplace_back(pixelSpacePointsForSeed.at(bottom_idx), pixelSpacePointsForSeed.at(medium_idx),
-                                       pixelSpacePointsForSeed.at(top_idx), seed->z());
-          data.i_ITkSeeds.back().setQuality(-seed->seedQuality());
-        }
+	if (not convertPixelSeed(ctx, data, *seedPtrs.get())) {
+	  ATH_MSG_FATAL("Error in pixel seed conversion");
+	  return;
+	}
       } else {
-        SG::ReadHandle<xAOD::StripClusterContainer> inputClusterContainer( m_stripClusterContainerKey, ctx );
-        if (!inputClusterContainer.isValid()){
-          ATH_MSG_FATAL("xAOD::StripClusterContainer with key " << m_stripClusterContainerKey.key() << " is not available...");
-          return;
-        }
-        const xAOD::StripClusterContainer inputContainer = *inputClusterContainer.cptr();
-
-        std::map< std::pair<size_t, size_t>, InDet::SCT_SpacePoint* > stripSpacePoints;
-        std::map< std::pair<size_t, size_t>, ITk::SiSpacePointForSeed* > stripSpacePointsForSeed;
-
-        for (const ActsTrk::Seed* seed : *seedPtrs.get()) {
-          // creating ITk::SiSpacePointForSeed for bottom, middle and top sps
-          // first we need the space points
-          auto& bottom_idx = seed->sp()[0]->measurementIndexes();
-          auto& medium_idx = seed->sp()[1]->measurementIndexes();
-          auto& top_idx    = seed->sp()[2]->measurementIndexes();
-
-          std::array<const xAOD::StripCluster*, 6> strip_cluster{ inputContainer.at(bottom_idx[0]), inputContainer.at(bottom_idx[1]),
-                                                                  inputContainer.at(medium_idx[0]), inputContainer.at(medium_idx[1]),
-                                                                  inputContainer.at(top_idx[0])   , inputContainer.at(top_idx[1]) };
-
-          const SG::AuxElement::Accessor< ElementLink< InDet::SCT_ClusterCollection > > stripLinkAcc("sctClusterLink");
-          if (!stripLinkAcc.isAvailable(*strip_cluster[0]) or !stripLinkAcc.isAvailable(*strip_cluster[1])){
-            ATH_MSG_FATAL("no sctClusterLink for clusters associated to bottom sp!");
-            return;
-          }
-          if (!stripLinkAcc.isAvailable(*strip_cluster[2]) or !stripLinkAcc.isAvailable(*strip_cluster[3])){
-            ATH_MSG_FATAL("no sctClusterLink for clusters associated to middle sp!");
-            return;
-          }
-          if (!stripLinkAcc.isAvailable(*strip_cluster[4]) or !stripLinkAcc.isAvailable(*strip_cluster[5])){
-            ATH_MSG_FATAL("no sctClusterLink for clusters associated to top sp!");
-            return;
-          }
-
-          std::pair<size_t, size_t> bottom_indices = {bottom_idx[0], bottom_idx[1]};
-          std::pair<size_t, size_t> middle_indices = {medium_idx[0], medium_idx[1]};
-          std::pair<size_t, size_t> top_indices    = {top_idx[0], top_idx[1]};
-
-          if (auto & pBottomPoint = stripSpacePoints[bottom_indices];!pBottomPoint){
-            pBottomPoint = new InDet::SCT_SpacePoint(
-             {strip_cluster[0]->identifierHash(), strip_cluster[1]->identifierHash()},
-             Amg::Vector3D(seed->sp()[0]->x(), seed->sp()[0]->y(), seed->sp()[0]->z()),
-             {*(stripLinkAcc(*strip_cluster[0])), *(stripLinkAcc(*strip_cluster[1]))});
-          }
-
-          if (auto & pMiddlePoint = stripSpacePoints[middle_indices];!pMiddlePoint){
-            pMiddlePoint = new InDet::SCT_SpacePoint(
-             {strip_cluster[2]->identifierHash(), strip_cluster[3]->identifierHash()},
-             Amg::Vector3D(seed->sp()[1]->x(), seed->sp()[1]->y(), seed->sp()[1]->z()),
-             {*(stripLinkAcc(*strip_cluster[2])), *(stripLinkAcc(*strip_cluster[3]))});
-          }
-          
-          if (auto & pTopPoint = stripSpacePoints[top_indices];!pTopPoint){
-            pTopPoint = new InDet::SCT_SpacePoint(
-             {strip_cluster[4]->identifierHash(), strip_cluster[5]->identifierHash()},
-             Amg::Vector3D(seed->sp()[2]->x(), seed->sp()[2]->y(), seed->sp()[2]->z()),
-             {*(stripLinkAcc(*strip_cluster[4])), *(stripLinkAcc(*strip_cluster[5]))});
-          }
-
-
-          std::array<InDet::SCT_SpacePoint*, 3> spacePoints {stripSpacePoints[bottom_indices],
-                                                             stripSpacePoints[middle_indices],
-                                                             stripSpacePoints[top_indices]};
-
-           for (unsigned int index = 0; index<3; index++) {
-            std::pair<size_t, size_t> sp_indices = {seed->sp()[index]->measurementIndexes()[0], seed->sp()[index]->measurementIndexes()[1]};
-            if (stripSpacePointsForSeed.find(sp_indices) == stripSpacePointsForSeed.end()) {
-              float r[15];
-              r[0] = seed->sp()[index]->x();
-              r[1] = seed->sp()[index]->y();
-              r[2] = seed->sp()[index]->z();
-              stripInform(data, spacePoints[index], r);
-
-              stripSpacePointsForSeed[sp_indices] = new ITk::SiSpacePointForSeed(spacePoints[index], r);
-            }
-            stripSpacePointsForSeed[sp_indices]->setQuality(-seed->seedQuality());
-          }
-
-          data.i_ITkSeeds.emplace_back(stripSpacePointsForSeed[bottom_indices], stripSpacePointsForSeed[middle_indices],
-                                       stripSpacePointsForSeed[top_indices], seed->z());
-          data.i_ITkSeeds.back().setQuality(-seed->seedQuality());
-        }
+	if (not convertStripSeed(ctx, data, *seedPtrs.get())) {
+	  ATH_MSG_FATAL("Error in strip seed conversion");
+	  return;
+	}
       }
     }
 
@@ -813,7 +489,7 @@ namespace ActsTrk {
 
   const InDet::SiSpacePointsSeed*
   SiSpacePointsSeedMaker::next(const EventContext& /*ctx*/,
-				   InDet::SiSpacePointsSeedMakerEventData& data) const
+			       InDet::SiSpacePointsSeedMakerEventData& data) const
   {
 
     do {
@@ -830,9 +506,9 @@ namespace ActsTrk {
 
   void
   SiSpacePointsSeedMaker::writeNtuple(const InDet::SiSpacePointsSeed* seed,
-					  const Trk::Track* track, 
-					  int seedType,
-					  long eventNumber) const
+				      const Trk::Track* track, 
+				      int seedType,
+				      long eventNumber) const
   {
     if (not m_writeNtuple) return;
 
@@ -895,13 +571,13 @@ namespace ActsTrk {
   {
     std::string s2, s3, s4, s5;
 
-    int n = 42-m_spacepointsPixel.key().size();
+    int n = 42-m_actsSpacepointsPixel.key().size();
     s2.append(n,' ');
     s2.append("|");
-    n     = 42-m_spacepointsStrip.key().size();
+    n     = 42-m_actsSpacepointsStrip.key().size();
     s3.append(n,' ');
     s3.append("|");
-    n     = 42-m_spacepointsOverlap.key().size();
+    n     = 42-m_actsSpacepointsOverlap.key().size();
     s4.append(n,' ');
     s4.append("|");
     n     = 42-m_beamSpotKey.key().size();
@@ -910,11 +586,11 @@ namespace ActsTrk {
 
     out<<"|---------------------------------------------------------------------|"
        <<endmsg;
-    out<<"| Pixel    space points   | "<<m_spacepointsPixel.key() <<s2
+    out<<"| Pixel    space points   | "<<m_actsSpacepointsPixel.key() <<s2
        <<endmsg;
-    out<<"| Strip    space points   | "<<m_spacepointsStrip.key()<<s3
+    out<<"| Strip    space points   | "<<m_actsSpacepointsStrip.key()<<s3
        <<endmsg;
-    out<<"| Overlap  space points   | "<<m_spacepointsOverlap.key()<<s4
+    out<<"| Overlap  space points   | "<<m_actsSpacepointsOverlap.key()<<s4
        <<endmsg;
     out<<"| BeamConditionsService   | "<<m_beamSpotKey.key()<<s5
        <<endmsg;
@@ -983,4 +659,229 @@ namespace ActsTrk {
 
   }
 
+  bool
+  SiSpacePointsSeedMaker::convertStripSeed(const EventContext& ctx,
+					   InDet::SiSpacePointsSeedMakerEventData& data,
+					   const ActsTrk::SeedContainer& seedPtrs) const {
+    // If the read handle key for clusters is not empty, that means the xAOD->InDet Cluster link is available
+    // Else we can use xAOD->Trk Space Point link
+    // If none of these is available, we have a JO misconfguration!
+    const bool useClusters = not m_stripClusterContainerKey.empty();
+
+    static const SG::AuxElement::Accessor< ElementLink< ::SpacePointCollection > > linkAcc("sctSpacePointLink");
+    static const SG::AuxElement::Accessor< ElementLink< ::SpacePointOverlapCollection > > overlaplinkAcc("stripOverlapSpacePointLink");
+    static const SG::AuxElement::Accessor< ElementLink< InDet::SCT_ClusterCollection > > stripLinkAcc("sctClusterLink");
+
+    const xAOD::StripClusterContainer *inputContainer = nullptr;
+    if (useClusters) {
+      SG::ReadHandle<xAOD::StripClusterContainer> inputClusterContainer( m_stripClusterContainerKey, ctx );
+      if (!inputClusterContainer.isValid()){
+	ATH_MSG_FATAL("xAOD::StripClusterContainer with key " << m_stripClusterContainerKey.key() << " is not available...");
+	return false;
+      }
+      inputContainer = inputClusterContainer.cptr();
+    }
+
+    std::array<const Trk::SpacePoint*, 3> spacePoints {};
+    std::array<ITk::SiSpacePointForSeed*, 3> stripSpacePointsForSeeds {nullptr, nullptr, nullptr};
+
+    for (const ActsTrk::Seed* seed : seedPtrs) {
+      // Retrieve/make space points
+      if (not useClusters) {
+	// Get the space point from the element link
+	if (not linkAcc.isAvailable(*seed->sp()[0]) and
+	    not overlaplinkAcc.isAvailable(*seed->sp()[0])) {
+	  ATH_MSG_FATAL("no sctSpacePointLink/stripOverlapSpacePointLink for bottom sp!");
+	  return false;
+	}
+	if (not linkAcc.isAvailable(*seed->sp()[1]) and
+	    not overlaplinkAcc.isAvailable(*seed->sp()[1])) {
+	  ATH_MSG_FATAL("no sctSpacePointLink/stripOverlapSpacePointLink for middle sp!");
+	  return false;
+	}
+	if (not linkAcc.isAvailable(*seed->sp()[2])  and
+	    not overlaplinkAcc.isAvailable(*seed->sp()[2])) {
+	  ATH_MSG_FATAL("no sctSpacePointLink/stripOverlapSpacePointLink for top sp!");
+	  return false;
+	}
+	
+	for (std::size_t nsp(0ul); nsp < 3ul; ++nsp) {
+	  spacePoints[nsp] = linkAcc.isAvailable(*seed->sp()[nsp])
+	    ? *linkAcc(*seed->sp()[nsp])
+	    : *overlaplinkAcc(*seed->sp()[nsp]);
+	}
+      } 
+      else {
+	// Get the clusters from the xAOD::Clusters and then make the space points
+	const auto& bottom_idx = seed->sp()[0]->measurementIndexes();
+	auto& medium_idx = seed->sp()[1]->measurementIndexes();
+	auto& top_idx    = seed->sp()[2]->measurementIndexes();
+
+	std::array<const xAOD::StripCluster*, 6> strip_cluster { 
+	  inputContainer->at(bottom_idx[0]), inputContainer->at(bottom_idx[1]),
+	    inputContainer->at(medium_idx[0]), inputContainer->at(medium_idx[1]),
+	    inputContainer->at(top_idx[0])   , inputContainer->at(top_idx[1]) 
+	    };
+	
+	if (not stripLinkAcc.isAvailable(*strip_cluster[0]) or 
+	    not stripLinkAcc.isAvailable(*strip_cluster[1])){
+	  ATH_MSG_FATAL("no sctClusterLink for clusters associated to bottom sp!");
+	  return false;
+	}
+	if (not stripLinkAcc.isAvailable(*strip_cluster[2]) or 
+	    not stripLinkAcc.isAvailable(*strip_cluster[3])){
+	  ATH_MSG_FATAL("no sctClusterLink for clusters associated to middle sp!");
+	  return false;
+	}
+	if (not stripLinkAcc.isAvailable(*strip_cluster[4]) or 
+	    not stripLinkAcc.isAvailable(*strip_cluster[5])){
+	  ATH_MSG_FATAL("no sctClusterLink for clusters associated to top sp!");
+	  return false;
+	}
+
+	spacePoints = {
+	  new InDet::SCT_SpacePoint({strip_cluster[0]->identifierHash(), strip_cluster[1]->identifierHash()},
+				    Amg::Vector3D(seed->sp()[0]->x(), seed->sp()[0]->y(), seed->sp()[0]->z()),
+	                            {*(stripLinkAcc(*strip_cluster[0])), *(stripLinkAcc(*strip_cluster[1]))}),
+	  new InDet::SCT_SpacePoint({strip_cluster[2]->identifierHash(), strip_cluster[3]->identifierHash()},
+				    Amg::Vector3D(seed->sp()[1]->x(), seed->sp()[1]->y(), seed->sp()[1]->z()), 
+	                            {*(stripLinkAcc(*strip_cluster[2])), *(stripLinkAcc(*strip_cluster[3]))}),
+	  new InDet::SCT_SpacePoint({strip_cluster[4]->identifierHash(), strip_cluster[5]->identifierHash()},
+				    Amg::Vector3D(seed->sp()[2]->x(), seed->sp()[2]->y(), seed->sp()[2]->z()),
+	                            {*(stripLinkAcc(*strip_cluster[4])), *(stripLinkAcc(*strip_cluster[5]))})
+	};
+
+      }
+
+      for (unsigned int index = 0; index<3; index++) {
+	float r[15];
+	r[0] = seed->sp()[index]->x();
+	r[1] = seed->sp()[index]->y();
+	r[2] = seed->sp()[index]->z();
+	stripInform(data, spacePoints[index], r);
+	stripSpacePointsForSeeds[index] = new ITk::SiSpacePointForSeed(spacePoints[index], r);
+	stripSpacePointsForSeeds[index]->setQuality(-seed->seedQuality());
+      }
+      
+      data.i_ITkSeeds.emplace_back(stripSpacePointsForSeeds[0], stripSpacePointsForSeeds[1],
+				   stripSpacePointsForSeeds[2], seed->z());
+      data.i_ITkSeeds.back().setQuality(-seed->seedQuality());
+      
+      if (useClusters) {
+        for (std::size_t i(0ul); i<3ul; ++i) {
+          delete spacePoints[i];
+          spacePoints[i] = nullptr;
+        }
+      }
+    }
+    
+    return true;
+  }
+
+  bool 
+  SiSpacePointsSeedMaker::convertPixelSeed(const EventContext& ctx,
+					   InDet::SiSpacePointsSeedMakerEventData& data,
+					   const ActsTrk::SeedContainer& seedPtrs) const {
+    // If the read handle key for clusters is not empty, that means the xAOD->InDet Cluster link is available
+    // Else we can use xAOD->Trk Space Point link
+    // If none of these is available, we have a JO misconfguration!
+    bool useClusters = not m_pixelClusterContainerKey.empty();
+
+    static const SG::AuxElement::Accessor< ElementLink< InDet::PixelClusterCollection > > pixelLinkAcc("pixelClusterLink");
+    static const SG::AuxElement::Accessor< ElementLink< ::SpacePointCollection > > linkAcc("pixelSpacePointLink");
+
+    const xAOD::PixelClusterContainer *inputContainer = nullptr;
+    if (useClusters) {
+      SG::ReadHandle<xAOD::PixelClusterContainer> inputClusterContainer( m_pixelClusterContainerKey, ctx );
+      if (not inputClusterContainer.isValid()){
+	ATH_MSG_FATAL("xAOD::PixelClusterContainer with key " << m_pixelClusterContainerKey.key() << " is not available...");
+	return false;
+      }
+      inputContainer = inputClusterContainer.cptr();
+    }
+
+    std::array<const Trk::SpacePoint*, 3> spacePoints {nullptr, nullptr, nullptr};
+    std::array<ITk::SiSpacePointForSeed*, 3> pixelSpacePointsForSeeds {nullptr, nullptr, nullptr};
+
+    for (const ActsTrk::Seed* seed : seedPtrs) {
+      // Retrieve/make the space points!
+      if (not useClusters) {
+	// Get the Space Point from the element link
+	if (not linkAcc.isAvailable(*seed->sp()[0])){
+	  ATH_MSG_FATAL("no pixelSpacePointLink for bottom sp!");
+	  return false;
+	}
+	if (not linkAcc.isAvailable(*seed->sp()[1])){
+	  ATH_MSG_FATAL("no pixelSpacePointLink for middle sp!");
+	  return false;
+	}
+	if (not linkAcc.isAvailable(*seed->sp()[2])){
+	  ATH_MSG_FATAL("no pixelSpacePointLink for top sp!");
+	  return false;
+	}
+
+	spacePoints = {
+	  *linkAcc(*seed->sp()[0]),
+	  *linkAcc(*seed->sp()[1]),
+	  *linkAcc(*seed->sp()[2])
+	};      
+      }
+      else {
+	// Get the clusters from the xAOD::Clusters and then make the space points
+	std::size_t bottom_idx = seed->sp()[0]->measurementIndexes()[0];
+	std::size_t medium_idx = seed->sp()[1]->measurementIndexes()[0];
+	std::size_t top_idx    = seed->sp()[2]->measurementIndexes()[0];
+
+	const  xAOD::PixelCluster* bottom_cluster = inputContainer->at(bottom_idx);
+	const  xAOD::PixelCluster* medium_cluster = inputContainer->at(medium_idx);
+	const  xAOD::PixelCluster* top_cluster = inputContainer->at(top_idx);
+
+	if (not pixelLinkAcc.isAvailable(*bottom_cluster)) {
+	  ATH_MSG_FATAL("no pixelClusterLink for cluster associated to bottom sp!");
+	  return false;
+	}
+	if (not pixelLinkAcc.isAvailable(*medium_cluster)) {
+	  ATH_MSG_FATAL("no pixelClusterLink for cluster associated to middle sp!");
+	  return false;
+	}
+	if (not pixelLinkAcc.isAvailable(*top_cluster)) {
+	  ATH_MSG_FATAL("no pixelClusterLink for cluster associated to top sp!");
+	  return false;
+	}
+
+	spacePoints =  { 
+	  new InDet::PixelSpacePoint(bottom_cluster->identifierHash(), *(pixelLinkAcc(*bottom_cluster))),
+	  new InDet::PixelSpacePoint(medium_cluster->identifierHash(), *(pixelLinkAcc(*medium_cluster))),
+	  new InDet::PixelSpacePoint(top_cluster->identifierHash(), *(pixelLinkAcc(*top_cluster)))
+	};
+
+      }
+           
+      for (unsigned int index = 0; index<3; ++index) {
+	float r[15];
+	r[0] = seed->sp()[index]->x();
+	r[1] = seed->sp()[index]->y();
+	r[2] = seed->sp()[index]->z();
+	pixInform(spacePoints[index], r);
+	pixelSpacePointsForSeeds[index] = new ITk::SiSpacePointForSeed(spacePoints[index], r);
+	pixelSpacePointsForSeeds[index]->setQuality(-seed->seedQuality());
+      }
+      
+      data.i_ITkSeeds.emplace_back(pixelSpacePointsForSeeds[0],
+				   pixelSpacePointsForSeeds[1],
+				   pixelSpacePointsForSeeds[2],
+				   seed->z());
+      data.i_ITkSeeds.back().setQuality(-seed->seedQuality());
+
+      if (useClusters) {
+	for (std::size_t i(0ul); i<3ul; ++i) {
+	  delete spacePoints[i];
+	  spacePoints[i] = nullptr;
+	}
+      }
+    }    
+    
+    return true;
+  }
+  
 }

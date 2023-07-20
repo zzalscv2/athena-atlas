@@ -113,13 +113,7 @@ def  ActsTrkSiSpacePointsSeedMakerCfg(flags,
     kwargs['name'] = name
 
     # Main properties
-    from ActsConfig.TrackingComponentConfigurer import TrackingComponentConfigurer
-    configuration_settings = TrackingComponentConfigurer(flags)
-
-    kwargs.setdefault('SpacePointsPixelName', 'ITkPixelSpacePoints')
-    kwargs.setdefault('SpacePointsStripName', 'ITkStripSpacePoints')
-    kwargs.setdefault('SpacePointsOverlapName', 'ITkOverlapSpacePoints')
-    kwargs.setdefault('usePixel',
+    kwargs.setdefault('usePixel', 
                       flags.Tracking.ActiveConfig.useITkPixel and
                       flags.Tracking.ActiveConfig.useITkPixelSeeding)
     kwargs.setdefault('useStrip',
@@ -128,12 +122,26 @@ def  ActsTrkSiSpacePointsSeedMakerCfg(flags,
     kwargs.setdefault('useOverlapSpCollection',
                       flags.Tracking.ActiveConfig.useITkStrip and
                       flags.Tracking.ActiveConfig.useITkStripSeeding)
-    kwargs.setdefault('doSpacePointConversion', not (configuration_settings.doActsSpacePoint and configuration_settings.doAthenaToActsCluster))
+
     kwargs.setdefault('ActsTrkSpacePointsPixelName'    , "ITkPixelSpacePoints")
     kwargs.setdefault('ActsTrkSpacePointsStripName'    , "ITkStripSpacePoints")
     kwargs.setdefault('ActsTrkSpacePointsOverlapName'  , "ITkStripOverlapSpacePoints")
-    kwargs.setdefault('PixelClusterContainerKey', "ITkPixelClusters")
-    kwargs.setdefault('StripClusterContainerKey', "ITkStripClusters")
+
+    from ActsConfig.TrackingComponentConfigurer import TrackingComponentConfigurer
+    configuration_settings = TrackingComponentConfigurer(flags)
+
+    # The code will need to use Trk::SpacePoint object for downstream Athena tracking
+    # If we run this tool we have two options to retrieve this:
+    #     (1) Have the Athena->Acts Space Point Converter scheduled beforehand
+    #     (2) Have the Athena->Acts Cluster Converter scheduled beforehand
+    # In case (1) the link xAOD -> Trk Space Point will be used to retrieve the Trk::SpacePoints
+    # In case (2) the link xAOD -> InDet Cluster will be used to create the Trk::SpacePoints
+    # If none of the above conditions are met, it means there is a misconfiguration of the algorithms
+    useClusters = configuration_settings.doAthenaToActsCluster and not configuration_settings.doAthenaToActsSpacePoint
+    if useClusters and kwargs['usePixel']:
+        kwargs.setdefault('PixelClusterContainerKey', 'ITkPixelClusters')
+    if useClusters and kwargs['useStrip']:
+        kwargs.setdefault('StripClusterContainerKey', 'ITkStripClusters')
 
     if flags.Tracking.ActiveConfig.usePrdAssociationTool:
         # not all classes have that property !!!
