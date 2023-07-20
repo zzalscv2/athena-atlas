@@ -39,7 +39,7 @@ def testCfg (flags):
     result = ComponentAccumulator()
 
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-    result.merge (MuonGeoModelCfg(flags, forceDisableAlignment=True))
+    result.merge (MuonGeoModelCfg(flags))
 
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
     result.merge (AtlasFieldCacheCondAlgCfg(flags, UseDCS = False))

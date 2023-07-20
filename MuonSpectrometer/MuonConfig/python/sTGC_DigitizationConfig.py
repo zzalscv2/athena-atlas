@@ -127,7 +127,7 @@ def sTGC_DigitizationBasicCfg(flags, **kwargs):
 
 def sTGC_OverlayDigitizationBasicCfg(flags, **kwargs):
     """Return ComponentAccumulator with sTGC Overlay digitization"""
-    acc = MuonGeoModelCfg(flags, forceDisableAlignment=not flags.Overlay.DataOverlay)
+    acc = MuonGeoModelCfg(flags)
     if flags.Common.ProductionStep != ProductionStep.FastChain:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         if 'sTGCSimHitCollection#sTGCSensitiveDetector' in flags.Input.SecondaryTypedCollections:

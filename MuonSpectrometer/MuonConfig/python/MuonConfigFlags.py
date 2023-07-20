@@ -78,7 +78,8 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.runCommissioningChain", lambda prevFlags: ( False and (prevFlags.Detector.EnableMM or prevFlags.Detector.EnablesTGC) \
                                                                  and prevFlags.Beam.Type is BeamType.Collisions) )
     
-    mcf.addFlag("Muon.applyMMPassivation", lambda prevFlags: prevFlags.GeoModel.Run>=LHCPeriod.Run3 and not prevFlags.Common.isOnline )
+    mcf.addFlag("Muon.applyMMPassivation", lambda prevFlags: prevFlags.GeoModel.Run>=LHCPeriod.Run3 and not prevFlags.Common.isOnline and (prevFlags.Common.Project is not Project.AthSimulation \
+                                                      and (prevFlags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.FastChain] or prevFlags.Overlay.DataOverlay)))
     # CalibFlags
     mcf.addFlag("Muon.Calib.readMDTCalibFromBlob", True)  # Read mdt tube calibration from blob-folders
     mcf.addFlag("Muon.Calib.correctMdtRtForBField", lambda prevFlags : (prevFlags.Input.isMC is False and prevFlags.Beam.Type is BeamType.Collisions)) # Apply B-field correction to drift times only for collision data (as done in https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/MuonSpectrometer/MuonCnv/MuonCnvExample/python/MuonCalibFlags.py#0028)

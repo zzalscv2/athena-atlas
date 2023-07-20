@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Based on : https://gitlab.cern.ch/atlas/athena/blob/master/MuonSpectrometer/MuonCnv/MuonCnvExample/python/MuonCalibConfig.py
 
 from MuonConfig.MuonCondAlgConfig import CscCondDbAlgCfg, NswCalibDbAlgCfg
-from MuonConfig.MuonGeometryConfig import MuonDetectorCondAlgCfg
+from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType, LHCPeriod
@@ -116,7 +116,7 @@ def MdtCalibrationDbToolCfg(flags, **kwargs):
     return result
     
 def MdtCalibDbAlgCfg(flags,name="MdtCalibDbAlg",**kwargs):
-    result = MuonDetectorCondAlgCfg(flags)
+    result = MuonGeoModelCfg(flags)
 
     # setup COOL folders
     acc, mdt_folder_name_appendix = _setupMdtCondDB(flags)
