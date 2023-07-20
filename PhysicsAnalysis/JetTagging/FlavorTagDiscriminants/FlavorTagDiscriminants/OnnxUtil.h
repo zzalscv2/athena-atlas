@@ -7,9 +7,11 @@ Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
 #include "nlohmann/json.hpp"
 #include <core/session/onnxruntime_cxx_api.h>
-#include <map>
-
 #include "FlavorTagDiscriminants/GNNConfig.h"
+#include <map> //also has std::pair
+#include <vector>
+#include <string>
+#include <memory>
 
 namespace FlavorTagDiscriminants {
 

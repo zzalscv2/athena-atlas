@@ -2,12 +2,12 @@
 Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <fstream>
-#include <iostream>
+
 
 #include "FlavorTagDiscriminants/OnnxUtil.h"
-#include "PathResolver/PathResolver.h"
 #include "CxxUtils/checker_macros.h"
+#include <stdexcept>
+#include <tuple> //for std::make_tuple
 
 namespace FlavorTagDiscriminants {
 
@@ -53,8 +53,8 @@ namespace FlavorTagDiscriminants {
 
     // iterate over all input nodes
     for (std::size_t i = 0; i < num_input_nodes; i++) {
-      char* input_name = m_session->GetInputNameAllocated(i, allocator).release();
-      m_input_node_names.push_back(std::string(input_name));
+      auto input_name = m_session->GetInputNameAllocated(i, allocator);
+      m_input_node_names.emplace_back(input_name.get());
      }
 
     // get the output nodes
@@ -63,9 +63,9 @@ namespace FlavorTagDiscriminants {
 
     // iterate over all output nodes
     for(std::size_t i = 0; i < num_output_nodes; i++ ) {
-      char* output_name = m_session->GetOutputNameAllocated(i, allocator).release();
+      auto output_name = m_session->GetOutputNameAllocated(i, allocator);
       ONNXOutputNode output_node;
-      output_node.name = std::string(output_name);
+      output_node.name = std::string(output_name.get());
       output_node.name_in_model = output_node.name;
       output_node.type = 
         m_session->GetOutputTypeInfo(i).GetTensorTypeAndShapeInfo().GetElementType();
@@ -89,8 +89,8 @@ namespace FlavorTagDiscriminants {
 
     Ort::AllocatorWithDefaultOptions allocator;
     Ort::ModelMetadata metadata = m_session->GetModelMetadata();
-    std::string val = metadata.LookupCustomMetadataMapAllocated(key.c_str(), allocator).release();
-    return val;
+    std::string val(metadata.LookupCustomMetadataMapAllocated(key.c_str(), allocator).get());
+    return val; 
   }
 
   std::vector<ONNXOutputNode> OnnxUtil::getOutputNodeInfo() const {
