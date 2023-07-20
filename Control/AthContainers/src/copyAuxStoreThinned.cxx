@@ -48,6 +48,10 @@ void copyAuxStoreThinned NO_SANITIZE_UNDEFINED
   const ThinningDecisionBase* dec = info ? info->m_decision : nullptr;
 
   size_t nremaining = dec ? dec->thinnedSize() : size;
+  if( nremaining == 0) {
+    copy.resize(0);
+    return;
+  }
 
   // Access the auxiliary type registry:
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
