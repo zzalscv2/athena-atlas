@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef _MUON_NSW_DECODE_HELPER_H_
 #define _MUON_NSW_DECODE_HELPER_H_
@@ -139,7 +139,7 @@ namespace Muon
       constexpr int8_t min_bit(const T &number) {
       constexpr int8_t num_bits = sizeof(number) * 8 - 1;  
       for (size_t bit = 0; bit <= num_bits; ++bit) {
-	if (number & (1 << bit))
+	if (number & (1u << bit))
 	  return bit;
       }
       return -1;
