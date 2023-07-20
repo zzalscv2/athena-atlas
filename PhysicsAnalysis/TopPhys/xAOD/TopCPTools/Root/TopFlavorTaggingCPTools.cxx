@@ -192,8 +192,9 @@ namespace top {
                      "Failed to set b-tagging systematics to exclude from EV treatment");
           top::check(btageff->initialize(), "Failed to initialize " + bTagWPName);
           // Check the excludedSysts - Cannot check before the tool is initialised
-          top::check(this->checkExcludedSysts(btageff, excludedSysts),
-                     "Incorrect excluded systematics have been provided.");
+          if (this->checkExcludedSysts(btageff, excludedSysts) != StatusCode::SUCCESS) {
+              ATH_MSG_WARNING("Incorrect excluded systematics have been provided.");
+          }
           m_btagging_efficiency_tools.push_back(btageff);
           m_config->setBTagWP_calibrated(bTagWPName);
         }
@@ -290,8 +291,9 @@ namespace top {
                        "Failed to set b-tagging systematics to exclude from EV treatment");
             top::check(btageff->initialize(), "Failed to initialize " + bTagWPName);
             // Check the excludedSysts - Cannot check before the tool is initialised
-            top::check(this->checkExcludedSysts(btageff, excludedSysts),
-                       "Incorrect excluded systematics have been provided.");
+            if (this->checkExcludedSysts(btageff, excludedSysts) != StatusCode::SUCCESS) {
+                ATH_MSG_WARNING("Incorrect excluded systematics have been provided.");
+            }
             m_btagging_efficiency_tools.push_back(btageff);
             m_config->setBTagWP_calibrated_trkJet(bTagWPName);
           }
