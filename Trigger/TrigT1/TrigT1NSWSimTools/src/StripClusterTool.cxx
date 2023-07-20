@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -192,7 +192,8 @@ namespace NSWL1 {
     m_cl_phiId->clear();
   }
 
-  StatusCode StripClusterTool::fill_strip_validation_id(std::vector<std::unique_ptr<StripClusterData>>& clusters, 
+  StatusCode StripClusterTool::fill_strip_validation_id(const EventContext& ctx,
+							std::vector<std::unique_ptr<StripClusterData>>& clusters,
                                                         std::vector<std::shared_ptr<std::vector<std::unique_ptr<StripData> >>  > &cluster_cache) const {
 
     ATH_MSG_DEBUG("Cluster cache received " << cluster_cache.size());
@@ -218,7 +219,6 @@ namespace NSWL1 {
         continue;
       }
 
-      const auto& ctx = Gaudi::Hive::currentContext();
       const MuonSimDataCollection* sdo_container = nullptr;
       if(m_isMC) {
         SG::ReadHandle<MuonSimDataCollection> readMuonSimDataCollection( m_sTgcSdoContainerKey, ctx );
@@ -370,7 +370,7 @@ namespace NSWL1 {
   }
 
 
-  StatusCode StripClusterTool::cluster_strip_data( std::vector<std::unique_ptr<StripData>>& strips, std::vector< std::unique_ptr<StripClusterData> >& clusters) const {
+  StatusCode StripClusterTool::cluster_strip_data(const EventContext& ctx, std::vector<std::unique_ptr<StripData>>& strips, std::vector< std::unique_ptr<StripClusterData> >& clusters) const {
 
       if(strips.empty()){
         ATH_MSG_WARNING("Received 0 strip hits... Skip event");
@@ -456,7 +456,7 @@ namespace NSWL1 {
       }
 
       ATH_MSG_DEBUG("Found :" << cluster_cache.size() << " clusters");
-      ATH_CHECK(fill_strip_validation_id(clusters, cluster_cache));
+      ATH_CHECK(fill_strip_validation_id(ctx, clusters, cluster_cache));
       cluster_cache.clear();
 
       return StatusCode::SUCCESS;

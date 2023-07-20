@@ -340,9 +340,11 @@ namespace NSWL1 {
         int trigger_sector = (isSmall)? stationPhi*2-1 : stationPhi*2-2;
         return (stationEta>0)? trigger_sector + 16 : trigger_sector;
     }
-    //------------------------------------------------------------------------------
-    bool PadTdsOfflineTool::determine_delay_and_bc(const sTgcDigit* digit, const int pad_hit_number,
-                                                   double &delayed_time, uint16_t &BCtag) const
+
+  // FIXME: method not used anywhere, drop it?
+  //------------------------------------------------------------------------------
+  bool PadTdsOfflineTool::determine_delay_and_bc(const sTgcDigit* digit, const int pad_hit_number,
+						 double &delayed_time, uint16_t &BCtag) const
     {
         bool success = false;
         if(!digit) return success;

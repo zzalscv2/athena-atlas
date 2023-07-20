@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STRIPCLUSTERTOOL_H
@@ -63,14 +63,15 @@ namespace NSWL1 {
     virtual ~StripClusterTool()=default;
     virtual StatusCode initialize() override;
     virtual void handle (const Incident& inc) override;
-    virtual StatusCode cluster_strip_data( std::vector<std::unique_ptr<StripData>>& strips,std::vector<std::unique_ptr<StripClusterData>>& clusters) const override;
+    virtual StatusCode cluster_strip_data(const EventContext& ctx, std::vector<std::unique_ptr<StripData>>& strips,std::vector<std::unique_ptr<StripClusterData>>& clusters) const override;
 
   private:
     // methods implementing the internal data processing
     StatusCode init_branches();                             //!< init the branches
     StatusCode book_branches();                             //!< book the branches to analyze the StripTds
     void clear_ntuple_variables();                          //!< clear the variables used in the analysis
-    StatusCode fill_strip_validation_id(std::vector<std::unique_ptr<StripClusterData>>& clusters,
+    StatusCode fill_strip_validation_id(const EventContext& ctx,
+					std::vector<std::unique_ptr<StripClusterData>>& clusters,
                                         std::vector< std::shared_ptr<std::vector<std::unique_ptr<StripData> >>  > &cluster_cache) const;
 
     // needed Servives, Tools and Helpers
