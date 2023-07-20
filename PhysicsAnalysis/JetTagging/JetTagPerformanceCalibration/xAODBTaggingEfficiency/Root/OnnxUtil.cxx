@@ -2,12 +2,11 @@
 Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <fstream>
-#include <iostream>
-
 #include "xAODBTaggingEfficiency/OnnxUtil.h"
-#include "PathResolver/PathResolver.h"
 #include "CxxUtils/checker_macros.h"
+#include "PathResolver/PathResolver.h" //for PathResolverFindCalibFile
+
+#include <cstdint> //for int64_t
 
 // Constructor
 OnnxUtil::OnnxUtil(const std::string& name){
@@ -35,8 +34,8 @@ void OnnxUtil::initialize(){
     
 	// iterate over all input nodes
 	for (std::size_t i = 0; i < num_input_nodes; i++) {
-    char* input_name = m_session->GetInputNameAllocated(i, allocator).release();
-		m_input_node_names.push_back(std::string(input_name));
+    auto input_name = m_session->GetInputNameAllocated(i, allocator);
+		m_input_node_names.emplace_back(input_name.get());
 	}
 
 	// get the output nodes
@@ -45,8 +44,8 @@ void OnnxUtil::initialize(){
 
 	// iterate over all output nodes
 	for(std::size_t i = 0; i < num_output_nodes; i++ ) {
-        char* output_name = m_session->GetOutputNameAllocated(i, allocator).release();
-		    m_output_node_names.push_back(std::string(output_name));
+        auto output_name = m_session->GetOutputNameAllocated(i, allocator);
+		    m_output_node_names.emplace_back(output_name.get());
     
         // get output node types
         Ort::TypeInfo type_info = m_session->GetOutputTypeInfo(i);

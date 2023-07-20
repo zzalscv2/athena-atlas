@@ -1,11 +1,14 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ONNXUTIL_H
 #define ONNXUTIL_H
 
 #include <core/session/onnxruntime_cxx_api.h>
+#include <string>
+#include <vector>
+#include <memory>
 
 
 class OnnxUtil final{
@@ -40,7 +43,7 @@ class OnnxUtil final{
     std::string m_path_to_onnx;
     
     // num_wp=1 for fixed cut;
-    int m_num_wp;
+    int m_num_wp{};
     
 }; // Class OnnxUtil
 
