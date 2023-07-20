@@ -64,19 +64,10 @@ atlas_add_library( DataQualityUtils
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
                    LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} CxxUtils nlohmann_json::nlohmann_json
                    PRIVATE_LINK_LIBRARIES DataQualityInterfaces )
-
-# With gcc8, need to link with -lstdc++fs in order to use std::filesystem.
-if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND                 
-    "${CMAKE_CXX_COMPILER_VERSION}" VERSION_GREATER_EQUAL 8 AND
-    "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 9 )
-  set( filesystem_lib stdc++fs )
-else()
-  set( filesystem_lib )
-endif()
     
 atlas_add_executable( han-results-print
                       src/han_results_print.cxx
-                      LINK_LIBRARIES DataQualityUtils ${filesystem_lib} )
+                      LINK_LIBRARIES DataQualityUtils)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py
