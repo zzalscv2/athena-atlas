@@ -38,20 +38,15 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
     CoinFlagF=4,CoinFlagC,CoinFlagH,CoinFlagEI,CoinFlagTile,CoinFlagRPC,CoinFlagNSW,
     CoinFlags = CoinFlagF, InnerCoinFlags = CoinFlagEI
   };
-  struct EtaPhi{
-    double eta{};
-    double phi{};
-    EtaPhi(double _eta, double _phi){eta=_eta;phi=_phi;}
-  };
-  struct MyMuonRoI{
+  struct TimedMuonRoI{
     int timing{}; // -2,-1,0(current BC),+1,+2
     const xAOD::MuonRoI* muonRoI{};
-    MyMuonRoI(const xAOD::MuonRoI* muonroi, int bcid = 0){
+    TimedMuonRoI(const xAOD::MuonRoI* muonroi, int bcid = 0){
       timing = bcid;
       muonRoI = muonroi;
     }
   };
-  struct MyMuon{
+  struct TimedMuon{
     const xAOD::Muon* muon{};
     std::vector<double> extPosZ;
     std::vector<TVector3> extPos;
@@ -326,6 +321,7 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
 		      std::vector<ExtTrigInfo>&,
 		      std::vector<Monitored::ObjectsCollection<std::vector<ExtTrigInfo>, double>>&,
 		      MonVariables&) const;
+  double getMatchingWindow(const xAOD::Muon* muon) const;
   
   ToolHandle<IGoodRunsListSelectorTool> m_GoodRunsListSelectorTool{this,"GRLTool","GoodRunsListSelectorTool","GoodRunsListSelectorTool"};
   ToolHandle<Trk::IExtrapolator> m_extrapolator{this,"TrackExtrapolator","Trk::Extrapolator/AtlasExtrapolator","Track extrapolator"};
