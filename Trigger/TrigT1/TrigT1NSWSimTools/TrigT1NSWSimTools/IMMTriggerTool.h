@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IMMTRIGGERTOOL_H
@@ -21,7 +21,7 @@ namespace NSWL1 {
   public:
     virtual ~IMMTriggerTool() {}
 
-    virtual StatusCode runTrigger(Muon::NSW_TrigRawDataContainer* rdo, const bool do_MMDiamonds) const = 0;
+    virtual StatusCode runTrigger(const EventContext& ctx, Muon::NSW_TrigRawDataContainer* rdo, const bool do_MMDiamonds) const = 0;
 
     static const InterfaceID& interfaceID() {
         static const InterfaceID IID_IMMTriggerTool("NSWL1::IMMTriggerTool", 1 ,0);

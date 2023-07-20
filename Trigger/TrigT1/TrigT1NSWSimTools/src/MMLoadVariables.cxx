@@ -1,18 +1,18 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1NSWSimTools/MMLoadVariables.h"
 #include "TruthUtils/MagicNumbers.h"
 
-MMLoadVariables::MMLoadVariables(StoreGateSvc* evtStore, const MuonGM::MuonDetectorManager* detManager, const MmIdHelper* idhelper):
+MMLoadVariables::MMLoadVariables(const MuonGM::MuonDetectorManager* detManager, const MmIdHelper* idhelper):
    AthMessaging(Athena::getMessageSvc(), "MMLoadVariables") {
-      m_evtStore = evtStore;
       m_detManager = detManager;
       m_MmIdHelper = idhelper;
 }
 
-StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContainer,
+StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
+					    const McEventCollection *truthContainer,
                                             const TrackRecordCollection* trackRecordCollection,
                                             const MmDigitContainer *nsw_MmDigitContainer,
                                             std::map<std::pair<int,unsigned int>,std::vector<digitWrapper> >& entries,
@@ -97,7 +97,7 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
         } //end particle loop
       } //end truth container loop (should be only 1 container per event)
       } // if truth container is not null
-      const auto& ctx = Gaudi::Hive::currentContext();
+
       int event = ctx.eventID().event_number();
 
       int TruthParticle_n = j;

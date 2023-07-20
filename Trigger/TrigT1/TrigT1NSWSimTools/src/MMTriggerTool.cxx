@@ -71,8 +71,8 @@ namespace NSWL1 {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode MMTriggerTool::runTrigger(Muon::NSW_TrigRawDataContainer* rdo, const bool do_MMDiamonds) const {
-    const auto& ctx = Gaudi::Hive::currentContext();
+  StatusCode MMTriggerTool::runTrigger(const EventContext& ctx, Muon::NSW_TrigRawDataContainer* rdo, const bool do_MMDiamonds) const {
+
     int event = ctx.eventID().event_number();
     ATH_MSG_DEBUG("********************************************************* EVENT NUMBER = " << event);
 
@@ -85,7 +85,7 @@ namespace NSWL1 {
     std::map<std::string, std::shared_ptr<MMT_Parameters> > pars;
     pars["MML"] = m_par_large;
     pars["MMS"] = m_par_small;
-    MMLoadVariables load = MMLoadVariables(&(*(evtStore())), m_detManager, m_MmIdHelper);
+    MMLoadVariables load = MMLoadVariables(m_detManager, m_MmIdHelper);
 
     std::map<std::pair<int, unsigned int>,std::vector<digitWrapper> > entries;
     std::map<std::pair<int, unsigned int>,std::map<hitData_key,hitData_entry> > Hits_Data_Set_Time;
@@ -94,13 +94,13 @@ namespace NSWL1 {
     const McEventCollection* ptrMcEventCollection = nullptr;
     const TrackRecordCollection* ptrMuonEntryLayer = nullptr;
     if(m_isMC){
-      SG::ReadHandle<McEventCollection> readMcEventCollection( m_keyMcEventCollection );
+      SG::ReadHandle<McEventCollection> readMcEventCollection( m_keyMcEventCollection, ctx );
       if( !readMcEventCollection.isValid() ){
         ATH_MSG_ERROR("Cannot retrieve McEventCollection");
         return StatusCode::FAILURE;
       }
       ptrMcEventCollection = readMcEventCollection.cptr();
-      SG::ReadHandle<TrackRecordCollection> readMuonEntryLayer( m_keyMuonEntryLayer );
+      SG::ReadHandle<TrackRecordCollection> readMuonEntryLayer( m_keyMuonEntryLayer, ctx );
       if( !readMuonEntryLayer.isValid() ){
         ATH_MSG_ERROR("Cannot retrieve MuonEntryLayer");
         return StatusCode::FAILURE;
@@ -108,13 +108,13 @@ namespace NSWL1 {
       ptrMuonEntryLayer = readMuonEntryLayer.cptr();
     }
 
-    SG::ReadHandle<MmDigitContainer> readMmDigitContainer( m_keyMmDigitContainer );
+    SG::ReadHandle<MmDigitContainer> readMmDigitContainer( m_keyMmDigitContainer, ctx );
     if( !readMmDigitContainer.isValid() ){
       ATH_MSG_ERROR("Cannot retrieve MmDigitContainer");
       return StatusCode::FAILURE;
     }
     histogramDigitVariables histDigVars;
-    ATH_CHECK( load.getMMDigitsInfo( ptrMcEventCollection, ptrMuonEntryLayer, readMmDigitContainer.cptr(), entries, Hits_Data_Set_Time, Event_Info, pars, histDigVars) );
+    ATH_CHECK( load.getMMDigitsInfo(ctx, ptrMcEventCollection, ptrMuonEntryLayer, readMmDigitContainer.cptr(), entries, Hits_Data_Set_Time, Event_Info, pars, histDigVars) );
     if (m_doNtuple) this->fillNtuple(histDigVars);
 
     if (entries.empty()) {
