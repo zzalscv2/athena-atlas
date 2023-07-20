@@ -24,7 +24,7 @@ ActsTrk::MutableMultiTrajectory::MutableMultiTrajectory(
   if (other.m_trackStatesAux or other.m_trackParametersAux or
       other.m_trackJacobiansAux or other.m_trackMeasurementsAux) {
     throw std::runtime_error(
-        "ActsTrk::MultiTrajectory that was default constructed can not be "
+        "MutableMultiTrajectory that was default constructed can not be "
         "copied");
   }
   for (auto& decoration : other.m_decorations) {
@@ -174,7 +174,7 @@ void ActsTrk::MutableMultiTrajectory::shareFrom_impl(
       sourceIndex = other->jacobian();
       break;
     default:
-      throw std::domain_error{"Unable to share this component"};
+      throw std::domain_error{"MutableMultiTrajectory Unable to share this component"};
   }
 
   assert(sourceIndex != kInvalid);
@@ -197,7 +197,7 @@ void ActsTrk::MutableMultiTrajectory::shareFrom_impl(
       self->setJacobian(sourceIndex);
       break;
     default:
-      throw std::domain_error{"Unable to share this component"};
+      throw std::domain_error{"MutableMultiTrajectory Unable to share this component"};
   }
 }
 
@@ -230,7 +230,7 @@ void ActsTrk::MutableMultiTrajectory::unset_impl(
 
       break;
     default:
-      throw std::domain_error{"Unable to unset this component"};
+      throw std::domain_error{"MutableMultiTrajectory Unable to unset this component"};
   }
 }
 
@@ -265,7 +265,7 @@ std::any ActsTrk::MutableMultiTrajectory::component_impl(
           return d.getter(istate, d.name);
         }
       }
-      throw std::runtime_error("no such component " + std::to_string(key));
+      throw std::runtime_error("MutableMultiTrajectory no such component " + std::to_string(key));
     }
   }
 }
@@ -311,7 +311,7 @@ const std::any ActsTrk::MutableMultiTrajectory::component_impl(
           return d.getter(istate, d.name);
         }
       }
-      throw std::runtime_error("no such component " + std::to_string(key));
+      throw std::runtime_error("MutableMultiTrajectory no such component " + std::to_string(key));
     }
   }
 }
@@ -329,6 +329,19 @@ ActsTrk::MutableMultiTrajectory::getUncalibratedSourceLink_impl(
   auto el = trackStates()[istate]->uncalibratedMeasurementLink();
   auto geoID = trackStates()[istate]->geometryId();
   return Acts::SourceLink(geoID, el);
+}
+
+
+void ActsTrk::MutableMultiTrajectory::setReferenceSurface_impl(IndexType istate,
+                                std::shared_ptr<const Acts::Surface> surface) {          
+  if ( istate >= m_surfaces.size() )                                  
+    m_surfaces.resize(istate, nullptr);
+  m_surfaces[istate] = surface.get();
+}
+
+const Acts::Surface* ActsTrk::MutableMultiTrajectory::referenceSurface_impl(IndexType istate) const {
+  if ( istate >= m_surfaces.size() ) throw std::out_of_range("MutableMultiTrajectory index out of range when accessing reference surface");
+  return m_surfaces[istate];
 }
 
 
@@ -432,7 +445,7 @@ const std::any ActsTrk::ConstMultiTrajectory::component_impl(
           return  d.getter(istate, d.name);
         }
       }
-      throw std::runtime_error("no such component " + std::to_string(key));
+      throw std::runtime_error("ConstMultiTrajectory no such component " + std::to_string(key));
     }
   }
 }
@@ -461,4 +474,35 @@ bool ActsTrk::ConstMultiTrajectory::hasColumn_impl(
       }
     }
   return false;
+}
+
+  ActsTrk::IndexType 
+  ActsTrk::ConstMultiTrajectory::calibratedSize_impl(ActsTrk::IndexType istate) const {
+    const ActsTrk::IndexType i = (*m_trackStates)[istate]->calibrated();
+    return (*m_trackMeasurements)[i]->size();
+  }
+
+
+typename Acts::SourceLink
+ActsTrk::ConstMultiTrajectory::getUncalibratedSourceLink_impl(ActsTrk::IndexType istate) const {
+  auto el = (*m_trackStates)[istate]->uncalibratedMeasurementLink();
+  auto geoID = (*m_trackStates)[istate]->geometryId();
+  return Acts::SourceLink(geoID, el);
+}
+
+
+void ActsTrk::ConstMultiTrajectory::fillSurfaces(std::shared_ptr<Acts::TrackingGeometry> geo ) {
+  if ( not m_surfaces.empty() )
+    return;
+  m_surfaces.resize(m_trackStates->size(), nullptr);
+  for ( IndexType i = 0; i < m_trackStates->size(); i++ ) {
+      auto geoID = (*m_trackStates)[i]->geometryId();  
+      if ( geoID != 0 ) {
+        m_surfaces[i] = geo->findSurface(geoID);
+      }
+  }
+}
+
+const Acts::Surface* ActsTrk::ConstMultiTrajectory::referenceSurface_impl(IndexType istate) const {
+  return m_surfaces[istate];
 }
