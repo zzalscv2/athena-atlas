@@ -10,6 +10,7 @@
 #include "Acts/EventData/TrackStatePropMask.hpp"
 #include "Acts/EventData/VectorMultiTrajectory.hpp"
 #include "Acts/Utilities/HashedString.hpp"
+#include "Acts/Geometry/TrackingGeometry.hpp"
 #include "CxxUtils/concepts.h"
 #include "xAODTracking/TrackJacobianAuxContainer.h"
 #include "xAODTracking/TrackJacobianContainer.h"
@@ -27,6 +28,7 @@ class ConstMultiTrajectory;
 }  // namespace ActsTrk
 
 namespace Acts {
+class Surface;
 template <typename T>
 struct IsReadOnlyMultiTrajectory {};
 
@@ -330,6 +332,12 @@ class MutableMultiTrajectory final
       ActsTrk::IndexType istate) const;
   typename Acts::SourceLink getUncalibratedSourceLink_impl(IndexType istate);
 
+
+  void setReferenceSurface_impl(IndexType,
+                                std::shared_ptr<const Acts::Surface>);
+  const Acts::Surface* referenceSurface_impl(IndexType ) const;
+
+
  private:
   // bare pointers to the backend (need to be fast and we do not claim ownership
   // anyways)
@@ -377,6 +385,9 @@ class MutableMultiTrajectory final
   std::any decorationSetter(ActsTrk::IndexType, const std::string&);
   template <typename T>
   const std::any decorationGetter(ActsTrk::IndexType, const std::string&) const;
+
+  std::vector<const Acts::Surface*> m_surfaces;
+
 };
 
 namespace detail {
@@ -444,6 +455,17 @@ class ConstMultiTrajectory
   measurementCovariance_impl(IndexType index) const;
   inline size_t size_impl() const { return m_trackStates->size(); }
 
+  ActsTrk::IndexType calibratedSize_impl(ActsTrk::IndexType istate) const;
+  typename Acts::SourceLink getUncalibratedSourceLink_impl(ActsTrk::IndexType istate) const;
+
+  const Acts::Surface* referenceSurface_impl(IndexType) const;
+
+  /**
+   * Cache Surface pointers for every state.
+   * If the surfaces are already there it means that the container is trainsient and this is void operation
+   */
+  void fillSurfaces(std::shared_ptr<Acts::TrackingGeometry> geo );
+
  private:
   // TODO these 4 DATA links will be replaced by a reference to storable object that would contain those
   DataLink<xAOD::TrackStateContainer> m_trackStates;
@@ -453,6 +475,7 @@ class ConstMultiTrajectory
   std::vector<detail::Decoration> m_decorations;
   template <typename T>
   const std::any decorationGetter(ActsTrk::IndexType, const std::string&) const;
+  std::vector<const Acts::Surface*> m_surfaces;
 };
 
 }  // namespace ActsTrk
