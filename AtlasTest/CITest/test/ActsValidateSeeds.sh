@@ -6,6 +6,7 @@ input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/A
 n_events=10
 
 Reco_tf.py --CA \
+  --preExec "flags.Exec.FPE=500;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateSeedsFlags" \
   --inputRDOFile ${input_rdo} \
   --outputAODFile test.AOD.pool.root  \

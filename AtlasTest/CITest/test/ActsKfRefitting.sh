@@ -6,7 +6,7 @@ input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/A
 n_events=5
 
 Reco_tf.py --CA \
-   --preExec "flags.Reco.EnableHGTDExtension=False;" \
+   --preExec "flags.Exec.FPE=500;" "flags.Reco.EnableHGTDExtension=False;" \
    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
    --postInclude "ActsConfig.ActsTrkFittingConfig.ActsReFitterAlgCfg" \
    --inputRDOFile ${input_rdo} \
