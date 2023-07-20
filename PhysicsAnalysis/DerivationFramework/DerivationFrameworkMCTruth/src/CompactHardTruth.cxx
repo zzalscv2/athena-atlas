@@ -465,11 +465,7 @@ StatusCode CompactHardTruth::execute() {
 
   if (doDebug) ATH_MSG_DEBUG("Start parton thinning");
   while (moreP) {
-#ifdef HEPMC3
-    if (doDebug) ATH_MSG_DEBUG("New parton pass " << inEvent << " " << thinEvt->particles().size() << " " << thinEvt->vertices().size());
-#else
     if (doDebug) ATH_MSG_DEBUG("New parton pass " << inEvent << " " << thinEvt->particles_size() << " " << thinEvt->vertices_size());
-#endif
 
     moreP = false;
     removePV.clear();
@@ -1369,13 +1365,8 @@ StatusCode CompactHardTruth::execute() {
     std::cout << "========== END EVENT AFTER THINNING ==========" << std::endl;
   }
 
-#ifdef HEPMC3
-  m_thinParticles += thinEvt->particles().size();
-  m_thinVertices += thinEvt->vertices().size();
-#else
   m_thinParticles += thinEvt->particles_size();
   m_thinVertices += thinEvt->vertices_size();
-#endif
 
   /////////////////////////////////////////
   // Save thinned event in output container

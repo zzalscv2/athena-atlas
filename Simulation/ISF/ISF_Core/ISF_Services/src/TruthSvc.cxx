@@ -337,11 +337,7 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
     // FIXME should probably make this part a separate function and
     // also check if the pdgids of the child particles are the same
     // too.
-#ifdef HEPMC3
-    unsigned short nVertexChildren=vtxFromTI->particles_out().size();
-#else
     unsigned short nVertexChildren=vtxFromTI->particles_out_size();
-#endif
     if(parentAfterIncident) { nVertexChildren-=1; }
     if(nVertexChildren!=numSec) {
       ATH_MSG_WARNING("Existing vertex has " << nVertexChildren << " children. " <<

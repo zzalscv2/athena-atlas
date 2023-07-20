@@ -219,11 +219,7 @@ StatusCode McTopAnaSolution::doMcTopWb()
 
     if (MC::TQUARK == particle->pdg_id() && //> select top
         0      !=  decayVtx        && //> check that we have a valid vtx pointer
-#ifdef HEPMC3
-        2      <=  decayVtx->particles_out().size() ) { //> isn't necessary, just to exercize the GenVertex interface
-#else
         2      <=  decayVtx->particles_out_size() ) { //> isn't necessary, just to exercize the GenVertex interface
-#endif
       m_h_mctop_mass->Fill( particle->momentum().m() );
     }//> top
   }//> end loop over particles

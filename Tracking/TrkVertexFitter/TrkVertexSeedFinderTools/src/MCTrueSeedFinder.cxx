@@ -182,11 +182,7 @@ namespace Trk
     //we select in-time pile-up interactions and hard-scattering, if valid
 
 
-#ifdef HEPMC3
-    bool isEmpty = ( evt->particles().empty() );
-#else
     bool isEmpty = ( evt->particles_size() == 0 );
-#endif
     bool isDummy = ( ( evt->event_number() == -1 ) &&
 		     ( HepMC::signal_process_id(evt) == 0 ) );
     if( isDummy ) isEmpty = false;

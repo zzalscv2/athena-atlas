@@ -972,11 +972,7 @@ void ISF::InputConverter::processPredefinedDecays(const HepMC::GenParticlePtr& g
     ATH_MSG_VERBOSE( "Will add the primary particle set on." );
     ATH_MSG_VERBOSE( "ISF Particle: " << isp );
     ATH_MSG_VERBOSE( "Primary Particle: " << genpart );
-#ifdef HEPMC3
-    ATH_MSG_VERBOSE( "Number of daughters of "<<bcgenpart<<": " << genpart->end_vertex()->particles_out().size() << " at position "<< genpart->end_vertex() );
-#else
     ATH_MSG_VERBOSE( "Number of daughters of "<<bcgenpart<<": " << genpart->end_vertex()->particles_out_size() << " at position "<< genpart->end_vertex() );
-#endif
   }
   else {
     ATH_MSG_WARNING( "Detected primary particle with end vertex. This should only be the case if" );
@@ -985,11 +981,7 @@ void ISF::InputConverter::processPredefinedDecays(const HepMC::GenParticlePtr& g
     ATH_MSG_WARNING( "particle set on." );
     ATH_MSG_WARNING( "ISF Particle: " << isp );
     ATH_MSG_WARNING( "Primary Particle: " << genpart );
-#ifdef HEPMC3
-    ATH_MSG_VERBOSE( "Number of daughters of "<<bcgenpart<<": " << genpart->end_vertex()->particles_out().size() );
-#else
     ATH_MSG_WARNING( "Number of daughters of "<<bcgenpart<<": " << genpart->end_vertex()->particles_out_size() );
-#endif
   }
   // Add all necessary daughter particles
   for ( auto daughter: *(genpart->end_vertex())) {

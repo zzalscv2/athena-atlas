@@ -78,13 +78,8 @@ namespace Muon {
         const HepMC::ConstGenVertexPtr& vtx) const {
         HepMC::ConstGenParticlePtr mother{nullptr};
         HepMC::ConstGenParticlePtr daughter{nullptr};
-#ifdef HEPMC3
-        int particles_in_size = vtx ? vtx->particles_in().size() : 0;
-        int particles_out_size = vtx ? vtx->particles_out().size() : 0;
-#else
         int particles_in_size = vtx ? vtx->particles_in_size() : 0;
         int particles_out_size = vtx ? vtx->particles_out_size() : 0;
-#endif
         if (vtx && msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << " new vertex: nparticles in " << particles_in_size << endmsg;
         // only truth vertices with 1 incoming particle
         if (vtx && (particles_in_size == 1)) {

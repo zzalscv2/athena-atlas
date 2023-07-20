@@ -561,11 +561,7 @@ selectGenSignal  (const McEventCollection* SimTracks,
   for(unsigned int ievt=0; ievt<nb_mc_event; ++ievt)
     {
       const HepMC::GenEvent* genEvent = SimTracks->at(ievt);
-#ifdef HEPMC3
-      counter.m_counter[kN_gen_tracks_processed] += genEvent->particles().size();
-#else
       counter.m_counter[kN_gen_tracks_processed] += genEvent->particles_size();
-#endif
       for (const auto& particle: *genEvent){
 	  // require stable particle from generation or simulation
 	  if (!MC::isStable(particle)) continue;

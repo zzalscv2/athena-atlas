@@ -204,11 +204,7 @@ namespace Trk {
 //this vertex is not from the central region.
 //checking whether it is a bremsstrahlung
 //if so, propagating track to its origin, otherwise rejecting it completely.
-#ifdef HEPMC3
-                                                        if ( pVertex->particles_in().size() == 1 ) {
-#else
                                                         if ( pVertex->particles_in_size() == 1 ) {
-#endif
 // one mother particle: is it a brem of some kind?
 #ifdef HEPMC3
                                                             auto inp = pVertex->particles_in()[0] ;

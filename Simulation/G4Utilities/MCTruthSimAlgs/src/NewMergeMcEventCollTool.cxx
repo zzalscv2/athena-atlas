@@ -161,11 +161,7 @@ void NewMergeMcEventCollTool::printDetailsOfMergedMcEventCollection(McEventColle
   while(outputEventItr!=endOfEvents) {
     const int signal_process_id(HepMC::signal_process_id((*outputEventItr)));
     const int event_number((*outputEventItr)->event_number());
-#ifdef HEPMC3
-    ATH_MSG_INFO ( "GenEvent #"<<event_number<<", signal_process_id="<<signal_process_id<</*", category="<<event->second<<*/", number of Vertices="<<(*outputEventItr)->vertices().size() );
-#else
     ATH_MSG_INFO ( "GenEvent #"<<event_number<<", signal_process_id="<<signal_process_id<</*", category="<<event->second<<*/", number of Vertices="<<(*outputEventItr)->vertices_size() );
-#endif
     char fname[80];
     sprintf(fname,"%s.event%d.txt",m_truthCollInputKey.value().c_str(),event_number);
     std::ofstream of(fname);

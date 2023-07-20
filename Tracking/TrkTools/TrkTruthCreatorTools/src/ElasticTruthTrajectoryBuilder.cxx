@@ -75,12 +75,10 @@ ElasticTruthTrajectoryBuilder::MotherDaughter
 	HepMC::ConstGenParticlePtr mother{nullptr};
 	HepMC::ConstGenParticlePtr daughter{nullptr};
 	// only truth vertices with 1 incoming particle
+	if(vtx && (vtx->particles_in_size() == 1)) {
 #ifdef HEPMC3
-	if(vtx && (vtx->particles_in().size() == 1)) {
 		mother = vtx->particles_in().front();
 #else
-	if(vtx && (vtx->particles_in_size() == 1)) {
-
 		mother = *vtx->particles_in_const_begin();
 #endif
 		// Allow status code 1 and 2.  E.g. a pion that produced a long track can decay  outside of InDet and have status==2.
@@ -94,11 +92,7 @@ ElasticTruthTrajectoryBuilder::MotherDaughter
 			// is that with the higher energy (NOT pt).
 			// 
 			// allow 1 outgoing to cover possible vertexes from interaction in detector material
-#ifdef HEPMC3
-			if (vtx->particles_out().size() <= 2) {
-#else
 			if (vtx->particles_out_size() <= 2) {
-#endif
 				int num_passed_cuts = 0;
 				HepMC::ConstGenParticlePtr passed_cuts{nullptr};
 				for(const auto& candidate: *vtx) {
