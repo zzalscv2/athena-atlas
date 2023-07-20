@@ -92,7 +92,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     emulatedDataTowersKey = "L1_jFexEmulatedTowers"
     if flags.Trigger.L1.dojFex and isNotPool:
         from L1CaloFEXAlgos.FexEmulatedTowersConfig import jFexEmulatedTowersCfg
-        acc.merge(jFexEmulatedTowersCfg(flags,'jFexEmulatedTowerMaker',emulatedDataTowersKey))
+        acc.merge(jFexEmulatedTowersCfg(flags, writeKey=emulatedDataTowersKey))
 
     # Decorate any jFEX data towers
     if flags.Trigger.L1.dojFex and isNotPool:
