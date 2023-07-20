@@ -1,6 +1,6 @@
-Tue Jun 13 16:43:28 CEST 2023
+Tue Jul 18 18:42:28 CEST 2023
 Preloading tcmalloc_minimal.so
-Py:Athena            INFO using release [WorkDir-24.0.6] [x86_64-centos7-gcc11-opt] [Kill-HTT/45db40f] -- built on [2023-06-12T2128]
+Py:Athena            INFO using release [WorkDir-24.0.8] [x86_64-centos7-gcc11-opt] [RUN4-03-00-00_Tests/da9ed526037] -- built on [2023-07-18T1745]
 Py:Athena            INFO including file "AthenaCommon/Preparation.py"
 Py:Athena            INFO including file "AthenaCommon/Atlas.UnixStandardJob.py"
 Py:Athena            INFO executing ROOT6Setup
@@ -8,16 +8,12 @@ Py:Athena            INFO including file "AthenaCommon/Execution.py"
 Py:Athena            INFO including file "FPGATrackSimInput/FPGATrackSimRawToLogicalHitsWrapperAlg_jobOptions.py"
 Py:FPGATrackSimRawToLogicalHitsWrapperAlg    INFO OutFPGATrackSim file ['fpgatracksim_loghits_wrap.OUT.root'] 
 Py:Athena            INFO including file "AthenaCommon/runbatch.py"
-Py:ConfigurableDb    INFO Read module info for 5239 configurables from 13 genConfDb files
-Py:ConfigurableDb WARNING Found 1 duplicates among the 13 genConfDb files :
-Py:ConfigurableDb WARNING --------------------------------------------------
-Py:ConfigurableDb WARNING   -<component name>: <module> - [ <duplicates> ]
-Py:ConfigurableDb WARNING --------------------------------------------------
-Py:ConfigurableDb WARNING   -FPGATrackSimRawHitsWrapperAlg: FPGATrackSimSGInput.FPGATrackSimSGInputConf - ['FPGATrackSimInput.FPGATrackSimInputConf', 'FPGATrackSimInput.FPGATrackSimInputConf']
+Py:ConfigurableDb    INFO Read module info for 5217 configurables from 5 genConfDb files
+Py:ConfigurableDb    INFO No duplicates have been found: that's good !
 ApplicationMgr    SUCCESS 
 ====================================================================================================================================
-                                                   Welcome to ApplicationMgr (GaudiCoreSvc v36r13)
-                                          running on lxplus725.cern.ch on Tue Jun 13 16:43:42 2023
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v36r14)
+                                          running on lxplus783.cern.ch on Tue Jul 18 18:42:42 2023
 ====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
 AthDictLoaderSvc     INFO in initialize...
@@ -27,8 +23,8 @@ CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 
 AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
 FPGATrackSimLog...  DEBUG Property update for OutputLevel : new value = 2
 FPGATrackSimLog...  DEBUG Property update for OutputLevel : new value = 2
-FPGATrackSimLog...  DEBUG Opening file  /eos/atlas/atlascerngroupdisk/det-htt/HTTsim/ATLAS-P2-RUN4-01-01-00/single_mu.root in READ mode
-FPGATrackSimLog...   INFO Input file: /eos/atlas/atlascerngroupdisk/det-htt/HTTsim/ATLAS-P2-RUN4-01-01-00/single_mu.root has 100 event entries
+FPGATrackSimLog...  DEBUG Opening file  /eos/atlas/atlascerngroupdisk/det-htt/HTTsim/ATLAS-P2-RUN4-03-00-00/FPGATrackSimWrapper.root in READ mode
+FPGATrackSimLog...   INFO Input file: /eos/atlas/atlascerngroupdisk/det-htt/HTTsim/ATLAS-P2-RUN4-03-00-00/FPGATrackSimWrapper.root has 1000 event entries
 FPGATrackSimLog...   INFO Getting branch and set EventHeader
 FPGATrackSimLog...  DEBUG Initialized in READ MODE
 FPGATrackSimLog...  DEBUG Property update for OutputLevel : new value = 2
@@ -66,36 +62,58 @@ AthenaEventLoopMgr   INFO   ===>>>  start of run 1    <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
 FPGATrackSimLog...  DEBUG Asked Event 0 in this file; current total is 0
 FPGATrackSimLog...   INFO 0
-FPGATrackSimLog...  DEBUG Reading event  Event 38001 	Run 242000
-FPGATrackSimLog...  DEBUG Event: Event 38001 	Run 242000	Optional: nOfflineClusters: 14, nOfflineTracks: 1, nTruthTracks: 1
-	Nhits=21
- 0  type=unmapped tech=pixel zone=posEndcap etamod=4 phimod=12 physLayer=0 eta=13 phi=292
- 1  type=unmapped tech=pixel zone=posEndcap etamod=4 phimod=12 physLayer=0 eta=12 phi=292
- 2  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=12 physLayer=0 eta=90 phi=302
- 3  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=12 physLayer=0 eta=90 phi=303
- 4  type=unmapped tech=pixel zone=posEndcap etamod=6 phimod=12 physLayer=0 eta=182 phi=315
- 5  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=12 physLayer=0 eta=290 phi=330
- 6  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=12 physLayer=0 eta=289 phi=330
- 7  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=13 physLayer=0 eta=70 phi=40
- 8  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=13 physLayer=0 eta=70 phi=41
- 9  type=unmapped tech=pixel zone=posEndcap etamod=6 phimod=13 physLayer=0 eta=161 phi=21
- 10  type=unmapped tech=pixel zone=posEndcap etamod=12 phimod=14 physLayer=2 eta=89 phi=290
- 11  type=unmapped tech=pixel zone=posEndcap etamod=12 phimod=14 physLayer=2 eta=89 phi=291
- 12  type=unmapped tech=pixel zone=posEndcap etamod=13 phimod=14 physLayer=2 eta=281 phi=280
- 13  type=unmapped tech=pixel zone=posEndcap etamod=14 phimod=14 physLayer=2 eta=497 phi=267
- 14  type=unmapped tech=pixel zone=posEndcap etamod=15 phimod=14 physLayer=2 eta=745 phi=253
- 15  type=unmapped tech=pixel zone=posEndcap etamod=15 phimod=14 physLayer=2 eta=744 phi=253
- 16  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=6 physLayer=4 eta=256 phi=653
- 17  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=6 physLayer=4 eta=255 phi=653
- 18  type=unmapped tech=pixel zone=posEndcap etamod=6 phimod=6 physLayer=4 eta=578 phi=679
- 19  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=7 physLayer=4 eta=229 phi=2
- 20  type=unmapped tech=pixel zone=posEndcap etamod=6 phimod=9 physLayer=6 eta=386 phi=385
+FPGATrackSimLog...  DEBUG Reading event  Event 115001 	Run 242000
+FPGATrackSimLog...  DEBUG Event: Event 115001 	Run 242000	Optional: nOfflineClusters: 19, nOfflineTracks: 1, nTruthTracks: 1
+	Nhits=39
+ 0  type=unmapped tech=pixel zone=negEndcap etamod=2 phimod=12 physLayer=0 eta=41 phi=211
+ 1  type=unmapped tech=pixel zone=negEndcap etamod=3 phimod=12 physLayer=0 eta=130 phi=213
+ 2  type=unmapped tech=pixel zone=negEndcap etamod=3 phimod=12 physLayer=0 eta=129 phi=213
+ 3  type=unmapped tech=pixel zone=negEndcap etamod=4 phimod=12 physLayer=0 eta=228 phi=214
+ 4  type=unmapped tech=pixel zone=negEndcap etamod=4 phimod=12 physLayer=0 eta=227 phi=214
+ 5  type=unmapped tech=pixel zone=negEndcap etamod=4 phimod=12 physLayer=0 eta=227 phi=213
+ 6  type=unmapped tech=pixel zone=negEndcap etamod=5 phimod=12 physLayer=0 eta=30 phi=11
+ 7  type=unmapped tech=pixel zone=negEndcap etamod=5 phimod=12 physLayer=0 eta=332 phi=216
+ 8  type=unmapped tech=pixel zone=negEndcap etamod=6 phimod=12 physLayer=0 eta=14 phi=224
+ 9  type=unmapped tech=pixel zone=negEndcap etamod=6 phimod=12 physLayer=0 eta=14 phi=223
+ 10  type=unmapped tech=pixel zone=negEndcap etamod=6 phimod=12 physLayer=0 eta=15 phi=223
+ 11  type=unmapped tech=pixel zone=negEndcap etamod=5 phimod=13 physLayer=0 eta=37 phi=257
+ 12  type=unmapped tech=pixel zone=negEndcap etamod=5 phimod=13 physLayer=0 eta=36 phi=257
+ 13  type=unmapped tech=pixel zone=negEndcap etamod=11 phimod=13 physLayer=0 eta=22 phi=25
+ 14  type=unmapped tech=pixel zone=negEndcap etamod=11 phimod=13 physLayer=0 eta=21 phi=25
+ 15  type=unmapped tech=pixel zone=negEndcap etamod=7 phimod=14 physLayer=0 eta=41 phi=280
+ 16  type=unmapped tech=pixel zone=negEndcap etamod=7 phimod=14 physLayer=0 eta=40 phi=280
+ 17  type=unmapped tech=pixel zone=negEndcap etamod=11 phimod=14 physLayer=0 eta=115 phi=281
+ 18  type=unmapped tech=pixel zone=negEndcap etamod=11 phimod=14 physLayer=0 eta=114 phi=281
+ 19  type=unmapped tech=pixel zone=negEndcap etamod=11 phimod=14 physLayer=0 eta=113 phi=281
+ 20  type=unmapped tech=pixel zone=negEndcap etamod=11 phimod=14 physLayer=0 eta=113 phi=280
+ 21  type=unmapped tech=pixel zone=negEndcap etamod=11 phimod=14 physLayer=0 eta=112 phi=280
+ 22  type=unmapped tech=pixel zone=negEndcap etamod=11 phimod=14 physLayer=0 eta=111 phi=280
+ 23  type=unmapped tech=pixel zone=negEndcap etamod=10 phimod=15 physLayer=2 eta=172 phi=473
+ 24  type=unmapped tech=pixel zone=negEndcap etamod=10 phimod=15 physLayer=2 eta=171 phi=473
+ 25  type=unmapped tech=pixel zone=negEndcap etamod=11 phimod=15 physLayer=2 eta=389 phi=485
+ 26  type=unmapped tech=pixel zone=negEndcap etamod=11 phimod=15 physLayer=2 eta=388 phi=485
+ 27  type=unmapped tech=pixel zone=negEndcap etamod=12 phimod=15 physLayer=2 eta=612 phi=497
+ 28  type=unmapped tech=pixel zone=negEndcap etamod=12 phimod=15 physLayer=2 eta=611 phi=496
+ 29  type=unmapped tech=pixel zone=negEndcap etamod=12 phimod=15 physLayer=2 eta=611 phi=497
+ 30  type=unmapped tech=pixel zone=negEndcap etamod=12 phimod=15 physLayer=2 eta=612 phi=496
+ 31  type=unmapped tech=pixel zone=negEndcap etamod=2 phimod=21 physLayer=4 eta=238 phi=297
+ 32  type=unmapped tech=pixel zone=negEndcap etamod=2 phimod=21 physLayer=4 eta=237 phi=297
+ 33  type=unmapped tech=pixel zone=negEndcap etamod=3 phimod=21 physLayer=4 eta=554 phi=289
+ 34  type=unmapped tech=pixel zone=negEndcap etamod=4 phimod=29 physLayer=6 eta=401 phi=94
+ 35  type=unmapped tech=pixel zone=negEndcap etamod=4 phimod=30 physLayer=6 eta=384 phi=760
+ 36  type=unmapped tech=pixel zone=negEndcap etamod=6 phimod=35 physLayer=8 eta=80 phi=404
+ 37  type=unmapped tech=pixel zone=negEndcap etamod=6 phimod=35 physLayer=8 eta=79 phi=404
+ 38  type=unmapped tech=pixel zone=negEndcap etamod=7 phimod=35 physLayer=8 eta=783 phi=407
 
-FPGATrackSimLog...  DEBUG Mapping 21 hits using stage 1
-FPGATrackSimLog...  DEBUG Getting Event Event 38001 	Run 242000
+FPGATrackSimLog...  DEBUG Mapping 39 hits using stage 1
+FPGATrackSimLog...  DEBUG Getting Event Event 115001 	Run 242000
 FPGATrackSimLog...  DEBUG Created 1 towers. Now map Hits
-Package.UserCode    ERROR /afs/cern.ch/work/j/jahreda/athena_renamehtt/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 6 element in m_diskIndex which is of size 5
-FPGATrackSimLog...  DEBUG Event: Event 38001 	Run 242000	Optional: nOfflineClusters: 14, nOfflineTracks: 1, nTruthTracks: 1
+Package.UserCode    ERROR /build/atnight/localbuilds/nightlies/Athena/main/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 6 element in m_diskIndex which is of size 5
+Package.UserCode    ERROR /build/atnight/localbuilds/nightlies/Athena/main/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 6 element in m_diskIndex which is of size 5
+Package.UserCode    ERROR /build/atnight/localbuilds/nightlies/Athena/main/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 8 element in m_diskIndex which is of size 5
+Package.UserCode    ERROR /build/atnight/localbuilds/nightlies/Athena/main/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 8 element in m_diskIndex which is of size 5
+Package.UserCode    ERROR /build/atnight/localbuilds/nightlies/Athena/main/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 8 element in m_diskIndex which is of size 5
+FPGATrackSimLog...  DEBUG Event: Event 115001 	Run 242000	Optional: nOfflineClusters: 19, nOfflineTracks: 1, nTruthTracks: 1
 	NTowers: 1
  0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
 
@@ -103,7 +121,7 @@ FPGATrackSimLog...  DEBUG Event: Event 38001 	Run 242000	Optional: nOfflineClust
 FPGATrackSimLog...  DEBUG Produced 0 clusters
 FPGATrackSimLog...   INFO Ending with 0 clusters
 FPGATrackSimLog...  DEBUG Writing data in TTree
-FPGATrackSimLog...  DEBUG Wrote Event 0 in first stage header event Event 38001 	Run 242000
+FPGATrackSimLog...  DEBUG Wrote Event 0 in first stage header event Event 115001 	Run 242000
 FPGATrackSimLog...  DEBUG n.roads_1st = 0
 FPGATrackSimLog...  DEBUG n.roads_2nd = 0
 FPGATrackSimLog...  DEBUG n.tracks_1st = 0
@@ -112,28 +130,66 @@ AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #1 1 events pr
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #1 1 events processed so far  <<<===
 FPGATrackSimLog...  DEBUG Asked Event 1 in this file; current total is 1
 FPGATrackSimLog...   INFO 1
-FPGATrackSimLog...  DEBUG Reading event  Event 38005 	Run 242000
-FPGATrackSimLog...  DEBUG Event: Event 38005 	Run 242000	Optional: nOfflineClusters: 12, nOfflineTracks: 1, nTruthTracks: 1
-	Nhits=14
- 0  type=unmapped tech=pixel zone=negEndcap etamod=12 phimod=7 physLayer=0 eta=26 phi=53
- 1  type=unmapped tech=pixel zone=negEndcap etamod=13 phimod=7 physLayer=0 eta=101 phi=37
- 2  type=unmapped tech=pixel zone=negEndcap etamod=13 phimod=7 physLayer=0 eta=100 phi=37
- 3  type=unmapped tech=pixel zone=negEndcap etamod=14 phimod=7 physLayer=0 eta=187 phi=18
- 4  type=unmapped tech=pixel zone=negEndcap etamod=14 phimod=7 physLayer=0 eta=187 phi=19
- 5  type=unmapped tech=pixel zone=negEndcap etamod=12 phimod=8 physLayer=0 eta=38 phi=298
- 6  type=unmapped tech=pixel zone=negEndcap etamod=13 phimod=8 physLayer=0 eta=114 phi=309
- 7  type=unmapped tech=pixel zone=negEndcap etamod=14 phimod=8 physLayer=0 eta=201 phi=321
- 8  type=unmapped tech=pixel zone=negEndcap etamod=4 phimod=13 physLayer=1 eta=83 phi=199
- 9  type=unmapped tech=pixel zone=negEndcap etamod=5 phimod=13 physLayer=1 eta=220 phi=199
- 10  type=unmapped tech=pixel zone=negEndcap etamod=21 phimod=8 physLayer=2 eta=175 phi=104
- 11  type=unmapped tech=pixel zone=negEndcap etamod=22 phimod=8 physLayer=2 eta=373 phi=73
- 12  type=unmapped tech=pixel zone=negEndcap etamod=21 phimod=9 physLayer=2 eta=171 phi=662
- 13  type=unmapped tech=pixel zone=negEndcap etamod=22 phimod=9 physLayer=2 eta=369 phi=693
+FPGATrackSimLog...  DEBUG Reading event  Event 115006 	Run 242000
+FPGATrackSimLog...  DEBUG Event: Event 115006 	Run 242000	Optional: nOfflineClusters: 23, nOfflineTracks: 1, nTruthTracks: 1
+	Nhits=49
+ 0  type=unmapped tech=pixel zone=barrel etamod=7 phimod=6 physLayer=0 eta=68 phi=670
+ 1  type=unmapped tech=pixel zone=barrel etamod=7 phimod=6 physLayer=0 eta=66 phi=669
+ 2  type=unmapped tech=pixel zone=barrel etamod=7 phimod=6 physLayer=0 eta=65 phi=668
+ 3  type=unmapped tech=pixel zone=barrel etamod=7 phimod=6 physLayer=0 eta=68 phi=669
+ 4  type=unmapped tech=pixel zone=barrel etamod=7 phimod=6 physLayer=0 eta=64 phi=668
+ 5  type=unmapped tech=pixel zone=barrel etamod=7 phimod=6 physLayer=0 eta=64 phi=667
+ 6  type=unmapped tech=pixel zone=barrel etamod=7 phimod=6 physLayer=0 eta=67 phi=669
+ 7  type=unmapped tech=pixel zone=barrel etamod=7 phimod=6 physLayer=0 eta=66 phi=668
+ 8  type=unmapped tech=pixel zone=barrel etamod=7 phimod=6 physLayer=0 eta=63 phi=667
+ 9  type=unmapped tech=pixel zone=barrel etamod=7 phimod=6 physLayer=0 eta=69 phi=670
+ 10  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=13 physLayer=0 eta=65 phi=337
+ 11  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=13 physLayer=0 eta=65 phi=336
+ 12  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=13 physLayer=0 eta=64 phi=336
+ 13  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=13 physLayer=0 eta=63 phi=336
+ 14  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=13 physLayer=0 eta=63 phi=335
+ 15  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=13 physLayer=0 eta=62 phi=335
+ 16  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=13 physLayer=0 eta=62 phi=334
+ 17  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=13 physLayer=0 eta=61 phi=334
+ 18  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=13 physLayer=0 eta=61 phi=333
+ 19  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=13 physLayer=0 eta=61 phi=332
+ 20  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=13 physLayer=0 eta=60 phi=332
+ 21  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=13 physLayer=0 eta=59 phi=329
+ 22  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=13 physLayer=0 eta=59 phi=328
+ 23  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=13 physLayer=0 eta=59 phi=327
+ 24  type=unmapped tech=pixel zone=posEndcap etamod=2 phimod=16 physLayer=2 eta=114 phi=714
+ 25  type=unmapped tech=pixel zone=posEndcap etamod=3 phimod=16 physLayer=2 eta=294 phi=749
+ 26  type=unmapped tech=pixel zone=posEndcap etamod=3 phimod=16 physLayer=2 eta=293 phi=748
+ 27  type=unmapped tech=pixel zone=posEndcap etamod=3 phimod=16 physLayer=2 eta=293 phi=749
+ 28  type=unmapped tech=pixel zone=posEndcap etamod=2 phimod=17 physLayer=2 eta=112 phi=174
+ 29  type=unmapped tech=pixel zone=posEndcap etamod=3 phimod=17 physLayer=2 eta=294 phi=152
+ 30  type=unmapped tech=pixel zone=posEndcap etamod=3 phimod=17 physLayer=2 eta=293 phi=152
+ 31  type=unmapped tech=pixel zone=posEndcap etamod=4 phimod=17 physLayer=2 eta=491 phi=127
+ 32  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=17 physLayer=2 eta=704 phi=101
+ 33  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=17 physLayer=2 eta=703 phi=101
+ 34  type=unmapped tech=pixel zone=posEndcap etamod=2 phimod=17 physLayer=3 eta=151 phi=371
+ 35  type=unmapped tech=pixel zone=posEndcap etamod=3 phimod=17 physLayer=3 eta=765 phi=369
+ 36  type=unmapped tech=pixel zone=posEndcap etamod=6 phimod=23 physLayer=5 eta=306 phi=614
+ 37  type=unmapped tech=pixel zone=posEndcap etamod=6 phimod=23 physLayer=5 eta=306 phi=615
+ 38  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=14 physLayer=8 eta=570 phi=85
+ 39  type=unmapped tech=strip zone=posEndcap etamod=0 phimod=17 physLayer=0 eta=0 phi=463
+ 40  type=unmapped tech=strip zone=posEndcap etamod=0 phimod=17 physLayer=1 eta=0 phi=519
+ 41  type=unmapped tech=strip zone=posEndcap etamod=8 phimod=17 physLayer=2 eta=0 phi=536
+ 42  type=unmapped tech=strip zone=posEndcap etamod=8 phimod=17 physLayer=3 eta=0 phi=571
+ 43  type=unmapped tech=strip zone=posEndcap etamod=16 phimod=17 physLayer=4 eta=0 phi=588
+ 44  type=unmapped tech=strip zone=posEndcap etamod=16 phimod=17 physLayer=5 eta=0 phi=644
+ 45  type=unmapped tech=strip zone=posEndcap etamod=1030251365 phimod=17 physLayer=6 eta=0 phi=708
+ 46  type=unmapped tech=strip zone=posEndcap etamod=1030251365 phimod=17 physLayer=7 eta=0 phi=773
+ 47  type=unmapped tech=strip zone=posEndcap etamod=4023662 phimod=34 physLayer=8 eta=0 phi=837
+ 48  type=unmapped tech=strip zone=posEndcap etamod=1752178688 phimod=34 physLayer=10 eta=0 phi=859
 
-FPGATrackSimLog...  DEBUG Mapping 14 hits using stage 1
-FPGATrackSimLog...  DEBUG Getting Event Event 38005 	Run 242000
+FPGATrackSimLog...  DEBUG Mapping 49 hits using stage 1
+FPGATrackSimLog...  DEBUG Getting Event Event 115006 	Run 242000
 FPGATrackSimLog...  DEBUG Created 1 towers. Now map Hits
-FPGATrackSimLog...  DEBUG Event: Event 38005 	Run 242000	Optional: nOfflineClusters: 12, nOfflineTracks: 1, nTruthTracks: 1
+Package.UserCode    ERROR /build/atnight/localbuilds/nightlies/Athena/main/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 5 element in m_diskIndex which is of size 5
+Package.UserCode    ERROR /build/atnight/localbuilds/nightlies/Athena/main/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 5 element in m_diskIndex which is of size 5
+Package.UserCode    ERROR /build/atnight/localbuilds/nightlies/Athena/main/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 8 element in m_diskIndex which is of size 5
+FPGATrackSimLog...  DEBUG Event: Event 115006 	Run 242000	Optional: nOfflineClusters: 23, nOfflineTracks: 1, nTruthTracks: 1
 	NTowers: 1
  0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
 
@@ -141,7 +197,7 @@ FPGATrackSimLog...  DEBUG Event: Event 38005 	Run 242000	Optional: nOfflineClust
 FPGATrackSimLog...  DEBUG Produced 0 clusters
 FPGATrackSimLog...   INFO Ending with 0 clusters
 FPGATrackSimLog...  DEBUG Writing data in TTree
-FPGATrackSimLog...  DEBUG Wrote Event 1 in first stage header event Event 38005 	Run 242000
+FPGATrackSimLog...  DEBUG Wrote Event 1 in first stage header event Event 115006 	Run 242000
 FPGATrackSimLog...  DEBUG n.roads_1st = 0
 FPGATrackSimLog...  DEBUG n.roads_2nd = 0
 FPGATrackSimLog...  DEBUG n.tracks_1st = 0
@@ -150,55 +206,46 @@ AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #1 2 events pr
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #3, run #1 2 events processed so far  <<<===
 FPGATrackSimLog...  DEBUG Asked Event 2 in this file; current total is 2
 FPGATrackSimLog...   INFO 2
-FPGATrackSimLog...  DEBUG Reading event  Event 38014 	Run 242000
-FPGATrackSimLog...  DEBUG Event: Event 38014 	Run 242000	Optional: nOfflineClusters: 14, nOfflineTracks: 1, nTruthTracks: 1
-	Nhits=32
- 0  type=unmapped tech=pixel zone=barrel etamod=4 phimod=7 physLayer=0 eta=57 phi=52
- 1  type=unmapped tech=pixel zone=barrel etamod=4 phimod=7 physLayer=0 eta=58 phi=52
- 2  type=unmapped tech=pixel zone=barrel etamod=4 phimod=7 physLayer=0 eta=59 phi=52
- 3  type=unmapped tech=pixel zone=barrel etamod=4 phimod=11 physLayer=1 eta=743 phi=311
- 4  type=unmapped tech=pixel zone=barrel etamod=4 phimod=11 physLayer=1 eta=742 phi=311
- 5  type=unmapped tech=pixel zone=barrel etamod=4 phimod=11 physLayer=1 eta=741 phi=311
- 6  type=unmapped tech=pixel zone=barrel etamod=7 phimod=17 physLayer=2 eta=157 phi=654
- 7  type=unmapped tech=pixel zone=barrel etamod=7 phimod=17 physLayer=2 eta=156 phi=654
- 8  type=unmapped tech=pixel zone=barrel etamod=7 phimod=17 physLayer=2 eta=155 phi=654
- 9  type=unmapped tech=pixel zone=barrel etamod=7 phimod=17 physLayer=2 eta=155 phi=653
- 10  type=unmapped tech=pixel zone=barrel etamod=7 phimod=17 physLayer=2 eta=154 phi=653
- 11  type=unmapped tech=pixel zone=barrel etamod=7 phimod=17 physLayer=2 eta=153 phi=653
- 12  type=unmapped tech=pixel zone=barrel etamod=6 phimod=18 physLayer=2 eta=692 phi=13
- 13  type=unmapped tech=pixel zone=barrel etamod=6 phimod=18 physLayer=2 eta=691 phi=13
- 14  type=unmapped tech=pixel zone=barrel etamod=6 phimod=18 physLayer=2 eta=690 phi=13
- 15  type=unmapped tech=pixel zone=barrel etamod=6 phimod=18 physLayer=2 eta=689 phi=13
- 16  type=unmapped tech=pixel zone=barrel etamod=6 phimod=18 physLayer=2 eta=688 phi=13
- 17  type=unmapped tech=pixel zone=barrel etamod=9 phimod=24 physLayer=3 eta=252 phi=344
- 18  type=unmapped tech=pixel zone=barrel etamod=9 phimod=24 physLayer=3 eta=251 phi=344
- 19  type=unmapped tech=pixel zone=barrel etamod=9 phimod=24 physLayer=3 eta=250 phi=344
- 20  type=unmapped tech=pixel zone=barrel etamod=9 phimod=24 physLayer=3 eta=249 phi=344
- 21  type=unmapped tech=pixel zone=barrel etamod=9 phimod=24 physLayer=3 eta=248 phi=344
- 22  type=unmapped tech=pixel zone=posEndcap etamod=1 phimod=30 physLayer=7 eta=374 phi=695
- 23  type=unmapped tech=pixel zone=posEndcap etamod=1 phimod=31 physLayer=7 eta=376 phi=29
- 24  type=unmapped tech=pixel zone=posEndcap etamod=1 phimod=31 physLayer=7 eta=375 phi=29
- 25  type=unmapped tech=strip zone=barrel etamod=96 phimod=15 physLayer=0 eta=0 phi=323
- 26  type=unmapped tech=strip zone=barrel etamod=100 phimod=15 physLayer=1 eta=0 phi=339
- 27  type=unmapped tech=strip zone=barrel etamod=100 phimod=15 physLayer=1 eta=0 phi=340
- 28  type=unmapped tech=strip zone=barrel etamod=136 phimod=21 physLayer=2 eta=0 phi=934
- 29  type=unmapped tech=strip zone=barrel etamod=140 phimod=21 physLayer=3 eta=0 phi=956
- 30  type=unmapped tech=strip zone=barrel etamod=46 phimod=30 physLayer=4 eta=0 phi=568
- 31  type=unmapped tech=strip zone=barrel etamod=46 phimod=30 physLayer=5 eta=0 phi=596
+FPGATrackSimLog...  DEBUG Reading event  Event 115011 	Run 242000
+FPGATrackSimLog...  DEBUG Event: Event 115011 	Run 242000	Optional: nOfflineClusters: 18, nOfflineTracks: 1, nTruthTracks: 1
+	Nhits=28
+ 0  type=unmapped tech=pixel zone=negEndcap etamod=0 phimod=3 physLayer=2 eta=361 phi=126
+ 1  type=unmapped tech=pixel zone=negEndcap etamod=0 phimod=3 physLayer=2 eta=360 phi=126
+ 2  type=unmapped tech=pixel zone=negEndcap etamod=1 phimod=3 physLayer=2 eta=577 phi=97
+ 3  type=unmapped tech=pixel zone=negEndcap etamod=0 phimod=4 physLayer=2 eta=376 phi=746
+ 4  type=unmapped tech=pixel zone=negEndcap etamod=0 phimod=4 physLayer=2 eta=376 phi=747
+ 5  type=unmapped tech=pixel zone=negEndcap etamod=0 phimod=4 physLayer=2 eta=375 phi=747
+ 6  type=unmapped tech=pixel zone=negEndcap etamod=0 phimod=12 physLayer=3 eta=152 phi=463
+ 7  type=unmapped tech=pixel zone=negEndcap etamod=0 phimod=12 physLayer=3 eta=152 phi=462
+ 8  type=unmapped tech=pixel zone=negEndcap etamod=1 phimod=12 physLayer=3 eta=729 phi=476
+ 9  type=unmapped tech=pixel zone=negEndcap etamod=3 phimod=16 physLayer=5 eta=366 phi=167
+ 10  type=unmapped tech=pixel zone=negEndcap etamod=5 phimod=21 physLayer=7 eta=182 phi=525
+ 11  type=unmapped tech=pixel zone=barrel etamod=-5 phimod=2 physLayer=0 eta=62 phi=65
+ 12  type=unmapped tech=pixel zone=barrel etamod=-5 phimod=2 physLayer=0 eta=62 phi=66
+ 13  type=unmapped tech=pixel zone=barrel etamod=-5 phimod=2 physLayer=0 eta=59 phi=65
+ 14  type=unmapped tech=pixel zone=barrel etamod=-5 phimod=2 physLayer=0 eta=61 phi=65
+ 15  type=unmapped tech=pixel zone=barrel etamod=-5 phimod=2 physLayer=0 eta=61 phi=66
+ 16  type=unmapped tech=pixel zone=barrel etamod=-5 phimod=2 physLayer=0 eta=60 phi=65
+ 17  type=unmapped tech=pixel zone=barrel etamod=-5 phimod=2 physLayer=0 eta=60 phi=66
+ 18  type=unmapped tech=strip zone=negEndcap etamod=1030251365 phimod=4 physLayer=0 eta=0 phi=986
+ 19  type=unmapped tech=strip zone=negEndcap etamod=1030251365 phimod=4 physLayer=1 eta=0 phi=924
+ 20  type=unmapped tech=strip zone=negEndcap etamod=4023662 phimod=9 physLayer=2 eta=0 phi=246
+ 21  type=unmapped tech=strip zone=negEndcap etamod=4023662 phimod=9 physLayer=3 eta=0 phi=167
+ 22  type=unmapped tech=strip zone=negEndcap etamod=1685024105 phimod=9 physLayer=4 eta=0 phi=283
+ 23  type=unmapped tech=strip zone=negEndcap etamod=1685024105 phimod=9 physLayer=5 eta=0 phi=186
+ 24  type=unmapped tech=strip zone=negEndcap etamod=1282636136 phimod=9 physLayer=6 eta=0 phi=313
+ 25  type=unmapped tech=strip zone=negEndcap etamod=1282636136 phimod=9 physLayer=7 eta=0 phi=211
+ 26  type=unmapped tech=strip zone=barrel etamod=-172 phimod=3 physLayer=1 eta=0 phi=786
+ 27  type=unmapped tech=strip zone=barrel etamod=-168 phimod=3 physLayer=0 eta=0 phi=768
 
-FPGATrackSimLog...  DEBUG Mapping 32 hits using stage 1
-FPGATrackSimLog...  DEBUG Getting Event Event 38014 	Run 242000
+FPGATrackSimLog...  DEBUG Mapping 28 hits using stage 1
+FPGATrackSimLog...  DEBUG Getting Event Event 115011 	Run 242000
 FPGATrackSimLog...  DEBUG Created 1 towers. Now map Hits
-Package.UserCode    ERROR /afs/cern.ch/work/j/jahreda/athena_renamehtt/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 7 element in m_diskIndex which is of size 5
-Package.UserCode    ERROR /afs/cern.ch/work/j/jahreda/athena_renamehtt/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 7 element in m_diskIndex which is of size 5
-Package.UserCode    ERROR /afs/cern.ch/work/j/jahreda/athena_renamehtt/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 7 element in m_diskIndex which is of size 5
+Package.UserCode    ERROR /build/atnight/localbuilds/nightlies/Athena/main/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 5 element in m_diskIndex which is of size 5
+Package.UserCode    ERROR /build/atnight/localbuilds/nightlies/Athena/main/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 7 element in m_diskIndex which is of size 5
 FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=1 PLayer=0 section=0
-FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=2 PLayer=2 section=0
-FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=3 PLayer=3 section=0
-FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=4 PLayer=4 section=0
-FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=5 PLayer=5 section=0
-FPGATrackSimLog...  DEBUG Found 5 missing mapped hits in this event
-FPGATrackSimLog...  DEBUG Event: Event 38014 	Run 242000	Optional: nOfflineClusters: 14, nOfflineTracks: 1, nTruthTracks: 1
+FPGATrackSimLog...  DEBUG Found 1 missing mapped hits in this event
+FPGATrackSimLog...  DEBUG Event: Event 115011 	Run 242000	Optional: nOfflineClusters: 18, nOfflineTracks: 1, nTruthTracks: 1
 	NTowers: 1
  0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
 
@@ -206,7 +253,7 @@ FPGATrackSimLog...  DEBUG Event: Event 38014 	Run 242000	Optional: nOfflineClust
 FPGATrackSimLog...  DEBUG Produced 0 clusters
 FPGATrackSimLog...   INFO Ending with 0 clusters
 FPGATrackSimLog...  DEBUG Writing data in TTree
-FPGATrackSimLog...  DEBUG Wrote Event 2 in first stage header event Event 38014 	Run 242000
+FPGATrackSimLog...  DEBUG Wrote Event 2 in first stage header event Event 115011 	Run 242000
 FPGATrackSimLog...  DEBUG n.roads_1st = 0
 FPGATrackSimLog...  DEBUG n.roads_2nd = 0
 FPGATrackSimLog...  DEBUG n.tracks_1st = 0
@@ -215,41 +262,45 @@ AthenaEventLoopMgr   INFO   ===>>>  done processing event #3, run #1 3 events pr
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #4, run #1 3 events processed so far  <<<===
 FPGATrackSimLog...  DEBUG Asked Event 3 in this file; current total is 3
 FPGATrackSimLog...   INFO 3
-FPGATrackSimLog...  DEBUG Reading event  Event 38015 	Run 242000
-FPGATrackSimLog...  DEBUG Event: Event 38015 	Run 242000	Optional: nOfflineClusters: 15, nOfflineTracks: 1, nTruthTracks: 1
-	Nhits=23
- 0  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=13 physLayer=0 eta=64 phi=321
- 1  type=unmapped tech=pixel zone=posEndcap etamod=8 phimod=13 physLayer=0 eta=146 phi=334
- 2  type=unmapped tech=pixel zone=posEndcap etamod=8 phimod=13 physLayer=0 eta=146 phi=335
- 3  type=unmapped tech=pixel zone=posEndcap etamod=9 phimod=13 physLayer=0 eta=242 phi=350
- 4  type=unmapped tech=pixel zone=posEndcap etamod=9 phimod=13 physLayer=0 eta=242 phi=351
- 5  type=unmapped tech=pixel zone=posEndcap etamod=10 phimod=13 physLayer=0 eta=343 phi=367
- 6  type=unmapped tech=pixel zone=posEndcap etamod=10 phimod=13 physLayer=0 eta=342 phi=367
- 7  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=14 physLayer=0 eta=69 phi=63
- 8  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=14 physLayer=0 eta=68 phi=63
- 9  type=unmapped tech=pixel zone=posEndcap etamod=8 phimod=14 physLayer=0 eta=151 phi=48
- 10  type=unmapped tech=pixel zone=posEndcap etamod=9 phimod=14 physLayer=0 eta=246 phi=30
- 11  type=unmapped tech=pixel zone=posEndcap etamod=10 phimod=14 physLayer=0 eta=346 phi=12
- 12  type=unmapped tech=pixel zone=posEndcap etamod=10 phimod=14 physLayer=0 eta=346 phi=11
- 13  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=23 physLayer=1 eta=319 phi=133
- 14  type=unmapped tech=pixel zone=posEndcap etamod=15 phimod=15 physLayer=2 eta=139 phi=395
- 15  type=unmapped tech=pixel zone=posEndcap etamod=16 phimod=15 physLayer=2 eta=318 phi=397
- 16  type=unmapped tech=pixel zone=posEndcap etamod=17 phimod=15 physLayer=2 eta=520 phi=398
- 17  type=unmapped tech=pixel zone=posEndcap etamod=17 phimod=15 physLayer=2 eta=520 phi=399
- 18  type=unmapped tech=pixel zone=posEndcap etamod=18 phimod=15 physLayer=2 eta=750 phi=400
- 19  type=unmapped tech=pixel zone=posEndcap etamod=8 phimod=8 physLayer=4 eta=159 phi=599
- 20  type=unmapped tech=pixel zone=posEndcap etamod=8 phimod=8 physLayer=4 eta=158 phi=599
- 21  type=unmapped tech=pixel zone=posEndcap etamod=9 phimod=8 physLayer=4 eta=472 phi=621
- 22  type=unmapped tech=pixel zone=posEndcap etamod=9 phimod=8 physLayer=4 eta=472 phi=620
+FPGATrackSimLog...  DEBUG Reading event  Event 115010 	Run 242000
+FPGATrackSimLog...  DEBUG Event: Event 115010 	Run 242000	Optional: nOfflineClusters: 13, nOfflineTracks: 1, nTruthTracks: 1
+	Nhits=21
+ 0  type=unmapped tech=pixel zone=barrel etamod=-1 phimod=6 physLayer=0 eta=64 phi=512
+ 1  type=unmapped tech=pixel zone=barrel etamod=-1 phimod=6 physLayer=0 eta=64 phi=511
+ 2  type=unmapped tech=pixel zone=barrel etamod=-1 phimod=6 physLayer=0 eta=64 phi=510
+ 3  type=unmapped tech=pixel zone=barrel etamod=-2 phimod=16 physLayer=2 eta=273 phi=685
+ 4  type=unmapped tech=pixel zone=barrel etamod=-2 phimod=16 physLayer=2 eta=274 phi=685
+ 5  type=unmapped tech=pixel zone=barrel etamod=-2 phimod=16 physLayer=2 eta=275 phi=685
+ 6  type=unmapped tech=pixel zone=barrel etamod=-2 phimod=17 physLayer=2 eta=412 phi=41
+ 7  type=unmapped tech=pixel zone=barrel etamod=-2 phimod=17 physLayer=2 eta=413 phi=42
+ 8  type=unmapped tech=pixel zone=barrel etamod=-2 phimod=17 physLayer=2 eta=412 phi=42
+ 9  type=unmapped tech=pixel zone=barrel etamod=-3 phimod=23 physLayer=3 eta=680 phi=140
+ 10  type=unmapped tech=pixel zone=barrel etamod=-3 phimod=23 physLayer=3 eta=681 phi=140
+ 11  type=unmapped tech=pixel zone=barrel etamod=-3 phimod=29 physLayer=4 eta=161 phi=254
+ 12  type=unmapped tech=pixel zone=barrel etamod=-3 phimod=29 physLayer=4 eta=162 phi=254
+ 13  type=unmapped tech=strip zone=barrel etamod=-28 phimod=14 physLayer=0 eta=0 phi=508
+ 14  type=unmapped tech=strip zone=barrel etamod=-28 phimod=14 physLayer=1 eta=0 phi=537
+ 15  type=unmapped tech=strip zone=barrel etamod=-40 phimod=20 physLayer=2 eta=0 phi=730
+ 16  type=unmapped tech=strip zone=barrel etamod=-40 phimod=20 physLayer=3 eta=0 phi=739
+ 17  type=unmapped tech=strip zone=barrel etamod=-14 phimod=28 physLayer=4 eta=0 phi=1008
+ 18  type=unmapped tech=strip zone=barrel etamod=-14 phimod=28 physLayer=5 eta=0 phi=1009
+ 19  type=unmapped tech=strip zone=barrel etamod=-18 phimod=37 physLayer=6 eta=0 phi=127
+ 20  type=unmapped tech=strip zone=barrel etamod=-18 phimod=37 physLayer=7 eta=0 phi=116
 
-FPGATrackSimLog...  DEBUG Mapping 23 hits using stage 1
-FPGATrackSimLog...  DEBUG Getting Event Event 38015 	Run 242000
+FPGATrackSimLog...  DEBUG Mapping 21 hits using stage 1
+FPGATrackSimLog...  DEBUG Getting Event Event 115010 	Run 242000
 FPGATrackSimLog...  DEBUG Created 1 towers. Now map Hits
-getLayerSection(siTech=1, DZ=1, layer=75) out of bounds
-getLayerSection(siTech=1, DZ=1, layer=75) out of bounds
-getLayerSection(siTech=1, DZ=1, layer=75) out of bounds
-getLayerSection(siTech=1, DZ=1, layer=75) out of bounds
-FPGATrackSimLog...  DEBUG Event: Event 38015 	Run 242000	Optional: nOfflineClusters: 15, nOfflineTracks: 1, nTruthTracks: 1
+FPGATrackSimLog...  DEBUG Unmapped hit: pixel=1 Barrel=1 Layer=0 PLayer=4 section=0
+FPGATrackSimLog...  DEBUG Unmapped hit: pixel=1 Barrel=1 Layer=0 PLayer=4 section=0
+FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=1 PLayer=0 section=0
+FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=2 PLayer=2 section=0
+FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=3 PLayer=3 section=0
+FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=4 PLayer=4 section=0
+FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=5 PLayer=5 section=0
+FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=6 PLayer=6 section=0
+FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=7 PLayer=7 section=0
+FPGATrackSimLog...  DEBUG Found 9 missing mapped hits in this event
+FPGATrackSimLog...  DEBUG Event: Event 115010 	Run 242000	Optional: nOfflineClusters: 13, nOfflineTracks: 1, nTruthTracks: 1
 	NTowers: 1
  0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
 
@@ -257,7 +308,7 @@ FPGATrackSimLog...  DEBUG Event: Event 38015 	Run 242000	Optional: nOfflineClust
 FPGATrackSimLog...  DEBUG Produced 0 clusters
 FPGATrackSimLog...   INFO Ending with 0 clusters
 FPGATrackSimLog...  DEBUG Writing data in TTree
-FPGATrackSimLog...  DEBUG Wrote Event 3 in first stage header event Event 38015 	Run 242000
+FPGATrackSimLog...  DEBUG Wrote Event 3 in first stage header event Event 115010 	Run 242000
 FPGATrackSimLog...  DEBUG n.roads_1st = 0
 FPGATrackSimLog...  DEBUG n.roads_2nd = 0
 FPGATrackSimLog...  DEBUG n.tracks_1st = 0
@@ -266,101 +317,33 @@ AthenaEventLoopMgr   INFO   ===>>>  done processing event #4, run #1 4 events pr
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #5, run #1 4 events processed so far  <<<===
 FPGATrackSimLog...  DEBUG Asked Event 4 in this file; current total is 4
 FPGATrackSimLog...   INFO 4
-FPGATrackSimLog...  DEBUG Reading event  Event 38016 	Run 242000
-FPGATrackSimLog...  DEBUG Event: Event 38016 	Run 242000	Optional: nOfflineClusters: 30, nOfflineTracks: 1, nTruthTracks: 1
-	Nhits=82
- 0  type=unmapped tech=pixel zone=barrel etamod=4 phimod=8 physLayer=0 eta=31 phi=305
- 1  type=unmapped tech=pixel zone=barrel etamod=4 phimod=8 physLayer=0 eta=35 phi=306
- 2  type=unmapped tech=pixel zone=barrel etamod=4 phimod=8 physLayer=0 eta=32 phi=305
- 3  type=unmapped tech=pixel zone=barrel etamod=4 phimod=8 physLayer=0 eta=33 phi=305
- 4  type=unmapped tech=pixel zone=barrel etamod=4 phimod=8 physLayer=0 eta=34 phi=305
- 5  type=unmapped tech=pixel zone=barrel etamod=4 phimod=8 physLayer=0 eta=34 phi=306
- 6  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=604 phi=480
- 7  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=615 phi=478
- 8  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=614 phi=478
- 9  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=613 phi=478
- 10  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=612 phi=478
- 11  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=611 phi=478
- 12  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=610 phi=478
- 13  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=609 phi=478
- 14  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=603 phi=481
- 15  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=617 phi=478
- 16  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=603 phi=480
- 17  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=616 phi=478
- 18  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=602 phi=480
- 19  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=607 phi=481
- 20  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=606 phi=481
- 21  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=605 phi=481
- 22  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=604 phi=481
- 23  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=608 phi=478
- 24  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=607 phi=478
- 25  type=unmapped tech=pixel zone=barrel etamod=6 phimod=13 physLayer=1 eta=606 phi=478
- 26  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=18 physLayer=2 eta=468 phi=220
- 27  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=18 physLayer=2 eta=629 phi=141
- 28  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=18 physLayer=2 eta=628 phi=141
- 29  type=unmapped tech=pixel zone=posEndcap etamod=1 phimod=18 physLayer=2 eta=380 phi=249
- 30  type=unmapped tech=pixel zone=posEndcap etamod=2 phimod=18 physLayer=2 eta=439 phi=360
- 31  type=unmapped tech=pixel zone=posEndcap etamod=2 phimod=18 physLayer=2 eta=439 phi=359
- 32  type=unmapped tech=pixel zone=posEndcap etamod=3 phimod=18 physLayer=2 eta=245 phi=250
- 33  type=unmapped tech=pixel zone=posEndcap etamod=3 phimod=18 physLayer=2 eta=244 phi=250
- 34  type=unmapped tech=pixel zone=posEndcap etamod=3 phimod=18 physLayer=2 eta=244 phi=251
- 35  type=unmapped tech=pixel zone=posEndcap etamod=4 phimod=18 physLayer=2 eta=387 phi=215
- 36  type=unmapped tech=pixel zone=posEndcap etamod=4 phimod=18 physLayer=2 eta=387 phi=214
- 37  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=18 physLayer=2 eta=48 phi=156
- 38  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=18 physLayer=2 eta=48 phi=157
- 39  type=unmapped tech=pixel zone=posEndcap etamod=6 phimod=18 physLayer=2 eta=359 phi=226
- 40  type=unmapped tech=pixel zone=posEndcap etamod=6 phimod=18 physLayer=2 eta=358 phi=226
- 41  type=unmapped tech=pixel zone=posEndcap etamod=6 phimod=18 physLayer=2 eta=358 phi=225
- 42  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=142 phi=382
- 43  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=141 phi=382
- 44  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=141 phi=381
- 45  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=137 phi=372
- 46  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=137 phi=371
- 47  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=137 phi=370
- 48  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=136 phi=370
- 49  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=136 phi=369
- 50  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=276 phi=330
- 51  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=277 phi=330
- 52  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=277 phi=331
- 53  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=278 phi=332
- 54  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=278 phi=333
- 55  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=140 phi=381
- 56  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=279 phi=333
- 57  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=279 phi=334
- 58  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=294 phi=339
- 59  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=296 phi=339
- 60  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=297 phi=339
- 61  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=297 phi=338
- 62  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=298 phi=338
- 63  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=299 phi=338
- 64  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=300 phi=338
- 65  type=unmapped tech=pixel zone=posEndcap etamod=7 phimod=18 physLayer=2 eta=301 phi=338
- 66  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=21 physLayer=3 eta=364 phi=411
- 67  type=unmapped tech=pixel zone=posEndcap etamod=0 phimod=21 physLayer=3 eta=365 phi=411
- 68  type=unmapped tech=pixel zone=posEndcap etamod=3 phimod=29 physLayer=5 eta=265 phi=344
- 69  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=37 physLayer=7 eta=473 phi=277
- 70  type=unmapped tech=pixel zone=posEndcap etamod=5 phimod=37 physLayer=7 eta=473 phi=276
- 71  type=unmapped tech=strip zone=barrel etamod=164 phimod=18 physLayer=0 eta=0 phi=517
- 72  type=unmapped tech=strip zone=barrel etamod=168 phimod=18 physLayer=1 eta=0 phi=558
- 73  type=unmapped tech=strip zone=posEndcap etamod=1030251365 phimod=21 physLayer=0 eta=0 phi=818
- 74  type=unmapped tech=strip zone=posEndcap etamod=1030251365 phimod=21 physLayer=1 eta=0 phi=876
- 75  type=unmapped tech=strip zone=posEndcap etamod=1635018016 phimod=43 physLayer=2 eta=0 phi=45
- 76  type=unmapped tech=strip zone=posEndcap etamod=1635018016 phimod=43 physLayer=3 eta=0 phi=121
- 77  type=unmapped tech=strip zone=posEndcap etamod=1685024105 phimod=43 physLayer=4 eta=0 phi=52
- 78  type=unmapped tech=strip zone=posEndcap etamod=1685024105 phimod=43 physLayer=5 eta=0 phi=146
- 79  type=unmapped tech=strip zone=posEndcap etamod=1282636136 phimod=43 physLayer=6 eta=0 phi=66
- 80  type=unmapped tech=strip zone=posEndcap etamod=1282636136 phimod=43 physLayer=7 eta=0 phi=166
- 81  type=unmapped tech=strip zone=posEndcap etamod=1919252833 phimod=43 physLayer=8 eta=0 phi=229
+FPGATrackSimLog...  DEBUG Reading event  Event 115012 	Run 242000
+FPGATrackSimLog...  DEBUG Event: Event 115012 	Run 242000	Optional: nOfflineClusters: 11, nOfflineTracks: 0, nTruthTracks: 1
+	Nhits=19
+ 0  type=unmapped tech=pixel zone=negEndcap etamod=12 phimod=11 physLayer=0 eta=40 phi=244
+ 1  type=unmapped tech=pixel zone=negEndcap etamod=13 phimod=11 physLayer=0 eta=112 phi=248
+ 2  type=unmapped tech=pixel zone=negEndcap etamod=13 phimod=11 physLayer=0 eta=113 phi=248
+ 3  type=unmapped tech=pixel zone=negEndcap etamod=14 phimod=11 physLayer=0 eta=196 phi=253
+ 4  type=unmapped tech=pixel zone=negEndcap etamod=14 phimod=11 physLayer=0 eta=196 phi=254
+ 5  type=unmapped tech=pixel zone=negEndcap etamod=4 phimod=18 physLayer=1 eta=65 phi=104
+ 6  type=unmapped tech=pixel zone=negEndcap etamod=5 phimod=18 physLayer=1 eta=195 phi=94
+ 7  type=unmapped tech=pixel zone=negEndcap etamod=4 phimod=19 physLayer=1 eta=55 phi=363
+ 8  type=unmapped tech=pixel zone=negEndcap etamod=4 phimod=19 physLayer=1 eta=54 phi=363
+ 9  type=unmapped tech=pixel zone=negEndcap etamod=4 phimod=19 physLayer=1 eta=55 phi=364
+ 10  type=unmapped tech=pixel zone=negEndcap etamod=5 phimod=19 physLayer=1 eta=184 phi=381
+ 11  type=unmapped tech=pixel zone=negEndcap etamod=21 phimod=13 physLayer=2 eta=111 phi=72
+ 12  type=unmapped tech=pixel zone=negEndcap etamod=21 phimod=13 physLayer=2 eta=110 phi=72
+ 13  type=unmapped tech=pixel zone=negEndcap etamod=21 phimod=13 physLayer=2 eta=111 phi=71
+ 14  type=unmapped tech=pixel zone=negEndcap etamod=22 phimod=13 physLayer=2 eta=298 phi=37
+ 15  type=unmapped tech=pixel zone=negEndcap etamod=21 phimod=14 physLayer=2 eta=127 phi=612
+ 16  type=unmapped tech=pixel zone=negEndcap etamod=22 phimod=14 physLayer=2 eta=316 phi=637
+ 17  type=unmapped tech=pixel zone=negEndcap etamod=22 phimod=14 physLayer=2 eta=316 phi=636
+ 18  type=unmapped tech=pixel zone=negEndcap etamod=22 phimod=14 physLayer=2 eta=317 phi=636
 
-FPGATrackSimLog...  DEBUG Mapping 82 hits using stage 1
-FPGATrackSimLog...  DEBUG Getting Event Event 38016 	Run 242000
+FPGATrackSimLog...  DEBUG Mapping 19 hits using stage 1
+FPGATrackSimLog...  DEBUG Getting Event Event 115012 	Run 242000
 FPGATrackSimLog...  DEBUG Created 1 towers. Now map Hits
-Package.UserCode    ERROR /afs/cern.ch/work/j/jahreda/athena_renamehtt/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 5 element in m_diskIndex which is of size 5
-Package.UserCode    ERROR /afs/cern.ch/work/j/jahreda/athena_renamehtt/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 7 element in m_diskIndex which is of size 5
-Package.UserCode    ERROR /afs/cern.ch/work/j/jahreda/athena_renamehtt/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 7 element in m_diskIndex which is of size 5
-FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=1 PLayer=0 section=0
-FPGATrackSimLog...  DEBUG Found 1 missing mapped hits in this event
-FPGATrackSimLog...  DEBUG Event: Event 38016 	Run 242000	Optional: nOfflineClusters: 30, nOfflineTracks: 1, nTruthTracks: 1
+FPGATrackSimLog...  DEBUG Event: Event 115012 	Run 242000	Optional: nOfflineClusters: 11, nOfflineTracks: 0, nTruthTracks: 1
 	NTowers: 1
  0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
 
@@ -368,7 +351,7 @@ FPGATrackSimLog...  DEBUG Event: Event 38016 	Run 242000	Optional: nOfflineClust
 FPGATrackSimLog...  DEBUG Produced 0 clusters
 FPGATrackSimLog...   INFO Ending with 0 clusters
 FPGATrackSimLog...  DEBUG Writing data in TTree
-FPGATrackSimLog...  DEBUG Wrote Event 4 in first stage header event Event 38016 	Run 242000
+FPGATrackSimLog...  DEBUG Wrote Event 4 in first stage header event Event 115012 	Run 242000
 FPGATrackSimLog...  DEBUG n.roads_1st = 0
 FPGATrackSimLog...  DEBUG n.roads_2nd = 0
 FPGATrackSimLog...  DEBUG n.tracks_1st = 0
@@ -381,17 +364,899 @@ ToolSvc              INFO Removing all tools created by ToolSvc
 FPGATrackSimLog...   INFO finalize: closing files
 ******************************************************************************
 *Tree    :FPGATrackSimLogicalEventTree: data                                                   *
-*Entries :        5 : Total =           21048 bytes  File  Size =          0 *
+*Entries :        5 : Total =          201184 bytes  File  Size =          0 *
 *        :          : Tree compression factor =   1.00                       *
 ******************************************************************************
-*Br    0 :FPGATrackSimLogicalEventInputHeader_1st :                          *
-*         | FPGATrackSimLogicalEventInputHeader                              *
-*Entries :        5 : Total  Size=      18335 bytes  One basket in memory    *
+*Branch  :FPGATrackSimLogicalEventInputHeader_1st                            *
+*Entries :        5 : BranchElement (see below)                              *
+*............................................................................*
+*Br    0 :fUniqueID : UInt_t                                                 *
+*Entries :        5 : Total  Size=        741 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br    1 :FPGATrackSimLogicalEventOutputHeader :                             *
-*         | FPGATrackSimLogicalEventOutputHeader                             *
-*Entries :        5 : Total  Size=       2247 bytes  One basket in memory    *
+*Br    1 :fBits     : UInt_t                                                 *
+*Entries :        5 : Total  Size=        741 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br    2 :m_event   :                                                        *
+*Entries :        5 : Total  Size=      10862 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br    3 :m_event.fUniqueID : UInt_t                                         *
+*Entries :        5 : Total  Size=        789 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br    4 :m_event.fBits : UInt_t                                             *
+*Entries :        5 : Total  Size=        789 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br    5 :m_event.m_run_number : ULong_t                                     *
+*Entries :        5 : Total  Size=        827 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br    6 :m_event.m_event_number : ULong_t                                   *
+*Entries :        5 : Total  Size=        839 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br    7 :m_event.m_averageInteractionsPerCrossing : Float_t                 *
+*Entries :        5 : Total  Size=        927 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br    8 :m_event.m_actualInteractionsPerCrossing : Float_t                  *
+*Entries :        5 : Total  Size=        921 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br    9 :m_event.m_LB : Int_t                                               *
+*Entries :        5 : Total  Size=        759 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   10 :m_event.m_BCID : Int_t                                             *
+*Entries :        5 : Total  Size=        771 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   11 :m_event.m_extendedLevel1ID : UInt_t                                *
+*Entries :        5 : Total  Size=        843 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   12 :m_event.m_level1TriggerType : UInt_t                               *
+*Entries :        5 : Total  Size=        849 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   13 :m_event.m_level1TriggerInfo : vector<unsigned int>                 *
+*Entries :        5 : Total  Size=        903 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   14 :m_optional :                                                       *
+*Entries :        5 : Total  Size=      73761 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   15 :m_optional.fUniqueID : UInt_t                                      *
+*Entries :        5 : Total  Size=        807 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   16 :m_optional.fBits : UInt_t                                          *
+*Entries :        5 : Total  Size=        807 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   17 :m_optional.m_OfflineClusters : Int_t m_optional.m_OfflineClusters_ *
+*Entries :        5 : Total  Size=      42578 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   18 :m_optional.m_OfflineClusters.fUniqueID :                           *
+*         | UInt_t fUniqueID[m_optional.m_OfflineClusters_]                  *
+*Entries :        5 : Total  Size=       1377 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   19 :m_optional.m_OfflineClusters.fBits :                               *
+*         | UInt_t fBits[m_optional.m_OfflineClusters_]                      *
+*Entries :        5 : Total  Size=       1353 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   20 :m_optional.m_OfflineClusters.m_hitlist :                           *
+*         | vector<FPGATrackSimHit> m_hitlist[m_optional.m_OfflineClusters_] *
+*Entries :        5 : Total  Size=       1417 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   21 :m_optional.m_OfflineClusters.m_clusterEquiv.m_hitType :            *
+*         | Int_t m_hitType[m_optional.m_OfflineClusters_]                   *
+*Entries :        5 : Total  Size=       1437 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   22 :m_optional.m_OfflineClusters.m_clusterEquiv.m_detectorZone :       *
+*         | Int_t m_detectorZone[m_optional.m_OfflineClusters_]              *
+*Entries :        5 : Total  Size=       1467 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   23 :m_optional.m_OfflineClusters.m_clusterEquiv.m_detType :            *
+*         | Int_t m_detType[m_optional.m_OfflineClusters_]                   *
+*Entries :        5 : Total  Size=       1437 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   24 :m_optional.m_OfflineClusters.m_clusterEquiv.m_identifierHash :     *
+*         | UInt_t m_identifierHash[m_optional.m_OfflineClusters_]           *
+*Entries :        5 : Total  Size=       1479 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   25 :m_optional.m_OfflineClusters.m_clusterEquiv.m_layer_disk :         *
+*         | UInt_t m_layer_disk[m_optional.m_OfflineClusters_]               *
+*Entries :        5 : Total  Size=       1455 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   26 :m_optional.m_OfflineClusters.m_clusterEquiv.m_side :               *
+*         | UInt_t m_side[m_optional.m_OfflineClusters_]                     *
+*Entries :        5 : Total  Size=       1419 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   27 :m_optional.m_OfflineClusters.m_clusterEquiv.m_etaModule :          *
+*         | Int_t m_etaModule[m_optional.m_OfflineClusters_]                 *
+*Entries :        5 : Total  Size=       1449 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   28 :m_optional.m_OfflineClusters.m_clusterEquiv.m_phiModule :          *
+*         | UInt_t m_phiModule[m_optional.m_OfflineClusters_]                *
+*Entries :        5 : Total  Size=       1449 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   29 :m_optional.m_OfflineClusters.m_clusterEquiv.m_etaWidth :           *
+*         | UInt_t m_etaWidth[m_optional.m_OfflineClusters_]                 *
+*Entries :        5 : Total  Size=       1443 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   30 :m_optional.m_OfflineClusters.m_clusterEquiv.m_phiWidth :           *
+*         | UInt_t m_phiWidth[m_optional.m_OfflineClusters_]                 *
+*Entries :        5 : Total  Size=       1443 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   31 :m_optional.m_OfflineClusters.m_clusterEquiv.m_layer :              *
+*         | Int_t m_layer[m_optional.m_OfflineClusters_]                     *
+*Entries :        5 : Total  Size=       1425 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   32 :m_optional.m_OfflineClusters.m_clusterEquiv.m_section :            *
+*         | Int_t m_section[m_optional.m_OfflineClusters_]                   *
+*Entries :        5 : Total  Size=       1437 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   33 :m_optional.m_OfflineClusters.m_clusterEquiv.m_phiIndex :           *
+*         | Int_t m_phiIndex[m_optional.m_OfflineClusters_]                  *
+*Entries :        5 : Total  Size=       1443 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   34 :m_optional.m_OfflineClusters.m_clusterEquiv.m_etaIndex :           *
+*         | Int_t m_etaIndex[m_optional.m_OfflineClusters_]                  *
+*Entries :        5 : Total  Size=       1443 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   35 :m_optional.m_OfflineClusters.m_clusterEquiv.m_x :                  *
+*         | Float_t m_x[m_optional.m_OfflineClusters_]                       *
+*Entries :        5 : Total  Size=       1401 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   36 :m_optional.m_OfflineClusters.m_clusterEquiv.m_y :                  *
+*         | Float_t m_y[m_optional.m_OfflineClusters_]                       *
+*Entries :        5 : Total  Size=       1401 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   37 :m_optional.m_OfflineClusters.m_clusterEquiv.m_z :                  *
+*         | Float_t m_z[m_optional.m_OfflineClusters_]                       *
+*Entries :        5 : Total  Size=       1401 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   38 :m_optional.m_OfflineClusters.m_clusterEquiv.m_hw_word :            *
+*         | UInt_t m_hw_word[m_optional.m_OfflineClusters_]                  *
+*Entries :        5 : Total  Size=       1437 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   39 :m_optional.m_OfflineClusters.m_clusterEquiv.m_ToT :                *
+*         | UInt_t m_ToT[m_optional.m_OfflineClusters_]                      *
+*Entries :        5 : Total  Size=       1413 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   40 :m_optional.m_OfflineClusters.m_clusterEquiv.m_eventindex :         *
+*         | Long_t m_eventindex[m_optional.m_OfflineClusters_]               *
+*Entries :        5 : Total  Size=       1791 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   41 :m_optional.m_OfflineClusters.m_clusterEquiv.m_barcode :            *
+*         | Long_t m_barcode[m_optional.m_OfflineClusters_]                  *
+*Entries :        5 : Total  Size=       1773 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   42 :m_optional.m_OfflineClusters.m_clusterEquiv.m_barcode_pt :         *
+*         | Float_t m_barcode_pt[m_optional.m_OfflineClusters_]              *
+*Entries :        5 : Total  Size=       1455 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   43 :m_optional.m_OfflineClusters.m_clusterEquiv.m_parentage_mask :     *
+*         | ULong_t m_parentage_mask[m_optional.m_OfflineClusters_]          *
+*Entries :        5 : Total  Size=       1815 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   44 :m_optional.m_OfflineClusters.m_clusterEquiv.m_truth.fUniqueID :    *
+*         | UInt_t fUniqueID[m_optional.m_OfflineClusters_]                  *
+*Entries :        5 : Total  Size=       1469 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   45 :m_optional.m_OfflineClusters.m_clusterEquiv.m_truth.fBits :        *
+*         | UInt_t fBits[m_optional.m_OfflineClusters_]                      *
+*Entries :        5 : Total  Size=       1445 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   46 :m_optional.m_OfflineClusters.m_clusterEquiv.m_truth.m_truth :      *
+*         | map<pair<long,long>,float> m_truth[m_optional.m_OfflineClusters_]*
+*Entries :        5 : Total  Size=       1517 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   47 :m_optional.m_OfflineTracks : Int_t m_optional.m_OfflineTracks_     *
+*Entries :        5 : Total  Size=      13851 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   48 :m_optional.m_OfflineTracks.fUniqueID :                             *
+*         | UInt_t fUniqueID[m_optional.m_OfflineTracks_]                    *
+*Entries :        5 : Total  Size=       1041 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   49 :m_optional.m_OfflineTracks.fBits :                                 *
+*         | UInt_t fBits[m_optional.m_OfflineTracks_]                        *
+*Entries :        5 : Total  Size=       1017 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   50 :m_optional.m_OfflineTracks.m_qoverpt :                             *
+*         | Double_t m_qoverpt[m_optional.m_OfflineTracks_]                  *
+*Entries :        5 : Total  Size=       1057 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   51 :m_optional.m_OfflineTracks.m_eta :                                 *
+*         | Double_t m_eta[m_optional.m_OfflineTracks_]                      *
+*Entries :        5 : Total  Size=       1033 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   52 :m_optional.m_OfflineTracks.m_phi :                                 *
+*         | Double_t m_phi[m_optional.m_OfflineTracks_]                      *
+*Entries :        5 : Total  Size=       1033 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   53 :m_optional.m_OfflineTracks.m_d0 :                                  *
+*         | Double_t m_d0[m_optional.m_OfflineTracks_]                       *
+*Entries :        5 : Total  Size=       1027 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   54 :m_optional.m_OfflineTracks.m_z0 :                                  *
+*         | Double_t m_z0[m_optional.m_OfflineTracks_]                       *
+*Entries :        5 : Total  Size=       1027 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   55 :m_optional.m_OfflineTracks.m_barcode :                             *
+*         | Long_t m_barcode[m_optional.m_OfflineTracks_]                    *
+*Entries :        5 : Total  Size=       1057 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   56 :m_optional.m_OfflineTracks.m_barcode_frac :                        *
+*         | Double_t m_barcode_frac[m_optional.m_OfflineTracks_]             *
+*Entries :        5 : Total  Size=       1087 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   57 :m_optional.m_OfflineTracks.m_hits :                                *
+*         | vector<FPGATrackSimOfflineHit> m_hits[m_optional.m_OfflineTracks_]*
+*Entries :        5 : Total  Size=       3403 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   58 :m_optional.m_TruthTracks : Int_t m_optional.m_TruthTracks_         *
+*Entries :        5 : Total  Size=      16328 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   59 :m_optional.m_TruthTracks.fUniqueID :                               *
+*         | UInt_t fUniqueID[m_optional.m_TruthTracks_]                      *
+*Entries :        5 : Total  Size=       1029 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   60 :m_optional.m_TruthTracks.fBits :                                   *
+*         | UInt_t fBits[m_optional.m_TruthTracks_]                          *
+*Entries :        5 : Total  Size=       1005 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   61 :m_optional.m_TruthTracks.m_d0 :                                    *
+*         | Double_t m_d0[m_optional.m_TruthTracks_]                         *
+*Entries :        5 : Total  Size=       1019 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   62 :m_optional.m_TruthTracks.m_z0 :                                    *
+*         | Double_t m_z0[m_optional.m_TruthTracks_]                         *
+*Entries :        5 : Total  Size=       1019 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   63 :m_optional.m_TruthTracks.m_vtx_x :                                 *
+*         | Double_t m_vtx_x[m_optional.m_TruthTracks_]                      *
+*Entries :        5 : Total  Size=       1037 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   64 :m_optional.m_TruthTracks.m_vtx_y :                                 *
+*         | Double_t m_vtx_y[m_optional.m_TruthTracks_]                      *
+*Entries :        5 : Total  Size=       1037 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   65 :m_optional.m_TruthTracks.m_vtx_z :                                 *
+*         | Double_t m_vtx_z[m_optional.m_TruthTracks_]                      *
+*Entries :        5 : Total  Size=       1037 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   66 :m_optional.m_TruthTracks.m_px :                                    *
+*         | Double_t m_px[m_optional.m_TruthTracks_]                         *
+*Entries :        5 : Total  Size=       1019 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   67 :m_optional.m_TruthTracks.m_py :                                    *
+*         | Double_t m_py[m_optional.m_TruthTracks_]                         *
+*Entries :        5 : Total  Size=       1019 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   68 :m_optional.m_TruthTracks.m_pz :                                    *
+*         | Double_t m_pz[m_optional.m_TruthTracks_]                         *
+*Entries :        5 : Total  Size=       1019 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   69 :m_optional.m_TruthTracks.m_q : Int_t m_q[m_optional.m_TruthTracks_]*
+*Entries :        5 : Total  Size=        993 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   70 :m_optional.m_TruthTracks.m_pdgcode :                               *
+*         | Int_t m_pdgcode[m_optional.m_TruthTracks_]                       *
+*Entries :        5 : Total  Size=       1029 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   71 :m_optional.m_TruthTracks.m_barcode :                               *
+*         | Int_t m_barcode[m_optional.m_TruthTracks_]                       *
+*Entries :        5 : Total  Size=       1029 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   72 :m_optional.m_TruthTracks.m_evtindex :                              *
+*         | Int_t m_evtindex[m_optional.m_TruthTracks_]                      *
+*Entries :        5 : Total  Size=       1035 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   73 :m_optional.m_TruthTracks.m_barcode_frac_offline :                  *
+*         | Double_t m_barcode_frac_offline[m_optional.m_TruthTracks_]       *
+*Entries :        5 : Total  Size=       1127 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   74 :m_towers  : Int_t m_towers_                                        *
+*Entries :        5 : Total  Size=       8577 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   75 :m_towers.fUniqueID : UInt_t fUniqueID[m_towers_]                   *
+*Entries :        5 : Total  Size=        901 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   76 :m_towers.fBits : UInt_t fBits[m_towers_]                           *
+*Entries :        5 : Total  Size=        877 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   77 :m_towers.m_id : Int_t m_id[m_towers_]                              *
+*Entries :        5 : Total  Size=        871 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   78 :m_towers.m_Eta : Double_t m_Eta[m_towers_]                         *
+*Entries :        5 : Total  Size=        897 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   79 :m_towers.m_Phi : Double_t m_Phi[m_towers_]                         *
+*Entries :        5 : Total  Size=        897 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   80 :m_towers.m_DeltaEta : Double_t m_DeltaEta[m_towers_]               *
+*Entries :        5 : Total  Size=        927 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   81 :m_towers.m_DeltaPhi : Double_t m_DeltaPhi[m_towers_]               *
+*Entries :        5 : Total  Size=        927 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   82 :m_towers.m_Hits : vector<FPGATrackSimHit> m_Hits[m_towers_]        *
+*Entries :        5 : Total  Size=        923 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Branch  :FPGATrackSimLogicalEventOutputHeader                               *
+*Entries :        5 : BranchElement (see below)                              *
+*............................................................................*
+*Br   83 :fUniqueID : UInt_t                                                 *
+*Entries :        5 : Total  Size=        741 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   84 :fBits     : UInt_t                                                 *
+*Entries :        5 : Total  Size=        741 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   85 :m_FPGATrackSimRoads_1st : Int_t m_FPGATrackSimRoads_1st_           *
+*Entries :        5 : Total  Size=       9085 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   86 :m_FPGATrackSimRoads_1st.fUniqueID :                                *
+*         | UInt_t fUniqueID[m_FPGATrackSimRoads_1st_]                       *
+*Entries :        5 : Total  Size=       1001 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   87 :m_FPGATrackSimRoads_1st.fBits :                                    *
+*         | UInt_t fBits[m_FPGATrackSimRoads_1st_]                           *
+*Entries :        5 : Total  Size=        977 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   88 :m_FPGATrackSimRoads_1st.m_roadID :                                 *
+*         | Int_t m_roadID[m_FPGATrackSimRoads_1st_]                         *
+*Entries :        5 : Total  Size=        995 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   89 :m_FPGATrackSimRoads_1st.m_pid :                                    *
+*         | Int_t m_pid[m_FPGATrackSimRoads_1st_]                            *
+*Entries :        5 : Total  Size=        977 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   90 :m_FPGATrackSimRoads_1st.m_sector :                                 *
+*         | Int_t m_sector[m_FPGATrackSimRoads_1st_]                         *
+*Entries :        5 : Total  Size=        995 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   91 :m_FPGATrackSimRoads_1st.m_hit_layers :                             *
+*         | UInt_t m_hit_layers[m_FPGATrackSimRoads_1st_]                    *
+*Entries :        5 : Total  Size=       1019 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   92 :m_FPGATrackSimRoads_1st.m_wildcard_layers :                        *
+*         | UInt_t m_wildcard_layers[m_FPGATrackSimRoads_1st_]               *
+*Entries :        5 : Total  Size=       1049 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   93 :m_FPGATrackSimRoads_1st.m_hits :                                   *
+*         | vector<vector<const FPGATrackSimHit*> > m_hits[m_FPGATrackSimRoads_1st_]*
+*Entries :        5 : Total  Size=       1013 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   94 :m_FPGATrackSimRoads_2nd : Int_t m_FPGATrackSimRoads_2nd_           *
+*Entries :        5 : Total  Size=       9085 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   95 :m_FPGATrackSimRoads_2nd.fUniqueID :                                *
+*         | UInt_t fUniqueID[m_FPGATrackSimRoads_2nd_]                       *
+*Entries :        5 : Total  Size=       1001 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   96 :m_FPGATrackSimRoads_2nd.fBits :                                    *
+*         | UInt_t fBits[m_FPGATrackSimRoads_2nd_]                           *
+*Entries :        5 : Total  Size=        977 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   97 :m_FPGATrackSimRoads_2nd.m_roadID :                                 *
+*         | Int_t m_roadID[m_FPGATrackSimRoads_2nd_]                         *
+*Entries :        5 : Total  Size=        995 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   98 :m_FPGATrackSimRoads_2nd.m_pid :                                    *
+*         | Int_t m_pid[m_FPGATrackSimRoads_2nd_]                            *
+*Entries :        5 : Total  Size=        977 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   99 :m_FPGATrackSimRoads_2nd.m_sector :                                 *
+*         | Int_t m_sector[m_FPGATrackSimRoads_2nd_]                         *
+*Entries :        5 : Total  Size=        995 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  100 :m_FPGATrackSimRoads_2nd.m_hit_layers :                             *
+*         | UInt_t m_hit_layers[m_FPGATrackSimRoads_2nd_]                    *
+*Entries :        5 : Total  Size=       1019 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  101 :m_FPGATrackSimRoads_2nd.m_wildcard_layers :                        *
+*         | UInt_t m_wildcard_layers[m_FPGATrackSimRoads_2nd_]               *
+*Entries :        5 : Total  Size=       1049 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  102 :m_FPGATrackSimRoads_2nd.m_hits :                                   *
+*         | vector<vector<const FPGATrackSimHit*> > m_hits[m_FPGATrackSimRoads_2nd_]*
+*Entries :        5 : Total  Size=       1013 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  103 :m_FPGATrackSimTracks_1st : Int_t m_FPGATrackSimTracks_1st_         *
+*Entries :        5 : Total  Size=      28510 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  104 :m_FPGATrackSimTracks_1st.fUniqueID :                               *
+*         | UInt_t fUniqueID[m_FPGATrackSimTracks_1st_]                      *
+*Entries :        5 : Total  Size=       1009 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  105 :m_FPGATrackSimTracks_1st.fBits :                                   *
+*         | UInt_t fBits[m_FPGATrackSimTracks_1st_]                          *
+*Entries :        5 : Total  Size=        985 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  106 :m_FPGATrackSimTracks_1st.m_trackCorrType :                         *
+*         | Int_t m_trackCorrType[m_FPGATrackSimTracks_1st_]                 *
+*Entries :        5 : Total  Size=       1045 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  107 :m_FPGATrackSimTracks_1st.m_trackStage :                            *
+*         | Int_t m_trackStage[m_FPGATrackSimTracks_1st_]                    *
+*Entries :        5 : Total  Size=       1027 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  108 :m_FPGATrackSimTracks_1st.m_doDeltaGPhis :                          *
+*         | Bool_t m_doDeltaGPhis[m_FPGATrackSimTracks_1st_]                 *
+*Entries :        5 : Total  Size=       1039 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  109 :m_FPGATrackSimTracks_1st.m_bankID :                                *
+*         | Int_t m_bankID[m_FPGATrackSimTracks_1st_]                        *
+*Entries :        5 : Total  Size=       1003 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  110 :m_FPGATrackSimTracks_1st.m_patternID :                             *
+*         | Int_t m_patternID[m_FPGATrackSimTracks_1st_]                     *
+*Entries :        5 : Total  Size=       1021 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  111 :m_FPGATrackSimTracks_1st.m_firstSectorID :                         *
+*         | Int_t m_firstSectorID[m_FPGATrackSimTracks_1st_]                 *
+*Entries :        5 : Total  Size=       1045 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  112 :m_FPGATrackSimTracks_1st.m_secondSectorID :                        *
+*         | Int_t m_secondSectorID[m_FPGATrackSimTracks_1st_]                *
+*Entries :        5 : Total  Size=       1051 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  113 :m_FPGATrackSimTracks_1st.m_trackID :                               *
+*         | Int_t m_trackID[m_FPGATrackSimTracks_1st_]                       *
+*Entries :        5 : Total  Size=       1009 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  114 :m_FPGATrackSimTracks_1st.m_IdealGeoCorr :                          *
+*         | Int_t m_IdealGeoCorr[m_FPGATrackSimTracks_1st_]                  *
+*Entries :        5 : Total  Size=       1039 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  115 :m_FPGATrackSimTracks_1st.m_houghX :                                *
+*         | Float_t m_houghX[m_FPGATrackSimTracks_1st_]                      *
+*Entries :        5 : Total  Size=       1003 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  116 :m_FPGATrackSimTracks_1st.m_houghY :                                *
+*         | Float_t m_houghY[m_FPGATrackSimTracks_1st_]                      *
+*Entries :        5 : Total  Size=       1003 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  117 :m_FPGATrackSimTracks_1st.m_qoverpt :                               *
+*         | Float_t m_qoverpt[m_FPGATrackSimTracks_1st_]                     *
+*Entries :        5 : Total  Size=       1009 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  118 :m_FPGATrackSimTracks_1st.m_d0 :                                    *
+*         | Float_t m_d0[m_FPGATrackSimTracks_1st_]                          *
+*Entries :        5 : Total  Size=        979 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  119 :m_FPGATrackSimTracks_1st.m_phi :                                   *
+*         | Float_t m_phi[m_FPGATrackSimTracks_1st_]                         *
+*Entries :        5 : Total  Size=        985 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  120 :m_FPGATrackSimTracks_1st.m_z0 :                                    *
+*         | Float_t m_z0[m_FPGATrackSimTracks_1st_]                          *
+*Entries :        5 : Total  Size=        979 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  121 :m_FPGATrackSimTracks_1st.m_eta :                                   *
+*         | Float_t m_eta[m_FPGATrackSimTracks_1st_]                         *
+*Entries :        5 : Total  Size=        985 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  122 :m_FPGATrackSimTracks_1st.m_chi2 :                                  *
+*         | Float_t m_chi2[m_FPGATrackSimTracks_1st_]                        *
+*Entries :        5 : Total  Size=        991 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  123 :m_FPGATrackSimTracks_1st.m_origchi2 :                              *
+*         | Float_t m_origchi2[m_FPGATrackSimTracks_1st_]                    *
+*Entries :        5 : Total  Size=       1015 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  124 :m_FPGATrackSimTracks_1st.m_nmissing :                              *
+*         | UInt_t m_nmissing[m_FPGATrackSimTracks_1st_]                     *
+*Entries :        5 : Total  Size=       1015 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  125 :m_FPGATrackSimTracks_1st.m_typemask :                              *
+*         | UInt_t m_typemask[m_FPGATrackSimTracks_1st_]                     *
+*Entries :        5 : Total  Size=       1015 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  126 :m_FPGATrackSimTracks_1st.m_hitmap :                                *
+*         | UInt_t m_hitmap[m_FPGATrackSimTracks_1st_]                       *
+*Entries :        5 : Total  Size=       1003 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  127 :m_FPGATrackSimTracks_1st.m_hits :                                  *
+*         | vector<FPGATrackSimHit> m_hits[m_FPGATrackSimTracks_1st_]        *
+*Entries :        5 : Total  Size=       1031 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  128 :m_FPGATrackSimTracks_1st.m_eventindex :                            *
+*         | Long_t m_eventindex[m_FPGATrackSimTracks_1st_]                   *
+*Entries :        5 : Total  Size=       1027 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  129 :m_FPGATrackSimTracks_1st.m_barcode :                               *
+*         | Long_t m_barcode[m_FPGATrackSimTracks_1st_]                      *
+*Entries :        5 : Total  Size=       1009 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  130 :m_FPGATrackSimTracks_1st.m_barcode_frac :                          *
+*         | Float_t m_barcode_frac[m_FPGATrackSimTracks_1st_]                *
+*Entries :        5 : Total  Size=       1039 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  131 :m_FPGATrackSimTracks_1st.m_ORcode :                                *
+*         | UInt_t m_ORcode[m_FPGATrackSimTracks_1st_]                       *
+*Entries :        5 : Total  Size=       1003 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  132 :m_FPGATrackSimTracks_2nd : Int_t m_FPGATrackSimTracks_2nd_         *
+*Entries :        5 : Total  Size=      28510 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  133 :m_FPGATrackSimTracks_2nd.fUniqueID :                               *
+*         | UInt_t fUniqueID[m_FPGATrackSimTracks_2nd_]                      *
+*Entries :        5 : Total  Size=       1009 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  134 :m_FPGATrackSimTracks_2nd.fBits :                                   *
+*         | UInt_t fBits[m_FPGATrackSimTracks_2nd_]                          *
+*Entries :        5 : Total  Size=        985 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  135 :m_FPGATrackSimTracks_2nd.m_trackCorrType :                         *
+*         | Int_t m_trackCorrType[m_FPGATrackSimTracks_2nd_]                 *
+*Entries :        5 : Total  Size=       1045 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  136 :m_FPGATrackSimTracks_2nd.m_trackStage :                            *
+*         | Int_t m_trackStage[m_FPGATrackSimTracks_2nd_]                    *
+*Entries :        5 : Total  Size=       1027 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  137 :m_FPGATrackSimTracks_2nd.m_doDeltaGPhis :                          *
+*         | Bool_t m_doDeltaGPhis[m_FPGATrackSimTracks_2nd_]                 *
+*Entries :        5 : Total  Size=       1039 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  138 :m_FPGATrackSimTracks_2nd.m_bankID :                                *
+*         | Int_t m_bankID[m_FPGATrackSimTracks_2nd_]                        *
+*Entries :        5 : Total  Size=       1003 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  139 :m_FPGATrackSimTracks_2nd.m_patternID :                             *
+*         | Int_t m_patternID[m_FPGATrackSimTracks_2nd_]                     *
+*Entries :        5 : Total  Size=       1021 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  140 :m_FPGATrackSimTracks_2nd.m_firstSectorID :                         *
+*         | Int_t m_firstSectorID[m_FPGATrackSimTracks_2nd_]                 *
+*Entries :        5 : Total  Size=       1045 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  141 :m_FPGATrackSimTracks_2nd.m_secondSectorID :                        *
+*         | Int_t m_secondSectorID[m_FPGATrackSimTracks_2nd_]                *
+*Entries :        5 : Total  Size=       1051 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  142 :m_FPGATrackSimTracks_2nd.m_trackID :                               *
+*         | Int_t m_trackID[m_FPGATrackSimTracks_2nd_]                       *
+*Entries :        5 : Total  Size=       1009 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  143 :m_FPGATrackSimTracks_2nd.m_IdealGeoCorr :                          *
+*         | Int_t m_IdealGeoCorr[m_FPGATrackSimTracks_2nd_]                  *
+*Entries :        5 : Total  Size=       1039 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  144 :m_FPGATrackSimTracks_2nd.m_houghX :                                *
+*         | Float_t m_houghX[m_FPGATrackSimTracks_2nd_]                      *
+*Entries :        5 : Total  Size=       1003 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  145 :m_FPGATrackSimTracks_2nd.m_houghY :                                *
+*         | Float_t m_houghY[m_FPGATrackSimTracks_2nd_]                      *
+*Entries :        5 : Total  Size=       1003 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  146 :m_FPGATrackSimTracks_2nd.m_qoverpt :                               *
+*         | Float_t m_qoverpt[m_FPGATrackSimTracks_2nd_]                     *
+*Entries :        5 : Total  Size=       1009 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  147 :m_FPGATrackSimTracks_2nd.m_d0 :                                    *
+*         | Float_t m_d0[m_FPGATrackSimTracks_2nd_]                          *
+*Entries :        5 : Total  Size=        979 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  148 :m_FPGATrackSimTracks_2nd.m_phi :                                   *
+*         | Float_t m_phi[m_FPGATrackSimTracks_2nd_]                         *
+*Entries :        5 : Total  Size=        985 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  149 :m_FPGATrackSimTracks_2nd.m_z0 :                                    *
+*         | Float_t m_z0[m_FPGATrackSimTracks_2nd_]                          *
+*Entries :        5 : Total  Size=        979 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  150 :m_FPGATrackSimTracks_2nd.m_eta :                                   *
+*         | Float_t m_eta[m_FPGATrackSimTracks_2nd_]                         *
+*Entries :        5 : Total  Size=        985 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  151 :m_FPGATrackSimTracks_2nd.m_chi2 :                                  *
+*         | Float_t m_chi2[m_FPGATrackSimTracks_2nd_]                        *
+*Entries :        5 : Total  Size=        991 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  152 :m_FPGATrackSimTracks_2nd.m_origchi2 :                              *
+*         | Float_t m_origchi2[m_FPGATrackSimTracks_2nd_]                    *
+*Entries :        5 : Total  Size=       1015 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  153 :m_FPGATrackSimTracks_2nd.m_nmissing :                              *
+*         | UInt_t m_nmissing[m_FPGATrackSimTracks_2nd_]                     *
+*Entries :        5 : Total  Size=       1015 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  154 :m_FPGATrackSimTracks_2nd.m_typemask :                              *
+*         | UInt_t m_typemask[m_FPGATrackSimTracks_2nd_]                     *
+*Entries :        5 : Total  Size=       1015 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  155 :m_FPGATrackSimTracks_2nd.m_hitmap :                                *
+*         | UInt_t m_hitmap[m_FPGATrackSimTracks_2nd_]                       *
+*Entries :        5 : Total  Size=       1003 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  156 :m_FPGATrackSimTracks_2nd.m_hits :                                  *
+*         | vector<FPGATrackSimHit> m_hits[m_FPGATrackSimTracks_2nd_]        *
+*Entries :        5 : Total  Size=       1031 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  157 :m_FPGATrackSimTracks_2nd.m_eventindex :                            *
+*         | Long_t m_eventindex[m_FPGATrackSimTracks_2nd_]                   *
+*Entries :        5 : Total  Size=       1027 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  158 :m_FPGATrackSimTracks_2nd.m_barcode :                               *
+*         | Long_t m_barcode[m_FPGATrackSimTracks_2nd_]                      *
+*Entries :        5 : Total  Size=       1009 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  159 :m_FPGATrackSimTracks_2nd.m_barcode_frac :                          *
+*         | Float_t m_barcode_frac[m_FPGATrackSimTracks_2nd_]                *
+*Entries :        5 : Total  Size=       1039 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  160 :m_FPGATrackSimTracks_2nd.m_ORcode :                                *
+*         | UInt_t m_ORcode[m_FPGATrackSimTracks_2nd_]                       *
+*Entries :        5 : Total  Size=       1003 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  161 :m_dataflowInfo :                                                   *
+*Entries :        5 : Total  Size=      28484 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  162 :m_dataflowInfo.nMappedHits_1st_layer : vector<unsigned long>       *
+*Entries :        5 : Total  Size=        957 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  163 :m_dataflowInfo.nMappedHits_1st_total : ULong_t                     *
+*Entries :        5 : Total  Size=        923 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  164 :m_dataflowInfo.nClusters_1st_layer : vector<unsigned long>         *
+*Entries :        5 : Total  Size=        945 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  165 :m_dataflowInfo.nClusters_1st_total : ULong_t                       *
+*Entries :        5 : Total  Size=        911 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  166 :m_dataflowInfo.nRoads_1st_total : ULong_t                          *
+*Entries :        5 : Total  Size=        893 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  167 :m_dataflowInfo.nRoads_1st_7hits : ULong_t                          *
+*Entries :        5 : Total  Size=        893 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  168 :m_dataflowInfo.nRoads_1st_8hits : ULong_t                          *
+*Entries :        5 : Total  Size=        893 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  169 :m_dataflowInfo.nTracks_1st_total : ULong_t                         *
+*Entries :        5 : Total  Size=        899 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  170 :m_dataflowInfo.nTracks_1st_passChi2 : ULong_t                      *
+*Entries :        5 : Total  Size=        917 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  171 :m_dataflowInfo.nTracks_1st_afterOR : ULong_t                       *
+*Entries :        5 : Total  Size=        911 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  172 :m_dataflowInfo.nTracks_1st_per_patt_total : vector<unsigned long>  *
+*Entries :        5 : Total  Size=        987 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  173 :m_dataflowInfo.nTracks_1st_per_patt_passChi2 :                     *
+*         | vector<unsigned long>                                            *
+*Entries :        5 : Total  Size=       1005 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  174 :m_dataflowInfo.nTracks_1st_per_patt_afterOR : vector<unsigned long>*
+*Entries :        5 : Total  Size=        999 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  175 :m_dataflowInfo.nConstants_1st_fitter : ULong_t                     *
+*Entries :        5 : Total  Size=        923 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  176 :m_dataflowInfo.nConstants_1st_passChi2 : ULong_t                   *
+*Entries :        5 : Total  Size=        935 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  177 :m_dataflowInfo.nConstants_1st_afterOR : ULong_t                    *
+*Entries :        5 : Total  Size=        929 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  178 :m_dataflowInfo.nRoads_2nd_total : ULong_t                          *
+*Entries :        5 : Total  Size=        893 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  179 :m_dataflowInfo.nTracks_2nd_total : ULong_t                         *
+*Entries :        5 : Total  Size=        899 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  180 :m_dataflowInfo.nTracks_2nd_passChi2 : ULong_t                      *
+*Entries :        5 : Total  Size=        917 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  181 :m_dataflowInfo.nTracks_2nd_afterOR : ULong_t                       *
+*Entries :        5 : Total  Size=        911 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  182 :m_dataflowInfo.nConstants_2nd_extrapolate : ULong_t                *
+*Entries :        5 : Total  Size=        953 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  183 :m_dataflowInfo.nConstants_2nd_fitter : ULong_t                     *
+*Entries :        5 : Total  Size=        923 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  184 :m_dataflowInfo.nConstants_2nd_passChi2 : ULong_t                   *
+*Entries :        5 : Total  Size=        935 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  185 :m_dataflowInfo.nConstants_2nd_afterOR : ULong_t                    *
+*Entries :        5 : Total  Size=        929 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  186 :m_dataflowInfo.nTruthTracks : ULong_t                              *
+*Entries :        5 : Total  Size=        869 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  187 :m_dataflowInfo.nOfflineTracks : ULong_t                            *
+*Entries :        5 : Total  Size=        881 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  188 :m_dataflowInfo.nTracks_1st_over_nOfflineTracks : Float_t           *
+*Entries :        5 : Total  Size=        963 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br  189 :m_dataflowInfo.nTracks_2nd_over_nOfflineTracks : Float_t           *
+*Entries :        5 : Total  Size=        963 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
 FPGATrackSimLog...   INFO Contains 5 entries, over 5 events run
@@ -400,9 +1265,9 @@ ApplicationMgr       INFO Application Manager Finalized successfully
 ApplicationMgr       INFO Application Manager Terminated successfully
 Py:Athena            INFO leaving with code 0: "successful run"
 Produced file fpgatracksim_loghits_wrap.OUT.root, now read it back
-Tue Jun 13 16:43:44 CEST 2023
+Tue Jul 18 18:42:44 CEST 2023
 Preloading tcmalloc_minimal.so
-Py:Athena            INFO using release [WorkDir-24.0.6] [x86_64-centos7-gcc11-opt] [Kill-HTT/45db40f] -- built on [2023-06-12T2128]
+Py:Athena            INFO using release [WorkDir-24.0.8] [x86_64-centos7-gcc11-opt] [RUN4-03-00-00_Tests/da9ed526037] -- built on [2023-07-18T1745]
 Py:Athena            INFO including file "AthenaCommon/Preparation.py"
 Py:Athena            INFO including file "AthenaCommon/Atlas.UnixStandardJob.py"
 Py:Athena            INFO executing ROOT6Setup
@@ -410,16 +1275,12 @@ Py:Athena            INFO including file "AthenaCommon/Execution.py"
 Py:Athena            INFO including file "FPGATrackSimInput/FPGATrackSimReadLogicalHitsAlg_jobOptions.py"
 Py:FPGATrackSimReadLogicalHitsAlg    INFO Input file ['fpgatracksim_loghits_wrap.OUT.root']
 Py:Athena            INFO including file "AthenaCommon/runbatch.py"
-Py:ConfigurableDb    INFO Read module info for 5239 configurables from 13 genConfDb files
-Py:ConfigurableDb WARNING Found 1 duplicates among the 13 genConfDb files :
-Py:ConfigurableDb WARNING --------------------------------------------------
-Py:ConfigurableDb WARNING   -<component name>: <module> - [ <duplicates> ]
-Py:ConfigurableDb WARNING --------------------------------------------------
-Py:ConfigurableDb WARNING   -FPGATrackSimRawHitsWrapperAlg: FPGATrackSimSGInput.FPGATrackSimSGInputConf - ['FPGATrackSimInput.FPGATrackSimInputConf', 'FPGATrackSimInput.FPGATrackSimInputConf']
+Py:ConfigurableDb    INFO Read module info for 5217 configurables from 5 genConfDb files
+Py:ConfigurableDb    INFO No duplicates have been found: that's good !
 ApplicationMgr    SUCCESS 
 ====================================================================================================================================
-                                                   Welcome to ApplicationMgr (GaudiCoreSvc v36r13)
-                                          running on lxplus725.cern.ch on Tue Jun 13 16:43:55 2023
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v36r14)
+                                          running on lxplus783.cern.ch on Tue Jul 18 18:42:59 2023
 ====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
 AthDictLoaderSvc     INFO in initialize...
@@ -440,10 +1301,10 @@ ApplicationMgr       INFO Application Manager Started successfully
 AthenaEventLoopMgr   INFO   ===>>>  start of run 1    <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
 FPGATrackSimRea...  DEBUG Asked Event 0 in this file; current total is 0
-FPGATrackSimRea...  DEBUG Asked in first stage header event: Event 38001 	Run 242000
+FPGATrackSimRea...  DEBUG Asked in first stage header event: Event 115001 	Run 242000
 FPGATrackSimRea...  DEBUG n.roads_1st = 0
 FPGATrackSimRea...  DEBUG n.tracks_1st = 0
-FPGATrackSimRea...  DEBUG Event: Event 38001 	Run 242000	Optional: nOfflineClusters: 14, nOfflineTracks: 1, nTruthTracks: 1
+FPGATrackSimRea...  DEBUG Event: Event 115001 	Run 242000	Optional: nOfflineClusters: 19, nOfflineTracks: 1, nTruthTracks: 1
 	NTowers: 1
  0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
 
@@ -451,10 +1312,10 @@ FPGATrackSimRea...  DEBUG Event: Event 38001 	Run 242000	Optional: nOfflineClust
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #1 1 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #1 1 events processed so far  <<<===
 FPGATrackSimRea...  DEBUG Asked Event 1 in this file; current total is 1
-FPGATrackSimRea...  DEBUG Asked in first stage header event: Event 38005 	Run 242000
+FPGATrackSimRea...  DEBUG Asked in first stage header event: Event 115006 	Run 242000
 FPGATrackSimRea...  DEBUG n.roads_1st = 0
 FPGATrackSimRea...  DEBUG n.tracks_1st = 0
-FPGATrackSimRea...  DEBUG Event: Event 38005 	Run 242000	Optional: nOfflineClusters: 12, nOfflineTracks: 1, nTruthTracks: 1
+FPGATrackSimRea...  DEBUG Event: Event 115006 	Run 242000	Optional: nOfflineClusters: 23, nOfflineTracks: 1, nTruthTracks: 1
 	NTowers: 1
  0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
 
@@ -462,10 +1323,10 @@ FPGATrackSimRea...  DEBUG Event: Event 38005 	Run 242000	Optional: nOfflineClust
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #1 2 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #3, run #1 2 events processed so far  <<<===
 FPGATrackSimRea...  DEBUG Asked Event 2 in this file; current total is 2
-FPGATrackSimRea...  DEBUG Asked in first stage header event: Event 38014 	Run 242000
+FPGATrackSimRea...  DEBUG Asked in first stage header event: Event 115011 	Run 242000
 FPGATrackSimRea...  DEBUG n.roads_1st = 0
 FPGATrackSimRea...  DEBUG n.tracks_1st = 0
-FPGATrackSimRea...  DEBUG Event: Event 38014 	Run 242000	Optional: nOfflineClusters: 14, nOfflineTracks: 1, nTruthTracks: 1
+FPGATrackSimRea...  DEBUG Event: Event 115011 	Run 242000	Optional: nOfflineClusters: 18, nOfflineTracks: 1, nTruthTracks: 1
 	NTowers: 1
  0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
 
@@ -473,10 +1334,10 @@ FPGATrackSimRea...  DEBUG Event: Event 38014 	Run 242000	Optional: nOfflineClust
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #3, run #1 3 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #4, run #1 3 events processed so far  <<<===
 FPGATrackSimRea...  DEBUG Asked Event 3 in this file; current total is 3
-FPGATrackSimRea...  DEBUG Asked in first stage header event: Event 38015 	Run 242000
+FPGATrackSimRea...  DEBUG Asked in first stage header event: Event 115010 	Run 242000
 FPGATrackSimRea...  DEBUG n.roads_1st = 0
 FPGATrackSimRea...  DEBUG n.tracks_1st = 0
-FPGATrackSimRea...  DEBUG Event: Event 38015 	Run 242000	Optional: nOfflineClusters: 15, nOfflineTracks: 1, nTruthTracks: 1
+FPGATrackSimRea...  DEBUG Event: Event 115010 	Run 242000	Optional: nOfflineClusters: 13, nOfflineTracks: 1, nTruthTracks: 1
 	NTowers: 1
  0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
 
@@ -484,10 +1345,10 @@ FPGATrackSimRea...  DEBUG Event: Event 38015 	Run 242000	Optional: nOfflineClust
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #4, run #1 4 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #5, run #1 4 events processed so far  <<<===
 FPGATrackSimRea...  DEBUG Asked Event 4 in this file; current total is 4
-FPGATrackSimRea...  DEBUG Asked in first stage header event: Event 38016 	Run 242000
+FPGATrackSimRea...  DEBUG Asked in first stage header event: Event 115012 	Run 242000
 FPGATrackSimRea...  DEBUG n.roads_1st = 0
 FPGATrackSimRea...  DEBUG n.tracks_1st = 0
-FPGATrackSimRea...  DEBUG Event: Event 38016 	Run 242000	Optional: nOfflineClusters: 30, nOfflineTracks: 1, nTruthTracks: 1
+FPGATrackSimRea...  DEBUG Event: Event 115012 	Run 242000	Optional: nOfflineClusters: 11, nOfflineTracks: 0, nTruthTracks: 1
 	NTowers: 1
  0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
 

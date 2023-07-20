@@ -12,7 +12,7 @@
 lastref_dir=last_results
 dcubeXml=dcube_ART_IDPVMPlots_ITk.xml
 
-geometry=ATLAS-P2-RUN4-01-01-00
+geometry=ATLAS-P2-RUN4-03-00-00
 
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml -print -quit 2>/dev/null)
