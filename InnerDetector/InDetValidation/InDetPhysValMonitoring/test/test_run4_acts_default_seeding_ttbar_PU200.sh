@@ -9,7 +9,7 @@
 
 lastref_dir=last_results
 dcubeXml=dcube_ART_ACTS_SEEDS_R22.xml
-input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/inputs/ATLAS-P2-RUN4-01-01-00_ttbar_mu200.RDO.root
+input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1
 
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml -print -quit 2>/dev/null)
@@ -18,8 +18,6 @@ if [ -z "$dcubeXmlAbsPath" ]; then
     echo "art-result: 1 dcube-xml-config"
     exit 1
 fi
-
-geometry=ATLAS-P2-RUN4-01-00-00
 
 run () {
     name="${1}"
