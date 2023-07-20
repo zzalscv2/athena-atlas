@@ -255,7 +255,10 @@ def setupDigitizationFlags(runArgs, flags):
 
     if flags.Digitization.PileUp:
         flags.Input.OverrideRunNumber = True
-        # keep this one True by default in CA-based config
-        flags.Digitization.DoXingByXingPileUp = True
+        # Needs to be False for MT pileup
+        if flags.Concurrency.NumThreads > 0:
+            flags.Digitization.DoXingByXingPileUp = False
+        else:
+            flags.Digitization.DoXingByXingPileUp = True
     else:
         flags.Input.OverrideRunNumber = flags.Input.ConditionsRunNumber > 0

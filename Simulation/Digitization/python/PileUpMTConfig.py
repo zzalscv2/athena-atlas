@@ -25,6 +25,38 @@ from Digitization.PileUpConfig import (
 
 from enum import Enum
 
+def numBkgToLoad(nPerBC):
+    "Given number of bkg needed (on average) per BC, returns number to load per batch"
+    from math import ceil
+    import numpy as np
+    # We don't have scipy in the release so we have a lookup table
+    # Lookup table computed using scipy.stats.poisson.isf to determine how many events need
+    # to be loaded to have a probability of running out of events < 10^-6.
+    boundaries = np.array([1.74752840e-03, 4.03701726e-03, 7.74263683e-03, 1.23284674e-02,
+                           1.78864953e-02, 2.36448941e-02, 3.12571585e-02, 3.76493581e-02,
+                           4.53487851e-02, 5.46227722e-02, 6.57933225e-02, 7.92482898e-02,
+                           8.69749003e-02, 9.54548457e-02, 1.04761575e-01, 1.14975700e-01,
+                           1.26185688e-01, 1.38488637e-01, 1.51991108e-01, 1.66810054e-01,
+                           1.83073828e-01, 2.00923300e-01, 2.20513074e-01, 2.42012826e-01,
+                           2.65608778e-01, 2.91505306e-01, 3.19926714e-01, 3.51119173e-01,
+                           3.85352859e-01, 4.22924287e-01, 4.64158883e-01, 5.09413801e-01,
+                           5.59081018e-01, 6.13590727e-01, 6.73415066e-01, 7.39072203e-01,
+                           8.11130831e-01, 8.90215085e-01, 9.77009957e-01, 1.07226722e+00,
+                           1.17681195e+00, 1.29154967e+00, 1.41747416e+00, 1.55567614e+00,
+                           1.70735265e+00, 1.87381742e+00, 2.05651231e+00, 2.25701972e+00,
+                           2.47707636e+00, 2.71858824e+00, 2.98364724e+00, 3.27454916e+00,
+                           3.59381366e+00, 3.94420606e+00, 4.32876128e+00, 4.75081016e+00,
+                           5.21400829e+00, 5.72236766e+00, 6.28029144e+00, 6.89261210e+00,
+                           7.56463328e+00, 8.30217568e+00, 9.11162756e+00, 1.00000000e+01])
+    n_to_load = np.array([  3.,   4.,   5.,   6.,   7.,   8.,   9.,  10.,  11.,  12.,  13.,
+                           14.,  15.,  16.,  17.,  18.,  19.,  20.,  21.,  22.,  23.,  24.,
+                           26.,  27.,  29.,  31.,  33.,  35.,  37.,  39.,  42.,  44.,  47.,
+                           51.,  54.,  58.,  62.,  66.,  71.,  76.,  81.,  88.,  94., 101.,
+                          109., 117., 126., 136., 147., 158., 171., 185., 200., 216., 234.,
+                          253., 275., 298., 323., 350., 380., 413., 448., 487.])
+    if nPerBC > 10:
+        return int(ceil(1.224 * nPerBC * 39)) # Table only goes up to 10 per bunch crossing
+    return int(n_to_load[np.searchsorted(boundaries, nPerBC, side='right')])
 
 class PUBkgKind(Enum):
     LOWPT = 1
@@ -62,7 +94,7 @@ def BatchedMinbiasSvcCfg(flags, name="LowPtMinbiasSvc", kind=PUBkgKind.LOWPT, **
         # kwargs.setdefault("MBBatchSize", 1.3 * flags.Digitization.PU.NumberOfLowPtMinBias * n_bc)
         kwargs.setdefault("NSimultaneousBatches", 1)
         kwargs.setdefault("SkippedHSEvents", skip)
-        kwargs.setdefault("HSBatchSize", 16)
+        kwargs.setdefault("HSBatchSize", 128)
         evt_per_batch = kwargs["HSBatchSize"]
         actualNHSEventsPerBatch = (
             (skip // evt_per_batch) * [0]
@@ -77,9 +109,9 @@ def BatchedMinbiasSvcCfg(flags, name="LowPtMinbiasSvc", kind=PUBkgKind.LOWPT, **
     elif kind == PUBkgKind.HIGHPT:
         acc.merge(HighPtMinBiasEventSelectorCfg(flags))
         kwargs.setdefault("OnDemandMB", False)
-        # load enough events that the probability of running out for any given event is no more than 1e-5
+        # load enough events that the probability of running out for any given event is no more than 1e-6
         kwargs.setdefault(
-            "MBBatchSize", 2 * max(flags.Digitization.PU.NumberOfHighPtMinBias, 1) * n_bc
+            "MBBatchSize", numBkgToLoad(flags.Digitization.PU.NumberOfHighPtMinBias)
         )
         kwargs.setdefault("NSimultaneousBatches", flags.Concurrency.NumConcurrentEvents)
         kwargs.setdefault("SkippedHSEvents", skip)
@@ -115,7 +147,7 @@ def BatchedMinbiasSvcCfg(flags, name="LowPtMinbiasSvc", kind=PUBkgKind.LOWPT, **
         acc.merge(BeamGasEventSelectorCfg(flags))
         kwargs.setdefault("OnDemandMB", False)
         kwargs.setdefault(
-            "MBBatchSize", 8 * flags.Digitization.PU.NumberOfBeamGas * n_bc
+            "MBBatchSize", numBkgToLoad(flags.Digitization.PU.NumberOfBeamGas)
         )
         kwargs.setdefault("NSimultaneousBatches", flags.Concurrency.NumConcurrentEvents)
         kwargs.setdefault("SkippedHSEvents", skip)
@@ -133,7 +165,7 @@ def BatchedMinbiasSvcCfg(flags, name="LowPtMinbiasSvc", kind=PUBkgKind.LOWPT, **
         acc.merge(BeamHaloEventSelectorCfg(flags))
         kwargs.setdefault("OnDemandMB", False)
         kwargs.setdefault(
-            "MBBatchSize", 8 * flags.Digitization.PU.NumberOfBeamHalo * n_bc
+            "MBBatchSize", numBkgToLoad(flags.Digitization.PU.NumberOfBeamHalo)
         )
         kwargs.setdefault("NSimultaneousBatches", flags.Concurrency.NumConcurrentEvents)
         kwargs.setdefault("SkippedHSEvents", skip)
@@ -158,8 +190,8 @@ def PileUpMTAlgCfg(flags, **kwargs):
     # acc = BeamSpotFixerAlgCfg(flags)  # Needed currently for running on 21.0 HITS
 
     assert (
-        flags.Digitization.DoXingByXingPileUp
-    ), "PileUpMTAlg only supports XingByXing pile-up!"
+        not flags.Digitization.DoXingByXingPileUp
+    ), "PileUpMTAlg does not support XingByXing pile-up!"
     # Bunch Structure
     if flags.Digitization.PU.BeamIntensityPattern:
         if flags.Digitization.PU.SignalPatternForSteppingCache:

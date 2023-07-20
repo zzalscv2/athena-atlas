@@ -28,13 +28,13 @@ def PileUpToolsCfg(flags, **kwargs):
     kwargs["ExtraInputs"] = flags.Digitization.ExtraInputs
 
     # choose the correct alg
-    if flags.Digitization.DoXingByXingPileUp:
-        if flags.Concurrency.NumThreads > 0:
-            Alg = PileUpMTAlg
-        else:
-            Alg = PileUpToolsAlg
+    if flags.Concurrency.NumThreads > 0 and flags.Digitization.PileUp:
+        Alg = PileUpMTAlg
     else:
-        Alg = DigitizationAlg
+        if flags.Digitization.DoXingByXingPileUp:
+            Alg = PileUpToolsAlg
+        else:
+            Alg = DigitizationAlg
 
     # setup EventInfo
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
