@@ -48,11 +48,7 @@ StatusCode ParentTwoChildrenFilter::filterEvent() {
       const HepMC::ConstGenVertexPtr&  decayVtx = pitr->end_vertex();
       // Verify if we got a valid pointer and retrieve the number of daughters
       if (!decayVtx) continue; 
-#ifdef HEPMC3
-      int n_daughters = decayVtx->particles_out().size();
-#else
       int n_daughters = decayVtx->particles_out_size();
-#endif
 
       if (n_daughters < 2) continue; 
 

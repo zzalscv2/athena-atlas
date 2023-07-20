@@ -567,11 +567,7 @@ bool EvtInclusiveDecay::isToBeDecayed(HepMC::ConstGenParticlePtr p, bool doCross
   int stat = p->status();
   int nDaughters = 0;
   auto v = p->end_vertex();
-#ifdef HEPMC3
-  if (v) nDaughters = v->particles_out().size();
-#else
   if (v) nDaughters = v->particles_out_size();
-#endif
 
   // Ignore documentation lines
   if (stat == 3) return false;

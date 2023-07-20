@@ -9,13 +9,8 @@ namespace {
     for ( McEventCollection::const_iterator itr = mcEvents->begin();
           itr != itrEnd;
           ++itr ) {
-#ifdef HEPMC3
-      nParts += (*itr)->particles().size();
-      nVerts += (*itr)->vertices().size();
-#else
       nParts += (*itr)->particles_size();
       nVerts += (*itr)->vertices_size();
-#endif
     }
 
     return std::make_pair( nParts, nVerts );
