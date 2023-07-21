@@ -53,5 +53,7 @@
  <enum name="HLT::Reason::Code"/>
  <class name="HLT::SteeringInternalReason"/>
  <enum name="HLT::SteeringInternalReason::Code"/>
+ <enum name="HLT::OnlineErrorCode"/>
+ <function name="HLT::OnlineErrorCodeToString"/>
  <class name="HLT::StringSerializer"/>
 </lcgdict>
