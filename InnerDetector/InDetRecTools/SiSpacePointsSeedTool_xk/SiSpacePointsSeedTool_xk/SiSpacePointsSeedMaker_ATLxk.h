@@ -446,7 +446,7 @@ namespace InDet {
      * and data.endlist is not set (indicating the search is not finished). 
     **/ 
     void findNext(EventData& data) const;
-    bool isZCompatible(EventData& data, const float& Zv, const float& R, const float& T) const;
+    bool isZCompatible(EventData& data, const float Zv, const float R, const float T) const;
 
     /** This method popualtes the r array 
     * with the space point's coordinates 
