@@ -19,6 +19,8 @@
 #include "MuonReadoutGeometry/GenericRPCCache.h"
 #include "MuonReadoutGeometry/GenericTGCCache.h"
 #include "MuonReadoutGeometry/MuonStation.h"
+#include "MuonReadoutGeometry/MMReadoutElement.h"
+#include "MuonReadoutGeometry/sTgcReadoutElement.h"
 #include "StoreGate/StoreGateSvc.h"
 
 namespace MuonGM {
@@ -56,13 +58,38 @@ namespace MuonGM {
 
     MsgStream log(Athena::getMessageSvc(), "MuGM:MuonFactory");
 
-    if (!m_manager)
-      m_manager = new  MuonDetectorManager();
-
+    if (!m_manager)  m_manager = new  MuonDetectorManager();
 
     m_manager->setApplyCscIntAlignment(false);
     m_manager->setCscIlinesFlag(false);
     m_manager->setCscFromGM(true);
+
+
+
+    // Iterate using iterator in for loop
+    for (const auto& [key, pV] : mapFPV) {
+      int /*index1=key[3]-'0',*/ eta=key[5]-'0', ml=key[7]-'0', phi=key[12]-'0';
+      
+      char AC=key[13];
+      int ec = AC=='C' ? -1 : 1;
+      std::string vName = pV->getLogVol()->getName();
+      if (key.substr(0,3)=="sMD") {
+	std::string sName = vName.substr(4,4);
+	MuonGM::MMReadoutElement *re=new MuonGM::MMReadoutElement(pV, sName, ec*eta,phi,ml,m_manager,nullptr);
+	re->initDesign();
+	re->fillCache();
+	m_manager->addMMReadoutElement(re);
+      }
+      else if (key.substr(0,3)=="sTG") {
+	std::string sName = vName.substr(7,4);
+	sTgcReadoutElement* re = new sTgcReadoutElement(pV, sName, ec*eta, phi, ml, m_manager);
+	re->initDesign(-999., -999., -999., 3.2, -999., 2.7, -999., 2.6);
+	re->fillCache();
+	m_manager->addsTgcReadoutElement(re);
+      }
+    }
+
+
 
     // here create the MYSQL singleton
     MYSQL::LockedMYSQL mysql = MYSQL::GetPointer();

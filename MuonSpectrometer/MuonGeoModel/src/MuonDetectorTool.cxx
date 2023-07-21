@@ -171,10 +171,12 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
       if (m_fillCache_initTime) {
         mgr->fillCache();
       } else {
-        // cache for RPC / TGC / CSC must be filled once forever
-        mgr->fillRpcCache();
-        mgr->fillTgcCache();
-        mgr->fillCscCache();
+	// cache for RPC / TGC / CSC must be filled once forever
+	mgr->fillRpcCache();
+	mgr->fillTgcCache();
+	mgr->fillCscCache();
+	mgr->fillMMCache();
+	mgr->fillsTgcCache();
       }
     
       return StatusCode::SUCCESS;
