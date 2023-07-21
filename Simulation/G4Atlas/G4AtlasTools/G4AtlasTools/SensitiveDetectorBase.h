@@ -72,7 +72,7 @@ class SensitiveDetectorBase : public extends<AthAlgTool, ISensitiveDetector>
   /** This method supports wild card matching */
   StatusCode assignSD(G4VSensitiveDetector* sd,
                       const std::vector<std::string>& volumes) const;
-
+  
   /// @brief Retrieve the current SD.
   /** In AthenaMT, this means the thread-local SD.
       Otherwise, it is simply the single SD. */
@@ -94,6 +94,11 @@ class SensitiveDetectorBase : public extends<AthAlgTool, ISensitiveDetector>
   /// @brief Set the current SD.
   /** In hive, this gets assigned as the thread-local SD. */
   void setSD(G4VSensitiveDetector*);
+  
+  /// @brief Match two strings with wildcard support
+  /** Compares two strings character by character 
+      with optional * wildcard in the first argument*/
+  static bool matchStrings(const char *first, const char * second);
 
 #ifdef G4MULTITHREADED
   /// Thread-to-SD concurrent map type
