@@ -67,8 +67,13 @@ namespace xAODMaker {
          bool exists = false;
          for( const xAOD::TruthMetaData* existing : *m_truthMeta ) {
             if( existing->mcChannelNumber() == meta->mcChannelNumber() ){
-               exists = true;
-               break;
+               const std::string generators{"generators"};
+               if (!existing->isAvailable<std::string>(generators) ||
+                   !meta->isAvailable<std::string>(generators) ||
+                   existing->generators() == meta->generators() ) {
+                     exists = true;
+                     break;
+               }
             }
          }
          if( exists ) {
