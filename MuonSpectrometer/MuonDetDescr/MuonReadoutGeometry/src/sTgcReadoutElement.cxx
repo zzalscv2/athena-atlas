@@ -39,6 +39,13 @@
 #include "TrkSurfaces/RotatedTrapezoidBounds.h"
 #include "TrkSurfaces/TrapezoidBounds.h"
 
+#include "GaudiKernel/ISvcLocator.h"
+#include "AthenaBaseComps/AthCheckMacros.h"
+#include "RDBAccessSvc/IRDBAccessSvc.h"
+#include "RDBAccessSvc/IRDBRecord.h"
+#include "RDBAccessSvc/IRDBRecordset.h"
+#include "GeoModelInterfaces/IGeoDbTagSvc.h"
+
 namespace MuonGM {
 
     //============================================================================
@@ -56,9 +63,8 @@ namespace MuonGM {
         setChamberLayer(mL);
         setIdentifier(id); // representative identifier, with stName, stEta, stPhi, mL 
 
-        sTGCDetectorHelper sTGC_helper;
-
 #ifndef NDEBUG
+        sTGCDetectorHelper sTGC_helper;
         std::string sTGCname = std::string("sTG1-") + stName;
         MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
         if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "sTGCname: " << sTGCname << endmsg;
@@ -114,119 +120,381 @@ namespace MuonGM {
     sTgcReadoutElement::~sTgcReadoutElement() { clearCache(); }
 
     //============================================================================
-    void sTgcReadoutElement::initDesign(double /*largeX*/, double /*smallX*/, double /*lengthY*/, double /*stripPitch*/,
-                                        double /*wirePitch*/, double /*stripWidth*/, double /*wireWidth*/, double thickness) {
-                                        
-        char sector_l  = getStationName().substr(2, 1) == "L" ? 'L' : 'S';
-        int  stEta     = std::abs(getStationEta());
-        int  Etasign   = getStationEta() / stEta;
-        std::string side = (Etasign > 0) ? "A" : "C";
-        m_diamondShape = (sector_l == 'L' && stEta == 3) ? true : false;
-        
-#ifndef NDEBUG
-        MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
-        if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "station name" << getStationName() << endmsg;
-#endif
+  void sTgcReadoutElement::initDesign(double /*largeX*/, double /*smallX*/, double /*lengthY*/, double /*stripPitch*/,
+				      double /*wirePitch*/, double /*stripWidth*/, double /*wireWidth*/, double thickness) {
+    
+    
+    MsgStream log(Athena::getMessageSvc(), "sTGCReadoutElement");
+    ISvcLocator* svcLocator = Gaudi::svcLocator(); // from Bootstrap
+    IGeoDbTagSvc* geoDbTag{nullptr};
+    StatusCode sc = svcLocator->service("GeoDbTagSvc",geoDbTag);
+    if (sc.isFailure()) log << MSG::FATAL << "Could not locate GeoDbTagSvc" << endmsg;
+    GeoModelIO::ReadGeoModel* sqliteReader = geoDbTag->getSqliteReader();
+    if (sqliteReader) {
+      IRDBAccessSvc *accessSvc{nullptr};
+      StatusCode sc=svcLocator->service(geoDbTag->getParamSvcName(),accessSvc);
+      if (sc.isFailure()) log << MSG::FATAL << "Could not locate " << geoDbTag->getParamSvcName() << endmsg;
+      IRDBRecordset_ptr nswdimRec = accessSvc->getRecordsetPtr("NSWDIM","","");
+      IRDBRecordset_ptr wstgcRec  = accessSvc->getRecordsetPtr("WSTGC","","");
+      IRDBRecordset_ptr nswPars   = accessSvc->getRecordsetPtr("NSWPARS","","");
 
-        sTGCDetectorHelper aHelper;
-        sTGCDetectorDescription* stgc = aHelper.Get_sTGCDetector(sector_l, stEta, getStationPhi(), m_ml, side.back());
-   
-#ifndef NDEBUG
-        log << MSG::DEBUG << "Found sTGC Detector " << stgc->GetName() << endmsg;
-#endif
+      PVConstLink parent = getMaterialGeom()->getParent();
+      unsigned int index=parent->indexOf(getMaterialGeom());
+      std::string pVName=parent->getNameOfChildVol(index);
+      float yCutoutCathode(0);
+      if (nswPars->size()==0) {
+	throw std::runtime_error("Error, cannot access NSWPARS record!");
+      }
+      else {
+	yCutoutCathode=(*nswPars)[0]->getFloat("NSW_sTGC_yCutoutCathode");
+      }
 
-        auto tech = stgc->GetTechnology();
-        if (!tech)
-            throw std::runtime_error(
-                Form("File: %s, Line: %d\nsTgcReadoutElement::initDesign() - Failed To get Technology for stgc element: %s", __FILE__,  __LINE__, stgc->GetName().c_str()));
+      for (unsigned int ind = 0; ind < wstgcRec->size(); ind++) {
+	std::string WSTGC_TYPE       = (*wstgcRec)[ind]->getString("WSTGC_TYPE");               
+	
+	if (getStationName()[2] != WSTGC_TYPE[6])            continue;
+	if (abs(getStationEta())!=(int) (WSTGC_TYPE[7]-'0')) continue;
+	if (m_ml != (int) (pVName[7]-'0'))                   continue;
+	const IRDBRecord *nswdim{nullptr};
+	for (size_t w=0;w<nswdimRec->size();w++) {
+	  nswdim = (*nswdimRec)[w];
+	  break;
+	}
+	
+	m_sWidthChamber = nswdim->getDouble("BASE_WIDTH");;         // bottom base length (full chamber)
+	m_lWidthChamber = nswdim->getDouble("TOP_WIDTH");           // top base length (full chamber)
+	m_lengthChamber = nswdim->getDouble("LENGTH");              // height of the trapezoid (full chamber)
+	
+	double      gasTck                = (*wstgcRec)[ind]->getDouble("gasTck");                 
+	double      Tck                   = (*wstgcRec)[ind]->getDouble("Tck");                    
+	double      xFrame                = (*wstgcRec)[ind]->getDouble("xFrame");                 
+	double      ylFrame               = (*wstgcRec)[ind]->getDouble("ylFrame");                
+	double      ysFrame               = (*wstgcRec)[ind]->getDouble("ysFrame");                
+	double      wirePitch             = (*wstgcRec)[ind]->getDouble("wirePitch");              
+	double      stripWidth            = (*wstgcRec)[ind]->getDouble("stripWidth");             
+	double      sPadWidth             = (*wstgcRec)[ind]->getDouble("sPadWidth");              
+	double      lPadWidth             = (*wstgcRec)[ind]->getDouble("lPadWidth");              
+	double      anglePadPhi           = (*wstgcRec)[ind]->getDouble("anglePadPhi");            
+	double      sStripWidth           = (*wstgcRec)[ind]->getDouble("sStripWidth");            
+	double      lStripWidth           = (*wstgcRec)[ind]->getDouble("lStripWidth");            
+	int         wireGroupWidth        = (*wstgcRec)[ind]->getInt("wireGroupWidth");            
+	int         nStrips               = (*wstgcRec)[ind]->getInt("nStrips");                   
+	std::string padH                  = (*wstgcRec)[ind]->getString("padH");                   
+	std::string rankPadPhi            = (*wstgcRec)[ind]->getString("rankPadPhi");             
+	std::string nPadPhi               = (*wstgcRec)[ind]->getString("nPadPhi");                
+	std::string firstPadPhiDivision_C = (*wstgcRec)[ind]->getString("firstPadPhiDivision_C");  
+	std::string PadPhiShift_C         = (*wstgcRec)[ind]->getString("PadPhiShift_C");          
+	std::string firstPadPhiDivision_A = (*wstgcRec)[ind]->getString("firstPadPhiDivision_A");  
+	std::string PadPhiShift_A         = (*wstgcRec)[ind]->getString("PadPhiShift_A");          
+	std::string rankPadH              = (*wstgcRec)[ind]->getString("rankPadH");               
+	std::string nPadH                 = (*wstgcRec)[ind]->getString("nPadH");                  
+	std::string firstPadH             = (*wstgcRec)[ind]->getString("firstPadH");              
+	std::string firstPadRow           = (*wstgcRec)[ind]->getString("firstPadRow");            
+	std::string wireCutout            = (*wstgcRec)[ind]->getString("wireCutout");             
+	std::string nWires                = (*wstgcRec)[ind]->getString("nWires");                 
+	std::string firstWire             = (*wstgcRec)[ind]->getString("firstWire");              
+	std::string firstTriggerBand      = (*wstgcRec)[ind]->getString("firstTriggerBand");       
+	std::string nTriggerBands         = (*wstgcRec)[ind]->getString("nTriggerBands");          
+	std::string firstStripInTrigger   = (*wstgcRec)[ind]->getString("firstStripInTrigger");    
+	std::string firstStripWidth       = (*wstgcRec)[ind]->getString("firstStripWidth");        
+	std::string StripsInBandsLayer1   = (*wstgcRec)[ind]->getString("StripsInBandsLayer1");    
+	std::string StripsInBandsLayer2   = (*wstgcRec)[ind]->getString("StripsInBandsLayer2");    
+	std::string StripsInBandsLayer3   = (*wstgcRec)[ind]->getString("StripsInBandsLayer3");    
+	std::string StripsInBandsLayer4   = (*wstgcRec)[ind]->getString("StripsInBandsLayer4");    
+	std::string nWireGroups           = (*wstgcRec)[ind]->getString("nWireGroups");            
+	std::string firstWireGroup        = (*wstgcRec)[ind]->getString("firstWireGroup");         
+	
+	for (std::string * s : {
+   	      &padH                 ,
+	      &rankPadPhi           ,
+	      &nPadPhi              ,
+	      &firstPadPhiDivision_C,
+	      &PadPhiShift_C        ,
+	      &firstPadPhiDivision_A,
+	      &PadPhiShift_A        ,
+	      &rankPadH             ,
+	      &nPadH                ,
+	      &firstPadH            ,
+	      &firstPadRow          ,
+	      &wireCutout           ,
+	      &nWires               ,
+	      &firstWire            ,
+	      &firstTriggerBand     ,
+	      &nTriggerBands        ,
+	      &firstStripInTrigger  ,
+	      &firstStripWidth      ,
+	      &StripsInBandsLayer1  ,
+	      &StripsInBandsLayer2  ,
+	      &StripsInBandsLayer3  ,
+	      &StripsInBandsLayer4  ,
+	      &nWireGroups          ,
+	      &firstWireGroup       
+		}) {
+	  std::replace(s->begin(),s->end(),';',' ');
+	}
 
-        m_phiDesign = std::vector<MuonChannelDesign>(m_nlayers);
-        m_etaDesign = std::vector<MuonChannelDesign>(m_nlayers);
-        m_padDesign = std::vector<MuonPadDesign>(m_nlayers);
+	
+	char sector_l  = getStationName().substr(2, 1) == "L" ? 'L' : 'S';
+	int  stEta     = std::abs(getStationEta());
+	int  Etasign   = getStationEta() / stEta;
+	std::string side = (Etasign > 0) ? "A" : "C";
+	m_diamondShape = (sector_l == 'L' && stEta == 3) ? true : false;
+	
+	m_phiDesign = std::vector<MuonChannelDesign>(m_nlayers);
+	m_etaDesign = std::vector<MuonChannelDesign>(m_nlayers);
+	m_padDesign = std::vector<MuonPadDesign>(m_nlayers);
+	
+	// Get frame widths
+	m_tckChamber    = Tck;            // thickness (full chamber)
 
-        // Get Chamber length, width and frame widths
-        m_sWidthChamber = stgc->sWidth();         // bottom base length (full chamber)
-        m_lWidthChamber = stgc->lWidth();         // top base length (full chamber)
-        m_lengthChamber = stgc->Length();         // height of the trapezoid (full chamber)
-        m_tckChamber    = stgc->Tck();            // thickness (full chamber)
-        double ysFrame  = stgc->ysFrame();        // Frame thickness on short parallel edge
-        double ylFrame  = stgc->ylFrame();        // Frame thickness on long parallel edge
-        double xFrame   = stgc->xFrame();         // Frame thickness of non parallel edges
-        double yCutout  = stgc->yCutoutCathode(); // y of cutout of trapezoid (only in outermost detectors)
-        sTGCReadoutParameters roParam = stgc->GetReadoutParameters();
+	double yCutout  = getStationName().substr(3,0)=="QL3" ? yCutoutCathode: 0.0; // y of cutout of trapezoid (only in outermost detectors)
 
-        // For strips:
-        m_halfX        = std::vector<double>(m_nlayers);
-        m_minHalfY     = std::vector<double>(m_nlayers);
-        m_maxHalfY     = std::vector<double>(m_nlayers);
-        // For pads and wires:
-        m_PadhalfX     = std::vector<double>(m_nlayers);
-        m_PadminHalfY  = std::vector<double>(m_nlayers);
-        m_PadmaxHalfY  = std::vector<double>(m_nlayers);
-
-        // Radial shift of the local frame origin w.r.t. the center of the quadruplet.
-        // For diamond shape (QL3) the origin is on the cutout base. For the rest, the it is at the center 
-        // of the active area, therefore the shift is half the difference of the top and bottom frame widths.
-        m_offset = (m_diamondShape) ? 0.5*m_lengthChamber - (yCutout + ylFrame) : -0.5*(ylFrame - ysFrame); 
-
-        //-------------------
-        // Strips
-        //-------------------
-
-        for (int il = 0; il < m_nlayers; il++) {
-            // identifier of the first channel - strip plane - to retrieve max number of strips
-            /*Identifier id = manager()->stgcIdHelper()->channelID(getStationName(),getStationEta(),getStationPhi(),m_ml, il+1, 1, 1);
-            int chMax =  manager()->stgcIdHelper()->channelMax(id);
-            if (chMax<0) chMax = 350;*/
-
-            m_etaDesign[il].type        = MuonChannelDesign::ChannelType::etaStrip;
-            m_etaDesign[il].detType     = MuonChannelDesign::DetType::STGC;
-            if (yCutout == 0.)
-                m_etaDesign[il].defineTrapezoid(0.5 * roParam.sStripWidth, 0.5 * roParam.lStripWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame));
-            else 
-                m_etaDesign[il].defineDiamond(0.5 * roParam.sStripWidth, 0.5 * roParam.lStripWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame), yCutout);
-
-            m_etaDesign[il].inputPitch  = stgc->stripPitch();
-            m_etaDesign[il].inputWidth  = stgc->stripWidth();
-            m_etaDesign[il].thickness   = tech->gasThickness;
-            m_etaDesign[il].firstPitch  = roParam.firstStripWidth[il];
-            m_etaDesign[il].setFirstPos((m_diamondShape) ? -(m_etaDesign[il].xSize()- yCutout) + m_etaDesign[il].firstPitch
-                                                           : -0.5 * m_etaDesign[il].xSize()+ m_etaDesign[il].firstPitch);
-            m_etaDesign[il].nch         = roParam.nStrips;
-
-            m_nStrips.push_back(m_etaDesign[il].nch);
-            
-            m_halfX[il]    = 0.5*m_etaDesign[il].xSize();
-            m_minHalfY[il] = 0.5*roParam.sStripWidth;
-            m_maxHalfY[il] = 0.5*roParam.lStripWidth;
-
-#ifndef NDEBUG
-            if (log.level() <= MSG::DEBUG)
-                log << MSG::DEBUG << "initDesign:" << getStationName() << " layer " << il << ", strip pitch " << m_etaDesign[il].inputPitch
-                    << ", nstrips " << m_etaDesign[il].nch << ", firstPos: " << m_etaDesign[il].firstPos() << endmsg;
-#endif
+	// For strips:
+	m_halfX        = std::vector<double>(m_nlayers);
+	m_minHalfY     = std::vector<double>(m_nlayers);
+	m_maxHalfY     = std::vector<double>(m_nlayers);
+	// For pads and wires:
+	m_PadhalfX     = std::vector<double>(m_nlayers);
+	m_PadminHalfY  = std::vector<double>(m_nlayers);
+	m_PadmaxHalfY  = std::vector<double>(m_nlayers);
+	
+	// Radial shift of the local frame origin w.r.t. the center of the quadruplet.
+	// For diamond shape (QL3) the origin is on the cutout base. For the rest, the it is at the center 
+	// of the active area, therefore the shift is half the difference of the top and bottom frame widths.
+	m_offset = (m_diamondShape) ? 0.5*m_lengthChamber - (yCutout + ylFrame) : -0.5*(ylFrame - ysFrame); 
+	
+	//-------------------
+	// Strips
+	//-------------------
+	std::istringstream firstStripWidthStream(firstStripWidth);
+	for (int il = 0; il < m_nlayers; il++) {
+	  // identifier of the first channel - strip plane - to retrieve max number of strips
+	  /*Identifier id = manager()->stgcIdHelper()->channelID(getStationName(),getStationEta(),getStationPhi(),m_ml, il+1, 1, 1);
+	    int chMax =  manager()->stgcIdHelper()->channelMax(id);
+	    if (chMax<0) chMax = 350;*/
+	  
+	  m_etaDesign[il].type        = MuonChannelDesign::ChannelType::etaStrip;
+	  m_etaDesign[il].detType     = MuonChannelDesign::DetType::STGC;
+	  if (yCutout == 0.)
+	    m_etaDesign[il].defineTrapezoid(0.5 * sStripWidth, 0.5 * lStripWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame));
+	  else 
+	    m_etaDesign[il].defineDiamond(0.5 * sStripWidth, 0.5 * lStripWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame), yCutout);
+	  
+	  m_etaDesign[il].inputPitch  = stripWidth;
+	  m_etaDesign[il].inputWidth  = stripWidth;
+	  m_etaDesign[il].thickness   = gasTck;
+	  firstStripWidthStream >> m_etaDesign[il].firstPitch;
+	  m_etaDesign[il].setFirstPos((m_diamondShape) ? -(m_etaDesign[il].xSize()- yCutout) + m_etaDesign[il].firstPitch
+				      : -0.5 * m_etaDesign[il].xSize()+ m_etaDesign[il].firstPitch);
+	  m_etaDesign[il].nch         = nStrips;
+	  
+	  m_nStrips.push_back(m_etaDesign[il].nch);
+          
+	  m_halfX[il]    = 0.5*m_etaDesign[il].xSize();
+	  m_minHalfY[il] = 0.5*sStripWidth;
+	  m_maxHalfY[il] = 0.5*lStripWidth;
+	  
+	}
+	
+	//-------------------
+	// Wires
+	//-------------------
+	std::istringstream firstWireStream      (firstWire);
+	std::istringstream firstWireGroupStream (firstWireGroup);
+	std::istringstream nWireGroupsStream    (nWireGroups);
+	std::istringstream wireCutoutStream     (wireCutout);
+	std::istringstream nWiresStream         (nWires);
+	
+	for (int il = 0; il < m_nlayers; il++) {
+	  m_phiDesign[il].type        = MuonChannelDesign::ChannelType::phiStrip;
+	  m_phiDesign[il].detType     = MuonChannelDesign::DetType::STGC;
+	  if (yCutout == 0.)
+	    m_phiDesign[il].defineTrapezoid(0.5 * sPadWidth, 0.5 * lPadWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame) );
+	  else 
+	    m_phiDesign[il].defineDiamond(0.5 * sPadWidth, 0.5 * lPadWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame), yCutout);
+	  m_phiDesign[il].inputPitch  = wirePitch;
+	  m_phiDesign[il].inputWidth  = 0.015;
+	  m_phiDesign[il].thickness   = m_tckChamber;
+	  {int fw; firstWireStream >> fw; m_phiDesign[il].setFirstPos(fw);}       // Position of 1st wire, accounts for staggering
+	  firstWireGroupStream >> m_phiDesign[il].firstPitch;                     // Number of Wires in 1st group, group staggering
+	  m_phiDesign[il].groupWidth  = wireGroupWidth;                           // Number of Wires normal group
+	  nWireGroupsStream >> m_phiDesign[il].nGroups;                           // Number of Wire Groups
+	  wireCutoutStream >> m_phiDesign[il].wireCutout;                         // Size of "active" wire region for digits
+	  nWiresStream >> m_phiDesign[il].nch;
+	  
+	  m_nWires.push_back(m_phiDesign[il].nGroups);                            // number of nWireGroups
+	  
         }
+	
+        //-------------------
+        // Pads
+        //-------------------
+	std::istringstream nPadPhiStream(nPadPhi);
+	std::istringstream firstPadPhiDivision_AStream(firstPadPhiDivision_A);
+	std::istringstream padPhiShift_AStream(PadPhiShift_A);
+	std::istringstream firstPadRowStream(firstPadRow);
+	std::istringstream nPadHStream(nPadH);
+	std::istringstream firstPadHStream(firstPadH);
+	std::istringstream padHStream(padH);
 
-        //-------------------
-        // Wires
-        //-------------------
-            
+        double radius = absTransform().translation().perp() + m_offset;
         for (int il = 0; il < m_nlayers; il++) {
-            m_phiDesign[il].type        = MuonChannelDesign::ChannelType::phiStrip;
-            m_phiDesign[il].detType     = MuonChannelDesign::DetType::STGC;
-            if (yCutout == 0.)
-                m_phiDesign[il].defineTrapezoid(0.5 * roParam.sPadWidth, 0.5 * roParam.lPadWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame) );
-            else 
-                m_phiDesign[il].defineDiamond(0.5 * roParam.sPadWidth, 0.5 * roParam.lPadWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame), yCutout);
-            m_phiDesign[il].inputPitch  = stgc->wirePitch();
-            m_phiDesign[il].inputWidth  = 0.015;
-            m_phiDesign[il].thickness   = m_tckChamber;
-            m_phiDesign[il].setFirstPos(roParam.firstWire[il]);      // Position of 1st wire, accounts for staggering
-            m_phiDesign[il].firstPitch  = roParam.firstWireGroup[il]; // Number of Wires in 1st group, group staggering
-            m_phiDesign[il].groupWidth  = roParam.wireGroupWidth;     // Number of Wires normal group
-            m_phiDesign[il].nGroups     = roParam.nWireGroups[il];    // Number of Wire Groups
-            m_phiDesign[il].wireCutout  = roParam.wireCutout[il];     // Size of "active" wire region for digits
-            m_phiDesign[il].nch         = roParam.nWires[il];
+	  m_padDesign[il].Length  = m_lengthChamber;
+	  m_padDesign[il].sWidth  = m_sWidthChamber;
+	  m_padDesign[il].lWidth  = m_lWidthChamber;
+	  m_padDesign[il].Size    = m_lengthChamber - ylFrame - ysFrame;
+	  m_padDesign[il].xFrame  = xFrame;
+	  m_padDesign[il].ysFrame = ysFrame;
+	  m_padDesign[il].ylFrame = ylFrame;
+	  m_padDesign[il].yCutout = yCutout;
+	  m_padDesign[il].etasign = Etasign;
+	  m_padDesign[il].setR(radius);
+	  m_padDesign[il].sPadWidth = sPadWidth;
+	  m_padDesign[il].lPadWidth = lPadWidth;
+	  nPadPhiStream >>m_padDesign[il].nPadColumns;
+	  
+	  m_PadhalfX[il]    = 0.5*m_padDesign[il].Size;
+	  m_PadminHalfY[il] = 0.5*sPadWidth;
+	  m_PadmaxHalfY[il] = 0.5*lPadWidth;
+	  
+	  // The C side of the NSW is mirrored instead of rotated
+	  // We should be using the same values for the pads for both A and C
+	  // It is easier for us to simply read the same correct value once
+	  // whereas changing the XML and the reading functions will make this incompatible with past versions
+	  // Alexandre Laurier 12 Sept 2018
+	  firstPadPhiDivision_AStream >> m_padDesign[il].firstPhiPos;
+	  m_padDesign[il].inputPhiPitch = anglePadPhi;                                            // stEta<2 ?  PAD_PHI_DIVISION/PAD_PHI_SUBDIVISION : PAD_PHI_DIVISION ;
+	  padPhiShift_AStream >> m_padDesign[il].PadPhiShift;
+	  firstPadRowStream >> m_padDesign[il].padEtaMin;                                         // FIRST_PAD_ROW_DIVISION[2*sector+(m_ml-1)][stEta-1][il];
+	  nPadHStream >> m_padDesign[il].nPadH;
+	  m_padDesign[il].padEtaMax     = m_padDesign[il].padEtaMin + m_padDesign[il].nPadH;      // PAD_ROWS[2*sector+(m_ml-1)][stEta-1][il];
+	  firstPadHStream >> m_padDesign[il].firstRowPos;                                         // H_PAD_ROW_0[2*sector+(m_ml-1)][il];
+	  padHStream >> m_padDesign[il].inputRowPitch;                                            // PAD_HEIGHT[2*sector+(m_ml-1)][il];
+	  
+	  if (sector_l == 'L') {
+	    m_padDesign[il].isLargeSector = 1;
+	    m_padDesign[il].sectorOpeningAngle = m_padDesign[il].largeSectorOpeningAngle;
+	  } else {
+	    m_padDesign[il].isLargeSector = 0;
+	    m_padDesign[il].sectorOpeningAngle = m_padDesign[il].smallSectorOpeningAngle;
+	  }
+	  
+	  m_padDesign[il].thickness = thickness;
+        }      
+      }
+    }
+    // AGDD STYLE STARTS HERE:
+    else {
+	char sector_l  = getStationName().substr(2, 1) == "L" ? 'L' : 'S';
+	int  stEta     = std::abs(getStationEta());
+	int  Etasign   = getStationEta() / stEta;
+	std::string side = (Etasign > 0) ? "A" : "C";
+	m_diamondShape = (sector_l == 'L' && stEta == 3) ? true : false;
+	
+#ifndef NDEBUG
+	 MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
+	 if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "station name" << getStationName() << endmsg;
+#endif
+	 
+	 sTGCDetectorHelper aHelper;
+	 sTGCDetectorDescription* stgc = aHelper.Get_sTGCDetector(sector_l, stEta, getStationPhi(), m_ml, side.back());
+	 
+#ifndef NDEBUG
+	 log << MSG::DEBUG << "Found sTGC Detector " << stgc->GetName() << endmsg;
+#endif
+	 
+	 auto tech = stgc->GetTechnology();
+	 if (!tech)
+	   throw std::runtime_error(
+				    Form("File: %s, Line: %d\nsTgcReadoutElement::initDesign() - Failed To get Technology for stgc element: %s", __FILE__,  __LINE__, stgc->GetName().c_str()));
+	 
+	 m_phiDesign = std::vector<MuonChannelDesign>(m_nlayers);
+	 m_etaDesign = std::vector<MuonChannelDesign>(m_nlayers);
+	 m_padDesign = std::vector<MuonPadDesign>(m_nlayers);
+	 
+	 // Get Chamber length, width and frame widths
+	 m_sWidthChamber = stgc->sWidth();         // bottom base length (full chamber)
+	 m_lWidthChamber = stgc->lWidth();         // top base length (full chamber)
+	 m_lengthChamber = stgc->Length();         // height of the trapezoid (full chamber)
+	 m_tckChamber    = stgc->Tck();            // thickness (full chamber)
+	 double ysFrame  = stgc->ysFrame();        // Frame thickness on short parallel edge
+	 double ylFrame  = stgc->ylFrame();        // Frame thickness on long parallel edge
+	 double xFrame   = stgc->xFrame();         // Frame thickness of non parallel edges
+	 double yCutout  = stgc->yCutoutCathode(); // y of cutout of trapezoid (only in outermost detectors)
+	 sTGCReadoutParameters roParam = stgc->GetReadoutParameters();
+	 
+	 // For strips:
+	 m_halfX        = std::vector<double>(m_nlayers);
+	 m_minHalfY     = std::vector<double>(m_nlayers);
+	 m_maxHalfY     = std::vector<double>(m_nlayers);
+	 // For pads and wires:
+	 m_PadhalfX     = std::vector<double>(m_nlayers);
+	 m_PadminHalfY  = std::vector<double>(m_nlayers);
+	 m_PadmaxHalfY  = std::vector<double>(m_nlayers);
+	 
+	 // Radial shift of the local frame origin w.r.t. the center of the quadruplet.
+	 // For diamond shape (QL3) the origin is on the cutout base. For the rest, the it is at the center 
+	 // of the active area, therefore the shift is half the difference of the top and bottom frame widths.
+	 m_offset = (m_diamondShape) ? 0.5*m_lengthChamber - (yCutout + ylFrame) : -0.5*(ylFrame - ysFrame); 
+	 
+	 //-------------------
+	 // Strips
+	 //-------------------
+	 
+	 for (int il = 0; il < m_nlayers; il++) {
+	   // identifier of the first channel - strip plane - to retrieve max number of strips
+	   /*Identifier id = manager()->stgcIdHelper()->channelID(getStationName(),getStationEta(),getStationPhi(),m_ml, il+1, 1, 1);
+	     int chMax =  manager()->stgcIdHelper()->channelMax(id);
+	     if (chMax<0) chMax = 350;*/
+	   
+	   m_etaDesign[il].type        = MuonChannelDesign::ChannelType::etaStrip;
+	   m_etaDesign[il].detType     = MuonChannelDesign::DetType::STGC;
+	   if (yCutout == 0.)
+	     m_etaDesign[il].defineTrapezoid(0.5 * roParam.sStripWidth, 0.5 * roParam.lStripWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame));
+	   else 
+	     m_etaDesign[il].defineDiamond(0.5 * roParam.sStripWidth, 0.5 * roParam.lStripWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame), yCutout);
+	   
+	   m_etaDesign[il].inputPitch  = stgc->stripPitch();
+	   m_etaDesign[il].inputWidth  = stgc->stripWidth();
+	   m_etaDesign[il].thickness   = tech->gasThickness;
+	   m_etaDesign[il].firstPitch  = roParam.firstStripWidth[il];
+	   m_etaDesign[il].setFirstPos((m_diamondShape) ? -(m_etaDesign[il].xSize()- yCutout) + m_etaDesign[il].firstPitch
+				       : -0.5 * m_etaDesign[il].xSize()+ m_etaDesign[il].firstPitch);
+	   m_etaDesign[il].nch         = roParam.nStrips;
+	   
+	   m_nStrips.push_back(m_etaDesign[il].nch);
+           
+	   m_halfX[il]    = 0.5*m_etaDesign[il].xSize();
+	   m_minHalfY[il] = 0.5*roParam.sStripWidth;
+	   m_maxHalfY[il] = 0.5*roParam.lStripWidth;
+	   
+#ifndef NDEBUG
+	   if (log.level() <= MSG::DEBUG)
+	     log << MSG::DEBUG << "initDesign:" << getStationName() << " layer " << il << ", strip pitch " << m_etaDesign[il].inputPitch
+		 << ", nstrips " << m_etaDesign[il].nch << ", firstPos: " << m_etaDesign[il].firstPos() << endmsg;
+#endif
+	 }
+	 
+	 //-------------------
+	 // Wires
+	 //-------------------
+	 
+	 for (int il = 0; il < m_nlayers; il++) {
+	   m_phiDesign[il].type        = MuonChannelDesign::ChannelType::phiStrip;
+	   m_phiDesign[il].detType     = MuonChannelDesign::DetType::STGC;
+	   if (yCutout == 0.)
+	     m_phiDesign[il].defineTrapezoid(0.5 * roParam.sPadWidth, 0.5 * roParam.lPadWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame) );
+	   else 
+	     m_phiDesign[il].defineDiamond(0.5 * roParam.sPadWidth, 0.5 * roParam.lPadWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame), yCutout);
+	   m_phiDesign[il].inputPitch  = stgc->wirePitch();
+	   m_phiDesign[il].inputWidth  = 0.015;
+	   m_phiDesign[il].thickness   = m_tckChamber;
+	   m_phiDesign[il].setFirstPos(roParam.firstWire[il]);      // Position of 1st wire, accounts for staggering
+	   m_phiDesign[il].firstPitch  = roParam.firstWireGroup[il]; // Number of Wires in 1st group, group staggering
+	   m_phiDesign[il].groupWidth  = roParam.wireGroupWidth;     // Number of Wires normal group
+	   m_phiDesign[il].nGroups     = roParam.nWireGroups[il];    // Number of Wire Groups
+	   m_phiDesign[il].wireCutout  = roParam.wireCutout[il];     // Size of "active" wire region for digits
+	   m_phiDesign[il].nch         = roParam.nWires[il];
 
             m_nWires.push_back(m_phiDesign[il].nGroups);  // number of nWireGroups
 
@@ -298,8 +566,8 @@ namespace MuonGM {
                     << " yCutout: " << m_padDesign[il].yCutout << endmsg;
 #endif
         }       
+      }
     }
-
 
     //============================================================================
     void sTgcReadoutElement::fillCache() {
