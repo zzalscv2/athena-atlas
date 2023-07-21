@@ -68,12 +68,14 @@ void InDet::SiTrajectoryElement_xk::setDeadRadLength(Trk::PatternTrackParameters
 {
   if(m_radlength >= 0.) return;
   double z = std::abs(Tp.parameters()[1]);
-  if     (z <  250.) m_radlength = .004;
-  else if(z <  500.) m_radlength = .018+(z- 250.)*.000048;
-  else if(z < 1000.) m_radlength = .030+(z- 500.)*.000040;
-  else if(z < 1500.) m_radlength = .050+(z-1000.)*.000020;
-  else if(z < 3000.) m_radlength = .060+(z-1500.)*.0000067;
-  else               m_radlength = .07;
+  if     (z <  50.)   m_radlength = .0075;
+  else if(z <  205.)  m_radlength = .02;
+  else if(z <  360.)  m_radlength = .03+(z-205.)*0.000129032;
+  else if(z <  570.)  m_radlength = .035+(z-360.)*9.04762e-05;
+  else if(z <  1500.) m_radlength = .054+(z-570.)*1.82796e-05;
+  else if(z <  2400.) m_radlength = .071+(z-1500.)*7.14286e-06;
+  else                m_radlength = .078;
+
 }
 
 
