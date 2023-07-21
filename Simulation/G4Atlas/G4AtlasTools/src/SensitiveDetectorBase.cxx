@@ -88,8 +88,7 @@ assignSD(G4VSensitiveDetector* sd, const std::vector<std::string>& volumes) cons
 
       // Find volumes with this name
       for(auto* logVol : *logicalVolumeStore) {
-        //if( matchStrings( volumeName.data(), logVol->GetName() ) )
-        if(logVol->GetName() == volumeName.c_str()) {
+        if( matchStrings( volumeName.data(), logVol->GetName() ) ){
           ++numFound;
           SetSensitiveDetector(logVol, sd);
         }
@@ -141,6 +140,35 @@ void SensitiveDetectorBase::setSD(G4VSensitiveDetector* sd)
 #else
   m_SD = sd;
 #endif
+}
+
+//This function was adapted from the example found at
+//https://www.geeksforgeeks.org/wildcard-character-matching/
+bool SensitiveDetectorBase::matchStrings(const char *first, const char *second)
+{
+  // If we reach at the end of both strings, we are done
+  if (*first == '\0' && *second == '\0')
+    return true;
+
+  // If there are consecutive '*' present in the first string
+  // advance to the next character
+  if(*first == '*' && *(first + 1) == '*')
+    return matchStrings(first + 1, second);
+
+  // Make sure that the characters after '*' are present in second string.
+  if (*first == '*' && *(first + 1) != '\0' && *second == '\0')
+    return false;
+
+  // If the current characters of both strings match
+  if (*first == *second)
+    return matchStrings(first + 1, second + 1);
+
+  // If there is *, then there are two possibilities
+  // a) We consider current character of second string
+  // b) We ignore current character of second string.
+  if (*first == '*')
+    return matchStrings(first + 1, second) || matchStrings(first, second + 1);
+  return false;
 }
 
 void SensitiveDetectorBase::
