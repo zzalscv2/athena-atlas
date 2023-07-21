@@ -4,7 +4,7 @@
 atlas_subdir( TileRecAlgs )
 
 # External dependencies:
-find_package( Boost COMPONENTS thread system )
+find_package( Boost COMPONENTS thread )
 find_package( CLHEP )
 
 # Component(s) in the package:

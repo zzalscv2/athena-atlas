@@ -4,7 +4,7 @@
 atlas_subdir( TileTBRec )
 
 # External dependencies:
-find_package( Boost COMPONENTS thread system )
+find_package( Boost COMPONENTS thread )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 find_package( tdaq-common )
 

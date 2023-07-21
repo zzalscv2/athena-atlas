@@ -4,15 +4,13 @@
 atlas_subdir( Navigation )
 
 # External dependencies:
-find_package( Boost )
 find_package( UUID )
 
 # Component(s) in the package:
 atlas_add_library( Navigation Navigation/*.h Navigation/*.icc src/*.cxx
    PUBLIC_HEADERS Navigation
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    PRIVATE_INCLUDE_DIRS ${UUID_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} AthAllocators AthLinks AthenaKernel
+   LINK_LIBRARIES AthAllocators AthLinks AthenaKernel
    PRIVATE_LINK_LIBRARIES ${UUID_LIBRARIES} GaudiKernel )
 
 atlas_add_dictionary( NavigationDict

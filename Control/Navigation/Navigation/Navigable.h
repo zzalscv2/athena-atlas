@@ -72,7 +72,6 @@
 #include <map>
 #include <utility>  // pair
 
-// boost include (pointer arbitration)
 #include <any>
 
 // i/o

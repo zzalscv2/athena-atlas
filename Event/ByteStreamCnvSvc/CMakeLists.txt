@@ -4,7 +4,7 @@
 atlas_subdir( ByteStreamCnvSvc )
 
 # External dependencies:
-find_package( Boost COMPONENTS system )
+find_package( Boost )
 find_package( CORAL COMPONENTS CoralBase )
 find_package( tdaq-common COMPONENTS eformat_old eformat_write RawFileName
    DataReader DataWriter )

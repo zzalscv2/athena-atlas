@@ -4,7 +4,7 @@
 atlas_subdir( ByteStreamCnvSvcLegacy )
 
 # External dependencies:
-find_package( Boost COMPONENTS system )
+find_package( Boost )
 find_package( UUID )
 find_package( tdaq-common COMPONENTS EventStorage eformat eformat_write ers 
    RawFileName )

@@ -6,7 +6,7 @@
 atlas_subdir( CoraCool )
 
 # External dependencies:
-find_package( Boost COMPONENTS  unit_test_framework thread system)
+find_package( Boost COMPONENTS  unit_test_framework thread)
 find_package( COOL COMPONENTS CoolKernel CoolApplication )
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )

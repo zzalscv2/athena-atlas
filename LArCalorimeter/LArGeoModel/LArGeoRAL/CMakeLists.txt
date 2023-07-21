@@ -4,7 +4,7 @@
 atlas_subdir( LArGeoRAL )
 
 # External dependencies:
-find_package( Boost COMPONENTS system )
+find_package( Boost )
 find_package( CLHEP )
 
 # Component(s) in the package:
