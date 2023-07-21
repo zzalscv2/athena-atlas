@@ -26,7 +26,7 @@ public:
 
   ///randomly select in which bunch the current t0 is wrto the beam intensity
   /// distribution. This should be done proportionally to the distribution...
-  virtual void selectT0() =0;
+  virtual void selectT0(unsigned int run, unsigned long long event) =0;
 
   ///return the bunch crossing selected to be the current t0 bunch crossing
   virtual unsigned int getCurrentT0BunchCrossing() const =0;

@@ -407,7 +407,7 @@ StatusCode PileUpEventLoopMgr::nextEvent(int maxevt)
 
     //ask the BeamIntensitySvc to choose (and remember)
     //in which xing this event will be wrto the beam int distribution
-    m_beamInt->selectT0();
+    m_beamInt->selectT0(ctx.eventID().run_number(), ctx.eventID().event_number());
 
     // Use the position in the beam intensity array to set a BCID-like quantity
     pOverEvent->setBCID( m_beamInt->getCurrentT0BunchCrossing() );

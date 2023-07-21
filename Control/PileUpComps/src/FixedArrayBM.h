@@ -36,7 +36,7 @@ public:
   //@{
   virtual float normFactor(int iXing) const override final;
   virtual float largestElementInPattern() const override final { return m_largestElementInPattern; }
-  virtual void selectT0() override final { }
+  virtual void selectT0(unsigned int /*run*/, unsigned long long /*event*/) override final { }
   virtual unsigned int getCurrentT0BunchCrossing() const override final { return m_t0Offset; }
   virtual unsigned int getBeamPatternLength() const override final { return m_ipLength; }
   //@}

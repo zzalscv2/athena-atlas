@@ -109,7 +109,7 @@ StatusCode StepArrayBM::initialize()
   return StatusCode::SUCCESS;
 }
 
-void StepArrayBM::selectT0()
+void StepArrayBM::selectT0(unsigned int /*run*/, unsigned long long /*event*/)
 {
   //move to the next xing as dictated by the signalPattern, for each incremember, shift the t0Offset
   do {

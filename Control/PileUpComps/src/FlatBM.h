@@ -26,7 +26,7 @@ public:
   //@{
   inline virtual float normFactor(int /*iXing*/) const override final { return 1.0; }
   inline virtual float largestElementInPattern() const override final { return 1.0; }
-  inline virtual void selectT0() override {}
+  inline virtual void selectT0(unsigned int /*run*/, unsigned long long /*event*/) override {}
   inline virtual unsigned int getCurrentT0BunchCrossing() const override final
   {
     //The first filled bunch crossing is always BCID 1

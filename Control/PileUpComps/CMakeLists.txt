@@ -16,4 +16,4 @@ atlas_add_component( PileUpComps
                      LINK_LIBRARIES 
                      ${CLHEP_LIBRARIES} AthenaBaseComps AthenaKernel
                      PileUpToolsLib StoreGateLib EventInfo
-                     EventInfoUtils xAODEventInfo GaudiKernel )
+                     EventInfoUtils xAODEventInfo GaudiKernel CxxUtils)

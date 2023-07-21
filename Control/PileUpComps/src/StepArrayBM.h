@@ -15,10 +15,12 @@
  * $Id: BkgStreamsStepCache.h,v 1.10 2008-08-28 01:11:06 calaf Exp $
  * @author Will Buttinger - ATLAS Collaboration
  */
+#include "GaudiKernel/ContextSpecificPtr.h"
 #include "Gaudi/Property.h"
 
 #include "PileUpTools/IBeamIntensity.h"
 #include "AthenaBaseComps/AthService.h"
+
 
 class StepArrayBM : public extends<AthService, IBeamIntensity>
 {
@@ -45,7 +47,7 @@ public:
     return m_largestElementInPattern*m_intensityPattern[ index ];
   }
   virtual float largestElementInPattern() const override final { return m_largestElementInPattern; }
-  virtual void selectT0() override final;
+  virtual void selectT0(unsigned int run, unsigned long long event) override final;
   virtual unsigned int getCurrentT0BunchCrossing() const override final { return m_t0Offset; }
   virtual unsigned int getBeamPatternLength() const override final { return m_ipLength; }
   //@}
@@ -53,14 +55,14 @@ private:
   /// max bunch crossings per orbit
   unsigned int m_maxBunchCrossingPerOrbit;
   /// offset of the t0 wrto our intensity pattern
-  unsigned int m_t0Offset;
+  Gaudi::Hive::ContextSpecificData<unsigned int> m_t0Offset;
   /// offset of the current xing wrto the signal pattern
-  unsigned int m_signalOffset;
+  Gaudi::Hive::ContextSpecificData<unsigned int> m_signalOffset;
   /// user-defined intensity pattern
   Gaudi::Property<std::vector<float>> m_intensityPatternProp;
   /// user-defined signal pattern - non zero numbers means "Do Signal"
   Gaudi::Property<std::vector<float>> m_signalPatternProp;
-  /// lenght of the intensity pattern
+  /// length of the intensity pattern
   unsigned int m_ipLength;
   /// length of the signal pattern
   unsigned int m_spLength;
