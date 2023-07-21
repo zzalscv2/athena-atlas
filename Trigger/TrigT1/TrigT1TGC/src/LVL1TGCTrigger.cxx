@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // STL
@@ -814,7 +814,7 @@ void LVL1TGCTrigger::recordRdoInner(TGCSector * sector,
     bool status = m_cabling->getSReadoutIDfromSLID(phi, isAside, isEndcap,
                                                    subDetectorId, rodId, sswId, sbLoc);
     if (!status) {
-      ATH_MSG_WARNING("TGCcablignSvc::ReadoutIDfromSLID fails in recordRdoInner()" );
+      ATH_MSG_WARNING("TGCcablingSvc::ReadoutIDfromSLID fails in recordRdoInner()" );
       return;
     }
 
@@ -823,12 +823,17 @@ void LVL1TGCTrigger::recordRdoInner(TGCSector * sector,
     //  0-15(EC), 0-7(FWD) for 1/3 sector covered by SROD in RUn3
     int startEndcapSector, coverageOfEndcapSector;
     int startForwardSector, coverageOfForwardSector;
-    m_cabling->getCoveragefromSRodID(rodId,
-                                     startEndcapSector,
-                                     coverageOfEndcapSector,
-                                     startForwardSector,
-                                     coverageOfForwardSector
-                                     ) ;
+    if (!m_cabling->getCoveragefromSRodID(rodId,
+                                          startEndcapSector,
+                                          coverageOfEndcapSector,
+                                          startForwardSector,
+                                          coverageOfForwardSector
+                                          ) )
+    {
+      ATH_MSG_WARNING("LVL1TGCTrigger::recordRdoInner --- bad rodId " << rodId );
+      return;
+    }
+
     int secId = 0;
     if (isEndcap){
       secId = sectorId % coverageOfEndcapSector;
