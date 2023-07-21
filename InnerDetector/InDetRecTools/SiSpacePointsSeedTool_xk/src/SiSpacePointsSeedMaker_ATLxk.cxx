@@ -1681,15 +1681,15 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::production3Sp
   ++iter_topCands[0];
 
   /// prepare cut values 
-  const float& ipt2K = data.ipt2K;
-  const float& ipt2C = data.ipt2C;
-  const float& COFK  = data.COFK;
-  const float& maxd0cut = m_maxdImpact;
-  const float& maxd0cutstrips = m_maxdImpactDecays;
-  const float& zmin  = data.zminU;
-  const float& zmax  = data.zmaxU;
-  const float& dzdrmax = data.dzdrmax;
-  const float& dzdrmin = data.dzdrmin;
+  const float ipt2K = data.ipt2K;
+  const float ipt2C = data.ipt2C;
+  const float COFK  = data.COFK;
+  const float maxd0cut = m_maxdImpact;
+  const float maxd0cutstrips = m_maxdImpactDecays;
+  const float zmin  = data.zminU;
+  const float zmax  = data.zmaxU;
+  const float dzdrmax = data.dzdrmax;
+  const float dzdrmin = data.dzdrmin;
   data.CmSp.clear();
 
   /// keep track of the SP storace capacity. 
@@ -2508,7 +2508,7 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::writeNtuple(const SiSpacePointsSeed* s
 }
 
 bool InDet::SiSpacePointsSeedMaker_ATLxk::isZCompatible  
-(EventData& data, const float& Zv, const float& R, const float& T) const
+(EventData& data, const float Zv, const float R, const float T) const
 {
   if (Zv < data.zminU or Zv > data.zmaxU) return false;
   if (not data.isvertex) return true;
