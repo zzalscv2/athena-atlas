@@ -19,8 +19,8 @@ def JfexInputMonitoringConfig(inputFlags):
     if inputFlags.Input.Format==Format.BS:
         
         #Decorator for the DataTowers
-        from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CaloFEXDecoratorCfg
-        result.merge(L1CaloFEXDecoratorCfg(inputFlags,"jFexTower2SCellDecorator",ExtraInfo = False))
+        from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CalojFEXDecoratorCfg
+        result.merge(L1CalojFEXDecoratorCfg(inputFlags,ExtraInfo = False))
         
         #jfex emulated input: EmulatedTowers
         from L1CaloFEXAlgos.FexEmulatedTowersConfig import jFexEmulatedTowersCfg

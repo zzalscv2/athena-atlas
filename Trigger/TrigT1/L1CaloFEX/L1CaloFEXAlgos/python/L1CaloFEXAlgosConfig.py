@@ -9,7 +9,7 @@ from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import gFexInputByteStreamToo
 from AthenaConfiguration.Enums import Format
 
 
-def L1CaloFEXDecoratorCfg(flags, name, jTowersReadKey = 'L1_jFexDataTowers', ExtraInfo = False, SCMasking = True):
+def L1CalojFEXDecoratorCfg(flags, name = "jFexTower2SCellDecorator", jTowersReadKey = 'L1_jFexDataTowers', ExtraInfo = False, SCMasking = True):
 
     acc=ComponentAccumulator()
     
@@ -215,7 +215,7 @@ if __name__ == '__main__':
     
     # Uses SCell to decorate the jTowers (with extra info)
     if 'jTowers' in args.outputs:
-        DecoratorAlgo = L1CaloFEXDecoratorCfg(flags,'jFexTower2SCellDecorator', ExtraInfo = True)   
+        DecoratorAlgo = L1CalojFEXDecoratorCfg(flags, ExtraInfo = True)   
         acc.merge(DecoratorAlgo)
 
     # Decorate eFEX RoIs
