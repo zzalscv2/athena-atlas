@@ -34,9 +34,9 @@ def CombinedTrackingPassFlagSets(flags):
         flags_set += [flagsLRT]
 
     # Photon conversion tracking reco
-    if flags.Detector.EnableCalo and flags.Tracking.doITkConversionFinding:
+    if flags.Detector.EnableCalo and flags.Tracking.doITkConversion:
         flagsConv = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                          "Tracking.ITkConversionFindingPass")
+                                          "Tracking.ITkConversionPass")
         flags_set += [flagsConv]
 
     # LowPt

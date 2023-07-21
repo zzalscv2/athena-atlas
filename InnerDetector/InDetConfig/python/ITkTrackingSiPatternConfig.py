@@ -61,7 +61,7 @@ def ITkTrackingSiPatternCfg(flags,
             from InDetConfig.SiSPSeededTrackFinderConfig import (
                 ITkSiSPSeededTrackFinderCfg)
             SiSPSeededTrackFinderCfg = ITkSiSPSeededTrackFinderCfg
-            if flags.Tracking.ActiveConfig.extension == "ConversionFinding":
+            if flags.Tracking.ActiveConfig.extension == "Conversion":
                 from InDetConfig.SiSPSeededTrackFinderConfig import (
                     ITkSiSPSeededTrackFinderROIConvCfg)
                 SiSPSeededTrackFinderCfg = ITkSiSPSeededTrackFinderROIConvCfg
@@ -77,7 +77,7 @@ def ITkTrackingSiPatternCfg(flags,
                 ActsTrkSeedingCfg)
             acc.merge(ActsTrkSeedingCfg(flags))
 
-            if flags.Tracking.ActiveConfig.extension == "ConversionFinding":
+            if flags.Tracking.ActiveConfig.extension == "Conversion":
                 from AthenaCommon.Logging import logging
                 log = logging.getLogger('ITkTrackingSiPattern')
                 log.warning(

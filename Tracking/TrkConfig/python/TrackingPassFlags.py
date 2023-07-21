@@ -741,10 +741,10 @@ def createLowPtTrackingPassFlags():
     
     return icf
 
-## ITkConversionFinding mode ########################
-def createITkConversionFindingTrackingPassFlags(): #To be updated
+## ITkConversion mode ########################
+def createITkConversionTrackingPassFlags():
     icf = createITkTrackingPassFlags()
-    icf.extension               = "ConversionFinding"
+    icf.extension               = "Conversion"
     icf.usePrdAssociationTool   = True
 
     icf.useEtaDepCuts           = True
