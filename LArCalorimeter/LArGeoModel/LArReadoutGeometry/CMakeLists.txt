@@ -4,7 +4,7 @@
 atlas_subdir( LArReadoutGeometry )
 
 # External dependencies:
-find_package( Boost COMPONENTS system )
+find_package( Boost )
 find_package( CLHEP )
 find_package( GeoModel COMPONENTS GeoModelKernel )
 

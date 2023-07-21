@@ -4,7 +4,7 @@
 atlas_subdir( AthenaMPTools )
 
 # External dependencies:
-find_package( Boost COMPONENTS thread system )
+find_package( Boost COMPONENTS thread )
 find_package( yampl )
 
 atlas_add_library( AthenaMPToolsLib

@@ -6,7 +6,7 @@
 atlas_subdir( AmdcDb )
 
 # External dependencies:
-find_package( Boost COMPONENTS thread system )
+find_package( Boost COMPONENTS thread )
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 
 # Component(s) in the package:

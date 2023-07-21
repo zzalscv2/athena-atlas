@@ -10,7 +10,7 @@
 #include "Navigation/NavigationDefaults.h"
 
 
-// Normally, i'd want to use boost::iterator_adaptor here.
+// Normally, i'd want to use iterator_adaptor here.
 // But this causes dictionary problems:
 //   - We'd need to add this to the selection (or use an auto-select).
 //   - More importantly, it causes cint to crash because type names
