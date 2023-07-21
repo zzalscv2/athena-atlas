@@ -233,7 +233,7 @@ def ITkSiTrackMaker_xkCfg(flags, name="ITkSiTrackMaker", **kwargs):
         kwargs.setdefault("TrackPatternRecoInfo",
                           'SiSpacePointsSeedMaker_Cosmic')
 
-    elif flags.Tracking.ActiveConfig.extension == "ConversionFinding":
+    elif flags.Tracking.ActiveConfig.extension == "Conversion":
         kwargs.setdefault("TrackPatternRecoInfo",
                           'SiSpacePointsSeedMaker_ITkConversionTracks')
 

@@ -282,8 +282,8 @@ def createTrackingConfigFlags():
 
     # Turn running of ITk FastTracking on and off
     icf.addFlag("Tracking.doITkFastTracking", False)
-    # Turn running of ConversionFinding second pass on and off
-    icf.addFlag("Tracking.doITkConversionFinding",
+    # Turn running of Conversion second tracking pass on and off
+    icf.addFlag("Tracking.doITkConversion",
                 lambda prevFlags: not prevFlags.Tracking.doITkFastTracking)
     # Allows TrigFastTrackFinder to be run as an offline algorithm by replacing
     # SiSPSeededTrackFinder
@@ -370,7 +370,7 @@ def createTrackingConfigFlags():
 
     from TrkConfig.TrackingPassFlags import (
         createITkTrackingPassFlags, createITkLargeD0TrackingPassFlags,
-        createITkConversionFindingTrackingPassFlags,
+        createITkConversionTrackingPassFlags,
         createITkFastTrackingPassFlags, createITkLargeD0FastTrackingPassFlags,
         createITkFTFPassFlags, createITkLowPtTrackingPassFlags)
 
@@ -389,8 +389,8 @@ def createTrackingConfigFlags():
                           createITkTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkLargeD0Pass",
                           createITkLargeD0TrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkConversionFindingPass",
-                          createITkConversionFindingTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkConversionPass",
+                          createITkConversionTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkLowPt",
                           createITkLowPtTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkFastPass",

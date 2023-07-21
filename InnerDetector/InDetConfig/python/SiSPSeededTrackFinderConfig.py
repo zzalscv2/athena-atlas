@@ -88,7 +88,7 @@ def ITkSiSPSeededTrackFinderCfg(flags, name="ITkSiSpTrackFinder", **kwargs):
             TrackingComponentConfigurer)
         configuration_settings = TrackingComponentConfigurer(flags)
 
-        if (flags.Tracking.ActiveConfig.extension != "ConversionFinding" and
+        if (flags.Tracking.ActiveConfig.extension != "Conversion" and
             configuration_settings.ActsToAthenaSeedConverter):
             from ActsConfig.ActsTrkSeedingConfig import (
                 ActsTrkSiSpacePointsSeedMakerCfg)
