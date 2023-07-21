@@ -604,7 +604,7 @@ bool InDet::SiTrajectory_xk::initialize
   double Xi2cut     = 2.*m_tools->xi2max();
 
   // radius of the dead cylinder
-  double Rdead      = 123.;
+  double Rdead      = 142.5;
   // boolean to decide if initialisation is needed or not
   // initDeadMaterial is False (which means dead material needs be initialised)
   // for ITk fast tracking configuration
