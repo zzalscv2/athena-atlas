@@ -7,6 +7,8 @@
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "PixelChargeLUTCalibCondAlg.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
+#include "PixelConditionsData/ChargeCalibrationBundle.h" 
+
 
 #include <nlohmann/json.hpp>
 

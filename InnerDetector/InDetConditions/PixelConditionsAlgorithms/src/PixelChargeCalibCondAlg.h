@@ -24,6 +24,9 @@
 #include "InDetIdentifier/PixelID.h"
 
 #include "Gaudi/Property.h"
+namespace PixelChargeCalib{
+  class ChargeCalibrationBundle;
+}
 
 class PixelChargeCalibCondAlg : public AthReentrantAlgorithm {
   public:
@@ -47,6 +50,8 @@ class PixelChargeCalibCondAlg : public AthReentrantAlgorithm {
 
     SG::WriteCondHandleKey<PixelChargeCalibCondData> m_writeKey
     {this, "WriteKey", "PixelChargeCalibCondData", "Output charge caliblation data"};
+    
+    
 };
 
 #endif
