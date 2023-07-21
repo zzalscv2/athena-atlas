@@ -36,9 +36,7 @@ BatchedMinbiasSvc::BatchedMinbiasSvc(const std::string& name, ISvcLocator* svc)
       m_empty_caches(),
       m_empty_caches_mtx(),
       m_batch_use_count(),
-      m_last_loaded_batch(),
-      m_last_unloaded_batch() {}
-
+      m_last_loaded_batch() {}
 BatchedMinbiasSvc::~BatchedMinbiasSvc() {}
 
 int BatchedMinbiasSvc::event_to_batch(std::uint64_t hs_id) {
@@ -127,7 +125,6 @@ StatusCode BatchedMinbiasSvc::initialize() {
                                  << " events. " << m_actualNHSEventsPerBatch);
         ATH_CHECK(m_bkgEventSelector->next(*m_bkg_evt_sel_ctx, batchesToSkip * mbBatchSize - 1));
         m_last_loaded_batch = batchesToSkip - 1;
-        m_last_unloaded_batch = batchesToSkip - 1;
     }
     ATH_CHECK(sg->clearStore());
     m_activeStoreSvc->setStore(old_store);
@@ -137,6 +134,9 @@ StatusCode BatchedMinbiasSvc::initialize() {
 StatusCode BatchedMinbiasSvc::beginHardScatter(std::uint64_t hs_id) {
     using namespace std::chrono_literals;
     int batch = event_to_batch(hs_id);
+    bool first_wait = true;
+    std::chrono::steady_clock::time_point cache_wait_start{};
+    std::chrono::steady_clock::time_point order_wait_start{};
     while (true) {
         if (m_cache.count(batch) != 0) {
             // batch already loaded
@@ -147,88 +147,103 @@ StatusCode BatchedMinbiasSvc::beginHardScatter(std::uint64_t hs_id) {
         }
         // prevent batches loading out-of-order
         if (m_last_loaded_batch < (batch - 1)) {
-            ATH_MSG_VERBOSE("Waiting to prevent out-of-order loading of batches");
-        }
-        while (m_last_loaded_batch < (batch - 1)) {
-            std::this_thread::sleep_for(50ms);
+            ATH_MSG_INFO("Waiting to prevent out-of-order loading of batches");
+            order_wait_start = std::chrono::steady_clock::now();
+            while (m_last_loaded_batch < (batch - 1)) {
+                std::this_thread::sleep_for(50ms);
+            }
+            auto wait_time = std::chrono::steady_clock::now() - order_wait_start;
+            ATH_MSG_INFO(fmt::format("Waited {:%M:%S} to prevent out-of-order loading", wait_time));
         }
         // See if there are any free caches
         // Using try_lock here to avoid reading same batch twice
         if (m_empty_caches_mtx.try_lock()) {
-            if (!m_empty_caches.empty()) {
-                std::scoped_lock reading{m_cache_mtxs[batch], m_reading_batch_mtx};
-                if (m_HSBatchSize != 1) {
-                    ATH_MSG_INFO("Reading next batch in event "
-                                 << Gaudi::Hive::currentContext().evt() << ", slot "
-                                 << Gaudi::Hive::currentContext().slot() << " (hs_id " << hs_id
-                                 << ")");
-                }
-                auto start_time = std::chrono::system_clock::now();
-                m_cache[batch] = std::move(m_empty_caches.front());
-                m_cache_used[batch].reserve(m_MBBatchSize.value());
-                for (int i = 0; i < m_MBBatchSize.value(); ++i) {
-                    m_cache_used[batch].emplace_back(std::make_unique<std::atomic_bool>(false));
-                }
-                m_empty_caches.pop_front();
-                // Remember old store to reset later
-                auto* old_store = m_activeStoreSvc->activeStore();
-                for (auto&& sg : *m_cache[batch]) {
-                    if (!sg->proxies().empty()) {
-                        // Not cleared therefore not used -- don't reload
-                        // COMMENTED OUT -- INCOMPATIBLE WITH EVENT SKIPPING
-                        // continue;
-                    }
-                    // Change active store
-                    m_activeStoreSvc->setStore(sg.get());
-                    SG::CurrentEventStore::Push reader_sg_ces(sg.get());
-                    // Read next event
-                    ATH_CHECK(sg->clearStore(true));
-                    if (!(m_bkgEventSelector->next(*m_bkg_evt_sel_ctx)).isSuccess()) {
-                        ATH_MSG_FATAL("Ran out of minbias events");
-                        return StatusCode::FAILURE;
-                    }
-                    IOpaqueAddress* addr = nullptr;
-                    if (!m_bkgEventSelector->createAddress(*m_bkg_evt_sel_ctx, addr).isSuccess()) {
-                        ATH_MSG_WARNING("Failed to create address. No more events?");
-                        return StatusCode::FAILURE;
-                    }
-                    if (addr == nullptr) {
-                        ATH_MSG_WARNING("createAddress returned nullptr. No more events?");
-                        return StatusCode::FAILURE;
-                    }
-                    ATH_CHECK(sg->recordAddress(addr));
-                    ATH_CHECK(sg->loadEventProxies());
-                    // Read data now if desired
-                    for (const auto* proxy_ptr : sg->proxies()) {
-                        if (!proxy_ptr->isValid()) {
-                            // Get this warning on every event
-                            // ATH_MSG_WARNING("Invalid proxy");
-                            continue;
-                        }
-
-                        if (!m_onDemandMB) {
-                            // Sort of a const_cast, then ->accessData()
-                            sg->proxy_exact(proxy_ptr->sgkey())->accessData();
-                        }
-                    }
-                }
-                // Reset active store
-                m_activeStoreSvc->setStore(old_store);
-                if (m_HSBatchSize != 1) {
-                    ATH_MSG_INFO(fmt::format("Reading {} events took {:%OMm %OSs}",
-                                             m_cache[batch]->size(),
-                                             std::chrono::system_clock::now() - start_time));
-                }
-                m_empty_caches_mtx.unlock();
-                m_last_loaded_batch.exchange(batch);
-                return StatusCode::SUCCESS;
+            if (m_empty_caches.empty()) {
+              // Unlock mutex if we got the lock but there were no free caches
+              m_empty_caches_mtx.unlock();
+              if (first_wait) {
+                  ATH_MSG_INFO("Waiting for a free cache");
+                  first_wait = false;
+                  cache_wait_start = std::chrono::steady_clock::now();
+              }
+              // Wait 100ms then try again
+              std::this_thread::sleep_for(100ms);
+              continue;
             }
-                             // Unlock mutex if we got the lock but all caches were empty
-                m_empty_caches_mtx.unlock();
+            if (!first_wait) {
+                auto wait_time = std::chrono::steady_clock::now() - order_wait_start;
+                ATH_MSG_INFO(fmt::format("Waited {:%M:%S} for a free cache", wait_time));
+            }
+            std::scoped_lock reading{m_cache_mtxs[batch], m_reading_batch_mtx};
+            if (m_HSBatchSize != 0) {
+              ATH_MSG_INFO("Reading next batch in event "
+                           << Gaudi::Hive::currentContext().evt() << ", slot "
+                           << Gaudi::Hive::currentContext().slot() << " (hs_id "
+                           << hs_id << ")");
+            }
+            auto start_time = std::chrono::system_clock::now();
+            m_cache[batch] = std::move(m_empty_caches.front());
+            m_cache_used[batch].reserve(m_MBBatchSize.value());
+            for (int i = 0; i < m_MBBatchSize.value(); ++i) {
+              m_cache_used[batch].emplace_back(
+                  std::make_unique<std::atomic_bool>(false));
+            }
+            m_empty_caches.pop_front();
+            // Remember old store to reset later
+            auto* old_store = m_activeStoreSvc->activeStore();
+            for (auto&& sg : *m_cache[batch]) {
+              if (!sg->proxies().empty()) {
+                // Not cleared therefore not used -- don't reload
+                // COMMENTED OUT -- INCOMPATIBLE WITH EVENT SKIPPING
+                // continue;
+              }
+              // Change active store
+              m_activeStoreSvc->setStore(sg.get());
+              SG::CurrentEventStore::Push reader_sg_ces(sg.get());
+              // Read next event
+              ATH_CHECK(sg->clearStore(true));
+              if (!(m_bkgEventSelector->next(*m_bkg_evt_sel_ctx)).isSuccess()) {
+                ATH_MSG_FATAL("Ran out of minbias events");
+                return StatusCode::FAILURE;
+              }
+              IOpaqueAddress* addr = nullptr;
+              if (!m_bkgEventSelector->createAddress(*m_bkg_evt_sel_ctx, addr)
+                       .isSuccess()) {
+                ATH_MSG_WARNING("Failed to create address. No more events?");
+                return StatusCode::FAILURE;
+              }
+              if (addr == nullptr) {
+                ATH_MSG_WARNING(
+                    "createAddress returned nullptr. No more events?");
+                return StatusCode::FAILURE;
+              }
+              ATH_CHECK(sg->recordAddress(addr));
+              ATH_CHECK(sg->loadEventProxies());
+              // Read data now if desired
+              for (const auto* proxy_ptr : sg->proxies()) {
+                if (!proxy_ptr->isValid()) {
+                  // Get this warning on every event
+                  // ATH_MSG_WARNING("Invalid proxy");
+                  continue;
+                }
 
+                if (!m_onDemandMB) {
+                  // Sort of a const_cast, then ->accessData()
+                  sg->proxy_exact(proxy_ptr->sgkey())->accessData();
+                }
+              }
+            }
+            // Reset active store
+            m_activeStoreSvc->setStore(old_store);
+            if (m_HSBatchSize != 0) {
+              ATH_MSG_INFO(fmt::format(
+                  "Reading {} events took {:%OMm %OSs}", m_cache[batch]->size(),
+                  std::chrono::system_clock::now() - start_time));
+            }
+            m_empty_caches_mtx.unlock();
+            m_last_loaded_batch.exchange(batch);
+            return StatusCode::SUCCESS;
         }
-        // Wait  100ms then try again
-        std::this_thread::sleep_for(100ms);
     }
     return StatusCode::SUCCESS;
 }
@@ -250,18 +265,11 @@ StatusCode BatchedMinbiasSvc::endHardScatter(std::uint64_t hs_id) {
         std::vector used = std::move(m_cache_used[batch]);
         m_cache.erase(batch);
         m_cache_used.erase(batch);
-        // std::size_t i = 0;
         for (auto&& sg : *temp) {
-            //    if (used.at(i++)) {
             ATH_CHECK(sg->clearStore());
-            //    }
-        }
-        while (m_last_unloaded_batch < (batch - 1)) {
-            std::this_thread::sleep_for(50ms);
         }
         std::lock_guard lg{m_empty_caches_mtx};
         m_empty_caches.emplace_back(std::move(temp));
-        m_last_unloaded_batch.store(batch);
     }
     else {
         ATH_MSG_VERBOSE("BATCH " << batch << ": " << uses << " uses out of "

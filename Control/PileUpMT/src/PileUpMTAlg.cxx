@@ -240,7 +240,7 @@ StatusCode PileUpMTAlg::execute() {
                             std::make_unique<xAOD::EventInfoAuxContainer>()));
 
     // Get crossing number
-    m_beamInt->selectT0();
+    m_beamInt->selectT0(evtID.run_number(), evtID.event_number());
     overlaidEvt->setBCID(m_beamInt->getCurrentT0BunchCrossing());
 
     // Set simulation bit

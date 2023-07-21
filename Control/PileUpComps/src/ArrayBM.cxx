@@ -2,15 +2,17 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include<algorithm> /*count_if,max_element*/
-#include<cassert>
-#include<cmath>     /*ceil,floor*/
-#include<numeric>   /*accumulate*/
+#include <algorithm> /*count_if,max_element*/
+#include <cassert>
+#include <cmath>   /*ceil,floor*/
+#include <numeric> /*accumulate*/
 
 // Random Number Generation
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "CLHEP/Random/RandGeneral.h"
+
+#include "CxxUtils/FastReseededPRNG.h"
 
 #include "UtilityFuncs.h"
 #include "ArrayBM.h"
@@ -42,8 +44,11 @@ ArrayBM::~ArrayBM()
 
 StatusCode ArrayBM::initialize()
 {
-  ATH_CHECK(m_randomSvc.retrieve());
-  m_rngWrapper = m_randomSvc->getEngine(this);
+  if (m_seed == 0) {
+    // Only need AthRNGSvc if seed is set to 0
+    ATH_CHECK(m_randomSvc.retrieve());
+    m_rngWrapper = m_randomSvc->getEngine(this);
+  }
 
   // Need to copy to make modifications for empty bunches
   const std::vector<float>& rProp(m_intensityPatternProp.value());
@@ -130,25 +135,42 @@ StatusCode ArrayBM::initialize()
   // from having max value 1.0 to having mean value 1.0
   m_largestElementInPattern = (maxElement/denominator);
 
-  //FIXME add a check that entry 0 is zero? In data, BCID=1 is always the first filled bunch.
-  delete m_biRandom;
-  //the engine is created if not there already
-  m_biRandom = new CLHEP::RandGeneral(m_signalPattern,
-                                      m_ipLength,
-                                      /*IntType=*/1); //discrete distribution
+  // FIXME add a check that entry 0 is zero? In data, BCID=1 is always the
+  // first filled bunch.
+
+  if (m_seed == 0) {
+    delete m_biRandom;
+    // the engine is created if not there already
+    m_biRandom =
+        new CLHEP::RandGeneral(m_signalPattern, m_ipLength,
+                               /*IntType=*/1);  // discrete distribution
+  } else {
+    m_t0Dist =
+        std::make_unique<boost::random::discrete_distribution<unsigned int>>(
+            m_intensityPattern, m_intensityPattern + m_ipLength);
+  }
   return StatusCode::SUCCESS;
 }
 
-void ArrayBM::selectT0()
+void ArrayBM::selectT0(unsigned int run, unsigned long long event)
 {
-    // Set the RNG to use for this event.
-  const EventContext& ctx = Gaudi::Hive::currentContext(); // not ideal, but seems the cleanest solution for now, as this call is once per event.
-  m_rngWrapper->setSeed( "BEAMINT", ctx );
-  CLHEP::HepRandomEngine *rndmEngine = m_rngWrapper->getEngine(ctx);
-  //m_biRandom->shoot() returns in range [0,1]
-  m_t0Offset = static_cast<unsigned int>(floor((m_biRandom->shoot(rndmEngine) * m_ipLength)+0.5));
-  assert(m_intensityPattern[m_t0Offset % m_ipLength]>0.0); //just in case
-  ATH_MSG_DEBUG( "selectT0 offset for this event " << m_t0Offset );
+  if (m_seed == 0) {
+    // Use AthRNGSvc
+    const EventContext& ctx =
+        Gaudi::Hive::currentContext();  // not ideal, but seems the cleanest
+                                        // solution for now, as this call is
+                                        // once per event.
+    m_rngWrapper->setSeed("BEAMINT", ctx.slot(), event, run, ctx.evt());
+    CLHEP::HepRandomEngine* rndmEngine = m_rngWrapper->getEngine(ctx);
+    // m_biRandom->shoot() returns in range [0,1]
+    m_t0Offset = static_cast<unsigned int>(
+        floor((m_biRandom->shoot(rndmEngine) * m_ipLength) + 0.5));
+  } else {
+    FastReseededPRNG prng{m_seed.value(), run, event};
+    m_t0Offset = (*m_t0Dist)(prng);
+  }
+  assert(m_intensityPattern[m_t0Offset % m_ipLength] > 0.0);  // just in case
+  ATH_MSG_DEBUG("selectT0 offset for this event " << m_t0Offset);
   return;
 }
 

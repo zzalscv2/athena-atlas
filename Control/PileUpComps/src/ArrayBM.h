@@ -14,6 +14,7 @@
  * $Id: BkgStreamsCache.h,v 1.10 2008-08-28 01:11:06 calaf Exp $
  * @author Paolo Calafiura - ATLAS Collaboration
  */
+#include "GaudiKernel/ContextSpecificPtr.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "Gaudi/Property.h"
 
@@ -21,6 +22,8 @@
 #include "CxxUtils/checker_macros.h"
 #include "AthenaBaseComps/AthService.h"
 #include "AthenaKernel/IAthRNGSvc.h"
+
+#include <boost/random.hpp>
 
 namespace CLHEP
 {
@@ -43,7 +46,7 @@ public:
   //@{
   virtual float normFactor(int iXing) const override final;
   virtual float largestElementInPattern() const override final { return m_largestElementInPattern; }
-  virtual void selectT0() override final;
+  virtual void selectT0(unsigned int run, unsigned long long event) override final;
   virtual unsigned int getCurrentT0BunchCrossing() const override final { return m_t0Offset; }
   virtual unsigned int getBeamPatternLength() const override final { return m_ipLength; }
   //@}
@@ -51,15 +54,19 @@ private:
   /// max bunch crossings per orbit
   unsigned int m_maxBunchCrossingPerOrbit;
   /// offset of the t0 wrto our intensity pattern
-  unsigned int m_t0Offset;
+  Gaudi::Hive::ContextSpecificData<unsigned int> m_t0Offset;
+  /// seed for FastReseededPRNG. Non-zero switches to using FastReseededPRNG.
+  Gaudi::Property<std::uint64_t> m_seed{this, "Seed", 0, "Seed for FastReseededPRNG. Zero seed switches to AthRNGSvc mode."};
   /// user-defined intensity pattern
   Gaudi::Property<std::vector<float>> m_intensityPatternProp;
-  /// lenght of the intensity pattern
+  /// length of the intensity pattern
   unsigned int m_ipLength;
   /// normalized intensity pattern. C array to make clhep RandGeneral happy
   double* m_intensityPattern;
   /// shoot random number proportionally to m_intensityPattern
   CLHEP::RandGeneral* m_biRandom;
+  /// as with m_biRandom, but for FastReseededPRNG
+  std::unique_ptr<const boost::random::discrete_distribution<unsigned int>> m_t0Dist{nullptr};
   /// the service managing our random seeds/sequences
   ServiceHandle<IAthRNGSvc> m_randomSvc{this, "RandomSvc", "AthRNGSvc","The random number service that will be used."};
   ATHRNG::RNGWrapper*           m_rngWrapper ATLAS_THREAD_SAFE{};

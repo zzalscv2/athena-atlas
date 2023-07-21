@@ -71,7 +71,6 @@ class BatchedMinbiasSvc : public extends<AthService, IMinbiasSvc> {
     std::mutex m_empty_caches_mtx; // protects m_empty_caches
     std::vector<std::unique_ptr<std::atomic_int>> m_batch_use_count;
     std::atomic_int m_last_loaded_batch;
-    std::atomic_int m_last_unloaded_batch;
     int event_to_batch(std::uint64_t hs_id);
 };
 
