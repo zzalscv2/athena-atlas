@@ -34,64 +34,63 @@ namespace InDet {
     /////////////////////////////////////////////////////////////////////////////////
     
   public:
-    
-    SiSpacePointsSeed();
-    SiSpacePointsSeed
-      (const Trk::SpacePoint*&,const Trk::SpacePoint*&,
-       const double&);
-    SiSpacePointsSeed
-      (const Trk::SpacePoint*&,const Trk::SpacePoint*&,const Trk::SpacePoint*&,
-       const double&);
-    SiSpacePointsSeed(const SiSpacePointsSeed&);
-    SiSpacePointsSeed& operator = (const SiSpacePointsSeed&);
-    ~SiSpacePointsSeed();
-    void                                     erase();
-    void                                     add(const Trk::SpacePoint*&);
-    void                                     setD0     (const double&);
-    void                                     setZVertex(const double&);
-    void                                     setEta    (const double&);
-    void                                     setX1     (const double&);
-    void                                     setX2     (const double&);
-    void                                     setX3     (const double&);
-    void                                     setY1     (const double&);
-    void                                     setY2     (const double&);
-    void                                     setY3     (const double&);
-    void                                     setZ1     (const double&);
-    void                                     setZ2     (const double&);
-    void                                     setZ3     (const double&);
-    void                                     setR1     (const double&);
-    void                                     setR2     (const double&);
-    void                                     setR3     (const double&);
-    void                                     setDZDR_B (const double&);
-    void                                     setDZDR_T (const double&);
-    void                                     setPt     (const double&);
+   SiSpacePointsSeed();
+   SiSpacePointsSeed(const Trk::SpacePoint*&, const Trk::SpacePoint*&,
+                     const double&);
+   SiSpacePointsSeed(const Trk::SpacePoint*&, const Trk::SpacePoint*&,
+                     const Trk::SpacePoint*&, const double&);
+   SiSpacePointsSeed(const SiSpacePointsSeed&);
+   SiSpacePointsSeed& operator=(const SiSpacePointsSeed&);
+   SiSpacePointsSeed(SiSpacePointsSeed&&) = default;
+   SiSpacePointsSeed& operator=(SiSpacePointsSeed&&) = default;
+   ~SiSpacePointsSeed() = default;
+   void erase();
+   void add(const Trk::SpacePoint*&);
+   void setD0(const double&);
+   void setZVertex(const double&);
+   void setEta(const double&);
+   void setX1(const double&);
+   void setX2(const double&);
+   void setX3(const double&);
+   void setY1(const double&);
+   void setY2(const double&);
+   void setY3(const double&);
+   void setZ1(const double&);
+   void setZ2(const double&);
+   void setZ3(const double&);
+   void setR1(const double&);
+   void setR2(const double&);
+   void setR3(const double&);
+   void setDZDR_B(const double&);
+   void setDZDR_T(const double&);
+   void setPt(const double&);
 
-    const std::vector<const Trk::SpacePoint*>& spacePoints() const;
-    const double&                            d0         () const;
-    const double&                            zVertex    () const;
-    const double&                            eta        () const;
-    const double&                            x1         () const;
-    const double&                            x2         () const;
-    const double&                            x3         () const;
-    const double&                            y1         () const;
-    const double&                            y2         () const;
-    const double&                            y3         () const;
-    const double&                            z1         () const;
-    const double&                            z2         () const;
-    const double&                            z3         () const;
-    const double&                            r1         () const;
-    const double&                            r2         () const;
-    const double&                            r3         () const;
-    const double&                            dzdr_b     () const;
-    const double&                            dzdr_t     () const;
-    const double&                            pt         () const;
+   const std::vector<const Trk::SpacePoint*>& spacePoints() const;
+   const double& d0() const;
+   const double& zVertex() const;
+   const double& eta() const;
+   const double& x1() const;
+   const double& x2() const;
+   const double& x3() const;
+   const double& y1() const;
+   const double& y2() const;
+   const double& y3() const;
+   const double& z1() const;
+   const double& z2() const;
+   const double& z3() const;
+   const double& r1() const;
+   const double& r2() const;
+   const double& r3() const;
+   const double& dzdr_b() const;
+   const double& dzdr_t() const;
+   const double& pt() const;
 
-    virtual MsgStream&    dump(MsgStream&    out) const ;
-    virtual std::ostream& dump(std::ostream& out) const ;
-    
-    /////////////////////////////////////////////////////////////////////////////////
-    // Protected data members
-    /////////////////////////////////////////////////////////////////////////////////
+   virtual MsgStream& dump(MsgStream& out) const;
+   virtual std::ostream& dump(std::ostream& out) const;
+
+   /////////////////////////////////////////////////////////////////////////////////
+   // Protected data members
+   /////////////////////////////////////////////////////////////////////////////////
     
   protected:
     

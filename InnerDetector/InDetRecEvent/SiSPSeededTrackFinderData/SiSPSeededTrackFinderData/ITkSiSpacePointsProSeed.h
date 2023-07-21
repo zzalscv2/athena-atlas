@@ -37,8 +37,10 @@ namespace ITk
 
     SiSpacePointsProSeed(SiSpacePointForSeed*&,SiSpacePointForSeed*&,SiSpacePointForSeed*&,float);
     SiSpacePointsProSeed(const SiSpacePointsProSeed&);
+    SiSpacePointsProSeed& operator=(const SiSpacePointsProSeed&);
+    SiSpacePointsProSeed(SiSpacePointsProSeed&&) = default;
+    SiSpacePointsProSeed& operator=(SiSpacePointsProSeed&&) = default;
     ~SiSpacePointsProSeed() = default;
-    SiSpacePointsProSeed& operator  = (const SiSpacePointsProSeed&);
 
     SiSpacePointForSeed* spacepoint0() {return m_s0;}
     SiSpacePointForSeed* spacepoint1() {return m_s1;}
