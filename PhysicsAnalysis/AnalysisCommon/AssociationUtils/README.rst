@@ -97,6 +97,10 @@ type-specific and do a runtime type check.
 * TauLooseMuOverlapTool - Implements overlap removal between taus and loose
   muons. The criteria considers muons based on PT and isCombined as
   recommended in the run-2 harmonization document (`ATL-PHYS-INT-2014-018 <https://cds.cern.ch/record/1743654>`_).
+* TauAntiTauJetOverlapTool - Implements overlap removal between taus, b-jets,
+  anti-taus (= failing tau selection, with very loose RNN score cut) and
+  untagged jets. To be used for data-driven background estimation for fake-taus.
+  More details can be found in (`ATL-COM-PHYS-2020-766 <https://cds.cern.ch/record/2743097>`_).
 * ObjLinkOverlapTool - A generic tool which flags overlaps by looking for
   ElementLinks to other particles. This tool can be used to find overlaps in
   two stages. For example, one might use the EleMuSharedTrkOverlapTool to
@@ -363,3 +367,9 @@ The MuJetOverlapTool needs the PV to retrieve the numTrack and sumTrkPt
 quantities. This can be a problem for users that filter out the PV, so I've
 added two properties that specify user decorations for the required
 quantities: JetNumTrackDecoration, JetSumTrackPTDecoration.
+
+Tau-AntiTau-Jet overlap removal
+---------------------------------
+Tau-AntiTau-Ket OR is now available. To enable instead of the DeltaR Tau-Jet OR,
+set the ORFlags::doTauAntiTauJetOR flag to true or the doTauAntiTauJetOR flag in
+the python helper function, together with the antiTauLabel.

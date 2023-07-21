@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -23,6 +23,8 @@ class OverlapAnalysisConfig (ConfigBlock):
         self.addOption ('muons', "", type=str)
         self.addOption ('photons', "", type=str)
         self.addOption ('taus', "", type=str)
+        self.addOption ('doTauAntiTauJetOR', False, type=bool)
+        self.addOption ('antiTauLabel', '', type=str)
 
 
     def makeAlgs (self, config) :
@@ -192,8 +194,15 @@ class OverlapAnalysisConfig (ConfigBlock):
 
         # Set up the tau-(narrow-)jet overlap removal.
         if taus and jets:
-            config.addPrivateTool( 'overlapTool.TauJetORT',
-                                   'ORUtils::DeltaROverlapTool' )
+            if self.doTauAntiTauJetOR:
+                config.addPrivateTool( 'overlapTool.TauJetORT',
+                                       'ORUtils::TauAntiTauJetOverlapTool' )
+                alg.overlapTool.TauJetORT.AntiTauLabel = self.antiTauLabel
+                alg.overlapTool.TauJetORT.BJetLabel = self.bJetLabel
+            else:
+                config.addPrivateTool( 'overlapTool.TauJetORT',
+                                       'ORUtils::DeltaROverlapTool' )
+
             alg.overlapTool.TauJetORT.InputLabel = self.inputLabel
             alg.overlapTool.TauJetORT.OutputLabel = self.outputLabel
             alg.overlapTool.TauJetORT.LinkOverlapObjects = self.linkOverlapObjects

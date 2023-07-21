@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnaAlgorithm.AnaAlgSequence import AnaAlgSequence
@@ -8,10 +8,11 @@ def makeOverlapAnalysisSequence( dataType,
                                  inputLabel = '', outputLabel = 'passesOR',
                                  linkOverlapObjects = False,
                                  doEleEleOR = False, doElectrons = True,
-                                 doMuons = True, doJets = True, doTaus = True,
+                                 doMuons = True, doJets = True,
+                                 doTaus = True, doTauAntiTauJetOR = False,
                                  doPhotons = True, doFatJets = False,
                                  enableUserPriority = False,
-                                 bJetLabel = '',
+                                 bJetLabel = '', antiTauLabel = '',
                                  boostedLeptons = False,
                                  postfix = '',
                                  shallowViewOutput = True,
@@ -169,8 +170,15 @@ def makeOverlapAnalysisSequence( dataType,
 
     # Set up the tau-(narrow-)jet overlap removal.
     if doTaus and doJets:
-        addPrivateTool( alg, 'overlapTool.TauJetORT',
-                        'ORUtils::DeltaROverlapTool' )
+        if doTauAntiTauJetOR:
+            addPrivateTool( alg, 'overlapTool.TauJetORT',
+                            'ORUtils::TauAntiTauJetOverlapTool' )
+            alg.overlapTool.TauJetORT.AntiTauLabel = antiTauLabel
+            alg.overlapTool.TauJetORT.BJetLabel = bJetLabel
+        else:
+            addPrivateTool( alg, 'overlapTool.TauJetORT',
+                            'ORUtils::DeltaROverlapTool' )
+
         alg.overlapTool.TauJetORT.InputLabel = inputLabel
         alg.overlapTool.TauJetORT.OutputLabel = outputLabel
         alg.overlapTool.TauJetORT.LinkOverlapObjects = linkOverlapObjects
