@@ -246,8 +246,8 @@ if __name__ == '__main__':
             
             
             # Uses SCell to decorate the jTowers
-            from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CaloFEXDecoratorCfg
-            DecoratorAlgo = L1CaloFEXDecoratorCfg(flags, name = 'jFexTower2SCellDecorator', ExtraInfo=True, SCMasking=True)
+            from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CalojFEXDecoratorCfg
+            DecoratorAlgo = L1CalojFEXDecoratorCfg(flags, ExtraInfo=True, SCMasking=True)
             acc.merge(DecoratorAlgo)    
 
         if "emulated" in args.outputs:
