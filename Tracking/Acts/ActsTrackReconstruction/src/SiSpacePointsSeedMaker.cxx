@@ -672,6 +672,8 @@ namespace ActsTrk {
     static const SG::AuxElement::Accessor< ElementLink< ::SpacePointOverlapCollection > > overlaplinkAcc("stripOverlapSpacePointLink");
     static const SG::AuxElement::Accessor< ElementLink< InDet::SCT_ClusterCollection > > stripLinkAcc("sctClusterLink");
 
+    std::map<std::pair<std::size_t, std::size_t>, const InDet::SCT_SpacePoint*> sps;
+
     const xAOD::StripClusterContainer *inputContainer = nullptr;
     if (useClusters) {
       SG::ReadHandle<xAOD::StripClusterContainer> inputClusterContainer( m_stripClusterContainerKey, ctx );
@@ -739,16 +741,30 @@ namespace ActsTrk {
 	  return false;
 	}
 
+	std::pair<std::size_t, std::size_t> key_b = std::make_pair(bottom_idx[0], bottom_idx[1]);
+	std::pair<std::size_t, std::size_t> key_m = std::make_pair(medium_idx[0], medium_idx[1]);
+	std::pair<std::size_t, std::size_t> key_t = std::make_pair(top_idx[0], top_idx[1]);
+
+	if (sps.find(key_b) == sps.end()) {
+	  sps[key_b] = new InDet::SCT_SpacePoint({strip_cluster[0]->identifierHash(), strip_cluster[1]->identifierHash()},
+						 Amg::Vector3D(seed->sp()[0]->x(), seed->sp()[0]->y(), seed->sp()[0]->z()),
+						 {*(stripLinkAcc(*strip_cluster[0])), *(stripLinkAcc(*strip_cluster[1]))});
+	}
+	if (sps.find(key_m) == sps.end()) {
+	  sps[key_m] = new InDet::SCT_SpacePoint({strip_cluster[2]->identifierHash(), strip_cluster[3]->identifierHash()},
+						 Amg::Vector3D(seed->sp()[1]->x(), seed->sp()[1]->y(), seed->sp()[1]->z()),
+						 {*(stripLinkAcc(*strip_cluster[2])), *(stripLinkAcc(*strip_cluster[3]))});
+	}
+	if (sps.find(key_t) == sps.end()) {
+	  sps[key_t] = new InDet::SCT_SpacePoint({strip_cluster[4]->identifierHash(), strip_cluster[5]->identifierHash()},
+						 Amg::Vector3D(seed->sp()[2]->x(), seed->sp()[2]->y(), seed->sp()[2]->z()),
+						 {*(stripLinkAcc(*strip_cluster[4])), *(stripLinkAcc(*strip_cluster[5]))});
+	}
+
 	spacePoints = {
-	  new InDet::SCT_SpacePoint({strip_cluster[0]->identifierHash(), strip_cluster[1]->identifierHash()},
-				    Amg::Vector3D(seed->sp()[0]->x(), seed->sp()[0]->y(), seed->sp()[0]->z()),
-	                            {*(stripLinkAcc(*strip_cluster[0])), *(stripLinkAcc(*strip_cluster[1]))}),
-	  new InDet::SCT_SpacePoint({strip_cluster[2]->identifierHash(), strip_cluster[3]->identifierHash()},
-				    Amg::Vector3D(seed->sp()[1]->x(), seed->sp()[1]->y(), seed->sp()[1]->z()), 
-	                            {*(stripLinkAcc(*strip_cluster[2])), *(stripLinkAcc(*strip_cluster[3]))}),
-	  new InDet::SCT_SpacePoint({strip_cluster[4]->identifierHash(), strip_cluster[5]->identifierHash()},
-				    Amg::Vector3D(seed->sp()[2]->x(), seed->sp()[2]->y(), seed->sp()[2]->z()),
-	                            {*(stripLinkAcc(*strip_cluster[4])), *(stripLinkAcc(*strip_cluster[5]))})
+	  sps[key_b],
+	  sps[key_m],
+	  sps[key_t]
 	};
 
       }
@@ -766,13 +782,6 @@ namespace ActsTrk {
       data.i_ITkSeeds.emplace_back(stripSpacePointsForSeeds[0], stripSpacePointsForSeeds[1],
 				   stripSpacePointsForSeeds[2], seed->z());
       data.i_ITkSeeds.back().setQuality(-seed->seedQuality());
-      
-      if (useClusters) {
-        for (std::size_t i(0ul); i<3ul; ++i) {
-          delete spacePoints[i];
-          spacePoints[i] = nullptr;
-        }
-      }
     }
     
     return true;
@@ -790,6 +799,8 @@ namespace ActsTrk {
     static const SG::AuxElement::Accessor< ElementLink< InDet::PixelClusterCollection > > pixelLinkAcc("pixelClusterLink");
     static const SG::AuxElement::Accessor< ElementLink< ::SpacePointCollection > > linkAcc("pixelSpacePointLink");
 
+    std::vector<const InDet::PixelSpacePoint*> sps {};
+
     const xAOD::PixelClusterContainer *inputContainer = nullptr;
     if (useClusters) {
       SG::ReadHandle<xAOD::PixelClusterContainer> inputClusterContainer( m_pixelClusterContainerKey, ctx );
@@ -798,6 +809,8 @@ namespace ActsTrk {
 	return false;
       }
       inputContainer = inputClusterContainer.cptr();
+
+      sps.resize(inputContainer->size(), nullptr);
     }
 
     std::array<const Trk::SpacePoint*, 3> spacePoints {nullptr, nullptr, nullptr};
@@ -849,10 +862,17 @@ namespace ActsTrk {
 	  return false;
 	}
 
+	if (not sps[bottom_idx]) 
+	  sps[bottom_idx] = new InDet::PixelSpacePoint(bottom_cluster->identifierHash(), *(pixelLinkAcc(*bottom_cluster)));
+	if (not sps[medium_idx]) 
+	  sps[medium_idx] = new InDet::PixelSpacePoint(medium_cluster->identifierHash(), *(pixelLinkAcc(*medium_cluster)));
+	if (not sps[top_idx]) 
+	  sps[top_idx] = new InDet::PixelSpacePoint(top_cluster->identifierHash(), *(pixelLinkAcc(*top_cluster)));
+
 	spacePoints =  { 
-	  new InDet::PixelSpacePoint(bottom_cluster->identifierHash(), *(pixelLinkAcc(*bottom_cluster))),
-	  new InDet::PixelSpacePoint(medium_cluster->identifierHash(), *(pixelLinkAcc(*medium_cluster))),
-	  new InDet::PixelSpacePoint(top_cluster->identifierHash(), *(pixelLinkAcc(*top_cluster)))
+	  sps[bottom_idx],
+	  sps[medium_idx],
+	  sps[top_idx]
 	};
 
       }
@@ -872,13 +892,6 @@ namespace ActsTrk {
 				   pixelSpacePointsForSeeds[2],
 				   seed->z());
       data.i_ITkSeeds.back().setQuality(-seed->seedQuality());
-
-      if (useClusters) {
-	for (std::size_t i(0ul); i<3ul; ++i) {
-	  delete spacePoints[i];
-	  spacePoints[i] = nullptr;
-	}
-      }
     }    
     
     return true;
