@@ -363,7 +363,7 @@ def defineInputsMenu():
                     TopoMenuDef( '100RATIO-0MATCH-eTAU40si2-eEMall',         outputbits = 9 ),
                     TopoMenuDef( 'NOT-0MATCH-eTAU40si1-eEMall',              outputbits = 10),
                     TopoMenuDef( '0DETA24-eTAU30s2-eTAU12s2',                outputbits = 11),
-                    TopoMenuDef( '0DETA24-4DPHI99-eTAU30abm-eTAU12abm',      outputbits = 12),
+                    TopoMenuDef( '0DETA24-4DPHI99-eTAU30ab-eTAU12ab',        outputbits = 12),
 
                 ]
             },
