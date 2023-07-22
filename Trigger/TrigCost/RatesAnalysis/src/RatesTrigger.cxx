@@ -156,7 +156,7 @@ bool RatesTrigger::getPassed() const { return m_pass; }
 
 bool RatesTrigger::getActive() const { return m_active; }
 
-bool RatesTrigger::getDisabled() const { return (isZero(m_prescale) || isZero(m_seedPrescale)); }
+bool RatesTrigger::getDisabled() const { return (isNotPositive(m_prescale) || isNotPositive(m_seedPrescale)); }
 
 void RatesTrigger::setUniqueGroup(const RatesGroup* unique) { m_uniqueGroup = unique; } 
 
