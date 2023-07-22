@@ -480,14 +480,14 @@ class TopoAlgoDef:
              "otype1" : "MU3VFab", "ocut1": "", "olist1": "","nleading1": HW.muonOutputWidthSelect, 
              "otype2" : ""       , "ocut2": "", "olist2": "","nleading2": HW.muonOutputWidthSelect}, #5DETA99-5DPHI99-2MU3VFab
             { "minDeta": 0, "maxDeta": 24, "minDphi": 4, "maxDphi": 99, "mult": 1, 
-              "otype1" : "eTAU", "ocut1": 30, "olist1": "abm", "nleading1": HW.eTauOutputWidthSelect, 
-              "otype2" : "eTAU", "ocut2": 20, "olist2": "abm", "nleading2": HW.eTauOutputWidthSelect},#0DETA24_4DPHI99_eTAU30abm_eTAU20abm
+              "otype1" : "eTAU", "ocut1": 30, "olist1": "ab", "nleading1": HW.eTauOutputWidthSelect, 
+              "otype2" : "eTAU", "ocut2": 20, "olist2": "ab", "nleading2": HW.eTauOutputWidthSelect},#0DETA24_4DPHI99_eTAU30ab_eTAU20ab
             { "minDeta": 0, "maxDeta": 24, "minDphi": 4, "maxDphi": 99, "mult": 1, 
-              "otype1" : "eTAU", "ocut1": 30, "olist1": "abm", "nleading1": HW.eTauOutputWidthSelect,
-              "otype2" : "eTAU", "ocut2": 12, "olist2": "abm", "nleading2": HW.eTauOutputWidthSelect},#0DETA24_4DPHI99_eTAU30abm_eTAU12abm 
+              "otype1" : "eTAU", "ocut1": 30, "olist1": "ab", "nleading1": HW.eTauOutputWidthSelect,
+              "otype2" : "eTAU", "ocut2": 12, "olist2": "ab", "nleading2": HW.eTauOutputWidthSelect},#0DETA24_4DPHI99_eTAU30ab_eTAU12ab 
             { "minDeta": 0, "maxDeta": 24, "minDphi": 10, "maxDphi": 99, "mult": 1, 
-              "otype1" : "eTAU", "ocut1": 30, "olist1": "abm", "nleading1": HW.eTauOutputWidthSelect, 
-              "otype2" : "eTAU", "ocut2": 12, "olist2": "abm", "nleading2": HW.eTauOutputWidthSelect},#0DETA24_10DPHI99_eTAU30abm_eTAU12abm
+              "otype1" : "eTAU", "ocut1": 30, "olist1": "ab", "nleading1": HW.eTauOutputWidthSelect, 
+              "otype2" : "eTAU", "ocut2": 12, "olist2": "ab", "nleading2": HW.eTauOutputWidthSelect},#0DETA24_10DPHI99_eTAU30ab_eTAU12ab
         ]
         for x in algolist:            
             class d:
@@ -1336,20 +1336,20 @@ class TopoAlgoDef:
               "otype3" : "jJ"  , "ocut3": 55, "olist3": "ab" , "nleading3": HW.jJetOutputWidthSelect, "inputwidth3": HW.jJetOutputWidthSelect,
               "drcutmin": 0, "drcutmax": 28}, # 2DISAMB-jJ55ab-0DR28-eTAU30abm-eTAU20abm     
             { "disamb" : 2, 
-              "otype1" : "eTAU", "ocut1": 30, "olist1": "abm", "nleading1": HW.eTauOutputWidthSelect, "inputwidth1": HW.eTauOutputWidthSelect,
-              "otype2" : "eTAU", "ocut2": 20, "olist2": "abm", "nleading2": HW.eTauOutputWidthSelect, "inputwidth2": HW.eTauOutputWidthSelect,
+              "otype1" : "eTAU", "ocut1": 30, "olist1": "ab", "nleading1": HW.eTauOutputWidthSelect, "inputwidth1": HW.eTauOutputWidthSelect,
+              "otype2" : "eTAU", "ocut2": 20, "olist2": "ab", "nleading2": HW.eTauOutputWidthSelect, "inputwidth2": HW.eTauOutputWidthSelect,
               "otype3" : "jJ"  , "ocut3": 55, "olist3": "ab" , "nleading3": HW.jJetOutputWidthSelect, "inputwidth3": HW.jJetOutputWidthSelect,
-              "drcutmin": 4    , "drcutmax": 28}, # 2DISAMB-jJ55ab-4DR28-eTAU30abm-eTAU20abm
+              "drcutmin": 4    , "drcutmax": 28}, # 2DISAMB-jJ55ab-4DR28-eTAU30ab-eTAU20ab
             { "disamb" : 2, 
-              "otype1" : "eTAU", "ocut1": 30, "olist1": "abm", "nleading1": HW.eTauOutputWidthSelect, "inputwidth1": HW.eTauOutputWidthSelect,
-              "otype2" : "eTAU", "ocut2": 20, "olist2": "abm", "nleading2": HW.eTauOutputWidthSelect, "inputwidth2": HW.eTauOutputWidthSelect,
+              "otype1" : "eTAU", "ocut1": 30, "olist1": "ab", "nleading1": HW.eTauOutputWidthSelect, "inputwidth1": HW.eTauOutputWidthSelect,
+              "otype2" : "eTAU", "ocut2": 20, "olist2": "ab", "nleading2": HW.eTauOutputWidthSelect, "inputwidth2": HW.eTauOutputWidthSelect,
               "otype3" : "jJ"  , "ocut3": 55, "olist3": "ab" , "nleading3": HW.jJetOutputWidthSelect, "inputwidth3": HW.jJetOutputWidthSelect,
-              "drcutmin": 4    , "drcutmax": 32}, # 2DISAMB-jJ55ab-4DR32-eTAU30abm-eTAU20abm
+              "drcutmin": 4    , "drcutmax": 32}, # 2DISAMB-jJ55ab-4DR32-eTAU30ab-eTAU20ab
             { "disamb" : 2, 
-              "otype1" : "eTAU", "ocut1": 30, "olist1": "abm", "nleading1": HW.eTauOutputWidthSelect, "inputwidth1": HW.eTauOutputWidthSelect,
-              "otype2" : "eTAU", "ocut2": 20, "olist2": "abm", "nleading2": HW.eTauOutputWidthSelect, "inputwidth2": HW.eTauOutputWidthSelect,
+              "otype1" : "eTAU", "ocut1": 30, "olist1": "ab", "nleading1": HW.eTauOutputWidthSelect, "inputwidth1": HW.eTauOutputWidthSelect,
+              "otype2" : "eTAU", "ocut2": 20, "olist2": "ab", "nleading2": HW.eTauOutputWidthSelect, "inputwidth2": HW.eTauOutputWidthSelect,
               "otype3" : "jJ"  , "ocut3": 55, "olist3": "ab" , "nleading3": HW.jJetOutputWidthSelect, "inputwidth3": HW.jJetOutputWidthSelect,
-              "drcutmin": 10   , "drcutmax": 32}, # 2DISAMB-jJ55ab-10DR32-eTAU30abm-eTAU20abm
+              "drcutmin": 10   , "drcutmax": 32}, # 2DISAMB-jJ55ab-10DR32-eTAU30ab-eTAU20ab
         ]
         for x in algolist:
             class d:
