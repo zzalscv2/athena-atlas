@@ -27,7 +27,7 @@ def bmumuxRecoSequence(flags, rois, muons):
         topSequence.SGInputLoader.Load += [('TRT_RDO_Container', 'StoreGateSvc+TRT_RDOs')]
     else:
         viewDataVerifier.DataObjects += [( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
-
+    viewDataVerifier.DataObjects += [( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )]
 
     for viewAlg in viewAlgs:
         recoSequence += viewAlg

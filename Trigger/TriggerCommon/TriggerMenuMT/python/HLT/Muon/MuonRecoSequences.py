@@ -86,6 +86,7 @@ def MuDataPrepViewDataVerifierCfg(flags):
                  ( 'TgcRdo_Cache' , 'StoreGateSvc+TgcRdoCache' ),
                  ( 'MdtCsm_Cache' , 'StoreGateSvc+MdtCsmRdoCache' ),
                  ( 'RpcPad_Cache' , 'StoreGateSvc+RpcRdoCache' ),
+                 ( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  ),
                  ( 'RpcCoinDataCollection_Cache' , 'StoreGateSvc+RpcCoinCache' ),
                  ( 'TgcPrepDataCollection_Cache' , 'StoreGateSvc+' + MuonPrdCacheNames.TgcCache + 'PriorBC' ),
                  ( 'TgcPrepDataCollection_Cache' , 'StoreGateSvc+' + MuonPrdCacheNames.TgcCache + 'NextBC' ),
@@ -376,7 +377,8 @@ def VDVEFMuCBCfg(flags, RoIs, name):
                  ( 'Muon::TgcPrepDataContainer' , 'StoreGateSvc+TGC_Measurements' ),
                  ( 'Muon::RpcPrepDataContainer' , 'StoreGateSvc+RPC_Measurements' ),
                  ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs ),
-                 ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )]
+                 ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
+                 ( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )]
   if "FS" in name:
     dataObjects +=[( 'MuonCandidateCollection' , 'StoreGateSvc+MuonCandidates_FS' )]
   else:
@@ -404,12 +406,13 @@ def VDVPrecMuTrkCfg(flags, name):
   trkname = "LRT" if "LRT" in name else ''
   dataObjects = [( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+getIDTracks(flags, trkname) ),
                  ( 'xAOD::IParticleContainer' , 'StoreGateSvc+'+ getIDTracks(flags, trkname) ),
-                 ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_FlaggedCondData' )]
+                 ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_FlaggedCondData' ),
+                 ( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )]
 
   if not flags.Input.isMC:
     dataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
                     ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' ),
-                    ( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
+                    ( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' ) ]
 
   alg = CompFactory.AthViews.ViewDataVerifier( name = vdvName,
                                                DataObjects = dataObjects)
@@ -651,7 +654,8 @@ def efmuisoRecoSequence( flags, RoIs, Muons, doMSiso=False ):
   from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
   viewAlgs, viewVerify = makeInDetTrigFastTracking( flags, config = IDTrigConfig, rois = RoIs )
   viewVerify.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+MUEFIsoRoIs'+name ),
-                             ( 'xAOD::MuonContainer' , 'StoreGateSvc+IsoViewMuons'+name )]
+                             ( 'xAOD::MuonContainer' , 'StoreGateSvc+IsoViewMuons'+name ),
+                             ( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )]
 
   # Make sure required objects are still available at whole-event level
   if flags.Input.isMC:

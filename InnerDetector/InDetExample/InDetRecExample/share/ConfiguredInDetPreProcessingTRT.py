@@ -171,7 +171,6 @@ class ConfiguredInDetPreProcessingTRT:
          from InDetPrepRawDataFormation.InDetPrepRawDataFormationConf import InDet__TRT_RIO_Maker
          InDetTRT_RIO_Maker = InDet__TRT_RIO_Maker(name                   = prefix+"RIO_Maker",
                                                    TRT_DriftCircleTool    = InDetTRT_DriftCircleTool,
-                                                   TrtDescrManageLocation = InDetKeys.TRT_Manager(),
                                                    TRTRDOLocation         = InDetKeys.TRT_RDOs(),
                                                    TRTRIOLocation         = collection)
 
@@ -185,7 +184,6 @@ class ConfiguredInDetPreProcessingTRT:
          if InDetFlags.doSplitReco() :
             InDetTRT_RIO_MakerPU = InDet__TRT_RIO_Maker(name                   = prefix+"RIO_MakerPU",
                                                         TRT_DriftCircleTool    = InDetTRT_DriftCircleTool,
-                                                        TrtDescrManageLocation = InDetKeys.TRT_Manager(),
                                                         TRTRDOLocation         = InDetKeys.TRT_PU_RDOs(),
                                                         TRTRIOLocation         = collectionPU)
             topSequence += InDetTRT_RIO_MakerPU
