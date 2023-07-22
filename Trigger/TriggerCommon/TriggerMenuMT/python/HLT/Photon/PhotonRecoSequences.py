@@ -27,7 +27,8 @@ def photonViewDataVerifierCfg():
     from AthenaConfiguration.ComponentFactory import CompFactory
     moveClusters = CompFactory.AthViews.ViewDataVerifier("VDVFastPhoton")
     moveClusters.DataObjects = [ ('xAOD::TrigEMClusterContainer','StoreGateSvc+HLT_FastCaloEMClusters'),
-                                 ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+L2PhotonRecoRoIs' )]
+                                 ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+L2PhotonRecoRoIs' ),
+                                 ( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )]
 
     result = ComponentAccumulator()
     result.addEventAlgo(moveClusters)

@@ -72,6 +72,8 @@ def precisionElectronRecoSequence(flags, RoIs, ion=False, doGSF=True, doLRT=Fals
         else:
           ViewVerifyTrk_GSF.DataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' )]
           ViewVerifyTrk_GSF.DataObjects += [( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
+        
+        ViewVerifyTrk_GSF.DataObjects += [( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )]
 
     """ Retrieve the factories now """
     from TriggerMenuMT.HLT.Electron.TrigElectronFactories import TrigEgammaRecElectronCfg, TrigElectronSuperClusterBuilderCfg, TrigTopoEgammaElectronCfg

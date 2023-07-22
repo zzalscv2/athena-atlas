@@ -32,12 +32,14 @@ def precisionTracking(flags, RoIs, ion=False, variant=''):
     if not flags.Input.isMC:
       ViewVerifyTrk.DataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
                                     ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' ),
-                                    ( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
+                                    ( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' ) ]
     else:
       from AthenaCommon.AlgSequence import AlgSequence
       topSequence = AlgSequence()
       topSequence.SGInputLoader.Load += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
       ViewVerifyTrk.DataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
+
+    ViewVerifyTrk.DataObjects += [( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )]
 
     """ Precision Track Related Setup.... """
     PTAlgs = []
