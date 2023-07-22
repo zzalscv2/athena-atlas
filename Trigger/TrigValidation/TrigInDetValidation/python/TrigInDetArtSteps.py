@@ -243,7 +243,7 @@ class TrigInDetRecoData(ExecStep):
         self.input = ''
         self.perfmon=False
         self.imf=False
-        self.args = '-c "setMenu=\'Cosmic_run3_v1\';doCosmics=True;doL1Sim=True;rewriteLVL1=True;"'
+        self.args = '-c "setMenu=\'Cosmic_run3_v1\';doCosmics=True;doL1Sim=False;forceEnableAllChains=True;"'
         self.args += ' -o output'
 
 

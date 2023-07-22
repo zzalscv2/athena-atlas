@@ -18,7 +18,8 @@ ex.threads = 1
 precommand = ''.join([
   "setMenu='Cosmic_run3_v1';",
   "doCosmics=True;",
-  "doL1Sim=True;",
+  "doL1Sim=False;",
+  "forceEnableAllChains=True;",
   "doWriteBS=False;",
   "doWriteRDOTrigger=True;",
 ])
