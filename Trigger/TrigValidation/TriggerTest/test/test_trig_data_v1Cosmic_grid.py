@@ -31,7 +31,8 @@ ex.concurrent_events = 4
 precommand = ''.join([
   "setMenu='Cosmic_run3_v1';",
   "doCosmics=True;",
-  "doL1Sim=True;",
+  "doL1Sim=False;",
+  "forceEnableAllChains=True;",
   "doWriteBS=False;",
   "doWriteRDOTrigger=True;",
 ])

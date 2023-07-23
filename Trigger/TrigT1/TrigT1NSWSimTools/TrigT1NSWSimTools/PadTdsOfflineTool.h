@@ -134,6 +134,7 @@ namespace NSWL1 {
          * Apply time delay and determine BC tag for the hit according to the trigger capture window.
          * BC tag:  bit nr. 8 correspond to the current bunch for simulated events
          */
+	// FIXME: method not used anywhere, drop it?
         bool determine_delay_and_bc(const sTgcDigit* digit, const int pad_hit_number, double &delayed_time, uint16_t &BCtag) const;
         void store_pads(const std::vector<PadHits> &pad_hits, std::vector< std::vector<std::shared_ptr<PadData>> > &pad_cache) const; //!< Store pad data in the cache
         void print_digit(const sTgcDigit* digit) const;

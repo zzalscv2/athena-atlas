@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MMLOADVARIABLES_H
 #define MMLOADVARIABLES_H
 
 #include "AthenaBaseComps/AthMessaging.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaKernel/getMessageSvc.h"
 #include "AtlasHepMC/GenEvent.h"
 #include "GeneratorObjects/McEventCollection.h"
@@ -50,9 +49,10 @@ struct histogramDigitVariables{
  class MMLoadVariables : public AthMessaging {
 
   public:
-    MMLoadVariables(StoreGateSvc* evtStore, const MuonGM::MuonDetectorManager* detManager, const MmIdHelper* idhelper);
+   MMLoadVariables(const MuonGM::MuonDetectorManager* detManager, const MmIdHelper* idhelper);
 
-    StatusCode getMMDigitsInfo(const McEventCollection *truthContainer,
+    StatusCode getMMDigitsInfo(const EventContext& ctx,
+			       const McEventCollection *truthContainer,
                                const TrackRecordCollection* trackRecordCollection,
                                const MmDigitContainer *nsw_MmDigitContainer,
                                std::map<std::pair<int,unsigned int>,std::vector<digitWrapper> >& entries,
@@ -60,7 +60,7 @@ struct histogramDigitVariables{
                                std::map<std::pair<int,unsigned int>,evInf_entry>& Event_Info,
                                std::map<std::string,std::shared_ptr<MMT_Parameters> > &pars,
                                histogramDigitVariables &histDigVars) const;
-    //Import_Athena..._.m stuff
+
     double phi_shift(double athena_phi,const std::string& wedgeType, int stationPhi) const;
     int Get_VMM_chip(int strip) const;  //*** Not Finished... Rough
     int strip_number(int station, int plane, int spos, std::shared_ptr<MMT_Parameters> par)const;
@@ -72,6 +72,5 @@ struct histogramDigitVariables{
   private:
     const MuonGM::MuonDetectorManager* m_detManager;        //!< MuonDetectorManager
     const MmIdHelper* m_MmIdHelper;        //!< MM offline Id helper
-    const StoreGateSvc* m_evtStore {nullptr};
   };
 #endif

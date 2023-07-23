@@ -569,25 +569,25 @@ def getDevSignatures():
         #ATR-27121
         ChainProp(name="HLT_tau30_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB_L1J45p0ETA21_3J15p0ETA25", l1SeedThresholds=['TAU20IM','TAU12IM'], groups=MultiTauGroup+DevGroup+LegacyTopoGroup),#gianipez
         #ATR-27132
-        ChainProp(name="HLT_tau30_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB_L12cTAU20M_4DR28-eTAU30MeTAU20M-jJ55" , l1SeedThresholds=['cTAU20M','cTAU20M'], groups=MultiTauGroup+DevGroup), 
-        ChainProp(name="HLT_tau30_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB_L12cTAU20M_4DR32-eTAU30MeTAU20M-jJ55" , l1SeedThresholds=['cTAU20M','cTAU20M'], groups=MultiTauGroup+DevGroup), 
-        ChainProp(name="HLT_tau30_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB_L12cTAU20M_10DR32-eTAU30MeTAU20M-jJ55", l1SeedThresholds=['cTAU20M','cTAU20M'], groups=MultiTauGroup+DevGroup), 
+        ChainProp(name="HLT_tau30_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB_L12cTAU20M_4DR28-eTAU30eTAU20-jJ55" , l1SeedThresholds=['cTAU20M','cTAU20M'], groups=MultiTauGroup+DevGroup), 
+        ChainProp(name="HLT_tau30_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB_L12cTAU20M_4DR32-eTAU30eTAU20-jJ55" , l1SeedThresholds=['cTAU20M','cTAU20M'], groups=MultiTauGroup+DevGroup), 
+        ChainProp(name="HLT_tau30_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB_L12cTAU20M_10DR32-eTAU30eTAU20-jJ55", l1SeedThresholds=['cTAU20M','cTAU20M'], groups=MultiTauGroup+DevGroup), 
 
-        ChainProp(name="HLT_tau30_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB_L14jJ30p0ETA24_0DETA24-eTAU30MeTAU12M"         , l1SeedThresholds=['cTAU20M','cTAU20M'], groups=MultiTauGroup+DevGroup), 
-        ChainProp(name="HLT_tau30_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB_L14jJ30p0ETA24_0DETA24_4DPHI99-eTAU30MeTAU20M" , l1SeedThresholds=['cTAU20M','cTAU20M'], groups=MultiTauGroup+DevGroup), 
-        ChainProp(name="HLT_tau30_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB_L14jJ30p0ETA24_0DETA24_4DPHI99-eTAU30MeTAU12M" , l1SeedThresholds=['cTAU20M','cTAU20M'], groups=MultiTauGroup+DevGroup), 
-        ChainProp(name="HLT_tau30_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB_L14jJ30p0ETA24_0DETA24_10DPHI99-eTAU30MeTAU12M", l1SeedThresholds=['cTAU20M','cTAU20M'], groups=MultiTauGroup+DevGroup), 
+        ChainProp(name="HLT_tau30_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB_L14jJ30p0ETA24_0DETA24-eTAU30eTAU12"         , l1SeedThresholds=['eTAU20','eTAU12'], groups=MultiTauGroup+DevGroup), 
+        ChainProp(name="HLT_tau30_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB_L14jJ30p0ETA24_0DETA24_4DPHI99-eTAU30eTAU20" , l1SeedThresholds=['eTAU20','eTAU12'], groups=MultiTauGroup+DevGroup), 
+        ChainProp(name="HLT_tau30_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB_L14jJ30p0ETA24_0DETA24_4DPHI99-eTAU30eTAU12" , l1SeedThresholds=['eTAU20','eTAU12'], groups=MultiTauGroup+DevGroup), 
+        ChainProp(name="HLT_tau30_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB_L14jJ30p0ETA24_0DETA24_10DPHI99-eTAU30eTAU12", l1SeedThresholds=['eTAU20','eTAU12'], groups=MultiTauGroup+DevGroup), 
         #
         ChainProp(name="HLT_tau30_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB30_L1J45p0ETA21_3J15p0ETA25", l1SeedThresholds=['TAU20IM','TAU12IM'], groups=MultiTauGroup+DevGroup),#gianipez
         #ATR-27132
-        ChainProp(name="HLT_tau0_mediumRNN_tracktwoMVA_tau0_mediumRNN_tracktwoMVA_03dRAB_L12cTAU20M_4DR28-eTAU30MeTAU20M-jJ55" , l1SeedThresholds=['cTAU20M','cTAU20M'], groups=MultiTauGroup+DevGroup), 
-        ChainProp(name="HLT_tau0_mediumRNN_tracktwoMVA_tau0_mediumRNN_tracktwoMVA_03dRAB_L12cTAU20M_4DR32-eTAU30MeTAU20M-jJ55" , l1SeedThresholds=['cTAU20M','cTAU20M'], groups=MultiTauGroup+DevGroup), 
-        ChainProp(name="HLT_tau0_mediumRNN_tracktwoMVA_tau0_mediumRNN_tracktwoMVA_03dRAB_L12cTAU20M_10DR32-eTAU30MeTAU20M-jJ55", l1SeedThresholds=['cTAU20M','cTAU20M'], groups=MultiTauGroup+DevGroup), 
+        ChainProp(name="HLT_tau0_mediumRNN_tracktwoMVA_tau0_mediumRNN_tracktwoMVA_03dRAB_L12cTAU20M_4DR28-eTAU30eTAU20-jJ55" , l1SeedThresholds=['cTAU20M','cTAU20M'], groups=MultiTauGroup+DevGroup), 
+        ChainProp(name="HLT_tau0_mediumRNN_tracktwoMVA_tau0_mediumRNN_tracktwoMVA_03dRAB_L12cTAU20M_4DR32-eTAU30eTAU20-jJ55" , l1SeedThresholds=['cTAU20M','cTAU20M'], groups=MultiTauGroup+DevGroup), 
+        ChainProp(name="HLT_tau0_mediumRNN_tracktwoMVA_tau0_mediumRNN_tracktwoMVA_03dRAB_L12cTAU20M_10DR32-eTAU30eTAU20-jJ55", l1SeedThresholds=['cTAU20M','cTAU20M'], groups=MultiTauGroup+DevGroup), 
 
-        ChainProp(name="HLT_tau0_mediumRNN_tracktwoMVA_tau0_mediumRNN_tracktwoMVA_03dRAB_L14jJ30p0ETA24_0DETA24-eTAU30MeTAU12M"         , l1SeedThresholds=['cTAU20M','cTAU20M'], groups=MultiTauGroup+DevGroup), 
-        ChainProp(name="HLT_tau0_mediumRNN_tracktwoMVA_tau0_mediumRNN_tracktwoMVA_03dRAB_L14jJ30p0ETA24_0DETA24_4DPHI99-eTAU30MeTAU20M" , l1SeedThresholds=['cTAU20M','cTAU20M'], groups=MultiTauGroup+DevGroup), 
-        ChainProp(name="HLT_tau0_mediumRNN_tracktwoMVA_tau0_mediumRNN_tracktwoMVA_03dRAB_L14jJ30p0ETA24_0DETA24_4DPHI99-eTAU30MeTAU12M" , l1SeedThresholds=['cTAU20M','cTAU20M'], groups=MultiTauGroup+DevGroup), 
-        ChainProp(name="HLT_tau0_mediumRNN_tracktwoMVA_tau0_mediumRNN_tracktwoMVA_03dRAB_L14jJ30p0ETA24_0DETA24_10DPHI99-eTAU30MeTAU12M", l1SeedThresholds=['cTAU20M','cTAU20M'], groups=MultiTauGroup+DevGroup), 
+        ChainProp(name="HLT_tau0_mediumRNN_tracktwoMVA_tau0_mediumRNN_tracktwoMVA_03dRAB_L14jJ30p0ETA24_0DETA24-eTAU30eTAU12"         , l1SeedThresholds=['eTAU20','eTAU12'], groups=MultiTauGroup+DevGroup), 
+        ChainProp(name="HLT_tau0_mediumRNN_tracktwoMVA_tau0_mediumRNN_tracktwoMVA_03dRAB_L14jJ30p0ETA24_0DETA24_4DPHI99-eTAU30eTAU20" , l1SeedThresholds=['eTAU20','eTAU20'], groups=MultiTauGroup+DevGroup), 
+        ChainProp(name="HLT_tau0_mediumRNN_tracktwoMVA_tau0_mediumRNN_tracktwoMVA_03dRAB_L14jJ30p0ETA24_0DETA24_4DPHI99-eTAU30eTAU12" , l1SeedThresholds=['eTAU20','eTAU12'], groups=MultiTauGroup+DevGroup), 
+        ChainProp(name="HLT_tau0_mediumRNN_tracktwoMVA_tau0_mediumRNN_tracktwoMVA_03dRAB_L14jJ30p0ETA24_0DETA24_10DPHI99-eTAU30eTAU12", l1SeedThresholds=['eTAU20','eTAU12'], groups=MultiTauGroup+DevGroup), 
       
 
         # eta L1

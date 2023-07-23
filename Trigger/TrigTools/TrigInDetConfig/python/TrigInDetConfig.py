@@ -19,12 +19,14 @@ class InDetCacheNames(object):
   PixRDOCacheKey     = "PixRDOCache"
   PixBSErrCacheKey   = "PixBSErrCache"
   TRTRDOCacheKey     = "TrtRDOCache"
+  TRT_DriftCircleCacheKey = "TRT_DriftCircleCache"
 
 def InDetIDCCacheCreatorCfg(flags):
   #Create IdentifiableCaches
   acc = ComponentAccumulator()
   InDet__CacheCreator=CompFactory.getComp("InDet::CacheCreator")
   InDetCacheCreatorTrig = InDet__CacheCreator(name = "InDetCacheCreatorTrig",
+                                              TRT_DriftCircleKey = InDetCacheNames.TRT_DriftCircleCacheKey,
                                               Pixel_ClusterKey   = InDetCacheNames.Pixel_ClusterKey,
                                               SCT_ClusterKey     = InDetCacheNames.SCT_ClusterKey,
                                               SpacePointCachePix = InDetCacheNames.SpacePointCachePix,
@@ -175,6 +177,7 @@ def trigInDetPrecisionTrackingCfg( inflags, rois, signatureName, in_view=True ):
                                                       DataObjects= [('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
                                                                     ('InDet::PixelClusterContainerCache', InDetCacheNames.Pixel_ClusterKey),
                                                                     ('PixelRDO_Cache', InDetCacheNames.PixRDOCacheKey),
+                                                                    ('InDet::TRT_DriftCircleContainerCache', InDetCacheNames.TRT_DriftCircleCacheKey),
                                                                     ('SCT_RDO_Cache', InDetCacheNames.SCTRDOCacheKey),
                                                                     ('TRT_RDO_Cache', InDetCacheNames.TRTRDOCacheKey),
                                                                     ('SpacePointCache', InDetCacheNames.SpacePointCachePix),

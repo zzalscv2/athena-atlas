@@ -1,0 +1,31 @@
+<!-- eta coverage of the tracker -->
+<!ENTITY ETA "4.0">
+<!ENTITY NETA "100">
+
+<!-- min eta covered by pix. endcaps -->
+<!ENTITY ETASct "2.5">
+
+<!-- term used for innermost pixel barrel layer in histogram text -->
+<!ENTITY L0PixBarr "Pix. Barr. layer0">
+
+<!-- bins for hits -->
+<!ENTITY PIXHIT "20">
+<!ENTITY SIHIT "30">
+
+<!-- bins for resolutions -->
+<!ENTITY D0RES "2.00">
+<!ENTITY Z0RES "10.0">
+<!ENTITY PHIRES "0.010">
+<!ENTITY Z0SINRES "1.00">
+
+<!-- Number of tracks vs MU -->
+<!ENTITY EXPMU "260">
+<!ENTITY EXPTRK "3000">
+<!ENTITY ETABINS2D "256">
+
+<!-- PU density plots -->
+<!ENTITY NBINSPUDENS "9">
+<!ENTITY PUDENSMAX "4.5">
+
+<!-- Tracking Recommendation Plots -->
+<!ENTITY EtaBinsTrkRec "160">

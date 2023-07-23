@@ -185,7 +185,7 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
         ATH_MSG_VERBOSE(" Vox " << vox << " energy " << energyInVoxel
                                 << " binx " << ix << " biny " << iy);
 
-        if (energyInVoxel == 0) {
+        if (energyInVoxel <= 0) {
           vox++;
           continue;
         }
@@ -300,7 +300,7 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
         ATH_MSG_VERBOSE(" Vox " << vox << " energy " << energyInVoxel
                                 << " binx " << ix << " biny " << iy);
 
-        if (energyInVoxel == 0) {
+        if (energyInVoxel <= 0) {
           vox++;
           continue;
         }

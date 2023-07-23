@@ -92,6 +92,7 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
         
         // keeping just tile information
         if(std::abs(tower->eta())>1.5 || tower->sampling()!=1) continue;
+        
         map_TileID2ptr[tower->coolId()]=tower;
     }
     
@@ -141,7 +142,7 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
                 //check that the SCell Identifier exists in the map
                 auto it_ScellID2ptr = map_ScellID2ptr.find(SCellID);
                 if(it_ScellID2ptr == map_ScellID2ptr.end()) {
-                    ATH_MSG_DEBUG("Scell ID: 0x"<<std::hex<< (SCellID >> 32) <<std::dec<< " not found in the CaloCell Container, skipping");
+                    if(m_isDATA) ATH_MSG_DEBUG("Scell ID: 0x"<<std::hex<< (SCellID >> 32) <<std::dec<< " not found in the CaloCell Container, skipping");
                     continue;
                 }
 
@@ -179,7 +180,7 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
             //check that the Tile Identifier exists in the map
             auto it_TileID2ptr = map_TileID2ptr.find(TileID);
             if(it_TileID2ptr == map_TileID2ptr.end()) {
-                ATH_MSG_WARNING("Tile cool ID: "<<TileID<< " not found in the xAOD::TriggerTower, skipping");
+                if(m_isDATA) ATH_MSG_WARNING("Tile cool ID: "<<TileID<< " not found in the xAOD::TriggerTower, skipping");
                 continue;
             }
             else{
@@ -342,8 +343,6 @@ bool jFexEmulatedTowers::isBadSCellID(const std::string& ID) const{
 
 
 StatusCode  jFexEmulatedTowers::ReadTilefromFile(const std::string& fileName){
-   
-    
     
     //openning file with ifstream
     std::ifstream file(fileName);

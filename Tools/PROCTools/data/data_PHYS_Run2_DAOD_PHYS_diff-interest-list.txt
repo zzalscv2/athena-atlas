@@ -1,18 +1,19 @@
 # BTagging branches
-BTagging_AntiKt4EMPFlowAuxDyn.DL1dv01*p?
-BTagging_AntiKt4EMPFlowAuxDyn.GN*p?
-BTagging_AntiKtVR30Rmax4Rmin02TrackAuxDyn.DL1d*p?
-BTagging_AntiKtVR30Rmax4Rmin02TrackAuxDyn.GN*p?
+BTagging_AntiKt4EMPFlowAuxDyn\.DL1dv01(.*)
+BTagging_AntiKt4EMPFlowAuxDyn\.GN120220509_p.
+BTagging_AntiKt4EMPFlowAuxDyn\.GN2v00_p.
+BTagging_AntiKtVR30Rmax4Rmin02TrackAuxDyn\.DL1d(.*)
+BTagging_AntiKtVR30Rmax4Rmin02TrackAuxDyn\.GN2V00_p.
 
 # Large R Xbb branches
-AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAuxDyn.GN2*
+AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAuxDyn\.GN2(.*)
 
 # JetEtMiss branches
-AntiKt4EMPFlowJetsAux.*
+AntiKt4EMPFlowJetsAuxDyn(.*)
 Kt4EMPFlowEventShapeAux.Density
 Kt4EMPFlowPUSBEventShapeAux.Density
 Kt4EMPFlowNeutEventShapeAux.Density
 PrimaryVerticesAux.vertexType
-AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAuxDyn.*
+AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAuxDyn(.*)
 AntiKt10UFOCSSKJetsAuxDyn.NumTrkPt500
 AntiKt10UFOCSSKJetsAuxDyn.GhostAntiKtVR30Rmax4Rmin02PV0TrackJets

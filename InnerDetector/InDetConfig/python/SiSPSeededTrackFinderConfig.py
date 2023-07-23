@@ -60,7 +60,55 @@ def SiSPSeededTrackFinderCfg(flags, name="InDetSiSpTrackFinder", **kwargs):
         name+flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
 
+def TrigSiSPSeededTrackFinderCfg(flags, name="InDetTrigSiSpTrackFinder", **kwargs):
+    acc = ComponentAccumulator()
 
+    if "TracksLocation" not in kwargs:
+        kwargs.setdefault("TracksLocation", flags.Tracking.ActiveConfig.trkTracks_IDTrig)
+
+    kwargs.setdefault("SpacePointsSCTName","SCT_TrigSpacePoints")
+    kwargs.setdefault("SpacePointsPixelName","PixelTrigSpacePoints")
+    
+    if "TrackTool" not in kwargs:
+        from InDetConfig.SiTrackMakerConfig import TrigSiTrackMaker_xkCfg
+        kwargs.setdefault("TrackTool", acc.popToolsAndMerge(
+            TrigSiTrackMaker_xkCfg(flags)))
+
+    #for the time being no need of InDetTrigPropagator 
+    #    acc.popToolsAndMerge(InDetPropagatorCfg(flags, name="InDetTrigPropagator"))   
+
+    if "TrackSummaryTool" not in kwargs:
+        from TrkConfig.TrkTrackSummaryToolConfig import (
+            InDetTrigFastTrackSummaryToolCfg)
+        kwargs.setdefault("TrackSummaryTool", acc.popToolsAndMerge(
+            InDetTrigFastTrackSummaryToolCfg(flags)))
+
+    if "SeedsTool" not in kwargs:
+        from InDetConfig.SiSpacePointsSeedToolConfig import (
+            TrigSiSpacePointsSeedMakerCfg)
+        kwargs.setdefault("SeedsTool", acc.popToolsAndMerge(
+            TrigSiSpacePointsSeedMakerCfg(flags)))
+
+    # Heavy-ion config (TODO the steering for the trigger)
+    kwargs.setdefault("useMBTSTimeDiff", flags.Reco.EnableHI)
+    kwargs.setdefault("useZvertexTool", False)
+    kwargs.setdefault("useZBoundFinding",
+                      flags.Tracking.ActiveConfig.doZBoundary)
+    if flags.Reco.EnableHI:
+        # Heavy Ion optimization from Igor
+        kwargs.setdefault("FreeClustersCut", 2)
+    ### End of trigger-specific HI steering (TODO)
+    
+    if flags.Tracking.ActiveConfig.usePrdAssociationTool:
+        # not all classes have that property !!!
+        kwargs.setdefault("PRDtoTrackMap", (
+            'InDetPRDtoTrackMap' + flags.Tracking.ActiveConfig.input_name))
+    else:
+        kwargs.setdefault("PRDtoTrackMap", "")
+
+    acc.merge(SiSPSeededTrackFinderCfg(flags, name, **kwargs))
+    return acc
+    
 def ITkSiSPSeededTrackFinderCfg(flags, name="ITkSiSpTrackFinder", **kwargs):
     acc = ComponentAccumulator()
 

@@ -107,6 +107,12 @@ LArRAWtoSuperCell::execute(const EventContext& context) const
 		   }
 		   
 		}
+		// energy value selected in LArLATOMEDecoder to mean
+		// invalid channel. Converting it to a bit-wise representation
+		// on the provenance word.
+		if ( energy < -99998.0 ){
+		     cell->setProvenance(cell->provenance()|0x40);
+		}
 		// we probably should soon associate some quality information to the saturation, maybe the bcid to provenance
 		cell->setQuality((unsigned short)saturation);
                 new_scell_cont->push_back( std::move(cell) );

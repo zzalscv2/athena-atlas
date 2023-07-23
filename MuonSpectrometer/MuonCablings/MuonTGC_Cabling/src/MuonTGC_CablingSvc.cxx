@@ -1444,7 +1444,7 @@ bool MuonTGC_CablingSvc::getSReadoutIDfromSLID(const int phi,
       (MuonTGC_Cabling::TGCId::NumberOfEndcapSector / MuonTGC_Cabling::TGCId::NumberOfSReadoutSector); // [2-48, 1] % (48/3)
     sbLoc = sectorInReadout;
     srodID = (sector-sectorInReadout)/
-      (MuonTGC_Cabling::TGCId::NumberOfEndcapSector / MuonTGC_Cabling::TGCId::NumberOfReadoutSector)
+      (MuonTGC_Cabling::TGCId::NumberOfEndcapSector / MuonTGC_Cabling::TGCId::NumberOfSReadoutSector)
       + 0x11 ;
   } else {
     sector = phi % MuonTGC_Cabling::TGCId::NumberOfForwardSector;
@@ -1452,7 +1452,7 @@ bool MuonTGC_CablingSvc::getSReadoutIDfromSLID(const int phi,
       (MuonTGC_Cabling::TGCId::NumberOfForwardSector / MuonTGC_Cabling::TGCId::NumberOfSReadoutSector); // [2-23, 1] % (24/3)
     sbLoc = sectorInReadout;
     srodID = (sector-sectorInReadout)/
-      (MuonTGC_Cabling::TGCId::NumberOfForwardSector / MuonTGC_Cabling::TGCId::NumberOfReadoutSector)
+      (MuonTGC_Cabling::TGCId::NumberOfForwardSector / MuonTGC_Cabling::TGCId::NumberOfSReadoutSector)
       + 0x11;
   }
   // Fixed SSWID for SL 

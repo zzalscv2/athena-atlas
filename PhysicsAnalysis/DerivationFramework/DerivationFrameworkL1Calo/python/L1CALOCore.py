@@ -92,16 +92,16 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     emulatedDataTowersKey = "L1_jFexEmulatedTowers"
     if flags.Trigger.L1.dojFex and isNotPool:
         from L1CaloFEXAlgos.FexEmulatedTowersConfig import jFexEmulatedTowersCfg
-        acc.merge(jFexEmulatedTowersCfg(flags,'jFexEmulatedTowerMaker',emulatedDataTowersKey))
+        acc.merge(jFexEmulatedTowersCfg(flags, writeKey=emulatedDataTowersKey))
 
     # Decorate any jFEX data towers
     if flags.Trigger.L1.dojFex and isNotPool:
-        from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CaloFEXDecoratorCfg
-        acc.merge(L1CaloFEXDecoratorCfg(flags,'jFexTower2SCellDecorator','L1_jFexDataTowers'))
+        from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CalojFEXDecoratorCfg
+        acc.merge(L1CalojFEXDecoratorCfg(flags))
 
     # Decorate the emulated jFEX towers
     if flags.Trigger.L1.dojFex and isNotPool:
-        acc.merge(L1CaloFEXDecoratorCfg(flags,'jFexTower2SCellEmulatedDecorator',emulatedDataTowersKey))
+        acc.merge(L1CalojFEXDecoratorCfg(flags,name='jFexTower2SCellEmulatedDecorator',jTowersReadKey=emulatedDataTowersKey))
 
     # Emulate eFEX input towers
     if flags.Trigger.L1.doeFex and isNotPool:

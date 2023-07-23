@@ -27,11 +27,11 @@ def defineInputsMenu():
                         if group["fpga"]==0 and group["clock"]==1:
                             group["algorithms"] += [
                                     TopoMenuDef( '0DR04-MU5VFab-CjJ90ab',     outputbits = 11), #Bjet, TODO: not a primary
-                                    TopoMenuDef( '2DISAMB-jJ55ab-4DR28-eTAU30abm-eTAU20abm',  outputbits = 13),
-                                    TopoMenuDef( '2DISAMB-jJ55ab-4DR32-eTAU30abm-eTAU20abm',  outputbits = 14),
-                                    TopoMenuDef( '2DISAMB-jJ55ab-10DR32-eTAU30abm-eTAU20abm', outputbits = 15),
-                                    TopoMenuDef( '0DETA24-4DPHI99-eTAU30abm-eTAU20abm',       outputbits = 16),
-                                    TopoMenuDef( '0DETA24-10DPHI99-eTAU30abm-eTAU12abm',      outputbits = 17),
+                                    TopoMenuDef( '2DISAMB-jJ55ab-4DR28-eTAU30ab-eTAU20ab',  outputbits = 13),
+                                    TopoMenuDef( '2DISAMB-jJ55ab-4DR32-eTAU30ab-eTAU20ab',  outputbits = 14),
+                                    TopoMenuDef( '2DISAMB-jJ55ab-10DR32-eTAU30ab-eTAU20ab', outputbits = 15),
+                                    TopoMenuDef( '0DETA24-4DPHI99-eTAU30ab-eTAU20ab',       outputbits = 16),
+                                    TopoMenuDef( '0DETA24-10DPHI99-eTAU30ab-eTAU12ab',      outputbits = 17),
                             ]
                         elif group["fpga"]==1 and group["clock"]==0:
                             group["algorithms"] += [

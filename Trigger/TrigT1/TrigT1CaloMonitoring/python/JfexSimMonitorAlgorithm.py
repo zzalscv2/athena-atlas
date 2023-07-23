@@ -44,7 +44,7 @@ def JfexSimMonitoringConfig(flags, UseOfflineCopy = True):
     myGroup = helper.addGroup(JfexSimMonAlg, groupName, mainDir)
     myGenericGroup = helper.addGroup(None, groupName+"Gen", mainDir)
     
-    myGenericGroup.defineHistogram('genLocation,genType;jFEX_Errors', path=None, type='TH2I',
+    myGenericGroup.defineHistogram('genLocation,genType;h_jFEX_Errors', path=None, type='TH2I',
                             title='jFEX generic monitoring for shifters;Location;Type',
                             xbins=4, xmin=0, xmax=4, xlabels=["Sim_DataTowers","Sim_EmulatedTowers","Input_Mismatch","Input_Invalids"],
                             ybins=4, ymin=0, ymax=4, ylabels=["TOB", "global TOB", "EM layer", "HAD layer" ],

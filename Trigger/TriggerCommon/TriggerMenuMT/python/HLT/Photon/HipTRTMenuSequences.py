@@ -43,6 +43,7 @@ def TRTHitGeneratorSequence(flags):
     else:
         ViewVerify.DataObjects += [( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
 
+    ViewVerify.DataObjects += [( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )]
     # calling trtRIOMaker
     from TrigInDetConfig.InDetTrigPrecisionTracking import trtRIOMaker_builder
     trtInviewAlgs = trtRIOMaker_builder(flags, signature = "electrontrt", config = None, rois=InViewRoIs)

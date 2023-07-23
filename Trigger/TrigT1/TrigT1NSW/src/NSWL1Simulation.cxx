@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/checker_macros.h"
@@ -73,7 +73,7 @@ namespace NSWL1 {
     //  }
       if(m_doStrip){
         ATH_CHECK( m_strip_tds->gather_strip_data(strips,padTriggers) );
-        ATH_CHECK( m_strip_cluster->cluster_strip_data(strips,clusters) );
+        ATH_CHECK( m_strip_cluster->cluster_strip_data(ctx, strips, clusters) );
         ATH_CHECK( m_strip_segment->find_segments(clusters,stripTriggerContainer) );
       }
       if(m_doPad) ATH_CHECK(PadTriggerAdapter::fillContainer(padTriggerContainer, padTriggers, ctx.eventID().event_number()));
@@ -81,7 +81,7 @@ namespace NSWL1 {
 
     //retrive the MM Strip hit data
     if(m_doMM){
-      ATH_CHECK( m_mmtrigger->runTrigger(MMTriggerContainer.get(), m_doMMDiamonds) );
+      ATH_CHECK( m_mmtrigger->runTrigger(ctx, MMTriggerContainer.get(), m_doMMDiamonds) );
     }
     if(m_doNtuple && m_tree){
       static std::mutex mutex;

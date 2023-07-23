@@ -169,7 +169,7 @@ void RatesGroup::execute(const WeightingValuesSummary_t& weights) {
     if (!isZero(wAND)) m_dataCachedPtr->Fill(RatesBinIdentifier_t::kPASS_WEIGHTED_AND_BIN, wAND);
   }
 
-  if (m_uniqueTrigger != nullptr && m_uniqueTrigger->getDataHist() != nullptr) {
+  if (m_uniqueTrigger != nullptr && m_uniqueTrigger->getDataHist() != nullptr && !m_uniqueTrigger->getDisabled()) {
     m_uniqueTrigger->getDataHist()->Fill(RatesBinIdentifier_t::kUNIQUE_BIN, wOR);
   }
 
