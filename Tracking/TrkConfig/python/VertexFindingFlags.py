@@ -17,6 +17,8 @@ class VertexSetup(FlagEnum):
     # The following are for trigger only
     GaussAMVF = 'GaussAdaptiveMultiFinding'
     GaussIVF = 'GaussIterativeFinding'
+    # Experimental setups, not to be used in production
+    ExperimentalActsIVF = 'ExperimentalActsIterativeFinding'
 
 
 def createSecVertexingFlags():
