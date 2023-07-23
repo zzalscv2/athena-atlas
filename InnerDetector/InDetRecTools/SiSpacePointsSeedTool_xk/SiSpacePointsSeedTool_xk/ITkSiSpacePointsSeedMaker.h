@@ -494,7 +494,7 @@ namespace ITk
     void sort(std::vector<InDet::FloatInt>& s, int start, int size) const;
     bool newVertices(EventData& data, const std::list<Trk::Vertex>&) const;
     void findNext(EventData& data) const;
-    bool isZCompatible(EventData& data, float&,float&,float&) const;
+    bool isZCompatible(EventData& data, float Zv, float R, float T) const;
     static void convertToBeamFrameWork(EventData& data, const Trk::SpacePoint*const&,float*) ;
     bool isUsed(const Trk::SpacePoint*, const Trk::PRDtoTrackMap &prd_to_track_map) const;
 

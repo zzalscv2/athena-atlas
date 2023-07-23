@@ -2092,11 +2092,11 @@ void SiSpacePointsSeedMaker::production3SpSSS(EventData &data,
   ++iter_topCands[0];
 
   /// prepare cut values
-  const float &ipt2K = data.ipt2K;
-  const float &ipt2C = data.ipt2C;
-  const float &COFK = data.COFK;
-  const float &maxd0cut = m_maxdImpactSSS;
-  const float &zmax = data.zmaxU;
+  const float ipt2K = data.ipt2K;
+  const float ipt2C = data.ipt2C;
+  const float COFK = data.COFK;
+  const float maxd0cut = m_maxdImpactSSS;
+  const float zmax = data.zmaxU;
   data.ITkCmSp.clear();
 
   /// keep track of the SP storace capacity.
@@ -2790,7 +2790,8 @@ const InDet::SiSpacePointsSeed *SiSpacePointsSeedMaker::next(const EventContext&
   return nullptr;
 }
 
-bool SiSpacePointsSeedMaker::isZCompatible(EventData &data, float &Zv, float &R, float &T) const
+bool SiSpacePointsSeedMaker::isZCompatible(EventData &data,
+					   float Zv, float R, float T) const
 {
   if (Zv < data.zminU || Zv > data.zmaxU)
     return false;
