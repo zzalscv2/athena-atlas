@@ -7,11 +7,7 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
 
     toAOD = []
 
-    from ActsConfig.TrackingComponentConfigurer import (
-        TrackingComponentConfigurer)
-    configuration_settings = TrackingComponentConfigurer(flags)
-
-    if flags.Acts.EDM.PersistifyClusters and configuration_settings.producesActsClusters():
+    if flags.Acts.EDM.PersistifyClusters:
         pixel_cluster_shortlist = ['-pixelClusterLink']
         strip_cluster_shortlist = ['-sctClusterLink']
         
@@ -23,8 +19,8 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
                   'xAOD::StripClusterContainer#ITkStripClusters',
                   'xAOD::StripClusterAuxContainer#ITkStripClustersAux.' + strip_cluster_variables]
 
-    if flags.Acts.EDM.PersistifySpacePoints and configuration_settings.producesActsSpacePoints():        
-        pixel_spacepoint_shortlist = []
+    if flags.Acts.EDM.PersistifySpacePoints:
+        pixel_spacepoint_shortlist = ['-pixelSpacePointLink']
         strip_spacepoint_shortlist = ['topHalfStripLength', 
                                       'bottomHalfStripLength', 
                                       'topStripDirection',
