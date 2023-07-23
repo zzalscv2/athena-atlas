@@ -15,24 +15,68 @@ def JETM12SkimmingToolCfg(ConfigFlags):
 
     from DerivationFrameworkJetEtMiss import TriggerLists
     metTriggers = TriggerLists.MET_Trig(ConfigFlags)
+    elTriggers = TriggerLists.single_el_Trig(ConfigFlags)
     muTriggers = TriggerLists.single_mu_Trig(ConfigFlags)
-    orstr  = ' || '
-    andstr = ' && '
-    trackRequirements = '(InDetTrackParticles.pt > 10.*GeV && InDetTrackParticles.TrkIsoPt1000_ptcone20 < 0.12*InDetTrackParticles.pt && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV) < 5.0*mm )'
-    trackRequirementsMu = '(InDetTrackParticles.pt > 70.*GeV && InDetTrackParticles.TrkIsoPt1000_ptcone20 < 0.12*InDetTrackParticles.pt && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV) < 5.0*mm )'
-    trackRequirementsTtbar = '(InDetTrackParticles.pt > 25.*GeV && InDetTrackParticles.TrkIsoPt1000_ptcone20 < 0.12*InDetTrackParticles.pt && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV) < 5.0*mm )'
 
-    #Previously used also b-tagging criteria for slimming, to be checked in r22
-    jetRequirementsTtbar = '( AntiKt4EMTopoJets.pt > 20*GeV )'
-    expressionW = '( (' + orstr.join(metTriggers) + ' )' + andstr + '( count('+trackRequirements+') >=1 ) )'
-    expressionMu = '( (' + orstr.join(muTriggers) + ' )' + andstr + '( count('+trackRequirementsMu+') >=1 ) )'
-    expressionTtbar = '( (' + orstr.join(muTriggers) + ' )' + andstr + '( count('+trackRequirementsTtbar+') >=1 )' + andstr + '( count('+trackRequirements+') >=2 )' + andstr + '( count('+jetRequirementsTtbar+') >=1 ) )'
-    expression = '( '+expressionW+' || '+expressionMu+' || '+expressionTtbar+' )'
+    #xAODStringSkimmingTool cannot handle electron trigger names, therefore need to use TriggerSkimmingTool
 
-    JETM12OfflineSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "JETM12SkimmingTool",
-                                                                                       expression = expression)
+    tracks = 'InDetTrackParticles.TrkIsoPt1000_ptcone20 < 0.12*InDetTrackParticles.pt && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm'
 
-    acc.addPublicTool(JETM12OfflineSkimmingTool, primary=True)
+    trackRequirements = '(InDetTrackParticles.pt > 6.*GeV && '+tracks+' )'
+    trackRequirementsMu = '(InDetTrackParticles.pt > 40.*GeV && '+tracks+' )'
+    jetRequirementsTtbar = '(AntiKt4EMPFlowJets.pt > 18*GeV && log(BTagging_AntiKt4EMPFlow.DL1dv01_pb/(0.018*BTagging_AntiKt4EMPFlow.DL1dv01_pc+(1.0-0.018)*BTagging_AntiKt4EMPFlow.DL1dv01_pu)) > 0.948)'
+    trackRequirementsNoIso = '(InDetTrackParticles.pt > 10.*GeV && abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )'
+
+    muonsRequirements = '(Muons.pt >= 20.*GeV) && (abs(Muons.eta) < 2.6) && (Muons.DFCommonMuonPassPreselection)'
+    electronsRequirements = '(Electrons.pt > 20.*GeV) && (abs(Electrons.eta) < 2.6) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))'
+
+    #String skimming selections
+    expression_W = '( count('+trackRequirements+') >=1 )'
+    expression_Mu = '( count('+trackRequirementsMu+') >=1 )'
+    expression_ttbarEl = '( count('+electronsRequirements+') >=1 ) && ( count('+jetRequirementsTtbar+') >=1 ) && ( count('+trackRequirementsNoIso+') >=2 ) && ( count('+trackRequirements+') >=1 )'
+    expression_ttbarElNoTag = '( count('+electronsRequirements+') >=1 ) && ( count('+trackRequirements+') >=1 )'
+    expression_ttbarMu = '( count('+muonsRequirements+') >=1 ) && ( count('+jetRequirementsTtbar+') >=1 ) && ( count('+trackRequirementsNoIso+') >=2 ) && ( count('+trackRequirements+') >=1 )'
+    expression_ttbarMuNoTag = '( count('+muonsRequirements+') >=1 ) && ( count('+trackRequirements+') >=1 )'
+
+    skimmingTool_W = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "skimmingTool_W", expression = expression_W)
+    acc.addPublicTool(skimmingTool_W)
+    skimmingTool_Mu = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "skimmingTool_mu", expression = expression_Mu)
+    acc.addPublicTool(skimmingTool_Mu)
+    skimmingTool_ttbarEl = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "skimmingTool_ttbarEl", expression = expression_ttbarEl)
+    acc.addPublicTool(skimmingTool_ttbarEl)
+    skimmingTool_ttbarElNoTag = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "skimmingTool_ttbarElNoTag", expression = expression_ttbarElNoTag)
+    acc.addPublicTool(skimmingTool_ttbarElNoTag)
+    skimmingTool_ttbarMu = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "skimmingTool_ttbarMu", expression = expression_ttbarMu)
+    acc.addPublicTool(skimmingTool_ttbarMu)
+    skimmingTool_ttbarMuNoTag = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "skimmingTool_ttbarMuNoTag", expression = expression_ttbarMuNoTag)
+    acc.addPublicTool(skimmingTool_ttbarMuNoTag)
+
+    # Trigger skimming tools
+    JETM12TriggerSkimmingTool_W = CompFactory.DerivationFramework.TriggerSkimmingTool(name = "JETM12TriggerSkimmingTool_W", TriggerListOR = metTriggers)
+    acc.addPublicTool(JETM12TriggerSkimmingTool_W)
+    JETM12TriggerSkimmingTool_ele = CompFactory.DerivationFramework.TriggerSkimmingTool(name = "JETM12TriggerSkimmingTool_ele", TriggerListOR = elTriggers)
+    acc.addPublicTool(JETM12TriggerSkimmingTool_ele)
+    JETM12TriggerSkimmingTool_mu = CompFactory.DerivationFramework.TriggerSkimmingTool(name = "JETM12TriggerSkimmingTool_mu", TriggerListOR = muTriggers)
+    acc.addPublicTool(JETM12TriggerSkimmingTool_mu)
+
+    JETM12SkimmingTool_W  = CompFactory.DerivationFramework.FilterCombinationAND(name="JETM12SkimmingTool_W",  FilterList=[skimmingTool_W,  JETM12TriggerSkimmingTool_W])
+    acc.addPublicTool(JETM12SkimmingTool_W)
+    JETM12SkimmingTool_Mu = CompFactory.DerivationFramework.FilterCombinationAND(name="JETM12SkimmingTool_Mu", FilterList=[skimmingTool_Mu, JETM12TriggerSkimmingTool_mu])
+    acc.addPublicTool(JETM12SkimmingTool_Mu)
+    JETM12SkimmingTool_ttbarEl      = CompFactory.DerivationFramework.FilterCombinationAND(name="JETM12SkimmingTool_ttbarEl",      FilterList=[skimmingTool_ttbarEl, JETM12TriggerSkimmingTool_ele])
+    acc.addPublicTool(JETM12SkimmingTool_ttbarEl)
+    JETM12SkimmingTool_ttbarElNoTag = CompFactory.DerivationFramework.FilterCombinationAND(name="JETM12SkimmingTool_ttbarElNoTag", FilterList=[skimmingTool_ttbarElNoTag, JETM12TriggerSkimmingTool_ele])
+    acc.addPublicTool(JETM12SkimmingTool_ttbarElNoTag)
+    JETM12SkimmingTool_ttbarMu      = CompFactory.DerivationFramework.FilterCombinationAND(name="JETM12SkimmingTool_ttbarMu",      FilterList=[skimmingTool_ttbarMu, JETM12TriggerSkimmingTool_mu])
+    acc.addPublicTool(JETM12SkimmingTool_ttbarMu)
+    JETM12SkimmingTool_ttbarMuNoTag = CompFactory.DerivationFramework.FilterCombinationAND(name="JETM12SkimmingTool_ttbarMuNoTag", FilterList=[skimmingTool_ttbarMuNoTag, JETM12TriggerSkimmingTool_mu])
+    acc.addPublicTool(JETM12SkimmingTool_ttbarMuNoTag)
+
+    JETM12SkimmingTool = CompFactory.DerivationFramework.FilterCombinationOR(name="JETM12SkimmingTool", FilterList=[JETM12SkimmingTool_W,
+                                                                                                                    JETM12SkimmingTool_Mu,
+                                                                                                                    JETM12SkimmingTool_ttbarEl,JETM12SkimmingTool_ttbarMu,
+                                                                                                                    JETM12SkimmingTool_ttbarElNoTag, JETM12SkimmingTool_ttbarMuNoTag])
+    acc.addPublicTool(JETM12SkimmingTool, primary = True)
 
     return(acc)
 
@@ -40,17 +84,9 @@ def JETM12AugmentationToolsForSkimmingCfg(ConfigFlags):
     """Configure the augmentation tool for skimming"""
     acc = ComponentAccumulator()
 
-    toolkwargs = {}
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
-    toolkwargs["TrackSelectionTool"] = acc.popToolsAndMerge(InDetTrackSelectionTool_Loose_Cfg(ConfigFlags, 
-                                                                                              name = "TrackSelectionTool1000_JETM12", 
-                                                                                              maxZ0SinTheta = 3.0,
-                                                                                              minPt = 1000.))
-
-    
-
-    TrackIsoTool = CompFactory.xAOD.TrackIsolationTool(**toolkwargs)
-    acc.addPublicTool(TrackIsoTool)
+    # Loose tracks with pT > 1000 MeV and Nonprompt_All_MaxWeight TTVA
+    from IsolationAlgs.IsoToolsConfig import TrackIsolationToolCfg
+    TrackIsoTool = acc.popToolsAndMerge(TrackIsolationToolCfg(ConfigFlags))
 
     from xAODPrimitives.xAODIso import xAODIso as isoPar
     Pt1000IsoTrackDecorator = CompFactory.DerivationFramework.trackIsolationDecorator(name = "Pt1000IsoTrackDecorator",
@@ -68,21 +104,25 @@ def JETM12AugmentationToolsCfg(ConfigFlags):
     acc = ComponentAccumulator()
 
     toolkwargs = {}
+    # Loose tracks with pT > 500 MeV
     from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
     toolkwargs["TrackSelectionTool"] = acc.popToolsAndMerge(InDetTrackSelectionTool_Loose_Cfg(ConfigFlags,
                                                                                               name = "TrackSelectionTool500_JETM12",
-                                                                                              maxZ0SinTheta = 3.0,
                                                                                               minPt = 500.))
+    #Nonprompt_All_MaxWeight TTVA
+    from IsolationAlgs.IsoToolsConfig import isoTTVAToolCfg
+    toolkwargs['TTVATool'] = acc.popToolsAndMerge(isoTTVAToolCfg(ConfigFlags))
+
     toolkwargs["name"] = "TrackIsolationToolPt500"
     TrackIsoTool = CompFactory.xAOD.TrackIsolationTool(**toolkwargs)
     acc.addPublicTool(TrackIsoTool)
 
     from xAODPrimitives.xAODIso import xAODIso as isoPar
     Pt500IsoTrackDecorator = CompFactory.DerivationFramework.trackIsolationDecorator(name = "Pt500IsoTrackDecorator",
-                                                                                      TrackIsolationTool = TrackIsoTool,
-                                                                                      TargetContainer = "InDetTrackParticles",
-                                                                                      ptcones = [isoPar.ptcone40,isoPar.ptcone30,isoPar.ptcone20],
-                                                                                      Prefix = 'TrkIsoPt500_')
+                                                                                     TrackIsolationTool = TrackIsoTool,
+                                                                                     TargetContainer = "InDetTrackParticles",
+                                                                                     ptcones = [isoPar.ptcone40,isoPar.ptcone30,isoPar.ptcone20],
+                                                                                     Prefix = 'TrkIsoPt500_')
 
     acc.addPublicTool(Pt500IsoTrackDecorator, primary=True)
     
@@ -103,15 +143,14 @@ def JETM12KernelCfg(ConfigFlags, name='JETM12Kernel', **kwargs):
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     skimmingTool = acc.getPrimaryAndMerge(JETM12SkimmingToolCfg(ConfigFlags))
     augmentationToolSkim = acc.getPrimaryAndMerge(JETM12AugmentationToolsForSkimmingCfg(ConfigFlags))
-    #acc.merge(JETM12AugmentationToolsForSkimmingCfg(ConfigFlags))
     skimmingKernel = DerivationKernel(kwargs["PreselectionName"], SkimmingTools = [skimmingTool], AugmentationTools = [augmentationToolSkim])
     acc.addEventAlgo( skimmingKernel, sequenceName="JETM12Sequence" ) 
 
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, TauTrackParticleThinningCfg
 
-    # https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/DaodRecommendations
-    JETM12_thinning_expression = "( InDetTrackParticles.pt > 10*GeV && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV) < 5.0*mm )"
+    # Increased cut (w.r.t. R21) on abs(z0) for new TTVA working points
+    JETM12_thinning_expression = "( InDetTrackParticles.pt > 10*GeV && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
     JETM12TrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
         ConfigFlags,
         name                    = "JETM12TrackParticleThinningTool",
@@ -161,16 +200,17 @@ def JETM12KernelCfg(ConfigFlags, name='JETM12Kernel', **kwargs):
                      JETM12TauTPThinningTool]
 
     #CaloClusterThinning does not support the usage of InDetTrackParticles at the moment, needs to be migrated to R22
-    #from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import CaloClusterThinningCfg
-    #selectionString = "( InDetTrackParticles.pt > 10*GeV && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV) < 5.0*mm )"
-    #JETM12CaloThinningTool = acc.getPrimaryAndMerge(CaloClusterThinningCfg(ConfigFlags,
-    #                                                                       name                  = "JETM12CaloClusterThinning",
-    #                                                                       StreamName            = kwargs['StreamName'],
-    #                                                                       SGKey                 = "InDetTrackParticles",
-    #                                                                       TopoClCollectionSGKey = "CaloCalTopoClusters",
-    #                                                                       SelectionString = selectionString,
-    #                                                                       ConeSize = 0.6))
-    #thinningTools.append(JETM12CaloThinningTool)
+    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import CaloClusterThinningCfg
+    selectionString = "( InDetTrackParticles.pt > 10*GeV && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV) < 5.0*mm )"
+    JETM12CaloThinningTool = acc.getPrimaryAndMerge(CaloClusterThinningCfg(ConfigFlags,
+                                                                           name                  = "JETM12CaloClusterThinning",
+                                                                           StreamName            = kwargs['StreamName'],
+                                                                           SGKey                 = "InDetTrackParticles",
+                                                                           TopoClCollectionSGKey = "CaloCalTopoClusters",
+                                                                           SelectionString = selectionString,
+                                                                           ConeSize = 0.6))
+    acc.addPublicTool(JETM12CaloThinningTool)
+    thinningTools.append(JETM12CaloThinningTool)
 
     if ConfigFlags.Input.isMC:
         truth_cond_status    = "( (TruthParticles.status == 1) && (TruthParticles.barcode < 200000) && (TruthParticles.pt > 8*GeV) )"       # high pt pions for E/p

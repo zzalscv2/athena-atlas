@@ -113,6 +113,7 @@ DerivationFramework::CaloClusterThinning::doThinning() const
   bool is_muons = false;
   bool is_egamma = false;
   bool is_tau = false;
+  bool is_track = false;
 
   // Retrieve egCluster collection
   SG::ReadHandle<xAOD::CaloClusterContainer> importedCaloCluster;
@@ -167,6 +168,7 @@ DerivationFramework::CaloClusterThinning::doThinning() const
 
   is_egamma = false;
   is_muons = false;
+  is_track = false;
 
   // Are we dealing with a compatible collection?
   const xAOD::ElectronContainer* testElectrons =
@@ -186,9 +188,14 @@ DerivationFramework::CaloClusterThinning::doThinning() const
   if (testTaus) {
     is_tau = true;
   }
+  const xAOD::TrackParticleContainer* testTracks =
+    dynamic_cast<const xAOD::TrackParticleContainer*>(importedParticles);
+  if (testTracks) {
+    is_track = true;
+  }
 
-  if (!(is_egamma || is_muons || is_tau)) {
-    ATH_MSG_ERROR("This tool only works with Egamma, Muons and Taus, "
+  if (!(is_egamma || is_muons || is_tau || is_track)) {
+    ATH_MSG_ERROR("This tool only works with Egamma, Muons, Taus and Tracks "
                   << m_sgKey.key() << " is not a compatible collection");
     return StatusCode::FAILURE;
   }
@@ -227,7 +234,8 @@ DerivationFramework::CaloClusterThinning::doThinning() const
                             particle,
                             importedCaloCluster.cptr(),
                             is_muons,
-                            is_egamma) != StatusCode::SUCCESS) {
+                            is_egamma,
+			    is_track) != StatusCode::SUCCESS) {
           return StatusCode::FAILURE;
         }
       }
@@ -244,7 +252,8 @@ DerivationFramework::CaloClusterThinning::doThinning() const
                             particle,
                             importedTopoCaloCluster.cptr(),
                             is_muons,
-                            is_egamma) != StatusCode::SUCCESS) {
+                            is_egamma,
+			    is_track) != StatusCode::SUCCESS) {
           return StatusCode::FAILURE;
         }
       }
@@ -264,7 +273,8 @@ DerivationFramework::CaloClusterThinning::doThinning() const
                             particle,
                             importedCaloCluster.cptr(),
                             is_muons,
-                            is_egamma) != StatusCode::SUCCESS) {
+                            is_egamma,
+			    is_track) != StatusCode::SUCCESS) {
           return StatusCode::FAILURE;
         }
       }
@@ -281,7 +291,8 @@ DerivationFramework::CaloClusterThinning::doThinning() const
                             particle,
                             importedTopoCaloCluster.cptr(),
                             is_muons,
-                            is_egamma) != StatusCode::SUCCESS) {
+                            is_egamma,
+			    is_track) != StatusCode::SUCCESS) {
           return StatusCode::FAILURE;
         }
       }
@@ -316,7 +327,8 @@ DerivationFramework::CaloClusterThinning::setClustersMask(
   const xAOD::IParticle* particle,
   const xAOD::CaloClusterContainer* cps,
   bool is_muons,
-  bool is_egamma) const
+  bool is_egamma,
+  bool is_track) const
 {
   if (!cps) {
     ATH_MSG_ERROR("Cluster collection not found");
@@ -338,6 +350,14 @@ DerivationFramework::CaloClusterThinning::setClustersMask(
       return StatusCode::FAILURE;
     }
     DerivationFramework::ClustersInCone::select(muon, m_coneSize, cps, mask);
+  }
+  if (is_track) {
+    const xAOD::TrackParticle* track = dynamic_cast<const xAOD::TrackParticle*>(particle);
+    if (!track) {
+      ATH_MSG_ERROR("Track cast failed");
+      return StatusCode::FAILURE;
+    }
+    DerivationFramework::ClustersInCone::select(track, m_coneSize, cps, mask);
   }
   return StatusCode::SUCCESS;
 }
