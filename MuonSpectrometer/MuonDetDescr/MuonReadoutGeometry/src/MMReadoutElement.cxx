@@ -65,18 +65,16 @@ namespace MuonGM {
         bool foundShape = false;
 
         if (!mgr->MinimalGeoFlag()) {
-	  if (GeoFullPhysVol* pvc = dynamic_cast<GeoFullPhysVol*>(pv)) {
-	    const GeoLogVol *lvol=pvc->getLogVol();
-	    const GeoShape  *shape=lvol->getShape();
-	    const GeoTrd    *trd=dynamic_cast<const GeoTrd *> (shape);
-	    if (trd) {
-	      m_sWidthChamber = 2*trd->getYHalfLength1();       // bottom base length (full chamber)
-	      m_lWidthChamber = 2*trd->getYHalfLength2();       // top base length (full chamber)
-	      m_lengthChamber = 2*trd->getZHalfLength();        // height of the trapezoid (full chamber)         
-	    }
-	    else {
-	      throw std::runtime_error("Cannot locate physVolShape");
-	    }
+            if (GeoFullPhysVol* pvc = dynamic_cast<GeoFullPhysVol*>(pv)) {
+                const GeoLogVol *lvol=pvc->getLogVol();
+                const GeoShape  *shape=lvol->getShape();
+                const GeoTrd    *trd=dynamic_cast<const GeoTrd *> (shape);
+                if (trd) {
+                m_sWidthChamber = 2*trd->getYHalfLength1();       // bottom base length (full chamber)
+                m_lWidthChamber = 2*trd->getYHalfLength2();       // top base length (full chamber)
+                m_lengthChamber = 2*trd->getZHalfLength();        // height of the trapezoid (full chamber)         
+            }
+        
 
                 unsigned int nchildvol = pvc->getNChildVols();
                 int llay = 0;
@@ -159,124 +157,124 @@ namespace MuonGM {
 
        
        if (m_ml < 1 || m_ml > 2) {
-	 MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
-	 log << MSG::WARNING << "MMReadoutElement -- Unexpected Multilayer: m_ml= " << m_ml << endmsg;
-	 return;
+     MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
+     log << MSG::WARNING << "MMReadoutElement -- Unexpected Multilayer: m_ml= " << m_ml << endmsg;
+     return;
        }
         
        char side     = getStationEta() < 0 ? 'C' : 'A';
        char sector_l = getStationName().substr(2, 1) == "L" ? 'L' : 'S';
- 	// Initialize from database:
-	if (sqliteReader) {
-	  IRDBAccessSvc *accessSvc{nullptr};
-	  StatusCode sc=svcLocator->service(geoDbTag->getParamSvcName(),accessSvc);
-	  if (sc.isFailure()) log << MSG::FATAL << "Could not locate " << geoDbTag->getParamSvcName() << endmsg;
-	  IRDBRecordset_ptr wmmRec = accessSvc->getRecordsetPtr("WMM","","");
-	  for (unsigned int ind = 0; ind < wmmRec->size(); ind++) {
-	    std::string WMM_TYPE       = (*wmmRec)[ind]->getString("WMM_TYPE");               
-	    if (sector_l != WMM_TYPE[4])                       continue;
-	    if (abs(getStationEta())!=(int) (WMM_TYPE[6]-'0')) continue;
-	    if (m_ml != (int) (WMM_TYPE[12]-'0'))              continue;
+     // Initialize from database:
+    if (sqliteReader) {
+      IRDBAccessSvc *accessSvc{nullptr};
+      StatusCode sc=svcLocator->service(geoDbTag->getParamSvcName(),accessSvc);
+      if (sc.isFailure()) log << MSG::FATAL << "Could not locate " << geoDbTag->getParamSvcName() << endmsg;
+      IRDBRecordset_ptr wmmRec = accessSvc->getRecordsetPtr("WMM","","");
+      for (unsigned int ind = 0; ind < wmmRec->size(); ind++) {
+        std::string WMM_TYPE       = (*wmmRec)[ind]->getString("WMM_TYPE");               
+        if (sector_l != WMM_TYPE[4])                       continue;
+        if (abs(getStationEta())!=(int) (WMM_TYPE[6]-'0')) continue;
+        if (m_ml != (int) (WMM_TYPE[12]-'0'))              continue;
 
-	    double Tck                 = (*wmmRec)[ind]->getDouble("Tck");                    
-	    double activeBottomLength  = (*wmmRec)[ind]->getDouble("activeBottomLength");     
-	    double activeH             = (*wmmRec)[ind]->getDouble("activeH");                
-	    double activeTopLength     = (*wmmRec)[ind]->getDouble("activeTopLength");        
-	    double gasTck              = (*wmmRec)[ind]->getDouble("gasTck");                 
-	    int nMissedBottomEta       = (*wmmRec)[ind]->getInt("nMissedBottomEta");          
-	    int nMissedBottomStereo    = (*wmmRec)[ind]->getInt("nMissedBottomStereo");       
-	    int nMissedTopEta          = (*wmmRec)[ind]->getInt("nMissedTopEta");             
-	    int nMissedTopStereo       = (*wmmRec)[ind]->getInt("nMissedTopStereo");          
-	    std::string  readoutSide   = (*wmmRec)[ind]->getString("readoutSide");            
-	    std::string  stereoAngle   = (*wmmRec)[ind]->getString("stereoAngle");            
-	    double       stripPitch    = (*wmmRec)[ind]->getDouble("stripPitch");             
-	    int          totalStrips   = (*wmmRec)[ind]->getInt   ("totalStrips");            
-	    double       ylFrame       = (*wmmRec)[ind]->getDouble("ylFrame");                
-	    double       ysFrame       = (*wmmRec)[ind]->getDouble("ysFrame");                
-	    
-	    m_tckChamber    = Tck;                              // thickness (full chamber)
-	    m_halfX         = activeH / 2;                      // 0.5*radial_size (active area)
-	    m_minHalfY      = activeBottomLength / 2;           // 0.5*bottom length (active area)
-	    m_maxHalfY      = activeTopLength / 2;              // 0.5*top length (active area)
-	    m_offset        = -0.5*(ylFrame - ysFrame);         // radial dist. of active area center w.r.t. chamber center
-	    std::replace(stereoAngle.begin(),stereoAngle.end(), ';',' ');
-	    std::istringstream stereoStream(stereoAngle);
+        double Tck                 = (*wmmRec)[ind]->getDouble("Tck");                    
+        double activeBottomLength  = (*wmmRec)[ind]->getDouble("activeBottomLength");     
+        double activeH             = (*wmmRec)[ind]->getDouble("activeH");                
+        double activeTopLength     = (*wmmRec)[ind]->getDouble("activeTopLength");        
+        double gasTck              = (*wmmRec)[ind]->getDouble("gasTck");                 
+        int nMissedBottomEta       = (*wmmRec)[ind]->getInt("nMissedBottomEta");          
+        int nMissedBottomStereo    = (*wmmRec)[ind]->getInt("nMissedBottomStereo");       
+        int nMissedTopEta          = (*wmmRec)[ind]->getInt("nMissedTopEta");             
+        int nMissedTopStereo       = (*wmmRec)[ind]->getInt("nMissedTopStereo");          
+        std::string  readoutSide   = (*wmmRec)[ind]->getString("readoutSide");            
+        std::string  stereoAngle   = (*wmmRec)[ind]->getString("stereoAngle");            
+        double       stripPitch    = (*wmmRec)[ind]->getDouble("stripPitch");             
+        int          totalStrips   = (*wmmRec)[ind]->getInt   ("totalStrips");            
+        double       ylFrame       = (*wmmRec)[ind]->getDouble("ylFrame");                
+        double       ysFrame       = (*wmmRec)[ind]->getDouble("ysFrame");                
+        
+        m_tckChamber    = Tck;                              // thickness (full chamber)
+        m_halfX         = activeH / 2;                      // 0.5*radial_size (active area)
+        m_minHalfY      = activeBottomLength / 2;           // 0.5*bottom length (active area)
+        m_maxHalfY      = activeTopLength / 2;              // 0.5*top length (active area)
+        m_offset        = -0.5*(ylFrame - ysFrame);         // radial dist. of active area center w.r.t. chamber center
+        std::replace(stereoAngle.begin(),stereoAngle.end(), ';',' ');
+        std::istringstream stereoStream(stereoAngle);
 
 
-	    for (int il = 0; il < m_nlayers; il++) {
-	      double stereoAngleIL{0};
-	      stereoStream >> stereoAngleIL;
+        for (int il = 0; il < m_nlayers; il++) {
+          double stereoAngleIL{0};
+          stereoStream >> stereoAngleIL;
 
-	      // identifier of the first channel to retrieve max number of strips
-	      Identifier id = manager()->mmIdHelper()->channelID(getStationName(), getStationEta(), getStationPhi(), m_ml, il + 1, 1);
-	      int chMax = manager()->mmIdHelper()->channelMax(id);
-	      if (chMax < 0) {
-		chMax = 2500;
-		MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
-		log << MSG::WARNING << "MMReadoutElement -- Max number of strips not a valid value" << endmsg;
-	      }
-	      MuonChannelDesign& design = m_etaDesign[il];
-	      
-	      design.type                = MuonChannelDesign::ChannelType::etaStrip;
-	      design.detType             = MuonChannelDesign::DetType::MM;
-	      design.inputPitch          = stripPitch;
-	      design.thickness           = gasTck; 
-	      design.nMissedTopEta       = nMissedTopEta;  // #of eta strips that are not connected to any FE board
-	      design.nMissedBottomEta    = nMissedBottomEta;
-	      design.nMissedTopStereo    = nMissedTopStereo;  // #of stereo strips that are not connected to any FE board
-	      design.nMissedBottomStereo = nMissedBottomStereo;
-	      design.totalStrips         = totalStrips;   
-	      /// The stereo angle is defined clock-wise from the y-axis
-	      design.defineTrapezoid(m_minHalfY, m_maxHalfY,m_halfX, - stereoAngleIL);
-	      /// Input width is defined as the distance between two channels
-	      design.inputWidth          = stripPitch * std::cos(design.stereoAngle());
-	      
-	      m_nStrips.push_back(design.totalStrips);
-	      if (!design.hasStereoAngle()) {  // eta layers
-		design.nch      = design.totalStrips - design.nMissedBottomEta - design.nMissedTopEta;
-		design.setFirstPos(-0.5 * design.xSize() + stripPitch);
-	      } else {  // stereo layers
-		design.nch      = design.totalStrips - design.nMissedBottomStereo - design.nMissedTopStereo;
-		design.setFirstPos( -0.5 * design.xSize() + (1 + design.nMissedBottomStereo - design.nMissedBottomEta) * stripPitch);
-	      }
-	      
-	      MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
-	      if (log.level() <= MSG::DEBUG)
-		log << MSG::DEBUG << "initDesign:" << getStationName() << " layer " << il << ", strip pitch " << design.inputPitch
-		    << ", nstrips " << design.nch << " stereo " << design.stereoAngle() / Gaudi::Units::degree << endmsg;
-	    }
-	  }
-	  
-	}
-	else
-	{
-	  MMDetectorHelper aHelper;
-	  MMDetectorDescription* mm   = aHelper.Get_MMDetector(sector_l, std::abs(getStationEta()), getStationPhi(), m_ml, side);
-	  MMReadoutParameters roParam = mm->GetReadoutParameters();
-	  
-	  double ylFrame  = mm->ylFrame();
-	  double ysFrame  = mm->ysFrame();
-	  double pitch    = roParam.stripPitch;
-	  m_sWidthChamber = mm->sWidth();                   // bottom base length (full chamber)
-	  m_lWidthChamber = mm->lWidth();                   // top base length (full chamber)
-	  m_lengthChamber = mm->Length();                   // height of the trapezoid (full chamber)
-	  m_tckChamber    = mm->Tck();                      // thickness (full chamber)
-	  m_halfX         = roParam.activeH / 2;            // 0.5*radial_size (active area)
-	  m_minHalfY      = roParam.activeBottomLength / 2; // 0.5*bottom length (active area)
-	  m_maxHalfY      = roParam.activeTopLength / 2;    // 0.5*top length (active area)
-	  m_offset        = -0.5*(ylFrame - ysFrame);       // radial dist. of active area center w.r.t. chamber center
-	  
-	  for (int il = 0; il < m_nlayers; il++) {
+          // identifier of the first channel to retrieve max number of strips
+          Identifier id = manager()->mmIdHelper()->channelID(getStationName(), getStationEta(), getStationPhi(), m_ml, il + 1, 1);
+          int chMax = manager()->mmIdHelper()->channelMax(id);
+          if (chMax < 0) {
+        chMax = 2500;
+        MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
+        log << MSG::WARNING << "MMReadoutElement -- Max number of strips not a valid value" << endmsg;
+          }
+          MuonChannelDesign& design = m_etaDesign[il];
+          
+          design.type                = MuonChannelDesign::ChannelType::etaStrip;
+          design.detType             = MuonChannelDesign::DetType::MM;
+          design.inputPitch          = stripPitch;
+          design.thickness           = gasTck; 
+          design.nMissedTopEta       = nMissedTopEta;  // #of eta strips that are not connected to any FE board
+          design.nMissedBottomEta    = nMissedBottomEta;
+          design.nMissedTopStereo    = nMissedTopStereo;  // #of stereo strips that are not connected to any FE board
+          design.nMissedBottomStereo = nMissedBottomStereo;
+          design.totalStrips         = totalStrips;   
+          /// The stereo angle is defined clock-wise from the y-axis
+          design.defineTrapezoid(m_minHalfY, m_maxHalfY,m_halfX, - stereoAngleIL);
+          /// Input width is defined as the distance between two channels
+          design.inputWidth          = stripPitch * std::cos(design.stereoAngle());
+          
+          m_nStrips.push_back(design.totalStrips);
+          if (!design.hasStereoAngle()) {  // eta layers
+        design.nch      = design.totalStrips - design.nMissedBottomEta - design.nMissedTopEta;
+        design.setFirstPos(-0.5 * design.xSize() + stripPitch);
+          } else {  // stereo layers
+        design.nch      = design.totalStrips - design.nMissedBottomStereo - design.nMissedTopStereo;
+        design.setFirstPos( -0.5 * design.xSize() + (1 + design.nMissedBottomStereo - design.nMissedBottomEta) * stripPitch);
+          }
+          
+          MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
+          if (log.level() <= MSG::DEBUG)
+        log << MSG::DEBUG << "initDesign:" << getStationName() << " layer " << il << ", strip pitch " << design.inputPitch
+            << ", nstrips " << design.nch << " stereo " << design.stereoAngle() / Gaudi::Units::degree << endmsg;
+        }
+      }
+      
+    }
+    else
+    {
+      MMDetectorHelper aHelper;
+      MMDetectorDescription* mm   = aHelper.Get_MMDetector(sector_l, std::abs(getStationEta()), getStationPhi(), m_ml, side);
+      MMReadoutParameters roParam = mm->GetReadoutParameters();
+      
+      double ylFrame  = mm->ylFrame();
+      double ysFrame  = mm->ysFrame();
+      double pitch    = roParam.stripPitch;
+      m_sWidthChamber = mm->sWidth();                   // bottom base length (full chamber)
+      m_lWidthChamber = mm->lWidth();                   // top base length (full chamber)
+      m_lengthChamber = mm->Length();                   // height of the trapezoid (full chamber)
+      m_tckChamber    = mm->Tck();                      // thickness (full chamber)
+      m_halfX         = roParam.activeH / 2;            // 0.5*radial_size (active area)
+      m_minHalfY      = roParam.activeBottomLength / 2; // 0.5*bottom length (active area)
+      m_maxHalfY      = roParam.activeTopLength / 2;    // 0.5*top length (active area)
+      m_offset        = -0.5*(ylFrame - ysFrame);       // radial dist. of active area center w.r.t. chamber center
+      
+      for (int il = 0; il < m_nlayers; il++) {
             // identifier of the first channel to retrieve max number of strips
             Identifier id = manager()->mmIdHelper()->channelID(getStationName(), getStationEta(), getStationPhi(), m_ml, il + 1, 1);
             int chMax = manager()->mmIdHelper()->channelMax(id);
             if (chMax < 0) {
-	      chMax = 2500;
-	      MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
-	      log << MSG::WARNING << "MMReadoutElement -- Max number of strips not a valid value" << endmsg;
+          chMax = 2500;
+          MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
+          log << MSG::WARNING << "MMReadoutElement -- Max number of strips not a valid value" << endmsg;
             }
             MuonChannelDesign& design = m_etaDesign[il];
-	    
+        
             design.type                = MuonChannelDesign::ChannelType::etaStrip;
             design.detType             = MuonChannelDesign::DetType::MM;
             design.inputPitch          = pitch;
@@ -290,22 +288,22 @@ namespace MuonGM {
             design.defineTrapezoid(m_minHalfY, m_maxHalfY,m_halfX, - roParam.stereoAngle.at(il));
             /// Input width is defined as the distance between two channels
             design.inputWidth          = pitch * std::cos(design.stereoAngle());
-	    
+        
             m_nStrips.push_back(design.totalStrips);
             if (!design.hasStereoAngle()) {  // eta layers
-	      design.nch      = design.totalStrips - design.nMissedBottomEta - design.nMissedTopEta;
-	      design.setFirstPos(-0.5 * design.xSize() + pitch);
+          design.nch      = design.totalStrips - design.nMissedBottomEta - design.nMissedTopEta;
+          design.setFirstPos(-0.5 * design.xSize() + pitch);
             } else {  // stereo layers
-	      design.nch      = design.totalStrips - design.nMissedBottomStereo - design.nMissedTopStereo;
-	      design.setFirstPos( -0.5 * design.xSize() + (1 + design.nMissedBottomStereo - design.nMissedBottomEta) * pitch);
+          design.nch      = design.totalStrips - design.nMissedBottomStereo - design.nMissedTopStereo;
+          design.setFirstPos( -0.5 * design.xSize() + (1 + design.nMissedBottomStereo - design.nMissedBottomEta) * pitch);
             }
-	    
+        
             MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
             if (log.level() <= MSG::DEBUG)
-	      log << MSG::DEBUG << "initDesign:" << getStationName() << " layer " << il << ", strip pitch " << design.inputPitch
-		  << ", nstrips " << design.nch << " stereo " << design.stereoAngle() / Gaudi::Units::degree << endmsg;
-	  }
-	}
+          log << MSG::DEBUG << "initDesign:" << getStationName() << " layer " << il << ", strip pitch " << design.inputPitch
+          << ", nstrips " << design.nch << " stereo " << design.stereoAngle() / Gaudi::Units::degree << endmsg;
+      }
+    }
     }
 
 
@@ -325,28 +323,28 @@ namespace MuonGM {
         MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
 #endif
         for (int layer = 0; layer < m_nlayers; ++layer) {
-	  // identifier of the first channel
-	  Identifier id = manager()->mmIdHelper()->channelID(getStationName(), getStationEta(), getStationPhi(), m_ml, layer + 1, 1);
+      // identifier of the first channel
+      Identifier id = manager()->mmIdHelper()->channelID(getStationName(), getStationEta(), getStationPhi(), m_ml, layer + 1, 1);
           const double sAngle = m_etaDesign[layer].stereoAngle();
-	  m_surfaceData->m_layerSurfaces.emplace_back(std::make_unique<Trk::PlaneSurface>(*this,id));
-	  m_surfaceData->m_surfBounds.emplace_back(std::make_unique<Trk::RotatedTrapezoidBounds>(m_halfX, m_minHalfY, m_maxHalfY, sAngle));
-	  
-	  m_surfaceData->m_layerTransforms.push_back(
-						     absTransform()                         // transformation from chamber to ATLAS frame
-						     * m_delta                              // rotations (a-lines) from the alignment group
-						     * m_Xlg[layer]                         // x-shift of the gas-gap center w.r.t. quadruplet center
-						     * Amg::Translation3D(0., 0., m_offset) // z-shift to volume center
-						     * Amg::AngleAxis3D(-90. * CLHEP::deg, Amg::Vector3D::UnitY()) // x<->z because of GeoTrd definition
-						     * Amg::AngleAxis3D(sAngle, Amg::Vector3D::UnitZ())); 
-	  
-	  // surface info (center, normal)
-	  m_surfaceData->m_layerCenters.push_back(m_surfaceData->m_layerTransforms.back().translation());
-	  m_surfaceData->m_layerNormals.push_back(m_surfaceData->m_layerTransforms.back().linear() * (-Amg::Vector3D::UnitZ()));
-	  
+      m_surfaceData->m_layerSurfaces.emplace_back(std::make_unique<Trk::PlaneSurface>(*this,id));
+      m_surfaceData->m_surfBounds.emplace_back(std::make_unique<Trk::RotatedTrapezoidBounds>(m_halfX, m_minHalfY, m_maxHalfY, sAngle));
+      
+      m_surfaceData->m_layerTransforms.push_back(
+                             absTransform()                         // transformation from chamber to ATLAS frame
+                             * m_delta                              // rotations (a-lines) from the alignment group
+                             * m_Xlg[layer]                         // x-shift of the gas-gap center w.r.t. quadruplet center
+                             * Amg::Translation3D(0., 0., m_offset) // z-shift to volume center
+                             * Amg::AngleAxis3D(-90. * CLHEP::deg, Amg::Vector3D::UnitY()) // x<->z because of GeoTrd definition
+                             * Amg::AngleAxis3D(sAngle, Amg::Vector3D::UnitZ())); 
+      
+      // surface info (center, normal)
+      m_surfaceData->m_layerCenters.push_back(m_surfaceData->m_layerTransforms.back().translation());
+      m_surfaceData->m_layerNormals.push_back(m_surfaceData->m_layerTransforms.back().linear() * (-Amg::Vector3D::UnitZ()));
+      
 #ifndef NDEBUG
           
-	  if (log.level() <= MSG::DEBUG)
-	    log << MSG::DEBUG << "MMReadoutElement layer " << layer << " sAngle " << sAngle << " phi direction MM eta strip "
+      if (log.level() <= MSG::DEBUG)
+        log << MSG::DEBUG << "MMReadoutElement layer " << layer << " sAngle " << sAngle << " phi direction MM eta strip "
                     << (m_surfaceData->m_layerTransforms.back().linear() * Amg::Vector3D::UnitY()).phi() << endmsg;
 #endif
         }
