@@ -223,7 +223,7 @@ StatusCode PileupFilterTool::selectSpclMcBarcodes()
         // Children
         if( isSpcl && decayVtx ) {
           for(const auto& child: *(part->end_vertex())) {
-             if( HepMC::is_truthhelper_generator_particle(child) && !m_removeDecayToSelf) { 
+             if( !HepMC::is_simulation_particle(child) && !m_removeDecayToSelf) { 
 	       m_particles.insert(child);// its not there already
              }
           }

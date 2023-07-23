@@ -205,7 +205,7 @@ bool EtaPtFilterTool::isAccepted( const HepMC::ConstGenParticlePtr& mc ) const
     // helper class to know if a GenParticle has been produced at Generator 
     // level. ie: not at simulation level (Geant4)
 
-    if ( ! HepMC::is_truthhelper_generator_particle(mc) ) {
+    if ( HepMC::is_simulation_particle(mc) ) {
       return false;
     }
   }
