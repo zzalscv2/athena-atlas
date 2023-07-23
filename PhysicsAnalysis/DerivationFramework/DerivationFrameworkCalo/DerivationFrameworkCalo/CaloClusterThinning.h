@@ -61,7 +61,8 @@ private:
                              const xAOD::IParticle* particle,
                              const xAOD::CaloClusterContainer* cps,
                              bool is_muons,
-                             bool is_egamma) const;
+                             bool is_egamma,
+			     bool is_track) const;
   StatusCode particleCluster(std::vector<bool>& mask,
                              const xAOD::IParticle* particle,
                              const xAOD::CaloClusterContainer* cps,
