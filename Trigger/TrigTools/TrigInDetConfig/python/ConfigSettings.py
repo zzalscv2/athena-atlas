@@ -72,7 +72,6 @@ class ConfigSettings_tau( _ConfigSettingsBase ):
       self._suffix   = "Tau"
       self._roi      = "HLT_Roi_Tau"
       self._vertex   = "HLT_IDVertex_Tau"
-      # Note: This is the only AMVF non-ACTS mode
       self._adaptiveVertex  = True
       self._pTmin           = 0.8*GeV
       self._etaHalfWidth    = 0.4
@@ -102,7 +101,6 @@ class ConfigSettings_tauIso( _ConfigSettingsBase ):
       self._phiHalfWidth   = 0.4
       self._zedHalfWidth   = 7.0
       self._adaptiveVertex = True
-      self._actsVertex     = True
       self._addSingleTrackVertices = True
       self._vertex         = "HLT_IDVertex_Tau"
       self._electronPID    = False
@@ -143,7 +141,6 @@ class ConfigSettings_jetSuper( _ConfigSettingsBase ):
       self._suffix   = "JetSuper"
       self._vertex   = "HLT_IDVertex_JetSuper"
       self._adaptiveVertex = True
-      self._actsVertex     = True
       self._addSingleTrackVertices = True
       self._roi          = "HLT_Roi_JetSuper"
       self._etaHalfWidth = 0.3
@@ -200,7 +197,6 @@ class ConfigSettings_fullScan( _ConfigSettingsBase ):
       self._roi      = "HLT_Roi_FS"
       self._vertex              = "HLT_IDVertex_FS"
       self._adaptiveVertex      = True
-      self._actsVertex          = True
       # these are being evaluated and may be added
       # self._addSingleTrackVertices = True
       # self._TracksMaxZinterval = 3

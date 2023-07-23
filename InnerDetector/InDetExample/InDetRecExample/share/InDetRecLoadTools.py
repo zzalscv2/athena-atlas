@@ -788,16 +788,8 @@ if (InDetFlags.doVertexFinding() or InDetFlags.doVertexFindingForMonitoring()) o
     # --- load adaptive multi primary vertex finder
     #
     if not InDetFlags.useActsPriVertexing():
-      from InDetPriVxFinderTool.InDetPriVxFinderToolConf import InDet__InDetAdaptiveMultiPriVxFinderTool
-      InDetPriVxFinderTool = InDet__InDetAdaptiveMultiPriVxFinderTool(name              = "InDetAdaptiveMultiPriVxFinderTool",
-                                                                      SeedFinder        = InDetVtxSeedFinder,
-                                                                      VertexFitterTool  = InDetVxFitterTool,
-                                                                      TrackSelector     = InDetTrackSelectorTool,
-                                                                      useBeamConstraint = InDetFlags.useBeamConstraint(),
-                                                                      selectiontype     = 0,
-                                                                      TracksMaxZinterval = 3,#mm 
-                                                                      useSeedConstraint = False, #switching off seed constraint
-                                                                      do3dSplitting     = InDetFlags.doPrimaryVertex3DFinding())
+      print("WARNING: AMVF configuration without ACTS is not supported anymore!!!")
+
     else:
       from ActsGeometry.ActsTrackingGeometryTool import ActsTrackingGeometryTool
       from ActsVertexReconstruction.ActsVertexReconstructionConf import ActsTrk__AdaptiveMultiPriVtxFinderTool
