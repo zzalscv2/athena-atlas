@@ -280,7 +280,7 @@ StatusCode DumpAll::execute(){
 	for( auto tt : *truth ){
 		if ( tt->status() != 1 ) continue;
                 if ( std::abs(tt->absPdgId()) != 11 ) continue;                 
-                if ( tt->barcode() >= HepMC::SIM_BARCODE_THRESHOLD )continue; // discard sim particles
+                if ( HepMC::is_simulation_particle(tt) )continue; // discard sim particles
 		m_truth_pt.push_back( tt->pt() );
 		m_truth_eta.push_back( tt->eta() );
 		m_truth_phi.push_back( tt->phi() );

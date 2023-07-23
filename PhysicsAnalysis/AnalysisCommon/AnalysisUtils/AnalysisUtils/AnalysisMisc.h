@@ -127,7 +127,7 @@ namespace AnalysisUtils {
 	{
 	  for (; it != itE; ++it)
 	    {
-	      if ( (*it)->barcode() < HepMC::SIM_BARCODE_THRESHOLD ) // only generator particles
+	      if ( !HepMC::is_simulation_particle(*it) ) // only generator particles
 		{
 		  if (((*it)->pdgId()==pdg) || pdg==0 )
 		    {
@@ -194,7 +194,7 @@ namespace AnalysisUtils {
 	{
 	  for (; it != itE; ++it)
 	    {
-	      if ( (*it)->barcode() < HepMC::SIM_BARCODE_THRESHOLD ) // only generator particles
+	      if ( !HepMC::is_simulation_particle(*it) ) // only generator particles
 		{	      
 		  if (((*it)->pdgId()==pdg) || pdg==0 )
 		    {
@@ -288,7 +288,7 @@ namespace AnalysisUtils {
 	{
 	  for (; it != itE; ++it)
 	    {
-	      if ( (*it)->barcode() < HepMC::SIM_BARCODE_THRESHOLD ) // only generator particles
+	      if ( !HepMC::is_simulation_particle(*it) ) // only generator particles
 		{
 		  double rtu = Delta::R(*it,eta,phi);
 		  if ( rtu < deltaR )
@@ -347,7 +347,7 @@ namespace AnalysisUtils {
 	{
 	  for (; it != itE; ++it)
 	    {
-	      if ( (*it)->barcode() < HepMC::SIM_BARCODE_THRESHOLD ) // only generator particles
+	      if ( !HepMC::is_simulation_particle(*it) ) // only generator particles
 		{
 		  double rtu = Delta::R(*it,eta,phi);
 		  double dE  = fabs( e-(*it)->e() );

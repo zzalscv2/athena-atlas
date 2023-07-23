@@ -189,7 +189,7 @@ StatusCode EFexAnalysis::execute(){
 	for( auto tt : *truth ){
 		if ( tt->status() != 1 ) continue;
 		if ( std::abs(tt->absPdgId()) != 11 ) continue;
-		if ( tt->barcode() >= HepMC::SIM_BARCODE_THRESHOLD ) continue;
+		if ( HepMC::is_simulation_particle(tt) ) continue;
 		if ( tt->pt() < 1e3 ) continue;
 		m_eff_truth_pt_d->Fill( tt->pt()/1e3 );
 		if ( std::abs( tt->eta() )<2.5 ) m_eff_truth_ptA_d->Fill( tt->pt()/1e3 );
