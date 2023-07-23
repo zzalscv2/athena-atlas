@@ -666,7 +666,7 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
   bool pixseed = data.trajectory().isLastPixel();
   /// max #iterations
   int itmax    = 30;
-  if (data.simpleTrack()) itmax = 10;
+  if (!data.useFastTracking() and data.simpleTrack()) itmax = 10;
   if (data.heavyIon()) itmax = 50;
 
   // 

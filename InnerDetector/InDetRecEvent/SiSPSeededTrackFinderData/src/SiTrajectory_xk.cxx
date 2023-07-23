@@ -160,7 +160,7 @@ InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurface(const EventContext& c
 
   if (tsos) dtsos.push_back(tsos);
   
-  tsos = m_elements[m_elementsMap[i]].trackSimpleStateOnSurface(false,false,0);
+  tsos = m_elements[m_elementsMap[i]].trackSimpleStateOnSurface(false,false,m_tools->useFastTracking());
 
   if (tsos) dtsos.push_back(tsos);
   
