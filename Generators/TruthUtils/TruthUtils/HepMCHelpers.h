@@ -43,12 +43,10 @@ namespace MC
 /* The functions below should be unified */
   template <class T> inline bool isStableOrSimDecayed(const T& p) {
     const auto vertex = p->end_vertex();
-    const int status = p->status();
-    return ((status == 1) ||
-            (status == 2 && (!vertex || HepMC::is_simulation_vertex(vertex))));
+    return ( isStable<T>(p) || (isDecayed<T>(p) && (!vertex || HepMC::is_simulation_vertex(vertex))));
   }
 
-  template <class T> inline bool isZeroEnergyPhoton(const T&  p) { return isPhoton(p->pdg_id()) && p->e() == 0;}
+  template <class T> inline bool isZeroEnergyPhoton(const T&  p) { return isPhoton<T>(p) && p->e() == 0;}
 
   template <class T> inline bool jettruthparticleselectortool_isStable( const T& p) {
     if (HepMC::is_simulation_particle(p)) return false; // This particle is from G4
@@ -93,7 +91,6 @@ namespace MC
 
   template <class T> inline bool ThinGeantTruthAlg_isStatus1BSMParticle(const T& p)  {
     const int apid = std::abs(p->pdg_id());
-    bool status1 = (p->status() == 1);
     return ((31 < apid && apid < 38) || // BSM Higgs / W' / Z' / etc
       apid == 39 || apid == 41 || apid == 42 ||
       apid == 7 || // 4th gen beauty
@@ -106,7 +103,7 @@ namespace MC
       apid == 6000007 ||  // B-1/3
       apid == 6000008 ||  // Y-4/3
       ((apid >= 10000100) && (apid <= 10001000)) // multi-charged
-      ) && status1;
+      ) && isStable<T>(p);
   }
 
   template <class T> inline bool MenuTruthThinning_isBSM(const T& p) {

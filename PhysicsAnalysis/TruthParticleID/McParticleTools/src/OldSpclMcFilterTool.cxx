@@ -244,7 +244,7 @@ StatusCode OldSpclMcFilterTool::selectSpclMcBarcodes()
         for(const auto& child: *dcyVtx) {
 	if( child->pdg_id()==id && //> looking for parton showers or documentaries
 	    HepMC::barcode(child) !=barcode  && //> just to be sure that merging GEN_EVENT/G4Truth is OK
-	    HepMC::is_truthhelper_generator_particle(child)  //> child is not from GEANT
+	    !HepMC::is_simulation_particle(child)  //> child is not from GEANT
 	    ) {
 	  if ( m_includePartonShowers ) {
 	    // we keep the parent particle
@@ -278,7 +278,7 @@ StatusCode OldSpclMcFilterTool::selectSpclMcBarcodes()
     // Children
     if( isSpcl && decayVtx ) {
       for(const auto& child: *(part->end_vertex())) {
-        if( HepMC::is_truthhelper_generator_particle(child) && !m_removeDecayToSelf) { 
+        if( HepMC::is_simulation_particle(child) && !m_removeDecayToSelf) { 
 	  m_barcodes.insert(HepMC::barcode(child));// its not there already
         }
       }

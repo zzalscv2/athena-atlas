@@ -59,7 +59,7 @@ public:
                 if (genEvt == 0) return StatusCode::FAILURE;
                 if (ifgen) {
                     for (auto it: *genEvt) {
-                        if (HepMC::is_truthhelper_generator_particle(it)) mcParticles.push_back(it);
+                        if (!HepMC::is_simulation_particle(it)) mcParticles.push_back(it);
                     }
                 } else {
                     for (auto it: *genEvt) {

@@ -220,11 +220,6 @@ bool PhotonTruthTool::isFinalStatePhotonMC
 bool
 PhotonTruthTool::isFinalState(const xAOD::TruthParticle* truePart) const
 {
-  /*
-  if ( truePart->genParticle() == 0 ) return false ;
-  int status = truePart->genParticle()->status() ;
-  return ( status == 1 ) ;
-  */
   if ( truePart==0 ) return false ;
   // decayed in generator?
   if ( truePart->status()!=1 ) return false ; 
