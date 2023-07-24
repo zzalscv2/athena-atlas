@@ -79,18 +79,14 @@ namespace Trk {
 //getting the signal event itself
                 McEventCollection::const_iterator it = mcCollection->begin();
                 const HepMC::GenEvent* genEvent= ( *it );
-#ifdef HEPMC3
-                if( genEvent->vertices().empty() ) {
-                  ATH_MSG_DEBUG( "No vertices found in first GenEvent" );
-                  return nullptr;
-                }
-               auto pv = genEvent->vertices()[0];
-#else
-//        std::cout<<"The ID of the first event of the collection: "<<genEvent->event_number()<<std::endl;
+
                 if( genEvent->vertices_empty() ) {
                   ATH_MSG_DEBUG( "No vertices found in first GenEvent" );
                   return nullptr;
                 }
+#ifdef HEPMC3
+               auto pv = genEvent->vertices()[0];
+#else
                auto pv = *(genEvent->vertices_begin());
 #endif
 

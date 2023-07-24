@@ -116,11 +116,10 @@ int TruthLeptonNearbyAssociationTool::get_real_parent( HepMC::ConstGenParticlePt
 
   auto prodvertex = p->production_vertex();
   if ( !prodvertex ) return 0;  // parent didn't exist
+  if (!prodvertex->particles_in_size()) return 0;
 #ifdef HEPMC3
-  if (!prodvertex->particles_in().size()) return 0;
   auto parentparticle=prodvertex->particles_in()[0];
 #else
-  if (!prodvertex->particles_in_size()) return 0;
   auto parentparticle=*(prodvertex->particles_begin(HepMC::parents));
 #endif
   if ( !parentparticle ) return 0;  // parent didn't exist

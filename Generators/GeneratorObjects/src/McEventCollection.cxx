@@ -18,11 +18,7 @@ namespace {
   public:
     FilledMatchEventNumber(int eventNumber) : m_evtNumber(eventNumber) {}
     bool operator()(const HepMC::GenEvent* pGE) const {
-#ifdef HEPMC3
-      return ((m_evtNumber == pGE->event_number()) && !(pGE->vertices().empty()) );
-#else
       return ((m_evtNumber == pGE->event_number()) && !(pGE->vertices_empty()) );
-#endif
     }
   private:
     int m_evtNumber;
