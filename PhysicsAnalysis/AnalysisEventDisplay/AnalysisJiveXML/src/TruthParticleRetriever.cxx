@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisJiveXML/TruthParticleRetriever.h"
@@ -157,9 +157,9 @@ namespace JiveXML {
 
      truthLabels = "No" + DataType( countTruth ).toString() +"_Pdg="
                    + DataType( (*mcpartItr)->pdgId() ).toString()
-                 + "_stat=" + DataType( (*mcpartItr)->status() ).toString(); 
-                 + "_nParents=" + DataType( (*mcpartItr)->nParents() ).toString()
-                 + "_nDecay=" + DataType( (*mcpartItr)->nDecay() ).toString(); 
+                   + "_stat=" + DataType( (*mcpartItr)->status() ).toString()
+                   + "_nParents=" + DataType( (*mcpartItr)->nParents() ).toString()
+                   + "_nDecay=" + DataType( (*mcpartItr)->nDecay() ).toString();
 
      for ( unsigned int iChild = 0; iChild < (*mcpartItr)->nDecay(); ++iChild ) { 
         bool childHasPdgId = (*mcpartItr)->child(iChild)->hasPdgId();
