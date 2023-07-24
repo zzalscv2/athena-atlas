@@ -75,6 +75,8 @@ using namespace ST;
 #include "BoostedJetTaggers/JSSWTopTaggerDNN.h"
 #include "ParticleJetTools/JetTruthLabelingTool.h"
 
+#include "InDetTrackSystematicsTools/IInclusiveTrackFilterTool.h"
+
 
 #define CONFIG_EG_EFF_TOOL( TOOLHANDLE, TOOLNAME, CORRFILE )                \
   if( !TOOLHANDLE.isUserConfigured() ) {                                \
@@ -145,6 +147,20 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     ATH_MSG_INFO("Using user-configured PRW tool");
     ATH_CHECK( m_prwTool.retrieve() );
   }
+
+  /////////////////////////////////////////////////////////////////////////////////////////
+  // Initialize LRT systematics tool
+  if (!m_LRTuncTool.isUserConfigured())
+  {
+    ATH_MSG_INFO("Initializing LRT uncertainty tool");
+    m_LRTuncTool.setTypeAndName("InDet::InclusiveTrackFilterTool/LRTUncTool");    
+    ATH_CHECK( m_LRTuncTool.setProperty("Seed", 1) );
+    ATH_CHECK(m_LRTuncTool.retrieve());
+  } else {
+    ATH_MSG_INFO("Using user-configured LRT uncertainty tool");
+    ATH_CHECK(m_LRTuncTool.retrieve());
+  }
+
   std::string toolName; // to be used for tool init below, keeping explicit string constants a minimum /CO
 
   std::string jetname,jetcoll,fatjetcoll;

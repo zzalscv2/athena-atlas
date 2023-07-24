@@ -323,7 +323,7 @@ StatusCode SUSYToolsAlg::execute() {
   // get EventInfo
   const xAOD::EventInfo* evtInfo(0);
   ATH_CHECK( evtStore()->retrieve(evtInfo, "EventInfo") );
-    bool isData = m_SUSYTools->isData();
+  bool isData = m_SUSYTools->isData();
 
   // manual max events within lumiblock selection (on top of Nevts)
   if (m_maxEvts>=-1 && (evtInfo->lumiBlock() != (unsigned int)m_lbfilter)) return StatusCode::SUCCESS;
@@ -937,6 +937,14 @@ StatusCode SUSYToolsAlg::execute() {
     bool syst_affectsTaus      = ST::testAffectsObject(xAOD::Type::Tau, sysInfo.affectsType);
     bool syst_affectsJets      = ST::testAffectsObject(xAOD::Type::Jet, sysInfo.affectsType);
     bool syst_affectsBTag      = ST::testAffectsObject(xAOD::Type::BTag, sysInfo.affectsType);
+    bool syst_affectsLRT       = ST::testAffectsObject(sysInfo.affectsType) == "LRT_Objects";
+
+    // Apply LRT uncertainty.  
+    // Needs to be before retrieving leptons as they could be removed if the track is vetoed
+    if (syst_affectsLRT) 
+    {
+      ATH_CHECK( m_SUSYTools->ApplyLRTUncertainty() );
+    } 
 
     // If necessary (kinematics affected), make a shallow copy with the variation applied
     // otherwise set the collection pointers to the nominal

@@ -74,6 +74,8 @@
 #include "BoostedJetTaggers/JSSWTopTaggerDNN.h"
 #include "ParticleJetTools/JetTruthLabelingTool.h"
 
+#include "InDetTrackSystematicsTools/IInclusiveTrackFilterTool.h"
+
 // For reading metadata
 #include "xAODMetaData/FileMetaData.h"
 
@@ -410,6 +412,8 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     //
     m_prwTool(""),
     //
+    m_LRTuncTool(""),
+    //
     m_orToolbox("ORToolbox",this),
     //
     m_pmgSHnjetWeighter(""),
@@ -719,6 +723,8 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   //
   m_prwTool.declarePropertyFor( this, "PileupReweightingTool", "The PRW tool" );
   //
+  m_LRTuncTool.declarePropertyFor( this, "InclusiveTrackFilterTool", "The LRT uncertainty tool"); 
+  //
   m_pmgSHnjetWeighter.declarePropertyFor( this, "PMGSHVjetReweightTool", "The PMGSHVjetReweightTool (AntiKt4TruthJets)" );
   m_pmgSHnjetWeighterWZ.declarePropertyFor( this, "PMGSHVjetReweightWZTool", "The PMGSHVjetReweightTool (AntiKt4TruthWZJets)" );
   //
@@ -921,6 +927,11 @@ StatusCode SUSYObjDef_xAOD::initialize() {
     // need to set a full path if you don't use the one in CVMFS
     ATH_CHECK( autoconfigurePileupRWTool(m_autoconfigPRWPath, m_autoconfigPRWFile, false, m_autoconfigPRWRPVmode, m_autoconfigPRWCombinedmode) );
 
+  // Read Handles
+  ATH_CHECK( m_LRTCollectionName.initialize() );
+  ATH_CHECK( m_GSFLRTCollectionName.initialize() );
+
+  // Write Handles
   ATH_CHECK( m_outElectronLocation.initialize() );
   ATH_CHECK( m_outMuonLocation.initialize() );
 
@@ -2355,6 +2366,16 @@ StatusCode SUSYObjDef_xAOD::applySystematicVariation( const CP::SystematicSet& s
     }
   }
 
+  if (!m_LRTuncTool.empty()) {
+    StatusCode ret = m_LRTuncTool->applySystematicVariation(systConfig);
+    if ( ret != StatusCode::SUCCESS) {
+      ATH_MSG_ERROR("Cannot configure InDetTrackFilterTool for systematic var. " << systConfig.name() );
+      return ret;
+    } else {
+      ATH_MSG_VERBOSE("Configured InDetTrackFilterTool for systematic var. " << systConfig.name() );
+    }
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -2671,6 +2692,13 @@ ST::SystInfo SUSYObjDef_xAOD::getSystInfo(const CP::SystematicVariation& sys) co
     }
   }
 
+  if (!m_LRTuncTool.empty()){
+    if ( m_LRTuncTool->isAffectedBySystematic(sys) ) {
+      sysInfo.affectsKinematics = true;
+      sysInfo.affectsType = SystObjType::LRT_Object;
+    }
+  }
+
   std::string affectedType;
   switch (sysInfo.affectsType) {
   case Unknown     : affectedType = "UNKNOWN";  break;
@@ -2685,6 +2713,7 @@ ST::SystInfo SUSYObjDef_xAOD::getSystInfo(const CP::SystematicVariation& sys) co
   case MET_CST     : affectedType = "MET_CST";  break;
   case MET_Track   : affectedType = "MET_Track";  break;
   case EventWeight : affectedType = "EVENT WEIGHT"; break;
+  case LRT_Object  : affectedType = "LRT_OBJECT"; break;
   }
 
   ATH_MSG_VERBOSE("Variation " << sys.name() << " affects "
@@ -2884,6 +2913,45 @@ unsigned int SUSYObjDef_xAOD::GetRunNumber() const {
   return randomrunnumber(*(evtInfo));
 
 }
+
+
+const xAOD::TrackParticleContainer& SUSYObjDef_xAOD::GetInDetLargeD0Tracks(const EventContext &ctx) const {
+  SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_LRTCollectionName, ctx);
+
+  if ( !tracks.isValid() ) {
+    throw std::runtime_error("Unable to fetch LargeD0 tracks.");
+  }
+
+  //const xAOD::TrackParticleContainer out = *tracks;
+
+  return *tracks;
+}
+
+const xAOD::TrackParticleContainer& SUSYObjDef_xAOD::GetInDetLargeD0GSFTracks(const EventContext &ctx) const {
+  SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_GSFLRTCollectionName, ctx);
+
+  if ( !tracks.isValid() ) {
+    throw std::runtime_error("Unable to fetch LargeD0 GSF tracks.");
+  }
+  return *tracks;
+}
+
+StatusCode SUSYObjDef_xAOD::ApplyLRTUncertainty(){
+  
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+
+  // Loop over tracks and call LRT uncertainty tool
+  ATH_MSG_DEBUG ( "Applying LRT filter tool decorations for uncertainty");
+  const xAOD::TrackParticleContainer inTracks = GetInDetLargeD0Tracks(ctx);
+  for(const auto trk: inTracks)  dec_lrtFilter(*trk) = m_LRTuncTool->accept(trk);
+
+  // Loop over GSF LRT tracks and call uncertainty tool
+  const xAOD::TrackParticleContainer inGSFTracks = GetInDetLargeD0GSFTracks(ctx);
+  for(const auto trk: inGSFTracks) dec_lrtFilter(*trk) = m_LRTuncTool->accept(trk);
+
+  return StatusCode::SUCCESS;
+}
+
 
 int SUSYObjDef_xAOD::treatAsYear(const int runNumber) const {
   // Use the run number we are passed if we are passed one, otherwise

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // This source file implements all of the functions related to Electrons
@@ -56,6 +56,7 @@ namespace ST {
   const static SG::AuxElement::Decorator<float>     dec_d0sig("d0sig");
   const static SG::AuxElement::ConstAccessor<float> acc_d0sig("d0sig");
   const static SG::AuxElement::Decorator<ElementLink<xAOD::ElectronContainer>> dec_originalElectronLink("originalElectronLink");
+  const static SG::AuxElement::ConstAccessor<ElementLink<xAOD::ElectronContainer>> acc_originalElectronLink("originalElectronLink");
   const static SG::AuxElement::Decorator<char> dec_isLRT("isLRT");
 
   const static SG::AuxElement::ConstAccessor<float> acc_topoetcone20("topoetcone20");
@@ -78,15 +79,53 @@ StatusCode SUSYObjDef_xAOD::MergeElectrons(const xAOD::ElectronContainer & elect
             ATH_MSG_DEBUG( "ELECTRON cl phi: "                                    << electron->caloCluster()->phi());
             newElectron = new xAOD::Electron(*electron);
 
-            ElementLink<xAOD::ElectronContainer> eleLink;
-            eleLink.toIndexedElement(electrons, electron->index());
-            dec_originalElectronLink(*newElectron) = eleLink;
+            if (electron->isAvailable<ElementLink<xAOD::ElectronContainer>>("originalElectronLink") ) {
+              dec_originalElectronLink(*newElectron) = acc_originalElectronLink(*electron);
+            } else {
+              ElementLink<xAOD::ElectronContainer> eleLink;
+              eleLink.toIndexedElement(electrons, electron->index());
+              dec_originalElectronLink(*newElectron) = eleLink;
+            }
 
             outputCol->push_back(newElectron); 
         }
     }
     return StatusCode::SUCCESS;
 }
+
+
+StatusCode SUSYObjDef_xAOD::prepareLRTElectrons(const xAOD::ElectronContainer* inElectrons, xAOD::ElectronContainer* copy) const{
+  for (const xAOD::Electron *electron: *inElectrons){
+    const xAOD::TrackParticle* idtrack = electron->trackParticle();
+    
+    // Save electron if the id track passes the LRT filter
+    if (  idtrack->isAvailable<char>("passLRTFilter") )
+    {
+      if ( static_cast<int>(acc_lrtFilter(*idtrack) ) ){
+        std::unique_ptr<xAOD::Electron> copyElectron = std::make_unique<xAOD::Electron>(*electron);
+
+        // transfer original electron link
+        ElementLink<xAOD::ElectronContainer> eleLink;
+        eleLink.toIndexedElement(*inElectrons, electron->index());
+        dec_originalElectronLink(*copyElectron) = eleLink;
+
+        copy->push_back( std::move(copyElectron) );        
+      }  
+    } 
+    else // Keep electron if flag is not available
+    {
+      std::unique_ptr<xAOD::Electron> copyElectron = std::make_unique<xAOD::Electron>(*electron);
+      
+      ElementLink<xAOD::ElectronContainer> eleLink;
+      eleLink.toIndexedElement(*inElectrons, electron->index());
+      dec_originalElectronLink(*copyElectron) = eleLink;
+
+      copy->push_back( std::move(copyElectron) );
+    }
+  }
+  return StatusCode::SUCCESS;
+}
+
 
 StatusCode SUSYObjDef_xAOD::GetElectrons(xAOD::ElectronContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, bool recordSG, const std::string& elekey, const std::string& lrtelekey, const xAOD::ElectronContainer* containerToBeCopied)
 {
@@ -102,39 +141,43 @@ StatusCode SUSYObjDef_xAOD::GetElectrons(xAOD::ElectronContainer*& copy, xAOD::S
   outputCol->setStore(outputAuxCol.get());
   ATH_CHECK( m_outElectronLocation.initialize() );
 
-  if (bool(m_eleLRT) && evtStore()->contains<xAOD::ElectronContainer>(lrtelekey)){
+  if (bool(m_eleLRT) && !lrtelekey.empty() && evtStore()->contains<xAOD::ElectronContainer>(lrtelekey)){
     ATH_MSG_DEBUG("Applying prompt/LRT electron OR procedure"); 
 
-    // First identify if merged container has already been made (for instances where GetMuons() is called more than once)
+    // First identify if merged container has already been made (for instances where GetElectrons() is called more than once)
     if (evtStore()->contains<xAOD::ElectronContainer>("StdWithLRTElectrons")) {
       ATH_MSG_DEBUG("Merged prompt/LRT container already created in TStore");  
     } else {
       ATH_MSG_DEBUG("Creating merged prompt/LRT container in TStore");
 
-      // Retrieve prompt and LRT muons from TStore
+      // Retrieve prompt and LRT electrons from TStore
       ATH_CHECK( evtStore()->retrieve(prompt_electrons, elekey) );
       ATH_CHECK( evtStore()->retrieve(lrt_electrons, lrtelekey) );
 
+      // Remove LRT electrons as flagged by filter for uncertainty
+      auto filtered_electrons = std::make_unique<xAOD::ElectronContainer>();
+      std::unique_ptr<xAOD::ElectronAuxContainer> filtered_electrons_aux = std::make_unique<xAOD::ElectronAuxContainer>();
+      filtered_electrons->setStore(filtered_electrons_aux.get());
+      ATH_CHECK(prepareLRTElectrons(lrt_electrons, filtered_electrons.get()));
+
       // Check overlap between prompt and LRT collections
       std::set<const xAOD::Electron *> ElectronsToRemove;
-      m_elecLRTORTool->checkOverlap(*prompt_electrons, *lrt_electrons, ElectronsToRemove);
+      m_elecLRTORTool->checkOverlap(*prompt_electrons, *filtered_electrons, ElectronsToRemove);
     
-      // Decorate muons with prompt/LRT
-      for (const xAOD::Electron* el : *prompt_electrons)  dec_isLRT(*el) = 0;
-      for (const xAOD::Electron* el : *lrt_electrons)     dec_isLRT(*el) = 1;
+      // Decorate electrons with prompt/LRT
+      for (const xAOD::Electron* el : *prompt_electrons)   dec_isLRT(*el) = 0;
+      for (const xAOD::Electron* el : *filtered_electrons) dec_isLRT(*el) = 1;
 
       // Create merged StdWithLRTElectrons container
-      outputCol->reserve(prompt_electrons->size() + lrt_electrons->size());
-      ATH_MSG_DEBUG("Merging Prompt Electrons");
+      outputCol->reserve(prompt_electrons->size() + filtered_electrons->size());
       ATH_CHECK(MergeElectrons(*prompt_electrons, outputCol.get(), ElectronsToRemove ));
-      ATH_MSG_DEBUG("Merging LRT Electrons");
-      ATH_CHECK(MergeElectrons(*lrt_electrons, outputCol.get(), ElectronsToRemove ));
+      ATH_CHECK(MergeElectrons(*filtered_electrons, outputCol.get(), ElectronsToRemove ));
 
-      // Save merged StdWithLRTMuons container to TStore
+      // Save merged StdWithLRTElectrons container to TStore
       ATH_CHECK(evtStore()->record(std::move(outputCol), m_outElectronLocation.key())); 
       ATH_CHECK(evtStore()->record(std::move(outputAuxCol), m_outElectronLocation.key() + "Aux.") );
     }
-  } else {
+  } else if (!lrtelekey.empty()) {
     if(evtStore()->contains<xAOD::ElectronContainer>(lrtelekey) == false && bool(m_eleLRT) == true) ATH_MSG_WARNING("prompt/LRT OR procedure attempted but " << lrtelekey << " not in ROOT file, check config!");
     ATH_MSG_DEBUG("Not applying prompt/LRT electron OR procedure"); 
   }
@@ -170,7 +213,7 @@ StatusCode SUSYObjDef_xAOD::GetElectrons(xAOD::ElectronContainer*& copy, xAOD::S
   if (!setLinks) {
     ATH_MSG_WARNING("Failed to set original object links on " << elekey);
   } else { // use the user-supplied collection instead
-    ATH_MSG_DEBUG("Not retrieving electron collecton, using existing one provided by user");
+    ATH_MSG_DEBUG("Not retrieving electron collection, using existing one provided by user");
     electrons=copy;
   }
 

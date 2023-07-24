@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // This source file implements all of the functions related to Muons
@@ -51,25 +51,61 @@ namespace ST {
   const static SG::AuxElement::Decorator<float>     dec_d0sig("d0sig");
   const static SG::AuxElement::ConstAccessor<float> acc_d0sig("d0sig");
   const static SG::AuxElement::Decorator<ElementLink<xAOD::MuonContainer>> dec_originalMuonLink("originalMuonLink");
-  const static SG::AuxElement::Decorator<char> dec_isLRT("isLRT");
+  const static SG::AuxElement::ConstAccessor<ElementLink<xAOD::MuonContainer>> acc_originalMuonLink("originalMuonLink");
+  const static SG::AuxElement::Decorator<char>      dec_isLRT("isLRT");
 
 
 StatusCode SUSYObjDef_xAOD::MergeMuons(const xAOD::MuonContainer & muons, const std::vector<bool> &writeMuon, xAOD::MuonContainer* outputCol) const{
-
     if (muons.empty()) return StatusCode::SUCCESS;
     for (const xAOD::Muon* muon: muons) {
         // add muon into output 
         if (writeMuon.at(muon->index())){
             newMuon = new xAOD::Muon(*muon);
-            ElementLink<xAOD::MuonContainer> muLink;
-            muLink.toIndexedElement(muons, muon->index());
-            dec_originalMuonLink(*newMuon) = muLink;
+
+            if (muon->isAvailable<ElementLink<xAOD::MuonContainer>>("originalMuonLink") ) {
+              dec_originalMuonLink(*newMuon) = acc_originalMuonLink(*muon);
+            } else {
+              ElementLink<xAOD::MuonContainer> muLink;
+              muLink.toIndexedElement(muons, muon->index());
+              dec_originalMuonLink(*newMuon) = muLink;
+            }
             outputCol->push_back(newMuon); 
         }
     }
     return StatusCode::SUCCESS;
 }
 
+StatusCode SUSYObjDef_xAOD::prepareLRTMuons(const xAOD::MuonContainer* inMuons, xAOD::MuonContainer* copy) const{
+  for (const xAOD::Muon *muon: *inMuons){
+    const xAOD::TrackParticle* idtrack = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+
+    // Save muon if the id track passes the LRT filter
+    if ( idtrack->isAvailable<char>("passLRTFilter") )
+    {
+      if ( static_cast<int>(acc_lrtFilter(*idtrack) ) ){ 
+        std::unique_ptr<xAOD::Muon> copyMuon = std::make_unique<xAOD::Muon>(*muon);
+
+        // transfer original muon link
+        ElementLink<xAOD::MuonContainer> muLink;
+        muLink.toIndexedElement(*inMuons, muon->index());
+        dec_originalMuonLink(*copyMuon) = muLink;
+        copy->push_back( std::move(copyMuon) );
+      } 
+    }
+    else // Keep muon if flag is not available
+    {  
+      std::unique_ptr<xAOD::Muon> copyMuon = std::make_unique<xAOD::Muon>(*muon);
+
+      ElementLink<xAOD::MuonContainer> muLink;
+      muLink.toIndexedElement(*inMuons, muon->index());
+      dec_originalMuonLink(*copyMuon) = muLink;
+
+      copy->push_back( std::move(copyMuon) );
+    }
+    
+  }
+    return StatusCode::SUCCESS;
+}
 
 StatusCode SUSYObjDef_xAOD::GetMuons(xAOD::MuonContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, bool recordSG, const std::string& muonkey, const std::string& lrtmuonkey, const xAOD::MuonContainer* containerToBeCopied)
 {
@@ -85,7 +121,7 @@ StatusCode SUSYObjDef_xAOD::GetMuons(xAOD::MuonContainer*& copy, xAOD::ShallowAu
   outputCol->setStore(outputAuxCol.get());
   ATH_CHECK( m_outMuonLocation.initialize() );
 
-  if (bool(m_muLRT) && evtStore()->contains<xAOD::MuonContainer>(lrtmuonkey)){
+  if (bool(m_muLRT) && !lrtmuonkey.empty() && evtStore()->contains<xAOD::MuonContainer>(lrtmuonkey)){
     ATH_MSG_DEBUG("Applying prompt/LRT muon OR procedure"); 
 
     // First identify if merged container has already been made (for instances where GetMuons() is called more than once)
@@ -98,25 +134,32 @@ StatusCode SUSYObjDef_xAOD::GetMuons(xAOD::MuonContainer*& copy, xAOD::ShallowAu
       ATH_CHECK( evtStore()->retrieve(prompt_muons, muonkey) );
       ATH_CHECK( evtStore()->retrieve(lrt_muons, lrtmuonkey) );
 
+      // Remove LRT muons as flagged by filter for uncertainty
+      auto filtered_muons = std::make_unique<xAOD::MuonContainer>();
+      std::unique_ptr<xAOD::MuonAuxContainer> filtered_muons_aux = std::make_unique<xAOD::MuonAuxContainer>();
+      filtered_muons->setStore(filtered_muons_aux.get());
+      ATH_CHECK(prepareLRTMuons(lrt_muons, filtered_muons.get()));
+
       // Check overlap between prompt and LRT collections
       std::vector<bool> writePromptMuon;
       std::vector<bool> writeLRTMuon;
-      m_muonLRTORTool->checkOverlap(*prompt_muons, *lrt_muons, writePromptMuon, writeLRTMuon);
+      m_muonLRTORTool->checkOverlap(*prompt_muons, *filtered_muons, writePromptMuon, writeLRTMuon);
     
       // Decorate muons with prompt/LRT
-      for (const xAOD::Muon* mu : *prompt_muons) dec_isLRT(*mu) = 0;
-      for (const xAOD::Muon* mu : *lrt_muons) dec_isLRT(*mu) = 1;
+      for (const xAOD::Muon* mu : *prompt_muons)   dec_isLRT(*mu) = 0;
+      for (const xAOD::Muon* mu : *filtered_muons) dec_isLRT(*mu) = 1;
 
       // Create merged StdWithLRTMuons container
-      outputCol->reserve(prompt_muons->size() + lrt_muons->size());
+      outputCol->reserve(prompt_muons->size() + filtered_muons->size());
       ATH_CHECK(MergeMuons(*prompt_muons, writePromptMuon, outputCol.get()) );
-      ATH_CHECK(MergeMuons(*lrt_muons, writeLRTMuon, outputCol.get()) );
+      ATH_CHECK(MergeMuons(*filtered_muons, writeLRTMuon, outputCol.get()) );
 
       // Save merged StdWithLRTMuons container to TStore
       ATH_CHECK(evtStore()->record(std::move(outputCol), m_outMuonLocation.key())); 
       ATH_CHECK(evtStore()->record(std::move(outputAuxCol), m_outMuonLocation.key() + "Aux.") );
+
     }
-  } else {
+  } else if (!lrtmuonkey.empty()) {
     if (evtStore()->contains<xAOD::MuonContainer>(lrtmuonkey) == false && bool(m_muLRT) == true) ATH_MSG_WARNING("prompt/LRT OR procedure attempted but " << lrtmuonkey << " not in ROOT file, check config!");
     ATH_MSG_DEBUG("Not applying prompt/LRT muon OR procedure"); 
   }
@@ -152,7 +195,7 @@ StatusCode SUSYObjDef_xAOD::GetMuons(xAOD::MuonContainer*& copy, xAOD::ShallowAu
   if (!setLinks) {
     ATH_MSG_WARNING("Failed to set original object links on " << muonkey);
   } else { // use the user-supplied collection instead 
-      ATH_MSG_DEBUG("Not retrieving muon collecton, using existing one provided by user");
+      ATH_MSG_DEBUG("Not retrieving muon collection, using existing one provided by user");
       muons=copy;
   }
 

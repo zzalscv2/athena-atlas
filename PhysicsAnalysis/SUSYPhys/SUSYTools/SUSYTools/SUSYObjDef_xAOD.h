@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
@@ -30,6 +30,10 @@
 #include "AsgTools/AnaToolHandle.h"
 #include "MuonAnalysisInterfaces/IMuonLRTOverlapRemovalTool.h"
 #include "EgammaAnalysisInterfaces/IElectronLRTOverlapRemovalTool.h"
+
+// Container read handle
+#include "AsgDataHandles/ReadHandle.h"
+#include "AsgDataHandles/ReadHandleKey.h"
 
 // Configuration
 #include "TEnv.h"
@@ -91,6 +95,10 @@ namespace CP {
   class IIsolationCorrectionTool;
   class IPileupReweightingTool;
   class IJetJvtEfficiency;
+}
+
+namespace InDet {
+  class IInclusiveTrackFilterTool;
 }
 
 namespace TauAnalysisTools {
@@ -187,15 +195,18 @@ namespace ST {
 		         ) override final;
 
     StatusCode MergeMuons(const  xAOD::MuonContainer & muons, const std::vector<bool> &writeMuon, xAOD::MuonContainer* outputCol) const override final;
-
     const xAOD::MuonContainer* prompt_muons = nullptr;
     const xAOD::MuonContainer* lrt_muons = nullptr;
     mutable xAOD::Muon* newMuon = nullptr;
+
+    StatusCode prepareLRTMuons(const xAOD::MuonContainer* inMuons, xAOD::MuonContainer* copy) const override final;
 
     StatusCode MergeElectrons(const  xAOD::ElectronContainer & electrons, xAOD::ElectronContainer* outputCol, const std::set<const xAOD::Electron *> &ElectronsToRemove) const override final;
     const xAOD::ElectronContainer* prompt_electrons = nullptr;
     const xAOD::ElectronContainer* lrt_electrons = nullptr;
     mutable xAOD::Electron* newElectron = nullptr;
+
+    StatusCode prepareLRTElectrons(const xAOD::ElectronContainer* inMuons, xAOD::ElectronContainer* copy) const override final;
 
     StatusCode SetBtagWeightDecorations(const xAOD::Jet& input, const asg::AnaToolHandle<IBTaggingSelectionTool>& btagSelTool, const std::string& btagTagger) const override final;
     bool IsPFlowCrackVetoCleaning(const xAOD::ElectronContainer* elec = nullptr, const xAOD::PhotonContainer* gamma = nullptr) const override final;
@@ -360,6 +371,12 @@ namespace ST {
 
     unsigned int GetRunNumber() const override final;
 
+    const xAOD::TrackParticleContainer& GetInDetLargeD0Tracks(const EventContext &ctx) const override final;
+
+    const xAOD::TrackParticleContainer& GetInDetLargeD0GSFTracks(const EventContext &ctx) const override final;
+
+    StatusCode ApplyLRTUncertainty() override final;
+
     int treatAsYear(const int runNumber=-1) const override final;
 
     StatusCode OverlapRemoval(const xAOD::ElectronContainer *electrons, const xAOD::MuonContainer *muons, const xAOD::JetContainer *jets,
@@ -449,6 +466,10 @@ namespace ST {
     std::vector<std::string> m_v_trigs17_cache_multiLep;
     std::vector<std::string> m_v_trigs18_cache_multiLep;
     std::vector<std::string> m_v_trigs22_cache_multiLep;
+
+    // Read Handles
+    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_LRTCollectionName{this, "LRTCollectionName", "InDetLargeD0TrackParticles", "LRT collection name"};
+    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_GSFLRTCollectionName{this, "GSFLRTCollectionName", "LRTGSFTrackParticles", "GSF LRT collection name"};
 
   protected:
 
@@ -910,6 +931,8 @@ namespace ST {
     //
     asg::AnaToolHandle<CP::IPileupReweightingTool> m_prwTool;
     //
+    asg::AnaToolHandle<InDet::IInclusiveTrackFilterTool> m_LRTuncTool;
+    //
     asg::AnaToolHandle<ORUtils::IOverlapTool> m_tauJetORtool;
     ORUtils::ToolBox m_orToolbox;
     //
@@ -940,6 +963,8 @@ namespace ST {
   const static SG::AuxElement::Decorator<char> dec_passOR("passOR");
   const static SG::AuxElement::Decorator<double> dec_effscalefact("effscalefact");
   const static SG::AuxElement::Decorator<char> dec_signal_less_JVT("signal_less_JVT"); //!< Decorator for signal jets without a JVT requirement
+  const static SG::AuxElement::Decorator<char> dec_lrtFilter("passLRTFilter");
+
 
   // const accessors for reading decorations that we set
   const static SG::AuxElement::ConstAccessor<char> acc_baseline("baseline");
@@ -949,7 +974,8 @@ namespace ST {
   const static SG::AuxElement::ConstAccessor<char> acc_isolHighPt("isolHighPt"); // use different WPs for low-pt and high-pt
   const static SG::AuxElement::ConstAccessor<char> acc_passOR("passOR");
   const static SG::AuxElement::ConstAccessor<char> acc_signal_less_JVT("signal_less_JVT"); //!< Accessor for signal jets without a JVT requirement
-  const static SG::AuxElement::ConstAccessor<char> acc_trigmatched("trigmatched");
+  const static SG::AuxElement::ConstAccessor<char> acc_trigmatched("trigmatched"); 
+  const static SG::AuxElement::ConstAccessor<char> acc_lrtFilter("passLRTFilter");
 
   // more decorations that are set externally
   const static SG::AuxElement::ConstAccessor<unsigned int> acc_OQ("OQ");
