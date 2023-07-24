@@ -132,24 +132,17 @@ int TrigInDetTrackTruth::updateFamilyTree()
       
       /* find mother: there should be only one for final state particles 
 	 (particles which can leave energy deposits in detectors)        */
-#ifdef HEPMC3
+
      // check a mother was found
-      if ( p_child_vtx->particles_in().size()==0)
+      if ( p_child_vtx->particles_in_size()==0)
 	{
 	  log << MSG::DEBUG<< "Mother not found: go to next particle" <<endmsg;
 	  continue;
 	}  
+#ifdef HEPMC3
      auto p_mum = p_child_vtx->particles_in().begin();
-      
 #else
       HepMC::GenVertex::particles_in_const_iterator p_mum = p_child_vtx->particles_in_const_begin();
-      
-      // check a mother was found
-      if ( p_mum == p_child_vtx->particles_in_const_end() )
-	{
-	  log << MSG::DEBUG<< "Mother not found: go to next particle" <<endmsg;
-	  continue;
-	} 
 #endif
       log << MSG::DEBUG<< "Mother GenParticle (" << *p_mum << ") found; PDG id=" 
 	  << (*p_mum)->pdg_id() << "; status=" << (*p_mum)->status()

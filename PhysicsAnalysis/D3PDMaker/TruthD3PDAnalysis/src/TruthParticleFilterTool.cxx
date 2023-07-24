@@ -175,17 +175,14 @@ TruthParticleFilterTool::isAccepted (const HepMC::ConstGenParticlePtr& p)
   HepMC::ConstGenVertexPtr vprod = p->production_vertex();
   if( barcode > HepMC::PHOTOSMIN && !HepMC::is_simulation_particle(barcode) && vprod )
   {
-#ifdef HEPMC3
-    if (vprod->particles_in().size() > 0) {
-      auto mother = vprod->particles_in().front();
-      if (mother) motherPDGID = mother->pdg_id();
-    }
-#else
     if (vprod->particles_in_size() > 0) {
+#ifdef HEPMC3
+      auto mother = vprod->particles_in().front();
+#else
       const HepMC::GenParticle* mother = *vprod->particles_in_const_begin();
+#endif
       if (mother) motherPDGID = mother->pdg_id();
     }
-#endif
     if( m_writePartons && !MC::isHadron( motherPDGID ) )
       ok = true;
     if( m_writeHadrons && MC::isHadron( motherPDGID ) )

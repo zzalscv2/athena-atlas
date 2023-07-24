@@ -89,14 +89,14 @@ StatusCode PrintMC::execute() {
     /// @todo Isn't this if (m_VerboseOutput... redundant?
     else if (m_VerboseOutput && m_printsty == "Barcode") {
       drawLine(std::cout);
-#ifdef HEPMC3
+
       std::cout << "GenEvent: #" << evt->event_number()
                 << " ID=" << HepMC::signal_process_id(evt)
                 << " SignalProcessGenVertex Barcode: "
                 << ( HepMC::signal_process_vertex(evt) ? HepMC::barcode(HepMC::signal_process_vertex(evt)) : 0 ) << "\n";
-      std::cout << " Entries this event: " << evt->vertices().size() << " vertices, "
-                << evt->particles().size() << " particles.\n";
-
+      std::cout << " Entries this event: " << evt->vertices_size() << " vertices, "
+                << evt->particles_size() << " particles.\n";
+#ifdef HEPMC3
       if (evt->heavy_ion()) {
         std::cout << " HeavyIon: jatt=" << evt->heavy_ion()->Ncoll_hard
                   << " np=" << evt->heavy_ion()->Npart_proj
@@ -143,13 +143,6 @@ StatusCode PrintMC::execute() {
 		  << std::endl;
       }
 #else
-      std::cout << "GenEvent: #" << evt->event_number()
-                << " ID=" << HepMC::signal_process_id(evt)
-                << " SignalProcessGenVertex Barcode: "
-                << ( HepMC::signal_process_vertex(evt) ? HepMC::barcode(HepMC::signal_process_vertex(evt)) : 0 ) << "\n";
-      std::cout << " Entries this event: " << evt->vertices_size() << " vertices, "
-                << evt->particles_size() << " particles.\n";
-
       if (evt->heavy_ion()) {
         std::cout << " HeavyIon: jatt=" << evt->heavy_ion()->Ncoll_hard()
                   << " np=" << evt->heavy_ion()->Npart_proj()

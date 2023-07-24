@@ -205,11 +205,10 @@ namespace MCTesting {
       //to set geantino kinematic phi=eta=0, E=p=E_hard_scat
 #ifdef HEPMC3
       auto itrp =hScatVx->particles_in().begin();
-      if (hScatVx->particles_in().size()==2){
 #else
       HepMC::GenVertex::particles_in_const_iterator itrp =hScatVx->particles_in_const_begin();
-      if (hScatVx->particles_in_size()==2){
 #endif
+      if (hScatVx->particles_in_size()==2){
         HepMC::FourVector mom1=(*itrp)->momentum();
         HepMC::FourVector mom2=(*(++itrp))->momentum();
         HepMC::FourVector vxmom;

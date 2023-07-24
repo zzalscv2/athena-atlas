@@ -660,18 +660,14 @@ StatusCode GetLCSinglePionsPerf::execute()
   ******************************************** */
   const McEventCollection* truthEvent=nullptr;
   ATH_CHECK( evtStore()->retrieve(truthEvent, "TruthEvent") );
-#ifdef HEPMC3
-  if( truthEvent->at(0)->particles().empty() ){
-    ATH_MSG_ERROR( "No particles in McEventCollection" );
-    return StatusCode::FAILURE;
-  }
-  const HepMC::ConstGenParticlePtr& gen=truthEvent->at(0)->particles().front();
-#else  
+
   if( truthEvent->at(0)->particles_empty() ){
     ATH_MSG_ERROR( "No particles in McEventCollection" );
     return StatusCode::FAILURE;
   }
-  // primary particle info
+#ifdef HEPMC3
+  const HepMC::ConstGenParticlePtr& gen=truthEvent->at(0)->particles().front();
+#else  
   HepMC::GenEvent::particle_const_iterator pit  = truthEvent->at(0)->particles_begin();
   const HepMC::GenParticle *gen = (*pit);
 #endif
