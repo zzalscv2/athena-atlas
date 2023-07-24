@@ -98,10 +98,24 @@ StatusCode EFTrackingSmearingAlg::initialize() {
 
   ATH_CHECK( m_inputTrackParticleKey.initialize() );
   ATH_CHECK( m_outputTrackParticleKey.initialize() );
+  
+  ATH_CHECK( m_inputTruthParticleKey.initialize() );
+  ATH_CHECK( m_outputTruthParticleKey.initialize() );
+
+ // Decoration keys
+  m_d0DecoratorKey = m_outputTruthParticleKey.key() + ".d0";
+  m_z0DecoratorKey = m_outputTruthParticleKey.key() + ".z0";
+  m_ptDecoratorKey = m_outputTruthParticleKey.key() + ".pt";
+
+  ATH_CHECK(m_d0DecoratorKey.initialize());
+  ATH_CHECK(m_z0DecoratorKey.initialize());
+  ATH_CHECK(m_ptDecoratorKey.initialize());
 
   ATH_MSG_INFO("########## EFTrackingSmearingAlg Configurations are ########## ");
   ATH_MSG_INFO("------- InputTrackParticleKey: "<<m_inputTrackParticleKey.key());
   ATH_MSG_INFO("------- OutputTrackParticleKey: "<<m_outputTrackParticleKey.key());
+  ATH_MSG_INFO("------- InputTruthParticleKey: " <<m_inputTruthParticleKey.key());
+  ATH_MSG_INFO("------- OutputTruthParticleKey: "<<m_outputTruthParticleKey.key());
   ATH_MSG_INFO("------- inputTracksPtCut [GeV]: "<<m_inputTracksPtCut);
   ATH_MSG_INFO("------- outputTracksPtCut [GeV]: "<<m_outputTracksPtCut);
   ATH_MSG_INFO("------- SmearingSigma: "<<m_SigmaScaleFactor);  
@@ -110,19 +124,27 @@ StatusCode EFTrackingSmearingAlg::initialize() {
   ATH_MSG_INFO("------- UseResolutionPtCutOff: "<<m_UseResolutionPtCutOff);
   ATH_MSG_INFO("------- SetResolutionPtCutOff: "<<m_SetResolutionPtCutOff);
   ATH_MSG_INFO("------- EnableMonitoring:" <<m_enableMonitoring);
+  ATH_MSG_INFO("------- SmearTruthParticle:"<< m_smearTruthParticle);
   
   ATH_MSG_INFO("------- IncludeDuplicatesAndFakes: "<<m_EnableFakes);
-  ATH_MSG_INFO("------- RandomSeed: "<<m_RandomSeed);
-  ATH_MSG_INFO("------- UseCoinToss: "<<m_UseCoinToss);
+  ATH_MSG_INFO("------- RandomSeed: "   <<m_RandomSeed);
+  ATH_MSG_INFO("------- UseCoinToss: "  <<m_UseCoinToss);
   ATH_MSG_INFO("------- FakeKillerEnable: "<<m_FakeKillerEnable);
   ATH_MSG_INFO("------- IncludeFakesInResolutionCalculation: "<<m_IncludeFakesInResolutionCalculation);
   ATH_MSG_INFO("########## EFTrackingSmearingAlg Configurations: That's it. ########## ");
 
-  ATH_MSG_INFO("Will output new track container with name "<<m_outputTrackParticleKey.key());
+  std::string smearerName;
+  if (m_smearTruthParticle){
+    ATH_MSG_INFO("Will output new truth container with name "<<m_outputTruthParticleKey.key());
+    smearerName = m_outputTruthParticleKey.key()+"_smearer";
+  }
+  else { 
+    ATH_MSG_INFO("Will output new track container with name "<<m_outputTrackParticleKey.key());
+    smearerName = m_outputTrackParticleKey.key()+"_smearer";
+  }
 
   // configure the Smearer
-  std::string smearerName = m_outputTrackParticleKey.key()+"_smearer";
-  m_mySmearer = (void *) new FakeTrackSmearer(smearerName.c_str(), m_RandomSeed,msgLvl (MSG::DEBUG));
+  m_mySmearer = (void *) new FakeTrackSmearer(smearerName.c_str(), m_RandomSeed, msgLvl (MSG::DEBUG));
   ((FakeTrackSmearer *) m_mySmearer)->SetInputTracksPtCut(m_inputTracksPtCut);
   ((FakeTrackSmearer *) m_mySmearer)->SetOutputTracksPtCut(m_outputTracksPtCut);
   ((FakeTrackSmearer *) m_mySmearer)->SetTrackingEfficiency(m_smearedTrackEfficiency);
@@ -135,29 +157,33 @@ StatusCode EFTrackingSmearingAlg::initialize() {
   ((FakeTrackSmearer *) m_mySmearer)->UseCoinToss(m_UseCoinToss.value());
   ((FakeTrackSmearer *) m_mySmearer)->FakeKillerEnable(m_FakeKillerEnable.value());
   ((FakeTrackSmearer *) m_mySmearer)->IncludeFakesInResolutionCalculation(m_IncludeFakesInResolutionCalculation.value());
-  
-
-  
 
   if (m_enableMonitoring) {
     // store the smearing functions
     TF1 *d0res_eta = ((FakeTrackSmearer *) m_mySmearer)->d0res_eta;
     TF1 *z0res_eta = ((FakeTrackSmearer *) m_mySmearer)->z0res_eta;
+    TF1 *curvres_eta = ((FakeTrackSmearer *) m_mySmearer)->curvres_eta;
     TF1 *d0res_pt  = ((FakeTrackSmearer *) m_mySmearer)->d0res_pt;
     TF1 *z0res_pt  = ((FakeTrackSmearer *) m_mySmearer)->z0res_pt;
+    TF1 *curvres_pt  = ((FakeTrackSmearer *) m_mySmearer)->curvres_pt;
     CHECK(book(new TH1F("d0res_function_vs_eta","#eta of track",100, 0.0,4.0)));
     CHECK(book(new TH1F("z0res_function_vs_eta","#eta of track",100, 0.0,4.0)));
+    CHECK(book(new TH1F("curvres_function_vs_eta","#eta of track",100, 0.0,4.0)));
     CHECK(book(new TH1F("d0res_function_vs_pt","#pt of track",100, 4.0,200.0)));
     CHECK(book(new TH1F("z0res_function_vs_pt","#pt of track",100, 4.0,200.0)));
+    CHECK(book(new TH1F("curvres_function_vs_pt","#pt of track",100, 4.0,200.0)));
     hist("d0res_function_vs_eta")->Add(d0res_eta);
     hist("z0res_function_vs_eta")->Add(z0res_eta);
+    hist("curvres_function_vs_eta")->Add(curvres_eta);
     hist("d0res_function_vs_pt")->Add(d0res_pt);
     hist("z0res_function_vs_pt")->Add(z0res_pt);
+    hist("curvres_function_vs_pt")->Add(curvres_pt);
     // book historgams
     CHECK(book_histograms());
   }
   return StatusCode::SUCCESS;
 }
+
 
 StatusCode EFTrackingSmearingAlg::finalize() {
   ATH_MSG_INFO ("Finalizing " << name() << "...");
@@ -165,17 +191,143 @@ StatusCode EFTrackingSmearingAlg::finalize() {
   return StatusCode::SUCCESS;
 }
 
+
+StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) { 
+  
+  SG::ReadHandle<xAOD::TruthParticleContainer> inputTruth_handle( m_inputTruthParticleKey, ctx );
+  const xAOD::TruthParticleContainer* inputTruth = inputTruth_handle.cptr();
+  if (not inputTruth) {
+    ATH_MSG_FATAL("Unable to retrieve input truth particle");
+   return StatusCode::FAILURE;
+  }
+  SG::WriteHandle<xAOD::TruthParticleContainer> outputTruth_handle( m_outputTruthParticleKey, ctx );
+  ATH_CHECK( outputTruth_handle.record( std::make_unique<xAOD::TruthParticleContainer>(), std::make_unique<xAOD::TruthParticleAuxContainer>() ) );
+  auto outputTruth = outputTruth_handle.ptr();
+
+  // create decorators
+  SG::WriteDecorHandle<xAOD::TruthParticleContainer, float > d0Decorator(m_d0DecoratorKey, ctx);
+  SG::WriteDecorHandle<xAOD::TruthParticleContainer, float > z0Decorator(m_z0DecoratorKey, ctx);
+  SG::WriteDecorHandle<xAOD::TruthParticleContainer, float > ptDecorator(m_ptDecoratorKey, ctx);
+   
+
+  // clear the smearear
+  FakeTrackSmearer *mySmearer=static_cast<FakeTrackSmearer *>(m_mySmearer);
+  //FakeTrackSmearer *mySmearer=(FakeTrackSmearer *) m_mySmearer;
+  mySmearer->Clear();
+
+  int trackno=0;
+  int n_input_tracks=0;
+  int n_output_tracks=0;
+  int n_output_broad_tracks=0;
+  int n_output_narrow_tracks=0; 
+  ATH_MSG_DEBUG ("Found "<<inputTruth->size()<< " input truth particles");
+  for ( const auto* part : *inputTruth ) 
+    {    
+      double pt = part->pt();// MeV      
+      float theta = part->auxdata<float>("theta");
+      float z0 = part->auxdata<float>("z0");
+      float d0 = part->auxdata<float>("d0");
+      float eta = part->eta();
+      float phi = part->phi();
+      if (part->isNeutral()) continue;
+
+      ATH_MSG_DEBUG ("===> New Truth particle: parameters: d0=" << d0
+                      <<" z0="          << z0
+                      <<" theta="       << theta                      
+                      <<" pt(GeV)="     << pt /1000.
+                      <<" eta="         << eta
+                      <<" phi="         << phi);            
+      
+      if (std::abs(pt) > m_inputTracksPtCut)
+      	{
+      	  n_input_tracks++;
+          if (m_enableMonitoring) {
+      	    hist("track_input_eta")->Fill(eta);
+      	    hist("track_input_theta")->Fill(theta);
+      	    hist("track_input_pt" )->Fill(pt);
+      	    hist("track_input_phi")->Fill(phi);
+      	    hist("track_input_z0" )->Fill(z0);
+      	    hist("track_input_d0" )->Fill(d0);      	    
+          }
+      	  double qoverPt = part->charge()/pt; 
+          mySmearer->AddTrack(d0,z0,qoverPt,eta,phi);  // smearing here                  
+      	  n_output_tracks += mySmearer->GetNTracks();
+      	  
+      	  ATH_MSG_DEBUG ("Looping on output tracks #"<< mySmearer->GetNTracks());
+          for (const auto& otrack : mySmearer->Tracks)       	  
+      	    {                                                         
+                xAOD::TruthParticle * newtrk = new xAOD::TruthParticle(*part);
+                outputTruth->push_back(newtrk); 
+                // set the decorators                  
+                d0Decorator(*newtrk) = otrack.d0();
+                z0Decorator(*newtrk) = otrack.z0();
+                ptDecorator(*newtrk) = otrack.pt();
+
+                ATH_MSG_DEBUG ("Smeared truth: "
+                      <<" curv=" << 1./newtrk->pt()
+                      <<" phi="  << newtrk->phi()
+                      <<" eta="  << newtrk->eta()
+                      <<" d0="   << newtrk->auxdata<float>("d0")
+                      <<" z0="   << newtrk->auxdata<float>("z0")
+                      <<" pT="   << newtrk->pt()
+                       );
+
+                
+                if (m_enableMonitoring) {
+                  hist("track_output_eta")->Fill(otrack.eta());
+                  hist("track_output_theta")->Fill(otrack.theta());
+                  hist("track_output_pt" )->Fill(otrack.pt()/1000.0 );
+                  hist("track_output_phi")->Fill(otrack.phi());
+                  hist("track_output_z0" )->Fill(otrack.z0() );
+                  hist("track_output_d0" )->Fill(otrack.d0() );      
+        
+                  hist("track_outputcoll_eta")->Fill(newtrk->eta());
+                  hist("track_outputcoll_theta")->Fill(newtrk->auxdata<float>("theta"));
+                  hist("track_outputcoll_pt" )->Fill(std::sin(newtrk->pt()));
+                  hist("track_outputcoll_phi")->Fill(newtrk->phi());
+                  hist("track_outputcoll_z0" )->Fill(newtrk->auxdata<float>("z0"));
+                  hist("track_outputcoll_d0" )->Fill(newtrk->auxdata<float>("d0"));
+                
+                  hist("track_delta_eta")->Fill(otrack.eta() - part->eta());      	      
+                  hist("track_delta_crv")->Fill(1000.0*otrack.curv()-((part->charge()*1000./part->pt())));
+                  hist("track_delta_phi")->Fill(otrack.phi() - part->phi());
+                  hist("track_delta_z0" )->Fill(otrack.z0()  - part->auxdata<float>("z0"));
+                  hist("track_delta_d0" )->Fill(otrack.d0()  - part->auxdata<float>("d0"));
+                }                         	                
+      	    } // end of loop                      
+	      }
+      mySmearer->Clear(); // clear the smearer after each input track
+      trackno++;
+    }
+
+  ATH_MSG_DEBUG ("End of loop track #"<<n_input_tracks<<" ---> "<<" "<< n_output_tracks
+              <<" "<<n_output_narrow_tracks<<" "<<n_output_broad_tracks);
+  if (m_enableMonitoring) {
+    hist("n_input_tracks")->Fill(n_input_tracks);
+    hist("n_output_tracks")->Fill(n_output_tracks);
+    hist("n_output_narrow_tracks")->Fill(n_output_narrow_tracks);
+    hist("n_output_broad_tracks")->Fill(n_output_broad_tracks);
+  }
+  return StatusCode::SUCCESS;
+}
+
+
+
 StatusCode EFTrackingSmearingAlg::execute() {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
+
+  auto ctx = getContext() ;
+  if (m_smearTruthParticle)
+    return smearTruthParticles(ctx);      
   
-  SG::ReadHandle<xAOD::TrackParticleContainer> inputTracks_handle( m_inputTrackParticleKey, getContext() );
+  SG::ReadHandle<xAOD::TrackParticleContainer> inputTracks_handle( m_inputTrackParticleKey, ctx );
   const xAOD::TrackParticleContainer* inputTracks = inputTracks_handle.cptr();
   if (not inputTracks) {
      ATH_MSG_FATAL("Unable to retrieve input ID tacks");
      return StatusCode::FAILURE;
   }
 
-  SG::WriteHandle<xAOD::TrackParticleContainer> outputTracks_handle( m_outputTrackParticleKey, getContext() );
+  SG::WriteHandle<xAOD::TrackParticleContainer> outputTracks_handle( m_outputTrackParticleKey, ctx );
   ATH_CHECK( outputTracks_handle.record( std::make_unique<xAOD::TrackParticleContainer>(), std::make_unique<xAOD::TrackParticleAuxContainer>() ) );
   auto outputTracks = outputTracks_handle.ptr();
   
@@ -191,10 +343,12 @@ StatusCode EFTrackingSmearingAlg::execute() {
   ATH_MSG_DEBUG ("Found "<<inputTracks->size()<< " input tracks");
   for ( const auto* trk : *inputTracks ) 
     {            
-      xAOD::ParametersCovMatrix_t trkcov = trk->definingParametersCovMatrix();
+      // get Cov matrix of input track
+      xAOD::ParametersCovMatrix_t trkcov = trk->definingParametersCovMatrix();  
+      auto trkcovvec = trk->definingParametersCovMatrixVec();  
       double theta=trk->theta();
-      double pt = TMath::Sin(theta)/(1000.*trk->qOverP());// GeV
-      float qoverPt = trk->qOverP()*1000./TMath::Sin(theta); // GeV
+      double pt = std::sin(theta)/(trk->qOverP());// MeV
+      float qoverPt = trk->qOverP()/std::sin(theta); 
       ATH_MSG_DEBUG ("===> New Track: parameters: d0=" << trk->d0()
                       <<" z0="     << trk->z0()
                       <<" qoverP=" << trk->qOverP()<<" pt(GeV)="<<pt << " curvT="<<qoverPt
@@ -202,11 +356,11 @@ StatusCode EFTrackingSmearingAlg::execute() {
                       <<" phi="    << trk->phi0()
                       <<" cov d0=" << trkcov(Trk::d0,Trk::d0)
                       <<" cov z0=" << trkcov(Trk::z0,Trk::z0)
-                      <<" sigma d0="  << TMath::Sqrt(TMath::Abs(trkcov(Trk::d0,Trk::d0)))
-                      <<" sigma z0="  << TMath::Sqrt(TMath::Abs(trkcov(Trk::z0,Trk::z0))) );
+                      <<" sigma d0="  << std::sqrt(std::abs(trkcov(Trk::d0,Trk::d0)))
+                      <<" sigma z0="  << std::sqrt(std::abs(trkcov(Trk::z0,Trk::z0))) );
       
       
-      if (TMath::Abs(pt) > m_inputTracksPtCut)
+      if (std::abs(pt) > m_inputTracksPtCut)
       	{
       	  n_input_tracks++;
           if (m_enableMonitoring) {
@@ -217,94 +371,98 @@ StatusCode EFTrackingSmearingAlg::execute() {
       	    hist("track_input_z0" )->Fill(trk->z0());
       	    hist("track_input_d0" )->Fill(trk->d0());
       	
-      	    hist("track_input_sigma_theta") ->Fill(TMath::Sqrt(trkcov(Trk::theta,Trk::theta)));
-      	    hist("track_input_sigma_qOverP")->Fill(TMath::Sqrt(trkcov(Trk::qOverP,Trk::qOverP)));
-      	    hist("track_input_sigma_phi")   ->Fill(TMath::Sqrt(trkcov(Trk::phi0,Trk::phi0)));
-      	    hist("track_input_sigma_z0")    ->Fill(TMath::Sqrt(trkcov(Trk::z0,Trk::z0)));
-      	    hist("track_input_sigma_d0")    ->Fill(TMath::Sqrt(trkcov(Trk::d0,Trk::d0)));
+      	    hist("track_input_sigma_theta") ->Fill(std::sqrt(trkcov(Trk::theta,Trk::theta)));
+      	    hist("track_input_sigma_qOverP")->Fill(std::sqrt(trkcov(Trk::qOverP,Trk::qOverP)));
+      	    hist("track_input_sigma_phi")   ->Fill(std::sqrt(trkcov(Trk::phi0,Trk::phi0)));
+      	    hist("track_input_sigma_z0")    ->Fill(std::sqrt(trkcov(Trk::z0,Trk::z0)));
+      	    hist("track_input_sigma_d0")    ->Fill(std::sqrt(trkcov(Trk::d0,Trk::d0)));
           }
       	  
+          // get Cov matrix of input track          
+          auto trkcovvec = trk->definingParametersCovMatrixVec();  
           
           mySmearer->AddTrack(trk->d0(),trk->z0(),qoverPt,trk->eta(),trk->phi0());                    
       	  n_output_tracks += mySmearer->GetNTracks();
       	  
-      	  ATH_MSG_DEBUG ("Looping on output track #"<< n_output_tracks);
-      	  for (int i=0;i<mySmearer->GetNTracks();i++)
-      	    {
+      	  ATH_MSG_DEBUG ("Looping on output tracks #"<< mySmearer->GetNTracks());
+          for (const auto& otrack : mySmearer->Tracks) 
+            {      	  
       	      xAOD::TrackParticle * newtrk = new xAOD::TrackParticle(*trk);
-      	      xAOD::ParametersCovMatrix_t trkcov = trk->definingParametersCovMatrix();
-      
-      	      double sintheta=TMath::Sin(mySmearer->Tracks[i].theta());
+              outputTracks->push_back(newtrk);  
+
+              double sintheta=std::sin(otrack.theta());
+              // modify the cov matrix
+              
+              trkcov = trk->definingParametersCovMatrix();      	            	      
       	      for (int ii=0;ii<5;ii++) for (int jj=0;jj<5;jj++) if (ii!=jj) trkcov(ii,jj)=0.0;
       	      // not sure about the position of the elements below: need to cross check 
-      	      trkcov(Trk::d0    ,Trk::d0    ) = mySmearer->Tracks[i].sigma_d0()   * mySmearer->Tracks[i].sigma_d0()   ; 
-      	      trkcov(Trk::z0    ,Trk::z0    ) = mySmearer->Tracks[i].sigma_z0()   * mySmearer->Tracks[i].sigma_z0()   ; 
-      	      trkcov(Trk::theta ,Trk::theta ) = mySmearer->Tracks[i].sigma_theta()* mySmearer->Tracks[i].sigma_theta(); 
-      	      trkcov(Trk::phi0  ,Trk::phi0  ) = mySmearer->Tracks[i].sigma_phi()  * mySmearer->Tracks[i].sigma_phi()  ; 
-      	      trkcov(Trk::qOverP,Trk::qOverP) = mySmearer->Tracks[i].sigma_curv() * mySmearer->Tracks[i].sigma_curv() *sintheta*sintheta; 
+      	      trkcov(Trk::d0    ,Trk::d0    ) = otrack.sigma_d0()   * otrack.sigma_d0()   ; 
+      	      trkcov(Trk::z0    ,Trk::z0    ) = otrack.sigma_z0()   * otrack.sigma_z0()   ; 
+      	      trkcov(Trk::theta ,Trk::theta ) = otrack.sigma_theta()* otrack.sigma_theta(); 
+      	      trkcov(Trk::phi0  ,Trk::phi0  ) = otrack.sigma_phi()  * otrack.sigma_phi()  ; 
+      	      trkcov(Trk::qOverP,Trk::qOverP) = otrack.sigma_curv() * otrack.sigma_curv() *sintheta*sintheta; 
               if (m_enableMonitoring) {
-      	        hist("track_outputcoll_sigma_theta") ->Fill(TMath::Sqrt(trkcov(Trk::theta,Trk::theta)));
-      	        hist("track_outputcoll_sigma_qOverP")->Fill(TMath::Sqrt(trkcov(Trk::qOverP,Trk::qOverP)));
-      	        hist("track_outputcoll_sigma_phi")   ->Fill(TMath::Sqrt(trkcov(Trk::phi0,Trk::phi0)));
-      	        hist("track_outputcoll_sigma_z0")    ->Fill(TMath::Sqrt(trkcov(Trk::z0,Trk::z0)));
-      	        hist("track_outputcoll_sigma_d0")    ->Fill(TMath::Sqrt(trkcov(Trk::d0,Trk::d0)));
+      	        hist("track_outputcoll_sigma_theta") ->Fill(std::sqrt(trkcov(Trk::theta,Trk::theta)));
+      	        hist("track_outputcoll_sigma_qOverP")->Fill(std::sqrt(trkcov(Trk::qOverP,Trk::qOverP)));
+      	        hist("track_outputcoll_sigma_phi")   ->Fill(std::sqrt(trkcov(Trk::phi0,Trk::phi0)));
+      	        hist("track_outputcoll_sigma_z0")    ->Fill(std::sqrt(trkcov(Trk::z0,Trk::z0)));
+      	        hist("track_outputcoll_sigma_d0")    ->Fill(std::sqrt(trkcov(Trk::d0,Trk::d0)));
               }
 
-      	      ATH_MSG_DEBUG ("Setting parameters covariance vector"); 
-              auto trkcovvec = trk->definingParametersCovMatrixVec();
+      	      ATH_MSG_DEBUG ("Setting parameters in covariance vector"); 
+              
       	      trkcovvec.clear();
       	      EigenHelpers::eigenMatrixToVector(trkcovvec,trkcov,"");
       	      newtrk->setDefiningParametersCovMatrixVec(trkcovvec);
       
       	      ATH_MSG_DEBUG ("Setting parameters covariance");
-      	      newtrk->setDefiningParametersCovMatrix(trkcov);                             
-
-
-      	      ATH_MSG_DEBUG ("Smeared track: d0="  << mySmearer->Tracks[i].d0()
-                      <<" z0="     << mySmearer->Tracks[i].z0()
-                      <<" qoverPt (curv)=" << mySmearer->Tracks[i].curv()
-                      <<" pT="     << mySmearer->Tracks[i].pt()
-                      <<" pT (inverse curv)=" << 1./mySmearer->Tracks[i].curv()  
-                      <<" qoverP="  << mySmearer->Tracks[i].curv()*sintheta
-                      <<" eta="    << mySmearer->Tracks[i].eta()
-                      <<" phi="    << mySmearer->Tracks[i].phi() );
+      	      newtrk->setDefiningParametersCovMatrix(trkcov);                                               	      
                       
               //(float d0, float z0, float phi0, float theta, float qOverP)
               newtrk->setDefiningParameters(
-      					    mySmearer->Tracks[i].d0(),
-      					    mySmearer->Tracks[i].z0(),
-      					    mySmearer->Tracks[i].phi(),
-      					    mySmearer->Tracks[i].theta(),
-      					    (mySmearer->Tracks[i].curv()*sintheta)
+      					    otrack.d0(),
+      					    otrack.z0(),
+      					    otrack.phi(),
+      					    otrack.theta(),
+      					    (otrack.curv()*sintheta)
       					    );
+
+              ATH_MSG_DEBUG ("Smeared track: "
+                      <<" curv=" << 1./newtrk->pt()
+                      <<" phi="  << newtrk->phi()
+                      <<" eta="  << newtrk->eta()
+                      <<" d0="   << newtrk->d0()
+                      <<" z0="   << newtrk->z0()
+                      <<" pT="   << newtrk->pt()
+                       );
               
       	      if (m_enableMonitoring) {
-      	        hist("track_output_eta")->Fill(mySmearer->Tracks[i].eta());
-      	        hist("track_output_theta")->Fill(mySmearer->Tracks[i].theta());
-      	        hist("track_output_pt" )->Fill(mySmearer->Tracks[i].pt()/1000.0 );
-      	        hist("track_output_phi")->Fill(mySmearer->Tracks[i].phi());
-      	        hist("track_output_z0" )->Fill(mySmearer->Tracks[i].z0() );
-      	        hist("track_output_d0" )->Fill(mySmearer->Tracks[i].d0() );      
+      	        hist("track_output_eta")->Fill(otrack.eta());
+      	        hist("track_output_theta")->Fill(otrack.theta());
+      	        hist("track_output_pt" )->Fill(otrack.pt()/1000.0 );
+      	        hist("track_output_phi")->Fill(otrack.phi());
+      	        hist("track_output_z0" )->Fill(otrack.z0() );
+      	        hist("track_output_d0" )->Fill(otrack.d0() );      
       
       	        hist("track_outputcoll_eta")->Fill(newtrk->eta());
       	        hist("track_outputcoll_theta")->Fill(newtrk->theta());
-      	        hist("track_outputcoll_pt" )->Fill(TMath::Sin(newtrk->theta())/(1000.0*newtrk->qOverP()));
+      	        hist("track_outputcoll_pt" )->Fill(std::sin(newtrk->theta())/(1000.0*newtrk->qOverP()));
       	        hist("track_outputcoll_phi")->Fill(newtrk->phi0());
       	        hist("track_outputcoll_z0" )->Fill(newtrk->z0());
       	        hist("track_outputcoll_d0" )->Fill(newtrk->d0());
       	      
-      	        hist("track_delta_eta")->Fill(mySmearer->Tracks[i].eta() - trk->eta());      	      
-      	        hist("track_delta_crv")->Fill(1000.0*mySmearer->Tracks[i].curv()-((1000.0*trk->qOverP())/TMath::Sin(theta)));
-      	        hist("track_delta_phi")->Fill(mySmearer->Tracks[i].phi() - trk->phi0());
-      	        hist("track_delta_z0" )->Fill(mySmearer->Tracks[i].z0()  - trk->z0());
-      	        hist("track_delta_d0" )->Fill(mySmearer->Tracks[i].d0()  - trk->d0());
+      	        hist("track_delta_eta")->Fill(otrack.eta() - trk->eta());      	      
+      	        hist("track_delta_crv")->Fill(1000.0*otrack.curv()-((1000.0*trk->qOverP())/std::sin(theta)));
+      	        hist("track_delta_phi")->Fill(otrack.phi() - trk->phi0());
+      	        hist("track_delta_z0" )->Fill(otrack.z0()  - trk->z0());
+      	        hist("track_delta_d0" )->Fill(otrack.d0()  - trk->d0());
               
       	        xAOD::ParametersCovMatrix_t trkcov_out = newtrk->definingParametersCovMatrix();
-      	        hist("track_outputcoll_check_sigma_theta") ->Fill(TMath::Sqrt(trkcov_out(Trk::theta,Trk::theta)));
-      	        hist("track_outputcoll_check_sigma_qOverP")->Fill(TMath::Sqrt(trkcov_out(Trk::qOverP,Trk::qOverP)));
-      	        hist("track_outputcoll_check_sigma_phi")   ->Fill(TMath::Sqrt(trkcov_out(Trk::phi0,Trk::phi0)));
-      	        hist("track_outputcoll_check_sigma_z0")    ->Fill(TMath::Sqrt(trkcov_out(Trk::z0,Trk::z0)));
-      	        hist("track_outputcoll_check_sigma_d0")    ->Fill(TMath::Sqrt(trkcov_out(Trk::d0,Trk::d0)));
+      	        hist("track_outputcoll_check_sigma_theta") ->Fill(std::sqrt(trkcov_out(Trk::theta,Trk::theta)));
+      	        hist("track_outputcoll_check_sigma_qOverP")->Fill(std::sqrt(trkcov_out(Trk::qOverP,Trk::qOverP)));
+      	        hist("track_outputcoll_check_sigma_phi")   ->Fill(std::sqrt(trkcov_out(Trk::phi0,Trk::phi0)));
+      	        hist("track_outputcoll_check_sigma_z0")    ->Fill(std::sqrt(trkcov_out(Trk::z0,Trk::z0)));
+      	        hist("track_outputcoll_check_sigma_d0")    ->Fill(std::sqrt(trkcov_out(Trk::d0,Trk::d0)));
               }
               // do we need this hack?
       	      // hack!!!
@@ -312,9 +470,9 @@ StatusCode EFTrackingSmearingAlg::execute() {
       	      //       0 -> "core tracks"
       	      //
       	      // NDF: index of parent track in input track collection 
-      	      newtrk->setFitQuality(mySmearer->Tracks[i].FakeFlags(),trackno);
+      	      //newtrk->setFitQuality(otrack.FakeFlags(),trackno);
       
-      	      outputTracks->push_back(newtrk);              
+      	                  
       	    }
             
 	      }
