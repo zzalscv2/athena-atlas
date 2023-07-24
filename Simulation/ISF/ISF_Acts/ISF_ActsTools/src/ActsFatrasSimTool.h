@@ -143,7 +143,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
       actor.initialParticle = particle;
       // use AnyCharge to be able to handle neutral and charged parameters
       Acts::SingleCurvilinearTrackParameters<Acts::AnyCharge> startPoint(
-          particle.fourPosition(), particle.unitDirection(),
+          particle.fourPosition(), particle.direction(),
           particle.absoluteMomentum(), particle.charge());
       options.absPdgCode = Acts::makeAbsolutePdgParticle(particle.pdg());
       options.mass = particle.mass();

@@ -130,7 +130,7 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
       for (const auto& simfail : simulatedFailure){
         auto errCode = Acts::make_error_code(Acts::PropagatorError(simfail.error.value()));
         ATH_MSG_WARNING(name() << " Particle id " <<simfail.particle.particleId()<< ": fail to be simulated during Propagation: " << errCode.message());
-        ATH_MSG_WARNING(name() << " Particle vertex|particle|generation|subparticle"<<simfail.particle << " starts from position" << Acts::toString(simfail.particle.position()) << " and direction " << Acts::toString(simfail.particle.unitDirection()));
+        ATH_MSG_WARNING(name() << " Particle vertex|particle|generation|subparticle"<<simfail.particle << " starts from position" << Acts::toString(simfail.particle.position()) << " and direction " << Acts::toString(simfail.particle.direction()));
         return StatusCode::SUCCESS;
       }
     }
