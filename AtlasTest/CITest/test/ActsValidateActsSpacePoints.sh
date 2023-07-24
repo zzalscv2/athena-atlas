@@ -7,7 +7,7 @@ n_events=5
 
 Reco_tf.py --CA \
   --preExec "flags.Exec.FPE=500;" \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsTrkValidateSpacePointsFlags" \
+  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateSpacePointsFlags" \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.pool.root \
   --maxEvents ${n_events}

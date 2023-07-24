@@ -15,11 +15,11 @@
 // Algs
 DECLARE_COMPONENT(ActsTrk::PixelClusterizationAlg)
 DECLARE_COMPONENT(ActsTrk::StripClusterizationAlg)
-DECLARE_COMPONENT( ActsTrk::PixelSpacePointFormationAlg )
-DECLARE_COMPONENT( ActsTrk::StripSpacePointFormationAlg )
+DECLARE_COMPONENT(ActsTrk::PixelSpacePointFormationAlg)
+DECLARE_COMPONENT(ActsTrk::StripSpacePointFormationAlg)
 // Tools
 DECLARE_COMPONENT(ActsTrk::PixelClusteringTool)
 DECLARE_COMPONENT(ActsTrk::StripClusteringTool)
-DECLARE_COMPONENT( ActsTrk::PixelSpacePointFormationTool )
-DECLARE_COMPONENT( ActsTrk::ActsCoreStripSpacePointFormationTool )
-DECLARE_COMPONENT( ActsTrk::ActsTrkStripSpacePointFormationTool )
+DECLARE_COMPONENT(ActsTrk::PixelSpacePointFormationTool)
+DECLARE_COMPONENT(ActsTrk::ActsCoreStripSpacePointFormationTool)
+DECLARE_COMPONENT(ActsTrk::ActsTrkStripSpacePointFormationTool)

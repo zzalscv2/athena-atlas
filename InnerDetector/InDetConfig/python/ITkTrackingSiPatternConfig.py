@@ -73,9 +73,9 @@ def ITkTrackingSiPatternCfg(flags,
         # ACTS seed
         if configuration_settings.doActsSeed:
 
-            from ActsConfig.ActsTrkSeedingConfig import (
-                ActsTrkSeedingCfg)
-            acc.merge(ActsTrkSeedingCfg(flags))
+            from ActsConfig.ActsSeedingConfig import (
+                ActsSeedingCfg)
+            acc.merge(ActsSeedingCfg(flags))
 
             if flags.Tracking.ActiveConfig.extension == "Conversion":
                 from AthenaCommon.Logging import logging
@@ -85,15 +85,15 @@ def ITkTrackingSiPatternCfg(flags,
 
         # ACTS track
         if configuration_settings.doActsTrack:
-            from ActsConfig.ActsTrkFindingConfig import ActsTrkFindingCfg
-            acc.merge(ActsTrkFindingCfg(flags))
+            from ActsConfig.ActsTrackFindingConfig import ActsTrackFindingCfg
+            acc.merge(ActsTrackFindingCfg(flags))
 
             if flags.Acts.doAmbiguityResolution :
-                from ActsConfig.ActsTrkFindingConfig import ActsAmbiguityResolutionCfg
+                from ActsConfig.ActsTrackFindingConfig import ActsAmbiguityResolutionCfg
                 acc.merge(ActsAmbiguityResolutionCfg(flags))
-                
+
         if configuration_settings.doActsToAthenaTrack:
-            from ActsConfig.ActsTrkEventCnvConfig import ActsToTrkConvertorAlgCfg
+            from ActsConfig.ActsEventCnvConfig import ActsToTrkConvertorAlgCfg
             acc.merge(ActsToTrkConvertorAlgCfg(flags,
                                                TracksLocation=SiSPSeededTrackCollectionKey))
 

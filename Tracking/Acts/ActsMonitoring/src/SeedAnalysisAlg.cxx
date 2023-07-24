@@ -81,7 +81,7 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "Retrieved " << seed_collection->size() << " input elements from key " << m_inputSeedColletionKey.key() );
     
     auto monitor_nseed = Monitored::Scalar<int>("Nseed", seed_collection->size());
-    fill("ActsTrkSeedAnalysisAlg", monitor_nseed);
+    fill("ActsSeedAnalysisAlg", monitor_nseed);
 
     // bottom  
     auto monitor_x1 = 
@@ -192,7 +192,7 @@ namespace ActsTrk {
     auto monitor_truth_barcode = Monitored::Collection("truth_barcode", vec_truthBarcode);
     auto monitor_truth_prob = Monitored::Collection("truth_prob", vec_truthProb);
 
-    fill("ActsTrkSeedAnalysisAlg",
+    fill("ActsSeedAnalysisAlg",
 	 monitor_x1, monitor_y1, monitor_z1, monitor_r1,
 	 monitor_x2, monitor_y2, monitor_z2, monitor_r2,
 	 monitor_x3, monitor_y3, monitor_z3, monitor_r3,
@@ -312,7 +312,7 @@ namespace ActsTrk {
     auto monitor_estimated_eta = Monitored::Collection("estimated_eta", estimated_eta);
     auto monitor_pass = Monitored::Collection("passed", vec_pass);
 
-    fill("ActsTrkSeedAnalysisAlg",
+    fill("ActsSeedAnalysisAlg",
 	 monitor_pass,
 	 monitor_estimated_pt, monitor_estimated_eta);
 

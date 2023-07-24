@@ -8,7 +8,7 @@ n_events=5
 Reco_tf.py --CA \
    --preExec "flags.Exec.FPE=500;" \
    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateGSFFlags" \
-   --postInclude "ActsConfig.ActsTrkFittingConfig.ActsReFitterAlgCfg" \
+   --postInclude "ActsConfig.ActsTrackFittingConfig.ActsReFitterAlgCfg" \
    --inputRDOFile ${input_rdo} \
    --outputESDFile ESD.pool.root \
    --outputAODFile AOD.pool.root \

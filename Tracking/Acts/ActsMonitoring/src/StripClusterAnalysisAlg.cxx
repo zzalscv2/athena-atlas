@@ -101,7 +101,7 @@ namespace ActsTrk {
 					       [] (const auto* cluster) -> int
 					       { return cluster->channelsInPhi(); });
     
-    fill("ActsTrkClusterAnalysisAlg",
+    fill("ActsClusterAnalysisAlg",
 	 monitor_barrelEndcap, monitor_layerDisk,
 	 monitor_phiModule, monitor_etaModule, monitor_sideModule,
 	 monitor_eta, monitor_perp,

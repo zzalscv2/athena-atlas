@@ -247,8 +247,8 @@ atlas_add_citest( ACTS_ValidateActsCoreSpacePoints
     SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateActsCoreSpacePoints.sh
     LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
 
-atlas_add_citest( ACTS_ValidateActsTrkSpacePoints
-    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateActsTrkSpacePoints.sh
+atlas_add_citest( ACTS_ValidateActsSpacePoints
+    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateActsSpacePoints.sh
     LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
 
 atlas_add_citest( ACTS_ValidateSeeds

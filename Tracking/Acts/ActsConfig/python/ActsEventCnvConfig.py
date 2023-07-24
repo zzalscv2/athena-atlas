@@ -4,7 +4,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 
 def ActsToTrkConverterToolCfg(flags, name="ActsToTrkConverterTool", **kwargs):
-    from ActsConfig.ActsTrkGeometryConfig import ActsTrackingGeometryToolCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
     result = ComponentAccumulator()
     kwargs.setdefault("TrackingGeometryTool", result.popToolsAndMerge(
         ActsTrackingGeometryToolCfg(flags)))  # PrivateToolHandle
@@ -30,10 +30,10 @@ def ActsToTrkConvertorAlgCfg(flags,
     # this depends on the ambi resol. activation
     kwargs.setdefault('ACTSTracksLocation', 'ActsTracks' if not flags.Acts.doAmbiguityResolution else 'ActsTracksResolved')
 
-    from ActsConfig.ActsTrkGeometryConfig import ActsTrackingGeometryToolCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
     kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
 
-    from ActsConfig.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
+    from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
     kwargs.setdefault("ATLASConverterTool", acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
 
     BoundaryCheckToolCfg = None

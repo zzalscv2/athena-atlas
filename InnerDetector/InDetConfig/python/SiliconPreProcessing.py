@@ -122,9 +122,9 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
         acc.merge(AthenaTrkClusterizationCfg(flags))
 
     if configuration_settings.doActsCluster:
-        from ActsConfig.ActsTrkClusterizationConfig import (
-            ActsTrkClusterizationCfg)
-        acc.merge(ActsTrkClusterizationCfg(flags))
+        from ActsConfig.ActsClusterizationConfig import (
+            ActsClusterizationCfg)
+        acc.merge(ActsClusterizationCfg(flags))
 
     #
     # ---  Cluster EDM converters
@@ -159,9 +159,9 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
             acc.merge(ITkSiTrackerSpacePointFinderCfg(flags))
 
     if configuration_settings.doActsSpacePoint:
-        from ActsConfig.ActsTrkSpacePointFormationConfig import (
-            ActsTrkSpacePointFormationCfg)
-        acc.merge(ActsTrkSpacePointFormationCfg(flags))
+        from ActsConfig.ActsSpacePointFormationConfig import (
+            ActsSpacePointFormationCfg)
+        acc.merge(ActsSpacePointFormationCfg(flags))
 
     #
     # --- Space Point EDM converters

@@ -32,7 +32,7 @@ ServiceMgr.THistSvc.Output += [ "val DATAFILE='TrackComparison.root' TYPE='ROOT'
 from AthenaCommon.AlgSequence import AlgSequence
 topSequence = AlgSequence()
       
-from ActsTrkFitting.ActsTrkFittingConf import ActsCompareTrackAlg     
+from ActsTrackReconstruction.ActsTrackReconstructionConf import ActsCompareTrackAlg
 compareTrack = ActsCompareTrackAlg(name = "ActsCompareTrackAlg",
                                    ATLASTrackName = "ResolvedTracks_TrackParticle",
                                    ActsTrackName = "ReFitted_Tracks_TrackParticle")

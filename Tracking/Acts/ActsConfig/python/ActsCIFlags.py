@@ -18,7 +18,7 @@ def actsValidateClustersFlags(flags):
     flags.Reco.EnableHGTDExtension = False
     flags.Tracking.recoChain = [TrackingComponent.ValidateActsClusters]
 
-def actsTrkValidateSpacePointsFlags(flags):
+def actsValidateSpacePointsFlags(flags):
     """flags for Reco_tf with CA used in CI tests: use for validating Athena-based space point formation"""
     flags.Reco.EnableHGTDExtension = False
     flags.Tracking.recoChain = [TrackingComponent.ValidateActsSpacePoints]
@@ -27,7 +27,7 @@ def actsCoreValidateSpacePointsFlags(flags):
     """flags for Reco_tf with CA used in CI tests: use for validating ACTS-based space point formation"""
     from ActsConfig.ActsConfigFlags import SpacePointStrategy
     flags.Acts.SpacePointStrategy = SpacePointStrategy.ActsCore
-    actsTrkValidateSpacePointsFlags(flags)
+    actsValidateSpacePointsFlags(flags)
     
 def actsValidateSeedsFlags(flags):
     """flags for Reco_tf with CA used in CI tests: use SiSpacePointSeedMaker tool during reconstruction"""
@@ -42,14 +42,14 @@ def actsValidateOrthogonalSeedsFlags(flags):
     actsValidateSeedsFlags(flags)
 
 def actsValidateTracksFlags(flags):
-    """flags for Reco_tf with CA used in CI tests: use ActsTrkFinding during reconstruction"""
+    """flags for Reco_tf with CA used in CI tests: use ActsTrackFinding during reconstruction"""
     flags.Reco.EnableHGTDExtension = False
     flags.Acts.doAmbiguityResolution = False
     flags.Tracking.ITkMainPass.doAmbiguityProcessorTrackFit = False
     flags.Tracking.recoChain = [TrackingComponent.ValidateActsTracks]
 
 def actsValidateAmbiguityResolutionFlags(flags):
-    """flags for Reco_tf with CA used in CI tests: use ActsTrkFinding during reconstruction with ambi. resolution"""
+    """flags for Reco_tf with CA used in CI tests: use ActsTrackFinding during reconstruction with ambi. resolution"""
     actsValidateTracksFlags(flags)
     flags.Tracking.ITkMainPass.doAmbiguityProcessorTrackFit = True
 

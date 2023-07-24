@@ -118,18 +118,17 @@ def VertexFinderToolCfg(flags, **kwargs):
     elif flags.Tracking.PriVertex.setup == VertexSetup.FastIVF:
         return FastIterativeFindingCfg(flags, **kwargs)
     elif flags.Tracking.PriVertex.setup == VertexSetup.ActsGaussAMVF:
-        from ActsConfig.ActsTrkPriVxFinderConfig import (
-            ActsGaussAdaptiveMultiFindingCfg)
+        from ActsConfig.ActsPriVxFinderConfig import ActsGaussAdaptiveMultiFindingCfg
         return ActsGaussAdaptiveMultiFindingCfg(flags, **kwargs)
     elif flags.Tracking.PriVertex.setup == VertexSetup.ExperimentalActsIVF:
-        from ActsConfig.ActsTrkPriVxFinderConfig import (
+        from ActsConfig.ActsPriVxFinderConfig import (
             ActsIterativeFindingCfg)
         return ActsIterativeFindingCfg(flags, **kwargs)
 
 
 def TrigVertexFinderToolCfg(flags, **kwargs):
     if flags.Tracking.ActiveConfig.adaptiveVertex:
-        from ActsConfig.ActsTrkPriVxFinderConfig import (
+        from ActsConfig.ActsPriVxFinderConfig import (
             TrigActsGaussAdaptiveMultiFindingCfg)
         return TrigActsGaussAdaptiveMultiFindingCfg(flags, **kwargs)
     else:
