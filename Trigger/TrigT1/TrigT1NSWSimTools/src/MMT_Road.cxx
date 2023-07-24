@@ -63,8 +63,7 @@ void MMT_Road::addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits) {
     }
 
     if (has_hit) continue;
-    auto hit = std::make_unique<MMT_Hit>(hit_i.get());
-    m_road_hits.push_back(std::move(hit));
+    m_road_hits.emplace_back(std::make_unique<MMT_Hit>(hit_i.get()));
     m_road_hits.back()->setAge(0);
   }
 }
@@ -101,7 +100,9 @@ double MMT_Road::avgZofUV(const int uv1, const int uv2) const {
 
 bool MMT_Road::checkCoincidences(const int bcwind) const {
   bool passHorizontalCheck = this->horizontalCheck();
+  if (!passHorizontalCheck) return false;
   bool passStereoCheck = this->stereoCheck();
+  if (!passStereoCheck) return false;
   bool passMatureCheck = this->matureCheck(bcwind);
   return (passHorizontalCheck && passStereoCheck && passMatureCheck);
 }

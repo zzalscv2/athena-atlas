@@ -56,7 +56,7 @@ void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::map<hit
   }
 
   int nroad = 8192/this->getRoadSize();
-  double B = (1./std::tan(1.5/180.*M_PI));
+  static const double B = (1./std::tan(1.5/180.*M_PI));
   int uvfactor = std::round( par->getlWidth() / (B * 0.4 * 2.)/this->getRoadSize() ); // full wedge has to be considered, i.e. S(L/M)2
   this->setUVfactor(uvfactor);
 
@@ -104,7 +104,6 @@ void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::map<hit
     }
   }
   m_diamonds.push_back(entry);
-  planeCoordinates.clear();
   ATH_MSG_DEBUG("CreateRoadsAndFillHits: Feeding hitDatas Ended");
 }
 
@@ -159,7 +158,7 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const int event) {
           // priority encode the hits by channel number; remember hits 8+
           to_erase.clear();
 
-          std::sort(addc_same.begin(), addc_same.end(), [](std::pair<int, int> p1, std::pair<int, int> p2) { return p1.second < p2.second; });
+          std::sort(addc_same.begin(), addc_same.end(), [](const std::pair<int, int>& p1, const std::pair<int, int>& p2) { return p1.second < p2.second; });
           for (unsigned int it = 8; it < addc_same.size(); it++) to_erase.push_back(addc_same[it].first);
 
           // reverse and erase
@@ -221,7 +220,8 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const int event) {
         slope.my = road->avgSofX(); // defined as my in ATL-COM-UPGRADE-2015-033
         slope.uavg = road->avgSofUV(2,4);
         slope.vavg = road->avgSofUV(3,5);
-        slope.mx = (slope.uavg-slope.vavg)/(2.*std::tan(0.02618)); // The stereo angle is fixed and can be hardcoded
+	static const double tan_stereo_angle = std::tan(0.02618); // The stereo angle is fixed and can be hardcoded
+        slope.mx = (slope.uavg-slope.vavg)/(2.*tan_stereo_angle);
         double theta = std::atan(std::sqrt(std::pow(slope.mx,2) + std::pow(slope.my,2)));
         slope.theta = (slope.my > 0.) ? theta : M_PI - theta;
         slope.eta = -1.*std::log(std::tan(slope.theta/2.));
