@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -72,13 +72,35 @@ def decodeTriggerBits(words, num_sets, base=32):
 def header_info(event):
     '''Return a string with basic information about the event from the header'''
 
-    'RunNumber: {:7d}, LB: {:4d}, LVL1_ID: {:10d}, Global_ID: {:10d}, BCID: {:4d}, TT: x{:2x}'
     info_str = 'RunNumber: {:6d}, '.format(event.run_no())
     info_str += 'LB: {:4d}, '.format(event.lumi_block())
     info_str += 'Global_ID: {:10d}, '.format(event.global_id())
     info_str += 'LVL1_ID: {:10d}, '.format(event.lvl1_id())
     info_str += 'BC_ID: {:4d}, '.format(event.bc_id())
-    info_str += 'TT: x{:2x}'.format(event.lvl1_trigger_type())
+    info_str += 'TT: 0x{:2x}, '.format(event.lvl1_trigger_type())
+    info_str += 'Status: ' + event_status(event)
+    return info_str
+
+
+def event_status(event):
+    '''Return event status and string representation'''
+
+    if len(event.status())==0:
+        return 'None'
+
+    # Generic event status:
+    info_str = '[' + ', '.join('0x%x' % s for s in event.status()) + ']'
+    full_event_status = event.status()[0]
+    for code, name in eformat.helper.FullEventStatus.values.items():
+        if full_event_status & code:
+            info_str += f' {name}'
+
+    # HLT-specific event status:
+    if len(event.status())>1:
+        import cppyy
+        cppyy.gbl.HLT.OnlineErrorCode  # trigger auto-loading via enum
+        info_str += ' '+ cppyy.gbl.HLT.OnlineErrorCodeToString(event.status()[1]).data()
+
     return info_str
 
 
