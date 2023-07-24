@@ -124,7 +124,7 @@ def defineMenu():
         'L1_J12_BGRP12',
 
         # jJ 
-        'L1_jJ30', 'L1_jJ30p0ETA25', 'L1_jJ40', 'L1_jJ40p0ETA25', 'L1_jJ50', 'L1_jJ55',  'L1_jJ55p0ETA23',
+        'L1_jJ30', 'L1_jJ30_EMPTY', 'L1_jJ30p0ETA25', 'L1_jJ40', 'L1_jJ40p0ETA25', 'L1_jJ50', 'L1_jJ55',  'L1_jJ55p0ETA23',
         'L1_jJ60', 'L1_jJ60_EMPTY', 'L1_jJ60_FIRSTEMPTY', 'L1_jJ70p0ETA23', 'L1_jJ80', 'L1_jJ80p0ETA25', 'L1_jJ85p0ETA21', 'L1_jJ90',
         'L1_jJ125', 'L1_jJ140', 'L1_jJ160', 'L1_jJ180', 'L1_jJ500',
         'L1_jJ500_LAR',
@@ -295,8 +295,8 @@ def defineMenu():
         'L1_eTAU80_2cTAU30M_DR-eTAU30eTAU20', 
         'L1_cTAU20M_DR-eTAU20eTAU12-jJ40', 
         #ATR-26902
-        'L1_4jJ30p0ETA24_0DETA24-eTAU30MeTAU12M',
-        'L1_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30MeTAU12M',
+        'L1_4jJ30p0ETA24_0DETA24-eTAU30eTAU12',
+        'L1_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30eTAU12',
         
         
         'L1_DY-BOX-2MU5VF', 'L1_DY-BOX-MU5VFMU3V', 'L1_DY-BOX-2MU3VF',

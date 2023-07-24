@@ -24,7 +24,8 @@ def fastElectronRecoSequence(flags, RoIs, variant=''):
     ViewVerifyTrk.DataObjects += [( 'xAOD::TrigEMClusterContainer' , 'StoreGateSvc+%s' % CaloMenuDefs.L2CaloClusters ),
                                   ( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+%s' % trackParticlesName ),
                                   ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs )]
-                                  
+    ViewVerifyTrk.DataObjects += [( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )]
+
     from TrigEgammaRec.TrigEgammaFastElectronConfig import fastElectronFexAlgCfg
     theElectronFex = algorithmCAToGlobalWrapper(fastElectronFexAlgCfg, flags, name="EgammaFastElectronFex_Clean_gen"+variant, rois=RoIs)[0]
     theElectronFex.TrigEMClusterName = CaloMenuDefs.L2CaloClusters

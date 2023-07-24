@@ -66,7 +66,6 @@ namespace InDet{
     SG::ReadHandleKey<TRT_RDO_Container> m_rdoContainerKey;
     ToolHandle< ITRT_DriftCircleTool > m_driftcircle_tool;
     SG::WriteHandleKey<InDet::TRT_DriftCircleContainer> m_rioContainerKey;
-    std::string                    m_trt_mgr_location   ; //REMOVE LATER
     int                            m_mode_rio_production;
     bool                           m_trtBadChannels;
 

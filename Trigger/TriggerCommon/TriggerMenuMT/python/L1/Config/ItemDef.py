@@ -582,6 +582,7 @@ class ItemDef:
         MenuItem('L1_jJ20'          ).setLogic( d.jJ20         & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jJ20p31ETA49'  ).setLogic( d.jJ2031ETA49  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jJ30'          ).setLogic( d.jJ30         & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_jJ30_EMPTY'    ).setLogic( d.jJ30         & cosmiccond ).setTriggerType(TT.calo)
         MenuItem('L1_jJ30p0ETA25'   ).setLogic( d.jJ300ETA25   & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jJ40'          ).setLogic( d.jJ40         & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jJ40p0ETA25'   ).setLogic( d.jJ400ETA25   & physcond).setTriggerType(TT.calo)
@@ -1928,13 +1929,13 @@ class ItemDef:
             MenuItem('L1_eTAU80_2cTAU30M_DR-eTAU30eTAU20').setLogic( d.eTAU80 & d.cTAU30M.x(2) & d.TOPO_0DR28_eTAU30ab_eTAU20ab & physcond)
 
             # ATR-26902
-            MenuItem('L1_2cTAU20M_4DR28-eTAU30MeTAU20M-jJ55').setLogic ( d.cTAU20M.x(2) & d.TOPO_2DISAMB_jJ55ab_4DR28_eTAU30abm_eTAU20abm   & physcond)
-            MenuItem('L1_2cTAU20M_4DR32-eTAU30MeTAU20M-jJ55').setLogic ( d.cTAU20M.x(2) & d.TOPO_2DISAMB_jJ55ab_4DR32_eTAU30abm_eTAU20abm   & physcond)
-            MenuItem('L1_2cTAU20M_10DR32-eTAU30MeTAU20M-jJ55').setLogic( d.cTAU20M.x(2) & d.TOPO_2DISAMB_jJ55ab_10DR32_eTAU30abm_eTAU20abm  & physcond)
-            MenuItem('L1_4jJ30p0ETA24_0DETA24-eTAU30MeTAU12M').setLogic         ( d.jJ300ETA25.x(4) & d.TOPO_0DETA24_eTAU30s2_eTAU12s2      & physcond)
-            MenuItem('L1_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30MeTAU20M').setLogic ( d.jJ300ETA25.x(4) & d.TOPO_0DETA24_4DPHI99_eTAU30abm_eTAU20abm  & physcond)
-            MenuItem('L1_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30MeTAU12M').setLogic ( d.jJ300ETA25.x(4) & d.TOPO_0DETA24_4DPHI99_eTAU30abm_eTAU12abm  & physcond)
-            MenuItem('L1_4jJ30p0ETA24_0DETA24_10DPHI99-eTAU30MeTAU12M').setLogic( d.jJ300ETA25.x(4) & d.TOPO_0DETA24_10DPHI99_eTAU30abm_eTAU12abm & physcond)
+            MenuItem('L1_2cTAU20M_4DR28-eTAU30eTAU20-jJ55').setLogic ( d.cTAU20M.x(2) & d.TOPO_2DISAMB_jJ55ab_4DR28_eTAU30ab_eTAU20ab   & physcond)
+            MenuItem('L1_2cTAU20M_4DR32-eTAU30eTAU20-jJ55').setLogic ( d.cTAU20M.x(2) & d.TOPO_2DISAMB_jJ55ab_4DR32_eTAU30ab_eTAU20ab   & physcond)
+            MenuItem('L1_2cTAU20M_10DR32-eTAU30eTAU20-jJ55').setLogic( d.cTAU20M.x(2) & d.TOPO_2DISAMB_jJ55ab_10DR32_eTAU30ab_eTAU20ab  & physcond)
+            MenuItem('L1_4jJ30p0ETA24_0DETA24-eTAU30eTAU12').setLogic         ( d.jJ300ETA25.x(4) & d.TOPO_0DETA24_eTAU30s2_eTAU12s2      & physcond)
+            MenuItem('L1_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30eTAU20').setLogic ( d.jJ300ETA25.x(4) & d.TOPO_0DETA24_4DPHI99_eTAU30ab_eTAU20ab  & physcond)
+            MenuItem('L1_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30eTAU12').setLogic ( d.jJ300ETA25.x(4) & d.TOPO_0DETA24_4DPHI99_eTAU30ab_eTAU12ab  & physcond)
+            MenuItem('L1_4jJ30p0ETA24_0DETA24_10DPHI99-eTAU30eTAU12').setLogic( d.jJ300ETA25.x(4) & d.TOPO_0DETA24_10DPHI99_eTAU30ab_eTAU12ab & physcond)
             MenuItem('L1_jJ85p0ETA21_3jJ40p0ETA25_cTAU20M_2cTAU12M').setLogic   ( d.jJ850ETA21 & d.jJ400ETA25.x(3) & d.cTAU20M & d.cTAU12M.x(2)   & physcond)
             # ATR-27252
             MenuItem('L1_eTAU60_2cTAU20M_jXE80').setLogic( d.eTAU60 & d.cTAU20M.x(2) & d.jXE80 & physcond)

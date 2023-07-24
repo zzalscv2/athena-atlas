@@ -14,7 +14,8 @@ def fastPhotonVDVCfg(name, InViewRoIs):
     acc = ComponentAccumulator()
     fastPhotonVDV = CompFactory.AthViews.ViewDataVerifier(name)
     fastPhotonVDV.DataObjects = [( 'xAOD::TrigEMClusterContainer' , 'StoreGateSvc+%s' % CaloMenuDefs.L2CaloClusters ),
-                                 ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s'%InViewRoIs  )]
+                                 ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s'%InViewRoIs  ),
+                                 ( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )]
     acc.addEventAlgo(fastPhotonVDV)
     return acc
 

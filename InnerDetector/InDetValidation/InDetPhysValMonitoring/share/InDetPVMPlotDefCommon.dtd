@@ -1,0 +1,74 @@
+<!ENTITY PI "3.1415926">
+
+<!-- eta coverage of the tracker -->
+<!ENTITY ETA "2.5">
+<!ENTITY NETA "64">
+
+<!-- min eta covered by pix. endcaps -->
+<!ENTITY ETAPixECMin "1.5">
+
+<!-- eta coverage of sct -->
+<!ENTITY ETASct "2.0">
+
+<!-- min eta covered by sct endcaps -->
+<!ENTITY ETASctECMin "1.0">
+
+<!-- term used for innermost pixel barrel layer in histogram text -->
+<!ENTITY L0PixBarr "IBL">
+
+<!-- bins for hits -->
+<!ENTITY PIXHIT "10">
+<!ENTITY SCTHIT "20">
+<!ENTITY SIHIT "20">
+<!ENTITY TRTHIT "40">
+
+<!-- bins for resolutions -->
+<!ENTITY D0RES "10.00">
+<!ENTITY Z0RES "20.0">
+<!ENTITY PTQOPTRES "2.00">
+<!ENTITY QOPRES "5.00">
+<!ENTITY THETARES "0.10">
+<!ENTITY PHIRES "0.20">
+<!ENTITY Z0SINRES "10.00">
+
+<!-- bins for parameters -->
+<!ENTITY D0PARA "20.0">
+<!ENTITY Z0PARA "250.0">
+<!ENTITY QOPPARA "5.0e-3">
+<!ENTITY Z0SINPARA "40.0">
+<!ENTITY TIMEPARA "0.4">
+
+<!-- dR plots for tracks in jets -->
+<!ENTITY DRMAX "0.4">
+<!ENTITY SMALLDRMAX "0.1">
+
+<!-- Number of tracks vs MU -->
+<!ENTITY NmuBINS "26">
+<!ENTITY EXPMU "100">
+<!ENTITY EXPTRK "2000">
+<!ENTITY ETABINS2D "160">
+<!ENTITY PHIBINS2D "160">
+
+<!-- PU density plots -->
+<!ENTITY NBINSPUDENS "4">
+<!ENTITY PUDENSMAX "2.0">
+
+<!-- Tracking Recommendation Plots -->
+<!ENTITY EtaBinsTrkRec "100">
+
+<!ENTITY d0TrkRec     "300.0">
+<!ENTITY d0BinsTrkRec "4800">
+
+<!ENTITY prodRTrkRec     "300.0">
+<!ENTITY prodRBinsTrkRec "1200">
+
+<!ENTITY pTTrkRec     "50.0">
+<!ENTITY pTBinsTrkRec "500">
+
+<!ENTITY muTrkRec     "80.5">
+<!ENTITY muBinsTrkRec "80">
+
+<!-- histogram definitions common to Run2 and ITk -->
+<!ENTITY Common SYSTEM "InDetPVMPlotDefCommon.xml">
+<!ENTITY CommonRun2 SYSTEM "InDetPVMPlotDefCommon_Run2.xml">
+<!ENTITY CommonITK SYSTEM "InDetPVMPlotDefCommon_ITK.xml">

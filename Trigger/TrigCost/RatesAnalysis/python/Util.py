@@ -54,9 +54,11 @@ def toCSV(fileName, metadata, HLTTriggers, readL1=False):
       else:
         passFrac_afterPS=100*float(trig.passWeighted)/float(trig.activeWeighted)
 
+      isL1 = trig.name.startswith("L1_")
       rates_csv_writer.writerow([trig.name,"%.4f" % trig.rateDenominator,group_name,"%.4f" % trig.rate,"%.4f" % trig.rateErr, \
-          "%.4f" % trig.rateUnique,"%.4f" % trig.rateUniqueErr, "%.4f" % trig.rateExpress,"%.4f" % trig.rateExpressErr, trig.prescale, trig.expressPrescale, chain_id, \
-          "%.0f" % trig.activeRaw,"%.0f" % trig.passRaw,"%.4f" % trig.activeWeighted,"%.4f" % (float(trig.activeWeighted)/float(trig.rateDenominator)),"%.4f" % passFrac_afterPS,"%.4f" % trig.passWeighted])
+          "%.4f" % trig.rateUnique,"%.4f" % trig.rateUniqueErr, ("%.4f" % trig.rateExpress if not isL1 else "-"), ("%.4f" % trig.rateExpressErr if not isL1 else "-"), \
+          trig.prescale, (trig.expressPrescale if not isL1 else "-"), chain_id, "%.0f" % trig.activeRaw,"%.0f" % trig.passRaw,"%.4f" % trig.activeWeighted, \
+          "%.4f" % (float(trig.activeWeighted)/float(trig.rateDenominator)),"%.4f" % passFrac_afterPS,"%.4f" % trig.passWeighted])
       
     
 
@@ -142,9 +144,9 @@ def getMetadata(inputFile):
     prescale = metatree.prescales.at(i)
     expressPrescale = metatree.express.at(i)
     # Handle group prescale values
-    prescales[metatree.triggers.at(i)] = prescale if prescale > -1 else "Multiple"
+    prescales[metatree.triggers.at(i)] = prescale if prescale >= -1 else "Multiple"
     lowers[metatree.triggers.at(i)] = str(metatree.lowers.at(i))
-    express[metatree.triggers.at(i)] = expressPrescale if expressPrescale > -1 else "Multiple"
+    express[metatree.triggers.at(i)] = expressPrescale if expressPrescale >= -1 else "Multiple"
 
   metadata['prescales'] = prescales
   metadata['lowers'] = lowers

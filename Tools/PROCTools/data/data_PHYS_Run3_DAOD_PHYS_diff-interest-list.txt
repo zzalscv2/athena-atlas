@@ -1,18 +1,1 @@
-# BTagging branches
-BTagging_AntiKt4EMPFlowAuxDyn.DL1dv01*p?
-BTagging_AntiKt4EMPFlowAuxDyn.GN*p?
-BTagging_AntiKtVR30Rmax4Rmin02TrackAuxDyn.DL1d*p?
-BTagging_AntiKtVR30Rmax4Rmin02TrackAuxDyn.GN*p?
-
-# Large R Xbb branches
-AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAuxDyn.GN2*
-
-# JetEtMiss branches
-AntiKt4EMPFlowJetsAux.*
-Kt4EMPFlowEventShapeAux.Density
-Kt4EMPFlowPUSBEventShapeAux.Density
-Kt4EMPFlowNeutEventShapeAux.Density
-PrimaryVerticesAux.vertexType
-AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAuxDyn.*
-AntiKt10UFOCSSKJetsAuxDyn.NumTrkPt500
-AntiKt10UFOCSSKJetsAuxDyn.GhostAntiKtVR30Rmax4Rmin02PV0TrackJets
+data_PHYS_Run2_DAOD_PHYS_diff-interest-list.txt

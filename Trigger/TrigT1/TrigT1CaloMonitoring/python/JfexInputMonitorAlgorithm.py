@@ -19,12 +19,12 @@ def JfexInputMonitoringConfig(inputFlags):
     if inputFlags.Input.Format==Format.BS:
         
         #Decorator for the DataTowers
-        from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CaloFEXDecoratorCfg
-        result.merge(L1CaloFEXDecoratorCfg(inputFlags,"jFexTower2SCellDecorator",ExtraInfo = False))
+        from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CalojFEXDecoratorCfg
+        result.merge(L1CalojFEXDecoratorCfg(inputFlags,ExtraInfo = False))
         
         #jfex emulated input: EmulatedTowers
         from L1CaloFEXAlgos.FexEmulatedTowersConfig import jFexEmulatedTowersCfg
-        result.merge(jFexEmulatedTowersCfg(inputFlags,"jFexEmulatedTowerMaker"))    
+        result.merge(jFexEmulatedTowersCfg(inputFlags))    
     
 
     # get any algorithms
@@ -59,7 +59,7 @@ def JfexInputMonitoringConfig(inputFlags):
     # add monitoring algorithm to group, with group name and main directory 
     myGenericGroup = helper.addGroup(None, groupName+"Gen", mainDir)
     
-    myGenericGroup.defineHistogram('genLocation,genType;jFEX_Errors', path=None, type='TH2I',
+    myGenericGroup.defineHistogram('genLocation,genType;h_jFEX_Errors', path=None, type='TH2I',
                             title='jFEX generic monitoring for shifters;Location;Type',
                             xbins=4, xmin=0, xmax=4, xlabels=["Sim_DataTowers","Sim_EmulatedTowers","Input_Mismatch","Input_Invalids"],
                             ybins=4, ymin=0, ymax=4, ylabels=["TOB", "global TOB", "EM layer", "HAD layer" ],
@@ -76,39 +76,39 @@ def JfexInputMonitoringConfig(inputFlags):
         DetailsGroup.append( helper.addGroup(JfexInputMonAlg, groupName+"_details_"+str(i)   , mainDir))
         
         if(i == 1):
-            DetailsGroup[i].defineHistogram('DataEt_Tile,EmulatedEt_Tile;SumSCell_vs_Data_'+Calosource_names[i], title='Data Et vs Tile Et ('+ Calosource_names[i]+'); Data Et [GeV]; Tile Et [GeV]',
+            DetailsGroup[i].defineHistogram('DataEt_Tile,EmulatedEt_Tile;h_SumSCell_vs_Data_'+Calosource_names[i], title='Data Et vs Tile Et ('+ Calosource_names[i]+'); Data Et [GeV]; Tile Et [GeV]',
                             type='TH2F',path=trigPath+"expert/", xbins=200,xmin=0,xmax=100,ybins=200,ymin=0,ymax=100)
                             
         else:    
-            DetailsGroup[i].defineHistogram('DataEt,EmulatedEt;SumSCell_vs_Data_'+Calosource_names[i], title='Data vs SCell Sum Et ('+ Calosource_names[i]+'); Data Et [MeV]; SCell Sum Et [MeV]',
+            DetailsGroup[i].defineHistogram('DataEt,EmulatedEt;h_SumSCell_vs_Data_'+Calosource_names[i], title='Data vs SCell Sum Et ('+ Calosource_names[i]+'); Data Et [MeV]; SCell Sum Et [MeV]',
                             type='TH2F',path=trigPath+"expert/", xbins=160,xmin=-2000,xmax=2000,ybins=160,ymin=-2000,ymax=2000)
                             
         
 
-    myGroup.defineHistogram('region,type;DataErrors', title='jFEX Data mismatches per region; Region; Type',
+    myGroup.defineHistogram('region,type;h_DataErrors', title='jFEX Data mismatches per region; Region; Type',
                             type='TH2F',path=trigPath, xbins=7,xmin=0,xmax=7,ybins=2,ymin=0,ymax=2,xlabels=Calosource_names,ylabels=["Invalid codes","Data mismatch"])
 
-    myGroup.defineHistogram('TowerEtaInvalid,TowerPhiInvalid;2Dmap_InvalidCodes', title='jFex DataTower Invalid Et codes (4095); #eta; #phi',
+    myGroup.defineHistogram('TowerEtaInvalid,TowerPhiInvalid;h_2Dmap_InvalidCodes', title='jFex DataTower Invalid Et codes (4095); #eta; #phi',
                             type='TH2F',path=trigPath, **eta_phi_bins)
 
-    myGroup.defineHistogram('TowerEtaEmpty,TowerPhiEmpty;2Dmap_EmptyCodes', title='jFex DataTower Empty Et codes (0); #eta; #phi',
+    myGroup.defineHistogram('TowerEtaEmpty,TowerPhiEmpty;h_2Dmap_EmptyCodes', title='jFex DataTower Empty Et codes (0); #eta; #phi',
                             type='TH2F',path=trigPath, **eta_phi_bins)
                             
-    DecorGroup.defineHistogram('TowerEta,TowerPhi;2Dmap_MismatchedEts', title='jFex DataTower mismatches (no invalid codes); #eta; #phi',
+    DecorGroup.defineHistogram('TowerEta,TowerPhi;h_2Dmap_MismatchedEts', title='jFex DataTower mismatches (no invalid codes); #eta; #phi',
                             type='TH2F',path=trigPath, **eta_phi_bins)
                             
-    DecorGroup.defineHistogram('DataEt,SCellSum;SumSCell_vs_Data_Mismatched', title='Data vs SCell Sum Et (unmatching); Data Et [MeV]; SCell Sum Et [MeV]',
+    DecorGroup.defineHistogram('DataEt,SCellSum;h_SumSCell_vs_Data_Mismatched', title='Data vs SCell Sum Et (unmatching); Data Et [MeV]; SCell Sum Et [MeV]',
                             type='TH2F',path=trigPath, xbins=160,xmin=-2000,xmax=2000,ybins=160,ymin=-2000,ymax=2000)
                             
-    DecorAllGroup.defineHistogram('DataEt,SCellSum;SumSCell_vs_Data_all', title='Data vs SCell Sum Et (all Towers); Data Et [MeV]; SCell Sum Et [MeV]',
+    DecorAllGroup.defineHistogram('DataEt,SCellSum;h_SumSCell_vs_Data_all', title='Data vs SCell Sum Et (all Towers); Data Et [MeV]; SCell Sum Et [MeV]',
                             type='TH2F',path=trigPath, xbins=160,xmin=-2000,xmax=2000,ybins=160,ymin=-2000,ymax=2000)
                             
-    DecorGroup.defineHistogram('DataEt,frac_SCellSum;frac_SumSCell_vs_Data', title='Data vs (Et_{SCell}-Et_{Data})/Et_{Data} (no invalid codes); Data Et [MeV]; (Et_{SCell}-Et_{Data})/Et_{Data}',
+    DecorGroup.defineHistogram('DataEt,frac_SCellSum;h_frac_SumSCell_vs_Data', title='Data vs (Et_{SCell}-Et_{Data})/Et_{Data} (no invalid codes); Data Et [MeV]; (Et_{SCell}-Et_{Data})/Et_{Data}',
                             type='TH2F',path=trigPath, xbins=160,xmin=-2000,xmax=2000,ybins=100,ymin=-20,ymax=20)
                             
-    EmulatedGroup.defineHistogram('TowerEta,TowerPhi;2Dmap_DataVsEmulated', title='Input Data vs Emulated data; #eta; #phi',
+    EmulatedGroup.defineHistogram('TowerEta,TowerPhi;h_2Dmap_DataVsEmulated', title='Input Data vs Emulated data; #eta; #phi',
                             type='TH2F',path=trigPath, **eta_phi_bins)
-    EmulatedGroup.defineHistogram('TowerEtaDeco,TowerPhiDeco;2Dmap_EmulatedVsDecorated', title='Emulated vs Decorated data; #eta; #phi',
+    EmulatedGroup.defineHistogram('TowerEtaDeco,TowerPhiDeco;h_2Dmap_EmulatedVsDecorated', title='Emulated vs Decorated data; #eta; #phi',
                             type='TH2F',path=trigPath, **eta_phi_bins)
                             
     # histograms of jFex tower variables (content of the container)

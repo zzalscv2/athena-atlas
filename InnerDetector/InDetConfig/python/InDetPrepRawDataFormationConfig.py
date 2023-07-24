@@ -209,7 +209,6 @@ def InDetTRT_RIO_MakerCfg(flags, name = "InDetTRT_RIO_Maker", **kwargs):
         kwargs.setdefault("TRT_DriftCircleTool", acc.popToolsAndMerge(
             TRT_DriftCircleToolCfg(flags)))
 
-    kwargs.setdefault("TrtDescrManageLocation", 'TRT')
     if not flags.Overlay.doTrackOverlay:
         kwargs.setdefault("TRTRDOLocation", 'TRT_RDOs')
     else:
@@ -267,6 +266,7 @@ def TrigTRTRIOMakerCfg(flags, name="InDetTrigMTTRTDriftCircleMaker", **kwargs):
     kwargs.setdefault("isRoI_Seeded", True)
     kwargs.setdefault("RoIs", flags.Tracking.ActiveConfig.roi)
     
+    kwargs.setdefault("TRT_DriftCircleCache", "TRT_DriftCircleCache")
     acc.addEventAlgo(CompFactory.InDet.TRT_RIO_Maker(
         name+"_"+flags.Tracking.ActiveConfig.input_name, **kwargs))
     return acc

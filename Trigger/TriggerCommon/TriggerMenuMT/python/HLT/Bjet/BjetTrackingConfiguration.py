@@ -27,6 +27,8 @@ def getSecondStageBjetTracking( flags, inputRoI, inputVertex, inputJets ):
     else:
       viewVerify.DataObjects += [( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
 
+    viewVerify.DataObjects += [( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )]
+
     algSequence.append( parOR("SecondStageFastTrackingSequence",viewAlgs) )
 
     # Precision Tracking

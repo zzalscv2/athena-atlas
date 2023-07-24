@@ -807,7 +807,9 @@ namespace Muon {
         } else if constexpr (std::is_same<CollContainer, RpcPrepDataCollection>::value) {
             channel_max = m_idHelperSvc->rpcIdHelper().stripMax();
         } else if constexpr(std::is_same<CollContainer, sTgcPrepDataCollection>::value) {
-            channel_max = m_idHelperSvc->stgcIdHelper().channelMax(cont.front()->identify());
+            /// Enlarge the vector artifically by 3 to make enough space for Pads, strip and wires which
+            /// are all aligned in the same channel vector
+            channel_max = m_idHelperSvc->stgcIdHelper().channelMax(cont.front()->identify()) * 3;
         } else if constexpr(std::is_same<CollContainer, MMPrepDataCollection>::value) {            
             channel_max = m_idHelperSvc->mmIdHelper().channelMax(cont.front()->identify());
         }

@@ -42,7 +42,8 @@ def makeInDetTrigPrecisionTracking( inflags, config=None, verifier=False, rois='
         from .InDetTrigCollectionKeys import TrigPixelKeys
         verifier.DataObjects += [( 'InDet::PixelGangedClusterAmbiguities' , 'StoreGateSvc+' + TrigPixelKeys.PixelClusterAmbiguitiesMap ),
                                  ( 'TrackCollection' , 'StoreGateSvc+' +inputTracks ),
-                                 ( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
+                                 ( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' ),
+                                 ( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )]
 
     from TrkConfig.TrkAmbiguitySolverConfig import TrkAmbiguityScore_Trig_Cfg
     ambiguityScore = algorithmCAToGlobalWrapper(

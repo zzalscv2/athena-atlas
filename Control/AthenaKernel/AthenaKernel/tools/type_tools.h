@@ -4,18 +4,7 @@
 
 #ifndef ATHENAKERNEL_TOOLS_TYPE_TOOLS_H
 #define ATHENAKERNEL_TOOLS_TYPE_TOOLS_H
-#ifndef BOOST_CONFIG_HPP
- #include <boost/config.hpp>
-#endif
-#ifndef BOOST_TT_OBJECT_TRAITS_HPP_INLCUDED
- #include <boost/type_traits/object_traits.hpp>
-#endif
-#ifndef BOOST_TT_TRANSFORM_TRAITS_HPP_INCLUDED
- #include <boost/type_traits/transform_traits.hpp>
-#endif
-#ifndef SELECT_TYPE_DWA20010206_HPP
- #include <boost/detail/select_type.hpp>
-#endif
+#include <type_traits>
 
 namespace type_tools {
   ///assign a type to an integer value
@@ -40,32 +29,13 @@ namespace type_tools {
   template <typename T>
   struct Parameter {
   private:
-    typedef typename boost::add_reference<T>::type TRef;
+    typedef typename std::add_lvalue_reference<T>::type TRef;
     typedef const TRef const_TRef;
-    BOOST_STATIC_CONSTANT(bool, s_isScalar = boost::is_scalar<T>::value);
+    static const bool  s_isScalar = std::is_scalar<T>::value;
   public:
-    typedef typename boost::detail::if_true<(s_isScalar)>::template
-    then<
-      T,
-      //else
-      TRef
-      >::type ref_type;
-
-    typedef typename boost::detail::if_true<(s_isScalar)>::template
-    then<
-      T,
-      //else
-      const T&
-      //FIXME const_TRef
-      >::type const_type;
-      
-    typedef typename boost::detail::if_true<(s_isScalar)>::template
-    then<
-      T,
-      //else
-      T*
-      >::type ptr_type;
-
+    typedef typename std::conditional<s_isScalar,T,TRef>::type ref_type;
+    typedef typename std::conditional<s_isScalar,T,const T&>::type const_type;
+    typedef typename std::conditional<s_isScalar,T,T*>::type ptr_type;
     typedef const_type type;
   };
 

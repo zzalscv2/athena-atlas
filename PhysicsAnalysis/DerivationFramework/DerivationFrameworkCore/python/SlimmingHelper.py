@@ -228,7 +228,7 @@ class SlimmingHelper:
                                 masterItemList.extend(self.GetExtraItems(item))
 
                 #Add on-the-fly containers to the dictionary
-                for _cont,_type in ContainersOnTheFly:
+                for _cont,_type in ContainersOnTheFly(self.ConfigFlags):
                         if _cont not in self.AppendToDictionary:
                                 self.AppendToDictionary[_cont]=_type
 
@@ -339,7 +339,7 @@ class SlimmingHelper:
         def GetSmartItems(self,collectionName):
                 # Look up what is needed for this container type
                 items = []
-                if collectionName not in FullListOfSmartContainers:
+                if collectionName not in FullListOfSmartContainers(self.ConfigFlags):
                         raise RuntimeError("Smart slimming container "+collectionName+" does not exist or does not have a smart slimming list")
                 if collectionName=="EventInfo":
                         from DerivationFrameworkCore.EventInfoContent import EventInfoContent

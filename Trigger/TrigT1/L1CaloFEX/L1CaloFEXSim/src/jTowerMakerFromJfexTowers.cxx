@@ -40,6 +40,8 @@ jTowerMakerFromJfexTowers::jTowerMakerFromJfexTowers(const std::string& name, IS
 
 StatusCode jTowerMakerFromJfexTowers::initialize()
 {
+    ATH_MSG_DEBUG("isMC: " << m_isMC );
+    ATH_MSG_DEBUG("UseEmulated: " << m_UseEmulated );
     ATH_CHECK( m_DataTowerKey.initialize(!m_isMC) );
     ATH_CHECK( m_EmulTowerKey.initialize(m_UseEmulated) );
     ATH_CHECK( m_jSuperCellTowerMapperTool.retrieve() );
@@ -88,16 +90,18 @@ StatusCode jTowerMakerFromJfexTowers::execute()
     m_jTowerBuilderTool->init(local_jTowerContainerRaw);
     
     // STEP 2 - Mapping jFexTowers with decoded Energies
-    if( !m_isMC && (jDataTowerFilled || m_UseEmulated) ) {
+    if( jDataTowerFilled || m_UseEmulated ) {
         
-        SG::ReadHandle<xAOD::jFexTowerContainer> * data_jTowerContainer = &jDataTowerContainer;
+        SG::ReadHandle<xAOD::jFexTowerContainer> * data_jTowerContainer;
         
-        if(m_UseEmulated){
-            // If we allow emulated input data, then we need to check if decoded data is available, otherwise use emulated
-            data_jTowerContainer = jDataTowerContainer->empty() ? &jEmulatedTowerContainer : &jDataTowerContainer;
+        if(m_UseEmulated && !jDataTowerFilled){
+            data_jTowerContainer = &jEmulatedTowerContainer;
+        }
+        else{
+            data_jTowerContainer = &jDataTowerContainer;
         }
         
-        ATH_MSG_DEBUG("Collection used to build the jTower for simulation: " << (*data_jTowerContainer).key() << "with size: "<<(*data_jTowerContainer)->size() << ". Expected towers 17920");
+        ATH_MSG_DEBUG("Collection used to build the jTower for simulation: " << (*data_jTowerContainer).key() << " with size: "<<(*data_jTowerContainer)->size());
 
         for(const xAOD::jFexTower* my_jTower : *(*data_jTowerContainer) ) {
 

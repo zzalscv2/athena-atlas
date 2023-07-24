@@ -38,13 +38,12 @@ namespace InDet {
   {
     // Read TRT_RIO_Maker steering parameters
     declareProperty("TRTRDOLocation"      ,m_rdoContainerKey  );
-    declareProperty("TrtDescrManageLocation",m_trt_mgr_location   );//Remove later
     declareProperty("ModeRIOProduction"   ,m_mode_rio_production);
     //selection of the TRT bad channels(true/false)
     declareProperty("TRTBadChannels"    ,m_trtBadChannels = true );
     declareProperty("TRT_DriftCircleTool", m_driftcircle_tool);
     declareProperty("TRTRIOLocation",  m_rioContainerKey);
-    declareProperty("TRTRIOCache",  m_rioContainerCacheKey);
+    declareProperty("TRT_DriftCircleCache",  m_rioContainerCacheKey);
   }
   
   ///////////////////////////////////////////////////////////////////
