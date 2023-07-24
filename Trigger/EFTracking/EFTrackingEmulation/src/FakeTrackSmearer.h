@@ -55,6 +55,9 @@ class FakeTrackSmearer
     d0res_eta=new TF1(name.c_str(),[&](double*x,double*p){return d0ResFunc(x[0],p[0],0); },0.0,4.0,1);
     name="z0res_eta"+m_baseName;
     z0res_eta=new TF1(name.c_str(),[&](double*x,double*p){return z0ResFunc(x[0],p[0],0); },0.0,4.0,1);
+    name="curvres_eta"+m_baseName;
+    curvres_eta=new TF1(name.c_str(),[&](double*x,double*p){return curvResFunc(x[0],p[0],0); },0.0,4.0,1);
+    
     name="d0ref_eta"+m_baseName;
     d0ref_eta=new TF1(name.c_str(),[&](double*x,double*p){return d0RefFunc(x[0],p[0],0); },0.0,4.0,1);
     name="z0ref_eta"+m_baseName;
@@ -62,13 +65,17 @@ class FakeTrackSmearer
 
 
     name="d0res_pt"+m_baseName;
-    d0res_pt=new TF1(name.c_str(),[&](double*x,double*p){return d0ResFunc(p[0],x[0],0); },4.0,200.0,1);
+    d0res_pt=new TF1(name.c_str(),[&](double*x,double*p){return d0ResFunc(p[0],x[0],0); },1.0,200.0,1);
     name="z0res_pt"+m_baseName;
-    z0res_pt=new TF1(name.c_str(),[&](double*x,double*p){return z0ResFunc(p[0],x[0],0); },4.0,200.0,1);
+    z0res_pt=new TF1(name.c_str(),[&](double*x,double*p){return z0ResFunc(p[0],x[0],0); },1.0,200.0,1);
+    name="curvres_pt"+m_baseName;
+    curvres_pt=new TF1(name.c_str(),[&](double*x,double*p){return curvResFunc(p[0],x[0],0); },1.0,200.0,1);
+
     name="d0ref_pt"+m_baseName;
-    d0ref_pt=new TF1(name.c_str(),[&](double*x,double*p){return d0RefFunc(p[0],x[0],0); },4.0,200.0,1);
+    d0ref_pt=new TF1(name.c_str(),[&](double*x,double*p){return d0RefFunc(p[0],x[0],0); },1.0,200.0,1);
     name="z0ref_pt"+m_baseName;
-    z0ref_pt=new TF1(name.c_str(),[&](double*x,double*p){return z0RefFunc(p[0],x[0],0); },4.0,200.0,1);
+    z0ref_pt=new TF1(name.c_str(),[&](double*x,double*p){return z0RefFunc(p[0],x[0],0); },1.0,200.0,1);
+   
   }
 
 
@@ -99,7 +106,8 @@ class FakeTrackSmearer
   double curvResFunc(double eta __attribute__((unused)),double pt __attribute__((unused)),int verbose __attribute__((unused)))
   {
     // add here other curv res functions
-    return FitFunctions::getptqoptResParam_N(eta,pt,verbose)/pt;
+    if (pt!=0.) return FitFunctions::getptqoptResParam_N(eta,pt,verbose)/pt;
+    return 0.;
   }
 
 // Reference functions, in case needed ////
@@ -167,18 +175,20 @@ double effFunc(double eta,double pt,int verbose)
   void AddTrack(double d0,double z0,double curv,double eta,double phi)
   {
     // Adding one or more tracks to this input
-    // input curv is in GeV    
+    // input curv is in MeV    
     bool verbose=m_verbose;
       
     double abseta=std::abs(eta);
-    double abspt=std::abs(1.0/curv); //GeV
-    if (verbose) printf("Smearer::AddTrack : d0=%f, z0=%f, qOverPt=%f, eta=%f, phi=%f, pt=%f\n", d0, z0, curv, eta,phi, abspt);
+    double abspt=std::abs(1.0/curv); //MeV
+    if (verbose) printf("Smearer::AddTrack:  Initial track: curv = %f, phi=%f, eta=%f, d0=%f, z0=%f (pt=%f)\n", curv, phi, eta, d0, z0, abspt);
+    
  
     bool condition = (abspt>m_inPtCut) &&
       (d0RefFunc(abseta,abspt,verbose)>0.0) &&
       (d0ResFunc(abseta,abspt,verbose)>0.0) &&
       (z0RefFunc(abseta,abspt,verbose)>0.0) &&
-      (z0ResFunc(abseta,abspt,verbose)>0.0);
+      (z0ResFunc(abseta,abspt,verbose)>0.0) &&
+      (curvResFunc(abseta,abspt,verbose)>0.0);
 
     if (!condition)
       return;
@@ -187,11 +197,11 @@ double effFunc(double eta,double pt,int verbose)
     //Call here SetFakeFraction() and SetMatchRatio();
     
     double curvres = m_SigmaScaleFactor * curvResFunc(abseta,abspt,0);
-    double phires = m_SigmaScaleFactor * phiResFunc(abseta,abspt,0);
-    double etares = m_SigmaScaleFactor * etaResFunc(abseta,abspt,0);
-    double d0res = m_SigmaScaleFactor * d0ResFunc(abseta,abspt,0);
-    double z0res = m_SigmaScaleFactor * z0ResFunc(abseta,abspt,0);
-    if (verbose) printf("Smearing parameters: curv = %f, phi=%f, eta=%f, d0=%f, z0=%f\n",curvres, phires, etares, d0res, z0res);
+    double phires  = m_SigmaScaleFactor * phiResFunc(abseta,abspt,0);
+    double etares  = m_SigmaScaleFactor * etaResFunc(abseta,abspt,0);
+    double d0res   = m_SigmaScaleFactor * d0ResFunc(abseta,abspt,0);
+    double z0res   = m_SigmaScaleFactor * z0ResFunc(abseta,abspt,0);
+    if (verbose) printf("Smearer::AddTrack:  Smearing parameters: curv = %f, phi=%f, eta=%f, d0=%f, z0=%f\n", curvres, phires, etares, d0res, z0res);
 
    
   #ifdef STANDALONE_FAKETRACKSMEARER
@@ -225,38 +235,40 @@ double effFunc(double eta,double pt,int verbose)
           ntracks= m_myRandom->Poisson(avgntracks);
       }    
 
-    if (verbose) printf("Now producing %d tracks\n", ntracks);
+    if (verbose) printf("Smearer::AddTrack:  Now producing %d tracks\n", ntracks);
     for (int i=0;i<ntracks;i++)
       {
 
         // Creating close track
         double gend0,genz0, geneta, genphi, gencurv;
-        gend0= m_myRandom->Gaus(d0,d0res);
-        genz0= m_myRandom->Gaus(z0,z0res);
+        gend0 = m_myRandom->Gaus(d0,d0res);
+        genz0 = m_myRandom->Gaus(z0,z0res);
         geneta= m_myRandom->Gaus(eta,etares);
         genphi= m_myRandom->Gaus(phi,phires);
         gencurv= m_myRandom->Gaus(curv,curvres);
 
         EFTrackingSmearing::FTS_Track Track(
-              1000./ gencurv, // convert to MeV
+              1./gencurv, //pT
               geneta,
               genphi,
               gend0,
               genz0,
-              curvres,
+              curvres/gencurv/gencurv, // res pT
               etares,
               phires,
               d0res,
               z0res,
               false
         );
-        if (verbose) printf("Producing this track: curv = %f, phi=%f, eta=%f, d0=%f, z0=%f pt=%f\n",gencurv, genphi, geneta, gend0, genz0, Track.pt()/1000.0);
+        if (verbose) printf("Smearer::AddTrack:  Producing this track: curv = %f, phi=%f, eta=%f, d0=%f, z0=%f pt=%f (ptres=%f)\n",gencurv, genphi, geneta, gend0, genz0, Track.pt(), Track.sigma_pt());
         if (std::abs(Track.pt())>=m_outPtCut)
           {
             Tracks.push_back(Track);
             m_ntracks++;
-            if (verbose) printf("Adding track with pt=%f ==> track #%d\n",Track.pt(), m_ntracks);
+            if (verbose) printf("Smearer::AddTrack:  Adding track with pt=%f ==> track #%d\n",Track.pt(), m_ntracks);
           }
+          else if (verbose) printf("Smearer::AddTrack: No track added because of the output pt cut\n");
+
       }
 
         
@@ -280,28 +292,28 @@ double effFunc(double eta,double pt,int verbose)
   {
     m_produceFakes=enable;
     if (not Tracks.empty())
-      printf("Warning: you are reconfiguring fakes production but it seems you have already processed events with this instance of FakeTracksSmearer\n");
+      printf("Smearer::EnableFakes: Warning: you are reconfiguring fakes production but it seems you have already processed events with this instance of FakeTracksSmearer\n");
   }
 
   void FakeKillerEnable(bool enable=true)
   {
     m_fakeKillerEnable=enable;
     if (not Tracks.empty())
-      printf("Warning: you are reconfiguring fakes production but it seems you have already processed events with this instance of FakeTracksSmearer (FakeKillerEnable)\n");
+      printf("Smearer::FakeKillerEnable:  Warning: you are reconfiguring fakes production but it seems you have already processed events with this instance of FakeTracksSmearer (FakeKillerEnable)\n");
   }
 
   void IncludeFakesInResolutionCalculation(bool enable=true)
   {
     m_includeFakesInResolutionCalculation=enable;
     if (not Tracks.empty())
-      printf("Warning: you are reconfiguring fakes production but it seems you have already processed events with this instance of FakeTracksSmearer (IncluldeFakesInResolutionCalculation)\n");
+      printf("Smearer::IncludeFakesInResolutionCalculation:  Warning: you are reconfiguring fakes production but it seems you have already processed events with this instance of FakeTracksSmearer (IncluldeFakesInResolutionCalculation)\n");
   }
 
   void UseCoinToss(bool enable=true)
   {
     m_useCoinToss=enable;
     if (not Tracks.empty())
-      printf("Warning: you are reconfiguring fakes production but it seems you have already processed events with this instance of FakeTracksSmearer (UseCoinToss)\n");
+      printf("Smearer::UseCoinToss:  Warning: you are reconfiguring fakes production but it seems you have already processed events with this instance of FakeTracksSmearer (UseCoinToss)\n");
   }
 
   void SetTrackingEfficiency(double epsilon=0.95)
@@ -315,12 +327,12 @@ double effFunc(double eta,double pt,int verbose)
   }
 
   std::vector<EFTrackingSmearing::FTS_Track> Tracks;
-  double z0(int idx)  {return Tracks[idx].z0();};
-  double d0(int idx)  {return Tracks[idx].d0();};
-  double phi(int idx) {return Tracks[idx].phi();};
-  double pt(int idx)  {return Tracks[idx].pt();};
-  double curv(int idx)  {return 1000.0/Tracks[idx].pt();};
-  double eta(int idx) {return Tracks[idx].eta();};
+  double z0(int idx)    {return Tracks[idx].z0();};
+  double d0(int idx)    {return Tracks[idx].d0();};
+  double phi(int idx)   {return Tracks[idx].phi();};
+  double pt(int idx)    {return Tracks[idx].pt();};
+  double curv(int idx)  {return Tracks[idx].pt();};
+  double eta(int idx)   {return Tracks[idx].eta();};
 
   
   TH1F *d0Narrow = nullptr;
@@ -336,6 +348,8 @@ double effFunc(double eta,double pt,int verbose)
   TF1 *d0ref_pt = nullptr;
   TF1 *z0res_pt = nullptr;
   TF1 *z0ref_pt = nullptr;
+  TF1 *curvres_eta = nullptr;
+  TF1 *curvres_pt = nullptr;
 
 
  private:
