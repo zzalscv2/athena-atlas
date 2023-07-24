@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -34,6 +34,13 @@
  * work as expected.  There are also a few convenience functions defined
  * in the @c CxxUtils namespace: @c set, @c reset, and @c test.
  *
+ * In case of two different enum types (with common underlying type) the (non-assignment)
+ * boolean operators (&, |, ^) are also defined:
+ *
+ *@code
+   int result = Mask::Bit1 & OtherMask::Bit2
+ @endcode
+ *
  * This approach was suggested by these postings:
  *
  * <http://blog.bitwigglers.org/using-enum-classes-as-type-safe-bitmasks>
@@ -63,6 +70,44 @@
 #define ATH_BITMASK IS_ATH_BITMASK=1
 
 
+/// Internal helpers
+namespace {
+
+  /// SFINAE friendly underlying_type that also works on other types
+  template <typename T, bool = std::is_enum_v<T>>
+  struct relaxed_underlying_type {
+    using type = std::underlying_type_t<T>;
+  };
+  template <typename T>
+  struct relaxed_underlying_type<T, false> {
+    using type = T;
+  };
+  template <class T>
+  using relaxed_underlying_type_t = typename relaxed_underlying_type<T>::type;
+
+  /// Check if E and F have same underlying type
+  template <class E, class F>
+  constexpr bool has_same_underlying_v = std::is_same_v<relaxed_underlying_type_t<E>,
+                                                        relaxed_underlying_type_t<F>>;
+
+  /// Common (underlying) type for enum classes E and F
+  template <class E, class F>
+  struct enum_or_underlying {
+    using type = std::conditional_t<std::is_same_v<E,F> && has_same_underlying_v<E,F>,
+                                    E, relaxed_underlying_type_t<E>>;
+  };
+  template <class E, class F>
+  using enum_or_underlying_t = typename enum_or_underlying<E,F>::type;
+
+  /// Check if enum is an ATH_BITMASK
+  template <class E, typename Enable = void>
+  constexpr bool is_bitmask_v = false;
+
+  template <class E>
+  constexpr bool is_bitmask_v<E, std::enable_if_t<(E::IS_ATH_BITMASK,1)>> = true;
+}
+
+
 /*
  * Define bitwise operators for class enums.
  * These all cast the operands to the underlying type, and then cast
@@ -72,58 +117,66 @@
  * @c ATH_BITMASK macro.
  */
 
-
 /// operator~
 template <class E>
-inline
-typename std::enable_if<(E::IS_ATH_BITMASK,1), E>::type
+constexpr
+std::enable_if_t<is_bitmask_v<E>, E>
 operator~ (E lhs)
 {
-  typedef typename std::underlying_type<E>::type underlying;
+  typedef std::underlying_type_t<E> underlying;
   return static_cast<E> (~static_cast<underlying>(lhs));
 }
 
 
 /// operator&
-template <class E>
-inline
-typename std::enable_if<(E::IS_ATH_BITMASK,1), E>::type
-operator& (E lhs, E rhs)
+///
+/// One operand needs to be a bitmask and the other share at least the same
+/// underlying type. This allows bit operations with the underlying type (e.g. int)
+/// and chained operations involving more than two bitmasks.
+template <class E, class F,
+          typename = std::enable_if_t<(is_bitmask_v<E> || is_bitmask_v<F>) &&
+                                      has_same_underlying_v<E,F>>>
+constexpr auto operator& (E lhs, F rhs)
 {
-  typedef typename std::underlying_type<E>::type underlying;
-  return static_cast<E> (static_cast<underlying>(lhs) & static_cast<underlying>(rhs));
+  typedef relaxed_underlying_type_t<E> underlying;
+  return static_cast<enum_or_underlying_t<E,F>>(static_cast<underlying>(lhs) &
+                                                static_cast<underlying>(rhs));
 }
 
 
 /// operator|
-template <class E>
-inline
-typename std::enable_if<(E::IS_ATH_BITMASK,1), E>::type
-operator| (E lhs, E rhs)
+/// @copydetails operator&
+template <class E, class F,
+          typename = std::enable_if_t<(is_bitmask_v<E> || is_bitmask_v<F>) &&
+                                      has_same_underlying_v<E,F>>>
+constexpr auto operator| (E lhs, F rhs)
 {
-  typedef typename std::underlying_type<E>::type underlying;
-  return static_cast<E> (static_cast<underlying>(lhs) | static_cast<underlying>(rhs));
+  typedef relaxed_underlying_type_t<E> underlying;
+  return static_cast<enum_or_underlying_t<E,F>>(static_cast<underlying>(lhs) |
+                                                static_cast<underlying>(rhs));
 }
 
 
 /// operator^
-template <class E>
-inline
-typename std::enable_if<(E::IS_ATH_BITMASK,1), E>::type
-operator^ (E lhs, E rhs)
+/// @copydetails operator&
+template <class E, class F,
+          typename = std::enable_if_t<(is_bitmask_v<E> || is_bitmask_v<F>) &&
+                                      has_same_underlying_v<E,F>>>
+constexpr auto operator^ (E lhs, F rhs)
 {
-  typedef typename std::underlying_type<E>::type underlying;
-  return static_cast<E> (static_cast<underlying>(lhs) ^ static_cast<underlying>(rhs));
+  typedef relaxed_underlying_type_t<E> underlying;
+  return static_cast<enum_or_underlying_t<E,F>>(static_cast<underlying>(lhs) ^
+                                                static_cast<underlying>(rhs));
 }
 
 
 /// operator&=
 template <class E>
-inline
-typename std::enable_if<(E::IS_ATH_BITMASK,1), E&>::type
+constexpr
+std::enable_if_t<is_bitmask_v<E>, E&>
 operator&= (E& lhs, E rhs)
 {
-  typedef typename std::underlying_type<E>::type underlying;
+  typedef std::underlying_type_t<E> underlying;
   lhs = static_cast<E> (static_cast<underlying>(lhs) & static_cast<underlying>(rhs));
   return lhs;
 }
@@ -131,11 +184,11 @@ operator&= (E& lhs, E rhs)
 
 /// operator|=
 template <class E>
-inline
-typename std::enable_if<(E::IS_ATH_BITMASK,1), E&>::type
+constexpr
+std::enable_if_t<is_bitmask_v<E>, E&>
 operator|= (E& lhs, E rhs)
 {
-  typedef typename std::underlying_type<E>::type underlying;
+  typedef std::underlying_type_t<E> underlying;
   lhs = static_cast<E> (static_cast<underlying>(lhs) | static_cast<underlying>(rhs));
   return lhs;
 }
@@ -143,11 +196,11 @@ operator|= (E& lhs, E rhs)
 
 /// operator^=
 template <class E>
-inline
-typename std::enable_if<(E::IS_ATH_BITMASK,1), E&>::type
+constexpr
+std::enable_if_t<is_bitmask_v<E>, E&>
 operator^= (E& lhs, E rhs)
 {
-  typedef typename std::underlying_type<E>::type underlying;
+  typedef std::underlying_type_t<E> underlying;
   lhs = static_cast<E> (static_cast<underlying>(lhs) ^ static_cast<underlying>(rhs));
   return lhs;
 }
@@ -166,8 +219,8 @@ namespace CxxUtils {
  * @c ATH_BITMASK macro.
  */
 template <class E>
-inline
-typename std::enable_if<(E::IS_ATH_BITMASK,1), E&>::type
+constexpr
+std::enable_if_t<is_bitmask_v<E>, E&>
 set (E& lhs, E rhs)
 {
   lhs |= rhs;
@@ -185,8 +238,8 @@ set (E& lhs, E rhs)
  * @c ATH_BITMASK macro.
  */
 template <class E>
-inline
-typename std::enable_if<(E::IS_ATH_BITMASK,1), E&>::type
+constexpr
+std::enable_if_t<is_bitmask_v<E>, E&>
 reset (E& lhs, E rhs)
 {
   lhs &= ~rhs;
@@ -204,11 +257,11 @@ reset (E& lhs, E rhs)
  * @c ATH_BITMASK macro.
  */
 template <class E>
-inline
-typename std::enable_if<(E::IS_ATH_BITMASK,1), bool>::type
+constexpr
+std::enable_if_t<is_bitmask_v<E>, bool>
 test (E lhs, E rhs)
 {
-  typedef typename std::underlying_type<E>::type underlying;
+  typedef std::underlying_type_t<E>underlying;
   return static_cast<underlying> (lhs & rhs) != 0;
 }
 
