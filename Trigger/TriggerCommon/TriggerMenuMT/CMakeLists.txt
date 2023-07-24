@@ -74,8 +74,7 @@ endfunction()
 function( atlas_test_hlt_trigger_menu menu )
    set (extra_args ${ARGN})
    atlas_add_test( "HLT_${menu}"
-   set (pre_command "from AthenaConfiguration.AllConfigFlags import ConfigFlags; ${extra_args}")
-                   SCRIPT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_HLTmenu.sh ${menu}  -c "${pre_command}"
+                   SCRIPT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_HLTmenu.sh ${menu} "${extra_args}"
                    PROPERTIES TIMEOUT 800
                    PRIVATE_WORKING_DIRECTORY
                    POST_EXEC_SCRIPT "check_log.py --errors --config checklogTriggerTest.conf ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/unitTestRun_HLT_${menu}/HLT_${menu}.log" )
