@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -130,7 +130,8 @@ class LayerMaterialProperties {
 inline double LayerMaterialProperties::factor(
     PropDirection pDir, MaterialUpdateStage mStage) const {
   if (mStage == Trk::fullUpdate) return 1.;
-  return (pDir * mStage > 0 ? m_splitFactor : 1. - m_splitFactor);
+  return (static_cast<int>(pDir) * static_cast<int>(mStage) > 0 ?
+          m_splitFactor : 1. - m_splitFactor);
 }
 
 /** inline return methods for the pre/post factors */
