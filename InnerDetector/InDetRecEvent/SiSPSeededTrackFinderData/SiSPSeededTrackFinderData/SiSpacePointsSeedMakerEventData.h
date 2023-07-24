@@ -177,16 +177,29 @@ namespace InDet {
     /**
      * @brief We want to use a pool block allocator.
      * AthAllocators provides some options.
+     * Namely PoolSTL and HeapSTL
      *
-     * We mainly emplace and we do not call  erase
-     * So we  go for the simplest most performant one..
+     * We mainly emplace and we do not call erase
+     * for these lists.
+     * So we  go for the simplest most performant one.
      *
      * Note the calls to clear should be handled
-     * as dtor/ctor pairs with this allocator
+     * as dtor/ctor pairs for the list
+     * with this allocator.
+     * Aka de-allocation happens via dtor
+     * and the ctor will have a block reserved.
      */
     using SiSpacePointForSeedPoolList =
         std::list<InDet::SiSpacePointForSeed,
                   SG::ArenaPoolSTLAllocator<InDet::SiSpacePointForSeed>>;
+
+    using SiSpacePointsSeedPoolList =
+        std::list<InDet::SiSpacePointsSeed,
+                  SG::ArenaPoolSTLAllocator<InDet::SiSpacePointsSeed>>;
+
+    using SiSpacePointsProSeedPoolList =
+        std::list<InDet::SiSpacePointsProSeed,
+                  SG::ArenaPoolSTLAllocator<InDet::SiSpacePointsProSeed>>;
     /**
      * list of all space points considered for seed building.
      * This has ownership over the pointers stored in the binned vectors
@@ -201,12 +214,12 @@ namespace InDet {
 
     std::vector<const xAOD::SpacePoint*> v_ActsSpacePointForSeed;  //<! list of acts space points considered for seed building.
 
-    std::list<InDet::SiSpacePointsSeed> l_seeds;
-    std::list<InDet::SiSpacePointsSeed>::iterator i_seed;
-    std::list<InDet::SiSpacePointsSeed>::iterator i_seede;
-    std::list<InDet::SiSpacePointsProSeed> l_seeds_Pro;       //<! lists of output seeds 
-    std::list<InDet::SiSpacePointsProSeed>::iterator i_seed_Pro;       //<! iterators over the said list 
-    std::list<InDet::SiSpacePointsProSeed>::iterator i_seede_Pro;
+    SiSpacePointsSeedPoolList l_seeds;
+    SiSpacePointsSeedPoolList::iterator i_seed;
+    SiSpacePointsSeedPoolList::iterator i_seede;
+    SiSpacePointsProSeedPoolList l_seeds_Pro;       //<! lists of output seeds
+    SiSpacePointsProSeedPoolList::iterator i_seed_Pro; //<! iterators over the said list
+    SiSpacePointsProSeedPoolList::iterator i_seede_Pro;
 
     std::list<ITk::SiSpacePointsProSeed> i_ITkSeeds;
     std::list<ITk::SiSpacePointsProSeed>::iterator i_ITkSeed;
