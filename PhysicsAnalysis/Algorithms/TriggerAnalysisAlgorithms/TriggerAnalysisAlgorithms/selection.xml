@@ -2,5 +2,6 @@
 
    <class name="CP::TrigEventSelectionAlg" />
    <class name="CP::TrigPrescalesAlg" />
+   <class name="CP::TrigGlobalEfficiencyAlg" />
    
 </lcgdict>

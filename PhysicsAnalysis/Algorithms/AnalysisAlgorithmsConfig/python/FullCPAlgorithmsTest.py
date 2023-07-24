@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 
@@ -9,6 +9,13 @@ from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
 from AnalysisAlgorithmsConfig.ConfigAccumulator import ConfigAccumulator
 
 # Config:
+triggerChainsPerYear = {
+    '2015': ['HLT_e24_lhmedium_L1EM20VH || HLT_e60_lhmedium || HLT_e120_lhloose', 'HLT_mu20_iloose_L1MU15 || HLT_mu50', 'HLT_2g20_tight'],
+    '2016': ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_mu26_ivarmedium || HLT_mu50', 'HLT_g35_loose_g25_loose'],
+    '2017': ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_2g22_tight_L12EM15VHI', 'HLT_mu50'],
+    '2018': ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_g35_medium_g25_medium_L12EM20VH', 'HLT_mu26_ivarmedium', 'HLT_2mu14'],
+    '2022': ['HLT_e26_lhtight_ivarloose_L1EM22VHI || HLT_e60_lhmedium_L1EM22VHI || HLT_e140_lhloose_L1EM22VHI'],
+}
 triggerChains = [
     'HLT_2mu14',
     'HLT_mu20_mu8noL1',
@@ -630,12 +637,6 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
         vars += [ 'EventInfo.generatorWeight_%SYS% -> generatorWeight_%SYS%', ]
 
 
-    # Include, and then set up the trigger analysis sequence:
-    configSeq += makeConfig( 'Trigger.Chains', None )
-    configSeq.setOptionValue ('.triggerChains', triggerChains )
-    configSeq.setOptionValue ('.noFilter', True )
-
-
     configSeq += makeConfig ('Selection.PtEta', 'AnaElectrons')
     configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
     configSeq.setOptionValue ('.minPt', electronMinPt, noneAction='ignore')
@@ -718,6 +719,23 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     if trackJets :
         configSeq += makeConfig ('Output.Thinning', 'AnaTrackJets.Thinning')
         configSeq.setOptionValue ('.outputName', 'OutTrackJets')
+
+    # Include, and then set up the trigger analysis sequence:
+    configSeq += makeConfig( 'Trigger.Chains', None )
+    configSeq.setOptionValue ('.triggerChainsPerYear', triggerChainsPerYear )
+    configSeq.setOptionValue ('.noFilter', True )
+    configSeq.setOptionValue ('.electronID', 'Tight' )
+    configSeq.setOptionValue ('.electronIsol', 'Tight_VarRad')
+    configSeq.setOptionValue ('.photonIsol', 'TightCaloOnly')
+    configSeq.setOptionValue ('.muonID', 'Tight')
+    configSeq.setOptionValue ('.electrons', 'AnaElectrons' )
+    configSeq.setOptionValue ('.photons', 'AnaPhotons' )
+    configSeq.setOptionValue ('.muons', 'AnaMuons' )
+    if dataType != 'data':
+        vars += ['EventInfo.globalTriggerEffSF_%SYS% -> globalTriggerEffSF_%SYS%']
+    vars += ['EventInfo.trigPassed_' + t + ' -> trigPassed_' + t for t in ['HLT_e24_lhmedium_L1EM20VH','HLT_e60_lhmedium','HLT_e120_lhloose', 'HLT_mu20_iloose_L1MU15', 'HLT_mu50', 'HLT_e26_lhtight_nod0_ivarloose', 'HLT_e60_lhmedium_nod0', 'HLT_e140_lhloose_nod0', 'HLT_mu26_ivarmedium', 'HLT_2g20_tight', 'HLT_g35_loose_g25_loose', 'HLT_g35_medium_g25_medium_L12EM20VH', 'HLT_2g22_tight_L12EM15VHI']]
+    vars += ['EventInfo.globalTriggerMatch_%SYS% -> globalTriggerMatch_%SYS%']
+
 
     configSeq += makeConfig ('Output.Simple', 'Output')
     configSeq.setOptionValue ('.treeName', 'analysis')
