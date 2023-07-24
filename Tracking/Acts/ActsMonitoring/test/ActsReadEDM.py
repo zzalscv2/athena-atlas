@@ -29,12 +29,12 @@ if __name__ == "__main__":
     acc.merge(PoolReadCfg(flags))
     
     if flags.readClusters:
-        from ActsConfig.ActsTrkAnalysisConfig import ActsTrkClusterAnalysisCfg
-        acc.merge(ActsTrkClusterAnalysisCfg(flags))
+        from ActsConfig.ActsAnalysisConfig import ActsClusterAnalysisCfg
+        acc.merge(ActsClusterAnalysisCfg(flags))
 
     if flags.readSpacePoints:
-        from ActsConfig.ActsTrkAnalysisConfig import ActsTrkSpacePointAnalysisCfg
-        acc.merge(ActsTrkSpacePointAnalysisCfg(flags))
+        from ActsConfig.ActsAnalysisConfig import ActsSpacePointAnalysisCfg
+        acc.merge(ActsSpacePointAnalysisCfg(flags))
 
     acc.printConfig()
     status = acc.run()

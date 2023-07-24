@@ -44,14 +44,14 @@ if __name__ == "__main__":
 
     print(flags_set[0].dump())
 
-    from ActsConfig.ActsTrkAnalysisConfig import ActsTrkSeedingAlgorithmAnalysisAlgCfg
-    acc.merge(ActsTrkSeedingAlgorithmAnalysisAlgCfg(flags_set[0]))
+    from ActsConfig.ActsAnalysisConfig import ActsSeedingAlgorithmAnalysisAlgCfg
+    acc.merge(ActsSeedingAlgorithmAnalysisAlgCfg(flags_set[0]))
 
     mlog = logging.getLogger("SeedingAlgorithmAnalysis")
     mlog.info("Configuring  SeedingAlgorithmAnalysis: ")
     printProperties(
       mlog,
-      acc.getEventAlgo("ActsTrkSeedingAlgorithmAnalysis"),
+      acc.getEventAlgo("ActsSeedingAlgorithmAnalysis"),
       nestLevel=2,
       printDefaults=True,
     )

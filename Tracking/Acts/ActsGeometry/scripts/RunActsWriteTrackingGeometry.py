@@ -83,11 +83,11 @@ if args.verboseStoreGate:
 log.debug('Dumping of ConfigFlags now.')
 flags.dump()
 
-from ActsConfig.ActsTrkGeometryConfig import ActsAlignmentCondAlgCfg
+from ActsConfig.ActsGeometryConfig import ActsAlignmentCondAlgCfg
 cfg.merge(ActsAlignmentCondAlgCfg(flags,
                                   name="ActsAlignmentCondAlg"))
 
-from ActsConfig.ActsTrkGeometryConfig import ActsWriteTrackingGeometryCfg
+from ActsConfig.ActsGeometryConfig import ActsWriteTrackingGeometryCfg
 cfg.merge(ActsWriteTrackingGeometryCfg(flags,
                                        name="ActsWriteTrackingGeometry"))
 

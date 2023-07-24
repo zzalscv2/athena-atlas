@@ -45,7 +45,7 @@ namespace ActsTrk {
     }
 
     auto monitor_nsp = Monitored::Scalar<int>("Nsp", inputSpacePointContainer->size());
-    fill("ActsTrkSpacePointAnalysisAlg", monitor_nsp);
+    fill("ActsSpacePointAnalysisAlg", monitor_nsp);
     
     std::variant < const xAOD::PixelClusterContainer*, const xAOD::StripClusterContainer* > inputContainer;
     
@@ -176,7 +176,7 @@ namespace ActsTrk {
 					       [] (const auto* spacePoint) -> double
 					       { return spacePoint->varianceZ(); }); 
 
-    fill("ActsTrkSpacePointAnalysisAlg",
+    fill("ActsSpacePointAnalysisAlg",
 	 monitor_barrelEndcap, monitor_layerDisk,
 	 monitor_phiModule, monitor_etaModule, monitor_sideModule,
 	 monitor_isInnermost, monitor_isNextToInnermost,

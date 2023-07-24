@@ -6,7 +6,7 @@ from SCT_ConditionsTools.ITkStripConditionsToolsConfig import ITkStripConditions
 from InDetConfig.SiClusterizationToolConfig import ITkClusterMakerToolCfg, ITkPixelRDOToolCfg
 from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
 
-def ActsTrkITkPixelClusteringToolCfg(flags, name="ActsITkPixelClusteringTool", **kwargs):
+def ActsITkPixelClusteringToolCfg(flags, name="ActsITkPixelClusteringTool", **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("PixelRDOTool", acc.popToolsAndMerge(ITkPixelRDOToolCfg(flags)))
     kwargs.setdefault("ClusterMakerTool", acc.popToolsAndMerge(ITkClusterMakerToolCfg(flags)))
@@ -18,7 +18,7 @@ def ActsTrkITkPixelClusteringToolCfg(flags, name="ActsITkPixelClusteringTool", *
     return acc
 
 
-def ActsTrkITkStripClusteringToolCfg(flags, name="ActsITkStripClusteringTool", **kwargs):
+def ActsITkStripClusteringToolCfg(flags, name="ActsITkStripClusteringTool", **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("StripConditionsTool", acc.popToolsAndMerge(ITkStripConditionsSummaryToolCfg(flags)))
     kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)))
@@ -31,44 +31,44 @@ def ActsTrkITkStripClusteringToolCfg(flags, name="ActsITkStripClusteringTool", *
     acc.setPrivateTools(CompFactory.ActsTrk.StripClusteringTool(name, **kwargs))
     return acc
 
-def ActsTrkITkPixelClusterizationAlgCfg(flags, name='ActsTrkITkPixelClusterizationAlg', **kwargs):
+def ActsITkPixelClusterizationAlgCfg(flags, name='ActsTrkITkPixelClusterizationAlg', **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("PixelRDOContainerKey", "ITkPixelRDOs")
     kwargs.setdefault("PixelClustersKey", "ITkPixelClusters")
-    kwargs.setdefault("PixelClusteringTool", acc.popToolsAndMerge(ActsTrkITkPixelClusteringToolCfg(flags)))
+    kwargs.setdefault("PixelClusteringTool", acc.popToolsAndMerge(ActsITkPixelClusteringToolCfg(flags)))
 
     if flags.Acts.doMonitoring:
-        from ActsConfig.ActsTrkMonitoringConfig import ActsTrkITkPixelClusterizationMonitoringToolCfg
-        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkPixelClusterizationMonitoringToolCfg(flags)))
+        from ActsConfig.ActsMonitoringConfig import ActsITkPixelClusterizationMonitoringToolCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkPixelClusterizationMonitoringToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterizationAlg(name, **kwargs))
     return acc
 
-def ActsTrkITkStripClusterizationAlgCfg(flags, name='ActsTrkITkStripClusterizationAlg', **kwargs):
+def ActsITkStripClusterizationAlgCfg(flags, name='ActsTrkITkStripClusterizationAlg', **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("StripRDOContainerKey", "ITkStripRDOs")
     kwargs.setdefault("StripClustersKey", "ITkStripClusters")
     kwargs.setdefault("StripDetEleCollKey", "ITkStripDetectorElementCollection")
-    kwargs.setdefault("StripClusteringTool", acc.popToolsAndMerge(ActsTrkITkStripClusteringToolCfg(flags)))
+    kwargs.setdefault("StripClusteringTool", acc.popToolsAndMerge(ActsITkStripClusteringToolCfg(flags)))
     kwargs.setdefault("conditionsTool", acc.popToolsAndMerge(ITkStripConditionsSummaryToolCfg(flags)))
     kwargs.setdefault("checkBadModules", True)
 
     if flags.Acts.doMonitoring:
-        from ActsConfig.ActsTrkMonitoringConfig import ActsTrkITkStripClusterizationMonitoringToolCfg
-        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkStripClusterizationMonitoringToolCfg(flags)))
+        from ActsConfig.ActsMonitoringConfig import ActsITkStripClusterizationMonitoringToolCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkStripClusterizationMonitoringToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.StripClusterizationAlg(name, **kwargs))
     return acc
 
-def ActsTrkClusterizationCfg(flags):
+def ActsClusterizationCfg(flags):
     acc = ComponentAccumulator()
     if flags.Detector.EnableITkPixel:
-        acc.merge(ActsTrkITkPixelClusterizationAlgCfg(flags))
+        acc.merge(ActsITkPixelClusterizationAlgCfg(flags))
     if flags.Detector.EnableITkStrip:
-        acc.merge(ActsTrkITkStripClusterizationAlgCfg(flags))
+        acc.merge(ActsITkStripClusterizationAlgCfg(flags))
 
     if flags.Acts.doAnalysis:
-        from ActsConfig.ActsTrkAnalysisConfig import ActsTrkClusterAnalysisCfg
-        acc.merge(ActsTrkClusterAnalysisCfg(flags))
+        from ActsConfig.ActsAnalysisConfig import ActsClusterAnalysisCfg
+        acc.merge(ActsClusterAnalysisCfg(flags))
 
     return acc

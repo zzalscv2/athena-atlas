@@ -50,8 +50,7 @@ namespace ActsTrk {
     ATH_CHECK( m_seedKey.initialize() );
     ATH_CHECK( m_actsTrackParamsKey.initialize() );
 
-    if ( not m_monTool.empty() )
-      ATH_CHECK( m_monTool.retrieve() );
+    ATH_CHECK( m_monTool.retrieve(EnableTool{not m_monTool.empty()}) );
 
     return StatusCode::SUCCESS;
   }

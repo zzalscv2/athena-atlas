@@ -2,15 +2,15 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from ActsConfig.ActsTrkTrackParamsEstimationConfig import TrackParamsEstimationToolCfg
-from ActsConfig.ActsTrkGeometryConfig import ActsTrackingGeometryToolCfg
+from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
+from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
 from ActsConfig.ActsConfigFlags import SeedingStrategy
-from ActsConfig.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
+from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
 from ActsInterop import UnitConstants
 
 # ACTS tools
-def ActsTrkITkPixelSeedingToolCfg(flags,
-                                  **kwargs) -> ComponentAccumulator:
+def ActsITkPixelSeedingToolCfg(flags,
+                               **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     ## For ITkPixel
     kwargs.setdefault("numSeedIncrement" , float("inf"))
@@ -19,8 +19,8 @@ def ActsTrkITkPixelSeedingToolCfg(flags,
     acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name = "ActsSeedingTool_ITkPixel", **kwargs))
     return acc
 
-def ActsTrkITkFastPixelSeedingToolCfg(flags,
-                                  **kwargs) -> ComponentAccumulator:
+def ActsITkFastPixelSeedingToolCfg(flags,
+                                   **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     ## For ITkPixel
     kwargs.setdefault("numSeedIncrement" , float("inf"))
@@ -32,8 +32,8 @@ def ActsTrkITkFastPixelSeedingToolCfg(flags,
     acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name = "ActsFastSeedingTool_ITkPixel", **kwargs))
     return acc
 
-def ActsTrkITkStripSeedingToolCfg(flags,
-                                  **kwargs) -> ComponentAccumulator:
+def ActsITkStripSeedingToolCfg(flags,
+                               **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     ## For ITkStrip, change properties that have to be modified w.r.t. the default values
     kwargs.setdefault("doSeedQualitySelection", False)
@@ -70,15 +70,15 @@ def ActsTrkITkStripSeedingToolCfg(flags,
     acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name = "ActsSeedingTool_ITkStrip", **kwargs))
     return acc
 
-def ActsTrkITkPixelOrthogonalSeedingToolCfg(flags,
-                                            **kwargs) -> ComponentAccumulator:
+def ActsITkPixelOrthogonalSeedingToolCfg(flags,
+                                         **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     ## For ITkPixel, use default values for ActsTrk::OrthogonalSeedingTool
     acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name = "OrthogonalSeedingTool_ITkPixel", **kwargs))
     return acc
 
-def ActsTrkITkStripOrthogonalSeedingToolCfg(flags,
-                                            **kwargs) -> ComponentAccumulator:
+def ActsITkStripOrthogonalSeedingToolCfg(flags,
+                                         **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     ## For ITkStrip, change properties that have to be modified w.r.t. the default values
     kwargs.setdefault("impactMax" , 20. * UnitConstants.mm)
@@ -103,9 +103,9 @@ def ActsTrkITkStripOrthogonalSeedingToolCfg(flags,
     acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name = "OrthogonalSeedingTool_ITkStrip", **kwargs))
     return acc
 
-def  ActsTrkSiSpacePointsSeedMakerCfg(flags,
-                                      name: str = 'ActsTrkSiSpacePointsSeedMaker',
-                                      **kwargs) -> ComponentAccumulator:
+def ActsSiSpacePointsSeedMakerCfg(flags,
+                                  name: str = 'ActsSiSpacePointsSeedMaker',
+                                  **kwargs) -> ComponentAccumulator:
     assert isinstance(name, str)
 
     acc = ComponentAccumulator()
@@ -122,10 +122,9 @@ def  ActsTrkSiSpacePointsSeedMakerCfg(flags,
     kwargs.setdefault('useOverlapSpCollection',
                       flags.Tracking.ActiveConfig.useITkStrip and
                       flags.Tracking.ActiveConfig.useITkStripSeeding)
-
-    kwargs.setdefault('ActsTrkSpacePointsPixelName'    , "ITkPixelSpacePoints")
-    kwargs.setdefault('ActsTrkSpacePointsStripName'    , "ITkStripSpacePoints")
-    kwargs.setdefault('ActsTrkSpacePointsOverlapName'  , "ITkStripOverlapSpacePoints")
+    kwargs.setdefault('ActsSpacePointsPixelName'    , "ITkPixelSpacePoints")
+    kwargs.setdefault('ActsSpacePointsStripName'    , "ITkStripSpacePoints")
+    kwargs.setdefault('ActsSpacePointsOverlapName'  , "ITkStripOverlapSpacePoints")
 
     from ActsConfig.TrackingComponentConfigurer import TrackingComponentConfigurer
     configuration_settings = TrackingComponentConfigurer(flags)
@@ -153,20 +152,20 @@ def  ActsTrkSiSpacePointsSeedMakerCfg(flags,
     seedTool_pixel = None
     if 'SeedToolPixel' not in kwargs:
         if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
-            seedTool_pixel = acc.popToolsAndMerge(ActsTrkITkPixelOrthogonalSeedingToolCfg(flags))
+            seedTool_pixel = acc.popToolsAndMerge(ActsITkPixelOrthogonalSeedingToolCfg(flags))
         else:
             if flags.Tracking.doITkFastTracking:
                 kwargs.setdefault("useFastTracking", True)
-                seedTool_pixel = acc.popToolsAndMerge(ActsTrkITkFastPixelSeedingToolCfg(flags))
+                seedTool_pixel = acc.popToolsAndMerge(ActsITkFastPixelSeedingToolCfg(flags))
             else:
-                seedTool_pixel = acc.popToolsAndMerge(ActsTrkITkPixelSeedingToolCfg(flags))
+                seedTool_pixel = acc.popToolsAndMerge(ActsITkPixelSeedingToolCfg(flags))
 
     seedTool_strip = None
     if 'SeedToolStrip' not in kwargs:
         if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
-            seedTool_strip = acc.popToolsAndMerge(ActsTrkITkStripOrthogonalSeedingToolCfg(flags))
+            seedTool_strip = acc.popToolsAndMerge(ActsITkStripOrthogonalSeedingToolCfg(flags))
         else:
-            seedTool_strip = acc.popToolsAndMerge(ActsTrkITkStripSeedingToolCfg(flags))
+            seedTool_strip = acc.popToolsAndMerge(ActsITkStripSeedingToolCfg(flags))
 
     kwargs.setdefault('SeedToolPixel', seedTool_pixel)
     kwargs.setdefault('SeedToolStrip', seedTool_strip)
@@ -182,9 +181,9 @@ def  ActsTrkSiSpacePointsSeedMakerCfg(flags,
 
 
 # ACTS algorithm using Athena objects upstream
-def ActsTrkITkPixelSeedingCfg(flags,
-                              name: str = 'ActsTrkPixelSeedingAlg',
-                              **kwargs):
+def ActsITkPixelSeedingCfg(flags,
+                           name: str = 'ActsPixelSeedingAlg',
+                           **kwargs):
     acc = ComponentAccumulator()
 
     # Need To add additional tool(s)
@@ -196,18 +195,18 @@ def ActsTrkITkPixelSeedingCfg(flags,
     converterTool = acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags))
 
     # Track Param Estimation Tool
-    trackEstimationTool = acc.popToolsAndMerge(TrackParamsEstimationToolCfg(flags))
+    trackEstimationTool = acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags))
 
     seedTool = None
     if "SeedTool" not in kwargs:
         if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
-            seedTool = acc.popToolsAndMerge(ActsTrkITkPixelOrthogonalSeedingToolCfg(flags))
+            seedTool = acc.popToolsAndMerge(ActsITkPixelOrthogonalSeedingToolCfg(flags))
         else:
             if flags.Tracking.doITkFastTracking:
                 kwargs.setdefault("useFastTracking", True)
-                seedTool = acc.popToolsAndMerge(ActsTrkITkFastPixelSeedingToolCfg(flags))
+                seedTool = acc.popToolsAndMerge(ActsITkFastPixelSeedingToolCfg(flags))
             else:
-                seedTool = acc.popToolsAndMerge(ActsTrkITkPixelSeedingToolCfg(flags))
+                seedTool = acc.popToolsAndMerge(ActsITkPixelSeedingToolCfg(flags))
 
     kwargs.setdefault('InputSpacePoints', ['ITkPixelSpacePoints'])
     kwargs.setdefault('OutputSeeds', 'ITkPixelSeeds')
@@ -219,16 +218,16 @@ def ActsTrkITkPixelSeedingCfg(flags,
     kwargs.setdefault('DetectorElements', 'ITkPixelDetectorElementCollection')
 
     if flags.Acts.doMonitoring:
-        from ActsConfig.ActsTrkMonitoringConfig import ActsTrkITkPixelSeedingMonitoringCfg
-        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkPixelSeedingMonitoringCfg(flags)))
+        from ActsConfig.ActsMonitoringConfig import ActsITkPixelSeedingMonitoringToolCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkPixelSeedingMonitoringToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
     return acc
 
 
-def ActsTrkITkStripSeedingCfg(flags,
-                              name: str = 'ActsTrkStripSeedingAlg',
-                              **kwargs):
+def ActsITkStripSeedingCfg(flags,
+                           name: str = 'ActsStripSeedingAlg',
+                           **kwargs):
     acc = ComponentAccumulator()
 
     # Need To add additional tool(s)
@@ -240,14 +239,14 @@ def ActsTrkITkStripSeedingCfg(flags,
     converterTool = acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags))
 
     # Track Param Estimation Tool
-    trackEstimationTool = acc.popToolsAndMerge(TrackParamsEstimationToolCfg(flags))
+    trackEstimationTool = acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags))
 
     seedTool = None
     if "SeedTool" not in kwargs:
         if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
-            seedTool = acc.popToolsAndMerge(ActsTrkITkStripOrthogonalSeedingToolCfg(flags))
+            seedTool = acc.popToolsAndMerge(ActsITkStripOrthogonalSeedingToolCfg(flags))
         else:
-            seedTool = acc.popToolsAndMerge(ActsTrkITkStripSeedingToolCfg(flags))
+            seedTool = acc.popToolsAndMerge(ActsITkStripSeedingToolCfg(flags))
 
     kwargs.setdefault('InputSpacePoints', ['ITkStripSpacePoints', 'ITkStripOverlapSpacePoints'])
     kwargs.setdefault('OutputSeeds', 'ITkStripSeeds')
@@ -259,24 +258,24 @@ def ActsTrkITkStripSeedingCfg(flags,
     kwargs.setdefault('DetectorElements', 'ITkStripDetectorElementCollection')
 
     if flags.Acts.doMonitoring:
-        from ActsConfig.ActsTrkMonitoringConfig import ActsTrkITkStripSeedingMonitoringCfg
-        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkStripSeedingMonitoringCfg(flags)))
+        from ActsConfig.ActsMonitoringConfig import ActsITkStripSeedingMonitoringToolCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkStripSeedingMonitoringToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
     return acc
 
 
-def ActsTrkSeedingCfg(flags):
+def ActsSeedingCfg(flags):
     acc = ComponentAccumulator()
     if flags.Detector.EnableITkPixel:
-        acc.merge(ActsTrkITkPixelSeedingCfg(flags))
+        acc.merge(ActsITkPixelSeedingCfg(flags))
     if flags.Detector.EnableITkStrip:
-        acc.merge(ActsTrkITkStripSeedingCfg(flags))
+        acc.merge(ActsITkStripSeedingCfg(flags))
 
     if flags.Acts.doAnalysis:
-        from ActsConfig.ActsTrkAnalysisConfig import ActsTrkSeedAnalysisCfg, ActsTrkEstimatedTrackParamsAnalysisCfg
-        acc.merge(ActsTrkSeedAnalysisCfg(flags))
-        acc.merge(ActsTrkEstimatedTrackParamsAnalysisCfg(flags))
+        from ActsConfig.ActsAnalysisConfig import ActsSeedAnalysisCfg, ActsEstimatedTrackParamsAnalysisCfg
+        acc.merge(ActsSeedAnalysisCfg(flags))
+        acc.merge(ActsEstimatedTrackParamsAnalysisCfg(flags))
 
     return acc
 

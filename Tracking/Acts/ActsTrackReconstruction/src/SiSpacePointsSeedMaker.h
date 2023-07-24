@@ -186,9 +186,9 @@ namespace ActsTrk {
 
     SG::ReadHandleKey< Trk::PRDtoTrackMap > m_prdToTrackMap {this, "PRDtoTrackMap", "", "option PRD-to-track association"};
 
-    SG::ReadHandleKey< xAOD::SpacePointContainer > m_actsSpacepointsPixel {this, "ActsTrkSpacePointsPixelName", "ITkPixelSpacePoints", "Pixel space points container"};
-    SG::ReadHandleKey< xAOD::SpacePointContainer > m_actsSpacepointsStrip {this, "ActsTrkSpacePointsStripName", "ITkStripSpacePoints", "Strip space points container"};
-    SG::ReadHandleKey< xAOD::SpacePointContainer > m_actsSpacepointsOverlap {this, "ActsTrkSpacePointsOverlapName", "ITkStripOverlapSpacePoints", "Strip overlap space points container"};
+    SG::ReadHandleKey< xAOD::SpacePointContainer > m_actsSpacepointsPixel {this, "ActsSpacePointsPixelName", "ITkPixelSpacePoints", "Pixel space points container"};
+    SG::ReadHandleKey< xAOD::SpacePointContainer > m_actsSpacepointsStrip {this, "ActsSpacePointsStripName", "ITkStripSpacePoints", "Strip space points container"};
+    SG::ReadHandleKey< xAOD::SpacePointContainer > m_actsSpacepointsOverlap {this, "ActsSpacePointsOverlapName", "ITkStripOverlapSpacePoints", "Strip overlap space points container"};
 
     SG::ReadHandleKey< xAOD::PixelClusterContainer > m_pixelClusterContainerKey {this, "PixelClusterContainerKey", "", "Key of input pixel clusters"};
     SG::ReadHandleKey< xAOD::StripClusterContainer > m_stripClusterContainerKey {this, "StripClusterContainerKey", "", "Key of input strip clusters"};

@@ -10,7 +10,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def ActsFatrasSimToolCfg(flags, name="ISF_ActsFatrasSimTool", **kwargs):
     """Return ISF_FatrasSimHitCreatorID configured with ComponentAccumulator"""
     acc = ComponentAccumulator()
-    from ActsConfig.ActsTrkGeometryConfig import ActsTrackingGeometryToolCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
     kwargs.setdefault('TrackingGeometryTool', acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
 
     kwargs.setdefault("MaxSteps", 2000)

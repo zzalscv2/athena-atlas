@@ -6,7 +6,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 # Tools
 
 
-def ActsTrkFindingToolCfg(
+def ActsTrackFindingToolCfg(
     flags, name: str = "ActsTrackFindingTool", **kwargs
 ) -> ComponentAccumulator:
     acc = ComponentAccumulator()
@@ -17,7 +17,7 @@ def ActsTrkFindingToolCfg(
     kwargs.setdefault("chi2CutOff", [flags.Acts.trackFindingChi2CutOff])
     kwargs.setdefault("numMeasurementsCutOff", [10])
 
-    from ActsConfig.ActsTrkGeometryConfig import ActsExtrapolationToolCfg, ActsTrackingGeometryToolCfg
+    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg, ActsTrackingGeometryToolCfg
     kwargs.setdefault(
         "TrackingGeometryTool",
         acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
@@ -26,7 +26,8 @@ def ActsTrkFindingToolCfg(
         "ExtrapolationTool",
         acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
     )  # PrivateToolHandle
-    from ActsConfig.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
+
+    from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
     kwargs.setdefault(
         "ATLASConverterTool",
         acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)),
@@ -65,13 +66,15 @@ def ActsTrackStatePrinterCfg(
     return acc
 
 # ACTS only algorithm
-def ActsTrkFindingCfg(flags, name: str = "ActsTrkFindingAlg", **kwargs):
+def ActsTrackFindingCfg(flags, 
+                        name: str = "ActsTrackFindingAlg", 
+                        **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     # tools
     if "TrackFindingTool" not in kwargs:
         kwargs["TrackFindingTool"] = acc.popToolsAndMerge(
-            ActsTrkFindingToolCfg(flags))
+            ActsTrackFindingToolCfg(flags))
 
     if flags.Detector.EnableITkPixel:
         kwargs.setdefault("PixelClusterContainerKey", "ITkPixelClusters")
@@ -98,9 +101,9 @@ def ActsTrkFindingCfg(flags, name: str = "ActsTrkFindingAlg", **kwargs):
         )
 
     if flags.Acts.doMonitoring:
-        from ActsConfig.ActsTrkMonitoringConfig import ActsTrkFindingMonitoringCfg
+        from ActsConfig.ActsMonitoringConfig import ActsTrackFindingMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(
-            ActsTrkFindingMonitoringCfg(flags)))
+            ActsTrackFindingMonitoringToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.TrackFindingAlg(name, **kwargs))
     return acc
@@ -115,9 +118,9 @@ def ActsAmbiguityResolutionCfg(flags, name: str = "ActsAmbiguityResolution", **k
     kwargs.setdefault('NMeasurementsMin', 7)
 
     if flags.Acts.doMonitoring:
-        from ActsConfig.ActsTrkMonitoringConfig import ActsAmbiguityResolutionMonitoringCfg
+        from ActsConfig.ActsMonitoringConfig import ActsAmbiguityResolutionMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(
-            ActsAmbiguityResolutionMonitoringCfg(flags)))
+            ActsAmbiguityResolutionMonitoringToolCfg(flags)))
     
     acc.addEventAlgo(CompFactory.ActsTrk.AmbiguityResolutionAlg(name, **kwargs))
     return acc

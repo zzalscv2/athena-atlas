@@ -2,7 +2,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import json
-from ActsConfig.ActsTrkEventCnvConfig import RunConversion
+from ActsConfig.ActsEventCnvConfig import RunConversion
 import math
 
 if "__main__" == __name__:

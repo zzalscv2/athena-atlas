@@ -28,7 +28,7 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "Retrieved " << trackParams->size() << " input parameters with key " << m_inputTrackParamsColletionKey.key() );
 
     auto monitor_nparams = Monitored::Scalar<int>("Nparams", trackParams->size());
-    fill("ActsTrkEstimatedTrackParamsAnalysisAlg", monitor_nparams);
+    fill("ActsEstimatedTrackParamsAnalysisAlg", monitor_nparams);
 
     auto monitor_pt = Monitored::Collection("track_param_pt", *trackParams,
 					    [] (const auto* param) -> double
@@ -59,7 +59,7 @@ namespace ActsTrk {
 						[] (const auto* param) -> int
 						{ return param->charge(); });
 
-    fill("ActsTrkEstimatedTrackParamsAnalysisAlg",
+    fill("ActsEstimatedTrackParamsAnalysisAlg",
 	 monitor_pt, monitor_eta,
 	 monitor_loc0, monitor_loc1,
 	 monitor_phi, monitor_theta,

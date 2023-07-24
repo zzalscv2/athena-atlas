@@ -4,9 +4,9 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from ActsInterop import UnitConstants
 
-def TrackParamsEstimationToolCfg(ConfigFlags,
-                                 name: str = "TrackParamsEstimationTool",
-                                 **kwargs) -> ComponentAccumulator:
+def ActsTrackParamsEstimationToolCfg(ConfigFlags,
+                                     name: str = "ActsTrackParamsEstimationTool",
+                                     **kwargs) -> ComponentAccumulator:
     assert isinstance(name, str)
 
     acc = ComponentAccumulator()

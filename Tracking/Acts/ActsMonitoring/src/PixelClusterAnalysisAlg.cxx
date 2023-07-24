@@ -126,7 +126,7 @@ namespace ActsTrk {
 						[] (const auto* cluster) -> float
 						{ return cluster->widthInEta(); });
 
-    fill("ActsTrkClusterAnalysisAlg",
+    fill("ActsClusterAnalysisAlg",
 	 monitor_barrelEndcap, monitor_layerDisk,
 	 monitor_phiModule, monitor_etaModule,
 	 monitor_isInnermost, monitor_isNextToInnermost,

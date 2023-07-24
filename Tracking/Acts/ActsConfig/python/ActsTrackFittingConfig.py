@@ -12,11 +12,11 @@ def ActsFitterCfg(flags, name: str = "ActsKalmanFitter", **kwargs):
     #  /eos/project-a/acts/public/MaterialMaps/ATLAS/material-maps-Pixel-SCT.json
 
     if "TrackingGeometryTool" not in kwargs:
-        from ActsConfig.ActsTrkGeometryConfig import ActsTrackingGeometryToolCfg
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
         kwargs["TrackingGeometryTool"] = result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)) # PrivateToolHandle
 
     if "ExtrapolationTool" not in kwargs:
-        from ActsConfig.ActsTrkGeometryConfig import ActsExtrapolationToolCfg
+        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
         kwargs["ExtrapolationTool"] = result.popToolsAndMerge(
             ActsExtrapolationToolCfg(flags, MaxSteps=10000)
         ) # PrivateToolHandle
@@ -25,7 +25,7 @@ def ActsFitterCfg(flags, name: str = "ActsKalmanFitter", **kwargs):
         kwargs.setdefault("ReverseFilteringPt", 1.0 * UnitConstants.GeV)
         kwargs.setdefault("OverstepLimit", 300 * UnitConstants.um)
 
-    from ActsConfig.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
+    from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
     actsConverter = result.popToolsAndMerge(ActsToTrkConverterToolCfg(flags))
     kwargs["ATLASConverterTool"] = actsConverter
 

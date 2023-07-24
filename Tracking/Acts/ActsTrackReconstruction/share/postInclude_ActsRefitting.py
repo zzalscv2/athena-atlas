@@ -45,14 +45,14 @@ ToolSvc += actsReFittingTrackingGeometry
 
 actsExtrapolationTool = CfgMgr.ActsExtrapolationTool("ActsExtrapolationTool", TrackingGeometryTool = actsReFittingTrackingGeometry, MaxSteps = 10000)
 
-from ActsConfig.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
+from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
 actsAtlasConverter = ActsToTrkConverterToolCfg( TrackingGeometryTool = actsReFittingTrackingGeometry)
 ToolSvc+=actsAtlasConverter
 
 import InDetRecExample.TrackingCommon as TrackingCommon
 
-from ActsTrkFitting.ActsTrkFittingConf import ActsReFitterAlg    
-from ActsTrkFitting.ActsTrkFittingConf import ActsKalmanFitter
+from ActsTrackReconstruction.ActsTrackReconstructionConf import ActsReFitterAlg
+from ActsTrackReconstruction.ActsTrackReconstructionConf import ActsKalmanFitter
 
 summary = TrackingCommon.getInDetTrackSummaryToolNoHoleSearch()
 

@@ -3,15 +3,15 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def ActsTrkPixelClusterAnalysisAlgCfg(flags, name="ActsTrkPixelClusterAnalysisAlg", **kwargs):
+def ActsPixelClusterAnalysisAlgCfg(flags, name="ActsPixelClusterAnalysisAlg", **kwargs):
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     result = ITkPixelReadoutGeometryCfg(flags)
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(flags, 'ActsTrkClusterAnalysisAlgCfg')
+    helper = AthMonitorCfgHelper(flags, 'ActsClusterAnalysisAlgCfg')
 
     kwargs.setdefault("ClusterContainerKey", "ITkPixelClusters")
     monitoringAlgorithm = helper.addAlgorithm(CompFactory.ActsTrk.PixelClusterAnalysisAlg, name, **kwargs)
-    monitoringGroup = helper.addGroup(monitoringAlgorithm, 'ActsTrkClusterAnalysisAlg', '/ActsTrkAnalysis/')
+    monitoringGroup = helper.addGroup(monitoringAlgorithm, 'ActsClusterAnalysisAlg', '/ActsAnalysis/')
 
     monitoringGroup.defineHistogram('globalZ,perp;h_globalZR', title="h_globalZR; z [mm]; r [mm]", type="TH2F", path="PixelClusters",
                                     xbins=1500, xmin=-3000, xmax=3000,
@@ -27,15 +27,15 @@ def ActsTrkPixelClusterAnalysisAlgCfg(flags, name="ActsTrkPixelClusterAnalysisAl
     return result
 
 
-def ActsTrkStripClusterAnalysisAlgCfg(flags, name="ActsTrkStripClusterAnalysisAlg", **kwargs):
+def ActsStripClusterAnalysisAlgCfg(flags, name="ActsStripClusterAnalysisAlg", **kwargs):
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
     result = ITkStripReadoutGeometryCfg(flags)
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(flags, 'ActsTrkClusterAnalysisAlgCfg')
+    helper = AthMonitorCfgHelper(flags, 'ActsClusterAnalysisAlgCfg')
 
     kwargs.setdefault("ClusterContainerKey", "ITkStripClusters")
     monitoringAlgorithm = helper.addAlgorithm(CompFactory.ActsTrk.StripClusterAnalysisAlg, name, **kwargs)
-    monitoringGroup = helper.addGroup(monitoringAlgorithm, 'ActsTrkClusterAnalysisAlg', '/ActsTrkAnalysis/')
+    monitoringGroup = helper.addGroup(monitoringAlgorithm, 'ActsClusterAnalysisAlg', '/ActsAnalysis/')
 
     monitoringGroup.defineHistogram('globalZ,perp;h_globalZR', title="h_globalZR; z [mm]; r [mm]", type="TH2F", path="StripClusters",
                                     xbins=1500, xmin=-3000, xmax=3000,
@@ -50,21 +50,21 @@ def ActsTrkStripClusterAnalysisAlgCfg(flags, name="ActsTrkStripClusterAnalysisAl
     result.merge(helper.result())
     return result
 
-def ActsTrkBaseSpacePointAnalysisAlgCfg(flags,
-                                        name,
-                                        histoPath,
-                                        ntupleName,
-                                        **kwargs):
+def ActsBaseSpacePointAnalysisAlgCfg(flags,
+                                     name,
+                                     histoPath,
+                                     ntupleName,
+                                     **kwargs):
     isPixel = 'Pixel' in name
     perp_min = 0 if isPixel else 300
     perp_max = 400 if isPixel else 1100
 
     acc = ComponentAccumulator()
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(flags, 'ActsTrkSpacePointAnalysisAlgCfg')
+    helper = AthMonitorCfgHelper(flags, 'ActsSpacePointAnalysisAlgCfg')
     
     monitoringAlgorithm = helper.addAlgorithm(CompFactory.ActsTrk.SpacePointAnalysisAlg, name, **kwargs)
-    monitoringGroup = helper.addGroup(monitoringAlgorithm, 'ActsTrkSpacePointAnalysisAlg', '/ActsTrkAnalysis/')
+    monitoringGroup = helper.addGroup(monitoringAlgorithm, 'ActsSpacePointAnalysisAlg', '/ActsAnalysis/')
     
 
     monitoringGroup.defineHistogram('Nsp;h_Nsp', title="Number of Space Points;N;Entries", type="TH1I", path=f"{histoPath}",
@@ -86,7 +86,7 @@ def ActsTrkBaseSpacePointAnalysisAlgCfg(flags,
     acc.merge(helper.result())
     return acc
 
-def ActsTrkPixelSpacePointAnalysisAlgCfg(flags, name="ActsTrkPixelSpacePointAnalysisAlg", **kwargs):
+def ActsPixelSpacePointAnalysisAlgCfg(flags, name="ActsPixelSpacePointAnalysisAlg", **kwargs):
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     result = ITkPixelReadoutGeometryCfg(flags)
 
@@ -95,15 +95,15 @@ def ActsTrkPixelSpacePointAnalysisAlgCfg(flags, name="ActsTrkPixelSpacePointAnal
     kwargs.setdefault("UsePixel", True)
     kwargs.setdefault("UseOverlap", False)
 
-    result.merge(ActsTrkBaseSpacePointAnalysisAlgCfg(flags, 
-                                                     name = name,
-                                                     histoPath = "PixelSpacePoints",
-                                                     ntupleName = "PixelSpacePoints",
-                                                     **kwargs))
+    result.merge(ActsBaseSpacePointAnalysisAlgCfg(flags, 
+                                                  name = name,
+                                                  histoPath = "PixelSpacePoints",
+                                                  ntupleName = "PixelSpacePoints",
+                                                  **kwargs))
     return result
 
 
-def ActsTrkStripSpacePointAnalysisAlgCfg(flags, name="ActsTrkStripSpacePointAnalysisAlg", **kwargs):
+def ActsStripSpacePointAnalysisAlgCfg(flags, name="ActsStripSpacePointAnalysisAlg", **kwargs):
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
     result = ITkStripReadoutGeometryCfg(flags)
 
@@ -112,15 +112,15 @@ def ActsTrkStripSpacePointAnalysisAlgCfg(flags, name="ActsTrkStripSpacePointAnal
     kwargs.setdefault("UsePixel", False)
     kwargs.setdefault("UseOverlap", False)
 
-    result.merge(ActsTrkBaseSpacePointAnalysisAlgCfg(flags,
-                                                     name = name,
-                                                     histoPath = "StripSpacePoints",
-                                                     ntupleName = "StripSpacePoints",
-                                                     **kwargs))
+    result.merge(ActsBaseSpacePointAnalysisAlgCfg(flags,
+                                                  name = name,
+                                                  histoPath = "StripSpacePoints",
+                                                  ntupleName = "StripSpacePoints",
+                                                  **kwargs))
     return result
 
 
-def ActsTrkStripOverlapSpacePointAnalysisAlgCfg(flags, name="ActsTrkStripOverlapSpacePointAnalysisAlg", **kwargs):
+def ActsStripOverlapSpacePointAnalysisAlgCfg(flags, name="ActsStripOverlapSpacePointAnalysisAlg", **kwargs):
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
     result = ITkStripReadoutGeometryCfg(flags)
 
@@ -129,19 +129,19 @@ def ActsTrkStripOverlapSpacePointAnalysisAlgCfg(flags, name="ActsTrkStripOverlap
     kwargs.setdefault("UsePixel", False)
     kwargs.setdefault("UseOverlap", True)
 
-    result.merge(ActsTrkBaseSpacePointAnalysisAlgCfg(flags,
-                                                     name = name,
-                                                     histoPath = "StripOverlapSpacePoints",
-                                                     ntupleName = "StripOverlapSpacePoints",
-                                                     **kwargs))
+    result.merge(ActsBaseSpacePointAnalysisAlgCfg(flags,
+                                                  name = name,
+                                                  histoPath = "StripOverlapSpacePoints",
+                                                  ntupleName = "StripOverlapSpacePoints",
+                                                  **kwargs))
     return result
 
 
-def ActsTrkBaseSeedAnalysisAlgCfg(flags, 
-                                  name,
-                                  histoPath,
-                                  ntupleName,
-                                  **kwargs):
+def ActsBaseSeedAnalysisAlgCfg(flags, 
+                               name,
+                               histoPath,
+                               ntupleName,
+                               **kwargs):
     acc = ComponentAccumulator()
 
     isPixel = 'Pixel' in name
@@ -149,28 +149,28 @@ def ActsTrkBaseSeedAnalysisAlgCfg(flags,
     perp_max = 400 if isPixel else 1100
 
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(flags,'ActsTrkSeedAnalysisAlgCfg')
+    helper = AthMonitorCfgHelper(flags,'ActsSeedAnalysisAlgCfg')
 
     kwargs.setdefault('InputSeedCollection', 'ITkPixelSeeds')
 
-    from ActsConfig.ActsTrkGeometryConfig import ActsTrackingGeometryToolCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
     geoTool = acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
     acc.addPublicTool(geoTool)
     
     # ATLAS Converter Tool
-    from ActsConfig.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
+    from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
     converterTool = acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags))
     
     # Track Param Estimation Tool
-    from ActsConfig.ActsTrkTrackParamsEstimationConfig import TrackParamsEstimationToolCfg
-    trackEstimationTool = acc.popToolsAndMerge(TrackParamsEstimationToolCfg(flags))
+    from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
+    trackEstimationTool = acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags))
     
     kwargs.setdefault('TrackingGeometryTool', acc.getPublicTool(geoTool.name)) # PublicToolHandle
     kwargs.setdefault('ATLASConverterTool', converterTool)
     kwargs.setdefault('TrackParamsEstimationTool', trackEstimationTool)
 
     monitoringAlgorithm = helper.addAlgorithm(CompFactory.ActsTrk.SeedAnalysisAlg, name, **kwargs)
-    monitoringGroup = helper.addGroup(monitoringAlgorithm, 'ActsTrkSeedAnalysisAlg', 'ActsTrkAnalysis')
+    monitoringGroup = helper.addGroup(monitoringAlgorithm, 'ActsSeedAnalysisAlg', 'ActsAnalysis')
 
     monitoringGroup.defineHistogram('Nseed', title='Number of Seeds;N;Entries', type='TH1I', path=f'{histoPath}',
                                     xbins=100, xmin=0, xmax=0)
@@ -266,17 +266,17 @@ def ActsTrkBaseSeedAnalysisAlgCfg(flags,
 
 
 
-def ActsTrkPixelSeedAnalysisAlgCfg(flags, name = "ActsTrkPixelSeedAnalysisAlg", **kwargs):
+def ActsPixelSeedAnalysisAlgCfg(flags, name = "ActsPixelSeedAnalysisAlg", **kwargs):
     kwargs.setdefault('InputSeedCollection', 'ITkPixelSeeds')
 
     if flags.Tracking.doTruth:
         kwargs.setdefault('DetectorElements', 'ITkPixelDetectorElementCollection')
         kwargs.setdefault('ITkClustersTruth', 'PRD_MultiTruthITkPixel')
 
-    return ActsTrkBaseSeedAnalysisAlgCfg(flags, name, histoPath='PixelSeeds', ntupleName='PixelSeeds', **kwargs)
+    return ActsBaseSeedAnalysisAlgCfg(flags, name, histoPath='PixelSeeds', ntupleName='PixelSeeds', **kwargs)
 
 
-def ActsTrkStripSeedAnalysisAlgCfg(flags, name = "ActsTrkStripSeedAnalysisAlg", **kwargs):
+def ActsStripSeedAnalysisAlgCfg(flags, name = "ActsStripSeedAnalysisAlg", **kwargs):
     kwargs.setdefault('InputSeedCollection', 'ITkStripSeeds')
     kwargs.setdefault('UsePixel', False)
 
@@ -284,19 +284,19 @@ def ActsTrkStripSeedAnalysisAlgCfg(flags, name = "ActsTrkStripSeedAnalysisAlg", 
         kwargs.setdefault('DetectorElements', 'ITkStripDetectorElementCollection')
         kwargs.setdefault('ITkClustersTruth', 'PRD_MultiTruthITkStrip')
 
-    return ActsTrkBaseSeedAnalysisAlgCfg(flags, name, histoPath='StripSeeds', ntupleName='StripSeeds', **kwargs)
+    return ActsBaseSeedAnalysisAlgCfg(flags, name, histoPath='StripSeeds', ntupleName='StripSeeds', **kwargs)
 
 
-def ActsTrkBaseEstimatedTrackParamsAnalysisAlgCfg(flags,
-                                                  name,
-                                                  histoPath,
-                                                  ntupleName,
-                                                  **kwargs):
+def ActsBaseEstimatedTrackParamsAnalysisAlgCfg(flags,
+                                               name,
+                                               histoPath,
+                                               ntupleName,
+                                               **kwargs):
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(flags,'ActsTrkEstimatedTrackParamsAnalysisAlgCfg')
+    helper = AthMonitorCfgHelper(flags,'ActsEstimatedTrackParamsAnalysisAlgCfg')
 
     monitoringAlgorithm = helper.addAlgorithm(CompFactory.ActsTrk.EstimatedTrackParamsAnalysisAlg, name, **kwargs)
-    monitoringGroup = helper.addGroup(monitoringAlgorithm, 'ActsTrkEstimatedTrackParamsAnalysisAlg', 'ActsTrkAnalysis')
+    monitoringGroup = helper.addGroup(monitoringAlgorithm, 'ActsEstimatedTrackParamsAnalysisAlg', 'ActsAnalysis')
 
     monitoringGroup.defineHistogram('Nparams', title='Number of Estimated Parameters from Seeds;N;Entries', type='TH1I', path=f'{histoPath}',
                                     xbins=100, xmin=0, xmax=0)
@@ -307,7 +307,7 @@ def ActsTrkBaseEstimatedTrackParamsAnalysisAlgCfg(flags,
 
     return helper.result()
 
-def ActsTrkSeedingAlgorithmAnalysisAlgCfg(flags, name="ActsTrkSeedingAlgorithmAnalysis", **kwargs):
+def ActsSeedingAlgorithmAnalysisAlgCfg(flags, name="ActsSeedingAlgorithmAnalysis", **kwargs):
     result = ComponentAccumulator()
 
     MonitoringGroupNames = []
@@ -318,17 +318,17 @@ def ActsTrkSeedingAlgorithmAnalysisAlgCfg(flags, name="ActsTrkSeedingAlgorithmAn
         ITkSiSpacePointsSeedMaker.maxSize = 1e8
         MonitoringGroupNames.append("ITkSiSpacePointSeedMaker")
 
-        from ActsConfig.ActsTrkSeedingConfig import ActsTrkSiSpacePointsSeedMakerCfg
-        ActsITkSiSpacePointsSeedMaker = result.popToolsAndMerge(ActsTrkSiSpacePointsSeedMakerCfg(flags))
+        from ActsConfig.ActsSeedingConfig import ActsSiSpacePointsSeedMakerCfg
+        ActsITkSiSpacePointsSeedMaker = result.popToolsAndMerge(ActsSiSpacePointsSeedMakerCfg(flags))
         ActsITkSiSpacePointsSeedMaker.doSeedConversion = False
         MonitoringGroupNames.append("ActsITkSiSpacePointSeedMaker")
 
-        from ActsConfig.ActsTrkSeedingConfig import ActsTrkITkPixelOrthogonalSeedingToolCfg
-        orthogonal_seeding_tool = result.popToolsAndMerge(ActsTrkITkPixelOrthogonalSeedingToolCfg(flags))
+        from ActsConfig.ActsSeedingConfig import ActsITkPixelOrthogonalSeedingToolCfg
+        orthogonal_seeding_tool = result.popToolsAndMerge(ActsITkPixelOrthogonalSeedingToolCfg(flags))
         ActsITkSiSpacePointsSeedMakerOrthogonal = \
-          result.popToolsAndMerge(ActsTrkSiSpacePointsSeedMakerCfg(flags,
-                                                                   name="ActsTrkSiSpacePointsSeedMakerOrthogonal",
-                                                                   SeedToolPixel=orthogonal_seeding_tool))
+          result.popToolsAndMerge(ActsSiSpacePointsSeedMakerCfg(flags,
+                                                                name="ActsSiSpacePointsSeedMakerOrthogonal",
+                                                                SeedToolPixel=orthogonal_seeding_tool))
         ActsITkSiSpacePointsSeedMakerOrthogonal.doSeedConversion = False
         MonitoringGroupNames.append("ActsOrthogonalITkSiSpacePointSeedMaker")
 
@@ -354,14 +354,14 @@ def ActsTrkSeedingAlgorithmAnalysisAlgCfg(flags, name="ActsTrkSeedingAlgorithmAn
     return result
 
 
-def ActsTrkPixelEstimatedTrackParamsAnalysisAlgCfg(flags, name = 'ActsTrkPixelEstimatedTrackParamsAnalysisAlg', **kwargs):
+def ActsPixelEstimatedTrackParamsAnalysisAlgCfg(flags, name = 'ActsPixelEstimatedTrackParamsAnalysisAlg', **kwargs):
     kwargs.setdefault('InputTrackParamsCollection', 'ITkPixelEstimatedTrackParams')
-    return ActsTrkBaseEstimatedTrackParamsAnalysisAlgCfg(flags, name, histoPath = 'PixelEstimatedTrackParams', ntupleName = 'PixelEstimatedTrackParams', **kwargs)
+    return ActsBaseEstimatedTrackParamsAnalysisAlgCfg(flags, name, histoPath = 'PixelEstimatedTrackParams', ntupleName = 'PixelEstimatedTrackParams', **kwargs)
 
 
-def ActsTrkStripEstimatedTrackParamsAnalysisAlgCfg(flags, name = 'ActsTrkStripEstimatedTrackParamsAnalysisAlg', **kwargs):
+def ActsStripEstimatedTrackParamsAnalysisAlgCfg(flags, name = 'ActsStripEstimatedTrackParamsAnalysisAlg', **kwargs):
     kwargs.setdefault('InputTrackParamsCollection', 'ITkStripEstimatedTrackParams')
-    return ActsTrkBaseEstimatedTrackParamsAnalysisAlgCfg(flags, name, histoPath = 'StripEstimatedTrackParams', ntupleName = 'StripEstimatedTrackParams', **kwargs)
+    return ActsBaseEstimatedTrackParamsAnalysisAlgCfg(flags, name, histoPath = 'StripEstimatedTrackParams', ntupleName = 'StripEstimatedTrackParams', **kwargs)
 
 def PhysValActsCfg(flags,
                    name: str = 'PhysValActs') -> ComponentAccumulator:
@@ -369,38 +369,38 @@ def PhysValActsCfg(flags,
     acc.setPrivateTools(CompFactory.ActsTrk.PhysValTool(name=name))
     return acc
     
-def ActsTrkClusterAnalysisCfg(flags):
+def ActsClusterAnalysisCfg(flags):
     acc = ComponentAccumulator()
     if flags.Detector.EnableITkPixel:
-        acc.merge(ActsTrkPixelClusterAnalysisAlgCfg(flags))
+        acc.merge(ActsPixelClusterAnalysisAlgCfg(flags))
     if flags.Detector.EnableITkStrip:
-        acc.merge(ActsTrkStripClusterAnalysisAlgCfg(flags))
+        acc.merge(ActsStripClusterAnalysisAlgCfg(flags))
     return acc
 
 
-def ActsTrkSpacePointAnalysisCfg(flags):
+def ActsSpacePointAnalysisCfg(flags):
     acc = ComponentAccumulator()
     if flags.Detector.EnableITkPixel:
-        acc.merge(ActsTrkPixelSpacePointAnalysisAlgCfg(flags))
+        acc.merge(ActsPixelSpacePointAnalysisAlgCfg(flags))
     if flags.Detector.EnableITkStrip:
-        acc.merge(ActsTrkStripSpacePointAnalysisAlgCfg(flags))
-        acc.merge(ActsTrkStripOverlapSpacePointAnalysisAlgCfg(flags))
+        acc.merge(ActsStripSpacePointAnalysisAlgCfg(flags))
+        acc.merge(ActsStripOverlapSpacePointAnalysisAlgCfg(flags))
     return acc
 
 
-def ActsTrkSeedAnalysisCfg(flags):
+def ActsSeedAnalysisCfg(flags):
     acc = ComponentAccumulator()
     if flags.Detector.EnableITkPixel:
-        acc.merge(ActsTrkPixelSeedAnalysisAlgCfg(flags))
+        acc.merge(ActsPixelSeedAnalysisAlgCfg(flags))
     if flags.Detector.EnableITkStrip:
-        acc.merge(ActsTrkStripSeedAnalysisAlgCfg(flags))
+        acc.merge(ActsStripSeedAnalysisAlgCfg(flags))
     return acc
 
 
-def ActsTrkEstimatedTrackParamsAnalysisCfg(flags):
+def ActsEstimatedTrackParamsAnalysisCfg(flags):
     acc = ComponentAccumulator()
     if flags.Detector.EnableITkPixel:
-        acc.merge(ActsTrkPixelEstimatedTrackParamsAnalysisAlgCfg(flags))
+        acc.merge(ActsPixelEstimatedTrackParamsAnalysisAlgCfg(flags))
     if flags.Detector.EnableITkStrip:
-        acc.merge(ActsTrkStripEstimatedTrackParamsAnalysisAlgCfg(flags))
+        acc.merge(ActsStripEstimatedTrackParamsAnalysisAlgCfg(flags))
     return acc
