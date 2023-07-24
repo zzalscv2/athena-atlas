@@ -121,7 +121,11 @@ public:
 
   TrigRoiDescriptor( const IRoiDescriptor& roi );
 
+  TrigRoiDescriptor( const TrigRoiDescriptor& roi );
+
   TrigRoiDescriptor& operator=( const IRoiDescriptor& roi );
+
+  TrigRoiDescriptor& operator=( const TrigRoiDescriptor& roi );
 
   // Destructor
   virtual ~TrigRoiDescriptor();

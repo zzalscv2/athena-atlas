@@ -62,19 +62,20 @@ TrigRoiDescriptor::TrigRoiDescriptor( const IRoiDescriptor& roi )
     m_l1Id(roi.l1Id()), m_roiId(roi.roiId()), m_roiWord(roi.roiWord()) {  
 }
 
+TrigRoiDescriptor::TrigRoiDescriptor( const TrigRoiDescriptor& roi ) : TrigRoiDescriptor( static_cast<const IRoiDescriptor&>(roi) )  { } 
+
+
 
 TrigRoiDescriptor& TrigRoiDescriptor::operator=( const IRoiDescriptor& roi ) {
   if ( this==&roi ) return *this;
 
-  m_l1Id    = roi.l1Id();
-  m_roiId   = roi.roiId();
-  m_roiWord = roi.roiWord();
-
   construct(roi);
-  m_l1Id    = roi.l1Id();
-  m_roiId   = roi.roiId();
+  
+  m_l1Id    = roi.l1Id();     
+  m_roiId   = roi.roiId();    
   m_roiWord = roi.roiWord();
 
+  /// for this, should just use the RoiDescriptor::operator=() 
   if ( roi.size()>0 ) { 
     if ( m_manageConstituents ) { 
       /// manging it's own constituents, so take a deep copy
@@ -90,6 +91,9 @@ TrigRoiDescriptor& TrigRoiDescriptor::operator=( const IRoiDescriptor& roi ) {
 }
 
 
+TrigRoiDescriptor& TrigRoiDescriptor::operator=( const TrigRoiDescriptor& roi ) {
+  return TrigRoiDescriptor::operator=( static_cast<const IRoiDescriptor&>(roi) );
+}
 
 TrigRoiDescriptor::~TrigRoiDescriptor() { }
 

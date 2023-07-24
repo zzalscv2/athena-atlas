@@ -53,6 +53,13 @@ StatusCode ViewCreatorJetSuperROITool::attachROILinks( TrigCompositeUtils::Decis
   
   // This is needed to merge the RoIs from each jet
   std::unique_ptr<TrigRoiDescriptor> superRoI = std::make_unique<TrigRoiDescriptor>();
+
+  /// not really composite until a constituent has been added
+  /// so whether setting here or only when adding a constituent, depends
+  /// on how it should be used in the future - if we want it to be treated as 
+  /// empty with no constituents, then setComposite should be true even with 
+  /// no constituents, otherwise, with no constituantes it will be treated
+  /// as a normal fullscan Roi which may not be what is intended  
   superRoI->setComposite(true);
   superRoI->manageConstituents(false);
 
@@ -77,16 +84,20 @@ StatusCode ViewCreatorJetSuperROITool::attachROILinks( TrigCompositeUtils::Decis
       double zMinus = -1. * m_roiZWidth;
       double zPlus  = m_roiZWidth;
 
-      std::unique_ptr<TrigRoiDescriptor> newROI =
-        std::make_unique<TrigRoiDescriptor>( jetEta, etaMinus, etaPlus,
-                                             jetPhi, phiMinus, phiPlus,
-                                             0.,zMinus,zPlus );
+      /// don't mess about with unique_ptr here as the pointer management is 
+      /// done by the Roi itself
+      superRoI->push_back( new TrigRoiDescriptor( jetEta, etaMinus, etaPlus,
+						  jetPhi, phiMinus, phiPlus,
+						  0.,zMinus,zPlus ) );
 
-      superRoI->push_back( newROI.release() );
+      /// only set this to true here, just in case. It will still be false, 
+      /// if there are no constituents, but it doesn;t really matter one way 
+      /// or another in that case 
+      superRoI->manageConstituents(true);
     }
   }
 
-  roisWriteHandle->push_back(superRoI.release());
+  roisWriteHandle->push_back(superRoI.release()); /// why is the superRoi a unique pointer if it is just going to be released ? 
   const ElementLink< TrigRoiDescriptorCollection > roiEL = ElementLink< TrigRoiDescriptorCollection >( *roisWriteHandle, 0, ctx );
   outputDecision->setObjectLink( TrigCompositeUtils::roiString(), roiEL );
 

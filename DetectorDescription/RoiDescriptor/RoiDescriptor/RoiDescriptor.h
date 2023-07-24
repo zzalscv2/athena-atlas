@@ -79,11 +79,17 @@ public:
 		double phiMinus_, double phiPlus_ ); 
 
   /**
-   * @brief copy constructor
+   * @brief copy constructors
    */
   RoiDescriptor( const IRoiDescriptor& roi );
-
   RoiDescriptor& operator=( const IRoiDescriptor& r );  
+
+  /*
+   *  need an explicit class copy constructor
+   */
+  RoiDescriptor( const RoiDescriptor& roi );
+  RoiDescriptor& operator=( const RoiDescriptor& r );  
+
   
   // Destructor
   virtual ~RoiDescriptor();
