@@ -39,7 +39,6 @@ units = [
     "g",
     "kg",
     "e",
-    "C",
     "T",
     "Gauss",
     "kGauss",
