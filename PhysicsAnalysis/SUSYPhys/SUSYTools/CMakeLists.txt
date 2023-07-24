@@ -31,6 +31,7 @@ atlas_add_library( SUSYToolsLib
    EgammaAnalysisHelpersLib FTagAnalysisInterfacesLib IsolationSelectionLib
    IsolationCorrectionsLib JetAnalysisInterfacesLib JetSelectorToolsLib
    JetCPInterfaces JetCalibToolsLib JetInterface
+   InDetTrackSystematicsToolsLib
    # JetResolutionLib
    JetUncertaintiesLib JetMomentToolsLib METInterface METUtilitiesLib
    PileupReweightingLib PathResolver TauAnalysisToolsLib

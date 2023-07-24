@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SUSYTOOLS_SUSYOBJDEF_XAODTOOL_H
@@ -17,6 +17,7 @@
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODMuon/Muon.h"
 #include "xAODMuon/MuonContainer.h"
+#include "xAODMuon/MuonAuxContainer.h"
 #include "xAODTracking/TrackingPrimitives.h"
 #include "xAODTracking/Vertex.h"
 #include "xAODJet/Jet.h"
@@ -80,7 +81,8 @@ namespace ST {
     MET_TST,
     MET_CST,
     MET_Track,
-    EventWeight
+    EventWeight,
+    LRT_Object
   };
 
 
@@ -137,6 +139,7 @@ namespace ST {
     case Muon:     return (type==xAOD::Type::Muon);
     case Tau:      return (type==xAOD::Type::Tau);
     case BTag:     return (type==xAOD::Type::BTag);
+    case LRT_Object:return (type==xAOD::Type::Electron||type==xAOD::Type::Muon);
     default: break;
     }
     return false;
@@ -156,6 +159,7 @@ namespace ST {
     case MET_CST:
     case MET_Track: return "MET";
     case EventWeight: return "EventWeight";
+    case LRT_Object: return "LRT_objects";
     default:       break;
     }
     return "Unknown";
@@ -266,7 +270,11 @@ namespace ST {
 
     virtual StatusCode MergeMuons(const  xAOD::MuonContainer & muons, const std::vector<bool> &writeMuon, xAOD::MuonContainer* outputCol) const = 0;
 
+    virtual StatusCode prepareLRTMuons(const xAOD::MuonContainer* inMuons, xAOD::MuonContainer* copy) const = 0;
+
     virtual StatusCode MergeElectrons(const  xAOD::ElectronContainer & electrons, xAOD::ElectronContainer* outputCol, const std::set<const xAOD::Electron *> &ElectronsToRemove) const = 0;
+
+    virtual StatusCode prepareLRTElectrons(const xAOD::ElectronContainer* inElectrons, xAOD::ElectronContainer* copy) const = 0;
 
     virtual StatusCode SetBtagWeightDecorations(const xAOD::Jet& input, const asg::AnaToolHandle<IBTaggingSelectionTool>& btagSelTool, const std::string& btagTagger) const = 0;
     virtual bool IsPFlowCrackVetoCleaning(const xAOD::ElectronContainer* elec = nullptr, const xAOD::PhotonContainer* gamma = nullptr) const = 0;
@@ -419,6 +427,12 @@ namespace ST {
     virtual StatusCode ApplyPRWTool(bool muDependentRRN = true) = 0;
 
     virtual unsigned int GetRunNumber() const = 0;
+
+    virtual const xAOD::TrackParticleContainer& GetInDetLargeD0Tracks(const EventContext &ctx) const = 0;
+
+    virtual const xAOD::TrackParticleContainer& GetInDetLargeD0GSFTracks(const EventContext &ctx) const = 0;
+
+    virtual StatusCode ApplyLRTUncertainty() = 0;
 
     virtual int treatAsYear(const int runNumber=-1) const = 0;
 

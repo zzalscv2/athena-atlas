@@ -134,6 +134,7 @@ int main( int argc, char* argv[] ) {
   int NoSyst = 1;
   int debug = 1;
   bool isPHYSLite = false;
+  bool hasLRT = false;
   Long64_t entries=-1;
 
   // Open the input file:
@@ -187,6 +188,7 @@ int main( int argc, char* argv[] ) {
     if (x.first.find("AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets")!=std::string::npos) hasFatJets = true;
     if (x.first.find("AnalysisElectrons")!=std::string::npos)                        isPHYSLite = true;
     if (isPHYSLite && x.first.find("AnalysisLargeRJets")!=std::string::npos)         hasFatJets = true;
+    if (x.first.find("InDetLargeD0TrackParticles") != std::string::npos)             hasLRT     = true;
   }
   if (debug>0) {
     ANA_MSG_INFO("Checking file contents (containers):");
@@ -194,6 +196,7 @@ int main( int argc, char* argv[] ) {
     ANA_MSG_INFO("hasTrkJets: " << (hasTrkJets?"true":"false"));
     ANA_MSG_INFO("hasFatJets: " << (hasFatJets?"true":"false"));
     ANA_MSG_INFO("isPHYSLite: " << (isPHYSLite?"true":"false"));
+    ANA_MSG_INFO("hasLRT    : " << (hasLRT?"true":"false"));
   }
 
   // Create a TEvent object:
@@ -505,6 +508,12 @@ int main( int argc, char* argv[] ) {
       ANA_CHECK( objTool.ApplyPRWTool());
     }
     ANA_MSG_DEBUG( "PRW Weight = " << objTool.GetPileupWeight());
+
+    // Only need LRT uncertainty tool if there are LRT tracks!
+    if (hasLRT) {
+      ANA_MSG_DEBUG( "Applying LRT uncertainty decorations" );
+      ANA_CHECK( objTool.ApplyLRTUncertainty());
+    }
 
     // ============================================================================================
     // Print some event information for fun:
