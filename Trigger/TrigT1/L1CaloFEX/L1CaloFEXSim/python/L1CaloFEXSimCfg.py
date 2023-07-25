@@ -79,7 +79,7 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
     log = logging.getLogger('L1CaloFEXSimCfg')
 
     # Configure SCell inputs
-    sCellType = "SCell"
+    sCellType = flags.Trigger.L1.L1CaloSuperCellContainerName
     if flags.Input.isMC:
         # Read SCell directly from input RDO file
         acc.merge(ReadSCellFromPoolFileCfg(flags,sCellType))
@@ -91,9 +91,8 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         from AthenaConfiguration.Enums import LHCPeriod
         if flags.GeoModel.Run is LHCPeriod.Run2:
             # Run-2 data inputs, emulate SCells
-            sCellType = "EmulatedSCell"
             from TrigT1CaloFexPerf.EmulationConfig import emulateSC_Cfg
-            acc.merge(emulateSC_Cfg(flags,SCOut=sCellType))
+            acc.merge(emulateSC_Cfg(flags))
         else:
             # Run-3+ data inputs, decode SCells from ByteStream
             acc.merge(ReadSCellFromByteStreamCfg(flags,key=sCellType))
@@ -163,7 +162,7 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
             acc.addEventAlgo(decoderAlg)
             
         from L1CaloFEXAlgos.FexEmulatedTowersConfig import jFexEmulatedTowersCfg
-        acc.merge(jFexEmulatedTowersCfg(flags, SCell=sCellType))      
+        acc.merge(jFexEmulatedTowersCfg(flags))      
         
         jFEXInputs = CompFactory.LVL1.jTowerMakerFromJfexTowers('jTowerMakerFromJfexTowers')
         jFEXInputs.IsMC = flags.Input.isMC

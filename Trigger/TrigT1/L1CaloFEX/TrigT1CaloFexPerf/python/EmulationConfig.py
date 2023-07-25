@@ -2,7 +2,7 @@
 from TrigT1CaloFexPerf.L1PerfControlFlags import L1Phase1PerfFlags as perfFlags
 
 
-def emulateSC_Cfg(flags, CellsIn="SeedLessFS", SCOut="EmulatedSCell"):
+def emulateSC_Cfg(flags, CellsIn="SeedLessFS"):
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from AthenaConfiguration.ComponentFactory import CompFactory
@@ -22,7 +22,7 @@ def emulateSC_Cfg(flags, CellsIn="SeedLessFS", SCOut="EmulatedSCell"):
 
     larSCargs = {}
     larSCargs["SCellContainerIn"] = "EmulatedSCellNoBCID"
-    larSCargs["SCellContainerOut"] = SCOut
+    larSCargs["SCellContainerOut"] = flags.Trigger.L1.L1CaloSuperCellContainerName
 
     if(perfFlags.Calo.ApplyEmulatedPedestal()):
         #Apply the pedestal correction. There may be cases we do not want this. 
