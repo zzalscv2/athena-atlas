@@ -20,6 +20,7 @@
 #include "xAODTruth/TruthMetaDataContainer.h"
 // STL includes
 #include <string>
+#include "TruthUtils/HepMCHelpers.h"
 
 // Constructor
 DerivationFramework::TruthBornLeptonCollectionMaker::TruthBornLeptonCollectionMaker(const std::string& t,
@@ -222,7 +223,7 @@ bool DerivationFramework::TruthBornLeptonCollectionMaker::hasBareDescendent( con
   // Null pointer check
   if (!p) return false;
   // If we hit a bare descendent, then we're a winnner
-  if (p->isLepton() && p->status()==1) return true;
+  if (p->isLepton() && MC::isStable(p) ) return true;
   // Otherwise look through all the children
   for (size_t c=0;c<p->nChildren();++c){
     if (!p->child(c)) continue; // Null pointer protection

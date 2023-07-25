@@ -44,7 +44,7 @@
 #include "HepPDT/ParticleID.hh"
 #include "HepPDT/DecayData.hh"
 #include "HepPDT/ParticleDataTable.hh"
-
+#include "TruthUtils/HepMCHelpers.h"
 
 /** Constructor **/
 ISF::InputConverter::InputConverter(const std::string& name, ISvcLocator* svc)
@@ -314,7 +314,7 @@ ISF::InputConverter::convertParticle(const HepMC::GenParticlePtr& genPartPtr, EB
     if (std::abs(e-teste)>0.01*e) {
       ATH_MSG_WARNING("Difference in energy for: " << genPartPtr<<" Morg="<<pMomentum.m()<<" Mmod="<<pMass<<" Eorg="<<e<<" Emod="<<teste);
     }
-    if (genPartPtr->status()==2 && pVertex && genPartPtr->end_vertex()) { //check for possible changes of gamma for quasi stable particles
+    if (MC::isDecayed(genPartPtr) && pVertex && genPartPtr->end_vertex()) { //check for possible changes of gamma for quasi stable particles
       const auto& prodVtx = genPartPtr->production_vertex()->position();
       const auto& endVtx = genPartPtr->end_vertex()->position();
       CLHEP::Hep3Vector dist3D(endVtx.x()-prodVtx.x(), endVtx.y()-prodVtx.y(), endVtx.z()-prodVtx.z());
@@ -1061,7 +1061,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
       // Old approach particle had an end vertex - predefined decays taken from the main GenEvent
       processPredefinedDecays(genpart, isp, g4particle.get(), true);
     }
-    else if (genpart->status()==2 // Some assumptions about main GenEvent here
+    else if (MC::isDecayed(genpart) // Some assumptions about main GenEvent here
              && !genpart->end_vertex()) {
       // New approach - predefined decays taken from shadow GenEvent
       // Find the matching particle in the shadowGenEvent

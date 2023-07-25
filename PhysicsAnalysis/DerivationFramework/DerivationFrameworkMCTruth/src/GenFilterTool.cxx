@@ -198,14 +198,14 @@ namespace DerivationFramework {
     for (const xAOD::TruthParticle* pitr1 : *tpc){
       int pdgId1 = pitr1->pdgId();
       if (HepMC::is_simulation_particle(pitr1)) continue;
-      if (pitr1->status()!=1) continue;
+      if (!MC::isStable(pitr1)) continue;
       // Pick electrons or muons with Pt > MinPt_PTZ and |eta| < m_maxEta
       if (std::abs(pdgId1) == 11 || std::abs(pdgId1) == 13) {
         if (pitr1->pt() >= MinPt_PTZ && std::abs(pitr1->eta()) <= MaxEta_PTZ){
           for (const xAOD::TruthParticle* pitr2 : *tpc){
             if (pitr2==pitr1) continue;
             if (HepMC::is_simulation_particle(pitr2)) continue;
-            if (pitr2->status()!=1) continue;
+            if (!MC::isStable(pitr2)) continue;
             int pdgId2 = pitr2->pdgId();
             // Pick electrons or muons with Pt > MinPt_PTZ and |eta| < MaxEta_PTZ
             // If AllowSameCharge_PTZ is not true only pick those with opposite charge to the first particle

@@ -11,7 +11,7 @@
 
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "MuonDetDescrUtils/MuonSectorMapping.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 namespace {
     static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> acc_tpl("truthParticleLink");
 
@@ -78,7 +78,7 @@ StatusCode DerivationFramework::MuonTruthIsolationTool::addBranches() const {
     for (const xAOD::TruthEvent* event : *tec) {
         for (size_t parti = 0; parti < event->nTruthParticles(); ++parti) {
             const xAOD::TruthParticle* tpart = event->truthParticle(parti);
-            if (!tpart || tpart->status() != 1 || HepMC::is_simulation_particle(tpart) || tpart->isNeutrino()) continue;
+            if (!tpart || !MC::isStable(tpart) || HepMC::is_simulation_particle(tpart) || tpart->isNeutrino()) continue;
             const int sector = sector_mapping.getSector(tpart->phi());
             truth_map_calo[sector].push_back(tpart);
             if (!tpart->isCharged() || tpart->abseta() > 2.5 || tpart->pt() < 500) continue;

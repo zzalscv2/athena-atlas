@@ -394,11 +394,11 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
         ok = true;
     
     // All stable
-    if (m_writeAllStable && p->status()==1 && !HepMC::is_simulation_particle(barcode))
+    if (m_writeAllStable && MC::isStable(p) && !HepMC::is_simulation_particle(barcode))
         ok = true;
     
     // All leptons not from hadron decays
-    if(!ok && m_writeLeptonsNotFromHadrons && (pdg_id>10 && pdg_id<19) && p->status()==1) {// Include 4th generation...
+    if(!ok && m_writeLeptonsNotFromHadrons && (pdg_id>10 && pdg_id<19) && MC::isStable(p)) {// Include 4th generation...
         ok = !(matchHadronIncTau(p) || matchQuarkIncTau(p) || isOrphanIncTau(p));
     }
     

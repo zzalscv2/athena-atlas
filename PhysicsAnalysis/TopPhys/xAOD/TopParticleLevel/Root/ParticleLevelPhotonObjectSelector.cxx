@@ -5,6 +5,7 @@
 #include "TopParticleLevel/ParticleLevelPhotonObjectSelector.h"
 
 #include "TopConfiguration/Tokenize.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace top {
   ParticleLevelPhotonObjectSelector::ParticleLevelPhotonObjectSelector(Options opt /* = Options() */)
@@ -70,7 +71,7 @@ namespace top {
     // --------------------------------------------------
     // Require that the photon is status=1 (stable)
     // TODO: Should we include other statuses?
-    if (truthParticle.status() != 1) {
+    if (!MC::isStable(&truthParticle)) {
       return false;
     }
 

@@ -201,14 +201,13 @@ TruthIsolationTool::buildEtIsolations( const std::string& mcEvtName,
   for ( const auto& i: *genEvt) {
     const HepMC::FourVector hlv = i->momentum();
     const int    ida = std::abs(i->pdg_id());
-    const int    sta = i->status();
     const double pt  = hlv.perp();
 
     // Compute isolation only for photon, electron, muon or tau. 
     // Not for documentation particle
     const bool doComputeIso = ( ( ida == 22 && pt > m_ptGamMin ) ||
                                 ida == 11 || ida == 13 || ida == 15 ) &&
-                                sta != 3 && MC::isSimInteracting(i);
+                                i->status() != 3 && MC::isSimInteracting(i);
     if ( doComputeIso ) {
       computeIso( particles, i, etIsols, partSel );
     }

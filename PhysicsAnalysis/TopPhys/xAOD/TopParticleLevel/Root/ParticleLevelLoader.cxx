@@ -28,7 +28,7 @@
 #include "FourMomUtils/xAODP4Helpers.h"
 
 #include <boost/algorithm/string.hpp>
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 // #define TOP_PARTICLE_LEVEL_DEBUG_OVERLAP_REMOVAL 1
 
@@ -649,7 +649,7 @@ namespace top {
         {
           for(const xAOD::TruthParticle* p : *truth_particles)
           {
-            if(p->isMuon() && p->status()==1) truth_particles_vec.push_back(p);
+            if(p->isMuon() && MC::isStable(p)) truth_particles_vec.push_back(p);
           }
         }
       }

@@ -133,7 +133,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
 
   int iParticlePDG = thePart->pdgId();
   // status=HepMC::SPECIALSTATUS in Pythia?
-  if (thePart->status() != 1 && thePart->status() != 2 && thePart->status() != HepMC::SPECIALSTATUS) {
+  if (!MC::isStable(thePart) && !MC::isDecayed(thePart) && thePart->status() != HepMC::SPECIALSTATUS) {
     return std::make_pair(GenParticle, partOrig);
   }
   bool isPartHadr = isHadron(thePart);
@@ -389,10 +389,9 @@ std::tuple<unsigned int, const xAOD::TruthParticle*> MCTruthClassifier::defOrigO
   ATH_MSG_DEBUG( "Executing DefOrigOfParticle " );
 
   const xAOD::TruthParticle *parent_hadron_ptr = nullptr;
-  const int status = thePart->status();
 
   bool uncat = 0, fromHad = 0, fromTau = 0;
-  bool isPhysical = (status == 1 || status == 2);
+  bool isPhysical = MC::isPhysical(thePart);
   bool isGeant = HepMC::is_simulation_particle(thePart);
   bool isBSM = MC::isBSM(thePart->pdgId());
   bool fromBSM = isBSM; // just to initialise
@@ -434,8 +433,7 @@ bool MCTruthClassifier::fromHadron(const xAOD::TruthParticle* p,
     // sometimes Athena replaces status 2 with HepMC::SPECIALSTATUS, see e.g.
     // PhysicsAnalysis/TruthParticleID/McParticleTools/src/EtaPtFilterTool.cxx#L374
     // not at all clear why and unfortunately there's no documentation in the code
-    const int st = parent->status();
-    if (st > 2 && st != HepMC::SPECIALSTATUS)  return false;
+    if (!MC::isPhysical(parent) && parent->status() != HepMC::SPECIALSTATUS)  return false;
     fromTau |= abs(parent->pdgId()) == 15;
     if (isHadron(parent)) {
       if (!hadptr)  hadptr = parent; // assumes linear hadron parentage
@@ -515,7 +513,7 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
 
   //---patch to fix LQ dataset problem
   if (m_LQpatch) {
-    if (abs(motherPDG) == 11 && mother->status() == 2 && mothOriVert == nullptr && motherPDG == thePriPart->pdgId() &&
+    if (abs(motherPDG) == 11 && MC::isDecayed(mother) && mothOriVert == nullptr && motherPDG == thePriPart->pdgId() &&
         numOfParents == 1 && (partOriVert->nOutgoingParticles() == 1 || partOriVert->nOutgoingParticles() == 2)) {
       const xAOD::TruthParticle* theP(nullptr);
       int itr = 0;
@@ -737,7 +735,7 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
     return ElMagProc;
 
   // unknown process pos/el->pos/el??
-  if (abs(motherPDG) == 11 && mother->status() != 2 && motherPDG == thePriPart->pdgId() && numOfDaug == 1 && !samePart)
+  if (abs(motherPDG) == 11 && !MC::isDecayed(mother) && motherPDG == thePriPart->pdgId() && numOfDaug == 1 && !samePart)
     return ElMagProc;
 
   // pi->pi+e+/e-; mu->mu+e+/e- ;
@@ -805,7 +803,7 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
     const xAOD::TruthParticle* thePartToCheck = thePriPart;
     const xAOD::TruthParticle* theMother =
       thePriPart->hasProdVtx() ? thePriPart->prodVtx()->incomingParticle(0) : nullptr;
-    if (theMother != nullptr && abs(theMother->pdgId()) == 11 && theMother->status() == 2)
+    if (theMother != nullptr && abs(theMother->pdgId()) == 11 && MC::isDecayed(theMother))
       thePartToCheck = theMother;
 
     bool isZboson = false;
@@ -1415,7 +1413,7 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
   const xAOD::TruthVertex* partOriVert = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
 
   //-- to define tau  outcome status
-  if (thePriPart->status() < 3) {
+  if (MC::isPhysical(thePriPart)) {
     if (info)
       info->particleOutCome = defOutComeOfTau(thePriPart, info);
   }
@@ -2367,7 +2365,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
     const xAOD::TruthParticle* theMother =
       thePriPart->hasProdVtx() ? thePriPart->prodVtx()->incomingParticle(0) : nullptr;
 
-    if (abs(theMother->pdgId()) == 11 && theMother->status() == 2)
+    if (abs(theMother->pdgId()) == 11 && MC::isDecayed(theMother))
       thePartToCheck = theMother;
 
     bool isZboson = false;
@@ -2968,7 +2966,7 @@ MCTruthClassifier::findFinalStatePart(const xAOD::TruthVertex* EndVert) const
       continue;
 
     finalStatePart.push_back(thePart);
-    if (thePart->status() != 1) {
+    if (!MC::isStable(thePart)) {
 
       const xAOD::TruthVertex* pVert = findEndVert(thePart);
       if (pVert == EndVert)

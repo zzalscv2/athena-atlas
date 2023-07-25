@@ -15,6 +15,7 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthVertex.h"
 #include "xAODTruth/TruthVertexContainer.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 
 namespace FlavorTagDiscriminants {
@@ -83,7 +84,7 @@ namespace FlavorTagDiscriminants {
     for ( const auto& truth_particle : sorted_truth_particles ) {
       
       // for efficiency, skip unstable and low pt particles (< 500 MeV)
-      if ( truth_particle->status() != 1 or truth_particle->pt() < 500) {
+      if ( !MC::isStable(truth_particle) || truth_particle->pt() < 500) {
         dec_origin_label(*truth_particle) = InDet::ExclusiveOrigin::Pileup;
         dec_type_label(*truth_particle) = TruthDecoratorHelpers::ExclusiveType::NoTruth;
         dec_vertex_index(*truth_particle) = -1;
