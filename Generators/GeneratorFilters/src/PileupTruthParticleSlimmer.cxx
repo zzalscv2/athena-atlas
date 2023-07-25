@@ -16,7 +16,7 @@
 #include "xAODTruth/TruthParticleAuxContainer.h"
 
 #include "GeneratorFilters/PileupTruthParticleSlimmer.h"
-
+#include "TruthUtils/HepMCHelpers.h"
 
 using namespace std;
 
@@ -82,7 +82,7 @@ StatusCode PileupTruthParticleSlimmer::execute() {
     for (const xAOD::TruthParticle *theParticle : *xTruthParticleContainer) {
      
       //We only want to save stable particles (lifetime > 10mm)
-      if (theParticle->status() != 1){
+      if (!MC::isStable(theParticle)){
           continue; //Skip this particle
       }
 

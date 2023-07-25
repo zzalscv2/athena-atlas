@@ -8,6 +8,8 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleAuxContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "TruthUtils/HepMCHelpers.h"
+
 xAODFourLeptonMassFilter::xAODFourLeptonMassFilter(const std::string& name,
                                                    ISvcLocator* pSvcLocator)
     : GenFilter(name, pSvcLocator) {}
@@ -44,7 +46,7 @@ StatusCode xAODFourLeptonMassFilter::filterEvent() {
     const xAOD::TruthParticle* lightLeptonParticle =
         (*xTruthParticleContainerReadHandle)[iPart];
     int pdgId1 = lightLeptonParticle->pdgId();
-    if (lightLeptonParticle->status() != 1)
+    if (!MC::isStable(lightLeptonParticle))
       continue;
     // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta
     if (!(lightLeptonParticle->isElectron() || lightLeptonParticle->isMuon()))
@@ -58,7 +60,7 @@ StatusCode xAODFourLeptonMassFilter::filterEvent() {
       const xAOD::TruthParticle* lightLeptonParticle2 =
           (*xTruthParticleContainerReadHandle)[iPart2];
       int pdgId2 = lightLeptonParticle2->pdgId();
-      if (lightLeptonParticle->status() != 1 || iPart == iPart2)
+      if ( !MC::isStable(lightLeptonParticle) || iPart == iPart2)
         continue;
       // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta
       if (!(lightLeptonParticle2->isElectron() ||
@@ -72,7 +74,7 @@ StatusCode xAODFourLeptonMassFilter::filterEvent() {
         const xAOD::TruthParticle* lightLeptonParticle3 =
             (*xTruthParticleContainerReadHandle)[iPart3];
         int pdgId3 = lightLeptonParticle3->pdgId();
-        if (lightLeptonParticle->status() != 1 || iPart == iPart3 ||
+        if (!MC::isStable(lightLeptonParticle) || iPart == iPart3 ||
             iPart2 == iPart3)
           continue;
         // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta
@@ -87,7 +89,7 @@ StatusCode xAODFourLeptonMassFilter::filterEvent() {
           const xAOD::TruthParticle* lightLeptonParticle4 =
               (*xTruthParticleContainerReadHandle)[iPart4];
           int pdgId4 = lightLeptonParticle4->pdgId();
-          if (lightLeptonParticle->status() != 1 || iPart == iPart4 ||
+          if (!MC::isStable(lightLeptonParticle) || iPart == iPart4 ||
               iPart2 == iPart4 || iPart3 == iPart4)
             continue;
           // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta

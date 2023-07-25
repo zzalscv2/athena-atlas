@@ -279,12 +279,11 @@ StatusCode CheckFlow_New::execute() {
   }
   for (auto pitr: particles) {
     int    pid    = pitr->pdg_id();
-    int    p_stat = pitr->status();
     double pt     = pitr->momentum().perp();
     double rapid  = pitr->momentum().pseudoRapidity();
     double phi    = pitr->momentum().phi();
     msg(MSG::DEBUG)
-	   << " PID = " << pid << " Status = " << p_stat
+	   << " PID = " << pid << " Status = " << pitr->status()
 	   << " Eta = " << rapid << "  Phi = " << phi<< endmsg;
 
     if( (std::abs(rapid) >= m_rapcut_min) && (std::abs(rapid) <= m_rapcut_max) &&

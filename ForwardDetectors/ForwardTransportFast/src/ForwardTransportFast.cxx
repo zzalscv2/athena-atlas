@@ -9,6 +9,7 @@
 #include "ForwardTransportFast.h"
 #include "ForwardTracker/Particle.h"
 #include "ForwardTracker/Point.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 ForwardTransportFast::ForwardTransportFast(const std::string& name, ISvcLocator* pSvcLocator) :
   AthAlgorithm(name, pSvcLocator), 
@@ -62,7 +63,7 @@ StatusCode ForwardTransportFast::execute() {
     
     for (auto gParticle: *gEvent) {
   
-      if (gParticle->status() != 1) continue; // take only stable particles
+      if (!MC::isStable(gParticle)) continue; // take only stable particles
       if (gParticle->end_vertex())  continue; // skip decay vertices
       
       gParticle->set_status(201);

@@ -3,6 +3,7 @@
 */
 
 #include "GeneratorFilters/FourLeptonMassFilter.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 
 FourLeptonMassFilter::FourLeptonMassFilter(const std::string& name, ISvcLocator* pSvcLocator)
@@ -40,7 +41,7 @@ StatusCode FourLeptonMassFilter::filterEvent() {
     auto genEvt_particles_begin = HepMC::begin(*genEvt);
     auto genEvt_particles_end = HepMC::end(*genEvt);
     for (auto  pitr1 = genEvt_particles_begin; pitr1 != genEvt_particles_end; ++pitr1) {
-	  if ((*pitr1)->status() != 1) continue;
+	  if (!MC::isStable(*pitr1)) continue;
 
 	  // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta
 	  int pdgId1((*pitr1)->pdg_id());
@@ -56,7 +57,7 @@ StatusCode FourLeptonMassFilter::filterEvent() {
    
 
 	  for (; pitr2 != genEvt_particles_end; ++pitr2) {
-        if ((*pitr2)->status()!=1 || pitr1 == pitr2) continue;
+        if (!MC::isStable(*pitr2) || pitr1 == pitr2) continue;
         // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta
         int pdgId2((*pitr2)->pdg_id());
         if (!(std::abs(pdgId2) == 11 || abs(pdgId2) == 13)) continue;
@@ -67,7 +68,7 @@ StatusCode FourLeptonMassFilter::filterEvent() {
         pitr3++;
 
         for (; pitr3 != genEvt_particles_end; ++pitr3) {
-		  if ((*pitr3)->status()!=1 || pitr1 == pitr3 || pitr2 == pitr3 ) continue;
+		  if (!MC::isStable(*pitr3) || pitr1 == pitr3 || pitr2 == pitr3 ) continue;
 
 		  // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta
 		  int pdgId3((*pitr3)->pdg_id());
@@ -79,7 +80,7 @@ StatusCode FourLeptonMassFilter::filterEvent() {
 		  pitr4++;
    
 		  for (; pitr4 != genEvt_particles_end; ++pitr4) {
-            if ((*pitr4)->status()!=1 || pitr1 == pitr4 || pitr2 == pitr4 || pitr3 == pitr4) continue;
+            if (!MC::isStable(*pitr4) || pitr1 == pitr4 || pitr2 == pitr4 || pitr3 == pitr4) continue;
 
             // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta
             int pdgId4((*pitr4)->pdg_id());

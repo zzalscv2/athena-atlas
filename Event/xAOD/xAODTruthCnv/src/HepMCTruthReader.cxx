@@ -11,6 +11,7 @@
 
 #include "GeneratorObjects/McEventCollection.h"
 #include "HepMCTruthReader.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 using std::cout;
 using std::endl;
@@ -224,7 +225,7 @@ void HepMCTruthReader::printParticle(const HepMC::ConstGenParticlePtr& particle)
   cout << particle->momentum().e() << " ";
   cout.setf(std::ios::fmtflags(0), std::ios::floatfield);
   cout.unsetf(std::ios_base::showpos);
-  if ( particle->status()==2 ) {
+  if ( MC::isDecayed(particle) ) {
     if ( HepMC::barcode(particle->end_vertex())!=0 ) {
       cout.width(3);
       cout << particle->status() << " ";

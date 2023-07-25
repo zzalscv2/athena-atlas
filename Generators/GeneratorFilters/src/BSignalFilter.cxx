@@ -426,7 +426,7 @@ void BSignalFilter::FindAllChildren(const HepMC::ConstGenParticlePtr& mother,std
 {
   int pID = mother->pdg_id();
   //
-  if ( !(mother->end_vertex()) && (mother->status() == 1) )  // i.e. this is a final state
+  if ( !(mother->end_vertex()) && MC::isStable(mother) )  // i.e. this is a final state
     {
       bool hasChildGoodParent = fromFinalB && (fromSelectedB || m_B_pdgid==0);
       //
@@ -460,7 +460,7 @@ void BSignalFilter::FindAllChildren(const HepMC::ConstGenParticlePtr& mother,std
   else{
     if ( !(mother->end_vertex()) )  // i.e. something is wrong in HepMC
       {
-        if (mother->status() == 2)
+        if (MC::isDecayed(mother))
         	ATH_MSG_DEBUG(" Inconsistent entry in HepMC (status 2 particle not decayed), chain rejected!");
 	return;
       }
