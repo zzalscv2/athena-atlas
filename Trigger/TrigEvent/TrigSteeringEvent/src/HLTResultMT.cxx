@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSteeringEvent/HLTResultMT.h"
@@ -15,9 +15,10 @@ namespace {
    *
    * Changed from 0.0 to 1.0 in September 2019 to differentiate Run-3 HLT ByteStream format from earlier formats.
    * Further version changes:
-   * - v1.1 (August 2021): Remove rerun bits from the HLT bits in event header
+   * - v1.1 (Aug 2021): Remove rerun bits from the HLT bits in event header
+   * - v1.2 (Jul 2023): Store truncation status in ROB header
    */
-  constexpr HLT::HLTResultMT::RODMinorVersion s_currentHltRodMinorVersion{1,1};
+  constexpr HLT::HLTResultMT::RODMinorVersion s_currentHltRodMinorVersion{1,2};
 
   /// Class name to print in messages
   constexpr std::string_view s_contextName{"HLT::HLTResultMT"};
@@ -29,16 +30,12 @@ namespace {
 HLT::HLTResultMT::HLTResultMT(std::vector<eformat::helper::StreamTag> streamTags,
                               boost::dynamic_bitset<uint32_t> hltPassRawBits,
                               boost::dynamic_bitset<uint32_t> hltPrescaledBits,
-                              std::unordered_map<uint16_t, std::vector<uint32_t> > data,
-                              std::vector<uint32_t> status,
-                              std::set<uint16_t> truncatedModuleIds)
+                              std::unordered_map<uint16_t, std::vector<uint32_t> > data)
 : m_streamTags(std::move(streamTags)),
   m_hltPassRawBits(std::move(hltPassRawBits)),
   m_hltPrescaledBits(std::move(hltPrescaledBits)),
   m_data(std::move(data)),
-  m_status(std::move(status)),
-  m_version(s_currentHltRodMinorVersion),
-  m_truncatedModuleIds(std::move(truncatedModuleIds)) {}
+  m_version(s_currentHltRodMinorVersion) {}
 
 // =============================================================================
 // Getter/setter methods for stream tags
@@ -201,14 +198,6 @@ const std::vector<uint32_t>& HLT::HLTResultMT::getStatus() const {
 }
 
 // -----------------------------------------------------------------------------
-const eformat::helper::Status HLT::HLTResultMT::getFirstStatusWord() const {
-  if (m_status.empty())
-    return eformat::helper::Status(eformat::GenericStatus::UNCLASSIFIED,0); // empty status word
-  else
-    return eformat::helper::Status(m_status.at(0));
-}
-
-// -----------------------------------------------------------------------------
 const std::vector<HLT::OnlineErrorCode> HLT::HLTResultMT::getErrorCodes() const {
   std::vector<HLT::OnlineErrorCode> errorCodes;
   if (m_status.size()<2)
@@ -226,21 +215,23 @@ void HLT::HLTResultMT::setStatus(std::vector<uint32_t> status) {
 }
 
 // -----------------------------------------------------------------------------
-void HLT::HLTResultMT::setErrorCodes(const std::vector<HLT::OnlineErrorCode>& errorCodes,
-                                     const eformat::helper::Status& firstStatusWord) {
-  m_status.clear();
-  m_status.push_back(firstStatusWord.code());
-  for (const HLT::OnlineErrorCode& code : errorCodes)
-    m_status.push_back(static_cast<uint32_t>(code));
-}
-
-// -----------------------------------------------------------------------------
 void HLT::HLTResultMT::addErrorCode(const HLT::OnlineErrorCode& errorCode,
                                     const eformat::helper::Status& firstStatusWord) {
   if (m_status.empty()) m_status.push_back(firstStatusWord.code());
   else m_status[0] |= firstStatusWord.code();
   m_status.push_back(static_cast<uint32_t>(errorCode));
 }
+
+// -----------------------------------------------------------------------------
+const std::vector<uint32_t>& HLT::HLTResultMT::getRobStatus(uint16_t moduleId) const {
+  const auto it = m_robStatus.find(moduleId);
+  if (it==m_robStatus.end()) {
+    static const std::vector<uint32_t> empty;
+    return empty;
+  }
+  else return it->second;
+}
+
 
 // =============================================================================
 // Getter/setter methods for HLT ROD minor version
@@ -263,7 +254,17 @@ const std::set<uint16_t>& HLT::HLTResultMT::getTruncatedModuleIds() const {
 
 // -----------------------------------------------------------------------------
 void HLT::HLTResultMT::addTruncatedModuleId(const uint16_t moduleId) {
-  m_truncatedModuleIds.insert(moduleId);
+  auto [itr, inserted] = m_truncatedModuleIds.insert(moduleId);
+  // Also update ROB status words
+  if (inserted) {
+    // Note that the per-ROB status requires the specific status bits to be zero
+    // if a problem is detected by the HLT framework. This is different from the
+    // event status where we set PSC_PROBLEM.
+    // See eformat v5.0.2, section 5.8.2 (https://cds.cern.ch/record/683741)
+    eformat::helper::Status firstStatusWord(eformat::GenericStatus::DATA_CORRUPTION);
+    m_robStatus[moduleId] = {firstStatusWord.code(),
+                             static_cast<uint32_t>(HLT::OnlineErrorCode::RESULT_TRUNCATION)};
+  }
 }
 
 // =============================================================================
