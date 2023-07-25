@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AtlasHepMC/GenEvent.h"
@@ -9,8 +9,15 @@
 
 #include "Sherpa_i/Sherpa_i.h"
 
-//needed from Sherpa EvtGeneratorz
-//#include "SHERPA/Main/Sherpa.H"
+#ifdef IS_SHERPA_3
+#include "ATOOLS/Org/CXXFLAGS_PACKAGES.H"
+#ifdef HEPMC3
+#undef USING__HEPMC2
+#else
+#undef USING__HEPMC3
+#endif
+#include "SHERPA/Main/Sherpa.H"
+#else
 /** Begin of  content of Sherpa.H */
 #ifndef SHERPA_Main_Sherpa_H
 #define SHERPA_Main_Sherpa_H
@@ -103,6 +110,7 @@ namespace SHERPA {
 }
 #endif
  /*End of content of Sherpa.H */
+#endif
 #include "SHERPA/Initialization/Initialization_Handler.H"
 #ifdef IS_SHERPA_3
 #include "ATOOLS/Phys/Variations.H"
@@ -135,7 +143,9 @@ Sherpa_i::Sherpa_i(const std::string& name, ISvcLocator* pSvcLocator)
 StatusCode Sherpa_i::genInitialize(){
   if (m_plugincode != "") {
     compilePlugin(m_plugincode);
+    #ifndef IS_SHERPA_3
     m_params.value().push_back("SHERPA_LDADD=Sherpa_iPlugin");
+    #endif
   }
 
   ATH_MSG_INFO("Sherpa initialising...");
