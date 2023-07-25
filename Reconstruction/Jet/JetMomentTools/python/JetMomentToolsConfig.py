@@ -217,7 +217,7 @@ def getPFlowfJVTTool(jetdef, modspec):
                                                   FEName = jetdef.inputdef.containername,
                                                   ORName = "",
                                                   FjvtRawName = "DFCommonJets_fJvt",
-                                                  includePV = True)
+                                                  includePV = False)
 
     return fJVTTool
 

@@ -124,20 +124,13 @@ namespace pflow {
     Gaudi::Property<std::string> m_jetContainerName{this, "JetContainer", "", "SG key for the input jet container"};
     Gaudi::Property<std::string> m_jetsName{this, "jetsName", "AntiKt4PUPFlowJets", "Container name for the output reconstructed PU jets"};
     Gaudi::Property<std::string> m_jetchargedp4{this, "jetchargedp4", "JetChargedScaleMomentum", "Name of the jet charged momentum 4-vector"};
-    Gaudi::Property<std::string> m_pfoToolName{this, "pfoToolName", "PFOTool", "Name of PFO retriever tool"};
-    Gaudi::Property<std::string> m_wpfoToolName{this, "wpfoToolName", "WPFOTool", "Name of PFO weighting tool"};
-    Gaudi::Property<std::string> m_pfoJESName{this, "pfoJESName", "pfoJES", "Name of jet claibration tool"};
-    Gaudi::Property<std::string> m_jetAlgo{this, "jetAlgo", "AntiKt4EMPFlow", "Jet calibration collection name"};
-    Gaudi::Property<std::string> m_calibconfig{this, "calibconfig", "JES_MC16Recommendation_Consolidated_PFlow_Apr2019_Rel21.config", "Calibration config for PFlow jets, need to be updated with latest one"};
-    Gaudi::Property<std::string> m_calibSeq{this, "calibSeq", "JetArea_Residual_EtaJES", "Calibration sequence to be applied"};
-    Gaudi::Property<std::string> m_calibArea{this, "calibArea", "00-04-82", "Calibration area"};
     
     Gaudi::Property<bool> m_isdata{this, "isdata", false, "True if data"};
     Gaudi::Property<int> m_pvind{this, "pvind", -1, "Hard-Scatter primary vertex index of the event. If -1 it will be automatically retrieved from the event"};
     Gaudi::Property<int> m_vertices{this, "vertices", 10, "Number of vertices for which the missing momentum is calculated"};
     Gaudi::Property<bool> m_includePV{this, "includePV", false, "Flag to include jets and tracks associated to PV in the calculation"};
     Gaudi::Property<double> m_etaThresh{this, "etaThresh", 2.5, "Maximum eta value for considering a jet as central"};
-    Gaudi::Property<double> m_forwardMinPt{this, "forwardMinPt", 20e3, "Minimum forward jet pt"};
+    Gaudi::Property<double> m_forwardMinPt{this, "forwardMinPt", 18e3, "Minimum forward jet pt"};
     Gaudi::Property<double> m_forwardMaxPt{this, "forwardMaxPt", -1, "Maximum forward jet pt. If -1 no threshold is applied"};
     Gaudi::Property<double> m_centerMinPt{this, "centralMinPt", 20e3, "Minimum central jet pt"};
     Gaudi::Property<double> m_centerMaxPt{this, "centralMaxPt", -1, "Maximum central jet pt. If -1 no threshold is applied"};
@@ -158,7 +151,7 @@ namespace pflow {
     SG::ReadHandleKey<xAOD::PFOContainer> m_PFOKey{this, "PFOName", "CHSParticleFlowObjects", "SG Key for CHS PFO Container"};
     SG::ReadHandleKey<xAOD::FlowElementContainer> m_FEKey{this, "FEName", "", "SG Key for CHS FlowElement Container (overrides PFO if not empty)"};
 
-    SG::ReadDecorHandleKey<xAOD::JetContainer> m_jvtKey{this, "jvtName", "Jvt", "SG key for the Jvt decoration"};
+    SG::ReadDecorHandleKey<xAOD::JetContainer> m_passJvtKey{this, "passJvtName", "NNJvtPass", "SG key for output pass-JVT decoration"};
     SG::ReadDecorHandleKey<xAOD::PFO> m_orKey{this, "ORName", "", "OR label"};
     SG::ReadDecorHandleKey<xAOD::FlowElement> m_orFEKey{this, "ORNameFE", "", "OR label"};
 
