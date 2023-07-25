@@ -97,9 +97,13 @@ void DataStore::clearStore(bool force, bool hard, MsgStream* /*pmlog*/)
   }
 
   KeyMap_t newMap (KeyMap_t::Updater_t(), m_keyMap.capacity());
-  for (auto p : m_keyMap) {
-    if (saved.count (p.second)) {
-      newMap.emplace (p.first, p.second);
+  {
+    auto lock = newMap.lock();
+    auto ctx = KeyMap_t::Updater_t::defaultContext();
+    for (auto p : m_keyMap) {
+      if (saved.count (p.second)) {
+        newMap.emplace (lock, p.first, p.second, ctx);
+      }
     }
   }
   m_keyMap.swap (newMap);
