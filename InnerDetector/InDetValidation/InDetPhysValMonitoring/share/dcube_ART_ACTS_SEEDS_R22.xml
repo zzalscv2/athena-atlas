@@ -47,7 +47,7 @@
   <plimit fail="0.75" warn="0.95"/>
   <TDirectory name="/">
    <TDirectory name="run_242020">
-    <TDirectory name="ActsTrkAnalysis">
+    <TDirectory name="ActsAnalysis">
       <TDirectory name="PixelSeeds">
 	<hist2D name="zr1" plotopts="box" tests="KS" type="TH2F"/>
 	<hist2D name="zr2" plotopts="box" tests="KS" type="TH2F"/>
