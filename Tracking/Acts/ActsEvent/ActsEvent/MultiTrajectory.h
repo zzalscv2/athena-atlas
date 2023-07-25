@@ -66,6 +66,7 @@ struct Decoration;
 class MutableMultiTrajectory final
     : public Acts::MultiTrajectory<ActsTrk::MutableMultiTrajectory> {
  public:
+  friend ConstMultiTrajectory;
   using TrackStateProxy = typename Acts::MultiTrajectory<
       ActsTrk::MutableMultiTrajectory>::TrackStateProxy;
   using ConstTrackStateProxy = typename Acts::MultiTrajectory<
@@ -387,6 +388,7 @@ class MutableMultiTrajectory final
   const std::any decorationGetter(ActsTrk::IndexType, const std::string&) const;
 
   std::vector<const Acts::Surface*> m_surfaces;
+  const std::vector<const Acts::Surface*>& surfaces() const { return m_surfaces; }
 
 };
 
@@ -464,7 +466,8 @@ class ConstMultiTrajectory
    * Cache Surface pointers for every state.
    * If the surfaces are already there it means that the container is trainsient and this is void operation
    */
-  void fillSurfaces(std::shared_ptr<Acts::TrackingGeometry> geo );
+  void fillSurfaces(const Acts::TrackingGeometry* geo );
+  void fillSurfaces(const ActsTrk::MutableMultiTrajectory* mtj);
 
  private:
   // TODO these 4 DATA links will be replaced by a reference to storable object that would contain those
@@ -475,7 +478,9 @@ class ConstMultiTrajectory
   std::vector<detail::Decoration> m_decorations;
   template <typename T>
   const std::any decorationGetter(ActsTrk::IndexType, const std::string&) const;
+
   std::vector<const Acts::Surface*> m_surfaces;
+
 };
 
 }  // namespace ActsTrk

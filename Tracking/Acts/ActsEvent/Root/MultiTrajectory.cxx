@@ -344,6 +344,12 @@ const Acts::Surface* ActsTrk::MutableMultiTrajectory::referenceSurface_impl(Inde
   return m_surfaces[istate];
 }
 
+void ActsTrk::ConstMultiTrajectory::fillSurfaces(const ActsTrk::MutableMultiTrajectory* mtj) {
+  m_surfaces.resize(mtj->surfaces().size());
+  m_surfaces.insert(m_surfaces.end(), mtj->surfaces().cbegin(), mtj->surfaces().cend());
+}
+
+
 
 /////////////////////////////////////////////////////////
 // ReadOnly MTJ
@@ -491,7 +497,7 @@ ActsTrk::ConstMultiTrajectory::getUncalibratedSourceLink_impl(ActsTrk::IndexType
 }
 
 
-void ActsTrk::ConstMultiTrajectory::fillSurfaces(std::shared_ptr<Acts::TrackingGeometry> geo ) {
+void ActsTrk::ConstMultiTrajectory::fillSurfaces(const Acts::TrackingGeometry* geo ) {
   if ( not m_surfaces.empty() )
     return;
   m_surfaces.resize(m_trackStates->size(), nullptr);
