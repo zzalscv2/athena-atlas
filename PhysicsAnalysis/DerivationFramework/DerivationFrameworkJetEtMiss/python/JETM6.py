@@ -131,14 +131,20 @@ def JETM6SkimmingToolCfg(ConfigFlags):
     muofflinesel = andstr.join(['count((Muons.pt > 20*GeV) && (Muons.DFCommonMuonPassPreselection)) >= 1',jetsel_lep])
     gammaofflinesel = andstr.join(['count(Photons.pt > 150*GeV) >= 1',jetsel_lep])
 
+    # TrigDecisionTool not used in skimming via xAODStringSkimmingTool here but with dedicated TriggerSkimmingTool
+    # Explicitely set to "" here to be able to run over HL-LHC samples
     JETM6OfflineSkimmingTool_ele = CompFactory.DerivationFramework.xAODStringSkimmingTool( name = "JETM6OfflineSkimmingTool_ele",
-                                                                                           expression = elofflinesel)
+                                                                                           expression = elofflinesel,
+                                                                                           TrigDecisionTool="")
     JETM6OfflineSkimmingTool_mu    = CompFactory.DerivationFramework.xAODStringSkimmingTool( name = "JETM6OfflineSkimmingTool_mu",
-                                                                                             expression = muofflinesel)
+                                                                                             expression = muofflinesel,
+                                                                                             TrigDecisionTool="")
     JETM6OfflineSkimmingTool_gamma = CompFactory.DerivationFramework.xAODStringSkimmingTool( name = "JETM6OfflineSkimmingTool_gamma",
-                                                                                             expression = gammaofflinesel)
+                                                                                             expression = gammaofflinesel,
+                                                                                             TrigDecisionTool="")
     JETM6OfflineSkimmingTool_jets  = CompFactory.DerivationFramework.xAODStringSkimmingTool( name = "JETM6OfflineSkimmingTool_jets",
-                                                                                             expression = jetsofflinesel)
+                                                                                             expression = jetsofflinesel,
+                                                                                             TrigDecisionTool="")
 
     acc.addPublicTool(JETM6OfflineSkimmingTool_ele)
     acc.addPublicTool(JETM6OfflineSkimmingTool_mu)

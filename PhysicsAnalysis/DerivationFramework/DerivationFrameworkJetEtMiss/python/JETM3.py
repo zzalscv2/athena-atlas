@@ -20,10 +20,14 @@ def JETM3SkimmingToolCfg(ConfigFlags):
     elofflinesel = '(count((Electrons.pt > 20*GeV) && (Electrons.DFCommonElectronsLHMedium)) >= 2)'
     muofflinesel = '(count((Muons.pt > 20*GeV) && (Muons.DFCommonMuonPassPreselection)) >= 2)'
 
+    # TrigDecisionTool not used in skimming via xAODStringSkimmingTool here but with dedicated TriggerSkimmingTool
+    # Explicitely set to "" here to be able to run over HL-LHC samples
     JETM3OfflineSkimmingTool_ele = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "JETM3OfflineSkimmingTool_ele",
-                                                                                          expression = elofflinesel)
+                                                                                          expression = elofflinesel,
+                                                                                          TrigDecisionTool="")
     JETM3OfflineSkimmingTool_mu = CompFactory.DerivationFramework.xAODStringSkimmingTool( name = "JETM3OfflineSkimmingTool_mu",
-                                                                                          expression = muofflinesel)
+                                                                                          expression = muofflinesel,
+                                                                                          TrigDecisionTool="")
     
     acc.addPublicTool(JETM3OfflineSkimmingTool_ele)
     acc.addPublicTool(JETM3OfflineSkimmingTool_mu)
@@ -44,7 +48,7 @@ def JETM3SkimmingToolCfg(ConfigFlags):
         JETM3SkimmingTool = CompFactory.DerivationFramework.FilterCombinationOR(name="JETM3SkimmingTool", FilterList=[JETM3SkimmingTool_ele, JETM3SkimmingTool_mu])
         acc.addPublicTool(JETM3SkimmingTool, primary = True)
     else:
-        
+
         JETM3SkimmingTool = CompFactory.DerivationFramework.FilterCombinationOR(name="JETM3SkimmingTool", FilterList=[JETM3OfflineSkimmingTool_ele, JETM3OfflineSkimmingTool_mu])
         acc.addPublicTool(JETM3SkimmingTool, primary = True)
 
