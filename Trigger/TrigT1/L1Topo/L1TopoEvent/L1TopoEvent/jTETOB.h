@@ -30,11 +30,15 @@ namespace TCS {
       unsigned int sumEt() const { return m_sumEt; }
 
       double sumEtDouble() const { return m_sumEtDouble; }
+
+      bool saturationFlag() const { return m_saturationFlag; }
       
       // setters
       void setSumEt(unsigned int sumEt) { m_sumEt = sumEt; }
 
       void setSumEtDouble(double sumEt) { m_sumEtDouble = sumEt; }
+
+      void setSaturationFlag(bool saturationFlag) { m_saturationFlag = saturationFlag; }
       
       // memory management
       static jTETOB* createOnHeap(const jTETOB& jte);
@@ -52,6 +56,8 @@ namespace TCS {
       unsigned int m_sumEt {0};
 
       double m_sumEtDouble {0};
+
+      bool m_saturationFlag {false};
 
       inputTOBType_t  m_tobType { NONE };
 

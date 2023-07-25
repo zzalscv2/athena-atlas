@@ -339,6 +339,7 @@ jFexInputProvider::fillTE(TCS::TopoInputEvent& inputEvent) const {
   ATH_CHECK(jTE_EDM.isValid());
 
   int topoTE = 0;
+  bool topoTE_sat = false;
   // jTE variations include jTEC, jTEFWD, jTEFWDA, jTEFWDC
   // These quantities are defined according to the jFex module number
   // FWDA = 5, FWDC = 0, C = 1,2,3,4
@@ -353,7 +354,10 @@ jFexInputProvider::fillTE(TCS::TopoInputEvent& inputEvent) const {
     int EtLowerTopo = jFexRoI->Et_lower()*m_sumEt_conversion;
     int EtUpperTopo = jFexRoI->Et_upper()*m_sumEt_conversion;
     int jFexNumber = jFexRoI->jFexNumber();
-    int fpgaNumber = jFexRoI->fpgaNumber();  
+    int fpgaNumber = jFexRoI->fpgaNumber(); 
+
+    int Sat_lower = jFexRoI->tobSat_lower();
+    int Sat_upper = jFexRoI->tobSat_upper();
 
     ATH_MSG_DEBUG( "EDM jFex TE Number: "
                    << jFexNumber
@@ -363,37 +367,40 @@ jFexInputProvider::fillTE(TCS::TopoInputEvent& inputEvent) const {
                    << EtLowerTopo
                    << " Et_upper: "
                    << EtUpperTopo
+                   << " Sat_lower: "
+                   << Sat_lower
+                   << " Sat_upper: "
+                   << Sat_upper
                    );
 
     // jTE
     topoTE += EtLowerTopo;
     topoTE += EtUpperTopo;
+    topoTE_sat |= Sat_lower;
+    topoTE_sat |= Sat_upper;
 
     // jTEC
+    topoTEC += EtLowerTopo;
     if( jFexNumber!=0 && jFexNumber!=5 )
       {
-	topoTEC += EtLowerTopo;
 	topoTEC += EtUpperTopo;
       }
 
     // jTEFWD
     if( jFexNumber==0 || jFexNumber==5 )
       {
-	topoTEFWD += EtLowerTopo;
 	topoTEFWD += EtUpperTopo;
       }
 
     // jTEFWDA
     if( jFexNumber==5 )
       {
-	topoTEFWDA += EtLowerTopo;
 	topoTEFWDA += EtUpperTopo;
       }
 
     // jTEFWDC
     if( jFexNumber==0 )
       {
-	topoTEFWDC += EtLowerTopo;
 	topoTEFWDC += EtUpperTopo;
       }
   }
@@ -404,6 +411,7 @@ jFexInputProvider::fillTE(TCS::TopoInputEvent& inputEvent) const {
   TCS::jTETOB jtefwda( static_cast<unsigned int>(topoTEFWDA), TCS::JTEFWDA );
   TCS::jTETOB jtefwdc( static_cast<unsigned int>(topoTEFWDC), TCS::JTEFWDC );
 
+  jte.setSaturationFlag( static_cast<double>(topoTE_sat) );
   jte.setSumEtDouble( static_cast<double>(topoTE*m_sumEtDouble_conversion) );
   jtec.setSumEtDouble( static_cast<double>(topoTEC*m_sumEtDouble_conversion) );
   jtefwd.setSumEtDouble( static_cast<double>(topoTEFWD*m_sumEtDouble_conversion) );
@@ -416,12 +424,13 @@ jFexInputProvider::fillTE(TCS::TopoInputEvent& inputEvent) const {
   inputEvent.setjTEFWDA( jtefwda );
   inputEvent.setjTEFWDC( jtefwdc );
 
+  auto mon_h_jTE_saturation = Monitored::Scalar("jTETOBsaturation", jte.saturationFlag());
   auto mon_h_jTE_sumEt = Monitored::Scalar("jTETOBsumEt", jte.sumEtDouble());
   auto mon_h_jTEC_sumEt = Monitored::Scalar("jTECTOBsumEt", jtec.sumEtDouble());
   auto mon_h_jTEFWD_sumEt = Monitored::Scalar("jTEFWDTOBsumEt", jtefwd.sumEtDouble());
   auto mon_h_jTEFWDA_sumEt = Monitored::Scalar("jTEFWDATOBsumEt", jtefwda.sumEtDouble());
   auto mon_h_jTEFWDC_sumEt = Monitored::Scalar("jTEFWDCTOBsumEt", jtefwdc.sumEtDouble());
-  Monitored::Group(m_monTool, mon_h_jTE_sumEt, mon_h_jTEC_sumEt, mon_h_jTEFWD_sumEt, mon_h_jTEFWDA_sumEt, mon_h_jTEFWDC_sumEt); 
+  Monitored::Group(m_monTool, mon_h_jTE_saturation, mon_h_jTE_sumEt, mon_h_jTEC_sumEt, mon_h_jTEFWD_sumEt, mon_h_jTEFWDA_sumEt, mon_h_jTEFWDC_sumEt); 
 
   return StatusCode::SUCCESS;
 }
