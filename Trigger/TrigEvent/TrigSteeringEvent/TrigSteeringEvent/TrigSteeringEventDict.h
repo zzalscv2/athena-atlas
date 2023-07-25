@@ -1,7 +1,7 @@
 // meacs: this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGSTEERINGEVENT_TRIGSTEERINGEVENTDICT_H
@@ -16,6 +16,7 @@
 #include "TrigSteeringEvent/Lvl1Result.h"
 #include "TrigSteeringEvent/Lvl1Item.h"
 #include "TrigSteeringEvent/Enums.h"
+#include "TrigSteeringEvent/OnlineErrorCode.h"
 #include "TrigSteeringEvent/TrigOperationalInfoCollection.h"
 #include "TrigSteeringEvent/TrigPassBitsCollection.h"
 #include "TrigSteeringEvent/TrigPassFlagsCollection.h"

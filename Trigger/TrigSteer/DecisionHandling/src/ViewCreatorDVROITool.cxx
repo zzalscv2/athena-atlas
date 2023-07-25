@@ -55,7 +55,7 @@ StatusCode ViewCreatorDVROITool::attachROILinks( TrigCompositeUtils::DecisionCon
          // This is needed to merge the RoIs from each dv
          std::unique_ptr<TrigRoiDescriptor> superRoI = std::make_unique<TrigRoiDescriptor>();
          superRoI->setComposite(true);
-         superRoI->manageConstituents(false);
+         superRoI->manageConstituents(true);
 
          if(!dvLink.link.isValid()) {
             ATH_MSG_DEBUG("Received invalid hitDV link from decision object! " << m_featureLinkName << " : " << dvLink.link);

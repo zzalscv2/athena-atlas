@@ -105,21 +105,23 @@ StatusCode ViewCreatorMuonSuperROITool::attachROILinks( TrigCompositeUtils::Deci
 
       ATH_MSG_DEBUG( "eta- " << etaMinus << " eta+ " << etaPlus << "     phi- " << phiMinus << " phi+ " << phiPlus << "    zed- " << zMinus << " zed+ " << zPlus);
 
-      newROI = std::make_unique<TrigRoiDescriptor>( muonEta, etaMinus, etaPlus,
-                                                    muonPhi, phiMinus, phiPlus,
-                                                    muonZed, zMinus, zPlus );
+     superRoI->push_back( new TrigRoiDescriptor( muonEta, etaMinus, etaPlus,
+						 muonPhi, phiMinus, phiPlus,
+						 muonZed, zMinus, zPlus ) );
+
+     superRoI->manageConstituents(true);
 
    } else {
       ATH_MSG_DEBUG("Adding RoI to RoI container");
       ATH_MSG_DEBUG( "eta " << muonEta << " +/-" << m_roiEtaWidth << "     phi " << muonPhi << " +/- " << m_roiPhiWidth);
       ATH_MSG_DEBUG( "eta- " << etaMinus << " eta+ " << etaPlus << "     phi- " << phiMinus << " phi+ " << phiPlus);      
  
-      newROI = std::make_unique<TrigRoiDescriptor>( muonEta, etaMinus, etaPlus,
-                                                    muonPhi, phiMinus, phiPlus);
+      superRoI->push_back( new TrigRoiDescriptor( muonEta, etaMinus, etaPlus,
+						  muonPhi, phiMinus, phiPlus) );
+
+      superRoI->manageConstituents(true);
+
    }
-
-
-      superRoI->push_back( newROI.release() );
 
 
   }  //end loop over decisions
