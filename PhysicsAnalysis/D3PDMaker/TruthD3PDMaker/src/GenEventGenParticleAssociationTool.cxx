@@ -80,11 +80,10 @@ const HepMC::GenParticle* GenEventGenParticleAssociationTool::next()
   while( !ok ) {
 
     int pdg_id = std::abs ((*m_it)->pdg_id());
-    int status = (*m_it)->status();
     int barcode = HepMC::barcode(*m_it);
     
     // are we at parton/hadron level?
-    if ( status!=3 && pdg_id > HepMC::PARTONPDGMAX && !m_haveSeenAHadron ) {
+    if ( (*m_it)->status()!=3 && pdg_id > HepMC::PARTONPDGMAX && !m_haveSeenAHadron ) {
       m_haveSeenAHadron = true;
       m_firstHadronBarcode = barcode;
     }

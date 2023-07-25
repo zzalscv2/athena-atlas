@@ -18,6 +18,7 @@
 #include "TrkPseudoMeasurementOnTrack/PseudoMeasurementOnTrack.h"
 #include "TrkTrack/Track.h"
 #include "TrkTruthData/TruthTrajectory.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace Muon {
 
@@ -700,7 +701,7 @@ namespace Muon {
 #else
                 auto particle = pit.cptr();
 #endif
-                if (particle->status() > 1) {  // first non final state particle
+                if (!MC::isStable(particle)) {  // first non final state particle
                   return particle;
                 }
             }

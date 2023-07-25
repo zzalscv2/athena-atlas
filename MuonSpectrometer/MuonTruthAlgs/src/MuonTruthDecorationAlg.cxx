@@ -19,7 +19,7 @@
 #include "xAODMuon/MuonSegmentAuxContainer.h"
 #include "xAODTruth/TruthParticleAuxContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 namespace {
     const SG::AuxElement::Decorator<int> dec_truthOrigin{"truthOrigin"};
     const SG::AuxElement::Decorator<int> dec_truthType{"truthType"};
@@ -103,7 +103,7 @@ namespace Muon {
 
         // loop over truth coll
         for (const xAOD::TruthParticle* truth : *truthContainer) {
-            if (truth->status() != 1 || !truth->isMuon() || truth->pt() < 1000.) continue;
+            if (!MC::isStable(truth)	 || !truth->isMuon() || truth->pt() < 1000.) continue;
             xAOD::TruthParticle* truthParticle = new xAOD::TruthParticle();
             muonTruthContainer->push_back(truthParticle);
             truthParticle->setPdgId(truth->pdgId());

@@ -218,7 +218,7 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
       encounteredBarcodes.clear();
     }
     // Retain children of longer-lived generator particles
-    if (particle->status() == 1) {
+    if (MC::isStable(particle)) {
       int pdgId = abs(particle->pdgId());
       if (std::find(m_longlived.begin(), m_longlived.end(), pdgId) !=
           m_longlived.end()) {

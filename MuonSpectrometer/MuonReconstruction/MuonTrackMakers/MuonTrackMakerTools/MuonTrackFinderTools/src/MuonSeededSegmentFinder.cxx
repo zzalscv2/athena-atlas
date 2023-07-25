@@ -16,6 +16,7 @@
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkRoad/TrackRoad.h"
 #include "TrkSurfaces/StraightLineSurface.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace Muon {
 
@@ -364,7 +365,7 @@ namespace Muon {
         std::vector<const MdtPrepData*>::const_iterator mit = mdtPrdCols.begin();
         std::vector<const MdtPrepData*>::const_iterator mit_end = mdtPrdCols.end();
         for (; mit != mit_end; ++mit) {
-            if ((*mit)->status() != 1) continue;
+            if (!MC::isStable(*mit)) continue;
             // calibrate MDT
             const MdtDriftCircleOnTrack* mdt = handleMdtPrd(ctx, pars, **mit, doHoleSearch);
 

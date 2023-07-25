@@ -15,7 +15,7 @@
 #include "McParticleEvent/TruthParticle.h"
 #include "McParticleEvent/TruthParticleContainer.h"
 #include "GeneratorObjects/McEventCollection.h"
-
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace D3PD {
 
@@ -75,13 +75,13 @@ void TruthTauDecayAssociationTool::addStableDaughters(HepMC::ConstGenParticlePtr
 
   auto endvx = part->end_vertex();
   if(!endvx){ // no children
-    if ( part && part->status()==1 ) m_tau_prod_barcodes.push_back( HepMC::barcode(part) );
+    if ( part && MC::isStable(part) ) m_tau_prod_barcodes.push_back( HepMC::barcode(part) );
     return;
   }
 
   // Loop over the parents of this particle.
   for(auto Child: *endvx){
-    if ( (Child) && (Child)->status()==1 ){
+    if ( (Child) && MC::isStable(Child) ){
       // Found a stable child!
       m_tau_prod_barcodes.push_back( HepMC::barcode(Child) );
     } else if ( (Child) ){

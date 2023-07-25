@@ -12,7 +12,7 @@
 #include "TrkTrack/TrackStateOnSurface.h"
 #include "MuonCombinedEvent/TagBase.h"
 #include "FourMomUtils/xAODP4Helpers.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 using namespace xAOD::P4Helpers;
 namespace {
     constexpr unsigned int dummy_unsigned = 999;
@@ -130,7 +130,7 @@ StatusCode MuonTruthAssociationAlg::execute(const EventContext& ctx) const {
                 ATH_MSG_VERBOSE(" Got valid truth link for muon author " << muon->author() << " barcode " << (*truthLink)->barcode());
                 // loop over truth particles
                 for (const xAOD::TruthParticle* truthParticle : *muonTruthContainer) {
-                    if (truthParticle->status() != 1) continue;
+                    if (!MC::isStable(truthParticle)) continue;
                     ATH_MSG_DEBUG("Got truth muon with barcode " << truthParticle->barcode() << " pt " << truthParticle->pt());
                     if (((*truthLink)->barcode() % HepMC::SIM_REGENERATION_INCREMENT) != truthParticle->barcode()) {
                         ATH_MSG_VERBOSE("Barcode truth link: " << (*truthLink)->barcode() << " HepMC::SIM_REGENERATION_INCREMENT:  " << HepMC::SIM_REGENERATION_INCREMENT << " --> "

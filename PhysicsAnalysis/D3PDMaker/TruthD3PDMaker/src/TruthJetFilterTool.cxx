@@ -15,7 +15,7 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Vector/LorentzVector.h"
 #include <utility>
 
@@ -470,7 +470,7 @@ TruthJetFilterTool::acceptParticle (const HepMC::ConstGenParticlePtr& p)
                 mom_pdg_id==1000023 || mom_pdg_id==1000024 || mom_pdg_id==1000025 || mom_pdg_id==1000035 || // Gauginos
                 isWZ) { // paricle decends from W or Z
 				//  Save lepton reference for comparison to FSR photons (only for muons and electrons)
-				if(p->status()==1 && (std::abs(p->pdg_id())==11 || std::abs(p->pdg_id())==13) ) m_WZleptons.push_back(p);
+				if( MC::isStable(p) && (std::abs(p->pdg_id())==11 || std::abs(p->pdg_id())==13) ) m_WZleptons.push_back(p);
 
 				// Only exclude photons within deltaR of leptons (if m_photonCone<0, exclude all photons)
 				if(std::abs (p->pdg_id()) == 22 && m_photonCone>0)

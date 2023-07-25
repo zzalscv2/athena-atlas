@@ -18,7 +18,7 @@
 #include "TFile.h"
 #include "TH1F.h"
 #include "TH2F.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "xAODTrigCalo/TrigEMClusterContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODEgamma/ElectronContainer.h"
@@ -187,7 +187,7 @@ StatusCode EFexAnalysis::execute(){
 	}
 
 	for( auto tt : *truth ){
-		if ( tt->status() != 1 ) continue;
+		if ( !MC::isStable(tt) ) continue;
 		if ( std::abs(tt->absPdgId()) != 11 ) continue;
 		if ( HepMC::is_simulation_particle(tt) ) continue;
 		if ( tt->pt() < 1e3 ) continue;

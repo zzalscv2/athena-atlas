@@ -13,6 +13,7 @@
 #include "AtlasHepMC/GenVertex.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "TrkTruthData/TruthTrajectory.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace Muon {
 
@@ -93,7 +94,7 @@ namespace Muon {
                 msg(MSG::DEBUG) << " new mother: " << mother->pdg_id() << " status " << mother->status() << " particles out "
                                 << particles_out_size << endmsg;
             // Allow status code 1 and 2.  E.g. a pion that produced a long track can decay  outside of InDet and have status==2.
-            if (mother && (mother->status() < 3)) {
+            if (mother && MC::isPhysical(mother)) {
                 unsigned int nDecayMuons = 0;
                 HepMC::ConstGenParticlePtr passed_cuts{nullptr};
                 for (auto& candidate : *vtx) {
@@ -132,7 +133,7 @@ namespace Muon {
                         // m_isDecayIntoTwoMuons = true;
                     }
                 }
-            }  // if( mother && (mother->status() == 1) )
+            }  
         }
 
         return std::make_pair(mother, daughter);

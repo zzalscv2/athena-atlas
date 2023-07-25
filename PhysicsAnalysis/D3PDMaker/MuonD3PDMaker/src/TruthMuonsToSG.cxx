@@ -56,7 +56,7 @@ StatusCode TruthMuonsToSG::execute() {
     = new ConstDataVector<xAOD::TruthParticleContainer>(SG::VIEW_ELEMENTS);
 
   for (const xAOD::TruthParticle* p : *truthCollection) {
-    if( abs(p->pdgId()) == MC::MUON && p->status() == 1 ) {
+    if( abs(p->pdgId()) == MC::MUON && MC::isStable(p) ) {
       muonColl->push_back(p);
     }
     else if( p->pdgId() == 22 ) {
