@@ -3,16 +3,12 @@
 # Declare the package name:
 atlas_subdir( MuonCondSvc )
 
-# External dependencies:
-find_package( Boost )
-
 # Component(s) in the package:
 atlas_add_library( MuonCondSvcLib
                    src/*.cxx
                    PUBLIC_HEADERS MuonCondSvc
-                   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                    LINK_LIBRARIES AthenaBaseComps AthenaKernel AthenaPoolUtilities GaudiKernel MuonAlignmentData MuonCondInterface MuonIdHelpersLib StoreGateLib
-                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} Identifier )
+                   PRIVATE_LINK_LIBRARIES Identifier )
 
 atlas_add_component( MuonCondSvc
                      src/components/*.cxx
