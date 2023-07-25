@@ -3,7 +3,7 @@
 */
 
 #include "MuonCondAlg/MuonAlignmentErrorDbAlg.h"
-
+#include "boost/regex.hpp"
 MuonAlignmentErrorDbAlg::MuonAlignmentErrorDbAlg(const std::string& name, ISvcLocator* pSvcLocator) :
     AthReentrantAlgorithm(name, pSvcLocator) {}
 
