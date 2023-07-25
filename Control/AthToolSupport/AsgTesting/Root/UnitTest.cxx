@@ -12,7 +12,7 @@
 
 #include <AsgTesting/UnitTest.h>
 
-#include <boost/regex.hpp>
+#include <regex>
 
 //
 // method implementations
@@ -24,7 +24,7 @@ namespace asg
   {
     bool matchesRegex (const std::string& regex, const std::string& str)
     {
-      return regex_search (str, boost::regex (regex));
+      return regex_search (str, std::regex (regex));
     }
   }
 }

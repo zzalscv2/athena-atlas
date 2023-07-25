@@ -12,7 +12,7 @@
 #include <PATInterfaces/SystematicVariation.h>
 
 #include <cmath>
-#include <boost/regex.hpp>
+#include <regex>
 #include <sstream>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/ThrowMsg.h>
@@ -436,7 +436,7 @@ namespace CP
   bool SystematicVariation ::
   isToyVariation () const
   {
-    static const boost::regex pattern (".*__toy_[0-9]+_[0-9]+((scale)[0-9]{1,4})?");
+    static const std::regex pattern (".*__toy_[0-9]+_[0-9]+((scale)[0-9]{1,4})?");
     return regex_match (m_name, pattern);
   }
 
@@ -445,7 +445,7 @@ namespace CP
   bool SystematicVariation ::
   isContinuousVariation () const
   {
-    static const boost::regex pattern (".*__[0-9]+((up)|(down))([0-9]{1,4})?");
+    static const std::regex pattern (".*__[0-9]+((up)|(down))([0-9]{1,4})?");
     return regex_match (m_name, pattern);
   }
 
