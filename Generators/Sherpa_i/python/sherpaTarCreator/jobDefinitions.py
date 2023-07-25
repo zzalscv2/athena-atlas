@@ -66,7 +66,8 @@ def mkCreateLibsJob(options, prevJob):
     job.cmds += ["set -e"]
 
     job.cmds += ["rm -rf Process/Amegic.db Process/Comix.db Process/Sherpa.db Process/Amegic"]
-    job.cmds += ["echo 'genSeq.Sherpa_i.Parameters += [ \"INIT_ONLY=1\", \"EVENTS=0\", \"FRAGMENTATION=Off\", \"MI_HANDLER=None\", \"LOG_FILE=\"]\n' > events.py"]
+    if os.environ["SHERPAVER"].startswith('2.'):
+      job.cmds += ["echo 'genSeq.Sherpa_i.Parameters += [ \"INIT_ONLY=1\", \"EVENTS=0\", \"FRAGMENTATION=Off\", \"MI_HANDLER=None\", \"LOG_FILE=\"]\n' > events.py"]
     job.cmds += ["outputEVNTFile=$(mktemp -u /tmp/XXXXXXXX.pool.root)"]
     job.cmds += ["returncode=0"]
     job.cmds += ["Gen_tf.py --ecmEnergy="+str(options.ecm[0]*1000.)+" --maxEvents=1 --firstEvent=1 --randomSeed=10 --jobConfig="+options.jobOptionDir[0]+" --postInclude=events.py --outputEVNTFile=${outputEVNTFile} || returncode=$?"]
@@ -252,7 +253,8 @@ def mkEvntGenTestJob(options, ecm, jodir, prevJob):
     job.cmds += ["rm -rf 5.EvntGenTest"]
     job.cmds += ["mkdir 5.EvntGenTest"]
     job.cmds += ["cd 5.EvntGenTest"]
-    job.cmds += ["echo 'genSeq.Sherpa_i.Parameters += [ \"LOG_FILE=\" ]' > events.py"]
+    if os.environ["SHERPAVER"].startswith('2.'):
+      job.cmds += ["echo 'genSeq.Sherpa_i.Parameters += [ \"LOG_FILE=\" ]' > events.py"]
     job.cmds += ["outputEVNTFile=$(mktemp -u /tmp/XXXXXXXX.pool.root)"]
     job.cmds += ["Gen_tf.py --ecmEnergy="+str(ecm*1000.)+" --maxEvents=1 --firstEvent=1 --randomSeed=10 --jobConfig="+jodir+" --postInclude=events.py --outputEVNTFile=${outputEVNTFile} --maxEvents="+str(options.nEvts)]
     job.cmds += ["cat log.generate"]

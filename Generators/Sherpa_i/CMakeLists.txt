@@ -5,8 +5,29 @@ atlas_subdir( Sherpa_i )
 
 # External dependencies:
 find_package( CLHEP )
+find_package( libzip )
 find_package( OpenLoops )
-find_package( Sherpa COMPONENTS SherpaTools SherpaInitialization )
+find_package( Sherpa COMPONENTS SherpaMain SherpaInitialization SherpaSingleEvents SherpaSoftPhysics SherpaPerturbativePhysics LundTools SherpaTools
+ShrimpsMain ShrimpsEvents ShrimpsLadders ShrimpsBeamRemnants ShrimpsXsecs ShrimpsEikonals ShrimpsTools
+HadronsMain HadronsMEs HadronsCurrents HadronsPSs
+Reconnections
+AhadicMain AhadicTools AhadicFormation AhadicDecays
+Amisic AmisicTools AmisicPerturbative
+PhotonsMain PhotonsTools PhotonsPhaseSpace PhotonsMEs PhotonsPhotonSplitter
+Remnants  RemnantsTools
+MCatNLOMain MCatNLOCalculators MCatNLOShowers MCatNLOTools
+DIMTools DIMShower DIMGauge DIMLorentz DIMMain
+CSMain CSCalculators CSShowers CSTools
+DireTools DireShower DireGauge DireLorentz DireMain
+PhasicScales Comix  ComixPhasespace ComixAmplitude
+PhasicMain PhasicChannels PhasicProcess PhasicSelectors PhasicEnhance PhasicDecays
+Amegic DipoleSubtraction Amplitude AmegicPSGen
+String Zfunctions
+ExtAmp ExtraXSNLO ExtraXSSpecial ExtraXS2_2 ExtraXS1_2 ExtraXS1_3 ExtraXS
+METoolsExplicit METoolsCurrents METoolsVertices METoolsColors METoolsSpinCorrelations METoolsLoops METoolsMain ModelUFO ModelMain
+PDF
+BeamMain BeamSpectra
+ToolsPhys ToolsMath ToolsYaml ToolsOrg)
 if (HEPMC3_USE)
 find_package( hepmc3 )
 else()
