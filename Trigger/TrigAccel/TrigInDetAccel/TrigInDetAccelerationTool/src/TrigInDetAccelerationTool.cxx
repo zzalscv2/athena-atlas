@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigInDetAccelerationTool.h"
@@ -63,6 +63,7 @@ size_t TrigInDetAccelerationTool::exportSeedMakingJob(const TrigCombinatorialSet
 
   TrigAccel::SEED_MAKING_JOB* pJ = reinterpret_cast<TrigAccel::SEED_MAKING_JOB*>(output.m_buffer+bufferOffset);
 
+  // cppcheck-suppress memsetClassFloat; deliberate
   memset(pJ,0,dataTypeSize);
 
   TrigAccel::SEED_FINDER_SETTINGS& sfs = pJ->m_settings; 
