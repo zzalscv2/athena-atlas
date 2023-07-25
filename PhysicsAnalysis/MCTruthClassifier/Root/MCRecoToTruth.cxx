@@ -317,11 +317,11 @@ MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, Info* info /*= nul
     }
   }
 
-  if (theGenParticle->status() == 2 || theGenParticle->status() == 3) {
+  if (MC::isDecayed(theGenParticle) || theGenParticle->status() == 3) {
     ATH_MSG_WARNING("track matched to the truth with status " << theGenParticle->status());
   }
 
-  if (theGenParticle->status() == 2 && (abs(theGenParticle->pdgId()) == 11 || abs(theGenParticle->pdgId()) == 13)) {
+  if (MC::isDecayed(theGenParticle) && (abs(theGenParticle->pdgId()) == 11 || abs(theGenParticle->pdgId()) == 13)) {
     const xAOD::TruthVertex* EndVrtx = theGenParticle->decayVtx();
     const xAOD::TruthParticle* theGenPartTmp(nullptr);
 
@@ -353,7 +353,7 @@ MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, Info* info /*= nul
         } else {
           EndVrtx = nullptr;
         }
-      } while (theGenPartTmp && theGenPartTmp->pdgId() == theGenParticle->pdgId() && theGenPartTmp->status() == 2 &&
+      } while (theGenPartTmp && theGenPartTmp->pdgId() == theGenParticle->pdgId() && MC::isDecayed(theGenPartTmp) &&
                EndVrtx != nullptr);
 
       if (theGenPartTmp && theGenPartTmp->pdgId() == theGenParticle->pdgId()) {

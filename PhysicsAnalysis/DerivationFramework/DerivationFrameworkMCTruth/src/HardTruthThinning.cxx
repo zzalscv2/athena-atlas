@@ -175,7 +175,7 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
   pItr = inHardParts->begin();
   pItrE = inHardParts->end();
   for(; pItr!=pItrE; ++pItr){
-    if( (*pItr)->status() == 1 ){
+    if( MC::isStable(*pItr) ){
       hardPart.push_back(*pItr);
       if( m_isolR > 0 ){
         int ida = abs( (*pItr)->pdgId() );

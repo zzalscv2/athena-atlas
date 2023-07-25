@@ -176,7 +176,7 @@ StatusCode OldSpclMcFilterTool::selectSpclMcBarcodes()
     bool isSpcl = false;
 
     /// skip stuff with no end-vertex
-    if( part->status() != 1 && !decayVtx ) continue;
+    if( !MC::isStable(part) && !decayVtx ) continue;
 
     const bool accept = pt > m_ptMin;
 

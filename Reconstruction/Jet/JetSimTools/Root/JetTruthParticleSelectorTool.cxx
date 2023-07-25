@@ -75,7 +75,7 @@ namespace {
     if (vprod && vprod->nIncomingParticles() > 0) {
       if (isWZDecay(p)) { // paricle decends from W or Z
         //  Save lepton reference for comparison to FSR photons (only for muons and electrons)
-        if(p->status()==1 && (  (pdg_id==11) || (pdg_id==13) ) ) {
+        if(MC::isStable(p) && (  (pdg_id==11) || (pdg_id==13) ) ) {
 	  wzLeptons.push_back(p);
 	  // std::cout << "isWZDecay found pdgId: " << pdg_id << " status: " << p->status() << std::endl;
 	  // std::cout << "isWZDecay: have " << wzLeptons.size() << " W/Z leptons" << std::endl;
@@ -84,7 +84,7 @@ namespace {
         // Only exclude photons within deltaR of leptons (if m_photonCone<0, exclude all photons)
         if( pdg_id == 22 && photonCone2>0)
           {
-            if(p->status()==1 && (abs(p->pdgId())==22) ) {
+            if(MC::isStable(p) && (abs(p->pdgId())==22) ) {
 	      // std::cout << "isWZDecay: found pdgId: " << p->pdgId() << " status: " << p->status() << std::endl;
 	      // std::cout << "isWZDecay: have " << wzLeptons.size() << " W/Z leptons" << std::endl;
 	    }

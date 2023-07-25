@@ -12,7 +12,7 @@
 #include "xAODEgamma/EgammaxAODHelpers.h"
 #include "xAODTruth/xAODTruthHelpers.h"
 
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include <memory>
 
@@ -178,7 +178,7 @@ egammaTruthAssociationAlg::isPromptEgammaParticle(
 {
 
   if ((truth->pdgId() != 22 && abs(truth->pdgId()) != 11) ||
-      truth->status() == 2 || truth->status() == 3 ||
+      MC::isDecayed(truth) || truth->status() == 3 ||
       HepMC::is_simulation_particle(truth) || truth->pt() < m_minPt) {
     return false;
   }

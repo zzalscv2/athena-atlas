@@ -193,7 +193,7 @@ StatusCode PileupFilterTool::selectSpclMcBarcodes()
         const HepMC::ConstGenVertexPtr& prodVtx  = part->production_vertex();
         bool isSpcl = false;
         /// skip stuff with no end-vertex
-        if( part->status() != 1 && !decayVtx ) continue;
+        if( !MC::isStable(part) && !decayVtx ) continue;
 
         float xi = (prodVtx->position()).x();
         float yi = (prodVtx->position()).y();

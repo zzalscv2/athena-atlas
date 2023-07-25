@@ -120,7 +120,7 @@ MCTruthClassifier::egammaClusMatch(const xAOD::CaloCluster* clus,
 
   for (const auto* const thePart : tps) {
     // loop over the stable particle
-    if (thePart->status() != 1) {
+    if (!MC::isStable(thePart)) {
       continue;
     }
     // excluding G4 particle
@@ -253,7 +253,7 @@ MCTruthClassifier::egammaClusMatch(const xAOD::CaloCluster* clus,
   // additional loop over G4 particles,
   for (const auto* const thePart : tps) {
     // loop over the stable particle
-    if (thePart->status() != 1) {
+    if (!MC::isStable(thePart)) {
       continue;
     }
     // only G4 particle

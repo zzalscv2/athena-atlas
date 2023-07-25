@@ -19,6 +19,7 @@
 #include "xAODTau/TauJetContainer.h" 
 #include "xAODTruth/TruthParticleContainer.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 
 PhysValTau::PhysValTau(const std::string& type, 
@@ -181,7 +182,7 @@ StatusCode PhysValTau::fillHistograms()
       bool isElectron = false;
       for ( auto truth : *truthParticles ) {
 	if ( abs(truth->pdgId()) != 11 ) continue;
-	if ( truth->status() != 1 ) continue;
+	if ( !MC::isStable(truth) ) continue;
 	if ( truth->pt() < 10000.0 ) continue;
 	if ( tau->p4().DeltaR(truth->p4()) > 0.2 ) continue;
 	// OK, now it probably is an electron

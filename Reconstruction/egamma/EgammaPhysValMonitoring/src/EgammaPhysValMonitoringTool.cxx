@@ -31,7 +31,7 @@
 
 #include <iostream>
 
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 using CLHEP::GeV;
 using namespace std;
@@ -151,7 +151,7 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
 
       //--electrons
       if (std::abs(truthParticle->pdgId()) == 11 &&
-          truthParticle->status() == 1 && HepMC::generations(truthParticle) < 1) {
+          MC::isStable(truthParticle) && HepMC::generations(truthParticle) < 1) {
         m_oElectronValidationPlots.m_oTruthIsoPlots.fill(*truthParticle,
                                                          *eventInfo);
         m_oElectronValidationPlots.m_oTruthPromptElecPlots.fill(*truthParticle,
@@ -160,7 +160,7 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
 
       //--photons
       if (std::abs(truthParticle->pdgId()) == 22 &&
-          truthParticle->status() == 1 && HepMC::generations(truthParticle) < 1) {
+          MC::isStable(truthParticle) && HepMC::generations(truthParticle) < 1) {
         m_oPhotonValidationPlots.m_oTruthIsoPlots.fill(*truthParticle,
                                                        *eventInfo);
         //-- filling conversions
@@ -261,7 +261,7 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
 
       //--electrons
       if (std::abs(truthallParticle->pdgId()) == 11 &&
-          truthallParticle->status() == 1 &&
+          MC::isStable(truthallParticle) &&
           HepMC::generations(truthallParticle) == 0) {
 
 #ifdef MCTRUTHCLASSIFIER_CONST
@@ -294,7 +294,7 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
 
       //--photons
       if (std::abs(truthallParticle->pdgId()) == 22 &&
-          truthallParticle->status() == 1 &&
+          MC::isStable(truthallParticle) &&
           HepMC::generations(truthallParticle) == 0) {
 
 #ifdef MCTRUTHCLASSIFIER_CONST
@@ -662,7 +662,7 @@ const xAOD::TruthParticle* EgammaPhysValMonitoringTool::Match(const xAOD::Egamma
   float currentdr = 0.05;
   const xAOD::TruthParticle* matchedTruthParticle = nullptr;
   for (const auto *truthParticle: *truthParticles){
-    if (std::abs(truthParticle->pdgId()) != pdg || truthParticle->status() != 1) continue;
+    if (std::abs(truthParticle->pdgId()) != pdg || !MC::isStable(truthParticle)) continue;
     float dr = particle->p4().DeltaR(truthParticle->p4());
     if (dr < currentdr){
       currentdr = dr;
