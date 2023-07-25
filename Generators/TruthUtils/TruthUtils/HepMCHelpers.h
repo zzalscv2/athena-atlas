@@ -40,17 +40,19 @@ namespace MC
   /// @brief Identify if the particle could interact with the detector during the simulation, e.g. not a neutrino or WIMP
   template <class T> inline bool isSimInteracting(const T& p) { return isGenStable<T>(p) && isInteracting<T>(p);}
 
-/* The functions below should be unified */
+  /// @brief Identify if particle is satble or decayed in simulation. + a pathological case of decayed particle w/o end vertex.
   template <class T> inline bool isStableOrSimDecayed(const T& p) {
     const auto vertex = p->end_vertex();
     return ( isStable<T>(p) || (isDecayed<T>(p) && (!vertex || HepMC::is_simulation_vertex(vertex))));
   }
 
+  /// @brief Identify a photon with zero energy. Probably a workaround for a generator bug.
   template <class T> inline bool isZeroEnergyPhoton(const T&  p) { return isPhoton<T>(p) && p->e() == 0;}
 
+/* The functions below should be unified */
   template <class T> inline bool jettruthparticleselectortool_isStable( const T& p) {
     if (HepMC::is_simulation_particle(p)) return false; // This particle is from G4
-    if (p->pdg_id() == 21 && p->p4().E() == 0) return false; //< Workaround for a gen bug?
+    if (isZeroEnergyPhoton<T>(p)) return false;
     const int status = p->status();
     const auto vertex = p->end_vertex();
     return ((status == 1) || //< Fully stable, even if marked that way by G4
@@ -78,15 +80,13 @@ namespace MC
 
   template <class T> inline bool egammaTruthAlg_isGenStable_and_isGenInteracting (const T& p) {
     if (HepMC::is_simulation_particle(p)) return false;
-    if (p->pdg_id() == 21 && p->e() == 0) return false;
+    if (isZeroEnergyPhoton<T>(p)) return false;
     const int status = p->status();
     const int apid = std::abs(p->pdg_id());
-    const auto vertex = p->end_vertex();
     if (apid == 12 || apid == 14 || apid == 16) return false; //< neutrinos
     if (status == 1 && (apid == 1000022 || apid == 1000024 || apid == 5100022)) return false;
     if (status == 1 && (apid == 39 || apid == 1000039 || apid == 5000039)) return false;
-    return ((status == 1) ||
-            (status == 2 && (!vertex || HepMC::is_simulation_vertex(vertex))));
+    return isStableOrSimDecayed<T>(p);
   }
 
   template <class T> inline bool ThinGeantTruthAlg_isStatus1BSMParticle(const T& p)  {
@@ -108,13 +108,9 @@ namespace MC
 
   template <class T> inline bool MenuTruthThinning_isBSM(const T& p) {
     const int apid = std::abs(p->pdg_id());
-    return ((31 < apid && apid < 38) || // BSM Higgs / W' / Z' / etc
-      apid == 39 || apid == 41 || apid == 42 ||
-      apid == 7 || // 4th gen beauty
-      apid == 8 || // 4th gen top
+    return (isBSM(apid) ||
+      /// Legacy Athena BSM. Not clear if those are still in use.
       (600 < apid && apid < 607) || // scalar leptoquarks
-      (1000000 < apid && apid < 1000040) || // left-handed SUSY
-      (2000000 < apid && apid < 2000040) || // right-handed SUSY
       apid == 6000005 || // X5/3
       apid == 6000006 || // T2/3
       apid == 6000007 || // B-1/3
