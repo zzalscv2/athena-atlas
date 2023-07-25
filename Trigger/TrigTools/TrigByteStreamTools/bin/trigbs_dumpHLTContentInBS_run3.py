@@ -78,28 +78,33 @@ def header_info(event):
     info_str += 'LVL1_ID: {:10d}, '.format(event.lvl1_id())
     info_str += 'BC_ID: {:4d}, '.format(event.bc_id())
     info_str += 'TT: 0x{:2x}, '.format(event.lvl1_trigger_type())
-    info_str += 'Status: ' + event_status(event)
+    info_str += 'Status: ' + decode_status(event)
     return info_str
 
 
-def event_status(event):
-    '''Return event status and string representation'''
+def decode_status(fragment):
+    '''Return event/ROB fragment status and string representation'''
 
-    if len(event.status())==0:
+    if not fragment.status():
         return 'None'
 
-    # Generic event status:
-    info_str = '[' + ', '.join('0x%x' % s for s in event.status()) + ']'
-    full_event_status = event.status()[0]
-    for code, name in eformat.helper.FullEventStatus.values.items():
-        if full_event_status & code:
-            info_str += f' {name}'
+    info_str = '[' + ', '.join('0x%x' % s for s in fragment.status()) + ']'
+
+    # First word:
+    status = eformat.helper.Status(fragment.status()[0])
+    info_str += ''.join(f' {item.name}' for code, item in eformat.helper.GenericStatus.values.items()
+                        if status.generic() & code)
+
+    # The specific bits of the first word are only relevant for the full event:
+    if isinstance(fragment, eformat.FullEventFragment):
+        info_str += ''.join(f' {item.name}' for code, item in eformat.helper.FullEventStatus.values.items()
+                            if status.specific() & code)
 
     # HLT-specific event status:
-    if len(event.status())>1:
+    if len(fragment.status())>1:
         import cppyy
         cppyy.gbl.HLT.OnlineErrorCode  # trigger auto-loading via enum
-        info_str += ' '+ cppyy.gbl.HLT.OnlineErrorCodeToString(event.status()[1]).data()
+        info_str += ' '+ cppyy.gbl.HLT.OnlineErrorCodeToString(fragment.status()[1]).data()
 
     return info_str
 
@@ -198,11 +203,12 @@ def hlt_result(event, print_sizes=False, conf_keys=False, runtime_metadata=False
             continue
         num_hlt_robs += 1
         version = hlt_rod_minor_version(rob)
-        info_str += '\n-- {:s} SourceID: {:s}, Version: {:s}, Size: {:d} bytes'.format(
+        info_str += '\n-- {:s} SourceID: {:s}, Version: {:s}, Size: {:d} bytes, Status: {:s}'.format(
             rob.__class__.__name__,
             rob.source_id().human(),
             f'{version[0]:d}.{version[1]:d}',
-            rob.fragment_size_word()*4
+            rob.fragment_size_word()*4,
+            decode_status(rob)
         )
         if print_sizes or conf_keys or runtime_metadata:
             if version[0] < 1:
