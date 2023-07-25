@@ -121,6 +121,8 @@ RoiDescriptor::RoiDescriptor( const IRoiDescriptor& roi ) :
 
 }
 
+RoiDescriptor::RoiDescriptor( const RoiDescriptor& roi ) : RoiDescriptor( static_cast<const IRoiDescriptor&>(roi) ) { } 
+
 
 RoiDescriptor& RoiDescriptor::operator=( const IRoiDescriptor& roi ) {  
 
@@ -145,6 +147,8 @@ RoiDescriptor& RoiDescriptor::operator=( const IRoiDescriptor& roi ) {
   return *this;
 }
 
+
+RoiDescriptor& RoiDescriptor::operator=( const RoiDescriptor& roi ) { return operator=( static_cast<const IRoiDescriptor&>(roi) ); } 
 
 
 
@@ -256,7 +260,7 @@ RoiDescriptor::operator std::string() const {
      << ( isFullscan() ? " - fullscan": "" );
   if ( composite() ) { 
     ss << "\t : components: " << size() << "\n";
-    for ( unsigned i=0 ; i<size() ; i++ ) ss << "\t\t" << i << *at(i) << "\n";
+    for ( unsigned i=0 ; i<size() ; i++ ) ss << "\t\t" << i << " " << at(i) << "  " << *at(i) << "\n";
   } 
   return ss.str();
 }

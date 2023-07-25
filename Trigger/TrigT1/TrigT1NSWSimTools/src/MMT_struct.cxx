@@ -1097,8 +1097,8 @@ void hitData_key::print()const{
 }
 
 
-hitData_info::hitData_info(int pl,int station_eta,int strip,std::shared_ptr<MMT_Parameters> par,const ROOT::Math::XYZVector &tru,double tpos,double ppos):plane(pl){
-  (void) tru;
+hitData_info::hitData_info(int pl,int station_eta,int strip,std::shared_ptr<MMT_Parameters> par,const ROOT::Math::XYZVector & /*tru*/,double tpos,double ppos):plane(pl){
+
   //The idea here is to calculate/assign a y and a z to a given hit based on its pl/station/strip, the geometry of the detector (in par), and misalignment based on position.
   //We start by assigning the plane dependent strip width (the stereo planes come in skew and so get divided by cos(stereo_angle)
   char schar=par->setup[plane];
