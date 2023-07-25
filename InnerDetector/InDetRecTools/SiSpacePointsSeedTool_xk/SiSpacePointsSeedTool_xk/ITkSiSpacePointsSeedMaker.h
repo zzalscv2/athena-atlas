@@ -235,11 +235,6 @@ namespace ITk
     BooleanProperty m_checketa{this, "checkEta", false};
     //@}
 
-    /// @name Data member, which is not updated at all
-    //@{
-    float m_drminv{20.};
-    //@}
-
     /// @name Data members, which are updated only in initialize
     //@{
     int m_outputlevel{0};
