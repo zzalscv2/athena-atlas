@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -19,7 +19,7 @@
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "helpers/PhiComps.h"
 #include "helpers/VectorVectorIntParser.h"
-
+#include "CaloConditions/CaloNoise.h" 
 
 
 class RingerReFex : public IReAlgToolCalo
@@ -33,19 +33,19 @@ class RingerReFex : public IReAlgToolCalo
                  const std::vector<int> &detectors,
                  const std::vector<int> &samplings,
                  const std::vector<int> &samples,
-                 bool doQuarter, bool doEtaAxesDivision, bool doPhiAxesDivision );
+                 bool doQuarter, bool doEtaAxesDivision, bool doPhiAxesDivision);
         
         ~RingSet()=default;
 
-        void buildRings( const double eta_hot, const double phi_hot);
+        void buildRings( const double eta_hot, const double phi_hot,const CaloNoise* noiseCDO, const double m_noiseFactor, const bool m_doNoiseThrRings);
 
         const std::vector<double>& rings() const;
         const std::vector<std::pair<int,int>>  detectors() const;
         bool isValid( const CaloCell * ) const;
         void push_back( const CaloCell * );
         void clear();
-        void fill_cells_info(std::vector<float> &cells_eta, std::vector<float> &cells_phi, std::vector<float> &cells_et,  std::vector<int> &cells_sampling, std::vector<int> &cells_size, std::vector < double > &rings_sum);
-        
+        void fill_cells_info(std::vector<float> &cells_eta, std::vector<float> &cells_phi, std::vector<float> &cells_et,  std::vector<int> &cells_sampling, std::vector<int> &cells_size, std::vector < double > &rings_sum, std::vector <int> &cells_id, std::vector <float> &cells_gain);
+
       private:
 
         double m_deltaEta, m_deltaPhi;
@@ -85,7 +85,7 @@ class RingerReFex : public IReAlgToolCalo
     ToolHandle< GenericMonitoringTool >                m_monTool { this, "MonTool", "", "Monitoring tool"};
     SG::WriteHandleKey<xAOD::TrigRingerRingsContainer> m_ringerContainerKey  {this, "RingerKey", "HLT_FastCaloRinger", "TrigRingerRings container key"};
     SG::ReadHandleKey<xAOD::TrigEMClusterContainer>    m_clusterContainerKey {this, "ClustersName", "HLT_FastCaloEMClusters", "TrigEMCluster container key"};
-
+    SG::ReadCondHandleKey<CaloNoise>                   m_noiseCDOKey{this,"CaloNoiseKey","totalNoise","SG Key of CaloNoise data object"};
 
     Gaudi::Property<double>                        m_etaSearchWindowSize  {this, "EtaSearchWindowSize", 0.1,  ""};
     Gaudi::Property<double>                        m_phiSearchWindowSize  {this, "PhiSearchWindowSize", 0.1,  ""};
@@ -98,7 +98,9 @@ class RingerReFex : public IReAlgToolCalo
     Gaudi::Property<std::vector<std::vector<int>>> m_samples     {this, "Samples"    , {}   , "samples per layer" };
     
     Gaudi::Property<bool>                          m_useTile     {this, "UseTile"     , true ,  "Use tile cells"                 };
-    Gaudi::Property<bool>                          m_decorateWithCells     {this, "DumpCells"     , false ,  "Dump Ringer Cells Information"                 };
+    Gaudi::Property<bool>                          m_dumpCells     {this, "DumpCells"     , false ,  "Dump Ringer Cells Information"                 };
+    Gaudi::Property<bool>                          m_doNoiseThrRings {this, "DoNoiseThrRings"     , false ,  "Building rings with noise threshold" };
+    Gaudi::Property<double>                        m_noiseFactor {this, "NoiseFactor"     , 2.0,  "Building rings above a factor sigma noise" };
     Gaudi::Property<bool>                          m_globalCenter{this, "GlobalCenter", false,  "Use cluster position as center" };
     Gaudi::Property<std::vector<bool>>             m_doQuarter     {this, "DoQuarter", {} ,  "Do Quarter Rings" };
     Gaudi::Property<std::vector<bool>>             m_doEtaAxesDivision{this, "DoEtaAxesDivision", {} ,  "Do Eta axes division" };
