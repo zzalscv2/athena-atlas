@@ -29,7 +29,7 @@
 #include "TFile.h"
 #include "TMath.h"
 
-#include "boost/regex.hpp"
+#include <regex>
 
 
 #include <vector>
@@ -135,19 +135,19 @@ StatusCode LArShapeDumper::start()
   m_runData = std::make_unique<RunData>(0);
 
   if (m_doTrigger) {
-    std::vector<boost::regex> regexs;
+    std::vector<std::regex> regexs;
     for (const std::string& name : m_triggerNames) {
-      regexs.push_back(boost::regex(name));
+      regexs.push_back(std::regex(name));
     }
 
     std::vector<std::string> chains = m_trigDec->getListOfTriggers();
     std::vector<std::string> myChains;
-    boost::cmatch match;
+    std::cmatch match;
 
     for (const std::string& chain : chains) {
       ATH_MSG_INFO ( "Configured chain : " << chain );
-      for (const boost::regex& regex : regexs) {
-        if (boost::regex_match(chain.c_str(), match, regex)) myChains.push_back(chain);
+      for (const std::regex& regex : regexs) {
+        if (std::regex_match(chain.c_str(), match, regex)) myChains.push_back(chain);
       }
     }
     for (const std::string& group : m_trigDec->getListOfGroups())
