@@ -564,15 +564,14 @@ void EvtInclusiveDecay::addEvtGenDecayTree(HepMC::GenEvent* hepMC, HepMC::GenPar
 //
 bool EvtInclusiveDecay::isToBeDecayed(HepMC::ConstGenParticlePtr p, bool doCrossChecks) {
   int id = p->pdg_id();
-  int stat = p->status();
   int nDaughters = 0;
   auto v = p->end_vertex();
   if (v) nDaughters = v->particles_out_size();
 
   // Ignore documentation lines
-  if (stat == 3) return false;
+  if (p->status() == 3) return false;
   // And any particles that aren't stable or decayed
-  if(!m_isfHerwig && stat>2) return false;
+  if(!m_isfHerwig && !MC::isPhysical(p)) return false;
 
   // Particularly for Herwig, try to ignore particles that really should
   // be flagged as documentation lines
@@ -591,7 +590,7 @@ bool EvtInclusiveDecay::isToBeDecayed(HepMC::ConstGenParticlePtr p, bool doCross
     nModes = EvtDecayTable::getInstance()->getNMode(evtId.getAlias());
   if (doCrossChecks) {
     ATH_MSG_VERBOSE("Checking particle " << pdgName(p)
-        << " (status = " << stat
+        << " (status = " << p->status()
                     <<") -- " << nModes << " decay modes found");
     if (m_checkDecayChannels && nModes==0) {
       std::map<int,long>::iterator pos = m_noDecayChannels.find(id);
@@ -603,7 +602,7 @@ bool EvtInclusiveDecay::isToBeDecayed(HepMC::ConstGenParticlePtr p, bool doCross
   }
 
   // Check prohibit* settings
-  if (m_prohibitFinalStateDecay && stat==1) return false;
+  if (m_prohibitFinalStateDecay && MC::isStable(p)) return false;
   if (m_prohibitReDecay && nDaughters>0) return false;
   if (m_prohibitUnDecay && nModes==0) return false;
   if (m_prohibitRemoveSelfDecay && nDaughters>0) {

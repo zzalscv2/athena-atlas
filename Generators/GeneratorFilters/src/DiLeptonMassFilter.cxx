@@ -4,6 +4,7 @@
 
 #include "GeneratorFilters/DiLeptonMassFilter.h"
 #include "GaudiKernel/PhysicalConstants.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 DiLeptonMassFilter::DiLeptonMassFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter(name,pSvcLocator)
@@ -66,7 +67,7 @@ StatusCode DiLeptonMassFilter::filterEvent() {
     // Loop over all particles in the event
     for (auto pitr1 = HepMC::begin(*genEvt);  pitr1!=HepMC::end(*genEvt); ++pitr1 ){
       int pdgId1((*pitr1)->pdg_id());
-      if((*pitr1)->status()!=1) continue;
+      if(!MC::isStable(*pitr1)) continue;
 
       // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta
       if (std::abs(pdgId1) == 11 || std::abs(pdgId1) == 13) {
@@ -78,7 +79,7 @@ StatusCode DiLeptonMassFilter::filterEvent() {
 
           for(; pitr2 != HepMC::end(*genEvt); ++pitr2){
             int pdgId2((*pitr2)->pdg_id());
-            if((*pitr2)->status()!=1 || pitr1 == pitr2) continue;
+            if(!MC::isStable(*pitr2) || pitr1 == pitr2) continue;
 
             // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta
             // If m_allowSameChagrge is not true only pick those with opposite charge to the first particle

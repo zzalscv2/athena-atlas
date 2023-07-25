@@ -31,7 +31,7 @@ StatusCode SimTimeEstimate::execute()
         for (const auto& part: *itr)
          { 
             // Only use stable particles
-            if (part->status()!=1) continue;
+            if (!MC::isStable(part)) continue;
             // Only use particles that are interacting
             if (!(MC::isSimInteracting(part))) continue;
             // Grab the momentum

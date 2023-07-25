@@ -3,7 +3,7 @@
 */
 
 #include "GeneratorFilters/MuonFilter.h"
-
+#include "TruthUtils/HepMCHelpers.h"
 MuonFilter::MuonFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter(name,pSvcLocator)
 {
@@ -17,7 +17,7 @@ StatusCode MuonFilter::filterEvent() {
   for (itr = events()->begin(); itr!=events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
     for (const auto& pitr: *genEvt){
-    if (pitr->status() != 1 || std::abs(pitr->pdg_id()) != 13)  continue;
+    if (!MC::isStable(pitr) || std::abs(pitr->pdg_id()) != 13)  continue;
     if (pitr->momentum().perp() < m_Ptmin || std::abs(pitr->momentum().pseudoRapidity()) > m_EtaRange) continue;
     return StatusCode::SUCCESS;
     }

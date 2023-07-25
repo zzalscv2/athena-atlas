@@ -36,7 +36,7 @@ StatusCode LeptonFilter::filterEvent() {
     // Loop over all particles in event
     for (const auto& part: *genEvt) {
 
-      // We're only interested in stable (status == 1) particles
+      // We're only interested in stable particles
       if ( !MC::isStable(part)) continue;
 
       // We are specifically looking for electrons (+-11) and muons (+-13)

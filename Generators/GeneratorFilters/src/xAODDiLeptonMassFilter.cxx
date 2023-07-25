@@ -4,6 +4,7 @@
 
 #include "GeneratorFilters/xAODDiLeptonMassFilter.h"
 #include "GaudiKernel/PhysicalConstants.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 xAODDiLeptonMassFilter::xAODDiLeptonMassFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter(name,pSvcLocator)
@@ -72,7 +73,7 @@ StatusCode xAODDiLeptonMassFilter::filterEvent() {
   for (unsigned int iPart=0; iPart<nParticles; ++iPart) {
     const xAOD::TruthParticle* lightLeptonParticle = (*xTruthParticleContainer)[iPart];
     int pdgId1 = lightLeptonParticle->pdgId();
-    if (lightLeptonParticle->status()!=1) continue;
+    if (!MC::isStable(lightLeptonParticle)) continue;
 
     // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta
       if (std::abs(pdgId1) == 11 || std::abs(pdgId1) == 13) {
@@ -82,7 +83,7 @@ StatusCode xAODDiLeptonMassFilter::filterEvent() {
           for(unsigned int iPart2=iPart + 1; iPart2<nParticles; ++iPart2) {
             const xAOD::TruthParticle* lightLeptonParticle2 = (*xTruthParticleContainer)[iPart2];
             int pdgId2 = lightLeptonParticle2->pdgId();
-            if(lightLeptonParticle->status()!=1 || iPart == iPart2) continue;
+            if( !MC::isStable(lightLeptonParticle) || iPart == iPart2) continue;
 
             // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta
             // If m_allowSameChagrge is not true only pick those with opposite charge to the first particle

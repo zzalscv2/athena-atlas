@@ -118,7 +118,7 @@ StatusCode SoftLeptonInJetFilter::filterEvent() {
 }
 
 bool SoftLeptonInJetFilter::isElectron(const HepMC::ConstGenParticlePtr& p) const {
-  return (std::abs(p->pdg_id())==11 && p->status()==1 &&
+  return (std::abs(p->pdg_id())==11 && MC::isStable(p) &&
           p->momentum().perp() >= m_Ptmin &&
           std::abs(p->momentum().pseudoRapidity()) <= m_EtaRange );
 }

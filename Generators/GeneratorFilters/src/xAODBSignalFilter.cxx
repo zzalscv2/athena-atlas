@@ -448,7 +448,7 @@ void xAODBSignalFilter::FindAllChildren(const xAOD::TruthParticle* mother, std::
 {
     int pID = mother->pdgId();
     //
-    if (!(mother->decayVtx()) && (mother->status() == 1)) // i.e. this is a final state
+    if (!(mother->decayVtx()) && MC::isStable(mother)) // i.e. this is a final state
     {
         bool hasChildGoodParent = fromFinalB && (fromSelectedB || m_B_pdgid == 0);
         //
@@ -496,7 +496,7 @@ void xAODBSignalFilter::FindAllChildren(const xAOD::TruthParticle* mother, std::
     {
         if (!(mother->decayVtx())) // i.e. something is wrong in HepMC
         {
-            if (mother->status() == 2)
+            if (MC::isDecayed(mother))
                 ATH_MSG_DEBUG(" Inconsistent entry in HepMC (status 2 particle not decayed), chain rejected!");
             return;
         }

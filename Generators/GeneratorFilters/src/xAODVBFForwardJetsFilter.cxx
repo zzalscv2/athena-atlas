@@ -115,7 +115,7 @@ StatusCode xAODVBFForwardJetsFilter::filterEvent()
         {
             const xAOD::TruthParticle *pitr = (*itr)->truthParticle(iPart);
             // photon
-            if (pitr->pdgId() == 22 && pitr->status() == 1 &&
+            if (pitr->pdgId() == 22 && MC::isStable(pitr) &&
                 pitr->pt() >= m_LGMinPt && std::abs(pitr->eta()) <= m_LGMaxEta)
             {
                 MCTruthPhotonList.push_back(pitr);
