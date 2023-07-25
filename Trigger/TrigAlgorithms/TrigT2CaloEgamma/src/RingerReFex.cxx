@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*******************************************************
@@ -65,6 +65,7 @@ StatusCode RingerReFex::initialize()
 
   ATH_CHECK( m_ringerContainerKey.initialize() );
   ATH_CHECK( m_clusterContainerKey.initialize() );
+  ATH_CHECK( m_noiseCDOKey.initialize() );
 
   if (!m_monTool.empty()){
     ATH_MSG_DEBUG("Retrieving monTool");
@@ -74,12 +75,15 @@ StatusCode RingerReFex::initialize()
   }
 
 
-  ATH_MSG_DEBUG( "Ringer algorithm initialization completed successfully." );
-  ATH_MSG_DEBUG( "User parameters are:                                          " );
-  ATH_MSG_DEBUG( "Using Global Center               : " << m_globalCenter         );
-  ATH_MSG_DEBUG( "Using Tile cells                  : " << m_useTile              );
-  ATH_MSG_DEBUG( "Search Window in Eta              : " << m_etaSearchWindowSize  );
-  ATH_MSG_DEBUG( "Search Window in Phi              : " << m_phiSearchWindowSize  );
+  ATH_MSG_DEBUG( "Ringer algorithm initialization completed successfully."               );
+  ATH_MSG_DEBUG( "User parameters are:                                          "        );
+  ATH_MSG_DEBUG( "Using Global Center                      : " << m_globalCenter         );
+  ATH_MSG_DEBUG( "Using Tile cells                         : " << m_useTile              );
+  ATH_MSG_DEBUG( "Search Window in Eta                     : " << m_etaSearchWindowSize  );
+  ATH_MSG_DEBUG( "Search Window in Phi                     : " << m_phiSearchWindowSize  );
+  ATH_MSG_DEBUG( "Dumping cells info                       : " << m_dumpCells            );
+  ATH_MSG_DEBUG( "Building Rings with noise factor         : " << m_doNoiseThrRings      );
+  ATH_MSG_DEBUG( "Building Rings with Noise Factor Constant: " << m_noiseFactor          );
 
   return StatusCode::SUCCESS;
 }
@@ -104,6 +108,8 @@ StatusCode RingerReFex::execute( xAOD::TrigEMCluster &emCluster,
  
   SG::WriteHandle<xAOD::TrigRingerRingsContainer> ringsCollection = 
   SG::WriteHandle<xAOD::TrigRingerRingsContainer>( m_ringerContainerKey, context );
+  SG::ReadCondHandle<CaloNoise> noiseHdl{m_noiseCDOKey,context};
+  const CaloNoise* noiseCDO=*noiseHdl;
 
   ATH_CHECK( ringsCollection.record( std::make_unique<xAOD::TrigRingerRingsContainer>(),  
              std::make_unique<xAOD::TrigRingerRingsAuxContainer>() ) );
@@ -239,9 +245,9 @@ StatusCode RingerReFex::execute( xAOD::TrigEMCluster &emCluster,
 
     // Use all Tile cells in cache
     if (m_globalCenter || !hotCell) {
-      rs.buildRings( emCluster.eta(), emCluster.phi() );
+      rs.buildRings( emCluster.eta(), emCluster.phi(),noiseCDO,m_noiseFactor,m_doNoiseThrRings);
     }else {
-      rs.buildRings( hotCell->eta(), hotCell->phi() );
+      rs.buildRings( hotCell->eta(), hotCell->phi(),noiseCDO,m_noiseFactor,m_doNoiseThrRings);
     }
 
   }// Loop over all ringer sets
@@ -260,20 +266,27 @@ StatusCode RingerReFex::execute( xAOD::TrigEMCluster &emCluster,
   ringsCollection->push_back( ptrigRingerRings );  
   ptrigRingerRings->setRings(ref_rings);
   //ptrigRingerRings->auxdecor<int>("type") = 1;
-  if (m_decorateWithCells){
+  if (m_dumpCells){
     std::vector<float> cells_eta;
     std::vector<float> cells_et;
     std::vector<float> cells_phi;
     std::vector<int>    cells_sampling;
     std::vector<int>    cells_size;
     std::vector<double> rings_sum;
+    std::vector<int> cells_id;
+    std::vector<float> cells_gain;
+
     for( auto& rs : vec_rs )
-      rs.fill_cells_info(cells_eta, cells_phi, cells_et, cells_sampling, cells_size, rings_sum);
+      rs.fill_cells_info(cells_eta, cells_phi, cells_et, cells_sampling, cells_size, rings_sum, cells_id, cells_gain);
+
     ptrigRingerRings->auxdecor< std::vector<float> >("cells_eta") = cells_eta;
     ptrigRingerRings->auxdecor< std::vector<float> >("cells_et") = cells_et;
     ptrigRingerRings->auxdecor< std::vector<float> >("cells_phi") = cells_phi;
     ptrigRingerRings->auxdecor< std::vector<int> >("cells_sampling") = cells_sampling;
     ptrigRingerRings->auxdecor< std::vector<int> >("cells_size") = cells_size;
+    ptrigRingerRings->auxdecor< std::vector<int> >("cells_id") = cells_id;
+    ptrigRingerRings->auxdecor< std::vector<float> >("cells_gain") = cells_gain;
+
     if (m_doQuarter[0]) ptrigRingerRings->auxdecor< std::vector< double > >("asym_rings_sum") = rings_sum;
     else  ptrigRingerRings->auxdecor< std::vector< double > >("rings_sum") = rings_sum;
   }
@@ -291,13 +304,15 @@ StatusCode RingerReFex::execute( xAOD::TrigEMCluster &emCluster,
 
 
 //!=================================================================================
-void RingerReFex::RingSet::fill_cells_info(std::vector<float> &cells_eta, std::vector<float> &cells_phi, std::vector<float> &cells_et, std::vector<int> &cells_sampling, std::vector<int> &cells_size, std::vector<double>  &rings_sum){
+void RingerReFex::RingSet::fill_cells_info(std::vector<float> &cells_eta, std::vector<float> &cells_phi, std::vector<float> &cells_et, std::vector<int> &cells_sampling, std::vector<int> &cells_size, std::vector<double>  &rings_sum, std::vector<int> &cells_id, std::vector<float> &cells_gain ){
   for (std::vector<const CaloCell*>::const_iterator it=m_cells.begin(); it!=m_cells.end(); ++it) {
     cells_eta.push_back((*it)->eta());
     cells_phi.push_back((*it)->phi());
     cells_et.push_back((*it)->energy());
     auto sampling = (*it)->caloDDE()->getSampling();
     cells_sampling.push_back((int) sampling);
+    cells_id.push_back((*it)->ID().get_identifier32().get_compact());
+    cells_gain.push_back((*it)->gain());
   }
   cells_size.push_back(m_cells.size());
   double sum = 0;
@@ -442,7 +457,7 @@ void RingerReFex::RingSet::clear(){
 
 //!=================================================================================
 
-void RingerReFex::RingSet::buildRings( const double eta_center, const double phi_center)
+void RingerReFex::RingSet::buildRings( const double eta_center, const double phi_center,const CaloNoise* noiseCDO, const double noiseFactor, const bool doNoiseThrRings)
 { 
   // cache cosh eta value
   const double cosh_eta = std::cosh(std::abs(eta_center));
@@ -505,18 +520,23 @@ void RingerReFex::RingSet::buildRings( const double eta_center, const double phi
     }// Do quarter?
 
     // Fill
-    if (i < m_rings.size()) 
-      m_rings[i] += (*it)->energy() / cosh_eta;
-    
+    if (i < m_rings.size()) {
+      if (doNoiseThrRings){
+
+        float noiseSigma = noiseCDO->getNoise((*it)->ID(),(*it)->gain());
+        float et = (*it)->energy() / cosh_eta;
+        
+        if ( et < noiseSigma*noiseFactor){
+          m_rings[i] = 0;
+        }else{
+          m_rings[i] += (*it)->energy() / cosh_eta;
+        }
+      }else{ // Building Rings with sigmaNoise constraint? 
+        m_rings[i] += (*it)->energy() / cosh_eta;
+      }
+    }
   }// Loop over each
 
 }
 
 //!=================================================================================
-
-
-
-
-
-
-

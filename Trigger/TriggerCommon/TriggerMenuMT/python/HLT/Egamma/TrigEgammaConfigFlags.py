@@ -22,6 +22,16 @@ def createTrigEgammaConfigFlags():
     flags.addFlag('Trigger.egamma.Calib.precCaloMVAVersion'  , 'egammaMVACalib/online/v7')
     flags.addFlag('Trigger.egamma.Calib.precEgammaMVAVersion', 'egammaMVACalib/online/v7')
 
+    # Dump rings cells information at FastCalo
+    flags.addFlag('Trigger.egamma.dumpCellsFastCaloInfo', False)
+
+    # Do QuarterRings feature extraction at Fastcalo
+    flags.addFlag('Trigger.egamma.doQuarterRings', False)
+
+    # Build rings with a sigmanoise factor constraint / phase2 studies
+    flags.addFlag('Trigger.egamma.doNoiseThrRings', False)
+    flags.addFlag('Trigger.egamma.sigmaNoiseFactor',2.0)
+
     return flags
 
 
