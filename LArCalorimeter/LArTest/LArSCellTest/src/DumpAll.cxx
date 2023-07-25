@@ -13,7 +13,7 @@
  * **/
 
 #include "DumpAll.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "CaloEvent/CaloCellContainer.h"
 #include "LArRawEvent/LArDigitContainer.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
@@ -278,7 +278,7 @@ StatusCode DumpAll::execute(){
 	((TNtuple*)m_evt)->Fill(m_counter,event_number,nvtxs);
 
 	for( auto tt : *truth ){
-		if ( tt->status() != 1 ) continue;
+		if ( !MC::isStable(tt) ) continue;
                 if ( std::abs(tt->absPdgId()) != 11 ) continue;                 
                 if ( HepMC::is_simulation_particle(tt) )continue; // discard sim particles
 		m_truth_pt.push_back( tt->pt() );

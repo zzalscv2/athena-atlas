@@ -310,7 +310,7 @@ std::vector<TLorentzVector> VGammaORTool::getPhotonP4s(const xAOD::TruthParticle
   std::vector<int> photon_origins;
   for (const auto *p : truthParticles) {
     // consider only final state photons, not from geant, above a lower pt cut
-    if (p->status() != 1 || HepMC::is_simulation_particle(p) || p->pdgId() != 22 || p->pt() < m_min_considered_photon_pT) {
+    if (!MC::isStable(p) || HepMC::is_simulation_particle(p) || p->pdgId() != 22 || p->pt() < m_min_considered_photon_pT) {
       continue;
     }
     // require photons to be isolated if use_gamma_iso is true
@@ -373,7 +373,7 @@ bool VGammaORTool::frixioneIsolated(const xAOD::TruthParticle& photon,
   std::map<float, float> dr_to_pt;
   for (const auto *p : truthParticles) {
     // consider status 1  not from geant
-    if (p->status() != 1 || HepMC::is_simulation_particle(p)) {
+    if (!MC::isStable(p) || HepMC::is_simulation_particle(p)) {
       continue;
     }
     // ignore what typically is leptons and photons

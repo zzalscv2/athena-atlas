@@ -232,7 +232,7 @@ namespace DerivationFramework {
             for (xAOD::TruthParticleContainer::const_iterator pItr=allParticles->begin(); pItr!=allParticles->end(); ++pItr) {
                 const xAOD::TruthParticle *particle = *pItr;
                 
-                if (particle->status() != 1) continue;
+                if (!MC::isStable(particle) ) continue;
                 
                 if (!skipPdgCheck && find(pdgId.begin(), pdgId.end(), abs(particle->pdgId())) == pdgId.end()) continue;
                 

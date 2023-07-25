@@ -67,7 +67,7 @@ StatusCode TruthLeptonNearbyAssociationTool::fill (const TruthParticle& p)
 
       for (auto currentGenParticle: *(*currentGenEventIter)) {
         if (!currentGenParticle) continue;
-        if (currentGenParticle->status()!=1) continue;
+        if (!MC::isStable(currentGenParticle)) continue;
         if (HepMC::barcode(currentGenParticle)==p.barcode()) continue; // The same particle twice!
 
         dR2 = p.phi() - currentGenParticle->momentum().phi();

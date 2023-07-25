@@ -20,6 +20,7 @@
 
 // Local include(s):
 #include "PMGTools/PMGSherpaVjetsSysTool.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace PMGTools {
 
@@ -443,7 +444,7 @@ namespace PMGTools {
      for( const xAOD::TruthParticle* truthParticle : *truthParticles ) {
        
        // Only select final state electrons and muons:
-       if( ( truthParticle->status() != 1 ) ||
+       if( !MC::isStable(truthParticle) ||
 	   ( ( std::abs( truthParticle->pdgId() ) != 11 ) &&
 	     ( std::abs( truthParticle->pdgId() ) != 13 ) ) ) {
 	 continue;

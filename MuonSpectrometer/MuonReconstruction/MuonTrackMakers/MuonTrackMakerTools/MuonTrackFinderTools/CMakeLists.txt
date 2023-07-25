@@ -18,5 +18,6 @@ atlas_add_component( MuonTrackFinderTools
                                                       MuonRecHelperToolsLib MuonRecToolInterfaces MuonStationIntersectCondLib MuonSegmentMakerUtils MuidInterfaces TrkFitterInterfaces 
                                                       TrkDetDescrInterfaces TrkDetElementBase TrkGeometry TrkSurfaces TrkVolumes TrkEventPrimitives TrkEventUtils TrkMaterialOnTrack 
                                                       TrkMeasurementBase TrkParameters TrkPseudoMeasurementOnTrack TrkRIO_OnTrack TrkRoad TrkTrack TrkSegment TrkTrackSummary TrkExInterfaces 
-                                                      TrkToolInterfaces TrkDriftCircleMath MuonCondData MagFieldElements MagFieldConditions MuonSegmentMakerInterfacesLib MuonTrackMakerUtils )
+                                                      TrkToolInterfaces TrkDriftCircleMath MuonCondData MagFieldElements MagFieldConditions MuonSegmentMakerInterfacesLib MuonTrackMakerUtils 
+                                                      TruthUtils)
 
