@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/tests/bitmask_test.cxx
@@ -18,6 +18,8 @@
 enum class Bits { None=0, One=1, Two=2, Three=4, Four=8,
                   ATH_BITMASK };
 
+enum class Bits2 { None=0, Five=16, Six=32, Seven=64,
+                   ATH_BITMASK };
 
 void test1()
 {
@@ -49,9 +51,22 @@ void test1()
 }
 
 
+void test2()
+{
+  std::cout << "test2\n";
+  assert ((Bits::One | Bits2::Five) == 17);
+  assert ((Bits::One & Bits2::None) == 0);
+  assert ((Bits::One ^ Bits2::Six) == 33);
+  assert ((Bits::None | 1 | Bits2::Five) == 17);
+  assert ((42 & Bits::Four & Bits2::None) == 0);
+  assert ((Bits::One ^ 2 ^ Bits2::Six) == 35);
+}
+
+
 int main()
 {
   std::cout << "bitmask_test\n";
   test1();
+  test2();
   return 0;
 }
