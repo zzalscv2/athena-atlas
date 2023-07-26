@@ -154,7 +154,7 @@ try:
 
         fJVT =           JetModifier("JetForwardPFlowJvtTool", "fJVT",
                                      createfn=JetMomentToolsConfig.getPFlowfJVTTool,
-                                     prereqs = ["input:EventDensity","input:PrimaryVertices"],
+                                     prereqs = ["input:EventDensity","input:PrimaryVertices","mod:NNJVT"],
                                      JetContainer = _jetname),
 
         bJVT =           JetModifier("JetBalancePFlowJvtTool", "bJVT",

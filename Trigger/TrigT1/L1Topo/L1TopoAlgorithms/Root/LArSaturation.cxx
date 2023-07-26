@@ -32,7 +32,6 @@ TCS::LArSaturation::LArSaturation(const std::string & name) : CountingAlg(name) 
 
 TCS::StatusCode TCS::LArSaturation::initialize(){
 
-
     m_threshold = getThreshold();
 
     // book histograms
@@ -49,18 +48,21 @@ TCS::StatusCode TCS::LArSaturation::processBitCorrect(const TCS::InputTOBArray &
 }
 
 
-TCS::StatusCode TCS::LArSaturation::process( const TCS::InputTOBArray & /*input*/,
+TCS::StatusCode TCS::LArSaturation::process( const TCS::InputTOBArray & input,
 			       Count & count )
 {
 
-    int counting = 0;
-    fillHist1D( m_histAccept[0], counting);
-    
-    // If required, cast input to appropriate type (jTE) and check saturation bit
-    // similarly to EnergyThreshold algorithm
+    const jTETOBArray & jTEArray = dynamic_cast<const jTETOBArray&>(input);
 
-    // Pass counting to TCS::Count object - output bits are composed there
-    count.setSizeCount(counting);
+    bool saturation = false;
+    // check saturation bit
+    for(jTETOBArray::const_iterator jte = jTEArray.begin(); jte != jTEArray.end(); ++jte ) {
+      saturation |= (*jte)->saturationFlag();
+    }
+
+    fillHist1D( m_histAccept[0], saturation);
+
+    count.setSizeCount(saturation);
 
   return TCS::StatusCode::SUCCESS;
 }

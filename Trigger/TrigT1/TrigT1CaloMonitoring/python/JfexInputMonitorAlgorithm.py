@@ -1,7 +1,7 @@
 #
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
-def JfexInputMonitoringConfig(inputFlags):
+def JfexInputMonitoringConfig(flags):
     '''Function to configure LVL1 JfexInput algorithm in the monitoring system.'''
 
     # get the component factory - used for getting the algorithms
@@ -12,19 +12,19 @@ def JfexInputMonitoringConfig(inputFlags):
 
     # make the athena monitoring helper
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags,'JfexInputMonitoringCfg')
+    helper = AthMonitorCfgHelper(flags,'JfexInputMonitoringCfg')
     
     
     #Algorithms needed for the monitoring
-    if inputFlags.Input.Format==Format.BS:
+    if flags.Input.Format==Format.BS:
         
         #Decorator for the DataTowers
         from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CalojFEXDecoratorCfg
-        result.merge(L1CalojFEXDecoratorCfg(inputFlags,ExtraInfo = False))
+        result.merge(L1CalojFEXDecoratorCfg(flags,ExtraInfo = False))
         
         #jfex emulated input: EmulatedTowers
         from L1CaloFEXAlgos.FexEmulatedTowersConfig import jFexEmulatedTowersCfg
-        result.merge(jFexEmulatedTowersCfg(inputFlags))    
+        result.merge(jFexEmulatedTowersCfg(flags))    
     
 
     # get any algorithms

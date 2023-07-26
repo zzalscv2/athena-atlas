@@ -192,6 +192,9 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.L1.doeFex', lambda prevFlags: prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1)
     flags.addFlag('Trigger.L1.dojFex', lambda prevFlags: prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1)
     flags.addFlag('Trigger.L1.dogFex', lambda prevFlags: prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1)
+    
+    # tells the L1Calo if it is EmulatedSCell (Run2 container name) or SCells (Run3 container name)
+    flags.addFlag('Trigger.L1.L1CaloSuperCellContainerName', lambda prevFlags: "EmulatedSCell" if prevFlags.GeoModel.Run is LHCPeriod.Run2 else "SCell")
 
     # enable L1Topo ByteStream conversion / simulation (general flag steering both legacy and phase-1 Topo)
     flags.addFlag('Trigger.L1.doTopo', True)
