@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -13,7 +13,7 @@ class  LArSingleFloatP{
   enum {ERRORCODE = LArElecCalib::ERRORCODE};
   LArSingleFloatP() : m_data(ERRORCODE) {} 
   LArSingleFloatP(const float& f) : m_data(f) {} 
-  bool isEmpty() const {return (m_data<=1.0+ERRORCODE);};
+  bool isEmpty() const {return (m_data<=1.0+static_cast<int>(ERRORCODE));};
   operator float() {return m_data;};
   operator float() const {return m_data;};
   float m_data;

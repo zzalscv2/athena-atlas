@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRAWCONDITIONS_LARPEDESTALP1
@@ -24,8 +24,8 @@ public:
 };
 
 inline bool LArPedestalP1::isEmpty() const  {
-  return (m_Pedestal<=1.0+ILArPedestal::ERRORCODE || 
-	  m_PedestalRMS<=1.0+ILArPedestal::ERRORCODE); 
+  return (m_Pedestal<=1.0+static_cast<int>(ILArPedestal::ERRORCODE) || 
+	  m_PedestalRMS<=1.0+static_cast<int>(ILArPedestal::ERRORCODE)); 
 }
      
 #endif 

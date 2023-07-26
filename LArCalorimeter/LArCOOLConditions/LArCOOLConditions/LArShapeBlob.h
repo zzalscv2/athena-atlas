@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -29,7 +29,7 @@ class LArShapeBlob {
 
   ILArShape::ShapeRef_t ShapeByHash(const IdentifierHash& hs,int gain) const {
     const float* pStart=m_pShape[gain]+(hs*m_nSamples);
-    if (*pStart==ERRORCODE) 
+    if (*pStart==static_cast<float>(ERRORCODE)) 
       return ILArShape::ShapeRef_t(NULL,NULL);
     else
       return ILArShape::ShapeRef_t(pStart,pStart+m_nSamples);
@@ -37,7 +37,7 @@ class LArShapeBlob {
 
   ILArShape::ShapeRef_t ShapeDerByHash(const IdentifierHash& hs,int gain) const {
     const float* pStart=m_pShapeDer[gain]+(hs*m_nSamples);
-    if (*pStart==ERRORCODE) 
+    if (*pStart==static_cast<float>(ERRORCODE)) 
       return ILArShape::ShapeRef_t(NULL,NULL);
     else
       return ILArShape::ShapeRef_t(pStart,pStart+m_nSamples);

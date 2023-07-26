@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -45,7 +45,7 @@ class LArOFCFlat: public ILArOFC, public LArCondFlatBase {
 
   OFCRef_t OFC_a(const IdentifierHash& hs,int gain) const {
     const float* pStart=m_pOFCa[gain]+(hs*m_nSamples);
-    if (*pStart==ERRORCODE) 
+    if (*pStart==static_cast<float>(ERRORCODE)) 
       return OFCRef_t(NULL,NULL);
     else
       return OFCRef_t(pStart,pStart+m_nSamples);
@@ -53,7 +53,7 @@ class LArOFCFlat: public ILArOFC, public LArCondFlatBase {
 
   OFCRef_t OFC_b(const IdentifierHash& hs,int gain) const {
     const float* pStart=m_pOFCb[gain]+(hs*m_nSamples);
-    if (*pStart==ERRORCODE) 
+    if (*pStart==static_cast<float>(ERRORCODE)) 
       return OFCRef_t(NULL,NULL);
     else
       return OFCRef_t(pStart,pStart+m_nSamples);
