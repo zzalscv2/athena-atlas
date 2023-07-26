@@ -27,7 +27,6 @@ using InDetDD::enum2uint;
 
 namespace{
   constexpr int halfModuleThreshold{8};
-  constexpr size_t FEStringSize{21};
 } // namespace
 
 
@@ -45,7 +44,6 @@ StatusCode PixelChargeCalibCondAlg::initialize() {
   ATH_CHECK(m_configKey.initialize());
   ATH_CHECK(m_readKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_writeKey.initialize());
-
   return StatusCode::SUCCESS;
 }
 
@@ -70,6 +68,7 @@ StatusCode PixelChargeCalibCondAlg::execute(const EventContext& ctx) const {
 
   SG::ReadCondHandle<PixelModuleData> configDataHandle(m_configKey, ctx);
   const PixelModuleData *configData = *configDataHandle;
+  
 
   // Construct the output Cond Object and fill it in
   auto writeCdo = std::make_unique<PixelChargeCalibCondData>(m_pixelID->wafer_hash_max());
