@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -15,6 +15,7 @@
 
 // FrameWork includes
 #include "AsgTools/IAsgTool.h"
+#include "StoreGate/WriteDecorHandle.h"
 
 // Forward declaration
 
@@ -41,17 +42,10 @@ class ICaloClusterMatchingTool
 { 
   ASG_TOOL_INTERFACE(ICaloClusterMatchingTool)
 
-  /////////////////////////////////////////////////////////////////// 
-  // Public methods: 
-  /////////////////////////////////////////////////////////////////// 
- public: 
 
-  /** Destructor: 
-   */
+public: 
+  using elementLinkDecorHandle_t = SG::WriteDecorHandle<xAOD::CaloClusterContainer,std::vector<ElementLink<xAOD::CaloClusterContainer> > >;
 
-  /////////////////////////////////////////////////////////////////// 
-  // Const methods: 
-  ///////////////////////////////////////////////////////////////////
 
   // Prime the map before starting to match
   virtual StatusCode fillClusterMap(const EventContext& ctx, TopoClusterMap& tcmap) const = 0;
@@ -97,7 +91,8 @@ class ICaloClusterMatchingTool
   // set ElementLinks to clusters from the configured cluster container that match the reference cluster
   // works via getMatchedClusters
   // return true if matchedClusters list is non-empty
-  virtual StatusCode linkMatchedClusters(const xAOD::CaloCluster& refCluster,
+  virtual StatusCode linkMatchedClusters(elementLinkDecorHandle_t& elementLinkDec,
+                                         const xAOD::CaloCluster& refCluster,
 					 const std::vector<const xAOD::CaloCluster*>& testClusters,
 					 bool (*gtrthan)(const std::pair<const xAOD::CaloCluster*,float>& pair1,
 							 const std::pair<const xAOD::CaloCluster*,float>& pair2) = ClusterMatching::gtrMatchedE) const = 0;
@@ -105,17 +100,12 @@ class ICaloClusterMatchingTool
   // set ElementLinks to clusters from the configured cluster container that match the reference cluster
   // works via getMatchedClusters
   // return true if matchedClusters list is non-empty
-  virtual StatusCode linkMatchedClusters(const xAOD::CaloCluster& refCluster,
+  virtual StatusCode linkMatchedClusters(elementLinkDecorHandle_t& elementLinkDec,
+                                         const xAOD::CaloCluster& refCluster,
 					 const TopoClusterMap& tcmap,
 					 bool useLeadingCellEtaPhi=false,
 					 bool (*gtrthan)(const std::pair<const xAOD::CaloCluster*,float>& pair1,
 							 const std::pair<const xAOD::CaloCluster*,float>& pair2) = ClusterMatching::gtrMatchedE) const = 0;
-
-  /////////////////////////////////////////////////////////////////// 
-  // Protected data: 
-  /////////////////////////////////////////////////////////////////// 
- protected: 
-
 }; 
 
 #endif //> !CALOCLUSTERMATCHING_ICALOCLUSTERMATCHINGTOOL_H

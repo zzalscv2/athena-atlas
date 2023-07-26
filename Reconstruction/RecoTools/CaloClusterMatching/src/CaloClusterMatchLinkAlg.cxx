@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // CaloClusterMatchLinkAlg.cxx
@@ -33,6 +33,9 @@ namespace ClusterMatching {
     ATH_MSG_INFO ("Initializing " << name() << "...");
 
     ATH_CHECK( m_clusterKey.initialize() );
+
+    m_elementLinkName =  m_clusterKey.key() + ".constituentClusterLinks";
+    ATH_CHECK( m_elementLinkName.initialize() );
 
     ATH_CHECK( m_clusterMatch.retrieve() );
 
@@ -73,8 +76,9 @@ namespace ClusterMatching {
       return StatusCode::SUCCESS;
     }
 
+    ICaloClusterMatchingTool::elementLinkDecorHandle_t elementLinkDec (m_elementLinkName, ctx);
     for(const auto cl : *clustersToDecorate) {
-      ATH_CHECK( m_clusterMatch->linkMatchedClusters(*cl, tcmap, m_useLeadCellEtaPhi, gtrthan) );
+      ATH_CHECK( m_clusterMatch->linkMatchedClusters(elementLinkDec, *cl, tcmap, m_useLeadCellEtaPhi, gtrthan) );
     }
 
     return StatusCode::SUCCESS;
