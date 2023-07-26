@@ -122,6 +122,66 @@ def LRTElectronMergerAlg(ConfigFlags, name="LLP1_ElectronLRTMergingAlg", **kwarg
     acc.addEventAlgo(alg, primary=True)
     return acc
 
+# Photon IsEM setup for LLP1
+def PhotonIsEMSelectorsCfg(ConfigFlags):
+
+    acc = ComponentAccumulator()
+    from ROOT import egammaPID
+    from ElectronPhotonSelectorTools.AsgPhotonIsEMSelectorsConfig import (
+        AsgPhotonIsEMSelectorCfg,
+    )
+
+    isFullSim = ConfigFlags.Sim.ISF.Simulator.isFullSim() if ConfigFlags.Input.isMC else False
+
+    if isFullSim:
+        from EGammaVariableCorrection.EGammaVariableCorrectionConfig import (
+            ElectronPhotonVariableCorrectionToolCfg,
+        )
+
+        configFile = (
+            "EGammaVariableCorrection/TUNE23/ElPhVariableNominalCorrection.conf"
+        )
+        EGVariableCorrectionTool = acc.popToolsAndMerge(
+            ElectronPhotonVariableCorrectionToolCfg(
+                ConfigFlags,
+                name="EGVariableCorrectionTool",
+                ConfigFile=configFile,
+            )
+        )
+        acc.addPublicTool(EGVariableCorrectionTool)
+
+    PhotonIsEMSelectorMedium = acc.popToolsAndMerge(
+        AsgPhotonIsEMSelectorCfg(
+            ConfigFlags, name="PhotonIsEMSelectorMedium", quality=egammaPID.PhotonIDMedium
+        )
+    )
+    acc.addPublicTool(PhotonIsEMSelectorMedium)
+
+    from DerivationFrameworkEGamma.EGammaToolsConfig import EGSelectionToolWrapperCfg
+
+    EGFudgeMCTool = EGVariableCorrectionTool if isFullSim else None
+
+    PhotonPassIsEMMedium = acc.getPrimaryAndMerge(
+        EGSelectionToolWrapperCfg(
+            ConfigFlags,
+            name="PhotonPassIsEMMedium",
+            EGammaSelectionTool=PhotonIsEMSelectorMedium,
+            EGammaFudgeMCTool=EGFudgeMCTool,
+            CutType="",
+            StoreGateEntryName="DFCommonPhotonsIsEMMedium",
+            ContainerName="Photons"
+        )
+    )
+
+    PhotonIDAugmentationTools = [PhotonPassIsEMMedium]
+
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
+        "LLP1PhotonIDKernel",
+        AugmentationTools=PhotonIDAugmentationTools
+    ))
+
+    return acc
+    
 # Electron LLH setup for LLP1
 def LRTElectronLHSelectorsCfg(ConfigFlags):
 
