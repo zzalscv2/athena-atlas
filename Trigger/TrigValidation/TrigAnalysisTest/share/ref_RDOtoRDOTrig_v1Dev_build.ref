@@ -8278,6 +8278,12 @@ HLT_g0_hiptrt_L1eEM26M:
     0: 6
   stepFeatures:
     0: 10
+HLT_g0_hiptrt_L1eEM28M:
+  eventCount: 0
+  stepCounts:
+    0: 6
+  stepFeatures:
+    0: 10
 HLT_g100_loose_L1eEM26M:
   eventCount: 0
   stepCounts:
