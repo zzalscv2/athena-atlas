@@ -238,23 +238,23 @@ public:
    * This class can be used only for reading data.
    * To modify data, see the class @c Accessor.
    */
-  template <class T>
+  template <class T, class ALLOC = AuxAllocator_t<T> >
   class ConstAccessor
   {
   public:
     /// Type the user sees.
-    using element_type = typename AuxDataTraits<T>::element_type;
+    using element_type = typename AuxDataTraits<T, ALLOC>::element_type;
 
     /// Type referencing an item.
     using const_reference_type =
-      typename AuxDataTraits<T>::const_reference_type;
+      typename AuxDataTraits<T, ALLOC>::const_reference_type;
 
     /// Pointer into the container holding this item.
     using const_container_pointer_type =
-      typename AuxDataTraits<T>::const_container_pointer_type;
+      typename AuxDataTraits<T, ALLOC>::const_container_pointer_type;
 
     /// A span over elements in the container.
-    using const_span = typename AuxDataTraits<T>::const_span;
+    using const_span = typename AuxDataTraits<T, ALLOC>::const_span;
 
 
     /**
@@ -375,25 +375,25 @@ public:
    *   vint1 (*m) = 123;
    @endcode
    */
-  template <class T>
+  template <class T, class ALLOC = AuxAllocator_t<T> >
   class Decorator
   {
   public:
     /// Type referencing an item.
-    using reference_type = typename AuxDataTraits<T>::reference_type;
+    using reference_type = typename AuxDataTraits<T, ALLOC>::reference_type;
 
     /// Type the user sees.
-    using element_type = typename AuxDataTraits<T>::element_type;
+    using element_type = typename AuxDataTraits<T, ALLOC>::element_type;
 
     /// Pointer into the container holding this item.
     using container_pointer_type =
-      typename AuxDataTraits<T>::container_pointer_type;
+      typename AuxDataTraits<T, ALLOC>::container_pointer_type;
     using const_container_pointer_type =
-      typename AuxDataTraits<T>::const_container_pointer_type;
+      typename AuxDataTraits<T, ALLOC>::const_container_pointer_type;
 
     /// A span over elements in the container.
-    using span = typename AuxDataTraits<T>::span;
-    using const_span = typename AuxDataTraits<T>::const_span;
+    using span = typename AuxDataTraits<T, ALLOC>::span;
+    using const_span = typename AuxDataTraits<T, ALLOC>::const_span;
 
 
     /**
@@ -554,8 +554,8 @@ public:
    * inside of loops is discouraged; instead use the @c Accessor
    * or @c ConstAccessor classes above.
    */
-  template <class T>
-  typename AuxDataTraits<T>::const_reference_type
+  template <class T, class ALLOC = AuxAllocator_t<T> >
+  typename AuxDataTraits<T, ALLOC>::const_reference_type
   auxdata (const std::string& name) const;
 
 
@@ -569,8 +569,8 @@ public:
    * inside of loops is discouraged; instead use the @c Accessor
    * or @c ConstAccessor classes above.
    */
-  template <class T>
-  typename AuxDataTraits<T>::const_reference_type
+  template <class T, class ALLOC = AuxAllocator_t<T> >
+  typename AuxDataTraits<T, ALLOC>::const_reference_type
   auxdata (const std::string& name,
            const std::string& clsname) const;
 
@@ -584,8 +584,8 @@ public:
    * inside of loops is discouraged; instead use the @c ConstAccessor
    * class above.
    */
-  template <class T>
-  typename AuxDataTraits<T>::const_reference_type
+  template <class T, class ALLOC = AuxAllocator_t<T> >
+  typename AuxDataTraits<T, ALLOC>::const_reference_type
   auxdataConst (const std::string& name) const;
 
 
@@ -599,8 +599,8 @@ public:
    * inside of loops is discouraged; instead use the @c ConstAccessor
    * class above.
    */
-  template <class T>
-  typename AuxDataTraits<T>::const_reference_type
+  template <class T, class ALLOC = AuxAllocator_t<T> >
+  typename AuxDataTraits<T, ALLOC>::const_reference_type
   auxdataConst (const std::string& name,
                 const std::string& clsname) const;
 
@@ -615,7 +615,7 @@ public:
    * inside of loops is discouraged; instead use the @c Accessor
    * class above.
    */
-  template <class T>
+  template <class T, class ALLOC = AuxAllocator_t<T> >
   bool isAvailable (const std::string& name,
                     const std::string& clsname = "") const;
 
@@ -630,7 +630,7 @@ public:
    * inside of loops is discouraged; instead use the @c Accessor
    * class above.
    */
-  template <class T>
+  template <class T, class ALLOC = AuxAllocator_t<T> >
   bool isAvailableWritableAsDecoration (const std::string& name,
                                         const std::string& clsname = "") const;
 
@@ -648,8 +648,8 @@ public:
    * that do not yet exist (in which case they will be marked as decorations)
    * or variables already marked as decorations.
    */
-  template <class T>
-  typename AuxDataTraits<T>::reference_type
+  template <class T, class ALLOC = AuxAllocator_t<T> >
+  typename AuxDataTraits<T, ALLOC>::reference_type
   auxdecor (const std::string& name) const;
 
 
@@ -667,8 +667,8 @@ public:
    * that do not yet exist (in which case they will be marked as decorations)
    * or variables already marked as decorations.
    */
-  template <class T>
-  typename AuxDataTraits<T>::reference_type
+  template <class T, class ALLOC = AuxAllocator_t<T> >
+  typename AuxDataTraits<T, ALLOC>::reference_type
   auxdecor (const std::string& name,
             const std::string& clsname) const;
 
@@ -979,20 +979,20 @@ public:
    * This class can be used only for reading data.
    * To modify data, see the class @c Accessor.
    */
-  template <class T>
+  template <class T, class ALLOC = AuxAllocator_t<T> >
   class ConstAccessor
-    : public ConstAuxElement::ConstAccessor<T>
+    : public ConstAuxElement::ConstAccessor<T, ALLOC>
   {
   public:
     ConstAccessor (const std::string& name)
-      : ConstAuxElement::ConstAccessor<T> (name) {}
+      : ConstAuxElement::ConstAccessor<T, ALLOC> (name) {}
     ConstAccessor (const std::string& name, const std::string& clsname)
-      : ConstAuxElement::ConstAccessor<T> (name, clsname) {}
+      : ConstAuxElement::ConstAccessor<T, ALLOC> (name, clsname) {}
   protected:
     ConstAccessor (const std::string& name,
                    const std::string& clsname,
                    const SG::AuxTypeRegistry::Flags flags)
-      : ConstAuxElement::ConstAccessor<T> (name, clsname, flags) {}
+      : ConstAuxElement::ConstAccessor<T, ALLOC> (name, clsname, flags) {}
   };
 
 
@@ -1025,27 +1025,27 @@ public:
    *      return acc (*this); }
    @endcode
    */
-  template <class T>
+  template <class T, class ALLOC = AuxAllocator_t<T> >
   class Accessor
-    : public ConstAccessor<T>
+    : public ConstAccessor<T, ALLOC>
   {
   public:
     /// Type referencing an item.
-    using reference_type = typename AuxDataTraits<T>::reference_type;
+    using reference_type = typename AuxDataTraits<T, ALLOC>::reference_type;
 
     /// Type the user sees.
-    using element_type = typename AuxDataTraits<T>::element_type;
+    using element_type = typename AuxDataTraits<T, ALLOC>::element_type;
 
     /// Pointer into the container holding this item.
     using container_pointer_type =
-      typename AuxDataTraits<T>::container_pointer_type;
+      typename AuxDataTraits<T, ALLOC>::container_pointer_type;
 
     /// A span over elements in the container.
-    using span = typename AuxDataTraits<T>::span;
+    using span = typename AuxDataTraits<T, ALLOC>::span;
 
-    using ConstAccessor<T>::operator();
-    using ConstAccessor<T>::getDataArray;
-    using ConstAccessor<T>::getDataSpan;
+    using ConstAccessor<T, ALLOC>::operator();
+    using ConstAccessor<T, ALLOC>::getDataArray;
+    using ConstAccessor<T, ALLOC>::getDataSpan;
 
 
     /**
@@ -1140,21 +1140,21 @@ public:
    *   vint1 (*m) = 123;
    @endcode
    */
-  template <class T>
+  template <class T, class ALLOC = AuxAllocator_t<T> >
   class Decorator
-    : public ConstAuxElement::Decorator<T>
+    : public ConstAuxElement::Decorator<T, ALLOC>
   {
   public:
     Decorator (const std::string& name)
-      : ConstAuxElement::Decorator<T> (name) {}
+      : ConstAuxElement::Decorator<T, ALLOC> (name) {}
     Decorator (const std::string& name, const std::string& clsname)
-      : ConstAuxElement::Decorator<T> (name, clsname) {}
+      : ConstAuxElement::Decorator<T, ALLOC> (name, clsname) {}
   protected:
     Decorator (const std::string& name,
                const std::string& clsname,
                const SG::AuxTypeRegistry::Flags flags)
     
-      : ConstAuxElement::Decorator<T> (name, clsname, flags) {}
+      : ConstAuxElement::Decorator<T, ALLOC> (name, clsname, flags) {}
   };
 
 
@@ -1167,8 +1167,8 @@ public:
    * inside of loops is discouraged; instead use the @c Accessor
    * class above.
    */
-  template <class T>
-  typename AuxDataTraits<T>::reference_type
+  template <class T, class ALLOC = AuxAllocator_t<T> >
+  typename AuxDataTraits<T, ALLOC>::reference_type
   auxdata (const std::string& name);
 
 
@@ -1182,8 +1182,8 @@ public:
    * inside of loops is discouraged; instead use the @c Accessor
    * class above.
    */
-  template <class T>
-  typename AuxDataTraits<T>::reference_type
+  template <class T, class ALLOC = AuxAllocator_t<T> >
+  typename AuxDataTraits<T, ALLOC>::reference_type
   auxdata (const std::string& name,
            const std::string& clsname);
 
@@ -1197,8 +1197,8 @@ public:
    * inside of loops is discouraged; instead use the @c Accessor
    * or @c ConstAccessor classes above.
    */
-  template <class T>
-  typename AuxDataTraits<T>::const_reference_type
+  template <class T, class ALLOC = AuxAllocator_t<T> >
+  typename AuxDataTraits<T, ALLOC>::const_reference_type
   auxdata (const std::string& name) const;
 
 
@@ -1212,8 +1212,8 @@ public:
    * inside of loops is discouraged; instead use the @c Accessor
    * or @c ConstAccessor classes above.
    */
-  template <class T>
-  typename AuxDataTraits<T>::const_reference_type
+  template <class T, class ALLOC = AuxAllocator_t<T> >
+  typename AuxDataTraits<T, ALLOC>::const_reference_type
   auxdata (const std::string& name,
            const std::string& clsname) const;
 
@@ -1227,8 +1227,8 @@ public:
    * inside of loops is discouraged; instead use the @c ConstAccessor
    * class above.
    */
-  template <class T>
-  typename AuxDataTraits<T>::const_reference_type
+  template <class T, class ALLOC = AuxAllocator_t<T> >
+  typename AuxDataTraits<T, ALLOC>::const_reference_type
   auxdataConst (const std::string& name) const;
 
 
@@ -1242,8 +1242,8 @@ public:
    * inside of loops is discouraged; instead use the @c ConstAccessor
    * class above.
    */
-  template <class T>
-  typename AuxDataTraits<T>::const_reference_type
+  template <class T, class ALLOC = AuxAllocator_t<T> >
+  typename AuxDataTraits<T, ALLOC>::const_reference_type
   auxdataConst (const std::string& name,
                 const std::string& clsname) const;
 
@@ -1258,7 +1258,7 @@ public:
    * inside of loops is discouraged; instead use the @c Accessor
    * class above.
    */
-  template <class T>
+  template <class T, class ALLOC = AuxAllocator_t<T> >
   bool isAvailable (const std::string& name,
                     const std::string& clsname = "") const;
 
@@ -1273,7 +1273,7 @@ public:
    * inside of loops is discouraged; instead use the @c Accessor
    * class above.
    */
-  template <class T>
+  template <class T, class ALLOC = AuxAllocator_t<T> >
   bool isAvailableWritable (const std::string& name,
                             const std::string& clsname = "");
 
@@ -1288,7 +1288,7 @@ public:
    * inside of loops is discouraged; instead use the @c Accessor
    * class above.
    */
-  template <class T>
+  template <class T, class ALLOC = AuxAllocator_t<T> >
   bool isAvailableWritableAsDecoration (const std::string& name,
                                         const std::string& clsname = "") const;
 
@@ -1306,8 +1306,8 @@ public:
    * that do not yet exist (in which case they will be marked as decorations)
    * or variables already marked as decorations.
    */
-  template <class T>
-  typename AuxDataTraits<T>::reference_type
+  template <class T, class ALLOC = AuxAllocator_t<T> >
+  typename AuxDataTraits<T, ALLOC>::reference_type
   auxdecor (const std::string& name) const;
 
 
@@ -1325,8 +1325,8 @@ public:
    * that do not yet exist (in which case they will be marked as decorations)
    * or variables already marked as decorations.
    */
-  template <class T>
-  typename AuxDataTraits<T>::reference_type
+  template <class T, class ALLOC = AuxAllocator_t<T> >
+  typename AuxDataTraits<T, ALLOC>::reference_type
   auxdecor (const std::string& name,
             const std::string& clsname) const;
 
