@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGHLTMONITORING_TRIGHLTMONITORALGORITHM_H
@@ -29,7 +29,6 @@ class TrigHLTMonitorAlgorithm : public AthMonitorAlgorithm {
    SG::ReadHandleKey<xAOD::TrigConfKeys> m_eventKey{this, "EventObjectName", "TrigConfKeys", "Key for the event-level configuration identifier object"};
    SG::ReadHandleKey<xAOD::TrigConfKeys> m_onlineKey{this, "OnlineObjectName", "TrigConfKeysOnline", "Key for the online configuration identifier object"};
 
-   ToolHandle<Trig::TrigDecisionTool> m_trigDecTool; 
    ServiceHandle< TrigConf::ITrigConfigSvc > m_trigConfigSvc{ this, "TrigConfigSvc", "" };
    StatusCode fillResultAndConsistencyHistograms( const EventContext& ctx ) const;
 
