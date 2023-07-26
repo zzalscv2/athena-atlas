@@ -80,8 +80,7 @@ def LArSuperCellMonConfig(inputFlags, **kwargs):
     cfg.merge(LArRawSCDataReadingCfg(inputFlags))
 
     from TrigT1CaloFexPerf.EmulationConfig import emulateSC_Cfg
-    sCellType = "EmulatedSCell"
-    cfg.merge(emulateSC_Cfg(inputFlags,SCOut=sCellType))
+    cfg.merge(emulateSC_Cfg(inputFlags))
 
     from LArCellRec.LArRAWtoSuperCellConfig import LArRAWtoSuperCellCfg
     cfg.merge(LArRAWtoSuperCellCfg(inputFlags,mask=mask) )
@@ -127,7 +126,7 @@ def LArSuperCellMonConfigCore(helper, algclass, inputFlags, isCosmics=False, isM
 
     LArSuperCellMonAlg.EnableLumi = False
     LArSuperCellMonAlg.CaloCellContainer = "SCell_ET"
-    LArSuperCellMonAlg.CaloCellContainerRef = "EmulatedSCell"
+    LArSuperCellMonAlg.CaloCellContainerRef = inputFlags.Trigger.L1.L1CaloSuperCellContainerName
     LArSuperCellMonAlg.RemoveMasked = RemoveMasked
     
 

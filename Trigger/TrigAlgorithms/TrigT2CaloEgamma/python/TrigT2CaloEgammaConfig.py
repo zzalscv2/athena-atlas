@@ -61,8 +61,10 @@ def RingerReFexConfig(flags, name="RingerReMaker", RingerKey="FastCaloRings",
                       [ Layer.HEC1,       Layer.HEC2,     Layer.TileBar1, Layer.TileGap0, Layer.TileExt1 ], # TTHEC: 1,2, TILE
                       [ Layer.HEC3,       Layer.TileBar2, Layer.TileGap1, Layer.TileExt2 ] # TTHEC: 3, TILE
                      ],
-        DumpCells         = False,
-        DoQuarter         = [False]*_lenNRings,
+        DumpCells         = flags.Trigger.egamma.dumpCellsFastCaloInfo,
+        DoNoiseThrRings   = flags.Trigger.egamma.doNoiseThrRings,
+        NoiseFactor       = flags.Trigger.egamma.sigmaNoiseFactor,
+        DoQuarter         = [flags.Trigger.egamma.doQuarterRings]*_lenNRings,
         DoEtaAxesDivision = [True]*_lenNRings,
         DoPhiAxesDivision = [True]*_lenNRings,
         MonTool = monTool)
@@ -92,6 +94,7 @@ def t2CaloEgamma_AllCfg(flags, name="T2CaloEgamma_All",RoIs=inputEDM,ExtraInputs
     alg.ExtraInputs+=ExtraInputs
     alg.ClustersName = recordable(ClustersName)
     acc.addEventAlgo(alg)
+
     return acc
 
 #=======================================================================
@@ -156,6 +159,7 @@ def t2CaloEgamma_ReFastAlgoCfg(flags, name="T2CaloEgamma_ReFastAlgo", ClustersNa
                                    RingerKey= RingerKey,
                                    ClustersName = ClustersName)
         alg.IReAlgToolList += [ringer]
+
 
     alg.RoIs=RoIs
     alg.ExtraInputs+=ExtraInputs

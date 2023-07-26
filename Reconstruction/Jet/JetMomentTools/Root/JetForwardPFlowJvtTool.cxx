@@ -73,15 +73,17 @@
     m_fjvtRawKey = m_jetContainerName + "." + m_fjvtRawKey.key();
     m_isHSKey = m_jetContainerName + "." + m_isHSKey.key();
     m_isPUKey = m_jetContainerName + "." + m_isPUKey.key();
-    m_jvtKey = m_jetContainerName + "." + m_jvtKey.key();
+    m_passJvtKey = m_jetContainerName + "." + m_passJvtKey.key(); //nnjvt pass
 
     ATH_CHECK(m_fjvtKey.initialize());
     ATH_CHECK(m_fjvtRawKey.initialize());
     ATH_CHECK(m_isHSKey.initialize());
     ATH_CHECK(m_isPUKey.initialize());
-    ATH_CHECK(m_jvtKey.initialize());
+    ATH_CHECK(m_passJvtKey.initialize());
 
     ATH_CHECK(m_vxContKey.initialize());
+
+
     
     return StatusCode::SUCCESS;
   }
@@ -173,10 +175,10 @@
 
   bool JetForwardPFlowJvtTool::hasCloseByHSjet(const xAOD::Jet *jet, const xAOD::JetContainer *pjets ) const {
     for (const xAOD::Jet* pjet : *pjets) {
-      float jet_jvt=0;
-      SG::ReadDecorHandle<xAOD::JetContainer, float> jvtHandle(m_jvtKey);
-      jet_jvt = jvtHandle(*pjet);
-     if (pjet->p4().DeltaR(jet->p4())<0.3 && jet_jvt>m_jvtCut && isCentralJet(pjet) ) return true;
+      char jet_nnjvtpass=false;
+      SG::ReadDecorHandle<xAOD::JetContainer, char>  passJvtHandle(m_passJvtKey);
+      jet_nnjvtpass = passJvtHandle(*pjet);
+      if (pjet->p4().DeltaR(jet->p4())<0.3 && jet_nnjvtpass && isCentralJet(pjet) ) return true;
     }
     return false;
   }

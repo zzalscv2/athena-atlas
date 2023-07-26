@@ -73,14 +73,12 @@
     m_isHSKey = m_jetContainerName + "." + m_isHSKey.key();
     m_isQCDPUKey = m_jetContainerName + "." + m_isQCDPUKey.key();
     m_isStochPUKey = m_jetContainerName + "." + m_isStochPUKey.key();
-    m_jvtKey = m_jetContainerName + "." + m_jvtKey.key();
 
     ATH_CHECK(m_bjvtKey.initialize());
     ATH_CHECK(m_bjvtRawKey.initialize());
     ATH_CHECK(m_isHSKey.initialize());
     ATH_CHECK(m_isQCDPUKey.initialize());
     ATH_CHECK(m_isStochPUKey.initialize());
-    ATH_CHECK(m_jvtKey.initialize());
 
     ATH_CHECK(m_vxContKey.initialize());
 
