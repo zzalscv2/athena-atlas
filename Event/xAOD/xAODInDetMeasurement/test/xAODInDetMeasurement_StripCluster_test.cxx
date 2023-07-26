@@ -12,6 +12,9 @@
 
 #include "GeoPrimitives/GeoPrimitives.h"
 
+#include "xAODMeasurementBase/MeasurementDefs.h"
+
+
 template< typename T >
 std::ostream& operator<< ( std::ostream& out,
                            const std::vector< T >& vec ) {
@@ -31,8 +34,9 @@ std::ostream& operator<< ( std::ostream& out,
 
 void fill( xAOD::StripCluster& stripCluster) {
 
-    IdentifierHash::value_type idHashVal(123485);
-    IdentifierHash idHash(idHashVal);
+    constexpr xAOD::DetectorIDHashType idHash(123485);
+
+    constexpr xAOD::DetectorIdentType id(1234855431);
 
     Eigen::Matrix<float,1,1> localPosition(0.15);
 
@@ -41,6 +45,7 @@ void fill( xAOD::StripCluster& stripCluster) {
     localCovariance(0, 0) = 0.012;
 
     stripCluster.setMeasurement<1>(idHash, localPosition, localCovariance);
+    stripCluster.setIdentifier(id);
 
     Eigen::Matrix<float, 3, 1> globalPosition(10, 10, 10);
 
@@ -51,12 +56,15 @@ void fill( xAOD::StripCluster& stripCluster) {
     stripCluster.setRDOlist(rdoList);
 
     stripCluster.globalPosition() = globalPosition;
+
     stripCluster.setChannelsInPhi(3);
+
 }
 
 void print ( const xAOD::StripCluster& stripCluster) {
     std::cout << " --------- MEASUREMENT BASE ------------ " << std::endl;
     std::cout << "Identifier Hash = " << stripCluster.identifierHash() << std::endl;
+    std::cout << "Identifier = " << stripCluster.identifier() << std::endl;
     std::cout << "Local Position = " << stripCluster.localPosition<1>() << std::endl;
     std::cout << "Local Covariance = " << stripCluster.localCovariance<1>() << std::endl;
     std::cout << " ----------STRIP CLUSTER INFO ----------- " << std::endl;

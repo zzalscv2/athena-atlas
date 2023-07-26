@@ -9,6 +9,8 @@
 #include "Identifier/Identifier.h"
 #include "EventPrimitives/EventPrimitives.h"
 
+#include "xAODMeasurementBase/MeasurementDefs.h"
+
 #include <array>
 
 namespace xAOD {
@@ -24,9 +26,6 @@ namespace xAOD {
     float values[3]; 
   };
 
-  /// @ detector ID element hash
-  using DetectorIDHashType = unsigned int;
-  
   class SpacePoint_v1 : public SG::AuxElement {
   public:
     using ConstVectorMap = Eigen::Map<const Eigen::Matrix<float, 3, 1>>;
