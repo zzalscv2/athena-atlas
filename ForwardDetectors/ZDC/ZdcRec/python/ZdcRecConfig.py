@@ -31,10 +31,13 @@ def ZdcRecOutputCfg(flags):
     return acc
 
 
-def ZdcAnalysisToolCfg(flags, run, config="PbPb2015", DoCalib=False, DoTimeCalib=False, DoTrigEff=False):
+def ZdcAnalysisToolCfg(flags, run, config="LHCf2022", DoCalib=False, DoTimeCalib=False, DoTrigEff=False):
     acc = ComponentAccumulator()
 
+    print('ZdcAnalysisToolCfg: setting up ZdcAnalysisTool with config='+config)
+
     acc.setPrivateTools(CompFactory.ZDC.ZdcAnalysisTool(
+        name = 'ZdcAnalysisTool'+config, 
         Configuration = config,
         DoCalib = DoCalib,
         DoTimeCalib = DoTimeCalib,
@@ -75,6 +78,7 @@ def ZdcRecRun2Cfg(flags):
 
     acc.addEventAlgo(CompFactory.ZdcByteStreamRawDataV2())
     anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,2,config,doCalib,doTimeCalib,doTrigEff))
+
     acc.addEventAlgo(CompFactory.ZdcRecV3("ZdcRecV3",ZdcAnalysisTool=anaTool))
 
     return acc
@@ -92,9 +96,16 @@ def ZdcRecRun3Cfg(flags):
     elif flags.Input.ProjectName == "data23_hi":
         config = "PbPb2023"
 
+    acc.merge(ByteStreamReadCfg(flags, type_names=['xAOD::TriggerTowerContainer/ZdcTriggerTowers',
+                                         'xAOD::TriggerTowerAuxContainer/ZdcTriggerTowersAux.']))
+
     acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())
     anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,3,config,doCalib,doTimeCalib,doTrigEff))
-    acc.addEventAlgo(CompFactory.ZdcRecRun3("ZdcRecRun3",ZdcAnalysisTool=anaTool))
+
+    zdcTools = [anaTool] # expand list as needed
+
+    zdcAlg = CompFactory.ZdcRecRun3("ZdcRecRun3",ZdcAnalysisTools=zdcTools)
+    acc.addEventAlgo(zdcAlg, primary=True)
 
     return acc
 
@@ -112,10 +123,14 @@ def ZdcRecCfg(flags):
         print ("ZdcRecConfig.py: run = "+run.name)
 
         if (run == LHCPeriod.Run2):
+            print ('ZdcRecConfig.py: setting up Run 2!')
             acc.merge(ZdcRecRun2Cfg(flags))
         elif (run == LHCPeriod.Run3):
+            print ('ZdcRecConfig.py: setting up Run 3!')
             acc.merge(ZdcRecRun3Cfg(flags))
-        
+        else:
+            print ('ZdcRecConfig.py: setting up nothing (problem)!')
+
     if flags.Output.doWriteESD or flags.Output.doWriteAOD:
         acc.merge(ZdcRecOutputCfg(flags))
 
@@ -131,6 +146,11 @@ if __name__ == '__main__':
     GeoModelSvc.AtlasVersion = "ATLAS-R3S-2021-03-00-00"
 
     flags = initConfigFlags()
+    flags.Scheduler.CheckDependencies = True
+    flags.Scheduler.ShowDataDeps = True
+    flags.Scheduler.ShowDataFlow = True
+    flags.Scheduler.ShowControlFlow = True
+    flags.Scheduler.EnableVerboseViews = True
 
     flags.Detector.GeometryZDC=True
     flags.Detector.GeometryAFP=False
@@ -144,6 +164,7 @@ if __name__ == '__main__':
     flags.Trigger.L1.doMuon=False
     flags.Trigger.L1.doCalo=False
     flags.Trigger.L1.doTopo=False
+    #flags.Reco.EnableTrigger = False
 
     # This does not work in this context
     # run = flags.GeoModel.Run
@@ -167,7 +188,6 @@ if __name__ == '__main__':
 
     acc=MainServicesCfg(flags)
 
-    
     from TriggerJobOpts.TriggerRecoConfig import TriggerRecoCfgData
     acc.merge(TriggerRecoCfgData(flags))
 

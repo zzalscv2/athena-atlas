@@ -62,15 +62,11 @@ private:
 	SG::WriteHandleKey<xAOD::ZdcModuleContainer> m_zdcSumContainerName
 	  { this, "ZdcSumContainerName", "ZdcSums", "" };
 
-
-	//Include here all tools to do the job. They will be called by the algorithm execute method
-	//Another option is to use ToolHandleArray<IZdcRecTool>, where IZdcRecTool is the factory for
-	//the tools
-
 	ToolHandle<ZdcRecChannelToolLucrod> m_ChannelTool
 	  { this, "ChannelTool", "ZdcRecChannelToolLucrod", "" };
-	ToolHandle<ZDC::IZdcAnalysisTool> m_zdcTool
-	  { this, "ZdcAnalysisTool", "ZDC::ZdcAnalysisTool/ZdcAnalysisTool", "" };
+
+	ToolHandleArray<ZDC::IZdcAnalysisTool> m_zdcTools{ this, "ZdcAnalysisTools",{} };
+
 
 };
 
