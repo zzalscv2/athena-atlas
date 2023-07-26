@@ -128,10 +128,34 @@ class TrigBmuxComboHypo: public ::ComboHypo {
       const Trk::VxCascadeInfo& vxCascadeInfo,
       const Amg::Vector3D& beamSpotPosition) const;
 
+  /**
+   * @brief Returns false for the tracks with opposite charges.
+   * Otherwise calculates the deltaR(lhs, rhs) and compares it with threshold value m_deltaR.
+   * Should be used to remove muon InDet track from the track collection.
+   */
   bool isIdenticalTracks(const xAOD::TrackParticle* lhs, const xAOD::TrackParticle* rhs) const;
+
+  /**
+   * @brief Checks that the given track is close enough to the muon, i.e. it belongs to the RoI built around muon (approximately).
+   * Should be used to mimic standard RoI behavior only when the option IDConfig.SuperRoI is active in bmumuxAlgSequence.
+   */
   bool isInSameRoI(const xAOD::Muon*, const xAOD::TrackParticle*) const;
+
+  /**
+   * @brief Checks that the given mass value falls into the specified range.
+   */
   bool isInMassRange(double mass, const std::pair<double, double>& range) const { return (mass > range.first && mass < range.second); }
+
+  /**
+   * @brief Returns the longitudinal impact parameter z0 of the track w.r.t. the vertex in [mm].
+   * If track cannot be extrapolated to the vertex, a value -1000. will be returned.
+   */
   double getTrkImpactParameterZ0(const EventContext& ctx, const xAOD::TrackParticle& track, const Amg::Vector3D& vertex) const;
+
+  /**
+   * @brief Returns the transverse decay length of a particle Lxy in [mm].
+   * It is defined as the transverse distance between the production and decay vertices projected along the transverse momentum of the particle.
+   */
   double Lxy(const Amg::Vector3D& productionVertex, const Amg::Vector3D& decayVertex, const std::vector<TLorentzVector>& momenta) const;
 
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackParticleContainerKey {this,
