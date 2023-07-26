@@ -10,7 +10,6 @@
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "MuonAlignmentData/ALinePar.h"
 #include "MuonAlignmentData/BLinePar.h"
-#include "MuonAlignmentData/CscInternalAlignmentPar.h"
 #include "MuonReadoutGeometry/CscReadoutElement.h"
 #include "MuonReadoutGeometry/GlobalUtilities.h"
 #include "MuonReadoutGeometry/MMReadoutElement.h"
@@ -607,50 +606,7 @@ namespace MuonGM {
         m_TgcReadoutParamsVec.push_back(std::move(x));
     }
 
-    StatusCode MuonDetectorManager::initCSCInternalAlignmentMap() {
-       
-
-        if (!m_useCscIlinesFromGM) {
-            ATH_MSG_INFO( "Init of CSC I-Lines will be done via Conditions DB" );
-            m_cscALineContainer.clear();
-            const CscIdHelper& idHelper{m_idHelperSvc->cscIdHelper()};
-
-            for (auto& ist : m_MuonStationMap) {
-                MuonStation* ms = ist.second.get();
-                std::string stType = ms->getStationType();
-                if (stType[0] != 'C') continue;
-
-                int jff{ms->getPhiIndex()}, jzz{ms->getEtaIndex()}, job{3};  // it's always like this for CSCs
-
-                for (unsigned int wlay = 1; wlay < 5; ++wlay) {
-                    CscInternalAlignmentPar newILine;
-                    newILine.setAmdbId(stType, jff, jzz, job, wlay);
-                    
-                    ATH_MSG_DEBUG( "No starting I-Lines or reseting them for Station " << stType << " Jzz/Jff/Wlay " << jzz << "/"
-                        << jff << "/" << wlay );
-                    // there is no way to check if the RE already has parameters set - always overwriting them.
-                    newILine.setParameters(0., 0., 0., 0., 0., 0.);
-                    newILine.isNew(true);
-                    Identifier idp = idHelper.parentID(ms->getMuonReadoutElement(job)->identify());
-                    Identifier id = idHelper.channelID(idp, 2, wlay, 0, 1);
-                    
-                    ATH_MSG_DEBUG( "<Filling I-Line container with entry for key >" << m_idHelperSvc->toString(id));
-                    m_cscALineContainer.emplace(id, newILine);
-                }
-            }
-            ATH_MSG_INFO( "Init I-Line Container - done - size is respectively " << m_cscALineContainer.size() );
-        }
-        
-        ATH_MSG_DEBUG( "Init CSC I-Line Containers - pointer is <" << (uintptr_t)&m_cscALineContainer << ">" );
-
-        ATH_MSG_INFO( "I-Line for CSC wire layers loaded (Csc Internal Alignment)" );
-        if (m_useCscIntAlign)
-            ATH_MSG_INFO( "According to configuration they WILL be used " );
-        else
-            ATH_MSG_INFO( "According to configuration parameters they WILL BE UPDATED FROM CONDDB " );
-        return StatusCode::SUCCESS;
-    }
-    StatusCode MuonDetectorManager::updateCSCInternalAlignmentMap(const CscInternalAlignmentMapContainer& ilineData) {
+    StatusCode MuonDetectorManager::updateCSCInternalAlignmentMap(const ALineContainer& ilineData) {
        
         if (ilineData.empty()) {
             ATH_MSG_WARNING("Empty temporary CSC I-line container - nothing to do here" );
@@ -660,59 +616,27 @@ namespace MuonGM {
 
         // loop over the container of the updates passed by the MuonAlignmentDbTool
         unsigned int nLines{0}, nUpdates{0};
-        for (const auto& [ILineId, ILine] : ilineData) {
+        for (const ALinePar& ILine : ilineData) {
             nLines++;
-            std::string stType = "";
-            int jff{0}, jzz{0}, job{0}, jlay{0};
-            ILine.getAmdbId(stType, jff, jzz, job, jlay);
-            if (!ILine.isNew()) {
-                ATH_MSG_WARNING("CscInternalAlignmentPar with AmdbId " << stType << " " << jzz << " " << jff << " " << job << " "
-                    << jlay << " is not new *** skipping" );
-                continue;
-            }
-            
-            ATH_MSG_DEBUG( "CscInternalAlignmentPar with AmdbId " << stType << " " << jzz << " " << jff << " " << job << " "
-                << jlay << " is new ID = " << m_idHelperSvc->toString(ILineId) );
+            const std::string stType = ILine.AmdbStation();
+            const int jff = ILine.AmdbPhi();
+            const int jzz = ILine.AmdbEta();
+            const int job = ILine.AmdbJob();
+            ATH_MSG_DEBUG( "CscInternalAlignmentPar with AmdbId " << ILine << " is new ID = " << m_idHelperSvc->toString(ILine.identify()) );
             if (job == 3) {
                 MuonStation* thisStation = getMuonStation(stType, jzz, jff);
                 if (!thisStation) {
-                    ATH_MSG_WARNING("CscInternalAlignmentPar with AmdbId " << stType << " " << jzz << " " << jff << " " << job << " "
-                        << jlay
+                    ATH_MSG_WARNING("CscInternalAlignmentPar with AmdbId " << ILine
                         << " *** No MuonStation found \n PLEASE CHECK FOR possible MISMATCHES between alignment constants from COOL and "
                            "Geometry Layout in use");
                     continue;
                 }
-
-                auto [it, flag] = m_cscALineContainer.insert_or_assign(ILineId, ILine);
-                if (flag) {                    
-                    ATH_MSG_DEBUG( "               New entry in CSC I-line container for Station " << stType
-                        << " at Jzz/Jff/Jlay " << jzz << "/" << jff << "/" << jlay << " --- in the container with key "
-                        << m_idHelperSvc->toString(ILineId) );
-                } else {                    
-                    ATH_MSG_DEBUG( "Updating extisting entry in CSC I-line container for Station " << stType
-                        << " at Jzz/Jff/Jlay " << jzz << "/" << jff << "/" << jlay );
-                }
-
-                CscInternalAlignmentPar& newILine = it->second;
-                float tras{0.f}, traz{0.f}, trat{0.f}, rots{0.f}, rotz{0.f}, rott{0.f};
-                newILine.getParameters(tras, traz, trat, rots, rotz, rott);
-                int choice = CscIlinesFlag();
-                if (choice % 10 == 0) tras = 0.;
-                if (int(choice / 10) % 10 == 0) rotz = 0.;
-                if (int(choice / 100) % 10 == 0) rots = 0.;
-                if (int(choice / 1000) % 10 == 0) trat = 0.;
-                if (int(choice / 10000) % 10 == 0) traz = 0.;
-                if (int(choice / 100000) % 10 == 0) traz = 0.;
-                if (m_controlCscIlines != 111111) newILine.setParameters(tras, traz, trat, rots, rotz, rott);
-                
-                ATH_MSG_DEBUG( "Setting CSC I-Lines for Station " << stType << " " << jzz << " " << jff << " " << job << " "
-                    << jlay << " "
-                    << " params are = " << tras << " " << traz << " " << trat << " " << rots << " " << rotz << " " << rott );
+                ATH_MSG_DEBUG( "Setting CSC I-Lines for Station " <<ILine);
                 CscReadoutElement* CscRE = dynamic_cast<CscReadoutElement*>(thisStation->getMuonReadoutElement(job));
                 if (!CscRE)
                     ATH_MSG_ERROR( "The CSC I-lines container includes stations which are no CSCs! This is impossible." );
                 else {
-                    CscRE->setCscInternalAlignmentPar(newILine);
+                    CscRE->setCscInternalAlignmentPar(ILine);
                 }
                 if (cacheFillingFlag()) {
                     thisStation->clearCache();
@@ -728,11 +652,9 @@ namespace MuonGM {
         }
         ATH_MSG_INFO( "# of CSC I-lines read from the ILineMapContainer in StoreGate is " << nLines );
         ATH_MSG_INFO( "# of deltaTransforms updated according to A-lines             is " << nUpdates );
-        ATH_MSG_INFO( "# of entries in the CSC I-lines historical container          is " << CscInternalAlignmentContainer()->size());
-
         return StatusCode::SUCCESS;
     }
-    StatusCode MuonDetectorManager::updateMdtAsBuiltParams(const MdtAsBuiltMapContainer& asbuiltData) {
+    StatusCode MuonDetectorManager::updateMdtAsBuiltParams(const MdtAsBuiltContainer& asbuiltData) {
        
         if (asbuiltData.empty()) {
             ATH_MSG_WARNING("Empty temporary As-Built container - nothing to do here" );
@@ -742,36 +664,25 @@ namespace MuonGM {
 
         // loop over the container of the updates passed by the MuonAlignmentDbTool
         unsigned int nLines{0}, nUpdates{0};
-        for (const auto& [AsBuiltId, AsBuiltPar] : asbuiltData) {
+        for (const auto& AsBuiltPar : asbuiltData) {
             nLines++;
             const std::string stType = AsBuiltPar.AmdbStation();
             const int jff = AsBuiltPar.AmdbPhi();
             const int jzz = AsBuiltPar.AmdbEta();
-            const int job = AsBuiltPar.AmdbJob();
             
-            auto [it, flag] = m_AsBuiltParamsMap.insert_or_assign(AsBuiltId, AsBuiltPar);
-            if (flag) {                
-                ATH_MSG_DEBUG( "New entry in AsBuilt container for Station " << stType << " at Jzz/Jff " << jzz << "/" << jff
-                    << " --- in the container with key " << m_idHelperSvc->toString(AsBuiltId) );
-            } else {                
-                ATH_MSG_DEBUG( "Updating extisting entry in AsBuilt container for Station " << stType << " at Jzz/Jff " << jzz
-                    << "/" << jff );
-            }
-
-            
-            ATH_MSG_DEBUG( "MdtAsBuiltPar with AmdbId " << stType << " " << jzz << " " << jff << " " << job
-                    << " is new ID = " << m_idHelperSvc->toString(AsBuiltId) );
+            ATH_MSG_DEBUG( "MdtAsBuiltPar with AmdbId " << AsBuiltPar
+                    << " is new ID = " << m_idHelperSvc->toString(AsBuiltPar.identify()) );
 
             MuonStation* thisStation = getMuonStation(stType, jzz, jff);
             if (thisStation) {
                 
-                ATH_MSG_DEBUG( "Setting as-built parameters for Station " << stType << " " << jzz << " " << jff << " " );
+                ATH_MSG_DEBUG( "Setting as-built parameters for Station " << AsBuiltPar );
                 thisStation->clearBLineCache();
-                thisStation->setMdtAsBuiltParams(&it->second);
+                thisStation->setMdtAsBuiltParams(&AsBuiltPar);
                 if (cacheFillingFlag()) thisStation->fillBLineCache();
                 nUpdates++;
             } else {
-                ATH_MSG_WARNING("MdtAsBuiltPar with AmdbId " << stType << " " << jzz << " " << jff << " " << job
+                ATH_MSG_WARNING("MdtAsBuiltPar with AmdbId " <<AsBuiltPar
                     << " *** No MuonStation found \n PLEASE CHECK FOR possible MISMATCHES between alignment constants from COOL and "
                        "Geometry Layout in use");
                 continue;
@@ -779,40 +690,9 @@ namespace MuonGM {
         }
         ATH_MSG_INFO( "# of MDT As-Built read from the MdtAsBuiltMapContainer in StoreGate is " << nLines );
         ATH_MSG_INFO( "# of deltaTransforms updated according to As-Built                  is " << nUpdates );
-        ATH_MSG_INFO( "# of entries in the MdtAsBuilt historical container                 is " << MdtAsBuiltContainer()->size());
-
         return StatusCode::SUCCESS;
     }
-    void MuonDetectorManager::storeCscInternalAlignmentParams(const CscInternalAlignmentPar& x) {
-       
-
-        std::string stName = "XXX";
-        int jff{0}, jzz{0}, job{0}, wlayer{0};
-        x.getAmdbId(stName, jff, jzz, job, wlayer);
-        // chamberLayer is always 2 => job is always 3
-        int chamberLayer = 2;
-        if (job != 3)
-            ATH_MSG_WARNING("job = " << job << " is not 3 => chamberLayer should be 1 - not existing ! setting 2" );
-        Identifier id = m_idHelperSvc->cscIdHelper().channelID(stName, jzz, jff, chamberLayer, wlayer, 0, 1);
-
-        m_cscALineContainer.emplace(id, x);
-        ATH_MSG_DEBUG( "Adding Aline for CSC wire layer: " << m_idHelperSvc->toString(id) );
-        ATH_MSG_DEBUG( "CscInternalAlignmentMapContainer has currently size " << m_cscALineContainer.size() );
-        
-    }
-
-    const MdtAsBuiltPar* MuonDetectorManager::getMdtAsBuiltParams(const Identifier& id) const {
-        if (!MdtAsBuiltContainer()) {           
-            ATH_MSG_DEBUG( "No Mdt AsBuilt parameter container available" );
-            return nullptr;
-        }
-        ciMdtAsBuiltMap iter = m_AsBuiltParamsMap.find(id);
-        if (iter == m_AsBuiltParamsMap.end()) {           
-            ATH_MSG_DEBUG( "No Mdt AsBuilt parameters for station " << m_idHelperSvc->toString(id) );
-            return nullptr;
-        }
-        return &iter->second;
-    }
+    
     void MuonDetectorManager::setNswAsBuilt(const NswAsBuiltDbData* nswAsBuiltData) {
         m_nswAsBuilt = nswAsBuiltData;
     }

@@ -28,9 +28,6 @@
 #include "MuonNSWAsBuilt/StgcStripCalculator.h"
 #endif
 
-typedef CscInternalAlignmentMapContainer::const_iterator ciCscInternalAlignmentMap;
-typedef MdtAsBuiltMapContainer::const_iterator ciMdtAsBuiltMap;
-
 namespace MuonGM {
 
     constexpr bool optimRE = true;
@@ -80,9 +77,6 @@ namespace MuonGM {
        
         // storeTgcReadoutParams
         void storeTgcReadoutParams(std::unique_ptr<const TgcReadoutParams> x);
-
-        // storeCscInternalAlignmentParams
-        void storeCscInternalAlignmentParams(const CscInternalAlignmentPar& x);
 
         // access to Readout Elements
         const MdtReadoutElement* getMdtReadoutElement(const Identifier&) const;    //!< access via extended identifier (requires unpacking)
@@ -152,12 +146,6 @@ namespace MuonGM {
         inline int  IncludeCutoutsFlag() const;
         void setCutoutsBogFlag(int flag);
         inline int  IncludeCutoutsBogFlag() const;
-        void setApplyCscIntAlignment(bool x) { m_useCscIntAlign = x; }
-        inline bool applyCscIntAlignment() const { return m_useCscIntAlign; }
-        void setCscIlinesFlag(int flag) { m_controlCscIlines = flag; }
-        inline int  CscIlinesFlag() const { return m_controlCscIlines; }
-        void setCscFromGM(bool x) { m_useCscIlinesFromGM = x; }
-        inline bool CscFromGM() const { return m_useCscIlinesFromGM; }
         
         enum readoutElementHashMax {
             MdtRElMaxHash = 2500,
@@ -246,18 +234,10 @@ namespace MuonGM {
         void fillsTgcCache();
         void fillMMCache();
 
-        inline const CscInternalAlignmentMapContainer* CscInternalAlignmentContainer() const;
-        inline const MdtAsBuiltMapContainer* MdtAsBuiltContainer() const;
-
-        inline ciCscInternalAlignmentMap CscALineMapBegin() const;
-        inline ciCscInternalAlignmentMap CscALineMapEnd() const;
-        inline ciMdtAsBuiltMap MdtAsBuiltMapBegin() const;
-        inline ciMdtAsBuiltMap MdtAsBuiltMapEnd() const;
         StatusCode updateAlignment(const ALineContainer& a);
         StatusCode updateDeformations(const BLineContainer& a);
-        StatusCode updateMdtAsBuiltParams(const MdtAsBuiltMapContainer& a);
-        StatusCode initCSCInternalAlignmentMap();
-        StatusCode updateCSCInternalAlignmentMap(const CscInternalAlignmentMapContainer& cscIntAline);
+        StatusCode updateMdtAsBuiltParams(const MdtAsBuiltContainer& a);
+        StatusCode updateCSCInternalAlignmentMap(const ALineContainer& cscIntAline);
 
         void setNswAsBuilt(const NswAsBuiltDbData* nswAsBuiltData);
 #ifndef SIMULATIONBASE
@@ -268,9 +248,6 @@ namespace MuonGM {
             return m_nswAsBuilt ? m_nswAsBuilt->sTgcData.get() : nullptr; ; 
         }
 #endif
-
-        // get Mdt AsBuilt parameters for chamber specified by Identifier
-        const MdtAsBuiltPar* getMdtAsBuiltParams(const Identifier& id) const;
 
         // map the RPC station indices (0-NRpcStatType) back to the RpcIdHelper stationNames
         int rpcStationName(const int stationIndex) const;
@@ -297,9 +274,6 @@ namespace MuonGM {
         int m_minimalgeo{0};
         int m_includeCutouts{0};
         int m_includeCutoutsBog{0};
-        bool m_useCscIntAlign{false};
-        int m_controlCscIlines{111111};
-        bool m_useCscIlinesFromGM{true};
 
         std::vector<PVLink> m_envelope;  // Tree-top...
 
@@ -343,9 +317,8 @@ namespace MuonGM {
         // pointers to the XxxDetectorElements (with granularity a la EDM)
         std::vector<std::unique_ptr<const TgcReadoutParams> > m_TgcReadoutParamsVec;
 
-        CscInternalAlignmentMapContainer m_cscALineContainer;
-        MdtAsBuiltMapContainer m_AsBuiltParamsMap;
-
+     
+        
         const NswAsBuiltDbData* m_nswAsBuilt{nullptr};
         /// RPC name caches
         std::map<int, int> m_rpcStatToIdx;
@@ -407,15 +380,6 @@ namespace MuonGM {
     unsigned int MuonDetectorManager::nCscDE() const { return m_n_cscDE; }
     unsigned int MuonDetectorManager::nRpcDE() const { return m_n_rpcDE; }
     unsigned int MuonDetectorManager::nTgcDE() const { return m_n_tgcDE; }
-
-    const CscInternalAlignmentMapContainer* MuonDetectorManager::CscInternalAlignmentContainer() const { return &m_cscALineContainer; }
-
-    const MdtAsBuiltMapContainer* MuonDetectorManager::MdtAsBuiltContainer() const { return &m_AsBuiltParamsMap; }
-
-    ciCscInternalAlignmentMap MuonDetectorManager::CscALineMapBegin() const { return m_cscALineContainer.begin(); }
-    ciCscInternalAlignmentMap MuonDetectorManager::CscALineMapEnd() const { return m_cscALineContainer.end(); }
-    ciMdtAsBuiltMap MuonDetectorManager::MdtAsBuiltMapBegin() const { return m_AsBuiltParamsMap.begin(); }
-    ciMdtAsBuiltMap MuonDetectorManager::MdtAsBuiltMapEnd() const { return m_AsBuiltParamsMap.end(); }
 
     int MuonDetectorManager::cacheFillingFlag() const { return m_cacheFillingFlag; }
     int MuonDetectorManager::cachingFlag() const { return m_cachingFlag; }

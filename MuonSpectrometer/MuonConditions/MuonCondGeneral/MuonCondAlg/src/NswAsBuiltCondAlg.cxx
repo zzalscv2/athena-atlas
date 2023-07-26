@@ -51,9 +51,8 @@ StatusCode NswAsBuiltCondAlg::execute(const EventContext& ctx) const {
             const coral::AttributeList& atr = itr->second;
             const std::string data{*(static_cast<const std::string*>((atr["data"]).addressOfData()))};
             ATH_MSG_DEBUG(__FILE__<<":"<<__LINE__<<" data load is " << data << " FINISHED HERE ");            
-            std::unique_ptr<NswAsBuilt::StripCalculator> stripCal = std::make_unique<NswAsBuilt::StripCalculator>();
-            stripCal->parseJSON(data);
-            writeCdo->microMegaData = std::move(stripCal);
+            writeCdo->microMegaData = std::make_unique<NswAsBuilt::StripCalculator>();
+            writeCdo->microMegaData->parseJSON(data);          
             ++nLines;
         }
         if(nLines>1) {
@@ -70,9 +69,8 @@ StatusCode NswAsBuiltCondAlg::execute(const EventContext& ctx) const {
         }
         std::stringstream buffer;
         buffer << thefile.rdbuf();
-        std::unique_ptr<NswAsBuilt::StripCalculator> stripCal = std::make_unique<NswAsBuilt::StripCalculator>();
-        stripCal->parseJSON(buffer.str());
-        writeCdo->microMegaData = std::move(stripCal);
+        writeCdo->microMegaData = std::make_unique<NswAsBuilt::StripCalculator>();
+        writeCdo->microMegaData->parseJSON(buffer.str());       
     }
 
     if (!m_readSTgcAsBuiltParamsKey.empty()) {
@@ -89,9 +87,8 @@ StatusCode NswAsBuiltCondAlg::execute(const EventContext& ctx) const {
             const coral::AttributeList& atr = itr->second;
             const std::string data{*(static_cast<const std::string*>((atr["data"]).addressOfData()))};
             ATH_MSG_DEBUG(__FILE__<<":"<<__LINE__<<" data load is " << data << " FINISHED HERE ");
-            std::unique_ptr<NswAsBuilt::StgcStripCalculator> stripCal = std::make_unique<NswAsBuilt::StgcStripCalculator>();
-            stripCal->parseJSON(data);
-            writeCdo->sTgcData = std::move(stripCal);
+            writeCdo->sTgcData = std::make_unique<NswAsBuilt::StgcStripCalculator>();
+            writeCdo->sTgcData->parseJSON(data);          
             ++nLines;
         }
         if(nLines>1) {
@@ -108,9 +105,8 @@ StatusCode NswAsBuiltCondAlg::execute(const EventContext& ctx) const {
         }
         std::stringstream buffer;
         buffer << thefile.rdbuf();
-        std::unique_ptr<NswAsBuilt::StgcStripCalculator> stripCal = std::make_unique<NswAsBuilt::StgcStripCalculator>();
-        stripCal->parseJSON(buffer.str());
-        writeCdo->sTgcData = std::move(stripCal);            
+        writeCdo->sTgcData = std::make_unique<NswAsBuilt::StgcStripCalculator>();
+        writeCdo->sTgcData->parseJSON(buffer.str());            
     }
     if (!writeCdo->sTgcData && !writeCdo->microMegaData) {
         ATH_MSG_ERROR("No AsBuilt constants were loaded. Please check the algorithm configucration");

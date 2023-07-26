@@ -134,14 +134,7 @@ namespace MuonGM {
         //                     no internal structure of the Detector is built
         // minimalgeo = 0 => The geo tree is built in full details
         m_manager->setMinimalGeoFlag(m_minimalGeoFlag);
-
-        if (m_controlCscIntAlines == 0)
-            m_manager->setApplyCscIntAlignment(false);
-        else
-            m_manager->setApplyCscIntAlignment(true);
-
-        m_manager->setCscIlinesFlag(m_controlCscIntAlines);
-        m_manager->setCscFromGM(m_useCscIntAlinesFromGM);
+        
         m_manager->setGeometryVersion(m_layout);
         m_manager->set_DBMuonVersion(m_DBMuonVersion);
 

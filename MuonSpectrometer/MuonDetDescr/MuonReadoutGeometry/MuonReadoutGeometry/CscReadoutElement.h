@@ -241,11 +241,8 @@ namespace MuonGM {
         void set_wirepitch(double);
         void set_first_strip_localcoo(double);
         void set_first_wire_localcoo(double);
-        void setCscInternalAlignmentPar(const CscInternalAlignmentPar&);
-        void setCscInternalAlignmentParams();
-        //    // internal alignment
+        void setCscInternalAlignmentPar(const ALinePar&);
 
-        const CscInternalAlignmentPar getCscInternalAlignmentPar(int gasGap) const;
         double getGasGapIntAlign_s(int gasGap) const;
         double getGasGapIntAlign_z(int gasGap) const;
         double getGasGapIntAlign_t(int gasGap) const;

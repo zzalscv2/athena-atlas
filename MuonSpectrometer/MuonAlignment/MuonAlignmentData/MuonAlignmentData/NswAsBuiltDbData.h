@@ -7,8 +7,8 @@
 
 // Athena includes
 #include "AthenaKernel/CondCont.h" 
-#include "AthenaKernel/BaseInfo.h" 
-#include <memory>
+#include "AthenaKernel/BaseInfo.h"
+#include "GeoModelUtilities/TransientConstSharedPtr.h"
 #ifndef SIMULATIONBASE
 #include "MuonNSWAsBuilt/StripCalculator.h"
 #include "MuonNSWAsBuilt/StgcStripCalculator.h"
@@ -19,9 +19,9 @@ class NswAsBuiltDbData {
 public:
 #ifndef SIMULATIONBASE
     /// Storage to the micromega as built calculator
-    std::unique_ptr<const NswAsBuilt::StripCalculator> microMegaData{};
+    GeoModel::TransientConstSharedPtr<NswAsBuilt::StripCalculator> microMegaData{};
     /// Storage to the stgc as built calculator
-    std::unique_ptr<const NswAsBuilt::StgcStripCalculator> sTgcData{};
+    GeoModel::TransientConstSharedPtr<NswAsBuilt::StgcStripCalculator> sTgcData{};
 #endif
     NswAsBuiltDbData() = default;
     virtual ~NswAsBuiltDbData() = default;

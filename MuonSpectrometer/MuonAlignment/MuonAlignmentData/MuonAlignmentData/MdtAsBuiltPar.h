@@ -25,12 +25,12 @@ public:
     /**
      * MDT multi-layer index
      */
-    enum multilayer_t { ML1 = 0, ML2, NMLTYPES };
+    enum class multilayer_t { ML1 = 0, ML2, NMLTYPES };
 
     /**
      * MDT tube side
      */
-    enum tubeSide_t {
+    enum class tubeSide_t {
         POS = 0,  // s>0 side
         NEG,      // s<0 side
         NTUBESIDETYPES
@@ -42,7 +42,6 @@ public:
     void setAlignmentParameters(multilayer_t iML, tubeSide_t iTubeSide, float y0, float z0, float alpha, float ypitch, float zpitch,
                                 int stagg);
 
-    bool setFromAscii(const std::string& line);
 
     // Getters
     double y0(multilayer_t iML, tubeSide_t iTubeSide) const { return meas(iML, iTubeSide).y0; }
