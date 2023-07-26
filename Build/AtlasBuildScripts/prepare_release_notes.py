@@ -262,19 +262,23 @@ This sweep contains the following MRs:
 """
 
 def format_mrs_from_gitlab(merged_mrs, group_mrs=False):
+
     # FIXME - we don't want to dump all labels, so have an approved list
     # However should try to think of a way to link to domain_map.py?
     # For the time being, this list was made as follows:
     # import domain_map.py
     # allowed_labels = sorted(domain_map.DOMAIN_MAP.keys())
     # and then edited to remove e.g. Bugfix
-    allowed_labels = ['ACTS', 'Analysis', 'AnalysisTop', 'BTagging', 'Build', 'CI', 'Calorimeter', 'Core', 'DQ', 'Database', 'Derivation', 'Digitization', 'EDM', 'Egamma', 'EventDisplay', 'Externals', 'ForwardDetectors', 'Generators', 'Geometry', 'HGTD', 'ITk', 'InnerDetector', 'JetEtmiss', 'LAr', 'Magnets', 'MuonSpectrometer', 'Other', 'Overlay', 'Powheg', 'QuickAna', 'Reconstruction', 'SUSYTools', 'Simulation', 'Tau', 'Test', 'TestBeam', 'Tile', 'Tools', 'Tracking', 'Trigger', 'TriggerEDM', 'TriggerID',
-                      'TriggerJet', 'TriggerMenu', 'TriggerMinBias', 'changes-trigger-counts', 'changes-derivation-output', 'changes-digitization-output', 'changes-upgrade-output', 'frozen-tier0-violating', 'Run2-AF3-output-changed', 'Run2-DataOverlay-output-changed', 'Run2-DataReco-output-changed', 'Run2-FullSim-output-changed', 'Run2-MCOverlay-output-changed', 'Run2-MCReco-output-changed', 'Run3-DataReco-output-changed', 'Run3-FullSim-output-changed', 'Run3-MCOverlay-output-changed', 'Run3-MCReco-output-changed']
+    def allowed_label(label):
+        allowed_labels = {'ACTS', 'Analysis', 'AnalysisTop', 'BTagging', 'Build', 'CI', 'Calorimeter', 'CaloRinger', 'Core', 'DQ', 'Database', 'Derivation', 'Digitization', 'EDM', 'Egamma', 'EventDisplay', 'Externals', 'ForwardDetectors', 'Generators', 'Geometry', 'HGTD', 'ITk', 'InnerDetector', 'JetEtmiss', 'LAr', 'Magnets', 'MuonSpectrometer', 'Other', 'Overlay', 'Powheg', 'QuickAna', 'Reconstruction', 'SUSYTools', 'Simulation', 'Tau', 'Test', 'TestBeam', 'Tile', 'Tools', 'Tracking', 'Trigger', 'TriggerEDM', 'TriggerID', 'TriggerJet', 'TriggerMenu', 'TriggerMinBias', 'frozen-tier0-violating'}
+        allowed_labels_regex = [re.compile('changes-.*'), re.compile('.*-output-changed')]
+        return label in allowed_labels or any(regex.match(label) for regex in allowed_labels_regex)
+
     lines = []
     if group_mrs:
         grouped_mrs = defaultdict(list)
         for mr in merged_mrs:
-            labels = ['~'+label for label in mr.labels if label in allowed_labels]
+            labels = ['~'+label for label in mr.labels if allowed_label(label)]
             label_key = ", ".join(labels)
             grouped_mrs[label_key].append(
                 '   * !{} : {}'.format(mr.get_id(), mr.title))
@@ -284,7 +288,7 @@ def format_mrs_from_gitlab(merged_mrs, group_mrs=False):
                 lines.append(title)
     else:
         for mr in merged_mrs:
-            labels = ['~'+label for label in mr.labels if label in allowed_labels]
+            labels = ['~'+label for label in mr.labels if allowed_label(label)]
             lines.append(" * !{id} {title} {labels}".format(id=mr.get_id(),
                          title=mr.title, labels=", ".join(labels)))
     return '\n'.join(lines)
