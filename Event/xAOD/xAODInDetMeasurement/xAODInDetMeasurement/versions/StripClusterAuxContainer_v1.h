@@ -23,8 +23,8 @@ class StripClusterAuxContainer_v1 : public AuxContainerBase {
    private:
     /// @name Defining uncalibrated measurement parameters
     /// @{
-    std::vector<Identifier::value_type> identifier;
-    std::vector<IdentifierHash::value_type> identifierHash;
+    std::vector<DetectorIdentType> identifier;
+    std::vector<DetectorIDHashType> identifierHash;
     std::vector<PosAccessor<1>::element_type> localPosition;
     std::vector<CovAccessor<1>::element_type> localCovariance;
     /// @}

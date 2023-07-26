@@ -23,8 +23,8 @@ class PixelClusterAuxContainer_v1 : public AuxContainerBase {
    private:
     /// @name Defining uncalibrated measurement parameters
     /// @{
-    std::vector<Identifier::value_type> identifier;
-    std::vector<IdentifierHash::value_type> identifierHash;
+    std::vector<DetectorIdentType> identifier;
+    std::vector<DetectorIDHashType> identifierHash;
     std::vector<PosAccessor<2>::element_type> localPosition;
     std::vector<CovAccessor<2>::element_type> localCovariance;
     /// @}
