@@ -35,12 +35,8 @@ namespace PixelChargeCalib{
           b.isValid = false;
           return b;
         }
-        auto getInt = [&calibArray] (size_t i)->int {
-          return calibArray[i].get<int>();
-        };
-        auto getFloat = [&calibArray] (size_t i)->float {
-          return calibArray[i].get<float>();
-        };
+        auto getInt = getFunc<int>(calibArray);
+        auto getFloat = getFunc<float>(calibArray); 
         b.threshold.emplace_back(getInt(0), getInt(1), getInt(2), getInt(3));
         b.thresholdLong.emplace_back(getInt(4), getInt(5), getInt(6), getInt(7));
         b.thresholdGanged.emplace_back(getInt(8), getInt(9), getInt(10), getInt(11));
@@ -55,14 +51,13 @@ namespace PixelChargeCalib{
           // search for ToT when charge exceeds threshold
           if (!(element->isDBM())) {
             //charge threshold beyond which linear fit will be used
-            static constexpr float exth = 1e5;   // The calibration function is analytically connected at the threshold exth.
             const int totIdxStart = m_configData->getToTThreshold(barrel_ec,layer);
             const int totIdxEnd = m_configData->getFEI3Latency(barrel_ec,layer);
             // Normal pixels
-            int totlimit = b.idxAtChargeLimit(exth, InDetDD::PixelDiodeType::NORMAL, totIdxStart, totIdxEnd);
+            int totlimit = b.idxAtChargeLimit(m_chargeLimit, InDetDD::PixelDiodeType::NORMAL, totIdxStart, totIdxEnd);
             b.insertLinearParams( InDetDD::PixelDiodeType::NORMAL, totlimit);
             // Ganged pixels
-            totlimit = b.idxAtChargeLimit(exth, InDetDD::PixelDiodeType::GANGED, totIdxStart, totIdxEnd);
+            totlimit = b.idxAtChargeLimit(m_chargeLimit, InDetDD::PixelDiodeType::GANGED, totIdxStart, totIdxEnd);
             b.insertLinearParams( InDetDD::PixelDiodeType::GANGED, totlimit);
           } else {    // DBM
             b.lin.emplace_back(0.f, 0.f);
@@ -80,5 +75,4 @@ namespace PixelChargeCalib{
     }
     return b;
   }
-
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file PixelConditionsAlgorithms/PixelChargeCalibCondAlg.h
@@ -21,12 +21,10 @@
 #include "PixelConditionsData/PixelModuleData.h"
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
 
-#include "InDetIdentifier/PixelID.h"
-
 #include "Gaudi/Property.h"
-namespace PixelChargeCalib{
-  class ChargeCalibrationBundle;
-}
+class PixelID;
+
+
 
 class PixelChargeCalibCondAlg : public AthReentrantAlgorithm {
   public:

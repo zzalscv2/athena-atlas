@@ -15,14 +15,15 @@
 #include "PixelReadoutDefinitions/PixelReadoutDefinitions.h" //diode types
 #include "PixelConditionsData/ChargeCalibParameters.h" //Thresholds, LegacyFitParameters etc
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
-#include <utility> // for std::pair
 #include <vector>
-#include <map>
+#include <map> //also has std::pair
  
 namespace PixelChargeCalib{
   ///bundles of parameters used together in the PixelChargeCalibCondAlg
   struct ChargeCalibrationBundle{
     bool isValid=true;
+    bool useLUT = false;
+    
     std::vector<PixelChargeCalib::Thresholds> threshold;
     std::vector<PixelChargeCalib::Thresholds> thresholdLong;
     std::vector<PixelChargeCalib::Thresholds> thresholdGanged;
@@ -31,10 +32,11 @@ namespace PixelChargeCalib{
     std::vector<PixelChargeCalib::LinearFitParameters> lin;
     std::vector<PixelChargeCalib::LinearFitParameters> linGanged;
     std::vector<PixelChargeCalib::Resolutions> totRes;
+    PixelChargeCalibCondData::IBLModule tot2Charges;
     PixelChargeCalibCondData::CalibrationStrategy  calibrationType{PixelChargeCalibCondData::CalibrationStrategy::RUN1PIX};
     //
     ///constructor with reserve for the vectors, n = number of frontends
-    ChargeCalibrationBundle(size_t n){
+    ChargeCalibrationBundle(size_t n, bool lut = false):useLUT(lut){
       threshold.reserve(n);
       thresholdLong.reserve(n);
       thresholdGanged.reserve(n);

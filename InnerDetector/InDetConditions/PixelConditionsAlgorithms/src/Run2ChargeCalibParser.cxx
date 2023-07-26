@@ -10,7 +10,6 @@
 
 
 namespace{
-  constexpr int halfModuleThreshold{8};
   constexpr size_t FEStringSize{21};
 } // namespace
 
@@ -41,12 +40,9 @@ namespace PixelChargeCalib{
         b.isValid=false;
         return b;
       }
-      auto getInt = [&FEString](size_t i)->int {
-        return std::stoi(FEString[i]);
-      };
-      auto getFloat = [&FEString](size_t i)->float {
-        return std::stof(FEString[i]);
-      };
+      
+      auto getInt = getFunc<int>(FEString);
+      auto getFloat = getFunc<float>(FEString);
       //
       b.threshold.emplace_back(getInt(1), getInt(2), getInt(3), getInt(4));
       b.thresholdLong.emplace_back(getInt(5), getInt(6), getInt(7), getInt(8));
@@ -61,14 +57,13 @@ namespace PixelChargeCalib{
         const auto & [barrel_ec, layer] = getBecAndLayer(wafer_hash);
         // search for ToT when charge exceeds threshold
         int totlimit = -1;
-        static constexpr float exth = 1e5;   // The calibration function is analytically connected at the threshold exth.
         int start =  m_configData->getToTThreshold(barrel_ec,layer);
         int end = m_configData->getFEI3Latency(barrel_ec,layer);
         // Normal pixels
-        totlimit = b.idxAtChargeLimit(exth, InDetDD::PixelDiodeType::NORMAL, start, end);
+        totlimit = b.idxAtChargeLimit(m_chargeLimit, InDetDD::PixelDiodeType::NORMAL, start, end);
         b.insertLinearParams(InDetDD::PixelDiodeType::NORMAL, totlimit);
         // Ganged pixels
-        totlimit = b.idxAtChargeLimit(exth, InDetDD::PixelDiodeType::GANGED, start, end);
+        totlimit = b.idxAtChargeLimit(m_chargeLimit, InDetDD::PixelDiodeType::GANGED, start, end);
         b.insertLinearParams(InDetDD::PixelDiodeType::GANGED, totlimit);
       } else {
         b.lin.emplace_back(0.f, 0.f);
