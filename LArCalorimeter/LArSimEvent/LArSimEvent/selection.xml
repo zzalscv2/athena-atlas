@@ -7,4 +7,7 @@
   <class name="std::vector<LArHit*>::iterator" />
   <class name="AthenaHitsVector<LArHit>" />
   <class name="LArHitContainer" id="32703AED-CAA5-45ED-B804-8556900CA6B5"  />
+  <exclusion>
+    <class pattern="*iterator_traits*" />
+  </exclusion>
 </lcgdict>
