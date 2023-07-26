@@ -15,9 +15,6 @@ def TRTHitGeneratorSequence(flags):
     from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
     TrigEgammaKeys = getTrigEgammaKeys()
 
-    from InDetTrigRecExample import InDetTrigCA
-    InDetTrigCA.InDetTrigConfigFlags = flags
-
     """ hipTRT step ....."""
     InViewRoIs = "TRTHitGenerator"
     # EVCreator:
@@ -35,7 +32,8 @@ def TRTHitGeneratorSequence(flags):
     trtViewsMaker.RequireParentView = True
    
     # view data verifier
-    ViewVerify = CfgMgr.AthViews__ViewDataVerifier("TRTHitGeneratorViewDataVerifier")
+    ViewVerifyName = "TRTHitGeneratorViewDataVerifier"
+    ViewVerify = CfgMgr.AthViews__ViewDataVerifier(ViewVerifyName)
     ViewVerify.DataObjects = [('TrigRoiDescriptorCollection' , 'StoreGateSvc+TRTHitGenerator'),
                              ]
     if flags.Input.isMC:
@@ -44,9 +42,20 @@ def TRTHitGeneratorSequence(flags):
         ViewVerify.DataObjects += [( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
 
     ViewVerify.DataObjects += [( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )]
-    # calling trtRIOMaker
-    from TrigInDetConfig.InDetTrigPrecisionTracking import trtRIOMaker_builder
-    trtInviewAlgs = trtRIOMaker_builder(flags, signature = "electrontrt", config = None, rois=InViewRoIs)
+
+    from AthenaCommon.Logging import logging
+    log = logging.getLogger(__name__)
+    from TrigInDetConfig.utils import getFlagsForActiveConfig
+    flagsWithTrk = getFlagsForActiveConfig(flags, 'photon', log)
+
+    from TriggerMenuMT.HLT.Config.MenuComponents import extractAlgorithmsAndAppendCA
+    from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
+
+    seq = InDetTrigSequence(flagsWithTrk, flagsWithTrk.Tracking.ActiveConfig.input_name, 
+                            rois = trtViewsMaker.InViewRoIs, inView = ViewVerifyName)
+
+    ca = seq.dataPreparationTRT()
+    trtInviewAlgs = extractAlgorithmsAndAppendCA(ca)
     
     trtHTHFex = TrigTRTHTHCounterFex(flags, name="TrigTRTH_fex",
                                      RoIs = trtViewsMaker.InViewRoIs,
