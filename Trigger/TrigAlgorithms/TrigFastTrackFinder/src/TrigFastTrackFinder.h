@@ -251,8 +251,20 @@ protected:
   StatusCode findSPSeeds( const EventContext&, const std::vector<float>&, const std::vector<float>&, const std::vector<int>&, 
 			  const std::vector<int>&, std::vector<float>&, std::vector<float>& ) const;
   int   getSPLayer(int, float) const;
-  float deltaR(float, float, float, float) const;
+  float deltaR2(float, float, float, float) const;
 
+  struct trackInfo {
+    int n_hits_inner = 0;
+    int n_hits_pix = 0;
+    int n_hits_sct = 0;
+    int n_hits_innermost = 0;
+    float ptGeV = 0; 
+    float a0beam = 0;
+    float eta = 0; 
+    float phi0 = 0;
+  };
+
+  bool isGoodTrackUTT(const Trk::Track* track, trackInfo& theTrackInfo, const float shift_x, const float shift_y) const;
   // dEdx calculation
   bool m_dodEdxTrk;
   StatusCode calcdEdx(const EventContext&, const TrackCollection&) const;
