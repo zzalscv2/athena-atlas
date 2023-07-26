@@ -176,15 +176,14 @@ namespace Analysis {
     const xAOD::Vertex& PrimaryVtx = *primaryVertex;
 
     Trk::VxSecVertexInfoContainer::const_iterator infoSVIter = h_VxSecVertexInfoName->begin();
-    for (xAOD::JetContainer::const_iterator jetIter = h_JetCollectionName->begin(); jetIter != h_JetCollectionName->end(); ++jetIter, ++infoSVIter) {
-      const xAOD::Jet& jetToTag = **jetIter;
-      const Trk::VxSecVertexInfo* myVertexInfo = *infoSVIter;
 
-      if(basename == "MSV") {
+    if(basename == "MSV") {
+      for (const xAOD::Jet* jetToTag : *h_JetCollectionName) {
+        const Trk::VxSecVertexInfo* myVertexInfo = *infoSVIter++;
         if(myVertexInfo != nullptr) {
           if(const Trk::VxSecVKalVertexInfo* myVertexInfoVKal = dynamic_cast<const Trk::VxSecVKalVertexInfo*>(myVertexInfo)) {
             ATH_MSG_DEBUG("#BTAG# Found VKalVertexInfo information");
-            StatusCode sc = m_MSVvarFactory->createMSVContainer(jetToTag, myVertexInfoVKal, &(*h_BTagSVCollectionName), PrimaryVtx);
+            StatusCode sc = m_MSVvarFactory->createMSVContainer(*jetToTag, myVertexInfoVKal, &(*h_BTagSVCollectionName), PrimaryVtx);
             if(sc.isFailure()){
                ATH_MSG_ERROR("#BTAG# error filling variables in MSVVariablesFactory" );
               return sc;
@@ -194,9 +193,13 @@ namespace Analysis {
             ATH_MSG_DEBUG("#BTAG# dynamic_cast failed for a non-nullptr myVertexInfo!");
           }  
         }
-      } 
-      else if(basename == "SV1" || basename == "SV1Flip")  { //SV1
-        SG::WriteDecorHandle<xAOD::JetContainer,std::vector<ElementLink< xAOD::VertexContainer> > > h_jetSVLinkName(m_jetSVLinkName, ctx);
+      }
+    }
+
+    else if(basename == "SV1" || basename == "SV1Flip")  { //SV1
+      SG::WriteDecorHandle<xAOD::JetContainer,std::vector<ElementLink< xAOD::VertexContainer> > > h_jetSVLinkName(m_jetSVLinkName, ctx);
+      for (const xAOD::Jet* jetToTag : *h_JetCollectionName) {
+        const Trk::VxSecVertexInfo* myVertexInfo = *infoSVIter++;
         std::vector< ElementLink< xAOD::VertexContainer > > SVertexLinks;
         if(myVertexInfo != nullptr) {
           if(const Trk::VxSecVKalVertexInfo* myVertexInfoVKal = dynamic_cast<const Trk::VxSecVKalVertexInfo*>(myVertexInfo)) {
@@ -211,10 +214,14 @@ namespace Analysis {
             ATH_MSG_DEBUG("#BTAG# dynamic_cast failed for a non-nullptr myVertexInfo!");
           }
         }
-        h_jetSVLinkName(jetToTag) = SVertexLinks;
+        h_jetSVLinkName(*jetToTag) = SVertexLinks;
       }
-      else if(basename == "JetFitter" || basename == "JetFitterFlip") {
-        SG::WriteDecorHandle<xAOD::JetContainer,std::vector<ElementLink< xAOD::BTagVertexContainer> > > h_jetSVLinkName(m_jetSVLinkName, ctx);
+    }
+
+    else if(basename == "JetFitter" || basename == "JetFitterFlip") {
+      SG::WriteDecorHandle<xAOD::JetContainer,std::vector<ElementLink< xAOD::BTagVertexContainer> > > h_jetSVLinkName(m_jetSVLinkName, ctx);
+      for (const xAOD::Jet* jetToTag : *h_JetCollectionName) {
+        const Trk::VxSecVertexInfo* myVertexInfo = *infoSVIter++;
         std::vector< ElementLink< xAOD::BTagVertexContainer > > JFVtxLinks;
         if(myVertexInfo != nullptr) {
           if(const Trk::VxJetFitterVertexInfo* myVertexInfoJetFitter = dynamic_cast<const Trk::VxJetFitterVertexInfo*>(myVertexInfo)) {
@@ -229,12 +236,13 @@ namespace Analysis {
             ATH_MSG_DEBUG("#BTAG# dynamic_cast failed for a non-nullptr myVertexInfo!");
           }
         }
-        h_jetSVLinkName(jetToTag) = JFVtxLinks;
-      } 
-      else {
-        ATH_MSG_ERROR("#BTAG# JetSecVertexingAlg encounters an unknown basename: " << basename);
+        h_jetSVLinkName(*jetToTag) = JFVtxLinks;
       }
-    }// for loop on jets
+    }
+    
+    else {
+      ATH_MSG_ERROR("#BTAG# JetSecVertexingAlg encounters an unknown basename: " << basename);
+    }
 
     return StatusCode::SUCCESS;
   } 
