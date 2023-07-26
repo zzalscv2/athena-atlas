@@ -30,7 +30,7 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "InDetRIO_OnTrack/SiClusterOnTrack.h"
 
@@ -660,7 +660,7 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
       if (std::abs(charge) < 0.5) {
         continue;
       }
-      if (particle->status() % 1000 != 1) {
+      if (!MC::isStable(particle)) {
         continue;
       }
 
@@ -754,7 +754,7 @@ void FPGATrackSimSGToRawHitsTool::getTruthInformation(InDetSimDataCollection::co
     const float genEta = particleLink->momentum().pseudoRapidity();
     const float genPt = particleLink->momentum().perp(); // MeV
     // reject unstable particles
-    if (particleLink->status() % 1000 != 1) { continue; }
+    if (!MC::isStable(particleLink)) { continue; }
     // reject secondaries and low pT (<400 MeV) pileup
     if (HepMC::is_simulation_particle(particleLink.barcode()) ||particleLink.barcode() == 0) { continue; }
     // reject far forward particles
