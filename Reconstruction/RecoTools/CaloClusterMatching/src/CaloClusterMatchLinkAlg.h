@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // CaloClusterMatchLinkAlg.h 
@@ -20,6 +20,7 @@
 #include "AsgTools/ToolHandle.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "CaloClusterMatching/ICaloClusterMatchingTool.h"
+#include "StoreGate/WriteDecorHandleKey.h"
 
 namespace ClusterMatching {
   class CaloClusterMatchLinkAlg
@@ -47,6 +48,13 @@ namespace ClusterMatching {
     Gaudi::Property<bool> m_useLeadCellEtaPhi{this,"UseLeadCellEtaPhi",false};
     Gaudi::Property<int> m_clusterSortMethod{this,"ClusterSortMethod",(int)MatchedE};
     ToolHandle<ICaloClusterMatchingTool> m_clusterMatch{this,"ClusterMatchTool","ClusterMatching::CaloClusterMatchingTool/CaloClusterMatch","Tool for the acutal matching"};
+
+    //The decorator
+    SG::WriteDecorHandleKey<xAOD::CaloClusterContainer> m_elementLinkName{
+      this,
+      "ElementLinkName",
+      "MuonClusterCollection.constituentClusterLinks"
+    };
 
   }; 
 }

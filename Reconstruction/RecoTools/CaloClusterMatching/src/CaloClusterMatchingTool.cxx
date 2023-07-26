@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // CaloClusterMatchingTool.cxx
@@ -38,11 +38,8 @@ namespace ClusterMatching {
                     "work with -- aborting");
       return StatusCode::FAILURE;
     }
-    //adapt WriteDecorHandleKey to input name of reference clusters
-    m_elementLinkName =  m_referenceClustersName + ".constituentClusterLinks";
 
     ATH_CHECK(m_clustersIn.initialize());
-    ATH_CHECK( m_elementLinkName.initialize() );
 
     return StatusCode::SUCCESS;
   }
@@ -201,12 +198,12 @@ namespace ClusterMatching {
   // set ElementLinks to clusters from the configured cluster container that match the reference cluster
   // works via getMatchedClusters
   // return true if matchedClusters list is non-empty
-  StatusCode CaloClusterMatchingTool::linkMatchedClusters(const xAOD::CaloCluster& refCluster,
+  StatusCode CaloClusterMatchingTool::linkMatchedClusters(elementLinkDecorHandle_t& elementLinkDec,
+                                                          const xAOD::CaloCluster& refCluster,
 							  const std::vector<const xAOD::CaloCluster*>& testClusters,
 							  bool (*gtrthan)(const std::pair<const xAOD::CaloCluster*,float>& pair1,
 									  const std::pair<const xAOD::CaloCluster*,float>& pair2)) const
   {
-    SG::WriteDecorHandle<xAOD::CaloClusterContainer,std::vector<ElementLink<xAOD::CaloClusterContainer> > >elementLinkDec(m_elementLinkName);
     std::vector<std::pair<const CaloCluster*,float> > matchedClustersAndE;
     std::vector<ElementLink<CaloClusterContainer> > tcLinks;
     std::vector<float> tcSharedE;
@@ -231,13 +228,13 @@ namespace ClusterMatching {
   // works via getMatchedClusters
   // return true if matchedClusters list is non-empty
   StatusCode CaloClusterMatchingTool::linkMatchedClusters(
+    elementLinkDecorHandle_t& elementLinkDec,
     const xAOD::CaloCluster& refCluster,
     const TopoClusterMap& tcmap,
     bool useLeadingCellEtaPhi,
     bool (*gtrthan)(const std::pair<const xAOD::CaloCluster*,float>& pair1,
                     const std::pair<const xAOD::CaloCluster*,float>& pair2)) const
   {
-    SG::WriteDecorHandle<xAOD::CaloClusterContainer,std::vector<ElementLink<xAOD::CaloClusterContainer> > > elementLinkDec(m_elementLinkName);
     std::vector<std::pair<const CaloCluster*,float> > matchedClustersAndE;
     std::vector<ElementLink<CaloClusterContainer> > tcLinks;
     std::vector<float> tcSharedE;

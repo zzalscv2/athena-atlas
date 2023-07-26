@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // CaloClusterMatchingTool.h 
@@ -16,7 +16,7 @@
 
 // FrameWork includes
 #include "AsgTools/AsgTool.h"
-#include "StoreGate/WriteDecorHandleKey.h"
+#include "StoreGate/WriteDecorHandle.h"
 
 // CaloClusterMatching includes
 #include "CaloClusterMatching/TopoClusterMap.h"
@@ -97,7 +97,8 @@ namespace ClusterMatching {
     // set ElementLinks to clusters from the configured cluster container that match the reference cluster
     // works via getMatchedClusters
     // return true if matchedClusters list is non-empty
-    StatusCode linkMatchedClusters(const xAOD::CaloCluster& refCluster,
+    StatusCode linkMatchedClusters(elementLinkDecorHandle_t& elementLinkDec,
+                                   const xAOD::CaloCluster& refCluster,
 				   const std::vector<const xAOD::CaloCluster*>& testClusters,
 				   bool (*gtrthan)(const std::pair<const xAOD::CaloCluster*,float>& pair1,
 						   const std::pair<const xAOD::CaloCluster*,float>& pair2)) const override final;
@@ -105,7 +106,8 @@ namespace ClusterMatching {
     // set ElementLinks to clusters from the configured cluster container that match the reference cluster
     // works via getMatchedClusters
     // return true if matchedClusters list is non-empty
-    StatusCode linkMatchedClusters(const xAOD::CaloCluster& refCluster,
+    StatusCode linkMatchedClusters(elementLinkDecorHandle_t& elementLinkDec,
+                                   const xAOD::CaloCluster& refCluster,
 				   const TopoClusterMap& tcmap,
 				   bool useLeadingCellEtaPhi,
 				   bool (*gtrthan)(const std::pair<const xAOD::CaloCluster*,float>& pair1,
@@ -123,24 +125,6 @@ namespace ClusterMatching {
       "CaloCalTopoClusters",
       "The CaloCluster collection to match to "
     };
-    // The typical usage is to decorate the
-    // Muon Clusters with element links to the topological
-    // clusters.
-    // Ala what e/gamma clusters have by default
-    Gaudi::Property<std::string> m_referenceClustersName{
-      this,
-      "ReferenceClusterToDecorate",
-      "MuonClusterCollection",
-      "The name of the collection the reference clusters belong to"
-    };
- 
-    //The decorator
-    SG::WriteDecorHandleKey<xAOD::CaloClusterContainer> m_elementLinkName{
-      this,
-      "ElementLinkName",
-      "MuonClusterCollection.constituentClusterLinks"
-    };
-
   }; 
 }
 
