@@ -337,9 +337,6 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
         // Register the MuonDetectorNode instance with the Transient Detector Store
         MuonGM::MuonDetectorManager *theManager = theFactory.getDetectorManager();
        
-        if ((theManager->initCSCInternalAlignmentMap()).isFailure())
-            return StatusCode::FAILURE; // does nothing other then checking the size (map is built while reading data from the primary source)
-
         if (m_fillCache_initTime) {
             theManager->fillCache();
         } else {

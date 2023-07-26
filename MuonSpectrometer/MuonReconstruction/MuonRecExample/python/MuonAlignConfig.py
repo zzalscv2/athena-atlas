@@ -62,27 +62,25 @@ condSequence+=MuonAlignAlg
 
 MuonDetectorTool.FillCacheInitTime = 0 # We do not need to fill cache for the MuonGeoModel MuonDetectorTool, just for the condAlg
 
-# Condition DB is needed only if A-lines or B-lines are requested
-if not (muonAlignFlags.UseAlines=='none' and muonAlignFlags.UseBlines=='none'):
-    MuonDetectorTool.UseConditionDb = 1
+
+# here define if As-Built (MDT chamber alignment) are enabled
+applyNswAsBuilt = False
+applyMdtAsBuilt = False
+applyILines = False
 
 # here define if I-lines (CSC internal alignment) are enabled
 if muonAlignFlags.UseIlines and MuonGeometryFlags.hasCSC(): 
     if 'HLT' in globalflags.ConditionsTag() :
         logMuon.info("Reading CSC I-Lines from layout - special configuration for COMP200 in HLT setup.")
-        MuonDetectorTool.UseIlinesFromGM = True
-        MuonDetectorTool.EnableCscInternalAlignment = False
+        applyILines = False
     else :
         logMuon.info("Reading CSC I-Lines from conditions database.")
         conddb.addFolderSplitOnline('MUONALIGN','/MUONALIGN/Onl/CSC/ILINES','/MUONALIGN/CSC/ILINES',className='CondAttrListCollection')
-        MuonDetectorTool.UseIlinesFromGM = False
-        MuonDetectorTool.EnableCscInternalAlignment = True
-        MuonAlignAlg.ParlineFolders += ["/MUONALIGN/CSC/ILINES"]
-        MuonAlignAlg.ILinesFromCondDB = True
-
-# here define if As-Built (MDT chamber alignment) are enabled
-applyNswAsBuilt = False
-applyMdtAsBuilt = False
+        applyILines = True
+        from MuonCondAlg.MuonCondAlgConf import CscILinesCondAlg
+        if not hasattr(condSequence, "CscILinesCondAlg"):
+            condSequence+=CscILinesCondAlg("CscILinesCondAlg")
+ 
 if muonAlignFlags.UseAsBuilt:
     if conddb.dbdata == 'COMP200' or conddb.dbmc == 'COMP200' or \
        'HLT' in globalflags.ConditionsTag() or conddb.isOnline or conddb.isMC:
@@ -92,7 +90,9 @@ if muonAlignFlags.UseAsBuilt:
         logMuon.info("Reading As-Built parameters from conditions database")
         applyMdtAsBuilt = True        
         conddb.addFolder('MUONALIGN_OFL','/MUONALIGN/MDT/ASBUILTPARAMS' ,className='CondAttrListCollection')
-        MuonAlignAlg.ParlineFolders += ["/MUONALIGN/MDT/ASBUILTPARAMS"]
+        from MuonCondAlg.MuonCondAlgConf import MdtAsBuiltCondAlg
+        if not hasattr(condSequence, "MdtAsBuiltCondAlg"):
+            condSequence+=MdtAsBuiltCondAlg("MdtAsBuiltCondAlg")
         if CommonGeometryFlags.Run not in ["RUN1","RUN2"]: 
             applyNswAsBuilt = True
             # TODO: remove hard-coded tag once the global tag is ready
@@ -122,5 +122,6 @@ if not hasattr(condSequence, "MuonDetectorCondAlg"):
     MuonDetectorManagerCond.MuonDetectorTool = MuonDetectorTool
     MuonDetectorManagerCond.applyNswAsBuilt = applyNswAsBuilt
     MuonDetectorManagerCond.applyMdtAsBuilt = applyMdtAsBuilt
+    MuonDetectorManagerCond.applyILines = applyILines
     MuonDetectorManagerCond.MuonDetectorTool.FillCacheInitTime = 1 # CondAlg cannot update itself later - not threadsafe
     condSequence+=MuonDetectorManagerCond

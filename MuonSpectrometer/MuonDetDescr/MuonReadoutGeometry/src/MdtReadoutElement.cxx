@@ -1121,18 +1121,21 @@ namespace MuonGM {
                 << endmsg;
 #endif
 
-        static const int nsid = 2;
-        MdtAsBuiltPar::tubeSide_t tubeSide[nsid] = {MdtAsBuiltPar::POS, MdtAsBuiltPar::NEG};
-        Amg::Vector3D wireEnd[nsid] = {locAMDBWireEndP, locAMDBWireEndN};
-        MdtAsBuiltPar::multilayer_t ml = (multilayer == 1) ? MdtAsBuiltPar::ML1 : MdtAsBuiltPar::ML2;
+        using tubeSide_t = MdtAsBuiltPar::tubeSide_t;
+        using multilayer_t = MdtAsBuiltPar::multilayer_t;
+        static constexpr int nsid = 2;
+        static constexpr std::array<tubeSide_t, nsid> tubeSide {tubeSide_t::POS, tubeSide_t::NEG};
+        std::array<Amg::Vector3D, nsid> wireEnd{locAMDBWireEndP, locAMDBWireEndN};
+        
+        multilayer_t ml = (multilayer == 1) ? multilayer_t::ML1 : multilayer_t::ML2;
 
         for (int isid = 0; isid < nsid; ++isid) {  // first s>0 then s<0
             // Compute the reference for the as-built parameters
             double xref = 0.;
             double yref = 0.;
             double zref = 0.;
-            int ref_layer = (ml == MdtAsBuiltPar::ML1) ? m_nlayers : 1;
-            double y_offset = (ml == MdtAsBuiltPar::ML1) ? outerTubeRadius() : -outerTubeRadius();
+            int ref_layer = (ml == multilayer_t::ML1) ? m_nlayers : 1;
+            double y_offset = (ml == multilayer_t::ML1) ? outerTubeRadius() : -outerTubeRadius();
             double xmin = *std::min_element(m_firstwire_x.begin(), m_firstwire_x.begin() + m_nlayers) - outerTubeRadius();
             if (m_inBarrel) {
                 xref = -m_Rsize / 2. + m_firstwire_y[ref_layer - 1] + y_offset;
@@ -1150,7 +1153,7 @@ namespace MuonGM {
                 reference_point = reference_point + Amg::Vector3D(-0.5 * getNominalTubeLengthWoCutouts(ref_layer, 1), 0., 0.);
 
             int layer_delta = tubelayer;
-            if (ml == MdtAsBuiltPar::ML1) layer_delta = m_nlayers + 1 - tubelayer;
+            if (ml == multilayer_t::ML1) layer_delta = m_nlayers + 1 - tubelayer;
 
             // Get the As-Built parameters for this ML and side of the chamber
             double zpitch = params->zpitch(ml, tubeSide[isid]);
@@ -1193,7 +1196,7 @@ namespace MuonGM {
             }
 
             // Save the result
-            if (tubeSide[isid] == MdtAsBuiltPar::POS)
+            if (tubeSide[isid] == tubeSide_t::POS)
                 locAMDBWireEndP = ret;
             else
                 locAMDBWireEndN = ret;

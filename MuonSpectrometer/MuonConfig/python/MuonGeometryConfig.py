@@ -94,8 +94,7 @@ def MuonDetectorToolCfg(flags, name = "MuonDetectorTool", **kwargs):
 
 def MuonAlignmentCondAlgCfg(flags, name="MuonAlignmentCondAlg", **kwargs):
     acc = ComponentAccumulator()
-    from IOVDbSvc.IOVDbSvcConfig import addFolders
-    MuonAlignmentCondAlg=CompFactory.MuonAlignmentCondAlg
+    from IOVDbSvc.IOVDbSvcConfig import addFolders    
     if (flags.Common.isOnline and not flags.Input.isMC):
         acc.merge(addFolders( flags, ['/MUONALIGN/Onl/MDT/BARREL'], 'MUONALIGN', className='CondAttrListCollection'))
         acc.merge(addFolders( flags, ['/MUONALIGN/Onl/MDT/ENDCAP/SIDEA'], 'MUONALIGN', className='CondAttrListCollection'))
@@ -109,8 +108,6 @@ def MuonAlignmentCondAlgCfg(flags, name="MuonAlignmentCondAlg", **kwargs):
         acc.merge(addFolders( flags, ['/MUONALIGN/TGC/SIDEA'], 'MUONALIGN_OFL', className='CondAttrListCollection'))
         acc.merge(addFolders( flags, ['/MUONALIGN/TGC/SIDEC'], 'MUONALIGN_OFL', className='CondAttrListCollection'))
 
-    MuonAlign = MuonAlignmentCondAlg()
-
 
     ParlineFolders = ["/MUONALIGN/MDT/BARREL",
                       "/MUONALIGN/MDT/ENDCAP/SIDEA",
@@ -119,31 +116,16 @@ def MuonAlignmentCondAlgCfg(flags, name="MuonAlignmentCondAlg", **kwargs):
                       "/MUONALIGN/TGC/SIDEC"]
 
     # here define if I-lines (CSC internal alignment) are enabled
-    if flags.Muon.Align.UseILines and flags.Detector.GeometryCSC:
-        if 'HLT' in flags.IOVDb.GlobalTag:
-            #logMuon.info("Reading CSC I-Lines from layout - special configuration for COMP200 in HLT setup.")
-            kwargs.setdefault("ILinesFromCondDB", False)
-        else:
-            #logMuon.info("Reading CSC I-Lines from conditions database.")
-            if (flags.Common.isOnline and not flags.Input.isMC):
-                acc.merge(addFolders( flags, ['/MUONALIGN/Onl/CSC/ILINES'], 'MUONALIGN', className='CondAttrListCollection'))
-            else:
-                acc.merge(addFolders( flags, ['/MUONALIGN/CSC/ILINES'], 'MUONALIGN_OFL', className='CondAttrListCollection'))
-            ParlineFolders += ["/MUONALIGN/CSC/ILINES"]
-            kwargs.setdefault("ILinesFromCondDB", True)
-
+    acc.merge(CscILineCondAlgCfg(flags))
     # here define if As-Built (MDT chamber alignment) are enabled
     if flags.Muon.Align.UseAsBuilt:
         if flags.IOVDb.DatabaseInstance == 'COMP200' or \
-                'HLT' in flags.IOVDb.GlobalTag or flags.Common.isOnline :
-            #logMuon.info("No MDT As-Built parameters applied.")
+                'HLT' in flags.IOVDb.GlobalTag or flags.Common.isOnline :           
             pass
-        else :
-            #logMuon.info("Reading As-Built parameters from conditions database")
-            acc.merge(addFolders( flags, '/MUONALIGN/MDT/ASBUILTPARAMS' , 'MUONALIGN_OFL', className='CondAttrListCollection'))
-            ParlineFolders += ["/MUONALIGN/MDT/ASBUILTPARAMS"]
+        else :            
+            acc.merge(MdtAsBuiltCondAlgCfg(flags))
             acc.merge(NswAsBuiltCondAlgCfg(flags))
-            pass
+    
     kwargs.setdefault("ParlineFolders", ParlineFolders)
     MuonAlign = CompFactory.MuonAlignmentCondAlg(name, **kwargs)
     acc.addCondAlgo(MuonAlign, primary = True)
@@ -163,15 +145,38 @@ def NswAsBuiltCondAlgCfg(flags, name = "NswAsBuiltCondAlg", **kwargs):
     if flags.GeoModel.Run < LHCPeriod.Run3:
         return result
     ##TODO: remove hard-coded tag once the global tag is ready
-    from IOVDbSvc.IOVDbSvcConfig import addFolders
-    result.merge(addFolders( flags, '/MUONALIGN/ASBUILTPARAMS/MM'  , 'MUONALIGN_OFL', className='CondAttrListCollection', tag='MuonAlignAsBuiltParamsMm-RUN3-01-00'))
+    if "readFromJSON" not in kwargs or not kwargs["readFromJSON"]:
+        from IOVDbSvc.IOVDbSvcConfig import addFolders
+        result.merge(addFolders( flags, '/MUONALIGN/ASBUILTPARAMS/MM', 'MUONALIGN_OFL', className='CondAttrListCollection', tag='MuonAlignAsBuiltParamsMm-RUN3-01-00'))
+        result.merge(addFolders( flags, '/MUONALIGN/ASBUILTPARAMS/STGC', 'MUONALIGN_OFL', className='CondAttrListCollection', tag='MUONALIGN_STG_ASBUILT-001-03'))
     ### Disable the STGC as-built parameters (Keep the path if we want to add later fully validated As-built)
-    result.merge(addFolders( flags, '/MUONALIGN/ASBUILTPARAMS/STGC', 'MUONALIGN_OFL', className='CondAttrListCollection', tag='MUONALIGN_STG_ASBUILT-001-03'))
     kwargs.setdefault("ReadSTgcAsBuiltParamsKey", "")
     the_alg = CompFactory.NswAsBuiltCondAlg(name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)     
     return result
 
+def MdtAsBuiltCondAlgCfg(flags, name="MdtAsBuiltCondAlg", **kwargs):
+    result = ComponentAccumulator()
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    if "readFromJSON" not in kwargs or not kwargs["readFromJSON"]:
+        result.merge(addFolders( flags, '/MUONALIGN/MDT/ASBUILTPARAMS' , 'MUONALIGN_OFL', className='CondAttrListCollection'))
+    the_alg = CompFactory.MdtAsBuiltCondAlg(name = name, **kwargs)
+    result.addCondAlgo(the_alg, primary = True)    
+    return result
+
+def CscILineCondAlgCfg(flags, name="CscILinesCondAlg", **kwargs):
+    result = ComponentAccumulator()
+    if not flags.Muon.Align.UseILines or not flags.Detector.GeometryCSC or 'HLT' in flags.IOVDb.GlobalTag: 
+        return result
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    if (flags.Common.isOnline and not flags.Input.isMC):
+        result.merge(addFolders( flags, ['/MUONALIGN/Onl/CSC/ILINES'], 'MUONALIGN', className='CondAttrListCollection'))
+    else:
+        result.merge(addFolders( flags, ['/MUONALIGN/CSC/ILINES'], 'MUONALIGN_OFL', className='CondAttrListCollection'))
+    
+    the_alg = CompFactory.CscILinesCondAlg(name, **kwargs)
+    result.addCondAlgo(the_alg, primary = True)
+    return result 
 def MuonDetectorCondAlgCfg(flags, name = "MuonDetectorCondAlg", **kwargs):
     result = ComponentAccumulator()
 
@@ -185,9 +190,9 @@ def MuonDetectorCondAlgCfg(flags, name = "MuonDetectorCondAlg", **kwargs):
         result.merge(MuonAlignmentCondAlgCfg(flags))
     kwargs.setdefault("applyALines", len([alg for alg in result.getCondAlgos() if alg.name == "MuonAlignmentCondAlg"])>0)
     kwargs.setdefault("applyBLines", len([alg for alg in result.getCondAlgos() if alg.name == "MuonAlignmentCondAlg"])>0)
+    kwargs.setdefault("applyILines", len([alg for alg in result.getCondAlgos() if alg.name == "CscILinesCondAlg"])>0)
     kwargs.setdefault("applyNswAsBuilt", len([alg for alg in result.getCondAlgos() if alg.name == "NswAsBuiltCondAlg"])>0)
-    kwargs.setdefault("applyMdtAsBuilt", flags.Muon.Align.UseAsBuilt and not (flags.IOVDb.DatabaseInstance == 'COMP200' or \
-                                         'HLT' in flags.IOVDb.GlobalTag or flags.Common.isOnline or flags.Input.isMC))
+    kwargs.setdefault("applyMdtAsBuilt", len([alg for alg in result.getCondAlgos() if alg.name == "MdtAsBuiltCondAlg"])>0)
 
    
     

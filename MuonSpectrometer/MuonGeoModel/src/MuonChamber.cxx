@@ -1154,7 +1154,6 @@ namespace MuonGM {
                 
 
                 // set alignment parameters for the wire layers
-                det->setCscInternalAlignmentParams();
                 manager->addCscReadoutElement(det);
             }
 

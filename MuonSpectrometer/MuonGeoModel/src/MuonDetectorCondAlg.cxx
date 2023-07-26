@@ -36,7 +36,7 @@ StatusCode MuonDetectorCondAlg::initialize() {
 
     ATH_CHECK(m_readALineKey.initialize(m_applyALines));
     ATH_CHECK(m_readBLineKey.initialize(m_applyBLines));
-    ATH_CHECK(m_readILineKey.initialize(MuonDetMgrDS->applyCscIntAlignment()));
+    ATH_CHECK(m_readILineKey.initialize(m_applyILines));
     ATH_CHECK(m_readMdtAsBuiltKey.initialize(m_applyMdtAsBuilt));
     ATH_CHECK(m_readNswAsBuiltKey.initialize(m_applyNswAsBuilt));
     ATH_CHECK(m_condMmPassivKey.initialize(m_applyMmPassivation));
@@ -103,8 +103,8 @@ StatusCode MuonDetectorCondAlg::execute(const EventContext& ctx) const {
     // Update CSC Internal Alignment if requested
     // =======================
 
-    if (MuonMgrData->applyCscIntAlignment()) {
-        SG::ReadCondHandle<CscInternalAlignmentMapContainer> readILinesHandle{m_readILineKey, ctx};
+    if (!m_readILineKey.empty()) {
+        SG::ReadCondHandle<ALineContainer> readILinesHandle{m_readILineKey, ctx};
         if (!readILinesHandle.isValid()){
             ATH_MSG_FATAL("Failed to retrieve the CSC I-line container "<<readILinesHandle.fullKey());
             return StatusCode::FAILURE;
@@ -117,7 +117,7 @@ StatusCode MuonDetectorCondAlg::execute(const EventContext& ctx) const {
     // Update MdtAsBuiltMapContainer if requested BEFORE updating ALINES and BLINES
     // =======================
     if (!m_readMdtAsBuiltKey.empty()) {
-        SG::ReadCondHandle<MdtAsBuiltMapContainer> readMdtAsBuiltHandle{m_readMdtAsBuiltKey, ctx};
+        SG::ReadCondHandle<MdtAsBuiltContainer> readMdtAsBuiltHandle{m_readMdtAsBuiltKey, ctx};
         if (!readMdtAsBuiltHandle.isValid()) {
             ATH_MSG_FATAL("Failed to load Mdt as-built container "<<m_readMdtAsBuiltKey.fullKey());
             return StatusCode::FAILURE;

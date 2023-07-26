@@ -34,7 +34,6 @@ public:
     /// @brief station Name
     std::string AmdbStation() const;
 
-    void isNew(bool){};
 private:
     Identifier m_id{0};
     std::string m_station{};

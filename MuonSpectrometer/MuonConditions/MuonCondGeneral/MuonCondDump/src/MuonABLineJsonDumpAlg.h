@@ -1,14 +1,12 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
+#ifndef MuonCondDump_MuonABLineJsonDumpAlg_H
+#define MuonCondDump_MuonABLineJsonDumpAlg_H
 
 /*
  * Algorithm to dump the A & B line container content into a JSON file
 */
-
-#ifndef MuonCondDump_MuonABLineJsonDumpAlg_H
-#define MuonCondDump_MuonABLineJsonDumpAlg_H
-
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"

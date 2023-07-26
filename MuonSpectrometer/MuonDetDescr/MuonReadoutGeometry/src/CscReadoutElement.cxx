@@ -25,7 +25,6 @@
 #include "GeoModelKernel/GeoFullPhysVol.h"
 #include "Identifier/IdContext.h"
 #include "MuonAlignmentData/CorrContainer.h"
-#include "MuonAlignmentData/CscInternalAlignmentPar.h"
 #include "MuonIdHelpers/CscIdHelper.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "TrkSurfaces/PlaneSurface.h"
@@ -70,8 +69,9 @@ namespace MuonGM {
                     }
                 }
             } else {
-                throw std::runtime_error(Form(
-                    "File: %s, Line: %d\nCscReadoutElement::CscReadoutElement() - Cannot perform a dynamic cast !", __FILE__, __LINE__));
+                std::stringstream error_str{};
+                error_str<<__FILE__<<":"<<__LINE__<<" - Cannot performa dynamic cast!";
+                throw std::runtime_error(error_str.str());
             }
         } else {
             // hard wire for the moment
@@ -570,84 +570,36 @@ namespace MuonGM {
         const Amg::Transform3D cscTrans = absTransform();
         return cscTrans * localP;
     }
-
-    void CscReadoutElement::setCscInternalAlignmentParams() {
+    
+    void CscReadoutElement::setCscInternalAlignmentPar(const ALinePar& x) {
         // get id helper
-        const CscIdHelper* idh = manager()->cscIdHelper();
+        const CscIdHelper& idh{idHelperSvc()->cscIdHelper()};
+        const int wlayer = idh.wireLayer(x.identify());
+        const bool notAllowedLayer = (wlayer > 4 || wlayer <1);
 
-        if (!manager()->CscInternalAlignmentContainer()) {
-            MsgStream log(Athena::getMessageSvc(), "CscReadoutElement");
-            if (log.level() <= MSG::DEBUG)
-                log << MSG::DEBUG
-                    << "No CscInternalAlignmenContainer has been built - nothing to do in CscReadouElement::setCscInternalAlignmentParams"
-                    << endmsg;
+
+        if (idh.elementID(x.identify()) != idh.elementID(identify()) || notAllowedLayer) {
+            ATH_MSG_WARNING("Trying to set the following CSC internal A-line " << x << " for Csc readout Element " << idHelperSvc()->toString(identify()) 
+                                << "Inconsistent CSC int. Aline assignment - Internal alignment will not be applied ");
             return;
         }
-
-        // ask the manager for CSC internal alignment params for this CSC readoutElement
-        ciCscInternalAlignmentMap iter;
-        ciCscInternalAlignmentMap iterEnd = manager()->CscALineMapEnd();
-
-        for (unsigned int wlay = 1; wlay < 5; ++wlay) {
-            Identifier idp = idh->parentID(identify());
-            Identifier id = idh->channelID(idp, 2, wlay, 0, 1);
-            MsgStream log(Athena::getMessageSvc(), "CscReadoutElement");
-            if (log.level() <= MSG::DEBUG)
-                log << MSG::DEBUG << "in setCscInternalAlignmentParams for wlay=" << wlay
-                    << " : w-lay identifier = " << idh->show_to_string(id) << " this cscRE " << idh->show_to_string(identify())
-                    << " it's parent " << idh->show_to_string(idp) << endmsg;
-            iter = manager()->CscInternalAlignmentContainer()->find(id);
-            if (iter != iterEnd) setCscInternalAlignmentPar((*iter).second);
+        ATH_MSG_DEBUG("Set internal alignment parameter "<<x);
+        using Parameter = ALinePar::Parameter;
+        m_cscIntTransl[wlayer - 1][0] = x.getParameter(Parameter::transS);
+        m_cscIntTransl[wlayer - 1][1] = x.getParameter(Parameter::transZ);
+        m_cscIntTransl[wlayer - 1][2] = x.getParameter(Parameter::transT);
+        m_cscIntRot[wlayer - 1][0] =x.getParameter(Parameter::rotS);
+        m_cscIntRot[wlayer - 1][1] =x.getParameter(Parameter::rotZ);
+        m_cscIntRot[wlayer - 1][2] =x.getParameter(Parameter::rotT);
+       
+        for (unsigned int j = 0; j < 3; ++j) {
+            ATH_MSG_DEBUG("<CscReadoutElement::setCscInternalAlignmentPar()>: m_cscIntTransl[" << (wlayer - 1) << "][" << j
+                << "]: " << m_cscIntTransl[(wlayer - 1)][j]);
+            ATH_MSG_DEBUG("<CscReadoutElement::setCscInternalAlignmentPar()>: m_cscIntRot[" << (wlayer - 1) << "][" << j
+                << "]: " << m_cscIntRot[(wlayer - 1)][j]);
         }
-        //
     }
-    void CscReadoutElement::setCscInternalAlignmentPar(const CscInternalAlignmentPar& x) {
-        // get id helper
-        const CscIdHelper* idh = manager()->cscIdHelper();
 
-        std::string stName = "XXX";
-        int jff{0}, jzz{0}, job{0}, wlayer{0};
-        x.getAmdbId(stName, jff, jzz, job, wlayer);
-        float s_trans{0.}, z_trans{0.}, t_trans{0.}, s_rot{0.}, z_rot{0.}, t_rot{0.};
-        x.getParameters(s_trans, z_trans, t_trans, s_rot, z_rot, t_rot);
-        bool notAllowedWLayer = (wlayer > 4 || wlayer < 1);
-
-        if (stName != getStationName().substr(0, 3) || jff != getStationPhi() || jzz != getStationEta() || notAllowedWLayer) {
-            MsgStream log(Athena::getMessageSvc(), "CscReadoutElement");
-            if (log.level() <= MSG::WARNING) {
-                log << MSG::WARNING << "Trying to set the following CSC internal A-line " << stName << " fi/zi/job/wLayer " << jff << "/"
-                    << jzz << "/" << job << "/" << wlayer << " for Csc readout Element " << idh->show_to_string(identify()) << endmsg;
-                log << MSG::WARNING << "Inconsistent CSC int. Aline assignment - Internal alignment will not be applied " << endmsg;
-            }
-            return;
-        }
-        m_cscIntTransl[wlayer - 1][0] = s_trans;
-        m_cscIntTransl[wlayer - 1][1] = z_trans;
-        m_cscIntTransl[wlayer - 1][2] = t_trans;
-        m_cscIntRot[wlayer - 1][0] = s_rot;
-        m_cscIntRot[wlayer - 1][1] = z_rot;
-        m_cscIntRot[wlayer - 1][2] = t_rot;
-#ifndef NDEBUG
-        MsgStream log(Athena::getMessageSvc(), "CscReadoutElement");
-        if (log.level() <= MSG::DEBUG) {
-            for (unsigned int j = 0; j < 3; ++j) {
-                log << MSG::DEBUG << "<CscReadoutElement::setCscInternalAlignmentPar()>: m_cscIntTransl[" << (wlayer - 1) << "][" << j
-                    << "]: " << m_cscIntTransl[(wlayer - 1)][j] << endmsg;
-                log << MSG::DEBUG << "<CscReadoutElement::setCscInternalAlignmentPar()>: m_cscIntRot[" << (wlayer - 1) << "][" << j
-                    << "]: " << m_cscIntRot[(wlayer - 1)][j] << endmsg;
-            }
-        }
-#endif
-
-        return;
-    }
-    const CscInternalAlignmentPar CscReadoutElement::getCscInternalAlignmentPar(int gasGap) const {
-        CscInternalAlignmentPar ialine;
-        ialine.setAmdbId(getStationName().substr(0, 3), getStationPhi(), getStationEta(), 3, gasGap);
-        ialine.setParameters(m_cscIntTransl[gasGap - 1][0], m_cscIntTransl[gasGap - 1][1], m_cscIntTransl[gasGap - 1][2],
-                             m_cscIntRot[gasGap - 1][0], m_cscIntRot[gasGap - 1][1], m_cscIntRot[gasGap - 1][2]);
-        return ialine;
-    }
 
     double CscReadoutElement::getGasGapIntAlign_s(int gasGap) const { return m_cscIntTransl[gasGap - 1][0]; }
 

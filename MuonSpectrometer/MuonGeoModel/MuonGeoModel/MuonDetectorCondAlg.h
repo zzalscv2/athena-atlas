@@ -50,9 +50,9 @@ class MuonDetectorCondAlg : public AthReentrantAlgorithm {
     // Read Handles
     SG::ReadCondHandleKey<ALineContainer> m_readALineKey{this, "ReadALineKey", "ALineContainer", "Key of input muon alignment ALine condition data"};
     SG::ReadCondHandleKey<BLineContainer> m_readBLineKey{this, "ReadBLineKey", "BLineContainer", "Key of input muon alignment BLine condition data"};
-    SG::ReadCondHandleKey<CscInternalAlignmentMapContainer> m_readILineKey{this, "ReadILineKey", "CscInternalAlignmentMapContainer",
-                                                                           "Key of input muon alignment CSC/ILine condition data"};
-    SG::ReadCondHandleKey<MdtAsBuiltMapContainer> m_readMdtAsBuiltKey{this, "ReadMdtAsBuiltKey", "MdtAsBuiltMapContainer", "Key of output muon alignment MDT/AsBuilt condition data"};
+    SG::ReadCondHandleKey<ALineContainer> m_readILineKey{this, "ReadILineKey", "CscInternalAlignmentContainer",
+                                                         "Key of input muon alignment CSC/ILine condition data"};
+    SG::ReadCondHandleKey<MdtAsBuiltContainer> m_readMdtAsBuiltKey{this, "ReadMdtAsBuiltKey", "MdtAsBuiltContainer", "Key of output muon alignment MDT/AsBuilt condition data"};
     SG::ReadCondHandleKey<NswAsBuiltDbData> m_readNswAsBuiltKey{this, "ReadNswAsBuiltKey", "NswAsBuiltDbData", "Key of NswAsBuiltDbData object containing conditions data for NSW as-built params!"};
     SG::ReadCondHandleKey<NswPassivationDbData> m_condMmPassivKey {this, "condMmPassivKey", "NswPassivationDbData", "Key of NswPassivationDbData object containing passivation data for MMs"};
 

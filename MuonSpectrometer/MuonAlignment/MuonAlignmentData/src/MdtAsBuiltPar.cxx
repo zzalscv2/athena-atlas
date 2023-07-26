@@ -41,27 +41,4 @@ void MdtAsBuiltPar::setAlignmentParameters(multilayer_t iML, tubeSide_t iTubeSid
     params.zpitch = zpitch;
     params.stagg = stagg;
 }
-bool MdtAsBuiltPar::setFromAscii(const std::string& line) {
-    std::istringstream in(line);
 
-    std::string tok;
-    if (!((in >> tok) && (tok == "Corr:"))) return false;
-
-    std::string typ;
-    int jff, jzz;
-    if (!(in >> typ >> jff >> jzz)) return false;
-    setAmdbId(typ, jzz, jff, 0);
-    multilayer_t ml[NMLTYPES] = {ML1, ML2};
-    tubeSide_t sid[NTUBESIDETYPES] = {POS, NEG};
-    int stagg[NMLTYPES];
-    if (!(in >> stagg[ML1] >> stagg[ML2])) return false;
-    for (int iML = 0; iML < NMLTYPES; ++iML) {
-        for (int iTubeSide = 0; iTubeSide < NTUBESIDETYPES; ++iTubeSide) {
-            float y0, z0, alpha, ypitch, zpitch;
-            if (!(in >> y0 >> z0 >> alpha >> ypitch >> zpitch)) return false;
-            setAlignmentParameters(ml[iML], sid[iTubeSide], y0, z0, alpha, ypitch, zpitch, stagg[iML]);
-        }
-    }
-
-    return true;
-}
