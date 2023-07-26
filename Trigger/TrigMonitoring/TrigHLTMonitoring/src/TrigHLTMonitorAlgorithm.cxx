@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigHLTMonitorAlgorithm.h"
@@ -8,8 +8,6 @@ using namespace TrigCompositeUtils;
 
 TrigHLTMonitorAlgorithm::TrigHLTMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
   : AthMonitorAlgorithm(name,pSvcLocator)
-  , m_trigDecTool("Trig::TrigDecisionTool/TrigDecisionTool") 
-
 {
 }
 
@@ -19,7 +17,6 @@ TrigHLTMonitorAlgorithm::~TrigHLTMonitorAlgorithm() {}
 
 StatusCode TrigHLTMonitorAlgorithm::initialize() {
 
-  ATH_CHECK( m_trigDecTool.retrieve() );
   ATH_CHECK( m_eventKey.initialize() );
   ATH_CHECK( m_onlineKey.initialize() );
   ATH_CHECK( m_trigConfigSvc.retrieve() );
@@ -45,7 +42,7 @@ StatusCode TrigHLTMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
   ////////////////////////////////////
   // L1 items monitoring
 
-  const Trig::ChainGroup* l1group = m_trigDecTool->getChainGroup("L1_.*");
+  const Trig::ChainGroup* l1group = getTrigDecisionTool()->getChainGroup("L1_.*");
   const std::vector<std::string> L1items = l1group->getListOfTriggers();
   const std::vector<bool> isPassed = l1group->isPassedForEach();
 
@@ -114,7 +111,7 @@ StatusCode TrigHLTMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     //Loop over HLT chains
     ATH_MSG_DEBUG( "Filling HLT" << signaturename << " and RoI information for " << thisregex );
 
-    const Trig::ChainGroup* group = m_trigDecTool->getChainGroup(thisregex);
+    const Trig::ChainGroup* group = getTrigDecisionTool()->getChainGroup(thisregex);
     const std::vector<std::string> chainNames = group->getListOfTriggers();
     const std::vector<bool> isPassed = group->isPassedForEach(TrigDefs::requireDecision);
 
@@ -128,13 +125,13 @@ StatusCode TrigHLTMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         fill(tool,HLT_RAW);
 
         //If the chain is prescaled
-        const TrigConf::HLTChain* c = m_trigDecTool->ExperimentalAndExpertMethods().getChainConfigurationDetails(chain);
+        const TrigConf::HLTChain* c = getTrigDecisionTool()->ExperimentalAndExpertMethods().getChainConfigurationDetails(chain);
         float prescale = 0;
         if (c) {
           prescale = c->prescale();
         }
         else {
-          ATH_MSG_WARNING("No chain found in m_trigDecTool->ExperimentalAndExpertMethods().getChainConfigurationDetails(" <<  chain << "). Using prescale 0");
+          ATH_MSG_WARNING("No chain found in trigDecTool->ExperimentalAndExpertMethods().getChainConfigurationDetails(" <<  chain << "). Using prescale 0");
         }
         if(prescale>1. || prescale<1.) {
           //NB! Right now very few chains are prescaled, so this histogram is seldom filled
@@ -144,7 +141,7 @@ StatusCode TrigHLTMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         }
 
         /// Fill RoIs histogram and 1D histos for eta, phi, RoI count
-        std::vector<LinkInfo<TrigRoiDescriptorCollection>> fvec = m_trigDecTool->features<TrigRoiDescriptorCollection>(chain, TrigDefs::Physics, "", TrigDefs::lastFeatureOfType, initialRoIString());
+        std::vector<LinkInfo<TrigRoiDescriptorCollection>> fvec = getTrigDecisionTool()->features<TrigRoiDescriptorCollection>(chain, TrigDefs::Physics, "", TrigDefs::lastFeatureOfType, initialRoIString());
 
         //Loop over RoIs
         for (const LinkInfo<TrigRoiDescriptorCollection>& li : fvec) {
