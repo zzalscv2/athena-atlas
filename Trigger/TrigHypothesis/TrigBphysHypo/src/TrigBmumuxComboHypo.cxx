@@ -355,7 +355,7 @@ StatusCode TrigBmumuxComboHypo::findBmumuxCandidates(TrigBmumuxState& state) con
       if (state.isCompositeRoI && !isInSameRoI(muons[0], *trackEL) && !isInSameRoI(muons[1], *trackEL)) continue;
       if (m_trkZ0 > 0.) {
         std::unique_ptr<const Trk::Perigee> perigee(m_trackToVertexTool->perigeeAtVertex(state.context(), **trackEL, dimuon->position()));
-        if (std::abs(perigee->parameters()[Trk::z0]) < m_trkZ0) {
+        if (perigee && std::abs(perigee->parameters()[Trk::z0]) < m_trkZ0) {
           selectedTracks.push_back(trackEL);
           selectedTrackZ0[*trackEL] = perigee->parameters()[Trk::z0];
         }
