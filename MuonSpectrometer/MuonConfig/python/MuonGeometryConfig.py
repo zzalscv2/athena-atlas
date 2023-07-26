@@ -144,13 +144,20 @@ def NswAsBuiltCondAlgCfg(flags, name = "NswAsBuiltCondAlg", **kwargs):
     #### Do not apply the as-built correction if not activated
     if flags.GeoModel.Run < LHCPeriod.Run3:
         return result
+    kwargs.setdefault("MicroMegaJSON","")
+    kwargs.setdefault("sTgcJSON","")
+
+    kwargs.setdefault("ReadMmAsBuiltParamsKey","/MUONALIGN/ASBUILTPARAMS/MM")
+    #kwargs.setdefault("ReadSTgcAsBuiltParamsKey","/MUONALIGN/ASBUILTPARAMS/STGC") # This is the folder that sould be used once the as builts are validated, so keep it here but commented out
+    kwargs.setdefault("ReadSTgcAsBuiltParamsKey","") # for now diable the reading of sTGC as build from the conditions database
+    
     ##TODO: remove hard-coded tag once the global tag is ready
-    if "readFromJSON" not in kwargs or not kwargs["readFromJSON"]:
-        from IOVDbSvc.IOVDbSvcConfig import addFolders
-        result.merge(addFolders( flags, '/MUONALIGN/ASBUILTPARAMS/MM', 'MUONALIGN_OFL', className='CondAttrListCollection', tag='MuonAlignAsBuiltParamsMm-RUN3-01-00'))
-        result.merge(addFolders( flags, '/MUONALIGN/ASBUILTPARAMS/STGC', 'MUONALIGN_OFL', className='CondAttrListCollection', tag='MUONALIGN_STG_ASBUILT-001-03'))
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    if(not (kwargs["MicroMegaJSON"] or not kwargs["ReadMmAsBuiltParamsKey"]) ) : # no need to add the folder if we are reading a json file anyhow
+        result.merge(addFolders( flags, kwargs["ReadMmAsBuiltParamsKey"]  , 'MUONALIGN_OFL', className='CondAttrListCollection', tag='MuonAlignAsBuiltParamsMm-RUN3-01-00'))
     ### Disable the STGC as-built parameters (Keep the path if we want to add later fully validated As-built)
-    kwargs.setdefault("ReadSTgcAsBuiltParamsKey", "")
+    if(not (kwargs["sTgcJSON"] or not kwargs["ReadSTgcAsBuiltParamsKey"])): # no need to add the folder if we are reading a json file anyhow
+        result.merge(addFolders( flags, kwargs["ReadSTgcAsBuiltParamsKey"], 'MUONALIGN_OFL', className='CondAttrListCollection', tag='MUONALIGN_STG_ASBUILT-001-03'))
     the_alg = CompFactory.NswAsBuiltCondAlg(name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)     
     return result
