@@ -47,8 +47,7 @@ StatusCode CheckCloningFactor::execute() {
         const HepMC::GenEvent* genEvt = (*itr);
         for (auto pitr: *genEvt) {
 	    int p_id = pitr->pdg_id();
-	    int p_stat = pitr->status();
-            if ( (std::abs(p_id)==5) && (p_stat == 62 || p_stat == 63) ) {
+            if ( (std::abs(p_id)==5) && (pitr->status() == 62 || pitr->status() == 63) ) {
                 bQuarks.push_back(pitr);
             }
         }

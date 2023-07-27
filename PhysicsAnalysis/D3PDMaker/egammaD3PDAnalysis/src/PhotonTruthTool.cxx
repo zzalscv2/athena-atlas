@@ -220,14 +220,9 @@ bool PhotonTruthTool::isFinalStatePhotonMC
 bool
 PhotonTruthTool::isFinalState(const xAOD::TruthParticle* truePart) const
 {
-  if ( truePart==0 ) return false ;
-  // decayed in generator?
-  if ( truePart->status()!=1 ) return false ; 
-  // 
-  if ( ! m_useG4Particles ) {
-    return ( !HepMC::is_simulation_particle(truePart) ) ;
-  }
-  else {
+  if ( truePart == nullptr ) return false;
+  if ( !MC::isStable(truePart)) return false; 
+  if ( !m_useG4Particles ) return ( !HepMC::is_simulation_particle(truePart) );
     // if it is a photon, keep it regardless of its Geant interaction
     if ( truePart->pdgId()==22 ) return true ; 
     // reject Geant electron from conversion
@@ -243,7 +238,6 @@ PhotonTruthTool::isFinalState(const xAOD::TruthParticle* truePart) const
       if ( v->perp()<m_rTruthConv 
 	   && fabs(v->z())<m_zTruthConv )  return false ;
     }
-  } // end if ( ! m_useG4Particles ) 
   return true ;
 }
 

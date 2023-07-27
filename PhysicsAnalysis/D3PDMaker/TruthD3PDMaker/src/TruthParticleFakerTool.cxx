@@ -14,7 +14,7 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/SimpleVector.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "AthenaKernel/errorcheck.h"
 
 #include "GaudiKernel/SystemOfUnits.h"
@@ -86,8 +86,7 @@ StatusCode TruthParticleFakerTool::fill (const HepMC::GenParticle& p)
   }
 
   if ( !last &&
-       p.status()!= 1 &&
-       !(p.status()==2 && (!endvertex || HepMC::is_simulation_vertex(endvertex)) ) ) {
+       !MC::isStableOrSimDecayed(&p)) {
     return StatusCode(IBlockFillerTool::EMPTY);
   }
 

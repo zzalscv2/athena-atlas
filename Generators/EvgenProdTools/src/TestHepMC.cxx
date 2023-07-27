@@ -581,7 +581,7 @@ StatusCode TestHepMC::execute() {
           auto desc=(*desc_it);
 #endif
             if (std::abs(desc->pdg_id()) == m_pdg) tau_child = 1;
-            if (desc->status() == 1) p_energy += desc->momentum().e();
+            if ( MC::isStable(desc) ) p_energy += desc->momentum().e();
           }
           if (std::abs( p_energy - pmom.e()) > m_energy_diff && !tau_child) {
             ATH_MSG_WARNING("Energy sum (decay products): "
