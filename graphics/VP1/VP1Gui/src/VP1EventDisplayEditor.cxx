@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -422,7 +422,7 @@ void VP1EventDisplayEditor::addPixmapList(QList<QPixmap>& list, QStringList& lis
 	VP1Msg::messageVerbose("VP1EventDisplayEditor::addPixmapList()");
 
 	if (!list.isEmpty()) {
-		foreach (QPixmap img, list) {
+		for (QPixmap img : list) {
 			// add  and set it movableimage to the scene
 			QGraphicsPixmapItem* item = m_scene->addPixmap(img);
 			item->setFlags(QGraphicsItem::ItemIsMovable);
@@ -431,7 +431,7 @@ void VP1EventDisplayEditor::addPixmapList(QList<QPixmap>& list, QStringList& lis
 	}
 
 	if (!listNames.isEmpty()) {
-		foreach (QString name, listNames) {
+		for (QString name : listNames) {
 			// add image name to the list
 			new QListWidgetItem(name, m_d->ui.listWidget);
 		}

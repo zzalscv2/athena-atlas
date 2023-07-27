@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -828,13 +828,13 @@ QMap<QString,QString> VP1MainWindow::availableFiles(const QString& extension,
 #else
 		QStringList tmp = path.split(":",QString::SkipEmptyParts);//This 'tmp' is for SLC3 compilation.
 #endif
-		foreach (QString dir,tmp) {
+		for (QString dir : tmp) {
 			vp1pluginpath << ( instareasubdir.isEmpty() ? dir : dir+QDir::separator()+QDir::separator()+instareasubdir );
 		}
 	}
 
 	//Remove all nonexisting directories:
-	foreach (QString plugindir, vp1pluginpath) {
+	for (QString plugindir : vp1pluginpath) {
 		QFileInfo fi(plugindir);
 		if (!fi.exists()||!fi.isDir()) {
 			vp1pluginpath.removeAll(plugindir);
@@ -843,9 +843,9 @@ QMap<QString,QString> VP1MainWindow::availableFiles(const QString& extension,
 
 	//Find all files with required extension in the directories (in case of duplicates - the ones appearing first are used):
 	QMap<QString,QString> plugins2fullpath;
-	foreach (QString plugindir, vp1pluginpath) {
+	for (QString plugindir : vp1pluginpath) {
 		QStringList plugins = QDir(plugindir).entryList((QStringList()<<("*"+extension)),QDir::CaseSensitive | QDir::Files | QDir::Readable,QDir::Name);
-		foreach (QString plugin, plugins) {
+		for (QString plugin : plugins) {
 			plugin = QFileInfo(plugin).fileName();
 			if (!plugins2fullpath.contains(plugin)) {
 				QString fullpath = plugindir+QDir::separator()+plugin;
@@ -887,7 +887,7 @@ void VP1MainWindow::pluginDialogClosed() {
 
 	QStringList bns = m_channelmanager->channelsInPluginFile(filename);
 
-	foreach (QString bn, bns) {
+	for (QString bn : bns) {
 		while(m_channelmanager->basename2UniqueNames(bn).count()>0)
 			m_tabmanager->removeChannel(m_channelmanager->basename2UniqueNames(bn).value(0));
 	}
@@ -900,7 +900,7 @@ void VP1MainWindow::pluginDialogClosed() {
 //_________________________________________________________________________________
 void VP1MainWindow::unloadPlugin_continue()
 {
-	foreach (QString filename, m_currentunloadpluginfiles) {
+	for (QString filename : m_currentunloadpluginfiles) {
 		bool success = m_channelmanager->unloadPluginFile(filename);
 		if (!success)
 			QMessageBox::critical(0, "Error - problems unloading plugin file: "+filename,
@@ -1021,7 +1021,7 @@ void VP1MainWindow::setRunEvtNumber(const int& r, const unsigned long long& e, c
 	if (m_availEvents)
 		m_availEvents->setCurrentEvent(r,e);
 
-	foreach(IVP1ChannelWidget* channel,m_tabmanager->allChannels()) {
+	for(IVP1ChannelWidget* channel : m_tabmanager->allChannels()) {
 		channel->setRunEvtNumber(r,e);
 		channel->setEvtTimestamp(time);
 	}
@@ -1168,7 +1168,7 @@ void VP1MainWindow::getAllChannelsIntoSnapshots(QList<QPixmap>& list, QStringLis
 	int nT = 0;
 
 	// loop over all tabs/channels
-	foreach(IVP1ChannelWidget* widg, allTabs) {
+	for(IVP1ChannelWidget* widg : allTabs) {
 
 		// increase tab number
 		++nT;
@@ -1235,7 +1235,7 @@ QPixmap VP1MainWindow::getSingleChannelCustomSnapshot(QString tabName, int width
 	}
 
 	// loop over all tabs/channels
-	foreach(IVP1ChannelWidget* widg, allTabs) {
+	for(IVP1ChannelWidget* widg : allTabs) {
 
 		// get channel name (e.g. Geometry, 3DCocktail)
 		QString channelname = m_tabmanager->channelToTab(widg);
@@ -1301,7 +1301,7 @@ void VP1MainWindow::saveAllCurrentChannels()
 	QStringList tab_save_files;
 
 	int nT = 0;
-	foreach(IVP1ChannelWidget* widg, allTabs) {
+	for(IVP1ChannelWidget* widg : allTabs) {
 
 		// increase tab number
 		++nT;
@@ -1544,7 +1544,7 @@ void VP1MainWindow::showMenu_loadPlugin()
 	pluglist.sort();
 
 	QStringList currentpluginfiles = m_channelmanager->currentPluginFiles();
-	foreach(QString plug,pluglist) {
+	for(QString plug : pluglist) {
 		QAction * act = m_menu_loadPlugin->addAction(plug);
 		assert(plugins2fullpath.contains(plug));
 		QString fullpath = plugins2fullpath[plug];
@@ -1591,7 +1591,7 @@ void VP1MainWindow::showMenu_loadConfFile()
 	QStringList filelist(conffile2fullpath.keys());
 	filelist.sort();
 
-	foreach(QString file,filelist) {
+	for(QString file : filelist) {
 		QAction * act = m_menu_loadConfFile->addAction(file);
 		assert(conffile2fullpath.contains(file));
 		QString fullpath = conffile2fullpath[file];
@@ -1867,7 +1867,7 @@ void VP1MainWindow::updateInputDirectoriesStatus()
 	QFont fb;
 	fb.setBold(true);
 
-	foreach (QAction * act,m_inputdiractions) {
+	for (QAction * act : m_inputdiractions) {
 		VP1DirStatusData& dirstatus = m_inputdirstatuses[act];
 		QString inputdir(act->data().toString());
 		QString dirname = QDir(inputdir).dirName();

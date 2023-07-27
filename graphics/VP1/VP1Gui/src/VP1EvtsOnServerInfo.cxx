@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -70,16 +70,16 @@ QStringList VP1EvtsOnServerInfo::print() const
     return l;
   }
   l << "Valid with "+QString::number(numberOfEvents())+" files:";
-  foreach(VP1EventFile evt, events())
+  for(VP1EventFile evt : events())
     l << "  "+evt.print();
   l << "Events within 10 minutes of latest:";
-  foreach(VP1EventFile evt, events(10*60))
+  for(VP1EventFile evt : events(10*60))
     l << "  "+evt.print();
   l << "Events with same run number as latest:";
-  foreach(VP1EventFile evt, events(-1,true))
+  for(VP1EventFile evt : events(-1,true))
     l << "  "+evt.print();
   l << "Events with same run number as latest and within 1 minute:";
-  foreach(VP1EventFile evt, events(1*60,true))
+  for(VP1EventFile evt : events(1*60,true))
     l << "  "+evt.print();
 
   return l;
@@ -256,7 +256,7 @@ QList<VP1EventFile> VP1EvtsOnServerInfo::events(int timecut, bool requireNewestR
   const unsigned minTime = (timecut<0&&unsigned(timecut)>newestRawTime) ? 0 : newestRawTime-timecut;
 
   QList<VP1EventFile> out;
-  foreach (VP1EventFile evt, m_d->events) {
+  for (VP1EventFile evt : m_d->events) {
     if (minTime>0&&evt.rawTime()<minTime)
       continue;
     if (requireNewestRunNumber&&evt.runNumber()!=newestRunNumber)

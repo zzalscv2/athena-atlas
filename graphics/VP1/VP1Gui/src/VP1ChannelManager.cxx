@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -197,7 +197,7 @@ bool VP1ChannelManager::unloadPluginFile(QString filename) {
 	QPluginLoader* loader = m_d->pluginfile_2_pluginloader[filename];
 
 	//Abort if any active channels are affected by this plugin:
-	foreach (QString bn, bns)
+	for (QString bn : bns)
 	if (nActive(bn)>0)
 		return false;
 
@@ -211,7 +211,7 @@ bool VP1ChannelManager::unloadPluginFile(QString filename) {
 	//Update maps:
 	m_d->pluginfile_2_basenamesAndFactory.erase(m_d->pluginfile_2_basenamesAndFactory.find(filename));
 	m_d->pluginfile_2_pluginloader.erase(m_d->pluginfile_2_pluginloader.find(filename));
-	foreach (QString bn, bns) {
+	for (QString bn : bns) {
 		m_d->basename_2_channels.erase(m_d->basename_2_channels.find(bn));
 		m_d->basename_2_pluginfile.erase(m_d->basename_2_pluginfile.find(bn));
 	}
@@ -325,14 +325,14 @@ QString VP1ChannelManager::loadPluginFile(QString filename)
 		m_d->pluginfile_2_basenamesAndFactory[filename] = std::pair<QStringList,IVP1ChannelWidgetFactory *>(providedbasenames,fact);
 
 
-		foreach (QString bn,providedbasenames) {
+		for (QString bn : providedbasenames) {
 			if (m_d->basename_2_pluginfile.find(bn)!=m_d->basename_2_pluginfile.end())
 				return "Channels navp1 '"+bn+"' are already provided by plugin file "
 						+m_d->basename_2_pluginfile[bn]+" (ignoring other plugins in file '"+filename+"')";
 		}
 
 
-		foreach (QString bn,providedbasenames) {
+		for (QString bn : providedbasenames) {
 			m_d->basename_2_pluginfile[bn] = filename;
 			m_d->basename_2_channels[bn] = std::set<IVP1ChannelWidget*>();
 		}

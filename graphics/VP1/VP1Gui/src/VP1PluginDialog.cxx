@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -113,7 +113,7 @@ void VP1PluginDialog::Imp::setInfo()
     textBrowser_channels->setEnabled(true);
 
     int i(0);
-    foreach(QString file,files) {
+    for(QString file : files) {
       QFileInfo fi(file);
       comboBox_plugins->addItem(fi.fileName());
       index_2_fullpath.insert(i++,file);
@@ -135,10 +135,10 @@ void VP1PluginDialog::pluginSelected(int i)
     m_d->textBrowser_channels->setEnabled(false);
   } else {
     QString text;
-    foreach(QString bn,availablechannels) {
+    for(QString bn : availablechannels) {
       QStringList uns = m_d->channelmanager->basename2UniqueNames(bn);
       bool refreshing=false;
-      foreach(QString un,uns) {
+      for(QString un : uns) {
  	if (m_d->channelmanager->hasRefreshingSystem(un))
  	  refreshing=true;
 	IVP1ChannelWidget* cw = m_d->channelmanager->uniqueName2Channel(un);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -590,7 +590,7 @@ void VP1TabManager::removeTab( QString tabname ) {
 void VP1TabManager::removeAllTabs()
 {
 	VP1Msg::messageDebug("VP1TabManager::removeAllTabs()");
-	foreach(QString tab, tabList() ) {
+	for(QString tab : tabList() ) {
 		removeTab(tab);
 	}
 }
@@ -889,7 +889,7 @@ void VP1TabManager::loadConfigurationFromFile(QString filename,const QMap<QStrin
   QString sharedlibsuffix_wrong = ".dylib";
 #endif
   
-  foreach(QString pf,pluginfiles) {
+  for(QString pf : pluginfiles) {
     if (pf.endsWith(sharedlibsuffix_wrong)) {
       pf.replace(sharedlibsuffix_wrong, sharedlibsuffix_correct);
     } 
@@ -924,7 +924,7 @@ void VP1TabManager::loadConfigurationFromFile(QString filename,const QMap<QStrin
 
   QString lastaddedtab;
 
-  foreach (QString newtabname_infile, tabs_orded) {
+  for (QString newtabname_infile : tabs_orded) {
     //Check format:
     if (!tab2channels.contains(newtabname_infile)||!tab2arrangements.contains(newtabname_infile)) {
       QMessageBox::critical(0, "Error - file not in correct format: "+filename,
@@ -1158,7 +1158,7 @@ void VP1TabManager::raiseTabBarContextMenu(int i,const QPoint & p) {
   if (chnls.empty()) {
     menu_addchan.addAction("No channels available")->setEnabled(false);
   } else {
-    foreach (QString chnl, chnls) {
+    for (QString chnl : chnls) {
       QString iconloc = m_d->channelmanager->getIconLocation(chnl, true);
       QAction* pChnlAct;
       if (iconloc.isEmpty())
@@ -1176,7 +1176,7 @@ void VP1TabManager::raiseTabBarContextMenu(int i,const QPoint & p) {
   if (chnls_rem.empty()) {
     menu_remchan.addAction("No channels in tab")->setEnabled(false);
   } else {
-    foreach (QString chnl, chnls_rem) {
+    for (QString chnl : chnls_rem) {
       QString iconloc = m_d->channelmanager->getIconLocation(chnl, false);
       QAction* pChnlAct;
       if (iconloc.isEmpty())
@@ -1575,6 +1575,6 @@ void VP1TabManager::unserializeChannelState(IVP1ChannelWidget*cw,ChanState state
       std::cout<<"VP1TabManager::unserializeChannelState Warning: Did not find state data for system "<<name.toStdString()<<std::endl;
     }
   }
-  foreach (QString name,storedSystems)
+  for (QString name : storedSystems)
     std::cout<<"VP1TabManager::unserializeChannelState Warning: Did not use stored configuration for system "<<name.toStdString()<<std::endl;
 }

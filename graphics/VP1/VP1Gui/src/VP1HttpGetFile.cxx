@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -136,7 +136,7 @@ void VP1HttpGetFile::downloadThreadTerminated()
 //____________________________________________________________________
 bool VP1HttpGetFile::isDownloading(const QString& urltofile) const
 {
-  foreach( VP1HttpGetFile_DownloadThread * thread, m_d->activeDownloadThreads)
+  for( VP1HttpGetFile_DownloadThread * thread : m_d->activeDownloadThreads)
     if (urltofile==thread->urltofile()) {
       QTimer::singleShot(0, thread, SLOT(checkForStall()));
       return true;
@@ -147,7 +147,7 @@ bool VP1HttpGetFile::isDownloading(const QString& urltofile) const
 //____________________________________________________________________
 bool VP1HttpGetFile::isDownloadingTo(const QString& localtargetfile) const
 {
-  foreach( VP1HttpGetFile_DownloadThread * thread, m_d->activeDownloadThreads)
+  for( VP1HttpGetFile_DownloadThread * thread : m_d->activeDownloadThreads)
     if (localtargetfile==thread->localtargetfile()) {
       QTimer::singleShot(0, thread, SLOT(checkForStall()));
       return true;

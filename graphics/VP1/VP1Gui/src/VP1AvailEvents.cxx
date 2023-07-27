@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -118,7 +118,7 @@ QList<VP1EventFile> VP1AvailEvents::freshEvents(VP1EventFile newestEvt, const QL
       l << newestEvt;
     return l;
   }
-  foreach(VP1EventFile evt, inputEventList)
+  for(VP1EventFile evt : inputEventList)
     if (m_d->historySorted.find(Imp::evtToID(evt))==histItE && isConsideredFresh(evt,newestEvt))
       l << evt;
   return l;
@@ -314,7 +314,7 @@ void VP1AvailEvents::Imp::cleanupTmpLocalFiles()
   }
   QList<VP1EventFile> freshEvts = theclass->freshEvents();
   int ifreshkept(0);
-  foreach (VP1EventFile evt,theclass->freshEvents()) {
+  for (VP1EventFile evt : theclass->freshEvents()) {
     protectedEvents << Imp::evtToID(evt);
     if (++ifreshkept==maxLocalFilesToKeep)
       break;

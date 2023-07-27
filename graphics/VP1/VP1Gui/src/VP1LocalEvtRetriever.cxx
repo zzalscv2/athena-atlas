@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1LocalEvtRetriever.h"
@@ -67,7 +67,7 @@ void VP1LocalEvtRetriever::updateLocalDir()
   bool changestmplocal(false), changesad(false);
   if (!ad.isEmpty()&&!tmplocal.isEmpty()) {
     int ncopied(0);
-    foreach (VP1EventFile evt, freshEvtsInSource) {
+    for (VP1EventFile evt : freshEvtsInSource) {
       QString fn = evt.fileName();
       QString basefn = QFileInfo(fn).fileName();
       QString target = tmplocal + basefn;
@@ -122,7 +122,7 @@ void VP1LocalEvtRetriever::setSourceDir(QString dir)
     QList<VP1EventFile> freshevts = m_availEvts->freshEvents();
     if (freshevts.isEmpty())
       break;
-    foreach(VP1EventFile evt, freshevts) {
+    for(VP1EventFile evt : freshevts) {
       QString fn = evt.fileName();
       if (!QFile::remove(fn))
 	m_availEvts->message("ERROR: Could not remove "+fn);
