@@ -24,13 +24,9 @@
 
 
 MuonRegSelCondAlg::MuonRegSelCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  AthReentrantAlgorithm( name, pSvcLocator ),
-  m_managerName(""),
-  m_printTable(false)
-{ 
+  AthReentrantAlgorithm( name, pSvcLocator )  { 
   ATH_MSG_DEBUG( "MuonRegSelCondAlg::MuonRegSelCondAlg() " << name );
-  declareProperty( "PrintTable",  m_printTable=false );  
-  declareProperty( "ManagerName", m_managerName );  
+  
 }
 
 
@@ -40,6 +36,7 @@ StatusCode MuonRegSelCondAlg::initialize()
 {
   ATH_MSG_DEBUG("MuonRegSelCondAlg::initialize() ");
   ATH_CHECK(m_tableKey.initialize());
+  ATH_CHECK(m_detMgrKey.initialize());
   ATH_MSG_INFO("MuonRegSelCondAlg::initialize() " << m_tableKey );
   return StatusCode::SUCCESS;
 }

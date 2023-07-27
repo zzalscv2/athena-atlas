@@ -48,21 +48,12 @@ CSC_RegSelCondAlg::CSC_RegSelCondAlg(const std::string& name, ISvcLocator* pSvcL
 
 
 
-
-StatusCode CSC_RegSelCondAlg::initialize() {
-  ATH_CHECK(MuonRegSelCondAlg::initialize());
-  ATH_CHECK(m_mdtCablingKey.initialize());
-  return StatusCode::SUCCESS;
-}
-
-
-
 std::unique_ptr<RegSelSiLUT> CSC_RegSelCondAlg::createTable( const EventContext& ctx, EventIDRange& id_range ) const { 
 
-  SG::ReadCondHandle<MuonMDT_CablingMap> mdtCabling( m_mdtCablingKey, ctx );
+  SG::ReadCondHandle<MuonGM::MuonDetectorManager> manager( m_detMgrKey, ctx );
 
-  if( !mdtCabling.range( id_range ) ) {
-    ATH_MSG_ERROR("Failed to retrieve validity range for " << mdtCabling.key());
+  if( !manager.range( id_range ) ) {
+    ATH_MSG_ERROR("Failed to retrieve validity range for " << manager.key());
     return std::unique_ptr<RegSelSiLUT>(nullptr);
   }   
   
@@ -76,14 +67,6 @@ std::unique_ptr<RegSelSiLUT> CSC_RegSelCondAlg::createTable( const EventContext&
     return std::unique_ptr<RegSelSiLUT>(nullptr);
   }
 
-  /// get the CSC detector manager
-
-  const MuonGM::MuonDetectorManager* manager = nullptr;
-  
-  if ( (detStore()->retrieve( manager ).isFailure() ) ) { 
-    ATH_MSG_ERROR( "Could not retrieve CSC Manager for " << name() );
-    return std::unique_ptr<RegSelSiLUT>(nullptr);
-  }
 
   const CscIdHelper*  helper = manager->cscIdHelper();
   
