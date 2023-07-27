@@ -5,6 +5,9 @@
 #ifndef ZDCMsg_h
 #define ZDCMsg_h
 
+#include <functional>
+#include <memory>
+
 namespace ZDCMsg {
     typedef std::function<bool(int, std::string)> MessageFunction;
 
