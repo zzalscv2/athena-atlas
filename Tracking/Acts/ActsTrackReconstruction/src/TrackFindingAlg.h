@@ -12,7 +12,9 @@
 #include "GaudiKernel/ToolHandle.h"
 
 // Tools
-#include "ActsToolInterfaces/ITrackFindingTool.h"
+#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "src/ITrackStatePrinter.h"
 
 // ACTS
 #include "ActsEvent/Seed.h"
@@ -25,6 +27,18 @@
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
+#include "xAODMeasurementBase/UncalibratedMeasurement.h"
+#include "GeoPrimitives/GeoPrimitives.h"
+#include "GaudiKernel/EventContext.h"
+#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
+
+// Other
+#include <limits>
+#include <string>
+#include <vector>
+#include <memory>
+#include <variant>
+#include <atomic>
 
 // Handle Keys
 #include "StoreGate/ReadCondHandleKey.h"
@@ -40,15 +54,19 @@ namespace ActsTrk
 
     TrackFindingAlg(const std::string &name,
                     ISvcLocator *pSvcLocator);
-    virtual ~TrackFindingAlg() = default;
+    virtual ~TrackFindingAlg();
 
     virtual StatusCode initialize() override;
+    virtual StatusCode finalize() override;
     virtual StatusCode execute(const EventContext &ctx) const override;
 
   private:
     // Tool Handles
-    ToolHandle<ActsTrk::ITrackFindingTool> m_trackFindingTool{this, "TrackFindingTool", "", "Track finding tool"};
     ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring tool"};
+    ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "ActsExtrapolationTool"};
+    ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+    ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", "ActsToTrkConverterTool"};
+    ToolHandle<ActsTrk::ITrackStatePrinter> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
 
     // Handle Keys
     SG::ReadHandleKey<xAOD::PixelClusterContainer> m_pixelClusterContainerKey{this, "PixelClusterContainerKey", "", "input pixel clusters"};
@@ -64,6 +82,78 @@ namespace ActsTrk
     SG::ReadHandleKey<ActsTrk::BoundTrackParametersContainer> m_stripEstimatedTrackParametersKey{this, "StripEstimatedTrackParameters", "", "estimated track parameters from strip seeding"};
 
     SG::WriteHandleKey<ActsTrk::ConstTrackContainer> m_tracksContainerKey{this, "ACTSTracksLocation", "SiSPSeededActsTrackContainer", "Output track collection (ActsTrk variant)"};
+
+    // Configuration
+    Gaudi::Property<unsigned int> m_maxPropagationStep{this, "maxPropagationStep", 1000, "Maximum number of steps for one propagate call"};
+    Gaudi::Property<bool> m_skipDuplicateSeeds{this, "skipDuplicateSeeds", true, "skip duplicate seeds before calling CKF"};
+    // Selection cuts for associating measurements with predicted track parameters on a surface.
+    Gaudi::Property<std::vector<double>> m_etaBins{this, "etaBins", {}, "MeasurementSelector: bins in |eta| to specify variable selections"};
+    Gaudi::Property<std::vector<double>> m_chi2CutOff{this, "chi2CutOff", {std::numeric_limits<double>::max()}, "MeasurementSelector: maximum local chi2 contribution"};
+    Gaudi::Property<std::vector<size_t>> m_numMeasurementsCutOff{this, "numMeasurementsCutOff", {1}, "MeasurementSelector: maximum number of associated measurements on a single surface"};
+     SG::WriteHandleKey< std::vector<ATLASUncalibSourceLink::ElementsType> > m_sourceLinksOut
+        {this, "ATLASUncalibSourceLinkElementsName","" /*"UncalibratedMeasurementSourceLinkElements"*/, ""};
+
+    // Class to hold the measurement source links. This is created by TrackFindingAlg::initMeasurements().
+  public:
+    struct Measurements
+    {
+      using UncalibratedMeasurementContainerPtr = std::variant<const xAOD::PixelClusterContainer *, const xAOD::StripClusterContainer *>;
+      virtual ~Measurements() = default;
+      virtual void addMeasurements(size_t type,
+                                   const EventContext &ctx,
+                                   const UncalibratedMeasurementContainerPtr &clusterContainer,
+                                   const InDetDD::SiDetectorElementCollection &detElems,
+                                   const ActsTrk::SeedContainer *seeds) = 0;
+    };
+  private:
+    std::unique_ptr<Measurements> initMeasurements(size_t numMeasurements, size_t numSeeds) const;
+
+    /**
+     * @brief invoke track finding procedure
+     *
+     * @param ctx - event context
+     * @param measurements - measurements container
+     * @param estimatedTrackParameters - estimates
+     * @param seeds - spacepoint triplet seeds
+     * @param tracksContainer - output tracks
+     * @param tracksCollection - auxiliary output for downstream tools compatibility (to be removed in the future)
+     * @param seedCollectionIndex - index of seeds in measurements
+     * @param seedType name of type of seeds (strip or pixel) - only used for messages
+     */
+    StatusCode
+    findTracks(const EventContext &ctx,
+               const Measurements &measurements,
+               const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
+               const ActsTrk::SeedContainer *seeds,
+               ActsTrk::TrackContainer &tracksContainer,
+               size_t seedCollectionIndex,
+               const char *seedType) const;
+
+    // Create tracks from one seed's CKF result, appending to tracksContainer
+    StatusCode storeSeedInfo(const ActsTrk::TrackContainer &tracksContainer,
+                             const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
+                             const Measurements &measurements) const;
+
+
+    // Access Acts::CombinatorialKalmanFilter etc using "pointer to implementation"
+    // so we don't have to instantiate the heavily templated classes in the header.
+    struct CKF_pimpl;
+    std::unique_ptr<CKF_pimpl> m_trackFinder;
+
+    // statistics
+    mutable std::atomic<size_t> m_nTotalSeeds{0};
+    mutable std::atomic<size_t> m_nFailedSeeds{0};
+    mutable std::atomic<size_t> m_nDuplicateSeeds{0};
+    mutable std::atomic<size_t> m_nOutputTracks{0};
+
+    /// Private access to the logger
+    const Acts::Logger &logger() const
+    {
+      return *m_logger;
+    }
+
+    /// logging instance
+    std::unique_ptr<const Acts::Logger> m_logger;
   };
 
 } // namespace

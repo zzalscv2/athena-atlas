@@ -3,15 +3,51 @@
 */
 
 #include "src/TrackFindingAlg.h"
+#include "src/TrackFindingData.h"
+
+// Athena
+#include "TrkParameters/TrackParameters.h"
+#include "TrkTrackSummary/TrackSummary.h"
+#include "InDetPrepRawData/PixelClusterCollection.h"
+#include "InDetPrepRawData/SCT_ClusterCollection.h"
+#include "TrkRIO_OnTrack/RIO_OnTrack.h"
+#include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
+#include "InDetRIO_OnTrack/SCT_ClusterOnTrack.h"
+#include "xAODInDetMeasurement/PixelCluster.h"
+#include "xAODInDetMeasurement/StripCluster.h"
 
 // ACTS
 #include "Acts/Definitions/Units.hpp"
-
 #include "AthenaMonitoringKernel/Monitored.h"
+#include "Acts/Geometry/TrackingGeometry.hpp"
+#include "Acts/Geometry/GeometryIdentifier.hpp"
+#include "Acts/MagneticField/MagneticFieldProvider.hpp"
+#include "Acts/Surfaces/Surface.hpp"
+#include "Acts/TrackFinding/SourceLinkAccessorConcept.hpp"
+#include "Acts/TrackFinding/MeasurementSelector.hpp"
+#include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
+#include "Acts/Surfaces/PerigeeSurface.hpp"
+// ACTS glue
+#include "ActsEvent/TrackContainer.h"
+
+// PACKAGE
+#include "ActsGeometry/ATLASSourceLink.h"
+#include "ActsGeometry/ATLASMagneticFieldWrapper.h"
+#include "ActsGeometry/ActsGeometryContext.h"
 #include "ActsGeometry/ActsDetectorElement.h"
+#include "ActsInterop/Logger.h"
+
+// Other
+#include <sstream>
+#include <functional>
+#include <tuple>
+#include <algorithm>
 
 namespace ActsTrk
 {
+  struct TrackFindingAlg::CKF_pimpl : public CKF_config
+  {
+  };
 
   TrackFindingAlg::TrackFindingAlg(const std::string &name,
                                    ISvcLocator *pSvcLocator)
@@ -19,12 +55,17 @@ namespace ActsTrk
   {
   }
 
+  TrackFindingAlg::~TrackFindingAlg() = default;
+
   StatusCode TrackFindingAlg::initialize()
   {
     ATH_MSG_INFO("Initializing " << name() << " ... ");
-
-    // Retrieve seed tool
-    ATH_CHECK(m_trackFindingTool.retrieve());
+    ATH_MSG_DEBUG("Properties Summary:");
+    ATH_MSG_DEBUG("   " << m_maxPropagationStep);
+    ATH_MSG_DEBUG("   " << m_skipDuplicateSeeds);
+    ATH_MSG_DEBUG("   " << m_etaBins);
+    ATH_MSG_DEBUG("   " << m_chi2CutOff);
+    ATH_MSG_DEBUG("   " << m_numMeasurementsCutOff);
 
     // Read and Write handles
     ATH_CHECK(m_pixelSeedsKey.initialize(SG::AllowEmpty));
@@ -40,6 +81,53 @@ namespace ActsTrk
     if (not m_monTool.empty())
       ATH_CHECK(m_monTool.retrieve());
 
+    ATH_CHECK(m_trackingGeometryTool.retrieve());
+    ATH_CHECK(m_extrapolationTool.retrieve());
+    ATH_CHECK(m_ATLASConverterTool.retrieve());
+    if (!m_trackStatePrinter.empty())
+    {
+      ATH_CHECK(m_trackStatePrinter.retrieve());
+    }
+    ATH_CHECK(m_sourceLinksOut.initialize(SG::AllowEmpty));
+
+    m_logger = makeActsAthenaLogger(this, "Acts");
+
+    auto magneticField = std::make_unique<ATLASMagneticFieldWrapper>();
+    auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
+
+    Stepper stepper(std::move(magneticField));
+    Navigator::Config cfg{trackingGeometry};
+    cfg.resolvePassive = false;
+    cfg.resolveMaterial = true;
+    cfg.resolveSensitive = true;
+    Navigator navigator(cfg);
+    Propagator propagator(std::move(stepper), std::move(navigator), logger().cloneWithSuffix("Prop"));
+
+    Acts::MeasurementSelector::Config measurementSelectorCfg{{Acts::GeometryIdentifier(),
+                                                              {m_etaBins, m_chi2CutOff, m_numMeasurementsCutOff}}};
+
+    m_trackFinder.reset(new CKF_pimpl{CKF_config{{std::move(propagator), logger().cloneWithSuffix("CKF")}, measurementSelectorCfg, {}, {}}});
+
+    m_trackFinder->pOptions.maxSteps = m_maxPropagationStep;
+
+    m_trackFinder->ckfExtensions.updater.connect<&gainMatrixUpdate>();
+    m_trackFinder->ckfExtensions.smoother.connect<&gainMatrixSmoother>();
+    m_trackFinder->ckfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<ActsTrk::TrackStateBackend, ATLASUncalibSourceLink>>();
+    m_trackFinder->ckfExtensions.measurementSelector.connect<&Acts::MeasurementSelector::select<ActsTrk::TrackStateBackend>>(&m_trackFinder->measurementSelector);
+
+    return StatusCode::SUCCESS;
+  }
+
+  // finalize
+  StatusCode TrackFindingAlg::finalize()
+  {
+    ATH_MSG_INFO(name() << " statistics:");
+    ATH_MSG_INFO("- total seeds: " << m_nTotalSeeds);
+    ATH_MSG_INFO("- duplicate seeds: " << m_nDuplicateSeeds);
+    ATH_MSG_INFO("- failed seeds: " << m_nFailedSeeds);
+    ATH_MSG_INFO("- output tracks: " << m_nOutputTracks);
+    ATH_MSG_INFO("- failure ratio: " << static_cast<double>(m_nFailedSeeds) / m_nTotalSeeds);
+    ATH_MSG_INFO("- duplication ratio: " << static_cast<double>(m_nDuplicateSeeds) / m_nTotalSeeds);
     return StatusCode::SUCCESS;
   }
 
@@ -149,10 +237,10 @@ namespace ActsTrk
 
     // convert all measurements to source links, so the CKF can find them from either strip or pixel seeds.
 
-    auto measurements = m_trackFindingTool->initMeasurements(((pixelClusterContainer ? pixelClusterContainer->size() : 0u) +
-                                                              (stripClusterContainer ? stripClusterContainer->size() : 0u)),
-                                                             ((pixelSeeds ? pixelSeeds->size() : 0u) +
-                                                              (stripSeeds ? stripSeeds->size() : 0u)));
+    auto measurements = initMeasurements(((pixelClusterContainer ? pixelClusterContainer->size() : 0u) +
+                                          (stripClusterContainer ? stripClusterContainer->size() : 0u)),
+                                         ((pixelSeeds ? pixelSeeds->size() : 0u) +
+                                          (stripSeeds ? stripSeeds->size() : 0u)));
     if (pixelClusterContainer && pixelDetEleColl)
     {
       ATH_MSG_DEBUG("Create " << pixelClusterContainer->size() << " source links from pixel measurements");
@@ -183,24 +271,24 @@ namespace ActsTrk
     // Afterwards, we could start with strips where the occupancy is lower.
     if (pixelEstimatedTrackParameters && !pixelEstimatedTrackParameters->empty())
     {
-      ATH_CHECK(m_trackFindingTool->findTracks(ctx,
-                                               *measurements,
-                                               *pixelEstimatedTrackParameters,
-                                               pixelSeeds,
-                                               trackContainer,
-                                               0,
-                                               "pixel"));
+      ATH_CHECK(findTracks(ctx,
+                           *measurements,
+                           *pixelEstimatedTrackParameters,
+                           pixelSeeds,
+                           trackContainer,
+                           0,
+                           "pixel"));
     }
 
     if (stripEstimatedTrackParameters && !stripEstimatedTrackParameters->empty())
     {
-      ATH_CHECK(m_trackFindingTool->findTracks(ctx,
-                                               *measurements,
-                                               *stripEstimatedTrackParameters,
-                                               stripSeeds,
-                                               trackContainer,
-                                               1,
-                                               "strip"));
+      ATH_CHECK(findTracks(ctx,
+                           *measurements,
+                           *stripEstimatedTrackParameters,
+                           stripSeeds,
+                           trackContainer,
+                           1,
+                           "strip"));
     }
 
     ATH_MSG_DEBUG("    \\__ Created " << trackContainer.size() << " tracks");
@@ -213,6 +301,173 @@ namespace ActsTrk
     ActsTrk::ConstTrackBackend trackBackend(trackContainer.container());
     auto constTrackContainer = std::make_unique<ActsTrk::ConstTrackContainer>(std::move(trackBackend), std::move(trackStateBackend));
     ATH_CHECK(trackContainerHandle.record(std::move(constTrackContainer)));
+
+    return StatusCode::SUCCESS;
+  }
+
+  std::unique_ptr<TrackFindingAlg::Measurements>
+  TrackFindingAlg::initMeasurements(size_t numMeasurements, size_t numSeeds) const
+  {
+     std::vector<ATLASUncalibSourceLink::ElementsType> *elements_collection=nullptr;
+     if (!m_sourceLinksOut.empty()) {
+        SG::WriteHandle< std::vector<ATLASUncalibSourceLink::ElementsType> > source_links_out_handle(m_sourceLinksOut);
+        if (source_links_out_handle.record( std::make_unique< std::vector<ATLASUncalibSourceLink::ElementsType> >() ).isFailure() ) {
+           std::stringstream a_msg;
+           a_msg << "Failed to write ATLASUncalibSourceLink elements collection with key " << m_sourceLinksOut.key();
+           ATH_MSG_FATAL( a_msg.str() );
+           throw std::runtime_error(a_msg.str());
+        }
+        elements_collection = source_links_out_handle.ptr();
+     }
+
+     return std::make_unique<Measurements_impl>(numMeasurements,
+                                                numSeeds,
+                                                &*m_ATLASConverterTool,
+                                                m_trackStatePrinter.empty() ? nullptr : &*m_trackStatePrinter,
+                                                elements_collection,
+                                                m_skipDuplicateSeeds);
+  }
+
+  StatusCode
+  TrackFindingAlg::findTracks(const EventContext &ctx,
+                               const Measurements &measurements,
+                               const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
+                               const ActsTrk::SeedContainer *seeds,
+                               ActsTrk::TrackContainer &tracksContainer,
+                               size_t typeIndex,
+                               const char *seedType) const
+  {
+    ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
+
+    if (seeds && seeds->size() != estimatedTrackParameters.size())
+    {
+      // should be the same, but we can cope if not
+      ATH_MSG_WARNING("Have " << seeds->size() << " " << seedType << " seeds, but " << estimatedTrackParameters.size() << "estimated track parameters");
+    }
+
+    // Get measurement source links. We cast to Measurements_impl to give access to this file's local data members.
+    auto &meas = dynamic_cast<const Measurements_impl &>(measurements);
+
+    // Construct a perigee surface as the target surface
+    auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
+
+    Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+    Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
+    // CalibrationContext converter not implemented yet.
+    Acts::CalibrationContext calContext = Acts::CalibrationContext();
+
+    UncalibSourceLinkAccessor slAccessor;
+    slAccessor.container = &meas.sourceLinks();
+    Acts::SourceLinkAccessorDelegate<UncalibSourceLinkAccessor::Iterator> slAccessorDelegate;
+    slAccessorDelegate.connect<&UncalibSourceLinkAccessor::range>(&slAccessor);
+
+    // Set the CombinatorialKalmanFilter options
+    using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<UncalibSourceLinkAccessor::Iterator, ActsTrk::TrackStateBackend>;
+    TrackFinderOptions options(tgContext,
+                               mfContext,
+                               calContext,
+                               slAccessorDelegate,
+                               m_trackFinder->ckfExtensions,
+                               m_trackFinder->pOptions,
+                               &(*pSurface));
+
+    // Perform the track finding for all initial parameters
+    ATH_MSG_DEBUG("Invoke track finding with " << estimatedTrackParameters.size() << ' ' << seedType << " seeds.");
+
+    m_nTotalSeeds += estimatedTrackParameters.size();
+    size_t addTracks = 0;
+
+    // Loop over the track finding results for all initial parameters
+    for (std::size_t iseed = 0; iseed < estimatedTrackParameters.size(); ++iseed)
+    {
+      if (!estimatedTrackParameters[iseed])
+      {
+        ATH_MSG_WARNING("No " << seedType << " seed " << iseed);
+        ++m_nFailedSeeds;
+        continue;
+      }
+
+      const Acts::BoundTrackParameters &initialParameters = *estimatedTrackParameters[iseed];
+
+      if (!m_trackStatePrinter.empty() && seeds)
+      {
+        if (iseed == 0)
+        {
+          ATH_MSG_INFO("CKF results for " << estimatedTrackParameters.size() << ' ' << seedType << " seeds:");
+        }
+        m_trackStatePrinter->printSeed(tgContext, *(*seeds)[iseed], initialParameters, meas.measurementOffset(typeIndex), iseed);
+      }
+
+      if (meas.duplicateSeedDetector().isDuplicate(meas.seedOffset(typeIndex) + iseed))
+      {
+        ATH_MSG_DEBUG("skip " << seedType << " seed " << iseed << " - already found");
+        ++m_nDuplicateSeeds;
+        continue;
+      }
+
+      // Get the Acts tracks, given this seed
+      // Result here contains a vector of TrackProxy objects
+
+      auto result = m_trackFinder->ckf.findTracks(initialParameters, options, tracksContainer);
+
+      // The result for this seed
+      if (not result.ok())
+      {
+        ATH_MSG_WARNING("Track finding failed for " << seedType << " seed " << iseed << " with error" << result.error());
+        ++m_nFailedSeeds;
+        continue;
+      }
+
+      // Fill the track infos into the duplicate seed detector
+      ATH_CHECK(storeSeedInfo(tracksContainer, result.value(), measurements));
+
+      size_t ntracks = result.value().size();
+      addTracks += ntracks;
+
+      if (!m_trackStatePrinter.empty())
+      {
+        m_trackStatePrinter->printTracks(tgContext, tracksContainer, result.value(), meas.sourceLinkVec());
+      }
+
+      if (ntracks == 0)
+      {
+        ATH_MSG_WARNING("Track finding found no track candidates for " << seedType << " seed " << iseed);
+        ++m_nFailedSeeds;
+      }
+    }
+
+    m_nOutputTracks += addTracks;
+
+    ATH_MSG_DEBUG("Completed " << seedType << " track finding with " << addTracks << " track candidates.");
+
+    return StatusCode::SUCCESS;
+  }
+
+  StatusCode
+  TrackFindingAlg::storeSeedInfo(const ActsTrk::TrackContainer &tracksContainer,
+                                  const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
+                                  const Measurements &measurements) const
+  {
+    auto &duplicateSeedDetector = dynamic_cast<const Measurements_impl &>(measurements).duplicateSeedDetector();
+
+    for (auto &track : fitResult)
+    {
+      const auto lastMeasurementIndex = track.tipIndex();
+      duplicateSeedDetector.newTrajectory();
+
+      tracksContainer.trackStateContainer().visitBackwards(
+          lastMeasurementIndex,
+          [&duplicateSeedDetector](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
+          {
+            // Check there is a source link
+            if (not state.hasUncalibratedSourceLink())
+              return;
+
+            // Fill the duplicate selector
+            auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
+            duplicateSeedDetector.addMeasurement(sl);
+          }); // end visit backwards
+    }         // loop on tracks from fitResult
 
     return StatusCode::SUCCESS;
   }
