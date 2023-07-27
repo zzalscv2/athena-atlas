@@ -63,7 +63,6 @@ MCTruthClassifier::MCTruthClassifier(const std::string& type)
   declareProperty("pTChargePartCut", m_pTChargePartCut = 1.0);
   declareProperty("pTNeutralPartCut", m_pTNeutralPartCut = 0.);
   declareProperty("inclG4part", m_inclG4part = false);
-  declareProperty("LQpatch", m_LQpatch = false);
 
 }
 

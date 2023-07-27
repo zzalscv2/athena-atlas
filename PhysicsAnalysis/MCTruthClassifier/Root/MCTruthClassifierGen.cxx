@@ -511,51 +511,6 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
   }
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
 
-  //---patch to fix LQ dataset problem
-  if (m_LQpatch) {
-    if (abs(motherPDG) == 11 && MC::isDecayed(mother) && mothOriVert == nullptr && motherPDG == thePriPart->pdgId() &&
-        numOfParents == 1 && (partOriVert->nOutgoingParticles() == 1 || partOriVert->nOutgoingParticles() == 2)) {
-      const xAOD::TruthParticle* theP(nullptr);
-      int itr = 0;
-      float dRMin(99999.);
-      do {
-        const xAOD::TruthParticle* thePtmp = barcode_to_particle(mcTruthTES, motherBarcode - (itr + 2));
-        if (abs(thePtmp->pdgId()) == 11 && thePtmp->pdgId() == motherPDG && thePtmp->status() == 3 &&
-            thePtmp->decayVtx() == nullptr) {
-          float dphi = detPhi(mother->phi(), thePtmp->phi());
-          float deta = mother->eta() - thePtmp->eta();
-          float dR = rCone(dphi, deta);
-          if (dR < dRMin) {
-            dRMin = dR;
-            theP = thePtmp;
-          };
-        }
-        itr++;
-      } while (itr < 4);
-
-      if (dRMin > 0.1)
-        theP = nullptr;
-      if (theP != nullptr) {
-        thePriPart = theP;
-        mother = getMother(thePriPart);
-        if (info) {
-          info->mother = mother;
-        }
-        if (!mother) {
-          return NonDefined;
-        }
-        motherPDG = mother->pdgId();
-        motherBarcode = mother->barcode();
-        mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
-        if (info) {
-          info->motherPDG = motherPDG;
-          info->motherBarcode = motherBarcode;
-        }
-      }
-    }
-  }
-  //----
-
   // to exclude interactions mu(barcode<10^6)->mu(barcode10^6)+e
   bool samePart = false;
   for (unsigned int ipOut = 0; ipOut < partOriVert->nOutgoingParticles(); ++ipOut) {
