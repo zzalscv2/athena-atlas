@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_Monitoring_Tool.h"
@@ -54,7 +54,7 @@ const int TRT_Monitoring_Tool::s_moduleNum[2] = {96, 64};
 //------------------------------------------------------------------------------------------------//
 TRT_Monitoring_Tool::TRT_Monitoring_Tool(const std::string &type, const std::string &name, const IInterface *parent) :
 	ManagedMonitorToolBase(type, name, parent),
-	m_lastLumiBlock(-99),
+	m_lastTRTLumiBlock(-99),
 	m_evtLumiBlock(0),
 	m_good_bcid(0),
 	m_nTotalTracks(0),
@@ -1644,20 +1644,20 @@ StatusCode TRT_Monitoring_Tool::procHistograms() {
 
 	if (endOfLumiBlockFlag() || endOfRunFlag()) {
 		if (m_doShift) {
-			Int_t lumiblock1440 = m_lastLumiBlock % 1440;
+			Int_t lumiblock1440 = m_lastTRTLumiBlock % 1440;
 			float lumiBlockScale = (m_evtLumiBlock > 0) ? (1. / m_evtLumiBlock) : 0;
 			const float barrelConst = 1. / 105088;
 			const float endcapConst = 1. / 122880;
 
 			if (m_doTracksMon && m_evtLumiBlock > 0) {
-				m_hNHitsperLB_B->Fill(m_lastLumiBlock,   (float)m_nHitsperLB_B * lumiBlockScale * barrelConst);
-				m_hNTrksperLB_B->Fill(m_lastLumiBlock,   (float)m_nTrksperLB_B * lumiBlockScale);
-				m_hNHLHitsperLB_B->Fill(m_lastLumiBlock, (float)m_nHLHitsperLB_B * lumiBlockScale * barrelConst);
+				m_hNHitsperLB_B->Fill(m_lastTRTLumiBlock,   (float)m_nHitsperLB_B * lumiBlockScale * barrelConst);
+				m_hNTrksperLB_B->Fill(m_lastTRTLumiBlock,   (float)m_nTrksperLB_B * lumiBlockScale);
+				m_hNHLHitsperLB_B->Fill(m_lastTRTLumiBlock, (float)m_nHLHitsperLB_B * lumiBlockScale * barrelConst);
 
 				for (int iside = 0; iside < 2; iside++) {
-					m_hNHitsperLB_E[iside]->Fill(m_lastLumiBlock, (float)m_nHitsperLB_E[iside] * lumiBlockScale * endcapConst);
-					m_hNTrksperLB_E[iside]->Fill(m_lastLumiBlock,  (float)m_nTrksperLB_E[iside] * lumiBlockScale);
-					m_hNHLHitsperLB_E[iside]->Fill(m_lastLumiBlock, (float)m_nHLHitsperLB_E[iside] * lumiBlockScale * endcapConst);
+					m_hNHitsperLB_E[iside]->Fill(m_lastTRTLumiBlock, (float)m_nHitsperLB_E[iside] * lumiBlockScale * endcapConst);
+					m_hNTrksperLB_E[iside]->Fill(m_lastTRTLumiBlock,  (float)m_nTrksperLB_E[iside] * lumiBlockScale);
+					m_hNHLHitsperLB_E[iside]->Fill(m_lastTRTLumiBlock, (float)m_nHLHitsperLB_E[iside] * lumiBlockScale * endcapConst);
 				}
 
 				m_nTrksperLB_B = 0;
@@ -1718,7 +1718,7 @@ StatusCode TRT_Monitoring_Tool::procHistograms() {
 
 		//Resetting Occupuncy histograms for online environment
 		if (m_doShift && m_environment == AthenaMonManager::online &&
-		    (m_lastLumiBlock % m_lumiBlocksToResetOcc) == 0) {
+		    (m_lastTRTLumiBlock % m_lumiBlocksToResetOcc) == 0) {
 			for (int ibe = 0; ibe < 2; ibe++) {
 				for (int iside = 0; iside < 2; iside++) {
 					m_hAvgHLOcc_side[ibe][iside]->Reset();
@@ -4018,8 +4018,8 @@ StatusCode TRT_Monitoring_Tool::checkTRTReadoutIntegrity(const xAOD::EventInfo& 
 	ATH_MSG_VERBOSE("This is lumiblock : " << lumiBlock);
 	m_good_bcid = eventInfo.bcid();
 
-	if ((int)lumiBlock != m_lastLumiBlock) {
-		m_lastLumiBlock = lumiBlock;
+	if ((int)lumiBlock != m_lastTRTLumiBlock) {
+		m_lastTRTLumiBlock = lumiBlock;
 	}
 	////
 	//Get BSConversion errors
