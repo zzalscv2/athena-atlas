@@ -92,7 +92,7 @@ prefix="InDetTrigMT"
 
 def TRTDataProviderCfg(flags : AthConfigFlags, rois : str, signatureName : str = None):
   if signatureName is None:
-    suffix = flags.Tracking.ActiveConfig.name
+    suffix = flags.Tracking.ActiveConfig.input_name
   else:
     suffix = signatureName
     
