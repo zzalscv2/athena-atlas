@@ -14,9 +14,10 @@ def SetupArgParser():
     parser.add_argument("--inputFile", "-i", default=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"], 
                         help="Input file to run on ", nargs="+")
     parser.add_argument("--geoModelFile", default ="root://eoshome.cern.ch:1094//eos/user/c/cimuonsw/GeometryFiles/muonsOnlyR4WMDT.db", help="GeoModel SqLite file containing the muon geometry.")
-    parser.add_argument("--chambers", default=["BIL1A3"], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
+    parser.add_argument("--chambers", default=["all"], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
     parser.add_argument("--outRootFile", default="MdtGeoDump.root", help="Output ROOT file to dump the geomerty")
     parser.add_argument("--outTxtFile", default ="MdtGeoDump.txt", help="Output txt file to dump the geometry")
+    parser.add_argument("--nEvents", help="Number of events to rum", type = int ,default = 1)
     return parser
 
 def setupServicesCfg(flags):
@@ -90,6 +91,13 @@ def setupGeoR4TestCfg(args):
 
     flags.Muon.setupGeoModelXML = True
 
+    flags.Scheduler.CheckDependencies = True
+    flags.Scheduler.ShowDataDeps = True
+    flags.Scheduler.ShowDataFlow = True
+    flags.Scheduler.ShowControlFlow = True
+    flags.Scheduler.EnableVerboseViews = True
+    flags.Scheduler.AutoLoadUnmetDependencies = True
+
     flags.lock()
     flags.dump()
 
@@ -98,29 +106,29 @@ def setupGeoR4TestCfg(args):
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
     geoModelSvc = cfg.getPrimaryAndMerge(GeoModelCfg(flags))
     from MuonGeoModelR4.MuonGeoModelConfig import MuonDetectorToolCfg
-    #from AthenaCommon.Constants import VERBOSE
-    geoModelSvc.DetectorTools =[cfg.popToolsAndMerge(MuonDetectorToolCfg(flags,#OutputLevel= VERBOSE
-    ))]
-    
+    geoModelSvc.DetectorTools =[cfg.popToolsAndMerge(MuonDetectorToolCfg(flags))]    
 
     return flags, cfg
 
-if __name__=="__main__":
-    args = SetupArgParser().parse_args()
-    flags, cfg = setupGeoR4TestCfg(args)
-    cfg.merge(GeoModelMdtTestCfg(flags))    
-    ####    
+def executeTest(cfg, num_events = 1):
     DetDescCnvSvc = cfg.getService("DetDescrCnvSvc")
     DetDescCnvSvc.IdDictFromRDB = False
     DetDescCnvSvc.MuonIDFileName="IdDictParser/IdDictMuonSpectrometer_R.10.00.xml"
     DetDescCnvSvc.MuonIDFileName="IdDictParser/IdDictMuonSpectrometer_R.09.03.xml"
-
-    cfg.merge(setupHistSvcCfg(flags, out_file = args.outRootFile))
-    cfg.merge(GeoModelMdtTestCfg(flags, DumpTxtFile =  args.outTxtFile,
-                                        TestStations = args.chambers))
     
     cfg.printConfig(withDetails=True, summariseProps=True)
-    if not cfg.run(1).isSuccess():
+    if not cfg.run(num_events).isSuccess():
         import sys
         sys.exit("Execution failed")
+if __name__=="__main__":
+    args = SetupArgParser().parse_args()
+    flags, cfg = setupGeoR4TestCfg(args)
+    cfg.merge(GeoModelMdtTestCfg(flags))    
+    #### 
+    cfg.merge(setupHistSvcCfg(flags, out_file = args.outRootFile))
+    cfg.merge(GeoModelMdtTestCfg(flags, DumpTxtFile = args.outTxtFile,
+                                        TestStations = args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []))
+    executeTest(cfg, num_events = args.nEvents)
+    
+   
   

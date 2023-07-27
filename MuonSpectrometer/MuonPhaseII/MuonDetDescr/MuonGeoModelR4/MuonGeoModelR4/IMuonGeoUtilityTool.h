@@ -29,7 +29,6 @@ class IMuonGeoUtilityTool : virtual public IAlgTool {
         virtual Amg::Transform3D extractShifts(const PVConstLink& physVol) const = 0;
         virtual Amg::Transform3D extractShifts(const GeoShape* inShape) const = 0;
 
-        virtual std::string dump(const Amg::Transform3D& transform) const = 0;
         ///     
         virtual std::string dumpShape(const GeoShape* inShape) const = 0;
         ///

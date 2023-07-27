@@ -15,11 +15,10 @@ class MdtReadoutElement : public MuonReadoutElement {
     
     /// Set of parameters to describe a MDT chamber
     struct parameterBook {
-        /// Number of tubes per layer
-        unsigned int numTubesPerLay{0};
         /// Vector defining the position of all tubes in each tube layer.
         /// The Size of the vector reflects the number of tube layers in the
-        /// multi layer
+        /// multi layer. The number of tubes of the readout element is taken from
+        // the number of tubes of the first layer
         std::vector<MdtTubeLayer> tubeLayers{};
         /// Thickness of the tube walls
         double tubeWall{0.};
@@ -68,7 +67,6 @@ class MdtReadoutElement : public MuonReadoutElement {
     StatusCode initElement() override final;
     /// Returns the multi layer of the MdtReadoutElement
     unsigned int multilayer() const;
-
     /// Returns the number of tube layer
     unsigned int numLayers() const;
     /// Returns the number of tubes per layer
@@ -88,7 +86,9 @@ class MdtReadoutElement : public MuonReadoutElement {
     /// hash is always defined w.r.t the specific detector element and used to
     /// access the information in memory quickly
     IdentifierHash measurementHash(const Identifier& measId) const override final;
-    /// Transforms the Identifier into a layer hash
+    
+    /// Transforms the Identifier into the layer hash. The layer hash corresponds
+    /// to the same measurement hash as for tube = nTubes / 2
     IdentifierHash layerHash(const Identifier& measId) const override final;
 
     /// Converts the measurement hash back to the full Identifier
@@ -117,7 +117,6 @@ class MdtReadoutElement : public MuonReadoutElement {
 
     Amg::Vector3D readOutPos(const ActsGeometryContext& ctx,
                              const IdentifierHash& measId) const;
-    
     
     
     double activeTubeLength(const IdentifierHash& hash) const;

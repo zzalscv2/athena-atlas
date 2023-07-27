@@ -27,13 +27,14 @@ namespace MuonGMR4{
         const Amg::Transform3D layerTransform() const;
         ///@brief Returns the transformation of the tube to the muon station
         ///       Index counting [0 - nTubes()-1]
-        const Amg::Transform3D tubeTransform(unsigned int tube) const;
+        const Amg::Transform3D tubeTransform(const unsigned int tube) const;
+        ///@brief Returns the tube position within the given tube layer
+        const Amg::Vector3D tubePosInLayer(const unsigned int tube) const;
         ///@brief Returns the half-length of the given tube 
-        double tubeHalfLength(unsigned int tube) const;
+        double tubeHalfLength(const unsigned int tube) const;
     private:
         PVConstLink m_layerNode{nullptr};       
         PVConstLink getTubeNode(unsigned int tube) const;
-        const GeoSerialTransformer* m_serialTrans{nullptr};
     };
 }
 #endif

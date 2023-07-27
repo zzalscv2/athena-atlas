@@ -9,14 +9,14 @@ find_package( xAODUtilities )
 atlas_add_library( xAODMuonSimHit
     xAODMuonSimHit/*.h xAODMuonSimHit/versions/*.h Root/*.cxx
     PUBLIC_HEADERS xAODMuonSimHit
-    LINK_LIBRARIES xAODCore GeoPrimitives MuonPrepRawData 
+    LINK_LIBRARIES xAODCore GeoPrimitives GeneratorObjects
                    xAODMeasurementBase Identifier MuonReadoutGeometryR4)
 
   
 atlas_add_xaod_smart_pointer_dicts(
     INPUT xAODMuonSimHit/selection.xml
     OUTPUT _selectionFile
-    CONTAINERS "xAOD::MdtDriftCircleContainer_v1" )
+    CONTAINERS "xAOD::MuonSimHitContainer_v1" )
 
 atlas_add_dictionary( xAODMuonSimHitDict
     xAODMuonSimHit/xAODMuonSimHitDict.h

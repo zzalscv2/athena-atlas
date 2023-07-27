@@ -59,7 +59,7 @@ using ConstMatrixMap = Eigen::Map<const MeasMatrix<N>>;
 ///@brief Converts the double precision of the AmgVector 
 ///       into the floating point storage precision of the MeasVector
 template <int N> MeasVector<N> toStorage(const AmgVector(N)& amgVec){
-        MeasVector<N> vec{};
+        MeasVector<N> vec{MeasVector<N>::Zero()};
         for (int i =0 ; i < N ; ++i) vec[i] = amgVec[i];
         return vec;
 }
@@ -67,7 +67,7 @@ template <int N> MeasVector<N> toStorage(const AmgVector(N)& amgVec){
 ///@brief Converts the double precision of the AmgSymMatrix 
 ///       into the floating point storage precision of the MeasMatrix
 template <int N> MeasMatrix<N> toStorage(const AmgSymMatrix(N)& amgMat) {
-     MeasMatrix<N> mat{};
+     MeasMatrix<N> mat{MeasMatrix<N>::Zero()};
      for (int i =0 ; i < N; ++i){
         for (int j =0 ; j < N; ++j) {
             mat(i,j) = amgMat(i, j);
@@ -76,6 +76,23 @@ template <int N> MeasMatrix<N> toStorage(const AmgSymMatrix(N)& amgMat) {
      return mat;
 }
 
+template <int N> AmgSymMatrix(N) toEigen(const ConstMatrixMap<N>& xAODmat) {
+    AmgSymMatrix(N) mat{AmgSymMatrix(N)::Zero()};
+    for (int i=0; i < N; ++i){
+        for (int j =0; j < N; ++j){
+            mat(i, j) = xAODmat(i, j);
+        }
+    }
+    return mat;
+}
+
+template <int N> AmgVector(N) toEigen(const ConstVectorMap<N>& xAODvec) {
+    AmgVector(N) v{AmgVector(N)::Zero()};
+    for (int i = 0 ; i <= N; ++i) {
+        v[i] = xAODvec[i];
+    }
+    return v;
+}
 
 
 }  // namespace xAOD

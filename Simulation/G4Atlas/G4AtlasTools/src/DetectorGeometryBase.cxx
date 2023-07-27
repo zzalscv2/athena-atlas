@@ -8,6 +8,7 @@
 // Geant4 includes used in functions
 #include "G4PVPlacement.hh"
 #include "G4RotationMatrix.hh"
+#include "G4LogicalVolumeStore.hh"
 
 DetectorGeometryBase::DetectorGeometryBase(const std::string& type, const std::string& name, const IInterface* parent)
   : base_class(type,name,parent)
@@ -51,14 +52,23 @@ StatusCode DetectorGeometryBase::initialize()
 
 void DetectorGeometryBase::Build()
 {
-  ATH_MSG_VERBOSE( name() << "::Build() (Base class method): Starting" );
+  ATH_MSG_VERBOSE( name() << "::Build() (Base class method): Starting. Number of registered volumes "<<G4LogicalVolumeStore::GetInstance()->size() );
+  
   SetEnvelope();
+  ATH_MSG_VERBOSE( name() << "::Build() - Envelope set. Number of registered volumes "<<G4LogicalVolumeStore::GetInstance()->size() );
+ 
   m_notifierSvc->SetCurrentDetectorName(m_detectorName.value());
   BuildGeometry();
+  ATH_MSG_VERBOSE( name() << "::Build() - Geometry built. Number of registered volumes "<<G4LogicalVolumeStore::GetInstance()->size() );
+ 
   SetRotationAndOffset();
+  ATH_MSG_VERBOSE( name() << "::Build() - Volume moved around. Number of registered volumes "<<G4LogicalVolumeStore::GetInstance()->size() );
+ 
   PositionInParent();
+  ATH_MSG_VERBOSE( name() << "::Build() - Connected with parent. Number of registered volumes "<<G4LogicalVolumeStore::GetInstance()->size() );
+ 
   BuildSubDetectors();
-  ATH_MSG_VERBOSE( name() << "::Build() (Base class method): Finished" );
+  ATH_MSG_VERBOSE( name() << "::Build() (Base class method): Finished. Number of registered volumes "<<G4LogicalVolumeStore::GetInstance()->size() );
   return;
 }
 

@@ -1,6 +1,9 @@
 
-#include <GeoModelKernel/GeoFullPhysVol.h>
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
 #include <MuonReadoutGeometryR4/MuonTransformCache.h>
+#include <GeoModelKernel/GeoFullPhysVol.h>
 
 namespace MuonGMR4 {
 MuonTransformCache::MuonTransformCache(const IdentifierHash& hash,

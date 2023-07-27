@@ -22,12 +22,15 @@ AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(MuonSimHit_v1, int, pdgId, setPdgId)
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(MuonSimHit_v1, float, energyDeposit, setEnergyDeposit)
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(MuonSimHit_v1, float, kineticEnergy, setKineticEnergy)
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(MuonSimHit_v1, float, stepLength, setStepLength)
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(MuonSimHit_v1, ElementLink<McEventCollection>, genParticleLink, setGenParticleLink)
+
+
 
 void MuonSimHit_v1::setLocalPosition(MeasVector<3> vec) {
    VectorMap<3> lPos{acc_localPos(*this).data()};
    lPos = vec;   
 }
-ConstVectorMap<3> MuonSimHit_v1::localPostion() const { return ConstVectorMap<3>{acc_localPos(*this).data()};}
+ConstVectorMap<3> MuonSimHit_v1::localPosition() const { return ConstVectorMap<3>{acc_localPos(*this).data()};}
 
 void MuonSimHit_v1::setLocalDirection(MeasVector<3> vec) {
    VectorMap<3> lPos{acc_localDir(*this).data()};

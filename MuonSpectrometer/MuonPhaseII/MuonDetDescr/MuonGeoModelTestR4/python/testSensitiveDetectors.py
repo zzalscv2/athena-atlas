@@ -1,9 +1,29 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+
+def setupTestOutputCfg(flags,**kwargs):
+
+    kwargs.setdefault("streamName","MuonSimTestStream")
+    kwargs.setdefault("AcceptAlgs",[])
+  
+    result = ComponentAccumulator()
+    ### Setup an xAOD Stream to test the size of the Mdt container
+    # =============================
+    # Define contents of the format
+    # =============================
+    container_items = ["xAOD::MuonSimHitContainer#",
+                       "xAOD::MuonSimHitAuxContainer#",
+                       "xAOD::TruthParticleContainer#",
+                       "xAOD::TruthParticleAuxContainer#"]
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    kwargs.setdefault("ItemList", container_items)
+    result.merge(OutputStreamCfg(flags, **kwargs))
+    return result
 
 if __name__=="__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
     parser = SetupArgParser()
-    parser.add_argument("--nEvents", help="Number of events to rum", type = int ,default = 100)
+    parser.set_defaults(nEvents = -1)
 
     args = parser.parse_args()
     flags, cfg = setupGeoR4TestCfg(args)
@@ -13,12 +33,20 @@ if __name__=="__main__":
 
     from G4AtlasAlg.G4AtlasAlgConfig import G4AtlasAlgCfg
     cfg.merge(G4AtlasAlgCfg(flags))
-     ####    
-    DetDescCnvSvc = cfg.getService("DetDescrCnvSvc")
-    DetDescCnvSvc.IdDictFromRDB = False
-    DetDescCnvSvc.MuonIDFileName="IdDictParser/IdDictMuonSpectrometer_R.10.00.xml"
-    DetDescCnvSvc.MuonIDFileName="IdDictParser/IdDictMuonSpectrometer_R.09.03.xml"
-    cfg.printConfig(withDetails=True, summariseProps=True)
-    if not cfg.run(args.nEvents).isSuccess():
-        import sys
-        sys.exit("Execution failed")
+    ### Keep the Volume debugger commented for the moment
+    #from G4DebuggingTools.PostIncludes import VolumeDebuggerAtlas
+    #cfg.merge(VolumeDebuggerAtlas(flags, name="G4UA::UserActionSvc", 
+    #                                     PrintGeometry = True,
+    #                                     TargetVolume="BMS7_MDT04_1_3_2"
+    #                                    ))
+    
+    ## xAOD TruthParticle conversion
+    from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
+    cfg.merge(EventInfoCnvAlgCfg(flags,inputKey="McEventInfo", disableBeamSpot=True))
+   
+    from xAODTruthCnv.xAODTruthCnvConfig import GEN_EVNT2xAODCfg
+    cfg.merge(GEN_EVNT2xAODCfg(flags,name="GEN_EVNT2xAOD",AODContainerName="TruthEvent"))
+
+    cfg.merge(setupTestOutputCfg(flags))
+    executeTest(cfg, num_events = args.nEvents)
+  

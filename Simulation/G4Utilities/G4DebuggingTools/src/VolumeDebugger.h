@@ -40,15 +40,16 @@ namespace G4UA
 
     struct Config
     {
-      std::string path="./test_volume.gdml";
-      std::string targetVolume=""; // By default targetVolume is empty => dump the whole Atlas::Atlas geometry
-      int res=1000000;
-      bool verbose=true;
-      float tol=0.000001;
-      bool volumeCheck=false;
-      double targetMaxCopiesToCheck=1.e6;
-      bool dumpGDML=true;
-      bool dumpPhysicsRegions=false;
+      std::string path{"./test_volume.gdml"};
+      std::string targetVolume{""}; // By default targetVolume is empty => dump the whole Atlas::Atlas geometry
+      int res{1000000};
+      bool verbose{true};
+      float tol{0.000001};
+      bool volumeCheck{false};
+      double targetMaxCopiesToCheck{1.e6};
+      bool dumpGDML{true};
+      bool dumpPhysicsRegions{false};
+      bool printGeo{false};
     };
 
     VolumeDebugger(const Config& config);
@@ -65,6 +66,8 @@ namespace G4UA
     void PullVolumes( G4LogicalVolume* v ) const;
     /// Returns true if there were overlaps
     bool recursiveCheck(G4VPhysicalVolume *pv) const;
+
+    std::string printVolume(const G4VPhysicalVolume *pv, const std::string& delim = "") const;
 
   }; // class VolumeDebugger
 

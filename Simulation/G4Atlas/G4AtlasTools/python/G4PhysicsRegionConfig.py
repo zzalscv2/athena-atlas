@@ -346,7 +346,7 @@ def DeadMaterialPhysicsRegionToolCfg(flags, name='DeadMaterialPhysicsRegionTool'
 def DriftWallPhysicsRegionToolCfg(flags, name='DriftWallPhysicsRegionTool', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'DriftWall')
-    volumeList = ['Muon::MDTDriftWall']
+    volumeList = ['Muon::MDTDriftWall' if not flags.Muon.setupGeoModelXML else 'MuonR4::MDTDriftWall' ]
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", 0.05)
     kwargs.setdefault("PositronCut", 0.05)
@@ -357,7 +357,7 @@ def DriftWallPhysicsRegionToolCfg(flags, name='DriftWallPhysicsRegionTool', **kw
 def DriftWall1PhysicsRegionToolCfg(flags, name='DriftWall1PhysicsRegionTool', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'DriftWall1')
-    volumeList = ['Muon::Endplug']
+    volumeList = ['Muon::Endplug' if not flags.Muon.setupGeoModelXML else 'MuonR4::Endplug']
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", 1.0)
     kwargs.setdefault("PositronCut", 1.0)
@@ -368,7 +368,7 @@ def DriftWall1PhysicsRegionToolCfg(flags, name='DriftWall1PhysicsRegionTool', **
 def DriftWall2PhysicsRegionToolCfg(flags, name='DriftWall2PhysicsRegionTool', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'DriftWall2')
-    volumeList = ['Muon::SensitiveGas']
+    volumeList = ['Muon::SensitiveGas' if not flags.Muon.setupGeoModelXML else 'MuonR4::MDTDriftGas']
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", 1.0)
     kwargs.setdefault("PositronCut", 1.0)

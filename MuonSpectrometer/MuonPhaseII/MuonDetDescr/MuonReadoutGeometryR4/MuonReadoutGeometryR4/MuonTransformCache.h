@@ -4,8 +4,9 @@
 #ifndef MUONREADOUTGEOMETRY_MUONTRANSFORMCACHE_H
 #define MUONREADOUTGEOMETRY_MUONTRANSFORMCACHE_H
 
-#include <CxxUtils/CachedUniquePtr.h>
 #include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
+#include <CxxUtils/CachedUniquePtr.h>
+
 
 /// The Muon transform cache is used to hold all geometry 
 namespace MuonGMR4 {

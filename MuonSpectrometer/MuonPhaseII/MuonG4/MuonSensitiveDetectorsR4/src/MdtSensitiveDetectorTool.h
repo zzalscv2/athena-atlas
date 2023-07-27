@@ -12,11 +12,11 @@
 
 namespace MuonG4R4 {
 
-class MDTSensitiveDetectorTool : public SensitiveDetectorBase {
+class MdtSensitiveDetectorTool : public SensitiveDetectorBase {
 
 public:
-    MDTSensitiveDetectorTool(const std::string& type, const std::string& name, const IInterface *parent);
-    ~MDTSensitiveDetectorTool()=default;
+    MdtSensitiveDetectorTool(const std::string& type, const std::string& name, const IInterface *parent);
+    ~MdtSensitiveDetectorTool()=default;
 
     StatusCode initialize() override final;
 protected:

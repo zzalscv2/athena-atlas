@@ -68,32 +68,64 @@ class GeoModelMdtTest : public AthHistogramAlgorithm{
 
 
       /// Transformation of the readout element (Translation, ColX, ColY, ColZ)
-      MuonVal::ThreeVectorBranch m_readoutTransform{m_tree, "ElementTransform"};   
+      MuonVal::ThreeVectorBranch m_readoutTransform{m_tree, "GeoModelTransform"};   
       /// Number of tubes per layer
       MuonVal::ScalarBranch<unsigned short>& m_numTubes{m_tree.newScalar<unsigned short>("numTubes")};
       /// Number of tubes per layer
       MuonVal::ScalarBranch<unsigned short>& m_numLayers{m_tree.newScalar<unsigned short>("numLayers")};
 
-      /// Transfortmations to the first tube in a layer
-      MuonVal::VectorBranch<unsigned short>& m_layTransNumber{m_tree.newVector<unsigned short>("layerNumber")};
-      /// Ideal transformations
-      MuonVal::ThreeVectorBranch m_layCenter{m_tree,"LayerCenter"};
-      MuonVal::ThreeVectorBranch m_layTransColX{m_tree, "LayerLinearCol1"};
-      MuonVal::ThreeVectorBranch m_layTransColY{m_tree, "LayerLinearCol2"};
-      MuonVal::ThreeVectorBranch m_layTransColZ{m_tree, "LayerLinearCol3"};
-    
-
       /// Readout each tube specifically
       MuonVal::VectorBranch<unsigned short>& m_tubeLay{m_tree.newVector<unsigned short>("tubeLayer")};
       MuonVal::VectorBranch<unsigned short>& m_tubeNum{m_tree.newVector<unsigned short>("tubeNumber")};
+
+      /// Transformation to each tube
+      MuonVal::ThreeVectorBranch m_tubeTransformTran{m_tree, "tubeTransformTranslation"};
+      MuonVal::ThreeVectorBranch m_tubeTransformColX{m_tree, "tubeTransformCol0"};
+      MuonVal::ThreeVectorBranch m_tubeTransformColY{m_tree, "tubeTransformCol1"};
+      MuonVal::ThreeVectorBranch m_tubeTransformColZ{m_tree, "tubeTransformCol2"};
+
       MuonVal::VectorBranch<double>& m_tubeLength{m_tree.newVector<double>("tubeLength")};
       MuonVal::VectorBranch<double>& m_activeTubeLength{m_tree.newVector<double>("activeTubeLength")};
       MuonVal::VectorBranch<double>& m_wireLength{m_tree.newVector<double>("wireLength")};
 
-      /// Center of the tube
-      MuonVal::ThreeVectorBranch m_tubePos{m_tree, "tubePos"};
       /// Position of the readout
       MuonVal::ThreeVectorBranch m_roPos{m_tree, "readOutPos"};
+
+
+      /// Alignment parameters
+      MuonVal::ScalarBranch<float>& m_ALineTransS{m_tree.newScalar<float>("ALineTransS", 0.)};
+      MuonVal::ScalarBranch<float>& m_ALineTransT{m_tree.newScalar<float>("ALineTransT", 0.)};
+      MuonVal::ScalarBranch<float>& m_ALineTransZ{m_tree.newScalar<float>("ALineTransZ", 0.)};
+      MuonVal::ScalarBranch<float>& m_ALineRotS{m_tree.newScalar<float>("ALineRotS", 0.)};
+      MuonVal::ScalarBranch<float>& m_ALineRotT{m_tree.newScalar<float>("ALineRotT", 0.)};
+      MuonVal::ScalarBranch<float>& m_ALineRotZ{m_tree.newScalar<float>("ALineRotZ", 0.)};
+
+      /// B Line chamber defomrations
+      MuonVal::ScalarBranch<float>& m_BLineBz{m_tree.newScalar<float>("BLineBz", 0.)};
+      MuonVal::ScalarBranch<float>& m_BLineBp{m_tree.newScalar<float>("BLineBp", 0.)};
+      MuonVal::ScalarBranch<float>& m_BLineBn{m_tree.newScalar<float>("BLineBn", 0.)};    
+      MuonVal::ScalarBranch<float>& m_BLineSp{m_tree.newScalar<float>("BLineSp", 0.)};
+      MuonVal::ScalarBranch<float>& m_BLineSn{m_tree.newScalar<float>("BLineSn", 0.)};
+      MuonVal::ScalarBranch<float>& m_BLineTw{m_tree.newScalar<float>("BLineTw", 0.)};
+      MuonVal::ScalarBranch<float>& m_BLinePg{m_tree.newScalar<float>("BLinePg", 0.)};
+      MuonVal::ScalarBranch<float>& m_BLineTr{m_tree.newScalar<float>("BLineTr", 0.)};    
+      MuonVal::ScalarBranch<float>& m_BLineEg{m_tree.newScalar<float>("BLineEg", 0.)};
+      MuonVal::ScalarBranch<float>& m_BLineEp{m_tree.newScalar<float>("BLineEp", 0.)};
+      MuonVal::ScalarBranch<float>& m_BLineEn{m_tree.newScalar<float>("BLineEn", 0.)};
+      /// AS-built parameters
+      MuonVal::ScalarBranch<float>& m_asBuiltPosY0{m_tree.newScalar<float>("AsBuiltPosY0", 0.)};
+      MuonVal::ScalarBranch<float>& m_asBuiltPosZ0{m_tree.newScalar<float>("AsBuiltPosZ0", 0.)};
+      MuonVal::ScalarBranch<float>& m_asBuiltPosAlpha{m_tree.newScalar<float>("AsBuiltPosAlpha", 0.)};
+      MuonVal::ScalarBranch<float>& m_asBuiltPosPitchY{m_tree.newScalar<float>("AsBuiltPosPitchY", 0.)};
+      MuonVal::ScalarBranch<float>& m_asBuiltPosPitchZ{m_tree.newScalar<float>("AsBuiltPosPitchZ", 0.)};
+      MuonVal::ScalarBranch<int>  & m_asBuiltPosStagg{m_tree.newScalar<int>("AsBuiltPosStagg",0)};
+      MuonVal::ScalarBranch<float>& m_asBuiltNegY0{m_tree.newScalar<float>("AsBuiltNegY0", 0.)};
+      MuonVal::ScalarBranch<float>& m_asBuiltNegZ0{m_tree.newScalar<float>("AsBuiltNegZ0", 0.)};
+      MuonVal::ScalarBranch<float>& m_asBuiltNegAlpha{m_tree.newScalar<float>("AsBuiltNegAlpha", 0.)};
+      MuonVal::ScalarBranch<float>& m_asBuiltNegPitchY{m_tree.newScalar<float>("AsBuiltNegPitchY", 0.)};
+      MuonVal::ScalarBranch<float>& m_asBuiltNegPitchZ{m_tree.newScalar<float>("AsBuiltNegPitchZ", 0.)};
+      MuonVal::ScalarBranch<int>  & m_asBuiltNegStagg{m_tree.newScalar<int>("AsBuiltNegStagg",0)};
+
 };
 
 }

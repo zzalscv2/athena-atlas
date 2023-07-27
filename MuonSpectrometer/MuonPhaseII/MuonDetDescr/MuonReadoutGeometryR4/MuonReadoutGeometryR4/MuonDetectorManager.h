@@ -4,14 +4,15 @@
 #ifndef MUONREADOUTGEOMETRY_MUONDETECTORMANAGER_H
 #define MUONREADOUTGEOMETRY_MUONDETECTORMANAGER_H
 
-#include <map>
-#include <memory>
-
+#include "MuonReadoutGeometryR4/MuonDetectorDefs.h"
+///
 #include "AthenaKernel/CLASS_DEF.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GeoModelKernel/GeoVDetectorManager.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "MuonReadoutGeometryR4/MuonDetectorDefs.h"
+
+#include <map>
+#include <memory>
 
 /// The muon detector manager is the central class administrating the readout
 /// elements of All muon subdetectors defined in the Geometry. The detector
@@ -61,11 +62,15 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
 
     DECLARE_ELEMENT(MdtReadoutElement)
 
-    /// No idea what these things are doing
+    /// Returns the number of primary nodes in the GeoModel tree
+    /// that are building the full MuonSystem (MuonBarrel, MuonEndCap, NSW etc)
     unsigned int getNumTreeTops() const override final;
+    /// Returns the i-th top node of the MuonSystem trees 
     PVConstLink getTreeTop(unsigned int i) const override final;
-
+    /// Adds a new GeoModelTree node indicating the entrance to a muon system description
     void addTreeTop(PVConstLink pv);
+    /// Returns a point to the central MuonIdHelperSvc
+    const Muon::IMuonIdHelperSvc* idHelperSvc() const;
 
    private:
     /// Returns the detector Identifier Hash

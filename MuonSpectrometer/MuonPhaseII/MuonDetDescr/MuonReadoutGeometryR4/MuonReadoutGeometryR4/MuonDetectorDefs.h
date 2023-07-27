@@ -5,10 +5,12 @@
 #define MUONGEOMODELR4_MUONDETECTORDEFS_H
 
 #include <GeoPrimitives/GeoPrimitives.h>
-/// 
+///
 #include <MuonReadoutGeometry/ArrayHelper.h>
 #include <MuonReadoutGeometry/GlobalUtilities.h>
 
+#include <GeoPrimitives/GeoPrimitivesHelpers.h>
+#include <EventPrimitives/EventPrimitivesToStringConverter.h>
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
 #include <ActsGeometryInterfaces/RawGeomAlignStore.h>
 
@@ -19,7 +21,7 @@
 #include <functional>
 
 //// This header contains common helper utilities and definitions
-namespace MuonGMR4 {
+namespace MuonGMR4 {   
 
 
 }  // namespace MuonGMR4

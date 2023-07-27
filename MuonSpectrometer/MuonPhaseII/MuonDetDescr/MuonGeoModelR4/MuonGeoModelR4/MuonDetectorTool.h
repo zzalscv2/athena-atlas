@@ -5,6 +5,8 @@
 #ifndef MUONGEOMODELR4_MUONDETECTORTOOL_H
 #define MUONGEOMODELR4_MUONDETECTORTOOL_H
 
+#include "MuonReadoutGeometryR4/MuonDetectorDefs.h"
+///
 #include "CxxUtils/checker_macros.h"
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
 #include "GeoModelUtilities/GeoModelTool.h"
