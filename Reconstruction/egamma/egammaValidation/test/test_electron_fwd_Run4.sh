@@ -3,11 +3,10 @@
 # art-description: ART Monitoring Tool for electron Validation
 #
 # art-type: grid
-# art-input: mc16_13TeV.423000.ParticleGun_single_electron_egammaET.recon.RDO.e3566_e5984_s3112_r12662
-# art-input-nfiles: 8
+# art-input: mc21_14TeV.901966.PG_single_epm_PtFlat20_100_etaFlatnp23_50.recon.RDO.e8481_s4149_r14697
+# art-input-nfiles: 60
 # art-cores: 4
 # art-include: main/Athena
-# art-include: 23.0/Athena
 # art-output: *.hist.root
 # art-output: *.txt
 # art-output: *.png
@@ -40,16 +39,17 @@ case $ArtProcess in
 
 	echo  "art-result: $? checks_files"
 
-	runegammaMonitoring.py -p 'electron'
+	runegammaMonitoring.py -p 'electron' -fwd 'True'
 
 	echo  "art-result: $? athena_job"
 
-	EgammaARTmonitoring_plotsMaker.py /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/Nightly_Files/ref_main/Nightly-monitoring_electron_pileup.hist.root Nightly-monitoring.hist.root electron
+	EgammaARTmonitoring_plotsMaker.py /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/Nightly_Files/ref_main/Nightly-monitoring_electron.hist.root Nightly-monitoring.hist.root electron
 
 	echo  "art-result: $? final_comparison"
 
-	$ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py -p -x dcube -c /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/DCube_Config/electron.xml -r /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/Nightly_Files/Nightly-monitoring_electron_pileup.hist.root  Nightly-monitoring.hist.root
-	echo  "art-result: $? plot"
+	## dcube not so relevant for the time being.
+	#$ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py -p -x dcube -c /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/DCube_Config/electron.xml -r /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/Nightly_Files/Nightly-monitoring_electron.hist.root  Nightly-monitoring.hist.root
+	#echo  "art-result: $? plot"
 
 	;;
 
@@ -66,7 +66,7 @@ case $ArtProcess in
 	echo "Unsetting ATHENA_NUM_PROC=${ATHENA_NUM_PROC}"
 	unset  ATHENA_NUM_PROC
 
-	Reco_tf.py --CA --inputRDOFile=$x --outputAODFile=Nightly_AOD.pool.root --maxEvents=2000 --autoConfiguration="everything" --conditionsTag="OFLCOND-MC16-SDR-RUN2-09" --preInclude egammaConfig.egammaOnlyFromRawFlags.egammaOnlyFromRaw --postInclude egammaValidation.egammaArtSpecialContent.egammaArtSpecialContent
+	Reco_tf.py --CA --inputRDOFile=$x --outputAODFile=Nightly_AOD.pool.root --maxEvents=1000 --autoConfiguration="everything" --conditionsTag="OFLCOND-MC15c-SDR-14-05" --preInclude egammaConfig.egammaOnlyFromRawFlags.egammaOnlyFromRaw --postInclude egammaValidation.egammaArtSpecialContent.egammaArtSpecialContent
 
 	echo  "art-result: $? reconstruction"
 

@@ -3,8 +3,8 @@
 # art-description: ART Monitoring Tool for electron Validation
 #
 # art-type: grid
-# art-input: mc21_14TeV.900494.PG_single_epm_Pt10_etaFlatnp0_43.recon.RDO.e8481_s4038_r14362
-# art-input-nfiles: 10
+# art-input: mc21_14TeV.901967.PG_single_epm_egammaET_etaFlatnp0_25.recon.RDO.e8481_s4149_r14697
+# art-input-nfiles: 60
 # art-cores: 4
 # art-include: main/Athena
 # art-output: *.hist.root
@@ -43,12 +43,12 @@ case $ArtProcess in
 
 	echo  "art-result: $? athena_job"
 
-	EgammaARTmonitoring_plotsMaker.py /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/Nightly_Files/Nightly-monitoring_electron.hist.root Nightly-monitoring.hist.root electron
+	EgammaARTmonitoring_plotsMaker.py /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/Nightly_Files/ref_main/Nightly-monitoring_electron.hist.root Nightly-monitoring.hist.root electron
 
 	echo  "art-result: $? final_comparison"
 
-	## dcube not relevant for the time being, need proper references
-	#$ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py -p -x dcube -c /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/DCube_Config/electron.xml -r /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/Nightly_Files/Nightly-monitoring_electron.hist.root  Nightly-monitoring.hist.root
+	## dcube not so relevant for the time being. Still compare to the run2/3 sample
+	$ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py -p -x dcube -c /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/DCube_Config/electron.xml -r /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/Nightly_Files/Nightly-monitoring_electron.hist.root  Nightly-monitoring.hist.root
 	#echo  "art-result: $? plot"
 
 	;;
