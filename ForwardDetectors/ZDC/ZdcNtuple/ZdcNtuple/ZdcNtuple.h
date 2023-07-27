@@ -175,6 +175,9 @@ public:
   unsigned short t_ZdcLucrodTriggerAmp[2][4];
   float t_ZdcModuleMaxADC[2][4];
 
+  float t_RPDChannelAmplitude[2][16];
+  unsigned int t_RPDChannelMaxSample[2][16];
+
   int   t_nvx;
   float t_vx[3];
   int t_vxntrk;

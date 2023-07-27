@@ -13,6 +13,7 @@
 
 
 #include "ZdcAnalysis/ZDCDataAnalyzer.h"
+#include "ZdcAnalysis/RPDDataAnalyzer.h"
 #include "ZdcAnalysis/ZDCTriggerEfficiency.h"
 #include "ZdcAnalysis/IZdcAnalysisTool.h"
 #include "ZdcAnalysis/ZDCMsg.h"
@@ -168,9 +169,14 @@ private:
   float m_ChisqRatioCut;
   int m_LHCRun;
 
+  // The objects that carry out the analysis
+  //
   std::shared_ptr<ZDCDataAnalyzer> m_zdcDataAnalyzer;
   std::shared_ptr<ZDCDataAnalyzer> m_zdcDataAnalyzer_40MHz;
   std::shared_ptr<ZDCDataAnalyzer> m_zdcDataAnalyzer_80MHz;
+
+  std::vector<std::unique_ptr<RPDDataAnalyzer> > m_rpdDataAnalyzer;
+  
   ZDCDataAnalyzer::ZDCModuleIntArray m_peak2ndDerivMinSamples;
   ZDCDataAnalyzer::ZDCModuleFloatArray m_peak2ndDerivMinThresholdsHG;
   ZDCDataAnalyzer::ZDCModuleFloatArray m_peak2ndDerivMinThresholdsLG;
