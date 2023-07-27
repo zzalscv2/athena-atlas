@@ -100,7 +100,7 @@ const HepMC::GenParticle* GenEventGenParticleAssociationTool::next()
     // hadron range
     int motherBarcode = 999999999;
     HepMC::ConstGenVertexPtr vprod = (*m_it)->production_vertex();
-    if( barcode > HepMC::PHOTOSMIN && !HepMC::is_simulation_particle(barcode) && vprod ) {
+    if( barcode > HepMC::PHOTOSMIN && !HepMC::is_simulation_particle(*m_it) && vprod ) {
 #ifdef HEPMC3
       if (vprod->particles_in().size() > 0) {
 	auto mother = vprod->particles_in().front();
@@ -121,7 +121,7 @@ const HepMC::GenParticle* GenEventGenParticleAssociationTool::next()
     }
 
     // OK if we should select G4 particles and are in G4 range
-    if( m_doGeant && HepMC::is_simulation_particle(barcode) )
+    if( m_doGeant && HepMC::is_simulation_particle(*m_it) )
       ok = true;
 
     out = *m_it;

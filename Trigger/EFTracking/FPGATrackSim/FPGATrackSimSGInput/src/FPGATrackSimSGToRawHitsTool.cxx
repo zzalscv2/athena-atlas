@@ -699,7 +699,7 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
       bool isPrimary = true;
       if (std::abs(truth_d0corr) > 2.) { isPrimary = false; }
       const int bc = HepMC::barcode(particle);
-      if (HepMC::is_simulation_particle(bc) || bc == 0) { isPrimary = false; }
+      if (HepMC::is_simulation_particle(particle) || bc == 0) { isPrimary = false; }
 
       if (isPrimary && particle->production_vertex()) {
         const HepGeom::Point3D<double> startVertex(particle->production_vertex()->position().x(), particle->production_vertex()->position().y(), particle->production_vertex()->position().z());
@@ -756,7 +756,7 @@ void FPGATrackSimSGToRawHitsTool::getTruthInformation(InDetSimDataCollection::co
     // reject unstable particles
     if (!MC::isStable(particleLink)) { continue; }
     // reject secondaries and low pT (<400 MeV) pileup
-    if (HepMC::is_simulation_particle(particleLink.barcode()) ||particleLink.barcode() == 0) { continue; }
+    if (HepMC::is_simulation_particle(&particleLink) ||particleLink.barcode() == 0) { continue; }
     // reject far forward particles
     if (std::fabs(genEta) > m_maxEta) { continue; }
     // "bestParent" is the highest pt particle

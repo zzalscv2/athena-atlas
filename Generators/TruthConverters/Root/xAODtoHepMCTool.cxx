@@ -354,14 +354,10 @@ void xAODtoHepMCTool::printxAODEvent(const xAOD::TruthEvent *event, const xAOD::
   for (int i = 0; i < nPart; ++i)
   {
     const xAOD::TruthParticle *part = event->truthParticle(i);
-    if (part == nullptr)
-      continue;
-    int bc = part->barcode();
-    if (HepMC::generations(bc) > 0)
-      continue;
+    if (part == nullptr) continue;
+    if (HepMC::generations(part) > 0) continue;
     int id = part->pdgId();
-    if (id != 25)
-      continue;
+    if (id != 25) continue;
     int stat = part->status();
     float px = part->px() / 1000.;
     float py = part->py() / 1000.;
@@ -384,7 +380,7 @@ void xAODtoHepMCTool::printxAODEvent(const xAOD::TruthEvent *event, const xAOD::
         bcKids.push_back(dvtx->barcode());
     }
 
-    std::cout << std::setw(10) << bc << std::setw(12) << id
+    std::cout << std::setw(10) << part->barcode() << std::setw(12) << id
               << std::setw(8) << stat
               << std::setprecision(2) << std::fixed
               << std::setw(10) << px << std::setw(10) << py

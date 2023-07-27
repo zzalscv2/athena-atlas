@@ -86,8 +86,7 @@ namespace InDet {
     }
 
     // Secondary? 
-    int truthBarcode = truth->barcode();
-    if (HepMC::is_simulation_particle(truthBarcode)) {
+    if (HepMC::is_simulation_particle(truth)) {
       // sub-categorize secondaries...
       int parentID = getParentID(truth);
 

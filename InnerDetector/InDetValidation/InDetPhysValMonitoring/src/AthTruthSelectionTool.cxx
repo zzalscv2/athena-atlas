@@ -109,7 +109,7 @@ AthTruthSelectionTool::initialize() {
   }
   if (m_requireOnlyPrimary) {
     m_cutList.add(Accept_t([](const P_t& p) {
-      return(!HepMC::is_simulation_particle(p.barcode()));
+      return(!HepMC::is_simulation_particle(&p));
     }, "OnlyPrimary"));
   }
   if (m_requireCharged) {

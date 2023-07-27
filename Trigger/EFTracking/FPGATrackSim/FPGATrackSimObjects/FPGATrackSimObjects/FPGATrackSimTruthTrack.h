@@ -52,6 +52,8 @@ public:
 
   int getPDGCode() const { return m_pdgcode; }
   int getBarcode() const { return m_barcode; }
+  int barcode() const { return m_barcode; }
+  
   int getEventIndex() const { return m_evtindex; }
   double getBarcodeFracOffline() const { return m_barcode_frac_offline; }
 

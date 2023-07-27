@@ -44,14 +44,13 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
           const HepMC::GenParticle *particle = pit;
 #endif
           const HepMC::FourVector momentum = particle->momentum();
-          int barcodeparticle = HepMC::barcode(particle);
-          if( HepMC::generations(barcodeparticle) < 1 && std::abs(particle->pdg_id())==13){
+          if( HepMC::generations(particle) < 1 && std::abs(particle->pdg_id())==13){
             thePart.SetCoordinates(momentum.perp(),momentum.eta(),momentum.phi(),momentum.e());
             if(trackRecordCollection!=nullptr){
             for(const auto & mit : *trackRecordCollection ) {
               const CLHEP::Hep3Vector mumomentum = mit.GetMomentum();
               const CLHEP::Hep3Vector muposition = mit.GetPosition();
-              if(!trackRecordCollection->empty() && barcodeparticle ==mit.GetBarCode()) {
+              if(!trackRecordCollection->empty() && HepMC::barcode(particle) ==mit.GetBarCode()) {
                 pdg_tmp         = particle->pdg_id();
                 phiEntry_tmp    = mumomentum.getPhi();
                 etaEntry_tmp    = mumomentum.getEta();
@@ -76,7 +75,7 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
           }
           j++;
 
-            if(thePart.Pt() > 0. && HepMC::generations(barcodeparticle) < 1){
+            if(thePart.Pt() > 0. && HepMC::generations(particle) < 1){
               bool addIt = true;
               for(unsigned int ipart=0; ipart < truthParticles.size(); ipart++){
                 if( std::abs(thePart.Pt()-truthParticles[ipart].Pt()) < 0.001 ||

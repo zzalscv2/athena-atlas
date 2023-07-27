@@ -330,7 +330,7 @@ std::vector<FPGATrackSimTruthTrack> FPGATrackSimMatrixGenAlgo::filterTrainingTra
   std::vector<FPGATrackSimTruthTrack> training_tracks;
 
   for (FPGATrackSimTruthTrack const & track : truth_tracks) {
-    if (HepMC::generations(track.getBarcode()) >= 1 || std::abs(track.getPDGCode()) != m_TRAIN_PDG) continue;
+    if (HepMC::generations(&track) >= 1 || std::abs(track.getPDGCode()) != m_TRAIN_PDG) continue;
     if (std::abs(track.getD0()) > m_D0_THRESHOLD) continue;
     
     double pt = TMath::Sqrt(track.getPX()*track.getPX() + track.getPY()*track.getPY());

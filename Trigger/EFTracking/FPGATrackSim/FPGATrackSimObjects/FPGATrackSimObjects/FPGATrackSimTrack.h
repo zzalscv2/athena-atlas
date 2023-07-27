@@ -46,6 +46,7 @@ public:
   int getNCoords() const;
   signed long getEventIndex() const { return m_eventindex; }
   signed long getBarcode() const { return m_barcode; }
+  signed long barcode() const { return getBarcode(); }
   float getBarcodeFrac() const { return m_barcode_frac; }
   //Should be passed as const ref to avoid excessive copying.
   const std::vector <FPGATrackSimHit>& getFPGATrackSimHits() const { return m_hits; }

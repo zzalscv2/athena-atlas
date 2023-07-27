@@ -4,7 +4,7 @@
 
 #include "TopObjectSelectionTools/TruthSelectionTtres.h"
 #include "TopEvent/EventTools.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace top {
   TruthSelectionTtres::TruthSelectionTtres() {
@@ -13,13 +13,12 @@ namespace top {
   bool TruthSelectionTtres::passSelection(const xAOD::TruthParticle& mc) const {
     int p = (int) std::fabs(mc.pdgId());
     int s = mc.status();
-    int b = mc.barcode();
 
     // secondary particles  
-    if (HepMC::generations(b) > 0) return false;
+    if (HepMC::generations(&mc) > 0) return false;
 
     if (p == 11 || p == 13) {
-      if (s != 1) // only final electrons and muons for e-in-jet and isolation performance eval.
+      if (!MC::isStable(&mc)) // only final electrons and muons for e-in-jet and isolation performance eval.
         return false;
 
       return true;
