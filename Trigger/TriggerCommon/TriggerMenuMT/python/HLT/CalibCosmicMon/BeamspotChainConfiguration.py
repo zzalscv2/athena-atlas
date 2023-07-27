@@ -13,6 +13,9 @@ from DecisionHandling.DecisionHandlingConf import ViewCreatorInitialROITool
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
+from TrigInDetConfig.utils import getFlagsForActiveConfig
+from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
+from ..Config.MenuComponents import algorithmCAToGlobalWrapper
 
 #----------------------------------------------------------------
 # fragments generating configuration will be functions in New JO,
@@ -33,24 +36,22 @@ def allTE_trkfast( flags, signature="FS" ):
         inputMakerAlg.InViewRoIs = "beamspotViewRoI_"+signature
         inputMakerAlg.Views      = "beamspotViewRoI_"+signature
 
-        from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
         from TrigT2BeamSpot.T2VertexBeamSpotConfig import T2VertexBeamSpot_activeAllTE
 
-        #Load signature configuration (containing cut values, names of collections, etc)
-        from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-        IDTrigConfig = getInDetTrigConfig( signature )
-
+        _signature=signature
         if(signature == "FS"):
-            IDTrigConfig = getInDetTrigConfig("beamSpotFS")
+            _signature = "beamSpotFS"
 
-        viewAlgs, viewVerify  = makeInDetTrigFastTracking(flags, config = IDTrigConfig,  rois=inputMakerAlg.InViewRoIs)
+        flagsWithTrk = getFlagsForActiveConfig(flags, signature, log)
+        viewAlgs = algorithmCAToGlobalWrapper(
+                trigInDetFastTrackingCfg,
+                flagsWithTrk,
+                inputMakerAlg.InViewRoIs,
+                signatureName=_signature,
+        )
 
         vertexAlg = T2VertexBeamSpot_activeAllTE(flags, "vertex_"+signature )
-        vertexAlg.TrackCollection = IDTrigConfig.trkTracks_FTF()
-
-        viewVerify.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+beamspotViewRoI_'+signature ),
-                                   ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
-                                   ( 'TagInfo' , 'DetectorStore+ProcessingTags' )]
+        vertexAlg.TrackCollection = flagsWithTrk.Tracking.ActiveConfig.trkTracks_FTF
 
         # Make sure this is still available at whole-event level
         from AthenaCommon.AlgSequence import AlgSequence
@@ -81,7 +82,7 @@ def getBeamspotVtx(flags):
         signature = "BeamspotJet"
 
         from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-        IDTrigConfig = getInDetTrigConfig("jet")
+        IDTrigConfig = getInDetTrigConfig("fullScan")
 
         #-- Setting up inputMakerAlg
         from DecisionHandling.DecisionHandlingConf import InputMakerForRoI

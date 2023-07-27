@@ -276,7 +276,7 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
       Currently the default values of $`\eta (\text{half-width}) = \phi (\text{half-width}) = 0.4`$ are being used (cf. [ViewCreatorCentredOnJetWithPVConstraintROITool.h](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigSteer/DecisionHandling/src/ViewCreatorCentredOnJetWithPVConstraintROITool.h)). Hence, the total size will be $`0.8 \times 0.8`$. The event views allow us to process only the most relevant parts of the detector information and thereby speed up the computation time. In addition a constraint on the distance between jet and primary vertex of $`z < 10 mm`$ is applied when creating the view.\
       The primary vertex (PV) has already been determined by the jet code upstream. The collection name is configured from [TrigInDetConfig/ConfigSettings.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigTools/TrigInDetConfig/python/ConfigSettings.py), currently being `HLT_IDVertex_FS`  
       ```python
-       config=getInDetTrigConfig('jet')
+       config=getInDetTrigConfig('fullScan')
        prmVtxKey = config.vertex
       ```
       The vertex-collection is attached to the RoI

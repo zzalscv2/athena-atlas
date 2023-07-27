@@ -27,6 +27,7 @@ from TrigEFMissingET.TrigEFMissingETConfig import getMETMonTool
 from abc import ABC, abstractmethod
 from string import ascii_uppercase
 from TrigMissingETHypo.TrigMissingETHypoConfig import TrigMETHypoToolFromDict
+from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
 
 
 def streamer_hypo_tool(chainDict):
@@ -284,8 +285,14 @@ class AlgConfig(ABC):
         steps[-1].addEventAlgo(fex)
         return steps
 
-    def make_accumulator_steps(self, flags, chainDict):
+    def make_accumulator_steps(self, flags, chainDict, noComboHypo=False):
         """Make the full accumulator steps"""
+        # The 'noComboHypo' argument is a workaround to avoid errors in jobs
+        # that convert CA configuration into legacy sequences. If we create
+        # a ChainStep with ConfigurableCABehavior on, the constructor caches
+        # a GaudiConfig2 ComboHypo. So we disable the combo creation when
+        # making the CA, and then enable it when making a legacy ChainStep.
+
         # Get the reco sequences
         reco_sequences = self.make_reco_ca(flags)
         output_steps = []
@@ -312,7 +319,7 @@ class AlgConfig(ABC):
                 reco_acc.merge(reco_sequence)
 
                 # Create a selection CA
-                sel_acc = SelectionCA(self.name_step(step_idx))
+                sel_acc = SelectionCA('METAthSeq_'+self.name_step(step_idx))
                 # Merge in the reconstruction sequence
                 sel_acc.mergeReco(reco_acc)
                 # Add its hypo alg
@@ -333,6 +340,9 @@ class AlgConfig(ABC):
                             flags, selectionCA=sel_acc, HypoToolGen=hypo_tool
                         )
                     ],
+                    # If converting from CA to legacy we need to avoid
+                    # caching the GaudiConfig2 ComboHypo
+                    comboHypoCfg=None if noComboHypo else ComboHypoCfg,
                 )
             )
 
@@ -376,7 +386,7 @@ class AlgConfig(ABC):
         """The input makers for each step"""
         if hasattr(self, "_inputMakers"):
             return self._inputMakers
-        from ..Jet.JetMenuSequences import getCaloInputMaker, getTrackingInputMaker
+        from ..Jet.JetMenuSequencesConfig import getCaloInputMaker, getTrackingInputMaker
 
         self._inputMakers = [getCaloInputMaker(), None, getTrackingInputMaker("ftf")]
         return self._inputMakers
