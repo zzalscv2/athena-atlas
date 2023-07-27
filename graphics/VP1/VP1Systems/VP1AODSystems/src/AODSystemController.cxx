@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -78,7 +78,7 @@ const QString AODSystemController::Imp::noneAvailString = QString("None availabl
 // QString AODSystemController::toString( const QList<unsigned>& l )
 // {
 //   QString s;
-//   foreach(unsigned i,l) {
+//   for(unsigned i :l) {
 //     if (!s.isEmpty()) s+=", ";
 //     s+=QString::number(i);
 //   }
@@ -89,7 +89,7 @@ const QString AODSystemController::Imp::noneAvailString = QString("None availabl
 // QString AODSystemController::toString( const QList<int>& l )
 // {
 //   QString s;
-//   foreach(int i,l) {
+//   for(int i : l) {
 //     if (!s.isEmpty()) s+=", ";
 //     s+=QString::number(i);
 //   }

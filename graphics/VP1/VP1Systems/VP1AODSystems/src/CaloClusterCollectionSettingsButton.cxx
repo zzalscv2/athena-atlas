@@ -731,7 +731,7 @@ QPair<bool,double> CaloClusterCollectionSettingsButton::scale() const
 
   double highestvisibleenergy=0*SYSTEM_OF_UNITS::eV;
 
-////  foreach(VP1StdCollection* stdcol, m_d->collWidget->visibleStdCollections()) {
+////  for(VP1StdCollection* stdcol : m_d->collWidget->visibleStdCollections()) {
 ////    VP1CaloClusterCollection* col = dynamic_cast<VP1CaloClusterCollection*>(stdcol);
 
   std::cout << "coll: ";

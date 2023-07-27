@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -275,7 +275,7 @@ void IParticleCollHandle_CaloCluster::setScale(const QPair<bool,double>& s)
 	  return;
   }
 //  largeChangesBegin();
-//  foreach(Imp::ClusterHandle*cluster,m_d->clusters)
+//  for(Imp::ClusterHandle*cluster : m_d->clusters)
 //    if (cluster->attached())
 //      cluster->updateShapePars(m_d);
 //  largeChangesEnd();
@@ -519,7 +519,7 @@ bool IParticleCollHandle_CaloCluster::cut(AODHandleBase* c) {
     if (!getPhiAllowall() ) {
       double phi = handle->phi();
       bool ok(false);
-      foreach (VP1Interval phirange, getCutAllowedPhi() ) {
+      for (VP1Interval phirange :  getCutAllowedPhi() ) {
         messageVerbose("object's phi, phiCut, PhiAll: " + QString::number(phi)  + " - " + phirange.toString() + " - " + QString::number(int(getPhiAllowall())) );
         if (phirange.contains(phi)||phirange.contains(phi+2*M_PI)||phirange.contains(phi-2*M_PI)) {
           ok = true;
