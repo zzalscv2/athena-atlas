@@ -8,7 +8,7 @@
  **   @date   Sun 22 Sep 2019 10:21:50 BST
  **
  **
- **   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -44,34 +44,14 @@ sTGC_RegSelCondAlg::sTGC_RegSelCondAlg(const std::string& name, ISvcLocator* pSv
 
 
 
-StatusCode sTGC_RegSelCondAlg::initialize() {
-  ATH_CHECK(MuonRegSelCondAlg::initialize());
-  ATH_CHECK(m_DetectorManagerKey.initialize());
-  return StatusCode::SUCCESS;
-}
-
-
-
 std::unique_ptr<RegSelSiLUT> sTGC_RegSelCondAlg::createTable( const EventContext& ctx, EventIDRange& id_range ) const { 
 
-  SG::ReadCondHandle<MuonGM::MuonDetectorManager> muonDetMan( m_DetectorManagerKey, ctx );
-  if( !muonDetMan.isValid() ) {
-    ATH_MSG_ERROR("Failed to retrieve " << muonDetMan.key());
-    return std::unique_ptr<RegSelSiLUT>(nullptr);
-  }
-  if( !muonDetMan.range( id_range ) ) {
-    ATH_MSG_ERROR("Failed to retrieve validity range for " << muonDetMan.key());
-    return std::unique_ptr<RegSelSiLUT>(nullptr);
-  }
+  SG::ReadCondHandle<MuonGM::MuonDetectorManager> manager( m_detMgrKey, ctx );
 
-  /// get the MM detector manager
-
-  const MuonGM::MuonDetectorManager* manager = nullptr;
-  
-  if ( (detStore()->retrieve( manager ).isFailure() ) ) { 
-    ATH_MSG_ERROR( "Could not retrieve Muon Manager for " << name() );
+  if( !manager.range( id_range ) ) {
+    ATH_MSG_ERROR("Failed to retrieve validity range for " << manager.key());
     return std::unique_ptr<RegSelSiLUT>(nullptr);
-  }
+  } 
 
   const sTgcIdHelper*  helper = manager->stgcIdHelper();
 

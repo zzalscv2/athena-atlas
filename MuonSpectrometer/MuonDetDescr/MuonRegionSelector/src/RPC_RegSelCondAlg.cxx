@@ -54,12 +54,13 @@ std::unique_ptr<RegSelSiLUT> RPC_RegSelCondAlg::createTable( const EventContext&
 
   const RpcCablingCondData* cabling{*cablingCondData};
 
-  const MuonGM::MuonDetectorManager* manager = nullptr;
+  SG::ReadCondHandle<MuonGM::MuonDetectorManager> managerHandle( m_detMgrKey, ctx );
 
-  if ( detStore()->retrieve( manager ).isFailure() ) { 
-    ATH_MSG_ERROR( "Could not retrieve RPC Manager for " << name() );
+  if( !managerHandle.range( id_range ) ) {
+    ATH_MSG_ERROR("Failed to retrieve validity range for " << m_detMgrKey.key());
     return std::unique_ptr<RegSelSiLUT>(nullptr);
   }
+  const MuonGM::MuonDetectorManager* manager = managerHandle.cptr(); 
 
   const RpcIdHelper*  helper = manager->rpcIdHelper();
   
