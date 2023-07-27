@@ -6,7 +6,6 @@
 #include "AthenaKernel/errorcheck.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
-#include "TruthUtils/MagicNumbers.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
@@ -44,7 +43,7 @@ SimpleTruthParticleFilterTool::isAccepted (const HepMC::ConstGenParticlePtr& p)
        p->momentum().perp()>m_minPt ) ok = true;
 
   bool last = std::abs(p->pdg_id())==15;
-  if ( std::abs(p->pdg_id())==15 && p->status()!=1 && p->end_vertex() ){
+  if ( std::abs(p->pdg_id())==15 && !MC::isStable(p) && p->end_vertex() ){
     // Special handling for taus - take the ones that are last in the tau chain
 #ifdef HEPMC3
     for (const auto& pit: p->end_vertex()->particles_out()){

@@ -25,6 +25,8 @@
 #include "xAODEgamma/EgammaDefs.h"
 
 #include "AthenaBaseComps/AthCheckMacros.h"
+#include "TruthUtils/HepMCHelpers.h"
+
 using CLHEP::GeV;
 
 namespace ZeeValidation {
@@ -237,7 +239,7 @@ namespace ZeeValidation {
 	for(auto truth_part : *truth_particles)
 	  {
 	    // Select truth particle which passed pT, eta cuts and have pid=11
-	    if( std::abs(truth_part -> pdgId()) != 11 || truth_part -> status() != 1  || truth_part -> barcode() > 100000 ) continue;
+	    if( std::abs(truth_part -> pdgId()) != 11 || !MC::isStable(truth_part)  || HepMC::is_simulation_particle(truth_part) ) continue;
 	    if( truth_part -> pt()*(1./GeV) < m_PtCentCut ) continue;
 	    if(std::abs(truth_part -> eta()) > m_EtaCentCut ) continue;
 
@@ -325,7 +327,7 @@ namespace ZeeValidation {
 	for (auto truth_part : *truth_particles){
 	  
 	  //select truth particle which passed fwd pT, eta cuts and have pid=11
-	  if ( std::abs(truth_part -> pdgId()) != 11 || truth_part -> status() != 1  || truth_part -> barcode() > 100000 ) continue;
+	  if ( std::abs(truth_part -> pdgId()) != 11 || !MC::isStable(truth_part)  || HepMC::is_simulation_particle(truth_part) ) continue;
 	  if ( truth_part -> pt()*(1./GeV) < m_PtFwdCut ) continue;
 	  if (std::abs( truth_part -> eta() ) < m_EtaLowFwdCut || std::abs(  truth_part -> eta() ) > m_EtaHighFwdCut ) continue;
 	  
