@@ -274,8 +274,11 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeLHCf2022()
   // disable EM module on each side
   zdcDataAnalyzer->disableModule(0, 0);
   zdcDataAnalyzer->disableModule(1, 0);
-  
-  return zdcDataAnalyzer;
+
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", 4, 4, m_numSample));
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", 4, 4, m_numSample));
+
+ return zdcDataAnalyzer;
 
 }
 
@@ -1021,66 +1024,97 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
   ATH_MSG_DEBUG("Processing modules");
     for (const auto zdcModule : moduleContainer)
       {
-	
-        if (zdcModule->zdcType() == 1) continue; // skip position sensitive modules
-	
-	if (m_LHCRun==3) // no delay channels, so we drop the index
-	  {
-	    adcUndelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0data")); // g0
-	    adcUndelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1data")); // g1
-	  }
-	else if (m_LHCRun==2)
-	  {
-	    if (zdcModule->zdcModule() == 0 && m_flipEMDelay) // flip delay/non-delay for 2015 ONLY
-	      {
-		adcUndelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0d1Data")); // g0d1
-		adcUndelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1d1Data")); // g1d1
-		
-		adcDelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0d0Data")); // g0d0
-		adcDelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1d0Data")); // g1d0
-	      }
-	    else // nominal configuation
-	      {
-		adcUndelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0d0Data")); // g0d0
-		adcUndelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1d0Data")); // g1d0
-		
-		adcDelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0d1Data")); // g0d1
-		adcDelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1d1Data")); // g1d1
-	      }
-	  }
-	else
-	  {
-	    ATH_MSG_WARNING("Unknown LHC Run " << m_LHCRun);
-	    return StatusCode::FAILURE;
-	  }
+	if (zdcModule->zdcType() == 1) {
+	  if (m_LHCRun < 3) continue; // type == 1 -> pixel data in runs 2 and 3, skip
 
-	// Why were these static? to optimize processing time	
-        std::vector<float> HGUndelADCSamples(m_numSample);
-        std::vector<float> LGUndelADCSamples(m_numSample);
-	
-        std::copy(adcUndelayLG->begin(), adcUndelayLG->end(), LGUndelADCSamples.begin());
-        std::copy(adcUndelayHG->begin(), adcUndelayHG->end(), HGUndelADCSamples.begin());
-	
-        int side = (zdcModule->zdcSide() == -1) ? 0 : 1 ;
-	
-        if (!m_combineDelay) {
-	  m_zdcDataAnalyzer->LoadAndAnalyzeData(side, zdcModule->zdcModule(), HGUndelADCSamples, LGUndelADCSamples);
-        }
-        else {
-	  std::vector<float> HGDelayADCSamples(m_numSample);
-	  std::vector<float> LGDelayADCSamples(m_numSample);
-	  
-	  std::copy(adcDelayLG->begin(), adcDelayLG->end(), LGDelayADCSamples.begin());
-	  std::copy(adcDelayHG->begin(), adcDelayHG->end(), HGDelayADCSamples.begin());
-	  
-	  // If the delayed channels actually come earlier (as in the pPb in 2016), we invert the meaning of delayed and undelayed
-	  //   see the initialization sections for similar inversion on the sign of the pedestal difference
+	  //  This is RPD data in Run 3
 	  //
+	  int rpdChannel = zdcModule->zdcChannel() - 1;
+	  if (rpdChannel > 15 || rpdChannel < 0) {
+	    //
+	    //  The data is somehow corrupt, spit out an error
+	    //
+	  }
+	  else {
+	    const std::vector<uint16_t>* vector_p = &(zdcModule->auxdata<std::vector<uint16_t>>("g0data"));
+	    if (!vector_p) {
+	      //  This is obviously a problem, generate a non-fatal but serious error and continue
+	      //
+	      continue;
+	    }
+	    
+	    //
+	    // Pass the data to the RPD analysis tool 
+	    //
+	    unsigned int side = (zdcModule->zdcSide() == -1) ? 0 : 1 ;
+	    m_rpdDataAnalyzer.at(side)->loadChannelData(rpdChannel, *vector_p);
+	    m_rpdDataAnalyzer.at(side)->analyzeData();
+	  }
+	}
+	else {
+	  //
+	  // This is ZDC data
+	  //
+	  if (m_LHCRun==3) // no delay channels, so we drop the index
+	    {
+	      adcUndelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0data")); // g0
+	      adcUndelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1data")); // g1
+	    }
+	  else if (m_LHCRun==2)
+	    {
+	      if (zdcModule->zdcType() == 1) continue; // skip position sensitive modules
+	      
+	      if (zdcModule->zdcModule() == 0 && m_flipEMDelay) // flip delay/non-delay for 2015 ONLY
+		{
+		  adcUndelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0d1Data")); // g0d1
+		  adcUndelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1d1Data")); // g1d1
+		  
+		  adcDelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0d0Data")); // g0d0
+		  adcDelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1d0Data")); // g1d0
+		}
+	      else // nominal configuation
+		{
+		  adcUndelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0d0Data")); // g0d0
+		  adcUndelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1d0Data")); // g1d0
+		  
+		  adcDelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0d1Data")); // g0d1
+		  adcDelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1d1Data")); // g1d1
+		}
+	    }
+	  else
+	    {
+	      ATH_MSG_WARNING("Unknown LHC Run " << m_LHCRun);
+	      return StatusCode::FAILURE;
+	    }
 	  
-	  m_zdcDataAnalyzer->LoadAndAnalyzeData(side, zdcModule->zdcModule(),
-						HGUndelADCSamples, LGUndelADCSamples,
-						HGDelayADCSamples, LGDelayADCSamples);
-        }
+	  // Why were these static? to optimize processing time	
+	  std::vector<float> HGUndelADCSamples(m_numSample);
+	  std::vector<float> LGUndelADCSamples(m_numSample);
+	  
+	  std::copy(adcUndelayLG->begin(), adcUndelayLG->end(), LGUndelADCSamples.begin());
+	  std::copy(adcUndelayHG->begin(), adcUndelayHG->end(), HGUndelADCSamples.begin());
+	  
+	  int side = (zdcModule->zdcSide() == -1) ? 0 : 1 ;
+	  
+	  if (!m_combineDelay) {
+	    m_zdcDataAnalyzer->LoadAndAnalyzeData(side, zdcModule->zdcModule(), HGUndelADCSamples, LGUndelADCSamples);
+	  }
+	  else {
+	    std::vector<float> HGDelayADCSamples(m_numSample);
+	    std::vector<float> LGDelayADCSamples(m_numSample);
+	    
+	    std::copy(adcDelayLG->begin(), adcDelayLG->end(), LGDelayADCSamples.begin());
+	    std::copy(adcDelayHG->begin(), adcDelayHG->end(), HGDelayADCSamples.begin());
+	    
+	    // If the delayed channels actually come earlier (as in the pPb in 2016), we invert the meaning of delayed and undelayed
+	    //   see the initialization sections for similar inversion on the sign of the pedestal difference
+	    //
+	    
+	    m_zdcDataAnalyzer->LoadAndAnalyzeData(side, zdcModule->zdcModule(),
+						  HGUndelADCSamples, LGUndelADCSamples,
+						  HGDelayADCSamples, LGDelayADCSamples);
+	  }
+	}
       }
     
     ATH_MSG_DEBUG("Finishing event processing");
@@ -1088,45 +1122,51 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
     m_zdcDataAnalyzer->FinishEvent();
     
     ATH_MSG_DEBUG("Adding variables with suffix=" + m_auxSuffix);
-
+    
     for (const auto zdcModule : moduleContainer)
     {
-
-        if (zdcModule->zdcType() == 1) continue;
-
         int side = (zdcModule->zdcSide() == -1) ? 0 : 1 ;
         int mod = zdcModule->zdcModule();
 
-        if (m_writeAux) {
-            if (m_doCalib) {
-                float calibEnergy = m_zdcDataAnalyzer->GetModuleCalibAmplitude(side, mod);
-                zdcModule->auxdecor<float>("CalibEnergy" + m_auxSuffix) = calibEnergy;
-                zdcModule->auxdecor<float>("CalibTime" + m_auxSuffix) = m_zdcDataAnalyzer->GetModuleCalibTime(side, mod);
+        if (zdcModule->zdcType() == 1) {
+          // this is the RPD
+          if (m_writeAux) {
+            int rpdChannel = zdcModule->zdcChannel() - 1;
+            zdcModule->auxdecor<float>("RPDChannelAmplitude" + m_auxSuffix) = m_rpdDataAnalyzer.at(side)->getChSumADC(rpdChannel);
+            zdcModule->auxdecor<unsigned int>("RPDChannelMaxSample" + m_auxSuffix) = m_rpdDataAnalyzer.at(side)->getChMaxADCSample(rpdChannel);
+          }
+        } else {
+          // this is the ZDC
+          if (m_writeAux) {
+              if (m_doCalib) {
+                  float calibEnergy = m_zdcDataAnalyzer->GetModuleCalibAmplitude(side, mod);
+                  zdcModule->auxdecor<float>("CalibEnergy" + m_auxSuffix) = calibEnergy;
+                  zdcModule->auxdecor<float>("CalibTime" + m_auxSuffix) = m_zdcDataAnalyzer->GetModuleCalibTime(side, mod);
+              }
+              else
+              {
+                  zdcModule->auxdecor<float>("CalibEnergy" + m_auxSuffix) = -1000;
+                  zdcModule->auxdecor<float>("CalibTime" + m_auxSuffix) = -1000;
+              }
+
+              zdcModule->auxdecor<unsigned int>("Status" + m_auxSuffix) = m_zdcDataAnalyzer->GetModuleStatus(side, mod);
+              zdcModule->auxdecor<float>("Amplitude" + m_auxSuffix) = m_zdcDataAnalyzer->GetModuleAmplitude(side, mod);
+              zdcModule->auxdecor<float>("Time" + m_auxSuffix) = m_zdcDataAnalyzer->GetModuleTime(side, mod);
+
+              const ZDCPulseAnalyzer* pulseAna_p = m_zdcDataAnalyzer->GetPulseAnalyzer(side, mod);
+              zdcModule->auxdecor<float>("Chisq" + m_auxSuffix) = pulseAna_p->GetChisq();
+              zdcModule->auxdecor<float>("FitAmp" + m_auxSuffix) = pulseAna_p->GetFitAmplitude();
+              zdcModule->auxdecor<float>("FitAmpError" + m_auxSuffix) = pulseAna_p->GetAmpError();
+              zdcModule->auxdecor<float>("FitT0" + m_auxSuffix) = pulseAna_p->GetFitT0();
+              zdcModule->auxdecor<float>("BkgdMaxFraction" + m_auxSuffix) = pulseAna_p->GetBkgdMaxFraction();
+              zdcModule->auxdecor<float>("PreSampleAmp" + m_auxSuffix) = pulseAna_p->GetPreSampleAmp();
+              zdcModule->auxdecor<float>("Presample" + m_auxSuffix) = pulseAna_p->GetPresample();
+              zdcModule->auxdecor<float>("MinDeriv2nd" + m_auxSuffix) = pulseAna_p->GetMinDeriv2nd();
+              zdcModule->auxdecor<float>("MaxADC" + m_auxSuffix) = pulseAna_p->GetMaxADC();
             }
-            else
-            {
-                zdcModule->auxdecor<float>("CalibEnergy" + m_auxSuffix) = -1000;
-                zdcModule->auxdecor<float>("CalibTime" + m_auxSuffix) = -1000;
-            }
-
-            zdcModule->auxdecor<unsigned int>("Status" + m_auxSuffix) = m_zdcDataAnalyzer->GetModuleStatus(side, mod);
-            zdcModule->auxdecor<float>("Amplitude" + m_auxSuffix) = m_zdcDataAnalyzer->GetModuleAmplitude(side, mod);
-            zdcModule->auxdecor<float>("Time" + m_auxSuffix) = m_zdcDataAnalyzer->GetModuleTime(side, mod);
-
-            const ZDCPulseAnalyzer* pulseAna_p = m_zdcDataAnalyzer->GetPulseAnalyzer(side, mod);
-            zdcModule->auxdecor<float>("Chisq" + m_auxSuffix) = pulseAna_p->GetChisq();
-            zdcModule->auxdecor<float>("FitAmp" + m_auxSuffix) = pulseAna_p->GetFitAmplitude();
-            zdcModule->auxdecor<float>("FitAmpError" + m_auxSuffix) = pulseAna_p->GetAmpError();
-            zdcModule->auxdecor<float>("FitT0" + m_auxSuffix) = pulseAna_p->GetFitT0();
-            zdcModule->auxdecor<float>("BkgdMaxFraction" + m_auxSuffix) = pulseAna_p->GetBkgdMaxFraction();
-            zdcModule->auxdecor<float>("PreSampleAmp" + m_auxSuffix) = pulseAna_p->GetPreSampleAmp();
-            zdcModule->auxdecor<float>("Presample" + m_auxSuffix) = pulseAna_p->GetPresample();
-            zdcModule->auxdecor<float>("MinDeriv2nd" + m_auxSuffix) = pulseAna_p->GetMinDeriv2nd();
-            zdcModule->auxdecor<float>("MaxADC" + m_auxSuffix) = pulseAna_p->GetMaxADC();
-
+            ATH_MSG_DEBUG ("side = " << side << " module=" << zdcModule->zdcModule() << " CalibEnergy=" << zdcModule->auxdecor<float>("CalibEnergy")
+                            << " should be " << m_zdcDataAnalyzer->GetModuleCalibAmplitude(side, mod));
         }
-        ATH_MSG_DEBUG ("side = " << side << " module=" << zdcModule->zdcModule() << " CalibEnergy=" << zdcModule->auxdecor<float>("CalibEnergy")
-                         << " should be " << m_zdcDataAnalyzer->GetModuleCalibAmplitude(side, mod));
     }
 
     // Output sum information

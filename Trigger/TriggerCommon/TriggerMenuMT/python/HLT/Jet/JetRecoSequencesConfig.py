@@ -6,28 +6,27 @@
 
 from .JetRecoCommon import (
     interpretRecoAlg,
-    jetRecoDictFromString,
-    jetRecoDictToString,
     cloneAndUpdateJetRecoDict,
     defineJets,
-    getClustersKey,
+    defineGroomedJets,
+    defineReclusteredJets,
     getFilterCut,
     getCalibMods,
+    getClustersKey,
     getDecorList,
     getJetContext,
     getHLTPrefix,
-    defineGroomedJets,
-    defineReclusteredJets,
     isPFlow,
     doTracking,
     doFSTracking,
-    getJetCalibDefaultString
+    getJetCalibDefaultString,
+    jetRecoDictFromString
 )
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaCommon.CFElements import parOR
 from ..CommonSequences.FullScanDefs import fs_cells
 from ..Bjet.BjetFlavourTaggingConfiguration import getFastFlavourTagging
-from ..Config.MenuComponents import parOR
 from .JetTrackingConfig import JetRoITrackingCfg
 
 from JetRecConfig import JetRecConfig
@@ -100,7 +99,7 @@ def StandardJetBuildCfg(flags, dataSource, clustersKey, **jetRecoDict):
 
     seqname = "JetBuildSeq_"+jetRecoDict['jetDefStr']
     acc = ComponentAccumulator()
-    acc.addSequence(parOR(seqname))
+    acc.addSequence(parOR(seqname),primary=True)
     use_FS_tracking = doFSTracking(jetRecoDict)
 
     context = getJetContext(jetRecoDict)
@@ -143,6 +142,8 @@ def StandardJetBuildCfg(flags, dataSource, clustersKey, **jetRecoDict):
     ]
     if jetRecoDict["recoAlg"] == "a4":
         jetDef.modifiers += ["CaloEnergies"]  # needed for GSC
+        if isPFlow(jetRecoDict):
+            jetDef.modifiers += ["CaloEnergiesClus"] # Needed for FlowElement GSC
     if use_FS_tracking:
         jetDef.modifiers += ["TrackMoments", "JVF", "JVT"]
         
@@ -170,7 +171,7 @@ def StandardJetBuildCfg(flags, dataSource, clustersKey, **jetRecoDict):
 
         # Make sure that the jets are constructed with the ghost tracks included
         merge_alg = CompFactory.PseudoJetMerger(
-            f"PJMerger_{pj_name}",
+            f"PJMerger_{pj_name}MergedWithGhostTracks",
             InputPJContainers=[pj_name, context["GhostTracks"]],
             OutputContainer=f"{pj_name}MergedWithGhostTracks",
         )
@@ -186,7 +187,6 @@ def StandardJetBuildCfg(flags, dataSource, clustersKey, **jetRecoDict):
             jetDef,JetOnlineMon.getMonTool_TrigJetAlgorithm(flags, f"HLTJets/{jetsOut}/")
         ),
         seqname,
-        primary=True,
     )
 
     return acc, jetsOut, jetDef
@@ -205,13 +205,15 @@ def StandardJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
             flags, dataSource, clustersKey, **jetRecoDict
         )
 
+        # This view alg is added here rather than in StandardJetBuildCfg
+        # so that we are able to get the no-calib collection name later
         jetViewAcc, jetsOut = JetViewAlgCfg(
             flags,
             jetDef.fullname(),
             jetPtMin=10, # GeV converted internally
             **jetRecoDict
         )
-        build_acc.merge(jetViewAcc,"JetBuildSeq_"+jetRecoDictToString(jetRecoDict))
+        build_acc.merge(jetViewAcc, 'JetBuildSeq_'+jetRecoDict['jetDefStr'])
         return build_acc, jetsOut, jetDef
 
     # Schedule reconstruction w/o calibration
@@ -220,13 +222,22 @@ def StandardJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
         jetCalib="nojcalib"
     )
 
-    seqname = "JetRecSeq_"+jetRecoDictToString(jetRecoDict)
+    seqname = "JetRecSeq_"+jetRecoDict['jetDefStr']
     acc = ComponentAccumulator()
     acc.addSequence(parOR(seqname))
 
     build_acc, jetsNoCalib, jetDefNoCalib = StandardJetBuildCfg(
         flags, dataSource, clustersKey, **jrdNoJCalib
     )
+
+    jetViewAcc, jetsViewNoCalib = JetViewAlgCfg(
+        flags,
+        jetDefNoCalib.fullname(),
+        jetPtMin=10, # GeV converted internally
+        **jrdNoJCalib
+    )
+    build_acc.merge(jetViewAcc, 'JetBuildSeq_'+jrdNoJCalib['jetDefStr'])
+
     acc.merge(build_acc,seqname)
     # Get the calibration tool
     jetDef = jetDefNoCalib.clone()
@@ -333,7 +344,7 @@ def GroomedJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
 
     seqname = "JetGroomSeq_"+jetRecoDict['jetDefStr']
     acc = ComponentAccumulator()
-    acc.addSequence(parOR(seqname))
+    acc.addSequence(parOR(seqname),primary=True)
 
     build_acc, ungroomedJetsName, ungroomedDef = StandardJetBuildCfg(
         flags,
@@ -367,9 +378,9 @@ def ReclusteredJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
 
     First the input jets are built, then the reclustering algorithm is run
     """
-    seqname = "JetReclusterSeq_"+jetRecoDictToString(jetRecoDict)
+    seqname = "JetReclusterSeq_"+jetRecoDict['jetDefStr']
     acc = ComponentAccumulator()
-    acc.addSequence(parOR(seqname))
+    acc.addSequence(parOR(seqname),primary=True)
 
     basicJetRecoDict = cloneAndUpdateJetRecoDict(
         jetRecoDict,

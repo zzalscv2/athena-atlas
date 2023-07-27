@@ -2,73 +2,63 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-# menu components
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool, algorithmCAToGlobalWrapper
-from AthenaCommon.CFElements import parOR, seqAND
-from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
-from DecisionHandling.DecisionHandlingConf import ViewCreatorPreviousROITool
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
 
+# menu components   
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
-def fastElectronSequence(flags, variant=''):
+@AccumulatorCache
+def fastElectronSequenceCfg(flags, name, variant='', is_probe_leg = False):
     """ second step:  tracking....."""
+
     InViewRoIs = "EMFastElectronRoIs"+variant
-  
-    # EVCreator:
-    fastElectronViewsMaker = EventViewCreatorAlgorithm("IMfastElectron"+variant)
-    fastElectronViewsMaker.RoIsLink = "initialRoI" # Merge inputs based on their initial L1 ROI
-    fastElectronViewsMaker.RoITool = ViewCreatorPreviousROITool()
-    fastElectronViewsMaker.InViewRoIs = InViewRoIs
-    fastElectronViewsMaker.Views = "EMElectronViews"+variant
-    fastElectronViewsMaker.ViewFallThrough = True
-    fastElectronViewsMaker.RequireParentView = True
+
+    roiTool = CompFactory.ViewCreatorPreviousROITool()
+    reco = InViewRecoCA("EMElectron"+variant, RoITool = roiTool, InViewRoIs = InViewRoIs, RequireParentView = True, isProbe=is_probe_leg)
 
     # Configure the reconstruction algorithm sequence
     from TriggerMenuMT.HLT.Electron.FastElectronRecoSequences import fastElectronRecoSequence
-    (fastElectronRec, sequenceOut) = fastElectronRecoSequence(flags, InViewRoIs, variant)
-    
-    # Suffix to distinguish probe leg sequences
-    fastElectronInViewAlgs = parOR("fastElectronInViewAlgs" + variant, [fastElectronRec])
-    fastElectronViewsMaker.ViewNodeName = "fastElectronInViewAlgs" + variant
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
+ 
+    robPrefetchAlg = ROBPrefetchingAlgCfg_Si(flags, nameSuffix='IM_'+reco.name)
 
-    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, flags, nameSuffix=fastElectronViewsMaker.name())[0]
-    fastElectronAthSequence = seqAND("fastElectronAthSequence" + variant, [fastElectronViewsMaker, robPrefetchAlg, fastElectronInViewAlgs] )
-    return (fastElectronAthSequence, fastElectronViewsMaker, sequenceOut)
-
-def fastElectronSequence_LRT(flags):
-    # This is SAME as fastElectronSequence but for variant "_LRT"
-    return fastElectronSequence(flags,"_LRT")
-
-
-def fastElectronMenuSequence(flags, is_probe_leg=False, variant=''):
-    """ Creates 2nd step Electron  MENU sequence"""
-    # retrieve the reco sequence+EVC
-    theSequence = {
-            ''      : fastElectronSequence,
-            '_LRT'  : fastElectronSequence_LRT
-            }
-    (fastElectronAthSequence, fastElectronViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(theSequence[variant], flags)
-    # make the Hypo
-    from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaFastElectronHypoAlg
+    reco.mergeReco(fastElectronRecoSequence(flags, name, InViewRoIs, variant))
+    
+    theFastElectronHypo = CompFactory.TrigEgammaFastElectronHypoAlg("TrigEgammaFastElectronHypoAlg"+variant)
     TrigEgammaKeys = getTrigEgammaKeys(variant)
-
-    theElectronHypo = TrigEgammaFastElectronHypoAlg("TrigEgammaFastElectronHypoAlg"+variant)
-    theElectronHypo.Electrons = TrigEgammaKeys.fastElectronContainer
-
-    theElectronHypo.RunInView=True
-
+    theFastElectronHypo.Electrons = TrigEgammaKeys.fastElectronContainer
+    theFastElectronHypo.RunInView = True
     from TrigEgammaHypo.TrigEgammaFastElectronHypoTool import TrigEgammaFastElectronHypoToolFromDict
 
-    return  MenuSequence( flags,
-                          Maker       = fastElectronViewsMaker,
-                          Sequence    = fastElectronAthSequence,
-                          Hypo        = theElectronHypo,
-                          HypoToolGen = TrigEgammaFastElectronHypoToolFromDict,
-                          IsProbe=is_probe_leg)
+    selAcc = SelectionCA('FastElectronMenuSequence'+variant,isProbe=is_probe_leg)
+    selAcc.mergeReco(reco, robPrefetchCA=robPrefetchAlg)
+    selAcc.addHypoAlgo(theFastElectronHypo)
+
+    return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaFastElectronHypoToolFromDict,isProbe=is_probe_leg)
 
 
-def fastElectronMenuSequence_LRT(flags, is_probe_leg=False):
+def fastElectronSequenceCfg_lrt(flags, name, is_probe_leg=False):
     # This is to call fastElectronMenuSequence for the _LRT variant
-    return fastElectronMenuSequence(flags, is_probe_leg=is_probe_leg, variant='_LRT')
+    return fastElectronSequenceCfg(flags, name, is_probe_leg=is_probe_leg, variant='_LRT')
+
+
+def fastElectronMenuSequence(flags, name="FastElectron", is_probe_leg=False):
+    """Creates secpond step photon sequence"""
+
+    if isComponentAccumulatorCfg():
+        return fastElectronSequenceCfg(flags, name = name, is_probe_leg=is_probe_leg)
+    else: 
+        return menuSequenceCAToGlobalWrapper(fastElectronSequenceCfg, flags, name = name, is_probe_leg=is_probe_leg)
+
+
+def fastElectronMenuSequence_LRT(flags,name="FastElectron", is_probe_leg=False):
+    """Creates secpond step photon sequence"""
+
+    if isComponentAccumulatorCfg():
+        return fastElectronSequenceCfg_lrt(flags, name = name, is_probe_leg=is_probe_leg)
+    else:
+        return menuSequenceCAToGlobalWrapper(fastElectronSequenceCfg_lrt, flags, name = name, is_probe_leg=is_probe_leg)

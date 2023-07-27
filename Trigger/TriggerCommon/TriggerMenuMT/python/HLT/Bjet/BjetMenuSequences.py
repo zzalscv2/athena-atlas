@@ -25,7 +25,7 @@ def getBJetSequence(flags, jc_name=None):
     if not jc_name:
         raise ValueError("jet collection name is empty - pass the full HLT jet collection name to getBJetSequence().")
 
-    config=getInDetTrigConfig('jet')
+    config=getInDetTrigConfig('fullScan')
     prmVtxKey = config.vertex
 
     bjetconfig    = getInDetTrigConfig('bjet')

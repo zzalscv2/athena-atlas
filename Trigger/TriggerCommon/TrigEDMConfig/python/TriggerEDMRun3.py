@@ -459,7 +459,7 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigElectronContainer#HLT_FastElectrons',                 'BS ESD AODCOMM', 'Egamma', 'inViews:EMElectronViews'),
     ('xAOD::TrigElectronAuxContainer#HLT_FastElectronsAux.',          'BS ESD AODCOMM', 'Egamma'),
 
-    ('xAOD::TrigElectronContainer#HLT_FastElectrons_LRT',                 'BS ESD AODCOMM', 'Egamma', 'inViews:EMElectronViews_LRT'),
+    ('xAOD::TrigElectronContainer#HLT_FastElectrons_LRT',                 'BS ESD AODCOMM', 'Egamma', 'inViews:EMElectron_LRTViews'),
     ('xAOD::TrigElectronAuxContainer#HLT_FastElectrons_LRTAux.',          'BS ESD AODCOMM', 'Egamma'),
 
     ('xAOD::TrackParticleContainer#HLT_IDTrack_Electron_FTF',        'BS ESD AODFULL', 'Egamma', 'inViews:EMFastTrackingViews'),

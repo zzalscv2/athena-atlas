@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 def VrtSecInclusiveSequence(flags):
     from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-    fscfg = getInDetTrigConfig("jet")
+    fscfg = getInDetTrigConfig("fullScan")
     lrtcfg = getInDetTrigConfig("fullScanLRT")
 
     from TriggerMenuMT.HLT.UnconventionalTracking.CommonConfiguration import getCommonInDetFullScanLRTSequence

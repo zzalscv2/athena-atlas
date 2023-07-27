@@ -13,7 +13,7 @@ vtxCountName = "HLT_TrigDV_VtxCount"
 def DVRecoFragment(flags):
 
     from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-    FSConfig = getInDetTrigConfig("jet")
+    FSConfig = getInDetTrigConfig("fullScan")
     LRTConfig = getInDetTrigConfig( "DVtxLRT" )
 
     from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm

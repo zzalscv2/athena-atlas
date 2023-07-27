@@ -48,8 +48,9 @@ StatusCode ZdcRecRun3::initialize()
 	ATH_CHECK( m_ChannelTool.retrieve() );
 
 	// Reconstruction Tool
-	ATH_CHECK( m_zdcTool.retrieve() );
 
+	ATH_CHECK( m_zdcTools.retrieve() );
+	
 	ATH_CHECK( m_zdcModuleContainerName.initialize() );
 	ATH_CHECK( m_zdcSumContainerName.initialize() );
 	ATH_CHECK( m_zldContainerName.initialize(SG::AllowEmpty) );
@@ -109,7 +110,10 @@ StatusCode ZdcRecRun3::execute()
   ATH_MSG_DEBUG( ZdcModuleToString(*moduleSumContainer) );
   
   // re-reconstruct big tubes 
-  ATH_CHECK( m_zdcTool->recoZdcModules(*moduleContainer.get(), *moduleSumContainer.get()) ); // passes by reference
+  for (ToolHandle<ZDC::IZdcAnalysisTool>& tool : m_zdcTools)
+    {
+      ATH_CHECK( tool->recoZdcModules(*moduleContainer.get(), *moduleSumContainer.get()) );
+    }
 
   // eventually reconstruct RPD, using ML libraries
   // ATH_CHECK( m_rpdTool...)

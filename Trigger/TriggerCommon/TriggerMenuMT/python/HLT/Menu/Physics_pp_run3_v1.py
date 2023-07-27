@@ -564,6 +564,9 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_2g15_loose_25dphiAA_invmAA80_L12eEM9', l1SeedThresholds=['eEM15'], groups=SupportPhIGroup+MultiPhotonGroup+['RATE:CPS_2eEM9']),  # Phase-1 ATR-27156
         ChainProp(name='HLT_2g15_tight_25dphiAA_L12eEM9', l1SeedThresholds=['eEM15'], groups=SupportPhIGroup+MultiPhotonGroup+['RATE:CPS_2eEM9']),   # Phase-1 ATR-27156
 
+        #--- hipTRT trigger, ATR-27996
+        ChainProp(name='HLT_g0_hiptrt_L1eEM26M' , l1SeedThresholds=['eEM26M'], groups=PrimaryPhIGroup+SinglePhotonGroup), 
+        ChainProp(name='HLT_g0_hiptrt_L1eEM28M' , l1SeedThresholds=['eEM28M'], groups=PrimaryPhIGroup+SinglePhotonGroup), 
         # support 2g ATR-23425
         ChainProp(name='HLT_2g20_loose_L12eEM18L', groups=SupportPhIGroup+MultiPhotonGroup),
 

@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODTRACKING_VERSIONS_TRACKPARTICLE_V1_H
@@ -347,11 +347,24 @@ private:
       typedef std::vector< std::pair<covMatrixIndex,covMatrixIndex> > covMatrixIndexPairVec;
       static const covMatrixIndexPairVec& covMatrixComprIndexPairs();
 
-#if ( ! defined(XAOD_ANALYSIS) ) && ( ! defined(__CLING__) )
+#if ( ! defined(XAOD_ANALYSIS) )
+# ifdef __CLING__
+      // If Cling sees the declaration below, then we get mysterious
+      // errors during auto-parsing.  On the other hand, if we hide
+      // it completely, then we can run into memory corruption problems
+      // if instances of this class are created from Python,
+      // since Cling will then be allocating a block of the wrong size
+      // (see !63818).  However, everything dealing with this member
+      // is out-of-line (including ctors/dtor/assignment), and it also
+      // declared as transient.  Thus, for the Cling case, we can replace
+      // it with padding of the correct size.
+      char m_perigeeParameters[sizeof(CxxUtils::CachedValue<Trk::Perigee>)];
+# else
       /// @brief Cached MeasuredPerigee, built from this object.
       /// @note This is only available in Athena.
      CxxUtils::CachedValue<Trk::Perigee> m_perigeeParameters;
-#endif // not XAOD_ANALYSIS and not __CLING__
+# endif
+#endif // not XAOD_ANALYSIS
 
     }; // class Track Particle
 

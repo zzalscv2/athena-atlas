@@ -1,14 +1,15 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.CFElements import seqAND
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
+from AthenaCommon.Configurable import ConfigurableCABehavior
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence
 from AthenaCommon.Logging import logging
 
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 from TrigCaloRec.TrigCaloRecConfig import jetmetTopoClusteringCfg
-from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
+from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper, extractAlgorithmsAndAppendCA
 
 def UTTJetRecoSequence(flags):
 
@@ -20,7 +21,7 @@ def UTTJetRecoSequence(flags):
         from TrigStreamerHypo.TrigStreamerHypoConf   import TrigStreamerHypoAlg
         from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
 
-        from ..Jet.JetRecoSequences  import jetRecoSequence
+        from ..Jet.JetRecoSequencesConfig  import JetRecoCfg
         from ..Jet.JetRecoCommon     import extractRecoDict
         from ..Menu.SignatureDicts   import JetChainParts_Default
         
@@ -29,15 +30,9 @@ def UTTJetRecoSequence(flags):
                 {'recoAlg': 'a4', 'constitType': 'tc', 'clusterCalib': 'em', 'constitMod': '', 'trkopt': 'notrk'}
         )
 
-        trkcolls = {}
-
-        JetSeq, jetName, jetDef = RecoFragmentsPool.retrieve(
-            jetRecoSequence,
-            flags,
-            clustersKey=clustersKey,
-            **trkcolls,
-            **jetRecoDict,
-        )
+        with ConfigurableCABehavior():
+                JetCA, jetName, jetDef = JetRecoCfg(flags, clustersKey, **jetRecoDict)
+                JetSeq = extractAlgorithmsAndAppendCA(JetCA)
 
         HypoAlg = TrigStreamerHypoAlg("UTTJetRecDummyStream")
 

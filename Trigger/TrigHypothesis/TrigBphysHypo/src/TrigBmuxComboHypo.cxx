@@ -272,7 +272,7 @@ StatusCode TrigBmuxComboHypo::findBmuxCandidates(TrigBmuxState& state) const {
             bool makeDstar = true;
             if (m_BToD0_maxDstarPionZ0 > 0.) {
               std::unique_ptr<const Trk::Perigee> perigee(m_trackToVertexTool->perigeeAtVertex(state.context(), *trk3, vtx_D0->position()));
-              if (std::abs(perigee->parameters()[Trk::z0]) > m_BToD0_maxDstarPionZ0) makeDstar = false;
+              if (!perigee || std::abs(perigee->parameters()[Trk::z0]) > m_BToD0_maxDstarPionZ0) makeDstar = false;
             }
 
             if (makeDstar) {
@@ -708,8 +708,7 @@ bool TrigBmuxComboHypo::isInSameRoI(const xAOD::Muon* muon, const xAOD::TrackPar
 double TrigBmuxComboHypo::getTrkImpactParameterZ0(const EventContext& ctx, const xAOD::TrackParticle& track, const Amg::Vector3D& vertex) const {
 
   std::unique_ptr<const Trk::Perigee> perigee(m_trackToVertexTool->perigeeAtVertex(ctx, track, vertex));
-  double z0 = perigee->parameters()[Trk::z0];
-  return z0;
+  return (perigee ? perigee->parameters()[Trk::z0] : -1000.);
 }
 
 

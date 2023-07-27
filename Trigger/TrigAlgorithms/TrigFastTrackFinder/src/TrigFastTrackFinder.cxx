@@ -1570,6 +1570,7 @@ StatusCode TrigFastTrackFinder::createEmptyUTTEDMs(const EventContext& ctx) cons
    return StatusCode::SUCCESS;
 }
 
+
 StatusCode TrigFastTrackFinder::findHitDV(const EventContext& ctx, const std::vector<TrigSiSpacePointBase>& convertedSpacePoints,
 					  const TrackCollection& outputTracks) const
 {
@@ -1585,14 +1586,6 @@ StatusCode TrigFastTrackFinder::findHitDV(const EventContext& ctx, const std::ve
    ATH_CHECK( hitDVSPHandle.record(std::make_unique<xAOD::TrigCompositeContainer>(), std::make_unique<xAOD::TrigCompositeAuxContainer>()) );
    auto hitDVSPContainer = hitDVSPHandle.ptr();
 
-   // select good tracks
-   const float  TRKCUT_PT_GEV       = 0.5;
-   const float  TRKCUT_A0BEAM       = 2.5;
-   const int    TRKCUT_N_HITS_INNER = 1;
-   const int    TRKCUT_N_HITS_PIX   = 2;
-   const int    TRKCUT_N_HITS       = 4;
-   std::unordered_map<Identifier, int> umap_fittedTrack_identifier;
-   int fittedTrack_id = -1;
    std::vector<int>   v_dvtrk_id;
    std::vector<float> v_dvtrk_pt;
    std::vector<float> v_dvtrk_eta;
@@ -1601,33 +1594,22 @@ StatusCode TrigFastTrackFinder::findHitDV(const EventContext& ctx, const std::ve
    std::vector<int>   v_dvtrk_n_hits_pix;
    std::vector<int>   v_dvtrk_n_hits_sct;
    std::vector<float> v_dvtrk_a0beam;
-   for (auto track : outputTracks) {
-      if ( track->perigeeParameters()==nullptr ) continue;
-      if ( track->trackSummary()==nullptr )  continue;
-      int n_hits_innermost = track->trackSummary()->get(Trk::SummaryType::numberOfInnermostPixelLayerHits);
-      int n_hits_next_to_innermost = track->trackSummary()->get(Trk::SummaryType::numberOfNextToInnermostPixelLayerHits);
-      int n_hits_inner = n_hits_innermost + n_hits_next_to_innermost;
-      int n_hits_pix   = track->trackSummary()->get(Trk::SummaryType::numberOfPixelHits);
-      int n_hits_sct   = track->trackSummary()->get(Trk::SummaryType::numberOfSCTHits);
-      if( n_hits_inner < TRKCUT_N_HITS_INNER )      continue;
-      if( n_hits_pix < TRKCUT_N_HITS_PIX )          continue;
-      if( (n_hits_pix+n_hits_sct) < TRKCUT_N_HITS ) continue;
-      float theta     = track->perigeeParameters()->parameters()[Trk::theta];
-      float absqOverP = std::abs(track->perigeeParameters()->parameters()[Trk::qOverP]);
-      if( absqOverP<1e-12 ) absqOverP = 1e-12;
-      float ptGeV = std::sin(theta)/absqOverP;
-      ptGeV /= Gaudi::Units::GeV;
-      if( ptGeV < TRKCUT_PT_GEV ) continue;
-      float a0   = track->perigeeParameters()->parameters()[Trk::d0];
-      float phi0 = track->perigeeParameters()->parameters()[Trk::phi0];
+   std::unordered_map<Identifier, int> umap_fittedTrack_identifier;
+   int fittedTrack_id = -1;
+   
+   for (const auto& track: outputTracks) {
       float shift_x = 0; float shift_y = 0;
-      if( m_useBeamSpot ) getBeamSpot(shift_x, shift_y, ctx);
-      float a0beam = a0 + shift_x*sin(phi0)-shift_y*cos(phi0);
-      if( std::abs(a0beam) > TRKCUT_A0BEAM ) continue;
+      if(m_useBeamSpot) {
+        getBeamSpot(shift_x, shift_y, ctx);
+      }
+      trackInfo theTrackInfo;
+      bool igt = isGoodTrackUTT(track, theTrackInfo, shift_x, shift_y);
+      if (not igt) {continue;}
 
-      // track is selected
       fittedTrack_id++;
-      ATH_MSG_DEBUG("Selected track pT = " << ptGeV << " GeV");
+      ATH_MSG_DEBUG("Selected track pT = " << theTrackInfo.ptGeV << " GeV");
+      
+
       DataVector<const Trk::MeasurementBase>::const_iterator
 	 m  = track->measurementsOnTrack()->begin(),
 	 me = track->measurementsOnTrack()->end  ();
@@ -1639,16 +1621,15 @@ StatusCode TrigFastTrackFinder::findHitDV(const EventContext& ctx, const std::ve
 	    umap_fittedTrack_identifier.insert(std::make_pair(id_prd,fittedTrack_id));
 	 }
       }
-      float eta = -std::log(std::tan(0.5*theta));
       float phi = track->perigeeParameters()->parameters()[Trk::phi];
       v_dvtrk_id.push_back(fittedTrack_id);
-      v_dvtrk_pt.push_back(ptGeV*Gaudi::Units::GeV);
-      v_dvtrk_eta.push_back(eta);
+      v_dvtrk_pt.push_back(theTrackInfo.ptGeV*Gaudi::Units::GeV);
+      v_dvtrk_eta.push_back(theTrackInfo.eta);
       v_dvtrk_phi.push_back(phi);
-      v_dvtrk_n_hits_inner.push_back(n_hits_inner);
-      v_dvtrk_n_hits_pix.push_back(n_hits_pix);
-      v_dvtrk_n_hits_sct.push_back(n_hits_sct);
-      v_dvtrk_a0beam.push_back(a0beam);
+      v_dvtrk_n_hits_inner.push_back(theTrackInfo.n_hits_inner);
+      v_dvtrk_n_hits_pix.push_back(theTrackInfo.n_hits_pix);
+      v_dvtrk_n_hits_sct.push_back(theTrackInfo.n_hits_sct);
+      v_dvtrk_a0beam.push_back(theTrackInfo.a0beam);
    }
    ATH_MSG_DEBUG("Nr of selected tracks / all = " << fittedTrack_id << " / " << outputTracks.size());
    ATH_MSG_DEBUG("Nr of Identifiers used by selected tracks = " << umap_fittedTrack_identifier.size());
@@ -1832,8 +1813,8 @@ StatusCode TrigFastTrackFinder::findHitDV(const EventContext& ctx, const std::ve
 	 for (unsigned int iSeed=0; iSeed<v_seeds_eta.size(); ++iSeed) {
 	    float seed_eta = v_seeds_eta[iSeed];
 	    float seed_phi = v_seeds_phi[iSeed];
-	    float dR = deltaR(trk_eta,trk_phi,seed_eta,seed_phi);
-	    if( dR <= TRKCUT_DELTA_R_TO_SEED ) { isNearSeed = true; break; }
+	    float dR2 = deltaR2(trk_eta,trk_phi,seed_eta,seed_phi);
+	    if( dR2 <= TRKCUT_DELTA_R_TO_SEED*TRKCUT_DELTA_R_TO_SEED ) { isNearSeed = true; break; }
 	 }
 	 if( ! isNearSeed ) continue;
       }
@@ -1877,8 +1858,8 @@ StatusCode TrigFastTrackFinder::findHitDV(const EventContext& ctx, const std::ve
        for (size_t iSeed=0; iSeed<v_seeds_eta.size(); ++iSeed) {
          const float seed_eta = v_seeds_eta[iSeed];
          const float seed_phi = v_seeds_phi[iSeed];
-         const float dR = deltaR(sp_eta, sp_phi, seed_eta, seed_phi);
-         if( dR <= SPCUT_DELTA_R_TO_SEED ) { isNearSeed = true; break; }
+         const float dR2 = deltaR2(sp_eta, sp_phi, seed_eta, seed_phi);
+         if( dR2 <= SPCUT_DELTA_R_TO_SEED*SPCUT_DELTA_R_TO_SEED ) { isNearSeed = true; break; }
        }
        if( ! isNearSeed ) continue;
      }
@@ -2079,8 +2060,8 @@ StatusCode TrigFastTrackFinder::findSPSeeds( const EventContext& ctx,
 	 if( std::find(idx_to_delete.begin(),idx_to_delete.end(),j) != idx_to_delete.end() ) continue;
 	 float eta_j = seeds_eta[j];
 	 float phi_j = seeds_phi[j];
-	 float dr = deltaR(eta_i,phi_i,eta_j,phi_j);
-	 if( dr < CLUSTCUT_DIST ) idx_to_delete.push_back(j);
+	 float dr2 = deltaR2(eta_i,phi_i,eta_j,phi_j);
+	 if( dr2 < CLUSTCUT_DIST*CLUSTCUT_DIST ) idx_to_delete.push_back(j);
       }
    }
    ATH_MSG_VERBOSE("nr of duplicated seeds to be removed = " << idx_to_delete.size());
@@ -2099,12 +2080,10 @@ StatusCode TrigFastTrackFinder::findSPSeeds( const EventContext& ctx,
    return StatusCode::SUCCESS;
 }
 
-float TrigFastTrackFinder::deltaR(float eta_1, float phi_1, float eta_2, float phi_2) const {
-   float dPhi = phi_1 - phi_2;
-   if (dPhi < -TMath::Pi()) dPhi += 2*TMath::Pi();
-   if (dPhi >  TMath::Pi()) dPhi -= 2*TMath::Pi();
+float TrigFastTrackFinder::deltaR2(float eta_1, float phi_1, float eta_2, float phi_2) const {
+   float dPhi = CxxUtils::wrapToPi(phi_1 - phi_2);
    float dEta = eta_1 - eta_2;
-   return sqrt(dPhi*dPhi+dEta*dEta);
+   return (dPhi*dPhi)+(dEta*dEta);
 }
 
 int TrigFastTrackFinder::getSPLayer(int layer, float eta) const
@@ -2226,6 +2205,39 @@ int TrigFastTrackFinder::getSPLayer(int layer, float eta) const
    return 0;
 }
 
+
+bool TrigFastTrackFinder::isGoodTrackUTT(const Trk::Track* track, trackInfo& theTrackInfo, const float shift_x, const float shift_y) const {
+      static constexpr int   TRKCUT_N_HITS_INNER  = 1;
+      static constexpr int   TRKCUT_N_HITS_PIX    = 2;
+      static constexpr float TRKCUT_A0BEAM        = 2.5;
+      static constexpr float TRKCUT_PTGEV_LOOSE   = 3.0;
+      static constexpr int   TRKCUT_N_HITS        = 4;
+
+      std::unordered_map<Identifier, int> umap_fittedTrack_identifier;
+
+      if ( track->perigeeParameters()==nullptr ) return false;
+      if ( track->trackSummary()==nullptr )  return false;
+      theTrackInfo.n_hits_innermost = track->trackSummary()->get(Trk::SummaryType::numberOfInnermostPixelLayerHits);
+      float n_hits_next_to_innermost = track->trackSummary()->get(Trk::SummaryType::numberOfNextToInnermostPixelLayerHits);
+      theTrackInfo.n_hits_inner = theTrackInfo.n_hits_innermost + n_hits_next_to_innermost;
+      theTrackInfo.n_hits_pix   = track->trackSummary()->get(Trk::SummaryType::numberOfPixelHits);
+      theTrackInfo.n_hits_sct   = track->trackSummary()->get(Trk::SummaryType::numberOfSCTHits);
+      if( theTrackInfo.n_hits_inner < TRKCUT_N_HITS_INNER )      return false;
+      if( theTrackInfo.n_hits_pix < TRKCUT_N_HITS_PIX )          return false;
+      if( (theTrackInfo.n_hits_pix+theTrackInfo.n_hits_sct) < TRKCUT_N_HITS ) return false;
+      theTrackInfo.eta = track->perigeeParameters()->eta();
+      theTrackInfo.ptGeV = track->perigeeParameters()->pT()/Gaudi::Units::GeV;
+      if( theTrackInfo.ptGeV < TRKCUT_PTGEV_LOOSE ) return false;
+      float a0 = track->perigeeParameters()->parameters()[Trk::d0];
+      theTrackInfo.phi0 = track->perigeeParameters()->parameters()[Trk::phi0];
+      theTrackInfo.a0beam = a0 + shift_x*sin(theTrackInfo.phi0)-shift_y*cos(theTrackInfo.phi0);
+      if( std::abs(theTrackInfo.a0beam) > TRKCUT_A0BEAM ) {return false;}
+      ATH_MSG_DEBUG("Selected track pT = " << theTrackInfo.ptGeV << " GeV");
+      return true;
+}
+
+
+
 StatusCode TrigFastTrackFinder::finddEdxTrk(const EventContext& ctx, const TrackCollection& outputTracks) const
 {
    SG::WriteHandle<xAOD::TrigCompositeContainer> dEdxTrkHandle(m_dEdxTrkKey, ctx);
@@ -2247,42 +2259,25 @@ StatusCode TrigFastTrackFinder::finddEdxTrk(const EventContext& ctx, const Track
 
    ATH_MSG_VERBOSE("========== in finddEdxTrk ==========");
 
-   const float  TRKCUT_A0BEAM       = 2.5;
-   const int    TRKCUT_N_HITS_INNER = 1;
-   const int    TRKCUT_N_HITS_PIX   = 2;
-   const int    TRKCUT_N_HITS       = 4;
 
    const float  TRKCUT_PTGEV_LOOSE  =  3.0;
    const float  TRKCUT_PTGEV_TIGHT  = 10.0;
    const float  TRKCUT_DEDX_LOOSE   =  1.25;
    const float  TRKCUT_DEDX_TIGHT   =  1.55;
 
-   for (auto track : outputTracks) {
+   for (const auto& track: outputTracks) {
+
+      float shift_x = 0; float shift_y = 0;
+      if(m_useBeamSpot) {
+        getBeamSpot(shift_x, shift_y, ctx);
+      }
 
       ATH_MSG_VERBOSE("+++++++ i_track: " << i_track << " +++++++");
-
       i_track++;
-      if ( ! track->perigeeParameters() ) continue;
-      if ( ! track->trackSummary() )      continue;
-      float n_hits_innermost = 0;  float n_hits_next_to_innermost = 0; float n_hits_inner = 0; float n_hits_pix = 0; float n_hits_sct = 0;
-      n_hits_innermost = (float)track->trackSummary()->get(Trk::SummaryType::numberOfInnermostPixelLayerHits);
-      n_hits_next_to_innermost = (float)track->trackSummary()->get(Trk::SummaryType::numberOfNextToInnermostPixelLayerHits);
-      n_hits_inner = n_hits_innermost + n_hits_next_to_innermost;
-      n_hits_pix = (float)track->trackSummary()->get(Trk::SummaryType::numberOfPixelHits);
-      n_hits_sct = (float)track->trackSummary()->get(Trk::SummaryType::numberOfSCTHits);
-      if( n_hits_inner < TRKCUT_N_HITS_INNER )      continue;
-      if( n_hits_pix < TRKCUT_N_HITS_PIX )          continue;
-      if( (n_hits_pix+n_hits_sct) < TRKCUT_N_HITS ) continue;
-      float theta = track->perigeeParameters()->parameters()[Trk::theta];
-      float pt    = std::abs(1./track->perigeeParameters()->parameters()[Trk::qOverP]) * sin(theta);
-      float ptgev = pt / 1000.0;
-      if( ptgev < TRKCUT_PTGEV_LOOSE ) continue;
-      float a0   = track->perigeeParameters()->parameters()[Trk::d0];
-      float phi0 = track->perigeeParameters()->parameters()[Trk::phi0];
-      float shift_x = 0; float shift_y = 0;
-      if( m_useBeamSpot ) getBeamSpot(shift_x, shift_y, ctx);
-      float a0beam = a0 + shift_x*sin(phi0)-shift_y*cos(phi0);
-      if( std::abs(a0beam) > TRKCUT_A0BEAM ) continue;
+
+      trackInfo theTrackInfo;
+      bool igt = isGoodTrackUTT(track, theTrackInfo, shift_x, shift_y);
+      if (not igt) {continue;}
 
       ATH_MSG_VERBOSE("calculate dEdx -->");
       int pixelhits=0; int n_usedhits=0;
@@ -2295,24 +2290,23 @@ StatusCode TrigFastTrackFinder::finddEdxTrk(const EventContext& ctx, const Track
       mnt_dedx.push_back(dedx);
       mnt_dedx_nusedhits.push_back(n_usedhits);
 
-      bool hpt = (ptgev >= TRKCUT_PTGEV_TIGHT && dedx >= TRKCUT_DEDX_LOOSE);
-      bool lpt = (ptgev >= TRKCUT_PTGEV_LOOSE && dedx >= TRKCUT_DEDX_TIGHT);
+      bool hpt = (theTrackInfo.ptGeV >= TRKCUT_PTGEV_TIGHT && dedx >= TRKCUT_DEDX_LOOSE);
+      bool lpt = (theTrackInfo.ptGeV >= TRKCUT_PTGEV_LOOSE && dedx >= TRKCUT_DEDX_TIGHT);
       if( ! hpt && ! lpt ) continue;
 
       xAOD::TrigComposite *dEdxTrk = new xAOD::TrigComposite();
       dEdxTrkContainer->push_back(dEdxTrk);
       dEdxTrk->setDetail<int>  ("dEdxTrk_id",     i_track);
-      dEdxTrk->setDetail<float>("dEdxTrk_pt",     pt);
-      float eta = -log(tan(0.5*theta));
-      dEdxTrk->setDetail<float>("dEdxTrk_eta",    eta);
-      dEdxTrk->setDetail<float>("dEdxTrk_phi",    phi0);
-      dEdxTrk->setDetail<float>("dEdxTrk_a0beam", a0beam);
+      dEdxTrk->setDetail<float>("dEdxTrk_pt",     theTrackInfo.ptGeV/1000);
+      dEdxTrk->setDetail<float>("dEdxTrk_eta",    theTrackInfo.eta);
+      dEdxTrk->setDetail<float>("dEdxTrk_phi",    theTrackInfo.phi0);
+      dEdxTrk->setDetail<float>("dEdxTrk_a0beam", theTrackInfo.a0beam);
       dEdxTrk->setDetail<float>("dEdxTrk_dedx",   dedx);
       dEdxTrk->setDetail<int>  ("dEdxTrk_dedx_n_usedhits",  n_usedhits);
-      dEdxTrk->setDetail<int>  ("dEdxTrk_n_hits_innermost", n_hits_innermost);
-      dEdxTrk->setDetail<int>  ("dEdxTrk_n_hits_inner",     n_hits_inner);
-      dEdxTrk->setDetail<int>  ("dEdxTrk_n_hits_pix",       n_hits_pix);
-      dEdxTrk->setDetail<int>  ("dEdxTrk_n_hits_sct",       n_hits_sct);
+      dEdxTrk->setDetail<int>  ("dEdxTrk_n_hits_innermost", theTrackInfo.n_hits_innermost);
+      dEdxTrk->setDetail<int>  ("dEdxTrk_n_hits_inner",     theTrackInfo.n_hits_inner);
+      dEdxTrk->setDetail<int>  ("dEdxTrk_n_hits_pix",       theTrackInfo.n_hits_pix);
+      dEdxTrk->setDetail<int>  ("dEdxTrk_n_hits_sct",       theTrackInfo.n_hits_sct);
 
       for(unsigned int i=0; i<v_pixhit_dedx.size(); i++) {
 	 xAOD::TrigComposite *dEdxHit = new xAOD::TrigComposite();
@@ -2327,9 +2321,10 @@ StatusCode TrigFastTrackFinder::finddEdxTrk(const EventContext& ctx, const Track
 	 dEdxHit->setDetail<int>  ("dEdxHit_layer",   v_pixhit_layer[i]);
       }
    }
-
    return StatusCode::SUCCESS;
 }
+
+
 
 float TrigFastTrackFinder::dEdx(const Trk::Track* track, int& pixelhits, int& n_usedhits,
 				std::vector<float>& v_pixhit_dedx,    std::vector<float>& v_pixhit_tot,

@@ -8278,6 +8278,12 @@ HLT_g0_hiptrt_L1eEM26M:
     0: 6
   stepFeatures:
     0: 10
+HLT_g0_hiptrt_L1eEM28M:
+  eventCount: 0
+  stepCounts:
+    0: 6
+  stepFeatures:
+    0: 10
 HLT_g100_loose_L1eEM26M:
   eventCount: 0
   stepCounts:
@@ -12365,7 +12371,7 @@ HLT_j0_perf_pf_subjesgscIS_ftf_L1RD0_FILLED:
     1: 20
   stepFeatures:
     0: 20
-    1: 186
+    1: 20
 HLT_j100_0eta290_020jvt_bdl1d60_pf_ftf_xe50_cell_xe85_pfopufit_L1XE55:
   eventCount: 1
   stepCounts:

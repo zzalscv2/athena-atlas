@@ -171,9 +171,8 @@ def IDCalibTriggerCfg(flags):
     from TrigTrackingHypo.IDCalibHypoConfig import createIDCalibHypoAlg
     theHypoAlg = createIDCalibHypoAlg(flags, "IDCalibHypo")
 
-    from TriggerMenuMT.HLT.UnconventionalTracking.CommonConfiguration import getCommonInDetFullScanSequence
-    ( TrkSeq, InputMakerAlg, sequenceOut ) = RecoFragmentsPool.retrieve(getCommonInDetFullScanSequence,flags)
-    theHypoAlg.tracksKey = sequenceOut
+    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
+    theHypoAlg.tracksKey = getInDetTrigConfig('fullScan').tracks_FTF()
 
     from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
     from AthenaConfiguration.ComponentFactory import CompFactory
@@ -191,8 +190,11 @@ def IDCalibTriggerCfg(flags):
 
 def IDCalibFTFCfg(flags):
 
-    from TriggerMenuMT.HLT.UnconventionalTracking.CommonConfiguration import getCommonInDetFullScanSequence
-    ( TrkSeq, InputMakerAlg, sequenceOut ) = RecoFragmentsPool.retrieve(getCommonInDetFullScanSequence,flags)
+    from ..CommonSequences.FullScanInDetSequences import getCommonInDetFullScanSequence
+    ( TrkSeq, sequenceOut ) = RecoFragmentsPool.retrieve(getCommonInDetFullScanSequence,flags)
+
+    from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import getTrackingInputMaker
+    InputMakerAlg=getTrackingInputMaker("ftf")
 
     from TrigStreamerHypo.TrigStreamerHypoConf import TrigStreamerHypoAlg
     from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator

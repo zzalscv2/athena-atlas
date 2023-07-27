@@ -306,7 +306,7 @@ class ComponentAccumulator:
         return ret
 
 
-    def addSequence(self, newseq, parentName = None ):
+    def addSequence(self, newseq, primary=False, parentName = None ):
         """ Adds new sequence. If second argument is present then it is added under another sequence  """
         from AthenaCommon.AlgSequence import AthSequencer as LegacySequence
         if isinstance( newseq, LegacySequence ):
@@ -330,6 +330,14 @@ class ComponentAccumulator:
         parent.Members.append(newseq)
         if "trackSequence" in ComponentAccumulator.debugMode:
             self._componentsContext[newseq] = shortCallStack()
+
+        if primary:
+            if self._primaryComp:
+                self._msg.warning("addEventAlgo: Overwriting primary component of this CA. Was %s/%s, now %s/%s",
+                                  self._primaryComp.__cpp_type__, self._primaryComp.name,
+                                  newseq.__cpp_type__, newseq.name)
+            #keep a ref of the sequence as primary component
+            self._primaryComp = newseq
         return newseq
 
 

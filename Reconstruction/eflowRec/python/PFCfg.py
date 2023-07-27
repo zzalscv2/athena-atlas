@@ -149,9 +149,9 @@ def getPFLCCalibTool(inputFlags):
 
     return PFLCCalibTool
 
-def getChargedFlowElementCreatorAlgorithm(inputFlags,chargedFlowElementOutputName,eflowCaloObjectContainerName="eflowCaloObjects"):
+def getChargedFlowElementCreatorAlgorithm(inputFlags,chargedFlowElementOutputName,nameSuffix="",eflowCaloObjectContainerName="eflowCaloObjects"):
     FlowElementChargedCreatorAlgorithmFactory = CompFactory.PFChargedFlowElementCreatorAlgorithm
-    FlowElementChargedCreatorAlgorithm = FlowElementChargedCreatorAlgorithmFactory("PFChargedFlowElementCreatorAlgorithm")
+    FlowElementChargedCreatorAlgorithm = FlowElementChargedCreatorAlgorithmFactory("PFChargedFlowElementCreatorAlgorithm"+nameSuffix)
     FlowElementChargedCreatorAlgorithm.eflowCaloObjectContainerName = eflowCaloObjectContainerName
     if chargedFlowElementOutputName:
         FlowElementChargedCreatorAlgorithm.FlowElementOutputName=chargedFlowElementOutputName
@@ -161,9 +161,9 @@ def getChargedFlowElementCreatorAlgorithm(inputFlags,chargedFlowElementOutputNam
 
     return FlowElementChargedCreatorAlgorithm
 
-def getNeutralFlowElementCreatorAlgorithm(inputFlags,neutralFlowElementOutputName,eflowCaloObjectContainerName="eflowCaloObjects"):
+def getNeutralFlowElementCreatorAlgorithm(inputFlags,neutralFlowElementOutputName,nameSuffix="",eflowCaloObjectContainerName="eflowCaloObjects"):
     FlowElementNeutralCreatorAlgorithmFactory = CompFactory.PFNeutralFlowElementCreatorAlgorithm
-    FlowElementNeutralCreatorAlgorithm = FlowElementNeutralCreatorAlgorithmFactory("PFNeutralFlowElementCreatorAlgorithm")
+    FlowElementNeutralCreatorAlgorithm = FlowElementNeutralCreatorAlgorithmFactory("PFNeutralFlowElementCreatorAlgorithm"+nameSuffix)
     FlowElementNeutralCreatorAlgorithm.eflowCaloObjectContainerName = eflowCaloObjectContainerName
     if neutralFlowElementOutputName:
         FlowElementNeutralCreatorAlgorithm.FlowElementOutputName=neutralFlowElementOutputName

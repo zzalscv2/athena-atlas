@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Trigger includes
@@ -215,7 +215,7 @@ StatusCode HLT::HLTResultMTByteStreamCnv::createRep(DataObject* pObj, IOpaqueAdd
     const std::vector<uint32_t>& data = it->second;
 
     // Create an HLT ROBFragment and append it to the full event
-    cache->robFragments.push_back(std::make_unique<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment>(
+    auto hltROB = std::make_unique<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment>(
       resultId.code(),
       re->run_no(),
       re->lvl1_id(),
@@ -225,9 +225,14 @@ StatusCode HLT::HLTResultMTByteStreamCnv::createRep(DataObject* pObj, IOpaqueAdd
       data.size(),
       data.data(),
       eformat::STATUS_BACK
-    ));
-    cache->robFragments.back()->rod_minor_version(hltRodMinorVersion16);
-    re->append(cache->robFragments.back().get());
+    );
+    hltROB->rod_minor_version(hltRodMinorVersion16);
+    // Fill the ROB status words
+    const std::vector<uint32_t>& status = hltResult->getRobStatus(resultId.module_id());
+    hltROB->status(status.size(), status.data());
+
+    re->append(hltROB.get());
+    cache->robFragments.push_back(std::move(hltROB));
     ATH_MSG_DEBUG("Appended data for HLT result ID 0x" << MSG::hex << resultId.code() << MSG::dec << " with "
                   << data.size() << " words of serialised payload to the output full event");
   }
