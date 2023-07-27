@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -37,7 +37,7 @@ QWidget * VP1ControllerHelper::compositionController( const QList<IVP1System*>& 
 
   //First we figure out which system controllers we should add:
   QList<QPair<QWidget*,QString> > controllerTabs;
-  foreach (IVP1System* s, systemsWithControllersAllowed) {
+  for (IVP1System* s : systemsWithControllersAllowed) {
     QWidget* w = s->controllerWidget();
     if (w) {
       controllerTabs << QPair<QWidget*,QString>(w,s->name());

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -69,7 +69,7 @@ public:
   template <class collT>
   QList<collT*> collections() const {
     QList<collT*> l;
-    foreach(VP1Collection*col,collections()) {
+    for(VP1Collection*col : collections()) {
       collT* c = dynamic_cast<collT*>(col);
       if (c) l << c;
     }

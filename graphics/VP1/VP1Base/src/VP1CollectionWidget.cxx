@@ -67,7 +67,7 @@ QList<VP1Collection*> VP1CollectionWidget::collections() const
 void VP1CollectionWidget::Imp::clearGui(bool deleteGuiElements)
 {
   if (!deleteGuiElements) {
-    foreach(QWidget *w, widgetsFromCollections) {
+    for(QWidget *w : widgetsFromCollections) {
       w->hide();
       w->setParent(0);
     }
@@ -85,7 +85,7 @@ void VP1CollectionWidget::clear(bool deleteCollections,bool deleteGuiElements)
   m_d->widgetsFromCollections.clear();
 
   if (deleteCollections) {
-    foreach(VP1Collection*col, m_d->collections)
+    for(VP1Collection*col : m_d->collections)
       delete col;
   }
   m_d->collections.clear();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1Base/PhiSectionWidget.h"
@@ -284,12 +284,12 @@ void PhiSectionWidget::Imp::addMenuEntriesForSetNPhi()
   if (!popup_menu)
     return;
   if (!popuplist_setNPhi.isEmpty()) {
-    foreach(QAction * setNPhiAct, popuplist_setNPhi)
+    for(QAction * setNPhiAct : popuplist_setNPhi)
       delete setNPhiAct;
   }
   popuplist_setNPhi.clear();
 
-  foreach(int nSectors, allowedNSectors) {
+  for(int nSectors : allowedNSectors) {
     QAction * a  = popup_setNPhiSubMenu->addAction(QString::number(nSectors));
     a->setData(nSectors);
     popuplist_setNPhi << a;
@@ -312,7 +312,7 @@ void PhiSectionWidget::launchContextMenu(QPoint p)
   m_d->popup_pasteAction->setEnabled(clipboard
 	       &&clipboard->mimeData()->hasFormat("vp1/enabledphisectors"));
 
-  foreach(QAction * setNPhiAct, m_d->popuplist_setNPhi) {
+  for(QAction * setNPhiAct : m_d->popuplist_setNPhi) {
     bool ok;
     int nSectors = setNPhiAct->data().toInt(&ok);
     setNPhiAct->setEnabled(ok&&nSectors!=m_d->sectorstatus.count());
@@ -673,7 +673,7 @@ bool PhiSectionWidget::virtualSectorEnabled(int iSector,int nSectors) const
   VP1Interval phirange(dphi*iSector+epsilon,dphi*(iSector+1)-epsilon);
 
   //Compare with enabled ranges:
-  foreach(VP1Interval enabledrange,m_d->cachedRanges) {
+  for(VP1Interval enabledrange : m_d->cachedRanges) {
     if (phirange.hasOverlap(enabledrange,2*M_PI))
       return true;
   }
@@ -785,7 +785,7 @@ void PhiSectionWidget::Imp::approximateSectorStatusFromRanges( QList<VP1Interval
   const double epsilon(dphi*1.0e-9);
   for (unsigned i = 0; i < n; ++i) {
     VP1Interval phirange(dphi*i+epsilon,dphi*(i+1)-epsilon);
-    foreach(VP1Interval oldrange,oldEnabledRanges) {
+    for(VP1Interval oldrange : oldEnabledRanges) {
       if (phirange.hasOverlap(oldrange,2*M_PI)) {
 	target[i]=true;
 	break;
@@ -821,7 +821,7 @@ void PhiSectionWidget::setAllowedNumberOfSectors(QList<int> allowedNSectors, boo
     }
     return;
   }
-  foreach(int s, allowedNSectors) {
+  for(int s : allowedNSectors) {
     if (s<4) {
       if(VP1Msg::verbose()){
 		    messageVerbose("allowedNSectors s < 4. Returning.");

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -57,7 +57,7 @@ public:
 //{
 //  VP1Serialise s(0/*version*/);
 //  QList<QByteArray> frameStates;
-//  foreach(VP1CustomTourFrameWidget*frame,m_d->frames) {
+//  for(VP1CustomTourFrameWidget*frame : m_d->frames) {
 //    frameStates << frame->serialise();
 //    s.ignoreWidget(frame);
 //  }
@@ -72,7 +72,7 @@ public:
 ////____________________________________________________________________
 //void VP1CustomStereoEditor::setState(QByteArray ba)
 //{
-//  foreach(VP1CustomTourFrameWidget*frame,m_d->frames)
+//  for(VP1CustomTourFrameWidget*frame : m_d->frames)
 //    frame->deleteLater();
 //  m_d->frames.clear();
 //
@@ -87,7 +87,7 @@ public:
 //
 //  m_d->ui.widget_utilityZoomContents->setVisible(m_d->ui.groupBox_utilityZoom->isChecked());
 //
-//  foreach(QByteArray ba2, frameStates)
+//  for(QByteArray ba2 : frameStates)
 //    m_d->addFrame(new VP1CustomTourFrameWidget(ba2));
 //  m_d->updateFrameListVisuals();
 //  enabledFrameListChanged();
@@ -174,7 +174,7 @@ VP1CustomStereoEditor::VP1CustomStereoEditor(VP1ExaminerViewer* viewer)
 VP1CustomStereoEditor::~VP1CustomStereoEditor()
 {
 	//  m_d->frameHolderWidget->deleteLater();
-	//  foreach(VP1CustomTourFrameWidget*frame,m_d->frames)
+	//  for(VP1CustomTourFrameWidget*frame : m_d->frames)
 	//    frame->deleteLater();
 	delete m_d;
 }
@@ -457,7 +457,7 @@ void VP1CustomStereoEditor::buttonClicked()
 //{
 //  nEnabledPerspectiveFrames = 0;
 //  nEnabledOrthographicFrames = 0;
-//  foreach(VP1CustomTourFrameWidget*frame,frames) {
+//  for(VP1CustomTourFrameWidget*frame : frames) {
 //    if (frame->frameIsEnabled()) {
 //      if (frame->camStateIsPerspective())
 //	++nEnabledPerspectiveFrames;
@@ -493,7 +493,7 @@ void VP1CustomStereoEditor::buttonClicked()
 //  }
 //  m_d->ui.label_statustext->setText(s);
 //
-//  foreach (QObject * o, m_d->objectsToDisableWhenTourUnavailable) {
+//  for (QObject * o : m_d->objectsToDisableWhenTourUnavailable) {
 //    if (o->isWidgetType())
 //      static_cast<QWidget*>(o)->setEnabled(enable);
 //    else
@@ -528,7 +528,7 @@ void VP1CustomStereoEditor::buttonClicked()
 //  if (!tourAvailable())
 //    return;
 //  bool firstInDirectJump(jumpDirectlyToFirstFrame);
-//  foreach(VP1CustomTourFrameWidget*frame,m_d->frames) {
+//  for(VP1CustomTourFrameWidget*frame : m_d->frames) {
 //    if (frame->frameIsEnabled()) {
 //      double t(frame->zoomToFrameTime());
 //      if (firstInDirectJump) {

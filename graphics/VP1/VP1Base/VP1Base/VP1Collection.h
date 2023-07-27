@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -80,7 +80,7 @@ template <class T>
 QList<VP1Collection*> VP1Collection::toBaseCollList( const QList<T*>& in)
 {
   QList<VP1Collection*> l;
-  foreach (T * t, in)
+  for (T * t : in)
     l << static_cast<T*>(t);
   return l;
 }

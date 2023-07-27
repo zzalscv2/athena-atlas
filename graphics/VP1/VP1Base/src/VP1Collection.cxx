@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -94,23 +94,23 @@ VP1CollStates VP1Collection::getStates(QList<VP1Collection*> cols)
 	VP1Msg::messageDebug("VP1Collection::getStates() - start...");
 
 	VP1CollStates states;
-  foreach (VP1Collection* col,cols) {
+        for (VP1Collection* col : cols) {
 	  VP1Msg::messageDebug("inserting collection: " + col->section() );
-    states.insert(col->persistifiableID(),col->persistifiableState());
-  }
+          states.insert(col->persistifiableID(),col->persistifiableState());
+        }
 
-  VP1Msg::messageDebug("VP1Collection::getStates() - end.");
+        VP1Msg::messageDebug("VP1Collection::getStates() - end.");
 
-  return states;
+        return states;
 }
 
 //____________________________________________________________________
 void VP1Collection::applyStates(QList<VP1Collection*> cols, const VP1CollStates& states)
 {
 	VP1Msg::messageDebug("VP1Collection::applyStates() - start...");
-  foreach (VP1Collection* col,cols)
-    if (states.contains(col->persistifiableID()))
-      col->setState(states.value(col->persistifiableID()));
+        for (VP1Collection* col : cols)
+          if (states.contains(col->persistifiableID()))
+            col->setState(states.value(col->persistifiableID()));
 	VP1Msg::messageDebug("VP1Collection::applyStates() - end.");
 }
 
