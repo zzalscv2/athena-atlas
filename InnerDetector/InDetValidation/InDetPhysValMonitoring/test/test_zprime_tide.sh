@@ -44,7 +44,7 @@ Reco_tf.py \
     --outputDAOD_IDTIDEFile="DAOD_TIDE.pool.root"  \
     --outputRDOFile output.RDO.root \
     --multithreaded="True"
-
+rec_tf_exit_code=$?
 echo "art-result: $rec_tf_exit_code reco"
 
 if [ $rec_tf_exit_code -eq 0 ]  ;then
