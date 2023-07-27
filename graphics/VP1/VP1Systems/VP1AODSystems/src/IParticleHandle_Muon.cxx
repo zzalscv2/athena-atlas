@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -202,8 +202,7 @@ void IParticleHandle_Muon::addParameterShapes(){
   int i = 0;
   QList<std::pair<xAOD::ParameterPosition, Amg::Vector3D> > parAndPoses = parametersAndPositions();
   
-  std::pair<xAOD::ParameterPosition, Amg::Vector3D> parpos;
-  foreach (parpos, parAndPoses ) {
+  for (std::pair<xAOD::ParameterPosition, Amg::Vector3D> parpos : parAndPoses ) {
     Amg::Vector3D pos = parpos.second;
     vertices2->vertex.set1Value(i++,pos.x(),pos.y(),pos.z());
   } 

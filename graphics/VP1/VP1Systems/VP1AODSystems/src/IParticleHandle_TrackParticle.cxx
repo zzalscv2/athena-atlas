@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -140,8 +140,7 @@ void IParticleHandle_TrackParticle::addParameterShapes(){
   bool colourByParamType = m_d->collHandle->collSettingsButton().colourParametersByType();
   QList<std::pair<xAOD::ParameterPosition, Amg::Vector3D> > parAndPoses = parametersAndPositions();
   
-  std::pair<xAOD::ParameterPosition, Amg::Vector3D> parpos;
-  foreach (parpos, parAndPoses ) {
+  for (std::pair<xAOD::ParameterPosition, Amg::Vector3D> parpos : parAndPoses ) {
     Amg::Vector3D pos = parpos.second;
 
     if (colourByParamType) {

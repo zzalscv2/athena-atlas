@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -131,7 +131,7 @@ MissingEtCollHandle::~MissingEtCollHandle()
   //	m_d->defaultParametersMaterial->unref();
 
   // clean the QList<handle>
-  foreach(AODHandleBase* handle, m_d->handles) {
+  for(AODHandleBase* handle : m_d->handles) {
     delete handle;
   }
 
@@ -294,7 +294,7 @@ const MissingEtCollectionSettingsButton& MissingEtCollHandle::collSettingsButton
 //  std::cout << "Scale change: m_d->scale/(Gaudi::Units::m/(100.0*Gaudi::Units::GeV)))" <<  "m/100GeV. Updating " << m_d->handlesList.count() << " jets" << std::endl;
 //  largeChangesBegin();
 //
-//  foreach(AODHandleBase* partHandle, m_d->handles) {
+//  for(AODHandleBase* partHandle : m_d->handles) {
 //    MissingEtHandle* met = dynamic_cast<MissingEtHandle*>(partHandle);
 //    if (met->has3DObjects()) {
 //      met->setScale(m_d->scale);
@@ -344,7 +344,7 @@ void MissingEtCollHandle::setMetSize(int size)
 //
 //	largeChangesBegin();
 //	int ijet = 0;
-//	foreach(AODHandleBase* partHandle, m_d->handles) {
+//	for(AODHandleBase* partHandle : m_d->handles) {
 //		++ijet;
 //		messageVerbose("considering jet: "+QString::number(ijet));
 //		MissingEtCollHandle* jet = dynamic_cast<MissingEtCollHandle*>(partHandle);
@@ -375,7 +375,7 @@ void MissingEtCollHandle::setMetSize(int size)
 //	}
 //
 //	largeChangesBegin();
-//	foreach(AODHandleBase* partHandle, m_d->handles) {
+//	for(AODHandleBase* partHandle : m_d->handles) {
 //		MissingEtCollHandle* jet = dynamic_cast<MissingEtCollHandle*>(partHandle);
 //		if (jet->has3DObjects())
 //			jet->rerandomiseMaterial();
@@ -475,7 +475,7 @@ bool MissingEtCollHandle::cut(AODHandleBase* c) {
     		if (!getPhiAllowall() ) {
     			double phi = handle->phi();
     			bool ok(false);
-    			foreach (VP1Interval phirange, getCutAllowedPhi() ) {
+    			for (VP1Interval phirange : getCutAllowedPhi() ) {
     				messageVerbose("MET phi, phiCut, PhiAll: " + QString::number(phi)  + " - " + phirange.toString() + " - " + QString::number(int(getPhiAllowall())) );
     				if (phirange.contains(phi)||phirange.contains(phi+2*M_PI)||phirange.contains(phi-2*M_PI)) {
     					ok = true;

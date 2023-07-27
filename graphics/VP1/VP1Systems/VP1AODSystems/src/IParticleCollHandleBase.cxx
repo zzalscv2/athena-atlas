@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -89,7 +89,7 @@ IParticleCollHandleBase::~IParticleCollHandleBase()
   m_d->handles.clear();
   
   // clean the QList<handle>
-  foreach(AODHandleBase* handle, m_d->handlesList) {
+  for(AODHandleBase* handle : m_d->handlesList) {
     delete handle;
   }
   
@@ -193,7 +193,7 @@ bool IParticleCollHandleBase::cut(AODHandleBase* ahand)
         double phi = VP1LinAlgUtils::phiFromXY(mom.x(), mom.y() );
         messageVerbose("value oh handle's phi: " + QString::number(phi));
         bool ok(false);
-        foreach (VP1Interval phirange, m_cut_allowedPhi) {
+        for (VP1Interval phirange : m_cut_allowedPhi) {
           if (phirange.contains(phi)||phirange.contains(phi+2*M_PI)||phirange.contains(phi-2*M_PI)) {
             ok = true;
             break;
