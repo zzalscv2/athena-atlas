@@ -126,20 +126,21 @@ def generateCFChains(flags, opt):
     ##################################################################
 
     from TriggerMenuMT.HLT.Jet.JetRecoCommon import jetRecoDictFromString
+    from TriggerMenuMT.HLT.Jet.JetChainConfiguration import callGenerator
     def jetCaloHypoMenuSequenceFromString(jet_def_str):
         jetRecoDict = jetRecoDictFromString(jet_def_str)
-        from TriggerMenuMT.HLT.Jet.JetMenuSequences import jetCaloHypoMenuSequence
-        return jetCaloHypoMenuSequence(flags, isPerf=False, **jetRecoDict)
+        from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import jetCaloHypoMenuSequence
+        return callGenerator(jetCaloHypoMenuSequence,flags, isPerf=False, **jetRecoDict)
 
     def jetCaloPreselMenuSequenceFromString(jet_def_str):
         jetRecoDict = jetRecoDictFromString(jet_def_str)
-        from TriggerMenuMT.HLT.Jet.JetMenuSequences import jetCaloPreselMenuSequence
-        return jetCaloPreselMenuSequence(flags, **jetRecoDict)
+        from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import jetCaloPreselMenuSequence
+        return callGenerator(jetCaloPreselMenuSequence,flags, **jetRecoDict)
 
     def jetTrackingHypoMenuSequenceFromString(jet_def_str,clustersKey):
         jetRecoDict = jetRecoDictFromString(jet_def_str)
-        from TriggerMenuMT.HLT.Jet.JetMenuSequences import jetFSTrackingHypoMenuSequence
-        return jetFSTrackingHypoMenuSequence(flags, clustersKey=clustersKey, isPerf=False, **jetRecoDict)
+        from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import jetFSTrackingHypoMenuSequence
+        return callGenerator(jetFSTrackingHypoMenuSequence,flags, clustersKey=clustersKey, isPerf=False, **jetRecoDict)
 
     if opt.doJetSlice is True:
 

@@ -80,10 +80,22 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
   seq = InDetTrigSequence(flags, 
                           flags.Tracking.ActiveConfig.input_name, 
                           rois   = roisKey,
-                          inView = "VDVInDetFTF")
+                          inView = "VDVInDetFTF" if in_view else None)
   acc = seq.sequence("FastTrackFinder")
 
   return acc
+
+
+def trigInDetLRTCfg(flags, LRTInputCollection, roisKey, in_view):
+  from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
+  seq = InDetTrigSequence(flags,
+                          flags.Tracking.ActiveConfig.input_name,
+                          rois   = roisKey,
+                          inView = "VDVInDetLRT" if in_view else None)
+  acc = seq.fastTrackFinder(inputTracksName = LRTInputCollection)
+  return acc
+
+
 
 ############################################################################################################################
 # precision tracking

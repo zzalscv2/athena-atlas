@@ -9,6 +9,7 @@ from TrigEDMConfig.TriggerEDMRun3 import recordable
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorCentredOnIParticleROITool
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
+from ..CommonSequences.FullScanInDetConfig import commonInDetLRTCfg
 
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
@@ -20,7 +21,7 @@ def DJPromptStep(flags):
     hypo_alg = DisplacedJetPromptHypoAlg("DJTrigPromptHypoAlg")
 
     #get the jet tracking config to get the track collection name
-    fscfg = getInDetTrigConfig("jet")
+    fscfg = getInDetTrigConfig("fullScan")
 
     hypo_alg.min_trk_pt = 1.0
     hypo_alg.stdTracksKey = fscfg.tracks_FTF()
@@ -45,15 +46,11 @@ def DJDispFragment(flags):
     lrtcfg = getInDetTrigConfig( 'DJetLRT' )
     roiTool = ViewCreatorCentredOnIParticleROITool('ViewCreatorDJRoI', RoisWriteHandleKey = recordable(lrtcfg.roi), RoIEtaWidth = lrtcfg.etaHalfWidth, RoIPhiWidth = lrtcfg.phiHalfWidth, RoIZedWidth=lrtcfg.zedHalfWidth, UseZedPosition=False)
     InputMakerAlg = EventViewCreatorAlgorithm("IMDJRoIFTF",mergeUsingFeature = True, RoITool = roiTool,Views = "DJRoIViews",InViewRoIs = "InViewRoIs",RequireParentView = False,ViewFallThrough = True)
-    fscfg = getInDetTrigConfig("jet")
-    from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
+    fscfg = getInDetTrigConfig("fullScan")
 
-    algs, view_verify = makeInDetTrigFastTracking(flags, config=lrtcfg, LRTInputCollection = fscfg.trkTracks_FTF(), rois = InputMakerAlg.InViewRoIs)
+    algs = algorithmCAToGlobalWrapper(commonInDetLRTCfg, flags, fscfg, lrtcfg, rois=InputMakerAlg.InViewRoIs)
 
     reco_seq = parOR("UncTrkrecoSeqDJTrigDispRecoSeq", algs)
-
-    view_verify.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % InputMakerAlg.InViewRoIs )]
-    view_verify.DataObjects += [( 'TrackCollection' , 'StoreGateSvc+%s' % fscfg.trkTracks_FTF() )]
 
     InputMakerAlg.ViewNodeName = reco_seq.name()
 
@@ -69,7 +66,7 @@ def DJDispStep(flags):
     hypo_alg = DisplacedJetDispHypoAlg("DJTrigDispHypoAlg")
 
     lrtcfg = getInDetTrigConfig( 'DJetLRT' )
-    fscfg = getInDetTrigConfig("jet")
+    fscfg = getInDetTrigConfig("fullScan")
 
     hypo_alg.lrtTracksKey = lrtcfg.tracks_FTF()
     hypo_alg.vtxKey = fscfg.vertex_jet

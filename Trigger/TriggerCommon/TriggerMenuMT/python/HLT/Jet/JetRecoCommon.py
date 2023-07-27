@@ -209,7 +209,7 @@ def getPrefilterCleaningString(prefilters_list):
 # the calibration config helper
 def getCalibMods(flags,jetRecoDict,dataSource,rhoKey="auto"):
 
-    config = getInDetTrigConfig( 'jet' )
+    config = getInDetTrigConfig( 'fullScan' )
 
     # Minimum modifier set for calibration w/o track GSC
     # Should eventually build in more mods, depend on track info etc

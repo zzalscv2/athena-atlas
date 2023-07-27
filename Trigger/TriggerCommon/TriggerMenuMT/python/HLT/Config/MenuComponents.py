@@ -11,7 +11,7 @@ from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import (NoHypoToolCreated,
 from AthenaCommon.CFElements import parOR, seqAND, compName, getProp, hasProp, findAlgorithmByPredicate
 from AthenaCommon.Configurable import Configurable, ConfigurableCABehavior
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, ConfigurationError
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
@@ -1135,8 +1135,18 @@ def algorithmCAToGlobalWrapper(gen, flags, *args, **kwargs):
     return extractAlgorithmsAndAppendCA(ca)
 
 def extractAlgorithmsAndAppendCA(ca: ComponentAccumulator) -> list[Configurable]:
-    """Extract and return the algorithms from a component accumulator"""
-    algorithms = ca.getEventAlgos()
+    """Extract and return the algorithms from a component accumulator
+       By default, extracts all event algorithms as a flat list.
+       If the CA declares a primary component, returns only this, to handle
+       nested sequences properly and avoid duplicating algorithms.
+    """
+    algorithms = []
+    try:
+        primary = ca.getPrimary()
+        assert primary.__component_type__ == 'Algorithm'
+        algorithms = [primary]
+    except ConfigurationError:
+        algorithms = ca.getEventAlgos()
     ca._algorithms.clear()
     ca._allSequences.clear()
     appendCAtoAthena(ca)
@@ -1164,12 +1174,37 @@ def appendMenuSequenceCAToAthena(msca, flags):
 
     def _convertSeq(s):
         sname = compName(s)
-        old = AthSequencer( sname )
-        if s.ModeOR: #this seems stupid way to do it but we avoid setting this property if is == default here, this is streamlining comparisons
-            old.ModeOR = True
-        if s.Sequential:
-            old.Sequential = True
-        old.StopOverride = s.StopOverride 
+        # Create fresh if not existing, else retrieve the configured one
+        old = AthSequencer(sname)
+
+        # We only need to handle these and the members?
+        props_that_matter = ['ModeOR','Sequential','StopOverride']
+
+        # Compare properties one by one
+        # Return False if any of the properties above or the member list disagrees
+        # If all agree, we can simply return old
+        # Otherwise assume we have to do the conversion
+        # This does not verify the member configuration, assume the recursion into
+        # subsequences and other checks suffice
+        def seq_properties_agree(s,old):
+            for propname in props_that_matter:
+                if not hasattr(old,propname) or getattr(old,propname) != getattr(s,propname):
+                    return False
+            # Collect the list of member name/types
+            # Skip the hypo
+            s_members = [m.getFullJobOptName() for m in s.Members if m != msca.hypo.Alg]
+            old_members = [m.getFullName() for m in old.getChildren()]
+            return s_members == old_members
+
+        if seq_properties_agree(s,old):
+            return old
+
+        # From here we configure the legacy sequence assuming it was never defined previously
+        # If we missed anything in the preceding checks, this should clash with the locked sequence
+        old.ModeOR = s.ModeOR
+        old.Sequential = s.Sequential
+        old.StopOverride = s.StopOverride
+
         for member in s.Members:
             if isSequence(member):
                 old += _convertSeq(member)
@@ -1294,6 +1329,7 @@ class RecoFragmentsPool(object):
     @AccumulatorCache(maxSize=1024)
     def retrieve_cacheable(creator, flags, kwargsTuple):
         kwargs = RecoFragmentsPool.recursiveFromTuple(kwargsTuple)
+
         if RecoFragmentsPool.DebugCaching:
             fName = 'RecoFragmentsPool.retrieve_cacheable'
             log.debug('%s: creator = %s hash = %s', fName, creator, hash(creator))
