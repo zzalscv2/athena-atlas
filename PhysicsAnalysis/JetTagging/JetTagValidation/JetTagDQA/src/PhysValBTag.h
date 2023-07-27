@@ -86,9 +86,9 @@ namespace JetTagDQA {
     bool m_doTrackTruth = true;
 
     // Containers
-    std::string m_jetName1;
-    std::string m_jetName2;
-    std::string m_jetName3;
+    std::string m_jetNameEMTopo;
+    std::string m_jetNamePFlow;
+    std::string m_jetNameTrackJet;
 
     std::string m_trackName;
     std::string m_vertexName;
