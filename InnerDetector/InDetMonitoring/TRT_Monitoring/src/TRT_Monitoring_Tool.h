@@ -1,6 +1,6 @@
 // -*- c++ -*-
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_MONITORING_TOOL_H
@@ -72,7 +72,7 @@ public:
 	virtual StatusCode procHistograms();
 
 private:
-	int m_lastLumiBlock;
+	int m_lastTRTLumiBlock;
 	int m_evtLumiBlock;
 	int m_good_bcid;
 	int m_nTotalTracks;
