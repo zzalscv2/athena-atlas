@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -199,7 +199,7 @@ VP1WebWatcher::~VP1WebWatcher()
 //____________________________________________________________________
 void VP1WebWatcher::httpRequestDone(bool error)
 {
-  foreach(Imp::WatchedUrl*wu, m_d->watchedUrls)
+  for(Imp::WatchedUrl*wu : m_d->watchedUrls)
     if (wu->thread && wu->thread->handleDone(error, sender())) {
       bool changed = wu->lastResult != wu->thread->result();
       wu->lastResult = wu->thread->result();
@@ -215,7 +215,7 @@ void VP1WebWatcher::httpRequestDone(bool error)
 //____________________________________________________________________
 bool VP1WebWatcher::isWatchingUrl(const QString&u) const
 {
-  foreach (Imp::WatchedUrl*wu, m_d->watchedUrls) {
+  for (Imp::WatchedUrl*wu : m_d->watchedUrls) {
     if (wu->url == u)
       return true;
   }
@@ -290,7 +290,7 @@ void VP1WebWatcher::timerEvent(QTimerEvent*)
 //____________________________________________________________________
 VP1WebWatcher::RESULT VP1WebWatcher::lastResult(const QString& url)
 {
-  foreach(Imp::WatchedUrl*wu, m_d->watchedUrls)
+  for(Imp::WatchedUrl*wu : m_d->watchedUrls)
     if (wu->url==url) {
       if (wu->lastResult==VP1WebWatcher_UrlInvalid)
 	return INVALID_URL;
@@ -324,7 +324,7 @@ QString VP1WebWatcher::lastResultToString(const QString& url)
 //____________________________________________________________________
 QDateTime VP1WebWatcher::lastModTime(const QString& url)
 {
-  foreach(Imp::WatchedUrl*wu, m_d->watchedUrls)
+  for(Imp::WatchedUrl*wu : m_d->watchedUrls)
     if (wu->url==url) {
       if (wu->lastResult.startsWith(VP1WebWatcher_PREFIX))
 	return QDateTime();//invalid

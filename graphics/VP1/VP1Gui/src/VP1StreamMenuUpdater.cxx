@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1StreamMenuUpdater.h"
@@ -40,7 +40,7 @@ void VP1StreamMenuUpdater::updateInputDirectoriesStatus()
 {
   QMutexLocker locker(m_mutex);
 
-  foreach (QAction* act,m_inputdiractions.keys()) {
+  for (QAction* act : m_inputdiractions.keys()) {
     VP1DirStatusData& dirstatus = m_inputdiractions[act];
     dirstatus.enabled = true;
     dirstatus.bold = false;

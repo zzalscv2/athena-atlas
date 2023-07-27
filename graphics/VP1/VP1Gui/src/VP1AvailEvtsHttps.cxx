@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1Gui/VP1AvailEvtsHttps.h"
@@ -186,7 +186,7 @@ void VP1AvailEvtsHttps::generateHttpsRequest()
     VP1EventFile evtToGet;
     QString localfiledir = tmpLocalFileDir();
 
-    foreach (VP1EventFile evt, newEvtsOnServerInfo.events(timeCutForNew(),requireNewestRunNumber())) {
+    for (VP1EventFile evt : newEvtsOnServerInfo.events(timeCutForNew(),requireNewestRunNumber())) {
       //We are looking for an event which was never seen before and not available locally:
       if (!evt.isValid()||inHistory(evt.runNumber(),evt.eventNumber()))
 	continue;
@@ -202,7 +202,7 @@ void VP1AvailEvtsHttps::generateHttpsRequest()
       //to download:
       QList<VP1EventFile> freshLocalEvents = freshEvents();
       unsigned nNewer(0);
-      foreach(VP1EventFile evt,freshLocalEvents) {
+      for(VP1EventFile evt : freshLocalEvents) {
 	if (evt < evtToGet) {
 	  ++nNewer;
 	  if (nNewer>=3) {

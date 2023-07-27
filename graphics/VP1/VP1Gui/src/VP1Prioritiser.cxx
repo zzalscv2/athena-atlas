@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -276,7 +276,7 @@ void VP1Prioritiser::setupSysItr(IVP1ChannelWidget*cw) {
 //___________________________________________________________________
 void VP1Prioritiser::Imp::updateSysinfoWithVisibilityState(const QSet<IVP1ChannelWidget*>& channels,
 							   const SystemInfo::VisibilityState&vs) {
-  foreach(IVP1ChannelWidget*cw,channels) {
+  for(IVP1ChannelWidget*cw : channels) {
     for (prioritiser->setupSysItr(cw);itsys!=itsysE;++itsys) {
       assert(sys2info.contains(*itsys));
       //if (sys2info.contains(*itsys))//This check since channel deletion might have triggered this update.
