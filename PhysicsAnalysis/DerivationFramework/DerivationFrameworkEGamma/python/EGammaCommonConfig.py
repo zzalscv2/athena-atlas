@@ -681,6 +681,14 @@ def EGammaCommonCfg(ConfigFlags):
             ]
         )
 
+    if ConfigFlags.Derivation.Egamma.addMissingCellInfo:
+        from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
+            EgammaCoreCellRecoveryCfg)
+        CoreCellRecoveryTool = acc.popToolsAndMerge(
+            EgammaCoreCellRecoveryCfg(ConfigFlags))
+        acc.addPublicTool(CoreCellRecoveryTool)
+        EGAugmentationTools.append(CoreCellRecoveryTool)
+
     # ==================================================
     # Truth Related tools
     if ConfigFlags.Input.isMC:
