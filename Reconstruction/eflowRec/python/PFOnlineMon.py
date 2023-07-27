@@ -15,7 +15,7 @@ def getMonTool_eflowTrackCaloExtensionTool(flags):
 
 def getMonTool_PFTrackSelector(flags):
   from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-  monTool = GenericMonitoringTool(flags, 'MonTool')
+  monTool = GenericMonitoringTool(flags, 'MonTool', HistPath='PFTrackSelector')
 
   monTool.defineHistogram( 'TIME_execute', path='EXPERT', type='TH1F', title='Track selector - execution time; Execution time [ms]; Counts',
                            xbins=60, xmin=0., xmax=20. )
@@ -60,7 +60,7 @@ def getMonTool_ParticleCaloExtensionTool(flags):
 
 def getMonTool_PFAlgorithm(flags):
   from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-  monTool = GenericMonitoringTool(flags, 'MonTool')
+  monTool = GenericMonitoringTool(flags, 'MonTool', HistPath='PFAlgorithm')
 
   monTool.defineHistogram( 'TIME_execute', path='EXPERT', type='TH1F', title='PFlow algorithm - execution time; Time [ms]; Counts',
                            xbins=100, xmin=0., xmax=500. )

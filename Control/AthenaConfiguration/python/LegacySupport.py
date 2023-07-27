@@ -4,7 +4,7 @@
 # and old Configurable classes
 
 from AthenaCommon import CfgMgr, CFElements
-from AthenaCommon.AlgSequence import AlgSequence
+from AthenaCommon.AlgSequence import AthSequencer
 from AthenaCommon.Configurable import Configurable, ConfigurableCABehavior
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
@@ -39,7 +39,7 @@ def _setProperties( dest, src, indent="" ):
     _log = logging.getLogger( "_setProperties" )
 
     for pname, pvalue in src._properties.items():
-        if dest.__class__.__name__ == 'AlgSequence' and pname == 'Members':
+        if dest.__class__.__name__ == 'AthSequencer' and pname == 'Members':
             continue
 
         propType = src._descriptors[pname].cpp_type
@@ -77,6 +77,33 @@ def _setProperties( dest, src, indent="" ):
             setattr( dest, pname, pvalue )
 
 
+def _fetchOldSeq(name=""):
+    with ConfigurableCABehavior(target_state=False):
+        seq = AthSequencer(name)
+    return seq
+
+def _mergeSequences( currentConfigurableSeq, conf2Sequence, _log, indent="" ):
+    """Merge conf2sequence into currentConfigurableSeq"""
+
+    sequence = CFElements.findSubSequence( currentConfigurableSeq, conf2Sequence.name )
+    if not sequence:
+        sequence = _fetchOldSeq( conf2Sequence.name )
+        _setProperties( sequence, conf2Sequence, indent=_indent( indent ) )
+        currentConfigurableSeq += sequence
+        _log.debug( "%sCreated missing AthSequencer %s and added to %s",
+                    _indent( indent ), sequence.name(), currentConfigurableSeq.name() )
+
+    for el in conf2Sequence.Members:
+        if el.__class__.__name__ in ["AthSequencer"]:
+            _mergeSequences( sequence, el, _log, _indent( indent ) )
+        elif el.getGaudiType() == "Algorithm":
+            toadd = conf2toConfigurable( el, indent=_indent( indent ), suppressDupes=True)
+            if toadd is not None:
+                sequence += toadd
+                _log.debug( "%sAlgorithm %s and added to the sequence %s",
+                            _indent( indent ),  el.getFullJobOptName(), sequence.name() )
+
+
 def conf2toConfigurable( comp, indent="", parent="", servicesOfThisCA=[], suppressDupes=False ):
     """
     Method converts from Conf2 ( comp argument ) to old Configurable
@@ -94,6 +121,13 @@ def conf2toConfigurable( comp, indent="", parent="", servicesOfThisCA=[], suppre
             _log.warning( "%sComponent '%s' in '%s' is of type string, no conversion, "
                           "some properties possibly not set?", indent, comp, parent)
         return comp
+
+    if comp.getType() == 'AthSequencer':
+        _log.debug( "%sComponent is a sequence %s, attempt to merge",
+                    indent, CFElements.compName(comp))
+        oldsequence = _fetchOldSeq(CFElements.compName(comp))
+        _mergeSequences(oldsequence, comp, _log, indent)
+        return oldsequence
 
     _log.debug( "%sConverting from GaudiConfig2 object %s type %s, parent %s",
                 indent, CFElements.compName(comp), comp.__class__.__name__ , parent)
@@ -180,10 +214,12 @@ def conf2toConfigurable( comp, indent="", parent="", servicesOfThisCA=[], suppre
                                     conf1.getFullName(), conf2.getFullJobOptName() ) )
 
         alreadySetProperties = conf1.getValuedProperties().copy()
+
         _log.debug( "%sExisting properties: %s", indent, alreadySetProperties )
         _log.debug( "%sNew properties: %s", indent, conf2._properties )
 
         for pname, pvalue in conf2._properties.items():
+
             if _isOldConfigurable( pvalue ):
                 _log.warning( "%sNew configuration object %s property %s has legacy configuration "
                               "components assigned to it %s. Skipping comparison, no guarantees "
@@ -428,32 +464,6 @@ def appendCAtoAthena(ca):
                     raise DeduplicationFailed(f"ApplicationMgr property {propName} set twice: "
                                               "{origPropValue} and {propValue}")
 
-    def _fetchOldSeq(name=""):
-        with ConfigurableCABehavior(target_state=False):
-            seq = AlgSequence(name)
-        return seq
-
-    def _mergeSequences( currentConfigurableSeq, conf2Sequence, indent="" ):
-        """Merge conf2sequence into currentConfigurableSeq"""
-
-        sequence = CFElements.findSubSequence( currentConfigurableSeq, conf2Sequence.name )
-        if not sequence:
-            sequence = _fetchOldSeq( conf2Sequence.name )
-            _setProperties( sequence, conf2Sequence, indent=_indent( indent ) )
-            currentConfigurableSeq += sequence
-            _log.debug( "%sCreated missing AlgSequence %s and added to %s",
-                        _indent( indent ), sequence.name(), currentConfigurableSeq.name() )
-
-        for el in conf2Sequence.Members:
-            if el.__class__.__name__ == "AthSequencer":
-                _mergeSequences( sequence, el, _indent( indent ) )
-            elif el.getGaudiType() == "Algorithm":
-                toadd = conf2toConfigurable( el, indent=_indent( indent ), suppressDupes=True)
-                if toadd is not None:
-                    sequence += toadd
-                    _log.debug( "%sAlgorithm %s and added to the sequence %s",
-                                _indent( indent ),  el.getFullJobOptName(), sequence.name() )
-
     preconfigured = [athCondSeq,athOutSeq,athAlgSeq,topSequence]
 
     for seq in ca._allSequences:
@@ -469,19 +479,19 @@ def appendCAtoAthena(ca):
             if seq.getName() == pre.getName():
                 _log.debug( "%sfound sequence %s to have the same name as predefined %s",
                             _indent(), seq.getName(),  pre.getName() )
-                _mergeSequences( pre, seq )
+                _mergeSequences( pre, seq, _log )
                 merged = True
                 break
             if CFElements.findSubSequence( pre, seq.name ):
                 _log.debug( "%sfound sequence %s in predefined %s",
                             _indent(), seq.getName(),  pre.getName() )
-                _mergeSequences( pre, seq )
+                _mergeSequences( pre, seq, _log )
                 merged = True
                 break
 
         if not merged:
             _log.debug( "%snot found sequence %s merging it to AthAlgSeq", _indent(), seq.name )
-            _mergeSequences( athAlgSeq, seq )
+            _mergeSequences( athAlgSeq, seq, _log )
 
     ca.wasMerged()
     _log.debug( "Merging of CA to global done" )

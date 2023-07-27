@@ -13,7 +13,6 @@ from PixelMonitoring.PixelAthMonitoringBase import define1DProfLumiLayers, basel
 from PixelMonitoring.PixelAthMonitoringBase import layers, totcuts, xbinsem, xminsem, lumibinsx, ztotbinsy, ztotminsy
 from PixelMonitoring.PixelAthMonitoringBase import addOnTrackTxt, addOnTrackToPath, fullDressTitle
 from PixelMonitoring.PixelAthMonitoringBase import runtext, ReadingDataErrLabels
-from AthenaCommon.AthenaCommonFlags import athenaCommonFlags ### test of 100 LB histograms
 
 def PixelAthClusterMonAlgCfg(helper, alg, **kwargs):
 
@@ -23,9 +22,7 @@ def PixelAthClusterMonAlgCfg(helper, alg, **kwargs):
     doHeavyIonMon = kwargs.get('doHeavyIonMon', False)
     doFEPlots  = kwargs.get('doFEPlots',  False)
 
-    forceOnline = doOnline and not athenaCommonFlags.isOnline
-
-### begin status histograms
+    ### begin status histograms
 
     path        = '/Pixel/Status/'
     pathLowStat = '/Pixel/LumiBlock/'
@@ -104,11 +101,9 @@ def PixelAthClusterMonAlgCfg(helper, alg, **kwargs):
     define1DProfLumiLayers(helper, alg, histoGroupName, title, path, yaxistext, type='TProfile')
 
     if doOnline:
-        if forceOnline: athenaCommonFlags.isOnline = True
         histoGroupName = 'HitEffAll'
         title          = 'hit efficiency per LB for last 100LB'
         define1DProfLumiLayers(helper, alg, histoGroupName, title, path, ';hit efficiency', type='TProfile', opt='kLive=100', histname='HitEffAllLast100LB')
-        if forceOnline: athenaCommonFlags.isOnline = False
 
     histoGroupName = 'HolesRatio' 
     title = 'Holes per track'
@@ -168,7 +163,6 @@ def PixelAthClusterMonAlgCfg(helper, alg, **kwargs):
                                    ybins=10, ymin=-0.5, ymax=9.5)
 
     if doOnline:
-        if forceOnline: athenaCommonFlags.isOnline = True
         varName = 'pixclusmontool_lb,npixhits_per_track'
         title   = fullDressTitle('Number of pixhits per track per LB for last 100LB', False, ';lumi block', ';number of hits')
         varName += ';NPixHitsPerTrackPerLumiLast100LB'
@@ -176,7 +170,6 @@ def PixelAthClusterMonAlgCfg(helper, alg, **kwargs):
                                 type='TH2F', path=path, title=title, weight='npixhits_per_track_wgt',
                                 xbins=100, xmin=-0.5, xmax=-0.5+100,
                                 ybins=10, ymin=-0.5, ymax=9.5, opt='kLive=100')
-        if forceOnline: athenaCommonFlags.isOnline = False
 
         histoGroupName = 'HolesRatio5min' 
         title = 'Holes per track reset every 5 LBs'
@@ -373,10 +366,8 @@ def PixelAthClusterMonAlgCfg(helper, alg, **kwargs):
             title = addOnTrackTxt('Cluster ToTxCosAlpha', ontrack, True)
             define1DLayers(helper, alg, histoGroupName, title, pathGroup, ';ToT [BC]', ';# clusters', xbins=[300], xmins=[-0.5])
             if doOnline:
-                if forceOnline: athenaCommonFlags.isOnline = True
                 title = addOnTrackTxt('Zoomed Cluster ToTxCosAlpha per LB for last 100LB', ontrack, True)
                 defineMapVsLumiLayers(helper, alg, histoGroupName, title, pathGroup, ';lumi block', ';ToT [BC]', ybins=ztotbinsy, ymins=ztotminsy, opt='kLive=100', histname='ZoomedClusterToTxCosAlphaOnTrackPerLumiLast100LB')
-                if forceOnline: athenaCommonFlags.isOnline = False
             else:
                 title = addOnTrackTxt('Zoomed Cluster ToTxCosAlpha per LB', ontrack, True)
                 defineMapVsLumiLayers(helper, alg, histoGroupName, title, pathGroup, ';lumi block', ';ToT [BC]', ybins=ztotbinsy, ymins=ztotminsy, histname='ZoomedClusterToTxCosAlphaOnTrackPerLumi')

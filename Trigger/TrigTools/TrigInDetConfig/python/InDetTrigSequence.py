@@ -18,8 +18,7 @@ class InDetTrigSequence:
     self.__signature = signature
     self.__rois = rois
     self.__inView = inView
-    #self.__cas = list()
-    
+    self.__lastTrkCollection = self.__flags.Tracking.ActiveConfig.trkTracks_FTF 
     
   def sequence(self, recoType : str = "FastTrackFinder") -> ComponentAccumulator:
     ca = ComponentAccumulator()
@@ -41,6 +40,20 @@ class InDetTrigSequence:
 
     return ca
 
+  def sequenceAfterPattern(self, recoType : str = "PrecisionTracking") -> ComponentAccumulator:
+    with ConfigurableCABehavior():
+    
+      ca = ComponentAccumulator()
+
+      ca.merge(self.ambiguitySolver())
+
+      if self.__flags.Tracking.ActiveConfig.doTRT:
+        ca.merge(self.trtExtensions())
+
+      ca.merge(self.xAODParticleCreation())
+    
+      return ca
+    
   def viewDataVerifier(self, viewVerifier='IDViewDataVerifier') -> ComponentAccumulator:
     
     with ConfigurableCABehavior():
@@ -97,7 +110,23 @@ class InDetTrigSequence:
       acc.merge(TrigSCTClusterizationCfg(self.__flags, name="InDetSCTClusterization" + signature, RoIs = self.__rois))
 
       return acc
-  
+
+  def dataPreparationTRT(self) ->ComponentAccumulator:
+
+    with ConfigurableCABehavior():
+      acc = ComponentAccumulator()
+
+      if self.__flags.Input.Format == Format.BS:
+        from TrigInDetConfig.TrigInDetConfig import TRTDataProviderCfg
+        acc.merge(TRTDataProviderCfg(self.__flags, self.__rois, self.__signature))
+
+      from InDetConfig.InDetPrepRawDataFormationConfig import TrigTRTRIOMakerCfg
+      acc.merge(TrigTRTRIOMakerCfg(self.__flags, RoIs = self.__rois))
+      
+
+      return acc
+
+
   def spacePointFormation(self) -> ComponentAccumulator:
     
     signature = self.__flags.Tracking.ActiveConfig.input_name
@@ -140,6 +169,58 @@ class InDetTrigSequence:
         acc.merge(trackFTFConverterCfg(flags, signature))
 
       return acc
-               
-  
-  
+
+  def ambiguitySolver(self) -> ComponentAccumulator:
+    with ConfigurableCABehavior():
+      acc = ComponentAccumulator()
+
+      from TrkConfig.TrkAmbiguitySolverConfig import TrkAmbiguityScore_Trig_Cfg
+      acc.merge(
+        TrkAmbiguityScore_Trig_Cfg(
+          self.__flags,
+          name = f"TrigAmbiScore_{self.__flags.Tracking.ActiveConfig.input_name}",
+          TrackInput = [self.__lastTrkCollection],
+          AmbiguityScoreProcessor = None
+        )
+      )
+
+      from TrkConfig.TrkAmbiguitySolverConfig import TrkAmbiguitySolver_Trig_Cfg
+      acc.merge(
+        TrkAmbiguitySolver_Trig_Cfg(
+          self.__flags,
+          name = "TrigAmbiguitySolver"+self.__flags.Tracking.ActiveConfig.input_name,
+        )
+      )
+    
+      self.__lastTrkCollection = self.__flags.Tracking.ActiveConfig.trkTracks_IDTrig+"_Amb"
+      return acc
+
+  def trtExtensions(self) -> ComponentAccumulator:
+    with ConfigurableCABehavior():
+      acc = self.dataPreparationTRT()
+      
+      from InDetConfig.TRT_TrackExtensionAlgConfig import Trig_TRT_TrackExtensionAlgCfg
+      acc.merge(Trig_TRT_TrackExtensionAlgCfg(self.__flags, self.__lastTrkCollection, name="TrigTrackExtensionAlg%s"% self.__signature))
+
+      from InDetConfig.InDetExtensionProcessorConfig import TrigInDetExtensionProcessorCfg
+      acc.merge(TrigInDetExtensionProcessorCfg(self.__flags, name="TrigExtensionProcessor%s"% self.__signature))
+                                                       
+      self.__lastTrkCollection = self.__flags.Tracking.ActiveConfig.trkTracks_IDTrig   
+
+      return acc
+    
+  def xAODParticleCreation(self) -> ComponentAccumulator:
+
+    with ConfigurableCABehavior():
+      acc = self.dataPreparationTRT()
+
+      from xAODTrackingCnv.xAODTrackingCnvConfig import TrigTrackParticleCnvAlgCfg
+      prefix = "InDet" 
+      acc.merge(
+        TrigTrackParticleCnvAlgCfg(
+          self.__flags,
+          name = prefix+'xAODParticleCreatorAlg'+self.__flags.Tracking.ActiveConfig.input_name+'_IDTrig', 
+          TrackContainerName = self.__lastTrkCollection,
+          xAODTrackParticlesFromTracksContainerName = self.__flags.Tracking.ActiveConfig.tracks_IDTrig,
+        ))
+      return acc

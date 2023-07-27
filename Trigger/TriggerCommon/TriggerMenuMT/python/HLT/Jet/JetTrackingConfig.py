@@ -7,15 +7,16 @@ from JetRecTools import JetRecToolsConfig
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, conf2toConfigurable
 
-from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 from TrigInDetConfig.utils import getFlagsForActiveConfig
 from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
 from InDetConfig.InDetPriVxFinderConfig import InDetTrigPriVxFinderCfg
 from InDetUsedInVertexFitTrackDecorator.UsedInVertexFitTrackDecoratorCfg import getUsedInVertexFitTrackDecoratorAlg
+from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 from ..Config.MenuComponents import parOR
+from ..CommonSequences.FullScanInDetConfig import commonInDetFullScanCfg
 
 def retrieveJetContext(trkopt):
     """Tell the standard jet config about the specific track related options we are using here.
@@ -32,7 +33,7 @@ def retrieveJetContext(trkopt):
         # *****************
         # Set the options corresponding to trkopt to a new entry in jetContextDic 
         trksig = {
-            'ftf':    'jet',
+            'ftf':    'fullScan',
             'roiftf': 'jetSuper',
         }[trkopt]
         IDTrigConfig = getInDetTrigConfig( trksig )
@@ -69,38 +70,14 @@ def JetFSTrackingCfg(flags, trkopt, RoIs):
     """ Create the tracking CA and return it as well as the output name dictionary """
     seqname = f"JetFSTracking_{trkopt}_RecoSequence"
     acc = ComponentAccumulator()
-    acc.addSequence(parOR(seqname))
+    acc.addSequence(parOR(seqname),primary=True)
 
-    IDTrigConfig = getInDetTrigConfig( 'jet' )
+    IDTrigConfig = getInDetTrigConfig( 'fullScan' )
 
-    from AthenaCommon.Logging import logging
-    log = logging.getLogger(__name__)
-
-    flagsWithTrk = getFlagsForActiveConfig(flags, 'jet', log)
-
-    assert trkopt == "ftf"
-    acc.merge(
-        trigInDetFastTrackingCfg(
-            flagsWithTrk,
-            RoIs,
-            signatureName="jet",
-            in_view=False
-        ),
-        seqname
-    )
+    acc.merge(commonInDetFullScanCfg(flags),seqname)
 
     # get the jetContext for trkopt (and build it if not existing yet)
     jetContext, trkKeys = retrieveJetContext(trkopt)
-
-    acc.merge(
-        InDetTrigPriVxFinderCfg(
-            flagsWithTrk,
-            inputTracks = jetContext["Tracks"],
-            outputVtx = jetContext["Vertices"],
-            name="InDetTrigPriVxFinder_jetFS",
-        ),
-        seqname
-    )
 
     acc.addEventAlgo(
         getUsedInVertexFitTrackDecoratorAlg(
@@ -144,22 +121,18 @@ def JetRoITrackingCfg(flags, jetsIn, trkopt, RoIs):
 
     acc = ComponentAccumulator()
 
-    acc.addEventAlgo(
-        CompFactory.AthViews.ViewDataVerifier(
-            name='VDVInDetFTF_jetsuper',
-            DataObjects=[
-                ('TrigRoiDescriptorCollection' , f'StoreGateSvc+{RoIs}'),
-                ('xAOD::JetContainer' , f'StoreGateSvc+{jetsIn}'),
-            ]
-        )
-    )
+    acc.addEventAlgo(CompFactory.AthViews.ViewDataVerifier(
+        name = "VDVInDetFTF_jetSuper",
+        DataObjects = [
+            ('xAOD::JetContainer' , 'StoreGateSvc+HLT_AntiKt4EMTopoJets_subjesIS_fastftag'),
+        ]
+    ))
 
     assert trkopt == "roiftf"
-    IDTrigConfig = getInDetTrigConfig( 'jetSuper' )
 
     from AthenaCommon.Logging import logging
     log = logging.getLogger(__name__)
-    flagsWithTrk = getFlagsForActiveConfig(flags, 'jet', log)
+    flagsWithTrk = getFlagsForActiveConfig(flags, 'jetSuper', log)
 
     acc.merge(
         trigInDetFastTrackingCfg(
@@ -173,9 +146,8 @@ def JetRoITrackingCfg(flags, jetsIn, trkopt, RoIs):
     acc.merge(
         InDetTrigPriVxFinderCfg(
             flagsWithTrk,
-            inputTracks = IDTrigConfig.tracks_FTF(),
-            outputVtx =   IDTrigConfig.vertex,
-            name="InDetTrigPriVxFinderjetSuper",
+            inputTracks = flagsWithTrk.Tracking.ActiveConfig.tracks_FTF,
+            outputVtx =   flagsWithTrk.Tracking.ActiveConfig.vertex,
         )
     )
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGSTEERINGEVENT_HLTResultMT_H
@@ -41,9 +41,7 @@ namespace HLT {
     HLTResultMT(std::vector<eformat::helper::StreamTag> streamTags = {},
                 boost::dynamic_bitset<uint32_t> hltPassRawBits = boost::dynamic_bitset<uint32_t>(),
                 boost::dynamic_bitset<uint32_t> hltPrescaledBits = boost::dynamic_bitset<uint32_t>(),
-                std::unordered_map<uint16_t, std::vector<uint32_t> > data = {},
-                std::vector<uint32_t> status = {0},
-                std::set<uint16_t> truncatedModuleIds = {});
+                std::unordered_map<uint16_t, std::vector<uint32_t> > data = {});
 
 
     // ------------------------- Public typedefs -------------------------------
@@ -131,21 +129,11 @@ namespace HLT {
     /// Full event status reference getter (1 bit-mask status word + error code words)
     const std::vector<uint32_t>& getStatus() const;
 
-    /// First status word getter (by value)
-    const eformat::helper::Status getFirstStatusWord() const;
-
     /// Error codes getter  (by value) - strips off the first bit-mask status word
     const std::vector<HLT::OnlineErrorCode> getErrorCodes() const;
 
     /// Replace the full status words with the given data
     void setStatus(std::vector<uint32_t> status);
-
-    /// Replace error codes with the given codes
-    void setErrorCodes(const std::vector<HLT::OnlineErrorCode>& errorCodes,
-                       const eformat::helper::Status& firstStatusWord = {
-                         eformat::GenericStatus::DATA_CORRUPTION,
-                         eformat::FullEventStatus::PSC_PROBLEM
-                       });
 
     /** @brief Append an error code
      *
@@ -158,6 +146,8 @@ namespace HLT {
                         eformat::FullEventStatus::PSC_PROBLEM
                       });
 
+    /// Status words for ROB with given moduleId
+    const std::vector<uint32_t>& getRobStatus(uint16_t moduleId) const;
 
     // ------------------------- Version getters/setters -----------------------
     // The format of the HLT ByteStream (ROD payload) and the interpretation of the HLT-specific information
@@ -202,8 +192,11 @@ namespace HLT {
     /// Serialised result (ROBFragment payload) for each moduleId (0 for full result, >0 for data scouting)
     std::unordered_map<uint16_t, std::vector<uint32_t> > m_data;
 
-    /// First word is eformat::helper::Status, next words are optional error codes
+    /// FullEvent status words (first word is eformat::helper::Status, next words are optional error codes)
     std::vector<uint32_t> m_status;
+
+    /// ROBFragment status words for each moduleId
+    std::unordered_map<uint16_t, std::vector<uint32_t>> m_robStatus;
 
     /// Stores the ROD minor version of the HLT ROBFragments
     RODMinorVersion m_version;

@@ -510,8 +510,6 @@ ConfigSettingsInstances = {
 
     "bjet"        : ConfigSettings_bjet(),
 
-    "jet"         : ConfigSettings_fullScan(),
-    #    "jet"         : ConfigSettings_bjet(),
     "fullScan"    : ConfigSettings_fullScan(),
     "FS"          : ConfigSettings_fullScan(),
 

@@ -152,6 +152,9 @@ StatusCode ZdcNtuple :: initialize ()
     m_outputTree->Branch("zdc_ZdcLucrodTriggerAmp",&t_ZdcLucrodTriggerAmp,"zdc_ZdcLucrodTriggerAmp[2][4]/S");
     m_outputTree->Branch("zdc_ZdcModuleMaxADC",&t_ZdcModuleMaxADC,"zdc_ZdcModuleMaxADC[2][4]/F");
 
+    m_outputTree->Branch("zdc_RPDChannelAmplitude",&t_RPDChannelAmplitude,"zdc_RPDChannelAmplitude[2][16]/F");
+    m_outputTree->Branch("zdc_RPDChannelMaxSample",&t_RPDChannelMaxSample,"zdc_RPDChannelMaxSample[2][16]/i");
+
     if (!(zdcCalib || zdcLaser || zdcOnly))
     {
       m_outputTree->Branch("mbts_in_e", &t_mbts_in_e, "mbts_in_e[2][8]/F");
@@ -516,50 +519,59 @@ void ZdcNtuple::processZdcNtupleFromModules()
 
       ANA_MSG_VERBOSE ("Module " << zdcMod->zdcSide() << " " << zdcMod->zdcModule() << " amp:" << zdcMod->auxdataConst<float>("Amplitude"));
 
-      if (zdcMod->zdcType() != 0) continue;
+      if (zdcMod->zdcType() == 0) {
+        // thi is the ZDC
+        t_ZdcModuleCalibAmp[iside][imod] = zdcMod->auxdataConst<float>("CalibEnergy" + auxSuffix);
+        t_ZdcModuleCalibTime[iside][imod] = zdcMod->auxdataConst<float>("CalibTime" + auxSuffix);
+        t_ZdcModuleStatus[iside][imod] = zdcMod->auxdataConst<unsigned int>("Status" + auxSuffix);
+        if (t_ZdcModuleAmp[iside][imod] != 0.)
+          Warning("processZdcNtupleFromModules", "overwriting side %d module %d!", iside, imod);
+        t_ZdcModuleAmp[iside][imod] = zdcMod->auxdataConst<float>("Amplitude" + auxSuffix);
+        t_ZdcModuleTime[iside][imod] = zdcMod->auxdataConst<float>("Time" + auxSuffix);
 
-      t_ZdcModuleCalibAmp[iside][imod] = zdcMod->auxdataConst<float>("CalibEnergy" + auxSuffix);
-      t_ZdcModuleCalibTime[iside][imod] = zdcMod->auxdataConst<float>("CalibTime" + auxSuffix);
-      t_ZdcModuleStatus[iside][imod] = zdcMod->auxdataConst<unsigned int>("Status" + auxSuffix);
-      if (t_ZdcModuleAmp[iside][imod] != 0.)
-        Warning("processZdcNtupleFromModules", "overwriting side %d module %d!", iside, imod);
-      t_ZdcModuleAmp[iside][imod] = zdcMod->auxdataConst<float>("Amplitude" + auxSuffix);
-      t_ZdcModuleTime[iside][imod] = zdcMod->auxdataConst<float>("Time" + auxSuffix);
+        t_ZdcModuleChisq[iside][imod] = zdcMod->auxdataConst<float>("Chisq" + auxSuffix);
+        t_ZdcModuleFitAmp[iside][imod] = zdcMod->auxdataConst<float>("FitAmp" + auxSuffix);
+        t_ZdcModuleAmpError[iside][imod] = zdcMod->auxdataConst<float>("FitAmpError" + auxSuffix);
+        t_ZdcModuleFitT0[iside][imod] = zdcMod->auxdataConst<float>("FitT0" + auxSuffix);
+        t_ZdcModuleBkgdMaxFraction[iside][imod] = zdcMod->auxdataConst<float>("BkgdMaxFraction" + auxSuffix);
+        t_ZdcModuleMinDeriv2nd[iside][imod] = zdcMod->auxdataConst<float>("MinDeriv2nd" + auxSuffix);
+        t_ZdcModulePresample[iside][imod] = zdcMod->auxdataConst<float>("Presample" + auxSuffix);
+        t_ZdcModulePreSampleAmp[iside][imod] = zdcMod->auxdataConst<float>("PreSampleAmp" + auxSuffix);
+        t_ZdcLucrodTriggerAmp[iside][imod] = zdcMod->auxdataConst<uint16_t>("LucrodTriggerAmp");
+        t_ZdcModuleMaxADC[iside][imod] = zdcMod->auxdataConst<float>("MaxADC");
 
-      t_ZdcModuleChisq[iside][imod] = zdcMod->auxdataConst<float>("Chisq" + auxSuffix);
-      t_ZdcModuleFitAmp[iside][imod] = zdcMod->auxdataConst<float>("FitAmp" + auxSuffix);
-      t_ZdcModuleAmpError[iside][imod] = zdcMod->auxdataConst<float>("FitAmpError" + auxSuffix);
-      t_ZdcModuleFitT0[iside][imod] = zdcMod->auxdataConst<float>("FitT0" + auxSuffix);
-      t_ZdcModuleBkgdMaxFraction[iside][imod] = zdcMod->auxdataConst<float>("BkgdMaxFraction" + auxSuffix);
-      t_ZdcModuleMinDeriv2nd[iside][imod] = zdcMod->auxdataConst<float>("MinDeriv2nd" + auxSuffix);
-      t_ZdcModulePresample[iside][imod] = zdcMod->auxdataConst<float>("Presample" + auxSuffix);
-      t_ZdcModulePreSampleAmp[iside][imod] = zdcMod->auxdataConst<float>("PreSampleAmp" + auxSuffix);
-      t_ZdcLucrodTriggerAmp[iside][imod] = zdcMod->auxdataConst<uint16_t>("LucrodTriggerAmp");
-      t_ZdcModuleMaxADC[iside][imod] = zdcMod->auxdataConst<float>("MaxADC");
-
-      if (enableOutputSamples)
+        if (enableOutputSamples)
+          {
+            for (unsigned int isamp = 0; isamp < nsamplesZdc; isamp++) // 7 samples
         {
-          for (unsigned int isamp = 0; isamp < nsamplesZdc; isamp++) // 7 samples
-	    {
-	      if (nsamplesZdc == 7)
-		{
-		  t_raw7[iside][imod][0][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0data")).at(isamp);
-		  t_raw7[iside][imod][1][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1data")).at(isamp);
-		}
-	      
-	      if (nsamplesZdc == 15)
-		{
-		  t_raw15[iside][imod][0][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0data")).at(isamp);
-		  t_raw15[iside][imod][1][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1data")).at(isamp);
-		}
+          if (nsamplesZdc == 7)
+      {
+        t_raw7[iside][imod][0][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0data")).at(isamp);
+        t_raw7[iside][imod][1][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1data")).at(isamp);
+      }
+          
+          if (nsamplesZdc == 15)
+      {
+        t_raw15[iside][imod][0][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0data")).at(isamp);
+        t_raw15[iside][imod][1][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1data")).at(isamp);
+      }
 
-	      if (nsamplesZdc == 24)
-		{
-		  t_raw24[iside][imod][0][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0data")).at(isamp);
-		  t_raw24[iside][imod][1][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1data")).at(isamp);
-		}
-	    }
+          if (nsamplesZdc == 24)
+      {
+        t_raw24[iside][imod][0][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0data")).at(isamp);
+        t_raw24[iside][imod][1][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1data")).at(isamp);
+      }
         }
+          }
+
+      } else if (zdcMod->zdcType() == 1) {
+        // this is the RPD
+        int rpdChannel = zdcMod->zdcChannel() - 1; // zero-based
+        t_RPDChannelAmplitude[iside][rpdChannel] = zdcMod->auxdataConst<float>("RPDChannelAmplitude" + auxSuffix);
+        t_RPDChannelMaxSample[iside][rpdChannel] = zdcMod->auxdataConst<unsigned int>("RPDChannelMaxSample" + auxSuffix);
+
+      }
+
  
     }
   }
@@ -1477,5 +1489,3 @@ StatusCode ZdcNtuple :: finalize ()
 
   return StatusCode::SUCCESS;
 }
-
-

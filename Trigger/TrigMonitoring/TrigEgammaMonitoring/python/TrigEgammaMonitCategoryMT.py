@@ -63,8 +63,6 @@ validation_photon = [
         'HLT_g140_loose_L1EM22VHI',
         'HLT_g140_loose_L1eEM26M',
         'HLT_g300_etcut_L1EM22VHI',
-        'HLT_g25_tight_icaloloose_L1EM22VHI',
-        'HLT_g25_tight_icalotight_L1EM22VHI'
         ]
 
 validation_photon_ringer = [ #this chains will be monitored once photon ringer is updated 

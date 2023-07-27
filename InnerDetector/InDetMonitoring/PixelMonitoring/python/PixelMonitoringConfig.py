@@ -12,7 +12,6 @@ def PixelMonitoringConfig(flags):
     doErrorMonAlg     = True
     doMVAMonAlg       = True #allowed only if online, see below
 
-    from InDetRecExample.InDetKeys          import InDetKeys
     # run on RAW only
     if flags.DQ.Environment in ('online', 'tier0', 'tier0Raw'):
         if forceOnline: 
@@ -23,7 +22,7 @@ def PixelMonitoringConfig(flags):
         kwargsHitMonAlg = { 'doOnline'        : isOnline,      #Histograms for online (GlobalMonitoring) running
                             'doLumiBlock'     : not isOnline,  #Turn on/off histograms stored every 1(20) lumi block(s)
                             'doFEPlots'       : True,                       #Turn on/off per FE-I3 histograms
-                            'RDOName'         : InDetKeys.PixelRDOs()       #'PixelRDOs'
+                            'RDOName'         : 'PixelRDOs',
         }
 
         kwargsClusMonAlg = { 'doOnline'        : isOnline,      #Histograms for online (GlobalMonitoring) running
@@ -31,8 +30,8 @@ def PixelMonitoringConfig(flags):
                              'doLowOccupancy'  : flags.Beam.Type is BeamType.Cosmics, #Setting up 1D histogram ranges and binnings, if False, high occupancy i.e. collisions settings will be used
                              'doHeavyIonMon'   : flags.Reco.EnableHI,     #Setting up 1D histogram ranges and binnings for heavy ions
                              'doFEPlots'       : True,                       #Turn on/off per FE-I3 histograms
-                             'ClusterName'     : InDetKeys.PixelClusters(),  #'PixelClusters'
-                             'TrackName'       : InDetKeys.UnslimmedTracks()          #'Tracks'
+                             'ClusterName'     : 'PixelClusters',
+                             'TrackName'       : 'CombinedInDetTracks',
         }
 
         kwargsErrMonAlg = { 'doOnline'        : isOnline,        #Histograms for online (GlobalMonitoring) running
@@ -40,9 +39,9 @@ def PixelMonitoringConfig(flags):
         }
 
         kwargsMVAMonAlg = { 'calibFolder'     : '20220503',
-                            'RDOName'         : InDetKeys.PixelRDOs(),      #'PixelRDOs'
-                            'ClusterName'     : InDetKeys.PixelClusters(),  #'PixelClusters'
-                            'TrackParticleContainerName' : InDetKeys.xAODTrackParticleContainer()
+                            'RDOName'         : 'PixelRDOs',
+                            'ClusterName'     : 'PixelClusters',
+                            'TrackParticleContainerName' : 'InDetTrackParticles',
         }
 
         if doHitMonAlg or doClusterMonAlg or doErrorMonAlg or doMVAMonAlg:

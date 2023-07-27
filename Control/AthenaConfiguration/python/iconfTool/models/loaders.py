@@ -433,7 +433,15 @@ def loadConfigFile(fname, args) -> Dict:
             for c in cfg:
                 conf.update(cfg)
 
-        logger.info("... Read %d items from python pickle file: %s", len(conf), fname)
+        # For compatibility with HLTJobOptions json, which produces structure:
+        # {
+        #   "filetype": "joboptions",
+        #   "properties": { the thing we are interested in}
+        # }
+        if 'properties' in conf:
+            conf = conf['properties']
+
+        logger.info("... Read %d items from json file: %s", len(conf), fname)
 
     else:
         sys.exit("File format not supported.")

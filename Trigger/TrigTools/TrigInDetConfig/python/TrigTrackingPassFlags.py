@@ -19,7 +19,7 @@ def signatureSpecificSettingOfFlags(flags,mode):
     flags.nHolesGapMax        = 2
     flags.nWeightedClustersMin= 6
     flags.roadWidth           =10.
-    if flags.input_name in ['jet','jetSuper','fullScan','fullScanUTT']:
+    if flags.input_name in ['jetSuper','fullScan','fullScanUTT']:
       flags.roadWidth =         5.
     elif flags.input_name == 'cosmics':
       flags.roadWidth =        75.

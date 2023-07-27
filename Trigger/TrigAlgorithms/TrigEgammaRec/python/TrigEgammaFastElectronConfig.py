@@ -4,10 +4,9 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaCommon.SystemOfUnits import GeV, mm
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-from TrigEDMConfig.TriggerEDMRun3 import recordable
 
 
-def fastElectronFexAlgCfg(flags, name="EgammaFastElectronFex_1", rois="EMRoIs"):
+def fastElectronFexAlgCfg(flags, trigEMClusterName, trackParticlesName, electronsName, name="EgammaFastElectronFex_1", rois="EMRoIs"):
 
     acc = ComponentAccumulator()
 
@@ -29,10 +28,10 @@ def fastElectronFexAlgCfg(flags, name="EgammaFastElectronFex_1", rois="EMRoIs"):
                                          RCalBarrelFace=1470.0*mm,
                                          ZCalEndcapFace=3800.0*mm,
                                          ParticleCaloExtensionTool=extTool,
-                                         ElectronsName=recordable("HLT_FastElectrons"),
+                                         ElectronsName= electronsName,
                                          RoIs=rois,
-                                         TrackParticlesName="HLT_IDTrack_Electron_FTF",
-                                         TrigEMClusterName="HLT_FastCaloEMClusters",
+                                         TrackParticlesName= trackParticlesName,
+                                         TrigEMClusterName= trigEMClusterName,
                                          DummyElectronsName="HLT_FastDummyElectrons"
                                          )
 

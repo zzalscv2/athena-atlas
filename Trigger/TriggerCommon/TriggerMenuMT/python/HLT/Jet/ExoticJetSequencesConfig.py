@@ -7,26 +7,26 @@ from ..Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def jetEJsMenuSequence(flags, jetsIn, name):
+def jetEJsMenuSequence(flags, jetsIn):
     
     from TrigHLTJetHypo.TrigJetHypoToolConfig import trigJetEJsHypoToolFromDict
 
     # Get track sequence name
     from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-    IDTrigConfig = getInDetTrigConfig( 'jet' )
+    IDTrigConfig = getInDetTrigConfig( 'fullScan' )
     sequenceOut  = IDTrigConfig.tracks_FTF()
     vertices     = IDTrigConfig.vertex_jet
     
     reco = InEventRecoCA(
-        f"EmergingJets_HypoOnlyStep_{jetsIn}Reco",
+        f"EmergingJets_{jetsIn}Reco",
         inputMaker=CompFactory.InputMakerForRoI(
-            "IM_EmergingJets_HypoOnlyStep",
+            "IM_EmergingJets",
             RoITool = CompFactory.ViewCreatorInitialROITool(),
             mergeUsingFeature = True
         )
     )
 
-    selAcc = SelectionCA(f"EmergingJets_HypoOnlyStep_{jetsIn}")
+    selAcc = SelectionCA(f"EmergingJets_{jetsIn}")
     selAcc.mergeReco(reco)
 
     selAcc.addHypoAlgo(
@@ -40,14 +40,14 @@ def jetEJsMenuSequence(flags, jetsIn, name):
     return MenuSequenceCA(flags, selAcc, HypoToolGen=trigJetEJsHypoToolFromDict)
 
                                                                                                                             
-def jetCRMenuSequence(flags, jetsIn, name):
+def jetCRMenuSequence(flags, jetsIn):
 
     from TrigHLTJetHypo.TrigJetHypoToolConfig import trigJetCRHypoToolFromDict
 
     # Get track sequence name
     from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
     from ..CommonSequences.FullScanDefs import fs_cells, trkFSRoI
-    IDTrigConfig = getInDetTrigConfig( 'jet' )
+    IDTrigConfig = getInDetTrigConfig( 'fullScan' )
     sequenceOut  = IDTrigConfig.tracks_FTF()
     cellsin=fs_cells
 
@@ -55,10 +55,10 @@ def jetCRMenuSequence(flags, jetsIn, name):
     from .JetTrackingConfig import JetFSTrackingCfg
     trk_acc = JetFSTrackingCfg(flags, trkopt='ftf', RoIs=trkFSRoI)
 
-    reco = InEventRecoCA(f"EmergingJets_HypoOnlyStep_{jetsIn}Reco", inputMaker=getTrackingInputMaker('ftf'))
+    reco = InEventRecoCA(f"CalRatio_{jetsIn}Reco", inputMaker=getTrackingInputMaker('ftf'))
     reco.mergeReco(trk_acc)
 
-    selAcc = SelectionCA(f"EmergingJets_HypoOnlyStep_{jetsIn}")
+    selAcc = SelectionCA(f"CalRatio_{jetsIn}")
     selAcc.mergeReco(reco)
     selAcc.addHypoAlgo(
         CompFactory.TrigJetCRHypoAlg(
