@@ -47,10 +47,20 @@ namespace xAOD {
       /// @name Functions identifying the vertex in the MC record
       /// @{
 
-      /// Set vertex ID code
+      /// Obsolete function
+      /// Set vertex ID code HepMC2 id == HepMC3 status, i.e. physical status.  
       void setId( int value );
-      /// Vertex ID code
+      /// Obsolete function
+      /// Vertex ID code HepMC2 id == HepMC3 status, i.e. physical status.  
       int id() const;
+
+      /// New function
+      /// Vertex status HepMC2 id == HepMC3 status, i.e. physical status.  
+      int status() const { return id(); }
+
+      /// New function
+      /// Set vertex status HepMC2 id == HepMC3 status, i.e. physical status.  
+      void setStatus( int value ) { setId(value); }
 
       /// Set barcode
       void setBarcode( int value );
