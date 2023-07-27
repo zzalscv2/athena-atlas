@@ -44,7 +44,7 @@ case $ArtProcess in
 
 	echo  "art-result: $? athena_job"
 
-	EgammaARTmonitoring_plotsMaker.py /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/Baseline_Files/rootFiles/Baseline-monitoring_gamma_pileup.hist.root Nightly-monitoring.hist.root gamma
+	EgammaARTmonitoring_plotsMaker.py /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/Nightly_Files/ref_main/Nightly-monitoring_gamma_pileup.hist.root Nightly-monitoring.hist.root gamma
 
 	echo  "art-result: $? final_comparison"
 
