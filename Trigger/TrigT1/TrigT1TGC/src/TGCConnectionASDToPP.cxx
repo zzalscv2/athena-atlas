@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -62,9 +62,9 @@ bool TGCConnectionASDToPP::readData(TGCRegionType region, int type,
 //  fn = "ASD2PP.db" ;
   fn = TGCDatabaseManager::getFilename(0);
 
-  fullName = PathResolver::find_file(fn.c_str(), "PWD");
+  fullName = PathResolver::find_file(fn, "PWD");
   if( fullName.length() == 0 ) 
-    fullName = PathResolver::find_file(fn.c_str(), "DATAPATH");
+    fullName = PathResolver::find_file(fn, "DATAPATH");
   std::ifstream file(fullName.c_str() ,std::ios::in);
   if (!file) return false;
 
@@ -184,6 +184,9 @@ TGCConnectionASDToPP&
 TGCConnectionASDToPP::operator=(const TGCConnectionASDToPP& right)
 {
   if(this != &right) {
+    m_type = right.m_type;
+    m_forwardBackward = right.m_forwardBackward;
+
     m_totalNumberOfChannel = right.m_totalNumberOfChannel;
     if(m_layerId!=0) {
       delete [] m_layerId;

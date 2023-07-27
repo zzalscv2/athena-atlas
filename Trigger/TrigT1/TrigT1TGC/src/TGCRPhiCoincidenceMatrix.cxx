@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCRPhiCoincidenceMatrix.h"
@@ -154,6 +154,8 @@ TGCRPhiCoincidenceMatrix::~TGCRPhiCoincidenceMatrix()
 TGCRPhiCoincidenceMatrix& TGCRPhiCoincidenceMatrix::operator=(const TGCRPhiCoincidenceMatrix& right)
 {
   if (this != &right){
+    m_sideId = right.m_sideId;
+    m_tgcArgs = right.m_tgcArgs;
     m_sectorLogic = right.m_sectorLogic;
     delete m_matrixOut;
     m_matrixOut =0;

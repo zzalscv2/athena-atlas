@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCSectorLogic.h"
@@ -129,7 +129,7 @@ void TGCSectorLogic::getTrackSelectorOutput(std::shared_ptr<TGCTrackSelectorOut>
   trackSelectorOut=m_trackSelectorOut;
 }
 
-void TGCSectorLogic::clockIn(const SG::ReadCondHandleKey<TGCTriggerData> /* readCondKey */,
+void TGCSectorLogic::clockIn(const SG::ReadCondHandleKey<TGCTriggerData>& /* readCondKey */,
                              int bidIn, bool process)
 {
   // skip to process if want. (e.g. no hit in TGC)
@@ -280,6 +280,8 @@ TGCSectorLogic&
 TGCSectorLogic::operator=(const TGCSectorLogic& right)
 {
   if ( this != &right ) {
+    m_tgcArgs = right.m_tgcArgs;
+    m_matrix = right.m_matrix;
     m_bid =right.m_bid;
     m_id  =right.m_id;
     m_sideId = right.m_sideId;

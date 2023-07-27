@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCConnectionInPP.h"
@@ -47,9 +47,9 @@ void TGCConnectionInPP::readConnectionTable(TGCPatchPanel* PP)
 //  fn = "PP.db" ;
   fn = TGCDatabaseManager::getFilename(1);
 
-  fullName = PathResolver::find_file(fn.c_str(), "PWD");
+  fullName = PathResolver::find_file(fn, "PWD");
   if( fullName.length() == 0 ) 
-    fullName = PathResolver::find_file(fn.c_str(),"DATAPATH");
+    fullName = PathResolver::find_file(fn,"DATAPATH");
   std::ifstream file(fullName.c_str() ,std::ios::in);
 
   // find entries match in PatchPanel type.
@@ -357,7 +357,7 @@ TGCPatchPanel* TGCConnectionInPP::getOredPPIn(int connectorOut, int chOut)
 }
 
 bool TGCConnectionInPP::replacePatchPanelPointers(TGCPatchPanel* newPatchPanel, 
-						  const std::vector<const TGCPatchPanel*> oldPatchPanels)
+						  const std::vector<const TGCPatchPanel*>& oldPatchPanels)
 {
   // The size of oldPatchPanels should be 3. 
   // oldPatchPanels.at(0) : oldPatchPanel
