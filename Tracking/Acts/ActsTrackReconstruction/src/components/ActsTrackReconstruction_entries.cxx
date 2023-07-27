@@ -13,7 +13,6 @@
 #include "src/OrthogonalSeedingTool.h"
 #include "src/SiSpacePointsSeedMaker.h"
 #include "src/TrackParamsEstimationTool.h"
-#include "src/TrackFindingTool.h"
 #include "src/TrackStatePrinter.h"
 #include "src/ActsKalmanFitter.h"
 #include "src/ActsGaussianSumFitter.h"
@@ -30,7 +29,6 @@ DECLARE_COMPONENT( ActsTrk::SeedingTool )
 DECLARE_COMPONENT( ActsTrk::OrthogonalSeedingTool )
 DECLARE_COMPONENT( ActsTrk::SiSpacePointsSeedMaker )
 DECLARE_COMPONENT( ActsTrk::TrackParamsEstimationTool )
-DECLARE_COMPONENT( ActsTrk::TrackFindingTool )
 DECLARE_COMPONENT( ActsTrk::TrackStatePrinter )
 DECLARE_COMPONENT( ActsTrk::ActsKalmanFitter )
 DECLARE_COMPONENT( ActsTrk::ActsGaussianSumFitter )

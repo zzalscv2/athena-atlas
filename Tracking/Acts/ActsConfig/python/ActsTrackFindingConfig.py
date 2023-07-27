@@ -4,12 +4,58 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 # Tools
-
-
-def ActsTrackFindingToolCfg(
-    flags, name: str = "ActsTrackFindingTool", **kwargs
+def ActsTrackStatePrinterCfg(
+    flags, name: str = "TrackStatePrinter", **kwargs
 ) -> ComponentAccumulator:
     acc = ComponentAccumulator()
+
+    kwargs.setdefault(
+        "InputSpacePoints",
+        [
+            "ITkPixelSpacePoints",
+            "ITkStripSpacePoints",
+            "ITkStripOverlapSpacePoints",
+        ],
+    )
+    kwargs.setdefault("spacePointType", [0, 1, 1])
+
+    acc.setPrivateTools(CompFactory.ActsTrk.TrackStatePrinter(name, **kwargs))
+    return acc
+
+# ACTS only algorithm
+def ActsTrackFindingCfg(flags, 
+                        name: str = "ActsTrackFindingAlg", 
+                        **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    if flags.Detector.EnableITkPixel:
+        kwargs.setdefault("PixelClusterContainerKey", "ITkPixelClusters")
+        kwargs.setdefault("PixelDetectorElements",
+                          "ITkPixelDetectorElementCollection")
+        kwargs.setdefault("PixelEstimatedTrackParameters",
+                          "ITkPixelEstimatedTrackParams")
+        kwargs.setdefault('PixelSeeds', 'ITkPixelSeeds')
+
+    if flags.Detector.EnableITkStrip:
+        kwargs.setdefault("StripClusterContainerKey", "ITkStripClusters")
+        kwargs.setdefault("StripDetectorElements",
+                          "ITkStripDetectorElementCollection")
+        kwargs.setdefault("StripEstimatedTrackParameters",
+                          "ITkStripEstimatedTrackParams")
+        kwargs.setdefault('StripSeeds', 'ITkStripSeeds')
+
+    kwargs.setdefault('ACTSTracksLocation', 'ActsTracks')
+
+    if flags.Acts.doAmbiguityResolution:
+        kwargs.setdefault(
+            "ACTSTracksLocation",
+            "ActsTracks"
+        )
+
+    if flags.Acts.doMonitoring:
+        from ActsConfig.ActsMonitoringConfig import ActsTrackFindingMonitoringToolCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(
+            ActsTrackFindingMonitoringToolCfg(flags)))
 
     kwargs.setdefault("maxPropagationStep", 10000)
     kwargs.setdefault("skipDuplicateSeeds", flags.Acts.skipDuplicateSeeds)
@@ -42,68 +88,6 @@ def ActsTrackFindingToolCfg(
     # need to persistify source link helper container to ensure that source links do not contaion
     # stale pointers pointing to freed memory
     kwargs.setdefault("ATLASUncalibSourceLinkElementsName","ACTSUncalibratedMeasurementSourceLinkElements")
-
-    acc.setPrivateTools(CompFactory.ActsTrk.TrackFindingTool(name, **kwargs))
-    return acc
-
-
-def ActsTrackStatePrinterCfg(
-    flags, name: str = "TrackStatePrinter", **kwargs
-) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-
-    kwargs.setdefault(
-        "InputSpacePoints",
-        [
-            "ITkPixelSpacePoints",
-            "ITkStripSpacePoints",
-            "ITkStripOverlapSpacePoints",
-        ],
-    )
-    kwargs.setdefault("spacePointType", [0, 1, 1])
-
-    acc.setPrivateTools(CompFactory.ActsTrk.TrackStatePrinter(name, **kwargs))
-    return acc
-
-# ACTS only algorithm
-def ActsTrackFindingCfg(flags, 
-                        name: str = "ActsTrackFindingAlg", 
-                        **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-
-    # tools
-    if "TrackFindingTool" not in kwargs:
-        kwargs["TrackFindingTool"] = acc.popToolsAndMerge(
-            ActsTrackFindingToolCfg(flags))
-
-    if flags.Detector.EnableITkPixel:
-        kwargs.setdefault("PixelClusterContainerKey", "ITkPixelClusters")
-        kwargs.setdefault("PixelDetectorElements",
-                          "ITkPixelDetectorElementCollection")
-        kwargs.setdefault("PixelEstimatedTrackParameters",
-                          "ITkPixelEstimatedTrackParams")
-        kwargs.setdefault('PixelSeeds', 'ITkPixelSeeds')
-
-    if flags.Detector.EnableITkStrip:
-        kwargs.setdefault("StripClusterContainerKey", "ITkStripClusters")
-        kwargs.setdefault("StripDetectorElements",
-                          "ITkStripDetectorElementCollection")
-        kwargs.setdefault("StripEstimatedTrackParameters",
-                          "ITkStripEstimatedTrackParams")
-        kwargs.setdefault('StripSeeds', 'ITkStripSeeds')
-
-    kwargs.setdefault('ACTSTracksLocation', 'ActsTracks')
-
-    if flags.Acts.doAmbiguityResolution:
-        kwargs.setdefault(
-            "ACTSTracksLocation",
-            "ActsTracks"
-        )
-
-    if flags.Acts.doMonitoring:
-        from ActsConfig.ActsMonitoringConfig import ActsTrackFindingMonitoringToolCfg
-        kwargs.setdefault('MonTool', acc.popToolsAndMerge(
-            ActsTrackFindingMonitoringToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.TrackFindingAlg(name, **kwargs))
     return acc
