@@ -6,6 +6,7 @@
 #include <charconv>
 #include <limits>
 #include <functional>
+#include <iostream>
 
 namespace MuonGMR4 {
 /// We should remove the MdtStringUtils class at some point
@@ -50,5 +51,13 @@ double stof(std::string_view str) {
     double result{std::numeric_limits<double>::max()};
     std::from_chars(str.data(), str.data() + str.size(), result);
     return result;
+}
+std::string to_string(const Amg::Transform3D& trans) {
+    std::stringstream sstr{};
+    sstr<<"translation: "<<Amg::toString(trans.translation(),2);
+    sstr<<", rotation: {"<<Amg::toString(trans.linear()*Amg::Vector3D::UnitX(),3)<<",";
+    sstr<<Amg::toString(trans.linear()*Amg::Vector3D::UnitY(),3)<<",";
+    sstr<<Amg::toString(trans.linear()*Amg::Vector3D::UnitZ(),3)<<"}";
+    return sstr.str();
 }
 }  // namespace MuonGMR4

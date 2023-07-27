@@ -11,7 +11,23 @@ atlas_add_component( MuonGeoModelTestR4
                      src/components/*.cxx src/*.cxx
                      INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
                      LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel StoreGateLib GeoModelUtilities MuonTesterTreeLib
-                                    GaudiKernel MuonReadoutGeometryR4 MuonGeoModelR4Lib AthenaPoolUtilities)
+                                    GaudiKernel MuonReadoutGeometryR4 MuonGeoModelR4Lib AthenaPoolUtilities
+                                    xAODTruth xAODMuonSimHit)
+
+                                    # build exes 
+file(GLOB_RECURSE files "util/*.cxx")
+foreach(_exeFile ${files})
+  get_filename_component(_theExec ${_exeFile} NAME_WE)
+  get_filename_component(_theLoc ${_exeFile} DIRECTORY)
+  # we specify a folder for programs we do not want to compile. Useful during r21 transition...
+  if(${_theLoc} MATCHES "DoNotBuild")
+    continue()
+  endif() 
+  atlas_add_executable( ${_theExec} ${_exeFile}
+                       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} 
+                      LINK_LIBRARIES ${ROOT_LIBRARIES} MuonReadoutGeometryR4 MuonCablingData PathResolver )
+ 
+endforeach()
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

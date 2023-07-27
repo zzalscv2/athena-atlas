@@ -53,7 +53,7 @@ MuonReadoutElement::MuonReadoutElement(defineArgs&& args)
 
 const Amg::Transform3D& MuonReadoutElement::globalToLocalTrans(const ActsGeometryContext& ctx, const IdentifierHash& hash) const {
     SubDetAlignments::const_iterator map_itr = ctx.alignmentStores.find(detectorType());
-    const ActsTrk::AlignmentStore* store = map_itr !=ctx.alignmentStores.end() ? 
+    const ActsTrk::AlignmentStore* store = map_itr != ctx.alignmentStores.end() ? 
                                                         map_itr->second.get() : nullptr;
 
     MuonTransformSet::const_iterator cache = m_globalToLocalCaches.find(hash);
@@ -73,7 +73,7 @@ const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const ActsGeometr
 }
 
 Amg::Transform3D MuonReadoutElement::toStation(RawGeomAlignStore* alignStore) const {
-   return getMaterialGeom()->getAbsoluteTransform(alignStore ? alignStore->geoModelAlignment.get() : nullptr)*toCenterTrans();
+   return getMaterialGeom()->getAbsoluteTransform(alignStore ? alignStore->geoModelAlignment.get() : nullptr);
 }
 const Acts::Transform3& MuonReadoutElement::transform(const Acts::GeometryContext& anygctx) const {
     const ActsGeometryContext *gctx = anygctx.get<const ActsGeometryContext *>();
@@ -81,7 +81,7 @@ const Acts::Transform3& MuonReadoutElement::transform(const Acts::GeometryContex
 }
 
 StatusCode MuonReadoutElement::insertTransform(const IdentifierHash& hash,
-                                 TransformMaker make) {
+                                               TransformMaker make) {
     
     MuonTransformSet::const_iterator cache = m_localToGlobalCaches.find(hash);
     if (cache != m_localToGlobalCaches.end()) {

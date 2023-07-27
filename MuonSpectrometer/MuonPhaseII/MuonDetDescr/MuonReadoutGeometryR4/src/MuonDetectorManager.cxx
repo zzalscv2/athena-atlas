@@ -81,7 +81,9 @@ PVConstLink MuonDetectorManager::getTreeTop(unsigned int i) const {
 void MuonDetectorManager::addTreeTop(PVConstLink pv) {
     m_treeTopVector.push_back(pv);
 }
-
+const Muon::IMuonIdHelperSvc* MuonDetectorManager::idHelperSvc() const {
+    return m_idHelperSvc.get();
+}
 }  // namespace MuonGMR4
 #undef WRITE_SETTER
 #undef ADD_DETECTOR

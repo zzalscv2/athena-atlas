@@ -8,6 +8,7 @@
 #include <StoreGate/WriteHandle.h>
 #include <xAODMuonSimHit/MuonSimHitAuxContainer.h>
 #include <MuonReadoutGeometry/MdtReadoutElement.h>
+#include <MuonReadoutGeometryR4/MdtReadoutElement.h>
 
 MdtSimHitToxAODCnvAlg::MdtSimHitToxAODCnvAlg(const std::string& name, ISvcLocator* pSvcLocator):
     AthReentrantAlgorithm{name, pSvcLocator} {}
@@ -16,8 +17,9 @@ StatusCode MdtSimHitToxAODCnvAlg::initialize() {
     ATH_CHECK(m_readKey.initialize());
     ATH_CHECK(m_writeKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
-    ATH_CHECK(m_legDetMgrKey.initialize());
-      m_muonHelper = MdtHitIdHelper::GetHelper(m_idHelperSvc->mdtIdHelper().tubeMax());
+    ATH_CHECK(m_legDetMgrKey.initialize(!m_useNewGeo));
+    if (m_useNewGeo) ATH_CHECK(detStore()->retrieve(m_r4DetMgr));
+    m_muonHelper = MdtHitIdHelper::GetHelper(m_idHelperSvc->mdtIdHelper().tubeMax());
     ATH_MSG_INFO("Successfully initialized the legacy -> xAOD MdtSimHit conversion "<<m_readKey.fullKey()<<", "<<m_writeKey.fullKey());    
     return StatusCode::SUCCESS;
 }
@@ -74,7 +76,16 @@ StatusCode MdtSimHitToxAODCnvAlg::execute(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
 }
 Amg::Transform3D MdtSimHitToxAODCnvAlg::getTubeTransform(const EventContext& ctx, const Identifier& id) const{
-   
+    ///
+    if (m_r4DetMgr) {
+        /// This needs to be fixed once the alignment constants are part of GeoModel
+        const ActsGeometryContext gctx{};
+        const MuonGMR4::MdtReadoutElement* reElement = m_r4DetMgr->getMdtReadoutElement(id);
+        if (reElement) return reElement->globalToLocalTrans(gctx, reElement->measurementHash(id));
+        ATH_MSG_WARNING("Failed to retrieve a Readout element for "<<m_idHelperSvc->toString(id));
+        return Amg::Transform3D::Identity();
+    }
+    
     /// We may need to add a pass retrieving the new detector manager instead of the legacy one
     SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{m_legDetMgrKey, ctx};
     if (!detMgr.isValid()) {

@@ -35,7 +35,6 @@ class MuonGeoUtilityTool final : virtual public IMuonGeoUtilityTool, public AthA
     Amg::Transform3D extractShifts(const GeoShape* inShape) const override final;
 
     
-    std::string dump(const Amg::Transform3D& transform) const override final;
     /// Dumps the shape to string
     std::string dumpShape(const GeoShape* inShape) const override final;
 

@@ -6,6 +6,8 @@
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
 #include <AthenaBaseComps/AthCheckMacros.h>
 #include <Acts/Surfaces/PlaneSurface.hpp>
+#include <GaudiKernel/SystemOfUnits.h>
+#include <optional>
 using namespace ActsTrk;
 
 namespace MuonGMR4 {
@@ -48,18 +50,56 @@ StatusCode MdtReadoutElement::initElement() {
   }
   /// Coordinate system of the trapezoid is in the center while the tubes are defined 
   /// w.r.t. to the chamber edge. Move first tube into the proper position
+  std::optional<Amg::Vector3D> prevLayPos{std::nullopt};
   for (unsigned int lay =1 ; lay <= numLayers() ; ++lay){
      /// Cache the transformations to the chamber layers
-     ATH_CHECK(insertTransform(measurementHash(lay,0), 
+     ATH_CHECK(insertTransform(measurementHash(lay, 0), 
                 [this](RawGeomAlignStore* store, const IdentifierHash& hash){
                     return toStation(store) * toChamberLayer(hash); 
                 }));
     /// Cache the transformations to the tube layers
+    std::optional<Amg::Vector3D> prevTubePos{std::nullopt};
     for (unsigned int tube = 1; tube <= numTubesInLay(); ++ tube) {
-      ATH_CHECK(insertTransform(measurementHash(lay,tube),
+      const IdentifierHash idHash = measurementHash(lay,tube);
+      ATH_CHECK(insertTransform(idHash,
                 [this](RawGeomAlignStore* store, const IdentifierHash& hash){
                     return toStation(store) * toTubeFrame(hash); 
                 }));
+      ///Ensure that all linear transformations are rotations
+      const AmgSymMatrix(3) tubeRot = toTubeFrame(idHash).linear();
+      if (std::abs(tubeRot.determinant()- 1.) > std::numeric_limits<float>::epsilon()){
+         ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Transformation matrix is not a pure rotation for "<<
+                       idHelperSvc()->toStringDetEl(identify())<<" in layer: "<<lay<<", tube: "<<tube
+                       <<"transformation: {"<<Amg::toString(tubeRot*Amg::Vector3D::UnitX(),3)<<","
+                                            <<Amg::toString(tubeRot*Amg::Vector3D::UnitY(),3)<<","
+                                            <<Amg::toString(tubeRot*Amg::Vector3D::UnitZ(),3)<<"}.");
+         return StatusCode::FAILURE;
+      }
+      /// Ensure that all tubes have the same pitch
+      const Amg::Vector3D tubePos = toTubeFrame(idHash).translation();
+      
+      constexpr double pitchTolerance = 10. * Gaudi::Units::micrometer;
+      if (prevTubePos) {
+         const double dR = std::abs((tubePos - (*prevTubePos)).z());
+         if (std::abs(dR - tubePitch()) > pitchTolerance) {
+            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Detected irregular tube in "<<
+                          idHelperSvc()->toStringDetEl(identify())<<" in layer: "<<lay<<", tube: "<<tube
+                          <<". Expected tube pitch: "<<tubePitch()<<" measured tube pitch: "
+                          <<dR<<" tube position: "<<Amg::toString(tubePos,2)
+                          <<" previous: "<<Amg::toString((*prevTubePos), 2));
+         }
+      } else if (prevLayPos) {
+         const double dR = (tubePos - (*prevLayPos)).mag();
+         if (std::abs(dR - tubePitch()) > pitchTolerance) {
+            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Detected irregular layer pitch in "<<
+                          idHelperSvc()->toStringDetEl(identify())<<" for layer "<<lay
+                          <<". Expected tube pitch: "<<tubePitch()<<" measured tube pitch: "
+                          <<dR<<" tube position: "<<Amg::toString(tubePos,2)
+                          <<" previous:"<<Amg::toString((*prevLayPos), 2));
+         }        
+      } 
+      if (!prevTubePos) prevLayPos = std::make_optional<Amg::Vector3D>(tubePos);
+      prevTubePos = std::make_optional<Amg::Vector3D>(tubePos);
     }
   }
   m_init = true;
@@ -119,5 +159,4 @@ double MdtReadoutElement::tubeLength(const IdentifierHash& hash) const {
 double MdtReadoutElement::wireLength(const IdentifierHash& hash) const {
    return tubeLength(hash) - 2.*m_pars.endPlugLength;
 }
-        
 }  // namespace MuonGMR4

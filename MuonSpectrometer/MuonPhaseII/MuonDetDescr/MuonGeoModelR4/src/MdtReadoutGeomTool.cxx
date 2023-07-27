@@ -33,6 +33,7 @@ StatusCode MdtReadoutGeomTool::initialize() {
     return StatusCode::SUCCESS;
 }
 StatusCode MdtReadoutGeomTool::loadDimensions(MdtReadoutElement::defineArgs& define) {    
+    
     ATH_MSG_VERBOSE("Load dimensions of "<<m_idHelperSvc->toString(define.detElId)
                      <<std::endl<<std::endl<<m_geoUtilTool->dumpVolume(define.physVol));
     const GeoShape* shape = m_geoUtilTool->extractShape(define.physVol);
@@ -43,7 +44,7 @@ StatusCode MdtReadoutGeomTool::loadDimensions(MdtReadoutElement::defineArgs& def
     /// The trapezoid defines the length of the chamber including the extra material
     /// stemming from the faraday cache etc.
     if (shape->typeID() == GeoTrd::getClassTypeID()) {
-        ATH_MSG_ALWAYS("Extracted shape "<<m_geoUtilTool->dumpShape(shape));
+        ATH_MSG_VERBOSE("Extracted shape "<<m_geoUtilTool->dumpShape(shape));
         const GeoTrd* trd = static_cast<const GeoTrd*>(shape);
         define.longHalfX = std::max(trd->getYHalfLength1(), trd->getYHalfLength2()) * Gaudi::Units::mm;
         define.shortHalfX = std::min(trd->getYHalfLength1(), trd->getYHalfLength2())* Gaudi::Units::mm;
@@ -53,11 +54,6 @@ StatusCode MdtReadoutGeomTool::loadDimensions(MdtReadoutElement::defineArgs& def
         ATH_MSG_FATAL("Unknown shape type "<<shape->type());
         return StatusCode::FAILURE;
     }
-    /// Calculate the number of tubes from the width
-    /// width  = tube pitch x (N + 0.5) <- On one site a half tube of the second layer 
-    ///                                    is visible from the top  
-    define.numTubesPerLay = ( 2. * define.halfY / define.tubePitch - 0.5);
-    
     /// The particular tubes and their lengths can be directly extracted from GeoModel
     /// Loop over the child nodes of the multi layer to find the nodes containing 
     /// all the tubes per layer  
@@ -109,7 +105,7 @@ StatusCode MdtReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
             ATH_MSG_FATAL("Failed to build a good identifier out of " << key);
             // return StatusCode::FAILURE;
             continue;
-        }
+        }       
         ATH_MSG_DEBUG("Key "<<key<<" brought us "<<m_idHelperSvc->toStringDetEl(define.detElId));
         
         /// Skip the endcap chambers

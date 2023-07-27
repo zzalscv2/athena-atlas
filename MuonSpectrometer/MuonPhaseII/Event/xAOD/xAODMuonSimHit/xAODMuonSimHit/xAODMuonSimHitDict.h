@@ -7,7 +7,9 @@
 #include <xAODCore/tools/DictHelpers.h>
 #include <xAODMuonSimHit/MuonSimHit.h>
 #include <xAODMuonSimHit/MuonSimHitContainer.h>
+#include <xAODMuonSimHit/MuonSimHitAuxContainer.h>
 #include <xAODMuonSimHit/versions/MuonSimHitContainer_v1.h>
+#include <xAODMuonSimHit/versions/MuonSimHitAuxContainer_v1.h>
 #include <xAODMuonSimHit/versions/MuonSimHit_v1.h>
 
 // Instantiate all necessary types for the dictionary.

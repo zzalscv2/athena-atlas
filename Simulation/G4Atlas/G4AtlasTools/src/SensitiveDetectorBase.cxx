@@ -88,10 +88,13 @@ assignSD(G4VSensitiveDetector* sd, const std::vector<std::string>& volumes) cons
 
       // Find volumes with this name
       for(auto* logVol : *logicalVolumeStore) {
+
+        ATH_MSG_VERBOSE("Check whether "<<logVol->GetName()<<" belongs to the set of sensitive detectors "<<volumeName);
         if( matchStrings( volumeName.data(), logVol->GetName() ) ){
           ++numFound;
           SetSensitiveDetector(logVol, sd);
         }
+        
       }
       // Warn if no volumes were found
       if(numFound == 0) {
@@ -109,7 +112,7 @@ assignSD(G4VSensitiveDetector* sd, const std::vector<std::string>& volumes) cons
     // Abort if we have failed to assign any volume
     if(!gotOne) {
       ATH_MSG_ERROR( "Failed to assign *any* volume to SD " << name() <<
-                     " and expected at least one." );
+                     " and expected at least one. Size of the volume store "<<G4LogicalVolumeStore::GetInstance()->size() );
       return StatusCode::FAILURE;
     }
   }

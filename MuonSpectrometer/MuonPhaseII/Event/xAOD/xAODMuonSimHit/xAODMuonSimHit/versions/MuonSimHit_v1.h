@@ -7,9 +7,9 @@
 
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "Identifier/Identifier.h"
-#include "Identifier/IdentifierHash.h"
+#include "AthLinks/ElementLink.h"
 #include "xAODMeasurementBase/MeasurementDefs.h"
-
+#include "GeneratorObjects/McEventCollection.h"
 namespace xAOD {
 
 
@@ -21,7 +21,7 @@ class MuonSimHit_v1 : public SG::AuxElement {
     ///@brief Sets the local position of the traversing particle
     void setLocalPosition(MeasVector<3> vec);
     ///@brief Returns the local postion of the traversing particle
-    ConstVectorMap<3> localPostion() const;
+    ConstVectorMap<3> localPosition() const;
 
     ///@brief Sets the local direction of the traversing particle
     void setLocalDirection(MeasVector<3> vec);
@@ -57,7 +57,12 @@ class MuonSimHit_v1 : public SG::AuxElement {
     float kineticEnergy() const;
     ///@brief Sets the kinetic energy of the traversing particle
     void setKineticEnergy(const float energy);
-
+    
+    ///@brief Returns the link to the HepMC particle producing this hit
+    ElementLink<McEventCollection> genParticleLink() const;
+    ///@brief Sets the link to the HepMC particle producing this hit
+    void setGenParticleLink(const ElementLink<McEventCollection> link);
+    
 };
 }
 #include "AthContainers/DataVector.h"

@@ -21,6 +21,7 @@ namespace G4UA
     declareProperty("MaxCopiesToCheck", m_config.targetMaxCopiesToCheck);
     declareProperty("DumpGDML", m_config.dumpGDML);
     declareProperty("DumpPhysicsRegions", m_config.dumpPhysicsRegions);
+    declareProperty("PrintGeometry", m_config.printGeo);
   }
 
   std::unique_ptr<VolumeDebugger>

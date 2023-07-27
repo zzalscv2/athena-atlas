@@ -2,11 +2,13 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonGeoModelR4/MuonGeoUtilityTool.h>
+#include <MuonReadoutGeometryR4/StringUtils.h>
 #include <GeoModelKernel/GeoBox.h>
 #include <GeoModelKernel/GeoTrd.h>
 #include <GeoModelKernel/GeoShapeShift.h>
 #include <GeoModelKernel/GeoTube.h>
 #include <GeoModelKernel/GeoTransform.h>
+#include <GeoModelKernel/GeoShapeSubtraction.h>
 #include <GeoModelKernel/GeoSerialTransformer.h>
 #include <GeoModelKernel/GeoVolumeCursor.h>
 #include <EventPrimitives/EventPrimitivesToStringConverter.h>
@@ -17,7 +19,7 @@
 namespace MuonGMR4{
 MuonGeoUtilityTool::~MuonGeoUtilityTool() = default;
 MuonGeoUtilityTool::MuonGeoUtilityTool(const std::string &type, const std::string &name,
-                     const IInterface *parent):
+                                       const IInterface *parent):
     AthAlgTool(type,name,parent) {
     declareInterface<IMuonGeoUtilityTool>(this);
 }
@@ -52,12 +54,12 @@ const GeoShape* MuonGeoUtilityTool::extractShape(const GeoShape* inShape) const 
     if (inShape->typeID() == GeoShapeShift::getClassTypeID()) {
         const GeoShapeShift* shift = static_cast<const GeoShapeShift*>(inShape);
         ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<" "<<__func__<<
-                        "Shape is a shift by "<<Amg::toString(shift->getX().translation(), 2)
+                        "Shape is a shift by "<<to_string(shift->getX())
                         << ". Continue navigation "<<shift);
             return extractShape(shift->getOp());
     }
-    ATH_MSG_ERROR(__FILE__<<":"<<__LINE__<<" "<<__func__<<" The shape "<<inShape->type()<<" is unknown to the method ");
-    return nullptr;
+    ATH_MSG_WARNING(__func__<<"() MuonSpectrometer/MuonPhaseII/MuonDetDescr/MuonGeoModelR4/src/MuonGeoUtilitiyTool.cxxshape "<<inShape->type()<<" is unknown to the method ");
+    return inShape;
 }   
 Amg::Transform3D MuonGeoUtilityTool::extractShifts(const PVConstLink& physVol) const { 
     const GeoLogVol* logVol = physVol->getLogVol();
@@ -79,7 +81,7 @@ Amg::Transform3D MuonGeoUtilityTool::extractShifts(const GeoShape* inShape) cons
         ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<" "<<__func__<<" Shape is a shift . Continue navigation "<<shift);
         sumTrans = extractShifts(shift->getOp()) * shift->getX();
     }
-    ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<" "<<__func__<<" Extacted transformation "<<dump(sumTrans));
+    ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<" "<<__func__<<" Extacted transformation "<<to_string(sumTrans));
     return sumTrans;
 }
 std::string MuonGeoUtilityTool::dumpShape(const GeoShape* shape) const {
@@ -103,15 +105,6 @@ std::string MuonGeoUtilityTool::dumpShape(const GeoShape* shape) const {
   }
   return sstr.str();
 }
-std::string MuonGeoUtilityTool::dump(const Amg::Transform3D& transform) const {
-  std::stringstream sstr{};
-  sstr<<"translation "<<Amg::toString(transform.translation(),1)<<", "
-      <<"rotation {"<<Amg::toString(transform.rotation().col(0),3)<<","
-                      <<Amg::toString(transform.rotation().col(1),3)<<","
-                      <<Amg::toString(transform.rotation().col(2),3)<<"}";
-  return sstr.str();
-}
-
 std::string MuonGeoUtilityTool::dumpVolume(const PVConstLink& physVol) const {
    return dumpVolume(physVol, "");
 }
@@ -129,19 +122,30 @@ std::string MuonGeoUtilityTool::dumpVolume(const PVConstLink& physVol, const std
       return sstr.str();
   }
   sstr<<"logical volume "<<physVol->getLogVol()->getName()<<", ";
+  Amg::Transform3D absTrans{Amg::Transform3D::Identity()};
   if (physVol->isShared() || !physVol->getParent()){
-    sstr<<"Shared volume, ";
+    sstr<<"shared volume, ";
   } else {
-    sstr<<dump(physVol->getX())<<", ";
+    if (typeid(*physVol) == typeid(GeoFullPhysVol)){
+      absTrans = static_cast<const GeoFullPhysVol&>(*physVol).getAbsoluteTransform();
+      sstr<<"absolute pos: "<<to_string(absTrans) << ", ";
+    } else{
+        sstr<<"relative pos: "<<to_string(physVol->getX())<<", ";  
+    }
   }
   sstr<<dumpShape(shape)<<", ";
+  const Amg::Transform3D shift = extractShifts(physVol);
+  if (shift.translation().mag() > 0. ||
+      shift.linear() != AmgSymMatrix(3)::Identity()){
+    sstr<<" shape shifted by "<<to_string(shift);
+  } 
   sstr<<"number of children "<<physVol->getNChildVols()<<", ";
   sstr<<std::endl;
   GeoVolumeCursor aV(physVol);
   unsigned int child{1};
   while (!aV.atEnd()) {
-    sstr<<childDelim<<child<<": "<<dump(aV.getTransform())<<", "<< dumpVolume(aV.getVolume(),
-                                        childDelim + "    ");
+    sstr<<childDelim<<child<<": "<<to_string(aV.getTransform())<<", "<< dumpVolume(aV.getVolume(),
+                                                                                childDelim + "    ");
     ++child;
     aV.next();
   }

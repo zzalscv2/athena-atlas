@@ -5,9 +5,9 @@
 */
 
 /**
-    @section MDTSensitiveDetector Class methods and properties
+    @section MdtSensitiveDetector Class methods and properties
  **   
-The method MDTSensitiveDetector::ProcessHits is executed by the G4 kernel each
+The method MdtSensitiveDetector::ProcessHits is executed by the G4 kernel each
 time a charged particle (or a geantino) crosses one of the MDT Sensitive Gas
 volumes.
 
@@ -28,7 +28,7 @@ Two cases are given:
 
 Navigating with the touchableHistory method GetHistoryDepth()
 through the hierarchy of the volumes crossed by the particles, the 
-MDTSensitiveDetector determinates the
+MdtSensitiveDetector determinates the
 correct set of geometry parameters to be folded in the Simulation Identifier
 associated to each hit.
 
@@ -83,13 +83,13 @@ class G4TouchableHistory;
 namespace MuonG4R4 {
 
 
-class MDTSensitiveDetector : public G4VSensitiveDetector, public AthMessaging {
+class MdtSensitiveDetector : public G4VSensitiveDetector, public AthMessaging {
 
 public:
     /** construction/destruction */
-    MDTSensitiveDetector(const std::string& name, const std::string& output_key,
+    MdtSensitiveDetector(const std::string& name, const std::string& output_key,
                          const MuonGMR4::MuonDetectorManager* detMgr);
-    ~MDTSensitiveDetector()=default;
+    ~MdtSensitiveDetector()=default;
     
     /** member functions */
     void   Initialize(G4HCofThisEvent* HCE) override final;
@@ -101,15 +101,17 @@ private:
      *  managed by a service which must not have a data dependency
     */
     SG::WriteHandle<xAOD::MuonSimHitContainer> m_writeHandle;
+    /// Pointer to the acts Geometry context
+    const ActsGeometryContext m_gctx{};
     /// Pointer to the underlying detector manager
     const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
+
     
     double m_driftR{std::numeric_limits<double>::max()};
     double m_globalTime{0.};
+    Amg::Transform3D m_trans{Amg::Transform3D::Identity()};
     Amg::Vector3D m_locPos{Amg::Vector3D::Zero()};
     Amg::Vector3D m_locDir{Amg::Vector3D::Zero()};
-
-   
 
 };
 

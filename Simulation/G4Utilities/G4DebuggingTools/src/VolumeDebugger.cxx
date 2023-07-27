@@ -20,6 +20,9 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IMessageSvc.h"
 
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
+
+
 namespace
 {
   std::once_flag VolumeDebugger_DumpGeometryOnce;
@@ -63,6 +66,7 @@ namespace G4UA
       G4TransportationManager::GetTransportationManager()->
       GetNavigatorForTracking()->GetWorldVolume();
 
+   
     // Clear out the EMEC if necessary
     PullVolumes( W->GetLogicalVolume() );
 
@@ -101,6 +105,10 @@ namespace G4UA
     } // Requested a volume
 
   exitLoop:
+    
+    if (m_config.printGeo) {
+        ATH_MSG_INFO("Dump of the Geant4 world "<<std::endl<<printVolume(W));
+    }
     if (m_config.dumpGDML) {
       ATH_MSG_INFO( "Writing to GDML volume " << W->GetName() << " to path " << m_config.path );
       G4GDMLParser parser;
@@ -178,5 +186,26 @@ namespace G4UA
     }
     return somethingOverlapped;
   }
+  
+  std::string VolumeDebugger::printVolume(const G4VPhysicalVolume *pv, const std::string& childDelim) const {
+      std::stringstream sstr{};
+      const G4ThreeVector trans = pv->GetFrameTranslation();
+      const G4RotationMatrix* rot = pv->GetFrameRotation();
+    
+      sstr<<"Volume: "<<pv->GetName()<<", location: "<<Amg::toString(trans, 2)<<", ";
+      if (rot) {
+        sstr<<"orientation: {"<<Amg::toString(rot->colX(), 3)<<", ";
+        sstr<<Amg::toString(rot->colY(), 3)<<", ";
+        sstr<<Amg::toString(rot->colZ(), 3)<<"}";        
+      }
+      sstr<<std::endl;    
+      G4LogicalVolume* log = pv->GetLogicalVolume();
+      for (size_t d= 0; d <log->GetNoDaughters(); ++d){         
+         sstr<<childDelim<<(d+1)<<": "<< printVolume(log->GetDaughter(d),
+                                                     childDelim + "    ");
+      }      
+      return sstr.str();
+   }
+
 
 } // namespace G4UA

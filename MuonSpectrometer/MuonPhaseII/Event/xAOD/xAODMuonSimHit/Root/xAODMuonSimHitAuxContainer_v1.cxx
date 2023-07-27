@@ -10,7 +10,7 @@
 namespace xAOD {
 MuonSimHitAuxContainer_v1::MuonSimHitAuxContainer_v1()
     : AuxContainerBase() {
-    AUX_MEASUREMENTVAR(localPostion, 3);
+    AUX_MEASUREMENTVAR(localPosition, 3);
     AUX_MEASUREMENTVAR(localDirection, 3);
     AUX_VARIABLE(stepLength);
     AUX_VARIABLE(globalTime);
@@ -18,5 +18,6 @@ MuonSimHitAuxContainer_v1::MuonSimHitAuxContainer_v1()
     AUX_VARIABLE(identifier);
     AUX_VARIABLE(energyDeposit);
     AUX_VARIABLE(kineticEnergy);
+    AUX_VARIABLE(genParticleLink);
 }
 }  // namespace xAOD

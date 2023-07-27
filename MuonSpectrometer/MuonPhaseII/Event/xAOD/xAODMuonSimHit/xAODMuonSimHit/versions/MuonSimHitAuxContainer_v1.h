@@ -8,6 +8,8 @@
 #include "Identifier/IdentifierHash.h"
 #include "xAODCore/AuxContainerBase.h"
 #include "xAODMeasurementBase/MeasurementDefs.h"
+#include "AthLinks/ElementLink.h"
+#include "GeneratorObjects/McEventCollection.h"
 #include <array>
 namespace xAOD {
 /// Auxiliary store for Mdt drift circles
@@ -20,7 +22,7 @@ class MuonSimHitAuxContainer_v1 : public AuxContainerBase {
    private:
     /// @name Defining Mdt Drift Circle parameters
     /// @{
-    std::vector<std::array<float, 3>> localPostion{};
+    std::vector<std::array<float, 3>> localPosition{};
     std::vector<std::array<float, 3>> localDirection{};
     std::vector<float> stepLength{};
     std::vector<float> globalTime{};
@@ -28,6 +30,7 @@ class MuonSimHitAuxContainer_v1 : public AuxContainerBase {
     std::vector<Identifier::value_type> identifier{};
     std::vector<float> energyDeposit{};
     std::vector<float> kineticEnergy{};
+    std::vector<ElementLink<McEventCollection>> genParticleLink{};
     /// @}
 };
 }  // namespace xAOD

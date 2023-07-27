@@ -7,7 +7,7 @@
 namespace MuonGMR4 {
 inline unsigned int MdtReadoutElement::multilayer() const { return m_stML; }
 inline unsigned int MdtReadoutElement::numLayers() const { return m_pars.tubeLayers.size(); }
-inline unsigned int MdtReadoutElement::numTubesInLay() const { return m_pars.numTubesPerLay; }
+inline unsigned int MdtReadoutElement::numTubesInLay() const { return m_pars.tubeLayers.empty() ? 0 : m_pars.tubeLayers[0].nTubes(); }
 inline double MdtReadoutElement::innerTubeRadius() const {return m_pars.tubeInnerRad;}
 inline double MdtReadoutElement::tubeRadius() const {return innerTubeRadius() + m_pars.tubeWall;}
 inline double MdtReadoutElement::tubePitch() const { return m_pars.tubePitch;}
@@ -35,7 +35,7 @@ inline IdentifierHash MdtReadoutElement::layerHash(const Identifier& measId) con
                         << " picks the wrong readout element "
                         << idHelperSvc()->toStringDetEl(identify()));
     }
-    IdentifierHash hash = measurementHash(m_idHelper.tubeLayer(measId), 0);
+    IdentifierHash hash = measurementHash(m_idHelper.tubeLayer(measId), numTubesInLay()  / 2);
     ATH_MSG_VERBOSE("Translate measurement identifier "
                     << idHelperSvc()->toString(measId)
                     << " to layer hash hash " << static_cast<int>(hash));

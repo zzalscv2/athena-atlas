@@ -10,6 +10,15 @@
 #include "MuonReadoutGeometry/MdtReadoutElement.h"
 #include "MuonReadoutGeometry/MuonStation.h"
 namespace MuonGM {
+
+std::ostream& operator<<(std::ostream& ostr, const Amg::Transform3D& trans){
+    ostr<<"translation: "<<Amg::toString(trans.translation(),2);
+    ostr<<", rotation: {"<<Amg::toString(trans.linear()*Amg::Vector3D::UnitX(),3)<<",";
+    ostr<<Amg::toString(trans.linear()*Amg::Vector3D::UnitY(),3)<<",";
+    ostr<<Amg::toString(trans.linear()*Amg::Vector3D::UnitZ(),3)<<"}";
+    return ostr;
+}  
+
 GeoModelMdtTest::GeoModelMdtTest(const std::string& name,
                                  ISvcLocator* pSvcLocator)
     : AthHistogramAlgorithm{name, pSvcLocator} {}
@@ -153,7 +162,7 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadout
         const MdtAsBuiltPar* asBuilt = station->getMdtAsBuiltParams();
         using multilayer_t = MdtAsBuiltPar::multilayer_t;
         using tubeSide_t   = MdtAsBuiltPar::tubeSide_t;
-        const multilayer_t asBuiltMl = readoutEle->getMultilayer() ? multilayer_t::ML1  : multilayer_t::ML2;
+        const multilayer_t asBuiltMl = readoutEle->getMultilayer() == 1 ? multilayer_t::ML1  : multilayer_t::ML2;
         m_asBuiltPosY0 = asBuilt->y0(asBuiltMl, tubeSide_t::POS);
         m_asBuiltPosZ0 = asBuilt->z0(asBuiltMl, tubeSide_t::POS);
         m_asBuiltPosAlpha = asBuilt->alpha (asBuiltMl, tubeSide_t::POS);
@@ -170,11 +179,11 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadout
     }
 
 
-    const Amg::Transform3D& trans{readoutEle->transform()};
+    const Amg::Transform3D trans{readoutEle->getMaterialGeom()->getAbsoluteTransform()};
     m_readoutTransform.push_back(Amg::Vector3D(trans.translation()));
     m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitX()));
     m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitY()));
-    m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitX()));
+    m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitZ()));
     
     const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
 
@@ -183,37 +192,34 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadout
     for (int lay = 1; lay <= readoutEle->getNLayers(); ++lay) {
         for (int tube = 1; tube <= readoutEle->getNtubesperlayer(); ++tube) {
             bool is_valid{false};
-            const Identifier tube_id =
-                id_helper.channelID(readoutEle->identify(), 
-                                    readoutEle->getMultilayer(), lay, tube, is_valid);
+            const Identifier tube_id =id_helper.channelID(readoutEle->identify(), 
+                                                          readoutEle->getMultilayer(), 
+                                                          lay, tube, is_valid);
             if (!is_valid) continue;
             if (deadChan && !deadChan->isGood(tube_id)) {
                 ATH_MSG_ALWAYS("Dead dube detected "<<m_idHelperSvc->toString(tube_id));
                 continue;
-            }
-            const Trk::SaggedLineSurface& surf{readoutEle->surface(tube_id)};
-            if (tube == 1) {
-                const Amg::Transform3D layTransf{readoutEle->transform(tube_id)};
-                m_layTransNumber.push_back(lay);
-                m_layCenter.push_back(Amg::Vector3D(layTransf.translation()));
-                m_layTransColX.push_back(Amg::Vector3D(layTransf.linear()* Amg::Vector3D::UnitX()));
-                m_layTransColY.push_back(Amg::Vector3D(layTransf.linear()* Amg::Vector3D::UnitY()));
-                m_layTransColZ.push_back(Amg::Vector3D(layTransf.linear()* Amg::Vector3D::UnitZ()));
-            }
-            const Amg::Vector3D roPos = readoutEle->ROPos(tube_id);
-            const Amg::Vector3D tubePos = readoutEle->tubePos(tube_id);
-           
-            m_tubePos.push_back(tubePos);
-            m_roPos.push_back(roPos);            
+            }            
+            const Amg::Transform3D layTransf{readoutEle->transform(tube_id)};
             m_tubeLay.push_back(lay);
             m_tubeNum.push_back(tube);
+
+            m_tubeTransformTran.push_back(Amg::Vector3D(layTransf.translation()));
+            m_tubeTransformColX.push_back(Amg::Vector3D(layTransf.linear()* Amg::Vector3D::UnitX()));
+            m_tubeTransformColY.push_back(Amg::Vector3D(layTransf.linear()* Amg::Vector3D::UnitY()));
+            m_tubeTransformColZ.push_back(Amg::Vector3D(layTransf.linear()* Amg::Vector3D::UnitZ()));
+            
+            const Amg::Vector3D tubePos = layTransf.translation();
+            const Amg::Vector3D roPos = readoutEle->ROPos(tube_id);
+            m_roPos.push_back(roPos);
             m_activeTubeLength.push_back(readoutEle->getActiveTubeLength(lay,tube));
             m_tubeLength.push_back(readoutEle->tubeLength(tube_id));
             m_wireLength.push_back(readoutEle->getWireLength(lay, tube));
             
             if (!m_dumpSurfaces) continue;
             const Amg::Vector3D globalDir {(tubePos - roPos).unit()};
-               
+            
+            const Trk::SaggedLineSurface& surf{readoutEle->surface(tube_id)};
             for (double l = readoutEle->tubeLength(tube_id) /2; l > 0; l = l  -100. ) {
                 Amg::Vector2D lPos{Amg::Vector2D::Zero()};
                 surf.globalToLocal(roPos + l * globalDir,Amg::Vector3D::Zero(),lPos);
@@ -238,15 +244,8 @@ void GeoModelMdtTest::dumpToFile(const EventContext& ctx, const MdtReadoutElemen
     sstr << "##############################################################################"<< std::endl;
     sstr << "Found Readout element " << m_idHelperSvc->toStringDetEl(reElement->identify()) << std::endl;
     sstr << "##############################################################################"<< std::endl;
-    const Amg::Transform3D& localToGlob{reElement->transform()};
-    sstr << "Displacement:       "
-         << Amg::toString(localToGlob.translation()) << std::endl;
-    sstr << "x-Axis orientation: "
-         << Amg::toString(localToGlob.linear() * Amg::Vector3D::UnitX()) << std::endl;
-    sstr << "y-Axis orientation: "
-         << Amg::toString(localToGlob.linear() * Amg::Vector3D::UnitY()) << std::endl;
-    sstr << "z-Axis orientation: "
-         << Amg::toString(localToGlob.linear() * Amg::Vector3D::UnitZ()) << std::endl;
+    const Amg::Transform3D localToGlob{reElement->getMaterialGeom()->getAbsoluteTransform()};
+    sstr << "GeoModel transformation: "<< localToGlob<< std::endl;
     sstr << "Number of layers: " << reElement->getNLayers()
          << ", number of tubes: " << reElement->getNtubesperlayer()
          << std::endl;
@@ -272,18 +271,12 @@ void GeoModelMdtTest::dumpToFile(const EventContext& ctx, const MdtReadoutElemen
                      << Amg::toString(layTransf.linear() * Amg::Vector3D::UnitZ()) << std::endl;                    
             }
             const Amg::Vector3D roPos{reElement->ROPos(tube_id)},
-                                LocRoPos{reElement->localROPos(tube_id)},
-                                tubePos{reElement->tubePos(tube_id)},
-                                LocTubePos{reElement->localTubePos(tube_id)};
+                                tubePos{reElement->tubePos(tube_id)};
                 
             const Amg::Vector3D globalDir {(tubePos - roPos).unit()};
             sstr << " *** (" << std::setfill('0') << std::setw(2) << lay
                  << ", " << std::setfill('0') << std::setw(3) << tube << ")    "; 
-            sstr << Amg::toString(roPos,3)<<" / "
-                 << Amg::toString(LocRoPos,3)<<"  --> "
-                 << Amg::toString(tubePos,3) << " / "
-                 << Amg::toString(LocTubePos,3);
-                
+            sstr<<Amg::toString(tubePos,2)<<" "<<reElement->transform(tube_id);
                 
             sstr<<", activeTube: "<<reElement->getActiveTubeLength(lay,tube);
             sstr<<", tubeLength: "<<reElement->tubeLength(tube_id);

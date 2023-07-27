@@ -14,6 +14,8 @@
 #include <xAODMuonSimHit/MuonSimHitContainer.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <MuonReadoutGeometry/MuonDetectorManager.h>
+#include <MuonReadoutGeometryR4/MuonDetectorManager.h>
+
 /**
  * The MdtSimHitToxAODCnvAlg takes the legacy MdtSimHits and translates them into the xAOD format
 */
@@ -41,6 +43,11 @@ class MdtSimHitToxAODCnvAlg: public AthReentrantAlgorithm{
         const MdtHitIdHelper* m_muonHelper{nullptr};
         /// Legacy access to the geometry
         SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_legDetMgrKey{this,  "MuonManagerKey", "MuonDetectorManager"};
+        /// Access to the new readout geometry
+        const MuonGMR4::MuonDetectorManager* m_r4DetMgr{nullptr};
+
+        Gaudi::Property<bool> m_useNewGeo{this, "UseR4DetMgr", false,
+                                         "Switch between the legacy and the new geometry"};
         
 };
 #endif

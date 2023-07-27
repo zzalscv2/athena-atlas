@@ -55,7 +55,7 @@ inline const Amg::Transform3D& MuonReadoutElement::globalToLocalTrans(
 }
 inline const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(
     const ActsGeometryContext& ctx, const Identifier& id) const {
-    return globalToLocalTrans(ctx, layerHash(id));
+    return localToGlobalTrans(ctx, layerHash(id));
 }
 
 }  // namespace MuonGMR4

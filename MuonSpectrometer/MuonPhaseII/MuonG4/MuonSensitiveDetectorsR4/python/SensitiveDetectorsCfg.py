@@ -4,7 +4,8 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def MdtSensitiveDetectorToolCfg(flags, name = "MdtSensitiveDetector", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("OutputCollectionNames", [ "xMdtSimHits"])
-    the_tool = CompFactory.MuonG4R4.MDTSensitiveDetectorTool(name, **kwargs)
+    kwargs.setdefault("LogicalVolumeNames", ["MuonR4::MDTDriftGas"])
+    the_tool = CompFactory.MuonG4R4.MdtSensitiveDetectorTool(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
 
