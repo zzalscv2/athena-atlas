@@ -247,7 +247,6 @@ private:
   bool m_inclG4part;
   bool m_inclEgammaPhoton;
   bool m_inclEgammaFwrdEle;
-  bool m_LQpatch;
 
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE) /*When no Athena Reconstruction packages expected*/
   ToolHandle<Trk::IParticleCaloExtensionTool> m_caloExtensionTool{
