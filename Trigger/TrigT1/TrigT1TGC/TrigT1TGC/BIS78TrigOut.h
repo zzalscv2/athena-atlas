@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BIS78_TRIGOUT_H
@@ -25,10 +25,15 @@ class BIS78TrigOut {
 
  public:
   BIS78TrigOut() = default;
-  BIS78TrigOut(std::vector<int> BIS78Trigger, std::vector<uint8_t> BIS78eta, std::vector<uint8_t> BIS78phi, std::vector<uint8_t> BIS78Deta, std::vector<uint8_t> BIS78Dphi,
-               std::vector<uint8_t> BIS78flag3over3over3Eta, std::vector<uint8_t> BIS78flag3over3Phi,
+  BIS78TrigOut(const std::vector<int>& BIS78Trigger,
+               const std::vector<uint8_t>& BIS78eta,
+               const std::vector<uint8_t>& BIS78phi,
+               const std::vector<uint8_t>& BIS78Deta,
+               const std::vector<uint8_t>& BIS78Dphi,
+               const std::vector<uint8_t>& BIS78flag3over3over3Eta,
+               const std::vector<uint8_t>& BIS78flag3over3Phi,
                LVL1TGCTrigger::TGCArguments* tgcargs=nullptr);
-  BIS78TrigOut(std::vector<int> BIS78Trigger, LVL1TGCTrigger::TGCArguments* tgcargs=nullptr);
+  BIS78TrigOut(const std::vector<int>& BIS78Trigger, LVL1TGCTrigger::TGCArguments* tgcargs=nullptr);
   
   BIS78TrigOut& operator+=(const BIS78TrigOut& right);
   bool operator==(const BIS78TrigOut& right) const

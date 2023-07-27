@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -129,7 +129,7 @@ namespace LVL1TGCTrigger {
   }
 
 
-  bool TGCNSWCoincidenceMap::readMap(std::string moduleName, ReadCW_Type cw_type) 
+  bool TGCNSWCoincidenceMap::readMap(const std::string& moduleName, ReadCW_Type cw_type) 
   {
     std::string kSide[2] = {"a", "c"};
     std::string kCWtype[2] = {"EtaPhi","EtaDtheta"};

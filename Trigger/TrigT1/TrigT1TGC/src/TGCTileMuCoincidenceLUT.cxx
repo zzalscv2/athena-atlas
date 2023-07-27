@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCTileMuCoincidenceLUT.h"
@@ -48,15 +48,6 @@ TGCTileMuCoincidenceLUT::TGCTileMuCoincidenceLUT(LVL1TGCTrigger::TGCArguments* t
 
 TGCTileMuCoincidenceLUT::~TGCTileMuCoincidenceLUT()
 {
-}
-
-TGCTileMuCoincidenceLUT::TGCTileMuCoincidenceLUT(const TGCTileMuCoincidenceLUT& right)
- : m_verName(right.m_verName),
-   m_readCondKey(right.m_readCondKey)
-{
-  m_flagpt = right.m_flagpt;
-  m_flagroi = right.m_flagroi;
-  m_trigbit = right.m_trigbit;
 }
 
 bool TGCTileMuCoincidenceLUT::readMap() 

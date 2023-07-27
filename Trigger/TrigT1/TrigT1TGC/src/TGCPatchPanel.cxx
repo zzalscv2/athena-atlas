@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCPatchPanel.h"
@@ -123,6 +123,8 @@ TGCPatchPanel&
 TGCPatchPanel::operator=(const TGCPatchPanel& right)
 {
   if (this != &right) {
+    m_nHit = right.m_nHit;
+    m_tgcArgs = right.m_tgcArgs;
     m_id = right.m_id;
     m_type = right.m_type;
     m_region = right.m_region;

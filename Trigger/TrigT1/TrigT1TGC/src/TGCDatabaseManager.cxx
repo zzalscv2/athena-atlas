@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCDatabaseManager.h"
@@ -210,6 +210,7 @@ TGCDatabaseManager&
 TGCDatabaseManager::operator=(const TGCDatabaseManager& right)
 {
   if(this!=&right){
+    m_tgcArgs = right.m_tgcArgs;
     for( int j=0; j<NumberOfRegionType; j+=1){
       for( int i=0; i<TGCSector::NumberOfPatchPanelType; i+=1){
 	for( int k=0; k<TotalNumForwardBackwardType; k+=1){

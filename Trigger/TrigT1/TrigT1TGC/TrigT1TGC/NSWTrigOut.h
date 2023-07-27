@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef NSW_TRIGOUT_H
@@ -26,8 +26,16 @@ protected:
 
 public:
   NSWTrigOut() = default;
-  NSWTrigOut(int side, std::vector<int> NSWTrigger, std::vector<uint8_t> NSWeta, std::vector<uint8_t> NSWphi, std::vector<uint8_t> NSWDtheta, std::vector<bool> NSWlowRes, std::vector<bool> NSWphiRes, std::vector<bool> NSWmonitor, LVL1TGCTrigger::TGCArguments* tgcargs=nullptr);
-  NSWTrigOut(int side, std::vector<int> NSWTrigger, LVL1TGCTrigger::TGCArguments* tgcargs=nullptr);
+  NSWTrigOut(int side,
+             const std::vector<int>& NSWTrigger,
+             const std::vector<uint8_t>& NSWeta,
+             const std::vector<uint8_t>& NSWphi,
+             const std::vector<uint8_t>& NSWDtheta,
+             const std::vector<bool>& NSWlowRes,
+             const std::vector<bool>& NSWphiRes,
+             const std::vector<bool>& NSWmonitor,
+             LVL1TGCTrigger::TGCArguments* tgcargs=nullptr);
+  NSWTrigOut(int side, const std::vector<int>& NSWTrigger, LVL1TGCTrigger::TGCArguments* tgcargs=nullptr);
 
   NSWTrigOut& operator+=(const NSWTrigOut& right);
   bool operator==(const NSWTrigOut& right) const

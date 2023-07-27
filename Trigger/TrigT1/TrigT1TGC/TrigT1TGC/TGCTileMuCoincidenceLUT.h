@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigT1TGC_TGCTileMuCoincidenceLUT_h
@@ -66,7 +66,7 @@ class TGCTileMuCoincidenceLUT
                           const std::string& version="NA");
   virtual ~TGCTileMuCoincidenceLUT();
 
-  TGCTileMuCoincidenceLUT(const TGCTileMuCoincidenceLUT& right);
+  TGCTileMuCoincidenceLUT(const TGCTileMuCoincidenceLUT& right) = default;
   TGCTileMuCoincidenceLUT& operator = (const TGCTileMuCoincidenceLUT& right) = delete;
 
   uint16_t getAddr(int16_t side, int16_t sec, int16_t ssc) const;

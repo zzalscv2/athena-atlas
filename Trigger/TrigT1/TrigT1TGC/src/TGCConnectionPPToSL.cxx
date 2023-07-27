@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCConnectionPPToSL.h"
@@ -40,9 +40,9 @@ TGCConnectionPPToSL& TGCConnectionPPToSL::operator =(const TGCConnectionPPToSL& 
 bool TGCConnectionPPToSL::readData(TGCRegionType type)
 {
   std::string fn = TGCDatabaseManager::getFilename(2);    // PP2SL.db
-  std::string fullpath = PathResolver::find_file(fn.c_str(), "PWD");
+  std::string fullpath = PathResolver::find_file(fn, "PWD");
   if (fullpath.length() == 0)
-    fullpath = PathResolver::find_file(fn.c_str(), "DATAPATH");
+    fullpath = PathResolver::find_file(fn, "DATAPATH");
   std::ifstream inputfile(fullpath.c_str(), std::ios::in);
 
   static constexpr int BufferSize = 512;

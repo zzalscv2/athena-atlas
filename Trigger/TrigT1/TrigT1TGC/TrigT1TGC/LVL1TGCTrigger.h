@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1TGC_LVL1TGCTRIGGER_H
@@ -106,7 +106,7 @@ class LVL1TGCTrigger : public AthAlgorithm
     
     // useful functions
     int getCharge(int dR, int Zdir);
-    void extractFromString(std::string, std::vector<int>&);
+    void extractFromString(const std::string&, std::vector<int>&);
     //bool addRawData(TgcRawData * rawdata,
     bool addRawData(std::unique_ptr<TgcRawData> rawdata,
 		    std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>&  tgcrdo );
