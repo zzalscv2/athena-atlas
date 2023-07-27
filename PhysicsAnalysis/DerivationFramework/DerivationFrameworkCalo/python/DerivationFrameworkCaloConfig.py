@@ -22,6 +22,12 @@ def GainDecoratorCfg(ConfigFlags,**kwargs):
     acc.setPrivateTools(CompFactory.DerivationFramework.GainDecorator(**kwargs))
     return acc
 
+def EgammaCoreCellRecoveryCfg(ConfigFlags,**kwargs):
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(
+        CompFactory.DerivationFramework.EGammaClusterCoreCellRecovery(**kwargs))
+    return acc
+
 def CaloFillRectangularClusterCfg(ConfigFlags,**kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("cells_name", ConfigFlags.Egamma.Keys.Input.CaloCells)
