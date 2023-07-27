@@ -335,8 +335,9 @@ ActsTrk::MutableMultiTrajectory::getUncalibratedSourceLink_impl(
 void ActsTrk::MutableMultiTrajectory::setReferenceSurface_impl(IndexType istate,
                                 std::shared_ptr<const Acts::Surface> surface) {          
   if ( istate >= m_surfaces.size() )                                  
-    m_surfaces.resize(istate, nullptr);
+    m_surfaces.resize(istate+1, nullptr);
   m_surfaces[istate] = surface.get();
+  m_managedSurfaces.push_back(std::move(surface));
 }
 
 const Acts::Surface* ActsTrk::MutableMultiTrajectory::referenceSurface_impl(IndexType istate) const {
@@ -506,6 +507,7 @@ void ActsTrk::ConstMultiTrajectory::fillSurfaces(const Acts::TrackingGeometry* g
       if ( geoID != 0 ) {
         m_surfaces[i] = geo->findSurface(geoID);
       }
+      // TODO here we will have a other part when the surfaces are read from surfaces collection
   }
 }
 

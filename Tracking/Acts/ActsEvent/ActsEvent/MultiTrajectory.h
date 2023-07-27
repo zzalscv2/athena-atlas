@@ -11,6 +11,7 @@
 #include "Acts/EventData/VectorMultiTrajectory.hpp"
 #include "Acts/Utilities/HashedString.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
+#include "Acts/Surfaces/Surface.hpp"
 #include "CxxUtils/concepts.h"
 #include "xAODTracking/TrackJacobianAuxContainer.h"
 #include "xAODTracking/TrackJacobianContainer.h"
@@ -388,6 +389,7 @@ class MutableMultiTrajectory final
   const std::any decorationGetter(ActsTrk::IndexType, const std::string&) const;
 
   std::vector<const Acts::Surface*> m_surfaces;
+  std::vector<std::shared_ptr<const Acts::Surface>> m_managedSurfaces;
   const std::vector<const Acts::Surface*>& surfaces() const { return m_surfaces; }
 
 };

@@ -870,5 +870,11 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyStorage, EmptyMTJ) {
       link.get<ElementLink<xAOD::UncalibratedMeasurementContainer>>().key());    
 }
 
+BOOST_FIXTURE_TEST_CASE(InsertRefSurface, EmptyMTJ) {
+  size_t ia = mtj->addTrackState(TrackStatePropMask::All);
+  auto ts = mtj->getTrackState(ia);
+  ts.setReferenceSurface(std::shared_ptr<const Acts::Surface>(nullptr));
+}
+
 // TODO remaining tests
 BOOST_AUTO_TEST_SUITE_END()
