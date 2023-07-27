@@ -15,31 +15,38 @@ from TrigDecisionTool.TrigDecisionToolConfig import getRun3NavigationContainerFr
 
 from JetMonitoring.JetStandardHistoSpecs import knownHistos
 import math
+import re
 
 #####################################
 # Offline jet collections to monitor
 #####################################
 
-OfflineJetCollections = {
+OfflineJetCollections = dict()
+
+OfflineJetCollections['pp'] = {
   'AntiKt4EMTopoJets'  : { 'MatchTo' : 'AntiKt4EMPFlowJets' },
-  'AntiKt4EMPFlowJets' : { 'MatchTo' : 'NONE' },
-  #'AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets' : { 'MatchTo' : 'NONE' }, # Remove until ATR-25800 is fixed
+ 'AntiKt4EMPFlowJets' : { 'MatchTo' : 'NONE' },
+ #'AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets' : { 'MatchTo' : 'NONE' }, # Remove until ATR-25800 is fixed
+}
+
+OfflineJetCollections['HI'] = {
+  'AntiKt4HIJets'  : { 'MatchTo' : 'AntiKt4HIJets' },
 }
 
 ###########################################
 # L1 jet collections and chains to monitor
 ###########################################
 
-# The MatchedTo list must be either emptu of length 2, and contain the names of an offline collection
+# The MatchedTo list must be either empty of length 2, and contain the names of an offline collection
 # and an HLT collection. These names can be the empty string.
 
 # the strings in L1JetCollections are jet container names.
-L1JetCollections = {
+L1JetCollections = dict()
 
-  'LVL1JetRoIs'  : {
-    'MatchTo' : ['AntiKt4EMPFlowJets',
-                 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf']
- },
+L1JetCollections['pp'] = {
+
+  'LVL1JetRoIs'  : {'MatchTo' : ['AntiKt4EMPFlowJets',
+                 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf']},
   
   'L1_jFexSRJetRoI': {'MatchTo': ['AntiKt4EMPFlowJets',
                                   'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf']},
@@ -56,21 +63,31 @@ L1JetCollections = {
                                   'HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jes']},
 }
 
-try:
-  items = L1JetCollections.items()
-except (AttributeError, TypeError):
-  raise RuntimeError('L1JetCollections is not a mapping type')
+L1JetCollections['HI'] = {
+  'LVL1JetRoIs'  : {'MatchTo' : ['AntiKt4HIJets',
+                                  'HLT_AntiKt4HIJets']},
+  'L1_jFexSRJetRoI': {'MatchTo': ['AntiKt4HIJets',
+                                  'HLT_AntiKt4HIJets']},
+  'L1_gFexSRJetRoI': {'MatchTo': ['AntiKt4HIJets',
+                                  'HLT_AntiKt4HIJets']},
+}
 
-for k, d in items:
+for case in L1JetCollections.keys():
   try:
-    d_items = d.items()
+    items = L1JetCollections[case].items()
   except (AttributeError, TypeError):
-    raise RuntimeError('L1JetCollections value is not a mapping type')
+    raise RuntimeError('L1JetCollections for %s is not a mapping type'%case)
 
-  if 'MatchTo' not in d:
-    errmsg = 'L1Collections entry %s has no (possibly empty) MatchType list' % (
-      str(k),)
-    raise RuntimeError(errmsg)
+  for k, d in items:
+    try:
+      d_items = d.items()
+    except (AttributeError, TypeError):
+      raise RuntimeError('L1JetCollections value for %s is not a mapping type'%case)
+
+    if 'MatchTo' not in d:
+      errmsg = 'L1Collections entry %s has no (possibly empty) MatchType list' % (
+        str(k))
+      raise RuntimeError(errmsg)
 
 # Now seeing new L1 containers of differing types. These types
 # are explicit in the C++ JetMatcher algorithm, and correspond
@@ -87,17 +104,21 @@ l1Coll2MatcherKey = {
   'L1_gFexLRJetRoI': 'L1gFexJetRoIContainerName',
 }
 
-for k, d in L1JetCollections.items():
-  if d['MatchTo']:  # exists by previous checks. check if empty.
-    if k not in l1Coll2MatcherKey:
-      errmsg = 'Match(es) to an L1 container requested  entry '\
-      '%s but no C++ MatcherAlg attribute name provided' % (str(k),)
-      raise RuntimeError(errmsg)
+for case in L1JetCollections.keys():
+  for k, d in L1JetCollections[case].items():
+    if d['MatchTo']:  # exists by previous checks. check if empty.
+      if k not in l1Coll2MatcherKey:
+        errmsg = 'Match(es) to an L1 container requested  entry '\
+        '%s but no C++ MatcherAlg attribute name provided' % (str(k),)
+        raise RuntimeError(errmsg)
       
 
 # the values of Chain2L1JetCollDict are keys of L1JetCollections.
 # the keys of Chain2L1JetCollDict are used to select events before histograms are filled
-Chain2L1JetCollDict = { # set L1 jet collection name for L1 jet chains
+
+Chain2L1JetCollDict = dict()
+
+Chain2L1JetCollDict['pp'] = { # set L1 jet collection name for L1 jet chains
   'L1_J15': ['LVL1JetRoIs'],
   'L1_J20': ['LVL1JetRoIs'],
   'L1_J100': ['LVL1JetRoIs'],
@@ -121,8 +142,15 @@ Chain2L1JetCollDict = { # set L1 jet collection name for L1 jet chains
   'L1_gLJ120': ['L1_gFexLRJetRoI'],
   'L1_gLJ140': ['L1_gFexLRJetRoI'],
 
-   'L1_SC111-CjJ40': ['L1_jFexSRJetRoI'],
+  'L1_SC111-CjJ40': ['L1_jFexSRJetRoI'],
 }
+
+Chain2L1JetCollDict['HI'] = { 
+  'L1_J15': ['LVL1JetRoIs'],
+  'L1_J20': ['LVL1JetRoIs'],
+  'L1_J100': ['LVL1JetRoIs'],
+}
+
 
 Legacy2PhaseIjJThresholdDict = {
   'J5'   : 'jJ20',
@@ -171,14 +199,12 @@ Legacy2PhaseIgLJThresholdDict = {
 # HLT jet collections and chains to monitor
 ############################################
 
-# AthenaMT
-
-# List of HLT jet collections for AT and legacy master (stating
+# List of HLT jet collections (stating
 # which should be matched and to which offline jet collection
 
 JetCollections = dict()
 
-JetCollections['MT'] = {
+JetCollections['pp'] = {
   'HLT_AntiKt4EMTopoJets_subjesIS'                                : { 'MatchTo' : 'AntiKt4EMPFlowJets'}, # default small-R EM
   'HLT_AntiKt4EMTopoJets_subjesIS_fastftag'                       : { 'MatchTo' : 'NONE'}, # small-R EM jets with RoI tracking & fast flavour tagging
   'HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf'                      : { 'MatchTo' : 'AntiKt4EMPFlowJets'}, # a4 calo jet w/ FTF
@@ -193,11 +219,22 @@ JetCollections['MT'] = {
   'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf'      : { 'MatchTo' : 'NONE'},               # a10sd pflow cssk jes
 }
 
+JetCollections['HI'] = {
+  'HLT_AntiKt4HIJets'  : {'MatchTo': 'AntiKt4HIJets'}
+}
+
 # set HLT jet collection, reference chain and offline jet collection
-# for turn-on curves, for AT and legacy master HLT jet chains
+# for turn-on curves 
+
 Chains2Monitor  = dict()
 
-Chains2Monitor['MT'] = {
+Chains2Monitor['HI'] = {  # TODO: do it properly with monGroups
+  'HLT_j75_ion_L1J30': {'HLTColl': 'HLT_AntiKt4HIJets',
+                        'RefChain': 'NONE',
+                        'OfflineColl': 'AntiKt4HIJets'},
+}
+
+Chains2Monitor['pp'] = {
   # perf chain (runs no hypo)
   'HLT_j0_perf_L1J12_EMPTY': {'HLTColl': 'HLT_AntiKt4EMTopoJets_subjesIS',
                               'RefChain': 'NONE',
@@ -339,40 +376,40 @@ Chains2Monitor['MT'] = {
                                                           'OfflineColl': 'NONE'},
 
   # L1 turn-ons
-  'HLT_noalg_L1J100'                     : { 'HLTColl' : 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',                                             'RefChain' : 'HLT_j45_pf_ftf_preselj20_L1J15', 
+  'HLT_noalg_L1J100'                     : { 'HLTColl' : 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',                                              
+                                             'RefChain' : 'HLT_j45_pf_ftf_preselj20_L1J15', 
                                              'OfflineColl' : 'AntiKt4EMPFlowJets' },
 }
 
 
 # Phase1: duplicate all relevant chains with jFex algos
 temp_Phase1_chains = dict()
-import re
 L1pattern = re.compile(r"L1([0-9]*[J][0-9]+)")
-for chainName in Chains2Monitor['MT']:
+for chainName in Chains2Monitor['pp']:
   foundL1 = L1pattern.search(chainName)
   if foundL1:
     L1Legacy =  foundL1.group(1)
     if L1Legacy in Legacy2PhaseIjJThresholdDict:
         L1PhaseI = Legacy2PhaseIjJThresholdDict[L1Legacy]
         newChain = chainName.replace(L1Legacy,L1PhaseI)
-        temp_Phase1_chains[newChain] = Chains2Monitor['MT'][chainName] #uses same reference chain, not phase1 variation!
+        temp_Phase1_chains[newChain] = Chains2Monitor['pp'][chainName] #uses same reference chain, not phase1 variation!
     if L1Legacy in Legacy2PhaseIgJThresholdDict:
         L1PhaseI = Legacy2PhaseIgJThresholdDict[L1Legacy]
         newChain = chainName.replace(L1Legacy,L1PhaseI)
-        temp_Phase1_chains[newChain] = Chains2Monitor['MT'][chainName] #uses same reference chain, not phase1 variation!
+        temp_Phase1_chains[newChain] = Chains2Monitor['pp'][chainName] #uses same reference chain, not phase1 variation!
     if "a10" in chainName:
         if L1Legacy in Legacy2PhaseIjLJThresholdDict:   ## For now monitor a10 chains seeded by both jLJ and jJ items.
             L1PhaseI = Legacy2PhaseIjLJThresholdDict[L1Legacy]
             newChain = chainName.replace(L1Legacy,L1PhaseI)
-            temp_Phase1_chains[newChain] = Chains2Monitor['MT'][chainName] #uses same reference chain, not phase1 variation!
+            temp_Phase1_chains[newChain] = Chains2Monitor['pp'][chainName] #uses same reference chain, not phase1 variation!
         if L1Legacy in Legacy2PhaseIgLJThresholdDict:   ## For now monitor a10 chains seeded by both jLJ and jJ items.
             L1PhaseI = Legacy2PhaseIgLJThresholdDict[L1Legacy]
             newChain = chainName.replace(L1Legacy,L1PhaseI)
-            temp_Phase1_chains[newChain] = Chains2Monitor['MT'][chainName] #uses same reference chain, not phase1 variation!
+            temp_Phase1_chains[newChain] = Chains2Monitor['pp'][chainName] #uses same reference chain, not phase1 variation!
   if 'L1SC111-CJ15' in chainName:
     for largerSeed in ('L1SC111-CjJ40', 'L1jLJ140', 'L1jLJ160'):
       newChain = chainName.replace('L1SC111-CJ15', largerSeed)
-      temp_Phase1_chains[newChain] = Chains2Monitor['MT'][chainName]      
+      temp_Phase1_chains[newChain] = Chains2Monitor['pp'][chainName]      
       pass
     pass
 temp_Phase1_chains.update({
@@ -412,69 +449,16 @@ temp_Phase1_chains.update({
                                       'OfflineColl': 'NONE'},
 })
 
-Chains2Monitor['MT'].update(temp_Phase1_chains)
-
-
-# Legacy
-JetCollections['Legacy'] = {
-  'HLT_xAOD__JetContainer_a4tcemsubjesISFS'    : {'MatchTo' : 'NONE'}, # default small-R
-  'HLT_xAOD__JetContainer_a10r_tcemsubjesISFS' : {'MatchTo' : 'NONE'}, # a10r
-  'HLT_xAOD__JetContainer_a10tclcwsubjesFS'    : {'MatchTo' : 'NONE'}, # a10
-  'HLT_xAOD__JetContainer_a10ttclcwjesFS'      : {'MatchTo' : 'NONE'}, # a10t
-}
-Chains2Monitor['Legacy'] = {
-  # Small-R chains
-  'HLT_j420': {'HLTColl': 'HLT_xAOD__JetContainer_a4tcemsubjesISFS',
-               'RefChain': 'HLT_j175',
-               'OfflineColl': 'AntiKt4EMTopoJets'},
-  
-  'HLT_j260_320eta490': {'HLTColl': 'HLT_xAOD__JetContainer_a4tcemsubjesISFS',
-                         'RefChain': 'HLT_j45_320eta490',
-                         'OfflineColl': 'AntiKt4EMTopoJets'},
-  
-  'HLT_j80_j60_L1J15': {'HLTColl': 'HLT_xAOD__JetContainer_a4tcemsubjesISFS',
-                        'RefChain': 'NONE',
-                        'OfflineColl': 'NONE'},
-  
-  'HLT_5j70_0eta240': {'HLTColl': 'HLT_xAOD__JetContainer_a4tcemsubjesISFS',
-                       'RefChain': 'NONE',
-                       'OfflineColl': 'NONE'},
-  
-  'HLT_3j200': {'HLTColl': 'HLT_xAOD__JetContainer_a4tcemsubjesISFS',
-                'RefChain': 'HLT_j175',
-                'OfflineColl': 'AntiKt4EMTopoJets'},
-  
-  # Large-R reclustered chains
-  'HLT_j460_a10r_L1J100': {'HLTColl': 'HLT_xAOD__JetContainer_a10r_tcemsubjesISFS',
-                           'RefChain': 'HLT_j175',
-                           'OfflineColl': 'AntiKt4EMTopoJets'},
-  
-  # Large-R LCTopo chains
-  'HLT_j460_a10_lcw_subjes_L1J100': {'HLTColl': 'HLT_xAOD__JetContainer_a10tclcwsubjesFS',
-                                     'RefChain': 'HLT_j175',
-                                     'OfflineColl': 'AntiKt4EMTopoJets'},
-  
-  # Large-R trimmed chains
-  'HLT_j460_a10t_lcw_jes_L1J100': {'HLTColl': 'HLT_xAOD__JetContainer_a10ttclcwjesFS',
-                                   'RefChain': 'HLT_j175',
-                                   'OfflineColl': 'AntiKt4EMTopoJets'},
-  
-  'HLT_j460_a10t_lcw_jes_30smcINF_L1J100': {'HLTColl': 'HLT_xAOD__JetContainer_a10ttclcwjesFS',
-                                            'RefChain': 'HLT_j175',
-                                            'OfflineColl': 'AntiKt4EMTopoJets'},
-  
-  'HLT_2j330_a10t_lcw_jes_35smcINF_L1J100': {'HLTColl': 'HLT_xAOD__JetContainer_a10ttclcwjesFS',
-                                             'RefChain': 'HLT_j175',
-                                             'OfflineColl': 'AntiKt4EMTopoJets'},
-}
+Chains2Monitor['pp'].update(temp_Phase1_chains)
 
 #########################################################
 # Protections
 #########################################################
 
 # Add missing jet collections to JetCollections dict
-# (this can happen if a given chain uses a jet collection that is not listed in JetCollections)
-for case in ['MT','Legacy']:
+# (this can happen if a given chain uses a jet collection that is not listed in JetCollections) 
+# TODO: make more general
+for case in ['pp','HI']:
   for chain,chaindict in Chains2Monitor[case].items():
     if chaindict['HLTColl'] not in JetCollections[case]: # chain will not be monitored unless HLT collection is present in JetCollections
       JetCollections[case][chaindict['HLTColl']] = {'MatchTo': 'NONE'}
@@ -608,18 +592,16 @@ OfflineScaleMomenta.append("")
 
 def TrigJetMonConfig(inputFlags):
 
-  # This is the right place to get the info, but the autoconfig of the flag
-  # is not yet implemented
-  AthenaMT = inputFlags.Trigger.EDMVersion==3
-
-  # AthenaMT or Legacy
-  InputType = 'MT' if AthenaMT else 'Legacy'
-
   from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
   cfg = ComponentAccumulator()
 
+  from AthenaMonitoring.DQConfigFlags import DQDataType
+  data_type = inputFlags.DQ.DataType
+  if data_type == DQDataType.Collisions: monMode = 'pp'
+  elif data_type == DQDataType.HeavyIon: monMode = 'HI'
+
   # Match HLT jets to offline jets
-  for hltColl,collDict in JetCollections[InputType].items():
+  for hltColl,collDict in JetCollections[monMode].items():
     if collDict['MatchTo'] != 'NONE':
       for jetcalibscale in OnlineScaleMomenta:
         scalestring = "_"+jetcalibscale if jetcalibscale != "" else ""
@@ -634,7 +616,7 @@ def TrigJetMonConfig(inputFlags):
         cfg.addEventAlgo(alg)
 
   # Match offline to offline jets
-  for offjetColl,collDict in OfflineJetCollections.items():
+  for offjetColl,collDict in OfflineJetCollections[monMode].items():
     if collDict['MatchTo'] != 'NONE':
       for jetcalibscale in OfflineScaleMomenta:
         scalestring = "_"+jetcalibscale if jetcalibscale != "" else ""
@@ -649,7 +631,7 @@ def TrigJetMonConfig(inputFlags):
         cfg.addEventAlgo(alg)
 
   # Match L1 to offline as well as HLT jets
-  for l1jetColl,collDict in L1JetCollections.items():
+  for l1jetColl,collDict in L1JetCollections[monMode].items():
     for matchjetcoll in collDict['MatchTo']:
 
       kwds = {'name': 'Matching_{}_{}'.format(l1jetColl,matchjetcoll),
@@ -669,40 +651,41 @@ def TrigJetMonConfig(inputFlags):
   helper = AthMonitorCfgHelper(inputFlags,'TrigJetMonitorAlgorithm')
 
   # Loop over L1 jet collections
-  for jetcoll in L1JetCollections:
-    l1jetconf = l1JetMonitoringConfig(inputFlags,jetcoll,'',True)
+  for jetcoll in L1JetCollections[monMode]:
+    l1jetconf = l1JetMonitoringConfig(inputFlags,jetcoll,monMode,'',True)
     l1jetconf.toAlg(helper)
 
   # Loop over L1 jet chains
-  for chain,jetcolls in Chain2L1JetCollDict.items():
+  for chain,jetcolls in Chain2L1JetCollDict[monMode].items():
     for jetcoll in jetcolls:
-      l1chainconf = l1JetMonitoringConfig(inputFlags,jetcoll,chain)
+      l1chainconf = l1JetMonitoringConfig(inputFlags,jetcoll,monMode,chain)
       l1chainconf.toAlg(helper)
 
   # Loop over offline jet collections
-  for jetcoll in OfflineJetCollections:
-    offlineMonitorConf = jetMonitoringConfig(inputFlags,jetcoll,AthenaMT)
+  for jetcoll in OfflineJetCollections[monMode]:
+    offlineMonitorConf = jetMonitoringConfig(inputFlags,jetcoll,monMode)
     offlineMonitorConf.toAlg(helper)
 
   # Loop over HLT jet collections
-  for jetcoll in JetCollections[InputType]:
-    monitorConf = jetMonitoringConfig(inputFlags,jetcoll,AthenaMT)
+  for jetcoll in JetCollections[monMode]:
+    monitorConf = jetMonitoringConfig(inputFlags,jetcoll,monMode)
     # then we turn the full specification into properly configured algorithm and tools.
     # we use the method 'toAlg()' defined for the specialized dictionnary 'JetMonAlgSpec'
     monitorConf.toAlg(helper)
 
   # Loop over HLT jet chains
-  for chain,chainDict in Chains2Monitor[InputType].items():
+  for chain,chainDict in Chains2Monitor[monMode].items():
     jetcoll = chainDict['HLTColl']
     # kinematic plots
-    if AthenaMT:
-      chainMonitorConfT = jetChainMonitoringConfig(inputFlags,jetcoll,chain,AthenaMT,True)
-      chainMonitorConfT.toAlg(helper)
-    chainMonitorConfF = jetChainMonitoringConfig(inputFlags,jetcoll,chain,AthenaMT,False)
+    # only use passing jets
+    chainMonitorConfT = jetChainMonitoringConfig(inputFlags,jetcoll,chain,True)
+    chainMonitorConfT.toAlg(helper)
+    # all jets
+    chainMonitorConfF = jetChainMonitoringConfig(inputFlags,jetcoll,chain,False)
     chainMonitorConfF.toAlg(helper)
     # efficiency plots
     if chainDict['RefChain'] != 'NONE' and chainDict['OfflineColl'] != 'NONE':
-      effMonitorConf = jetEfficiencyMonitoringConfig(inputFlags,jetcoll,chainDict['OfflineColl'],chain,chainDict['RefChain'],AthenaMT)
+      effMonitorConf = jetEfficiencyMonitoringConfig(inputFlags,jetcoll,chainDict['OfflineColl'],chain,chainDict['RefChain'])
       effMonitorConf.toAlg(helper)
 
   cfg.merge(helper.result())
@@ -710,7 +693,7 @@ def TrigJetMonConfig(inputFlags):
 
 
 # Basic selection of histograms common for online and offline jets
-def basicJetMonAlgSpec(jetcoll,isOnline,athenaMT):
+def basicJetMonAlgSpec(jetcoll,isOnline):
   # we use a specialized dictionnary (JetMonAlgSpec) which will be translated into the final C++ tool
   path = 'NoTriggerSelection' if isOnline else 'standardHistos/'
   minNjetBin = 1 if isOnline else 0
@@ -718,11 +701,7 @@ def basicJetMonAlgSpec(jetcoll,isOnline,athenaMT):
   TopLevelDir  = 'HLT/JetMon/'
   TopLevelDir += 'Online/' if isOnline else 'Offline/'
 
-  # Remap online Run 2 jet collections
-  from TrigJetMonitoring import JetCollRemapping
   jetcollFolder = jetcoll
-  if jetcoll in JetCollRemapping.JetCollRun2ToRun3 and not athenaMT:
-    jetcollFolder = JetCollRemapping.JetCollRun2ToRun3[jetcoll]
   Conf = JetMonAlgSpec(jetcoll+"Mon",JetContainerName = jetcoll, defaultPath = path, topLevelDir=TopLevelDir, bottomLevelDir=jetcollFolder, failureOnMissingContainer=False)
 
   # Now start filling the histo spec list
@@ -797,12 +776,11 @@ def basicJetMonAlgSpec(jetcoll,isOnline,athenaMT):
 
   return Conf
 
-def jetMonitoringConfig(inputFlags,jetcoll,athenaMT):
+def jetMonitoringConfig(inputFlags,jetcoll,monMode):
    '''Function to configures some algorithms in the monitoring system.'''
 
    isOnline  = True if 'HLT' in jetcoll else False
-   InputType = 'Legacy' if not athenaMT else 'MT'
-   conf      = basicJetMonAlgSpec(jetcoll,isOnline,athenaMT)
+   conf      = basicJetMonAlgSpec(jetcoll,isOnline)
 
    # Declare a configuration dictionnary for a JetContainer
    if isOnline:
@@ -829,30 +807,30 @@ def jetMonitoringConfig(inputFlags,jetcoll,athenaMT):
      else:
        for hist in ExtraLargeROnlineHists: conf.appendHistos(hist)
      # Add matched jets plots
-     if JetCollections[InputType][jetcoll]['MatchTo'] != 'NONE':
+     if JetCollections[monMode][jetcoll]['MatchTo'] != 'NONE':
        def defineHistoForHLTJetMatch(conf, parentAlg, monhelper , path):
            # create a monitoring group with the histo path starting from the parentAlg
            group = monhelper.addGroup(parentAlg, conf.Group, conf.topLevelDir+'/'+conf.bottomLevelDir+'/NoTriggerSelection/')
            # define the histograms
            for histname in [ 'ptdiff', 'energydiff', 'massdiff' ]: #defines which variable difference will be plotted
              group.defineHistogram(histname,title=histname, type="TH1F",
-                                   path='MatchedJets_{}'.format(JetCollections[InputType][jetcoll]['MatchTo']),
+                                   path='MatchedJets_{}'.format(JetCollections[monMode][jetcoll]['MatchTo']),
                                    xbins=100 , xmin=-100000., xmax=100000. ,)
              
            for histname in [ 'ptresp', 'energyresp', 'massresp' ]:
              group.defineHistogram(histname,title=histname, type="TH1F",
-                                   path='MatchedJets_{}'.format(JetCollections[InputType][jetcoll]['MatchTo']),
+                                   path='MatchedJets_{}'.format(JetCollections[monMode][jetcoll]['MatchTo']),
                                    xbins=100 , xmin=-2., xmax=2. ,)
              
            group.defineHistogram('ptresp,ptref;ptresp_vs_ptRef',title='ptresponse vs ptRef', type="TH2F",
-                                 path='MatchedJets_{}'.format(JetCollections[InputType][jetcoll]['MatchTo']),
+                                 path='MatchedJets_{}'.format(JetCollections[monMode][jetcoll]['MatchTo']),
                                  xbins=10 , xmin=-2., xmax=2., ybins=10, ymin=0., ymax=500000.,)
            
            group.defineHistogram('ptresp,etaref;ptresp_vs_etaRef',title='ptresponse vs etaRef', type="TH2F",
-                                 path='MatchedJets_{}'.format(JetCollections[InputType][jetcoll]['MatchTo']),
+                                 path='MatchedJets_{}'.format(JetCollections[monMode][jetcoll]['MatchTo']),
                                  xbins=10 , xmin=-2., xmax=2., ybins=10, ymin=-5., ymax=5.,)
            
-       matchedJetColl   = JetCollections[InputType][jetcoll]['MatchTo']
+       matchedJetColl   = JetCollections[monMode][jetcoll]['MatchTo']
        
        # we can get specific calibration scales by adding e.g. '_EtaJESScale' to the strings
        jetmatchKey      = '{}.matched_{}'.format(jetcoll,matchedJetColl)
@@ -875,7 +853,7 @@ def jetMonitoringConfig(inputFlags,jetcoll,athenaMT):
        )
    else: # offline
      for hist in ExtraOfflineHists: conf.appendHistos(hist)
-     if 'AntiKt4' in jetcoll:
+     if 'AntiKt4' in jetcoll and monMode=="pp":
          conf.appendHistos(SelectSpec('LooseBadFailedJets', 'LooseBad',
                                       InverseJetSel=True,
                                       FillerTools = ["pt",
@@ -888,30 +866,31 @@ def jetMonitoringConfig(inputFlags,jetcoll,athenaMT):
              conf.appendHistos("fCharged")
          elif 'EMTopo' in jetcoll:
              conf.appendHistos("Timing")
-     if OfflineJetCollections[jetcoll]['MatchTo'] != 'NONE':
+    
+     if OfflineJetCollections[monMode][jetcoll]['MatchTo'] != 'NONE':
        def defineHistoForOfflineJetMatch(conf, parentAlg, monhelper , path):
          # create a monitoring group with the histo path starting from the parentAlg
          group = monhelper.addGroup(parentAlg, conf.Group, conf.topLevelDir+'/'+conf.bottomLevelDir+'/standardHistos/')
          # define the histograms
          for histname in [ 'ptdiff', 'energydiff', 'massdiff' ]: #defines which variable difference will be plotted
            group.defineHistogram(histname,title=histname, type="TH1F",
-                                 path='MatchedJets_{}'.format(OfflineJetCollections[jetcoll]['MatchTo']),
+                                 path='MatchedJets_{}'.format(OfflineJetCollections[monMode][jetcoll]['MatchTo']),
                                  xbins=100 , xmin=-100000., xmax=100000. ,)
            
          for histname in [ 'ptresp', 'energyresp', 'massresp' ]:
            group.defineHistogram(histname,title=histname, type="TH1F",
-                                 path='MatchedJets_{}'.format(OfflineJetCollections[jetcoll]['MatchTo']),
+                                 path='MatchedJets_{}'.format(OfflineJetCollections[monMode][jetcoll]['MatchTo']),
                                  xbins=100 , xmin=-2., xmax=2. ,)
            
          group.defineHistogram('ptresp,ptref;ptresp_vs_ptRef',title='ptresp vs ptRef', type="TH2F",
-                               path='MatchedJets_{}'.format(OfflineJetCollections[jetcoll]['MatchTo']),
+                               path='MatchedJets_{}'.format(OfflineJetCollections[monMode][jetcoll]['MatchTo']),
                                xbins=10 , xmin=-2., xmax=2., ybins=10, ymin=0., ymax=500000.,)
          
          group.defineHistogram('ptresp,etaref;ptresp_vs_etaRef',title='ptresp vs etaRef', type="TH2F",
-                               path='MatchedJets_{}'.format(OfflineJetCollections[jetcoll]['MatchTo']),
+                               path='MatchedJets_{}'.format(OfflineJetCollections[monMode][jetcoll]['MatchTo']),
                                xbins=10 , xmin=-2., xmax=2., ybins=10, ymin=-5., ymax=5.,)
          
-       matchedJetColl   = OfflineJetCollections[jetcoll]['MatchTo']
+       matchedJetColl   = OfflineJetCollections[monMode][jetcoll]['MatchTo']
        jetmatchKey      = '{}.matched_{}'.format(jetcoll,matchedJetColl)
        jetptdiffKey     = '{}.ptdiff_{}'.format(jetcoll,matchedJetColl)
        jetenergydiffKey = '{}.energydiff_{}'.format(jetcoll,matchedJetColl)
@@ -934,40 +913,30 @@ def jetMonitoringConfig(inputFlags,jetcoll,athenaMT):
 
    return conf
 
-def l1JetMonitoringConfig(inputFlags,jetcoll,chain='',matched=False):
+def l1JetMonitoringConfig(inputFlags,jetcoll,monMode,chain='',matched=False):
 
   from TrigJetMonitoring.L1JetMonitoringConfig import L1JetMonAlg
   name = jetcoll if chain=='' else jetcoll+'_'+chain
 
-  if not L1JetCollections[jetcoll]['MatchTo']:
+  if not L1JetCollections[monMode][jetcoll]['MatchTo']:
     conf = L1JetMonAlg(name,jetcoll,chain)
   else:
-    assert  len(L1JetCollections[jetcoll]['MatchTo']) == 2
+    assert  len(L1JetCollections[monMode][jetcoll]['MatchTo']) == 2
     
     conf = L1JetMonAlg(name,jetcoll,chain,
-                       matched,L1JetCollections[jetcoll]['MatchTo'][0],
-                       L1JetCollections[jetcoll]['MatchTo'][1])
+                       matched,L1JetCollections[monMode][jetcoll]['MatchTo'][0],
+                       L1JetCollections[monMode][jetcoll]['MatchTo'][1])
 
   return conf
 
-def jetChainMonitoringConfig(inputFlags,jetcoll,chain,athenaMT,onlyUsePassingJets=True):
+def jetChainMonitoringConfig(inputFlags,jetcoll,chain,onlyUsePassingJets=True):
    '''Function to configures some algorithms in the monitoring system.'''
 
-   # Remap online Run 2 jet collections
-   from TrigJetMonitoring import JetCollRemapping
    jetcollFolder = jetcoll
-   if jetcoll in JetCollRemapping.JetCollRun2ToRun3 and not athenaMT:
-     jetcollFolder = JetCollRemapping.JetCollRun2ToRun3[jetcoll]
+   chainFolder = chain
 
-   # Remap Run 2 jet chain name to Run 3 jet chain
-   from TrigJetMonitoring import JetChainRemapping
-   if chain in JetChainRemapping.JetChainRun2ToRun3:
-     chainFolder = JetChainRemapping.JetChainRun2ToRun3[chain]
-   else:
-     chainFolder = chain
-
-   if not athenaMT:
-     onlyUsePassingJets = False #does not work for legacy samples yet
+   #if not athenaMT:
+   #  onlyUsePassingJets = False #does not work for legacy samples yet
    jetMonAlgSpecName = chain+"TrigMon"
    if not onlyUsePassingJets:
      chainFolder = chainFolder + "/ExpertHistos"
@@ -1050,21 +1019,11 @@ def jetChainMonitoringConfig(inputFlags,jetcoll,chain,athenaMT,onlyUsePassingJet
 
    return trigConf
 
-def jetEfficiencyMonitoringConfig(inputFlags,onlinejetcoll,offlinejetcoll,chain,refChain,athenaMT):
+def jetEfficiencyMonitoringConfig(inputFlags,onlinejetcoll,offlinejetcoll,chain,refChain):
    '''Function to configures some algorithms in the monitoring system.'''
 
-   # Remap online Run 2 jet collections
-   from TrigJetMonitoring import JetCollRemapping
    jetcollFolder = onlinejetcoll
-   if onlinejetcoll in JetCollRemapping.JetCollRun2ToRun3 and not athenaMT:
-     jetcollFolder = JetCollRemapping.JetCollRun2ToRun3[onlinejetcoll]
-
-   # Remap Run 2 jet chain name to Run 3 jet chain
-   from TrigJetMonitoring import JetChainRemapping
-   if chain in JetChainRemapping.JetChainRun2ToRun3:
-     chainFolder = JetChainRemapping.JetChainRun2ToRun3[chain]
-   else:
-     chainFolder = chain
+   chainFolder = chain
 
    # We schedule a new JetAlg which will be acting only when a TriggerChain fired (using the TriggerChain from the base classes).
    # We'll plot 1 histo build by a dedicated JetHistoTriggEfficiency tool.
@@ -1140,25 +1099,14 @@ if __name__=='__main__':
 
   # Read arguments
   parser = argparse.ArgumentParser()
-  parser.add_argument('--athenaMT',            action='store_true', dest='athenaMT',            default=False)
-  parser.add_argument('--legacy',              action='store_true', dest='legacy',              default=False)
   parser.add_argument('--runTruthReco',        action='store_true', dest='runTruthReco',        default=False)
   parser.add_argument('--genOfflineR10PF',     action='store_true', dest='genOfflineR10PF',     default=False)
   parser.add_argument('--printDetailedConfig', action='store_true', dest='printDetailedConfig', default=False)
   parser.add_argument('--input',               action='store',      dest='inputFile')
   args                = parser.parse_args()
-  AthenaMT            = args.athenaMT
-  Legacy              = args.legacy
   RunTruth            = args.runTruthReco
   GenOfflineR10PF     = args.genOfflineR10PF
   PrintDetailedConfig = args.printDetailedConfig
-  # Protections
-  if AthenaMT and Legacy:
-    logger.error('ERROR: Choose AthenaMT or Legacy, exiting')
-    sys.exit(0)
-  elif not AthenaMT and not Legacy:
-    logger.error('ERROR: Choose AthenaMT or Legacy, exiting')
-    sys.exit(0)
 
   # Input file
   if args.inputFile is not None: inputFile = args.inputFile
@@ -1176,16 +1124,18 @@ if __name__=='__main__':
   flags = initConfigFlags()
   flags.Input.Files = [inputFile]
   flags.Input.isMC = True
-  flags.Output.HISTFileName = 'AthenaMTMonitorOutput.root' if AthenaMT else 'LegacyMonitoringOutput.root'
+  flags.Output.HISTFileName = 'AthenaMTMonitorOutput.root' 
   flags.lock()
+
+  from AthenaMonitoring.DQConfigFlags import DQDataType
+  data_type = flags.DQ.DataType
+  if data_type == DQDataType.Collisions: monMode = 'pp'
+  elif data_type == DQDataType.HeavyIon: monMode = 'HI'
 
   # Initialize configuration object, add accumulator, merge, and run.
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
   from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
   cfg = MainServicesCfg(flags)
-
-  # AthenaMT or Legacy
-  InputType = 'MT' if AthenaMT else 'Legacy'
 
   # Define the output list
   outputlist = ["xAOD::EventInfo#*","xAOD::VertexContainer#*","xAOD::JetContainer#AntiKt4*Jets","xAOD::JetAuxContainer#AntiKt4*JetsAux.-PseudoJet","xAOD::JetContainer#HLT_*","xAOD::JetAuxContainer#HLT_*Aux.-PseudoJet","xAOD::ShallowAuxContainer#HLT_*Aux.-PseudoJet"]
@@ -1232,7 +1182,7 @@ if __name__=='__main__':
   cfg.merge(helper.result()) # merge it to add the sequence needed to add matchers
 
   # Match HLT jets to offline jets
-  for hltColl,collDict in JetCollections[InputType].items():
+  for hltColl,collDict in JetCollections[monMode].items():
     if collDict['MatchTo'] != 'NONE':
       for jetcalibscale in OnlineScaleMomenta:
         scalestring = "_"+jetcalibscale if jetcalibscale != "" else ""
@@ -1242,7 +1192,7 @@ if __name__=='__main__':
         cfg.addEventAlgo(alg,sequenceName='AthMonSeq_TrigJetMonitorAlgorithm') # Add matchers to monitoring alg sequence
 
   # Match offline to offline jets
-  for offjetColl,collDict in OfflineJetCollections.items():
+  for offjetColl,collDict in OfflineJetCollections[monMode].items():
     if collDict['MatchTo'] != 'NONE':
       for jetcalibscale in OfflineScaleMomenta:
         scalestring = "_"+jetcalibscale if jetcalibscale != "" else ""
@@ -1252,7 +1202,7 @@ if __name__=='__main__':
         cfg.addEventAlgo(alg,sequenceName='AthMonSeq_TrigJetMonitorAlgorithm')
 
   # Match L1 to offline as well as HLT jets
-  for l1jetColl,collDict in L1JetCollections.items():
+  for l1jetColl,collDict in L1JetCollections[monMode].items():
     for matchjetcoll in collDict['MatchTo']:
       if matchjetcoll != 'NONE':
         name = 'Matching_{}_{}'.format(l1jetColl,matchjetcoll)
@@ -1261,41 +1211,42 @@ if __name__=='__main__':
         cfg.addEventAlgo(alg,sequenceName='AthMonSeq_TrigJetMonitorAlgorithm')
   
   # Loop over L1 jet collectoins
-  for jetcoll in L1JetCollections:
-    l1jetconf = l1JetMonitoringConfig(flags,jetcoll,'',True)
+  for jetcoll in L1JetCollections[monMode]:
+    l1jetconf = l1JetMonitoringConfig(flags,jetcoll,monMode,'',True)
     l1jetconf.toAlg(helper)
 
   # Loop over L1 jet chains
-  for chain,jetcoll in Chain2L1JetCollDict.items():
-    l1chainconf = l1JetMonitoringConfig(flags,jetcoll,chain)
+  for chain,jetcoll in Chain2L1JetCollDict[monMode].items():
+    l1chainconf = l1JetMonitoringConfig(flags,jetcoll,monMode,chain)
     l1chainconf.toAlg(helper)
 
   # Loop over offline jet collections
-  for jetcoll in OfflineJetCollections:
-    offlineMonitorConf = jetMonitoringConfig(flags,jetcoll,AthenaMT)
+  for jetcoll in OfflineJetCollections[monMode]:
+    offlineMonitorConf = jetMonitoringConfig(flags,jetcoll,monMode)
     offlineMonitorConf.toAlg(helper)
 
   # Loop over HLT jet collections
-  for jetcoll in JetCollections[InputType]:
-    monitorConf = jetMonitoringConfig(flags,jetcoll,AthenaMT)
+  for jetcoll in JetCollections[monMode]:
+    monitorConf = jetMonitoringConfig(flags,jetcoll,monMode)
     # then we turn the full specification into properly configured algorithm and tools.
     # we use the method 'toAlg()' defined for the specialized dictionnary 'JetMonAlgSpec'
     monitorConf.toAlg(helper)
 
   # Loop over HLT jet chains
-  for chain,chainDict in Chains2Monitor[InputType].items():
+  for chain,chainDict in Chains2Monitor[monMode].items():
     jetcoll = chainDict['HLTColl']
     # kinematic plots
-    if AthenaMT:
-      chainMonitorConfT = jetChainMonitoringConfig(flags,jetcoll,chain,AthenaMT,True)
-      chainMonitorConfT.toAlg(helper)
-    chainMonitorConfF = jetChainMonitoringConfig(flags,jetcoll,chain,AthenaMT,False)
+    # only passing jets
+    chainMonitorConfT = jetChainMonitoringConfig(flags,jetcoll,chain,True)
+    chainMonitorConfT.toAlg(helper)
+    # all jets
+    chainMonitorConfF = jetChainMonitoringConfig(flags,jetcoll,chain,False)
     chainMonitorConfF.toAlg(helper)
     # efficiency plots
     if chainDict['RefChain'] != 'NONE' and chainDict['OfflineColl'] != 'NONE':
       effMonitorConf = jetEfficiencyMonitoringConfig(flags, jetcoll,
                                                      chainDict['OfflineColl'], chain,
-                                                     chainDict['RefChain'], AthenaMT)
+                                                     chainDict['RefChain'])
       effMonitorConf.toAlg(helper)
 
   cfg.merge(helper.result())
