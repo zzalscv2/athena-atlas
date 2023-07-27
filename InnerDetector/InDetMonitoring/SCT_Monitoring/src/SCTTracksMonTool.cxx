@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**    @file SCTTracksMonTool.cxx
@@ -95,7 +95,7 @@ StatusCode SCTTracksMonTool::initialize() {
 StatusCode
 SCTTracksMonTool::bookHistogramsRecurrent() {
   ATH_MSG_DEBUG("SCTTracksMonTool::bookHistograms");
-  m_path = (m_useIDGlobal) ? ("/InDetGlobal/") : ("");
+  m_gpath = (m_useIDGlobal) ? ("/InDetGlobal/") : ("");
   if (newRunFlag()) {
     m_numberOfEvents = 0;
   }
@@ -111,7 +111,7 @@ SCTTracksMonTool::bookHistogramsRecurrent() {
 StatusCode
 SCTTracksMonTool::bookHistograms() {
   ATH_MSG_DEBUG("SCTTracksMonTool::bookHistograms");
-  m_path = (m_useIDGlobal) ? ("/InDetGlobal/") : ("");
+  m_gpath = (m_useIDGlobal) ? ("/InDetGlobal/") : ("");
   if (newRunFlag()) {
     m_numberOfEvents = 0;
   }
@@ -365,8 +365,8 @@ SCTTracksMonTool::calculatePull(const float residual, const float trkErr, const 
 StatusCode
 SCTTracksMonTool::bookGeneralHistos() {
   if (newRunFlag()) {
-    std::string stem{m_path + "/SCT/GENERAL/tracks/"};
-    MonGroup Tracks{this, m_path + "SCT/GENERAL/tracks", run, ATTRIB_UNMANAGED};
+    std::string stem{m_gpath + "/SCT/GENERAL/tracks/"};
+    MonGroup Tracks{this, m_gpath + "SCT/GENERAL/tracks", run, ATTRIB_UNMANAGED};
 
     const std::string regionNames[N_REGIONS]{"EndCapC", "Barrel", "EndCapA"};
 

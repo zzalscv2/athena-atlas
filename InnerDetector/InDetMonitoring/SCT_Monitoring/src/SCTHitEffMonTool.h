@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** Tool to measure the intrinsic single hit efficiency in the SCT
@@ -122,7 +122,7 @@ class SCTHitEffMonTool : public ManagedMonitorToolBase  {
   int layerIndex2layer(const int index) const;
   int becIdxLayer2Index(const int becIdx, const int layer) const;
 
-  std::string m_path;
+  std::string m_gpath;
   const std::map<Identifier, unsigned int>* m_badChips{nullptr};
 
   SG::ReadHandleKey<InDet::SCT_ClusterContainer> m_sctContainerName{this, "SCT_ClusterContainer", "SCT_Clusters"};

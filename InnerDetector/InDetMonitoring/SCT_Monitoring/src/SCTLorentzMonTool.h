@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**    @file SCTLorentzMonTool.h
@@ -62,7 +62,7 @@ class SCTLorentzMonTool : public ManagedMonitorToolBase {
   enum Sides { side0, side1, nSides };
 
   // Data member, which is not changed after initialization
-  std::string m_path{""};
+  std::string m_gpath{""};
 
   //@name Histograms related members
   //@{

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** Tool to measure the intrinsic single hit efficiency in the SCT
@@ -152,7 +152,7 @@ SCTHitEffMonTool::initialize() {
   ATH_MSG_INFO("Initialized bunch crossing conditions key: " << m_bunchCrossingKey);
   ATH_CHECK(m_configConditions.retrieve());
 
-  m_path = (m_useIDGlobal) ? ("/InDetGlobal/") : ("");
+  m_gpath = (m_useIDGlobal) ? ("/InDetGlobal/") : ("");
 
   if ((m_minSCTHits == -1) and (m_minTRTHits == -1) and (m_minOtherHits == -1)) {
     if (m_isCosmic) {
@@ -192,23 +192,23 @@ SCTHitEffMonTool::bookHistograms() {
     }
 
     std::array < MonGroup, N_REGIONS_INC_GENERAL > histGroupE = {
-      MonGroup{this, m_path + histogramPath[ENDCAP_C_INDEX], run, ATTRIB_UNMANAGED},
-      MonGroup{this, m_path + histogramPath[BARREL_INDEX], run, ATTRIB_UNMANAGED},
-      MonGroup{this, m_path + histogramPath[ENDCAP_A_INDEX], run, ATTRIB_UNMANAGED},
-      MonGroup{this, m_path + histogramPath[GENERAL_INDEX], run, ATTRIB_UNMANAGED}
+      MonGroup{this, m_gpath + histogramPath[ENDCAP_C_INDEX], run, ATTRIB_UNMANAGED},
+      MonGroup{this, m_gpath + histogramPath[BARREL_INDEX], run, ATTRIB_UNMANAGED},
+      MonGroup{this, m_gpath + histogramPath[ENDCAP_A_INDEX], run, ATTRIB_UNMANAGED},
+      MonGroup{this, m_gpath + histogramPath[GENERAL_INDEX], run, ATTRIB_UNMANAGED}
     };
 
     std::array < MonGroup, N_REGIONS > histGroupL = {
-      MonGroup{this, m_path + histogramPathRe[ENDCAP_C_INDEX], run, ATTRIB_UNMANAGED},
-      MonGroup{this, m_path + histogramPathRe[BARREL_INDEX], run, ATTRIB_UNMANAGED},
-      MonGroup{this, m_path + histogramPathRe[ENDCAP_A_INDEX], run, ATTRIB_UNMANAGED}
+      MonGroup{this, m_gpath + histogramPathRe[ENDCAP_C_INDEX], run, ATTRIB_UNMANAGED},
+      MonGroup{this, m_gpath + histogramPathRe[BARREL_INDEX], run, ATTRIB_UNMANAGED},
+      MonGroup{this, m_gpath + histogramPathRe[ENDCAP_A_INDEX], run, ATTRIB_UNMANAGED}
     };
 
     std::array < MonGroup, N_REGIONS_INC_GENERAL > histGroupShift = {
-      MonGroup{this, m_path + histogramPath[ENDCAP_C_INDEX], run, ATTRIB_UNMANAGED},
-      MonGroup{this, m_path + histogramPath[BARREL_INDEX], run, ATTRIB_UNMANAGED},
-      MonGroup{this, m_path + histogramPath[ENDCAP_A_INDEX], run, ATTRIB_UNMANAGED},
-      MonGroup{this, m_path + histogramPath[GENERAL_INDEX], run, ATTRIB_UNMANAGED}
+      MonGroup{this, m_gpath + histogramPath[ENDCAP_C_INDEX], run, ATTRIB_UNMANAGED},
+      MonGroup{this, m_gpath + histogramPath[BARREL_INDEX], run, ATTRIB_UNMANAGED},
+      MonGroup{this, m_gpath + histogramPath[ENDCAP_A_INDEX], run, ATTRIB_UNMANAGED},
+      MonGroup{this, m_gpath + histogramPath[GENERAL_INDEX], run, ATTRIB_UNMANAGED}
     };
 
     ATH_CHECK(bookEffHisto(m_Eff_Total, histGroupE[GENERAL_INDEX], "SctTotalEff", "SCT Total Efficiency", N_REGIONS, 0,
@@ -320,23 +320,23 @@ SCTHitEffMonTool::bookHistogramsRecurrent() {
     }
 
     std::array < MonGroup, N_REGIONS_INC_GENERAL > histGroupE = {
-      MonGroup{this, m_path + histogramPath[ENDCAP_C_INDEX], run, ATTRIB_UNMANAGED},
-      MonGroup{this, m_path + histogramPath[BARREL_INDEX], run, ATTRIB_UNMANAGED},
-      MonGroup{this, m_path + histogramPath[ENDCAP_A_INDEX], run, ATTRIB_UNMANAGED},
-      MonGroup{this, m_path + histogramPath[GENERAL_INDEX], run, ATTRIB_UNMANAGED}
+      MonGroup{this, m_gpath + histogramPath[ENDCAP_C_INDEX], run, ATTRIB_UNMANAGED},
+      MonGroup{this, m_gpath + histogramPath[BARREL_INDEX], run, ATTRIB_UNMANAGED},
+      MonGroup{this, m_gpath + histogramPath[ENDCAP_A_INDEX], run, ATTRIB_UNMANAGED},
+      MonGroup{this, m_gpath + histogramPath[GENERAL_INDEX], run, ATTRIB_UNMANAGED}
     };
 
     std::array < MonGroup, N_REGIONS > histGroupL = {
-      MonGroup{this, m_path + histogramPathRe[ENDCAP_C_INDEX], run, ATTRIB_UNMANAGED},
-      MonGroup{this, m_path + histogramPathRe[BARREL_INDEX], run, ATTRIB_UNMANAGED},
-      MonGroup{this, m_path + histogramPathRe[ENDCAP_A_INDEX], run, ATTRIB_UNMANAGED}
+      MonGroup{this, m_gpath + histogramPathRe[ENDCAP_C_INDEX], run, ATTRIB_UNMANAGED},
+      MonGroup{this, m_gpath + histogramPathRe[BARREL_INDEX], run, ATTRIB_UNMANAGED},
+      MonGroup{this, m_gpath + histogramPathRe[ENDCAP_A_INDEX], run, ATTRIB_UNMANAGED}
     };
 
     std::array < MonGroup, N_REGIONS_INC_GENERAL > histGroupShift = {
-      MonGroup{this, m_path + histogramPath[ENDCAP_C_INDEX], run, ATTRIB_UNMANAGED},
-      MonGroup{this, m_path + histogramPath[BARREL_INDEX], run, ATTRIB_UNMANAGED},
-      MonGroup{this, m_path + histogramPath[ENDCAP_A_INDEX], run, ATTRIB_UNMANAGED},
-      MonGroup{this, m_path + histogramPath[GENERAL_INDEX], run, ATTRIB_UNMANAGED}
+      MonGroup{this, m_gpath + histogramPath[ENDCAP_C_INDEX], run, ATTRIB_UNMANAGED},
+      MonGroup{this, m_gpath + histogramPath[BARREL_INDEX], run, ATTRIB_UNMANAGED},
+      MonGroup{this, m_gpath + histogramPath[ENDCAP_A_INDEX], run, ATTRIB_UNMANAGED},
+      MonGroup{this, m_gpath + histogramPath[GENERAL_INDEX], run, ATTRIB_UNMANAGED}
     };
 
     ATH_CHECK(bookEffHisto(m_Eff_Total, histGroupE[GENERAL_INDEX], "SctTotalEff", "SCT Total Efficiency", N_REGIONS, 0,
