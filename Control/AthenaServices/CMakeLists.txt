@@ -61,7 +61,7 @@ atlas_add_test( ThinningCacheTool_test
    LINK_LIBRARIES TestTools AsgTools AthenaKernel GaudiKernel EventInfo AthenaBaseComps )
    
 atlas_add_test( MetaDataSvc_test
-   SOURCES test/MetaDataToolStub.h test/MetaDataSvc_test.cxx src/MetaDataSvc.cxx src/OutputStreamSequencerSvc.cxx 
+   SOURCES test/MetaDataSvc_test.cxx src/MetaDataSvc.cxx src/OutputStreamSequencerSvc.cxx 
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES TestTools  AthenaKernel GaudiKernel StoreGateLib  PersistencySvc AthenaBaseComps RootAuxDynIO ${Boost_LIBRARIES} 
    POST_EXEC_SCRIPT nopost.sh)
