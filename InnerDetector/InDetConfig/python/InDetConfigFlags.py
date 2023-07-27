@@ -40,5 +40,7 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.doTRTPhase", lambda prevFlags:
                 prevFlags.Beam.Type is BeamType.Cosmics and
                 prevFlags.Detector.EnableTRT)
+    icf.addFlag("InDet.PixelDumpMode", 1)
+    icf.addFlag("InDet.DRAWZSelection", False)
 
     return icf
