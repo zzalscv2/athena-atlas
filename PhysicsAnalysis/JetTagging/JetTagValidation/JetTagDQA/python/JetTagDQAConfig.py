@@ -32,6 +32,7 @@ def PhysValBTagCfg(flags, **kwargs):
 
     kwargs.setdefault("HistogramDefinitions", definitions + definitions_Run)
     kwargs.setdefault("JetEtaCut", 2.5 if flags.GeoModel.Run <= LHCPeriod.Run3 else 4.0)
+    kwargs.setdefault("JetContainerEMTopo", "" if flags.GeoModel.Run <= LHCPeriod.Run3 else "AntiKt4EMTopoJets")
 
     if "trackTruthOriginTool" not in kwargs:
         from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import InDetTrackTruthOriginToolCfg

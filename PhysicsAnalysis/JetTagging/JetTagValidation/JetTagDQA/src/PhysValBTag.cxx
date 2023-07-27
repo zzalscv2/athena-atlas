@@ -46,12 +46,12 @@ namespace JetTagDQA {
     m_antiKtVR30Rmax4Rmin02PV0TrackJetsPlots (0, "BTag/AntiKtVR30Rmax4Rmin02PV0TrackJets/", "antiKtVR30Rmax4Rmin02PV0TrackJets"),
     m_nevents(0)
   {
-
+ 
     declareProperty( "isData", m_isData );
 
-    declareProperty( "JetContainerName1", m_jetName1 = "AntiKt4EMTopoJets" );
-    declareProperty( "JetContainerName2", m_jetName2 = "AntiKt4EMPFlowJets");
-    declareProperty( "JetContainerName3", m_jetName3 = "AntiKtVR30Rmax4Rmin02PV0TrackJets");
+    declareProperty( "JetContainerEMTopo", m_jetNameEMTopo = "AntiKt4EMTopoJets" );
+    declareProperty( "JetContainerPFlow", m_jetNamePFlow = "AntiKt4EMPFlowJets");
+    declareProperty( "JetContainerTrackJets", m_jetNameTrackJet = "AntiKtVR30Rmax4Rmin02PV0TrackJets");
 
     declareProperty( "TrackContainerName", m_trackName = "InDetTrackParticles" );
     declareProperty( "VertexContainerName", m_vertexName = "PrimaryVertices" );
@@ -91,10 +91,11 @@ namespace JetTagDQA {
       std::string name = m_HistogramDefinitionsVector[i][0];
       m_HistogramDefinitionsMap.insert(std::pair< std::string, std::vector< std::string > >(name, m_HistogramDefinitionsVector[i]));
     }
-
-    m_btagplots.insert(std::make_pair(m_jetName1, &m_antiKt4EMTopoPlots));
-    m_btagplots.insert(std::make_pair(m_jetName2, &m_antiKt4EMPFlowJetsPlots));
-    m_btagplots.insert(std::make_pair(m_jetName3, &m_antiKtVR30Rmax4Rmin02PV0TrackJetsPlots));
+    if(!m_jetNameEMTopo.empty()){
+    m_btagplots.insert(std::make_pair(m_jetNameEMTopo, &m_antiKt4EMTopoPlots));
+    }
+    m_btagplots.insert(std::make_pair(m_jetNamePFlow, &m_antiKt4EMPFlowJetsPlots));
+    m_btagplots.insert(std::make_pair(m_jetNameTrackJet, &m_antiKtVR30Rmax4Rmin02PV0TrackJetsPlots));
 
     for(const auto& [name, plot]: m_btagplots){
       plot->setDetailLevel(m_detailLevel);
