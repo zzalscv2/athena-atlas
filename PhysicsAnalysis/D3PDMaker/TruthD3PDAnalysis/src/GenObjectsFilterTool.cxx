@@ -176,7 +176,6 @@ bool GenObjectsFilterTool::isRequested(const HepMC::ConstGenParticlePtr& part) c
    double eta = p4.eta();
 
    int pdg = part->pdg_id();
-   int status = part->status();
 
    /// always keep these pdgids
    if(isKeep(pdg)) return true;
@@ -253,7 +252,6 @@ bool GenObjectsFilterTool::isRequested(const HepMC::ConstGenParticlePtr& part) c
      }
 #endif
    }
-   int barcode = HepMC::barcode(part);
    if(m_keepbcHadronDecayChain){
      //// keep particles from b/c hadron decay
 
@@ -291,7 +289,7 @@ bool GenObjectsFilterTool::isRequested(const HepMC::ConstGenParticlePtr& part) c
    }
 
    if(m_keepLeptonicWZBosonDecayChains){
-     if(!HepMC::is_simulation_particle(barcode)){
+     if(!HepMC::is_simulation_particle(part)){
 
        bool isleptonicWZ=false;
 #ifdef HEPMC3
@@ -341,7 +339,7 @@ bool GenObjectsFilterTool::isRequested(const HepMC::ConstGenParticlePtr& part) c
 
    if(m_keepStatusOneLeptonsFromWZ){
      if(std::abs(pdg) == 11 || abs(pdg) == 13 || abs(pdg) == 15 ){
-       if(!HepMC::is_simulation_particle(barcode) && status == 1){
+       if(!HepMC::is_simulation_particle(part) && MC::isStable(part)){
 
 	 bool isleptonicWZ=false;
 #ifdef HEPMC3

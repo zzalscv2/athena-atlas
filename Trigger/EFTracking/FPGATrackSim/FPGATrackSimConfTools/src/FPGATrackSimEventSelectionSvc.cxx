@@ -242,7 +242,7 @@ bool FPGATrackSimEventSelectionSvc::passMatching(FPGATrackSimTrack const & track
 bool FPGATrackSimEventSelectionSvc::passMatching(FPGATrackSimTruthTrack const & truthTrack) const
 {
   if (truthTrack.getBarcode() == 0 || truthTrack.getQ() == 0) return false;
-  if ((!m_allowHighBarcode) && m_st != SampleType::skipTruth && HepMC::is_simulation_particle(truthTrack.getBarcode())) return false;
+  if ((!m_allowHighBarcode) && m_st != SampleType::skipTruth && HepMC::is_simulation_particle(&truthTrack)) return false;
   if (!passCuts(truthTrack)) return false;
 
   return true;

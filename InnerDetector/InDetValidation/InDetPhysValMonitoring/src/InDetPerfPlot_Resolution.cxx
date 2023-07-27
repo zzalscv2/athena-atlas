@@ -292,7 +292,7 @@ InDetPerfPlot_Resolution::fill(const xAOD::TrackParticle& trkprt, const xAOD::Tr
   int isPrimTrk = 0;
   int isSecdTrk = 0;
 
-  if (HepMC::is_simulation_particle(trueBC)) {
+  if (HepMC::is_simulation_particle(&truthprt)) {
     isSecdTrk = 1;
   } else {
    if (trueBC > 0) isPrimTrk = 1;

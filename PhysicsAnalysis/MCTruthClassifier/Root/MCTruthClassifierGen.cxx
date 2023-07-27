@@ -2716,7 +2716,6 @@ MCTruthClassifier::getMother(const xAOD::TruthParticle* thePart) const
   const xAOD::TruthVertex* partOriVert = thePart->hasProdVtx() ? thePart->prodVtx() : nullptr;
 
   long partPDG = thePart->pdgId();
-  int partBarcode = thePart->barcode() % m_barcodeShift;
   long MotherPDG(0);
 
   const xAOD::TruthVertex* MothOriVert(nullptr);
@@ -2743,7 +2742,7 @@ MCTruthClassifier::getMother(const xAOD::TruthParticle* thePart) const
       ATH_MSG_WARNING("getMother:: infinite while");
       break;
     }
-  } while (MothOriVert != nullptr && MotherPDG == partPDG && !HepMC::is_simulation_particle(partBarcode) &&
+  } while (MothOriVert != nullptr && MotherPDG == partPDG && !HepMC::is_simulation_particle(thePart) &&
            MothOriVert != partOriVert);
 
   ATH_MSG_DEBUG("succeded getMother");

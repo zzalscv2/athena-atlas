@@ -418,7 +418,7 @@ TruthJetFilterTool::acceptParticle (const HepMC::ConstGenParticlePtr& p)
   int status = p->status();
   int barcode = HepMC::barcode(p);
 
-	if ( !m_writeGeant && HepMC::is_simulation_particle(barcode))
+	if ( !m_writeGeant && HepMC::is_simulation_particle(p))
 		return false;
 
 	if (m_excludeWZdecays) {
@@ -512,7 +512,7 @@ TruthJetFilterTool::acceptParticle (const HepMC::ConstGenParticlePtr& p)
   // PHOTOS range: check whether photons come from parton range or 
   // hadron range
   int motherBarcode = 999999999;
-  if( barcode > HepMC::PHOTOSMIN && !HepMC::is_simulation_particle(barcode) && p->production_vertex() ) {
+  if( barcode > HepMC::PHOTOSMIN && !HepMC::is_simulation_particle(p) && p->production_vertex() ) {
     HepMC::ConstGenVertexPtr vprod = p->production_vertex();
     if ( HepMC::particles_in_size(vprod) > 0) {
 #ifdef HEPMC3
@@ -531,7 +531,7 @@ TruthJetFilterTool::acceptParticle (const HepMC::ConstGenParticlePtr& p)
   }
 
   // OK if we should select G4 particles and are in G4 range
-  if( m_writeGeant && HepMC::is_simulation_particle(barcode) )
+  if( m_writeGeant && HepMC::is_simulation_particle(p) )
     ok = true;
 
   return ok;

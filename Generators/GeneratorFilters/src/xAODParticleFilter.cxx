@@ -66,7 +66,7 @@ StatusCode xAODParticleFilter::filterEvent()
               continue;
             if (child == pitr)
               continue;
-            if (HepMC::is_simulation_particle(part))
+            if (HepMC::is_simulation_particle(child))
               continue;
             notSelfDecay = false;
             break;

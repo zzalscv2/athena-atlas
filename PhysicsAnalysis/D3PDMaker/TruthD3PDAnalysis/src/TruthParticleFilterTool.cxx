@@ -140,7 +140,7 @@ TruthParticleFilterTool::isAccepted (const HepMC::ConstGenParticlePtr& p)
     ok=true;
   }
 
-  if (HepMC::is_simulation_particle(barcode) && !m_writeGeant && !m_writeEverything && !ok) {
+  if (HepMC::is_simulation_particle(p) && !m_writeGeant && !m_writeEverything && !ok) {
     if (! (pdg_id == MC::PHOTON &&
            m_geantPhotonPtThresh >= 0 &&
            p->momentum().perp() > m_geantPhotonPtThresh) )
@@ -173,7 +173,7 @@ TruthParticleFilterTool::isAccepted (const HepMC::ConstGenParticlePtr& p)
   // hadron range
   int motherPDGID = 999999999;
   HepMC::ConstGenVertexPtr vprod = p->production_vertex();
-  if( barcode > HepMC::PHOTOSMIN && !HepMC::is_simulation_particle(barcode) && vprod )
+  if( barcode > HepMC::PHOTOSMIN && !HepMC::is_simulation_particle(p) && vprod )
   {
     if (vprod->particles_in_size() > 0) {
 #ifdef HEPMC3
@@ -190,7 +190,7 @@ TruthParticleFilterTool::isAccepted (const HepMC::ConstGenParticlePtr& p)
   }
 
   // OK if we should select G4 particles and are in G4 range
-  if( m_writeGeant && HepMC::is_simulation_particle(barcode) )
+  if( m_writeGeant && HepMC::is_simulation_particle(p) )
     ok = true;
 
   if(isLeptonFromTau(p)) 

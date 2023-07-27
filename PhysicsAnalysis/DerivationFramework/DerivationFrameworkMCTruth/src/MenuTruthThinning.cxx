@@ -294,7 +294,6 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
     bool ok = false;
     
     int pdg_id = std::abs(p->pdgId());
-    int barcode = p->barcode();
 
     // All explicitly requested PDG IDs of long lived particles, this is needed
     // because their childrens barcodes can be above the cut off m_geantOffset
@@ -303,7 +302,7 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
     }
 
 
-    if (HepMC::is_simulation_particle(barcode) && !m_writeGeant && !m_writeEverything && !ok) {
+    if (HepMC::is_simulation_particle(p) && !m_writeGeant && !m_writeEverything && !ok) {
         if (! (pdg_id == 22/*PDG::gamma*/ &&
                m_geantPhotonPtThresh >= 0 &&
                p->pt() > m_geantPhotonPtThresh) )
@@ -326,23 +325,23 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
     
     //  OK if we should select hadrons and are in hadron range
     // JRC: cut changed from PHOTOSMIN to m_geantOffset
-    if( m_writeHadrons && MC::isHadron (pdg_id) && !HepMC::is_simulation_particle(barcode) )
+    if( m_writeHadrons && MC::isHadron (pdg_id) && !HepMC::is_simulation_particle(p) )
         ok = true;
     
     // OK if we should select b hadrons and are in hadron range
     // JRC: cut changed from PHOTOSMIN to m_geantOffset
-    if( m_writeBHadrons &&  !HepMC::is_simulation_particle(barcode) && MC::isBottomHadron (pdg_id))
+    if( m_writeBHadrons &&  !HepMC::is_simulation_particle(p) && MC::isBottomHadron (pdg_id))
         ok= true;
 
     // OK if we should select c hadrons and are in hadron range
     // JRC: cut changed from PHOTOSMIN to m_geantOffset
-    if( m_writeCHadrons &&  !HepMC::is_simulation_particle(barcode) && MC::isCharmHadron (pdg_id))
+    if( m_writeCHadrons &&  !HepMC::is_simulation_particle(p) && MC::isCharmHadron (pdg_id))
         ok= true;
 
     // PHOTOS range: check whether photons come from parton range or
     // hadron range
     int motherPDGID = 999999999;
-    if( barcode > HepMC::PHOTOSMIN && !HepMC::is_simulation_particle(barcode) &&
+    if( p->barcode() > HepMC::PHOTOSMIN && !HepMC::is_simulation_particle(p) &&
        p->hasProdVtx() )
     {
         const xAOD::TruthVertex* vprod = p->prodVtx();
@@ -357,7 +356,7 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
     }
     
     // OK if we should select G4 particles and are in G4 range
-    if( m_writeGeant && HepMC::is_simulation_particle(barcode) )
+    if( m_writeGeant && HepMC::is_simulation_particle(p) )
         ok = true;
     
     if(isLeptonFromTau(p))
@@ -394,7 +393,7 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
         ok = true;
     
     // All stable
-    if (m_writeAllStable && MC::isStable(p) && !HepMC::is_simulation_particle(barcode))
+    if (m_writeAllStable && MC::isStable(p) && !HepMC::is_simulation_particle(p))
         ok = true;
     
     // All leptons not from hadron decays
