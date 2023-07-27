@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -371,7 +371,7 @@ public:
 		while (true) {
 			QString n = QString(perspective?"Perspective":"Orthographic")+"View"+QString::number(i++);
 			bool ok(true);
-			foreach(StoredView sv, storedViews) {
+			for(StoredView sv : storedViews) {
 				if (sv.name()==n) {
 					ok = false;
 					break;
@@ -737,7 +737,7 @@ QByteArray VP1ExaminerViewer::saveState()
 	/////////////////////////
 
 	QList<QByteArray> persistifiedViews;
-	foreach(Imp::StoredView sv, m_d->storedViews)
+	for(Imp::StoredView sv : m_d->storedViews)
 	persistifiedViews << sv.persistifiedState();
 	out << persistifiedViews;
 
@@ -886,7 +886,7 @@ void VP1ExaminerViewer::restoreFromState(QByteArray ba_state)
 		m_d->storedViews.clear();
 		QList<QByteArray> persistifiedViews;
 		state >> persistifiedViews;
-		foreach(QByteArray ba_pv, persistifiedViews) {
+		for(QByteArray ba_pv : persistifiedViews) {
 			Imp::StoredView sv(ba_pv);
 			if (sv.isValid())
 				m_d->storedViews << sv;
@@ -1988,7 +1988,7 @@ bool VP1ExaminerViewer::Imp::ensureMenuInit()
 	//Drawstyles sub menus:
 	QActionGroup * ds_still_group = new QActionGroup(drawstyle_still_menu);
 	QActionGroup * ds_interactive_group = new QActionGroup(drawstyle_interactive_menu);
-	foreach(SoQtViewer::DrawStyle ds, getAllViewerDrawStyles()) {
+	for(SoQtViewer::DrawStyle ds : getAllViewerDrawStyles()) {
 		int ids = viewerDrawStyleToInt(ds);
 		QString pretty = viewerDrawStyle2PrettyString(ds);
 		if (ds!=SoQtViewer::VIEW_SAME_AS_STILL) {
@@ -2011,7 +2011,7 @@ bool VP1ExaminerViewer::Imp::ensureMenuInit()
 
 	//Transparency type sub menu:
 	QActionGroup * transptype_group = new QActionGroup(drawstyle_transptype_menu);
-	foreach(SoGLRenderAction::TransparencyType type, VP1QtInventorUtils::getAllTransparencyTypes()) {
+	for(SoGLRenderAction::TransparencyType type : VP1QtInventorUtils::getAllTransparencyTypes()) {
 		QAction * act = drawstyle_transptype_menu->addAction(VP1QtInventorUtils::transparencyType2PrettyString(type));
 		act->setData(VP1QtInventorUtils::transparencyTypeToInt(type));
 		popup_transptype_actions << act;
@@ -2052,7 +2052,7 @@ bool VP1ExaminerViewer::Imp::ensureMenuInit()
 //	QList<float> offset_values;
 //	offset_values << 0 << 1000.00 << 5000.00 << 10000.00 << 20000.00;
 //
-//	foreach(float value, offset_values) {
+//	for(float value : offset_values) {
 //		QAction * act = stereo_set_offset_menu->addAction(QString::number(value));
 //		act->setData(QString::number(value));
 //		popup_stereo_offset_actions << act;
@@ -2074,7 +2074,7 @@ bool VP1ExaminerViewer::Imp::ensureMenuInit()
 //	QList<SoQtViewer::StereoType> stereo_type_values;
 //	stereo_type_values << SoQtViewer::STEREO_NONE << SoQtViewer::STEREO_ANAGLYPH;
 //
-//	foreach(SoQtViewer::StereoType value, getAllStereoViewTypes() ) {
+//	for(SoQtViewer::StereoType value : getAllStereoViewTypes() ) {
 //		QAction * act = stereo_set_type_menu->addAction(viewerStereoType2PrettyString(value));
 //		act->setData( viewerStereoTypeToInt(value) );
 //		popup_stereo_type_actions << act;
@@ -2092,7 +2092,7 @@ bool VP1ExaminerViewer::Imp::ensureMenuInit()
 //	QStringList options;
 //	options << "Standard Red-Cyan view" << "Left-eye only" << "Right-eye only";
 //
-//	foreach(QString value, options ) {
+//	for(QString value : options ) {
 //		QAction * act = stereo_set_anaglyph_menu->addAction(value);
 //		act->setData( value );
 //		popup_stereo_anaglyph_actions << act;
@@ -2129,7 +2129,7 @@ bool VP1ExaminerViewer::Imp::ensureMenuInit()
 //	QStringList options_camera;
 //	options_camera << "Standard view" << "Left-eye view" << "Right-eye view";
 //
-//	foreach(QString value, options_camera ) {
+//	for(QString value : options_camera ) {
 //		QAction * act = stereo_set_stereo_camera_view_menu->addAction(value);
 //		act->setData( value );
 //		popup_stereo_anaglyph_actions_camera << act;
@@ -2157,7 +2157,7 @@ void VP1ExaminerViewer::Imp::aboutToShowMenu(QMenu * menu)
 		storeViewActions << act;
 		if (!storedViews.isEmpty()) {
 			viewmenu_storecurrentview->addSeparator();
-			foreach(StoredView sv, storedViews) {
+			for(StoredView sv : storedViews) {
 				act = viewmenu_storecurrentview->addAction("Overwrite "+sv.name());
 				act->setIcon(sv.icon());
 				if (!fitsCurrentCamType(sv)) {
@@ -2174,7 +2174,7 @@ void VP1ExaminerViewer::Imp::aboutToShowMenu(QMenu * menu)
 	if (viewmenu_zoomtoview==menu) {
 		viewmenu_zoomtoview->clear();
 		zoomToViewActions.clear();
-		foreach(StoredView sv, storedViews) {
+		for(StoredView sv : storedViews) {
 			QAction * act = viewmenu_zoomtoview->addAction(sv.name());
 			act->setIcon(sv.icon());
 			if (!fitsCurrentCamType(sv)) {
@@ -2189,7 +2189,7 @@ void VP1ExaminerViewer::Imp::aboutToShowMenu(QMenu * menu)
 	if (viewmenu_restoreview==menu) {
 		viewmenu_restoreview->clear();
 		restoreViewActions.clear();
-		foreach(StoredView sv, storedViews) {
+		for(StoredView sv : storedViews) {
 			QAction * act = viewmenu_restoreview->addAction(sv.name());
 			act->setIcon(sv.icon());
 			act->setData(sv.name());
@@ -2200,7 +2200,7 @@ void VP1ExaminerViewer::Imp::aboutToShowMenu(QMenu * menu)
 	if (viewmenu_deleteview==menu) {
 		viewmenu_deleteview->clear();
 		deleteViewActions.clear();
-		foreach(StoredView sv, storedViews) {
+		for(StoredView sv : storedViews) {
 			QAction * act = viewmenu_deleteview->addAction(sv.name());
 			act->setIcon(sv.icon());
 			act->setData(sv.name());
@@ -2223,7 +2223,7 @@ void VP1ExaminerViewer::Imp::updatePopupMenuStates()
 	popup_hidedecorationsaction->setChecked(! theclass->isDecoration());
 
 	int idrawstyle_still = viewerDrawStyleToInt(theclass->getDrawStyle(SoQtViewer::STILL));
-	foreach (QAction * act, popup_drawstyle_still_actions) {
+	for (QAction * act : popup_drawstyle_still_actions) {
 		if (act->data().toInt() == idrawstyle_still) {
 			act->setChecked(true);
 			break;
@@ -2231,7 +2231,7 @@ void VP1ExaminerViewer::Imp::updatePopupMenuStates()
 	}
 
 	int idrawstyle_interactive = viewerDrawStyleToInt(theclass->getDrawStyle(SoQtViewer::INTERACTIVE));
-	foreach (QAction * act, popup_drawstyle_interactive_actions) {
+	for (QAction * act : popup_drawstyle_interactive_actions) {
 		if (act->data().toInt() == idrawstyle_interactive) {
 			act->setChecked(true);
 			break;
@@ -2239,7 +2239,7 @@ void VP1ExaminerViewer::Imp::updatePopupMenuStates()
 	}
 
 	int itransptype = VP1QtInventorUtils::transparencyTypeToInt(theclass->getTransparencyType());
-	foreach (QAction * act, popup_transptype_actions) {
+	for (QAction * act : popup_transptype_actions) {
 		if (act->data().toInt() == itransptype) {
 			act->setChecked(true);
 			break;
@@ -2556,7 +2556,7 @@ void VP1ExaminerViewer::showPopupMenu()
 		//Remove old stored views with that name (if any)
 		int i(0);
 		bool replaced(false);
-		foreach(Imp::StoredView oldsv, m_d->storedViews) {
+		for(Imp::StoredView oldsv : m_d->storedViews) {
 			if (oldsv.name()==name) {
 				m_d->storedViews.replace(i,sv);
 				replaced = true;
@@ -2575,7 +2575,7 @@ void VP1ExaminerViewer::showPopupMenu()
 		SoGroup * root = dynamic_cast<SoGroup*>(getSceneGraph());
 		SoCamera * camera = getCamera();
 		if (root&&camera) {
-			foreach(Imp::StoredView sv, m_d->storedViews) {
+			for(Imp::StoredView sv : m_d->storedViews) {
 				if (sv.name()==name) {
 					if (isAnimating())
 						stopAnimating();
@@ -2597,7 +2597,7 @@ void VP1ExaminerViewer::showPopupMenu()
 		SoGroup * root = dynamic_cast<SoGroup*>(getSceneGraph());
 		SoCamera * camera = getCamera();
 		if (root&&camera) {
-			foreach(Imp::StoredView sv, m_d->storedViews) {
+			for(Imp::StoredView sv : m_d->storedViews) {
 				if (sv.name()==name) {
 					if (!m_d->fitsCurrentCamType(sv))
 						toggleCameraType();
@@ -2619,7 +2619,7 @@ void VP1ExaminerViewer::showPopupMenu()
 	if (m_d->deleteViewActions.contains(selAct)) {
 		QString name = selAct->data().toString();
 		int i(0);
-		foreach(Imp::StoredView sv, m_d->storedViews) {
+		for(Imp::StoredView sv : m_d->storedViews) {
 			if (sv.name()==name) {
 				m_d->storedViews.removeAt(i);
 				break;

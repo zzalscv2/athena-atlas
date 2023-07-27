@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -94,14 +94,14 @@ void IVP12DStandardChannelWidget::addSystem( IVP12DSystem*system, const SystemOp
 
   assert(!m_d->system2itemcols.contains(system));
   m_d->system2itemcols.insert(system,system->getItemCollections());
-  foreach (VP1GraphicsItemCollection*ic,system->getItemCollections()) {
+  for (VP1GraphicsItemCollection*ic : system->getItemCollections()) {
     m_d->view->addItemCollection(ic);
   }
 
-  foreach (VP1GraphicsItemCollection* ic,system->getItemCollections()){
+  for (VP1GraphicsItemCollection* ic : system->getItemCollections()){
     m_d->view->setDisallowInteractions(ic, !handleSelections );
   }
-  foreach (VP1GraphicsItemCollection* ic,system->getItemCollections()){
+  for (VP1GraphicsItemCollection* ic : system->getItemCollections()){
     m_d->view->setDisallowMovable(ic, !allowMovable );
   }
 
@@ -174,7 +174,7 @@ void IVP12DStandardChannelWidget::Imp::updateSystemState(QCheckBox* cb)
   assert(system2itemcols.contains(sys));
   if (cb->isChecked()) {
     channel->turnOn(sys);
-    foreach(VP1GraphicsItemCollection*ic,system2itemcols.value(sys)) {
+    for(VP1GraphicsItemCollection*ic : system2itemcols.value(sys)) {
       ic->reattachToView();
     }
     if (tabwidget&&sys2tabpage.contains(sys)) {
@@ -203,7 +203,7 @@ void IVP12DStandardChannelWidget::Imp::updateSystemState(QCheckBox* cb)
   } else {
     //Fixme: if system being turned off has selections, we should deselect!!
     channel->turnOff(sys,false);
-    foreach(VP1GraphicsItemCollection*ic,system2itemcols.value(sys)) {
+    for(VP1GraphicsItemCollection*ic : system2itemcols.value(sys)) {
       ic->detachFromView();
     }
     if (tabwidget&&sys2tabpage.contains(sys)) {
