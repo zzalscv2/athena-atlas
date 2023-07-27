@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**    @file SCTErrMonTool.h
@@ -86,7 +86,7 @@ class SCTErrMonTool : public ManagedMonitorToolBase {
   int m_current_lb{0};
   int m_last_reset_lb{0};
 
-  std::string m_path{};
+  std::string m_gpath{};
 
   std::vector<moduleGeo_t> m_geo{};
 

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**    @file SCTTracksMonTool.h
@@ -67,7 +67,7 @@ class SCTTracksMonTool : public ManagedMonitorToolBase {
   static const std::string s_triggerNames[N_TRIGGER_TYPES];
 
   // Data members, which are not changed after initialization
-  std::string m_path{""};
+  std::string m_gpath{""};
 
   // Data members, which are changed during event processing
   // These have to be converted to local variables or be protected by std::atomic or std::mutex

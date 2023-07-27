@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*    @file SCTErrMonTool.cxx
@@ -875,8 +875,8 @@ SCTErrMonTool::bookConfMapsGen() {
     };
 
     std::string streamName{streamNameFunction()->getStreamName(this, ConfHist[GENERAL_INDEX], "", false)};
-    m_path = streamName.substr(0, streamName.rfind("SCT/GENERAL/Conf"));
-    ATH_MSG_INFO("Global Path :" << m_path);
+    m_gpath = streamName.substr(0, streamName.rfind("SCT/GENERAL/Conf"));
+    ATH_MSG_INFO("Global Path :" << m_gpath);
 
     if (m_makeConfHisto or testOffline) {
       m_DetailedConfiguration = TProfile_LW::create("SCTConfDetails", "Exclusion from the Configuration",
@@ -980,7 +980,7 @@ SCTErrMonTool::bookConfMapsGen() {
           ATH_MSG_WARNING("Cannot book Histogram:SCTConfNoiseOnlineRecent");
         }
       }
-      ATH_MSG_DEBUG("Finished registering Conf Histograms :" << m_path);
+      ATH_MSG_DEBUG("Finished registering Conf Histograms :" << m_gpath);
     }// end if m_makeConfHisto or testOffline
   }// end if isNewRun
   return StatusCode::SUCCESS;
@@ -1265,13 +1265,13 @@ SCTErrMonTool::getHisto(const int layer, const int reg, const int type, TH2* his
     {"SCT/SCTEC/Noise/noiseoccupancymaptriggerECm_", "SCT/SCTB/Noise/noiseoccupancymaptrigger_", "SCT/SCTEA/Noise/noiseoccupancymaptriggerECp_"},
     {"SCT/SCTEC/eff/ineffm_", "SCT/SCTB/eff/ineff_", "SCT/SCTEA/eff/ineffp_"}
   };
-  std::string shname1{m_path + trm[type][reg] + std::to_string(layer)};
-  std::string shname2{m_path + trm[type][reg] + std::to_string(layer)};
+  std::string shname1{m_gpath + trm[type][reg] + std::to_string(layer)};
+  std::string shname2{m_gpath + trm[type][reg] + std::to_string(layer)};
 
   if (testOffline or ((m_environment != AthenaMonManager::online) and
                       (AthenaMonManager::dataType() != AthenaMonManager::cosmics))) {
-    shname1 = m_path + trm_trig[type][reg] + std::to_string(layer);
-    shname2 = m_path + trm_trig[type][reg] + std::to_string(layer);
+    shname1 = m_gpath + trm_trig[type][reg] + std::to_string(layer);
+    shname2 = m_gpath + trm_trig[type][reg] + std::to_string(layer);
   }
   if ((type==0) or (type==1)) {
     shname1 += "_0";
@@ -1316,8 +1316,8 @@ SCTErrMonTool::getHistoRecent(const int layer, const int reg, const int type, TH
   static const std::string trm[1][N_REGIONS] = {
     {"SCT/SCTEC/Noise/noiseoccupancymaprecentECm_", "SCT/SCTB/Noise/noiseoccupancymaprecent_", "SCT/SCTEA/Noise/noiseoccupancymaprecentECp_"}
   };
-  std::string shname1{m_path + trm[type][reg] + std::to_string(layer) + "_0"};
-  std::string shname2{m_path + trm[type][reg] + std::to_string(layer) + "_1"};
+  std::string shname1{m_gpath + trm[type][reg] + std::to_string(layer) + "_0"};
+  std::string shname2{m_gpath + trm[type][reg] + std::to_string(layer) + "_1"};
 
   bool failedBooking{false};
   histo[0] = nullptr;

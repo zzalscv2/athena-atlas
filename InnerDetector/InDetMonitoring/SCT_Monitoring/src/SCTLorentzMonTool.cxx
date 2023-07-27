@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**    @file SCTLorentzMonTool.cxx
@@ -64,7 +64,7 @@ StatusCode SCTLorentzMonTool::initialize() {
 // ====================================================================================================
 StatusCode
 SCTLorentzMonTool::bookHistogramsRecurrent( ) {
-  m_path = "";
+  m_gpath = "";
   ATH_MSG_DEBUG("initialize being called");
   // Booking  Track related Histograms
   if (bookLorentzHistos().isFailure()) {
@@ -78,7 +78,7 @@ SCTLorentzMonTool::bookHistogramsRecurrent( ) {
 // ====================================================================================================
 StatusCode
 SCTLorentzMonTool::bookHistograms( ) {
-  m_path = "";
+  m_gpath = "";
   ATH_MSG_DEBUG("initialize being called");
   // Booking  Track related Histograms
   if (bookLorentzHistos().isFailure()) {
@@ -271,8 +271,8 @@ SCTLorentzMonTool::checkHists(bool /*fromFinalize*/) {
 // ====================================================================================================
 StatusCode
 SCTLorentzMonTool::bookLorentzHistos() {
-  const std::string stem{m_path + "/SCT/GENERAL/lorentz/"};
-  MonGroup Lorentz{this, m_path + "SCT/GENERAL/lorentz", run, ATTRIB_UNMANAGED};
+  const std::string stem{m_gpath + "/SCT/GENERAL/lorentz/"};
+  MonGroup Lorentz{this, m_gpath + "SCT/GENERAL/lorentz", run, ATTRIB_UNMANAGED};
 
   static const std::string hNum[N_BARRELS] = {
     "0", "1", "2", "3"
