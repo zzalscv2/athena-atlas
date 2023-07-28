@@ -32,6 +32,7 @@ class TauCalibrationConfig (ConfigBlock):
             config.addPrivateTool( 'matchingTool',
                                    'TauAnalysisTools::TauTruthMatchingTool' )
             alg.matchingTool.WriteTruthTaus = 1
+            alg.matchingTool.TruthJetContainerName = 'AntiKt4TruthDressedWZJets'
             alg.taus = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
 
