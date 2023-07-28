@@ -132,10 +132,8 @@ StatusCode MuonTruthAssociationAlg::execute(const EventContext& ctx) const {
                 for (const xAOD::TruthParticle* truthParticle : *muonTruthContainer) {
                     if (!MC::isStable(truthParticle)) continue;
                     ATH_MSG_DEBUG("Got truth muon with barcode " << truthParticle->barcode() << " pt " << truthParticle->pt());
-                    if (((*truthLink)->barcode() % HepMC::SIM_REGENERATION_INCREMENT) != truthParticle->barcode()) {
-                        ATH_MSG_VERBOSE("Barcode truth link: " << (*truthLink)->barcode() << " HepMC::SIM_REGENERATION_INCREMENT:  " << HepMC::SIM_REGENERATION_INCREMENT << " --> "
-                                                               << ((*truthLink)->barcode() % HepMC::SIM_REGENERATION_INCREMENT)
-                                                               << " != " << truthParticle->barcode());
+                    if ( !HepMC::is_same_generator_particle(*truthLink, truthParticle)) {
+                        ATH_MSG_VERBOSE("Barcode truth link: " << (*truthLink)->barcode() << " is not related to  " << truthParticle->barcode());
                         continue;
                     }
                     ATH_MSG_VERBOSE("Truth muon barcode matches -> creating link with truth particle " << (*truthLink)->barcode());
