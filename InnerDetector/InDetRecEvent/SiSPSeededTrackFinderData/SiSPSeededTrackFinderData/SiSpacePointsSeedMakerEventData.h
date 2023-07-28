@@ -16,6 +16,8 @@
 #include "SiSPSeededTrackFinderData/ITkSiSpacePointForSeed.h"
 #include "SiSPSeededTrackFinderData/SiSpacePointsProSeed.h"
 #include "SiSPSeededTrackFinderData/ITkSiSpacePointsProSeed.h"
+#include "SiSpacePoint/SCT_SpacePoint.h"
+#include "SiSpacePoint/PixelSpacePoint.h"
 
 //custom allocator
 #include "AthAllocators/ArenaPoolSTLAllocator.h"
@@ -213,6 +215,9 @@ namespace InDet {
     std::list<ITk::SiSpacePointForSeed>::iterator i_ITkSpacePointForSeed;
 
     std::vector<const xAOD::SpacePoint*> v_ActsSpacePointForSeed;  //<! list of acts space points considered for seed building.
+    std::vector<std::unique_ptr<InDet::PixelSpacePoint>> v_PixelSpacePointForSeed; 
+    std::vector<ITk::SiSpacePointForSeed> v_PixelSiSpacePointForSeed;
+    std::map<std::pair<std::size_t, std::size_t>, std::unique_ptr<InDet::SCT_SpacePoint>> v_StripSpacePointForSeed;
 
     SiSpacePointsSeedPoolList l_seeds;
     SiSpacePointsSeedPoolList::iterator i_seed;
