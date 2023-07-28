@@ -122,18 +122,23 @@ ATLAS_EXT_PROJECT_TAG=$(grep "${ATLAS_EXT_PROJECT_NAME}"                       \
                         ${ATLAS_PROJECT_DIR}/externals.txt                     |
                         sed "s/${ATLAS_EXT_PROJECT_NAME}Version = \(.*\)/\1/g" )
 
-# Generate hash of any extra (c)make arguments.
-cmakehash=$(echo -n "${ATLAS_EXTRA_CMAKE_ARGS[@]};${ATLAS_EXTRA_MAKE_ARGS[@]}" |
-            openssl md5 | awk '{print $2}')
+# Helper to create a "stamp" file that contains all relevant settings and versions
+# of this externals build. This is used to decide if a rebuild is needed.
+create_stamp_file() {
+   stamp_file=$1
+   # The actual externals version:
+   cp "${ATLAS_PROJECT_DIR}/externals.txt" "${stamp_file}"
+   # Add any other relevant settings:
+   echo "# ${ATLAS_EXTRA_CMAKE_ARGS[@]};${ATLAS_EXTRA_MAKE_ARGS[@]}" >> "${stamp_file}"
+}
 
 # Check if previous externals build can be reused.
-externals_stamp="${ATLAS_BUILD_DIR}/build/${ATLAS_EXT_PROJECT_NAME}/externals-${ATLAS_PROJECT_VERSION}-${cmakehash}.stamp"
+externals_stamp="${ATLAS_BUILD_DIR}/build/${ATLAS_EXT_PROJECT_NAME}/externals-${ATLAS_PROJECT_VERSION}.stamp"
 if [ -f "${externals_stamp}" ]; then
-   if diff -q "${externals_stamp}" "${ATLAS_PROJECT_DIR}/externals.txt"; then
+   create_stamp_file "${externals_stamp}.tmp"
+   if diff -q "${externals_stamp}" "${externals_stamp}.tmp"; then
       echo "Correct version of externals already available in ${ATLAS_BUILD_DIR}"
       exit 0
-   else
-      rm ${externals_stamp}
    fi
 fi
 
@@ -195,6 +200,6 @@ if [ ${ERROR_COUNT} -ne 0 ]; then
         rm -rf "${ATLAS_BUILD_DIR}/build/${ATLAS_EXT_PROJECT_NAME}/${BINARY_TAG}"
     fi
 else
-    cp "${ATLAS_PROJECT_DIR}/externals.txt" "${externals_stamp}"
+    create_stamp_file "${externals_stamp}"
 fi
 exit ${ERROR_COUNT}
