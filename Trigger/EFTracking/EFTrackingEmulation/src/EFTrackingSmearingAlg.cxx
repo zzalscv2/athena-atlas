@@ -215,7 +215,6 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
   //FakeTrackSmearer *mySmearer=(FakeTrackSmearer *) m_mySmearer;
   mySmearer->Clear();
 
-  int trackno=0;
   int n_input_tracks=0;
   int n_output_tracks=0;
   int n_output_broad_tracks=0;
@@ -297,7 +296,6 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
       	    } // end of loop                      
 	      }
       mySmearer->Clear(); // clear the smearer after each input track
-      trackno++;
     }
 
   ATH_MSG_DEBUG ("End of loop track #"<<n_input_tracks<<" ---> "<<" "<< n_output_tracks
@@ -335,7 +333,7 @@ StatusCode EFTrackingSmearingAlg::execute() {
   FakeTrackSmearer *mySmearer=(FakeTrackSmearer *) m_mySmearer;
   mySmearer->Clear();
 
-  int trackno=0;
+  //int trackno=0;
   int n_input_tracks=0;
   int n_output_tracks=0;
   int n_output_broad_tracks=0;
@@ -477,7 +475,7 @@ StatusCode EFTrackingSmearingAlg::execute() {
             
 	      }
         mySmearer->Clear(); // clear teh smearer after each input track
-        trackno++;
+        //trackno++;
       }
 
   ATH_MSG_DEBUG ("End of loop track #"<<n_input_tracks<<" ---> "<<" "<< n_output_tracks
