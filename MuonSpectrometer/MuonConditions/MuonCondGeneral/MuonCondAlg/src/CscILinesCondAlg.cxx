@@ -160,9 +160,7 @@ StatusCode CscILinesCondAlg::loadDataFromLegacy(const std::string& data, nlohman
 StatusCode CscILinesCondAlg::parseDataFromJSON(const nlohmann::json& lines,
                                                ALineContainer& writeCdo) const{
     
-    unsigned int nLines{0}, nDecodedLines{0};
      for (auto& corr : lines.items()) {
-        ++nLines;
         nlohmann::json line = corr.value();
         ALinePar newILine{};
 
@@ -192,7 +190,6 @@ StatusCode CscILinesCondAlg::parseDataFromJSON(const nlohmann::json& lines,
         newILine.setParameters(line["tras"], line["traz"], line["trat"], 
                                 line["rots"], line["rotz"], line["rott"]);
         // new Iline
-        ++nDecodedLines;
         const auto insertItr = writeCdo.insert(newILine);
         if (!insertItr.second) {
             ATH_MSG_FATAL("Could not insert "<<newILine<<" as "<<(*insertItr.first)<<" has already been safed before" );
