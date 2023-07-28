@@ -57,7 +57,9 @@ public:
   /** @brief Set bar code */ 
   void SetBarCode(int theCode){m_barCode=theCode;}
   /** @brief bar code */ 
-  int GetBarCode() const {return m_barCode;}
+  int GetBarCode() const {return m_barCode;}  
+  /** @brief bar code. Alias function. */ 
+  int barcode() const {return GetBarCode();}
   /** @brief Set Volume name */ 
   void SetVolName(const std::string& theName){m_volName=theName;}
   /** @brief Volume name */ 

@@ -9,6 +9,7 @@
 #include <limits> 
 #include <cstdint> 
 #include <memory>
+#include <type_traits>
 #if  defined(HEPMC3) && !defined(XAOD_STANDALONE)
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
@@ -66,5 +67,13 @@ template <>  inline bool is_simulation_vertex(const GenVertexPtr& p){ return (ba
 #endif
 
 
+template <class T1,class T2, std::enable_if_t< !std::is_arithmetic<T1>::value &&  !std::is_arithmetic<T2>::value, bool> = true >
+inline bool is_same_generator_particle(const T1& p1,const T2& p2) { return p1->barcode() % SIM_REGENERATION_INCREMENT == p2->barcode() % SIM_REGENERATION_INCREMENT; }
+
+template <class T1,class T2, std::enable_if_t< !std::is_arithmetic<T1>::value &&  std::is_arithmetic<T2>::value, bool> = true >
+inline bool is_same_generator_particle(const T1& p1,const T2& p2) { return p1->barcode() % SIM_REGENERATION_INCREMENT == p2 % SIM_REGENERATION_INCREMENT; }
+
+template <class T1,class T2, std::enable_if_t< std::is_arithmetic<T1>::value &&  std::is_arithmetic<T2>::value, bool> = true >
+inline bool is_same_generator_particle(const T1& p1,const T2& p2) { return p1 % SIM_REGENERATION_INCREMENT == p2 % SIM_REGENERATION_INCREMENT; }
 }
 #endif
