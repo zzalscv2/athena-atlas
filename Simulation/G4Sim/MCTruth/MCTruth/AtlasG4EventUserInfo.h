@@ -14,8 +14,7 @@
 class AtlasG4EventUserInfo: public G4VUserEventInformation {
 public:
         AtlasG4EventUserInfo(): G4VUserEventInformation(),m_nrOfPrimaryParticles(0),
-                        m_nrOfPrimaryVertices(0),m_secondaryParticleBarCode(HepMC::SIM_BARCODE_THRESHOLD),
-                        m_secondaryVertexBarCode(-HepMC::SIM_BARCODE_THRESHOLD),m_theEvent(0),
+                        m_nrOfPrimaryVertices(0),m_theEvent(0),
                         m_currentPrimary(0),m_currentlyTraced(0),
                         m_last_processed_barcode(0),m_last_processed_step(0) {}
         HepMC::GenEvent* GetHepMCEvent() ;
@@ -36,10 +35,7 @@ public:
 
         HepMC::GenParticlePtr GetCurrentlyTraced() {return m_currentlyTraced;}
         HepMC::ConstGenParticlePtr GetCurrentlyTraced() const {return m_currentlyTraced;}
-        int SecondaryParticleBarCode() {m_secondaryParticleBarCode++;
-                                        return m_secondaryParticleBarCode;}
-        int SecondaryVertexBarCode() {m_secondaryVertexBarCode--;
-                                      return m_secondaryVertexBarCode;}
+
         int GetLastProcessedBarcode() const { return m_last_processed_barcode; }
         void SetLastProcessedBarcode(int b) { m_last_processed_barcode = b; }
         int GetLastProcessedStep() const { return m_last_processed_step; }
@@ -49,8 +45,6 @@ private:
         G4ThreeVector m_vertexPosition;
         int m_nrOfPrimaryParticles;
         int m_nrOfPrimaryVertices;
-        int m_secondaryParticleBarCode;
-        int m_secondaryVertexBarCode;
         HepMC::GenEvent *m_theEvent;
         HepMC::ConstGenParticlePtr m_currentPrimary;
         HepMC::GenParticlePtr m_currentlyTraced;
