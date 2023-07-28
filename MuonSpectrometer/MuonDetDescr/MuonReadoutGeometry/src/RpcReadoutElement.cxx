@@ -25,7 +25,6 @@
 #include "GeoModelKernel/GeoFullPhysVol.h"
 #include "GeoModelUtilities/GeoVisitVolumes.h"
 #include "MuonReadoutGeometry/GenericRPCCache.h"
-#include "MuonReadoutGeometry/RpcReadoutSet.h"
 #include "TrkSurfaces/PlaneSurface.h"
 #include "TrkSurfaces/RectangleBounds.h"
 #include "TrkSurfaces/Surface.h"
@@ -47,7 +46,7 @@ namespace MuonGM {
         setCachingFlag(mgr->cachingFlag());
 
         m_descratzneg = (zi < 0 && !is_mirrored);
-       
+
 
         setStationName(stName);
 
@@ -661,7 +660,12 @@ namespace MuonGM {
         // we want to have the distance from the side of the phi readout (length travelled along a phi strip) from a signal produced at P)
         // m_set will not be null but be initialized in "initDesign()" earlier
         // if it is null the code should crash! - because we're time-critical here a check for null was not implemented
-        unsigned int ndbz = m_set->NdoubletZ();
+        unsigned int ndbz{0};
+        for (int dbz = 1 ; dbz <= m_idHelper.doubletZMax(identify()); ++dbz) {
+            const Identifier dbzId = m_idHelper.channelID(identify(), dbz, 1, 1, 0, 1);
+            ndbz+=(manager()->getRpcReadoutElement(dbzId) != nullptr);
+        }
+
         double dist = -999.;
         double zPoint = P.z();
         double Zsizehalf = getZsize() / 2.;
@@ -834,8 +838,6 @@ namespace MuonGM {
 
             m_etaDesigns.push_back(etaDesign);
         }
-
-        m_set = std::make_unique<RpcReadoutSet>(manager(), identify());
     }
 
 #if defined(FLATTEN) && defined(__GNUC__)

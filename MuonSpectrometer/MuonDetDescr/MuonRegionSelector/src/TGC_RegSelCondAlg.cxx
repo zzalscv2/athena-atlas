@@ -25,12 +25,7 @@
 
 
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
-#include "MuonReadoutGeometry/MuonReadoutElement.h" 
-#include "MuonReadoutGeometry/MdtReadoutElement.h"
-#include "MuonReadoutGeometry/CscReadoutElement.h"
-#include "MuonReadoutGeometry/RpcReadoutElement.h"
 #include "MuonReadoutGeometry/TgcReadoutElement.h"
-#include "MuonReadoutGeometry/RpcReadoutSet.h"
 #include "MuonReadoutGeometry/MuonStation.h"
 
 #include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"

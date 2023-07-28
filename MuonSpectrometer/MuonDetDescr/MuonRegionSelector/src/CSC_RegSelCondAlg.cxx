@@ -8,7 +8,7 @@
  **   @date   Sun 22 Sep 2019 10:21:50 BST
  **
  **
- **   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -27,12 +27,7 @@
 #include "CSCcabling/CSCcablingSvc.h"
 
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
-#include "MuonReadoutGeometry/MuonReadoutElement.h" 
-#include "MuonReadoutGeometry/MdtReadoutElement.h"
 #include "MuonReadoutGeometry/CscReadoutElement.h"
-#include "MuonReadoutGeometry/RpcReadoutElement.h"
-#include "MuonReadoutGeometry/TgcReadoutElement.h"
-#include "MuonReadoutGeometry/RpcReadoutSet.h"
 #include "MuonReadoutGeometry/MuonStation.h"
 
 

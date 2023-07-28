@@ -25,7 +25,6 @@
 #include "MuonRDO/RpcFiredChannel.h"
 #include "MuonRDO/RpcPad.h"
 #include "MuonRDO/RpcPadContainer.h"
-#include "MuonReadoutGeometry/RpcReadoutSet.h"
 namespace {
 static constexpr int maxPRD = 50000;
 
