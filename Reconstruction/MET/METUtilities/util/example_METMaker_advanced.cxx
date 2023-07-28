@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //Author: Russell Smith
@@ -242,8 +242,8 @@ int main( int argc, char* argv[] ){std::cout << __PRETTY_FUNCTION__ << std::endl
 
 
     //this builds the final track and cluster met sums, using systematic varied container
-    ANA_CHECK( met::buildMETSum("FinalTrk" , newMetContainer, MissingETBase::Source::Track ) );
-    ANA_CHECK( met::buildMETSum("FinalClus", newMetContainer, MissingETBase::Source::LCTopo) );
+    ANA_CHECK( met::buildMETSum("FinalTrk" , newMetContainer, static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::Track)) );
+    ANA_CHECK( met::buildMETSum("FinalClus", newMetContainer, static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::LCTopo)) );
 
     ANA_CHECK(store->record( newMetContainer,    "FinalMETContainer"    ));
     ANA_CHECK(store->record( newMetAuxContainer, "FinalMETContainerAux."));

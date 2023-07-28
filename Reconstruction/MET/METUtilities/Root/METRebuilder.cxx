@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METRebuilder.cxx
@@ -421,7 +421,7 @@ namespace met {
     MissingET* metSoft = (*metCont)[softKey];
     const MissingETComponent* comp_softtrk(0);
     if(m_doSTVF) {
-      comp_softtrk = MissingETComposition::getComponent(metMap,MissingETBase::Source::SoftEvent|MissingETBase::Source::idTrack());
+      comp_softtrk = MissingETComposition::getComponent(metMap,MissingETBase::Source::Type::SoftEvent|MissingETBase::Source::idTrack());
       if(!comp_softtrk) {
 	ATH_MSG_WARNING("Could not retrieve soft track component -- STVF calculation failed!");
 	return StatusCode::FAILURE;

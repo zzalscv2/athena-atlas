@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TopSystematicObjectMaker/MissingETObjectCollectionMaker.h"
@@ -302,7 +302,7 @@ namespace top {
     // Total MET = RefEle + RefPhoton + RefTau + RefMuon + RefJet + PVSoftTrk (Track Soft Term)
     top::check(met::buildMETSum("FinalTrk",
                                 new_met_container,
-                                MissingETBase::Source::Track),
+                                static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::Track)),
                "Failed to rebuild Final Track MET");
     if(m_config->METSignificance()){
       const xAOD::EventInfo* eventInfo(nullptr);

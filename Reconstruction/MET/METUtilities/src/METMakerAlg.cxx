@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "METMakerAlg.h"
@@ -261,12 +261,12 @@ namespace met {
 		  << acc_constitObjLinks(*(*newMet)["RefJet"]).size() << " are non-overlapping, "
 		  << acc_constitObjLinks(*(*newMet)[m_softtrkname]).size() << " are soft");
 
-    MissingETBase::Types::bitmask_t trksource = MissingETBase::Source::Track;
+    MissingETBase::Types::bitmask_t trksource = static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::Track);
     if((*newMet)[m_softtrkname]) trksource = (*newMet)[m_softtrkname]->source();
     if( buildMETSum("FinalTrk", newMet, trksource).isFailure() ){
       ATH_MSG_WARNING("Building MET FinalTrk sum failed.");
     }
-    MissingETBase::Types::bitmask_t clsource = MissingETBase::Source::LCTopo;
+    MissingETBase::Types::bitmask_t clsource = static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::LCTopo);
     if((*newMet)[m_softclname]) clsource = (*newMet)[m_softclname]->source();
     if( buildMETSum("FinalClus", newMet, clsource).isFailure() ) {
       ATH_MSG_WARNING("Building MET FinalClus sum failed.");

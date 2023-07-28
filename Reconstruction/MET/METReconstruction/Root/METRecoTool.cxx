@@ -161,7 +161,7 @@ namespace met {
       // FIXME: Make a genuine decision about whether
       //        to include terms in the sum here.
       ///////////////////////////////////////////////////
-      if( m_doMetSum && MissingETBase::Source::hasCategory(metTerm->source(),MissingETBase::Source::Refined) ) {
+      if( m_doMetSum && MissingETBase::Source::hasCategory(metTerm->source(),MissingETBase::Source::Category::Refined) ) {
         ATH_MSG_DEBUG("Adding constructed term: " << metTerm->name() << " to sum" );
         (*metFinal) += (*metTerm);
       }

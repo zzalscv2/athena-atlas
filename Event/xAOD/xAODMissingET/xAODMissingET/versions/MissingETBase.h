@@ -20,6 +20,8 @@
 #define EXTRACT_SCALED_PY( _T_, _V_, _P_, _S_ )	\
   _T_ _V_(_P_.p4().Py()*_S_)
 
+#include "CxxUtils/bitmask.h"
+
 #include <cstddef>
 #include <cmath>
 #include <vector>
@@ -160,46 +162,61 @@ namespace MissingETBase
       /*! @name Bitmasks for MET source indicators */
       /*!@{*/
       /*! @brief Source category tag */
-      enum Category  { Refined         = 0x10000,   /*!< @brief Indicator for genuine reconstructed MET terms */ 
-		       Truth           = 0x20000,   /*!< @brief Indicator for MET terms from the particle level (MC truth) event */
-		       Calo            = 0x40000,   /*!< @brief Indicator for MET terms reconstructed from calorimeter signals alone */
-		       ID              = 0x80000,   /*!< @brief Indicator for MET terms reconstructed from inner detector (ID) tracks alone */
-		       UnknownCategory = 0x00000    /*!< @brief Indicator for an unknown category */ };
+      enum class Category : Types::bitmask_t {
+        Refined         = 0x10000,   /*!< @brief Indicator for genuine reconstructed MET terms */
+        Truth           = 0x20000,   /*!< @brief Indicator for MET terms from the particle level (MC truth) event */
+        Calo            = 0x40000,   /*!< @brief Indicator for MET terms reconstructed from calorimeter signals alone */
+        ID              = 0x80000,   /*!< @brief Indicator for MET terms reconstructed from inner detector (ID) tracks alone */
+        UnknownCategory = 0x00000,   /*!< @brief Indicator for an unknown category */
+        ATH_BITMASK
+      };
       /*! @brief Physics contribution types category */
-      enum Type      { Electron    = 0x00001,   /*!< @brief Indicator for the MET term from reconstructed or MC truth electrons */ 
-		       Photon      = 0x00002,   /*!< @brief Indicator for the MET term from reconstructed or MC truth electrons */
-		       Tau         = 0x00004,   /*!< @brief Indicator for the MET term from reconstructed or MC truth tau leptons */
-		       Muon        = 0x00008,   /*!< @brief Indicator for the MET term from reconstructed or MC truth muons */
-		       Jet         = 0x00010,   /*!< @brief Indicator for the MET term from reconstructed or MC truth particle jets */ 
-		       SoftEvent   = 0x00020,   /*!< @brief Indicator for the MET term from reconstructed soft event signals (tracks, clusters) or MC truth particles not contributing
-						 *         to any other (hard) final state object. */
-		       Total       = 0x00040,   /*!< @brief Indicator for the total reconstructed MET (sum of MET terms from reconstruction and MC truth particles) */
-		       UnknownType = 0x00000    /*!< @brief Indicator for an unknown MET term source */ };
+      enum class Type : Types::bitmask_t {
+        Electron    = 0x00001,   /*!< @brief Indicator for the MET term from reconstructed or MC truth electrons */
+        Photon      = 0x00002,   /*!< @brief Indicator for the MET term from reconstructed or MC truth electrons */
+        Tau         = 0x00004,   /*!< @brief Indicator for the MET term from reconstructed or MC truth tau leptons */
+        Muon        = 0x00008,   /*!< @brief Indicator for the MET term from reconstructed or MC truth muons */
+        Jet         = 0x00010,   /*!< @brief Indicator for the MET term from reconstructed or MC truth particle jets */
+        SoftEvent   = 0x00020,   /*!< @brief Indicator for the MET term from reconstructed soft event signals (tracks, clusters) or MC truth particles not contributing
+                                  *         to any other (hard) final state object. */
+        Total       = 0x00040,   /*!< @brief Indicator for the total reconstructed MET (sum of MET terms from reconstruction and MC truth particles) */
+        UnknownType = 0x00000,   /*!< @brief Indicator for an unknown MET term source */
+        ATH_BITMASK
+      };
       /*! @brief Regional tags
        *
        *  These regional tags indicate MET contributions from three regions in ATLAS (central, endcap, and forward). The particular ranges in pseudorapidity (@f$ \eta @f$)
        *  defining these regions are set in the tools calculating the respective MET terms.
        */
-      enum Region    { Central        = 0x00100,  /*!< @brief Indicator for MET contribution from the central region */
-		       Endcap         = 0x00200,  /*!< @brief Indicator for MET contribution from the endcap region */
-		       Forward        = 0x00400,  /*!< @brief Indicator for MET contribution from the forward region */
-		       FullAcceptance = 0x00000,  /*!< @brief Indicator for full detector acceptance contribution */
-		       UnknownRegion  = 0x00000   /*!< @brief Indicator for unknown region (same as full acceptance contribution) */ };
+      enum class Region : Types::bitmask_t {
+        Central        = 0x00100,  /*!< @brief Indicator for MET contribution from the central region */
+        Endcap         = 0x00200,  /*!< @brief Indicator for MET contribution from the endcap region */
+        Forward        = 0x00400,  /*!< @brief Indicator for MET contribution from the forward region */
+        FullAcceptance = 0x00000,  /*!< @brief Indicator for full detector acceptance contribution */
+        UnknownRegion  = 0x00000,   /*!< @brief Indicator for unknown region (same as full acceptance contribution) */
+        ATH_BITMASK
+      };
       /*! @brief Truth type indicators 
        *
        *  These indicators are only applicable for MC generated events. The types have the Truth category bit set. 
        */
-      enum TruthType { NonInt       = 0x21000, /*!< @brief Indicator for MET from non-interacting particles generated in the collision */
-		       Int          = 0x22000, /*!< @brief Indicator for MET from interacting particles within the nominal @f$ \eta @f$ acceptance of the detector */
-		       IntOut       = 0x24000, /*!< @brief Indicator for MET contributions from particles outside of the @f$ \eta @f$ acceptance of the detector (typically between
-						*          edge of the detector and the maximum @f$ \eta @f$ for "stable" particle production used in the MC generation) */
-		       TruthMuons   = 0x28000, /*!< @brief Indicator for muons from MC truth (muons from the interaction) */
-		       UnknownTruth = 0x00000  /*!< @brief Unknown truth type indicator */ };
+      enum class TruthType : Types::bitmask_t {
+        NonInt       = 0x21000, /*!< @brief Indicator for MET from non-interacting particles generated in the collision */
+        Int          = 0x22000, /*!< @brief Indicator for MET from interacting particles within the nominal @f$ \eta @f$ acceptance of the detector */
+        IntOut       = 0x24000, /*!< @brief Indicator for MET contributions from particles outside of the @f$ \eta @f$ acceptance of the detector (typically between
+                                 *          edge of the detector and the maximum @f$ \eta @f$ for "stable" particle production used in the MC generation) */
+        TruthMuons   = 0x28000, /*!< @brief Indicator for muons from MC truth (muons from the interaction) */
+        UnknownTruth = 0x00000,  /*!< @brief Unknown truth type indicator */
+        ATH_BITMASK
+      };
       /*! @brief Signal contribution types */
-      enum Signal    { LCTopo        = 0x01000, /*!< @brief Indicator for MET contribution from TopoClusters with LCW calibration applied */ 
-		       EMTopo        = 0x02000, /*!< @brief Indicator for MET contribution from TopoClusters with EM (basic signal) calibration applied */ 
-		       Track         = 0x04000, /*!< @brief Indicator for MET contribution from reconstructed charged particle tracks */
-		       UnknownSignal = 0x00000  /*!< @brief Unknown signal contribution */ };
+      enum class Signal : Types::bitmask_t {
+        LCTopo        = 0x01000, /*!< @brief Indicator for MET contribution from TopoClusters with LCW calibration applied */
+        EMTopo        = 0x02000, /*!< @brief Indicator for MET contribution from TopoClusters with EM (basic signal) calibration applied */
+        Track         = 0x04000, /*!< @brief Indicator for MET contribution from reconstructed charged particle tracks */
+        UnknownSignal = 0x00000,  /*!< @brief Unknown signal contribution */
+        ATH_BITMASK
+      };
 
       /*! @name Bit mask constructors for pre-defined MET physics object contributions */
       /*!@{*/
@@ -209,49 +226,49 @@ namespace MissingETBase
        *
        *  @param[in] reg regional indicator bit pattern (optional, default is FullAcceptance)
        */		      
-      static Types::bitmask_t electron(Region reg=FullAcceptance)                      { return ( Refined | Electron  ) | reg; }
+      static Types::bitmask_t electron(Region reg=Region::FullAcceptance)                      { return ( Category::Refined | Type::Electron  ) | reg; }
       /*! @brief Standard MET term from reconstructed photons
        *
        *  @return Default bit pattern for the photon MET term indicator. It can optional be OR'ed with a regional tag.
        *
        *  @param[in] reg regional indicator bit pattern (optional, default is FullAcceptance)
        */		      
-      static Types::bitmask_t photon(Region reg=FullAcceptance)                        { return ( Refined | Photon    ) | reg; }
+      static Types::bitmask_t photon(Region reg=Region::FullAcceptance)                        { return ( Category::Refined | Type::Photon    ) | reg; }
       /*! @brief Standard MET term from reconstructed tau leptons
        *
        *  @return Default bit pattern for the tau MET term indicator. It can optional be OR'ed with a regional tag.
        *
        *  @param[in] reg regional indicator bit pattern (optional, default is FullAcceptance)
        */		      
-      static Types::bitmask_t tau(Region reg=FullAcceptance)                           { return ( Refined | Tau       ) | reg; }
+      static Types::bitmask_t tau(Region reg=Region::FullAcceptance)                           { return ( Category::Refined | Type::Tau       ) | reg; }
       /*! @brief Standard MET term from reconstructed muons
        *
        *  @return Default bit pattern for the muon MET term indicator. It can optional be OR'ed with a regional tag.
        *
        *  @param[in] reg regional indicator bit pattern (optional, default is FullAcceptance)
        */		      
-      static Types::bitmask_t muon(Region reg=FullAcceptance)                          { return ( Refined | Muon      ) | reg; }
+      static Types::bitmask_t muon(Region reg=Region::FullAcceptance)                          { return ( Category::Refined | Type::Muon      ) | reg; }
       /*! @brief Standard MET term from reconstructed jets
        *
        *  @return Default bit pattern for the jet MET term indicator. It can optional be OR'ed with a regional tag.
        *
        *  @param[in] reg regional indicator bit pattern (optional, default is FullAcceptance)
        */		      
-      static Types::bitmask_t jet(Region reg=FullAcceptance)                           { return ( Refined | Jet       ) | reg; }
+      static Types::bitmask_t jet(Region reg=Region::FullAcceptance)                           { return ( Category::Refined | Type::Jet       ) | reg; }
       /*! @brief Standard MET term from reconstructed soft event
        *
        *  @return Default bit pattern for the soft event MET term indicator. It can optional be OR'ed with a regional tag.
        *
        *  @param[in] reg regional indicator bit pattern (optional, default is FullAcceptance)
        */		      
-      static Types::bitmask_t softEvent(Region reg=FullAcceptance)                     { return ( Refined | SoftEvent ) | reg; }
+      static Types::bitmask_t softEvent(Region reg=Region::FullAcceptance)                     { return ( Category::Refined | Type::SoftEvent ) | reg; }
       /*! @brief Standard full reconstructed MET
        *
        *  @return Default bit pattern for a fully reconstructed MET. It can optional be OR'ed with a regional tag.
        *
        *  @param[in] reg regional indicator bit pattern (optional, default is FullAcceptance)
        */		      
-      static Types::bitmask_t total(Region reg=FullAcceptance)                         { return ( Refined | Total     ) | reg; }
+      static Types::bitmask_t total(Region reg=Region::FullAcceptance)                         { return ( Category::Refined | Type::Total     ) | reg; }
       /*!@}*/
       /*! @name Bit mask constructors for pre-defined MET signal object contributions */
       /*!@{*/
@@ -262,7 +279,7 @@ namespace MissingETBase
        *  @param[in] sig signal source indicator (optional, default is a mix of LCTopo and Track objects)
        *  @param[in] reg regional indicator bit pattern (optional, default is FullAcceptance)
        */		      
-      static Types::bitmask_t signal(Types::bitmask_t sig=(LCTopo|Track),Region reg=FullAcceptance)  { return ( Refined | sig       ) | reg; }
+      static Types::bitmask_t signal(Signal sig=(Signal::LCTopo|Signal::Track),Region reg=Region::FullAcceptance)  { return ( Category::Refined | sig       ) | reg; }
       /*! @name Bit mask constructors for pre-defined MET signal object contributions */
       /*!@{*/
       /*! @brief Bit mask for MET term from Track signal objects
@@ -271,28 +288,28 @@ namespace MissingETBase
        *
        *  @param[in] reg regional indicator bit pattern (optional, default is FullAcceptance)
        */		      
-      static Types::bitmask_t track(Region reg=FullAcceptance)                         { return signal(Track,reg); }
+      static Types::bitmask_t track(Region reg=Region::FullAcceptance)                         { return signal(Signal::Track,reg); }
       /*! @brief Bit mask for MET term from LCTopo (locally calibrated calorimeter cell clusters) signal objects
        *
        *  @return Default bit pattern for a MET term exclusively constructed from LCTopo signal objects.
        *
        *  @param[in] reg regional indicator bit pattern (optional, default is FullAcceptance)
        */		      
-      static Types::bitmask_t clusterLC(Region reg=FullAcceptance)                     { return signal(LCTopo,reg); }
+      static Types::bitmask_t clusterLC(Region reg=Region::FullAcceptance)                     { return signal(Signal::LCTopo,reg); }
       /*! @brief Bit mask for MET term from EMTopo signal objects
        *
        *  @return Default bit pattern for a MET term exclusively constructed from EMTopo signal objects.
        *
        *  @param[in] reg regional indicator bit pattern (optional, default is FullAcceptance)
        */		      
-      static Types::bitmask_t clusterEM(Region reg=FullAcceptance)                     { return signal(EMTopo,reg); }
+      static Types::bitmask_t clusterEM(Region reg=Region::FullAcceptance)                     { return signal(Signal::EMTopo,reg); }
       /*! @brief Bit mask for MET term from any cluster signal objects
        *
        *  @return Default bit pattern for a MET term constructed from EMTopo and/or LCTopo signal objects.
        *
        *  @param[in] reg regional indicator bit pattern (optional, default is FullAcceptance)
        */		      
-      static Types::bitmask_t cluster(Region reg=FullAcceptance)                       { return signal(LCTopo|EMTopo,reg); }
+      static Types::bitmask_t cluster(Region reg=Region::FullAcceptance)                       { return signal(Signal::LCTopo|Signal::EMTopo,reg); }
       /*!@}*/
 
       /*! @name Truth indicator bit patterns */
@@ -301,27 +318,27 @@ namespace MissingETBase
        *
        *  @return Default bit pattern for a MET term constructed from non-interacting final state particles in the MC truth event.  
        */
-      static Types::bitmask_t truthNonInt()                         { return NonInt; }
+      static Types::bitmask_t truthNonInt()                         { return static_cast<Types::bitmask_t>(TruthType::NonInt); }
       /*! @brief Standard bit pattern indicating effective true MET
        *
        *  @return Default bit pattern for a MET term constructed from all (stable and interacting) particles emitted into the detector @f$ \eta @f$ acceptance. 
        *
        *  @param[in] reg regional indicator bit pattern (optional, default is FullAcceptance)
        */
-      static Types::bitmask_t truthInt(Region reg=FullAcceptance)   { return Int | reg; }
+      static Types::bitmask_t truthInt(Region reg=Region::FullAcceptance)   { return TruthType::Int | reg; }
       /*! @brief Standard bit pattern indicating a true MET contribution from particles outside of the detector @f$ \eta @f$ acceptance.
        *
        *  @return Default bit pattern for a MET term constructed from all (stable and interacting) final state particles in the MC truth event generated outside the
        *          detector @f$ \eta @f$ acceptance.  
        */
-      static Types::bitmask_t truthIntOut()                         { return IntOut; }
+      static Types::bitmask_t truthIntOut()                         { return static_cast<Types::bitmask_t>(TruthType::IntOut); }
       /*! @brief Standard bit pattern indicating the true muon contribution to MET truth
        *
        *  @return Default bit pattern for a MET term constructed from muons generated in the interaction.
        *
        *  @param[in] reg regional indicator bit pattern (optional, default is FullAcceptance)
        */
-      static Types::bitmask_t truthMuons(Region reg=FullAcceptance) { return TruthMuons | reg; }
+      static Types::bitmask_t truthMuons(Region reg=Region::FullAcceptance) { return TruthType::TruthMuons | reg; }
       /*!@}*/
      
       /*! @name Indicators for MET terms from detector signals */
@@ -332,21 +349,21 @@ namespace MissingETBase
        *
        *  @param[in] reg regional indicator bit pattern (optional, default is FullAcceptance)
        */
-      static Types::bitmask_t caloLCTopo(Region reg=FullAcceptance) { return ( Calo | LCTopo ) | reg; } 
+      static Types::bitmask_t caloLCTopo(Region reg=Region::FullAcceptance) { return ( Category::Calo | Signal::LCTopo ) | reg; }
       /*! @brief Bit pattern indicating a EMTopo MET term
        *
        *  @return Bit pattern indicating a MET term exclusively constructed from (all) EMTopo clusters in the event. 
        *
        *  @param[in] reg regional indicator bit pattern (optional, default is FullAcceptance)
        */
-      static Types::bitmask_t caloEMTopo(Region reg=FullAcceptance) { return ( Calo | EMTopo ) | reg; }
+      static Types::bitmask_t caloEMTopo(Region reg=Region::FullAcceptance) { return ( Category::Calo | Signal::EMTopo ) | reg; }
       /*! @brief Bit pattern indicating a ID Track MET term
        *
        *  @return Bit pattern indicating a MET term exclusively constructed from ID tracks.
        *
        *  @param[in] reg regional indicator bit pattern (optional, default is FullAcceptance)
        */
-      static Types::bitmask_t idTrack(Region reg=FullAcceptance)    { return ( ID | Track )    | reg; } 
+      static Types::bitmask_t idTrack(Region reg=Region::FullAcceptance)    { return ( Category::ID | Signal::Track )    | reg; }
       /*!@}*/
 
       /*! @name Pattern tests for categories, types, truth types, and signal tags */
@@ -361,7 +378,10 @@ namespace MissingETBase
        *  @note This is not a test on equality of two bit patterns. The only requirement is that the tested word has all bits of a given pattern set. Additional
        *        set bits are ignored.
        */
-      static bool hasPattern(Types::bitmask_t bits,Types::bitmask_t mask)   { return ( bits & mask)  == mask; }
+      template <class E, class F>
+      static bool hasPattern(E bits, F mask)
+      { return static_cast<Types::bitmask_t>( bits & mask) == static_cast<Types::bitmask_t>(mask); }
+
       /*! @brief Check if bit pattern includes a given category
        *
        *  @return @c true if bits representing a given catergory are set, else @c false.
@@ -375,21 +395,21 @@ namespace MissingETBase
       static bool hasSignal(Types::bitmask_t bits,Signal sig)               { return hasPattern(bits,sig);}
       /*!@}*/
 
-      static bool isElectronTerm(Types::bitmask_t bits,Region reg=FullAcceptance) { return hasPattern(bits,electron(reg)); }
-      static bool isPhotonTerm(Types::bitmask_t bits,Region reg=FullAcceptance)   { return hasPattern(bits,photon(reg)); }
-      static bool isTauTerm(Types::bitmask_t bits,Region reg=FullAcceptance)      { return hasPattern(bits,tau(reg)); }
-      static bool isMuonTerm(Types::bitmask_t bits,Region reg=FullAcceptance)     { return hasPattern(bits,muon(reg)); }
-      static bool isJetTerm(Types::bitmask_t bits,Region reg=FullAcceptance)      { return hasPattern(bits,jet(reg)); }
-      static bool isSoftTerm(Types::bitmask_t bits,Region reg=FullAcceptance)     { return hasPattern(bits,softEvent(reg)); }
-      static bool isTrackTerm(Types::bitmask_t bits,Region reg=FullAcceptance)    { return hasPattern(bits,track(reg)); }
-      static bool isTotalTerm(Types::bitmask_t bits,Region reg=FullAcceptance)    { return hasPattern(bits,total(reg)); }
+      static bool isElectronTerm(Types::bitmask_t bits,Region reg=Region::FullAcceptance) { return hasPattern(bits,electron(reg)); }
+      static bool isPhotonTerm(Types::bitmask_t bits,Region reg=Region::FullAcceptance)   { return hasPattern(bits,photon(reg)); }
+      static bool isTauTerm(Types::bitmask_t bits,Region reg=Region::FullAcceptance)      { return hasPattern(bits,tau(reg)); }
+      static bool isMuonTerm(Types::bitmask_t bits,Region reg=Region::FullAcceptance)     { return hasPattern(bits,muon(reg)); }
+      static bool isJetTerm(Types::bitmask_t bits,Region reg=Region::FullAcceptance)      { return hasPattern(bits,jet(reg)); }
+      static bool isSoftTerm(Types::bitmask_t bits,Region reg=Region::FullAcceptance)     { return hasPattern(bits,softEvent(reg)); }
+      static bool isTrackTerm(Types::bitmask_t bits,Region reg=Region::FullAcceptance)    { return hasPattern(bits,track(reg)); }
+      static bool isTotalTerm(Types::bitmask_t bits,Region reg=Region::FullAcceptance)    { return hasPattern(bits,total(reg)); }
 
       static bool isTruthNonInt(Types::bitmask_t bits)                          { return hasPattern(bits,truthNonInt()); }
-      static bool isTruthInt(Types::bitmask_t bits,Region reg=FullAcceptance)    { return hasPattern(bits,truthInt(reg)); }
+      static bool isTruthInt(Types::bitmask_t bits,Region reg=Region::FullAcceptance)    { return hasPattern(bits,truthInt(reg)); }
       static bool isTruthIntOut(Types::bitmask_t bits)                          { return hasPattern(bits,truthIntOut()); }
-      static bool isTruthMuons(Types::bitmask_t bits,Region reg=FullAcceptance)  { return hasPattern(bits,truthMuons(reg)); }
+      static bool isTruthMuons(Types::bitmask_t bits,Region reg=Region::FullAcceptance)  { return hasPattern(bits,truthMuons(reg)); }
 
-      static bool unknown() { return UnknownCategory; }
+      static Types::bitmask_t unknown() { return static_cast<Types::bitmask_t>(Category::UnknownCategory); }
     };
 
 } // namespace MissingETBase

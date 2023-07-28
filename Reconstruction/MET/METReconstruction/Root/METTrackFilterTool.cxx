@@ -228,11 +228,11 @@ namespace met {
       return StatusCode::FAILURE;
     }
     MissingETComponent* newComp = *iter;
-    newComp->setStatusWord(MissingETBase::Status::Tags::correctedTerm(MissingETBase::Status::Nominal,
-								      MissingETBase::Status::PileupTrack));
+    newComp->setStatusWord(MissingETBase::Status::Tags::correctedTerm(MissingETBase::Status::Vertex::Nominal,
+                                                                      MissingETBase::Status::Correction::PileupTrack));
 
     // Extract the component corresponding to the Track SoftTerms
-    MissingETBase::Types::bitmask_t src_ST_idTrk = MissingETBase::Source::SoftEvent | MissingETBase::Source::idTrack();
+    MissingETBase::Types::bitmask_t src_ST_idTrk = MissingETBase::Source::Type::SoftEvent | MissingETBase::Source::idTrack();
     MissingETBase::Types::bitmask_t src_ST_refTrk = MissingETBase::Source::softEvent() | MissingETBase::Source::track();
     metTerm->setSource(src_ST_refTrk);
 

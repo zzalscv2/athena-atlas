@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METSystematicsTool.h
@@ -40,13 +40,13 @@ namespace met {
   //since it creates a private store which is slow
   //please forgive the code duplication :)
   struct missingEt {
-    missingEt() : mpx(0), mpy(0), sumet(0), name(""), source(MissingETBase::Source::UnknownType){}
+    missingEt() : mpx(0), mpy(0), sumet(0), name(""), source(static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Type::UnknownType)){}
     missingEt(double mpx_in, double mpy_in, double sumet_in) :
       mpx(mpx_in),
       mpy(mpy_in),
       sumet(sumet_in),
       name(""),
-      source(MissingETBase::Source::UnknownType)
+      source(static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Type::UnknownType))
     {}
     missingEt(double mpx_in, double mpy_in, double sumet_in, std::string const & iname, MissingETBase::Types::bitmask_t const & isource ) :
       mpx(mpx_in),

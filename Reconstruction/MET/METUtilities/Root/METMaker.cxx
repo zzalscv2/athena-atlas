@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METMaker.cxx
@@ -284,7 +284,7 @@ namespace met {
     if(metType==xAOD::Type::Muon && (m_muEloss || m_doSetMuonJetEMScale) && !(*metCont)["MuonEloss"]) {
       MissingET* met_muEloss = nullptr;
       if( fillMET(met_muEloss,metCont,"MuonEloss",
-                  MissingETBase::Source::Muon | MissingETBase::Source::Calo) != StatusCode::SUCCESS) {
+                  MissingETBase::Source::Type::Muon | MissingETBase::Source::Category::Calo) != StatusCode::SUCCESS) {
         ATH_MSG_ERROR("failed to create Muon Eloss MET term");
         return StatusCode::FAILURE;
       }
@@ -1060,7 +1060,7 @@ namespace met {
             if(metSoftClus && !JVT_reject) {
               // add fractional contribution
               ATH_MSG_VERBOSE("Jet added at const scale");
-              if (std::abs(jet->eta())<2.5 || !(coreSoftClus->source()&MissingETBase::Source::Central)) {
+              if (std::abs(jet->eta())<2.5 || !(coreSoftClus->source()&MissingETBase::Source::Region::Central)) {
                 softJetLinks.push_back( jetLink );
                 softJetWeights.push_back( uniquefrac );
                 metSoftClus->add(opx,opy,opt);
@@ -1101,7 +1101,7 @@ namespace met {
             }
             if (hardJet) metJet->add(opx,opy,opt);
             // use nominal calibrated jets instead
-            else if (std::abs(nominal_jet->eta())<2.5 || !(coreSoftTrk->source()&MissingETBase::Source::Central)) {
+            else if (std::abs(nominal_jet->eta())<2.5 || !(coreSoftTrk->source()&MissingETBase::Source::Region::Central)) {
               metSoftTrk->add(opx,opy,opt);
               // Don't need to add if already done for softclus.
               if(!metSoftClus) {
