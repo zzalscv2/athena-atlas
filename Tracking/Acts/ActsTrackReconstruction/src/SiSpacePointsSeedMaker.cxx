@@ -148,9 +148,9 @@ namespace ActsTrk {
     const InDet::SiCluster *cl = static_cast<const InDet::SiCluster *>(sp->clusterList().first);
     const InDetDD::SiDetectorElement *de = cl->detectorElement();
     const Amg::Transform3D &Tp = de->surface().transform();
-    r[3] = float(Tp(0, 2));
-    r[4] = float(Tp(1, 2));
-    r[5] = float(Tp(2, 2));
+    r[3] = static_cast<float>(Tp(0, 2));
+    r[4] = static_cast<float>(Tp(1, 2));
+    r[5] = static_cast<float>(Tp(2, 2));
   }
 
 
@@ -179,24 +179,24 @@ namespace ActsTrk {
     Amg::Vector3D d02(s0 - s1);
 
     // b0
-    r[3] = float(b0[0]);
-    r[4] = float(b0[1]);
-    r[5] = float(b0[2]);
+    r[3] = static_cast<float>(b0[0]);
+    r[4] = static_cast<float>(b0[1]);
+    r[5] = static_cast<float>(b0[2]);
 
     // b1
-    r[6] = float(b1[0]);
-    r[7] = float(b1[1]);
-    r[8] = float(b1[2]);
+    r[6] = static_cast<float>(b1[0]);
+    r[7] = static_cast<float>(b1[1]);
+    r[8] = static_cast<float>(b1[2]);
 
     // r0-r2
-    r[9] = float(d02[0]);
-    r[10] = float(d02[1]);
-    r[11] = float(d02[2]);
+    r[9] = static_cast<float>(d02[0]);
+    r[10] = static_cast<float>(d02[1]);
+    r[11] = static_cast<float>(d02[2]);
 
     // r0
-    r[12] = float(s0[0]) - data.xbeam[0];
-    r[13] = float(s0[1]) - data.ybeam[0];
-    r[14] = float(s0[2]) - data.zbeam[0];
+    r[12] = static_cast<float>(s0[0]) - data.xbeam[0];
+    r[13] = static_cast<float>(s0[1]) - data.ybeam[0];
+    r[14] = static_cast<float>(s0[2]) - data.zbeam[0];
   }
 
   StatusCode 
@@ -672,8 +672,6 @@ namespace ActsTrk {
     static const SG::AuxElement::Accessor< ElementLink< ::SpacePointOverlapCollection > > overlaplinkAcc("stripOverlapSpacePointLink");
     static const SG::AuxElement::Accessor< ElementLink< InDet::SCT_ClusterCollection > > stripLinkAcc("sctClusterLink");
 
-    std::map<std::pair<std::size_t, std::size_t>, const InDet::SCT_SpacePoint*> sps;
-
     const xAOD::StripClusterContainer *inputContainer = nullptr;
     if (useClusters) {
       SG::ReadHandle<xAOD::StripClusterContainer> inputClusterContainer( m_stripClusterContainerKey, ctx );
@@ -682,6 +680,7 @@ namespace ActsTrk {
 	return false;
       }
       inputContainer = inputClusterContainer.cptr();
+      data.v_StripSpacePointForSeed.clear();
     }
 
     std::array<const Trk::SpacePoint*, 3> spacePoints {};
@@ -716,8 +715,8 @@ namespace ActsTrk {
       else {
 	// Get the clusters from the xAOD::Clusters and then make the space points
 	const auto& bottom_idx = seed->sp()[0]->measurementIndexes();
-	auto& medium_idx = seed->sp()[1]->measurementIndexes();
-	auto& top_idx    = seed->sp()[2]->measurementIndexes();
+	const auto& medium_idx = seed->sp()[1]->measurementIndexes();
+	const auto& top_idx    = seed->sp()[2]->measurementIndexes();
 
 	std::array<const xAOD::StripCluster*, 6> strip_cluster { 
 	  inputContainer->at(bottom_idx[0]), inputContainer->at(bottom_idx[1]),
@@ -745,26 +744,26 @@ namespace ActsTrk {
 	std::pair<std::size_t, std::size_t> key_m = std::make_pair(medium_idx[0], medium_idx[1]);
 	std::pair<std::size_t, std::size_t> key_t = std::make_pair(top_idx[0], top_idx[1]);
 
-	if (sps.find(key_b) == sps.end()) {
-	  sps[key_b] = new InDet::SCT_SpacePoint({strip_cluster[0]->identifierHash(), strip_cluster[1]->identifierHash()},
-						 Amg::Vector3D(seed->sp()[0]->x(), seed->sp()[0]->y(), seed->sp()[0]->z()),
-						 {*(stripLinkAcc(*strip_cluster[0])), *(stripLinkAcc(*strip_cluster[1]))});
+	if (data.v_StripSpacePointForSeed.find(key_b) == data.v_StripSpacePointForSeed.end()) {
+	  data.v_StripSpacePointForSeed[key_b] = std::make_unique<InDet::SCT_SpacePoint>(std::make_pair<IdentifierHash, IdentifierHash>(strip_cluster[0]->identifierHash(), strip_cluster[1]->identifierHash()),
+											 Amg::Vector3D(seed->sp()[0]->x(), seed->sp()[0]->y(), seed->sp()[0]->z()),
+											 std::make_pair<const Trk::PrepRawData*, const Trk::PrepRawData*>(*(stripLinkAcc(*strip_cluster[0])), *(stripLinkAcc(*strip_cluster[1]))));
 	}
-	if (sps.find(key_m) == sps.end()) {
-	  sps[key_m] = new InDet::SCT_SpacePoint({strip_cluster[2]->identifierHash(), strip_cluster[3]->identifierHash()},
-						 Amg::Vector3D(seed->sp()[1]->x(), seed->sp()[1]->y(), seed->sp()[1]->z()),
-						 {*(stripLinkAcc(*strip_cluster[2])), *(stripLinkAcc(*strip_cluster[3]))});
+	if (data.v_StripSpacePointForSeed.find(key_m) == data.v_StripSpacePointForSeed.end()) {
+	  data.v_StripSpacePointForSeed[key_m] = std::make_unique<InDet::SCT_SpacePoint>(std::make_pair<IdentifierHash, IdentifierHash>(strip_cluster[2]->identifierHash(), strip_cluster[3]->identifierHash()),
+											 Amg::Vector3D(seed->sp()[1]->x(), seed->sp()[1]->y(), seed->sp()[1]->z()),
+											 std::make_pair<const Trk::PrepRawData*, const Trk::PrepRawData*>(*(stripLinkAcc(*strip_cluster[2])), *(stripLinkAcc(*strip_cluster[3]))));
 	}
-	if (sps.find(key_t) == sps.end()) {
-	  sps[key_t] = new InDet::SCT_SpacePoint({strip_cluster[4]->identifierHash(), strip_cluster[5]->identifierHash()},
-						 Amg::Vector3D(seed->sp()[2]->x(), seed->sp()[2]->y(), seed->sp()[2]->z()),
-						 {*(stripLinkAcc(*strip_cluster[4])), *(stripLinkAcc(*strip_cluster[5]))});
+	if (data.v_StripSpacePointForSeed.find(key_t) == data.v_StripSpacePointForSeed.end()) {
+	  data.v_StripSpacePointForSeed[key_t] = std::make_unique<InDet::SCT_SpacePoint>(std::make_pair<IdentifierHash, IdentifierHash>(strip_cluster[4]->identifierHash(), strip_cluster[5]->identifierHash()),
+											 Amg::Vector3D(seed->sp()[2]->x(), seed->sp()[2]->y(), seed->sp()[2]->z()),
+											 std::make_pair<const Trk::PrepRawData*, const Trk::PrepRawData*>(*(stripLinkAcc(*strip_cluster[4])), *(stripLinkAcc(*strip_cluster[5]))));
 	}
-
+	
 	spacePoints = {
-	  sps[key_b],
-	  sps[key_m],
-	  sps[key_t]
+	  data.v_StripSpacePointForSeed[key_b].get(),
+	  data.v_StripSpacePointForSeed[key_m].get(),
+	  data.v_StripSpacePointForSeed[key_t].get()
 	};
 
       }
@@ -799,8 +798,6 @@ namespace ActsTrk {
     static const SG::AuxElement::Accessor< ElementLink< InDet::PixelClusterCollection > > pixelLinkAcc("pixelClusterLink");
     static const SG::AuxElement::Accessor< ElementLink< ::SpacePointCollection > > linkAcc("pixelSpacePointLink");
 
-    std::vector<const InDet::PixelSpacePoint*> sps {};
-
     const xAOD::PixelClusterContainer *inputContainer = nullptr;
     if (useClusters) {
       SG::ReadHandle<xAOD::PixelClusterContainer> inputClusterContainer( m_pixelClusterContainerKey, ctx );
@@ -810,13 +807,26 @@ namespace ActsTrk {
       }
       inputContainer = inputClusterContainer.cptr();
 
-      sps.resize(inputContainer->size(), nullptr);
+      data.v_PixelSpacePointForSeed.clear();
+      data.v_PixelSpacePointForSeed.resize(inputContainer->size());
     }
+
+    data.v_PixelSiSpacePointForSeed.clear();
+    data.v_PixelSiSpacePointForSeed.reserve(data.ns);
+    std::unordered_map<std::size_t, std::size_t> bridge_idx_sispacepoints;
 
     std::array<const Trk::SpacePoint*, 3> spacePoints {nullptr, nullptr, nullptr};
     std::array<ITk::SiSpacePointForSeed*, 3> pixelSpacePointsForSeeds {nullptr, nullptr, nullptr};
 
     for (const ActsTrk::Seed* seed : seedPtrs) {
+      std::array<std::size_t, 3> indexes {
+	seed->sp()[0]->measurementIndexes()[0],
+	  seed->sp()[1]->measurementIndexes()[0],
+	  seed->sp()[2]->measurementIndexes()[0]
+	  };
+
+      const auto [bottom_idx, medium_idx, top_idx] = indexes;
+
       // Retrieve/make the space points!
       if (not useClusters) {
 	// Get the Space Point from the element link
@@ -841,10 +851,6 @@ namespace ActsTrk {
       }
       else {
 	// Get the clusters from the xAOD::Clusters and then make the space points
-	std::size_t bottom_idx = seed->sp()[0]->measurementIndexes()[0];
-	std::size_t medium_idx = seed->sp()[1]->measurementIndexes()[0];
-	std::size_t top_idx    = seed->sp()[2]->measurementIndexes()[0];
-
 	const  xAOD::PixelCluster* bottom_cluster = inputContainer->at(bottom_idx);
 	const  xAOD::PixelCluster* medium_cluster = inputContainer->at(medium_idx);
 	const  xAOD::PixelCluster* top_cluster = inputContainer->at(top_idx);
@@ -862,29 +868,41 @@ namespace ActsTrk {
 	  return false;
 	}
 
-	if (not sps[bottom_idx]) 
-	  sps[bottom_idx] = new InDet::PixelSpacePoint(bottom_cluster->identifierHash(), *(pixelLinkAcc(*bottom_cluster)));
-	if (not sps[medium_idx]) 
-	  sps[medium_idx] = new InDet::PixelSpacePoint(medium_cluster->identifierHash(), *(pixelLinkAcc(*medium_cluster)));
-	if (not sps[top_idx]) 
-	  sps[top_idx] = new InDet::PixelSpacePoint(top_cluster->identifierHash(), *(pixelLinkAcc(*top_cluster)));
-
+	if (not data.v_PixelSpacePointForSeed[bottom_idx]) 
+	  data.v_PixelSpacePointForSeed[bottom_idx] = std::make_unique<InDet::PixelSpacePoint>(bottom_cluster->identifierHash(), *(pixelLinkAcc(*bottom_cluster)));
+	if (not data.v_PixelSpacePointForSeed[medium_idx]) 
+	  data.v_PixelSpacePointForSeed[medium_idx] = std::make_unique<InDet::PixelSpacePoint>(medium_cluster->identifierHash(), *(pixelLinkAcc(*medium_cluster)));
+	if (not data.v_PixelSpacePointForSeed[top_idx]) 
+	  data.v_PixelSpacePointForSeed[top_idx] = std::make_unique<InDet::PixelSpacePoint>(top_cluster->identifierHash(), *(pixelLinkAcc(*top_cluster)));
+	
 	spacePoints =  { 
-	  sps[bottom_idx],
-	  sps[medium_idx],
-	  sps[top_idx]
+	  data.v_PixelSpacePointForSeed[bottom_idx].get(),
+	  data.v_PixelSpacePointForSeed[medium_idx].get(),
+	  data.v_PixelSpacePointForSeed[top_idx].get()
 	};
 
       }
            
-      for (unsigned int index = 0; index<3; ++index) {
-	float r[15];
-	r[0] = seed->sp()[index]->x();
-	r[1] = seed->sp()[index]->y();
-	r[2] = seed->sp()[index]->z();
-	pixInform(spacePoints[index], r);
-	pixelSpacePointsForSeeds[index] = new ITk::SiSpacePointForSeed(spacePoints[index], r);
-	pixelSpacePointsForSeeds[index]->setQuality(-seed->seedQuality());
+      for (int index = 0; index<3; ++index) {
+	std::size_t sp_idx = indexes[index];
+
+	// Try add an element. 
+	// If already there just return the old value
+	// If not present, we add a new element to it
+	auto [itr, outcome] = bridge_idx_sispacepoints.try_emplace(sp_idx, data.v_PixelSiSpacePointForSeed.size());
+	std::size_t mapped_idx = itr->second;
+	// We added a new element
+	if (outcome) { 
+	  float r[15];
+	  r[0] = seed->sp()[index]->x();
+	  r[1] = seed->sp()[index]->y();
+	  r[2] = seed->sp()[index]->z();
+	  pixInform(spacePoints[index], r);	 
+	  data.v_PixelSiSpacePointForSeed.emplace_back( spacePoints[index], r );
+
+	}
+	data.v_PixelSiSpacePointForSeed[mapped_idx].setQuality(-seed->seedQuality());
+	pixelSpacePointsForSeeds[index] = &data.v_PixelSiSpacePointForSeed[mapped_idx];
       }
       
       data.i_ITkSeeds.emplace_back(pixelSpacePointsForSeeds[0],
