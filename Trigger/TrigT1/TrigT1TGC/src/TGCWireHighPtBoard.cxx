@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ref. SOS063V07,S0S061V04 
@@ -100,9 +100,6 @@ void TGCWireHighPtBoard::decodeSlaveBoardOut(int chip,
                           +m_nChOfDSBOut/2*block+m_decoderInDSB[chip][j]->getPos(block));
         }
     }
-
-  tHit=0;
-  dHit=0;
 }
 
 void TGCWireHighPtBoard::doCoincidenceMatrix(int chip, 

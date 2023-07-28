@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/getMessageSvc.h"
@@ -8,13 +8,19 @@
 
 namespace LVL1TGC {
 
-BIS78TrigOut::BIS78TrigOut(std::vector<int> BIS78PB, std::vector<uint8_t> BIS78eta, std::vector<uint8_t> BIS78phi, std::vector<uint8_t> BIS78Deta, std::vector<uint8_t> BIS78Dphi, std::vector<uint8_t> BIS78flag3over3eta, std::vector<uint8_t> BIS78flag3over3phi,
+BIS78TrigOut::BIS78TrigOut(const std::vector<int>& BIS78PB,
+                           const std::vector<uint8_t>& BIS78eta,
+                           const std::vector<uint8_t>& BIS78phi,
+                           const std::vector<uint8_t>& BIS78Deta,
+                           const std::vector<uint8_t>& BIS78Dphi,
+                           const std::vector<uint8_t>& BIS78flag3over3eta,
+                           const std::vector<uint8_t>& BIS78flag3over3phi,
                            LVL1TGCTrigger::TGCArguments* tgcargs)
   : m_BIS78PadBoard(BIS78PB), m_BIS78eta_6bit(BIS78eta), m_BIS78phi_6bit(BIS78phi), m_BIS78Deta_3bit(BIS78Deta), m_BIS78Dphi_3bit(BIS78Dphi), m_BIS78flag3over3eta_1bit(BIS78flag3over3eta), m_BIS78flag3over3phi_1bit(BIS78flag3over3phi),
     m_tgcArgs(tgcargs)
 {}
 
-BIS78TrigOut::BIS78TrigOut(std::vector<int> BIS78PB, LVL1TGCTrigger::TGCArguments* tgcargs)
+BIS78TrigOut::BIS78TrigOut(const std::vector<int>& BIS78PB, LVL1TGCTrigger::TGCArguments* tgcargs)
   : m_BIS78PadBoard(BIS78PB), m_tgcArgs(tgcargs)
 {}
 

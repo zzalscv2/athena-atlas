@@ -1040,9 +1040,9 @@ StatusCode LVL1TGCTrigger::getMaskedChannel()
     std::string fname=m_MaskFileName12.value();
     if (fname.empty()) return StatusCode::SUCCESS;
     
-    std::string fullName = PathResolver::find_file (fname.c_str(), "PWD");
+    std::string fullName = PathResolver::find_file (fname, "PWD");
     if( fullName.empty())
-      fullName =  PathResolver::find_file (fname.c_str(), "DATAPATH");
+      fullName =  PathResolver::find_file (fname, "DATAPATH");
     
     std::ifstream fin(fullName.c_str());
     if (!fin) {
@@ -1164,7 +1164,7 @@ StatusCode LVL1TGCTrigger::start() {
 }
 
 /////////////////////////////////////////
-void LVL1TGCTrigger::extractFromString(std::string str, std::vector<int> & v) {
+void LVL1TGCTrigger::extractFromString(const std::string& str, std::vector<int> & v) {
     v.clear();
     if (str.empty()) return;
     std::string line=str;

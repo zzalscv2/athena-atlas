@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef TGCNSWCoincidenceMap_h
@@ -48,7 +48,7 @@ public:
 
   // copy and assignment operator
   TGCNSWCoincidenceMap(const TGCNSWCoincidenceMap& right);
-  bool readMap(std::string moduleName, ReadCW_Type cw_type);
+  bool readMap(const std::string& moduleName, ReadCW_Type cw_type);
   bool readShift();
   TGCArguments* tgcArgs() { return m_tgcArgs;}
   const TGCArguments* tgcArgs() const { return m_tgcArgs;}

@@ -5,7 +5,7 @@
  **   @author  sutt
  **   @date    Tue  4 Feb 2020 15:25:00 CET
  **
- **   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
  
 #ifndef MuonRegSelCondAlg_h
@@ -15,11 +15,8 @@
 #include "GaudiKernel/ISvcLocator.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "AthenaBaseComps/AthAlgTool.h"
 
-#include "GaudiKernel/ToolHandle.h"
-
-#include "MuonCablingData/MuonMDT_CablingMap.h"
+#include "MuonReadoutGeometry/MuonDetectorManager.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
@@ -44,10 +41,15 @@ public:
 
   virtual std::unique_ptr<RegSelSiLUT> createTable( const EventContext& ctx, EventIDRange& id_range ) const = 0;   
 
+ protected:
+    /// MuonDetectorManager from the conditions store
+    SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detMgrKey{
+        this, "DetectorManagerKey", "MuonDetectorManager",
+        "Key of input MuonDetectorManager condition data"};
  private:
 
-  std::string m_managerName;
-  bool        m_printTable;
+  Gaudi::Property<bool>        m_printTable{this, "PrintTable", false};
+  Gaudi::Property<std::string> m_mangerName{this, "ManagerName", "", "Property no where used"};
  
   /// Output conditions object
   SG::WriteCondHandleKey<IRegSelLUTCondData> m_tableKey  

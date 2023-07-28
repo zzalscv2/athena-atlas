@@ -41,7 +41,7 @@ MDT_RegSelCondAlg::MDT_RegSelCondAlg(const std::string& name, ISvcLocator* pSvcL
 
 
 StatusCode MDT_RegSelCondAlg::initialize() {
-  ATH_CHECK(MuonRegSelCondAlg::initialize());
+  ATH_CHECK(MuonRegSelCondAlg::initialize()); 
   ATH_CHECK(m_cablingKey.initialize());
   ATH_CHECK(m_condKey.initialize(!m_condKey.empty()));
   return StatusCode::SUCCESS;
@@ -51,13 +51,21 @@ StatusCode MDT_RegSelCondAlg::initialize() {
 
 
 std::unique_ptr<RegSelSiLUT> MDT_RegSelCondAlg::createTable( const EventContext& ctx, EventIDRange& id_range ) const { 
-
+  
   SG::ReadCondHandle<MuonMDT_CablingMap> cabling( m_cablingKey, ctx );
 
   if( !cabling.range( id_range ) ) {
     ATH_MSG_ERROR("Failed to retrieve validity range for " << cabling.key());
     return std::unique_ptr<RegSelSiLUT>(nullptr);
   }   
+
+  SG::ReadCondHandle<MuonGM::MuonDetectorManager> manager( m_detMgrKey, ctx );
+
+  if( !manager.range( id_range ) ) {
+    ATH_MSG_ERROR("Failed to retrieve validity range for " << manager.key());
+    return std::unique_ptr<RegSelSiLUT>(nullptr);
+  }   
+    
     
    const MdtCondDbData* conditions_ptr = nullptr;
    
@@ -71,15 +79,7 @@ std::unique_ptr<RegSelSiLUT> MDT_RegSelCondAlg::createTable( const EventContext&
   }
   /// create the new lookup table
 
-  const MuonGM::MuonDetectorManager* manager = nullptr; // again 0 would do as well here 
-  
-  StatusCode sc = detStore()->retrieve( manager );
 
-  /// can't use ATH_CHECK here as we can;'t return the StatusCode 
-  if ( sc.isFailure() ) { 
-    ATH_MSG_ERROR( "Could not retrieve MDT Manager for " << name() );
-    return std::unique_ptr<RegSelSiLUT>(nullptr);
-  }
   
   const MdtIdHelper* helper = manager->mdtIdHelper();
   

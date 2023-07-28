@@ -8,7 +8,7 @@
  **   @date   Sun 22 Sep 2019 10:21:50 BST
  **
  **
- **   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 #include "GaudiKernel/EventIDRange.h"
@@ -22,7 +22,6 @@
 #include <string>
 #include <cmath>
 
-#include "MuonCablingData/MuonMDT_CablingMap.h"
 
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonReadoutGeometry/MuonReadoutElement.h" 
@@ -48,33 +47,17 @@ MM_RegSelCondAlg::MM_RegSelCondAlg(const std::string& name, ISvcLocator* pSvcLoc
 }
 
 
-
-
-StatusCode MM_RegSelCondAlg::initialize() {
-  ATH_CHECK(MuonRegSelCondAlg::initialize());
-  ATH_CHECK(m_mdtCablingKey.initialize());
-  return StatusCode::SUCCESS;
-}
-
-
-
 std::unique_ptr<RegSelSiLUT> MM_RegSelCondAlg::createTable( const EventContext& ctx, EventIDRange& id_range ) const { 
 
-  SG::ReadCondHandle<MuonMDT_CablingMap> mdtCabling( m_mdtCablingKey, ctx );
- 
-  if( !mdtCabling.range( id_range ) ) {
-    ATH_MSG_ERROR("Failed to retrieve validity range for " << mdtCabling.key());
+  /// get the MM detector manager
+  SG::ReadCondHandle<MuonGM::MuonDetectorManager> manager( m_detMgrKey, ctx );
+
+  if( !manager.range( id_range ) ) {
+    ATH_MSG_ERROR("Failed to retrieve validity range for " << manager.key());
     return std::unique_ptr<RegSelSiLUT>(nullptr);
   }   
+   
 
-  /// get the MM detector manager
-
-  const MuonGM::MuonDetectorManager* manager = nullptr;
-  
-  if ( (detStore()->retrieve( manager ).isFailure() ) ) { 
-    ATH_MSG_ERROR( "Could not retrieve CSC Manager for " << name() );
-    return std::unique_ptr<RegSelSiLUT>(nullptr);
-  }
 
   const MmIdHelper*  helper = manager->mmIdHelper();
 

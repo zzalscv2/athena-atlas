@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/errorcheck.h"
@@ -74,6 +74,7 @@ StatusCode ALFA_CLinkAlg::execute()
         }
         SG::WriteHandle<ALFA_CLinkEvent> clinkEventH (m_clinkEventKey, ctx);
         ATH_CHECK( clinkEventH.record (std::move (pDataEvent)) );
+        ATH_CHECK( GenerateXAOD (ctx) );
 
         return StatusCode::SUCCESS;
 }
@@ -359,7 +360,8 @@ StatusCode ALFA_CLinkAlg::FillXAOD_TrackingData(const EventContext& ctx,
 		//return StatusCode::FAILURE;
 	}
 
-	auto pData = std::make_unique<xAOD::ALFAData>();
+        auto pData =
+          xAODContainer.push_back(std::make_unique<xAOD::ALFAData>());
 
 	//LocRecEvCollection & LocRecODEvCollection
 	pData->setXDetCS(m_vecXDetCS);
@@ -385,8 +387,6 @@ StatusCode ALFA_CLinkAlg::FillXAOD_TrackingData(const EventContext& ctx,
 	pData->setYStatCS(m_vecYStatCS);
 	pData->setXBeamCS(m_vecXBeamCS);
 	pData->setYBeamCS(m_vecYBeamCS);
-
-	xAODContainer.push_back(std::move(pData));
 
 	return StatusCode::SUCCESS;
 }
@@ -500,7 +500,8 @@ StatusCode ALFA_CLinkAlg::FillXAOD_HeaderData(const EventContext& ctx,
 		//return StatusCode::FAILURE;
 	}
 
-	auto pData = std::make_unique<xAOD::ALFAData>();
+	auto pData =
+          xAODContainer.push_back(std::make_unique<xAOD::ALFAData>());
 
 	//RawDataContainer
 	pData->setScaler(m_vecScaler);
@@ -518,8 +519,6 @@ StatusCode ALFA_CLinkAlg::FillXAOD_HeaderData(const EventContext& ctx,
 	pData->setODFiberHitsNeg(m_vecODFiberHitsNeg);
 	pData->setODMultiplicityPos(m_vecODMultiplicityPos);
 	pData->setODMultiplicityNeg(m_vecODMultiplicityNeg);
-
-	xAODContainer.push_back(std::move(pData));
 
 	return StatusCode::SUCCESS;
 }

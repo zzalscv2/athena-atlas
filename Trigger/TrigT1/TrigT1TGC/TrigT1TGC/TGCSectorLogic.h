@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGGSectorLogic_hh
@@ -53,7 +53,7 @@ class TGCSectorLogic
   int  getTileMuonWord() const;
   int  getInnerStationWord() const;
 
-  void clockIn(const SG::ReadCondHandleKey<TGCTriggerData> readCondKey,
+  void clockIn(const SG::ReadCondHandleKey<TGCTriggerData>& readCondKey,
                int bidIn, bool process=true);
 
   int getId() const;
@@ -90,7 +90,7 @@ protected:
   enum {MaxNumberOfWireHighPtBoard =2};
   void collectInput();
 
-  void doInnerCoincidence(const SG::ReadCondHandleKey<TGCTriggerData> readCondKey,
+  void doInnerCoincidence(const SG::ReadCondHandleKey<TGCTriggerData>& readCondKey,
                           int SSCId,  TGCRPhiCoincidenceOut* coincidenceOut);
 
   void doInnerCoincidence(int SSCId,  TGCRPhiCoincidenceOut* coincidenceOut);
