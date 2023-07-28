@@ -17,7 +17,7 @@ atlas_add_library( G4AtlasAlgLib
                      PUBLIC_HEADERS G4AtlasAlg
                      INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
 
-                     LINK_LIBRARIES ${GEANT4_LIBRARIES} ${EIGEN_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} AtlasHepMCLib AthenaBaseComps AthenaKernel BarcodeInterfacesLib CxxUtils GaudiKernel G4AtlasInterfaces SGTools StoreGateLib EventInfo GeneratorObjects GeoModelInterfaces HepMC_InterfacesLib ISF_InterfacesLib MCTruthBaseLib )
+                     LINK_LIBRARIES ${GEANT4_LIBRARIES} ${EIGEN_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} AtlasHepMCLib AthenaBaseComps AthenaKernel CxxUtils GaudiKernel G4AtlasInterfaces SGTools StoreGateLib EventInfo GeneratorObjects GeoModelInterfaces HepMC_InterfacesLib ISF_InterfacesLib MCTruthBaseLib )
 
 # Component(s) in the package:
 atlas_add_library( G4AtlasAlg
