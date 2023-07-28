@@ -232,14 +232,14 @@ template<> inline bool isGeantino(const int& p){ return (std::abs(p) ==  GEANTIN
 /// he superpartner of a boson or a left-handed fermion hasn= 1whilethe superpartner of a right-handed fermion hasn= 2. 
 /// When mixing occurs, such asbetween the winos and charged Higgsinos to give charginos, or between left and rightsfermions, 
 /// the lighter physical state is given the smaller basis state number.
-template<> inline bool isSUSY(const DecodedPID& p){return (p.ndigits() == 7 && (p(0) == 1 || p(0) == 2 ) && isValid(p.shift(2)));}
+template<> inline bool isSUSY(const DecodedPID& p){return (p.ndigits() == 7 && (p(0) == 1 || p(0) == 2 ) && isValid(p.shift(2)) && !isGenSpecific(p.shift(2).pid()));}
 
 /// PDG rule 11e
 /// Technicolor states have n= 3, with technifermions treated like ordinary fermions. States which are ordinary color singlets
 /// have nr= 0. Color octets have nr= 1. If a state has non-trivial quantum numbers under the topcolor groups SU(3)1×SU(3)2, 
 /// the quantum numbers are specified by tech, ij, where i and j are 1 or 2. nLis then 2i+j. The coloron
 /// V8, is a heavy gluon color octet and thus is 3100021
-template<> inline bool isTechnicolor(const DecodedPID& p){return (p.ndigits() == 7 &&  p(0) == 3 && (p(1) == 0 || p(0) == 1) && isValid(p.shift(2)));}
+template<> inline bool isTechnicolor(const DecodedPID& p){return (p.ndigits() == 7 &&  p(0) == 3 && (p(1) == 0 || p(0) == 1) && isValid(p.shift(2)) && !isGenSpecific(p.shift(2).pid()));}
 template<> inline bool isTechnicolor(const int& p){ auto value_digits = DecodedPID(p); return isTechnicolor(value_digits);}
 
 /// PDG rule 11f

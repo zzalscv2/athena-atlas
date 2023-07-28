@@ -20,6 +20,7 @@
 #include "G4ParticleTable.hh"
 
 #include "AtlasHepMC/GenEvent.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "ISF_Event/TruthBinding.h"
 #include "ISF_Event/ISFParticle.h"
@@ -145,7 +146,6 @@ void ForwardTransportModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastS
                                                                          time)); // TODO Update this value?
   gEvent->add_vertex(gVertex);
   gVertex->add_particle_in(part);
-  const int statusCode = 212;
   HepMC::GenParticlePtr gParticle = HepMC::newGenParticlePtr(
                                                              HepMC::FourVector(
                                                                                postTransportMomentum.x(),
@@ -153,7 +153,7 @@ void ForwardTransportModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastS
                                                                                postTransportMomentum.z(),
                                                                                energy),
                                                              pdgcode,
-                                                             statusCode);
+                                                             HepMC::FORWARDTRANSPORTMODELSTATUS);
   gVertex->add_particle_out(gParticle);
   HepMC::suggest_barcode(gParticle, HepMC::barcode(part)+HepMC::SIM_REGENERATION_INCREMENT);
 
@@ -162,11 +162,11 @@ void ForwardTransportModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastS
 
   const G4ParticleDefinition *aParticleDefinition{};
   /// Special cases for Geantinos
-  if (pdgcode==998)
+  if (pdgcode == MC::GEANTINOPLUS)
     {
       aParticleDefinition = G4ChargedGeantino::Definition();
     }
-  if (pdgcode==999)
+  if (pdgcode == MC::GEANTINO0)
     {
       aParticleDefinition = G4Geantino::GeantinoDefinition();
     }
