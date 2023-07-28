@@ -234,7 +234,8 @@ inline
 bool AuxTypeVectorHolder<T, CONT>::resize (size_t sz)
 {
   const void* orig = m_vecPtr->data();
-  m_vecPtr->resize (sz * SCALE);
+  m_vecPtr->resize (sz * SCALE,
+                    Zero<typename AuxDataTraits<T>::element_type>::zero());
   return m_vecPtr->data() == orig;
 }
 
