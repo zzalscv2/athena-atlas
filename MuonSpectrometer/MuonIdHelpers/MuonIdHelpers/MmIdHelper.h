@@ -100,6 +100,20 @@ public:
     Identifier pcbID(const Identifier& channelID, int pcb) const;
     Identifier pcbID(const Identifier& channelID, int pcb, bool& isValid) const;
     Identifier pcbID(const Identifier& channelID) const;
+    /*
+    One readout board of the Micromegas cover 512 channels and they are named according to their radial position in a layer (0-15).
+    This helper function creates a dummy identifier which can be associated with a front end board, which is primarily needed to deal with the correlation between DCS data and the hits in athena.
+    The identifier always points to the innermost channel that is read out by  a given front end board, i.e. radius*512 + 1 (_1 since athena counts from one). For the outer quads it is (radius-10)*512+1 since athena restarts from channel 1 in the outer quads but the DAQ convention for radius counts for the full sector and only febs 0-9 are reading out the inner quad
+    The las function is meant to translate an athena identifier to a feb ID. It returns the same fields except for the channel which is set to the coresponding feb channel by doing ((channel-1)/512)*512+1   (one also needs to take into account the quad, see the actual implementation for that)
+    */
+    Identifier febID(int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int radius) const;
+    Identifier febID(int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int radius, bool& isValid) const;
+    Identifier febID(const std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int radius) const;
+    Identifier febID(const std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int radius, bool& isValid) const;
+    Identifier febID(const Identifier& channelID, int radius) const;
+    Identifier febID(const Identifier& channelID, int radius, bool& isValid) const;
+    Identifier febID(const Identifier& channelID) const;
+
 
     // for an Identifier id, get the list of the daughter readout channel ids
     void idChannels(const Identifier& id, std::vector<Identifier>& vect) const;
@@ -148,6 +162,7 @@ public:
 
 private:
     int getFirstPcbChnl(int stationEta, int pcb) const;
+    int getFirstRadiusChnl(int stationEta, int pcb) const;
     bool isStNameInTech(const std::string& stationName) const override;
 
     int init_id_to_hashes();

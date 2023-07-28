@@ -332,6 +332,42 @@ Identifier MmIdHelper::pcbID(const Identifier& channelId) const {
 	return pcbID(channelId, pcb);
 }
 /*******************************************************************************/
+int MmIdHelper::getFirstRadiusChnl(int stationEta, int radius) const {
+	int radiusNb = std::abs(stationEta)==1 ? radius : radius-10;
+	return radiusNb*512+1;
+}
+Identifier MmIdHelper::febID(int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int radius) const {
+	int chnl = getFirstRadiusChnl(stationEta,  radius); 
+	return channelID(stationName, stationEta, stationPhi, multilayer, gasGap, chnl);
+}
+Identifier MmIdHelper::febID(int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int radius, bool& isValid) const {
+	int chnl = getFirstRadiusChnl(stationEta,  radius); 
+	return channelID(stationName, stationEta, stationPhi, multilayer, gasGap, chnl, isValid);
+}
+Identifier MmIdHelper::febID(const std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int radius) const {
+	int chnl = getFirstRadiusChnl(stationEta,  radius); 
+	return channelID(stationName, stationEta, stationPhi, multilayer, gasGap, chnl);
+}
+Identifier MmIdHelper::febID(const std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int radius, bool& isValid) const {
+	int chnl = getFirstRadiusChnl(stationEta,  radius); 
+	return channelID(stationName, stationEta, stationPhi, multilayer, gasGap, chnl, isValid);
+}
+Identifier MmIdHelper::febID(const Identifier& channelId, int radius) const {
+	int chnl = getFirstRadiusChnl(stationEta(channelId),  radius); 
+	return channelID(channelId, multilayer(channelId), gasGap(channelId), chnl);
+}
+Identifier MmIdHelper::febID(const Identifier& channelId, int radius, bool& isValid) const {
+	int chnl = getFirstRadiusChnl(stationEta(channelId),  radius); 
+	return channelID(channelId, multilayer(channelId), gasGap(channelId), chnl, isValid);
+}
+Identifier MmIdHelper::febID(const Identifier& channelId) const {
+	int chnl = channel(channelId);
+        // radius counts from 0-15. Radii 0-9 are in abs(stationEta)==1 and radii 10-15 in abs(stationEta)==2
+        // each radius consists of 512 readout strips (strip number in athena is counting from 1 therefore chnl -1)
+	int radius  = (chnl-1)/512 + (std::abs(stationEta(channelId))==2 ? 10:0); // int division should round downwards
+	return febID(channelId, radius);
+}
+/*******************************************************************************/
 void MmIdHelper::idChannels(const Identifier& id, std::vector<Identifier>& vect) const {
     vect.clear();
     Identifier parent = parentID(id);

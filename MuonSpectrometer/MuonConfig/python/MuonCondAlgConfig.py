@@ -308,6 +308,9 @@ def NswDcsDbAlgCfg(flags, **kwargs):
     if flags.Input.isMC: return acc
     acc.merge(addFolders(flags, "/MMG/DCS/HV", "DCS_OFL", className="CondAttrListCollection"))
     acc.merge(addFolders(flags, "/STG/DCS/HV", "DCS_OFL", className="CondAttrListCollection"))
+    acc.merge(addFolders(flags, "/MDT/MM/ELinks", "MDT_OFL", className="CondAttrListCollection", tag="MdtMmElinks-2023-TEST"))
+    acc.merge(addFolders(flags, "/TGC/NSW/ELinks", detDb="TGC_OFL", className="CondAttrListCollection", tag="TgcNswElinks-2023-TEST"))
+    acc.merge(addFolders(flags, "/MMG/DCS/TSELTX", "DCS_OFL", className="CondAttrListCollection"))
     alg = CompFactory.NswDcsDbAlg("NswDcsDbAlg", **kwargs)
     acc.addCondAlgo(alg)
     return acc

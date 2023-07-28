@@ -131,9 +131,6 @@ public:
     const std::string& technologyString(const int& index) const;
     int nStationNames() const;
 
-    // Print out contents of an id
-
-    void print(const Identifier& id) const;
 
     // Check whether helper is fully initialized
     bool isInitialized() const;

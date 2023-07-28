@@ -79,6 +79,41 @@ bool Muon::nsw::MapperSTG::vmm_info (uint8_t channel_type, uint8_t sector_type, 
   return false;  
 }
 
+//=====================================================================
+bool Muon::nsw::MapperSTG::elink_info (uint8_t channel_type, uint8_t sector_type, uint8_t mod_radius, uint8_t layer, uint16_t channel_number, uint &elink) const
+{
+  if(mod_radius>0) {elink = 0; return true;} // The boards on Q2 and Q3 are only read out by one elink per board
+  uint16_t vmm{0}, vmm_chan{0};
+  if(!vmm_info (channel_type, sector_type, mod_radius, layer, channel_number, vmm, vmm_chan)) return false;
+  if(channel_type==OFFLINE_CHANNEL_TYPE_STRIP){
+    if(geoVmmToRocVmm(vmm) < 4){
+      elink=0; 
+      return true;
+    } else{
+      elink=2; 
+      return true;
+    }
+  } else if (channel_type==OFFLINE_CHANNEL_TYPE_WIRE || channel_type==OFFLINE_CHANNEL_TYPE_PAD){
+    if(geoVmmToRocVmm(vmm)==2){
+      elink=0;
+      return true;
+    } else{
+      elink=2;
+      return true;
+    }
+  } 
+  elink = 0;
+  return false;
+}
+
+
+//=====================================================================
+  
+  uint16_t Muon::nsw::MapperSTG::geoVmmToRocVmm(uint16_t VMM) const {
+      constexpr uint16_t vmmRemap[8] = { 2, 3, 0, 1, 5, 4, 6, 7 };
+      return vmmRemap[VMM];
+  }
+
 
 //=====================================================================
 uint16_t Muon::nsw::MapperSTG::AB_to_Athena_channel_number (uint8_t channel_type, uint8_t sector_type, uint8_t feb_radius, uint8_t layer, uint16_t channel_number) const

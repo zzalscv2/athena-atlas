@@ -100,19 +100,19 @@ StatusCode NswDcsTestAlg::retrieveData(const EventContext& ctx, const DcsDataTyp
     rangeW = EventIDRange::intersect(range, rangeW);
 
     // retrieve all channels
-    std::vector<Identifier> channelIds = readCdo->getChannelIds(tech, side);
+    std::vector<Identifier> channelIds = readCdo->getChannelIdsHv(tech, side);
     ATH_MSG_INFO("Found data for " << channelIds.size() << " channels!");
 
     // retrieve data for the first channel
     std::stringstream sstr{};
     if (!channelIds.empty()) {
         const Identifier& channel = channelIds[0];
-        const NswDcsDbData::DcsConstants& dcs_data = *readCdo->getDataForChannel(tech, channel);
+        const NswDcsDbData::DcsConstants& dcs_data = *readCdo->getDataForChannelHv(tech, channel);
         ATH_MSG_INFO("Checking channel 0 (Id = " << channel.get_compact() << ") "<<dcs_data);
         if (!m_logName.empty()){
             for (const Identifier& chan_id : channelIds) {
-                const NswDcsDbData::DcsConstants& thedata = *readCdo->getDataForChannel(tech, chan_id);
-                sstr<<m_idHelperSvc->toString(chan_id)<<" "<<thedata<<" "<<readCdo->isGood(chan_id)<<std::endl;
+                const NswDcsDbData::DcsConstants& thedata = *readCdo->getDataForChannelHv(tech, chan_id);
+                sstr<<m_idHelperSvc->toString(chan_id)<<" "<<thedata<<" "<<readCdo->isGood(chan_id)<< " " << readCdo->isGoodTDaq(ctx,chan_id) <<std::endl;
             }                   
         }
     }

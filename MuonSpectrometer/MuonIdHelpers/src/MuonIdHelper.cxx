@@ -727,9 +727,6 @@ int MuonIdHelper::stationRegion(const Identifier& id) const {
 /*******************************************************************************/
 Identifier MuonIdHelper::muon() const { return AtlasDetectorID::muon(); }
 /*******************************************************************************/
-// Print method
-void MuonIdHelper::print(const Identifier& id) const { AtlasDetectorID::print(id); }
-/*******************************************************************************/
 IdContext MuonIdHelper::technology_context(void) const {
     ExpandedIdentifier id;
     return (IdContext(id, 0, m_TECHNOLOGY_INDEX));
