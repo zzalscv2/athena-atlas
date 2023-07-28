@@ -4,12 +4,13 @@ from AthenaCommon.CFElements import (seqAND, parOR)
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence
 from AthenaCommon.Logging import logging
 
-from ..Config.MenuComponents import RecoFragmentsPool, algorithmCAToGlobalWrapper
+from ..Config.MenuComponents import RecoFragmentsPool, algorithmCAToGlobalWrapper, extractAlgorithmsAndAppendCA
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorCentredOnIParticleROITool
+from TrigInDetConfig.utils import getFlagsForActiveConfig
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-from ..CommonSequences.FullScanInDetConfig import commonInDetLRTCfg
+from TrigInDetConfig.TrigInDetConfig import trigInDetLRTCfg
 
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
@@ -48,9 +49,19 @@ def DJDispFragment(flags):
     InputMakerAlg = EventViewCreatorAlgorithm("IMDJRoIFTF",mergeUsingFeature = True, RoITool = roiTool,Views = "DJRoIViews",InViewRoIs = "InViewRoIs",RequireParentView = False,ViewFallThrough = True)
     fscfg = getInDetTrigConfig("fullScan")
 
-    algs = algorithmCAToGlobalWrapper(commonInDetLRTCfg, flags, fscfg, lrtcfg, rois=InputMakerAlg.InViewRoIs)
+    flagsWithTrk = getFlagsForActiveConfig(flags, lrtcfg.name, log)
 
-    reco_seq = parOR("UncTrkrecoSeqDJTrigDispRecoSeq", algs)
+    from AthenaCommon.Configurable import ConfigurableCABehavior
+    with ConfigurableCABehavior():
+        lrt_ca = trigInDetLRTCfg(
+            flagsWithTrk,
+            fscfg.trkTracks_FTF(),
+            InputMakerAlg.InViewRoIs,
+            in_view=True
+        )
+    lrt_algs = extractAlgorithmsAndAppendCA(lrt_ca)
+
+    reco_seq = parOR("UncTrkrecoSeqDJTrigDispRecoSeq", lrt_algs)
 
     InputMakerAlg.ViewNodeName = reco_seq.name()
 

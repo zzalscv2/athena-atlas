@@ -86,13 +86,26 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
   return acc
 
 
-def trigInDetLRTCfg(flags, LRTInputCollection, roisKey, in_view):
+def trigInDetLRTCfg(flags, LRTInputCollection, roisKey, in_view, extra_view_inputs=[]):
   from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
+  viewname = "VDVInDetLRT" if in_view else None
   seq = InDetTrigSequence(flags,
                           flags.Tracking.ActiveConfig.input_name,
                           rois   = roisKey,
-                          inView = "VDVInDetLRT" if in_view else None)
-  acc = seq.fastTrackFinder(inputTracksName = LRTInputCollection)
+                          inView = viewname)
+  acc = ComponentAccumulator()
+  if in_view:
+    acc.addEventAlgo( CompFactory.AthViews.ViewDataVerifier(
+      name = viewname + "_" + flags.Tracking.ActiveConfig.input_name,
+      DataObjects = [
+        ( 'TrigRoiDescriptorCollection' ,  f'StoreGateSvc+{roisKey}' ),
+        ( 'TrackCollection' ,               'StoreGateSvc+HLT_IDTrkTrack_FS_FTF' ),
+        ( 'SpacePointContainer' ,           'StoreGateSvc+SCT_TrigSpacePoints' ),
+        ( 'InDet::PixelClusterContainer' ,  'StoreGateSvc+PixelTrigClusters' ),
+        ( 'InDet::SCT_ClusterContainer' ,   'StoreGateSvc+SCT_TrigClusters' ),
+      ]+extra_view_inputs
+    ) )
+  acc.merge(seq.fastTrackFinder(inputTracksName = LRTInputCollection))
   return acc
 
 

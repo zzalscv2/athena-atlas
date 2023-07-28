@@ -1,7 +1,10 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon.CFElements import seqAND
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool, algorithmCAToGlobalWrapper
 from AthenaCommon.Logging import logging
+
+from TrigInDetConfig.utils import getFlagsForActiveConfig
+from TrigInDetConfig.TrigInDetConfig import trigInDetLRTCfg
 
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
@@ -33,14 +36,22 @@ def DVRecoFragment(flags):
         RequireParentView = False,
         ViewFallThrough = True)
 
-    from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-    viewAlgs, viewVerify = makeInDetTrigFastTracking( flags, config = LRTConfig, LRTInputCollection = FSConfig.trkTracks_FTF(), rois=inputMakerAlg.InViewRoIs )
+    fscfg = getInDetTrigConfig("fullScan")
+    lrtcfg = getInDetTrigConfig( 'DVtxLRT' )
 
-    viewVerify.DataObjects += [ ( 'TrigRoiDescriptorCollection',  'StoreGateSvc+%s' % inputMakerAlg.InViewRoIs ),
-                                ( 'TrackCollection', 'StoreGateSvc+%s' % FSConfig.trkTracks_FTF() ),
-                                ( 'xAOD::TrackParticleContainer', 'StoreGateSvc+%s' % FSConfig.tracks_FTF()),
-                                ( 'xAOD::VertexContainer', 'StoreGateSvc+%s' % FSConfig.vertex ) ]
+    flagsWithTrk = getFlagsForActiveConfig(flags, lrtcfg.name, log)
 
+    lrt_algs = algorithmCAToGlobalWrapper(
+        trigInDetLRTCfg,
+        flagsWithTrk,
+        fscfg.trkTracks_FTF(),
+        inputMakerAlg.InViewRoIs,
+        in_view=True,
+        extra_view_inputs=[
+            ( 'xAOD::TrackParticleContainer' , FSConfig.tracks_FTF() ),
+            ( 'xAOD::VertexContainer' ,        FSConfig.vertex ),
+        ]
+    )
 
     from TrigEDMConfig.TriggerEDMRun3 import recordable
     from TrigVrtSecInclusive.TrigVrtSecInclusiveConfig import TrigVrtSecInclusiveCfg
@@ -51,7 +62,7 @@ def DVRecoFragment(flags):
                                             VxCandidatesOutputName = recordable(vtxOutName),
                                             TrkPairOutputName = recordable(trkPairOutName) )
 
-    recoAlgSequence = seqAND("DVRecoSequence", [viewAlgs, vertexingAlgs])
+    recoAlgSequence = seqAND("DVRecoSequence", [lrt_algs, vertexingAlgs])
     inputMakerAlg.ViewNodeName = recoAlgSequence.name()
 
     algSequence = seqAND("TrigDVRecoSequence", [inputMakerAlg, recoAlgSequence])
