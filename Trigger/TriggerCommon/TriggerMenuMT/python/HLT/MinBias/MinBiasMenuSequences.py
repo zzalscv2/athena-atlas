@@ -126,8 +126,7 @@ def MinBiasSPSel(flags):
 
 def MinBiasSPSequenceCfg(flags):
     selAcc = MinBiasSPSel(flags)
-    from TrigInDetConfig.TrigInDetConfig import InDetIDCCacheCreatorCfg
-    return MenuSequenceCA(flags, selAcc, HypoToolGen = SPCountHypoToolGen, globalRecoCA=InDetIDCCacheCreatorCfg(flags))
+    return MenuSequenceCA(flags, selAcc, HypoToolGen = SPCountHypoToolGen)
 
 def MinBiasZVertexFinderSequenceCfg(flags):
     recoAcc = InViewRecoCA(name="ZVertFinderReco", InViewRoIs="InputRoI", RequireParentView=True)
