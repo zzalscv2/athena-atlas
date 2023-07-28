@@ -80,9 +80,7 @@ def makeNameGetPreAndSuffix( name, kwargs) :
     return namePrefix + name + nameSuffix,namePrefix,nameSuffix
 
 def getDefaultName(func) :
-    # @TODO only works for python 2
-    import inspect
-    defaults=inspect.getargspec(func).defaults
+    defaults=func.__defaults__
     if len(defaults)==0 :
         raise Exception("Missing default name for %s" % func.__name__)
     return defaults[0]
