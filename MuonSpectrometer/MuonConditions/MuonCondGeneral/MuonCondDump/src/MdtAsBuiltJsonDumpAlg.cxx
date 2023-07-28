@@ -43,9 +43,9 @@ StatusCode MdtAsBuiltJsonDumpAlg::execute(){
           prefix<<"Ml"<<(static_cast<unsigned>(ml) + 1);
           prefix<<(side  == tubeSide_t::POS? "Pos" : "Neg")<<"TubeSide";
           
-          auto dumpValue = [&prefix,&ostr, this](const std::string& field, 
-                                                 const float val,
-                                                 bool last = false) {
+          auto dumpValue = [&prefix,&ostr](const std::string& field, 
+                                           const float val,
+                                           bool last = false) {
               ostr<<"     \""<<prefix.str()<<field<<"\": ";
               ostr<<val<<(last ? "":", ")<<std::endl;      
           };
