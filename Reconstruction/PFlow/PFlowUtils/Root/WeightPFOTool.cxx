@@ -13,8 +13,11 @@ namespace CP {
     declareProperty("NeutralPFOScale",m_theNeutralPFOScaleString="EM");
   }
 
-  // The intended result:
+  // Further details of the motivation for this procedure and explanations
+  // of how it works can be found in section 4 of:
+  // Eur. Phys. J. C 81 (2021) 689: https://arxiv.org/abs/2007.02645 
   //
+  //The intended result is briefly described below. 
   //CP::EM Case
   // Subtraction applied (inDenseEnvironment==false)
   // pt < 30 GeV: Ptrk [weight = 1]
