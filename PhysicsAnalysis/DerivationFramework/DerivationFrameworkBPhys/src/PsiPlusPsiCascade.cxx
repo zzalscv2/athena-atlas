@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /////////////////////////////////////////////////////////////////
 // PsiPlusPsiCascade.cxx, (c) ATLAS Detector software
@@ -147,7 +147,10 @@ namespace DerivationFramework {
 
     for(unsigned int ic=0; ic<cascadeinfoContainer.size(); ic++) {
       Trk::VxCascadeInfo* cascade_info = cascadeinfoContainer[ic];
-      if(cascade_info==nullptr) ATH_MSG_ERROR("CascadeInfo is null");
+      if(cascade_info==nullptr) {
+        ATH_MSG_ERROR("CascadeInfo is null");
+        return StatusCode::FAILURE;
+      }
 
       Trk::VxCascadeInfo* cascade_info_noConstr = cascadeinfoContainer_noConstr[ic];
 
