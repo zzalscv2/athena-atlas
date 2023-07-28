@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCSTruthState_h
@@ -9,9 +9,8 @@
 
 #include "ISF_FastCaloSimEvent/MLogging.h"
 
-using namespace ISF_FCS;
 
-class TFCSTruthState : public TLorentzVector, public MLogging {
+class TFCSTruthState : public TLorentzVector, public ISF_FCS::MLogging {
 public:
   TFCSTruthState();
   TFCSTruthState(Double_t x, Double_t y, Double_t z, Double_t t, int pdgid);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/DoubleArray.h"
@@ -577,7 +577,7 @@
 
 #pragma link C++ class TFCS2DFunction + ;
 #pragma link C++ class TFCS2DFunctionHistogram + ;
-#pragma link C++ class MLogging + ;
+#pragma link C++ class ISF_FCS::MLogging + ;
 #pragma link C++ class TFCSParametrizationBase + ;
 #pragma link C++ class TFCSParametrizationPlaceholder + ;
 #pragma link C++ class TFCSParametrization + ;

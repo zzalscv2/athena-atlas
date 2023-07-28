@@ -8,9 +8,8 @@
 #include "TObject.h"
 #include "ISF_FastCaloSimEvent/MLogging.h"
 
-using namespace ISF_FCS;
 
-class TFCSFunction : public TObject, public MLogging {
+class TFCSFunction : public TObject, public ISF_FCS::MLogging {
 public:
   TFCSFunction(){};
   virtual ~TFCSFunction(){};

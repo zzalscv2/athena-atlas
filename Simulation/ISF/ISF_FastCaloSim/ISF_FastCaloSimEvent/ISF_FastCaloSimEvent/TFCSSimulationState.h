@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCSSimulationState_h
@@ -28,9 +28,8 @@ class HepRandomEngine;
 
 constexpr std::uint32_t operator"" _FCShash(char const *s, std::size_t count);
 
-using ISF_FCS::MLogging;
 
-class TFCSSimulationState : public TObject, public MLogging {
+class TFCSSimulationState : public TObject, public ISF_FCS::MLogging {
 public:
   TFCSSimulationState(CLHEP::HepRandomEngine *randomEngine = nullptr);
 
