@@ -116,8 +116,12 @@ def AddTauIDDecorationCfg(flags, **kwargs):
 
     if kwargs['DeepSetID']:
         tools.append( acc.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )
-        tools.append( acc.popToolsAndMerge(tauTools.TauJetDeepSetEvaluatorCfg(flags)) )
-        tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorJetDeepSetCfg(flags)) )
+        # R22 DeepSet tau ID tune with track RNN scores
+        tools.append( acc.popToolsAndMerge(tauTools.TauJetDeepSetEvaluatorCfg(flags, version="v1")) )
+        tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorJetDeepSetCfg(flags, version="v1")) )
+        # R22 DeepSet tau ID tune without track RNN scores
+        tools.append( acc.popToolsAndMerge(tauTools.TauJetDeepSetEvaluatorCfg(flags, version="v2")) )
+        tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorJetDeepSetCfg(flags, version="v2")) )
 
     if tools:
         for tool in tools:
