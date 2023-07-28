@@ -54,8 +54,12 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.TauEleRNNWPConfig", ["taueveto_rnn_flat_1P_r22.root", "taueveto_rnn_flat_3P_r22.root"])
     tau_cfg.addFlag("Tau.DecayModeNNClassifierConfig", "NNDecayMode_R22_v1.json")
     tau_cfg.addFlag("Tau.TauEleRNNWPfix", ["rnneveto_mc16d_flat_1p_fix.root", "rnneveto_mc16d_flat_3p_fix.root"])
+    # R22 DeepSet tau ID tune with track RNN scores
     tau_cfg.addFlag("Tau.TauJetDeepSetConfig", ["tauid_R22_1p_trk_dpst_notrkfakeRNN.json", "tauid_R22_2p_trk_dpst.json", "tauid_R22_3p_trk_dpst.json"])
     tau_cfg.addFlag("Tau.TauJetDeepSetWP", ["model_R22_1p_trk_dpst_notrkfakeRNN.root", "model_R22_2p_trk_dpst.root", "model_R22_3p_trk_dpst.root"])
+    # R22 DeepSet tau ID tune without track RNN scores, for now define a second set of flags, but ultimately we'll choose one and drop the other
+    tau_cfg.addFlag("Tau.TauJetDeepSetConfig_v2", ["tauid_1p_R22_dpst_noTrackScore.json", "tauid_2p_R22_dpst_noTrackScore.json", "tauid_3p_R22_dpst_noTrackScore.json"])
+    tau_cfg.addFlag("Tau.TauJetDeepSetWP_v2", ["model_1p_R22_dpst_noTrackScore.root", "model_2p_R22_dpst_noTrackScore.root", "model_3p_R22_dpst_noTrackScore.root"])
 
     # create 2 flag categories, for standard taus and electron-subtracted taus
     tau_cfg.addFlagsCategory("Tau.TauRec", createTauRecConfigFlags, prefix=True)
