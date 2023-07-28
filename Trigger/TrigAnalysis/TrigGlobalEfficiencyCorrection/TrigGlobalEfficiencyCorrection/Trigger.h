@@ -88,7 +88,7 @@ public:
 			+ (obj!=xAOD::Type::Muon)*nDistinctLegs(xAOD::Type::Muon));
 	}
 	
-	auto cbegin(xAOD::Type::ObjectType obj) const
+	constexpr auto cbegin(xAOD::Type::ObjectType obj) const
 	{
 		return m_legs.cbegin() + cbegin_offset(obj);
 	}
@@ -99,7 +99,7 @@ public:
 			+ (obj!=xAOD::Type::Muon)*nDistinctLegs(xAOD::Type::Muon)));
 	}
 	
-	auto cend(xAOD::Type::ObjectType obj) const
+	constexpr auto cend(xAOD::Type::ObjectType obj) const
 	{
 		return m_legs.cbegin() + nDistinctLegs() + cend_offset(obj);
 	}
@@ -216,12 +216,12 @@ public:
 		return legs == rhs.legs;
 	}
 	
-	template<xAOD::Type::ObjectType obj = object()> auto cbegin() const
+	template<xAOD::Type::ObjectType obj = object()> constexpr auto cbegin() const
 	{
 		return legs.cbegin() + TriggerProperties(tt).cbegin_offset(obj);
 	}
 	
-	template<xAOD::Type::ObjectType obj = object()> auto cend() const
+	template<xAOD::Type::ObjectType obj = object()> constexpr auto cend() const
 	{
 		return legs.cend() + TriggerProperties(tt).cend_offset(obj);
 	}
@@ -250,7 +250,7 @@ public:
 		static_assert(obj != xAOD::Type::Other, "implementation incomplete");
 		using CastType = decltype(side<obj, anti>());
 		CastType trig;
-		std::copy(this->cbegin<CastType::object()>(), this->cend<CastType::object()>(), trig.legs.begin());
+		std::copy_n(this->cbegin<CastType::object()>(), nDistinctLegs(CastType::object()), trig.legs.begin());
 		return trig;
 	}
 	/// Returns a pseudo trigger built only from the legs of the same flavour as the trigger 'TrigX'

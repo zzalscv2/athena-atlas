@@ -9,6 +9,7 @@
 
 #include "xAODEgamma/Electron.h"
 #include "xAODEgamma/Photon.h"
+#include "xAODMuon/Muon.h"
 
 namespace TrigGlobEffCorr
 {
