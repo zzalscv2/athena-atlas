@@ -109,6 +109,22 @@ public:
     Identifier multilayerID(const Identifier& moduleID, int multilayer) const;
     Identifier multilayerID(const Identifier& moduleID, int multilayer, bool& isValid) const;
 
+    
+    /*
+    For the sTGCs each layer of a quadruplet is read out by two front end boards, one covering the strips (sFEB) and one covering the pads and wires (pFEBs).
+    This helper function creates a dummy identifier which can be associated with a front end board, which is primarily needed to deal with the correlation between DCS data and the hits in athena
+    sFEBs are always mapped to channel type strip and to channel one of the layer that is readout by this board. pFEBs are mapped to pad channel type and channel one of a layer.
+    The last fuction which just takes the identifier as an input is meant to convert hit identifiers to front end identifiers. It retruns the same fields as the input identifier except for channel which is set to 1 and for wire identifiers the channel type is set to pad.
+    */
+    
+    Identifier febID(int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int channelType) const;
+    Identifier febID(int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int channelType, bool& isValid) const;
+    Identifier febID(const std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int channelType) const;
+    Identifier febID(const std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int channelType, bool& isValid) const;
+    Identifier febID(const Identifier& channelID, int channelType) const;
+    Identifier febID(const Identifier& channelID, int channelType, bool& isValid) const;
+    Identifier febID(const Identifier& channelID) const;
+
     // for an Identifier id, get the list of the daughter readout channel ids
     void idChannels(const Identifier& id, std::vector<Identifier>& vect) const;
 

@@ -316,6 +316,34 @@ Identifier sTgcIdHelper::multilayerID(const Identifier& moduleID, int multilayer
     return Identifier{0};
 }
 /*******************************************************************************/
+
+// febID constructs an identifier that can be associcate with a region of the detector that is read out by the same front end board 
+Identifier sTgcIdHelper::febID(int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int channelType) const{
+    return channelID(stationName,stationEta,stationPhi,multilayer,gasGap,(channelType==sTgcChannelTypes::Strip ? sTgcChannelTypes::Strip : sTgcChannelTypes::Pad), 1); 
+}
+Identifier sTgcIdHelper::febID(int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int channelType, bool& isValid) const{
+    return channelID(stationName,stationEta,stationPhi,multilayer,gasGap, (channelType==sTgcChannelTypes::Strip ? sTgcChannelTypes::Strip : sTgcChannelTypes::Pad), 1, isValid); 
+}
+Identifier sTgcIdHelper::febID(const std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int channelType) const{
+    return channelID(stationName,stationEta,stationPhi,multilayer,gasGap,(channelType==sTgcChannelTypes::Strip ? sTgcChannelTypes::Strip : sTgcChannelTypes::Pad), 1); 
+}
+Identifier sTgcIdHelper::febID(const std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int channelType, bool& isValid) const{
+    return channelID(stationName,stationEta,stationPhi,multilayer,gasGap,(channelType==sTgcChannelTypes::Strip ? sTgcChannelTypes::Strip : sTgcChannelTypes::Pad), 1, isValid); 
+}
+Identifier sTgcIdHelper::febID(const Identifier& channelId) const{
+    return channelID(channelId, multilayer(channelId), gasGap(channelId),(int)(channelType(channelId) ==sTgcChannelTypes::Strip ? sTgcChannelTypes::Strip : sTgcChannelTypes::Pad), 1); 
+}
+
+
+
+
+
+
+
+
+
+
+/*******************************************************************************/
 void sTgcIdHelper::idChannels(const Identifier& id, std::vector<Identifier>& vect) const {
     vect.clear();
     Identifier parent = parentID(id);

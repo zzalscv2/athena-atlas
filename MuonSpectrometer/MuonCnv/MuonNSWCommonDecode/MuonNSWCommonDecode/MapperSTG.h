@@ -23,6 +23,8 @@ namespace Muon
       uint16_t nchannels (uint8_t channel_type, uint8_t sector_type, uint8_t feb_radius, uint8_t layer) const;
       uint16_t channel_number (uint8_t channel_type, uint8_t sector_type, uint8_t feb_radius, uint8_t layer, uint16_t vmm, uint16_t vmm_chan) const;
       bool vmm_info (uint8_t channel_type, uint8_t sector_type, uint8_t mod_radius, uint8_t layer, uint16_t channel_number, uint16_t& vmm, uint16_t& vmm_chan) const;
+      bool elink_info (uint8_t channel_type, uint8_t sector_type, uint8_t mod_radius, uint8_t layer, uint16_t channel_number, uint &elink) const;
+      uint16_t geoVmmToRocVmm(uint16_t geoVMM) const; // go from geometrical (as used offline) vmm number to roc capture vmm number, also works in opposite direction 
 
       static uint16_t private_id (uint8_t channel_type, uint8_t sector_type, uint8_t feb_radius, uint8_t layer);
       

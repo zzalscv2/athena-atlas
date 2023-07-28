@@ -11,7 +11,14 @@
 #include "MuonReadoutGeometry/MMReadoutElement.h"
 
 
+#include "MuonNSWCommonDecode/MapperSTG.h"
+#include "MuonNSWCommonDecode/MapperMMG.h"
+
+
+
+
 // general functions ---------------------------------
+
 NswDcsDbData::NswDcsDbData(const MmIdHelper& mmIdHelper, const sTgcIdHelper& stgcIdHelper, const MuonGM::MuonDetectorManager* muonGeoMgr):
     m_mmIdHelper(mmIdHelper),
     m_stgcIdHelper(stgcIdHelper),
@@ -57,6 +64,11 @@ std::ostream& operator<<(std::ostream& ostr, const NswDcsDbData::DcsConstants& o
     return ostr;
 }
 
+std::ostream& operator<<(std::ostream& ostr, const NswDcsDbData::TDaqConstants& obj) {
+    ostr  << " lbSince " << obj.lbSince << " lbUntil " << obj.lbUntil << " elink " << obj.elink;
+    return ostr;
+}
+
 unsigned int NswDcsDbData::identToModuleIdx(const Identifier& chan_id) const{
     if (m_mmIdHelper.is_mm(chan_id)) {
         IdentifierHash hash{0};
@@ -77,9 +89,9 @@ unsigned int NswDcsDbData::identToModuleIdx(const Identifier& chan_id) const{
 
 // setting functions ---------------------------------
 
-// setData
+// setDataHv
 void
-NswDcsDbData::setData(const DcsTechType tech, const Identifier& chnlId, DcsConstants constants) {
+NswDcsDbData::setDataHv(const DcsTechType tech, const Identifier& chnlId, DcsConstants constants) {
     if(tech == DcsTechType::MMG || tech == DcsTechType::MMD) {
         ChannelDcsMap& dcsMap = tech == DcsTechType::MMG ? m_data_hv_mmg : m_data_hv_mmd;
         const unsigned int array_idx = identToModuleIdx(chnlId);
@@ -112,6 +124,18 @@ NswDcsDbData::setData(const DcsTechType tech, const Identifier& chnlId, DcsConst
     }
 }
 
+// setDataTDaq
+void
+NswDcsDbData::setDataTDaq(const DcsTechType tech, const Identifier& chnlId, unsigned int lbSince, unsigned int lbUntil, unsigned int elink) {
+    ChannelTDaqMap& data = tech == DcsTechType::MMG ? m_data_tdaq_mmg : m_data_tdaq_stg;
+    const unsigned int array_idx = identToModuleIdx(chnlId);
+    if (array_idx >= data.size()) data.resize(array_idx + 1);
+    TDaqConstants x;
+    x.lbSince = lbSince;
+    x.lbUntil = lbUntil;
+    x.elink = elink;
+    data[array_idx][chnlId].insert(x);
+}
 
 
 
@@ -119,7 +143,7 @@ NswDcsDbData::setData(const DcsTechType tech, const Identifier& chnlId, DcsConst
 
 // getChannelIds
 std::vector<Identifier>
-NswDcsDbData::getChannelIds(const DcsTechType tech, const std::string& side) const {
+NswDcsDbData::getChannelIdsHv(const DcsTechType tech, const std::string& side) const {
     std::vector<Identifier> chnls;
     if(tech == DcsTechType::MMG || tech == DcsTechType::MMD){
         const ChannelDcsMap& dcsMap = tech == DcsTechType::MMG ? m_data_hv_mmg : m_data_hv_mmd;
@@ -151,7 +175,7 @@ NswDcsDbData::getChannelIds(const DcsTechType tech, const std::string& side) con
 }
 
 const NswDcsDbData::DcsConstants* 
-NswDcsDbData::getDataForChannel(const DcsTechType tech, const Identifier& channelId) const {
+NswDcsDbData::getDataForChannelHv(const DcsTechType tech, const Identifier& channelId) const {
     if(tech == DcsTechType::MMG || tech == DcsTechType::MMD){
         if(!m_mmIdHelper.is_mm(channelId)) return nullptr;
         const ChannelDcsMap& dcsMap = tech==DcsTechType::MMG ? m_data_hv_mmg : m_data_hv_mmd; // later add something like: type == DcsDataType::HV ? m_data_hv : m_data_lv;
@@ -168,10 +192,13 @@ NswDcsDbData::getDataForChannel(const DcsTechType tech, const Identifier& channe
     return nullptr;
 }
 
+
 bool NswDcsDbData::isGood(const Identifier& channelId, bool issTgcQ1OuterHv) const {
     // here we will check the different DCS components that need to be good to declare a detector region as good
     // for now we only we only have the HV data
     if(!isGoodHv(channelId, issTgcQ1OuterHv)) return false;
+    //while the isGoodTDaq is under validation it should not reject any hits in recosntruction, therefore keep it commented for now 
+    //if(!isGoodTDaq(ctx, channelId)) return false;
     if(!isConnectedChannel(channelId))  return false;
     return true;
 
@@ -183,22 +210,52 @@ bool NswDcsDbData::isGoodHv(const Identifier& channelId, bool issTgcQ1OuterHv) c
         // the parameter issTgcQ1OuterHv is only relevant for the Q1s of the stgcs. So set it to false if we are not in Q1, just in case
         if(std::abs(m_stgcIdHelper.stationEta(channelId))!= 1) {issTgcQ1OuterHv=false;}
         Identifier dcsChannelId = m_stgcIdHelper.channelID(channelId,m_stgcIdHelper.multilayer(channelId), m_stgcIdHelper.gasGap(channelId), 1, (issTgcQ1OuterHv ? 100:1));
-        const NswDcsDbData::DcsConstants* dcs = getDataForChannel(DcsTechType::STG, dcsChannelId);
+        const NswDcsDbData::DcsConstants* dcs = getDataForChannelHv(DcsTechType::STG, dcsChannelId);
         /// For the moment do not kill the hit if there's no dcs data
         return !dcs || dcs->fsmState == DcsFsmState::ON;
     } else if (m_stgcIdHelper.is_mm(channelId)){
         Identifier dcsChannelIdDriftHv = m_mmIdHelper.multilayerID(channelId);
         Identifier dcsChannelIdStripHv = m_mmIdHelper.pcbID(channelId);
 
-        const NswDcsDbData::DcsConstants* dcsDrift = getDataForChannel(DcsTechType::MMD, dcsChannelIdDriftHv);
+        const NswDcsDbData::DcsConstants* dcsDrift = getDataForChannelHv(DcsTechType::MMD, dcsChannelIdDriftHv);
         bool driftHvIsGood = (!dcsDrift || dcsDrift->fsmState == DcsFsmState::ON);
 
-        const NswDcsDbData::DcsConstants* dcsStrips = getDataForChannel(DcsTechType::MMG, dcsChannelIdStripHv);
+        const NswDcsDbData::DcsConstants* dcsStrips = getDataForChannelHv(DcsTechType::MMG, dcsChannelIdStripHv);
         bool stripHvIsGood = (!dcsStrips || dcsStrips->fsmState == DcsFsmState::ON);
         
         return  driftHvIsGood && stripHvIsGood; 
     }
     return false;
+}
+
+
+bool NswDcsDbData::isGoodTDaq(const EventContext& ctx, const Identifier& channelId) const {
+    const ChannelTDaqMap & data = m_stgcIdHelper.is_mm(channelId) ? m_data_tdaq_mmg : m_data_tdaq_stg;
+    const unsigned int array_idx = identToModuleIdx(channelId);
+    if(data.size()<=array_idx || data[array_idx].empty()) return true; // for this ro element no bad elink have been recorded 
+    const std::map<Identifier, std::set<TDaqConstants>>& dataInRoElement = data[array_idx];
+    Identifier mapIdentifier{0};
+    uint elink{0};
+
+    if(m_stgcIdHelper.is_stgc(channelId)){
+        mapIdentifier = m_stgcIdHelper.febID(channelId);
+        auto mapper = Muon::nsw::MapperSTG();
+        mapper.elink_info(m_stgcIdHelper.channelType(channelId), !m_stgcIdHelper.isSmall(channelId), std::abs(m_stgcIdHelper.stationEta(channelId))-1, 4*(m_stgcIdHelper.multilayer(channelId)-1) + m_stgcIdHelper.gasGap(channelId) -1, m_stgcIdHelper.channel(channelId), elink);
+    } else {
+        mapIdentifier = m_mmIdHelper.febID(channelId);
+        auto mapper = Muon::nsw::MapperMMG();
+        mapper.elink_info(std::abs(m_mmIdHelper.stationEta(channelId))-1, m_mmIdHelper.channel(channelId), elink); 
+    }
+    
+    auto elm = dataInRoElement.find(mapIdentifier);
+    if(elm == dataInRoElement.end()) return true; // channel in question was not deactivated at all
+    TDaqConstants x;
+    x.lbSince = ctx.eventID().lumi_block();
+    x.lbUntil = ctx.eventID().lumi_block();
+    x.elink = elink;
+
+    if(elm->second.find(x) != elm->second.end()) return false; // elink was deactivated for this time period
+    return true; // checked the channel in question, not deactivated for given run and lumi block combination, all good
 }
 
 
@@ -228,7 +285,5 @@ bool NswDcsDbData::isConnectedChannel(const Identifier& channelId) const {
       } 
     }
     return true; 
-
-
 
 }

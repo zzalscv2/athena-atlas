@@ -19,6 +19,7 @@ namespace Muon
 
       uint16_t channel_number (uint8_t feb_radius, uint16_t vmm, uint16_t vmm_chan) const;
       bool vmm_info (uint8_t mod_radius, uint16_t channel_number, uint8_t& feb_radius, uint16_t& vmm, uint16_t& vmm_chan) const;
+      bool elink_info(uint8_t mod_radius, uint16_t channel_number, uint& elink) const;
     };
   }
 }
@@ -64,6 +65,28 @@ inline bool Muon::nsw::MapperMMG::vmm_info (uint8_t mod_radius, uint16_t channel
   }
   
   return true;
+}
+
+inline bool Muon::nsw::MapperMMG::elink_info(uint8_t mod_radius, uint16_t channel_number, uint& elink) const {
+  uint16_t vmm{0}, vmm_chan{0};
+  uint8_t feb_radius{0};
+  vmm_info(mod_radius, channel_number, feb_radius, vmm, vmm_chan);
+  if(feb_radius<12){ // febs 0-11 are only read out through 1 elink 
+    elink=0;
+    return true;
+  } else if(feb_radius >11 || feb_radius<16){
+    // for febs at radius 12 to 15 vmms 0-3 are connected to sroc 2 while vmms 3-7 are connected to sroc 3. This mapping is configurable in the ROC but not forssen to change before RUN4
+    if (vmm < 4){
+      elink = 2;
+    } else {
+      elink = 3;
+    }
+    return true;
+  }
+  return false;
+  
+
+
 }
 
 #endif
