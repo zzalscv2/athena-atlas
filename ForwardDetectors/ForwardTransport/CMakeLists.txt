@@ -13,7 +13,7 @@ atlas_add_library( ForwardTransport
                    OBJECT
                    NO_PUBLIC_HEADERS
                    PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS}
-                   PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} AtlasHepMCLib ForwardTracker GaudiKernel GeneratorObjects G4AtlasToolsLib ForwardTransportSvcLib ISF_Event MCTruth )
+                   PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} AtlasHepMCLib  TruthUtils ForwardTracker GaudiKernel GeneratorObjects G4AtlasToolsLib ForwardTransportSvcLib ISF_Event MCTruth )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
