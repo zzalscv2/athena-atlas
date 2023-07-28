@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCSExtrapolationState_h
@@ -9,9 +9,8 @@
 #include "ISF_FastCaloSimEvent/FastCaloSim_CaloCell_ID.h"
 #include "ISF_FastCaloSimEvent/MLogging.h"
 
-using namespace ISF_FCS;
 
-class TFCSExtrapolationState : public TObject, public MLogging {
+class TFCSExtrapolationState : public TObject, public ISF_FCS::MLogging {
 public:
   TFCSExtrapolationState();
 

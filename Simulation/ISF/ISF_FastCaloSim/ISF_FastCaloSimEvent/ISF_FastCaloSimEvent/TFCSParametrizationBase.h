@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCSParametrizationBase_h
@@ -42,9 +42,8 @@ enum FCSReturnCode { FCSFatal = 0, FCSSuccess = 1, FCSRetry = 2 };
 
 #define FCS_RETRY_COUNT 3
 
-using ISF_FCS::MLogging;
 
-class TFCSParametrizationBase : public TNamed, public MLogging {
+class TFCSParametrizationBase : public TNamed, public ISF_FCS::MLogging {
 public:
   TFCSParametrizationBase(const char *name = nullptr,
                           const char *title = nullptr);
