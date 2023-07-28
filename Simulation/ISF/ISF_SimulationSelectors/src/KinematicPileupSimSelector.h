@@ -12,9 +12,6 @@
 #include "ISF_Event/KinematicParticleCuts.h"
 #include "BaseSimulationSelector.h"
 
-// Barcode interpretation
-#include "BarcodeServices/BitCalculator.h"
-
 namespace ISF {
 
   /** @class KinematicPileupSimSelector
