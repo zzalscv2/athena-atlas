@@ -57,8 +57,6 @@ namespace MuonGM {
        from G4, are expressed).
     */
 
-    class RpcReadoutSet;
-
     class RpcReadoutElement final : public MuonClusterReadoutElement {
         friend class Muon::RpcAlignModule;
         friend class Muon::CombinedMuonAlignModule;
@@ -233,6 +231,7 @@ namespace MuonGM {
         inline bool isMirrored() const {return m_mirrored;}       
         inline bool isDescrAtNegZ() const {return m_descratzneg;}
     private:
+        const RpcIdHelper& m_idHelper{idHelperSvc()->rpcIdHelper()};
         bool m_mirrored{false};
         bool m_descratzneg{false};
         /** returns the MuonStripDesign class for the given identifier */
@@ -273,9 +272,8 @@ namespace MuonGM {
         Amg::Transform3D localToGlobalStripPanelTransf(int dbZ, int dbPhi, int gasGap) const;
         Amg::Vector3D localStripPanelPos(int dbZ, int dbP, int gg) const;
 
-        std::vector<MuonStripDesign> m_phiDesigns;
-        std::vector<MuonStripDesign> m_etaDesigns;
-        std::unique_ptr<RpcReadoutSet> m_set;
+        std::vector<MuonStripDesign> m_phiDesigns{};
+        std::vector<MuonStripDesign> m_etaDesigns{};
 
         float m_y_translation{0.f};
         float m_z_translation{0.f};

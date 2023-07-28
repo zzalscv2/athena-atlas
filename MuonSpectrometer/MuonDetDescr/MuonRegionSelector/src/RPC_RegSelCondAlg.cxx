@@ -22,12 +22,7 @@
 #include "Identifier/IdentifierHash.h"
 #include "MuonCablingData/MuonMDT_CablingMap.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
-#include "MuonReadoutGeometry/MuonReadoutElement.h" 
-#include "MuonReadoutGeometry/MdtReadoutElement.h"
-#include "MuonReadoutGeometry/CscReadoutElement.h"
 #include "MuonReadoutGeometry/RpcReadoutElement.h"
-#include "MuonReadoutGeometry/TgcReadoutElement.h"
-#include "MuonReadoutGeometry/RpcReadoutSet.h"
 #include "MuonReadoutGeometry/MuonStation.h"
 
 RPC_RegSelCondAlg::RPC_RegSelCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
@@ -110,8 +105,7 @@ std::unique_ptr<RegSelSiLUT> RPC_RegSelCondAlg::createTable( const EventContext&
     int layerid = exp_id[1];
     if ( layerid==0 ) layerid = 11;  // this line should never be executed 
     
-    MuonGM::RpcReadoutSet Set( manager, prdId );
-    int ndbz = Set.NdoubletZ();
+    int ndbz = helper->doubletZMax(prdId);
 
     double zmin =  99999999;
     double zmax = -99999999;
@@ -125,11 +119,12 @@ std::unique_ptr<RegSelSiLUT> RPC_RegSelCondAlg::createTable( const EventContext&
     for (int dbz=1; dbz<=ndbz; dbz++) {
         
       const MuonGM::RpcReadoutElement* rpcold = nullptr;
-      int ndbp = Set.NPhimodules(dbz);
+      int ndbp = helper->doubletPhiMax(prdId);
         
       for (int dbp=1; dbp<=ndbp; dbp++) {
-
-        const MuonGM::RpcReadoutElement* rpc = Set.readoutElement(dbz, dbp);
+        Identifier chid = helper->channelID(prdId, dbz, dbp, 1, 0, 1);
+      
+        const MuonGM::RpcReadoutElement* rpc = manager->getRpcReadoutElement(chid);
 	
         if ( rpc != rpcold ) {
           
