@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCElectronicsSystem.h"
@@ -195,23 +195,5 @@ TGCElectronicsSystem::~TGCElectronicsSystem()
   }  // loop side
 }
 
-// hiddedn copy constructor
-TGCElectronicsSystem::TGCElectronicsSystem(const TGCElectronicsSystem& )
-: m_DB(0)
-{
-  for (int i=0; i < LVL1TGC::kNSide; i++) {
-    for (int j=0; j<NumberOfOctant; j++) {
-      for (int k=0; k<NumberOfModule; k++) {
-        m_sector[i][j][k] = 0;
-      } // loop module
-    } // loop octant
-  } // loop side
-}
-
-//hidden assignement operator
-TGCElectronicsSystem& TGCElectronicsSystem::operator=(const TGCElectronicsSystem& )
-{
-  return *this;
-}
   
 } //end of namespace bracket

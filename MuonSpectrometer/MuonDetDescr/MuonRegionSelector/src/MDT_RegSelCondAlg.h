@@ -5,7 +5,7 @@
  **   @author  sutt
  **   @date    Tue  4 Feb 2020 15:25:00 CET
  **
- **   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
  
 #ifndef MDT_RegSelCondAlg_h
@@ -13,6 +13,7 @@
 
 #include "MuonRegSelCondAlg.h"
 #include "MuonCondData/MdtCondDbData.h"
+#include "MuonCablingData/MuonMDT_CablingMap.h"
 
 class MDT_RegSelCondAlg : public MuonRegSelCondAlg { 
 

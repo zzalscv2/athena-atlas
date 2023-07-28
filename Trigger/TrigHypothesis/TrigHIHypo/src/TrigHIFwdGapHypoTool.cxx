@@ -41,7 +41,7 @@ StatusCode TrigHIFwdGapHypoTool::decide(const xAOD::HIEventShapeContainer* event
     }
 
     const float eta = 0.5 * (es->etaMin() + es->etaMax());
-    if (eta < 0.) {
+    if (eta > 0.) {
       totalFCalEtSideA += et;
     }
     else {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCPatchPanel_hh
@@ -50,7 +50,7 @@ public:
   const TGCPatchPanel* getAdjacentPP(int side) const { return m_PPAdj[side]; };
   void setAdjacentPP(int side, TGCPatchPanel* PP);
 
-  void setASDOut(int connector, int ch, const TGCASDOut* asdOut);
+  void setASDOut(int ch, int connector, const TGCASDOut* asdOut);
 
   TGCBIDOut* getBIDOut(int ch, int connector, int bunch);
 

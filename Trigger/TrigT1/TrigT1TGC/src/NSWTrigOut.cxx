@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/getMessageSvc.h"
@@ -8,13 +8,20 @@
 
 namespace LVL1TGC {
 
-NSWTrigOut::NSWTrigOut(int side, std::vector<int> NSWTP, std::vector<uint8_t> NSWeta, std::vector<uint8_t> NSWphi, std::vector<uint8_t> NSWDtheta, std::vector<bool> NSWlowRes, std::vector<bool> NSWphiRes, std::vector<bool> NSWmonitor,
+NSWTrigOut::NSWTrigOut(int side,
+                       const std::vector<int>& NSWTP,
+                       const std::vector<uint8_t>& NSWeta,
+                       const std::vector<uint8_t>& NSWphi,
+                       const std::vector<uint8_t>& NSWDtheta,
+                       const std::vector<bool>& NSWlowRes,
+                       const std::vector<bool>& NSWphiRes,
+                       const std::vector<bool>& NSWmonitor,
                        LVL1TGCTrigger::TGCArguments* tgcargs)
 : m_sideID(side), m_NSWTriggerProcessor(NSWTP), m_NSWeta_8bit(NSWeta), m_NSWphi_6bit(NSWphi), m_NSWDtheta_5bit(NSWDtheta), m_NSWlowRes(NSWlowRes), m_NSWphiRes(NSWphiRes), m_NSWmonitor(NSWmonitor), m_tgcArgs(tgcargs)
 {
 }
 
-NSWTrigOut::NSWTrigOut(int side, std::vector<int> NSWTP, LVL1TGCTrigger::TGCArguments* tgcargs)
+NSWTrigOut::NSWTrigOut(int side, const std::vector<int>& NSWTP, LVL1TGCTrigger::TGCArguments* tgcargs)
   : m_sideID(side), m_NSWTriggerProcessor(NSWTP), m_tgcArgs(tgcargs)
 {
 }

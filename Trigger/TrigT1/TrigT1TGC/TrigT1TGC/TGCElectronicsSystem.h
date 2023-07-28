@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCElectronicsSystem_hh
@@ -54,8 +54,8 @@ class TGCElectronicsSystem {
  private:
   // hide default/copy constructor and assignment operator
   TGCElectronicsSystem();
-  TGCElectronicsSystem(const TGCElectronicsSystem& right);
-  TGCElectronicsSystem& operator=(const TGCElectronicsSystem& right);
+  TGCElectronicsSystem(const TGCElectronicsSystem& right) = delete;
+  TGCElectronicsSystem& operator=(const TGCElectronicsSystem& right) = delete;
 
  private:
   TGCDatabaseManager* m_DB;

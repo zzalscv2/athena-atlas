@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCEIFICoincidenceMap.h"
@@ -129,6 +129,7 @@ TGCEIFICoincidenceMap& TGCEIFICoincidenceMap::operator=(const TGCEIFICoincidence
   ATH_MSG_INFO("operator = ");
 
   if (this != &right) {
+    m_tgcArgs = right.m_tgcArgs;
     for (size_t sec=0; sec < kNEndcapTrigSector; sec++){
       for (size_t ssc=0; ssc < kNMaxSSC; ssc++){
 	for (size_t input=0; input< N_INNER_SECTORS; input++){

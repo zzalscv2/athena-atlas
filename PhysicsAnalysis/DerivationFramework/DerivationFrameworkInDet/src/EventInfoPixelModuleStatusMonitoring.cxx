@@ -82,6 +82,9 @@ namespace DerivationFramework {
     int chkLB = m_lbCounter;
     if (chkLB==0) { chkLB=-1; }
 
+    bool isMC = false;
+    if (eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION)) { isMC=true; }
+
     SG::ReadCondHandle<PixelDCSHVData> dcsHV(m_readKeyHV,ctx);
     SG::ReadCondHandle<PixelDCSTempData> dcsTemp(m_readKeyTemp,ctx);
     SG::ReadCondHandle<PixelDCSStateData> dcsState(m_condDCSStateKey,ctx);
@@ -95,7 +98,21 @@ namespace DerivationFramework {
     std::vector<int> activeStatus;
     std::vector<int> feMaskIndex;
     std::vector<int> feMaskStatus;
-    if (chkLB!=LB) {
+    bool storeLB = false;
+    if (!isMC) {
+      if (chkLB!=LB) {
+        storeLB = true;
+        m_lbCounter = LB;
+      }
+    }
+    else {
+      if (chkLB==-1) {
+        storeLB = true;
+        m_lbCounter = 1;
+      }
+    }
+
+    if (storeLB) {
       for (int ihash=0; ihash<maxHash; ihash++) {
         biasVoltage.push_back(dcsHV->getBiasVoltage(ihash));
         temperature.push_back(dcsTemp->getTemperature(ihash));
@@ -114,7 +131,6 @@ namespace DerivationFramework {
           }
         }
       }
-      m_lbCounter = LB;
     }
 
     //====================================================================================
@@ -150,58 +166,58 @@ namespace DerivationFramework {
     //     = [52176, 52735] :  Error counter in bit#=31 from ServiceRecords
     //
     //====================================================================================
-
-    SG::ReadHandle<InDet::SiDetectorElementStatus> pixel_active = getPixelDetElStatus(m_pixelDetElStatusActiveOnly, ctx);
-    SG::ReadHandle<IDCInDetBSErrContainer> idcErrCont;
-    if (m_readoutTechnologyMask) {
-      idcErrCont = SG::ReadHandle<IDCInDetBSErrContainer>(m_idcErrContKey,ctx);
-      if (!idcErrCont.isValid()) {
-        ATH_MSG_FATAL("Faled to get BS error container" << m_idcErrContKey.key());
-      }
-    }
-
     std::vector<uint64_t> bsErrIndex;
     std::vector<uint64_t> bsErrWord;
-    if (maxHash==2048) { // only valid for RUN2/3
-      // First, access BS error for each FE chip
-      for (int ihash=0; ihash<maxHash; ihash++) {
-        for (int chFE=0; chFE<16; chFE++) {
-          int indexFE = (1+chFE)*maxHash+ihash;    // (FE_channel+1)*2048 + moduleHash
-          uint64_t word = (!m_pixelDetElStatusActiveOnly.empty() && m_readoutTechnologyMask
-                        ? InDet::getBSErrorWord(*pixel_active,*idcErrCont,ihash,indexFE,m_readoutTechnologyMask) 
-                        : m_pixelSummary->getBSErrorWord(ihash,indexFE,ctx));
-          VALIDATE_STATUS_ARRAY(!m_pixelDetElStatusActiveOnly.empty() && m_readoutTechnologyMask, 
-                                InDet::getBSErrorWord(*pixel_active,*idcErrCont,ihash,indexFE,m_readoutTechnologyMask),
-                                m_pixelSummary->getBSErrorWord(ihash,indexFE,ctx));
-
-          if (word>0) {
-            bsErrIndex.push_back(indexFE);
-            bsErrWord.push_back(word);
-          }
+    if (!isMC) {
+      SG::ReadHandle<InDet::SiDetectorElementStatus> pixel_active = getPixelDetElStatus(m_pixelDetElStatusActiveOnly, ctx);
+      SG::ReadHandle<IDCInDetBSErrContainer> idcErrCont;
+      if (m_readoutTechnologyMask) {
+        idcErrCont = SG::ReadHandle<IDCInDetBSErrContainer>(m_idcErrContKey,ctx);
+        if (!idcErrCont.isValid()) {
+          ATH_MSG_FATAL("Faled to get BS error container" << m_idcErrContKey.key());
         }
       }
-      // Next, access IBL service record
-      int indexOffset = 17*maxHash;
-      for (int ihash=156; ihash<436; ihash++) {
-        for (int chFE=0; chFE<2; chFE++) {
-          for (int serviceCode=0; serviceCode<32; serviceCode++) {
-            int indexSvcCounter = indexOffset+serviceCode*280*2+2*(ihash-156)+chFE;
+
+      if (maxHash==2048) { // only valid for RUN2/3
+        // First, access BS error for each FE chip
+        for (int ihash=0; ihash<maxHash; ihash++) {
+          for (int chFE=0; chFE<16; chFE++) {
+            int indexFE = (1+chFE)*maxHash+ihash;    // (FE_channel+1)*2048 + moduleHash
             uint64_t word = (!m_pixelDetElStatusActiveOnly.empty() && m_readoutTechnologyMask
-                          ? InDet::getBSErrorWord(*pixel_active,*idcErrCont,ihash,indexSvcCounter,m_readoutTechnologyMask) 
-                          : m_pixelSummary->getBSErrorWord(ihash,indexSvcCounter,ctx));
+                ? InDet::getBSErrorWord(*pixel_active,*idcErrCont,ihash,indexFE,m_readoutTechnologyMask) 
+                : m_pixelSummary->getBSErrorWord(ihash,indexFE,ctx));
             VALIDATE_STATUS_ARRAY(!m_pixelDetElStatusActiveOnly.empty() && m_readoutTechnologyMask, 
-                                  InDet::getBSErrorWord(*pixel_active,*idcErrCont,ihash,indexSvcCounter,m_readoutTechnologyMask),
-                                  m_pixelSummary->getBSErrorWord(ihash,indexSvcCounter,ctx));
+                InDet::getBSErrorWord(*pixel_active,*idcErrCont,ihash,indexFE,m_readoutTechnologyMask),
+                m_pixelSummary->getBSErrorWord(ihash,indexFE,ctx));
 
             if (word>0) {
-              bsErrIndex.push_back(indexSvcCounter);
+              bsErrIndex.push_back(indexFE);
               bsErrWord.push_back(word);
+            }
+          }
+        }
+        // Next, access IBL service record
+        int indexOffset = 17*maxHash;
+        for (int ihash=156; ihash<436; ihash++) {
+          for (int chFE=0; chFE<2; chFE++) {
+            for (int serviceCode=0; serviceCode<32; serviceCode++) {
+              int indexSvcCounter = indexOffset+serviceCode*280*2+2*(ihash-156)+chFE;
+              uint64_t word = (!m_pixelDetElStatusActiveOnly.empty() && m_readoutTechnologyMask
+                  ? InDet::getBSErrorWord(*pixel_active,*idcErrCont,ihash,indexSvcCounter,m_readoutTechnologyMask) 
+                  : m_pixelSummary->getBSErrorWord(ihash,indexSvcCounter,ctx));
+              VALIDATE_STATUS_ARRAY(!m_pixelDetElStatusActiveOnly.empty() && m_readoutTechnologyMask, 
+                  InDet::getBSErrorWord(*pixel_active,*idcErrCont,ihash,indexSvcCounter,m_readoutTechnologyMask),
+                  m_pixelSummary->getBSErrorWord(ihash,indexSvcCounter,ctx));
+
+              if (word>0) {
+                bsErrIndex.push_back(indexSvcCounter);
+                bsErrWord.push_back(word);
+              }
             }
           }
         }
       }
     }
-
     std::vector<SG::WriteDecorHandle<xAOD::EventInfo,std::vector<float>>> decorModuleCondition(createDecorators<xAOD::EventInfo,std::vector<float>>(m_moduleConditionKeys,ctx));
     assert(decorModuleCondition.size()==2);
     decorModuleCondition[0](*eventInfo) = std::move(biasVoltage);
