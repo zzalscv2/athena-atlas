@@ -103,8 +103,7 @@ StatusCode MdtReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
             atoi(key_tokens[3]) + 1, atoi(key_tokens[4]), 1, 1, isValid);
         if (!isValid) {
             ATH_MSG_FATAL("Failed to build a good identifier out of " << key);
-            // return StatusCode::FAILURE;
-            continue;
+            return StatusCode::FAILURE;
         }       
         ATH_MSG_DEBUG("Key "<<key<<" brought us "<<m_idHelperSvc->toStringDetEl(define.detElId));
         

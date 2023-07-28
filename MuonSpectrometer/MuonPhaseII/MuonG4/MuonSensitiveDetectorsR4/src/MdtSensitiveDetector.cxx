@@ -183,8 +183,6 @@ Identifier MdtSensitiveDetector::getIdentifier(const G4TouchableHistory* touchHi
    /// Then retrieve the Detector element
    const MdtReadoutElement* readOutEle = m_detMgr->getMdtReadoutElement(detElId);
    if (!readOutEle) {
-      /// For the moment let's skip these hits
-      return Identifier{};
       ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Failed to retrieve a valid detector element from "
                     <<m_detMgr->idHelperSvc()->toStringDetEl(detElId)<<" "<<stationVolume);
       throw std::runtime_error("Invalid detector Element");
