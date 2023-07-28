@@ -352,7 +352,7 @@ namespace Muon {
             
             // loop over collection and find particle with the same bar code
             for (const auto& particle : *col) {
-                if (!HepMC::is_same_generator_particle(&particle,barcode)) continue;
+                if ((particle.GetBarCode()) % HepMC::SIM_REGENERATION_INCREMENT != barcode) continue;
                 CLHEP::Hep3Vector pos = particle.GetPosition();
                 CLHEP::Hep3Vector mom = particle.GetMomentum();
                 ATH_MSG_VERBOSE("Found associated  " << r_name << " pt " << mom.perp() << " position: r " << pos.perp() << " z " << pos.z());
