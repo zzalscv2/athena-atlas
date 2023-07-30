@@ -595,10 +595,8 @@ def TrigJetMonConfig(inputFlags):
   from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
   cfg = ComponentAccumulator()
 
-  from AthenaMonitoring.DQConfigFlags import DQDataType
-  data_type = inputFlags.DQ.DataType
-  if data_type == DQDataType.Collisions: monMode = 'pp'
-  elif data_type == DQDataType.HeavyIon: monMode = 'HI'
+  monMode = 'pp'
+  if inputFlags.Reco.EnableHI: monMode = 'HI'
 
   # Match HLT jets to offline jets
   for hltColl,collDict in JetCollections[monMode].items():
@@ -1127,10 +1125,8 @@ if __name__=='__main__':
   flags.Output.HISTFileName = 'AthenaMTMonitorOutput.root' 
   flags.lock()
 
-  from AthenaMonitoring.DQConfigFlags import DQDataType
-  data_type = flags.DQ.DataType
-  if data_type == DQDataType.Collisions: monMode = 'pp'
-  elif data_type == DQDataType.HeavyIon: monMode = 'HI'
+  monMode = 'pp'
+  if flags.Reco.EnableHI: monMode = 'HI'
 
   # Initialize configuration object, add accumulator, merge, and run.
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
