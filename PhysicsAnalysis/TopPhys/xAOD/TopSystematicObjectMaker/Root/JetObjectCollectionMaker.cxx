@@ -915,7 +915,7 @@ namespace top {
       const std::string fullName = name.first + "_" + name.second;
 
       // Checking kinematic range
-      if(name.first=="SmoothedWZTagger") lowPtCut = 175000.;
+      if(name.first=="SmoothedWZTagger" || name.first=="JSSWTopTaggerANN") lowPtCut = 175000.;
       else lowPtCut=300000.;
       
       char passedRangeCheck = (jet_pt>lowPtCut &&
