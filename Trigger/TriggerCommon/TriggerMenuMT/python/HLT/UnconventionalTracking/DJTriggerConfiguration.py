@@ -4,7 +4,7 @@ from AthenaCommon.CFElements import (seqAND, parOR)
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence
 from AthenaCommon.Logging import logging
 
-from ..Config.MenuComponents import RecoFragmentsPool, algorithmCAToGlobalWrapper, extractAlgorithmsAndAppendCA
+from ..Config.MenuComponents import RecoFragmentsPool, algorithmCAToGlobalWrapper
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorCentredOnIParticleROITool
@@ -51,15 +51,13 @@ def DJDispFragment(flags):
 
     flagsWithTrk = getFlagsForActiveConfig(flags, lrtcfg.name, log)
 
-    from AthenaCommon.Configurable import ConfigurableCABehavior
-    with ConfigurableCABehavior():
-        lrt_ca = trigInDetLRTCfg(
-            flagsWithTrk,
-            fscfg.trkTracks_FTF(),
-            InputMakerAlg.InViewRoIs,
-            in_view=True
-        )
-    lrt_algs = extractAlgorithmsAndAppendCA(lrt_ca)
+    lrt_algs = algorithmCAToGlobalWrapper(
+    trigInDetLRTCfg,
+        flagsWithTrk,
+        fscfg.trkTracks_FTF(),
+        InputMakerAlg.InViewRoIs,
+        in_view=True,
+    )
 
     reco_seq = parOR("UncTrkrecoSeqDJTrigDispRecoSeq", lrt_algs)
 
