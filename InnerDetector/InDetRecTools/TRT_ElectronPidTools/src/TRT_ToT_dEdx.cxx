@@ -36,14 +36,10 @@ inRange(const double val, const double lo, const double hi){
 TRT_ToT_dEdx::TRT_ToT_dEdx(const std::string& t, const std::string& n, const IInterface* p)
   :
   AthAlgTool(t,n,p),
-  m_TRTStrawSummaryTool("TRT_StrawStatusSummaryTool",this),
-  m_assoTool("InDet::InDetPRD_AssociationToolGangedPixels"),
-  m_localOccTool("",this)
+  m_TRTStrawSummaryTool("TRT_StrawStatusSummaryTool",this)
 {
   declareInterface<ITRT_ToT_dEdx>(this);
   declareProperty("TRTStrawSummaryTool",    m_TRTStrawSummaryTool);
-  declareProperty("AssociationTool", m_assoTool);
-  declareProperty("TRT_LocalOccupancyTool", m_localOccTool);
 
   setDefaultConfiguration();
 

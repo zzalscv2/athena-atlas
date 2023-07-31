@@ -20,7 +20,7 @@ from AthenaCommon.DetFlags import DetFlags
 from AthenaCommon.Logging import logging 
 log = logging.getLogger("InDetTrigConfigRecLoadTools.py")
 
-from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
+from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper,CAtoLegacyPrivateToolWrapper
 
 from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
 InDetTrigTRTStrawStatusSummaryTool = CAtoLegacyPublicToolWrapper(TRT_StrawStatusSummaryToolCfg, name="InDetTrigTRTStrawStatusSummaryTool")
@@ -80,7 +80,7 @@ else:
 
 # ------load association tool from Inner Detector to handle pixel ganged ambiguities
 from InDetConfig.InDetAssociationToolsConfig import TrigPrdAssociationToolCfg
-InDetTrigPrdAssociationTool = CAtoLegacyPublicToolWrapper(TrigPrdAssociationToolCfg)
+InDetTrigPrdAssociationTool = CAtoLegacyPrivateToolWrapper(TrigPrdAssociationToolCfg)
 
 #
 # ----------- control loading of Summary Tool
