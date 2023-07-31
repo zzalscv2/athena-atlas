@@ -476,8 +476,7 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
 
   ATH_MSG_DEBUG("Executing DefOrigOfElectron ");
 
-  int PriBarcode = thePart->barcode() % m_barcodeShift;
-  const xAOD::TruthParticle* thePriPart = barcode_to_particle(mcTruthTES, PriBarcode);
+  const xAOD::TruthParticle* thePriPart = barcode_to_particle(mcTruthTES, thePart->barcode());
   if (!thePriPart)
     return NonDefined;
   if (abs(thePriPart->pdgId()) != 11)
@@ -959,8 +958,7 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
 
   ATH_MSG_DEBUG("Executing DefOrigOfMuon ");
 
-  int PriBarcode = thePart->barcode() % m_barcodeShift;
-  const xAOD::TruthParticle* thePriPart = barcode_to_particle(mcTruthTES, PriBarcode);
+  const xAOD::TruthParticle* thePriPart = barcode_to_particle(mcTruthTES, thePart->barcode());
   if (!thePriPart)
     return NonDefined;
   if (abs(thePriPart->pdgId()) != 13)
@@ -1358,8 +1356,7 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
 
   ATH_MSG_DEBUG("Executing DefOrigOfTau ");
 
-  int PriBarcode = thePart->barcode() % m_barcodeShift;
-  const xAOD::TruthParticle* thePriPart = barcode_to_particle(mcTruthTES, PriBarcode);
+  const xAOD::TruthParticle* thePriPart = barcode_to_particle(mcTruthTES, thePart->barcode());
   if (!thePriPart)
     return NonDefined;
   if (abs(thePriPart->pdgId()) != 15)
@@ -1669,9 +1666,7 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
     info->motherBarcode = 0;
   }
 
-  int PriBarcode = thePart->barcode() % m_barcodeShift;
-
-  const xAOD::TruthParticle* thePriPart = barcode_to_particle(mcTruthTES, PriBarcode);
+  const xAOD::TruthParticle* thePriPart = barcode_to_particle(mcTruthTES, thePart->barcode());
   if (!thePriPart)
     return NonDefined;
   if (abs(thePriPart->pdgId()) != 22)
@@ -2090,7 +2085,7 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
 
   // Pythia8 gamma+jet samples
   if ((motherStatus == 62 || motherStatus == 52 || motherStatus == 21 || motherStatus == 22) &&
-      thePriPart->status() == 1 && NumOfPht == 1 && numOfDaug == (NumOfPht + NumOfPartons)) {
+      MC::isStable(thePriPart) && NumOfPht == 1 && numOfDaug == (NumOfPht + NumOfPartons)) {
     return PromptPhot;
   }
 
@@ -2112,9 +2107,8 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   //
   ATH_MSG_DEBUG("Executing DefOrigOfNeutrino ");
 
-  int PriBarcode = thePart->barcode() % m_barcodeShift;
   int nuFlav = abs(thePart->pdgId());
-  const xAOD::TruthParticle* thePriPart = barcode_to_particle(mcTruthTES, PriBarcode);
+  const xAOD::TruthParticle* thePriPart = barcode_to_particle(mcTruthTES, thePart->barcode());
   if (!thePriPart)
     return NonDefined;
   if (abs(thePriPart->pdgId()) != nuFlav)
@@ -3026,7 +3020,7 @@ MCTruthClassifier::checkOrigOfBkgElec(const xAOD::TruthParticle* theEle, Info* i
       && info->photonMotherStatus < 3) {
     do {
       const xAOD::TruthParticle* theMotherPart =
-        barcode_to_particle(truthParticleContainerReadHandle.ptr(), info->photonMotherBarcode % m_barcodeShift);
+        barcode_to_particle(truthParticleContainerReadHandle.ptr(), info->photonMotherBarcode);
       if (theMotherPart == nullptr || theMotherPart == thePart)
         break;
       thePart = theMotherPart;
@@ -3041,7 +3035,7 @@ MCTruthClassifier::checkOrigOfBkgElec(const xAOD::TruthParticle* theEle, Info* i
     if (part.first == BkgElectron && part.second == PhotonConv) {
       // in case of photon from gen particle  classify photon
       // part=particleTruthClassifier(mother);
-      thePart = barcode_to_particle(truthParticleContainerReadHandle.ptr(), info->motherBarcode % m_barcodeShift);
+      thePart = barcode_to_particle(truthParticleContainerReadHandle.ptr(), info->motherBarcode);
       if (thePart != nullptr)
         part = particleTruthClassifier(thePart, info);
 
@@ -3053,7 +3047,7 @@ MCTruthClassifier::checkOrigOfBkgElec(const xAOD::TruthParticle* theEle, Info* i
 
   } else {
     // in case of photon from gen particle  classify photon
-    thePart = barcode_to_particle(truthParticleContainerReadHandle.ptr(), info->motherBarcode % m_barcodeShift);
+    thePart = barcode_to_particle(truthParticleContainerReadHandle.ptr(), info->motherBarcode);
     if (thePart != nullptr)
       part = particleTruthClassifier(thePart, info);
   }
@@ -3072,9 +3066,12 @@ MCTruthClassifier::partCharge(const xAOD::TruthParticle* thePart)
 }
 
 //------------------------------------------------------------------------
+/// This function returns the *original* generator particle if it is found in the TrueTES container.
+/// The input is barcode of some particle.
 const xAOD::TruthParticle*
-MCTruthClassifier::barcode_to_particle(const xAOD::TruthParticleContainer* TruthTES, int bc)
+MCTruthClassifier::barcode_to_particle(const xAOD::TruthParticleContainer* TruthTES, int bcin)
 {
+  int bc = bcin % m_barcodeShift;
   //------------------------------------------------------------------------
   // temporary solution?
   const xAOD::TruthParticle* ptrPart = nullptr;
