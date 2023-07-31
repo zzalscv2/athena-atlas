@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1GeometrySystems/VolumeHandle.h"
@@ -712,7 +712,7 @@ void VolumeHandle::updateLabels() {
     }
 
     unsigned int row=0;
-    foreach(QString str, text){
+    for(QString str : text){
       QByteArray array = str.toLatin1();
       labelText->string.set1Value(row++,array.data());
     }

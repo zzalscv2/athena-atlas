@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -479,7 +479,7 @@ VP1GeoFlags::MuonChamberAdaptionStyleFlags GeoSysController::muonChamberAdaption
 //  if (m_d->labelProvidingSystems.find(sys->name())!=m_d->labelProvidingSystems.end())
 //    return;
 //  QList<QCheckBox*> checkboxes;
-//  foreach(QString label, providedLabels) {
+//  for(QString label : providedLabels) {
 //    QCheckBox *checkbox = new QCheckBox(label, this);
 //    checkboxes.append(checkbox);
 //  }
