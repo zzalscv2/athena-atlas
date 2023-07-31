@@ -45,7 +45,8 @@ public:
   IOVDbFolder(IOVDbConn* conn, const IOVDbParser& folderprop, MsgStream& msg,
               IClassIDSvc* clidsvc, IIOVDbMetaDataTool* metadatatool,
               const bool checklock, const bool outputToFile=false,
-              const std::string & source="COOL_DATABASE", const bool crestToFile=false);
+              const std::string & source="COOL_DATABASE", const bool crestToFile=false,
+              const std::string & crestServer="");
   ~IOVDbFolder();
   
 
@@ -289,6 +290,7 @@ private:
   const bool m_outputToFile{false};
   const bool m_crestToFile{false};
   const std::string m_source;
+  const std::string m_crestServer;
   std::string m_globaltag = "";
   std::map<std::string, std::string> m_cresttagmap; // pairs: COOL folder - CREST tag name
   std::string m_crest_tag = "";

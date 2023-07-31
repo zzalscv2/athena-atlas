@@ -17,13 +17,23 @@
 #include <map>
 
 namespace IOVDbNamespace{
-  const std::string_view
-  urlBase(){
-    return "http://crest-02.cern.ch:9090";
+
+  CrestFunctions::CrestFunctions(const std::string & crest_path = "http://crest-undertow-api.web.cern.ch"){
+    setURLBase(crest_path);
+  }
+
+  const std::string &
+  CrestFunctions::getURLBase(){
+    return m_CREST_PATH;
+  }
+
+  void 
+  CrestFunctions::setURLBase(const std::string & crest_path){
+    m_CREST_PATH = crest_path;
   }
 
   std::vector<IovHashPair>
-  extractIovAndHash(const std::string_view jsonReply){
+  CrestFunctions::extractIovAndHash(const std::string_view jsonReply){
     std::vector<IovHashPair> iovHashPairs;
     bool all_ok = true;
     std::string_view iovSignature = "since\":";
@@ -62,7 +72,7 @@ namespace IOVDbNamespace{
   }
 
   std::string
-  extractHashFromJson(const std::string & jsonReply){
+  CrestFunctions::extractHashFromJson(const std::string & jsonReply){
     std::string hash{};
     try{
       std::string_view signature="payloadHash\":\"";
@@ -80,11 +90,11 @@ namespace IOVDbNamespace{
   }
 
   std::vector<IovHashPair>
-  getIovsForTag(const std::string & tag, const bool testing){
+  CrestFunctions::getIovsForTag(const std::string & tag, const bool testing){
     std::string reply{R"delim([{"insertionTime":"2022-05-26T12:10:58+0000","payloadHash":"99331506eefbe6783a8d5d5bc8b9a44828a325adfcaac32f62af212e9642db71","since":0,"tagName":"LARIdentifierFebRodMap-RUN2-000"}])delim"};
     if (not testing){
       //...CrestApi returns Iovs as a json object
-      auto myCrestClient = Crest::CrestClient(urlBase());
+      auto myCrestClient = Crest::CrestClient(getURLBase());
       try{
         reply = myCrestClient.findAllIovs(tag).dump();
       } catch (std::exception & e){
@@ -96,13 +106,13 @@ namespace IOVDbNamespace{
   }
 
   std::string 
-  getLastHashForTag(const std::string & tag, const bool testing){
+  CrestFunctions::getLastHashForTag(const std::string & tag, const bool testing){
     char tu[] = "";
     strfry(tu);
     std::string reply{R"delim([{"insertionTime":"2022-05-26T12:10:58+0000","payloadHash":"99331506eefbe6783a8d5d5bc8b9a44828a325adfcaac32f62af212e9642db71","since":0,"tagName":"LARIdentifierFebRodMap-RUN2-000"}])delim"};
     if (not testing){
       //...CrestApi returns Iovs as a json object
-      auto myCrestClient = Crest::CrestClient(urlBase());
+      auto myCrestClient = Crest::CrestClient(getURLBase());
       try{
         reply = myCrestClient.findAllIovs(tag).dump();
       } catch (std::exception & e){
@@ -115,12 +125,12 @@ namespace IOVDbNamespace{
 
 
   std::string 
-  getPayloadForHash(const std::string & hash, const bool testing){
+  CrestFunctions::getPayloadForHash(const std::string & hash, const bool testing){
     std::string reply{R"delim({"data":{"0":["[DB=B2E3B2B6-B76C-DF11-A505-000423D5ADDA][CNT=CollectionTree(LArTTCell_P/LArTTCellMapAtlas)][CLID=DF8C509C-A91A-40B5-B76C-5B57EEE21EC3][TECH=00000202][OID=00000003-00000000]"]}})delim"};
     if (not testing){
       //CrestApi method:
       try{
-        auto   myCrestClient = Crest::CrestClient(urlBase());
+        auto   myCrestClient = Crest::CrestClient(getURLBase());
         reply = myCrestClient.getPayloadAsString(hash);
       } catch (std::exception & e){
         std::cout<<__FILE__<<":"<<__LINE__<< ": "<<e.what()<<" while trying to find the payload"<<std::endl;
@@ -131,12 +141,12 @@ namespace IOVDbNamespace{
   }
   
   std::string 
-  getPayloadForTag(const std::string & tag, const bool testing){
+  CrestFunctions::getPayloadForTag(const std::string & tag, const bool testing){
     return getPayloadForHash(getLastHashForTag(tag, testing), testing);
   }
   
   std::string 
-  extractDescriptionFromJson(const std::string & jsonReply){
+  CrestFunctions::extractDescriptionFromJson(const std::string & jsonReply){
     std::string description{};
     try{
       const std::string_view signature="node_description\\\":\\\"";
@@ -156,7 +166,7 @@ namespace IOVDbNamespace{
   }
   
   std::string 
-  extractSpecificationFromJson(const std::string & jsonReply){
+  CrestFunctions::extractSpecificationFromJson(const std::string & jsonReply){
     std::string spec{};
     try{
       const std::string_view signature="payload_spec\\\":\\\"";
@@ -173,7 +183,7 @@ namespace IOVDbNamespace{
   }
   
   std::pair<std::vector<cool::ChannelId> , std::vector<std::string>>
-  extractChannelListFromJson(const std::string & jsonReply){
+  CrestFunctions::extractChannelListFromJson(const std::string & jsonReply){
     std::vector<cool::ChannelId> list;
     std::vector<std::string> names;
     std::string textRep;
@@ -208,41 +218,41 @@ namespace IOVDbNamespace{
   }
   
   std::string 
-  folderDescriptionForTag(const std::string & tag, const bool testing){
+  CrestFunctions::folderDescriptionForTag(const std::string & tag, const bool testing){
     std::string jsonReply{R"delim({"format":"TagMetaSetDto","resources":[{"tagName":"LARAlign-RUN2-UPD4-03","description":"{\"dbname\":\"CONDBR2\",\"nodeFullpath\":\"/LAR/Align\",\"schemaName\":\"COOLONL_LAR\"}","chansize":1,"colsize":1,"tagInfo":"{\"channel_list\":[{\"0\":\"\"}],\"node_description\":\"<timeStamp>run-lumi</timeStamp><addrHeader><address_header service_type=\\\"256\\\" clid=\\\"1238547719\\\" /></addrHeader><typeName>CondAttrListCollection</typeName><updateMode>UPD1</updateMode>\",\"payload_spec\":\"PoolRef:String4k\"}","insertionTime":"2022-05-26T12:10:38+0000"}],"size":1,"datatype":"tagmetas","format":null,"page":null,"filter":null})delim"};
     if (not testing){
-      auto myCrestClient = Crest::CrestClient(urlBase());
+      auto myCrestClient = Crest::CrestClient(getURLBase());
       jsonReply= myCrestClient.getTagMetaInfo(tag).dump();
     }
     return extractDescriptionFromJson(jsonReply);
   }
   
   std::string 
-  payloadSpecificationForTag(const std::string & specTag, const bool testing){
+  CrestFunctions::payloadSpecificationForTag(const std::string & specTag, const bool testing){
     std::string jsonReply{R"delim({"folder_payloadspec": "PoolRef: String4k"})delim"};
     if (not testing){
-      auto myCrestClient = Crest::CrestClient(urlBase());
+      auto myCrestClient = Crest::CrestClient(getURLBase());
       jsonReply= myCrestClient.getTagMetaInfo(specTag).dump();
     }
     return extractSpecificationFromJson(jsonReply);
   }
   
   std::pair<std::vector<cool::ChannelId> , std::vector<std::string>>
-  channelListForTag(const std::string & tag, const bool testing){
+  CrestFunctions::channelListForTag(const std::string & tag, const bool testing){
        std::string reply{R"delim([{"chansize":8,"colsize":5,"description":"{\"dbname\":\"CONDBR2\",\"nodeFullpath\":\"/LAR/BadChannelsOfl/BadChannels\",\"schemaName\":\"COOLOFL_LAR\"}","insertionTime":"2022-05-26T16:40:32+0000","tagInfo":"{\"channel_list\":[{\"0\":\"\"},{\"1\":\"\"},{\"2\":\"\"},{\"3\":\"\"},{\"4\":\"\"},{\"5\":\"\"},{\"6\":\"\"},{\"7\":\"\"}],\"node_description\":\"<timeStamp>run-lumi</timeStamp><addrHeader><address_header service_type=\\\"71\\\" clid=\\\"1238547719\\\" /></addrHeader><typeName>CondAttrListCollection</typeName>\",\"payload_spec\":\"ChannelSize:UInt32,StatusWordSize:UInt32,Endianness:UInt32,Version:UInt32,Blob:Blob64k\"}","tagName":"LARBadChannelsOflBadChannels-RUN2-UPD4-21"}])delim"};
     if (not testing){
-     auto myCrestClient = Crest::CrestClient(urlBase());
+     auto myCrestClient = Crest::CrestClient(getURLBase());
      reply= myCrestClient.getTagMetaInfo(tag).dump();
     }
     return extractChannelListFromJson(reply);
   }
   
   std::string
-  resolveCrestTag(const std::string & globalTagName, const std::string & folderName, const std::string & forceTag, const bool testing){
+  CrestFunctions::resolveCrestTag(const std::string & globalTagName, const std::string & folderName, const std::string & forceTag, const bool testing){
     std::string result{};
     if (not forceTag.empty()) return forceTag;
     if (testing) return "LARAlign-RUN2-UPD4-03";
-    auto crestClient = Crest::CrestClient(urlBase());
+    auto crestClient = Crest::CrestClient(getURLBase());
     auto j = crestClient.findGlobalTagMap(globalTagName);
     for (const auto &i:j){
       if (i["label"] == folderName){
@@ -254,15 +264,15 @@ namespace IOVDbNamespace{
   }
   
   std::string
-  jsonTagName(const std::string &globalTag, const std::string & folderName){
+  CrestFunctions::jsonTagName(const std::string &globalTag, const std::string & folderName){
     return resolveCrestTag(globalTag,folderName);
   }
   
   std::map<std::string, std::string>
-  getGlobalTagMap(const std::string& globaltag){
+  CrestFunctions::getGlobalTagMap(const std::string& globaltag){
     std::map<std::string, std::string> tagmap;
     try{
-      auto crestClient = Crest::CrestClient(urlBase());
+      auto crestClient = Crest::CrestClient(getURLBase());
       nlohmann::json j = crestClient.findGlobalTagMap(globaltag);
       int n = j.size();
       for (int i = 0; i < n; i++ ){
@@ -279,9 +289,9 @@ namespace IOVDbNamespace{
   }
 
 
-  nlohmann::json getTagInfo(const std::string & tag){
+  nlohmann::json CrestFunctions::getTagInfo(const std::string & tag){
     try{
-      auto crestClient = Crest::CrestClient(urlBase());
+      auto crestClient = Crest::CrestClient(getURLBase());
       nlohmann::json meta_info = crestClient.getTagMetaInfo(tag)[0];
 
       if (meta_info.contains("tagInfo")){
@@ -295,7 +305,7 @@ namespace IOVDbNamespace{
   }
 
 
-  std::string getTagInfoElement(nlohmann::json tag_info, const std::string & key){
+  std::string CrestFunctions::getTagInfoElement(nlohmann::json tag_info, const std::string & key){
     if (tag_info.contains(key)){
       if (key == "channel_list"){ 
         return  tag_info[key].dump();
@@ -308,7 +318,7 @@ namespace IOVDbNamespace{
   }
 
   std::pair<std::vector<cool::ChannelId> , std::vector<std::string>>
-  extractChannelListFromString(const std::string & chanString){
+  CrestFunctions::extractChannelListFromString(const std::string & chanString){
     std::vector<cool::ChannelId> list;
     std::vector<std::string> names;
     nlohmann::json js = nlohmann::json::parse(chanString);

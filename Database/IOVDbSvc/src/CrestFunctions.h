@@ -25,64 +25,81 @@
 namespace IOVDbNamespace{
   typedef std::pair<std::string,std::string> IovHashPair; // <IOV,Hash> pairs extracted from Json
 
-  const std::string_view
-  urlBase();
+  class CrestFunctions
+  {
 
-  std::vector<IovHashPair>
-  extractIovAndHash(const std::string_view jsonReply);
+    public:
 
-  std::string
-  extractHashFromJson(const std::string & jsonReply);
+    CrestFunctions(const std::string & crest_path);
 
-  std::vector<IovHashPair>
-  getIovsForTag(const std::string & tag, const bool testing=false);
+    const std::string & getURLBase();
 
-  std::string
-  getLastHashForTag(const std::string & tag, const bool testing=false);
+    void setURLBase(const std::string & crest_path);
 
-  std::string 
-  getPayloadForHash(const std::string & hash, const bool testing=false);
-  
-  std::pair<std::vector<cool::ChannelId> , std::vector<std::string>>
-  extractChannelListFromJson(const std::string & jsonReply);
+    std::vector<IovHashPair>
+    extractIovAndHash(const std::string_view jsonReply);
 
-  std::pair<std::vector<cool::ChannelId> , std::vector<std::string>>
-  channelListForTag(const std::string & tag, const bool testing=false);
+    std::string
+    extractHashFromJson(const std::string & jsonReply);
+
+    std::vector<IovHashPair>
+    getIovsForTag(const std::string & tag, const bool testing=false);
+
+    std::string
+    getLastHashForTag(const std::string & tag, const bool testing=false);
+
+    std::string 
+    getPayloadForHash(const std::string & hash, const bool testing=false);
   
-  std::map<cool::ChannelId, std::string> 
-  channelNameMap(const std::string & folderName);
+    std::pair<std::vector<cool::ChannelId> , std::vector<std::string>>
+    extractChannelListFromJson(const std::string & jsonReply);
+
+    std::pair<std::vector<cool::ChannelId> , std::vector<std::string>>
+    channelListForTag(const std::string & tag, const bool testing=false);
   
-  std::string 
-  getPayloadForTag(const std::string & tag,const bool testing=false);
+    std::map<cool::ChannelId, std::string> 
+    channelNameMap(const std::string & folderName);
   
-  std::string 
-  folderDescriptionForTag(const std::string & tag, const bool testing=false);
+    std::string 
+    getPayloadForTag(const std::string & tag,const bool testing=false);
   
-  std::string 
-  payloadSpecificationForTag(const std::string & tag, const bool testing=false);
+    std::string 
+    folderDescriptionForTag(const std::string & tag, const bool testing=false);
   
-  std::string 
-  extractDescriptionFromJson(const std::string & jsonReply);
+    std::string 
+    payloadSpecificationForTag(const std::string & tag, const bool testing=false);
   
-  std::string
-	resolveCrestTag(const std::string & globalTagName, const std::string & folderName, const std::string & forceTag="", const bool testing=false);
+    std::string 
+    extractDescriptionFromJson(const std::string & jsonReply);
+  
+    std::string
+    resolveCrestTag(const std::string & globalTagName, const std::string & folderName, const std::string & forceTag="", const bool testing=false);
 	
   
-  std::string
-  jsonTagName(const std::string &globalTag, const std::string & folderName);
+    std::string
+    jsonTagName(const std::string &globalTag, const std::string & folderName);
 
-  std::map<std::string, std::string>
+    std::map<std::string, std::string>
     getGlobalTagMap(const std::string& globaltag);
 
-  nlohmann::json getTagInfo(const std::string & tag);
+    nlohmann::json getTagInfo(const std::string & tag);
 
-  std::string 
+    std::string 
     extractPayloadSpecification(const std::string & tag, nlohmann::json tagMeta);
 
-  std::string
+    std::string
     getTagInfoElement(nlohmann::json tag_info, const std::string & key);
 
-  std::pair<std::vector<cool::ChannelId> , std::vector<std::string>>
+    std::pair<std::vector<cool::ChannelId> , std::vector<std::string>>
     extractChannelListFromString(const std::string & chanString);
+
+    std::string 
+    extractSpecificationFromJson(const std::string & jsonReply);
+
+    private:
+
+    std::string m_CREST_PATH = "";
+
+  };
 }
 #endif
