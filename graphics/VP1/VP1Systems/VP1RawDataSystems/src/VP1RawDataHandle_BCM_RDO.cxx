@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -57,7 +57,7 @@ public:
     if (prefix.isEmpty())
       return l;
     QStringList l2;
-    foreach (QString s,l)
+    for (QString s : l)
       l2 << (prefix + s);
     return l2;
   }
@@ -89,8 +89,7 @@ public:
       m_group = new SoGroup;
       m_group->ref();
       Amg::Transform3D accumTransf;
-      QPair< Amg::Transform3D,const GeoBox *> p;
-      foreach(p, m_transformsAndBoxes) {
+      for(QPair< Amg::Transform3D,const GeoBox *> p : m_transformsAndBoxes) {
 	if (!m_transform) {
 	  m_transform = VP1LinAlgUtils::toSoTransform(p.first);
 	  m_transform->ref();
@@ -169,7 +168,7 @@ VP1RawDataHandle_BCM_RDO::VP1RawDataHandle_BCM_RDO(VP1RawDataCollBase* coll,int 
   : VP1RawDataHandleBase(coll), m_moduleID(moduleID), m_nHighAttenuationHits(0), m_data(data)
 {
   Imp::ensureInitModuleInfo();
-  foreach(const BCM_RawData* hit,data) {
+  for(const BCM_RawData* hit : data) {
     if (isHighAttenuationChannel(hit->getChannel()))
       ++m_nHighAttenuationHits;
   }
