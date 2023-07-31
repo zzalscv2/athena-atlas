@@ -153,41 +153,6 @@ def TRTDataProviderCfg(flags : AthConfigFlags, rois : str, signatureName : str =
   return acc
 
 
-def TRTExtensionBuilderCfg(flags, rois):
-  acc = ComponentAccumulator()
-  if flags.Input.Format is Format.BS:
-    acc.merge( TRTDataProviderCfg(flags, rois) )
-
-  from InDetConfig.InDetPrepRawDataFormationConfig import TrigTRTRIOMakerCfg
-  acc.merge( TrigTRTRIOMakerCfg(flags) )
-
-  from InDetConfig.TRT_TrackExtensionAlgConfig import Trig_TRT_TrackExtensionAlgCfg
-  acc.merge( Trig_TRT_TrackExtensionAlgCfg(flags, inputTracks = flags.Tracking.ActiveConfig.trkTracks_IDTrig+"_Amb") )
-
-  from InDetConfig.InDetExtensionProcessorConfig import TrigInDetExtensionProcessorCfg
-  acc.merge( TrigInDetExtensionProcessorCfg(flags) )
-#  'TRTRawDataProvider/InDetTrigMTTRTRawDataProvider_electronLRT', 
-#  'InDet::TRT_RIO_Maker/InDetTrigMTTRTDriftCircleMaker_electronLRT', 
-#  'InDet::TRT_TrackExtensionAlg/InDetTrigMTTrackExtensionAlg_electronLRT', 
-#  'InDet::InDetExtensionProcessor/InDetTrigMTExtensionProcessor_electronLRT', 
-
-  return acc
-
-def ambiguitySolverAlgCfg(flags):
-  acc = ComponentAccumulator()
-
-  from TrkConfig.TrkAmbiguitySolverConfig import TrkAmbiguityScore_Trig_Cfg, TrkAmbiguitySolver_Trig_Cfg
-  acc.merge(TrkAmbiguityScore_Trig_Cfg(flags, name = f"{prefix}TrkAmbiguityScore_{flags.Tracking.ActiveConfig.input_name}"))
-  acc.merge(TrkAmbiguitySolver_Trig_Cfg(flags, name = f"{prefix}TrkAmbiguitySolver_{flags.Tracking.ActiveConfig.input_name}"))
-
-  return acc
-
-def trackEFIDConverterCfg(flags):
-  return _trackConverterCfg(flags, 
-                            "_Precision"+flags.Tracking.ActiveConfig.name,
-                            flags.Tracking.ActiveConfig.trkTracks_IDTrig,
-                            flags.Tracking.ActiveConfig.tracks_IDTrig)
-
 
 def trigInDetPrecisionTrackingCfg( inflags, rois, signatureName, in_view=True ):
   if inflags.Detector.GeometryITk:
@@ -224,13 +189,13 @@ def trigInDetPrecisionTrackingCfg( inflags, rois, signatureName, in_view=True ):
                                   ('IDCInDetBSErrContainer_Cache', 'SctFlaggedCondCache'), ]
     acc.addEventAlgo(verifier)
 
-  acc.merge(ambiguitySolverAlgCfg(flags))
-  acc.merge(TRTExtensionBuilderCfg(flags, rois))
-  acc.merge(trackEFIDConverterCfg(flags))
-
-#   Members = ['Trk::TrkAmbiguityScore/InDetTrigMTTrkAmbiguityScore_electronLRT', 
-#  'Trk::TrkAmbiguitySolver/InDetTrigMTTrkAmbiguitySolver_electronLRT', 
-#  'xAODMaker::TrackParticleCnvAlg/InDetTrigMTxAODParticleCreatorAlgelectronLRT_IDTrig']
+  from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
+  seq = InDetTrigSequence(flags, 
+                          flags.Tracking.ActiveConfig.input_name, 
+                          rois = rois, 
+                          inView = verifier.getName() if verifier else '')
+  
+  acc.merge(seq.sequenceAfterPattern())
 
   return acc
 
