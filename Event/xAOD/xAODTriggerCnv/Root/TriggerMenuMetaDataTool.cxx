@@ -20,9 +20,9 @@ namespace xAODMaker {
       : asg::AsgMetadataTool( name ),
         m_menu(), m_menuAux(), m_beginFileIncidentSeen( false ) {
 
-#ifndef XAOD_STANDALONE
+#ifdef ASGTOOL_ATHENA
       declareInterface< ::IMetaDataTool >( this );
-#endif // XAOD_STANDALONE
+#endif // ASGTOOL_ATHENA
 
       declareProperty("InputKey", m_inputKey = "TriggerMenu");
       declareProperty("OutputKey", m_outputKey = "TriggerMenu");

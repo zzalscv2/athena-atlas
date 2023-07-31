@@ -36,9 +36,9 @@ namespace xAODMaker {
    /// $Date: 2015-07-16 13:11:56 +0200 (Thu, 16 Jul 2015) $
    ///
    class TriggerMenuMetaDataTool : public asg::AsgMetadataTool
-#ifndef XAOD_STANDALONE
+#ifdef ASGTOOL_ATHENA
    , public virtual ::IMetaDataTool
-#endif // XAOD_STANDALONE
+#endif // ASGTOOL_ATHENA
    {
 
       /// Declare the correct constructor for Athena
