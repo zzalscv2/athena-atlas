@@ -4,6 +4,8 @@
 
 #include "TrigHLTMonitorAlgorithm.h"
 
+#include "CxxUtils/fpcompare.h"
+
 using namespace TrigCompositeUtils;
 
 TrigHLTMonitorAlgorithm::TrigHLTMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
@@ -133,8 +135,7 @@ StatusCode TrigHLTMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         else {
           ATH_MSG_WARNING("No chain found in trigDecTool->ExperimentalAndExpertMethods().getChainConfigurationDetails(" <<  chain << "). Using prescale 0");
         }
-        if(prescale>1. || prescale<1.) {
-          //NB! Right now very few chains are prescaled, so this histogram is seldom filled
+        if(!CxxUtils::fpcompare::equal(prescale, 1.0f)) {
           HLT_PS = chain;
           ATH_MSG_DEBUG( "HLT_PS: " << chain << " has PS = " << prescale);
           fill(tool,HLT_PS);
