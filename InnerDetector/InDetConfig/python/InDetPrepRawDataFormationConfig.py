@@ -74,6 +74,7 @@ def TrigPixelClusterizationCfg(flags, name="InDetPixelClusterization", **kwargs)
     kwargs.setdefault("ClustersName", "PixelTrigClusters")
     kwargs.setdefault("isRoI_Seeded", True)
     kwargs.setdefault("ClusterContainerCacheKey", "PixelTrigClustersCache")
+    kwargs.setdefault("useDataPoolWithCache", True)
 
     acc.addEventAlgo(CompFactory.InDet.PixelClusterization(name, **kwargs))
     return acc
@@ -165,6 +166,7 @@ def TrigSCTClusterizationCfg(flags, name="InDetSCT_Clusterization", roisKey="", 
     kwargs.setdefault("isRoI_Seeded", True)
     kwargs.setdefault("ClusterContainerCacheKey", "SCT_ClustersCache")
     kwargs.setdefault("FlaggedCondCacheKey", "")
+    kwargs.setdefault("useDataPoolWithCache", True)
 
     acc.addEventAlgo(CompFactory.InDet.SCT_Clusterization(name+signature, **kwargs))
     return acc
@@ -267,6 +269,7 @@ def TrigTRTRIOMakerCfg(flags, name="InDetTrigMTTRTDriftCircleMaker", **kwargs):
     kwargs.setdefault("RoIs", flags.Tracking.ActiveConfig.roi)
     
     kwargs.setdefault("TRT_DriftCircleCache", "TRT_DriftCircleCache")
+    kwargs.setdefault("useDataPoolWithCache", True)
     acc.addEventAlgo(CompFactory.InDet.TRT_RIO_Maker(
         name+"_"+flags.Tracking.ActiveConfig.input_name, **kwargs))
     return acc

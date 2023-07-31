@@ -411,7 +411,7 @@ void TrigTrackSelector::truthBeamline( const xAOD::TruthParticleContainer* truth
     
     const xAOD::TruthParticle* track = (*trackitr);
     
-    if ( track->status() != 1 || !track->hasProdVtx() ) continue; 
+    if ( !MC::isStable(track) || !track->hasProdVtx() ) continue; 
 
     /// get track production vertex
 
@@ -474,7 +474,7 @@ void TrigTrackSelector::selectTracks( const xAOD::TruthParticleContainer* trutht
     static const particleType ptype;
     if ( q==-999 ) q = ptype.charge( (*trackitr)->pdgId() );
 
-    if (q == 0 || (*trackitr)->status() !=1) continue;
+    if (q == 0 || !MC::isStable(*trackitr) ) continue;
 
     // If looking for tau parents, don't select mu or e children
 
@@ -500,7 +500,7 @@ void TrigTrackSelector::selectTracks( const xAOD::TruthParticleContainer* trutht
 bool TrigTrackSelector::selectTrack( HepMC::ConstGenParticlePtr track ) {
   
     /// not a "final state" particle
-    if ( track->status() != 1 ) return false;
+    if ( !MC::isStable(track) ) return false;
 
     /// set this so can use it as the identifier - don't forget to reset!!
 //AV Using memory to get some value is not a good idea. This is not a repruducible/portable way, but I leave it as is.
@@ -700,7 +700,7 @@ TIDA::Track* TrigTrackSelector::makeTrack(HepMC::ConstGenParticlePtr track ) {
 TIDA::Track* TrigTrackSelector::makeTrack( const TruthParticle* track, unsigned long tid ) { 
   
     if ( track==0 ) return 0; 
-    if ( track->status() != 1 ) return 0;   /// check for final state
+    if ( !MC::isStable(track)) return 0;   /// check for final state
 
 
     double phi = track->phi();

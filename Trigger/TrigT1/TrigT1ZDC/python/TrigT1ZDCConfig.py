@@ -6,8 +6,8 @@
 def L1ZDCSimCfg(flags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
-    from ZdcRec.ZdcRecConfig import ZdcRecRun2Cfg
-    acc.merge(ZdcRecRun2Cfg(flags))
+    from ZdcRec.ZdcRecConfig import ZdcRecCfg
+    acc.merge(ZdcRecCfg(flags))
     from AthenaConfiguration.ComponentFactory import CompFactory
     acc.addEventAlgo(CompFactory.LVL1.TrigT1ZDC(filepath_LUT = "TrigT1ZDC/zdcRun3T1LUT_v1_30_05_2023.json",
                                                 EnergyADCScale = 0.4))

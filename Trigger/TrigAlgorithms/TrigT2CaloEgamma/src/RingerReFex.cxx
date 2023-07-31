@@ -522,21 +522,16 @@ void RingerReFex::RingSet::buildRings( const double eta_center, const double phi
     // Fill
     if (i < m_rings.size()) {
       if (doNoiseThrRings){
-
-        float noiseSigma = noiseCDO->getNoise((*it)->ID(),(*it)->gain());
-        float et = (*it)->energy() / cosh_eta;
-        
-        if ( et < noiseSigma*noiseFactor){
-          m_rings[i] = 0;
-        }else{
+        float noiseSigma = noiseCDO->getNoise((*it)->ID(),(*it)->gain());        
+        if ( (*it)->energy() > noiseSigma*noiseFactor){
           m_rings[i] += (*it)->energy() / cosh_eta;
         }
-      }else{ // Building Rings with sigmaNoise constraint? 
+      }else{ // Building Rings with sigmaNoise constraint? / in the constructor , rings already resized with your respect rings quantities 
         m_rings[i] += (*it)->energy() / cosh_eta;
       }
     }
   }// Loop over each
-
+  
 }
 
 //!=================================================================================

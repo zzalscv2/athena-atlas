@@ -67,8 +67,8 @@ private:
       , "Decoration for Average Interaction Per Crossing"};
   const TRT_ID* m_trtId;                                                // ID TRT helper 
 
-  ToolHandle< Trk::IPRD_AssociationTool >  m_assoTool;
-  ToolHandle< InDet::ITRT_LocalOccupancy > m_localOccTool;     //!< the track selector tool
+  ToolHandle< Trk::IPRD_AssociationTool >  m_assoTool{this, "AssociationTool","InDet::InDetPRD_AssociationToolGangedPixels","PRD_AssociationTool"};
+  ToolHandle< InDet::ITRT_LocalOccupancy > m_localOccTool{this, "TRT_LocalOccupancyTool","", "Local occupancy tool"}; 
 
   // Algorithm switchers
 

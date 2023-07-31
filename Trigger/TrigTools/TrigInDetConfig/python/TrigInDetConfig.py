@@ -86,13 +86,32 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
   return acc
 
 
-def trigInDetLRTCfg(flags, LRTInputCollection, roisKey, in_view):
+def trigInDetLRTCfg(flags, LRTInputCollection, roisKey, in_view, extra_view_inputs=[]):
   from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
+  viewname = "VDVInDetLRT" if in_view else None
   seq = InDetTrigSequence(flags,
                           flags.Tracking.ActiveConfig.input_name,
                           rois   = roisKey,
-                          inView = "VDVInDetLRT" if in_view else None)
-  acc = seq.fastTrackFinder(inputTracksName = LRTInputCollection)
+                          inView = viewname)
+  acc = ComponentAccumulator()
+  if in_view:
+    bserr_inputs = []
+    if flags.Input.Format is Format.BS:
+      bserr_inputs += [
+        ('IDCInDetBSErrContainer' , 'PixelByteStreamErrs'),
+        ('IDCInDetBSErrContainer',  'SCT_ByteStreamErrs'),
+      ]
+    acc.addEventAlgo( CompFactory.AthViews.ViewDataVerifier(
+      name = viewname + "_" + flags.Tracking.ActiveConfig.input_name,
+      DataObjects = [
+        ( 'TrigRoiDescriptorCollection' ,  f'StoreGateSvc+{roisKey}' ),
+        ( 'TrackCollection' ,               'StoreGateSvc+HLT_IDTrkTrack_FS_FTF' ),
+        ( 'SpacePointContainer' ,           'StoreGateSvc+SCT_TrigSpacePoints' ),
+        ( 'InDet::PixelClusterContainer' ,  'StoreGateSvc+PixelTrigClusters' ),
+        ( 'InDet::SCT_ClusterContainer' ,   'StoreGateSvc+SCT_TrigClusters' ),
+      ]+bserr_inputs+extra_view_inputs
+    ) )
+  acc.merge(seq.fastTrackFinder(inputTracksName = LRTInputCollection))
   return acc
 
 
@@ -134,41 +153,6 @@ def TRTDataProviderCfg(flags : AthConfigFlags, rois : str, signatureName : str =
   return acc
 
 
-def TRTExtensionBuilderCfg(flags, rois):
-  acc = ComponentAccumulator()
-  if flags.Input.Format is Format.BS:
-    acc.merge( TRTDataProviderCfg(flags, rois) )
-
-  from InDetConfig.InDetPrepRawDataFormationConfig import TrigTRTRIOMakerCfg
-  acc.merge( TrigTRTRIOMakerCfg(flags) )
-
-  from InDetConfig.TRT_TrackExtensionAlgConfig import Trig_TRT_TrackExtensionAlgCfg
-  acc.merge( Trig_TRT_TrackExtensionAlgCfg(flags, inputTracks = flags.Tracking.ActiveConfig.trkTracks_IDTrig+"_Amb") )
-
-  from InDetConfig.InDetExtensionProcessorConfig import TrigInDetExtensionProcessorCfg
-  acc.merge( TrigInDetExtensionProcessorCfg(flags) )
-#  'TRTRawDataProvider/InDetTrigMTTRTRawDataProvider_electronLRT', 
-#  'InDet::TRT_RIO_Maker/InDetTrigMTTRTDriftCircleMaker_electronLRT', 
-#  'InDet::TRT_TrackExtensionAlg/InDetTrigMTTrackExtensionAlg_electronLRT', 
-#  'InDet::InDetExtensionProcessor/InDetTrigMTExtensionProcessor_electronLRT', 
-
-  return acc
-
-def ambiguitySolverAlgCfg(flags):
-  acc = ComponentAccumulator()
-
-  from TrkConfig.TrkAmbiguitySolverConfig import TrkAmbiguityScore_Trig_Cfg, TrkAmbiguitySolver_Trig_Cfg
-  acc.merge(TrkAmbiguityScore_Trig_Cfg(flags, name = f"{prefix}TrkAmbiguityScore_{flags.Tracking.ActiveConfig.input_name}"))
-  acc.merge(TrkAmbiguitySolver_Trig_Cfg(flags, name = f"{prefix}TrkAmbiguitySolver_{flags.Tracking.ActiveConfig.input_name}"))
-
-  return acc
-
-def trackEFIDConverterCfg(flags):
-  return _trackConverterCfg(flags, 
-                            "_Precision"+flags.Tracking.ActiveConfig.name,
-                            flags.Tracking.ActiveConfig.trkTracks_IDTrig,
-                            flags.Tracking.ActiveConfig.tracks_IDTrig)
-
 
 def trigInDetPrecisionTrackingCfg( inflags, rois, signatureName, in_view=True ):
   if inflags.Detector.GeometryITk:
@@ -205,13 +189,13 @@ def trigInDetPrecisionTrackingCfg( inflags, rois, signatureName, in_view=True ):
                                   ('IDCInDetBSErrContainer_Cache', 'SctFlaggedCondCache'), ]
     acc.addEventAlgo(verifier)
 
-  acc.merge(ambiguitySolverAlgCfg(flags))
-  acc.merge(TRTExtensionBuilderCfg(flags, rois))
-  acc.merge(trackEFIDConverterCfg(flags))
-
-#   Members = ['Trk::TrkAmbiguityScore/InDetTrigMTTrkAmbiguityScore_electronLRT', 
-#  'Trk::TrkAmbiguitySolver/InDetTrigMTTrkAmbiguitySolver_electronLRT', 
-#  'xAODMaker::TrackParticleCnvAlg/InDetTrigMTxAODParticleCreatorAlgelectronLRT_IDTrig']
+  from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
+  seq = InDetTrigSequence(flags, 
+                          flags.Tracking.ActiveConfig.input_name, 
+                          rois = rois, 
+                          inView = verifier.getName() if verifier else '')
+  
+  acc.merge(seq.sequenceAfterPattern())
 
   return acc
 

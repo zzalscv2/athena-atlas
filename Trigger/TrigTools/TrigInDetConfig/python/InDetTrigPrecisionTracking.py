@@ -19,6 +19,10 @@ def makeInDetTrigPrecisionTracking( inflags, config=None, verifier=False, rois='
     from TrigInDetConfig.utils import getFlagsForActiveConfig
     flags = getFlagsForActiveConfig(inflags, config.input_name, log)
 
+    #temporary until imports of public tools via CAtoLegacyPublicToolWrapper not needed anymore  
+    from InDetTrigRecExample import InDetTrigCA
+    InDetTrigCA.InDetTrigConfigFlags = flags
+
     if verifier:
         from .InDetTrigCollectionKeys import TrigPixelKeys
         inputTracks = flags.Tracking.ActiveConfig.trkTracks_FTF 

@@ -1,14 +1,12 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
+from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
 def createIDCalibHypoAlg(flags, name):
-    # make the Hypo
-    from TrigTrackingHypo.TrigTrackingHypoConf import (IDCalibHypoAlg)
-
     # Setup the hypothesis algorithm
-    theHypo = IDCalibHypoAlg(name)
+    theHypo = CompFactory.IDCalibHypoAlg(name)
     
     # monioring
     monTool = GenericMonitoringTool(flags, "IM_MonTool"+name)
@@ -33,7 +31,6 @@ def IDCalibHypoToolFromDict( chainDict ):
     else:
         log.error("chainName not in chain dictionary")
 
-    from AthenaConfiguration.ComponentFactory import CompFactory
     tool = CompFactory.IDCalibHypoTool(name)
 
     # set thresholds

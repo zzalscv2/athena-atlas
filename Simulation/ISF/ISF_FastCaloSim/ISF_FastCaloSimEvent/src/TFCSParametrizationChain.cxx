@@ -234,7 +234,8 @@ void TFCSParametrizationChain::Streamer(TBuffer &R__b) {
             std::unique_ptr<TFCSParametrizationBase> new_R__t = nullptr;
 
             if (dir) {
-              new_R__t.reset((TFCSParametrizationBase *)dir->Get(R__t->GetName()));
+              new_R__t.reset(
+                  (TFCSParametrizationBase *)dir->Get(R__t->GetName()));
             }
 
             if (new_R__t) {
@@ -264,27 +265,20 @@ void TFCSParametrizationChain::Streamer(TBuffer &R__b) {
       }
     }
 
-    // Expect that any TFCSParametrizationBase from the last time the
-    // streamer was called can be safely forgotten.
-    m_writtenBases.clear();
-
     TFCSParametrizationChain::Chain_t &R__stl = m_chain;
     int R__n = int(R__stl.size());
     R__b << R__n;
     if (R__n) {
       TFCSParametrizationChain::Chain_t::iterator R__k;
       for (R__k = R__stl.begin(); R__k != R__stl.end(); ++R__k) {
-        std::unique_ptr<TFCSParametrizationBase> R__t(*R__k);
-        std::unique_ptr<TFCSParametrizationBase> new_R__t;
-        if (dir && R__t != nullptr) {
-          dir->WriteTObject(R__t.get());
-          new_R__t = std::make_unique<TFCSParametrizationPlaceholder>(
-              R__t->GetName(), TString("Placeholder for: ") + R__t->GetTitle());
-          R__t = std::move(new_R__t);
+        TFCSParametrizationBase *R__t = *R__k;  // Ownership stays with m_chain
+        if (dir && R__t != nullptr) { 
+          dir->WriteTObject(R__t);
+          TFCSParametrizationPlaceholder tmp( R__t->GetName(), TString("Placeholder for: ") + R__t->GetTitle());
+          R__b.WriteObject( &tmp, false ); // tell R__b object with same address are actually different
+        } else {
+          R__b.WriteObject( R__t );
         }
-        m_writtenBases.emplace_back(R__t.release());
-        // Get raw pointer from R__t because TBuffer operator<< does not support unique_ptr
-        R__b << m_writtenBases.back().get();
       }
     }
     R__b.SetByteCount(R__c, kTRUE);

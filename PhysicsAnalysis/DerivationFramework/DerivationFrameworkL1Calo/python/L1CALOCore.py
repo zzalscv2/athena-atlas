@@ -119,6 +119,8 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
         from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import eFexTOBDecoratorCfg
         DecoratorAlgo = eFexTOBDecoratorCfg(flags,'eFexTOBDecorator','L1_eEMRoI_OfflineCopy','L1_eTauRoI_OfflineCopy')
         acc.merge(DecoratorAlgo)
+        DecoratorAlgoSim = eFexTOBDecoratorCfg(flags,'eFexTOBDecoratorSim','L1_eEMRoISim','L1_eTauRoISim')
+        acc.merge(DecoratorAlgoSim)
 
     # set up the slimming helper
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
@@ -135,6 +137,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
 
     L1CaloSlimmingHelper.IncludeEGammaTriggerContent = True
     L1CaloSlimmingHelper.IncludeJetTriggerContent = True
+    L1CaloSlimmingHelper.IncludeBJetTriggerContent = True
 
     # Container selection based on share/L1CALO versions
     # Note: if the container is in the on-the-fly list (ContainersOnTheFly.py) then we do not have to add it to the dictionary
@@ -182,8 +185,13 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
                                                          "HLT_IDVertex_FS":"xAOD::VertexContainer",
                                                          "HLT_IDVertex_FSAux":"xAOD::VertexAuxContainer",
                                                          "HLT_TCEventInfo_jet":"xAOD::TrigCompositeContainer",
-                                                         "HLT_TCEventInfo_jetAux":"xAOD::TrigCompositeAuxContainer"})
+                                                         "HLT_TCEventInfo_jetAux":"xAOD::TrigCompositeAuxContainer",
+                                                         "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTagging": "xAOD::BTaggingContainer",
+                                                         "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingAux": "xAOD::BTaggingAuxContainer",
+                                                         "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets": "xAOD::JetContainer",
+                                                         "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJetsAux": "xAOD::JetAuxContainer"})
 
+    AllVariables += ["HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTagging", "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets"]
 
     # Generic event info
     L1CaloSlimmingHelper.AppendToDictionary.update({"EventInfo":"xAOD::EventInfo","EventInfoAux":"xAOD::EventAuxInfo"}) 
@@ -258,7 +266,14 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
         trackParticleAuxExclusions="-caloExtension.-cellAssociation.-clusterAssociation.-trackParameterCovarianceMatrices.-parameterX.-parameterY.-parameterZ.-parameterPX.-parameterPY.-parameterPZ.-parameterPosition"
         StaticContent += ["xAOD::TrackParticleContainer#GSFTrackParticles"]
         StaticContent += ["xAOD::TrackParticleAuxContainer#GSFTrackParticlesAux."+trackParticleAuxExclusions]
-    # to be updated for POOL
+    else:
+        L1CaloSlimmingHelper.AppendToDictionary.update (
+            {"GSFConversionVertices":"xAOD::VertexContainer",
+             "GSFConversionVerticesAux":"xAOD::VertexAuxContainer",
+             "GSFTrackParticles":"xAOD::TrackParticleContainer",
+             "GSFTrackParticlesAux":"xAOD::TrackParticleAuxContainer"}
+        )
+        AllVariables += ["GSFConversionVertices","GSFTrackParticles"]
 
     L1CaloSlimmingHelper.AppendToDictionary.update (
         {"egammaClusters":"xAOD::CaloClusterContainer",
@@ -398,7 +413,43 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     )    
     AllVariables += ["L1_jFexEmulatedTowers"]
 
-    
+    # Truth collections
+    if flags.Input.isMC:
+        from DerivationFrameworkMCTruth.MCTruthCommonConfig import PreJetMCTruthAugmentationsCfg,AddTruthJetsCfg
+        from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTruthCollectionNavigationDecorationsCfg,AddBornLeptonCollectionCfg
+        from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddHardScatterCollectionCfg,AddTruthMETCfg,PostJetMCTruthAugmentationsCfg
+
+        acc.merge(PreJetMCTruthAugmentationsCfg(flags,decorationDressing = 'dressedPhoton'))
+        acc.merge(AddTruthJetsCfg(flags))
+        acc.merge(AddTruthMETCfg(flags))
+        acc.merge(PostJetMCTruthAugmentationsCfg(flags, decorationDressing = 'dressedPhoton'))
+        acc.merge(AddTruthCollectionNavigationDecorationsCfg(flags, ["TruthElectrons", "TruthMuons", "TruthPhotons", "TruthTaus", "TruthNeutrinos"]))
+        # Special collection for Born leptons
+        acc.merge(AddBornLeptonCollectionCfg(flags))
+        # Special collection for hard scatter (matrix element) - save TWO extra generations of particles
+        acc.merge(AddHardScatterCollectionCfg(flags, 2))
+
+        L1CaloSlimmingHelper.AppendToDictionary.update (
+            {'TruthElectrons':'xAOD::TruthParticleContainer','TruthElectronsAux':'xAOD::TruthParticleAuxContainer',
+             'TruthMuons':'xAOD::TruthParticleContainer','TruthMuonsAux':'xAOD::TruthParticleAuxContainer',
+             'TruthPhotons':'xAOD::TruthParticleContainer','TruthPhotonsAux':'xAOD::TruthParticleAuxContainer',
+             'TruthTaus':'xAOD::TruthParticleContainer','TruthTausAux':'xAOD::TruthParticleAuxContainer',
+             'TruthNeutrinos':'xAOD::TruthParticleContainer','TruthNeutrinosAux':'xAOD::TruthParticleAuxContainer',
+             'BornLeptons':'xAOD::TruthParticleContainer','BornLeptonsAux':'xAOD::TruthParticleAuxContainer',
+             'HardScatterParticles':'xAOD::TruthParticleContainer','HardScatterParticlesAux':'xAOD::TruthParticleAuxContainer',
+             'MET_Truth':'xAOD::MissingETContainer','MET_TruthAux':'xAOD::MissingETAuxContainer'}
+        )
+        AllVariables += [
+            "TruthElectrons",
+            "TruthMuons",
+            "TruthPhotons",
+            "TruthTaus",
+            "TruthNeutrinos",
+            "BornLeptons",
+            "HardScatterParticles",
+            "MET_Truth"
+        ]
+
     L1CaloSlimmingHelper.AllVariables = AllVariables
     L1CaloSlimmingHelper.StaticContent = StaticContent
     L1CaloSlimmingHelper.SmartCollections = SmartCollections

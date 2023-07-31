@@ -274,7 +274,7 @@ StatusCode LVL1::eFEXNtupleWriter::loadTruthElectron() {
       // ignore geant4
       if(HepMC::is_simulation_particle(each_particle)) continue;
       // select particles that is not decayed further by the generator
-      if(each_particle->status() != 1) continue;
+      if(!MC::isStable(each_particle)) continue;
       // select electrons
       if(std::abs(each_particle->pdgId()) != 11) continue;
       // select particles from Z

@@ -9,8 +9,7 @@
 
 """
 
-
-def CAtoLegacyPublicToolWrapper(func,**kwargs):
+def CAtoLegacyPrivateToolWrapper(func,**kwargs):
 
   from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper, conf2toConfigurable
   from InDetTrigRecExample import InDetTrigCA
@@ -19,8 +18,15 @@ def CAtoLegacyPublicToolWrapper(func,**kwargs):
   privateTool = ca.popPrivateTools()
   tool = conf2toConfigurable(privateTool)
 
+  return tool
+
+def CAtoLegacyPublicToolWrapper(func,**kwargs):
+
+  tool = CAtoLegacyPrivateToolWrapper(func, **kwargs)
+
   from AthenaCommon.AppMgr import ToolSvc
   ToolSvc += tool
 
   return tool
+
 
