@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2019-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2019-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibSvc/MdtCalibrationDbTool.h"
@@ -208,11 +208,11 @@ void MdtCalibrationDbTool::initialize_B_correction(MuonCalib::MdtCorFuncSet *fun
   std::vector<double> corr_params(2);
   corr_params[0] = 3080.0; // high voltage (not correct for sMDT which use 2730V!)
   corr_params[1] = 0.11;   // epsilon parameter
-  funcSet->setBField(new MuonCalib::BFieldCorFunc(std::string("medium"), corr_params, rt_rel->rt()));
+  funcSet->setBField(std::make_unique<MuonCalib::BFieldCorFunc>("medium", corr_params, rt_rel->rt()));
 }
 
 void MdtCalibrationDbTool::initializeSagCorrection(MuonCalib::MdtCorFuncSet *funcSet) {
   ATH_MSG_VERBOSE( "initializeSagCorrection..." );
   std::vector<double> corr_params(0);
-  funcSet->wireSag(new MuonCalib::WireSagCorFunc(corr_params));
+  funcSet->wireSag(std::make_unique<MuonCalib::WireSagCorFunc>(corr_params));
 }

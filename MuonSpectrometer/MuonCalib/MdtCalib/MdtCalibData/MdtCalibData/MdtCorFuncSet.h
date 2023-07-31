@@ -1,51 +1,51 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MDTCORFUNCSET_H
 #define MDTCORFUNCSET_H
 
+#include "MdtCalibData/IMdtBFieldCorFunc.h"
+#include "MdtCalibData/IMdtBackgroundCorFunc.h"
+#include "MdtCalibData/IMdtSlewCorFunc.h"
+#include "MdtCalibData/IMdtTempCorFunc.h"
+#include "MdtCalibData/IMdtWireSagCorFunc.h"
+
+#include <memory>
 namespace MuonCalib {
-
-    class IMdtSlewCorFunc;
-    class IMdtBFieldCorFunc;
-    class IMdtTempCorFunc;
-    class IMdtBackgroundCorFunc;
-    class IMdtWireSagCorFunc;
-
-    /** Class which holds all correction functions for a given region.
+     /** Class which holds all correction functions for a given region.
         The segmentation can differ from the rt calibration region */
     class MdtCorFuncSet {
     public:
-        MdtCorFuncSet();
+        MdtCorFuncSet() = default;
 
-        MdtCorFuncSet(IMdtSlewCorFunc* s, IMdtBFieldCorFunc* bf, IMdtTempCorFunc* t, IMdtBackgroundCorFunc* bg, IMdtWireSagCorFunc* w);
+        MdtCorFuncSet(std::unique_ptr<IMdtSlewCorFunc> && s, 
+                      std::unique_ptr<IMdtBFieldCorFunc>&& bf, 
+                      std::unique_ptr<IMdtTempCorFunc>&& t, 
+                      std::unique_ptr<IMdtBackgroundCorFunc>&& bg, 
+                      std::unique_ptr<IMdtWireSagCorFunc>&& w);
 
-        ~MdtCorFuncSet();
+        ~MdtCorFuncSet() = default;
 
-        const IMdtSlewCorFunc* slewing() const { return m_slewing; }
-        const IMdtBFieldCorFunc* bField() const { return m_bField; }
-        const IMdtTempCorFunc* temperature() const { return m_temperature; }
-        const IMdtBackgroundCorFunc* background() const { return m_background; }
-        const IMdtWireSagCorFunc* wireSag() const { return m_wireSag; }
+        const IMdtSlewCorFunc* slewing() const { return m_slewing.get(); }
+        const IMdtBFieldCorFunc* bField() const { return m_bField.get(); }
+        const IMdtTempCorFunc* temperature() const { return m_temperature.get(); }
+        const IMdtBackgroundCorFunc* background() const { return m_background.get(); }
+        const IMdtWireSagCorFunc* wireSag() const { return m_wireSag.get(); }
 
-        void setSlewing(IMdtSlewCorFunc* slew);
-        void setBField(IMdtBFieldCorFunc* bField);
-        void setTemperature(IMdtTempCorFunc* temperature);
-        void background(IMdtBackgroundCorFunc* background);
-        void wireSag(IMdtWireSagCorFunc* wireSag);
+        void setSlewing(std::unique_ptr<IMdtSlewCorFunc>&& slew);
+        void setBField(std::unique_ptr<IMdtBFieldCorFunc>&& bField);
+        void setTemperature(std::unique_ptr<IMdtTempCorFunc>&& temperature);
+        void background(std::unique_ptr<IMdtBackgroundCorFunc>&& background);
+        void wireSag(std::unique_ptr<IMdtWireSagCorFunc>&& wireSag);
 
     private:
-        /** no assignment */
-        MdtCorFuncSet& operator=(const MdtCorFuncSet&);
-        /** no copy constructor */
-        MdtCorFuncSet(const MdtCorFuncSet&);
 
-        IMdtSlewCorFunc* m_slewing;
-        IMdtBFieldCorFunc* m_bField;
-        IMdtTempCorFunc* m_temperature;
-        IMdtBackgroundCorFunc* m_background;
-        IMdtWireSagCorFunc* m_wireSag;
+        std::unique_ptr<IMdtSlewCorFunc> m_slewing{};
+        std::unique_ptr<IMdtBFieldCorFunc> m_bField{};
+        std::unique_ptr<IMdtTempCorFunc> m_temperature{};
+        std::unique_ptr<IMdtBackgroundCorFunc> m_background{};
+        std::unique_ptr<IMdtWireSagCorFunc> m_wireSag{};
     };
 
 }  // namespace MuonCalib
