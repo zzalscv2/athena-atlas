@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -34,15 +34,11 @@
 
 IDAlignMonSivsTRT::IDAlignMonSivsTRT(const std::string& type, const std::string& name, const IInterface* parent)
   : ManagedMonitorToolBase(type, name, parent) {
-  m_trackSelection = ToolHandle<InDetAlignMon::TrackSelectionTool>("InDetAlignMon::TrackSelectionTool");
-  m_trackSumTool = ToolHandle<Trk::ITrackSummaryTool>("Trk::TrackSummaryTool/InDetTrackSummaryTool");
-  m_triggerChainName = "NoTriggerSelection";
-
 
   declareProperty("CheckRate", m_checkrate = 1000);
-  declareProperty("triggerChainName", m_triggerChainName);
-  declareProperty("trackSelection", m_trackSelection);
-  declareProperty("trackSumTool", m_trackSumTool);
+  declareProperty("triggerChainName", m_triggerChainName = "NoTriggerSelection");
+  declareProperty("trackSelection", m_trackSelection = ToolHandle<InDetAlignMon::TrackSelectionTool>("InDetAlignMon::TrackSelectionTool"));
+  declareProperty("trackSumTool", m_trackSumTool = ToolHandle<Trk::ITrackSummaryTool>("Trk::TrackSummaryTool/InDetTrackSummaryTool"));
   declareProperty("MatchdRCut", m_matchdRcut = 0.01);
 }
 

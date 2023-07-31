@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 // ***************************************************************************************
@@ -195,110 +195,77 @@ struct IDAlignMonResiduals::TRTEndcapHistograms {
 IDAlignMonResiduals::IDAlignMonResiduals(const std::string& type, const std::string& name, const IInterface* parent)
   : ManagedMonitorToolBase(type, name, parent),
   m_trtcaldbTool("TRT_CalDbTool", this),
+  m_gap_pix(4),
+  m_gap_sct(10),
+  m_NLumiBlocksMon(1),
+  m_minSiResMeanWindow(-0.1),
+  m_maxSiResMeanWindow(0.1),
+  m_minSiResWidthWindow(0.0),
+  m_maxSiResWidthWindow(0.3),
+  m_minSiPullWidthWindow(0.0),
+  m_maxSiPullWidthWindow(2.0),
+  m_ClusterSizeRange(10.),
+  m_IncidentThetaRange(2.),
+  m_IncidentPhiRange(0.8),
+  m_LBGranularity(1),
+  m_TRTB_nSectorBins(32),
+  m_TRTEC_nSectorBins(8),
+  m_mu(0.),
+  m_hasBeenCalledThisEvent(false),
+  m_nBinsMuRange(101.),
+  m_muRangeMin(-0.5),
+  m_muRangeMax(100.5),
+  m_LBRangeMin(-0.5),
+  m_LBRangeMax(2599.5),
+  m_nIBLHitsPerLB(0),
+  m_trt_b_hist(new TRTBarrelHistograms()),
+  m_trt_ec_hist(new TRTEndcapHistograms()),
   m_hWeightInFile(nullptr),
-  m_etapTWeight(nullptr) {
-  m_iUpdator = ToolHandle<Trk::IUpdator>("Trk::KalmanUpdator");
-  m_propagator = ToolHandle<Trk::IPropagator>("Trk::RungeKuttaPropagator");
-  m_residualPullCalculator = ToolHandle<Trk::IResidualPullCalculator>(
-    "Trk::ResidualPullCalculator/ResidualPullCalculator");
-  m_trackSelection = ToolHandle<InDetAlignMon::TrackSelectionTool>("InDetAlignMon::TrackSelectionTool");
-  //m_idtrackSelection = ToolHandle<InDet::IInDetTrackSelectionTool>("InDetTrackSelectionTool/InDetTrackSelectionTool");
-  m_hitQualityTool = ToolHandle<IInDetAlignHitQualSelTool>("");
-  m_trt_b_hist = new TRTBarrelHistograms();
-  m_trt_ec_hist = new TRTEndcapHistograms();
-
-  m_triggerChainName = "NoTriggerSelection";
-  m_z_fix = 366.5; // IBL Stave fixing screw position [mm]
-  m_NLumiBlocksMon = 1;
-  m_minTRTResWindow = -1.0;
-  m_maxTRTResWindow = 1.0;
-  m_minSiResMeanWindow = -0.1;
-  m_maxSiResMeanWindow = 0.1;
-  m_minSiResWidthWindow = 0.0;
-  m_maxSiResWidthWindow = 0.3;
-  m_minSiPullWidthWindow = 0.0;
-  m_maxSiPullWidthWindow = 2.0;
-  m_minSiResFillRange = -0.08;
-  m_maxSiResFillRange = 0.08;
-  m_maxPIXResXFillRange = 0.;  // if 0, it will use the m_maxSiResFillRange value
-  m_minPIXResXFillRange = 0.;  // if 0, it will use the m_minSiResFillRange value
-  m_maxPIXResYFillRange = 0.4;
-  m_minPIXResYFillRange = -0.4;
-  m_maxSCTResFillRange = 0.;
-  m_minSCTResFillRange = 0.;
-  m_ClusterSizeRange = 10.;
-  m_IncidentThetaRange = 2.;
-  m_IncidentPhiRange = 0.8;
-  m_RangeOfPullHistos = 6.;
-  m_PtRange = 40.;
-  m_xHitErrorRange = 0.08;
-  m_yHitErrorRange = 0.12;
-  m_mu = 0.;
-  m_nBinsMuRange = 101.;
-  m_muRangeMin = -0.5;
-  m_muRangeMax = 100.5;
-  m_nBinsPtRange = 50;
-  m_mapSplit = 1; // Create the residual maps splitting the modules in nxn pieces
-  m_do3DOverlapHistos = false;
-  m_extendedPlots = false;
-  m_doClusterSizeHistos = false;
-  m_FinerBinningFactor = 1;
-  m_LBGranularity = 1;
-  m_LBRangeMin = -0.5;
-  m_LBRangeMax = 2599.5;
-  m_nBinsLB = 52;
-  m_gap_pix = 4;
-  m_gap_sct = 10;
-  m_nIBLHitsPerLB = 0;
-  m_minIBLhits = -1;
-  m_hasBeenCalledThisEvent = false;
-  m_doIBLLBPlots = false;
-  m_useGausFit = false;
-  m_maxPtEC = 10.; // in GeV
-  m_TRTB_nSectorBins = 32;
-  m_TRTEC_nSectorBins = 8;
-
-  InitializeHistograms();
+  m_etapTWeight(nullptr),
+  m_z_fix (366.5), // IBL Stave fixing screw position [mm]
+  m_minIBLhits(-1) {
 
   declareProperty("CheckRate", m_checkrate = 1000);
-  declareProperty("triggerChainName", m_triggerChainName);
-  declareProperty("minTRTResidualWindow", m_minTRTResWindow);
-  declareProperty("maxTRTResidualWindow", m_maxTRTResWindow);
-  declareProperty("iUpdator", m_iUpdator);
-  declareProperty("propagator", m_propagator);
-  declareProperty("trackSelection", m_trackSelection);
-  //declareProperty("idtrackSelection"          , m_idtrackSelection);   //For retreiving from jO
-  declareProperty("ResidualPullCalculatorTool", m_residualPullCalculator);
+  declareProperty("triggerChainName", m_triggerChainName = "NoTriggerSelection");
+  declareProperty("minTRTResidualWindow", m_minTRTResWindow = -1.0);
+  declareProperty("maxTRTResidualWindow", m_maxTRTResWindow = 1.0);
+  declareProperty("iUpdator", m_iUpdator = ToolHandle<Trk::IUpdator>("Trk::KalmanUpdator"));
+  declareProperty("propagator", m_propagator = ToolHandle<Trk::IPropagator>("Trk::RungeKuttaPropagator"));
+  declareProperty("trackSelection", m_trackSelection = ToolHandle<InDetAlignMon::TrackSelectionTool>("InDetAlignMon::TrackSelectionTool"));
+  //declareProperty("idtrackSelection"          , m_idtrackSelection ="InDetTrackSelectionTool/InDetTrackSelectionTool");   //For retreiving from jO
+  declareProperty("ResidualPullCalculatorTool", m_residualPullCalculator = ToolHandle<Trk::IResidualPullCalculator>("Trk::ResidualPullCalculator/ResidualPullCalculator"));
   declareProperty("HitQualityTool", m_hitQualityTool);
   declareProperty("Pixel_Manager", m_Pixel_Manager);
   declareProperty("SCT_Manager", m_SCT_Manager);
   declareProperty("TRT_Manager", m_TRT_Manager);
-  declareProperty("minSiResFillRange", m_minSiResFillRange);
-  declareProperty("maxSiResFillRange", m_maxSiResFillRange);
-  declareProperty("do3DOverlapHistos", m_do3DOverlapHistos);
-  declareProperty("doClusterSizeHistos", m_doClusterSizeHistos);
-  declareProperty("ITRT_CalDbTool", m_trtcaldbTool);
-  declareProperty("useExtendedPlots", m_extendedPlots);
-  declareProperty("maxPIXResXFillRange", m_maxPIXResXFillRange);
-  declareProperty("minPIXResXFillRange", m_minPIXResXFillRange);
-  declareProperty("maxPIXResYFillRange", m_maxPIXResYFillRange);
-  declareProperty("minPIXResYFillRange", m_minPIXResYFillRange);
-  declareProperty("maxSCTResFillRange", m_maxSCTResFillRange);
-  declareProperty("minSCTResFillRange", m_minSCTResFillRange);
-  declareProperty("RangeOfPullHistos", m_RangeOfPullHistos);
-  declareProperty("PtRange", m_PtRange);
-  declareProperty("NBinsPtRange", m_nBinsPtRange);
-  declareProperty("xHitErrorRange", m_xHitErrorRange);
-  declareProperty("yHitErrorRange", m_yHitErrorRange);
-  declareProperty("NBinsLB", m_nBinsLB);
-  declareProperty("FinerBinningFactor", m_FinerBinningFactor);
-  declareProperty("NSplitMap", m_mapSplit);
+  declareProperty("minSiResFillRange", m_minSiResFillRange = -0.08);
+  declareProperty("maxSiResFillRange", m_maxSiResFillRange =  0.08);
+  declareProperty("do3DOverlapHistos", m_do3DOverlapHistos = false);
+  declareProperty("doClusterSizeHistos", m_doClusterSizeHistos = false);
+  declareProperty("ITRT_CalDbTool", m_trtcaldbTool = ToolHandle<ITRT_CalDbTool>("TRT_CalDbTool"));
+  declareProperty("useExtendedPlots", m_extendedPlots = false);
+  declareProperty("minPIXResXFillRange", m_minPIXResXFillRange = 0); // if 0, it will use the m_minSiResFillRange value
+  declareProperty("maxPIXResXFillRange", m_maxPIXResXFillRange = 0); // if 0, it will use the m_maxSiResFillRange value
+  declareProperty("minPIXResYFillRange", m_minPIXResYFillRange = -0.4);
+  declareProperty("maxPIXResYFillRange", m_maxPIXResYFillRange =  0.4);
+  declareProperty("minSCTResFillRange", m_minSCTResFillRange = 0);
+  declareProperty("maxSCTResFillRange", m_maxSCTResFillRange = 0);
+  declareProperty("RangeOfPullHistos", m_RangeOfPullHistos = 6.);
+  declareProperty("PtRange", m_PtRange = 40.);
+  declareProperty("NBinsPtRange", m_nBinsPtRange = 50);
+  declareProperty("xHitErrorRange", m_xHitErrorRange = 0.08);
+  declareProperty("yHitErrorRange", m_yHitErrorRange = 0.12);
+  declareProperty("NBinsLB", m_nBinsLB = 52);
+  declareProperty("FinerBinningFactor", m_FinerBinningFactor = 1);
+  declareProperty("NSplitMap", m_mapSplit = 1); // Create the residual maps splitting the modules in nxn pieces
   declareProperty("applyHistWeight", m_applyHistWeight = false);
   declareProperty("hWeightInFileName", m_hWeightInFileName = "hWeight.root");
   declareProperty("hWeightHistName", m_hWeightHistName = "trk_pT_vs_eta");
-  declareProperty("doIBLLBPlots", m_doIBLLBPlots);
-  declareProperty("useGausFit", m_useGausFit);
-  declareProperty("maxPtforECHistos", m_maxPtEC);
+  declareProperty("doIBLLBPlots", m_doIBLLBPlots = false);
+  declareProperty("useGausFit", m_useGausFit = false);
+  declareProperty("maxPtforECHistos", m_maxPtEC = 10.); // in GeV
+
+  InitializeHistograms();
 }
 
 //---------------------------------------------------------------------------------------
@@ -1392,16 +1359,6 @@ StatusCode IDAlignMonResiduals::fillHistograms() {
         ATH_MSG_DEBUG("** IDAlignMonResiduals::fillHistograms() ** Hit is from the TRT, finding residuals... ");
         bool isTubeHit = (mesh->localCovariance()(Trk::locX, Trk::locX) > 1.0) ? 1 : 0;
         const Trk::TrackParameters* trackParameter = tsos->trackParameters();
-        float hitR = hit->localParameters()[Trk::driftRadius];
-        float trketa = tsos->trackParameters()->eta();
-        float pullR = -9.9;
-
-        const Identifier& id = m_trtID->layer_id(hitId);
-        int barrel_ec = m_trtID->barrel_ec(id);
-        int layer_or_wheel = m_trtID->layer_or_wheel(id);
-        int phi_module = m_trtID->phi_module(id);
-        int straw_layer = m_trtID->straw_layer(id);
-
         //finding residuals
         if (!trackParameter) {
           if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "No TrackParameters associated with TRT TrkSurface " <<
@@ -1409,6 +1366,16 @@ StatusCode IDAlignMonResiduals::fillHistograms() {
           continue;
         }
         ATH_MSG_DEBUG("Found Trk::TrackParameters for hit " << nTSOS << " --> TRT hit (detType= " << detType << ")");
+
+        float hitR = hit->localParameters()[Trk::driftRadius];
+        float trketa = trackParameter->eta();
+        float pullR = -9.9;
+
+        const Identifier& id = m_trtID->layer_id(hitId);
+        int barrel_ec = m_trtID->barrel_ec(id);
+        int layer_or_wheel = m_trtID->layer_or_wheel(id);
+        int phi_module = m_trtID->phi_module(id);
+        int straw_layer = m_trtID->straw_layer(id);
 
         //getting unbiased track parameters by removing the hit from the track and refitting
         const Trk::TrackParameters* trackParameterUnbiased = getUnbiasedTrackParameters(track, tsos);
