@@ -324,40 +324,7 @@ namespace dqi
         }
       }
 
-      // if there's an output object from the algorithm, include a clone
-      if (HanOutput_FileVersion == 2)
-      {
-        TObject* resultobj = result.getObject();
-        if (resultobj != 0)
-        {
-          TObject* resultobjclone = resultobj->Clone();
-          if (setNameGeneral(resultobj, "ResultObject"))
-          {
-            resultList->Add(resultobjclone);
-          }
-          else
-          {
-            std::cerr << "Discarding result object " << result.getObject()->GetName() << std::endl;
-            delete resultobjclone;
-          }
-        }
 
-        if (m_config != 0)
-        {
-          TObject* ref = m_config->GetReference(parentName, parname);
-          if (ref)
-          {
-            if (setNameGeneral(ref, "Reference"))
-            {
-              resultList->Add(ref);
-            }
-            else
-            {
-              std::cerr << "Discarding reference object " << ref->GetName() << std::endl;
-            }
-          }
-        }
-      }
 
       resultList = dynamic_cast<TSeqCollection*>(resultList->FindObject("Results"));
 
@@ -377,37 +344,34 @@ namespace dqi
         resultList->Add(newTObjArray(iter->first.c_str(), new TObjString(tagval.str().c_str()), 1));
       }
 
-      if (HanOutput_FileVersion == 1)
+      // if there's an output object from the algorithm, include a clone
+      TObject* resultobj = result.getObject();
+      if (resultobj != 0)
       {
-        // if there's an output object from the algorithm, include a clone
-        TObject* resultobj = result.getObject();
-        if (resultobj != 0)
+        TObject* resultobjclone = resultobj->Clone();
+        if (setNameGeneral(resultobj, "ResultObject"))
         {
-          TObject* resultobjclone = resultobj->Clone();
-          if (setNameGeneral(resultobj, "ResultObject"))
+          resultList->Add(resultobjclone);
+        }
+        else
+        {
+          std::cerr << "Discarding result object " << result.getObject()->GetName() << std::endl;
+          delete resultobjclone;
+        }
+      }
+
+      if (m_config != 0)
+      {
+        TObject* ref = m_config->GetReference(parentName, parname);
+        if (ref)
+        {
+          if (setNameGeneral(ref, "Reference"))
           {
-            resultList->Add(resultobjclone);
+            resultList->Add(ref);
           }
           else
           {
-            std::cerr << "Discarding result object " << result.getObject()->GetName() << std::endl;
-            delete resultobjclone;
-          }
-        }
-
-        if (m_config != 0)
-        {
-          TObject* ref = m_config->GetReference(parentName, parname);
-          if (ref)
-          {
-            if (setNameGeneral(ref, "Reference"))
-            {
-              resultList->Add(ref);
-            }
-            else
-            {
-              std::cerr << "Discarding reference object " << ref->GetName() << std::endl;
-            }
+            std::cerr << "Discarding reference object " << ref->GetName() << std::endl;
           }
         }
       }
@@ -464,7 +428,20 @@ namespace dqi
         {
           TString listname = tmpList->GetName();
           if (listname == "Config" || listname == "Results")
-          {  // Convert them to JSON
+          {  
+            ///First: we need to know - are there any histograms storing in this dir (e.g. References).
+            //If yes - we should save them in the upper level
+            TIter nextElem(tmpList);
+            TObject* objInResultConfig;
+            while ((objInResultConfig = nextElem()) != 0)
+            {
+              if ((strncmp(objInResultConfig->ClassName(), "TH", 2) == 0) || (strncmp(objInResultConfig->ClassName(), "TGraph", 6) == 0) ||
+                  (strncmp(objInResultConfig->ClassName(), "TProfile", 8) == 0) || (strncmp(objInResultConfig->ClassName(), "TEfficiency", 11) == 0))
+              {
+                dir->WriteTObject(objInResultConfig);
+              }
+            }
+            // For the rest of the content - Convert them to JSON 
             nlohmann::ordered_json j = to_JSON(tmpList);
             // Then, save JSON to file as TObjString
             // Convert json to string
@@ -522,6 +499,13 @@ namespace dqi
     TObject* obj;
     while ((obj = nextElem()) != 0)
     {
+      // If Results (or Config) directory contatins hist - ignore it (do not write in to the file), it
+      // should to be writen to the outer level before
+      if ((strncmp(obj->ClassName(), "TH", 2) == 0) || (strncmp(obj->ClassName(), "TGraph", 6) == 0) ||
+          (strncmp(obj->ClassName(), "TProfile", 8) == 0) || (strncmp(obj->ClassName(), "TEfficiency", 11) == 0))
+      {
+        continue;
+      }
       TSeqCollection* tmpList = dynamic_cast<TSeqCollection*>(obj);
       if (tmpList != 0)
       {  // Nested object
