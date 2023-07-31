@@ -144,7 +144,7 @@ int main( int argc, char* argv[] ) {
   ANA_CHECK( ifile.get() );
 
   bool isRun3 = false;
-  if ((fileName.Contains("mc21") || fileName.Contains("data22")) && fileName.Contains("13p6TeV")) isRun3 = true;
+  if ((fileName.Contains("mc23") || fileName.Contains("mc21") || fileName.Contains("data22")) && fileName.Contains("13p6TeV")) isRun3 = true;
   std::string config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default.conf")).c_str();
   if (isRun3) {
     config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default_Run3.conf")).c_str();
@@ -240,13 +240,9 @@ int main( int argc, char* argv[] ) {
   SUSY::CrossSectionDB *my_XsecDB(0);
   if (!isData){
     ANA_MSG_INFO(fileName);
-    if (isRun3) {
-      my_XsecDB = new SUSY::CrossSectionDB(PathResolverFindCalibFile("dev/PMGTools/PMGxsecDB_mc21.txt"));
-    }
-    else 
-    {
-      my_XsecDB = new SUSY::CrossSectionDB(PathResolverFindCalibFile("dev/PMGTools/PMGxsecDB_mc16.txt"));
-    }
+    if      (isRun3 && fileName.Contains("mc21")) { my_XsecDB = new SUSY::CrossSectionDB(PathResolverFindCalibFile("dev/PMGTools/PMGxsecDB_mc21.txt"));}
+    else if (isRun3 && fileName.Contains("mc23")) { my_XsecDB = new SUSY::CrossSectionDB(PathResolverFindCalibFile("dev/PMGTools/PMGxsecDB_mc23.txt"));}
+    else {                                          my_XsecDB = new SUSY::CrossSectionDB(PathResolverFindCalibFile("dev/PMGTools/PMGxsecDB_mc16.txt"));}
     ANA_MSG_INFO( "xsec DB initialized" );
   }
 

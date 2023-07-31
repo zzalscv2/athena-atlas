@@ -533,7 +533,7 @@ StatusCode SUSYToolsAlg::execute() {
 
   //--- Trigger
   bool isRun3Trig = false;
-  if (m_mcCampaign.find("mc21") != std::string::npos) isRun3Trig = true;
+  if (m_mcCampaign.find("mc21") != std::string::npos || m_mcCampaign.find("mc23") != std::string::npos) isRun3Trig = true;
 
   //--- Monitoring
   for (const auto& obj : m_objects) { for (const auto& lev : m_levels) { m_obj_count[obj][lev] = 0; } }
