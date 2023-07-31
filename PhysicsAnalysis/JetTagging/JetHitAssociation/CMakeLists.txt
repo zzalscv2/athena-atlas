@@ -1,16 +1,16 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( JetHitAssociation )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core TVector3 )
+find_package( ROOT COMPONENTS Core MathCore )
 
 atlas_add_library( JetHitAssociationLib
                    src/*.h
                    INTERFACE
                    PUBLIC_HEADERS JetHitAssociation
-                   LINK_LIBRARIES GaudiKernel AthenaBaseComps TrkValInterfaces xAODEventInfo AthContainers xAODJet xAODTracking  InDetEventTPCnv )
+                   LINK_LIBRARIES GaudiKernel AthenaBaseComps TrkValInterfaces xAODEventInfo AthContainers xAODJet xAODTracking )
 
 # Component(s) in the package:
 atlas_add_component( JetHitAssociation
