@@ -79,56 +79,90 @@ namespace xAOD
     /**
      * access nMeasurements
      **/
-    const std::vector<unsigned int> &nMeasurements() const;
+    unsigned int nMeasurements() const;
     /**
      * access set nMeasurements
      **/
-    void setnMeasurements(const std::vector<unsigned int> &m);
+    void setnMeasurements(unsigned int m);
+    /**
+     * @brief pointers API needed by MTJ
+     */
+    const unsigned int* nMeasurementsPtr() const;
+    unsigned int* nMeasurementsPtr();
 
     /**
      * access nHoles
      **/
-    const std::vector<unsigned int> &nHoles() const;
+    unsigned int nHoles() const;
     /**
      * access set nHoles
      **/
-    void setnHoles(const std::vector<unsigned int> &m);
+    void setnHoles(unsigned int m);
+    /**
+     * @brief pointers API needed by MTJ
+     */
+    const unsigned int* nHolesPtr() const;
+    unsigned int* nHolesPtr();
+
+
 
     /**
      * access chi2
      **/
-    const std::vector<float> &chi2() const;
+    float chi2() const;
     /**
      * access set chi2
      **/
-    void setChi2(const std::vector<float> &m);
+    void setChi2(float m);
+    /**
+    * @brief pointers API needed by MTJ
+    */
+    const float* chi2Ptr() const;
+    float* chi2Ptr();
 
     /**
      * access ndf
      **/
-    const std::vector<unsigned int> &ndf() const;
+    unsigned int ndf() const;
     /**
      * access set ndf
      **/
-    void setNdf(const std::vector<unsigned int> &m);
+    void setNdf(unsigned int m);
+    /**
+     * @brief pointers API needed by MTJ
+     */
+    const unsigned int* ndfPtr() const;
+    unsigned int* ndfPtr();
+
 
     /**
      * access nOutliers
      **/
-    const std::vector<unsigned int> &nOutliers() const;
+    unsigned int nOutliers() const;
     /**
      * access set nOutliers
      **/
-    void setnOutliers(const std::vector<unsigned int> &m);
+    void setnOutliers(unsigned int m);
+    /**
+     * @brief pointers API needed by MTJ
+     */
+    const unsigned int* nOutliersPtr() const;
+    unsigned int* nOutliersPtr();
 
     /**
      * access nSharedHits
      **/
-    const std::vector<unsigned int> &nSharedHits() const;
+    unsigned int nSharedHits() const;
     /**
      * access set nSharedHits
      **/
-    void setnSharedHits(const std::vector<unsigned int> &m);
+    void setnSharedHits(unsigned int m);
+    /**
+     * @brief pointers API needed by MTJ
+     */
+    const unsigned int* nSharedHitsPtr() const;
+    unsigned int* nSharedHitsPtr();
+
 
     void resize(size_t sz = 6);
 

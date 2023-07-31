@@ -1,62 +1,53 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-#include "xAODCore/AuxStoreAccessorMacros.h"
 #include "xAODTracking/versions/TrackBackend_v1.h"
 
+#include "xAODCore/AuxStoreAccessorMacros.h"
+
+#define DEFINE_API(__TYPE, __GETTER, __SETTER)                            \
+  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackBackend_v1, __TYPE, __GETTER, \
+                                       __SETTER)                          \
+  __TYPE* TrackBackend_v1::__GETTER##Ptr() {                              \
+    static const SG::AuxElement::Accessor<__TYPE> acc(#__GETTER);         \
+    return &(acc(*this));                                                 \
+  }                                                                       \
+  const __TYPE* TrackBackend_v1::__GETTER##Ptr() const {                  \
+    static const SG::AuxElement::ConstAccessor<__TYPE> acc(#__GETTER);    \
+    return &(acc(*this));                                                 \
+  }
 
 namespace xAOD {
 
-    AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackBackend_v1,
-                                        std::vector<double>,
-                                        params,
-                                        setParams)
+AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackBackend_v1, std::vector<double>, params,
+                                  setParams)
 
-    AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackBackend_v1,
-                                        std::vector<double>,
-                                        covParams,
-                                        setCovParams)
+AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackBackend_v1, std::vector<double>,
+                                  covParams, setCovParams)
 
-    AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackBackend_v1,
-                                        std::vector<unsigned int>,
-                                        nMeasurements,
-                                        setnMeasurements)
+DEFINE_API(unsigned int, nMeasurements, setnMeasurements)
 
-    AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackBackend_v1,
-                                        std::vector<unsigned int>,
-                                        nHoles,
-                                        setnHoles)
+DEFINE_API(unsigned int, nHoles, setnHoles)
 
-    AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackBackend_v1,
-                                        std::vector<float>,
-                                        chi2,
-                                        setChi2)
+DEFINE_API(float, chi2, setChi2)
 
-    AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackBackend_v1,
-                                        std::vector<unsigned int>,
-                                        ndf,
-                                        setNdf)
+DEFINE_API(unsigned int, ndf, setNdf)
 
-    AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackBackend_v1,
-                                        std::vector<unsigned int>,
-                                        nOutliers,
-                                        setnOutliers)
+DEFINE_API(unsigned int, nOutliers, setnOutliers)
 
-    AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackBackend_v1,
-                                        std::vector<unsigned int>,
-                                        nSharedHits,
-                                        setnSharedHits)
+DEFINE_API(unsigned int, nSharedHits, setnSharedHits)
 
-    const SG::AuxElement::Accessor<std::vector<double> > xAOD::TrackBackend_v1::s_paramsAcc{"params"};
-    const SG::AuxElement::Accessor<std::vector<double> > xAOD::TrackBackend_v1::s_covParamsAcc{"covParams"};
+const SG::AuxElement::Accessor<std::vector<double> >
+    xAOD::TrackBackend_v1::s_paramsAcc{"params"};
+const SG::AuxElement::Accessor<std::vector<double> >
+    xAOD::TrackBackend_v1::s_covParamsAcc{"covParams"};
 
-
-    void TrackBackend_v1::resize(size_t sz) {
-        s_paramsAcc(*this).resize(sz);
-        s_covParamsAcc(*this).resize(sz * sz);
-    }
-
-    size_t TrackBackend_v1::size() const {
-        return s_paramsAcc(*this).size();
-    }
+void TrackBackend_v1::resize(size_t sz) {
+  s_paramsAcc(*this).resize(sz);
+  s_covParamsAcc(*this).resize(sz * sz);
 }
+
+size_t TrackBackend_v1::size() const {
+  return s_paramsAcc(*this).size();
+}
+}  // namespace xAOD

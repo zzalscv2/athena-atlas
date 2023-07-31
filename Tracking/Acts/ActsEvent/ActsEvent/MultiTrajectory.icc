@@ -89,10 +89,7 @@ void ActsTrk::MutableMultiTrajectory::addColumn_impl(const std::string& name) {
   // It is actually not clear if we would allow decorating RO MTJ, maybe we do
   using std::placeholders::_1;
   using std::placeholders::_2;
-  if constexpr (std::is_same<T, float>::value or
-                std::is_same<T, double>::value or
-                std::is_same<T, short>::value or std::is_same<T, int>::value or
-                std::is_same<T, std::uint32_t>::value) {
+  if constexpr (ActsTrk::detail::accepted_decoration_types<T>::value) {
     m_decorations.emplace_back(
         name,
         std::bind(&ActsTrk::MutableMultiTrajectory::decorationSetter<T>, this,
