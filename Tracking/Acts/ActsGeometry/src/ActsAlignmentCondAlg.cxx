@@ -32,6 +32,7 @@ StatusCode ActsAlignmentCondAlg::initialize() {
     ATH_MSG_DEBUG("initialize " << name());
     ATH_CHECK(m_alignStoreKeys.initialize());
     ATH_CHECK(m_wchk.initialize());
+    ATH_CHECK(m_trackingGeometrySvc.retrieve());
     return StatusCode::SUCCESS;
 }
 
