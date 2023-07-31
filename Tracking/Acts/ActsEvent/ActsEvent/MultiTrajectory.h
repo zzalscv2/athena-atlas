@@ -23,6 +23,8 @@
 #include "xAODTracking/TrackStateAuxContainer.h"
 #include "xAODTracking/TrackStateContainer.h"
 
+#include "ActsEvent/Decoration.h"
+
 namespace ActsTrk {
 class MutableMultiTrajectory;
 class ConstMultiTrajectory;
@@ -52,9 +54,6 @@ namespace ActsTrk {
 
 using IndexType = std::uint32_t;
 
-namespace detail {
-struct Decoration;
-}
 
 /**
  * @brief Athena implementation of ACTS::MultiTrajectory (ReadWrite version)
@@ -381,7 +380,7 @@ class MutableMultiTrajectory final
     return *m_trackMeasurements;
   }
 
-  std::vector<detail::Decoration> m_decorations;
+  std::vector<ActsTrk::detail::Decoration> m_decorations;
   //!< decoration accessors, one per type
   template <typename T>
   std::any decorationSetter(ActsTrk::IndexType, const std::string&);
@@ -393,22 +392,6 @@ class MutableMultiTrajectory final
   const std::vector<const Acts::Surface*>& surfaces() const { return m_surfaces; }
 
 };
-
-namespace detail {
-struct Decoration {
-  using SetterType =
-      std::function<std::any(ActsTrk::IndexType, const std::string&)>;
-  using GetterType =
-      std::function<const std::any(ActsTrk::IndexType, const std::string&)>;
-
-  Decoration(const std::string& n, SetterType s, GetterType g)
-      : name(n), hash(Acts::hashString(name)), setter(s), getter(g) {}
-  std::string name;   // xAOD API needs this
-  uint32_t hash;      // Acts API comes with this
-  SetterType setter;  // type aware accessors
-  GetterType getter;
-};
-}  // namespace detail
 
 /**
  * Read only version of MTJ
@@ -477,7 +460,7 @@ class ConstMultiTrajectory
   DataLink<xAOD::TrackParametersContainer> m_trackParameters;
   DataLink<xAOD::TrackJacobianContainer> m_trackJacobians;
   DataLink<xAOD::TrackMeasurementContainer> m_trackMeasurements;
-  std::vector<detail::Decoration> m_decorations;
+  std::vector<ActsTrk::detail::Decoration> m_decorations;
   template <typename T>
   const std::any decorationGetter(ActsTrk::IndexType, const std::string&) const;
 

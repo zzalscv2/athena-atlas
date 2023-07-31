@@ -9,18 +9,16 @@
 #include "Acts/EventData/Measurement.hpp"
 #include "Acts/EventData/MeasurementHelpers.hpp"
 #include "Acts/EventData/MultiTrajectory.hpp"
-#include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/EventData/SourceLink.hpp"
+#include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Utilities/Helpers.hpp"
-
 #include "ActsEvent/MultiTrajectory.h"
+#include "CommonHelpers/GenerateParameters.hpp"
+#include "CommonHelpers/TestSourceLink.hpp"
 #include "xAODTracking/TrackJacobianAuxContainer.h"
 #include "xAODTracking/TrackMeasurementAuxContainer.h"
 #include "xAODTracking/TrackParametersAuxContainer.h"
 #include "xAODTracking/TrackStateAuxContainer.h"
-
-#include "CommonHelpers/GenerateParameters.hpp"
-#include "CommonHelpers/TestSourceLink.hpp"
 
 namespace {
 
@@ -152,10 +150,9 @@ std::default_random_engine rng(31415);
 BOOST_AUTO_TEST_SUITE(EventDataMultiTrajectory)
 
 struct EmptyMTJ {  // setup empty MTJ
-  EmptyMTJ()
-    : trackStateBackend (std::make_unique<xAOD::TrackStateContainer>()),
-      trackStateBackendAux (std::make_unique<xAOD::TrackStateAuxContainer>())
-  {
+  EmptyMTJ() {
+    trackStateBackend = std::make_unique<xAOD::TrackStateContainer>();
+    trackStateBackendAux = std::make_unique<xAOD::TrackStateAuxContainer>();
     trackStateBackend->setStore(trackStateBackendAux.get());
 
     parametersBackend = std::make_unique<xAOD::TrackParametersContainer>();
@@ -176,11 +173,12 @@ struct EmptyMTJ {  // setup empty MTJ
         trackStateBackend.get(), parametersBackend.get(), jacobianBackend.get(),
         measurementsBackend.get());
     // backends can be shared
-    ro_mtj = std::make_unique<ActsTrk::ConstMultiTrajectory>(trackStateBackend.get(), parametersBackend.get(), jacobianBackend.get(), measurementsBackend.get());
+    ro_mtj = std::make_unique<ActsTrk::ConstMultiTrajectory>(
+        trackStateBackend.get(), parametersBackend.get(), jacobianBackend.get(),
+        measurementsBackend.get());
     // construction below should not work
     // ActsTrk::MutableMultiTrajectory mtest(*ro_mtj.get());
     ActsTrk::MutableMultiTrajectory mtest1(*mtj.get());
-
   }
   std::unique_ptr<xAOD::TrackStateContainer> trackStateBackend;
   std::unique_ptr<xAOD::TrackStateAuxContainer> trackStateBackendAux;
@@ -198,7 +196,6 @@ struct EmptyMTJ {  // setup empty MTJ
 BOOST_AUTO_TEST_CASE(OwningMTJ) {
   std::cout << "constructing owning MTJ\n";
   ActsTrk::MutableMultiTrajectory mtj;
-  // ActsTrk::ConstMultiTrajectory cmtj; // this should not compile  (undefined reference)
 }
 
 // cppcheck-suppress syntaxError
@@ -247,7 +244,7 @@ BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
   BOOST_CHECK_EQUAL(mtj->hasColumn("jacobian"_hash),
                     true);  // not dynamic column
   BOOST_CHECK_EQUAL(mtj->hasColumn("author"_hash),
-                    false);              // dynamic column absent initially
+                    false);         // dynamic column absent initially
   mtj->addColumn<short>("author");  // add dynamic column
 
   BOOST_CHECK_EQUAL(mtj->hasColumn("author"_hash),
@@ -255,7 +252,6 @@ BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
   mtj->addColumn<float>("mcprob");
   BOOST_CHECK_EQUAL(mtj->hasColumn("mcprob"_hash),
                     true);  // dynamic column present now
-
 
   constexpr auto kMask = Acts::TrackStatePropMask::Predicted;
   auto i0 = mtj->addTrackState(kMask);
@@ -271,7 +267,6 @@ BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
 
   ts0.component<float, "mcprob"_hash>() = 0.5;
   ts1.component<float, "mcprob"_hash>() = 0.9;
-
 
   // unset for ts2
 
@@ -289,22 +284,22 @@ BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
 
   BOOST_CHECK_THROW((ts2.component<float, "sth"_hash>()), std::runtime_error);
 
-  // RO MTJ needs to be remade now because only at construction it can recognise the dynamic columns
-  ro_mtj = std::make_unique<ActsTrk::ConstMultiTrajectory>(trackStateBackend.get(), parametersBackend.get(), jacobianBackend.get(), measurementsBackend.get());
+  // RO MTJ needs to be remade now because only at construction it can recognise
+  // the dynamic columns
+  ro_mtj = std::make_unique<ActsTrk::ConstMultiTrajectory>(
+      trackStateBackend.get(), parametersBackend.get(), jacobianBackend.get(),
+      measurementsBackend.get());
 
   BOOST_CHECK_EQUAL(ro_mtj->hasColumn("author"_hash),
                     true);  // dynamic column present now in const version too
   BOOST_CHECK_EQUAL(ro_mtj->hasColumn("mcprob"_hash),
                     true);  // dynamic column present now in const version too
 
-
-
   auto ro_ts0 = ro_mtj->getTrackState(i0);
   auto ro_ts1 = ro_mtj->getTrackState(i1);
   auto ro_ts2 = ro_mtj->getTrackState(i2);
 
   BOOST_CHECK_EQUAL((ro_ts0.component<double, "chi2"_hash>()), 0.0);
-
 
   BOOST_CHECK_EQUAL((ro_ts0.component<short, "author"_hash>()), 5);
   BOOST_CHECK_EQUAL((ro_ts1.component<short, "author"_hash>()), 6);
@@ -316,8 +311,6 @@ BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
              boost::test_tools::tolerance(0.01));
   BOOST_TEST((ro_ts2.component<float, "mcprob"_hash>()) == 0.0,
              boost::test_tools::tolerance(0.01));
-
-
 }
 
 // FIXME - test below should use ACTS::MTJ api once available in needed shape
@@ -325,22 +318,22 @@ BOOST_FIXTURE_TEST_CASE(UncalibratedSourceLink, EmptyMTJ) {
   auto index = mtj->addTrackState();
   using namespace Acts::HashedStringLiteral;
 
-  // BOOST_CHECK_EQUAL((ts0.component<Acts::SourceLink *, "uncalibratedSourceLink"_hash>()),
-  //                   nullptr);
-  auto el1 = ElementLink<xAOD::UncalibratedMeasurementContainer>("hello", 7); // EL to a fictional container & a fictional index
+  auto el1 = ElementLink<xAOD::UncalibratedMeasurementContainer>(
+      "hello", 7);  // EL to a fictional container & a fictional index
 
-  auto link1 = Acts::SourceLink(99, el1); // a fictional geometry ID
+  auto link1 = Acts::SourceLink(99, el1);  // a fictional geometry ID
   auto ts = mtj->getTrackState(index);
-  ts.setUncalibratedSourceLink(link1); // set link at position 0
+  ts.setUncalibratedSourceLink(link1);  // set link at position 0
   // get it back
   auto link1Back = ts.getUncalibratedSourceLink();
-  BOOST_CHECK_EQUAL( link1.geometryId(), link1Back.geometryId());
-  auto el1Back = link1Back.get<ElementLink<xAOD::UncalibratedMeasurementContainer>>();
-  // compare them by key & index because equality, requires proper has key generation and is bound to SG
-  BOOST_CHECK_EQUAL( el1.key(), el1Back.key());
-  BOOST_CHECK_EQUAL( el1.index(), el1Back.index()); 
+  BOOST_CHECK_EQUAL(link1.geometryId(), link1Back.geometryId());
+  auto el1Back =
+      link1Back.get<ElementLink<xAOD::UncalibratedMeasurementContainer>>();
+  // compare them by key & index because equality, requires proper has key
+  // generation and is bound to SG
+  BOOST_CHECK_EQUAL(el1.key(), el1Back.key());
+  BOOST_CHECK_EQUAL(el1.index(), el1Back.index());
 }
-
 
 BOOST_FIXTURE_TEST_CASE(Clear, EmptyMTJ) {
   constexpr auto kMask = Acts::TrackStatePropMask::Predicted;
@@ -718,7 +711,6 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyAllocations, EmptyMTJ) {
   BOOST_CHECK(!tsall.has<"calibrated"_hash>());
 }
 
-
 BOOST_FIXTURE_TEST_CASE(TrackStateProxyShare, EmptyMTJ) {
   std::default_random_engine rng(12345);
   TestTrackState pc(rng, 2u);
@@ -795,7 +787,6 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyShare, EmptyMTJ) {
   }
 }
 
-
 BOOST_FIXTURE_TEST_CASE(TrackStateProjector, EmptyMTJ) {
 
   std::default_random_engine rng(12345);
@@ -803,7 +794,7 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProjector, EmptyMTJ) {
 
   size_t ia = mtj->addTrackState(TrackStatePropMask::All);
   auto ts = mtj->getTrackState(ia);
-  
+
   fillTrackState(pc, TrackStatePropMask::All, ts);
 
   // reset only the effective measurements
@@ -826,7 +817,6 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProjector, EmptyMTJ) {
 
   BOOST_CHECK_EQUAL(ts.effectiveProjector(), proj);
 }
-
 
 BOOST_FIXTURE_TEST_CASE(TrackStateProxyStorage, EmptyMTJ) {
 
@@ -857,17 +847,25 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyStorage, EmptyMTJ) {
   BOOST_CHECK_EQUAL(ts.pathLength(), pc.pathLength);
   // check that chi2 is set
   BOOST_CHECK_EQUAL(ts.chi2(), pc.chi2);
-  
+
   // set SourceLink and get it back
-  auto el = ElementLink<xAOD::UncalibratedMeasurementContainer>("hello", 7); // EL to a fictional container & a fictional index
-  auto link = Acts::SourceLink(99, el); // a fictional geometry ID
+  auto el = ElementLink<xAOD::UncalibratedMeasurementContainer>(
+      "hello", 7);  // EL to a fictional container & a fictional index
+  auto link = Acts::SourceLink(99, el);  // a fictional geometry ID
   ts.setUncalibratedSourceLink(link);
   // check that the uncalibratedSourceLink source link is set
-  BOOST_CHECK_EQUAL(ts.getUncalibratedSourceLink().geometryId(), link.geometryId());
-  BOOST_CHECK_EQUAL(ts.getUncalibratedSourceLink().get<ElementLink<xAOD::UncalibratedMeasurementContainer>>().index(), 
+  BOOST_CHECK_EQUAL(ts.getUncalibratedSourceLink().geometryId(),
+                    link.geometryId());
+  BOOST_CHECK_EQUAL(
+      ts.getUncalibratedSourceLink()
+          .get<ElementLink<xAOD::UncalibratedMeasurementContainer>>()
+          .index(),
       link.get<ElementLink<xAOD::UncalibratedMeasurementContainer>>().index());
-  BOOST_CHECK_EQUAL(ts.getUncalibratedSourceLink().get<ElementLink<xAOD::UncalibratedMeasurementContainer>>().key(), 
-      link.get<ElementLink<xAOD::UncalibratedMeasurementContainer>>().key());    
+  BOOST_CHECK_EQUAL(
+      ts.getUncalibratedSourceLink()
+          .get<ElementLink<xAOD::UncalibratedMeasurementContainer>>()
+          .key(),
+      link.get<ElementLink<xAOD::UncalibratedMeasurementContainer>>().key());
 }
 
 BOOST_FIXTURE_TEST_CASE(InsertRefSurface, EmptyMTJ) {
