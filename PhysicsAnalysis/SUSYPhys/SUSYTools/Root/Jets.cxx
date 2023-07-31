@@ -53,9 +53,14 @@ namespace ST {
   const static SG::AuxElement::Decorator<char> dec_bjet_loose("bjet_loose");
 
   const static SG::AuxElement::Decorator<double> dec_btag_weight("btag_weight");
-  const static SG::AuxElement::Decorator<float> dec_btag_dl1pb("btag_dl1pb"); // added for dl1 components
+  const static SG::AuxElement::Decorator<float> dec_btag_pb("btag_pb");
+  const static SG::AuxElement::Decorator<float> dec_btag_pc("btag_pc");
+  const static SG::AuxElement::Decorator<float> dec_btag_pu("btag_pu");
+  // for backwards compatibility
+  const static SG::AuxElement::Decorator<float> dec_btag_dl1pb("btag_dl1pb");
   const static SG::AuxElement::Decorator<float> dec_btag_dl1pc("btag_dl1pc");
   const static SG::AuxElement::Decorator<float> dec_btag_dl1pu("btag_dl1pu");
+
 
   const static SG::AuxElement::Decorator<float> dec_VRradius("VRradius");
   const static SG::AuxElement::ConstAccessor<float> acc_VRradius("VRradius");
@@ -1055,17 +1060,26 @@ namespace ST {
     dec_btag_weight(input) = weight;
     ATH_MSG_DEBUG( btagSelTool->name() << " b-tag weight: " << weight );
 
+    double btag_pb(-10), btag_pc(-10), btag_pu(-10);
+    xAOD::BTaggingUtilities::getBTagging(input)->pb(btagTagger, btag_pb);
+    xAOD::BTaggingUtilities::getBTagging(input)->pc(btagTagger, btag_pc);
+    xAOD::BTaggingUtilities::getBTagging(input)->pu(btagTagger, btag_pu);
+    dec_btag_pb(input) = btag_pb;
+    dec_btag_pc(input) = btag_pc;
+    dec_btag_pu(input) = btag_pu;
+    ATH_MSG_DEBUG( btagSelTool->name() << " b-tag " << btagTagger << "-type pb: " << btag_pb );
+    ATH_MSG_DEBUG( btagSelTool->name() << " b-tag " << btagTagger << "-type pc: " << btag_pc );
+    ATH_MSG_DEBUG( btagSelTool->name() << " b-tag " << btagTagger << "-type pu: " << btag_pu );
+    // backwards compatibility
     if ( btagSelTool->name().find("DL1")!=std::string::npos ) {
-       double dl1_pb(-10), dl1_pc(-10), dl1_pu(-10);
-       xAOD::BTaggingUtilities::getBTagging(input)->pb(btagTagger, dl1_pb);
-       xAOD::BTaggingUtilities::getBTagging(input)->pc(btagTagger, dl1_pc);
-       xAOD::BTaggingUtilities::getBTagging(input)->pu(btagTagger, dl1_pu);
-       dec_btag_dl1pb(input) = dl1_pb;
-       dec_btag_dl1pc(input) = dl1_pc;
-       dec_btag_dl1pu(input) = dl1_pu;
-       ATH_MSG_DEBUG( btagSelTool->name() << " b-tag dl1-type pb: " << dl1_pb );
-       ATH_MSG_DEBUG( btagSelTool->name() << " b-tag dl1-type pc: " << dl1_pc );
-       ATH_MSG_DEBUG( btagSelTool->name() << " b-tag dl1-type pu: " << dl1_pu );
+       dec_btag_dl1pb(input) = btag_pb;
+       dec_btag_dl1pc(input) = btag_pc;
+       dec_btag_dl1pu(input) = btag_pu;
+    }
+    else {
+       dec_btag_dl1pb(input) = -10;
+       dec_btag_dl1pc(input) = -10;
+       dec_btag_dl1pu(input) = -10;
     }
     return StatusCode::SUCCESS;
   }
