@@ -159,7 +159,7 @@ try:
 
         bJVT =           JetModifier("JetBalancePFlowJvtTool", "bJVT",
                                      createfn=JetMomentToolsConfig.getPFlowbJVTTool,
-                                     prereqs = ["input:EventDensity","input:PrimaryVertices"],
+                                     prereqs = ["input:EventDensity","input:PrimaryVertices","mod:NNJVT"],
                                      JetContainer = _jetname),
 
         ConstitFrac =    JetModifier("JetConstituentFrac", "constitFrac",
