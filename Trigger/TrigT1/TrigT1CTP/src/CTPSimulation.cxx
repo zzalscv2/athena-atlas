@@ -660,7 +660,7 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
          cable = static_cast<uint64_t>(zdcInput->cableWord0());
          uint flatIndex = tl.flatindex();
          uint pass = (cable & (uint64_t(0x1) << flatIndex)) == 0 ? 0 : 1;
-         thrMultiMap[tl.name()];
+         thrMultiMap[tl.name()] = pass;
          ATH_MSG_DEBUG(tl.name() << " MULT calculated mult for topo " << pass);
          }
          continue;
