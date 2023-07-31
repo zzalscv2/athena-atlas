@@ -77,7 +77,7 @@ public:
     //Proper highlighting:
     if (selNode_highlight) {
       selNode_highlight->deselectAll();
-      foreach(PRDHandleBase*handle,currentlySelectedHandles) {
+      for(PRDHandleBase*handle : currentlySelectedHandles) {
         // 	theclass->messageDebug("Highlighting handle...");
         SoSeparator* target = handle->collHandle()->simpleDetailLevel() ? handle->sepSimple() : handle->sepDetailed();
         SoPath * path = new SoPath(selNode_highlight);
@@ -98,7 +98,7 @@ public:
         line->vertexProperty = vertices;
         line->numVertices.set1Value(0,currentlySelectedHandles.count());
         int i(0);
-        foreach(PRDHandleBase*handle,currentlySelectedHandles) {
+        for(PRDHandleBase*handle : currentlySelectedHandles) {
           Amg::Vector3D pos(handle->center());
           vertices->vertex.set1Value(i++,pos.x(),pos.y(),pos.z());
         }
@@ -169,7 +169,7 @@ public:
   template <class T>
   QList<PRDCollHandleBase*> createSpecificCollections() {
     QList<PRDCollHandleBase*> l;
-    foreach (QString name, T::availableCollections(theclass)) {
+    for (QString name : T::availableCollections(theclass)) {
       T * col = new T(common,name);
       col->init();
       l << col;
@@ -294,7 +294,7 @@ void VP1PrepRawDataSystem::buildEventSceneGraph(StoreGateSvc*, SoSeparator *root
   QList<PRDCollHandleBase*> cols = m_d->createCollections();
   
   //Inform about appropriate projects:
-  foreach (PRDCollHandleBase* col,cols) {
+  for (PRDCollHandleBase* col : cols) {
     
     connect(col,SIGNAL(detailLevelChanged()),this,SLOT(updateSelectionVisualsAndPossiblyEmitPRDList()));
     

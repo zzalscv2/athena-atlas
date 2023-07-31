@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -282,7 +282,7 @@ void PRDTrackSegmentHelper::Imp::addSegmentToPRDs(const Trk::Segment * seg)
       itHandle = prd2handles->find(prd);
       if (itHandle!=itHandleEnd) {
         QList<PRDHandleBase*> handles = itHandle->second;
-        foreach (PRDHandleBase*handle,handles)
+        for (PRDHandleBase*handle : handles)
           if (handle->collHandle()->colourBySegments())
           handle->updateMaterial();
       }
@@ -317,7 +317,7 @@ void PRDTrackSegmentHelper::Imp::removeSegmentFromPRDs(const Trk::Segment * seg)
         itHandle = prd2handles->find(prd);
         if (itHandle!=itHandleEnd) {
           QList<PRDHandleBase*> handles = itHandle->second;
-          foreach (PRDHandleBase*handle,handles)
+          for (PRDHandleBase*handle : handles)
             if (handle->collHandle()->colourBySegments())
             handle->updateMaterial();
         }
@@ -350,7 +350,7 @@ void PRDTrackSegmentHelper::Imp::updateMaterialOfPRDs(const Trk::Segment * seg)
       itHandle = prd2handles->find(prd);
       if (itHandle!=itHandleEnd) {
         QList<PRDHandleBase*> handles = itHandle->second;
-        foreach (PRDHandleBase*handle,handles)
+        for (PRDHandleBase*handle : handles)
           if (handle->collHandle()->colourByTracks())
           handle->updateMaterial();
       }
@@ -397,7 +397,7 @@ void PRDTrackSegmentHelper::Imp::addTrackToPRDs(const Trk::Track * trk, bool out
         itHandle = prd2handles->find(prd);
         if (itHandle!=itHandleEnd) {
           QList<PRDHandleBase*> handles = itHandle->second;
-          foreach (PRDHandleBase*handle,handles)
+          for (PRDHandleBase*handle : handles)
             if (handle->collHandle()->colourByTracks())
             handle->updateMaterial();
         }
@@ -434,7 +434,7 @@ void PRDTrackSegmentHelper::Imp::removeTrackFromPRDs(const Trk::Track * trk, boo
         itHandle = prd2handles->find(prd);
         if (itHandle!=itHandleEnd) {
           QList<PRDHandleBase*> handles = itHandle->second;
-          foreach (PRDHandleBase*handle,handles)
+          for (PRDHandleBase*handle : handles)
             if (handle->collHandle()->colourByTracks())
             handle->updateMaterial();
         }
@@ -468,7 +468,7 @@ void PRDTrackSegmentHelper::Imp::updateMaterialOfPRDs(const Trk::Track * trk, bo
       itHandle = prd2handles->find(prd);
       if (itHandle!=itHandleEnd) {
         QList<PRDHandleBase*> handles = itHandle->second;
-        foreach (PRDHandleBase*handle,handles)
+        for (PRDHandleBase*handle : handles)
           if (handle->collHandle()->colourByTracks())
           handle->updateMaterial();
       }

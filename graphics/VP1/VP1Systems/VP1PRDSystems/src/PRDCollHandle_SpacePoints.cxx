@@ -30,13 +30,13 @@ QStringList PRDCollHandle_SpacePoints::availableCollections(IVP1System*sys)
   QStringList keys = VP1SGContentsHelper(sys).getKeys<SpacePointContainer>();
   QStringList unsafekeys;
   if (!VP1JobConfigInfo::hasSCTGeometry()) {
-    foreach (QString key,keys) {
+    for (QString key : keys) {
       if (key.contains("sct",Qt::CaseInsensitive))
 	unsafekeys << key;
     }
   }
   if (!VP1JobConfigInfo::hasPixelGeometry()) {
-    foreach (QString key,keys) {
+    for (QString key : keys) {
       if (key.contains("pixel",Qt::CaseInsensitive))
 	unsafekeys << key;
     }
