@@ -10,6 +10,8 @@
 
 // MuonCalib
 #include "MuonCalibIdentifier/MuonFixedId.h"
+#include "Identifier/Identifier.h"
+#include "Identifier/IdentifierHash.h"
 
 class MdtIdHelper;
 namespace MuonGM {
@@ -17,6 +19,14 @@ namespace MuonGM {
 }
 
 namespace MuonCalib {
+
+    /** define type MdtBasicRegionId for the smallest possible MDT calibration region */
+    typedef Identifier     MdtBasicRegionId;
+    /** define type MdtBasicRegionHash for the smallest possible MDT calibration region */
+    typedef IdentifierHash MdtBasicRegionHash;
+    /** define type MdtRegionHash */
+    typedef IdentifierHash MdtRegionHash;
+
 
     /** @class NtupleStationId
     Station Identifier for sorting calibration data

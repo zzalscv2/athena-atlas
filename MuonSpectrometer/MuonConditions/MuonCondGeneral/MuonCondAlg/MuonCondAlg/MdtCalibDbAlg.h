@@ -25,7 +25,6 @@
 #include "MdtCalibData/MdtRtRelationCollection.h"
 #include "MdtCalibData/MdtTubeCalibContainerCollection.h"
 #include "MdtCalibData/RtResolutionLookUp.h"
-#include "MdtCalibInterfaces/IMdtCalibDBTool.h"
 #include "MdtCalibSvc/MdtCalibrationRegionSvc.h"
 #include "MuonCalibITools/IIdToFixedIdTool.h"
 #include "MuonCalibMath/SamplePoint.h"
