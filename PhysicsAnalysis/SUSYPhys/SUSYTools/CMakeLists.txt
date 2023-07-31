@@ -127,7 +127,15 @@ if( XAOD_STANDALONE )
              ilumicalcFile=GoodRunsLists/data22_13p6TeV/20230116/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-002.root 
       LOG_IGNORE_PATTERN ${extra_patterns}
    )
-else()
+   atlas_add_test( ut_SUSYToolsTester_mc23a_Run3
+      SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/mc23_13p6TeV.601229.FS_mc23a_p5737.PHYS.pool.root
+             maxEvents=100 isData=0 isAtlfast=0 Debug=0 NoSyst=0
+             PRWFile=PileupReweighting/mc23_common/mc23a.410000.physlite.prw.v2.root 
+             ilumicalcFile=GoodRunsLists/data22_13p6TeV/20230116/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-002.root autoconfigPRW=0
+      LOG_IGNORE_PATTERN ${extra_patterns}
+   )
+
+   else()
    atlas_add_test( ut_SUSYToolsAlg_data
       SCRIPT "athena SUSYTools/jobOptions.py --evtMax 500 - --testCampaign data18"
       PROPERTIES TIMEOUT 300

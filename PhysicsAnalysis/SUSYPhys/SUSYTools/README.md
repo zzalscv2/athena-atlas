@@ -118,6 +118,8 @@ ctest -R SUSYTools_ut_SUSYToolsTester_data_ctest
 ctest -R SUSYTools_ut_SUSYToolsTester_data_Run3_ctest
 ctest -R SUSYTools_ut_SUSYToolsTester_mc_ctest
 ctest -R SUSYTools_ut_SUSYToolsTester_mc_Run3_ctest
+ctest -R SUSYTools_ut_SUSYToolsTester_mc23a_Run3_ctest
+
 ```
 3) Before copying the files, check that all the changes are expected.
 ```bash
@@ -126,6 +128,7 @@ cp ut_SUSYToolsTester_data.log-todiff $WorkDir_DIR/../../src/athena/PhysicsAnaly
 cp ut_SUSYToolsTester_data_Run3.log-todiff $WorkDir_DIR/../../src/athena/PhysicsAnalysis/SUSYPhys/SUSYTools/share/ut_SUSYToolsTester_data_Run3.ref
 cp ut_SUSYToolsTester_mc.log-todiff $WorkDir_DIR/../../src/athena/PhysicsAnalysis/SUSYPhys/SUSYTools/share/ut_SUSYToolsTester_mc.ref
 cp ut_SUSYToolsTester_mc_Run3.log-todiff $WorkDir_DIR/../../src/athena/PhysicsAnalysis/SUSYPhys/SUSYTools/share/ut_SUSYToolsTester_mc_Run3.ref
+cp ut_SUSYToolsTester_mc23a_Run3.log-todiff $WorkDir_DIR/../../src/athena/PhysicsAnalysis/SUSYPhys/SUSYTools/share/ut_SUSYToolsTester_mc23a_Run3.ref
 ```
 Or if you are using AthAnalysis these are the current test:
 ```bash

@@ -2,7 +2,7 @@
 
 # art-description: SUSYTools ART test - share/minimalExampleJobOptions.py
 # art-type: grid
-# art-include: master/AthAnalysis
+# art-include: main/AthAnalysis
 # art-output: hist-Ath_mc21a_DAOD_PHYSLITE.root
 # art-output: dcube
 
