@@ -18,6 +18,9 @@ namespace GeoModel {
         /// Get const access to the underlying object
         const Obj* get() const { return m_ptr.get(); }
         const Obj* operator->() const { return get(); }
+        /// Dereference operator
+        const Obj& operator*() const { return *m_ptr; }
+        Obj& operator*() { return *m_ptr; }
 
         /// Constructor from unique_ptr
         TransientConstSharedPtr(std::unique_ptr<Obj> ptr) : m_ptr{std::move(ptr)} {}
