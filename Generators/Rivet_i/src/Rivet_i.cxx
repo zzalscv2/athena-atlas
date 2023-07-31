@@ -8,6 +8,7 @@
 #include "LogLevels.h"
 
 #include "AtlasHepMC/GenEvent.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "GeneratorObjects/McEventCollection.h"
 #include "AthenaKernel/errorcheck.h"
@@ -388,7 +389,7 @@ const HepMC::GenEvent* Rivet_i::checkEvent(const HepMC::GenEvent& event, const E
     // first work out centre-of-mass energy
     double etotal = 0;
     for (const auto& p : modEvent->particles()) {
-      if (p->status() != 1) continue;
+      if (!MC::isStable(p)) continue;
       etotal += p->momentum().e();
     }
     const double ebeam = 0.5*etotal;
