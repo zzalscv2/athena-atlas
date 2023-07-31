@@ -115,18 +115,14 @@ public:
     }
   };
 
- TrigFTF_GNN_Edge() : m_n1(nullptr), m_n2(nullptr), m_level(-1), m_next(-1), m_nNei(0) {};
-
- TrigFTF_GNN_Edge(const TrigFTF_GNN_Edge& e) : m_n1(e.m_n1), m_n2(e.m_n2) {};
-
-  inline void initialize(TrigFTF_GNN_Node* n1, TrigFTF_GNN_Node* n2) {
-    m_n1 = n1; 
-    m_n2 = n2;
-    m_level = 1;
-    m_next = 1;
-    m_nNei = 0;
+ TrigFTF_GNN_Edge(TrigFTF_GNN_Node* n1, TrigFTF_GNN_Node* n2, float p1, float p2, float p3, float p4) : m_n1(n1), m_n2(n2), m_level(1), m_next(1), m_nNei(0) {
+    m_p[0] = p1;
+    m_p[1] = p2;
+    m_p[2] = p3;
+    m_p[3] = p4;
   }
 
+ TrigFTF_GNN_Edge() : m_n1(nullptr), m_n2(nullptr), m_level(-1), m_next(-1), m_nNei(0) {};
 
   TrigFTF_GNN_Node* m_n1{nullptr};
   TrigFTF_GNN_Node* m_n2{nullptr};

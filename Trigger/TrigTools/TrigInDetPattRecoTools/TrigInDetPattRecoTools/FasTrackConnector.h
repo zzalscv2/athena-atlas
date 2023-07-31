@@ -10,7 +10,7 @@
 #include<map>
 
 typedef struct FasTrackConnection {
-public:
+  
   FasTrackConnection(unsigned int, unsigned int);
   ~FasTrackConnection() {};
 
@@ -21,12 +21,24 @@ public:
 
 
 typedef class FasTrackConnector {
+
  public:
+
+  struct LayerGroup {
+  LayerGroup(unsigned int l1Key, const std::vector<const FASTRACK_CONNECTION*>& v) : m_dst(l1Key), m_sources(v) {};
+
+    unsigned int m_dst;//the target layer of the group
+    std::vector<const FASTRACK_CONNECTION*> m_sources;//the source layers of the group
+  };
+
+ public:
+
   FasTrackConnector(std::ifstream&);
   ~FasTrackConnector();
 
   float m_etaBin;
 
+  std::map<int, std::vector<struct LayerGroup> > m_layerGroups;
   std::map<int, std::vector<FASTRACK_CONNECTION*> > m_connMap;
 
 } FASTRACK_CONNECTOR;
