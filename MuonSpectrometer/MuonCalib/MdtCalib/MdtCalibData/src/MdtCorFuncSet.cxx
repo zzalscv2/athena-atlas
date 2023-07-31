@@ -1,54 +1,36 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibData/MdtCorFuncSet.h"
 
-#include "MdtCalibData/IMdtBFieldCorFunc.h"
-#include "MdtCalibData/IMdtBackgroundCorFunc.h"
-#include "MdtCalibData/IMdtSlewCorFunc.h"
-#include "MdtCalibData/IMdtTempCorFunc.h"
-#include "MdtCalibData/IMdtWireSagCorFunc.h"
-
 namespace MuonCalib {
 
-    MdtCorFuncSet::MdtCorFuncSet(IMdtSlewCorFunc* s, IMdtBFieldCorFunc* bf, IMdtTempCorFunc* t, IMdtBackgroundCorFunc* bg,
-                                 IMdtWireSagCorFunc* w) :
-        m_slewing(s), m_bField(bf), m_temperature(t), m_background(bg), m_wireSag(w) {}
+    MdtCorFuncSet::MdtCorFuncSet(std::unique_ptr<IMdtSlewCorFunc>&& s, 
+                                 std::unique_ptr<IMdtBFieldCorFunc>&& bf, 
+                                 std::unique_ptr<IMdtTempCorFunc>&& t, 
+                                 std::unique_ptr<IMdtBackgroundCorFunc>&& bg,
+                                 std::unique_ptr<IMdtWireSagCorFunc>&& w) :
+    m_slewing(std::move(s)), 
+    m_bField(std::move(bf)), 
+    m_temperature(std::move(t)), 
+    m_background(std::move(bg)), 
+    m_wireSag(std::move(w)) {}
 
-    MdtCorFuncSet::MdtCorFuncSet() :
-        m_slewing(nullptr), m_bField(nullptr), m_temperature(nullptr), m_background(nullptr), m_wireSag(nullptr) {}
 
-    MdtCorFuncSet::~MdtCorFuncSet() {
-        delete m_slewing;
-        delete m_bField;
-        delete m_temperature;
-        delete m_background;
-        delete m_wireSag;
+    void MdtCorFuncSet::setSlewing(std::unique_ptr<IMdtSlewCorFunc>&& slew) {
+        m_slewing = std::move(slew);
     }
-
-    // MdtCorFuncSet& MdtCorFuncSet::operator=(const MdtCorFuncSet&) {return *this;}
-    // MdtCorFuncSet::MdtCorFuncSet(const MdtCorFuncSet&) {}
-
-    void MdtCorFuncSet::setSlewing(IMdtSlewCorFunc* slew) {
-        if (m_slewing) delete m_slewing;
-        m_slewing = slew;
+    void MdtCorFuncSet::setBField(std::unique_ptr<IMdtBFieldCorFunc>&& bField) {
+        m_bField = std::move(bField);
     }
-    void MdtCorFuncSet::setBField(IMdtBFieldCorFunc* bField) {
-        if (m_bField) delete m_bField;
-        m_bField = bField;
+    void MdtCorFuncSet::setTemperature(std::unique_ptr<IMdtTempCorFunc>&& temperature) {
+        m_temperature = std::move(temperature);
     }
-    void MdtCorFuncSet::setTemperature(IMdtTempCorFunc* temperature) {
-        if (m_temperature) delete m_temperature;
-        m_temperature = temperature;
+    void MdtCorFuncSet::background(std::unique_ptr<IMdtBackgroundCorFunc>&& background) {
+        m_background = std::move(background);
     }
-    void MdtCorFuncSet::background(IMdtBackgroundCorFunc* background) {
-        if (m_background) delete m_background;
-        m_background = background;
+    void MdtCorFuncSet::wireSag(std::unique_ptr<IMdtWireSagCorFunc>&& wireSag) {
+        m_wireSag = std::move(wireSag);
     }
-    void MdtCorFuncSet::wireSag(IMdtWireSagCorFunc* wireSag) {
-        if (m_wireSag) delete m_wireSag;
-        m_wireSag = wireSag;
-    }
-
 }  // namespace MuonCalib

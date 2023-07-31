@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -9,18 +9,13 @@
 #ifndef MDTCALIBDBCOOLSTRTOOL_MDTCALIBDBALG_H
 #define MDTCALIBDBCOOLSTRTOOL_MDTCALIBDBALG_H
 
-#include <string>
-#include <vector>
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "CoralBase/Blob.h"
 #include "CoralUtilities/blobaccess.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "MdtCalibData/MdtCorFuncSetCollection.h"
 #include "MdtCalibData/MdtRtRelationCollection.h"
 #include "MdtCalibData/MdtTubeCalibContainerCollection.h"
@@ -30,6 +25,8 @@
 #include "MuonCalibMath/SamplePoint.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
+#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
+
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "nlohmann/json.hpp"
@@ -39,26 +36,52 @@ namespace coral {
     class Blob;
 }
 
-class MdtCalibDbAlg : public AthAlgorithm {
+class MdtCalibDbAlg : public AthReentrantAlgorithm {
 public:
     MdtCalibDbAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~MdtCalibDbAlg() = default;
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
+    virtual bool isReEntrant() const override { return false;}
 
 private:
-    MuonCalib::MdtTubeCalibContainer* buildMdtTubeCalibContainer(const Identifier& id);
+    std::unique_ptr<MuonCalib::MdtTubeCalibContainer> buildMdtTubeCalibContainer(const Identifier& id) const;
 
-    StatusCode loadRt();
-    StatusCode defaultRt(std::unique_ptr<MdtRtRelationCollection>& writeCdoRt);
-    StatusCode loadTube();
-    StatusCode defaultT0s(std::unique_ptr<MdtTubeCalibContainerCollection>& writeCdoTube);
+    StatusCode loadRt(const EventContext& ctx) const;
+    StatusCode loadTube(const EventContext& ctx) const;
+    
+    StatusCode defaultT0s(MdtTubeCalibContainerCollection& writeCdoTube) const;
+    StatusCode defaultRt(MdtRtRelationCollection& writeCdoRt) const;
 
+    std::optional<double> getInnerTubeRadius(const Identifier& id) const;
+
+
+    
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     ToolHandle<MuonCalib::IIdToFixedIdTool> m_idToFixedIdTool{this, "IdToFixedIdTool", "MuonCalib::IdToFixedIdTool"};
     ServiceHandle<MdtCalibrationRegionSvc> m_regionSvc{this, "MdtCalibrationRegionSvc", "MdtCalibrationRegionSvc"};
 
-    const MuonGM::MuonDetectorManager* m_detMgr{nullptr};  
+    const MuonGM::MuonDetectorManager* m_detMgr{nullptr}; 
+    const MuonGMR4::MuonDetectorManager* m_r4detMgr{nullptr};
+
+    Gaudi::Property<bool> m_useNewGeo{this, "UseR4DetMgr", false,
+                                    "Switch between the legacy and the new geometry"};
+
+    /// Helper struct to parse the number of total tubes around
+    struct chamberDim{
+        unsigned int tubes{0};
+        unsigned int layers{0};
+        unsigned int multilayers{0};
+        /// Object is valid if all three quantities are set
+        operator bool() const { 
+            return tubes > 0 && layers >0 && multilayers > 0;
+        }
+    };
+
+    chamberDim getChamberDimension(const Identifier& moduleId) const;
+
+    
+
     /// only needed to retrieve information on number of tubes etc. (no alignment needed)
 
     Gaudi::Property<bool> m_checkTubes{this, "checkTubes", true,"If true the number of tubes must agree between the conditions DB & geometry"};
@@ -78,8 +101,8 @@ private:
         this, "CreateSlewingFunctions", false,
         "If set to true, the slewing correction functions are initialized for each rt-relation that is loaded."};
 
-    void initialize_B_correction(MuonCalib::MdtCorFuncSet* funcSet, const MuonCalib::MdtRtRelation* rt);
-    void initializeSagCorrection(MuonCalib::MdtCorFuncSet* funcSet);
+    void initialize_B_correction(MuonCalib::MdtCorFuncSet& funcSet, const MuonCalib::MdtRtRelation& rt) const;
+    void initializeSagCorrection(MuonCalib::MdtCorFuncSet& funcSet) const;
 
     // if m_TimeSlewingCorrection is set to true then it is assumed that the
     // time slewing correction is applied. If false not. If this flag does
@@ -113,8 +136,9 @@ private:
                                       {"DC2_rt_default.dat"},
                                       "single input ascii file for default RT to be applied in absence of DB information"};  // temporary!!!
 
-    static inline MuonCalib::RtResolutionLookUp* getRtResolutionInterpolation(const std::vector<MuonCalib::SamplePoint>& sample_points);
-    inline StatusCode extractString(std::string& input, std::string& output, const std::string& separator);
+    static  std::unique_ptr<MuonCalib::RtResolutionLookUp> getRtResolutionInterpolation(const std::vector<MuonCalib::SamplePoint>& sample_points);
+    
+    StatusCode extractString(std::string& input, std::string& output, const std::string& separator) const;
 
     SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyRt{this, "ReadKeyRt", "/MDT/RTBLOB", "DB folder containing the RT calibrations"};
     SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyTube{this, "ReadKeyTube", "/MDT/T0BLOB",
@@ -126,7 +150,7 @@ private:
     SG::WriteCondHandleKey<MdtCorFuncSetCollection> m_writeKeyCor{this, "MdtCorFuncSetCollection", "MdtCorFuncSetCollection",
                                                                   "MDT cor Funcs"};
 
-    unsigned int m_regionIdThreshold;
+    const unsigned int m_regionIdThreshold{2500};
 };
 
 #endif

@@ -144,9 +144,9 @@ def MdtCalibDbAlgCfg(flags,name="MdtCalibDbAlg",**kwargs):
     kwargs.setdefault("CreateSlewingFunctions", flags.Muon.Calib.correctMdtRtForTimeSlewing)
     from RngComps.RandomServices import AthRNGSvcCfg
     kwargs.setdefault("AthRNGSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
-
-    MdtCalibDbAlg=CompFactory.MdtCalibDbAlg
-    alg = MdtCalibDbAlg (name, **kwargs)
+    
+    kwargs.setdefault("UseR4DetMgr", flags.Muon.setupGeoModelXML)
+    alg = CompFactory.MdtCalibDbAlg (name, **kwargs)
 
     result.addCondAlgo (alg)
     return result

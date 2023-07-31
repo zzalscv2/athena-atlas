@@ -1,36 +1,35 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCALIB_MDTRTRELATION_H
 #define MUONCALIB_MDTRTRELATION_H
 
+#include "MdtCalibData/IRtRelation.h"
+#include "MdtCalibData/IRtResolution.h"
+#include "MdtCalibData/TrRelation.h"
+
 #include <iostream>
+#include <memory>
 
 namespace MuonCalib {
-
-    class IRtRelation;
-    class IRtResolution;
-    class TrRelation;
 
     /** class which holds calibration constants per rt-region */
     class MdtRtRelation {
     public:
-        MdtRtRelation(IRtRelation* rt, IRtResolution* reso, float t0);
-        ~MdtRtRelation();
-        inline const IRtRelation* rt() const { return m_rt; }          //!< rt relation
-        inline const IRtResolution* rtRes() const { return m_rtRes; }  //!< resolution
-        inline const TrRelation* tr() const { return m_tr; }           //!< t(r) relationship
-        inline const float& t0Global() const { return m_t0; }          //!< global t0
+        MdtRtRelation(std::unique_ptr<IRtRelation>&& rt, 
+                      std::unique_ptr<IRtResolution>&& reso, float t0);
+        ~MdtRtRelation() = default;
+        inline const IRtRelation* rt() const { return m_rt.get(); }          //!< rt relation
+        inline const IRtResolution* rtRes() const { return m_rtRes.get(); }  //!< resolution
+        inline const TrRelation* tr() const { return m_tr.get(); }           //!< t(r) relationship
+        inline float t0Global() const { return m_t0; }          //!< global t0
     private:
-        IRtRelation* m_rt;
-        IRtResolution* m_rtRes;
-        TrRelation* m_tr;
-        float m_t0;
+        std::unique_ptr<IRtRelation> m_rt{};
+        std::unique_ptr<IRtResolution> m_rtRes{};
+        std::unique_ptr<TrRelation> m_tr{};
+        float m_t0{0.f};
 
-        /** private copy constructor, assignment operator w/o concrete implemenation */
-        MdtRtRelation(const MdtRtRelation&);
-        MdtRtRelation& operator=(const MdtRtRelation& right);
     };
 
 }  // namespace MuonCalib
