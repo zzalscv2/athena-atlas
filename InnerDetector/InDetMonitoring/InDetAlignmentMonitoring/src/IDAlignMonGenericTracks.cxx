@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -54,55 +54,38 @@ IDAlignMonGenericTracks::IDAlignMonGenericTracks(const std::string& type, const 
   m_trtID(nullptr),
   m_events(0),
   m_histosBooked(0),
-  m_triggerChainName("NoTriggerSelection"),
   m_barrelEta(0.8),
   m_vertices(nullptr),
   m_doHitQuality(0),
-  m_d0Range(2.0),
-  m_d0BsRange(0.5),
-  m_d0BsNbins(100),
-  m_z0Range(250.0),
-  m_etaRange(3.0),
-  m_NTracksRange(200),
-  m_rangePixHits(10),
-  m_rangeSCTHits(20),
-  m_rangeTRTHits(60),
   m_hWeightInFile(nullptr),
-  m_etapTWeight(nullptr) { // cppcheck-suppress useInitializationList
-  m_trackSelection = ToolHandle< InDetAlignMon::TrackSelectionTool >("InDetAlignMon::TrackSelectionTool");
-  m_extrapolator = ToolHandle<Trk::IExtrapolator> ( "Trk::Extrapolator/AtlasExtrapolator" );
-  m_trackToVertexIPEstimatorTool = ToolHandle<Trk::ITrackToVertexIPEstimator> ( "Trk::TrackToVertexIPEstimator/TrackToVertexIPEstimator" );
-  // cppcheck-suppress useInitializationList
-  m_hitQualityTool = ToolHandle<IInDetAlignHitQualSelTool>("");
-
-  m_pTRange = 100.0;
-
-  InitializeHistograms();
+  m_etapTWeight(nullptr) {
 
   declareProperty("CheckRate", m_checkrate = 1000);
-  declareProperty("triggerChainName", m_triggerChainName);
-  declareProperty("trackSelection", m_trackSelection);
+  declareProperty("triggerChainName", m_triggerChainName = "NoTriggerSelection");
+  declareProperty("trackSelection", m_trackSelection = ToolHandle< InDetAlignMon::TrackSelectionTool > ("InDetAlignMon::TrackSelectionTool"));
   declareProperty("Pixel_Manager", m_Pixel_Manager);
   declareProperty("SCT_Manager", m_SCT_Manager);
   declareProperty("TRT_Manager", m_TRT_Manager);
   declareProperty("HitQualityTool", m_hitQualityTool);
   declareProperty("useExtendedPlots", m_extendedPlots = false);
-  declareProperty("d0Range", m_d0Range);
-  declareProperty("d0BsRange", m_d0BsRange);
-  declareProperty("d0BsNbins", m_d0BsNbins);
-  declareProperty("z0Range", m_z0Range);
-  declareProperty("etaRange", m_etaRange);
-  declareProperty("pTRange", m_pTRange);
-  declareProperty("NTracksRange", m_NTracksRange);
+  declareProperty("d0Range", m_d0Range = 2.0);
+  declareProperty("d0BsRange", m_d0BsRange = 0.5);
+  declareProperty("d0BsNbins", m_d0BsNbins = 100);
+  declareProperty("z0Range", m_z0Range = 250.0);
+  declareProperty("etaRange", m_etaRange = 3.0);
+  declareProperty("pTRange", m_pTRange = 100.0);
+  declareProperty("NTracksRange", m_NTracksRange = 200);
   declareProperty("applyHistWeight", m_applyHistWeight = false);
   declareProperty("hWeightInFileName", m_hWeightInFileName = "hWeight.root");
   declareProperty("hWeightHistName", m_hWeightHistName = "trk_pT_vs_eta");
   declareProperty("doIP", m_doIP = false);
-  declareProperty("RangePixHits", m_rangePixHits);
-  declareProperty("RangeSCTHits", m_rangeSCTHits);
-  declareProperty("RangeTRTHits", m_rangeTRTHits);
-  declareProperty("Extrapolator", m_extrapolator);
-  declareProperty("TrackToVertexIPEstimatorTool", m_trackToVertexIPEstimatorTool);
+  declareProperty("RangePixHits", m_rangePixHits = 10);
+  declareProperty("RangeSCTHits", m_rangeSCTHits = 20);
+  declareProperty("RangeTRTHits", m_rangeTRTHits = 60);
+  declareProperty("Extrapolator", m_extrapolator = ToolHandle<Trk::IExtrapolator> ("Trk::Extrapolator/AtlasExtrapolator"));
+  declareProperty("TrackToVertexIPEstimatorTool", m_trackToVertexIPEstimatorTool = ToolHandle<Trk::ITrackToVertexIPEstimator>("Trk::TrackToVertexIPEstimator/TrackToVertexIPEstimator"));
+
+  InitializeHistograms();
 }
 
 IDAlignMonGenericTracks::~IDAlignMonGenericTracks() { }

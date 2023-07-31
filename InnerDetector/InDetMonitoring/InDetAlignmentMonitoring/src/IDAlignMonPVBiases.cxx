@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -46,23 +46,17 @@
 IDAlignMonPVBiases::IDAlignMonPVBiases(const std::string& type, const std::string& name, const IInterface* parent)
   : ManagedMonitorToolBase(type, name, parent),
   m_events(0),
-  m_histosBooked(0),
-  m_tracksName("ExtendedTracks"),
-  m_triggerChainName("NoTriggerSelection") {
-  m_trackSelection = ToolHandle< InDetAlignMon::TrackSelectionTool >("InDetAlignMon::TrackSelectionTool");
-  m_extrapolator = ToolHandle<Trk::IExtrapolator> ( "Trk::Extrapolator/AtlasExtrapolator" );
-  m_trackToVertexIPEstimatorTool = ToolHandle<Trk::ITrackToVertexIPEstimator> ( "Trk::TrackToVertexIPEstimator/TrackToVertexIPEstimator" );
+  m_histosBooked(0)
+{
+  declareProperty("tracksName", m_tracksName = "ExtendedTracks");
+  declareProperty("CheckRate", m_checkrate = 1000);
+  declareProperty("triggerChainName", m_triggerChainName = "NoTriggerSelection");
+  declareProperty("trackSelection", m_trackSelection = ToolHandle< InDetAlignMon::TrackSelectionTool >("InDetAlignMon::TrackSelectionTool"));
+  declareProperty("VxPrimContainerName", m_VxPrimContainerName);
+  declareProperty("Extrapolator", m_extrapolator = ToolHandle<Trk::IExtrapolator>("Trk::Extrapolator/AtlasExtrapolator"));
+  declareProperty("TrackToVertexIPEstimatorTool", m_trackToVertexIPEstimatorTool = ToolHandle<Trk::ITrackToVertexIPEstimator>("Trk::TrackToVertexIPEstimator/TrackToVertexIPEstimator"));
 
   InitializeHistograms();
-
-  declareProperty("tracksName", m_tracksName);
-  declareProperty("CheckRate", m_checkrate = 1000);
-  declareProperty("triggerChainName", m_triggerChainName);
-  declareProperty("trackSelection", m_trackSelection);
-  declareProperty("VxPrimContainerName", m_VxPrimContainerName);
-  declareProperty("Extrapolator", m_extrapolator);
-  declareProperty("TrackToVertexIPEstimatorTool", m_trackToVertexIPEstimatorTool);
-
 }
 
 IDAlignMonPVBiases::~IDAlignMonPVBiases() { }

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -21,14 +21,10 @@
 InDetAlignMon::TrackSelectionTool::TrackSelectionTool(const std::string& type, const std::string& name,
                                                       const IInterface* parent)
   : AthAlgTool(type, name, parent) {
-  m_trackSelectorTool = ToolHandle<Trk::ITrackSelectorTool>("InDet::InDetDetailedTrackSelectorTool");
-  m_idtrackSelectionTool =
-    ToolHandle<InDet::IInDetTrackSelectionTool>("InDetTrackSelectionTool/InDetTrackSelectionTool");
-
   declareInterface<TrackSelectionTool>(this);
   declareProperty("PassAllTracks", m_passAllTracks = false);
-  declareProperty("TrackSelectorTool", m_trackSelectorTool);
-  declareProperty("IDTrackSelectionTool", m_idtrackSelectionTool);
+  declareProperty("TrackSelectorTool", m_trackSelectorTool = ToolHandle< Trk::ITrackSelectorTool >("InDet::InDetDetailedTrackSelectorTool"));
+  declareProperty("IDTrackSelectionTool", m_idtrackSelectionTool = ToolHandle<InDet::IInDetTrackSelectionTool>("InDetTrackSelectionTool/InDetTrackSelectionTool"));
   declareProperty("UseIDTrackSelectionTool", m_useIDTrackSelectionTool = false);
   declareProperty("DoEventPhaseCut", m_doEventPhaseCut = false);
   declareProperty("MinEventPhase", m_minEventPhase = 5);

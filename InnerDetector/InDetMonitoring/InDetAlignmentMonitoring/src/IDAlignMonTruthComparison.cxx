@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -39,12 +39,10 @@
 IDAlignMonTruthComparison::IDAlignMonTruthComparison(const std::string& type, const std::string& name,
                                                      const IInterface* parent)
   : ManagedMonitorToolBase(type, name, parent) {
-  m_trackSelection = ToolHandle< InDetAlignMon::TrackSelectionTool >("InDetAlignMon::TrackSelectionTool");
-  m_truthToTrack = ToolHandle<Trk::ITruthToTrack>("Trk::TruthToTrack/InDetTruthToTrack");
 
   declareProperty("CheckRate", m_checkrate = 1000);
-  declareProperty("TruthToTrackTool", m_truthToTrack);
-  declareProperty("trackSelection", m_trackSelection);
+  declareProperty("TruthToTrackTool", m_truthToTrack = ToolHandle<Trk::ITruthToTrack>("Trk::TruthToTrack/InDetTruthToTrack"));
+  declareProperty("trackSelection", m_trackSelection = ToolHandle<InDetAlignMon::TrackSelectionTool>("InDetAlignMon::TrackSelectionTool"));
 }
 
 IDAlignMonTruthComparison::~IDAlignMonTruthComparison() { }

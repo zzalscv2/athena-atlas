@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -178,42 +178,27 @@ IDAlignMonEfficiencies::IDAlignMonEfficiencies(const std::string& type, const st
   m_NPixLayers(0),
   m_events(0),
   m_histosBooked(0),
-  m_doHitQuality(false) {
-  m_minLB = -0.5;
-  m_maxLB = 3023.5;
-  m_nLB = 3024;
-  // cppcheck-suppress useInitializationList
-  m_trackSelection = ToolHandle<InDetAlignMon::TrackSelectionTool>("InDetAlignMon::TrackSelectionTool");
-  // cppcheck-suppress useInitializationList
-  m_hitQualityTool = ToolHandle<IInDetAlignHitQualSelTool>("");
-  // cppcheck-suppress useInitializationList
-  m_holeSearchTool = ToolHandle<Trk::ITrackHoleSearchTool>("InDetHoleSearchTool");
-  // cppcheck-suppress useInitializationList
-  m_trackSumTool = ToolHandle<Trk::ITrackSummaryTool>("Trk::TrackSummaryTool/InDetTrackSummaryTool");
-
-  m_minSiliconEffWindow = 0.8;
-  m_maxSiliconEffWindow = 1.05;
-  m_triggerChainName = "NoTriggerSelection";
-  m_doHoleSearch = true;
-  m_extendedPlots = false;
-  m_mapSplit = 1;
-
-  InitializeHistograms();
+  m_doHitQuality(false),
+  m_minLB (-0.5),
+  m_maxLB (3023.5),
+  m_nLB (3024) {
 
   declareProperty("CheckRate", m_checkrate = 1000);
-  declareProperty("HoleSearch", m_holeSearchTool);
-  declareProperty("doHoleSearch", m_doHoleSearch);
-  declareProperty("trackSelection", m_trackSelection);
-  declareProperty("minSiliconEffWindow", m_minSiliconEffWindow);
-  declareProperty("maxSiliconEffWindow", m_maxSiliconEffWindow);
+  declareProperty("HoleSearch", m_holeSearchTool = ToolHandle<Trk::ITrackHoleSearchTool>("InDetHoleSearchTool"));
+  declareProperty("doHoleSearch", m_doHoleSearch = true);
+  declareProperty("trackSelection", m_trackSelection = ToolHandle<InDetAlignMon::TrackSelectionTool>("InDetAlignMon::TrackSelectionTool"));
+  declareProperty("minSiliconEffWindow", m_minSiliconEffWindow = 0.8);
+  declareProperty("maxSiliconEffWindow", m_maxSiliconEffWindow = 1.05);
   declareProperty("HitQualityTool", m_hitQualityTool);
-  declareProperty("triggerChainName", m_triggerChainName);
+  declareProperty("triggerChainName", m_triggerChainName = "NoTriggerSelection");
   declareProperty("Pixel_Manager", m_Pixel_Manager);
   declareProperty("SCT_Manager", m_SCT_Manager);
   declareProperty("TRT_Manager", m_TRT_Manager);
-  declareProperty("trackSumTool", m_trackSumTool);
-  declareProperty("NSplitMap", m_mapSplit);
-  declareProperty("useExtendedPlots", m_extendedPlots);
+  declareProperty("trackSumTool", m_trackSumTool = ToolHandle<Trk::ITrackSummaryTool>("Trk::TrackSummaryTool/InDetTrackSummaryTool"));
+  declareProperty("NSplitMap", m_mapSplit = 1);
+  declareProperty("useExtendedPlots", m_extendedPlots = false);
+
+  InitializeHistograms();
 }
 
 IDAlignMonEfficiencies::~IDAlignMonEfficiencies() {

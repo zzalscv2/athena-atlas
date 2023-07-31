@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -67,21 +67,8 @@ struct IDAlignMonTrackSegments::DeltaTrackParamHistograms {
 IDAlignMonTrackSegments::IDAlignMonTrackSegments(const std::string& type, const std::string& name,
                                                  const IInterface* parent)
   : ManagedMonitorToolBase(type, name, parent),
-  //m_trackSumTool("Trk::TrackSummaryTool/InDetTrackSummaryTool"),
-  m_trackSplitter(""),
-  m_useCTBSplitTracks(true),
-  m_deltaD0Range(0.25),
-  m_deltaD0Range2D(1.0),
-  m_deltaPhiRange(0.005),
-  m_deltaPhiRange2D(0.02),
-  m_deltaQoverPtRange(0.1),
-  m_deltaQoverPtRange2D(0.4),
-  m_deltaPtQoverPtRange(0.5),
-  m_deltaPtQoverPtRange2D(0.5),
-  m_deltaZ0Range(0.6),
-  m_d0Range(150),
-  m_upperPhi(0),
-  m_triggerChainName("NoTriggerSelection"),
+  m_events(0),
+  m_histosBooked(0),
   m_upper_hist(new UpperLowerHistograms),
   m_lower_hist(new UpperLowerHistograms),
   m_delta_d0(new DeltaTrackParamHistograms),
@@ -92,36 +79,27 @@ IDAlignMonTrackSegments::IDAlignMonTrackSegments(const std::string& type, const 
   m_delta_PtqOverPt(new DeltaTrackParamHistograms),
   m_delta_nHits(new DeltaTrackParamHistograms),
   m_delta_charge(new DeltaTrackParamHistograms) {
-  m_trackSelectionUpper = ToolHandle<InDetAlignMon::TrackSelectionTool>("InDetAlignMon::TrackSelectionTool");
-  m_trackSelectionLower = ToolHandle<InDetAlignMon::TrackSelectionTool>("InDetAlignMon::TrackSelectionTool");
-  m_trackSumTool = ToolHandle<Trk::ITrackSummaryTool>("Trk::TrackSummaryTool/InDetTrackSummaryTool");
 
+  declareProperty("triggerChainName", m_triggerChainName = "NoTriggerSelection");
+  declareProperty("MatchedRCut", m_matchedRcut = 0.2);
+  declareProperty("UseCTBSplitTracks", m_useCTBSplitTracks = true);
+  declareProperty("TrackSplitter", m_trackSplitter);
+  declareProperty("trackSelectionUp", m_trackSelectionUpper = ToolHandle<InDetAlignMon::TrackSelectionTool>("InDetAlignMon::TrackSelectionTool"));
+  declareProperty("trackSelectionLow", m_trackSelectionLower = ToolHandle<InDetAlignMon::TrackSelectionTool>("Trk::TrackSummaryTool/InDetTrackSummaryTool"));
+  declareProperty("DeltaD0Range", m_deltaD0Range = 0.25);
+  declareProperty("DeltaD0Range2D", m_deltaD0Range2D = 1.0);
+  declareProperty("DeltaPhiRange", m_deltaPhiRange = 0.005);
+  declareProperty("DeltaPhiRange2D", m_deltaPhiRange2D = 0.02);
+  declareProperty("DeltaQoverPtRange", m_deltaQoverPtRange = 0.1);
+  declareProperty("DeltaQoverPtRange2D", m_deltaQoverPtRange2D = 0.4);
+  declareProperty("DeltaQoverPtRange", m_deltaPtQoverPtRange = 0.5);
+  declareProperty("DeltaQoverPtRange2D", m_deltaPtQoverPtRange2D = 0.5);
+  declareProperty("DeltaZ0Range", m_deltaZ0Range = 0.6);
+  declareProperty("D0Range", m_d0Range = 150);
+  declareProperty("UpperPhi", m_upperPhi = 0);
+  declareProperty("trackSumTool", m_trackSumTool = ToolHandle<Trk::ITrackSummaryTool>("Trk::TrackSummaryTool/InDetTrackSummaryTool"));
 
   InitializeHistograms();
-
-
-
-  declareProperty("triggerChainName", m_triggerChainName);
-  declareProperty("MatchedRCut", m_matchedRcut = 0.2);
-  declareProperty("UseCTBSplitTracks", m_useCTBSplitTracks);
-  declareProperty("TrackSplitter", m_trackSplitter);
-  declareProperty("trackSelectionUp", m_trackSelectionUpper);
-  declareProperty("trackSelectionLow", m_trackSelectionLower);
-  declareProperty("DeltaD0Range", m_deltaD0Range);
-  declareProperty("DeltaD0Range2D", m_deltaD0Range2D);
-  declareProperty("DeltaPhiRange", m_deltaPhiRange);
-  declareProperty("DeltaPhiRange2D", m_deltaPhiRange2D);
-  declareProperty("DeltaQoverPtRange", m_deltaQoverPtRange);
-  declareProperty("DeltaQoverPtRange2D", m_deltaQoverPtRange2D);
-  declareProperty("DeltaQoverPtRange", m_deltaPtQoverPtRange);
-  declareProperty("DeltaQoverPtRange2D", m_deltaPtQoverPtRange2D);
-  declareProperty("DeltaZ0Range", m_deltaZ0Range);
-  declareProperty("D0Range", m_d0Range);
-  declareProperty("UpperPhi", m_upperPhi);
-  declareProperty("trackSumTool", m_trackSumTool);
-
-  m_histosBooked = 0;
-  m_events = 0;
 }
 
 //---------------------------------------------------------------------------------------
