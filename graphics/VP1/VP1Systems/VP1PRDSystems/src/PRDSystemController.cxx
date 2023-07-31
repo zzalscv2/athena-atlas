@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -304,7 +304,7 @@ SoGroup * PRDSystemController::drawOptions(PRDDetType::Type t) const
 QSet<PRDDetType::Type> PRDSystemController::Imp::shownCollectionTypes() const
 {
   QSet<PRDDetType::Type> s;
-  foreach (qint32 i,collWidget->visibleStdCollectionTypes()) {
+  for (qint32 i : collWidget->visibleStdCollectionTypes()) {
     bool ok;
     PRDDetType::Type t = PRDDetType::intToType(i,ok);
     if (ok)
@@ -620,7 +620,8 @@ bool PRDSystemController::showSelectionLine() const
 std::set<PRDDetType::Type> PRDSystemController::shownCollectionTypes() const
 {
   std::set<PRDDetType::Type> s;
-  foreach(qint32 i, collWidget()->visibleStdCollectionTypes()) {
+
+  for(qint32 i : collWidget()->visibleStdCollectionTypes()) {
     bool ok;
     PRDDetType::Type t = PRDDetType::intToType(i, ok);
     if (ok)
