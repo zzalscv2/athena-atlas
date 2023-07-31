@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -45,7 +45,7 @@ bool TrackCollHandle_RefittedTracks::load()
 {
   hintNumberOfTracksInEvent(m_d->fittedtracks.count());
   int i(0);
-  foreach (const Trk::Track * trk, m_d->fittedtracks) {
+  for (const Trk::Track * trk : m_d->fittedtracks) {
     if (trk) {
       messageDebug("ADDTRACK.");
       addTrackHandle(new TrackHandle_TrkTrack(this,trk));

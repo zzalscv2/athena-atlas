@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -140,7 +140,7 @@ void TrackCollHandle_SimulationTracks::Imp::addHitCollections(std::map<SimBarCod
   theclass->message("Entered addHitCollections " + QString(typeid(collT).name()));
   VP1SGAccessHelper sgaccess(theclass->systemBase());
 
-  foreach (QString key, VP1SGContentsHelper(theclass->systemBase()).getKeys<collT>()) {
+  for (QString key : VP1SGContentsHelper(theclass->systemBase()).getKeys<collT>()) {
     const collT * hitColl;
     theclass->message("Try to retrieve "+QString(typeid(collT).name())+" collection with key = "+key);
     if (!sgaccess.retrieve(hitColl, key)) {

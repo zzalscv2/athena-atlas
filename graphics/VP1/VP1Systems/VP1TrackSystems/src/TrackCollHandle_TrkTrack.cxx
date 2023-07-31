@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -52,7 +52,7 @@ QStringList TrackCollHandle_TrkTrack::availableCollections(IVP1System*sys)
   }
 
   QStringList keysInSG;
-  foreach(QString key,VP1SGContentsHelper(sys).getKeys<TrackCollection>()) {
+  for(QString key : VP1SGContentsHelper(sys).getKeys<TrackCollection>()) {
     // if ( key=="CombinedInDetTracks") // Useful for debugging to limit to one collection
       keysInSG<<key;
   }
@@ -71,7 +71,7 @@ QStringList TrackCollHandle_TrkTrack::availableCollections(IVP1System*sys)
 
   QStringList outkeys;
 
-  foreach (QString key, keysInSG) {
+  for (QString key : keysInSG) {
     if (!VP1JobConfigInfo::hasMuonGeometry() && needsMuonsPattern.exactMatch(key)) {
       sys->messageDebug("TrackCollHandle_TrkTrack::availableCollections: Ignoring key '"
 			   +key+"' since muon geometry is not present in job.");

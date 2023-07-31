@@ -214,7 +214,7 @@ void AscObjSelectionManager::Imp::updateSelectionVisuals()
 {
   const bool isSimpleMode = controller->assocObjDetailLevel()==TrackCommonFlags::SIMPLE;
   sel_assocobjs->deselectAll();
-  foreach (AssociatedObjectHandleBase* handle,selAscObjHandles) {
+  for (AssociatedObjectHandleBase* handle : selAscObjHandles) {
     SoPath * path = new SoPath(sel_assocobjs);
     path->ref();
     if (!VP1QtInventorUtils::changePathTail(path,sel_assocobjs,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -142,7 +142,7 @@ QStringList TrackCollHandle_TruthTracks::availableCollections( IVP1System*sys )
     return l;
   }
 
-  foreach (QString mcevent_key,mcevent_keys) {
+  for (QString mcevent_key : mcevent_keys) {
     l << mcevent_key;
     if (extrainfo)
       l << mcevent_key + Imp::nameHepMCAugmentedEnd;
@@ -209,7 +209,7 @@ void TrackCollHandle_TruthTracks::Imp::addHitCollections(std::map<SimBarCode,Sim
 
   VP1SGAccessHelper sgaccess(theclass->systemBase());
 
-  foreach (QString key, VP1SGContentsHelper(theclass->systemBase()).getKeys<collT>()) {
+  for (QString key : VP1SGContentsHelper(theclass->systemBase()).getKeys<collT>()) {
     const collT * hitColl;
       if (!sgaccess.retrieve(hitColl, key)) {
 	theclass->message("Error: Could not retrieve "+QString(typeid(collT).name())+" collection with key = "+key);
