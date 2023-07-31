@@ -73,7 +73,8 @@ IOVDbFolder::IOVDbFolder(IOVDbConn* conn,
                          const IOVDbParser& folderprop, MsgStream& msg,
                          IClassIDSvc* clidsvc, IIOVDbMetaDataTool* metadatatool,
                          const bool checklock, const bool outputToFile,
-                         const std::string & source, const bool crestToFile):
+                         const std::string & source, const bool crestToFile,
+                         const std::string & crestServer):
   AthMessaging("IOVDbFolder"),
   p_clidSvc(clidsvc),
   p_metaDataTool(metadatatool),
@@ -83,7 +84,8 @@ IOVDbFolder::IOVDbFolder(IOVDbConn* conn,
   m_chansel(cool::ChannelSelection::all()),
   m_outputToFile{outputToFile},
   m_crestToFile{crestToFile},
-  m_source{source}
+  m_source{source},
+  m_crestServer{crestServer}
 {
   // set message same message level as our parent (IOVDbSvc)
   setLevel(msg.level());
@@ -233,10 +235,12 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
   if (m_source == "CREST"){
     //const std::string  jsonFolderName=sanitiseCrestTag(m_foldername);
 
+    CrestFunctions cfunctions(m_crestServer);
+
     if (m_globaltag != globalTag){
       m_globaltag = globalTag;
       m_cresttagmap.clear();
-      m_cresttagmap = getGlobalTagMap(globalTag);
+      m_cresttagmap = cfunctions.getGlobalTagMap(globalTag);
     }
     const std::string completeTag = m_cresttagmap[m_foldername];
     ATH_MSG_INFO("Download tag would be: "<<completeTag);
@@ -246,7 +250,7 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     
     // Get a vector of pairs retrieved from crest
     //  <IOV_SINCE(string),HASH(string)>
-    auto crestIOVs = getIovsForTag(completeTag);
+    auto crestIOVs = cfunctions.getIovsForTag(completeTag);
 
     typedef std::pair<cool::ValidityKey,size_t> IOV2Index; // <CREST_IOV(converted to ull),Index_in_crestIOVs>
     std::vector<IOV2Index> iov2IndexVect;                  // Temporary vector for sorting IOV_SINCE values
@@ -307,7 +311,7 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     ATH_MSG_DEBUG("Found IOV for " << m_foldername << " and VKEY " << vkey
 		  << " " << iovHashVect[indIOV].first);
 
-    std::string reply=getPayloadForHash(iovHashVect[indIOV].second);
+    std::string reply = cfunctions.getPayloadForHash(iovHashVect[indIOV].second);
 
     if (m_crestToFile){
      
@@ -350,9 +354,9 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
  
     if (m_crest_tag != completeTag){
       m_crest_tag = completeTag;
-      m_tag_info = getTagInfo(completeTag);
+      m_tag_info = cfunctions.getTagInfo(completeTag);
     }
-    const auto & specString =  getTagInfoElement(m_tag_info,"payload_spec");
+    const auto & specString = cfunctions.getTagInfoElement(m_tag_info,"payload_spec");
 
     if (specString.empty()){
       ATH_MSG_FATAL("Reading payload spec from "<<m_foldername<<" failed.");
@@ -1021,18 +1025,19 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
   p_tagInfoMgr = tagInfoMgr;
   if( not m_useFileMetaData ) {
     if(m_source=="CREST"){
+      CrestFunctions cfunctions(m_crestServer);
       if (m_globaltag != globalTag){
         m_globaltag = globalTag;
         m_cresttagmap.clear();
-        m_cresttagmap = getGlobalTagMap(globalTag);
+        m_cresttagmap = cfunctions.getGlobalTagMap(globalTag);
       }
       const std::string  & tagName=m_cresttagmap[m_foldername];
 
       if (m_crest_tag != tagName){
         m_crest_tag = tagName;
-        m_tag_info = getTagInfo(tagName);
+        m_tag_info = cfunctions.getTagInfo(tagName);
       }
-      m_folderDescription = getTagInfoElement(m_tag_info,"node_description");
+      m_folderDescription = cfunctions.getTagInfoElement(m_tag_info,"node_description");
     } else {
       //folder desc from db
       std::tie(m_multiversion, m_folderDescription) = IOVDbNamespace::folderMetadata(m_conn, m_foldername);
@@ -1055,21 +1060,22 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
   // setup channel list and folder type
   if( not m_useFileMetaData ) {
     if(m_source=="CREST"){
+        CrestFunctions cfunctions(m_crestServer);
         if (m_globaltag != globalTag){
           m_globaltag = globalTag;
           m_cresttagmap.clear();
-          m_cresttagmap = getGlobalTagMap(globalTag); // test
+          m_cresttagmap = cfunctions.getGlobalTagMap(globalTag);
         }       
         const std::string  & crestTag=m_cresttagmap[m_foldername];
 
         if (m_crest_tag != crestTag){
           m_crest_tag = crestTag;
-          m_tag_info = getTagInfo(crestTag);
+          m_tag_info = cfunctions.getTagInfo(crestTag);
         }
  
-        const std::string & payloadSpec = getTagInfoElement(m_tag_info,"payload_spec");  
-        std::string chanList = getTagInfoElement(m_tag_info,"channel_list");
-        std::tie(m_channums, m_channames) = extractChannelListFromString(chanList);
+        const std::string & payloadSpec = cfunctions.getTagInfoElement(m_tag_info,"payload_spec");  
+        std::string chanList = cfunctions.getTagInfoElement(m_tag_info,"channel_list");
+        std::tie(m_channums, m_channames) = cfunctions.extractChannelListFromString(chanList);
 
         //determine foldertype from the description, the spec and the number of channels
         m_foldertype = IOVDbNamespace::determineFolderType(m_folderDescription, payloadSpec, m_channums);
@@ -1198,7 +1204,8 @@ IOVDbFolder::resolveTag(const cool::IFolderPtr& fptr,const std::string& globalTa
     if (m_globaltag != globalTag){
       m_globaltag = globalTag;
       m_cresttagmap.clear();
-      m_cresttagmap = getGlobalTagMap(globalTag); // test
+      CrestFunctions cfunctions(m_crestServer);
+      m_cresttagmap = cfunctions.getGlobalTagMap(globalTag);
     }
     m_tag = m_cresttagmap[m_foldername];
     ATH_MSG_DEBUG( "resolveTag returns " << m_tag );
