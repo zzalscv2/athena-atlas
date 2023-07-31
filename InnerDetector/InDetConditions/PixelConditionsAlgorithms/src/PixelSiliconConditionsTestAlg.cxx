@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CLHEP/Units/SystemOfUnits.h"
@@ -7,6 +7,9 @@
 
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
+#include "PixelConditionsData/ChargeCalibParameters.h"
+
+
 
 PixelSiliconConditionsTestAlg::PixelSiliconConditionsTestAlg( const std::string& name, ISvcLocator* pSvcLocator ) : 
   AthAlgorithm( name, pSvcLocator )
@@ -39,29 +42,29 @@ StatusCode PixelSiliconConditionsTestAlg::execute(){
     for (int j=0; j<16; j++) {
       try {
         // ignore invalid FEs
-        calib->getAnalogThreshold(InDetDD::PixelDiodeType::NORMAL, i, j);
+        [[maybe_unused]] const auto &v = calib->getThresholds(InDetDD::PixelDiodeType::NORMAL, i, j).value;
       } catch (const std::range_error &) {
         continue;
       }
       ATH_MSG_INFO("FE " << j << " "
-                   << calib->getAnalogThreshold(InDetDD::PixelDiodeType::NORMAL, i, j) << " " 
-                   << calib->getAnalogThresholdSigma(InDetDD::PixelDiodeType::NORMAL, i, j) << " " 
-                   << calib->getAnalogThresholdNoise(InDetDD::PixelDiodeType::NORMAL, i, j) << " " 
-                   << calib->getInTimeThreshold(InDetDD::PixelDiodeType::NORMAL, i, j) << " " 
-                   << calib->getAnalogThreshold(InDetDD::PixelDiodeType::LONG, i, j) << " " 
-                   << calib->getAnalogThresholdSigma(InDetDD::PixelDiodeType::LONG, i, j) << " " 
-                   << calib->getAnalogThresholdNoise(InDetDD::PixelDiodeType::LONG, i, j) << " " 
-                   << calib->getInTimeThreshold(InDetDD::PixelDiodeType::LONG, i, j) << " " 
-                   << calib->getAnalogThreshold(InDetDD::PixelDiodeType::GANGED, i, j) << " " 
-                   << calib->getAnalogThresholdSigma(InDetDD::PixelDiodeType::GANGED, i, j) << " " 
-                   << calib->getAnalogThresholdNoise(InDetDD::PixelDiodeType::GANGED, i, j) << " " 
-                   << calib->getInTimeThreshold(InDetDD::PixelDiodeType::GANGED, i, j) << " " 
-                   << calib->getQ2TotA(InDetDD::PixelDiodeType::NORMAL, i, j) << " " 
-                   << calib->getQ2TotE(InDetDD::PixelDiodeType::NORMAL, i, j) << " " 
-                   << calib->getQ2TotC(InDetDD::PixelDiodeType::NORMAL, i, j) << " " 
-                   << calib->getQ2TotA(InDetDD::PixelDiodeType::GANGED, i, j) << " " 
-                   << calib->getQ2TotE(InDetDD::PixelDiodeType::GANGED, i, j) << " " 
-                   << calib->getQ2TotC(InDetDD::PixelDiodeType::GANGED, i, j));
+                   << calib->getThresholds(InDetDD::PixelDiodeType::NORMAL, i, j).value << " " 
+                   << calib->getThresholds(InDetDD::PixelDiodeType::NORMAL, i, j).sigma << " " 
+                   << calib->getThresholds(InDetDD::PixelDiodeType::NORMAL, i, j).noise << " " 
+                   << calib->getThresholds(InDetDD::PixelDiodeType::NORMAL, i, j).inTimeValue << " " 
+                   << calib->getThresholds(InDetDD::PixelDiodeType::LONG, i, j).value << " " 
+                   << calib->getThresholds(InDetDD::PixelDiodeType::LONG, i, j).sigma << " " 
+                   << calib->getThresholds(InDetDD::PixelDiodeType::LONG, i, j).noise << " " 
+                   << calib->getThresholds(InDetDD::PixelDiodeType::LONG, i, j).inTimeValue << " " 
+                   << calib->getThresholds(InDetDD::PixelDiodeType::GANGED, i, j).value << " " 
+                   << calib->getThresholds(InDetDD::PixelDiodeType::GANGED, i, j).sigma << " " 
+                   << calib->getThresholds(InDetDD::PixelDiodeType::GANGED, i, j).noise << " " 
+                   << calib->getThresholds(InDetDD::PixelDiodeType::GANGED, i, j).inTimeValue << " " 
+                   << calib->getLegacyFitParameters(InDetDD::PixelDiodeType::NORMAL, i, j).A << " " 
+                   << calib->getLegacyFitParameters(InDetDD::PixelDiodeType::NORMAL, i, j).E << " " 
+                   << calib->getLegacyFitParameters(InDetDD::PixelDiodeType::NORMAL, i, j).C << " " 
+                   << calib->getLegacyFitParameters(InDetDD::PixelDiodeType::GANGED, i, j).A << " " 
+                   << calib->getLegacyFitParameters(InDetDD::PixelDiodeType::GANGED, i, j).E << " " 
+                   << calib->getLegacyFitParameters(InDetDD::PixelDiodeType::GANGED, i, j).C);
     }
 
 

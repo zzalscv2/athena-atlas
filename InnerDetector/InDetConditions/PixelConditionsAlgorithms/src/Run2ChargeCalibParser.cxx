@@ -6,6 +6,7 @@
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "PixelConditionsData/ChargeCalibrationBundle.h" 
 #include "PixelConditionsData/PixelModuleData.h"
+#include "PixelConditionsData/PixelChargeCalibUtils.h" //for getBecAndLayer
 
 
 
@@ -13,13 +14,15 @@ namespace{
   constexpr size_t FEStringSize{21};
 } // namespace
 
+using PixelChargeCalib::getBecAndLayer;
+using PixelChargeCalib::numChipsAndTechnology;
 
 namespace PixelChargeCalib{
   ChargeCalibrationBundle
   Run2ChargeCalibParser::parseImpl(unsigned int moduleHash, const std::string & data){
     IdentifierHash wafer_hash = IdentifierHash(moduleHash);
     const InDetDD::SiDetectorElement *element = m_elements->getDetectorElement(wafer_hash);
-    const InDetDD::PixelModuleDesign *p_design = static_cast<const InDetDD::PixelModuleDesign*>(&element->design());
+    const auto & [numChips, technology] = PixelChargeCalib::numChipsAndTechnology(element);
     //
     std::stringstream ss(data);
     std::vector<std::string> component;
@@ -27,6 +30,9 @@ namespace PixelChargeCalib{
     std::getline(ss, buffer, '\n'); // skip first line
     while (std::getline(ss, buffer, '\n')) { component.push_back(buffer); }
     const size_t numFE = component.size();
+    if (numFE != numChips){
+      std::cout << "Warning that the number of chips in the DB string and the number of chips according to readout technology are not equal\n";
+    }
     //
     ChargeCalibrationBundle b(numFE);
     //
@@ -52,9 +58,9 @@ namespace PixelChargeCalib{
       b.totRes.emplace_back(getFloat(19), getFloat(20));
 
       // Linear extrapolation above large charge
-      if (m_configData->getPIXLinearExtrapolation() && p_design->getReadoutTechnology()==InDetDD::PixelReadoutTechnology::FEI3) {
+      if (m_configData->getPIXLinearExtrapolation() && technology==InDetDD::PixelReadoutTechnology::FEI3) {
         b.calibrationType =  PixelChargeCalibCondData::CalibrationStrategy::RUN3PIX;
-        const auto & [barrel_ec, layer] = getBecAndLayer(wafer_hash);
+        const auto & [barrel_ec, layer] = getBecAndLayer(m_pixelID, wafer_hash);
         // search for ToT when charge exceeds threshold
         int totlimit = -1;
         int start =  m_configData->getToTThreshold(barrel_ec,layer);

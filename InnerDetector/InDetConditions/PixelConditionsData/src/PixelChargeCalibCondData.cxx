@@ -4,9 +4,15 @@
 
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
 #include "PixelConditionsData/ChargeCalibParameters.h"
+#include "PixelConditionsData/ChargeCalibrationBundle.h"
+#include "PixelConditionsData/PixelModuleData.h"
+
+
 #include <stdexcept>
 #include <sstream>
 #include <cfloat> //for FLT_MAX
+
+
 
 using namespace PixelChargeCalib;
 using InDetDD::enum2uint; //in PixelReadoutDefinitions.h; will use ADL anyway,but make it explicit
@@ -40,6 +46,45 @@ namespace{
 
 PixelChargeCalibCondData::PixelChargeCalibCondData(std::size_t max_module_hash) : m_maxModuleHash(max_module_hash){
   //nop
+}
+
+void 
+PixelChargeCalibCondData::setAllFromBundle(unsigned int moduleHash, const ChargeCalibrationBundle& b){
+  //calibration strategy
+  setCalibrationStrategy(moduleHash, b.calibrationType);
+  // Normal pixel
+  setThresholds(InDetDD::PixelDiodeType::NORMAL, moduleHash, b.threshold);
+  setLegacyFitParameters(InDetDD::PixelDiodeType::NORMAL, moduleHash, b.params); 
+  setLinearFitParameters(InDetDD::PixelDiodeType::NORMAL, moduleHash, b.lin); 
+  setTotResolutions(moduleHash, b.totRes);
+  // Long pixel
+  setThresholds(InDetDD::PixelDiodeType::LONG, moduleHash, b.thresholdLong);
+  setLegacyFitParameters(InDetDD::PixelDiodeType::LONG, moduleHash, b.params); 
+  setLinearFitParameters(InDetDD::PixelDiodeType::LONG, moduleHash, b.lin); 
+  // Ganged/large pixel
+  setThresholds(InDetDD::PixelDiodeType::GANGED, moduleHash, b.thresholdGanged);
+  setLegacyFitParameters(InDetDD::PixelDiodeType::GANGED, moduleHash, b.paramsGanged);
+  setLinearFitParameters(InDetDD::PixelDiodeType::GANGED, moduleHash, b.linGanged);
+}
+
+void 
+PixelChargeCalibCondData::setAllFromConfigData(unsigned int moduleHash, const PixelModuleData * configData, const std::pair<int, int> &becLayer, unsigned int numFE){
+  const auto & [barrel_ec, layer] = becLayer;
+  for (size_t i{}; i != s_NPixelDiodes; ++i) {
+    const auto t = static_cast<InDetDD::PixelDiodeType>(i);
+    setAnalogThreshold(t, moduleHash, std::vector<int>(numFE, configData->getDefaultAnalogThreshold(barrel_ec, layer)));
+    setAnalogThresholdSigma( t, moduleHash, std::vector<int>(numFE, configData->getDefaultAnalogThresholdSigma(barrel_ec, layer)));
+    setAnalogThresholdNoise(t, moduleHash, std::vector<int>(numFE, configData->getDefaultAnalogThresholdNoise(barrel_ec, layer)));
+    setInTimeThreshold(t, moduleHash, std::vector<int>(numFE, configData->getDefaultInTimeThreshold(barrel_ec, layer)));
+
+    setQ2TotA(t, moduleHash, std::vector<float>(numFE, configData->getDefaultQ2TotA()));
+    setQ2TotE(t, moduleHash, std::vector<float>(numFE, configData->getDefaultQ2TotE()));
+    setQ2TotC(t, moduleHash, std::vector<float>(numFE, configData->getDefaultQ2TotC()));
+    setQ2TotF(t, moduleHash, std::vector<float>(numFE, 0.0));
+    setQ2TotG(t, moduleHash, std::vector<float>(numFE, 0.0));
+  }
+  setTotRes1(moduleHash, std::vector<float>(numFE, 0.0));
+  setTotRes2(moduleHash, std::vector<float>(numFE, 0.0));
 }
 
 void 

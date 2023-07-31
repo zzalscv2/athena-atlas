@@ -8,6 +8,7 @@
 #include "PixelChargeLUTCalibCondAlg.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "PixelConditionsData/ChargeCalibrationBundle.h" 
+#include "PixelConditionsData/PixelChargeCalibUtils.h" //getBecAndLayer
 #include "IChargeCalibrationParser.h"
 #include "LUTChargeCalibParser.h"
 
@@ -18,6 +19,7 @@
 
 
 using namespace PixelChargeCalib; //containing LegacyFitParameters etc
+
 using InDetDD::enum2uint;
 namespace{
   constexpr int halfModuleThreshold{8};
@@ -106,22 +108,7 @@ StatusCode PixelChargeLUTCalibCondAlg::execute(const EventContext& ctx) const {
             writeCdo -> setTot2Charges(moduleHash, b.tot2Charges);
           }
           //calibration strategy
-          writeCdo -> setCalibrationStrategy(moduleHash, b.calibrationType);
-          
-          // Normal pixel
-          writeCdo -> setThresholds(InDetDD::PixelDiodeType::NORMAL, moduleHash, b.threshold);
-          writeCdo -> setLegacyFitParameters(InDetDD::PixelDiodeType::NORMAL, moduleHash, b.params); 
-          writeCdo -> setLinearFitParameters(InDetDD::PixelDiodeType::NORMAL, moduleHash, b.lin); 
-          writeCdo -> setTotResolutions(moduleHash, b.totRes);
-
-          // Long pixel
-          writeCdo -> setThresholds(InDetDD::PixelDiodeType::LONG, moduleHash, b.thresholdLong);
-          writeCdo -> setLegacyFitParameters(InDetDD::PixelDiodeType::LONG, moduleHash, b.params); 
-          writeCdo -> setLinearFitParameters(InDetDD::PixelDiodeType::LONG, moduleHash, b.lin); 
-          // Ganged/large pixel
-          writeCdo -> setThresholds(InDetDD::PixelDiodeType::GANGED, moduleHash, b.thresholdGanged);
-          writeCdo -> setLegacyFitParameters(InDetDD::PixelDiodeType::GANGED, moduleHash, b.paramsGanged);
-          writeCdo -> setLinearFitParameters(InDetDD::PixelDiodeType::GANGED, moduleHash, b.linGanged);
+          writeCdo -> setAllFromBundle(moduleHash, b);
           
           // Ganged/large pixel
           if (p_design->getReadoutTechnology() == InDetDD::PixelReadoutTechnology::RD53) {
@@ -138,30 +125,12 @@ StatusCode PixelChargeLUTCalibCondAlg::execute(const EventContext& ctx) const {
     }
   } else {
     for (unsigned int moduleHash{}; moduleHash < m_pixelID->wafer_hash_max(); moduleHash++) {
+      const auto & becLayer = getBecAndLayer(m_pixelID, moduleHash);
       IdentifierHash wafer_hash = IdentifierHash(moduleHash);
-      Identifier wafer_id = m_pixelID->wafer_id(wafer_hash);
-      int barrel_ec = m_pixelID->barrel_ec(wafer_id);
-      int layer     = m_pixelID->layer_disk(wafer_id);
       const InDetDD::SiDetectorElement *element = elements->getDetectorElement(wafer_hash);
       const InDetDD::PixelModuleDesign *p_design = static_cast<const InDetDD::PixelModuleDesign*>(&element->design());
-      // in some cases numberOfCircuits returns FEs per half-module
       unsigned int numFE = p_design->numberOfCircuits() < halfModuleThreshold ? p_design->numberOfCircuits() : 2 * p_design->numberOfCircuits();
-
-      for (InDetDD::PixelDiodeType type : diodeTypes) {
-        writeCdo -> setAnalogThreshold(type, moduleHash, std::vector<int>(numFE, configData->getDefaultAnalogThreshold(barrel_ec, layer)));
-        writeCdo -> setAnalogThresholdSigma(type, moduleHash, std::vector<int>(numFE, configData->getDefaultAnalogThresholdSigma(barrel_ec, layer)));
-        writeCdo -> setAnalogThresholdNoise(type, moduleHash, std::vector<int>(numFE, configData->getDefaultAnalogThresholdNoise(barrel_ec, layer)));
-        writeCdo -> setInTimeThreshold(type, moduleHash, std::vector<int>(numFE, configData->getDefaultInTimeThreshold(barrel_ec, layer)));
-
-        writeCdo -> setQ2TotA(type, moduleHash, std::vector<float>(numFE, configData->getDefaultQ2TotA()));
-        writeCdo -> setQ2TotE(type, moduleHash, std::vector<float>(numFE, configData->getDefaultQ2TotE()));
-        writeCdo -> setQ2TotC(type, moduleHash, std::vector<float>(numFE, configData->getDefaultQ2TotC()));
-        writeCdo -> setQ2TotF(type, moduleHash, std::vector<float>(numFE, 0.0));
-        writeCdo -> setQ2TotG(type, moduleHash, std::vector<float>(numFE, 0.0));
-      }
-
-      writeCdo -> setTotRes1(moduleHash, std::vector<float>(numFE, 0.0));
-      writeCdo -> setTotRes2(moduleHash, std::vector<float>(numFE, 0.0));
+      writeCdo -> setAllFromConfigData(moduleHash, configData, becLayer, numFE);
     }
   }
 

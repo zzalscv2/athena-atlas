@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -18,6 +18,7 @@
 #include "Identifier/Identifier.h"
 #include "InDetIdentifier/PixelID.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
+#include "PixelConditionsData/ChargeCalibParameters.h" //for LegacyFitParameters
 
 
 #include "TrkTruthData/PRD_MultiTruthCollection.h"
@@ -733,10 +734,10 @@ void PixelPrepDataToxAOD::addRdoInformation(xAOD::TrackMeasurementValidation* xp
     IdentifierHash moduleHash = m_PixelHelper->wafer_hash(moduleID); // wafer hash
     unsigned int FE = m_pixelReadout->getFE(rId, moduleID);
     InDetDD::PixelDiodeType type = m_pixelReadout->getDiodeType(rId);
-
-    CTerm.push_back(calibData->getQ2TotC(type, moduleHash, FE));
-    ATerm.push_back(calibData->getQ2TotA(type, moduleHash, FE));
-    ETerm.push_back(calibData->getQ2TotE(type, moduleHash, FE));
+    const auto & parameters = calibData->getLegacyFitParameters(type, moduleHash, FE);
+    CTerm.emplace_back(parameters.C);
+    ATerm.emplace_back(parameters.A);
+    ETerm.emplace_back(parameters.E);
 
   }//end iteration on rdos
 

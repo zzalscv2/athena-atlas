@@ -8,12 +8,14 @@
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "PixelConditionsData/ChargeCalibrationBundle.h" 
 #include "PixelConditionsData/PixelModuleData.h"
+#include "PixelConditionsData/PixelChargeCalibUtils.h"
 
 namespace{
-  constexpr int halfModuleThreshold{8};
   constexpr size_t FEStringSize{20};
 } // namespace
 
+using PixelChargeCalib::getBecAndLayer;
+using PixelChargeCalib::numChipsAndTechnology;
 
 namespace PixelChargeCalib{
 
@@ -21,9 +23,7 @@ namespace PixelChargeCalib{
   LUTChargeCalibParser::parseImpl(unsigned int moduleHash, const nlohmann::json & data){
     IdentifierHash wafer_hash = IdentifierHash(moduleHash);
     const InDetDD::SiDetectorElement *element = m_elements->getDetectorElement(wafer_hash);
-    const InDetDD::PixelModuleDesign *p_design = static_cast<const InDetDD::PixelModuleDesign*>(&element->design());
-    // in some cases numberOfCircuits returns FEs per half-module
-    unsigned int numFE = p_design->numberOfCircuits() < halfModuleThreshold ? p_design->numberOfCircuits() : 2 * p_design->numberOfCircuits();
+    const auto & [numFE, technology] = numChipsAndTechnology(element);
     //
     ChargeCalibrationBundle b(numFE);
     //
@@ -31,7 +31,7 @@ namespace PixelChargeCalib{
       const auto &calibArray = data.at(j);
       if (!calibArray.empty()) {
         // new charge calibration for RUN-3
-        if ((p_design->getReadoutTechnology() == InDetDD::PixelReadoutTechnology::FEI4 && !(element->isDBM())) || (b.useLUT && p_design->getReadoutTechnology() == InDetDD::PixelReadoutTechnology::RD53)) {
+        if ((technology == InDetDD::PixelReadoutTechnology::FEI4 && !(element->isDBM())) || (b.useLUT && technology == InDetDD::PixelReadoutTechnology::RD53)) {
           if (calibArray.size() != FEStringSize) {
             std::cout<<"Parameter size is not consistent(" << FEStringSize << ") " << calibArray.size() << " at (i,j)=(" << moduleHash << "," << j << ")\n";
             b.isValid = false;
@@ -68,7 +68,7 @@ namespace PixelChargeCalib{
           // Linear extrapolation above large charge
           if (m_configData->getPIXLinearExtrapolation()) {
             b.calibrationType = PixelChargeCalibCondData::CalibrationStrategy::RUN3PIX;
-            const auto & [barrel_ec, layer] = getBecAndLayer(wafer_hash);
+            const auto & [barrel_ec, layer] = getBecAndLayer(m_pixelID, wafer_hash);
             // search for ToT when charge exceeds threshold
             if (!(element->isDBM())) {
               //charge threshold beyond which linear fit will be used

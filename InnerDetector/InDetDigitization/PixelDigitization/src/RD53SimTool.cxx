@@ -1,10 +1,11 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "RD53SimTool.h"
 
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
+#include "PixelConditionsData/ChargeCalibParameters.h" //for Thresholds
 
 #include "SiDigitization/SiHelper.h"
 #include "ReadoutGeometryBase/SiReadoutCellId.h"
@@ -87,10 +88,11 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
     unsigned int FE = m_pixelReadout->getFE(diodeID, moduleID);
     InDetDD::PixelDiodeType type = m_pixelReadout->getDiodeType(diodeID);
 
-    // Apply analogu threshold, timing simulation
-    const int th0 = calibData->getAnalogThreshold(type, moduleHash, FE);
-    const int sigma = calibData->getAnalogThresholdSigma(type, moduleHash, FE);
-    const int noise = calibData->getAnalogThresholdNoise(type, moduleHash, FE); 
+    // Apply analogue threshold, timing simulation
+    const auto thresholds = calibData->getThresholds(type, moduleHash, FE);
+    const int th0 = thresholds.value;
+    const int sigma = thresholds.sigma;
+    const int noise = thresholds.noise;
     double threshold = th0 +
                        sigma * CLHEP::RandGaussZiggurat::shoot(rndmEngine) +
                        noise * CLHEP::RandGaussZiggurat::shoot(rndmEngine); // This noise check is unaffected by digitizationFlags.doInDetNoise in 21.0 - see PixelCellDiscriminator.cxx in that branch
