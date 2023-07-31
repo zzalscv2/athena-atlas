@@ -284,6 +284,7 @@ template<> inline bool isDiquark(const DecodedPID& p){
 /// The special numbers 310 and 130 are given to the K0S and K0L respectively.
 /// APID: The special code K0 is used when a generator uses K0S/K0L
 template<> inline bool isMeson(const DecodedPID& p){
+  if (p.ndigits() < 3 ) return false;
   if (std::abs(p.pid()) == K0S) return true;
   if (std::abs(p.pid()) == K0L) return true;
   if (std::abs(p.pid()) == K0) return true;
@@ -309,6 +310,7 @@ template<> inline bool isMeson(const DecodedPID& p){
 }
 ///Table 43.2
 template<> inline bool isBaryon(const DecodedPID& p){
+  if (p.ndigits() < 4 ) return false;
   if (p.max_digit(1,4) >= 6 ) return false;
   if (p.min_digit(1,4) == 0) return false;
   if (p.ndigits() == 4 && (p.last() == 2 || p.last() == 4|| p.last() == 6|| p.last() == 8) ) return true;
