@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -60,7 +60,7 @@ QStringList TrackCollHandle_TrkSegment::availableCollections(IVP1System*sys)
 
   QStringList outkeys;
 
-  foreach (QString key, keysInSG) {
+  for (QString key : keysInSG) {
     if (!VP1JobConfigInfo::hasMuonGeometry() && needsMuonsPattern.exactMatch(key)) {
       sys->messageDebug("TrackCollHandle_TrkSegment::availableCollections: Ignoring key '"
 			+key+"' since muon geometry is not present in job.");

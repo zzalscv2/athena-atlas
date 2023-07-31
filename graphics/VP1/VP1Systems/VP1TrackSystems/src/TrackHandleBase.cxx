@@ -207,7 +207,7 @@ TrackHandleBase::~TrackHandleBase()
     common()->unregisterTrack(m_d->extraRepresentation);
 
   //FIXME: if visible, should we call detach first?
-  foreach(AssociatedObjectHandleBase*ao,m_d->associatedObjects)
+  for(AssociatedObjectHandleBase*ao : m_d->associatedObjects)
     delete ao;
 
   //Delete points the following way since we might use same points for raw and propagated.
@@ -765,7 +765,7 @@ void TrackHandleBase::Imp::rebuild3DObjects()
       }
 
     unsigned int row=0;
-    foreach(QString str, text){
+    for(QString str : text){
       QByteArray array = str.toLatin1();
       labelText->string.set1Value(row++,array.data());
     }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -171,7 +171,7 @@ const QString TrackSystemController::Imp::noneAvailString = QString("None availa
 QString TrackSystemController::toString( const QList<unsigned>& l )
 {
   QString s;
-  foreach(unsigned i,l) {
+  for(unsigned i : l) {
     if (!s.isEmpty()) s+=", ";
     s+=QString::number(i);
   }
@@ -182,7 +182,7 @@ QString TrackSystemController::toString( const QList<unsigned>& l )
 QString TrackSystemController::toString( const QList<int>& l )
 {
   QString s;
-  foreach(int i,l) {
+  for(int i : l) {
     if (!s.isEmpty()) s+=", ";
     s+=QString::number(i);
   }
@@ -205,9 +205,9 @@ void TrackSystemController::Imp::ensureExtrapolatorsCreated(IVP1System * sys) {
 
   VP1ToolAccessHelper toolaccess(sys);
 #if QTCORE_VERSION >= 0x050E00
-  foreach (QString key,VP1QtUtils::environmentVariableValue("VP1_JOBCFG_EXTRA_VP1_EXTRAPOLATORS").split(';',Qt::SkipEmptyParts))
+  for (QString key : VP1QtUtils::environmentVariableValue("VP1_JOBCFG_EXTRA_VP1_EXTRAPOLATORS").split(';',Qt::SkipEmptyParts))
 #else
-  foreach (QString key,VP1QtUtils::environmentVariableValue("VP1_JOBCFG_EXTRA_VP1_EXTRAPOLATORS").split(';',QString::SkipEmptyParts))
+  for (QString key : VP1QtUtils::environmentVariableValue("VP1_JOBCFG_EXTRA_VP1_EXTRAPOLATORS").split(';',QString::SkipEmptyParts))
 #endif
   {
     if (existingExtrapolators.contains(key))
@@ -242,9 +242,9 @@ void TrackSystemController::Imp::ensureFittersCreated(IVP1System * sys) {
 
   VP1ToolAccessHelper toolaccess(sys);
 #if QTCORE_VERSION >= 0x050E00
-  foreach (QString instance,VP1QtUtils::environmentVariableValue("VP1_JOBCFG_EXTRA_VP1_FITTERS").split(';',Qt::SkipEmptyParts))
+  for (QString instance : VP1QtUtils::environmentVariableValue("VP1_JOBCFG_EXTRA_VP1_FITTERS").split(';',Qt::SkipEmptyParts))
 #else
-  foreach (QString instance,VP1QtUtils::environmentVariableValue("VP1_JOBCFG_EXTRA_VP1_FITTERS").split(';',QString::SkipEmptyParts))
+  for (QString instance : VP1QtUtils::environmentVariableValue("VP1_JOBCFG_EXTRA_VP1_FITTERS").split(';',QString::SkipEmptyParts))
 #endif
   {
     if (existingFitters.contains(instance))
