@@ -14,7 +14,8 @@ def setupTestOutputCfg(flags,**kwargs):
     container_items = ["xAOD::MuonSimHitContainer#",
                        "xAOD::MuonSimHitAuxContainer#",
                        "xAOD::TruthParticleContainer#",
-                       "xAOD::TruthParticleAuxContainer#"]
+                       "xAOD::TruthParticleAuxContainer#",
+                       "McEventCollection#"]
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     kwargs.setdefault("ItemList", container_items)
     result.merge(OutputStreamCfg(flags, **kwargs))

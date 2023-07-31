@@ -6,7 +6,11 @@
 #include <MuonSimEvent/MdtHitIdHelper.h>
 #include <StoreGate/ReadHandle.h>
 #include <StoreGate/WriteHandle.h>
+#include <GaudiKernel/SystemOfUnits.h>
+namespace{
+    constexpr double toGeV = 1. / Gaudi::Units::GeV;
 
+}
 xAODSimHitToMdtCnvAlg::xAODSimHitToMdtCnvAlg(const std::string& name, ISvcLocator* pSvcLocator):
     AthReentrantAlgorithm{name, pSvcLocator} {}
 
@@ -40,12 +44,32 @@ StatusCode xAODSimHitToMdtCnvAlg::execute(const EventContext& ctx) const {
                               hit->globalTime(), 
                               hit->localPosition().perp(),
                               xAOD::toEigen(hit->localPosition()),
-                              hit->genParticleLink().index(),
+                              hit->genParticleLink(),
                               hit->stepLength(),
                               hit->energyDeposit(),
                               hit->pdgId(),
                               hit->kineticEnergy());
-
+        if (msgLvl(MSG::DEBUG)){            
+            std::stringstream hep_mc{};
+            if (!hit->genParticleLink().isValid()){
+                hep_mc<<"HEP mc link invalid";
+            } else {
+               const HepMC::GenParticle& mc_part{*hit->genParticleLink()};
+               hep_mc<<"Valid HEP mc link: "<<mc_part.pid()<<", ";
+               hep_mc<<"Four momentum: pt:"<<mc_part.momentum().pt()*toGeV<<" [GeV], ";
+               hep_mc<<"eta: "<<mc_part.momentum().eta()<<", ";
+               hep_mc<<"phi: "<<mc_part.momentum().phi()<<", ";
+            }
+            ATH_MSG_INFO("Converted xAOD simHit "<<m_idHelperSvc->toString(hit->identify())<<", "
+                     <<"globalTime: "<<hit->globalTime()<<", "
+                     <<"drift radius: "<<hit->localPosition().perp()<<", "
+                     <<"step length: "<<hit->stepLength()<<", "
+                     <<"energy deposit: "<<hit->energyDeposit()*toGeV<<" [GeV], "
+                     <<"pdgId: "<<hit->pdgId()<<", "
+                     <<"kinetic energy: "<<hit->kineticEnergy()*toGeV<<" [GeV], "
+                     <<hep_mc.str());
+     
+        }
     }  
     return StatusCode::SUCCESS;
 }

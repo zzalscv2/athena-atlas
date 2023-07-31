@@ -5,11 +5,13 @@
 #ifndef XAODMUONSIMHIT_VERSION_MUONSIMHIT_V1_H
 #define XAODMUONSIMHIT_VERSION_MUONSIMHIT_V1_H
 
-#include "GeoPrimitives/GeoPrimitives.h"
-#include "Identifier/Identifier.h"
-#include "AthLinks/ElementLink.h"
-#include "xAODMeasurementBase/MeasurementDefs.h"
-#include "GeneratorObjects/McEventCollection.h"
+#include <GeoPrimitives/GeoPrimitives.h>
+
+#include <Identifier/Identifier.h>
+#include <xAODMeasurementBase/MeasurementDefs.h>
+#include <CxxUtils/CachedUniquePtr.h>
+#include <GeneratorObjects/HepMcParticleLink.h>
+
 namespace xAOD {
 
 
@@ -59,9 +61,27 @@ class MuonSimHit_v1 : public SG::AuxElement {
     void setKineticEnergy(const float energy);
     
     ///@brief Returns the link to the HepMC particle producing this hit
-    ElementLink<McEventCollection> genParticleLink() const;
+    const HepMcParticleLink& genParticleLink() const;
     ///@brief Sets the link to the HepMC particle producing this hit
-    void setGenParticleLink(const ElementLink<McEventCollection> link);
+    void setGenParticleLink(const HepMcParticleLink& link);
+private:
+
+# ifdef __CLING__
+      // If Cling sees the declaration below, then we get mysterious
+      // errors during auto-parsing.  On the other hand, if we hide
+      // it completely, then we can run into memory corruption problems
+      // if instances of this class are created from Python,
+      // since Cling will then be allocating a block of the wrong size
+      // (see !63818).  However, everything dealing with this member
+      // is out-of-line (including ctors/dtor/assignment), and it also
+      // declared as transient.  Thus, for the Cling case, we can replace
+      // it with padding of the correct size.
+      char m_hepMCLink[sizeof(CxxUtils::CachedUniquePtr<HepMcParticleLink>)];
+# else
+      CxxUtils::CachedUniquePtr<HepMcParticleLink> m_hepMCLink{};
+# endif
+
+
     
 };
 }

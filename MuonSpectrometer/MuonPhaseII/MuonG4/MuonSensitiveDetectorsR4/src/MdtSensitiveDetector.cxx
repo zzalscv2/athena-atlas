@@ -156,8 +156,7 @@ G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
   hit->setPdgId(currentTrack->GetDefinition()->GetPDGEncoding());
   hit->setEnergyDeposit(aStep->GetTotalEnergyDeposit());
   hit->setKineticEnergy(preStep->GetKineticEnergy());
-  /// Need to fix the gen particle link
-  hit->setGenParticleLink(ElementLink<McEventCollection>{});
+  hit->setGenParticleLink(trHelp.GetParticleLink());
 
   return true;
 }

@@ -30,7 +30,12 @@ class MuonSimHitAuxContainer_v1 : public AuxContainerBase {
     std::vector<Identifier::value_type> identifier{};
     std::vector<float> energyDeposit{};
     std::vector<float> kineticEnergy{};
-    std::vector<ElementLink<McEventCollection>> genParticleLink{};
+    
+    /// Information needed to save the HEPMC particle link
+    std::vector<unsigned short> mcEventIndex{};
+    std::vector<unsigned int>  mcBarcode{};
+    std::vector<char>           mcCollectionType{};
+
     /// @}
 };
 }  // namespace xAOD
