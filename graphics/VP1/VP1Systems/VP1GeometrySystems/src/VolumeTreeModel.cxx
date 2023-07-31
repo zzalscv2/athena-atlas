@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1GeometrySystems/VolumeTreeModel.h"
@@ -157,7 +157,7 @@ void VolumeTreeModel::cleanup()
     disableSubSystem(it->first);
   for (it = m_d->flag2subsystems.begin();it!=itE;++it)
     delete it->second;
-  foreach (Imp::SectionInfo* section, m_d->allSections)
+  for (Imp::SectionInfo* section :  m_d->allSections)
     delete section;
 }
 
@@ -177,8 +177,8 @@ void VolumeTreeModel::addSubSystem( VP1GeoFlags::SubSystemFlag flag,
 
   //Check whether we added this subsystem already:
   bool found(false);
-  foreach(Imp::SectionInfo* section, m_d->allSections) {
-    foreach(Imp::SubSystem* subsys,(section->enabledSubSystems+section->disabledSubSystems)) {
+  for(Imp::SectionInfo* section : m_d->allSections) {
+    for(Imp::SubSystem* subsys : (section->enabledSubSystems+section->disabledSubSystems)) {
       if (subsys->subsysflag==flag) {
 	found=true;
 	break;
@@ -204,7 +204,7 @@ void VolumeTreeModel::addSubSystem( VP1GeoFlags::SubSystemFlag flag,
   //needed - i.e. if this is the first subsystem in a given section):
   Imp::SectionInfo* section(0);
   found = false;
-  foreach(Imp::SectionInfo* sec, m_d->allSections) {
+  for(Imp::SectionInfo* sec : m_d->allSections) {
 	  if (sec->sectionflag==sectionflag) {
 		  //std::cout << "added section: " << sec->sectionflag << std::endl;
 		  section = sec;
@@ -253,7 +253,7 @@ void VolumeTreeModel::enableSubSystem(VP1GeoFlags::SubSystemFlag flag)
   Imp::SubSystem * subsys = m_d->flag2subsystems[flag];
   //Find the appropriate section:
   Imp::SectionInfo* section(0);
-  foreach(Imp::SectionInfo* sec, m_d->allSections) {
+  for(Imp::SectionInfo* sec : m_d->allSections) {
     if (sec->enabledSubSystems.contains(subsys)) {
       //It is already enabled
       assert(!sec->disabledSubSystems.contains(subsys));
@@ -279,7 +279,7 @@ void VolumeTreeModel::enableSubSystem(VP1GeoFlags::SubSystemFlag flag)
     m_d->activeSections << section;//Fixme: Ordering.
   }
   //Put volume handle pointers into quick subsystem access map:
-  foreach (VolumeHandle* volhandle, subsys->volhandlelist ) {
+  for (VolumeHandle* volhandle : subsys->volhandlelist ) {
     m_d->volhandle2subsystem[volhandle] = subsys;
   }
 
@@ -299,7 +299,7 @@ void VolumeTreeModel::disableSubSystem(VP1GeoFlags::SubSystemFlag flag)
   Imp::SubSystem * subsys = m_d->flag2subsystems[flag];
   //Find the appropriate section:
   Imp::SectionInfo* section(0);
-  foreach(Imp::SectionInfo* sec, m_d->allSections) {
+  for(Imp::SectionInfo* sec : m_d->allSections) {
     if (sec->disabledSubSystems.contains(subsys)) {
       //It is already disabled
       assert(!sec->enabledSubSystems.contains(subsys));
@@ -327,7 +327,7 @@ void VolumeTreeModel::disableSubSystem(VP1GeoFlags::SubSystemFlag flag)
   }
 
   //Remove volume handle pointers from quick subsystem access map:
-  foreach (VolumeHandle* volhandle, subsys->volhandlelist ) {
+  for (VolumeHandle* volhandle : subsys->volhandlelist ) {
     Q_ASSERT(m_d->volhandle2subsystem.find(volhandle)!=m_d->volhandle2subsystem.end());
     m_d->volhandle2subsystem.erase(m_d->volhandle2subsystem.find(volhandle));
   }
