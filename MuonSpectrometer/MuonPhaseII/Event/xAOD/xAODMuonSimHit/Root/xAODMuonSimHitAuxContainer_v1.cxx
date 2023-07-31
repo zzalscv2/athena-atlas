@@ -18,6 +18,9 @@ MuonSimHitAuxContainer_v1::MuonSimHitAuxContainer_v1()
     AUX_VARIABLE(identifier);
     AUX_VARIABLE(energyDeposit);
     AUX_VARIABLE(kineticEnergy);
-    AUX_VARIABLE(genParticleLink);
+    
+    AUX_VARIABLE(mcEventIndex);
+    AUX_VARIABLE(mcBarcode);
+    AUX_VARIABLE(mcCollectionType);
 }
 }  // namespace xAOD

@@ -72,6 +72,7 @@ StatusCode MdtSimHitToxAODCnvAlg::execute(const EventContext& ctx) const {
         newHit->setPdgId(hit.particleEncoding());
         newHit->setEnergyDeposit(hit.energyDeposit());
         newHit->setKineticEnergy(hit.kineticEnergy());
+        newHit->setGenParticleLink(hit.particleLink());
     }
     return StatusCode::SUCCESS;
 }
