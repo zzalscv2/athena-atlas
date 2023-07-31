@@ -5,15 +5,20 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, InEventRecoCA, menuSequenceCAToGlobalWrapper, appendMenuSequenceCAToAthena
 from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
 from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool, algorithmCAToGlobalWrapper
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, algorithmCAToGlobalWrapper
 from TrigT2CaloCommon.CaloDef import fastCaloRecoSequenceCfg
 from TrigGenericAlgs.TrigGenericAlgsConfig import TimeBurnerCfg, TimeBurnerHypoToolGen
 from DecisionHandling.DecisionHandlingConf import InputMakerForRoI, ViewCreatorInitialROITool
 from AthenaCommon.CFElements import seqAND
+from AthenaCommon.Configurable import ConfigurableCABehavior
 
+from TrigTrackingHypo.IDCalibHypoConfig import IDCalibHypoToolFromDict, createIDCalibHypoAlg
+from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
+from ..CommonSequences.FullScanInDetConfig import commonInDetFullScanCfg
+from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import getTrackingInputMaker
 
 def getLArNoiseBurstRecoSequence(flags):
     from TrigCaloRec.TrigCaloRecConfig import hltCaloCellMakerCfg
@@ -166,45 +171,49 @@ class CalibChainConfiguration(ChainConfigurationBase):
 # --------------------
 
 def IDCalibTriggerCfg(flags):
+    with ConfigurableCABehavior():
 
-    from TrigTrackingHypo.IDCalibHypoConfig import IDCalibHypoToolFromDict
-    from TrigTrackingHypo.IDCalibHypoConfig import createIDCalibHypoAlg
-    theHypoAlg = createIDCalibHypoAlg(flags, "IDCalibHypo")
+        DummyInputMakerAlg = CompFactory.InputMakerForRoI( "IM_IDCalib_HypoOnlyStep" )
+        DummyInputMakerAlg.RoITool = CompFactory.ViewCreatorInitialROITool()
 
-    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-    theHypoAlg.tracksKey = getInDetTrigConfig('fullScan').tracks_FTF()
+        reco = InEventRecoCA('IDCalibEmptySeq_reco',inputMaker=DummyInputMakerAlg)
 
-    from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
-    from AthenaConfiguration.ComponentFactory import CompFactory
-    DummyInputMakerAlg = conf2toConfigurable(CompFactory.InputMakerForRoI( "IM_IDCalib_HypoOnlyStep" ))
-    DummyInputMakerAlg.RoITool = conf2toConfigurable(CompFactory.ViewCreatorInitialROITool())
+        theHypoAlg = createIDCalibHypoAlg(flags, "IDCalibHypo")
+        theHypoAlg.tracksKey = getInDetTrigConfig('fullScan').tracks_FTF()
 
-    return MenuSequence( flags,
-                         Sequence    = seqAND("IDCalibEmptySeq",[DummyInputMakerAlg]),
-                         Maker       = DummyInputMakerAlg,
-                         Hypo        = theHypoAlg,
-                         HypoToolGen = IDCalibHypoToolFromDict,
-    )
+        selAcc = SelectionCA('IDCalibEmptySeq_sel')
+        selAcc.mergeReco(reco)
+        selAcc.addHypoAlgo(theHypoAlg)
+
+        msca = MenuSequenceCA(
+            flags, selAcc, 
+            HypoToolGen=IDCalibHypoToolFromDict,
+        )
+    if isComponentAccumulatorCfg():
+        return msca
+    else:
+        return appendMenuSequenceCAToAthena(msca, flags)
+
 
 # --------------------
 
 def IDCalibFTFCfg(flags):
+    with ConfigurableCABehavior():
+        reco = InEventRecoCA('IDCalibTrkrecoSeq_reco',inputMaker=getTrackingInputMaker("ftf"))
+        reco.mergeReco(commonInDetFullScanCfg(flags))
 
-    from ..CommonSequences.FullScanInDetSequences import getCommonInDetFullScanSequence
-    ( TrkSeq, sequenceOut ) = RecoFragmentsPool.retrieve(getCommonInDetFullScanSequence,flags)
+        selAcc = SelectionCA('IDCalibTrkrecoSeq')
+        selAcc.mergeReco(reco)
+        selAcc.addHypoAlgo(CompFactory.TrigStreamerHypoAlg("IDCalibTrkDummyStream"))
 
-    from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import getTrackingInputMaker
-    InputMakerAlg=getTrackingInputMaker("ftf")
-
-    from TrigStreamerHypo.TrigStreamerHypoConf import TrigStreamerHypoAlg
-    from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
-    HypoAlg = TrigStreamerHypoAlg("IDCalibTrkDummyStream")
-
-    return MenuSequence( flags,
-                         Sequence    = seqAND("IDCalibTrkrecoSeq", TrkSeq),
-                         Maker       = InputMakerAlg,
-                         Hypo        = HypoAlg,
-                         HypoToolGen = StreamerHypoToolGenerator )
+        msca = MenuSequenceCA(
+            flags, selAcc,
+            HypoToolGen = lambda chainDict: CompFactory.TrigStreamerHypoTool(chainDict['chainName'])
+        )
+    if isComponentAccumulatorCfg():
+        return msca
+    else:
+        return appendMenuSequenceCAToAthena(msca, flags)
 
 #----------------------------------------------------------------
 

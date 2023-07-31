@@ -7,7 +7,7 @@ atlas_subdir( TrigHLTMonitoring )
 atlas_add_component( TrigHLTMonitoring
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaMonitoringKernelLib AthenaMonitoringLib StoreGateLib TrigSteeringEvent xAODTrigger )
+                     LINK_LIBRARIES AthenaMonitoringKernelLib AthenaMonitoringLib StoreGateLib TrigSteeringEvent xAODTrigger CxxUtils )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
