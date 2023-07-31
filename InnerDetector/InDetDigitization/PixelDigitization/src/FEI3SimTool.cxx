@@ -4,6 +4,8 @@
 
 #include "FEI3SimTool.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "PixelConditionsData/ChargeCalibParameters.h" //for Thresholds
+
 #include <cmath>
 
 namespace{
@@ -121,16 +123,16 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
 
     // charge to ToT conversion
     double tot = calibData->getToT(type, moduleHash, FE, charge);
-
+    const auto thresholds = calibData->getThresholds(type, moduleHash, FE);
     // Apply analog threshold, timing simulation
-    double th0 = calibData->getAnalogThreshold(type, moduleHash, FE);
-    double ith0 = calibData->getInTimeThreshold(type, moduleHash, FE);
+    double th0 = thresholds.value;
+    double ith0 = thresholds.inTimeValue;
 
     double thrand1 = CLHEP::RandGaussZiggurat::shoot(rndmEngine);
     double thrand2 = CLHEP::RandGaussZiggurat::shoot(rndmEngine);
     double threshold = th0
-                       + calibData->getAnalogThresholdSigma(type, moduleHash, FE) * thrand1
-                       + calibData->getAnalogThresholdNoise(type, moduleHash, FE) * thrand2;
+                       + thresholds.sigma * thrand1
+                       + thresholds.noise * thrand2;
                        // This noise check is unaffected by digitizationFlags.doInDetNoise in
                        // 21.0 - see PixelCellDiscriminator.cxx in that branch
 

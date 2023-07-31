@@ -9,6 +9,7 @@
 
 // Pixel digitization includes
 #include "FastSiDigitization/PixelFastDigitizationTool.h"
+#include "PixelConditionsData/ChargeCalibParameters.h" //for Thresholds
 
 // Det Descr
 #include "Identifier/Identifier.h"
@@ -520,7 +521,7 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx,
       unsigned int FE = m_pixelReadout->getFE(diodeID, moduleID);
       InDetDD::PixelDiodeType type = m_pixelReadout->getDiodeType(diodeID);
 
-      double th0 = calibData->getAnalogThreshold(type, waferHash, FE) / m_ThrConverted;
+      double th0 = calibData->getThresholds(type, waferHash, FE).value/ m_ThrConverted;
 
       //        if (old_th != th0) std::cout<<"converted threshold "<<th0<<std::endl, old_th= th0;
 

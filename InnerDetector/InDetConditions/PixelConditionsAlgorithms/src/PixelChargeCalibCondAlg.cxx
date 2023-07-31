@@ -9,6 +9,8 @@
 #include "PixelReadoutDefinitions/PixelReadoutDefinitions.h" //Diode types
 #include "PixelConditionsData/ChargeCalibParameters.h" //LegacyFitParameters, LinearFitParameters, Thresholds, Resolutions
 #include "PixelConditionsData/ChargeCalibrationBundle.h"
+#include "PixelConditionsData/PixelChargeCalibUtils.h"
+
 #include "IChargeCalibrationParser.h"
 #include "Run3ChargeCalibParser.h"
 #include "Run2ChargeCalibParser.h"
@@ -22,13 +24,12 @@
 #include <fstream>
 #include <iomanip>
 
+
+using  PixelChargeCalib::getBecAndLayer;
+using  PixelChargeCalib::numChipsAndTechnology;
+
 using namespace PixelChargeCalib; //containing LegacyFitParameters etc
 using InDetDD::enum2uint;
-
-namespace{
-  constexpr int halfModuleThreshold{8};
-} // namespace
-
 
 
 
@@ -110,21 +111,7 @@ StatusCode PixelChargeCalibCondAlg::execute(const EventContext& ctx) const {
             ATH_MSG_FATAL("Parsing failed");
             return StatusCode::FAILURE;
           }
-          //calibration strategy
-          writeCdo -> setCalibrationStrategy(moduleHash, b.calibrationType);
-          // Normal pixel
-          writeCdo -> setThresholds(InDetDD::PixelDiodeType::NORMAL, moduleHash, b.threshold);
-          writeCdo -> setLegacyFitParameters(InDetDD::PixelDiodeType::NORMAL, moduleHash, b.params); 
-          writeCdo -> setLinearFitParameters(InDetDD::PixelDiodeType::NORMAL, moduleHash, b.lin); 
-          writeCdo -> setTotResolutions(moduleHash, b.totRes);
-          // Long pixel
-          writeCdo -> setThresholds(InDetDD::PixelDiodeType::LONG, moduleHash, b.thresholdLong);
-          writeCdo -> setLegacyFitParameters(InDetDD::PixelDiodeType::LONG, moduleHash, b.params); 
-          writeCdo -> setLinearFitParameters(InDetDD::PixelDiodeType::LONG, moduleHash, b.lin); 
-          // Ganged/large pixel
-          writeCdo -> setThresholds(InDetDD::PixelDiodeType::GANGED, moduleHash, b.thresholdGanged);
-          writeCdo -> setLegacyFitParameters(InDetDD::PixelDiodeType::GANGED, moduleHash, b.paramsGanged);
-          writeCdo -> setLinearFitParameters(InDetDD::PixelDiodeType::GANGED, moduleHash, b.linGanged);
+          writeCdo -> setAllFromBundle(moduleHash, b);
         }
       } else if (payload.exists("data") and not payload["data"].isNull()) { // RUN-2 format
         pParser = std::make_unique<Run2ChargeCalibParser>(configData, elements, m_pixelID);
@@ -146,21 +133,7 @@ StatusCode PixelChargeCalibCondAlg::execute(const EventContext& ctx) const {
           ATH_MSG_FATAL("Parsing failed");
           return StatusCode::FAILURE;
         }
-        //calibration strategy
-        writeCdo -> setCalibrationStrategy(channelNumber, b.calibrationType);
-        // Normal pixel
-        writeCdo -> setThresholds(InDetDD::PixelDiodeType::NORMAL, channelNumber, b.threshold);
-        writeCdo -> setLegacyFitParameters(InDetDD::PixelDiodeType::NORMAL, channelNumber, b.params); 
-        writeCdo -> setLinearFitParameters(InDetDD::PixelDiodeType::NORMAL, channelNumber, b.lin); 
-        writeCdo -> setTotResolutions(channelNumber, b.totRes);
-        // Long pixel
-        writeCdo -> setThresholds(InDetDD::PixelDiodeType::LONG, channelNumber, b.thresholdLong); 
-        writeCdo -> setLegacyFitParameters(InDetDD::PixelDiodeType::LONG, channelNumber, b.params);   
-        writeCdo -> setLinearFitParameters(InDetDD::PixelDiodeType::LONG, channelNumber, b.lin); 
-        // Ganged pixel
-        writeCdo -> setThresholds(InDetDD::PixelDiodeType::GANGED, channelNumber, b.thresholdGanged);
-        writeCdo -> setLegacyFitParameters(InDetDD::PixelDiodeType::GANGED, channelNumber, b.paramsGanged);
-        writeCdo -> setLinearFitParameters(InDetDD::PixelDiodeType::GANGED, channelNumber, b.linGanged);
+        writeCdo -> setAllFromBundle(moduleHash, b);
       } else {
         ATH_MSG_ERROR("payload[\"data\"] does not exist for ChanNum " << channelNumber);
         return StatusCode::FAILURE;
@@ -169,14 +142,9 @@ StatusCode PixelChargeCalibCondAlg::execute(const EventContext& ctx) const {
   } else {
     for (unsigned int moduleHash{}; moduleHash < m_pixelID->wafer_hash_max(); moduleHash++) {
       IdentifierHash wafer_hash = IdentifierHash(moduleHash);
-      Identifier wafer_id = m_pixelID->wafer_id(wafer_hash);
-      int barrel_ec = m_pixelID->barrel_ec(wafer_id);
-      int layer     = m_pixelID->layer_disk(wafer_id);
+      const auto & [barrel_ec, layer] = getBecAndLayer(m_pixelID, wafer_hash);
       const InDetDD::SiDetectorElement *element = elements->getDetectorElement(wafer_hash);
-      const InDetDD::PixelModuleDesign *p_design = static_cast<const InDetDD::PixelModuleDesign*>(&element->design());
-      // in some cases numberOfCircuits returns FEs per half-module
-      unsigned int numFE = p_design->numberOfCircuits() < halfModuleThreshold ? p_design->numberOfCircuits() : 2 * p_design->numberOfCircuits();
-      
+      const auto & [numFE, technology] = numChipsAndTechnology(element);
       const Thresholds defaultThreshold{configData->getDefaultAnalogThreshold(barrel_ec, layer), configData->getDefaultAnalogThresholdSigma(barrel_ec, layer),
             configData->getDefaultAnalogThresholdNoise(barrel_ec, layer), configData->getDefaultInTimeThreshold(barrel_ec, layer)};
       const std::vector<Thresholds> allDefaultThresholds(numFE, defaultThreshold);
@@ -204,14 +172,9 @@ StatusCode PixelChargeCalibCondAlg::execute(const EventContext& ctx) const {
   // This is useful for threshold study. So far only threshold value.
   for (unsigned int moduleHash{}; moduleHash < m_pixelID->wafer_hash_max(); moduleHash++) {
     IdentifierHash wafer_hash = IdentifierHash(moduleHash);
-    Identifier wafer_id = m_pixelID->wafer_id(wafer_hash);
-    int barrel_ec = m_pixelID->barrel_ec(wafer_id);
-    int layer     = m_pixelID->layer_disk(wafer_id);
+    const auto & [barrel_ec, layer] = getBecAndLayer(m_pixelID, wafer_hash);
     const InDetDD::SiDetectorElement *element = elements->getDetectorElement(wafer_hash);
-    const InDetDD::PixelModuleDesign *p_design = static_cast<const InDetDD::PixelModuleDesign*>(&element->design());
-    // in some cases numberOfCircuits returns FEs per half-module
-    unsigned int numFE = p_design->numberOfCircuits() < halfModuleThreshold ? p_design->numberOfCircuits() : 2 * p_design->numberOfCircuits();
-
+    const auto & [numFE, technology] = numChipsAndTechnology(element);
     if (configData->getDefaultAnalogThreshold(barrel_ec, layer) > -0.1) {
       for (InDetDD::PixelDiodeType type : diodeTypes) {
         writeCdo -> setAnalogThreshold(type, moduleHash, std::vector<int>(numFE, configData->getDefaultAnalogThreshold(barrel_ec, layer)));

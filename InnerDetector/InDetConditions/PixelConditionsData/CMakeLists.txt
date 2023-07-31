@@ -14,7 +14,7 @@ atlas_add_library( PixelConditionsData
                    PUBLIC_HEADERS PixelConditionsData
                    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES AthenaKernel AthenaPoolUtilities GeoPrimitives Identifier InDetByteStreamErrors InDetIdentifier PixelReadoutDefinitionsLib
+                   LINK_LIBRARIES AthenaKernel AthenaPoolUtilities GeoPrimitives Identifier InDetByteStreamErrors InDetIdentifier PixelReadoutDefinitionsLib PixelReadoutGeometryLib
                    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} )
                    
 atlas_add_test( PixelChargeCondData_test

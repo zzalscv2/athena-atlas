@@ -49,12 +49,6 @@ namespace PixelChargeCalib{
     const PixelID* m_pixelID{};
     ///If the calculated charge exceeds this limit, a linear extrapolation is used at this point
     static constexpr float m_chargeLimit = 1e5; 
-    //
-    std::pair<int, int>
-    getBecAndLayer(const IdentifierHash& hash) const{
-      const Identifier & waferId = m_pixelID->wafer_id(hash);
-      return  {m_pixelID->barrel_ec(waferId), m_pixelID->layer_disk(waferId)};
-    }
     ///Return function converting a string to number type T at index i of data vector
     template<typename T, typename b = std::is_integral<T>>
     std::function<T(size_t)>
