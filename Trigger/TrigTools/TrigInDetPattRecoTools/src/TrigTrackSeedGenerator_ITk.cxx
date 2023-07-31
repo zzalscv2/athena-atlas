@@ -78,8 +78,6 @@ void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDesc
 
   int currentStage = 0;
 
-  std::map<unsigned int, int> n2StageMap;
-
   const FASTRACK_CONNECTOR& conn = *(m_settings.m_conn);
 
   std::vector<TrigFTF_GNN_Edge> edgeStorage;
@@ -88,187 +86,193 @@ void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDesc
   
   int nEdges = 0;
 
-  for(std::map<int, std::vector<FASTRACK_CONNECTION*> >::const_iterator it = conn.m_connMap.begin();it!=conn.m_connMap.end();++it, currentStage++) {
+  for(std::map<int, std::vector<FASTRACK_CONNECTOR::LayerGroup> >::const_iterator it = conn.m_layerGroups.begin();it!=conn.m_layerGroups.end();++it, currentStage++) {
     
-    const std::vector<FASTRACK_CONNECTION*> & vConn = (*it).second;
+    //loop over L1 layers for the current stage
 
-    //2. loop over links
-
-    for(std::vector<FASTRACK_CONNECTION*>::const_iterator cIt=vConn.begin();cIt!=vConn.end();++cIt) {
+    for(const auto& layerGroup : (*it).second) {
       
-      unsigned int src = (*cIt)->m_src;//n2 : the new connectors
-      unsigned int dst = (*cIt)->m_dst;//n1
-
+      unsigned int dst = layerGroup.m_dst;//n1 : inner nodes
+      
       const TrigFTF_GNN_Layer* pL1 = m_settings.m_geo->getTrigFTF_GNN_LayerByKey(dst);
-      const TrigFTF_GNN_Layer* pL2 = m_settings.m_geo->getTrigFTF_GNN_LayerByKey(src);
 
       if (pL1==nullptr) {
 	continue; 
       }
-      if (pL2==nullptr) {
-	continue; 
-      }
 
+      for(const auto& conn : layerGroup.m_sources) {//loop over L2(L1) for the current stage
 
-      //3. loops over eta-bins
+	unsigned int src = conn->m_src;//n2 : the new connectors
 
-      int nSrcBins = pL2->m_bins.size();
-      int nDstBins = pL1->m_bins.size();
+	const TrigFTF_GNN_Layer* pL2 = m_settings.m_geo->getTrigFTF_GNN_LayerByKey(src);
 
-      for(int b1=0;b1<nDstBins;b1++) {//loop over bins in Layer 1
-
-	const TrigFTF_GNN_EtaBin& B1 = m_storage->getEtaBin(pL1->m_bins.at(b1));
-
-	if(B1.empty()) continue;
-
-	float rb1 = pL1->getMinBinRadius(b1);
-
-	for(int b2=0;b2<nSrcBins;b2++) {//loop over bins in Layer 2
-	  
-	  if(m_settings.m_useEtaBinning && (nSrcBins+nDstBins > 2)) {
-	    if((*cIt)->m_binTable[b1 + b2*nDstBins] != 1) continue;//using precomputed LUT
-	  }
-	  
-          const TrigFTF_GNN_EtaBin& B2 = m_storage->getEtaBin(pL2->m_bins.at(b2));
-
-          if(B2.empty()) continue;
-
-	  float rb2 = pL2->getMaxBinRadius(b2);
-
-	  //calculated delta Phi for rb1 ---> rb2 extrapolation
-
-	  float deltaPhi = 0.5*m_phiSliceWidth;//the default sliding window along phi
-
-	  if(m_settings.m_useEtaBinning) {
-            deltaPhi = 0.001 + m_maxCurv*std::fabs(rb2-rb1);
-          }
-
-	  //loop over nodes in Layer 1
-
-	  unsigned int first_it = 0;
-
-	  for(std::vector<TrigFTF_GNN_Node*>::const_iterator n1It = B1.m_vn.begin();n1It!=B1.m_vn.end();++n1It) {
-
-	    TrigFTF_GNN_Node& n1 = *(*n1It);
-
-	    if(n1.m_in.size() == MAX_SEG_PER_NODE) continue;
-
-
-	    float phi1 = n1.m_sp.phi();
-	    float r1 = n1.m_sp.r();
-	    float x1 = n1.m_sp.x(); 
-	    float y1 = n1.m_sp.y(); 
-	    float z1 = n1.m_sp.z();
-	    
-	    //sliding window phi1 +/- deltaPhi
-
-	    float minPhi = phi1 - deltaPhi;
-	    float maxPhi = phi1 + deltaPhi;
-
-	    for(unsigned int n2PhiIdx = first_it; n2PhiIdx<B2.m_vPhiNodes.size();n2PhiIdx++) {
-	      
-	      float phi2 = B2.m_vPhiNodes.at(n2PhiIdx).first;
-	      
-	      if(phi2 < minPhi) {
-		first_it = n2PhiIdx;
-		continue;
-	      }
-	      if(phi2 > maxPhi) break;
-
-	      TrigFTF_GNN_Node& n2 = *B2.m_vn.at(B2.m_vPhiNodes.at(n2PhiIdx).second);
-	      
-	      if(n2.m_out.size() == MAX_SEG_PER_NODE) continue;
-	      if(n2.isFull()) continue;
-	      
-
-	      float r2 = n2.m_sp.r();
-	      float dr = r2 - r1;
-	      
-	      if(dr < m_minDeltaRadius) {
-
-		continue;
-	      }
-	      
-	      float z2 = n2.m_sp.z();
-
-	      float dz = z2 - z1;
-	      float tau = dz/dr;
-	      float ftau = std::fabs(tau);
-	      if (ftau > 36.0) {
-		
-		continue;
-	      }
-	      
-	      if(ftau < n1.m_minCutOnTau) continue;
-	      if(ftau < n2.m_minCutOnTau) continue;
-	      if(ftau > n1.m_maxCutOnTau) continue;
-	      if(ftau > n2.m_maxCutOnTau) continue;
-	      
-	      if (m_settings.m_doubletFilterRZ) {
-
-		float z0 = z1 - r1*tau;
-
-		if(z0 < min_z0 || z0 > max_z0) continue;
-
-		float zouter = z0 + maxOuterRadius*tau;
-
-		if(zouter < cut_zMinU || zouter > cut_zMaxU) continue;                
-	      }
-	      
-
-	      float dx = n2.m_sp.x() - x1;
-	      float dy = n2.m_sp.y() - y1;
-	      
-	      float L2 = 1/(dx*dx+dy*dy);
-                  
-	      float D = (n2.m_sp.y()*x1 - y1*n2.m_sp.x())/(r1*r2);
-
-	      float kappa = D*D*L2; 
-
-	      if(ftau < 4.0) {//eta = 2.1
-		if(kappa > maxKappa_low_eta) {
-		  continue;
-		}
-
-	      }
-	      else {
-		if(kappa > maxKappa_high_eta) {
-		  continue;
-		}
-		
-	      }
-
-	      float curv = D*std::sqrt(L2);//signed curvature
-
-	      float dPhi2 = std::asin(curv*r2);
-
-	      float dPhi1 = std::asin(curv*r1);
-              
-	      if(nEdges < MaxEdges) {
-
-		edgeStorage.push_back(TrigFTF_GNN_Edge());
-		TrigFTF_GNN_Edge* pE = &(edgeStorage.at(nEdges));
-		
-		float* params = pE->m_p;//exp(-eta), curvature, phi1, phi2
-	      
-		params[0] = std::sqrt(1+tau*tau)-tau;
-		params[1] = curv;
-		params[2] = phi1 + dPhi1;
-		params[3] = phi2 + dPhi2;
-	      
-		pE->initialize(&n1, &n2);
-		pE->m_n1->addIn(nEdges);
-		pE->m_n2->addOut(nEdges);
-				
-		nEdges++;
-		
-	      }
-	    }
-	  }
+	if (pL2==nullptr) {
+	  continue; 
 	}
-      }
-    }
-  }
+
+	int nDstBins = pL1->m_bins.size();
+	int nSrcBins = pL2->m_bins.size();
+
+	for(int b1=0;b1<nDstBins;b1++) {//loop over bins in Layer 1
+
+	  const TrigFTF_GNN_EtaBin& B1 = m_storage->getEtaBin(pL1->m_bins.at(b1));
+
+	  if(B1.empty()) continue;
+
+	  float rb1 = pL1->getMinBinRadius(b1);
+	  
+	  //3. loops over source eta-bins
+	  
+	  for(int b2=0;b2<nSrcBins;b2++) {//loop over bins in Layer 2
+	  
+	    if(m_settings.m_useEtaBinning && (nSrcBins+nDstBins > 2)) {
+	      if(conn->m_binTable[b1 + b2*nDstBins] != 1) continue;//using precomputed LUT
+	    }
+	  
+	    const TrigFTF_GNN_EtaBin& B2 = m_storage->getEtaBin(pL2->m_bins.at(b2));
+
+	    if(B2.empty()) continue;
+
+	    float rb2 = pL2->getMaxBinRadius(b2);
+
+	    //calculated delta Phi for rb1 ---> rb2 extrapolation
+
+	    float deltaPhi = 0.5f*m_phiSliceWidth;//the default sliding window along phi
+	    
+	    if(m_settings.m_useEtaBinning) {
+	      deltaPhi = 0.001f + m_maxCurv*std::fabs(rb2-rb1);
+	    }
+	    
+	    unsigned int first_it = 0;
+
+	    for(std::vector<TrigFTF_GNN_Node*>::const_iterator n1It = B1.m_vn.begin();n1It!=B1.m_vn.end();++n1It) {//loop over nodes in Layer 1
+
+	      TrigFTF_GNN_Node* n1 = (*n1It);
+
+	      if(n1->m_in.size() >= MAX_SEG_PER_NODE) continue;
+	    
+	      float phi1 = n1->m_sp.phi();
+	      float r1 = n1->m_sp.r();
+	      float x1 = n1->m_sp.x(); 
+	      float y1 = n1->m_sp.y(); 
+	      float z1 = n1->m_sp.z();
+	      
+	      //sliding window phi1 +/- deltaPhi
+	      
+	      float minPhi = phi1 - deltaPhi;
+	      float maxPhi = phi1 + deltaPhi;
+
+	      for(unsigned int n2PhiIdx = first_it; n2PhiIdx<B2.m_vPhiNodes.size();n2PhiIdx++) {//sliding window over nodes in Layer 2
+		
+		float phi2 = B2.m_vPhiNodes.at(n2PhiIdx).first;
+		
+		if(phi2 < minPhi) {
+		  first_it = n2PhiIdx;
+		  continue;
+		}
+		if(phi2 > maxPhi) break;
+		
+		TrigFTF_GNN_Node* n2 = B2.m_vn.at(B2.m_vPhiNodes.at(n2PhiIdx).second);
+	      
+		if(n2->m_out.size() >= MAX_SEG_PER_NODE) continue;
+		if(n2->isFull()) continue;
+	      
+		float r2 = n2->m_sp.r();
+		float dr = r2 - r1;
+	      
+		if(dr < m_minDeltaRadius) {
+		  continue;
+		}
+	      
+		float z2 = n2->m_sp.z();
+
+		float dz = z2 - z1;
+		float tau = dz/dr;
+		float ftau = std::fabs(tau);
+		if (ftau > 36.0) {
+		  continue;
+		}
+		
+		if(ftau < n1->m_minCutOnTau) continue;
+		if(ftau < n2->m_minCutOnTau) continue;
+		if(ftau > n1->m_maxCutOnTau) continue;
+		if(ftau > n2->m_maxCutOnTau) continue;
+		
+		if (m_settings.m_doubletFilterRZ) {
+		  
+		  float z0 = z1 - r1*tau;
+		  
+		  if(z0 < min_z0 || z0 > max_z0) continue;
+		  
+		  float zouter = z0 + maxOuterRadius*tau;
+		  
+		  if(zouter < cut_zMinU || zouter > cut_zMaxU) continue;                
+		}
+		
+		float dx = n2->m_sp.x() - x1;
+		float dy = n2->m_sp.y() - y1;
+		  
+		float L2 = 1/(dx*dx+dy*dy);
+                  
+		float D = (n2->m_sp.y()*x1 - y1*n2->m_sp.x())/(r1*r2);
+		
+		float kappa = D*D*L2; 
+		
+		if(ftau < 4.0) {//eta = 2.1
+		  if(kappa > maxKappa_low_eta) {
+		    continue;
+		  }
+		  
+		}
+		else {
+		  if(kappa > maxKappa_high_eta) {
+		    continue;
+		  }
+		}
+
+		//match edge candidate against edges incoming to n2
+
+		float exp_eta = std::sqrt(1+tau*tau)-tau;
+		
+		if(currentStage > 20) {
+
+		  bool isGood = false;
+		  float uat_1 = 1.0f/exp_eta;
+		    
+		  for(const auto& n2_in_idx : n2->m_in) {
+		    float tau2 = edgeStorage.at(n2_in_idx).m_p[0]; 
+		    float tau_ratio = tau2*uat_1 - 1.0f;
+		    
+		    if(std::fabs(tau_ratio) < cut_tau_ratio_max){
+		      continue;
+		    }
+		    isGood = true;
+		    break;
+		  }
+		  if(!isGood) isGood = n2->m_in.size() < 2;
+		  if(!isGood) continue;//skip creating [n1 <- n2] edge
+		}
+		
+		float curv = D*std::sqrt(L2);//signed curvature
+		float dPhi2 = std::asin(curv*r2);
+		float dPhi1 = std::asin(curv*r1);
+
+		if(nEdges < MaxEdges) {
+
+		  edgeStorage.emplace_back(n1, n2, exp_eta, curv, phi1 + dPhi1, phi2 + dPhi2);
+		  
+		  n1->addIn(nEdges);
+		  n2->addOut(nEdges);
+
+		  nEdges++;		
+		}
+	      } //loop over n2 (outer) nodes
+	    } //loop over n1 (inner) nodes 
+	  } //loop over source eta bins
+	} //loop over dst eta bins
+      } //loop over L2(L1) layers
+    } //loop over dst layers
+  } //loop over the stages of doublet making
 
   std::vector<const TrigFTF_GNN_Node*> vNodes;
 
@@ -312,7 +316,7 @@ void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDesc
 
       pS->m_nNei  = 0;
       float tau1  = pS->m_p[0];
-      float uat_1 = 1.0/tau1;
+      float uat_1 = 1.0f/tau1;
       float curv1 = pS->m_p[1];
       float Phi1  = pS->m_p[2];
 
@@ -324,9 +328,9 @@ void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDesc
 	
 	
 	float tau2 = pNS->m_p[0];
-	float tau_ratio = tau2*uat_1 - 1.0;
+	float tau_ratio = tau2*uat_1 - 1.0f;
 	
-	if(tau_ratio < -1.0*cut_tau_ratio_max) {
+	if(tau_ratio < -cut_tau_ratio_max) {
 	  last_out = out_idx;
 	  continue;
 	}
@@ -338,15 +342,14 @@ void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDesc
 	if(dPhi<-M_PI) dPhi += 2*M_PI;
 	else if(dPhi>M_PI) dPhi -= 2*M_PI;
 	
-	if(dPhi < -1.0*(cut_dphi_max) || dPhi > cut_dphi_max) {
+	if(dPhi < -cut_dphi_max || dPhi > cut_dphi_max) {
 	  continue;
 	}
 	
 	float curv2 = pNS->m_p[1];
 	float dcurv = curv2-curv1;
-        
-	
-	if(dcurv < -1.0*(cut_dcurv_max) || dcurv > cut_dcurv_max) {
+        	
+	if(dcurv < -cut_dcurv_max || dcurv > cut_dcurv_max) {
 	  continue;
 	}
 		
