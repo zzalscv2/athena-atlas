@@ -5,8 +5,9 @@
 //***************************************************************************
 //                           eFexTOBDecorator  -  description
 //                              -------------------
-//      This algorithm decorates the eFEX TOBs with jet descriminant variables  
+//      This algorithm decorates the eFEX TOBs with jet descriminant variables and, for the EM TOBs, with the cluster layer supercell Et sums
 //      recalculated from input data using the eFEXTOBEtTool
+//      All values are in 25 MeV counts
 //      
 //     begin                : 03 02 2022
 //     email                : paul.daniel.thompson@cern.ch
@@ -32,6 +33,11 @@ namespace LVL1 {
     ATH_CHECK( m_RhadHadDec.initialize() );
     ATH_CHECK( m_WstotDenDec.initialize() );    
     ATH_CHECK( m_WstotNumDec.initialize() );    
+
+    ATH_CHECK( m_ClusterEtSumPSDec.initialize() );
+    ATH_CHECK( m_ClusterEtSumL1Dec.initialize() );
+    ATH_CHECK( m_ClusterEtSumL2Dec.initialize() );
+    ATH_CHECK( m_ClusterEtSumL3Dec.initialize() );
 
     ATH_CHECK( m_RCoreDec.initialize() );      
     ATH_CHECK( m_REnvDec.initialize() );       
@@ -69,6 +75,11 @@ namespace LVL1 {
     SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, unsigned int >   WstotDenDec  (m_WstotDenDec );
     SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, unsigned int >   WstotNumDec  (m_WstotNumDec );
 
+    SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, unsigned int >   ClusterEtSumPSDec  (m_ClusterEtSumPSDec );
+    SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, unsigned int >   ClusterEtSumL1Dec  (m_ClusterEtSumL1Dec );
+    SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, unsigned int >   ClusterEtSumL2Dec  (m_ClusterEtSumL2Dec );
+    SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, unsigned int >   ClusterEtSumL3Dec  (m_ClusterEtSumL3Dec );
+
     //looping over EM TOB to decorate them
     for ( const xAOD::eFexEMRoI* emRoI : *emEDMConstPtr ){
               
@@ -89,6 +100,27 @@ namespace LVL1 {
       RhadHadDec  (*emRoI) = RhadSums[1];
       WstotDenDec (*emRoI) = WstotSums[0];
       WstotNumDec (*emRoI) = WstotSums[1];
+
+      // cluster et per layer summed from SCells
+      unsigned int ps(0); // 0-1 - pre-sampler
+      unsigned int l1(0); // 2-7 - layer 1
+      unsigned int l2(0); // 8-13 - layer 2
+      unsigned int l3(0); // 14-15 - layer 3
+      for(std::size_t i = 0; i < ClusterCellETs.size(); ++i) {
+	if (i<2)
+	  ps += ClusterCellETs[i];
+	else if (i < 8 )
+	  l1 += ClusterCellETs[i];
+	else if (i < 14 )
+	  l2 += ClusterCellETs[i];
+	else
+	  l3 += ClusterCellETs[i];
+      }
+
+      ClusterEtSumPSDec (*emRoI) = ps;
+      ClusterEtSumL1Dec (*emRoI) = l1;
+      ClusterEtSumL2Dec (*emRoI) = l2;
+      ClusterEtSumL3Dec (*emRoI) = l3;
     }
 
     //Setup Tau Decorator Handlers
