@@ -6,11 +6,11 @@ atlas_subdir( InDetMeasurementUtilities )
 atlas_add_library( InDetMeasurementUtilitiesLib
 		   src/ClusterConversionUtilities.cxx
 		   src/SpacePointConversionUtilities.cxx
-		   PUBLIC_HEADERS 
+		   PUBLIC_HEADERS
 		      InDetMeasurementUtilities
-   		   LINK_LIBRARIES 
+   		   LINK_LIBRARIES
 		      InDetPrepRawData
-		      xAODInDetMeasurement 
+		      xAODInDetMeasurement
 		      InDetIdentifier
 		      InDetReadoutGeometry
 		      PixelReadoutGeometryLib
@@ -21,14 +21,14 @@ atlas_add_library( InDetMeasurementUtilitiesLib
 
 # Component(s) in the package:
 atlas_add_component( InDetMeasurementUtilities
-                     src/*.cxx 
-		     src/components/*.cxx
-                     LINK_LIBRARIES 
-		        InDetMeasurementUtilitiesLib 
-			GaudiKernel 
-			AthenaBaseComps 
-			StoreGateLib
-			BeamSpotConditionsData
+                     src/*.cxx
+				     src/components/*.cxx
+                     LINK_LIBRARIES
+		 		        InDetMeasurementUtilitiesLib
+						GaudiKernel
+						AthenaBaseComps
+						StoreGateLib
+						BeamSpotConditionsData
 		     )
 
 atlas_install_scripts( share/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
