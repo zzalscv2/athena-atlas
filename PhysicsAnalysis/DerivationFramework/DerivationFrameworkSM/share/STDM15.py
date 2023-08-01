@@ -25,6 +25,50 @@ from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFram
 from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__TriggerSkimmingTool
 
 #====================================================================
+# SET UP LARGE JET CREATION
+#====================================================================
+
+def addJetOutputs(slimhelper,contentlist,smartlist=[],vetolist=[]):
+    '''
+    copy from  DerivationFrameworkJetEtMiss.JetCommon, which only adds the jet to
+    all variables if the jet content is not already listed in the ExtraVariables
+    '''
+    outputlist = []
+    from AthenaCommon import Logging
+    dfjetlog = Logging.logging.getLogger('JetCommon')
+
+    from DerivationFrameworkJetEtMiss.JetCommon import OutputJets
+    for content in contentlist:
+        if content in OutputJets.keys():
+            for item in OutputJets[content]:
+                if item in vetolist: continue
+                outputlist.append(item)
+        else:
+            outputlist.append(content)
+
+    for item in outputlist:
+        if not slimhelper.AppendToDictionary.has_key(item):
+            slimhelper.AppendToDictionary[item]='xAOD::JetContainer'
+            slimhelper.AppendToDictionary[item+"Aux"]='xAOD::JetAuxContainer'
+        if item in smartlist:
+            dfjetlog.info( "Add smart jet collection "+item )
+            slimhelper.SmartCollections.append(item)
+        else :
+            head=item + '.'
+            add_item=True
+            for var in slimhelper.ExtraVariables :
+                if len(var) > len(head) :
+                    if var[0:len(head)] == head :
+                        dfjetlog.info( "Add specialised content for jet collection "+item )
+                        add_item=False
+                        break
+            if add_item :
+                dfjetlog.info( "Add full jet collection "+item )
+                slimhelper.AllVariables.append(item)
+
+
+
+#====================================================================
 # SET UP STREAM
 #====================================================================
 
@@ -58,24 +102,20 @@ STDM15ThinningHelper.AppendToStream( STDM15Stream )
 #=====================  
 
 # removed for full tracking info...
-PHYS_thinning_expression = "abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 5*mm"
+PHYS_thinning_expression = "abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 0.5*mm"
 
 from DerivationFrameworkInDet.DerivationFrameworkInDetConf import DerivationFramework__TrackParticleThinning
 STDM15TPThinningTool = DerivationFramework__TrackParticleThinning(name                    =  "STDM15TPThinningTool",
                                                                   ThinningService = STDM15ThinningHelper.ThinningSvc(),
-                                                                  SelectionString         = PHYS_thinning_expression, #"InDetTrackParticles.pt > 0.1*GeV && InDetTrackParticles.eta > -2.5 && InDetTrackParticles.eta < 2.5 " #&& abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) <= 5.0", # && (abs(DFCommonInDetTrackZ0AtPV-EventInfo.STDM15_PVz))<3.0",
+                                                                  SelectionString         = PHYS_thinning_expression, 
                                                                   InDetTrackParticlesKey  =  "InDetTrackParticles")
-#ToolSvc += STDM15TPThinningTool
-#thinningTools.append(STDM15TPThinningTool)
-
-#print "anastopoulos"
-#print EventInfo.STDM15_PVz
 
 # Truth leptons and their ancestors and descendants + final-state hadrons
 truth_cond_boson = "((abs(TruthParticles.pdgId) == 22) || (abs(TruthParticles.pdgId) == 23) || (abs(TruthParticles.pdgId) == 24) || (abs(TruthParticles.pdgId) == 25) || (abs(TruthParticles.pdgId) == 35) || (abs(TruthParticles.pdgId) == 36))"
 truth_cond_lepton = "((abs(TruthParticles.pdgId) >= 11) && (abs(TruthParticles.pdgId) <= 14) &&(TruthParticles.pt > 1*GeV) && (TruthParticles.status ==1) && (TruthParticles.barcode<200000))"
 # Truth hadrons for UE analysis
 truth_cond_hadrons = "( (TruthParticles.status ==1) && (TruthParticles.barcode<200000) && (abs(TruthParticles.pdgId) == 2212))"
+
 
 
 from DerivationFrameworkMCTruth.DerivationFrameworkMCTruthConf import DerivationFramework__GenericTruthThinning
@@ -114,124 +154,45 @@ if globalflags.DataSource()=='geant4':
 
     ToolSvc += STDM15TruthLepTool
     ToolSvc += STDM15TruthBosTool
-#    ToolSvc += STDM15PhotonThinning
     ToolSvc += STDM15TruthHadTool
     thinningTools.append(STDM15TruthLepTool)
     thinningTools.append(STDM15TruthBosTool)
-#    thinningTools.append(STDM15PhotonThinning)
     thinningTools.append(STDM15TruthHadTool)
     
 #====================================================================
 # SKIMMING TOOL 
 #====================================================================
 
-filterVal = derivationFlags.WriteDAOD_STDM15Stream.nChFilter
-#print "kristin " + str(filterVal)
-
 muonsRequirements = '(Muons.pt >= 22*GeV) && (abs(Muons.eta) < 2.6) && (Muons.DFCommonMuonsPreselection) && (Muons.DFCommonGoodMuon)'
 electronsRequirements = '(Electrons.pt > 22*GeV) && (abs(Electrons.eta) < 2.6) && (Electrons.DFCommonElectronsLHMedium)'
-chargedParticleRequirements = '(TruthParticles.pt > 500) && (TruthParticles.barcode < 200000) && (TruthParticles.status == 1) && (TruthParticles.charge != 0) && (TruthParticles.theta > 0.163803) && (TruthParticles.theta < 2.97779) && (TruthParticles.HSBool)' #the theta cuts correspond to |eta|<2.5.  Often, theta = 0 or pi, so using eta directly causes and Floating Point Exception
+chargedParticleRequirements = 'true' 
 muonOnlySelection = 'count('+muonsRequirements+') >=1'
 electronOnlySelection = 'count('+electronsRequirements+') >= 1'
 electronMuonSelection = '(count('+electronsRequirements+') + count('+muonsRequirements+')) < 3'
-jetRequirements = '((count (AntiKt4EMPFlowJets.DFCommonJets_Calib_pt > 15*GeV && abs(AntiKt4EMPFlowJets.DFCommonJets_Calib_eta) < 2.6) >= 2) || (count (AntiKt4EMTopoJets.DFCommonJets_Calib_pt > 15*GeV && abs(AntiKt4EMTopoJets.DFCommonJets_Calib_eta) < 2.6) >= 2)) && ((count (AntiKt4EMPFlowJets.DFCommonJets_Calib_pt > 15*GeV && abs(AntiKt4EMPFlowJets.DFCommonJets_Calib_eta) < 2.6) <5) || (count (AntiKt4EMTopoJets.DFCommonJets_Calib_pt > 15*GeV && abs(AntiKt4EMTopoJets.DFCommonJets_Calib_eta) < 2.6) <5)) '
+jetRequirements = '((count (AntiKt4EMPFlowJets.DFCommonJets_Calib_pt > 15*GeV && abs(AntiKt4EMPFlowJets.DFCommonJets_Calib_eta) < 2.6) >= 2) && (count (AntiKt4EMPFlowJets.DFCommonJets_Calib_pt > 15*GeV && abs(AntiKt4EMPFlowJets.DFCommonJets_Calib_eta) < 2.6) <5) ||   count( (AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets.pt > 150.0*GeV) && (abs(AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets.eta) < 2.6) ) > 0 ) '
 
-trackRequirements = 'count( (abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 5*mm)) <100 ' 
+trackRequirements = 'count( (abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 0.5*mm)) <140 ' 
 
-#jetRequirements = '(((((count (AntiKt4EMPFlowJets.DFCommonJets_Calib_pt > 15*GeV && abs(AntiKt4EMPFlowJets.DFCommonJets_Calib_eta) < 2.6) >= 2) || (count (AntiKt4EMTopoJets.DFCommonJets_Calib_pt > 15*GeV && abs(AntiKt4EMTopoJets.DFCommonJets_Calib_eta) < 2.6) >= 2)) && ((count (AntiKt4EMPFlowJets.DFCommonJets_Calib_pt > 15*GeV && abs(AntiKt4EMPFlowJets.DFCommonJets_Calib_eta) < 2.6) <5) || (count (AntiKt4EMTopoJets.DFCommonJets_Calib_pt > 15*GeV && abs(AntiKt4EMTopoJets.DFCommonJets_Calib_eta) < 2.6) <5)) ) ||( count(AntiKt10LCTopoJets.pt > 150*GeV && abs(AntiKt10LCTopoJets.eta) < 2.8)>0) ) '
-
-
-if filterVal > -1 and globalflags.DataSource()=='geant4':
-    chargedParticleSelection = 'count('+chargedParticleRequirements+') < '+str(filterVal)
-    offlineexpression = '(('+muonOnlySelection+' || '+electronOnlySelection+' || '+electronMuonSelection+') && ('+chargedParticleSelection+') && ('+jetRequirements+') && ('+trackRequirements+'))'
-else:
-    offlineexpression = '(('+muonOnlySelection+' || '+electronOnlySelection+' || '+electronMuonSelection+') && ('+jetRequirements+') && ('+trackRequirements+'))'
+offlineexpression = '(('+muonOnlySelection+' || '+electronOnlySelection+' || '+electronMuonSelection+') && ('+jetRequirements+') && ('+trackRequirements+'))'
 
 MuonTriggerRequirement=['HLT_mu20_iloose_L1MU15', 'HLT_mu24_imedium', 'HLT_mu26_ivarmedium', 'HLT_mu24_iloose']
 
 from RecExConfig.InputFilePeeker import inputFileSummary
 triggerRequirement=STDMTriggers.single_e_triggers  + STDMTriggers.single_mu_triggers
-#MuonTriggerRequirement
 
-#from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__TriggerSkimmingTool
 STDM15SkimmingTool_Trig = DerivationFramework__TriggerSkimmingTool( name = "STDM15SkimmingTool_Trig", TriggerListOR = triggerRequirement )
 ToolSvc += STDM15SkimmingTool_Trig
 
-#from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__xAODStringSkimmingTool
 STDM15SkimmingTool_offsel = DerivationFramework__xAODStringSkimmingTool( name = "STDM15SkimmingTool_offsel", expression = offlineexpression )
 ToolSvc += STDM15SkimmingTool_offsel
 
-#from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__FilterCombinationAND
-#STDM15SkimmingTool=DerivationFramework__FilterCombinationAND(name="STDM15SkimmingTool", FilterList=[STDM15SkimmingTool_Trig,STDM15SkimmingTool_offsel] )
-#ToolSvc+=STDM15SkimmingTool
-
-#STDM15SkimmingTool_ntrk = DerivationFramework__xAODStringSkimmingTool( name = "STDM15SkimmingTool_ntrk", expression = "EventInfoAuxDyn.STDM15_nTracks<20" )
-#ToolSvc += STDM15SkimmingTool_ntrk
-
-#====================================================================
-# count tracks around vertex window
-#====================================================================
-#nTrkVertexWindowTool = CfgMgr.DerivationFramework__TrackVtxWindowCounting( name = "STDM15TrackVtxWindowCounting",
-#                                                                   OutputLevel    = DEBUG,
-#                                                                   DecorationPrefix      = "STDM15_",
-#                                                                   TrackContainerName = "InDetTrackParticles",
-#								   WindowSize        = 1.0)
-#ToolSvc += nTrkVertexWindowTool
-
-
-#STDM15SkimmingTool_ntrk = DerivationFramework__xAODStringSkimmingTool( name = "STDM15SkimmingTool_ntrk", expression = "EventInfo.STDM15_nTracks<100" )
-#ToolSvc += STDM15SkimmingTool_ntrk
-
-
-
 from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__FilterCombinationAND
 
-#STDM15SkimmingTool=DerivationFramework__FilterCombinationAND(name="STDM15SkimmingTool", FilterList=[STDM15SkimmingTool_Trig,STDM15SkimmingTool_offsel,STDM15SkimmingTool_ntrk] )
 STDM15SkimmingTool=DerivationFramework__FilterCombinationAND(name="STDM15SkimmingTool", FilterList=[STDM15SkimmingTool_Trig,STDM15SkimmingTool_offsel] )
 ToolSvc+=STDM15SkimmingTool
 
 ToolSvc += STDM15TPThinningTool
 thinningTools.append(STDM15TPThinningTool)
-
-
-#ToolSvc += CfgMgr.GoodRunsListSelectionTool("STDM15GRLTool",GoodRunsListVec=['DerivationFrameworkSM/data/Lowmu.grl.xml'])
-#ToolSvc += CfgMgr.GoodRunsListSelectionTool("STDM15GRLTool",GoodRunsListVec=['DerivationFrameworkSM/data/Highmu.grl.xml'])
-
-#====================================================================
-# AUGMENTATION TOOLS
-#====================================================================
-#augmentationTools = []
-#augmentationTools.append( nTrkVertexWindowTool )
-
-
-#====================================================================
-# count tracks around vertex window
-#====================================================================
-
-
-
-#====================================================================
-# Track-to-Lepton vertex fitting
-#====================================================================
-#ExtraVariablesLeptonVertexFit = ''
-#if af.fileinfos["eventdata_items"].__contains__(('xAOD::TrackParticleContainer', "LowPtRoITrackParticles")) :
-#    import MagFieldServices.SetupField
-#    vtxTool = CfgMgr.TrkToLeptonPVTool("STDM15TrkToLeptonPVTool",OutputLevel=INFO)
-#    ToolSvc += vtxTool
-    
-    # the augmentation tool
-#    fittingTool = CfgMgr.DerivationFramework__LeptonVertexFitting( name = "STDM15LeptonVertexFitting",
-                                                                   #OutputLevel    = DEBUG,
-#                                                                   ElectronContainerName = "Electrons",
-#                                                                   MuonContainerName     = "Muons",
-#                                                                   TrackContainerName    = "LowPtRoITrackParticles",
-#                                                                   DecorationPrefix      = "STDM15_",
-#                                                                   VtxFittingTool        = vtxTool)
-#    ToolSvc += fittingTool
-#    augmentationTools.append( fittingTool )
-#
-#    ExtraVariablesLeptonVertexFit += "LowPtRoITrackParticles.STDM15_LepTrkVtx_z.STDM15_LepTrkVtx_chi2.STDM15_LepTrkVtx_ndf"
-
 
 #=====================================================
 # CREATE AND SCHEDULE THE DERIVATION KERNEL ALGORITHM   
@@ -242,51 +203,46 @@ from DerivationFrameworkCore.DerivationFrameworkCoreConf import DerivationFramew
 # CREATE THE PRIVATE SEQUENCE
 STDM15Sequence = CfgMgr.AthSequencer("STDM15Sequence")
 
-# ADD KERNEL
-STDM15Sequence += CfgMgr.DerivationFramework__DerivationKernel("STDM15Kernel",
-                                                              RunSkimmingFirst = False,
-                                                           #   AugmentationTools = augmentationTools,
-                                                              SkimmingTools = [STDM15SkimmingTool],
-                                                              ThinningTools = thinningTools)
-
-#                                                              AugmentationTools = augmentationTools)
-
-
 # JET REBUILDING
-OutputJets["STDM15"] = ["AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets","AntiKt10TruthTrimmedPtFrac5SmallR20Jets"]
+OutputJets["STDM15"] = ["AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets"]
+largeRJetCollections = ["AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets"]
 
-reducedJetList = ["AntiKt4TruthJets","AntiKt10TruthTrimmedPtFrac5SmallR20Jets","AntiKt2PV0TrackJets","AntiKt4PV0TrackJets"]
+
+reducedJetList = ["AntiKt4TruthJets","AntiKt2PV0TrackJets","AntiKt4PV0TrackJets"]
 
 if DerivationFrameworkHasTruth:
 
    OutputJets["STDM15"].append("AntiKt10TruthTrimmedPtFrac5SmallR20Jets")
+
+   reducedJetList.append("AntiKt10TruthTrimmedPtFrac5SmallR20Jets")
+   largeRJetCollections.append("AntiKt10TruthTrimmedPtFrac5SmallR20Jets")
 
    OutputJets["STDM15"].append("AntiKt10TruthSoftDropBeta100Zcut10Jets")
 
 
 replaceAODReducedJets(reducedJetList, STDM15Sequence, "STDM15Jets")
 
-add_largeR_truth_jets = DerivationFrameworkHasTruth #and not hasattr(STDM15Sequence,'jetalgAntiKt10TruthTrimmedPtFrac5SmallR20')
+add_largeR_truth_jets = DerivationFrameworkHasTruth 
 
 addDefaultTrimmedJets(STDM15Sequence,"STDM15Jets",dotruth=add_largeR_truth_jets)
 
+addVRJets(STDM15Sequence, largeRColls=largeRJetCollections, do_ghost=True)
+
+if DerivationFrameworkHasTruth:
+        for coll in largeRJetCollections:
+                alg = coll.replace('Jets', '')
+                addJetTruthLabel(jetalg=alg, sequence=STDM15Sequence, algname="JetTruthLabelingAlg", labelname="R10TruthLabel_R21Consolidated")
+
+
+# ADD KERNEL
+STDM15Sequence += CfgMgr.DerivationFramework__DerivationKernel("STDM15Kernel",
+                                                              RunSkimmingFirst = False,
+                                                              SkimmingTools = [STDM15SkimmingTool],
+                                                              ThinningTools = thinningTools)
+
+
 # ADD SEQUENCE TO JOB
 DerivationFrameworkJob += STDM15Sequence
-
-#====================================================================
-# SET UP STREAM   
-#====================================================================
-#streamName = derivationFlags.WriteDAOD_STDM15Stream.StreamName
-#fileName   = buildFileName( derivationFlags.WriteDAOD_STDM15Stream )
-#STDM15Stream = MSMgr.NewPoolRootStream( streamName, fileName )
-#STDM15Stream.AcceptAlgs(["STDM15Kernel"])
-
-# Special lines for thinning
-# Thinning service name must match the one passed to the thinning tools
-# from AthenaServices.Configurables import ThinningSvc, createThinningSvc
-# augStream = MSMgr.GetStream( streamName )
-# evtStream = augStream.GetEventStream()
-# svcMgr += createThinningSvc( svcName="STDM15ThinningSvc", outStreams=[evtStream] )
 
 #====================================================================
 # Jet reconstruction/retagging
@@ -315,37 +271,29 @@ STDM15SlimmingHelper.SmartCollections = ["Electrons",
                                         "Muons",
                                         "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
 					"AntiKt10TruthTrimmedPtFrac5SmallR20Jets",
-#                                        "MET_Reference_AntiKt4EMTopo", #
-#                                        "AntiKt4EMTopoJets", #
                                         "MET_Reference_AntiKt4EMPFlow",
-                                        #"AntiKt10LCTopoJets",
+                                        "AntiKt4EMTopoJets",
+                                        "BTagging_AntiKt4EMTopo_201810",
+                                        "AntiKt4EMTopoJets_BTagging201810",
                                         "AntiKt4EMPFlowJets",
-#                                        "BTagging_AntiKt4EMPFlow_201810",
                                         "BTagging_AntiKt4EMPFlow_201903",
-#                                        "AntiKt4EMPFlowJets_BTagging201810", 
                                         "AntiKt4EMPFlowJets_BTagging201903",
                                         "InDetTrackParticles",
-#                                        "LowPtRoITrackParticles",
-#                                        "LowPtRoIVertexContainer",
                                         "PrimaryVertices"]
 
 STDM15SlimmingHelper.IncludeEGammaTriggerContent = True
 STDM15SlimmingHelper.IncludeMuonTriggerContent = True
 
-
-#STDM15SlimmingHelper.ExtraVariables = ExtraContentAll
-STDM15SlimmingHelper.ExtraVariables = ExtraContentSTDM15
-STDM15SlimmingHelper.ExtraVariables += ["AntiKt4EMTopoJets.JetEMScaleMomentum_pt.JetEMScaleMomentum_eta.JetEMScaleMomentum_phi.JetEMScaleMomentum_m"]
+STDM15SlimmingHelper.ExtraVariables = ExtraContentAll_STDM15
 STDM15SlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.OriginVertex"]
-#STDM15SlimmingHelper.ExtraVariables += [ExtraVariablesLeptonVertexFit]
 
 # btagging variables
 from  DerivationFrameworkFlavourTag.BTaggingContent import *
-#STDM15SlimmingHelper.ExtraVariables += BTaggingStandardContent("AntiKt4EMTopoJets")
+STDM15SlimmingHelper.ExtraVariables += BTaggingStandardContent("AntiKt4EMTopoJets")
 STDM15SlimmingHelper.ExtraVariables += BTaggingStandardContent("AntiKt4EMPFlowJets")
 
-#ExtraDictionary["BTagging_AntiKt4EMTopo"]     = "xAOD::BTaggingContainer"
-#ExtraDictionary["BTagging_AntiKt4EMTopoAux"]  = "xAOD::BTaggingAuxContainer"
+ExtraDictionary["BTagging_AntiKt4EMTopo"]     = "xAOD::BTaggingContainer"
+ExtraDictionary["BTagging_AntiKt4EMTopoAux"]  = "xAOD::BTaggingAuxContainer"
 ExtraDictionary["BTagging_AntiKt4EMPFlow"]    = "xAOD::BTaggingContainer"
 ExtraDictionary["BTagging_AntiKt4EMPFlowAux"] = "xAOD::BTaggingAuxContainer"
 
@@ -354,7 +302,6 @@ STDM15SlimmingHelper.AllVariables += ExtraContainersAll
 STDM15SlimmingHelper.AllVariables += ["Electrons"]
 
 if globalflags.DataSource()=='geant4':
-    STDM15SlimmingHelper.ExtraVariables += ExtraContentAllTruth_STDM15
     STDM15SlimmingHelper.AllVariables += ExtraContainersTruth_STDM15
     STDM15SlimmingHelper.AppendToDictionary.update(ExtraDictionary)
 

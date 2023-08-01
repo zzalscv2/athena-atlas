@@ -992,6 +992,20 @@ class WriteDAOD_STDM14Stream (JobProperty):
 jobproperties.DerivationFrameworkProdFlags.add_JobProperty(WriteDAOD_STDM14Stream)
 listAODtoDPD.append(WriteDAOD_STDM14Stream.StreamName)
 
+class WriteDAOD_STDM15Stream (JobProperty):
+    """AFP analysis yy->WW->lnujj"""
+    statusOn = True
+    allowedTypes = ['bool']
+    StoredValue = False
+    StreamName = 'StreamDAOD_STDM15'
+    FileName = ''
+    isVirtual = False
+    DPDMakerScript = "DerivationFrameworkSM/STDM15.py"
+    nChFilter = -2
+    pass
+jobproperties.DerivationFrameworkProdFlags.add_JobProperty(WriteDAOD_STDM15Stream)
+listAODtoDPD.append(WriteDAOD_STDM15Stream.StreamName)
+
 #################################
 # Defined by the Tau group
 #################################

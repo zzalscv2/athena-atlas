@@ -11,7 +11,7 @@ ExtraContentTaus=["TauJets.BDTEleScore.BDTJetScore.eta.jetLink.m.phi.pt.charge.i
 
 ExtraContentBtag=["BTagging_AntiKt4EMTopo.MV2cl100_discriminant"]
 
-ExtraContentVtx=["PrimaryVertices.x.y.z.covariance.trackWeights.vertexType.sumPt2"]
+ExtraContentVtx=["PrimaryVertices.x.y.z.covariance.trackWeights.vertexType.sumPt2.numberDoF.chiSquared"]
 
 ExtraContentTrk=["InDetTrackParticles.definingParametersCovMatrixVec.theta.z0.d0.qOverP"]
 
@@ -24,6 +24,9 @@ ExtraContentJets_PFlow=["AntiKt4EMPFlowJets.EMFrac.Width.TrackWidthPt500.SumPtTr
 ExtraContentJets_STDM11=ExtraContentJets_EMTopo+ExtraContentJets_PFlow
 
 ExtraContentAll=ExtraContentElectrons+ExtraContentPhotons+ExtraContentMuons+ExtraContentTaus+ExtraContentBtag+ExtraContentVtx+ExtraContentTrk+ExtraContentJets
+
+ExtraContentBtag_STDM15=["BTagging_AntiKt4EMPFlowTopo.MV2cl100_discriminant"]
+ExtraContentAll_STDM15=ExtraContentElectrons+ExtraContentMuons+ExtraContentVtx+ExtraContentTrk+ExtraContentJets_PFlow+ExtraContentBtag_STDM15
 
 # These are only added if running on MC
 ExtraElectronsTruth=[".".join(["Electrons", 
@@ -49,6 +52,8 @@ ExtraTausTruth=[]
 
 ExtraContentAllTruth=ExtraElectronsTruth+ExtraPhotonsTruth+ExtraMuonsTruth+ExtraTausTruth
 
+ExtraContentAllTruth_STDM15=ExtraElectronsTruth+ExtraMuonsTruth+ExtraTausTruth
+
 # Extra containers
 ExtraContainersElectron=["ForwardElectrons","ForwardElectronClusters"]
 
@@ -66,7 +71,17 @@ ExtraContainersTruth=["TruthEvents", "TruthParticles", "TruthVertices", "AntiKt4
                       "STDMTruthElectrons",
                       "STDMTruthPhotons",
                       "STDMTruthNeutrinos",
-                      "STDMTruthTaus"]
+                      "STDMTruthTaus"
+			]
+
+ExtraContainersTruth_STDM15=["TruthEvents", "TruthParticles", "TruthVertices", "AntiKt4TruthJets","AntiKt4TruthWZJets",
+                      "TruthMuons",
+                      "TruthElectrons",
+                      "TruthPhotons",
+                      "TruthNeutrinos",
+                      "STDMTruthMuons",
+                      "STDMTruthElectrons",
+                       ]
 
 ExtraDictionary={
     "STDMTruthMuons":"xAOD::TruthParticleContainer" ,
@@ -88,7 +103,6 @@ ExtraContainersTruthPhotons=["egammaTruthParticles"]
 #ExtraContainers6Jets=["AntiKt6EMTopoJets","AntiKt6LCTopoJets", "BTagging_AntiKt6LCTopo", "BTagging_AntiKt6EMTopo"]
 
 ExtraContainersAll=ExtraContainersElectron+ExtraContainersJets+ExtraContainersOthers
-
 
 #Extra variables
 ExtraVariablesEventShape=[
