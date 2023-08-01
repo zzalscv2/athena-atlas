@@ -175,10 +175,8 @@ namespace MuonCombined {
 
     xAOD::Muon* MuonCreatorTool::create(const EventContext& ctx, const MuonCandidate& candidate, OutputData& outputData) const {
         // skip all muons without extrapolated track
-        if (!candidate.extrapolatedTrack()) {
-            ATH_MSG_DEBUG(
-                "MuonCreatorTool::create(...) No extrapolated track - "
-                "aborting. Will not create Muon.");
+        if (m_requireMSOEforSA && !candidate.extrapolatedTrack()) {
+            ATH_MSG_DEBUG("MuonCreatorTool::create(...) No extrapolated track - aborting. Will not create Muon.");
             return nullptr;  // Do we really want to do this?
         }
 
@@ -194,7 +192,8 @@ namespace MuonCombined {
         // create candidate from SA muon only
         addMuonCandidate(ctx, candidate, *muon, outputData);
 
-        if (!muon->extrapolatedMuonSpectrometerTrackParticleLink().isValid()) {
+        using TrackParticleType = xAOD::Muon::TrackParticleType;
+        if (m_requireMSOEforSA && !muon->trackParticle(TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle)) {
             ATH_MSG_DEBUG("Creation of track particle for SA muon failed, removing it");
             outputData.muonContainer->pop_back();
             return nullptr;
@@ -206,28 +205,22 @@ namespace MuonCombined {
             return nullptr;
         }
 
-        // make sure we can extrapolate the track back through the calo, otherwise
-        // it's not a muon shouldn't above requirement that an extrapolated track exist
-        // do this, though? difference between different ways of extrapolating probably
-        // needs to be investigated the muons that are rejected by this all seem to be
-        // useless low-pT SA muons with 2 precision layers that would never make it
-        // into analyses, though
-        std::unique_ptr<Trk::CaloExtension> caloExtension =
-            m_caloExtTool->caloExtension(ctx, *muon->trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle));
-        if (!caloExtension) {
+        const xAOD::TrackParticle* track = muon->trackParticle(TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle);
+        if (!track) track = muon->primaryTrackParticle();
+        std::unique_ptr<Trk::CaloExtension> caloExtension = m_caloExtTool->caloExtension(ctx, *track);
+        if (m_requireCaloDepositForSA && !caloExtension) {
             ATH_MSG_DEBUG("failed to get a calo extension for this SA muon, discard it");
             outputData.muonContainer->pop_back();
             return nullptr;
         }
-        if (caloExtension->caloLayerIntersections().empty()) {
+        if (m_requireCaloDepositForSA && caloExtension->caloLayerIntersections().empty()) {
             ATH_MSG_DEBUG("failed to retrieve any calo layers for this SA muon, discard it");
             outputData.muonContainer->pop_back();
             return nullptr;
         }
-
         // check if there is a cluster container, if yes collect the cells around the
         // muon and fill Etcore variables for muon
-        if (m_useCaloCells) collectCells(ctx, *muon, outputData.clusterContainer, caloExtension.get());
+        if (caloExtension && m_useCaloCells) collectCells(ctx, *muon, outputData.clusterContainer, caloExtension.get());
 
         return muon;
     }
