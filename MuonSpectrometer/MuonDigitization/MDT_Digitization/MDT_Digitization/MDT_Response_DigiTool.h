@@ -38,12 +38,12 @@ public:
 private:
     MDT_Response m_tube;
 
-    double m_clusterDensity;
-    double m_threshold;
-    double m_attenuationLength;
+    Gaudi::Property<double> m_clusterDensity{this, "ClusterDensity" , 8.5};
+    Gaudi::Property<double> m_threshold{this, "Threshold" , 20.};
+    Gaudi::Property<double> m_attenuationLength{this, "AttenuationLength", 16000};
+    Gaudi::Property<bool> m_DoQballGamma{this, "DoQballGamma", false};
 
     const MdtIdHelper* m_idHelper;
-    bool m_DoQballGamma;
 };
 
 #endif

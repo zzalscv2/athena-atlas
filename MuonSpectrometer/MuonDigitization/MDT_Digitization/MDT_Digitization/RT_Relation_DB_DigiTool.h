@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MDT_DIGITIZATION_RT_RELATION_DB_DIGITOOL_H
@@ -36,7 +36,6 @@ public:
     // Methods
     virtual StatusCode initialize() override;
     virtual MdtDigiToolOutput digitize(const MdtDigiToolInput& input, CLHEP::HepRandomEngine* rndmEngine) override final;
-    bool initializeTube();
 
 private:
     // Methods
@@ -45,8 +44,7 @@ private:
     bool isTubeEfficient(double radius, CLHEP::HepRandomEngine* rndmEngine) const;
 
     // Data members
-    double m_maxRadius;
-    const MuonGM::MuonDetectorManager* m_muonGeoMgr;
+    double m_maxRadius{0.};
 
     ToolHandle<MdtCalibrationDbTool> m_calibrationDbTool{this, "CalibrationDbTool", "MdtCalibrationDbTool"};
     Gaudi::Property<double> m_effRadius{this, "EffectiveRadius", 14.4275};

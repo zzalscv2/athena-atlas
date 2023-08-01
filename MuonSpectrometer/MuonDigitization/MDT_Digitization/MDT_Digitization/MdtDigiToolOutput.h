@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MDT_DIGITIZATION_MDTDIGITOOLOUTPUT_H
@@ -18,7 +18,10 @@ Class to store output produced by MDT_Digitization tools:
 
 class MdtDigiToolOutput {
 public:
-    MdtDigiToolOutput(bool wasEff, double time, double adc) : m_wasEff(wasEff), m_time(time), m_adc(adc) {}
+    MdtDigiToolOutput(bool wasEff, double time, double adc) : 
+      m_wasEff(wasEff), 
+      m_time(time), 
+      m_adc(adc) {}
 
 
     double driftTime() const { return m_time; }
@@ -26,9 +29,9 @@ public:
     double wasEfficient() const { return m_wasEff; }
 
 private:
-    bool m_wasEff;
-    double m_time;
-    double m_adc;
+    bool m_wasEff{false};
+    double m_time{0.};
+    double m_adc{0.};
 };
 
 #endif

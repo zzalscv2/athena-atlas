@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MDT_DIGITIZATION_MDTDIGITOOLINPUT_H
@@ -25,14 +25,14 @@ Class to store input needed for the MDT_Digitization tools:
 
 class MdtDigiToolInput {
 public:
-    /*  MdtDigiToolInput(double radius, double posx, double field, double temp) :
-        m_radius(radius),m_xpos(posx),m_field(field),m_temperature(temp) {}
-
-      MdtDigiToolInput(double radius, double posx, double field, double temp, Identifier hitID) :
-        m_radius(radius),m_xpos(posx),m_field(field),m_temperature(temp),m_hitID(hitID) {}
-    */
+ 
     MdtDigiToolInput(double radius, double posx, double field, double temp, double electrcharge, double gammafact) :
-        m_radius(radius), m_xpos(posx), m_field(field), m_temperature(temp), m_electriccharge(electrcharge), m_gamma(gammafact) {}
+        m_radius(radius), 
+        m_xpos(posx), 
+        m_field(field), 
+        m_temperature(temp), 
+        m_electriccharge(electrcharge), 
+        m_gamma(gammafact) {}
 
     MdtDigiToolInput(double radius, double posx, double field, double temp, double electrcharge, double gammafact, Identifier hitID) :
         m_radius(radius),
@@ -42,7 +42,8 @@ public:
         m_electriccharge(electrcharge),
         m_gamma(gammafact),
         m_hitID(hitID) {}
-    ~MdtDigiToolInput() {}
+    
+    ~MdtDigiToolInput() = default;
 
     double radius() const { return m_radius; }
     double positionAlongWire() const { return m_xpos; }
@@ -53,13 +54,13 @@ public:
     Identifier getHitID() const { return m_hitID; }
 
 private:
-    double m_radius;
-    double m_xpos;
-    double m_field;
-    double m_temperature;
-    double m_electriccharge;
-    double m_gamma;
-    Identifier m_hitID;
+    double m_radius{0.};
+    double m_xpos{0.};
+    double m_field{0.};
+    double m_temperature{0.};
+    double m_electriccharge{0.};
+    double m_gamma{0.};
+    Identifier m_hitID{};
 };
 
 #endif

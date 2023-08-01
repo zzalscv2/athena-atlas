@@ -16,10 +16,6 @@ MDT_Response_DigiTool::MDT_Response_DigiTool(const std::string& type, const std:
     AthAlgTool(type, name, parent), m_idHelper(nullptr) {
     declareInterface<IMDT_DigitizationTool>(this);
 
-    declareProperty("ClusterDensity", m_clusterDensity = 8.5);
-    declareProperty("Threshold", m_threshold = 20.);
-    declareProperty("AttenuationLength", m_attenuationLength = 16000);
-    declareProperty("DoQballGamma", m_DoQballGamma = false);
 }
 
 MdtDigiToolOutput MDT_Response_DigiTool::digitize(const MdtDigiToolInput& input, CLHEP::HepRandomEngine* rndmEngine) {
