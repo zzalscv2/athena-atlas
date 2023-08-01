@@ -26,8 +26,10 @@ def usage():
     print ("-g, --gain=, -a, --adc=  specify adc(gain) to print or number of adcs to print with - sign, default is -2")
     print ("-n, --nval=     specify number of values to output, default is all")
     print ("-C, --comment   print comment for every IOV")
-    print ("-d, --default   print also default values stored in AUX01-AUX20 ")
-    print ("-b, --blob      print additional blob info")
+    print ("-i, --iov       print IOVs only for every module")
+    print ("-I, --IOV       print IOVs only")
+    print ("-d, --default   print also default values stored in AUX01-AUX20")
+    print ("-B, --blob      print additional blob info")
     print ("-H, --hex       print frag id instead of module name")
     print ("-P, --pmt       print pmt number in addition to channel number")
     print ("-p, --prefix=   print some prefix on every line ")
@@ -36,8 +38,8 @@ def usage():
     print ("-D, --dbname=   specify dbname part of schema if schema only contains file name, default is CONDBR2")
     print ("-S, --server=   specify server - ORACLE or FRONTIER, default is FRONTIER")
 
-letters = "hr:l:s:t:f:D:S:n:b:e:m:N:X:c:a:g:p:dBCHPk:"
-keywords = ["help","run=","lumi=","schema=","tag=","folder=","dbname=","server=","module=","begin=","end=","chmin=","chmax=","gain=","adc=","chan=","nval=","prefix=","default","blob","hex","pmt","keep=","comment"]
+letters = "hr:l:s:t:f:D:S:n:b:e:m:N:X:c:a:g:p:dBCiIHPk:"
+keywords = ["help","run=","lumi=","schema=","tag=","folder=","dbname=","server=","module=","begin=","end=","chmin=","chmax=","gain=","adc=","chan=","nval=","prefix=","default","blob","hex","pmt","keep=","comment","iov","IOV"]
 
 try:
     opts, extraparams = getopt.getopt(sys.argv[1:],letters,keywords)
@@ -74,9 +76,11 @@ chanmin = -1
 chanmax = -1
 gainmin = -1
 gainmax = -1
-begin = 0
+begin = -1
 end = 2147483647
 iov = False
+iovonly = False
+IOVONLY = False
 comment = False
 keep=[]
 
@@ -102,6 +106,16 @@ for o, a in opts:
         end = int(a)
         iov = True
         one_mod = True
+    elif o in ("-i","--iov"):
+        iov = True
+        iovonly = True
+        if modulename=='AUX-1':
+            modulename='ALL00'
+    elif o in ("-I","--IOV"):
+        iov = True
+        IOVONLY = True
+        if modulename=='AUX-1':
+            modulename='ALL00'
     elif o in ("-a","--adc","-g","--gain"):
         nadc = int(a)
     elif o in ("-m","--module"):
@@ -121,7 +135,7 @@ for o, a in opts:
         lumi = int(a)
     elif o in ("-d","--default"):
         rosmin = 0
-    elif o in ("-b","--blob"):
+    elif o in ("-B","--blob"):
         blob = True
     elif o in ("-H","--hex"):
         hexid = True
@@ -260,6 +274,70 @@ else:
         gainmax = -nadc
     else:
         gainmax = ngain
+
+
+#=== IOV only option
+if iovonly or IOVONLY:
+    if iovonly:
+        print("")
+    if begin<0:
+        begin = end
+    lastRun = -1
+    allsince = {}
+    roslist = list(range(rosmin,rosmax))
+    if comment:
+        roslist += [-1]
+    for ros in roslist:
+        if ros==-1:
+            modlist = [1000]
+            modName = "Comment"
+        else:
+            modlist=range(modmin, min(modmax,TileCalibUtils.getMaxDrawer(ros)))
+        for mod in modlist:
+            if mod<1000:
+                if hexid:
+                    modName = "0x%x" % ((ros<<8)+mod)
+                else:
+                    modName = TileCalibUtils.getDrawerString(ros,mod)
+            iovs = ["None"]
+            dbobjs = blobReader.getDBobjsWithinRange(ros,mod)
+            while dbobjs.goToNext():
+                obj = dbobjs.currentRef()
+                objsince = obj.since()
+                sinceRun = objsince >> 32
+                sinceLum = objsince & 0xFFFFFFFF
+                since    = "(%d,%d)" % (sinceRun, sinceLum)
+                if sinceRun>lastRun:
+                    lastRun = sinceRun
+                if sinceRun>=begin:
+                    if iovs[0]!="None":
+                        iovs += [since]
+                    else:
+                        iovs[0] = since
+                    if since in allsince:
+                        allsince[since] += [modName]
+                    else:
+                        allsince[since] = [modName]
+                else:
+                    iovs[0] = since
+            if iovonly:
+                print("%s %s" % (modName, " ".join(iovs)) )
+    if IOVONLY:
+        print("")
+        all=[]
+        for since in allsince:
+            if comment and allsince[since][-1]!="Comment":
+                allsince[since] += ["NO_COMMENT"]
+            all+=["%s %s" % (since," ".join(allsince[since]))]
+        if len(all)>0:
+            all.sort()
+            for s in all:
+                print(s)
+        else:
+            print("No new IOVs after run",lastRun)
+    #=== close DB
+    db.closeDatabase()
+    sys.exit(0)
 
 
 #=== Filling the iovList

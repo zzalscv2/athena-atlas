@@ -23,7 +23,10 @@ def extractCollectionPrefix(track_collection_name):
 def HistogramDefinitionSvcCfg(flags, **kwargs):
     acc = ComponentAccumulator()
     if flags.Detector.GeometryID:
-        kwargs.setdefault("DefinitionSource", "InDetPVMPlotDefRun2.xml")
+        if flags.PhysVal.IDPVM.doValidateLargeD0Tracks or flags.PhysVal.IDPVM.doValidateMergedLargeD0Tracks:
+            kwargs.setdefault("DefinitionSource", "InDetPVMPlotDefLRT.xml")
+        else:
+            kwargs.setdefault("DefinitionSource", "InDetPVMPlotDefRun2.xml")
     elif flags.Detector.GeometryITk:
         kwargs.setdefault("DefinitionSource", "InDetPVMPlotDefITK.xml")
     kwargs.setdefault("DefinitionFormat", "text/xml")
@@ -44,7 +47,15 @@ def InDetRttTruthSelectionToolCfg(
                       else False)
     kwargs.setdefault("maxProdVertRadius",
                       flags.PhysVal.IDPVM.maxProdVertRadius)
-    kwargs.setdefault("maxEta", 4. if flags.Detector.GeometryITk else 2.5)
+
+    if flags.Detector.GeometryID:
+        if flags.PhysVal.IDPVM.doValidateLargeD0Tracks or flags.PhysVal.IDPVM.doValidateMergedLargeD0Tracks:
+            kwargs.setdefault("maxEta", 3.0)
+        else:
+            kwargs.setdefault("maxEta", 2.5)
+    elif flags.Detector.GeometryITk:
+        kwargs.setdefault("maxEta", 4.0)
+
     kwargs.setdefault("minPt", flags.PhysVal.IDPVM.truthMinPt)
     kwargs.setdefault("ancestorList", flags.PhysVal.IDPVM.ancestorIDs)
     kwargs.setdefault("requireSiHit", flags.PhysVal.IDPVM.requiredSiHits)

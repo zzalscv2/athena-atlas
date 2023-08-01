@@ -57,6 +57,15 @@ private:
   TEfficiency* m_efficiency_vs_prodZ{};
   TEfficiency* m_efficiency_vs_prodZ_extended{};
 
+  TEfficiency* m_TrkRec_eta{};
+  TEfficiency* m_TrkRec_d0{};
+  TEfficiency* m_TrkRec_prodR{};
+  TEfficiency* m_TrkRec_pT{};
+  TEfficiency* m_TrkRec_mu{};
+  TEfficiency* m_TrkRec_eta_d0{};
+  TEfficiency* m_TrkRec_eta_prodR{};
+  TEfficiency* m_TrkRec_eta_pT{};
+
   // plot base has nop default implementation of this; we use it to book the histos
   void initializePlots();
   void finalizePlots();
