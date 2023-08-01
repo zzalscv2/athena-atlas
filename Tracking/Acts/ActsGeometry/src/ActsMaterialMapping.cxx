@@ -31,7 +31,7 @@
 #include <string>
 
 //TEST
-#include "Acts/EventData/NeutralTrackParameters.hpp"
+#include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Propagator/ActionList.hpp"
 #include "Acts/Propagator/Navigator.hpp"
 #include "Acts/Propagator/Propagator.hpp"

@@ -24,7 +24,7 @@
 #include "ActsInterop/Logger.h"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/MagneticField/MagneticFieldContext.hpp"
-#include "Acts/EventData/SingleCurvilinearTrackParameters.hpp"
+#include "Acts/EventData/GenericCurvilinearTrackParameters.hpp"
 #include "Acts/Propagator/Navigator.hpp"
 #include "Acts/Propagator/EigenStepper.hpp"
 #include "Acts/Propagator/StraightLineStepper.hpp"
@@ -142,7 +142,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
       actor.selectHitSurface = selectHitSurface;
       actor.initialParticle = particle;
       // use AnyCharge to be able to handle neutral and charged parameters
-      Acts::SingleCurvilinearTrackParameters<Acts::AnyCharge> startPoint(
+      Acts::GenericCurvilinearTrackParameters<Acts::AnyCharge> startPoint(
           particle.fourPosition(), particle.direction(),
           particle.absoluteMomentum(), particle.charge());
       options.absPdgCode = Acts::makeAbsolutePdgParticle(particle.pdg());
