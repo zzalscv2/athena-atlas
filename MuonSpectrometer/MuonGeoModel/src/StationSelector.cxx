@@ -28,29 +28,25 @@ namespace MuonGM {
             m_selector.push_back(key);
         }
 
-        StationIterator it;
-        for (it = mysql.StationBegin(); it != mysql.StationEnd(); ++it) {
-            if (select(it)) {
-                m_theMap[(*it).first] = (*it).second;
-            }
+        for (const auto& [name, station] :  mysql.stationMap()) {
+            if (select(name))
+                m_theMap[name] = station.get();
         }
     }
 
     StationSelector::StationSelector(const MYSQL& mysql, std::vector<std::string> s) : m_selector(std::move(s)) {
         StationIterator it;
-        for (it = mysql.StationBegin(); it != mysql.StationEnd(); ++it) {
-            if (select(it))
-                m_theMap[(*it).first] = (*it).second;
+        for (const auto& [name, station] :  mysql.stationMap()) {
+            if (select(name))
+                m_theMap[name] = station.get();
         }
     }
 
-    StationIterator StationSelector::begin() { return m_theMap.begin(); }
+    StationSelector::StationIterator StationSelector::begin() { return m_theMap.begin(); }
+    StationSelector::StationIterator StationSelector::end() { return m_theMap.end(); }
 
-    StationIterator StationSelector::end() { return m_theMap.end(); }
-
-    bool StationSelector::select(StationIterator it) {
+    bool StationSelector::select(const std::string& name ) {
         MsgStream log(Athena::getMessageSvc(), "MuonGeoModel");
-        std::string name = (*it).second->GetName();
         int selFlag = m_selectType;
         if (m_selector[0] == "*") {
             selFlag = 1; // override JO choice for general configuration

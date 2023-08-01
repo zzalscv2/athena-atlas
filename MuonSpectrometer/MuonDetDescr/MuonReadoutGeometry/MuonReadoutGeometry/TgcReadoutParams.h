@@ -33,14 +33,46 @@ namespace MuonGM {
 
     class TgcReadoutParams {
     public:
-        TgcReadoutParams(const std::string& name, int iCh, int Version, float WireSp, const float NCHRNG, const float* NWGS,
-                         const float* IWGS1, const float* IWGS2, const float* IWGS3, const float* ROFFST, const float* NSPS,
-                         const float* POFFST);
+        
+        // Readout array sizes
+        enum TgcReadoutArraySizes { MaxNGaps = 3, MaxNGangs = 180, MaxNStrips = 33 };
+        using GasGapIntArray =  std::array<int, MaxNGaps>;
+        using GasGapFloatArray = std::array<float, MaxNGaps>;
+        using WiregangArray = std::array<int, MaxNGangs>;
+        using StripArray = std::array<float, MaxNStrips>;
+
+        
+        TgcReadoutParams(const std::string& name, 
+                         int iCh, 
+                         int Version, 
+                         float WireSp, 
+                         const int NCHRNG, 
+                         GasGapIntArray && numWireGangs,
+                         WiregangArray&& IWGS1, 
+                         WiregangArray&& IWGS2, 
+                         WiregangArray&& IWGS3, 
+                         GasGapIntArray&& gangOffSet, 
+                         GasGapIntArray&& numStrips,
+                         GasGapFloatArray&& stripOffSet);
 
         // Another constructor for the layout Q
-        TgcReadoutParams(const std::string& name, int iCh, int Version, float WireSp, const int NCHRNG, const float* NWGS,
-                         const float* IWGS1, const float* IWGS2, const float* IWGS3, float PDIST, const float* SLARGE, const float* SSHORT,
-                         const float* ROFFST, const float* NSPS, const float* POFFST);
+        TgcReadoutParams(const std::string& name, 
+                         int iCh, 
+                         int Version, float WireSp, 
+                         const int NCHRNG, 
+                         GasGapIntArray && numWireGangs,
+                         WiregangArray&& IWGS1, 
+                         WiregangArray&& IWGS2, 
+                         WiregangArray&& IWGS3, 
+                          
+                         
+                         float PDIST, 
+                         StripArray&& SLARGE, 
+                         StripArray&& SSHORT,
+
+                         GasGapIntArray&& gangOffSet, 
+                         GasGapIntArray&& numStrips,
+                         GasGapFloatArray&& stripOffSet);
 
         ~TgcReadoutParams();
 
@@ -69,9 +101,6 @@ namespace MuonGM {
         float stripPositionOnShortBase(int strip) const;
 
     private:
-        // Readout array sizes
-        enum TgcReadoutArraySizes { MaxNGaps = 3, MaxNGangs = 180, MaxNStrips = 33 };
-
         // Data members
         std::string m_chamberName{};
         int m_chamberType{0};
@@ -79,17 +108,19 @@ namespace MuonGM {
         float m_wirePitch{0.f};
         int m_nPhiChambers{0};
 
-        std::array<int, MaxNGaps> m_nGangs{0};
         int m_nWires[MaxNGaps][MaxNGangs];
-        std::array<int, MaxNGaps> m_gangOffset{0};
-        std::array<int, MaxNGaps> m_nStrips{0};
-        std::array<float, MaxNGaps> m_stripOffset{0.f};
-        std::array<int, MaxNGaps> m_totalWires{0};
+        
+        GasGapIntArray m_nGangs{0};
+        GasGapIntArray m_gangOffset{0};
+        GasGapIntArray m_nStrips{0};
+        GasGapIntArray m_totalWires{0};
+        GasGapFloatArray m_stripOffset{0.f};
+
 
         // strip postion on the bases for the first layer in +Z
         float m_physicalDistanceFromBase{-9999.};
-        std::array<float, MaxNStrips> m_stripPositionOnLargeBase{0.f};
-        std::array<float, MaxNStrips> m_stripPositionOnShortBase{0.f};
+        StripArray m_stripPositionOnLargeBase{0.f};
+        StripArray m_stripPositionOnShortBase{0.f};
 
         // Hard-coded data
         static constexpr float m_gangThickness = 0.05;

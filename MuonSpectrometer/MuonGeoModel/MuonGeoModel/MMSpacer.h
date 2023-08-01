@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MMSpacer_H
@@ -21,11 +21,11 @@ namespace MuonGM {
     class MMSpacer : public DetectorElement {
 
       public:
-        double width;
-        double length;
-        double thickness;
-        double longWidth; // for trapezoidal layers
-        int index;
+        double width{0.};
+        double length{0.};
+        double thickness{0.};
+        double longWidth{0.}; // for trapezoidal layers
+        int index{0};
 
         MMSpacer(const MYSQL& mysql, Component *s);
         GeoPhysVol *build(StoredMaterialManager& matManager,
@@ -35,10 +35,10 @@ namespace MuonGM {
                           const MYSQL& mysql,
                           int minimalgeo, int cutoutson,
                           const std::vector<Cutout *>&);
-        virtual void print() override;
+        virtual void print() const override;
 
       private:
-        MMSpacerComponent *m_component;
+        MMSpacerComponent *m_component{nullptr};
     };
 
 } // namespace MuonGM

@@ -71,7 +71,7 @@ namespace MuonGM {
         return ptube;
     }
 
-    void DriftTube::print() {
+    void DriftTube::print() const {
         MsgStream log(Athena::getMessageSvc(), "MuonGM::DriftTube");
 
         log << MSG::INFO << "Drift tube " << name.c_str() << " :" << std::endl

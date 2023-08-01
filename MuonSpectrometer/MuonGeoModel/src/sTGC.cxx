@@ -254,7 +254,7 @@ namespace MuonGM {
         return ptrd;
     }
 
-    void sTGC::print() {
+    void sTGC::print() const {
         MsgStream log(Athena::getMessageSvc(), "MuGM::sTGC");
         log << MSG::INFO << " sTGC " << name << " :" << endmsg;
     }

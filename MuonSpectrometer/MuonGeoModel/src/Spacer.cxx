@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/Spacer.h"
@@ -138,7 +138,7 @@ namespace MuonGM {
         }
     }
 
-    void Spacer::print() {
+    void Spacer::print() const {
         MsgStream log(Athena::getMessageSvc(), "MuGM:MuonChamber:Spacer");
         log << MSG::INFO << "Spacer " << name << " :" << endmsg;
     }

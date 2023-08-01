@@ -41,7 +41,7 @@ namespace MuonGM {
         length = s->dy;
         m_component = s;
         m_component->cutoutTubeXShift = 0.;
-        layer = new MultiLayer(mysql, s->name);
+        layer = std::make_unique<MultiLayer>(mysql, s->name);
         layer->logVolName = lVName;
         layer->cutoutNsteps = 0;
         layer->width = width;
@@ -55,10 +55,7 @@ namespace MuonGM {
         index = s->index;
     }
 
-    Mdt::~Mdt() {
-        delete layer;
-        layer = nullptr;
-    }
+
 
     GeoFullPhysVol *Mdt::build(StoredMaterialManager& matManager,
                                const MYSQL& mysql) {
@@ -104,18 +101,15 @@ namespace MuonGM {
             }
 
             if (!cutoutsVsX) {              // nominal case (used for BMS/BOG/BMG etc.)
-                int cutoutNtubes[5];        // Number of tubes in sub-multilayer[i]
-                bool cutoutFullLength[5];   // True if this region is outside the cutout
-                double cutoutXtubes[5];     // Location of tube center within sub-ml[i] along x-amdb
-                double cutoutTubeLength[5]; // Tube length
-                double cutoutYmax[5];
+                std::array<int, 5> cutoutNtubes{};        // Number of tubes in sub-multilayer[i]
+                std::array<bool, 5> cutoutFullLength{};   // True if this region is outside the cutout
+                std::array<double, 5> cutoutXtubes{};     // Location of tube center within sub-ml[i] along x-amdb
+                std::array<double, 5> cutoutTubeLength{}; // Tube length
+                std::array<double, 5> cutoutYmax{};
 
                 for (int i = 0; i < 5; i++) {
-                    cutoutNtubes[i] = 0;
                     cutoutFullLength[i] = true;
-                    cutoutXtubes[i] = 0.;
                     cutoutTubeLength[i] = width;
-                    cutoutYmax[i] = 0.;
                 }
 
                 // Order cutouts by increasing dy
@@ -140,9 +134,7 @@ namespace MuonGM {
                 }
 
                 // Calculate quantities needed by multilayer
-                double twidth;
-                double xmin;
-                double xmax;
+                double twidth{0.}, xmin{0.}, xmax{0.};
                 bool cutAtAngle = false;
                 int Nsteps = 0;
                 for (int i = 0; i < Ncuts; i++) {
@@ -177,10 +169,8 @@ namespace MuonGM {
                 cutoutYmax[Nsteps] = top;
                 Nsteps++;
 
-                double regionLength = 0.;
-                double low = 0.;
-                int fullLengthCounter = 0;
-                int tubeCounter = 0;
+                double regionLength{0.}, low{0.};
+                int fullLengthCounter{0}, tubeCounter{0};
                 for (int i = 0; i < Nsteps; i++) {
                     if (cutoutFullLength[i])
                         fullLengthCounter++;
@@ -408,7 +398,7 @@ namespace MuonGM {
         }
     }
 
-    void Mdt::print() {
+    void Mdt::print() const {
         MsgStream log(Athena::getMessageSvc(), "MuonGM::Mdt");
         log << MSG::INFO << "Mdt " << name.c_str() << " :" << endmsg;
     }

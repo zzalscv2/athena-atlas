@@ -79,9 +79,10 @@ namespace MuonGM {
     // cutouts for BMS at eta=+-1 and phi=4 (RPC/DED/MDT) ok //16 tubes shorter + entire RPC and DED (of dbz1) narrower
 
   MuonChamberLite::MuonChamberLite(const MYSQL& mysql, Station *s,
-				   std::map<std::string, GeoFullPhysVol*> * mapFPV,
-				   std::map<std::string, GeoAlignableTransform *> *mapAXF) : 
+                   std::map<std::string, GeoFullPhysVol*> * mapFPV,
+                   std::map<std::string, GeoAlignableTransform *> *mapAXF) : 
     DetectorElement(s->GetName()),
+    AthMessaging{"MuonchamberLite"},
     m_mapFPV(mapFPV),
     m_mapAXF(mapAXF)
   {
@@ -102,13 +103,11 @@ namespace MuonGM {
     GeoVPhysVol *MuonChamberLite::addReadoutLayers(
                                     const MYSQL& mysql,
                                     MuonDetectorManager *manager, int zi, int fi, bool is_mirrored, bool &isAssembly) {
-      MsgStream log(Athena::getMessageSvc(), "MuGM:MuonChamberLite");
-        bool debug = log.level() <= MSG::DEBUG;
-        bool verbose = log.level() <= MSG::VERBOSE;
-        if (verbose) {
-            log << MSG::VERBOSE << " Building a MuonChamberLite for m_station " << m_station->GetName() << " at zi, fi " << zi << " " << fi + 1 << " is_mirrored " << is_mirrored
-                << " is assembly = " << isAssembly << endmsg;
-        }
+      
+        
+        ATH_MSG_VERBOSE( " Building a MuonChamberLite for m_station " << m_station->GetName() << " at zi, fi " << zi << " " << fi + 1 << " is_mirrored " << is_mirrored
+                        << " is assembly = " << isAssembly );
+        
         std::string stname(m_station->GetName(), 0, 3);
 
         double halfpitch = m_station->mdtHalfPitch(mysql);
@@ -133,15 +132,12 @@ namespace MuonGM {
                 amdbOrigine_along_length += halfpitch;
             }
         }
-        if (verbose) {
-            log << MSG::VERBOSE << "amdb origine: in the length direction = " << amdbOrigine_along_length << " in the thickness direction = " << amdbOrigine_along_thickness
-                << endmsg;
-        }
-
+        ATH_MSG_VERBOSE( "amdb origine: in the length direction = " 
+                            << amdbOrigine_along_length << " in the thickness direction = " << amdbOrigine_along_thickness);
+        
         if (isAssembly) {
-            if (debug) {
-                log << MSG::DEBUG << "Station  " << stName << " at zi, fi " << zi << " " << fi + 1 << " will be described as  Assembly" << endmsg;
-            }
+            ATH_MSG_DEBUG("Station  " << stName << " at zi, fi " << zi << " " << fi + 1 << " will be described as  Assembly" );
+        
         }
 
         // for BOG in layout Q we will have to shorten CHV, CMI as these
@@ -151,15 +147,11 @@ namespace MuonGM {
         // if this is a BOG, we want to make cutouts in the MOTHER VOLUME
         if (stName.compare(0, 3, "BOG") == 0 && (manager->IncludeCutoutsBogFlag() || manager->IncludeCutoutsFlag())) {
 
-            if (verbose) {
-                log << MSG::VERBOSE << "amdb org: length= " << amdbOrigine_along_length << " thickness= " << amdbOrigine_along_thickness << endmsg;
-            }
+            ATH_MSG_VERBOSE( "amdb org: length= " << amdbOrigine_along_length << " thickness= " << amdbOrigine_along_thickness );
 
             std::string statType = stName.substr(0, 3);
             if (m_station->GetNrOfCutouts() > 0) {
-                if (debug) {
-                    log << MSG::DEBUG << "Station  " << stName << " at zi, fi " << zi << " " << fi + 1 << " has components with cutouts " << endmsg;
-                }
+                ATH_MSG_DEBUG( "Station  " << stName << " at zi, fi " << zi << " " << fi + 1 << " has components with cutouts " );
                 isAssembly = true;
 
                 // look for FIRST component with cutouts and loop over all of the cutouts:
@@ -205,22 +197,15 @@ namespace MuonGM {
 
 
 
-        double ypos;
-        double zpos;
-        double xpos; // imt new
-        double irad = 0;
-        int ndbz[2] = {0, 0};
+        double ypos{0.}, zpos{0.}, xpos{0.}, irad{0.};
+        std::array<int, 2 > ndbz{0, 0};
 
         // Compute how many RPC modules there are in the m_station
-        int nDoubletR = 0;
-        int nRpc = 0;
-        int nTgc = 0;
-        int nCsc = 0;
-        int nMdt = 0;
+        int nDoubletR{0}, nRpc{0}, nTgc{0}, nCsc{0}, nMdt{0};
         double previous_depth = 0.;
-        if (verbose) {
-            log << MSG::VERBOSE << " Station Name = " << stName << " fi/zi " << fi << "/" << zi << " defining the n. of DoubletR to " << endmsg;
-        }
+
+        ATH_MSG_VERBOSE( " Station Name = " << stName << " fi/zi " << fi << "/" << zi << " defining the n. of DoubletR to " );
+        
 
         for (int j = 0; j < m_station->GetNrOfComponents(); j++) {
             StandardComponent *d = (StandardComponent *)m_station->GetComponent(j);
@@ -246,17 +231,13 @@ namespace MuonGM {
                 nMdt++;
             }
         }
-        if (debug) {
-            log << MSG::DEBUG << " " << nDoubletR;
-            log << MSG::DEBUG << " nMdt/Rpc/Tgc/Csc " << nMdt << "/" << nRpc << "/" << nTgc << "/" << nCsc << endmsg;
-        }
-
+        ATH_MSG_DEBUG( "nDoubletR: " << nDoubletR<<" nMdt/Rpc/Tgc/Csc " << nMdt << "/" << nRpc << "/" << nTgc << "/" << nCsc );
+        
         // Get location and dimensions of long beams and pass them to cross beams
         // in order to make holes
         int numLB = -1;
-        double LBheight = 0;
-        double LBwidth = 0;
-        double LBpos[2] = {-1, -1};
+        double LBheight{0.}, LBwidth{0.};
+        std::array<double, 2> LBpos{-1, -1};
         for (int i = 0; i < m_station->GetNrOfComponents(); i++) {
             StandardComponent *c = (StandardComponent *)m_station->GetComponent(i);
             std::string_view cname = std::string_view(c->name).substr(0, 2);
@@ -302,7 +283,7 @@ namespace MuonGM {
                 if (lbic) {
                     lbic->associated_CMIsubtype = CMIcomponentNumber;
                 } else
-                    log << MSG::ERROR << "MuonChamberLite :: cannot associate a CMI subtype to the LB component " << endmsg;
+                    ATH_MSG_ERROR( "MuonChamberLite :: cannot associate a CMI subtype to the LB component " );
             }
         }
 
@@ -316,21 +297,17 @@ namespace MuonGM {
                                     (zi < 0 && !is_mirrored)); //!< fi here goes from 0 to 7; in amdb from 1 to 8;
         }
         manager->addMuonStation(mstat);
-        if (debug) {
-            log << MSG::DEBUG << " Building a MuonStation for this MuonChamberLite " << m_station->GetName() << " at zi, fi " << zi << " " << fi + 1 << " is_mirrored " << is_mirrored
-                << endmsg;
-        }
-
-	GeoFullPhysVol *ptrd=(*m_mapFPV)[std::string(stName)+"_Station"+"_"+std::to_string(zi)+"_"+std::to_string(fi)];
+        ATH_MSG_DEBUG( " Building a MuonStation for this MuonChamberLite " << m_station->GetName() 
+                        << " at zi, fi " << zi << " " << fi + 1 << " is_mirrored " << is_mirrored);
+        
+        GeoFullPhysVol *ptrd=(*m_mapFPV)[std::string(stName)+"_Station"+"_"+std::to_string(zi)+"_"+std::to_string(fi)];
         // here the big loop over the components !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         for (int i = 0; i < m_station->GetNrOfComponents(); i++) {
             StandardComponent *c = (StandardComponent *)m_station->GetComponent(i);
-            if (verbose) {
-                log << MSG::VERBOSE << " Component index " << c->index << " in loop for " << stName << " " << stationType << " at zi, fi " << zi << " " << fi + 1 << "  cName "
-                    << c->name << " thickness " << c->GetThickness(mysql) << " length " << c->dy << " w, lw " << c->dx1 << " " << c->dx2 << endmsg;
-                log << MSG::VERBOSE << " Component local (amdb) coords " << c->posx << " " << c->posy << " " << c->posz << endmsg;
-            }
-
+            ATH_MSG_VERBOSE( " Component index " << c->index << " in loop for " << stName << " " << stationType << " at zi, fi " << zi << " " << fi + 1 << "  cName "
+                              << c->name << " thickness " << c->GetThickness(mysql) << " length " << c->dy << " w, lw " << c->dx1 << " " << c->dx2 );
+            ATH_MSG_VERBOSE( " Component local (amdb) coords " << c->posx << " " << c->posy << " " << c->posz );
+           
             ypos = -thickness / 2. + c->posz + c->GetThickness(mysql) / 2.;
             zpos = 0.;
             xpos = 0.;
@@ -356,7 +333,7 @@ namespace MuonGM {
             double cthickness = c->GetThickness(mysql);
             int ncutouts = 0;
             std::vector<Cutout *> vcutdef;
-            std::vector<Cutout *> vcutdef_todel;
+            std::vector<std::unique_ptr<Cutout>> vcutdef_todel;
             for (int ii = 0; ii < m_station->GetNrOfCutouts(); ii++) {
                 Cutout *cut = m_station->GetCutout(ii);
                 cut->setThickness(cthickness * 1.01); // extra thickness to be sure
@@ -386,11 +363,9 @@ namespace MuonGM {
                     // in thickness, cutout will coincide with component
                     // not needed (DHW)  double xposcut = 0.;  // rel. to component thickness
                     ncutouts++;
-                    if (verbose) {
-                        log << MSG::VERBOSE << "A new cutout for this component " << endmsg;
-                        log << MSG::VERBOSE << *cut << endmsg;
-                    }
-
+                    ATH_MSG_VERBOSE( "A new cutout for this component " );
+                    ATH_MSG_VERBOSE( *cut );
+                   
                     // Corrected cutout values for BMS7, BMS14
                     if (stName.compare(0, 3, "BMS") == 0) {
                         if (fi == 3) {               // stationPhi = 4
@@ -421,9 +396,8 @@ namespace MuonGM {
                         cut->dead1 = 30.; // why this is not 30. or -30. already ?????
                         if (techname == "MDT03")
                             cut->dy = cut->dy + 30.0; // *cos(cut->dead1*Gaudi::Units::deg);
-                        if (verbose) {
-                            log << MSG::VERBOSE << "Cut dead1 for BOS 6 on C side is " << cut->dead1 << endmsg;
-                        }
+                        ATH_MSG_VERBOSE( "Cut dead1 for BOS 6 on C side is " << cut->dead1 );
+                        
                     }
 
                     // this mirroring of the cutout is necessary only for barrel MDT chambers; for EC the cutout will be automatically mirrored
@@ -438,10 +412,9 @@ namespace MuonGM {
                         // this way, after the rotation by 180 Gaudi::Units::deg, the cut will be at the same global phi
                         // it has for the m_station at z>0
                         vcutdef.push_back(cutmirr);
-                        vcutdef_todel.push_back(cutmirr);
-                        if (verbose) {
-                            log << MSG::VERBOSE << "adding for application mirrored cut \n" << *cutmirr << endmsg;
-                        }
+                        vcutdef_todel.emplace_back(cutmirr);
+                        ATH_MSG_VERBOSE( "adding for application mirrored cut \n" << *cutmirr );
+                        
                     } else if (type == "RPC" || type == "DED") {
                         Cutout *cutRpcType = new Cutout(*cut);
                         // temporary for testing fixes to r.03.09
@@ -462,11 +435,9 @@ namespace MuonGM {
                             }
                         }
 
-                        if (verbose) {
-                            log << MSG::VERBOSE << " Rpc or ded cutout redefined as follows \n" << *cutRpcType << endmsg;
-                        }
+                        ATH_MSG_VERBOSE( " Rpc or ded cutout redefined as follows \n" << *cutRpcType );
                         vcutdef.push_back(cutRpcType);
-                        vcutdef_todel.push_back(cutRpcType);
+                        vcutdef_todel.emplace_back(cutRpcType);
                     } else if (type == "TGC") {
                         // In AMDB, y coordinates of cutout and component are given by
                         // radius from detector z-axis.  To get standard y value of cutout,
@@ -474,11 +445,9 @@ namespace MuonGM {
                         Cutout *tgccut = new Cutout(*cut);
                         tgccut->dy -= c->posy; //
 
-                        if (verbose) {
-                            log << MSG::VERBOSE << " Tgc cutout redefined as follows \n" << *tgccut << endmsg;
-                        }
+                        ATH_MSG_VERBOSE( " Tgc cutout redefined as follows \n" << *tgccut );
                         vcutdef.push_back(tgccut);
-                        vcutdef_todel.push_back(tgccut);
+                        vcutdef_todel.emplace_back(tgccut);
                     } else {
                         vcutdef.push_back(cut);
                     }
@@ -486,9 +455,7 @@ namespace MuonGM {
             } // Loop over cutouts in m_station
 
             if (ncutouts > 0) {
-                if (debug) {
-                    log << MSG::DEBUG << c->name << " of station " << stName << " at fi/zi " << fi + 1 << "/" << zi << " has " << ncutouts << " cutouts " << endmsg;
-                }
+                ATH_MSG_DEBUG( c->name << " of station " << stName << " at fi/zi " << fi + 1 << "/" << zi << " has " << ncutouts << " cutouts " );                
             }
             // define here the total transform that will be applied to component:
             GeoTrf::Transform3D htcomponent(GeoTrf::Transform3D::Identity());
@@ -503,7 +470,7 @@ namespace MuonGM {
             }
 
             if (type == "MDT") {
-	        MdtComponent *md= (MdtComponent *) c;
+                MdtComponent *md= (MdtComponent *) c;
                 htcomponent = GeoTrf::TranslateX3D(ypos) * GeoTrf::TranslateZ3D(zpos) * GeoTrf::TranslateY3D(xpos);
 
                 if (zi < 0 && !is_mirrored && stName[0] == 'B') {
@@ -535,7 +502,7 @@ namespace MuonGM {
                     key += "m" + buildString(mysql.allocPosFindSubtype(statType, fi, zi), 0) + "_" + buildString(mysql.allocPosFindCutout(statType, fi, zi), 0);
                 }
 
-		lvm = (*m_mapFPV)[key+"_"+std::to_string(zi)+"_"+std::to_string(fi)+"_"+std::to_string(md->index)];
+        lvm = (*m_mapFPV)[key+"_"+std::to_string(zi)+"_"+std::to_string(fi)+"_"+std::to_string(md->index)];
 
             } else if (type == "RPC") {
                 // position stuff needed for cutout, used to be below:
@@ -544,7 +511,7 @@ namespace MuonGM {
                 int ndivz = rp->ndivz;
 
                 if (ndivz != 1 || ndivy != 1) {
-                    log << MSG::ERROR << " RPC segmentation z,y " << ndivz << " " << ndivy << endmsg;
+                    ATH_MSG_ERROR( " RPC segmentation z,y " << ndivz << " " << ndivy );
                 }
 
                 double xpos = c->posx;
@@ -552,11 +519,9 @@ namespace MuonGM {
                 if (is_mirrored)
                     xpos = -xpos;
 
-                if (verbose) {
-                    log << MSG::VERBOSE << " In station " << stName << " with " << nDoubletR << " doubletR,"
-                        << " RPC " << (c->name).substr(3, 2) << " has swap flag = " << rp->iswap << " ypos, zpos " << ypos << " " << zpos << " " << endmsg;
-                }
-
+                ATH_MSG_VERBOSE( " In station " << stName << " with " << nDoubletR << " doubletR,"
+                                << " RPC " << (c->name).substr(3, 2) << " has swap flag = " << rp->iswap << " ypos, zpos " << ypos << " " << zpos << " " );
+                
                 htcomponent = GeoTrf::TranslateX3D(ypos) * GeoTrf::TranslateY3D(xpos) * GeoTrf::TranslateZ3D(zpos);
                 if (rp->iswap == -1) { // this is like amdb iswap
                     htcomponent = htcomponent * GeoTrf::RotateY3D(180 * Gaudi::Units::deg);
@@ -575,7 +540,7 @@ namespace MuonGM {
                            buildString(vcutdef.size(), 0) + "_" + buildString(rp->iswap, 0);
                 }
                 xfaligncomponent = (*m_mapAXF)[key+"_"+std::to_string(zi)+"_"+std::to_string(fi)+"_"+std::to_string(rp->index)];
-		lvr = (*m_mapFPV)[key+"_"+std::to_string(zi)+"_"+std::to_string(fi)+"_"+std::to_string(rp->index)];
+                lvr = (*m_mapFPV)[key+"_"+std::to_string(zi)+"_"+std::to_string(fi)+"_"+std::to_string(rp->index)];
             } else if (type == "TGC") {
                 TgcComponent *tg = (TgcComponent *)m_station->GetComponent(i);
                 TgcComponent *tgInner = (TgcComponent *)m_station->GetComponent(0);
@@ -604,7 +569,7 @@ namespace MuonGM {
                 key += chswidth;
                 xfaligncomponent = (*m_mapAXF)[key+"_"+std::to_string(zi)+"_"+std::to_string(fi)];
 
-		lvt =               (*m_mapFPV)[key+"_"+std::to_string(zi)+"_"+std::to_string(fi)];
+                lvt = (*m_mapFPV)[key+"_"+std::to_string(zi)+"_"+std::to_string(fi)];
 
             } else if (type == "CSC") {
                 htcomponent = GeoTrf::TranslateX3D(ypos) * GeoTrf::TranslateZ3D(zpos);
@@ -621,7 +586,7 @@ namespace MuonGM {
             } else {
                 if (type != "MDT" && type != "RPC" && type != "TGC" && type != "SUP" && type != "DED" && type != "SPA" && type != "CHV" && type != "CRO" && type != "CMI" &&
                     type != "LB0" && type != "LBI") {
-                    log << MSG::INFO << "Unknown component " << type << endmsg;
+                   ATH_MSG_WARNING("Unknown component " << type );
                 }
             }
 
@@ -696,15 +661,14 @@ namespace MuonGM {
             }
 
             if (lvt && manager->tgcIdHelper()) {
-                if (debug) {
-                    log << MSG::DEBUG << " Adding a TGC chamber to the tree zi,fi, is_mirrored " << zi << " " << fi + 1 << " " << is_mirrored << endmsg;
-                }
+                
+                ATH_MSG_DEBUG( " Adding a TGC chamber to the tree zi,fi, is_mirrored " << zi << " " << fi + 1 << " " << is_mirrored );
+                
 
                 TgcComponent *tg = (TgcComponent *)m_station->GetComponent(i);
-                if (verbose) {
-                    log << MSG::VERBOSE << "There's a TGC named " << techname << " of thickness " << tg->GetThickness(mysql) << endmsg;
-                }
-
+                
+                ATH_MSG_VERBOSE( "There's a TGC named " << techname << " of thickness " << tg->GetThickness(mysql) );
+                
                 const TgcIdHelper *tgc_id = manager->tgcIdHelper();
                 int stationEta = 0;
                 stationEta = tg->index;
@@ -734,7 +698,7 @@ namespace MuonGM {
                 int ndivz = rp->ndivz;
 
                 if (ndivz != 1 || ndivy != 1) {
-                    log << MSG::ERROR << " RPC segmentation z,y " << ndivz << " " << ndivy << endmsg;
+                    ATH_MSG_ERROR( " RPC segmentation z,y " << ndivz << " " << ndivy );
                 }
 
                 double zpos = -length / 2. + c->posy + c->dy / 2.;
@@ -760,7 +724,7 @@ namespace MuonGM {
                     if (stname.find("BIS") != std::string::npos) {
                         // for BIS78, there is a second RPC doubletZ at amdb-y (MuonGeoModel-z)=144mm inside the station
                         if (std::abs(stationEta)>= 7){
-                           log << MSG::DEBUG <<"BIS78 station eta: "<<stationEta<<" phi: "<<stationPhi<<" dR: "<<doubletR<<" dZ:"<< doubletZ <<" rp: "<<rp->posz<<endmsg;
+                           ATH_MSG_DEBUG("BIS78 station eta: "<<stationEta<<" phi: "<<stationPhi<<" dR: "<<doubletR<<" dZ:"<< doubletZ <<" rp: "<<rp->posz);
                         }
                         if (std::abs(stationEta) >= 7 && rp->posz > 80)
                             doubletZ = 2;
@@ -822,7 +786,7 @@ namespace MuonGM {
                 if (rp->iswap == -1)
                     tag = -1 * tag;
                 if (useAssemblies || isAssembly) {
-		  //
+          //
                 } else {
                     int tag = rp->index + doubletR * 100 + dbphi * 1000;
                     if (rp->iswap == -1)
@@ -836,7 +800,7 @@ namespace MuonGM {
                 setRpcReadoutGeom(mysql, det, rp, ip, "R.ANYTHING", manager);
                 det->setHasCutouts(ncutouts > 0);
                 Identifier id = rpc_id->channelID(stationType, stationEta, stationPhi, doubletR, doubletZ, doubletPhi, gasGap, measuresPhi, strip);
-		        det->setIdentifier(id);
+                det->setIdentifier(id);
                 det->setDoubletR(doubletR);
                 det->setDoubletZ(doubletZ);
                 det->setDoubletPhi(doubletPhi);
@@ -867,9 +831,6 @@ namespace MuonGM {
 
             } // if (lvr && RPCON && manager->rpcIdHelper()) {
 
-            for (size_t i = 0; i < vcutdef_todel.size(); i++)
-                delete vcutdef_todel[i];
-
         } // End big loop over components
         mstat->updateBlineFixedPointInAmdbLRS();
 
@@ -878,8 +839,7 @@ namespace MuonGM {
 
     void MuonChamberLite::setCscReadoutGeom(const MYSQL& mysql,
                                         CscReadoutElement *re, const CscComponent *cc, const Position &ip) {
-      MsgStream log(Athena::getMessageSvc(), "MuGM:MuonChamberLite:setCscReadoutGeom");
-
+      
         re->m_Ssize = cc->dx1;
         re->m_LongSsize = cc->dx2;
         re->m_Rsize = cc->dy;
@@ -896,7 +856,7 @@ namespace MuonGM {
         if (ip.isAssigned) {
             re->setStationS(ip.shift);
         } else {
-	  throw std::runtime_error(" MuonChamberLite::setCscReadoutGeom: position not found ");
+      throw std::runtime_error(" MuonChamberLite::setCscReadoutGeom: position not found ");
         }
 
         const CSC *thisc = dynamic_cast<const CSC*>(mysql.GetTechnology(tname));
@@ -915,8 +875,7 @@ namespace MuonGM {
 
     void MuonChamberLite::setMdtReadoutGeom(const MYSQL& mysql,
                                         MdtReadoutElement *re, const MdtComponent *cc, const Position &ip) {
-        MsgStream log(Athena::getMessageSvc(), "MuGM:MuonChamberLite:setMdtReadoutGeom");
-
+        
         re->m_Ssize = cc->dx1;
         re->m_LongSsize = cc->dx2;
 
@@ -938,7 +897,7 @@ namespace MuonGM {
         if (ip.isAssigned) {
             re->setStationS(ip.shift);
         } else {
-	  throw std::runtime_error(" MuonChamberLite::setMdtReadoutGeom: position not found ");
+            throw std::runtime_error(" MuonChamberLite::setMdtReadoutGeom: position not found ");
         }
 
         std::string tname = cc->name;
@@ -977,7 +936,7 @@ namespace MuonGM {
 
     void MuonChamberLite::setRpcReadoutGeom(const MYSQL& mysql,
                                         RpcReadoutElement *re, const RpcComponent *cc, const Position &ip, const std::string& /*gVersion*/, MuonDetectorManager *manager) {
-        MsgStream log(Athena::getMessageSvc(), "MuGM:MuonChamberLite:setRpcReadoutGeom");
+       
         re->m_Ssize = cc->dx1;
         re->m_LongSsize = cc->dx2;
         re->m_Rsize = cc->GetThickness(mysql);
@@ -992,7 +951,7 @@ namespace MuonGM {
         if (ip.isAssigned) {
             re->setStationS(ip.shift);
         } else {
-	  throw std::runtime_error(" MuonChamberLite::setRpcReadoutGeom: position not found ");
+            throw std::runtime_error(" MuonChamberLite::setRpcReadoutGeom: position not found ");
         }
 
         std::string tname = cc->name;
@@ -1063,8 +1022,7 @@ namespace MuonGM {
 
     void MuonChamberLite::setTgcReadoutGeom(const MYSQL& mysql,
                                         TgcReadoutElement *re, const TgcComponent *cc, const Position &ip, const std::string& stName) {
-        MsgStream log(Athena::getMessageSvc(), "MuGM:MuonChamberLite:setTgcReadoutGeom");
-
+       
         re->m_Ssize = cc->dx1;
         re->m_LongSsize = cc->dx2;
         re->m_Rsize = cc->dy;
@@ -1088,8 +1046,8 @@ namespace MuonGM {
         re->m_readout_name = stName.substr(0, 4) + '_' + index;
         re->m_readoutParams = mysql.GetTgcRPars(tname_index);
 
-        if (re->m_readoutParams == nullptr) {
-            log << MSG::WARNING << " MuonChamberLite::setTgcReadoutGeometry: no readoutParams found for key <" << re->m_readout_name << ">" << endmsg;
+        if (!re->m_readoutParams) {
+            ATH_MSG_WARNING( " MuonChamberLite::setTgcReadoutGeometry: no readoutParams found for key <" << re->m_readout_name << ">" );
         } else {
             re->m_readout_type = re->m_readoutParams->chamberType();
         }
@@ -1115,7 +1073,7 @@ namespace MuonGM {
                 re->m_nwiregangs_per_plane[Nwireplanes - 1] = 0;
                 re->m_strippitch[Nstripplanes - 1] = 0.;
                 re->m_stripwidth[Nstripplanes - 1] = 0.;
-                if (re->m_readoutParams != nullptr)
+                if (re->m_readoutParams)
                     re->m_wirepitch[Nwireplanes - 1] = re->m_readoutParams->wirePitch();
                 else
                     re->m_wirepitch[Nwireplanes - 1] = 0;
@@ -1127,8 +1085,7 @@ namespace MuonGM {
         }
     }
 
-    void MuonChamberLite::print() {
-        MsgStream log(Athena::getMessageSvc(), "MuGM:MuonChamberLite");
-        log << MSG::INFO << "MuonChamberLite " << name << " :" << endmsg;
+    void MuonChamberLite::print() const {
+        ATH_MSG_INFO("MuonChamberLite " << name << " :" );
     }
 } // namespace MuonGM

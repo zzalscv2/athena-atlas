@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/Csc.h"
@@ -47,7 +47,7 @@ namespace MuonGM {
             upWidth = num / (excent - maxwLength);
         }
 
-        layer = new CscMultiLayer(mysql, s->name);
+        layer = std::make_unique<CscMultiLayer>(mysql, s->name);
         layer->width = width;
         layer->longWidth = longWidth;
         layer->upWidth = upWidth;
@@ -59,10 +59,6 @@ namespace MuonGM {
         index = s->index;
     }
 
-    Csc::~Csc() {
-        delete layer;
-        layer = nullptr;
-    }
 
     GeoFullPhysVol *Csc::build(StoredMaterialManager& matManager,
                                const MYSQL& mysql,
@@ -104,7 +100,7 @@ namespace MuonGM {
         return pcsc;
     }
 
-    void Csc::print() {
+    void Csc::print() const {
         MsgStream log(Athena::getMessageSvc(), "MuonGM::Csc");
         log << MSG::INFO << " Csc:: Csc " << name << " : " << endmsg;
     }

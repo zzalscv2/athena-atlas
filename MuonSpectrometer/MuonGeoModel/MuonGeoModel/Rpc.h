@@ -21,14 +21,14 @@ namespace MuonGM {
     class Rpc : public DetectorElement {
 
       public:
-        double width;
-        double length;
-        double thickness;
-        double longWidth; // for trapezoidal layers
-        double idiv;
-        double jdiv;
-        float y_translation;
-        float z_translation;
+        double width{0.};
+        double length{0.};
+        double thickness{0.};
+        double longWidth{0.}; // for trapezoidal layers
+        double idiv{0.};
+        double jdiv{0.};
+        float y_translation{0.f};
+        float z_translation{0.f};
 
         Rpc(const MYSQL& mysql, Component *s);
         GeoVFullPhysVol *build();
@@ -39,12 +39,12 @@ namespace MuonGM {
                               const MYSQL& mysql,
                               int minimalgeo, int cutoutson,
                               const std::vector<Cutout *>&);
-        virtual void print() override;
+        virtual void print() const override;
         unsigned int nGasGaps() const;
 
       private:
-        RpcComponent *m_component;
-        unsigned int m_nlayers;
+        RpcComponent *m_component{nullptr};
+        unsigned int m_nlayers{0};
     };
     inline unsigned int Rpc::nGasGaps() const { return m_nlayers; }
 } // namespace MuonGM

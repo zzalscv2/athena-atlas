@@ -283,7 +283,7 @@ namespace MuonGM {
 
         int m_readout_type{-1};
         std::string m_readout_name;
-        const TgcReadoutParams* m_readoutParams{nullptr};
+        GeoModel::TransientConstSharedPtr <TgcReadoutParams> m_readoutParams{nullptr};
     };
 
     int TgcReadoutElement::Ngasgaps() const { return m_ngasgaps; }
@@ -337,7 +337,7 @@ namespace MuonGM {
     float TgcReadoutElement::getStripPositionOnLargeBase(int strip) const { return m_readoutParams->stripPositionOnLargeBase(strip); }
     float TgcReadoutElement::getStripPositionOnShortBase(int strip) const { return m_readoutParams->stripPositionOnShortBase(strip); }
 
-    const TgcReadoutParams* TgcReadoutElement::getReadoutParams() const { return m_readoutParams; }
+    const TgcReadoutParams* TgcReadoutElement::getReadoutParams() const { return m_readoutParams.get(); }
 
     int TgcReadoutElement::layerHash(const Identifier& id) const { return manager()->tgcIdHelper()->gasGap(id) - 1; }
 

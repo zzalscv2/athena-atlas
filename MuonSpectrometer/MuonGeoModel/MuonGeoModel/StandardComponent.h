@@ -14,19 +14,17 @@ namespace MuonGM {
 
     class StandardComponent : public Component {
       public:
-        StandardComponent();
-        StandardComponent(const StandardComponent &c);
-        StandardComponent &operator=(const StandardComponent &c);
-
-        double posx;
-        double posy;
-        double posz;
-        double deadx;
-        double deady;
-        double dead3;
-        double excent;
-        int iswap;
-        int index;
+        StandardComponent() = default;
+     
+        double posx{0.};
+        double posy{0.};
+        double posz{0.};
+        double deadx{0.};
+        double deady{0.};
+        double dead3{0.};
+        double excent{0.};
+        int iswap{0};
+        int index{0};
         double GetThickness(const MYSQL& mysql) const;
         friend std::ostream &operator<<(std::ostream &os, const StandardComponent &c);
     };

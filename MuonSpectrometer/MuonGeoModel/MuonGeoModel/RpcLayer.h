@@ -20,12 +20,12 @@ namespace MuonGM {
     class RpcLayer : public DetectorElement {
 
       public:
-        double lwidth;
-        double llength;
-        double thickness;
-        double llongWidth; // for trapezoidal layers
+        double lwidth{0.};
+        double llength{0.};
+        double thickness{0.};
+        double llongWidth{0.}; // for trapezoidal layers
 
-        Rpc *m;
+        Rpc *m{nullptr};
 
         RpcLayer(const std::string& s, Rpc *t);
         GeoVPhysVol *build(StoredMaterialManager& matManager,
@@ -34,7 +34,7 @@ namespace MuonGM {
                            const MYSQL& mysql,
                            int cutoutson,
                            const std::vector<Cutout *>&);
-        virtual void print() override;
+        virtual void print() const override;
     };
 } // namespace MuonGM
 

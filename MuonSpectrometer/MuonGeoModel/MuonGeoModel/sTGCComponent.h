@@ -15,12 +15,12 @@ namespace MuonGM {
     class sTGCComponent : public StandardComponent {
 
       public:
-        sTGCComponent();
+        sTGCComponent() = default;
         friend std::ostream &operator<<(std::ostream &os, const sTGCComponent &c);
 
-        double yCutout;
-        double yCutoutCathode = 0.0;
-        std::string subType;
+        double yCutout{0.};
+        double yCutoutCathode{0.};
+        std::string subType{};
     };
 
 } // namespace MuonGM

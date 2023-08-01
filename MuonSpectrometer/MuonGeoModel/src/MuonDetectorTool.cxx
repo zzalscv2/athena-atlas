@@ -224,22 +224,16 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
     // Locate the top level experiment node
     //
 
-    int tempControlCscIntAlines = m_controlCscIntAlines;
-    if (!m_useCscIntAlines)
-        tempControlCscIntAlines = 0;
     ATH_MSG_INFO("Properties have been set as follows: " << endmsg
                                                          // <<"    LayoutName                     "<< m_layout.substr(0,1) <<endmsg
-                                                         << "    LayoutName                     " << tempLayout.substr(0, 1) << endmsg << "    IncludeCutouts                 "
-                                                         << m_includeCutouts << endmsg << "    IncludeCutoutsBog              " << m_includeCutoutsBog << endmsg
-                                                         << "    IncludeCtbBis                  " << m_includeCtbBis << endmsg << "    ControlAlines                  "
-                                                         << m_controlAlines << endmsg << "    MinimalGeoFlag                 " << m_minimalGeoFlag << endmsg
-                                                         << "    EnableCscIntAlignment          " << m_useCscIntAlines << endmsg << "    EnableCscIntAlignmentFromGM    "
+                                                         << "    LayoutName                     " << tempLayout.substr(0, 1) << endmsg 
+                                                         << "    IncludeCutouts                 " << m_includeCutouts << endmsg 
+                                                         << "    IncludeCutoutsBog              " << m_includeCutoutsBog << endmsg
+                                                         << "    IncludeCtbBis                  " << m_includeCtbBis << endmsg 
+                                                         << "    MinimalGeoFlag                 " << m_minimalGeoFlag << endmsg
+                                                         << "    EnableCscIntAlignmentFromGM    "
                                                          << m_useCscIntAlinesFromGM << endmsg << "    FillCacheInitTime              " << m_fillCache_initTime);
-    if (m_useCscIntAlines)
-        ATH_MSG_INFO("    ControlCscIntAlines            " << tempControlCscIntAlines);
-    else
-        ATH_MSG_INFO("    ControlCscIntAlines   reset to " << tempControlCscIntAlines);
-
+   
     if (m_stationSelection > 0) {
         StationSelector::SetSelectionType(m_stationSelection);
         if ((m_selectedStations.size() + m_selectedStEta.size() + m_selectedStPhi.size()) < 1) {
@@ -294,11 +288,7 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
         theFactory.setCutoutsFlag(m_includeCutouts);
         theFactory.setCutoutsBogFlag(m_includeCutoutsBog);
         theFactory.setCtbBisFlag(m_includeCtbBis);
-        theFactory.setControlAlines(m_controlAlines);
         theFactory.setMinimalGeoFlag(m_minimalGeoFlag);
-        if (!m_useCscIntAlines)
-            tempControlCscIntAlines = 0;
-        theFactory.setControlCscIntAlines(tempControlCscIntAlines);
         theFactory.setDumpMemoryBreakDown(m_dumpMemoryBreakDown);
         theFactory.setCachingFlag(m_cachingFlag);
         theFactory.setCacheFillingFlag(m_fillCache_initTime);
@@ -312,9 +302,6 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
         theFactory.setRDBAccess(access);
         // theFactory.setUseRDB(1);
         theFactory.setAltAsciiDBMap(altAsciiDBMap);
-        theFactory.setDumpAlines(m_dumpAlines);
-        theFactory.setDumpCscIntAlines(m_dumpCscIntAlines);
-        theFactory.setUseCscIntAlinesFromGM(m_useCscIntAlinesFromGM);
         try {
             //
             // This strange way of casting is to avoid an

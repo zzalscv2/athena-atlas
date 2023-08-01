@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/SpacerBeam.h"
 
+#include "AthenaKernel/getMessageSvc.h"
 #include "GeoModelKernel/GeoBox.h"
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "GeoModelKernel/GeoLogVol.h"
@@ -25,7 +26,7 @@
 namespace MuonGM {
 
     SpacerBeam::SpacerBeam(const MYSQL& mysql,
-                           Component *ss) : DetectorElement(ss->name), m_hole_pos1(0), m_hole_pos2(0), m_lb_height(0), m_lb_width(0), m_cross_excent(0) {
+                           Component *ss) : DetectorElement(ss->name) {
         StandardComponent *s = (StandardComponent *)ss;
         std::string_view componentType = std::string_view(s->name).substr(0, 3);
 
@@ -137,7 +138,7 @@ namespace MuonGM {
         }
     }
 
-    void SpacerBeam::print() {
+    void SpacerBeam::print() const {
         MsgStream log(Athena::getMessageSvc(), "MuGM::SpacerBeam");
         log << MSG::INFO << " SpacerBeam " << name << " :" << endmsg;
     }

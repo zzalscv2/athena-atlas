@@ -602,10 +602,6 @@ namespace MuonGM {
         return StatusCode::SUCCESS;
     }
 
-    void MuonDetectorManager::storeTgcReadoutParams(std::unique_ptr<const TgcReadoutParams> x) {
-        m_TgcReadoutParamsVec.push_back(std::move(x));
-    }
-
     StatusCode MuonDetectorManager::updateCSCInternalAlignmentMap(const ALineContainer& ilineData) {
        
         if (ilineData.empty()) {

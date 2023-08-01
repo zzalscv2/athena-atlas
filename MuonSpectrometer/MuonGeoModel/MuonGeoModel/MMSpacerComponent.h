@@ -14,7 +14,7 @@ namespace MuonGM {
     class MMSpacerComponent : public StandardComponent {
 
       public:
-        MMSpacerComponent();
+        MMSpacerComponent() = default;
         friend std::ostream &operator<<(std::ostream &os, const MMSpacerComponent &c);
     };
 

@@ -14,30 +14,30 @@ namespace MuonGM {
 
     class sTGC_Technology : public Technology {
       public:
-        double thickness;
-        int nlayers;
-        double gasThickness;
-        double pcbThickness;
-        double pcbThickness150;
-        double pcbThickness200;
-        double coverThickness;
-        double f4Thickness;
-        double f5Thickness;
-        double f6Thickness;
+        double thickness{0.};
+        int nlayers{0};
+        double gasThickness{0.};
+        double pcbThickness{0.};
+        double pcbThickness150{0.};
+        double pcbThickness200{0.};
+        double coverThickness{0.};
+        double f4Thickness{0.};
+        double f5Thickness{0.};
+        double f6Thickness{0.};
 
-        int geoLevel;
+        int geoLevel{0};
 
         // inner structure parameters (to be defined)
 
         // constructor
         inline sTGC_Technology(std::string s);
-        inline double Thickness();
+        inline double Thickness() const;
     };
 
     sTGC_Technology::sTGC_Technology(std::string s)
-        : Technology(s), thickness(0.), nlayers(0), gasThickness(0.), pcbThickness(0.), pcb150Thickness(0.), pcb200Thickness(0.), coverThickness(0.), f4Thickness(0.), f5Thickness(0.), f6Thickness(0.), geoLevel(0) {}
+        : Technology(s){}
 
-    double sTGC_Technology::Thickness() {
+    double sTGC_Technology::Thickness() const {
         // thickness=nlayers*(gasThickness+pcbThickness) + pcbThickness;
         return thickness;
     }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MuonChamber_H
@@ -8,6 +8,7 @@
 #include "GeoModelKernel/GeoVFullPhysVol.h"
 #include "MuonGeoModel/DetectorElement.h"
 #include "MuonGeoModel/Station.h"
+#include "AthenaBaseComps/AthMessaging.h"
 
 class IMessageSvc;
 
@@ -25,24 +26,24 @@ namespace MuonGM {
     class FPVMAP;
     class MYSQL;
 
-    class MuonChamber : public DetectorElement {
+    class MuonChamber : public DetectorElement, public AthMessaging {
 
       public:
-        double width;
-        double length;
-        double thickness;
-        double longWidth; // for trapezoidal layers
+        double width{0.};
+        double length{0.};
+        double thickness{0.};
+        double longWidth{0.}; // for trapezoidal layers
 
-        double rotangle[10]{};
+        std::array<double, 10> rotangle{};
 
-        inline void setFineClashFixingFlag(int value);
+        void setFineClashFixingFlag(int value);
 
         MuonChamber(const MYSQL& mysql, Station *s);
         GeoVPhysVol *build(StoredMaterialManager& matManager,
                            const MYSQL& mysql,
                            MuonDetectorManager *manager, int ieta, int iphi, bool is_mirrored, bool &isAssembly);
-        virtual void print() override;
-        inline void setFPVMAP(FPVMAP *fpvmap);
+        virtual void print() const override;
+        void setFPVMAP(FPVMAP *fpvmap);
 
       private:
         void setCscReadoutGeom(const MYSQL& mysql,
@@ -54,16 +55,13 @@ namespace MuonGM {
         void setTgcReadoutGeom(const MYSQL& mysql,
                                TgcReadoutElement *re, const TgcComponent *cc, const Position &p, const std::string& statname);
 
-        Station *m_station;
-        IMessageSvc *m_msgSvc;
-        int m_enableFineClashFixing;
+        Station *m_station{nullptr};
+        int m_enableFineClashFixing{0};
 
         FPVMAP *m_FPVMAP = nullptr;
     };
 
-    void MuonChamber::setFineClashFixingFlag(int value) { m_enableFineClashFixing = value; }
-    void MuonChamber::setFPVMAP(FPVMAP *fpvmap) { m_FPVMAP = fpvmap; }
-
+    
 } // namespace MuonGM
 
 #endif

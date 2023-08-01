@@ -11,23 +11,23 @@ namespace MuonGM {
 
     class MuonSystemDescription {
       public:
-        double barrelInnerRadius; // Inner radius behind the idet
-        double innerRadius;       // Inner radius at the beam pipe
-        double outerRadius;
-        double endcapFrontFace; // Z at the endcap front face
-        double length;
-        double barreLength;
-        double barrelInterRadius;
+        double barrelInnerRadius{0.}; // Inner radius behind the idet
+        double innerRadius{0.};       // Inner radius at the beam pipe
+        double outerRadius{0.};
+        double endcapFrontFace{0.}; // Z at the endcap front face
+        double length{0.};
+        double barreLength{0.};
+        double barrelInterRadius{0.};
 
-        double extraZ;
-        double extraR;
+        double extraZ{0.};
+        double extraR{0.};
 
-        std::string amdb;
+        std::string amdb{};
 
         MuonSystemDescription(std::string n);
 
       private:
-        std::string m_name;
+        std::string m_name{};
     };
 } // namespace MuonGM
 

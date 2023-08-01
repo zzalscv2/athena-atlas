@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CscMultiLayer_H
@@ -17,20 +17,20 @@ namespace MuonGM {
     class CscMultiLayer : public DetectorElement {
 
       public: // data members
-        int nrOfLayers;
+        int nrOfLayers{0};
 
-        double width;
-        double longWidth;
-        double upWidth;
+        double width{0.};
+        double longWidth{0.};
+        double upWidth{0.};
 
-        double excent;
-        double length;
-        double physicalLength;
-        double maxwLength;
+        double excent{0.};
+        double length{0.};
+        double physicalLength{0.};
+        double maxwLength{0.};
 
-        double thickness;
-        double cscthickness;
-        double dim[8]{};
+        double thickness{0.};
+        double cscthickness{0.};
+        std::array<double, 8> dim{};
 
       public: // methods
         CscMultiLayer(const MYSQL& mysql, const std::string& n);
@@ -40,7 +40,7 @@ namespace MuonGM {
                            const MYSQL& mysql,
                            int cutoutson,
                            const std::vector<Cutout *>& vcutdef);
-        virtual void print() override;
+        virtual void print() const override;
     };
 
 } // namespace MuonGM

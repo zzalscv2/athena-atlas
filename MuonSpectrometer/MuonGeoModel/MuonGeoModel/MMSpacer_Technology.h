@@ -18,16 +18,17 @@ namespace MuonGM {
         inline MMSpacer_Technology(MYSQL& mysql, const std::string& s);
         inline double Thickness() const;
 
-        int lowZCutOuts;
-        double lowZCutOutWidth;
-        double lowZCutOutDZ;
-        int highZCutOuts;
-        double highZCutOutWidth;
-        double highZCutOutDZ;
+        int lowZCutOuts{0};
+        double lowZCutOutWidth{0.};
+        double lowZCutOutDZ{0.};
+
+        int highZCutOuts{0};
+        double highZCutOutWidth{0.};
+        double highZCutOutDZ{0.};
     };
 
     MMSpacer_Technology::MMSpacer_Technology(MYSQL& mysql, const std::string& s)
-        : Technology(mysql, s), lowZCutOuts(0), lowZCutOutWidth(0.), lowZCutOutDZ(0.), highZCutOuts(0), highZCutOutWidth(0.), highZCutOutDZ(0.) {}
+        : Technology(mysql, s) {}
 
     double MMSpacer_Technology::Thickness() const { return thickness; }
 

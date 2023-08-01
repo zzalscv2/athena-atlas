@@ -29,23 +29,28 @@ namespace MuonGM {
         //             zz1=2, zz2=50, zz3=64, zz4=4;
         // picture in dice/muons/rpcsup.txt
 
-        double alFlangeThickness;     // XX1
-        double alHorFlangeLength;     // ZZ1 for sup1 and sup2     //ZZ2     for sup3
-        double alVerFlangeLength;     // 0   for sup1 and sup2     //XX2-XX1 for sup3
-        double alVerProfileThickness; // XX1 for sup1 and sup2     //ZZ4     for sup3
-        double alHorProfileThickness; // 0(not defined) for sup1,2 //XX4-XX3 for sup3
-        double largeVerClearance;     // XX2 for sup1 and sup2     //XX4     for sup3
-        double smallVerClearance;     // 0(not defined) for sup1,2 //XX3     for sup3
-        double HorClearance;          // 0(not defined) for sup1,2 //ZZ3     for sup3
-        double totalThickness;
+        double alFlangeThickness{0.};     // XX1
+        double alHorFlangeLength{0.};     // ZZ1 for sup1 and sup2     //ZZ2     for sup3
+        double alVerFlangeLength{0.};     // 0   for sup1 and sup2     //XX2-XX1 for sup3
+        double alVerProfileThickness{0.}; // XX1 for sup1 and sup2     //ZZ4     for sup3
+        double alHorProfileThickness{0.}; // 0(not defined) for sup1,2 //XX4-XX3 for sup3
+        double largeVerClearance{0.};     // XX2 for sup1 and sup2     //XX4     for sup3
+        double smallVerClearance{0.};     // 0(not defined) for sup1,2 //XX3     for sup3
+        double HorClearance{0.};          // 0(not defined) for sup1,2 //ZZ3     for sup3
+        double totalThickness{0.};
 
-        double xAMDB0, yAMDB0, zAMDB0;
-        double bottomsizewrtAMDB0, topsizewrtAMDB0;
-        // ss}
-
-        double alThickness;
-        double length;
-        double sup3Square, sup3VerticalThickness, sup3CentralLength, sup3OuterLength; // only for SUP3
+        double xAMDB0{0.};
+        double yAMDB0{0.};
+        double zAMDB0{0.};
+        double bottomsizewrtAMDB0{0.};
+        double topsizewrtAMDB0{0.};
+  
+        double alThickness{0.};
+        double length{0.};
+        double sup3Square{0.};
+        double sup3VerticalThickness{0.};
+        double sup3CentralLength{0.};
+        double sup3OuterLength{0.}; // only for SUP3
 
         //    double thickness() const;
         SUP(MYSQL& mysql, std::string s);

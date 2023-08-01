@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/Rpc.h"
@@ -22,6 +22,7 @@
 #include "MuonGeoModel/MYSQL.h"
 #include "MuonGeoModel/RPC_Technology.h"
 #include "MuonGeoModel/RpcLayer.h"
+#include "AthenaKernel/getMessageSvc.h"
 
 #include <cassert>
 #include <iomanip>
@@ -177,7 +178,7 @@ namespace MuonGM {
             }
 
             // bottom RpcLayer
-            RpcLayer *rl = new RpcLayer(name, this);
+            std::unique_ptr<RpcLayer> rl = std::make_unique<RpcLayer>(name, this);
             GeoVPhysVol *plowergg;
             if (cutoutson && vcutdef.size() > 0) {
                 plowergg = rl->build(matManager, mysql, cutoutson, vcutdef);
@@ -240,7 +241,7 @@ namespace MuonGM {
             }
 
             // top RpcLayer
-            RpcLayer *ru = new RpcLayer(name, this);
+            std::unique_ptr<RpcLayer> ru = std::make_unique<RpcLayer>(name, this);
             GeoVPhysVol *puppergg;
             if (cutoutson && vcutdef.size() > 0) {
                 // This code required to take into account the various
@@ -330,18 +331,11 @@ namespace MuonGM {
                     prpc->add(pthirdgg);
                 }
             }
-
-            // release memory allocated for the builders
-            delete ru;
-            delete rl;
-            ru = nullptr;
-            rl = nullptr;
         }
-
         return prpc;
     }
 
-    void Rpc::print() {
+    void Rpc::print() const {
         MsgStream log(Athena::getMessageSvc(), "MuonGM::Rpc::build");
         log << MSG::INFO << "Rpc " << name.c_str() << " :" << endmsg;
     }

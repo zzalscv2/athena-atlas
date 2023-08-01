@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/RpcLayer.h"
-
+///
+#include "AthenaKernel/getMessageSvc.h"
 #include "GeoModelKernel/GeoCutVolAction.h"
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "GeoModelKernel/GeoIdentifierTag.h"
@@ -25,17 +26,17 @@
 #include <utility>
 
 namespace {
-    static constexpr double const &rpc3GapLayerThickness = 11.8; // gas vol. + ( bakelite + graphite + PET )x2
-    static constexpr double const &rpc3GapStrPanThickness = 3.5;
-    static constexpr double const &rpc3GapStrPanCopThickness = 0.3;
-    static constexpr double const &rpc3GapBakelThickness = 1.2;
-    static constexpr double const &rpc3GapGThickness = 1.0;
-    static constexpr double const &rpc3GapTotAirThickness = 0.52; // corresponds to PET+glue, which are not simulated?
+    static constexpr double const rpc3GapLayerThickness = 11.8; // gas vol. + ( bakelite + graphite + PET )x2
+    static constexpr double const rpc3GapStrPanThickness = 3.5;
+    static constexpr double const rpc3GapStrPanCopThickness = 0.3;
+    static constexpr double const rpc3GapBakelThickness = 1.2;
+    static constexpr double const rpc3GapGThickness = 1.0;
+    static constexpr double const rpc3GapTotAirThickness = 0.52; // corresponds to PET+glue, which are not simulated?
 } // namespace
 
 namespace MuonGM {
 
-    RpcLayer::RpcLayer(const std::string& s, Rpc *t) : DetectorElement(s), lwidth(0.), llength(0.), thickness(0.), llongWidth(0.) { m = t; }
+    RpcLayer::RpcLayer(const std::string& s, Rpc *t) : DetectorElement(s) { m = t; }
 
     GeoVPhysVol *RpcLayer::build(StoredMaterialManager& matManager,
                                  const MYSQL& mysql) {
@@ -302,7 +303,7 @@ namespace MuonGM {
         return prpcl;
     }
 
-    void RpcLayer::print() {
+    void RpcLayer::print() const {
         MsgStream log(Athena::getMessageSvc(), "MuGM::GeoVPhysVol");
         log << MSG::INFO << " Rpc Layer " << name + "Layer"
             << " :" << endmsg;

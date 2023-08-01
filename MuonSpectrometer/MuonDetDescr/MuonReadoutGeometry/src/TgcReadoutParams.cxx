@@ -18,73 +18,72 @@
 
 namespace MuonGM {
 
-    TgcReadoutParams::TgcReadoutParams(const std::string& name, int iCh, int Version, float WireSp, const float NCHRNG, const float* NWGS,
-                                       const float* IWGS1, const float* IWGS2, const float* IWGS3, const float* ROFFST, const float* NSPS,
-                                       const float* POFFST) :
-        m_chamberName(name), m_chamberType(iCh), m_readoutVersion(Version), m_wirePitch(WireSp), m_nPhiChambers((int)NCHRNG) {
-        for (int iGap = 0; iGap < MaxNGaps; ++iGap) {
-            m_nGangs[iGap] = (int)NWGS[iGap];
-            m_gangOffset[iGap] = (int)ROFFST[iGap];
-            m_nStrips[iGap] = (int)NSPS[iGap];
-            m_stripOffset[iGap] = POFFST[iGap];
-            m_totalWires[iGap] = 0;
-        }
+    TgcReadoutParams::TgcReadoutParams(const std::string& name, 
+                                       int iCh, 
+                                       int Version, 
+                                       float WireSp, 
+                                       const int NCHRNG, 
+                                       GasGapIntArray && numWireGangs,
+                                       WiregangArray && IWGS1, 
+                                       WiregangArray && IWGS2, 
+                                       WiregangArray && IWGS3, 
+                                       GasGapIntArray && gangOffSet, 
+                                       GasGapIntArray && numStrips,
+                                       GasGapFloatArray && stripOffSet):
+        m_chamberName(name), 
+        m_chamberType(iCh), 
+        m_readoutVersion(Version), 
+        m_wirePitch(WireSp), 
+        m_nPhiChambers(NCHRNG),
+        m_nGangs{std::move(numWireGangs)},
+        m_gangOffset{std::move(gangOffSet)},
+        m_nStrips{std::move(numStrips)},
+        m_stripOffset{std::move(stripOffSet)}
+         {
+
         for (int iGang = 0; iGang < MaxNGangs; ++iGang) {
             if (iGang < m_nGangs[0]) {
-                m_nWires[0][iGang] = (int)IWGS1[iGang];
-                m_totalWires[0] += (int)IWGS1[iGang];
+                m_nWires[0][iGang] = IWGS1[iGang];
+                m_totalWires[0] += IWGS1[iGang];
             } else
                 m_nWires[0][iGang] = 0;
 
             if (iGang < m_nGangs[1]) {
-                m_nWires[1][iGang] = (int)IWGS2[iGang];
-                m_totalWires[1] += (int)IWGS2[iGang];
+                m_nWires[1][iGang] = IWGS2[iGang];
+                m_totalWires[1] += IWGS2[iGang];
             } else
                 m_nWires[1][iGang] = 0;
 
             if (iGang < m_nGangs[2]) {
-                m_nWires[2][iGang] = (int)IWGS3[iGang];
-                m_totalWires[2] += (int)IWGS3[iGang];
+                m_nWires[2][iGang] = IWGS3[iGang];
+                m_totalWires[2] += IWGS3[iGang];
             } else
                 m_nWires[2][iGang] = 0;
         }
     }
-
-    TgcReadoutParams::TgcReadoutParams(const std::string& name, int iCh, int Version, float WireSp, const int NCHRNG, const float* NWGS,
-                                       const float* IWGS1, const float* IWGS2, const float* IWGS3, float PDIST, const float* SLARGE,
-                                       const float* SSHORT, const float* ROFFST, const float* NSPS, const float* POFFST) :
-        m_chamberName(name), m_chamberType(iCh), m_readoutVersion(Version), m_wirePitch(WireSp), m_nPhiChambers(NCHRNG) {
-        for (int iGap = 0; iGap < MaxNGaps; ++iGap) {
-            m_nGangs[iGap] = (int)NWGS[iGap];
-            m_gangOffset[iGap] = (int)ROFFST[iGap];
-            m_nStrips[iGap] = (int)NSPS[iGap];
-            m_stripOffset[iGap] = POFFST[iGap];
-            m_totalWires[iGap] = 0;
-        }
-        for (int iGang = 0; iGang < MaxNGangs; ++iGang) {
-            if (iGang < m_nGangs[0]) {
-                m_nWires[0][iGang] = (int)IWGS1[iGang];
-                m_totalWires[0] += (int)IWGS1[iGang];
-            } else
-                m_nWires[0][iGang] = 0;
-            if (iGang < m_nGangs[1]) {
-                m_nWires[1][iGang] = (int)IWGS2[iGang];
-                m_totalWires[1] += (int)IWGS2[iGang];
-            } else
-                m_nWires[1][iGang] = 0;
-            if (iGang < m_nGangs[2]) {
-                m_nWires[2][iGang] = (int)IWGS3[iGang];
-                m_totalWires[2] += (int)IWGS3[iGang];
-            } else
-                m_nWires[2][iGang] = 0;
-        }
-
+    TgcReadoutParams::TgcReadoutParams(const std::string& name, 
+                         int iCh, 
+                         int Version, 
+                         float WireSp, 
+                         const int NCHRNG, 
+                         GasGapIntArray && numWireGangs,
+                         WiregangArray&& IWGS1, 
+                         WiregangArray&& IWGS2, 
+                         WiregangArray&& IWGS3,
+                         float PDIST, 
+                         StripArray&& SLARGE, 
+                         StripArray&& SSHORT,
+                         GasGapIntArray&& gangOffSet, 
+                         GasGapIntArray&& numStrips,
+                         GasGapFloatArray&& stripOffSet):
+        TgcReadoutParams(name, iCh, Version, WireSp, NCHRNG, std::move(numWireGangs), 
+                        std::move(IWGS1), std::move(IWGS2), std::move(IWGS3),
+                        std::move(gangOffSet), std::move(numStrips), std::move(stripOffSet)){
+      
         m_physicalDistanceFromBase = PDIST;
+        m_stripPositionOnLargeBase = std::move(SLARGE);
+        m_stripPositionOnShortBase = std::move(SSHORT);
 
-        for (int iStrip = 0; iStrip < MaxNStrips; ++iStrip) {
-            m_stripPositionOnLargeBase[iStrip] = SLARGE[iStrip];
-            m_stripPositionOnShortBase[iStrip] = SSHORT[iStrip];
-        }
     }
 
     TgcReadoutParams::~TgcReadoutParams() = default;

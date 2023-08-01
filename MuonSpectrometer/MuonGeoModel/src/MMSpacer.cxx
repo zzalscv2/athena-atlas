@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/MMSpacer.h"
@@ -13,6 +13,7 @@
 #include "GeoModelKernel/GeoShapeSubtraction.h"
 #include "GeoModelKernel/GeoTrd.h"
 #include "MuonGeoModel/Component.h"
+#include "MuonGeoModel/Technology.h"
 #include "MuonGeoModel/MMSpacerComponent.h"
 #include "MuonGeoModel/MMSpacer_Technology.h"
 #include "MuonGeoModel/MYSQL.h"
@@ -87,7 +88,7 @@ namespace MuonGM {
         return ptrd;
     }
 
-    void MMSpacer::print() {
+    void MMSpacer::print() const {
         MsgStream log(Athena::getMessageSvc(), "MuonGM::MMSpacer");
         log << MSG::INFO << " MMSpacer " << name << " :" << endmsg;
     }

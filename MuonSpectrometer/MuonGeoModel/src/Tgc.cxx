@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/Tgc.h"
 
+#include "AthenaKernel/getMessageSvc.h"
 #include "GeoModelKernel/GeoFullPhysVol.h"
 #include "GeoModelKernel/GeoIdentifierTag.h"
 #include "GeoModelKernel/GeoLogVol.h"
@@ -32,7 +33,7 @@
 
 namespace MuonGM {
 
-    Tgc::Tgc(const MYSQL& mysql, Component *ss) : DetectorElement(ss->name), irad(0.), orad(0.), dphi(0.) {
+    Tgc::Tgc(const MYSQL& mysql, Component *ss) : DetectorElement(ss->name) {
         TgcComponent *s = (TgcComponent *)ss;
         m_component = s;
         width = s->dx1;
@@ -290,7 +291,7 @@ namespace MuonGM {
         return ptrd;
     }
 
-    void Tgc::print() {
+    void Tgc::print() const {
         MsgStream log(Athena::getMessageSvc(), "MuGM::Tgc");
         log << MSG::INFO << " Tgc " << name << " :" << endmsg;
     }

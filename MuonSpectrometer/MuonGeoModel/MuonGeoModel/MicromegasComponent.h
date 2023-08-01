@@ -15,10 +15,10 @@ namespace MuonGM {
     class MicromegasComponent : public StandardComponent {
 
       public:
-        MicromegasComponent();
+        MicromegasComponent() = default;
         friend std::ostream &operator<<(std::ostream &os, const MicromegasComponent &c);
 
-        std::string subType;
+        std::string subType{};
     };
 
 } // namespace MuonGM

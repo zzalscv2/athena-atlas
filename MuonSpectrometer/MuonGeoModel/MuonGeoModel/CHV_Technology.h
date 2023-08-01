@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CHV_H
@@ -13,12 +13,12 @@ namespace MuonGM {
     class CHV : public Technology {
       public:
         inline CHV(MYSQL& mysql, const std::string& s);
-        double largeness;
-        double height;
-        double excent;
+        double largeness{0.};
+        double height{0.};
+        double excent{0.};
     };
 
-    CHV::CHV(MYSQL& mysql, const std::string& s) : Technology(mysql, s), largeness(0.), height(0.), excent(0.) {}
+    CHV::CHV(MYSQL& mysql, const std::string& s) : Technology(mysql, s) {}
 } // namespace MuonGM
 
 #endif

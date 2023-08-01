@@ -10,26 +10,26 @@ namespace MuonGM {
 
     class Position {
       public:
-        Position();
+        Position() = default;
 
-        int zindex;
-        int phiindex;
-        int phitype;
-        int icut;
-        int subtype;
-        double phi;
-        double radius;
-        double z;
-        double shift;
-        double inclination;
-        double alpha;
-        double beta;
-        double gamma;
+        int zindex{0};
+        int phiindex{0};
+        int phitype{0};
+        int icut{0};
+        int subtype{0};
+        double phi{0.};
+        double radius{0.};
+        double z{0.};
+        double shift{0.};
+        double inclination{0.};
+        double alpha{0.};
+        double beta{0.};
+        double gamma{0.};
 
-        bool isAssigned;
+        bool isAssigned{false};
 
-        bool isMirrored;
-        bool isBarrelLike;
+        bool isMirrored{false};
+        bool isBarrelLike{false};
         friend std::ostream &operator<<(std::ostream &os, const Position &p);
     };
 } // namespace MuonGM

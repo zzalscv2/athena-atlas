@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CSC_H
@@ -13,26 +13,35 @@ namespace MuonGM {
     class CSC : public Technology {
       public:
         inline CSC(MYSQL& sql, const std::string& s);
-        int numOfLayers;
-        double innerRadius;
-        double totalThickness;
-        double nonsisa;
-        double honeycombthick, g10thick, wirespacing, anocathodist;
-        double gapbetwcathstrips;
-        double readoutstripswidth, phistripwidth, floatingstripswidth;
-        double rectwasherthick, roxacellwith;
-        double roxwirebargap, fullgasgapwirewidth, fullwirefixbarwidth;
-        double wirebarposx, wirebarposy, wirebarposz;
+        int numOfLayers{0};
+        double innerRadius{0.};
+        double totalThickness{0.};
+        double nonsisa{0.};
+        double honeycombthick{0.};
+        double g10thick{0.}; 
+        double wirespacing{0.};
+        double anocathodist{0.};
+        double gapbetwcathstrips{0.};
+        double readoutstripswidth{0.};
+        double phistripwidth{0.};
+        double floatingstripswidth{0.};
+        double rectwasherthick{0.};
+        double roxacellwith{0.};
+        double roxwirebargap{0.}; 
+        double fullgasgapwirewidth{0.}; 
+        double fullwirefixbarwidth{0.};
+        double wirebarposx{0.}; 
+        double wirebarposy{0.}; 
+        double wirebarposz{0.};
 
-        double cathreadoutpitch, phireadoutpitch;
-        int nEtastrips, nPhistrips;
+        double cathreadoutpitch{0.};
+        double phireadoutpitch{0.};
+        int nEtastrips{0}; 
+        int nPhistrips{0};
     };
 
     CSC::CSC(MYSQL& mysql, const std::string& s)
-        : Technology(mysql, s), numOfLayers(0), innerRadius(0.), totalThickness(0.), nonsisa(0.), honeycombthick(0.), g10thick(0.), wirespacing(0.), anocathodist(0.),
-          gapbetwcathstrips(0.), readoutstripswidth(0.), phistripwidth(0.), floatingstripswidth(0.), rectwasherthick(0.), roxacellwith(0.), roxwirebargap(0.),
-          fullgasgapwirewidth(0.), fullwirefixbarwidth(0.), wirebarposx(0.), wirebarposy(0.), wirebarposz(0.), cathreadoutpitch(0.), phireadoutpitch(0.), nEtastrips(0),
-          nPhistrips(0) {}
+        : Technology(mysql, s){}
 } // namespace MuonGM
 
 #endif

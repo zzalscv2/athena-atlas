@@ -16,7 +16,7 @@ namespace MuonGM {
 
     class FPVMAP {
       public:
-        FPVMAP();
+        FPVMAP() = default;
         ~FPVMAP() = default;
         inline DetectorIterator Begin();
         inline DetectorIterator End();
@@ -28,8 +28,8 @@ namespace MuonGM {
         void PrintAllDetectors();
 
       private:
-        std::map<std::string, GeoVPhysVol *> m_Detectors;
-        int m_nreused;
+        std::map<std::string, GeoVPhysVol *> m_Detectors{};
+        int m_nreused{0};
     };
     DetectorIterator FPVMAP::Begin() { return m_Detectors.begin(); }
     DetectorIterator FPVMAP::End() { return m_Detectors.end(); }

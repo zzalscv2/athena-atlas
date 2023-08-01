@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MuonChamberLite_H
@@ -8,6 +8,7 @@
 #include "GeoModelKernel/GeoVFullPhysVol.h"
 #include "MuonGeoModel/DetectorElement.h"
 #include "MuonGeoModel/Station.h"
+#include "AthenaBaseComps/AthMessaging.h"
 #include <map>
 #include <string> 
 class GeoAlignableTransform;
@@ -26,7 +27,7 @@ namespace MuonGM {
     class Position;
     class MYSQL;
 
-    class MuonChamberLite : public DetectorElement {
+    class MuonChamberLite : public DetectorElement, public AthMessaging{
 
       public:
         double width{0.};
@@ -41,7 +42,7 @@ namespace MuonGM {
                         std::map<std::string, GeoAlignableTransform *> * mapAXF);
         GeoVPhysVol *addReadoutLayers(const MYSQL& mysql,
                            MuonDetectorManager *manager, int ieta, int iphi, bool is_mirrored, bool &isAssembly);
-        virtual void print() override;
+        virtual void print() const override;
 
       private:
         void setCscReadoutGeom(const MYSQL& mysql,
@@ -56,7 +57,7 @@ namespace MuonGM {
         Station *m_station{nullptr};
 
         std::map<std::string, GeoFullPhysVol*>        * m_mapFPV{nullptr};
-	std::map<std::string, GeoAlignableTransform*> * m_mapAXF{nullptr};
+	      std::map<std::string, GeoAlignableTransform*> * m_mapAXF{nullptr};
      
     };
 

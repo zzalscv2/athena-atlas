@@ -181,16 +181,14 @@ namespace MuonGM {
         if (log.level() <= MSG::DEBUG)
             log << MSG::DEBUG << "calling RDBReaderAtlas with m_altAsciiDBMap" << endmsg;
 
-        std::unique_ptr<RDBReaderAtlas> dbr =std::make_unique< RDBReaderAtlas>(m_pDetStore, m_pRDBAccess, OracleTag, OracleNode, m_dumpAlines, m_useCscIntAlinesFromGM, m_dumpCscIntAlines, &m_altAsciiDBMap);
+        std::unique_ptr<RDBReaderAtlas> dbr =std::make_unique<RDBReaderAtlas>(m_pDetStore, m_pRDBAccess, OracleTag, OracleNode, m_altAsciiDBMap);
 
-        dbr->setControlCscIntAlines(m_controlCscIntAlines);
 
         // set here the flag deciding whether to include cutouts:
         // m_includeCutouts = 1 => include cutouts
         // m_includeCutouts = 0 => no cutouts
         m_manager->setCutoutsFlag(m_includeCutouts);
         m_manager->setCutoutsBogFlag(m_includeCutoutsBog);
-        mysql->setControlAlines(m_controlAlines);
 
         dbr->setGeometryVersion(m_layout);
         dbr->setManager(getDetectorManager());
