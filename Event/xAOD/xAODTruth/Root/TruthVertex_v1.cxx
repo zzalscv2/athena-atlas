@@ -58,6 +58,16 @@ namespace xAOD {
       return incomingParticleLinksAcc( *this ).size();
    }
 
+   std::vector<const TruthParticle*> TruthVertex_v1::particles_in() const {
+     std::vector<const TruthParticle*> res;
+     for (size_t i=0; i<nIncomingParticles();i++) res.push_back(incomingParticle(i)); 
+     return res;
+   }
+   std::vector<const TruthParticle*> TruthVertex_v1::particles_out() const {
+     std::vector<const TruthParticle*> res;
+     for (size_t i=0; i<nOutgoingParticles();i++) res.push_back(outgoingParticle(i)); 
+     return res;
+   }
    const TruthParticle* TruthVertex_v1::incomingParticle( size_t index ) const {
 
       // Check that the variable exists, and that it has enough elements in it:
