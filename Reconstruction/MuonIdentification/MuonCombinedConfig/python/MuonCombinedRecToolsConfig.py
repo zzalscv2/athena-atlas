@@ -146,11 +146,11 @@ def MuonCreatorToolCfg(flags, name="MuonCreatorTool", **kwargs):
     kwargs.setdefault("MuonPrinter", CompFactory.Rec.MuonPrintingTool(name='MuonPrintingTool',
                                                                       MuonStationPrinter=muon_edm_printer))
 
-    acc = ParticleCaloExtensionToolCfg(
-        flags, name='MuonParticleCaloExtensionTool', StartFromPerigee=True)
-    kwargs.setdefault("ParticleCaloExtensionTool", acc.popPrivateTools())
-    result.merge(acc)
-
+    kwargs.setdefault("ParticleCaloExtensionTool", 
+                      result.popToolsAndMerge(ParticleCaloExtensionToolCfg(flags, 
+                                                                           name='MuonParticleCaloExtensionTool', 
+                                                                           StartFromPerigee=True)))
+   
     from TrkConfig.TrkParticleCreatorConfig import MuonCombinedParticleCreatorCfg
     kwargs.setdefault("TrackParticleCreator", result.popToolsAndMerge(
         MuonCombinedParticleCreatorCfg(flags)))
@@ -195,7 +195,10 @@ def MuonCreatorToolCfg(flags, name="MuonCreatorTool", **kwargs):
     trackingVolSvc = CompFactory.Trk.TrackingVolumesSvc(
         name="TrackingVolumesSvc")
     result.addService(trackingVolSvc)
-
+    
+    kwargs.setdefault("RequireMSOEforSA", flags.Beam.Type is BeamType.Collisions)
+    kwargs.setdefault("RequireCaloForSA", flags.Beam.Type is BeamType.Collisions)
+ 
     tool = CompFactory.MuonCombined.MuonCreatorTool(name, **kwargs)
     result.setPrivateTools(tool)
     return result

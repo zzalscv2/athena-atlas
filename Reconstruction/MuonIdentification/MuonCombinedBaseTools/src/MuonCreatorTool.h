@@ -204,6 +204,11 @@ namespace MuonCombined {
 		  "numberOfPixelOutliers", "numberOfInnermostPixelLayerOutliers", "numberOfNextToInnermostPixelLayerOutliers", "numberOfSCTOutliers"},
             "List of uint8_t aux element names to copy over from ID track particle summaries."};
 
+        Gaudi::Property<bool> m_requireMSOEforSA{this, "RequireMSOEforSA", true, 
+                                                "Flag to accept muons with SA track only but not MSOE. Interesting for BSM?"};
+        
+        Gaudi::Property<bool> m_requireCaloDepositForSA{this, "RequireCaloForSA", true, 
+                                                       "Flag to discard SA muons that have no calorimeter loss associated."};
         std::vector< std::unique_ptr<SG::AuxElement::Accessor<float> > >    m_copyFloatSummaryAccessors;
         std::vector< std::unique_ptr<SG::AuxElement::Accessor<uint8_t> > >  m_copyCharSummaryAccessors;
 
