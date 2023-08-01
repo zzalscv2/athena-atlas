@@ -215,9 +215,10 @@ def makeHLTTree(flags, newJO=False, hltMenuConfig = None):
                 # CosmicCalo explicitly requested [ATR-26096]
                 endOfEventFilterAlg.StreamFilter = ['Main','VBFDelayed','TLA','TLAJetPEB','CosmicCalo']
 
-                from TriggerMenuMT.HLT.CalibCosmicMon.CalibChainConfiguration import getLArNoiseBurstRecoSequence
-                recoSeq = getLArNoiseBurstRecoSequence(flags)
-                acceptedEventSeq += conf2toConfigurable(recoSeq)
+                from TriggerMenuMT.HLT.CalibCosmicMon.CalibChainConfiguration import getLArNoiseBurstRecoCfg
+                from ..MenuComponents import algorithmCAToGlobalWrapper
+                recoSeq = algorithmCAToGlobalWrapper(getLArNoiseBurstRecoCfg,flags)
+                acceptedEventSeq += recoSeq
             elif any(purpose.startswith("met") for purpose in purposes):
                 from TriggerMenuMT.HLT.MET.EndOfEvent import getMETRecoSequences
                 algorithms, rois, streams = getMETRecoSequences(flags, purposes)

@@ -5,6 +5,7 @@ from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from TriggerMenuMT.HLT.CommonSequences.FullScanDefs import em_clusters, lc_clusters, fs_towers, fs_cells
 
 from TrigEDMConfig.TriggerEDMRun3 import recordable
@@ -55,6 +56,7 @@ def HLTCaloCellMaker(flags, name, roisKey='UNSPECIFIED', CellsName=None, monitor
     return cellmaker
 
 
+@AccumulatorCache
 def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None, monitorCells=False, doTau=False):
     acc = ComponentAccumulator()
     from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg, CaloDataAccessSvcDependencies
@@ -92,6 +94,7 @@ def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None,
     acc.addEventAlgo(cellMaker, primary=True)
     return acc
 
+@AccumulatorCache
 def hltCaloCellCorrectorCfg(flags,name='HLTCaloCellCorrector', inputEDM='CellsClusters', outputEDM='CorrectedCellsClusters', eventShape='HIEventShape'):
     acc = ComponentAccumulator()
     cellCorrector = CompFactory.HLTCaloCellCorrector(name = name,
@@ -102,6 +105,7 @@ def hltCaloCellCorrectorCfg(flags,name='HLTCaloCellCorrector', inputEDM='CellsCl
     return acc           
   
 
+@AccumulatorCache
 def hltCaloCellSeedlessMakerCfg(flags, roisKey='UNSPECIFIED'):
     acc = ComponentAccumulator()
     hltCaloCellMakerAcc = hltCaloCellMakerCfg(flags, "CaloCellSeedLessFS",
@@ -163,6 +167,7 @@ def hltCaloDMCalib(flags, name = "TrigDMCalib" ):
 
 
 
+@AccumulatorCache
 def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS",
                            cellsKey=None, doLC=False):
     acc = ComponentAccumulator()
@@ -249,6 +254,7 @@ def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS",
     return acc
 
 
+@AccumulatorCache
 def hltCaloTopoClusterCalibratorCfg(flags, name, clustersin, clustersout, **kwargs):
     """ Create the LC calibrator """
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
@@ -295,6 +301,7 @@ TrigEgammaKeys = getTrigEgammaKeys()
 TrigEgammaKeys_LRT = getTrigEgammaKeys(name = '_LRT')
 TrigEgammaKeys_HI = getTrigEgammaKeys(ion = True)
 
+@AccumulatorCache
 def hltCaloTopoClusteringCfg(
     flags, namePrefix=None,nameSuffix=None, CellsName=None, monitorCells=False, roisKey="UNSPECIFIED",clustersKey=None, doLCFS=False, doTau = False):
     if doTau:
@@ -325,30 +332,36 @@ def hltCaloTopoClusteringCfg(
     return acc
 
 ###################################EgammaSpecific TopoClustering####################################
+@AccumulatorCache
 def egammaTopoClusteringCfg(flags, RoIs):
   cfg = hltCaloTopoClusteringCfg(flags, namePrefix="", nameSuffix="RoI", CellsName="CaloCells",  monitorCells=True, roisKey=RoIs)
   return cfg
 
 
+@AccumulatorCache
 def egammaTopoClusteringCfg_LRT(flags, RoIs):
   cfg = hltCaloTopoClusteringCfg(flags, namePrefix="", nameSuffix="RoI_LRT", CellsName="CaloCells",  monitorCells=True, roisKey=RoIs, clustersKey= TrigEgammaKeys_LRT.precisionTopoClusterContainer)
   return cfg
 
 
 ###################################JetMetSpecific TopoClustering####################################
+@AccumulatorCache
 def jetmetTopoClusteringCfg(flags, RoIs):
   cfg = hltCaloTopoClusteringCfg(flags, namePrefix="", nameSuffix="FS", CellsName="CaloCellsFS",  monitorCells=False, roisKey=RoIs)
   return cfg
 
+@AccumulatorCache
 def jetmetTopoClusteringCfg_LC(flags, RoIs):
   cfg = hltCaloTopoClusteringCfg(flags, namePrefix="", nameSuffix="FS", CellsName="CaloCellsFS",  monitorCells=False, roisKey=RoIs, doLCFS=True)
   return cfg
 
 ###################################TauSpecific TopoClustering####################################
+@AccumulatorCache
 def tauTopoClusteringCfg(flags, RoIs):
   cfg = hltCaloTopoClusteringCfg(flags, namePrefix="Tau", nameSuffix="", CellsName="CaloCellsLC",  monitorCells=False, roisKey=RoIs, clustersKey="HLT_TopoCaloClustersLC", doTau= True)
   return cfg
 
+@AccumulatorCache
 def hltCaloTopoClusteringHICfg(
     flags, CellsName=None, roisKey="UNSPECIFIED", doLC=False,algSuffix='HIRoI', ion=True):
     from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import  getTrigEgammaKeys
@@ -361,6 +374,7 @@ def hltCaloTopoClusteringHICfg(
     acc.merge(hltTopoClusterMakerCfg(flags, "TrigCaloClusterMaker_topo"+algSuffix, clustersKey=clustersKey,cellsKey="CorrectedRoICaloCells"))
     return acc
 
+@AccumulatorCache
 def hltHICaloTowerMakerCfg(flags, name, towersKey, cellsKey="CaloCellsFS", RoIs=""):
     acc = ComponentAccumulator()
     larcmbtwrbldr = CompFactory.LArTowerBuilderTool("LArCmbTwrBldr",
@@ -400,6 +414,7 @@ def hltHICaloTowerMakerCfg(flags, name, towersKey, cellsKey="CaloCellsFS", RoIs=
     acc.addEventAlgo(alg, primary=True)
     return acc
 
+@AccumulatorCache
 def HICaloTowerCfg(flags):
     """ Create the towers for heavy ion """
     acc = ComponentAccumulator()
