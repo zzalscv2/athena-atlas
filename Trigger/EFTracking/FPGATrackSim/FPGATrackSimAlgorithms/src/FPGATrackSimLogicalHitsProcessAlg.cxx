@@ -57,28 +57,25 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
         }
     }
 
-    ATH_CHECK(m_hitInputTool.retrieve());
-    if (m_secondInputToolN > 0) ATH_CHECK(m_hitInputTool2.retrieve());
+    ATH_CHECK(m_hitSGInputTool.retrieve(EnableTool{!m_hitSGInputTool.empty()}));
+    ATH_CHECK(m_hitInputTool.retrieve(EnableTool{!m_hitInputTool.empty()}));
+    ATH_CHECK(m_hitInputTool2.retrieve(EnableTool{m_secondInputToolN > 0 && !m_hitInputTool2.empty()}));
     ATH_CHECK(m_hitMapTool.retrieve());
-    if (m_doHitFiltering) ATH_CHECK(m_hitFilteringTool.retrieve());
-    if (m_clustering) ATH_CHECK(m_clusteringTool.retrieve());
-    if (m_doSpacepoints) ATH_CHECK(m_spacepointsTool.retrieve());
+    ATH_CHECK(m_hitFilteringTool.retrieve(EnableTool{m_doHitFiltering}));
+    ATH_CHECK(m_clusteringTool.retrieve(EnableTool{m_clustering}));
+    ATH_CHECK(m_spacepointsTool.retrieve(EnableTool{m_doSpacepoints}));
     ATH_CHECK(m_roadFinderTool.retrieve());
     
-    if (m_doLRT) {
-        ATH_CHECK(m_LRTRoadFilterTool.retrieve());
-        ATH_CHECK(m_LRTRoadFinderTool.retrieve());
-    }
-    if (m_doHoughRootOutput) ATH_CHECK(m_houghRootOutputTool.retrieve());
-    if (m_doNNTrack) ATH_CHECK(m_NNTrackTool.retrieve());
-    if (m_filterRoads) ATH_CHECK(m_roadFilterTool.retrieve());
-    if (m_filterRoads2) ATH_CHECK(m_roadFilterTool2.retrieve());
-    if (m_doTracking) ATH_CHECK(m_trackFitterTool_1st.retrieve());
+    ATH_CHECK(m_LRTRoadFilterTool.retrieve(EnableTool{m_doLRT}));
+    ATH_CHECK(m_LRTRoadFinderTool.retrieve(EnableTool{m_doLRT}));
+    ATH_CHECK(m_houghRootOutputTool.retrieve(EnableTool{m_doHoughRootOutput}));
+    ATH_CHECK(m_NNTrackTool.retrieve(EnableTool{m_doNNTrack}));
+    ATH_CHECK(m_roadFilterTool.retrieve(EnableTool{m_filterRoads}));
+    ATH_CHECK(m_roadFilterTool2.retrieve(EnableTool{m_filterRoads2}));
+    ATH_CHECK(m_trackFitterTool_1st.retrieve(EnableTool{m_doTracking}));
     ATH_CHECK(m_overlapRemovalTool_1st.retrieve());
-    if (m_runSecondStage) {
-        if (m_doTracking) ATH_CHECK(m_trackFitterTool_2nd.retrieve());
-        ATH_CHECK(m_overlapRemovalTool_2nd.retrieve());
-    }
+    ATH_CHECK(m_trackFitterTool_2nd.retrieve(EnableTool{m_runSecondStage && m_doTracking}));
+    ATH_CHECK(m_overlapRemovalTool_2nd.retrieve(EnableTool{m_runSecondStage}));
     ATH_CHECK(m_dataFlowTool.retrieve());
     ATH_CHECK(m_writeOutputTool.retrieve());
 
@@ -331,6 +328,11 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
 StatusCode FPGATrackSimLogicalHitsProcessAlg::readInputs(bool & done)
 {
+    if ( !m_hitSGInputTool.empty()) {
+        ATH_CHECK(m_hitSGInputTool->readData(&m_firstInputHeader, Gaudi::Hive::currentContext()));
+        return StatusCode::SUCCESS;
+    }
+
     if (m_ev % m_firstInputToolN == 0)
     {
         // Read primary input
