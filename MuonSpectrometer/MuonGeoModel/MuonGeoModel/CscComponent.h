@@ -10,7 +10,7 @@ namespace MuonGM {
 
     class CscComponent : public StandardComponent {
       public:
-        double maxwdy; // length from bottom to the max width of the CSL
+        double maxwdy{0.}; // length from bottom to the max width of the CSL
         // for CSC it is = dy
     };
 } // namespace MuonGM

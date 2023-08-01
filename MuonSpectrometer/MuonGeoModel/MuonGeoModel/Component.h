@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef Component_H
@@ -10,15 +10,15 @@ namespace MuonGM {
 
     class Component {
       public:
-        Component();
+        Component() = default;
         Component(const Component &c) = default;
         Component &operator=(const Component &c) = default;
-        virtual ~Component(){};
+        virtual ~Component() = default;
         double GetThickness() const;
-        std::string name;
-        double dx1;
-        double dx2;
-        double dy;
+        std::string name{};
+        double dx1{0.};
+        double dx2{0.};
+        double dy{0.};
     };
 } // namespace MuonGM
 

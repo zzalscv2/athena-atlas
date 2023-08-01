@@ -39,9 +39,10 @@ namespace MuonGM {
     class Station : public AthMessaging {
       public:
         Station();
-        ~Station();
+        ~Station() = default;
         Station(const Station &s) = delete;
         Station& operator= (const Station &s) = delete;
+        
         Station(MYSQL& mysql, std::string name);
         void SetComponent(Component *c);
         void SetCutout(Cutout *c);
@@ -92,12 +93,12 @@ namespace MuonGM {
         double getYMin() const;
         mutable std::atomic<double> m_amdbOrigine_along_length;
         mutable std::atomic<double> m_amdbOrigine_along_thickness;
-        std::string m_name;
-        bool m_hasMdts;
-        std::vector<Component *> m_components;
-        std::vector<Cutout *> m_cutouts;
-        PositionMap m_positions;
-        AlignPosMap m_alignpositions;
+        std::string m_name{};
+        bool m_hasMdts{false};
+        std::vector<std::unique_ptr<Component>> m_components{};
+        std::vector< std::unique_ptr<Cutout>> m_cutouts{};
+        PositionMap m_positions{};
+        AlignPosMap m_alignpositions{};
     }; // class Station
 
 } // namespace MuonGM

@@ -17,9 +17,5 @@
 namespace MuonGM {
 
     SUP::SUP(MYSQL& mysql, std::string s)
-       : Technology(mysql, std::move(s)), alFlangeThickness(0.), alHorFlangeLength(0.), alVerFlangeLength(0.), alVerProfileThickness(0.), alHorProfileThickness(0.), largeVerClearance(0.),
-          smallVerClearance(0.), HorClearance(0.), xAMDB0(0.), yAMDB0(0.), zAMDB0(0.), bottomsizewrtAMDB0(0.), topsizewrtAMDB0(0.), alThickness(0.), length(0.), sup3Square(0.),
-          sup3VerticalThickness(0.), sup3CentralLength(0.), sup3OuterLength(0.) {
-        totalThickness = 0.;
-    }
+       : Technology(mysql, std::move(s)){}
 } // namespace MuonGM

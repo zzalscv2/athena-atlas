@@ -16,25 +16,6 @@
 
 namespace MuonGM {
 
-    Cutout::Cutout() {
-        dx = dy = widthXs = widthXl = lengthY = excent = dead1 = thickness = 0.;
-        ijob = subtype = icut = 0;
-    }
-
-    Cutout::Cutout(const Cutout &c) {
-        dx = c.dx;
-        dy = c.dy;
-        widthXs = c.widthXs;
-        widthXl = c.widthXl;
-        lengthY = c.lengthY;
-        excent = c.excent;
-        dead1 = c.dead1;
-        ijob = c.ijob;
-        subtype = c.subtype;
-        icut = c.icut;
-        thickness = c.thickness;
-    }
-
     void Cutout::setThickness(double compThickness) { thickness = compThickness; }
 
     const GeoShape *Cutout::build() {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/CscMultiLayer.h"
@@ -36,7 +36,7 @@ namespace MuonGM {
 
 namespace MuonGM {
 
-    CscMultiLayer::CscMultiLayer(const MYSQL& mysql, const std::string& n) : DetectorElement(n), width(0.), longWidth(0.), upWidth(0.), excent(0.), length(0.), physicalLength(0.), maxwLength(0.) {
+    CscMultiLayer::CscMultiLayer(const MYSQL& mysql, const std::string& n) : DetectorElement(n) {
         const CSC *md = dynamic_cast<const CSC*>(mysql.GetTechnology(name));
         nrOfLayers = md->numOfLayers;
         cscthickness = md->totalThickness;
@@ -154,7 +154,7 @@ namespace MuonGM {
         return pml;
     }
 
-    void CscMultiLayer::print() {
+    void CscMultiLayer::print() const {
         MsgStream log(Athena::getMessageSvc(), "MuonGM::CscMultiLayer");
         log << MSG::INFO << "CscMulti Layer:: CscMulti Layer " << name << " :" << endmsg;
     }

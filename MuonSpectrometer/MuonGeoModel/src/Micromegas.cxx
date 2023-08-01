@@ -146,7 +146,7 @@ namespace MuonGM {
         return ptrd;
     }
 
-    void Micromegas::print() {
+    void Micromegas::print() const {
         MsgStream log(Athena::getMessageSvc(), "MuonGM::Micromegas");
         log << MSG::INFO << " Micromegas " << name << " :" << endmsg;
     }

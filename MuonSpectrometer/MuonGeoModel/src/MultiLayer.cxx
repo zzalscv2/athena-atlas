@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/MultiLayer.h"
@@ -56,8 +56,7 @@ namespace {
 namespace MuonGM {
 
     MultiLayer::MultiLayer(const MYSQL& mysql, const std::string& n)
-        : DetectorElement(n), nrOfLayers(0), nrOfTubes(0), tubePitch(0.), width(0.), length(0.), thickness(0.), mdtthickness(0.), longWidth(0.), nrOfSteps(0), cutoutNsteps(0),
-          cutoutAtAngle(false), m_nonCutoutXSteps(), m_nonCutoutYSteps() {
+        : DetectorElement(n)  {
         MsgStream log(Athena::getMessageSvc(), "MultiLayer::MultiLayer");
 
         const MDT *md = dynamic_cast<const MDT*>(mysql.GetTechnology(name));
@@ -65,11 +64,6 @@ namespace MuonGM {
             nrOfLayers = md->numOfLayers;
             mdtthickness = md->totalThickness;
             tubePitch = md->pitch;
-            for (int i = 0; i < 4; i++) {
-                yy[i] = 0.;
-                xx[i] = 0.;
-            }
-
             for (int i = 0; i < nrOfLayers; i++) {
                 yy[i] = md->y[i];
                 xx[i] = md->x[i];
@@ -517,7 +511,7 @@ namespace MuonGM {
 
         if (cutoutNsteps < -10000 && cutoutNsteps > -40000) {
 
-            bool internalCutoutBMG[3] = {false, true, false};
+            std::array<bool, 3> internalCutoutBMG{false, true, false};
             std::array<std::array<int, 3>, 4> NtubesBMG{};
 
             if (cutoutNsteps == -11112) { // BMG1A12 - ML1
@@ -720,7 +714,7 @@ namespace MuonGM {
         return play;
     }
 
-    void MultiLayer::print() {
+    void MultiLayer::print() const {
         MsgStream log(Athena::getMessageSvc(), "MuonGM::MultiLayer");
         log << MSG::INFO << "Multi Layer " << name.c_str() << " :" << endmsg;
     }

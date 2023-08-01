@@ -48,12 +48,9 @@ namespace MuonGM {
         inline void setRDBAccess(IRDBAccessSvc *access);
         inline void setAltAsciiDBMap(const AltAsciiDBMap& asciidbmap);
         inline void setUseRDB(int rdb);
-        inline void setControlAlines(int cA);
+
         inline void setMinimalGeoFlag(int minimalGeo);
-        inline void setControlCscIntAlines(int cA);
-        inline void setDumpAlines(bool cA);
-        inline void setDumpCscIntAlines(bool cA);
-        inline void setUseCscIntAlinesFromGM(bool cA);
+
         inline void setSelection(const std::vector<std::string>&,
                                  const std::vector<int>&,
                                  const std::vector<int>&);
@@ -82,15 +79,8 @@ namespace MuonGM {
         int m_includeCutoutsBog{0};
         int m_includeCtbBis{0};
         int m_rdb{1};
-        int m_controlAlines{0};
         int m_minimalGeoFlag{0};
-        int m_controlCscIntAlines{0};
-        bool m_dumpAlines{false};
-        bool m_dumpCscIntAlines{false};
-        bool m_useCscIntAlinesFromGM{true};
 
-    
-    
 
         int m_caching{0};
         int m_cacheFillingFlag{0};
@@ -124,12 +114,7 @@ namespace MuonGM {
     void MuonDetectorFactory001::setUseRDB(int rdb) { m_rdb = rdb; }
     void MuonDetectorFactory001::setRDBAccess(IRDBAccessSvc *access) { m_pRDBAccess = access; }
     void MuonDetectorFactory001::setAltAsciiDBMap(const AltAsciiDBMap& asciidbmap) { m_altAsciiDBMap = asciidbmap; }
-    void MuonDetectorFactory001::setControlAlines(int cA) { m_controlAlines = cA; }
     void MuonDetectorFactory001::setMinimalGeoFlag(int minimalGeo) { m_minimalGeoFlag = minimalGeo; }
-    void MuonDetectorFactory001::setControlCscIntAlines(int cA) { m_controlCscIntAlines = cA; }
-    void MuonDetectorFactory001::setDumpAlines(bool dumpAlines) { m_dumpAlines = dumpAlines; }
-    void MuonDetectorFactory001::setDumpCscIntAlines(bool dumpAlines) { m_dumpCscIntAlines = dumpAlines; }
-    void MuonDetectorFactory001::setUseCscIntAlinesFromGM(bool useIlinesFromGM) { m_useCscIntAlinesFromGM = useIlinesFromGM; }
 
     void MuonDetectorFactory001::setSelection(const std::vector<std::string>& vst,
                                               const std::vector<int>& veta,

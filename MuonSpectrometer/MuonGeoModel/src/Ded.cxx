@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/Ded.h"
@@ -16,6 +16,7 @@
 #include "MuonGeoModel/Cutout.h"
 #include "MuonGeoModel/DED_Technology.h"
 #include "MuonGeoModel/MYSQL.h"
+#include "AthenaKernel/getMessageSvc.h"
 
 #define skip_ded false
 
@@ -83,7 +84,7 @@ namespace MuonGM {
         return pded;
     }
 
-    void Ded::print() {
+    void Ded::print() const {
         MsgStream log(Athena::getMessageSvc(), "MuonGM::Ded");
         log << MSG::INFO << "Ded " << name.c_str() << " :" << endmsg;
     }

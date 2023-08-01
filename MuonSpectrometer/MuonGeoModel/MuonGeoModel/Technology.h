@@ -14,13 +14,13 @@ namespace MuonGM {
 
     class Technology {
       protected:
-        std::string m_name;
+        std::string m_name{};
 
       public:
-        double thickness;
+        double thickness{0.};
         Technology(MYSQL& mysql, std::string s);
-        virtual ~Technology();
-        std::string GetName();
+        virtual ~Technology() = default;
+        std::string GetName()const;
     };
 } // namespace MuonGM
 

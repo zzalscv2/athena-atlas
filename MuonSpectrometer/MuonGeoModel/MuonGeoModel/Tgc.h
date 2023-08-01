@@ -18,14 +18,14 @@ namespace MuonGM {
     class Tgc : public DetectorElement {
 
       public:
-        double width;
-        double length;
-        double thickness;
-        double longWidth; // for trapezoidal layers
-        double irad;
-        double orad;
-        double dphi;
-        int index;
+        double width{0.};
+        double length{0.};
+        double thickness{0.};
+        double longWidth{0.}; // for trapezoidal layers
+        double irad{0.};
+        double orad{0.};
+        double dphi{0.};
+        int index{0};
 
         Tgc(const MYSQL& mysql, Component *s);
         GeoFullPhysVol *build(StoredMaterialManager& matManager,
@@ -35,10 +35,10 @@ namespace MuonGM {
                               const MYSQL& mysql,
                               int minimalgeo, int cutoutson,
                               const std::vector<Cutout *>&);
-        virtual void print() override;
+        virtual void print() const override;
 
       private:
-        TgcComponent *m_component;
+        TgcComponent *m_component{nullptr};
     };
 
 } // namespace MuonGM

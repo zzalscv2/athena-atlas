@@ -11,8 +11,8 @@ namespace MuonGM {
 
     class RpcComponent : public StandardComponent {
       public:
-        int ndivy;
-        int ndivz;
+        int ndivy{0};
+        int ndivz{0};
     };
 } // namespace MuonGM
 

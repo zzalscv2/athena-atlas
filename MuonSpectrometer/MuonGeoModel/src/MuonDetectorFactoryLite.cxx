@@ -98,14 +98,10 @@ namespace MuonGM {
       // We never alter these in the "Lite" workflow
       std::string oracleTag="";
       std::string oracleNode="";
-      bool dumpAlines=false;
-      bool useCscIntAlinesFromGM=true;
-      bool controlCscIntAlines=false;
-      bool dumpCscIntAlines=false;
+      std::map<std::string, std::string> ascii{};
+      dbr = std::make_unique<RDBReaderAtlas>(m_pDetStore, m_pRDBAccess, oracleTag, oracleNode,  ascii);
 	  
-      dbr =std::make_unique< RDBReaderAtlas>(m_pDetStore, m_pRDBAccess, oracleTag, oracleNode, dumpAlines, useCscIntAlinesFromGM, dumpCscIntAlines, nullptr);
-	  
-      dbr->setControlCscIntAlines(controlCscIntAlines);
+
     }
 
 
@@ -115,7 +111,6 @@ namespace MuonGM {
     // m_includeCutouts = 0 => no cutouts
     m_manager->setCutoutsFlag(true);
     m_manager->setCutoutsBogFlag(true);
-    mysql->setControlAlines(false);
 
 
     StatusCode sc = StatusCode::SUCCESS;
@@ -168,12 +163,12 @@ namespace MuonGM {
     }
 
     for (auto i: mappedStations) {
-      auto it=std::find_if(mysql->StationBegin(),mysql->StationEnd(),[i](std::pair<std::string, Station *> s)->bool {return i==s.second->GetName();});
-      if (it==mysql->StationEnd()) {
-	throw std::runtime_error("Raw/readout geometry mismatch");
+      auto it= mysql->stationMap().find(i);
+      if (it==mysql->stationMap().end()) {
+	        throw std::runtime_error("Raw/readout geometry mismatch");
       }
 
-      Station *station = (*it).second;
+      Station *station = (*it).second.get();
       std::string stname(station->GetName(), 0, 3);
   
       bool isAssembly = false;

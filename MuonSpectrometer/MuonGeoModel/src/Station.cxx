@@ -36,17 +36,8 @@ namespace MuonGM {
       m_amdbOrigine_along_thickness (0),
       m_name("unknown"),
       m_hasMdts (false)
-    {
-    }
+    { }
 
-    Station::~Station() {
-        for (unsigned int i = 0; i < m_components.size(); i++) {
-            delete m_components[i];
-        }
-        for (unsigned int i = 0; i < m_cutouts.size(); i++) {
-            delete m_cutouts[i];
-        }
-    }
 
     void Station::SetAlignPos(const AlignPos &p) {
         if (FindAlignPos(p.zindex, p.phiindex) != m_alignpositions.end() && p.jobindex == 0) {
@@ -85,13 +76,13 @@ namespace MuonGM {
     AlignPosIterator Station::abegin() const { return m_alignpositions.begin(); }
     AlignPosIterator Station::aend() const { return m_alignpositions.end(); }
 
-    void Station::SetComponent(Component *c) { m_components.push_back(c); }
+    void Station::SetComponent(Component *c) { m_components.emplace_back(c); }
 
-    void Station::SetCutout(Cutout *c) { m_cutouts.push_back(c); }
+    void Station::SetCutout(Cutout *c) { m_cutouts.emplace_back(c); }
 
-    Component *Station::GetComponent(int i) const { return m_components[i]; }
+    Component *Station::GetComponent(int i) const { return m_components[i].get(); }
 
-    Cutout *Station::GetCutout(int i) const { return m_cutouts[i]; }
+    Cutout *Station::GetCutout(int i) const { return m_cutouts[i].get(); }
 
     void Station::SetPosition(Position p) {
         if (FindPosition(p.zindex, p.phiindex) != end()) {
@@ -122,14 +113,14 @@ namespace MuonGM {
         double thick = 0;
         if (m_name[0] == 'T') {
             for (unsigned int i = 0; i < m_components.size(); i++) {
-                TgcComponent *t = (TgcComponent *)m_components[i];
+                TgcComponent *t = dynamic_cast<TgcComponent*>(m_components[i].get());
                 thick = thick > t->GetThickness(mysql) + t->posz ? thick : t->GetThickness(mysql) + t->posz;
             }
         } else {
             double zstart = std::numeric_limits<double>::max();
 
             for (unsigned int i = 0; i < m_components.size(); i++) {
-                StandardComponent *s = (StandardComponent *)m_components[i];
+                StandardComponent* s = dynamic_cast<StandardComponent*>(m_components[i].get());
                 thick = thick > s->GetThickness(mysql) + s->posz ? thick : s->GetThickness(mysql) + s->posz;
                 if (i == 0 || s->posz < zstart)
                     zstart = s->posz;
@@ -137,7 +128,7 @@ namespace MuonGM {
                 ATH_MSG_VERBOSE("Station " << m_name << " calculating  Thinkness = " << thick << " and zstart = " << zstart);
             }
 
-            if (fabs(zstart) > 0.001) {
+            if (std::abs(zstart) > 0.001) {
                 thick = thick - zstart;
                 m_amdbOrigine_along_thickness = -zstart;
                 ATH_MSG_VERBOSE("Station " << m_name << " redefining Thinkness = " << thick <<
@@ -150,85 +141,12 @@ namespace MuonGM {
     }
 
     double Station::GetExtraTopThickness() const {
-        if (m_name[0] != 'B')
-            return 0.;
-
-        return 0.;
-        /* COMMENTING IS JUST TO MAKE COVERITY HAPPY
-           WHY THIS CODE WAS NEVER ENTERED HAS TO BE FIGURED OUT
-            double xupsup = 0.;
-            double deltaup = 0.;
-            int nsup=0;
-            for (unsigned int i=0;i<m_components.size();i++)
-            {
-                std::string n=m_components[i]->m_name.substr(0,3);
-                if (n=="SUP")
-                {
-                    ++nsup;
-                    SupComponent *s=(SupComponent *)m_components[i];
-                    deltaup = s->posz + s->topsizewrtAMDB0();
-        //             log << MSG::DEBUG<<" deltaup: s->posz, s->topsizewrtAMDB0 "
-        //                      <<s->posz<<" "
-        //                      <<s->topsizewrtAMDB0()<<endmsg;
-                    double pos = -m_thickness/2. + deltaup;
-        //            log << MSG::DEBUG<<" pos, m_thickness/2., deltaup "<<pos<<" "
-        //	    <<-m_thickness/2.<<" "<<deltaup<<endmsg;
-                    //xupsup > pos ? xupsup : pos;
-                    if (xupsup <= pos) xupsup=pos;
-        //             log << MSG::DEBUG<<" SUP component named "<<s->m_name
-        //                       <<" xupsup, m_thickness/2. ="<<xupsup<<" "<<m_thickness/2.<<endmsg;
-                }
-            }
-            double dtop=xupsup - m_thickness/2.;
-            //log << MSG::DEBUG<<" dtop = "<<dtop<<endmsg;
-            if (dtop > 0.) {
-              if (log.level()<=MSG::VERBOSE) log << MSG::VERBOSE<<" GetExtraTopThickness for stat = "
-            <<m_name<<" with "<<nsup<<" SUPs is "<<dtop<<endmsg;
-                return dtop;
-            }
-
-            return 0.;
-        */
+        return 0.;       
     }
 
     double Station::GetExtraBottomThickness() const {
-        if (m_name[0] != 'B')
-            return 0.;
-
         return 0.;
-        /* COMMENTING IS JUST TO MAKE COVERITY HAPPY
-           WHY THIS CODE WAS NEVER ENTERED HAS TO BE FIGURED OUT
-            double xdownsup = 0.;
-            double deltadown = 0.;
-            int nsup =0;
-            for (unsigned int i=0;i<m_components.size();i++)
-            {
-                std::string n=m_components[i]->m_name.substr(0,3);
-                if (n=="SUP")
-                {
-                    ++nsup;
-                    SupComponent *s=(SupComponent *)m_components[i];
-                    deltadown = s->posz - s->bottomsizewrtAMDB0();
-        //             log << MSG::DEBUG<<" deltadown: s->posz, s->bottomsizewrtAMDB0 "
-        //                      <<s->posz<<" "
-        //                      <<s->bottomsizewrtAMDB0()<<endmsg;
-                    double pos = -m_thickness/2. + deltadown;
-                    // log << MSG::DEBUG<<" pos, m_thickness/2., deltadown "<<pos
-              //	    <<" "<<-m_thickness/2.<<" "<<deltadown<<endmsg;
-                    //xdownsup < pos ? xdownsup : pos;
-                    if (xdownsup >=pos ) xdownsup=pos;
-        //             log << MSG::DEBUG<<" SUP component named "<<s->m_name
-        //                      <<" xdownsup, -m_thickness/2. ="<<xdownsup<<" "<<-m_thickness/2.<<endmsg;
-                }
-            }
-            double dbottom = - xdownsup - m_thickness/2.;
-            if (dbottom > 0.) {
-              if (log.level()<=MSG::VERBOSE) log << MSG::VERBOSE <<" GetExtraBottomThickness for stat = "
-            <<m_name<<" with "<<nsup<<" SUPs is "<<dbottom<<endmsg;
-                return dbottom;
-            }
-            return 0.;
-        */
+        
     }
 
     double Station::GetLength() const {
@@ -238,7 +156,7 @@ namespace MuonGM {
             double outerrad = 0.;
 
             for (unsigned int i = 0; i < m_components.size(); i++) {
-                TgcComponent *tg = (TgcComponent *)m_components[i];
+                TgcComponent *tg = dynamic_cast<TgcComponent*>(m_components[i].get());
 
                 if (tg->posy < innerrad) {
                     innerrad = tg->posy;
@@ -254,7 +172,7 @@ namespace MuonGM {
             double ystart = 999999.;
 
             for (unsigned int i = 0; i < m_components.size(); i++) {
-                StandardComponent *sc = (StandardComponent *)m_components[i];
+                StandardComponent* sc = dynamic_cast<StandardComponent*>(m_components[i].get());
                 ATH_MSG_VERBOSE("Station " << m_name << " *** comp " << i << " named " <<
                                 sc->name << " posy " << sc->posy << " dy " << sc->dy << " len " << len <<
                                 " ystart " << ystart);
@@ -265,7 +183,7 @@ namespace MuonGM {
                 ATH_MSG_VERBOSE(" now len = " << len << " ystart = " << ystart);
             }
 
-            if (fabs(ystart) > 0.001) {
+            if (std::abs(ystart) > 0.001) {
                 len = len - ystart;
                 m_amdbOrigine_along_length = -ystart;
 
@@ -281,7 +199,7 @@ namespace MuonGM {
             double ystart = std::numeric_limits<double>::max();
 
             for (unsigned int i = 0; i < m_components.size(); i++) {
-                StandardComponent *sc = (StandardComponent *)m_components[i];
+                StandardComponent* sc = dynamic_cast<StandardComponent*>(m_components[i].get());
                 if (i == 0 || sc->posy < ystart)
                     ystart = sc->posy;
             }
@@ -313,12 +231,12 @@ namespace MuonGM {
                 }
             } else {
                 double dxmin = 0.;
-                if (fabs(m_components[i]->dy) < 1.e-10) {
+                if (std::abs(m_components[i]->dy) < 1.e-10) {
                     dxmin = m_components[i]->dx1;
                 } else {
                     double num = (m_components[i]->dx2 - m_components[i]->dx1) / 2.;
                     double tantheta = num != 0 ? num / m_components[i]->dy : 0;
-                    double y = ((StandardComponent *)m_components[i])->posy;
+                    double y = dynamic_cast<StandardComponent*>(m_components[i].get())->posy;
                     dxmin = m_components[i]->dx1 + 2. * tantheta * (ymin - y);
                 }
 
@@ -355,12 +273,12 @@ namespace MuonGM {
                 w += dw;
             } else {
                 double dxmax = 0.;
-                if (fabs(m_components[i]->dy) < 1.e-10)
+                if (std::abs(m_components[i]->dy) < 1.e-10)
                     dxmax = m_components[i]->dx2;
                 else {
                     double num = (m_components[i]->dx2 - m_components[i]->dx1) / 2.;
                     double tantheta = num != 0 ? num / m_components[i]->dy : 0;
-                    double y = ((StandardComponent *)m_components[i])->posy;
+                    double y = dynamic_cast<StandardComponent*>(m_components[i].get())->posy;
                     dxmax = m_components[i]->dx1 + 2. * tantheta * (ymax - y);
                 }
 
@@ -382,7 +300,7 @@ namespace MuonGM {
     std::ostream &operator<<(std::ostream &os, const Station &s) {
         os << "Station m_name: " << s.m_name << " " << s.m_components.size() << std::endl;
         for (unsigned int i = 0; i < s.m_components.size(); i++)
-            os << "\t" << s.m_components[i] << std::endl;
+            os << "\t" << s.m_components[i].get() << std::endl;
 
         PositionIterator k;
         for (k = s.begin(); k != s.end(); k++)

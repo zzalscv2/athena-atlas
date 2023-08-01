@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/StandardComponent.h"
@@ -15,46 +15,6 @@
 #include <string>
 
 namespace MuonGM {
-
-    StandardComponent::StandardComponent() : Component() {
-        posx = 0.;
-        posy = 0.;
-        posz = 0.;
-        deadx = 0.;
-        deady = 0.;
-        excent = 0.;
-        iswap = 0;
-        index = 0;
-        dead3 = 0.;
-    }
-
-    StandardComponent::StandardComponent(const StandardComponent &c) : Component(c) {
-        posx = c.posx;
-        posy = c.posy;
-        posz = c.posz;
-        deadx = c.deadx;
-        deady = c.deady;
-        excent = c.excent;
-        iswap = c.iswap;
-        index = c.index;
-        dead3 = c.dead3;
-    }
-
-    StandardComponent &StandardComponent::operator=(const StandardComponent &c) {
-        if (this != &c) {
-            Component::operator=(c);
-            posx = c.posx;
-            posy = c.posy;
-            posz = c.posz;
-            deadx = c.deadx;
-            deady = c.deady;
-            excent = c.excent;
-            iswap = c.iswap;
-            index = c.index;
-            dead3 = c.dead3;
-        }
-        return *this;
-    }
 
     std::ostream &operator<<(std::ostream &os, const StandardComponent &c) {
         os << "Component " << c.name << std::endl;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MdtComponent_H
@@ -11,14 +11,11 @@ namespace MuonGM {
 
     class MdtComponent : public StandardComponent {
       public:
-        MdtComponent();
-        MdtComponent(const MdtComponent &c);
+        MdtComponent() = default;
+      
+        double tubelenStepSize{0.};  // step size for tube length in endcap chambers
+        double cutoutTubeXShift{0.}; // distance along tube length to shift tube center
 
-        double tubelenStepSize;  // step size for tube length in endcap chambers
-        double cutoutTubeXShift; // distance along tube length to shift tube center
-
-      private:
-        MdtComponent &operator=(const MdtComponent &right);
     };
 } // namespace MuonGM
 

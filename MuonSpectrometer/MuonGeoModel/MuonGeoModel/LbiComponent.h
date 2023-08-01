@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LbiComponent_H
@@ -11,7 +11,7 @@ namespace MuonGM {
 
     class LbiComponent : public StandardComponent {
       public:
-        std::string associated_CMIsubtype;
+        std::string associated_CMIsubtype{};
     };
 } // namespace MuonGM
 

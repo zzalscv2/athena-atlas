@@ -6,6 +6,7 @@
 #define Mdt_H
 
 #include "MuonGeoModel/DetectorElement.h"
+#include "MuonGeoModel/MultiLayer.h"
 
 #include <string>
 #include <vector>
@@ -14,7 +15,6 @@ class GeoFullPhysVol;
 
 namespace MuonGM {
 
-    class MultiLayer;
     class Cutout;
     class Component;
     class MdtComponent;
@@ -23,28 +23,28 @@ namespace MuonGM {
     class Mdt : public DetectorElement {
 
       public:
-        double width;
-        double length;
-        double thickness;
-        double longWidth; // for trapezoidal layers
-        int index;
-        double tubelenStepSize;
-        double tubePitch;
+        double width{0.};
+        double length{0.};
+        double thickness{0.};
+        double longWidth{0.}; // for trapezoidal layers
+        int index{0};
+        double tubelenStepSize{0.};
+        double tubePitch{0.};
 
+        std::unique_ptr<MultiLayer> layer{};
         Mdt(const MYSQL& mysql, Component *s1, const std::string& s2);
-        ~Mdt();
-        MultiLayer *layer;
+   
+       
         GeoFullPhysVol *build(StoredMaterialManager& matManager,
                               const MYSQL& mysql);
         GeoFullPhysVol *build(StoredMaterialManager& matManager,
                               const MYSQL& mysql,
                               std::vector<Cutout *>&);
-        virtual void print() override;
+        virtual void print() const override;
 
       private:
-        MdtComponent *m_component;
-        Mdt &operator=(const Mdt &right);
-        Mdt(const Mdt &);
+        MdtComponent *m_component{nullptr};
+
     };
 
 } // namespace MuonGM

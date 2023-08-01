@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -16,6 +16,6 @@
 
 namespace MuonGM {
 
-    DED::DED(MYSQL& mysql, std::string s) : Technology(mysql, std::move(s)), AlThickness(0.), HoneyCombThickness(0.) {}
+    DED::DED(MYSQL& mysql, std::string s) : Technology(mysql, std::move(s)) {}
 
 } // namespace MuonGM

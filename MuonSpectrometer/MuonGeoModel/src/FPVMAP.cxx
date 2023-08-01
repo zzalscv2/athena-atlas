@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/FPVMAP.h"
@@ -13,8 +13,6 @@
 #include <utility>
 
 namespace MuonGM {
-
-    FPVMAP::FPVMAP() { m_nreused = 0; }
 
     GeoVPhysVol *FPVMAP::GetDetector(const std::string& name) {
         if (m_Detectors.find(name) != m_Detectors.end()) {

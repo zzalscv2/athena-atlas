@@ -18,10 +18,10 @@ namespace MuonGM {
     class Ded : public DetectorElement {
 
       public:
-        double width;
-        double length;
-        double thickness;
-        double longWidth; // for trapezoidal layers
+        double width{0.};
+        double length{0.};
+        double thickness{0.};
+        double longWidth{0.}; // for trapezoidal layers
 
         Ded(const MYSQL& mysql, Component *s);
         GeoVPhysVol *build(StoredMaterialManager& matManager,
@@ -30,10 +30,10 @@ namespace MuonGM {
                            const MYSQL& mysql,
                            int cutoutson,
                            const std::vector<Cutout *>&);
-        virtual void print() override;
+        virtual void print() const override;
 
       private:
-        DedComponent *m_component;
+        DedComponent *m_component{nullptr};
     };
 } // namespace MuonGM
 

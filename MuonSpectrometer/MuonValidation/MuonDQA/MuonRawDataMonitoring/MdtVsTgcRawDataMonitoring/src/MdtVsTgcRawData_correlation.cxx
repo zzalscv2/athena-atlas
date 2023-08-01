@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -13,7 +13,6 @@
 
 #include "MdtVsTgcRawDataValAlg.h"
 
-#include "MuonReadoutGeometry/TgcReadoutParams.h"
 #include "MuonDQAUtils/MuonChamberNameConverter.h"
 #include "MuonDQAUtils/MuonChambersRange.h"
 #include "MuonDQAUtils/MuonCosmicSetup.h"

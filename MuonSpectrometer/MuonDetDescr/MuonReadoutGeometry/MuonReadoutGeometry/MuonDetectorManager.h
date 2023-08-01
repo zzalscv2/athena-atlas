@@ -40,7 +40,6 @@ namespace MuonGM {
     class MMReadoutElement;
     class MuonClusterReadoutElement;
     class MuonStation;
-    class TgcReadoutParams;
 
     /**
        The MuonDetectorManager stores the transient representation of the Muon Spectrometer geometry
@@ -74,9 +73,7 @@ namespace MuonGM {
         void addCscReadoutElement(CscReadoutElement*);    //!< store the CscReadoutElement using as "key" the identifier
         void addsTgcReadoutElement(sTgcReadoutElement*);  //!< store the sTGCReadoutElement using as "key" the identifier
         void addMMReadoutElement(MMReadoutElement*);      //!< store the MMReadoutElement using as "key" the identifier
-       
-        // storeTgcReadoutParams
-        void storeTgcReadoutParams(std::unique_ptr<const TgcReadoutParams> x);
+
 
         // access to Readout Elements
         const MdtReadoutElement* getMdtReadoutElement(const Identifier&) const;    //!< access via extended identifier (requires unpacking)
@@ -314,10 +311,6 @@ namespace MuonGM {
         unsigned int m_n_rpcDE{0};
         unsigned int m_n_tgcDE{0};
 
-        // pointers to the XxxDetectorElements (with granularity a la EDM)
-        std::vector<std::unique_ptr<const TgcReadoutParams> > m_TgcReadoutParamsVec;
-
-     
         
         const NswAsBuiltDbData* m_nswAsBuilt{nullptr};
         /// RPC name caches

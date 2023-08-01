@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef StationSelector_H
@@ -16,7 +16,8 @@ namespace MuonGM {
 
     class StationSelector {
       public:
-        typedef std::map<std::string, Station *, std::less<std::string>>::const_iterator StationIterator;
+        using StationMap = std::map<std::string, Station*, std::less<std::string>>;
+        using StationIterator = StationMap::const_iterator ;
         StationSelector(const MYSQL& mysql, const std::string& filename);
         StationSelector(const MYSQL& mysql, std::vector<std::string> s);
         StationIterator begin();
@@ -24,10 +25,9 @@ namespace MuonGM {
         static void SetSelectionType(int t);
 
       private:
-        const StationIterator m_iterator;
-        std::vector<std::string> m_selector;
-        std::map<std::string, Station *, std::less<std::string>> m_theMap;
-        bool select(StationIterator it);
+        std::vector<std::string> m_selector{};
+        StationMap m_theMap{};
+        bool select(const std::string& name);
         static std::atomic<int> m_selectType;
     };
 

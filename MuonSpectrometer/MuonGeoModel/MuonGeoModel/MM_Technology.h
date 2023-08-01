@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MM_Technology_H
@@ -14,16 +14,16 @@ namespace MuonGM {
 
     class MM_Technology : public Technology {
       public:
-        double thickness;
-        int nlayers;
-        double gasThickness;
-        double pcbThickness;
-        double roThickness;
-        double f1Thickness;
-        double f2Thickness;
-        double f3Thickness;
+        double thickness{0.};
+        int nlayers{0};
+        double gasThickness{0.};
+        double pcbThickness{0.};
+        double roThickness{0.};
+        double f1Thickness{0.};
+        double f2Thickness{0.};
+        double f3Thickness{0.};
 
-        int geoLevel;
+        int geoLevel{0};
 
         // inner structure parameters (to be defined)
 
@@ -33,7 +33,7 @@ namespace MuonGM {
     };
 
     MM_Technology::MM_Technology(std::string s)
-        : Technology(s), thickness(0.), nlayers(0), gasThickness(0.), pcbThickness(0.), roThickness(0), f1Thickness(0.), f2Thickness(0.), f3Thickness(0.), geoLevel(0) {}
+        : Technology(s) {}
 
     double MM_Technology::Thickness() {
         // thickness=nlayers*(gasThickness+pcbThickness) + 2.*pcbThickness;

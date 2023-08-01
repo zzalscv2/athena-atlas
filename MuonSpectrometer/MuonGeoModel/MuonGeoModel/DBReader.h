@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -137,17 +137,17 @@ namespace MuonGM {
         std::string m_version;
     }; // end of class DBReader
 
-    static std::atomic<int> nmdt = 0;
-    static std::atomic<int> nrpc = 0;
-    static std::atomic<int> ntgc = 0;
-    static std::atomic<int> ncsc = 0;
-    static std::atomic<int> nspa = 0;
-    static std::atomic<int> nded = 0;
-    static std::atomic<int> nsup = 0;
-    static std::atomic<int> nchv = 0;
-    static std::atomic<int> ncro = 0;
-    static std::atomic<int> ncmi = 0;
-    static std::atomic<int> nlbi = 0;
+    static std::atomic<int> nmdt{0};
+    static std::atomic<int> nrpc{0};
+    static std::atomic<int> ntgc{0};
+    static std::atomic<int> ncsc{0};
+    static std::atomic<int> nspa{0};
+    static std::atomic<int> nded{0};
+    static std::atomic<int> nsup{0};
+    static std::atomic<int> nchv{0};
+    static std::atomic<int> ncro{0};
+    static std::atomic<int> ncmi{0};
+    static std::atomic<int> nlbi{0};
 
     // here the template functions used by the specialised versions of ProcessFile
     template <class TYPEdhwmdt, class TYPEwmdt>
@@ -761,10 +761,8 @@ namespace MuonGM {
 
         int nstat = 0;
         int nnodes = 0;
-        for (StationIterator is = mysql.StationBegin(); is != mysql.StationEnd(); ++is) {
+        for (const auto& [name, stat] : mysql.stationMap()) {
             nstat++;
-            Station *stat = (*is).second;
-            std::string name = stat->GetName();
             np = stat->Npositions();
             if (verbose_posmap) {
                 log << MSG::VERBOSE << " Symmetrizing position map for station " << name << " with " << np << " not mirrored positions " << endmsg;
@@ -837,7 +835,7 @@ namespace MuonGM {
     static void ProcessAlignements(MYSQL& mysql, const TYPEdnaszt dnaszt, const TYPEaszt *aszt) {
         MsgStream log(Athena::getMessageSvc(), "MuGM:ProcessAlignements");
 
-        int controlAlines = mysql.controlAlines();
+
         if (verbose_alimap) {
             log << MSG::VERBOSE << " ProcessAlignements:: how many stations there are ? " << mysql.NStations() << endmsg;
         }
@@ -879,37 +877,17 @@ namespace MuonGM {
                             ap.rotz = 0.;                    // in radians
                             ap.rott = 0.;                    // in radians
 
-                            if (controlAlines >= 111111) {
-                                ap.tras = aszt[ipos].tras * Gaudi::Units::cm; // in cm from NOVA...
-                                ap.traz = aszt[ipos].traz * Gaudi::Units::cm; // in cm
-                                ap.trat = aszt[ipos].trat * Gaudi::Units::cm; // in cm
-                                ap.rots = aszt[ipos].rots;                    // in radians
-                                ap.rotz = aszt[ipos].rotz;                    // in radians
-                                ap.rott = aszt[ipos].rott;                    // in radians
+                           
+                            ap.tras = aszt[ipos].tras * Gaudi::Units::cm; // in cm from NOVA...
+                            ap.traz = aszt[ipos].traz * Gaudi::Units::cm; // in cm
+                            ap.trat = aszt[ipos].trat * Gaudi::Units::cm; // in cm
+                            ap.rots = aszt[ipos].rots;                    // in radians
+                            ap.rotz = aszt[ipos].rotz;                    // in radians
+                            ap.rott = aszt[ipos].rott;                    // in radians
 
-                                if (verbose_alimap) {
-                                    log << MSG::VERBOSE << "A-line: " << ap.tras << " " << ap.traz << " " << ap.trat << " " << ap.rots << " " << ap.rotz << " " << ap.rott
-                                        << endmsg;
-                                }
-                            } else {
-                                if (controlAlines % 10 != 0) {
-                                    ap.rott = aszt[ipos].rott;
-                                }
-                                if (int(controlAlines / 10) % 10 != 0) {
-                                    ap.rotz = aszt[ipos].rotz;
-                                }
-                                if (int(controlAlines / 100) % 10 != 0) {
-                                    ap.rots = aszt[ipos].rots;
-                                }
-                                if (int(controlAlines / 1000) % 10 != 0) {
-                                    ap.trat = aszt[ipos].trat * Gaudi::Units::cm;
-                                }
-                                if (int(controlAlines / 10000) % 10 != 0) {
-                                    ap.traz = aszt[ipos].traz * Gaudi::Units::cm;
-                                }
-                                if (int(controlAlines / 100000) % 10 != 0) {
-                                    ap.tras = aszt[ipos].tras * Gaudi::Units::cm;
-                                }
+                            if (verbose_alimap) {
+                                log << MSG::VERBOSE << "A-line: " << ap.tras << " " << ap.traz << " " << ap.trat << " " << ap.rots << " " << ap.rotz << " " << ap.rott
+                                    << endmsg;
                             }
 
                             ap.phiindex = aszt[ipos].jff - 1; // jff 1-8, not 0-7?

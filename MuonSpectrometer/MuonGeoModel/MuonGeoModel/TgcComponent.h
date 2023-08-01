@@ -14,7 +14,7 @@ namespace MuonGM {
     class TgcComponent : public StandardComponent {
 
       public:
-        TgcComponent();
+        TgcComponent() = default;
         friend std::ostream &operator<<(std::ostream &os, const TgcComponent &c);
     };
 
