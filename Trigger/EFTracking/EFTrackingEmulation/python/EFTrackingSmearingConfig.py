@@ -52,7 +52,8 @@ if __name__ == "__main__":
 
     # create basic infrastructure
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(flags)    
+    acc = MainServicesCfg(flags)        
+    acc.getService("MessageSvc").debugLimit = 100000
  
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     acc.merge(PoolReadCfg(flags))
@@ -61,19 +62,29 @@ if __name__ == "__main__":
     from InDetPhysValMonitoring.InDetPhysValDecorationConfig import AddDecoratorCfg
     acc.merge(AddDecoratorCfg(flags))
     
+    TestsmearFactor = 2
     # example to smear the track particles with smearing factor =2 and efficiency 90%
-    smearerTrack = EFTrackingSmearingCfg(flags, name="testTrack", trkpTCut=1, smearFactor=2, InputTrackParticle="InDetTrackParticles",
+    smearerTrack = EFTrackingSmearingCfg(flags, name="testTrack", trkpTCut=1, smearFactor=TestsmearFactor, InputTrackParticle="InDetTrackParticles",
                                     trackEfficiency=0.9, parameterizeEfficiency=False, smearTruthParticle=False,
                                     EnableMonitoring=True, OutputLevel=INFO)
     acc.merge(smearerTrack)
     
     
     # example to smear the truth particles with smearing factor =2 and efficiency 90%
-    smearerTruth = EFTrackingSmearingCfg(flags, name="testTruth", trkpTCut=1, smearFactor=2, InputTruthParticle="TruthParticles",
+    smearerTruth = EFTrackingSmearingCfg(flags, name="testTruth", trkpTCut=1, smearFactor=TestsmearFactor, InputTruthParticle="TruthParticles",
                                     trackEfficiency=0.9, parameterizeEfficiency=False, smearTruthParticle=True,
                                     EnableMonitoring=True, OutputLevel=INFO)
     acc.merge(smearerTruth)
-        
+    
+    
+    # validation of the smeared tracks and truth particles
+    validationAlg = CompFactory.EFTrackingSmearMonAlg ( name="EFTrakingSmearMonAlg",
+      OutputLevel = INFO, 
+      InputTrackParticleContainer = "InDetTrackParticles_smeared_SF"+str(TestsmearFactor),
+      InputTruthParticleContainer = "TruthParticle_smeared_SF"+str(TestsmearFactor),
+      )
+    acc.addEventAlgo(validationAlg)
+    
     acc.wasMerged()
     
     # below is validation
