@@ -1,4 +1,6 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+/*
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
 #ifndef EFTRACKING_SMEARINGALG_H
 #define EFTRACKING_SMEARINGALG_H 
 
@@ -19,9 +21,9 @@ class EFTrackingSmearingAlg: public ::AthHistogramAlgorithm {
   EFTrackingSmearingAlg( const std::string& name, ISvcLocator* pSvcLocator );
   virtual ~EFTrackingSmearingAlg(); 
 
-  virtual StatusCode  initialize();
-  virtual StatusCode  execute();
-  virtual StatusCode  finalize();
+  virtual StatusCode  initialize() override;
+  virtual StatusCode  execute() override;
+  virtual StatusCode  finalize() override;
 
  private: 
 
@@ -31,7 +33,6 @@ class EFTrackingSmearingAlg: public ::AthHistogramAlgorithm {
   SG::WriteHandleKey<xAOD::TrackParticleContainer> m_outputTrackParticleKey { this, "OutputTrackParticleContainer", "InDetTrackParticles_smeared",
                                                                           "key for retrieval of output TrackParticles" };
 
-  /** ReadHandleKey for truth particle container */
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_inputTruthParticleKey{this,"InputTruthParticleContainer","TruthParticles_tosmear",
                                                                           "key for retrieval of input Truth particle"};
   

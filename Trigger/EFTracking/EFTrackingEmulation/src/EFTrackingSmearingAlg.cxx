@@ -1,5 +1,7 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-
+/*
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
+ 
 
 #include "EFTrackingSmearingAlg.h"
 #include "xAODTracking/VertexContainer.h" 
@@ -230,12 +232,13 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
       float phi = part->phi();
       if (part->isNeutral()) continue;
 
-      ATH_MSG_DEBUG ("===> New Truth particle: parameters: d0=" << d0
-                      <<" z0="          << z0
-                      <<" theta="       << theta                      
-                      <<" pt(GeV)="     << pt /1000.
-                      <<" eta="         << eta
-                      <<" phi="         << phi);            
+      ATH_MSG_DEBUG ("===> New Truth: "  
+                      <<" curv=" << 1./part->pt()
+                      <<" phi="  << part->phi()
+                      <<" eta="  << part->eta()
+                      <<" d0="   << part->auxdata<float>("d0")
+                      <<" z0="   << part->auxdata<float>("z0")
+                      <<" pT="   << part->pt()  );        
       
       if (std::abs(pt) > m_inputTracksPtCut)
       	{
@@ -257,12 +260,13 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
       	    {                                                         
                 xAOD::TruthParticle * newtrk = new xAOD::TruthParticle(*part);
                 outputTruth->push_back(newtrk); 
+                *newtrk = *part;
                 // set the decorators                  
                 d0Decorator(*newtrk) = otrack.d0();
                 z0Decorator(*newtrk) = otrack.z0();
                 ptDecorator(*newtrk) = otrack.pt();
 
-                ATH_MSG_DEBUG ("Smeared truth: "
+                ATH_MSG_DEBUG ("Smeared Truth: "
                       <<" curv=" << 1./newtrk->pt()
                       <<" phi="  << newtrk->phi()
                       <<" eta="  << newtrk->eta()
@@ -347,17 +351,20 @@ StatusCode EFTrackingSmearingAlg::execute() {
       double theta=trk->theta();
       double pt = std::sin(theta)/(trk->qOverP());// MeV
       float qoverPt = trk->qOverP()/std::sin(theta); 
-      ATH_MSG_DEBUG ("===> New Track: parameters: d0=" << trk->d0()
-                      <<" z0="     << trk->z0()
-                      <<" qoverP=" << trk->qOverP()<<" pt(GeV)="<<pt << " curvT="<<qoverPt
-                      <<" eta="    << trk->eta()
-                      <<" phi="    << trk->phi0()
-                      <<" cov d0=" << trkcov(Trk::d0,Trk::d0)
-                      <<" cov z0=" << trkcov(Trk::z0,Trk::z0)
-                      <<" sigma d0="  << std::sqrt(std::abs(trkcov(Trk::d0,Trk::d0)))
-                      <<" sigma z0="  << std::sqrt(std::abs(trkcov(Trk::z0,Trk::z0))) );
+      ATH_MSG_DEBUG ("===> New Track: "
+                      <<" curv=" << 1./trk->pt()
+                      <<" phi="  << trk->phi0()
+                      <<" eta="  << trk->eta()
+                      <<" d0="   << trk->d0()
+                      <<" z0="   << trk->z0()
+                      <<" pT="   << trk->pt()
+                      <<" cov_d0=" << trkcov(Trk::d0,Trk::d0)
+                      <<" cov_z0=" << trkcov(Trk::z0,Trk::z0)
+                      <<" sigma_d0="  << std::sqrt(std::abs(trkcov(Trk::d0,Trk::d0)))
+                      <<" sigma_z0="  << std::sqrt(std::abs(trkcov(Trk::z0,Trk::z0))) );
       
       
+                      
       if (std::abs(pt) > m_inputTracksPtCut)
       	{
       	  n_input_tracks++;
@@ -387,6 +394,7 @@ StatusCode EFTrackingSmearingAlg::execute() {
             {      	  
       	      xAOD::TrackParticle * newtrk = new xAOD::TrackParticle(*trk);
               outputTracks->push_back(newtrk);  
+              *newtrk = *trk;
 
               double sintheta=std::sin(otrack.theta());
               // modify the cov matrix
@@ -424,15 +432,19 @@ StatusCode EFTrackingSmearingAlg::execute() {
       					    otrack.theta(),
       					    (otrack.curv()*sintheta)
       					    );
-
-              ATH_MSG_DEBUG ("Smeared track: "
+              xAOD::ParametersCovMatrix_t trkcov_out = newtrk->definingParametersCovMatrix();
+              ATH_MSG_DEBUG ("Smeared Track: "
                       <<" curv=" << 1./newtrk->pt()
                       <<" phi="  << newtrk->phi()
                       <<" eta="  << newtrk->eta()
                       <<" d0="   << newtrk->d0()
                       <<" z0="   << newtrk->z0()
                       <<" pT="   << newtrk->pt()
-                       );
+                      <<" cov_d0=" << trkcov_out(Trk::d0,Trk::d0)
+                      <<" cov_z0=" << trkcov_out(Trk::z0,Trk::z0)
+                      <<" sigma_d0="  << std::sqrt(std::abs(trkcov_out(Trk::d0,Trk::d0)))
+                      <<" sigma_z0="  << std::sqrt(std::abs(trkcov_out(Trk::z0,Trk::z0))) );
+                       
               
       	      if (m_enableMonitoring) {
       	        hist("track_output_eta")->Fill(otrack.eta());
@@ -455,7 +467,7 @@ StatusCode EFTrackingSmearingAlg::execute() {
       	        hist("track_delta_z0" )->Fill(otrack.z0()  - trk->z0());
       	        hist("track_delta_d0" )->Fill(otrack.d0()  - trk->d0());
               
-      	        xAOD::ParametersCovMatrix_t trkcov_out = newtrk->definingParametersCovMatrix();
+      	        
       	        hist("track_outputcoll_check_sigma_theta") ->Fill(std::sqrt(trkcov_out(Trk::theta,Trk::theta)));
       	        hist("track_outputcoll_check_sigma_qOverP")->Fill(std::sqrt(trkcov_out(Trk::qOverP,Trk::qOverP)));
       	        hist("track_outputcoll_check_sigma_phi")   ->Fill(std::sqrt(trkcov_out(Trk::phi0,Trk::phi0)));
