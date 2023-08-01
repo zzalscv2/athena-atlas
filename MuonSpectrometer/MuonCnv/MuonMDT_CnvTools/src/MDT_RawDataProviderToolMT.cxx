@@ -9,29 +9,57 @@
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 
 Muon::MDT_RawDataProviderToolMT::MDT_RawDataProviderToolMT(const std::string& t, const std::string& n, const IInterface* p) :
-    base_class(t, n, p), m_rdoContainerCacheKey("") {
+    base_class(t, n, p) {
     declareInterface<Muon::IMuonRawDataProviderTool>(this);
 
-    declareProperty("CsmContainerCacheKey", m_rdoContainerCacheKey, "Optional external cache for the CSM container");
 }
 
 StatusCode Muon::MDT_RawDataProviderToolMT::initialize() {
     ATH_MSG_VERBOSE("Starting init");
 
-    ATH_CHECK(MDT_RawDataProviderToolCore::initialize());
+    ATH_MSG_VERBOSE("Getting m_robDataProvider");
 
+    // Get ROBDataProviderSvc
+    ATH_CHECK(m_robDataProvider.retrieve());
+    ATH_CHECK(m_idHelperSvc.retrieve());
+
+    ATH_MSG_VERBOSE("Getting m_decoder");
+
+    // Retrieve decoder
+    ATH_CHECK(m_decoder.retrieve());
+    m_maxhashtoUse = m_idHelperSvc->mdtIdHelper().stationNameIndex("BME") != -1 ? m_idHelperSvc->mdtIdHelper().detectorElement_hash_max()
+                                                                                : m_idHelperSvc->mdtIdHelper().module_hash_max();
+
+    ATH_CHECK(m_rdoContainerKey.initialize());
+    ATH_CHECK(m_readKey.initialize());
     ATH_CHECK(m_rdoContainerCacheKey.initialize(!m_rdoContainerCacheKey.key().empty()));
 
     ATH_MSG_DEBUG("initialize() successful in " << name());
     return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::MDT_RawDataProviderToolMT::finalize() { return StatusCode::SUCCESS; }
+StatusCode Muon::MDT_RawDataProviderToolMT::convertIntoContainer(
+    const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs, MdtCsmContainer& mdtContainer) const {
+    ATH_MSG_VERBOSE("convert(): " << vecRobs.size() << " ROBFragments.");
+
+    for (const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* frag : vecRobs) {
+        // convert only if data payload is delivered
+        if (frag->rod_ndata() != 0) {
+            ATH_CHECK(m_decoder->fillCollections(*frag, mdtContainer));
+        } else {
+            ATH_MSG_DEBUG(" ROB " << MSG::hex << frag->source_id() << " is delivered with an empty payload" );
+            // store the error condition into the StatusCode and continue
+        }
+    }
+    // in presence of errors return FAILURE
+    ATH_MSG_DEBUG("After processing numColls=" << mdtContainer.numberOfCollections());
+    return StatusCode::SUCCESS;
+}
 
 // the new one
 StatusCode Muon::MDT_RawDataProviderToolMT::convert() const  // call decoding function using list of all detector ROBId's
 {
-    return this->convert(Gaudi::Hive::currentContext());
+    return convert(Gaudi::Hive::currentContext());
 }
 
 StatusCode Muon::MDT_RawDataProviderToolMT::convert(
@@ -39,7 +67,7 @@ StatusCode Muon::MDT_RawDataProviderToolMT::convert(
 {
     SG::ReadCondHandle<MuonMDT_CablingMap> readHandle{m_readKey, ctx};
     const MuonMDT_CablingMap* readCdo{*readHandle};
-    if (readCdo == nullptr) {
+    if (!readCdo) {
         ATH_MSG_ERROR("Null pointer to the read conditions object");
         return StatusCode::FAILURE;
     }
@@ -47,13 +75,13 @@ StatusCode Muon::MDT_RawDataProviderToolMT::convert(
 }
 
 StatusCode Muon::MDT_RawDataProviderToolMT::convert(const std::vector<IdentifierHash>& HashVec) const {
-    return this->convert(HashVec, Gaudi::Hive::currentContext());
+    return convert(HashVec, Gaudi::Hive::currentContext());
 }
 
 StatusCode Muon::MDT_RawDataProviderToolMT::convert(const std::vector<IdentifierHash>& HashVec, const EventContext& ctx) const {
     SG::ReadCondHandle<MuonMDT_CablingMap> readHandle{m_readKey, ctx};
     const MuonMDT_CablingMap* readCdo{*readHandle};
-    if (readCdo == nullptr) {
+    if (!readCdo) {
         ATH_MSG_ERROR("Null pointer to the read conditions object");
         return StatusCode::FAILURE;
     }
@@ -61,7 +89,7 @@ StatusCode Muon::MDT_RawDataProviderToolMT::convert(const std::vector<Identifier
 }
 
 StatusCode Muon::MDT_RawDataProviderToolMT::convert(const std::vector<uint32_t>& robIds) const {
-    return this->convert(robIds, Gaudi::Hive::currentContext());
+    return convert(robIds, Gaudi::Hive::currentContext());
 }
 
 StatusCode Muon::MDT_RawDataProviderToolMT::convert(const std::vector<uint32_t>& robIds, const EventContext& ctx) const {
@@ -72,7 +100,7 @@ StatusCode Muon::MDT_RawDataProviderToolMT::convert(const std::vector<uint32_t>&
 
 StatusCode Muon::MDT_RawDataProviderToolMT::convert(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs,
                                                     const std::vector<IdentifierHash>&) const {
-    return this->convert(vecRobs, Gaudi::Hive::currentContext());
+    return convert(vecRobs, Gaudi::Hive::currentContext());
 }
 
 StatusCode Muon::MDT_RawDataProviderToolMT::convert(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs,
@@ -81,7 +109,7 @@ StatusCode Muon::MDT_RawDataProviderToolMT::convert(const std::vector<const OFFL
 }
 
 StatusCode Muon::MDT_RawDataProviderToolMT::convert(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs) const {
-    return this->convert(vecRobs, Gaudi::Hive::currentContext());
+    return convert(vecRobs, Gaudi::Hive::currentContext());
 }
 
 StatusCode Muon::MDT_RawDataProviderToolMT::convert(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs,
