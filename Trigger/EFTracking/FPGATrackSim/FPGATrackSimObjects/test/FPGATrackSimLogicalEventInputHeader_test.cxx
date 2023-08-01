@@ -19,7 +19,7 @@ int main(int, char**)
   const int layer(3);
   const double qoverpt(-0.00002);
   const double d0(1.1), z0(2.2);
-  const int pdgcode(-13), barcode(123);
+  const int pdgcode(-13), status(1), barcode(123);
   const double px(100.), py(-200.), pz(300.);
 
 
@@ -55,6 +55,7 @@ int main(int, char**)
   optional.addOfflineTrack(track);
   FPGATrackSimTruthTrack truth;
   truth.setPDGCode(pdgcode);
+  truth.setStatus(status);
   truth.setBarcode(barcode);
   truth.setPX(px);
   truth.setPY(py);
@@ -76,6 +77,7 @@ int main(int, char**)
 
 
   std::cout << "Truth pdg = " << header.optional().getTruthTracks()[0].getPDGCode() 
+	    << " status = " << header.optional().getTruthTracks()[0].getStatus() 
 	    << " and barcode = " << header.optional().getTruthTracks()[0].getBarcode() << std::endl;
 
   std::cout << "Truth px = " << header.optional().getTruthTracks()[0].getPX() 
