@@ -46,7 +46,7 @@ STDMElectronTool = DerivationFramework__TruthCollectionMaker(name               
 ToolSvc += STDMElectronTool
 STDMAugmentationTools.append(STDMElectronTool)
 
-truthphotexpression = "(abs(TruthParticles.pdgId) == 22) && (TruthParticles.status ==1) && (TruthParticles.barcode < 200000)"
+truthphotexpression = "(abs(TruthParticles.pdgId) == 22) && (  ( (TruthParticles.status ==1) && (TruthParticles.barcode < 200000)) || (TruthParticles.barcode < 10010))"
 STDMPhotonTool = DerivationFramework__TruthCollectionMaker(name                 = "STDMPhotonTool",
                                                             NewCollectionName       = "STDMTruthPhotons",
                                                             ParticleSelectionString = truthphotexpression,
@@ -128,3 +128,4 @@ from DerivationFrameworkCore.DerivationFrameworkCoreConf import DerivationFramew
 DerivationFrameworkJob += CfgMgr.DerivationFramework__CommonAugmentation("STDMAugmentationKernel", AugmentationTools = STDMAugmentationTools)
 
 STDMphotonthinningexpr = "(STDMTruthPhotons.classifierParticleOrigin != 42) && !(STDMTruthPhotons.classifierParticleOrigin >= 23 && STDMTruthPhotons.classifierParticleOrigin <= 35)"
+
