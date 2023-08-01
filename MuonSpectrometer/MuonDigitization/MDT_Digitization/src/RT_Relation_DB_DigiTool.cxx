@@ -12,25 +12,17 @@
 using namespace MuonGM;
 
 RT_Relation_DB_DigiTool::RT_Relation_DB_DigiTool(const std::string &type, const std::string &name, const IInterface *parent) :
-    AthAlgTool(type, name, parent), m_maxRadius(0), m_muonGeoMgr(nullptr) {
+    AthAlgTool(type, name, parent)  {
     declareInterface<IMDT_DigitizationTool>(this);
 }
 
 StatusCode RT_Relation_DB_DigiTool::initialize() {
     ATH_MSG_INFO("Initializing RT_Relation_DB_DigiTool");
 
-    if (detStore()->contains<MuonDetectorManager>("Muon")) {
-        StatusCode status = detStore()->retrieve(m_muonGeoMgr);
-        if (status.isFailure()) {
-            ATH_MSG_FATAL("Could not retrieve MuonGeoModelDetectorManager!");
-            return status;
-        } else {
-            ATH_MSG_DEBUG("MuonGeoModelDetectorManager retrieved from StoreGate");
-        }
-    }
-
-    initializeTube();
-
+    const MuonGM::MuonDetectorManager* detMgr{nullptr};
+    ATH_CHECK(detStore()->retrieve(detMgr));    
+    m_maxRadius = detMgr->getGenericMdtDescriptor()->innerRadius;
+   
     return StatusCode::SUCCESS;
 }
 
@@ -46,13 +38,6 @@ MdtDigiToolOutput RT_Relation_DB_DigiTool::digitize(const MdtDigiToolInput &inpu
     MdtDigiToolOutput output(false, 0., 0.);
 
     return output;
-}
-
-bool RT_Relation_DB_DigiTool::initializeTube() {
-    m_maxRadius = m_muonGeoMgr->getGenericMdtDescriptor()->innerRadius;
-    ATH_MSG_DEBUG("Initialized Inner tube radius to " << m_maxRadius << " and effective radius to " << m_effRadius);
-
-    return true;
 }
 
 double RT_Relation_DB_DigiTool::getDriftTime(double r, Identifier DigitId, CLHEP::HepRandomEngine *rndmEngine) const {
