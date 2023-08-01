@@ -726,6 +726,7 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
       tmpSGTrack.setPY(track_truth_p * (track_truth_sinphi * track_truth_sintheta));
       tmpSGTrack.setPZ(track_truth_p * track_truth_costheta);
       tmpSGTrack.setPDGCode(pdgcode);
+      tmpSGTrack.setStatus(particle->status());
       tmpSGTrack.setBarcode(extBarcode2.barcode());
       index_type index2, position2;
       extBarcode2.eventIndex(index2, position2);
@@ -756,7 +757,7 @@ void FPGATrackSimSGToRawHitsTool::getTruthInformation(InDetSimDataCollection::co
     // reject unstable particles
     if (!MC::isStable(particleLink)) { continue; }
     // reject secondaries and low pT (<400 MeV) pileup
-    if (HepMC::is_simulation_particle(&particleLink) ||particleLink.barcode() == 0) { continue; }
+    if (HepMC::is_simulation_particle(particleLink.cptr()) ||particleLink.barcode() == 0) { continue; }
     // reject far forward particles
     if (std::fabs(genEta) > m_maxEta) { continue; }
     // "bestParent" is the highest pt particle
