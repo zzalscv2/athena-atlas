@@ -98,6 +98,10 @@ namespace xAOD {
       size_t nOutgoingParticles() const;
       /// Get one of the outgoing particles
       const TruthParticle_v1* outgoingParticle( size_t index ) const;
+      /// Get the incoming particles
+      std::vector<const TruthParticle*> particles_in() const;
+      /// Get the outgoing particles
+      std::vector<const TruthParticle*> particles_out() const;
       /// Add one outgoing particle
       void addOutgoingParticleLink( const TPLink_t& link );
       /// Remove all outgoing particles
