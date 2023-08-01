@@ -73,7 +73,6 @@ private:
 
 
   Gaudi::Property<std::string>         m_tracksTruthName { this, "OfflineName", "InDetTrackParticles", "name of offline tracks collection" };
-
   Gaudi::Property<bool>        m_dumpHitsOnTracks { this, "dumpHitsOnTracks", false };
   Gaudi::Property<bool>        m_dumpTruthIntersections { this, "dumpTruthIntersections", false };
   Gaudi::Property<bool>        m_readOfflineClusters { this, "ReadOfflineClusters", true, "flag to enable the offline cluster save" };
@@ -93,7 +92,7 @@ private:
   const HepPDT::ParticleDataTable* m_particleDataTable = nullptr;
 
   typedef std::map<Identifier, int> HitIndexMap;
-  StatusCode readRawSilicon(HitIndexMap& hitIndexMap, HitIndexMap& pixelClusterIndexMap, const EventContext& eventContext); // dump raw silicon data to text file and populate hitIndexMap for rec. track processing
+  StatusCode readRawSilicon(HitIndexMap& hitIndexMap, const EventContext& eventContext); // dump raw silicon data to text file and populate hitIndexMap for rec. track processing
   StatusCode readTruthTracks(std::vector<FPGATrackSimTruthTrack>& truth, const EventContext& eventContext);
   StatusCode readOfflineTracks(std::vector<FPGATrackSimOfflineTrack>& Track, const EventContext& eventContext);
   StatusCode readOfflineClusters(std::vector<FPGATrackSimCluster>& Clusters, const EventContext& eventContext);

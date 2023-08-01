@@ -51,8 +51,8 @@ StatusCode FPGATrackSimSGToRawHitsTool::initialize() {
 
   ATH_MSG_DEBUG("FPGATrackSimSGToRawHitsTool::initialize()");
 
-  ATH_CHECK(m_truthToTrack.retrieve());
-  ATH_CHECK(m_extrapolator.retrieve());
+  if(!m_truthToTrack.empty() ) ATH_CHECK(m_truthToTrack.retrieve());
+  if(!m_extrapolator.empty()) ATH_CHECK(m_extrapolator.retrieve());
   ATH_CHECK(m_beamSpotKey.initialize());
 
 
@@ -77,13 +77,13 @@ StatusCode FPGATrackSimSGToRawHitsTool::initialize() {
   ATH_CHECK(detStore()->retrieve(m_sctId, "SCT_ID"));
 
   ATH_CHECK(m_eventInfoKey.initialize());
-  ATH_CHECK(m_pixelClusterContainerKey.initialize());
-  ATH_CHECK(m_sctClusterContainerKey.initialize());
+  ATH_CHECK(m_pixelClusterContainerKey.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_sctClusterContainerKey.initialize(SG::AllowEmpty));
 
-  ATH_CHECK(m_offlineTracksKey.initialize());
-  ATH_CHECK(m_mcCollectionKey.initialize());
-  ATH_CHECK(m_pixelSDOKey.initialize());
-  ATH_CHECK(m_stripSDOKey.initialize());
+  ATH_CHECK(m_offlineTracksKey.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_mcCollectionKey.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_pixelSDOKey.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_stripSDOKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_pixelRDOKey.initialize());
   ATH_CHECK(m_stripRDOKey.initialize());
 
@@ -126,7 +126,7 @@ StatusCode FPGATrackSimSGToRawHitsTool::readData(FPGATrackSimEventInputHeader* h
 
   // dump raw silicon data
   ATH_MSG_DEBUG("Dump raw silicon data");
-  ATH_CHECK(readRawSilicon(hitIndexMap, pixelClusterIndexMap, eventContext));
+  ATH_CHECK(readRawSilicon(hitIndexMap,  eventContext));
 
   ATH_MSG_DEBUG("Found list of hits, size =" << m_eventHeader->nHits());
   FPGATrackSimOptionalEventInfo optional;
@@ -136,6 +136,7 @@ StatusCode FPGATrackSimSGToRawHitsTool::readData(FPGATrackSimEventInputHeader* h
     ATH_CHECK(readOfflineClusters(clusters, eventContext));
     for (auto cluster : clusters) optional.addOfflineCluster(cluster);
     ATH_MSG_DEBUG("Saved " << optional.nOfflineClusters() << " offline clusters");
+    ATH_CHECK(dumpPixelClusters(pixelClusterIndexMap, eventContext));
   }
 
   if (m_readTruthTracks) {
@@ -225,14 +226,13 @@ StatusCode FPGATrackSimSGToRawHitsTool::readOfflineTracks(std::vector<FPGATrackS
 
 // dump silicon channels with geant matching information.
 StatusCode
-FPGATrackSimSGToRawHitsTool::readRawSilicon(HitIndexMap& hitIndexMap, HitIndexMap& pixelClusterIndexMap, const EventContext& eventContext) // const cannot make variables push back to DataInput
+FPGATrackSimSGToRawHitsTool::readRawSilicon(HitIndexMap& hitIndexMap, const EventContext& eventContext) // const cannot make variables push back to DataInput
 {
   ATH_MSG_DEBUG("read silicon hits");
   unsigned int hitIndex = 0u;
 
   ATH_CHECK(readPixelSimulation(hitIndexMap, hitIndex, eventContext));
   ATH_CHECK(readStripSimulation(hitIndexMap, hitIndex, eventContext));
-  ATH_CHECK(dumpPixelClusters(pixelClusterIndexMap, eventContext));
 
   return StatusCode::SUCCESS;
 }

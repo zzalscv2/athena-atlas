@@ -3,7 +3,7 @@
 def createFPGATrackSimConfigFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
     cf = AthConfigFlags()
-    cf.addFlag('algoTag', '')
+    cf.addFlag('algoTag', 'Hough')
     cf.addFlag('wrapperFileName', 'FPGATrackSimWrapper.root')
 
     def __httHough1DFlags():

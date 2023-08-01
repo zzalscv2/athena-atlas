@@ -24,6 +24,7 @@
 #include "FPGATrackSimHough/FPGATrackSimHoughRootOutputTool.h"
 #include "FPGATrackSimLRT/FPGATrackSimLLPRoadFilterTool.h"
 #include "FPGATrackSimObjects/FPGATrackSimEventInputHeader.h"
+#include "FPGATrackSimSGInput/IFPGATrackSimInputTool.h"
 
 #include "AthenaMonitoringKernel/Monitored.h"
 
@@ -62,6 +63,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         int m_ev = 0;
 
         // Handles
+        ToolHandle<IFPGATrackSimInputTool>               m_hitSGInputTool {this, "SGInputTool", "", "Input tool from SG"};
         ToolHandle<IFPGATrackSimEventInputHeaderTool>    m_hitInputTool {this, "InputTool", "FPGATrackSimSGToRawHitsTool/FPGATrackSimSGToRawHitsTool", "Input Tool"};
 	ToolHandle<FPGATrackSimReadRawRandomHitsTool>    m_hitInputTool2 {this, "InputTool2", "FPGATrackSimReadRawRandomHitsTool/FPGATrackSimReadRawRandomHitsTool", "Potential 2nd input Tool to load data from more than one source"};
         ToolHandle<FPGATrackSimRawToLogicalHitsTool>     m_hitMapTool {this, "RawToLogicalHitsTool", "FPGATrackSim_RawToLogicalHitsTool/FPGATrackSim_RawToLogicalHitsTool", "Raw To Logical Tool"};
