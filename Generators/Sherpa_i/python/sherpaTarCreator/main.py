@@ -17,7 +17,7 @@ def main():
     parser = ArgumentParser(description='create gridpackage from job option')
     parser.add_argument("jobOptionDir",type=str, nargs='+',help="Path to job option directory. If multiple are given only the calculation of MinEvents is performed for the additional setups (meant e.g. for different filters).")
     parser.add_argument('-b', '--batchSystem', type=str, dest='batchSystem', default='htcondor_lxplus', help='Batch system to use (default = %(default)s, alternatives: htcondor_naf, slurm_taurus, sge_grace)')
-    parser.add_argument('-c', '--ecm', type=float, dest='ecm', nargs="+", default=[13.0], help='center of mass energy')
+    parser.add_argument('-c', '--ecm', type=float, dest='ecm', nargs="+", default=[13.0], help='center of mass energy in TeV')
     parser.add_argument('-o', '--only', type=str, dest='performOnly', nargs="+", default=["all"], help='steps which can be performed, default:all, there are: getOpenLoops, createLibs, makelibs, integrate, makeTarball, evgen')
     parser.add_argument('-n', '--maxCores', type=int, dest='maxCores', default="100000", help='maximal number of cores for the integration')
     parser.add_argument('-r', '--RAM', type=int, dest='RAM', default="-1", help='reserved RAM in MB for the integration')
