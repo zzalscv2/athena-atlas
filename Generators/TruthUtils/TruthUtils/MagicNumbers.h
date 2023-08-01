@@ -23,6 +23,8 @@ constexpr int SIM_BARCODE_THRESHOLD = 200000;
 /// @brief Constant defining the barcode threshold for regenerated particles, eg. secondary simulated particles following an interaction
 constexpr int SIM_REGENERATION_INCREMENT = 1000000;
 
+constexpr int SIM_STATUS_INCREMENT = 100000;
+
 constexpr int PARTONPDGMAX = 43;
 constexpr int NPPDGMIN = 1000000;
 constexpr int NPPDGMAX = 8999999;
