@@ -219,7 +219,11 @@ class CFSequenceCA(CFSequence):
 
     def mergeStepSequences(self, chainStep):
         for menuseq in chainStep.sequences:
-            self.ca.merge(menuseq.ca, sequenceName=self.stepReco.getName())
+            try:
+                self.ca.merge(menuseq.ca, sequenceName=self.stepReco.getName())
+            except Exception as e:
+                log.error(f'Failed to merge into {self.stepReco.getName()}')
+                raise e
             if menuseq.globalRecoCA:
                 self.ca.merge(menuseq.globalRecoCA)
 
