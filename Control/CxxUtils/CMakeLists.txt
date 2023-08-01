@@ -4,7 +4,7 @@
 atlas_subdir( CxxUtils )
 
 # External dependencies:
-find_package( Boost COMPONENTS regex timer unit_test_framework )
+find_package( Boost COMPONENTS regex timer )
 find_package( TBB )
 
 # The main library of the package:
@@ -27,6 +27,9 @@ atlas_add_library( AthDSoCallBacks src/AthDsoCbk.c
    PUBLIC_HEADERS CxxUtils
    LINK_LIBRARIES calg
    PRIVATE_LINK_LIBRARIES ${CMAKE_DL_LIBS} )
+
+#Add unit_test_framework
+find_package( Boost COMPONENTS regex timer unit_test_framework )
 
 # Unit tests in the package:
 atlas_add_test( read_athena_statm_test
@@ -153,7 +156,7 @@ foreach( test sincos_test ArrayScanner_test Arrayrep_test
       releasing_iterator_test SizedUInt_test UIntConv_test starts_with_test )
    atlas_add_test( ${test}
       SOURCES test/${test}.cxx
-      LINK_LIBRARIES CxxUtils TestTools )
+      LINK_LIBRARIES CxxUtils TestTools ${Boost_LIBRARIES})
 endforeach()
 # Needed because this executable directly uses multiversioned functions.
 set_property( TARGET CxxUtils_crc64_test PROPERTY POSITION_INDEPENDENT_CODE ON )
