@@ -211,7 +211,7 @@ namespace Muon {
                     continue;
                 }
                 // match barcodes
-                if (barcode % HepMC::SIM_REGENERATION_INCREMENT == truthParticle->barcode()) {
+                if (HepMC::is_sim_descendant(result.second.truthTrack,truthParticle)) {
                     ATH_MSG_DEBUG("Matched reconstructed segment: barcode " << barcode << " layer "
                                                                             << Muon::MuonStationIndex::chName(chIndex));
                     recoLink.toPersistent();

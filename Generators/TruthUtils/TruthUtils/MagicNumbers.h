@@ -75,5 +75,14 @@ inline bool is_same_generator_particle(const T1& p1,const T2& p2) { return p1->b
 
 template <class T1,class T2, std::enable_if_t< std::is_arithmetic<T1>::value &&  std::is_arithmetic<T2>::value, bool> = true >
 inline bool is_same_generator_particle(const T1& p1,const T2& p2) { return p1 % SIM_REGENERATION_INCREMENT == p2 % SIM_REGENERATION_INCREMENT; }
+
+/// @brief Method to check if the first particle is a descendant of the second in the simulation, i.e. particle p1 was produced simulations particle p2.
+template <class T1,class T2, std::enable_if_t< !std::is_arithmetic<T1>::value &&  !std::is_arithmetic<T2>::value, bool> = true >
+inline bool is_sim_descendant(const T1& p1,const T2& p2) { return p1->barcode() % SIM_REGENERATION_INCREMENT == p2->barcode();}
+
+template <class T1,class T2, std::enable_if_t< std::is_arithmetic<T1>::value &&  !std::is_arithmetic<T2>::value, bool> = true >
+inline bool is_sim_descendant(const T1& p1,const T2& p2) { return p1 % SIM_REGENERATION_INCREMENT == p2->barcode() ; }
+
+
 }
 #endif

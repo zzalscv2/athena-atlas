@@ -317,7 +317,6 @@ namespace Muon {
 
     void MuonTruthDecorationAlg::addTrackRecords(const EventContext& ctx, xAOD::TruthParticle& truthParticle) const {
         // first loop over track records, store parameters at the different positions
-        const int barcode = truthParticle.barcode();
         const xAOD::TruthVertex* vertex = truthParticle.prodVtx();        
         const Trk::TrackingGeometry* trackingGeometry = !m_extrapolator.empty()? m_extrapolator->trackingGeometry() : nullptr;
       
@@ -352,7 +351,7 @@ namespace Muon {
             
             // loop over collection and find particle with the same bar code
             for (const auto& particle : *col) {
-                if ((particle.GetBarCode()) % HepMC::SIM_REGENERATION_INCREMENT != barcode) continue;
+                if (!HepMC::is_sim_descendant(&particle,&truthParticle)) continue;
                 CLHEP::Hep3Vector pos = particle.GetPosition();
                 CLHEP::Hep3Vector mom = particle.GetMomentum();
                 ATH_MSG_VERBOSE("Found associated  " << r_name << " pt " << mom.perp() << " position: r " << pos.perp() << " z " << pos.z());
@@ -464,7 +463,7 @@ namespace Muon {
             // loop over trajectories
             for (const auto& trajectory : *col) {
                 // check if gen particle same as input
-                if ((trajectory.second.barcode()) % HepMC::SIM_REGENERATION_INCREMENT != barcode) continue;
+                if (!HepMC::is_sim_descendant(&trajectory.second,&truthParticle)) continue;
 
                 const Identifier& id = trajectory.first;
                 bool measPhi = m_idHelperSvc->measuresPhi(id);
