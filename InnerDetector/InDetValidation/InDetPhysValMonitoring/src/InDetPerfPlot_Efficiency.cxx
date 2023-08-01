@@ -42,6 +42,15 @@ InDetPerfPlot_Efficiency::initializePlots() {
   book(m_efficiency_vs_prodZ, "efficiency_vs_prodZ");
   book(m_efficiency_vs_prodZ_extended, "efficiency_vs_prodZ_extended");
 
+  book(m_TrkRec_eta,       "TrkRec_eta");
+  book(m_TrkRec_d0,        "TrkRec_d0");
+  book(m_TrkRec_prodR,     "TrkRec_prodR");
+  book(m_TrkRec_pT,        "TrkRec_pT");
+  book(m_TrkRec_mu,        "TrkRec_mu");
+  book(m_TrkRec_eta_d0,    "TrkRec_eta_d0");
+  book(m_TrkRec_eta_prodR, "TrkRec_eta_prodR");
+  book(m_TrkRec_eta_pT,    "TrkRec_eta_pT");
+
   book(m_efficiency_vs_pt_log, "efficiency_vs_pt_log");
   const TH1* h = m_efficiency_vs_pt_log->GetTotalHistogram();
   int nbins = h->GetNbinsX();
@@ -83,6 +92,14 @@ InDetPerfPlot_Efficiency::fill(const xAOD::TruthParticle& truth, const bool isGo
   fillHisto(m_extended_efficiency_vs_z0_abs, std::abs(z0), isGood, weight);
   fillHisto(m_efficiency_vs_mu, mu, isGood, weight);
 
+  fillHisto(m_TrkRec_eta, eta, isGood, weight);
+  fillHisto(m_TrkRec_d0,  d0,  isGood, weight);
+  fillHisto(m_TrkRec_pT,  pt,  isGood, weight);
+  fillHisto(m_TrkRec_mu,  mu,  isGood, weight);
+
+  fillHisto(m_TrkRec_eta_d0, eta, d0, isGood, weight);
+  fillHisto(m_TrkRec_eta_pT, eta, pt, isGood, weight);
+
   if (truth.hasProdVtx()) {
     const xAOD::TruthVertex* vtx = truth.prodVtx();
     double prod_rad = vtx->perp();
@@ -91,6 +108,10 @@ InDetPerfPlot_Efficiency::fill(const xAOD::TruthParticle& truth, const bool isGo
     fillHisto(m_efficiency_vs_prodR_extended, prod_rad, isGood, weight);
     fillHisto(m_efficiency_vs_prodZ, prod_z, isGood, weight);
     fillHisto(m_efficiency_vs_prodZ_extended, prod_z, isGood, weight);
+
+    fillHisto(m_TrkRec_prodR, prod_rad, isGood, weight);
+
+    fillHisto(m_TrkRec_eta_prodR, eta, prod_rad, isGood, weight);
   }
 }
 
