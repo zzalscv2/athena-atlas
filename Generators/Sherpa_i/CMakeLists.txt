@@ -5,6 +5,7 @@ atlas_subdir( Sherpa_i )
 
 # External dependencies:
 find_package( CLHEP )
+# Uncomment  only for the layers with Sherpa3
 find_package( libzip )
 find_package( OpenLoops )
 find_package( Sherpa COMPONENTS SherpaMain SherpaInitialization SherpaSingleEvents SherpaSoftPhysics SherpaPerturbativePhysics LundTools SherpaTools
