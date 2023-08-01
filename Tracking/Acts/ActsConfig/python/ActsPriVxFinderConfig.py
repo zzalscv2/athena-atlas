@@ -2,6 +2,7 @@
 # Configuration of InDetPriVxFinderTool package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
 
 def ActsGaussAdaptiveMultiFindingCfg(flags,
                                      name="ActsAdaptiveMultiPriVtxFinderTool",
@@ -30,6 +31,10 @@ def ActsGaussAdaptiveMultiFindingCfg(flags,
                       flags.Tracking.PriVertex.maxZinterval)
     kwargs.setdefault("do3dSplitting",
                       not flags.Tracking.PriVertex.useBeamConstraint)
+
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
+        kwargs.setdefault("minWeight", 0.02)
+        kwargs.setdefault("maxIterations", 200)
 
     acc.setPrivateTools(
         CompFactory.ActsTrk.AdaptiveMultiPriVtxFinderTool(name, **kwargs))
