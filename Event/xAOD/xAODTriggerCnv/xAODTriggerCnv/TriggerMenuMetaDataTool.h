@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TriggerMenuMetaDataTool.h 683395 2015-07-16 11:11:56Z krasznaa $
@@ -11,6 +11,7 @@
 // System include(s):
 #include <string>
 #include <memory>
+#include <mutex>
 
 // Gaudi/Athena include(s):
 #include "AsgTools/AsgMetadataTool.h"
@@ -49,7 +50,7 @@ namespace xAODMaker {
                                   "TriggerMenuMetaDataTool" );
 
       /// Function initialising the tool
-      virtual StatusCode initialize();
+      virtual StatusCode initialize() override; 
 
    protected:
       /// @name Functions called by the AsgMetadataTool base class
@@ -57,17 +58,29 @@ namespace xAODMaker {
 
       /// Function collecting the trigger configuration metadata from the input
       /// file
-      virtual StatusCode beginInputFile();
+      virtual StatusCode beginInputFile() override;
 
       /// Function used to make sure that file openings are not missed
-      virtual StatusCode beginEvent();
+      virtual StatusCode beginEvent() override;
 
       /// Function writing out the collected metadata
-      virtual StatusCode metaDataStop();
+      virtual StatusCode metaDataStop() override;
 
       /// @}
 
    private:
+
+      /// Perform the R2 data copy from the input metastore to the internal metastore
+      StatusCode checkxAODTriggerMenu();
+      /// Perform the R2 data copy from the internal metastore to the output metastore
+      StatusCode endxAODTriggerMenu();
+      /// Common code to copy and de-duplicate menus from the copyFrom collection into the copyTo collection.
+      StatusCode doCopyxAODTriggerMenu(const xAOD::TriggerMenuContainer* copyFrom, 
+         xAOD::TriggerMenuContainer* copyTo);
+
+      /// @name Runs 1, 2 data propagation
+      /// @{
+
       /// The key of the trigger menu in the input file
       std::string m_inputKey;
       /// The key of the trigger menu for the output file
@@ -78,9 +91,14 @@ namespace xAODMaker {
       /// The merged trigger menu auxiliary container
       std::unique_ptr< xAOD::TriggerMenuAuxContainer > m_menuAux;
 
+      /// @}
+
       /// Internal status flag showing whether a BeginInputFile incident was
       /// seen already
       bool m_beginFileIncidentSeen;
+
+      /// Global serial protection over writing to the output store for MP
+      static std::mutex s_mutex;
 
    }; // class TriggerMenuMetaDataTool
 
