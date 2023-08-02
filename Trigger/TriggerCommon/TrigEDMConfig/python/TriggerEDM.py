@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # ********************* All Tools/Functions for the TriggerEDM **********************
 # Keeping all functions from the original TriggerEDM.py (Run 2 EDM) in this file
@@ -125,7 +125,7 @@ def getRun3TrigObjProducedInView(theKey, trigEDMList):
     for item in itertools.chain(*trigEDMList):
         if len(item) < 4:
             continue
-        if theKey not in item[0]:
+        if theKey != item[0].split('#')[1]:
             continue
         return ("inViews" in item[3])
     return False
