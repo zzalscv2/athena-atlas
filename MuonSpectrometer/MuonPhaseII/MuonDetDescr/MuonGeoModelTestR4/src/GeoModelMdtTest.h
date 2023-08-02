@@ -8,6 +8,7 @@
 #include <set>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <ActsGeometryInterfaces/IActsTrackingGeometryTool.h>
+#include <MuonStationGeoHelpers/IMuonStationLayerSurfaceTool.h>
 #include <MuonTesterTree/MuonTesterTree.h>
 #include <MuonTesterTree/IdentifierBranch.h>
 #include <MuonTesterTree/ThreeVectorBranch.h>
@@ -29,21 +30,23 @@ class GeoModelMdtTest : public AthHistogramAlgorithm{
         unsigned int cardinality() const override final {return 1;}
 
     private:
-        ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
-        this, "IdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+      ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
+                                                "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-        ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{
-      this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+      ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", 
+                                                "ActsTrackingGeometryTool"};
 
-         /// Set of stations to be tested
-       std::set<Identifier> m_testStations{};
-    
-       /// String should be formated like <stationName><stationEta><A/C><stationPhi>
-       Gaudi::Property<std::vector<std::string>> m_selectStat{this, "TestStations", {"BIL1A3"}};
-    
-       Gaudi::Property<std::string> m_outputTxt{this, "DumpTxtFile", "MdtGeoDump.txt", 
-       "Dump the basic informations from the Readout geometry into a txt file" };
-        const MuonDetectorManager* m_detMgr{nullptr};
+      PublicToolHandle<MuonGMR4::IMuonStationLayerSurfaceTool> m_surfaceProvTool{this, "LayerGeoTool", ""};
+      /// Set of stations to be tested
+      std::set<Identifier> m_testStations{};
+  
+      /// String should be formated like <stationName><stationEta><A/C><stationPhi>
+      Gaudi::Property<std::vector<std::string>> m_selectStat{this, "TestStations", {}};
+  
+      Gaudi::Property<std::string> m_outputTxt{this, "DumpTxtFile", "", 
+            "Dump the basic informations from the Readout geometry into a txt file" };
+      
+      const MuonDetectorManager* m_detMgr{nullptr};
 
      
       StatusCode dumpToTree(const EventContext& ctx,

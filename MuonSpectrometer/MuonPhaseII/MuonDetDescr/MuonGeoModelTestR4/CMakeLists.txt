@@ -12,7 +12,7 @@ atlas_add_component( MuonGeoModelTestR4
                      INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
                      LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel StoreGateLib GeoModelUtilities MuonTesterTreeLib
                                     GaudiKernel MuonReadoutGeometryR4 MuonGeoModelR4Lib AthenaPoolUtilities
-                                    xAODTruth xAODMuonSimHit)
+                                    xAODTruth xAODMuonSimHit MuonStationGeoHelpersLib)
 
                                     # build exes 
 file(GLOB_RECURSE files "util/*.cxx")
@@ -25,7 +25,7 @@ foreach(_exeFile ${files})
   endif() 
   atlas_add_executable( ${_theExec} ${_exeFile}
                        INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} 
-                      LINK_LIBRARIES ${ROOT_LIBRARIES} MuonReadoutGeometryR4 MuonCablingData PathResolver )
+                       LINK_LIBRARIES ${ROOT_LIBRARIES} MuonReadoutGeometryR4 MuonCablingData PathResolver )
  
 endforeach()
 

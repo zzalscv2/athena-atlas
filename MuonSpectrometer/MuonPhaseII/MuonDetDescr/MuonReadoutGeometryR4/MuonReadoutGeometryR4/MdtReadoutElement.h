@@ -38,7 +38,7 @@ class MdtReadoutElement : public MuonReadoutElement {
         /// The former is mounted in the barrel while the latter can be found on the middle and outer
         /// big wheels. In Run 1 & Run 2, the inner wheel also consistet of MDT chambers.
         /// The local coordinate system is placed in the center of the chamber and the x-axis
-        /// is paralell to the long & short edges of the trapezoid as illustrated in
+        /// is parallel to the long & short edges of the trapezoid as illustrated in
         /// https://gitlab.cern.ch/atlas/athena/-/blob/master/docs/images/TrapezoidalBounds.gif
         /// For the rectengular barrel chambers, the X length is read from longHalfX
         double shortHalfX{0.};
@@ -87,10 +87,9 @@ class MdtReadoutElement : public MuonReadoutElement {
     /// access the information in memory quickly
     IdentifierHash measurementHash(const Identifier& measId) const override final;
     
-    /// Transforms the Identifier into the layer hash. The layer hash corresponds
-    /// to the same measurement hash as for tube = nTubes / 2
+    /// Transforms the Identifier into the layer hash.
     IdentifierHash layerHash(const Identifier& measId) const override final;
-
+    static IdentifierHash layerHash(const IdentifierHash& measHash);
     /// Converts the measurement hash back to the full Identifier
     Identifier measurementId(const IdentifierHash& measHash) const override final;
 

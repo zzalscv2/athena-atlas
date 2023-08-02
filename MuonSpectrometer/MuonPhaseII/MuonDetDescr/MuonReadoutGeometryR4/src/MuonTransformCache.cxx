@@ -12,10 +12,11 @@ MuonTransformCache::MuonTransformCache(const IdentifierHash& hash,
       m_transform{maker} {}
 
 const Amg::Transform3D& MuonTransformCache::getTransform(const ActsTrk::AlignmentStore* alignStore) const {    
-    /// Alignment store is found defined
+    /// Valid alignment store is given -> Take the transformation from the cache there
     if (alignStore){
         const Amg::Transform3D* cache = alignStore->getTransform(this);
         if (cache) return *cache;
+        throw std::runtime_error("The Alignment store does not contain an aligned transformation.");
     }
     /// Fall back solution to go onto the nominal cache    
     if (!m_nomCache) {
@@ -33,6 +34,9 @@ void MuonTransformCache::storeAlignment(ActsTrk::RawGeomAlignStore& alignStore) 
 }
 IdentifierHash MuonTransformCache::hash() const {
     return m_hash;
+}
+const MuonTransformCache::TransformMaker& MuonTransformCache::transformMaker() const {
+    return m_transform;
 }
 
 }  // namespace MuonGMR4

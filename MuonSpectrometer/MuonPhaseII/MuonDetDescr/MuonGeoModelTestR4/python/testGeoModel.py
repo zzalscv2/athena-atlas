@@ -43,6 +43,8 @@ def setupHistSvcCfg(flags, out_file="MdtGeoDump.root"):
 
 def GeoModelMdtTestCfg(flags, name = "GeoModelMdtTest", **kwargs):
     result = ComponentAccumulator()
+    from MuonStationGeoHelpers.MuonStationGeoHelpersCfg import MuonLaySurfaceToolCfg
+    kwargs.setdefault("LayerGeoTool", result.getPrimaryAndMerge(MuonLaySurfaceToolCfg(flags)))
     the_alg = CompFactory.MuonGMR4.GeoModelMdtTest(name, **kwargs)
     result.addEventAlgo(the_alg)
     return result
