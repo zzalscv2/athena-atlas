@@ -287,7 +287,8 @@ def jetFSTrackingSelCfg(flags, clustersKey, isPerf, **jetRecoDict):
             TrigEventInfoRecorderAlgCfg(
                 flags,
                 name="TrigEventInfoRecorderAlg_jet",
-                decorateTLA=True,
+                decoratePFlowInfo=True,
+                decorateEMTopoInfo=False,
                 trigEventInfoKey=trig_evt_info_key, primaryVertexInputName=pvKey,
                 RhoKey_EMTopo='HLT_Kt4EMTopoEventShape', RhoKey_PFlow='HLT_Kt4EMPFlowEventShape'
             )
