@@ -4,6 +4,7 @@
 #include "LArRecEvent/LArEventBitInfo.h"
 #include "TrigMETMonitorAlgorithm.h"
 #include <TVector3.h>
+#include <cmath>
 
 TrigMETMonitorAlgorithm::TrigMETMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
   : AthMonitorAlgorithm(name,pSvcLocator)
@@ -794,8 +795,8 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         float hlt_Ex = hlt_met->ex()/Gaudi::Units::GeV;
         float hlt_Ey = hlt_met->ey()/Gaudi::Units::GeV;
         float hlt_Et = std::sqrt(hlt_Ex*hlt_Ex + hlt_Ey*hlt_Ey);
-        if (L1_roiMet_Et > 50.) {
-          auto met_presel_Et = Monitored::Scalar<float>(alg+"_presel_Et", static_cast<float>(hlt_Et));
+        if (L1_roiMet_Et > 50. && !std::isnan(hlt_Et)) {
+          auto met_presel_Et = Monitored::Scalar<float>(alg+"_presel_Et", hlt_Et);
           fill(tool,met_presel_Et);
         }
       }
@@ -992,16 +993,17 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         float hlt_Ey = hlt_met->ey()/Gaudi::Units::GeV;
         float hlt_Et = std::sqrt(hlt_Ex*hlt_Ex + hlt_Ey*hlt_Ey);
         float hlt_sumEt = hlt_met->sumEt()/Gaudi::Units::GeV;
-
-        auto met_Ex = Monitored::Scalar<float>(alg+"_Ex", static_cast<float>(hlt_Ex));
-        auto met_Ey = Monitored::Scalar<float>(alg+"_Ey", static_cast<float>(hlt_Ey));
-        auto met_Et = Monitored::Scalar<float>(alg+"_Et", static_cast<float>(hlt_Et));
-        auto met_sumEt = Monitored::Scalar<float>(alg+"_sumEt", static_cast<float>(hlt_sumEt));
-        fill(tool,met_Ex,met_Ey,met_Et,met_sumEt);
-        ATH_MSG_DEBUG(alg << ": hlt_Et = " << hlt_Et);
-        if (L1_roiMet_Et > 50.) {
-          auto met_presel_Et = Monitored::Scalar<float>(alg+"_presel_Et", static_cast<float>(hlt_Et));
-          fill(tool,met_presel_Et);
+        if (!std::isnan(hlt_Et))  {
+          auto met_Ex = Monitored::Scalar<float>(alg+"_Ex", static_cast<float>(hlt_Ex));
+          auto met_Ey = Monitored::Scalar<float>(alg+"_Ey", static_cast<float>(hlt_Ey));
+          auto met_Et = Monitored::Scalar<float>(alg+"_Et", static_cast<float>(hlt_Et));
+          auto met_sumEt = Monitored::Scalar<float>(alg+"_sumEt", static_cast<float>(hlt_sumEt));
+          fill(tool,met_Ex,met_Ey,met_Et,met_sumEt);
+          ATH_MSG_DEBUG(alg << ": hlt_Et = " << hlt_Et);
+          if (L1_roiMet_Et > 50.) {
+            auto met_presel_Et = Monitored::Scalar<float>(alg+"_presel_Et", static_cast<float>(hlt_Et));
+            fill(tool,met_presel_Et);
+          }
         }
       }
     }
