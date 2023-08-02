@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MSVertexRecoTool.h"
@@ -1160,8 +1160,10 @@ namespace Muon {
             if (std::abs(dphi) > 0.6) continue;
             int nChHits(0);
             Identifier id = (*mdt)->identify();
-            float nTubes = (m_idHelperSvc->mdtIdHelper().tubeLayerMax(id) - m_idHelperSvc->mdtIdHelper().tubeLayerMin(id) + 1) *
-                           (m_idHelperSvc->mdtIdHelper().tubeMax(id) - m_idHelperSvc->mdtIdHelper().tubeMin(id) + 1);
+            auto [tubeLayerMin, tubeLayerMax] = m_idHelperSvc->mdtIdHelper().tubeLayerMinMax(id);
+            auto [tubeMin, tubeMax] = m_idHelperSvc->mdtIdHelper().tubeMinMax(id);
+            float nTubes = (tubeLayerMax - tubeLayerMin + 1) *
+                           (tubeMax - tubeMin + 1);
             for (; mdt != mdtE; ++mdt) {
                 if ((*mdt)->adc() < 50) continue;
                 if ((*mdt)->status() != 1) continue;
