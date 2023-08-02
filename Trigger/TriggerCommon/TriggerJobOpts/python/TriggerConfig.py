@@ -493,7 +493,7 @@ def triggerPOOLOutputCfg(flags):
 def triggerMergeViewsAndAddMissingEDMCfg( flags, edmSet, hypos, viewMakers, decObj, decObjHypoOut ):
 
     HLTEDMCreatorAlg, HLTEDMCreator=CompFactory.getComps("HLTEDMCreatorAlg","HLTEDMCreator",)
-    from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3, addExtraCollectionsToEDMList
+    from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3, addExtraCollectionsToEDMList, InViews, Alias
 
     __log.info( "Number of EDM items in triggerMergeViewsAndAddMissingEDMCfg: %d", len(TriggerHLTListRun3))
     if flags.Trigger.ExtraEDMList:
@@ -505,13 +505,14 @@ def triggerMergeViewsAndAddMissingEDMCfg( flags, edmSet, hypos, viewMakers, decO
     alg = HLTEDMCreatorAlg("EDMCreatorAlg")
 
     # configure views merging
-    needMerging = [x for x in TriggerHLTListRun3 if len(x) >= 4 and x[3].startswith("inViews:")]
+    needMerging = [x for x in TriggerHLTListRun3 if len(x) >= 4 and
+                   any(isinstance(v, InViews) for v in x[3])]
     __log.info("These collections need merging: %s", " ".join([ c[0] for c in needMerging ]))
     mergingTool = HLTEDMCreator( "ViewsMergingTool")
     for coll in needMerging:
         collType, collName = coll[0].split("#")
         collType = collType.split(":")[-1]
-        possibleViews = coll[3].split(":")[-1].split(",")
+        possibleViews = [ str(v) for v in coll[3] if isinstance(v, InViews) ]
         for viewsColl in possibleViews:
             attrView = getattr(mergingTool, collType+"Views", [])
             attrInView = getattr(mergingTool, collType+"InViews", [])
@@ -549,13 +550,12 @@ def triggerMergeViewsAndAddMissingEDMCfg( flags, edmSet, hypos, viewMakers, decO
             if "Aux" in collType: # the GapFiller crates appropriate Aux objects
                 continue
             if len(el) >= 4: # see if there is an alias
-                aliases = [ x for x in el[3:]  if "alias:" in x ] # assume that the description can be: (.... , [alias:Blah | inViews:XYZ | inViews:XYZ, alias:Blah])
+                aliases = [ str(a) for a in el[3] if isinstance(a, Alias) ]
                 if len(aliases) == 1:
-                    alias = aliases[0].split(":")[1]
-                    __log.info("GapFiller configuration found an aliased type '%s' for '%s'", alias, collType)
-                    collType = alias
+                    __log.info("GapFiller configuration found an aliased type '%s' for '%s'", aliases[0], collType)
+                    collType = aliases[0]
                 elif len(aliases) > 1:
-                    __log.error("GapFiller configuration found inconsistent '%s' (too many aliases?)", el[3:])
+                    __log.error("GapFiller configuration found inconsistent '%s' (too many aliases?)", aliases)
 
             groupedByType[collType].append( collName )
 

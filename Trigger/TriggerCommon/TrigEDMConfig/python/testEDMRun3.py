@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3, EDMDetailsRun3, AllowedOutputFormats
 from AthenaCommon.Logging import logging
@@ -27,12 +27,15 @@ def main():
   serializable_names = []
   serializable_names_no_label = []
   #Check for duplicates
-  if len(set(TriggerHLTListRun3))!=len(TriggerHLTListRun3):
+  names = [edm[0] for edm in TriggerHLTListRun3]
+  if len(set(names))!=len(names):
     log.error("Duplicates in TriggerHLTListRun3")
     import collections.abc
-    for item, count in collections.Counter(TriggerHLTListRun3).items():
+    for item, count in collections.Counter(names).items():
         if count > 1:
           log.error(str(count) + "x: " + str(item))
+    return 1
+
   for TriggerSerializable in TriggerHLTListRun3:
     serializable_name = TriggerSerializable[0]
     serializable_name_no_label = re.sub(r"\#.*", "", serializable_name)

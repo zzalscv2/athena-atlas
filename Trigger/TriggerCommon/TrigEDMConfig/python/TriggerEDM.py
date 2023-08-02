@@ -121,14 +121,12 @@ def getRun3TrigObjProducedInView(theKey, trigEDMList):
     Returns true if this collection is produced inside EventViews
     (Hence, has the special viewIndex Aux decoration applied by steering)
     """
+    from TrigEDMConfig.TriggerEDMRun3 import InViews
     import itertools
-    for item in itertools.chain(*trigEDMList):
-        if len(item) < 4:
-            continue
-        if theKey != item[0].split('#')[1]:
-            continue
-        return ("inViews" in item[3])
-    return False
+
+    return any(coll for coll in itertools.chain(*trigEDMList) if
+               len(coll)>3 and theKey==coll[0].split('#')[1] and
+               any(isinstance(v, InViews) for v in coll[3]))
 
 
 def handleRun3ViewContainers( el ):
