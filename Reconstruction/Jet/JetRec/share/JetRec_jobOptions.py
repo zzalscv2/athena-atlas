@@ -5,11 +5,11 @@
 
 
 from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
+from AthenaCommon.Configurable import ConfigurableCABehavior
 from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow, AntiKt4LCTopo, AntiKt4EMTopo, AntiKt4Truth
 from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo_noVR
 from JetRecConfig.JetRecConfig import getJetAlgs, reOrderAlgs
 
-from JetRecConfig.StandardJetConstits import stdConstitDic
 from JetRecConfig.JetConfigFlags import jetInternalFlags
 
 # We're in Reco job : propagate this info to the runIII jet config
@@ -33,8 +33,9 @@ evtDensities = []
 #--------------------------------------------------------------
 
 for jd in jetdefs:
-    algs, jetdef_i = getJetAlgs(ConfigFlags, jd, True)
-    algs, ca = reOrderAlgs( [a for a in algs if a is not None])
+    with ConfigurableCABehavior():
+        algs, jetdef_i = getJetAlgs(ConfigFlags, jd, True)
+        algs, ca = reOrderAlgs( [a for a in algs if a is not None])
     # ignore dangling CA instance in legacy config
     ca.wasMerged()
     for a in algs:
