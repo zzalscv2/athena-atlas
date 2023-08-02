@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MOOCANDIDATEMATCHINGTOOL_H
@@ -124,16 +124,6 @@ namespace Muon {
            calorimeter
         */
         bool sameSide(const MuPatTrack& entry1, const MuPatTrack& entry2, bool requireSameSideOfPerigee) const;
-
-        /** check whether two positions are on the same side of the point of closest
-           approach to the perigee of the connecting track, or on the same side of the
-           calorimeter (i.e. not crossing calo).
-
-            @c requireSameSideOfPerigee : True  : require the segments to be on same
-           side of perigee False : require the segments to be on same side of
-           calorimeter
-        */
-        bool sameSide(const Amg::Vector3D& pos1, const Amg::Vector3D& pos2, bool requireSameSideOfPerigee) const;
 
         /** check whether two positions are on the same side of the point of closest
            approach to the perigee of the connecting track, or on the same side of the
