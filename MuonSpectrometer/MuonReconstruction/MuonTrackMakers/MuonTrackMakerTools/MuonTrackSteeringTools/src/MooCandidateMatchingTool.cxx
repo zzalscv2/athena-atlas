@@ -1093,7 +1093,9 @@ namespace Muon {
 
     bool MooCandidateMatchingTool::sameSide(const MuPatSegment& entry1, const MuPatSegment& entry2, bool sameSideOfPerigee) const {
         ATH_MSG_VERBOSE("sameSide:  MuPatSegment, MuPatSegment");
-        return sameSide(entry1.entryPars().position(), entry2.entryPars().position(), sameSideOfPerigee);
+        return sameSide(entry1.entryPars().momentum().unit(), 
+                        entry1.entryPars().position(),
+                        entry2.entryPars().position(), sameSideOfPerigee);
     }
 
     bool MooCandidateMatchingTool::sameSide(const MuPatTrack& entry1, const MuPatSegment& entry2, bool sameSideOfPerigee) const {
@@ -1107,21 +1109,14 @@ namespace Muon {
         return sameSide(entry1.entryPars().momentum().unit(), entry1.entryPars().position(), entry2.entryPars().position(),
                         sameSideOfPerigee);
     }
-
-    bool MooCandidateMatchingTool::sameSide(const Amg::Vector3D& pos1, const Amg::Vector3D& pos2, bool sameSideOfPerigee) const {
-        ATH_MSG_VERBOSE("sameSide:  position, position");
-        Amg::Vector3D diffPos = (pos2 - pos1).unit();
-        return sameSide(diffPos, pos1, pos2, sameSideOfPerigee);
-    }
-
     bool MooCandidateMatchingTool::sameSide(const Amg::Vector3D& dir, const Amg::Vector3D& pos1, const Amg::Vector3D& pos2,
                                             bool requireSameSideOfPerigee) const {
         // check if segments are on same side of the Perigee in the xy plane
-        Amg::Vector3D dirxy = dir.unit();
-        // dirxy.setZ(0);
+        Amg::Vector3D dirxy{dir.x(),dir.y(), 0.};
+        dirxy = dirxy.unit();
         double distFromPerigee1 = pos1.dot(dirxy);
         double distFromPerigee2 = pos2.dot(dirxy);
-        bool sameSideOfPerigee = distFromPerigee1 * distFromPerigee2 > 0. ? true : false;
+        bool sameSideOfPerigee = (distFromPerigee1 * distFromPerigee2 > 0.);
         bool same = sameSideOfPerigee;
 
         // if one segment in each endcap, then consider on different side
@@ -1165,119 +1160,7 @@ namespace Muon {
             if (msgLvl(MSG::VERBOSE)) msg(MSG::DEBUG) << " => Rejected" << endmsg;
             return false;
         }
-
-        // Test on weaker requirement: accept if segments do not cross the calorimeter
-        Amg::Vector3D intersect = pos1 - distFromPerigee1 * dir;
-        // Check on radial distance
-        bool crossingCalo = intersect.perp() < m_minimumSideMatchRadius ? true : false;
-        bool inSameEndcap = false;
-
-        if (!crossingCalo) return true;
-        return false;
-
-        // Not used code leave in for the moment coverity 14808
-
-        // Check on Z position
-        bool crossesCaloDiskA = false;
-        bool crossesCaloDiskC = false;
-        bool haveCaloDiskA = false;
-        bool haveCaloDiskC = false;
-        Amg::Vector3D caloDiskA;
-        Amg::Vector3D caloDiskC;
-        if (crossingCalo) {
-            // crossing in R, now check if crossing in Z
-            if ((pos1.z() > +m_caloMatchZ && pos2.z() > +m_caloMatchZ) || (pos1.z() < -m_caloMatchZ && pos2.z() < -m_caloMatchZ)) {
-                // both in same end-cap, so not crossing calo
-                inSameEndcap = true;
-                crossingCalo = false;
-            } else if ((std::abs(pos1.z()) > m_caloMatchZ || std::abs(pos2.z()) > m_caloMatchZ)) {
-                // one segment inside, one segment outside, or one segment in each endcap
-                // check crossing with calo endcap A surface (z > 0)
-                double dz1 = pos1.z() - m_caloMatchZ;
-                double dz2 = pos2.z() - m_caloMatchZ;
-                if (dz1 * dz2 <= 0) {
-                    // crossing Calo A side endcap
-                    crossesCaloDiskA = true;
-                    if (std::abs(dir.z()) < 0.0001) {         // protect against division by zero
-                        if (dz1 > 0.0) crossingCalo = false;  // vertical track starting outside calo
-                    } else {
-                        haveCaloDiskA = true;
-                        caloDiskA = pos1 - (dz1 / dir.z()) * dir;
-                        // cross-check
-                        if (std::abs(caloDiskA.z() - m_caloMatchZ) > 0.001) {
-                            if (msgLvl(MSG::VERBOSE)) msg(MSG::DEBUG) << endmsg;  // finish printout before ERROR message
-                            msg(MSG::DEBUG) << MSG::ERROR << "Wrong calculation of crossing calo disk: expected z=" << m_caloMatchZ
-                                            << " found z=" << caloDiskA.z() << endmsg;
-                        }
-                        if (caloDiskA.perp() > m_minimumSideMatchRadius) crossesCaloDiskA = false;
-                    }
-                }
-                // check crossing with calo endcap C surface (z < 0)
-                dz1 = pos1.z() + m_caloMatchZ;
-                dz2 = pos2.z() + m_caloMatchZ;
-                if (dz1 * dz2 <= 0) {
-                    // crossing Calo C side endcap
-                    crossesCaloDiskC = true;
-                    if (std::abs(dir.z()) < 0.0001) {         // protect against division by zero
-                        if (dz1 < 0.0) crossingCalo = false;  // vertical track starting outside calo
-                    } else {
-                        haveCaloDiskC = true;
-                        caloDiskC = pos1 - (dz1 / dir.z()) * dir;
-                        // cross-check
-                        if (std::abs(caloDiskC.z() + m_caloMatchZ) > 0.001) {
-                            if (msgLvl(MSG::VERBOSE)) msg(MSG::DEBUG) << endmsg;  // finish printout before ERROR message
-                            msg(MSG::DEBUG) << MSG::ERROR << "Wrong calculation of crossing calo disk: expected z=" << -m_caloMatchZ
-                                            << " found z=" << caloDiskC.z() << endmsg;
-                        }
-                        if (caloDiskC.perp() > m_minimumSideMatchRadius) crossesCaloDiskC = false;
-                    }
-                }
-
-                if (!crossesCaloDiskA && !crossesCaloDiskC) crossingCalo = false;
-
-            }  // if (one segment inside, one segment outside, or one segment in each endcap)
-        }
-
-        // accept if on same side of IP or out side the calo volume
-        bool accepted = !crossingCalo;
-
-        // some printout
-        if (msgLvl(MSG::VERBOSE)) {
-            msg(MSG::DEBUG) << MSG::VERBOSE << " Checking if crossing Calo:" << std::fixed << std::setprecision(0) << std::endl
-                            << " intersect: r " << std::setw(5) << intersect.perp() << " (x,y,z)=(" << std::setw(5) << intersect.x() << ","
-                            << std::setw(5) << intersect.y() << "," << std::setw(5) << intersect.z() << ")"
-                            << " r_calo=" << m_minimumSideMatchRadius << " z_calo=" << m_caloMatchZ;
-            if (inSameEndcap) { msg(MSG::DEBUG) << std::endl << " In same endcap"; }
-            if (haveCaloDiskA) {
-                msg(MSG::DEBUG) << std::endl
-                                << " crossing disk A at"
-                                << " r " << std::setw(5) << caloDiskA.perp() << " (x,y,z)=(" << std::setw(5) << caloDiskA.x() << ","
-                                << std::setw(5) << caloDiskA.y() << "," << std::setw(5) << caloDiskA.z() << ")"
-                                << " outside=" << !crossesCaloDiskA;
-            }
-            if (haveCaloDiskC) {
-                msg(MSG::DEBUG) << std::endl
-                                << " crossing disk C at"
-                                << " r " << std::setw(5) << caloDiskC.perp() << " (x,y,z)=(" << std::setw(5) << caloDiskC.x() << ","
-                                << std::setw(5) << caloDiskC.y() << "," << std::setw(5) << caloDiskC.z() << ")"
-                                << " outside=" << !crossesCaloDiskC;
-            }
-            if (crossingCalo) {
-                msg(MSG::DEBUG) << std::endl << " crossing calo:";
-            } else {
-                msg(MSG::DEBUG) << std::endl << " not crossing calo:";
-            }
-
-            if (accepted) {
-                msg(MSG::DEBUG) << " => Accepted";
-            } else {
-                msg(MSG::DEBUG) << " => Rejected";
-            }
-            msg(MSG::DEBUG) << std::setprecision(6)  // back to default precision
-                            << endmsg;               // final flush
-        }                                            // if (msgLvl(MSG::VERBOSE))
-
-        return accepted;
+        return true;
     }
 
     bool MooCandidateMatchingTool::match(const EventContext& ctx, const MuPatCandidateBase& entry1, const MuPatSegment& entry2, bool useTightCuts) const {
