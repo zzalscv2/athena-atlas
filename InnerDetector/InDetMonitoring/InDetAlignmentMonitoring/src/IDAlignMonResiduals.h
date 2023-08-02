@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef IDAlignMonResiduals_H
@@ -156,16 +156,9 @@ private:
   //Layer/Disk/Ring Gap for modified module histograms
   int m_gap_pix {};
   int m_gap_sct {};
-  int m_NLumiBlocksMon {};
 
   float m_minTRTResWindow {};
   float m_maxTRTResWindow {};
-  float m_minSiResMeanWindow {};
-  float m_maxSiResMeanWindow {};
-  float m_minSiResWidthWindow {};
-  float m_maxSiResWidthWindow {};
-  float m_minSiPullWidthWindow {};
-  float m_maxSiPullWidthWindow {};
   float m_minSiResFillRange {};
   float m_maxSiResFillRange {};
   float m_maxSCTResFillRange {};
@@ -199,7 +192,6 @@ private:
   bool m_changedlumiblock {};
   int m_oldlumiblock {};
   float m_FinerBinningFactor {};
-  float m_LBGranularity {};
   std::vector<TString> m_siliconBarrelLayersLabels;
   std::vector<TString> m_siliconEndcapLayersLabels;
   bool m_useGausFit {};
