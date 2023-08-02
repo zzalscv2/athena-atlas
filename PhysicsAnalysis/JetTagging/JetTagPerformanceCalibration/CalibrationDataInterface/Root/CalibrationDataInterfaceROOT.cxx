@@ -8,7 +8,7 @@
 /* Begin_Html
 <h2>Purpose</h2>
 <p>This class provides the main interface to b-tagging calibration information.
-   Each instance can be used to handle a single tagger (so if multiple taggers' information       // <--------- Each CDIROOT object represents 1 tagger (DL1, DL1r, MV2c10, etc.)
+   Each instance can be used to handle a single tagger (so if multiple taggers' information
    needs to be accessed, multiple CalibrationDataInterfaceROOT instances need to be created).<br />
    Its action is steered by a configuration file (which is parsed using TEnv and which is
    specified in the CalibrationDataInterfaceROOT constructor).
@@ -338,7 +338,7 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const strin
     cout << endl;
   }
 
-  std::string flavours[] = { "B", "C", "T", "Light" };
+  m_flavours = { "B", "C", "T", "Light" };
   string testPrefix(taggerName); testPrefix += ".";
 
   // Since TEnv doesn't allow for straight retrieval of vectors of strings, expect
@@ -348,7 +348,7 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const strin
 
   // Calibration names for the efficiencies
   std::map<string, std::vector<string> > effNames;
-  for (auto const& flavour : flavours) {
+  for (auto const& flavour : m_flavours) {
     string test(testPrefix); test += "EfficiencyCalibration"; test += flavour; test += "Name";
     effNames[flavour] = split(string(env.GetValue(test.c_str(), "default")));
   }
@@ -356,7 +356,7 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const strin
 
   // Calibration names for the efficiency scale factors
   std::map<string, string> SFNames;
-  for (auto const& flavour : flavours) {
+  for (auto const& flavour : m_flavours) {
     string test(testPrefix); test += "ScaleFactorCalibration"; test += flavour; test += "Name";
     SFNames[flavour] = string(env.GetValue(test.c_str(), "default")); trim(SFNames[flavour]);
   }
@@ -394,10 +394,10 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const strin
     test = "excludeFromCovMatrix";
     std::vector<std::string> to_exclude = split(env.GetValue(test.c_str(), ""));
     // Copy the resulting list to all flavours
-    for (auto const& flavour : flavours) {
+    for (auto const& flavour : m_flavours) {
       m_excludeFromCovMatrix[flavour] = to_exclude;
     }
-    for (auto const& flavour : flavours) {
+    for (auto const& flavour : m_flavours) {
       test = "excludeFrom"; test += flavour; test += "CovMatrix";
       to_exclude = split(env.GetValue(test.c_str(), ""));
       // Append to the existing list
@@ -405,18 +405,18 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const strin
     }
     
     unsigned int n_excluded = 0;
-    for (auto const& flavour : flavours) {
+    for (auto const& flavour : m_flavours) {
       n_excluded += m_excludeFromCovMatrix[flavour].size();
     }
     if (m_verbose) {
       cout << " List of uncertainties to exclude:";
       if (n_excluded == 0) cout << " none";
-      for (auto const& flavour : flavours) {
+      for (auto const& flavour : m_flavours) {
 	if (m_excludeFromCovMatrix[flavour].size() > 0) {
 	  cout << "\n\t" << flavour << ":\t";
 	  for (unsigned int i = 0; i < m_excludeFromCovMatrix[flavour].size(); ++i) {
-	    cout << m_excludeFromCovMatrix[flavour][i];
-	    if (i+1 != m_excludeFromCovMatrix[flavour].size()) cout << ";  ";
+	    cout << m_excludeFromCovMatrix[flavour].at(i);
+	    if (i+1 == m_excludeFromCovMatrix[flavour].size()) cout << ";  ";
 	  }
 	  cout << endl;
 	}
@@ -433,7 +433,7 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const strin
     mappings["Loose"] = Loose;
     mappings["Medium"] = Medium;
     mappings["Tight"] = Tight;
-    for (auto const& flavour : flavours) {
+    for (auto const& flavour : m_flavours) {
       test = testPrefix; test += "EigenvectorReduction"; test += flavour;
       std::string reduction = string(env.GetValue(test.c_str(), "Loose")); trim(reduction);
       m_EVReductions[flavour] = mappings.find(reduction) == mappings.end() ? mappings["Loose"] : mappings.find(reduction)->second;
@@ -483,11 +483,12 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const std::
 								     const std::vector<std::string>& jetAliases,
 								     const std::map<std::string, std::string>& SFNames,
 								     const std::map<std::string, std::vector<std::string> >& EffNames,
-								     const std::map<std::string, std::vector<std::string> >& excludeFromEV, //<------- Take the map of flavours and flavour uncertainties to exclude from EV per jet flavour
+								     const std::map<std::string, std::vector<std::string> >& excludeFromEV,
 								     const std::map<std::string, EVReductionStrategy> EVReductions,
 								     bool useEV, Uncertainty strat, bool useMCMCSF, bool useTopologyRescaling,
-								     bool useRecommendedEEVExclusions, bool verbose) :
-  m_filenameSF(fileSF), m_filenameEff(""),
+								     bool useRecommendedEEVExclusions, bool verbose,
+                     std::vector<std::string> flavours) :
+  m_filenameSF(fileSF), m_filenameEff(""), m_flavours(flavours),
   m_runEigenVectorMethod(useEV), m_EVStrategy(strat), m_EVReductions(EVReductions),
   m_useRecommendedEVExclusions(useRecommendedEEVExclusions), m_verbose(verbose),
   m_useMCMCSF(useMCMCSF), m_useTopologyRescaling(useTopologyRescaling),
@@ -500,6 +501,8 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const std::
   //     fileSF:         full path of the calibration ROOT file containing the calibration scale factors
   //     fileEff:        optional full path name of a ROOT file containing additional MC efficiency maps
   //                     (use a null pointer to disable the use of such additional file)
+  //     flavours;       This should correspond to the list of flavour labels that's used by a tagger, and
+  //                     which corresponds to the labels used in internal maps
   //     jetAliases:     this can be used to convert jet collection names to the corresponding names in the
   //                     calibration ROOT file (this may be useful as e.g. the collection names in the
   //                     calibration ROOT file have the JVF criterion attached as a suffix).
@@ -565,25 +568,25 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const std::
   setEffCalibrationNames(EffNames);
   setSFCalibrationNames(SFNames);
 
-  if (m_runEigenVectorMethod) { // <---------- IF we want to run EV, then decide which one
+  if (m_runEigenVectorMethod) { 
+    // if we want to run EV, then decide which one
     // The following should hold for both eigenvector decomposition methods (SFEigen and SFGlobalEigen)
     // The global one simply adapts itself to using the m_excludeFromCovMatrix to perform the same task
     
     m_excludeFromCovMatrix = excludeFromEV;
-    std::string flavours[] = { "B", "C", "T", "Light" };
     unsigned int n_excluded = 0;
-    for (auto const& flavour : flavours) {
+    for (auto const& flavour : m_flavours) {
       n_excluded += m_excludeFromCovMatrix[flavour].size();
     }
     if (m_verbose) {
       cout << " List of uncertainties to exclude:";
       if (n_excluded == 0) cout << " none";
-      for (auto const& flavour : flavours) {
+      for (auto const& flavour : m_flavours) {
         if (m_excludeFromCovMatrix[flavour].size() > 0) {
           cout << "\n\t" << flavour << ":\t";
           for (unsigned int i = 0; i < m_excludeFromCovMatrix[flavour].size(); ++i) {
-            cout << m_excludeFromCovMatrix[flavour][i];
-            if (i+1 != m_excludeFromCovMatrix[flavour].size()) cout << ";  ";
+            cout << m_excludeFromCovMatrix[flavour].at(i);
+            if (i+1 == m_excludeFromCovMatrix[flavour].size()) cout << ";  ";
           }
           cout << endl;
         }
@@ -782,10 +785,10 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
 
 //________________________________________________________________________________
 Analysis::CalibrationStatus
-Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVariables& variables, //<---- variables contain author, pt, eta, tagweight
+Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVariables& variables,
 							unsigned int indexSF, unsigned int indexEff,
 							Uncertainty unc, unsigned int numVariation,
-							Analysis::CalibResult& result, const string& flavour) //const /// <------- CalibResult is a pair<double,double>
+							Analysis::CalibResult& result, const string& flavour)
 {
   // Scale factor retrieval identifying the requested calibration object by index.
   //
@@ -892,7 +895,7 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
     return statUp; // end of getScaleFactor if SFEigen, SFGlobalEigen, or SFNamed is set
 
 
-  } // <-------------- The above returns the up/down varied scale factor
+  } // The above returns the up/down varied scale factor
   //Proceed with no-eigenvector result
 
   // always retrieve the result itself
@@ -2474,26 +2477,18 @@ Analysis::CalibrationDataInterfaceROOT::initialize(const string& jetauthor, cons
     cout << "initializing BTagCalibrationDataInterfaceROOT for PROOF with jetAuthor = " << jetauthor  << ", tagger = " << m_taggerName << ", operating point = " << OP << ", uncertainty = " << unc << endl; 
   } 
  		 
-  // quark flavours 
-  std::vector<string> label; 
-  label.push_back("Light");
-  label.push_back("T");
-  label.push_back("C");
-  label.push_back("B"); 
- 		 
   CalibrationDataVariables BTagVars; 
   BTagVars.jetAuthor = jetauthor; 
   BTagVars.jetPt  = 100000.; //Irrelevant, just has to be valid to retrieve objects 
   BTagVars.jetEta = 1.5; //Irrelevant, just has to be valid to retrieve objects 
  		 
-  std::vector<string>::iterator flav = label.begin(); 
-  for(; flav!=label.end(); ++flav) { 
+  for(const auto& flavour : m_flavours){
     std::pair<double, double> BTagCalibResult; 
-    BTagCalibResult = getScaleFactor(BTagVars,(*flav), OP, unc);
+    BTagCalibResult = getScaleFactor(BTagVars, flavour, OP, unc);
     std::cout << "CalibrationDataInterfaceROOT->initialize : BTagCalibResult " << std::endl;
  		 
     std::pair<double, double> BTagCalibMCEff; 
-    BTagCalibMCEff = getMCEfficiency(BTagVars,(*flav), OP, unc); 
+    BTagCalibMCEff = getMCEfficiency(BTagVars, flavour, OP, unc); 
     std::cout << "CalibrationDataInterfaceROOT->initialize : BTagCalibMCEff " << std::endl;
   }      
  		 
@@ -2627,7 +2622,7 @@ Analysis::CalibrationDataInterfaceROOT::retrieveContainer(const string& label, c
 
       // At this point we may also want to reduce the number of eigenvector variations.
       // The choices are stored with the container object; but first we need to know what flavour we are dealing with.
-      string flavour = dir.substr(dir.find_last_of("/")+1); //<--- Pretty sure this could easily be just "label", no?
+      string flavour = dir.substr(dir.find_last_of("/")+1);
 
       for (auto entry : m_excludeFromCovMatrix[flavour]) {
         newEigenVariation->excludeNamedUncertainty(entry, cnt);
@@ -2655,17 +2650,15 @@ Analysis::CalibrationDataInterfaceROOT::retrieveContainer(const string& label, c
       if (evit == m_eigenVariationsMap.end()){
         // now to see if it's completely empty or not
         if (m_eigenVariationsMap.empty()){
-          // <---------- cdipath = m_filenameSF (for now), tagger = m_taggerName, wp = OP, jetcollection = author, 
-          std::shared_ptr<CalibrationDataGlobalEigenVariations> newEigenVariation(new CalibrationDataGlobalEigenVariations(m_filenameSF, m_taggerName, OP, author, histoContainer, m_useRecommendedEVExclusions));
+          std::shared_ptr<CalibrationDataGlobalEigenVariations> newEigenVariation(new CalibrationDataGlobalEigenVariations(m_filenameSF, m_taggerName, OP, author, m_flavours, histoContainer, m_useRecommendedEVExclusions));
           for (auto entry : m_excludeFromCovMatrix[label]) {
-            newEigenVariation->excludeNamedUncertainty(entry, label);//, cnt); // <---- custom exclude named uncertainties method for global variations
+            newEigenVariation->excludeNamedUncertainty(entry, label); // <---- custom exclude named uncertainties method for global variations
           }
 
           newEigenVariation->initialize();
           
           // flavour loop to get the flavour reduction schemes and apply them
-          std::vector<std::string> flavz = {"B", "C", "Light", "T"};
-          for (std::string& flavour : flavz){
+          for (std::string& flavour : m_flavours){
             int to_retain = histoContainer->getEigenvectorReduction(m_EVReductions[flavour]); // returns the number of eigenvariations to retain as per the EV reduction strategy
             if (to_retain > -1) {
               if (m_verbose) cout << "btag Calib: reducing number of eigenvector variations for flavour " << flavour << " to " << to_retain << endl;

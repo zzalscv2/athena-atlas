@@ -100,7 +100,8 @@ namespace Analysis
 				   const std::map<std::string, Analysis::EVReductionStrategy> EVReductions,
 				   bool useEV = true, Uncertainty strat = SFEigen, bool useMCMCSF = true,
 				   bool useTopologyRescaling = false, bool useRecommendedEVExclusions = false,
-				   bool verbose = true);
+				   bool verbose = true, std::vector<std::string> flavours = {"B", "C", "Light", "T"}
+           );
 
       /** default constructor for PROOF object retrieval */
       CalibrationDataInterfaceROOT();
@@ -415,6 +416,7 @@ namespace Analysis
       /** @brief in addition, store also the filenames themselves (needed for the copy constructor) */
       std::string m_filenameSF;
       std::string m_filenameEff;
+      std::vector<std::string> m_flavours;
       
       // ------------------------------------------------------------------------------------------
 

@@ -2,6 +2,7 @@
 #include "AsgMessaging/MessageCheck.h"
 #include "AsgMessaging/MsgStream.h"
 #include <AsgTools/StandaloneToolHandle.h>
+#include <xAODBTaggingEfficiency/TruthTagResults.h>
 #include "FTagAnalysisInterfaces/IBTaggingTruthTaggingTool.h"
 #include "xAODBTaggingEfficiency/TruthTagResults.h"
 

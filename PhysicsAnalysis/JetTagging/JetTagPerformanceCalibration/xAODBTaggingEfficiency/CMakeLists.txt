@@ -39,7 +39,8 @@ if( XAOD_ANALYSIS )
 
    atlas_add_executable( SystematicStrategyComparison
       util/SystematicStrategyComparison.cxx
-      LINK_LIBRARIES xAODRootAccess AsgTools FTagAnalysisInterfacesLib )
+      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+      LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess AsgTools xAODJet xAODBTagging PATInterfaces FTagAnalysisInterfacesLib )
 
    atlas_add_executable( BTaggingEigenVectorRecompositionToolTester
       util/BTaggingEigenVectorRecompositionToolTester.cxx
@@ -48,13 +49,17 @@ if( XAOD_ANALYSIS )
    atlas_add_executable( BTaggingSelectionToolTester
       util/BTaggingSelectionToolTester.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-      LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools xAODJet xAODBTagging
-      PATInterfaces FTagAnalysisInterfacesLib )
+      LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools xAODJet xAODBTagging PATInterfaces FTagAnalysisInterfacesLib )
+
    if( XAOD_STANDALONE )
       target_link_libraries( BTaggingSelectionToolTester
          PRIVATE xAODRootAccess )
+      target_link_libraries( SystematicStrategyComparison 
+         PRIVATE xAODRootAccess )
    else()
       target_link_libraries( BTaggingSelectionToolTester
+         PRIVATE POOLRootAccessLib )
+      target_link_libraries( SystematicStrategyComparison 
          PRIVATE POOLRootAccessLib )
    endif()
 

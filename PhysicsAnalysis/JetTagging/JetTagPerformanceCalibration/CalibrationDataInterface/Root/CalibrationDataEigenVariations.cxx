@@ -56,7 +56,7 @@ namespace {
     TMatrixDSym approx_cov(matrixsize); // matrix with zeros
 
     if (scheme == "SFEigen"){
-      for (std::pair<TH1*,TH1*> var : eigenvars){
+      for (const std::pair<TH1*,TH1*>& var : eigenvars){
         // we want to make the tensor product of (purely) the variation with itself, and store it in a TMatrix
         // ---> get the pure variations by subtracting the result from the up_variation combined eigenvariation histogram
         TH1* pure_var = static_cast<TH1*>(var.first->Clone()); pure_var->SetDirectory(0);
@@ -81,7 +81,7 @@ namespace {
     } else if (scheme == "SFGlobalEigen"){
       TH1* comb_result = result; // renaming to match the intended usage...
       
-      for (std::pair<TH1*,TH1*> var : eigenvars){
+      for (const std::pair<TH1*,TH1*>& var : eigenvars){
         // we want to make the tensor product of (purely) the variation with itself, and store it in a TMatrix
         // get the pure variations by subtracting the comb_result from the up_variation combined eigenvariation histogram
         TH1* pure_var = static_cast<TH1*>(var.first->Clone()); pure_var->SetDirectory(0);
@@ -329,7 +329,7 @@ namespace {
 ClassImp(CalibrationDataEigenVariations)
 #endif
 //________________________________________________________________________________
-CalibrationDataEigenVariations::CalibrationDataEigenVariations(std::string cdipath, std::string tagger, std::string wp, std::string jetcollection, CalibrationDataHistogramContainer* cnt, bool excludeRecommendedUncertaintySet, bool base) :
+CalibrationDataEigenVariations::CalibrationDataEigenVariations(const std::string& cdipath, const std::string& tagger, const std::string& wp, const std::string& jetcollection, CalibrationDataHistogramContainer* cnt, bool excludeRecommendedUncertaintySet, bool base) :
     m_cnt(cnt), m_initialized(false), m_validate(false), m_namedExtrapolation(-1), m_statVariations(false), m_cdipath(cdipath), m_taggername(tagger), m_wp(wp), m_jetauthor(jetcollection), m_totalvariance(0), m_capturedvariance(0)
 {
 
@@ -337,7 +337,7 @@ CalibrationDataEigenVariations::CalibrationDataEigenVariations(std::string cdipa
   // if specified, add items recommended for exclusion from EV decomposition by the calibration group to the 'named uncertainties' list
   if (excludeRecommendedUncertaintySet && base) {
     std::vector<std::string> to_exclude = split(m_cnt->getExcludedUncertainties());
-    for (auto name : to_exclude) {
+    for (const auto& name : to_exclude) {
       excludeNamedUncertainty(name, const_cast<CalibrationDataHistogramContainer*>(cnt));
     }
     if (to_exclude.size() == 0) {
@@ -346,7 +346,7 @@ CalibrationDataEigenVariations::CalibrationDataEigenVariations(std::string cdipa
   }
   // also flag if statistical uncertainties stored as variations (this typically happens as a result of smoothing / pruning of SF results)
   vector<string> uncs = m_cnt->listUncertainties(); // <-------- The "listUncertainties" method retrieves the list of "information" in the CDIHistogramContainer, basically the "list" output from "showCalibration"
-  for (auto name : uncs) {
+  for (const auto& name : uncs) {
     if (name.find("stat_np") != string::npos) m_statVariations = true;
   }
 
@@ -398,7 +398,7 @@ CalibrationDataEigenVariations::excludeNamedUncertainty(const std::string& name,
 		   return el.compare(0, temp_name.size(), temp_name) == 0;
 		 });
     std::cout <<"Found a group of uncertainties to exclude: " <<name <<" found " <<unc_subgroup.size() <<" uncertainties corresponding to the query" <<std::endl;
-    for (auto single_name : unc_subgroup){
+    for (const auto& single_name : unc_subgroup){
       // only really add if the entry is not yet in the list
       if (m_namedIndices.find(single_name) == m_namedIndices.end()) {
         std::cout << "Name : " << single_name << std::endl;
@@ -474,8 +474,8 @@ CalibrationDataEigenVariations::getEigenCovarianceMatrixFromVariations()
   TMatrixDSym cov(nbins);
   auto variation = std::make_unique<double[]>(nbins);
 
-  for (std::vector<std::pair<TH1*, TH1*> >::const_iterator it = m_eigen.begin(); it != m_eigen.end(); ++it) { // <--------- m_eigen is vector of pairs of TH1* which point to TH1's representing the upVariation and downVariation respectively
-    TH1* resultVariedUp = it->first; // <--------------- This is the "result" but "varied" upwards - i.e. how the result would look like if the systematic "it" was imposed
+  for (const std::pair<TH1*, TH1*>& it : m_eigen){ // m_eigen is vector of pairs of TH1* which point to TH1's representing the upVariation and downVariation respectively
+    TH1* resultVariedUp = it.first; // <--------------- This is the "result" but "varied" upwards - i.e. how the result would look like if the systematic "it" was imposed
     for (unsigned int u = 0; u < (unsigned int) nbins; ++u) variation[u] = resultVariedUp->GetBinContent(u) - result->GetBinContent(u);
     for (int u = 0; u < nbins; ++u){ 
       for (int v = 0; v < nbins; ++v){
@@ -1251,8 +1251,8 @@ CalibrationDataEigenVariations::EigenVectorRecomposition(const std::string label
 
 
 //________________________________________________________________________________
-CalibrationDataGlobalEigenVariations::CalibrationDataGlobalEigenVariations(std::string cdipath, std::string tagger, std::string wp, std::string jetcollection, CalibrationDataHistogramContainer* cnt, bool excludeRecommendedUncertaintySet) : 
-CalibrationDataEigenVariations(cdipath, tagger, wp, jetcollection, cnt, excludeRecommendedUncertaintySet, false), m_flav_eigen()
+CalibrationDataGlobalEigenVariations::CalibrationDataGlobalEigenVariations(const std::string& cdipath, const std::string& tagger, const std::string& wp, const std::string& jetcollection, const std::vector<std::string>& flavours, CalibrationDataHistogramContainer* cnt, bool excludeRecommendedUncertaintySet) : 
+CalibrationDataEigenVariations(cdipath, tagger, wp, jetcollection, cnt, excludeRecommendedUncertaintySet, false), m_flav_eigen(), m_flavours(flavours)
 //m_blockmatrixsize(1200)
 {
   m_blockmatrixsize = 0; // <------- This needs to be computed based off of the dimensions of the result vectors (currently 4x1x5 for continuous WP, 1x300x1 for fixed cut WP, circa 2022)
@@ -1267,10 +1267,9 @@ CalibrationDataEigenVariations(cdipath, tagger, wp, jetcollection, cnt, excludeR
   TFile* f = TFile::Open(fileName.Data(), "READ");
   f->cd();
 
-  m_flavours = { "B", "C", "Light", "T" };
   // This loop extracts all the "flavour containers", i.e. all CalibrationDataHistogramContainers pertaining to the same path, but with different flavours
   // It also puts all the uncertainties for all containers into a set, which we can then later loop over, to construct the total covariance matrix
-  for (auto const& flavour : m_flavours){
+  for (const auto& flavour : m_flavours){
     std::string dir = m_taggername + "/" + m_jetauthor + "/" + m_wp  + "/" + flavour + "/" + "default_SF" ;
     TString contName(dir);
     Analysis::CalibrationDataHistogramContainer* c;
@@ -1282,7 +1281,7 @@ CalibrationDataEigenVariations(cdipath, tagger, wp, jetcollection, cnt, excludeR
       TH1* result = dynamic_cast<TH1*>(c->GetValue("result")); // let's get the size of this for later
       m_blockmatrixsize+=result->GetNbinsX()*result->GetNbinsY()*result->GetNbinsZ(); // should be ~300 for fixed cut, something else for continuous
       std::cout << "m_blockmatrixsize is now " << m_blockmatrixsize << std::endl;
-      for (std::string unc : uncs){
+      for (const std::string& unc : uncs){
         if (unc.find("stat_np") != string::npos) m_statVariations = true;
         if ((unc=="result")||(unc=="comment")||(unc=="ReducedSets")||(unc=="systematics")||(unc=="statistics")||(unc=="extrapolation")||(unc=="MChadronisation")||(unc=="combined")||(unc=="extrapolation from charm")) { 
           continue; 
@@ -1297,7 +1296,7 @@ CalibrationDataEigenVariations(cdipath, tagger, wp, jetcollection, cnt, excludeR
         if (to_exclude.size() == 0) {
           std::cerr << "CalibrationDataEigenVariations warning: exclusion of pre-set uncertainties list requested but no (or empty) list found" << std::endl;
         }
-        for (auto name : to_exclude) {
+        for (const auto& name : to_exclude) {
           if (name == "") continue;
           excludeNamedUncertainty(name, flavour);
         }
@@ -1307,14 +1306,20 @@ CalibrationDataEigenVariations(cdipath, tagger, wp, jetcollection, cnt, excludeR
   
   std::cout << "\n number of shared uncertainties is " << m_all_shared_systematics.size() << std::endl;
   
-  std::cout << "Printing out the all shared uncertainties for " << tagger << "/" << jetcollection << "/" << wp << std::endl;
   std::set<std::string>::iterator it = m_all_shared_systematics.begin();
-  std::cout << "| " << std::endl;
-  while (it != m_all_shared_systematics.end()){
-    std::cout << "|-- " << (*it) << std::endl;
-    ++it;
+  if (it != m_all_shared_systematics.end()){
+    std::cout << "Printing out all shared uncertainties for " << tagger << "/" << jetcollection << "/" << wp << std::endl;
+    std::cout << "| " << std::endl;
+    while (it != m_all_shared_systematics.end()){
+      std::cout << "|-- " << (*it) << std::endl;
+      ++it;
+    }
+  } else {
+    std::cout << "| no shared systematics between ";
+    for (const auto& f : m_flavours){
+      std::cout << f << ", ";
+    } std::cout << std::endl;
   }
-  std::cout << std::endl;
   // End of constructor
 }
 
@@ -1322,7 +1327,7 @@ CalibrationDataEigenVariations(cdipath, tagger, wp, jetcollection, cnt, excludeR
 CalibrationDataGlobalEigenVariations::~CalibrationDataGlobalEigenVariations()
 {
   // delete all variation histograms owned by us
-  for (auto flavour : m_flavours){
+  for (const auto& flavour : m_flavours){
     for (vector<pair<TH1*, TH1*> >::iterator it = m_flav_eigen[flavour].begin(); it != m_flav_eigen[flavour].end(); ++it) {
       delete it->first;
       delete it->second;
@@ -1354,15 +1359,15 @@ CalibrationDataGlobalEigenVariations::getEigenCovarianceMatrix()
   // the fly.
 
   std::map<std::string, TMatrixDSym> cov_matrices; // temporary store, just to aid in printing out the individual systematic covariance matrices
-  TMatrixDSym global_covariance(m_blockmatrixsize); // <------- This is the matrix we want to construct,
+  TMatrixDSym global_covariance(m_blockmatrixsize);
   // Then loop through the list of (other) uncertainties
-  for (std::string unc : m_all_shared_systematics){
+  for (const std::string& unc : m_all_shared_systematics){
     std::vector<int> flavs_in_common;
     TString tunc(unc);
     std::vector<double> comb_syst; // this vector combines the TH1 uncertainty bins for each flavour into one object -> stored in comb_systematics for now, but meant for covariance matrix method
     // For the fixed cut case, we want to bin by groups of flavour > pT (i.e. "blocks" of flavour)
     // For the continuous case, we want to bin by groups of flavour > tagweight > pT (i.e. "blocks" of flavour, containing tagweight blocks... more complicated, but works on same principle)
-    for (auto flavour : m_flavours){
+    for (const auto& flavour : m_flavours){
       Analysis::CalibrationDataHistogramContainer* c = m_histcontainers[flavour]; // pointer to the flavour container
       int flavour_size = 0; // Store the length of the uncertainty in the flavour, initialize to zero
       if (c) {
@@ -1392,10 +1397,10 @@ CalibrationDataGlobalEigenVariations::getEigenCovarianceMatrix()
         }
         
         // Now we can loop through the bins of the flavour uncertainty, adding them onto the combined systematic
-        if (tagweightax == -1){ //<------ i.e. NOT continuous, but is a fixed cut WP
+        if (tagweightax == -1){ //<--- i.e. NOT continuous, but is a fixed cut WP
           for (int i = 1 ; i <= flavour_size ; i++){
             if (hunc){
-              Int_t bin = hunc->GetBin(1,i,1); // <----------- Need to check if the histograms encountered could have other bin axes, or if this is sufficient for retrieving uncertainties
+              Int_t bin = hunc->GetBin(1,i,1);
               double unc_val = hunc->GetBinContent(bin);
               comb_syst.push_back(unc_val); // if uncertainty, push uncertainty bin content to combined systematic vector
             } else {
@@ -1509,8 +1514,8 @@ CalibrationDataGlobalEigenVariations::listNamedVariations(const std::string& fla
   // Provides the list of named variations
 
   std::vector<std::string> names;
-  for (std::map<std::string, unsigned int>::const_iterator it = (m_flav_namedIndices.find(flavour)->second).begin(); it != (m_flav_namedIndices.find(flavour)->second).end(); ++it){
-    names.push_back(it->first);
+  for(const auto& namedar : m_flav_namedIndices.find(flavour)->second){
+    names.push_back(namedar.first);
   }
   return names;
 }
@@ -1542,19 +1547,19 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
   ///*
 
   // Second step: create the variations for the named sources of uncertainty (easy...)
-  // <---- News flash: This isn't so easy now, as it has to be done for all the flavours to which the uncertainty pertains
+  // News flash: This isn't so easy now, as it has to be done for all the flavours to which the uncertainty pertains
   // the following are temporary data structures
   std::vector<double> combined_result; 
   std::map<std::string, int> flav_bins; // store the nbins of each flavour histogram for later use in "reporting"
   // and eventually, at the end, we will want to separate the flavour blocks out...
-  for (auto const& flavour : m_flavours) {
+  for (const auto& flavour : m_flavours) {
     // for each flavour, we want to combine the results and uncertainty values across flavours into one "block" vector
     // retrieve the central calibration
     Analysis::CalibrationDataHistogramContainer* c = m_histcontainers[flavour]; // pointer to the flavour container
 
     TH1* result = dynamic_cast<TH1*>(c->GetValue("result"));
     //construct the combined_result and combined_named_variations (up and down)
-    if (c->getTagWeightAxis() == -1){ // <---- For fixed cut WP, the Y axis **should** be the pT axis (but can it can potentially be different in the future)
+    if (c->getTagWeightAxis() == -1){ // For fixed cut WP, the Y axis **should** be the pT axis (but can it can potentially be different in the future)
       flav_bins[flavour] = result->GetNbinsY(); // Add the number of bins of the result histogram with non-zero results...  
       std::cout << "flav_bins["<<flavour<<"] = " << flav_bins[flavour] << std::endl;
       for(int i = 0 ; i < flav_bins[flavour] ; i++){
@@ -1563,7 +1568,7 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
         double res_value = result->GetBinContent(bin);
         combined_result.push_back(res_value);
       }
-    } else if (c->getTagWeightAxis() == 0) { // <------ for continuous WP, the taxweight axis determines which axis is pt and |eta|
+    } else if (c->getTagWeightAxis() == 0) { // for continuous WP, the taxweight axis determines which axis is pt and |eta|
       flav_bins[flavour] = result->GetNbinsX()*result->GetNbinsY();
       int tagbins = result->GetNbinsX();
       int ptbins = result->GetNbinsY();
@@ -1609,7 +1614,7 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
     // the "m_flav_namedIndices" are constructed within "excludeNamedUncertainties", which is called in the constructor
     for (map<string, unsigned int>::iterator it = m_flav_namedIndices[flavour].begin(); it != m_flav_namedIndices[flavour].end(); ++it) {
       TH1* hunc = (TH1*) c->GetValue(it->first.c_str()); // this should store the name uncertainty, if it exists for this flavour 
-      // <---------------- I need to test if this uncertainty actually exists, and if it doesn't just use a ZERO variation histogram explicitly
+      // I need to test if this uncertainty actually exists, and if it doesn't just use a ZERO variation histogram explicitly
       // but even if it doesn't exist, we want to have it, so that the indices match between flavours
       pair<TH1*, TH1*>& p = m_flav_named[flavour][it->second];
       TString namedvar("namedVar");
@@ -1627,7 +1632,7 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
       }
       p.first  = resultVariedUp;
       p.second = resultVariedDown;
-    } //<------ End the uncertainty in flavour loop 
+    } // End of uncertainty in flavour loop 
     
     // Now handle the extrapolation uncertainties per flavour...
     // Refinement: add the "extrapolation" uncertainty as a named uncertainty, if the histogram is provided
@@ -1661,13 +1666,12 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
     }
 
 
-  } // <----- End the flavour loop  
+  } // End flavour loop  
   
 
 
   // Third step: compute the eigenvector variations corresponding to the remaining sources of uncertainty
   // First, build the combined_result vector into a TH1
-  //TH1* comb_result = new TH1D("combined_result", "", combined_result.size(), 0., 1.); // <-------- This is NOT binned properly, also not physically meaningful in its current state. Store variations per-flavour LATER
   std::unique_ptr<TH1> comb_result(new TH1D("combined_result", "", combined_result.size(), 0., 1.));
   int nbins = comb_result->GetNbinsX()+2;
   int ndim  = comb_result->GetDimension();
@@ -1686,7 +1690,7 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
   int size = matrixVariationJacobian.GetNrows();
 
   // Reduce the matrix to one without the zeros, using a "similarity" transformation
-  const TMatrixDSym matrixCovariance = cov.Similarity(matrixVariationJacobian); // <------- This step removes the zeros
+  const TMatrixDSym matrixCovariance = cov.Similarity(matrixVariationJacobian); // <--- This step removes the zeros
 
   // Carry out the Eigenvector decomposition on this matrix
   TMatrixDSymEigen eigenValueMaker (matrixCovariance);
@@ -1699,12 +1703,12 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
 
   for (int i = 0; i < size; ++i) {
     for (int r = 0; r < size; ++r) {
-      //first index is the variation number, second corresponds to the pT bin      //<----------- The "eigenvariations" matrix is the "C" matrix which has CKC^T = I with "K" being the o.g. covariance matrix, and "I" is the identity.
-      matrixVariations(i,r) = -1.0*eigenVectors[r][i]*sqrt(fabs(eigenValues[i])); // <----------------- So the result is a matrix (eigenvariation) which is the eigenvector scaled by the sqrt(eigenvalue)
+      //first index is the variation number, second corresponds to the pT bin      // The "eigenvariations" matrix is the "C" matrix which has CKC^T = I with "K" being the o.g. covariance matrix, and "I" is the identity.
+      matrixVariations(i,r) = -1.0*eigenVectors[r][i]*sqrt(fabs(eigenValues[i])); //  So the result is a matrix (eigenvariation) which is the eigenvector scaled by the sqrt(eigenvalue)
     } 
   } // <------- matrixVariations: each row is one variation, each column is the pT bin.
 
-  TMatrixT<double> matrixVariationsWithZeros = matrixVariations * matrixVariationJacobian; // <--------- This step adds in the zero rows again
+  TMatrixT<double> matrixVariationsWithZeros = matrixVariations * matrixVariationJacobian; // This step adds in the zero rows again
   
   // Construct the initial set of variations from this
   for (int i = 0; i < matrixVariationsWithZeros.GetNrows(); ++i) {
@@ -1715,16 +1719,16 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
     TString nameDown(superstring); nameDown += "_down";
     // TString nameUnc(superstring);  nameUnc+= "_unc";
 
-    TH1* resultVariedUp   = (TH1*)comb_result->Clone(nameUp);   resultVariedUp->SetDirectory(0); // <------------ clone "comb_result" hist, call it "up", and SetDirectory(0) means histogram doesn't belong to any directory.
+    TH1* resultVariedUp   = (TH1*)comb_result->Clone(nameUp);   resultVariedUp->SetDirectory(0);
     TH1* resultVariedDown = (TH1*)comb_result->Clone(nameDown); resultVariedDown->SetDirectory(0);
 
     for (int u = 0; u < comb_result->GetNbinsX(); ++u) {
-      resultVariedUp->SetBinContent(u,(comb_result->GetBinContent(u) + matrixVariationsWithZeros(i,u))); // <------------- This actually constructs the up-variation histogram!
+      resultVariedUp->SetBinContent(u,(comb_result->GetBinContent(u) + matrixVariationsWithZeros(i,u)));
       resultVariedDown->SetBinContent(u,(comb_result->GetBinContent(u) - matrixVariationsWithZeros(i,u)));
     }
 
-    m_eigen.push_back(std::make_pair(resultVariedUp, resultVariedDown)); //<------ This is currently storing the FULL/combined variations, which aren't binned with proper bin widths etc.
-    // The "proper binning" isn't necessary for pruning purposes. Later on, after pruning, I separate the flavour blocks of each eigenvariation, and construct the variations for each flavour, storing results in m_flav_eigen
+    m_eigen.push_back(std::make_pair(resultVariedUp, resultVariedDown)); //<--- This is currently storing the FULL/combined variations, which aren't binned with proper bin widths etc.
+    // The "proper binning" isn't necessary for pruning purposes. Later on, after pruning, separate the flavour blocks of each eigenvariation and construct the variations for each flavour, storing results in m_flav_eigen
 
   } //end eigenvector size
 
@@ -1740,7 +1744,7 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
   //////////////////////////////////////////////////////////////////////////////
   
   // Remove variations that are below the given tolerance (effectively meaning that they don't have any effect)
-  IndexSet final_set; // <------------------------ What's IndexSet? It's a typedef of std::set<size_t>, where size_t = int
+  IndexSet final_set;
   size_t current_set = 0;
 
   // We set the custom min_variance here 
@@ -1751,13 +1755,13 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
     up->Add(comb_result.get(), -1.0); // now we're left with decimal values centered around 0, i.e. 0.02 or -0.02
 
     for (int bin = 1; bin <= nbins; ++bin) {
-      if (fabs(up->GetBinContent(bin)) > min_variance) { // <--------- If you find even ONE bin with big enough variance, we keep the whole systematic.
+      if (fabs(up->GetBinContent(bin)) > min_variance) { // If you find even ONE bin with big enough variance, we keep the whole systematic.
         keep_variation = true;
         break;
       }
     }
-    if (!keep_variation){ // <--------------- At this stage, if we find no bins in the systematic with large enough variation, we insert it to "final_set" for removal/pruning
-      final_set.insert(current_set); // <---- This basically just stores the index of the variation (pair) that needs to be removed due to being too small
+    if (!keep_variation){ // At this stage, if we find no bins in the systematic with large enough variation, we insert it to "final_set" for removal/pruning
+      final_set.insert(current_set);
     } else {
       m_capturedvariance += eigenValues[index];
     }
@@ -1768,7 +1772,7 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
     std::cout << "CalibrationDataEigenVariations: Removing " << final_set.size() << " eigenvector variations leading to sub-tolerance effects, retaining " << m_eigen.size()-final_set.size() << " variations" << std::endl;
   }
   
-  CalibrationDataEigenVariations::removeVariations(final_set); // <----------------- This method actually performs the reduction. The above logic simply flags which variations to GET RID OF, inserting them into "final_set"
+  CalibrationDataEigenVariations::removeVariations(final_set); // This method actually performs the reduction. The above logic simply flags which variations to get rid of, inserting them into "final_set"
   
   // AT THIS STAGE: Pruning has already occurred, leaving us with a set of combined eigenvariations in "m_eigen", which we can thence recombine and compute the correlation matrix
   // That correlation matrix can then be compared to the original correlation matrix "corr", simply subtracting one from the other. Better approximations will have close to zero deviation.
@@ -1794,12 +1798,12 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
   //////////////////////////////////////////////////////////////////////////////
   
 
-  for(std::pair<TH1*,TH1*> var : m_eigen){
+  for(const std::pair<TH1*,TH1*>& var : m_eigen){
     // now we make use of the same old flavour loop and impose the flavour variation to the flavour container
     TString eigenvarup = var.first->GetName();
     TString eigenvardown = var.second->GetName();
     int bin_baseline = 0; // increment this by flav_bins after getting each flavour block
-    for (std::string flavour : m_flavours){
+    for (const std::string& flavour : m_flavours){
       Analysis::CalibrationDataHistogramContainer* c = m_histcontainers[flavour];
       TH1* result = dynamic_cast<TH1*>(c->GetValue("result"));
       TH1* resultVariedUp   = (TH1*)result->Clone(eigenvarup);   resultVariedUp->SetDirectory(0); // copy flavour result, want to set bin contents according to the combined eigenvartion flavour block
@@ -1817,10 +1821,9 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
     }
   }
 
-  std::cout << " B m_flav_eigen has " << m_flav_eigen["B"].size() << std::endl;
-  std::cout << " C m_flav_eigen has " << m_flav_eigen["C"].size() << std::endl;
-  std::cout << " Light m_flav_eigen has " << m_flav_eigen["Light"].size() << std::endl;
-  std::cout << " T m_flav_eigen has " << m_flav_eigen["T"].size() << std::endl;
+  for(const auto& f : m_flavours){
+    std::cout << " " << f << " m_flav_eigen has " << m_flav_eigen[f].size() << std::endl;
+  }
 
   m_initialized = true;
 }
@@ -1855,7 +1858,7 @@ CalibrationDataGlobalEigenVariations::getJacobianReductionMatrix(TMatrixDSym& co
       }
       if (! isThereANonZero){
         ++nZeros;
-        zeroComponents.push_back(i) ; // <---- Store the index of the covariance matrix row/column with all zeros
+        zeroComponents.push_back(i) ;
       }
     }
   }
@@ -1871,18 +1874,18 @@ CalibrationDataGlobalEigenVariations::getJacobianReductionMatrix(TMatrixDSym& co
 
   for (int i = 0; i < m_blockmatrixsize; ++i) { // full size
     bool missed = false;
-    for (unsigned int s = 0 ; s < zeroComponents.size(); ++s) { // <-------- Basically what this does is it flags "missed" for a given "i" of the full bin size
-      if (zeroComponents.at(s) == i) {                        //  <-------- if "i" is in "zeroComponents". Breaks (because it found that it's to be missed)
+    for (unsigned int s = 0 ; s < zeroComponents.size(); ++s) { // <--- Basically what this does is it flags "missed" for a given "i" of the full bin size
+      if (zeroComponents.at(s) == i) { // <--- if "i" is in "zeroComponents". Breaks (because it found that it's to be missed)
         missed = true;
         break;
       }
     }
-    if (missed) {                                       //        <-------- Finally, if "i" is to be missed, increase "nMissed" by one, and....
+    if (missed) {  // <-------- Finally, if "i" is to be missed, increase "nMissed" by one, and....
       ++nMissed;
       continue;
     }
 
-    matrixVariationJacobian(i-nMissed,i)=1;         //            <-------- ... this ALWAYS adds a one. If zero "nMissed", add to diagonal. otherwise off-diagonal
+    matrixVariationJacobian(i-nMissed,i)=1; //  <-------- ... this ALWAYS adds a one. If zero "nMissed", add to diagonal. otherwise off-diagonal
   }
 
   return matrixVariationJacobian;
@@ -2123,7 +2126,7 @@ CalibrationDataGlobalEigenVariations::mergeVariations(const IndexSuperSet &set, 
     m_flav_eigen[flavour][lowest_index].second = total_var_down;
   }
   
-  removeVariations(toDelete, flavour); // <------- This removes the flavour variations
+  removeVariations(toDelete, flavour);
 }
 
 
