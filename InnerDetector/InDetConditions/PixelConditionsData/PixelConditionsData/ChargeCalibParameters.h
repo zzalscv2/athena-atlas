@@ -41,6 +41,7 @@ namespace PixelChargeCalib{
   struct LinearFitParameters{
     float F = 0.f;
     float G = 0.f;
+    LinearFitParameters() = default;
     LinearFitParameters(float f, float g):F(f), G(g){
       //nop
     }

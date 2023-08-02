@@ -7,16 +7,14 @@
 
 #include <AthenaKernel/CLASS_DEF.h>
 #include <PixelReadoutDefinitions/PixelReadoutDefinitions.h>
+#include "PixelConditionsData/ChargeCalibParameters.h" //Thresholds, LegacyFitParameters etc
 
 #include <map>
 #include <vector>
 #include <array>
+
 namespace PixelChargeCalib{
   struct ChargeCalibrationBundle;
-  struct LegacyFitParameters;
-  struct LinearFitParameters;
-  struct Thresholds;
-  struct Resolutions;
 }
 
 class PixelModuleData;
@@ -105,69 +103,17 @@ class PixelChargeCalibCondData
     getToTLUTFEI4(unsigned int moduleHash, unsigned int FE, float Q) const;
 
   private:
-    std::size_t m_maxModuleHash = 0;
-
+    std::size_t m_sizeOfHashVector = 0;
     constexpr static std::size_t s_NPixelDiodes = enum2uint(InDetDD::PixelDiodeType::N_DIODETYPES);
-
-   template <typename T>
-    static void resize(std::size_t idx, std::size_t max_size, T &container)  { if (idx >= container.size()) { container.resize(max_size); } }
-    template <typename T, typename T_Value>
-    static void setValue(std::size_t max_size, T &container, unsigned int moduleHash, T_Value &&value)  {
-       resize( moduleHash,max_size, container);
-       container.at(moduleHash) = std::move(value);
-    }
-
-    template <typename T, typename T_Value>
-    static void setValue(std::size_t max_size, T &container, InDetDD::PixelDiodeType type, unsigned int moduleHash, T_Value &&value)  {
-       resize( moduleHash,max_size, container.at(enum2uint(type)));
-       container.at(enum2uint(type)).at(moduleHash) = std::move(value);
-    }
-
-    using chipThreshold = std::vector<std::vector<int>>;
-    using chipCharge = std::vector<std::vector<float>>;
-    using chipThresholdMap = std::array<chipThreshold, s_NPixelDiodes>;
-    using chipChargeMap = std::array<chipCharge, s_NPixelDiodes>;
-        
-    chipThresholdMap m_analogThreshold;
-    chipThresholdMap m_analogThresholdSigma;
-    chipThresholdMap m_analogThresholdNoise;
-    chipThresholdMap m_inTimeThreshold;
-
-    chipChargeMap m_totA;
-    chipChargeMap m_totE;
-    chipChargeMap m_totC;
-    chipChargeMap m_totF;
-    chipChargeMap m_totG;
-
-    chipCharge m_totRes1;
-    chipCharge m_totRes2;
+    
+    std::array<std::vector<std::vector<PixelChargeCalib::Thresholds>>, s_NPixelDiodes> m_thresholds;
+    std::array<std::vector<std::vector<PixelChargeCalib::LegacyFitParameters>>, s_NPixelDiodes> m_legacyFit;
+    std::array<std::vector<std::vector<PixelChargeCalib::LinearFitParameters>>, s_NPixelDiodes> m_linFit;
+    std::vector<std::vector<PixelChargeCalib::Resolutions>> m_totRes;
 
     // new IBL calibration
     std::map<int, CalibrationStrategy> m_calibrationStrategy;
     std::map<int, IBLModule> m_tot2Charges;
-    //
-    void setQ2TotA(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> &&value);
-    void setQ2TotE(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> &&value);
-    void setQ2TotC(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> &&value);
-    //
-    float getQ2TotA(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
-    float getQ2TotE(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
-    float getQ2TotC(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
-    //
-    void setQ2TotF(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> &&value);
-    void setQ2TotG(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> &&value);
-    //
-    void setTotRes1(unsigned int moduleHash, std::vector<float> &&value);
-    void setTotRes2(unsigned int moduleHash, std::vector<float> &&value);
-    //
-    void setAnalogThresholdSigma(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> &&value);
-    void setAnalogThresholdNoise(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> &&value);
-    void setInTimeThreshold(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> &&value);
-    //
-    int getAnalogThreshold(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
-    int getAnalogThresholdSigma(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
-    int getAnalogThresholdNoise(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
-    int getInTimeThreshold(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
 
 };
 
