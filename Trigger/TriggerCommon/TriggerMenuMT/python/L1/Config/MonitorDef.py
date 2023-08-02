@@ -373,27 +373,21 @@ class MonitorDef:
                 # Legacy L1Calo
                 # Tau
                 "L1_TAU8", "L1_TAU12IM",
-                "L1_TAU1_TE3_VTE200",
+                "L1_TAU1_TE4_VTE200",
                 "L1_TAU1_TE5_VTE200",
-                "L1_2TAU1_VTE50",
                 "L1_2TAU1_VTE200",
-                "L1_TAU1_VTE200",
                 # Jet
                 "L1_J30", "L1_J50",
                 "L1_J20p31ETA49", "L1_J30p31ETA49",
                 "L1_J12_EMPTY",
                 "L1_J40_XE50",
                 # TE
-                "L1_TE3", "L1_TE5",
+                "L1_TE3", "L1_TE4", "L1_TE5",
                 "L1_TE20", "L1_TE50",
                 "L1_TE100", "L1_TE200",
-                "L1_TE12000",
                 #
-                "L1_TE3_VTE200",
                 "L1_TE3_VTE50",
-                "L1_TE5_VTE20",
                 "L1_TE5_VTE200",
-                "L1_TE20_VTE200",
                 "L1_TE50_VTE200",
                 #
                 "L1_TE7p0ETA49",

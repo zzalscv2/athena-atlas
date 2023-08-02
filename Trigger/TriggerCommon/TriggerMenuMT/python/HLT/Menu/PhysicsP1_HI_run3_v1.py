@@ -26,10 +26,10 @@ HardProbesStream="HardProbes"
 MinBiasStream="MinBias"
 UPCStream="UPC"
 MinBiasOverlayStream="MinBiasOverlay"
+PCStream="PC"
+CCStream="CC"
 ### following stream tags not used yet, need to be implemented in StreamInfo.py before use
 #UCCStream="UCC"
-#PCStream="PC"
-#CCStream="CC"
 #PCpebStream="PCPEB"
 #CCpebStream="CCPEB"
 
