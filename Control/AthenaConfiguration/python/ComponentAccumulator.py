@@ -10,10 +10,11 @@ from AthenaCommon.Debugging import DbgStage
 from AthenaCommon.CFElements import (isSequence, findSubSequence, findAlgorithm, flatSequencers,
                                      checkSequenceConsistency, findAllAlgorithmsByName, compName)
 
-from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
 from AthenaConfiguration.Deduplication import deduplicate, deduplicateOne, DeduplicationFailed
 from AthenaConfiguration.DebuggingContext import (Context, raiseWithCurrentContext, shortCallStack,
                                                   createContextForDeduplication)
+
 
 from collections import OrderedDict
 from collections.abc import Sequence
@@ -85,6 +86,16 @@ class ComponentAccumulator:
     # track[EventAlgo|CondAlgo|PublicTool|PrivateTool|Service|Sequence] - to track categories components addition
     debugMode=""
     def __init__(self,sequence='AthAlgSeq'):
+        # Ensure that we are not operating in the legacy Athena Configurable mode
+        # where only a single global instance exists
+        if not isComponentAccumulatorCfg():
+            raise ConfigurationError(
+                """
+                ComponentAccumulator initialised with legacy (global) Configurable behavior!
+                CA Deduplication is impossible in this mode.
+                Create the CA using the AthenaCommon.Configurable.ConfigurableCABehavior context manager.
+                """
+            )
         self._msg=logging.getLogger('ComponentAccumulator')
         if isinstance(sequence, str):
             kwargs={'IgnoreFilterPassed' : True,
