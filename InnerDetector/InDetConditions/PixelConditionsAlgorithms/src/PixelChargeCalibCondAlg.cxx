@@ -175,9 +175,11 @@ StatusCode PixelChargeCalibCondAlg::execute(const EventContext& ctx) const {
     const auto & [barrel_ec, layer] = getBecAndLayer(m_pixelID, wafer_hash);
     const InDetDD::SiDetectorElement *element = elements->getDetectorElement(wafer_hash);
     const auto & [numFE, technology] = numChipsAndTechnology(element);
-    if (configData->getDefaultAnalogThreshold(barrel_ec, layer) > -0.1) {
+    Thresholds defaults{configData->getDefaultAnalogThreshold(barrel_ec, layer), configData->getDefaultAnalogThresholdSigma(barrel_ec, layer),
+            configData->getDefaultAnalogThresholdNoise(barrel_ec, layer), configData->getDefaultInTimeThreshold(barrel_ec, layer)};
+    if (defaults.value > -0.1) {
       for (InDetDD::PixelDiodeType type : diodeTypes) {
-        writeCdo -> setAnalogThreshold(type, moduleHash, std::vector<int>(numFE, configData->getDefaultAnalogThreshold(barrel_ec, layer)));
+        writeCdo -> setThresholds(type, moduleHash, std::vector<Thresholds>(numFE, defaults));
       }
     }
   }

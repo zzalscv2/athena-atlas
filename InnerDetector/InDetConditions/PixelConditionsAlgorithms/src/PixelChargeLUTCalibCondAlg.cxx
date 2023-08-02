@@ -145,10 +145,11 @@ StatusCode PixelChargeLUTCalibCondAlg::execute(const EventContext& ctx) const {
     const InDetDD::PixelModuleDesign *p_design = static_cast<const InDetDD::PixelModuleDesign*>(&element->design());
     // in some cases numberOfCircuits returns FEs per half-module
     unsigned int numFE = p_design->numberOfCircuits() < halfModuleThreshold ? p_design->numberOfCircuits() : 2 * p_design->numberOfCircuits();
-
-    if (configData->getDefaultAnalogThreshold(barrel_ec, layer) > -0.1) {
+    Thresholds defaults{configData->getDefaultAnalogThreshold(barrel_ec, layer), configData->getDefaultAnalogThresholdSigma(barrel_ec, layer),
+            configData->getDefaultAnalogThresholdNoise(barrel_ec, layer), configData->getDefaultInTimeThreshold(barrel_ec, layer)};
+    if (defaults.value > -0.1) {
       for (InDetDD::PixelDiodeType type : diodeTypes) {
-        writeCdo -> setAnalogThreshold(type, moduleHash, std::vector<int>(numFE, configData->getDefaultAnalogThreshold(barrel_ec, layer)));
+        writeCdo -> setThresholds(type, moduleHash, std::vector<Thresholds>(numFE, defaults));
       }
     }
   }

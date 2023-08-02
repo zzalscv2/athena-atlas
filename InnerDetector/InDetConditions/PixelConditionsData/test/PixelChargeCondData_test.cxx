@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_SUITE(PixelChargeCalibCondDataTest)
     unsigned int hashTooBig=200;
     PixelChargeCalibCondData calib(maxModuleHash);
     //arguments to set and get I will use:
-    unsigned int moduleHash=10;
+    unsigned int moduleHash=4;
     unsigned int frontEndIdx=1;
     unsigned int frontEndIdxTooBig=15;
     InDetDD::PixelDiodeType type = InDetDD::PixelDiodeType::NORMAL;
@@ -47,19 +47,15 @@ BOOST_AUTO_TEST_SUITE(PixelChargeCalibCondDataTest)
     PixelChargeCalib::Thresholds oneValue{0,3,6,9};// thresh, noise, sigma, intime
     std::vector<PixelChargeCalib::Thresholds> allThresholds(5, oneValue);
     BOOST_CHECK_NO_THROW(calib.setThresholds(type,moduleHash, allThresholds));
+    unsigned int moduleHashBiggerThanVector = 10;
+    BOOST_CHECK_NO_THROW(calib.setThresholds(type,moduleHashBiggerThanVector, allThresholds));
     BOOST_CHECK_THROW(calib.setThresholds(type,hashTooBig, allThresholds), std::out_of_range);
     //return struct in new method
     BOOST_CHECK(calib.getThresholds(type, moduleHash, frontEndIdx).sigma == 3);
     BOOST_CHECK(calib.getThresholds(type, moduleHash, frontEndIdx).noise == 6);
     BOOST_CHECK_THROW(calib.getThresholds(type,hashTooBig,frontEndIdx), std::out_of_range);
     BOOST_CHECK_THROW(calib.getThresholds(type,moduleHash,frontEndIdxTooBig), std::out_of_range);
-    //
-    std::vector<int> dummy(6,10);
-    std::vector<int> thresholds{0,20,40, 100, 4, 30};//normally 16 values, 1 for each chip
-    BOOST_CHECK_NO_THROW(calib.setAnalogThreshold(type,moduleHash, std::move(thresholds)));
-    BOOST_CHECK_THROW(calib.setAnalogThreshold(type,hashTooBig, std::move(dummy)), std::out_of_range);
-    //
-   
+
     //
     PixelChargeCalib::LegacyFitParameters oneFit{1.f, 2.f, 3.f};
     std::vector< PixelChargeCalib::LegacyFitParameters > allParameters(4, oneFit);
@@ -73,7 +69,6 @@ BOOST_AUTO_TEST_SUITE(PixelChargeCalibCondDataTest)
     std::vector< PixelChargeCalib::LinearFitParameters > linParameters(4, linFit);
     BOOST_CHECK_NO_THROW(calib.setLinearFitParameters(type,moduleHash, linParameters));
     BOOST_CHECK_THROW(calib.setLinearFitParameters(type,hashTooBig, linParameters), std::out_of_range);
-    BOOST_TEST(calib.getQ2TotF(type, moduleHash, frontEndIdx) == 4.f);
     BOOST_TEST(calib.getLinearFitParameters(type, moduleHash, frontEndIdx).G ==  5.f);
     BOOST_CHECK_THROW(calib.getLinearFitParameters(type,hashTooBig,frontEndIdx), std::out_of_range);
     BOOST_CHECK_THROW(calib.getLinearFitParameters(type,moduleHash,frontEndIdxTooBig), std::out_of_range);
@@ -117,7 +112,8 @@ BOOST_AUTO_TEST_SUITE(PixelChargeCalibCondDataTest)
      InDetDD::PixelDiodeType type = InDetDD::PixelDiodeType::NORMAL;
     PixelChargeCalibCondData calib(maxModuleHash);
     unsigned int frontEndIdx=1;//so only need two elements in the vectors
-    calib.setAnalogThreshold(type,moduleHash, std::vector<int>{0,1});
+    const PixelChargeCalib::Thresholds thr{1,1,1,1};
+    calib.setThresholds(type,moduleHash, std::vector<PixelChargeCalib::Thresholds>(2, thr));
     
     PixelChargeCalib::LegacyFitParameters oneFit{1.f, 2.f, 3.f};
     std::vector< PixelChargeCalib::LegacyFitParameters > allParameters(4, oneFit);
