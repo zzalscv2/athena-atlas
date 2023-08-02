@@ -16,7 +16,7 @@ from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 from ..CommonSequences.FullScanInDetConfig import commonInDetFullScanCfg
 from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import getTrackingInputMaker
 
-from TrigCaloRec.TrigCaloRecConfig import hltCaloCellMakerCfg, jetmetTopoClusteringCfg
+from TrigCaloRec.TrigCaloRecConfig import hltCaloCellMakerCfg
 from TrigCaloHypo.TrigCaloHypoConfig import TrigLArNoiseBurstRecoAlgCfg
 from TrigCaloHypo.TrigCaloHypoConfig import TrigLArNoiseBurstHypoToolGen
 from TrigT2CaloCommon.CaloDef import clusterFSInputMaker
@@ -26,7 +26,6 @@ def getLArNoiseBurstRecoCfg(flags):
     acc = InEventRecoCA("LArNoiseBurstRecoSequence", inputMaker=clusterFSInputMaker())
     cells_name = 'CaloCellsFS' 
     acc.mergeReco(hltCaloCellMakerCfg(flags=flags, name="HLTCaloCellMakerFS", roisKey=''))
-    acc.mergeReco(jetmetTopoClusteringCfg(flags, RoIs=''))
     acc.mergeReco(TrigLArNoiseBurstRecoAlgCfg(flags, cells_name))
     return acc
 
