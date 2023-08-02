@@ -364,32 +364,22 @@ bool TrigInDetAccelerationSvc::extractITkGeometryInformation(std::map<std::tuple
     short eta_index = sctId->eta_module(offlineId);
 
     // Calculate new volume and layer id for ITk
-    int vol_id = -1;
-    if (barrel_ec== 0) vol_id = 8;
-    if (barrel_ec==-2) vol_id = 7;
-    if (barrel_ec== 2) vol_id = 9;
+    int vol_id = 13;
+    if(barrel_ec) vol_id = 12;
+    if(barrel_ec>0) vol_id = 14;
     
-    int new_vol=0, new_lay=0;
-
-    if (vol_id == 7 || vol_id == 9) {
-      new_vol = 10*vol_id + layer_disk;
-      new_lay = eta_index;
-    } else if (vol_id == 8) {
-      new_lay = 0;
-      new_vol = 10*vol_id + layer_disk;
-    }
-    
-    auto t = std::make_tuple(barrel_ec==0 ? -100 : barrel_ec, subdetid, new_vol, new_lay);
+    auto t = std::make_tuple(barrel_ec==0 ? -100 : barrel_ec, subdetid, vol_id, layer_disk);
     std::map<std::tuple<short,short,int,int>,std::vector<PhiEtaHash> >::iterator it = hashMap.find(t);
     if(it==hashMap.end())
       hashMap.insert(std::pair<std::tuple<short,short,int,int>,std::vector<PhiEtaHash> >(t,std::vector<PhiEtaHash>(1, PhiEtaHash(phi_index, eta_index, hash) )));
     else (*it).second.push_back(PhiEtaHash(phi_index, eta_index, hash));
   }
 
-
+  m_layerInfo[0].clear();
+  m_layerInfo[1].clear();
+  m_layerInfo[2].clear();
 
   m_layerInfo[0].resize(hashMap.size()); // Mapping from layerId to barrel_ec
-  m_layerInfo[1].clear();
   m_layerInfo[1].resize(pixelId->wafer_hash_max(), -1); // Mapping from layerId to the module hash
   m_layerInfo[2].resize(sctId->wafer_hash_max(), -1);
 
@@ -550,7 +540,6 @@ bool TrigInDetAccelerationSvc::exportGeometryInformation(const std::map<std::tup
   return pW == 0;//request is actioned immediately, no actual WorkItem is created
 
 }
-
 
 
 bool TrigInDetAccelerationSvc::extractGeometryInformation(std::map<std::tuple<short,short,short>, std::vector<PhiEtaHash> >& hashMap) {

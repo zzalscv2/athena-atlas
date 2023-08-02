@@ -114,7 +114,10 @@ int TrigInDetModuleCuda::getNumberOfCores(int major, int minor) const {
        ncores = 64;//Turing
     }
     if ((minor == 1) || (minor == 2)) ncores = 128;
-       else if (minor == 0) ncores = 64;
+    else if (minor == 0) ncores = 64;
+    else if ((major == 8) && (minor == 6) ){
+       ncores = 32;
+    }
 
     if(ncores == 0) {
        printf("Cannot determine the number of cores: unknown device type, major=%d minor=%d\n", major, minor);
