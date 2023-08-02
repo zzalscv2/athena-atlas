@@ -53,7 +53,7 @@ def defineMenu():
         
         # combined mu - jet
         'L1_MU3V_J12',
-        'L1_MU3V_jJ20',
+        'L1_MU3V_jJ40',
 
         'L1_TAU8', 'L1_TAU60', 'L1_TAU12IM', 'L1_TAU20IM',
         'L1_TAU8_EMPTY',

@@ -194,18 +194,18 @@ def getDevHISignatures():
         ChainProp(name='HLT_j150_ion_L1J50',l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleJetGroup+PrimaryLegGroup),
 
         #--- phase-1 HI jets
-        ChainProp(name='HLT_j60_ion_L1jJ20', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleJetGroup+PrimaryPhIGroup),
-        ChainProp(name='HLT_j75_ion_L1jJ20', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleJetGroup+PrimaryPhIGroup),
-        ChainProp(name='HLT_j75_ion_L1jJ30', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleJetGroup+PrimaryPhIGroup),
-        ChainProp(name='HLT_j85_ion_L1jJ20', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleJetGroup+PrimaryPhIGroup),
-        ChainProp(name='HLT_j85_ion_L1jJ30', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleJetGroup+PrimaryPhIGroup),
-        ChainProp(name='HLT_j100_ion_L1jJ30', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleJetGroup+PrimaryPhIGroup),
-        ChainProp(name='HLT_j120_ion_L1jJ30', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleJetGroup+PrimaryPhIGroup),
-        ChainProp(name='HLT_j150_ion_L1jJ50', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleJetGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_j60_ion_L1jJ40', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleJetGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_j75_ion_L1jJ50', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleJetGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_j75_ion_L1jJ60', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleJetGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_j85_ion_L1jJ40', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleJetGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_j85_ion_L1jJ60', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleJetGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_j100_ion_L1jJ60', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleJetGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_j120_ion_L1jJ60', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleJetGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_j150_ion_L1jJ90', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleJetGroup+PrimaryPhIGroup),
         
-        ChainProp(name='HLT_j50f_ion_L1jJ15p31ETA49', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream, 'express'], groups=SingleJetGroup+SupportPhIGroup, monGroups=['jetMon:t0','jetMon:online']),
-        ChainProp(name='HLT_j60f_ion_L1jJ15p31ETA49', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream, 'express'], groups=SingleJetGroup+SupportPhIGroup, monGroups=['jetMon:t0','jetMon:online']),
-        ChainProp(name='HLT_j70f_ion_L1jJ20p31ETA49', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j50f_ion_L1jJ40p31ETA49', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream, 'express'], groups=SingleJetGroup+SupportPhIGroup, monGroups=['jetMon:t0','jetMon:online']),
+        ChainProp(name='HLT_j60f_ion_L1jJ40p31ETA49', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream, 'express'], groups=SingleJetGroup+SupportPhIGroup, monGroups=['jetMon:t0','jetMon:online']),
+        ChainProp(name='HLT_j70f_ion_L1jJ60p31ETA49', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleJetGroup+SupportPhIGroup),
 
          # TE-seeded jets, phase-1
         ChainProp(name='HLT_j50_ion_L1jTE50', l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SingleJetGroup+SupportPhIGroup),
@@ -348,7 +348,7 @@ def getDevHISignatures():
         ChainProp(name='HLT_mu6_j50_ion_L1MU3V',     l1SeedThresholds=['MU3V','FSNOSEED'], stream=[HardProbesStream], groups=SupportLegGroup+SingleBjetGroup),
 
         #----------- mu+j with new calo
-        ChainProp(name='HLT_mu4_j60_ion_dRAB04_L1MU3V_jJ20', l1SeedThresholds=['MU3V','FSNOSEED'], stream=[HardProbesStream], groups=PrimaryPhIGroup+SingleBjetGroup),
+        ChainProp(name='HLT_mu4_j60_ion_dRAB04_L1MU3V_jJ40', l1SeedThresholds=['MU3V','FSNOSEED'], stream=[HardProbesStream], groups=PrimaryPhIGroup+SingleBjetGroup),
 
         #----------- mu + UPC Fgap
         ChainProp(name='HLT_mu3_hi_FgapAC3_L1MU3V_VTE50', l1SeedThresholds=['MU3V','FSNOSEED'], stream=[UPCStream], groups=SingleMuonGroup+PrimaryLegGroup),
@@ -639,8 +639,9 @@ def getDevHISignatures():
         ChainProp(name='HLT_noalg_L1J15',   l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1J30',   l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=MinBiasGroup+SupportLegGroup),
         
-        ChainProp(name='HLT_noalg_L1jJ20',   l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=MinBiasGroup+SupportPhIGroup),
-        ChainProp(name='HLT_noalg_L1jJ30',   l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=MinBiasGroup+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_L1jJ40',   l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=MinBiasGroup+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_L1jJ50',   l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=MinBiasGroup+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_L1jJ60',   l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=MinBiasGroup+SupportPhIGroup),
 
         ChainProp(name='HLT_noalg_L1EM12',  l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1EM15',  l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=MinBiasGroup+SupportLegGroup),
