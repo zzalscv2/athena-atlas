@@ -18,7 +18,9 @@ def JetTLASequenceCfg(flags, jetsIn):
     # configure an instance of TrigEventInfoRecorderAlg
     recoAcc = InEventRecoCA("JetTLARecoSeq_"+jetsIn,inputMaker=tlaJetInputMakerAlg)
     eventInfoRecorderAlgCfg = TrigEventInfoRecorderAlgCfg(flags, name="TrigEventInfoRecorderAlg_TLA",
-                                                          decorateTLA=True,
+                                                          decoratePFlowInfo=True,
+                                                          decorateEMTopoInfo=True,
+                                                          renounceAll=True, # avoid dependencies, just take what is there, so can share alg between EMTopo & PFlow TLA
                                                           trigEventInfoKey=recordable("HLT_TCEventInfo_TLA"),
                                                           primaryVertexInputName="HLT_IDVertex_FS",
                                                          )
