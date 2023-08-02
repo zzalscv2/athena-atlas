@@ -201,7 +201,6 @@ StatusCode NswDcsDbAlg::loadELTXData(const EventContext& ctx, const readKey_t& r
 
 	// iterate through data
 	CondAttrListCollection::const_iterator itr;
-	unsigned int nChns = 0;
 	for(itr = readCdo->begin(); itr != readCdo->end(); ++itr) {
 
 		// channel ID and name
@@ -213,7 +212,6 @@ StatusCode NswDcsDbAlg::loadELTXData(const EventContext& ctx, const readKey_t& r
 		}
 		const coral::AttributeList& atr = itr->second;
 		ATH_MSG_DEBUG("found SCA " << chanName << " with status " << atr["online"]);
-		++nChns;
 	}
 	return StatusCode::SUCCESS;
 
