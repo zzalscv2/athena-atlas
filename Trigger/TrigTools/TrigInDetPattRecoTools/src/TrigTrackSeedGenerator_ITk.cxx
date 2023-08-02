@@ -233,25 +233,25 @@ void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDesc
 		//match edge candidate against edges incoming to n2
 
 		float exp_eta = std::sqrt(1+tau*tau)-tau;
-		
-		if(currentStage > 20) {
 
-		  bool isGood = false;
+		bool isGood = n2->m_in.size() <= 2;//we must have enough incoming edges to decide
+
+		if(!isGood) {
+
 		  float uat_1 = 1.0f/exp_eta;
 		    
 		  for(const auto& n2_in_idx : n2->m_in) {
 		    float tau2 = edgeStorage.at(n2_in_idx).m_p[0]; 
 		    float tau_ratio = tau2*uat_1 - 1.0f;
 		    
-		    if(std::fabs(tau_ratio) < cut_tau_ratio_max){
+		    if(std::fabs(tau_ratio) > cut_tau_ratio_max){//bad match
 		      continue;
 		    }
-		    isGood = true;
+		    isGood = true;//good match found
 		    break;
 		  }
-		  if(!isGood) isGood = n2->m_in.size() < 2;
-		  if(!isGood) continue;//skip creating [n1 <- n2] edge
 		}
+		if(!isGood) continue;//no moatch found, skip creating [n1 <- n2] edge
 		
 		float curv = D*std::sqrt(L2);//signed curvature
 		float dPhi2 = std::asin(curv*r2);
