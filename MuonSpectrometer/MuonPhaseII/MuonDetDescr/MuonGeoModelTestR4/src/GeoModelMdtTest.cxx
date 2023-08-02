@@ -19,6 +19,8 @@ StatusCode GeoModelMdtTest::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
     /// Disable the tracking geometry tool. We'll need it later
     ATH_CHECK(m_trackingGeometryTool.retrieve(DisableTool{true}));
+    
+    ATH_CHECK(m_surfaceProvTool.retrieve());
     /// Prepare the TTree dump
     if (m_dumpTree) ATH_CHECK(m_tree.init(this));
 
@@ -173,6 +175,8 @@ void GeoModelMdtTest::dumpToFile(const EventContext& /*ctx*/,
    /// location   
    const Amg::Transform3D localToGlob{reElement->localToGlobalTrans(gctx)};
    sstr<<"GeoModel transformation: "<<to_string(localToGlob)<<std::endl;
+   sstr<<"Chamber center: "<<to_string(m_surfaceProvTool->chambCenterToGlobal(gctx, 
+                                                               reElement->identify()))<<std::endl;
    
    sstr<<reElement->getParameters()<<std::endl;
   
@@ -183,7 +187,7 @@ void GeoModelMdtTest::dumpToFile(const EventContext& /*ctx*/,
          if (tube == 1) {
             const IdentifierHash layHash = reElement->layerHash(tube_id);
             const Amg::Transform3D& layTrans{reElement->localToGlobalTrans(gctx, layHash)};
-            sstr<<"Layer "<<lay<<" : "<<to_string(layTrans)<<std::endl;;
+            sstr<<"Layer "<<lay<<" : "<<to_string(layTrans)<<std::endl;
          }
          sstr<< " *** (" << std::setfill('0') << std::setw(2) << lay
              << ", " << std::setfill('0') << std::setw(3) << tube << ")    "; 

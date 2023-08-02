@@ -15,14 +15,14 @@ std::ostream& operator<<(
     std::ostream& ostr,
     const MuonGMR4::MdtReadoutElement::parameterBook& pars) {
     ostr << std::endl;
-    ostr << " //  tube half-length (min/max): "<<pars.shortHalfX<<"/"<<pars.longHalfX<<", chamber width "<<
-        pars.halfY<<", multilayer height: "<<pars.halfHeight;
+    ostr << " //  tube half-length (min/max): "<<pars.shortHalfX<<"/"<<pars.longHalfX
+         <<", chamber width "<<pars.halfY<<", multilayer height: "<<pars.halfHeight;
     ostr << " // Number of tube layers " << pars.tubeLayers.size()<< std::endl;
     ostr << " // Tube pitch: " << pars.tubePitch
          << " wall thickness: " << pars.tubeWall
          << " inner radius: " << pars.tubeInnerRad << std::endl;
     for (const MdtTubeLayer& layer : pars.tubeLayers) {
-         ostr << "//   **** "<< Amg::toString(layer.tubeTransform(0).linear(),3)<<std::endl;
+         ostr << "//   **** "<< Amg::toString(layer.tubeTransform(0).translation(), 2)<<std::endl;
     }
     return ostr;
 }
@@ -55,7 +55,8 @@ StatusCode MdtReadoutElement::initElement() {
      /// Cache the transformations to the chamber layers
      ATH_CHECK(insertTransform(measurementHash(lay, 0), 
                 [this](RawGeomAlignStore* store, const IdentifierHash& hash){
-                    return toStation(store) * toChamberLayer(hash); 
+                    const Amg::Translation3D toCenter{m_pars.halfY * Amg::Vector3D::UnitY()};
+                    return toStation(store) * toChamberLayer(hash)*toCenter; 
                 }));
     /// Cache the transformations to the tube layers
     std::optional<Amg::Vector3D> prevTubePos{std::nullopt};

@@ -35,7 +35,7 @@ inline IdentifierHash MdtReadoutElement::layerHash(const Identifier& measId) con
                         << " picks the wrong readout element "
                         << idHelperSvc()->toStringDetEl(identify()));
     }
-    IdentifierHash hash = measurementHash(m_idHelper.tubeLayer(measId), numTubesInLay()  / 2);
+    IdentifierHash hash = measurementHash(m_idHelper.tubeLayer(measId), 0);
     ATH_MSG_VERBOSE("Translate measurement identifier "
                     << idHelperSvc()->toString(measId)
                     << " to layer hash hash " << static_cast<int>(hash));
@@ -52,6 +52,9 @@ inline unsigned int MdtReadoutElement::layerNumber(const IdentifierHash& hash) {
 }
 inline IdentifierHash MdtReadoutElement::measurementHash(unsigned int layer, unsigned int tube) {
     return IdentifierHash{( (tube-1) << 16) | (layer-1)};
+}
+inline IdentifierHash MdtReadoutElement::layerHash(const IdentifierHash& measHash) {
+    return measurementHash(layerNumber(measHash) + 1 , 0);
 }
 inline bool MdtReadoutElement::isBarrel() const { return m_isBarrel; }
 
