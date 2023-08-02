@@ -243,7 +243,6 @@ private:
 
   float m_pTChargePartCut;
   float m_pTNeutralPartCut;
-  static constexpr long m_barcodeShift = HepMC::SIM_REGENERATION_INCREMENT;
   bool m_inclG4part;
   bool m_inclEgammaPhoton;
   bool m_inclEgammaFwrdEle;
