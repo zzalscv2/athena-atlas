@@ -70,8 +70,7 @@ namespace Muon {
         int stPhi = m_idHelperSvc->mdtIdHelper().stationPhi(id);
         int stEta = m_idHelperSvc->mdtIdHelper().stationEta(id);
         bool isBarrel = m_idHelperSvc->mdtIdHelper().isBarrel(id);
-        int stEtaMin = m_idHelperSvc->mdtIdHelper().stationEtaMin(id);
-        int stEtaMax = m_idHelperSvc->mdtIdHelper().stationEtaMax(id);
+        auto [stEtaMin, stEtaMax] = m_idHelperSvc->mdtIdHelper().stationEtaMinMax(id);
 
         int chEtaLeft = stEta - 1;
         int chEtaRight = stEta + 1;
