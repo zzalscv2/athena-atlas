@@ -8,10 +8,12 @@
 // Local include(s):
 #include "xAODMuonRDO/versions/NRPCRDOContainer_v1.h"
 #include "xAODMuonRDO/versions/NSWTPRDOContainer_v1.h"
+#include "xAODMuonRDO/versions/NSWMMTPRDOContainer_v1.h"
 
 
 // Set up the collection proxies:
 ADD_NS_DV_PROXY( xAOD, NRPCRDOContainer_v1 );
 ADD_NS_DV_PROXY( xAOD, NSWTPRDOContainer_v1 );
+ADD_NS_DV_PROXY( xAOD, NSWMMTPRDOContainer_v1 );
 
 

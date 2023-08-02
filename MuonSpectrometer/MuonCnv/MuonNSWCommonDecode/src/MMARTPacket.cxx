@@ -12,26 +12,26 @@
 #include "MuonNSWCommonDecode/NSWMMTPDecodeBitmaps.h"
 
 
-Muon::nsw::MMARTPacket::MMARTPacket (std::vector<uint32_t> payload){
-  uint pp = 0;
+Muon::nsw::MMARTPacket::MMARTPacket (std::vector<uint32_t>& payload) {
 
+  std::size_t readPointer{0};
+  CxxUtils::span<const std::uint32_t> data{payload.data(), 3}; 
+  
   if (payload.size()!=3) {
-    throw std::runtime_error("ART Packet size not as expected; expected exactly 96 bits");
+    throw std::runtime_error( Muon::nsw::format( "ART Packet size not as expected: expected exactly 3 uint32_t, got {}", payload.size() ));
   }
 
-  uint32_t bs[3]={payload[0],payload[1],payload[2]};
-
-  m_art_BCID =    bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMART::size_art_BCID-1);     pp+= Muon::nsw::MMART::size_art_BCID;
-  m_art_pipeID =  bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMART::size_art_pipeID-1);   pp+= Muon::nsw::MMART::size_art_pipeID;
-  m_art_fiberID = bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMART::size_art_fiberID-1);  pp+= Muon::nsw::MMART::size_art_fiberID;
-  m_art_VMMmap =  bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMART::size_art_VMMmap-1);   pp+= Muon::nsw::MMART::size_art_VMMmap;
+  //decoding
+  m_art_BCID =    Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMART::size_art_BCID);
+  m_art_pipeID =  Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMART::size_art_pipeID);
+  m_art_fiberID = Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMART::size_art_fiberID);
+  m_art_VMMmap =  Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMART::size_art_VMMmap);
   //remember ART 7 is first in the bit stream, ART 0 is last!
   for (uint8_t i = 0; i < 8; i++){
-    m_art_ARTs.push_back( bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMART::size_art_ARTs-1) );
-    pp+=Muon::nsw::MMART::size_art_ARTs;
+    m_art_ARTs.push_back( Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMART::size_art_ARTs) );
   }
   std::reverse(m_art_ARTs.begin(), m_art_ARTs.end()); //so that ART0 is element0 and no confusion is made
-
+  
   //populating layer,channel pair
   std::vector<std::tuple<uint8_t,uint8_t,uint8_t>> artHitInfo = VMMmapToHits();
 

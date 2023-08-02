@@ -62,18 +62,18 @@ void Muon::nsw::NSWTriggerSTGL1AElink::decode_data(std::size_t& readPointer) {
                                              STGTPL1A::size_stream_head_fifo_size + STGTPL1A::size_stream_head_streamID;
     if (readPointer + SIZE_DATA_HEADER >= endOfData) {
       throw std::length_error(
-          Muon::format("Read pointer ({}) would excede memory dedicated to data chunks ({}) while parsing the header (size: {})",
-                      readPointer, endOfData, SIZE_DATA_HEADER));
+			      Muon::nsw::format("Read pointer ({}) would excede memory dedicated to data chunks ({}) while parsing the header (size: {})",
+						readPointer, endOfData, SIZE_DATA_HEADER));
     }
     const auto header_data = decode_data_header(readPointer);
 
     if (header_data.total_expected_size > m_wordCountFlx - ceil(readPointer / WORD_SIZE) + 1) {
-      throw std::length_error(Muon::format("STG TP stream size {} larger than expected packet size {}",
+      throw std::length_error(Muon::nsw::format("STG TP stream size {} larger than expected packet size {}",
                                           header_data.total_expected_size,
                                           m_wordCountFlx - ceil(readPointer / WORD_SIZE) + 1));
     }
     if (header_data.nwords * header_data.data_size + readPointer > endOfData) {
-      throw std::length_error(Muon::format("Requested to decode {} bits but only {} bits are remaining",
+      throw std::length_error(Muon::nsw::format("Requested to decode {} bits but only {} bits are remaining",
                                           header_data.nwords * header_data.data_size, endOfData - readPointer));
     }
 
@@ -101,12 +101,12 @@ Muon::nsw::NSWTriggerSTGL1AElink::DataHeader Muon::nsw::NSWTriggerSTGL1AElink::d
   const auto data_size = static_cast<std::size_t>(std::ceil(corrected_current_stream_head_nbits / WORD_SIZE_DOUBLE));
   const auto total_expected_size = data_size * current_stream_head_nwords;
 
-  ERS_DEBUG(2, Muon::format("stream_head_nbits: {}", corrected_current_stream_head_nbits));
-  ERS_DEBUG(2, Muon::format("stream_head_nwords: {}", current_stream_head_nwords));
-  ERS_DEBUG(2, Muon::format("stream_head_fifo_size: {}", current_stream_head_fifo_size));
-  ERS_DEBUG(2, Muon::format("stream_head_streamID: {}", current_stream_head_streamID));
-  ERS_DEBUG(2, Muon::format("total_expected_size: {}", data_size * current_stream_head_nwords));
-  ERS_DEBUG(2, Muon::format("m_wordCountFlx: {}, ceil(readPointer/{}): {}", m_wordCountFlx, WORD_SIZE_DOUBLE,
+  ERS_DEBUG(2, Muon::nsw::format("stream_head_nbits: {}", corrected_current_stream_head_nbits));
+  ERS_DEBUG(2, Muon::nsw::format("stream_head_nwords: {}", current_stream_head_nwords));
+  ERS_DEBUG(2, Muon::nsw::format("stream_head_fifo_size: {}", current_stream_head_fifo_size));
+  ERS_DEBUG(2, Muon::nsw::format("stream_head_streamID: {}", current_stream_head_streamID));
+  ERS_DEBUG(2, Muon::nsw::format("total_expected_size: {}", data_size * current_stream_head_nwords));
+  ERS_DEBUG(2, Muon::nsw::format("m_wordCountFlx: {}, ceil(readPointer/{}): {}", m_wordCountFlx, WORD_SIZE_DOUBLE,
                            ceil(readPointer / WORD_SIZE_DOUBLE)));
 
   return {corrected_current_stream_head_nbits, current_stream_head_nwords, current_stream_head_fifo_size,
@@ -133,7 +133,7 @@ void Muon::nsw::NSWTriggerSTGL1AElink::decode_trailer(std::size_t& readPointer) 
 }
 
 std::uint64_t Muon::nsw::NSWTriggerSTGL1AElink::decode(std::size_t& readPointer, const std::size_t size) const {
-  return decode_and_advance<std::uint64_t, std::uint32_t>(m_data, readPointer, size);
+  return Muon::nsw::decode_and_advance<std::uint64_t, std::uint32_t>(m_data, readPointer, size);
 }
 
 void Muon::nsw::NSWTriggerSTGL1AElink::analyze_data() {
@@ -143,7 +143,7 @@ void Muon::nsw::NSWTriggerSTGL1AElink::analyze_data() {
       const auto expectedSize =
           static_cast<std::size_t>(std::ceil(m_stream_head_nbits.at(counterChunk) / WORD_SIZE_DOUBLE));
       if (std::size(dataWord) != expectedSize) {
-        throw std::length_error(Muon::format("Stream data size {} does not match expected number of messages {}",
+        throw std::length_error(Muon::nsw::format("Stream data size {} does not match expected number of messages {}",
                                             std::size(dataWord), expectedSize));
       }
       switch (m_stream_head_streamID.at(counterChunk)) {
@@ -154,7 +154,7 @@ void Muon::nsw::NSWTriggerSTGL1AElink::analyze_data() {
           m_segment_packets.emplace_back(dataWord);
           break;
         default:
-          throw std::runtime_error(Muon::format("Invalid stream type {}", m_stream_head_streamID.at(counterChunk)));
+          throw std::runtime_error(Muon::nsw::format("Invalid stream type {}", m_stream_head_streamID.at(counterChunk)));
       }
     }
     ++counterChunk;
