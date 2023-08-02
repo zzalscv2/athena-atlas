@@ -55,6 +55,7 @@ If for some reason, you do need to revert back to an older Rivet version, feel f
 
 | Rivet version | Athena release | Comments |
 | :----:  | :-------:| :----- |
+| v3.1.8 | `23.6.13,AthGeneration` | |
 | v3.1.7 | `22.6.26,AthGeneration` | |
 | v3.1.6 | `22.6.20,AthGeneration` | |
 | v3.1.5 | `22.6.14,AthGeneration` | |
@@ -608,10 +609,29 @@ yodascale -c '.* 10x' file.yoda
 will create a `file-scaled.yoda`, where every histogram will be scaled by a factor of 10.
 
 
-### "Can I run over (D)AOD files?"
+## Can I run over (D)AOD files?
 
 Yes! AODs and TRUTH1 DAOD can be read in and passed onto Rivet (Unfortunately TRUTH3 DAOD cannot, because the full truth record is not retained for TRUTH3).  For AOD files specifically, some of the events may be missing beam protons, causing Rivet to complain about a beam mismatch. If you encounter this problem, you can ask Rivet_i to add some dummy protons to the reconstructed GenEvent by setting the following flag in the JobOptions:
 ```
 rivet.AddMissingBeamParticles = True
 ```
 this will inject the necessary protons in the targeted events (those missing beam protons) with the appropriate centre of mass energy.
+
+## Analysis plugins not found?
+
+In case your custom routine cannot be found, you can point Rivet at its location by setting
+`RIVET_ANALYSIS_PATH` to the location of the compiled plugin.
+Most scripts will also accept a `--pwd` flag to look for it in the current working directory,
+and JobOptions can be supplemented with an equivalent
+```
+rivet.AnalysisPath = os.environ['PWD']
+```
+setting.
+
+Note that in the cvmfs installation of v3.1.8, the build-in analysis plugins cannot be found.
+This is a known bug that has been fixed for later versions.
+This can be worked around by setting the environment variable:
+```
+export RIVET_ANALYSIS_PATH=$RIVET_PATH/lib/Rivet:$RIVET_PATH/share/Rivet
+```
+
