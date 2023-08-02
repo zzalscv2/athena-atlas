@@ -17,7 +17,7 @@ namespace Muon
     {
     public:
 
-      MMARTPacket (std::vector<uint32_t> payload);
+      MMARTPacket (std::vector<uint32_t>& payload);
       virtual ~MMARTPacket () = default;
       uint32_t art_BCID () const {return m_art_BCID;};
       uint32_t art_pipeID () const {return m_art_pipeID;};

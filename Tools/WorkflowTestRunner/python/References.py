@@ -25,7 +25,7 @@ references_map = {
     "q442": "v5",
     "q443": "v4",
     "q445": "v5",
-    "q449": "v5",
+    "q449": "v6",
     # Derivations
     "data_PHYS_Run2": "v2",
     "data_PHYS_Run3": "v2",

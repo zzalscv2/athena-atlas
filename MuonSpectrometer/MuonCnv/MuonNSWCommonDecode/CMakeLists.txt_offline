@@ -35,27 +35,22 @@ atlas_add_test(STGCTPSegmentDecoderTest_test
 
 atlas_add_executable (test_stgc_cabling
 		      src/test/test_stgc_cabling.cxx
-          INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
+          	      INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
 		      LINK_LIBRARIES MuonNSWCommonDecode ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES})
 
 atlas_add_executable (test_nsw_common_decoder
 		      src/test/test_nsw_common_decoder.cxx
-          INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
+          	      INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
 		      LINK_LIBRARIES MuonNSWCommonDecode ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES})
 
 atlas_add_executable (test_nsw_trigger_common_decoder
-		      src/test/test_nsw_trigger_common_decoder.cxx
-          INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-		      LINK_LIBRARIES MuonNSWCommonDecode ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES} ${ROOT_LIBRARIES})
-
-atlas_add_executable (test_nsw_trigger_common_decoder_txt
-		      src/test/test_nsw_trigger_common_decoder_txt.cxx
-          INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-		      LINK_LIBRARIES MuonNSWCommonDecode ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES} ${ROOT_LIBRARIES})
+                      src/test/test_nsw_trigger_common_decoder.cxx
+                      INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} src/test
+                      LINK_LIBRARIES MuonNSWCommonDecode ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES} ${ROOT_LIBRARIES})
 
 atlas_add_executable (test_nsw_online2offline
 		      src/test/test_nsw_online2offline.cxx
-          INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
+          	      INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
 		      LINK_LIBRARIES MuonNSWCommonDecode ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES})
 
 if ( ${ATLAS_BASE_PROJECT_NAMES} MATCHES "^Athena" )

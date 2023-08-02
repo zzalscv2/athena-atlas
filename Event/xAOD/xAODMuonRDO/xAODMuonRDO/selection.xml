@@ -3,22 +3,33 @@
 
     <class name="xAOD::NRPCRDO_v1" />
     <class name="xAOD::NSWTPRDO_v1" />
+    <class name="xAOD::NSWMMTPRDO_v1" />
     
     <class name="xAOD::NRPCRDOContainer_v1"
            id="E43FA4A0-9C96-45D9-824A-F692EC062F31" />
     <class name="xAOD::NSWTPRDOContainer_v1"
            id="D5B8D004-7E09-4BB6-83DA-BE7788448F5" />
+    <class name="xAOD::NSWMMTPRDOContainer_v1"
+           id="6270E93F-13EB-4779-8997-7144F4486517" />
+
     <typedef name="xAOD::NRPCRDO" />
-    <typedef name = "xAOD::NSWTPRDO" />
+    <typedef name="xAOD::NSWTPRDO" />
+    <typedef name="xAOD::NSWMMTPRDO" />
+
     <typedef name="xAOD::NRPCRDOContainer" />
     <typedef name="xAOD::NSWTPRDOContainer" />
+    <typedef name="xAOD::NSWMMTPRDOContainer" />
     
     
     <class name="xAOD::NRPCRDOAuxContainer_v1"
            id="DFA7070F-7132-4988-93E1-4C3D23E4E2FF" />
-     <class name="xAOD::NSWTPRDOAuxContainer_v1"
+    <class name="xAOD::NSWTPRDOAuxContainer_v1"
            id="C52ED077-C36D-4CE1-B0D6-7C954FC19B0B" />
+    <class name="xAOD::NSWMMTPRDOAuxContainer_v1"
+           id="F9A7F986-7695-4635-8D06-D5BC8752BEB8" />
+
     <typedef name = "xAOD::NRPCRDOAuxContainer" />
     <typedef name = "xAOD::NSWTPRDOAuxContainer" />
+    <typedef name = "xAOD::NSWMMTPRDOAuxContainer" />
 
 </lcgdict>
