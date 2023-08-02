@@ -23,9 +23,9 @@ __global__ static void doubletCountingKernel(TrigAccel::SEED_FINDER_SETTINGS* dS
   __shared__ int nOuter[NUM_MIDDLE_THREADS];
 
   const float zTolerance = 3.0; 
-  const float maxEta = 2.7;
+  const float maxEta = dSettings->m_maxEta;
   const float maxDoubletLength = 200.0;
-  const float minDoubletLength = 10.0;
+  const float minDoubletLength = dSettings->m_minDoubletLength;
   const float maxOuterRadius = 550.0;
    
   const int sliceIdx = blockIdx.x;

@@ -65,7 +65,8 @@ def ITkFastTrackFinderStandaloneCfg(flags, SiSPSeededTrackCollectionKey = None):
                                             StandaloneMode           = True, # Allows ftf to be run as an offline algorithm with reco_tf
                                             doTrackRefit             = False,
                                             FreeClustersCut          = 1,
-                                            MonTool                  = monTool)
+                                            MonTool                  = monTool,
+                                            DoubletDR_Max            = 400.0)
 
     acc.addEventAlgo( ftf, primary=True )
     

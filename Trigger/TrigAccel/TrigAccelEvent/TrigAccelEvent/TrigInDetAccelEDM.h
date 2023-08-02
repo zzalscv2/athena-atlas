@@ -75,6 +75,7 @@ namespace TrigAccel {
     unsigned int m_maxTripletBufferLength; 
     int m_isFullScan;
     float m_zedMinus, m_zedPlus;
+    float m_maxEta, m_minDoubletLength;
     
   } SEED_FINDER_SETTINGS;
 

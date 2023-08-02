@@ -72,6 +72,8 @@ size_t TrigInDetAccelerationTool::exportSeedMakingJob(const TrigCombinatorialSet
   sfs.m_minEndcapPix = tcs.m_minEndcapPix;
   sfs.m_maxEndcapPix = tcs.m_maxEndcapPix;
   sfs.m_maxSiliconLayer = tcs.m_maxSiliconLayer;
+  sfs.m_maxEta = tcs.m_doublet_dR_Max/100;
+  sfs.m_minDoubletLength = tcs.m_seedRadBinWidth;
   
   sfs.m_magFieldZ = tcs.m_magFieldZ;
 
