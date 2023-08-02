@@ -256,6 +256,15 @@ private:
     case 15:
       return "T";
       break;
+    case 6:
+      return "Top_BX";
+      break;
+    case 21:
+      return "QCD_BB";
+      break;
+    case 23:
+      return "Z_BB";
+      break;
     case 0:
       return "Light";
       break;
@@ -265,20 +274,31 @@ private:
   }
 
   /// convert string flavour to its integer index equivalent
-  unsigned int getFlavourID(const std::string& label) const {
+  unsigned int getFlavourID(const std::string& label, bool conventional = true) const {
     // always default to "light" = 0
     if( label.size() <1)
       return 0;
-
-    switch (label[0]) {
-    case 'B':
-      return 5; break;
-    case 'C':
-      return 4; break;
-    case 'T':
-      return 15; break;
-    default:
-      return 0;
+    if (conventional){
+      switch (label[0]) {
+      case 'B':
+        return 5; break;
+      case 'C':
+        return 4; break;
+      case 'T':
+        return 15; break;
+      default:
+        return 0;
+      }
+    } else {
+      if(label == "Top_BX"){
+        return 6;
+      } else if (label == "QCD_BB"){
+        return 21;
+      } else if (label == "Z_BB"){
+        return 23;
+      } else {
+        return 25;
+      }
     }
   }
 
@@ -323,6 +343,14 @@ private:
   std::map<std::string, std::string> m_excludeFlvFromEV;
   /// optional (per-flavour) suffix that can be used to decorrelate uncertainties (between flavours, or -in case of a result from different runs- between periods)
   std::map<std::string, std::string> m_uncertaintySuffixes;
+  
+  bool m_using_conventional_labels; // flag for if the labels in the CDI configuration are "conventional", e.g. "B", "C", "Light", and "T"
+  std::string m_SFName_flex; // remove label dependence - work from a string of semi-colon sep. to populate m_SFNames
+  std::string m_EVReduction_flex; // remove label dependence - work from a string of semi-colon sep. to populate m_EVReduction
+  std::string m_EffNames_flex; // remove label dependence - work from a string of semi-colon sep. to populate m_EffNames
+  std::string m_uncertaintySuffixes_flex; // remove label dependence - work from a string of semi-colon sep. to populate m_uncertaintySuffixes
+  std::string m_excludeFlvFromEV_flex; // remove label dependence - work from a string of semi-colon sep. to populate m_excludeFlvFromEV
+
   /// tagger name
   std::string m_taggerName;
   /// operating point
@@ -352,6 +380,12 @@ private:
   /// if this string is empty, the onnx tool won't be created
   std::string m_pathToONNX;
   /// @}
+
+  // if true, use the flexible configuration of the CDIReader
+  bool m_useFlex = false;
+  bool m_doXbbTagging = false;
+  std::vector<std::string> m_flex_labels;
+  std::vector<unsigned int> m_flex_label_integers;
 
   /// @name Cached variables
   /// @{

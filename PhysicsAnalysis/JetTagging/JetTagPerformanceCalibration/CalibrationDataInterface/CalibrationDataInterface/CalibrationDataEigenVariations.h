@@ -30,7 +30,7 @@ namespace Analysis
     typedef std::set<IndexSet> IndexSuperSet;
 
     /** normal constructor. The second argument, if true, will attempt to retrieve a 'recommended' set of uncertainties to be excluded from EV decomposition */
-    CalibrationDataEigenVariations(std::string cdipath, std::string tagger, std::string wp, std::string jetcollection, CalibrationDataHistogramContainer* cnt, bool excludeRecommendedUncertaintySet = false, bool base = true); 
+    CalibrationDataEigenVariations(const std::string& cdipath, const std::string& tagger, const std::string& wp, const std::string& jetcollection, CalibrationDataHistogramContainer* cnt, bool excludeRecommendedUncertaintySet = false, bool base = true); 
     virtual ~CalibrationDataEigenVariations();
 
     /** exclude the source of uncertainty indicated by  name  from eigenvector calculations */
@@ -141,7 +141,7 @@ namespace Analysis
 
   class CalibrationDataGlobalEigenVariations : public CalibrationDataEigenVariations {
     public:
-      CalibrationDataGlobalEigenVariations(std::string cdipath, std::string tagger, std::string wp, std::string jetcollection, CalibrationDataHistogramContainer* cnt, bool excludeRecommendedUncertaintySet = false) ;
+      CalibrationDataGlobalEigenVariations(const std::string& cdipath, const std::string& tagger, const std::string& wp, const std::string& jetcollection, const std::vector<std::string>& flavours, CalibrationDataHistogramContainer* cnt, bool excludeRecommendedUncertaintySet = false) ;
       ~CalibrationDataGlobalEigenVariations();
 
       using CalibrationDataEigenVariations::getEigenCovarianceMatrix;
@@ -174,7 +174,6 @@ namespace Analysis
       
       int m_blockmatrixsize; // store the concatenated length of all binned flavour calibrations, i.e. dim(B) + dim(C) + dim(Light) + dim(T)
       
-      std::vector<std::string> m_flavours;
       std::map<std::string, Analysis::CalibrationDataHistogramContainer*> m_histcontainers; // map of flavour to container, useful for when you need to actually quote a variation! (correct binning here per flavour)
       std::set<std::string> m_all_shared_systematics;
       std::set<std::string> m_only_shared_systematics;
@@ -185,6 +184,7 @@ namespace Analysis
       std::map<std::string, std::vector<std::pair<TH1*,TH1*>>> m_flav_named; // On second second thought, this is needed to keep indices consistent between flavours...
       std::map<std::string, int> m_flav_namedExtrapolation; // store the index of the flavour container's extrapolation named uncertainty index - replaces m_namedExtrapolation
       std::map<std::string, std::vector<std::pair<TH1*, TH1*>>> m_flav_eigen; // replace m_eigen when it comes to RETURNING VARIATIONS with proper binning (i.e. the "reporting" of up/down variations per flavour)
+      std::vector<std::string> m_flavours;
 
   };
 

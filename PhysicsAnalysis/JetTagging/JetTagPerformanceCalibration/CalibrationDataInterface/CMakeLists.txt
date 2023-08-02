@@ -5,7 +5,7 @@ atlas_subdir( CalibrationDataInterface )
 
 # External dependencies:
 find_package( ROOT COMPONENTS Cint Core Tree MathCore Hist RIO pthread MathMore Minuit Minuit2 Matrix Physics HistPainter Rint)
-
+find_package( nlohmann_json )
 find_package( Boost ) # header-only so no libraries needed
 
 # Component(s) in the package:
@@ -19,7 +19,9 @@ atlas_add_root_dictionary( CalibrationDataInterfaceLib
                            CalibrationDataInterface/CalibrationDataEigenVariations.h
                            CalibrationDataInterface/CalibrationDataBackend.h
                            CalibrationDataInterface/CalibrationDataUtilities.h
-                           CalibrationDataInterface/CalibrationDataInternals.h Root/LinkDef.h
+                           CalibrationDataInterface/CalibrationDataInternals.h 
+                           CalibrationDataInterface/CDIReader.h
+                           Root/LinkDef.h
                            EXTERNAL_PACKAGES ROOT Boost )
 
 atlas_add_library( CalibrationDataInterfaceLib
@@ -27,7 +29,11 @@ atlas_add_library( CalibrationDataInterfaceLib
                    ${CalibrationDataInterfaceLibDictSource}
                    PUBLIC_HEADERS CalibrationDataInterface
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} CxxUtils)
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} CxxUtils nlohmann_json::nlohmann_json )
+
+atlas_add_executable( CDIReaderTester
+                      src/CDIReaderTester.cxx
+                      LINK_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} CxxUtils nlohmann_json::nlohmann_json CalibrationDataInterfaceLib)
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )
