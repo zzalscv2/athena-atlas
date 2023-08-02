@@ -71,8 +71,6 @@ FasTrackConnector::FasTrackConnector(std::ifstream& inFile) {
     std::copy(conn.second.begin(), conn.second.end(), std::back_inserter(lConns));
   }
 
-  std::size_t nConnTotal = lConns.size();
-
   int stageCounter = 0;
 
   while(!lConns.empty()) {
@@ -122,7 +120,6 @@ FasTrackConnector::FasTrackConnector(std::ifstream& inFile) {
       if(zeroLayers.find((*cIt)->m_dst) != zeroLayers.end()) {//check if contains
 	theStage.push_back(*cIt);
 	cIt = lConns.erase(cIt);
-	nConnTotal--;
 	continue;
       }
       cIt++;
