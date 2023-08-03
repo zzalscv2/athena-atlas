@@ -10,6 +10,10 @@ To run the FPGATrackSimMapMaker in master:
 ```
 python3 -m FPGATrackSimConfTools.FPGATrackSimMapMakerConfig --filesInput=../singlemu_invPtFlat1_1M_wrap.root --evtMax=5 OutFileName="NN_" region=0 Exec.DebugMessageComponents='["*/FPGATrackSim*"]'
 ```
+
+Or instead of the `--filesInput` one can use directly the property (note that a proper escaping is needed - it is python list of strings): 
+`Trigger.FPGATrackSim.wrapperFileName="['../singlemu_invPtFlat1_1M_wrap.root',]"`
+
 There is more options exposed (look for the addFlags in the FPGATrackSimMapMakerConfig.py)
 
 

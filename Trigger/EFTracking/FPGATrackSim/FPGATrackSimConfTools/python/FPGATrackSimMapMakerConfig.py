@@ -15,7 +15,7 @@ def FPGATrackSimMapMakerCfg(flags):
         trim=flags.trim,
         InputTool = acc.getPrimaryAndMerge(FPGATrackSimReadInputCfg(flags))
         )
-    
+
     acc.addEventAlgo(alg)
     return acc
 
@@ -29,10 +29,13 @@ if __name__ == "__main__":
     flags.addFlag("nSlices", 10)
     flags.addFlag("trim", 0.1)
     flags.addFlag("region", 0)
+    from AthenaCommon.Logging import logging
+    log = logging.getLogger(__name__)
 
-
-    flags.Input.Files = ['FPGATrackSimWrapper.singlemu_Pt10.root']
     flags.fillFromArgs()
+    if not flags.Trigger.FPGATrackSim.wrapperFileName and flags.Input.Files:
+        flags.Trigger.FPGATrackSim.wrapperFileName = flags.Input.Files
+        log.info("Taken wrapper input files from Input.Files(set via cmd line --filesInput option) property: %s", str(flags.Trigger.FPGATrackSim.wrapperFileName))
     flags.lock()
 
     acc=MainServicesCfg(flags)
