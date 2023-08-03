@@ -850,6 +850,10 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
 
     } else if (unc == SFGlobalEigen) {
       std::shared_ptr<CalibrationDataGlobalEigenVariations> GEV = std::dynamic_pointer_cast<CalibrationDataGlobalEigenVariations>(eigenVariation); //dynamic_cast<std::shared_ptr<CalibrationDataGlobalEigenVariations> >(eigenVariation);
+      if (not GEV){
+        cerr << "Analysis::CalibrationDataInterfaceROOT::getScaleFactor: dynamic cast failed\n";
+        return Analysis::kError;
+      }
       unsigned int maxVariations = GEV->getNumberOfEigenVariations(flavour); // <----- This gets the number of variations of the flavour
       if (numVariation > maxVariations-1) {
         cerr << "Asked for global eigenvariation number: " << numVariation << " but overall number of available variations is: " << maxVariations << endl;
@@ -2167,18 +2171,18 @@ Analysis::CalibrationDataInterfaceROOT::getShiftedScaleFactors (const std::strin
   if (! retrieveCalibrationIndex (label, OP, author, true, index)) {
     // Return a null result if the object is not found
     cerr << "getShiftedScaleFactors: unable to find SF calibration for object " << fullName(author, OP, label, true) << endl;
-    return 0;
+    return nullptr;
   }
   CalibrationDataHistogramContainer* container = dynamic_cast<CalibrationDataHistogramContainer*>(m_objects[index]);
-  if (! container) return 0;
+  if (! container) return nullptr;
 
   TH1* result = dynamic_cast<TH1*>(container->GetValue("result"));
   TH1* hunc = dynamic_cast<TH1*>(container->GetValue(unc.c_str()));
   // another sanity check...
-  if ((! hunc) || (! result)) return 0;
+  if ((! hunc) || (! result)) return nullptr;
   if (hunc->GetDimension() != result->GetDimension() || hunc->GetNbinsX() != result->GetNbinsX() ||
       hunc->GetNbinsX() != result->GetNbinsX() || hunc->GetNbinsX() != result->GetNbinsX())
-    return 0;
+    return nullptr;
   // also check that the uncertainty is to be treated as correlated from bin to bin
   // (for the variation is applied coherently, which isn't appropriate for uncertainties
   // that aren't correlated from bin to bin)
@@ -2187,6 +2191,7 @@ Analysis::CalibrationDataInterfaceROOT::getShiftedScaleFactors (const std::strin
   // if everything is consistent, the actual operation simply consists of adding histograms...
   std::string name(container->GetName()); name += "_"; name += unc; name += "_";
   TH1* shifted = dynamic_cast<TH1*>(result->Clone(name.c_str()));
+  if (not shifted) return nullptr;
   shifted->Add(hunc, sigmas);
   return shifted;
 }
@@ -2456,6 +2461,10 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactorCovarianceMatrix (const st
         uncs[t] == "statistics" || uncs[t]=="extrapolation" || uncs[t]=="MChadronisation" || 
         uncs[t]=="ReducedSets" || uncs[t]=="systematics") continue;
     TH1* hunc = dynamic_cast<TH1*>(container->GetValue(uncs[t].c_str()));
+    if (not hunc) {
+      std::cerr<<"Analysis::CalibrationDataInterfaceROOT::getScaleFactorCovarianceMatrix : dynamic cast failed\n";
+      continue;
+    }
     TMatrixDSym syst_cov = getSystCovarianceMatrix(result, hunc, container->isBinCorrelated(uncs[t]), uncs[t], container->getTagWeightAxis());
     cov += syst_cov;
   }
