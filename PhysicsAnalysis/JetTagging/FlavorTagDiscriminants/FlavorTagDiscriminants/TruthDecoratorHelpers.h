@@ -22,15 +22,19 @@ namespace FlavorTagDiscriminants {
             Photon   = 6
         };
         bool sort_particles(const xAOD::IParticle* particle_A, const xAOD::IParticle* particle_B);
+        int get_truth_type(const xAOD::TruthParticle* truth_particle);
+        
+        bool is_bc_hadron(const xAOD::TruthParticle* truth_particle, int flavour);
+        bool is_weakly_decaying_hadron(const xAOD::TruthParticle* truth_particle);
+        bool is_weakly_decaying_hadron(const xAOD::TruthParticle* truth_particle, int flavour);
+        const xAOD::TruthParticle* get_parent_hadron(const xAOD::TruthParticle* truth_particle, bool user_called=true);
+
         const xAOD::TruthVertex* get_truth_vertex(const xAOD::TruthParticle* truth );
         float get_distance(const xAOD::TruthVertex* vertex_A, const xAOD::TruthVertex* vertex_B);
-        int get_truth_type(const xAOD::TruthParticle* truth_particle);
-        const xAOD::TruthParticle* get_parent_hadron(const xAOD::TruthParticle* truth_particle);
-
         int get_vertex_index(const xAOD::TruthVertex* vertex, 
-                                    const xAOD::TruthVertex* truth_PV, 
-                                    std::vector<const xAOD::TruthVertex*>& seen_vertices,
-                                    const float& truthVertexMergeDistance);
+                             const xAOD::TruthVertex* truth_PV, 
+                             std::vector<const xAOD::TruthVertex*>& seen_vertices,
+                             const float truthVertexMergeDistance);
     }
 }
 
