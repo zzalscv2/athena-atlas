@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifdef XAOD_STANDALONE
@@ -17,8 +17,6 @@
 #include "xAODBTagging/BTagging.h"
 #include "xAODBTagging/BTaggingUtilities.h"
 
-
-
 #include <string>
 #include <iomanip>
 #include "TFile.h"
@@ -28,19 +26,20 @@ using CP::CorrectionCode;
 int main() {
 
 
-  std::string taggerName = "DL1";
-  std::string workingPointName = "HybBEff_77";
+  std::string taggerName = "GN2v00NewAliasWP";
+  std::string workingPointName = "FixedCutBEff_77";
 
 
   asg::StandaloneToolHandle<IBTaggingSelectionTool> tool("BTaggingSelectionTool/BTagSelecTest");
-  StatusCode code1 = tool.setProperty( "FlvTagCutDefinitionsFileName","xAODBTaggingEfficiency/13TeV/2021-22-13TeV-MC16-CDI-2022-07-28_v1.root" );
+  StatusCode code1 = tool.setProperty( "FlvTagCutDefinitionsFileName","xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root" );
   StatusCode code2 = tool.setProperty("TaggerName",    taggerName  );
   StatusCode code3 = tool.setProperty("OperatingPoint", workingPointName);
-  StatusCode code4 = tool.setProperty("JetAuthor",      "AntiKt4EMTopoJets" );
+  StatusCode code4 = tool.setProperty("JetAuthor",      "AntiKt4EMPFlowJets" );
+  StatusCode code5 = tool.setProperty("MinPt", 20000);
   // A successful initialisation ought to be checked for
-  StatusCode code5 = tool.initialize();
+  StatusCode code6 = tool.initialize();
 
-  if (code1 != StatusCode::SUCCESS || code2 != StatusCode::SUCCESS || code3 != StatusCode::SUCCESS || code4 != StatusCode::SUCCESS || code5 != StatusCode::SUCCESS) {
+  if (code1 != StatusCode::SUCCESS || code2 != StatusCode::SUCCESS || code3 != StatusCode::SUCCESS || code4 != StatusCode::SUCCESS || code5 != StatusCode::SUCCESS || code6 != StatusCode::SUCCESS) {
     std::cout << "Initialization of tool " << tool->name() << " failed! " << std::endl;
     return -1;
   }
@@ -59,7 +58,7 @@ int main() {
   #endif
 
 
-  TFile* m_file = TFile::Open("/afs/cern.ch/work/j/jshlomi/public/DAOD_FTAG2.root","read");
+  TFile* m_file = TFile::Open("/afs/cern.ch/work/b/bdong/public/DAOD_PHYS.root","read");
 
   if(!event.readFrom(m_file).isSuccess()){ std::cout << "failed to load file" << std::endl; return -1; }
 
@@ -67,7 +66,7 @@ int main() {
 
   const xAOD::JetContainer* jets = 0;
 
-  if (!event.retrieve( jets, "AntiKt4EMTopoJets" ).isSuccess() ){ std::cout << " error retrieving jets " << std::endl; return -1;}
+  if (!event.retrieve( jets, "AntiKt4EMPFlowJets" ).isSuccess() ){ std::cout << " error retrieving jets " << std::endl; return -1;}
 
   int jet_index = 0;
   for (const xAOD::Jet* jet : *jets) {
@@ -84,15 +83,15 @@ int main() {
 
 
 
-    //if you have DL1 weights, you can get the tagger weight this way
+    //if you have GN2v00 weights, you can get the tagger weight this way
     const xAOD::BTagging *btag = xAOD::BTaggingUtilities::getBTagging( *jet );
 
-    double dl1_pb = btag->auxdata<double>("DL1_pb");
-    double dl1_pc = btag->auxdata<double>("DL1_pc");
-    double dl1_pu = btag->auxdata<double>("DL1_pu");
+    float gn2_pb = btag->auxdata<float>("GN2v00_pb");
+    float gn2_pc = btag->auxdata<float>("GN2v00_pc");
+    float gn2_pu = btag->auxdata<float>("GN2v00_pu");
 
 
-    if(  tool->getTaggerWeight(dl1_pb,dl1_pc,dl1_pu, tagweight) !=CorrectionCode::Ok ){ std::cout << " error retrieving tagger weight " << std::endl; return -1; }
+    if(  tool->getTaggerWeight(gn2_pb,gn2_pc,gn2_pu, tagweight) !=CorrectionCode::Ok ){ std::cout << " error retrieving tagger weight " << std::endl; return -1; }
 
     std::cout << " tagweight " << tagweight << std::endl;
 
@@ -119,16 +118,17 @@ int main() {
   //*************************
   //with a selection tool using the Continuous working point,
   //you can get the jets tag weight bin (between the different fixedcutBEff working points, 60,70,77,85)
-  taggerName = "DL1";
+  taggerName = "GN2v00NewAliasWP";
   workingPointName = "Continuous";
   asg::StandaloneToolHandle<IBTaggingSelectionTool> tool_Continuous("BTaggingSelectionTool/BTagSelContinuousTest");
-  code1 = tool_Continuous.setProperty( "FlvTagCutDefinitionsFileName","xAODBTaggingEfficiency/13TeV/2021-22-13TeV-MC16-CDI-2022-07-28_v1.root" );
+  code1 = tool_Continuous.setProperty( "FlvTagCutDefinitionsFileName","xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root" );
   code2 = tool_Continuous.setProperty("TaggerName",    taggerName  );
   code3 = tool_Continuous.setProperty("OperatingPoint", workingPointName );
-  code4 = tool_Continuous.setProperty("JetAuthor",      "AntiKt4EMTopoJets" );
-  code5 = tool_Continuous.initialize();
+  code4 = tool_Continuous.setProperty("JetAuthor",      "AntiKt4EMPFlowJets" );
+  code5 = tool_Continuous.setProperty("MinPt", 20000);
+  code6 = tool_Continuous.initialize();
 
-  if (code1 != StatusCode::SUCCESS || code2 != StatusCode::SUCCESS || code3 != StatusCode::SUCCESS || code4 != StatusCode::SUCCESS || code5 != StatusCode::SUCCESS) {
+  if (code1 != StatusCode::SUCCESS || code2 != StatusCode::SUCCESS || code3 != StatusCode::SUCCESS || code4 != StatusCode::SUCCESS || code5 != StatusCode::SUCCESS || code6 != StatusCode::SUCCESS) {
     std::cout << "Initialization of tool " << tool_Continuous->name() << " failed! " << std::endl;
     return -1;
   }
@@ -160,19 +160,20 @@ int main() {
   //tagged by the standard working point
   //and to not be tagged by the secondary tagger and working point
 
-  taggerName = "DL1r";
+  taggerName = "GN2v00NewAliasWP";
   workingPointName = "Continuous";
 
   asg::StandaloneToolHandle<IBTaggingSelectionTool> tool_ctag("BTaggingSelectionTool/BTagSelecTest");
-  code1 = tool_ctag.setProperty( "FlvTagCutDefinitionsFileName","xAODBTaggingEfficiency/13TeV/2021-22-13TeV-MC16-CDI-2022-07-28_v1.root" );
+  code1 = tool_ctag.setProperty( "FlvTagCutDefinitionsFileName","xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root");
   code2 = tool_ctag.setProperty("TaggerName",    taggerName  );
   code3 = tool_ctag.setProperty("OperatingPoint", workingPointName );
   code4 = tool_ctag.setProperty("JetAuthor",      "AntiKt4EMPFlowJets" );
-  code5 = tool_ctag.setProperty("useCTagging",    true );
-  auto code6 = tool_ctag.initialize();
+  code5 = tool_ctag.setProperty("MinPt", 20000);
+  code6 = tool_ctag.setProperty("useCTagging",    true );
+  auto code7 = tool_ctag.initialize();
 
   if (code1 != StatusCode::SUCCESS || code2 != StatusCode::SUCCESS || code3 != StatusCode::SUCCESS 
-   || code4 != StatusCode::SUCCESS || code5 != StatusCode::SUCCESS || code6 != StatusCode::SUCCESS) {
+   || code4 != StatusCode::SUCCESS || code5 != StatusCode::SUCCESS || code6 != StatusCode::SUCCESS || code7 != StatusCode::SUCCESS) {
     std::cout << "Initialization of tool " << tool->name() << " failed! " << std::endl;
     return -1;
   }
@@ -195,15 +196,15 @@ int main() {
     double tagweight_ctag;
     if( tool->getTaggerWeight( *jet ,tagweight_nominal)!=CorrectionCode::Ok ){ std::cout << " error retrieving tagger weight " << std::endl; return -1; }
     if( tool_ctag->getTaggerWeight( *jet ,tagweight_ctag, true)!=CorrectionCode::Ok ){ std::cout << " error retrieving tagger weight in ctag mode " << std::endl; return -1; }
-    //if you have DL1 weights, you can get the tagger weight this way
+    //if you have GN2v00 weights, you can get the tagger weight this way
     const xAOD::BTagging *btag = xAOD::BTaggingUtilities::getBTagging( *jet );
 
-    double dl1_pb = btag->auxdata<double>("DL1_pb");
-    double dl1_pc = btag->auxdata<double>("DL1_pc");
-    double dl1_pu = btag->auxdata<double>("DL1_pu");
+    float gn2_pb = btag->auxdata<float>("GN2v00_pb");
+    float gn2_pc = btag->auxdata<float>("GN2v00_pc");
+    float gn2_pu = btag->auxdata<float>("GN2v00_pu");
 
     //the 5th argument tells it to retrive the tagger weight in ctagging mode instead of btagging
-    if(  tool_ctag->getTaggerWeight(dl1_pb,dl1_pc,dl1_pu, tagweight_ctag,true) !=CorrectionCode::Ok ){ std::cout << " error retrieving tagger weight " << std::endl; return -1; }
+    if(  tool_ctag->getTaggerWeight(gn2_pb,gn2_pc,gn2_pu, tagweight_ctag,true) !=CorrectionCode::Ok ){ std::cout << " error retrieving tagger weight " << std::endl; return -1; }
 
     double pT = jet->pt();
     double eta = jet->eta();
@@ -215,10 +216,6 @@ int main() {
     jet_index++;
 
   }
-
-
-
-
 
   return 0;
 }
