@@ -133,7 +133,7 @@ def MessageSvcCfg(flags):
     msgsvc = CompFactory.MessageSvc()
     msgsvc.OutputLevel = flags.Exec.OutputLevel
     msgsvc.Format = "% F%{:d}W%C%7W%R%T %0W%M".format(flags.Common.MsgSourceLength)
-    msgsvc.enableSuppression = True
+    msgsvc.enableSuppression = flags.Common.EnableSuppression
     if flags.Common.ShowMsgStats:
         msgsvc.showStats = True
         from AthenaCommon.Constants import WARNING
