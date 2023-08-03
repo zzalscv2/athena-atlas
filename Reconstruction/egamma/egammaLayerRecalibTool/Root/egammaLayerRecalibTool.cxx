@@ -908,10 +908,29 @@ CP::CorrectionCode egammaLayerRecalibTool::scale_inputs(StdCalibrationInputs & i
 
 CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particle, const xAOD::EventInfo& event_info) const
 {
+  const static SG::AuxElement::ConstAccessor<float> acc_Eadded_s2("Eadded_Lr2");
+  const static SG::AuxElement::ConstAccessor<float> acc_Eadded_s3("Eadded_Lr3");
+
   const xAOD::CaloCluster* cluster = particle.caloCluster();
   if (!cluster) {
     ATH_MSG_ERROR("egamma particle without CaloCluster");
     return CP::CorrectionCode::Error;
+  }
+
+  double addE2 = 0, addE3 = 0;
+  if (m_aodFixMissingCells) {
+    if (acc_Eadded_s2.isAvailable(particle))
+      { addE2 = acc_Eadded_s2(particle); }
+    else {
+      ATH_MSG_WARNING("Fix for missing cells required"
+		      " but layer 2 info is not available");
+    }
+    if (acc_Eadded_s3.isAvailable(particle))
+      { addE3 = acc_Eadded_s3(particle); }
+    else {
+      ATH_MSG_WARNING("Fix for missing cells required"
+		      " but layer 3 info is not available");
+    }
   }
 
   StdCalibrationInputs inputs {
@@ -921,8 +940,8 @@ CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particl
       cluster->phi(),
       cluster->energyBE(0),
       cluster->energyBE(1),
-      cluster->energyBE(2),
-      cluster->energyBE(3) };
+      cluster->energyBE(2) + addE2,
+      cluster->energyBE(3) + addE3 };
 
   const CP::CorrectionCode status = scale_inputs(inputs);
 

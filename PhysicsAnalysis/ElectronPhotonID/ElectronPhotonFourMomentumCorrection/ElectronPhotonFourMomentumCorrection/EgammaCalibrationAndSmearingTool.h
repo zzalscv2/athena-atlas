@@ -14,6 +14,7 @@
 #include "EgammaAnalysisInterfaces/IEgammaCalibrationAndSmearingTool.h"
 #include "EgammaAnalysisInterfaces/IegammaMVASvc.h"
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "AsgTools/AsgMetadataTool.h"
 #include "AsgMessaging/AsgMessaging.h"
 #include "PATInterfaces/ISystematicsTool.h"
@@ -158,6 +159,12 @@ private:
   int m_use_uA2MeV_2015_first2weeks_correction;
   bool m_use_mapping_correction;
   int m_user_random_run_number;
+
+  Gaudi::Property<bool> m_fixForMissingCells {
+    this,
+      "FixForMissingCells",
+      false,
+      "AOD fix for cell recovery in core egamma cluster" };
 
   void setupSystematics();
 
