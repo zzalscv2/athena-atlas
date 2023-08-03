@@ -1490,7 +1490,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_BtagWP, "Btag.WP", rEnv, "FixedCutBEff_77");
   configFromFile(m_BtagMinPt, "Btag.MinPt", rEnv, -1.); // Not calibrated below 20
 
-  configFromFile(m_bTaggingCalibrationFilePath, "Btag.CalibPath", rEnv, "xAODBTaggingEfficiency/13TeV/2022-22-13TeV-MC20-CDI-2022-07-28_v1.root");
+  configFromFile(m_bTaggingCalibrationFilePath, "Btag.CalibPath", rEnv, "xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root");
   configFromFile(m_BtagSystStrategy, "Btag.SystStrategy", rEnv, "Envelope");
 
   configFromFile(m_useBtagging_trkJet, "BtagTrkJet.enable", rEnv, true);
