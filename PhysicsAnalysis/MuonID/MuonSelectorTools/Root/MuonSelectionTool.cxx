@@ -277,6 +277,7 @@ namespace CP {
         if(isFirstRun3Check)
         {
             int rn=getRunNumber(true);
+            
             if(!m_isRun3 && rn>=399999)
             {
               if(m_geoOnTheFly)
@@ -1387,7 +1388,7 @@ namespace CP {
         retrieveSummaryValue(muon, summary.extendedLargeHits, xAOD::MuonSummaryType::extendedLargeHits);
         retrieveSummaryValue(muon, summary.extendedSmallHoles, xAOD::MuonSummaryType::extendedSmallHoles);
         retrieveSummaryValue(muon, summary.isSmallGoodSectors, xAOD::MuonSummaryType::isSmallGoodSectors);
-        if(!isRun3()) retrieveSummaryValue(muon, summary.cscUnspoiledEtaHits, xAOD::MuonSummaryType::cscUnspoiledEtaHits);
+        if(!isRun3(false)) retrieveSummaryValue(muon, summary.cscUnspoiledEtaHits, xAOD::MuonSummaryType::cscUnspoiledEtaHits); //setting allowForce to false for isRun3(bool) because otherwise that flag can be forced via tool properties to get a specific value, typically for testing purposes. But whatever you force that flag to be, you'll not have CSC hits in run-3 samples!
     }
     void MuonSelectionTool::retrieveParam(const xAOD::Muon& muon, float& value, const xAOD::Muon::ParamDef param) const {
         if (!muon.parameter(value, param)) {
@@ -1492,9 +1493,9 @@ namespace CP {
                     ATH_MSG_DEBUG("Random run number not available and this is mc16e or mc20e, returning dummy 2018 run number.");
                     return 351359;
                 }
-                else if (eventInfo->runNumber() < 500000) //mc21 is 330000
+                else if (eventInfo->runNumber() < 500000) //mc21 is 330000, mc23a is 410000, mc23c is 4500000
                 {
-                    ATH_MSG_DEBUG("Random run number not available and this is mc21, for the time being we're returing a dummy run number.");
+                    ATH_MSG_DEBUG("Random run number not available and this is mc21/mc23, for the time being we're returing a dummy run number.");
                     return 399999;
                 }
                 else{
