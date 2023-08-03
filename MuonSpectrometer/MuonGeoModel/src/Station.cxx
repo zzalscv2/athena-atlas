@@ -114,6 +114,10 @@ namespace MuonGM {
         if (m_name[0] == 'T') {
             for (unsigned int i = 0; i < m_components.size(); i++) {
                 TgcComponent *t = dynamic_cast<TgcComponent*>(m_components[i].get());
+                if (not t){
+                  ATH_MSG_ERROR("Dynamic cast to TgcComponent failed");
+                  continue;
+                }
                 thick = thick > t->GetThickness(mysql) + t->posz ? thick : t->GetThickness(mysql) + t->posz;
             }
         } else {
@@ -121,6 +125,10 @@ namespace MuonGM {
 
             for (unsigned int i = 0; i < m_components.size(); i++) {
                 StandardComponent* s = dynamic_cast<StandardComponent*>(m_components[i].get());
+                if (not s){
+                  ATH_MSG_ERROR("Dynamic cast to StandardComponent failed");
+                  continue;
+                }
                 thick = thick > s->GetThickness(mysql) + s->posz ? thick : s->GetThickness(mysql) + s->posz;
                 if (i == 0 || s->posz < zstart)
                     zstart = s->posz;
@@ -173,6 +181,10 @@ namespace MuonGM {
 
             for (unsigned int i = 0; i < m_components.size(); i++) {
                 StandardComponent* sc = dynamic_cast<StandardComponent*>(m_components[i].get());
+                if (not sc){
+                  ATH_MSG_ERROR("Dynamic cast to StandardComponent failed at line "<<__LINE__);
+                  continue;
+                }
                 ATH_MSG_VERBOSE("Station " << m_name << " *** comp " << i << " named " <<
                                 sc->name << " posy " << sc->posy << " dy " << sc->dy << " len " << len <<
                                 " ystart " << ystart);
@@ -200,6 +212,10 @@ namespace MuonGM {
 
             for (unsigned int i = 0; i < m_components.size(); i++) {
                 StandardComponent* sc = dynamic_cast<StandardComponent*>(m_components[i].get());
+                if (not sc){
+                  ATH_MSG_ERROR("Dynamic cast to StandardComponent failed at line "<<__LINE__);
+                  continue;
+                }
                 if (i == 0 || sc->posy < ystart)
                     ystart = sc->posy;
             }
@@ -236,7 +252,12 @@ namespace MuonGM {
                 } else {
                     double num = (m_components[i]->dx2 - m_components[i]->dx1) / 2.;
                     double tantheta = num != 0 ? num / m_components[i]->dy : 0;
-                    double y = dynamic_cast<StandardComponent*>(m_components[i].get())->posy;
+                    auto sc = dynamic_cast<StandardComponent*>(m_components[i].get());
+                    if (not sc){
+                      ATH_MSG_ERROR("Dynamic cast to StandardComponent failed at line "<<__LINE__);
+                      continue;
+                    }
+                    double y = sc->posy;
                     dxmin = m_components[i]->dx1 + 2. * tantheta * (ymin - y);
                 }
 
@@ -278,7 +299,12 @@ namespace MuonGM {
                 else {
                     double num = (m_components[i]->dx2 - m_components[i]->dx1) / 2.;
                     double tantheta = num != 0 ? num / m_components[i]->dy : 0;
-                    double y = dynamic_cast<StandardComponent*>(m_components[i].get())->posy;
+                    auto sc = dynamic_cast<StandardComponent*>(m_components[i].get());
+                    if (not sc){
+                      ATH_MSG_ERROR("Dynamic cast to StandardComponent failed at line "<<__LINE__);
+                      continue;
+                    }
+                    double y = sc->posy;
                     dxmax = m_components[i]->dx1 + 2. * tantheta * (ymax - y);
                 }
 
@@ -316,6 +342,10 @@ namespace MuonGM {
 
     double Station::mdtHalfPitch(const MYSQL& mysql) const {
         const MDT *mdtobj = dynamic_cast<const MDT*>(mysql.GetATechnology("MDT0"));
+        if (not mdtobj){
+          ATH_MSG_ERROR("Dynamic cast to MDT failed at line "<<__LINE__);
+          return 0.;
+        }
         double mdthalfpitch = 0.5 * (mdtobj->pitch);
 
         if (hasMdts()) {
