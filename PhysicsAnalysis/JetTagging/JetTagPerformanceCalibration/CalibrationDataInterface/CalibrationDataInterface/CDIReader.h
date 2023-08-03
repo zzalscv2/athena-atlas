@@ -27,7 +27,6 @@
 #include "CalibrationDataInterface/CalibrationDataInterfaceBase.h"
 #include "CalibrationDataInterface/CalibrationDataContainer.h"
 
-#include <nlohmann/json.hpp>
 #include <filesystem>
 #include <fstream>
 
