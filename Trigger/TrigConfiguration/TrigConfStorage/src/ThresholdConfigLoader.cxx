@@ -36,7 +36,7 @@
 #include <stdexcept>
 #include <typeinfo>
 
-#include "boost/lexical_cast.hpp" // for loading ptcut, etc
+#include "boost/lexical_cast.hpp"
 
 using namespace std;
 

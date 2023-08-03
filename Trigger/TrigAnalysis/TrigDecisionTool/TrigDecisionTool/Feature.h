@@ -22,8 +22,6 @@
 #include <string>
 #include <set>
 #include <type_traits>
-#include "boost/shared_ptr.hpp"
-#include "boost/lexical_cast.hpp"
 
 #include "AsgMessaging/MsgStream.h"
 
