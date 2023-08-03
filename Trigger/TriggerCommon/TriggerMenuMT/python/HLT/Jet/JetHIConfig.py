@@ -202,10 +202,10 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
 
     GetConstituentsModifierToolHLT(configFlags, name="HIJetConstituentModifierTool", ClusterKey=cluster_key_iter0_deep, ApplyOriginCorrection=False, label="HLTHIJetJetConstMod_iter0")
 
-    # Copy seed0 jets: seed1
-    jetDef_seed1 = jetDef_seed0.clone()
+    # Copy default jets: seed1
+    jetDef_seed1 = jetDef.clone()
     jetDef_seed1.suffix = jetDef_seed0.suffix.replace("_seed0","_seed1")
-    jetDef_seed1.modifiers=["HLTHIJetAssoc", "HLTHIJetConstSub_iter0:iter0", "EMScaleMom", "HLTHIJetCalib:{}___{}".format(calib_seq, JES_is_data), "Filter:25000"]
+    jetDef_seed1.modifiers=["HLTHIJetAssoc", "HLTHIJetConstSub_iter0:iter0", "HLTHIJetCalib:{}___{}".format(calib_seq, JES_is_data), "Filter:25000"]
     jetsFullName_seed1 = jetDef_seed1.fullname()
     copySeed1Alg = getJetCopyAlg(jetsin=jetsInUnsub,jetsoutdef=jetDef_seed1,decorations=[],shallowcopy=False,shallowIO=False,monTool=monTool)
     jetHIRecSeq += copySeed1Alg
@@ -228,7 +228,7 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
 
     jetDef_final = jetDef.clone()
     jetDef_final.suffix = jetDef.suffix.replace("_Unsubtracted","")
-    jetDef_final.modifiers=["HLTHIJetConstSub_iter0:iter0", "HLTHIJetJetConstMod_iter0", "HLTHIJetCalib:{}___{}".format(calib_seq, JES_is_data)]
+    jetDef_final.modifiers=["HLTHIJetConstSub_iter1:iter1", "HLTHIJetJetConstMod_iter1", "HLTHIJetCalib:{}___{}".format(calib_seq, JES_is_data),  "Filter:15000"]
     copyAlg_final= getJetCopyAlg(jetsin=jetsInUnsub,jetsoutdef=jetDef_final,decorations=[],shallowcopy=False,shallowIO=False,monTool=monTool)
     jetHIRecSeq += copyAlg_final
 
@@ -236,7 +236,7 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
 
     jetDef_final_noCalib = jetDef.clone()
     jetDef_final_noCalib.suffix = jetDef.suffix.replace("_Unsubtracted","_sub_noCalib")
-    jetDef_final_noCalib.modifiers=["HLTHIJetConstSub_iter0:iter0", "HLTHIJetJetConstMod_iter0"]
+    jetDef_final_noCalib.modifiers=["HLTHIJetConstSub_iter1:iter1", "HLTHIJetJetConstMod_iter1"]
     copyAlg_final_noCalib = getJetCopyAlg(jetsin=jetsInUnsub,jetsoutdef=jetDef_final_noCalib,decorations=[],shallowcopy=False,shallowIO=False,monTool=monTool)
     jetHIRecSeq += copyAlg_final_noCalib
 
