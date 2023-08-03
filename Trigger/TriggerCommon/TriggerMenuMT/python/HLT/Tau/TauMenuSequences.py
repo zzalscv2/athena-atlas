@@ -5,7 +5,7 @@
 # menu components
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
 
-from TriggerMenuMT.HLT.Tau.TauRecoSequences import tauCaloMVASequence, tauFTFCoreSequence, tauFTFLRTSequence, tauFTFIsoSequence, tauFTFIsoBDTSequence, tauMVASequence, tauLLPSequence, tauLRTSequence, tauPrecIsoTrackSequence, tauPrecLRTTrackSequence
+from TriggerMenuMT.HLT.Tau.TauRecoSequences import tauCaloMVASequence, tauFTFCoreSequence, tauFTFLRTSequence, tauFTFIsoSequence, tauMVASequence, tauLLPSequence, tauLRTSequence, tauPrecIsoTrackSequence, tauPrecLRTTrackSequence
 
 # ===============================================================================================
 #      Calo MVA step
@@ -85,27 +85,6 @@ def tauFTFTauIsoSeq(flags, is_probe_leg=False):
     return  MenuSequence( flags,
                           Sequence    = sequence,
                           Maker       = ftfIsoViewsMaker,
-                          Hypo        = fastTrkHypo,
-                          HypoToolGen = TrigTauTrackHypoToolFromDict,
-                          IsProbe     = is_probe_leg )
-
-# ===============================================================================================                                                            
-#   Fast track finder (iso bdt) + Dummy Hypo step (tracktwoMVABDT)                                                                                           
-# ===============================================================================================                                 
-
-def tauFTFTauIsoBDTSeq(flags, is_probe_leg=False):
-    (sequence, ftfIsoBDTViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauFTFIsoBDTSequence,flags )
-
-    from TrigTauHypo.TrigTauHypoConf import  TrigTrackPreSelHypoAlg
-    fastTrkHypo                 = TrigTrackPreSelHypoAlg("TrackPreSelHypoAlg_PassByIsoBDT")
-    fastTrkHypo.trackcollection = sequenceOut
-    fastTrkHypo.RoIForIDReadHandleKey = "UpdatedTrackBDTRoI"
-
-    from TrigTauHypo.TrigTauHypoTool import TrigTauTrackHypoToolFromDict
-
-    return  MenuSequence( flags,
-                          Sequence    = sequence,
-                          Maker       = ftfIsoBDTViewsMaker,
                           Hypo        = fastTrkHypo,
                           HypoToolGen = TrigTauTrackHypoToolFromDict,
                           IsProbe     = is_probe_leg )
