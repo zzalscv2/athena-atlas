@@ -4,6 +4,8 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 # Tools
+
+
 def ActsTrackStatePrinterCfg(
     flags, name: str = "TrackStatePrinter", **kwargs
 ) -> ComponentAccumulator:
@@ -23,8 +25,10 @@ def ActsTrackStatePrinterCfg(
     return acc
 
 # ACTS only algorithm
-def ActsTrackFindingCfg(flags, 
-                        name: str = "ActsTrackFindingAlg", 
+
+
+def ActsTrackFindingCfg(flags,
+                        name: str = "ActsTrackFindingAlg",
                         **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
@@ -45,6 +49,11 @@ def ActsTrackFindingCfg(flags,
         kwargs.setdefault('StripSeeds', 'ITkStripSeeds')
 
     kwargs.setdefault('ACTSTracksLocation', 'ActsTracks')
+
+    # need to persistify source link helper container to ensure that source links in ActsTracks do not contaion
+    # stale pointers pointing to freed memory
+    kwargs.setdefault("ATLASUncalibSourceLinkElementsName",
+                      "ACTSUncalibratedMeasurementSourceLinkElements")
 
     if flags.Acts.doAmbiguityResolution:
         kwargs.setdefault(
@@ -85,12 +94,9 @@ def ActsTrackFindingCfg(flags,
             acc.popToolsAndMerge(ActsTrackStatePrinterCfg(flags)),
         )
 
-    # need to persistify source link helper container to ensure that source links do not contaion
-    # stale pointers pointing to freed memory
-    kwargs.setdefault("ATLASUncalibSourceLinkElementsName","ACTSUncalibratedMeasurementSourceLinkElements")
-
     acc.addEventAlgo(CompFactory.ActsTrk.TrackFindingAlg(name, **kwargs))
     return acc
+
 
 def ActsAmbiguityResolutionCfg(flags, name: str = "ActsAmbiguityResolution", **kwargs):
     acc = ComponentAccumulator()
@@ -105,6 +111,7 @@ def ActsAmbiguityResolutionCfg(flags, name: str = "ActsAmbiguityResolution", **k
         from ActsConfig.ActsMonitoringConfig import ActsAmbiguityResolutionMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(
             ActsAmbiguityResolutionMonitoringToolCfg(flags)))
-    
-    acc.addEventAlgo(CompFactory.ActsTrk.AmbiguityResolutionAlg(name, **kwargs))
+
+    acc.addEventAlgo(
+        CompFactory.ActsTrk.AmbiguityResolutionAlg(name, **kwargs))
     return acc

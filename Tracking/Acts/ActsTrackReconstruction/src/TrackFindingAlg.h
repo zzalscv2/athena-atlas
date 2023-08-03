@@ -1,9 +1,8 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-#ifndef ACTSTRKFINDING_TRACKFINDINGALG_H
-#define ACTSTRKFINDING_TRACKFINDINGALG_H 1
+#ifndef ACTSTRACKRECONSTRUCTION_TRACKFINDINGALG_H
+#define ACTSTRACKRECONSTRUCTION_TRACKFINDINGALG_H 1
 
 // Base Class
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -21,6 +20,7 @@
 #include "ActsEvent/TrackParameters.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
+#include "ActsGeometry/ATLASSourceLink.h"
 
 // Athena
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
@@ -37,12 +37,19 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <variant>
 #include <atomic>
 
 // Handle Keys
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
+
+namespace
+{
+  // Forward-declare internal classes defined in TrackFindingData.h and used only in TrackFindingAlg.cxx.
+  // Define in the anonymous namespace to prevent unneccessary external linkage.
+  class TrackFindingMeasurements;
+  class DuplicateSeedDetector;
+}
 
 namespace ActsTrk
 {
@@ -50,8 +57,6 @@ namespace ActsTrk
   class TrackFindingAlg : public AthReentrantAlgorithm
   {
   public:
-    using Measurement = xAOD::UncalibratedMeasurement;
-
     TrackFindingAlg(const std::string &name,
                     ISvcLocator *pSvcLocator);
     virtual ~TrackFindingAlg();
@@ -81,7 +86,8 @@ namespace ActsTrk
     SG::ReadHandleKey<ActsTrk::BoundTrackParametersContainer> m_pixelEstimatedTrackParametersKey{this, "PixelEstimatedTrackParameters", "", "estimated track parameters from pixel seeding"};
     SG::ReadHandleKey<ActsTrk::BoundTrackParametersContainer> m_stripEstimatedTrackParametersKey{this, "StripEstimatedTrackParameters", "", "estimated track parameters from strip seeding"};
 
-    SG::WriteHandleKey<ActsTrk::ConstTrackContainer> m_tracksContainerKey{this, "ACTSTracksLocation", "SiSPSeededActsTrackContainer", "Output track collection (ActsTrk variant)"};
+    SG::WriteHandleKey<std::vector<ATLASUncalibSourceLink::ElementsType>> m_sourceLinksOutKey{this, "ATLASUncalibSourceLinkElementsName", "" /*"UncalibratedMeasurementSourceLinkElements"*/, ""};
+    SG::WriteHandleKey<ActsTrk::ConstTrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "SiSPSeededActsTrackContainer", "Output track collection (ActsTrk variant)"};
 
     // Configuration
     Gaudi::Property<unsigned int> m_maxPropagationStep{this, "maxPropagationStep", 1000, "Maximum number of steps for one propagate call"};
@@ -90,23 +96,6 @@ namespace ActsTrk
     Gaudi::Property<std::vector<double>> m_etaBins{this, "etaBins", {}, "MeasurementSelector: bins in |eta| to specify variable selections"};
     Gaudi::Property<std::vector<double>> m_chi2CutOff{this, "chi2CutOff", {std::numeric_limits<double>::max()}, "MeasurementSelector: maximum local chi2 contribution"};
     Gaudi::Property<std::vector<size_t>> m_numMeasurementsCutOff{this, "numMeasurementsCutOff", {1}, "MeasurementSelector: maximum number of associated measurements on a single surface"};
-     SG::WriteHandleKey< std::vector<ATLASUncalibSourceLink::ElementsType> > m_sourceLinksOut
-        {this, "ATLASUncalibSourceLinkElementsName","" /*"UncalibratedMeasurementSourceLinkElements"*/, ""};
-
-    // Class to hold the measurement source links. This is created by TrackFindingAlg::initMeasurements().
-  public:
-    struct Measurements
-    {
-      using UncalibratedMeasurementContainerPtr = std::variant<const xAOD::PixelClusterContainer *, const xAOD::StripClusterContainer *>;
-      virtual ~Measurements() = default;
-      virtual void addMeasurements(size_t type,
-                                   const EventContext &ctx,
-                                   const UncalibratedMeasurementContainerPtr &clusterContainer,
-                                   const InDetDD::SiDetectorElementCollection &detElems,
-                                   const ActsTrk::SeedContainer *seeds) = 0;
-    };
-  private:
-    std::unique_ptr<Measurements> initMeasurements(size_t numMeasurements, size_t numSeeds) const;
 
     /**
      * @brief invoke track finding procedure
@@ -122,7 +111,8 @@ namespace ActsTrk
      */
     StatusCode
     findTracks(const EventContext &ctx,
-               const Measurements &measurements,
+               const TrackFindingMeasurements &measurements,
+               DuplicateSeedDetector &duplicateSeedDetector,
                const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
                const ActsTrk::SeedContainer *seeds,
                ActsTrk::TrackContainer &tracksContainer,
@@ -132,8 +122,7 @@ namespace ActsTrk
     // Create tracks from one seed's CKF result, appending to tracksContainer
     StatusCode storeSeedInfo(const ActsTrk::TrackContainer &tracksContainer,
                              const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
-                             const Measurements &measurements) const;
-
+                             DuplicateSeedDetector &duplicateSeedDetector) const;
 
     // Access Acts::CombinatorialKalmanFilter etc using "pointer to implementation"
     // so we don't have to instantiate the heavily templated classes in the header.
