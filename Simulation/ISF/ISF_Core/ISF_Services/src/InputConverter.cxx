@@ -1053,8 +1053,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
   /// In the case that particles are being passed back to Geant4 then
   /// we may have particles which have already interacted, so we
   /// should set the regeneration number accordingly.
-  Barcode::ParticleBarcode barcode = isp.barcode();
-  const int regenerationNr = (barcode - barcode%m_barcodeGenerationIncrement)/m_barcodeGenerationIncrement;
+  const int regenerationNr = HepMC::generations(&isp);
   ppi->SetRegenerationNr(regenerationNr);
 
   if ( genpart ) {

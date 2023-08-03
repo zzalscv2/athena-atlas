@@ -135,8 +135,6 @@ namespace ISF {
     bool                                  m_quasiStableParticlesIncluded; //<! will quasi-stable particles be included in the simulation
     BooleanProperty m_useShadowEvent{this, "UseShadowEvent", false, "New approach to selecting particles for simulation" };
 
-    const Barcode::ParticleBarcode              m_barcodeGenerationIncrement = HepMC::SIM_REGENERATION_INCREMENT; //!< to be retrieved from ISF Barcode service
-
   };
 
 }
