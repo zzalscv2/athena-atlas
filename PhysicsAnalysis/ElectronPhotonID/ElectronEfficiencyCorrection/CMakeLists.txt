@@ -4,7 +4,7 @@
 atlas_subdir( ElectronEfficiencyCorrection )
 
 # External dependencies:
-find_package( Boost COMPONENTS program_options)
+find_package( Boost )
 find_package( ROOT COMPONENTS Core Hist MathCore)
 
 if (XAOD_STANDALONE)
@@ -35,6 +35,7 @@ atlas_add_dictionary( ElectronEfficiencyCorrectionDict
    ElectronEfficiencyCorrection/selection.xml
    LINK_LIBRARIES ElectronEfficiencyCorrectionLib )
 
+find_package( Boost COMPONENTS program_options)
 # Utilities provided by the package:
 atlas_add_executable( EgEfficiencyCorr_mem_check
    util/EgEfficiencyCorr_mem_check.cxx

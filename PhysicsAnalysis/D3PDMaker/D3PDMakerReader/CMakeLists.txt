@@ -4,7 +4,7 @@
 atlas_subdir( D3PDMakerReader )
 
 # External dependencies:
-find_package( Boost COMPONENTS program_options)
+find_package( Boost )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 
 # Component(s) in the package:
@@ -22,6 +22,8 @@ atlas_add_dictionary( D3PDMakerReaderDict
                       src/D3PDMakerReaderDict.h
                       D3PDMakerReader/selection.xml
                       LINK_LIBRARIES D3PDMakerReaderLib )
+
+find_package( Boost COMPONENTS program_options)
 
 atlas_add_executable( d3pdReaderMaker
                       src/apps/d3pdReaderMaker.cxx

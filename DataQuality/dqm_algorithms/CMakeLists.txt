@@ -4,7 +4,7 @@
 atlas_subdir( dqm_algorithms )
 
 # External dependencies:
-find_package( Boost COMPONENTS program_options thread )
+find_package( Boost COMPONENTS thread )
 find_package( ROOT COMPONENTS MathCore Hist Core Tree RIO pthread )
 find_package( tdaq-common COMPONENTS dqm_core_io dqm_core dqm_dummy_io dqm_dummy )
 find_package( COOL COMPONENTS CoolKernel CoolApplication )
@@ -48,6 +48,7 @@ atlas_add_dictionary( dqm_toolsDict
                       INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TDAQ-COMMON_INCLUDE_DIRS}
                       LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${TDAQ-COMMON_LIBRARIES} dqm_algorithms dqm_tools dqm_summaries )
 
+find_package( Boost COMPONENTS program_options thread )
 atlas_add_executable( dqm_print_algorithms
                       test/print_algorithms.cpp
                       INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TDAQ-COMMON_INCLUDE_DIRS}

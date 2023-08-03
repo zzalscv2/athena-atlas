@@ -7,7 +7,7 @@ atlas_subdir( AthenaMonitoringKernel )
 find_package( nlohmann_json )
 find_package( valgrind )
 find_package( ROOT COMPONENTS Core Hist )
-find_package( Boost COMPONENTS program_options )
+find_package( Boost )
 
 atlas_add_library(
     AthenaMonitoringKernelLib
@@ -40,6 +40,7 @@ if( VALGRIND_FOUND )
    list( APPEND _test_definitions DEFINITIONS ATHMON_VALGRIND )
 endif()
 
+find_package( Boost COMPONENTS program_options )
 # Unit tests C++:
 file( GLOB CXX_TEST_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/test/*.cxx )
 foreach ( test_file ${CXX_TEST_FILES} )
