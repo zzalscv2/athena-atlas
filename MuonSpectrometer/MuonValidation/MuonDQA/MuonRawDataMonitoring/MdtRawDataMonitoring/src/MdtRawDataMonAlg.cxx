@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1044,8 +1044,10 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
                     int tubeLayerMax = cachedTubeLayerMax(newId);
                     CorrectTubeMax(hardware_name, tubeMax);
                     CorrectLayerMax(hardware_name, tubeLayerMax);
-                    for (int i_tube = id_helper.tubeMin(newId); i_tube <= tubeMax; ++i_tube) {
-                        for (int i_layer = id_helper.tubeLayerMin(newId); i_layer <= tubeLayerMax; ++i_layer) {
+                    int tubeMin = id_helper.tubeMin(newId);
+                    int tubeLayerMin = id_helper.tubeLayerMin(newId);
+                    for (int i_tube = tubeMin; i_tube <= tubeMax; ++i_tube) {
+                        for (int i_layer = tubeLayerMin; i_layer <= tubeLayerMax; ++i_layer) {
                             Identifier tubeId = id_helper.channelID(newId, ML, i_layer, i_tube);
                             if (m_BMGpresent && m_idHelperSvc->mdtIdHelper().stationName(newId) == m_BMGid) {
                                 std::map<Identifier, std::set<Identifier>>::const_iterator myIt = m_DeadChannels.find(MdtRoEl->identify());

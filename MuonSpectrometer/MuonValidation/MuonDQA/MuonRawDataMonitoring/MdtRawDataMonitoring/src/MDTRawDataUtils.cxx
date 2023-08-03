@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1040,7 +1040,8 @@ StatusCode MdtRawDataValAlg::fillMDTMaskedTubes(IdentifierHash idHash, const std
             else
                 mdtlayer += 3;
         }
-        int mdttube = m_idHelperSvc->mdtIdHelper().tube(digcoll_id) + (mdtlayer - 1) * m_idHelperSvc->mdtIdHelper().tubeMax(digcoll_id);
+        int tubeMax = m_idHelperSvc->mdtIdHelper().tubeMax(digcoll_id);
+        int mdttube = m_idHelperSvc->mdtIdHelper().tube(digcoll_id) + (mdtlayer - 1) * tubeMax;
         ChamberTubeNumberCorrection(mdttube, hardware_name, m_idHelperSvc->mdtIdHelper().tube(digcoll_id), mdtlayer - 1);
         h->Fill(mdttube, 1);
     }
@@ -1079,10 +1080,12 @@ void MdtRawDataValAlg::mdtchamberId() {
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 int MdtRawDataValAlg::mezzmdt(Identifier digcoll_id) {  // int mezz_chamber, int mezz_eta, int mezz_ml, int mezz_tube, int max_tube) {
     int TotmezzTubes = 8;
-    if (m_idHelperSvc->mdtIdHelper().tubeLayerMax(digcoll_id) == 4) TotmezzTubes = 6;
+    int tubeLayerMax = m_idHelperSvc->mdtIdHelper().tubeLayerMax(digcoll_id);
+    int tubeMax = m_idHelperSvc->mdtIdHelper().tubeMax(digcoll_id);
+    if (tubeLayerMax == 4) TotmezzTubes = 6;
     int Imezz = (int)((m_idHelperSvc->mdtIdHelper().tube(digcoll_id) - 1) / TotmezzTubes) +
                 (int)((m_idHelperSvc->mdtIdHelper().multilayer(digcoll_id) - 1) *
-                      ((m_idHelperSvc->mdtIdHelper().tubeMax(digcoll_id)) / TotmezzTubes));
+                      (tubeMax / TotmezzTubes));
 
     return Imezz;
 }
