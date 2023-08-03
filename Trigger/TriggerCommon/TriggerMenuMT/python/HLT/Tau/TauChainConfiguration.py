@@ -13,12 +13,10 @@ from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBa
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
 
-from .generateTau import tauCaloMVAMenuSeq, tauFTFTauCoreSeq
+from .generateTau import tauCaloMVAMenuSeq, tauFTFTauCoreSeq, tauFTFTauIsoSeq
 
-if isComponentAccumulatorCfg():
-    from .generateTau import tauFTFTauIsoSeq, tauFTFTauIsoBDTSeq
-else:
-    from .TauMenuSequences import tauFTFTauLRTSeq, tauFTFTauIsoSeq, tauFTFTauIsoBDTSeq, tauTrackTwoMVASeq, tauTrackTwoLLPSeq, tauTrackLRTSeq, tauPrecTrackIsoSeq, tauPrecTrackLRTSeq
+if not isComponentAccumulatorCfg():
+    from .TauMenuSequences import tauFTFTauLRTSeq, tauTrackTwoMVASeq, tauTrackTwoLLPSeq, tauTrackLRTSeq, tauPrecTrackIsoSeq, tauPrecTrackLRTSeq
 
 #--------------------------------------------------------
 # fragments generating config will be functions in new JO
@@ -39,10 +37,10 @@ def getFTFLRTCfg(flags, is_probe_leg=False):
     return tauFTFTauLRTSeq(flags, is_probe_leg=is_probe_leg)
 
 def getFTFIsoCfg(flags, is_probe_leg=False):
-    return tauFTFTauIsoSeq(flags, is_probe_leg=is_probe_leg)
-
-def getFTFIsoBDTCfg(flags, is_probe_leg=False):
-    return tauFTFTauIsoBDTSeq(flags, is_probe_leg=is_probe_leg)
+    if isComponentAccumulatorCfg():
+       return tauFTFTauIsoSeq(flags, is_probe_leg=is_probe_leg)
+    else:
+       return menuSequenceCAToGlobalWrapper(tauFTFTauIsoSeq,flags, is_probe_leg=is_probe_leg)
 
 def getTrackTwoMVACfg(flags, is_probe_leg=False):
     return tauTrackTwoMVASeq(flags, is_probe_leg=is_probe_leg)
@@ -81,7 +79,6 @@ class TauChainConfiguration(ChainConfigurationBase):
         stepDictionary = {
             "ptonly"        :['getCaloMVASeq', 'getFTFEmpty', 'getTrkEmpty' , 'getPTEmpty'      , 'getIDEmpty'     ],
             "tracktwoMVA"   :['getCaloMVASeq', 'getFTFCore' , 'getFTFIso'   , 'getPrecTrackIso' , 'getTrackTwoMVA' ],
-            "tracktwoMVABDT":['getCaloMVASeq', 'getFTFCore' , 'getFTFIsoBDT', 'getPrecTrackIso' , 'getTrackTwoMVA' ],
             "tracktwoLLP"   :['getCaloMVASeq', 'getFTFCore' , 'getFTFIso'   , 'getPrecTrackIso' , 'getTrackTwoLLP' ],
             "trackLRT"      :['getCaloMVASeq', 'getFTFLRT'  , 'getTrkEmpty' , 'getPrecTrackLRT' , 'getTrackLRT'    ],
         }
@@ -127,12 +124,6 @@ class TauChainConfiguration(ChainConfigurationBase):
     def getFTFIso(self, flags, is_probe_leg=False):
         stepName = 'FTFIso_tau'
         return self.getStep(flags,3,stepName, [getFTFIsoCfg], is_probe_leg=is_probe_leg)
-
-    # --------------------
-
-    def getFTFIsoBDT(self, flags, is_probe_leg=False):
-        stepName = 'FTFIsoBDT_tau'
-        return self.getStep(flags,3,stepName, [getFTFIsoBDTCfg], is_probe_leg=is_probe_leg)
 
     # --------------------
 
