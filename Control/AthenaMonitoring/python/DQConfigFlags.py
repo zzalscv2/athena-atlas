@@ -60,7 +60,7 @@ def createDQConfigFlags():
     # steering ...
     for flag in _steeringFlags + _lowLevelSteeringFlags:
         arg = True
-        if flag == 'doJetTagMon' or flag == "doJetMon" or flag == "doMissingEtMon":
+        if flag in ['doJetTagMon', 'doJetMon', 'doMissingEtMon', 'doTauMon']:
             arg = lambda x: x.DQ.DataType is not DQDataType.Cosmics # noqa: E731
         if flag == 'doHLTMon':
             # new HLT monitoring not yet compatible with pre-Run 3 data

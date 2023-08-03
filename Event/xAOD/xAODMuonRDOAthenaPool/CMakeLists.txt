@@ -8,8 +8,8 @@ find_package( ROOT COMPONENTS Core )
 
 # Component(s) in the package:
 atlas_add_poolcnv_library( xAODMuonRDOAthenaPoolCnv
-   FILES xAODMuonRDO/NRPCRDOContainer.h xAODMuonRDO/NRPCRDOAuxContainer.h  xAODMuonRDO/NSWTPRDOContainer.h xAODMuonRDO/NSWTPRDOAuxContainer.h        
-   TYPES_WITH_NAMESPACE xAOD::NRPCRDOContainer xAOD::NRPCRDOAuxContainer xAOD::NSWTPRDOContainer xAOD::NSWTPRDOAuxContainer
+   FILES xAODMuonRDO/NRPCRDOContainer.h xAODMuonRDO/NRPCRDOAuxContainer.h  xAODMuonRDO/NSWTPRDOContainer.h xAODMuonRDO/NSWTPRDOAuxContainer.h xAODMuonRDO/NSWMMTPRDOContainer.h xAODMuonRDO/NSWMMTPRDOAuxContainer.h
+   TYPES_WITH_NAMESPACE xAOD::NRPCRDOContainer xAOD::NRPCRDOAuxContainer xAOD::NSWTPRDOContainer xAOD::NSWTPRDOAuxContainer xAOD::NSWMMTPRDOContainer xAOD::NSWMMTPRDOAuxContainer
    CNV_PFX xAOD
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthenaKernel

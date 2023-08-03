@@ -13,101 +13,131 @@
 #include "MuonNSWCommonDecode/NSWResourceId.h"
 #include "MuonNSWCommonDecode/MMARTPacket.h"
 #include "MuonNSWCommonDecode/MMTrigPacket.h"
+#include "ers/ers.h"
 
 Muon::nsw::NSWTriggerMML1AElink::NSWTriggerMML1AElink (const uint32_t *bs, const uint32_t remaining):
   NSWTriggerElink (bs, remaining)
 {
-  // 2 felix header 32b words already decoded;
-  uint pp = 2 * 32;
 
-  //once format finalized, checking a minimum size
+  std::size_t size_word{sizeof(uint32_t) * 8};
+  // 2 felix header 32b words already decoded
+  std::size_t readPointer{2 * 32};
+  CxxUtils::span<const std::uint32_t> data{bs, remaining};
+  //once format finalized, checking a minimum size or at least the structure
 
-  //NB bit_slice(start, end) includes edges
-  m_head_fragID =                       bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_head_fragID-1);                     pp+= Muon::nsw::MMTPL1A::size_head_fragID;
-  m_head_sectID =                       bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_head_sectID-1);                     pp+= Muon::nsw::MMTPL1A::size_head_sectID;
-  m_head_EC =                           bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_head_EC-1);                         pp+= Muon::nsw::MMTPL1A::size_head_EC;
-  m_head_flags =                        bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_head_flags-1);                      pp+= Muon::nsw::MMTPL1A::size_head_flags;
-  m_head_BCID =                         bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_head_BCID-1);                       pp+= Muon::nsw::MMTPL1A::size_head_BCID;
-  m_head_orbit =                        bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_head_orbit-1);                      pp+= Muon::nsw::MMTPL1A::size_head_orbit;
-  m_head_spare =                        bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_head_spare-1);                      pp+= Muon::nsw::MMTPL1A::size_head_spare;
-  m_L1ID =                              bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_L1ID-1);                            pp+= Muon::nsw::MMTPL1A::size_L1ID;
-  m_head_wdw_open =                     bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_head_wdw_open-1);                   pp+= Muon::nsw::MMTPL1A::size_head_wdw_open;
-  m_head_l1a_req =                      bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_head_l1a_req-1);                    pp+= Muon::nsw::MMTPL1A::size_head_l1a_req;
-  m_head_wdw_close =                    bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_head_wdw_close-1);                  pp+= Muon::nsw::MMTPL1A::size_head_wdw_close;
-  m_head_overflowCount =                bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_head_overflowCount-1);              pp+= Muon::nsw::MMTPL1A::size_head_overflowCount;
-  m_head_wdw_matching_engines_usage =   bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_head_wdw_matching_engines_usage-1); pp+= Muon::nsw::MMTPL1A::size_head_wdw_matching_engines_usage;
-  m_head_cfg_wdw_open_offset =          bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_head_cfg_wdw_open_offset-1);        pp+= Muon::nsw::MMTPL1A::size_head_cfg_wdw_open_offset;
-  m_head_cfg_l1a_req_offset =           bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_head_cfg_l1a_req_offset-1);         pp+= Muon::nsw::MMTPL1A::size_head_cfg_l1a_req_offset;
-  m_head_cfg_wdw_close_offset =         bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_head_cfg_wdw_close_offset-1);       pp+= Muon::nsw::MMTPL1A::size_head_cfg_wdw_close_offset;
-  m_head_cfg_timeout =                  bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_head_cfg_timeout-1);                pp+= Muon::nsw::MMTPL1A::size_head_cfg_timeout;
-  m_head_link_const =                   bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_head_link_const-1);                 pp+= Muon::nsw::MMTPL1A::size_head_link_const;
-  //this is important! It identifies the elink! It should be ABCD1230/ABCD1231/ABCD1232
+  m_head_fragID = Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_head_fragID);
+  m_head_sectID = Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_head_sectID);
+  m_head_EC =     Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_head_EC);
+  m_head_flags =  Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_head_flags);
+  m_head_BCID =   Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_head_BCID);
+  m_head_orbit =  Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_head_orbit);
+  m_head_spare =  Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_head_spare);
+  m_L1ID =        Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_L1ID);
+
+  ERS_DEBUG(2, Muon::nsw::format("\n TP header: \n" 
+				 "  fradID: {}\n"
+				 "  sectID: {}\n"
+				 "  EC:     {}\n"
+				 "  flags:  {}\n"
+				 "  BCID:   {}\n"
+				 "  orbit:  {}\n"
+				 "  spare:  {}\n"
+				 "  L1ID:   {}",
+				 m_head_fragID, m_head_sectID, m_head_EC, m_head_flags, m_head_BCID, m_head_orbit, m_head_spare, m_L1ID));
+
+  m_l1a_versionID =         Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_l1a_versionID);
+  m_l1a_local_req_BCID =    Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_l1a_local_req_BCID);
+  m_l1a_local_rel_BCID =    Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_l1a_local_rel_BCID);
+  m_l1a_open_BCID =         Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_l1a_open_BCID);
+  m_l1a_req_BCID =          Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_l1a_req_BCID);
+  m_l1a_close_BCID =        Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_l1a_close_BCID);
+  m_l1a_timeout =           Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_l1a_timeout);
+  m_l1a_open_BCID_offset =  Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_l1a_open_BCID_offset);
+  m_l1a_req_BCID_offset =   Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_l1a_req_BCID_offset);
+  m_l1a_close_BCID_offset = Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_l1a_close_BCID_offset);
+  m_l1a_timeout_config =    Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_l1a_timeout_config);
+  m_l1a_busy_thr =          Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_l1a_busy_thr);
+  m_l1a_engine_snapshot =   Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_l1a_engine_snapshot);
+  m_l1a_link_const =        Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_l1a_link_const);
+  m_l1a_padding =           Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_l1a_padding);
+  //m_l1a_link_const is important! It identifies the elink! It should be ABCD1230/ABCD1231/ABCD1232
   //not checked during decoding but must be checked at some point
 
-  //following logic could be improved if the number of stream blocks is known a priori
-  while ( pp < remaining * sizeof(uint32_t) * 8 && pp < (m_wordCountFlx-1) * sizeof(uint32_t) * 8 ){
-    //-1 since we know there's a crc/trailer at the end
-    uint32_t current_stream_head_nbits =     bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_stream_head_nbits-1);     pp+= Muon::nsw::MMTPL1A::size_stream_head_nbits;
-    uint32_t current_stream_head_nwords =    bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_stream_head_nwords-1);    pp+= Muon::nsw::MMTPL1A::size_stream_head_nwords;
-    uint32_t current_stream_head_fifo_size = bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_stream_head_fifo_size-1); pp+= Muon::nsw::MMTPL1A::size_stream_head_fifo_size;
-    uint32_t current_stream_head_streamID =  bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_stream_head_streamID-1);  pp+= Muon::nsw::MMTPL1A::size_stream_head_streamID;
+  //already checked in NSWTriggerElink that remaining >= m_wordCountFlx 
+  while ( readPointer < (m_wordCountFlx-1) * size_word ) {
+    //later during commissioning, need to change to ( readPointer < (m_wordCountFlx-1-stream_block_size) * size_word )
+    //later during commissioning, checking if there's at least enough space for the stream header and stream content 
+    //(protected for now by a generic expression in bit_slice, just want to be more specific)
+    
+    uint32_t current_stream_head_nbits =     Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_stream_head_nbits);
+    uint32_t current_stream_head_nwords =    Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_stream_head_nwords);
+    uint32_t current_stream_head_fifo_size = Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_stream_head_fifo_size);
+    uint32_t current_stream_head_streamID =  Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_stream_head_streamID);
+
+    ERS_DEBUG(2, Muon::nsw::format("\n Stream header: \n"
+				   "  nbits:       {}\n"
+				   "  nwords:      {}\n"
+				   "  fifo_size:   {}\n"
+				   "  streamID:    {}",
+				   current_stream_head_nbits, current_stream_head_nwords, current_stream_head_fifo_size, current_stream_head_streamID));
+
 
     //zero padding to multiples of 16bits - TP logic - this is the real number of bits to read
     current_stream_head_nbits = current_stream_head_nbits%16? ((current_stream_head_nbits+15)/16)*16 : current_stream_head_nbits;
-
-    if (current_stream_head_nwords*current_stream_head_nbits > ((m_wordCountFlx-1) * sizeof(uint32_t) * 8 - pp)){
-      Muon::nsw::NSWTriggerElinkException e ("Stream header corruption? Trying to read more bits than available");
-      throw e;
-    }
 
     m_stream_head_nbits.push_back ( current_stream_head_nbits );
     m_stream_head_nwords.push_back ( current_stream_head_nwords );
     m_stream_head_fifo_size.push_back ( current_stream_head_fifo_size );
     m_stream_head_streamID.push_back ( current_stream_head_streamID );
 
-    int dataSize = (current_stream_head_nbits-1)/32 +1; //how many words needed
+    int current_stream_head_n32b_per_word = (current_stream_head_nbits-1)/32 +1; //how many 32b words needed for a art/trigger packet
     std::vector<std::vector<uint32_t>> current_stream_data;
 
     //this block is very generic and agnostic of MMTP stream data format!
+    //only assumption: art/trigger packet size is multiple of 32b --- SF FIX BEFORE MR!
     for (uint i = 0; i<current_stream_head_nwords; i++){
-      std::vector<uint32_t> data;
-      for (int j = 0; j < dataSize-1; j++){
-        data.push_back( bit_slice<uint64_t,uint32_t>(bs, pp+32*j, pp+32*(j+1)-1) );
+      std::vector<uint32_t> current_stream_word;
+      for (int j = 0; j < current_stream_head_n32b_per_word; j++){
+	current_stream_word.push_back( Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, size_word) );
       }
-      data.push_back( bit_slice<uint64_t,uint32_t>(bs, pp+32*(dataSize-1),pp+32*(dataSize-1)+(current_stream_head_nbits-1)%32) );
-      current_stream_data.push_back(data);
-      pp+=current_stream_head_nbits;
+      current_stream_data.push_back(current_stream_word);
     }
     m_stream_data.push_back(current_stream_data);
 
   }
 
   for (uint i=0; i<m_stream_data.size(); i++){
-    if (m_stream_head_streamID[i]>=0xAAA0 && m_stream_head_streamID[i]<0xAAA4){
-      //then it's an ART packet
+    
+    switch (m_stream_head_streamID[i]) {
+    case 0xAAA0:
+    case 0xAAA1:
+    case 0xAAA2:
+    case 0xAAA3:
       for (uint j = 0; j < m_stream_data[i].size(); j++){
         if ( m_stream_data[i][j].size()!=3 ){
-          Muon::nsw::NSWTriggerElinkException e ("Stream ID 0xAAA[0-3] with a word longer different than three uint32_t's");
+	  Muon::nsw::NSWTriggerException e ( Muon::nsw::format( "Stream ID 0xAAA[0-3] packet length not correct: expected 3, got ({})", m_stream_data[i][j].size() ), 6);
           throw e;
         }
         m_art_packets.push_back( std::make_shared<Muon::nsw::MMARTPacket>(m_stream_data[i][j]) ); //arg will be a vector<uint32_t> of size 3
       }
-    } else if (m_stream_head_streamID[i]==0xAAA4){
-      //then it's a trigger packet
+      break;
+    case 0xAAA4:
       for (uint j = 0; j < m_stream_data[i].size(); j++){
-        if ( m_stream_data[i][j].size()!=1 ){
-          Muon::nsw::NSWTriggerElinkException e ("Stream ID 0xAAA4 with a word longer than one uint32_t");
+        if ( m_stream_data[i][j].size()!=2 ){
+	  Muon::nsw::NSWTriggerException e ( Muon::nsw::format( "Stream ID 0xAAA4 packet length not correct: expected 2, got ({})", m_stream_data[i][j].size() ), 7);
           throw e;
         }
-        m_trig_packets.push_back( std::make_shared<Muon::nsw::MMTrigPacket>(m_stream_data[i][j][0]) ); //arg will be a uint32_t, just 1!
+        m_trig_packets.push_back( std::make_shared<Muon::nsw::MMTrigPacket>(m_stream_data[i][j]) ); //arg will be a vector<uint32_t> of size 2
       }
-    } else {
-      Muon::nsw::NSWTriggerElinkException e ("Stream ID in MMTP L1A packet now recognized");
+      break;
+    default:
+      Muon::nsw::NSWTriggerException e ( Muon::nsw::format("Stream ID in MMTP L1A not recognized: {}", m_stream_head_streamID[i]), 5);
       throw e;
     }
+    
   }
 
   //warning: how the swROD is behaving if the last work is a uint16 only? Just 0-padding?
-  m_trailer_CRC = bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_trailer_CRC-1); pp+= Muon::nsw::MMTPL1A::size_trailer_CRC;
+  m_trailer_CRC = Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, Muon::nsw::MMTPL1A::size_trailer_CRC);
 
 }

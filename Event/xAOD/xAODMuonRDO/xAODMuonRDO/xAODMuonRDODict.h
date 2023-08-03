@@ -14,6 +14,9 @@
 #include "xAODMuonRDO/versions/NSWTPRDOContainer_v1.h"
 #include "xAODMuonRDO/versions/NSWTPRDOAuxContainer_v1.h"
 
+#include "xAODMuonRDO/versions/NSWMMTPRDOContainer_v1.h"
+#include "xAODMuonRDO/versions/NSWMMTPRDOAuxContainer_v1.h"
+
 #include "xAODCore/tools/DictHelpers.h"
 
 // Instantiate all necessary types for the dictionary.
@@ -22,6 +25,7 @@ namespace {
         // Type(s) needed for the dictionary generation to succeed.
         XAOD_INSTANTIATE_NS_CONTAINER_TYPES( xAOD, NRPCRDOContainer_v1 );
         XAOD_INSTANTIATE_NS_CONTAINER_TYPES( xAOD, NSWTPRDOContainer_v1 );
+        XAOD_INSTANTIATE_NS_CONTAINER_TYPES( xAOD, NSWMMTPRDOContainer_v1 );
     };
 }
 

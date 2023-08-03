@@ -25,10 +25,10 @@ hit2rdo.args += ' --numberOfHighPtMinBias="0.15520183"'
 hit2rdo.args += ' --numberOfLowPtMinBias="59.3447981771"'
 hit2rdo.args += ' --pileupFinalBunch="6"'
 hit2rdo.args += ' --jobNumber="1"'
-
 hit2rdo.args += ' --preExec "HITtoRDO:userRunLumiOverride={\'run\':300000, \'startmu\':40.0, \'endmu\':70.0, \'stepmu\':1.0, \'startlb\':1, \'timestamp\': 1500000000};ScaleTaskLength=0.1"'
 hit2rdo.args += ' --preInclude "HITtoRDO:Digitization/ForceUseOfPileUpTools.py,SimulationJobOptions/preInlcude.PileUpBunchTrainsMC16c_2017_Config1.py,RunDependentSimData/configLumi_muRange.py"'
 hit2rdo.args += ' --postInclude="h2r:LArROD/LArSuperCellEnable.py"' # to be removed when Run3 geometry RDO is integrated in Trigger ART tests
+hit2rdo.args += ' --conditionsTag="HITtoRDO:OFLCOND-MC16-SDR-RUN2-11"'
 
 rdo2aod = ExecStep.ExecStep('RDOtoAOD')
 rdo2aod.type = 'Reco_tf'
@@ -39,7 +39,7 @@ rdo2aod.args = '--inputRDOFile=RDO.pool.root --outputRDO_TRIGFile=RDO_TRIG.pool.
 rdo2aod.args += ' --steering "doRDO_TRIG"'
 rdo2aod.args += ' --CA "default:True" "RDOtoRDOTrigger:False"'
 rdo2aod.args += ' --preExec="setMenu=\'Dev_pp_run3_v1_TriggerValidation_prescale\'"'
-rdo2aod.args += ' --conditionsTag="all:OFLCOND-MC16-SDR-RUN2-09"'
+rdo2aod.args += ' --conditionsTag="all:OFLCOND-MC16-SDR-RUN2-11"'
 
 test = Test.Test()
 test.art_type = 'build'

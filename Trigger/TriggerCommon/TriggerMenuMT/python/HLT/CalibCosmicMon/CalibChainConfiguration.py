@@ -5,57 +5,61 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, InEventRecoCA, menuSequenceCAToGlobalWrapper, appendMenuSequenceCAToAthena
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, InEventRecoCA, menuSequenceCAToGlobalWrapper
 from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
-from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, algorithmCAToGlobalWrapper
 from TrigT2CaloCommon.CaloDef import fastCaloRecoSequenceCfg
 from TrigGenericAlgs.TrigGenericAlgsConfig import TimeBurnerCfg, TimeBurnerHypoToolGen
-from DecisionHandling.DecisionHandlingConf import InputMakerForRoI, ViewCreatorInitialROITool
-from AthenaCommon.CFElements import seqAND
-from AthenaCommon.Configurable import ConfigurableCABehavior
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 from TrigTrackingHypo.IDCalibHypoConfig import IDCalibHypoToolFromDict, createIDCalibHypoAlg
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 from ..CommonSequences.FullScanInDetConfig import commonInDetFullScanCfg
 from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import getTrackingInputMaker
 
-def getLArNoiseBurstRecoSequence(flags):
-    from TrigCaloRec.TrigCaloRecConfig import hltCaloCellMakerCfg
-    cells_sequence = algorithmCAToGlobalWrapper(hltCaloCellMakerCfg, flags = flags, name="HLTCaloCellMakerFS", roisKey='')[0]
+from TrigCaloRec.TrigCaloRecConfig import hltCaloCellMakerCfg
+from TrigCaloHypo.TrigCaloHypoConfig import TrigLArNoiseBurstRecoAlgCfg
+from TrigCaloHypo.TrigCaloHypoConfig import TrigLArNoiseBurstHypoToolGen
+from TrigT2CaloCommon.CaloDef import clusterFSInputMaker
+
+
+def getLArNoiseBurstRecoCfg(flags):
+    acc = InEventRecoCA("LArNoiseBurstRecoSequence", inputMaker=clusterFSInputMaker())
     cells_name = 'CaloCellsFS' 
-    from TrigCaloHypo.TrigCaloHypoConfig import TrigLArNoiseBurstRecoAlgCfg
-    TrigLArNoiseBurstRecoAlg = algorithmCAToGlobalWrapper(TrigLArNoiseBurstRecoAlgCfg, flags, cells_name)[0]
-    noiseBurstRecoSeq = seqAND('LArNoiseRecoSeq',[cells_sequence,TrigLArNoiseBurstRecoAlg])
-    return noiseBurstRecoSeq
+    acc.mergeReco(hltCaloCellMakerCfg(flags=flags, name="HLTCaloCellMakerFS", roisKey=''))
+    acc.mergeReco(TrigLArNoiseBurstRecoAlgCfg(flags, cells_name))
+    return acc
 
 
 # --------------------
 # LArNoiseBurst configuration
 # --------------------
-def getLArNoiseBurst(flags):
+@AccumulatorCache
+def getLArNoiseBurstSequenceCfg(flags):
 
     hypoAlg = CompFactory.TrigLArNoiseBurstAlg("NoiseBurstAlg")
-    from TrigCaloHypo.TrigCaloHypoConfig import TrigLArNoiseBurstHypoToolGen
-    from TrigT2CaloCommon.CaloDef import clusterFSInputMaker
-    noiseBurstInputMakerAlg = conf2toConfigurable(clusterFSInputMaker())
+    InEventReco = InEventRecoCA("LArNoiseBurstRecoSequence", inputMaker=clusterFSInputMaker())
 
-    noiseBurstRecoSeq = getLArNoiseBurstRecoSequence(flags)
+    noiseBurstRecoSeq = getLArNoiseBurstRecoCfg(flags)
 
-    noiseBurstMenuSeq =  seqAND("LArNoiseMenuSeq", [noiseBurstInputMakerAlg, noiseBurstRecoSeq])
-
-    return MenuSequence(flags,
-            Sequence    = noiseBurstMenuSeq,
-            Maker       = noiseBurstInputMakerAlg,
-            Hypo        = hypoAlg,
-            HypoToolGen = TrigLArNoiseBurstHypoToolGen)
-
+    InEventReco.mergeReco(noiseBurstRecoSeq)
+    selAcc = SelectionCA("LArNoiseBurstMenuSequence")
+    selAcc.mergeReco(InEventReco)
+    selAcc.addHypoAlgo(hypoAlg)
+    
+    return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigLArNoiseBurstHypoToolGen)
+    
+def getLArNoiseBurst(flags):
+    if isComponentAccumulatorCfg():
+       return getLArNoiseBurstSequenceCfg(flags)
+    else:
+       return menuSequenceCAToGlobalWrapper(getLArNoiseBurstSequenceCfg,flags)
 #----------------------------------------------------------------
 
 # --------------------
 # LArPS Noise Detection EM configuration
 # --------------------
 
+@AccumulatorCache
 def getCaloAllEMLayersPSSequenceCfg(flags,doAllorAllEM=False):
 
     from TrigT2CaloCommon.CaloDef import fastCaloVDVCfg
@@ -159,10 +163,10 @@ class CalibChainConfiguration(ChainConfigurationBase):
         return self.getEmptyStep(1, 'IDCalibEmptyStep')
 
     def getIDCalibFTFReco(self, flags, i):
-        return self.getStep(flags,2,'IDCalibFTFCfg',[IDCalibFTFCfg])
+        return self.getStep(flags,2,'IDCalibFTFCfg',[IDCalibFTFSeq])
 
     def getIDCalibTrigger(self, flags, i):
-        return self.getStep(flags,3,'IDCalibTriggerCfg',[IDCalibTriggerCfg])
+        return self.getStep(flags,3,'IDCalibTriggerCfg',[IDCalibTriggerSeq])
 
 #----------------------------------------------------------------
 
@@ -170,75 +174,96 @@ class CalibChainConfiguration(ChainConfigurationBase):
 # IDCalib trigger configurations
 # --------------------
 
+@AccumulatorCache
 def IDCalibTriggerCfg(flags):
-    with ConfigurableCABehavior():
+    DummyInputMakerAlg = CompFactory.InputMakerForRoI( "IM_IDCalib_HypoOnlyStep" )
+    DummyInputMakerAlg.RoITool = CompFactory.ViewCreatorInitialROITool()
 
-        DummyInputMakerAlg = CompFactory.InputMakerForRoI( "IM_IDCalib_HypoOnlyStep" )
-        DummyInputMakerAlg.RoITool = CompFactory.ViewCreatorInitialROITool()
+    reco = InEventRecoCA('IDCalibEmptySeq_reco',inputMaker=DummyInputMakerAlg)
 
-        reco = InEventRecoCA('IDCalibEmptySeq_reco',inputMaker=DummyInputMakerAlg)
+    theHypoAlg = createIDCalibHypoAlg(flags, "IDCalibHypo")
+    theHypoAlg.tracksKey = getInDetTrigConfig('fullScan').tracks_FTF()
 
-        theHypoAlg = createIDCalibHypoAlg(flags, "IDCalibHypo")
-        theHypoAlg.tracksKey = getInDetTrigConfig('fullScan').tracks_FTF()
+    selAcc = SelectionCA('IDCalibEmptySeq_sel')
+    selAcc.mergeReco(reco)
+    selAcc.addHypoAlgo(theHypoAlg)
 
-        selAcc = SelectionCA('IDCalibEmptySeq_sel')
-        selAcc.mergeReco(reco)
-        selAcc.addHypoAlgo(theHypoAlg)
-
-        msca = MenuSequenceCA(
-            flags, selAcc, 
-            HypoToolGen=IDCalibHypoToolFromDict,
-        )
+    msca = MenuSequenceCA(
+        flags, selAcc, 
+        HypoToolGen=IDCalibHypoToolFromDict,
+    )
+    return msca
+    
+def IDCalibTriggerSeq(flags):
     if isComponentAccumulatorCfg():
-        return msca
+        return IDCalibTriggerCfg(flags)
     else:
-        return appendMenuSequenceCAToAthena(msca, flags)
+        return menuSequenceCAToGlobalWrapper(IDCalibTriggerCfg, flags)
 
 
 # --------------------
 
+@AccumulatorCache
 def IDCalibFTFCfg(flags):
-    with ConfigurableCABehavior():
-        reco = InEventRecoCA('IDCalibTrkrecoSeq_reco',inputMaker=getTrackingInputMaker("ftf"))
-        reco.mergeReco(commonInDetFullScanCfg(flags))
+    reco = InEventRecoCA('IDCalibTrkrecoSeq_reco',inputMaker=getTrackingInputMaker("ftf"))
+    reco.mergeReco(commonInDetFullScanCfg(flags))
 
-        selAcc = SelectionCA('IDCalibTrkrecoSeq')
-        selAcc.mergeReco(reco)
-        selAcc.addHypoAlgo(CompFactory.TrigStreamerHypoAlg("IDCalibTrkDummyStream"))
+    selAcc = SelectionCA('IDCalibTrkrecoSeq')
+    selAcc.mergeReco(reco)
+    selAcc.addHypoAlgo(CompFactory.TrigStreamerHypoAlg("IDCalibTrkDummyStream"))
 
-        msca = MenuSequenceCA(
-            flags, selAcc,
-            HypoToolGen = lambda chainDict: CompFactory.TrigStreamerHypoTool(chainDict['chainName'])
-        )
+    msca = MenuSequenceCA(
+        flags, selAcc,
+        HypoToolGen = lambda chainDict: CompFactory.TrigStreamerHypoTool(chainDict['chainName'])
+    )
+    return msca
+
+def IDCalibFTFSeq(flags):
     if isComponentAccumulatorCfg():
-        return msca
+        return IDCalibFTFCfg(flags)
     else:
-        return appendMenuSequenceCAToAthena(msca, flags)
+        return menuSequenceCAToGlobalWrapper(IDCalibFTFCfg, flags)
 
 #----------------------------------------------------------------
 
 # --------------------
 # HLT step for the AcceptedEvents chains
 # --------------------
-def acceptedEventsSequence(flags):
+@AccumulatorCache
+def acceptedEventsCfg(flags):
     '''
-    Return MenuSequence for an HLT step used by the AcceptedEvents chains. This step is a trivial
+    Return MenuSequenceCA for an HLT step used by the AcceptedEvents chains. This step is a trivial
     always-reject hypo with no reco. The step itself should be noop as only the HLTSeeding and the
     end-of-event sequence parts of AcceptedEvents chains are actually used.
     '''
     # Implementation identical to the timeburner chain but with zero sleep time
-    inputMaker = InputMakerForRoI("IM_AcceptedEvents")
-    inputMaker.RoITool = ViewCreatorInitialROITool()
-    inputMaker.RoIs="AcceptedEventsRoIs"
-    inputMakerSeq = seqAND("AcceptedEventsSequence", [inputMaker])
 
+    inputMaker = CompFactory.InputMakerForRoI(
+        "IM_AcceptedEvents",
+        RoITool = CompFactory.ViewCreatorInitialROITool(),
+        RoIs="AcceptedEventsRoIs",
+    )
+    reco = InEventRecoCA('AcceptedEvents_reco',inputMaker=inputMaker)
     # TimeBurner alg works as a reject-all hypo
-    hypoAlg = conf2toConfigurable(TimeBurnerCfg(flags,
-                                                name="AcceptedEventsHypo",
-                                                SleepTimeMillisec = 0))
+    selAcc = SelectionCA('AcceptedEventsSequence')
+    selAcc.mergeReco(reco)
+    selAcc.addHypoAlgo(
+        TimeBurnerCfg(
+            flags,
+            name="AcceptedEventsHypo",
+            SleepTimeMillisec = 0,
+        )
+    )
 
-    return MenuSequence(flags,
-        Sequence    = inputMakerSeq,
-        Maker       = inputMaker,
-        Hypo        = hypoAlg,
-        HypoToolGen = TimeBurnerHypoToolGen)
+    msca = MenuSequenceCA(
+        flags, selAcc,
+        HypoToolGen=TimeBurnerHypoToolGen
+    )
+    return msca
+
+def acceptedEventsSequence(flags):
+
+    if isComponentAccumulatorCfg():
+        return acceptedEventsCfg(flags)
+    else:
+        return menuSequenceCAToGlobalWrapper(acceptedEventsCfg, flags)

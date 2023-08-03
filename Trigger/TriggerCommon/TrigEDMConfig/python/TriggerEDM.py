@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # ********************* All Tools/Functions for the TriggerEDM **********************
 # Keeping all functions from the original TriggerEDM.py (Run 2 EDM) in this file
@@ -121,14 +121,12 @@ def getRun3TrigObjProducedInView(theKey, trigEDMList):
     Returns true if this collection is produced inside EventViews
     (Hence, has the special viewIndex Aux decoration applied by steering)
     """
+    from TrigEDMConfig.TriggerEDMRun3 import InViews
     import itertools
-    for item in itertools.chain(*trigEDMList):
-        if len(item) < 4:
-            continue
-        if theKey not in item[0]:
-            continue
-        return ("inViews" in item[3])
-    return False
+
+    return any(coll for coll in itertools.chain(*trigEDMList) if
+               len(coll)>3 and theKey==coll[0].split('#')[1] and
+               any(isinstance(v, InViews) for v in coll[3]))
 
 
 def handleRun3ViewContainers( el ):

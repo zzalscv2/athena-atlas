@@ -27,10 +27,14 @@ namespace Muon
       //or we can make this a template but then loosing the ability to change trigger type at run time
       const std::vector<std::shared_ptr<Muon::nsw::NSWTriggerElink>>& get_elinks () const {return m_elinks;};
 
-      bool has_error () {return m_has_error;};
+      //keep in mind that the decoder is stopping at first exception: 
+      //no data recovery implemented on purpose, since there are infinite ways to have broken TP packets
+      bool has_error () const {return m_has_error;};
+      int error_id () const {return m_error_id;};
 
      private:
       bool m_has_error;
+      int  m_error_id;
       std::string m_triggerType;
       std::vector<std::shared_ptr<Muon::nsw::NSWTriggerElink>> m_elinks;
     };

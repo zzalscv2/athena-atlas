@@ -348,6 +348,32 @@ def MmBytestreamDecodeCfg(flags, name="MmRawDataProvider", **kwargs):
 
     return acc
 
+def NswMMTPRodDecoderCfg(flags, name ="NswMMTPRodDecoder", **kwargs):
+    result = ComponentAccumulator()
+    the_tool = CompFactory.Muon.NSWMMTP_ROD_Decoder(name = name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
+
+def NswMMTPRawDataProviderToolCfg(flags, name = "NswMMTPRawDataProviderTool", **kwargs ):
+    result = ComponentAccumulator()
+    kwargs.setdefault( "Decoder", result.popToolsAndMerge(NswMMTPRodDecoderCfg(flags)))
+    kwargs.setdefault( "RdoLocation", ( flags.Overlay.BkgPrefix  if flags.Common.isOverlay else "") + "NSW_MMTrigProcessor_RDO" )
+    the_tool = CompFactory.Muon.NSWMMTP_RawDataProviderToolMT(name = name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
+
+def NswMMTPByteStreamDecodeCfg(flags, name = "NswMMTPByteStreamDecode",  **kwargs ):
+    result = ComponentAccumulator()
+    # Make sure muon geometry is configured
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+    result.merge(MuonGeoModelCfg(flags))
+
+    #recycling Pad data provider since not it's not doing anything
+    the_alg = CompFactory.Muon.sTgcPadTriggerRawDataProvider(name = name, ProviderTool = result.popToolsAndMerge(NswMMTPRawDataProviderToolCfg(flags)), **kwargs )
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
+
 def MuonByteStreamDecodersCfg(flags):
     cfg=ComponentAccumulator()
     
@@ -374,8 +400,9 @@ def MuonByteStreamDecodersCfg(flags):
         cfg.merge( cscdecodingAcc )
 
     if (flags.Detector.GeometrysTGC and flags.Detector.GeometryMM):
-        # Schedule MM data decoding
+        # Schedule MM and MMTP data decoding
         cfg.merge( MmBytestreamDecodeCfg( flags ) )
+        cfg.merge( NswMMTPByteStreamDecodeCfg(flags) )
 
         # Schedule sTGC data decoding
         cfg.merge( sTgcBytestreamDecodeCfg( flags )  )

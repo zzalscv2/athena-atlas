@@ -9,6 +9,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from .HLTInputConfig import HLTInputConfigRegistry
 from ..CommonSequences.FullScanDefs import caloFSRoI, trkFSRoI
 from ..Config.MenuComponents import extractAlgorithmsAndAppendCA
+from ..Jet.JetMenuSequencesConfig import getCaloInputMaker, getTrackingInputMaker
 
 _algs_by_purpose = {
     "metcalo": ["cell", "tcpufit", "tcpufit_sig30"],
@@ -51,6 +52,10 @@ def getMETRecoSequences(flags, purposes: List[str]):
         step_cas, _ = registry.build_steps(flags, ef_reco_algs, return_ca=True)
         merged_ca = ComponentAccumulator()
         merged_ca.addSequence(parOR(seqname),primary=True)
+        if 'metcalo' in purposes:
+            merged_ca.addEventAlgo(getCaloInputMaker(), seqname)
+        if 'mettrk' in purposes:
+            merged_ca.addEventAlgo(getTrackingInputMaker('ftf'), seqname)
         for ca in step_cas:
             merged_ca.merge(ca,seqname)
 
