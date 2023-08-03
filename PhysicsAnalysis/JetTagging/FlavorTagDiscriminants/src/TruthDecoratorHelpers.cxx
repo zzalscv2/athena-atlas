@@ -21,7 +21,7 @@ namespace FlavorTagDiscriminants {
 
             // no vertex
             const xAOD::TruthVertex* truth_vertex = truth->prodVtx();
-            if ( not truth_vertex or truth_vertex->perp() > 440.0 ) { 
+            if ( not truth_vertex || truth_vertex->perp() > 440.0 ) { 
                 return nullptr;
             }
 
@@ -29,19 +29,43 @@ namespace FlavorTagDiscriminants {
         }
 
         float get_distance(const xAOD::TruthVertex* vertex_A, 
-                                                const xAOD::TruthVertex* vertex_B) {
-            if ( !vertex_A or !vertex_B ) { return 999.0; }
+                           const xAOD::TruthVertex* vertex_B) {
+            if ( !vertex_A || !vertex_B ) { return 999.0; }
             return (vertex_A->v4().Vect() - vertex_B->v4().Vect()).Mag();
         }
 
-        const xAOD::TruthParticle* get_parent_hadron(const xAOD::TruthParticle* truth_particle) {
+        bool is_bc_hadron(const xAOD::TruthParticle* truth_particle, int flavour) {
+            if( flavour == 5 && truth_particle->isBottomHadron() ) { return true; }
+            if( flavour == 4 && truth_particle->isCharmHadron()  ) { return true; }
+            return false;
+        }
+        
+        bool is_weakly_decaying_hadron(const xAOD::TruthParticle* truth_particle, int flavour) {
+            if (is_bc_hadron(truth_particle, flavour)) {
+                if ( not truth_particle->hasDecayVtx() ) { return false; }
+                const auto vx = truth_particle->decayVtx();
+                for ( size_t i = 0; i < vx->nOutgoingParticles(); i++ ) {
+                    const auto out_part = vx->outgoingParticle(i);
+                    if ( is_bc_hadron(out_part, flavour) ) { return  false; }
+                } 
+                return true;
+            }
+            return false;
+        }
+        
+        bool is_weakly_decaying_hadron(const xAOD::TruthParticle* truth_particle) {
+            return is_weakly_decaying_hadron(truth_particle, 5) || is_weakly_decaying_hadron(truth_particle, 4);
+        }
+
+        const xAOD::TruthParticle* get_parent_hadron(const xAOD::TruthParticle* truth_particle, bool user_called) {
+            // get the weakly decaying parent hadron of truth_particle
             if ( truth_particle == nullptr ) { return nullptr; }
-            if ( truth_particle->isBottomHadron() or truth_particle->isCharmHadron() ) {
+            if ( !user_called && is_weakly_decaying_hadron(truth_particle) )  {
                 return truth_particle;
             }
             for (unsigned int p = 0; p < truth_particle->nParents(); p++) {
-                const xAOD::TruthParticle* parent = truth_particle->parent(p);
-                auto parent_hadron = get_parent_hadron(parent);
+                const auto parent = truth_particle->parent(p);
+                const auto parent_hadron = get_parent_hadron(parent, false);
                 if ( parent_hadron != nullptr ) {
                     return parent_hadron;
                 }
@@ -75,7 +99,7 @@ namespace FlavorTagDiscriminants {
         int get_vertex_index(const xAOD::TruthVertex* this_vertex, 
                              const xAOD::TruthVertex* truth_PV, 
                              std::vector<const xAOD::TruthVertex*>& seen_vertices,
-                             const float& truthVertexMergeDistance) {
+                             const float truthVertexMergeDistance) {
             // no vertex
             if (!this_vertex) {
                 return -2;
