@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -397,8 +397,8 @@ namespace Analysis
     private:
 
       /** @brief pointer to the TFile object providing access to the calibrations */
-      TFile* m_fileEff; //! Do not attempt to persistify (PROOF)
-      TFile* m_fileSF; //! Do not attempt to persistify (PROOF)
+      TFile* m_fileEff{}; //! Do not attempt to persistify (PROOF)
+      TFile* m_fileSF{}; //! Do not attempt to persistify (PROOF)
 
       /** @brief jet author aliases (there is no single CalibrationBroker object here to
 	    take care of this, so we do it in this class) */
@@ -426,7 +426,7 @@ namespace Analysis
       std::map<const CalibrationDataContainer*, std::shared_ptr<CalibrationDataEigenVariations> > m_eigenVariationsMap;
       
       /** decide whether to run the eigenvector method or not **/
-      bool m_runEigenVectorMethod;
+      bool m_runEigenVectorMethod{};
       Uncertainty m_EVStrategy; // <--- In addition, specify whether to use the global eigenvariations method
 
       /** Eigenvector reduction strategy (per flavour) **/
@@ -438,10 +438,10 @@ namespace Analysis
 
 
       /** if true, exclude pre-recommended lists of uncertainties from the covariance matrix building, in addition to the above user specified lists **/
-      bool m_useRecommendedEVExclusions;
+      bool m_useRecommendedEVExclusions{};
       
       /** if true, allow also for some informational (and not only error/warning) messages **/
-      bool m_verbose;
+      bool m_verbose{};
 
       // ------------------------------------------------------------------------------------------
 
@@ -449,10 +449,10 @@ namespace Analysis
 
       /** specify whether or not to use MC/MC (hadronisation) scale factors
           (the fact that this is steerable is intended to be temporary only) */
-      bool m_useMCMCSF;
+      bool m_useMCMCSF{};
       /** specify whether or not to use MC/MC (topology) scale factors
 	    (also this steering option may be removed) */
-      bool m_useTopologyRescaling;
+      bool m_useTopologyRescaling{};
 
       /** the following maps (one for each directory) specify the name of the container
 	   serving as the 'hadronisation' reference for each object */
@@ -470,7 +470,7 @@ namespace Analysis
       // Bounds checking functionality
 
       /** |eta| bounds and strategy for dealing with out-of-bounds conditions */
-      double               m_maxAbsEta;
+      double               m_maxAbsEta{};
       OutOfBoundsStrategy  m_absEtaStrategy;
       OutOfBoundsStrategy  m_otherStrategy;
       
@@ -486,7 +486,7 @@ namespace Analysis
       // for (one-time) checks of scale factors
       void checkWeightScaleFactors(unsigned int indexSF, unsigned int indexEff);
       std::vector<std::pair<unsigned int, unsigned int> > m_checkedWeightScaleFactors;
-      double               m_maxTagWeight;
+      double               m_maxTagWeight{};
 
       // make it possible to persistify this class (for PROOF purposes)
       ClassDef(CalibrationDataInterfaceROOT,1)   // platform-independent (main) interface for access to b-tagging information

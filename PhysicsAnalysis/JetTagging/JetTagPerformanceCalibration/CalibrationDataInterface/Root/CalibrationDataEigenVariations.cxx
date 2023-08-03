@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////
@@ -28,7 +28,6 @@
 #include "TROOT.h"
 #include "TFile.h"
 
-#include <math.h>
 #include <memory.h>
 
 using Analysis::CalibrationDataEigenVariations;
@@ -432,6 +431,10 @@ CalibrationDataEigenVariations::getEigenCovarianceMatrix()
 
   // retrieve the central calibration
   TH1* result = dynamic_cast<TH1*>(m_cnt->GetValue("result"));
+  if (not result){
+    std::cerr<<"CalibrationDataEigenVariations::getEigenCovarianceMatrix(): failed dynamic cast to TH1*\n";
+    return  TMatrixDSym();
+  }
 
   // loop over the uncertainties to construct the covariance matrix for all uncertainties
   // to be addressed using the eigenvector method.
@@ -439,6 +442,7 @@ CalibrationDataEigenVariations::getEigenCovarianceMatrix()
   // First, treat the statistics separately.
   // Account for the possibility that this is handled as a (non-trivial) covariance matrix
   TMatrixDSym* sCov = dynamic_cast<TMatrixDSym*>(m_cnt->GetValue("statistics"));
+ 
   // Alternatively, statistical uncertainties may be accounted for as variations (i.e., much like systematic uncertainties).
   // In that case, we create a null matrix here and add the statistical contributions along with the systematic ones.
   TMatrixDSym cov = (sCov) ? *sCov : getStatCovarianceMatrix(result, m_statVariations);
@@ -454,6 +458,10 @@ CalibrationDataEigenVariations::getEigenCovarianceMatrix()
     // entries that can be excluded if desired
     if (m_namedIndices.find(uncs[t]) != m_namedIndices.end()) continue;
     TH1* hunc = dynamic_cast<TH1*>(m_cnt->GetValue(uncs[t].c_str()));
+    if (not hunc){
+      std::cerr<< "CalibrationDataEigenVariations::getEigenCovarianceMatrix(): dynamic cast failed\n";
+      continue;
+    }
     cov += getSystCovarianceMatrix(result, hunc, m_cnt->isBinCorrelated(uncs[t]), m_cnt->getTagWeightAxis()); // <-------- This is where we add the covariance matrices together to form the "total covariance"
   }
 
@@ -500,6 +508,10 @@ CalibrationDataEigenVariations::getJacobianReductionMatrix()
 
   // retrieve the central calibration
   TH1* result = dynamic_cast<TH1*>(m_cnt->GetValue("result"));
+  if (not result){
+    std::cerr<<"CalibrationDataEigenVariations::getJacobianReductionMatrix(): dynamic cast failed\n";
+    return TMatrixD();
+  }
 
   // loop over the uncertainties to construct the covariance matrix for all uncertainties
   // to be addressed using the eigenvector method.
@@ -632,7 +644,10 @@ CalibrationDataEigenVariations::initialize(double min_variance)
 
   // retrieve the central calibration
   TH1* result = dynamic_cast<TH1*>(m_cnt->GetValue("result"));
-
+  if (not result){
+    std::cerr<<"CalibrationDataEigenVariations::initialize: dyanmic cast failed\n";
+    return;
+  }
   // First step: construct the original covariance matrix
   TMatrixDSym cov = getEigenCovarianceMatrix();
   TMatrixDSym corr(result->GetNbinsX()*result->GetNbinsY()*result->GetNbinsZ()); // We want to construct the correlation matrix in order to compare the final eigenvariations correlation matrix to it  
@@ -1120,6 +1135,10 @@ CalibrationDataEigenVariations::EigenVectorRecomposition(const std::string label
     if (m_namedIndices.find(fullUncList[t]) != m_namedIndices.end()) continue;
     
     TH1* hunc = dynamic_cast<TH1*>(m_cnt->GetValue(fullUncList[t].c_str()));
+    if (not hunc){
+      std::cerr<<"CalibrationDataEigenVariations::EigenVectorRecomposition: dynamic cast failed\n";
+      continue;
+    }
 
     Int_t nx = hunc->GetNbinsX();
     Int_t ny = hunc->GetNbinsY();
@@ -1148,6 +1167,10 @@ CalibrationDataEigenVariations::EigenVectorRecomposition(const std::string label
   }
 
   TH1* nom = dynamic_cast<TH1*>(m_cnt->GetValue("result")); // Nominal SF hist
+  if (not nom){
+     std::cout<<"Eigenvector Recomposition: dynamic cast failed\n";
+     return false;
+  }
   int dim = nom->GetDimension();
   Int_t nx = nom->GetNbinsX();
   Int_t ny = nom->GetNbinsY();
@@ -1279,6 +1302,10 @@ CalibrationDataEigenVariations(cdipath, tagger, wp, jetcollection, cnt, excludeR
       m_histcontainers.insert({flavour, c}); // Build the mapping between flavour and the corresponding "flavour container", i.e. the CalibrationDataHistogramContainer
       std::vector<std::string> uncs = c->listUncertainties();
       TH1* result = dynamic_cast<TH1*>(c->GetValue("result")); // let's get the size of this for later
+      if (not result){
+        std::cout << "Dynamic cast failed at "<<__LINE__<<"\n";
+        continue;
+      }
       m_blockmatrixsize+=result->GetNbinsX()*result->GetNbinsY()*result->GetNbinsZ(); // should be ~300 for fixed cut, something else for continuous
       std::cout << "m_blockmatrixsize is now " << m_blockmatrixsize << std::endl;
       for (const std::string& unc : uncs){
@@ -1374,6 +1401,10 @@ CalibrationDataGlobalEigenVariations::getEigenCovarianceMatrix()
         // Now we want to get the histogram for this systematic, for this flavour
         TH1* hunc = dynamic_cast<TH1*>(c->GetValue(tunc.Data()));
         TH1* ref = dynamic_cast<TH1*>(c->GetValue("result")); // retrieving this just in case the uncertainty doesn't exist for this flavour, just need it to get dimensions right
+        if (not ref){
+           std::cout << " There was no uncertainty OR SF/EFF results... Are you sure you have the right CDIContainer path?" << std::endl;
+           continue;
+        }
         int tagweightax = c->getTagWeightAxis(); // for handling the continuous case(s)
         if (hunc){
           flavs_in_common.push_back(1); // report that we have this uncertainty in this flavour
@@ -1385,15 +1416,11 @@ CalibrationDataGlobalEigenVariations::getEigenCovarianceMatrix()
         } else {
           flavs_in_common.push_back(0); // If the uncertainty doesn't exist for that flavour, just report, we'll set to zero in the combined vector
           // Because the uncertainty doesn't exist for this flavour, we just get the dimensions we need
-          if (ref){
-            Int_t nbinx = ref->GetNbinsX(), nbiny = ref->GetNbinsY(), nbinz = ref->GetNbinsZ();
-            Int_t rows = nbinx;
-            if (ref->GetDimension() > 1) rows *= nbiny;
-            if (ref->GetDimension() > 2) rows *= nbinz;
-            flavour_size = rows;
-          } else {
-            std::cout << " There was no uncertainty OR SF/EFF results... Are you sure you have the right CDIContainer path?" << std::endl;
-          }
+          Int_t nbinx = ref->GetNbinsX(), nbiny = ref->GetNbinsY(), nbinz = ref->GetNbinsZ();
+          Int_t rows = nbinx;
+          if (ref->GetDimension() > 1) rows *= nbiny;
+          if (ref->GetDimension() > 2) rows *= nbinz;
+          flavour_size = rows;
         }
         
         // Now we can loop through the bins of the flavour uncertainty, adding them onto the combined systematic
@@ -1558,6 +1585,10 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
     Analysis::CalibrationDataHistogramContainer* c = m_histcontainers[flavour]; // pointer to the flavour container
 
     TH1* result = dynamic_cast<TH1*>(c->GetValue("result"));
+    if (not result){
+      std::cerr<<"CalibrationDataGlobalEigenVariations::initialize: dynamic cast failed\n ";
+      continue;
+    }
     //construct the combined_result and combined_named_variations (up and down)
     if (c->getTagWeightAxis() == -1){ // For fixed cut WP, the Y axis **should** be the pT axis (but can it can potentially be different in the future)
       flav_bins[flavour] = result->GetNbinsY(); // Add the number of bins of the result histogram with non-zero results...  
@@ -1777,9 +1808,9 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
   // AT THIS STAGE: Pruning has already occurred, leaving us with a set of combined eigenvariations in "m_eigen", which we can thence recombine and compute the correlation matrix
   // That correlation matrix can then be compared to the original correlation matrix "corr", simply subtracting one from the other. Better approximations will have close to zero deviation.
   // What follows is the construction of this comparison, and the reporting of the comparison (saving it to file)...  
-
+  std::streamsize ss = std::cout.precision();
   std::cout << " The total variance is " << m_totalvariance << " and the reduction captured " << std::setprecision(9) << 100.0*(m_capturedvariance/m_totalvariance) << "% of this." << std::endl;
-  
+  std::cout.precision(ss); //restore precision
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   ///// optionally: perform a visual validation of the 'SFGlobalEigen' method alongside the 'SFEigen'.                       /////
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1806,6 +1837,9 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
     for (const std::string& flavour : m_flavours){
       Analysis::CalibrationDataHistogramContainer* c = m_histcontainers[flavour];
       TH1* result = dynamic_cast<TH1*>(c->GetValue("result"));
+      if (not result){
+        std::cerr<<"CalibrationDataGlobalEigenVariations::initialize: dyanmic cast failed\n";
+      }
       TH1* resultVariedUp   = (TH1*)result->Clone(eigenvarup);   resultVariedUp->SetDirectory(0); // copy flavour result, want to set bin contents according to the combined eigenvartion flavour block
       TH1* resultVariedDown = (TH1*)result->Clone(eigenvardown); resultVariedDown->SetDirectory(0);
       int up_to_bin = flav_bins[flavour];
@@ -2052,6 +2086,10 @@ CalibrationDataGlobalEigenVariations::mergeVariations(const IndexSuperSet &set, 
   Analysis::CalibrationDataHistogramContainer* c = m_histcontainers[flavour];
 
   TH1* result = dynamic_cast<TH1*>(c->GetValue("result"));
+  if (not result){
+    std::cerr << "Error in CalibrationDataGlobalEigenVariations::mergeVariations: failed dynamic cast\n";
+    return;
+  }
   // retrieve the central calibration
 
   IndexSet toDelete;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -504,8 +504,11 @@ CalibrationDataHistogramContainer::computeVariableTypes()
   // histograms need a special treatment, as the coordinate titles are not actually stored
   // with the title itself, but instead moved off to the axis titles...
   const TH1* hobj = dynamic_cast<const TH1*>(m_objResult);
+  if (not hobj){
+    std::cerr << "in CalibrationDataHistogramContainer::computeVariableTypes(): dynamic_cast failed\n";
+    return;
+  }
 
-  // no protection against null pointers here -- should not be necessary?
   int dims = hobj->GetDimension();
   for (int dim = 0; dim < dims; ++dim) {
     const TAxis* axis = 0;
@@ -1013,7 +1016,7 @@ ClassImp(CalibrationDataMappedHistogramContainer)
 
 //________________________________________________________________________________
 CalibrationDataMappedHistogramContainer::CalibrationDataMappedHistogramContainer(const char* name) :
-  CalibrationDataHistogramContainer(name), m_lastBin(0)
+  CalibrationDataHistogramContainer(name), m_beginMapped(0),m_lastBin(0)
 {
 }
 
@@ -1037,8 +1040,11 @@ CalibrationDataMappedHistogramContainer::computeVariableTypes()
   // histograms need a special treatment, as the coordinate titles are not actually stored
   // with the title itself, but instead moved off to the axis titles...
   const TH1* hobj = dynamic_cast<const TH1*>(m_objResult);
+  if (not hobj){
+    std::cerr << "in CalibrationDataMappedHistogramContainer::computeVariableTypes(): dynamic cast failed\n";
+    return;
+  }
 
-  // no protection against null pointers here -- should not be necessary?
   int dims = hobj->GetDimension();
   for (int dim = 0; dim < dims; ++dim) {
     const TAxis* axis = 0;
@@ -1324,6 +1330,10 @@ CalibrationDataMappedHistogramContainer::findBin()
 
   Int_t mapped[3] = {0};
   const TH1* hist = dynamic_cast<const TH1*>(m_objResult);
+  if (not hist){
+    std::cerr << "CalibrationDataMappedHistogramContainer::findBin(): dynamic cast failed\n";
+    return 0;
+  }
   Int_t ndim = hist->GetDimension();
   // Push the mapped variables onto an array.
   // Since we derive from TH1 this need never be more than 3 elements long.
