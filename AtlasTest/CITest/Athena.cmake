@@ -236,52 +236,40 @@ atlas_add_citest( ACTS_Propagation_ID
    SCRIPT ActsExtrapolationAlgTest.py )
 
 atlas_add_citest( ACTS_Workflow
-    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsWorkflow.sh 
-    LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsWorkflow.sh )
 
 atlas_add_citest( ACTS_ValidateClusters
-    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateClusters.sh
-    LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateClusters.sh )
 
 atlas_add_citest( ACTS_ValidateActsCoreSpacePoints
-    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateActsCoreSpacePoints.sh
-    LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateActsCoreSpacePoints.sh )
 
-atlas_add_citest( ACTS_ValidateActsSpacePoints
-    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateActsSpacePoints.sh
-    LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
+atlas_add_citest( ACTS_ValidateActsTrkSpacePoints
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateActsSpacePoints.sh )
 
 atlas_add_citest( ACTS_ValidateSeeds
-    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateSeeds.sh 
-    LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateSeeds.sh )
 
 atlas_add_citest( ACTS_ValidateOrthogonalSeeds 
-    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateOrthogonalSeeds.sh 
-    LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateOrthogonalSeeds.sh )
 
 atlas_add_citest( ACTS_ActsPersistifyEDM 
-    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsPersistifyEDM.sh 
-    LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsPersistifyEDM.sh )
 
 atlas_add_citest( ACTS_ValidateTracks
-    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateTracks.sh
-    LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateTracks.sh )
 
 atlas_add_citest( ACTS_ValidateAmbiguityResolution
-    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateAmbiguityResolution.sh
-    LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateAmbiguityResolution.sh )
 
 atlas_add_citest( ACTS_ActsKfRefitting
-    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsKfRefitting.sh
-    LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsKfRefitting.sh )
 
 atlas_add_citest( ACTS_ActsGSFRefitting
-    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsGSFRefitting.sh
-    LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsGSFRefitting.sh )
 
 atlas_add_citest( ACTS_ActsBenchmarkWithSpot
-    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsBenchmarkWithSpot.sh
-    LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsBenchmarkWithSpot.sh )
 
 #################################################################################
 # Trigger
