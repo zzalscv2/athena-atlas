@@ -116,7 +116,14 @@ class MdtReadoutElement : public MuonReadoutElement {
 
     Amg::Vector3D readOutPos(const ActsGeometryContext& ctx,
                              const IdentifierHash& measId) const;
-    
+    /// Returns the distance along the wire from the readout card
+    /// The distance is given as the delta z of the readout card in the local tube frame
+    double distanceToReadout(const ActsGeometryContext& ctx,
+                             const Identifier& measId,
+                             const Amg::Vector3D& globPoint) const;
+    double distanceToReadout(const ActsGeometryContext& ctx,
+                             const IdentifierHash& measHash,
+                             const Amg::Vector3D& globPoint) const;
     
     double activeTubeLength(const IdentifierHash& hash) const;
         
@@ -129,13 +136,14 @@ class MdtReadoutElement : public MuonReadoutElement {
    private:
         /// Returns the tube position in the chamber coordinate frame
         Amg::Vector3D localTubePos(const IdentifierHash& hash) const;
-        /// Returns the transformation to go into the chamber layer
-        ///  x-axis: Parallel to the wire layer
-        ///  y-axis: Along the wire
-        ///  z-axis: Pointing outwards the chamber
+        /// Returns the transformation into the rest frame of the tube
+        /// x-axis: Pointing towards the next layer
+        /// y-axis: Pointing parallel to the wire layer 
+        /// z-axis: Pointing along the wire
         Amg::Transform3D toChamberLayer(const IdentifierHash& hash) const;
         /// Returns the transformation into the rest frame of the tube
-        /// x-axis: Pointing parallel to the wire layer 
+        /// x-axis: Pointing towards the next layer
+        /// y-axis: Pointing parallel to the wire layer 
         /// z-axis: Pointing along the wire
         Amg::Transform3D toTubeFrame(const IdentifierHash& hash) const;
 
