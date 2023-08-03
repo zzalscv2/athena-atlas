@@ -297,7 +297,7 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
       ```python
         InViewJets = recordable( f'HLT_{jc_key}bJets' )
       ```
-      At this point all of our inputs are defined and accessible inside the view. Though important to remember is that all collections inside the view have to be defined in [TriggerEDMRun3.py](https://gitlab.cern.ch/atlas/athena/-/blob/BjetDoc/Trigger/TriggerCommon/TrigEDMConfig/python/TriggerEDMRun3.py) with the respective '*inViews*'-name, here
+      At this point all of our inputs are defined and accessible inside the view. Though important to remember is that all collections inside the view have to be defined in [TriggerEDMRun3.py](https://gitlab.cern.ch/atlas/athena/-/blob/BjetDoc/Trigger/TriggerCommon/TrigEDMConfig/python/TriggerEDMRun3.py) with the respective '*InViews*'-name, here
       ```python
         Views = f"BTagViews_{jc_name}"
       ```
