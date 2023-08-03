@@ -100,9 +100,12 @@ class TriggerAnalysisBlock (ConfigBlock):
         alg.electronIsol = self.electronIsol
         alg.photonIsol = self.photonIsol
         alg.muonID = self.muonID
-        alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
-        alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
-        alg.photons, alg.photonSelection = config.readNameAndSelection(self.photons)
+        if self.electrons:
+            alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
+        if self.muons:
+            alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
+        if self.photons:
+            alg.photons, alg.photonSelection = config.readNameAndSelection(self.photons)
 
         if config.dataType != 'data' and not alg.doMatchingOnly:
             config.addOutputVar ('EventInfo', alg.scaleFactorDecoration, 'globalTriggerEffSF', isEventLevel=True)
