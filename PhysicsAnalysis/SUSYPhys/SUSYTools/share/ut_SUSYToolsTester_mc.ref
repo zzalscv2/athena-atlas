@@ -42,6 +42,21 @@ ToolSvc.TauTrigEffTool...WARNING 2022-prerec tag are pre-recommendations and sti
 ToolSvc.TauTrigEffTool...WARNING 2022-prerec tag are pre-recommendations and still under development.
 ToolSvc.TauTrigEffTool...WARNING 2022-prerec tag are pre-recommendations and still under development.
 ToolSvc.TauTrigEffTool...WARNING 2022-prerec tag are pre-recommendations and still under development.
+ CDI file build number: Custom
+ Your configuration looks good! Available labels are : 
+| DL1dv01
+|\__ AntiKt4EMPFlowJets
+|   |\__FixedCutBEff_85
+|   |   \___ (0) B
+|   |   \___ (1) C
+|   |   \___ (2) Light
+|   |   \___ (3) T
+number of taggers: 6
+DL1dv00, DL1dv01, DL1r, GN120220509, GN2v00LegacyWP, GN2v00NewAliasWP, 
+number of jet collections: 2
+AntiKt4EMPFlowJets, AntiKtVR30Rmax4Rmin02TrackJets, 
+number of working points: 5
+Continuous, FixedCutBEff_60, FixedCutBEff_70, FixedCutBEff_77, FixedCutBEff_85, 
 === CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT ===
  taggerName           : DL1dv01
  Systematic strategy : SFGlobalEigen
