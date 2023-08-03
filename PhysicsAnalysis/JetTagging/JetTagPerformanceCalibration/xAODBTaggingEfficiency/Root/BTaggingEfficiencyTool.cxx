@@ -272,7 +272,7 @@ StatusCode BTaggingEfficiencyTool::initialize() {
     excludeFromEVCov["T"].push_back("extrapolation from charm");
 
   //high pt extrapolation uncertainties
-  if((m_OP.find("Continuous") != std::string::npos) && (m_jetAuthor.find("AntiKtVR30Rmax4Rmin02TrackJets") != std::string::npos)){
+  if(m_OP.find("Continuous") != std::string::npos){
     excludeFromEVCov["B"].push_back("extrapolation_pt_b_Eigen*");
     excludeFromEVCov["C"].push_back("extrapolation_pt_c_Eigen*");
     excludeFromEVCov["Light"].push_back("extrapolation_pt_l_Eigen*");
