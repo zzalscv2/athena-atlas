@@ -704,6 +704,7 @@ protected:
                                     123.*Gaudi::Units::GeV,  // mass
                                     -1.,  // charge
                                     11,  // PDG code
+                                    1, ///status
                                     0.2*Gaudi::Units::second,  // time
                                     particleOrigin,
                                     123  // BCID
@@ -737,6 +738,7 @@ protected:
                                     123.*Gaudi::Units::GeV,  // mass
                                     -1.,  // charge
                                     11,  // PDG code
+                                    1, ///status                                    
                                     0.2*Gaudi::Units::second,  // time
                                     particleOrigin,
                                     123  // BCID
@@ -767,6 +769,7 @@ protected:
                                     123.*Gaudi::Units::GeV,  // mass
                                     -1.,  // charge
                                     11,  // PDG code
+                                    1, ///status                                    
                                     0.2*Gaudi::Units::second,  // time
                                     particleOrigin,
                                     123  // BCID
@@ -797,6 +800,7 @@ protected:
                                     123.*Gaudi::Units::GeV,  // mass
                                     -1.,  // charge
                                     11,  // PDG code
+                                    1, ///status
                                     0.2*Gaudi::Units::second,  // time
                                     particleOrigin,
                                     123  // BCID
@@ -857,6 +861,7 @@ protected:
                                        0.510999*Gaudi::Units::MeV,  // e- mass
                                        -1.,  // charge
                                        11,  // e- PDG code
+                                       1, ///status
                                        678.9/Gaudi::Units::c_light*Gaudi::Units::ns,  // time
                                        particleOrigin,
                                        0,  // BCID

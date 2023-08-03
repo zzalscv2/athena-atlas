@@ -354,6 +354,7 @@ ISF::InputConverter::convertParticle(const HepMC::GenParticlePtr& genPartPtr, EB
                                                        pMass,
                                                        charge,
                                                        pPdgId,
+                                                       genPartPtr->status(),
                                                        pTime,
                                                        origin,
                                                        bcid,

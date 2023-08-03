@@ -497,6 +497,7 @@ iFatras::McMaterialEffectsUpdator::updateInLay(
                                                       isp->mass(),
                                                       isp->charge(),
                                                       isp->pdgCode(),
+                                                      isp->status(),
                                                       isp->timeStamp(),
                                                       *m_isp,
                                                       isp->barcode());
@@ -685,6 +686,7 @@ iFatras::McMaterialEffectsUpdator::updateInLay(
                                                     isp->mass(),
                                                     isp->charge(),
                                                     isp->pdgCode(),
+                                                    isp->status(),
                                                     isp->timeStamp(),
                                                     *m_isp,
                                                     isp->barcode());
@@ -1285,6 +1287,7 @@ void iFatras::McMaterialEffectsUpdator::recordBremPhoton(double time,
                                                          0,   //!< mass
                                                          0,   //!< charge
                                                          22,  //!< pdg code
+                                                         1,   //!status
                                                          time,  //!< time
                                                          *parent );
 
@@ -1412,6 +1415,7 @@ void iFatras::McMaterialEffectsUpdator::recordBremPhotonLay(const ISF::ISFPartic
                                                          0,   //!< mass
                                                          0,   //!< charge
                                                          22,  //!< pdg code
+                                                         1,   //!< status
                                                          timeLim.time,  //!< time
                                                          *parent );
 
@@ -1588,6 +1592,7 @@ iFatras::McMaterialEffectsUpdator::interact(double time,
                                         0.,
                                         0.,
                                         22,
+                                        1,
                                         time,
                                         *parent );
 
@@ -1596,6 +1601,7 @@ iFatras::McMaterialEffectsUpdator::interact(double time,
                                         0.,
                                         0.,
                                         22,
+                                        1,
                                         time,
                                         *parent );
 
@@ -1701,6 +1707,7 @@ ISF::ISFParticleVector  iFatras::McMaterialEffectsUpdator::interactLay(const ISF
                                         0.,
                                         0.,
                                         22,
+                                        1,
                                         time,
                                         *parent );
 
@@ -1709,6 +1716,7 @@ ISF::ISFParticleVector  iFatras::McMaterialEffectsUpdator::interactLay(const ISF
                                         0.,
                                         0.,
                                         22,
+                                        1,
                                         time,
                                         *parent );
 

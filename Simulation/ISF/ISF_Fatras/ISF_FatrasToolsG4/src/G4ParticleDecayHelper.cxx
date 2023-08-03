@@ -381,6 +381,7 @@ iFatras::G4ParticleDecayHelper::decayParticle(const ISF::ISFParticle& parent,
                                                             prod->GetMass(),
                                                             prod->GetCharge(),
                                                             prod->GetPDGcode(),
+                                                            1, //status
                                                             timeStamp, 
                                                             parent,
 							    Barcode::fUndefinedBarcode,

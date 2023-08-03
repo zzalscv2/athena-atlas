@@ -618,6 +618,7 @@ ISF::ISFParticleVector iFatras::HadIntProcessorParametric::getHadState(const ISF
 							 mass,
 							 charge[i],
 							 pdgid[i],
+							 1,
 							 time,
 							 *parent );
 	// in the validation mode, add process info

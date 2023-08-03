@@ -17,6 +17,7 @@ void testConstructors() {
     double mass    = 123.;
     double charge  = 987.;
     int    pdgCode = 675;
+    int    status =  10005;
     double time    = 923.;
     int    bcid    = 123;
     const ISF::DetRegionSvcIDPair origin( AtlasDetDescr::fAtlasCalo, 2 );
@@ -31,6 +32,7 @@ void testConstructors() {
                            mass,
                            charge,
                            pdgCode,
+                           status,
                            time,
                            origin,
                            bcid,
@@ -42,6 +44,7 @@ void testConstructors() {
     assert( mass    == isp1.mass()         );
     assert( charge  == isp1.charge()       );
     assert( pdgCode == isp1.pdgCode()      );
+    assert( status  == isp1.status()      );
     assert( time    == isp1.timeStamp()    );
     const ISF::ParticleHistory &history1 = isp1.history();
     assert( 1       == history1.size()     );
@@ -58,6 +61,7 @@ void testConstructors() {
                            mass,
                            charge,
                            pdgCode,
+                           status,
                            time,
                            isp1, // parent
                            bc,
@@ -68,6 +72,7 @@ void testConstructors() {
     assert( mass    == isp2.mass()         );
     assert( charge  == isp2.charge()       );
     assert( pdgCode == isp2.pdgCode()      );
+    assert( status  == isp2.status()      );
     assert( time    == isp2.timeStamp()    );
     const ISF::ParticleHistory &history2 = isp2.history();
     assert( 1       == history2.size()     );
@@ -85,6 +90,7 @@ void testConstructors() {
                            mass,
                            charge,
                            pdgCode,
+                           status,
                            time,
                            isp2, // parent
                            bc,
@@ -95,6 +101,7 @@ void testConstructors() {
     assert( mass    == isp3.mass()         );
     assert( charge  == isp3.charge()       );
     assert( pdgCode == isp3.pdgCode()      );
+    assert( status  == isp3.status()       );
     assert( time    == isp3.timeStamp()    );
     const ISF::ParticleHistory &history3 = isp3.history();
     assert( 1       == history3.size()     );

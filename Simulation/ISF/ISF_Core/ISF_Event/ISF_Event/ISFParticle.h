@@ -55,6 +55,7 @@ namespace ISF {
                 double mass,
                 double charge,
                 int pdgCode,
+                int status,
                 double time,
                 const ISFParticle &parent,
                 Barcode::ParticleBarcode barcode = Barcode::fUndefinedBarcode,
@@ -67,6 +68,7 @@ namespace ISF {
                 double mass,
                 double charge,
                 int pdgCode,
+                int status,
                 double time,
                 const ISFParticle &parent,
                 Barcode::ParticleBarcode barcode = Barcode::fUndefinedBarcode,
@@ -79,6 +81,7 @@ namespace ISF {
                 double mass,
                 double charge,
                 int pdgCode,
+                int status,                
                 double time,
                 const DetRegionSvcIDPair &origin,
                 int bcid,
@@ -188,12 +191,16 @@ namespace ISF {
     MsgStream&    dump(MsgStream& out) const;
     std::ostream& dump(std::ostream& out) const;
 
+    void setStatus(int a) { m_status=a; }
+    int status() const { return m_status;}
+     
   private :
     Amg::Vector3D                m_position;
     Amg::Vector3D                m_momentum;
     double                       m_mass;
     double                       m_charge;
     int                          m_pdgCode;
+    int                          m_status;
     double                       m_tstamp;
     ParticleHistory              m_history;
     Barcode::ParticleBarcode     m_barcode;

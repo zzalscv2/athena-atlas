@@ -414,6 +414,7 @@ ISF::ISFParticle* iFatras::McMaterialEffectsEngine::bremPhoton(const ISF::ISFPar
 						       0,   //!< mass
 						       0,   //!< charge
 						       22,  //!< pdg code
+						       1,   //!status
 						       time,  //!< time
 						       *parent );
 
@@ -741,8 +742,15 @@ Trk::ExtrapolationCode iFatras::McMaterialEffectsEngine::processMaterialOnLayer(
 
   // register particle if not in the stack already
   if (isp!=m_isp ) {
-    ISF::ISFParticle* regisp=new ISF::ISFParticle(isp->position(),parm->momentum(),isp->mass(),isp->charge(),
-						  isp->pdgCode(),isp->timeStamp(),*m_isp,isp->barcode());
+    ISF::ISFParticle* regisp=new ISF::ISFParticle(isp->position(),
+                                                  parm->momentum(),
+                                                  isp->mass(),
+                                                  isp->charge(),
+                                                  isp->pdgCode(),
+                                                  isp->status(),
+                                                  isp->timeStamp(),
+                                                  *m_isp,
+                                                  isp->barcode());
     // add presampled process info
     if (isp->getUserInformation() && isp->getUserInformation()->materialLimit()) {
       const ISF::MaterialPathInfo* matLim = isp->getUserInformation()->materialLimit();
@@ -937,8 +945,15 @@ Trk::ExtrapolationCode iFatras::McMaterialEffectsEngine::processMaterialOnLayer(
 
   // register particle if not in the stack already
   if (isp!=m_isp ) {
-    ISF::ISFParticle* regisp=new ISF::ISFParticle(isp->position(),parm->momentum(),isp->mass(),isp->charge(),
-						  isp->pdgCode(),isp->timeStamp(),*m_isp,isp->barcode());
+    ISF::ISFParticle* regisp=new ISF::ISFParticle(isp->position(),
+                                                  parm->momentum(),
+                                                  isp->mass(),
+                                                  isp->charge(),
+                                                  isp->pdgCode(),
+                                                  isp->status(),
+                                                  isp->timeStamp(),
+                                                  *m_isp,
+                                                  isp->barcode());
     // add presampled process info
     if (isp->getUserInformation() && isp->getUserInformation()->materialLimit()) {
       const ISF::MaterialPathInfo* matLim = isp->getUserInformation()->materialLimit();

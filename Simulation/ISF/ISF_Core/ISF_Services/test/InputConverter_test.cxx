@@ -223,6 +223,7 @@ TEST_F(InputConverter_test, convertParticle_using_generated_mass) {
                             1234.56,
                             -1., // charge
                             11, // pdg id
+                            1, ///status                            
                             0.321/Gaudi::Units::c_light, // time
                             expectedHistory,
                             expectedBCID, // bcid
@@ -278,6 +279,7 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_photon) {
                             0., // mass from ParticleDataTable
                             0., // charge
                             22, // pdg id
+                            1,  ///status
                             0.321/Gaudi::Units::c_light, // time
                             expectedHistory,
                             expectedBCID, // bcid
@@ -334,6 +336,7 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_electron) {
                             0.51099891/Gaudi::Units::MeV, // from particle
                             -1., // charge
                             11, // pdg id
+                            1, ///status
                             0.321/Gaudi::Units::c_light, // time
                             expectedHistory,
                             expectedBCID, // bcid
