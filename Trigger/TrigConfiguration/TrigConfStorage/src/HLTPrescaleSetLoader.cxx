@@ -24,8 +24,6 @@
 #include <sstream>
 #include <memory>
 
-#include "boost/lexical_cast.hpp"
-
 #include <sys/time.h>
 
 using namespace std;
