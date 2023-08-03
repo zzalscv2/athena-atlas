@@ -116,8 +116,8 @@ def addRecoSubsteps(executorSet):
                                    perfMonFile = None))
     executorSet.add(dummyExecutor(name = 'AODtoTAG',
                                    inData = ['AOD', 'AOD_RPR'], outData = ['TAG'],))
-    executorSet.add(athenaExecutor(name = 'AODtoHIST', skeletonFile = 'RecJobTransforms/skeleton.AODtoHIST_tf.py',
-                                   inData = ['AOD'], outData = ['HIST_AOD'],))
+    executorSet.add(athenaExecutor(name = 'AODtoHIST', skeletonFile = 'RecJobTransforms/skeleton.AODtoHIST_tf.py', skeletonCA = 'RecJobTransforms.AODtoHIST_Skeleton',
+                                   substep = 'a2h', inData = ['AOD'], outData = ['HIST_AOD'],))
     executorSet.add(reductionFrameworkExecutor(name = 'AODtoDAOD', skeletonFile = 'PATJobTransforms/skeleton.AODtoDAOD_tf.py',
                                    substep = 'a2da', inData = ['AOD'], outData = ['DAOD']))
     executorSet.add(reductionFrameworkExecutorNTUP(name = 'NTUPtoRED', skeletonFile = 'PATJobTransforms/skeleton.NTUPtoRED_tf.py',
