@@ -127,14 +127,16 @@ def fromRunArgs(runArgs):
         cfg.merge(GeneratorVersioningFixCfg(flags))
 
     # Set EventPrintoutInterval to 100 events
-    cfg.getService(cfg.getAppProps()['EventLoop']).EventPrintoutInterval = 100
+    #  (in run interactive mode there's no loop manager service, do nothing in this case)
+    if flags.Exec.Interactive != 'run' :
+        cfg.getService(cfg.getAppProps()['EventLoop']).EventPrintoutInterval = 100
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)
 
     # Post-exec
     processPostExec(runArgs, flags, cfg)
-
+    
     # Run the final configuration
     sc = cfg.run()
     sys.exit(not sc.isSuccess())

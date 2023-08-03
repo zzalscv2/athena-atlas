@@ -1125,8 +1125,7 @@ class ComponentAccumulator:
         if self.interactive == 'init':
             printInteractiveMsg_init()
             from sys import exit # noqa: F401
-            import code
-            code.interact(local=locals())
+            startInteractive(locals())
 
         #At this point, we don't need the internal structures of this CA any more, clean them up
         self._cleanup()
@@ -1149,10 +1148,9 @@ class ComponentAccumulator:
 
         if self.interactive == 'run':
             printInteractiveMsg_run()
-            import code
             from AthenaPython.PyAthena import py_svc
             sg=py_svc("StoreGateSvc/StoreGateSvc")
-            code.interact(local=locals())
+            startInteractive(locals())
         else:
             sc = app.run(maxEvents)
             if not sc.isSuccess():
@@ -1195,6 +1193,34 @@ from AthenaConfiguration.LegacySupport import (conf2toConfigurable,  # noqa: F40
                                                appendCAtoAthena)
 
 
+def startInteractive(localVarDic):
+    """Setup and start a useful interactive session including auto-completion and history"""
+    import code
+    import readline
+    import rlcompleter
+    import os
+    
+    # collect all global and local variables
+    vars = globals()
+    vars.update(localVarDic)
+
+    # setup the autocompletion
+    readline.set_completer(rlcompleter.Completer(vars).complete)
+    readline.parse_and_bind("tab: complete")    
+
+    # setup history 
+    histfile = os.path.join(os.environ["HOME"], ".athena.history")
+    readline.set_history_length(1000)    
+    if os.path.exists(histfile):
+        readline.read_history_file(histfile)
+
+    # start the interpreter
+    code.interact(local=vars)
+
+    # write out the history
+    readline.write_history_file(histfile)
+
+    
 def printInteractiveMsg_init():
     print("Interactive mode")
     print("\tThe ComponentAccumulator is known as 'self', you can inspect it but changes are not taken into account")
