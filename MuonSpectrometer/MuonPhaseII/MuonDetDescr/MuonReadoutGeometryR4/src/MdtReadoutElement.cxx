@@ -121,7 +121,7 @@ Acts::Surface& MdtReadoutElement::surface() {
 }
 
 Amg::Vector3D MdtReadoutElement::globalTubePos(const ActsGeometryContext& ctx,
-                                const IdentifierHash& hash) const {
+                                               const IdentifierHash& hash) const {
    return localToGlobalTrans(ctx) * localTubePos(hash);
 }
 
@@ -159,5 +159,16 @@ double MdtReadoutElement::tubeLength(const IdentifierHash& hash) const {
 }
 double MdtReadoutElement::wireLength(const IdentifierHash& hash) const {
    return tubeLength(hash) - 2.*m_pars.endPlugLength;
+}
+double MdtReadoutElement::distanceToReadout(const ActsGeometryContext& ctx,
+                                            const IdentifierHash& measHash,
+                                            const Amg::Vector3D& globPoint) const {
+    const Amg::Vector3D locPoint = globalToLocalTrans(ctx, measHash) * globPoint;
+    /// The position of the readout chip is at the negative tube side
+    const unsigned int layer = layerNumber(measHash);
+    const unsigned int tube = tubeNumber(measHash);
+    const MdtTubeLayer& zeroT{m_pars.tubeLayers[layer]};
+    const Amg::Vector3D readOutPos = -zeroT.tubeHalfLength(tube) * Amg::Vector3D::UnitZ();
+    return readOutPos.z() - locPoint.z();
 }
 }  // namespace MuonGMR4
