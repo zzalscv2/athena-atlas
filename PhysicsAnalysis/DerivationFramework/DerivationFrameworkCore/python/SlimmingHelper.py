@@ -354,11 +354,15 @@ class SlimmingHelper:
                         from DerivationFrameworkEGamma.PhotonsCPContent import PhotonsCPContent
                         items.extend(PhotonsCPContent)
                 elif collectionName=="Muons":
-                        from DerivationFrameworkMuons.MuonsCPContent import MuonsCPContent
-                        items.extend(MuonsCPContent)
+                        if not self.ConfigFlags:
+                            raise RuntimeError("We're in the era of component accumulator. Please setup your job with CA if you want to have muons")
+                        from DerivationFrameworkMuons.MuonsCommonConfig import MuonCPContentCfg
+                        items.extend(MuonCPContentCfg(self.ConfigFlags))
                 elif collectionName=="MuonsLRT":
-                        from DerivationFrameworkMuons.LargeD0MuonsCPContent import LargeD0MuonsCPContent
-                        items.extend(LargeD0MuonsCPContent)
+                        if not self.ConfigFlags:
+                            raise RuntimeError("We're in the era of component accumulator. Please setup your job with CA if you want to have muons")
+                        from DerivationFrameworkMuons.MuonsCommonConfig import MuonCPContentLRTCfg
+                        items.extend(MuonCPContentLRTCfg(self.ConfigFlags))                        
                 elif collectionName=="TauJets":
                         from DerivationFrameworkTau.TauJetsCPContent import TauJetsCPContent
                         items.extend(TauJetsCPContent)

@@ -222,7 +222,7 @@ namespace CP {
 
         // variables for the TMVA readers
         mutable std::mutex m_low_pt_mva_mutex;
-
+        
         struct hitSummary {
             uint8_t nprecisionLayers{0};
             uint8_t nprecisionHoleLayers{0};
@@ -255,9 +255,9 @@ namespace CP {
 
         inline void IdMsPt(const xAOD::Muon& muon, float& idPt, float& msPt) const;
         
-        bool isRun3() const
+        bool isRun3(bool allowForce=true) const
         {
-          if(m_forceGeometry || !m_geoOnTheFly) return m_isRun3;
+          if(allowForce && (m_forceGeometry || !m_geoOnTheFly)) return m_isRun3;
           int rn=getRunNumber(true);
           return rn>=399999;
         }
