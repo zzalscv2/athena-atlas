@@ -218,13 +218,12 @@ namespace MuonGM {
     std::string MYSQL::AllocposFindName(int i) const {
         AllocposIterator it = m_allocatedpos.find(i);
         // imt fix in case key is wrong:
-        if (it != m_allocatedpos.end()) {
-            return (*it).second;
+        if (it == m_allocatedpos.end()) {
+           throw std::runtime_error("AllocPosFIndName() -- Bad key");
         }   
-        throw std::runtime_error("AllocPosFIndName() -- Bad key");
-        return "ERROR: bad key!";
-        
+        return (*it).second;
     }
+    //
     const MYSQL::StationMap& MYSQL::stationMap() const { return m_stations;}
     const MYSQL::TgcReadParsMap& MYSQL::tgcReadParsMap() const { return  m_tgcReadouts;}   
 
