@@ -165,7 +165,7 @@ PrintSiElements::printElements(const std::string & managerName){
         idstr << 2 << " " << det << " " 
           << bec << " " << layer_disk << " " 
           << phi_module << " " << eta_module << " " 
-          << side << " ";
+          << side << " " << id << " ";
       } else {
         idstr << element->getIdHelper()->show_to_string(id) << " ";
       }
