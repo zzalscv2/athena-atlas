@@ -268,6 +268,7 @@ ISF::ISFParticleVector  iFatras::ProcessSamplingTool::interact(const ISF::ISFPar
                                         0.,
                                         0.,
                                         22,
+                                        1,
                                         eCell.time,
                                         *parent );
 
@@ -276,6 +277,7 @@ ISF::ISFParticleVector  iFatras::ProcessSamplingTool::interact(const ISF::ISFPar
                                         0.,
                                         0.,
                                         22,
+                                        1,
                                         eCell.time,
                                         *parent );
 

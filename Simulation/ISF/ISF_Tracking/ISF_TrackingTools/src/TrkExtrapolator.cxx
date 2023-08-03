@@ -117,6 +117,7 @@ ISF::ISFParticle* ISF::TrkExtrapolator::extrapolate( const ISF::ISFParticle &par
                                                        particle.mass(),
                                                        particle.charge(),
                                                        particle.pdgCode(),
+                                                       particle.status(),
                                                        particle.timeStamp(),
                                                        particle );
   

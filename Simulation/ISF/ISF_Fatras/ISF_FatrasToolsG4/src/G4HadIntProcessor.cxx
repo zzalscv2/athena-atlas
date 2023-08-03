@@ -509,10 +509,11 @@ ISF::ISFParticleVector iFatras::G4HadIntProcessor::getHadState(const ISF::ISFPar
                                                           parDef->GetPDGMass(),
                                                           parDef->GetPDGCharge(),
                                                           parDef->GetPDGEncoding(),
+                                                          1, //status
                                                           time,
                                                           *parent,
-							  Barcode::fUndefinedBarcode,
-							  truthBinding );
+                                                          Barcode::fUndefinedBarcode,
+                                                          truthBinding );
       cParticle->setNextGeoID( parent->nextGeoID() );
       cParticle->setNextSimID( parent->nextSimID() );
       // process sampling tool takes care of validation info

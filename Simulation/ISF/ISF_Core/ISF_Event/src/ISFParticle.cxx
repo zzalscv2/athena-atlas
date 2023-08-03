@@ -16,6 +16,7 @@ ISF::ISFParticle::ISFParticle(
                               double mass,
                               double charge,
                               int pdgCode,
+                              int status,
                               double time,
                               const ISFParticle &parent,
                               Barcode::ParticleBarcode barcode,
@@ -26,6 +27,7 @@ ISF::ISFParticle::ISFParticle(
   m_mass(mass),
   m_charge(charge),
   m_pdgCode(pdgCode),
+  m_status(status),  
   m_tstamp(time),
   m_history(parent.history()),
   m_barcode(barcode),
@@ -44,6 +46,7 @@ ISF::ISFParticle::ISFParticle(
                               double mass,
                               double charge,
                               int pdgCode,
+                              int status,
                               double time,
                               const ISFParticle &parent,
                               Barcode::ParticleBarcode barcode,
@@ -54,6 +57,7 @@ ISF::ISFParticle::ISFParticle(
   m_mass(mass),
   m_charge(charge),
   m_pdgCode(pdgCode),
+  m_status(status),
   m_tstamp(time),
   m_history(parent.history()),
   m_barcode(barcode),
@@ -72,6 +76,7 @@ ISF::ISFParticle::ISFParticle(
                               double mass,
                               double charge,
                               int pdgCode,
+                              int status,
                               double time,
                               const DetRegionSvcIDPair &origin,
                               int bcid,
@@ -83,6 +88,7 @@ ISF::ISFParticle::ISFParticle(
   m_mass(mass),
   m_charge(charge),
   m_pdgCode(pdgCode),
+  m_status(status),
   m_tstamp(time),
   m_history(1, origin),
   m_barcode(barcode),
@@ -101,6 +107,7 @@ ISF::ISFParticle::ISFParticle(const ISFParticle& isfp):
   m_mass(isfp.mass()),
   m_charge(isfp.charge()),
   m_pdgCode(isfp.pdgCode()),
+  m_status(isfp.status()),
   m_tstamp(isfp.timeStamp()),
   m_history(isfp.history()),
   m_barcode(isfp.barcode()),
@@ -122,6 +129,7 @@ ISF::ISFParticle::ISFParticle(ISFParticle&& isfp):
   m_mass(isfp.mass()),
   m_charge(isfp.charge()),
   m_pdgCode(isfp.pdgCode()),
+  m_status(isfp.status()),  
   m_tstamp(isfp.timeStamp()),
   m_history(isfp.history()),
   m_barcode(isfp.barcode()),
@@ -149,6 +157,7 @@ ISF::ISFParticle& ISF::ISFParticle::operator=(const ISF::ISFParticle& rhs)
     m_mass         = rhs.mass();
     m_charge       = rhs.charge();
     m_pdgCode      = rhs.pdgCode();
+    m_status       = rhs.status();
     m_tstamp       = rhs.timeStamp();
     m_history      = rhs.history();
     m_barcode      = rhs.barcode();
@@ -178,6 +187,7 @@ ISF::ISFParticle& ISF::ISFParticle::operator=(ISF::ISFParticle&& rhs)
   m_mass         = rhs.mass();
   m_charge       = rhs.charge();
   m_pdgCode      = rhs.pdgCode();
+  m_status       = rhs.status();
   m_tstamp       = rhs.timeStamp();
   m_history      = rhs.history();
   m_barcode      = rhs.barcode();
@@ -207,6 +217,7 @@ bool ISF::ISFParticle::isEqual(const ISF::ISFParticle& rhs) const
   pass &= std::fabs(m_mass-rhs.mass()) < epsilon;
   pass &= std::fabs(m_charge-rhs.charge()) < epsilon;
   pass &= m_pdgCode == rhs.pdgCode();
+  pass &= m_status == rhs.status();
   pass &= std::fabs(m_tstamp-rhs.timeStamp()) < epsilon;
   pass &= m_history == rhs.history();
   pass &= m_barcode == rhs.barcode();
@@ -249,6 +260,7 @@ bool ISF::ISFParticle::isIdent(const ISF::ISFParticle& rhs) const
   pass &= m_mass == rhs.mass();
   pass &= m_charge == rhs.charge();
   pass &= m_pdgCode == rhs.pdgCode();
+  pass &= m_status == rhs.status();
   pass &= m_tstamp == rhs.timeStamp();
   pass &= m_history == rhs.history();
   pass &= m_barcode == rhs.barcode();

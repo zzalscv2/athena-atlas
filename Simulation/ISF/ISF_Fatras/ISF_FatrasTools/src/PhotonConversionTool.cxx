@@ -251,6 +251,7 @@ void iFatras::PhotonConversionTool::recordChilds(double time,
                                                mass,
                                                charge1,
                                                pdg1,
+                                               1,
                                                time,
                                                *parent );
       // in the validation mode, add process info
@@ -275,6 +276,7 @@ void iFatras::PhotonConversionTool::recordChilds(double time,
                                                mass,
                                                charge2,
                                                pdg2,
+                                               1,
                                                time,
                                                *parent );
       
@@ -353,6 +355,7 @@ ISF::ISFParticleVector iFatras::PhotonConversionTool::getChilds(const ISF::ISFPa
                                                                mass,
                                                                charge1,
                                                                pdg1,
+                                                               1,
                                                                time,
                                                                *parent));
     
@@ -361,6 +364,7 @@ ISF::ISFParticleVector iFatras::PhotonConversionTool::getChilds(const ISF::ISFPa
                                                                mass,
                                                                charge2,
                                                                pdg2,
+                                                               1,
                                                                time,
                                                                *parent));
 

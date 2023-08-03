@@ -151,7 +151,14 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
       }
       else {
         ATH_MSG_DEBUG(name() << " secondaries particle " << factsp);
-        auto secisfp = std::make_unique<ISF::ISFParticle>(pos,mom,mass,charge,pdgid,properTime,*isfp);
+        auto secisfp = std::make_unique<ISF::ISFParticle>(pos,
+                                                          mom,
+                                                          mass,
+                                                          charge,
+                                                          pdgid,
+                                                          1, //status
+                                                          properTime,
+                                                          *isfp);
         secondaries.push_back(secisfp.release());
 
       }

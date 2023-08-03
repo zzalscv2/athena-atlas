@@ -36,6 +36,7 @@ namespace test {
   double mass    = 0.;
   double charge  = 987.;
   int    pdgCode = 675;
+  int status     =  200045;
   double time    = 923.;
   int    bcid    = 123;
   const ISF::DetRegionSvcIDPair origin( AtlasDetDescr::fAtlasCalo, 2 );
@@ -46,6 +47,7 @@ namespace test {
                          mass,
                          charge,
                          pdgCode,
+                         status,
                          time,
                          origin,
                          bcid,
@@ -58,6 +60,7 @@ namespace test {
                          mass,
                          charge,
                          pdgCode,
+                         status,
                          time,
                          isp1, // parent
                          part2BC,

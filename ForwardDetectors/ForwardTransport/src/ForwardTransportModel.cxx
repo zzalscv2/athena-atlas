@@ -103,7 +103,7 @@ void ForwardTransportModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastS
                                                                 initialMomentum.x()/CLHEP::GeV,
                                                                 initialMomentum.y()/CLHEP::GeV,
                                                                 initialMomentum.z()/CLHEP::GeV,
-                                                                fabs(charge)>0);
+                                                                std::abs(charge)>0);
   if (m_verboseLevel>5)
     {
       G4cout << fParticle << G4endl;
@@ -197,6 +197,7 @@ void ForwardTransportModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastS
                                                             initialISP->mass(),
                                                             initialISP->charge(),
                                                             initialISP->pdgCode(),
+                                                            initialISP->status(),
                                                             time, // TODO Update??
                                                             *initialISP,
                                                             pBarcode,

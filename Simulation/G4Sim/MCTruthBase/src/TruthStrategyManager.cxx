@@ -73,10 +73,11 @@ bool TruthStrategyManager::CreateTruthIncident(const G4Step* aStep, int subDetVo
   double myMass = 0.0;
   double myCharge = 0.0;
   int    myPdgCode = 0;
+  int    mystatus = 3333;
   double myTime =0.;
   const ISF::DetRegionSvcIDPair origin(geoID, ISF::fUndefinedSimID);
   int myBCID = 0;
-  ISF::ISFParticle myISFParticle(myPos, myMom, myMass, myCharge, myPdgCode, myTime, origin, myBCID);
+  ISF::ISFParticle myISFParticle(myPos, myMom, myMass, myCharge, myPdgCode, mystatus, myTime, origin, myBCID);
 
   iGeant4::Geant4TruthIncident truth(aStep, myISFParticle, geoID, atlasG4EvtUserInfo);
 
