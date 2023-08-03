@@ -515,7 +515,10 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
     else {
       m_layer_recalibration_tool = new egammaLayerRecalibTool(m_layer_recalibration_tune);
     }
-    if (m_layer_recalibration_tool) { m_layer_recalibration_tool->msg().setLevel(this->msg().level()); }
+    if (m_layer_recalibration_tool) {
+      m_layer_recalibration_tool->msg().setLevel(this->msg().level());
+      m_layer_recalibration_tool->fixForMissingCells(m_fixForMissingCells);
+    }
   }
 
   if (m_use_temp_correction201215 != AUTO) m_rootTool->use_temp_correction201215(m_use_temp_correction201215);

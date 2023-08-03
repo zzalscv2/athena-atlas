@@ -341,6 +341,11 @@ public:
    * remove all the scale corrections
    **/
   void clear_corrections();
+  /**
+   * apply the fix for missing cells due to timing cut
+   **/
+  void fixForMissingCells(bool fix = true) { m_aodFixMissingCells = fix; }
+
 private:
   std::string m_tune;
   const std::string resolve_path(std::string filename) const;
@@ -348,6 +353,8 @@ private:
   ModifiersList m_modifiers;
 
   corr_pileupShift* m_pileup_tool = nullptr;
+
+  bool m_aodFixMissingCells;
 };
 
 #endif // EGAMMA_LAYER_RECALIB_TOOL
