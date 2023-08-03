@@ -29,7 +29,8 @@ atlas_add_library( CalibrationDataInterfaceLib
                    ${CalibrationDataInterfaceLibDictSource}
                    PUBLIC_HEADERS CalibrationDataInterface
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} CxxUtils nlohmann_json::nlohmann_json )
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} CxxUtils
+                   PRIVATE_LINK_LIBRARIES nlohmann_json::nlohmann_json )
 
 atlas_add_executable( CDIReaderTester
                       src/CDIReaderTester.cxx

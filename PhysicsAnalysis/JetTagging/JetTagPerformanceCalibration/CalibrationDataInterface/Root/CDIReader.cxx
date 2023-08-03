@@ -8,6 +8,8 @@
 
 #include "CalibrationDataInterface/CDIReader.h"
 
+#include <nlohmann/json.hpp>
+
 using json = nlohmann::json;
 
 Analysis::CDIReader::CDIReader(const std::string& cdipath) :  m_use_json(true), m_cdipath(cdipath), m_CDIFile(TFile::Open(m_cdipath.c_str(), "READ"))
