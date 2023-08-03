@@ -249,6 +249,10 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( const xAOD::Jet& jet, dou
 CorrectionCode BTaggingSelectionTool::getTaggerWeight( const xAOD::Jet& jet, double & tagweight, bool getCTagW) const{
 
   std::string taggerName = m_tagger.name;
+  // following taggerName change is needed given different name is used for GN2v00 in derivation and in CDI
+  if (taggerName == "GN2v00LegacyWP" || taggerName == "GN2v00NewAliasWP"){
+      taggerName = "GN2v00";
+  }
   tagweight = -100.;
 
    if(!m_continuous2D && (getCTagW != m_useCTag) ){
