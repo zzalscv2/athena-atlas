@@ -31,7 +31,6 @@
 #include "ActsEvent/TrackContainer.h"
 
 // PACKAGE
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometry/ActsGeometryContext.h"
 #include "ActsGeometry/ActsDetectorElement.h"
@@ -76,19 +75,14 @@ namespace ActsTrk
     ATH_CHECK(m_stripDetEleCollKey.initialize(SG::AllowEmpty));
     ATH_CHECK(m_pixelEstimatedTrackParametersKey.initialize(SG::AllowEmpty));
     ATH_CHECK(m_stripEstimatedTrackParametersKey.initialize(SG::AllowEmpty));
-    ATH_CHECK(m_tracksContainerKey.initialize());
+    ATH_CHECK(m_trackContainerKey.initialize());
+    ATH_CHECK(m_sourceLinksOutKey.initialize());
 
-    if (not m_monTool.empty())
-      ATH_CHECK(m_monTool.retrieve());
-
+    ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
     ATH_CHECK(m_trackingGeometryTool.retrieve());
     ATH_CHECK(m_extrapolationTool.retrieve());
     ATH_CHECK(m_ATLASConverterTool.retrieve());
-    if (!m_trackStatePrinter.empty())
-    {
-      ATH_CHECK(m_trackStatePrinter.retrieve());
-    }
-    ATH_CHECK(m_sourceLinksOut.initialize(SG::AllowEmpty));
+    ATH_CHECK(m_trackStatePrinter.retrieve(EnableTool{not m_trackStatePrinter.empty()}));
 
     m_logger = makeActsAthenaLogger(this, "Acts");
 
@@ -236,30 +230,46 @@ namespace ActsTrk
     }
 
     // convert all measurements to source links, so the CKF can find them from either strip or pixel seeds.
+    SG::WriteHandle<std::vector<ATLASUncalibSourceLink::ElementsType>> sourceLinksOutHandle(m_sourceLinksOutKey, ctx);
+    ATH_CHECK(sourceLinksOutHandle.record(std::make_unique<std::vector<ATLASUncalibSourceLink::ElementsType>>()));
+    if (!sourceLinksOutHandle.isValid())
+    {
+      ATH_MSG_FATAL("Failed to write ATLASUncalibSourceLink elements collection with key " << m_sourceLinksOutKey.key());
+      return StatusCode::FAILURE;
+    }
 
-    auto measurements = initMeasurements(((pixelClusterContainer ? pixelClusterContainer->size() : 0u) +
-                                          (stripClusterContainer ? stripClusterContainer->size() : 0u)),
-                                         ((pixelSeeds ? pixelSeeds->size() : 0u) +
-                                          (stripSeeds ? stripSeeds->size() : 0u)));
+    size_t numPixelMeasurements = (pixelClusterContainer ? pixelClusterContainer->size() : 0u);
+    size_t numStripMeasurements = (stripClusterContainer ? stripClusterContainer->size() : 0u);
+    TrackFindingMeasurements measurements(numPixelMeasurements + numStripMeasurements,
+                                          std::max(numPixelMeasurements, numStripMeasurements),
+                                          !m_trackStatePrinter.empty(),
+                                          sourceLinksOutHandle.ptr());
+
+    DuplicateSeedDetector duplicateSeedDetector(((pixelSeeds ? pixelSeeds->size() : 0u) +
+                                                 (stripSeeds ? stripSeeds->size() : 0u)),
+                                                m_skipDuplicateSeeds);
+
     if (pixelClusterContainer && pixelDetEleColl)
     {
       ATH_MSG_DEBUG("Create " << pixelClusterContainer->size() << " source links from pixel measurements");
-      measurements->addMeasurements(0, ctx, pixelClusterContainer, *pixelDetEleColl, pixelSeeds);
+      measurements.addMeasurements(0, ctx, pixelClusterContainer, *pixelDetEleColl, pixelSeeds,
+                                   m_ATLASConverterTool, m_trackStatePrinter, duplicateSeedDetector);
     }
     if (stripClusterContainer && stripDetEleColl)
     {
       ATH_MSG_DEBUG("Create " << stripClusterContainer->size() << " source links from strip measurements");
-      measurements->addMeasurements(1, ctx, stripClusterContainer, *stripDetEleColl, stripSeeds);
+      measurements.addMeasurements(1, ctx, stripClusterContainer, *stripDetEleColl, stripSeeds,
+                                   m_ATLASConverterTool, m_trackStatePrinter, duplicateSeedDetector);
     }
 
     // ================================================== //
     // ===================== OUTPUTS ==================== //
     // ================================================== //
 
-    auto trackContainerHandle = SG::makeHandle(m_tracksContainerKey, ctx);
-    Acts::TrackContainer trackContainer{Acts::VectorTrackContainer{},
-                                        ActsTrk::TrackStateBackend{}};
-    ATH_MSG_DEBUG("    \\__ Tracks Container `" << m_tracksContainerKey.key() << "` created ...");
+    auto trackContainerHandle = SG::makeHandle(m_trackContainerKey, ctx);
+
+    Acts::TrackContainer trackContainer{Acts::VectorTrackContainer{}, ActsTrk::TrackStateBackend{}};
+    ATH_MSG_DEBUG("    \\__ Tracks Container `" << m_trackContainerKey.key() << "` created ...");
 
     // ================================================== //
     // ===================== COMPUTATION ================ //
@@ -272,7 +282,8 @@ namespace ActsTrk
     if (pixelEstimatedTrackParameters && !pixelEstimatedTrackParameters->empty())
     {
       ATH_CHECK(findTracks(ctx,
-                           *measurements,
+                           measurements,
+                           duplicateSeedDetector,
                            *pixelEstimatedTrackParameters,
                            pixelSeeds,
                            trackContainer,
@@ -283,7 +294,8 @@ namespace ActsTrk
     if (stripEstimatedTrackParameters && !stripEstimatedTrackParameters->empty())
     {
       ATH_CHECK(findTracks(ctx,
-                           *measurements,
+                           measurements,
+                           duplicateSeedDetector,
                            *stripEstimatedTrackParameters,
                            stripSeeds,
                            trackContainer,
@@ -301,41 +313,24 @@ namespace ActsTrk
     ActsTrk::ConstTrackBackend trackBackend(trackContainer.container());
     auto constTrackContainer = std::make_unique<ActsTrk::ConstTrackContainer>(std::move(trackBackend), std::move(trackStateBackend));
     ATH_CHECK(trackContainerHandle.record(std::move(constTrackContainer)));
+    if (!trackContainerHandle.isValid())
+    {
+      ATH_MSG_FATAL("Failed to write TrackContainer with key " << m_trackContainerKey.key());
+      return StatusCode::FAILURE;
+    }
 
     return StatusCode::SUCCESS;
   }
 
-  std::unique_ptr<TrackFindingAlg::Measurements>
-  TrackFindingAlg::initMeasurements(size_t numMeasurements, size_t numSeeds) const
-  {
-     std::vector<ATLASUncalibSourceLink::ElementsType> *elements_collection=nullptr;
-     if (!m_sourceLinksOut.empty()) {
-        SG::WriteHandle< std::vector<ATLASUncalibSourceLink::ElementsType> > source_links_out_handle(m_sourceLinksOut);
-        if (source_links_out_handle.record( std::make_unique< std::vector<ATLASUncalibSourceLink::ElementsType> >() ).isFailure() ) {
-           std::stringstream a_msg;
-           a_msg << "Failed to write ATLASUncalibSourceLink elements collection with key " << m_sourceLinksOut.key();
-           ATH_MSG_FATAL( a_msg.str() );
-           throw std::runtime_error(a_msg.str());
-        }
-        elements_collection = source_links_out_handle.ptr();
-     }
-
-     return std::make_unique<Measurements_impl>(numMeasurements,
-                                                numSeeds,
-                                                &*m_ATLASConverterTool,
-                                                m_trackStatePrinter.empty() ? nullptr : &*m_trackStatePrinter,
-                                                elements_collection,
-                                                m_skipDuplicateSeeds);
-  }
-
   StatusCode
   TrackFindingAlg::findTracks(const EventContext &ctx,
-                               const Measurements &measurements,
-                               const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
-                               const ActsTrk::SeedContainer *seeds,
-                               ActsTrk::TrackContainer &tracksContainer,
-                               size_t typeIndex,
-                               const char *seedType) const
+                              const TrackFindingMeasurements &measurements,
+                              DuplicateSeedDetector &duplicateSeedDetector,
+                              const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
+                              const ActsTrk::SeedContainer *seeds,
+                              ActsTrk::TrackContainer &tracksContainer,
+                              size_t typeIndex,
+                              const char *seedType) const
   {
     ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
 
@@ -344,9 +339,6 @@ namespace ActsTrk
       // should be the same, but we can cope if not
       ATH_MSG_WARNING("Have " << seeds->size() << " " << seedType << " seeds, but " << estimatedTrackParameters.size() << "estimated track parameters");
     }
-
-    // Get measurement source links. We cast to Measurements_impl to give access to this file's local data members.
-    auto &meas = dynamic_cast<const Measurements_impl &>(measurements);
 
     // Construct a perigee surface as the target surface
     auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
@@ -357,7 +349,7 @@ namespace ActsTrk
     Acts::CalibrationContext calContext = Acts::CalibrationContext();
 
     UncalibSourceLinkAccessor slAccessor;
-    slAccessor.container = &meas.sourceLinks();
+    slAccessor.container = &measurements.sourceLinks();
     Acts::SourceLinkAccessorDelegate<UncalibSourceLinkAccessor::Iterator> slAccessorDelegate;
     slAccessorDelegate.connect<&UncalibSourceLinkAccessor::range>(&slAccessor);
 
@@ -395,10 +387,10 @@ namespace ActsTrk
         {
           ATH_MSG_INFO("CKF results for " << estimatedTrackParameters.size() << ' ' << seedType << " seeds:");
         }
-        m_trackStatePrinter->printSeed(tgContext, *(*seeds)[iseed], initialParameters, meas.measurementOffset(typeIndex), iseed);
+        m_trackStatePrinter->printSeed(tgContext, *(*seeds)[iseed], initialParameters, measurements.measurementOffset(typeIndex), iseed);
       }
 
-      if (meas.duplicateSeedDetector().isDuplicate(meas.seedOffset(typeIndex) + iseed))
+      if (duplicateSeedDetector.isDuplicate(measurements.seedOffset(typeIndex) + iseed))
       {
         ATH_MSG_DEBUG("skip " << seedType << " seed " << iseed << " - already found");
         ++m_nDuplicateSeeds;
@@ -419,14 +411,14 @@ namespace ActsTrk
       }
 
       // Fill the track infos into the duplicate seed detector
-      ATH_CHECK(storeSeedInfo(tracksContainer, result.value(), measurements));
+      ATH_CHECK(storeSeedInfo(tracksContainer, result.value(), duplicateSeedDetector));
 
       size_t ntracks = result.value().size();
       addTracks += ntracks;
 
       if (!m_trackStatePrinter.empty())
       {
-        m_trackStatePrinter->printTracks(tgContext, tracksContainer, result.value(), meas.sourceLinkVec());
+        m_trackStatePrinter->printTracks(tgContext, tracksContainer, result.value(), measurements.sourceLinkVec());
       }
 
       if (ntracks == 0)
@@ -445,11 +437,9 @@ namespace ActsTrk
 
   StatusCode
   TrackFindingAlg::storeSeedInfo(const ActsTrk::TrackContainer &tracksContainer,
-                                  const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
-                                  const Measurements &measurements) const
+                                 const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
+                                 DuplicateSeedDetector &duplicateSeedDetector) const
   {
-    auto &duplicateSeedDetector = dynamic_cast<const Measurements_impl &>(measurements).duplicateSeedDetector();
-
     for (auto &track : fitResult)
     {
       const auto lastMeasurementIndex = track.tipIndex();
@@ -457,7 +447,7 @@ namespace ActsTrk
 
       tracksContainer.trackStateContainer().visitBackwards(
           lastMeasurementIndex,
-          [&duplicateSeedDetector](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
+          [&duplicateSeedDetector](const ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
           {
             // Check there is a source link
             if (not state.hasUncalibratedSourceLink())
@@ -466,8 +456,8 @@ namespace ActsTrk
             // Fill the duplicate selector
             auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
             duplicateSeedDetector.addMeasurement(sl);
-          }); // end visit backwards
-    }         // loop on tracks from fitResult
+          }); // end visitBackwards
+    }         // end loop on tracks from fitResult
 
     return StatusCode::SUCCESS;
   }

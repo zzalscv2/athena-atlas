@@ -2,6 +2,10 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#ifndef ACTSTRACKRECONSTRUCTION_TRACKFINDINGDATA_H
+#define ACTSTRACKRECONSTRUCTION_TRACKFINDINGDATA_H 1
+
+// ACTS
 #include "Acts/Definitions/Common.hpp"
 #include "Acts/Definitions/Algebra.hpp"
 #include "Acts/Propagator/EigenStepper.hpp"
@@ -12,9 +16,15 @@
 #include "Acts/TrackFinding/MeasurementSelector.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 
+#include "ActsGeometry/ATLASSourceLink.h"
+#include "ActsEventCnv/IActsToTrkConverterTool.h"
+#include "src/ITrackStatePrinter.h"
+
 #include <boost/container/flat_set.hpp>
 #include <boost/container/flat_map.hpp>
 #include <utility>
+#include <vector>
+#include <variant>
 
 namespace
 {
@@ -184,146 +194,154 @@ namespace
     Acts::CombinatorialKalmanFilterExtensions<ActsTrk::TrackStateBackend> ckfExtensions;
   };
 
-  // Helper class to convert xAOD::PixelClusterContainer or xAOD::StripClusterContainer to UncalibSourceLinkMultiset.
-  struct Measurements_impl : public ActsTrk::TrackFindingAlg::Measurements
+  // === DuplicateSeedDetector ================================
+  // Identify duplicate seeds: seeds where all measurements were already located in a previously followed trajectory.
+  class DuplicateSeedDetector
   {
-
-    // Identify duplicate seeds: seeds where all measurements were already located in a previously followed trajectory.
-    struct DuplicateSeedDetector
+  public:
+    DuplicateSeedDetector(size_t numSeeds, bool enabled)
+        : m_disabled(!enabled),
+          m_nUsedMeasurements(enabled ? numSeeds : 0u, 0u),
+          m_nSeedMeasurements(enabled ? numSeeds : 0u, 0u),
+          m_isDuplicateSeed(enabled ? numSeeds : 0u, false)
     {
-      DuplicateSeedDetector(size_t numSeeds, bool enabled)
-          : m_disabled(!enabled),
-            m_nUsedMeasurements(enabled ? numSeeds : 0u, 0u),
-            m_nSeedMeasurements(enabled ? numSeeds : 0u, 0u),
-            m_isDuplicateSeed(enabled ? numSeeds : 0u, false)
-      {
-        if (m_disabled)
-          return;
-        m_seedIndex.reserve(6 * numSeeds); // 6 hits/seed for strips (3 for pixels)
-      }
+      if (m_disabled)
+        return;
+      m_seedIndex.reserve(6 * numSeeds); // 6 hits/seed for strips (3 for pixels)
+    }
 
-      DuplicateSeedDetector() = delete;
-      DuplicateSeedDetector(const DuplicateSeedDetector &) = delete;
-      DuplicateSeedDetector &operator=(const DuplicateSeedDetector &) = delete;
+    DuplicateSeedDetector() = delete;
+    DuplicateSeedDetector(const DuplicateSeedDetector &) = delete;
+    DuplicateSeedDetector &operator=(const DuplicateSeedDetector &) = delete;
 
-      void setElement(const ATLASUncalibSourceLink::ElementsType *firstElement)
-      {
-        m_firstElement = firstElement;
-      }
-
-      size_t addSeeds(const ActsTrk::SeedContainer &seeds, const std::vector<ATLASUncalibSourceLink> &measurements, size_t measurementOffset)
-      {
-        size_t seedOffset = m_numSeed;
-        if (m_disabled)
-          return seedOffset;
-        for (const auto *seed : seeds)
-        {
-          if (!seed)
-            continue;
-          for (auto *sp : seed->sp())
-          {
-            for (auto index : sp->measurementIndexes())
-            {
-              size_t imeasurement = measurementOffset + index;
-              assert(imeasurement < measurements.size());
-              m_seedIndex.insert({&measurements[imeasurement].atlasHit(), m_numSeed});
-              ++m_nSeedMeasurements[m_numSeed];
-            }
-          }
-          ++m_numSeed;
-        }
+    // add seeds from an associated measurements collection.
+    // measurementOffset non-zero is only needed if measurements holds more than one collection (eg. kept for TrackStatePrinter).
+    size_t addSeeds(const ActsTrk::SeedContainer &seeds, const std::vector<ATLASUncalibSourceLink> &measurements, size_t measurementOffset = 0)
+    {
+      size_t seedOffset = m_numSeed;
+      if (m_disabled)
         return seedOffset;
-      }
-
-      void newTrajectory()
+      for (const auto *seed : seeds)
       {
-        if (m_disabled || m_found == 0 || m_nextSeed == m_nUsedMeasurements.size())
-          return;
-        auto beg = m_nUsedMeasurements.begin();
-        if (m_nextSeed < m_nUsedMeasurements.size())
-          std::advance(beg, m_nextSeed);
-        std::fill(beg, m_nUsedMeasurements.end(), 0u);
-      }
-
-      void addMeasurement(const ATLASUncalibSourceLink &sl)
-      {
-        if (m_disabled || m_nextSeed == m_nUsedMeasurements.size())
-          return;
-        for (auto [iiseed, eiseed] = m_seedIndex.equal_range(&sl.atlasHit()); iiseed != eiseed; ++iiseed)
+        if (!seed)
+          continue;
+        for (const auto *sp : seed->sp())
         {
-          size_t iseed = iiseed->second;
-          assert(iseed < m_nUsedMeasurements.size());
-          if (iseed < m_nextSeed || m_isDuplicateSeed[iseed])
-            continue;
-          if (++m_nUsedMeasurements[iseed] >= m_nSeedMeasurements[iseed])
+          for (auto index : sp->measurementIndexes())
           {
-            assert(m_nUsedMeasurements[iseed] == m_nSeedMeasurements[iseed]); // shouldn't ever find more
-            m_isDuplicateSeed[iseed] = true;
+            size_t imeasurement = measurementOffset + index;
+            assert(imeasurement < measurements.size());
+            m_seedIndex.insert({&measurements[imeasurement].atlasHit(), m_numSeed});
+            ++m_nSeedMeasurements[m_numSeed];
           }
-          ++m_found;
         }
+        ++m_numSeed;
       }
+      return seedOffset;
+    }
 
-      // For complete removal of duplicate seeds, assumes isDuplicate(iseed) is called for monotonically increasing iseed.
-      bool isDuplicate(size_t iseed)
-      {
-        if (m_disabled)
-          return false;
-        assert(iseed < m_isDuplicateSeed.size());
-        // If iseed not increasing, we will miss some duplicate seeds, but won't exclude needed seeds.
-        if (iseed >= m_nextSeed)
-          m_nextSeed = iseed + 1;
-        return m_isDuplicateSeed[iseed];
-      }
-
-    private:
-      bool m_disabled = false;
-      boost::container::flat_multimap<const xAOD::UncalibratedMeasurement *, size_t> m_seedIndex;
-      std::vector<size_t> m_nUsedMeasurements;
-      std::vector<size_t> m_nSeedMeasurements;
-      std::vector<bool> m_isDuplicateSeed;
-      size_t m_numSeed = 0u;  // count of number of seeds so-far added with addSeeds()
-      size_t m_nextSeed = 0u; // index of next seed expected with isDuplicate()
-      size_t m_found = 0u;    // count of found seeds for this/last trajectory
-      const ATLASUncalibSourceLink::ElementsType *m_firstElement = nullptr;
-    };
-
-    // === Measurements_impl ================================
-    Measurements_impl(size_t numMeasurements,
-                      size_t numSeeds,
-                      const ActsTrk::IActsToTrkConverterTool *converterTool,
-                      const ActsTrk::ITrackStatePrinter *trackStatePrinter,
-                      std::vector<ATLASUncalibSourceLink::ElementsType> *elements_collection_external,
-                      bool skipDuplicateSeeds)
-        : m_numMeasurements(numMeasurements),
-          m_ATLASConverterTool(converterTool),
-          m_trackStatePrinter(trackStatePrinter),
-          m_elementsCollectionPtr(elements_collection_external ? elements_collection_external : &m_elementsCollectionInternal),
-          m_skipDuplicateSeeds(skipDuplicateSeeds),
-          m_duplicateSeedDetector(numSeeds, skipDuplicateSeeds)
+    void newTrajectory()
     {
-      m_sourceLinks.reserve(m_numMeasurements);
-      m_elementsCollectionPtr->reserve(m_numMeasurements);
-      m_duplicateSeedDetector.setElement(m_elementsCollectionPtr->data());
-      m_sourceLinksVec.reserve(m_numMeasurements);
-      m_measurementOffset.reserve(2);
+      if (m_disabled || m_found == 0 || m_nextSeed == m_nUsedMeasurements.size())
+        return;
+      auto beg = m_nUsedMeasurements.begin();
+      if (m_nextSeed < m_nUsedMeasurements.size())
+        std::advance(beg, m_nextSeed);
+      std::fill(beg, m_nUsedMeasurements.end(), 0u);
+    }
+
+    void addMeasurement(const ATLASUncalibSourceLink &sl)
+    {
+      if (m_disabled || m_nextSeed == m_nUsedMeasurements.size())
+        return;
+      for (auto [iiseed, eiseed] = m_seedIndex.equal_range(&sl.atlasHit()); iiseed != eiseed; ++iiseed)
+      {
+        size_t iseed = iiseed->second;
+        assert(iseed < m_nUsedMeasurements.size());
+        if (iseed < m_nextSeed || m_isDuplicateSeed[iseed])
+          continue;
+        if (++m_nUsedMeasurements[iseed] >= m_nSeedMeasurements[iseed])
+        {
+          assert(m_nUsedMeasurements[iseed] == m_nSeedMeasurements[iseed]); // shouldn't ever find more
+          m_isDuplicateSeed[iseed] = true;
+        }
+        ++m_found;
+      }
+    }
+
+    // For complete removal of duplicate seeds, assumes isDuplicate(iseed) is called for monotonically increasing iseed.
+    bool isDuplicate(size_t iseed)
+    {
+      if (m_disabled)
+        return false;
+      assert(iseed < m_isDuplicateSeed.size());
+      // If iseed not increasing, we will miss some duplicate seeds, but won't exclude needed seeds.
+      if (iseed >= m_nextSeed)
+        m_nextSeed = iseed + 1;
+      return m_isDuplicateSeed[iseed];
+    }
+
+  private:
+    bool m_disabled = false;
+    boost::container::flat_multimap<const xAOD::UncalibratedMeasurement *, size_t> m_seedIndex;
+    std::vector<size_t> m_nUsedMeasurements;
+    std::vector<size_t> m_nSeedMeasurements;
+    std::vector<bool> m_isDuplicateSeed;
+    size_t m_numSeed = 0u;  // count of number of seeds so-far added with addSeeds()
+    size_t m_nextSeed = 0u; // index of next seed expected with isDuplicate()
+    size_t m_found = 0u;    // count of found seeds for this/last trajectory
+  };
+
+  // === TrackFindingMeasurements ================================
+
+  // Helper class to convert xAOD::PixelClusterContainer or xAOD::StripClusterContainer to UncalibSourceLinkMultiset.
+  class TrackFindingMeasurements
+  {
+  public:
+    using UncalibratedMeasurementContainerPtr = std::variant<const xAOD::PixelClusterContainer *, const xAOD::StripClusterContainer *>;
+
+    TrackFindingMeasurements(size_t numMeasurements,
+                             size_t maxMeasurements,
+                             bool doTrackStatePrinter,
+                             std::vector<ATLASUncalibSourceLink::ElementsType> *elementsCollection)
+        : m_elementsCollection(elementsCollection)
+    {
+      m_sourceLinks.reserve(numMeasurements);
+      m_elementsCollection->reserve(numMeasurements);
+      if (doTrackStatePrinter)
+      {
+        m_sourceLinksVec.reserve(numMeasurements);
+        m_measurementOffset.reserve(2); // pixels+strips
+      }
+      else
+      {
+        m_sourceLinksVec.reserve(maxMeasurements);
+      }
       m_seedOffset.reserve(2);
     }
 
-    Measurements_impl() = delete;
-    Measurements_impl(const Measurements_impl &) = delete;
-    Measurements_impl &operator=(const Measurements_impl &) = delete;
+    TrackFindingMeasurements() = delete;
+    TrackFindingMeasurements(const TrackFindingMeasurements &) = delete;
+    TrackFindingMeasurements &operator=(const TrackFindingMeasurements &) = delete;
 
     void addMeasurements(size_t typeIndex,
                          const EventContext &ctx,
-                         const ActsTrk::TrackFindingAlg::Measurements::UncalibratedMeasurementContainerPtr &clusterContainer,
+                         const UncalibratedMeasurementContainerPtr &clusterContainer,
                          const InDetDD::SiDetectorElementCollection &detElems,
-                         const ActsTrk::SeedContainer *seeds) final
+                         const ActsTrk::SeedContainer *seeds,
+                         const ToolHandle<ActsTrk::IActsToTrkConverterTool> &ATLASConverterTool,
+                         const ToolHandle<ActsTrk::ITrackStatePrinter> &trackStatePrinter,
+                         DuplicateSeedDetector &duplicateSeedDetector)
     {
+      size_t measurementOffset = 0;
+      if (!trackStatePrinter.empty())
+      {
+        measurementOffset = m_sourceLinksVec.size();
+        if (!(typeIndex < m_measurementOffset.size()))
+          m_measurementOffset.resize(typeIndex + 1);
+        m_measurementOffset[typeIndex] = measurementOffset;
+      }
       // the following is just in case we call addMeasurements out of order or not for 2 types of measurements
-      if (!(typeIndex < m_measurementOffset.size()))
-        m_measurementOffset.resize(typeIndex + 1);
-      m_measurementOffset[typeIndex] = m_sourceLinksVec.size();
       if (!(typeIndex < m_seedOffset.size()))
         m_seedOffset.resize(typeIndex + 1);
 
@@ -331,46 +349,40 @@ namespace
                  {
                     for (auto *measurement : *clusterContainerVar)
                     {
-                      auto sl = m_ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(detElems, *measurement, *m_elementsCollectionPtr);
+                      auto sl = ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(detElems, *measurement, *m_elementsCollection);
                       m_sourceLinks.insert(m_sourceLinks.end(), sl);
                       m_sourceLinksVec.push_back(sl);
                     } },
                  clusterContainer);
 
-      if (m_trackStatePrinter)
+      if (seeds)
       {
-        m_trackStatePrinter->printSourceLinks(ctx, m_sourceLinksVec, typeIndex, m_measurementOffset[typeIndex]);
+        m_seedOffset[typeIndex] = duplicateSeedDetector.addSeeds(*seeds, m_sourceLinksVec, measurementOffset);
       }
-      if (seeds && m_skipDuplicateSeeds)
+
+      if (!trackStatePrinter.empty())
       {
-        m_seedOffset[typeIndex] = m_duplicateSeedDetector.addSeeds(*seeds, m_sourceLinksVec, m_measurementOffset[typeIndex]);
+        trackStatePrinter->printSourceLinks(ctx, m_sourceLinksVec, typeIndex, measurementOffset);
+      }
+      else
+      {
+        m_sourceLinksVec.clear(); // don't need any more
       }
     }
 
     const UncalibSourceLinkMultiset &sourceLinks() const { return m_sourceLinks; }
     const std::vector<ATLASUncalibSourceLink> &sourceLinkVec() const { return m_sourceLinksVec; }
-    size_t measurementOffset(size_t typeIndex) const { return m_measurementOffset[typeIndex]; }
-    size_t seedOffset(size_t typeIndex) const { return m_seedOffset[typeIndex]; }
-    DuplicateSeedDetector &duplicateSeedDetector() const
-    {
-      auto &d ATLAS_THREAD_SAFE = m_duplicateSeedDetector; // need a temporary ref so we can declare it ATLAS_THREAD_SAFE
-      return d;
-    }
+    size_t measurementOffset(size_t typeIndex) const { return typeIndex < m_measurementOffset.size() ? m_measurementOffset[typeIndex] : 0u; }
+    size_t seedOffset(size_t typeIndex) const { return typeIndex < m_seedOffset.size() ? m_seedOffset[typeIndex] : 0u; }
 
   private:
-    size_t m_numMeasurements = 0;
-    const ActsTrk::IActsToTrkConverterTool *m_ATLASConverterTool = nullptr;
-    const ActsTrk::ITrackStatePrinter *m_trackStatePrinter = nullptr;
     UncalibSourceLinkMultiset m_sourceLinks;
     std::vector<ATLASUncalibSourceLink> m_sourceLinksVec;
-    std::vector<ATLASUncalibSourceLink::ElementsType> m_elementsCollectionInternal;
-    std::vector<ATLASUncalibSourceLink::ElementsType> *m_elementsCollectionPtr;
+    std::vector<ATLASUncalibSourceLink::ElementsType> *m_elementsCollection;
     std::vector<size_t> m_measurementOffset;
     std::vector<size_t> m_seedOffset;
-    bool m_skipDuplicateSeeds;
-    // DuplicateSeedDetector is used internally to TrackFindingAlg to count up the duplicate seeds. This needs mutable access.
-    // This is thread safe, because Measurements_impl is local to the TrackFindingAlg::execute() and passed to us by (const&) argument.
-    mutable DuplicateSeedDetector m_duplicateSeedDetector ATLAS_THREAD_SAFE;
   };
 
 } // anonymous namespace
+
+#endif
