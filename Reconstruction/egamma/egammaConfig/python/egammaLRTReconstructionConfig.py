@@ -28,6 +28,7 @@ def egammaLRTReconstructionCfg(flags, name="egammaLRTReconstruction"):
             name="LRTegammaSelectedTrackCopy",
             TrackParticleContainerName="InDetLargeD0TrackParticles",
             OutputTrkPartContainerName="LRTegammaSelectedTrackParticles",
+            OutputFwdTrkPartContainerName="LRTegammaSelectedTrackParticlesFwd",
             ExtrapolationTool=emextLRT)
         )
 

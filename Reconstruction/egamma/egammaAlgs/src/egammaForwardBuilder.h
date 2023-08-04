@@ -21,7 +21,6 @@
           The forward electron AUTHOR is 8. 
 */
 
-//
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -47,108 +46,136 @@
 #include "EgammaAnalysisInterfaces/IAsgForwardElectronIsEMSelector.h"
 #include "egammaInterfaces/IEMTrackMatchBuilder.h"
 
-#include "GaudiKernel/SystemOfUnits.h"
-
 #include <string>
+
+#include <Gaudi/Accumulators.h>
 
 class egammaForwardBuilder : public AthReentrantAlgorithm
 {
- public:
-
-  /** @brief constructor*/
+public:
+  /** @brief Constructor. */
   egammaForwardBuilder(const std::string& name, ISvcLocator* pSvcLocator);
 
-  /** @brief destructor*/
+  /** @brief Destructor. */
   ~egammaForwardBuilder();
 
-  /** @brief initialize method*/
+  /** @brief Initialize method. */
   virtual StatusCode initialize() override final;
-  /** @brief finalize method*/
+
+  /** @brief Finalize method. */
   virtual StatusCode finalize() override final;
-  /** @brief execute method*/
+
+  /** @brief Execute method. */
   virtual StatusCode execute(const EventContext& ctx) const override final;
 
- private:
-   StatusCode RetrieveEMTrackMatchBuilder();
-   StatusCode ExecObjectQualityTool(const EventContext& ctx,
-                                    xAOD::Egamma* eg) const;
+private:
+  StatusCode RetrieveEMTrackMatchBuilder();
+  StatusCode ExecObjectQualityTool(const EventContext& ctx, xAOD::Egamma* eg) const;
 
-   /** @brief Tool to perform object quality*/
-   ToolHandle<IegammaOQFlagsBuilder> m_objectQualityTool{
-     this,
-     "ObjectQualityTool",
-     "",
-     "Name of the object quality tool (empty tool name ignored)"
-   };
+  /** @brief Convinience wrapper to set track match values in all samplings. */
+  void setAllTrackCaloMatchValues(
+    xAOD::Electron *el,
+    const std::array<xAOD::EgammaParameters::TrackCaloMatchType, 4> &match_parameters,
+    const std::array<double, 4> &match_values
+  ) const;
 
-   /** @brief Tool to perform the 4-mom computation*/
-   ToolHandle<IEMFourMomBuilder> m_fourMomBuilder{ this,
-                                                   "FourMomBuilderTool",
-                                                   "EMFourMomBuilder",
-                                                   "Handle of 4-mom Builder" };
+  /** @brief Tool to perform object quality. */
+  ToolHandle<IegammaOQFlagsBuilder> m_objectQualityTool{
+    this,
+    "ObjectQualityTool",
+    "",
+    "Name of the object quality tool (empty tool name ignored)"
+  };
 
-   /** @brief Tool to perform track-cluster matching*/
-   ToolHandle<IEMTrackMatchBuilder> m_trackMatchBuilder{
-     this,
-     "TrackMatchBuilderTool",
-     "EMTrackMatchBuilder",
-     "Tool that matches tracks to egammaRecs (Fwd)"
-   };
+  /** @brief Tool to perform the 4-mom computation. */
+  ToolHandle<IEMFourMomBuilder> m_fourMomBuilder{
+    this,
+    "FourMomBuilderTool",
+    "EMFourMomBuilder",
+    "Handle of 4-mom Builder"
+  };
 
-   /** @brief input topo cluster type */
-   SG::ReadHandleKey<xAOD::CaloClusterContainer> m_topoClusterKey{
-     this,
-     "TopoClusterName",
-     "CaloCalTopoClusters",
-     "Name of the input cluster collection"
-   };
+  /** @brief Tool to perform track-cluster matching. */
+  ToolHandle<IEMTrackMatchBuilder> m_trackMatchBuilder{
+    this,
+    "TrackMatchBuilderTool",
+    "EMTrackMatchBuilder",
+    "Tool that matches tracks to egammaRecs (Fwd)"
+  };
 
-   /** @brief output electron container */
-   SG::WriteHandleKey<xAOD::ElectronContainer> m_electronOutputKey{
-     this,
-     "ElectronOutputName",
-     "",
-     "Name of Electron Container to be created"
-   };
+  /** @brief Input topo cluster type. */
+  SG::ReadHandleKey<xAOD::CaloClusterContainer> m_topoClusterKey{
+    this,
+    "TopoClusterName",
+    "",
+    "Name of the input cluster collection"
+  };
 
-   /** @brief output cluster container */
-   SG::WriteHandleKey<xAOD::CaloClusterContainer> m_outClusterContainerKey{
-     this,
-     "ClusterContainerName",
-     ""
-     "Name of the output EM cluster container"
-   };
+  /** @brief Output electron container. */
+  SG::WriteHandleKey<xAOD::ElectronContainer> m_electronOutputKey{
+    this,
+    "ElectronOutputName",
+    "",
+    "Name of Electron Container to be created"
+  };
 
-   /** @brief output cluster container cell links: name taken from containter
-    * name **/
-   SG::WriteHandleKey<CaloClusterCellLinkContainer>
-     m_outClusterContainerCellLinkKey;
+  /** @brief Output cluster container. */
+  SG::WriteHandleKey<xAOD::CaloClusterContainer> m_outClusterContainerKey{
+    this,
+    "ClusterContainerName",
+    ""
+    "Name of the output EM cluster container"
+  };
 
-   /** @brief  ET cut */
-   Gaudi::Property<double> m_ETcut{ this,
-                                    "EtCut",
-                                    5. * Gaudi::Units::GeV,
-                                    "ET cut" };
+  /** @brief Output cluster container cell links: name taken from containter name. */
+  SG::WriteHandleKey<CaloClusterCellLinkContainer> m_outClusterContainerCellLinkKey;
 
-   /** @brief eta cut */
-   Gaudi::Property<double> m_etacut{ this, "EtaCut", 2.5, "eta cut" };
+  /** @brief Private member flag to do the track matching. */
+  Gaudi::Property<bool> m_doTrackMatching { 
+    this,
+    "doTrackMatching",
+    false,
+    "Boolean to do track matching"
+  };
 
-   /** @brief private member flag to do the track matching */
-   Gaudi::Property<bool> m_doTrackMatching{ this,
-                                            "doTrackMatching",
-                                            false,
-                                            "Boolean to do track matching" };
+  mutable Gaudi::Accumulators::Counter<> m_AllClusters {};
+  mutable Gaudi::Accumulators::Counter<> m_MatchedClusters {};
+  static constexpr std::array<xAOD::EgammaParameters::TrackCaloMatchType, 4> s_deltaEtaParameters = {
+    xAOD::EgammaParameters::deltaEta0,
+    xAOD::EgammaParameters::deltaEta1,
+    xAOD::EgammaParameters::deltaEta2,
+    xAOD::EgammaParameters::deltaEta3,
+  };
 
- protected:
-  /** Handle to the selectors */
-  ToolHandleArray<IAsgForwardElectronIsEMSelector> m_forwardElectronIsEMSelectors {this,
-      "forwardelectronIsEMselectors", {}, 
-      "The selectors that we need to apply to the FwdElectron object"};
+  static constexpr std::array<xAOD::EgammaParameters::TrackCaloMatchType, 4> s_deltaPhiParameters = {
+    xAOD::EgammaParameters::deltaPhi0,
+    xAOD::EgammaParameters::deltaPhi1,
+    xAOD::EgammaParameters::deltaPhi2,
+    xAOD::EgammaParameters::deltaPhi3,
+  };
 
-  Gaudi::Property<std::vector<std::string> > m_forwardElectronIsEMSelectorResultNames {this,
-      "forwardelectronIsEMselectorResultNames", {},
-      "The selector result names"};
-  
+  static constexpr std::array<xAOD::EgammaParameters::TrackCaloMatchType, 4> s_deltaPhiRescaledParameters = {
+    xAOD::EgammaParameters::deltaPhiRescaled0,
+    xAOD::EgammaParameters::deltaPhiRescaled1,
+    xAOD::EgammaParameters::deltaPhiRescaled2,
+    xAOD::EgammaParameters::deltaPhiRescaled3,
+  };
+
+protected:
+  /** Handle to the selectors. */
+  ToolHandleArray<IAsgForwardElectronIsEMSelector> m_forwardElectronIsEMSelectors {
+    this,
+    "forwardelectronIsEMselectors", 
+    {}, 
+    "The selectors that we need to apply to the FwdElectron object"
+  };
+
+  Gaudi::Property<std::vector<std::string>> m_forwardElectronIsEMSelectorResultNames {
+    this,
+    "forwardelectronIsEMselectorResultNames", 
+    {},
+    "The selector result names"
+  };
 };
 #endif
 

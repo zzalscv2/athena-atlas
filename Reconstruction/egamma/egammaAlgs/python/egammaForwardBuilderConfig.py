@@ -16,11 +16,12 @@ def egammaForwardBuilderCfg(flags, name='egammaForwardElectron', **kwargs):
     mlog.info('Starting configuration')
 
     acc = ComponentAccumulator()
-    if "TrackMatchBuilderTool" not in kwargs:
-        emtrkmatch = EMTrackMatchBuilderCfg(flags)
-        kwargs["TrackMatchBuilderTool"] = acc.popToolsAndMerge(emtrkmatch)
+
     if flags.Detector.GeometryITk:
         kwargs["doTrackMatching"] = True
+        kwargs.setdefault("TrackMatchBuilderTool", acc.popToolsAndMerge(EMTrackMatchBuilderCfg(
+                flags,
+                TrackParticlesName=flags.Egamma.Keys.Output.FwdGSFTrackParticles)))
     if "forwardelectronIsEMselectors" not in kwargs:
         LooseFwdElectronSelector = AsgForwardElectronIsEMSelectorCfg(
             flags,
@@ -55,11 +56,10 @@ def egammaForwardBuilderCfg(flags, name='egammaForwardElectron', **kwargs):
     kwargs.setdefault("ElectronOutputName",
                       flags.Egamma.Keys.Output.ForwardElectrons)
     kwargs.setdefault("TopoClusterName",
-                      flags.Egamma.Keys.Input.ForwardTopoClusters)
+                      flags.Egamma.Keys.Internal.ForwardTopoClusters)
     kwargs.setdefault("ClusterContainerName",
                       flags.Egamma.Keys.Output.ForwardClusters)
-    kwargs.setdefault("FourMomBuilderTool",
-                      CompFactory.EMFourMomBuilder())
+    kwargs.setdefault("FourMomBuilderTool", CompFactory.EMFourMomBuilder())
 
     fwdAlg = CompFactory.egammaForwardBuilder(name, **kwargs)
 

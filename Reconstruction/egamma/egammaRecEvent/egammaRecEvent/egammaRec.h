@@ -57,6 +57,9 @@ public:
   /// @brief set Pointer to the xAOD::CaloCluster
   void setCaloClusters(const std::vector<ElementLink<xAOD::CaloClusterContainer>>& links);
 
+  /// @brief Get a reference to the calo cluster links.
+  const std::vector<ElementLink<xAOD::CaloClusterContainer>> & caloClusterElementLinks() const;
+
   /// @brief Return the number xAOD::TrackParticles that match the electron candidate
   size_t getNumberOfTrackParticles() const;
 
@@ -68,6 +71,9 @@ public:
 
   /// @brief Set the ElementLinks to the xAOD::TrackParticle/s that match the electron candidate
   void setTrackParticles(const std::vector<ElementLink<xAOD::TrackParticleContainer>>& links);
+  
+  /// @brief Get a reference to the track particle links.
+  const std::vector<ElementLink<xAOD::TrackParticleContainer>> & trackParticleElementLinks() const;
 
   /// @brief Return the number xAOD::Vertex/vertices  that match the photon candidate
   size_t getNumberOfVertices() const;
@@ -80,6 +86,9 @@ public:
 
   /// @brief set Pointer to the xAOD::vertex/vertices that match  the photon candidate
   void setVertices(const std::vector<ElementLink<xAOD::VertexContainer>>& links);
+  
+  /// @brief Get a reference to the vertix links.
+  const std::vector<ElementLink<xAOD::VertexContainer>> & vertexElementLinks() const;
 
   /// @brief Push back another vertex
   void pushBackVertex(const ElementLink<xAOD::VertexContainer>& vertexElementLink);
@@ -91,11 +100,13 @@ public:
   /// @{
   /** @brief deltaEta at pre sampler(0) -> 3rd sampling(3)*/
   std::array<double,4>  deltaEta () const; 
+
   /** @brief deltaPhi at pre sampler(0) -> 3rd sampling(3)*/
   std::array<double,4>  deltaPhi () const;
-  /** @brief deltaPhi for rescaled momentum extrapolation
-       from the perigee. */
+
+  /** @brief deltaPhi for rescaled momentum extrapolation from the perigee. */
   std::array<double,4>  deltaPhiRescaled () const;
+
   /** @brief deltaPhi from Last measurement*/
   double deltaPhiLast () const ;
   

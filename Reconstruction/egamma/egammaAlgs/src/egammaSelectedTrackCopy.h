@@ -52,7 +52,7 @@
 class egammaSelectedTrackCopy : public AthReentrantAlgorithm
 {
 public:
-  /** @brief Default constructor*/
+  /** @brief Default constructor. */
   egammaSelectedTrackCopy(const std::string& name, ISvcLocator* pSvcLocator);
 
   virtual StatusCode initialize() override final;
@@ -60,35 +60,46 @@ public:
   virtual StatusCode execute(const EventContext& ctx) const override final;
 
 private:
-  /** @brief broad track selection */
+  /** @brief Broad track selection. */
   bool selectTrack(const EventContext& ctx,
                    const xAOD::CaloCluster* cluster,
                    const xAOD::TrackParticle* track,
                    bool trkTRT,
                    const CaloDetDescrManager& caloDD) const;
 
-  /** @brief Tool for extrapolation */
-  ToolHandle<IEMExtrapolationTools> m_extrapolationTool{ this,
-                                                         "ExtrapolationTool",
-                                                         "EMExtrapolationTools",
-                                                         "Extrapolation tool" };
-  /** @brief Tool to filter the calo clusters */
-  ToolHandle<IegammaCaloClusterSelector> m_egammaCaloClusterSelector{
+  /** @brief Tool for extrapolation. */
+  ToolHandle<IEMExtrapolationTools> m_extrapolationTool {
+    this,
+    "ExtrapolationTool",
+    "EMExtrapolationTools",
+    "Extrapolation tool"
+  };
+
+  /** @brief Tool to filter the calo clusters. */
+  ToolHandle<IegammaCaloClusterSelector> m_egammaCaloClusterSelector {
     this,
     "egammaCaloClusterSelector",
     "egammaCaloClusterSelector",
     "Tool that makes the cluster selection"
   };
 
-  /** @brief Names of input output collections */
-  SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clusterContainerKey{
+  /** @brief Names of input output collections. */
+  SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clusterContainerKey {
     this,
     "ClusterContainerName",
     "egammaTopoCluster",
     "Input calo cluster for seeding"
   };
 
-  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackParticleContainerKey{
+  /** @brief Names of forward input output collections. */
+  SG::ReadHandleKey<xAOD::CaloClusterContainer> m_fwdClusterContainerKey {
+    this,
+    "FwdClusterContainerName",
+    "",
+    "Input calo cluster for seeding"
+  };
+
+  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackParticleContainerKey {
     this,
     "TrackParticleContainerName",
     "InDetTrackParticles",
@@ -102,25 +113,36 @@ private:
     "SG Key for CaloDetDescrManager in the Condition Store"
   };
 
-  SG::WriteHandleKey<ConstDataVector<xAOD::TrackParticleContainer>>
-    m_OutputTrkPartContainerKey{ this,
-                                 "OutputTrkPartContainerName",
-                                 "egammaSelectedTrackParticles",
-                                 "Output selected TrackParticles" };
+  SG::WriteHandleKey<ConstDataVector<xAOD::TrackParticleContainer>> m_OutputTrkPartContainerKey {
+    this,
+    "OutputTrkPartContainerName",
+    "egammaSelectedTrackParticles",
+    "Output selected TrackParticles"
+  };
 
-  /** @brief broad cut on deltaEta*/
-  Gaudi::Property<double> m_broadDeltaEta{ this,
-                                           "broadDeltaEta",
-                                           0.2,
-                                           "Value of broad cut for delta eta" };
+  SG::WriteHandleKey<ConstDataVector<xAOD::TrackParticleContainer>> m_OutputFwdTrkPartContainerKey {
+    this,
+    "OutputFwdTrkPartContainerName",
+    "",
+    "Output selected TrackParticles"
+  };
 
-  /** @brief broad cut on deltaPhi*/
-  Gaudi::Property<double> m_broadDeltaPhi{ this,
-                                           "broadDeltaPhi",
-                                           0.3,
-                                           "Value of broad cut for delta phi" };
+  /** @brief Broad windows. */
+  Gaudi::Property<double> m_broadDeltaEta {
+    this,
+    "broadDeltaEta",
+    0.2,
+    "Value of broad cut for delta eta"
+  };
 
-  /** @brief narrow windows*/
+  Gaudi::Property<double> m_broadDeltaPhi {
+    this,
+    "broadDeltaPhi",
+    0.3,
+    "Value of broad cut for delta phi"
+  };
+
+  /** @brief Narrow windows. */
   Gaudi::Property<double> m_narrowDeltaEta{
     this,
     "narrowDeltaEta",
@@ -156,6 +178,14 @@ private:
     "Value of the narrow cut for delta phi Rescale Brem"
   };
 
+  /** @brief Private member flag to select forward tracks. */
+  Gaudi::Property<bool> m_doForwardTracks { 
+    this,
+    "doFwdTracks",
+    false,
+    "Boolean to select tracks in the forward region"
+  };
+
   mutable Gaudi::Accumulators::Counter<> m_AllClusters;
   mutable Gaudi::Accumulators::Counter<> m_SelectedClusters;
   mutable Gaudi::Accumulators::Counter<> m_AllTracks;
@@ -166,3 +196,4 @@ private:
   mutable Gaudi::Accumulators::Counter<> m_SelectedTRTTracks;
 };
 #endif
+
