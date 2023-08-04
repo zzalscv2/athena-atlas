@@ -150,7 +150,9 @@ foreach( test sincos_test ArrayScanner_test Arrayrep_test
       MurmurHash2_test bitmask_test crc64_test Ring_test
       restrict_test vectorize_test get_unaligned_test aligned_vector_test
       vec_int_test vec_float_test vec_fb_int_test vec_fb_float_test
-      ConcurrentHashmapImpl_test SimpleUpdater_test hexdump_test
+      ConcurrentHashmapImpl_test
+      ConcurrentToValMap_test ConcurrentStrToValMap_test
+      SimpleUpdater_test hexdump_test
       FPControl_test LockedPointer_test nodiscard_test span_test
       reverse_wrapper_test atomic_bounded_decrement_test
       releasing_iterator_test SizedUInt_test UIntConv_test starts_with_test )

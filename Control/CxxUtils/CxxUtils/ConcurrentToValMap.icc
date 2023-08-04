@@ -1,0 +1,898 @@
+/*
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ */
+/**
+ * @file CxxUtils/ConcurrentToValMap.icc
+ * @author scott snyder <snyder@bnl.gov>
+ * @date Jul, 2023
+ * @brief Hash map from pointers/integers to arbitrary objects allowing
+ *        concurrent, lockless reads.
+ */
+
+
+namespace CxxUtils {
+
+
+#define T_CONCURRENTTOVALMAP template <class KEY, class VALUE, \
+                                       template <class> class UPDATER,  \
+                                       class HASHER, class MATCHER,     \
+                                       detail::ConcurrentHashmapVal_t NULLVAL> \
+  ATH_REQUIRES (detail::IsConcurrentHashmapPayload<KEY> &&              \
+                detail::IsUpdater<UPDATER> &&                           \
+                detail::IsHash<HASHER, KEY> &&                          \
+                detail::IsBinaryPredicate<MATCHER, KEY>)
+
+#define CONCURRENTTOVALMAP ConcurrentToValMap<KEY, VALUE, UPDATER, HASHER, MATCHER, NULLVAL>
+
+
+/**
+ * @brief Constructor.
+ * @param updater Object used to manage memory
+ *                (see comments at the start of the class).
+ * @param capacity The initial table capacity.
+ *                 (Will be rounded up to a power of two.)
+ * @param ctx Execution context.
+ */
+T_CONCURRENTTOVALMAP
+CONCURRENTTOVALMAP::ConcurrentToValMap (Updater_t&& updater,
+                                        size_type capacity /*= 64*/,
+                                        const Context_t& ctx
+                                          /* = Updater_t::defaultContext()*/) 
+  : m_impl (std::move (updater),
+            capacity,
+            Hasher(),
+            Matcher(),
+            ctx)
+{
+}
+
+
+/** 
+ * @brief Constructor from another map.
+ * @param updater Object used to manage memory
+ *                (see comments at the start of the class).
+ * @param capacity The initial table capacity of the new table.
+ *                 (Will be rounded up to a power of two.)
+ * @param ctx Execution context.
+ *
+ * (Not really a copy constructor since we need to pass @c updater.)
+ */
+T_CONCURRENTTOVALMAP
+CONCURRENTTOVALMAP::ConcurrentToValMap (const ConcurrentToValMap& other,
+                                        Updater_t&& updater,
+                                        size_type capacity /*= 64*/,
+                                        const Context_t& ctx
+                                          /*= Updater_t::defaultContext()*/)
+  : m_impl (std::move (updater),
+            capacity,
+            Hasher(),
+            Matcher(),
+            ctx)
+{
+  // not using reference, because our iterator doesn't return a reference
+  for (const auto p : other) {
+    this->put (p.first, std::make_unique<mapped_type> (p.second), ctx);
+  }
+}
+
+
+/** 
+ * @brief Constructor from a range.
+ * @param f Start iterator for the range.
+ * @param l End iterator for the range.
+ * @param updater Object used to manage memory
+ *                (see comments at the start of the class).
+ * @param capacity The initial table capacity of the new table.
+ *                 (Will be rounded up to a power of two.)
+ * @param ctx Execution context.
+ *
+ * Constructor from a range of pairs.
+ */
+T_CONCURRENTTOVALMAP
+template <class InputIterator>
+CONCURRENTTOVALMAP::ConcurrentToValMap (InputIterator f,
+                                        InputIterator l,
+                                        Updater_t&& updater,
+                                        size_t capacity /*= 64*/,
+                                        const Context_t& ctx
+                                          /*= Updater_t::defaultContext()*/)
+  : m_impl (std::move (updater),
+            capacity,
+            Hasher(),
+            Matcher(),
+            ctx)
+{
+  if constexpr (std::is_rvalue_reference_v<typename InputIterator::reference>)
+  {
+    for (; f != l; ++f) {
+      emplace (f->first, std::move (f->second), ctx);
+    }
+  }
+  else {
+    for (; f != l; ++f) {
+      emplace (f->first, f->second, ctx);
+    }
+  }
+}
+
+
+/**
+ * @brief Destructor.
+ */
+T_CONCURRENTTOVALMAP
+CONCURRENTTOVALMAP::~ConcurrentToValMap()
+{
+  // Need to delete the values that we've stored.
+  auto [begin, end] = m_impl.range();
+  while (begin != end) {
+    if (begin.key() != Impl_t::nullval) {
+      delete mappedAsMapped (begin.value());
+    }
+    begin.next();
+  }
+}
+
+
+/**
+ * @brief Return the number of items currently in the map.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::size() const -> size_type
+{
+  return m_impl.size();
+}
+
+
+/**
+ * @brief Test if the map is currently empty.
+ */
+T_CONCURRENTTOVALMAP
+inline
+bool CONCURRENTTOVALMAP::empty() const
+{
+  return !m_impl.size();
+}
+
+
+/**
+ * @brief Return the current size (capacity) of the hash table.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::capacity() const -> size_t
+{
+  return m_impl.capacity();
+}
+
+
+/**
+ * @brief Constructor.
+ * @param it Iterator of the underlying table.
+ */
+T_CONCURRENTTOVALMAP
+inline
+CONCURRENTTOVALMAP::const_iterator::const_iterator (typename Impl_t::const_iterator it)
+  : m_impl (it)
+{
+}
+
+
+/**
+ * @brief Conversion from non-const iterator (for interoperability).
+ * @param other The other iterator.
+ */
+T_CONCURRENTTOVALMAP
+inline
+CONCURRENTTOVALMAP::const_iterator::const_iterator (const iterator& other)
+  : m_impl (other.m_impl)
+{
+}
+
+
+/**
+ * @brief Test if this iterator is valid.
+ *
+ * This should be the same as testing for != end().
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::const_iterator::valid() const -> bool
+{
+  return m_impl.valid();
+}
+
+
+/**
+ * @brief iterator_facade requirement: Increment the iterator.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::const_iterator::increment() -> void
+{
+  m_impl.next();
+}
+
+
+/**
+ * @brief iterator_facade requirement: Decrement the iterator.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::const_iterator::decrement() -> void
+{
+  m_impl.prev();
+}
+
+
+/**
+ * @brief iterator_facade requirement: Dereference the iterator.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::const_iterator::dereference() const
+  -> const const_iterator_value
+{
+  return const_iterator_value (keyAsKey (m_impl.key()),
+                               *mappedAsMapped (m_impl.value()));
+}
+
+
+/**
+ * @brief iterator_facade requirement: Equality test.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::const_iterator::equal (const const_iterator& other) const
+  -> bool
+{
+  return !(m_impl != other.m_impl);
+}
+
+
+/**
+ * @brief iterator_facade requirement: Equality test.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::const_iterator::equal (const iterator& other) const
+  -> bool
+{
+  return !(m_impl != other.m_impl);
+}
+
+
+/**
+ * @brief Constructor.
+ * @param it Iterator of the underlying table.
+ */
+T_CONCURRENTTOVALMAP
+inline
+CONCURRENTTOVALMAP::iterator::iterator (typename Impl_t::const_iterator it)
+  : m_impl (it)
+{
+}
+
+
+/**
+ * @brief Test if this iterator is valid.
+ *
+ * This should be the same as testing for != end().
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::iterator::valid() const -> bool
+{
+  return m_impl.valid();
+}
+
+
+/**
+ * @brief iterator_facade requirement: Increment the iterator.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::iterator::increment() -> void
+{
+  m_impl.next();
+}
+
+
+/**
+ * @brief iterator_facade requirement: Decrement the iterator.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::iterator::decrement() -> void
+{
+  m_impl.prev();
+}
+
+
+/**
+ * @brief iterator_facade requirement: Dereference the iterator.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::iterator::dereference() const
+  -> const iterator_value
+{
+  return iterator_value (keyAsKey (m_impl.key()),
+                         *mappedAsMapped (m_impl.value()));
+}
+
+
+/**
+ * @brief iterator_facade requirement: Equality test.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::iterator::equal (const iterator& other) const
+  -> bool
+{
+  return !(m_impl != other.m_impl);
+}
+
+
+/**
+ * @brief iterator_facade requirement: Equality test.  (Interoperability.)
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::iterator::equal (const const_iterator& other) const
+  -> bool
+{
+  return !(m_impl != other.m_impl);
+}
+
+
+/**
+ * @brief Return an iterator range covering the entire map.
+ */
+T_CONCURRENTTOVALMAP
+auto CONCURRENTTOVALMAP::range() const -> const_iterator_range
+{
+  auto [begin, end] = m_impl.range();
+  return const_iterator_range (begin, end);
+}
+
+
+/**
+ * @brief Return an iterator range covering the entire map.
+ *
+ * The mapped objects must themselves be thread-safe in order to make
+ * any changes to them through the returned iterators.
+ */
+T_CONCURRENTTOVALMAP
+auto CONCURRENTTOVALMAP::range() -> iterator_range
+{
+  auto [begin, end] = m_impl.range();
+  return iterator_range (begin, end);
+}
+
+
+/**
+ * @brief Iterator at the start of the map.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::begin() const -> const_iterator
+{
+  return const_iterator (m_impl.begin());
+}
+
+
+/**
+ * @brief Iterator at the end of the map.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::end() const -> const_iterator
+{
+  return const_iterator (m_impl.end());
+}
+
+
+/**
+ * @brief Iterator at the start of the map.
+ *
+ * The mapped objects must themselves be thread-safe in order to make
+ * any changes to them through the returned iterators.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::begin() -> iterator
+{
+  return iterator (m_impl.begin());
+}
+
+
+/**
+ * @brief Iterator at the end of the map.
+ *
+ * The mapped objects must themselves be thread-safe in order to make
+ * any changes to them through the returned iterators.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::end() -> iterator
+{
+  return iterator (m_impl.end());
+}
+
+
+/**
+ * @brief Iterator at the start of the map.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::cbegin() const -> const_iterator
+{
+  return begin();
+}
+
+
+/**
+ * @brief Iterator at the end of the map.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::cend() const -> const_iterator
+{
+  return end();
+}
+
+
+/**
+ * @brief Test if a key is in the container.
+ * @param key The key to test.
+ */
+T_CONCURRENTTOVALMAP
+inline
+bool CONCURRENTTOVALMAP::contains (const key_type key) const
+{
+  return get(key).valid();
+}
+
+
+/**
+ * @brief Return the number of times a given key is in the container.
+ * @param key The key to test.
+ *
+ * Returns either 0 or 1, depending on whether or not the key is in the map.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::count (const key_type key) const -> size_type
+{
+  return contains (key) ? 1 : 0;
+}
+
+
+/**
+ * @brief Look up an element in the map.
+ * @param key The element to find.
+ *
+ * Returns either an iterator referencing the found element or end().
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::find (const key_type key) const -> const_iterator
+{
+  return const_iterator (this->get (key));
+}
+
+
+/**
+ * @brief Look up an element in the map.
+ * @param key The element to find.
+ *
+ * Returns either an iterator referencing the found element or end().
+ *
+ * The mapped object must itself be thread-safe in order to make
+ * any changes to it through the returned iterator.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::find (const key_type key) -> iterator
+{
+  return iterator (this->get (key));
+}
+
+
+/**
+ * @brief Look up an element in the map.
+ * @param key The element to find.
+ *
+ * Returns the value associated with the key.
+ * Throws @c std::out_of_range if the key does not exist in the map.
+ */
+T_CONCURRENTTOVALMAP
+auto CONCURRENTTOVALMAP::at (const key_type key) const -> const mapped_type&
+{
+  typename Impl_t::const_iterator it = this->get (key);
+  if (!it.valid()) {
+    throw std::out_of_range ("ConcurrentToValMap::at");
+  }
+  return *mappedAsMapped (it.value());
+}
+
+
+/**
+ * @brief Look up an element in the map.
+ * @param key The element to find.
+ *
+ * Returns the value associated with the key.
+ * Throws @c std::out_of_range if the key does not exist in the map.
+ *
+ * This returns a non-const reference to the mapped object.
+ * The mapped object must be thread-safe itself in order to safely
+ * make any changes to it.
+ */
+T_CONCURRENTTOVALMAP
+auto CONCURRENTTOVALMAP::at (const key_type key) -> mapped_type&
+{
+  typename Impl_t::const_iterator it = this->get (key);
+  if (!it.valid()) {
+    throw std::out_of_range ("ConcurrentToValMap::at");
+  }
+  return *mappedAsMapped (it.value());
+}
+
+
+/**
+ * @brief Return a range of iterators with entries matching @c key.
+ * @param key The element to find.
+ *
+ * As keys are unique in this container, this is either a single-element
+ * range, or both iterators are equal to end().
+ */
+T_CONCURRENTTOVALMAP
+auto CONCURRENTTOVALMAP::equal_range (const key_type key) const
+  -> std::pair<const_iterator, const_iterator>
+{
+  const_iterator i1 = find (key);
+  const_iterator i2 = i1;
+  if (i2.valid()) {
+    ++i2;
+  }
+  return std::make_pair (i1, i2);
+}
+
+
+/**
+ * @brief Return a range of iterators with entries matching @c key.
+ * @param key The element to find.
+ *
+ * As keys are unique in this container, this is either a single-element
+ * range, or both iterators are equal to end().
+ *
+ * The mapped objects must themselves be thread-safe in order to make
+ * any changes to them through the returned iterators.
+ */
+T_CONCURRENTTOVALMAP
+auto CONCURRENTTOVALMAP::equal_range (const key_type key)
+  -> std::pair<iterator, iterator>
+{
+  iterator i1 = find (key);
+  iterator i2 = i1;
+  if (i2.valid()) {
+    ++i2;
+  }
+  return std::make_pair (i1, i2);
+}
+
+
+/**
+ * @brief Add an element to the map.
+ * @param key The key of the new item to add.
+ * @param val The value of the new item to add.
+ * @param ctx Execution context.
+ *
+ * This will not overwrite an existing entry.
+ * The first element in the returned pair is an iterator referencing
+ * the added item.  The second is a flag that is true if a new element
+ * was added.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::emplace (key_type key,
+                                  const mapped_type& val,
+                                  const Context_t& ctx
+                                    /*= Updater_t::defaultContext()*/)
+  -> std::pair<const_iterator, bool>
+{
+  return put (key, std::make_unique<mapped_type> (val), ctx);
+}
+
+
+/**
+ * @brief Add an element to the map.
+ * @param key The key of the new item to add.
+ * @param val The value of the new item to add.
+ * @param ctx Execution context.
+ *
+ * This will not overwrite an existing entry.
+ * The first element in the returned pair is an iterator referencing
+ * the added item.  The second is a flag that is true if a new element
+ * was added.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::emplace (key_type key,
+                                  mapped_type&& val,
+                                  const Context_t& ctx
+                                    /*= Updater_t::defaultContext()*/)
+  -> std::pair<const_iterator, bool>
+{
+  return put (key, std::make_unique<mapped_type> (std::move (val)), ctx);
+}
+
+
+/**
+ * @brief Add an element to the map.
+ * @param key The key of the new item to add.
+ * @param val The value of the new item to add.
+ * @param ctx Execution context.
+ *
+ * This will not overwrite an existing entry.
+ * The first element in the returned pair is an iterator referencing
+ * the added item.  The second is a flag that is true if a new element
+ * was added.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::emplace (key_type key,
+                                  std::unique_ptr<mapped_type> val,
+                                  const Context_t& ctx
+                                    /*= Updater_t::defaultContext()*/)
+  -> std::pair<const_iterator, bool>
+{
+  return put (key, std::move (val), ctx);
+}
+
+
+/**
+ * @brief Add an element to the map.
+ * @param p The item to add.
+ *          Should be a pair where first is the string key
+ *          and second is the integer value.
+ * @param ctx Execution context.
+ *
+ * This will not overwrite an existing entry.
+ * The first element in the returned pair is an iterator referencing
+ * the added item.  The second is a flag that is true if a new element
+ * was added.
+ */
+T_CONCURRENTTOVALMAP
+template <class PAIR>
+inline
+auto CONCURRENTTOVALMAP::insert (const PAIR& p,
+                                 const Context_t& ctx /*= Updater_t::defaultContext()*/)
+  -> std::pair<const_iterator, bool>
+{
+  return emplace (p.first, p.second, ctx);
+}
+
+
+/**
+ * @brief Add an element to the map.
+ * @param p The item to add.
+ *          Should be a pair where first is the string key
+ *          and second is the integer value.
+ * @param ctx Execution context.
+ *
+ * This will not overwrite an existing entry.
+ * The first element in the returned pair is an iterator referencing
+ * the added item.  The second is a flag that is true if a new element
+ * was added.
+ */
+T_CONCURRENTTOVALMAP
+template <class PAIR>
+inline
+auto CONCURRENTTOVALMAP::insert (PAIR&& p,
+                                 const Context_t& ctx /*= Updater_t::defaultContext()*/)
+  -> std::pair<const_iterator, bool>
+{
+  return emplace (p.first, std::move (p.second), ctx);
+}
+
+
+/**
+ * @brief Insert a range of elements to the map.
+ * @param first Start of the range.
+ * @param last End of the range.
+ * @param ctx Execution context.
+ *
+ * The range should be a sequence of pairs where first is the string key
+ *  and second is the integer value.
+ */
+T_CONCURRENTTOVALMAP
+template <class InputIterator>
+void CONCURRENTTOVALMAP::insert (InputIterator first, InputIterator last,
+                                 const Context_t& ctx /*= Updater_t::defaultContext()*/)
+{
+  if constexpr (std::is_rvalue_reference_v<typename InputIterator::reference>)
+  {
+    for (; first != last; ++first) {
+      emplace (first->first, std::move (first->second), ctx);
+    }
+  }
+  else {
+    for (; first != last; ++first) {
+      emplace (first->first, first->second, ctx);
+    }
+  }
+}
+
+
+/**
+ * @brief Increase the table capacity.
+ * @param capacity The new table capacity.
+ * @param ctx Execution context.
+ *
+ * No action will be taken if @c capacity is smaller
+ * than the current capacity.
+ */
+T_CONCURRENTTOVALMAP
+inline
+void CONCURRENTTOVALMAP::reserve (size_type capacity,
+                                  const Context_t& ctx
+                                    /*= Updater_t::defaultContext()*/)
+{
+  return m_impl.reserve (capacity, ctx);
+}
+
+
+/**
+ * @brief Increase the table capacity.
+ * @param capacity The new table capacity.
+ *
+ * No action will be taken if @c capacity is smaller
+ * than the current capacity.
+ */
+T_CONCURRENTTOVALMAP
+inline
+void CONCURRENTTOVALMAP::rehash (size_type capacity)
+{
+  return reserve (capacity);
+}
+
+
+/**
+ * @brief Called when this thread is no longer referencing anything
+ *        from this container.
+ * @param ctx Execution context.
+ */
+T_CONCURRENTTOVALMAP
+inline
+void CONCURRENTTOVALMAP::quiescent (const Context_t& ctx)
+{
+  return m_impl.quiescent (ctx);
+}
+
+
+/**
+ * @brief Swap this container with another.
+ * @param other The container with which to swap.
+ *
+ * This will also call swap on the Updater object; hence, the Updater
+ * object must also support swap.
+ *
+ * This operation is NOT thread-safe.  No other threads may be accessing
+ * either container during this operation.
+ */
+T_CONCURRENTTOVALMAP
+void CONCURRENTTOVALMAP::swap (ConcurrentToValMap& other)
+{
+  m_impl.swap (other.m_impl);
+}
+
+
+/**
+ * @brief Access the Updater instance.
+ */
+T_CONCURRENTTOVALMAP
+auto CONCURRENTTOVALMAP::updater() -> Updater_t&
+{
+  return m_impl.updater();
+}
+
+
+/**
+ * @brief Convert an underlying key value to this type's key value.
+ * @param val The underlying key value.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::keyAsKey (val_t val) -> key_type
+{
+  return CxxUtils::detail::UIntConv<key_type>::uintToVal (val);
+}
+
+
+/**
+ * @brief Convert this type's key value to an underlying key value.
+ * @param k The key.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::keyAsVal (key_type k) -> val_t
+{
+  return CxxUtils::detail::UIntConv<key_type>::valToUInt (k);
+}
+
+
+/**
+ * @brief Convert an underlying mapped value a pointer to
+ *        this type's mapped value.
+ * @param val The underlying mapped value.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::mappedAsMapped (val_t val) -> mapped_type*
+{
+  return CxxUtils::detail::UIntConv<mapped_type*>::uintToVal (val);
+}
+
+
+/**
+ * @brief Convert this type's mapped value to an underlying mapped value.
+ * @param val The mapped value.
+ */
+T_CONCURRENTTOVALMAP
+inline
+auto CONCURRENTTOVALMAP::mappedAsVal (mapped_type* val) -> val_t
+{
+  return CxxUtils::detail::UIntConv<mapped_type*>::valToUInt (val);
+}
+
+
+/**
+ * @brief Do a lookup in the table.
+ * @param key The key to look up.
+ *
+ * Returns an iterator of the underlying map pointing at the found
+ * entry or end();
+ */
+T_CONCURRENTTOVALMAP
+auto CONCURRENTTOVALMAP::get (const key_type key) const
+  -> typename Impl_t::const_iterator
+{
+  val_t kval = keyAsVal (key);
+  size_t hash = m_impl.hasher() (kval);
+  return m_impl.get (keyAsVal(key), hash);
+}
+
+
+/**
+ * @brief Insert an entry in the table.
+ * @param key The key of the new item to add.
+ * @param val The new mapped value to add.
+ * @param ctx Execution context.
+ *
+ * The first element in the returned pair is an iterator referencing
+ * the added item.  The second is a flag that is true if a new element
+ * was added.
+ */
+T_CONCURRENTTOVALMAP
+auto CONCURRENTTOVALMAP::put (const key_type key,
+                              std::unique_ptr<mapped_type> val,
+                              const Context_t& ctx /*= Updater_t::defaultContext()*/)
+  -> std::pair<const_iterator, bool>
+{
+  val_t kval = keyAsVal (key);
+  size_t hash = m_impl.hasher() (kval);
+  auto [it, flag] = m_impl.put (kval, hash,
+                                mappedAsVal (val.get()),
+                                false, ctx);
+  if (flag) val.release();
+  return std::make_pair (const_iterator (it), flag);
+}
+
+
+#undef T_CONCURRENTTOVALMAP
+#undef CONCURRENTTOVALMAP
+
+
+} // namespace CxxUtils
