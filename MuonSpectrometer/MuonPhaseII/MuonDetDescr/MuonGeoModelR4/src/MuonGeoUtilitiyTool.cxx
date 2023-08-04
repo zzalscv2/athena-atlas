@@ -126,7 +126,8 @@ std::string MuonGeoUtilityTool::dumpVolume(const PVConstLink& physVol, const std
   if (physVol->isShared() || !physVol->getParent()){
     sstr<<"shared volume, ";
   } else {
-    if (typeid(*physVol) == typeid(GeoFullPhysVol)){
+    const GeoVPhysVol* pv = &*physVol; // avoid clang warning
+    if (typeid(*pv) == typeid(GeoFullPhysVol)){
       absTrans = static_cast<const GeoFullPhysVol&>(*physVol).getAbsoluteTransform();
       sstr<<"absolute pos: "<<to_string(absTrans) << ", ";
     } else{
