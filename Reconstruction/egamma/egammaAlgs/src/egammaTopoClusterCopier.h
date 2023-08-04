@@ -12,6 +12,8 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "AthContainers/ConstDataVector.h"
 
+#include "GaudiKernel/SystemOfUnits.h"
+
 #include <Gaudi/Accumulators.h>
 
 /**
@@ -47,26 +49,105 @@ public:
   virtual StatusCode execute(const EventContext& ctx) const override final;
   virtual StatusCode finalize() override final;
   
+  static bool greater(
+      xAOD::CaloCluster const *a, 
+      xAOD::CaloCluster const *b
+  );
+
 private:
 
-  SG::ReadHandleKey<xAOD::CaloClusterContainer> m_inputTopoCollection {this,
-      "InputTopoCollection", "CaloTopoClusters", "input topocluster collection"};
+  SG::ReadHandleKey<xAOD::CaloClusterContainer> m_inputTopoCollection {
+    this,
+    "InputTopoCollection",
+    "CaloTopoClusters", 
+    "input topocluster collection"
+  };
 
-  SG::WriteHandleKey<xAOD::CaloClusterContainer> m_outputTopoCollectionShallow {this,
-      "OutputTopoCollectionShallow", "tmp_egammaTopoCluster",
-      "Shallow copy of input collection that allows properties to be modified"};
+  SG::WriteHandleKey<xAOD::CaloClusterContainer> m_outputTopoCollectionShallow {
+    this,
+    "OutputTopoCollectionShallow",
+    "tmp_egammaTopoCluster",
+    "Shallow copy of input collection that allows properties to be modified"
+  };
 
-  SG::WriteHandleKey<ConstDataVector <xAOD::CaloClusterContainer> > m_outputTopoCollection {this,
-      "OutputTopoCollection", "egammaTopoCluster"
-      "View container of selected topoclusters"};
+  SG::WriteHandleKey<ConstDataVector<xAOD::CaloClusterContainer>> m_outputTopoCollection {
+    this,
+    "OutputTopoCollection",
+    "egammaTopoCluster",
+    "View container of selected topoclusters"
+  };
 
-  Gaudi::Property<float> m_etaCut {this, "EtaCut", 2.6, "maximum |eta| of selected clusters"};
-  Gaudi::Property<float> m_ECut {this, "ECut", 700, "minimum EM energy of selected clusters"};
-  Gaudi::Property<float> m_EMFracCut {this, "EMFracCut", 0.5, "mimimum EM fraction of selected clusters"};
+  SG::WriteHandleKey<ConstDataVector<xAOD::CaloClusterContainer>> m_outputFwdTopoCollection {
+    this,
+    "OutputFwdTopoCollection", 
+    "",
+    "View container of selected fwd topoclusters"
+  };
+
+  Gaudi::Property<float> m_etaCut {
+    this, 
+    "EtaCut", 
+    2.6, 
+    "maximum |eta| of selected clusters"
+  };
+
+  Gaudi::Property<double> m_fwdEtaCut {
+    this, 
+    "fwdEtaCut", 
+    2.5, 
+    "minimum |eta| of selected fwd clusters"
+  };
+
+  Gaudi::Property<float> m_ECut {
+    this, 
+    "ECut", 
+    700, 
+    "minimum EM energy of selected clusters"
+  };
+
+  Gaudi::Property<double> m_fwdETCut {
+    this,
+    "fwdETCut", 
+    5. * Gaudi::Units::GeV, 
+    "Fwd ET cut"
+  };
+
+  Gaudi::Property<float> m_EMFracCut {
+    this, 
+    "EMFracCut", 
+    0.5, 
+    "mimimum EM fraction of selected clusters"
+  };
  
-  mutable Gaudi::Accumulators::Counter<> m_AllClusters;
-  mutable Gaudi::Accumulators::Counter<> m_PassPreSelection;
-  mutable Gaudi::Accumulators::Counter<> m_PassSelection;
+  /** @brief Private member flag to do the track matching. */
+  Gaudi::Property<bool> m_hasITk { 
+    this,
+    "hasITk",
+    false,
+    "Boolean to do track matching"
+  };
+
+  /** @brief Private member flag to copy forward clusters. */
+  Gaudi::Property<bool> m_doForwardClusters { 
+    this,
+    "doFwdClusters",
+    false,
+    "Boolean to copy clusters in the forward region"
+  };
+
+  mutable Gaudi::Accumulators::Counter<> m_AllClusters {};
+  mutable Gaudi::Accumulators::Counter<> m_PassPreSelection {};
+  mutable Gaudi::Accumulators::Counter<> m_PassSelection {};
+  mutable Gaudi::Accumulators::Counter<> m_CentralPassPreSelection {};
+  mutable Gaudi::Accumulators::Counter<> m_CentralPassSelection {};
+  mutable Gaudi::Accumulators::Counter<> m_FwdPassPreSelection {};
+  mutable Gaudi::Accumulators::Counter<> m_FwdPassSelection {};
+  mutable Gaudi::Accumulators::Counter<> m_SharedPassPreSelection {};
+  mutable Gaudi::Accumulators::Counter<> m_SharedPassSelection {};
+
+  // Special egamma EMFraction which includes presampler and E4 cells.
+  thread_local inline static SG::AuxElement::Accessor<float> m_acc_emfraction {"EMFraction"};
 };
 
 #endif // EGAMMATOOLS_EMCLUSTERTOOL_H
+

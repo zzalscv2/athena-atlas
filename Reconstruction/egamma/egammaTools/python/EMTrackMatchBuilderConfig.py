@@ -21,8 +21,10 @@ def EMTrackMatchBuilderCfg(flags, name='EMTrackMatchBuilder', **kwargs):
         extrap = EMExtrapolationToolsCfg(flags)
         kwargs["ExtrapolationTool"] = acc.popToolsAndMerge(extrap)
 
-    kwargs.setdefault("TrackParticlesName",
-                      flags.Egamma.Keys.Output.GSFTrackParticles)
+    if "TrackParticlesName" not in kwargs:
+      kwargs.setdefault("TrackParticlesName",
+                        flags.Egamma.Keys.Output.GSFTrackParticles)
+
     # candidate match is done in 2 times this  so +- 0.2
     kwargs.setdefault("broadDeltaEta",      0.1)
     # candidate match is done in 2 times this  so +- 0.3

@@ -20,7 +20,7 @@ def egammaReconstructionCfg(flags, name="egammaReconstruction"):
             HIEgammaRecCfg)
         acc.merge(HIEgammaRecCfg(flags))
 
-    # Add e/gamma tracking algorithms
+    # Add e/gamma tracking algorithms.
     if flags.Egamma.doTracking:
         from egammaAlgs.egammaSelectedTrackCopyConfig import (
             egammaSelectedTrackCopyCfg)
@@ -30,7 +30,7 @@ def egammaReconstructionCfg(flags, name="egammaReconstruction"):
             EMBremCollectionBuilderCfg)
         acc.merge(EMBremCollectionBuilderCfg(flags))
 
-    # Add e/gamma conversion finding
+    # Add e/gamma conversion finding.
     if flags.Egamma.doConversionBuilding:
         from egammaAlgs.EMVertexBuilderConfig import (
             EMVertexBuilderCfg)
@@ -40,8 +40,7 @@ def egammaReconstructionCfg(flags, name="egammaReconstruction"):
         egammaTopoClusterCopierCfg)
     acc.merge(egammaTopoClusterCopierCfg(flags))
 
-    # Add algorithms to produce
-    # xAOD Electrons and Photons
+    # Add algorithms to produce xAOD Electrons and Photons.
     if flags.Egamma.doCentral:
         from egammaAlgs.egammaRecBuilderConfig import (
             egammaRecBuilderCfg)
@@ -64,9 +63,18 @@ def egammaReconstructionCfg(flags, name="egammaReconstruction"):
             egammaLargeClusterMakerAlgCfg)
         acc.merge(egammaLargeClusterMakerAlgCfg(flags))
 
-    # Add calo seeded forward algorithms to produce
-    # xAOD Forward Electrons
+    # Add calo seeded forward algorithms to produce xAOD Forward Electrons.
     if flags.Egamma.doForward:
+        if flags.Detector.GeometryITk:
+          from egammaAlgs.EMBremCollectionBuilderConfig import (
+              EMBremCollectionBuilderCfg)
+          acc.merge(EMBremCollectionBuilderCfg(
+              flags,
+              name="EMBremCollectionBuilderFwd",
+              SelectedTrackParticleContainerName=flags.Egamma.Keys.Output.FwdTrkPartContainerName,
+              OutputTrkPartContainerName=flags.Egamma.Keys.Output.FwdGSFTrackParticles,
+              OutputTrackContainerName=flags.Egamma.Keys.Output.FwdGSFTracks))
+
         from egammaAlgs.egammaForwardBuilderConfig import (
             egammaForwardBuilderCfg)
         acc.merge(egammaForwardBuilderCfg(flags))
@@ -75,7 +83,7 @@ def egammaReconstructionCfg(flags, name="egammaReconstruction"):
             egammaLargeFWDClusterMakerAlgCfg)
         acc.merge(egammaLargeFWDClusterMakerAlgCfg(flags))
 
-    # Add truth association
+    # Add truth association.
     if flags.Egamma.doTruthAssociation:
         from egammaAlgs.egammaTruthAssociationConfig import (
             egammaTruthAssociationCfg)
@@ -91,14 +99,13 @@ if __name__ == "__main__":
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     flags.Input.Files = defaultTestFiles.RDO_RUN2
-    flags.Output.doWriteESD = True  # To test the ESD parts
-    flags.Output.doWriteAOD = True  # To test the AOD parts
+    flags.Output.doWriteESD = True  # To test the ESD parts.
+    flags.Output.doWriteAOD = True  # To test the AOD parts.
     flags.lock()
 
     acc = MainServicesCfg(flags)
     acc.merge(egammaReconstructionCfg(flags))
-    acc.printConfig(withDetails=True,
-                    printDefaults=True)
+    acc.printConfig(withDetails=True, printDefaults=True) 
 
     with open("egammareconstructionconfig.pkl", "wb") as f:
         acc.store(f)

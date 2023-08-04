@@ -27,12 +27,11 @@ def egammaSelectedTrackCopyCfg(flags, name="egammaSelectedTrackCopy", **kwargs):
         extraptool = EMExtrapolationToolsCfg(flags, name="EMExtrapolationTools")
         kwargs["ExtrapolationTool"] = acc.popToolsAndMerge(extraptool)
 
-    kwargs.setdefault(
-        "ClusterContainerName", flags.Egamma.Keys.Internal.EgammaTopoClusters
-    )
-    kwargs.setdefault(
-        "TrackParticleContainerName", flags.Egamma.Keys.Input.TrackParticles
-    )
+    kwargs.setdefault("ClusterContainerName", flags.Egamma.Keys.Internal.EgammaTopoClusters)
+    kwargs.setdefault("FwdClusterContainerName", flags.Egamma.Keys.Internal.ForwardTopoClusters)
+    kwargs.setdefault("TrackParticleContainerName", flags.Egamma.Keys.Input.TrackParticles)
+    kwargs.setdefault("OutputTrkPartContainerName", flags.Egamma.Keys.Output.TrkPartContainerName)
+    kwargs.setdefault("OutputFwdTrkPartContainerName", flags.Egamma.Keys.Output.FwdTrkPartContainerName)
 
     # P->T conversion extra dependencies
     if flags.Detector.GeometryITk:

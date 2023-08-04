@@ -37,6 +37,11 @@ egammaRec::caloClusterElementLink(size_t index) const
   return m_caloClusters[index];
 }
 
+const std::vector<ElementLink<xAOD::CaloClusterContainer>> &
+egammaRec::caloClusterElementLinks() const {
+  return m_caloClusters;
+}
+
 const xAOD::TrackParticle*
 egammaRec::trackParticle(size_t index) const
 {
@@ -55,6 +60,11 @@ egammaRec::trackParticleElementLink(size_t index) const
   return m_trackParticles[index];
 }
 
+const std::vector<ElementLink<xAOD::TrackParticleContainer>> &
+egammaRec::trackParticleElementLinks() const {
+  return m_trackParticles;
+}
+
 const xAOD::Vertex*
 egammaRec::vertex(size_t index) const
 {
@@ -70,6 +80,11 @@ egammaRec::vertexElementLink(size_t index) const{
     return {};
   }
   return m_vertices.at(index);
+}
+
+const std::vector<ElementLink<xAOD::VertexContainer>> &
+egammaRec::vertexElementLinks() const {
+  return m_vertices;
 }
 
 void

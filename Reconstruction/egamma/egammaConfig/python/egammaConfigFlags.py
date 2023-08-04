@@ -6,66 +6,66 @@ from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 def createEgammaConfigFlags():
     egcf = AthConfigFlags()
 
-    # do standard cluster-based egamma algorithm
+    # Do standard cluster-based egamma algorithm.
     egcf.addFlag("Egamma.doCentral",
                  lambda prevFlags: prevFlags.Detector.EnableCalo)
 
-    # do forward egamma
     egcf.addFlag("Egamma.doForward",
                  lambda prevFlags: prevFlags.Detector.EnableCalo)
 
-    # run the GSF refitting/egamma Tracking it is calo seeded
+    # Run the GSF refitting/egamma Tracking it is calo seeded.
     egcf.addFlag("Egamma.doTracking",
                  lambda prevFlags: (
                      prevFlags.Detector.EnableID
                      or prevFlags.Detector.EnableITk)
                  and prevFlags.Detector.EnableCalo)
 
-    # build photon conversion vertices
+    # Build photon conversion vertices.
     egcf.addFlag("Egamma.doConversionBuilding",
                  lambda prevFlags: prevFlags.Egamma.doTracking)
 
-    # do egamma truth association when running on MC
+    # Do egamma truth association when running on MC.
     egcf.addFlag("Egamma.doTruthAssociation",
                  lambda prevFlags: prevFlags.Input.isMC or
                  prevFlags.Overlay.DataOverlay)
 
-    # Do e/gamma track thinning (Although we call the alg slimming...)
+    # Do e/gamma track thinning (Although we call the alg slimming...).
     egcf.addFlag("Egamma.doTrackThinning",
                  lambda prevFlags: prevFlags.Output.doWriteAOD and
                  prevFlags.Egamma.doTracking)
 
-    # Keep egamma Cells in AOD
+    # Keep egamma Cells in AOD. 
+    # Should these not be an internal key if they are not written the xAOD?
     egcf.addFlag("Egamma.keepCaloCellsAOD",
                  lambda prevFlags: prevFlags.Egamma.doCentral or
                  prevFlags.Egamma.doForward)
 
-    # Slim GSF Trk::Tracks
     egcf.addFlag("Egamma.slimGSFTrkTracks",
                  lambda prevFlags: prevFlags.Egamma.doTracking)
 
-    # Egamma runs in low <mu> mode (e.g UPC )
+    # Egamma runs in low <mu> mode (e.g UPC).
     egcf.addFlag("Egamma.doLowMu", False)
 
-    # The cluster corrections/calib
+    # The cluster corrections/calib.
     egcf.addFlag("Egamma.Calib.ClusterCorrectionVersion",
                  'v12phiflip_noecorrnogap')
     egcf.addFlag("Egamma.Calib.SuperClusterCorrectionVersion",
                  'v12phiflip_supercluster')
     egcf.addFlag("Egamma.Calib.MVAVersion", 'egammaMVACalib/offline/v7')
 
-    # The output keys
+    # The input keys.
     egcf.addFlag("Egamma.Keys.Input.CaloCells", 'AllCalo')
-    egcf.addFlag("Egamma.Keys.Input.TopoClusters",
-                 'CaloTopoClusters')  # input topoclusters
+    egcf.addFlag("Egamma.Keys.Input.TopoClusters", 'CaloTopoClusters')
     egcf.addFlag("Egamma.Keys.Input.TruthParticles", 'TruthParticles')
     egcf.addFlag("Egamma.Keys.Input.TruthEvents", 'TruthEvents')
-    egcf.addFlag("Egamma.Keys.Input.TrackParticles",
-                 'InDetTrackParticles')  # input to GSF
+    egcf.addFlag("Egamma.Keys.Input.TrackParticles", 'InDetTrackParticles') # Input to GSF.
 
-    # the topoclusters selected for egamma from the input topoclusters
-    egcf.addFlag("Egamma.Keys.Internal.EgammaTopoClusters",
+    # The topoclusters selected for egamma from the input topoclusters.
+    egcf.addFlag("Egamma.Keys.Internal.EgammaTopoClusters", 
                  'egammaTopoClusters')
+    egcf.addFlag("Egamma.Keys.Internal.ForwardTopoClusters",
+                 lambda prevFlags: (
+                     prevFlags.Egamma.Keys.Internal.EgammaTopoClusters + 'Fwd'))
     egcf.addFlag("Egamma.Keys.Internal.EgammaRecs", 'egammaRecCollection')
     egcf.addFlag("Egamma.Keys.Internal.PhotonSuperRecs",
                  'PhotonSuperRecCollection')
@@ -83,7 +83,6 @@ def createEgammaConfigFlags():
     egcf.addFlag("Egamma.Keys.Output.CaloClusters", 'egammaClusters')
     egcf.addFlag("Egamma.Keys.Output.CaloClustersSuppESD", '')
     egcf.addFlag("Egamma.Keys.Output.CaloClustersSuppAOD", '')
-
     egcf.addFlag("Egamma.Keys.Output.EgammaSuppAOD",
                  '-e033.-e011.-e333.-e335.-e337.-e377.'
                  '-isEMLoose.-isEMTight')
@@ -107,8 +106,6 @@ def createEgammaConfigFlags():
                      "-EgammaCovarianceMatrix."
                      "-isEMLHLoose.-isEMLHTight.-isEMLHMedium.-isEMMedium"))
 
-    egcf.addFlag("Egamma.Keys.Input.ForwardTopoClusters",
-                 'CaloCalTopoClusters')
     egcf.addFlag("Egamma.Keys.Output.ForwardElectrons", 'ForwardElectrons')
     egcf.addFlag("Egamma.Keys.Output.ForwardElectronsSuppESD", '')
     egcf.addFlag("Egamma.Keys.Output.ForwardElectronsSuppAOD",
@@ -134,6 +131,9 @@ def createEgammaConfigFlags():
                      prevFlags.Egamma.Keys.Output.EgammaSuppAOD))
 
     egcf.addFlag("Egamma.Keys.Output.GSFTrackParticles", 'GSFTrackParticles')
+    egcf.addFlag("Egamma.Keys.Output.FwdGSFTrackParticles", 
+                 lambda prevFlags: (
+                     prevFlags.Egamma.Keys.Output.GSFTrackParticles + 'Fwd'))
     egcf.addFlag("Egamma.Keys.Output.GSFTrackParticlesSuppESD", '')
     egcf.addFlag("Egamma.Keys.Output.GSFTrackParticlesSuppAOD",
                  lambda prevFlags: (
@@ -145,18 +145,27 @@ def createEgammaConfigFlags():
                  lambda prevFlags: (
                      prevFlags.Egamma.Keys.Output.TruthParticlesSuppESD))
 
-    # Not written in AOD
+    # Not written in AOD.
     egcf.addFlag("Egamma.Keys.Output.GSFTracks", 'GSFTracks')
+    egcf.addFlag("Egamma.Keys.Output.FwdGSFTracks",
+                 lambda prevFlags: (
+                     prevFlags.Egamma.Keys.Output.GSFTracks + 'Fwd'))
 
-    # These are the clusters that are used to determine
-    # which cells to write out to AOD
-    # don't define SuppAOD because the whole container is suppressed
+    # These are the clusters that are used to determine which cells to write 
+    # out to AOD don't define SuppAOD because the whole container is suppressed.
     egcf.addFlag("Egamma.Keys.Output.EgammaLargeClusters", 'egamma711Clusters')
     egcf.addFlag("Egamma.Keys.Output.EgammaLargeClustersSuppESD", '')
 
     egcf.addFlag("Egamma.Keys.Output.EgammaLargeFWDClusters",
                  'egamma66FWDClusters')
     egcf.addFlag("Egamma.Keys.Output.EgammaLargeFWDClustersSuppESD", '')
+
+    egcf.addFlag("Egamma.Keys.Output.TrkPartContainerName", 
+                 'egammaSelectedTrackParticles')
+
+    egcf.addFlag("Egamma.Keys.Output.FwdTrkPartContainerName", 
+                 lambda prevFlags: (
+                     prevFlags.Egamma.Keys.Output.TrkPartContainerName + 'Fwd'))
 
     return egcf
 
