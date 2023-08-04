@@ -58,7 +58,7 @@ TCS::jEmNoSort::sort(const InputTOBArray & input, TOBArray & output) {
 
    // keep only max number of jets
    int par = m_numberOfjEms ;
-   unsigned int maxNumberOfjEms = (unsigned int)(par<0?0:par);
+   unsigned int maxNumberOfjEms = std::clamp(par, 0, std::abs(par));
    if(maxNumberOfjEms>0) {
       while( output.size()> maxNumberOfjEms ) {
          output.pop_back();

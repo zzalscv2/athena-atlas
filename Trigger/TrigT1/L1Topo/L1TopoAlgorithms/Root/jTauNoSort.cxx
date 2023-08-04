@@ -51,7 +51,7 @@ TCS::jTauNoSort::sort(const InputTOBArray & input, TOBArray & output) {
 
    // keep only max number of clusters
    int par = m_numberOfjTaus ;
-   unsigned int maxNumberOfjTaus = (unsigned int)(par<0?0:par);
+   unsigned int maxNumberOfjTaus = std::clamp(par, 0, std::abs(par));
    if(maxNumberOfjTaus>0) {
       while( output.size()> maxNumberOfjTaus ) {
          output.pop_back();

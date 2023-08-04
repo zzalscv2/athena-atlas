@@ -87,7 +87,7 @@ TCS::MuonSort::sort(const InputTOBArray & input, TOBArray & output) {
 
    // keep only max number of muons
    int par = m_numberOfMuons;
-   unsigned int maxNumberOfMuons = (unsigned int)(par<0?0:par);
+   unsigned int maxNumberOfMuons = std::clamp(par, 0, std::abs(par));
    if(maxNumberOfMuons>0) {
       while( output.size()> maxNumberOfMuons ) {
          output.pop_back();
