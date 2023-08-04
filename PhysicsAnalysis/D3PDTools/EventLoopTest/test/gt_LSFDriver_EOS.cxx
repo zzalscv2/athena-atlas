@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -22,8 +22,6 @@
 #ifdef ROOTCORE
 #include <xAODRootAccess/Init.h>
 #endif
-
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 //
 // method implementations
