@@ -27,6 +27,7 @@
 
 #include <memory>
 
+using PixelCalib::PixelOfflineCalibData;
 using CLHEP::micrometer;
 
 namespace {

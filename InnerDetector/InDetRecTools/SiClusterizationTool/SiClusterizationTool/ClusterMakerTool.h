@@ -42,7 +42,6 @@ namespace InDetDD {
   class SiDetectorElement;
 }
 
-using PixelCalib::PixelOfflineCalibData;
 
 class PixelID;
 
@@ -104,7 +103,7 @@ public:
                              double splitProb1,
                              double splitProb2,
                              const PixelChargeCalibCondData *calibData,
-                             const PixelOfflineCalibData *offlineCalibData) const;
+                             const PixelCalib::PixelOfflineCalibData *offlineCalibData) const;
 
   xAOD::PixelCluster* xAODpixelCluster(xAOD::PixelCluster& cluster,
 				       const Amg::Vector2D& localPos,
@@ -120,7 +119,7 @@ public:
                                        double splitProb1,
                                        double splitProb2,
                                        const PixelChargeCalibCondData *calibData,
-                                       const PixelOfflineCalibData *offlineCalibData) const;
+                                       const PixelCalib::PixelOfflineCalibData *offlineCalibData) const;
 
   // Computes global position and errors for SCT cluster.
   // Called by SCT Clustering tools
@@ -160,7 +159,7 @@ private:
              double splitProb2,
              CreatorType clusterCreator,
              const PixelChargeCalibCondData *calibData,
-             const PixelOfflineCalibData *offlineCalibData) const;
+             const PixelCalib::PixelOfflineCalibData *offlineCalibData) const;
 
   ServiceHandle<InDetDD::IPixelReadoutManager> m_pixelReadout
   {this, "PixelReadoutManager", "PixelReadoutManager", "Pixel readout manager" };

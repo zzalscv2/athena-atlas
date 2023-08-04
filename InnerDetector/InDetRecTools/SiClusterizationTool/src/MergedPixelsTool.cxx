@@ -26,6 +26,7 @@
 #include "EventPrimitives/EventPrimitives.h"
 #include <unordered_set>
 
+using PixelCalib::PixelOfflineCalibData;
 using CLHEP::micrometer;
 
 namespace InDet {
