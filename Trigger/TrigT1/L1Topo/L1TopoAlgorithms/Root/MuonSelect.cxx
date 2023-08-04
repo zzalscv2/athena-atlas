@@ -84,9 +84,12 @@ TCS::MuonSelect::sort(const InputTOBArray & input, TOBArray & output) {
 
   // keep only max number of muons
   if( m_numberOfMuons > 0) {
-    while( output.size()> m_numberOfMuons ) {
+
+    if (output.size()> m_numberOfMuons) {setOverflow(true);}
+
+     while( output.size()> m_numberOfMuons ) {
       output.pop_back();
-    }
+     }
   }
   return TCS::StatusCode::SUCCESS;
 }

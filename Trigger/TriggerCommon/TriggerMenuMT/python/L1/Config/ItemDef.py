@@ -119,19 +119,19 @@ class ItemDef:
         PHYS_ZDC_1TO4XOR5          = ZDC_comb6
         PHYS_5ZDC_A_5ZDC_C         = ZDC_comb7
 
-        PHYS_ZDC_A_VZDC_C          = Not(ZDC_comb0) & Not(ZDC_comb2) & Not(ZDC_comb3) & Not(ZDC_comb5) & Not(ZDC_comb6) & Not(ZDC_comb7)
-        PHYS_VZDC_A_ZDC_C          = Not(ZDC_comb0) & Not(ZDC_comb1) & Not(ZDC_comb3) & Not(ZDC_comb4) & Not(ZDC_comb6) & Not(ZDC_comb7)
-        PHYS_ZDC_XOR4              = Not(ZDC_comb0) & Not(ZDC_comb3) & Not(ZDC_comb4) & Not(ZDC_comb5) & Not(ZDC_comb6) & Not(ZDC_comb7)
-        PHYS_ZDC_5XOR              = Not(ZDC_comb0) & Not(ZDC_comb1) & Not(ZDC_comb2) & Not(ZDC_comb3) & Not(ZDC_comb6) & Not(ZDC_comb7)
+        PHYS_ZDC_A_VZDC_C          = ZDC_comb1 | ZDC_comb4
+        PHYS_VZDC_A_ZDC_C          = ZDC_comb2 | ZDC_comb5
+        PHYS_ZDC_XOR4              = ZDC_comb1 | ZDC_comb2
+        PHYS_ZDC_5XOR              = d.ZDC_2 & Not(d.ZDC_1)
 
         #ATR-26984 refine ZDC_A and ZDC_C logic
-        ZDC_A     = Not(ZDC_comb0) & Not(ZDC_comb2) & Not(ZDC_comb5)
-        ZDC_C     = Not(ZDC_comb0) & Not(ZDC_comb1) & Not(ZDC_comb4)
+        ZDC_A     = (d.ZDC_0 & d.ZDC_1) | (d.ZDC_0 & Not(d.ZDC_2)) | (d.ZDC_2 & Not(d.ZDC_0))
+        ZDC_C     = d.ZDC_1 | (d.ZDC_0 & d.ZDC_2)
 
-        ZDC_A_C   = ZDC_A & ZDC_C
+        ZDC_A_C   = (d.ZDC_2 & d.ZDC_1) | (d.ZDC_1 & d.ZDC_0)
         ZDC_AND   = ZDC_A_C
         VZDC_A_C  = ZDC_comb0
-        ZDC_XOR   = Not(ZDC_comb0) & Not(ZDC_comb3) & Not(ZDC_comb6) & Not(ZDC_comb7)
+        ZDC_XOR   = (d.ZDC_0 & Not(d.ZDC_1)) | (d.ZDC_2 & Not(d.ZDC_1)) | (Not(d.ZDC_2) & d.ZDC_1 & Not(d.ZDC_0))
         VZDC_AORC = Not(ZDC_A) | Not(ZDC_C)
         ZDC_OR = Not(ZDC_comb0)
 

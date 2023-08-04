@@ -47,7 +47,9 @@ namespace TCS {
                           TOPO1OPT0=4,
                           TOPO1OPT1=5,
                           TOPO1OPT2=6,
-                          TOPO1OPT3=7
+                          TOPO1OPT3=7,
+			  OVERFLOWTOPO2EL=12,
+			  OVERFLOWTOPO3EL=13
    }; 
 
    std::string inputTypeAsString(inputTOBType_t type);

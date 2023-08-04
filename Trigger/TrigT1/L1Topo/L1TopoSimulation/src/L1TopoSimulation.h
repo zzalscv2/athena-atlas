@@ -58,7 +58,9 @@ namespace LVL1 {
       StatusCode hardwareDecisionLegacy();
      
       void WriteEDM(SG::WriteHandle<xAOD::L1TopoSimResultsContainer> &handle, const std::string &name, unsigned int clock, uint32_t word);
+      void WriteEDM_Overflow(SG::WriteHandle<xAOD::L1TopoSimResultsContainer> &handle, const std::string &name, unsigned int clock, uint32_t word);
       void WriteEDM(SG::WriteHandle<xAOD::L1TopoSimResultsContainer> &handle, const std::string &name, unsigned int clock, uint64_t word);
+      void WriteEDM_Overflow(SG::WriteHandle<xAOD::L1TopoSimResultsContainer> &handle, const std::string &name, unsigned int clock, uint64_t word);
 
       std::unique_ptr<TCS::TopoSteering>  m_topoSteering; //!< the topo steering
       std::unique_ptr<LVL1::PeriodicScaler> m_scaler {nullptr}; //! prescale decision tool

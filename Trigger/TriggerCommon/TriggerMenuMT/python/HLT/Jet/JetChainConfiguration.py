@@ -9,8 +9,13 @@ from ..Config.ChainConfigurationBase import ChainConfigurationBase
 from ..Config.MenuComponents import ChainStep
 
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
-from .JetMenuSequencesConfig import jetCaloHypoMenuSequence, jetHICaloHypoMenuSequence, jetRoITrackJetTagHypoMenuSequence
-from .JetMenuSequencesConfig import jetFSTrackingHypoMenuSequence, jetCaloRecoMenuSequence, jetCaloPreselMenuSequence
+from .JetMenuSequencesConfig import (
+    jetCaloHypoMenuSequence,
+    jetRoITrackJetTagHypoMenuSequence,
+    jetFSTrackingHypoMenuSequence,
+    jetCaloRecoMenuSequence, 
+    jetCaloPreselMenuSequence,
+)
 from .ExoticJetSequencesConfig import jetEJsMenuSequence, jetCRMenuSequence
 
 if isComponentAccumulatorCfg():
@@ -219,10 +224,25 @@ class JetChainConfiguration(ChainConfigurationBase):
         stepName = "MainStep_HIjet"
         if self.isPerf:
             stepName += '_perf'
-        jetSeq, jetDef = callGenerator(
-            jetHICaloHypoMenuSequence,
-            flags, isPerf=self.isPerf, **self.recoDict
-        )
+
+        if isComponentAccumulatorCfg():
+            # This CA config still needs improvement
+            # In principle runnable if ATR-28041 is fixed
+            from .JetMenuSequencesConfig import jetHICaloHypoMenuSequence
+            jetSeq, jetDef = callGenerator(
+                jetHICaloHypoMenuSequence,
+                flags, isPerf=self.isPerf, **self.recoDict
+            )
+            # A full hypo selecting only on heavy ion calo jets (step 1)
+        else:
+            # Temporarily restore legacy HI configuration, while HI jet CA
+            # is still under development
+            from .JetHISequences import jetHICaloHypoMenuSequence
+            jetSeq, jetDef = RecoFragmentsPool.retrieve(
+                jetHICaloHypoMenuSequence,
+                flags, isPerf=self.isPerf, **self.recoDict,
+            )
+
         jetCollectionName = jetDef.fullname()
 
         return jetCollectionName, jetDef, ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])

@@ -47,7 +47,7 @@ TCS::gJetNoSort::sort(const InputTOBArray & input, TOBArray & output) {
 
    // keep only max number of jets
    int par = m_numberOfgJets ;
-   unsigned int maxNumberOfgJets = (unsigned int)(par<0?0:par);
+   unsigned int maxNumberOfgJets = std::clamp(par, 0, std::abs(par));
    if(maxNumberOfgJets>0) {
       while( output.size()> maxNumberOfgJets ) {
          output.pop_back();

@@ -63,7 +63,7 @@ TCS::TauMatching::sort(const InputTOBArray & input, TOBArray & output) {
 
    // keep only max number of ctaus
    int par = m_numberOfcTaus ;
-   unsigned int maxNumberOfcTaus = (unsigned int)(par<0?0:par);
+   unsigned int maxNumberOfcTaus = std::clamp(par, 0, std::abs(par));
    if(maxNumberOfcTaus>0) {
       while( output.size()> maxNumberOfcTaus ) {
          output.pop_back();

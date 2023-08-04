@@ -39,41 +39,36 @@ def jetHIClusterSequence(configFlags, ionopt, RoIs):
 def jetHIEventShapeSequence(configFlags, clustersKey, towerKey):
     #Import the map tool - it will have to harvest configuration along the path
     eventShapeMapToolKey="HLTHIEventShapeMapTool"
-    from HIEventUtils.HIEventUtilsConf import HIEventShapeMapTool
-    theMapTool=HIEventShapeMapTool(eventShapeMapToolKey)
+    theMapTool=CompFactory.HIEventShapeMapTool(eventShapeMapToolKey)
 
 
     #Make new event shape at tower level
-    from HIGlobal.HIGlobalConf import HIEventShapeMaker
     EventShapeKey='HLTHIEventShapeWeighted'
     
-    ESAlg_W=HIEventShapeMaker("ESAlg_W")
+    ESAlg_W=CompFactory.HIEventShapeMaker("ESAlg_W")
     ESAlg_W.OutputContainerKey=EventShapeKey
     ESAlg_W.InputTowerKey=clustersKey
     ESAlg_W.NaviTowerKey=towerKey
     
     #Hack needed because ES algorithm requires a summary tool, this disables it
-    from HIEventUtils.HIEventUtilsConf import HIEventShapeSummaryTool
-    SummaryTool=HIEventShapeSummaryTool("SummaryTool2")
+    SummaryTool=CompFactory.HIEventShapeSummaryTool("SummaryTool2")
     SummaryTool.SubCalos=['FCal','EMCal','HCal','ALL']
     ESAlg_W.SummaryTool=SummaryTool
     ESAlg_W.SummaryContainerKey=""
     
     #Add filler tool
-    from HIGlobal.HIGlobalConf import HIEventShapeFillerTool
-    ESFiller=HIEventShapeFillerTool("WeightedFiller")
+    ESFiller=CompFactory.HIEventShapeFillerTool("WeightedFiller")
     ESFiller.UseClusters=True
     
     #Add weight tool to filler tool
-    from HIEventUtils.HIEventUtilsConf import HITowerWeightTool
-    TWTool=HITowerWeightTool()
+    TWTool=CompFactory.HITowerWeightTool()
     TWTool.ApplyCorrection=True
     TWTool.ConfigDir='HIJetCorrection/'
     from HIJetRec.HIJetRecUtilsCA import getHIClusterGeoWeightFile
     TWTool.InputFile=getHIClusterGeoWeightFile(configFlags)
 
     from AthenaCommon.AppMgr import ToolSvc
-    ToolSvc += HITowerWeightTool()
+    ToolSvc += CompFactory.HITowerWeightTool()
     ESFiller.TowerWeightTool=TWTool
     ESFiller.EventShapeMapTool=theMapTool
     
@@ -202,10 +197,10 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
 
     GetConstituentsModifierToolHLT(configFlags, name="HIJetConstituentModifierTool", ClusterKey=cluster_key_iter0_deep, ApplyOriginCorrection=False, label="HLTHIJetJetConstMod_iter0")
 
-    # Copy seed0 jets: seed1
-    jetDef_seed1 = jetDef_seed0.clone()
+    # Copy default jets: seed1
+    jetDef_seed1 = jetDef.clone()
     jetDef_seed1.suffix = jetDef_seed0.suffix.replace("_seed0","_seed1")
-    jetDef_seed1.modifiers=["HLTHIJetAssoc", "HLTHIJetConstSub_iter0:iter0", "EMScaleMom", "HLTHIJetCalib:{}___{}".format(calib_seq, JES_is_data), "Filter:25000"]
+    jetDef_seed1.modifiers=["HLTHIJetAssoc", "HLTHIJetConstSub_iter0:iter0", "HLTHIJetCalib:{}___{}".format(calib_seq, JES_is_data), "Filter:25000"]
     jetsFullName_seed1 = jetDef_seed1.fullname()
     copySeed1Alg = getJetCopyAlg(jetsin=jetsInUnsub,jetsoutdef=jetDef_seed1,decorations=[],shallowcopy=False,shallowIO=False,monTool=monTool)
     jetHIRecSeq += copySeed1Alg
@@ -228,7 +223,7 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
 
     jetDef_final = jetDef.clone()
     jetDef_final.suffix = jetDef.suffix.replace("_Unsubtracted","")
-    jetDef_final.modifiers=["HLTHIJetConstSub_iter0:iter0", "HLTHIJetJetConstMod_iter0", "HLTHIJetCalib:{}___{}".format(calib_seq, JES_is_data)]
+    jetDef_final.modifiers=["HLTHIJetConstSub_iter1:iter1", "HLTHIJetJetConstMod_iter1", "HLTHIJetCalib:{}___{}".format(calib_seq, JES_is_data),  "Filter:15000"]
     copyAlg_final= getJetCopyAlg(jetsin=jetsInUnsub,jetsoutdef=jetDef_final,decorations=[],shallowcopy=False,shallowIO=False,monTool=monTool)
     jetHIRecSeq += copyAlg_final
 
@@ -236,7 +231,7 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
 
     jetDef_final_noCalib = jetDef.clone()
     jetDef_final_noCalib.suffix = jetDef.suffix.replace("_Unsubtracted","_sub_noCalib")
-    jetDef_final_noCalib.modifiers=["HLTHIJetConstSub_iter0:iter0", "HLTHIJetJetConstMod_iter0"]
+    jetDef_final_noCalib.modifiers=["HLTHIJetConstSub_iter1:iter1", "HLTHIJetJetConstMod_iter1"]
     copyAlg_final_noCalib = getJetCopyAlg(jetsin=jetsInUnsub,jetsoutdef=jetDef_final_noCalib,decorations=[],shallowcopy=False,shallowIO=False,monTool=monTool)
     jetHIRecSeq += copyAlg_final_noCalib
 
@@ -296,8 +291,7 @@ def HLTAddIteration(configFlags, seed_container,shape_name,clustersKey, **kwargs
 
     if 'map_tool' in kwargs.keys() : map_tool=kwargs['map_tool']
     else :
-        from HIEventUtils.HIEventUtilsConf import HIEventShapeMapTool
-        map_tool=HIEventShapeMapTool()
+        map_tool=CompFactory.HIEventShapeMapTool()
 
     if 'sub_tool' in kwargs.keys() : sub_tool=kwargs['sub_tool']
     else :
@@ -311,8 +305,7 @@ def HLTAddIteration(configFlags, seed_container,shape_name,clustersKey, **kwargs
     if 'assoc_name' in kwargs.keys() : assoc_name=kwargs['assoc_name']
     else :
         log.info( "In HLTAddIteration function, HIJetDRAssociationTool is created with clustersKey= {}".format(clustersKey) )
-        from HIJetRec.HIJetRecConf import HIJetDRAssociationTool
-        assoc=HIJetDRAssociationTool("HIJetDRAssociation")
+        assoc=CompFactory.HIJetDRAssociationTool("HIJetDRAssociation")
         assoc.ContainerKey=clustersKey
         assoc.DeltaR=0.8
         assoc.AssociationName="%s_DR8Assoc" % (clustersKey)
@@ -393,12 +386,11 @@ def HLTHIJetClusterSubtractorGetter(configFlags):
 
 #same as MakeSubtractionTool in Reconstruction/HeavyIonRec/HIJetRec/HIJetRecUtils.py but without jtm
 def HLTMakeSubtractionTool(configFlags, shapeKey, moment_name='', momentOnly=False, **kwargs) :
-    from HIEventUtils.HIEventUtilsConf import HIEventShapeMapTool
 
     alg_props = {
         'EventShapeKey': shapeKey,
         'Modulator': HLTGetNullModulator(),
-        'EventShapeMapTool': HIEventShapeMapTool(),
+        'EventShapeMapTool': CompFactory.HIEventShapeMapTool(),
         'Subtractor': HLTHIJetClusterSubtractorGetter(configFlags),
         'MomentName': 'HLTJetSubtractedScale{}Momentum'.format(moment_name),
         'SetMomentOnly': momentOnly,
@@ -472,13 +464,12 @@ def HLTHIClusterGetter(dummyFlags, tower_key="CombinedTower", cell_key="AllCalo"
 
 
 def ApplySubtractionToClustersHLT(configFlags, **kwargs) :
-    from HIEventUtils.HIEventUtilsConf import HIEventShapeMapTool
 
     alg_props = {
         'EventShapeKey': "HLTHIEventShape_iter1",
         'ClusterKey': "HLT_HIClusters",
         'Modulator': HLTGetNullModulator(),
-        'EventShapeMapTool': HIEventShapeMapTool(),
+        'EventShapeMapTool': CompFactory.HIEventShapeMapTool(),
         'UpdateOnly': False,
         'ApplyOriginCorrection': True,
         'Subtractor': HLTHIJetClusterSubtractorGetter(configFlags),

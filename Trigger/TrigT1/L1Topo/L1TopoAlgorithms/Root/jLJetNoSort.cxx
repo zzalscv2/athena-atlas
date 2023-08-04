@@ -47,7 +47,7 @@ TCS::jLJetNoSort::sort(const InputTOBArray & input, TOBArray & output) {
 
    // keep only max number of jets
    int par = m_numberOfjLJets ;
-   unsigned int maxNumberOfjLJets = (unsigned int)(par<0?0:par);
+   unsigned int maxNumberOfjLJets = std::clamp(par, 0, std::abs(par));
    if(maxNumberOfjLJets>0) {
       while( output.size()> maxNumberOfjLJets ) {
          output.pop_back();

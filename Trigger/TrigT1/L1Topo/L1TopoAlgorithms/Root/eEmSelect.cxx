@@ -61,8 +61,11 @@ TCS::eEmSelect::sort(const InputTOBArray & input, TOBArray & output) {
 
    // keep only max number of eEms
    int par = m_numberOfeEms ;
-   unsigned int maxNumberOfeEms = (unsigned int)(par<0?0:par);
+   unsigned int maxNumberOfeEms = std::clamp(par, 0, std::abs(par));
    if(maxNumberOfeEms>0) {
+
+     if (output.size()> maxNumberOfeEms) {setOverflow(true);}
+
       while( output.size()> maxNumberOfeEms ) {
          output.pop_back();
       }
