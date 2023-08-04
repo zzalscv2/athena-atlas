@@ -38,7 +38,6 @@ namespace InDetDD {
   class SiDetectorElement;
 }
 
-using PixelCalib::PixelOfflineCalibData;
 
 namespace InDet {
   
@@ -96,7 +95,7 @@ namespace InDet {
         double splitProb1, 
         double splitProb2,
         const PixelChargeCalibCondData* calibData,
-        const PixelOfflineCalibData* offlineCalibData) const;
+        const PixelCalib::PixelOfflineCalibData* offlineCalibData) const;
 
     ///Retrieve the necessary services in initialize                
     virtual StatusCode initialize() override;
