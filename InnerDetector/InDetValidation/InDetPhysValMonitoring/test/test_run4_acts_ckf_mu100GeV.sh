@@ -65,6 +65,7 @@ run "Reconstruction-ambi" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateAmbiguityResolutionFlags" \
     --inputRDOFile ${rdo_23p0} \
     --outputAODFile AOD.ambi.root \
+    --perfmon fullmonmt \
     --maxEvents ${nEvents}
 
 reco_rc=$?

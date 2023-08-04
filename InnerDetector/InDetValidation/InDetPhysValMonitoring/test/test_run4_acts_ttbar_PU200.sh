@@ -46,6 +46,7 @@ run "Reconstruction" \
     --postInclude "ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
     --preExec "flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;" \
     --maxEvents 20 \
+    --perfmon fullmonmt \
     --multithreaded
 
 reco_rc=$?
