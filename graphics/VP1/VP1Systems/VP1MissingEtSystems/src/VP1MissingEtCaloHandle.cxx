@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -31,7 +31,7 @@ QList<VP1StdCollection*> VP1MissingEtCaloHandle::createCollections(IVP1System*sy
   static const MissingET* met = 0;
 
   QList<VP1StdCollection*> l;
-  foreach (QString key, VP1SGContentsHelper(sys).getKeys<MissingEtCalo>()) {
+  for (QString key : VP1SGContentsHelper(sys).getKeys<MissingEtCalo>()) {
     //updated: for prevent loading zero length system
     met = 0;
     if(!VP1SGAccessHelper(sys).retrieve(met, key))
