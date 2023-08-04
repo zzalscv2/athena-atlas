@@ -2490,6 +2490,16 @@ MultiRange::size_type MultiRange::size () const
   return (m_ranges.size ()); 
 } 
  
+MultiRange::const_iterator MultiRange::begin () const 
+{ 
+  return (m_ranges.begin ()); 
+} 
+ 
+MultiRange::const_iterator MultiRange::end () const 
+{ 
+  return (m_ranges.end ()); 
+} 
+ 
 MultiRange::size_type MultiRange::cardinality () const 
 { 
   size_type result = 0; 
