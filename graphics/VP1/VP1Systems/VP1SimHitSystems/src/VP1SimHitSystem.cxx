@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -113,7 +113,7 @@ QWidget* VP1SimHitSystem::buildController()
   m_clockwork->checkBoxNamesMap.insert(ui.chbxForwardRegionHits,"Forward Region");
 
   // Populate Check Box Map and connect slots
-  foreach(QCheckBox* cb,m_clockwork->checkBoxNamesMap.keys())
+  for(QCheckBox* cb : m_clockwork->checkBoxNamesMap.keys())
   {
     connect(cb,SIGNAL(toggled(bool)),this,SLOT(checkboxChanged()));
     m_clockwork->checkBoxMap.insert(m_clockwork->checkBoxNamesMap[cb],cb);
@@ -180,7 +180,7 @@ void VP1SimHitSystem::buildEventSceneGraph(StoreGateSvc* sg, SoSeparator *root)
     return;
   }
 
-  foreach(QString detector,m_clockwork->checkBoxMap.keys())
+  for(QString detector : m_clockwork->checkBoxMap.keys())
   {
     // Add switch, off by default
     SoSwitch* sw = new SoSwitch();
@@ -457,7 +457,7 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
       // Generic:
       //
       message("Trying for Generic Muon (as many collections as can be found)");
-      foreach(QString key,VP1SGContentsHelper(this).getKeys<GenericMuonSimHitCollection>()) {
+      for(QString key : VP1SGContentsHelper(this).getKeys<GenericMuonSimHitCollection>()) {
         const GenericMuonSimHitCollection* generic_collection;
         if(sg->retrieve( generic_collection,key.toStdString().c_str() )==StatusCode::SUCCESS)
         {
@@ -482,7 +482,7 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
       // Generic:
       //
       message("Trying for ForwardRegion (as many collections as can be found)");
-      foreach(QString key,VP1SGContentsHelper(this).getKeys<SimulationHitCollection>()) {
+      for(QString key : VP1SGContentsHelper(this).getKeys<SimulationHitCollection>()) {
         const SimulationHitCollection* generic_collection;
         if(sg->retrieve( generic_collection,key.toStdString().c_str() )==StatusCode::SUCCESS)
         {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////
@@ -180,7 +180,7 @@ void Example3DSystem5::userChangedSelection(SoCooperativeSelection*, QSet<SoNode
   Amg::Vector3D total3mom(0.0, 0.0, 0.0); //This is just a three vector
   double totalenergy(0);//for the energy part of the lorentz vector
 
-  foreach (SoNode * node, nodes) {
+  for (SoNode * node : nodes) {
     //Track pointer:
     if (m_nodeToTrack.find(node)==m_nodeToTrack.end()) {
       message("Error: Does not have track information for all nodes");

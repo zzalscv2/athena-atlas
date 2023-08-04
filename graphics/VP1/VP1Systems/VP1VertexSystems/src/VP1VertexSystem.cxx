@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1VertexSystems/VP1VertexSystem.h"
@@ -58,7 +58,7 @@ void VP1VertexSystem::buildEventSceneGraph ( StoreGateSvc*, SoSeparator *root )
   m_d->controller->collWidget()->setCollections(cols);
 
   //Add collections to event scenegraph:
-  foreach (VP1StdCollection* col,cols){
+  for (VP1StdCollection* col : cols){
     root->addChild(col->collSwitch());
     VP1VertexCollection* vertColl = dynamic_cast<VP1VertexCollection*> (col);
     if (vertColl) vertColl->recheckAllCuts(); //bit of a hack - the idea is to force the emission of the signal about track from vertices
@@ -79,7 +79,7 @@ void VP1VertexSystem::userPickedNode(SoNode*, SoPath * pickedPath) {
 
   //Find in which collection an object was picked:
   VP1StdCollection* pickedCol(0);
-  foreach (VP1StdCollection* col,m_d->controller->collWidget()->collections<VP1StdCollection>()) {
+  for (VP1StdCollection* col : m_d->controller->collWidget()->collections<VP1StdCollection>()) {
     if (col->visible()&&pickedPath->containsNode(col->collSep())) {
       pickedCol = col;
       break;
