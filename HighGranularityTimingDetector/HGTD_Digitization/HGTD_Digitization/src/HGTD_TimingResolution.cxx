@@ -346,7 +346,9 @@ float HGTD_TimingResolution::calculateTime(
   const PulseWaveform pulse = simulatePulse(rndm_engine);
   calculatePulse(pulse, pulseBins, t, E, max_hit, rndm_engine);
   for (auto &pulse : pulseBins) {
-    pulse.second.first = pulse.second.first / pulse.second.second;
+    if (pulse.second.second != 0) {
+      pulse.second.first = pulse.second.first / pulse.second.second;
+    }
     // We look the the time when E=Emax/2 to get the time
     if ((max_hit[1] > pulse.second.first) &&
         (max_hit[0] * m_cfdThreshold < pulse.second.second) &&
@@ -355,11 +357,10 @@ float HGTD_TimingResolution::calculateTime(
       max_hit[3] = pulse.second.first;  // Time when E=Emax*m_cfd
     }
   }
-  float electronicRes = hitTimingResolution(r);
-  electronicRes = sqrt(electronicRes * electronicRes -
-                       sensorResolution() * sensorResolution());
-  float cfdTime =
-      max_hit[3] + CLHEP::RandGaussZiggurat::shoot(
-                       rndm_engine, 0, electronicRes); // adds electric noise
-  return cfdTime;
+  const float electronicRes = hitTimingResolution(r);
+  const float noise = electronicRes * electronicRes - sensorResolution() * sensorResolution();
+  if (noise > 0) {
+    return max_hit[3] + CLHEP::RandGaussZiggurat::shoot(rndm_engine, 0, sqrt(noise));
+  }
+  return max_hit[3];
 }
