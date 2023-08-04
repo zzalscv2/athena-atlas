@@ -81,8 +81,8 @@ private:
   //fill the spline or vector that store the cut values for a particular working point
   void InitializeTaggerVariables(std::string taggerName,std::string OP, TSpline3 *spline, TVector *constcut, double &fraction);
 
-  bool m_initialised;
-  bool m_ErrorOnTagWeightFailure;
+  bool m_initialised = false;
+  bool m_ErrorOnTagWeightFailure = true;
   bool m_StoreNConstituents = false;
   bool m_continuous   = false; //Continuous1D
   bool m_continuous2D = false; //Continuous2D
@@ -99,9 +99,10 @@ private:
   std::string m_OP;
   std::string m_jetAuthor;
   std::string m_ContinuousBenchmarks;
+  std::string m_wps_raw;
 
   TFile *m_inf;
-  double m_continuouscuts[6];
+  std::vector<double> m_continuouscuts;
 
   struct taggerproperties{
     std::string  name;

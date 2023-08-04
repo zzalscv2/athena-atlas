@@ -50,6 +50,7 @@ BTaggingSelectionTool::BTaggingSelectionTool( const std::string & name)
   declareProperty( "TaggerName",                    m_taggerName="",    "tagging algorithm name");
   declareProperty( "OperatingPoint",                m_OP="",            "operating point");
   declareProperty( "JetAuthor",                     m_jetAuthor="",     "jet collection");
+  declareProperty( "WorkingPointDefinitions",       m_wps_raw="FixedCutBEff_85,FixedCutBEff_77,FixedCutBEff_70,FixedCutBEff_60",       "Comma-separated list of tagger working points (in decreasing order of efficiency!) - required for 1D tagging purposes");
   declareProperty( "ErrorOnTagWeightFailure",       m_ErrorOnTagWeightFailure=true, "optionally ignore cases where the tagweight cannot be retrived. default behaviour is to give an error, switching to false will turn it into a warning");
   declareProperty( "CutBenchmarksContinuousWP",     m_ContinuousBenchmarks="", "comma separated list of tag bins that will be accepted as tagged: 1,2,3 etc.. ");
   declareProperty( "useCTagging",                   m_useCTag=false, "Enabled only for FixedCut or Continuous WPs: define wether the cuts refer to b-tagging or c-tagging");
@@ -139,48 +140,37 @@ StatusCode BTaggingSelectionTool::initialize() {
      ATH_MSG_ERROR("Tagger fraction_c in Continuous2D WP not available");
    }
  } //Continuous2D
- else if ("Continuous"==cutname(0,10))  // For continuous tagging load all flat-cut WPs
-   {
-     if(m_useCTag)
+ else if ("Continuous"==cutname(0,10)){ // For continuous tagging load all flat-cut WPs
+      if(m_useCTag)
       ATH_MSG_WARNING( "Running in Continuous WP and using 1D c-tagging");
+      m_continuous   = true;
+      m_continuouscuts.push_back(-1.e4);
+      // the working points are defined above in the 'm_wps_raw' string
+      std::vector<std::string> workingpoints = split(m_wps_raw, ',');
+      std::sort(workingpoints.begin(), workingpoints.end());
+      std::reverse(workingpoints.begin(), workingpoints.end()); // put in descending order
+      for(std::string wp : workingpoints){
+        cutname = m_taggerName + "/" + m_jetAuthor + "/" + wp + "/cutvalue";
+        m_tagger.constcut = (TVector*) m_inf->Get(cutname);
+        if (m_tagger.constcut != nullptr) {
+          m_continuouscuts.push_back(m_tagger.constcut[0](0));
+        } else {
+          ATH_MSG_ERROR( "Continuous tagging is trying to use an invalid operating point: " + wp );
+        }
+      }
+      m_continuouscuts.push_back(+1.e4); // same as other approach...
 
-     m_continuous   = true;
-     m_continuouscuts[0] = -1.e4;
-     cutname = m_taggerName+"/"+m_jetAuthor+"/FixedCutBEff_85/cutvalue";
-     m_tagger.constcut = (TVector*) m_inf->Get(cutname);
-     
-     if (m_tagger.constcut!=nullptr) m_continuouscuts[1] = m_tagger.constcut[0](0);
-     else ATH_MSG_ERROR( "Continuous tagging is trying to use an unvalid operating point: FixedCutBEff_85" );
-     
-     cutname = m_taggerName+"/"+m_jetAuthor+"/FixedCutBEff_77/cutvalue";
-     m_tagger.constcut = (TVector*) m_inf->Get(cutname);
-     if (m_tagger.constcut!=nullptr) m_continuouscuts[2] = m_tagger.constcut[0](0);
-     else ATH_MSG_ERROR( "Continuous tagging is trying to use an unvalid operating point: FixedCutBEff_77" );
-     
-     cutname = m_taggerName+"/"+m_jetAuthor+"/FixedCutBEff_70/cutvalue";
-     m_tagger.constcut = (TVector*) m_inf->Get(cutname);
-     if (m_tagger.constcut!=nullptr) m_continuouscuts[3] = m_tagger.constcut[0](0);
-     else ATH_MSG_ERROR( "Continuous tagging is trying to use an unvalid operating point: FixedCutBEff_70" );
-     
-     cutname = m_taggerName+"/"+m_jetAuthor+"/FixedCutBEff_60/cutvalue";
-     m_tagger.constcut = (TVector*) m_inf->Get(cutname);
-     if (m_tagger.constcut!=nullptr) m_continuouscuts[4] = m_tagger.constcut[0](0);
-     else ATH_MSG_ERROR( "Continuous tagging is trying to use an unvalid operating point: FixedCutBEff_60" );
-     
-     //0% efficiency => MVXWP=+infinity
-     m_continuouscuts[5]= +1.e4;
-     
-     //The WP is not important. This is just to retrieve the c-fraction. 
-     ExtractTaggerProperties(m_tagger,m_taggerName, "FixedCutBEff_60");
-   }
- else {  // FixedCut Working Point: load only one WP
-   if(m_useCTag)
-    ATH_MSG_WARNING( "Running in FixedCut WP and using c-tagging");
+      //The WP is not important. This is just to retrieve the c-fraction. 
+      ExtractTaggerProperties(m_tagger, m_taggerName, workingpoints.at(0));
 
-   ExtractTaggerProperties(m_tagger,m_taggerName, m_OP);
+ } else {  // FixedCut Working Point: load only one WP
+    if(m_useCTag){
+      ATH_MSG_WARNING( "Running in FixedCut WP and using c-tagging");
+    }
+    ExtractTaggerProperties(m_tagger,m_taggerName, m_OP);
  }
 
- //set the working points
+ //set the accept working points, jets in these pseudo-continuous bins will be accepted
  if(m_continuous){
    std::vector<std::string> tag_benchmarks_names = split(m_ContinuousBenchmarks, ',');
    std::vector<int> tag_benchmarks;
