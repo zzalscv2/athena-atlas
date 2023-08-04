@@ -18,7 +18,7 @@
 
 namespace IOVDbNamespace{
 
-  CrestFunctions::CrestFunctions(const std::string & crest_path = "http://crest-undertow-api.web.cern.ch"){
+  CrestFunctions::CrestFunctions(const std::string & crest_path){
     setURLBase(crest_path);
   }
 
