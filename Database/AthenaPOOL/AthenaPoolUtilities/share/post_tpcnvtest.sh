@@ -287,8 +287,8 @@ else
 	if [ -r $reflog ]; then
             jobdiff=${joblog}-todiff.bz2
             refdiff=`basename ${reflog}`-todiff.bz2
-            sed 's/H1Topo/Topo/g' < $joblog | egrep -v "$PP" | bzip2 -9 > $jobdiff
-            sed 's/H1Topo/Topo/g' < $reflog | egrep -v "$PP" | bzip2 -9 > $refdiff
+            sed 's/H1Topo/Topo/g' < $joblog | grep -vE "$PP" | bzip2 -9 > $jobdiff
+            sed 's/H1Topo/Topo/g' < $reflog | grep -vE "$PP" | bzip2 -9 > $refdiff
             bzdiff -a -u -w $refdiff $jobdiff
 	    diffStatus=$?
 	    if [ $diffStatus != 0 ] ; then
