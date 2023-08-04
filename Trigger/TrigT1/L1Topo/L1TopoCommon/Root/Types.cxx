@@ -150,8 +150,12 @@ TCS::outputType(const std::string& output) {
     {return TCS::LEGACYTOPO1;}
   else if (output == "Topo2El")
     {return TCS::TOPO2EL;}
+  else if (output == "OverflowTopo2El")
+    {return TCS::OVERFLOWTOPO2EL;}
   else if (output == "Topo3El")
     {return TCS::TOPO3EL;}
+  else if (output == "OverflowTopo3El")
+    {return TCS::OVERFLOWTOPO3EL;}
   else if (output == "Topo1Opt0")
     {return TCS::TOPO1OPT0;}
   else if (output == "Topo1Opt1")

@@ -736,7 +736,8 @@ TriggerHLTListRun3 = [
     ('xAOD::TrackParticleContainer#HLT_IDTrack_TauLRT_FTF',                 'BS ESD AODFULL', 'Tau', [InViews('TAUFTFLRTViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_TauLRT_FTFAux.',          'BS ESD AODFULL', 'Tau'),
 
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_TauIso_FTF',                 'BS ESD AODFULL', 'Tau', [InViews('TAUFTFIsoViews'), InViews('TAUFTFIsoBDTViews')]),
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_TauIso_FTF',                 'BS ESD AODFULL', 'Tau', [InViews('FastTauIsoViews'), InViews('TAUFTFIsoBDTViews')]),
+
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_TauIso_FTFAux.',          'BS ESD AODFULL', 'Tau'),
 
     ('xAOD::TrackParticleContainer#HLT_IDTrack_Tau_IDTrig',                 'BS ESD AODFULL', 'Tau', [InViews('TAUPrecIsoViews')]),

@@ -269,9 +269,13 @@ L1TopoSimulation::execute() {
        ATH_MSG_DEBUG("Word 2 " << conn2 << " clock " << clock << "  " << globalOutput.decision_field( conn2, clock) );
        topoOutput2CTP->setCableWord2( clock, globalOutput.decision_field( conn2, clock) );  // TOPO 1
        WriteEDM(outputHandle,conn2,clock,globalOutput.decision_field( conn2, clock));
-       // topoOverflow2CTP->setCableWord0( clock, 0 ); // ALFA
-       // topoOverflow2CTP->setCableWord1( clock, dec.overflow( 0, clock) );  // TOPO 0
-       // topoOverflow2CTP->setCableWord2( clock, dec.overflow( 1, clock) );  // TOPO 1
+       
+       topoOverflow2CTP->setCableWord0( clock, 0 ); // ALFA
+       topoOverflow2CTP->setCableWord1( clock, globalOutput.overflow_field( conn1, clock) );  // TOPO 0
+       WriteEDM_Overflow(outputHandle,"Overflow"+conn1,clock,globalOutput.overflow_field( conn1, clock));
+       topoOverflow2CTP->setCableWord2( clock, globalOutput.overflow_field( conn2, clock) );  // TOPO 1
+       WriteEDM_Overflow(outputHandle,"Overflow"+conn2,clock,globalOutput.overflow_field( conn2, clock));
+
      }    
 
      // set optical connectors
@@ -311,6 +315,18 @@ L1TopoSimulation::WriteEDM(SG::WriteHandle<xAOD::L1TopoSimResultsContainer> &han
 }
 
 void
+L1TopoSimulation::WriteEDM_Overflow(SG::WriteHandle<xAOD::L1TopoSimResultsContainer> &handle, const std::string &name, unsigned int clock, uint32_t word) {
+
+  handle->push_back(std::make_unique<xAOD::L1TopoSimResults>());
+  handle->back()->setConnectionId(TCS::outputType(name));
+  handle->back()->setClock(clock);
+  handle->back()->setBitWidth(32);
+  handle->back()->setTopoWordOverflow(word);
+
+  ATH_MSG_DEBUG( "L1Topo EDM:: Connection Id: " << handle->back()->connectionId() << " Clock: " << handle->back()->clock() << " Decision: " << handle->back()->topoWord() );
+}
+
+void
 L1TopoSimulation::WriteEDM(SG::WriteHandle<xAOD::L1TopoSimResultsContainer> &handle, const std::string &name, unsigned int clock, uint64_t word) {
   
   handle->push_back(std::make_unique<xAOD::L1TopoSimResults>());
@@ -318,6 +334,18 @@ L1TopoSimulation::WriteEDM(SG::WriteHandle<xAOD::L1TopoSimResultsContainer> &han
   handle->back()->setClock(clock);
   handle->back()->setBitWidth(64);
   handle->back()->setTopoWord64(word);
+
+  ATH_MSG_DEBUG( "L1Topo EDM:: Connection Id: " << handle->back()->connectionId() << " Clock: " << handle->back()->clock() << " Decision: " << handle->back()->topoWord() );
+}
+
+void
+L1TopoSimulation::WriteEDM_Overflow(SG::WriteHandle<xAOD::L1TopoSimResultsContainer> &handle, const std::string &name, unsigned int clock, uint64_t word) {
+  
+  handle->push_back(std::make_unique<xAOD::L1TopoSimResults>());
+  handle->back()->setConnectionId(TCS::outputType(name));
+  handle->back()->setClock(clock);
+  handle->back()->setBitWidth(64);
+  handle->back()->setTopoWord64Overflow(word);
 
   ATH_MSG_DEBUG( "L1Topo EDM:: Connection Id: " << handle->back()->connectionId() << " Clock: " << handle->back()->clock() << " Decision: " << handle->back()->topoWord() );
 }

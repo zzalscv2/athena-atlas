@@ -67,7 +67,7 @@ TCS::JetSortingAlg::sort(const InputTOBArray & input, TOBArray & output) {
 
    // keep only max number of jets
    int par = parameter("NumberOfJets").value();
-   unsigned int maxNumberOfJets = (unsigned int)(par<0?0:par);
+   unsigned int maxNumberOfJets = std::clamp(par, 0, std::abs(par));
    if(maxNumberOfJets>0) {
       while( output.size()> maxNumberOfJets ) {
          output.pop_back();

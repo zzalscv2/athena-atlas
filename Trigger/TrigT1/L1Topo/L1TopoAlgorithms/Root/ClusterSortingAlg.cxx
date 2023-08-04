@@ -65,7 +65,7 @@ TCS::ClusterSortingAlg::sort(const InputTOBArray & input, TOBArray & output) {
 
    // keep only max number of clusters
    int par = parameter("NumberOfClusters").value();
-   unsigned int maxNumberOfClusters = (unsigned int)(par<0?0:par);
+   unsigned int maxNumberOfClusters = std::clamp(par, 0, std::abs(par));
    if(maxNumberOfClusters>0) {
       while( output.size()> maxNumberOfClusters ) {
          output.pop_back();

@@ -30,7 +30,7 @@ if [ -z "${ATLAS_CTEST_TESTSTATUS}" ]; then
 fi
 
 # selection patterns:
-errors="^ERROR | ERROR |^FATAL | FATAL | WARNING\s*FPE INVALID"
+errors="^ERROR | ERROR |^FATAL | FATAL | WARNING\s*FPE"
 
 if [ -n "${ATLAS_CTEST_LOG_SELECT_PATTERN}" ]; then
     errors="${errors}|${ATLAS_CTEST_LOG_SELECT_PATTERN}"

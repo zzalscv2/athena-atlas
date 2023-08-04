@@ -89,7 +89,6 @@ def _ftfCoreSeq(flags,name,is_probe_leg=False):
     robPrefetchAlg = ROBPrefetchingAlgCfg_Si( flags, nameSuffix='IM_'+fastInDetReco.name)
     if extraPrefetching:
       robPrefetchAlg.RoILinkName = str(prefetchRoITool.PrefetchRoIsLinkName) 
-      print('Anaxagoras: ',robPrefetchAlg.RoILinkName)
 
     from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
     fastInDetReco.mergeReco(trigInDetFastTrackingCfg(flags, roisKey=fastInDetReco.inputMaker().InViewRoIs, signatureName='tau'+name))
@@ -100,13 +99,12 @@ def _ftfCoreSeq(flags,name,is_probe_leg=False):
     RoIs = fastInDetReco.inputMaker().InViewRoIs
     TrackCollection = flags.Tracking.ActiveConfig.trkTracks_FTF
 
-    from TrigTauHypo.TrigTauHypoConfig import tauTrackRoiUpdaterCfg,tauTrackBDTRoiUpdaterCfg,tauLRTRoiUpdaterCfg
+    from TrigTauHypo.TrigTauHypoConfig import tauTrackRoiUpdaterCfg,tauLRTRoiUpdaterCfg
 
     if 'LRT' in name:
        fastInDetReco.mergeReco(tauLRTRoiUpdaterCfg(flags,inputRoIs = RoIs,tracks = TrackCollection))
     else:
        fastInDetReco.mergeReco(tauTrackRoiUpdaterCfg(flags,inputRoIs = RoIs,tracks = TrackCollection))
-       fastInDetReco.mergeReco(tauTrackBDTRoiUpdaterCfg(flags,inputRoIs = RoIs,tracks = TrackCollection))
     
     selAcc.mergeReco(fastInDetReco, robPrefetchCA=robPrefetchAlg)
     hypoAlg = CompFactory.TrigTrackPreSelHypoAlg('TrackPreSelHypoAlg_PassBy'+name,
@@ -136,12 +134,16 @@ def _ftfTauIsoSeq(flags,name,is_probe_leg=False):
 
     newRoITool = CompFactory.ViewCreatorFetchFromViewROITool(
                              RoisWriteHandleKey = recordable(flags.Tracking.ActiveConfig.roi),
-                             InViewRoIs = 'UpdatedTrackBDTRoI' if 'BDT' in name else 'UpdatedTrackRoI')
+                             InViewRoIs = 'UpdatedTrackRoI')
+
+    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
 
     fastInDetReco = InViewRecoCA('FastTau'+name,RoITool           = newRoITool,
                                                 RequireParentView = True,
                                                 ViewFallThrough   = True,
                                                 isProbe           = is_probe_leg)
+
+    robPrefetchAlg = ROBPrefetchingAlgCfg_Si( flags, nameSuffix='IM_'+fastInDetReco.name)
 
     from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
     idTracking = trigInDetFastTrackingCfg(flags, roisKey=fastInDetReco.inputMaker().InViewRoIs, signatureName='tau'+name)
@@ -150,7 +152,7 @@ def _ftfTauIsoSeq(flags,name,is_probe_leg=False):
                                 DataObjects=[( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+{}'.format(fastInDetReco.inputMaker().InViewRoIs) ),
                                ( 'xAOD::TauJetContainer' , 'StoreGateSvc+HLT_TrigTauRecMerged_CaloMVAOnly')]) )
 
-    selAcc.mergeReco(fastInDetReco)
+    selAcc.mergeReco(fastInDetReco, robPrefetchCA=robPrefetchAlg)
     hypoAlg = CompFactory.TrigTrackPreSelHypoAlg('TrackPreSelHypoAlg_PassBy'+name,
                                                     trackcollection = flags.Tracking.ActiveConfig.trkTracks_FTF )
     selAcc.addHypoAlgo(hypoAlg)
@@ -163,12 +165,5 @@ def tauFTFTauIsoSeq(flags, is_probe_leg=False):
     newflags = getInDetFlagsForSignature(flags,'tauIso')
 
     name = 'Iso'
-    (selAcc , menuCA) = _ftfTauIsoSeq(newflags,name,is_probe_leg)
-    return menuCA
-
-def tauFTFTauIsoBDTSeq(flags, is_probe_leg=False):
-    newflags = getInDetFlagsForSignature(flags,'tauIsoBDT')
-
-    name = 'IsoBDT'
     (selAcc , menuCA) = _ftfTauIsoSeq(newflags,name,is_probe_leg)
     return menuCA

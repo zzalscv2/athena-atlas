@@ -184,16 +184,19 @@ StatusCode L1TopoOnlineMonitor::doSimMon( DecisionBits& decisionBits, std::vecto
 
     if (l1topo_dec->bitWidth() == 32) {
       std::vector<unsigned> topoword;
+      std::vector<unsigned> topowordOverflow;
       for(unsigned int i=0; i<32; ++i) {
         uint32_t mask = 0x1; mask <<= i;
         if ((l1topo_dec->topoWord() & mask) !=0) {
           topoword.push_back(32*l1topo_dec->clock()+i);
           uint32_t pos = 32*(l1topo_dec->clock()+(l1topo_dec->connectionId()==2 ? 0 : 2))+i;
           triggerBitsSim[pos] = ((!decisionBits.triggerBits.has_value() || m_forceCTPasHdw) && m_ctpIds[pos]>=512) ? false : true;
-          if (l1topo_dec->topoWordOverflow() != 0) {
-            overflowBitsSim[pos] = ((!decisionBits.overflowBitsSim.has_value() || m_forceCTPasHdw) && m_ctpIds[pos]>=512) ? false : true;
-          }
-        }
+	}
+	if ((l1topo_dec->topoWordOverflow() & mask) !=0) {
+	  topowordOverflow.push_back(32*l1topo_dec->clock()+i);
+	  uint32_t pus = 32*(l1topo_dec->clock()+(l1topo_dec->connectionId()==12 ? 0 : 2))+i;
+	  overflowBitsSim[pus] = ((!decisionBits.overflowBitsSim.has_value() || m_forceCTPasHdw) && m_ctpIds[pus]>=512) ? false : true;
+	}
       }
       std::string name = "CableElec_";
       name += std::to_string(l1topo_dec->connectionId());
@@ -239,7 +242,7 @@ StatusCode L1TopoOnlineMonitor::doSimMon( DecisionBits& decisionBits, std::vecto
   std::vector<size_t> triggerBitIndicesSim = bitsetIndices(triggerBitsSim);
   std::vector<size_t> overflowBitIndicesSim = bitsetIndices(overflowBitsSim);
   auto monTopoSim = Monitored::Collection("TopoSim", triggerBitIndicesSim);
-  auto monTopoSimOverflow = Monitored::Collection("TopoSim_oveflows", overflowBitIndicesSim);
+  auto monTopoSimOverflow = Monitored::Collection("TopoSim_overflows", overflowBitIndicesSim);
   Monitored::Group(m_monTool,monTopoSim);
   Monitored::Group(m_monTool,monTopoSimOverflow);
   

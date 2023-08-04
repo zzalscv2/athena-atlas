@@ -214,119 +214,134 @@ StatusCode TopoInputEvent::setEventInfo(const uint32_t runNo, const uint32_t evt
    return StatusCode::SUCCESS;
 }
 
-void TopoInputEvent::setOverflowFromEmtauInput (const bool &v)
+void TopoInputEvent::setOverflowFromEmtauInput (bool v)
 {
     m_overflowFromEmtauInput = v;
 }
 
-void TopoInputEvent::setOverflowFromJetInput   (const bool &v)
+void TopoInputEvent::setOverflowFromJetInput   (bool v)
 {
     m_overflowFromJetInput = v;
 }
 
-void TopoInputEvent::setOverflowFromeEmInput   (const bool &v)
+void TopoInputEvent::setOverflowFromeEmInput   (bool v)
 {
     m_overflowFromeEmInput = v;
 }
 
-void TopoInputEvent::setOverflowFromjEmInput   (const bool &v)
+void TopoInputEvent::setOverflowFromjEmInput   (bool v)
 {
     m_overflowFromjEmInput = v;
 }
 
-void TopoInputEvent::setOverflowFromeTauInput   (const bool &v)
+void TopoInputEvent::setOverflowFromeTauInput   (bool v)
 {
     m_overflowFromeTauInput = v;
 }
 
-void TopoInputEvent::setOverflowFromjTauInput   (const bool &v)
+void TopoInputEvent::setOverflowFromcTauInput   (bool v)
+{
+    m_overflowFromcTauInput = v;
+}
+
+void TopoInputEvent::setOverflowFromjTauInput   (bool v)
 {
     m_overflowFromjTauInput = v;
 }
 
-void TopoInputEvent::setOverflowFromjJetInput   (const bool &v)
+void TopoInputEvent::setOverflowFromjJetInput   (bool v)
 {
     m_overflowFromjJetInput = v;
 }
 
-void TopoInputEvent::setOverflowFromgJetInput   (const bool &v)
+void TopoInputEvent::setOverflowFromgJetInput   (bool v)
 {
     m_overflowFromgJetInput = v;
 }
 
-void TopoInputEvent::setOverflowFromjLJetInput   (const bool &v)
+void TopoInputEvent::setOverflowFromjLJetInput   (bool v)
 {
     m_overflowFromjLJetInput = v;
 }
 
-void TopoInputEvent::setOverflowFromgLJetInput   (const bool &v)
+void TopoInputEvent::setOverflowFromgLJetInput   (bool v)
 {
     m_overflowFromgLJetInput = v;
 }
 
-void TopoInputEvent::setOverflowFromEnergyInput(const bool &v)
+void TopoInputEvent::setOverflowFromEnergyInput(bool v)
 {
     m_overflowFromEnergyInput = v;
 }
 
-void TopoInputEvent::setOverflowFromjXEInput   (const bool &v)
+void TopoInputEvent::setOverflowFromjXEInput   (bool v)
 {
     m_overflowFromjXEInput = v;
 }
 
-void TopoInputEvent::setOverflowFromjTEInput   (const bool &v)
+void TopoInputEvent::setOverflowFromjTEInput   (bool v)
 {
     m_overflowFromjTEInput = v;
 }
 
-void TopoInputEvent::setOverflowFromjTECInput   (const bool &v)
+void TopoInputEvent::setOverflowFromjTECInput   (bool v)
 {
     m_overflowFromjTECInput = v;
 }
 
-void TopoInputEvent::setOverflowFromjTEFWDInput   (const bool &v)
+void TopoInputEvent::setOverflowFromjTEFWDInput   (bool v)
 {
     m_overflowFromjTEFWDInput = v;
 }
 
-void TopoInputEvent::setOverflowFromjTEFWDAInput   (const bool &v)
+void TopoInputEvent::setOverflowFromjTEFWDAInput   (bool v)
 {
     m_overflowFromjTEFWDAInput = v;
 }
 
-void TopoInputEvent::setOverflowFromjTEFWDCInput   (const bool &v)
+void TopoInputEvent::setOverflowFromjTEFWDCInput   (bool v)
 {
     m_overflowFromjTEFWDCInput = v;
 }
 
-void TopoInputEvent::setOverflowFromgXEJWOJInput   (const bool &v)
+void TopoInputEvent::setOverflowFromgXEJWOJInput   (bool v)
 {
     m_overflowFromgXEJWOJInput = v;
 }
 
-void TopoInputEvent::setOverflowFromgMHTInput   (const bool &v)
+void TopoInputEvent::setOverflowFromgMHTInput   (bool v)
 {
     m_overflowFromgMHTInput = v;
 }
 
-void TopoInputEvent::setOverflowFromgXENCInput   (const bool &v)
+void TopoInputEvent::setOverflowFromgXENCInput   (bool v)
 {
     m_overflowFromgXENCInput = v;
 }
 
-void TopoInputEvent::setOverflowFromgXERHOInput   (const bool &v)
+void TopoInputEvent::setOverflowFromgXERHOInput   (bool v)
 {
     m_overflowFromgXERHOInput = v;
 }
 
-void TopoInputEvent::setOverflowFromgTEInput   (const bool &v)
+void TopoInputEvent::setOverflowFromgTEInput   (bool v)
 {
     m_overflowFromgTEInput = v;
 }
 
-void TopoInputEvent::setOverflowFromMuonInput  (const bool &v)
+void TopoInputEvent::setOverflowFromMuonInput  (bool v)
 {
     m_overflowFromMuonInput = v;
+}
+
+void TopoInputEvent::setOverflowFromLateMuonInput  (bool v)
+{
+    m_overflowFromLateMuonInput = v;
+}
+
+void TopoInputEvent::setOverflowFromMuonNextBCInput  (bool v)
+{
+    m_overflowFromMuonNextBCInput = v;
 }
 
 // access to data for the steering
@@ -371,26 +386,35 @@ bool TopoInputEvent::hasInputOverflow(TCS::inputTOBType_t tobType) const
     //Not using or setting the overflow bits in practice. We will need to get back to this in 2022. 
     bool inputOverflow = false;
     switch(tobType) {
-    case CLUSTER:    inputOverflow = overflowFromEmtauInput();  break;
-    case JET:        inputOverflow = overflowFromJetInput();    break;
-    case MUON:       inputOverflow = overflowFromMuonInput();   break;
-    case LATEMUON:   inputOverflow = false;                     break; 
-    case MUONNEXTBC: inputOverflow = false;                     break; 
-    case TAU:        inputOverflow = overflowFromEmtauInput();  break;
-    case MET:        inputOverflow = overflowFromEnergyInput(); break;
-    case JXE:        inputOverflow = overflowFromjXEInput();    break;
-    case JXEC:       inputOverflow = overflowFromjXEInput();    break;
-    case JXEPERF:    inputOverflow = overflowFromjXEInput();    break;
-    case JTE:        inputOverflow = overflowFromjTEInput();    break;
-    case JTEC:       inputOverflow = overflowFromjTECInput();    break;
-    case JTEFWD:     inputOverflow = overflowFromjTEFWDInput();    break;
+    case CLUSTER:    inputOverflow = overflowFromEmtauInput();      break;
+    case EEM:        inputOverflow = overflowFromeEmInput();        break; 
+    case JEM:        inputOverflow = overflowFromjEmInput();        break; 
+    case CTAU:       inputOverflow = overflowFromcTauInput();       break; 
+    case JET:        inputOverflow = overflowFromJetInput();        break;
+    case ETAU:       inputOverflow = overflowFromeTauInput();       break; 
+    case JTAU:       inputOverflow = overflowFromjTauInput();       break; 
+    case JJET:       inputOverflow = overflowFromjJetInput();       break;
+    case GJET:       inputOverflow = overflowFromgJetInput();       break;
+    case JLJET:      inputOverflow = overflowFromjLJetInput();      break;
+    case GLJET:      inputOverflow = overflowFromgLJetInput();      break;
+    case MUON:       inputOverflow = overflowFromMuonInput();       break;
+    case LATEMUON:   inputOverflow = overflowFromLateMuonInput();   break; 
+    case MUONNEXTBC: inputOverflow = overflowFromMuonNextBCInput(); break; 
+    case TAU:        inputOverflow = overflowFromEmtauInput();      break;
+    case MET:        inputOverflow = overflowFromEnergyInput();     break;
+    case JXE:        inputOverflow = overflowFromjXEInput();        break;
+    case JXEC:       inputOverflow = overflowFromjXEInput();        break;
+    case JXEPERF:    inputOverflow = overflowFromjXEInput();        break;
+    case JTE:        inputOverflow = overflowFromjTEInput();        break;
+    case JTEC:       inputOverflow = overflowFromjTECInput();       break;
+    case JTEFWD:     inputOverflow = overflowFromjTEFWDInput();     break;
     case JTEFWDA:    inputOverflow = overflowFromjTEFWDAInput();    break;
     case JTEFWDC:    inputOverflow = overflowFromjTEFWDCInput();    break;
     case GXEJWOJ:    inputOverflow = overflowFromgXEJWOJInput();    break;
     case GXENC:      inputOverflow = overflowFromgXEJWOJInput();    break;
     case GXERHO:     inputOverflow = overflowFromgXEJWOJInput();    break;
-    case GMHT:       inputOverflow = overflowFromgMHTInput();   break;
-    case GTE:        inputOverflow = overflowFromgTEInput();    break;
+    case GMHT:       inputOverflow = overflowFromgMHTInput();       break;
+    case GTE:        inputOverflow = overflowFromgTEInput();        break;
     default:         inputOverflow = false;
     }
    return inputOverflow;

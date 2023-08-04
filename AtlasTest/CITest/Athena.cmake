@@ -23,7 +23,7 @@ atlas_add_citest( SimulationRun2AF3
 
 atlas_add_citest( SimulationRun4FullSim
    SCRIPT RunWorkflowTests_Run4.py --CI -s -w FullSim -e '--maxEvents 5' --no-output-checks
-   LOG_IGNORE_PATTERN "WARNING FPE INVALID" )  # ignore FPEs from Geant4
+   LOG_IGNORE_PATTERN "WARNING FPE" )  # ignore FPEs from Geant4
 
 atlas_add_citest( PileUpPresamplingRun2
    SCRIPT RunWorkflowTests_Run2.py --CI -p -w PileUpPresampling -e '--maxEvents 5 --conditionsTag OFLCOND-MC16-SDR-RUN2-11' --no-output-checks )
@@ -115,7 +115,7 @@ atlas_add_citest( RecoRun3Data_Bulk_Checks
 
 atlas_add_citest( RecoRun3Data_Express
    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a x686 -e '--maxEvents 25 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00428353.express_express.merge.RAW._lb0800._SFO-ALL._0001.1' --no-output-checks
-   LOG_IGNORE_PATTERN "WARNING FPE INVALID.*PixelChargeLUTCalibCondAlg"  # ignore FPEs from Geant4
+   LOG_IGNORE_PATTERN "WARNING FPE .*PixelChargeLUTCalibCondAlg"  # ignore FPEs from PixelChargeLUTCalibCondAlg
    )
 
 atlas_add_citest( RecoRun3Data_Cosmics
@@ -161,7 +161,7 @@ atlas_add_citest( RecoRun4MC
 
 atlas_add_citest( RecoRun4MC_DAODPHYS
    SCRIPT RunWorkflowTests_Run4.py --CI -d -w Derivation -e '--maxEvents 5 --inputAODFile=../../RecoRun4MC/run_q447/myAOD.pool.root' --no-output-checks  # go two levels up as the test runs in a subfolder
-   LOG_IGNORE_PATTERN "WARNING FPE INVALID"
+   LOG_IGNORE_PATTERN "WARNING FPE"
    DEPENDS_SUCCESS RecoRun4MC )
 
 

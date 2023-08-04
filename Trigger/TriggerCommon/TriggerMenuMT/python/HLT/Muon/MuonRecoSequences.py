@@ -541,18 +541,14 @@ def VDVMuInsideOutCfg(flags, name, candidatesName):
   acc.addEventAlgo(alg)
   return acc
 
-def muEFInsideOutRecoSequence(flags, RoIs, name):
 
-  from AthenaCommon.CFElements import parOR
+def muEFInsideOutRecoSequenceCfg(flags, RoIs, name):
 
   from MuonConfig.MuonSegmentFindingConfig import MuonSegmentFinderAlgCfg, MuonLayerHoughAlgCfg, MuonSegmentFilterAlgCfg
   from MuonCombinedAlgs.MuonCombinedAlgsMonitoring import MuonCreatorAlgMonitoring
   from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCreatorAlgCfg, MuGirlStauAlgCfg, StauCreatorAlgCfg, MuonInDetToMuonSystemExtensionAlgCfg, MuonInsideOutRecoAlgCfg, MuonCombinedInDetCandidateAlgCfg
 
-  viewNodeName="efmuInsideOutViewNode_"+name
-  if "Late" in name:
-    viewNodeName = "latemuInsideOutViewNode"
-  efmuInsideOutRecoSequence = parOR(viewNodeName)
+  acc = ComponentAccumulator()
   
   candidatesName = "MuonCandidates"
   if 'FS' in name:
@@ -561,79 +557,51 @@ def muEFInsideOutRecoSequence(flags, RoIs, name):
   if "Late" in name:
 
     #Need to run hough transform at start of late muon chain   
-    theMuonLayerHough = algorithmCAToGlobalWrapper(MuonLayerHoughAlgCfg, flags, "TrigMuonLayerHoughAlg")
-    efmuInsideOutRecoSequence+=theMuonLayerHough
+    acc.merge(MuonLayerHoughAlgCfg(flags, "TrigMuonLayerHoughAlg"))
 
     # if NSW is excluded from reconstruction (during commissioning)
     if flags.Muon.runCommissioningChain:
-      theSegmentFinderAlg = algorithmCAToGlobalWrapper(MuonSegmentFinderAlgCfg, flags, name="TrigMuonSegmentMaker_"+name,SegmentCollectionName="TrackMuonSegments_withNSW") 
-      theSegmentFilterAlg = algorithmCAToGlobalWrapper(MuonSegmentFilterAlgCfg, flags, name="TrigMuonSegmentFilter_"+name,SegmentCollectionName="TrackMuonSegments_withNSW",
-                                                  FilteredCollectionName="TrackMuonSegments", TrashUnFiltered=False, ThinStations={}) 
+      acc.merge(MuonSegmentFinderAlgCfg(flags, name="TrigMuonSegmentMaker_"+name,SegmentCollectionName="TrackMuonSegments_withNSW"))
+      acc.merge(MuonSegmentFilterAlgCfg(flags, name="TrigMuonSegmentFilter_"+name,SegmentCollectionName="TrackMuonSegments_withNSW",
+                                                  FilteredCollectionName="TrackMuonSegments", TrashUnFiltered=False, ThinStations={})) 
     else:
-      theSegmentFinderAlg = algorithmCAToGlobalWrapper(MuonSegmentFinderAlgCfg, flags, "TrigMuonSegmentMaker_"+name)
+      acc.merge(MuonSegmentFinderAlgCfg(flags, "TrigMuonSegmentMaker_"+name))
 
-
-    efmuInsideOutRecoSequence+=theSegmentFinderAlg
-    if flags.Muon.runCommissioningChain:
-      efmuInsideOutRecoSequence+=theSegmentFilterAlg 
 
     # need to run precisions tracking for late muons, since we don't run it anywhere else
-
-    #Precision Tracking
-    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-    IDTrigConfig = getInDetTrigConfig( 'muonLate' )
-
-
-    PTAlgs = [] #List of precision tracking algs
-    PTTracks = [] #List of TrackCollectionKeys
-    PTTrackParticles = [] #List of TrackParticleKeys
-
-    from TrigInDetConfig.InDetTrigPrecisionTracking import makeInDetTrigPrecisionTracking
-    #When run in a different view than FTF some data dependencies needs to be loaded through verifier
-    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking(flags, config = IDTrigConfig, rois=RoIs)
-    PTSeq = parOR("precisionTrackingInLateMuons", PTAlgs  )
-
-    efmuInsideOutRecoSequence += PTSeq
-    trackParticles = PTTrackParticles[-1]
+    from TrigInDetConfig.TrigInDetConfig import trigInDetPrecisionTrackingCfg
+    flags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.muonLate")
+    acc.merge(trigInDetPrecisionTrackingCfg(flags, rois= RoIs, signatureName="muonLate"))
+    trackParticles = flags.Trigger.InDetTracking.muon.tracks_IDTrig
 
     #Make InDetCandidates
-    theIndetCandidateAlg = algorithmCAToGlobalWrapper(MuonCombinedInDetCandidateAlgCfg, flags, name="TrigMuonCombinedInDetCandidateAlg_"+name,TrackParticleLocation = [trackParticles],ForwardParticleLocation=trackParticles, InDetCandidateLocation="InDetCandidates_"+name)
-    efmuInsideOutRecoSequence+=theIndetCandidateAlg
-
+    acc.merge(MuonCombinedInDetCandidateAlgCfg(flags, name="TrigMuonCombinedInDetCandidateAlg_"+name,TrackParticleLocation = [trackParticles],ForwardParticleLocation=trackParticles, InDetCandidateLocation="InDetCandidates_"+name))
 
   else:
     # for non-latemu chains, the decoding/hough transform is run in an earlier step
     #Need PRD containers for inside-out reco
-    ViewVerifyInsideOut = algorithmCAToGlobalWrapper(VDVMuInsideOutCfg,flags, name, candidatesName)
-
-    efmuInsideOutRecoSequence += ViewVerifyInsideOut
-
+    acc.merge(VDVMuInsideOutCfg(flags, name, candidatesName))
 
   #Inside-out reconstruction
 
   cbMuonName = muNames.EFCBInOutName
   if 'Late' in name:
     cbMuonName = cbMuonName+"_Late"
-    theInsideOutRecoAlg = algorithmCAToGlobalWrapper(MuGirlStauAlgCfg, flags, name="TrigMuonLateInsideOutRecoAlg_"+name,InDetCandidateLocation="InDetCandidates_"+name)
-    insideoutcreatoralg = algorithmCAToGlobalWrapper(StauCreatorAlgCfg, flags, name="TrigLateMuonCreatorAlg_"+name, TagMaps=["stauTagMap"],InDetCandidateLocation="InDetCandidates_"+name,
-                                         MuonContainerLocation = cbMuonName, MonTool = MuonCreatorAlgMonitoring(flags, "LateMuonCreatorAlg_"+name))
+    acc.merge(MuGirlStauAlgCfg(flags, name="TrigMuonLateInsideOutRecoAlg_"+name,InDetCandidateLocation="InDetCandidates_"+name))
+    acc.merge(StauCreatorAlgCfg(flags, name="TrigLateMuonCreatorAlg_"+name, TagMaps=["stauTagMap"],InDetCandidateLocation="InDetCandidates_"+name,
+                                         MuonContainerLocation = cbMuonName, MonTool = MuonCreatorAlgMonitoring(flags, "LateMuonCreatorAlg_"+name)))
   else:
-    inDetExtensionAlg = algorithmCAToGlobalWrapper(MuonInDetToMuonSystemExtensionAlgCfg, flags, name="TrigInDetMuonExtensionAlg_"+name, InputInDetCandidates="InDetCandidates_"+name,
-                                                          WriteInDetCandidates="InDetCandidatesSystemExtended_"+name)
-    theInsideOutRecoAlg = algorithmCAToGlobalWrapper(MuonInsideOutRecoAlgCfg, flags, name="TrigMuonInsideOutRecoAlg_"+name,InDetCandidateLocation="InDetCandidatesSystemExtended_"+name)
+    acc.merge(MuonInDetToMuonSystemExtensionAlgCfg(flags, name="TrigInDetMuonExtensionAlg_"+name, InputInDetCandidates="InDetCandidates_"+name,
+                                                          WriteInDetCandidates="InDetCandidatesSystemExtended_"+name))
+    acc.merge(MuonInsideOutRecoAlgCfg(flags, name="TrigMuonInsideOutRecoAlg_"+name,InDetCandidateLocation="InDetCandidatesSystemExtended_"+name))
 
-    insideoutcreatoralg = algorithmCAToGlobalWrapper(MuonCreatorAlgCfg, flags, name="TrigMuonCreatorAlgInsideOut_"+name,  MuonCandidateLocation={candidatesName}, TagMaps=["muGirlTagMap"],InDetCandidateLocation="InDetCandidates_"+name,
+    acc.merge(MuonCreatorAlgCfg(flags, name="TrigMuonCreatorAlgInsideOut_"+name,  MuonCandidateLocation={candidatesName}, TagMaps=["muGirlTagMap"],InDetCandidateLocation="InDetCandidates_"+name,
                                          MuonContainerLocation = cbMuonName, ExtrapolatedLocation = "InsideOutCBExtrapolatedMuons",
-                                         MSOnlyExtrapolatedLocation = "InsideOutCBMSOnlyExtrapolatedMuons", CombinedLocation = "InsideOutCBCombinedMuon", MonTool = MuonCreatorAlgMonitoring(flags, "MuonCreatorAlgInsideOut_"+name))
+                                         MSOnlyExtrapolatedLocation = "InsideOutCBMSOnlyExtrapolatedMuons", CombinedLocation = "InsideOutCBCombinedMuon", MonTool = MuonCreatorAlgMonitoring(flags, "MuonCreatorAlgInsideOut_"+name)))
 
-    efmuInsideOutRecoSequence+=inDetExtensionAlg
 
-  efmuInsideOutRecoSequence+=theInsideOutRecoAlg
-  efmuInsideOutRecoSequence+=insideoutcreatoralg
 
-  sequenceOut = cbMuonName
-
-  return efmuInsideOutRecoSequence, sequenceOut
+  return acc
 
 
 
