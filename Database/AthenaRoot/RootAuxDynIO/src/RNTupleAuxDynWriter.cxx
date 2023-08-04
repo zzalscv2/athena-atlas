@@ -148,7 +148,7 @@ namespace RootAuxDynIO
 
    int RNTupleAuxDynWriter::commit()
    {
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 27, 0 )
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 29, 0 )
       // write only if there was data added, ignore empty commits
       if( !needsCommit() ) {
          ATH_MSG_DEBUG("Empty Commit");
@@ -161,19 +161,19 @@ namespace RootAuxDynIO
       for( auto& attr: m_attrDataMap ) {
          ATH_MSG_VERBOSE("Setting data ptr for field: " << attr.first << "  data=" << std::hex << attr.second << std::dec );
          if( !attr.second ) {
-            ATH_MSG_DEBUG("Generating default object for field: " << attr.first );
-            RFieldValue& val = m_generatedValues[attr.first];
-            if( !val.GetRawPtr() ) {
-               // create a default object, remember it for potential later reuse
-               val = m_entry->GetValue(attr.first).GetField()->GenerateValue();
+            if( m_generatedValues.find(attr.first) == m_generatedValues.end() ) {
+               ATH_MSG_DEBUG("Generating default object for field: " << attr.first );
+               for( auto val_i = m_entry->begin(); val_i != m_entry->end(); ++val_i ) {
+                  if( val_i->GetField()->GetName() == attr.first ) {
+                     m_generatedValues.insert( std::make_pair(attr.first, val_i->GetField()->GenerateValue()) );
+                     break;
+                  }
+               }
             }
-            m_entry->CaptureValueUnsafe( attr.first, val.GetRawPtr() );
-         } else {
-            // attach the attribute values rememberd internally
-            m_entry->CaptureValueUnsafe( attr.first, attr.second );
-            // set NULL so we don't try to delete it
-            attr.second = nullptr;
+            attr.second = m_generatedValues.find(attr.first)->second.GetRawPtr();
          }
+         // attach the attribute values rememberd internally
+         m_entry->CaptureValueUnsafe( attr.first, attr.second );
       }
       num_bytes += m_ntupleWriter->Fill( *m_entry );
       ATH_MSG_DEBUG("Filled RNTuple Row, bytes written: " << num_bytes);
@@ -191,11 +191,10 @@ namespace RootAuxDynIO
 
 
    void RNTupleAuxDynWriter::close() {
-      // delete the generated default fields
-      for( auto& nameval : m_generatedValues ) {
-         nameval.second.GetField()->DestroyValue(nameval.second);
-      }
+      // delete the generated default fields (RField should delete the default data objest)
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 29, 0 )
       m_generatedValues.clear();
+#endif
       m_ntupleWriter.reset(); m_entry.reset(); m_model.reset(); m_rowN=0;
    }
 
@@ -203,4 +202,6 @@ namespace RootAuxDynIO
    RNTupleAuxDynWriter::~RNTupleAuxDynWriter() {}
 
 }// namespace
+
+
 
