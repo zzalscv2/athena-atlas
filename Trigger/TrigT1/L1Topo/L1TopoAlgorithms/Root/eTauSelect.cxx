@@ -59,11 +59,14 @@ TCS::eTauSelect::sort(const InputTOBArray & input, TOBArray & output) {
 
    // keep only max number of clusters
    int par = m_numberOfeTaus ;
-   unsigned int maxNumberOfeTaus = (unsigned int)(par<0?0:par);
+   unsigned int maxNumberOfeTaus = std::clamp(par, 0, std::abs(par));
    if(maxNumberOfeTaus>0) {
-      while( output.size()> maxNumberOfeTaus ) {
+
+     if (output.size()> maxNumberOfeTaus) {setOverflow(true);}
+
+     while( output.size()> maxNumberOfeTaus ) {
          output.pop_back();
-      }
+     }
    }
    return TCS::StatusCode::SUCCESS;
 }

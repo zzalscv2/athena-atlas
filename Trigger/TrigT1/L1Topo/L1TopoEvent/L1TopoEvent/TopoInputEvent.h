@@ -86,6 +86,7 @@ namespace TCS {
       bool overflowFromjEmInput   () const { return m_overflowFromjEmInput   ; }
       bool overflowFromeTauInput   () const { return m_overflowFromeTauInput   ; }
       bool overflowFromjTauInput   () const { return m_overflowFromjTauInput   ; }
+      bool overflowFromcTauInput   () const { return m_overflowFromcTauInput   ; }
       bool overflowFromjLJetInput   () const { return m_overflowFromjLJetInput   ; }
       bool overflowFromgLJetInput   () const { return m_overflowFromgLJetInput   ; }
       bool overflowFromjJetInput   () const { return m_overflowFromjJetInput   ; }
@@ -105,6 +106,8 @@ namespace TCS {
       bool overflowFromgMHTInput   () const { return m_overflowFromgMHTInput   ; }
       bool overflowFromgTEInput   () const { return m_overflowFromgTEInput   ; }
       bool overflowFromMuonInput  () const { return m_overflowFromMuonInput  ; }
+      bool overflowFromLateMuonInput  () const { return m_overflowFromLateMuonInput  ; }
+      bool overflowFromMuonNextBCInput  () const { return m_overflowFromMuonNextBCInput  ; }
       /** @} */ // end of groupOverflowGetters
       StatusCode addCluster(const ClusterTOB & cluster);
       StatusCode addeEm(const eEmTOB & eEm);
@@ -142,31 +145,34 @@ namespace TCS {
        *  The bits are being propagated from the input providers.
        *  @{
        */
-      void setOverflowFromEmtauInput (const bool &v);
-      void setOverflowFromJetInput   (const bool &v);
-      void setOverflowFromeEmInput   (const bool &v);
-      void setOverflowFromjEmInput   (const bool &v);
-      void setOverflowFromeTauInput   (const bool &v);
-      void setOverflowFromjTauInput   (const bool &v);
-      void setOverflowFromjLJetInput   (const bool &v);
-      void setOverflowFromgLJetInput   (const bool &v);
-      void setOverflowFromjJetInput   (const bool &v);
-      void setOverflowFromgJetInput   (const bool &v);
-      void setOverflowFromEnergyInput(const bool &v);
-      void setOverflowFromjXEInput(const bool &v);
-      void setOverflowFromjXECInput(const bool &v);
-      void setOverflowFromjXEPERFInput(const bool &v);
-      void setOverflowFromjTEInput(const bool &v);
-      void setOverflowFromjTECInput(const bool &v);
-      void setOverflowFromjTEFWDInput(const bool &v);
-      void setOverflowFromjTEFWDAInput(const bool &v);
-      void setOverflowFromjTEFWDCInput(const bool &v);
-      void setOverflowFromgXEJWOJInput(const bool &v);
-      void setOverflowFromgXENCInput(const bool &v);
-      void setOverflowFromgXERHOInput(const bool &v);
-      void setOverflowFromgMHTInput(const bool &v);
-      void setOverflowFromgTEInput(const bool &v);
-      void setOverflowFromMuonInput  (const bool &v);
+      void setOverflowFromEmtauInput (bool v);
+      void setOverflowFromJetInput   (bool v);
+      void setOverflowFromeEmInput   (bool v);
+      void setOverflowFromjEmInput   (bool v);
+      void setOverflowFromeTauInput   (bool v);
+      void setOverflowFromjTauInput   (bool v);
+      void setOverflowFromcTauInput   (bool v);
+      void setOverflowFromjLJetInput   (bool v);
+      void setOverflowFromgLJetInput   (bool v);
+      void setOverflowFromjJetInput   (bool v);
+      void setOverflowFromgJetInput   (bool v);
+      void setOverflowFromEnergyInput(bool v);
+      void setOverflowFromjXEInput(bool v);
+      void setOverflowFromjXECInput(bool v);
+      void setOverflowFromjXEPERFInput(bool v);
+      void setOverflowFromjTEInput(bool v);
+      void setOverflowFromjTECInput(bool v);
+      void setOverflowFromjTEFWDInput(bool v);
+      void setOverflowFromjTEFWDAInput(bool v);
+      void setOverflowFromjTEFWDCInput(bool v);
+      void setOverflowFromgXEJWOJInput(bool v);
+      void setOverflowFromgXENCInput(bool v);
+      void setOverflowFromgXERHOInput(bool v);
+      void setOverflowFromgMHTInput(bool v);
+      void setOverflowFromgTEInput(bool v);
+      void setOverflowFromMuonInput  (bool v);
+      void setOverflowFromLateMuonInput  (bool v);
+      void setOverflowFromMuonNextBCInput  (bool v);
       /** @} */ // end of groupOverflowSetters
       // access all inputs by type
       const InputTOBArray * inputTOBs(TCS::inputTOBType_t) const;
@@ -232,6 +238,7 @@ namespace TCS {
       bool m_overflowFromjEmInput { false };
       bool m_overflowFromeTauInput { false };
       bool m_overflowFromjTauInput { false };
+      bool m_overflowFromcTauInput { false };
       bool m_overflowFromjLJetInput { false };
       bool m_overflowFromgLJetInput { false };
       bool m_overflowFromjJetInput { false };
@@ -251,6 +258,8 @@ namespace TCS {
       bool m_overflowFromgMHTInput { false };
       bool m_overflowFromgTEInput { false };
       bool m_overflowFromMuonInput { false };
+      bool m_overflowFromLateMuonInput { false };
+      bool m_overflowFromMuonNextBCInput { false };
       std::string m_inputDumpFile { "" };
 
    };
