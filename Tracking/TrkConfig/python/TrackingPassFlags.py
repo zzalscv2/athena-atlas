@@ -465,6 +465,7 @@ def createITkFTFPassFlags():
     
     icf.addFlag("doHitDV"            , False)
     icf.addFlag("doDisappearingTrk"  , False)
+    icf.seedFilterLevel       = 0
     icf.minPT                 = [0.9 * Units.GeV, 0.4 * Units.GeV, 0.4 * Units.GeV]
     icf.minPTSeed             = 0.9 * Units.GeV
 
