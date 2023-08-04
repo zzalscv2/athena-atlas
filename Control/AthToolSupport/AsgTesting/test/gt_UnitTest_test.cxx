@@ -23,8 +23,6 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <xAODRootAccess/Init.h>
 #endif
 
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-
 //
 // method implementations
 //
