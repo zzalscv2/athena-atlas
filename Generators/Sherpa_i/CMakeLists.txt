@@ -1,12 +1,10 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( Sherpa_i )
 
 # External dependencies:
 find_package( CLHEP )
-# Uncomment  only for the layers with Sherpa3
-find_package( libzip )
 find_package( OpenLoops )
 find_package( Sherpa COMPONENTS SherpaMain SherpaInitialization SherpaSingleEvents SherpaSoftPhysics SherpaPerturbativePhysics LundTools SherpaTools
 ShrimpsMain ShrimpsEvents ShrimpsLadders ShrimpsBeamRemnants ShrimpsXsecs ShrimpsEikonals ShrimpsTools
@@ -29,6 +27,7 @@ METoolsExplicit METoolsCurrents METoolsVertices METoolsColors METoolsSpinCorrela
 PDF
 BeamMain BeamSpectra
 ToolsPhys ToolsMath ToolsYaml ToolsOrg)
+
 if (HEPMC3_USE)
 find_package( hepmc3 )
 else()
@@ -42,6 +41,7 @@ atlas_disable_as_needed()
 # Add extra flag for Sherpa version 3.x
 set( _SHERPA3_FLAG )
 if( "${SHERPA_LCGVERSION}" VERSION_GREATER_EQUAL "3.0" )
+   find_package( libzip )
    list( APPEND _SHERPA3_FLAG -DIS_SHERPA_3=1 )
 endif()
 
