@@ -645,7 +645,7 @@ CalibrationDataEigenVariations::initialize(double min_variance)
   // retrieve the central calibration
   TH1* result = dynamic_cast<TH1*>(m_cnt->GetValue("result"));
   if (not result){
-    std::cerr<<"CalibrationDataEigenVariations::initialize: dyanmic cast failed\n";
+    std::cerr<<"CalibrationDataEigenVariations::initialize: dynamic cast failed\n";
     return;
   }
   // First step: construct the original covariance matrix
@@ -1838,7 +1838,8 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
       Analysis::CalibrationDataHistogramContainer* c = m_histcontainers[flavour];
       TH1* result = dynamic_cast<TH1*>(c->GetValue("result"));
       if (not result){
-        std::cerr<<"CalibrationDataGlobalEigenVariations::initialize: dyanmic cast failed\n";
+        std::cerr<<"CalibrationDataGlobalEigenVariations::initialize: dynamic cast failed\n";
+        continue;
       }
       TH1* resultVariedUp   = (TH1*)result->Clone(eigenvarup);   resultVariedUp->SetDirectory(0); // copy flavour result, want to set bin contents according to the combined eigenvartion flavour block
       TH1* resultVariedDown = (TH1*)result->Clone(eigenvardown); resultVariedDown->SetDirectory(0);
