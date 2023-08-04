@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -19,8 +19,6 @@
 #include <cmath>
 #include <gtest/gtest.h>
 #include <string>
-
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 #if __clang__
 // Work around warnings from gtest code.   See
@@ -88,7 +86,6 @@ namespace asg
     AnaToolHandle<IUnitTestTool1> tool ("asg::UnitTestTool1/" + makeUniqueName());
     ASSERT_FALSE (tool.isUserConfigured());
     ASSERT_TRUE (tool.isConfigurable());
-    ASSERT_SUCCESS (tool.make());
     ASSERT_FALSE (tool.isUserConfigured());
     ASSERT_TRUE (tool.isConfigurable());
     ASSERT_SUCCESS (tool.initialize());
@@ -232,7 +229,6 @@ namespace asg
     AnaToolHandle<IUnitTestTool2> tool ("asg::UnitTestTool2/" + makeUniqueName());
     ASSERT_FALSE (tool.isUserConfigured());
     ASSERT_TRUE (tool.isConfigurable());
-    ASSERT_SUCCESS (tool.make());
     ASSERT_SUCCESS (tool.setProperty ("regPublicHandle", ""));
     ASSERT_SUCCESS (tool.setProperty ("regPrivateHandle", ""));
     ASSERT_SUCCESS (tool.initialize());
@@ -246,7 +242,6 @@ namespace asg
   {
     AnaToolHandle<IUnitTestTool1> tool ("asg::UnitTestTool1/" + makeUniqueName());
     ASSERT_FALSE (tool.isInitialized());
-    ASSERT_SUCCESS (tool.make());
     ASSERT_FALSE (tool.isInitialized());
     ASSERT_SUCCESS (tool.initialize());
     ASSERT_TRUE (tool.isInitialized());
@@ -259,7 +254,6 @@ namespace asg
   // check make()
   TEST_F (AnaToolHandleMakeTest, makeBasic)
   {
-    ASSERT_SUCCESS (tool.make());
     ASSERT_FALSE (tool.isInitialized());
     ASSERT_SUCCESS (tool.initialize());
     ASSERT_EQ ("asg::UnitTestTool1", tool.type());
@@ -278,7 +272,6 @@ namespace asg
   TEST (AnaToolHandleTest, makeBasic_undefinedType)
   {
     AnaToolHandle<IUnitTestTool1> tool ("UNKNOWN_TOOL_TYPE/" + makeUniqueName());
-    ASSERT_SUCCESS (tool.make ());
     ASSERT_FAILURE (tool.initialize ());
   }
 
@@ -290,7 +283,7 @@ namespace asg
     // making separate ToolHandle with different type
     AnaToolHandle<IUnitTestTool1> tool ("UNKNOWN_TOOL_TYPE/" + makeUniqueName());
     ASSERT_EQ ("UNKNOWN_TOOL_TYPE", tool.type());
-    ASSERT_SUCCESS (tool.make ("asg::UnitTestTool1"));
+    tool.setType ("asg::UnitTestTool1");
     ASSERT_EQ ("asg::UnitTestTool1", tool.type());
     ASSERT_FALSE (tool.isInitialized());
     ASSERT_SUCCESS (tool.initialize());
@@ -305,7 +298,7 @@ namespace asg
     ASSERT_EQ ("UNKNOWN_TOOL_TYPE", tool.type());
     ASSERT_EQ ("UNKNOWN_TOOL_NAME", tool.name());
     std::string name = makeUniqueName();
-    ASSERT_SUCCESS (tool.make ("asg::UnitTestTool1/" + name));
+    tool.setTypeAndName ("asg::UnitTestTool1/" + name);
     ASSERT_EQ ("asg::UnitTestTool1", tool.type());
     ASSERT_MATCH_REGEX ("^(ToolSvc.)?" + name + "$", tool.name());
     ASSERT_FALSE (tool.isInitialized());
@@ -317,7 +310,7 @@ namespace asg
   // passing an unknown typename as argument into make()
   TEST_F (AnaToolHandleMakeTest, makeTyped_unknownType)
   {
-    ASSERT_SUCCESS (tool.make ("UNDEFINED_TYPE_NAME"));
+    tool.setType ("UNDEFINED_TYPE_NAME");
     ASSERT_FAILURE (tool.initialize ());
   }
 
@@ -325,7 +318,7 @@ namespace asg
   // check make(type)
   TEST_F (AnaToolHandleUseTest, makeTyped)
   {
-    ASSERT_DEATH (tool.make ("asg::UnitTestTool1").ignore(), "");
+    ASSERT_DEATH (tool.setType ("asg::UnitTestTool1"), "");
   }
 #endif
 
@@ -375,7 +368,6 @@ namespace asg
   TEST (AnaToolHandleTest, changeType)
   {
     AnaToolHandle<IUnitTestTool1> tool ("asg::UnitTestTool1A/" + makeUniqueName());
-    ASSERT_SUCCESS (tool.make());
     ASSERT_SUCCESS (tool.initialize());
     ASSERT_EQ (-7, tool->getPropertyInt());
   }
@@ -700,7 +692,7 @@ namespace asg
   {
     PublicAnaSubTool ()
     {
-      ANA_CHECK_THROW (handle.make ("asg::UnitTestTool1/" + makeUniqueName()));
+      handle.setTypeAndName ("asg::UnitTestTool1/" + makeUniqueName());
       ANA_CHECK_THROW (handle.initialize ());
     }
 
@@ -797,7 +789,7 @@ namespace asg
   {
     PointerRegSubTool ()
     {
-      ANA_CHECK_THROW (tool.make ("asg::UnitTestTool1/" + makeUniqueName()));
+      tool.setTypeAndName ("asg::UnitTestTool1/" + makeUniqueName());
       ANA_CHECK_THROW (tool.initialize ());
       handle = tool.get ();
     }
