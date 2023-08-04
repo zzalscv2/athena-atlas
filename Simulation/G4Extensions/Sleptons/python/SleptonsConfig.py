@@ -948,7 +948,7 @@ def GMSB_Cfg(flags):
         physicsOptions = []
         if GMSBIndex == 1: # generic neutralino to photon scenario
             physicsOptions = [ result.popToolsAndMerge(GauginosPhysicsToolCfg(flags)) ]
-            physicsOptions = [ result.popToolsAndMerge(NeutralinoToPhotonGravitinoCfg(flags)) ]
+            physicsOptions += [ result.popToolsAndMerge(NeutralinoToPhotonGravitinoCfg(flags)) ]
         elif GMSBIndex == 2 or GMSBIndex == 3 or GMSBIndex == 4: # generic stau scenario
             physicsOptions = [ result.popToolsAndMerge(SleptonsPhysicsToolCfg(flags)) ]
         else:

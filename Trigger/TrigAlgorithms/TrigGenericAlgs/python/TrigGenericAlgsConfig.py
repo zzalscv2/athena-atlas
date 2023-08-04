@@ -21,14 +21,17 @@ def EndOfEventROIConfirmerAlgCfg(name):
 def EndOfEventFilterAlgCfg(name, chainName):
     return CompFactory.EndOfEventFilterAlg(name, ChainName=chainName)
 
-def TrigEventInfoRecorderAlgCfg(flags,name,decorateTLA,trigEventInfoKey,primaryVertexInputName, RhoKey_PFlow = 'HLT_Kt4EMPFlowEventShape', RhoKey_EMTopo = 'HLT_Kt4EMTopoEventShape'):
+def TrigEventInfoRecorderAlgCfg(flags, name, trigEventInfoKey, decoratePFlowInfo, decorateEMTopoInfo, renounceAll=False, primaryVertexInputName="HLT_IDVertex_FS", RhoKey_PFlow = 'HLT_Kt4EMPFlowEventShape', RhoKey_EMTopo = 'HLT_Kt4EMTopoEventShape'):
     acc = ComponentAccumulator()
-    alg = CompFactory.TrigEventInfoRecorderAlg(name)
-    alg.decorateTLA = decorateTLA
-    alg.trigEventInfoKey = trigEventInfoKey
-    alg.primaryVertexInputName = primaryVertexInputName
-    alg.RhoKey_PFlow = RhoKey_PFlow
-    alg.RhoKey_EMTopo = RhoKey_EMTopo
+    alg = CompFactory.TrigEventInfoRecorderAlg(name,
+          trigEventInfoKey = trigEventInfoKey,
+          decoratePFlowInfo = decoratePFlowInfo,
+          decorateEMTopoInfo = decorateEMTopoInfo,
+          renounceAll = renounceAll,
+          primaryVertexInputName = primaryVertexInputName,
+          RhoKey_PFlow = RhoKey_PFlow,
+          RhoKey_EMTopo = RhoKey_EMTopo,
+          )
     acc.addEventAlgo(alg, primary=True)
     return acc
 

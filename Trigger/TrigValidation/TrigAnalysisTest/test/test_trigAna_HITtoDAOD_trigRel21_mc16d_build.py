@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
-# art-description: Test running HITS->RDO in master, then RDO->RDO_TRIG in 21.0-mc16d, then RDO_TRIG->AOD in master, then AOD->DAOD with multiprocess in master
+# art-description: Test running HITS->RDO in main/23.0, then RDO->RDO_TRIG in 21.0-mc16d, then RDO_TRIG->AOD in main/23.0, then AOD->DAOD with multiprocess in main
 # art-type: build
 # art-include: main/Athena
 # art-include: 23.0/Athena
@@ -11,7 +11,7 @@
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps, Input, Step
 from TrigAnalysisTest.TrigAnalysisSteps import add_analysis_steps
 
-# HITS -> RDO step in master
+# HITS -> RDO step in main/23.0
 hit2rdo = ExecStep.ExecStep('HITtoRDO')
 hit2rdo.type = 'Reco_tf'
 hit2rdo.input = 'ttbar_HITS'
@@ -49,6 +49,7 @@ hit2rdo.args += ' --pileupFinalBunch="6"'
 hit2rdo.args += ' --jobNumber="1"'
 hit2rdo.args += ' --preExec "HITtoRDO:{:s}"'.format(hit2rdo_preexec)
 hit2rdo.args += ' --preInclude "HITtoRDO:{:s}"'.format(hit2rdo_preinclude)
+hit2rdo.args += ' --conditionsTag="HITtoRDO:OFLCOND-MC16-SDR-RUN2-11"'
 
 # RDO -> RDO_TRIG step in 21.0
 rdo2rdotrig = ExecStep.ExecStep('RDOtoRDOTrigger')
@@ -60,6 +61,7 @@ rdo2rdotrig.args = '--inputRDOFile=RDO.pool.root --outputRDO_TRIGFile=RDO_TRIG.p
 rdo2rdotrig.args += ' --asetup="RDOtoRDOTrigger:Athena,21.0-mc16d,latest"'
 rdo2rdotrig.args += ' --triggerConfig="MCRECO:MC_pp_v7_tight_mc_prescale"'
 rdo2rdotrig.args += ' --imf="all:True"'
+rdo2rdotrig.args += ' --conditionsTag="RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02"'
 
 # Clear AthFile cache from r21 because it is incompatible with py3 r22 (ATR-21489)
 rm_cache = ExecStep.ExecStep('ClearAthFileCache')
@@ -70,17 +72,18 @@ rm_cache.args = '-f athfile-cache.ascii.gz'
 rm_cache.auto_report_result = False  # Do not set art-result for this step
 rm_cache.output_stream = Step.Step.OutputStream.STDOUT_ONLY  # Do not create a log file for this step
 
-# RDO_TRIG -> AOD step in master
+# RDO_TRIG -> AOD step in main/23.0
 rdotrig2aod = ExecStep.ExecStep('RDOTriggertoAOD')
 rdotrig2aod.type = 'Reco_tf'
 rdotrig2aod.input = ''
 rdotrig2aod.explicit_input = True
-rdotrig2aod.args = '--inputRDO_TRIGFile=RDO_TRIG.pool.root --outputAODFile=AOD.pool.root --steering "doRDO_TRIG" "doTRIGtoALL"'
-rdotrig2aod.args += ' --preExec="all:from AthenaConfiguration.AllConfigFlags import ConfigFlags; ConfigFlags.Trigger.AODEDMSet=\'AODFULL\'"'
-rdotrig2aod.args += ' --conditionsTag="all:OFLCOND-MC16-SDR-RUN2-09"'
-rdotrig2aod.args += ' --postExec="from OutputStreamAthenaPool.MultipleStreamManager import MSMgr; aod=MSMgr.GetStream(\\\"StreamAOD\\\"); aod.AddItem(\\\"xAOD::TrigCompositeContainer#HLTNav_R2ToR3Summary\\\"); aod.AddItem(\\\"xAOD::TrigCompositeAuxContainer#HLTNav_R2ToR3SummaryAux.\\\"); "'
+rdotrig2aod.args = '--inputRDO_TRIGFile=RDO_TRIG.pool.root --outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
+rdotrig2aod.args += ' --preExec="all:flags.Trigger.AODEDMSet=\'AODFULL\'"'
+rdotrig2aod.args += ' --conditionsTag="all:OFLCOND-MC16-SDR-RUN2-11"'
+rdotrig2aod.args += ' --postExec="all:from OutputStreamAthenaPool.OutputStreamConfig import addToAOD; extraContent=[\'xAOD::TrigCompositeContainer#HLTNav_R2ToR3Summary\',\'xAOD::TrigCompositeAuxContainer#HLTNav_R2ToR3SummaryAux.\']; cfg.merge(addToAOD(flags, extraContent));"'
+rdotrig2aod.args += ' --CA "all:True"'
 
-# AOD -> DAOD
+# AOD -> DAOD step in main
 aod2daod = ExecStep.ExecStep('AODtoDAOD')
 aod2daod.type = 'Derivation_tf'
 aod2daod.input = ''
@@ -88,7 +91,7 @@ aod2daod.forks = 4
 aod2daod.explicit_input = True
 aod2daod.args = '--inputAODFile=AOD.pool.root --outputDAODFile=DAOD.pool.root --CA --formats=PHYS'
 aod2daod.args += ' --sharedWriter=True --athenaMPMergeTargetSize "DAOD_*:0"'
-aod2daod.args += ' --asetup="all:Athena,master,latest"'
+aod2daod.args += ' --asetup="all:Athena,main,latest"'
 
 # Define the test with the above steps
 test = Test.Test()

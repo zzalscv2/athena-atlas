@@ -15,22 +15,24 @@ namespace Muon
     class MMTrigPacket
     {
     public:
-
-      MMTrigPacket (uint32_t payload);
+      
+      MMTrigPacket (std::vector<uint32_t>& payload);
       virtual ~MMTrigPacket () = default;
+      uint32_t trig_padding () const {return m_trig_padding;};
       uint32_t trig_BCID () const {return m_trig_BCID;};
       uint32_t trig_reserved () const {return m_trig_reserved;};
       uint32_t trig_dTheta () const {return m_trig_dTheta;};
       uint32_t trig_phiBin () const {return m_trig_phiBin;};
       uint32_t trig_rBin () const {return m_trig_rBin;};
-
+      
     private:
+      uint32_t m_trig_padding;
       uint32_t m_trig_BCID;
       uint32_t m_trig_reserved;
       uint32_t m_trig_dTheta;
       uint32_t m_trig_phiBin;
       uint32_t m_trig_rBin;
-
+      
     };
   }
 }

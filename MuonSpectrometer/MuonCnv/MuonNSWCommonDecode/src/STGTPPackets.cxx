@@ -19,7 +19,7 @@ Muon::nsw::STGTPPadPacket::STGTPPadPacket(const std::vector<uint32_t>& payload) 
   static constexpr auto PACKETS_SIZE = std::size_t{3};
   if (std::size(payload) != PACKETS_SIZE) {
     throw std::runtime_error(
-        Muon::format("Packet vector has size {} instead of expected size {}", std::size(payload), PACKETS_SIZE));
+			     Muon::nsw::format("Packet vector has size {} instead of expected size {}", std::size(payload), PACKETS_SIZE));
   }
 
   const auto packets = CxxUtils::span{payload.data(), std::size(payload)};
@@ -49,7 +49,7 @@ Muon::nsw::STGTPSegmentPacket::STGTPSegmentPacket(const std::vector<uint32_t>& p
   static constexpr auto PACKETS_SIZE = std::size_t{8};
   if (std::size(payload) != PACKETS_SIZE) {
     throw std::runtime_error(
-        Muon::format("Packet vector has size {} instead of expected size {}", std::size(payload), PACKETS_SIZE));
+			     Muon::nsw::format("Packet vector has size {} instead of expected size {}", std::size(payload), PACKETS_SIZE));
   }
   auto readPointer = std::size_t{0};
   const auto packets = CxxUtils::span{payload.data(), std::size(payload)};
@@ -80,7 +80,7 @@ const Muon::nsw::STGTPSegmentPacket::SegmentData& Muon::nsw::STGTPSegmentPacket:
     const std::size_t segment) const {
   if (segment >= STGTPSegments::num_segments) {
     throw std::out_of_range(
-        Muon::format("Requested segment {} which does not exist (max {})", segment, STGTPSegments::num_segments - 1));
+			    Muon::nsw::format("Requested segment {} which does not exist (max {})", segment, STGTPSegments::num_segments - 1));
   }
   return m_segmentData.at(segment);
 }

@@ -304,6 +304,7 @@ def DESDMCPOutputCfg(flags, **kwargs):
     else: container_items +=["Muon::MMPrepDataContainer#*",
                             "Muon::sTgcPrepDataContainer#*",
                             "xAOD::NSWTPRDOContainer#*","xAOD::NSWTPRDOAuxContainer#*",
+                            "xAOD::NSWMMTPRDOContainer#*","xAOD::NSWMMTPRDOAuxContainer#*",
                             "Muon::NSW_PadTriggerDataContainer#*", 
                             "Muon::NSW_TrigRawDataContainer#L1_NSWTrigContainer" ,
                             ]
