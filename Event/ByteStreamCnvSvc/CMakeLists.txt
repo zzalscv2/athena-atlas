@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ByteStreamCnvSvc )
@@ -63,7 +63,7 @@ atlas_add_test( AtlCopyBSEvent3
 
 atlas_add_test( AtlFindBSEvent4
    SCRIPT "AtlFindBSEvent -e 187403142 test_defl.data"
-   LOG_IGNORE_PATTERN "+Timestamp"
+   LOG_IGNORE_PATTERN "^Timestamp"
    DEPENDS AtlCopyBSEvent3 )
 
 atlas_add_test( AtlCopyBSEvent5
