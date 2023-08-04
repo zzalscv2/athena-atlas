@@ -62,10 +62,10 @@ class AthenaHitsVector {
 #else
   // methods not provided to rootcint
   AthenaHitsVector(const std::string& collectionName = "DefaultCollectionName",
-                   AthHitVec::OwnershipPolicy ownPolicy = AthHitVec::OWN_ELEMENTS) {
-
-    m_name = collectionName;
-    m_ownPolicy = ownPolicy;
+                   AthHitVec::OwnershipPolicy ownPolicy = AthHitVec::OWN_ELEMENTS)
+    : m_name (collectionName),
+      m_ownPolicy (ownPolicy)
+  {
     IMessageSvc* msgSvc(Athena::getMessageSvc());
     MsgStream log(msgSvc, "AthenaHitsVector");
     log << MSG::DEBUG << " initialized " << collectionName
@@ -109,6 +109,7 @@ class AthenaHitsVector {
 
   /// assignment deletes old elements and copies the new ones
   /// deep copy if AthHitVec::OWN_ELEMENTS shallow copy if VIEW_ELEMENTS
+  // cppcheck-suppress operatorEqVarError; m_ownPolicy deliberately not copied
   AthenaHitsVector<T>& operator=(const AthenaHitsVector<T>& rhs) {
     if (this != &rhs) {
       this->Clear();
