@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef _MUON_NSW_MMG_MAPPER_H_
 #define _MUON_NSW_MMG_MAPPER_H_
@@ -71,10 +71,10 @@ inline bool Muon::nsw::MapperMMG::elink_info(uint8_t mod_radius, uint16_t channe
   uint16_t vmm{0}, vmm_chan{0};
   uint8_t feb_radius{0};
   vmm_info(mod_radius, channel_number, feb_radius, vmm, vmm_chan);
-  if(feb_radius<12){ // febs 0-11 are only read out through 1 elink 
+  if(feb_radius <= 11){ // febs 0-11 are only read out through 1 elink 
     elink=0;
     return true;
-  } else if(feb_radius >11 || feb_radius<16){
+  } else if(feb_radius >= 12 && feb_radius <= 15){
     // for febs at radius 12 to 15 vmms 0-3 are connected to sroc 2 while vmms 3-7 are connected to sroc 3. This mapping is configurable in the ROC but not forssen to change before RUN4
     if (vmm < 4){
       elink = 2;
