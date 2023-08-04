@@ -74,6 +74,22 @@ ActsTrk::IndexType ActsTrk::MutableTrackBackendContainer::addTrack_impl() {
   return m_backend->size() - 1;
 }
 
+void ActsTrk::MutableTrackBackendContainer::removeTrack_impl (ActsTrk::IndexType itrack) {
+  if (itrack >= m_backend->size()) {
+    throw std::out_of_range ("removeTrack_impl");
+  }
+  m_backend->erase(m_backend->begin() + itrack);
+}
+
+void ActsTrk::MutableTrackBackendContainer::copyDynamicFrom_impl \
+  (ActsTrk::IndexType itrack,
+   const MutableTrackBackendContainer& other,
+   ActsTrk::IndexType other_itrack)
+{
+  m_backend->at(itrack) = other.m_backend->at(other_itrack);
+}
+
+
 std::any ActsTrk::MutableTrackBackendContainer::component_impl(
     Acts::HashedString key, ActsTrk::IndexType itrack) {
   std::any result = ::component_impl(*m_backend, key, itrack);

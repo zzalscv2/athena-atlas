@@ -48,12 +48,19 @@ class MutableTrackBackendContainer : public ConstTrackBackendContainer {
  public:
   MutableTrackBackendContainer(xAOD::TrackBackendContainer*);
   ActsTrk::IndexType addTrack_impl();
+  void removeTrack_impl(ActsTrk::IndexType itrack);
   template <typename T>
   constexpr void addColumn_impl(const std::string& key);
+  void copyDynamicFrom_impl (ActsTrk::IndexType itrack,
+                             const MutableTrackBackendContainer& other,
+                             ActsTrk::IndexType other_itrack);
 
+  using ConstTrackBackendContainer::component_impl;
   std::any component_impl(Acts::HashedString key,
                           ActsTrk::IndexType itrack);
+  using ConstTrackBackendContainer::parameters;
   ActsTrk::Parameters parameters(ActsTrk::IndexType itrack);
+  using ConstTrackBackendContainer::covariance;
   ActsTrk::Covariance covariance(ActsTrk::IndexType itrack);
   void ensureDynamicColumns_impl(const MutableTrackBackendContainer& other);
   void ensureDynamicColumns_impl(const ConstTrackBackendContainer& other);

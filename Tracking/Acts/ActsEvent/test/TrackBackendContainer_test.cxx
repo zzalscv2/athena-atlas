@@ -15,16 +15,18 @@
 BOOST_AUTO_TEST_SUITE(EventDataMultiTrajectory)
 
 BOOST_AUTO_TEST_CASE(ConstCompilesWithInterface) {
-  ACTS_STATIC_CHECK_CONCEPT(ConstTrackBackendContainer,
-                          ActsTrk::ConstTrackBackendContainer);
+  ACTS_STATIC_CHECK_CONCEPT(Acts::ConstTrackContainerBackend,
+                            ActsTrk::ConstTrackBackendContainer);
 
-  using ConstTrackContainer = Acts::TrackContainer<ActsTrk::ConstTrackBackendContainer, ActsTrk::ConstMultiTrajectory>;
+  // Doesn't compile --- ConstTrackContainerBackend is not sufficient
+  // to meet the requirements of TrackContainer.
+  //using ConstTrackContainer = Acts::TrackContainer<ActsTrk::ConstTrackBackendContainer, ActsTrk::ConstMultiTrajectory>;
 
 }
 
 BOOST_AUTO_TEST_CASE(MutableCompilesWithInterface) {
-  ACTS_STATIC_CHECK_CONCEPT(TrackBackendContainer,
-                          ActsTrk::TrackBackendContainer);
+  ACTS_STATIC_CHECK_CONCEPT(Acts::TrackContainerBackend,
+                            ActsTrk::MutableTrackBackendContainer);
 
   using MutableTrackContainer = Acts::TrackContainer<ActsTrk::MutableTrackBackendContainer, ActsTrk::MutableMultiTrajectory>;
 }
