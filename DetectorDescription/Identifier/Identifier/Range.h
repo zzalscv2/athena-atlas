@@ -353,7 +353,9 @@ public:
  
   typedef std::vector<Range> range_vector; 
   typedef ExpandedIdentifier::element_type element_type; 
-  typedef ExpandedIdentifier::size_type size_type; 
+  typedef ExpandedIdentifier::size_type size_type;
+
+  typedef range_vector::const_iterator const_iterator;
  
     /** 
    *    This factory is able to generate all possible identifiers, from a  
@@ -466,7 +468,9 @@ public:
  
   /// Accessors 
   const Range& operator [] (size_type index) const; 
-  size_type size () const; 
+  size_type size () const;
+  const_iterator begin () const;
+  const_iterator end () const;
  
   /** 
    *  Computes a possible cardinality from all ranges. 
