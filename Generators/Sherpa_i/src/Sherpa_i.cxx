@@ -406,7 +406,27 @@ void Atlas_RNG::SaveStatus() { p_engine->saveStatus(m_filename.c_str()); }
 void Atlas_RNG::RestoreStatus() { p_engine->restoreStatus(m_filename.c_str()); }
 
 // some getter magic to make this random number generator available to sherpa
+// DECLARE_GETTER doesn't compile with c++20 in Sherpa versions before 3.
+#ifdef IS_SHERPA_3
 DECLARE_GETTER(Atlas_RNG,"Atlas_RNG",External_RNG,RNG_Key);
+#else
+namespace ATOOLS {                                                    
+template <> class Getter<External_RNG,RNG_Key,Atlas_RNG,std::less<std::string>>:               
+    public Getter_Function<External_RNG,RNG_Key,std::less<std::string>> {                   
+private:                                                            
+  static Getter<External_RNG,RNG_Key,Atlas_RNG,std::less<std::string>> s_initializer;          
+protected:                                                          
+  void PrintInfo(std::ostream &str,const size_t width) const;       
+  Object_Type *operator()(const Parameter_Type &parameters) const;  
+public:                                                             
+  Getter(const bool &d=true):           
+    Getter_Function<External_RNG,RNG_Key,std::less<std::string>>("Atlas_RNG")
+  { SetDisplay(d); }                                              
+};                                                                  
+}
+ATOOLS::Getter<External_RNG,RNG_Key,Atlas_RNG>
+ATOOLS::Getter<External_RNG,RNG_Key,Atlas_RNG>::s_initializer(true);
+#endif
 
 External_RNG *ATOOLS::Getter<External_RNG,RNG_Key,Atlas_RNG>::operator()(const RNG_Key &) const
 { return new Atlas_RNG(p_rndEngine); }
