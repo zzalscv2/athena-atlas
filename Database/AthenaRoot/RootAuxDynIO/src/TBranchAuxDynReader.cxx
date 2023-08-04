@@ -272,7 +272,7 @@ TBranchAuxDynReader::getBranchInfo(const SG::auxid_t& auxid, const SG::AuxStoreI
       // if there is a TClass compare the whole storage types (usually vectors), because the Element type
       // returned by CollProxy loses the pointer component and element type comparison for vector<T*> fails
       brInfo.needsSE = brInfo.tclass ?
-         io_tinf != tcls_tinf && strcmp(io_tinf->name(), tcls_tinf->name()) != 0
+          io_tinf != tcls_tinf && (!tcls_tinf || strcmp(io_tinf->name(), tcls_tinf->name()) != 0)
          : ti && ti != reg_ti && strcmp(ti->name(), reg_ti->name()) != 0;
       if( brInfo.needsSE ) {
          // type in registry is different than type in the file.
