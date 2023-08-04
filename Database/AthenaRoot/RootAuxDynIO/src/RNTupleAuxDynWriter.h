@@ -20,7 +20,6 @@ namespace SG { class IAuxStoreIO; }
 namespace RootAuxDynIO
 {
    using RFieldBase    = ROOT::Experimental::Detail::RFieldBase;
-   using RFieldValue   = ROOT::Experimental::Detail::RFieldValue;
    using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
    using RNTupleModel  = ROOT::Experimental::RNTupleModel;
    using REntry        = ROOT::Experimental::REntry;
@@ -49,9 +48,10 @@ namespace RootAuxDynIO
       int                  m_clients = 0;
       bool                 m_needsCommit = false;
 
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 29, 0 )
       /// default-constructed objects to fill out blanks
-      std::map<std::string, RFieldValue> m_generatedValues;
-
+      std::map<std::string, RFieldBase::RValue> m_generatedValues;
+#endif
 
       RNTupleAuxDynWriter(TFile* file, const std::string& ntupleName, int compression);
 

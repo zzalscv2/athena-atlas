@@ -13,10 +13,10 @@
 
 #include <ROOT/RNTuple.hxx>
 #include <ROOT/REntry.hxx>
-#include <ROOT/RFieldValue.hxx>
-using RFieldValue   = ROOT::Experimental::Detail::RFieldValue;
+#include <ROOT/RField.hxx>
+using RFieldBase    = ROOT::Experimental::Detail::RFieldBase;
 using RNTupleReader = ROOT::Experimental::RNTupleReader;
-using REntry = ROOT::Experimental::REntry;
+using REntry        = ROOT::Experimental::REntry;
 
 using namespace RootAuxDynIO;
 
@@ -55,10 +55,14 @@ bool RNTupleAuxDynStore::readData(SG::auxid_t auxid)
 
       REntry *entry = m_ntupleReader->GetModel()->GetDefaultEntry();
       for( auto iValue = entry->begin(); iValue != entry->end(); ++iValue ) {
-         std::string field_name = iValue->GetField()->GetName();
-         if( field_name == fieldInfo.fieldName ) {
-            RFieldValue rfv = iValue->GetField()->CaptureValue( data );
+         if( iValue->GetField()->GetName() == fieldInfo.fieldName ) {
+#if ROOT_VERSION_CODE > ROOT_VERSION( 6, 29, 0 )
+            auto rfv = iValue->GetField()->BindValue(data);
+            rfv.Read(m_entry);
+#else
+            auto rfv = iValue->GetField()->CaptureValue( data );
             iValue->GetField()->Read(m_entry, &rfv);
+#endif
             break;
          }
       }

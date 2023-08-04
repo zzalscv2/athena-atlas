@@ -39,7 +39,6 @@
 using RNTupleModel = ROOT::Experimental::RNTupleModel;
 using RNTupleReader = ROOT::Experimental::RNTupleReader;
 using REntry = ROOT::Experimental::REntry;
-using RFieldValue = ROOT::Experimental::Detail::RFieldValue;
 
 using std::string;
 
@@ -369,9 +368,6 @@ RNTupleContainer::loadObject(void** obj_p, ShapeH, Token::OID_t& oid)
       int numBytes = 0;
       for( auto& dsc : m_fieldDescs ) {
          // read the object
-         REntry *entry = m_ntupleReader->GetModel()->GetDefaultEntry();
-         auto val = entry->GetValue( dsc.fieldname );
-         RFieldValue rfv;
          RootDataPtr p(*obj_p);
          switch( dsc.typeID() ) {
           case DbColumn::BLOB:
@@ -390,14 +386,29 @@ RNTupleContainer::loadObject(void** obj_p, ShapeH, Token::OID_t& oid)
              p.c_str += dsc.offset();
              break;             
          }
+         REntry *entry = m_ntupleReader->GetModel()->GetDefaultEntry();
          if( p.ptr ) {
             // there already is an object that needs to be read into
-            rfv = val.GetField()->CaptureValue( p.ptr );
-            val.GetField()->Read(evt_id, &rfv);
+            for( auto val_i = entry->begin(); val_i != entry->end(); ++val_i ) {
+               if( val_i->GetField()->GetName() == dsc.fieldname ) {
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 29, 0 )
+                  auto rfv = val_i->GetField()->BindValue( p.ptr );
+                  rfv.Read( evt_id );
+#endif
+                  break;
+               }
+            }
          } else {
+            /*
+              not sure we need that
+            auto val = entry->GetValue( dsc.fieldname );
             rfv = val.GetField()->GenerateValue();
             val.GetField()->Read(evt_id, &rfv);
             *obj_p = rfv.GetRawPtr();
+            */
+            DbPrint err(m_name);
+            err << DbPrintLvl::Fatal << "[RNTupleContainer] - ROOT object allocation requested" << DbPrint::endmsg;
+            return Error;
          }
 
          numBytes += 1;
