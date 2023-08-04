@@ -39,41 +39,36 @@ def jetHIClusterSequence(configFlags, ionopt, RoIs):
 def jetHIEventShapeSequence(configFlags, clustersKey, towerKey):
     #Import the map tool - it will have to harvest configuration along the path
     eventShapeMapToolKey="HLTHIEventShapeMapTool"
-    from HIEventUtils.HIEventUtilsConf import HIEventShapeMapTool
-    theMapTool=HIEventShapeMapTool(eventShapeMapToolKey)
+    theMapTool=CompFactory.HIEventShapeMapTool(eventShapeMapToolKey)
 
 
     #Make new event shape at tower level
-    from HIGlobal.HIGlobalConf import HIEventShapeMaker
     EventShapeKey='HLTHIEventShapeWeighted'
     
-    ESAlg_W=HIEventShapeMaker("ESAlg_W")
+    ESAlg_W=CompFactory.HIEventShapeMaker("ESAlg_W")
     ESAlg_W.OutputContainerKey=EventShapeKey
     ESAlg_W.InputTowerKey=clustersKey
     ESAlg_W.NaviTowerKey=towerKey
     
     #Hack needed because ES algorithm requires a summary tool, this disables it
-    from HIEventUtils.HIEventUtilsConf import HIEventShapeSummaryTool
-    SummaryTool=HIEventShapeSummaryTool("SummaryTool2")
+    SummaryTool=CompFactory.HIEventShapeSummaryTool("SummaryTool2")
     SummaryTool.SubCalos=['FCal','EMCal','HCal','ALL']
     ESAlg_W.SummaryTool=SummaryTool
     ESAlg_W.SummaryContainerKey=""
     
     #Add filler tool
-    from HIGlobal.HIGlobalConf import HIEventShapeFillerTool
-    ESFiller=HIEventShapeFillerTool("WeightedFiller")
+    ESFiller=CompFactory.HIEventShapeFillerTool("WeightedFiller")
     ESFiller.UseClusters=True
     
     #Add weight tool to filler tool
-    from HIEventUtils.HIEventUtilsConf import HITowerWeightTool
-    TWTool=HITowerWeightTool()
+    TWTool=CompFactory.HITowerWeightTool()
     TWTool.ApplyCorrection=True
     TWTool.ConfigDir='HIJetCorrection/'
     from HIJetRec.HIJetRecUtilsCA import getHIClusterGeoWeightFile
     TWTool.InputFile=getHIClusterGeoWeightFile(configFlags)
 
     from AthenaCommon.AppMgr import ToolSvc
-    ToolSvc += HITowerWeightTool()
+    ToolSvc += CompFactory.HITowerWeightTool()
     ESFiller.TowerWeightTool=TWTool
     ESFiller.EventShapeMapTool=theMapTool
     
@@ -296,8 +291,7 @@ def HLTAddIteration(configFlags, seed_container,shape_name,clustersKey, **kwargs
 
     if 'map_tool' in kwargs.keys() : map_tool=kwargs['map_tool']
     else :
-        from HIEventUtils.HIEventUtilsConf import HIEventShapeMapTool
-        map_tool=HIEventShapeMapTool()
+        map_tool=CompFactory.HIEventShapeMapTool()
 
     if 'sub_tool' in kwargs.keys() : sub_tool=kwargs['sub_tool']
     else :
@@ -311,8 +305,7 @@ def HLTAddIteration(configFlags, seed_container,shape_name,clustersKey, **kwargs
     if 'assoc_name' in kwargs.keys() : assoc_name=kwargs['assoc_name']
     else :
         log.info( "In HLTAddIteration function, HIJetDRAssociationTool is created with clustersKey= {}".format(clustersKey) )
-        from HIJetRec.HIJetRecConf import HIJetDRAssociationTool
-        assoc=HIJetDRAssociationTool("HIJetDRAssociation")
+        assoc=CompFactory.HIJetDRAssociationTool("HIJetDRAssociation")
         assoc.ContainerKey=clustersKey
         assoc.DeltaR=0.8
         assoc.AssociationName="%s_DR8Assoc" % (clustersKey)
@@ -393,12 +386,11 @@ def HLTHIJetClusterSubtractorGetter(configFlags):
 
 #same as MakeSubtractionTool in Reconstruction/HeavyIonRec/HIJetRec/HIJetRecUtils.py but without jtm
 def HLTMakeSubtractionTool(configFlags, shapeKey, moment_name='', momentOnly=False, **kwargs) :
-    from HIEventUtils.HIEventUtilsConf import HIEventShapeMapTool
 
     alg_props = {
         'EventShapeKey': shapeKey,
         'Modulator': HLTGetNullModulator(),
-        'EventShapeMapTool': HIEventShapeMapTool(),
+        'EventShapeMapTool': CompFactory.HIEventShapeMapTool(),
         'Subtractor': HLTHIJetClusterSubtractorGetter(configFlags),
         'MomentName': 'HLTJetSubtractedScale{}Momentum'.format(moment_name),
         'SetMomentOnly': momentOnly,
@@ -472,13 +464,12 @@ def HLTHIClusterGetter(dummyFlags, tower_key="CombinedTower", cell_key="AllCalo"
 
 
 def ApplySubtractionToClustersHLT(configFlags, **kwargs) :
-    from HIEventUtils.HIEventUtilsConf import HIEventShapeMapTool
 
     alg_props = {
         'EventShapeKey': "HLTHIEventShape_iter1",
         'ClusterKey': "HLT_HIClusters",
         'Modulator': HLTGetNullModulator(),
-        'EventShapeMapTool': HIEventShapeMapTool(),
+        'EventShapeMapTool': CompFactory.HIEventShapeMapTool(),
         'UpdateOnly': False,
         'ApplyOriginCorrection': True,
         'Subtractor': HLTHIJetClusterSubtractorGetter(configFlags),
