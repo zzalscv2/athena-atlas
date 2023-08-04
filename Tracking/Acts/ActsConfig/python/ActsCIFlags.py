@@ -51,7 +51,7 @@ def actsValidateTracksFlags(flags):
 def actsValidateAmbiguityResolutionFlags(flags):
     """flags for Reco_tf with CA used in CI tests: use ActsTrackFinding during reconstruction with ambi. resolution"""
     actsValidateTracksFlags(flags)
-    flags.Tracking.ITkMainPass.doAmbiguityProcessorTrackFit = True
+    flags.Acts.doAmbiguityResolution = True
 
 def actsValidateGSFFlags(flags):
     """flags for Reco_tf with CA used in CI tests: use GaussianSumFitter"""
