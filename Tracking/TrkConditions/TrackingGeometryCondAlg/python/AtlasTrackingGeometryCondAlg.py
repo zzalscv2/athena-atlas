@@ -130,12 +130,19 @@ class ConfiguredTrackingGeometryCondAlg( Trk__TrackingGeometryCondAlg ) :
           muonAlignDep = "MuonAlignmentCondAlg/MuonAlignmentCondAlg"
           muonPassivation = "NswPassivationDbAlg/NswPassivationDbAlg"
           muonDetDep = "MuonDetectorCondAlg/MuonDetectorCondAlg"
+          muonMdtAsBuilt = "MdtAsBuiltCondAlg/MdtAsBuiltCondAlg"
+          muonNswAsBuilt = "NswAsBuiltCondAlg/NswAsBuiltCondAlg"
+          CscILines = "CscILinesCondAlg/CscILinesCondAlg"
           condInputLoader = "CondInputLoader/CondInputLoader"
+
           dependencies = {pixelDep,
                           sctDep,
                           trtDep,
                           muonAlignDep,
+                          muonMdtAsBuilt,
+                          muonNswAsBuilt,
                           muonPassivation,
+                          CscILines,
                           muonDetDep,
                           condInputLoader}
           from AthenaCommon.ConcurrencyFlags import jobproperties as jp
