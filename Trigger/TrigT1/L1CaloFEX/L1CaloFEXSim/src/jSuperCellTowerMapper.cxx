@@ -58,7 +58,7 @@ StatusCode jSuperCellTowerMapper::initialize()
     
 }
 
-StatusCode jSuperCellTowerMapper::AssignTriggerTowerMapper(std::unique_ptr<jTowerContainer> & my_jTowerContainerRaw) {
+StatusCode jSuperCellTowerMapper::AssignTriggerTowerMapper(std::unique_ptr<jTowerContainer> & my_jTowerContainerRaw) const {
 
     static constexpr float pi_over_32 = M_PI/32;
 
@@ -104,7 +104,7 @@ void jSuperCellTowerMapper::reset(){
 }
 
   // works for real supercells from MC
- StatusCode jSuperCellTowerMapper::AssignSuperCellsToTowers(std::unique_ptr<jTowerContainer> & my_jTowerContainerRaw)
+ StatusCode jSuperCellTowerMapper::AssignSuperCellsToTowers(std::unique_ptr<jTowerContainer> & my_jTowerContainerRaw) const
 {
 
     bool doPrint = false;
@@ -306,7 +306,7 @@ void jSuperCellTowerMapper::reset(){
 }
 
 
-void jSuperCellTowerMapper::ConnectSuperCellToTower(std::unique_ptr<jTowerContainer> & my_jTowerContainerRaw,int iJTower, Identifier ID, int iCell, float et, int layer){
+void jSuperCellTowerMapper::ConnectSuperCellToTower(std::unique_ptr<jTowerContainer> & my_jTowerContainerRaw,int iJTower, Identifier ID, int iCell, float et, int layer) const {
 
   LVL1::jTower * tmpTower = my_jTowerContainerRaw->findTower(iJTower);
   if(tmpTower){
@@ -315,7 +315,7 @@ void jSuperCellTowerMapper::ConnectSuperCellToTower(std::unique_ptr<jTowerContai
 
 }
 
-int jSuperCellTowerMapper::FindAndConnectTower(std::unique_ptr<jTowerContainer> & my_jTowerContainerRaw,CaloSampling::CaloSample sample,const int region, int layer, const int pos_neg, const int eta_index, const int phi_index, Identifier ID, float et, int prov,bool doPrint, float eta_min, float eta_max, float eta0, float phi_min, float phi_max, float phi0)
+int jSuperCellTowerMapper::FindAndConnectTower(std::unique_ptr<jTowerContainer> & my_jTowerContainerRaw,CaloSampling::CaloSample sample,const int region, int layer, const int pos_neg, const int eta_index, const int phi_index, Identifier ID, float et, int prov,bool doPrint, float eta_min, float eta_max, float eta0, float phi_min, float phi_max, float phi0) const
 {
 
     // bool for the special case of 1.8 < eta < 2.0 only in the front layer
@@ -1108,21 +1108,16 @@ int jSuperCellTowerMapper::FindAndConnectTower(std::unique_ptr<jTowerContainer> 
     // END ITERATING OVER SUPER CELLS+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ +++++++++++++++++++++++++++++++++++++++++++++
 
     return 1;
-
 }
 
 
 
-
-
-int jSuperCellTowerMapper::FindTowerIDForSuperCell(int towereta, int towerphi)
+int jSuperCellTowerMapper::FindTowerIDForSuperCell(int towereta, int towerphi) const
 {
-
   return (towerphi + (64 * towereta));
-
 }
 
-  void jSuperCellTowerMapper::PrintCellSpec(const CaloSampling::CaloSample sample, int layer, const int region, const int eta_index, const int phi_index, const int pos_neg, int iJTower, int iCell, int prov, Identifier ID ,bool doenergysplit, float eta_min, float eta_max, float eta0, float phi_min, float phi_max, float phi0,bool cellValid)
+  void jSuperCellTowerMapper::PrintCellSpec(const CaloSampling::CaloSample sample, int layer, const int region, const int eta_index, const int phi_index, const int pos_neg, int iJTower, int iCell, int prov, Identifier ID ,bool doenergysplit, float eta_min, float eta_max, float eta0, float phi_min, float phi_max, float phi0,bool cellValid) const
 {
   
   std::string sampleName = "";
@@ -1196,7 +1191,7 @@ int jSuperCellTowerMapper::FindTowerIDForSuperCell(int towereta, int towerphi)
 }
 
 
-std::string jSuperCellTowerMapper::DectectorName(const CaloSampling::CaloSample sample){
+std::string jSuperCellTowerMapper::DectectorName(const CaloSampling::CaloSample sample) const {
     std::string sampleName ="";
     switch (sample) {
         case CaloSampling::PreSamplerB: { sampleName = "PreSamplerB";   break; }
