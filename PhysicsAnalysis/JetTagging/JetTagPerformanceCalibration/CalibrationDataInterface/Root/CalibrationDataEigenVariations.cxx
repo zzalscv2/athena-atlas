@@ -115,7 +115,7 @@ namespace {
         if (denominator(row,col)==0.0){
           correlation_comparison(row,col) = 0.0;
         } else {
-          correlation_comparison(row,col) = 100*abs(numerator(row,col))/abs(denominator(row,col)); // store relative percent errors
+          correlation_comparison(row,col) = 100*std::abs(numerator(row,col)/denominator(row,col)); // store relative percent errors
         }
       }
     }
