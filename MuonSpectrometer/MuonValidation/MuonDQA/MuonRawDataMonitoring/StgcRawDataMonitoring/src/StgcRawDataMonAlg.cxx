@@ -364,6 +364,25 @@ void sTgcRawDataMonAlg::fillsTgcPadTriggerDataHistograms(const Muon::NSW_PadTrig
       auto phiIdsSidedSizedPerSectorMon  = Monitored::Collection("phiIds_"  + side + "_sector_" + std::to_string(std::abs(sectorNumber)), phiIds);
       auto bandIdsSidedSizedPerSectorMon = Monitored::Collection("bandIds_" + side + "_sector_" + std::to_string(std::abs(sectorNumber)), bandIds);
       fill("padTriggerExpert", lbPerSectorMon, bandIDperSectorMon, numberOfTriggersPerSectorMon, phiIdsSidedSizedPerSectorMon, bandIdsSidedSizedPerSectorMon);
+      
+      auto TriggerRelBCIDPerSectorMon = Monitored::Collection("TriggerRelBCID_"+side+"_sector_"+std::to_string(std::abs(sectorNumber)), relBCID);
+      auto TriggerPhiIDPerSectorMon = Monitored::Collection("TriggerPhiID_"+side+"_sector_"+std::to_string(std::abs(sectorNumber)), phiIds);
+      auto TriggerBandIDPerSectorMon = Monitored::Collection("TriggerBandID_"+side+"_sector_"+std::to_string(std::abs(sectorNumber)), bandIds);
+      fill("padTriggerShifter", TriggerRelBCIDPerSectorMon, TriggerPhiIDPerSectorMon, TriggerBandIDPerSectorMon);
+      
+      for (size_t hits = 0; hits < rdo -> getNumberOfHits(); ++hits){
+	bool sideAs = rdo -> sideA();
+	int isides = (sideAs) ? 1 : 0;
+	std::string sides = GeometricSectors::sTgcSide[isides];
+	unsigned int sourceIds = rdo -> getSourceid();
+	int sectorNumbers = sourceidToSector(sourceIds, sideAs);
+	std::vector<unsigned int> hitRelBCID = rdo -> getHitRelBcids();
+	std::vector<unsigned int> hitpfebs = rdo -> getHitPfebs();
+
+	auto hitRelBCIDPerSectorMon = Monitored::Collection("hitRelBCID_"+sides+"_sector_"+std::to_string(std::abs(sectorNumbers)), hitRelBCID);
+	auto hitpfebsPerSectorMon = Monitored::Collection("hitpfebs_"+sides+"_sector_"+std::to_string(std::abs(sectorNumbers)), hitpfebs);     
+	fill("padTriggerShifter", hitRelBCIDPerSectorMon, hitpfebsPerSectorMon);
+      }
     }
   }
 }
