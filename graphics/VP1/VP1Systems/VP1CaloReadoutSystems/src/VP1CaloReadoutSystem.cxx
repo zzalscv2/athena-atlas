@@ -288,7 +288,7 @@ QWidget* VP1CaloReadoutSystem::buildController()
   m_clockwork->ui.phiSectionWidget->setAllowedNumberOfSectors(l);
 
   // Populate Check Box Map and connect slots
-  foreach(QCheckBox* cb,m_clockwork->checkBoxNamesMap.keys())
+  for(QCheckBox* cb : m_clockwork->checkBoxNamesMap.keys())
   {
     connect(cb,SIGNAL(toggled(bool)),this,SLOT(checkboxChanged()));
     m_clockwork->checkBoxMap.insert(m_clockwork->checkBoxNamesMap[cb],cb);

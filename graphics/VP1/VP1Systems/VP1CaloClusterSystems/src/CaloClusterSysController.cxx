@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -224,7 +224,7 @@ QPair<bool,double> CaloClusterSysController::scale() const
   const bool logscale = m_d->ui_display.checkBox_logscale->isChecked();
 
   double highestvisibleenergy=0*CLHEP::eV;
-  foreach(VP1StdCollection* stdcol, m_d->collWidget->visibleStdCollections()) {
+  for(VP1StdCollection* stdcol : m_d->collWidget->visibleStdCollections()) {
     VP1CaloClusterCollection* col = dynamic_cast<VP1CaloClusterCollection*>(stdcol);
     if ( col && highestvisibleenergy < col->highestVisibleClusterEnergy() )
       highestvisibleenergy = col->highestVisibleClusterEnergy();
