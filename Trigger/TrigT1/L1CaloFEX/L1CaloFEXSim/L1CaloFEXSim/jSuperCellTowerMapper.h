@@ -34,8 +34,8 @@ class jSuperCellTowerMapper: public AthAlgTool, virtual public IjSuperCellTowerM
   /** standard Athena-Algorithm method */
   virtual StatusCode initialize() override;
   
-  virtual StatusCode AssignSuperCellsToTowers(std::unique_ptr<jTowerContainer> & my_jTowerContainerRaw) override;
-  virtual StatusCode AssignTriggerTowerMapper(std::unique_ptr<jTowerContainer> & my_jTowerContainerRaw) override;
+  virtual StatusCode AssignSuperCellsToTowers(std::unique_ptr<jTowerContainer> & my_jTowerContainerRaw) const override;
+  virtual StatusCode AssignTriggerTowerMapper(std::unique_ptr<jTowerContainer> & my_jTowerContainerRaw) const override;
   
   
   virtual void reset() override;
@@ -47,12 +47,12 @@ class jSuperCellTowerMapper: public AthAlgTool, virtual public IjSuperCellTowerM
   
   Gaudi::Property<bool> m_apply_masking {this, "SCellMasking", false, "Applies masking. Only use for data"};
 
-  virtual int FindAndConnectTower(/*jTowerContainer**/std::unique_ptr<jTowerContainer> & my_jTowerContainerRaw,CaloSampling::CaloSample sample,const int region, int layer, const int pos_neg, const int eta_index, const int phi_index, Identifier ID, float et, int prov, bool doPrint,float eta_min, float eta_max, float eta0, float phi_min, float phi_max, float phi0) override;
-  virtual void ConnectSuperCellToTower(std::unique_ptr<jTowerContainer> & my_jTowerContainerRaw, int iETower, Identifier ID, int iCell, float et, int layer) override;
-  virtual int FindTowerIDForSuperCell(int towereta, int towerphi) override;
-  virtual void PrintCellSpec(const CaloSampling::CaloSample sample, int layer, const int region, const int eta_index, const int phi_index, const int pos_neg, int iETower, int iCell, int prov, Identifier ID, bool doenergysplit,float eta_min, float eta_max, float eta0, float phi_min, float phi_max, float phi0,bool cellValid=true) override;
+  virtual int FindAndConnectTower(/*jTowerContainer**/std::unique_ptr<jTowerContainer> & my_jTowerContainerRaw,CaloSampling::CaloSample sample,const int region, int layer, const int pos_neg, const int eta_index, const int phi_index, Identifier ID, float et, int prov, bool doPrint,float eta_min, float eta_max, float eta0, float phi_min, float phi_max, float phi0) const override;
+  virtual void ConnectSuperCellToTower(std::unique_ptr<jTowerContainer> & my_jTowerContainerRaw, int iETower, Identifier ID, int iCell, float et, int layer) const override;
+  virtual int FindTowerIDForSuperCell(int towereta, int towerphi) const override;
+  virtual void PrintCellSpec(const CaloSampling::CaloSample sample, int layer, const int region, const int eta_index, const int phi_index, const int pos_neg, int iETower, int iCell, int prov, Identifier ID, bool doenergysplit,float eta_min, float eta_max, float eta0, float phi_min, float phi_max, float phi0,bool cellValid=true) const override;
   
-  std::string DectectorName(const CaloSampling::CaloSample sample);
+  std::string DectectorName(const CaloSampling::CaloSample sample) const;
 
 };
 
