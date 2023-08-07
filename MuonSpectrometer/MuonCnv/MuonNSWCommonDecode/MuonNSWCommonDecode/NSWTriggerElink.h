@@ -5,8 +5,8 @@
 #define _MUON_NSW_TRIGGER_ELINK_H_
 
 #include <stdint.h>
-#include <vector>
 #include <exception>
+#include <string>
 #include <memory>
 
 #include "MuonNSWCommonDecode/NSWResourceId.h"
@@ -63,13 +63,13 @@ namespace Muon
       const std::shared_ptr<Muon::nsw::NSWResourceId>& elinkId () const {return m_elinkId;};
 
     protected:
-      unsigned int m_wordCount;
-      unsigned int m_wordCountFlx;
-      unsigned int m_packet_status;
-      bool         m_packet_sus;
+      unsigned int m_wordCount{};
+      unsigned int m_wordCountFlx{};
+      unsigned int m_packet_status{};
+      bool         m_packet_sus{};
 
       //decoding felix header
-      uint32_t m_elinkWord;
+      uint32_t m_elinkWord{};
       std::shared_ptr<Muon::nsw::NSWResourceId> m_elinkId;
 
     };

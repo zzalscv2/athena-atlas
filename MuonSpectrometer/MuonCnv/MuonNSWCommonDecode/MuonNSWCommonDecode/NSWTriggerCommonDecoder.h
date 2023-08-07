@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <vector>
 #include <string>
+#include <memory>
 
 #include "eformat/eformat.h"
 
@@ -33,8 +34,8 @@ namespace Muon
       int error_id () const {return m_error_id;};
 
      private:
-      bool m_has_error;
-      int  m_error_id;
+      bool m_has_error{};
+      int  m_error_id{};
       std::string m_triggerType;
       std::vector<std::shared_ptr<Muon::nsw::NSWTriggerElink>> m_elinks;
     };
