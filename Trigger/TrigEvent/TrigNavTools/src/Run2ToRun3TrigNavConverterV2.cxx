@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthLinks/ElementLinkVector.h"
@@ -251,6 +251,8 @@ StatusCode Run2ToRun3TrigNavConverterV2::execute(const EventContext &context) co
   ATH_CHECK(associateChainsToProxies(convProxies, m_allTEIdsToChains));
   ATH_CHECK(cureUnassociatedProxies(convProxies));
   ATH_MSG_DEBUG("Proxies to chains mapping done");
+
+  ATH_CHECK(removeTopologicalProxies(convProxies));
 
   if (not m_chainsToSave.empty())
   {
@@ -684,6 +686,33 @@ StatusCode Run2ToRun3TrigNavConverterV2::collapseFeaturelessProxies(ConvProxySet
   return StatusCode::SUCCESS;
 }
 
+StatusCode Run2ToRun3TrigNavConverterV2::removeTopologicalProxies(ConvProxySet_t & convProxies) const
+{
+ for (auto i = std::begin(convProxies); i != std::end(convProxies);)
+  {
+    if ((*i)->parents.size() > 1)
+    {
+      ConvProxy *toDel = *i;
+      // remove it from parents/children
+      for (auto parent : toDel->parents)
+      {
+          parent->children.erase(toDel);
+      }
+      for (auto child : toDel->children)
+      {
+        child->parents.erase(toDel);
+      }
+      delete toDel;
+      i = convProxies.erase(i);
+    }
+    else
+    {
+      ++i;
+    }
+  }
+  return StatusCode::SUCCESS;  
+}
+
 StatusCode Run2ToRun3TrigNavConverterV2::fillRelevantFeatures(ConvProxySet_t &convProxies, const HLT::TrigNavStructure &run2Nav) const
 {
   // from all FEAs of the associated TE pick those objects that are to be linked
@@ -823,7 +852,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::createSFNodes(const ConvProxySet_t &con
                                                        const TEIdToChainsMap_t &terminalIds, const EventContext &context) const
 {
   // make node & link it properly
-  auto makeSingleSFNode = [&decisions, &context](auto lastDecisionNode, auto chainIds)
+  auto makeSingleSFNode = [&decisions, &context](auto lastDecisionNode, auto chainIds, TrigCompositeUtils::DecisionID idStore = 0)
   {
     auto sfNode = TrigCompositeUtils::newDecisionIn(&decisions);
     sfNode->setName("SF");
@@ -831,24 +860,32 @@ StatusCode Run2ToRun3TrigNavConverterV2::createSFNodes(const ConvProxySet_t &con
     TrigCompositeUtils::linkToPrevious(sfNode, lastDecisionNode, context);
     for (auto chainId : chainIds)
     {
+      if (idStore == 0)
+    {
       TrigCompositeUtils::addDecisionID(chainId, sfNode);
       TrigCompositeUtils::addDecisionID(chainId, decisions.at(0));
     }
+      else if (chainId.numeric() == idStore)
+      {
+        TrigCompositeUtils::addDecisionID(chainId, sfNode);
+        TrigCompositeUtils::addDecisionID(chainId, decisions.at(0));
+      }
+    }
     return sfNode;
   };
-  auto makeSFNodes = [makeSingleSFNode](auto proxy)
+  auto makeSFNodes = [makeSingleSFNode](auto proxy, TrigCompositeUtils::DecisionID idToStore = 0)
   {
       if (proxy->hNode.empty())
       { // nothing has passed, so link to the IM node
         // TODO make sure it needs to be done like that
-        makeSingleSFNode(proxy->imNode, proxy->runChains);
+        makeSingleSFNode(proxy->imNode, proxy->runChains, idToStore);
       }
       else
       {
         // makeSFNode(proxy->hNode[0], TCU::decisionIDs(proxy->hNode[0])); // not using passChains as there may be additional filtering
         for (auto &hNode : proxy->hNode)
         {
-          makeSingleSFNode(hNode, proxy->passChains); // using passChains
+          makeSingleSFNode(hNode, proxy->passChains, idToStore); // using passChains
         }
       }
   };
@@ -873,9 +910,9 @@ StatusCode Run2ToRun3TrigNavConverterV2::createSFNodes(const ConvProxySet_t &con
           toRetain.insert(toRetain.end(), whereInMap->second.begin(), whereInMap->second.end());
         }
       }
-      if (not toRetain.empty())
+      for (auto chainIdstore : toRetain)
       {
-        makeSFNodes(proxy);
+        makeSFNodes(proxy, chainIdstore);
       }
     }
   }

@@ -249,11 +249,11 @@ def updateStdJetModifier(flags, name, **kwargs):
         stdJetModifiers.update(
             HIJetCalib=JetModifier("JetCalibrationTool",
                                    "HICalibTool_{modspec}",
-                                   JetCollection="AntiKt4HI",
+                                   JetCollection=lambda _, modspec: "AntiKt{}HI".format(modspec.split('___')[0]),
                                    PrimaryVerticesContainerName="",
-                                   ConfigFile='JES_MC15c_HI_Nov2016.config',
-                                   CalibSequence=lambda _, modspec: modspec.split('___')[0],
-                                   IsData=lambda _, modspec: modspec.split('___')[1] == 'True'))
+                                   ConfigFile='JES_MC16_HI_Jan2021_5TeV.config', # JES_MC16_HI_Jan2021_5TeV.config JES_MC15c_HI_Nov2016.config
+                                   CalibSequence=lambda _, modspec: modspec.split('___')[1],
+                                   IsData=lambda _, modspec: modspec.split('___')[2] == 'True'))
         return
 
     if name == "subtr1":
@@ -526,7 +526,7 @@ def HIJetRecCfg(flags):
 
     # get jet definitions for physics
     jetDef = []
-    jetRlist = [2, 3, 4, 6, 10]
+    jetRlist = [2, 3, 4, 10] #[2, 3, 4, 6, 10]
     for jetR in jetRlist:
         jetDef.append(HICaloJetDef(flags, jetradius=jetR, suffix="_Unsubtracted"))
         __log.info("HI Jet Collection for Reco: "+jetDef[-1].fullname())
@@ -564,7 +564,7 @@ def HIJetRecCfg(flags):
     # copy jets from the first iteration; create seed1
     jetDef_seed1 = HIJetDefCloner(flags, jetDef_in=jetDef2,
                                   suffix="_seed1",
-                                  modifiers=["HIJetAssoc", "subtr0", "HIJetCalib:{}___{}".format(calib_seq, not flags.Input.isMC), "Filter:{}".format(flags.HeavyIon.Jet.SeedPtMin)])
+                                  modifiers=["HIJetAssoc", "subtr0", "HIJetCalib:{}___{}___{}".format(2, calib_seq, not flags.Input.isMC), "Filter:{}".format(flags.HeavyIon.Jet.SeedPtMin)])
     acc.merge(HIJetCopyAlgCfg(flags, jetDef2, jetDef_seed1))
 
     # configuring track jets, seeds for second iteration
@@ -649,7 +649,7 @@ def HIJetRecCfg(flags):
         jetDef_final = HIJetDefCloner(flags,
                                       jetDef_in=jd,
                                       suffix="",
-                                      modifiers=["subtr1", "consmod", "HIJetCalib:{}___{}".format(calib_seq, not flags.Input.isMC), "Filter:{}".format(flags.HeavyIon.Jet.RecoOutputPtMin)])
+                                      modifiers=["subtr1", "consmod", "HIJetCalib:{}___{}___{}".format(str(float(jd.radius)*10).replace('.0',''),calib_seq, not flags.Input.isMC), "Filter:{}".format(flags.HeavyIon.Jet.RecoOutputPtMin)])
         acc.merge(HIJetCopyAlgCfg(flags, jd, jetDef_final))
 
         output = ["xAOD::JetContainer#"+jetDef_final.fullname(),
