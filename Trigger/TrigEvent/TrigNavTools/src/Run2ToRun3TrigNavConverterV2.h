@@ -108,6 +108,8 @@ private:
 
   StatusCode collapseFeaturelessProxies(ConvProxySet_t &) const;
 
+  StatusCode removeTopologicalProxies(ConvProxySet_t & ) const;
+
   template <typename MAP>
   StatusCode collapseProxies(ConvProxySet_t &, MAP &) const;
 

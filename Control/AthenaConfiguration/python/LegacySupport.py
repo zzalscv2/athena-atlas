@@ -252,15 +252,22 @@ def conf2toConfigurable( comp, indent="", parent="", servicesOfThisCA=[], suppre
                     configurableClass = _findConfigurableClass( className )
                     # Do not create with existing name, or it will try to get an existing public tool, if available
                     # (and public tools cannot be added to a PrivateToolHandleArray)
-                    instance = configurableClass( newC + className + str(len(indent)) )
+                    tmpName = newC + className + str(len(indent))
+                    instance = configurableClass( tmpName )
 
-                    # Now give it the correct name
+                    # Now give it the correct name and fix Configurable DB
                     instance._name = newCdict[newC].name
+                    if hasattr(instance, '_jobOptName'):
+                        instance._jobOptName = instance._name
+
+                    instance.allConfigurables[instance._name] = instance.allConfigurables.pop(tmpName)
+                    instance.configurables[instance._name] = instance.configurables.pop(tmpName)
 
                     _setProperties( instance, newCdict[newC], _indent( indent ) )
                     _log.debug('%s will now add %s to array.',indent, instance)
                     conf1 += instance # Makes a copy with a correctly set parent and name
-                    alreadySetProperties[pname].append(instance)
+                    del instance
+                    alreadySetProperties[pname].append(conf1.getChildren()[-1])
 
             elif "PublicToolHandleArray" in propType:
                 toolSet = {_.getName() for _ in alreadySetProperties[pname]}
@@ -303,9 +310,16 @@ def conf2toConfigurable( comp, indent="", parent="", servicesOfThisCA=[], suppre
                     configurableClass = _findConfigurableClass( className )
                     # Do not create with existing name, or it will try to get an existing public tool, if available
                     # (and public tools cannot be added to a PrivateToolHandle)
-                    instance = configurableClass( pvalueCompName + className + str(len(indent)) )
+                    tmpName = pvalueCompName + className + str(len(indent))
+                    instance = configurableClass( tmpName )
                     # Now give it the correct name, assign to the conf1 property, and merge
                     instance._name = pvalueCompName
+                    if hasattr(instance, '_jobOptName'):
+                        instance._jobOptName = instance._name
+
+                    instance.allConfigurables[instance._name] = instance.allConfigurables.pop(tmpName)
+                    instance.configurables[instance._name] = instance.configurables.pop(tmpName)
+
                     setattr(conf1, pname, instance)
                     existingVal = getattr(conf1, pname)
                     _areSettingsSame( existingVal, pvalue, indent,servicesOfThisCA)

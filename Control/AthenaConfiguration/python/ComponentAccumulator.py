@@ -1102,11 +1102,15 @@ class ComponentAccumulator:
 
     def run(self,maxEvents=None):
         from os import environ
-        if "PICKLECAFILE" in environ:
-            outpklfile=environ["PICKLECAFILE"]
-            self._msg.info("Store configurtion in pickle file %s",outpklfile)
-            with open(outpklfile, "wb") as f:
-                self.store(f)
+        outpklfile = environ.get("PICKLECAFILE", None)
+        if outpklfile is not None:
+            if outpklfile:  # non-empty string
+                self._msg.info("Storing configuration in pickle file %s",outpklfile)
+                with open(outpklfile, "wb") as f:
+                    self.store(f)
+            else:           # empty string, just exit
+                self.wasMerged()
+                self._msg.info("Exiting after configuration stage")
             from Gaudi.Main import BootstrapHelper
             return BootstrapHelper.StatusCode(True)
 

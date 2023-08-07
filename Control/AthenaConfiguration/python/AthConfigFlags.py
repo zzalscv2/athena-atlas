@@ -458,7 +458,7 @@ class AthConfigFlags(object):
         parser.add_argument("--skipEvents", type=int, default=None, help="Number of events to skip")
         parser.add_argument("--filesInput", default=None,nargs='+', help="Input file(s), supports * wildcard")
         parser.add_argument("-l", "--loglevel", default=None, choices=["ALL","VERBOSE","DEBUG","INFO","WARNING","ERROR","FATAL"], help="logging level")
-        parser.add_argument("--config-only", type=str, default=None, help="Stop after configuration phase (may not be respected by all diver scripts)")
+        parser.add_argument("--config-only", metavar='FILE', type=str, default=None, const=True, nargs='?', help="Stop after configuration and optionally pickle configuration to FILE (may not be respected by all diver scripts)")
         parser.add_argument("--threads", type=int, default=None, help="Run with given number of threads (use 0 for serial execution)")
         parser.add_argument('--concurrent-events', type=int, default=None, help='number of concurrent events for AthenaMT')
         parser.add_argument("--nprocs", type=int, default=None, help="Run AthenaMP with given number of worker processes")
@@ -593,7 +593,7 @@ class AthConfigFlags(object):
 
         if args.config_only is not None:
             from os import environ
-            environ["PICKLECAFILE"] = args.config_only
+            environ["PICKLECAFILE"] = "" if args.config_only is True else args.config_only
 
         if args.threads is not None:
             self.Concurrency.NumThreads = args.threads
