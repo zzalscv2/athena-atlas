@@ -6,7 +6,7 @@ import subprocess
 from .Helpers import warnings_count
 from .Inputs import references_CVMFS_path
 from .References import references_map
-from .Test import TestSetup, WorkflowCheck, WorkflowRun, WorkflowTest, WorkflowType
+from .Test import TestSetup, WorkflowCheck, WorkflowTest, WorkflowType
 
 
 class FailedOrPassedCheck(WorkflowCheck):
@@ -590,7 +590,7 @@ class FPECheck(WorkflowCheck):
     """Run FPE check."""
 
     # Ignore FPEs for these tests:
-    ignoreTestRuns = [WorkflowRun.Run4]
+    ignoreTestRuns = []
     ignoreTestTypes = [WorkflowType.FullSim]
     ignoreTestIDs = ['x686']
 

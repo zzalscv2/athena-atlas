@@ -156,12 +156,10 @@ atlas_add_citest( DerivationRun3MC_PHYSLITE
 
 atlas_add_citest( RecoRun4MC
    SCRIPT RunWorkflowTests_Run4.py --CI -r -w MCReco -e '--maxEvents 5 --inputHITSFile=../../SimulationRun4FullSim/run_s3761/myHITS.pool.root' --no-output-checks  # go two levels up as the test runs in a subfolder
-   LOG_IGNORE_PATTERN "WARNING FPE" 
    DEPENDS_SUCCESS SimulationRun4FullSim )
 
 atlas_add_citest( RecoRun4MC_DAODPHYS
    SCRIPT RunWorkflowTests_Run4.py --CI -d -w Derivation -e '--maxEvents 5 --inputAODFile=../../RecoRun4MC/run_q447/myAOD.pool.root' --no-output-checks  # go two levels up as the test runs in a subfolder
-   LOG_IGNORE_PATTERN "WARNING FPE"
    DEPENDS_SUCCESS RecoRun4MC )
 
 
