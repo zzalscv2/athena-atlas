@@ -38,7 +38,7 @@ StatusCode LVL1::jFEXsumETAlgo::initialize() {
 }
 
 //calls container for TT
-StatusCode LVL1::jFEXsumETAlgo::safetyTest() {
+StatusCode LVL1::jFEXsumETAlgo::safetyTest() const {
 
     SG::ReadHandle<jTowerContainer> jTowerContainer(m_jTowerContainerKey);
     if(! jTowerContainer.isValid()) {
@@ -174,7 +174,6 @@ int LVL1::jFEXsumETAlgo::getTTowerET(unsigned int TTID ) {
     
     //we shouldn't arrive here
     return 0;
-    
 }
 
 

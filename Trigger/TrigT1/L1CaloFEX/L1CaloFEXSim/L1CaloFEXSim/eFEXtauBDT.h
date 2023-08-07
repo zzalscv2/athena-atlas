@@ -57,11 +57,11 @@ public:
   void initEMETPointers();
   void initHADETPointers();
   void initTowersPointers();
-  unsigned int getETEstimate() { return m_eTEstimate; }
-  unsigned int getEMETEstimate() { return m_EM_eTEstimate; }
-  unsigned int getEMETEstimateOverflow() { return m_EM_eTEstimateOverflow; }
-  unsigned int getHADETEstimate() { return m_HAD_eTEstimate; }
-  unsigned int getHADETEstimateOverflow() { return m_HAD_eTEstimateOverflow; }
+  unsigned int getETEstimate() const { return m_eTEstimate; }
+  unsigned int getEMETEstimate() const { return m_EM_eTEstimate; }
+  unsigned int getEMETEstimateOverflow() const { return m_EM_eTEstimateOverflow; }
+  unsigned int getHADETEstimate() const { return m_HAD_eTEstimate; }
+  unsigned int getHADETEstimateOverflow() const { return m_HAD_eTEstimateOverflow; }
   std::vector<unsigned int> &getBDTVars() { return m_bdtVars; }
   std::vector<unsigned int> &getTowers() { return m_towers; }
   std::vector<unsigned int> &getEMMultipliedByFracParams() {
@@ -70,17 +70,17 @@ public:
   std::vector<unsigned int> &getEMMultipliedByFracParamsOverflow() {
     return m_emEtXMultiplierOverflow;
   }
-  unsigned int getBDTScoreShifted() { return m_bdtScoreShifted; }
+  unsigned int getBDTScoreShifted() const { return m_bdtScoreShifted; }
 
   // ======= These are the important getters ======
   // These are the fields in the algorithm's output TOB structure in the
   // VHDL implementation of eFEXFirmware (TriggerObjectCore_tau type in VHDL)
-  unsigned int getET();
-  unsigned int getTOBETOverflow() { return m_eTEstimateOverflow; }
-  unsigned int getIsMax() { return m_isSeeded; }
-  unsigned int getBDTCondition() { return m_bdtCondition; }
-  unsigned int getFracCondition() { return m_fracCondition; }
-  unsigned int getBDTScore() { return m_bdtScore; }
+  unsigned int getET() const;
+  unsigned int getTOBETOverflow() const { return m_eTEstimateOverflow; }
+  unsigned int getIsMax() const { return m_isSeeded; }
+  unsigned int getBDTCondition() const { return m_bdtCondition; }
+  unsigned int getFracCondition() const { return m_fracCondition; }
+  unsigned int getBDTScore() const { return m_bdtScore; }
   // ================================================================================
 
   unsigned int multWithOverflow(unsigned int a, unsigned int b, bool &overflow,

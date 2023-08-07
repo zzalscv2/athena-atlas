@@ -44,7 +44,7 @@ void LVL1::eFEXtauAlgo::setup(int inputTable[3][3], int efex_id, int fpga_id, in
 
 }
 
-std::unique_ptr<LVL1::eFEXtauTOB> LVL1::eFEXtauAlgo::getTauTOB()
+std::unique_ptr<LVL1::eFEXtauTOB> LVL1::eFEXtauAlgo::getTauTOB() const
 {
   std::unique_ptr<eFEXtauTOB> tob = std::make_unique<eFEXtauTOB>();
   unsigned int et = getEt();
@@ -62,7 +62,7 @@ std::unique_ptr<LVL1::eFEXtauTOB> LVL1::eFEXtauAlgo::getTauTOB()
 }
 
 // Calculate reconstructed ET value
-unsigned int LVL1::eFEXtauAlgo::getEt()
+unsigned int LVL1::eFEXtauAlgo::getEt() const
 {
   if (m_cellsSet == false){
     ATH_MSG_DEBUG("Layers not built, cannot accurately calculate Et.");
@@ -119,7 +119,7 @@ unsigned int LVL1::eFEXtauAlgo::getEt()
   return out;
 }
 
-unsigned int LVL1::eFEXtauAlgo::rCoreCore()
+unsigned int LVL1::eFEXtauAlgo::rCoreCore() const
 {
   if (m_cellsSet == false){
     ATH_MSG_DEBUG("Layers not built, cannot calculate rCore core value");
@@ -138,10 +138,9 @@ unsigned int LVL1::eFEXtauAlgo::rCoreCore()
   if (out > 0xffff) out = 0xffff;
 
   return out;
-
 }
 
-unsigned int LVL1::eFEXtauAlgo::rCoreEnv()
+unsigned int LVL1::eFEXtauAlgo::rCoreEnv() const
 {
   if (m_cellsSet == false){
     ATH_MSG_DEBUG("Layers not built, cannot calculate rCore environment value");
@@ -166,10 +165,9 @@ unsigned int LVL1::eFEXtauAlgo::rCoreEnv()
   if (out > 0xffff) out = 0xffff;
 
   return out;
-
 }
 
-unsigned int LVL1::eFEXtauAlgo::rHadCore()
+unsigned int LVL1::eFEXtauAlgo::rHadCore() const
 {
   if (m_cellsSet == false){
     ATH_MSG_DEBUG("Layers not built, cannot calculate rHad core value");
@@ -188,10 +186,9 @@ unsigned int LVL1::eFEXtauAlgo::rHadCore()
   if (out > 0xffff) out = 0xffff;
 
   return out;
-
 }
 
-unsigned int LVL1::eFEXtauAlgo::rHadEnv()
+unsigned int LVL1::eFEXtauAlgo::rHadEnv() const
 {
   if (m_cellsSet == false){
     ATH_MSG_DEBUG("Layers not built, cannot calculate rHad environment value");
@@ -220,7 +217,6 @@ unsigned int LVL1::eFEXtauAlgo::rHadEnv()
   if (out > 0xffff) out = 0xffff;
 
   return out;
-
 }
 
 // Set the off phi value used to calculate ET and isolation
@@ -283,18 +279,18 @@ void LVL1::eFEXtauAlgo::setSupercellSeed()
 
 // Return the bitwise value of the given Et
 // See eFEXtauBaseAlgo for a first attempt at this
-unsigned int LVL1::eFEXtauAlgo::getBitwiseEt()
+unsigned int LVL1::eFEXtauAlgo::getBitwiseEt() const
 {
     unsigned int out = 0;
     return out;
 }
 
-bool LVL1::eFEXtauAlgo::getUnD()
+bool LVL1::eFEXtauAlgo::getUnD() const
 {
     return m_und;
 }
 
-unsigned int LVL1::eFEXtauAlgo::getSeed()
+unsigned int LVL1::eFEXtauAlgo::getSeed() const
 {
     return m_seed;
 }

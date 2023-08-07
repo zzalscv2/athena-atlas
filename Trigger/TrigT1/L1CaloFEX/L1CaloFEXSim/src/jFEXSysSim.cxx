@@ -97,7 +97,7 @@ namespace LVL1 {
   }
 
   
-  void jFEXSysSim::init()  {
+  void jFEXSysSim::init() const {
 
   }
 
@@ -109,10 +109,9 @@ namespace LVL1 {
   }
 
 
-  int jFEXSysSim::calcTowerID(int eta, int phi, int mod)  {
+  int jFEXSysSim::calcTowerID(int eta, int phi, int mod) const {
 
     return ((64*eta) + phi + mod);
-
   }
 
   StatusCode jFEXSysSim::execute(jFEXOutputCollection* inputOutputCollection)  {    
@@ -1099,7 +1098,7 @@ namespace LVL1 {
   }
 
 
-    StatusCode jFEXSysSim::fillSRJetEDM(uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexSRJetRoIContainer > &jContainer) {
+    StatusCode jFEXSysSim::fillSRJetEDM(uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexSRJetRoIContainer > &jContainer) const {
 
         xAOD::jFexSRJetRoI* my_EDM = new xAOD::jFexSRJetRoI();
         jContainer->push_back( my_EDM );
@@ -1109,11 +1108,10 @@ namespace LVL1 {
         ATH_MSG_DEBUG(" setting SRJet jFEX Number:  " << +my_EDM->jFexNumber() << " et: " << my_EDM->et() << " eta: " << my_EDM->eta() <<" / "<< eta <<  " phi: " << my_EDM->phi()<<" / "<< phi  );
 
         return StatusCode::SUCCESS;
-
     }
       
       
-    StatusCode jFEXSysSim::fillTauEDM(uint8_t jFexNum,uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexTauRoIContainer > &jContainer) {
+    StatusCode jFEXSysSim::fillTauEDM(uint8_t jFexNum,uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexTauRoIContainer > &jContainer) const {
 
         xAOD::jFexTauRoI* my_EDM = new xAOD::jFexTauRoI();
         jContainer->push_back( my_EDM );
@@ -1123,10 +1121,9 @@ namespace LVL1 {
         ATH_MSG_DEBUG(" setting tau jFEX Number:  " << +my_EDM->jFexNumber() << " et: " << my_EDM->et() << " eta: " << my_EDM->eta() <<" / "<< eta <<  " phi: " << my_EDM->phi()<<" / "<< phi  );
 
         return StatusCode::SUCCESS;
-
     }
 
-  StatusCode jFEXSysSim::fillFwdElEDM(uint8_t jFexNum,uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexFwdElRoIContainer > &jContainer) {
+  StatusCode jFEXSysSim::fillFwdElEDM(uint8_t jFexNum,uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexFwdElRoIContainer > &jContainer) const {
 
     xAOD::jFexFwdElRoI* my_EDM = new xAOD::jFexFwdElRoI();
     jContainer->push_back( my_EDM );
@@ -1136,12 +1133,9 @@ namespace LVL1 {
     ATH_MSG_DEBUG(" setting Forward Elec jFEX Number:  " << +my_EDM->jFexNumber() << " et: " << my_EDM->et() << " eta: " << my_EDM->eta() <<" / "<< eta <<  " phi: " << my_EDM->phi()<<" / "<< phi  );
 
     return StatusCode::SUCCESS;
-
   }
 
-
-
-    StatusCode jFEXSysSim::fillLRJetEDM(uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexLRJetRoIContainer > &jContainer) {
+    StatusCode jFEXSysSim::fillLRJetEDM(uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexLRJetRoIContainer > &jContainer) const {
 
         xAOD::jFexLRJetRoI* my_EDM = new xAOD::jFexLRJetRoI();
         jContainer->push_back( my_EDM );
@@ -1151,10 +1145,9 @@ namespace LVL1 {
         ATH_MSG_DEBUG(" setting LRJet jFEX Number:  " << +my_EDM->jFexNumber() << " et: " << my_EDM->et() << " eta: " << my_EDM->eta() <<" / "<< eta <<  " phi: " << my_EDM->phi()<<" / "<< phi  );
 
         return StatusCode::SUCCESS;
-
     }
 
-    StatusCode jFEXSysSim::fillSumEtEDM(uint8_t jFexNum,uint8_t fpgaNumber, uint32_t tobWord, int resolution, std::unique_ptr< xAOD::jFexSumETRoIContainer > &jContainer) {
+    StatusCode jFEXSysSim::fillSumEtEDM(uint8_t jFexNum,uint8_t fpgaNumber, uint32_t tobWord, int resolution, std::unique_ptr< xAOD::jFexSumETRoIContainer > &jContainer) const {
 
         xAOD::jFexSumETRoI* my_EDM = new xAOD::jFexSumETRoI();
         jContainer->push_back( my_EDM );
@@ -1164,10 +1157,9 @@ namespace LVL1 {
         ATH_MSG_DEBUG(" setting SumET jFEX Number:  " << +my_EDM->jFexNumber() << " Et_up: " << my_EDM->tobEt_upper() << " Et_down: " << my_EDM->tobEt_lower() <<  " sat_up: " << my_EDM->tobSat_upper()<<  " sat_low: " << my_EDM->tobSat_lower());
         
         return StatusCode::SUCCESS;
+    }
 
-    }   
-
-    StatusCode jFEXSysSim::fillMetEDM(uint8_t jFexNum,uint8_t fpgaNumber, uint32_t tobWord, int resolution, std::unique_ptr< xAOD::jFexMETRoIContainer > &jContainer) {
+    StatusCode jFEXSysSim::fillMetEDM(uint8_t jFexNum,uint8_t fpgaNumber, uint32_t tobWord, int resolution, std::unique_ptr< xAOD::jFexMETRoIContainer > &jContainer) const {
 
         xAOD::jFexMETRoI* my_EDM = new xAOD::jFexMETRoI();
         jContainer->push_back( my_EDM );
@@ -1177,11 +1169,8 @@ namespace LVL1 {
         ATH_MSG_DEBUG(" setting MET jFEX Number:  " << +my_EDM->jFexNumber() << " Et_x: " << my_EDM->tobEx() << " Et_y: " << my_EDM->tobEy() <<  " sat: " << my_EDM->tobSat()<<  " res: " << my_EDM->tobRes() );
         
         return StatusCode::SUCCESS;
-
     }
 
 
   
 } // end of namespace bracket
-
-

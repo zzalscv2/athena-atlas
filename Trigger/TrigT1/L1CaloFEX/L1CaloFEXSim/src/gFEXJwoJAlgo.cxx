@@ -221,7 +221,7 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(gTowersCentral 
 
 }
 
-void gFEXJwoJAlgo::makeFPGAC(gTowersForward twrsCN, gTowersForward twrsCP, gTowersCentral & twrsC){
+void gFEXJwoJAlgo::makeFPGAC(const gTowersForward& twrsCN, const gTowersForward& twrsCP, gTowersCentral & twrsC) const {
 
   int rows = twrsC.size();
   int cols = twrsC[0].size();
@@ -255,7 +255,7 @@ void gFEXJwoJAlgo::makeFPGAC(gTowersForward twrsCN, gTowersForward twrsCP, gTowe
 
 
 
-void gFEXJwoJAlgo::gBlockAB(gTowersCentral twrs, gTowersCentral & gBlkSum){
+void gFEXJwoJAlgo::gBlockAB(const gTowersCentral& twrs, gTowersCentral & gBlkSum) const {
 
   int rows = twrs.size();
   int cols = twrs[0].size();
@@ -296,11 +296,11 @@ void gFEXJwoJAlgo::gBlockAB(gTowersCentral twrs, gTowersCentral & gBlkSum){
 }
 
 
-void gFEXJwoJAlgo::metFPGA(gTowersCentral twrs, gTowersCentral & gBlkSum, int gBlockthreshold,
+void gFEXJwoJAlgo::metFPGA(const gTowersCentral& twrs, const gTowersCentral & gBlkSum, int gBlockthreshold,
                            float aFPGA, float bFPGA,
                            int & MHT_x, int & MHT_y,
                            int & MST_x, int & MST_y,
-                           int & MET_x, int & MET_y){
+                           int & MET_x, int & MET_y) const {
 
   int rows = twrs.size();
   int cols = twrs[0].size();
@@ -319,13 +319,12 @@ void gFEXJwoJAlgo::metFPGA(gTowersCentral twrs, gTowersCentral & gBlkSum, int gB
   }
   MET_x = aFPGA * MHT_x + bFPGA * MST_x;
   MET_y = aFPGA * MHT_y + bFPGA * MST_y;
-
 }
 
 void gFEXJwoJAlgo::metTotal(int A_MET_x, int A_MET_y,
                             int B_MET_x, int B_MET_y,
                             int C_MET_x, int C_MET_y,
-                            int & MET_x, int & MET_y, int & MET){
+                            int & MET_x, int & MET_y, int & MET) const {
 
   MET_x = A_MET_x + B_MET_x;
   MET_y = A_MET_y + B_MET_y;
@@ -335,12 +334,11 @@ void gFEXJwoJAlgo::metTotal(int A_MET_x, int A_MET_y,
     MET_y = MET_y + C_MET_y;
   }
 
-  MET   = sqrt((MET_x * MET_x) + (MET_y * MET_y));
-
+  MET = std::sqrt((MET_x * MET_x) + (MET_y * MET_y));
 }
 
 
-void gFEXJwoJAlgo::sumEtFPGA(gTowersCentral twrs, int & partial_sumEt ){
+void gFEXJwoJAlgo::sumEtFPGA(const gTowersCentral& twrs, int & partial_sumEt ) const {
 
   int rows = twrs.size();
   int cols = twrs[0].size();
@@ -352,7 +350,7 @@ void gFEXJwoJAlgo::sumEtFPGA(gTowersCentral twrs, int & partial_sumEt ){
   }
 }
 
-void gFEXJwoJAlgo::sumEt(int  A_sumEt, int  B_sumEt, int  C_sumEt, int & total_sumEt ){
+void gFEXJwoJAlgo::sumEt(int  A_sumEt, int  B_sumEt, int  C_sumEt, int & total_sumEt ) const {
 
   total_sumEt = A_sumEt + B_sumEt;
   if (FEXAlgoSpaceDefs::ENABLE_JWOJ_C){
@@ -364,22 +362,22 @@ void gFEXJwoJAlgo::sumEt(int  A_sumEt, int  B_sumEt, int  C_sumEt, int & total_s
 //----------------------------------------------------------------------------------
 // bitwise simulation of sine LUT in firmware
 //----------------------------------------------------------------------------------
-float gFEXJwoJAlgo::sinLUT(unsigned int phiIDX, unsigned int aw)
+float gFEXJwoJAlgo::sinLUT(unsigned int phiIDX, unsigned int aw) const
 {
-  float c = ((float)phiIDX)/pow(2,aw);
+  float c = static_cast<float>(phiIDX)/std::pow(2,aw);
   float rad = (2*M_PI) *c;
-  float rsin = sin(rad);
+  float rsin = std::sin(rad);
   return rsin;
 }
 
 //----------------------------------------------------------------------------------
 // bitwise simulation cosine LUT in firmware
 //----------------------------------------------------------------------------------
-float gFEXJwoJAlgo::cosLUT(unsigned int phiIDX, unsigned int aw)
+float gFEXJwoJAlgo::cosLUT(unsigned int phiIDX, unsigned int aw) const
 {
-  float c = ((float)phiIDX)/pow(2,aw);
+  float c = static_cast<float>(phiIDX)/std::pow(2,aw);
   float rad = (2*M_PI) *c;
-  float rcos = cos(rad);
+  float rcos = std::cos(rad);
   return rcos;
 }
 

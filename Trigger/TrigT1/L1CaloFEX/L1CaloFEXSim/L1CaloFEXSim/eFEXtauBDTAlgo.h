@@ -42,14 +42,14 @@ public:
                      int central_eta) override;
   virtual void compute() override;
 
-  virtual std::unique_ptr<eFEXtauTOB> getTauTOB() override;
-  virtual unsigned int rHadCore() override;
-  virtual unsigned int rHadEnv() override;
-  virtual unsigned int getEt() override;
-  virtual unsigned int getBitwiseEt() override;
-  virtual unsigned int getBDTScore() override;
-  virtual unsigned int getBDTCondition() override;
-  virtual bool isBDT() override;
+  virtual std::unique_ptr<eFEXtauTOB> getTauTOB() const override;
+  virtual unsigned int rHadCore() const override;
+  virtual unsigned int rHadEnv() const override;
+  virtual unsigned int getEt() const override;
+  virtual unsigned int getBitwiseEt() const override;
+  virtual unsigned int getBDTScore() const override;
+  virtual unsigned int getBDTCondition() const override;
+  virtual bool isBDT() const override;
   virtual void setThresholds(std::vector<unsigned int> rHadThreshold,
                              std::vector<unsigned int> bdtThreshold,
                              unsigned int etThreshold,
