@@ -64,11 +64,11 @@ namespace LVL1 {
 
     virtual StatusCode execute(jFEXOutputCollection* inputOutputCollection) override ;
 
-    virtual void init() override ;
+    virtual void init() const override;
 
     virtual void cleanup() override;
 
-    virtual int calcTowerID(int eta, int phi, int mod) override ;
+    virtual int calcTowerID(int eta, int phi, int mod) const override;
 
 
       
@@ -108,14 +108,12 @@ namespace LVL1 {
     
     
     // Create and fill a new EDMs object
-    StatusCode fillSRJetEDM(uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexSRJetRoIContainer > &jContainer);
-    StatusCode fillLRJetEDM(uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexLRJetRoIContainer > &jContainer);
-    StatusCode fillTauEDM  (uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexTauRoIContainer   > &jContainer);
-    StatusCode fillFwdElEDM(uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexFwdElRoIContainer > &jContainer);  
-    StatusCode fillSumEtEDM(uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, int resolution, std::unique_ptr< xAOD::jFexSumETRoIContainer > &jContainer);  
-    StatusCode fillMetEDM  (uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, int resolution, std::unique_ptr< xAOD::jFexMETRoIContainer   > &jContainer);      
-    
-    
+    StatusCode fillSRJetEDM(uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexSRJetRoIContainer > &jContainer) const;
+    StatusCode fillLRJetEDM(uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexLRJetRoIContainer > &jContainer) const;
+    StatusCode fillTauEDM  (uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexTauRoIContainer   > &jContainer) const;
+    StatusCode fillFwdElEDM(uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, char istob, int resolution, float_t eta, float_t phi, std::unique_ptr< xAOD::jFexFwdElRoIContainer > &jContainer) const;
+    StatusCode fillSumEtEDM(uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, int resolution, std::unique_ptr< xAOD::jFexSumETRoIContainer > &jContainer) const;
+    StatusCode fillMetEDM  (uint8_t jFexNum, uint8_t fpgaNumber, uint32_t tobWord, int resolution, std::unique_ptr< xAOD::jFexMETRoIContainer   > &jContainer) const;
        
   };
   

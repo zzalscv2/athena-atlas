@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXJwoJAlgo - Jets without jets algorithm for gFEX
@@ -58,28 +58,28 @@ namespace LVL1 {
     float m_gBlockthresholdB;
     float m_gBlockthresholdC;
  
-    void makeFPGAC(gTowersForward twrsCN, gTowersForward twrsCP, gTowersCentral & twrsC);
+    void makeFPGAC(const gTowersForward& twrsCN, const gTowersForward& twrsCP, gTowersCentral & twrsC) const;
 
-    void gBlockAB(gTowersCentral twrs, gTowersCentral & gBlkSum);
+    void gBlockAB(const gTowersCentral& twrs, gTowersCentral & gBlkSum) const;
 
-    void metFPGA(gTowersCentral twrs, gTowersCentral & gBlkSum, int gBlockthreshold,
+    void metFPGA(const gTowersCentral& twrs, const gTowersCentral& gBlkSum, int gBlockthreshold,
                            float aFPGA, float bFPGA,
                            int & MHT_x, int & MHT_y,
                            int & MST_x, int & MST_y,
-                           int & MET_x, int & MET_y);
+                           int & MET_x, int & MET_y) const;
 
     void metTotal(int A_MET_x, int A_MET_y,
                           int B_MET_x, int B_MET_y,
                           int C_MET_x, int C_MET_y,
-                          int & MET_x, int & MET_y, int & MET);
+                          int & MET_x, int & MET_y, int & MET) const;
 
-    void sumEtFPGA(gTowersCentral twrs, int & partial_sumEt);
+    void sumEtFPGA(const gTowersCentral& twrs, int & partial_sumEt) const;
 
-    void sumEt(int  A_sumEt, int  B_sumEt, int  C_sumEt, int & total_sumEt);
+    void sumEt(int  A_sumEt, int  B_sumEt, int  C_sumEt, int & total_sumEt) const;
 
-    float sinLUT(unsigned int phiIDX, unsigned int aw);
+    float sinLUT(unsigned int phiIDX, unsigned int aw) const;
 
-    float cosLUT(unsigned int phiIDX, unsigned int aw);
+    float cosLUT(unsigned int phiIDX, unsigned int aw) const;
 
 
   };

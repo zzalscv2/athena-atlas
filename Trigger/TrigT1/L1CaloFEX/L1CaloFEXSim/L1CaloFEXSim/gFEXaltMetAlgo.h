@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXaltMetAlgo - Noise cut and Rho+RMS algorithm for gFEX MET
@@ -50,27 +50,27 @@ namespace LVL1 {
     int m_rhoPlusThr;
     
     
-    void metFPGA(const gTowersCentral &twrs, int & MET_x, int & MET_y, const unsigned short FPGA_NO);
+    void metFPGA(const gTowersCentral &twrs, int & MET_x, int & MET_y, const unsigned short FPGA_NO) const;
 
     void metTotal(const int A_MET_x, const int A_MET_y,
                   const int B_MET_x, const int B_MET_y,
-                  int & MET_x, int & MET_y, int & MET);
+                  int & MET_x, int & MET_y, int & MET) const;
 
-    int get_rho(const gTowersCentral &twrs);
+    int get_rho(const gTowersCentral &twrs) const;
 
-    int get_sigma(const gTowersCentral &twrs);
+    int get_sigma(const gTowersCentral &twrs) const;
 
-    void rho_MET(const gTowersCentral &twrs, int & MET_x, int & MET_y, const int rho, const int sigma);
+    void rho_MET(const gTowersCentral &twrs, int & MET_x, int & MET_y, const int rho, const int sigma) const;
 
-    int sumEtFPGAnc(const gTowersCentral &twrs, const unsigned short FPGA_NO);
+    int sumEtFPGAnc(const gTowersCentral &twrs, const unsigned short FPGA_NO) const;
 
-    int sumEtFPGArms(const gTowersCentral &twrs, const int sigma);
+    int sumEtFPGArms(const gTowersCentral &twrs, const int sigma) const;
 
-    int sumEt(const int A_sumEt, const int  B_sumEt);
+    int sumEt(const int A_sumEt, const int  B_sumEt) const;
 
-    float sinLUT(const unsigned int phiIDX, const unsigned int aw);
+    float sinLUT(const unsigned int phiIDX, const unsigned int aw) const;
 
-    float cosLUT(const unsigned int phiIDX, const unsigned int aw);
+    float cosLUT(const unsigned int phiIDX, const unsigned int aw) const;
 
   };
 
@@ -78,4 +78,3 @@ namespace LVL1 {
 
 
 #endif
-

@@ -38,24 +38,24 @@ namespace LVL1 {
 
     virtual void setup(int inputTable[3][3], int efex_id, int fpga_id, int central_eta) override;
 
-    virtual std::unique_ptr<eFEXtauTOB> getTauTOB() override;
-    virtual unsigned int rCoreCore() override;
-    virtual unsigned int rCoreEnv() override;
-    virtual unsigned int rHadCore() override;
-    virtual unsigned int rHadEnv() override;
+    virtual std::unique_ptr<eFEXtauTOB> getTauTOB() const override;
+    virtual unsigned int rCoreCore() const override;
+    virtual unsigned int rCoreEnv() const override;
+    virtual unsigned int rHadCore() const override;
+    virtual unsigned int rHadEnv() const override;
     virtual void getSums(unsigned int seed, bool UnD, 
                        std::vector<unsigned int> & RcoreSums, 
                        std::vector<unsigned int> & Remums) override;
-    virtual unsigned int getEt() override;
-    virtual unsigned int getBitwiseEt() override;
+    virtual unsigned int getEt() const override;
+    virtual unsigned int getBitwiseEt() const override;
 
   protected:
 
   private:
     virtual void setSupercellSeed() override;
     virtual void setUnDAndOffPhi() override;
-    virtual bool getUnD() override;
-    virtual unsigned int getSeed() override;
+    virtual bool getUnD() const override;
+    virtual unsigned int getSeed() const override;
 	
     unsigned int m_seed = 0;
     bool m_und = false;

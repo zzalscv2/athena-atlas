@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //             Interface for jFEXSmallRJetAlgo - Algorithm for small R jet Algorithm in jFEX
@@ -25,11 +25,11 @@ namespace LVL1{
       virtual void setup(int inputTable[7][7], int inputTableDisplaced[7][7]) = 0;
       virtual bool isSeedLocalMaxima() = 0;
       virtual void buildSeeds() = 0;
-      virtual unsigned int getTTowerET(unsigned int TTID ) = 0;
-      virtual unsigned int getSmallClusterET() =0;
-      virtual unsigned int getSmallETRing() =0;
-      virtual unsigned int getTTIDcentre() =0;
-      virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)   =0;
+      virtual unsigned int getTTowerET(unsigned int TTID ) const = 0;
+      virtual unsigned int getSmallClusterET() const = 0;
+      virtual unsigned int getSmallETRing() const = 0;
+      virtual unsigned int getTTIDcentre() const = 0;
+      virtual void setFPGAEnergy(const std::unordered_map<int,std::vector<int> >& et_map) = 0;
 
    private:
 

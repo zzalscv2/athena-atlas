@@ -32,25 +32,25 @@ Interface definition for eFEXtauAlgo
     virtual void setup(int inputTable[3][3], int efex_id, int fpga_id, int central_eta) = 0;
     virtual void compute() = 0;
     
-    virtual bool isCentralTowerSeed() = 0;
-    virtual std::unique_ptr<eFEXtauTOB> getTauTOB() = 0;
-    virtual unsigned int rCoreCore() = 0;
-    virtual unsigned int rCoreEnv() = 0;
-    virtual void getRCore(std::vector<unsigned int> & rCoreVec) = 0;
-    virtual float getRealRCore() = 0;
-    virtual unsigned int rHadCore() = 0;
-    virtual unsigned int rHadEnv() = 0;
-    virtual void getRHad(std::vector<unsigned int> & rHadVec) = 0;
-    virtual float getRealRHad() = 0;
-    virtual unsigned int getEt() = 0;
-    virtual unsigned int getBitwiseEt() = 0;
-    virtual bool getUnD() = 0;
-    virtual unsigned int getSeed() = 0;
+    virtual bool isCentralTowerSeed() const = 0;
+    virtual std::unique_ptr<eFEXtauTOB> getTauTOB() const = 0;
+    virtual unsigned int rCoreCore() const = 0;
+    virtual unsigned int rCoreEnv() const = 0;
+    virtual void getRCore(std::vector<unsigned int> & rCoreVec) const = 0;
+    virtual float getRealRCore() const = 0;
+    virtual unsigned int rHadCore() const = 0;
+    virtual unsigned int rHadEnv() const = 0;
+    virtual void getRHad(std::vector<unsigned int> & rHadVec) const = 0;
+    virtual float getRealRHad() const = 0;
+    virtual unsigned int getEt() const = 0;
+    virtual unsigned int getBitwiseEt() const = 0;
+    virtual bool getUnD() const = 0;
+    virtual unsigned int getSeed() const = 0;
     virtual void getSums(unsigned int seed, bool UnD, std::vector<unsigned int> & RcoreSums, 
                          std::vector<unsigned int> & RemSums) = 0;
-    virtual unsigned int getBDTScore() = 0;
-    virtual unsigned int getBDTCondition() = 0;
-    virtual bool isBDT() = 0;
+    virtual unsigned int getBDTScore() const = 0;
+    virtual unsigned int getBDTCondition() const = 0;
+    virtual bool isBDT() const = 0;
     virtual void setThresholds(std::vector<unsigned int> rHadThreshold, std::vector<unsigned int> bdtThreshold, unsigned int etThreshold, unsigned int etThresholdForRHad) = 0;
 
   private:
