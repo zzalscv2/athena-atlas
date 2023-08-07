@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -1535,7 +1535,7 @@ namespace MuonGM {
 #ifndef NDEBUG
         const Trk::PlaneSurface* tmpSurface = dynamic_cast<const Trk::PlaneSurface*>(&surface());  //<! filling m_associatedSurface
         const Trk::SurfaceBounds* tmpBounds = nullptr;                         //<! filling m_associatedBounds
-        if (MuonReadoutElement::barrel())
+        if (barrel())
             tmpBounds = dynamic_cast<const Trk::RectangleBounds*>(&bounds());
         else
             tmpBounds = dynamic_cast<const Trk::TrapezoidBounds*>(&bounds());
