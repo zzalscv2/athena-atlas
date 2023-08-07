@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file UnwindBacktrace.cc
@@ -22,10 +22,11 @@
 #include <malloc.h>
 
 
-// A couple declarations from that are not in unwind.h.
+// A couple declarations from libgcc that are not in unwind.h.
 extern "C" {
   const void* _Unwind_Find_FDE (void*, void*);
   void __register_frame_info (const void*, void*);
+  void __deregister_frame_info (const void*);
 }
 
 
@@ -350,6 +351,33 @@ void backtraceByUnwind (backtraceLineFn* lineFn, IOFD fd)
 
 
 } // namespace CxxUtils
+
+
+namespace {
+
+
+// Make sure there's a block on the free list of the internal btree
+// libgcc uses to keep track of registrations, so we won't have
+// to call malloc later.
+bool initUnwind()
+{
+  CxxUtils::SynthData data;
+  data.cie.length = sizeof (data.cie) - sizeof (data.cie.length);
+  data.fde.length = sizeof (data.fde) - sizeof (data.fde.length);
+  // cppcheck-suppress comparePointers
+  data.fde.CIE_delta = reinterpret_cast<char*>(&data.fde.CIE_delta) - reinterpret_cast<char*>(&data.cie.length);
+  data.fde.pc_begin = (void*)&data;
+  data.fde.pc_range = 8;
+  data.sentinel = 0;
+
+  __register_frame_info (&data.fde, &data.ob);
+  __deregister_frame_info (&data.fde);
+  return true;
+}
+const static bool initUnwindFlag = initUnwind();
+
+
+} // anonymous namespace
 
 
 #endif
