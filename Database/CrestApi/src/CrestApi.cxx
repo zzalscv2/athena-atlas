@@ -1481,9 +1481,6 @@ namespace Crest {
     CURL* curl;
     CURLcode res;
 
-    struct curl_httppost* formpost = NULL;
-    struct curl_httppost* lastptr = NULL;
-
     // get a curl handle
 
     curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -1507,18 +1504,37 @@ namespace Crest {
       curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
       // Create the form  for new version
+#if LIBCURL_VERSION_MAJOR < 8
+      struct curl_httppost* formpost = NULL;
+      struct curl_httppost* lastptr = NULL;
       curl_formadd(&formpost,
                    &lastptr,
                    CURLFORM_COPYNAME, "tag",
                    CURLFORM_COPYCONTENTS, tag.c_str(),
                    CURLFORM_END);
+#else
+      curl_mime* mime = curl_mime_init(curl);
+      {
+        curl_mimepart* part = curl_mime_addpart(mime);
+        curl_mime_name(part, "tag");
+        curl_mime_data(part, tag.c_str(), tag.size());
+      }
+#endif
       if (endtime != 0) {
+#if LIBCURL_VERSION_MAJOR < 8
         curl_formadd(&formpost,
                      &lastptr,
                      CURLFORM_COPYNAME, "endtime",
                      CURLFORM_COPYCONTENTS, std::to_string(endtime).c_str(),
                      CURLFORM_END);
+#else
+        std::string endtime_s = std::to_string(endtime);
+        curl_mimepart* part = curl_mime_addpart(mime);
+        curl_mime_name(part, "endtime");
+        curl_mime_data(part, endtime_s.c_str(), endtime_s.size());
+#endif
       }
+#if LIBCURL_VERSION_MAJOR < 8
       curl_formadd(&formpost,
                    &lastptr,
                    // CURLFORM_COPYNAME, "iovsetupload",
@@ -1526,10 +1542,17 @@ namespace Crest {
                    CURLFORM_COPYCONTENTS, js.c_str(),
                    CURLFORM_CONTENTTYPE, "application/json",
                    CURLFORM_END);
-
-
-
       curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+#else
+      {
+        curl_mimepart* part = curl_mime_addpart(mime);
+        curl_mime_name(part, "storeset");
+        curl_mime_type(part, "application/json");
+        curl_mime_data(part, js.c_str(), js.size());
+      }
+      curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
+#endif
+
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWrite_CallbackFunc_StdString);
       curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
 
@@ -1543,8 +1566,13 @@ namespace Crest {
 
       /* always cleanup */
       curl_easy_cleanup(curl);
+#if LIBCURL_VERSION_MAJOR < 8
       curl_formfree(formpost);
       curl_slist_free_all(headers);
+#else
+      curl_slist_free_all(headers);
+      curl_mime_free(mime);
+#endif
 
       curl_global_cleanup();
 
