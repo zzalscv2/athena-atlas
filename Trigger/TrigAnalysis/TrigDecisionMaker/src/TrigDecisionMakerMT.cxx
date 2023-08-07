@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**************************************************************************
@@ -121,18 +121,40 @@ TrigDec::TrigDecisionMakerMT::execute(const EventContext &context) const
       passRawBitset = hltResult->getHltPassRawBits();
       prescaledBitset = hltResult->getHltPrescaledBits();
 
+      // Inspect error codes from event header
       const std::vector<HLT::OnlineErrorCode> errorCodes = hltResult->getErrorCodes();
       bool truncated = false;
       uint32_t code = 0;
       for (size_t i = 0; i < errorCodes.size(); ++i) {
         truncated |= (errorCodes.at(i) == HLT::OnlineErrorCode::RESULT_TRUNCATION);
         if (i == 0) {
-          code = static_cast<uint32_t>(errorCodes.at(i));
+          code = static_cast<uint32_t>(errorCodes.at(0));
         }
       }
+
+      // If the event header does not show any truncation check the individual HLT ROBs
+      // to cover the case of allowed result truncation (see ATR-27986).
+      //
+      // We only support one truncation status in the TrigDecision. So the convention is:
+      //  1) If the main HLT result is available, its status is reflected (e.g. Physics stream)
+      //  2) If not, we take the combined status of all other ROBs, but in practice there
+      //     should only ever be one (TLA) ROB in a given stream.
+      if (!truncated) {
+        std::set<uint16_t> allModuleIds;  // sorted(!) set of module IDs
+        for (const auto& itr : hltResult->getSerialisedData()) allModuleIds.insert(itr.first);
+
+        for (uint16_t moduleId : allModuleIds) {
+          const std::vector<uint32_t>& status = hltResult->getRobStatus(moduleId);
+          if (status.size() > 1) {  // status[0] is the generic eformat event status
+            truncated |= (status[1] == static_cast<uint32_t>(HLT::OnlineErrorCode::RESULT_TRUNCATION));
+            code |= status[1];
+          }
+          if (moduleId==0) break;
+        }
+      }
+
       trigDec->setEFErrorBits(code);
       trigDec->setEFTruncated(truncated);
-
     }
 
     ATH_MSG_DEBUG ("Number of HLT chains passed raw: " << passRawBitset.count());
