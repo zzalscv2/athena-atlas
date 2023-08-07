@@ -46,3 +46,21 @@ atlas_add_executable( hdf5-merge
   LINK_LIBRARIES HDF5Utils ${Boost_LIBRARIES} ${HDF5_LIBRARIES} )
 
 atlas_install_scripts( bin/hdf5-merge-nolock )
+
+# Services only make sense in gaudi
+
+# we only build the algorithm stuff for Gaudi builds
+if (NOT XAOD_STANDALONE)
+  # interface library
+  atlas_add_library(IH5GroupSvc
+    INTERFACE
+    PUBLIC_HEADERS HDF5Utils
+    LINK_LIBRARIES GaudiKernel AthenaBaseComps
+    )
+  atlas_add_component(H5FileSvc
+    src/H5FileSvc.cxx
+    src/components/HDF5Utils_entries.cxx
+    INCLUDE_DIRS ${HDF5_INCLUDE_DIRS}
+    LINK_LIBRARIES IH5GroupSvc ${HDF5_LIBRARIES}
+  )
+endif()
