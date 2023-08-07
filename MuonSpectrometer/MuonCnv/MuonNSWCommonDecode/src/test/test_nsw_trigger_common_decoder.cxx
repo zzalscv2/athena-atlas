@@ -196,10 +196,12 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::ROBFragment &r, 
     
     std::cout << "Printing raw data (ignoring any structure)" << std::endl;
     std::cout << std::hex;
+    auto originalFill = std::cout.fill();
     for (unsigned int i = 0; i < r.rod_ndata (); ++i) {
       std::cout << " " << std::setfill('0') << std::setw(8) << bs[i];
       if (i % 4 == 3) std::cout << std::endl;
     }
+    std::cout<<std::setfill(originalFill);
     std::cout << std::dec;
     std::cout << std::endl;
   } else {
@@ -697,11 +699,11 @@ int test_nsw_trigger_common_decoder_loop (Params &params, Statistics &statistics
 	continue; //this way, an event without needed/wanted ROBs will not show up entirely
       }
       ++statistics.nevents;   
-      outtree->Fill();
+      if (outtree) outtree->Fill();
       if (buf) delete [] buf;
     }
-    outtree->Write();
-    outfile->Close();    
+    if (outtree) outtree->Write();
+    if (outfile) outfile->Close();    
   }
   return 0;
 }
