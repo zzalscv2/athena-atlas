@@ -50,8 +50,6 @@ namespace ST {
   const static SG::AuxElement::ConstAccessor<float> acc_z0sinTheta("z0sinTheta");
   const static SG::AuxElement::Decorator<float>     dec_d0sig("d0sig");
   const static SG::AuxElement::ConstAccessor<float> acc_d0sig("d0sig");
-  const static SG::AuxElement::Decorator<ElementLink<xAOD::MuonContainer>> dec_originalMuonLink("originalMuonLink");
-  const static SG::AuxElement::ConstAccessor<ElementLink<xAOD::MuonContainer>> acc_originalMuonLink("originalMuonLink");
   const static SG::AuxElement::Decorator<char>      dec_isLRT("isLRT");
 
 
@@ -62,12 +60,10 @@ StatusCode SUSYObjDef_xAOD::MergeMuons(const xAOD::MuonContainer & muons, const 
         if (writeMuon.at(muon->index())){
             newMuon = new xAOD::Muon(*muon);
 
-            if (muon->isAvailable<ElementLink<xAOD::MuonContainer>>("originalMuonLink") ) {
-              dec_originalMuonLink(*newMuon) = acc_originalMuonLink(*muon);
+            if ( getOriginalObject(*muon) != nullptr ) {
+              setOriginalObjectLink(*getOriginalObject(*muon), *newMuon);
             } else {
-              ElementLink<xAOD::MuonContainer> muLink;
-              muLink.toIndexedElement(muons, muon->index());
-              dec_originalMuonLink(*newMuon) = muLink;
+              setOriginalObjectLink(*muon, *newMuon);
             }
             outputCol->push_back(newMuon); 
         }
@@ -86,9 +82,7 @@ StatusCode SUSYObjDef_xAOD::prepareLRTMuons(const xAOD::MuonContainer* inMuons, 
         std::unique_ptr<xAOD::Muon> copyMuon = std::make_unique<xAOD::Muon>(*muon);
 
         // transfer original muon link
-        ElementLink<xAOD::MuonContainer> muLink;
-        muLink.toIndexedElement(*inMuons, muon->index());
-        dec_originalMuonLink(*copyMuon) = muLink;
+        setOriginalObjectLink(*muon, *copyMuon);
         copy->push_back( std::move(copyMuon) );
       } 
     }
@@ -96,10 +90,7 @@ StatusCode SUSYObjDef_xAOD::prepareLRTMuons(const xAOD::MuonContainer* inMuons, 
     {  
       std::unique_ptr<xAOD::Muon> copyMuon = std::make_unique<xAOD::Muon>(*muon);
 
-      ElementLink<xAOD::MuonContainer> muLink;
-      muLink.toIndexedElement(*inMuons, muon->index());
-      dec_originalMuonLink(*copyMuon) = muLink;
-
+      setOriginalObjectLink(*muon, *copyMuon);
       copy->push_back( std::move(copyMuon) );
     }
     
