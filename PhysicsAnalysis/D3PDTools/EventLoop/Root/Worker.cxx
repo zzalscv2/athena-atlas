@@ -936,6 +936,8 @@ namespace EL
     ANA_CHECK (xAOD::LoadDictionaries());
 
     mo = dynamic_cast<SH::MetaObject*>(f->Get(sampleName.c_str()));
+    if (!mo)
+      mo = dynamic_cast<SH::MetaObject*>(f->Get("defaultMetaObject"));
     if (!mo) {
       ANA_MSG_ERROR ("Could not read in sample meta object");
       return ::StatusCode::FAILURE;

@@ -246,12 +246,18 @@ doManagerStep (Detail::ManagerData& data) const
           outputs.Add(out->Clone());
         }      
         f.WriteTObject(&outputs, "outputs", "SingleKey");
+        bool haveDefault = false;
         for (SH::SampleHandler::iterator sample = data.job->sampleHandler().begin();
              sample != data.job->sampleHandler().end();  ++sample) {
           SH::MetaObject meta(*(*sample)->meta());
           meta.fetchDefaults(data.options);
           f.WriteObject(&meta, (*sample)->name().c_str());
           //f.WriteObject((*sample)->meta(), (*sample)->name().c_str());
+          if (!haveDefault)
+          {
+            f.WriteObject (&meta, "defaultMetaObject");
+            haveDefault = true;
+          }
         }
         f.Close();      
       }

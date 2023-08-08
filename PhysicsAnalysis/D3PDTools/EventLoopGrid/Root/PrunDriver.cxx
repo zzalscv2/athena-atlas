@@ -447,9 +447,15 @@ static void saveJobDef(const std::string& fileName,
     outputs.Add(o->Clone());
   file.WriteTObject(&job.jobConfig(), "jobConfig", "SingleKey");        
   file.WriteTObject(&outputs, "outputs", "SingleKey");        
+  bool haveDefault = false;
   for (SH::SampleHandler::iterator s = sh.begin(); s != sh.end(); ++s) {
     const SH::MetaObject& meta = *((*s)->meta());
     file.WriteObject(&meta, meta.castString("sample_name").c_str());
+    if (!haveDefault)
+    {
+      file.WriteObject (&meta, "defaultMetaObject");
+      haveDefault = true;
+    }
   }
 }  
 
