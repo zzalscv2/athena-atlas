@@ -30,6 +30,7 @@ def defineCommonL1Flags(L1MenuFlags):
 # Define here the list of triggers that should be in all L1 menus
 RequiredL1Items = [
         #CALREQ
+        'L1_CALREQ0',
         'L1_CALREQ1',
         'L1_CALREQ2',
 

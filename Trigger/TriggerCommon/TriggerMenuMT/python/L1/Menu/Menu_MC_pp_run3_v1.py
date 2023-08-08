@@ -182,6 +182,7 @@ def defineMenu():
         'L1_BPTX0_BGRP12':'',
         'L1_BPTX1_BGRP12':'',
 
+        'L1_CALREQ0':'',
         'L1_CALREQ1':'',
         'L1_CALREQ2':'',
 
