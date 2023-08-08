@@ -182,7 +182,9 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
       motherStatus = theMoth->status();
       motherBarcode = theMoth->barcode();
       if (info) {
+        info->mother = theMoth;
         info->motherPDG = motherPDG;
+        info->motherStatus = motherStatus;
         info->motherBarcode = motherBarcode;
       }
     }
@@ -217,7 +219,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
     return std::make_pair(Neutrino, partOrig);
   }
 
-  if (HepMC::is_same_generator_particle(thePart,motherBarcode))
+  if (HepMC::is_same_generator_particle(thePart, info ? info->Mother() : nullptr))
     return std::make_pair(NonPrimary, partOrig);
 
   if (isPartHadr)
@@ -467,7 +469,7 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
 
   ATH_MSG_DEBUG("Executing DefOrigOfElectron ");
 
-  const xAOD::TruthParticle* thePriPart = barcode_to_particle(mcTruthTES, thePart->barcode());
+  const xAOD::TruthParticle* thePriPart = find_matching(mcTruthTES, thePart);
   if (!thePriPart) return NonDefined;
   if (abs(thePriPart->pdgId()) != 11) return NonDefined;
 
@@ -483,15 +485,24 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
   if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfElectron:: electron  has more than one mother ");
 
   const xAOD::TruthParticle* mother = getMother(thePriPart);
-  if (info)
+  if (info){
     info->mother = mother;
+    if (mother) {
+      info->motherStatus = mother->status();
+      info->motherPDG = mother->pdg_id();
+      info->motherBarcode = mother->barcode();
+    }  
+  }
   if (!mother) {
     return NonDefined;
   }
   int motherPDG = mother->pdgId();
+  int motherStatus = mother->status();
   long motherBarcode = mother->barcode();
   if (info) {
+    info->mother = mother;
     info->motherPDG = motherPDG;
+    info->motherStatus = motherStatus;
     info->motherBarcode = motherBarcode;
   }
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
@@ -561,8 +572,12 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
   int numOfDaug = partOriVert->nOutgoingParticles();
 
   if (info) {
-    info->motherPDG = motherPDG;
-    info->motherBarcode = motherBarcode;
+    info->mother = mother;
+    if (mother) {
+      info->motherStatus = mother->status();
+      info->motherPDG = motherPDG;
+      info->motherBarcode = motherBarcode;
+    }
   }
 
   int NumOfPhot(0);
@@ -941,7 +956,7 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
 
   ATH_MSG_DEBUG("Executing DefOrigOfMuon ");
 
-  const xAOD::TruthParticle* thePriPart = barcode_to_particle(mcTruthTES, thePart->barcode());
+  const xAOD::TruthParticle* thePriPart = find_matching(mcTruthTES, thePart);
   if (!thePriPart)
     return NonDefined;
   if (abs(thePriPart->pdgId()) != 13)
@@ -967,7 +982,9 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
   int motherPDG = mother->pdgId();
   if (info) {
+    info->mother = mother;
     info->motherPDG = motherPDG;
+    info->motherStatus = mother->status();
     info->motherBarcode = mother->barcode();
   }
 
@@ -1006,8 +1023,14 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
         pPDG = MotherParent->pdgId();
         if (abs(pPDG) == 13 || abs(pPDG) == 15 || abs(pPDG) == 24) {
           mother = MotherParent;
-          if (info)
+          if (info){
             info->mother = mother;
+            if (mother){
+              info->motherStatus = mother->status();
+              info->motherPDG = mother->pdg_id();
+              info->motherBarcode = mother->barcode();
+            }
+          }
         }
       }
     } while ((abs(pPDG) == 13 || abs(pPDG) == 15 || abs(pPDG) == 24));
@@ -1016,8 +1039,14 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
         abs(pPDG) == 36 || abs(pPDG) == 37 || abs(pPDG) == 32 || abs(pPDG) == 33 || abs(pPDG) == 34 || abs(pPDG) == 6 ||
         abs(pPDG) == 9900024 || abs(pPDG) == 9900012 || abs(pPDG) == 9900014 || abs(pPDG) == 9900016 ||
         (abs(pPDG) < 2000040 && abs(pPDG) > 1000001)) {
-      if (info)
+      if (info) {
         info->mother = mother;
+        if (mother) {
+          info->motherStatus = mother->status();
+          info->motherPDG = mother->pdg_id();
+          info->motherBarcode = mother->barcode();
+        }
+      }
     }
   }
 
@@ -1028,8 +1057,12 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
   int numOfDaug = partOriVert->nOutgoingParticles();
 
   if (info) {
-    info->motherPDG = motherPDG;
-    info->motherBarcode = mother->barcode();
+    info->mother = mother;
+    if (mother) {
+      info->motherStatus = mother->status();
+      info->motherPDG = motherPDG;
+      info->motherBarcode = mother->barcode();
+    }
   }
 
   //---
@@ -1334,7 +1367,7 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
 
   ATH_MSG_DEBUG("Executing DefOrigOfTau ");
 
-  const xAOD::TruthParticle* thePriPart = barcode_to_particle(mcTruthTES, thePart->barcode());
+  const xAOD::TruthParticle* thePriPart = find_matching(mcTruthTES, thePart);
   if (!thePriPart)
     return NonDefined;
   if (abs(thePriPart->pdgId()) != 15)
@@ -1356,8 +1389,14 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
     ATH_MSG_DEBUG("DefOrigOfTau:: tau  has more than one mother ");
 
   const xAOD::TruthParticle* mother = getMother(thePriPart);
-  if (info)
+  if (info) {
     info->mother = mother;
+    if (mother) {
+      info->motherStatus = mother->status();
+      info->motherPDG = mother->pdg_id();
+      info->motherBarcode = mother->barcode();
+    }
+  }
   if (!mother) {
     return NonDefined;
   }
@@ -1373,17 +1412,27 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
       pPDG = MotherParent->pdgId();
       if (abs(pPDG) == 6) {
         mother = MotherParent;
-        if (info)
+        if (info) {
           info->mother = mother;
+          if (mother) {
+            info->motherStatus = mother->status();
+            info->motherPDG = mother->pdg_id();
+            info->motherBarcode = mother->barcode();
+          }
+        }
       }
     }
   }
 
   motherPDG = mother->pdgId();
   if (info) {
-    info->motherPDG = motherPDG;
-    info->motherBarcode = mother->barcode();
-  }
+    info->mother = mother;
+    if (mother) {
+      info->motherPDG = motherPDG;
+      info->motherStatus = mother->status();
+      info->motherBarcode = mother->barcode();
+    }
+}
   mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
   partOriVert = mother->decayVtx();
   if (!partOriVert) {
@@ -1638,13 +1687,15 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
 
   if (info) {
     info->mother = nullptr;
+    info->photonMother = nullptr;
+    info->motherStatus = 0;
     info->photonMotherBarcode = 0;
     info->photonMotherPDG = 0;
     info->photonMotherStatus = 0;
     info->motherBarcode = 0;
   }
 
-  const xAOD::TruthParticle* thePriPart = barcode_to_particle(mcTruthTES, thePart->barcode());
+  const xAOD::TruthParticle* thePriPart = find_matching(mcTruthTES, thePart);
   if (!thePriPart)
     return NonDefined;
   if (abs(thePriPart->pdgId()) != 22)
@@ -1665,8 +1716,14 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
     ATH_MSG_DEBUG("DefOrigOfPhoton:: photon  has more than one mother ");
 
   const xAOD::TruthParticle* mother = getMother(thePriPart);
-  if (info)
-    info->mother = mother;
+  if (info) {
+        info->mother = mother;
+        if (mother) {
+          info->motherStatus = mother->status();
+          info->motherPDG = mother->pdg_id();
+          info->motherBarcode = mother->barcode();
+        }
+  }
   if (!mother)
     return NonDefined;
   int motherPDG = mother->pdgId();
@@ -1674,8 +1731,12 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
   int motherStatus = mother->status();
   long motherBarcode = mother->barcode();
   if (info) {
-    info->motherPDG = motherPDG;
-    info->motherBarcode = motherBarcode;
+    info->mother = mother;
+    if (mother) {
+      info->motherPDG = motherPDG;
+      info->motherStatus = motherStatus;
+      info->motherBarcode = motherBarcode;
+    }
   }
   partOriVert = mother->decayVtx();
   numOfParents = partOriVert->nIncomingParticles();
@@ -1729,8 +1790,9 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
     if (abs(DaugType) < 11 || (abs(DaugType) > 16 && abs(DaugType) < 43 && abs(DaugType) != 22))
       NumOfPartons++;
 
-    if (DaugType == motherPDG)
+    if (DaugType == motherPDG) {
       DaugBarcode = partOriVert->outgoingParticle(ipOut)->barcode();
+     }
   } // cycle itrDaug
 
   bool foundISR = false;
@@ -2085,7 +2147,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   ATH_MSG_DEBUG("Executing DefOrigOfNeutrino ");
 
   int nuFlav = abs(thePart->pdgId());
-  const xAOD::TruthParticle* thePriPart = barcode_to_particle(mcTruthTES, thePart->barcode());
+  const xAOD::TruthParticle* thePriPart = find_matching(mcTruthTES, thePart);
   if (!thePriPart)
     return NonDefined;
   if (abs(thePriPart->pdgId()) != nuFlav)
@@ -2112,9 +2174,12 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
     return NonDefined;
   }
   int motherPDG = mother->pdgId();
+  long motherStatus = mother->status();
   long motherBarcode = mother->barcode();
   if (info) {
+    info->mother = mother;
     info->motherPDG = motherPDG;
+    info->motherStatus = motherStatus;
     info->motherBarcode = motherBarcode;
   }
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
@@ -2158,8 +2223,14 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
       }
       if (abs(pPDG) == nuFlav || abs(pPDG) == 15 || abs(pPDG) == 24) {
         mother = MotherParent;
-        if (info)
-          info->mother = mother;
+  if (info) {
+        info->mother = mother;
+        if (mother) {
+          info->motherStatus = mother->status();
+          info->motherPDG = mother->pdg_id();
+          info->motherBarcode = mother->barcode();
+        }
+  }
       }
 
     } while ((std::abs(pPDG) == nuFlav || std::abs(pPDG) == 15 || std::abs(pPDG) == 24));
@@ -2169,12 +2240,19 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
         std::abs(pPDG) == 34 || std::abs(pPDG) == 6 || std::abs(pPDG) == 9900024 || std::abs(pPDG) == 9900012 || std::abs(pPDG) == 9900014 ||
         std::abs(pPDG) == 9900016 || (std::abs(pPDG) < 2000040 && std::abs(pPDG) > 1000001)) {
       mother = MotherParent;
-      if (info)
+      if (info) {
         info->mother = mother;
+        if (mother) {
+          info->motherStatus = mother->status();
+          info->motherPDG = mother->pdg_id();
+          info->motherBarcode = mother->barcode();
+        }
+     }
     }
   }
 
   motherPDG = mother->pdgId();
+  motherStatus = mother->status();
   motherBarcode = mother->barcode();
   partOriVert = mother->decayVtx();
   mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
@@ -2182,7 +2260,9 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   int numOfDaug = partOriVert->nOutgoingParticles();
 
   if (info) {
+    info->mother = mother;
     info->motherPDG = motherPDG;
+    info->motherStatus = motherStatus;
     info->motherBarcode = motherBarcode;
   }
 
@@ -2993,7 +3073,7 @@ MCTruthClassifier::checkOrigOfBkgElec(const xAOD::TruthParticle* theEle, Info* i
       && info->photonMotherStatus < 3) {
     do {
       const xAOD::TruthParticle* theMotherPart =
-        barcode_to_particle(truthParticleContainerReadHandle.ptr(), info->photonMotherBarcode);
+        find_matching(truthParticleContainerReadHandle.ptr(), info ? info->PhotonMother() : nullptr );
       if (theMotherPart == nullptr || theMotherPart == thePart)
         break;
       thePart = theMotherPart;
@@ -3008,7 +3088,7 @@ MCTruthClassifier::checkOrigOfBkgElec(const xAOD::TruthParticle* theEle, Info* i
     if (part.first == BkgElectron && part.second == PhotonConv) {
       // in case of photon from gen particle  classify photon
       // part=particleTruthClassifier(mother);
-      thePart = barcode_to_particle(truthParticleContainerReadHandle.ptr(), info->motherBarcode);
+      thePart = find_matching(truthParticleContainerReadHandle.ptr(), info ? info->Mother() : nullptr );
       if (thePart != nullptr)
         part = particleTruthClassifier(thePart, info);
 
@@ -3020,7 +3100,7 @@ MCTruthClassifier::checkOrigOfBkgElec(const xAOD::TruthParticle* theEle, Info* i
 
   } else {
     // in case of photon from gen particle  classify photon
-    thePart = barcode_to_particle(truthParticleContainerReadHandle.ptr(), info->motherBarcode);
+    thePart = find_matching(truthParticleContainerReadHandle.ptr(), info ? info->Mother() : nullptr);
     if (thePart != nullptr)
       part = particleTruthClassifier(thePart, info);
   }
@@ -3035,16 +3115,11 @@ MCTruthClassifier::partCharge(const xAOD::TruthParticle* thePart)
   return thePart?thePart->charge():0.0;
 }
 
-//------------------------------------------------------------------------
-/// This function returns the *original* generator particle if it is found in the TrueTES container.
-/// The input is barcode of some particle.
 const xAOD::TruthParticle*
-MCTruthClassifier::barcode_to_particle(const xAOD::TruthParticleContainer* TruthTES, int bcin)
+MCTruthClassifier::find_matching(const xAOD::TruthParticleContainer* TruthTES, const xAOD::TruthParticle* bcin)
 {
-  //------------------------------------------------------------------------
-  // temporary solution?
   const xAOD::TruthParticle* ptrPart = nullptr;
-
+  if (!bcin) return ptrPart;
   for (const auto *const truthParticle : *TruthTES) {
     if (HepMC::is_sim_descendant(bcin,truthParticle)) {
       ptrPart = truthParticle;

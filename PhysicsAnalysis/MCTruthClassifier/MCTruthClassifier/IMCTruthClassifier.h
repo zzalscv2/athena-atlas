@@ -75,12 +75,15 @@ public:
       MCTruthPartClassifier::UnknownOutCome;
 
     const xAOD::TruthParticle* mother = nullptr;
+    long motherStatus = 0;
     long motherBarcode = 0;
     int motherPDG = 0;
+    const xAOD::TruthParticle* Mother() const { return mother;}
 
     long photonMotherBarcode = 0;
     long photonMotherStatus = 0;
     int photonMotherPDG = 0;
+    const xAOD::TruthParticle* PhotonMother() const { return photonMother;}
     const xAOD::TruthParticle* photonMother = nullptr;
 
     const xAOD::TruthParticle* bkgElecMother = nullptr;
