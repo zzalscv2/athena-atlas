@@ -207,6 +207,33 @@ int MdtIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         status = 1;
     }
 
+    // To speed up the range scans needed by the MinMax functions,
+    // keep indices of ranges by station name.
+
+    m_module_ranges_by_station.resize (nStationNames());
+    for (const Range& r : m_full_module_range) {
+      const Range::field& station_f = r[m_NAME_INDEX];
+      assert (station_f.has_minimum() && station_f.has_maximum() &&
+              station_f.get_minimum() == station_f.get_maximum());
+      unsigned int station = station_f.get_minimum();
+      if (station >= m_module_ranges_by_station.size()) {
+        m_module_ranges_by_station.resize (station+1);
+      }
+      m_module_ranges_by_station[station].push_back (&r);
+    }
+
+    m_channel_ranges_by_station.resize (nStationNames());
+    for (const Range& r : m_full_channel_range) {
+      const Range::field& station_f = r[m_NAME_INDEX];
+      assert (station_f.has_minimum() && station_f.has_maximum() &&
+              station_f.get_minimum() == station_f.get_maximum());
+      unsigned int station = station_f.get_minimum();
+      if (station >= m_channel_ranges_by_station.size()) {
+        m_channel_ranges_by_station.resize (station+1);
+      }
+      m_channel_ranges_by_station[station].push_back (&r);
+    }
+
     // Setup the hash tables for MDT
 
     ATH_MSG_INFO("Initializing MDT hash indices ... ");
@@ -341,232 +368,162 @@ void MdtIdHelper::idChannels(const Identifier& id, std::vector<Identifier>& vect
 
 /// Access to min and max of level ranges
 
-int MdtIdHelper::stationEtaMin(const Identifier& id) const {
+int MdtIdHelper::stationEtaMin(const Identifier& id) const
+{
+  return stationEtaMinMax(id).first;
+}
+int MdtIdHelper::stationEtaMax(const Identifier& id) const
+{
+  return stationEtaMinMax(id).second;
+}
+
+int MdtIdHelper::stationPhiMin(const Identifier& id) const
+{
+  return stationPhiMinMax(id).first;
+}
+int MdtIdHelper::stationPhiMax(const Identifier& id) const
+{
+  return stationPhiMinMax(id).second;
+}
+
+int MdtIdHelper::multilayerMin(const Identifier& id) const
+{
+  return multilayerMinMax(id).first;
+}
+int MdtIdHelper::multilayerMax(const Identifier& id) const
+{
+  return multilayerMinMax(id).second;
+}
+
+int MdtIdHelper::tubeLayerMin(const Identifier& id) const
+{
+  return tubeLayerMinMax(id).first;
+}
+int MdtIdHelper::tubeLayerMax(const Identifier& id) const
+{
+  return tubeLayerMinMax(id).second;
+}
+
+int MdtIdHelper::tubeMin(const Identifier& id) const
+{
+  return tubeMinMax(id).first;
+}
+int MdtIdHelper::tubeMax(const Identifier& id) const
+{
+  return tubeMinMax(id).second;
+}
+
+std::pair<int, int>
+MdtIdHelper::findMinMax(const Identifier& id,
+                        const size_type field_index,
+                        const ranges_by_station_t& ranges_by_station) const {
+    int resultMin =  999;
+    int resultMax = -999;
     ExpandedIdentifier expId;
-    IdContext eta_context(expId, 0, m_ETA_INDEX);
+    IdContext eta_context(expId, 0, field_index);
     if (!get_expanded_id(id, expId, &eta_context)) {
-        int result = -999;
-        for (unsigned int i = 0; i < m_full_module_range.size(); ++i) {
-            const Range& range = m_full_module_range[i];
-            if (range.match(expId)) {
-                const Range::field& eta_field = range[m_ETA_INDEX];
+        unsigned int station = expId[m_NAME_INDEX];
+        for (const Range* range : ranges_by_station.at (station)) {
+            if (range->match(expId)) {
+                const Range::field& field = (*range)[field_index];
+                if (field.has_minimum()) {
+                    resultMin = std::min (resultMin, field.get_minimum());
+                }
+                if (field.has_maximum()) {
+                    resultMax = std::max (resultMax, field.get_maximum());
+                }
+            }
+        }
+    }
+    return std::make_pair (resultMin, resultMax);
+}
+
+
+std::pair<int, int>
+MdtIdHelper::stationEtaMinMax(const Identifier& id) const {
+    return findMinMax (id, m_ETA_INDEX, m_module_ranges_by_station);
+}
+
+std::pair<int, int>
+MdtIdHelper::stationPhiMinMax(const Identifier& id) const {
+    return findMinMax (id, m_PHI_INDEX, m_module_ranges_by_station);
+}
+
+std::tuple<int, int, int, int>
+MdtIdHelper::stationEtaPhiMinMax(const Identifier& id) const {
+    int stationEtaMin =  999;
+    int stationEtaMax = -999;
+    int stationPhiMin =  999;
+    int stationPhiMax = -999;
+
+    ExpandedIdentifier expIdEta;
+    ExpandedIdentifier expIdPhi;
+    IdContext contextEta(expIdEta, 0, m_ETA_INDEX);
+    IdContext contextPhi(expIdPhi, 0, m_PHI_INDEX);
+    if (!get_expanded_id(id, expIdEta, &contextEta) &&
+        !get_expanded_id(id, expIdPhi, &contextPhi)) {
+        unsigned int station = expIdEta[m_NAME_INDEX];
+        for (const Range* range : m_module_ranges_by_station.at (station)) {
+            if (range->match(expIdEta)) {
+                const Range::field& eta_field = (*range)[m_ETA_INDEX];
                 if (eta_field.has_minimum()) {
-                    int etamin = eta_field.get_minimum();
-                    if (-999 == result) {
-                        result = etamin;
-                    } else {
-                        if (etamin < result) result = etamin;
-                    }
+                    stationEtaMin = std::min (stationEtaMin,
+                                              eta_field.get_minimum());
                 }
-            }
-        }
-        return result;
-    }
-    return 999;  /// default
-}
-
-int MdtIdHelper::stationEtaMax(const Identifier& id) const {
-    ExpandedIdentifier expId;
-    IdContext eta_context(expId, 0, m_ETA_INDEX);
-    if (!get_expanded_id(id, expId, &eta_context)) {
-        int result = -999;
-        for (unsigned int i = 0; i < m_full_module_range.size(); ++i) {
-            const Range& range = m_full_module_range[i];
-            if (range.match(expId)) {
-                const Range::field& eta_field = range[m_ETA_INDEX];
                 if (eta_field.has_maximum()) {
-                    int etamax = eta_field.get_maximum();
-                    if (result < etamax) result = etamax;
+                    stationEtaMax = std::max (stationEtaMax,
+                                              eta_field.get_maximum());
+                }
+
+                if (range->match(expIdPhi)) {
+                  const Range::field& phi_field = (*range)[m_PHI_INDEX];
+                  if (phi_field.has_minimum()) {
+                      stationPhiMin = std::min (stationPhiMin,
+                                                phi_field.get_minimum());
+                  }
+                  if (phi_field.has_maximum()) {
+                      stationPhiMax = std::max (stationPhiMax,
+                                                phi_field.get_maximum());
+                  }
                 }
             }
         }
-        return result;
     }
-    return -999;
-}
-
-int MdtIdHelper::stationPhiMin(const Identifier& id) const {
-    ExpandedIdentifier expId;
-    IdContext phi_context(expId, 0, m_PHI_INDEX);
-    if (!get_expanded_id(id, expId, &phi_context)) {
-        for (unsigned int i = 0; i < m_full_module_range.size(); ++i) {
-            const Range& range = m_full_module_range[i];
-            if (range.match(expId)) {
-                const Range::field& phi_field = range[m_PHI_INDEX];
-                if (phi_field.has_minimum()) { return (phi_field.get_minimum()); }
-            }
-        }
-    }
-    /// Failed to find the min
-    return 999;
-}
-
-int MdtIdHelper::stationPhiMax(const Identifier& id) const {
-    ExpandedIdentifier expId;
-    IdContext phi_context(expId, 0, m_PHI_INDEX);
-    if (!get_expanded_id(id, expId, &phi_context)) {
-        for (unsigned int i = 0; i < m_full_module_range.size(); ++i) {
-            const Range& range = m_full_module_range[i];
-            if (range.match(expId)) {
-                const Range::field& phi_field = range[m_PHI_INDEX];
-                if (phi_field.has_maximum()) { return (phi_field.get_maximum()); }
-            }
-        }
-    }
-    /// Failed to find the max
-    return -999;
+    return std::make_tuple (stationEtaMin, stationEtaMax,
+                            stationPhiMin, stationPhiMax);
 }
 
 int MdtIdHelper::numberOfMultilayers(const Identifier& id) const {
+    int result = -999;
     ExpandedIdentifier expId;
     IdContext context = technology_context();
     if (!get_expanded_id(id, expId, &context)) {
-        int result = -999;
-        for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
-            const Range& range = m_full_channel_range[i];
-            if (range.match(expId)) {
-                const Range::field& multilayer_field = range[m_DETECTORELEMENT_INDEX];
+        unsigned int station = expId[m_NAME_INDEX];
+        for (const Range* range : m_channel_ranges_by_station.at (station)) {
+            if (range->match(expId)) {
+                const Range::field& multilayer_field = (*range)[m_DETECTORELEMENT_INDEX];
                 if (multilayer_field.has_maximum()) {
-                    int multilayermax = multilayer_field.get_maximum();
-                    if (result < multilayermax) result = multilayermax;
+                    result = std::max (result, multilayer_field.get_maximum());
                 }
             }
         }
-        return result;
     }
-    return -999;
+    return result;
 }
 
-int MdtIdHelper::multilayerMin(const Identifier& id) const {
-    ExpandedIdentifier expId;
-    IdContext multilayer_context(expId, 0, m_DETECTORELEMENT_INDEX);
-    if (!get_expanded_id(id, expId, &multilayer_context)) {
-        int result = -999;
-        for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
-            const Range& range = m_full_channel_range[i];
-            if (range.match(expId)) {
-                const Range::field& multilayer_field = range[m_DETECTORELEMENT_INDEX];
-                if (multilayer_field.has_minimum()) {
-                    int multilayermin = multilayer_field.get_minimum();
-                    if (-999 == result) {
-                        result = multilayermin;
-                    } else {
-                        if (multilayermin < result) result = multilayermin;
-                    }
-                }
-            }
-        }
-        return result;
-    }
-    return 999;  /// default
+std::pair<int, int>
+MdtIdHelper::multilayerMinMax(const Identifier& id) const {
+    return findMinMax (id, m_DETECTORELEMENT_INDEX, m_channel_ranges_by_station);
 }
 
-int MdtIdHelper::multilayerMax(const Identifier& id) const {
-    ExpandedIdentifier expId;
-    IdContext multilayer_context(expId, 0, m_DETECTORELEMENT_INDEX);
-    if (!get_expanded_id(id, expId, &multilayer_context)) {
-        int result = -999;
-        for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
-            const Range& range = m_full_channel_range[i];
-            if (range.match(expId)) {
-                const Range::field& multilayer_field = range[m_DETECTORELEMENT_INDEX];
-                if (multilayer_field.has_maximum()) {
-                    int multilayermax = multilayer_field.get_maximum();
-                    if (result < multilayermax) result = multilayermax;
-                }
-            }
-        }
-        return result;
-    }
-    return -999;
+std::pair<int, int>
+MdtIdHelper::tubeLayerMinMax(const Identifier& id) const {
+    return findMinMax (id, m_TUBELAYER_INDEX, m_channel_ranges_by_station);
 }
 
-int MdtIdHelper::tubeLayerMin(const Identifier& id) const {
-    ExpandedIdentifier expId;
-    IdContext tubelayer_context(expId, 0, m_TUBELAYER_INDEX);
-    if (!get_expanded_id(id, expId, &tubelayer_context)) {
-        int result = -999;
-        for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
-            const Range& range = m_full_channel_range[i];
-            if (range.match(expId)) {
-                const Range::field& tubelayer_field = range[m_TUBELAYER_INDEX];
-                if (tubelayer_field.has_minimum()) {
-                    int tubelayermin = tubelayer_field.get_minimum();
-                    if (-999 == result) {
-                        result = tubelayermin;
-                    } else {
-                        if (tubelayermin < result) result = tubelayermin;
-                    }
-                }
-            }
-        }
-        return result;
-    }
-    return 999;  // default
-}
-
-int MdtIdHelper::tubeLayerMax(const Identifier& id) const {
-    ExpandedIdentifier expId;
-    IdContext tubelayer_context(expId, 0, m_TUBELAYER_INDEX);
-    if (!get_expanded_id(id, expId, &tubelayer_context)) {
-        int result = -999;
-        for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
-            const Range& range = m_full_channel_range[i];
-            if (range.match(expId)) {
-                const Range::field& tubelayer_field = range[m_TUBELAYER_INDEX];
-                if (tubelayer_field.has_maximum()) {
-                    int tubelayermax = tubelayer_field.get_maximum();
-                    if (result < tubelayermax) result = tubelayermax;
-                }
-            }
-        }
-        return result;
-    }
-    return -999;
-}
-
-int MdtIdHelper::tubeMin(const Identifier& id) const {
-    ExpandedIdentifier expId;
-    IdContext channel_context(expId, 0, m_CHANNEL_INDEX);
-    if (!get_expanded_id(id, expId, &channel_context)) {
-        int result = -999;
-        for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
-            const Range& range = m_full_channel_range[i];
-            if (range.match(expId)) {
-                const Range::field& channel_field = range[m_CHANNEL_INDEX];
-                if (channel_field.has_minimum()) {
-                    int channelmin = channel_field.get_minimum();
-                    if (-999 == result) {
-                        result = channelmin;
-                    } else {
-                        if (channelmin < result) result = channelmin;
-                    }
-                }
-            }
-        }
-        return result;
-    }
-    return 999;  /// default
-}
-
-int MdtIdHelper::tubeMax(const Identifier& id) const {
-    ExpandedIdentifier expId;
-    IdContext channel_context(expId, 0, m_CHANNEL_INDEX);
-    if (!get_expanded_id(id, expId, &channel_context)) {
-        int result = -999;
-        for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
-            const Range& range = m_full_channel_range[i];
-            if (range.match(expId)) {
-                const Range::field& channel_field = range[m_CHANNEL_INDEX];
-                if (channel_field.has_maximum()) {
-                    int channelmax = channel_field.get_maximum();
-                    if (result < channelmax) result = channelmax;
-                }
-            }
-        }
-        return result;
-    }
-    return -999;
+std::pair<int, int>
+MdtIdHelper::tubeMinMax(const Identifier& id) const {
+    return findMinMax (id, m_CHANNEL_INDEX, m_channel_ranges_by_station);
 }
 
 /// Public validation of levels
@@ -575,20 +532,23 @@ bool MdtIdHelper::valid(const Identifier& id) const {
     if (!validElement(id)) return false;
 
     int mlayer = multilayer(id);
-    if ((mlayer < multilayerMin(id)) || (mlayer > multilayerMax(id))) {
-        ATH_MSG_DEBUG("Invalid multilayer=" << mlayer << " multilayerMin=" << multilayerMin(id) << " multilayerMax=" << multilayerMax(id));
+    auto [multilayerMin, multilayerMax] = multilayerMinMax (id);
+    if (mlayer < multilayerMin || mlayer > multilayerMax) {
+        ATH_MSG_DEBUG("Invalid multilayer=" << mlayer << " multilayerMin=" << multilayerMin << " multilayerMax=" << multilayerMax);
         return false;
     }
 
     int layer = tubeLayer(id);
-    if ((layer < tubeLayerMin(id)) || (layer > tubeLayerMax(id))) {
-        ATH_MSG_DEBUG("Invalid tubeLayer=" << layer << " tubeLayerMin=" << tubeLayerMin(id) << " tubeLayerMax=" << tubeLayerMax(id));
+    auto [tubeLayerMin, tubeLayerMax] = tubeLayerMinMax(id);
+    if (layer < tubeLayerMin || layer > tubeLayerMax) {
+        ATH_MSG_DEBUG("Invalid tubeLayer=" << layer << " tubeLayerMin=" << tubeLayerMin << " tubeLayerMax=" << tubeLayerMax);
         return false;
     }
 
     int tb = tube(id);
-    if ((tb < tubeMin(id)) || (tb > tubeMax(id))) {
-        ATH_MSG_DEBUG("Invalid tube=" << tb << " tubeMin=" << tubeMin(id) << " tubeMax=" << tubeMax(id));
+    auto [tubeMin, tubeMax ] = tubeMinMax (id);
+    if (tb < tubeMin || tb > tubeMax) {
+        ATH_MSG_DEBUG("Invalid tube=" << tb << " tubeMin=" << tubeMin << " tubeMax=" << tubeMax);
         return false;
     }
     return true;
@@ -601,17 +561,19 @@ bool MdtIdHelper::validElement(const Identifier& id) const {
         return false;
     }
 
+    auto [stationEtaMin, stationEtaMax, stationPhiMin, stationPhiMax] =
+      stationEtaPhiMinMax (id);
     int eta = stationEta(id);
-    if (eta < stationEtaMin(id) || eta > stationEtaMax(id)) {
+    if (eta < stationEtaMin || eta > stationEtaMax) {
         ATH_MSG_DEBUG("Invalid stationEta=" << eta << " for stationName=" << stationNameString(station)
-                                            << " stationEtaMin=" << stationEtaMin(id) << " stationEtaMax=" << stationEtaMax(id));
+                                            << " stationEtaMin=" << stationEtaMin << " stationEtaMax=" << stationEtaMax);
         return false;
     }
 
     int phi = stationPhi(id);
-    if ((phi < stationPhiMin(id)) || (phi > stationPhiMax(id))) {
+    if (phi < stationPhiMin || phi > stationPhiMax) {
         ATH_MSG_DEBUG("Invalid stationPhi=" << phi << " for stationName=" << stationNameString(station)
-                                            << " stationPhiMin=" << stationPhiMin(id) << " stationPhiMax=" << stationPhiMax(id));
+                                            << " stationPhiMin=" << stationPhiMin << " stationPhiMax=" << stationPhiMax);
         return false;
     }
     return true;
@@ -624,14 +586,18 @@ bool MdtIdHelper::validElement(const Identifier& id, int stationName, int statio
         ATH_MSG_DEBUG("Invalid stationName=" << stationNameString(stationName));
         return false;
     }
-    if (stationEta < stationEtaMin(id) || stationEta > stationEtaMax(id)) {
+
+    auto [stationEtaMin, stationEtaMax, stationPhiMin, stationPhiMax] =
+      stationEtaPhiMinMax (id);
+    if (stationEta < stationEtaMin || stationEta > stationEtaMax) {
         ATH_MSG_DEBUG("Invalid stationEta=" << stationEta << " for stationName=" << stationNameString(stationName)
-                                            << " stationEtaMin=" << stationEtaMin(id) << " stationEtaMax=" << stationEtaMax(id));
+                                            << " stationEtaMin=" << stationEtaMin << " stationEtaMax=" << stationEtaMax);
         return false;
     }
-    if ((stationPhi < stationPhiMin(id)) || (stationPhi > stationPhiMax(id))) {
+
+    if (stationPhi < stationPhiMin || stationPhi > stationPhiMax) {
         ATH_MSG_DEBUG("Invalid stationPhi=" << stationPhi << " for stationName=" << stationNameString(stationName)
-                                            << " stationPhiMin=" << stationPhiMin(id) << " stationPhiMax=" << stationPhiMax(id));
+                                            << " stationPhiMin=" << stationPhiMin << " stationPhiMax=" << stationPhiMax);
         return false;
     }
     return true;
@@ -641,17 +607,21 @@ bool MdtIdHelper::validChannel(const Identifier& id, int stationName, int statio
                                int tube) const {
     if (!validElement(id, stationName, stationEta, stationPhi)) return false;
 
-    if ((multilayer < multilayerMin(id)) || (multilayer > multilayerMax(id))) {
-        ATH_MSG_DEBUG("Invalid multilayer=" << multilayer << " multilayerMin=" << multilayerMin(id)
-                                            << " multilayerMax=" << multilayerMax(id));
+    auto [multilayerMin, multilayerMax] = multilayerMinMax (id);
+    if (multilayer < multilayerMin || multilayer > multilayerMax) {
+        ATH_MSG_DEBUG("Invalid multilayer=" << multilayer << " multilayerMin=" << multilayerMin
+                                            << " multilayerMax=" << multilayerMax);
         return false;
     }
-    if ((tubeLayer < tubeLayerMin(id)) || (tubeLayer > tubeLayerMax(id))) {
-        ATH_MSG_DEBUG("Invalid tubeLayer=" << tubeLayer << " tubeLayerMin=" << tubeLayerMin(id) << " tubeLayerMax=" << tubeLayerMax(id));
+
+    auto [tubeLayerMin, tubeLayerMax] = tubeLayerMinMax(id);
+    if (tubeLayer < tubeLayerMin || tubeLayer > tubeLayerMax) {
+        ATH_MSG_DEBUG("Invalid tubeLayer=" << tubeLayer << " tubeLayerMin=" << tubeLayerMin << " tubeLayerMax=" << tubeLayerMax);
         return false;
     }
-    if ((tube < tubeMin(id)) || (tube > tubeMax(id))) {
-        ATH_MSG_DEBUG("Invalid tube=" << tube << " tubeMin=" << tubeMin(id) << " tubeMax=" << tubeMax(id));
+    auto [tubeMin, tubeMax ] = tubeMinMax (id);
+    if (tube < tubeMin || tube > tubeMax) {
+        ATH_MSG_DEBUG("Invalid tube=" << tube << " tubeMin=" << tubeMin << " tubeMax=" << tubeMax);
         return false;
     }
     return true;
