@@ -45,5 +45,6 @@
   <class name="DMTest::AllocTestAuxContainer_v1" id="155016C7-A9B8-4E2E-B2FE-B4A98A28BECF"/>
 
   <class name="std::vector<int, Athena_test::TestAlloc<int> >"/>
+  <class name="SG::PackedContainer<int, Athena_test::TestAlloc<int> >"/>
 
 </lcgdict>

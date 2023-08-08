@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file DataModelTestDataRead/src/AllocTestReadWithAlloc.cxx
@@ -11,6 +11,7 @@
 
 #include "AllocTestReadWithAlloc.h"
 #include "DataModelTestDataRead/AllocTestAuxContainer.h"
+#include <sstream>
 
 
 namespace DMTest {
@@ -31,12 +32,22 @@ StatusCode AllocTestReadWithAlloc::initialize()
  */
 StatusCode AllocTestReadWithAlloc::execute (const EventContext& ctx) const
 {
+  static const SG::AuxElement::Accessor<int, std::pmr::polymorphic_allocator<int> >
+    atInt3 ("atInt3");
+  static const SG::AuxElement::Accessor<int, Athena_test::TestAlloc<int> >
+    atInt4 ("atInt4");
+
+  // Write to a sstream first, to avpod having the output broken up by
+  // schema evolution messges.
+  std::ostringstream ss;
+
   SG::ReadHandle<AllocTestContainer> cont (m_containerKey, ctx);
-  std::cout << m_containerKey.key() << " ";
+  ss << m_containerKey.key() << " ";
   for (const AllocTest* at : *cont) {
-    std::cout << at->atInt1() << " " << at->atInt2() << " ";
+    ss << at->atInt1() << " " << at->atInt2() << " "
+       << atInt3(*at) << " " << atInt4(*at) << " ";
   }
-  std::cout << "\n";
+  std::cout << ss.str() << "\n";
   return StatusCode::SUCCESS;
 }
 
