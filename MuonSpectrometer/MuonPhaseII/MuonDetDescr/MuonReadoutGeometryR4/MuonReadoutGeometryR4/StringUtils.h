@@ -21,6 +21,10 @@ std::vector<std::string> tokenize(const std::string& the_str,
 
 std::vector<double> tokenizeDouble(const std::string& the_str,
                                    const std::string& delimiter);
+                                   
+std::vector<int> tokenizeInt(const std::string& the_str,
+                             const std::string& delimiter);
+
 int atoi(std::string_view str);
 
 double atof(std::string_view str);

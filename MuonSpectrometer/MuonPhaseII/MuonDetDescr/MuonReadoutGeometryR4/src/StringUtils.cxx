@@ -41,6 +41,16 @@ std::vector<double> tokenizeDouble(const std::string& the_str,
     });
     return toReturn;
 }
+
+std::vector<int> tokenizeInt(const std::string& the_str,
+                             const std::string& delimiter) {
+     const std::vector<std::string> strTokens = tokenize(the_str, delimiter);
+    std::vector<int> toReturn{};
+    std::transform(strTokens.begin(), strTokens.end(), std::back_inserter(toReturn), [](const std::string& token){
+        return atoi(token);
+    });
+    return toReturn;
+}
 int atoi(std::string_view str) {
     int result{std::numeric_limits<int>::max()};
     std::from_chars(str.data(), str.data() + str.size(), result);
