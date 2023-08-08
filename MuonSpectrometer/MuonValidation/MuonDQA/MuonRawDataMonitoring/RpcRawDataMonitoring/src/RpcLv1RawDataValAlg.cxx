@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2467,7 +2467,7 @@ void RpcLv1RawDataValAlg::bookRPCCoolHistograms(
     // Fill strip Id histogram
     if ((histName.find("ProfileCabling", 0)) != std::string::npos) {
         TH1* rpcCool_PanelIdHist = nullptr;
-        sc = rpcCoolDb.getHist(rpcCool_PanelIdHist, histName.c_str());
+        sc = rpcCoolDb.getHist(rpcCool_PanelIdHist, histName);
         if (sc.isFailure())
             ATH_MSG_WARNING("couldn't get " << histName << " hist");
         rpcCool_PanelIdHist->GetYaxis()->SetTitle("strip Id");
