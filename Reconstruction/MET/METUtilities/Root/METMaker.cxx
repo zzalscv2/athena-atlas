@@ -67,6 +67,7 @@ namespace met {
 
   typedef ElementLink<xAOD::IParticleContainer> iplink_t;
   static const SG::AuxElement::ConstAccessor< iplink_t  > acc_originalObject("originalObjectLink");
+  static const SG::AuxElement::ConstAccessor< iplink_t  > acc_nominalObject("nominalObjectLink");
   static const SG::AuxElement::ConstAccessor< std::vector<iplink_t > > acc_ghostMuons("GhostMuon");
   static const SG::AuxElement::ConstAccessor< std::vector<iplink_t > > acc_ghostElecs("GhostElec");
 
@@ -132,13 +133,14 @@ namespace met {
     declareProperty("GreedyPhotons",      m_greedyPhotons      = false               );
     declareProperty("VeryGreedyPhotons",  m_veryGreedyPhotons  = false               );
 
-
     declareProperty("UseGhostMuons",      m_useGhostMuons      = false               );
     declareProperty("DoRemoveMuonJets",   m_doRemoveMuonJets   = true                );
     declareProperty("DoSetMuonJetEMScale", m_doSetMuonJetEMScale = true              );
 
     declareProperty("DoRemoveElecTrks",   m_doRemoveElecTrks   = true                );
     declareProperty("DoRemoveElecTrksEM", m_doRemoveElecTrksEM = false               );
+
+    declareProperty("DoSimpleOR",         m_doSimpleOR         = false                );
 
     // muon overlap variables (expert use only)
     declareProperty("JetTrkNMuOlap",      m_jetTrkNMuOlap = 5                        );
@@ -232,6 +234,11 @@ namespace met {
 
     ATH_MSG_INFO("Suppressing warnings of objects missing in METAssociationMap for objects with pT < " << m_missObjWarningPtThreshold/1e3 << " GeV.");
 
+    // overlap removal simplification?
+    if (m_doSimpleOR) {
+      ATH_MSG_INFO("Requesting simplified overlap removal procedure in MET calculation");
+    }
+    
     return StatusCode::SUCCESS;
   }
 
@@ -712,19 +719,39 @@ namespace met {
         assoc = MissingETComposition::getAssociation(map,static_cast<const xAOD::Jet*>(orig));
       }
       if(assoc && !assoc->isMisc()) {
-        ATH_MSG_VERBOSE( "Jet calib pt = " << jet->pt());
 
-        bool selected = (std::abs(jet->eta())<m_JetEtaForw && jet->pt()>m_CenJetPtCut) || (std::abs(jet->eta())>=m_JetEtaForw && jet->pt()>m_FwdJetPtCut );
+        // init nominal_jet and either actually asign nominal jet or fall back to systematic jet
+        const xAOD::Jet * nominal_jet = nullptr;
+        if(m_doSimpleOR) {
+          // retrieve nominal calibrated jet
+          if (acc_nominalObject.isAvailable(*jet))
+            nominal_jet = static_cast<const xAOD::Jet*>(*acc_nominalObject(*jet));
+          else {
+            ATH_MSG_ERROR("No nominal calibrated jet available for jet " << jet->index() << ". Cannot simplify overlap removal!");
+            nominal_jet = jet;
+          }
+        }
+        else
+          nominal_jet = jet;
+
+        ATH_MSG_VERBOSE( "Jet (nom. calib) pt = " << nominal_jet->pt());
+        ATH_MSG_VERBOSE( "Jet pt = " << jet->pt());
+
+        // use nominal calibrated jets instead
+        bool selected = (std::abs(nominal_jet->eta())<m_JetEtaForw && nominal_jet->pt()>m_CenJetPtCut) || (std::abs(nominal_jet->eta())>=m_JetEtaForw && nominal_jet->pt()>m_FwdJetPtCut );
         bool JVT_reject(false);
         bool isMuFSRJet(false);
 
         // Apply a cut on the maximum jet eta. This restricts jets to those with calibration. Excluding more forward jets was found to have a minimal impact on the MET in Zee events
-        if(m_JetEtaMax>0.0 && std::abs(jet->eta())>m_JetEtaMax) JVT_reject=true;
+        // use nominal calibrated jets instead
+        if (m_JetEtaMax > 0.0 && std::abs(nominal_jet->eta()) > m_JetEtaMax)
+          JVT_reject = true;
 
         if(doJetJVT) {
           if (!m_useR21JvtFallback) {
             // intrinsically checks that is within range to apply Jvt requirement
-            JVT_reject  = !m_JvtTool->passesJvtCut(*jet);
+            // use nominal calibrated jets instead
+            JVT_reject  = !m_JvtTool->passesJvtCut(*nominal_jet);
           }
           else {
             if(jet->pt()<m_JvtPtMax && std::abs(jet->eta())<m_JetEtaForw) {
@@ -746,7 +773,8 @@ namespace met {
         }
 
         // if defined apply additional jet criterium
-        if (m_acc_jetRejectionDec && (*m_acc_jetRejectionDec)(*jet)==0) JVT_reject = true;
+        // use nominal calibrated jets instead
+        if (m_acc_jetRejectionDec && (*m_acc_jetRejectionDec)(*nominal_jet)==0) JVT_reject = true;
         bool hardJet(false);
         MissingETBase::Types::constvec_t calvec = assoc->overlapCalVec(helper);
         bool caloverlap = false;
@@ -769,7 +797,7 @@ namespace met {
         double constSF(1);
         if(m_jetConstitScaleMom.empty() && assoc->hasAlternateConstVec()){
           constjet = assoc->getAlternateConstVec();
-        } else {
+        } else { // we use this case but I don't think I need to use nominal calibrated jets - has no effect on OR decision
           constjet = jet->jetP4(m_jetConstitScaleMom);//grab a constituent scale added by the JetMomentTool/JetConstitFourMomTool.cxx
           double denom = (assoc->hasAlternateConstVec() ? assoc->getAlternateConstVec() : jet->jetP4("JetConstitScaleMomentum")).E();
           constSF = denom>1e-9 ? constjet.E()/denom : 0.;
@@ -879,7 +907,8 @@ namespace met {
               float jet_trk_N = acc_trkN.isAvailable(*jet) && this->getPV() ? acc_trkN(*jet)[this->getPV()->index()] : 0.;
               ATH_MSG_VERBOSE("Muon has ID pt " << mu_id_pt);
               ATH_MSG_VERBOSE("Jet has pt " << jet->pt() << ", trk sumpt " << jet_trk_sumpt << ", trk N " << jet_trk_N);
-              bool jet_from_muon = mu_id_pt>1e-9 && jet_trk_sumpt>1e-9 && (jet->pt()/mu_id_pt < m_muIDPTJetPtRatioMuOlap && mu_id_pt/jet_trk_sumpt>m_jetTrkPtMuPt) && jet_trk_N<m_jetTrkNMuOlap;
+              // those corrections are negligible but use nominal calibrated jets instead
+              bool jet_from_muon = mu_id_pt>1e-9 && jet_trk_sumpt>1e-9 && (nominal_jet->pt()/mu_id_pt < m_muIDPTJetPtRatioMuOlap && mu_id_pt/jet_trk_sumpt>m_jetTrkPtMuPt) && jet_trk_N<m_jetTrkNMuOlap;
               if(jet_from_muon) {
                 ATH_MSG_VERBOSE("Jet is from muon -- remove.");
                 JVT_reject = true;
@@ -1071,7 +1100,8 @@ namespace met {
               ATH_MSG_VERBOSE( "This jet has no associated tracks" );
             }
             if (hardJet) metJet->add(opx,opy,opt);
-            else if (std::abs(jet->eta())<2.5 || !(coreSoftTrk->source()&MissingETBase::Source::Central)) {
+            // use nominal calibrated jets instead
+            else if (std::abs(nominal_jet->eta())<2.5 || !(coreSoftTrk->source()&MissingETBase::Source::Central)) {
               metSoftTrk->add(opx,opy,opt);
               // Don't need to add if already done for softclus.
               if(!metSoftClus) {
