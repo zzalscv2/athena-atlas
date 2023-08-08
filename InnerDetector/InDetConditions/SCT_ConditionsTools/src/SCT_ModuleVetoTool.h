@@ -61,6 +61,7 @@ class SCT_ModuleVetoTool: public extends<AthAlgTool, ISCT_ConditionsTool> {
   SCT_ModuleVetoCondData m_localCondData{};
   const SCT_ID* m_pHelper{nullptr};
   bool m_useDatabase{false};
+  StringProperty m_JsonLocation {this, "JsonPath", "", "Path to the JSON file containing list of modules to be masked."};
   BooleanProperty m_maskLayers{this, "MaskLayers", false, "Mask full layers/disks in overlay"};
   IntegerProperty m_maskSide{this, "MaskSide", -1, "Mask full modules (-1), inner (0) or outer (1) sides"};
   IntegerArrayProperty m_layersToMask{this, "LayersToMask", {}, "Which barrel layers to mask out, goes from 0 to N-1"};

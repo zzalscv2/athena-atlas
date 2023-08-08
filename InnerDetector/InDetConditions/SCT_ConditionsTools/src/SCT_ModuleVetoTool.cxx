@@ -9,15 +9,22 @@
  **/
 
 #include "SCT_ModuleVetoTool.h"
+#include <nlohmann/json.hpp>
 
 //STL includes
 #include <algorithm>
 #include <iterator>
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
 
 //Athena includes
 #include "InDetIdentifier/SCT_ID.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "SCT_DetectorElementStatus.h"
+
+using json = nlohmann::json;
 
 static const std::string databaseSignature{"database"};
 
@@ -157,6 +164,30 @@ StatusCode
 SCT_ModuleVetoTool::fillData() {
   // Reset SCT_ModuleVetoCondData
   m_localCondData.clear();
+ 
+ // @TODO: This part should be changed to use PathResolver before using in production.
+
+ //Read bad module IDs from json file.
+  if(!m_JsonLocation.empty())
+  {
+    std::ifstream json_file(m_JsonLocation);
+    if (!json_file.is_open()) {
+        ATH_MSG_FATAL("Failed to open the json file.");
+        return StatusCode::FAILURE;
+    }
+
+    json data = json::parse(json_file);
+
+    for(const auto& i:data)
+    {
+      std::string id_mod = i["Decimal_ID"];
+      unsigned long long id_cstring = std::stoull(id_mod);     
+      m_localCondData.setBadWaferId(Identifier(id_cstring));
+      ATH_MSG_DEBUG("Masking Module ID: " << id_cstring << ".");
+    }
+     return StatusCode::SUCCESS;
+  }
+
 
   // Fill data based on properties
   StatusCode sc{StatusCode::SUCCESS};
@@ -165,6 +196,7 @@ SCT_ModuleVetoTool::fillData() {
     return sc;
   } 
 
+
   bool success{true};
   std::vector<std::string>::const_iterator pId{m_badElements.value().begin()};
   std::vector<std::string>::const_iterator last{m_badElements.value().end()};
@@ -172,6 +204,8 @@ SCT_ModuleVetoTool::fillData() {
     unsigned long long idToWrite{static_cast<unsigned long long>(atoll(pId->c_str()))};
     if (*pId != databaseSignature) success &= m_localCondData.setBadWaferId(Identifier(idToWrite));
   }
+
+  
 
   if (m_maskLayers) {
     ATH_MSG_INFO("Masking " << m_layersToMask.size() << " SCT Layers");

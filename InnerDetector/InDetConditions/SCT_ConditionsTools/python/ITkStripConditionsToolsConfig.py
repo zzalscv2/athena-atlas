@@ -98,7 +98,11 @@ def ITkStripModuleVetoCfg(flags, name="ITkStripModuleVeto", **kwargs):
     """
     # For SCT_ID used in SCT_ModuleVetoTool
     acc = GeoModelCfg(flags)
-
+    
+    
+    kwargs.setdefault("useDB", False)
+    kwargs.setdefault("BadModuleIdentifiers", [])
+    
     if kwargs["useDB"]:
         # Condition folder
         acc.merge(addFolders(flags,
