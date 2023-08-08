@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file DataModelTestDataWrite/src/AllocTestReadWithoutAlloc.cxx
@@ -11,6 +11,7 @@
 
 #include "AllocTestReadWithoutAlloc.h"
 #include "DataModelTestDataWrite/AllocTestAuxContainer.h"
+#include <sstream>
 
 
 namespace DMTest {
@@ -31,12 +32,20 @@ StatusCode AllocTestReadWithoutAlloc::initialize()
  */
 StatusCode AllocTestReadWithoutAlloc::execute (const EventContext& ctx) const
 {
+  static const SG::AuxElement::Accessor<int> atInt3 ("atInt3");
+  static const SG::AuxElement::Accessor<int> atInt4 ("atInt4");
+
+  // Write to a sstream first, to avpod having the output broken up by
+  // schema evolution messges.
+  std::ostringstream ss;
+
   SG::ReadHandle<AllocTestContainer> cont (m_containerKey, ctx);
-  std::cout << m_containerKey.key() << " ";
+  ss << m_containerKey.key() << " ";
   for (const AllocTest* at : *cont) {
-    std::cout << at->atInt1() << " " << at->atInt2() << " ";
+    ss << at->atInt1() << " " << at->atInt2() << " "
+       << atInt3(*at) << " " << atInt4(*at) << " ";
   }
-  std::cout << "\n";
+  std::cout << ss.str() << "\n";
   return StatusCode::SUCCESS;
 }
 
