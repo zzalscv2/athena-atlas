@@ -148,6 +148,15 @@ public:
     int tubeMin(const Identifier& id) const;
     int tubeMax(const Identifier& id) const;
 
+    // etamin, etamax, phimin, phimax
+    std::tuple<int, int, int, int>
+    stationEtaPhiMinMax(const Identifier& id) const;
+    std::pair<int, int> stationEtaMinMax(const Identifier& id) const;
+    std::pair<int, int> stationPhiMinMax(const Identifier& id) const;
+    std::pair<int, int> multilayerMinMax(const Identifier& id) const;
+    std::pair<int, int> tubeLayerMinMax(const Identifier& id) const;
+    std::pair<int, int> tubeMinMax(const Identifier& id) const;
+
     // Public validation of levels
 
     bool valid(const Identifier& id) const;
@@ -218,6 +227,17 @@ private:
 
     int m_BME_stat{-1};
     int m_BMG_stat{-1};
+
+    // To speed up the range scans needed by the MinMax functions,
+    // keep indices of ranges by station name.
+    using ranges_by_station_t = std::vector<std::vector<const Range*> >;
+    ranges_by_station_t m_module_ranges_by_station;
+    ranges_by_station_t m_channel_ranges_by_station;
+
+    std::pair<int, int>
+    findMinMax (const Identifier& id,
+                const size_type field_index,
+                const ranges_by_station_t& ranges_by_station) const;
 };
 
 // For backwards compatibility
