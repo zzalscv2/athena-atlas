@@ -985,7 +985,7 @@ StatusCode TrigEDMChecker::dumpTrigMissingET ATLAS_NOT_THREAD_SAFE() {
 	/// up to 14.2.0 /// ----------------------------
   ATH_MSG_INFO("Trying to fetch TrigMissingET objects from older releases");
 
-  const DataHandle<TrigMissingET> trigMETfirst ,trigMETlast;
+  SG::ConstIterator<TrigMissingET> trigMETfirst ,trigMETlast;
   StatusCode sc=evtStore()->retrieve(trigMETfirst ,trigMETlast);
   if( sc.isFailure() ){
     ATH_MSG_INFO("Failed to retrieve TrigMissingET (rel. <= 14.2.0)");
@@ -1215,8 +1215,8 @@ StatusCode TrigEDMChecker::dumpTrigPhotonContainer ATLAS_NOT_THREAD_SAFE() {
 
   ATH_MSG_INFO("REGTEST ==========START of TrigPhotonContainer DUMP===========");
 
-  const DataHandle< TrigPhotonContainer > trigPhoton;
-  const DataHandle< TrigPhotonContainer > lastTrigPhoton;
+  SG::ConstIterator< TrigPhotonContainer > trigPhoton;
+  SG::ConstIterator< TrigPhotonContainer > lastTrigPhoton;
 
   StatusCode sc = evtStore()->retrieve(trigPhoton,lastTrigPhoton);
   if (sc.isFailure()) {
@@ -1302,8 +1302,8 @@ StatusCode TrigEDMChecker::dumpTrigMuonEFContainer ATLAS_NOT_THREAD_SAFE() {
 
   ATH_MSG_INFO("REGTEST ==========START of TrigMuonEFContainer DUMP===========");
 
-  const DataHandle< TrigMuonEFContainer > trigMuon;
-  const DataHandle< TrigMuonEFContainer > lastTrigMuon;
+  SG::ConstIterator< TrigMuonEFContainer > trigMuon;
+  SG::ConstIterator< TrigMuonEFContainer > lastTrigMuon;
 
   StatusCode sc = evtStore()->retrieve(trigMuon,lastTrigMuon);
   if (sc.isFailure()) {
@@ -1372,8 +1372,8 @@ StatusCode TrigEDMChecker::dumpTrigMuonEFInfoContainer ATLAS_NOT_THREAD_SAFE() {
 
   ATH_MSG_INFO("REGTEST ==========START of TrigMuonEFInfoContainer DUMP===========");
 
-  const DataHandle< TrigMuonEFInfoContainer > trigMuon;
-  const DataHandle< TrigMuonEFInfoContainer > lastTrigMuon;
+  SG::ConstIterator< TrigMuonEFInfoContainer > trigMuon;
+  SG::ConstIterator< TrigMuonEFInfoContainer > lastTrigMuon;
 
   StatusCode sc = evtStore()->retrieve(trigMuon,lastTrigMuon);
   if (sc.isFailure()) {
@@ -1465,8 +1465,8 @@ StatusCode TrigEDMChecker::dumpTrigMuonEFIsolationContainer ATLAS_NOT_THREAD_SAF
 
   ATH_MSG_INFO("REGTEST ==========START of TrigMuonEFIsolationContainer DUMP===========");
 
-  const DataHandle< TrigMuonEFIsolationContainer > trigMuon;
-  const DataHandle< TrigMuonEFIsolationContainer > lastTrigMuon;
+  SG::ConstIterator< TrigMuonEFIsolationContainer > trigMuon;
+  SG::ConstIterator< TrigMuonEFIsolationContainer > lastTrigMuon;
 
   StatusCode sc = evtStore()->retrieve(trigMuon,lastTrigMuon);
   if (sc.isFailure()) {
@@ -1583,8 +1583,8 @@ StatusCode TrigEDMChecker::dumpTrigElectronContainer ATLAS_NOT_THREAD_SAFE() {
 
   ATH_MSG_INFO("REGTEST ==========START of TrigElectronContainer DUMP===========");
 
-	const DataHandle< TrigElectronContainer > trigElec;
-	const DataHandle< TrigElectronContainer > lastTrigElec;
+	SG::ConstIterator< TrigElectronContainer > trigElec;
+	SG::ConstIterator< TrigElectronContainer > lastTrigElec;
 
 	StatusCode sc = evtStore()->retrieve(trigElec,lastTrigElec);
 	if (sc.isFailure()) {
@@ -2019,8 +2019,8 @@ StatusCode TrigEDMChecker::dumpTrigTauContainer ATLAS_NOT_THREAD_SAFE() {
   ATH_MSG_DEBUG("in dumpTrigTauContainer()");
   ATH_MSG_INFO("REGTEST ==========START of TrigTauContainer DUMP===========");
 
-  const DataHandle< TrigTauContainer > trigTau;
-  const DataHandle< TrigTauContainer > lastTrigTau;
+  SG::ConstIterator< TrigTauContainer > trigTau;
+  SG::ConstIterator< TrigTauContainer > lastTrigTau;
 
   StatusCode sc = evtStore()->retrieve(trigTau,lastTrigTau);
   if (sc.isFailure()) {
@@ -2062,8 +2062,8 @@ StatusCode TrigEDMChecker::dumpTrigTauTracksInfo ATLAS_NOT_THREAD_SAFE() {
   ATH_MSG_DEBUG("in dumpTrigTauTracksInfo()");
   ATH_MSG_INFO("REGTEST ==========START of TrigTauTracksInfo DUMP===========");
 
-  const DataHandle< TrigTauTracksInfo > trigTau;
-  const DataHandle< TrigTauTracksInfo > lastTrigTau;
+  SG::ConstIterator< TrigTauTracksInfo > trigTau;
+  SG::ConstIterator< TrigTauTracksInfo > lastTrigTau;
 
   StatusCode sc = evtStore()->retrieve(trigTau,lastTrigTau);
   if (sc.isFailure()) {
@@ -2284,8 +2284,8 @@ StatusCode TrigEDMChecker::dumpTrigVertexCollection ATLAS_NOT_THREAD_SAFE() {
   ATH_MSG_DEBUG("in dumpTrigVertexCollection()");
   ATH_MSG_INFO("REGTEST ==========START of TrigVertexCollection DUMP===========");
 
-  const DataHandle< TrigVertexCollection > trigVertex;
-  const DataHandle< TrigVertexCollection > lastTrigVertex;
+  SG::ConstIterator< TrigVertexCollection > trigVertex;
+  SG::ConstIterator< TrigVertexCollection > lastTrigVertex;
 
   StatusCode sc = evtStore()->retrieve(trigVertex,lastTrigVertex);
   if (sc.isFailure()) {
@@ -2888,8 +2888,8 @@ StatusCode TrigEDMChecker::dumpTrigEFBjetContainer ATLAS_NOT_THREAD_SAFE() {
   ATH_MSG_DEBUG("in dumpTrigEFBjetContainer()");
   ATH_MSG_INFO("REGTEST ==========START of TrigEFBjetContainer DUMP===========");
 
-  const DataHandle< TrigEFBjetContainer > trigEFBjet;
-  const DataHandle< TrigEFBjetContainer > lastTrigEFBjet;
+  SG::ConstIterator< TrigEFBjetContainer > trigEFBjet;
+  SG::ConstIterator< TrigEFBjetContainer > lastTrigEFBjet;
 
   StatusCode sc = evtStore()->retrieve(trigEFBjet,lastTrigEFBjet);
   if (sc.isFailure()) {
@@ -2944,8 +2944,8 @@ StatusCode TrigEDMChecker::dumpTrigL2BjetContainer ATLAS_NOT_THREAD_SAFE() {
   ATH_MSG_DEBUG("in dumpTrigL2BjetContainer()");
   ATH_MSG_INFO("REGTEST ==========START of TrigL2BjetContainer DUMP===========");
 
-  const DataHandle< TrigL2BjetContainer > trigL2Bjet;
-  const DataHandle< TrigL2BjetContainer > lastTrigL2Bjet;
+  SG::ConstIterator< TrigL2BjetContainer > trigL2Bjet;
+  SG::ConstIterator< TrigL2BjetContainer > lastTrigL2Bjet;
 
   StatusCode sc = evtStore()->retrieve(trigL2Bjet,lastTrigL2Bjet);
   if (sc.isFailure()) {
@@ -2998,8 +2998,8 @@ StatusCode TrigEDMChecker::dumpMuonFeature ATLAS_NOT_THREAD_SAFE() {
 
   ATH_MSG_INFO("REGTEST ==========START of MuonFeature DUMP===========");
 
-  const DataHandle< MuonFeature > MuFeature;
-  const DataHandle< MuonFeature > lastMuFeature;
+  SG::ConstIterator< MuonFeature > MuFeature;
+  SG::ConstIterator< MuonFeature > lastMuFeature;
 
   StatusCode sc = evtStore()->retrieve(MuFeature,lastMuFeature);
   if (sc.isFailure()) {
@@ -3040,8 +3040,8 @@ StatusCode TrigEDMChecker::dumpCombinedMuonFeature ATLAS_NOT_THREAD_SAFE() {
 
   ATH_MSG_INFO("REGTEST ==========START of CombinedMuonFeature DUMP===========");
 
-  const DataHandle< CombinedMuonFeature > CombMuon;
-  const DataHandle< CombinedMuonFeature > lastCombMuon;
+  SG::ConstIterator< CombinedMuonFeature > CombMuon;
+  SG::ConstIterator< CombinedMuonFeature > lastCombMuon;
 
   StatusCode sc = evtStore()->retrieve(CombMuon,lastCombMuon);
   if (sc.isFailure()) {
@@ -3094,8 +3094,8 @@ StatusCode TrigEDMChecker::dumpCombinedMuonFeatureContainer ATLAS_NOT_THREAD_SAF
   ATH_MSG_DEBUG("in dumpCombinedMuonFeatureContainer()");
   ATH_MSG_INFO("REGTEST ==========START of CombinedMuonFeatureContainer DUMP===========");
 
-  const DataHandle< CombinedMuonFeatureContainer > CombMuon;
-  const DataHandle< CombinedMuonFeatureContainer > lastCombMuon;
+  SG::ConstIterator< CombinedMuonFeatureContainer > CombMuon;
+  SG::ConstIterator< CombinedMuonFeatureContainer > lastCombMuon;
 
   StatusCode sc = evtStore()->retrieve(CombMuon,lastCombMuon);
   if (sc.isFailure()) {
@@ -3153,8 +3153,8 @@ StatusCode TrigEDMChecker::dumpTrigEMCluster ATLAS_NOT_THREAD_SAFE() {
   ATH_MSG_DEBUG("in dumpTrigEMCluster()");
   ATH_MSG_INFO("REGTEST ==========START of TrigEMCluster DUMP===========");
 
-  const DataHandle< TrigEMCluster > EMCluster;
-  const DataHandle< TrigEMCluster > lastEMCluster;
+  SG::ConstIterator< TrigEMCluster > EMCluster;
+  SG::ConstIterator< TrigEMCluster > lastEMCluster;
 
   StatusCode sc = evtStore()->retrieve(EMCluster,lastEMCluster);
   if (sc.isFailure()) {
@@ -3194,8 +3194,8 @@ StatusCode TrigEDMChecker::dumpxAODTrigEMCluster ATLAS_NOT_THREAD_SAFE() {
 
   ATH_MSG_INFO("REGTEST ==========START of TrigEMCluster DUMP===========");
 
-  const DataHandle< xAOD::TrigEMCluster > EMCluster;
-  const DataHandle< xAOD::TrigEMCluster > lastEMCluster;
+  SG::ConstIterator< xAOD::TrigEMCluster > EMCluster;
+  SG::ConstIterator< xAOD::TrigEMCluster > lastEMCluster;
 
   StatusCode sc = evtStore()->retrieve(EMCluster,lastEMCluster);
   if (sc.isFailure()) {
@@ -3238,8 +3238,8 @@ StatusCode TrigEDMChecker::dumpTrigTauClusterContainer ATLAS_NOT_THREAD_SAFE() {
 
   ATH_MSG_INFO("REGTEST ==========START of TrigTauClusterContainer/TrigTauClusterDetailsContainer DUMP===========");
 
-  const DataHandle< TrigTauClusterContainer > TauCluster;
-  const DataHandle< TrigTauClusterContainer > lastTauCluster;
+  SG::ConstIterator< TrigTauClusterContainer > TauCluster;
+  SG::ConstIterator< TrigTauClusterContainer > lastTauCluster;
 
   StatusCode sc = evtStore()->retrieve(TauCluster,lastTauCluster);
   if (sc.isFailure()) {
@@ -3290,8 +3290,8 @@ StatusCode TrigEDMChecker::dumpTrigTauClusterContainer ATLAS_NOT_THREAD_SAFE() {
   }
 
   int nDetails = 0;
-  const DataHandle< TrigTauClusterDetailsContainer > TauDetailsCluster;
-  const DataHandle< TrigTauClusterDetailsContainer > lastTauDetailsCluster;
+  SG::ConstIterator< TrigTauClusterDetailsContainer > TauDetailsCluster;
+  SG::ConstIterator< TrigTauClusterDetailsContainer > lastTauDetailsCluster;
   sc = evtStore()->retrieve(TauDetailsCluster,lastTauDetailsCluster);
   if (sc.isFailure()) {
     ATH_MSG_INFO("REGTEST No TrigTauDetailsClusterContainer found");
@@ -3346,8 +3346,8 @@ StatusCode TrigEDMChecker::dumpTrigEMClusterContainer ATLAS_NOT_THREAD_SAFE() {
 
   ATH_MSG_INFO("REGTEST ==========START of TrigEMClusterContainer DUMP===========");
 
-  const DataHandle< TrigEMClusterContainer > EMCluster;
-  const DataHandle< TrigEMClusterContainer > lastEMCluster;
+  SG::ConstIterator< TrigEMClusterContainer > EMCluster;
+  SG::ConstIterator< TrigEMClusterContainer > lastEMCluster;
 
   StatusCode sc = evtStore()->retrieve(EMCluster,lastEMCluster);
   if (sc.isFailure()) {
@@ -3393,8 +3393,8 @@ StatusCode TrigEDMChecker::dumpxAODTrigEMClusterContainer ATLAS_NOT_THREAD_SAFE(
 
   ATH_MSG_INFO("REGTEST ==========START of xAODTrigEMClusterContainer DUMP===========");
 
-  const DataHandle< xAOD::TrigEMClusterContainer > EMCluster;
-  const DataHandle< xAOD::TrigEMClusterContainer > lastEMCluster;
+  SG::ConstIterator< xAOD::TrigEMClusterContainer > EMCluster;
+  SG::ConstIterator< xAOD::TrigEMClusterContainer > lastEMCluster;
 
   StatusCode sc = evtStore()->retrieve(EMCluster,lastEMCluster);
   if (sc.isFailure()) {
@@ -3440,8 +3440,8 @@ StatusCode TrigEDMChecker::dumpTileMuFeatureContainer ATLAS_NOT_THREAD_SAFE() {
   ATH_MSG_DEBUG("in dumpTileMuFeatureContainer()");
   ATH_MSG_INFO("REGTEST ==========START of TileMuFeatureContainer DUMP===========");
 
-  const DataHandle< TileMuFeatureContainer > TileMu;
-  const DataHandle< TileMuFeatureContainer > lastTileMu;
+  SG::ConstIterator< TileMuFeatureContainer > TileMu;
+  SG::ConstIterator< TileMuFeatureContainer > lastTileMu;
 
   StatusCode sc = evtStore()->retrieve(TileMu, lastTileMu);
   if (sc.isFailure()) {
@@ -3481,8 +3481,8 @@ StatusCode TrigEDMChecker::dumpTileTrackMuFeatureContainer ATLAS_NOT_THREAD_SAFE
   ATH_MSG_DEBUG("in dumpTileTrackMuFeatureContainer()");
   ATH_MSG_INFO("REGTEST ==========START of TileTrackMuFeatureContainer DUMP===========");
   
-  const DataHandle< TileTrackMuFeatureContainer > TileTrackMu;
-  const DataHandle< TileTrackMuFeatureContainer > lastTileTrackMu;
+  SG::ConstIterator< TileTrackMuFeatureContainer > TileTrackMu;
+  SG::ConstIterator< TileTrackMuFeatureContainer > lastTileTrackMu;
   
   StatusCode sc = evtStore()->retrieve(TileTrackMu, lastTileTrackMu);
   if (sc.isFailure()) {
@@ -3845,8 +3845,8 @@ StatusCode TrigEDMChecker::dumpTauJetContainer ATLAS_NOT_THREAD_SAFE() {
     }
   }
 
-  const DataHandle< TauJetContainer > TauJet;
-  const DataHandle< TauJetContainer > lastTauJet;
+  SG::ConstIterator< TauJetContainer > TauJet;
+  SG::ConstIterator< TauJetContainer > lastTauJet;
   StatusCode sc = evtStore()->retrieve(TauJet, lastTauJet);
   if (sc.isFailure()) {
     ATH_MSG_INFO("REGTEST No TauJetContainer found");
