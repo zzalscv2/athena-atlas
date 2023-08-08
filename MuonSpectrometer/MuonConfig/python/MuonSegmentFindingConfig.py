@@ -56,27 +56,6 @@ def MuonHoughPatternFinderToolCfg(flags, name = "MuonHoughPatternFinderTool", **
     the_tool = CompFactory.Muon.MuonHoughPatternFinderTool(name,**kwargs)
     result.setPrivateTools(the_tool)
     return result
-def MuonCurvedSegmentCombinerCfg(flags,name = "MuonCurvedSegmentCombiner", **kwargs):
-    result = ComponentAccumulator()  
-    # Taken from https://gitlab.cern.ch/atlas/athena/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecExample/python/MooreTools.py#L74
-    # The original code seems very odd. The default MissedHitsCut is 100 by default, and the rest of it is a bit tortuous.
-    # I've tried to clean it up, but might have made mistakes. 
-    if flags.Beam.Type is not BeamType.Collisions:
-        kwargs.setdefault( "AddUnassociatedMiddleEndcapSegments", False )
-    elif flags.Input.isMC:
-        kwargs.setdefault( "MissedHitsCut", 4 )
-
-
-    kwargs.setdefault("DoSummary", flags.Muon.printSummary)
-    kwargs.setdefault("DoCosmics", flags.Beam.Type is not BeamType.Collisions)
-    kwargs.setdefault( "AddAll2DCscs", False )
-    kwargs.setdefault( "UseCscSegments", flags.Detector.EnableCSC )
-    kwargs.setdefault( "AddUnassociatedMiddleEndcapSegments", True )
-    the_tool = CompFactory.Muon.MuonCurvedSegmentCombiner(name, **kwargs)
-    result.setPrivateTools(the_tool)
-    return result 
-    
-# def MuonSegmentCombinationCleanerTool(flags):
 
 def MdtDriftCircleOnTrackCreatorAdjustableT0Cfg(flags,**kwargs):
     from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MuonClusterOnTrackCreatorCfg
@@ -527,9 +506,7 @@ def MuonSegmentFinderNCBAlgCfg(flags, name="MuonSegmentMaker_NCB", **kwargs):
     kwargs.setdefault("NSWSegmentCollectionName", "")
     kwargs.setdefault("SegmentQuality", 1)
 
-    ### Do not recombine the segments
-    kwargs.setdefault("SegmentCombiner", result.popToolsAndMerge(MuonCurvedSegmentCombinerCfg(flags)))
-    kwargs.setdefault("RunSegmentCombiner", False)
+
     ### Setup the CSC segment maker
     if flags.Detector.EnableCSC:
         csc_segment_util_tool = result.popToolsAndMerge(CscSegmentUtilToolCfg(flags, 
@@ -595,8 +572,6 @@ def MuonSegmentFinderAlgCfg(flags, name="MuonSegmentMaker", **kwargs):
         kwargs.setdefault("CSC_clusterkey", "")
     
     kwargs.setdefault("PrintSummary", flags.Muon.printSummary)
-    kwargs.setdefault("SegmentCombiner", result.popToolsAndMerge(MuonCurvedSegmentCombinerCfg(flags)))
-    kwargs.setdefault("RunSegmentCombiner", False)
     kwargs.setdefault("doStgcSegments", flags.Detector.EnablesTGC)
     kwargs.setdefault("doMMSegments", flags.Detector.EnableMM)
 

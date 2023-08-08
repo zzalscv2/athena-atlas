@@ -79,9 +79,6 @@ def MuonSegmentFinderNCBAlg(name="MuonSegmentMaker_NCB", **kwargs):
     kwargs.setdefault("NSWSegmentCollectionName", "")
     kwargs.setdefault("SegmentQuality", 1)
 
-    ### Do not recombine the segments
-    kwargs.setdefault("SegmentCombiner", getPublicTool("MuonCurvedSegmentCombiner"))
-    kwargs.setdefault("RunSegmentCombiner", False)
     ### Setup the CSC segment maker
     if reco_cscs:
         cscSegmentUtilTool = getPublicToolClone("CscSegmentUtilTool_NCB",
@@ -140,10 +137,7 @@ def MuonSegmentFinderAlg( name="MuonSegmentMaker", **kwargs):
     kwargs.setdefault("PrintSummary",  muonStandaloneFlags.printSummary())
     kwargs.setdefault("MuonClusterSegmentFinder", getPublicTool("MuonClusterSegmentFinder"))
     kwargs.setdefault("TGC_PRDs", 'TGC_MeasurementsAllBCs' if not muonRecFlags.useTGCPriorNextBC else 'TGC_Measurements')
-    
-    
-    kwargs.setdefault("SegmentCombiner", getPublicTool("MuonCurvedSegmentCombiner"))
-    kwargs.setdefault("RunSegmentCombiner", False) #false in r21
+
     MuonSegmentFinderAlg = CfgMgr.MuonSegmentFinderAlg( name, **kwargs )   
    
     # we check whether the layout contains any CSC chamber and if yes, we check that the user also wants to use the CSCs in reconstruction

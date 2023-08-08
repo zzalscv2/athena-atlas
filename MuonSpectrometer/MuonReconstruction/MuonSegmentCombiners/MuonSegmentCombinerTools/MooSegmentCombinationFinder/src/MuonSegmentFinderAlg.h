@@ -19,7 +19,6 @@
 #include "MuonRecToolInterfaces/IMuonClusterOnTrackCreator.h"
 #include "MuonRecToolInterfaces/IMuonSegmentMaker.h"
 #include "MuonSegment/MuonSegmentCombinationCollection.h"
-#include "MuonSegmentCombinerToolInterfaces/IMuonCurvedSegmentCombiner.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonClusterSegmentFinder.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonSegmentSelectionTool.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonNSWSegmentFinderTool.h"
@@ -89,9 +88,6 @@ private:
         "Csc4dSegmentMaker",
         "Csc4dSegmentMaker/Csc4dSegmentMaker",
     };
-    ToolHandle<Muon::IMuonCurvedSegmentCombiner> m_curvedSegmentCombiner{this, "SegmentCombiner",
-                                                                       "Muon::MuonCurvedSegmentCombiner/MuonCurvedSegmentCombiner"};
-
     
     ToolHandle<Muon::IMuonSegmentSelectionTool> m_segmentSelector{this, "SegmentSelector",
                                                                 "Muon::MuonSegmentSelectionTool/MuonSegmentSelectionTool"};
@@ -161,9 +157,8 @@ private:
                            NSWSegmentCache& cache) const;
    
     /// Retrieve the raw outputs from the Csc segment makers for the curved combination
-    StatusCode createCscSegments(const EventContext& ctx, 
-                                std::unique_ptr<MuonSegmentCombinationCollection>& csc2dSegmentCombinations,
-                                std::unique_ptr<MuonSegmentCombinationCollection>& csc4dSegmentCombinations) const;
+    StatusCode createCscSegments(const EventContext& ctx,
+                                 std::unique_ptr<MuonSegmentCombinationCollection>& csc4dSegmentCombinations) const;
 
     void appendSegmentsFromCombi(const std::unique_ptr<MuonSegmentCombinationCollection>& combi_coll, 
                                  Trk::SegmentCollection* segments) const;
@@ -176,8 +171,6 @@ private:
 
     /// Run segment finding with eta / phi determination
     Gaudi::Property<bool> m_doFullFinder{this, "FullFinder", true}; 
-    /// Combined the segments of several multilayers (Only Legacy systems)
-    Gaudi::Property<bool> m_runSegCombiner{this, "RunSegmentCombiner", true};
     /// Run the Mdt segment maker (Switched of the NCB systems)
     Gaudi::Property<bool> m_runMdtSegments{this, "doMdtSegments", true};
     /// Run the NSW segment maker

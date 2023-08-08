@@ -66,29 +66,6 @@ def MuonPatternCalibration(name ="MuonPatternCalibration", **kwargs):
     
     return CfgMgr.Muon__MuonPatternCalibration(name,**kwargs)
 
-
-class MuonCurvedSegmentCombiner(CfgMgr.Muon__MuonCurvedSegmentCombiner,ConfiguredBase):
-    __slots__ = ()
-    def __init__(self,name="MuonCurvedSegmentCombiner",**kwargs):
-        self.applyUserDefaults(kwargs,name)
-        
-        if (beamFlags.beamType() == 'singlebeam' or beamFlags.beamType() == 'cosmics'):
-            kwargs.setdefault( "MissedHitsCut", 100 )
-            kwargs.setdefault( "AddUnassociatedMiddleEndcapSegments", False )
-        elif globalflags.DataSource() == 'data':  #collisions-data or simulation first data
-            kwargs.setdefault( "MissedHitsCut", 100 )
-        else:
-            kwargs.setdefault( "MissedHitsCut", 4 )
-
-        
-        kwargs.setdefault("DoCosmics", muonStandaloneFlags.reconstructionMode() != 'collisions' )
-        kwargs.setdefault( "AddAll2DCscs", False )
-        kwargs.setdefault( "UseCscSegments", muonRecFlags.doCSCs() )
-        kwargs.setdefault( "AddUnassociatedMiddleEndcapSegments", True )
-        super(MuonCurvedSegmentCombiner,self).__init__(name,**kwargs)        
-
-# end of class MuonCurvedSegmentCombiner
-
 #
 # Start of new Moore track finding tools
 #
