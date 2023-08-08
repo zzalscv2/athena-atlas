@@ -186,14 +186,14 @@ private:
     "Boolean to select tracks in the forward region"
   };
 
-  mutable Gaudi::Accumulators::Counter<> m_AllClusters;
-  mutable Gaudi::Accumulators::Counter<> m_SelectedClusters;
-  mutable Gaudi::Accumulators::Counter<> m_AllTracks;
-  mutable Gaudi::Accumulators::Counter<> m_SelectedTracks;
-  mutable Gaudi::Accumulators::Counter<> m_AllSiTracks;
-  mutable Gaudi::Accumulators::Counter<> m_SelectedSiTracks;
-  mutable Gaudi::Accumulators::Counter<> m_AllTRTTracks;
-  mutable Gaudi::Accumulators::Counter<> m_SelectedTRTTracks;
+  mutable Gaudi::Accumulators::Counter<> m_AllClusters {};
+  mutable Gaudi::Accumulators::Counter<> m_SelectedClusters {};
+  mutable Gaudi::Accumulators::Counter<> m_AllTracks {};
+  mutable Gaudi::Accumulators::Counter<> m_SelectedTracks {};
+  mutable Gaudi::Accumulators::Counter<> m_AllSiTracks {};
+  mutable Gaudi::Accumulators::Counter<> m_SelectedSiTracks {};
+  mutable Gaudi::Accumulators::Counter<> m_AllTRTTracks {};
+  mutable Gaudi::Accumulators::Counter<> m_SelectedTRTTracks {};
 };
 #endif
 
