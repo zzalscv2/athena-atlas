@@ -13,6 +13,7 @@
 #include "MuonCombinedEvent/TagBase.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include "xAODTruth/TruthVertex.h"
 using namespace xAOD::P4Helpers;
 namespace {
     constexpr unsigned int dummy_unsigned = 999;
