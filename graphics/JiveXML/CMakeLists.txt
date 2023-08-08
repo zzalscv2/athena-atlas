@@ -3,6 +3,7 @@
 # Declare the package name:
 atlas_subdir( JiveXML )
 
+
 # External package(s).
 list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
 if ( ATLAS_OS_ID STREQUAL "centos9" )
@@ -33,3 +34,4 @@ atlas_add_component( JiveXML
 # Install files from the package:
 atlas_install_joboptions( share/*.py )
 atlas_install_runtime( test/*.xml test/*.xsl )
+atlas_install_python_modules( python/*.py)

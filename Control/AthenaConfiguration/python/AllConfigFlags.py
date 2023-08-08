@@ -244,6 +244,7 @@ def initConfigFlags():
     acf.addFlag('Output.doWriteAOD', lambda prevFlags: bool(prevFlags.Output.AODFileName)) # write out AOD file
     acf.addFlag('Output.doWriteBS',  False) # write out RDO ByteStream file
     acf.addFlag('Output.doWriteDAOD',  False) # write out at least one DAOD file
+    acf.addFlag('Output.doJiveXML',  False) # write out a JiveXML file
 
     acf.addFlag('Output.TreeAutoFlush', {})  # {} = automatic for all streams, otherwise {'STREAM': 123}
     acf.addFlag('Output.StorageTechnology', 'ROOTTREEINDEX')  # Set the underlying POOL storage technology
