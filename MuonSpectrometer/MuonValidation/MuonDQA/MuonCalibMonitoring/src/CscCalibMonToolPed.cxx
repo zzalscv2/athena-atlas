@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscCalibMonToolPed.h"
@@ -568,7 +568,7 @@ StatusCode CscCalibMonToolPed::postProc()
   if(m_doAllDetailed || (m_doBadDetailed && m_numBad > 0))
   {
     //Retrieve calibration report container from transient data store
-    const DataHandle<CscCalibReportContainer> repCont;
+    const CscCalibReportContainer* repCont = nullptr;
     if (!evtStore()->retrieve(repCont, m_histKey).isSuccess())
     {
       ATH_MSG_WARNING( " Cannot retrieve object from storegate with key " 
