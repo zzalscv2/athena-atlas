@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // EtaPtFilterTool.h 
@@ -188,6 +188,10 @@ class EtaPtFilterTool : public TruthParticleFilterBaseTool
    *  (statuscode == 3)
    */
   BooleanProperty m_keepDocumentaries;
+
+  /** Switch to keep *all* leptons - i.e. do not apply kinematic cuts on them
+   */
+  BooleanProperty m_keepAllLeptons;
 
   /** Predicate to select pp->X vertices where p is a parton (q,g)
    *  This will select vertices:

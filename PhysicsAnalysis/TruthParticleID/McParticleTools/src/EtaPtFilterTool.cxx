@@ -25,6 +25,7 @@
 
 #include "AtlasHepMC/Flow.h"
 #include "TruthUtils/HepMCHelpers.h"
+
 /////////////////////////////////////////////////////////////////// 
 /// Public methods: 
 /////////////////////////////////////////////////////////////////// 
@@ -100,6 +101,10 @@ EtaPtFilterTool::EtaPtFilterTool( const std::string& type,
 		   m_keepDocumentaries = true,
 		   "Switch to keep *all* generator particles which are "
 		   "documentaries (statuscode == 3)" );
+
+  declareProperty( "KeepAllLeptons",
+       m_keepAllLeptons = true,
+		   "Switch to keep *all* leptons - i.e. do not apply kinematic cuts on them");
 
 }
 
@@ -195,10 +200,12 @@ bool EtaPtFilterTool::isAccepted( const HepMC::ConstGenParticlePtr& mc ) const
   if ( ! mc ) {
     return false;
   }
-  
+
   if ( m_butKeepAllGeneratorStable.value() ) {
-    if ( MC::isGenStable(mc) ) 
+    // static IsGenStable isStable;
+    if ( MC::isStable(mc) ) {
       return true;
+    }
   }
 
   if ( m_onlyGenerator.value() ) {
@@ -216,10 +223,16 @@ bool EtaPtFilterTool::isAccepted( const HepMC::ConstGenParticlePtr& mc ) const
     }
   }
 
-  const HepMC::FourVector hlv = mc->momentum();
-  const double pt  = hlv.perp();
-  const double eta = hlv.pseudoRapidity();
+  // Skip kinematic cuts for leptons
+  if ( m_keepAllLeptons.value() ) {
+    if ( MC::isLepton(mc) ) {
+      return true;
+    }
+  }
 
+  const HepMC::FourVector hlv = mc->momentum();
+  const double pt             = hlv.perp();
+  const double eta            = hlv.pseudoRapidity();
   if ( ( std::abs( eta )  >=  m_innerEtaRegionCuts.value()[0] && 
 	 std::abs( eta )  <   m_innerEtaRegionCuts.value()[1] &&
 	 pt               >   m_innerEtaRegionCuts.value()[2] ) 

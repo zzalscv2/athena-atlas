@@ -50,3 +50,25 @@ def GEN_AOD2xAODCfg(flags, name="GEN_AOD2xAOD", **kwargs):
         acc.merge(addToAOD(flags, toAOD))
 
     return acc
+
+def HepMCTruthReaderCfg(flags, name="HepMCTruthReader"):
+    acc = ComponentAccumulator()
+    HepMCTruthReader = CompFactory.HepMCTruthReader(
+        name               = name,
+        HepMCContainerKey  = flags.HepMCContainerKey,
+        Do4momPtEtaPhi     = flags.Do4momPtEtaPhi
+    )
+    acc.addEventAlgo(HepMCTruthReader)
+    return acc
+
+def xAODTruthReaderCfg(flags, name="xAODTruthReader"):
+    acc = ComponentAccumulator()
+    xAODTruthReader = CompFactory.xAODReader.xAODTruthReader(
+        name                              = name,
+        xAODTruthEventContainerKey       = flags.xAODTruthEventContainerKey,
+        # xAODTruthPileupEventContainerKey = flags.xAODTruthPileupEventContainerKey,
+        DoPUEventPrintout                 = flags.DoPUEventPrintout,
+        Do4momPtEtaPhi                    = flags.Do4momPtEtaPhi
+    )
+    acc.addEventAlgo(xAODTruthReader)
+    return acc

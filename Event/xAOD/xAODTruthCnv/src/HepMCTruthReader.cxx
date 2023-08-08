@@ -8,6 +8,7 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/DataSvc.h"
 #include "GaudiKernel/PhysicalConstants.h"
+#include "StoreGate/ReadHandle.h"
 
 #include "GeneratorObjects/McEventCollection.h"
 #include "HepMCTruthReader.h"
@@ -17,24 +18,33 @@ using std::cout;
 using std::endl;
 
 HepMCTruthReader::HepMCTruthReader(const std::string& name, ISvcLocator* svcLoc)
-  : AthAlgorithm(name, svcLoc)
-{
-  /// @todo Provide these names centrally in a Python module and remove these hard-coded versions?
-  declareProperty( "HepMCContainerName", m_hepMCContainerName="GEN_EVENT" );
-}
+  : AthReentrantAlgorithm(name, svcLoc)
+{}
 
 
 StatusCode HepMCTruthReader::initialize() {
-  ATH_MSG_INFO("HepMC container name = " << m_hepMCContainerName );
+  ATH_MSG_INFO("HepMC container name = " << m_hepMCContainerKey );
+
+  // initialize handles
+  ATH_CHECK(m_hepMCContainerKey.initialize());
+  ATH_MSG_DEBUG("HepMCContainerKey = " << m_hepMCContainerKey.key() );
   return StatusCode::SUCCESS;
 }
 
 
-StatusCode HepMCTruthReader::execute() {
+StatusCode HepMCTruthReader::execute(const EventContext& ctx) const {
 
   // Retrieve the HepMC truth:
-  const McEventCollection* mcColl = nullptr;
-  CHECK( evtStore()->retrieve( mcColl, m_hepMCContainerName ) );
+  SG::ReadHandle<McEventCollection> mcColl(m_hepMCContainerKey, ctx);
+  // validity check is only really needed for serial running. Remove when MT is only way.
+  if (!mcColl.isValid()) {
+    ATH_MSG_ERROR("Could not retrieve HepMC with key:" << m_hepMCContainerKey.key());
+    if (m_hepMCContainerKey.key() == "GEN_EVENT") ATH_MSG_ERROR("Try to set 'HepMCContainerKey' to 'TruthEvent'");
+    return StatusCode::FAILURE;
+  } else {
+    ATH_MSG_DEBUG( "Retrieved HepMC with key: " << m_hepMCContainerKey.key() );
+  }
+
   ATH_MSG_INFO("Number of pile-up events in this Athena event: " << mcColl->size()-1);
 
   // Loop over events
@@ -53,7 +63,7 @@ StatusCode HepMCTruthReader::execute() {
            << "). Pointer: " << signalProcessVtx);
     }
 
-    printEvent(genEvt);
+    printEvent(genEvt, m_do4momPtEtaPhi);
 
   }
 
@@ -63,18 +73,19 @@ StatusCode HepMCTruthReader::execute() {
 
 // Print method for event - mimics the HepMC dump.
 // Vertex print method called within here
-void HepMCTruthReader::printEvent(const HepMC::GenEvent* event) {
+void HepMCTruthReader::printEvent(const HepMC::GenEvent* event, bool do4momPtEtaPhi) {
   cout << "--------------------------------------------------------------------------------\n";
   cout << "GenEvent: #" << "NNN" << "\n";
   cout << " Entries this event: " << event->vertices_size() << " vertices, " << event->particles_size() << " particles.\n";
   cout << "                                    GenParticle Legend\n";
-  cout << "        Barcode   PDG ID      ( Px,       Py,       Pz,     E ) Stat  DecayVtx\n";
+  if (do4momPtEtaPhi) cout << "        Barcode   PDG ID      ( pt,      eta,      phi,     E ) Stat  DecayVtx\n";
+  else                cout << "        Barcode   PDG ID      ( Px,       Py,       Pz,     E ) Stat  DecayVtx\n";    
   cout << "--------------------------------------------------------------------------------\n";
 #ifdef HEPMC3
-  for (const auto& iv: event->vertices()) {  printVertex(iv);  } 
+  for (const auto& iv: event->vertices()) {  printVertex(iv, do4momPtEtaPhi);  } 
 #else
   for (HepMC::GenEvent::vertex_const_iterator iv = event->vertices_begin(); iv != event->vertices_end(); ++iv) {
-    printVertex(*iv);
+    printVertex(*iv, do4momPtEtaPhi);
   }
 #endif
   cout << "--------------------------------------------------------------------------------\n";
@@ -82,7 +93,7 @@ void HepMCTruthReader::printEvent(const HepMC::GenEvent* event) {
 
 // Print method for vertex - mimics the HepMC dump.
 // Particle print method called within here
-void HepMCTruthReader::printVertex(const HepMC::ConstGenVertexPtr& vertex) {
+void HepMCTruthReader::printVertex(const HepMC::ConstGenVertexPtr& vertex, bool do4momPtEtaPhi) {
   std::ios::fmtflags f( cout.flags() ); 
   cout << "GenVertex (" << vertex << "):";
   if (HepMC::barcode(vertex) != 0) {
@@ -166,7 +177,7 @@ void HepMCTruthReader::printVertex(const HepMC::ConstGenVertexPtr& vertex) {
       cout.width(2);
       cout << vertex->particles_in().size();
     } else cout << "      ";
-    printParticle(iPIn);
+    printParticle(iPIn, do4momPtEtaPhi);
   }
   for (const auto& iPOut: vertex->particles_out()) {
     if ( iPOut == vertex->particles_out().front()) {
@@ -174,7 +185,7 @@ void HepMCTruthReader::printVertex(const HepMC::ConstGenVertexPtr& vertex) {
       cout.width(2);
       cout << vertex->particles_out().size();
     } else cout << "      ";
-    printParticle(iPOut);
+    printParticle(iPOut, do4momPtEtaPhi);
   }  
 #else  
   for (HepMC::GenVertex::particles_in_const_iterator iPIn = vertex->particles_in_const_begin();
@@ -184,7 +195,7 @@ void HepMCTruthReader::printVertex(const HepMC::ConstGenVertexPtr& vertex) {
       cout.width(2);
       cout << vertex->particles_in_size();
     } else cout << "      ";
-    printParticle(*iPIn);
+    printParticle(*iPIn, do4momPtEtaPhi);
   }
   for (HepMC::GenVertex::particles_out_const_iterator iPOut = vertex->particles_out_const_begin();
        iPOut != vertex->particles_out_const_end(); ++iPOut) {
@@ -193,7 +204,7 @@ void HepMCTruthReader::printVertex(const HepMC::ConstGenVertexPtr& vertex) {
       cout.width(2);
       cout << vertex->particles_out_size();
     } else cout << "      ";
-    printParticle(*iPOut);
+    printParticle(*iPOut, do4momPtEtaPhi);
   }
 
 #endif
@@ -202,7 +213,7 @@ void HepMCTruthReader::printVertex(const HepMC::ConstGenVertexPtr& vertex) {
 
 
 // Print method for particle - mimics the HepMC dump.
-void HepMCTruthReader::printParticle(const HepMC::ConstGenParticlePtr& particle) {
+void HepMCTruthReader::printParticle(const HepMC::ConstGenParticlePtr& particle, bool do4momPtEtaPhi) {
   std::ios::fmtflags f( cout.flags() ); 
   cout << " ";
   cout.width(9);
@@ -213,13 +224,16 @@ void HepMCTruthReader::printParticle(const HepMC::ConstGenParticlePtr& particle)
   cout.precision(2);
   cout.setf(std::ios::scientific, std::ios::floatfield);
   cout.setf(std::ios_base::showpos);
-  cout << particle->momentum().px() << ",";
+  if (do4momPtEtaPhi) cout << particle->momentum().perp() << ",";
+  else                  cout << particle->momentum().px() << ",";
   cout.width(9);
   cout.precision(2);
-  cout << particle->momentum().py() << ",";
+  if (do4momPtEtaPhi) cout << particle->momentum().pseudoRapidity() << ",";
+  else                  cout << particle->momentum().py() << ",";
   cout.width(9);
   cout.precision(2);
-  cout << particle->momentum().pz() << ",";
+  if (do4momPtEtaPhi) cout << particle->momentum().phi() << ",";
+  else                  cout << particle->momentum().pz() << ",";
   cout.width(9);
   cout.precision(2);
   cout << particle->momentum().e() << " ";
