@@ -265,7 +265,7 @@ class MonitorDef:
                 # Random
                 "L1_RD0_FILLED",
                 # Detector
-                "L1_CALREQ1", "L1_CALREQ2",
+                "L1_CALREQ0", "L1_CALREQ1", "L1_CALREQ2",
                 "L1_BPTX0_BGRP12","L1_BPTX1_BGRP12",
                 "L1_TGC_BURST",
                 "L1_ZB",

@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //             Interface for jFEXsumETAlgo - Algorithm for Sum ET Algorithm in jFEX
@@ -22,11 +22,11 @@ static const InterfaceID IID_IjFEXsumETAlgo("LVL1::IjFEXsumETAlgo",1, 0);
 class IjFEXsumETAlgo : virtual public IAlgTool {
     public:
         static const InterfaceID& interfaceID ( ) ;
-        virtual StatusCode safetyTest() = 0;
+        virtual StatusCode safetyTest() const = 0;
         virtual StatusCode reset() =0;
         virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width]) = 0;
         virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width]) = 0;
-        virtual int getTTowerET(unsigned int ) =0; 
+        virtual int getTTowerET(unsigned int ) =0;
         
         virtual void buildBarrelSumET()  =0;
         virtual void buildFWDSumET()  =0;

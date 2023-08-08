@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TrigDecision_v1.cxx 581968 2014-02-06 16:08:52Z krasznaa $
 
 #include <algorithm>
 #include <climits>
@@ -118,7 +117,7 @@ std::ostream& operator<<(std::ostream& s, const xAOD::TrigDecision_v1& td) {
    s << " L1 After Veto: ";
    writeBits(s, td.tav());
    s << " Error Bits: L2Err=" << td.lvl2ErrorBits() << " L2Truncated=" << td.lvl2Truncated();
-   s << " EF/HLTErr=" << td.efErrorBits() << " EF/HLTTrucated=" << td.efTruncated() << std::endl;
+   s << " EF/HLTErr=" << td.efErrorBits() << " EF/HLTTruncated=" << td.efTruncated() << std::endl;
    // Run 1 
    bool r1 = false;
    if (!td.lvl2Prescaled().empty() || !td.lvl2PassedPhysics().empty() || !td.lvl2PassedRaw().empty() 

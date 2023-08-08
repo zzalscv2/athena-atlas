@@ -442,7 +442,7 @@ void LVL1::eFEXtauBDT::computeIsCentralTowerSeed() {
   m_log->msg(MSG::DEBUG) << "Seeded: " << (int)m_isSeeded << endmsg;
 }
 
-unsigned int LVL1::eFEXtauBDT::getET() {
+unsigned int LVL1::eFEXtauBDT::getET() const {
   if (m_eTEstimateOverflow) {
     return (1 << ENERGY_WIDTH) - 1;
   }
