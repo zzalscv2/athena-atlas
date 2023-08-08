@@ -55,7 +55,11 @@ private:
 
     std::optional<double> getInnerTubeRadius(const Identifier& id) const;
 
-
+    /// Parses the legacy payload for the RT functions to a json format
+    StatusCode legacyRtPayloadToJSON(const coral::AttributeList& attr, nlohmann::json & json) const;
+    ///
+    StatusCode legacyTubePayloadToJSON(const coral::AttributeList& attr,nlohmann::json & json) const;
+    
     
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     ToolHandle<MuonCalib::IIdToFixedIdTool> m_idToFixedIdTool{this, "IdToFixedIdTool", "MuonCalib::IdToFixedIdTool"};

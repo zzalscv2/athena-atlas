@@ -37,9 +37,9 @@
 #include "PathResolver/PathResolver.h"
 #include "SGTools/TransientAddress.h"
 
-// TODO: use smart pointers
-// TODO: avoid dynamic char array
-// TODO: check if temporary things can be removed
+
+#include "MuonReadoutGeometryR4/StringUtils.h"
+
 
 #include <fstream>
 
@@ -260,6 +260,97 @@ std::optional<double> MdtCalibDbAlg::getInnerTubeRadius(const Identifier& id) co
     return std::nullopt;
 }
 
+StatusCode MdtCalibDbAlg::legacyRtPayloadToJSON(const coral::AttributeList& attr, nlohmann::json & json) const {
+    std::string data{}, delim{};
+    if (attr["data"].specification().type() == typeid(coral::Blob)) {
+        ATH_MSG_VERBOSE("Loading data as a BLOB, uncompressing...");
+        if (!CoralUtilities::readBlobAsString(attr["data"].data<coral::Blob>(), data)) {
+            ATH_MSG_FATAL("Cannot uncompress BLOB! Aborting...");
+            return StatusCode::FAILURE;
+        }
+        delim = "\n";
+    } else {
+        data = *(static_cast<const std::string *>((attr["data"]).addressOfData()));
+        delim = " ";
+    }
+    const std::vector<std::string> tokens = MuonGMR4::tokenize(data, delim);
+    if (tokens.size() < 2) {
+        ATH_MSG_FATAL("The line "<<data<<" cannot be resolved into header & payload");
+        return StatusCode::FAILURE;
+    }
+    const std::string& header = tokens[0];
+    const std::string& payload = tokens[1];
+    /// Extract first the number of points and the Calib identifier
+    unsigned int numPoints{0};
+    nlohmann::json channel{};
+    const bool rt_ts_applied = (attr["tech"].data<int>() & MuonCalib::TIME_SLEWING_CORRECTION_APPLIED);
+    channel["appliedRT"] = rt_ts_applied;
+    const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
+    {       
+       std::vector<int> tokensHeader = MuonGMR4::tokenizeInt(data, ",");
+       if(tokensHeader.size()< 2){
+            ATH_MSG_FATAL("Failed to deduce extract number of points & calib Identifier from "<<header);
+            return StatusCode::FAILURE;
+       }
+       unsigned int calibId = tokensHeader[0];
+       numPoints = tokensHeader[1];
+       MuonCalib::MuonFixedId id(calibId);
+       if (!id.is_mdt()) {
+           ATH_MSG_FATAL("Found non-MDT MuonFixedId, continuing...");
+           return StatusCode::FAILURE;
+       }
+       const Identifier athenaId = m_idToFixedIdTool->fixedIdToId(id);
+       if (!m_idHelperSvc->isMuon(athenaId)) {
+            ATH_MSG_WARNING("The translation from the calibration ID with station: "
+                            <<id.stationNameString()<<"("<<id.stationName()<<") "
+                            <<" eta:"<<id.eta()<<" phi: "<<id.phi());
+       }
+       channel["station"] = m_idHelperSvc->stationNameString(athenaId);
+       channel["eta"] = m_idHelperSvc->stationEta(athenaId);
+       channel["phi"] = m_idHelperSvc->stationPhi(athenaId);
+       channel["ml"] =  idHelper.multilayer(athenaId);
+       channel["layer"] = idHelper.tubeLayer(athenaId);
+       channel["tube"] = idHelper.tube(athenaId);
+    }
+    /// Next convert the rt relations to 
+    const std::vector<double> dataPoints = MuonGMR4::tokenizeDouble(payload, ",");
+    std::vector<double> radii{}, times{}, resos{};
+    radii.reserve(numPoints);
+    times.reserve(numPoints);
+    resos.reserve(numPoints);
+    /// Another code beauty here. The legacy payload was structured such that a triplet of three numbers
+    /// in the vector represents a single data point, the first one is the radius, the second one the time
+    /// and the last one is the resolution
+    for (unsigned int k = 0 ; k < dataPoints.size(); ++k) {
+        const double value = dataPoints[k];
+        switch (k%3) {
+            case 0:
+                radii.push_back(value);
+                break;
+            case 1:
+                times.push_back(value);
+                break;
+            case 2:
+                resos.push_back(value);
+                break;
+            default:
+                break;
+        }
+    }
+    /// Check that we picked up the right amount of points
+    if (radii.size() != numPoints ||
+        times.size() != numPoints ||
+        resos.size() != numPoints) {
+        ATH_MSG_FATAL("Payload "<<payload<<" does not lead to the expected number of points "<<numPoints<<" vs. "<<dataPoints.size());
+        return StatusCode::FAILURE;
+    }
+    channel["radii"] = std::move(radii);
+    channel["times"] = std::move(times);
+    channel["resolutions"] = std::move(resos);
+    json.push_back(channel);
+    return StatusCode::SUCCESS;
+}
+
 StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx) const {
     ATH_MSG_DEBUG("loadRt " << name());
 
@@ -270,12 +361,7 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx) const {
     }
     std::unique_ptr<MdtRtRelationCollection> writeCdoRt{std::make_unique<MdtRtRelationCollection>()};
 
-    // like MdtCalibDbCoolStrTool::loadRt()
-    // m_rtData is writeCdoRt here
-    // atrc is readCdoRt here
 
-    // tr-relation creators
-    MuonCalib::RtFromPoints rt_fromPoints;
 
     ATH_CHECK(defaultRt(*writeCdoRt));
 
@@ -291,12 +377,14 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx) const {
     ATH_MSG_INFO("Range of input is " << readHandleRt.getRange());
 
     // read new-style format 2020
-    std::vector<coral::AttributeList> dataPerChannel;
+
+    nlohmann::json rtCalibJson = nlohmann::json::array();
+    const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
     if (m_newFormat2020) {
-        CondAttrListCollection::const_iterator itr;
-        for (itr = readHandleRt->begin(); itr != readHandleRt->end(); ++itr) {
+        for (CondAttrListCollection::const_iterator itr = readHandleRt->begin(); 
+                                                    itr != readHandleRt->end(); ++itr) {
             const coral::AttributeList &atr = itr->second;
-            std::string data;
+            std::string data{};
             if (atr["data"].specification().type() == typeid(coral::Blob)) {
                 ATH_MSG_VERBOSE("Loading data as a BLOB, uncompressing...");
                 if (!CoralUtilities::readBlobAsString(atr["data"].data<coral::Blob>(), data)) {
@@ -307,25 +395,11 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx) const {
                 ATH_MSG_VERBOSE("Loading data as a STRING");
                 data = *(static_cast<const std::string *>((atr["data"]).addressOfData()));
             }
-
             // unwrap the json and build the data vector
             nlohmann::json yy = nlohmann::json::parse(data);
             for (auto &it : yy.items()) {
                 nlohmann::json yx = it.value();
-                for (auto &jt : yx.items()) {
-                    coral::AttributeList al;
-                    al.extend("tech", "int");
-                    al.extend("file", "string");
-                    al.extend("data", "blob");
-                    al["tech"].data<int>() = jt.value()[1];
-                    al["file"].data<std::string>() = static_cast<std::string>(jt.value()[2]);
-                    std::string data = jt.value()[3];
-                    if (!CoralUtilities::writeBlobFromString(data, al["data"].data<coral::Blob>())) {
-                        ATH_MSG_FATAL("Cannot compress BLOB!");
-                        return StatusCode::FAILURE;
-                    }
-                    dataPerChannel.push_back(al);
-                }
+                rtCalibJson.push_back(yx);
             }
         }
     }
@@ -333,159 +407,92 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx) const {
     else {
         for (CondAttrListCollection::const_iterator itr = readHandleRt->begin(); 
              itr != readHandleRt->end(); ++itr) {
-            dataPerChannel.push_back(itr->second);
+            ATH_CHECK(legacyRtPayloadToJSON(itr->second, rtCalibJson));
         }
     }
 
     // unpack the strings in the collection and update the writeCdoRt
-    for (const auto& atr : dataPerChannel) {
-        bool rt_ts_applied = (atr["tech"].data<int>() & MuonCalib::TIME_SLEWING_CORRECTION_APPLIED);
-        std::string header = "", payload = "", trailer = "";
-        // if BLOB data
-        if (atr["data"].specification().type() == typeid(coral::Blob)) {
-            std::string istr;
-            ATH_MSG_VERBOSE("Loading data as a BLOB, uncompressing...");
-            if (!CoralUtilities::readBlobAsString(atr["data"].data<coral::Blob>(), istr)) {
-                ATH_MSG_FATAL("Cannot uncompress BLOB! Aborting...");
-                return StatusCode::FAILURE;
-            }
-            ATH_CHECK(extractString(istr, header, "\n"));
-            ATH_CHECK(extractString(istr, payload, "\n"));
-            if (!istr.empty()) ATH_CHECK(extractString(istr, trailer, "\n"));
-        } else {  // else CLOB data
-            std::string data;
-            data = *(static_cast<const std::string *>((atr["data"]).addressOfData()));
-            ATH_MSG_VERBOSE("Data load is " << data);
-            // interpret as string stream
-            std::string istr(data);
-            ATH_CHECK(extractString(istr, header, " "));
-            ATH_CHECK(extractString(istr, payload, " "));
-            if (!istr.empty()) ATH_CHECK(extractString(istr, trailer, " "));
-        }
-        ATH_MSG_VERBOSE("Read header:" << header << " payload:" << payload << " trailer:" << trailer);
-
-        // the header contains the muonfixedid rather than the hash
-        std::unique_ptr<char[]> parameters{new char[header.size() + 1]};
-        strncpy(parameters.get(), header.c_str(), header.size() + 1);
-        parameters[header.size()] = '\0';
-        unsigned int regionId, npoints(0);
-        Identifier athenaId;
-        char *saveptr;
-        char *pch = strtok_r(parameters.get(), " _,",&saveptr);
-        regionId = atoi(pch);
-        // Long ago the hash was put in the RT file header, but now (2016)
-        // the muonfixedid of the chamber is in the header.  Hence the "if" below will always be true.
-        if (regionId > m_regionIdThreshold) {
-            MuonCalib::MuonFixedId id(regionId);
-            if (!id.is_mdt()) {
-                ATH_MSG_WARNING("Found non-MDT MuonFixedId, continuing...");
-                continue;
-            }
-            if (!m_idHelperSvc->hasCSC()) {
-                // in case there are no CSCs, there must be 2 NSWs, and accordingly no EIS/EIL1-3 MDTs
-                std::string stationName = id.stationNumberToFixedStationString(id.stationName());
-                if (stationName.find("EIS") != std::string::npos ||
-                    (std::abs(id.eta()) < 4 && stationName.find("EIL") != std::string::npos)) {
-                    static std::atomic<bool> eisWarningPrinted = false;
-                    if (!eisWarningPrinted) {
-                        ATH_MSG_WARNING("Found EIS/EIL1-3 MuonFixedId, although NSWs should be present, continuing...");
-                        eisWarningPrinted.store(true, std::memory_order_relaxed);
-                    }
-                    continue;
-                }
-            }
-            athenaId = m_idToFixedIdTool->fixedIdToId(id);
-            if (!m_idHelperSvc->isMuon(athenaId)){
-                ATH_MSG_WARNING("The translation from the calibration ID with station: "
-                                <<id.stationNameString()<<"("<<id.stationName()<<") "
-                                <<" eta:"<<id.eta()<<" phi: "<<id.phi()
-                                <<" failed. Please check carefully the geometry tag provided and whether the previous printout also makes sense");
-                
-                continue;
-            }
-            // If using chamber RTs skip RTs for ML2 -- use ML1 RT for entire chamber
-            if (m_regionSvc->RegionType() == ONEPERCHAMBER && m_idHelperSvc->mdtIdHelper().multilayer(athenaId) == 2) {
-                ATH_MSG_VERBOSE("MdtCalibDbAlg::loadRt Ignore ML2 RT for region "
-                    << regionId << " " << m_idHelperSvc->toString(athenaId));  // TEMP
-                continue;
-            }
-            IdentifierHash hash{0};  // chamber hash
-            if (m_idHelperSvc->mdtIdHelper().get_module_hash(athenaId, hash)) {
-                ATH_MSG_ERROR("Could not retrieve module hash for identifier " << athenaId.get_compact());
-                return StatusCode::FAILURE;
-            }
-            ATH_MSG_VERBOSE("Fixed region Id " << regionId << " converted into athena Id " << athenaId << " and then into hash " << hash);
-            regionId = hash;  // reset regionId to chamber hash
-        }
-        if (regionId >= writeCdoRt->size()) {
-            ATH_MSG_ERROR("loadRt() - regionId=" << regionId << " larger than size of MdtRtRelationCollection, skipping...");
-            return StatusCode::FAILURE;
-        }
-        // extract npoints in RT function
-        pch = strtok_r(nullptr, "_,",&saveptr);
-        npoints = atoi(pch);
-        MuonCalib::CalibFunc::ParVec rtPars;
-        MuonCalib::CalibFunc::ParVec resoPars;
-
-        MuonCalib::SamplePoint tr_point, ts_point;  // pairs of numbers; tr = (time,radius); ts = (time,sigma)  [sigma=resolution]
-        std::vector<MuonCalib::SamplePoint> tr_points(0),
-            ts_points(0);  // all the points in time,radius [RT] and time,sigma [resolution func]
-        float multilayer_tmax_diff(-9e9);
+    for (const auto& payload : rtCalibJson) {
+        const bool rt_ts_applied = payload["appliedRT"];
+        /// Athena Identifier
+        const std::string stName = payload["station"];
+        const Identifier athenaId =  idHelper.channelID(stName, payload["eta"], payload["phi"],
+                                                        payload["ml"], payload["layer"], payload["tube"]);
 
         std::optional<double> innerTubeRadius = getInnerTubeRadius(m_idHelperSvc->mdtIdHelper().multilayerID(athenaId, 1));
         if (!innerTubeRadius) continue;
 
-        std::unique_ptr<char[]> RTPar{new char[payload.size() + 1]};
-        strncpy(RTPar.get(), payload.c_str(), payload.size() + 1);
-        RTPar[payload.size()] =
-            '\0';  // terminate string (not sure this is really needed because payload.c_str() should be terminated in \0)
-        char *saveptr1;
-        char *pch1 = strtok_r(RTPar.get(), ",",&saveptr1);
-        unsigned int n = 0;
+
+        const std::vector<double> radii = payload["radii"];
+        const std::vector<double> times = payload["times"];
+        const std::vector<double> resolutions = payload["resolutions"];
+ 
+        unsigned int regionId{0};
+        // If using chamber RTs skip RTs for ML2 -- use ML1 RT for entire chamber
+        if (m_regionSvc->RegionType() == ONEPERCHAMBER && m_idHelperSvc->mdtIdHelper().multilayer(athenaId) == 2) {
+            ATH_MSG_VERBOSE("MdtCalibDbAlg::loadRt Ignore ML2 RT for region "
+                           << regionId << " " << m_idHelperSvc->toString(athenaId));  // TEMP
+            continue;
+        }
+        IdentifierHash hash{0};  // chamber hash
+        if (m_idHelperSvc->mdtIdHelper().get_module_hash(athenaId, hash)) {
+            ATH_MSG_ERROR("Could not retrieve module hash for identifier " << athenaId.get_compact());
+            return StatusCode::FAILURE;
+        }
+        ATH_MSG_VERBOSE("Fixed region Id " << regionId << " converted into athena Id " << athenaId << " and then into hash " << hash);
+        regionId = hash;  // reset regionId to chamber hash
+
+        if (regionId >= writeCdoRt->size()) {
+            ATH_MSG_ERROR("loadRt() - regionId=" << regionId << " larger than size of MdtRtRelationCollection, skipping...");
+            return StatusCode::FAILURE;
+        }
+
+        MuonCalib::CalibFunc::ParVec rtPars;
+        MuonCalib::CalibFunc::ParVec resoPars;
+
+        MuonCalib::SamplePoint tr_point, ts_point;  // pairs of numbers; tr = (time,radius); ts = (time,sigma)  [sigma=resolution]
+        std::vector<MuonCalib::SamplePoint> tr_points{}, ts_points{};
+        /// all the points in time,radius [RT] and time,sigma [resolution func]
+        float multilayer_tmax_diff(-9e9);
+
         // loop over RT function payload (triplets of radius,time,sigma(=resolution) )
-        for (int k = 1; pch1 != nullptr && n <= npoints; pch1 = strtok_r(nullptr, ", ",&saveptr1), k++) {
-            if (k == 1) {  // radius point
-                float radius = atof(pch1);
-                if (m_rtShift != 0.) {
-                    float oldradius = radius;
-                    // TODO: What is this magic number
-                    float rshift = m_rtShift * 1.87652e-2 * radius * (radius - *innerTubeRadius);
-                    radius = oldradius + rshift;
-                    ATH_MSG_DEBUG("DEFORM RT: old radius " << oldradius << " new radius " << radius << " shift " << rshift << " max shift "
+        for (unsigned int k = 0; k < radii.size(); ++k) {
+            float radius = radii[k];
+            if (m_rtShift != 0.) {
+                float oldradius = radius;
+                // TODO: What is this magic number
+                float rshift = m_rtShift * 1.87652e-2 * radius * (radius - *innerTubeRadius);
+                radius = oldradius + rshift;
+                ATH_MSG_DEBUG("DEFORM RT: old radius " << oldradius << " new radius " << radius << " shift " << rshift << " max shift "
                                                            << m_rtShift);
-                }
+            }
 
-                if (m_rtScale != 1.) {
-                    radius = radius * m_rtScale;
-                    ATH_MSG_DEBUG("DEFORM RT: old radius " << radius << " new radius " << radius << " scale factor " << m_rtScale);
-                }
+            if (m_rtScale != 1.) {
+                float oldradius = radius;
+                radius = radius * m_rtScale;
+                ATH_MSG_DEBUG("DEFORM RT: old radius " << oldradius << " new radius " << radius << " scale factor " << m_rtScale);
+            }
+            tr_point.set_x2(radius);
 
-                tr_point.set_x2(radius);
-            } else if (k == 2) {  // time
-                float time = atof(pch1);
-                tr_point.set_x1(time);
-                ts_point.set_x1(time);
-            } else if (k == 3) {  // sigma or resolution
-                float sigma = atof(pch1);
-                ts_point.set_x2(sigma);
-                ts_point.set_error(1.0);
-                tr_point.set_error(1.0);
-                if (tr_point.x2() < -99) {  // if radius is < -99 then treat time as ML Tmax difference
-                    multilayer_tmax_diff = tr_point.x1();
-                } else if (n == 0 || (tr_points[n - 1].x1() < tr_point.x1() && tr_points[n - 1].x2() < tr_point.x2())) {
-                    tr_points.push_back(tr_point);
-                    ts_points.push_back(ts_point);
-                    n++;  // count points in RT
-                }
-                k = 0;
+            float time = times[k];
+            tr_point.set_x1(time);
+            ts_point.set_x1(time);
+
+            float sigma = resolutions[k];
+            ts_point.set_x2(sigma);
+            ts_point.set_error(1.0);
+            tr_point.set_error(1.0);
+            if (tr_point.x2() < -99) {  // if radius is < -99 then treat time as ML Tmax difference
+                multilayer_tmax_diff = tr_point.x1();
+            } else if (k == 0 || (tr_points[k - 1].x1() < tr_point.x1() && tr_points[k - 1].x2() < tr_point.x2())) {
+                tr_points.push_back(tr_point);
+                ts_points.push_back(ts_point);
             }
         }  // end loop over RT function payload (triplets of radius,time,resolution)
 
-        // Must have at least 3 points to have a valid RT
+        /// Must have at least 3 points to have a valid RT
         if (ts_points.size() < 3) {
             ATH_MSG_FATAL("Rt relation broken!");
-            ATH_MSG_FATAL("file='" << atr["file"].data<std::string>() << "'");
-            ATH_MSG_FATAL("header='" << header << "'");
             return StatusCode::FAILURE;
         }
 
@@ -514,56 +521,40 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx) const {
         }
 
         // Create RT function from tr_points and load RT and resolution functions
-        try {
-            std::unique_ptr<MuonCalib::IRtRelation> rt = std::make_unique<MuonCalib::RtRelationLookUp>(MuonCalib::RtFromPoints::getRtRelationLookUp(tr_points));
-            if (reso && rt) {
-                if (regionId >= writeCdoRt->size()) {                   
-                    ATH_MSG_ERROR("Illegal regionId " << regionId);
-                    return StatusCode::FAILURE;
-                } else {
-                    if (rt->par(1) == 0.) {
-                        ATH_MSG_WARNING("Bin size is 0");
-                        for (const MuonCalib::SamplePoint& it: tr_points)
-                            ATH_MSG_WARNING(it.x1() << " " << it.x2() << " " << it.error());
-                    }
-                    // Save ML difference if it is available
-                    if (multilayer_tmax_diff > -8e8) { rt->SetTmaxDiff(multilayer_tmax_diff); }
-                    // Store RT and resolution functions for this region
-                    std::unique_ptr<MuonCalib::MdtRtRelation> rt_rel = std::make_unique<MuonCalib::MdtRtRelation>(std::move(rt), std::move(reso), 0.);
-                    if (m_regionSvc->RegionType() == ONERT) {
-                        (*writeCdoRt)[0] = std::move(rt_rel);
-                        break;  // only read one RT from COOL for ONERT option.
-                        // If doing ML2 RTs, and this is a ML2 RT function then add it to the end of writeCdoRt
-                    } else if (m_regionSvc->RegionType() == ONEPERMULTILAYER && m_idHelperSvc->mdtIdHelper().multilayer(athenaId) == 2) {
-                        ATH_MSG_VERBOSE("MdtCalibDbAlg::loadRt Load ML2 RT for region "
-                                        << regionId << " " << m_idHelperSvc->toString(athenaId));
-                        (*writeCdoRt).push_back(std::move(rt_rel));
-                        IdentifierHash mlHash{0};
-                        m_idHelperSvc->mdtIdHelper().get_detectorElement_hash(athenaId, mlHash);
-                        m_regionSvc->setRegionHash(mlHash);
-                    } else {  // store RT for chamber or ML1 if doing ONEPERMULTILAYER
-                        (*writeCdoRt)[regionId] = std::move(rt_rel);
-                        // TODO: add setter method to the container to check if you are not overwriting an existing pointer
-                    }
-                }  // end else regionId is OK
-            }      // end if reso && rt
-        }          // end try
-        catch (int i) {
-            ATH_MSG_FATAL("Error in creating rt-relation!");
-            ATH_MSG_FATAL("npoints=" << tr_points.size());
-            ATH_MSG_FATAL("Offending input: header=" << header);
-            ATH_MSG_FATAL("Offending input: payload=" << payload);
+        std::unique_ptr<MuonCalib::IRtRelation> rt = std::make_unique<MuonCalib::RtRelationLookUp>(MuonCalib::RtFromPoints::getRtRelationLookUp(tr_points));
+        if (!reso || !rt) { continue; }
+
+        if (regionId >= writeCdoRt->size()) {
+            ATH_MSG_ERROR("Illegal regionId " << regionId);
             return StatusCode::FAILURE;
         }
-
+        if (rt->par(1) == 0.) {
+            ATH_MSG_WARNING("Bin size is 0");
+            for (const MuonCalib::SamplePoint& it: tr_points)
+                ATH_MSG_WARNING(it.x1() << " " << it.x2() << " " << it.error());
+        }
+        // Save ML difference if it is available
+        if (multilayer_tmax_diff > -8e8) { rt->SetTmaxDiff(multilayer_tmax_diff); }
+        // Store RT and resolution functions for this region
+        std::unique_ptr<MuonCalib::MdtRtRelation> rt_rel = std::make_unique<MuonCalib::MdtRtRelation>(std::move(rt), std::move(reso), 0.);
+        if (m_regionSvc->RegionType() == ONERT) {
+            (*writeCdoRt)[0] = std::move(rt_rel);
+            break;  // only read one RT from COOL for ONERT option.
+            // If doing ML2 RTs, and this is a ML2 RT function then add it to the end of writeCdoRt
+        } else if (m_regionSvc->RegionType() == ONEPERMULTILAYER && m_idHelperSvc->mdtIdHelper().multilayer(athenaId) == 2) {
+            ATH_MSG_VERBOSE("MdtCalibDbAlg::loadRt Load ML2 RT for region "
+                            << regionId << " " << m_idHelperSvc->toString(athenaId));
+            (*writeCdoRt).push_back(std::move(rt_rel));
+            IdentifierHash mlHash{0};
+            m_idHelperSvc->mdtIdHelper().get_detectorElement_hash(athenaId, mlHash);
+            m_regionSvc->setRegionHash(mlHash);
+        } else {  // store RT for chamber or ML1 if doing ONEPERMULTILAYER
+            (*writeCdoRt)[regionId] = std::move(rt_rel);           
+        }
     }  // end loop over itr (strings read from COOL)
     ATH_MSG_INFO("MdtCalibDbAlg::loadRt Read " << m_regionSvc->numberOfRegions() << "RTs from COOL");
 
-    // like MdtCalibrationDbSvc
-    // for corData in loadRt
-
     // finally record writeCdo
-
     if (writeCdoRt->empty()) {
         ATH_MSG_ERROR("writeCdoRt.size()==0");
         return StatusCode::FAILURE;
@@ -592,8 +583,6 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx) const {
 
     ATH_CHECK(writeHandleCor.record(std::move(writeCdoCor)));   
     ATH_MSG_INFO("recorded new " << writeHandleCor.key() << " with range " << writeHandleCor.getRange() << " into Conditions Store");
-    
-
     return StatusCode::SUCCESS;
 }
 
@@ -671,8 +660,126 @@ StatusCode MdtCalibDbAlg::defaultT0s(MdtTubeCalibContainerCollection &writeCdoTu
     return StatusCode::SUCCESS;
 }  // end MdtCalibDbAlg::defaultT0s
 
+
+StatusCode MdtCalibDbAlg::legacyTubePayloadToJSON(const coral::AttributeList& attr,nlohmann::json & json) const {
+    std::string data{};
+    if (attr["data"].specification().type() == typeid(coral::Blob)) {
+        ATH_MSG_VERBOSE("Loading data as a BLOB, uncompressing...");
+        if (!CoralUtilities::readBlobAsString(attr["data"].data<coral::Blob>(), data)) {
+            ATH_MSG_FATAL("Cannot uncompress BLOB! Aborting...");
+            return StatusCode::FAILURE;
+        }
+        
+    } else {
+        data = *(static_cast<const std::string *>((attr["data"]).addressOfData()));
+    }
+    std::vector<std::string> tokens = MuonGMR4::tokenize(data, "\n");
+    if (tokens.size() < 2) {
+        ATH_MSG_FATAL("The line "<<data<<" cannot be resolved into header & payload");
+        return StatusCode::FAILURE;
+    }
+    std::string& header = tokens[0];
+    const std::string& payload = tokens[1];
+    
+    /// A  typical header looks like: T0BIL_1_-6,v0.0,1,288
+    /// BIL is the station name, the numbers next do the underscores represent the station phi and the
+    /// station eta. That's followed by a mysterious version number which was never incremented throughout time -- soo sad.
+    /// The last two fields are the region number and the total number of tubes in the chamber.  
+    const std::string stName = header.substr(2,3);
+    int eta{0}, phi{0}, nTubes{0};
+    {
+        std::replace(header.begin(), header.end(),'_', ',');
+        const std::vector<std::string> headerTokens = MuonGMR4::tokenize(header, ",");
+        phi = MuonGMR4::atoi(headerTokens[1]);
+        eta = MuonGMR4::atoi(headerTokens[2]);
+        nTubes = MuonGMR4::atoi(headerTokens[5]);
+    }
+    const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
+    bool isValid{false};
+    const Identifier chamID = idHelper.elementID(stName, eta, phi, isValid);
+    if (!isValid) {
+        static std::atomic<bool> idWarningPrinted = false;
+        if (!idWarningPrinted) {
+            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Identifier: "<<stName<<","<<eta<<","<<phi
+                            <<" is invalid. Skipping");
+            idWarningPrinted.store(true, std::memory_order_relaxed);
+        }
+        return StatusCode::SUCCESS;
+    }
+    nlohmann::json channel{};
+    const bool t0_ts_applied = (attr["tech"].data<int>() & MuonCalib::TIME_SLEWING_CORRECTION_APPLIED);
+    channel["appliedT0"] = t0_ts_applied;
+    channel["station"] = stName;
+    channel["eta"] = eta;
+    channel["phi"] = phi;
+
+    const std::vector<double> payLoadData = MuonGMR4::tokenizeDouble(payload, ",");
+    std::vector<double> tzeros{}, meanAdcs{};
+    std::vector<int> statusCodes{};
+    /// The payload comes along in triplets. The first element of the triplet represents the
+    /// T0 shift of the single tube, the second one the status and the last one the mean Adc value
+    for (unsigned int k = 0; k < payLoadData.size(); ++k){
+        const double value = payLoadData[k];
+        switch (k%3) {
+            case 0:               
+                tzeros.push_back(value);
+                break;
+            case 1:                
+                statusCodes.push_back(value);
+                break;
+            case 2:                
+                meanAdcs.push_back(value);
+                break;
+            default:
+                break;
+        }
+    }
+    if (statusCodes.size() != tzeros.size() ||
+        statusCodes.size() != meanAdcs.size() ||
+        statusCodes.empty()) {
+        ATH_MSG_FATAL("Failed to properly readt t0 calibrations for chamber "<<m_idHelperSvc->toStringChamber(chamID));
+        return StatusCode::FAILURE;
+    }
+    /// pack everything into a json array
+    int ml{1}, layer{1}, tube{1};
+
+    const int numMl = idHelper.numberOfMultilayers(chamID);
+    const Identifier secondMlID = idHelper.multilayerID(chamID, numMl);
+    const int tubesPerLay = std::max(idHelper.tubeMax(chamID), idHelper.tubeMax(secondMlID));
+    const int numLayers = std::max(idHelper.tubeLayerMax(chamID), idHelper.tubeLayerMax(secondMlID));
+    if ( m_checkTubes &&  (numMl * numLayers * tubesPerLay) != nTubes) {
+        ATH_MSG_FATAL("Calibration database differs in terms of number of tubes for chamber "
+                     <<m_idHelperSvc->toStringChamber(chamID)<<". Expected "<<(numMl * numLayers * tubesPerLay)
+                     <<" vs. observed "<<nTubes);
+        return StatusCode::FAILURE;
+    }
+    nlohmann::json calibData = nlohmann::json::array();
+    for (unsigned int k = 0; k < tzeros.size(); ++k) {
+        nlohmann::json channelData{};
+        channelData["ml"] = ml;
+        channelData["layer"] =layer;
+        channelData["tube"] = tube;
+        channelData["t0"] = tzeros[k];
+        channelData["meanAdc"] = meanAdcs[k];
+        channelData["status"] = statusCodes[k];
+        ++tube;
+        if (tube > tubesPerLay){
+            tube = 1;
+            ++layer;
+        }
+        if (layer > numLayers){
+            layer = 1;
+            ++ml;
+        }
+        calibData.push_back(channelData);
+    }
+    channel["calibConstants"] = calibData;
+    json.push_back(channel);    
+    return StatusCode::SUCCESS;
+}
 StatusCode MdtCalibDbAlg::loadTube(const EventContext& ctx) const {
     ATH_MSG_DEBUG("loadTube " << name());
+    const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
 
     SG::WriteCondHandle<MdtTubeCalibContainerCollection> writeHandleTube{m_writeKeyTube, ctx};
     if (writeHandleTube.isValid()) {
@@ -691,14 +798,13 @@ StatusCode MdtCalibDbAlg::loadTube(const EventContext& ctx) const {
     writeHandleTube.addDependency(readHandleTube);
     ATH_MSG_INFO("Size of CondAttrListCollection " << readHandleTube.fullKey() << " readCdoTube->size()= " << readHandleTube->size());
     ATH_MSG_INFO("Range of input is " << readHandleTube.getRange());
-
     // read new-style format 2020
-    std::vector<coral::AttributeList> dataPerChannel;
+    nlohmann::json t0CalibJson = nlohmann::json::array();
     if (m_newFormat2020) {
-        CondAttrListCollection::const_iterator itr;
-        for (itr = readHandleTube->begin(); itr != readHandleTube->end(); ++itr) {
+        for (CondAttrListCollection::const_iterator itr = readHandleTube->begin(); 
+                                                    itr != readHandleTube->end(); ++itr) {
             const coral::AttributeList &atr = itr->second;
-            std::string data;
+            std::string data{};
             if (atr["data"].specification().type() == typeid(coral::Blob)) {
                 ATH_MSG_VERBOSE("Loading data as a BLOB, uncompressing...");
                 if (!CoralUtilities::readBlobAsString(atr["data"].data<coral::Blob>(), data)) {
@@ -709,33 +815,19 @@ StatusCode MdtCalibDbAlg::loadTube(const EventContext& ctx) const {
                 ATH_MSG_VERBOSE("Loading data as a STRING");
                 data = *(static_cast<const std::string *>((atr["data"]).addressOfData()));
             }
-
             // unwrap the json and build the data vector
             nlohmann::json yy = nlohmann::json::parse(data);
             for (auto &it : yy.items()) {
                 nlohmann::json yx = it.value();
-                for (auto &jt : yx.items()) {
-                    coral::AttributeList al;
-                    al.extend("tech", "int");
-                    al.extend("file", "string");
-                    al.extend("data", "blob");
-                    al["tech"].data<int>() = jt.value()[1];
-                    al["file"].data<std::string>() = static_cast<std::string>(jt.value()[2]);
-                    std::string data = jt.value()[3];
-                    if (!CoralUtilities::writeBlobFromString(data, al["data"].data<coral::Blob>())) {
-                        ATH_MSG_FATAL("Cannot compress BLOB!");
-                        return StatusCode::FAILURE;
-                    }
-                    dataPerChannel.push_back(al);
-                }
+                t0CalibJson.push_back(yx);
             }
         }
     }
     // read old-style format
-    else {
+    else {         
          for (CondAttrListCollection::const_iterator itr = readHandleTube->begin(); 
                     itr != readHandleTube->end(); ++itr) {
-             dataPerChannel.push_back(itr->second);
+             ATH_CHECK(legacyTubePayloadToJSON(itr->second, t0CalibJson));
         }
     }
 
@@ -744,69 +836,19 @@ StatusCode MdtCalibDbAlg::loadTube(const EventContext& ctx) const {
 
     // unpack the strings in the collection and update the
     // MdtTubeCalibContainers in TDS
-    for (auto atr : dataPerChannel) {
-        std::string header = "", payload = "", trailer = "";
-
-        bool t0_ts_applied = (atr["tech"].data<int>() & MuonCalib::TIME_SLEWING_CORRECTION_APPLIED);
-        // If BLOB data then uncompress
-        if (atr["data"].specification().type() == typeid(coral::Blob)) {
-            std::string istr;
-            ATH_MSG_VERBOSE("Loading data as a BLOB, uncompressing...");
-            if (!CoralUtilities::readBlobAsString(atr["data"].data<coral::Blob>(), istr)) {
-                ATH_MSG_FATAL("Cannot uncompress BLOB! Aborting...");
-                return StatusCode::FAILURE;
-            }
-            ATH_CHECK(extractString(istr, header, "\n"));
-            ATH_CHECK(extractString(istr, payload, "\n"));
-            if (!istr.empty()) ATH_CHECK(extractString(istr, trailer, "\n"));
-        } else {  // else is uncompressed CLOB (no longer used)
-            std::string data;
-            data = *(static_cast<const std::string *>((atr["data"]).addressOfData()));
-            ATH_MSG_VERBOSE("Data load is " << data);
-
-            // interpret as string stream
-            std::string istr(data);
-            ATH_CHECK(extractString(istr, header, "\n"));
-            ATH_CHECK(extractString(istr, payload, "\n"));
-            if (!istr.empty()) ATH_CHECK(extractString(istr, trailer, "\n"));
-        }
-        ATH_MSG_VERBOSE("Read header:" << header << " payload:" << payload << " trailer:" << trailer);
-
-        // Extract info from the header line, chamber name, number of tubes.
-        int ieta = -99, iphi = -99, region = -99, ntubes = -99;
-        //    std::string rName;
-
-        // parameters for the MdtTubeContainer
-        // header filename,version,region,tubes
-        std::unique_ptr<char[]> parameters{new char[header.size() + 1]};
-        strncpy(parameters.get(), header.c_str(), header.size() + 1);
-        parameters[header.size()] = '\0';             // terminate string
-        char *saveptr;
-        char *pch = strtok_r(parameters.get(), " _," , &saveptr);  // split using delimiters "_" and ","
-        std::string name(pch, 2, 3);                  // extract 3-character station to "name" (e.g. BIL)
-        // Split header line and extract phi, eta, region, ntubes
-        pch = strtok_r(nullptr, "_,",&saveptr);
-        for (int i = 1; pch != nullptr; pch = strtok_r(nullptr, "_,",&saveptr), i++) {
-            std::istringstream is(pch);
-            if (i == 1) {
-                is >> iphi;
-            } else if (i == 2) {
-                is >> ieta;
-            } else if (i == 4) {
-                is >> region;
-            } else if (i == 5) {
-                is >> ntubes;
-            }
-        }
-
+    for (const auto& chambChannel : t0CalibJson) {
+        const std::string stName = chambChannel["station"];
+        const int ieta = chambChannel["eta"];
+        const int iphi = chambChannel["phi"];
+        const bool t0_ts_applied = chambChannel["appliedT0"];
         // need to check validity of Identifier since database contains all Run 2 MDT chambers, e.g. also EI chambers which are
         // potentially replaced by NSW
         bool isValid = true;  // the elementID takes a bool pointer to check the validity of the Identifier
-        Identifier chId = m_idHelperSvc->mdtIdHelper().elementID(name, ieta, iphi, isValid);
+        const Identifier chId = idHelper.elementID(stName, ieta, iphi, isValid);
         if (!isValid) {
             static std::atomic<bool> idWarningPrinted = false;
             if (!idWarningPrinted) {
-                ATH_MSG_WARNING("Element Identifier " << chId.get_compact() << " retrieved for station name " << name
+                ATH_MSG_WARNING("Element Identifier " << chId.get_compact() << " retrieved for station name " << stName
                                                       << " is not valid, skipping");
                 idWarningPrinted.store(true, std::memory_order_relaxed);
             }
@@ -814,7 +856,6 @@ StatusCode MdtCalibDbAlg::loadTube(const EventContext& ctx) const {
         }
 
         MuonCalib::MdtTubeCalibContainer *tubes = nullptr;
-
         // get chamber hash
         IdentifierHash hash{0};
         if (m_idHelperSvc->mdtIdHelper().get_module_hash(chId, hash))
@@ -828,23 +869,13 @@ StatusCode MdtCalibDbAlg::loadTube(const EventContext& ctx) const {
         IdentifierHash detElHash{0};
         if (m_idHelperSvc->mdtIdHelper().MuonIdHelper::get_detectorElement_hash(chId, detElHash)) {
             ATH_MSG_WARNING("Retrieving detector element hash for Identifier "
-                            << chId.get_compact() << " failed, thus Identifier (original information was name=" << name << ", eta=" << ieta
+                            << chId.get_compact() << " failed, thus Identifier (original information was name=" << stName << ", eta=" << ieta
                             << ", phi=" << iphi << ") is not valid, skipping...");
             continue;
         }
 
-        if (msgLvl(MSG::VERBOSE)) {
-            ATH_MSG_VERBOSE("name of chamber is " << pch << " station name is " << name);
-            ATH_MSG_VERBOSE("phi value is " << iphi);
-            ATH_MSG_VERBOSE("eta value is " << ieta);
-            ATH_MSG_VERBOSE("region value is " << region);
-            ATH_MSG_VERBOSE("ntubes value is " << ntubes);
-            ATH_MSG_VERBOSE("station name is " << name << " chamber ID  is " << chId);
-            ATH_MSG_VERBOSE("corresponding hash is " << hash);
-        }
-
         if (hash >= writeCdoTube->size()) {
-            ATH_MSG_ERROR("Illegal station (1)! (" << name << "," << iphi << "," << ieta << ")");
+            ATH_MSG_ERROR("Illegal station (1)! (" << stName << "," << iphi << "," << ieta << ")");
             return StatusCode::FAILURE;
         }
 
@@ -852,70 +883,36 @@ StatusCode MdtCalibDbAlg::loadTube(const EventContext& ctx) const {
         tubes = (*writeCdoTube)[hash];
 
         if (!tubes) {
-            ATH_MSG_INFO("Illegal station (2)! (" << name << "," << iphi << "," << ieta << ")");
+            ATH_MSG_INFO("Illegal station (2)! (" << stName << "," << iphi << "," << ieta << ")");
             continue;
         }
-
-        int nml = tubes->numMultilayers();
-        int nlayers = tubes->numLayers();
-        int ntubesLay = tubes->numTubes();
-        int size = nml * nlayers * ntubesLay;
-
-        if (size != ntubes) {
-            if(m_checkTubes) {
-                ATH_MSG_ERROR("Mismatch between number of tubes in MdtTubeCalibContainer for chamber "
-                              << name << "," << iphi << "," << ieta << " (" << size << ") and COOL DB (" << ntubes << ")");
-                return StatusCode::FAILURE;
-            } else {
-                ATH_MSG_WARNING("Mismatch between number of tubes in MdtTubeCalibContainer for chamber "
-                              << name << "," << iphi << "," << ieta << " (" << size << ") and COOL DB (" << ntubes << ")");                
+        nlohmann::json tubeConstants = chambChannel["calibConstants"];
+        for (const auto& tubeChannel : tubeConstants) {
+            const int ml = tubeChannel["ml"]; 
+            const int l = tubeChannel["layer"];
+            const int t = tubeChannel["tube"];
+            double tzero = tubeChannel["t0"];
+            if (m_t0Shift != 0.) {
+                tzero += m_t0Shift;
+                ATH_MSG_VERBOSE("T0 shift " << m_t0Shift << " t0 " << tzero << " id " << ml << " " << l << " " << t);
             }
-        }
-
-        // Extract T0, ADCcal, valid flag for each tube from payload.
-        MuonCalib::MdtTubeCalibContainer::SingleTubeCalib datatube;
-        std::unique_ptr<char[]> TubePar{new char[payload.size() + 1]};
-        strncpy(TubePar.get(), payload.c_str(), payload.size() + 1);
-        TubePar[payload.size()] = '\0';
-
-        // Loop over payload
-        char *saveptr1;
-        char *pch1 = strtok_r(TubePar.get(), ",", &saveptr1);
-        int ml = 1, l = 1, t = 1;
-        for (int k = 1; pch1 != nullptr; pch1 = strtok_r(nullptr, ", ", &saveptr1), ++k) {
-            if (k == 1) {
-                double tzero = atof(pch1);
-                if (m_t0Shift != 0.) {
-                    tzero += m_t0Shift;
-                    ATH_MSG_VERBOSE("T0 shift " << m_t0Shift << " t0 " << tzero << " id " << ml << " " << l << " " << t);
-                }
-                if (m_t0Spread != 0.) {
-                    CLHEP::HepRandomEngine *engine = m_RNGWrapper->getEngine(ctx);
-                    double sh = CLHEP::RandGaussZiggurat::shoot(engine, 0., m_t0Spread);
-                    tzero += sh;
-                    ATH_MSG_VERBOSE("T0 spread " << sh << " t0 " << tzero << " id " << ml << " " << l << " " << t);
-                }
-                if (!t0_ts_applied && m_TimeSlewingCorrection) { tzero += m_TsCorrectionT0; }
-                if (t0_ts_applied && !m_TimeSlewingCorrection) { tzero -= m_TsCorrectionT0; }
-                datatube.t0 = tzero;
-            } else if (k == 2) {
-                datatube.statusCode = atoi(pch1);
-            } else if (k == 3) {
-                datatube.adcCal = atof(pch1);
-                datatube.inversePropSpeed = inversePropSpeed;
-                tubes->setCalib(ml - 1, l - 1, t - 1, datatube);
-                ATH_MSG_VERBOSE("Loading T0s " << ml << " " << l << " " << t << " " << datatube.t0);
-                t++;
-                k = 0;
-                if (t > ntubesLay) {
-                    l++;
-                    t = 1;
-                }
-                if (l > nlayers) {
-                    ml++;
-                    l = 1;
-                }
+            if (m_t0Spread != 0.) {
+                CLHEP::HepRandomEngine *engine = m_RNGWrapper->getEngine(ctx);
+                double sh = CLHEP::RandGaussZiggurat::shoot(engine, 0., m_t0Spread);
+                tzero += sh;
+                ATH_MSG_VERBOSE("T0 spread " << sh << " t0 " << tzero << " id " << ml << " " << l << " " << t);
             }
+            if (!t0_ts_applied && m_TimeSlewingCorrection) { tzero += m_TsCorrectionT0; }
+            if (t0_ts_applied && !m_TimeSlewingCorrection) { tzero -= m_TsCorrectionT0; }
+            
+            const int statusCode = tubeChannel["status"];
+            const double meanAdc = tubeChannel["meanAdc"];
+            MuonCalib::MdtTubeCalibContainer::SingleTubeCalib datatube; 
+            datatube.statusCode = statusCode;
+            datatube.inversePropSpeed = inversePropSpeed;
+            datatube.t0 = tzero;
+            datatube.adcCal = meanAdc;
+            tubes->setCalib(ml - 1, l - 1, t - 1, datatube);
         }
     }  // end loop over readCdoTube
 
