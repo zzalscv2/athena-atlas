@@ -11,6 +11,7 @@
 #include "xAODTruth/TruthParticleAuxContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "xAODTruth/TruthVertex.h"
 
 namespace Muon {
 
