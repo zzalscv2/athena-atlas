@@ -66,7 +66,9 @@ CONCURRENTSTRTOVALMAP::ConcurrentStrToValMap (const ConcurrentStrToValMap& other
 {
   // not using reference, because our iterator doesn't return a reference
   for (const auto p : other) {
-    this->put (p.first, std::make_unique<mapped_type> (p.second), ctx);
+    this->put (std::make_unique<key_type> (p.first),
+               std::make_unique<mapped_type> (p.second),
+               ctx);
   }
 }
 
@@ -100,7 +102,7 @@ CONCURRENTSTRTOVALMAP::ConcurrentStrToValMap (InputIterator f,
   if constexpr (std::is_rvalue_reference_v<typename InputIterator::reference>)
   {
     for (; f != l; ++f) {
-      emplace (f->first, std::move (f->second), ctx);
+      emplace (std::move (f->first), std::move (f->second), ctx);
     }
   }
   else {
@@ -598,7 +600,34 @@ auto CONCURRENTSTRTOVALMAP::emplace (const key_type& key,
                                        /*= Updater_t::defaultContext()*/)
   -> std::pair<const_iterator, bool>
 {
-  return put (key, std::make_unique<mapped_type> (val), ctx);
+  return put (std::make_unique<key_type> (key),
+              std::make_unique<mapped_type> (val),
+              ctx);
+}
+
+
+/**
+ * @brief Add an element to the map.
+ * @param key The key of the new item to add.
+ * @param val The value of the new item to add.
+ * @param ctx Execution context.
+ *
+ * This will not overwrite an existing entry.
+ * The first element in the returned pair is an iterator referencing
+ * the added item.  The second is a flag that is true if a new element
+ * was added.
+ */
+T_CONCURRENTSTRTOVALMAP
+inline
+auto CONCURRENTSTRTOVALMAP::emplace (key_type&& key,
+                                     const mapped_type& val,
+                                     const Context_t& ctx
+                                       /*= Updater_t::defaultContext()*/)
+  -> std::pair<const_iterator, bool>
+{
+  return put (std::make_unique<key_type> (std::move (key)),
+              std::make_unique<mapped_type> (val),
+              ctx);
 }
 
 
@@ -621,7 +650,34 @@ auto CONCURRENTSTRTOVALMAP::emplace (const key_type& key,
                                        /*= Updater_t::defaultContext()*/)
   -> std::pair<const_iterator, bool>
 {
-  return put (key, std::make_unique<mapped_type> (std::move (val)), ctx);
+  return put (std::make_unique<key_type> (key),
+              std::make_unique<mapped_type> (std::move (val)),
+              ctx);
+}
+
+
+/**
+ * @brief Add an element to the map.
+ * @param key The key of the new item to add.
+ * @param val The value of the new item to add.
+ * @param ctx Execution context.
+ *
+ * This will not overwrite an existing entry.
+ * The first element in the returned pair is an iterator referencing
+ * the added item.  The second is a flag that is true if a new element
+ * was added.
+ */
+T_CONCURRENTSTRTOVALMAP
+inline
+auto CONCURRENTSTRTOVALMAP::emplace (key_type&& key,
+                                     mapped_type&& val,
+                                     const Context_t& ctx
+                                       /*= Updater_t::defaultContext()*/)
+  -> std::pair<const_iterator, bool>
+{
+  return put (std::make_unique<key_type> (std::move (key)),
+              std::make_unique<mapped_type> (std::move (val)),
+              ctx);
 }
 
 
@@ -644,7 +700,34 @@ auto CONCURRENTSTRTOVALMAP::emplace (const key_type& key,
                                       /*= Updater_t::defaultContext()*/)
   -> std::pair<const_iterator, bool>
 {
-  return put (key, std::move (val), ctx);
+  return put (std::make_unique<key_type> (key),
+              std::move (val),
+              ctx);
+}
+
+
+/**
+ * @brief Add an element to the map.
+ * @param key The key of the new item to add.
+ * @param val The value of the new item to add.
+ * @param ctx Execution context.
+ *
+ * This will not overwrite an existing entry.
+ * The first element in the returned pair is an iterator referencing
+ * the added item.  The second is a flag that is true if a new element
+ * was added.
+ */
+T_CONCURRENTSTRTOVALMAP
+inline
+auto CONCURRENTSTRTOVALMAP::emplace (key_type&& key,
+                                     std::unique_ptr<mapped_type> val,
+                                     const Context_t& ctx
+                                      /*= Updater_t::defaultContext()*/)
+  -> std::pair<const_iterator, bool>
+{
+  return put (std::make_unique<key_type> (std::move (key)),
+              std::move (val),
+              ctx);
 }
 
 
@@ -690,7 +773,7 @@ auto CONCURRENTSTRTOVALMAP::insert (PAIR&& p,
                                     const Context_t& ctx /*= Updater_t::defaultContext()*/)
   -> std::pair<const_iterator, bool>
 {
-  return emplace (p.first, std::move (p.second), ctx);
+  return emplace (std::move (p.first), std::move (p.second), ctx);
 }
 
 
@@ -711,7 +794,7 @@ void CONCURRENTSTRTOVALMAP::insert (InputIterator first, InputIterator last,
   if constexpr (std::is_rvalue_reference_v<typename InputIterator::reference>)
   {
     for (; first != last; ++first) {
-      emplace (first->first, std::move (first->second), ctx);
+      emplace (std::move (first->first), std::move (first->second), ctx);
     }
   }
   else {
@@ -871,20 +954,19 @@ auto CONCURRENTSTRTOVALMAP::get (const key_type& key) const
  * was added.
  */
 T_CONCURRENTSTRTOVALMAP
-auto CONCURRENTSTRTOVALMAP::put (const key_type& key,
+auto CONCURRENTSTRTOVALMAP::put (std::unique_ptr<key_type> key,
                                  std::unique_ptr<mapped_type> val,
                                  const Context_t& ctx /*= Updater_t::defaultContext()*/)
   -> std::pair<const_iterator, bool>
 {
-  size_t hash = m_impl.hasher() (key);
-  std::string* newkey = new std::string (key);
-  auto [it, flag] = m_impl.put (keyAsVal(newkey), hash,
+  size_t hash = m_impl.hasher() (*key);
+  auto [it, flag] = m_impl.put (keyAsVal(key.get()), hash,
                                 mappedAsVal (val.get()),
                                 false, ctx);
-  if (flag)
+  if (flag) {
+    key.release();
     val.release();
-  else
-    delete newkey;
+  }
 
   return std::make_pair (const_iterator (it), flag);
 }

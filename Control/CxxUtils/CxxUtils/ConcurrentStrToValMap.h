@@ -535,6 +535,22 @@ public:
    * was added.
    */
   std::pair<const_iterator, bool>
+  emplace (key_type&& key, const mapped_type& val,
+           const Context_t& ctx = Updater_t::defaultContext());
+
+
+  /**
+   * @brief Add an element to the map.
+   * @param key The key of the new item to add.
+   * @param val The value of the new item to add.
+   * @param ctx Execution context.
+   *
+   * This will not overwrite an existing entry.
+   * The first element in the returned pair is an iterator referencing
+   * the added item.  The second is a flag that is true if a new element
+   * was added.
+   */
+  std::pair<const_iterator, bool>
   emplace (const key_type& key, mapped_type&& val,
            const Context_t& ctx = Updater_t::defaultContext());
 
@@ -551,7 +567,39 @@ public:
    * was added.
    */
   std::pair<const_iterator, bool>
+  emplace (key_type&& key, mapped_type&& val,
+           const Context_t& ctx = Updater_t::defaultContext());
+
+
+  /**
+   * @brief Add an element to the map.
+   * @param key The key of the new item to add.
+   * @param val The value of the new item to add.
+   * @param ctx Execution context.
+   *
+   * This will not overwrite an existing entry.
+   * The first element in the returned pair is an iterator referencing
+   * the added item.  The second is a flag that is true if a new element
+   * was added.
+   */
+  std::pair<const_iterator, bool>
   emplace (const key_type& key, std::unique_ptr<mapped_type> val,
+           const Context_t& ctx = Updater_t::defaultContext());
+
+
+  /**
+   * @brief Add an element to the map.
+   * @param key The key of the new item to add.
+   * @param val The value of the new item to add.
+   * @param ctx Execution context.
+   *
+   * This will not overwrite an existing entry.
+   * The first element in the returned pair is an iterator referencing
+   * the added item.  The second is a flag that is true if a new element
+   * was added.
+   */
+  std::pair<const_iterator, bool>
+  emplace (key_type&& key, std::unique_ptr<mapped_type> val,
            const Context_t& ctx = Updater_t::defaultContext());
 
 
@@ -703,7 +751,7 @@ private:
    * was added.
    */
   std::pair<const_iterator, bool>
-  put (const key_type& key,
+  put (std::unique_ptr<key_type> key,
        std::unique_ptr<mapped_type> val,
        const Context_t& ctx = Updater_t::defaultContext());
 

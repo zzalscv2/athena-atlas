@@ -386,6 +386,40 @@ public:
 
 
   /**
+   * @brief Add an element to the map.
+   * @param key The key of the new item to add.
+   * @param val The value of the new item to add.
+   * @param ctx Execution context.
+   *
+   * This will not overwrite an existing entry.
+   * The first element in the returned pair is an iterator referencing
+   * the added item.  The second is a flag that is true if a new element
+   * was added.
+   */
+  std::pair<const_iterator, bool>
+  emplace (key_type&& key, mapped_type val,
+           const Context_t& ctx = Updater_t::defaultContext());
+
+
+  /**
+   * @brief Add an element to the map, with external locking.
+   * @param lock The lock object returned from lock().
+   * @param key The key of the new item to add.
+   * @param val The value of the new item to add.
+   * @param ctx Execution context.
+   *
+   * This will not overwrite an existing entry.
+   * The first element in the returned pair is an iterator referencing
+   * the added item.  The second is a flag that is true if a new element
+   * was added.
+   */
+  std::pair<const_iterator, bool>
+  emplace (const Lock_t& lock,
+           key_type&& key, mapped_type val,
+           const Context_t& ctx = Updater_t::defaultContext());
+
+
+  /**
    * @brief Add an element to the map, or overwrite an existing one.
    * @param key The key of the new item to add.
    * @param val The value of the new item to add.
@@ -421,10 +455,46 @@ public:
 
 
   /**
+   * @brief Add an element to the map, or overwrite an existing one.
+   * @param key The key of the new item to add.
+   * @param val The value of the new item to add.
+   * @param ctx Execution context.
+   *
+   * This will overwrite an existing entry.
+   * The first element in the returned pair is an iterator referencing
+   * the added item.  The second is a flag that is true if a new element
+   * was added.
+   */
+  std::pair<const_iterator, bool>
+  insert_or_assign (key_type&& key, mapped_type val,
+                    const Context_t& ctx = Updater_t::defaultContext());
+
+
+  /**
+   * @brief Add an element to the map, or overwrite an existing one,
+   *        with external locking.
+   * @param lock The lock object returned from lock().
+   * @param key The key of the new item to add.
+   * @param val The value of the new item to add.
+   * @param ctx Execution context.
+   *
+   * This will overwrite an existing entry.
+   * The first element in the returned pair is an iterator referencing
+   * the added item.  The second is a flag that is true if a new element
+   * was added.
+   */
+  std::pair<const_iterator, bool>
+  insert_or_assign (const Lock_t& lock,
+                    key_type&& key, mapped_type val,
+                    const Context_t& ctx = Updater_t::defaultContext());
+
+
+  /**
    * @brief Add an element to the map.
    * @param p The item to add.
    *          Should be a pair where first is the string key
    *          and second is the integer value.
+   * @param ctx Execution context.
    *
    * This will not overwrite an existing entry.
    * The first element in the returned pair is an iterator referencing
@@ -434,19 +504,39 @@ public:
    * For external locking, use emplace().
    */
   template <class PAIR>
-  std::pair<const_iterator, bool> insert (const PAIR& p);
+  std::pair<const_iterator, bool> insert (const PAIR& p,
+                                          const Context_t& ctx = Updater_t::defaultContext());
+
+
+  /**
+   * @brief Add an element to the map.
+   * @param p The item to add.
+   *          Should be a pair where first is the string key
+   *          and second is the integer value.
+   * @param ctx Execution context.
+   *
+   * This will not overwrite an existing entry.
+   * The first element in the returned pair is an iterator referencing
+   * the added item.  The second is a flag that is true if a new element
+   * was added.
+   */
+  template <class PAIR>
+  std::pair<const_iterator, bool> insert (PAIR&& p,
+                                          const Context_t& ctx = Updater_t::defaultContext());
 
 
   /**
    * @brief Insert a range of elements to the map.
    * @param first Start of the range.
    * @param last End of the range.
+   * @param ctx Execution context.
    *
    * The range should be a sequence of pairs where first is the string key
    * and second is the integer value.
    */
   template <class InputIterator>
-  void insert (InputIterator first, InputIterator last);
+  void insert (InputIterator first, InputIterator last,
+               const Context_t& ctx = Updater_t::defaultContext());
 
 
   /**
@@ -549,7 +639,7 @@ private:
    * was added.
    */
   std::pair<const_iterator, bool>
-  put (const key_type& key,
+  put (std::unique_ptr<key_type> key,
        mapped_type val,
        bool overwrite = true,
        const Context_t& ctx = Updater_t::defaultContext());
@@ -568,7 +658,7 @@ private:
    */
   std::pair<const_iterator, bool>
   put (const Lock_t& lock,
-       const key_type& key,
+       std::unique_ptr<key_type> key,
        mapped_type val,
        bool overwrite = true,
        const Context_t& ctx = Updater_t::defaultContext());

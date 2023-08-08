@@ -326,6 +326,54 @@ void test1a()
     assert (Payload::s_count == MAXKEYS+5);
   }
   assert (map.size() == MAXKEYS+5);
+
+  // ---Testing moving strings.
+
+  MAP map2 {typename MAP::Updater_t()};
+  {
+    std::string k1 = "foo1";
+    Payload p1(1);
+    auto [it, flag] = map2.emplace (std::move (k1), p1);
+    assert (k1.empty());
+    assert (!p1.moved());
+    assert (flag);
+    assert (it.valid());
+    assert (it->first == "foo1");
+    assert (it->second.check (1));
+    assert (map2.size() == 1);
+  }
+  {
+    std::string k2 = "foo2";
+    Payload p2(2);
+    auto [it, flag] = map2.emplace (std::move (k2), std::move(p2));
+    assert (k2.empty());
+    assert (p2.moved());
+    assert (flag);
+    assert (it.valid());
+    assert (it->first == "foo2");
+    assert (it->second.check (2));
+    assert (map2.size() == 2);
+  }
+  {
+    std::string k3 = "foo3";
+    auto [it, flag] = map2.emplace (std::move (k3), std::make_unique<Payload>(3));
+    assert (k3.empty());
+    assert (flag);
+    assert (it.valid());
+    assert (it->first == "foo3");
+    assert (it->second.check (3));
+    assert (map2.size() == 3);
+  }
+  {
+    auto p = std::make_pair (std::string ("foo4"), Payload(4));
+    auto [it, flag] = map2.insert (std::move (p));
+    assert (p.first.empty());
+    assert (flag);
+    assert (it.valid());
+    assert (it->first == "foo4");
+    assert (it->second.check (4));
+    assert (map2.size() == 4);
+  }
 }
 
 
@@ -423,8 +471,9 @@ void test2a()
   std::vector<std::pair<std::string, mapped_type> > data4;
   for (size_t i = 0; i < 10; i++)
     data4.emplace_back (keys[i] + "4", Payload(i+10));
-  for (size_t i = 0; i < 10; i++)
+  for (size_t i = 0; i < 10; i++) {
     assert (!data4[i].second.moved());
+  }
   assert (Payload::s_count == 70);
 
   MAP map4 {Updater_t()};
@@ -433,8 +482,10 @@ void test2a()
   assert (map4.size() == 10);
   assert (Payload::s_count == 80);
   assert (map4.at (keys[5] + "4").check (15));
-  for (size_t i = 0; i < 10; i++)
+  for (size_t i = 0; i < 10; i++) {
+    assert (data4[i].first.empty());
     assert (data4[i].second.moved());
+  }
 
   std::vector<std::pair<std::string, std::unique_ptr<mapped_type> > > data5;
   for (size_t i = 0; i < 10; i++)
@@ -446,6 +497,9 @@ void test2a()
   assert (map4.size() == 20);
   assert (Payload::s_count == 90);
   assert (map4.at (keys[5] + "5").check (25));
+  for (size_t i = 0; i < 10; i++) {
+    assert (data5[i].first.empty());
+  }
 
   //----
   // Range ctors using move.
@@ -463,8 +517,10 @@ void test2a()
   assert (map6.size() == 10);
   assert (Payload::s_count == 110);
   assert (map6.at (keys[5] + "6").check (35));
-  for (size_t i = 0; i < 10; i++)
+  for (size_t i = 0; i < 10; i++) {
+    assert (data6[i].first.empty());
     assert (data6[i].second.moved());
+  }
 
   std::vector<std::pair<std::string, std::unique_ptr<mapped_type> > > data7;
   for (size_t i = 0; i < 10; i++)
@@ -477,6 +533,9 @@ void test2a()
   assert (map7.size() == 10);
   assert (Payload::s_count == 120);
   assert (map7.at (keys[5] + "7").check (45));
+  for (size_t i = 0; i < 10; i++) {
+    assert (data7[i].first.empty());
+  }
 }
 void test2()
 {

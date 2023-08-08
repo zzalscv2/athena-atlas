@@ -345,6 +345,62 @@ void test1a()
     assert (it->first == "baz");
     assert (it->second == vnew);
   }
+
+  // ---Testing moving strings.
+
+  MAP map2 {typename MAP::Updater_t()};
+  {
+    std::string k1 = "foo1";
+    auto [it, flag] = map2.emplace (std::move (k1), mapped_type(1));
+    assert (k1.empty());
+    assert (flag);
+    assert (it.valid());
+    assert (it->first == "foo1");
+    assert (it->second == mapped_type(1));
+    assert (map2.size() == 1);
+  }
+  {
+    std::string k1a = "foo1a";
+    auto lock = map2.lock();
+    auto [it, flag] = map2.emplace (lock, std::move (k1a), mapped_type(101));
+    assert (k1a.empty());
+    assert (flag);
+    assert (it.valid());
+    assert (it->first == "foo1a");
+    assert (it->second == mapped_type(101));
+    assert (map2.size() == 2);
+  }
+  {
+    std::string k1 = "foo1";
+    auto [it, flag] = map2.insert_or_assign (std::move (k1), mapped_type(2));
+    assert (k1.empty());
+    assert (!flag);
+    assert (it.valid());
+    assert (it->first == "foo1");
+    assert (it->second == mapped_type(2));
+    assert (map2.size() == 2);
+  }
+  {
+    std::string k1a = "foo1a";
+    auto lock = map2.lock();
+    auto [it, flag] = map2.insert_or_assign (lock, std::move (k1a), mapped_type(102));
+    assert (k1a.empty());
+    assert (!flag);
+    assert (it.valid());
+    assert (it->first == "foo1a");
+    assert (it->second == mapped_type(102));
+    assert (map2.size() == 2);
+  }
+  {
+    auto p = std::make_pair (std::string ("foo3"), mapped_type(3));
+    auto [it, flag] = map2.insert (std::move (p));
+    assert (p.first.empty());
+    assert (flag);
+    assert (it.valid());
+    assert (it->first == "foo3");
+    assert (it->second == mapped_type(3));
+    assert (map2.size() == 3);
+  }
 }
 void test1()
 {
@@ -419,6 +475,26 @@ void test2a()
   map3.insert (std::begin(data), std::end(data));
   assert (map3.size() == 10);
   assert (map3.at ("five") == vals[5]);
+
+  {
+    std::vector<std::pair<std::string, mapped_type> > data4 = data;
+    MAP map4 {std::make_move_iterator (data4.begin()),
+              std::make_move_iterator (data4.end()),
+              Updater_t()};
+    assert (data4[0].first.empty());
+    assert (map4.size() == 10);
+    assert (map4.at ("six") == vals[6]);
+  }
+
+  {
+    std::vector<std::pair<std::string, mapped_type> > data5 = data;
+    MAP map5 {Updater_t()};
+    map5.insert (std::make_move_iterator (data5.begin()),
+                 std::make_move_iterator (data5.end()));
+    assert (data5[0].first.empty());
+    assert (map5.size() == 10);
+    assert (map5.at ("six") == vals[6]);
+  }
 }
 void test2()
 {
