@@ -15,10 +15,11 @@ namespace MuonGMR4{
          m_elA{readOutEleA},
          m_elB{readOutEleB},
          m_surfA{hashLayA},
-         m_surfB{hashLayB} {
+         m_surfB{hashLayB}
+    {
         if (!m_elB) {
             m_elB = m_elA;
-            m_surfB = m_surfB;
+            m_surfB = m_surfA;
         }
     }
     bool StationCenterCache::storeAlignment(ActsTrk::RawGeomAlignStore& store) const {
