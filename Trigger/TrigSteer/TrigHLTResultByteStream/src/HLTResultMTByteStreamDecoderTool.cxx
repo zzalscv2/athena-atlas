@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Trigger includes
@@ -174,6 +174,22 @@ StatusCode HLTResultMTByteStreamDecoderTool::decodePayload(const std::vector<con
   for (const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* robf : vrobf) {
     eformat::helper::SourceIdentifier sid(robf->rob_source_id());
     ATH_MSG_DEBUG("Reading ROBFragment " << sid.human());
+
+    // ---------------------------------------------------------------------------
+    // Read the ROB status words (error codes from online event processing)
+    // ---------------------------------------------------------------------------
+    if (robf->nstatus() > 1) {
+      eformat::helper::Status firstStatusWord(*robf->status());
+      if (firstStatusWord.generic() == eformat::GenericStatus::DATA_CORRUPTION &&
+          *(robf->status()+1) == static_cast<uint32_t>(HLT::OnlineErrorCode::RESULT_TRUNCATION)) {
+        ATH_MSG_DEBUG("Detected truncated ROBFragment " << sid.human());
+        resultToFill.addTruncatedModuleId(sid.module_id());
+      }
+    }
+
+    // ---------------------------------------------------------------------------
+    // Read the payload
+    // ---------------------------------------------------------------------------
     std::vector<uint32_t> data;
     // try-catch around eformat calls and raw-pointer operations
     try {
