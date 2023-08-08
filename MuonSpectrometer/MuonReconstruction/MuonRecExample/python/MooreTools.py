@@ -23,8 +23,7 @@ from IOVDbSvc.CondDB import conddb
 
 from MuonCnvExample.MuonCnvUtils import mdtCalibWindowNumber
 from .MuonRecTools import MuonExtrapolator, MuonChi2TrackFitter
-from .MuonRecUtils import ConfiguredBase,ExtraFlags
-
+from .MuonRecUtils import ConfiguredBase
 
 from .MuonRecFlags import muonRecFlags
 from .MuonStandaloneFlags import muonStandaloneFlags
@@ -66,29 +65,6 @@ def MuonPatternCalibration(name ="MuonPatternCalibration", **kwargs):
         kwargs.setdefault("DropDistance", 100000000.)
     
     return CfgMgr.Muon__MuonPatternCalibration(name,**kwargs)
-def MuonPatternSegmentMaker(name="MuonPatternSegmentMaker",extraFlags=None,**kwargs):
-    if extraFlags is None: extraFlags = ExtraFlags()    
-    beamType       = extraFlags.setFlagDefault(beamFlags.beamType)
-    doSegmentT0Fit = extraFlags.setFlagDefault(muonRecFlags.doSegmentT0Fit)
-
-    if "MdtCreator" not in kwargs:
-        # on data configure a MdtDriftCircleOnTrackCreator for the segment finding with reduced errors
-        # when using the t0 refit enlarge the time window
-        if globalflags.DataSource() == 'data' and beamFlags.beamType() == 'collisions':
-            if doSegmentT0Fit:
-                mdtCreator = getPublicToolClone( "MdtDriftCircleOnTrackCreatorSegmentFinding", "MdtDriftCircleOnTrackCreator", 
-                                                 CreateTubeHit = False, TimeWindowSetting = mdtCalibWindowNumber('Collision_t0fit') )
-            else:
-                mdtCreator = getPublicToolClone( "MdtDriftCircleOnTrackCreatorSegmentFinding", "MdtDriftCircleOnTrackCreator", 
-                                                 CreateTubeHit = False, TimeWindowSetting = mdtCalibWindowNumber('Collision_data') )
-            kwargs["MdtCreator"] = mdtCreator
-
-    if beamType == 'cosmics':
-        kwargs.setdefault("AngleCutPhi", 1e9)
-        kwargs.setdefault("DropDistance", 100000000.)
-
-    return CfgMgr.Muon__MuonPatternSegmentMaker(name,**kwargs)
-# end of factory function MuonPatternSegmentMaker
 
 
 class MuonCurvedSegmentCombiner(CfgMgr.Muon__MuonCurvedSegmentCombiner,ConfiguredBase):

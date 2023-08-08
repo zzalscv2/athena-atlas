@@ -7,7 +7,6 @@
 #include "MuonPattern/MuonPatternChamberIntersect.h"
 #include "MuonPattern/MuonPatternCombination.h"
 #include "MuonPattern/MuonPatternCombinationCollection.h"
-#include "MuonPatternSegmentMaker/MuonPatternCalibration.h"
 #include "MuonPrepRawData/MuonCluster.h"
 #include "MuonPrepRawData/MuonPrepDataCollection.h"
 #include "MuonPrepRawData/MuonPrepDataContainer.h"
