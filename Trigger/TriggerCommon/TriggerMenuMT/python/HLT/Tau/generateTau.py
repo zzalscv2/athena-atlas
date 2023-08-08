@@ -59,12 +59,19 @@ def _ftfCoreSeq(flags,name,is_probe_leg=False):
 
     newRoITool   = CompFactory.ViewCreatorFetchFromViewROITool( 
                                 RoisWriteHandleKey = recordable(flags.Tracking.ActiveConfig.roi),
-                                InViewRoIs = 'UpdatedCaloRoI')                                                                                                
+                                InViewRoIs = 'UpdatedCaloRoI')
+
+    if 'LRT' in name:
+       newRoITool.doResize                 = True
+       newRoITool.RoIEtaWidth              = flags.Tracking.ActiveConfig.etaHalfWidth
+       newRoITool.RoIPhiWidth              = flags.Tracking.ActiveConfig.phiHalfWidth
+       newRoITool.RoIZedWidth              = flags.Tracking.ActiveConfig.zedHalfWidth
+                                                                                                
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
     from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
 
-    extraPrefetching = ROBPrefetching.TauCoreLargeRoI in flags.Trigger.ROBPrefetchingOptions
+    extraPrefetching = ROBPrefetching.TauCoreLargeRoI in flags.Trigger.ROBPrefetchingOptions and 'Core' in name
     if extraPrefetching:
       # Add extra RoI to prefetch ROBs for the subsequent tauIso step together with ROBs for tauCore
       prefetchRoIUpdater                   = CompFactory.RoiUpdaterTool()
