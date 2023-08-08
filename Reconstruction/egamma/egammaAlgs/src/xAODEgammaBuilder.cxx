@@ -387,17 +387,8 @@ xAODEgammaBuilder::getElectron(const egammaRec* egRec,
   static const SG::AuxElement::Accessor<uint8_t> acc("ambiguityType");
   acc(*electron) = type;
 
-  std::vector<ElementLink<xAOD::CaloClusterContainer>> clusterLinks;
-  for (size_t i = 0; i < egRec->getNumberOfClusters(); ++i) {
-    clusterLinks.push_back(egRec->caloClusterElementLink(i));
-  }
-  electron->setCaloClusterLinks(clusterLinks);
-
-  std::vector<ElementLink<xAOD::TrackParticleContainer>> trackLinks;
-  for (size_t i = 0; i < egRec->getNumberOfTrackParticles(); ++i) {
-    trackLinks.push_back(egRec->trackParticleElementLink(i));
-  }
-  electron->setTrackParticleLinks(trackLinks);
+  electron->setCaloClusterLinks(egRec->caloClusterElementLinks());
+  electron->setTrackParticleLinks(egRec->trackParticleElementLinks());
 
   const xAOD::TrackParticle* trackParticle = electron->trackParticle();
   if (trackParticle) {
@@ -468,19 +459,8 @@ xAODEgammaBuilder::getPhoton(const egammaRec* egRec,
   static const SG::AuxElement::Accessor<uint8_t> acc("ambiguityType");
   acc(*photon) = type;
 
-  // Transfer the links to the clusters
-  std::vector<ElementLink<xAOD::CaloClusterContainer>> clusterLinks;
-  for (size_t i = 0; i < egRec->getNumberOfClusters(); ++i) {
-    clusterLinks.push_back(egRec->caloClusterElementLink(i));
-  }
-  photon->setCaloClusterLinks(clusterLinks);
-
-  // Transfer the links to the vertices
-  std::vector<ElementLink<xAOD::VertexContainer>> vertexLinks;
-  for (size_t i = 0; i < egRec->getNumberOfVertices(); ++i) {
-    vertexLinks.push_back(egRec->vertexElementLink(i));
-  }
-  photon->setVertexLinks(vertexLinks);
+  photon->setCaloClusterLinks(egRec->caloClusterElementLinks());
+  photon->setVertexLinks(egRec->vertexElementLinks());
 
   // Transfer deltaEta/Phi info
   float deltaEta = egRec->deltaEtaVtx();

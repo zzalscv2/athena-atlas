@@ -35,14 +35,6 @@ UPDATE : 25/06/2018
 egammaSelectedTrackCopy::egammaSelectedTrackCopy(const std::string& name,
                                                  ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator)
-  , m_AllClusters{}
-  , m_SelectedClusters{}
-  , m_AllTracks{}
-  , m_SelectedTracks{}
-  , m_AllSiTracks{}
-  , m_SelectedSiTracks{}
-  , m_AllTRTTracks{}
-  , m_SelectedTRTTracks{}
 {}
 
 StatusCode
