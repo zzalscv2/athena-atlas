@@ -6,8 +6,8 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <string>
 #include <iomanip>
+#include <stdexcept>
 
 #include "TrigT1TGC/TGCNSWCoincidenceMap.h"
 #include "TrigT1TGC/NSWTrigOut.h"
@@ -175,7 +175,11 @@ namespace LVL1TGCTrigger {
 	  for(size_t posDTHETA=0; posDTHETA<N_Dtheta; posDTHETA++){
 	    cont >> word;
 	    std::istringstream(word) >> std::hex >> pT;
-	    m_EtaDtheta_CW[posR][posDTHETA][roi]=pT;
+	    auto & roiIndexedVector = m_EtaDtheta_CW[posR][posDTHETA];
+	    if ((roi<0) or (static_cast<size_t>(roi)>=roiIndexedVector.size())){
+	      throw std::out_of_range("roi outside of vector limits in TGCNSWCoincidenceMap::readMap");
+	    }
+	    roiIndexedVector[roi]=pT;
 	  }
 	}
       }      
