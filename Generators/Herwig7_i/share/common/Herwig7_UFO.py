@@ -15,7 +15,7 @@ def generateFRModel(UFOModel, overWriteLocalDir=False):
     MGModelsLatest = '/cvmfs/atlas.cern.ch/repo/sw/Generators/madgraph/models/latest/'
     MGModelDirCVMFS = os.path.join(MGModelsLatest, UFOModel)
     if not MGModelDirCVMFS:
-        athMsgLog.error(f'could not find UFO model {MGModel} on cvmfs.' \
+        athMsgLog.error(f'could not find UFO model {UFOModel} on cvmfs.' \
                         f' Are you sure it is available on {MGModelsLatest} ?')
         exit(1)
 
