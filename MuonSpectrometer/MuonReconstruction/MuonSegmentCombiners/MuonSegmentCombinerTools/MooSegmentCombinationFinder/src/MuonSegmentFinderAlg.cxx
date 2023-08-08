@@ -30,8 +30,6 @@ StatusCode MuonSegmentFinderAlg::initialize() {
     /// MDT segments
     ATH_CHECK(m_patternCalibration.retrieve(DisableTool{!m_runMdtSegments}));
     ATH_CHECK(m_segmentMaker.retrieve(DisableTool{!m_runMdtSegments}));
-    ATH_CHECK(m_curvedSegmentCombiner.retrieve(DisableTool{!m_runSegCombiner}));
-
     ATH_CHECK(m_clusterSegMaker.retrieve(DisableTool{!m_doTGCClust && !m_doRPCClust}));
     
     const bool doNSW = m_doSTgcSegments || m_doMMSegments;
@@ -68,39 +66,12 @@ StatusCode MuonSegmentFinderAlg::execute(const EventContext& ctx) const {
     ATH_CHECK(loadFromStoreGate(ctx, m_patternCollKey, patternColl));    
     ATH_MSG_DEBUG("Processing the pattern collections with  " << patternColl->size() << " Collections ");
 
-    
-    std::unique_ptr<MuonSegmentCombinationCollection> combiSegColl = m_runSegCombiner ? std ::make_unique<MuonSegmentCombinationCollection>() 
-                                                                                      : nullptr;
-
-    std::unique_ptr<Muon::MuonSegmentCombPatternCombAssociationMap> patternAssocMap = 
-                                                             m_runSegCombiner ? std::make_unique<Muon::MuonSegmentCombPatternCombAssociationMap>()
-                                                                              : nullptr;
-
     for (const Muon::MuonPatternCombination* patt :  *patternColl) {
         ATH_MSG_DEBUG("Working on pattern combination " << m_printer->print(*patt));
-        // check the technology & call the corresponding segment finder        
+        // check the technology & call the corresponding segment finder
+                
+        ATH_CHECK(createSegmentsWithMDTs(ctx, patt, segmentContainer.get()));
         
-        if (m_runSegCombiner) {
-            std::unique_ptr<Trk::SegmentCollection> segsToComb = std::make_unique<Trk::SegmentCollection>(SG::VIEW_ELEMENTS);
-            ATH_CHECK(createSegmentsWithMDTs(ctx, patt, segsToComb.get()));
-
-            std::unique_ptr<Muon::MuonSegmentCombination> combContainer = std::make_unique<Muon::MuonSegmentCombination>();
-            
-            /// Transform the segment collection into a vector of unique_ptrs 
-            std::unique_ptr<std::vector<std::unique_ptr<Muon::MuonSegment>>> muonSegVec = std::make_unique<std::vector<std::unique_ptr<Muon::MuonSegment>>>();
-            for (Trk::Segment* trk_seg : *segsToComb) {
-                Muon::MuonSegment* muo_seg = static_cast<Muon::MuonSegment*>(trk_seg);
-                ATH_MSG_VERBOSE("Found new segment for combination "<<std::endl<<m_printer->print(muo_seg->containedMeasurements()));
-                muonSegVec->emplace_back(muo_seg);
-            }
-            combContainer->addSegments(std::move(muonSegVec));
-            if (!segsToComb->empty()) {
-                patternAssocMap->insert(std::make_pair(combContainer.get(), patt));
-                combiSegColl->push_back(combContainer.release());
-            }       
-        } else {
-            ATH_CHECK(createSegmentsWithMDTs(ctx, patt, segmentContainer.get()));
-        }
        
         createNSWSegments(ctx, patt, nswCache);
         
@@ -136,21 +107,9 @@ StatusCode MuonSegmentFinderAlg::execute(const EventContext& ctx) const {
 
     m_segmentOverlapRemovalTool->removeDuplicates(*segmentContainer);
 
-    std::unique_ptr<MuonSegmentCombinationCollection> csc2dSegmentCombinations{}, csc4dSegmentCombinations{};
-    ATH_CHECK(createCscSegments(ctx, csc2dSegmentCombinations, csc4dSegmentCombinations));
-    if (m_runSegCombiner) {        
-        if (!csc2dSegmentCombinations) csc2dSegmentCombinations = std::make_unique<MuonSegmentCombinationCollection>();
-        if (!csc4dSegmentCombinations) csc4dSegmentCombinations = std::make_unique<MuonSegmentCombinationCollection>();
-        
-        std::unique_ptr<MuonSegmentCombinationCollection> curvedSegmentCombinations =  
-              m_curvedSegmentCombiner->combineSegments(*combiSegColl, 
-                                                       *csc4dSegmentCombinations,
-                                                       *csc2dSegmentCombinations, patternAssocMap.get());
-        appendSegmentsFromCombi(curvedSegmentCombinations, segmentContainer.get());
-    
-    } else {
-        appendSegmentsFromCombi(csc4dSegmentCombinations, segmentContainer.get());        
-    }
+    std::unique_ptr<MuonSegmentCombinationCollection> csc4dSegmentCombinations{};
+    ATH_CHECK(createCscSegments(ctx, csc4dSegmentCombinations));
+    appendSegmentsFromCombi(csc4dSegmentCombinations, segmentContainer.get());
     
     /// Get rid of all the duplicates in the segment container
     ATH_MSG_DEBUG("segments before overlap removal: " << segmentContainer->size());
@@ -179,8 +138,7 @@ StatusCode MuonSegmentFinderAlg::execute(const EventContext& ctx) const {
 }  // execute
 
 StatusCode MuonSegmentFinderAlg::createCscSegments(const EventContext& ctx, 
-                                std::unique_ptr<MuonSegmentCombinationCollection>& csc2dSegmentCombinations,
-                                std::unique_ptr<MuonSegmentCombinationCollection>& csc4dSegmentCombinations) const {
+                                    std::unique_ptr<MuonSegmentCombinationCollection>& csc4dSegmentCombinations) const {
     
     const Muon::CscPrepDataContainer* cscPrds{nullptr};
     ATH_CHECK(loadFromStoreGate(ctx,m_cscPrdsKey, cscPrds));
@@ -190,8 +148,7 @@ StatusCode MuonSegmentFinderAlg::createCscSegments(const EventContext& ctx,
     std::copy_if(cscPrds->begin(),cscPrds->end(), std::back_inserter(cscCols), [](const Muon::CscPrepDataCollection* coll) {return !coll->empty();});
     ATH_MSG_DEBUG("Retrieved CscPrepDataContainer " << cscCols.size());
     if (cscCols.empty()) return StatusCode::SUCCESS;
-    
-    csc2dSegmentCombinations = m_csc2dSegmentFinder->find(cscCols, ctx);
+    std::unique_ptr<MuonSegmentCombinationCollection> csc2dSegmentCombinations = m_csc2dSegmentFinder->find(cscCols, ctx);
     if (!csc2dSegmentCombinations) return StatusCode::SUCCESS;
 
     csc4dSegmentCombinations = m_csc4dSegmentFinder->find(*csc2dSegmentCombinations, ctx);
