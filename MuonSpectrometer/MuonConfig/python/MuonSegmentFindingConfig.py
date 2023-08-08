@@ -223,51 +223,6 @@ def DCMathSegmentMakerCfg(flags,
     return result
 
 
-def MuonPatternSegmentMakerCfg(flags, **kwargs):
-    Muon__MuonPatternSegmentMaker=CompFactory.Muon.MuonPatternSegmentMaker
-    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtDriftCircleOnTrackCreatorCfg, MuonClusterOnTrackCreatorCfg
-    # Taken from https://gitlab.cern.ch/atlas/athena/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecExample/python/MooreTools.py#L49
-    
-    # Tool has the following subtools:
-    # DCMathSegmentMaker, MdtDriftCircleOnTrackCreator, MuonClusterOnTrackCreator, MuonEDMPrinterTool
-    result=ComponentAccumulator()
-
-    if "MdtCreator" not in kwargs: 
-        # on data configure a MdtDriftCircleOnTrackCreator for the segment finding with reduced errors
-        # when using the t0 refit enlarge the time window
-        if not flags.Input.isMC and flags.Beam.Type is BeamType.Collisions:
-            if flags.Muon.doSegmentT0Fit:
-                timeWindowSetting = MdtCalibWindowNumber('Collision_t0fit')
-            else:
-                timeWindowSetting = MdtCalibWindowNumber('Collision_data')
-            acc = MdtDriftCircleOnTrackCreatorCfg(flags, name="MdtDriftCircleOnTrackCreator_NoTubeHits", CreateTubeHit = False, TimeWindowSetting = timeWindowSetting)   
-        else:
-            # I think we need to configure a 'default' version of the MdtDriftCircleOnTrackCreator here
-            acc=MdtDriftCircleOnTrackCreatorCfg(flags)
-
-        kwargs.setdefault('MdtCreator', result.getPrimaryAndMerge(acc))
-    #else:
-    # TODO work out what to do here
-    
-    acc = MuonClusterOnTrackCreatorCfg(flags)  
-    kwargs.setdefault('ClusterCreator', acc.getPrimary())
-    result.merge(acc)
-    
-    # Other dependencies:
-    # EDM printer tool
-
-    acc = DCMathSegmentMakerCfg(flags,name="DCMathSegmentMaker")
-    segment_maker = acc.getPrimary()
-    acc.addPublicTool(segment_maker)
-    kwargs.setdefault('SegmentMaker', segment_maker)
-    result.merge(acc)
-
-    if flags.Beam.Type is BeamType.Cosmics:
-        kwargs.setdefault("AngleCutPhi", 1e9)
-        kwargs.setdefault("DropDistance", 100000000.)
-    result.setPrivateTools(Muon__MuonPatternSegmentMaker("MuonPatternSegmentMaker", **kwargs))
-    return result
-    
 def CscAlignmentTool(flags, **kwargs):
 
     CscAlignmentTool=CompFactory.CscAlignmentTool

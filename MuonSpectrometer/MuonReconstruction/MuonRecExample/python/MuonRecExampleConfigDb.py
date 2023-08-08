@@ -188,7 +188,6 @@ addTool( "MuonRecExample.MooreTools.MuonTrackSelectorTool", "MuonTrackSelectorTo
 addToolClone("MuonSegmentRegionRecoveryTool","MuonEORecoveryTool",OnlyEO = True,
              Fitter="MCTBSLFitter", UseFitterOutlierLogic=False)
 
-addTool( "MuonRecExample.MooreTools.MuonPatternSegmentMaker","MuonPatternSegmentMaker")
 
 addTool("MuonRecExample.MooreTools.MuonPatternCalibration", "MuonPatternCalibration")
                                         
