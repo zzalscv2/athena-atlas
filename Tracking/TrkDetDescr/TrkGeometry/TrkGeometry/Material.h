@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -230,6 +230,12 @@ class Material {
 };
 
 inline Material* Material::scale(float sf) const {
+  // Tell clang to optimize assuming that FP exceptions can trap.
+  // Otherwise, it can vectorize the division, which can lead to
+  // spurious division-by-zero traps from unused vector lanes.
+#ifdef __clang__
+# pragma float_control(except, on)
+#endif
   return new Material(X0 / sf, L0 / sf, sf * A, sf * Z, sf * rho);
 }
 
