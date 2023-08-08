@@ -53,7 +53,7 @@ def tauTrackBDTRoiUpdaterCfg(flags, inputRoIs, tracks):
 @AccumulatorCache
 def tauLRTRoiUpdaterCfg(flags, inputRoIs, tracks):
     acc                               = ComponentAccumulator()
-    newflags = flags.Trigger.InDetTracking.tauLRT
+    newflags = flags.Tracking.ActiveConfig
     alg                               = CompFactory.TrigTauTrackRoiUpdater("TrackRoiUpdaterLRT",
                                         etaHalfWidth                  = newflags.etaHalfWidth,
                                         phiHalfWidth                  = newflags.phiHalfWidth,
