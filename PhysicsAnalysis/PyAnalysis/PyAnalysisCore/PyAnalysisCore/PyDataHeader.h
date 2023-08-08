@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PYANALYSISCORE_PYDATAHEADER_H
@@ -35,8 +35,8 @@ public:
     else
       {
 	// retrieve DataHeader
-	const DataHandle<DataHeader> beg; 
-	const DataHandle<DataHeader> ending; 
+        SG::ConstIterator<DataHeader> beg; 
+        SG::ConstIterator<DataHeader> ending; 
 	sc = pSvc->retrieve(beg,ending);
 	if (sc.isFailure() || beg==ending)
 	  log << MSG::ERROR << "could not get DataHeader" << endmsg;
@@ -45,10 +45,10 @@ public:
 	    // cache DataHeaderElement
 	    for (; beg != ending; ++beg)
 	      {
-		DataHeader &dh = const_cast<DataHeader &>(*beg);
+		const DataHeader &dh = *beg;
 		std::vector<DataHeaderElement>::const_iterator it = dh.begin();
 		for (; it != dh.end(); ++it)
-		  m_DataHeaderElementV.push_back(const_cast<DataHeaderElement *>(&*it));
+		  m_DataHeaderElementV.push_back(&*it);
 	      }
 	  }
       }
@@ -68,7 +68,7 @@ public:
   std::string getName (int index)
   {
     if (index >= size()) return "";
-    std::vector<DataHeaderElement *>::iterator it = m_DataHeaderElementV.begin();
+    std::vector<const DataHeaderElement *>::iterator it = m_DataHeaderElementV.begin();
     it += index;
 
     // look for non-symlink name
@@ -98,14 +98,14 @@ public:
   std::string getKey (int index)
   {
     if (index >= size()) return "";
-    std::vector<DataHeaderElement *>::iterator it = m_DataHeaderElementV.begin();
+    std::vector<const DataHeaderElement *>::iterator it = m_DataHeaderElementV.begin();
     it += index;
     return (*it)->getKey();
   }
 
 private:
   //! cash for DataHeaderElements
-  std::vector<DataHeaderElement *> m_DataHeaderElementV;
+  std::vector<const DataHeaderElement *> m_DataHeaderElementV;
 
   //!  class ID service
   IClassIDSvc *m_classIDSvc;
