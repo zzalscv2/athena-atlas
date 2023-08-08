@@ -16,13 +16,9 @@ using namespace TrigConf;
 
 
 HashStore::~HashStore() {
-  // delete categories owned by us
-  for (auto& [cat, catptr] : hashCat) delete catptr;
 }
 
 HashMap::~HashMap() {
-  // delete strings owned by us
-  for (auto& [hash, nameptr] : hash2name) delete nameptr;
 }
 
 
@@ -31,14 +27,14 @@ HLTHash HLTUtils::string2hash( const std::string& s, const std::string& category
   // Try to find existing hash in category
   const auto icat = s_hashStore.hashCat.find(category);
   if (icat != s_hashStore.hashCat.end()) { // category found
-    const HashMap* cat = icat->second;
-    const auto ihash = cat->name2hash.find(s);
-    if (ihash != cat->name2hash.end()) {   // hash found
+    const HashMap& cat = icat->second;
+    const auto ihash = cat.name2hash.find(s);
+    if (ihash != cat.name2hash.end()) {   // hash found
       return ihash->second;
     }
   }
   else {
-    s_hashStore.hashCat.emplace(category, new HashMap);
+    s_hashStore.hashCat.emplace(category, std::make_unique<HashMap>());
   }
 
   /*********************************************************************
@@ -57,22 +53,20 @@ HLTHash HLTUtils::string2hash( const std::string& s, const std::string& category
   /********************************************************************/
 
   // Try to insert new hash
-  HashMap* cat = s_hashStore.hashCat.at(category);
-  const std::string* nameptr = new std::string(s);
-  const auto& [itr, inserted] = cat->hash2name.emplace(hash, nameptr);
+  HashMap& cat = s_hashStore.hashCat.at(category);
+  const auto& [itr, inserted] = cat.hash2name.emplace(hash, s);
 
   if ( inserted ) {
     // also update reverse map
-    cat->name2hash.emplace(s, hash);
+    cat.name2hash.emplace(s, hash);
   }
   else {
     // There are two cases where insertion into the hash->name map would fail:
     // 1) another thread entered the same hash/name pair already
     // 2) there is a hash collision
-    delete nameptr;  // avoid memory leak if not inserted
-    if ( s != *itr->second ) {
+    if ( s != itr->second ) {
       throw std::domain_error("Hash collision in category " + category +
-                              " for elements " +  *itr->second + " and " + s);
+                              " for elements " +  itr->second + " and " + s);
     }
   }
 
@@ -86,13 +80,13 @@ const std::string HLTUtils::hash2string( HLTHash hash, const std::string& catego
     return "UNKNOWN CATEGORY";
   }
 
-  const HashMap* cat = icat->second;
-  const auto& h = cat->hash2name.find(hash);
-  if (h == cat->hash2name.end()) {
+  const HashMap& cat = icat->second;
+  const auto& h = cat.hash2name.find(hash);
+  if (h == cat.hash2name.end()) {
     return "UNKNOWN HASH ID";
   }
 
-  return *h->second;
+  return h->second;
 }
 
 void HLTUtils::hashes2file( const std::string& fileName) {
@@ -100,8 +94,8 @@ void HLTUtils::hashes2file( const std::string& fileName) {
 
   for (const auto& [category, hashes] : s_hashStore.hashCat) {
     fout << s_newCategory << std::endl << category << std::endl;
-    for (const auto& [hash, nameptr] : hashes->hash2name) {
-      std::string name(*nameptr);
+    for (const auto [hash, nameptr] : hashes.hash2name) {
+      std::string name(nameptr);
       name.erase(std::remove(name.begin(), name.end(), '\n'), name.end()); // Remove any line breaks
       fout << hash << std::endl << name << std::endl;
     }

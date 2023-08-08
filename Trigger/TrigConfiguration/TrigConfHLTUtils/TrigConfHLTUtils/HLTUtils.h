@@ -9,8 +9,9 @@
 #include <inttypes.h>
 
 #include "CxxUtils/checker_macros.h"
-#include "CxxUtils/ConcurrentMap.h"
 #include "CxxUtils/ConcurrentStrMap.h"
+#include "CxxUtils/ConcurrentStrToValMap.h"
+#include "CxxUtils/ConcurrentToValMap.h"
 #include "CxxUtils/SimpleUpdater.h"
 
 namespace TrigConf {
@@ -23,15 +24,12 @@ namespace TrigConf {
    * We are using CxxUtils::Concurrent*Map which is optimized for frequent (lock-less)
    * reads and rare writes. Previous implementations used TBB's concurrent containers
    * but they are much slower for this use-case.
-   *
-   * Due to limitations of CxxUtils::ConcurrentMap, we need to store a pointer
-   * to a string instead of the string itself for the hash->string lookup.
    */
   struct HashMap {
     ~HashMap();
 
     using Name2HashMap_t = CxxUtils::ConcurrentStrMap<HLTHash, CxxUtils::SimpleUpdater>;
-    using Hash2NameMap_t = CxxUtils::ConcurrentMap<HLTHash, const std::string*, CxxUtils::SimpleUpdater>;
+    using Hash2NameMap_t = CxxUtils::ConcurrentToValMap<HLTHash, const std::string, CxxUtils::SimpleUpdater>;
 
     Name2HashMap_t name2hash{Name2HashMap_t::Updater_t()};  //!< name to hash map
     Hash2NameMap_t hash2name{Hash2NameMap_t::Updater_t()};  //!< hash to name map
@@ -41,7 +39,7 @@ namespace TrigConf {
   struct HashStore {
     ~HashStore();
 
-    using HashMap_t = CxxUtils::ConcurrentStrMap<HashMap*, CxxUtils::SimpleUpdater>;
+    using HashMap_t = CxxUtils::ConcurrentStrToValMap<HashMap, CxxUtils::SimpleUpdater>;
     HashMap_t hashCat{HashMap_t::Updater_t()};  //!< one HashMap per category
   };
 
