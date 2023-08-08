@@ -1,20 +1,21 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HEPMCTRUTHREADER_H
 #define HEPMCTRUTHREADER_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "AtlasHepMC/GenEvent_fwd.h"
 #include "AtlasHepMC/GenVertex_fwd.h"
 #include "AtlasHepMC/GenParticle_fwd.h"
+#include "StoreGate/ReadHandleKey.h"
 
 
 /// @short Algorithm demonstrating reading of HepMC truth, and printing to screen
 /// @author James Catmore <James.Catmore@cern.ch>
-class HepMCTruthReader : public AthAlgorithm {
+class HepMCTruthReader : public AthReentrantAlgorithm {
 public:
 
   /// Regular algorithm constructor
@@ -24,17 +25,21 @@ public:
   virtual StatusCode initialize();
 
   /// Function executing the algorithm
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx) const;
 
 
 private:
 
-  /// The keys for the input xAOD truth containers
-  std::string m_hepMCContainerName;
+  /// The key of the input HepMC truth container
+  SG::ReadHandleKey<McEventCollection> m_hepMCContainerKey{ 
+      this, "HepMCContainerKey", "GEN_EVENT", "The input McEvenCollection"};
 
-  static void printEvent(const HepMC::GenEvent*);
-  static void printVertex(const HepMC::ConstGenVertexPtr&);
-  static void printParticle(const HepMC::ConstGenParticlePtr&);
+  /// Flag to printout in pt,eta,phi instead of px,py,pz
+  Gaudi::Property<bool> m_do4momPtEtaPhi{this, "Do4momPtEtaPhi", false};
+
+  static void printEvent(const HepMC::GenEvent* evt,                bool do4momPtEtaPhi);
+  static void printVertex(const HepMC::ConstGenVertexPtr& vtx,      bool do4momPtEtaPhi );
+  static void printParticle(const HepMC::ConstGenParticlePtr& part, bool do4momPtEtaPhi);
 
 }; // class HepMCTruthReader
 
