@@ -166,9 +166,9 @@ namespace Muon {
             patCombiCol = std::make_unique<MuonPatternCombinationCollection>();
         }
 
-        // summary
-      
-        ATH_MSG_DEBUG(" summarizing Combined pattern combination output: " <<std::endl << m_printer->print(*patCombiCol));
+        if (m_summary || msgLvl(MSG::DEBUG)) {
+            ATH_MSG_INFO(" summarizing Combined pattern combination output: " <<std::endl << m_printer->print(*patCombiCol));
+        }
     
         ATH_MSG_VERBOSE("execute(end) ");
         // return result
@@ -221,15 +221,15 @@ namespace Muon {
         std::unique_ptr<MuonPrdPatternCollection> phipatterns{m_muonHoughPatternTool->getPhiMuonPatterns(houghpattern)};        
         std::unique_ptr<MuonPrdPatternCollection> etapatterns{m_muonHoughPatternTool->getEtaMuonPatterns(houghpattern)};
 
-        if (true || m_summary || msgLvl(MSG::DEBUG)) {
+        if (m_summary || msgLvl(MSG::DEBUG)) {
             if (phipatterns->empty())
-                ATH_MSG_DEBUG(" summarizing input: Phi pattern combination empty");
+                ATH_MSG_INFO(" summarizing input: Phi pattern combination empty");
             else
-                ATH_MSG_DEBUG(" summarizing Phi pattern combination input: " << std::endl << m_printer->print(*phipatterns));
+                ATH_MSG_INFO(" summarizing Phi pattern combination input: " << std::endl << m_printer->print(*phipatterns));
             if (etapatterns->empty())
-                ATH_MSG_DEBUG(" summarizing input: Eta pattern combination empty");
+                ATH_MSG_INFO(" summarizing input: Eta pattern combination empty");
             else
-                ATH_MSG_DEBUG(" summarizing Eta pattern combination input: " << std::endl << m_printer->print(*etapatterns));
+                ATH_MSG_INFO(" summarizing Eta pattern combination input: " << std::endl << m_printer->print(*etapatterns));
         }
 
         ATH_MSG_DEBUG("writePatterns");

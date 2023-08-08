@@ -52,6 +52,7 @@ def MuonHoughPatternFinderToolCfg(flags, name = "MuonHoughPatternFinderTool", **
         kwargs.setdefault("RecordAll",False)
     kwargs.setdefault("muonHoughPatternTool", result.popToolsAndMerge(MuonHoughPatternToolCfg(flags)) )
     kwargs.setdefault("muonCombinePatternTool", result.popToolsAndMerge(MuonCombinePatternToolCfg(flags)) )
+    kwargs.setdefault("DoSummary", flags.Muon.printSummary)
     the_tool = CompFactory.Muon.MuonHoughPatternFinderTool(name,**kwargs)
     result.setPrivateTools(the_tool)
     return result
@@ -65,6 +66,8 @@ def MuonCurvedSegmentCombinerCfg(flags,name = "MuonCurvedSegmentCombiner", **kwa
     elif flags.Input.isMC:
         kwargs.setdefault( "MissedHitsCut", 4 )
 
+
+    kwargs.setdefault("DoSummary", flags.Muon.printSummary)
     kwargs.setdefault("DoCosmics", flags.Beam.Type is not BeamType.Collisions)
     kwargs.setdefault( "AddAll2DCscs", False )
     kwargs.setdefault( "UseCscSegments", flags.Detector.EnableCSC )
@@ -638,7 +641,7 @@ def MuonSegmentFinderAlgCfg(flags, name="MuonSegmentMaker", **kwargs):
     
     kwargs.setdefault("PrintSummary", flags.Muon.printSummary)
     kwargs.setdefault("SegmentCombiner", result.popToolsAndMerge(MuonCurvedSegmentCombinerCfg(flags)))
-    kwargs.setdefault("RunSegmentCombiner", flags.Beam.Type is BeamType.Cosmics)
+    kwargs.setdefault("RunSegmentCombiner", False)
     kwargs.setdefault("doStgcSegments", flags.Detector.EnablesTGC)
     kwargs.setdefault("doMMSegments", flags.Detector.EnableMM)
 

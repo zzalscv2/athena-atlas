@@ -230,10 +230,6 @@ namespace Muon {
         if (fitterData.firstHasMomentum || fitterData.secondHasMomentum) doPreFit = false;
         if (!doPreFit) particleType = Trk::muon;
 
-        if (m_cosmics) {
-            Muon::CosmicMuPatHitSorter sorter{*startPars};
-            std::stable_sort(fitterData.measurements.begin(),fitterData.measurements.end(),sorter);
-        }
         std::unique_ptr<Trk::Track> track = fit(ctx, *startPars, fitterData.measurements, particleType, doPreFit);
 
         if (!track) {
@@ -341,6 +337,7 @@ namespace Muon {
         }
         // are we in the endcap region?
         bool isEndcap = entry1.hasEndcap() || entry2.hasEndcap();
+
 
         // measurement sorting function
         SortMeasurementsByPosition sortMeasurements(isEndcap);

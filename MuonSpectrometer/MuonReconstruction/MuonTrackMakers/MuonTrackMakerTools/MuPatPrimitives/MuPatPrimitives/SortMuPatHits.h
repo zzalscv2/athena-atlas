@@ -36,11 +36,11 @@ namespace Muon {
 
     };
 
-    
-    class SortMuPatHits {
+    //Not used atm (default is SortByDirectionMuPatHits)
+    class SortByIPMuPatHits { 
     public:
 
-        SortMuPatHits(const IMuonIdHelperSvc* idh) : m_idh{idh} {}
+        SortByIPMuPatHits(const IMuonIdHelperSvc* idh) : m_idh{idh} {}
         /// Sort the mu pat hits using their associated surfaces
         bool operator()(const MuPatHitPtr& hit1, const MuPatHitPtr& hit2) const {
             return operator()(hit1.get(), hit2.get());
@@ -92,18 +92,13 @@ namespace Muon {
         /// DistanceAlongParameters distanceCalculator;
         const IMuonIdHelperSvc* m_idh{nullptr};
     };
-    /// Cosmic parameter sorting
-    class CosmicMuPatHitSorter{
+
+    /// Default for both collision and cosmic parameter sorting
+    class SortByDirectionMuPatHits{
         public:
-            CosmicMuPatHitSorter(const Trk::TrackParameters& refPars):
+            SortByDirectionMuPatHits(const Trk::TrackParameters& refPars):
                 m_ref(refPars) {}
         
-        bool operator()(const MuPatHitPtr& hit1, const MuPatHitPtr& hit2) const {
-            return operator()(hit1->measurement(), hit2->measurement());
-        }
-        bool operator()(const MuPatHit* hit1, const MuPatHit* hit2) const {           
-            return operator()(hit1->measurement(), hit2->measurement());
-        }
         bool operator() (const Trk::MeasurementBase* meas1, const Trk::MeasurementBase* meas2) const  {
             return operator()(*meas1,*meas2);
         }
@@ -111,10 +106,28 @@ namespace Muon {
             static const DistanceAlongParameters parsSorter{};
             return parsSorter(m_ref, meas1) < parsSorter(m_ref, meas2);
         }
+
+            bool operator()(const MuPatHitPtr& hit1, const MuPatHitPtr& hit2) const {
+               return operator()(hit1->parameters(),hit2->parameters());
+            }
+            bool operator()(const MuPatHit* hit1, const MuPatHit* hit2) const {           
+               return operator()(hit1->parameters(),hit2->parameters());
+            }
+            bool operator()(const Trk::TrackParameters* pars1, const Trk::TrackParameters* pars2) const {
+               return operator()(*pars1,*pars2);
+            }
+            bool operator()(const Trk::TrackParameters& pars1, const Trk::TrackParameters& pars2) const {
+               static const DistanceAlongParameters parsSorter{};
+               return parsSorter(m_ref, pars1) < parsSorter(m_ref, pars2);
+            }
+
+
+
         private:
             const Trk::TrackParameters& m_ref;
 
     };
+    
 
 }  // namespace Muon
 

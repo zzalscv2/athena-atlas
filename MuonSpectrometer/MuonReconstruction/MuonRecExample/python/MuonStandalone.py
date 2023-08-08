@@ -55,7 +55,7 @@ def MuonTrackSteering(name="MuonTrackSteering", extraFlags=None, **kwargs):
         if "TrackRefinementTool" not in kwargs:
             kwargs["TrackRefinementTool"] = getPublicTool("MooTrackBuilderTemplate")
 
-    kwargs.setdefault("SegSeedQCut", 2)
+    kwargs.setdefault("SegSeedQCut", 1)
     kwargs.setdefault("Seg2ndQCut", 1)
     return CfgMgr.Muon__MuonTrackSteering(name,**kwargs)
 
@@ -112,8 +112,6 @@ def MuonSegmentFinderNCBAlg(name="MuonSegmentMaker_NCB", **kwargs):
 
 
 def MuonSegmentFinderAlg( name="MuonSegmentMaker", **kwargs):
-    from AthenaCommon.BeamFlags import jobproperties
-    beamFlags = jobproperties.Beam
     
     SegmentFinder = getPublicTool("MuonNSWSegmentFinderTool")
     Cleaner = getPublicToolClone("MuonTrackCleaner_seg","MuonTrackCleaner")
@@ -145,7 +143,7 @@ def MuonSegmentFinderAlg( name="MuonSegmentMaker", **kwargs):
     
     
     kwargs.setdefault("SegmentCombiner", getPublicTool("MuonCurvedSegmentCombiner"))
-    kwargs.setdefault("RunSegmentCombiner", beamFlags.beamType() == 'cosmics')
+    kwargs.setdefault("RunSegmentCombiner", False) #false in r21
     MuonSegmentFinderAlg = CfgMgr.MuonSegmentFinderAlg( name, **kwargs )   
    
     # we check whether the layout contains any CSC chamber and if yes, we check that the user also wants to use the CSCs in reconstruction

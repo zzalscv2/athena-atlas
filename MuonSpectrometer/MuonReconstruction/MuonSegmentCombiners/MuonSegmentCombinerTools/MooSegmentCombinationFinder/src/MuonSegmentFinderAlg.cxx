@@ -152,18 +152,20 @@ StatusCode MuonSegmentFinderAlg::execute(const EventContext& ctx) const {
         appendSegmentsFromCombi(csc4dSegmentCombinations, segmentContainer.get());        
     }
     
-    if (msgLvl(MSG::VERBOSE)){
-        ATH_MSG_VERBOSE("Number of segments found " << segmentContainer->size());
-        for (Trk::Segment* tseg : *segmentContainer) {
-            const Muon::MuonSegment* mseg{dynamic_cast<Muon::MuonSegment*>(tseg)};
-            ATH_MSG_VERBOSE(m_printer->print(*mseg)<<std::endl<<m_printer->print(mseg->containedMeasurements())<<std::endl);
-        }
-    }
-
     /// Get rid of all the duplicates in the segment container
     ATH_MSG_DEBUG("segments before overlap removal: " << segmentContainer->size());
     m_segmentOverlapRemovalTool->removeDuplicates(*segmentContainer);
     ATH_MSG_DEBUG(" Segments after overlap removal: " << segmentContainer->size());
+
+
+    if (m_printSummary){
+        ATH_MSG_INFO("Number of segments found " << segmentContainer->size());
+        for (Trk::Segment* tseg : *segmentContainer) {
+            const Muon::MuonSegment* mseg{dynamic_cast<Muon::MuonSegment*>(tseg)};
+            ATH_MSG_INFO(m_printer->print(*mseg)<<std::endl<<m_printer->print(mseg->containedMeasurements())<<std::endl);
+        }
+    }
+
 
     SG::WriteHandle<Trk::SegmentCollection> handle(m_segmentCollectionKey, ctx);
     ATH_CHECK(handle.record(std::move(segmentContainer)));

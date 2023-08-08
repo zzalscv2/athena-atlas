@@ -89,13 +89,9 @@ namespace Muon {
             std::unique_ptr<MuPatHit> hit = std::make_unique<MuPatHit>(std::move(exPars), meas->uniqueClone(), std::move(broadMeas), std::move(hitInfo));
             hitList.push_back(std::move(hit));           
         }
-        if (!m_isCosmic) {
-            const SortMuPatHits isLargerCal{m_idHelperSvc.get()};
-            std::stable_sort(hitList.begin(), hitList.end(), isLargerCal);          
-        } else {
-            const CosmicMuPatHitSorter isLargerCal{pars};
-            std::stable_sort(hitList.begin(), hitList.end(), isLargerCal);      
-        }
+
+        const SortByDirectionMuPatHits isLargerCal{pars};
+        std::stable_sort(hitList.begin(), hitList.end(), isLargerCal);      
         return true;
     }
 
@@ -141,14 +137,11 @@ namespace Muon {
             hit->setResidual(residual,pull);
             hitList.push_back(std::move(hit));         
         }
-        if (!m_isCosmic) {
-            const SortMuPatHits isLargerCal{m_idHelperSvc.get()};
-            std::stable_sort(hitList.begin(), hitList.end(), isLargerCal);          
-        } else {
-            const Trk::TrackParameters* pars = track.perigeeParameters();
-            const CosmicMuPatHitSorter isLargerCal{*pars};
-            std::stable_sort(hitList.begin(), hitList.end(), isLargerCal);      
-        }
+
+        const Trk::TrackParameters* pars = track.perigeeParameters();
+        const SortByDirectionMuPatHits isLargerCal{*pars};
+        std::stable_sort(hitList.begin(), hitList.end(), isLargerCal);      
+
         return true;
     }
 
@@ -156,13 +149,10 @@ namespace Muon {
         // copy first list into outList
         MuPatHitList tmpList{};
         tmpList.reserve(hitList1.size() + hitList2.size());
-        if (!m_isCosmic) {
-            const SortMuPatHits isLargerCal{m_idHelperSvc.get()};
-            std::merge(hitList1.begin(), hitList1.end(), hitList2.begin(), hitList2.end(), 
-                            std::back_inserter(tmpList), isLargerCal);
-        } else if (!hitList1.empty()) {
+
+        if (!hitList1.empty()) {
             const Trk::TrackParameters& pars{hitList1.front()->parameters()};
-            const CosmicMuPatHitSorter isLargerCal{pars};            
+            const SortByDirectionMuPatHits isLargerCal{pars};            
             std::merge(hitList1.begin(), hitList1.end(), hitList2.begin(), hitList2.end(), 
                             std::back_inserter(tmpList), isLargerCal);
         } else {
@@ -323,7 +313,6 @@ namespace Muon {
 
     std::string MuPatHitTool::print(const MuPatHitList& hitList, bool printPos, bool printDir, bool printMom) const {
         std::ostringstream sout;
-        SortMuPatHits isLargerCal{m_idHelperSvc.get()};
         DistanceAlongParameters distCal{};
 
         // for nicely aligned printout, get max width of Id printout
@@ -338,8 +327,12 @@ namespace Muon {
         MuPatHitCit it_end = hitList.end();
         MuPatHitCit itNext = hitList.begin();
 
+        const Trk::TrackParameters& pars{hitList.front()->parameters()};
+        const SortByDirectionMuPatHits isLargerCal{pars};
+
         if (itNext != it_end) ++itNext;
         for (; it != it_end; ++it, ++itNext) {
+
             Identifier id = m_edmHelperSvc->getIdentifier((*it)->measurement());
             std::string idStr = id.is_valid() ? m_idHelperSvc->toString(id) : "pseudo-measurement";
             idStrings.push_back(idStr);
@@ -359,13 +352,16 @@ namespace Muon {
                         << pars.momentum().mag() * pars.charge() / 1000.;
             }
 
+
             dataOss << "  " << result << " dist " << distance;
             dataStrings.push_back(dataOss.str());
             if (itNext != it_end) {
-                isLarger = isLargerCal(*itNext, *it);
+                isLarger = isLargerCal(*it, *itNext);
+
                 distance = distCal(*it, *itNext);
                 result = isLarger ? "larger " : "smaller";
-                if (isLarger == isLargerCal(*it, *itNext)) {
+
+                if (isLarger == isLargerCal(*itNext, *it)) {
                     result = "duplicate";
                 } else if (!isLarger) {
                     result += "   sorting problem ";
@@ -383,12 +379,13 @@ namespace Muon {
         return sout.str();
     }
     bool MuPatHitTool::isSorted(const MuPatHitList& hitList) const {
-        SortMuPatHits isLargerCal{m_idHelperSvc.get()};
         MuPatHitCit it = hitList.begin();
         MuPatHitCit it_end = hitList.end();
         MuPatHitCit itNext = it;
         if (itNext != it_end) ++itNext;
         bool isLarger = true;
+        const Trk::TrackParameters& pars{hitList.front()->parameters()};
+        const SortByDirectionMuPatHits isLargerCal{pars};
         for (; itNext != it_end; ++it, ++itNext) {
             isLarger = isLargerCal(*it, *itNext);
             bool sameSurface = (isLarger == isLargerCal(*it, *itNext));  // same surface

@@ -378,7 +378,7 @@ def MuonTrackSteeringCfg(flags, name="MuonTrackSteering", **kwargs):
     result.merge(acc) 
     
     kwargs.setdefault("HoleRecoveryTool",       muon_eo_recovery_tool)
-    kwargs.setdefault("SegSeedQCut", 2)
+    kwargs.setdefault("SegSeedQCut", 1)
     kwargs.setdefault("Seg2ndQCut", 1)
    
     if "TrackBuilderTool" not in kwargs:
@@ -420,6 +420,8 @@ def MuonTrackSteeringCfg(flags, name="MuonTrackSteering", **kwargs):
     
     from TrkConfig.TrkTrackSummaryToolConfig import MuonTrackSummaryToolCfg
     kwargs.setdefault("TrackSummaryTool",  result.popToolsAndMerge(MuonTrackSummaryToolCfg(flags)))
+    kwargs.setdefault("DoSummary", flags.Muon.printSummary)
+
 
     track_maker_steering = Muon__MuonTrackSteering(name,**kwargs)
     result.setPrivateTools(track_maker_steering)
