@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Author: Paolo Calafiura, Wim Lavrijsen
 
 """Unit tests for verifying setting of global JobProperties setting."""
@@ -60,7 +60,7 @@ if __name__ == '__main__':
    loader = unittest.TestLoader()
    testSuite = loader.loadTestsFromModule( sys.modules[ __name__ ] )
 
-   runner = unittest.TextTestRunner( verbosity = 2 )
+   runner = unittest.TextTestRunner()
    result = not runner.run( testSuite ).wasSuccessful()
 
    sys.exit( result )
