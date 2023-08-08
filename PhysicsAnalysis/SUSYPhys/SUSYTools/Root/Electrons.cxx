@@ -55,8 +55,6 @@ namespace ST {
   const static SG::AuxElement::ConstAccessor<float> acc_z0sinTheta("z0sinTheta");
   const static SG::AuxElement::Decorator<float>     dec_d0sig("d0sig");
   const static SG::AuxElement::ConstAccessor<float> acc_d0sig("d0sig");
-  const static SG::AuxElement::Decorator<ElementLink<xAOD::ElectronContainer>> dec_originalElectronLink("originalElectronLink");
-  const static SG::AuxElement::ConstAccessor<ElementLink<xAOD::ElectronContainer>> acc_originalElectronLink("originalElectronLink");
   const static SG::AuxElement::Decorator<char> dec_isLRT("isLRT");
 
   const static SG::AuxElement::ConstAccessor<float> acc_topoetcone20("topoetcone20");
@@ -79,12 +77,10 @@ StatusCode SUSYObjDef_xAOD::MergeElectrons(const xAOD::ElectronContainer & elect
             ATH_MSG_DEBUG( "ELECTRON cl phi: "                                    << electron->caloCluster()->phi());
             newElectron = new xAOD::Electron(*electron);
 
-            if (electron->isAvailable<ElementLink<xAOD::ElectronContainer>>("originalElectronLink") ) {
-              dec_originalElectronLink(*newElectron) = acc_originalElectronLink(*electron);
+            if ( getOriginalObject(*electron) != nullptr ) {
+              setOriginalObjectLink(*getOriginalObject(*electron), *newElectron);
             } else {
-              ElementLink<xAOD::ElectronContainer> eleLink;
-              eleLink.toIndexedElement(electrons, electron->index());
-              dec_originalElectronLink(*newElectron) = eleLink;
+              setOriginalObjectLink(*electron, *newElectron);
             }
 
             outputCol->push_back(newElectron); 
@@ -105,10 +101,8 @@ StatusCode SUSYObjDef_xAOD::prepareLRTElectrons(const xAOD::ElectronContainer* i
         std::unique_ptr<xAOD::Electron> copyElectron = std::make_unique<xAOD::Electron>(*electron);
 
         // transfer original electron link
-        ElementLink<xAOD::ElectronContainer> eleLink;
-        eleLink.toIndexedElement(*inElectrons, electron->index());
-        dec_originalElectronLink(*copyElectron) = eleLink;
 
+        setOriginalObjectLink(*electron, *copyElectron);
         copy->push_back( std::move(copyElectron) );        
       }  
     } 
@@ -116,10 +110,7 @@ StatusCode SUSYObjDef_xAOD::prepareLRTElectrons(const xAOD::ElectronContainer* i
     {
       std::unique_ptr<xAOD::Electron> copyElectron = std::make_unique<xAOD::Electron>(*electron);
       
-      ElementLink<xAOD::ElectronContainer> eleLink;
-      eleLink.toIndexedElement(*inElectrons, electron->index());
-      dec_originalElectronLink(*copyElectron) = eleLink;
-
+      setOriginalObjectLink(*electron, *copyElectron);
       copy->push_back( std::move(copyElectron) );
     }
   }
