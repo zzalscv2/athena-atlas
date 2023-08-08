@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HepPDT/ParticleDataTable.hh"
@@ -134,7 +134,7 @@ void VP1MCSystem::Imp::handle(QTreeWidgetItem *item, const HepMC::GenParticle &t
   pidStream << theParticle.pdg_id();
   item->setText(1,pidStream.str().c_str());
 
-  massStream << theParticle.generatedMass()/CLHEP::GeV;
+  massStream << theParticle.generated_mass()/CLHEP::GeV;
   item->setText(2,massStream.str().c_str());
 
   ptStream << pt;
@@ -147,7 +147,7 @@ void VP1MCSystem::Imp::handle(QTreeWidgetItem *item, const HepMC::GenParticle &t
   item->setText(5,phiStream.str().c_str());
   
   if (1) {
-    HepMC::GenVertex *prodVertex      = theParticle.production_vertex();
+    HepMC::ConstGenVertexPtr prodVertex      = theParticle.production_vertex();
     
     QBrush brush=item->foreground(0);
     brush.setColor(Qt::gray);
@@ -172,16 +172,13 @@ void VP1MCSystem::Imp::handle(QTreeWidgetItem *item, const HepMC::GenParticle &t
     item->setForeground(4,brush);
   }
   if (1) {
-    HepMC::GenVertex *decayVertex      = theParticle.end_vertex();
+    HepMC::ConstGenVertexPtr decayVertex      = theParticle.end_vertex();
     if (decayVertex) {
       //      decayVertex->print();
-      for ( HepMC::GenVertex::particles_out_const_iterator current = decayVertex->particles_out_const_begin();
-        current != decayVertex->particles_out_const_end(); 
-        ++current ) {
-    
-    QTreeWidgetItem *newItem = new QTreeWidgetItem();
-    item->addChild(newItem);
-    handle(newItem,**current);
+      for ( const HepMC::ConstGenParticlePtr& current : *decayVertex ) {
+        QTreeWidgetItem *newItem = new QTreeWidgetItem();
+        item->addChild(newItem);
+        handle(newItem,*current);
       }
     }
   }
@@ -228,18 +225,13 @@ void VP1MCSystem::refresh( StoreGateSvc* )
     for (;iter!=endColl;++iter) {
       DataVector<HepMC::GenEvent>::const_iterator e;
       for (e=iter->begin();e!=iter->end(); ++e) {
-    //      (*e)->print(std::cout);
-    for (HepMC::GenEvent::particle_const_iterator p= (**e).particles_begin();
-         p!= (**e).particles_end(); ++p) {
-      HepMC::GenParticle *particle=*p;
-     
-      if (!particle->production_vertex() || ! particle->production_vertex()->particles_in_size()) {
-        QTreeWidgetItem *item = new QTreeWidgetItem();
-        m_d->tw->insertTopLevelItem(m_d->tw->topLevelItemCount(), item);
-        
-        m_d->handle(item,*particle);
-      }
-    }
+        for (const HepMC::ConstGenParticlePtr& particle : **e) {
+          if (!particle->production_vertex() || ! particle->production_vertex()->particles_in_size()) {
+            QTreeWidgetItem *item = new QTreeWidgetItem();
+            m_d->tw->insertTopLevelItem(m_d->tw->topLevelItemCount(), item);
+            m_d->handle(item,*particle);
+          }
+        }
       }
     }
   }
