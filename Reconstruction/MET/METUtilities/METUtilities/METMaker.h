@@ -215,6 +215,7 @@ namespace met {
     bool m_doRemoveElecTrks;
     bool m_doRemoveElecTrksEM;
     bool m_doSetMuonJetEMScale;
+    bool m_doSimpleOR;
 
     bool m_muEloss;
     bool m_orCaloTaggedMuon;
