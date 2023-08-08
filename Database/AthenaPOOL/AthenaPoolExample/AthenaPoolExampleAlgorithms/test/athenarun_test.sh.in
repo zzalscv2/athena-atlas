@@ -28,5 +28,5 @@ PP="$PP|ReadData             INFO CollectionMetadata, key = UnixTimestamp, value
 PP="$PP|^$"
 PP="$PP|Fd:"
 
-@toExecute@ | sed -e "$II"| egrep -v "$PP"
+@toExecute@ | sed -e "$II"| grep -vE "$PP"
 
